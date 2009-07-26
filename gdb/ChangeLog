@@ -1,3 +1,26 @@
+2009-07-26  Michael Snyder  <msnyder@vmware.com>
+
+	In-flux state: target methods temporarily broken.
+	
+	* checkpoint.c (checkpoint_insert): New function.
+	(checkpint_first): New function.
+	(checkpoint_next): New function.
+	(checkpoint_unlink): New function.
+	(checkpoint_find_id): New function.
+	(checkpoint_command): Manage list locally.
+	(delete_checkpoint_command): Ditto.
+	(info_checkpoints_command): Ditto.
+	(restart_command): Ditto
+
+	* checkpoint.h (checkpoint_insert, checkpoint_first, 
+	checkpoint_next, checkpoint_unlink, checkpoint_find_id): Export.
+
+	* record.c (record_insert_checkpoint): New function.
+	(record_delete_checkpoint): New function.
+	(record_show_checkpoint_info): New function.
+	(record_goto_checkpoint): New function.
+	(record_restore_checkpoint): New function.
+
 2009-07-25  Michael Snyder  <msnyder@vmware.com>
 
 	* inf-child.c (inf_child_target): Initialize target_ops only once.

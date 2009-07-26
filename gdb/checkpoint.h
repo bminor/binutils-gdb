@@ -20,6 +20,33 @@
 #if !defined (CHECKPOINT_H)
 #define CHECKPOINT_H 1
 
+/*
+ * The data structure for the checkpoint list.
+ */
+struct checkpoint_info 
+{
+  int checkpoint_id;
+  void *client_data;
+  struct checkpoint_info *next;
+};
+
+/*
+ * Public functions for managing the checkpoint list.
+ */
+
+/* Insert a checkpoint into the list.  */
+extern struct checkpoint_info *checkpoint_insert (void *client_data);
+
+/* Unlink a checkpoint from the list.  */
+extern void checkpoint_unlink (struct checkpoint_info *cp);
+
+/* Find a checkpoint (by id) in the list.  */
+extern struct checkpoint_info *checkpoint_find_id (int id);
+
+/* Traverse the checkpoint list.  */
+extern struct checkpoint_info *checkpoint_first (void);
+extern struct checkpoint_info *checkpoint_next (void);
+
 extern void checkpoint_init (void);
 
 #endif	/* CHECKPOINT_H */

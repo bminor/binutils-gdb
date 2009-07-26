@@ -17,16 +17,103 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* XXX mvs put the actual commands here, and add them to gdb's
-   command lists only by request.
-
-   TBD: actually manage the list here?
+/* TBD: actually manage the list here?
    How would that interplay with forks as written now?
 */
 
 #include "defs.h"
 #include "target.h"
 #include "gdbcmd.h"
+#include "checkpoint.h"
+#include "value.h"
+#include "regcache.h"
+#include "inferior.h"
+
+/*
+ * Checkpoint list management (exported).
+ */
+
+static struct checkpoint_info *checkpoint_list, *checkpoint_iterator;
+static int checkpoint_count;
+
+struct checkpoint_info *
+checkpoint_insert (void *client_data)
+{
+  struct checkpoint_info *cp = XZALLOC (struct checkpoint_info);
+
+  cp->checkpoint_id = ++checkpoint_count;
+  cp->client_data = client_data;
+  cp->next = checkpoint_list;
+  checkpoint_list = cp;
+  return cp;
+}
+
+struct checkpoint_info *
+checkpoint_first (void)
+{
+  if (checkpoint_list == NULL)
+    return NULL;
+  else
+    {
+      checkpoint_iterator = checkpoint_list;
+      return checkpoint_iterator;
+    }
+}
+
+struct checkpoint_info *
+checkpoint_next (void)
+{
+  if (checkpoint_iterator == NULL)
+    return NULL;
+  else if (checkpoint_iterator->next == NULL)
+    return NULL;
+  else
+    {
+      checkpoint_iterator = checkpoint_iterator->next;
+      return checkpoint_iterator;
+    }
+}
+
+void
+checkpoint_unlink (struct checkpoint_info *cp)
+{
+  if (cp == checkpoint_list)
+    checkpoint_list = cp->next;
+  else
+    {
+      struct checkpoint_info *prev;
+
+      for (prev = checkpoint_first (); prev != NULL;
+	   prev = checkpoint_next ())
+	if (prev->next == cp)
+	  break;
+
+      if (prev == NULL)
+	internal_error (__FILE__, __LINE__, 
+			_("checkpoint is not linked!"));
+
+      prev->next = cp->next;
+    }
+  xfree (cp);
+}
+
+struct checkpoint_info *
+checkpoint_find_id (int id)
+{
+  struct checkpoint_info *cp;
+
+  for (cp = checkpoint_first (); cp != NULL; cp = checkpoint_next ())
+    if (cp->checkpoint_id == id)
+      return cp;
+
+  return NULL;
+}
+
+/*
+ * Checkpoint commands (private).
+ */
+
+#if 0 /* First cut */
 
 /* Set a checkpoint (call target_ops method).  */
 
@@ -69,6 +156,100 @@ info_checkpoints_command (char *args, int from_tty)
   else
     error (_("info checkpoints command not implemented for this target."));
 }
+
+#else
+/* FIXME replace by target method.  */
+extern void *record_insert_checkpoint (struct checkpoint_info *, int);
+extern void  record_delete_checkpoint (struct checkpoint_info *, int);
+extern void  record_show_checkpoint_info (struct checkpoint_info *, int);
+extern void  record_restore_checkpoint (struct checkpoint_info *, int);
+
+
+static void
+checkpoint_command (char *args, int from_tty)
+{
+  struct checkpoint_info *cp = checkpoint_insert (NULL);
+
+  if (cp != NULL)
+    {
+      if (from_tty)
+	printf_filtered (_("Adding checkpoint #%d"), cp->checkpoint_id);
+      /* FIXME: here's the target method.  */
+      cp->client_data = record_insert_checkpoint (cp, from_tty);
+      if (from_tty)
+	puts_filtered (_("\n"));
+    }
+  else
+    error (_("insert checkpoint failed"));
+}
+
+static void
+delete_checkpoint_command (char *args, int from_tty)
+{
+  struct checkpoint_info *cp;
+
+  if (!args || !*args)
+    error (_("Requires argument (checkpoint id to delete)"));
+
+  /* FIXME: only accepts one argument, see breakpoint.  */
+  cp = checkpoint_find_id (parse_and_eval_long (args));
+  if (cp == NULL)
+    error (_("Not found: checkpoint id %s"), args);
+
+  /* FIXME: here's the target method.  */
+  record_delete_checkpoint (cp, from_tty);
+  checkpoint_unlink (cp);
+}
+
+static void
+info_checkpoints_command (char *args, int from_tty)
+{
+  struct checkpoint_info *cp = checkpoint_first ();
+  int requested = -1;
+
+  if (cp == NULL)
+    {
+      printf_filtered ("No checkpoints.\n");
+      return;
+    }
+
+  if (args && *args)
+    requested = (int) parse_and_eval_long (args);
+
+  do
+    {
+      /* Fixme: here's the target method.  */
+      if (requested == -1 || requested == cp->checkpoint_id)
+	record_show_checkpoint_info (cp, from_tty);
+      cp = checkpoint_next ();
+    } while (cp != NULL);
+}
+
+static void
+restart_command (char *args, int from_tty)
+{
+  extern void nullify_last_target_wait_ptid ();
+  struct checkpoint_info *cp;
+
+  if (!args || !*args)
+    error (_("Requres argument (checkpoint id to restart)"));
+
+  cp = checkpoint_find_id (parse_and_eval_long (args));
+  if (cp == NULL)
+    error (_("Not found: checkpoint id %s"), args);
+
+  /* FIXME: here's the target method.  */
+  record_restore_checkpoint (cp, from_tty);
+
+  registers_changed ();
+  reinit_frame_cache ();
+  stop_pc = regcache_read_pc (get_current_regcache ());
+  nullify_last_target_wait_ptid ();
+  if (from_tty)
+    print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
+}
+
+#endif
 
 
 /* Initializer function checkpoint_init().

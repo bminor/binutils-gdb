@@ -24,6 +24,7 @@
 #include "event-top.h"
 #include "exceptions.h"
 #include "record.h"
+#include "checkpoint.h"
 
 #include <signal.h>
 
@@ -1212,6 +1213,165 @@ static void
 info_record_command (char *args, int from_tty)
 {
   cmd_show_list (info_record_cmdlist, from_tty, "");
+}
+
+/*
+ * Process Record checkpoint stuff
+ */
+
+struct record_checkpoint_info
+{
+  struct record_entry *position;	/* pointer into the record log */
+  int insn_num;				/* numbered position in log */
+  CORE_ADDR pc;				/* program counter of checkpoint */
+};
+
+void *
+record_insert_checkpoint (struct checkpoint_info *cp, int from_tty)
+{
+  struct record_checkpoint_info *rp;
+  rp = XZALLOC (struct record_checkpoint_info);
+  rp->position = record_list;
+  rp->insn_num = record_insn_num;
+  rp->pc = stop_pc;	/* FIXME: should I use this?  */
+  if (from_tty && info_verbose)
+    {
+      printf_filtered (_(" at pos 0x%08x, count 0x%08x, pc 0x%08x"),
+		       (unsigned int) rp->position,
+		       (unsigned int) rp->insn_num,
+		       (unsigned int) rp->pc);
+    }
+  return rp;
+}
+
+void
+record_delete_checkpoint (struct checkpoint_info *cp, int from_tty)
+{
+  xfree (cp->client_data);
+}
+
+void
+record_show_checkpoint_info (struct checkpoint_info *cp, int from_tty)
+{
+  struct record_checkpoint_info *re = cp->client_data;
+
+  printf_filtered (_("\
+Checkpoint #%d at pos 0x%08x, count 0x%08x, pc 0x%08x\n"),
+		   cp->checkpoint_id, 
+		   (unsigned int) re->position,
+		   (unsigned int) re->insn_num,
+		   (unsigned int) re->pc);
+}
+
+static void
+record_goto_checkpoint (struct record_entry *checkpoint, 
+			enum exec_direction_kind dir)
+{
+  struct cleanup *set_cleanups = record_gdb_operation_disable_set ();
+  struct regcache *regcache = get_current_regcache ();
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+
+  /* Assume everything is valid: we will hit the checkpoint,
+     and we will not hit the end of the recording.  */
+
+  if (dir == EXEC_FORWARD)
+    record_list = record_list->next;
+
+  do
+    {
+      /* Set ptid, register and memory according to record_list.  */
+      if (record_list->type == record_reg)
+	{
+	  /* reg */
+	  gdb_byte reg[MAX_REGISTER_SIZE];
+	  if (record_debug > 1)
+	    fprintf_unfiltered (gdb_stdlog,
+				"Process record: record_reg %s to "
+				"inferior num = %d.\n",
+				host_address_to_string (record_list),
+				record_list->u.reg.num);
+	  regcache_cooked_read (regcache, record_list->u.reg.num, reg);
+	  regcache_cooked_write (regcache, record_list->u.reg.num,
+				 record_list->u.reg.val);
+	  memcpy (record_list->u.reg.val, reg, MAX_REGISTER_SIZE);
+	}
+      else if (record_list->type == record_mem)
+	{
+	  /* mem */
+	  gdb_byte *mem = alloca (record_list->u.mem.len);
+	  if (record_debug > 1)
+	    fprintf_unfiltered (gdb_stdlog,
+				"Process record: record_mem %s to "
+				"inferior addr = %s len = %d.\n",
+				host_address_to_string (record_list),
+				paddress (gdbarch, record_list->u.mem.addr),
+				record_list->u.mem.len);
+
+	  if (target_read_memory (record_list->u.mem.addr, 
+				  mem, record_list->u.mem.len))
+	    error (_("Process record: error reading memory at "
+		     "addr = %s len = %d."),
+		   paddress (gdbarch, record_list->u.mem.addr),
+		   record_list->u.mem.len);
+
+	  if (target_write_memory (record_list->u.mem.addr, 
+				   record_list->u.mem.val,
+				   record_list->u.mem.len))
+	    error (_("Process record: error writing memory at "
+		     "addr = %s len = %d."),
+		   paddress (gdbarch, record_list->u.mem.addr),
+		   record_list->u.mem.len);
+
+	  memcpy (record_list->u.mem.val, mem, record_list->u.mem.len);
+	}
+
+      if (dir == EXEC_REVERSE)
+	record_list = record_list->prev;
+      else
+	record_list = record_list->next;
+    } while (record_list != checkpoint);
+  do_cleanups (set_cleanups);
+}
+
+void
+record_restore_checkpoint (struct checkpoint_info *cp, int from_tty)
+{
+  int i = 0, checkpoint_index = 0, current_index = 0;
+  struct record_entry *p;
+  struct record_checkpoint_info *rp;
+
+  rp = cp->client_data;
+  for (p = &record_first; p != NULL; p = p->next)
+    {
+      if (p == rp->position)
+	checkpoint_index = i;
+      if (p == record_list)
+	current_index = i;
+      i++;
+    }
+  if (from_tty && info_verbose)
+    {
+      printf_filtered ("Checkpoint is at index %d\n", checkpoint_index);
+      printf_filtered ("Cur point is at index %d\n", current_index);
+      printf_filtered ("Counted %d (officially %d)\n", i-1, record_insn_num);
+    }
+
+  if (checkpoint_index == 0)
+    error (_("Checkpoint index not found.\n"));
+  else if (current_index == checkpoint_index)
+    error (_("Already at checkpoint.\n"));
+  else if (current_index > checkpoint_index)
+    {
+      if (from_tty)
+	printf_filtered ("Go backward to checkpoint.\n");
+      record_goto_checkpoint (rp->position, EXEC_REVERSE);
+    }
+  else
+    {
+      if (from_tty)
+	printf_filtered ("Go forward to checkpoint.\n");
+      record_goto_checkpoint (rp->position, EXEC_FORWARD);
+    }
 }
 
 void
