@@ -210,7 +210,7 @@ static const enum m68k_register mcf52223_ctrl[] = {
   0
 };
 static const enum m68k_register mcf52235_ctrl[] = {
-  VBR, CACR, ACR0, ACR1, FLASHBAR, RAMBAR, RAMBAR1,
+  VBR, FLASHBAR, RAMBAR, RAMBAR1,
   0
 };
 static const enum m68k_register mcf5225_ctrl[] = {
@@ -258,7 +258,7 @@ static const enum m68k_register mcf5282_ctrl[] = {
   0
 };
 static const enum m68k_register mcf53017_ctrl[] = {
-  VBR, CACR, ACR0, ACR1, RAMBAR0, RAMBAR,
+  VBR, CACR, ACR0, ACR1, RAMBAR, RAMBAR1,
   0
 };
 static const enum m68k_register mcf5307_ctrl[] = {
