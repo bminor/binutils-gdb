@@ -260,9 +260,20 @@ elf_file_symbol (const char *s, int appfile)
       || (symbol_rootP->bsym->flags & BSF_FILE) == 0)
     {
       symbolS *sym;
+      unsigned int name_length;
 
       sym = symbol_new (s, absolute_section, 0, NULL);
       symbol_set_frag (sym, &zero_address_frag);
+
+      name_length = strlen (s);
+      if (name_length > strlen (S_GET_NAME (sym)))
+	{
+	  obstack_grow (&notes, s, name_length + 1);
+	  S_SET_NAME (sym, obstack_finish (&notes));
+	}
+      else
+	strcpy ((char *) S_GET_NAME (sym), s);
+
       symbol_get_bfdsym (sym)->flags |= BSF_FILE;
 
       if (symbol_rootP != sym)
