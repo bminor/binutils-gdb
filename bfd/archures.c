@@ -213,6 +213,7 @@ DESCRIPTION
 .#define bfd_mach_ppc64		64
 .#define bfd_mach_ppc_403	403
 .#define bfd_mach_ppc_403gc	4030
+.#define bfd_mach_ppc_405	405
 .#define bfd_mach_ppc_505	505
 .#define bfd_mach_ppc_601	601
 .#define bfd_mach_ppc_602	602
