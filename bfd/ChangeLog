@@ -1,6 +1,11 @@
+2009-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* archures.c bfd_*_arch): Sorted.
+	(bfd_archures_list): Likewise.
+
 2009-07-27  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 
-      * elf32-cr16.c (elf_cr16_final_link_relocate): Add code to handle
+	* elf32-cr16.c (elf_cr16_final_link_relocate): Add code to handle
 	to R_cr16_NUM32 relocation.
 
 2009-07-26  Michael Eager  <eager@eagercon.com>
