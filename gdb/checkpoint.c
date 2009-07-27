@@ -158,24 +158,21 @@ info_checkpoints_command (char *args, int from_tty)
 }
 
 #else
-/* FIXME replace by target method.  */
-extern void *record_insert_checkpoint (struct checkpoint_info *, int);
-extern void  record_delete_checkpoint (struct checkpoint_info *, int);
-extern void  record_show_checkpoint_info (struct checkpoint_info *, int);
-extern void  record_restore_checkpoint (struct checkpoint_info *, int);
-
 
 static void
 checkpoint_command (char *args, int from_tty)
 {
-  struct checkpoint_info *cp = checkpoint_insert (NULL);
+  struct checkpoint_info *cp;
 
+  if (!target_set_checkpoint)
+    error (_("checkpoint command not implemented for this target."));
+
+  cp = checkpoint_insert (NULL);
   if (cp != NULL)
     {
       if (from_tty)
 	printf_filtered (_("Adding checkpoint #%d"), cp->checkpoint_id);
-      /* FIXME: here's the target method.  */
-      cp->client_data = record_insert_checkpoint (cp, from_tty);
+      cp->client_data = target_set_checkpoint (cp, from_tty);
       if (from_tty)
 	puts_filtered (_("\n"));
     }
@@ -188,6 +185,9 @@ delete_checkpoint_command (char *args, int from_tty)
 {
   struct checkpoint_info *cp;
 
+  if (!target_unset_checkpoint)
+    error (_("delete checkpoint command not implemented for this target."));
+
   if (!args || !*args)
     error (_("Requires argument (checkpoint id to delete)"));
 
@@ -196,17 +196,21 @@ delete_checkpoint_command (char *args, int from_tty)
   if (cp == NULL)
     error (_("Not found: checkpoint id %s"), args);
 
-  /* FIXME: here's the target method.  */
-  record_delete_checkpoint (cp, from_tty);
+  target_unset_checkpoint (cp, from_tty);
   checkpoint_unlink (cp);
 }
 
 static void
 info_checkpoints_command (char *args, int from_tty)
 {
-  struct checkpoint_info *cp = checkpoint_first ();
+  struct checkpoint_info *cp;
   int requested = -1;
+  int printed = 0;
 
+  if (!target_info_checkpoints)
+    error (_("info checkpoint command not implemented for this target."));
+
+  cp = checkpoint_first ();
   if (cp == NULL)
     {
       printf_filtered ("No checkpoints.\n");
@@ -218,11 +222,16 @@ info_checkpoints_command (char *args, int from_tty)
 
   do
     {
-      /* Fixme: here's the target method.  */
       if (requested == -1 || requested == cp->checkpoint_id)
-	record_show_checkpoint_info (cp, from_tty);
+	{
+	  target_info_checkpoints (cp, from_tty);
+	  printed = 1;
+	}
       cp = checkpoint_next ();
     } while (cp != NULL);
+
+  if (!printed)
+    printf_filtered (_("No checkpoint number %d.\n"), requested);
 }
 
 static void
@@ -231,6 +240,9 @@ restart_command (char *args, int from_tty)
   extern void nullify_last_target_wait_ptid ();
   struct checkpoint_info *cp;
 
+  if (!target_restore_checkpoint)
+    error (_("restart command not implemented for this target."));
+
   if (!args || !*args)
     error (_("Requres argument (checkpoint id to restart)"));
 
@@ -238,8 +250,7 @@ restart_command (char *args, int from_tty)
   if (cp == NULL)
     error (_("Not found: checkpoint id %s"), args);
 
-  /* FIXME: here's the target method.  */
-  record_restore_checkpoint (cp, from_tty);
+  target_restore_checkpoint (cp, from_tty);
 
   registers_changed ();
   reinit_frame_cache ();

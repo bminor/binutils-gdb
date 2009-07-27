@@ -308,7 +308,9 @@ extern ULONGEST get_target_memory_unsigned (struct target_ops *ops,
 					    CORE_ADDR addr, int len,
 					    enum bfd_endian byte_order);
 
-struct thread_info;		/* fwd decl for parameter list below: */
+/* Forward decls for parameter list below.  */
+struct thread_info;
+struct checkpoint_info;
 
 struct target_ops
   {
@@ -556,16 +558,16 @@ struct target_ops
     struct gdbarch *(*to_thread_architecture) (struct target_ops *, ptid_t);
 
     /* Set a checkpoint.  */
-    void (*to_set_checkpoint) (char *, int);
+    void *(*to_set_checkpoint) (struct checkpoint_info *, int);
 
     /* Unset a checkpoint.  */
-    void (*to_unset_checkpoint) (char *, int);
+    void (*to_unset_checkpoint) (struct checkpoint_info *, int);
 
     /* Restore a checkpoint.  */
-    void (*to_restore_checkpoint) (char *, int);
+    void (*to_restore_checkpoint) (struct checkpoint_info *, int);
 
     /* List checkpoints.  */
-    void (*to_info_checkpoints) (char *, int);
+    void (*to_info_checkpoints) (struct checkpoint_info *, int);
 
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?

@@ -1,5 +1,41 @@
 2009-07-26  Michael Snyder  <msnyder@vmware.com>
 
+	Nearly working.
+
+	* target.h (struct target_ops): Change func args of
+	checkpoint methods.
+
+	checkpoint.c (checkpoint_command): Use target method, 
+	bail if it isn't implemented.
+	(delete_checkpoint_command): Ditto.
+	(info_checkpoints_command): Ditto.
+	(restart_command): Ditto.
+
+	linux-fork.c (fork_list): Delete, use checkpoint list instead.
+	(forks_exist_p): Check checkpoint list instead of fork_list.
+	(delete_fork): Ditto.
+	(find_fork_ptid): Ditto.
+	(find_fork_id): Ditto.
+	(find_fork_pid): Ditto.
+	(add_fork): Ditto.
+	(linux_fork_killall): Ditto.
+	(linux_fork_mourn_inferior): Ditto.
+	(linux_fork_detach): Ditto.
+	(init_fork_list): Delete, no longer needed.
+	(delete_checkpoint_command): Ditto.
+	(info_checkpoints_command): Ditto.
+	(checkpoint_command): Ditto.
+	(restart_command): Ditto.
+	(linux_unset_checkpoint): New function (target method).
+	(linux_show_checkpoints_info): Ditto.
+	(linux_set_checkpoint): Ditto.
+	(linux_restore_checkpoint): Ditto.
+	(_initialize_linux_fork): Use new target methods.
+
+	* record.c (init_record_ops): Use new target methods.
+
+2009-07-26  Michael Snyder  <msnyder@vmware.com>
+
 	In-flux state: target methods temporarily broken.
 	
 	* checkpoint.c (checkpoint_insert): New function.

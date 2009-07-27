@@ -118,6 +118,13 @@ static int (*record_beneath_to_insert_breakpoint) (struct gdbarch *,
 static int (*record_beneath_to_remove_breakpoint) (struct gdbarch *,
 						   struct bp_target_info *);
 
+/* Checkpoint target methods.  */
+
+static void *record_insert_checkpoint (struct checkpoint_info *, int);
+static void record_delete_checkpoint (struct checkpoint_info *, int);
+static void record_show_checkpoint_info (struct checkpoint_info *, int);
+static void record_restore_checkpoint (struct checkpoint_info *, int);
+
 static void
 record_list_release (struct record_entry *rec)
 {
@@ -1109,6 +1116,11 @@ init_record_ops (void)
   record_ops.to_remove_breakpoint = record_remove_breakpoint;
   record_ops.to_can_execute_reverse = record_can_execute_reverse;
   record_ops.to_stratum = record_stratum;
+  /* Checkpoints */
+  record_ops.to_set_checkpoint = record_insert_checkpoint;
+  record_ops.to_unset_checkpoint = record_delete_checkpoint;
+  record_ops.to_info_checkpoints = record_show_checkpoint_info;
+  record_ops.to_restore_checkpoint = record_restore_checkpoint;
   record_ops.to_magic = OPS_MAGIC;
 }
 
@@ -1226,7 +1238,7 @@ struct record_checkpoint_info
   CORE_ADDR pc;				/* program counter of checkpoint */
 };
 
-void *
+static void *
 record_insert_checkpoint (struct checkpoint_info *cp, int from_tty)
 {
   struct record_checkpoint_info *rp;
@@ -1244,13 +1256,13 @@ record_insert_checkpoint (struct checkpoint_info *cp, int from_tty)
   return rp;
 }
 
-void
+static void
 record_delete_checkpoint (struct checkpoint_info *cp, int from_tty)
 {
   xfree (cp->client_data);
 }
 
-void
+static void
 record_show_checkpoint_info (struct checkpoint_info *cp, int from_tty)
 {
   struct record_checkpoint_info *re = cp->client_data;
@@ -1333,7 +1345,7 @@ record_goto_checkpoint (struct record_entry *checkpoint,
   do_cleanups (set_cleanups);
 }
 
-void
+static void
 record_restore_checkpoint (struct checkpoint_info *cp, int from_tty)
 {
   int i = 0, checkpoint_index = 0, current_index = 0;
