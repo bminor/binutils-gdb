@@ -1,3 +1,9 @@
+2009-07-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 10413
+	* objdump.c (dump_section_header): Skip sections that we are
+	ignoring.
+
 2009-07-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (guess_is_rela): Handle EM_L1OM.

@@ -320,6 +320,23 @@ nonfatal (const char *msg)
   exit_status = 1;
 }
 
+/* Returns TRUE if the specified section should be dumped.  */
+
+static bfd_boolean
+process_section_p (asection * section)
+{
+  size_t i;
+
+  if (only == NULL)
+    return TRUE;
+
+  for (i = 0; i < only_used; i++)
+    if (strcmp (only [i], section->name) == 0)
+      return TRUE;
+
+  return FALSE;
+}
+
 static void
 dump_section_header (bfd *abfd, asection *section,
 		     void *ignored ATTRIBUTE_UNUSED)
@@ -330,6 +347,10 @@ dump_section_header (bfd *abfd, asection *section,
   /* Ignore linker created section.  See elfNN_ia64_object_p in
      bfd/elfxx-ia64.c.  */
   if (section->flags & SEC_LINKER_CREATED)
+    return;
+
+  /* PR 10413: Skip sections that we are ignoring.  */
+  if (! process_section_p (section))
     return;
 
   printf ("%3d %-13s %08lx  ", section->index,
@@ -1354,24 +1375,6 @@ objdump_sprintf (SFILE *f, const char *format, ...)
   
   return n;
 }
-
-/* Returns TRUE if the specified section should be dumped.  */
-
-static bfd_boolean
-process_section_p (asection * section)
-{
-  size_t i;
-
-  if (only == NULL)
-    return TRUE;
-
-  for (i = 0; i < only_used; i++)
-    if (strcmp (only [i], section->name) == 0)
-      return TRUE;
-
-  return FALSE;
-}
-
 
 /* The number of zeroes we want to see before we start skipping them.
    The number is arbitrarily chosen.  */
