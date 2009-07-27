@@ -1,4 +1,9 @@
-2009-07-28  Maxim Kuvyrkov  <maxim@codesourcery.com>
+2009-07-27  Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+	* config/tc-m68k.c (mcf5221x_ctrl): New.
+	(m68k_cpu): Add line for MCF5221x.
+
+2009-07-27  Maxim Kuvyrkov  <maxim@codesourcery.com>
 
 	* config/tc-m68k.c (mcf52235_ctrl): Remove non-existent CACR, ACR[01].
 	(mcf53017_ctrl): Fix RAMBAR.
