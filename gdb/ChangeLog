@@ -1,3 +1,14 @@
+2009-07-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arch-utils.c (displaced_step_at_entry_point): Do not call
+	gdbarch_convert_from_func_ptr_addr.
+	* cris-tdep.c: Remove outdated comment.
+	* infcall.c (call_function_by_hand): Do not call
+	gdbarch_convert_from_func_ptr_addr after entry_point_address.
+	* objfiles.c (entry_point_address): Call both
+	gdbarch_convert_from_func_ptr_addr and
+	gdbarch_addr_bits_remove.
+
 2009-07-28  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* nto-tdep.c (nto_thread_state_str): New array.

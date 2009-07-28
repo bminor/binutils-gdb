@@ -76,10 +76,6 @@ displaced_step_at_entry_point (struct gdbarch *gdbarch)
 
   addr = entry_point_address ();
 
-  /* Make certain that the address points at real code, and not a
-     function descriptor.  */
-  addr = gdbarch_convert_from_func_ptr_addr (gdbarch, addr, &current_target);
-
   /* Inferior calls also use the entry point as a breakpoint location.
      We don't want displaced stepping to interfere with those
      breakpoints, so leave space.  */

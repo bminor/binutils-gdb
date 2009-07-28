@@ -279,7 +279,26 @@ init_entry_point_info (struct objfile *objfile)
 CORE_ADDR
 entry_point_address (void)
 {
-  return symfile_objfile ? symfile_objfile->ei.entry_point : 0;
+  struct gdbarch *gdbarch;
+  CORE_ADDR entry_point;
+
+  if (symfile_objfile == NULL)
+    return 0;
+
+  gdbarch = get_objfile_arch (symfile_objfile);
+
+  entry_point = symfile_objfile->ei.entry_point;
+
+  /* Make certain that the address points at real code, and not a
+     function descriptor.  */
+  entry_point = gdbarch_convert_from_func_ptr_addr (gdbarch, entry_point,
+						    &current_target);
+
+  /* Remove any ISA markers, so that this matches entries in the
+     symbol table.  */
+  entry_point = gdbarch_addr_bits_remove (gdbarch, entry_point);
+
+  return entry_point;
 }
 
 /* Create the terminating entry of OBJFILE's minimal symbol table.

@@ -39,7 +39,6 @@
 #include "regcache.h"
 #include "gdb_assert.h"
 
-/* To get entry_point_address.  */
 #include "objfiles.h"
 
 #include "solib.h"              /* Support for shared libraries.  */

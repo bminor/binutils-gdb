@@ -592,11 +592,6 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 
 	real_pc = funaddr;
 	dummy_addr = entry_point_address ();
-	/* Make certain that the address points at real code, and not a
-	   function descriptor.  */
-	dummy_addr = gdbarch_convert_from_func_ptr_addr (gdbarch,
-							 dummy_addr,
-							 &current_target);
 	/* A call dummy always consists of just a single breakpoint, so
 	   its address is the same as the address of the dummy.  */
 	bp_addr = dummy_addr;
@@ -614,14 +609,16 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	sym = lookup_minimal_symbol ("__CALL_DUMMY_ADDRESS", NULL, NULL);
 	real_pc = funaddr;
 	if (sym)
-	  dummy_addr = SYMBOL_VALUE_ADDRESS (sym);
+	  {
+	    dummy_addr = SYMBOL_VALUE_ADDRESS (sym);
+	    /* Make certain that the address points at real code, and not
+	       a function descriptor.  */
+	    dummy_addr = gdbarch_convert_from_func_ptr_addr (gdbarch,
+							     dummy_addr,
+							     &current_target);
+	  }
 	else
 	  dummy_addr = entry_point_address ();
-	/* Make certain that the address points at real code, and not
-	   a function descriptor.  */
-	dummy_addr = gdbarch_convert_from_func_ptr_addr (gdbarch,
-							 dummy_addr,
-							 &current_target);
 	/* A call dummy always consists of just a single breakpoint,
 	   so it's address is the same as the address of the dummy.  */
 	bp_addr = dummy_addr;
