@@ -47,6 +47,8 @@ enum gdb_regnum {
   ARM_WCGR0_REGNUM,		/* WMMX general purpose registers.  */
   ARM_WCGR3_REGNUM = ARM_WCGR0_REGNUM + 3,
   ARM_WCGR7_REGNUM = ARM_WCGR0_REGNUM + 7,
+  ARM_D0_REGNUM,		/* VFP double-precision registers.  */
+  ARM_D31_REGNUM = ARM_D0_REGNUM + 31,
 
   ARM_NUM_REGS,
 
@@ -151,6 +153,13 @@ struct gdbarch_tdep
   enum arm_float_model fp_model; /* Floating point calling conventions.  */
 
   int have_fpa_registers;	/* Does the target report the FPA registers?  */
+  int have_vfp_registers;	/* Does the target report the VFP registers?  */
+  int have_vfp_pseudos;		/* Are we synthesizing the single precision
+				   VFP registers?  */
+  int have_neon_pseudos;	/* Are we synthesizing the quad precision
+				   NEON registers?  Requires
+				   have_vfp_pseudos.  */
+  int have_neon;		/* Do we have a NEON unit?  */
 
   CORE_ADDR lowest_pc;		/* Lowest address at which instructions 
 				   will appear.  */
@@ -173,6 +182,8 @@ struct gdbarch_tdep
 
   /* ISA-specific data types.  */
   struct type *arm_ext_type;
+  struct type *neon_double_type;
+  struct type *neon_quad_type;
 };
 
 

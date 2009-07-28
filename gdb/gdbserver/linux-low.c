@@ -2394,7 +2394,16 @@ linux_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
 
   if (debug_threads)
     {
-      fprintf (stderr, "Writing %02x to %08lx\n", (unsigned)myaddr[0], (long)memaddr);
+      /* Dump up to four bytes.  */
+      unsigned int val = * (unsigned int *) myaddr;
+      if (len == 1)
+	val = val & 0xff;
+      else if (len == 2)
+	val = val & 0xffff;
+      else if (len == 3)
+	val = val & 0xffffff;
+      fprintf (stderr, "Writing %0*x to 0x%08lx\n", 2 * ((len < 4) ? len : 4),
+	       val, (long)memaddr);
     }
 
   /* Fill start and end extra bytes of buffer with existing memory data.  */

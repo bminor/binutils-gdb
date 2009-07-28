@@ -64,8 +64,13 @@ operators when expanding macros.  It also supports variable-arity
 macros.
 
 * GDB now supports inspecting extra signal information, exported by
-  the new $_siginfo convenience variable.  The feature is currently
-  implemented on linux ARM, i386 and amd64.
+the new $_siginfo convenience variable.  The feature is currently
+implemented on linux ARM, i386 and amd64.
+
+* GDB can now display the VFP floating point registers and NEON vector
+registers on ARM targets.  Both ARM GNU/Linux native GDB and gdbserver
+can provide these registers (requires Linux 2.6.30 or later).  Remote
+and simulator targets may also provide them.
 
 * New remote packets
 

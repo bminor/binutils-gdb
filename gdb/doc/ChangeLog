@@ -1,3 +1,8 @@
+2009-07-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (ARM Features): Document org.gnu.gdb.arm.vfp and
+	org.gnu.gdb.arm.neon.
+
 2009-07-20  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.texinfo (Target Description Format): Mention the new <osabi>

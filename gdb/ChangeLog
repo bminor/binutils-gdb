@@ -1,5 +1,43 @@
 2009-07-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* NEWS: Mention ARM VFP support.
+	* target-descriptions.c (tdesc_register_type): Make public.
+	(tdesc_unnumbered_register): New function.
+	(tdesc_register_reggroup_p): Allow missing
+	pseudo_register_reggroup_p.
+	* target-descriptions.h (tdesc_register_type): Declare.
+	(tdesc_unnumbered_register): Declare.
+	* arm-tdep.c (arm_neon_quad_read, arm_neon_quad_write): New functions.
+	(arm_push_dummy_call): Use arm_neon_quad_write.
+	(arm_neon_double_type, arm_neon_quad_type): New functions.
+	(arm_register_type): Handle VFP and NEON registers.  Override the
+	types of double-precision registers for NEON.  Disable FPA registers
+	if they are not present.
+	(arm_dwarf_reg_to_regnum): Add current VFP and NEON register numbers.
+	(arm_return_value): Use arm_neon_quad_write and arm_neon_quad_read.
+	(arm_register_name): Handle VFP single and NEON quad registers.
+	(arm_pseudo_read, arm_pseudo_write): New functions.
+	(arm_gdbarch_init): Check for VFP and NEON in the target description.
+	Assign numbers to double-precision registers.  Register VFP and NEON
+	pseudo registers.  Remove a shadowed "i" variable.
+	* arm-tdep.h (enum gdb_regnum): Add ARM_D0_REGNUM and
+	ARM_D31_REGNUM.
+	(struct gdbarch_tdep): Add have_neon_pseudos, have_neon,
+	have_vfp_registers, have_vfp_pseudos, neon_double_type,
+	and neon_quad_type.
+
+	* features/Makefile: Make expedite settings only architecture
+	specific.
+	(WHICH): Add new ARM descriptions.
+	* features/arm-with-neon.xml, features/arm-with-vfpv2.c,
+	features/arm-with-vfpv3.c, features/arm-vfpv2.xml,
+	features/arm-vfpv3.xml, features/arm-with-vfpv2.xml,
+	features/arm-with-vfpv3.xml, features/arm-with-neon.c: New files.
+	* regformats/arm-with-neon.dat, regformats/arm-with-vfpv2.dat,
+	regformats/arm-with-vfpv3.dat: Generate.
+
+2009-07-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* infrun.c (handle_inferior_event): Clear trap_expected after
 	stepping past a single-step breakpoint.
 

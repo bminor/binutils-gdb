@@ -20,14 +20,17 @@
 #include "server.h"
 #include "linux-low.h"
 
+#include <elf.h>
 #include <sys/ptrace.h>
 
 #include "gdb_proc_service.h"
 
-/* Defined in auto-generated file reg-arm.c.  */
+/* Defined in auto-generated files.  */
 void init_registers_arm (void);
-/* Defined in auto-generated file arm-with-iwmmxt.c.  */
 void init_registers_arm_with_iwmmxt (void);
+void init_registers_arm_with_vfpv2 (void);
+void init_registers_arm_with_vfpv3 (void);
+void init_registers_arm_with_neon (void);
 
 #ifndef PTRACE_GET_THREAD_AREA
 #define PTRACE_GET_THREAD_AREA 22
@@ -37,6 +40,20 @@ void init_registers_arm_with_iwmmxt (void);
 # define PTRACE_GETWMMXREGS 18
 # define PTRACE_SETWMMXREGS 19
 #endif
+
+#ifndef PTRACE_GETVFPREGS
+# define PTRACE_GETVFPREGS 27
+# define PTRACE_SETVFPREGS 28
+#endif
+
+static unsigned long arm_hwcap;
+
+/* These are in <asm/elf.h> in current kernels.  */
+#define HWCAP_VFP       64
+#define HWCAP_IWMMXT    512
+#define HWCAP_NEON      4096
+#define HWCAP_VFPv3     8192
+#define HWCAP_VFPv3D16  16384
 
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
@@ -87,12 +104,13 @@ arm_store_gregset (const void *buf)
       supply_register (i, zerobuf);
 }
 
-#ifdef __IWMMXT__
-
 static void
 arm_fill_wmmxregset (void *buf)
 {
   int i;
+
+  if (!(arm_hwcap & HWCAP_IWMMXT))
+    return;
 
   for (i = 0; i < 16; i++)
     collect_register (arm_num_regs + i, (char *) buf + i * 8);
@@ -107,6 +125,9 @@ arm_store_wmmxregset (const void *buf)
 {
   int i;
 
+  if (!(arm_hwcap & HWCAP_IWMMXT))
+    return;
+
   for (i = 0; i < 16; i++)
     supply_register (arm_num_regs + i, (char *) buf + i * 8);
 
@@ -115,7 +136,45 @@ arm_store_wmmxregset (const void *buf)
     supply_register (arm_num_regs + i + 16, (char *) buf + 16 * 8 + i * 4);
 }
 
-#endif /* __IWMMXT__ */
+static void
+arm_fill_vfpregset (void *buf)
+{
+  int i, num, base;
+
+  if (!(arm_hwcap & HWCAP_VFP))
+    return;
+
+  if ((arm_hwcap & (HWCAP_VFPv3 | HWCAP_VFPv3D16)) == HWCAP_VFPv3)
+    num = 32;
+  else
+    num = 16;
+
+  base = find_regno ("d0");
+  for (i = 0; i < num; i++)
+    collect_register (base + i, (char *) buf + i * 8);
+
+  collect_register_by_name ("fpscr", (char *) buf + 32 * 8);
+}
+
+static void
+arm_store_vfpregset (const void *buf)
+{
+  int i, num, base;
+
+  if (!(arm_hwcap & HWCAP_VFP))
+    return;
+
+  if ((arm_hwcap & (HWCAP_VFPv3 | HWCAP_VFPv3D16)) == HWCAP_VFPv3)
+    num = 32;
+  else
+    num = 16;
+
+  base = find_regno ("d0");
+  for (i = 0; i < num; i++)
+    supply_register (base + i, (char *) buf + i * 8);
+
+  supply_register_by_name ("fpscr", (char *) buf + 32 * 8);
+}
 
 extern int debug_threads;
 
@@ -208,24 +267,94 @@ ps_get_thread_area (const struct ps_prochandle *ph,
   return PS_OK;
 }
 
+static int
+arm_get_hwcap (unsigned long *valp)
+{
+  unsigned char *data = alloca (8);
+  int offset = 0;
+
+  while ((*the_target->read_auxv) (offset, data, 8) == 8)
+    {
+      unsigned int *data_p = (unsigned int *)data;
+      if (data_p[0] == AT_HWCAP)
+	{
+	  *valp = data_p[1];
+	  return 1;
+	}
+
+      offset += 8;
+    }
+
+  *valp = 0;
+  return 0;
+}
+
+static void
+arm_arch_setup (void)
+{
+  arm_hwcap = 0;
+  if (arm_get_hwcap (&arm_hwcap) == 0)
+    {
+      init_registers_arm ();
+      return;
+    }
+
+  if (arm_hwcap & HWCAP_IWMMXT)
+    {
+      init_registers_arm_with_iwmmxt ();
+      return;
+    }
+
+  if (arm_hwcap & HWCAP_VFP)
+    {
+      int pid;
+      char *buf;
+
+      /* NEON implies either no VFP, or VFPv3-D32.  We only support
+	 it with VFP.  */
+      if (arm_hwcap & HWCAP_NEON)
+	init_registers_arm_with_neon ();
+      else if ((arm_hwcap & (HWCAP_VFPv3 | HWCAP_VFPv3D16)) == HWCAP_VFPv3)
+	init_registers_arm_with_vfpv3 ();
+      else
+	init_registers_arm_with_vfpv2 ();
+
+      /* Now make sure that the kernel supports reading these
+	 registers.  Support was added in 2.6.30.  */
+      pid = lwpid_of (get_thread_lwp (current_inferior));
+      errno = 0;
+      buf = malloc (32 * 8 + 4);
+      if (ptrace (PTRACE_GETVFPREGS, pid, 0, buf) < 0
+	  && errno == EIO)
+	{
+	  arm_hwcap = 0;
+	  init_registers_arm ();
+	}
+      free (buf);
+
+      return;
+    }
+
+  /* The default configuration uses legacy FPA registers, probably
+     simulated.  */
+  init_registers_arm ();
+}
+
 struct regset_info target_regsets[] = {
   { PTRACE_GETREGS, PTRACE_SETREGS, 18 * 4,
     GENERAL_REGS,
     arm_fill_gregset, arm_store_gregset },
-#ifdef __IWMMXT__
   { PTRACE_GETWMMXREGS, PTRACE_SETWMMXREGS, 16 * 8 + 6 * 4,
     EXTENDED_REGS,
     arm_fill_wmmxregset, arm_store_wmmxregset },
-#endif
+  { PTRACE_GETVFPREGS, PTRACE_SETVFPREGS, 32 * 8 + 4,
+    EXTENDED_REGS,
+    arm_fill_vfpregset, arm_store_vfpregset },
   { 0, 0, -1, -1, NULL, NULL }
 };
 
 struct linux_target_ops the_low_target = {
-#ifdef __IWMMXT__
-  init_registers_arm_with_iwmmxt,
-#else
-  init_registers_arm,
-#endif
+  arm_arch_setup,
   arm_num_regs,
   arm_regmap,
   arm_cannot_fetch_register,

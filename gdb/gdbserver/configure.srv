@@ -26,10 +26,18 @@ srv_hostio_err_objs="hostio-errno.o"
 
 case "${target}" in
   arm*-*-linux*)	srv_regobj="reg-arm.o arm-with-iwmmxt.o"
+			srv_regobj="${srv_regobj} arm-with-vfpv2.o"
+			srv_regobj="${srv_regobj} arm-with-vfpv3.o"
+			srv_regobj="${srv_regobj} arm-with-neon.o"
 			srv_tgtobj="linux-low.o linux-arm-low.o"
 			srv_xmlfiles="arm-with-iwmmxt.xml"
+			srv_xmlfiles="${srv_xmlfiles} arm-with-vfpv2.xml"
+			srv_xmlfiles="${srv_xmlfiles} arm-with-vfpv3.xml"
+			srv_xmlfiles="${srv_xmlfiles} arm-with-neon.xml"
 			srv_xmlfiles="${srv_xmlfiles} arm-core.xml"
 			srv_xmlfiles="${srv_xmlfiles} xscale-iwmmxt.xml"
+			srv_xmlfiles="${srv_xmlfiles} arm-vfpv2.xml"
+			srv_xmlfiles="${srv_xmlfiles} arm-vfpv3.xml"
 			srv_linux_usrregs=yes
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes

@@ -1,5 +1,23 @@
 2009-07-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* linux-low.c (linux_write_memory): Update debugging output.
+	* Makefile.in (clean): Add new descriptions.
+	(arm-with-vfpv2.o, arm-with-vfpv2.c, arm-with-vfpv3.o)
+	(arm-with-vfpv3.c, arm-with-neon.o, arm-with-neon.c): New rules.
+	* configure.srv: Add new files for arm*-*-linux*.
+	* linux-arm-low.c: Add new declarations.
+	(PTRACE_GETVFPREGS, PTRACE_SETVFPREGS): Define if undefined.
+	(arm_hwcap, HWCAP_VFP, HWCAP_IWMMXT, HWCAP_NEON, HWCAP_VFPv3)
+	(HWCAP_VFPv3D16): New.
+	(arm_fill_wmmxregset, arm_store_wmmxregset): Check HWCAP_IWMMXT
+	instead of __IWMMXT__.
+	(arm_fill_vfpregset, arm_store_vfpregset, arm_get_hwcap)
+	(arm_arch_setup): New.
+	(target_regsets): Remove #ifdef.  Add VFP regset.
+	(the_low_target): Use arm_arch_setup.
+
+2009-07-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* linux-low.c (linux_kill_one_lwp): Adjust kernel workaround to skip
 	the main thread again.
 

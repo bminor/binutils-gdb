@@ -205,7 +205,9 @@ clean:
 	rm -f reg-arm.c reg-i386.c reg-ia64.c reg-m32r.c reg-m68k.c
 	rm -f reg-sh.c reg-sparc.c reg-spu.c reg-x86-64.c reg-i386-linux.c
 	rm -f reg-cris.c reg-crisv32.c reg-x86-64-linux.c reg-xtensa.c
-	rm -f arm-with-iwmmxt.c mips-linux.c mips64-linux.c
+	rm -f arm-with-iwmmxt.c
+	rm -f arm-with-vfpv2.c arm-with-vfpv3.c arm-with-neon.c
+	rm -f mips-linux.c mips64-linux.c
 	rm -f powerpc-32l.c powerpc-64l.c powerpc-e500l.c
 	rm -f powerpc-altivec32l.c powerpc-vsx32l.c powerpc-altivec64l.c
 	rm -f powerpc-vsx64l.c
@@ -326,6 +328,15 @@ reg-arm.c : $(srcdir)/../regformats/reg-arm.dat $(regdat_sh)
 arm-with-iwmmxt.o : arm-with-iwmmxt.c $(regdef_h)
 arm-with-iwmmxt.c : $(srcdir)/../regformats/arm-with-iwmmxt.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/arm-with-iwmmxt.dat arm-with-iwmmxt.c
+arm-with-vfpv2.o : arm-with-vfpv2.c $(regdef_h)
+arm-with-vfpv2.c : $(srcdir)/../regformats/arm-with-vfpv2.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/arm-with-vfpv2.dat arm-with-vfpv2.c
+arm-with-vfpv3.o : arm-with-vfpv3.c $(regdef_h)
+arm-with-vfpv3.c : $(srcdir)/../regformats/arm-with-vfpv3.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/arm-with-vfpv3.dat arm-with-vfpv3.c
+arm-with-neon.o : arm-with-neon.c $(regdef_h)
+arm-with-neon.c : $(srcdir)/../regformats/arm-with-neon.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/arm-with-neon.dat arm-with-neon.c
 reg-cris.o : reg-cris.c $(regdef_h)
 reg-cris.c : $(srcdir)/../regformats/reg-cris.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-cris.dat reg-cris.c

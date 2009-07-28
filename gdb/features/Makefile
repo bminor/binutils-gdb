@@ -31,28 +31,17 @@
 # in the GDB repository.  To generate C files:
 #   make GDB=/path/to/gdb XMLTOC="xml files" cfiles
 
-WHICH = arm-with-iwmmxt mips-linux mips64-linux \
+WHICH = arm-with-iwmmxt arm-with-vfpv2 arm-with-vfpv3 arm-with-neon \
+	mips-linux mips64-linux \
 	rs6000/powerpc-32l rs6000/powerpc-altivec32l rs6000/powerpc-e500l \
 	rs6000/powerpc-64l rs6000/powerpc-altivec64l rs6000/powerpc-vsx32l \
 	rs6000/powerpc-vsx64l
 
 # Record which registers should be sent to GDB by default after stop.
-arm-with-iwmmxt-expedite = r11,sp,pc
-mips-linux-expedite = r29,pc
-mips64-linux-expedite = r29,pc
-rs6000/powerpc-32l-expedite = r1,pc
-rs6000/powerpc-altivec32l-expedite = r1,pc
-rs6000/powerpc-vsx32l-expedite = r1,pc
-rs6000/powerpc-isa205-32l-expedite = r1,pc
-rs6000/powerpc-isa205-altivec32l-expedite = r1,pc
-rs6000/powerpc-isa205-vsx32l-expedite = r1,pc
-rs6000/powerpc-e500l-expedite = r1,pc
-rs6000/powerpc-64l-expedite = r1,pc
-rs6000/powerpc-altivec64l-expedite = r1,pc
-rs6000/powerpc-vsx64l-expedite = r1,pc
-rs6000/powerpc-isa205-64l-expedite = r1,pc
-rs6000/powerpc-isa205-altivec64l-expedite = r1,pc
-rs6000/powerpc-isa205-vsx64l-expedite = r1,pc
+arm-expedite = r11,sp,pc
+mips-expedite = r29,pc
+mips64-expedite = r29,pc
+powerpc-expedite = r1,pc
 
 
 XSLTPROC = xsltproc
@@ -69,7 +58,7 @@ $(outdir)/%.dat: %.xml number-regs.xsl sort-regs.xsl gdbserver-regs.xsl
 	echo "# DO NOT EDIT: generated from $<" > $(outdir)/$*.tmp
 	echo "name:`echo $(notdir $*) | sed 's/-/_/g'`" >> $(outdir)/$*.tmp
 	echo "xmltarget:$(<F)" >> $(outdir)/$*.tmp
-	echo "expedite:$($*-expedite)" >> $(outdir)/$*.tmp
+	echo "expedite:$($(firstword $(subst -, ,$(notdir $*)))-expedite)" >> $(outdir)/$*.tmp
 	$(XSLTPROC) --path "$(PWD)" --xinclude number-regs.xsl $< | \
 	  $(XSLTPROC) sort-regs.xsl - | \
 	  $(XSLTPROC) gdbserver-regs.xsl - >> $(outdir)/$*.tmp

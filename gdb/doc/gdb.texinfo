@@ -31092,6 +31092,19 @@ it should contain at least registers @samp{wR0} through @samp{wR15} and
 @samp{wCGR0} through @samp{wCGR3}.  The @samp{wCID}, @samp{wCon},
 @samp{wCSSF}, and @samp{wCASF} registers are optional.
 
+The @samp{org.gnu.gdb.arm.vfp} feature is optional.  If present, it
+should contain at least registers @samp{d0} through @samp{d15}.  If
+they are present, @samp{d16} through @samp{d31} should also be included.
+@value{GDBN} will synthesize the single-precision registers from
+halves of the double-precision registers.
+
+The @samp{org.gnu.gdb.arm.neon} feature is optional.  It does not
+need to contain registers; it instructs @value{GDBN} to display the
+VFP double-precision registers as vectors and to synthesize the
+quad-precision registers from pairs of double-precision registers.
+If this feature is present, @samp{org.gnu.gdb.arm.vfp} must also
+be present and include 32 double-precision registers.
+
 @node MIPS Features
 @subsection MIPS Features
 @cindex target descriptions, MIPS features

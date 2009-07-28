@@ -51,6 +51,11 @@ if { [istarget "alpha*-*-*"] } then {
 	-re "Software FPU type.*mask:.*flags:.*$gdb_prompt $" {
 	    pass "info float (FPA)"
 	}
+	-re "fpscr.*s0.*s1.*s31.*$gdb_prompt $" {
+	    # Only check for single precision; d0 might be a vector register
+	    # if we have NEON.
+	    pass "info float (VFP)"
+	}
         -re "No floating.point info available for this processor.*" {
             pass "info float (without FPU)"
 	}

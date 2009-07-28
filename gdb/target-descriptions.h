@@ -98,6 +98,12 @@ int tdesc_numbered_register (const struct tdesc_feature *feature,
 			     struct tdesc_arch_data *data,
 			     int regno, const char *name);
 
+/* Search FEATURE for a register named NAME, but do not assign a fixed
+   register number to it.  */
+
+int tdesc_unnumbered_register (const struct tdesc_feature *feature,
+			       const char *name);
+
 /* Search FEATURE for a register named NAME, and return its size in
    bits.  The register must exist.  */
 
@@ -158,6 +164,11 @@ struct tdesc_type *tdesc_named_type (const struct tdesc_feature *feature,
    from an architecture-provided pseudo_register_name method.  */
 
 const char *tdesc_register_name (struct gdbarch *gdbarch, int regno);
+
+/* Return the type of register REGNO, from the target description or
+   from an architecture-provided pseudo_register_type method.  */
+
+struct type *tdesc_register_type (struct gdbarch *gdbarch, int regno);
 
 /* Check whether REGNUM is a member of REGGROUP using the target
    description.  Return -1 if the target description does not
