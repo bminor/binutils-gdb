@@ -589,7 +589,7 @@ linux_kill_one_lwp (struct inferior_list_entry *entry, void *args)
      the children get a chance to be reaped, it will remain a zombie
      forever.  */
 
-  if (last_thread_of_process_p (thread))
+  if (lwpid_of (lwp) == pid)
     {
       if (debug_threads)
 	fprintf (stderr, "lkop: is last of process %s\n",
