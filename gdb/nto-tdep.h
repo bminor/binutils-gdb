@@ -25,6 +25,7 @@
 #include "solist.h"
 #include "osabi.h"
 #include "regset.h"
+#include "gdbthread.h"
 
 /* Target operations defined for Neutrino targets (<target>-nto-tdep.c).  */
 
@@ -138,6 +139,14 @@ typedef struct _debug_regs
   qnx_reg64 padding[1024];
 } nto_regset_t;
 
+struct private_thread_info
+{
+  short tid;
+  unsigned char state;
+  unsigned char flags;
+  char name[1];
+};
+
 /* Generic functions in nto-tdep.c.  */
 
 void nto_init_solib_absolute_prefix (void);
@@ -161,5 +170,7 @@ void nto_initialize_signals (void);
 void nto_dummy_supply_regset (struct regcache *regcache, char *regs);
 
 int nto_in_dynsym_resolve_code (CORE_ADDR pc);
+
+char *nto_extra_thread_info (struct thread_info *);
 
 #endif

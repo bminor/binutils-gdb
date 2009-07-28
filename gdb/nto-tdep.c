@@ -341,6 +341,40 @@ nto_elf_osabi_sniffer (bfd *abfd)
   return GDB_OSABI_UNKNOWN;
 }
 
+static const char *nto_thread_state_str[] =
+{
+  "DEAD",		/* 0  0x00 */
+  "RUNNING",	/* 1  0x01 */
+  "READY",	/* 2  0x02 */
+  "STOPPED",	/* 3  0x03 */
+  "SEND",		/* 4  0x04 */
+  "RECEIVE",	/* 5  0x05 */
+  "REPLY",	/* 6  0x06 */
+  "STACK",	/* 7  0x07 */
+  "WAITTHREAD",	/* 8  0x08 */
+  "WAITPAGE",	/* 9  0x09 */
+  "SIGSUSPEND",	/* 10 0x0a */
+  "SIGWAITINFO",	/* 11 0x0b */
+  "NANOSLEEP",	/* 12 0x0c */
+  "MUTEX",	/* 13 0x0d */
+  "CONDVAR",	/* 14 0x0e */
+  "JOIN",		/* 15 0x0f */
+  "INTR",		/* 16 0x10 */
+  "SEM",		/* 17 0x11 */
+  "WAITCTX",	/* 18 0x12 */
+  "NET_SEND",	/* 19 0x13 */
+  "NET_REPLY"	/* 20 0x14 */
+};
+
+char *
+nto_extra_thread_info (struct thread_info *ti)
+{
+  if (ti && ti->private
+      && ti->private->state < ARRAY_SIZE (nto_thread_state_str))
+    return (char *)nto_thread_state_str [ti->private->state];
+  return "";
+}
+
 void
 nto_initialize_signals (void)
 {

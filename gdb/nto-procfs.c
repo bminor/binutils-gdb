@@ -220,11 +220,96 @@ static int
 procfs_thread_alive (struct target_ops *ops, ptid_t ptid)
 {
   pid_t tid;
+  pid_t pid;
+  procfs_status status;
+  int err;
 
   tid = ptid_get_tid (ptid);
-  if (devctl (ctl_fd, DCMD_PROC_CURTHREAD, &tid, sizeof (tid), 0) == EOK)
-    return 1;
-  return 0;
+  pid = ptid_get_pid (ptid);
+
+  if (kill (pid, 0) == -1)
+    return 0;
+
+  status.tid = tid;
+  if ((err = devctl (ctl_fd, DCMD_PROC_TIDSTATUS,
+		     &status, sizeof (status), 0)) != EOK)
+    return 0;
+
+  /* Thread is alive or dead but not yet joined,
+     or dead and there is an alive (or dead unjoined) thread with
+     higher tid.
+
+     If the tid is not the same as requested, requested tid is dead.  */
+  return (status.tid == tid) && (status.state != STATE_DEAD);
+}
+
+static void
+update_thread_private_data_name (struct thread_info *new_thread,
+				 const char *newname)
+{
+  int newnamelen;
+  struct private_thread_info *pti;
+
+  gdb_assert (newname != NULL);
+  gdb_assert (new_thread != NULL);
+  newnamelen = strlen (newname);
+  if (!new_thread->private)
+    {
+      new_thread->private = xmalloc (offsetof (struct private_thread_info,
+					       name)
+				     + newnamelen + 1);
+      memcpy (new_thread->private->name, newname, newnamelen + 1);
+    }
+  else if (strcmp (newname, new_thread->private->name) != 0)
+    {
+      /* Reallocate if neccessary.  */
+      int oldnamelen = strlen (new_thread->private->name);
+
+      if (oldnamelen < newnamelen)
+	new_thread->private = xrealloc (new_thread->private,
+					offsetof (struct private_thread_info,
+						  name)
+					+ newnamelen + 1);
+      memcpy (new_thread->private->name, newname, newnamelen + 1);
+    }
+}
+
+static void 
+update_thread_private_data (struct thread_info *new_thread, 
+			    pthread_t tid, int state, int flags)
+{
+  struct private_thread_info *pti;
+  procfs_info pidinfo;
+  struct _thread_name *tn;
+  procfs_threadctl tctl;
+
+#if _NTO_VERSION > 630
+  gdb_assert (new_thread != NULL);
+
+  if (devctl (ctl_fd, DCMD_PROC_INFO, &pidinfo,
+	      sizeof(pidinfo), 0) != EOK)
+    return;
+
+  memset (&tctl, 0, sizeof (tctl));
+  tctl.cmd = _NTO_TCTL_NAME;
+  tn = (struct _thread_name *) (&tctl.data);
+
+  /* Fetch name for the given thread.  */
+  tctl.tid = tid;
+  tn->name_buf_len = sizeof (tctl.data) - sizeof (*tn);
+  tn->new_name_len = -1; /* Getting, not setting.  */
+  if (devctl (ctl_fd, DCMD_PROC_THREADCTL, &tctl, sizeof (tctl), NULL) != EOK)
+    tn->name_buf[0] = '\0';
+
+  tn->name_buf[_NTO_THREAD_NAME_MAX] = '\0';
+
+  update_thread_private_data_name (new_thread, tn->name_buf);
+
+  pti = (struct private_thread_info *) new_thread->private;
+  pti->tid = tid;
+  pti->state = state;
+  pti->flags = flags;
+#endif /* _NTO_VERSION */
 }
 
 void
@@ -233,20 +318,33 @@ procfs_find_new_threads (struct target_ops *ops)
   procfs_status status;
   pid_t pid;
   ptid_t ptid;
+  pthread_t tid;
+  struct thread_info *new_thread;
 
   if (ctl_fd == -1)
     return;
 
   pid = ptid_get_pid (inferior_ptid);
 
-  for (status.tid = 1;; ++status.tid)
+  status.tid = 1;
+
+  for (tid = 1;; ++tid)
     {
-      if (devctl (ctl_fd, DCMD_PROC_TIDSTATUS, &status, sizeof (status), 0)
-	  != EOK && status.tid != 0)
+      if (status.tid == tid 
+	  && (devctl (ctl_fd, DCMD_PROC_TIDSTATUS, &status, sizeof (status), 0)
+	      != EOK))
 	break;
-      ptid = ptid_build (pid, 0, status.tid);
-      if (!in_thread_list (ptid))
-	add_thread (ptid);
+      if (status.tid != tid)
+	/* The reason why this would not be equal is that devctl might have 
+	   returned different tid, meaning the requested tid no longer exists
+	   (e.g. thread exited).  */
+	continue;
+      ptid = ptid_build (pid, 0, tid);
+      new_thread = find_thread_ptid (ptid);
+      if (!new_thread)
+	new_thread = add_thread (ptid);
+      update_thread_private_data (new_thread, tid, status.state, 0);
+      status.tid++;
     }
   return;
 }
@@ -1338,6 +1436,7 @@ init_procfs_ops (void)
   procfs_ops.to_has_execution = default_child_has_execution;
   procfs_ops.to_magic = OPS_MAGIC;
   procfs_ops.to_have_continuable_watchpoint = 1;
+  procfs_ops.to_extra_thread_info = nto_extra_thread_info;
 }
 
 #define OSTYPE_NTO 1
