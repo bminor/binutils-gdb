@@ -54,10 +54,7 @@ static void
 target_bfd_xclose (struct target_ops *t, int quitting)
 {
   struct target_section_table *table = t->to_data;
-
-  /* If the target sections table is empty, the bfd had already been
-     closed.  */
-  if (table->sections != table->sections_end)
+  if (table->sections)
     bfd_close (table->sections->bfd);
   xfree (table->sections);
   xfree (table);
@@ -72,12 +69,6 @@ target_bfd_reopen (struct bfd *bfd)
 
   table = XZALLOC (struct target_section_table);
   build_section_table (bfd, &table->sections, &table->sections_end);
-
-  /* No use keeping the bfd open if there are no target sections we
-     care about.  This way, we avoid keeping the bfd pointer stored
-     somewhere so that target_bfd_xclose could use it.  */
-  if (table->sections == table->sections_end)
-    bfd_close (bfd);
 
   t = XZALLOC (struct target_ops);
   t->to_shortname = "bfd";

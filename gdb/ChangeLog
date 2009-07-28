@@ -1,10 +1,3 @@
-2009-07-28  Pedro Alves  <pedro@codesourcery.com>
-
-	* bfd-target.c (target_bfd_xclose): Only close the bfd if the
-	section tarble is not empty.
-	(target_bfd_reopen): If the section table ends up empty, close the
-	bfd here.
-
 2009-07-28  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* nto-tdep.c (nto_thread_state_str): New array.
