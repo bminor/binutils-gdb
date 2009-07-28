@@ -373,7 +373,7 @@ get_extended_arelt_filename (bfd *arch, const char *name, file_ptr *originp)
     {
       file_ptr origin = strtol (endp + 1, NULL, 10);
 
-      if (errno != 0 || index >= bfd_ardata (arch)->extended_names_size)
+      if (errno != 0)
         {
           bfd_set_error (bfd_error_malformed_archive);
           return NULL;
