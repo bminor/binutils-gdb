@@ -1,3 +1,16 @@
+2009-07-28  Joseph Myers  <joseph@codesourcery.com>
+
+	* arm-tdep.c (enum arm_vfp_cprc_base_type,
+	arm_vfp_cprc_unit_length, arm_vfp_cprc_reg_char,
+	arm_vfp_cprc_sub_candidate, arm_vfp_call_candidate,
+	arm_vfp_abi_for_function): New.
+	(arm_push_dummy_call): Handle VFP ABI.
+	(arm_extract_return_value, arm_store_return_value): Handle
+	ARM_FLOAT_VFP case.
+	(arm_return_value): Handle VFP ABI.
+	(arm_gdbarch_init): Default fp_model based on Tag_ABI_VFP_args for
+	EABI binaries.
+
 2009-07-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* arch-utils.c (displaced_step_at_entry_point): Do not call

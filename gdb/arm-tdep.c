@@ -1373,8 +1373,222 @@ arm_type_align (struct type *t)
     }
 }
 
-/* We currently only support passing parameters in integer registers.  This
-   conforms with GCC's default model.  Several other variants exist and
+/* Possible base types for a candidate for passing and returning in
+   VFP registers.  */
+
+enum arm_vfp_cprc_base_type
+{
+  VFP_CPRC_UNKNOWN,
+  VFP_CPRC_SINGLE,
+  VFP_CPRC_DOUBLE,
+  VFP_CPRC_VEC64,
+  VFP_CPRC_VEC128
+};
+
+/* The length of one element of base type B.  */
+
+static unsigned
+arm_vfp_cprc_unit_length (enum arm_vfp_cprc_base_type b)
+{
+  switch (b)
+    {
+    case VFP_CPRC_SINGLE:
+      return 4;
+    case VFP_CPRC_DOUBLE:
+      return 8;
+    case VFP_CPRC_VEC64:
+      return 8;
+    case VFP_CPRC_VEC128:
+      return 16;
+    default:
+      internal_error (__FILE__, __LINE__, _("Invalid VFP CPRC type: %d."),
+		      (int) b);
+    }
+}
+
+/* The character ('s', 'd' or 'q') for the type of VFP register used
+   for passing base type B.  */
+
+static int
+arm_vfp_cprc_reg_char (enum arm_vfp_cprc_base_type b)
+{
+  switch (b)
+    {
+    case VFP_CPRC_SINGLE:
+      return 's';
+    case VFP_CPRC_DOUBLE:
+      return 'd';
+    case VFP_CPRC_VEC64:
+      return 'd';
+    case VFP_CPRC_VEC128:
+      return 'q';
+    default:
+      internal_error (__FILE__, __LINE__, _("Invalid VFP CPRC type: %d."),
+		      (int) b);
+    }
+}
+
+/* Determine whether T may be part of a candidate for passing and
+   returning in VFP registers, ignoring the limit on the total number
+   of components.  If *BASE_TYPE is VFP_CPRC_UNKNOWN, set it to the
+   classification of the first valid component found; if it is not
+   VFP_CPRC_UNKNOWN, all components must have the same classification
+   as *BASE_TYPE.  If it is found that T contains a type not permitted
+   for passing and returning in VFP registers, a type differently
+   classified from *BASE_TYPE, or two types differently classified
+   from each other, return -1, otherwise return the total number of
+   base-type elements found (possibly 0 in an empty structure or
+   array).  Vectors and complex types are not currently supported,
+   matching the generic AAPCS support.  */
+
+static int
+arm_vfp_cprc_sub_candidate (struct type *t,
+			    enum arm_vfp_cprc_base_type *base_type)
+{
+  t = check_typedef (t);
+  switch (TYPE_CODE (t))
+    {
+    case TYPE_CODE_FLT:
+      switch (TYPE_LENGTH (t))
+	{
+	case 4:
+	  if (*base_type == VFP_CPRC_UNKNOWN)
+	    *base_type = VFP_CPRC_SINGLE;
+	  else if (*base_type != VFP_CPRC_SINGLE)
+	    return -1;
+	  return 1;
+
+	case 8:
+	  if (*base_type == VFP_CPRC_UNKNOWN)
+	    *base_type = VFP_CPRC_DOUBLE;
+	  else if (*base_type != VFP_CPRC_DOUBLE)
+	    return -1;
+	  return 1;
+
+	default:
+	  return -1;
+	}
+      break;
+
+    case TYPE_CODE_ARRAY:
+      {
+	int count;
+	unsigned unitlen;
+	count = arm_vfp_cprc_sub_candidate (TYPE_TARGET_TYPE (t), base_type);
+	if (count == -1)
+	  return -1;
+	if (TYPE_LENGTH (t) == 0)
+	  {
+	    gdb_assert (count == 0);
+	    return 0;
+	  }
+	else if (count == 0)
+	  return -1;
+	unitlen = arm_vfp_cprc_unit_length (*base_type);
+	gdb_assert ((TYPE_LENGTH (t) % unitlen) == 0);
+	return TYPE_LENGTH (t) / unitlen;
+      }
+      break;
+
+    case TYPE_CODE_STRUCT:
+      {
+	int count = 0;
+	unsigned unitlen;
+	int i;
+	for (i = 0; i < TYPE_NFIELDS (t); i++)
+	  {
+	    int sub_count = arm_vfp_cprc_sub_candidate (TYPE_FIELD_TYPE (t, i),
+							base_type);
+	    if (sub_count == -1)
+	      return -1;
+	    count += sub_count;
+	  }
+	if (TYPE_LENGTH (t) == 0)
+	  {
+	    gdb_assert (count == 0);
+	    return 0;
+	  }
+	else if (count == 0)
+	  return -1;
+	unitlen = arm_vfp_cprc_unit_length (*base_type);
+	if (TYPE_LENGTH (t) != unitlen * count)
+	  return -1;
+	return count;
+      }
+
+    case TYPE_CODE_UNION:
+      {
+	int count = 0;
+	unsigned unitlen;
+	int i;
+	for (i = 0; i < TYPE_NFIELDS (t); i++)
+	  {
+	    int sub_count = arm_vfp_cprc_sub_candidate (TYPE_FIELD_TYPE (t, i),
+							base_type);
+	    if (sub_count == -1)
+	      return -1;
+	    count = (count > sub_count ? count : sub_count);
+	  }
+	if (TYPE_LENGTH (t) == 0)
+	  {
+	    gdb_assert (count == 0);
+	    return 0;
+	  }
+	else if (count == 0)
+	  return -1;
+	unitlen = arm_vfp_cprc_unit_length (*base_type);
+	if (TYPE_LENGTH (t) != unitlen * count)
+	  return -1;
+	return count;
+      }
+
+    default:
+      break;
+    }
+
+  return -1;
+}
+
+/* Determine whether T is a VFP co-processor register candidate (CPRC)
+   if passed to or returned from a non-variadic function with the VFP
+   ABI in effect.  Return 1 if it is, 0 otherwise.  If it is, set
+   *BASE_TYPE to the base type for T and *COUNT to the number of
+   elements of that base type before returning.  */
+
+static int
+arm_vfp_call_candidate (struct type *t, enum arm_vfp_cprc_base_type *base_type,
+			int *count)
+{
+  enum arm_vfp_cprc_base_type b = VFP_CPRC_UNKNOWN;
+  int c = arm_vfp_cprc_sub_candidate (t, &b);
+  if (c <= 0 || c > 4)
+    return 0;
+  *base_type = b;
+  *count = c;
+  return 1;
+}
+
+/* Return 1 if the VFP ABI should be used for passing arguments to and
+   returning values from a function of type FUNC_TYPE, 0
+   otherwise.  */
+
+static int
+arm_vfp_abi_for_function (struct gdbarch *gdbarch, struct type *func_type)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  /* Variadic functions always use the base ABI.  Assume that functions
+     without debug info are not variadic.  */
+  if (func_type && TYPE_VARARGS (check_typedef (func_type)))
+    return 0;
+  /* The VFP ABI is only supported as a variant of AAPCS.  */
+  if (tdep->arm_abi != ARM_ABI_AAPCS)
+    return 0;
+  return gdbarch_tdep (gdbarch)->fp_model == ARM_FLOAT_VFP;
+}
+
+/* We currently only support passing parameters in integer registers, which
+   conforms with GCC's default model, and VFP argument passing following
+   the VFP variant of AAPCS.  Several other variants exist and
    we should probably support some of them based on the selected ABI.  */
 
 static CORE_ADDR
@@ -1388,6 +1602,16 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int argreg;
   int nstack;
   struct stack_item *si = NULL;
+  int use_vfp_abi;
+  struct type *ftype;
+  unsigned vfp_regs_free = (1 << 16) - 1;
+
+  /* Determine the type of this function and whether the VFP ABI
+     applies.  */
+  ftype = check_typedef (value_type (function));
+  if (TYPE_CODE (ftype) == TYPE_CODE_PTR)
+    ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
+  use_vfp_abi = arm_vfp_abi_for_function (gdbarch, ftype);
 
   /* Set the return address.  For the ARM, the return breakpoint is
      always at BP_ADDR.  */
@@ -1422,6 +1646,9 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       enum type_code typecode;
       bfd_byte *val;
       int align;
+      enum arm_vfp_cprc_base_type vfp_base_type;
+      int vfp_base_count;
+      int may_use_core_reg = 1;
 
       arg_type = check_typedef (value_type (args[argnum]));
       len = TYPE_LENGTH (arg_type);
@@ -1445,6 +1672,59 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    align = INT_REGISTER_SIZE * 2;
 	}
 
+      if (use_vfp_abi
+	  && arm_vfp_call_candidate (arg_type, &vfp_base_type,
+				     &vfp_base_count))
+	{
+	  int regno;
+	  int unit_length;
+	  int shift;
+	  unsigned mask;
+
+	  /* Because this is a CPRC it cannot go in a core register or
+	     cause a core register to be skipped for alignment.
+	     Either it goes in VFP registers and the rest of this loop
+	     iteration is skipped for this argument, or it goes on the
+	     stack (and the stack alignment code is correct for this
+	     case).  */
+	  may_use_core_reg = 0;
+
+	  unit_length = arm_vfp_cprc_unit_length (vfp_base_type);
+	  shift = unit_length / 4;
+	  mask = (1 << (shift * vfp_base_count)) - 1;
+	  for (regno = 0; regno < 16; regno += shift)
+	    if (((vfp_regs_free >> regno) & mask) == mask)
+	      break;
+
+	  if (regno < 16)
+	    {
+	      int reg_char;
+	      int reg_scaled;
+	      int i;
+
+	      vfp_regs_free &= ~(mask << regno);
+	      reg_scaled = regno / shift;
+	      reg_char = arm_vfp_cprc_reg_char (vfp_base_type);
+	      for (i = 0; i < vfp_base_count; i++)
+		{
+		  char name_buf[4];
+		  int regnum;
+		  sprintf (name_buf, "%c%d", reg_char, reg_scaled + i);
+		  regnum = user_reg_map_name_to_regnum (gdbarch, name_buf,
+							strlen (name_buf));
+		  regcache_cooked_write (regcache, regnum,
+					 val + i * unit_length);
+		}
+	      continue;
+	    }
+	  else
+	    {
+	      /* This CPRC could not go in VFP registers, so all VFP
+		 registers are now marked as used.  */
+	      vfp_regs_free = 0;
+	    }
+	}
+
       /* Push stack padding for dowubleword alignment.  */
       if (nstack & (align - 1))
 	{
@@ -1453,7 +1733,8 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	}
       
       /* Doubleword aligned quantities must go in even register pairs.  */
-      if (argreg <= ARM_LAST_ARG_REGNUM
+      if (may_use_core_reg
+	  && argreg <= ARM_LAST_ARG_REGNUM
 	  && align > INT_REGISTER_SIZE
 	  && argreg & 1)
 	argreg++;
@@ -1481,7 +1762,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	{
 	  int partial_len = len < INT_REGISTER_SIZE ? len : INT_REGISTER_SIZE;
 
-	  if (argreg <= ARM_LAST_ARG_REGNUM)
+	  if (may_use_core_reg && argreg <= ARM_LAST_ARG_REGNUM)
 	    {
 	      /* The argument is being passed in a general purpose
 		 register.  */
@@ -2315,6 +2596,9 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
 
 	case ARM_FLOAT_SOFT_FPA:
 	case ARM_FLOAT_SOFT_VFP:
+	  /* ARM_FLOAT_VFP can arise if this is a variadic function so
+	     not using the VFP ABI code.  */
+	case ARM_FLOAT_VFP:
 	  regcache_cooked_read (regs, ARM_A1_REGNUM, valbuf);
 	  if (TYPE_LENGTH (type) > 4)
 	    regcache_cooked_read (regs, ARM_A1_REGNUM + 1,
@@ -2501,6 +2785,9 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 
 	case ARM_FLOAT_SOFT_FPA:
 	case ARM_FLOAT_SOFT_VFP:
+	  /* ARM_FLOAT_VFP can arise if this is a variadic function so
+	     not using the VFP ABI code.  */
+	case ARM_FLOAT_VFP:
 	  regcache_cooked_write (regs, ARM_A1_REGNUM, valbuf);
 	  if (TYPE_LENGTH (type) > 4)
 	    regcache_cooked_write (regs, ARM_A1_REGNUM + 1, 
@@ -2576,6 +2863,31 @@ arm_return_value (struct gdbarch *gdbarch, struct type *func_type,
 		  gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum arm_vfp_cprc_base_type vfp_base_type;
+  int vfp_base_count;
+
+  if (arm_vfp_abi_for_function (gdbarch, func_type)
+      && arm_vfp_call_candidate (valtype, &vfp_base_type, &vfp_base_count))
+    {
+      int reg_char = arm_vfp_cprc_reg_char (vfp_base_type);
+      int unit_length = arm_vfp_cprc_unit_length (vfp_base_type);
+      int i;
+      for (i = 0; i < vfp_base_count; i++)
+	{
+	  char name_buf[4];
+	  int regnum;
+	  sprintf (name_buf, "%c%d", reg_char, i);
+	  regnum = user_reg_map_name_to_regnum (gdbarch, name_buf,
+						strlen (name_buf));
+	  if (writebuf)
+	    regcache_cooked_write (regcache, regnum,
+				   writebuf + i * unit_length);
+	  if (readbuf)
+	    regcache_cooked_read (regcache, regnum,
+				  readbuf + i * unit_length);
+	}
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
 
   if (TYPE_CODE (valtype) == TYPE_CODE_STRUCT
       || TYPE_CODE (valtype) == TYPE_CODE_UNION
@@ -3151,9 +3463,45 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		case EF_ARM_EABI_VER4:
 		case EF_ARM_EABI_VER5:
 		  arm_abi = ARM_ABI_AAPCS;
-		  /* EABI binaries default to VFP float ordering.  */
+		  /* EABI binaries default to VFP float ordering.
+		     They may also contain build attributes that can
+		     be used to identify if the VFP argument-passing
+		     ABI is in use.  */
 		  if (fp_model == ARM_FLOAT_AUTO)
-		    fp_model = ARM_FLOAT_SOFT_VFP;
+		    {
+#ifdef HAVE_ELF
+		      switch (bfd_elf_get_obj_attr_int (info.abfd,
+							OBJ_ATTR_PROC,
+							Tag_ABI_VFP_args))
+			{
+			case 0:
+			  /* "The user intended FP parameter/result
+			     passing to conform to AAPCS, base
+			     variant".  */
+			  fp_model = ARM_FLOAT_SOFT_VFP;
+			  break;
+			case 1:
+			  /* "The user intended FP parameter/result
+			     passing to conform to AAPCS, VFP
+			     variant".  */
+			  fp_model = ARM_FLOAT_VFP;
+			  break;
+			case 2:
+			  /* "The user intended FP parameter/result
+			     passing to conform to tool chain-specific
+			     conventions" - we don't know any such
+			     conventions, so leave it as "auto".  */
+			  break;
+			default:
+			  /* Attribute value not mentioned in the
+			     October 2008 ABI, so leave it as
+			     "auto".  */
+			  break;
+			}
+#else
+		      fp_model = ARM_FLOAT_SOFT_VFP;
+#endif
+		    }
 		  break;
 
 		default:
