@@ -2813,6 +2813,7 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 	  singlestep_breakpoints_inserted_p = 0;
 
 	  ecs->random_signal = 0;
+	  ecs->event_thread->trap_expected = 0;
 
 	  context_switch (saved_singlestep_ptid);
 	  if (deprecated_context_hook)
