@@ -1486,7 +1486,7 @@ static const operatorT op_encoding[256] = {
    7	* / % << >>
    8	unary - unary ~
 */
-static operator_rankT op_rank[] = {
+static operator_rankT op_rank[O_max] = {
   0,	/* O_illegal */
   0,	/* O_absent */
   0,	/* O_constant */
@@ -1517,22 +1517,6 @@ static operator_rankT op_rank[] = {
   3,	/* O_logical_and */
   2,	/* O_logical_or */
   1,	/* O_index */
-  0,	/* O_md1 */
-  0,	/* O_md2 */
-  0,	/* O_md3 */
-  0,	/* O_md4 */
-  0,	/* O_md5 */
-  0,	/* O_md6 */
-  0,	/* O_md7 */
-  0,	/* O_md8 */
-  0,	/* O_md9 */
-  0,	/* O_md10 */
-  0,	/* O_md11 */
-  0,	/* O_md12 */
-  0,	/* O_md13 */
-  0,	/* O_md14 */
-  0,	/* O_md15 */
-  0,	/* O_md16 */
 };
 
 /* Unfortunately, in MRI mode for the m68k, multiplication and

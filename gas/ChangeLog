@@ -1,3 +1,7 @@
+2009-07-28  Jan Beulich  <jbeulich@novell.com>
+
+	* expr.c (op_rank): Specify size. Remove O_md* initializers.
+
 2009-07-27  Maxim Kuvyrkov  <maxim@codesourcery.com>
 
 	* config/tc-m68k.c (mcf5221x_ctrl): New.
