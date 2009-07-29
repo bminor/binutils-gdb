@@ -143,12 +143,6 @@ extern int tc_i386_fix_adjustable (struct fix *);
   (OUTPUT_FLAVOR == bfd_target_elf_flavour)
 #endif
 
-/* BSF_GNU_INDIRECT_FUNCTION symbols always need relocatoon.  */
-#define TC_FORCE_RELOCATION(FIX)			\
-  ((symbol_get_bfdsym ((FIX)->fx_addsy)->flags		\
-    & BSF_GNU_INDIRECT_FUNCTION)			\
-   || generic_force_reloc (FIX))
-
 /* This expression evaluates to true if the relocation is for a local
    object for which we still want to do the relocation at runtime.
    False if we are willing to perform this relocation while building

@@ -2566,10 +2566,6 @@ tc_i386_fix_adjustable (fixS *fixP ATTRIBUTE_UNUSED)
       || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 0;
-
-  if (fixP->fx_addsy != NULL
-      && symbol_get_bfdsym (fixP->fx_addsy)->flags & BSF_GNU_INDIRECT_FUNCTION)
-    return 0;
 #endif
   return 1;
 }
@@ -7368,7 +7364,7 @@ md_apply_fix (fixP, valP, seg)
 	  if ((sym_seg == seg
 	       || (symbol_section_p (fixP->fx_addsy)
 		   && sym_seg != absolute_section))
-	      && !TC_FORCE_RELOCATION (fixP))
+	      && !generic_force_reloc (fixP))
 	    {
 	      /* Yes, we add the values in twice.  This is because
 		 bfd_install_relocation subtracts them out again.  I think
