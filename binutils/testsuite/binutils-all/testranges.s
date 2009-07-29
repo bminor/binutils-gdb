@@ -22,7 +22,7 @@ range_cu:
 	.section	.debug_info,"",@progbits
 	.long	debugE - debugS	# Length of Compilation Unit Info
 debugS:
-	.value	0x2	# DWARF version number
+	.short	0x2	# DWARF version number
 	.long	abbrev0	# Offset Into Abbrev. Section
 	.byte	0x4	# Pointer Size (in bytes)
 
