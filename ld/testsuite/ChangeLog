@@ -1,3 +1,10 @@
+2009-07-29  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-scripts/default-script.s (text): Globalize.
+	* ld-scripts/default-script1.d, ld-scripts/default-script2.d,
+	ld-scripts/default-script3.d, ld-scripts/default-script4.d: Adjust
+	accordingly.
+
 2009-07-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-x86-64/abs-l1om.d: New.
