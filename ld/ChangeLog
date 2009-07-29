@@ -1,3 +1,15 @@
+2009-07-29  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* scripttempl/mmo.sc: For relocateable links, set $OUTPUT_FORMAT to
+	the new $RELOCATEABLE_OUTPUT_FORMAT, if set.
+	(OUTPUT_FORMAT): Use the variable $OUTPUT_FORMAT.
+	(ENTRY): Don't emit for relocateable links.
+	(/DISCARD/): Don't discard .gnu.warning.* for relocateable links.
+	* emulparams/mmo.sh (RELOCATEABLE_OUTPUT_FORMAT): Set, to
+	elf64-mmix.
+	* emulparams/elf64mmix.sh (OTHER_TEXT_SECTIONS): Empty, don't
+	provide "Main" or set "_start.", for relocateable links.
+
 2009-07-27  Nick Clifton  <nickc@redhat.com>
 
 	* (po/fi.po): Updated Finnish translation.

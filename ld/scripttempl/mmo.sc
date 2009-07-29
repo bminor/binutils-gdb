@@ -1,7 +1,11 @@
+# MMO is not a relocateable format, and we don't want to require an
+# explicit (e.g.) "-m elf64mmix" when -r is used.
+test -z $RELOCATEABLE_OUTPUT_FORMAT && RELOCATEABLE_OUTPUT_FORMAT=$OUTPUT_FORMAT
+test -z ${RELOCATING+0} && OUTPUT_FORMAT=$RELOCATEABLE_OUTPUT_FORMAT
 cat <<EOF
-OUTPUT_FORMAT("mmo")
+OUTPUT_FORMAT("$OUTPUT_FORMAT")
 OUTPUT_ARCH(mmix)
-ENTRY(Main)
+${RELOCATING+ENTRY(Main)}
 SECTIONS
 {
   .text ${RELOCATING+ ${TEXT_START_ADDR}}:
@@ -128,6 +132,6 @@ SECTIONS
   /* Unfortunately, stabs are not mappable from ELF to MMO.
      It can probably be fixed with some amount of work.  */
   /DISCARD/ :
-  { *(.gnu.warning.*); }
+  { ${RELOCATING+ *(.gnu.warning.*);} }
 }
 EOF
