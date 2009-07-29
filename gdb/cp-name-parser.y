@@ -255,10 +255,6 @@ make_name (const char *name, int len)
       int fold_flag;
     } abstract;
     int lval;
-    struct {
-      int val;
-      struct demangle_component *type;
-    } typed_val_int;
     const char *opname;
   }
 
@@ -313,14 +309,6 @@ make_name (const char *name, int len)
 /* Non-C++ things we get from the demangler.  */
 %token <lval> DEMANGLER_SPECIAL
 %token CONSTRUCTION_VTABLE CONSTRUCTION_IN
-%token <typed_val_int> GLOBAL
-
-%{
-enum {
-  GLOBAL_CONSTRUCTORS = DEMANGLE_COMPONENT_LITERAL + 20,
-  GLOBAL_DESTRUCTORS = DEMANGLE_COMPONENT_LITERAL + 21
-};
-%}
 
 /* Precedence declarations.  */
 
@@ -430,10 +418,6 @@ demangler_special
 			  d_right ($$) = NULL; }
 		|	CONSTRUCTION_VTABLE start CONSTRUCTION_IN start
 			{ $$ = fill_comp (DEMANGLE_COMPONENT_CONSTRUCTION_VTABLE, $2, $4); }
-		|	GLOBAL
-			{ $$ = make_empty ($1.val);
-			  d_left ($$) = $1.type;
-			  d_right ($$) = NULL; }
 		;
 
 operator	:	OPERATOR NEW
@@ -1861,23 +1845,23 @@ yylex (void)
 	{
 	  const char *p;
 	  lexptr = tokstart + 29;
-	  yylval.typed_val_int.val = GLOBAL_CONSTRUCTORS;
+	  yylval.lval = DEMANGLE_COMPONENT_GLOBAL_CONSTRUCTORS;
 	  /* Find the end of the symbol.  */
 	  p = symbol_end (lexptr);
-	  yylval.typed_val_int.type = make_name (lexptr, p - lexptr);
+	  yylval.comp = make_name (lexptr, p - lexptr);
 	  lexptr = p;
-	  return GLOBAL;
+	  return DEMANGLER_SPECIAL;
 	}
       if (strncmp (tokstart, "global destructors keyed to ", 28) == 0)
 	{
 	  const char *p;
 	  lexptr = tokstart + 28;
-	  yylval.typed_val_int.val = GLOBAL_DESTRUCTORS;
+	  yylval.lval = DEMANGLE_COMPONENT_GLOBAL_DESTRUCTORS;
 	  /* Find the end of the symbol.  */
 	  p = symbol_end (lexptr);
-	  yylval.typed_val_int.type = make_name (lexptr, p - lexptr);
+	  yylval.comp = make_name (lexptr, p - lexptr);
 	  lexptr = p;
-	  return GLOBAL;
+	  return DEMANGLER_SPECIAL;
 	}
 
       HANDLE_SPECIAL ("vtable for ", DEMANGLE_COMPONENT_VTABLE);
@@ -1976,32 +1960,10 @@ allocate_info (void)
 char *
 cp_comp_to_string (struct demangle_component *result, int estimated_len)
 {
-  char *str, *prefix = NULL, *buf;
-  size_t err = 0;
+  size_t err;
 
-  if (result->type == GLOBAL_DESTRUCTORS)
-    {
-      result = d_left (result);
-      prefix = "global destructors keyed to ";
-    }
-  else if (result->type == GLOBAL_CONSTRUCTORS)
-    {
-      result = d_left (result);
-      prefix = "global constructors keyed to ";
-    }
-
-  str = cplus_demangle_print (DMGL_PARAMS | DMGL_ANSI, result, estimated_len, &err);
-  if (str == NULL)
-    return NULL;
-
-  if (prefix == NULL)
-    return str;
-
-  buf = malloc (strlen (str) + strlen (prefix) + 1);
-  strcpy (buf, prefix);
-  strcat (buf, str);
-  free (str);
-  return (buf);
+  return cplus_demangle_print (DMGL_PARAMS | DMGL_ANSI, result, estimated_len,
+			       &err);
 }
 
 /* Convert a demangled name to a demangle_component tree.  On success,
@@ -2047,17 +2009,6 @@ cp_print (struct demangle_component *result)
 {
   char *str;
   size_t err = 0;
-
-  if (result->type == GLOBAL_DESTRUCTORS)
-    {
-      result = d_left (result);
-      fputs ("global destructors keyed to ", stdout);
-    }
-  else if (result->type == GLOBAL_CONSTRUCTORS)
-    {
-      result = d_left (result);
-      fputs ("global constructors keyed to ", stdout);
-    }
 
   str = cplus_demangle_print (DMGL_PARAMS | DMGL_ANSI, result, 64, &err);
   if (str == NULL)

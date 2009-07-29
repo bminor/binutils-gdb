@@ -1,3 +1,16 @@
+2009-07-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix gcc-4.5 HEAD warnings.
+	* cp-name-parser.y (%union <typed_val_int>, %token GLOBAL)
+	(GLOBAL_CONSTRUCTORS, GLOBAL_DESTRUCTORS, demangler_special <GLOBAL>):
+	Remove.
+	(yylex <"global constructors keyed to ">)
+	(yylex <"global destructors keyed to ">): Base it on DEMANGLER_SPECIAL.
+	(cp_comp_to_string): Remove variables str, prefix and buf.  Remove the
+	GLOBAL_DESTRUCTORS and GLOBAL_CONSTRUCTORS handling.
+	(cp_print): Remove the GLOBAL_DESTRUCTORS and GLOBAL_CONSTRUCTORS
+	handling.
+
 2009-07-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* NEWS: Mention ARM VFP support.
