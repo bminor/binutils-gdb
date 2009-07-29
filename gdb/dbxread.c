@@ -1689,7 +1689,7 @@ pos %d"),
 	  sym_name = NULL;	/* pacify "gcc -Werror" */
  	  if (psymtab_language == language_cplus)
  	    {
- 	      char *new_name, *name = alloca (p - namestring + 1);
+ 	      char *new_name, *name = xmalloc (p - namestring + 1);
  	      memcpy (name, namestring, p - namestring);
  	      name[p - namestring] = '\0';
  	      new_name = cp_canonicalize_string (name);
@@ -1700,6 +1700,7 @@ pos %d"),
  					   &objfile->objfile_obstack);
  		  xfree (new_name);
  		}
+              xfree (name);
  	    }
 
  	  if (sym_len == 0)

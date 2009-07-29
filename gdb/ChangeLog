@@ -1,3 +1,8 @@
+2009-07-29  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	PR gdb/6817
+	* dbxread.c (read_dbx_symtab): Reduce stack use.
+	
 2009-07-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix gcc-4.5 HEAD warnings.
