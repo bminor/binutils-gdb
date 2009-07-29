@@ -14,6 +14,7 @@ GENERATE_PIE_SCRIPT=yes
 NO_SMALL_DATA=yes
 LARGE_SECTIONS=yes
 SEPARATE_GOTPLT=24
+IREL_IN_PLT=
 
 if [ "x${host}" = "x${target}" ]; then
   case " $EMULATION_LIBPATH " in

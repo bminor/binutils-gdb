@@ -113,7 +113,9 @@ if test -z "${INITIAL_READONLY_SECTIONS}${CREATE_SHLIB}"; then
   INITIAL_READONLY_SECTIONS=".interp       ${RELOCATING-0} : { *(.interp) }"
 fi
 if test -z "$PLT"; then
-  PLT=".plt          ${RELOCATING-0} : { *(.plt) *(.iplt)}"
+  IPLT=".iplt         ${RELOCATING-0} : { *(.iplt) }"
+  PLT=".plt          ${RELOCATING-0} : { *(.plt)${IREL_IN_PLT+ *(.iplt)} }
+  ${IREL_IN_PLT-$IPLT}"
 fi
 test -n "${DATA_PLT-${BSS_PLT-text}}" && TEXT_PLT=yes
 if test -z "$GOT"; then
@@ -124,6 +126,20 @@ if test -z "$GOT"; then
     GOTPLT=".got.plt      ${RELOCATING-0} : { *(.got.plt)  *(.igot.plt) }"
   fi
 fi
+REL_IFUNC=".rel.ifunc    ${RELOCATING-0} : { *(.rel.ifunc) }"
+RELA_IFUNC=".rela.ifunc   ${RELOCATING-0} : { *(.rela.ifunc) }"
+REL_IPLT=".rel.iplt     ${RELOCATING-0} :
+    {
+      ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__rel_iplt_start = .);}}
+      *(.rel.iplt)
+      ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__rel_iplt_end = .);}}
+    }"
+RELA_IPLT=".rela.iplt    ${RELOCATING-0} :
+    {
+      ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__rela_iplt_start = .);}}
+      *(.rela.iplt)
+      ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__rela_iplt_end = .);}}
+    }"
 DYNAMIC=".dynamic      ${RELOCATING-0} : { *(.dynamic) }"
 RODATA=".rodata       ${RELOCATING-0} : { *(.rodata${RELOCATING+ .rodata.* .gnu.linkonce.r.*}) }"
 DATARELRO=".data.rel.ro : { *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*) *(.data.rel.ro* .gnu.linkonce.d.rel.ro.*) }"
@@ -326,8 +342,10 @@ eval $COMBRELOCCAT <<EOF
   .rel.bss      ${RELOCATING-0} : { *(.rel.bss${RELOCATING+ .rel.bss.* .rel.gnu.linkonce.b.*}) }
   .rela.bss     ${RELOCATING-0} : { *(.rela.bss${RELOCATING+ .rela.bss.* .rela.gnu.linkonce.b.*}) }
   ${REL_LARGE}
-  .rel.ifunc      ${RELOCATING-0} : { *(.rel.ifunc) }
-  .rela.ifunc     ${RELOCATING-0} : { *(.rela.ifunc) }
+  ${IREL_IN_PLT+$REL_IFUNC}
+  ${IREL_IN_PLT+$RELA_IFUNC}
+  ${IREL_IN_PLT-$REL_IPLT}
+  ${IREL_IN_PLT-$RELA_IPLT}
 EOF
 
 if [ -n "$COMBRELOC" ]; then
@@ -351,16 +369,16 @@ cat >> ldscripts/dyntmp.$$ <<EOF
   .rel.plt      ${RELOCATING-0} :
     {
       *(.rel.plt)
-      ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__rel_iplt_start = .);}}
-      *(.rel.iplt)
-      ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__rel_iplt_end = .);}}
+      ${IREL_IN_PLT+${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__rel_iplt_start = .);}}}
+      ${IREL_IN_PLT+${RELOCATING+*(.rel.iplt)}}
+      ${IREL_IN_PLT+${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__rel_iplt_end = .);}}}
     }
   .rela.plt     ${RELOCATING-0} :
     {
       *(.rela.plt)
-      ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__rela_iplt_start = .);}}
-      *(.rela.iplt)
-      ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__rela_iplt_end = .);}}
+      ${IREL_IN_PLT+${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__rela_iplt_start = .);}}}
+      ${IREL_IN_PLT+${RELOCATING+*(.rela.iplt)}}
+      ${IREL_IN_PLT+${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__rela_iplt_end = .);}}}
     }
   ${OTHER_PLT_RELOC_SECTIONS}
 EOF

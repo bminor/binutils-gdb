@@ -11,7 +11,7 @@ SEPARATE_GOTPLT=0
 BSS_PLT=
 GOT=".got          ${RELOCATING-0} : SPECIAL { *(.got) }"
 GOTPLT=".plt          ${RELOCATING-0} : SPECIAL { *(.plt) }"
-PLT=".plt          ${RELOCATING-0} : SPECIAL { *(.plt) *(.iplt) }
+PLT=".plt          ${RELOCATING-0} : SPECIAL { *(.plt) }
   .iplt         ${RELOCATING-0} : { *(.iplt) }"
 OTHER_TEXT_SECTIONS="*(.glink)"
 EXTRA_EM_FILE=ppc32elf
