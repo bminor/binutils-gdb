@@ -1,3 +1,7 @@
+2009-07-30  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* Makefile.in (datarootdir): New variable.
+
 2008-08-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* compare_igen_models: Change license to GPL version 3.

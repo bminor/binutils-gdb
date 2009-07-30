@@ -22,6 +22,9 @@ srcdir = @srcdir@
 VPATH = .:@srcdir@
 
 prefix = @prefix@
+
+datarootdir = @datarootdir@
+
 infodir = @infodir@
 
 mandir = @mandir@

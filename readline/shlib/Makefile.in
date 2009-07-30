@@ -28,6 +28,8 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 RL_LIBRARY_VERSION = @LIBVERSION@
 RL_LIBRARY_NAME = readline
 
+datarootdir = @datarootdir@
+
 srcdir = @srcdir@
 VPATH = .:@top_srcdir@
 topdir = @top_srcdir@

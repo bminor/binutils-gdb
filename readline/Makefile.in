@@ -51,6 +51,8 @@ SHELL = @MAKE_SHELL@
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 
+datarootdir = @datarootdir@
+
 bindir = @bindir@
 libdir = @libdir@
 mandir = @mandir@
