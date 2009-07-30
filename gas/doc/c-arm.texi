@@ -323,10 +323,46 @@ features.  The default is to warn.
 @node ARM Syntax
 @section Syntax
 @menu
+* ARM-Instruction-Set::      Instruction Set
 * ARM-Chars::                Special Characters
 * ARM-Regs::                 Register Names
 * ARM-Relocations::	     Relocations
 @end menu
+
+@node ARM-Instruction-Set
+@subsection Instruction Set Syntax
+Two slightly different syntaxes are support for ARM and THUMB
+instructions.  The default, @code{divided}, uses the old style where
+ARM and THUMB instructions had their own, separate syntaxes.  The new,
+@code{unified} syntax, which can be selected via the @code{.syntax}
+directive, and has the following main features:
+
+@table @bullet
+@item
+Immediate operands do not require a @code{#} prefix.
+
+@item
+The @code{IT} instruction may appear, and if it does it is validated
+against subsequent conditional affixes.  In ARM mode it does not
+generate machine code, in THUMB mode it does.
+
+@item
+For ARM instructions the conditional affixes always appear at the end
+of the instruction.  For THUMB instructions conditional affixes can be
+used, but only inside the scope of an @code{IT} instruction.
+
+@item
+All of the instructions new to the V6T2 architecture (and later) are
+available.  (Only a few such instructions can be written in the
+@code{divided} syntax).
+
+@item
+The @code{.N} and @code{.W} suffixes are recognized and honored.
+
+@item
+All instructions set the flags if and only if they have an @code{s}
+affix.
+@end table
 
 @node ARM-Chars
 @subsection Special Characters
@@ -721,6 +757,11 @@ sub fp, ip, #4
 This directive emits relocations that evaluate to the section-relative
 offset of each expression's symbol.  This directive is only supported
 for PE targets.
+
+@cindex @code{.syntax} directive, ARM
+@item .syntax [@code{unified} | @code{divided}]
+This directive sets the Instruction Set Syntax as described in the
+@ref{ARM-Instruction-Set} section.
 
 @c TTTTTTTTTTTTTTTTTTTTTTTTTT
 

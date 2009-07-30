@@ -1,5 +1,9 @@
 2009-07-30  Nick Clifton  <nickc@redhat.com>
 
+	* doc/c-arm.texi (ARM-Instruction-Set): New node.  Documents the
+	different syntaxes support by the ARM port.
+	(ARM Directives): Add entry for .syntax.
+
 	* doc/c-mips.texi (MIPS insn): Fix typo.
 
 2009-07-29  Alan Modra  <amodra@bigpond.net.au>
