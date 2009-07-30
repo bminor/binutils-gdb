@@ -566,6 +566,41 @@ mi_cmd_var_assign (char *command, char **argv, int argc)
   ui_out_field_string (uiout, "value", varobj_get_value (var));
 }
 
+/* Type used for parameters passing to mi_cmd_var_update_iter.  */
+
+struct mi_cmd_var_update
+  {
+    int only_floating;
+    enum print_values print_values;
+  };
+
+/* Helper for mi_cmd_var_update - update each VAR.  */
+
+static void
+mi_cmd_var_update_iter (struct varobj *var, void *data_pointer)
+{
+  struct mi_cmd_var_update *data = data_pointer;
+  int thread_id, thread_stopped;
+
+  thread_id = varobj_get_thread_id (var);
+
+  if (thread_id == -1 && is_stopped (inferior_ptid))
+    thread_stopped = 1;
+  else
+    {
+      struct thread_info *tp = find_thread_id (thread_id);
+
+      if (tp)
+	thread_stopped = is_stopped (tp->ptid);
+      else
+	thread_stopped = 1;
+    }
+
+  if (thread_stopped)
+    if (!data->only_floating || varobj_floating_p (var))
+      varobj_update_one (var, data->print_values, 0 /* implicit */);
+}
+
 void
 mi_cmd_var_update (char *command, char **argv, int argc)
 {
@@ -596,31 +631,16 @@ mi_cmd_var_update (char *command, char **argv, int argc)
 
   if ((*name == '*' || *name == '@') && (*(name + 1) == '\0'))
     {
-      struct varobj **rootlist, **cr;
+      struct mi_cmd_var_update data;
 
-      varobj_list (&rootlist);
-      make_cleanup (xfree, rootlist);
+      data.only_floating = *name == '@';
+      data.print_values = print_values;
 
-      for (cr = rootlist; *cr != NULL; cr++)
-	{
-	  int thread_id = varobj_get_thread_id (*cr);
-	  int thread_stopped = 0;
+      /* varobj_update_one automatically updates all the children of VAROBJ.
+	 Therefore update each VAROBJ only once by iterating only the root
+	 VAROBJs.  */
 
-	  if (thread_id == -1 && is_stopped (inferior_ptid))
-	    thread_stopped = 1;
-	  else
-	    {
-	      struct thread_info *tp = find_thread_id (thread_id);
-	      if (tp)
-		thread_stopped = is_stopped (tp->ptid);
-	      else
-		thread_stopped = 1;
-	    }
-
-	  if (thread_stopped)
-	    if (*name == '*' || varobj_floating_p (*cr))
-	      varobj_update_one (*cr, print_values, 0 /* implicit */);
-	}
+      all_root_varobjs (mi_cmd_var_update_iter, &data);
     }
   else
     {

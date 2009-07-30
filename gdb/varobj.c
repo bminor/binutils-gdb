@@ -424,7 +424,6 @@ static int format_code[] = { 0, 't', 'd', 'x', 'o' };
 
 /* Header of the list of root variable objects */
 static struct varobj_root *rootlist;
-static int rootcount = 0;	/* number of root varobjs in the list */
 
 /* Prime number indicating the number of buckets in the hash table */
 /* A prime large enough to avoid too many colisions */
@@ -1169,37 +1168,6 @@ varobj_set_value (struct varobj *var, char *expression)
   return 1;
 }
 
-/* Returns a malloc'ed list with all root variable objects */
-int
-varobj_list (struct varobj ***varlist)
-{
-  struct varobj **cv;
-  struct varobj_root *croot;
-  int mycount = rootcount;
-
-  /* Alloc (rootcount + 1) entries for the result */
-  *varlist = xmalloc ((rootcount + 1) * sizeof (struct varobj *));
-
-  cv = *varlist;
-  croot = rootlist;
-  while ((croot != NULL) && (mycount > 0))
-    {
-      *cv = croot->rootvar;
-      mycount--;
-      cv++;
-      croot = croot->next;
-    }
-  /* Mark the end of the list */
-  *cv = NULL;
-
-  if (mycount || (croot != NULL))
-    warning
-      ("varobj_list: assertion failed - wrong tally of root vars (%d:%d)",
-       rootcount, mycount);
-
-  return rootcount;
-}
-
 /* Assign a new value to a variable object.  If INITIAL is non-zero,
    this is the first assignement after the variable object was just
    created, or changed type.  In that case, just assign the value 
@@ -1746,7 +1714,6 @@ install_variable (struct varobj *var)
       else
 	var->root->next = rootlist;
       rootlist = var->root;
-      rootcount++;
     }
 
   return 1;			/* OK */
@@ -1823,7 +1790,6 @@ uninstall_variable (struct varobj *var)
 	  else
 	    prer->next = cr->next;
 	}
-      rootcount--;
     }
 
 }
@@ -3206,6 +3172,24 @@ java_value_of_variable (struct varobj *var, enum varobj_display_formats format)
 {
   return cplus_value_of_variable (var, format);
 }
+
+/* Iterate all the existing _root_ VAROBJs and call the FUNC callback for them
+   with an arbitrary caller supplied DATA pointer.  */
+
+void
+all_root_varobjs (void (*func) (struct varobj *var, void *data), void *data)
+{
+  struct varobj_root *var_root, *var_root_next;
+
+  /* Iterate "safely" - handle if the callee deletes its passed VAROBJ.  */
+
+  for (var_root = rootlist; var_root != NULL; var_root = var_root_next)
+    {
+      var_root_next = var_root->next;
+
+      (*func) (var_root->rootvar, data);
+    }
+}
 
 extern void _initialize_varobj (void);
 void
@@ -3226,6 +3210,39 @@ When non-zero, varobj debugging is enabled."),
 			    &setlist, &showlist);
 }
 
+/* Invalidate varobj VAR if it is tied to locals and re-create it if it is
+   defined on globals.  It is a helper for varobj_invalidate.  */
+
+static void
+varobj_invalidate_iter (struct varobj *var, void *unused)
+{
+  /* Floating varobjs are reparsed on each stop, so we don't care if the
+     presently parsed expression refers to something that's gone.  */
+  if (var->root->floating)
+    return;
+
+  /* global var must be re-evaluated.  */     
+  if (var->root->valid_block == NULL)
+    {
+      struct varobj *tmp_var;
+
+      /* Try to create a varobj with same expression.  If we succeed
+	 replace the old varobj, otherwise invalidate it.  */
+      tmp_var = varobj_create (NULL, var->name, (CORE_ADDR) 0,
+			       USE_CURRENT_FRAME);
+      if (tmp_var != NULL) 
+	{ 
+	  tmp_var->obj_name = xstrdup (var->obj_name);
+	  varobj_delete (var, NULL, 0);
+	  install_variable (tmp_var);
+	}
+      else
+	var->root->is_valid = 0;
+    }
+  else /* locals must be invalidated.  */
+    var->root->is_valid = 0;
+}
+
 /* Invalidate the varobjs that are tied to locals and re-create the ones that
    are defined on globals.
    Invalidated varobjs will be always printed in_scope="invalid".  */
@@ -3233,41 +3250,5 @@ When non-zero, varobj debugging is enabled."),
 void 
 varobj_invalidate (void)
 {
-  struct varobj **all_rootvarobj;
-  struct varobj **varp;
-
-  if (varobj_list (&all_rootvarobj) > 0)
-    {
-      for (varp = all_rootvarobj; *varp != NULL; varp++)
-	{
-	  /* Floating varobjs are reparsed on each stop, so we don't care if
-	     the presently parsed expression refers to something that's gone.
-	     */
-	  if ((*varp)->root->floating)
-	    continue;
-
-	  /* global var must be re-evaluated.  */     
-	  if ((*varp)->root->valid_block == NULL)
-	    {
-	      struct varobj *tmp_var;
-
-	      /* Try to create a varobj with same expression.  If we succeed
-		 replace the old varobj, otherwise invalidate it.  */
-	      tmp_var = varobj_create (NULL, (*varp)->name, (CORE_ADDR) 0,
-				       USE_CURRENT_FRAME);
-	      if (tmp_var != NULL) 
-		{ 
-		  tmp_var->obj_name = xstrdup ((*varp)->obj_name);
-		  varobj_delete (*varp, NULL, 0);
-		  install_variable (tmp_var);
-		}
-	      else
-		(*varp)->root->is_valid = 0;
-	    }
-	  else /* locals must be invalidated.  */
-	    (*varp)->root->is_valid = 0;
-	}
-    }
-  xfree (all_rootvarobj);
-  return;
+  all_root_varobjs (varobj_invalidate_iter, NULL);
 }

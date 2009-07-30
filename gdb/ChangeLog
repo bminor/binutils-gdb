@@ -1,3 +1,18 @@
+2009-07-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Replace public function varobj_list by all_root_varobjs iterator.
+	* mi/mi-cmd-var.c (struct mi_cmd_var_update, mi_cmd_var_update_iter):
+	New.
+	(mi_cmd_var_update): Replace the varobj_list call by all_root_varobjs.
+	Remove the variables rootlist, cr.  New variable data.
+	* varobj.c (rootcount, varobj_list): Remove.
+	(install_variable, uninstall_variable): Remove the rootcount updates.
+	(all_root_varobjs): New function.
+	(varobj_invalidate): Use the all_root_varobjs call.  Move the code to...
+	(varobj_invalidate_iter): ... a new function.
+	* varobj.h (varobj_list): Remove the prototype.
+	(all_root_varobjs): New prototype.
+
 2009-07-29  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	PR gdb/6817
