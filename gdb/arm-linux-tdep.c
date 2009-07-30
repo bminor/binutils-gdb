@@ -38,6 +38,10 @@
 #include "arm-linux-tdep.h"
 #include "linux-tdep.h"
 #include "glibc-tdep.h"
+#include "arch-utils.h"
+#include "inferior.h"
+#include "gdbthread.h"
+#include "symfile.h"
 
 #include "gdb_string.h"
 
@@ -597,6 +601,210 @@ arm_linux_software_single_step (struct frame_info *frame)
   return 1;
 }
 
+/* Support for displaced stepping of Linux SVC instructions.  */
+
+static void
+arm_linux_cleanup_svc (struct gdbarch *gdbarch ATTRIBUTE_UNUSED,
+		       struct regcache *regs,
+		       struct displaced_step_closure *dsc)
+{
+  CORE_ADDR from = dsc->insn_addr;
+  ULONGEST apparent_pc;
+  int within_scratch;
+
+  regcache_cooked_read_unsigned (regs, ARM_PC_REGNUM, &apparent_pc);
+
+  within_scratch = (apparent_pc >= dsc->scratch_base
+		    && apparent_pc < (dsc->scratch_base
+				      + DISPLACED_MODIFIED_INSNS * 4 + 4));
+
+  if (debug_displaced)
+    {
+      fprintf_unfiltered (gdb_stdlog, "displaced: PC is apparently %.8lx after "
+			  "SVC step ", (unsigned long) apparent_pc);
+      if (within_scratch)
+        fprintf_unfiltered (gdb_stdlog, "(within scratch space)\n");
+      else
+        fprintf_unfiltered (gdb_stdlog, "(outside scratch space)\n");
+    }
+
+  if (within_scratch)
+    displaced_write_reg (regs, dsc, ARM_PC_REGNUM, from + 4, BRANCH_WRITE_PC);
+}
+
+static int
+arm_linux_copy_svc (struct gdbarch *gdbarch, uint32_t insn, CORE_ADDR to,
+		    struct regcache *regs, struct displaced_step_closure *dsc)
+{
+  CORE_ADDR from = dsc->insn_addr;
+  struct frame_info *frame;
+  unsigned int svc_number = displaced_read_reg (regs, from, 7);
+
+  if (debug_displaced)
+    fprintf_unfiltered (gdb_stdlog, "displaced: copying Linux svc insn %.8lx\n",
+			(unsigned long) insn);
+
+  frame = get_current_frame ();
+
+  /* Is this a sigreturn or rt_sigreturn syscall?  Note: these are only useful
+     for EABI.  */
+  if (svc_number == 119 || svc_number == 173)
+    {
+      if (get_frame_type (frame) == SIGTRAMP_FRAME)
+	{
+	  CORE_ADDR return_to;
+	  struct symtab_and_line sal;
+
+	  if (debug_displaced)
+	    fprintf_unfiltered (gdb_stdlog, "displaced: found "
+	      "sigreturn/rt_sigreturn SVC call. PC in frame = %lx\n",
+	      (unsigned long) get_frame_pc (frame));
+
+	  return_to = frame_unwind_caller_pc (frame);
+	  if (debug_displaced)
+	    fprintf_unfiltered (gdb_stdlog, "displaced: unwind pc = %lx. "
+	      "Setting momentary breakpoint.\n", (unsigned long) return_to);
+
+	  gdb_assert (inferior_thread ()->step_resume_breakpoint == NULL);
+
+	  sal = find_pc_line (return_to, 0);
+	  sal.pc = return_to;
+	  sal.section = find_pc_overlay (return_to);
+	  sal.explicit_pc = 1;
+
+	  frame = get_prev_frame (frame);
+
+	  if (frame)
+	    {
+	      inferior_thread ()->step_resume_breakpoint
+        	= set_momentary_breakpoint (gdbarch, sal, get_frame_id (frame),
+					    bp_step_resume);
+
+	      /* We need to make sure we actually insert the momentary
+	         breakpoint set above.  */
+	      insert_breakpoints ();
+	    }
+	  else if (debug_displaced)
+	    fprintf_unfiltered (gdb_stderr, "displaced: couldn't find previous "
+				"frame to set momentary breakpoint for "
+				"sigreturn/rt_sigreturn\n");
+	}
+      else if (debug_displaced)
+	fprintf_unfiltered (gdb_stdlog, "displaced: sigreturn/rt_sigreturn "
+			    "SVC call not in signal trampoline frame\n");
+    }
+
+  /* Preparation: If we detect sigreturn, set momentary breakpoint at resume
+		  location, else nothing.
+     Insn: unmodified svc.
+     Cleanup: if pc lands in scratch space, pc <- insn_addr + 4
+              else leave pc alone.  */
+
+  dsc->modinsn[0] = insn;
+
+  dsc->cleanup = &arm_linux_cleanup_svc;
+  /* Pretend we wrote to the PC, so cleanup doesn't set PC to the next
+     instruction.  */
+  dsc->wrote_to_pc = 1;
+
+  return 0;
+}
+
+
+/* The following two functions implement single-stepping over calls to Linux
+   kernel helper routines, which perform e.g. atomic operations on architecture
+   variants which don't support them natively.
+
+   When this function is called, the PC will be pointing at the kernel helper
+   (at an address inaccessible to GDB), and r14 will point to the return
+   address.  Displaced stepping always executes code in the copy area:
+   so, make the copy-area instruction branch back to the kernel helper (the
+   "from" address), and make r14 point to the breakpoint in the copy area.  In
+   that way, we regain control once the kernel helper returns, and can clean
+   up appropriately (as if we had just returned from the kernel helper as it
+   would have been called from the non-displaced location).  */
+
+static void
+cleanup_kernel_helper_return (struct gdbarch *gdbarch ATTRIBUTE_UNUSED,
+			      struct regcache *regs,
+			      struct displaced_step_closure *dsc)
+{
+  displaced_write_reg (regs, dsc, ARM_LR_REGNUM, dsc->tmp[0], CANNOT_WRITE_PC);
+  displaced_write_reg (regs, dsc, ARM_PC_REGNUM, dsc->tmp[0], BRANCH_WRITE_PC);
+}
+
+static void
+arm_catch_kernel_helper_return (struct gdbarch *gdbarch, CORE_ADDR from,
+				CORE_ADDR to, struct regcache *regs,
+				struct displaced_step_closure *dsc)
+{
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
+  dsc->numinsns = 1;
+  dsc->insn_addr = from;
+  dsc->cleanup = &cleanup_kernel_helper_return;
+  /* Say we wrote to the PC, else cleanup will set PC to the next
+     instruction in the helper, which isn't helpful.  */
+  dsc->wrote_to_pc = 1;
+
+  /* Preparation: tmp[0] <- r14
+                  r14 <- <scratch space>+4
+		  *(<scratch space>+8) <- from
+     Insn: ldr pc, [r14, #4]
+     Cleanup: r14 <- tmp[0], pc <- tmp[0].  */
+
+  dsc->tmp[0] = displaced_read_reg (regs, from, ARM_LR_REGNUM);
+  displaced_write_reg (regs, dsc, ARM_LR_REGNUM, (ULONGEST) to + 4,
+		       CANNOT_WRITE_PC);
+  write_memory_unsigned_integer (to + 8, 4, byte_order, from);
+
+  dsc->modinsn[0] = 0xe59ef004;  /* ldr pc, [lr, #4].  */
+}
+
+/* Linux-specific displaced step instruction copying function.  Detects when
+   the program has stepped into a Linux kernel helper routine (which must be
+   handled as a special case), falling back to arm_displaced_step_copy_insn()
+   if it hasn't.  */
+
+static struct displaced_step_closure *
+arm_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,
+				    CORE_ADDR from, CORE_ADDR to,
+				    struct regcache *regs)
+{
+  struct displaced_step_closure *dsc
+    = xmalloc (sizeof (struct displaced_step_closure));
+
+  /* Detect when we enter an (inaccessible by GDB) Linux kernel helper, and
+     stop at the return location.  */
+  if (from > 0xffff0000)
+    {
+      if (debug_displaced)
+        fprintf_unfiltered (gdb_stdlog, "displaced: detected kernel helper "
+			    "at %.8lx\n", (unsigned long) from);
+
+      arm_catch_kernel_helper_return (gdbarch, from, to, regs, dsc);
+    }
+  else
+    {
+      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+      uint32_t insn = read_memory_unsigned_integer (from, 4, byte_order);
+
+      if (debug_displaced)
+	fprintf_unfiltered (gdb_stdlog, "displaced: stepping insn %.8lx "
+			    "at %.8lx\n", (unsigned long) insn,
+			    (unsigned long) from);
+
+      /* Override the default handling of SVC instructions.  */
+      dsc->u.svc.copy_svc_os = arm_linux_copy_svc;
+
+      arm_process_displaced_insn (gdbarch, insn, from, to, regs, dsc);
+    }
+
+  arm_displaced_init_closure (gdbarch, from, to, dsc);
+
+  return dsc;
+}
+
 static void
 arm_linux_init_abi (struct gdbarch_info info,
 		    struct gdbarch *gdbarch)
@@ -657,6 +865,14 @@ arm_linux_init_abi (struct gdbarch_info info,
 					arm_linux_regset_from_core_section);
 
   set_gdbarch_get_siginfo_type (gdbarch, linux_get_siginfo_type);
+
+  /* Displaced stepping.  */
+  set_gdbarch_displaced_step_copy_insn (gdbarch,
+					arm_linux_displaced_step_copy_insn);
+  set_gdbarch_displaced_step_fixup (gdbarch, arm_displaced_step_fixup);
+  set_gdbarch_displaced_step_free_closure (gdbarch,
+					   simple_displaced_step_free_closure);
+  set_gdbarch_displaced_step_location (gdbarch, displaced_step_at_entry_point);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

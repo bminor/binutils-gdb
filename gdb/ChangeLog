@@ -1,3 +1,39 @@
+2009-07-31  Julian Brown  <julian@codesourcery.com>
+
+	* arm-linux-tdep.c (arch-utils.h, inferior.h, gdbthread.h, symfile.h):
+	Include files.
+	(arm_linux_cleanup_svc, arm_linux_copy_svc): New.
+	(cleanup_kernel_helper_return, arm_catch_kernel_helper_return): New.
+	(arm_linux_displaced_step_copy_insn): New.
+	(arm_linux_init_abi): Initialise displaced stepping callbacks.
+	* arm-tdep.c (DISPLACED_STEPPING_ARCH_VERSION): New macro.
+	(ARM_NOP): New.
+	(displaced_read_reg, displaced_in_arm_mode, branch_write_pc)
+	(bx_write_pc, load_write_pc, alu_write_pc, displaced_write_reg)
+	(insn_references_pc, copy_unmodified, cleanup_preload, copy_preload)
+	(copy_preload_reg, cleanup_copro_load_store, copy_copro_load_store)
+	(cleanup_branch, copy_b_bl_blx, copy_bx_blx_reg, cleanup_alu_imm)
+	(copy_alu_imm, cleanup_alu_reg, copy_alu_reg)
+	(cleanup_alu_shifted_reg, copy_alu_shifted_reg, cleanup_load)
+	(cleanup_store, copy_extra_ld_st, copy_ldr_str_ldrb_strb)
+	(cleanup_block_load_all, cleanup_block_store_pc)
+	(cleanup_block_load_pc, copy_block_xfer, cleanup_svc, copy_svc)
+	(copy_undef, copy_unpred): New.
+	(decode_misc_memhint_neon, decode_unconditional)
+	(decode_miscellaneous, decode_dp_misc, decode_ld_st_word_ubyte)
+	(decode_media, decode_b_bl_ldmstm, decode_ext_reg_ld_st)
+	(decode_svc_copro, arm_process_displaced_insn)
+	(arm_displaced_init_closure, arm_displaced_step_copy_insn)
+	(arm_displaced_step_fixup): New.
+	(arm_gdbarch_init): Initialise max insn length field.
+	* arm-tdep.h (DISPLACED_TEMPS, DISPLACED_MODIFIED_INSNS): New
+	macros.
+	(displaced_step_closure, pc_write_style): New.
+	(arm_displaced_init_closure, displaced_read_reg)
+	(arm_process_displaced_insn, arm_displaced_init_closure)
+	(displaced_read_reg, displaced_write_reg, arm_displaced_step_copy_insn)
+	(arm_displaced_step_fixup): Add prototypes.
+
 2009-07-31  Pedro Alves  <pedro@codesourcery.com>
 	    Julian Brown  <julian@codesourcery.com>
 

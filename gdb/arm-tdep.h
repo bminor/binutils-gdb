@@ -186,10 +186,112 @@ struct gdbarch_tdep
   struct type *neon_quad_type;
 };
 
+/* Structures used for displaced stepping.  */
+
+/* The maximum number of temporaries available for displaced instructions.  */
+#define DISPLACED_TEMPS			16
+/* The maximum number of modified instructions generated for one single-stepped
+   instruction, including the breakpoint (usually at the end of the instruction
+   sequence) and any scratch words, etc.  */
+#define DISPLACED_MODIFIED_INSNS	8
+
+struct displaced_step_closure
+{
+  ULONGEST tmp[DISPLACED_TEMPS];
+  int rd;
+  int wrote_to_pc;
+  union
+  {
+    struct
+    {
+      int xfersize;
+      int rn;			   /* Writeback register.  */
+      unsigned int immed : 1;      /* Offset is immediate.  */
+      unsigned int writeback : 1;  /* Perform base-register writeback.  */
+      unsigned int restore_r4 : 1; /* Used r4 as scratch.  */
+    } ldst;
+
+    struct
+    {
+      unsigned long dest;
+      unsigned int link : 1;
+      unsigned int exchange : 1;
+      unsigned int cond : 4;
+    } branch;
+
+    struct
+    {
+      unsigned int regmask;
+      int rn;
+      CORE_ADDR xfer_addr;
+      unsigned int load : 1;
+      unsigned int user : 1;
+      unsigned int increment : 1;
+      unsigned int before : 1;
+      unsigned int writeback : 1;
+      unsigned int cond : 4;
+    } block;
+
+    struct
+    {
+      unsigned int immed : 1;
+    } preload;
+
+    struct
+    {
+      /* If non-NULL, override generic SVC handling (e.g. for a particular
+         OS).  */
+      int (*copy_svc_os) (struct gdbarch *gdbarch, uint32_t insn, CORE_ADDR to,
+			  struct regcache *regs,
+			  struct displaced_step_closure *dsc);
+    } svc;
+  } u;
+  unsigned long modinsn[DISPLACED_MODIFIED_INSNS];
+  int numinsns;
+  CORE_ADDR insn_addr;
+  CORE_ADDR scratch_base;
+  void (*cleanup) (struct gdbarch *, struct regcache *,
+		   struct displaced_step_closure *);
+};
+
+/* Values for the WRITE_PC argument to displaced_write_reg.  If the register
+   write may write to the PC, specifies the way the CPSR T bit, etc. is
+   modified by the instruction.  */
+
+enum pc_write_style
+{
+  BRANCH_WRITE_PC,
+  BX_WRITE_PC,
+  LOAD_WRITE_PC,
+  ALU_WRITE_PC,
+  CANNOT_WRITE_PC
+};
+
+extern void
+  arm_process_displaced_insn (struct gdbarch *gdbarch, uint32_t insn,
+			      CORE_ADDR from, CORE_ADDR to,
+			      struct regcache *regs,
+			      struct displaced_step_closure *dsc);
+extern void
+  arm_displaced_init_closure (struct gdbarch *gdbarch, CORE_ADDR from,
+			      CORE_ADDR to, struct displaced_step_closure *dsc);
+extern ULONGEST
+  displaced_read_reg (struct regcache *regs, CORE_ADDR from, int regno);
+extern void
+  displaced_write_reg (struct regcache *regs,
+		       struct displaced_step_closure *dsc, int regno,
+		       ULONGEST val, enum pc_write_style write_pc);
 
 CORE_ADDR arm_skip_stub (struct frame_info *, CORE_ADDR);
 CORE_ADDR arm_get_next_pc (struct frame_info *, CORE_ADDR);
 int arm_software_single_step (struct frame_info *);
+
+extern struct displaced_step_closure *
+  arm_displaced_step_copy_insn (struct gdbarch *, CORE_ADDR, CORE_ADDR,
+				struct regcache *);
+extern void arm_displaced_step_fixup (struct gdbarch *,
+				      struct displaced_step_closure *,
+				      CORE_ADDR, CORE_ADDR, struct regcache *);
 
 /* Functions exported from armbsd-tdep.h.  */
 
