@@ -964,6 +964,7 @@ displaced_step_fixup (ptid_t event_ptid, enum target_signal signal)
       struct displaced_step_request *head;
       ptid_t ptid;
       struct regcache *regcache;
+      struct gdbarch *gdbarch;
       CORE_ADDR actual_pc;
 
       head = displaced_step_request_queue;
@@ -985,9 +986,11 @@ displaced_step_fixup (ptid_t event_ptid, enum target_signal signal)
 
 	  displaced_step_prepare (ptid);
 
+	  gdbarch = get_regcache_arch (regcache);
+
 	  if (debug_displaced)
 	    {
-	      struct gdbarch *gdbarch = get_regcache_arch (regcache);
+	      CORE_ADDR actual_pc = regcache_read_pc (regcache);
 	      gdb_byte buf[4];
 
 	      fprintf_unfiltered (gdb_stdlog, "displaced: run %s: ",
@@ -996,7 +999,10 @@ displaced_step_fixup (ptid_t event_ptid, enum target_signal signal)
 	      displaced_step_dump_bytes (gdb_stdlog, buf, sizeof (buf));
 	    }
 
-	  target_resume (ptid, 1, TARGET_SIGNAL_0);
+	  if (gdbarch_software_single_step_p (gdbarch))
+	    target_resume (ptid, 0, TARGET_SIGNAL_0);
+	  else
+	    target_resume (ptid, 1, TARGET_SIGNAL_0);
 
 	  /* Done, we're stepping a thread.  */
 	  break;
@@ -1105,15 +1111,19 @@ maybe_software_singlestep (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   int hw_step = 1;
 
-  if (gdbarch_software_single_step_p (gdbarch)
-      && gdbarch_software_single_step (gdbarch, get_current_frame ()))
+  if (gdbarch_software_single_step_p (gdbarch))
     {
-      hw_step = 0;
-      /* Do not pull these breakpoints until after a `wait' in
-	 `wait_for_inferior' */
-      singlestep_breakpoints_inserted_p = 1;
-      singlestep_ptid = inferior_ptid;
-      singlestep_pc = pc;
+      if (use_displaced_stepping (gdbarch))
+        hw_step = 0;
+      else if (gdbarch_software_single_step (gdbarch, get_current_frame ()))
+	{
+	  hw_step = 0;
+	  /* Do not pull these breakpoints until after a `wait' in
+	     `wait_for_inferior' */
+	  singlestep_breakpoints_inserted_p = 1;
+	  singlestep_ptid = inferior_ptid;
+	  singlestep_pc = pc;
+	}
     }
   return hw_step;
 }
@@ -1179,7 +1189,8 @@ a command like `return' or `jump' to continue execution."));
      comments in the handle_inferior event for dealing with 'random
      signals' explain what we do instead.  */
   if (use_displaced_stepping (gdbarch)
-      && tp->trap_expected
+      && (tp->trap_expected
+	  || (step && gdbarch_software_single_step_p (gdbarch)))
       && sig == TARGET_SIGNAL_0)
     {
       if (!displaced_step_prepare (inferior_ptid))
