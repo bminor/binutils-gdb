@@ -1212,15 +1212,68 @@ gnulib/Makefile: gnulib/Makefile.in gnulib/Makefile.in config.status @frags@
 	  $(SHELL) config.status
 
 config.h: stamp-h ; @true
-stamp-h: config.in config.status
+stamp-h: $(srcdir)/config.in config.status
 	CONFIG_HEADERS=config.h:config.in \
 	  CONFIG_COMMANDS="default depdir" \
 	  CONFIG_FILES= \
 	  CONFIG_LINKS= \
 	  $(SHELL) config.status
 
-config.status: configure configure.tgt configure.host
+config.status: $(srcdir)/configure configure.tgt configure.host
 	$(SHELL) config.status --recheck
+
+ACLOCAL = aclocal
+ACLOCAL_AMFLAGS = -I gnulib/m4
+aclocal_m4_deps = \
+	configure.ac \
+	gnulib/m4/extensions.m4 \
+	gnulib/m4/gnulib-common.m4 \
+	gnulib/m4/gnulib-comp.m4 \
+	gnulib/m4/include_next.m4 \
+	gnulib/m4/longlong.m4 \
+	gnulib/m4/memchr.m4 \
+	gnulib/m4/memcmp.m4 \
+	gnulib/m4/memmem.m4 \
+	gnulib/m4/onceonly_2_57.m4 \
+	gnulib/m4/stdint.m4 \
+	gnulib/m4/string_h.m4 \
+	gnulib/m4/wchar.m4 \
+	../config/extensions.m4 \
+	../config/lead-dot.m4 \
+	../config/proginstall.m4 \
+	../bfd/bfd.m4 \
+	../config/acinclude.m4 \
+	../config/override.m4 \
+	../config/gettext-sister.m4 \
+	../config/lib-ld.m4 \
+	../config/lib-prefix.m4 \
+	../config/lib-link.m4 \
+	../config/acx.m4 \
+	../config/tcl.m4 \
+	../config/depstand.m4 \
+	../config/lcmessage.m4 \
+	../config/codeset.m4
+
+$(srcdir)/aclocal.m4: @MAINTAINER_MODE_TRUE@ $(aclocal_m4_deps)
+	cd $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
+
+AUTOCONF = autoconf
+configure_deps = $(srcdir)/configure.ac $(srcdir)/aclocal.m4
+$(srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(configure_deps)
+	cd $(srcdir) && $(AUTOCONF)
+
+AUTOHEADER = autoheader
+$(srcdir)/config.in: @MAINTAINER_MODE_TRUE@ $(configure_deps)
+	cd $(srcdir) && $(AUTOHEADER)
+	rm -f stamp-h
+	touch $@
+
+# automatic rebuilding in automake-generated Makefiles requires
+# this rule in the toplevel Makefile, which, with GNU make, causes
+# the desired updates through the implicit regeneration of the Makefile
+# and all of its prerequisites.
+am--refresh:
+	@:
 
 force:
 
