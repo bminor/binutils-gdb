@@ -299,9 +299,10 @@ set run_cxx_tests {
     {"Run with libdl3a.so"
      "tmpdir/libdl3a.so" ""
      {dl3main.cc} "dl3a" "dl3a.out" "" "c++"}
-    {"Run with libdl3b.so"
-     "tmpdir/libdl3b.so" ""
-     {dl3main.cc} "dl3b" "dl3b.out" "" "c++"}
+# "-shared -Bsymbolic" only works with gcc 4.5.0 and newer.
+#    {"Run with libdl3b.so"
+#     "tmpdir/libdl3b.so" ""
+#     {dl3main.cc} "dl3b" "dl3b.out" "" "c++"}
     {"Run with libdl3c.so"
      "tmpdir/libdl3c.so" ""
      {dl3main.cc} "dl3c" "dl3a.out" "" "c++"}
