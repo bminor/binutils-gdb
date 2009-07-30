@@ -532,7 +532,7 @@ The @code{.global} and @code{.globl} directives supported by
 @code{@value{AS}} will by default mark the symbol as pointing to a
 region of data not code.  This means that, for example, any
 instructions following such a symbol will not be disassembled by
-@code{@value{objdump}} as it will regard them as data.  To change this
+@code{objdump} as it will regard them as data.  To change this
 behaviour an optional section name can be placed after the symbol name
 in the @code{.global} directive.  If this section exists and is known
 to be a code section, then the symbol will be marked as poiting at
