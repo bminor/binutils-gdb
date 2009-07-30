@@ -2380,7 +2380,7 @@ ia64_access_reg (unw_addr_space_t as, unw_regnum_t uw_regnum, unw_word_t *val,
 			"  access_reg: from cache: %4s=%s\n",
 			(((unsigned) regnum <= IA64_NAT127_REGNUM)
 			? ia64_register_names[regnum] : "r??"), 
-			paddress (*val));
+			paddress (gdbarch, *val));
   return 0;
 }
 

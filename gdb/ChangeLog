@@ -1,3 +1,7 @@
+2009-07-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ia64-tdep.c (ia64_access_reg): Correct paddress.
+
 2009-07-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Replace public function varobj_list by all_root_varobjs iterator.
