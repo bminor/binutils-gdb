@@ -1409,36 +1409,28 @@ int
 remove_breakpoints (void)
 {
   struct bp_location *b;
-  int val;
+  int val = 0;
 
   ALL_BP_LOCATIONS (b)
   {
     if (b->inserted)
-      {
-	val = remove_breakpoint (b, mark_uninserted);
-	if (val != 0)
-	  return val;
-      }
+      val |= remove_breakpoint (b, mark_uninserted);
   }
-  return 0;
+  return val;
 }
 
 int
 remove_hw_watchpoints (void)
 {
   struct bp_location *b;
-  int val;
+  int val = 0;
 
   ALL_BP_LOCATIONS (b)
   {
     if (b->inserted && b->loc_type == bp_loc_hardware_watchpoint)
-      {
-	val = remove_breakpoint (b, mark_uninserted);
-	if (val != 0)
-	  return val;
-      }
+      val |= remove_breakpoint (b, mark_uninserted);
   }
-  return 0;
+  return val;
 }
 
 int
@@ -1663,7 +1655,7 @@ int
 detach_breakpoints (int pid)
 {
   struct bp_location *b;
-  int val;
+  int val = 0;
   struct cleanup *old_chain = save_inferior_ptid ();
 
   if (pid == PIDGET (inferior_ptid))
@@ -1674,17 +1666,10 @@ detach_breakpoints (int pid)
   ALL_BP_LOCATIONS (b)
   {
     if (b->inserted)
-      {
-	val = remove_breakpoint (b, mark_inserted);
-	if (val != 0)
-	  {
-	    do_cleanups (old_chain);
-	    return val;
-	  }
-      }
+      val |= remove_breakpoint (b, mark_inserted);
   }
   do_cleanups (old_chain);
-  return 0;
+  return val;
 }
 
 static int
