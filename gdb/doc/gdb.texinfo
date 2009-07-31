@@ -30807,6 +30807,7 @@ are explained further below.
 <target version="1.0">
   @r{[}@var{architecture}@r{]}
   @r{[}@var{osabi}@r{]}
+  @r{[}@var{compatible}@r{]}
   @r{[}@var{feature}@dots{}@r{]}
 </target>
 @end smallexample
@@ -30858,9 +30859,8 @@ An @samp{<architecture>} element has this form:
   <architecture>@var{arch}</architecture>
 @end smallexample
 
-@var{arch} is an architecture name from the same selection
-accepted by @code{set architecture} (@pxref{Targets, ,Specifying a
-Debugging Target}).
+@var{arch} is one of the architectures from the set accepted by
+@code{set architecture} (@pxref{Targets, ,Specifying a Debugging Target}).
 
 @subsection OS ABI
 @cindex @code{<osabi>}
@@ -30876,6 +30876,34 @@ An @samp{<osabi>} element has this form:
 
 @var{abi-name} is an OS ABI name from the same selection accepted by
 @w{@code{set osabi}} (@pxref{ABI, ,Configuring the Current ABI}).
+
+@subsection Compatible Architecture
+@cindex @code{<compatible>}
+
+This optional field was introduced in @value{GDBN} version 7.0.
+Previous versions of @value{GDBN} ignore it.
+
+A @samp{<compatible>} element has this form:
+
+@smallexample
+  <compatible>@var{arch}</compatible>
+@end smallexample
+
+@var{arch} is one of the architectures from the set accepted by
+@code{set architecture} (@pxref{Targets, ,Specifying a Debugging Target}).
+
+A @samp{<compatible>} element is used to specify that the target
+is able to run binaries in some other than the main target architecture
+given by the @samp{<architecture>} element.  For example, on the
+Cell Broadband Engine, the main architecture is @code{powerpc:common}
+or @code{powerpc:common64}, but the system is able to run binaries
+in the @code{spu} architecture as well.  The way to describe this
+capability with @samp{<compatible>} is as follows:
+
+@smallexample
+  <architecture>powerpc:common</architecture>
+  <compatible>spu</compatible>
+@end smallexample
 
 @subsection Features
 @cindex <feature>

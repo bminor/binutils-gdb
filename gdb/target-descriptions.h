@@ -134,6 +134,12 @@ const struct bfd_arch_info *tdesc_architecture
 
 enum gdb_osabi tdesc_osabi (const struct target_desc *);
 
+/* Return non-zero if this target description is compatible
+   with the given BFD architecture.  */
+
+int tdesc_compatible_p (const struct target_desc *,
+			const struct bfd_arch_info *);
+
 /* Return the string value of a property named KEY, or NULL if the
    property was not specified.  */
 
@@ -186,6 +192,8 @@ void set_tdesc_architecture (struct target_desc *,
 void set_tdesc_osabi (struct target_desc *, enum gdb_osabi osabi);
 void set_tdesc_property (struct target_desc *,
 			 const char *key, const char *value);
+void tdesc_add_compatible (struct target_desc *,
+			   const struct bfd_arch_info *);
 
 struct tdesc_feature *tdesc_create_feature (struct target_desc *tdesc,
 					    const char *name);

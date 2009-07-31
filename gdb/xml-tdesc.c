@@ -124,6 +124,20 @@ tdesc_end_osabi (struct gdb_xml_parser *parser,
     set_tdesc_osabi (data->tdesc, osabi);
 }
 
+/* Handle the end of a <compatible> element and its value.  */
+
+static void
+tdesc_end_compatible (struct gdb_xml_parser *parser,
+		      const struct gdb_xml_element *element,
+		      void *user_data, const char *body_text)
+{
+  struct tdesc_parsing_data *data = user_data;
+  const struct bfd_arch_info *arch;
+
+  arch = bfd_scan_arch (body_text);
+  tdesc_add_compatible (data->tdesc, arch);
+}
+
 /* Handle the start of a <target> element.  */
 
 static void
@@ -334,6 +348,8 @@ static const struct gdb_xml_element target_children[] = {
     NULL, tdesc_end_arch },
   { "osabi", NULL, NULL, GDB_XML_EF_OPTIONAL,
     NULL, tdesc_end_osabi },
+  { "compatible", NULL, NULL, GDB_XML_EF_OPTIONAL | GDB_XML_EF_REPEATABLE,
+    NULL, tdesc_end_compatible },
   { "feature", feature_attributes, feature_children,
     GDB_XML_EF_OPTIONAL | GDB_XML_EF_REPEATABLE,
     tdesc_start_feature, NULL },

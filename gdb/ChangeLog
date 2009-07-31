@@ -1,5 +1,30 @@
 2009-07-31  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* features/gdb-target.dtd (target): Accept optional
+	<compatible> elements.
+	(compatible): Define element.
+
+	* target-descriptions.h (tdesc_compatible_p): New.
+	(tdesc_add_compatible): New.
+	* target-descriptions.c (arch_p): New VEC_P type.
+	(struct target_desc): New member compatible.
+	(free_target_description): Handle it.
+	(maint_print_c_tdesc_cmd): Likewise.
+	(tdesc_compatible_p): New function.
+	(tdesc_add_compatible): New function.
+
+	* xml-tdesc.c (tdesc_end_compatible): New function.
+	(target_children): Handle <compatible> element.
+
+	* arch-utils.c (choose_architecture_for_target): Accept target
+	description instead of BFD architecture as input.  Query target
+	description for compatible architectures.
+	(gdbarch_info_fill): Update call.
+
+	* NEWS: Mention <compatible> element of target descriptions.
+
+2009-07-31  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* breakpoint.c (remove_breakpoints): If removing one breakpoint
 	location fails, still continue to remove other locations.
 	(remove_hw_watchpoints): Likewise.
