@@ -65,7 +65,8 @@ enum strata
     core_stratum,		/* Core dump files */
     process_stratum,		/* Executing processes */
     thread_stratum,		/* Executing threads */
-    record_stratum		/* Support record debugging */
+    record_stratum,		/* Support record debugging */
+    arch_stratum		/* Architecture overrides */
   };
 
 enum thread_control_capabilities

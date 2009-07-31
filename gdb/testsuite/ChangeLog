@@ -1,3 +1,7 @@
+2009-07-31  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.xml/tdesc-regs.exp: Skip for SPU targets.
+
 2009-07-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/float.exp: Handle VFP registers.
