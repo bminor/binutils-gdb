@@ -1,5 +1,31 @@
 2009-07-31  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ppc-linux-tdep.c: Include "solib.h", "solist.h", "exceptions.h",
+	"arch-utils.h", and "spu-tdep.h".
+	(spu_context_objfile, spe_context_lm_addr, spe_context_offset):
+	New static variables.
+	(spe_context_cache_ptid, spe_context_cache_address): Likewise.
+	(ppc_linux_spe_context_lookup): New function.
+	(ppc_linux_spe_context_inferior_created): Likewise.
+	(ppc_linux_spe_context_solib_loaded): Likewise.
+	(ppc_linux_spe_context_solib_unloaded): Likewise.
+	(ppc_linux_spe_context): Likewise.
+	(struct ppu2spu_cache, struct ppu2spu_data): New data types.
+	(ppu2spu_prev_arch, ppu2spu_this_id, ppu2spu_prev_register,
+	ppu2spu_unwind_register, ppu2spu_sniffer,
+	ppu2spu_dealloc_cache): New functions.
+	(ppu2spu_unwind): New static variable.
+	(ppc_linux_init_abi): Install cross-architecture unwinder.
+	(_initialize_ppc_linux_tdep): Attach to observers.
+
+	* spu-tdep.c (struct spu2ppu_cache): New data type.
+	(spu2ppu_prev_arch, spu2ppu_this_id, spu2ppu_prev_register,
+	spu2ppu_sniffer, spu2ppu_dealloc_cache): New functions.
+	(spu2ppu_unwind): New static variable.
+	(spu_gdbarch_init): Install cross-architecture unwinder.
+
+2009-07-31  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* target.h (enum strata): New value arch_stratum.
 	* target.c (target_require_runnable): Skip arch_stratum targets.
 

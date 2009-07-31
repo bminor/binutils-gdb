@@ -1088,6 +1088,110 @@ spu_write_pc (struct regcache *regcache, CORE_ADDR pc)
 }
 
 
+/* Cell/B.E. cross-architecture unwinder support.  */
+
+struct spu2ppu_cache
+{
+  struct frame_id frame_id;
+  struct regcache *regcache;
+};
+
+static struct gdbarch *
+spu2ppu_prev_arch (struct frame_info *this_frame, void **this_cache)
+{
+  struct spu2ppu_cache *cache = *this_cache;
+  return get_regcache_arch (cache->regcache);
+}
+
+static void
+spu2ppu_this_id (struct frame_info *this_frame,
+		 void **this_cache, struct frame_id *this_id)
+{
+  struct spu2ppu_cache *cache = *this_cache;
+  *this_id = cache->frame_id;
+}
+
+static struct value *
+spu2ppu_prev_register (struct frame_info *this_frame,
+		       void **this_cache, int regnum)
+{
+  struct spu2ppu_cache *cache = *this_cache;
+  struct gdbarch *gdbarch = get_regcache_arch (cache->regcache);
+  gdb_byte *buf;
+
+  buf = alloca (register_size (gdbarch, regnum));
+  regcache_cooked_read (cache->regcache, regnum, buf);
+  return frame_unwind_got_bytes (this_frame, regnum, buf);
+}
+
+static int
+spu2ppu_sniffer (const struct frame_unwind *self,
+		 struct frame_info *this_frame, void **this_prologue_cache)
+{
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  CORE_ADDR base, func, backchain;
+  gdb_byte buf[4];
+
+  if (gdbarch_bfd_arch_info (target_gdbarch)->arch == bfd_arch_spu)
+    return 0;
+
+  base = get_frame_sp (this_frame);
+  func = get_frame_pc (this_frame);
+  if (target_read_memory (base, buf, 4))
+    return 0;
+  backchain = extract_unsigned_integer (buf, 4, byte_order);
+
+  if (!backchain)
+    {
+      struct frame_info *fi;
+
+      struct spu2ppu_cache *cache
+	= FRAME_OBSTACK_CALLOC (1, struct spu2ppu_cache);
+
+      cache->frame_id = frame_id_build (base + 16, func);
+
+      for (fi = get_next_frame (this_frame); fi; fi = get_next_frame (fi))
+	if (gdbarch_bfd_arch_info (get_frame_arch (fi))->arch != bfd_arch_spu)
+	  break;
+
+      if (fi)
+	{
+	  cache->regcache = frame_save_as_regcache (fi);
+	  *this_prologue_cache = cache;
+	  return 1;
+	}
+      else
+	{
+	  struct regcache *regcache;
+	  regcache = get_thread_arch_regcache (inferior_ptid, target_gdbarch);
+	  cache->regcache = regcache_dup (regcache);
+	  *this_prologue_cache = cache;
+	  return 1;
+	}
+    }
+
+  return 0;
+}
+
+static void
+spu2ppu_dealloc_cache (struct frame_info *self, void *this_cache)
+{
+  struct spu2ppu_cache *cache = this_cache;
+  regcache_xfree (cache->regcache);
+}
+
+static const struct frame_unwind spu2ppu_unwind = {
+  ARCH_FRAME,
+  spu2ppu_this_id,
+  spu2ppu_prev_register,
+  NULL,
+  spu2ppu_sniffer,
+  spu2ppu_dealloc_cache,
+  spu2ppu_prev_arch,
+};
+
+
 /* Function calling convention.  */
 
 static CORE_ADDR
@@ -2309,6 +2413,9 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_skip_prologue (gdbarch, spu_skip_prologue);
   set_gdbarch_in_function_epilogue_p (gdbarch, spu_in_function_epilogue_p);
+
+  /* Cell/B.E. cross-architecture unwinder support.  */
+  frame_unwind_prepend_unwinder (gdbarch, &spu2ppu_unwind);
 
   /* Breakpoints.  */
   set_gdbarch_decr_pc_after_break (gdbarch, 4);

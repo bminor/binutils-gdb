@@ -34,6 +34,8 @@
 #include "regset.h"
 #include "solib-svr4.h"
 #include "solib-spu.h"
+#include "solib.h"
+#include "solist.h"
 #include "ppc-tdep.h"
 #include "ppc-linux-tdep.h"
 #include "trad-frame.h"
@@ -42,6 +44,9 @@
 #include "observer.h"
 #include "auxv.h"
 #include "elf/common.h"
+#include "exceptions.h"
+#include "arch-utils.h"
+#include "spu-tdep.h"
 
 #include "features/rs6000/powerpc-32l.c"
 #include "features/rs6000/powerpc-altivec32l.c"
@@ -1125,6 +1130,293 @@ ppc_linux_core_read_description (struct gdbarch *gdbarch,
     }
 }
 
+
+/* Cell/B.E. active SPE context tracking support.  */
+
+static struct objfile *spe_context_objfile = NULL;
+static CORE_ADDR spe_context_lm_addr = 0;
+static CORE_ADDR spe_context_offset = 0;
+
+static ptid_t spe_context_cache_ptid;
+static CORE_ADDR spe_context_cache_address;
+
+/* Hook into inferior_created, solib_loaded, and solib_unloaded observers
+   to track whether we've loaded a version of libspe2 (as static or dynamic
+   library) that provides the __spe_current_active_context variable.  */
+static void
+ppc_linux_spe_context_lookup (struct objfile *objfile)
+{
+  struct minimal_symbol *sym;
+
+  if (!objfile)
+    {
+      spe_context_objfile = NULL;
+      spe_context_lm_addr = 0;
+      spe_context_offset = 0;
+      spe_context_cache_ptid = minus_one_ptid;
+      spe_context_cache_address = 0;
+      return;
+    }
+
+  sym = lookup_minimal_symbol ("__spe_current_active_context", NULL, objfile);
+  if (sym)
+    {
+      spe_context_objfile = objfile;
+      spe_context_lm_addr = svr4_fetch_objfile_link_map (objfile);
+      spe_context_offset = SYMBOL_VALUE_ADDRESS (sym);
+      spe_context_cache_ptid = minus_one_ptid;
+      spe_context_cache_address = 0;
+      return;
+    }
+}
+
+static void
+ppc_linux_spe_context_inferior_created (struct target_ops *t, int from_tty)
+{
+  struct objfile *objfile;
+
+  ppc_linux_spe_context_lookup (NULL);
+  ALL_OBJFILES (objfile)
+    ppc_linux_spe_context_lookup (objfile);
+}
+
+static void
+ppc_linux_spe_context_solib_loaded (struct so_list *so)
+{
+  if (strstr (so->so_original_name, "/libspe") != NULL)
+    {
+      solib_read_symbols (so, so->from_tty ? SYMFILE_VERBOSE : 0);
+      ppc_linux_spe_context_lookup (so->objfile);
+    }
+}
+
+static void
+ppc_linux_spe_context_solib_unloaded (struct so_list *so)
+{
+  if (so->objfile == spe_context_objfile)
+    ppc_linux_spe_context_lookup (NULL);
+}
+
+/* Retrieve contents of the N'th element in the current thread's
+   linked SPE context list into ID and NPC.  Return the address of
+   said context element, or 0 if not found.  */
+static CORE_ADDR
+ppc_linux_spe_context (int wordsize, enum bfd_endian byte_order,
+		       int n, int *id, unsigned int *npc)
+{
+  CORE_ADDR spe_context = 0;
+  gdb_byte buf[16];
+  int i;
+
+  /* Quick exit if we have not found __spe_current_active_context.  */
+  if (!spe_context_objfile)
+    return 0;
+
+  /* Look up cached address of thread-local variable.  */
+  if (!ptid_equal (spe_context_cache_ptid, inferior_ptid))
+    {
+      struct target_ops *target = &current_target;
+      volatile struct gdb_exception ex;
+
+      while (target && !target->to_get_thread_local_address)
+	target = find_target_beneath (target);
+      if (!target)
+	return 0;
+
+      TRY_CATCH (ex, RETURN_MASK_ERROR)
+	{
+	  /* We do not call target_translate_tls_address here, because
+	     svr4_fetch_objfile_link_map may invalidate the frame chain,
+	     which must not do while inside a frame sniffer.
+
+	     Instead, we have cached the lm_addr value, and use that to
+	     directly call the target's to_get_thread_local_address.  */
+	  spe_context_cache_address
+	    = target->to_get_thread_local_address (target, inferior_ptid,
+						   spe_context_lm_addr,
+						   spe_context_offset);
+	  spe_context_cache_ptid = inferior_ptid;
+	}
+
+      if (ex.reason < 0)
+	return 0;
+    }
+
+  /* Read variable value.  */
+  if (target_read_memory (spe_context_cache_address, buf, wordsize) == 0)
+    spe_context = extract_unsigned_integer (buf, wordsize, byte_order);
+
+  /* Cyle through to N'th linked list element.  */
+  for (i = 0; i < n && spe_context; i++)
+    if (target_read_memory (spe_context + align_up (12, wordsize),
+			    buf, wordsize) == 0)
+      spe_context = extract_unsigned_integer (buf, wordsize, byte_order);
+    else
+      spe_context = 0;
+
+  /* Read current context.  */
+  if (spe_context
+      && target_read_memory (spe_context, buf, 12) != 0)
+    spe_context = 0;
+
+  /* Extract data elements.  */
+  if (spe_context)
+    {
+      if (id)
+	*id = extract_signed_integer (buf, 4, byte_order);
+      if (npc)
+	*npc = extract_unsigned_integer (buf + 4, 4, byte_order);
+    }
+
+  return spe_context;
+}
+
+
+/* Cell/B.E. cross-architecture unwinder support.  */
+
+struct ppu2spu_cache
+{
+  struct frame_id frame_id;
+  struct regcache *regcache;
+};
+
+static struct gdbarch *
+ppu2spu_prev_arch (struct frame_info *this_frame, void **this_cache)
+{
+  struct ppu2spu_cache *cache = *this_cache;
+  return get_regcache_arch (cache->regcache);
+}
+
+static void
+ppu2spu_this_id (struct frame_info *this_frame,
+		 void **this_cache, struct frame_id *this_id)
+{
+  struct ppu2spu_cache *cache = *this_cache;
+  *this_id = cache->frame_id;
+}
+
+static struct value *
+ppu2spu_prev_register (struct frame_info *this_frame,
+		       void **this_cache, int regnum)
+{
+  struct ppu2spu_cache *cache = *this_cache;
+  struct gdbarch *gdbarch = get_regcache_arch (cache->regcache);
+  gdb_byte *buf;
+
+  buf = alloca (register_size (gdbarch, regnum));
+  regcache_cooked_read (cache->regcache, regnum, buf);
+  return frame_unwind_got_bytes (this_frame, regnum, buf);
+}
+
+struct ppu2spu_data
+{
+  struct gdbarch *gdbarch;
+  int id;
+  unsigned int npc;
+  gdb_byte gprs[128*16];
+};
+
+static int
+ppu2spu_unwind_register (void *src, int regnum, gdb_byte *buf)
+{
+  struct ppu2spu_data *data = src;
+  enum bfd_endian byte_order = gdbarch_byte_order (data->gdbarch);
+
+  if (regnum >= 0 && regnum < SPU_NUM_GPRS)
+    memcpy (buf, data->gprs + 16*regnum, 16);
+  else if (regnum == SPU_ID_REGNUM)
+    store_unsigned_integer (buf, 4, byte_order, data->id);
+  else if (regnum == SPU_PC_REGNUM)
+    store_unsigned_integer (buf, 4, byte_order, data->npc);
+  else
+    return 0;
+
+  return 1;
+}
+
+static int
+ppu2spu_sniffer (const struct frame_unwind *self,
+		 struct frame_info *this_frame, void **this_prologue_cache)
+{
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  struct ppu2spu_data data;
+  struct frame_info *fi;
+  CORE_ADDR base, func, backchain, spe_context;
+  gdb_byte buf[8];
+  int n = 0;
+
+  /* Count the number of SPU contexts already in the frame chain.  */
+  for (fi = get_next_frame (this_frame); fi; fi = get_next_frame (fi))
+    if (get_frame_type (fi) == ARCH_FRAME
+	&& gdbarch_bfd_arch_info (get_frame_arch (fi))->arch == bfd_arch_spu)
+      n++;
+
+  base = get_frame_sp (this_frame);
+  func = get_frame_pc (this_frame);
+  if (target_read_memory (base, buf, tdep->wordsize))
+    return 0;
+  backchain = extract_unsigned_integer (buf, tdep->wordsize, byte_order);
+
+  spe_context = ppc_linux_spe_context (tdep->wordsize, byte_order,
+				       n, &data.id, &data.npc);
+  if (spe_context && base <= spe_context && spe_context < backchain)
+    {
+      char annex[32];
+
+      /* Find gdbarch for SPU.  */
+      struct gdbarch_info info;
+      gdbarch_info_init (&info);
+      info.bfd_arch_info = bfd_lookup_arch (bfd_arch_spu, bfd_mach_spu);
+      info.byte_order = BFD_ENDIAN_BIG;
+      info.osabi = GDB_OSABI_LINUX;
+      info.tdep_info = (void *) &data.id;
+      data.gdbarch = gdbarch_find_by_info (info);
+      if (!data.gdbarch)
+	return 0;
+
+      xsnprintf (annex, sizeof annex, "%d/regs", data.id);
+      if (target_read (&current_target, TARGET_OBJECT_SPU, annex,
+		       data.gprs, 0, sizeof data.gprs)
+	  == sizeof data.gprs)
+	{
+	  struct ppu2spu_cache *cache
+	    = FRAME_OBSTACK_CALLOC (1, struct ppu2spu_cache);
+
+	  struct regcache *regcache = regcache_xmalloc (data.gdbarch);
+	  struct cleanup *cleanups = make_cleanup_regcache_xfree (regcache);
+	  regcache_save (regcache, ppu2spu_unwind_register, &data);
+	  discard_cleanups (cleanups);
+
+	  cache->frame_id = frame_id_build (base, func);
+	  cache->regcache = regcache;
+	  *this_prologue_cache = cache;
+	  return 1;
+	}
+    }
+
+  return 0;
+}
+
+static void
+ppu2spu_dealloc_cache (struct frame_info *self, void *this_cache)
+{
+  struct ppu2spu_cache *cache = this_cache;
+  regcache_xfree (cache->regcache);
+}
+
+static const struct frame_unwind ppu2spu_unwind = {
+  ARCH_FRAME,
+  ppu2spu_this_id,
+  ppu2spu_prev_register,
+  NULL,
+  ppu2spu_sniffer,
+  ppu2spu_dealloc_cache,
+  ppu2spu_prev_arch,
+};
+
+
 static void
 ppc_linux_init_abi (struct gdbarch_info info,
                     struct gdbarch *gdbarch)
@@ -1241,6 +1533,9 @@ ppc_linux_init_abi (struct gdbarch_info info,
       /* Cell/B.E. multi-architecture support.  */
       set_spu_solib_ops (gdbarch);
 
+      /* Cell/B.E. cross-architecture unwinder support.  */
+      frame_unwind_prepend_unwinder (gdbarch, &ppu2spu_unwind);
+
       /* The default displaced_step_at_entry_point doesn't work for
 	 SPU stand-alone executables.  */
       set_gdbarch_displaced_step_location (gdbarch,
@@ -1265,6 +1560,11 @@ _initialize_ppc_linux_tdep (void)
 
   /* Attach to inferior_created observer.  */
   observer_attach_inferior_created (ppc_linux_inferior_created);
+
+  /* Attach to observers to track __spe_current_active_context.  */
+  observer_attach_inferior_created (ppc_linux_spe_context_inferior_created);
+  observer_attach_solib_loaded (ppc_linux_spe_context_solib_loaded);
+  observer_attach_solib_unloaded (ppc_linux_spe_context_solib_unloaded);
 
   /* Initialize the Linux target descriptions.  */
   initialize_tdesc_powerpc_32l ();
