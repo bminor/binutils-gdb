@@ -4873,7 +4873,8 @@ fetch_register_using_p (struct regcache *regcache, struct packet_reg *reg)
   *p++ = 'p';
   p += hexnumstr (p, reg->pnum);
   *p++ = '\0';
-  remote_send (&rs->buf, &rs->buf_size);
+  putpkt (rs->buf);
+  getpkt (&rs->buf, &rs->buf_size, 0);
 
   buf = rs->buf;
 
@@ -5121,7 +5122,8 @@ remote_prepare_to_store (struct regcache *regcache)
    packet was not recognized.  */
 
 static int
-store_register_using_P (const struct regcache *regcache, struct packet_reg *reg)
+store_register_using_P (const struct regcache *regcache, 
+			struct packet_reg *reg)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct remote_state *rs = get_remote_state ();
@@ -5141,7 +5143,8 @@ store_register_using_P (const struct regcache *regcache, struct packet_reg *reg)
   p = buf + strlen (buf);
   regcache_raw_collect (regcache, reg->regnum, regp);
   bin2hex (regp, p, register_size (gdbarch, reg->regnum));
-  remote_send (&rs->buf, &rs->buf_size);
+  putpkt (rs->buf);
+  getpkt (&rs->buf, &rs->buf_size, 0);
 
   switch (packet_ok (rs->buf, &remote_protocol_packets[PACKET_P]))
     {
@@ -5189,7 +5192,10 @@ store_registers_using_G (const struct regcache *regcache)
   /* remote_prepare_to_store insures that rsa->sizeof_g_packet gets
      updated.  */
   bin2hex (regs, p, rsa->sizeof_g_packet);
-  remote_send (&rs->buf, &rs->buf_size);
+  putpkt (rs->buf);
+  getpkt (&rs->buf, &rs->buf_size, 0);
+  if (packet_check_result (rs->buf) == PACKET_ERROR)
+    error (_("Could not write registers"));
 }
 
 /* Store register REGNUM, or all registers if REGNUM == -1, from the contents
