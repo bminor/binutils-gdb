@@ -1,5 +1,19 @@
 2009-07-31  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* spu-tdep.c: Include "block.h".
+	(setspucmdlist, showspucmdlist): New static variables.
+	(spu_stop_on_load_p): Likewise.
+	(spu_catch_start): New function.
+	(show_spu_command, set_spu_command): New functions.
+	(show_spu_stop_on_load): Likewise.
+	(_initialize_spu_tdep): Attach spu_catch_start to new_objfile observer.
+	Install "set spu" / "show spu" prefix command handler.
+	Install "set spu stop-on-load" / "show spu stop-on-load" command.
+
+	* NEWS: Mention "set/show spu stop-on-load" commands.
+
+2009-07-31  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ppc-linux-tdep.c: Include "solib.h", "solist.h", "exceptions.h",
 	"arch-utils.h", and "spu-tdep.h".
 	(spu_context_objfile, spe_context_lm_addr, spe_context_offset):

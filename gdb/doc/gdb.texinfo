@@ -17490,6 +17490,23 @@ and local store addresses and transfer size are shown.
 
 @end table
  
+When @value{GDBN} is debugging a combined PowerPC/SPU application
+on the Cell Broadband Engine, it provides in addition the following
+special commands:
+
+@table @code
+@item set spu stop-on-load @var{arg}
+@kindex set spu
+Set whether to stop for new SPE threads.  When set to @code{on}, @value{GDBN}
+will give control to the user when a new SPE thread enters its @code{main}
+function.  The default is @code{off}.
+
+@item show spu stop-on-load
+@kindex show spu
+Show whether to stop for new SPE threads.
+
+@end table
+
 @node PowerPC
 @subsection PowerPC
 @cindex PowerPC architecture

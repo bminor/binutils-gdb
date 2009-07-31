@@ -259,6 +259,10 @@ kill inferior NUM
 
 * New options
 
+set spu stop-on-load
+show spu stop-on-load
+  Control whether to stop for new SPE threads during Cell/B.E. debugging.
+
 set sh calling-convention
 show sh calling-convention
   Control the calling convention used when calling SH target functions.

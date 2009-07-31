@@ -40,9 +40,18 @@
 #include "regcache.h"
 #include "reggroups.h"
 #include "floatformat.h"
+#include "block.h"
 #include "observer.h"
 
 #include "spu-tdep.h"
+
+
+/* The list of available "set spu " and "show spu " commands.  */
+static struct cmd_list_element *setspucmdlist = NULL;
+static struct cmd_list_element *showspucmdlist = NULL;
+
+/* Whether to stop for new SPE contexts.  */
+static int spu_stop_on_load_p = 0;
 
 
 /* The tdep structure.  */
@@ -1752,6 +1761,65 @@ spu_overlay_new_objfile (struct objfile *objfile)
 }
 
 
+/* Insert temporary breakpoint on "main" function of newly loaded
+   SPE context OBJFILE.  */
+static void
+spu_catch_start (struct objfile *objfile)
+{
+  struct minimal_symbol *minsym;
+  struct symtab *symtab;
+  CORE_ADDR pc;
+  char buf[32];
+
+  /* Do this only if requested by "set spu stop-on-load on".  */
+  if (!spu_stop_on_load_p)
+    return;
+
+  /* Consider only SPU objfiles.  */
+  if (!objfile || bfd_get_arch (objfile->obfd) != bfd_arch_spu)
+    return;
+
+  /* The main objfile is handled differently.  */
+  if (objfile == symfile_objfile)
+    return;
+
+  /* There can be multiple symbols named "main".  Search for the
+     "main" in *this* objfile.  */
+  minsym = lookup_minimal_symbol ("main", NULL, objfile);
+  if (!minsym)
+    return;
+
+  /* If we have debugging information, try to use it -- this
+     will allow us to properly skip the prologue.  */
+  pc = SYMBOL_VALUE_ADDRESS (minsym);
+  symtab = find_pc_sect_symtab (pc, SYMBOL_OBJ_SECTION (minsym));
+  if (symtab != NULL)
+    {
+      struct blockvector *bv = BLOCKVECTOR (symtab);
+      struct block *block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+      struct symbol *sym;
+      struct symtab_and_line sal;
+
+      sym = lookup_block_symbol (block, "main", NULL, VAR_DOMAIN);
+      if (sym)
+	{
+	  fixup_symbol_section (sym, objfile);
+	  sal = find_function_start_sal (sym, 1);
+	  pc = sal.pc;
+	}
+    }
+
+  /* Use a numerical address for the set_breakpoint command to avoid having
+     the breakpoint re-set incorrectly.  */
+  xsnprintf (buf, sizeof buf, "*%s", core_addr_to_string (pc));
+  set_breakpoint (get_objfile_arch (objfile),
+		  buf, NULL /* condition */,
+		  0 /* hardwareflag */, 1 /* tempflag */,
+		  -1 /* thread */, 0 /* ignore_count */,
+		  0 /* pending */, 1 /* enabled */);
+}
+
+
 /* "info spu" commands.  */
 
 static void
@@ -2321,6 +2389,29 @@ info_spu_command (char *args, int from_tty)
 }
 
 
+/* Root of all "set spu "/"show spu " commands.  */
+
+static void
+show_spu_command (char *args, int from_tty)
+{
+  help_list (showspucmdlist, "show spu ", all_commands, gdb_stdout);
+}
+
+static void
+set_spu_command (char *args, int from_tty)
+{
+  help_list (setspucmdlist, "set spu ", all_commands, gdb_stdout);
+}
+
+static void
+show_spu_stop_on_load (struct ui_file *file, int from_tty,
+                       struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Stopping for new SPE threads is %s.\n"),
+                    value);
+}
+
+
 /* Set up gdbarch struct.  */
 
 static struct gdbarch *
@@ -2441,6 +2532,32 @@ _initialize_spu_tdep (void)
   /* Add ourselves to objfile event chain.  */
   observer_attach_new_objfile (spu_overlay_new_objfile);
   spu_overlay_data = register_objfile_data ();
+
+  /* Install spu stop-on-load handler.  */
+  observer_attach_new_objfile (spu_catch_start);
+
+  /* Add root prefix command for all "set spu"/"show spu" commands.  */
+  add_prefix_cmd ("spu", no_class, set_spu_command,
+		  _("Various SPU specific commands."),
+		  &setspucmdlist, "set spu ", 0, &setlist);
+  add_prefix_cmd ("spu", no_class, show_spu_command,
+		  _("Various SPU specific commands."),
+		  &showspucmdlist, "show spu ", 0, &showlist);
+
+  /* Toggle whether or not to add a temporary breakpoint at the "main"
+     function of new SPE contexts.  */
+  add_setshow_boolean_cmd ("stop-on-load", class_support,
+                          &spu_stop_on_load_p, _("\
+Set whether to stop for new SPE threads."),
+                           _("\
+Show whether to stop for new SPE threads."),
+                           _("\
+Use \"on\" to give control to the user when a new SPE thread\n\
+enters its \"main\" function.\n\
+Use \"off\" to disable stopping for new SPE threads."),
+                          NULL,
+                          show_spu_stop_on_load,
+                          &setspucmdlist, &showspucmdlist);
 
   /* Add root prefix command for all "info spu" commands.  */
   add_prefix_cmd ("spu", class_info, info_spu_command,
