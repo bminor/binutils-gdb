@@ -42,6 +42,7 @@
 #include "floatformat.h"
 #include "block.h"
 #include "observer.h"
+#include "infcall.h"
 
 #include "spu-tdep.h"
 
@@ -52,6 +53,8 @@ static struct cmd_list_element *showspucmdlist = NULL;
 
 /* Whether to stop for new SPE contexts.  */
 static int spu_stop_on_load_p = 0;
+/* Whether to automatically flush the SW-managed cache.  */
+static int spu_auto_flush_cache_p = 1;
 
 
 /* The tdep structure.  */
@@ -340,7 +343,8 @@ spu_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   return default_register_reggroup_p (gdbarch, regnum, group);
 }
 
-/* Address conversion.  */
+
+/* Address handling.  */
 
 static int
 spu_gdbarch_id (struct gdbarch *gdbarch)
@@ -377,6 +381,37 @@ spu_lslr (int id)
   return strtoulst (buf, NULL, 16);
 }
 
+static int
+spu_address_class_type_flags (int byte_size, int dwarf2_addr_class)
+{
+  if (dwarf2_addr_class == 1)
+    return TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1;
+  else
+    return 0;
+}
+
+static const char *
+spu_address_class_type_flags_to_name (struct gdbarch *gdbarch, int type_flags)
+{
+  if (type_flags & TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1)
+    return "__ea";
+  else
+    return NULL;
+}
+
+static int
+spu_address_class_name_to_type_flags (struct gdbarch *gdbarch,
+				      const char *name, int *type_flags_ptr)
+{
+  if (strcmp (name, "__ea") == 0)
+    {
+      *type_flags_ptr = TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1;
+      return 1;
+    }
+  else
+   return 0;
+}
+
 static void
 spu_address_to_pointer (struct gdbarch *gdbarch,
 			struct type *type, gdb_byte *buf, CORE_ADDR addr)
@@ -395,6 +430,10 @@ spu_pointer_to_address (struct gdbarch *gdbarch,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST addr
     = extract_unsigned_integer (buf, TYPE_LENGTH (type), byte_order);
+
+  /* Do not convert __ea pointers.  */
+  if (TYPE_ADDRESS_CLASS_1 (type))
+    return addr;
 
   return addr? SPUADDR (id, addr & lslr) : 0;
 }
@@ -1820,6 +1859,73 @@ spu_catch_start (struct objfile *objfile)
 }
 
 
+/* Look up OBJFILE loaded into FRAME's SPU context.  */
+static struct objfile *
+spu_objfile_from_frame (struct frame_info *frame)
+{
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  struct objfile *obj;
+
+  if (gdbarch_bfd_arch_info (gdbarch)->arch != bfd_arch_spu)
+    return NULL;
+
+  ALL_OBJFILES (obj)
+    {
+      if (obj->sections != obj->sections_end
+	  && SPUADDR_SPU (obj_section_addr (obj->sections)) == tdep->id)
+	return obj;
+    }
+
+  return NULL;
+}
+
+/* Flush cache for ea pointer access if available.  */
+static void
+flush_ea_cache (void)
+{
+  struct minimal_symbol *msymbol;
+  struct objfile *obj;
+
+  if (!has_stack_frames ())
+    return;
+
+  obj = spu_objfile_from_frame (get_current_frame ());
+  if (obj == NULL)
+    return;
+
+  /* Lookup inferior function __cache_flush.  */
+  msymbol = lookup_minimal_symbol ("__cache_flush", NULL, obj);
+  if (msymbol != NULL)
+    {
+      struct type *type;
+      CORE_ADDR addr;
+
+      type = objfile_type (obj)->builtin_void;
+      type = lookup_function_type (type);
+      type = lookup_pointer_type (type);
+      addr = SYMBOL_VALUE_ADDRESS (msymbol);
+
+      call_function_by_hand (value_from_pointer (type, addr), 0, NULL);
+    }
+}
+
+/* This handler is called when the inferior has stopped.  If it is stopped in
+   SPU architecture then flush the ea cache if used.  */
+static void
+spu_attach_normal_stop (struct bpstats *bs, int print_frame)
+{
+  if (!spu_auto_flush_cache_p)
+    return;
+
+  /* Temporarily reset spu_auto_flush_cache_p to avoid recursively
+     re-entering this function when __cache_flush stops.  */
+  spu_auto_flush_cache_p = 0;
+  flush_ea_cache ();
+  spu_auto_flush_cache_p = 1;
+}
+
+
 /* "info spu" commands.  */
 
 static void
@@ -2411,6 +2517,14 @@ show_spu_stop_on_load (struct ui_file *file, int from_tty,
                     value);
 }
 
+static void
+show_spu_auto_flush_cache (struct ui_file *file, int from_tty,
+			   struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Automatic software-cache flush is %s.\n"),
+                    value);
+}
+
 
 /* Set up gdbarch struct.  */
 
@@ -2480,10 +2594,16 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_double_format (gdbarch, floatformats_ieee_double);
   set_gdbarch_long_double_format (gdbarch, floatformats_ieee_double);
 
-  /* Address conversion.  */
+  /* Address handling.  */
   set_gdbarch_address_to_pointer (gdbarch, spu_address_to_pointer);
   set_gdbarch_pointer_to_address (gdbarch, spu_pointer_to_address);
   set_gdbarch_integer_to_address (gdbarch, spu_integer_to_address);
+  set_gdbarch_address_class_type_flags (gdbarch, spu_address_class_type_flags);
+  set_gdbarch_address_class_type_flags_to_name
+    (gdbarch, spu_address_class_type_flags_to_name);
+  set_gdbarch_address_class_name_to_type_flags
+    (gdbarch, spu_address_class_name_to_type_flags);
+
 
   /* Inferior function calls.  */
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
@@ -2536,6 +2656,9 @@ _initialize_spu_tdep (void)
   /* Install spu stop-on-load handler.  */
   observer_attach_new_objfile (spu_catch_start);
 
+  /* Add ourselves to normal_stop event chain.  */
+  observer_attach_normal_stop (spu_attach_normal_stop);
+
   /* Add root prefix command for all "set spu"/"show spu" commands.  */
   add_prefix_cmd ("spu", no_class, set_spu_command,
 		  _("Various SPU specific commands."),
@@ -2557,6 +2680,21 @@ enters its \"main\" function.\n\
 Use \"off\" to disable stopping for new SPE threads."),
                           NULL,
                           show_spu_stop_on_load,
+                          &setspucmdlist, &showspucmdlist);
+
+  /* Toggle whether or not to automatically flush the software-managed
+     cache whenever SPE execution stops.  */
+  add_setshow_boolean_cmd ("auto-flush-cache", class_support,
+                          &spu_auto_flush_cache_p, _("\
+Set whether to automatically flush the software-managed cache."),
+                           _("\
+Show whether to automatically flush the software-managed cache."),
+                           _("\
+Use \"on\" to automatically flush the software-managed cache\n\
+whenever SPE execution stops.\n\
+Use \"off\" to never automatically flush the software-managed cache."),
+                          NULL,
+                          show_spu_auto_flush_cache,
                           &setspucmdlist, &showspucmdlist);
 
   /* Add root prefix command for all "info spu" commands.  */

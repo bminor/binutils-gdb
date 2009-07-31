@@ -1,5 +1,23 @@
 2009-07-31  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* spu-tdep.c: Include "infcall.h".
+	(spu_address_class_type_flags): New function.
+	(spu_address_class_type_flags_to_name): Likewise.
+	(spu_address_class_name_to_type_flags): Likewise.
+	(spu_pointer_to_address): Handle __ea pointers.
+	(spu_auto_flush_cache_p): New static variable.
+	(spu_objfile_from_frame): New function.
+	(flush_ea_cache, spu_attach_normal_stop): Likewise.
+	(show_spu_auto_flush_cache): Likewise.
+	(spu_gdbarch_init): Install address class handlers.
+	(_initialize_spu_tdep): Attach to normal_stop observer.
+	Install "set spu auto-flush-cache" / "show spu auto-flush-cache"
+	commands.
+
+	* NEWS: Mention "set/show spu auto-flush-cache" commands.
+
+2009-07-31  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* spu-tdep.c: Include "block.h".
 	(setspucmdlist, showspucmdlist): New static variables.
 	(spu_stop_on_load_p): Likewise.

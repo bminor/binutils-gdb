@@ -17505,6 +17505,16 @@ function.  The default is @code{off}.
 @kindex show spu
 Show whether to stop for new SPE threads.
 
+@item set spu auto-flush-cache @var{arg}
+Set whether to automatically flush the software-managed cache.  When set to
+@code{on}, @value{GDBN} will automatically cause the SPE software-managed
+cache to be flushed whenever SPE execution stops.  This provides a consistent
+view of PowerPC memory that is accessed via the cache.  If an application
+does not use the software-managed cache, this option has no effect.
+
+@item show spu auto-flush-cache
+Show whether to automatically flush the software-managed cache.
+
 @end table
 
 @node PowerPC

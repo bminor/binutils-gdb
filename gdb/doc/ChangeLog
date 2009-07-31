@@ -1,6 +1,11 @@
 2009-07-31  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdb.texinfo (Cell Broadband Engine SPU architecture): Document the
+	"set spu auto-flush-cache" and "show spu auto-flush-cache" commands.
+
+2009-07-31  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.texinfo (Cell Broadband Engine SPU architecture): Document the
 	"set spu stop-on-load" and "show spu stop-on-load" commands.
 
 2009-07-31  Ulrich Weigand  <uweigand@de.ibm.com>
