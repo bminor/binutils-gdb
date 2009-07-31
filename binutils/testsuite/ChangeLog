@@ -1,3 +1,9 @@
+2009-07-31  Daniel Gutson  <dgutson@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* binutils-all/arm/thumb2-cond.s: Use instructions instead of
+	.short.
+
 2009-07-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* binutils-all/testranges.s: Replace .value with .short.

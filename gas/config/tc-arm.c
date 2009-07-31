@@ -2433,19 +2433,14 @@ s_unreq (int a ATTRIBUTE_UNUSED)
 
 static enum mstate mapstate = MAP_UNDEFINED;
 
-void
-mapping_state (enum mstate state)
+/* Create a new mapping symbol for the transition to STATE.  */
+
+static void
+make_mapping_symbol (enum mstate state, valueT value, fragS *frag)
 {
   symbolS * symbolP;
   const char * symname;
   int type;
-
-  if (mapstate == state)
-    /* The mapping symbol has already been emitted.
-       There is nothing else to do.  */
-    return;
-
-  mapstate = state;
 
   switch (state)
     {
@@ -2461,16 +2456,11 @@ mapping_state (enum mstate state)
       symname = "$t";
       type = BSF_NO_FLAGS;
       break;
-    case MAP_UNDEFINED:
-      return;
     default:
       abort ();
     }
 
-  seg_info (now_seg)->tc_segment_info_data.mapstate = state;
-
-  symbolP = symbol_new (symname, now_seg, (valueT) frag_now_fix (), frag_now);
-  symbol_table_insert (symbolP);
+  symbolP = symbol_new (symname, now_seg, value, frag);
   symbol_get_bfdsym (symbolP)->flags |= type | BSF_LOCAL;
 
   switch (state)
@@ -2489,11 +2479,103 @@ mapping_state (enum mstate state)
 
     case MAP_DATA:
     default:
-      return;
+      break;
     }
+
+  /* Save the mapping symbols for future reference.  Also check that
+     we do not place two mapping symbols at the same offset within a
+     frag.  We'll handle overlap between frags in
+     check_mapping_symbols.  */
+  if (value == 0)
+    {
+      know (frag->tc_frag_data.first_map == NULL);
+      frag->tc_frag_data.first_map = symbolP;
+    }
+  if (frag->tc_frag_data.last_map != NULL)
+    know (S_GET_VALUE (frag->tc_frag_data.last_map) < S_GET_VALUE (symbolP));
+  frag->tc_frag_data.last_map = symbolP;
+}
+
+/* We must sometimes convert a region marked as code to data during
+   code alignment, if an odd number of bytes have to be padded.  The
+   code mapping symbol is pushed to an aligned address.  */
+
+static void
+insert_data_mapping_symbol (enum mstate state,
+			    valueT value, fragS *frag, offsetT bytes)
+{
+  /* If there was already a mapping symbol, remove it.  */
+  if (frag->tc_frag_data.last_map != NULL
+      && S_GET_VALUE (frag->tc_frag_data.last_map) == frag->fr_address + value)
+    {
+      symbolS *symp = frag->tc_frag_data.last_map;
+
+      if (value == 0)
+	{
+	  know (frag->tc_frag_data.first_map == symp);
+	  frag->tc_frag_data.first_map = NULL;
+	}
+      frag->tc_frag_data.last_map = NULL;
+      symbol_remove (symp, &symbol_rootP, &symbol_lastP);
+    }
+
+  make_mapping_symbol (MAP_DATA, value, frag);
+  make_mapping_symbol (state, value + bytes, frag);
+}
+
+static void mapping_state_2 (enum mstate state, int max_chars);
+
+/* Set the mapping state to STATE.  Only call this when about to
+   emit some STATE bytes to the file.  */
+
+void
+mapping_state (enum mstate state)
+{
+#define TRANSITION(from, to) (mapstate == (from) && state == (to))
+
+  if (mapstate == state)
+    /* The mapping symbol has already been emitted.
+       There is nothing else to do.  */
+    return;
+  else if (TRANSITION (MAP_UNDEFINED, MAP_DATA))
+    /* This case will be evaluated later in the next else.  */
+    return;
+  else if (TRANSITION (MAP_UNDEFINED, MAP_ARM)
+          || TRANSITION (MAP_UNDEFINED, MAP_THUMB))
+    {
+      /* Only add the symbol if the offset is > 0:
+         if we're at the first frag, check it's size > 0;
+         if we're not at the first frag, then for sure
+            the offset is > 0.  */
+      struct frag * const frag_first = seg_info (now_seg)->frchainP->frch_root;
+      const int add_symbol = (frag_now != frag_first) || (frag_now_fix () > 0);
+
+      if (add_symbol)
+        make_mapping_symbol (MAP_DATA, (valueT) 0, frag_first);
+    }
+
+  mapping_state_2 (state, 0);
+#undef TRANSITION
+}
+
+/* Same as mapping_state, but MAX_CHARS bytes have already been
+   allocated.  Put the mapping symbol that far back.  */
+
+static void
+mapping_state_2 (enum mstate state, int max_chars)
+{
+  if (mapstate == state)
+    /* The mapping symbol has already been emitted.
+       There is nothing else to do.  */
+    return;
+
+  mapstate = state;
+  seg_info (now_seg)->tc_segment_info_data.mapstate = state;
+  make_mapping_symbol (state, (valueT) frag_now_fix () - max_chars, frag_now);
 }
 #else
 #define mapping_state(x) /* nothing */
+#define mapping_state_2(x, y) /* nothing */
 #endif
 
 /* Find the real, Thumb encoded start of a Thumb function.  */
@@ -2549,7 +2631,6 @@ opcode_select (int width)
 	     coming from ARM mode, which is word-aligned.  */
 	  record_alignment (now_seg, 1);
 	}
-      mapping_state (MAP_THUMB);
       break;
 
     case 32:
@@ -2565,7 +2646,6 @@ opcode_select (int width)
 
 	  record_alignment (now_seg, 1);
 	}
-      mapping_state (MAP_ARM);
       break;
 
     default:
@@ -2804,7 +2884,10 @@ s_bss (int ignore ATTRIBUTE_UNUSED)
      marking in_bss, then looking at s_skip for clues.	*/
   subseg_set (bss_section, 0);
   demand_empty_rest_of_line ();
-  mapping_state (MAP_DATA);
+
+#ifdef md_elf_section_change_hook
+  md_elf_section_change_hook ();
+#endif
 }
 
 static void
@@ -14711,7 +14794,7 @@ output_inst (const char * str)
      what type of NOP padding to use, if necessary.  We override any previous
      setting so that if the mode has changed then the NOPS that we use will
      match the encoding of the last instruction in the frag.  */
-  frag_now->tc_frag_data = thumb_mode | MODE_RECORDED;
+  frag_now->tc_frag_data.thumb_mode = thumb_mode | MODE_RECORDED;
 
   if (thumb_mode && (inst.size > THUMB_SIZE))
     {
@@ -15015,6 +15098,7 @@ new_automatic_it_block (int cond)
   now_it.mask = 0x18;
   now_it.cc = cond;
   now_it.block_length = 1;
+  mapping_state (MAP_THUMB);
   now_it.insn = output_it_inst (cond, now_it.mask, NULL);
 }
 
@@ -15393,7 +15477,6 @@ md_assemble (char *str)
 	    }
 	}
 
-      mapping_state (MAP_THUMB);
       inst.instruction = opcode->tvalue;
 
       if (!parse_operands (p, opcode->operands))
@@ -15434,6 +15517,9 @@ md_assemble (char *str)
 	       || ARM_CPU_HAS_FEATURE (*opcode->tvariant, arm_ext_barrier)))
 	ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used,
 				arm_ext_v6t2);
+
+      if (!inst.error)
+	mapping_state (MAP_THUMB);
     }
   else if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v1))
     {
@@ -15456,7 +15542,6 @@ md_assemble (char *str)
 	  return;
 	}
 
-      mapping_state (MAP_ARM);
       inst.instruction = opcode->avalue;
       if (opcode->tag == OT_unconditionalF)
 	inst.instruction |= 0xF << 28;
@@ -15476,6 +15561,8 @@ md_assemble (char *str)
       else
 	ARM_MERGE_FEATURE_SETS (arm_arch_used, arm_arch_used,
 				*opcode->avariant);
+      if (!inst.error)
+	mapping_state (MAP_ARM);
     }
   else
     {
@@ -18309,6 +18396,9 @@ arm_handle_align (fragS * fragP)
   char * p;
   const char * noop;
   const char *narrow_noop = NULL;
+#ifdef OBJ_ELF
+  enum mstate state;
+#endif
 
   if (fragP->fr_type != rs_align_code)
     return;
@@ -18320,9 +18410,9 @@ arm_handle_align (fragS * fragP)
   if (bytes > MAX_MEM_FOR_RS_ALIGN_CODE)
     bytes &= MAX_MEM_FOR_RS_ALIGN_CODE;
 
-  gas_assert ((fragP->tc_frag_data & MODE_RECORDED) != 0);
+  gas_assert ((fragP->tc_frag_data.thumb_mode & MODE_RECORDED) != 0);
 
-  if (fragP->tc_frag_data & (~ MODE_RECORDED))
+  if (fragP->tc_frag_data.thumb_mode & (~ MODE_RECORDED))
     {
       if (ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6t2))
 	{
@@ -18332,12 +18422,18 @@ arm_handle_align (fragS * fragP)
       else
 	noop = thumb_noop[0][target_big_endian];
       noop_size = 2;
+#ifdef OBJ_ELF
+      state = MAP_THUMB;
+#endif
     }
   else
     {
       noop = arm_noop[ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6k) != 0]
 		     [target_big_endian];
       noop_size = 4;
+#ifdef OBJ_ELF
+      state = MAP_ARM;
+#endif
     }
 
   fragP->fr_var = noop_size;
@@ -18345,6 +18441,9 @@ arm_handle_align (fragS * fragP)
   if (bytes & (noop_size - 1))
     {
       fix = bytes & (noop_size - 1);
+#ifdef OBJ_ELF
+      insert_data_mapping_symbol (state, fragP->fr_fix, fragP, fix);
+#endif
       memset (p, 0, fix);
       p += fix;
       bytes -= fix;
@@ -18412,22 +18511,47 @@ arm_frag_align_code (int n, int max)
    and used a long time before its type is set, so beware of assuming that
    this initialisationis performed first.  */
 
+#ifndef OBJ_ELF
 void
-arm_init_frag (fragS * fragP)
+arm_init_frag (fragS * fragP, int max_chars ATTRIBUTE_UNUSED)
+{
+  /* Record whether this frag is in an ARM or a THUMB area.  */
+  fragP->tc_frag_data.thumb_mode = thumb_mode;
+}
+
+#else /* OBJ_ELF is defined.  */
+void
+arm_init_frag (fragS * fragP, int max_chars)
 {
   /* If the current ARM vs THUMB mode has not already
      been recorded into this frag then do so now.  */
-  if ((fragP->tc_frag_data & MODE_RECORDED) == 0)
-    fragP->tc_frag_data = thumb_mode | MODE_RECORDED;
+  if ((fragP->tc_frag_data.thumb_mode & MODE_RECORDED) == 0)
+    {
+      fragP->tc_frag_data.thumb_mode = thumb_mode | MODE_RECORDED;
+
+      /* Record a mapping symbol for alignment frags.  We will delete this
+	 later if the alignment ends up empty.  */
+      switch (fragP->fr_type)
+	{
+	  case rs_align:
+	  case rs_align_test:
+	  case rs_fill:
+	    mapping_state_2 (MAP_DATA, max_chars);
+	    break;
+	  case rs_align_code:
+	    mapping_state_2 (thumb_mode ? MAP_THUMB : MAP_ARM, max_chars);
+	    break;
+	  default:
+	    break;
+	}
+    }
 }
 
-#ifdef OBJ_ELF
 /* When we change sections we need to issue a new mapping symbol.  */
 
 void
 arm_elf_change_section (void)
 {
-  flagword flags;
   segment_info_type *seginfo;
 
   /* Link an unlinked unwind index table section to the .text section.	*/
@@ -18438,15 +18562,9 @@ arm_elf_change_section (void)
   if (!SEG_NORMAL (now_seg))
     return;
 
-  flags = bfd_get_section_flags (stdoutput, now_seg);
-
-  /* We can ignore sections that only contain debug info.  */
-  if ((flags & SEC_ALLOC) == 0)
-    return;
-
   seginfo = seg_info (now_seg);
-  mapstate = seginfo->tc_segment_info_data.mapstate;
   marked_pr_dependency = seginfo->tc_segment_info_data.marked_pr_dependency;
+  mapstate = seginfo->tc_segment_info_data.mapstate;
 }
 
 int
@@ -20985,6 +21103,73 @@ arm_cleanup (void)
     }
 }
 
+#ifdef OBJ_ELF
+/* Remove any excess mapping symbols generated for alignment frags in
+   SEC.  We may have created a mapping symbol before a zero byte
+   alignment; remove it if there's a mapping symbol after the
+   alignment.  */
+static void
+check_mapping_symbols (bfd *abfd ATTRIBUTE_UNUSED, asection *sec,
+		       void *dummy ATTRIBUTE_UNUSED)
+{
+  segment_info_type *seginfo = seg_info (sec);
+  fragS *fragp;
+
+  if (seginfo == NULL || seginfo->frchainP == NULL)
+    return;
+
+  for (fragp = seginfo->frchainP->frch_root;
+       fragp != NULL;
+       fragp = fragp->fr_next)
+    {
+      symbolS *sym = fragp->tc_frag_data.last_map;
+      fragS *next = fragp->fr_next;
+
+      /* Variable-sized frags have been converted to fixed size by
+	 this point.  But if this was variable-sized to start with,
+	 there will be a fixed-size frag after it.  So don't handle
+	 next == NULL.  */
+      if (sym == NULL || next == NULL)
+	continue;
+
+      if (S_GET_VALUE (sym) < next->fr_address)
+	/* Not at the end of this frag.  */
+	continue;
+      know (S_GET_VALUE (sym) == next->fr_address);
+
+      do
+	{
+	  if (next->tc_frag_data.first_map != NULL)
+	    {
+	      /* Next frag starts with a mapping symbol.  Discard this
+		 one.  */
+	      symbol_remove (sym, &symbol_rootP, &symbol_lastP);
+	      break;
+	    }
+
+	  if (next->fr_next == NULL)
+	    {
+	      /* This mapping symbol is at the end of the section.  Discard
+		 it.  */
+	      know (next->fr_fix == 0 && next->fr_var == 0);
+	      symbol_remove (sym, &symbol_rootP, &symbol_lastP);
+	      break;
+	    }
+
+	  /* As long as we have empty frags without any mapping symbols,
+	     keep looking.  */
+	  /* If the next frag is non-empty and does not start with a
+	     mapping symbol, then this mapping symbol is required.  */
+	  if (next->fr_address != next->fr_next->fr_address)
+	    break;
+
+	  next = next->fr_next;
+	}
+      while (next != NULL);
+    }
+}
+#endif
+
 /* Adjust the symbol table.  This marks Thumb symbols as distinct from
    ARM ones.  */
 
@@ -21059,6 +21244,9 @@ arm_adjust_symtab (void)
 	    }
 	}
     }
+
+  /* Remove any overlapping mapping symbols generated by alignment frags.  */
+  bfd_map_over_sections (stdoutput, check_mapping_symbols, (char *) 0);
 #endif
 }
 

@@ -1737,6 +1737,9 @@ obj_elf_ident (int ignore ATTRIBUTE_UNUSED)
 			     SEC_READONLY | SEC_HAS_CONTENTS
 			     | SEC_MERGE | SEC_STRINGS);
       comment_section->entsize = 1;
+#ifdef md_elf_section_change_hook
+      md_elf_section_change_hook ();
+#endif
       p = frag_more (1);
       *p = 0;
     }

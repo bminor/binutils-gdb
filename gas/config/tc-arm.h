@@ -199,8 +199,21 @@ void arm_copy_symbol_attributes (symbolS *, symbolS *);
 /* For frags in code sections we need to record whether they contain
    ARM code or THUMB code.  This is that if they have to be aligned,
    they can contain the correct type of no-op instruction.  */
-#define TC_FRAG_TYPE		int
-#define TC_FRAG_INIT(fragp)	arm_init_frag (fragp)
+struct arm_frag_type
+{
+  int thumb_mode;
+#ifdef OBJ_ELF
+  /* If there is a mapping symbol at offset 0 in this frag,
+     it will be saved in FIRST_MAP.  If there are any mapping
+     symbols in this frag, the last one will be saved in
+     LAST_MAP.  */
+  symbolS *first_map, *last_map;
+#endif
+};
+
+#define TC_FRAG_TYPE		struct arm_frag_type
+/* NOTE: max_chars is a local variable from frag_var / frag_variant.  */
+#define TC_FRAG_INIT(fragp)	arm_init_frag (fragp, max_chars)
 #define HANDLE_ALIGN(fragp)	arm_handle_align (fragp)
 
 #define md_do_align(N, FILL, LEN, MAX, LABEL)					\
@@ -307,7 +320,7 @@ extern char * arm_canonicalize_symbol_name (char *);
 extern void arm_adjust_symtab (void);
 extern void armelf_frob_symbol (symbolS *, int *);
 extern void cons_fix_new_arm (fragS *, int, int, expressionS *);
-extern void arm_init_frag (struct frag *);
+extern void arm_init_frag (struct frag *, int);
 extern void arm_handle_align (struct frag *);
 extern bfd_boolean arm_fix_adjustable (struct fix *);
 extern int arm_elf_section_type (const char *, size_t);

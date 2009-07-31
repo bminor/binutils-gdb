@@ -1,3 +1,31 @@
+2009-07-31  Daniel Gutson  <dgutson@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* config/obj-elf.c (obj_elf_ident): Notify section change to the hook.
+	* config/tc-arm.c (make_mapping_symbol): New function, from
+	mapping_state.  Save mapping symbols in the frag.
+	(insert_data_mapping_symbol): New.
+	(mapping_state): Use make_mapping_symbol, improve state transitions.
+	(mapping_state_2): New.  Provide dummy definition.
+	(opcode_select): Do not call mapping_state.
+	(s_bss): Call md_elf_section_change_hook instead of mapping_state.
+	(output_inst): Update use of tc_frag_data.
+	(new_automatic_it_block): Call mapping_state before emitting the
+	IT instruction.
+	(md_assemble): Move mapping_state to just before outputting the
+	new instruction.
+	(arm_handle_align): Update use of tc_frag_data.
+	Call insert_data_mapping_symbol.
+	(arm_init_frag): Update use of tc_frag_data.  Call
+	mapping_state_2.
+	(arm_elf_change_section): Always update the mapping symbol FSM state.
+	(check_mapping_symbols): New function.
+	(arm_adjust_symtab): Use check_mapping_symbols.
+	* config/tc-arm.h (struct arm_frag_type): New.
+	(TC_FRAG_TYPE): Change to struct arm_frag_type.
+	(TC_FRAG_INIT): Pass max_chars.
+	(arm_init_frag): Update prototype.
+
 2009-07-31  Anthony Green  <green@moxielogic.com>
 
 	* configure.tgt (generic_target): Add moxie-uclinux support.

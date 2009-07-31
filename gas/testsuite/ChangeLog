@@ -1,3 +1,17 @@
+2009-07-15  Daniel Gutson  <dgutson@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gas/arm/mapdir.d, gas/arm/mapdir.s: New files.
+	* gas/arm/mapping.d: Adapted to new symbols generation.
+	* gas/arm/mapping2.d: New test case.
+	* gas/arm/mapping2.s: New file.
+	* gas/arm/mapping3.d: New test case.
+	* gas/arm/mapping3.s: New file.
+	* gas/arm/mapping4.d: New test case.
+	* gas/arm/mapping4.s: New file.
+	* gas/arm/mapshort-eabi.d: Adapted to new symbols generation.
+	* gas/elf/section2.e-armeabi: Adapted to new symbols generation.
+
 2009-07-27  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/elf/file.[ds]: New.
