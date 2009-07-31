@@ -1,5 +1,12 @@
 2009-07-31  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* linux-ppc-low.c (INSTR_SC, NR_spu_run): Define.
+	(parse_spufs_run): New function.
+	(ppc_get_pc, ppc_set_pc): Detect and handle SPU PC.
+	(ppc_breakpoint_at): Handle SPU breakpoints.
+
+2009-07-31  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* linux-low.c: Include <sys/stat.h> and <sys/vfs.h>.
 	(SPUFS_MAGIC): Define.
 	(spu_enumerate_spu_ids): New function.

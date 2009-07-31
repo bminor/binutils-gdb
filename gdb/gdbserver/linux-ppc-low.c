@@ -191,10 +191,72 @@ ppc_supply_ptrace_register (int regno, const char *buf)
     supply_register (regno, buf);
 }
 
+
+#define INSTR_SC        0x44000002
+#define NR_spu_run      0x0116
+
+/* If the PPU thread is currently stopped on a spu_run system call,
+   return to FD and ADDR the file handle and NPC parameter address
+   used with the system call.  Return non-zero if successful.  */
+static int
+parse_spufs_run (int *fd, CORE_ADDR *addr)
+{
+  CORE_ADDR curr_pc;
+  int curr_insn;
+  int curr_r0;
+
+  if (register_size (0) == 4)
+    {
+      unsigned int pc, r0, r3, r4;
+      collect_register_by_name ("pc", &pc);
+      collect_register_by_name ("r0", &r0);
+      collect_register_by_name ("orig_r3", &r3);
+      collect_register_by_name ("r4", &r4);
+      curr_pc = (CORE_ADDR) pc;
+      curr_r0 = (int) r0;
+      *fd = (int) r3;
+      *addr = (CORE_ADDR) r4;
+    }
+  else
+    {
+      unsigned long pc, r0, r3, r4;
+      collect_register_by_name ("pc", &pc);
+      collect_register_by_name ("r0", &r0);
+      collect_register_by_name ("orig_r3", &r3);
+      collect_register_by_name ("r4", &r4);
+      curr_pc = (CORE_ADDR) pc;
+      curr_r0 = (int) r0;
+      *fd = (int) r3;
+      *addr = (CORE_ADDR) r4;
+    }
+
+  /* Fetch instruction preceding current NIP.  */
+  if ((*the_target->read_memory) (curr_pc - 4,
+				  (unsigned char *) &curr_insn, 4) != 0)
+    return 0;
+  /* It should be a "sc" instruction.  */
+  if (curr_insn != INSTR_SC)
+    return 0;
+  /* System call number should be NR_spu_run.  */
+  if (curr_r0 != NR_spu_run)
+    return 0;
+
+  return 1;
+}
+
 static CORE_ADDR
 ppc_get_pc (void)
 {
-  if (register_size (0) == 4)
+  CORE_ADDR addr;
+  int fd;
+
+  if (parse_spufs_run (&fd, &addr))
+    {
+      unsigned int pc;
+      (*the_target->read_memory) (addr, (unsigned char *) &pc, 4);
+      return ((CORE_ADDR)1 << 63) | ((CORE_ADDR)fd << 32) | (CORE_ADDR) (pc - 4);
+    }
+  else if (register_size (0) == 4)
     {
       unsigned int pc;
       collect_register_by_name ("pc", &pc);
@@ -211,7 +273,15 @@ ppc_get_pc (void)
 static void
 ppc_set_pc (CORE_ADDR pc)
 {
-  if (register_size (0) == 4)
+  CORE_ADDR addr;
+  int fd;
+
+  if (parse_spufs_run (&fd, &addr))
+    {
+      unsigned int newpc = pc;
+      (*the_target->write_memory) (addr, (unsigned char *) &newpc, 4);
+    }
+  else if (register_size (0) == 4)
     {
       unsigned int newpc = pc;
       supply_register_by_name ("pc", &newpc);
@@ -355,11 +425,24 @@ ppc_breakpoint_at (CORE_ADDR where)
 {
   unsigned int insn;
 
-  (*the_target->read_memory) (where, (unsigned char *) &insn, 4);
-  if (insn == ppc_breakpoint)
-    return 1;
-  /* If necessary, recognize more trap instructions here.  GDB only uses the
-     one.  */
+  if (where & ((CORE_ADDR)1 << 63))
+    {
+      char mem_annex[32];
+      sprintf (mem_annex, "%d/mem", (int)((where >> 32) & 0x7fffffff));
+      (*the_target->qxfer_spu) (mem_annex, (unsigned char *) &insn,
+				NULL, where & 0xffffffff, 4);
+      if (insn == 0x3fff)
+	return 1;
+    }
+  else
+    {
+      (*the_target->read_memory) (where, (unsigned char *) &insn, 4);
+      if (insn == ppc_breakpoint)
+	return 1;
+      /* If necessary, recognize more trap instructions here.  GDB only uses
+	 the one.  */
+    }
+
   return 0;
 }
 
