@@ -54,6 +54,11 @@
 #include "gdb_dirent.h"
 #include "xml-support.h"
 #include "terminal.h"
+#include <sys/vfs.h>
+
+#ifndef SPUFS_MAGIC
+#define SPUFS_MAGIC 0x23c9b64e
+#endif
 
 #ifdef HAVE_PERSONALITY
 # include <sys/personality.h>
@@ -3661,6 +3666,119 @@ linux_nat_corefile_thread_callback (struct lwp_info *ti, void *data)
   return 0;
 }
 
+/* Enumerate spufs IDs for process PID.  */
+
+static void
+iterate_over_spus (int pid, void (*callback) (void *, int), void *data)
+{
+  char path[128];
+  DIR *dir;
+  struct dirent *entry;
+
+  xsnprintf (path, sizeof path, "/proc/%d/fd", pid);
+  dir = opendir (path);
+  if (!dir)
+    return;
+
+  rewinddir (dir);
+  while ((entry = readdir (dir)) != NULL)
+    {
+      struct stat st;
+      struct statfs stfs;
+      int fd;
+
+      fd = atoi (entry->d_name);
+      if (!fd)
+	continue;
+
+      xsnprintf (path, sizeof path, "/proc/%d/fd/%d", pid, fd);
+      if (stat (path, &st) != 0)
+	continue;
+      if (!S_ISDIR (st.st_mode))
+	continue;
+
+      if (statfs (path, &stfs) != 0)
+	continue;
+      if (stfs.f_type != SPUFS_MAGIC)
+	continue;
+
+      callback (data, fd);
+    }
+
+  closedir (dir);
+}
+
+/* Generate corefile notes for SPU contexts.  */
+
+struct linux_spu_corefile_data
+{
+  bfd *obfd;
+  char *note_data;
+  int *note_size;
+};
+
+static void
+linux_spu_corefile_callback (void *data, int fd)
+{
+  struct linux_spu_corefile_data *args = data;
+  int i;
+
+  static const char *spu_files[] =
+    {
+      "object-id",
+      "mem",
+      "regs",
+      "fpcr",
+      "lslr",
+      "decr",
+      "decr_status",
+      "signal1",
+      "signal1_type",
+      "signal2",
+      "signal2_type",
+      "event_mask",
+      "event_status",
+      "mbox_info",
+      "ibox_info",
+      "wbox_info",
+      "dma_info",
+      "proxydma_info",
+   };
+
+  for (i = 0; i < sizeof (spu_files) / sizeof (spu_files[0]); i++)
+    {
+      char annex[32], note_name[32];
+      gdb_byte *spu_data;
+      LONGEST spu_len;
+
+      xsnprintf (annex, sizeof annex, "%d/%s", fd, spu_files[i]);
+      spu_len = target_read_alloc (&current_target, TARGET_OBJECT_SPU,
+				   annex, &spu_data);
+      if (spu_len > 0)
+	{
+	  xsnprintf (note_name, sizeof note_name, "SPU/%s", annex);
+	  args->note_data = elfcore_write_note (args->obfd, args->note_data,
+						args->note_size, note_name,
+						NT_SPU, spu_data, spu_len);
+	  xfree (spu_data);
+	}
+    }
+}
+
+static char *
+linux_spu_make_corefile_notes (bfd *obfd, char *note_data, int *note_size)
+{
+  struct linux_spu_corefile_data args;
+  args.obfd = obfd;
+  args.note_data = note_data;
+  args.note_size = note_size;
+
+  iterate_over_spus (PIDGET (inferior_ptid),
+		     linux_spu_corefile_callback, &args);
+
+  return args.note_data;
+}
+
 /* Fills the "to_make_corefile_note" target vector.  Builds the note
    section for a corefile, and returns it in a malloc buffer.  */
 
@@ -3721,6 +3839,8 @@ linux_nat_make_corefile_notes (bfd *obfd, int *note_size)
 				      "CORE", NT_AUXV, auxv, auxv_len);
       xfree (auxv);
     }
+
+  note_data = linux_spu_make_corefile_notes (obfd, note_data, note_size);
 
   make_cleanup (xfree, note_data);
   return note_data;
@@ -4055,6 +4175,100 @@ linux_proc_xfer_partial (struct target_ops *ops, enum target_object object,
   return ret;
 }
 
+
+/* Enumerate spufs IDs for process PID.  */
+static LONGEST
+spu_enumerate_spu_ids (int pid, gdb_byte *buf, ULONGEST offset, LONGEST len)
+{
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  LONGEST pos = 0;
+  LONGEST written = 0;
+  char path[128];
+  DIR *dir;
+  struct dirent *entry;
+
+  xsnprintf (path, sizeof path, "/proc/%d/fd", pid);
+  dir = opendir (path);
+  if (!dir)
+    return -1;
+
+  rewinddir (dir);
+  while ((entry = readdir (dir)) != NULL)
+    {
+      struct stat st;
+      struct statfs stfs;
+      int fd;
+
+      fd = atoi (entry->d_name);
+      if (!fd)
+	continue;
+
+      xsnprintf (path, sizeof path, "/proc/%d/fd/%d", pid, fd);
+      if (stat (path, &st) != 0)
+	continue;
+      if (!S_ISDIR (st.st_mode))
+	continue;
+
+      if (statfs (path, &stfs) != 0)
+	continue;
+      if (stfs.f_type != SPUFS_MAGIC)
+	continue;
+
+      if (pos >= offset && pos + 4 <= offset + len)
+	{
+	  store_unsigned_integer (buf + pos - offset, 4, byte_order, fd);
+	  written += 4;
+	}
+      pos += 4;
+    }
+
+  closedir (dir);
+  return written;
+}
+
+/* Implement the to_xfer_partial interface for the TARGET_OBJECT_SPU
+   object type, using the /proc file system.  */
+static LONGEST
+linux_proc_xfer_spu (struct target_ops *ops, enum target_object object,
+		     const char *annex, gdb_byte *readbuf,
+		     const gdb_byte *writebuf,
+		     ULONGEST offset, LONGEST len)
+{
+  char buf[128];
+  int fd = 0;
+  int ret = -1;
+  int pid = PIDGET (inferior_ptid);
+
+  if (!annex)
+    {
+      if (!readbuf)
+	return -1;
+      else
+	return spu_enumerate_spu_ids (pid, readbuf, offset, len);
+    }
+
+  xsnprintf (buf, sizeof buf, "/proc/%d/fd/%s", pid, annex);
+  fd = open (buf, writebuf? O_WRONLY : O_RDONLY);
+  if (fd <= 0)
+    return -1;
+
+  if (offset != 0
+      && lseek (fd, (off_t) offset, SEEK_SET) != (off_t) offset)
+    {
+      close (fd);
+      return 0;
+    }
+
+  if (writebuf)
+    ret = write (fd, writebuf, (size_t) len);
+  else if (readbuf)
+    ret = read (fd, readbuf, (size_t) len);
+
+  close (fd);
+  return ret;
+}
+
+
 /* Parse LINE as a signal set and add its set bits to SIGS.  */
 
 static void
@@ -4259,6 +4473,10 @@ linux_xfer_partial (struct target_ops *ops, enum target_object object,
   if (object == TARGET_OBJECT_OSDATA)
     return linux_nat_xfer_osdata (ops, object, annex, readbuf, writebuf,
                                offset, len);
+
+  if (object == TARGET_OBJECT_SPU)
+    return linux_proc_xfer_spu (ops, object, annex, readbuf, writebuf,
+				offset, len);
 
   /* GDB calculates all the addresses in possibly larget width of the address.
      Address width needs to be masked before its final use - either by

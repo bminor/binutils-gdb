@@ -1,5 +1,23 @@
 2009-07-31  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* linux-nat.c: Include <sys/vfs.h>.
+	(SPUFS_MAGIC): Define.
+	(spu_enumerate_spu_ids): New function.
+	(linux_proc_xfer_spu): New function.
+	(linux_xfer_partial): Handle TARGET_OBJECT_SPU.
+
+	(iterate_over_spus): New function.
+	(struct linux_spu_corefile_data): New data type.
+	(linux_spu_corefile_callback): New function.
+	(linux_spu_make_corefile_notes): New function.
+	(linux_nat_make_corefile_notes): Call it.
+
+	* corelow.c (struct spuid_list): New data type.
+	(add_to_spuid_list): New function.
+	(core_xfer_partial): Handle TARGET_OBJECT_SPU.
+
+2009-07-31  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* features/Makefile: Allow sub-platform specific expedite settings.
 	(WHICH): Add rs6000/powerpc-cell32l and rs6000/powerpc-cell64l.
 	(rs6000/powerpc-cell32l-expedite): Define.
