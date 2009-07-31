@@ -132,8 +132,8 @@ static char *myname;
 static SIM_OPEN_KIND sim_kind;
 static int issue_messages = 0;
 
-/* Default to a 8 Mbyte (== 2^23) memory space.  */
-static int sim_memory_size = 23;
+/* Default to a 16 Mbyte (== 2^23) memory space.  */
+static int sim_memory_size = 24;
 
 #define	MEM_SIZE_FLOOR	64
 void
@@ -997,12 +997,8 @@ sim_resume (sd, step, siggnal)
 		    {
 		      char *fname = &memory[cpu.asregs.regs[2]];
 		      int mode = (int) convert_target_flags ((unsigned) cpu.asregs.regs[3]);
-		      /* Permission bits are at 0x12($fp) */
-		      int perm = (int) EXTRACT_WORD(&memory[cpu.asregs.regs[0] + 20]);
+		      int perm = (int) cpu.asregs.regs[4];
 		      int fd = open (fname, mode, perm);
-#if 0
-		      fprintf(stderr, "open(\"%s\", 0x%x, 0x%x) = %d\n", fname, mode, perm, fd);
-#endif
 		      /* FIXME - set errno */
 		      cpu.asregs.regs[2] = fd;
 		      break;
@@ -1011,8 +1007,7 @@ sim_resume (sd, step, siggnal)
 		    {
 		      int fd = cpu.asregs.regs[2];
 		      char *buf = &memory[cpu.asregs.regs[3]];
-		      /* String length is at 0x12($fp) */
-		      unsigned len = EXTRACT_WORD(&memory[cpu.asregs.regs[0] + 20]);
+		      unsigned len = (unsigned) cpu.asregs.regs[4];
 		      cpu.asregs.regs[2] = read (fd, buf, len);
 		      break;
 		    }
@@ -1020,10 +1015,32 @@ sim_resume (sd, step, siggnal)
 		    {
 		      char *str = &memory[cpu.asregs.regs[3]];
 		      /* String length is at 0x12($fp) */
-		      unsigned count, len = EXTRACT_WORD(&memory[cpu.asregs.regs[0] + 20]);
+		      unsigned count, len = (unsigned) cpu.asregs.regs[4];
 		      count = write (cpu.asregs.regs[2], str, len);
 		      cpu.asregs.regs[2] = count;
 		      break;
+		    }
+		  case 0xffffffff: /* Linux System Call */
+		    {
+		      unsigned int handler = cpu.asregs.sregs[1];
+		      unsigned int sp = cpu.asregs.regs[1];
+		      cpu.asregs.sregs[2] = 3; /* MOXIE_EX_SWI */
+
+		      /* Save a slot for the static chain.  */
+		      sp -= 4;
+
+		      /* Push the return address.  */
+		      sp -= 4;
+		      wlat (opc, sp, pc + 6);
+		
+		      /* Push the current frame pointer.  */
+		      sp -= 4;
+		      wlat (opc, sp, cpu.asregs.regs[0]);
+
+		      /* Uncache the stack pointer and set the fp & pc.  */
+		      cpu.asregs.regs[1] = sp;
+		      cpu.asregs.regs[0] = sp;
+		      pc = handler - 6;
 		    }
 		  default:
 		    break;

@@ -1,3 +1,14 @@
+2009-07-31  Anthony Green  <green@moxielogic.com>
+
+	* interp.c: Increase simulated memory to 16MB.
+	(sim_resume): Tweak swi system calls to support new ABI (up to 5
+	args in regs).  Also simluate proper exception processing for
+	Linux system calls.
+
+2009-07-30  Anthony Green  <green@moxielogic.com>
+
+	* interp.c (sim_resume): Add system call software interrupt support.
+
 2009-06-11  Anthony Green  <green@moxielogic.com>
 
 	* interp.c (INST2OFFSET): Define.
