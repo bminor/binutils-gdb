@@ -3149,10 +3149,16 @@ fix_syms (struct bfd_link_hash_entry *h, void *data)
 	  else if (op == NULL)
 	    op = op1;
 	  else if (((op1->flags ^ op->flags)
-		    & (SEC_ALLOC | SEC_THREAD_LOCAL)) != 0)
+		    & (SEC_ALLOC | SEC_THREAD_LOCAL | SEC_LOAD)) != 0)
 	    {
 	      if (((op->flags ^ s->flags)
-		   & (SEC_ALLOC | SEC_THREAD_LOCAL)) != 0)
+		   & (SEC_ALLOC | SEC_THREAD_LOCAL)) != 0
+		  /* We prefer to choose a loaded section.  Section S
+		     doesn't have SEC_LOAD set (it being excluded, that
+		     part of the flag processing didn't happen) so we
+		     can't compare that flag to those of OP and OP1.  */
+		  || ((op1->flags & SEC_LOAD) != 0
+		      && (op->flags & SEC_LOAD) == 0))
 		op = op1;
 	    }
 	  else if (((op1->flags ^ op->flags) & SEC_READONLY) != 0)
