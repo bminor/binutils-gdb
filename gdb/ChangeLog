@@ -1,3 +1,19 @@
+2009-07-31  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* breakpoint.h (enum enable_state): Add bp_startup_disabled.
+	(disable_breakpoints_before_startup): Add prototype.
+	(enable_breakpoints_after_startup): Likewise.
+
+	* breakpoint.c (executing_startup): New static variable.
+	(describe_other_breakpoints): Handle bp_startup_disabled.
+	(check_duplicates_for): Likewise.
+	(disable_breakpoints_before_startup): New function.
+	(enable_breakpoints_after_startup): New function.
+	(create_breakpoint): Mark new breakpoints as bp_startup_disabled
+	if executing_startup flag is true.
+	(break_command_really): Likewise.
+	(breakpoint_re_set_one): Skip bp_startup_disabled breakpoints.
+
 2009-07-31  Julian Brown  <julian@codesourcery.com>
 
 	* arm-linux-tdep.c (arch-utils.h, inferior.h, gdbthread.h, symfile.h):

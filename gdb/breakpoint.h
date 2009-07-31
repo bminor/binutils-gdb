@@ -135,6 +135,12 @@ enum enable_state
 			   automatically enabled and reset when the call 
 			   "lands" (either completes, or stops at another 
 			   eventpoint). */
+    bp_startup_disabled,/* The eventpoint has been disabled during inferior
+			   startup.  This is necessary on some targets where
+			   the main executable will get relocated during
+			   startup, making breakpoint addresses invalid.
+			   The eventpoint will be automatically enabled and
+			   reset once inferior startup is complete.  */
     bp_permanent	/* There is a breakpoint instruction hard-wired into
 			   the target's code.  Don't try to write another
 			   breakpoint instruction on top of it, or restore
@@ -809,6 +815,19 @@ extern void disable_overlay_breakpoints (void);
 extern void disable_watchpoints_before_interactive_call_start (void);
 
 extern void enable_watchpoints_after_interactive_call_stop (void);
+
+/* These functions disable and re-enable all breakpoints during
+   inferior startup.  They are intended to be called from solib
+   code where necessary.  This is needed on platforms where the
+   main executable is relocated at some point during startup
+   processing, making breakpoint addresses invalid.
+
+   If additional breakpoints are created after the routine
+   disable_breakpoints_before_startup but before the routine
+   enable_breakpoints_after_startup was called, they will also
+   be marked as disabled.  */
+extern void disable_breakpoints_before_startup (void);
+extern void enable_breakpoints_after_startup (void);
 
 /* For script interpreters that need to define breakpoint commands
    after they've already read the commands into a struct command_line.  */
