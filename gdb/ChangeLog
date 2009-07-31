@@ -1,5 +1,34 @@
 2009-07-31  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* features/Makefile: Allow sub-platform specific expedite settings.
+	(WHICH): Add rs6000/powerpc-cell32l and rs6000/powerpc-cell64l.
+	(rs6000/powerpc-cell32l-expedite): Define.
+	(rs6000/powerpc-cell64l-expedite): Likewise.
+	* features/rs6000/powerpc-cell32l.xml: New file.
+	* features/rs6000/powerpc-cell64l.xml: New file.
+	* features/rs6000/powerpc-cell32l.c: New generated file.
+	* features/rs6000/powerpc-cell64l.c: New generated file.
+
+	* regformats/rs6000/powerpc-cell32l.dat: New generated file.
+	* regformats/rs6000/powerpc-cell64l.dat: New generated file.
+
+	* config/djgpp/fnchange.lst: Add mappings for new files.
+
+	* ppc-linux-tdep.h (tdesc_powerpc_cell32l): Add prototype.
+	(tdesc_powerpc_cell64l): Likewise.
+	* ppc-linux-tdep.c: Include "features/rs6000/powerpc-cell32l.c"
+	and "features/rs6000/powerpc-cell64l.c".
+	(_initialize_ppc_linux_tdep): Initialize target descriptions.
+	(ppc_linux_spu_section): New function.
+	(ppc_linux_core_read_description): Detect Cell/B.E. core files.
+	* ppc-linux-nat.c (PPC_FEATURE_CELL): Define.
+	(ppc_linux_read_description): Detect Cell/B.E. architecture.
+
+	* rs6000-tdep.c (rs6000_gdbarch_init): Do not trust BFD wordsize
+	if exec file is not PowerPC architecture.
+
+2009-07-31  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* features/gdb-target.dtd (target): Accept optional
 	<compatible> elements.
 	(compatible): Define element.

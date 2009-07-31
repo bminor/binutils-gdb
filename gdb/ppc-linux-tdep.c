@@ -41,12 +41,14 @@
 
 #include "features/rs6000/powerpc-32l.c"
 #include "features/rs6000/powerpc-altivec32l.c"
+#include "features/rs6000/powerpc-cell32l.c"
 #include "features/rs6000/powerpc-vsx32l.c"
 #include "features/rs6000/powerpc-isa205-32l.c"
 #include "features/rs6000/powerpc-isa205-altivec32l.c"
 #include "features/rs6000/powerpc-isa205-vsx32l.c"
 #include "features/rs6000/powerpc-64l.c"
 #include "features/rs6000/powerpc-altivec64l.c"
+#include "features/rs6000/powerpc-cell64l.c"
 #include "features/rs6000/powerpc-vsx64l.c"
 #include "features/rs6000/powerpc-isa205-64l.c"
 #include "features/rs6000/powerpc-isa205-altivec64l.c"
@@ -1034,11 +1036,18 @@ ppc_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
     regcache_cooked_write_unsigned (regcache, PPC_TRAP_REGNUM, -1);
 }
 
+static int
+ppc_linux_spu_section (bfd *abfd, asection *asect, void *user_data)
+{
+  return strncmp (bfd_section_name (abfd, asect), "SPU/", 4) == 0;
+}
+
 static const struct target_desc *
 ppc_linux_core_read_description (struct gdbarch *gdbarch,
 				 struct target_ops *target,
 				 bfd *abfd)
 {
+  asection *cell = bfd_sections_find_if (abfd, ppc_linux_spu_section, NULL);
   asection *altivec = bfd_get_section_by_name (abfd, ".reg-ppc-vmx");
   asection *vsx = bfd_get_section_by_name (abfd, ".reg-ppc-vsx");
   asection *section = bfd_get_section_by_name (abfd, ".reg");
@@ -1048,7 +1057,9 @@ ppc_linux_core_read_description (struct gdbarch *gdbarch,
   switch (bfd_section_size (abfd, section))
     {
     case 48 * 4:
-      if (vsx)
+      if (cell)
+	return tdesc_powerpc_cell32l;
+      else if (vsx)
 	return tdesc_powerpc_vsx32l;
       else if (altivec)
 	return tdesc_powerpc_altivec32l;
@@ -1056,7 +1067,9 @@ ppc_linux_core_read_description (struct gdbarch *gdbarch,
 	return tdesc_powerpc_32l;
 
     case 48 * 8:
-      if (vsx)
+      if (cell)
+	return tdesc_powerpc_cell64l;
+      else if (vsx)
 	return tdesc_powerpc_vsx64l;
       else if (altivec)
 	return tdesc_powerpc_altivec64l;
@@ -1196,12 +1209,14 @@ _initialize_ppc_linux_tdep (void)
   /* Initialize the Linux target descriptions.  */
   initialize_tdesc_powerpc_32l ();
   initialize_tdesc_powerpc_altivec32l ();
+  initialize_tdesc_powerpc_cell32l ();
   initialize_tdesc_powerpc_vsx32l ();
   initialize_tdesc_powerpc_isa205_32l ();
   initialize_tdesc_powerpc_isa205_altivec32l ();
   initialize_tdesc_powerpc_isa205_vsx32l ();
   initialize_tdesc_powerpc_64l ();
   initialize_tdesc_powerpc_altivec64l ();
+  initialize_tdesc_powerpc_cell64l ();
   initialize_tdesc_powerpc_vsx64l ();
   initialize_tdesc_powerpc_isa205_64l ();
   initialize_tdesc_powerpc_isa205_altivec64l ();

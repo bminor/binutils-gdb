@@ -60,6 +60,9 @@
    If they aren't, we can provide them ourselves (their values are fixed
    because they are part of the kernel ABI).  They are used in the AT_HWCAP
    entry of the AUXV.  */
+#ifndef PPC_FEATURE_CELL
+#define PPC_FEATURE_CELL 0x00010000
+#endif
 #ifndef PPC_FEATURE_BOOKE
 #define PPC_FEATURE_BOOKE 0x00008000
 #endif
@@ -1547,6 +1550,7 @@ ppc_linux_read_description (struct target_ops *ops)
   int altivec = 0;
   int vsx = 0;
   int isa205 = 0;
+  int cell = 0;
 
   int tid = TIDGET (inferior_ptid);
   if (tid == 0)
@@ -1600,9 +1604,14 @@ ppc_linux_read_description (struct target_ops *ops)
   if (ppc_linux_get_hwcap () & PPC_FEATURE_HAS_DFP)
     isa205 = 1;
 
+  if (ppc_linux_get_hwcap () & PPC_FEATURE_CELL)
+    cell = 1;
+
   if (ppc_linux_target_wordsize () == 8)
     {
-      if (vsx)
+      if (cell)
+	return tdesc_powerpc_cell64l;
+      else if (vsx)
 	return isa205? tdesc_powerpc_isa205_vsx64l : tdesc_powerpc_vsx64l;
       else if (altivec)
 	return isa205? tdesc_powerpc_isa205_altivec64l : tdesc_powerpc_altivec64l;
@@ -1610,7 +1619,9 @@ ppc_linux_read_description (struct target_ops *ops)
       return isa205? tdesc_powerpc_isa205_64l : tdesc_powerpc_64l;
     }
 
-  if (vsx)
+  if (cell)
+    return tdesc_powerpc_cell32l;
+  else if (vsx)
     return isa205? tdesc_powerpc_isa205_vsx32l : tdesc_powerpc_vsx32l;
   else if (altivec)
     return isa205? tdesc_powerpc_isa205_altivec32l : tdesc_powerpc_altivec32l;

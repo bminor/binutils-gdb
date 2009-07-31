@@ -28,6 +28,7 @@
 #define PPC_FEATURE_HAS_VSX		0x00000080
 #define PPC_FEATURE_HAS_ALTIVEC         0x10000000
 #define PPC_FEATURE_HAS_SPE             0x00800000
+#define PPC_FEATURE_CELL                0x00010000
 #define PPC_FEATURE_HAS_DFP             0x00000400
 
 static unsigned long ppc_hwcap;
@@ -37,6 +38,8 @@ static unsigned long ppc_hwcap;
 void init_registers_powerpc_32l (void);
 /* Defined in auto-generated file powerpc-altivec32l.c.  */
 void init_registers_powerpc_altivec32l (void);
+/* Defined in auto-generated file powerpc-cell32l.c.  */
+void init_registers_powerpc_cell32l (void);
 /* Defined in auto-generated file powerpc-vsx32l.c.  */
 void init_registers_powerpc_vsx32l (void);
 /* Defined in auto-generated file powerpc-isa205-32l.c.  */
@@ -51,6 +54,8 @@ void init_registers_powerpc_e500l (void);
 void init_registers_powerpc_64l (void);
 /* Defined in auto-generated file powerpc-altivec64l.c.  */
 void init_registers_powerpc_altivec64l (void);
+/* Defined in auto-generated file powerpc-cell64l.c.  */
+void init_registers_powerpc_cell64l (void);
 /* Defined in auto-generated file powerpc-vsx64l.c.  */
 void init_registers_powerpc_vsx64l (void);
 /* Defined in auto-generated file powerpc-isa205-64l.c.  */
@@ -272,7 +277,9 @@ ppc_arch_setup (void)
   if (msr < 0)
     {
       ppc_get_hwcap (&ppc_hwcap);
-      if (ppc_hwcap & PPC_FEATURE_HAS_VSX)
+      if (ppc_hwcap & PPC_FEATURE_CELL)
+	init_registers_powerpc_cell64l ();
+      else if (ppc_hwcap & PPC_FEATURE_HAS_VSX)
 	{
 	  /* Power ISA 2.05 (implemented by Power 6 and newer processors)
 	     increases the FPSCR from 32 bits to 64 bits. Even though Power 7
@@ -302,7 +309,9 @@ ppc_arch_setup (void)
   init_registers_powerpc_32l ();
 
   ppc_get_hwcap (&ppc_hwcap);
-  if (ppc_hwcap & PPC_FEATURE_HAS_VSX)
+  if (ppc_hwcap & PPC_FEATURE_CELL)
+    init_registers_powerpc_cell32l ();
+  else if (ppc_hwcap & PPC_FEATURE_HAS_VSX)
     {
       if (ppc_hwcap & PPC_FEATURE_HAS_DFP)
 	init_registers_powerpc_isa205_vsx32l ();

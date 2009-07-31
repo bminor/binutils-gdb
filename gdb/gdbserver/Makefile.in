@@ -210,8 +210,8 @@ clean:
 	rm -f arm-with-vfpv2.c arm-with-vfpv3.c arm-with-neon.c
 	rm -f mips-linux.c mips64-linux.c
 	rm -f powerpc-32l.c powerpc-64l.c powerpc-e500l.c
-	rm -f powerpc-altivec32l.c powerpc-vsx32l.c powerpc-altivec64l.c
-	rm -f powerpc-vsx64l.c
+	rm -f powerpc-altivec32l.c powerpc-cell32l.c powerpc-vsx32l.c
+	rm -f powerpc-altivec64l.c powerpc-cell64l.c powerpc-vsx64l.c
 	rm -f powerpc-isa205-32l.c powerpc-isa205-64l.c
 	rm -f powerpc-isa205-altivec32l.c powerpc-isa205-vsx32l.c powerpc-isa205-altivec64l.c
 	rm -f powerpc-isa205-vsx64l.c
@@ -371,6 +371,9 @@ powerpc-32l.c : $(srcdir)/../regformats/rs6000/powerpc-32l.dat $(regdat_sh)
 powerpc-altivec32l.o : powerpc-altivec32l.c $(regdef_h)
 powerpc-altivec32l.c : $(srcdir)/../regformats/rs6000/powerpc-altivec32l.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-altivec32l.dat powerpc-altivec32l.c
+powerpc-cell32l.o : powerpc-cell32l.c $(regdef_h)
+powerpc-cell32l.c : $(srcdir)/../regformats/rs6000/powerpc-cell32l.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-cell32l.dat powerpc-cell32l.c
 powerpc-vsx32l.o : powerpc-vsx32l.c $(regdef_h)
 powerpc-vsx32l.c : $(srcdir)/../regformats/rs6000/powerpc-vsx32l.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-vsx32l.dat powerpc-vsx32l.c
@@ -392,6 +395,9 @@ powerpc-64l.c : $(srcdir)/../regformats/rs6000/powerpc-64l.dat $(regdat_sh)
 powerpc-altivec64l.o : powerpc-altivec64l.c $(regdef_h)
 powerpc-altivec64l.c : $(srcdir)/../regformats/rs6000/powerpc-altivec64l.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-altivec64l.dat powerpc-altivec64l.c
+powerpc-cell64l.o : powerpc-cell64l.c $(regdef_h)
+powerpc-cell64l.c : $(srcdir)/../regformats/rs6000/powerpc-cell64l.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-cell64l.dat powerpc-cell64l.c
 powerpc-vsx64l.o : powerpc-vsx64l.c $(regdef_h)
 powerpc-vsx64l.c : $(srcdir)/../regformats/rs6000/powerpc-vsx64l.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-vsx64l.dat powerpc-vsx64l.c

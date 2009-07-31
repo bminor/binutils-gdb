@@ -1,3 +1,16 @@
+2009-07-31  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* configure.srv (powerpc*-*-linux*): Add powerpc-cell32l.o
+	and powerpc-cell64l.o to srv_regobj.  Add rs6000/powerpc-cell32l.xml
+	and rs6000/powerpc-cell64l.xml to srv_xmlfiles.
+	* Makefile.in (powerpc-cell32l.o, powerpc-cell32l.c): New rules.
+	(powerpc-cell64l.o, powerpc-cell64l.c): Likewise.
+	(clean): Handle powerpc-cell32l.c and powerpc-cell64l.c.
+	* linux-ppc-low.c (PPC_FEATURE_CELL): Define.
+	(init_registers_powerpc_cell32l): Add prototype.
+	(init_registers_powerpc_cell64l): Likewise.
+	(ppc_arch_setup): Detect Cell/B.E. architecture.
+
 2009-07-30  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.in (datarootdir): New variable.
