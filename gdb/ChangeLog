@@ -2,7 +2,11 @@
 
 	* remote.c (store_register_using_P): Call putpkt and getpkt
 	directly instead of calling remote_send.
-	(store_register_using_G): Ditto.
+	(store_registers_using_G): Ditto.
+	(fetch_register_using_p): Ditto.
+
+	* remote.c (store_register_using_P): Make error msg more verbose.
+	(store_registers_using_G): Ditto.
 	(fetch_register_using_p): Ditto.
 
 2009-07-31  Ulrich Weigand  <uweigand@de.ibm.com>

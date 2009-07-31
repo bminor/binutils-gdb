@@ -4885,8 +4885,10 @@ fetch_register_using_p (struct regcache *regcache, struct packet_reg *reg)
     case PACKET_UNKNOWN:
       return 0;
     case PACKET_ERROR:
-      error (_("Could not fetch register \"%s\""),
-	     gdbarch_register_name (get_regcache_arch (regcache), reg->regnum));
+      error (_("Could not fetch register \"%s\"; remote failure reply '%s'"),
+	     gdbarch_register_name (get_regcache_arch (regcache), 
+				    reg->regnum), 
+	     buf);
     }
 
   /* If this register is unfetchable, tell the regcache.  */
@@ -5151,8 +5153,8 @@ store_register_using_P (const struct regcache *regcache,
     case PACKET_OK:
       return 1;
     case PACKET_ERROR:
-      error (_("Could not write register \"%s\""),
-	     gdbarch_register_name (gdbarch, reg->regnum));
+      error (_("Could not write register \"%s\"; remote failure reply '%s'"),
+	     gdbarch_register_name (gdbarch, reg->regnum), rs->buf);
     case PACKET_UNKNOWN:
       return 0;
     default:
@@ -5195,7 +5197,8 @@ store_registers_using_G (const struct regcache *regcache)
   putpkt (rs->buf);
   getpkt (&rs->buf, &rs->buf_size, 0);
   if (packet_check_result (rs->buf) == PACKET_ERROR)
-    error (_("Could not write registers"));
+    error (_("Could not write registers; remote failure reply '%s'"), 
+	   rs->buf);
 }
 
 /* Store register REGNUM, or all registers if REGNUM == -1, from the contents
