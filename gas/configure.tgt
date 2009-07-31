@@ -149,7 +149,8 @@ case ${generic_target} in
   frv-*-*linux*)			fmt=elf em=linux;;
   frv-*-*)				fmt=elf ;;
 
-  moxie-*-*)                             fmt=elf ;;
+  moxie-*-uclinux)                      fmt=elf em=linux;;
+  moxie-*-*)                            fmt=elf ;;
 
   hppa-*-linux*)
     case ${cpu} in

@@ -1,3 +1,7 @@
+2009-07-31  Anthony Green  <green@moxielogic.com>
+
+	* configure.tgt (generic_target): Add moxie-uclinux support.
+
 2009-07-30  Nick Clifton  <nickc@redhat.com>
 
 	* doc/c-arm.texi (ARM-Instruction-Set): New node.  Documents the
