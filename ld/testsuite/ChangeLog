@@ -1,3 +1,9 @@
+2009-07-31  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-mmix/x.s, ld-mmix/y.s, ld-mmix/zeroeh.ld,
+	ld-mmix/zeroehelf.d, ld-mmix/zeroehmmo.d: Use .gcc_except_table,
+	not .eh_frame.
+
 2009-07-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/shared.exp: Comment out dl3b.
