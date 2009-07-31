@@ -1,5 +1,48 @@
 2009-07-31  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
+	* configure.ac: Run gdb.cell tests when appropriate.
+	* configure: Regenerate.
+	* lib/cell.exp: New file.
+	* gdb.cell: New directory.
+	* gdb.cell/configure.ac: New file.
+	* gdb.cell/configure: New file.
+	* gdb.cell/Makefile.in: New file.
+	* gdb.cell/arch.exp: New file.
+	* gdb.cell/break.c: New file.
+	* gdb.cell/break.exp: New file.
+	* gdb.cell/break-spu.c: New file.
+	* gdb.cell/bt.c: New file.
+	* gdb.cell/bt2-spu.c: New file.
+	* gdb.cell/bt-spu.c: New file.
+	* gdb.cell/bt.exp: New file.
+	* gdb.cell/coremaker.c: New file.
+	* gdb.cell/coremaker-spu.c: New file.
+	* gdb.cell/core.exp: New file.
+	* gdb.cell/gcore.exp: New file.
+	* gdb.cell/data.c: New file.
+	* gdb.cell/data.exp: New file.
+	* gdb.cell/data-spu.c: New file.
+	* gdb.cell/ea-cache.exp: New file.
+	* gdb.cell/ea-cache.c: New file.
+	* gdb.cell/ea-cache-spu.c: New file.
+	* gdb.cell/ea-standalone.c: New file.
+	* gdb.cell/ea-standalone.exp: New file.
+	* gdb.cell/ea-test.c: New file.
+	* gdb.cell/ea-test.exp: New file.
+	* gdb.cell/f-regs.exp: New file.
+	* gdb.cell/mem-access.c: New file.
+	* gdb.cell/mem-access.exp: New file.
+	* gdb.cell/mem-access-spu.c: New file.
+	* gdb.cell/ptype.exp: New file.
+	* gdb.cell/registers.exp: New file.
+	* gdb.cell/size.c: New file.
+	* gdb.cell/sizeof.exp: New file.
+	* gdb.cell/size-spu.c: New file.
+	* gdb.cell/solib.exp: New file.
+	* gdb.cell/solib-symbol.exp: New file.
+
+2009-07-31  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
 	* gdb.xml/tdesc-regs.exp: Skip for SPU targets.
 
 2009-07-28  Daniel Jacobowitz  <dan@codesourcery.com>

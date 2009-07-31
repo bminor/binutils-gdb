@@ -43,6 +43,23 @@ case $target in
     AC_CONFIG_SUBDIRS(gdb.hp) ;;
 esac
 
+# Add Cell/B.E. specific tests when appropriate.
+# We need support for both PowerPC and SPU targets configured in.
+case $target in
+  powerpc*-*-linux*)
+    have_spu_target=no
+    for targ in `echo $enable_targets | sed 's/,/ /g'`
+      do
+        case "${targ}" in
+          spu*|all) have_spu_target=yes ;;
+        esac
+      done
+    if test x$have_spu_target = xyes; then
+      AC_CONFIG_SUBDIRS(gdb.cell)
+    fi
+    ;;
+esac
+
 # With stabs.
 AC_ARG_WITH(stabs,
 [  --with-stabs            arrange to use stabs instead of host debug format],,
