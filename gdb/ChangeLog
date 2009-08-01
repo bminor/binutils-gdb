@@ -1,3 +1,10 @@
+2009-07-31  Kazu Hirata  <kazu@codesourcery.com>
+
+	* procfs.c (proc_set_current_signal): Populate mysinfo before
+	copying it to arg.
+	(proc_clear_current_signal): Likewise.
+	(proc_set_watchpoint): Populate pwatch before copying it to arg.
+
 2009-07-31  Michael Snyder  <msnyder@vmware.com>
 
 	* remote.c (store_register_using_P): Call putpkt and getpkt

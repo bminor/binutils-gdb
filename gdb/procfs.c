@@ -2505,7 +2505,7 @@ proc_set_current_signal (procinfo *pi, int signo)
     /* Use char array to avoid alignment issues.  */
     char sinfo[sizeof (gdb_siginfo_t)];
   } arg;
-  gdb_siginfo_t *mysinfo;
+  gdb_siginfo_t mysinfo;
   ptid_t wait_ptid;
   struct target_waitstatus wait_status;
 
@@ -2530,7 +2530,6 @@ proc_set_current_signal (procinfo *pi, int signo)
 #endif
 
   /* The pointer is just a type alias.  */
-  mysinfo = (gdb_siginfo_t *) &arg.sinfo;
   get_last_target_status (&wait_ptid, &wait_status);
   if (ptid_equal (wait_ptid, inferior_ptid)
       && wait_status.kind == TARGET_WAITKIND_STOPPED
@@ -2545,16 +2544,17 @@ proc_set_current_signal (procinfo *pi, int signo)
     /* Use the siginfo associated with the signal being
        redelivered.  */
 #ifdef NEW_PROC_API
-    memcpy (mysinfo, &pi->prstatus.pr_lwp.pr_info, sizeof (gdb_siginfo_t));
+    memcpy (arg.sinfo, &pi->prstatus.pr_lwp.pr_info, sizeof (gdb_siginfo_t));
 #else
-    memcpy (mysinfo, &pi->prstatus.pr_info, sizeof (gdb_siginfo_t));
+    memcpy (arg.sinfo, &pi->prstatus.pr_info, sizeof (gdb_siginfo_t));
 #endif
   else
     {
-      mysinfo->si_signo = signo;
-      mysinfo->si_code  = 0;
-      mysinfo->si_pid   = getpid ();       /* ?why? */
-      mysinfo->si_uid   = getuid ();       /* ?why? */
+      mysinfo.si_signo = signo;
+      mysinfo.si_code  = 0;
+      mysinfo.si_pid   = getpid ();       /* ?why? */
+      mysinfo.si_uid   = getuid ();       /* ?why? */
+      memcpy (arg.sinfo, &mysinfo, sizeof (gdb_siginfo_t));
     }
 
 #ifdef NEW_PROC_API
@@ -2597,16 +2597,16 @@ proc_clear_current_signal (procinfo *pi)
       /* Use char array to avoid alignment issues.  */
       char sinfo[sizeof (gdb_siginfo_t)];
     } arg;
-    gdb_siginfo_t *mysinfo;
+    gdb_siginfo_t mysinfo;
 
     arg.cmd = PCSSIG;
     /* The pointer is just a type alias.  */
-    mysinfo = (gdb_siginfo_t *) &arg.sinfo;
-    mysinfo->si_signo = 0;
-    mysinfo->si_code  = 0;
-    mysinfo->si_errno = 0;
-    mysinfo->si_pid   = getpid ();       /* ?why? */
-    mysinfo->si_uid   = getuid ();       /* ?why? */
+    mysinfo.si_signo = 0;
+    mysinfo.si_code  = 0;
+    mysinfo.si_errno = 0;
+    mysinfo.si_pid   = getpid ();       /* ?why? */
+    mysinfo.si_uid   = getuid ();       /* ?why? */
+    memcpy (arg.sinfo, &mysinfo, sizeof (gdb_siginfo_t));
 
     win = (write (pi->ctl_fd, (void *) &arg, sizeof (arg)) == sizeof (arg));
   }
@@ -2917,25 +2917,25 @@ proc_set_watchpoint (procinfo *pi, CORE_ADDR addr, int len, int wflags)
     procfs_ctl_t cmd;
     char watch[sizeof (prwatch_t)];
   } arg;
-  prwatch_t *pwatch;
+  prwatch_t pwatch;
 
-  pwatch            = (prwatch_t *) &arg.watch;
   /* NOTE: cagney/2003-02-01: Even more horrible hack.  Need to
      convert a target address into something that can be stored in a
      native data structure.  */
 #ifdef PCAGENT	/* Horrible hack: only defined on Solaris 2.6+ */
-  pwatch->pr_vaddr  = (uintptr_t) procfs_address_to_host_pointer (addr);
+  pwatch.pr_vaddr  = (uintptr_t) procfs_address_to_host_pointer (addr);
 #else
-  pwatch->pr_vaddr  = (caddr_t) procfs_address_to_host_pointer (addr);
+  pwatch.pr_vaddr  = (caddr_t) procfs_address_to_host_pointer (addr);
 #endif
-  pwatch->pr_size   = len;
-  pwatch->pr_wflags = wflags;
+  pwatch.pr_size   = len;
+  pwatch.pr_wflags = wflags;
 #if defined(NEW_PROC_API) && defined (PCWATCH)
   arg.cmd = PCWATCH;
+  memcpy (arg.watch, &pwatch, sizeof (prwatch_t));
   return (write (pi->ctl_fd, &arg, sizeof (arg)) == sizeof (arg));
 #else
 #if defined (PIOCSWATCH)
-  return (ioctl (pi->ctl_fd, PIOCSWATCH, pwatch) >= 0);
+  return (ioctl (pi->ctl_fd, PIOCSWATCH, &pwatch) >= 0);
 #else
   return 0;	/* Fail */
 #endif
