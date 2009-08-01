@@ -54,7 +54,8 @@ Instruction set avr31 is for the classic AVR core with exactly 128K program
 memory space (MCU types: atmega103, at43usb320).
 
 Instruction set avr35 is for classic AVR core plus MOVW, CALL, and JMP
-instructions (MCU types: attiny167, attiny327, at90usb82, at90usb162).
+instructions (MCU types: attiny167, attiny327, at90usb82, at90usb162, atmega8u2,
+atmega16u2, atmega32u2).
 
 Instruction set avr4 is for the enhanced AVR core with up to 8K program
 memory space (MCU types: atmega48, atmega48p,atmega8, atmega88, atmega88p,

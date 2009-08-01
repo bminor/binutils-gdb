@@ -1,3 +1,8 @@
+2009-08-01  Eric B. Weddington  <eric.weddington@atmel.com>
+
+	* config/tc-avr.c (mcu_types): Add atmega8u2, atmega16u2, atmega32u2.
+	* doc/c-avr.texi: Likewise.
+
 2009-07-31  Daniel Gutson  <dgutson@codesourcery.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 
