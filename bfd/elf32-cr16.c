@@ -1259,6 +1259,21 @@ cr16_elf_final_link_relocate (reloc_howto_type *howto,
                             | (bfd_get_32 (input_bfd, hit_data) & 0xf0ff));
 
               }
+            else if (r_type == R_CR16_NUM32)
+              {
+                 Rvalue1 = (bfd_get_32 (input_bfd, hit_data)); 
+
+                 /* Add or subtract the offset value */
+                 if (Rvalue1 & 0x80000000)
+                   Rvalue -= (~Rvalue1 + 1) & 0xffffffff;
+                 else
+                   Rvalue += Rvalue1;
+
+                /* Check for Ranga */
+                if (Rvalue > 0xffffffff)
+                  return bfd_reloc_overflow;
+              }
+
             bfd_put_32 (input_bfd, Rvalue, hit_data);
           }
         break;

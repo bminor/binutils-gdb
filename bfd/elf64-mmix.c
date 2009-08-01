@@ -2557,7 +2557,7 @@ mmix_dump_bpo_gregs (link_info, pf)
    when the last such reloc is done, an index-array is sorted according to
    the values and iterated over to produce register numbers (indexed by 0
    from the first allocated register number) and offsets for use in real
-   relocation.
+   relocation.  (N.B.: Relocatable runs are handled, not just punted.)
 
    PUSHJ stub accounting is also done here.
 
@@ -2589,10 +2589,6 @@ mmix_elf_relax_section (abfd, sec, link_info, again)
 
   /* Assume nothing changes.  */
   *again = FALSE;
-
-  if (link_info->relocatable)
-    (*link_info->callbacks->einfo)
-      (_("%P%F: --relax and -r may not be used together\n"));
 
   /* We don't have to do anything if this section does not have relocs, or
      if this is not a code section.  */

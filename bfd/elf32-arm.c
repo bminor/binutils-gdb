@@ -2724,6 +2724,7 @@ stub_hash_newfunc (struct bfd_hash_entry *entry,
       eh->stub_template_size = 0;
       eh->h = NULL;
       eh->id_sec = NULL;
+      eh->output_name = NULL;
     }
 
   return entry;
