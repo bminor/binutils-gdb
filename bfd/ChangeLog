@@ -1,3 +1,19 @@
+2009-08-02  H.J. Lu  <hongjiu.lu@intel.com>
+	    Jakub Jelinek  <jakub@redhat.com>
+
+	PR ld/6443
+	* elf32-i386.c (elf_i386_tls_transition): Check executable
+	instead of shared for TLS when building PIE.
+	(elf_i386_check_relocs): Likewise.
+	(elf_i386_allocate_dynrelocs): Likewise.
+	(elf_i386_relocate_section): Likewise.
+
+	* elf64-x86-64.c (elf64_x86_64_tls_transition): Check executable
+	instead of shared for TLS when building PIE.
+	(elf64_x86_64_check_relocs): Likewise.
+	(elf64_x86_64_allocate_dynrelocs): Likewise.
+	(elf64_x86_64_relocate_section): Likewise.
+
 2009-07-31  Anthony Green  <green@moxielogic.com>
 
 	* config.bfd (targ_cpu): Add moxie-uclinux support.

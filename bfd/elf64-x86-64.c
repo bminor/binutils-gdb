@@ -950,7 +950,7 @@ elf64_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
     case R_X86_64_GOTPC32_TLSDESC:
     case R_X86_64_TLSDESC_CALL:
     case R_X86_64_GOTTPOFF:
-      if (!info->shared)
+      if (info->executable)
 	{
 	  if (h == NULL)
 	    to_type = R_X86_64_TPOFF32;
@@ -965,7 +965,7 @@ elf64_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
 	{
 	  unsigned int new_to_type = to_type;
 
-	  if (!info->shared
+	  if (info->executable
 	      && h != NULL
 	      && h->dynindx == -1
 	      && tls_type == GOT_TLS_IE)
@@ -989,7 +989,7 @@ elf64_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
       break;
 
     case R_X86_64_TLSLD:
-      if (!info->shared)
+      if (info->executable)
 	to_type = R_X86_64_TPOFF32;
       break;
 
@@ -1248,7 +1248,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  break;
 
 	case R_X86_64_GOTTPOFF:
-	  if (info->shared)
+	  if (!info->executable)
 	    info->flags |= DF_STATIC_TLS;
 	  /* Fall through */
 
@@ -1942,7 +1942,7 @@ elf64_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   /* If R_X86_64_GOTTPOFF symbol is now local to the binary,
      make it a R_X86_64_TPOFF32 requiring no GOT entry.  */
   if (h->got.refcount > 0
-      && !info->shared
+      && info->executable
       && h->dynindx == -1
       && elf64_x86_64_hash_entry (h)->tls_type == GOT_TLS_IE)
     {
@@ -3632,7 +3632,7 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  break;
 
 	case R_X86_64_DTPOFF32:
-	  if (info->shared || (input_section->flags & SEC_CODE) == 0)
+	  if (!info->executable|| (input_section->flags & SEC_CODE) == 0)
 	    relocation -= elf64_x86_64_dtpoff_base (info);
 	  else
 	    relocation = elf64_x86_64_tpoff (info, relocation);

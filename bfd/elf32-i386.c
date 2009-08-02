@@ -1164,7 +1164,7 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
     case R_386_TLS_IE_32:
     case R_386_TLS_IE:
     case R_386_TLS_GOTIE:
-      if (!info->shared)
+      if (info->executable)
 	{
 	  if (h == NULL)
 	    to_type = R_386_TLS_LE_32;
@@ -1180,7 +1180,7 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
 	{
 	  unsigned int new_to_type = to_type;
 
-	  if (!info->shared
+	  if (info->executable
 	      && h != NULL
 	      && h->dynindx == -1
 	      && (tls_type & GOT_TLS_IE))
@@ -1206,7 +1206,7 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
       break;
 
     case R_386_TLS_LDM:
-      if (!info->shared)
+      if (info->executable)
 	to_type = R_386_TLS_LE_32;
       break;
 
@@ -1460,7 +1460,7 @@ elf_i386_check_relocs (bfd *abfd,
 	case R_386_TLS_IE_32:
 	case R_386_TLS_IE:
 	case R_386_TLS_GOTIE:
-	  if (info->shared)
+	  if (!info->executable)
 	    info->flags |= DF_STATIC_TLS;
 	  /* Fall through */
 
@@ -1578,7 +1578,7 @@ elf_i386_check_relocs (bfd *abfd,
 
 	case R_386_TLS_LE_32:
 	case R_386_TLS_LE:
-	  if (!info->shared)
+	  if (info->executable)
 	    break;
 	  info->flags |= DF_STATIC_TLS;
 	  /* Fall through */
@@ -2116,7 +2116,7 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   /* If R_386_TLS_{IE_32,IE,GOTIE} symbol is now local to the binary,
      make it a R_386_TLS_LE_32 requiring no TLS entry.  */
   if (h->got.refcount > 0
-      && !info->shared
+      && info->executable
       && h->dynindx == -1
       && (elf_i386_hash_entry(h)->tls_type & GOT_TLS_IE))
     h->got.offset = (bfd_vma) -1;
@@ -3366,7 +3366,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_386_TLS_IE:
-	  if (info->shared)
+	  if (!info->executable)
 	    {
 	      Elf_Internal_Rela outrel;
 	      bfd_byte *loc;
@@ -3932,7 +3932,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 
 	case R_386_TLS_LE_32:
 	case R_386_TLS_LE:
-	  if (info->shared)
+	  if (!info->executable)
 	    {
 	      Elf_Internal_Rela outrel;
 	      asection *sreloc;

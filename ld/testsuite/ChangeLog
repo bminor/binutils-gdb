@@ -1,3 +1,14 @@
+2009-08-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/6443
+	* ld-i386/i386.exp: Run tlspie1.
+	* ld-x86-64/x86-64.exp: tlspie1.
+
+	* ld-i386/tlspie1.d: New.
+	* ld-i386/tlspie1.s: Likewise.
+	* ld-x86-64/tlspie1.d: Likewise.
+	* ld-x86-64/tlspie1.s: Likewise.
+
 2009-07-31  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-mmix/x.s, ld-mmix/y.s, ld-mmix/zeroeh.ld,
