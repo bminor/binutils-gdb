@@ -60,12 +60,12 @@ atmega16u2, atmega32u2).
 Instruction set avr4 is for the enhanced AVR core with up to 8K program
 memory space (MCU types: atmega48, atmega48p,atmega8, atmega88, atmega88p,
 atmega8515, atmega8535, atmega8hva, atmega4hvd, atmega8hvd, at90pwm1,
-at90pwm2, at90pwm2b, at90pwm3, at90pwm3b, at90pwm81).
+at90pwm2, at90pwm2b, at90pwm3, at90pwm3b, at90pwm81, atmega8m1, atmega8c1).
 
 Instruction set avr5 is for the enhanced AVR core with up to 128K program
 memory space (MCU types: atmega16, atmega161, atmega162, atmega163, atmega164p,
-atmega165, atmega165p, atmega168, atmega168p, atmega169, atmega169p, atmega32,
-atmega323, atmega324p, atmega325, atmega325p, atmega3250, atmega3250p,
+atmega165, atmega165p, atmega168, atmega168p, atmega169, atmega169p, atmega16c1,
+atmega32, atmega323, atmega324p, atmega325, atmega325p, atmega3250, atmega3250p,
 atmega328p, atmega329, atmega329p, atmega3290, atmega3290p, atmega406, atmega64,
 atmega640, atmega644, atmega644p, atmega645, atmega6450, atmega649, atmega6490,
 atmega16hva, atmega16hvb, atmega32hvb, at90can32, at90can64, at90pwm216,
