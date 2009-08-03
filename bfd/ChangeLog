@@ -1,3 +1,20 @@
+2009-08-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_check_relocs): Always add a plt ref count
+	for local ifunc symbols in non-pie executables, regardless of
+	reloc type.  Don't specially create ifunc dyn relocs.  Tidy ifunc
+	code so that it's obvious that we only do anything special for
+	local ifunc syms.
+	(ppc_elf_gc_sweep_hook): Adjust to suit check_relocs changes.
+	(allocate_dynrelocs): Correct comment for syms defined in plt.
+	Don't specially allocate ifunc dyn relocs.
+	(ppc_elf_relax_section): Relax branches to ifunc plt entries too.
+	(ppc_elf_relocate_section): Set "relocation" value for ifunc
+	syms in non-pie executables.  No specially allocated dyn relocs
+	for ifunc to write.  Allow for local sym on R_PPC_RELAX32_PLT.
+	(ppc_elf_finish_dynamic_symbol): Set value of ifunc symbols in
+	a non-pie executable.
+
 2009-08-02  H.J. Lu  <hongjiu.lu@intel.com>
 	    Jakub Jelinek  <jakub@redhat.com>
 
