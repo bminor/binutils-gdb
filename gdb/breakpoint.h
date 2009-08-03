@@ -840,6 +840,8 @@ extern int get_number (char **);
 
 extern int get_number_or_range (char **);
 
+extern struct breakpoint *get_breakpoint (int num);
+
 /* The following are for displays, which aren't really breakpoints, but
    here is as good a place as any for them.  */
 
@@ -854,6 +856,9 @@ extern void clear_displays (void);
 extern void disable_breakpoint (struct breakpoint *);
 
 extern void enable_breakpoint (struct breakpoint *);
+
+extern void breakpoint_set_commands (struct breakpoint *b, 
+				     struct command_line *commands);
 
 /* Clear the "inserted" flag in all breakpoints.  */
 extern void mark_breakpoints_out (void);

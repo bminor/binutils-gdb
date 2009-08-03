@@ -562,6 +562,20 @@ get_number_or_range (char **pp)
   return last_retval;
 }
 
+/* Return the breakpoint with the specified number, or NULL
+   if the number does not refer to an existing breakpoint.  */
+
+struct breakpoint *
+get_breakpoint (int num)
+{
+  struct breakpoint *b;
+
+  ALL_BREAKPOINTS (b)
+    if (b->number == num)
+      return b;
+  
+  return NULL;
+}
 
 
 /* condition N EXP -- set break condition of breakpoint N to EXP.  */
@@ -626,6 +640,17 @@ condition_command (char *arg, int from_tty)
   error (_("No breakpoint number %d."), bnum);
 }
 
+/* Set the command list of B to COMMANDS.  */
+
+void
+breakpoint_set_commands (struct breakpoint *b, struct command_line *commands)
+{
+  free_command_lines (&b->commands);
+  b->commands = commands;
+  breakpoints_changed ();
+  observer_notify_breakpoint_modified (b->number);
+}
+
 static void
 commands_command (char *arg, int from_tty)
 {
@@ -655,10 +680,7 @@ commands_command (char *arg, int from_tty)
 	struct cleanup *cleanups = make_cleanup (xfree, tmpbuf);
 	l = read_command_lines (tmpbuf, from_tty, 1);
 	do_cleanups (cleanups);
-	free_command_lines (&b->commands);
-	b->commands = l;
-	breakpoints_changed ();
-	observer_notify_breakpoint_modified (b->number);
+	breakpoint_set_commands (b, l);
 	return;
     }
   error (_("No breakpoint number %d."), bnum);

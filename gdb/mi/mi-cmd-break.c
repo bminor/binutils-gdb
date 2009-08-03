@@ -252,3 +252,53 @@ mi_cmd_break_watch (char *command, char **argv, int argc)
       error (_("mi_cmd_break_watch: Unknown watchpoint type."));
     }
 }
+
+/* The mi_read_next_line consults these variable to return successive
+   command lines.  While it would be clearer to use a closure pointer,
+   it is not expected that any future code will use read_command_lines_1,
+   therefore no point of overengineering.  */
+
+static char **mi_command_line_array;
+static int mi_command_line_array_cnt;
+static int mi_command_line_array_ptr;
+
+static char *
+mi_read_next_line ()
+{
+  if (mi_command_line_array_ptr == mi_command_line_array_cnt)
+    return NULL;
+  else
+    return mi_command_line_array[mi_command_line_array_ptr++];
+}
+
+void
+mi_cmd_break_commands (char *command, char **argv, int argc)
+{
+  struct command_line *break_command;
+  char *endptr;
+  int bnum;
+  struct breakpoint *b;
+
+  if (argc < 1)
+    error ("USAGE: %s <BKPT> [<COMMAND> [<COMMAND>...]]", command);
+
+  bnum = strtol (argv[0], &endptr, 0);
+  if (endptr == argv[0])
+    error ("breakpoint number argument \"%s\" is not a number.",
+	   argv[0]);
+  else if (*endptr != '\0')
+    error ("junk at the end of breakpoint number argument \"%s\".",
+	   argv[0]);
+
+  b = get_breakpoint (bnum);
+  if (b == NULL)
+    error ("breakpoint %d not found.", bnum);
+
+  mi_command_line_array = argv;
+  mi_command_line_array_ptr = 1;
+  mi_command_line_array_cnt = argc;
+
+  break_command = read_command_lines_1 (mi_read_next_line, 0);
+  breakpoint_set_commands (b, break_command);
+}
+

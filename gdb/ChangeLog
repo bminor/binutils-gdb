@@ -1,6 +1,21 @@
 2009-08-03  Jim Ingham  <jingham@apple.com>
 	    Vladimir Prus  <vladimir@codesourcery.com>
 
+	Implement -break-commands
+
+	* breakpoint.c (get_breakpoint, breakpoint_set_commands): New.
+	(commands_command): Use breakpoint_set_commands.
+	* breakpoint.h (get_breakpoint, breakpoint_set_commands): Declare.
+
+	* mi/mi-cmds.h (mi_cmd_break_commands): New.
+	* mi/mi-cmds.c: Register -break-commands.
+	* mi/mi-cmd-break.c (mi_cmd_break_commands, mi_read_next_line)
+	(mi_command_line_array, mi_command_line_array_cnt)
+	(mi_command_line_array_ptr): New.
+
+2009-08-03  Jim Ingham  <jingham@apple.com>
+	    Vladimir Prus  <vladimir@codesourcery.com>
+
 	Refactor reading of commands
 
 	* defs.h (read_command_lines_1): Declare.

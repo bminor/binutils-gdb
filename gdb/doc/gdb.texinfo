@@ -21492,11 +21492,41 @@ line="5",times="0",ignore="3"@}]@}
 @ignore
 @subheading The @code{-break-catch} Command
 @findex -break-catch
+@end ignore
 
 @subheading The @code{-break-commands} Command
 @findex -break-commands
-@end ignore
 
+@subsubheading Synopsis
+
+@smallexample
+ -break-commands @var{number} [ @var{command1} ... @var{commandN} ]
+@end smallexample
+
+Specifies the CLI commands that should be executed when breakpoint
+@var{number} is hit.  The parameters @var{command1} to @var{commandN}
+are the commands.  If no command is specified, any previously-set
+commands are cleared.  @xref{Break Commands}.  Typical use of this
+functionality is tracing a program, that is, printing of values of
+some variables whenever breakpoint is hit and then continuing.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{commands}.
+
+@subsubheading Example
+
+@smallexample
+(gdb)
+-break-insert main
+^done,bkpt=@{number="1",type="breakpoint",disp="keep",
+enabled="y",addr="0x000100d0",func="main",file="hello.c",
+fullname="/home/foo/hello.c",line="5",times="0"@}
+(gdb)
+-break-commands 1 "print v" "continue"
+^done
+(gdb)
+@end smallexample
 
 @subheading The @code{-break-condition} Command
 @findex -break-condition

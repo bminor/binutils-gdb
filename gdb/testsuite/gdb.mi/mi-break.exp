@@ -197,6 +197,30 @@ proc test_disabled_creation {} {
             "test disabled creation: cleanup"
 }
 
+proc test_breakpoint_commands {} {
+    global line_callee2_body
+    global hex
+    global fullname
+
+    mi_create_breakpoint "basics.c:callee2" 7 keep callee2 ".*basics.c" $line_callee2_body $hex \
+             "breakpoint commands: insert breakpoint at basics.c:callee2"
+
+    mi_gdb_test "-break-commands 7 \"print 10\" \"continue\"" \
+        "\\^done" \
+        "breakpoint commands: set commands"
+
+    mi_gdb_test "-break-info 7" \
+    	"\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[bkpt=\{number=\"7\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"callee2\",file=\".*basics.c\",${fullname},line=\"$line_callee2_body\",times=\"0\",script=\{\"print 10\",\"continue\"\},original-location=\".*\"\}.*\\\]\}" \
+        "breakpoint commands: check that commands are set"
+
+    mi_gdb_test "-break-commands 7" \
+        "\\^done" \
+        "breakpoint commands: clear commands"
+
+    mi_list_breakpoints [list [list 7 "keep" "callee2" "basics.c" "$line_callee2_body" $hex]] \
+        "breakpoint commands: check that commands are cleared"
+}
+
 test_tbreak_creation_and_listing
 test_rbreak_creation_and_listing
 
@@ -205,6 +229,8 @@ test_ignore_count
 test_error
 
 test_disabled_creation
+
+test_breakpoint_commands
 
 mi_gdb_exit
 return 0

@@ -35,6 +35,7 @@ struct mi_cmd mi_cmds[] =
 {
   { "break-after", { "ignore", 1 }, NULL },
   { "break-condition", { "cond", 1 }, NULL },
+  { "break-commands", { NULL, 0 }, mi_cmd_break_commands },
   { "break-delete", { "delete breakpoint", 1 }, NULL },
   { "break-disable", { "disable breakpoint", 1 }, NULL },
   { "break-enable", { "enable breakpoint", 1 }, NULL },

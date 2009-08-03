@@ -1170,21 +1170,22 @@ proc mi_list_breakpoints { expected test } {
     set body ""
     set first 1
 
-    foreach item $children {
+    foreach item $expected {
         if {$first == 0} {
             set body "$body,"
+            set first 0
         }
-    set number disp func file line address
         set number [lindex $item 0]
         set disp [lindex $item 1]
         set func [lindex $item 2]
-        set line [lindex $item 3]
-        set address [lindex $item 4]
-        set body "$body,bkpt=\{number=\"$number\",type=\"breakpoint\",disp=\"$disp\",enabled=\"y\",addr=\"$address\",func=\"$func\",file=\"$file\",${fullname},line=\"$line\",times=\"0\",original-location=\".*\"\}"
+        set file [lindex $item 3]
+        set line [lindex $item 4]
+        set address [lindex $item 5]
+        set body "${body}bkpt=\{number=\"$number\",type=\"breakpoint\",disp=\"$disp\",enabled=\"y\",addr=\"$address\",func=\"$func\",file=\".*$file\",${fullname},line=\"$line\",times=\"0\",original-location=\".*\"\}"
         set first 0
     }
 
-    verbose -log "Expecint: 666\\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[$body\\\]\}" \
+    verbose -log "Expecting: 666\\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[$body\\\]\}"
     mi_gdb_test "666-break-list" \
         "666\\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[$body\\\]\}" \
         $test
