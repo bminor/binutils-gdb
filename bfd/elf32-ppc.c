@@ -2605,15 +2605,16 @@ struct ppc_elf_dyn_relocs
 };
 
 /* Track PLT entries needed for a given symbol.  We might need more
-   than one glink entry per symbol.  */
+   than one glink entry per symbol when generating a pic binary.  */
 struct plt_entry
 {
   struct plt_entry *next;
 
   /* -fPIC uses multiple GOT sections, one per file, called ".got2".
      This field stores the offset into .got2 used to initialise the
-     GOT pointer reg.  It will always be at least 32768 (and for
-     current gcc this is the only offset used).  */
+     GOT pointer reg.  It will always be at least 32768.  (Current
+     gcc always uses an offset of 32768, but ld -r will pack .got2
+     sections together resulting in larger offsets).  */
   bfd_vma addend;
 
   /* The .got2 section.  */
@@ -3491,7 +3492,8 @@ ppc_elf_check_relocs (bfd *abfd,
 		  if (r_type == R_PPC_PLTREL24)
 		    {
 		      ppc_elf_tdata (abfd)->makes_plt_call = 1;
-		      addend = rel->r_addend;
+		      if (info->shared)
+			addend = rel->r_addend;
 		    }
 		  if (!update_plt_info (abfd, ifunc,
 					addend < 32768 ? NULL : got2, addend))
@@ -3726,7 +3728,8 @@ ppc_elf_check_relocs (bfd *abfd,
 	      if (r_type == R_PPC_PLTREL24)
 		{
 		  ppc_elf_tdata (abfd)->makes_plt_call = 1;
-		  addend = rel->r_addend;
+		  if (info->shared)
+		    addend = rel->r_addend;
 		}
 	      h->needs_plt = 1;
 	      if (!update_plt_info (abfd, &h->plt.plist,
@@ -3828,7 +3831,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	  if (h == NULL
 	      && got2 != NULL
 	      && (sec->flags & SEC_CODE) != 0
-	      && (info->shared || info->pie)
+	      && info->shared
 	      && htab->plt_type == PLT_UNSET)
 	    {
 	      /* Old -fPIC gcc code has .long LCTOC1-LCFx just before
@@ -4424,8 +4427,12 @@ ppc_elf_gc_sweep_hook (bfd *abfd,
 	  if ((local_got_tls_masks[r_symndx] & PLT_IFUNC) != 0)
 	    {
 	      struct plt_entry **ifunc = local_plt + r_symndx;
-	      bfd_vma addend = r_type == R_PPC_PLTREL24 ? rel->r_addend : 0;
-	      struct plt_entry *ent = find_plt_ent (ifunc, got2, addend);
+	      bfd_vma addend = 0;
+	      struct plt_entry *ent;
+
+	      if (r_type == R_PPC_PLTREL24 && info->shared)
+		addend = rel->r_addend;
+	      ent = find_plt_ent (ifunc, got2, addend);
 	      if (ent->plt.refcount > 0)
 		ent->plt.refcount -= 1;
 	      continue;
@@ -4497,9 +4504,12 @@ ppc_elf_gc_sweep_hook (bfd *abfd,
 	case R_PPC_PLT16_HA:
 	  if (h != NULL)
 	    {
-	      bfd_vma addend = r_type == R_PPC_PLTREL24 ? rel->r_addend : 0;
-	      struct plt_entry *ent = find_plt_ent (&h->plt.plist,
-						    got2, addend);
+	      bfd_vma addend = 0;
+	      struct plt_entry *ent;
+
+	      if (r_type == R_PPC_PLTREL24 && info->shared)
+		addend = rel->r_addend;
+	      ent = find_plt_ent (&h->plt.plist, got2, addend);
 	      if (ent->plt.refcount > 0)
 		ent->plt.refcount -= 1;
 	    }
@@ -4984,7 +4994,7 @@ add_stub_sym (struct plt_entry *ent,
   const char *stub;
   struct ppc_elf_link_hash_table *htab = ppc_elf_hash_table (info);
 
-  if (info->shared || info->pie)
+  if (info->shared)
     stub = ".plt_pic32.";
   else
     stub = ".plt_call32.";
@@ -5116,7 +5126,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 		    ent->plt.offset = plt_offset;
 
 		    s = htab->glink;
-		    if (!doneone || info->shared || info->pie)
+		    if (!doneone || info->shared)
 		      {
 			glink_offset = s->size;
 			s->size += GLINK_ENTRY_SIZE;
@@ -5592,7 +5602,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 		ent->plt.offset = plt_offset;
 
 		s = htab->glink;
-		if (!doneone || info->shared || info->pie)
+		if (!doneone || info->shared)
 		  {
 		    glink_offset = s->size;
 		    s->size += GLINK_ENTRY_SIZE;
@@ -6027,7 +6037,7 @@ ppc_elf_relax_section (bfd *abfd,
 	      bfd_vma addend = 0;
 	      struct plt_entry *ent;
 
-	      if (r_type == R_PPC_PLTREL24)
+	      if (r_type == R_PPC_PLTREL24 && link_info->shared)
 		addend = irel->r_addend;
 	      ent = find_plt_ent (plist, got2, addend);
 	      if (ent != NULL)
@@ -6447,7 +6457,7 @@ write_glink_stub (struct plt_entry *ent, asection *plt_sec,
 	 + plt_sec->output_offset);
   p = (unsigned char *) htab->glink->contents + ent->glink_offset;
 
-  if (info->shared || info->pie)
+  if (info->shared)
     {
       bfd_vma got = 0;
 
@@ -6969,7 +6979,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  || is_branch_reloc (r_type)))
 	    {
 	      addend = 0;
-	      if (r_type == R_PPC_PLTREL24)
+	      if (r_type == R_PPC_PLTREL24 && info->shared)
 		addend = rel->r_addend;
 	      ent = find_plt_ent (ifunc, got2, addend);
 	    }
@@ -7543,7 +7553,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  if (h != NULL)
 	    {
 	      struct plt_entry *ent = find_plt_ent (&h->plt.plist, got2,
-						    addend);
+						    info->shared ? addend : 0);
 	      if (htab->plt_type == PLT_NEW)
 		relocation = (htab->glink->output_section->vma
 			      + htab->glink->output_offset
@@ -7636,8 +7646,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  /* Relocation is to the entry for this symbol in the
 	     procedure linkage table.  */
 	  {
-	    struct plt_entry *ent = find_plt_ent (&h->plt.plist, got2, addend);
-
+	    struct plt_entry *ent = find_plt_ent (&h->plt.plist, got2,
+						  info->shared ? addend : 0);
 	    addend = 0;
 	    if (ent == NULL
 		|| htab->plt == NULL)
@@ -8209,7 +8219,7 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
 
 	    write_glink_stub (ent, splt, info);
 
-	    if (!info->shared && !info->pie)
+	    if (!info->shared)
 	      /* We only need one non-PIC glink stub.  */
 	      break;
 	  }
@@ -8616,7 +8626,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	      + htab->glink->output_offset);
 
       /* Last comes the PLTresolve stub.  */
-      if (info->shared || info->pie)
+      if (info->shared)
 	{
 	  bfd_vma bcl;
 

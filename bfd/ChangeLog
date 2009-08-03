@@ -1,5 +1,18 @@
 2009-08-03  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.c (struct plt_entry): Revise comments.
+	(ppc_elf_check_relocs): Don't create needless plt_entry info
+	for non-pie executables.  Don't test info->pie when info->shared
+	already covers that case.
+	(ppc_elf_gc_sweep_hook): Adjust for above change.
+	(add_stub_sym): Don't test info->pie when info->shared tested.
+	(allocate_dynrelocs, ppc_elf_size_dynamic_sections): Likewise.
+	(write_glink_stub, ppc_elf_finish_dynamic_symbol): Likewise.
+	(ppc_elf_relax_section): Adjust find_plt_ent arguments.
+	(ppc_elf_relocate_section): Likewise.
+
+2009-08-03  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-ppc.c (ppc_elf_check_relocs): Always add a plt ref count
 	for local ifunc symbols in non-pie executables, regardless of
 	reloc type.  Don't specially create ifunc dyn relocs.  Tidy ifunc
