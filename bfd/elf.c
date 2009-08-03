@@ -331,7 +331,7 @@ bfd_elf_string_from_elf_section (bfd *abfd,
 	 (shindex == shstrndx && strindex == hdr->sh_name
 	  ? ".shstrtab"
 	  : bfd_elf_string_from_elf_section (abfd, shstrndx, hdr->sh_name)));
-      return "";
+      return NULL;
     }
 
   return ((char *) hdr->contents) + strindex;

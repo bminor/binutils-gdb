@@ -1,5 +1,11 @@
 2009-08-03  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/10363
+	* elf.c (bfd_elf_string_from_elf_section): Return NULL on
+	invalid string offset.
+
+2009-08-03  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/10433
 	* elf-ifunc.c (_bfd_elf_allocate_ifunc_dyn_relocs): Set got
 	to htab->init_got_offset and plt to htab->init_plt_offset
