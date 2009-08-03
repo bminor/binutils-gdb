@@ -39,11 +39,14 @@
 /* Prototypes for local functions */
 
 static enum command_control_type
-	recurse_read_control_structure (struct command_line *current_cmd);
+recurse_read_control_structure (char * (*read_next_line_func) (), 
+				struct command_line *current_cmd);
 
 static char *insert_args (char *line);
 
 static struct cleanup * setup_user_args (char *p);
+
+static char *read_next_line ();
 
 /* Level of control structure when reading.  */
 static int control_level;
@@ -114,7 +117,7 @@ get_command_line (enum command_control_type type, char *arg)
   old_chain = make_cleanup_free_command_lines (&cmd);
 
   /* Read in the body of this command.  */
-  if (recurse_read_control_structure (cmd) == invalid_control)
+  if (recurse_read_control_structure (read_next_line, cmd) == invalid_control)
     {
       warning (_("Error reading in canned sequence of commands."));
       do_cleanups (old_chain);
@@ -837,19 +840,15 @@ realloc_body_list (struct command_line *command, int new_length)
   command->body_count = new_length;
 }
 
-/* Read one line from the input stream.  If the command is an "end",
-   return such an indication to the caller.  If PARSE_COMMANDS is true,
-   strip leading whitespace (trailing whitespace is always stripped)
-   in the line, attempt to recognize GDB control commands, and also
-   return an indication if the command is an "else" or a nop.
-   Otherwise, only "end" is recognized.  */
+/* Read next line from stdout.  Passed to read_command_line_1 and
+   recurse_read_control_structure whenever we need to read commands
+   from stdout.  */
 
-static enum misc_command_type
-read_next_line (struct command_line **command, int parse_commands)
+static char *
+read_next_line ()
 {
-  char *p, *p1, *prompt_ptr, control_prompt[256];
+  char *prompt_ptr, control_prompt[256];
   int i = 0;
-  int not_handled = 0;
 
   if (control_level >= 254)
     error (_("Control nesting too deep!"));
@@ -866,7 +865,21 @@ read_next_line (struct command_line **command, int parse_commands)
   else
     prompt_ptr = NULL;
 
-  p = command_line_input (prompt_ptr, instream == stdin, "commands");
+  return command_line_input (prompt_ptr, instream == stdin, "commands");
+}
+
+/* Process one input line.  If the command is an "end",
+   return such an indication to the caller.  If PARSE_COMMANDS is true,
+   strip leading whitespace (trailing whitespace is always stripped)
+   in the line, attempt to recognize GDB control commands, and also
+   return an indication if the command is an "else" or a nop.
+   Otherwise, only "end" is recognized.  */
+
+static enum misc_command_type
+process_next_line (char *p, struct command_line **command, int parse_commands)
+{
+  char *p1;
+  int not_handled = 0;
 
   /* Not sure what to do here.  */
   if (p == NULL)
@@ -973,18 +986,20 @@ read_next_line (struct command_line **command, int parse_commands)
 }
 
 /* Recursively read in the control structures and create a command_line 
-   structure from them.
+   structure from them.  Use read_next_line_func to obtain lines of
+   the command.
 
-   The parent_control parameter is the control structure in which the
-   following commands are nested.  */
+*/
 
 static enum command_control_type
-recurse_read_control_structure (struct command_line *current_cmd)
+recurse_read_control_structure (char * (*read_next_line_func) (), 
+				struct command_line *current_cmd)
 {
   int current_body, i;
   enum misc_command_type val;
   enum command_control_type ret;
   struct command_line **body_ptr, *child_tail, *next;
+  char *p;
 
   child_tail = NULL;
   current_body = 1;
@@ -1002,7 +1017,8 @@ recurse_read_control_structure (struct command_line *current_cmd)
       dont_repeat ();
 
       next = NULL;
-      val = read_next_line (&next, current_cmd->control_type != python_control);
+      val = process_next_line (read_next_line_func (), &next, 
+			       current_cmd->control_type != python_control);
 
       /* Just skip blanks and comments.  */
       if (val == nop_command)
@@ -1068,7 +1084,7 @@ recurse_read_control_structure (struct command_line *current_cmd)
 	  || next->control_type == commands_control)
 	{
 	  control_level++;
-	  ret = recurse_read_control_structure (next);
+	  ret = recurse_read_control_structure (read_next_line_func, next);
 	  control_level--;
 
 	  if (ret != simple_control)
@@ -1095,12 +1111,7 @@ recurse_read_control_structure (struct command_line *current_cmd)
 struct command_line *
 read_command_lines (char *prompt_arg, int from_tty, int parse_commands)
 {
-  struct command_line *head, *tail, *next;
-  struct cleanup *old_chain;
-  enum command_control_type ret;
-  enum misc_command_type val;
-
-  control_level = 0;
+  struct command_line *head;
 
   if (from_tty && input_from_terminal_p ())
     {
@@ -1116,13 +1127,34 @@ read_command_lines (char *prompt_arg, int from_tty, int parse_commands)
 	}
     }
 
+  head = read_command_lines_1 (read_next_line, parse_commands);
+
+  if (deprecated_readline_end_hook && from_tty && input_from_terminal_p ())
+    {
+      (*deprecated_readline_end_hook) ();
+    }
+  return (head);
+}
+
+/* Act the same way as read_command_lines, except that each new line is
+   obtained using READ_NEXT_LINE_FUNC.  */
+
+struct command_line *
+read_command_lines_1 (char * (*read_next_line_func) (), int parse_commands)
+{
+  struct command_line *head, *tail, *next;
+  struct cleanup *old_chain;
+  enum command_control_type ret;
+  enum misc_command_type val;
+
+  control_level = 0;
   head = tail = NULL;
   old_chain = NULL;
 
   while (1)
     {
       dont_repeat ();
-      val = read_next_line (&next, parse_commands);
+      val = process_next_line (read_next_line_func (), &next, parse_commands);
 
       /* Ignore blank lines or comments.  */
       if (val == nop_command)
@@ -1146,7 +1178,7 @@ read_command_lines (char *prompt_arg, int from_tty, int parse_commands)
 	  || next->control_type == commands_control)
 	{
 	  control_level++;
-	  ret = recurse_read_control_structure (next);
+	  ret = recurse_read_control_structure (read_next_line_func, next);
 	  control_level--;
 
 	  if (ret == invalid_control)
@@ -1177,11 +1209,7 @@ read_command_lines (char *prompt_arg, int from_tty, int parse_commands)
 	do_cleanups (old_chain);
     }
 
-  if (deprecated_readline_end_hook && from_tty && input_from_terminal_p ())
-    {
-      (*deprecated_readline_end_hook) ();
-    }
-  return (head);
+  return head;
 }
 
 /* Free a chain of struct command_line's.  */

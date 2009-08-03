@@ -1,3 +1,19 @@
+2009-08-03  Jim Ingham  <jingham@apple.com>
+	    Vladimir Prus  <vladimir@codesourcery.com>
+
+	Refactor reading of commands
+
+	* defs.h (read_command_lines_1): Declare.
+	* cli/cli-script.c (read_next_line): Only return string,
+	do not process.
+	(process_next_line): New, extracted from read_next_line.
+	(recurse_read_control_structure): Take a function pointer to the
+	read function.
+	(get_command_line) Pass the read_next_line as reader function
+	into recurse_read_control_structure.
+	(read_command_lines_1): New, extracted from...
+	(read_command_lines): ...here.
+
 2009-07-31  Kazu Hirata  <kazu@codesourcery.com>
 
 	* procfs.c (proc_set_current_signal): Populate mysinfo before
