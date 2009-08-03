@@ -185,6 +185,8 @@ _bfd_elf_allocate_ifunc_dyn_relocs (struct bfd_link_info *info,
       return FALSE;
     }
 
+  htab = elf_hash_table (info);
+
   /* Return and discard space for dynamic relocations against it if
      it is never referenced in a non-shared object.  */
   if (!h->ref_regular)
@@ -192,7 +194,8 @@ _bfd_elf_allocate_ifunc_dyn_relocs (struct bfd_link_info *info,
       if (h->plt.refcount > 0
 	  || h->got.refcount > 0)
 	abort ();
-      h->got.offset = (bfd_vma) -1;
+      h->got = htab->init_got_offset;
+      h->plt = htab->init_plt_offset;
       *head = NULL;
       return TRUE;
     }
@@ -202,8 +205,6 @@ _bfd_elf_allocate_ifunc_dyn_relocs (struct bfd_link_info *info,
     sizeof_reloc = bed->s->sizeof_rela;
   else
     sizeof_reloc = bed->s->sizeof_rel;
-
-  htab = elf_hash_table (info);
 
   /* When building a static executable, use .iplt, .igot.plt and
      .rel[a].iplt sections for STT_GNU_IFUNC symbols.  */
