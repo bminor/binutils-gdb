@@ -1,3 +1,11 @@
+2009-08-03  Richard Guenther  <rguenther@suse.de>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix memory corruption on reread of file through a symbolic link.
+	* symfile.c (find_separate_debug_file): Initialize CANON_NAME earlier.
+	Allocate DEBUGFILE with length based on CANON_NAME.  Free CANON_NAME on
+	all the return paths.
+
 2009-08-03  Jim Ingham  <jingham@apple.com>
 	    Vladimir Prus  <vladimir@codesourcery.com>
 
