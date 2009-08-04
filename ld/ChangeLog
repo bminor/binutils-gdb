@@ -1,3 +1,9 @@
+2009-08-04  Alan Modra  <amodra@bigpond.net.au>
+
+   	PR 10474
+	* emultempl/ppc32elf.em (ppc_before_allocation): Test rawsize,
+	not size, after lang_reset_memory_regions.
+
 2009-07-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* emulparams/elf32ppc.sh (PLT): Don't include ".iplt".
