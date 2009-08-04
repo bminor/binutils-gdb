@@ -452,16 +452,7 @@ free_objfile (struct objfile *objfile)
   /* Discard any data modules have associated with the objfile.  */
   objfile_free_data (objfile);
 
-  /* We always close the bfd, unless the OBJF_KEEPBFD flag is set.  */
-
-  if (objfile->obfd != NULL && !(objfile->flags & OBJF_KEEPBFD))
-    {
-      char *name = bfd_get_filename (objfile->obfd);
-      if (!bfd_close (objfile->obfd))
-	warning (_("cannot close \"%s\": %s"),
-		 name, bfd_errmsg (bfd_get_error ()));
-      xfree (name);
-    }
+  gdb_bfd_unref (objfile->obfd);
 
   /* Remove it from the chain of all objfiles. */
 
@@ -1019,4 +1010,36 @@ void
 objfiles_changed (void)
 {
   objfiles_changed_p = 1;  /* Rebuild section map next time we need it.  */
+}
+
+/* Unreference and possibly close abfd.  */
+void
+gdb_bfd_unref (struct bfd *abfd)
+{
+  int *p_refcount;
+  char *name;
+
+  if (abfd == NULL)
+    return;
+
+  p_refcount = abfd->usrdata;
+
+  /* Valid range for p_refcount: NULL (single owner), or a pointer
+     to int counter, which has a value of 1 (single owner) or 2 (shared).  */
+  gdb_assert (p_refcount == NULL || *p_refcount == 1 || *p_refcount == 2);
+
+  if (p_refcount != NULL)
+    {
+      *p_refcount -= 1;
+      if (*p_refcount > 0)
+	return;
+    }
+  xfree (p_refcount);
+  abfd->usrdata = NULL;  /* Paranoia.  */
+
+  name = bfd_get_filename (abfd);
+  if (!bfd_close (abfd))
+    warning (_("cannot close \"%s\": %s"),
+	     name, bfd_errmsg (bfd_get_error ()));
+  xfree (name);
 }

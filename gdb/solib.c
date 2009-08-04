@@ -421,21 +421,11 @@ void
 free_so (struct so_list *so)
 {
   struct target_so_ops *ops = solib_ops (target_gdbarch);
-  char *bfd_filename = 0;
 
   if (so->sections)
     xfree (so->sections);
-      
-  if (so->abfd)
-    {
-      bfd_filename = bfd_get_filename (so->abfd);
-      if (! bfd_close (so->abfd))
-	warning (_("cannot close \"%s\": %s"),
-		 bfd_filename, bfd_errmsg (bfd_get_error ()));
-    }
 
-  if (bfd_filename)
-    xfree (bfd_filename);
+  gdb_bfd_unref (so->abfd);
 
   ops->free_so (so);
 
@@ -454,6 +444,7 @@ static void
 symbol_add_stub (struct so_list *so, int flags)
 {
   struct section_addr_info *sap;
+  int *p_refcount;
 
   /* Have we already loaded this shared object?  */
   ALL_OBJFILES (so->objfile)
@@ -465,8 +456,11 @@ symbol_add_stub (struct so_list *so, int flags)
   sap = build_section_addr_info_from_section_table (so->sections,
                                                     so->sections_end);
 
-  so->objfile = symbol_file_add_from_bfd (so->abfd, flags,
-					  sap, OBJF_SHARED | OBJF_KEEPBFD);
+  so->objfile = symbol_file_add_from_bfd (so->abfd, flags, sap, OBJF_SHARED);
+  p_refcount = xmalloc (sizeof (*p_refcount));
+  *p_refcount = 2;  /* Both solib and objfile refer to this abfd.  */
+  so->abfd->usrdata = p_refcount;
+
   free_section_addr_info (sap);
 
   return;

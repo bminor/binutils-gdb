@@ -1,3 +1,12 @@
+2009-08-04  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* objfiles.h (OBJF_KEEPBFD): Delete.
+	(gdb_bfd_unref): New prototype.
+	* objfiles.c (gdb_bfd_unref): New function.
+	(free_objfile): Call gdb_bfd_unref.
+	* solib.c (free_so): Likewise.
+	(symbol_add_stub): Set refcount.
+	
 2009-08-04  Hui Zhu  <teawater@gmail.com>
 	    Michael Snyder  <msnyder@vmware.com>
 
