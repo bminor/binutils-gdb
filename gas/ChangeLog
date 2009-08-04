@@ -1,3 +1,7 @@
+2009-08-04  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config/tc-arm.c (my_get_expression): Detect missing expressions.
+
 2009-08-02  Eric B. Weddington  <eric.weddington@atmel.com>
 
 	* config/tc-avr.c (mcu_types): Add atmega8m1, atmega8c1, atmega16c1.

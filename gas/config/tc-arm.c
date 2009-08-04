@@ -913,13 +913,14 @@ my_get_expression (expressionS * ep, char ** str, int prefix_mode)
   seg = expression (ep);
   in_my_get_expression = 0;
 
-  if (ep->X_op == O_illegal)
+  if (ep->X_op == O_illegal || ep->X_op == O_absent)
     {
-      /* We found a bad expression in md_operand().  */
+      /* We found a bad or missing expression in md_operand().  */
       *str = input_line_pointer;
       input_line_pointer = save_in;
       if (inst.error == NULL)
-	inst.error = _("bad expression");
+	inst.error = (ep->X_op == O_absent
+		      ? _("missing expression") :_("bad expression"));
       return 1;
     }
 
