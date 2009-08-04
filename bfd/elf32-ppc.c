@@ -5934,6 +5934,7 @@ ppc_elf_relax_section (bfd *abfd,
       bfd_byte *hit_addr;
       unsigned long t0;
       struct elf_link_hash_entry *h;
+      struct plt_entry **plist;
       unsigned char sym_type;
 
       switch (r_type)
@@ -5997,12 +5998,8 @@ ppc_elf_relax_section (bfd *abfd,
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-	  tsec = NULL;
-	  toff = 0;
-	  if (tsec != NULL)
-	    ;
-	  else if (h->root.type == bfd_link_hash_defined
-		   || h->root.type == bfd_link_hash_defweak)
+	  if (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
 	    {
 	      tsec = h->root.u.def.section;
 	      toff = h->root.u.def.value;
@@ -6019,42 +6016,48 @@ ppc_elf_relax_section (bfd *abfd,
 	  sym_type = h->type;
 	}
 
-      if (is_branch_reloc (r_type))
+      /* The condition here under which we call find_plt_ent must
+	 match that in relocate_section.  If we call find_plt_ent here
+	 but not in relocate_section, or vice versa, then the branch
+	 destination used here may be incorrect.  */
+      plist = NULL;
+      if (h != NULL)
 	{
-	  struct plt_entry **plist = NULL;
-
-	  if (h != NULL)
+	  /* We know is_branch_reloc (r_type) is true.  */
+	  if (h->type == STT_GNU_IFUNC
+	      || r_type == R_PPC_PLTREL24)
 	    plist = &h->plt.plist;
-	  else if (sym_type == STT_GNU_IFUNC)
-	    {
-	      bfd_vma *local_got_offsets = elf_local_got_offsets (abfd);
-	      struct plt_entry **local_plt = (struct plt_entry **)
-		(local_got_offsets + symtab_hdr->sh_info);
-	      plist = local_plt + ELF32_R_SYM (irel->r_info);
-	    }
-	  if (plist != NULL)
-	    {
-	      bfd_vma addend = 0;
-	      struct plt_entry *ent;
+	}
+      else if (sym_type == STT_GNU_IFUNC
+	       && elf_local_got_offsets (abfd) != NULL)
+	{
+	  bfd_vma *local_got_offsets = elf_local_got_offsets (abfd);
+	  struct plt_entry **local_plt = (struct plt_entry **)
+	    (local_got_offsets + symtab_hdr->sh_info);
+	  plist = local_plt + ELF32_R_SYM (irel->r_info);
+	}
+      if (plist != NULL)
+	{
+	  bfd_vma addend = 0;
+	  struct plt_entry *ent;
 
-	      if (r_type == R_PPC_PLTREL24 && link_info->shared)
-		addend = irel->r_addend;
-	      ent = find_plt_ent (plist, got2, addend);
-	      if (ent != NULL)
+	  if (r_type == R_PPC_PLTREL24 && link_info->shared)
+	    addend = irel->r_addend;
+	  ent = find_plt_ent (plist, got2, addend);
+	  if (ent != NULL)
+	    {
+	      if (htab->plt_type == PLT_NEW
+		  || h == NULL
+		  || !htab->elf.dynamic_sections_created
+		  || h->dynindx == -1)
 		{
-		  if (htab->plt_type == PLT_NEW
-		      || h == NULL
-		      || !htab->elf.dynamic_sections_created
-		      || h->dynindx == -1)
-		    {
-		      tsec = htab->glink;
-		      toff = ent->glink_offset;
-		    }
-		  else
-		    {
-		      tsec = htab->plt;
-		      toff = ent->plt.offset;
-		    }
+		  tsec = htab->glink;
+		  toff = ent->glink_offset;
+		}
+	      else
+		{
+		  tsec = htab->plt;
+		  toff = ent->plt.offset;
 		}
 	    }
 	}
