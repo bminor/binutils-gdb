@@ -51,6 +51,9 @@ struct record_mem_entry
 {
   CORE_ADDR addr;
   int len;
+  /* Set this flag if target memory for this entry
+     can no longer be accessed.  */
+  int mem_entry_not_accessible;
   gdb_byte *val;
 };
 
@@ -275,6 +278,7 @@ record_arch_list_add_mem (CORE_ADDR addr, int len)
   rec->type = record_mem;
   rec->u.mem.addr = addr;
   rec->u.mem.len = len;
+  rec->u.mem.mem_entry_not_accessible = 0;
 
   if (target_read_memory (addr, rec->u.mem.val, len))
     {
@@ -727,32 +731,55 @@ record_wait (struct target_ops *ops,
 	  else if (record_list->type == record_mem)
 	    {
 	      /* mem */
-	      gdb_byte *mem = alloca (record_list->u.mem.len);
-	      if (record_debug > 1)
-		fprintf_unfiltered (gdb_stdlog,
-				    "Process record: record_mem %s to "
-				    "inferior addr = %s len = %d.\n",
-				    host_address_to_string (record_list),
-				    paddress (gdbarch, record_list->u.mem.addr),
-				    record_list->u.mem.len);
+	      /* Nothing to do if the entry is flagged not_accessible.  */
+	      if (!record_list->u.mem.mem_entry_not_accessible)
+		{
+		  gdb_byte *mem = alloca (record_list->u.mem.len);
+		  if (record_debug > 1)
+		    fprintf_unfiltered (gdb_stdlog,
+				        "Process record: record_mem %s to "
+				        "inferior addr = %s len = %d.\n",
+				        host_address_to_string (record_list),
+				        paddress (gdbarch,
+					          record_list->u.mem.addr),
+				        record_list->u.mem.len);
 
-	      if (target_read_memory
-		  (record_list->u.mem.addr, mem, record_list->u.mem.len))
-		error (_("Process record: error reading memory at "
-			 "addr = %s len = %d."),
-		       paddress (gdbarch, record_list->u.mem.addr),
-		       record_list->u.mem.len);
-
-	      if (target_write_memory
-		  (record_list->u.mem.addr, record_list->u.mem.val,
-		   record_list->u.mem.len))
-		error (_
-		       ("Process record: error writing memory at "
-			"addr = %s len = %d."),
-		       paddress (gdbarch, record_list->u.mem.addr),
-		       record_list->u.mem.len);
-
-	      memcpy (record_list->u.mem.val, mem, record_list->u.mem.len);
+		  if (target_read_memory (record_list->u.mem.addr, mem,
+		                          record_list->u.mem.len))
+	            {
+		      if (execution_direction != EXEC_REVERSE)
+		        error (_("Process record: error reading memory at "
+			         "addr = %s len = %d."),
+		               paddress (gdbarch, record_list->u.mem.addr),
+		               record_list->u.mem.len);
+		      else
+			/* Read failed -- 
+			   flag entry as not_accessible.  */
+		        record_list->u.mem.mem_entry_not_accessible = 1;
+		    }
+		  else
+		    {
+		      if (target_write_memory (record_list->u.mem.addr,
+			                       record_list->u.mem.val,
+		                               record_list->u.mem.len))
+	                {
+			  if (execution_direction != EXEC_REVERSE)
+			    error (_("Process record: error writing memory at "
+			             "addr = %s len = %d."),
+		                   paddress (gdbarch, record_list->u.mem.addr),
+		                   record_list->u.mem.len);
+			  else
+			    /* Write failed -- 
+			       flag entry as not_accessible.  */
+			    record_list->u.mem.mem_entry_not_accessible = 1;
+			}
+		      else
+		        {
+			  memcpy (record_list->u.mem.val, mem,
+				  record_list->u.mem.len);
+			}
+		    }
+		}
 	    }
 	  else
 	    {
