@@ -2253,7 +2253,7 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
        ++p)
     {
       unsigned int index = (*p)->finalize_local_symbols(local_symbol_index,
-                                                        off);
+                                                        off, symtab);
       off += (index - local_symbol_index) * symsize;
       local_symbol_index = index;
     }

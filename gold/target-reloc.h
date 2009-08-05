@@ -218,12 +218,14 @@ relocate_section(
           // If the local symbol belongs to a section we are discarding,
           // and that section is a debug section, try to find the
           // corresponding kept section and map this symbol to its
-          // counterpart in the kept section.
+          // counterpart in the kept section.  The symbol must not 
+          // correspond to a section we are folding.
 	  bool is_ordinary;
 	  unsigned int shndx = psymval->input_shndx(&is_ordinary);
 	  if (is_ordinary
 	      && shndx != elfcpp::SHN_UNDEF
-	      && !object->is_section_included(shndx))
+	      && !object->is_section_included(shndx) 
+              && !(relinfo->symtab->is_section_folded(object, shndx)))
 	    {
 	      if (comdat_behavior == CB_UNDETERMINED)
 	        {

@@ -321,6 +321,11 @@ class Object
   section_flags(unsigned int shndx)
   { return this->do_section_flags(shndx); }
 
+  // Return the section entsize given a section index.
+  uint64_t
+  section_entsize(unsigned int shndx)
+  { return this->do_section_entsize(shndx); }
+
   // Return the section address given a section index.
   uint64_t
   section_address(unsigned int shndx)
@@ -508,6 +513,10 @@ class Object
   virtual uint64_t
   do_section_flags(unsigned int shndx) = 0;
 
+  // Get section entsize--implemented by child class.
+  virtual uint64_t
+  do_section_entsize(unsigned int shndx) = 0;
+
   // Get section address--implemented by child class.
   virtual uint64_t
   do_section_address(unsigned int shndx) = 0;
@@ -617,7 +626,8 @@ class Relobj : public Object
       output_sections_(),
       map_to_relocatable_relocs_(NULL),
       object_merge_map_(NULL),
-      relocs_must_follow_section_writes_(false)
+      relocs_must_follow_section_writes_(false),
+      sd_(NULL)
   { }
 
   // During garbage collection, the Read_symbols_data pass for 
@@ -689,8 +699,8 @@ class Relobj : public Object
   // indexes for the local variables, and set the offset where local
   // symbol information will be stored. Returns the new local symbol index.
   unsigned int
-  finalize_local_symbols(unsigned int index, off_t off)
-  { return this->do_finalize_local_symbols(index, off); }
+  finalize_local_symbols(unsigned int index, off_t off, Symbol_table* symtab)
+  { return this->do_finalize_local_symbols(index, off, symtab); }
 
   // Set the output dynamic symbol table indexes for the local variables.
   unsigned int
@@ -814,7 +824,7 @@ class Relobj : public Object
   // for the local variables, and set the offset where local symbol
   // information will be stored.
   virtual unsigned int
-  do_finalize_local_symbols(unsigned int, off_t) = 0;
+  do_finalize_local_symbols(unsigned int, off_t, Symbol_table*) = 0;
 
   // Set the output dynamic symbol table indexes for the local variables.
   virtual unsigned int
@@ -1491,7 +1501,7 @@ class Sized_relobj : public Relobj
 
   // Finalize the local symbols.
   unsigned int
-  do_finalize_local_symbols(unsigned int, off_t);
+  do_finalize_local_symbols(unsigned int, off_t, Symbol_table*);
 
   // Set the offset where local dynamic symbol information will be stored.
   unsigned int
@@ -1523,8 +1533,11 @@ class Sized_relobj : public Relobj
 
   // Return section flags.
   uint64_t
-  do_section_flags(unsigned int shndx)
-  { return this->elf_file_.section_flags(shndx); }
+  do_section_flags(unsigned int shndx);
+
+  // Return section entsize.
+  uint64_t
+  do_section_entsize(unsigned int shndx);
 
   // Return section address.
   uint64_t

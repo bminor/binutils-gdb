@@ -28,6 +28,7 @@
 #include <vector>
 
 #include "gc.h"
+#include "icf.h"
 #include "elfcpp.h"
 #include "parameters.h"
 #include "stringpool.h"
@@ -58,6 +59,7 @@ class Output_segment;
 class Output_file;
 class Output_symtab_xindex;
 class Garbage_collection;
+class Icf;
 
 // The base class of an entry in the symbol table.  The symbol table
 // can have a lot of entries, so we don't want this class to big.
@@ -1163,11 +1165,23 @@ class Symbol_table
   ~Symbol_table();
 
   void
+  set_icf(Icf* icf)
+  { this->icf_ = icf;}
+
+  Icf*
+  icf() const
+  { return this->icf_; }
+ 
+  // Returns true if ICF determined that this is a duplicate section. 
+  bool
+  is_section_folded(Object* obj, unsigned int shndx) const;
+
+  void
   set_gc(Garbage_collection* gc)
   { this->gc_ = gc; }
 
   Garbage_collection*
-  gc()
+  gc() const
   { return this->gc_; }
 
   // During garbage collection, this keeps undefined symbols.
@@ -1670,6 +1684,7 @@ class Symbol_table
   // Information parsed from the version script, if any.
   const Version_script_info& version_script_;
   Garbage_collection* gc_;
+  Icf* icf_;
 };
 
 // We inline get_sized_symbol for efficiency.

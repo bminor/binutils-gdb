@@ -1,3 +1,49 @@
+2009-08-05  Sriraman Tallam  <tmsriram@google.com>
+	
+	* icf.cc: New file.
+	* icf.h: New file.
+	* Makefile.am (CCFILES): Add icf.cc.
+	(HFILES): Add icf.h
+	* Makefile.in: Regenerate.
+	* dynobj.h (Sized_dynobj::do_section_entsize): New function.
+	* gc.h (gc_process_relocs): Populate lists used by icf to contain
+	section, symbol and addend information for the relocs.
+	* gold.cc (queue_middle_tasks): Call identical code folding.
+	* gold.h: Add defines for multimap.
+	* layout.cc (Layout::create_symtab_sections): Add symtab as parameter
+	to the call of finalize_local_symbols.
+	* main.cc (main): Create object of class Icf.
+	* object.cc (Sized_relobj::do_layout): Allow this function to be
+	called twice during icf.
+	(Sized_relobj::do_finalize_local_symbols): Fold symbols corresponding
+	to sections marked as identical by icf.
+	(Sized_relobj::do_section_flags): Get section_flags from Symbols_data
+	when available.
+	(Sized_relobj::do_section_entsize): New function.
+	* object.h (Object::section_entsize): New function.
+	(Object::do_section_entsize): New pure virtual function.
+	(Relobj::finalize_local_symbols): Add new parameter.
+	(Relobj::do_section_entsize): New function.
+	* options.h (General_options::icf): New option.
+	(General_options::icf_iterations): New option.
+	(General_options::print_icf_sections): New option.
+	* plugin.cc (Sized_pluginobj::do_section_entsize): New function.
+	* plugin.h (Sized_pluginobj::do_section_entsize): New function.
+	* reloc.cc (Read_relocs::run): Delay scanning relocs when doing
+	icf.
+	* symtab.cc (Symbol_table::is_section_folded): New function.
+	(Symbol_table::sized_finalize_symbol):  Fold symbols corresponding
+	to sections marked as identical by icf.
+	* symtab.h (Symbol_table::set_icf): New function.
+	(Symbol_table::icf): New function.
+	(Symbol_table::is_section_folded): New function.
+	(Symbol_table::icf_): New data member.
+	* target-reloc.h (relocate_section): Ignore sections folded by icf.
+	* testsuite/Makefile.am: Add commands to build icf_test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/icf_test.sh: New file.
+	* testsuite/icf_test.cc: New file.
+
 2009-07-24  Chris Demetriou  <cgd@google.com>
 
 	* layout.cc (is_compressible_debug_section): Fix incorrect

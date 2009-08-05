@@ -684,6 +684,16 @@ Sized_pluginobj<size, big_endian>::do_section_flags(unsigned int)
   return 0;
 }
 
+// Return section entsize.  Not used for plugin objects.
+
+template<int size, bool big_endian>
+uint64_t
+Sized_pluginobj<size, big_endian>::do_section_entsize(unsigned int)
+{
+  gold_unreachable();
+  return 0;
+}
+
 // Return section address.  Not used for plugin objects.
 
 template<int size, bool big_endian>

@@ -383,6 +383,10 @@ class Sized_pluginobj : public Pluginobj
   uint64_t
   do_section_flags(unsigned int shndx);
 
+  // Return section entsize.
+  uint64_t
+  do_section_entsize(unsigned int shndx);
+
   // Return section address.
   uint64_t
   do_section_address(unsigned int shndx);

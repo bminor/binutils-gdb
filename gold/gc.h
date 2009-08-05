@@ -24,6 +24,7 @@
 #define GOLD_GC_H
 
 #include <queue>
+#include <vector>
 
 #include "elfcpp.h"
 #include "symtab.h"
@@ -53,45 +54,51 @@ class Garbage_collection
     { return reinterpret_cast<uintptr_t>(loc.first) ^ loc.second; }
   };
 
+ public:
+
   typedef Unordered_set<Section_id, Section_id_hash> Sections_reachable;
   typedef std::map<Section_id, Sections_reachable> Section_ref;
   typedef std::queue<Section_id> Worklist_type;
 
-  public :  
-    Garbage_collection() 
-      :is_worklist_ready_(false)
-    { }
+  Garbage_collection()
+  : is_worklist_ready_(false)
+  { }
 
-    // Accessor methods for the private members.
+  // Accessor methods for the private members.
 
-    Sections_reachable&
-    referenced_list()
-    { return referenced_list_; }
+  Sections_reachable&
+  referenced_list()
+  { return referenced_list_; }
 
-    Section_ref&
-    section_reloc_map()
-    { return section_reloc_map_; }
+  Section_ref&
+  section_reloc_map()
+  { return this->section_reloc_map_; }
 
-    Worklist_type&
-    worklist()
-    { return work_list_; }
- 
-    bool
-    is_worklist_ready()
-    { return is_worklist_ready_; }
+  Worklist_type&
+  worklist()
+  { return this->work_list_; }
 
-    void
-    worklist_ready()
-    { is_worklist_ready_ = true; }
+  bool
+  is_worklist_ready()
+  { return this->is_worklist_ready_; }
 
-    void
-    do_transitive_closure();
+  void
+  worklist_ready()
+  { this->is_worklist_ready_ = true; }
 
-  private :
-    Worklist_type work_list_;
-    bool is_worklist_ready_;
-    Section_ref section_reloc_map_;
-    Sections_reachable referenced_list_;
+  void
+  do_transitive_closure();
+
+  bool
+  is_section_garbage(Object* obj, unsigned int shndx)
+  { return (this->referenced_list().find(Section_id(obj, shndx))
+            == this->referenced_list().end()); }
+ private:
+
+  Worklist_type work_list_;
+  bool is_worklist_ready_;
+  Section_ref section_reloc_map_;
+  Sections_reachable referenced_list_;
 };
 
 // Data to pass between successive invocations of do_layout
@@ -120,10 +127,11 @@ struct Symbols_data
   section_size_type symbol_names_size;
 };
 
-// This function implements the  the generic part of reloc 
-// processing to map a section to all the sections it 
-// references through relocs.  It is used only during garbage 
-// collection.
+// This function implements the generic part of reloc
+// processing to map a section to all the sections it
+// references through relocs.  It is called only during
+// garbage collection (--gc-sections) and identical code
+// folding (--icf).
 
 template<int size, bool big_endian, typename Target_type, int sh_type,
 	 typename Scan>
@@ -133,8 +141,8 @@ gc_process_relocs(
     Symbol_table* symtab,
     Layout*,
     Target_type* ,
-    Sized_relobj<size, big_endian>* object,
-    unsigned int data_shndx,
+    Sized_relobj<size, big_endian>* src_obj,
+    unsigned int src_indx,
     const unsigned char* prelocs,
     size_t reloc_count,
     Output_section*,
@@ -142,22 +150,36 @@ gc_process_relocs(
     size_t local_count,
     const unsigned char* plocal_syms)
 {
-  Object *src_obj, *dst_obj;
-  unsigned int src_indx, dst_indx;
+  Object *dst_obj;
+  unsigned int dst_indx;
 
-  src_obj = object;
-  src_indx = data_shndx; 
-  
   typedef typename Reloc_types<sh_type, size, big_endian>::Reloc Reltype;
   const int reloc_size = Reloc_types<sh_type, size, big_endian>::reloc_size;
   const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
+
+  std::vector<Section_id>* secvec = NULL;
+  std::vector<Symbol*>* symvec = NULL;
+  std::vector<std::pair<long long, long long> >* addendvec = NULL;
+  bool is_icf_tracked = false;
+
+  if (parameters->options().icf()
+      && is_prefix_of(".text.", (src_obj)->section_name(src_indx).c_str()))
+    {
+      is_icf_tracked = true;
+      Section_id src_id(src_obj, src_indx);
+      secvec = &symtab->icf()->section_reloc_list()[src_id];
+      symvec = &symtab->icf()->symbol_reloc_list()[src_id];
+      addendvec = &symtab->icf()->addend_reloc_list()[src_id];
+    }
 
   for (size_t i = 0; i < reloc_count; ++i, prelocs += reloc_size)
     {
       Reltype reloc(prelocs);
       typename elfcpp::Elf_types<size>::Elf_WXword r_info = reloc.get_r_info();
       unsigned int r_sym = elfcpp::elf_r_sym<size>(r_info);
-      
+      typename elfcpp::Elf_types<size>::Elf_Swxword addend =
+      Reloc_types<sh_type, size, big_endian>::get_reloc_addend_noerror(&reloc);
+
       if (r_sym < local_count)
         {
           gold_assert(plocal_syms != NULL);
@@ -165,17 +187,26 @@ gc_process_relocs(
                                                       + r_sym * sym_size);
           unsigned int shndx = lsym.get_st_shndx();
           bool is_ordinary;
-          shndx = object->adjust_sym_shndx(r_sym, shndx, &is_ordinary);
-          if (!is_ordinary) 
+          shndx = src_obj->adjust_sym_shndx(r_sym, shndx, &is_ordinary);
+          if (!is_ordinary)
             continue;
           dst_obj = src_obj;
-          if (shndx == src_indx) 
-            continue;
           dst_indx = shndx;
+          Section_id dst_id(dst_obj, dst_indx);
+          if (is_icf_tracked)
+            {
+              (*secvec).push_back(dst_id);
+              (*symvec).push_back(NULL);
+              long long symvalue = static_cast<long long>(lsym.get_st_value());
+              (*addendvec).push_back(std::make_pair(symvalue,
+                                              static_cast<long long>(addend)));
+            }
+          if (shndx == src_indx)
+            continue;
         }
       else
         {
-          Symbol* gsym = object->global_symbol(r_sym);
+          Symbol* gsym = src_obj->global_symbol(r_sym);
           gold_assert(gsym != NULL);
           if (gsym->is_forwarder())
             gsym = symtab->resolve_forwards(gsym);
@@ -186,19 +217,34 @@ gc_process_relocs(
           dst_indx = gsym->shndx(&is_ordinary);
           if (!is_ordinary)
             continue;
+          Section_id dst_id(dst_obj, dst_indx);
+          if (is_icf_tracked)
+            {
+              (*secvec).push_back(dst_id);
+              (*symvec).push_back(gsym);
+              Sized_symbol<size>* sized_gsym =
+                        static_cast<Sized_symbol<size>* >(gsym);
+              long long symvalue =
+                        static_cast<long long>(sized_gsym->value());
+              (*addendvec).push_back(std::make_pair(symvalue,
+                                        static_cast<long long>(addend)));
+            }
         }
-      Section_id p1(src_obj, src_indx);
-      Section_id p2(dst_obj, dst_indx);
-      Garbage_collection::Section_ref::iterator map_it;
-      map_it = symtab->gc()->section_reloc_map().find(p1);
-      if (map_it == symtab->gc()->section_reloc_map().end())
+      if (parameters->options().gc_sections())
         {
-          symtab->gc()->section_reloc_map()[p1].insert(p2);
-        }
-      else
-        {
-          Garbage_collection::Sections_reachable& v(map_it->second);
-          v.insert(p2);
+          Section_id src_id(src_obj, src_indx);
+          Section_id dst_id(dst_obj, dst_indx);
+          Garbage_collection::Section_ref::iterator map_it;
+          map_it = symtab->gc()->section_reloc_map().find(src_id);
+          if (map_it == symtab->gc()->section_reloc_map().end())
+            {
+              symtab->gc()->section_reloc_map()[src_id].insert(dst_id);
+            }
+          else
+            {
+              Garbage_collection::Sections_reachable& v(map_it->second);
+              v.insert(dst_id);
+            }
         }
     }
   return;

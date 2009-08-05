@@ -65,12 +65,12 @@ Read_relocs::run(Workqueue* workqueue)
   this->object_->set_relocs_data(rd);
   this->object_->release();
 
-  // If garbage collection is desired, we must process the relocs
-  // instead of scanning the relocs as reloc processing is necessary 
-  // to determine unused sections.
-  if (parameters->options().gc_sections())
-    {  
-      workqueue->queue_next(new Gc_process_relocs(this->options_, 
+  // If garbage collection or identical comdat folding is desired, we  
+  // process the relocs first before scanning them.  Scanning of relocs is
+  // done only after garbage or identical sections is identified.
+  if (parameters->options().gc_sections() || parameters->options().icf())
+    {
+      workqueue->queue_next(new Gc_process_relocs(this->options_,
                                                   this->symtab_,
                                                   this->layout_, 
                                                   this->object_, rd,
@@ -418,7 +418,7 @@ Sized_relobj<size, big_endian>::do_scan_relocs(const General_options& options,
       // When garbage collection is on, unreferenced sections are not included
       // in the link that would have been included normally. This is known only
       // after Read_relocs hence this check has to be done again.
-      if (parameters->options().gc_sections())
+      if (parameters->options().gc_sections() || parameters->options().icf())
         {
           if (p->output_section == NULL)
             continue;

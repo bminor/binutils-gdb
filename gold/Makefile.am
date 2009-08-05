@@ -51,6 +51,7 @@ CCFILES = \
         gc.cc \
 	gold.cc \
 	gold-threads.cc \
+	icf.cc \
 	incremental.cc \
 	layout.cc \
 	mapfile.cc \
@@ -93,6 +94,7 @@ HFILES = \
         gc.h \
 	gold.h \
 	gold-threads.h \
+	icf.h \
 	layout.h \
 	mapfile.h \
 	merge.h \

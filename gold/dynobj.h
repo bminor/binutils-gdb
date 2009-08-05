@@ -198,6 +198,11 @@ class Sized_dynobj : public Dynobj
   do_section_flags(unsigned int shndx)
   { return this->elf_file_.section_flags(shndx); }
 
+  // Not used for dynobj.
+  uint64_t
+  do_section_entsize(unsigned int )
+  { gold_unreachable(); }
+
   // Return section address.
   uint64_t
   do_section_address(unsigned int shndx)

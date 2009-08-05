@@ -489,7 +489,7 @@ Symbol_table::Symbol_table(unsigned int count,
   : saw_undefined_(0), offset_(0), table_(count), namepool_(),
     forwarders_(), commons_(), tls_commons_(), small_commons_(),
     large_commons_(), forced_locals_(), warnings_(),
-    version_script_(version_script), gc_(NULL)
+    version_script_(version_script), gc_(NULL), icf_(NULL)
 {
   namepool_.reserve(count);
 }
@@ -514,6 +514,13 @@ Symbol_table::Symbol_table_eq::operator()(const Symbol_table_key& k1,
 					  const Symbol_table_key& k2) const
 {
   return k1.first == k2.first && k1.second == k2.second;
+}
+
+bool
+Symbol_table::is_section_folded(Object* obj, unsigned int shndx) const
+{
+  return (parameters->options().icf()
+          && this->icf_->is_section_folded(obj, shndx));
 }
 
 // For symbols that have been listed with -u option, add them to the
@@ -2417,8 +2424,22 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
 	  {
 	    Relobj* relobj = static_cast<Relobj*>(symobj);
 	    Output_section* os = relobj->output_section(shndx);
+            uint64_t secoff64 = relobj->output_section_offset(shndx);
 
-	    if (os == NULL)
+            if (this->is_section_folded(relobj, shndx))
+              {
+                gold_assert(os == NULL);
+                // Get the os of the section it is folded onto.
+                Section_id folded = this->icf_->get_folded_section(relobj,
+                                                                   shndx);
+                gold_assert(folded.first != NULL);
+                Relobj* folded_obj = reinterpret_cast<Relobj*>(folded.first);
+                os = folded_obj->output_section(folded.second);  
+                gold_assert(os != NULL);
+                secoff64 = folded_obj->output_section_offset(folded.second);
+              }
+
+ 	    if (os == NULL)
 	      {
 		sym->set_symtab_index(-1U);
                 bool static_or_reloc = (parameters->doing_static_link() ||
@@ -2428,10 +2449,10 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
 		return false;
 	      }
 
-            uint64_t secoff64 = relobj->output_section_offset(shndx);
             if (secoff64 == -1ULL)
               {
                 // The section needs special handling (e.g., a merge section).
+
 	        value = os->output_address(relobj, shndx, sym->value());
 	      }
             else
@@ -2642,6 +2663,19 @@ Symbol_table::sized_write_globals(const Stringpool* sympool,
 		  {
 		    Relobj* relobj = static_cast<Relobj*>(symobj);
 		    Output_section* os = relobj->output_section(in_shndx);
+                    if (this->is_section_folded(relobj, in_shndx))
+                      {
+                        // This global symbol must be written out even though
+                        // it is folded.
+                        // Get the os of the section it is folded onto.
+                        Section_id folded =
+                             this->icf_->get_folded_section(relobj, in_shndx);
+                        gold_assert(folded.first !=NULL);
+                        Relobj* folded_obj = 
+                          reinterpret_cast<Relobj*>(folded.first);
+                        os = folded_obj->output_section(folded.second);  
+                        gold_assert(os != NULL);
+                      }
 		    gold_assert(os != NULL);
 		    shndx = os->out_shndx();
 

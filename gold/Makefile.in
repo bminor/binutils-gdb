@@ -82,10 +82,10 @@ am__objects_1 = archive.$(OBJEXT) binary.$(OBJEXT) common.$(OBJEXT) \
 	dirsearch.$(OBJEXT) dynobj.$(OBJEXT) dwarf_reader.$(OBJEXT) \
 	ehframe.$(OBJEXT) errors.$(OBJEXT) expression.$(OBJEXT) \
 	fileread.$(OBJEXT) gc.$(OBJEXT) gold.$(OBJEXT) \
-	gold-threads.$(OBJEXT) incremental.$(OBJEXT) layout.$(OBJEXT) \
-	mapfile.$(OBJEXT) merge.$(OBJEXT) object.$(OBJEXT) \
-	options.$(OBJEXT) output.$(OBJEXT) parameters.$(OBJEXT) \
-	plugin.$(OBJEXT) readsyms.$(OBJEXT) \
+	gold-threads.$(OBJEXT) icf.$(OBJEXT) incremental.$(OBJEXT) \
+	layout.$(OBJEXT) mapfile.$(OBJEXT) merge.$(OBJEXT) \
+	object.$(OBJEXT) options.$(OBJEXT) output.$(OBJEXT) \
+	parameters.$(OBJEXT) plugin.$(OBJEXT) readsyms.$(OBJEXT) \
 	reduced_debug_output.$(OBJEXT) reloc.$(OBJEXT) \
 	resolve.$(OBJEXT) script-sections.$(OBJEXT) script.$(OBJEXT) \
 	stringpool.$(OBJEXT) symtab.$(OBJEXT) target.$(OBJEXT) \
@@ -337,6 +337,7 @@ CCFILES = \
         gc.cc \
 	gold.cc \
 	gold-threads.cc \
+	icf.cc \
 	incremental.cc \
 	layout.cc \
 	mapfile.cc \
@@ -379,6 +380,7 @@ HFILES = \
         gc.h \
 	gold.h \
 	gold-threads.h \
+	icf.h \
 	layout.h \
 	mapfile.h \
 	merge.h \
@@ -565,6 +567,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gold-threads.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gold.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/i386.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/icf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/incremental.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/layout.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@

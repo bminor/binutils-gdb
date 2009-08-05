@@ -41,6 +41,7 @@
 #include "reloc.h"
 #include "defstd.h"
 #include "plugin.h"
+#include "icf.h"
 
 namespace gold
 {
@@ -203,10 +204,10 @@ queue_initial_tasks(const General_options& options,
     }
 
   if (parameters->options().relocatable()
-      && parameters->options().gc_sections())
-    gold_error(_("cannot mix -r with garbage collection"));
+      && (parameters->options().gc_sections() || parameters->options().icf()))
+    gold_error(_("cannot mix -r with --gc-sections or --icf"));
 
-  if (parameters->options().gc_sections())
+  if (parameters->options().gc_sections() || parameters->options().icf())
     {
       workqueue->queue(new Task_function(new Gc_runner(options,
                                                        input_objects,
@@ -309,8 +310,23 @@ queue_middle_tasks(const General_options& options,
       gold_assert(symtab->gc() != NULL);
       // Do a transitive closure on all references to determine the worklist.
       symtab->gc()->do_transitive_closure();
-      // Call do_layout again to determine the output_sections for all 
-      // referenced input sections.
+    }
+
+  // If identical code folding (--icf) is chosen it makes sense to do it 
+  // only after garbage collection (--gc-sections) as we do not want to 
+  // be folding sections that will be garbage.
+  if (parameters->options().icf())
+    {
+      symtab->icf()->find_identical_sections(input_objects, symtab);
+    }
+
+  // Call Object::layout for the second time to determine the 
+  // output_sections for all referenced input sections.  When 
+  // --gc-sections or --icf is turned on, Object::layout is 
+  // called twice.  It is called the first time when the 
+  // symbols are added.
+  if (parameters->options().gc_sections() || parameters->options().icf())
+    {
       for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
            p != input_objects->relobj_end();
            ++p)
@@ -318,6 +334,7 @@ queue_middle_tasks(const General_options& options,
           (*p)->layout(symtab, layout, NULL);
         }
     }
+
   // Layout deferred objects due to plugins.
   if (parameters->options().has_plugins())
     {
@@ -325,7 +342,8 @@ queue_middle_tasks(const General_options& options,
       gold_assert(plugins != NULL);
       plugins->layout_deferred_objects();
     }     
-  if (parameters->options().gc_sections())
+
+  if (parameters->options().gc_sections() || parameters->options().icf())
     {
       for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
            p != input_objects->relobj_end();
@@ -420,7 +438,7 @@ queue_middle_tasks(const General_options& options,
 
   // If doing garbage collection, the relocations have already been read.
   // Otherwise, read and scan the relocations.
-  if (parameters->options().gc_sections())
+  if (parameters->options().gc_sections() || parameters->options().icf())
     {
       for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
            p != input_objects->relobj_end();

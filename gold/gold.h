@@ -75,6 +75,7 @@
 
 #define Unordered_set std::tr1::unordered_set
 #define Unordered_map std::tr1::unordered_map
+#define Unordered_multimap std::tr1::unordered_multimap
 
 #define reserve_unordered_map(map, n) ((map)->rehash(n))
 
@@ -86,6 +87,7 @@
 
 #define Unordered_set __gnu_cxx::hash_set
 #define Unordered_map __gnu_cxx::hash_map
+#define Unordered_multimap __gnu_cxx::hash_multimap
 
 namespace __gnu_cxx
 {
@@ -119,6 +121,7 @@ struct hash<T*>
 
 #define Unordered_set std::set
 #define Unordered_map std::map
+#define Unordered_map std::multimap
 
 #define reserve_unordered_map(map, n)
 
