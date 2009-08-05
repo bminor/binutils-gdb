@@ -668,6 +668,17 @@ static bfd *reldyn_sorting_bfd;
   (   ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) != E_MIPS_ARCH_1) \
    || ((elf_elfheader (abfd)->e_flags & EF_MIPS_MACH) == E_MIPS_MACH_3900))
 
+/* True if ABFD is for CPUs that are faster if JAL is converted to BAL.
+   This should be safe for all architectures.  We enable this predicate
+   for RM9000 for now.  */
+#define JAL_TO_BAL_P(abfd) \
+  ((elf_elfheader (abfd)->e_flags & EF_MIPS_MACH) == E_MIPS_MACH_9000)
+
+/* True if ABFD is for CPUs that are faster if JALR is converted to BAL.
+   This should be safe for all architectures.  We enable this predicate for
+   all CPUs.  */
+#define JALR_TO_BAL_P(abfd) 1
+
 /* True if ABFD is a PIC object.  */
 #define PIC_OBJECT_P(abfd) \
   ((elf_elfheader (abfd)->e_flags & EF_MIPS_PIC) != 0)
@@ -5586,15 +5597,15 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
       x = (x & ~(0x3f << 26)) | (jalx_opcode << 26);
     }
 
-  /* On the RM9000, bal is faster than jal, because bal uses branch
-     prediction hardware.  If we are linking for the RM9000, and we
-     see jal, and bal fits, use it instead.  Note that this
-     transformation should be safe for all architectures.  */
-  if (bfd_get_mach (input_bfd) == bfd_mach_mips9000
-      && !info->relocatable
+  /* Try converting JAL and JALR to BAL, if the target is in range.  */
+  if (!info->relocatable
       && !require_jalx
-      && ((r_type == R_MIPS_26 && (x >> 26) == 0x3)	    /* jal addr */
-	  || (r_type == R_MIPS_JALR && x == 0x0320f809)))   /* jalr t9 */
+      && ((JAL_TO_BAL_P (input_bfd)
+	   && r_type == R_MIPS_26
+	   && (x >> 26) == 0x3)		/* jal addr */
+	  || (JALR_TO_BAL_P (input_bfd)
+	      && r_type == R_MIPS_JALR
+	      && x == 0x0320f809)))	/* jalr t9 */
     {
       bfd_vma addr;
       bfd_vma dest;

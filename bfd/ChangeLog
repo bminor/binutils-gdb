@@ -1,3 +1,13 @@
+2009-08-05  Chao-ying Fu  <fu@mips.com>
+
+	* elf32-mips.c (mips_reloc_map): Add BFD_RELOC_MIPS_JALR.
+	* elfxx-mips.c (JAL_TO_BAL_P): New define to transform JAL to BAL
+	for CPUs.  It is true for RM9000.
+	(JALR_TO_BAL_P): New define to transform JALR to BAL.  It is true
+	for all CPUs.
+	(mips_elf_perform_relocation): Use JAL_TO_BAL_P and JALR_TO_BAL_P
+	to guard the transformation.
+
 2009-08-05  Trevor Smigiel  <Trevor_Smigiel@playstation.sony.com>
 
 	* elf32-spu.h (spu_elf_params): Add member emit_fixups.
