@@ -26,6 +26,7 @@ Disassembly of section .text:
 0+0034 <[^>]*> addiu	t9,t9,0
 [ 	]*34: R_MIPS_LO16	.text
 0+0038 <[^>]*> jalr	t9
+[ 	]*38: R_MIPS_JALR	.text
 0+003c <[^>]*> nop
 0+0040 <[^>]*> lw	gp,0\(sp\)
 0+0044 <[^>]*> nop
@@ -33,6 +34,7 @@ Disassembly of section .text:
 [ 	]*48: R_MIPS_CALL16	weak_text_label
 0+004c <[^>]*> nop
 0+0050 <[^>]*> jalr	t9
+[ 	]*50: R_MIPS_JALR	weak_text_label
 0+0054 <[^>]*> nop
 0+0058 <[^>]*> lw	gp,0\(sp\)
 0+005c <[^>]*> nop
@@ -40,6 +42,7 @@ Disassembly of section .text:
 [ 	]*60: R_MIPS_CALL16	external_text_label
 0+0064 <[^>]*> nop
 0+0068 <[^>]*> jalr	t9
+[ 	]*68: R_MIPS_JALR	external_text_label
 0+006c <[^>]*> nop
 0+0070 <[^>]*> lw	gp,0\(sp\)
 0+0074 <[^>]*> b	0+0000 <text_label>

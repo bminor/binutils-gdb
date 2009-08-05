@@ -1,3 +1,8 @@
+2009-08-05  Chao-ying Fu  <fu@mips.com>
+
+	* gas/mips/jal-svr4pic.d, gas/mips/jal-xgot.d,
+	gas/mips/mips-abi32-pic2.d: Add R_MIPS_JALR relocations after jalr.
+
 2009-08-04  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* gas/arm/missing.s: New.
