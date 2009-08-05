@@ -37,7 +37,7 @@ static struct spu_elf_params params =
   &spu_elf_load_ovl_mgr,
   &spu_elf_open_overlay_script,
   &spu_elf_relink,
-  0, ovly_normal, 0, 0, 0, 0, 0, 0, 0,
+  0, ovly_normal, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0x3ffff,
   1, 0, 16, 0, 0, 2000
 };
@@ -315,6 +315,10 @@ spu_before_allocation (void)
       /* We must not cache anything from the preliminary sizing.  */
       lang_reset_memory_regions ();
     }
+
+  if (is_spu_target ()
+      && !link_info.relocatable)
+    spu_elf_size_sections (link_info.output_bfd, &link_info);
 
   gld${EMULATION_NAME}_before_allocation ();
 }
@@ -600,6 +604,7 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_SPU_RESERVED_SPACE	(OPTION_SPU_FIXED_SPACE + 1)
 #define OPTION_SPU_EXTRA_STACK		(OPTION_SPU_RESERVED_SPACE + 1)
 #define OPTION_SPU_NO_AUTO_OVERLAY	(OPTION_SPU_EXTRA_STACK + 1)
+#define OPTION_SPU_EMIT_FIXUPS		(OPTION_SPU_NO_AUTO_OVERLAY + 1)
 '
 
 PARSE_AND_LIST_LONGOPTS='
@@ -625,6 +630,7 @@ PARSE_AND_LIST_LONGOPTS='
   { "reserved-space", required_argument, NULL, OPTION_SPU_RESERVED_SPACE },
   { "extra-stack-space", required_argument, NULL, OPTION_SPU_EXTRA_STACK },
   { "no-auto-overlay", optional_argument, NULL, OPTION_SPU_NO_AUTO_OVERLAY },
+  { "emit-fixups", optional_argument, NULL, OPTION_SPU_EMIT_FIXUPS },
 '
 
 PARSE_AND_LIST_OPTIONS='
@@ -811,6 +817,10 @@ PARSE_AND_LIST_ARGS_CASES='
 	  tmp_file_list = tf;
 	  break;
 	}
+      break;
+
+    case OPTION_SPU_EMIT_FIXUPS:
+      params.emit_fixups = 1;
       break;
 '
 

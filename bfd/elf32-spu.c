@@ -344,6 +344,9 @@ struct spu_link_hash_table
   /* Count of overlay stubs needed in non-overlay area.  */
   unsigned int non_ovly_stub;
 
+  /* Pointer to the fixup section */
+  asection *sfixup;
+
   /* Set on error.  */
   unsigned int stub_err : 1;
 };
@@ -558,6 +561,7 @@ get_sym_h (struct elf_link_hash_entry **hp,
 bfd_boolean
 spu_elf_create_sections (struct bfd_link_info *info)
 {
+  struct spu_link_hash_table *htab = spu_hash_table (info);
   bfd *ibfd;
 
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
@@ -598,6 +602,19 @@ spu_elf_create_sections (struct bfd_link_info *info)
       memcpy (data + 12 + ((sizeof (SPU_PLUGIN_NAME) + 3) & -4),
 	      bfd_get_filename (info->output_bfd), name_len);
       s->contents = data;
+    }
+
+  if (htab->params->emit_fixups)
+    {
+      asection *s;
+      flagword flags;
+      ibfd = info->input_bfds;
+      flags = SEC_LOAD | SEC_ALLOC | SEC_READONLY | SEC_HAS_CONTENTS
+	      | SEC_IN_MEMORY;
+      s = bfd_make_section_anyway_with_flags (ibfd, ".fixup", flags);
+      if (s == NULL || !bfd_set_section_alignment (ibfd, s, 2))
+	return FALSE;
+      htab->sfixup = s;
     }
 
   return TRUE;
@@ -4718,6 +4735,48 @@ spu_elf_count_relocs (struct bfd_link_info *info, asection *sec)
   return count;
 }
 
+/* Functions for adding fixup records to .fixup */
+
+#define FIXUP_RECORD_SIZE 4
+
+#define FIXUP_PUT(output_bfd,htab,index,addr) \
+	  bfd_put_32 (output_bfd, addr, \
+		      htab->sfixup->contents + FIXUP_RECORD_SIZE * (index))
+#define FIXUP_GET(output_bfd,htab,index) \
+	  bfd_get_32 (output_bfd, \
+		      htab->sfixup->contents + FIXUP_RECORD_SIZE * (index))
+
+/* Store OFFSET in .fixup.  This assumes it will be called with an
+   increasing OFFSET.  When this OFFSET fits with the last base offset,
+   it just sets a bit, otherwise it adds a new fixup record.  */
+static void
+spu_elf_emit_fixup (bfd * output_bfd, struct bfd_link_info *info,
+		    bfd_vma offset)
+{
+  struct spu_link_hash_table *htab = spu_hash_table (info);
+  asection *sfixup = htab->sfixup;
+  bfd_vma qaddr = offset & ~(bfd_vma) 15;
+  bfd_vma bit = ((bfd_vma) 8) >> ((offset & 15) >> 2);
+  if (sfixup->reloc_count == 0)
+    {
+      FIXUP_PUT (output_bfd, htab, 0, qaddr | bit);
+      sfixup->reloc_count++;
+    }
+  else
+    {
+      bfd_vma base = FIXUP_GET (output_bfd, htab, sfixup->reloc_count - 1);
+      if (qaddr != (base & ~(bfd_vma) 15))
+	{
+	  if ((sfixup->reloc_count + 1) * FIXUP_RECORD_SIZE > sfixup->size)
+	    (*_bfd_error_handler) (_("fatal error while creating .fixup"));
+	  FIXUP_PUT (output_bfd, htab, sfixup->reloc_count, qaddr | bit);
+	  sfixup->reloc_count++;
+	}
+      else
+	FIXUP_PUT (output_bfd, htab, sfixup->reloc_count - 1, base | bit);
+    }
+}
+
 /* Apply RELOCS to CONTENTS of INPUT_SECTION from INPUT_BFD.  */
 
 static int
@@ -4908,6 +4967,16 @@ spu_elf_relocate_section (bfd *output_bfd,
 		  relocation += set_id << 18;
 		}
 	    }
+	}
+
+      if (htab->params->emit_fixups && !info->relocatable
+	  && (input_section->flags & SEC_ALLOC) != 0
+	  && r_type == R_SPU_ADDR32)
+	{
+	  bfd_vma offset;
+	  offset = rel->r_offset + input_section->output_section->vma
+		   + input_section->output_offset;
+	  spu_elf_emit_fixup (output_bfd, info, offset);
 	}
 
       if (unresolved_reloc)
@@ -5302,6 +5371,72 @@ spu_elf_modify_program_headers (bfd *abfd, struct bfd_link_info *info)
 	phdr[i].p_memsz += adjust;
       }
 
+  return TRUE;
+}
+
+bfd_boolean
+spu_elf_size_sections (bfd * output_bfd, struct bfd_link_info *info)
+{
+  struct spu_link_hash_table *htab = spu_hash_table (info);
+  if (htab->params->emit_fixups)
+    {
+      asection *sfixup = htab->sfixup;
+      int fixup_count = 0;
+      bfd *ibfd;
+      size_t size;
+
+      for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+	{
+	  asection *isec;
+
+	  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
+	    continue;
+
+	  /* Walk over each section attached to the input bfd.  */
+	  for (isec = ibfd->sections; isec != NULL; isec = isec->next)
+	    {
+	      Elf_Internal_Rela *internal_relocs, *irelaend, *irela;
+	      bfd_vma base_end;
+
+	      /* If there aren't any relocs, then there's nothing more
+	         to do.  */
+	      if ((isec->flags & SEC_RELOC) == 0
+		  || isec->reloc_count == 0)
+		continue;
+
+	      /* Get the relocs.  */
+	      internal_relocs =
+		_bfd_elf_link_read_relocs (ibfd, isec, NULL, NULL,
+					   info->keep_memory);
+	      if (internal_relocs == NULL)
+		return FALSE;
+
+	      /* 1 quadword can contain up to 4 R_SPU_ADDR32
+	         relocations.  They are stored in a single word by
+	         saving the upper 28 bits of the address and setting the
+	         lower 4 bits to a bit mask of the words that have the
+	         relocation.  BASE_END keeps track of the next quadword. */
+	      irela = internal_relocs;
+	      irelaend = irela + isec->reloc_count;
+	      base_end = 0;
+	      for (; irela < irelaend; irela++)
+		if (ELF32_R_TYPE (irela->r_info) == R_SPU_ADDR32
+		    && irela->r_offset >= base_end)
+		  {
+		    base_end = (irela->r_offset & ~(bfd_vma) 15) + 16;
+		    fixup_count++;
+		  }
+	    }
+	}
+
+      /* We always have a NULL fixup as a sentinel */
+      size = (fixup_count + 1) * FIXUP_RECORD_SIZE;
+      if (!bfd_set_section_size (output_bfd, sfixup, size))
+	return FALSE;
+      sfixup->contents = (bfd_byte *) bfd_zalloc (info->input_bfds, size);
+      if (sfixup->contents == NULL)
+	return FALSE;
+    }
   return TRUE;
 }
 

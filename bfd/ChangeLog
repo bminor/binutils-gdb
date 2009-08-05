@@ -1,3 +1,13 @@
+2009-08-05  Trevor Smigiel  <Trevor_Smigiel@playstation.sony.com>
+
+	* elf32-spu.h (spu_elf_params): Add member emit_fixups.
+	(spu_elf_size_sections): Declare prototype.
+	* elf32-spu.c (spu_link_hash_table): Add member sfixup.
+	(FIXUP_RECORD_SIZE, FIXUP_GET, FIXUP_PUT): New macros.
+	(spu_elf_emit_fixup): New function.
+	(spu_elf_relocate_section): Emit fixup for each SPU_ADDR32.
+	(spu_elf_size_sections): New function.
+
 2009-08-05  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_stub_type): Add arm_stub_a8_veneer_lwm.
