@@ -15257,6 +15257,15 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
 						ISA_MIPS32R2,	CPU_MIPS32R2 },
   { "74kx",           MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_DSPR2,
 						ISA_MIPS32R2,	CPU_MIPS32R2 },
+  /* 1004K cores are multiprocessor versions of the 34K.  */
+  { "1004kc",         MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_MT,
+						ISA_MIPS32R2,	CPU_MIPS32R2 },
+  { "1004kf2_1",      MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_MT,
+						ISA_MIPS32R2,	CPU_MIPS32R2 },
+  { "1004kf",         MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_MT,
+						ISA_MIPS32R2,	CPU_MIPS32R2 },
+  { "1004kf1_1",      MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_MT,
+						ISA_MIPS32R2,	CPU_MIPS32R2 },
 
   /* MIPS 64 */
   { "5kc",            0,			ISA_MIPS64,	CPU_MIPS64 },
