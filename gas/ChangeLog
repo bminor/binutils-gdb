@@ -1,3 +1,9 @@
+2009-08-05  Eric B. Weddington  <eric.weddington@atmel.com>
+
+	* config/tc-avr.c (mcu_types): Add attiny2313a, attiny4313, attiny261a,
+	attiny861a, atmega644pa, attiny24a, attiny44a.
+	* doc/c-avr.texi: Likewise.
+
 2009-08-04  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* doc/c-mips.texi (MIPS Opts): List 1004K options for -march.
