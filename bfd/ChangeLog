@@ -1,3 +1,14 @@
+2009-08-05  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_stub_type): Add arm_stub_a8_veneer_lwm.
+	(arm_build_one_stub): Build a8 veneers as a separate pass.
+	(cortex_a8_erratum_scan): Add prev_num_a8_fixes and stub_changed_p
+	parameters.  Use them to check if we create a different a8 fixup
+	than the previous pass.
+	(elf32_arm_size_stubs): Move scope of stub_changed and
+	prev_num_a8_fixes into main loop.
+	(elf32_arm_build_stubs): Build a8 veneers in a second pass.
+
 2009-08-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_relax_section): Correct conditions under

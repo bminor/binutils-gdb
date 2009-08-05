@@ -2228,6 +2228,8 @@ static const insn_sequence elf32_arm_stub_a8_veneer_blx[] =
 enum elf32_arm_stub_type {
   arm_stub_none,
   DEF_STUBS
+  /* Note the first a8_veneer type */
+  arm_stub_a8_veneer_lwm = arm_stub_a8_veneer_b_cond
 };
 #undef DEF_STUB
 
@@ -3437,6 +3439,12 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
   htab = elf32_arm_hash_table (info);
   stub_sec = stub_entry->stub_sec;
 
+  if ((htab->fix_cortex_a8 < 0)
+      != (stub_entry->stub_type >= arm_stub_a8_veneer_lwm))
+    /* We have to do the a8 fixes last, as they are less aligned than
+       the other veneers.  */
+    return TRUE;
+  
   /* Make a note of the offset within the stubs for this entry.  */
   stub_entry->stub_offset = stub_sec->size;
   loc = stub_sec->contents + stub_entry->stub_offset;
@@ -3893,7 +3901,9 @@ cortex_a8_erratum_scan (bfd *input_bfd,
 			unsigned int *num_a8_fixes_p,
 			unsigned int *a8_fix_table_size_p,
 			struct a8_erratum_reloc *a8_relocs,
-			unsigned int num_a8_relocs)
+			unsigned int num_a8_relocs,
+			unsigned prev_num_a8_fixes,
+			bfd_boolean *stub_changed_p)
 {
   asection *section;
   struct elf32_arm_link_hash_table *htab = elf32_arm_hash_table (info);
@@ -4105,7 +4115,7 @@ cortex_a8_erratum_scan (bfd *input_bfd,
 
                       if (((base_vma + i) & ~0xfff) == (target & ~0xfff))
                         {
-                          char *stub_name;
+                          char *stub_name = NULL;
 
                           if (num_a8_fixes == a8_fix_table_size)
                             {
@@ -4115,9 +4125,28 @@ cortex_a8_erratum_scan (bfd *input_bfd,
                                 * a8_fix_table_size);
                             }
 
-                          stub_name = bfd_malloc (8 + 1 + 8 + 1);
-                          if (stub_name != NULL)
-                            sprintf (stub_name, "%x:%x", section->id, i);
+			  if (num_a8_fixes < prev_num_a8_fixes)
+			    {
+			      /* If we're doing a subsequent scan,
+				 check if we've found the same fix as
+				 before, and try and reuse the stub
+				 name.  */
+			      stub_name = a8_fixes[num_a8_fixes].stub_name;
+			      if ((a8_fixes[num_a8_fixes].section != section)
+				  || (a8_fixes[num_a8_fixes].offset != i))
+				{
+				  free (stub_name);
+				  stub_name = NULL;
+				  *stub_changed_p = TRUE;
+				}
+			    }
+
+			  if (!stub_name)
+			    {
+			      stub_name = bfd_malloc (8 + 1 + 8 + 1);
+			      if (stub_name != NULL)
+				sprintf (stub_name, "%x:%x", section->id, i);
+			    }
 
                           a8_fixes[num_a8_fixes].input_bfd = input_bfd;
                           a8_fixes[num_a8_fixes].section = section;
@@ -4165,10 +4194,9 @@ elf32_arm_size_stubs (bfd *output_bfd,
 {
   bfd_size_type stub_group_size;
   bfd_boolean stubs_always_after_branch;
-  bfd_boolean stub_changed = 0;
   struct elf32_arm_link_hash_table *htab = elf32_arm_hash_table (info);
   struct a8_erratum_fix *a8_fixes = NULL;
-  unsigned int num_a8_fixes = 0, prev_num_a8_fixes = 0, a8_fix_table_size = 10;
+  unsigned int num_a8_fixes = 0, a8_fix_table_size = 10;
   struct a8_erratum_reloc *a8_relocs = NULL;
   unsigned int num_a8_relocs = 0, a8_reloc_table_size = 10, i;
 
@@ -4223,9 +4251,10 @@ elf32_arm_size_stubs (bfd *output_bfd,
       bfd *input_bfd;
       unsigned int bfd_indx;
       asection *stub_sec;
+      bfd_boolean stub_changed = FALSE;
+      unsigned prev_num_a8_fixes = num_a8_fixes;
 
       num_a8_fixes = 0;
-
       for (input_bfd = info->input_bfds, bfd_indx = 0;
 	   input_bfd != NULL;
 	   input_bfd = input_bfd->link_next, bfd_indx++)
@@ -4452,6 +4481,7 @@ elf32_arm_size_stubs (bfd *output_bfd,
 			{
 			  /* The proper stub has already been created.  */
 			  free (stub_name);
+			  stub_entry->target_value = sym_value;
 			  break;
 			}
 
@@ -4548,18 +4578,21 @@ elf32_arm_size_stubs (bfd *output_bfd,
           if (htab->fix_cortex_a8)
 	    {
               /* Sort relocs which might apply to Cortex-A8 erratum.  */
-              qsort (a8_relocs, num_a8_relocs, sizeof (struct a8_erratum_reloc),
+              qsort (a8_relocs, num_a8_relocs,
+		     sizeof (struct a8_erratum_reloc),
                      &a8_reloc_compare);
 
               /* Scan for branches which might trigger Cortex-A8 erratum.  */
               if (cortex_a8_erratum_scan (input_bfd, info, &a8_fixes,
 					  &num_a8_fixes, &a8_fix_table_size,
-					  a8_relocs, num_a8_relocs) != 0)
+					  a8_relocs, num_a8_relocs,
+					  prev_num_a8_fixes, &stub_changed)
+		  != 0)
 		goto error_ret_free_local;
 	    }
 	}
 
-      if (htab->fix_cortex_a8 && num_a8_fixes != prev_num_a8_fixes)
+      if (prev_num_a8_fixes != num_a8_fixes)
         stub_changed = TRUE;
 
       if (!stub_changed)
@@ -4598,8 +4631,6 @@ elf32_arm_size_stubs (bfd *output_bfd,
 
       /* Ask the linker to do its stuff.  */
       (*htab->layout_sections_again) ();
-      stub_changed = FALSE;
-      prev_num_a8_fixes = num_a8_fixes;
     }
 
   /* Add stubs for Cortex-A8 erratum fixes now.  */
@@ -4696,6 +4727,12 @@ elf32_arm_build_stubs (struct bfd_link_info *info)
   /* Build the stubs as directed by the stub hash table.  */
   table = &htab->stub_hash_table;
   bfd_hash_traverse (table, arm_build_one_stub, info);
+  if (htab->fix_cortex_a8)
+    {
+      /* Place the cortex a8 stubs last.  */
+      htab->fix_cortex_a8 = -1;
+      bfd_hash_traverse (table, arm_build_one_stub, info);
+    }
 
   return TRUE;
 }
