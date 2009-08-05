@@ -54,7 +54,9 @@ enum spu_regnum
 #define SPUADDR(spu, addr) \
   ((spu) != -1? (ULONGEST)1 << 63 | (ULONGEST)(spu) << 32 | (addr) : (addr))
 #define SPUADDR_SPU(addr) \
-  (((addr) & (ULONGEST)1 << 63)? (ULONGEST)(addr) >> 32 & 0x7fffffff : -1)
+  (((addr) & (ULONGEST)1 << 63) \
+   ? (int) ((ULONGEST)(addr) >> 32 & 0x7fffffff) \
+   : -1)
 #define SPUADDR_ADDR(addr) \
   (((addr) & (ULONGEST)1 << 63)? (ULONGEST)(addr) & 0xffffffff : (addr))
 

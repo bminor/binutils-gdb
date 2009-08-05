@@ -1,3 +1,7 @@
+2009-08-05  Tom Tromey  <tromey@redhat.com>
+
+	* spu-tdep.h (SPUADDR_SPU): Cast result to int.
+
 2009-08-04  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* objfiles.h (OBJF_KEEPBFD): Delete.
