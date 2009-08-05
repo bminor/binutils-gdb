@@ -290,6 +290,14 @@ static int file_ase_mips16;
 			      || mips_opts.isa == ISA_MIPS64		\
 			      || mips_opts.isa == ISA_MIPS64R2)
 
+/* True if we want to create R_MIPS_JALR for jalr $25.  */
+#ifdef TE_IRIX
+#define MIPS_JALR_HINT_P HAVE_NEWABI
+#else
+/* As a GNU extension, we use R_MIPS_JALR for o32 too.  */
+#define MIPS_JALR_HINT_P 1
+#endif
+
 /* True if -mips3d was passed or implied by arguments passed on the
    command line (e.g., by -march).  */
 static int file_ase_mips3d;
@@ -3922,13 +3930,13 @@ macro_build_jalr (expressionS *ep)
 {
   char *f = NULL;
 
-  if (HAVE_NEWABI)
+  if (MIPS_JALR_HINT_P)
     {
       frag_grow (8);
       f = frag_more (0);
     }
   macro_build (NULL, "jalr", "d,s", RA, PIC_CALL_REG);
-  if (HAVE_NEWABI)
+  if (MIPS_JALR_HINT_P)
     fix_new_exp (frag_now, f - frag_now->fr_literal,
 		 4, ep, FALSE, BFD_RELOC_MIPS_JALR);
 }

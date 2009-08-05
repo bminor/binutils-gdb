@@ -1,3 +1,9 @@
+2009-08-05  Chao-ying Fu  <fu@mips.com>
+
+	* config/tc-mips.c (MIPS_JALR_HINT_P): New define. For IRIX, it is
+	true for new abi.  For non-IRIX targets, it is always true.
+	(macro_build_jalr): If MIPS_JALR_HINT_P, emit BFD_RELOC_MIPS_JALR.
+
 2009-08-05  Eric B. Weddington  <eric.weddington@atmel.com>
 
 	* config/tc-avr.c (mcu_types): Add attiny2313a, attiny4313, attiny261a,
