@@ -1649,7 +1649,7 @@ short paragraph on how to use that command.
 @item apropos @var{args}
 The @code{apropos} command searches through all of the @value{GDBN}
 commands, and their documentation, for the regular expression specified in
-@var{args}. It prints out all matches found. For example:
+@var{args}.  It prints out all matches found.  For example:
 
 @smallexample
 apropos reload
@@ -3887,7 +3887,7 @@ one.
 Break conditions can have side effects, and may even call functions in
 your program.  This can be useful, for example, to activate functions
 that log program progress, or to use your own print functions to
-format special data structures. The effects are completely predictable
+format special data structures.  The effects are completely predictable
 unless there is another enabled breakpoint at the same address.  (In
 that case, @value{GDBN} might see the other breakpoint first and stop your
 program without checking the condition of this one.)  Note that
@@ -10834,7 +10834,7 @@ specified by the extension to support decimal floating-point arithmetic.
 
 There are two encodings in use, depending on the architecture: BID (Binary
 Integer Decimal) for x86 and x86-64, and DPD (Densely Packed Decimal) for
-PowerPC. @value{GDBN} will use the appropriate encoding for the configured
+PowerPC.  @value{GDBN} will use the appropriate encoding for the configured
 target.
 
 Because of a limitation in @file{libdecnumber}, the library used by @value{GDBN}
@@ -10846,8 +10846,8 @@ point computations, error checking in decimal float operations ignores
 underflow, overflow and divide by zero exceptions.
 
 In the PowerPC architecture, @value{GDBN} provides a set of pseudo-registers
-to inspect @code{_Decimal128} values stored in floating point registers. See
-@ref{PowerPC,,PowerPC} for more details.
+to inspect @code{_Decimal128} values stored in floating point registers.
+See @ref{PowerPC,,PowerPC} for more details.
 
 @node Objective-C
 @subsection Objective-C
@@ -10982,7 +10982,7 @@ arithmetic types.  Operators are often defined on groups of types.
 
 @table @code
 @item **
-The exponentiation operator. It raises the first operand to the power
+The exponentiation operator.  It raises the first operand to the power
 of the second one.
 
 @item :
@@ -11154,7 +11154,7 @@ Integer division and remainder.  Defined on integral types.  Same
 precedence as @code{*}.
 
 @item -
-Negative. Defined on @code{INTEGER} and @code{REAL} data.
+Negative.  Defined on @code{INTEGER} and @code{REAL} data.
 
 @item ^
 Pointer dereferencing.  Defined on pointer types.
@@ -13644,9 +13644,9 @@ the separate debug info file.  The separate debug file's name is
 usually @file{@var{executable}.debug}, where @var{executable} is the
 name of the corresponding executable file without leading directories
 (e.g., @file{ls.debug} for @file{/usr/bin/ls}).  In addition, the
-debug link specifies a CRC32 checksum for the debug file, which
-@value{GDBN} uses to validate that the executable and the debug file
-came from the same build.
+debug link specifies a 32-bit @dfn{Cyclic Redundancy Check} (CRC)
+checksum for the debug file, which @value{GDBN} uses to validate that
+the executable and the debug file came from the same build.
 
 @item
 The executable contains a @dfn{build ID}, a unique bit string that is
@@ -13796,10 +13796,47 @@ utilities (Binutils) package since version 2.18.
 
 @noindent
 
-Since there are many different ways to compute CRC's for the debug
-link (different polynomials, reversals, byte ordering, etc.), the
-simplest way to describe the CRC used in @code{.gnu_debuglink}
-sections is to give the complete code for a function that computes it:
+@cindex CRC algorithm definition
+The CRC used in @code{.gnu_debuglink} is the CRC-32 defined in
+IEEE 802.3 using the polynomial:
+
+@c TexInfo requires naked braces for multi-digit exponents for Tex
+@c output, but this causes HTML output to barf. HTML has to be set using
+@c raw commands. So we end up having to specify this equation in 2
+@c different ways!
+@ifhtml
+@display
+@html
+ <em>x</em><sup>32</sup> + <em>x</em><sup>26</sup> + <em>x</em><sup>23</sup> + <em>x</em><sup>22</sup> + <em>x</em><sup>16</sup> + <em>x</em><sup>12</sup> + <em>x</em><sup>11</sup>
+ + <em>x</em><sup>10</sup> + <em>x</em><sup>8</sup> + <em>x</em><sup>7</sup> + <em>x</em><sup>5</sup> + <em>x</em><sup>4</sup> + <em>x</em><sup>2</sup> + <em>x</em> + 1
+@end html
+@end display
+@end ifhtml
+@ifnothtml
+@display
+ @math{x^{32} + x^{26} + x^{23} + x^{22} + x^{16} + x^{12} + x^{11}}
+ @math{+ x^{10} + x^8 + x^7 + x^5 + x^4 + x^2 + x + 1}
+@end display
+@end ifnothtml
+
+The function is computed byte at a time, taking the least
+significant bit of each byte first.  The initial pattern
+@code{0xffffffff} is used, to ensure leading zeros affect the CRC and
+the final result is inverted to ensure trailing zeros also affect the
+CRC.
+
+@emph{Note:} This is the same CRC polynomial as used in handling the
+@dfn{Remote Serial Protocol} @code{qCRC} packet (@pxref{Remote Protocol,
+, @value{GDBN} Remote Serial Protocol}).  However in the
+case of the Remote Serial Protocol, the CRC is computed @emph{most}
+significant bit first, and the result is not inverted, so trailing
+zeros have no effect on the CRC value.
+
+To complete the description, we show below the code of the function
+which produces the CRC used in @code{.gnu_debuglink}.  Inverting the
+initially supplied @code{crc} argument means that an initial call to
+this function passing in zero will start computing the CRC using
+@code{0xffffffff}.
 
 @kindex gnu_debuglink_crc32
 @smallexample
@@ -15835,14 +15872,14 @@ In keeping with the naming conventions used by the Microsoft debugging
 tools, DLL export symbols are made available with a prefix based on the
 DLL name, for instance @code{KERNEL32!CreateFileA}.  The plain name is
 also entered into the symbol table, so @code{CreateFileA} is often
-sufficient. In some cases there will be name clashes within a program
+sufficient.  In some cases there will be name clashes within a program
 (particularly if the executable itself includes full debugging symbols)
 necessitating the use of the fully qualified name when referring to the
-contents of the DLL. Use single-quotes around the name to avoid the
+contents of the DLL.  Use single-quotes around the name to avoid the
 exclamation mark (``!'')  being interpreted as a language operator.
 
 Note that the internal name of the DLL may be all upper-case, even
-though the file name of the DLL is lower-case, or vice-versa. Since
+though the file name of the DLL is lower-case, or vice-versa.  Since
 symbols within @value{GDBN} are @emph{case-sensitive} this may cause
 some confusion. If in doubt, try the @code{info functions} and
 @code{info variables} commands or even @code{maint print msymbols}
@@ -28092,7 +28129,18 @@ Any other reply implies the old thread ID.
 @item qCRC:@var{addr},@var{length}
 @cindex CRC of memory block, remote request
 @cindex @samp{qCRC} packet
-Compute the CRC checksum of a block of memory.
+Compute the CRC checksum of a block of memory using CRC-32 defined in
+IEEE 802.3.  The CRC is computed byte at a time, taking the most
+significant bit of each byte first.  The initial pattern code
+@code{0xffffffff} is used to ensure leading zeros affect the CRC.
+
+@emph{Note:} This is the same CRC used in validating separate debug
+files (@pxref{Separate Debug Files, , Debugging Information in Separate
+Files}).  However the algorithm is slightly different.  When validating
+separate debug files, the CRC is computed taking the @emph{least}
+significant bit of each byte first, and the final result is inverted to
+detect trailing zeros.
+
 Reply:
 @table @samp
 @item E @var{NN}

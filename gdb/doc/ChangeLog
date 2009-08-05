@@ -1,3 +1,8 @@
+2009-08-05  Jeremy Bennett  <jeremy.bennett@embecosm.com>
+
+        * gdb.texinfo (Separate Debug Files, Remote Protocol): Clarified
+        CRC definitions.
+
 2009-08-03  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Breakpoint Commands): Document
