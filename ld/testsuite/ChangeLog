@@ -1,3 +1,10 @@
+2009-08-06  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-arm/arm-elf.exp: Add new test.
+	* ld-arm/cortex-a8-fix-hdr.d: New.
+	* ld-arm/cortex-a8-fix-hdr.s: New.
+	* ld-arm/cortex-a8-fix-hdr.t: New.
+
 2009-08-05  Trevor Smigiel  <Trevor_Smigiel@playstation.sony.com>
 
 	* ld-spu/fixup.d: New.

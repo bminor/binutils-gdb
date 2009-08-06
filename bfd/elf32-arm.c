@@ -4246,6 +4246,16 @@ elf32_arm_size_stubs (bfd *output_bfd,
 
   group_sections (htab, stub_group_size, stubs_always_after_branch);
 
+  /* If we're applying the cortex A8 fix, we need to determine the
+     program header size now, because we cannot change it later --
+     that could alter section placements.  Notice the A8 erratum fix
+     ends up requiring the section addresses to remain unchanged
+     modulo the page size.  That's something we cannot represent
+     inside BFD, and we don't want to force the section alignment to
+     be the page size.  */
+  if (htab->fix_cortex_a8)
+    (*htab->layout_sections_again) ();
+
   while (1)
     {
       bfd *input_bfd;

@@ -1,3 +1,8 @@
+2009-08-06  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_size_stubs): Call layout_sections_again
+	at least once when fixing cortex-a8.
+
 2009-08-05  Chao-ying Fu  <fu@mips.com>
 
 	* elf32-mips.c (mips_reloc_map): Add BFD_RELOC_MIPS_JALR.
