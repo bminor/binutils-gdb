@@ -1,3 +1,8 @@
+2009-08-06  Nick Roberts  <nickrob@snap.net.nz>
+
+	* utils.c (defaulted_query): Don't ask for confirmation if server
+	prefix is used.
+
 2009-08-05  Tom Tromey  <tromey@redhat.com>
 
 	* spu-tdep.h (SPUADDR_SPU): Cast result to int.
@@ -10,7 +15,7 @@
 	(free_objfile): Call gdb_bfd_unref.
 	* solib.c (free_so): Likewise.
 	(symbol_add_stub): Set refcount.
-	
+
 2009-08-04  Hui Zhu  <teawater@gmail.com>
 	    Michael Snyder  <msnyder@vmware.com>
 
