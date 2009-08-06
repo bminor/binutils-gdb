@@ -85,8 +85,12 @@ struct dwarf2_cie
 
   /* The version recorded in the CIE.  */
   unsigned char version;
+};
 
-  struct dwarf2_cie *next;
+struct dwarf2_cie_table
+{
+  int num_entries;
+  struct dwarf2_cie **entries;
 };
 
 /* Frame Description Entry (FDE).  */
@@ -109,8 +113,12 @@ struct dwarf2_fde
   /* True if this FDE is read from a .eh_frame instead of a .debug_frame
      section.  */
   unsigned char eh_frame_p;
+};
 
-  struct dwarf2_fde *next;
+struct dwarf2_fde_table
+{
+  int num_entries;
+  struct dwarf2_fde **entries;
 };
 
 /* A minimal decoding of DWARF2 compilation units.  We only decode
@@ -122,9 +130,6 @@ struct comp_unit
   bfd *abfd;
 
   struct objfile *objfile;
-
-  /* Linked list of CIEs for this object.  */
-  struct dwarf2_cie *cie;
 
   /* Pointer to the .debug_frame section loaded into memory.  */
   gdb_byte *dwarf_frame_buffer;
@@ -1464,31 +1469,56 @@ read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
 }
 
 
-/* GCC uses a single CIE for all FDEs in a .debug_frame section.
-   That's why we use a simple linked list here.  */
-
-static struct dwarf2_cie *
-find_cie (struct comp_unit *unit, ULONGEST cie_pointer)
+static int
+bsearch_cie_cmp (const void *key, const void *element)
 {
-  struct dwarf2_cie *cie = unit->cie;
+  ULONGEST cie_pointer = *(ULONGEST *) key;
+  struct dwarf2_cie *cie = *(struct dwarf2_cie **) element;
 
-  while (cie)
-    {
-      if (cie->cie_pointer == cie_pointer)
-	return cie;
+  if (cie_pointer == cie->cie_pointer)
+    return 0;
 
-      cie = cie->next;
-    }
+  return (cie_pointer < cie->cie_pointer) ? -1 : 1;
+}
 
+/* Find CIE with the given CIE_POINTER in CIE_TABLE.  */
+static struct dwarf2_cie *
+find_cie (struct dwarf2_cie_table *cie_table, ULONGEST cie_pointer)
+{
+  struct dwarf2_cie **p_cie;
+
+  p_cie = bsearch (&cie_pointer, cie_table->entries, cie_table->num_entries,
+                   sizeof (cie_table->entries[0]), bsearch_cie_cmp);
+  if (p_cie != NULL)
+    return *p_cie;
   return NULL;
 }
 
+/* Add a pointer to new CIE to the CIE_TABLE, allocating space for it.  */
 static void
-add_cie (struct comp_unit *unit, struct dwarf2_cie *cie)
+add_cie (struct dwarf2_cie_table *cie_table, struct dwarf2_cie *cie)
 {
-  cie->next = unit->cie;
-  unit->cie = cie;
-  cie->unit = unit;
+  const int n = cie_table->num_entries;
+
+  gdb_assert (n < 1
+              || cie_table->entries[n - 1]->cie_pointer < cie->cie_pointer);
+
+  cie_table->entries =
+      xrealloc (cie_table->entries, (n + 1) * sizeof (cie_table->entries[0]));
+  cie_table->entries[n] = cie;
+  cie_table->num_entries = n + 1;
+}
+
+static int
+bsearch_fde_cmp (const void *key, const void *element)
+{
+  CORE_ADDR seek_pc = *(CORE_ADDR *) key;
+  struct dwarf2_fde *fde = *(struct dwarf2_fde **) element;
+  if (seek_pc < fde->initial_location)
+    return -1;
+  if (seek_pc < fde->initial_location + fde->address_range)
+    return 0;
+  return 1;
 }
 
 /* Find the FDE for *PC.  Return a pointer to the FDE, and store the
@@ -1501,37 +1531,47 @@ dwarf2_frame_find_fde (CORE_ADDR *pc)
 
   ALL_OBJFILES (objfile)
     {
-      struct dwarf2_fde *fde;
+      struct dwarf2_fde_table *fde_table;
+      struct dwarf2_fde **p_fde;
       CORE_ADDR offset;
+      CORE_ADDR seek_pc;
 
-      fde = objfile_data (objfile, dwarf2_frame_objfile_data);
-      if (fde == NULL)
+      fde_table = objfile_data (objfile, dwarf2_frame_objfile_data);
+      if (fde_table == NULL)
 	continue;
 
       gdb_assert (objfile->section_offsets);
       offset = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
-      while (fde)
-	{
-	  if (*pc >= fde->initial_location + offset
-	      && *pc < fde->initial_location + offset + fde->address_range)
-	    {
-	      *pc = fde->initial_location + offset;
-	      return fde;
-	    }
+      gdb_assert (fde_table->num_entries > 0);
+      if (*pc < offset + fde_table->entries[0]->initial_location)
+        continue;
 
-	  fde = fde->next;
-	}
+      seek_pc = *pc - offset;
+      p_fde = bsearch (&seek_pc, fde_table->entries, fde_table->num_entries,
+                       sizeof (fde_table->entries[0]), bsearch_fde_cmp);
+      if (p_fde != NULL)
+        {
+          *pc = (*p_fde)->initial_location + offset;
+          return *p_fde;
+        }
     }
-
   return NULL;
 }
 
+/* Add a pointer to new FDE to the FDE_TABLE, allocating space for it.  */
 static void
-add_fde (struct comp_unit *unit, struct dwarf2_fde *fde)
+add_fde (struct dwarf2_fde_table *fde_table, struct dwarf2_fde *fde)
 {
-  fde->next = objfile_data (unit->objfile, dwarf2_frame_objfile_data);
-  set_objfile_data (unit->objfile, dwarf2_frame_objfile_data, fde);
+  if (fde->address_range == 0)
+    /* Discard useless FDEs.  */
+    return;
+
+  fde_table->num_entries += 1;
+  fde_table->entries =
+      xrealloc (fde_table->entries,
+                fde_table->num_entries * sizeof (fde_table->entries[0]));
+  fde_table->entries[fde_table->num_entries - 1] = fde;
 }
 
 #ifdef CC_HAS_LONG_LONG
@@ -1541,12 +1581,16 @@ add_fde (struct comp_unit *unit, struct dwarf2_fde *fde)
 #endif
 
 static gdb_byte *decode_frame_entry (struct comp_unit *unit, gdb_byte *start,
-				     int eh_frame_p);
+				     int eh_frame_p,
+                                     struct dwarf2_cie_table *cie_table,
+                                     struct dwarf2_fde_table *fde_table);
 
 /* Decode the next CIE or FDE.  Return NULL if invalid input, otherwise
    the next byte to be processed.  */
 static gdb_byte *
-decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p)
+decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p,
+                      struct dwarf2_cie_table *cie_table,
+                      struct dwarf2_fde_table *fde_table)
 {
   struct gdbarch *gdbarch = get_objfile_arch (unit->objfile);
   gdb_byte *buf, *end;
@@ -1601,7 +1645,7 @@ decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p)
       cie_pointer = start - unit->dwarf_frame_buffer;
 
       /* Check whether we've already read it.  */
-      if (find_cie (unit, cie_pointer))
+      if (find_cie (cie_table, cie_pointer))
 	return end;
 
       cie = (struct dwarf2_cie *)
@@ -1738,8 +1782,9 @@ decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p)
 
       cie->initial_instructions = buf;
       cie->end = end;
+      cie->unit = unit;
 
-      add_cie (unit, cie);
+      add_cie (cie_table, cie);
     }
   else
     {
@@ -1763,12 +1808,12 @@ decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p)
       fde = (struct dwarf2_fde *)
 	obstack_alloc (&unit->objfile->objfile_obstack,
 		       sizeof (struct dwarf2_fde));
-      fde->cie = find_cie (unit, cie_pointer);
+      fde->cie = find_cie (cie_table, cie_pointer);
       if (fde->cie == NULL)
 	{
 	  decode_frame_entry (unit, unit->dwarf_frame_buffer + cie_pointer,
-			      eh_frame_p);
-	  fde->cie = find_cie (unit, cie_pointer);
+			      eh_frame_p, cie_table, fde_table);
+	  fde->cie = find_cie (cie_table, cie_pointer);
 	}
 
       gdb_assert (fde->cie != NULL);
@@ -1802,7 +1847,7 @@ decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p)
 
       fde->eh_frame_p = eh_frame_p;
 
-      add_fde (unit, fde);
+      add_fde (fde_table, fde);
     }
 
   return end;
@@ -1810,7 +1855,9 @@ decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p)
 
 /* Read a CIE or FDE in BUF and decode it.  */
 static gdb_byte *
-decode_frame_entry (struct comp_unit *unit, gdb_byte *start, int eh_frame_p)
+decode_frame_entry (struct comp_unit *unit, gdb_byte *start, int eh_frame_p,
+                    struct dwarf2_cie_table *cie_table,
+                    struct dwarf2_fde_table *fde_table)
 {
   enum { NONE, ALIGN4, ALIGN8, FAIL } workaround = NONE;
   gdb_byte *ret;
@@ -1819,7 +1866,8 @@ decode_frame_entry (struct comp_unit *unit, gdb_byte *start, int eh_frame_p)
 
   while (1)
     {
-      ret = decode_frame_entry_1 (unit, start, eh_frame_p);
+      ret = decode_frame_entry_1 (unit, start, eh_frame_p,
+                                  cie_table, fde_table);
       if (ret != NULL)
 	break;
 
@@ -1905,11 +1953,31 @@ decode_frame_entry (struct comp_unit *unit, gdb_byte *start, int eh_frame_p)
 extern void dwarf2_get_section_info (struct objfile *, const char *, asection **,
                                      gdb_byte **, bfd_size_type *);
 
+static int
+qsort_fde_cmp (const void *a, const void *b)
+{
+  struct dwarf2_fde *aa = *(struct dwarf2_fde **)a;
+  struct dwarf2_fde *bb = *(struct dwarf2_fde **)b;
+  if (aa->initial_location == bb->initial_location)
+    /* Put eh_frame entries after debug_frame ones.  */
+    return aa->eh_frame_p - bb->eh_frame_p;
+
+  return (aa->initial_location < bb->initial_location) ? -1 : 1;
+}
+
 void
 dwarf2_build_frame_info (struct objfile *objfile)
 {
   struct comp_unit *unit;
   gdb_byte *frame_ptr;
+  struct dwarf2_cie_table cie_table;
+  struct dwarf2_fde_table fde_table;
+
+  cie_table.num_entries = 0;
+  cie_table.entries = NULL;
+
+  fde_table.num_entries = 0;
+  fde_table.entries = NULL;
 
   /* Build a minimal decoding of the DWARF2 compilation unit.  */
   unit = (struct comp_unit *) obstack_alloc (&objfile->objfile_obstack,
@@ -1919,8 +1987,6 @@ dwarf2_build_frame_info (struct objfile *objfile)
   unit->dbase = 0;
   unit->tbase = 0;
 
-  /* First add the information from the .eh_frame section.  That way,
-     the FDEs from that section are searched last.  */
   dwarf2_get_section_info (objfile, ".eh_frame",
                            &unit->dwarf_frame_section,
                            &unit->dwarf_frame_buffer,
@@ -1929,7 +1995,6 @@ dwarf2_build_frame_info (struct objfile *objfile)
     {
       asection *got, *txt;
 
-      unit->cie = NULL;
       /* FIXME: kettenis/20030602: This is the DW_EH_PE_datarel base
 	 that is used for the i386/amd64 target, which currently is
 	 the only target in GCC that supports/uses the
@@ -1946,7 +2011,16 @@ dwarf2_build_frame_info (struct objfile *objfile)
 
       frame_ptr = unit->dwarf_frame_buffer;
       while (frame_ptr < unit->dwarf_frame_buffer + unit->dwarf_frame_size)
-	frame_ptr = decode_frame_entry (unit, frame_ptr, 1);
+	frame_ptr = decode_frame_entry (unit, frame_ptr, 1,
+                                        &cie_table, &fde_table);
+
+      if (cie_table.num_entries != 0)
+        {
+          /* Reinit cie_table: debug_frame has different CIEs.  */
+          xfree (cie_table.entries);
+          cie_table.num_entries = 0;
+          cie_table.entries = NULL;
+        }
     }
 
   dwarf2_get_section_info (objfile, ".debug_frame",
@@ -1955,11 +2029,52 @@ dwarf2_build_frame_info (struct objfile *objfile)
                            &unit->dwarf_frame_size);
   if (unit->dwarf_frame_size)
     {
-      unit->cie = NULL;
-
       frame_ptr = unit->dwarf_frame_buffer;
       while (frame_ptr < unit->dwarf_frame_buffer + unit->dwarf_frame_size)
-	frame_ptr = decode_frame_entry (unit, frame_ptr, 0);
+	frame_ptr = decode_frame_entry (unit, frame_ptr, 0,
+                                        &cie_table, &fde_table);
+    }
+
+  /* Discard the cie_table, it is no longer needed.  */
+  if (cie_table.num_entries != 0)
+    {
+      xfree (cie_table.entries);
+      cie_table.entries = NULL;   /* Paranoia.  */
+      cie_table.num_entries = 0;  /* Paranoia.  */
+    }
+
+  if (fde_table.num_entries != 0)
+    {
+      struct dwarf2_fde_table *fde_table2;
+      int i, j;
+
+      /* Prepare FDE table for lookups.  */
+      qsort (fde_table.entries, fde_table.num_entries,
+             sizeof (fde_table.entries[0]), qsort_fde_cmp);
+
+      /* Copy fde_table to obstack: it is needed at runtime.  */
+      fde_table2 = (struct dwarf2_fde_table *)
+          obstack_alloc (&objfile->objfile_obstack, sizeof (*fde_table2));
+
+      /* Since we'll be doing bsearch, squeeze out identical (except for
+         eh_frame_p) fde entries so bsearch result is predictable.  */
+      for (i = 0, j = 0; j < fde_table.num_entries; ++i)
+        {
+          const int k = j;
+
+          obstack_grow (&objfile->objfile_obstack, &fde_table.entries[j],
+                        sizeof (fde_table.entries[0]));
+          while (++j < fde_table.num_entries
+                 && (fde_table.entries[k]->initial_location ==
+                     fde_table.entries[j]->initial_location))
+            /* Skip.  */;
+        }
+      fde_table2->entries = obstack_finish (&objfile->objfile_obstack);
+      fde_table2->num_entries = i;
+      set_objfile_data (objfile, dwarf2_frame_objfile_data, fde_table2);
+
+      /* Discard the original fde_table.  */
+      xfree (fde_table.entries);
     }
 }
 

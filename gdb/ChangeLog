@@ -1,3 +1,17 @@
+2009-08-06  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* dwarf2-frame.c (struct dwarf2_cie): Remove 'next'.
+	(struct dwarf2_cie_table): New.
+	(struct dwarf2_fde): Remove 'next'.
+	(struct dwarf2_fde_table): New.
+	(struct comp_unit): Remove 'cie'.
+	(bsearch_cie_cmp, bsearch_fde_cmp): New function.
+	(find_cie, dwarf2_frame_find_fde): Use bsearch.
+	(add_cie, add_fde): Use array instead of linked list.
+	(decode_frame_entry, decode_frame_entry_1): New parameters.
+	(qsort_fde_cmp): New function.
+	(dwarf2_build_frame_info): Adjust.
+	
 2009-08-06  Don Lee <don.lee@sunplusct.com>
 
 	* score-tdep.c: Support a new Sunplus CT S+core variant, S+core 3.
