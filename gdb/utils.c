@@ -1436,8 +1436,8 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
     }
 
   /* Automatically answer the default value if the user did not want
-     prompts.  */
-  if (! caution)
+     prompts or the command was issued with the server prefix.  */
+  if (! caution || server_command)
     return def_value;
 
   /* If input isn't coming from the user directly, just say what
