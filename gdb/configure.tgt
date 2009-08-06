@@ -397,7 +397,11 @@ s390*-*-*)
 
 score-*-*)
 	# Target: S+core embedded system
-	gdb_target_obs="score-tdep.o"
+	gdb_target_obs="score-tdep.o corelow.o"
+	if test -f ../sim/score/Makefile; then
+	  gdb_sim=../sim/score/libsim.a
+	fi
+	build_gdbserver=yes
 	;;
 
 sh*-*-linux*)

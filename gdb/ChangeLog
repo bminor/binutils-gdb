@@ -1,3 +1,11 @@
+2009-08-06  Don Lee <don.lee@sunplusct.com>
+
+	* score-tdep.c: Support a new Sunplus CT S+core variant, S+core 3.
+	* score-tdep.h: Ditto.
+	* NEWS: Ditto.
+	* configure.tgt: Test do we have a simulator.
+	* MAINTAINERS: Add myself under target score
+
 2009-08-06  Nick Roberts  <nickrob@snap.net.nz>
 
 	* utils.c (defaulted_query): Don't ask for confirmation if server

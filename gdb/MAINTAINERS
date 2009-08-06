@@ -312,6 +312,7 @@ the native maintainer when resolving ABI issues.
 
 	score	--target=score-elf
 			Qinwei		qinwei@sunnorth.com.cn
+			Don Lee		don.lee@sunplusct.com
 
 	sh		--target=sh-elf ,-Werror
 			--target=sh64-elf ,-Werror
