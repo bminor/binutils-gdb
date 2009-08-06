@@ -1,3 +1,12 @@
+2009-08-06  Jakub Jelinek  <jakub@redhat.com>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	PR binutils/10492
+	* elf.c (sym_is_global): Return true even for BSF_GNU_UNIQUE
+	symbols.
+	* elf32-mips.c (mips_elf_sym_is_global): Likewise.
+	* elfn32-mips.c (mips_elf_sym_is_global): Likewise.
+
 2009-08-06  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_size_stubs): Call layout_sections_again
