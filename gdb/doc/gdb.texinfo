@@ -18009,6 +18009,7 @@ Displays how many symbol complaints @value{GDBN} is permitted to produce.
 
 @end table
 
+@anchor{confirmation requests}
 By default, @value{GDBN} is cautious, and asks what sometimes seems to be a
 lot of stupid questions to confirm certain commands.  For example, if
 you try to run a program which is already running:
@@ -25697,9 +25698,13 @@ command to repeat if @key{RET} is pressed on a line by itself.  This
 means that commands can be run behind a user's back by a front-end in
 a transparent manner.
 
-The server prefix does not affect the recording of values into the value
-history; to print a value without recording it into the value history,
-use the @code{output} command instead of the @code{print} command.
+The @code{server } prefix does not affect the recording of values into
+the value history; to print a value without recording it into the
+value history, use the @code{output} command instead of the
+@code{print} command.
+
+Using this prefix also disables confirmation requests
+(@pxref{confirmation requests}).
 
 @node Prompting
 @section Annotation for @value{GDBN} Input
