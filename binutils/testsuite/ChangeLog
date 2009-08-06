@@ -1,4 +1,4 @@
-2009-08-03  H.J. Lu  <hongjiu.lu@intel.com>
+2009-08-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/10492
 	* binutils-all/objcopy.exp: Run strip-10.
