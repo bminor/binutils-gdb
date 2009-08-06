@@ -1958,9 +1958,18 @@ qsort_fde_cmp (const void *a, const void *b)
 {
   struct dwarf2_fde *aa = *(struct dwarf2_fde **)a;
   struct dwarf2_fde *bb = *(struct dwarf2_fde **)b;
+
   if (aa->initial_location == bb->initial_location)
-    /* Put eh_frame entries after debug_frame ones.  */
-    return aa->eh_frame_p - bb->eh_frame_p;
+    {
+      if (aa->address_range != bb->address_range
+          && aa->eh_frame_p == 0 && bb->eh_frame_p == 0)
+        /* Linker bug, e.g. gold/10400.
+           Work around it by keeping stable sort order.  */
+        return (a < b) ? -1 : 1;
+      else
+        /* Put eh_frame entries after debug_frame ones.  */
+        return aa->eh_frame_p - bb->eh_frame_p;
+    }
 
   return (aa->initial_location < bb->initial_location) ? -1 : 1;
 }

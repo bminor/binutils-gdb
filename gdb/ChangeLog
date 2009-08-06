@@ -1,4 +1,9 @@
 2009-08-06  Paul Pluzhnikov  <ppluzhnikov@google.com>
+	
+	gold/10400
+	* dwarf2-frame.c (qsort_fde_cmp): Use stable sort.	
+	
+2009-08-06  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* dwarf2-frame.c (struct dwarf2_cie): Remove 'next'.
 	(struct dwarf2_cie_table): New.
