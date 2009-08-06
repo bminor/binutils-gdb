@@ -49,6 +49,7 @@ CPU_DOCS = \
 	c-m32r.texi \
 	c-m68hc11.texi \
 	c-m68k.texi \
+	c-microblaze.texi \
 	c-mips.texi \
 	c-mmix.texi \
 	c-mt.texi \

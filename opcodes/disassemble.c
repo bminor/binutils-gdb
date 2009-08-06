@@ -56,6 +56,7 @@
 #define ARCH_maxq
 #define ARCH_mcore
 #define ARCH_mep
+#define ARCH_microblaze
 #define ARCH_mips
 #define ARCH_mmix
 #define ARCH_mn10200
@@ -262,6 +263,11 @@ disassembler (abfd)
 #ifdef ARCH_mt
     case bfd_arch_mt:
       disassemble = print_insn_mt;
+      break;
+#endif
+#ifdef ARCH_microblaze
+    case bfd_arch_microblaze:
+      disassemble = print_insn_microblaze;
       break;
 #endif
 #ifdef ARCH_msp430

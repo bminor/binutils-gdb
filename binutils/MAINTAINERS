@@ -93,6 +93,7 @@ responsibility among the other maintainers.
   MACH-O           Tristan Gingold <gingold@adacore.com>
   MAXQ		   Inderpreet Singh <inderpreetb@noida.hcltech.com>
   MEP		   Dave Brolley <brolley@redhat.com>
+  MICROBLAZE	   Michael Eager <eager@eagercon.com>
   MIPS		   Eric Christopher <echristo@apple.com>
   MMIX		   Hans-Peter Nilsson <hp@bitrange.com>
   MN10300	   Eric Christopher <echristo@apple.com>

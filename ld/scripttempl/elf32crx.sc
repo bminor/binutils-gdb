@@ -135,21 +135,21 @@ SECTIONS
    The heap and stack are aligned to the bus width, as a speed optimization
    for accessing data located there.  */
 
-  .heap :
+  .heap (NOLOAD) :
   {
     . = ALIGN(4);
     __HEAP_START = .;
     . += 0x2000; __HEAP_MAX = .;
   } > ram
 
-  .stack :
+  .stack (NOLOAD) :
   {
     . = ALIGN(4);
     . += 0x6000;
     __STACK_START = .;
   } > ram
 
-  .istack :
+  .istack (NOLOAD) :
   {
     . = ALIGN(4);
     . += 0x100;

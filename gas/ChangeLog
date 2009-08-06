@@ -1,3 +1,20 @@
+2009-08-06  Michael Eager <eager@eagercon.com>
+
+	* Makefile.am: add microblaze to CPU_TYPES, config/tc-microblaze.c to
+	TARGET_CPU_CFILES, config/tc-microblaze.h to TARGET_CPU_HFILES, add 
+	DEP_microblaze_elf target.
+	* Makefile.in: Regenerate.
+	* config/tc-microblaze.c: Add MicroBlaze assembler.
+	* config/tc-microblaze.h: Add header for tc-microblaze.c.
+	* configure.in: Add microblaze target.
+	* configure: Regenerate.
+	* configure.tgt: Same. 
+	* doc/Makefile.am: Add c-microblaze.texi to CPU_DOCS.
+	* doc/Makefile.in: Same.
+	* doc/all.texi: Set MICROBLAZE.
+	* doc/as.texinfo: Add MicroBlaze doc links.
+	* doc/c-microblaze.texi: New MicroBlaze docs.
+
 2009-08-06  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (md_assemble): Call mapping_state from inside a

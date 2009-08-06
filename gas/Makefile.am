@@ -72,6 +72,7 @@ CPU_TYPES = \
 	maxq \
 	mcore \
 	mep \
+	microblaze \
 	mips \
 	mmix \
 	mn10200 \
@@ -273,6 +274,7 @@ TARGET_CPU_CFILES = \
 	config/tc-maxq.c \
 	config/tc-mcore.c \
 	config/tc-mep.c \
+	config/tc-microblaze.c \
 	config/tc-mips.c \
 	config/tc-mmix.c \
 	config/tc-mn10200.c \
@@ -334,6 +336,7 @@ TARGET_CPU_HFILES = \
 	config/tc-maxq.h \
 	config/tc-mcore.h \
 	config/tc-mep.h \
+	config/tc-microblaze.h \
 	config/tc-mips.h \
 	config/tc-mmix.h \
 	config/tc-mn10200.h \
@@ -1787,6 +1790,19 @@ DEPTC_mep_elf = \
   $(srcdir)/config/tc-mep.h \
   cgen.h \
   dwarf2dbg.h \
+  subsegs.h
+DEPTC_microblaze_elf = \
+  $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h \
+  $(srcdir)/config/tc-microblaze.h \
+  $(INCDIR)/obstack.h \
+  $(srcdir)/../opcodes/microblaze-opc.h \
+  $(INCDIR)/elf/reloc-macros.h \
+  emul.h \
   subsegs.h
 DEPTC_mips_coff = \
   $(BFDDIR)/elf-bfd.h \
@@ -3921,6 +3937,14 @@ DEP_mep_elf = \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-mep.h \
   dwarf2dbg.h
+DEP_microblaze_elf = \
+  $(srcdir)/config/obj-elf.h \
+  $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h \
+  $(INCDIR)/bfdlink.h \
+  $(srcdir)/config/tc-microblaze.h
 DEP_mips_coff = \
   $(BFDDIR)/libcoff.h \
   $(INCDIR)/bfdlink.h \

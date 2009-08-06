@@ -191,6 +191,8 @@ ALL_EMULATIONS = \
 	eelf32m32c.o \
 	eelf32mcore.o \
 	eelf32mep.o \
+	eelf32mb_linux.o \
+ 	eelf32microblaze.o \
 	eelf32mipswindiss.o \
 	eelf32mt.o \
 	eelf32openrisc.o \
@@ -858,6 +860,12 @@ eelf32lmip.c: $(srcdir)/emulparams/elf32lmip.sh \
   $(srcdir)/emulparams/elf32bmip.sh $(ELF_DEPS) \
   $(srcdir)/emultempl/mipself.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32lmip "$(tdir_elf32lmip)"
+eelf32mb_linux.c: $(srcdir)/emulparams/elf32mb_linux.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32mb_linux "$(tdir_microblaze)"
+ eelf32microblaze.c: $(srcdir)/emulparams/elf32microblaze.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfmicroblaze.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32microblaze "$(tdir_microblaze)"
 eelf32mipswindiss.c: $(srcdir)/emulparams/elf32mipswindiss.sh $(ELF_DEPS) \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32mipswindiss "$(tdir_elf32mipswindiss)"

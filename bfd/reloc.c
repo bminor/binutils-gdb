@@ -5193,6 +5193,74 @@ ENUM
 ENUMDOC
  Mach-O generic relocations.
 
+ENUM
+  BFD_RELOC_MICROBLAZE_32_LO
+ENUMDOC
+  This is a 32 bit reloc for the microblaze that stores the 
+  low 16 bits of a value
+ENUM
+  BFD_RELOC_MICROBLAZE_32_LO_PCREL
+ENUMDOC
+  This is a 32 bit pc-relative reloc for the microblaze that 
+  stores the low 16 bits of a value
+ENUM
+  BFD_RELOC_MICROBLAZE_32_ROSDA
+ENUMDOC
+  This is a 32 bit reloc for the microblaze that stores a 
+  value relative to the read-only small data area anchor
+ENUM
+  BFD_RELOC_MICROBLAZE_32_RWSDA
+ENUMDOC
+  This is a 32 bit reloc for the microblaze that stores a 
+  value relative to the read-write small data area anchor
+ENUM
+  BFD_RELOC_MICROBLAZE_32_SYM_OP_SYM
+ENUMDOC
+  This is a 32 bit reloc for the microblaze to handle 
+  expressions of the form "Symbol Op Symbol"
+ENUM
+  BFD_RELOC_MICROBLAZE_64_NONE
+ENUMDOC
+  This is a 64 bit reloc that stores the 32 bit pc relative 
+  value in two words (with an imm instruction).  No relocation is 
+  done here - only used for relaxing
+ENUM
+  BFD_RELOC_MICROBLAZE_64_GOTPC
+ENUMDOC
+  This is a 64 bit reloc that stores the 32 bit pc relative 
+  value in two words (with an imm instruction).  The relocation is
+  PC-relative GOT offset
+ENUM
+  BFD_RELOC_MICROBLAZE_64_GOT
+ENUMDOC
+  This is a 64 bit reloc that stores the 32 bit pc relative 
+  value in two words (with an imm instruction).  The relocation is
+  GOT offset
+ENUM
+  BFD_RELOC_MICROBLAZE_64_PLT
+ENUMDOC
+  This is a 64 bit reloc that stores the 32 bit pc relative 
+  value in two words (with an imm instruction).  The relocation is
+  PC-relative offset into PLT
+ENUM
+  BFD_RELOC_MICROBLAZE_64_GOTOFF
+ENUMDOC
+  This is a 64 bit reloc that stores the 32 bit GOT relative 
+  value in two words (with an imm instruction).  The relocation is
+  relative offset from _GLOBAL_OFFSET_TABLE_
+ENUM
+  BFD_RELOC_MICROBLAZE_32_GOTOFF
+ENUMDOC
+  This is a 32 bit reloc that stores the 32 bit GOT relative 
+  value in a word.  The relocation is relative offset from 
+  _GLOBAL_OFFSET_TABLE_
+ENUM
+  BFD_RELOC_MICROBLAZE_COPY
+ENUMDOC
+  This is used to tell the dynamic linker to copy the value out of
+  the dynamic object into the runtime process image.
+
+
 ENDSENUM
   BFD_RELOC_UNUSED
 CODE_FRAGMENT

@@ -1285,8 +1285,8 @@ tic4x_inst_add (const tic4x_inst_t *insts)
   d = name;
 
   /* We do not care about INSNs that is not a part of our
-     oplevel setting */
-  if (!insts->oplevel & tic4x_oplevel)
+     oplevel setting.  */
+  if ((insts->oplevel & tic4x_oplevel) == 0)
     return ok;
 
   while (1)

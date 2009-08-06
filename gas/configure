@@ -12042,6 +12042,9 @@ _ACEOF
 echo "$as_me: WARNING: GAS support for ${generic_target} is preliminary and a work in progress" >&2;}
 	;;
 
+      microblaze*)
+        ;;
+
       mips-sony-bsd*)
 	;;
       mips-*-bsd*)

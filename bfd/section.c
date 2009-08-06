@@ -428,6 +428,13 @@ CODE_FRAGMENT
 .     section size calculated on a previous linker relaxation pass.  *}
 .  bfd_size_type rawsize;
 .
+.  {* Relaxation table. *}
+.  struct relax_table *relax;
+.
+.  {* Count of used relaxation table entries. *}
+.  int relax_count;
+.
+.
 .  {* If this section is going to be output, then this value is the
 .     offset in *bytes* into the output section of the first byte in the
 .     input section (byte ==> smallest addressable unit on the
@@ -516,6 +523,17 @@ CODE_FRAGMENT
 .    struct bfd_section *s;
 .  } map_head, map_tail;
 .} asection;
+.
+.{* Relax table contains information about instructions which can
+.   be removed by relaxation -- replacing a long address with a 
+.   short address.  *}
+.struct relax_table {
+.  {* Address where bytes may be deleted. *}
+.  bfd_vma addr;
+.  
+.  {* Number of bytes to be deleted.  *}
+.  int size;
+.};
 .
 .{* These sections are global, and are managed by BFD.  The application
 .   and target back end are not permitted to change the values in
@@ -652,8 +670,8 @@ CODE_FRAGMENT
 .  {* has_tls_get_addr_call, has_gp_reloc, need_finalize_relax,     *}	\
 .     0,                     0,            0,				\
 .									\
-.  {* reloc_done, vma, lma, size, rawsize                           *}	\
-.     0,          0,   0,   0,    0,					\
+.  {* reloc_done, vma, lma, size, rawsize, relax, relax_count,      *}	\
+.     0,          0,   0,   0,    0,       0,     0,			\
 .									\
 .  {* output_offset, output_section,              alignment_power,  *}	\
 .     0,             (struct bfd_section *) &SEC, 0,			\

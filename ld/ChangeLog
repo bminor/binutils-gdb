@@ -1,3 +1,13 @@
+2009-08-06  Michael Eager <eager@eagercon.com>
+
+	* Makefile.am: Add eelf32mb_linux.o, eelf32microblaze.o to 
+	ALL_EMULATIONS, targets.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add microblaze*-linux*, microblaze* targets.
+	* emulparams/elf32mb_linux.sh: New.
+	* emulparams/elf32microblaze.sh. New.
+	* scripttempl/elfmicroblaze.sc: New. 
+
 2009-08-05  Trevor Smigiel  <Trevor_Smigiel@playstation.sony.com>
 
 	* emulparams/elf32_spu.sh (OTHER_READONLY_SECTIONS): Add .fixup

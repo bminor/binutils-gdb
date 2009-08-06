@@ -1,3 +1,20 @@
+2009-08-06  Michael Eager <eager@eagercon.com>
+
+	* Makefile.am: Add cpu-microblaze.{lo,c}, elf32-microblaze.{lo,c}.
+	* Makefile.in: Regenerate.
+	* archures.c: Add bfd_arch_microblaze.
+	* bfd-in2.h: Regenerate.
+	* config.bfd: Add microblaze target.
+	* configure.in: Add bfd_elf32_microblaze_vec target.
+	* configure: Regenerate.
+	* cpu-microblaze.c: New.
+	* elf32-microblaze.c: New.
+	* libbfd-in.h: Add prototype _bfd_dwarf2_fixup_section_debug_loc().
+	* libbfd.h: Regenerate.
+	* reloc.c: Add MICROBLAZE relocations.
+	* section.c: Add struct relax_table and relax_count to section.
+	* targets.c: Add bfd_elf32_microblaze_vec.
+
 2009-08-06  Jakub Jelinek  <jakub@redhat.com>
 	    Alan Modra  <amodra@bigpond.net.au>
 

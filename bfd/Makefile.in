@@ -371,6 +371,7 @@ ALL_MACHINES = \
 	cpu-maxq.lo \
 	cpu-mcore.lo \
 	cpu-mep.lo \
+	cpu-microblaze.lo \
 	cpu-mips.lo \
 	cpu-mmix.lo \
 	cpu-moxie.lo \
@@ -441,6 +442,7 @@ ALL_MACHINES_CFILES = \
 	cpu-maxq.c \
 	cpu-mcore.c \
 	cpu-mep.c \
+	cpu-microblaze.c \
 	cpu-mips.c \
 	cpu-mmix.c \
 	cpu-moxie.c \
@@ -562,6 +564,7 @@ BFD32_BACKENDS = \
 	elf32-m88k.lo \
 	elf32-mcore.lo \
 	elf32-mep.lo \
+	elf32-microblaze.lo \
 	elf32-mips.lo \
 	elf32-moxie.lo \
 	elf32-msp430.lo \
@@ -745,6 +748,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-m88k.c \
 	elf32-mcore.c \
 	elf32-mep.c \
+	elf32-microblaze.c \
 	elf32-mips.c \
 	elf32-moxie.c \
 	elf32-msp430.c \
@@ -1986,6 +1990,10 @@ cpu-mcore.lo: \
   $(INCDIR)/hashtab.h
 cpu-mep.lo: \
   cpu-mep.c \
+  $(INCDIR)/filenames.h \
+  $(INCDIR)/hashtab.h
+cpu-microblaze.lo: \
+  cpu-microblaze.c $\
   $(INCDIR)/filenames.h \
   $(INCDIR)/hashtab.h
 cpu-mips.lo: \
@@ -3445,6 +3453,17 @@ elflink.lo: \
   $(INCDIR)/objalloc.h \
   $(INCDIR)/safe-ctype.h \
   elf-bfd.h
+elf32-microblaze.lo: \
+  elf32-microblaze.c \
+  $(INCDIR)/filenames.h \
+  $(INCDIR)/bfdlink.h \
+  genlink.h \
+  elf-bfd.h \
+  $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h \
+  $(INCDIR)/elf/reloc-macros.h \
+  elf32-target.h
 elfxx-mips.lo: \
   elfxx-mips.c \
   $(INCDIR)/bfdlink.h \

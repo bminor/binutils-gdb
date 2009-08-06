@@ -49,6 +49,7 @@ HFILES = \
 	m32r-desc.h m32r-opc.h \
 	mcore-opc.h \
 	mep-desc.h mep-opc.h \
+	microblaze-opc.h \
 	mt-desc.h mt-opc.h \
 	openrisc-desc.h openrisc-opc.h \
 	score-opc.h \
@@ -160,6 +161,7 @@ CFILES = \
 	mep-ibld.c \
 	mep-opc.c \
 	mips-dis.c \
+	microblaze-dis.c \
 	mips-opc.c \
 	mips16-opc.c \
 	m10200-dis.c \
@@ -315,6 +317,7 @@ ALL_MACHINES = \
 	mep-ibld.lo \
 	mep-opc.lo \
 	mips-dis.lo \
+	microblaze-dis.lo \
 	mips-opc.lo \
 	mips16-opc.lo \
 	mmix-dis.lo \
@@ -1798,6 +1801,11 @@ mep-opc.lo: \
   mep-desc.h \
   mep-opc.h \
   sysdep.h
+microblaze-dis.lo: \
+  microblaze-dis.c \
+  microblaze-opc.h \
+  $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h 
 mips-dis.lo: \
   mips-dis.c \
   $(BFDDIR)/elf-bfd.h \

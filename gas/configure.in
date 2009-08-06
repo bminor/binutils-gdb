@@ -137,6 +137,9 @@ for this_target in $target $canon_targets ; do
 	AC_MSG_WARN(GAS support for ${generic_target} is preliminary and a work in progress)
 	;;
 
+      microblaze*)
+        ;;
+
       mips-sony-bsd*)
 	;;
       mips-*-bsd*)

@@ -50,6 +50,7 @@
 @set M68HC11
 @set M680X0
 @set MCORE
+@set MICROBLAZE
 @set MIPS
 @set MMIX
 @set MS1

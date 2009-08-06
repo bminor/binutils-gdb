@@ -363,6 +363,10 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-jsri2bsr}] [@b{-sifilter}] [@b{-relax}]
    [@b{-mcpu=[210|340]}]
 @end ifset
+@ifset MICROBLAZE
+@emph{Target MICROBLAZE options:}
+@c MicroBlaze has no machine-dependent assembler options.
+@end ifset
 @ifset MIPS
 
 @emph{Target MIPS options:}
@@ -6766,6 +6770,9 @@ subject, see the hardware manufacturer's manual.
 @ifset M68HC11
 * M68HC11-Dependent::           M68HC11 and 68HC12 Dependent Features
 @end ifset
+@ifset MICROBLAZE
+* MicroBlaze-Dependent::	MICROBLAZE Dependent Features
+@end ifset
 @ifset MIPS
 * MIPS-Dependent::              MIPS Dependent Features
 @end ifset
@@ -6932,6 +6939,10 @@ family.
 
 @ifset M68HC11
 @include c-m68hc11.texi
+@end ifset
+
+@ifset MICROBLAZE 
+@include c-microblaze.texi
 @end ifset
 
 @ifset MIPS

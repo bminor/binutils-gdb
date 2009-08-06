@@ -119,6 +119,7 @@
 #include "elf/m68hc11.h"
 #include "elf/mcore.h"
 #include "elf/mep.h"
+#include "elf/microblaze.h"
 #include "elf/mips.h"
 #include "elf/mmix.h"
 #include "elf/mn10200.h"
@@ -614,6 +615,8 @@ guess_is_rela (unsigned int e_machine)
     case EM_XSTORMY16:
     case EM_XTENSA:
     case EM_XTENSA_OLD:
+    case EM_MICROBLAZE:
+    case EM_MICROBLAZE_OLD:
       return TRUE;
 
     case EM_68HC05:
@@ -1196,6 +1199,11 @@ dump_relocations (FILE * file,
 	case EM_CR16:
 	case EM_CR16_OLD:
 	  rtype = elf_cr16_reloc_type (type);
+	  break;
+	
+	case EM_MICROBLAZE:
+	case EM_MICROBLAZE_OLD:
+	  rtype = elf_microblaze_reloc_type (type);
 	  break;
 	}
 
@@ -1865,6 +1873,8 @@ get_machine_name (unsigned e_machine)
     case EM_CYGNUS_MEP:         return "Toshiba MeP Media Engine";
     case EM_CR16:
     case EM_CR16_OLD:		return "National Semiconductor's CR16";
+    case EM_MICROBLAZE:		return "Xilinx MicroBlaze";
+    case EM_MICROBLAZE_OLD:	return "Xilinx MicroBlaze";
     default:
       snprintf (buff, sizeof (buff), _("<unknown>: 0x%x"), e_machine);
       return buff;

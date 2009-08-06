@@ -422,6 +422,7 @@ DESCRIPTION
 .#define bfd_mach_r800           11 {* R800: successor with multiplication.  *}
 .  bfd_arch_lm32,      {* Lattice Mico32 *}
 .#define bfd_mach_lm32      1
+.  bfd_arch_microblaze,{* Xilinx MicroBlaze. *}
 .  bfd_arch_last
 .  };
 */
@@ -496,6 +497,7 @@ extern const bfd_arch_info_type bfd_maxq_arch;
 extern const bfd_arch_info_type bfd_mcore_arch;
 extern const bfd_arch_info_type bfd_mep_arch;
 extern const bfd_arch_info_type bfd_mips_arch;
+extern const bfd_arch_info_type bfd_microblaze_arch;
 extern const bfd_arch_info_type bfd_mmix_arch;
 extern const bfd_arch_info_type bfd_mn10200_arch;
 extern const bfd_arch_info_type bfd_mn10300_arch;
@@ -570,6 +572,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_maxq_arch,
     &bfd_mcore_arch,
     &bfd_mep_arch,
+    &bfd_microblaze_arch,
     &bfd_mips_arch,
     &bfd_mmix_arch,
     &bfd_mn10200_arch,
