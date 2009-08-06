@@ -1,3 +1,8 @@
+2009-08-07  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.texinfo (Server Prefix): Explain that server prefix suppresses
+	confirmation request. 
+
 2009-08-05  Jeremy Bennett  <jeremy.bennett@embecosm.com>
 
         * gdb.texinfo (Separate Debug Files, Remote Protocol): Clarified
