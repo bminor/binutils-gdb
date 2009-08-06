@@ -1,3 +1,8 @@
+2009-08-06  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (md_assemble): Call mapping_state from inside a
+	block in case it is a null macro.
+
 2009-08-05  Chao-ying Fu  <fu@mips.com>
 
 	* config/tc-mips.c (MIPS_JALR_HINT_P): New define. For IRIX, it is

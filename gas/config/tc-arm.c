@@ -15520,7 +15520,9 @@ md_assemble (char *str)
 				arm_ext_v6t2);
 
       if (!inst.error)
-	mapping_state (MAP_THUMB);
+	{
+	  mapping_state (MAP_THUMB);
+	}
     }
   else if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v1))
     {
@@ -15563,7 +15565,9 @@ md_assemble (char *str)
 	ARM_MERGE_FEATURE_SETS (arm_arch_used, arm_arch_used,
 				*opcode->avariant);
       if (!inst.error)
-	mapping_state (MAP_ARM);
+	{
+	  mapping_state (MAP_ARM);
+	}
     }
   else
     {
