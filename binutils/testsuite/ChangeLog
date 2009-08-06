@@ -1,3 +1,11 @@
+2009-08-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/10492
+	* binutils-all/objcopy.exp: Run strip-10.
+
+	* binutils-all/strip-10.d: New.
+	* binutils-all/unique.s: Likewise.
+
 2009-07-31  Daniel Gutson  <dgutson@codesourcery.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 
