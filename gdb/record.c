@@ -1246,6 +1246,16 @@ cmd_record_fd_cleanups (void *recfdp)
 
 #include "elf-bfd.h"
 
+static int
+bfdcore_write (bfd *obfd, asection *osec, void *buf, int len, int *offset)
+{
+  int ret = bfd_set_section_contents (obfd, osec, buf, *offset, len);
+
+  if (ret)
+    *offset += len;
+  return ret;
+}
+
 static void
 cmd_record_dump (char *args, int from_tty)
 {
@@ -1338,10 +1348,7 @@ cmd_record_dump (char *args, int from_tty)
     fprintf_unfiltered (gdb_stdlog, _("\
   Writing 4-byte magic cookie RECORD_FILE_MAGIC (0x%08x)\n"),
 			magic);
-  if (bfd_set_section_contents (obfd, osec, &magic, 
-				bfd_offset, sizeof (magic)))
-    bfd_offset += sizeof (magic);
-  else
+  if (!bfdcore_write (obfd, osec, &magic, sizeof (magic), &bfd_offset))
     error (_("Failed to write 'magic' to %s (%s)"), 
 	   recfilename, bfd_errmsg (bfd_get_error ()));
 
@@ -1352,10 +1359,7 @@ cmd_record_dump (char *args, int from_tty)
       uint64_t tmpu64;
 
       tmpu8 = p->type;
-      if (bfd_set_section_contents (obfd, osec, &tmpu8, 
-				    bfd_offset, sizeof (tmpu8)))
-	bfd_offset += sizeof (tmpu8);
-      else
+      if (!bfdcore_write (obfd, osec, &tmpu8, sizeof (tmpu8), &bfd_offset))
 	error (_("Failed to write 'type' to %s (%s)"), 
 	       recfilename, bfd_errmsg (bfd_get_error ()));
 
@@ -1373,20 +1377,14 @@ cmd_record_dump (char *args, int from_tty)
 				*(ULONGEST *) p->u.reg.val, 
 				MAX_REGISTER_SIZE);
 	  /* FIXME: register num does not need 8 bytes.  */
-	  if (bfd_set_section_contents (obfd, osec, &tmpu64,
-					bfd_offset, sizeof (tmpu64)))
-	    bfd_offset += sizeof (tmpu64);
-	  else
+	  if (!bfdcore_write (obfd, osec, &tmpu64, 
+			      sizeof (tmpu64), &bfd_offset))
 	    error (_("Failed to write regnum to %s (%s)"), 
 		   recfilename, bfd_errmsg (bfd_get_error ()));
 
 	  /* FIXME: add a len field, and write the smaller value.  */
-	  if (bfd_set_section_contents (obfd, osec, 
-					p->u.reg.val,
-					bfd_offset, 
-					MAX_REGISTER_SIZE))
-	    bfd_offset += MAX_REGISTER_SIZE;
-	  else
+	  if (!bfdcore_write (obfd, osec, p->u.reg.val,
+					MAX_REGISTER_SIZE, &bfd_offset))
 	    error (_("Failed to write regval to %s (%s)"), 
 		   recfilename, bfd_errmsg (bfd_get_error ()));
 	  break;
@@ -1400,10 +1398,7 @@ cmd_record_dump (char *args, int from_tty)
   Writing memory 0x%08x (1 plus 8 plus 8 bytes plus %d bytes)\n"),
 				(unsigned int) p->u.mem.addr,
 				p->u.mem.len);
-	  if (bfd_set_section_contents (obfd, osec, &tmpu64, 
-					bfd_offset, sizeof (tmpu64)))
-	    bfd_offset += sizeof (tmpu64);
-	  else
+	  if (!bfdcore_write (obfd, osec, &tmpu64, sizeof (tmpu64), &bfd_offset))
 	    error (_("Failed to write memaddr to %s (%s)"),
 		   recfilename, bfd_errmsg (bfd_get_error ()));
 
@@ -1412,19 +1407,12 @@ cmd_record_dump (char *args, int from_tty)
 	    tmpu64 = bswap_64 (tmpu64);
 
 	  /* FIXME: len does not need 8 bytes.  */
-	  if (bfd_set_section_contents (obfd, osec, &tmpu64, 
-					bfd_offset, sizeof (tmpu64)))
-	    bfd_offset += sizeof (tmpu64);
-	  else
+	  if (!bfdcore_write (obfd, osec, &tmpu64, sizeof (tmpu64), &bfd_offset))
 	    error (_("Failed to write memlen to %s (%s)"), 
 		   recfilename, bfd_errmsg (bfd_get_error ()));
 
-	  if (bfd_set_section_contents (obfd, osec, 
-					p->u.mem.val,
-					bfd_offset, 
-					p->u.mem.len))
-	    bfd_offset += p->u.mem.len;
-	  else
+	  if (!bfdcore_write (obfd, osec, p->u.mem.val,
+			      p->u.mem.len, &bfd_offset))
 	    error (_("Failed to write memval to %s (%s)"),
 		   recfilename, bfd_errmsg (bfd_get_error ()));
 	  break;
@@ -1648,7 +1636,7 @@ cmd_record_load (char *args, int from_tty)
   record_arch_list_head->prev = rec;
 
   /* Update record_insn_num and record_insn_max_num.  */
-  record_insn_num += insn_number;
+  record_insn_num = insn_number;
   if (record_insn_num > record_insn_max_num)
     {
       record_insn_max_num = record_insn_num;

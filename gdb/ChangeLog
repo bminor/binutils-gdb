@@ -1,5 +1,12 @@
 2009-08-06  Michael Snyder  <msnyder@vmware.com>
 
+	* record.c (bfdcore_write): New function, abstracted out
+	from cmd_record_dump.
+	(cmd_record_dump): Call bfdcore_write.
+	(cmd_record_load): Fix setting of record_insn_num.
+
+2009-08-06  Michael Snyder  <msnyder@vmware.com>
+
 	* record.c (record_list_release): Finish releasing record list.
 	(cmd_record_load): No longer necessary to null out
 	record list pointers: record_list_release does it.
