@@ -1,3 +1,7 @@
+2009-08-07  Sriraman Tallam  <tmsriram@google.com>
+	* dynobj.h (Sized_dynobj::do_section_entsize): Add return to avoid
+	compiler warnings.
+
 2009-08-06  Sriraman Tallam  <tmsriram@google.com>
 
 	* x86_64.cc (Target_x86_64::Relocate::relocate_tls): Check for a
