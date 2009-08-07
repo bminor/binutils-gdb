@@ -1,5 +1,11 @@
 2009-08-06  Michael Snyder  <msnyder@vmware.com>
 
+	* record.c (record_list_release): Finish releasing record list.
+	(cmd_record_load): No longer necessary to null out
+	record list pointers: record_list_release does it.
+
+2009-08-06  Michael Snyder  <msnyder@vmware.com>
+
 	* record.c (cmd_record_dump): Clean up draft version.
 	(cmd_record_load): Ditto.
 

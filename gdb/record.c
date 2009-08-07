@@ -159,6 +159,11 @@ record_list_release (struct record_entry *rec)
 
   if (rec != &record_first)
     xfree (rec);
+
+  record_list = &record_first;
+  record_arch_list_tail = NULL;
+  record_arch_list_tail = NULL;
+  record_insn_num = 0;
 }
 
 static void
@@ -1526,8 +1531,6 @@ cmd_record_load (char *args, int from_tty)
       /* Free any existing record log, and load the entries in
 	 core_bfd to the new record log.  */
       record_list_release (record_arch_list_tail);
-      record_arch_list_head = 0;
-      record_arch_list_tail = 0;
       old_cleanups2 = make_cleanup (record_message_cleanups, 0);
 
       while (1)
