@@ -150,11 +150,21 @@ show_language_command (struct ui_file *file, int from_tty,
 static void
 set_language_command (char *ignore, int from_tty, struct cmd_list_element *c)
 {
-  int i;
+  int i, len;
   enum language flang;
-  char *err_lang;
+  char *err_lang, *tem;
 
-  if (!language || !language[0])
+  /* Strip trailing whitespace.  */
+  if (!language)
+    len = 0;
+  else
+    {
+      len = strlen (language);
+      while (len > 0 && language[len - 1] == ' ')
+	--len;
+    }
+
+  if (len == 0)
     {
       printf_unfiltered (_("\
 The currently understood settings are:\n\n\
@@ -180,6 +190,11 @@ local or auto    Automatic setting based on source file\n"));
       set_language (current_language->la_language);
       return;
     }
+
+  /* Reset LANGUAGE to avoid trailing spaces.  */
+  tem = savestring (language, len);
+  xfree (language);
+  language = tem;
 
   /* Search the list of languages for a match.  */
   for (i = 0; i < languages_size; i++)
@@ -251,6 +266,18 @@ show_type_command (struct ui_file *file, int from_tty,
 static void
 set_type_command (char *ignore, int from_tty, struct cmd_list_element *c)
 {
+  int len;
+  char *tem;
+
+  /* Strip trailing whitespace.  */
+  len = strlen (type);
+  while (len > 0 && type[len - 1] == ' ')
+    --len;
+  /* Reset TYPE.  */
+  tem = savestring (type, len);
+  xfree (type);
+  type = tem;
+
   if (strcmp (type, "on") == 0)
     {
       type_check = type_check_on;
@@ -298,6 +325,18 @@ show_range_command (struct ui_file *file, int from_tty,
 static void
 set_range_command (char *ignore, int from_tty, struct cmd_list_element *c)
 {
+  int len;
+  char *tem;
+
+  /* Strip trailing whitespace.  */
+  len = strlen (range);
+  while (len > 0 && range[len - 1] == ' ')
+    --len;
+  /* Reset RANGE.  */
+  tem = savestring (range, len);
+  xfree (range);
+  range = tem;
+
   if (strcmp (range, "on") == 0)
     {
       range_check = range_check_on;

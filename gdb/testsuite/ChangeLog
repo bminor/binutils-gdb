@@ -1,3 +1,8 @@
+2009-08-07  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/setshow.exp: Add tests for changes to set language, set
+	check range, and set check type.
+
 2009-08-03  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* lib/mi-support.exp (mi_list_breakpoints): Make it work.

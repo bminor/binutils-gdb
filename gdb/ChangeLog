@@ -1,5 +1,11 @@
 2009-08-07  Tom Tromey  <tromey@redhat.com>
 
+	* language.c (set_language_command): Strip whitespace.
+	(set_type_command): Likewise.
+	(set_range_command): Likewise.
+
+2009-08-07  Tom Tromey  <tromey@redhat.com>
+
 	PR gdb/8869:
 	* language.c (language_completer): New function.
 	(range_or_type_completer): New function.

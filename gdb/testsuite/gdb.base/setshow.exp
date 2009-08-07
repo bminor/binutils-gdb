@@ -104,6 +104,10 @@ if { ![target_info exists use_gdb_stub] && ![target_info exists noargs] } {
 gdb_test "set check range on" "" "set check range on" 
 #test show check range on
 gdb_test "show check range" "Range checking is \"on\"\..*" "show check range (on)" 
+#test set check range off with trailing space
+gdb_test "set check range off " "" "set check range off" 
+#test show check range off
+gdb_test "show check range" "Range checking is \"off\"\..*" "show check range (off)" 
 #test set check range auto
 gdb_test "set check range auto" "" "set check range auto" 
 #test show check range auto
@@ -112,6 +116,10 @@ gdb_test "show check range" "Range checking is \"auto; currently .*" "show check
 gdb_test "set check type on" "" "set check type on" 
 #test show check type on
 gdb_test "show check type" "Type checking is \"on\"..*" "show check type (on)" 
+#test set check type off with trailing space
+gdb_test "set check type off " "" "set check type off" 
+#test show check type off
+gdb_test "show check type" "Type checking is \"off\"..*" "show check type (off)" 
 #test set check type auto
 gdb_test "set check type auto" "" "set check type auto" 
 #test show check type
@@ -170,6 +178,13 @@ gdb_test "show history size" "The size of the command history is 100..*" "show h
 gdb_test "set language asm" "" "set language asm" 
 #test show language asm
 gdb_test "show language" "The current source language is \"asm\"..*" "show language (asm)" 
+#test set language java, with a trailing space
+gdb_test "set language java " "" "set language java"
+#test show language java
+gdb_test "show language" "The current source language is \"java\"..*" "show language (java)" 
+#test completion for set language.
+gdb_test "complete set language min" "set language minimal" \
+  "complete set language minimal"
 #test set language auto
 gdb_test "set language auto" "" "set language auto" 
 #test show language
