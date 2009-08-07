@@ -1,4 +1,17 @@
-2009-08-06  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
+2009-08-06  Hui Zhu  <teawater@gmail.com>
+	    Michael Snyder  <msnyder@vmware.com>
+	(Add record dump/load commands: draft version, not ready for release).
+
+	* record.c (RECORD_FILE_MAGIC): New constant.
+	(record_arch_list_add_reg): Use xcalloc instead of xmalloc.
+	(record_exec_entry): Pre-zero the register buffer.
+	(cmd_record_fd_cleanup): New function (dead).
+	(cmd_record_dump): New function.
+	(bfdcore_read): New function.
+	(cmd_record_load): New function.
+	(_initialize_record): Add 'record dump' and 'record load' commands.
+
+2009-08-06  Michael Snyder  <msnyder@vmware.com>
 
 	* gcore.c (create_gcore_bfd): New function, abstracted 
 	from gcore_command for export.

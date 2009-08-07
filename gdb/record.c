@@ -23,15 +23,20 @@
 #include "gdbthread.h"
 #include "event-top.h"
 #include "exceptions.h"
+#include "completer.h"
 #include "record.h"
 #include "checkpoint.h"
 
+#include <byteswap.h>
 #include <signal.h>
+#include <netinet/in.h>
 
 #define DEFAULT_RECORD_INSN_MAX_NUM	200000
 
 #define RECORD_IS_REPLAY \
      (record_list->next || execution_direction == EXEC_REVERSE)
+
+#define RECORD_FILE_MAGIC	htonl(0x20090726) /* Host to network order */
 
 /* These are the core struct of record function.
 
@@ -249,7 +254,7 @@ record_arch_list_add_reg (struct regcache *regcache, int num)
 			num);
 
   rec = (struct record_entry *) xmalloc (sizeof (struct record_entry));
-  rec->u.reg.val = (gdb_byte *) xmalloc (MAX_REGISTER_SIZE);
+  rec->u.reg.val = (gdb_byte *) xcalloc (1, MAX_REGISTER_SIZE);
   rec->prev = NULL;
   rec->next = NULL;
   rec->type = record_reg;
@@ -441,6 +446,7 @@ record_exec_entry (struct regcache *regcache, struct gdbarch *gdbarch,
                               host_address_to_string (entry),
                               entry->u.reg.num);
 
+        memset (reg, 0, sizeof (reg));
         regcache_cooked_read (regcache, entry->u.reg.num, reg);
         regcache_cooked_write (regcache, entry->u.reg.num, entry->u.reg.val);
         memcpy (entry->u.reg.val, reg, MAX_REGISTER_SIZE);
@@ -449,6 +455,7 @@ record_exec_entry (struct regcache *regcache, struct gdbarch *gdbarch,
 
     case record_mem: /* mem */
       {
+	/* Nothing to do if the entry is flagged not_accessible.  */
         if (!record_list->u.mem.mem_entry_not_accessible)
           {
             gdb_byte *mem = alloca (entry->u.mem.len);
@@ -465,6 +472,8 @@ record_exec_entry (struct regcache *regcache, struct gdbarch *gdbarch,
               {
                 if (execution_direction == EXEC_REVERSE)
                   {
+		    /* Read failed -- 
+		       flag entry as not_accessible.  */
                     record_list->u.mem.mem_entry_not_accessible = 1;
                     if (record_debug)
                       warning (_("Process record: error reading memory at "
@@ -476,7 +485,7 @@ record_exec_entry (struct regcache *regcache, struct gdbarch *gdbarch,
                   error (_("Process record: error reading memory at "
                            "addr = %s len = %d."),
                          paddress (gdbarch, entry->u.mem.addr),
-                        entry->u.mem.len);
+			 entry->u.mem.len);
               }
             else
               {
@@ -485,6 +494,8 @@ record_exec_entry (struct regcache *regcache, struct gdbarch *gdbarch,
                   {
                     if (execution_direction == EXEC_REVERSE)
                       {
+			/* Write failed -- 
+			   flag entry as not_accessible.  */
                         record_list->u.mem.mem_entry_not_accessible = 1;
                         if (record_debug)
                           warning (_("Process record: error writing memory at "
@@ -496,11 +507,11 @@ record_exec_entry (struct regcache *regcache, struct gdbarch *gdbarch,
                       error (_("Process record: error writing memory at "
                                "addr = %s len = %d."),
                              paddress (gdbarch, entry->u.mem.addr),
-                            entry->u.mem.len);
+			     entry->u.mem.len);
                   }
+		else
+		  memcpy (entry->u.mem.val, mem, entry->u.mem.len);
               }
-
-            memcpy (entry->u.mem.val, mem, entry->u.mem.len);
           }
       }
       break;
@@ -803,9 +814,9 @@ record_wait (struct target_ops *ops,
 	      break;
 	    }
 
-	  record_exec_entry (regcache, gdbarch, record_list);
+          record_exec_entry (regcache, gdbarch, record_list);
 
- 	  if (record_list->type == record_end)
+	  if (record_list->type == record_end)
 	    {
 	      if (record_debug > 1)
 		fprintf_unfiltered (gdb_stdlog,
@@ -1024,6 +1035,7 @@ record_store_registers (struct target_ops *ops, struct regcache *regcache,
 
       record_registers_change (regcache, regno);
     }
+
   record_beneath_to_store_registers (record_beneath_to_store_registers_ops,
                                      regcache, regno);
 }
@@ -1181,6 +1193,628 @@ static void
 cmd_record_start (char *args, int from_tty)
 {
   execute_command ("target record", from_tty);
+}
+
+static void
+cmd_record_fd_cleanups (void *recfdp)
+{
+  int recfd = *(int *) recfdp;
+  close (recfd);
+}
+
+/* Record log save-file format
+   Version 1
+
+     Header:
+       4 bytes: magic number RECORD_FILE_MAGIC.
+                NOTE: be sure to change whenever this file format changes!
+
+     Records: 
+      record_end:
+       1 byte:  record type (record_end)
+      record_reg:
+       1 byte:  record type (record_reg)
+       8 bytes: register id
+      16 bytes: register value
+      record_mem:
+       1 byte:  record type (record_mem)
+       8 bytes: memory address
+       8 bytes: memory length
+       n bytes: memory value (n == memory length)
+
+   Version 2 (proposed)
+
+     Header:
+       4 bytes: magic number RECORD_FILE_MAGIC.
+                NOTE: be sure to change whenever this file format changes!
+       n bytes: architecture...
+       4 bytes: size of register snapshot
+       n bytes: register snapshot
+       4 bytes: number of section crcs
+       n bytes: section names with crcs
+       
+     Records:
+       See version 1.
+ */
+
+/* Dump the execution log to a file.  */
+
+#include "elf-bfd.h"
+
+static void
+cmd_record_dump (char *args, int from_tty)
+{
+  char *recfilename, recfilename_buffer[40];
+  int recfd;
+  struct record_entry *cur_record_list;
+  uint32_t magic;
+  struct regcache *regcache;
+  struct gdbarch *gdbarch;
+  struct cleanup *old_cleanups;
+  struct cleanup *set_cleanups;
+
+  if (current_target.to_stratum != record_stratum)
+    error (_("Process record is not started.\n"));
+
+  if (args && *args)
+    recfilename = args;
+  else
+    {
+      /* Default recfile name is "rec.PID".  */
+      sprintf (recfilename_buffer, "rec.%d", PIDGET (inferior_ptid));
+      recfilename = recfilename_buffer;
+    }
+
+  /* Open the dump file.  */
+  if (record_debug)
+    fprintf_unfiltered (gdb_stdlog, 
+			_("Saving recording to file '%s'\n"), 
+			recfilename);
+
+  /* Michael-style, elf core dump file.  */
+  {
+    extern void write_gcore_file (bfd *);
+    extern bfd *create_gcore_bfd (char *);
+    bfd *obfd;
+    int dump_size = 0;
+    asection *osec = NULL;
+    struct record_entry *p;
+    int bfd_offset = 0;
+
+    /* Open the output file.  */
+    obfd = create_gcore_bfd (recfilename);
+
+    /* Need a cleanup that will close the file (FIXME: delete it?).  */
+    old_cleanups = make_cleanup_bfd_close (obfd);
+
+    /* Save the current record entry to "cur_record_list".  */
+    cur_record_list = record_list;
+
+    /* Get the values of regcache and gdbarch.  */
+    regcache = get_current_regcache ();
+    gdbarch = get_regcache_arch (regcache);
+
+    /* Disable the GDB operation record.  */
+    set_cleanups = record_gdb_operation_disable_set ();
+
+    /* Reverse execute to the begin of record list.  */
+    for (; record_list && record_list != &record_first; 
+	 record_list = record_list->prev)
+      {
+	record_exec_entry (regcache, gdbarch, record_list);
+      }
+
+    /* Compute the size needed for the extra bfd section.  */
+    dump_size = 4;	/* magic cookie */
+    for (p = &record_first; p; p = p->next)
+      switch (p->type)
+	{
+	case record_end:
+	  dump_size += 1;
+	  break;
+	case record_reg:
+	  dump_size += 1 + 8 + MAX_REGISTER_SIZE;
+	  break;
+	case record_mem:
+	  dump_size += 1 + 8 + 8 + p->u.mem.len;
+	  break;
+	}
+
+    /* Make the new bfd section.  */
+    osec = bfd_make_section_anyway (obfd, "precord");
+    bfd_set_section_size (obfd, osec, dump_size);
+    bfd_set_section_vma (obfd, osec, 0);
+    bfd_section_lma (obfd, osec) = 0;
+    bfd_set_section_flags (obfd, osec, SEC_ALLOC | SEC_HAS_CONTENTS);
+
+    /* Save corefile state.  */
+    write_gcore_file (obfd);
+
+    /* Write out the record log (modified Hui method).  */
+    /* Write the magic code.  */
+    magic = RECORD_FILE_MAGIC;
+    if (record_debug)
+      fprintf_unfiltered (gdb_stdlog, _("\
+  Writing 4-byte magic cookie RECORD_FILE_MAGIC (0x%08x)\n"),
+			  magic);
+    if (bfd_set_section_contents (obfd, osec, &magic, 
+				  bfd_offset, sizeof (magic)))
+      bfd_offset += sizeof (magic);
+    else
+      error (_("Failed to write 'magic' to %s (%s)"), 
+	     recfilename, bfd_errmsg (bfd_get_error ()));
+
+    /* Dump the entries into the new bfd section.  */
+    for (p = &record_first; p; p = p->next)
+      {
+	uint8_t tmpu8;
+	uint64_t tmpu64;
+
+	tmpu8 = p->type;
+	if (bfd_set_section_contents (obfd, osec, &tmpu8, 
+				      bfd_offset, sizeof (tmpu8)))
+	  bfd_offset += sizeof (tmpu8);
+	else
+	  error (_("Failed to write 'type' to %s (%s)"), 
+		 recfilename, bfd_errmsg (bfd_get_error ()));
+
+	switch (p->type)
+	  {
+	  case record_reg: /* reg */
+	    tmpu64 = p->u.reg.num;
+	    if (BYTE_ORDER == LITTLE_ENDIAN)
+	      tmpu64 = bswap_64 (tmpu64);
+
+	    if (record_debug)
+	      fprintf_unfiltered (gdb_stdlog, _("\
+  Writing register %d val 0x%016llx (1 plus 8 plus %d bytes)\n"),
+				  p->u.reg.num,
+				  *(ULONGEST *) p->u.reg.val, 
+				  MAX_REGISTER_SIZE);
+	    /* FIXME: register num does not need 8 bytes.  */
+	    if (bfd_set_section_contents (obfd, osec, &tmpu64,
+					  bfd_offset, sizeof (tmpu64)))
+	      bfd_offset += sizeof (tmpu64);
+	    else
+	      error (_("Failed to write regnum to %s (%s)"), 
+		     recfilename, bfd_errmsg (bfd_get_error ()));
+
+	    /* FIXME: add a len field, and write the smaller value.  */
+	    if (bfd_set_section_contents (obfd, osec, 
+					  p->u.reg.val,
+					  bfd_offset, 
+					  MAX_REGISTER_SIZE))
+	      bfd_offset += MAX_REGISTER_SIZE;
+	    else
+	      error (_("Failed to write regval to %s (%s)"), 
+		     recfilename, bfd_errmsg (bfd_get_error ()));
+	    break;
+	  case record_mem: /* mem */
+	    tmpu64 = p->u.mem.addr;
+	    if (BYTE_ORDER == LITTLE_ENDIAN)
+	      tmpu64 = bswap_64 (tmpu64);
+
+	    if (record_debug)
+	      fprintf_unfiltered (gdb_stdlog, _("\
+  Writing memory 0x%08x (1 plus 8 plus 8 bytes plus %d bytes)\n"),
+				  (unsigned int) p->u.mem.addr,
+				  p->u.mem.len);
+	    if (bfd_set_section_contents (obfd, osec, &tmpu64, 
+					  bfd_offset, sizeof (tmpu64)))
+	      bfd_offset += sizeof (tmpu64);
+	    else
+	      error (_("Failed to write memaddr to %s (%s)"),
+		     recfilename, bfd_errmsg (bfd_get_error ()));
+
+	    tmpu64 = p->u.mem.len;
+	    if (BYTE_ORDER == LITTLE_ENDIAN)
+	      tmpu64 = bswap_64 (tmpu64);
+
+	    /* FIXME: len does not need 8 bytes.  */
+	    if (bfd_set_section_contents (obfd, osec, &tmpu64, 
+					  bfd_offset, sizeof (tmpu64)))
+	      bfd_offset += sizeof (tmpu64);
+	    else
+	      error (_("Failed to write memlen to %s (%s)"), 
+		     recfilename, bfd_errmsg (bfd_get_error ()));
+
+	    if (bfd_set_section_contents (obfd, osec, 
+					  p->u.mem.val,
+					  bfd_offset, 
+					  p->u.mem.len))
+	      bfd_offset += p->u.mem.len;
+	    else
+	      error (_("Failed to write memval to %s (%s)"),
+		     recfilename, bfd_errmsg (bfd_get_error ()));
+	    break;
+	  case record_end:
+	      /* FIXME: record the contents of record_end rec.  */
+	      if (record_debug)
+		fprintf_unfiltered (gdb_stdlog, _("\
+  Writing record_end (1 byte)\n"));
+	    break;
+	  }
+      }
+
+    /* Now forward-execute back to the saved entry.  */
+    for (record_list = &record_first; 
+	 record_list && record_list != cur_record_list; 
+	 record_list = record_list->next)
+      {
+	record_exec_entry (regcache, gdbarch, record_list);
+      }
+    /* Clean-ups will close the output file and free malloc memory.  */
+    do_cleanups (old_cleanups);
+  }
+
+  /* Succeeded.  */
+  fprintf_filtered (gdb_stdout, "Saved recfile %s.\n", recfilename);
+}
+
+static int
+bfdcore_read (bfd *obfd, asection *osec, void *buf, int len, int *offset)
+{
+  int ret = bfd_get_section_contents (obfd, osec, buf, *offset, len);
+
+  if (ret)
+    *offset += len;
+  return ret;
+}
+
+/* Load the execution log from a file.  */
+
+#include "gdbcore.h"
+#include <ctype.h>
+
+static void
+cmd_record_load (char *args, int from_tty)
+{
+  extern void nullify_last_target_wait_ptid (void);
+  int recfd;
+  uint32_t magic;
+  struct cleanup *old_cleanups;
+  struct cleanup *old_cleanups2;
+  struct record_entry *rec;
+  int insn_number = 0;
+
+  if (!args || (args && !*args))
+    error (_("Argument for filename required.\n"));
+
+  /* Open the load file.  */
+  if (record_debug)
+    fprintf_unfiltered (gdb_stdlog, 
+			_("Restoring recording from file '%s'\n"), args);
+#if 1
+  /* Michael-style elf core dump file.  */
+  {
+    bfd *core_bfd;
+    asection *osec;
+    extern bfd *load_corefile (char *, int);
+
+   /* Restore corefile regs and mem sections.  */
+   core_bfd = load_corefile (args, from_tty);
+   old_cleanups = make_cleanup_bfd_close (core_bfd);
+
+   /* Now need to find our special note section.  */
+   osec = bfd_get_section_by_name (core_bfd, "null0");
+   printf_filtered ("Find precord section %s.\n",
+		    osec ? "succeeded" : "failed");
+
+   if (osec) 
+     {
+       int i, len;
+       int bfd_offset = 0;
+
+       printf_filtered ("osec name = '%s'\n",
+			bfd_section_name (core_bfd, osec));
+       len = (int) bfd_section_size (core_bfd, osec);
+       printf_filtered ("osec size = %d\n", len);
+
+       /* Check the magic code.  */
+       if (!bfdcore_read (core_bfd, osec, &magic, 
+			  sizeof (magic), &bfd_offset))
+	 error (_("Failed to read 'magic' from %s (%s)"),
+		args, bfd_errmsg (bfd_get_error ()));
+
+       if (magic != RECORD_FILE_MAGIC)
+	 error (_("'%s', version mis-match / file format error."), 
+		args);
+
+       if (record_debug)
+	 fprintf_unfiltered (gdb_stdlog, _("\
+  Reading 4-byte magic cookie RECORD_FILE_MAGIC (0x%08x)\n"),
+			     magic);
+       if (current_target.to_stratum != record_stratum)
+	 {
+	   /* FIXME need cleanup!  We might error out.  */
+	   cmd_record_start (NULL, from_tty);
+	   printf_unfiltered (_("Auto start process record.\n"));
+	 }
+
+       /* Load the entries in recfd to the record_arch_list_head and
+	  record_arch_list_tail.  */
+       /* FIXME free old records? */
+       record_list_release (record_arch_list_tail);
+       record_arch_list_head = NULL;
+       record_arch_list_tail = NULL;
+       old_cleanups2 = make_cleanup (record_message_cleanups, 0);
+
+       while (1)
+	 {
+	   uint8_t tmpu8;
+	   uint64_t tmpu64;
+
+	   if (!bfdcore_read (core_bfd, osec, &tmpu8, 
+			      sizeof (tmpu8), &bfd_offset))
+	     break;
+
+	   switch (tmpu8)
+	     {
+	     case record_reg: /* reg */
+	       /* FIXME: abstract out into an 'insert' function.  */
+	       rec = (struct record_entry *) 
+		 xmalloc (sizeof (struct record_entry));
+	       rec->u.reg.val = (gdb_byte *) xcalloc (1, MAX_REGISTER_SIZE);
+	       rec->prev = NULL;
+	       rec->next = NULL;
+	       rec->type = record_reg;
+	       /* Get num.  */
+	       /* FIXME: register num does not need 8 bytes.  */
+	       if (!bfdcore_read (core_bfd, osec, &tmpu64, 
+				  sizeof (tmpu64), &bfd_offset))
+		 error (_("Failed to read regnum from %s (%s)"),
+			args, bfd_errmsg (bfd_get_error ()));
+
+	       if (BYTE_ORDER == LITTLE_ENDIAN)
+		 tmpu64 = bswap_64 (tmpu64);
+	       rec->u.reg.num = tmpu64;
+
+	       /* Get val.  */
+	       if (!bfdcore_read (core_bfd, osec, rec->u.reg.val,
+				  MAX_REGISTER_SIZE, &bfd_offset))
+		 error (_("Failed to read regval from  %s (%s)"),
+			args, bfd_errmsg (bfd_get_error ()));
+
+	       if (record_debug)
+		 fprintf_unfiltered (gdb_stdlog, _("\
+  Reading register %d val 0x%016llx (1 plus 8 plus %d bytes)\n"),
+				     rec->u.reg.num, 
+				     *(ULONGEST *) rec->u.reg.val, 
+				     MAX_REGISTER_SIZE);
+	       record_arch_list_add (rec);
+	       break;
+
+	     case record_mem: /* mem */
+	       rec = (struct record_entry *) 
+		 xmalloc (sizeof (struct record_entry));
+	       rec->prev = NULL;
+	       rec->next = NULL;
+	       rec->type = record_mem;
+	       /* Get addr.  */
+	       if (!bfdcore_read (core_bfd, osec, &tmpu64, 
+				  sizeof (tmpu64), &bfd_offset))
+		 error (_("Failed to read memaddr from %s (%s)"),
+			args, bfd_errmsg (bfd_get_error ()));
+	       if (BYTE_ORDER == LITTLE_ENDIAN)
+		 tmpu64 = bswap_64 (tmpu64);
+	       rec->u.mem.addr = tmpu64;
+
+	       /* Get len.  */
+	       /* FIXME: len does not need 8 bytes.  */
+	       if (!bfdcore_read (core_bfd, osec, &tmpu64, 
+				  sizeof (tmpu64), &bfd_offset))
+		 error (_("Failed to read memlen from %s (%s)"),
+			args, bfd_errmsg (bfd_get_error ()));
+	       if (BYTE_ORDER == LITTLE_ENDIAN)
+		 tmpu64 = bswap_64 (tmpu64);
+	       rec->u.mem.len = tmpu64;
+
+	       rec->u.mem.mem_entry_not_accessible = 0;
+	       rec->u.mem.val = (gdb_byte *) xmalloc (rec->u.mem.len);
+	       /* Get val.  */
+	       if (!bfdcore_read (core_bfd, osec, rec->u.mem.val,
+				 rec->u.mem.len, &bfd_offset))
+		 error (_("Failed to read memval from %s (%s)"),
+			args, bfd_errmsg (bfd_get_error ()));
+	       if (record_debug)
+		 fprintf_unfiltered (gdb_stdlog, _("\
+  Reading memory 0x%08x (1 plus 8 plus %d bytes)\n"),
+				     (unsigned int) rec->u.mem.addr,
+				     rec->u.mem.len);
+	       record_arch_list_add (rec);
+	       break;
+
+	     case record_end: /* end */
+	       /* FIXME: restore the contents of record_end rec.  */
+	       rec = (struct record_entry *) 
+		 xmalloc (sizeof (struct record_entry));
+	       rec->prev = NULL;
+	       rec->next = NULL;
+	       rec->type = record_end;
+	       if (record_debug)
+		 fprintf_unfiltered (gdb_stdlog, _("\
+  Reading record_end (one byte)\n"));
+	       record_arch_list_add (rec);
+	       insn_number ++;
+	       break;
+
+	     default:
+	       error (_("Format of '%s' is not right."), args);
+	       break;
+
+	     }
+	 }
+     }
+
+   discard_cleanups (old_cleanups2);
+
+   /* Add record_arch_list_head to the end of record list.  (??? FIXME)*/
+   for (rec = record_list; rec->next; rec = rec->next);
+   rec->next = record_arch_list_head;
+   record_arch_list_head->prev = rec;
+
+   /* Update record_insn_num and record_insn_max_num.  */
+   record_insn_num += insn_number;
+   if (record_insn_num > record_insn_max_num)
+     {
+       record_insn_max_num = record_insn_num;
+       warning (_("Auto increase record/replay buffer limit to %d."),
+		record_insn_max_num);
+     }
+
+   do_cleanups (old_cleanups);
+  }
+#endif
+
+#if 0
+  /* Hui-style binary dump file.  */
+  recfd = open (args, O_RDONLY | O_BINARY);
+  if (recfd < 0)
+    error (_("Failed to open '%s' for load."), args);
+  old_cleanups = make_cleanup (cmd_record_fd_cleanups, &recfd);
+
+  /* Check the magic code.  */
+  if (read (recfd, &magic, 4) != 4)
+    error (_("Failed to read '%s' for load."), args);
+  if (magic != RECORD_FILE_MAGIC)
+    error (_("'%s' is not a record dump."), args);
+  if (record_debug)
+    fprintf_unfiltered (gdb_stdlog, _("\
+  Reading 4-byte magic cookie RECORD_FILE_MAGIC (0x%08x)\n"),
+			magic);
+
+  if (current_target.to_stratum != record_stratum)
+    {
+      /* FIXME need cleanup!  We might error out.  */
+      cmd_record_start (NULL, from_tty);
+      printf_unfiltered (_("Auto start process record.\n"));
+    }
+
+  /* Load the entries in recfd to the record_arch_list_head and
+     record_arch_list_tail.  */
+  record_arch_list_head = NULL;
+  record_arch_list_tail = NULL;
+  old_cleanups2 = make_cleanup (record_message_cleanups, 0);
+
+  while (1)
+    {
+      int ret;
+      uint8_t tmpu8;
+      uint64_t tmpu64;
+
+      ret = read (recfd, &tmpu8, 1);
+      if (ret < 0)
+        error (_("Failed to read '%s' for load."), args);
+      if (ret == 0)
+        break;
+
+      switch (tmpu8)
+        {
+        case record_reg: /* reg */
+	  /* FIXME: abstract out into an 'insert' function.  */
+          rec = (struct record_entry *) xmalloc (sizeof (struct record_entry));
+          rec->u.reg.val = (gdb_byte *) xcalloc (1, MAX_REGISTER_SIZE);
+          rec->prev = NULL;
+          rec->next = NULL;
+          rec->type = record_reg;
+          /* Get num.  */
+	  /* FIXME: register num does not need 8 bytes.  */
+          if (read (recfd, &tmpu64, 8) != 8)
+            error (_("Failed to read '%s' for load."), args);
+	  if (BYTE_ORDER == LITTLE_ENDIAN)
+	    tmpu64 = bswap_64 (tmpu64);
+
+          rec->u.reg.num = tmpu64;
+          /* Get val.  */
+          if (read (recfd, rec->u.reg.val,
+                    MAX_REGISTER_SIZE) != MAX_REGISTER_SIZE)
+            error (_("Failed to read '%s' for load."), args);
+	  if (record_debug)
+	    fprintf_unfiltered (gdb_stdlog, _("\
+  Reading register %d val 0x%016llx (1 plus 8 plus %d bytes)\n"),
+				rec->u.reg.num, 
+				*(ULONGEST *) rec->u.reg.val, 
+				MAX_REGISTER_SIZE);
+          record_arch_list_add (rec);
+          break;
+
+        case record_mem: /* mem */
+          rec = (struct record_entry *) xmalloc (sizeof (struct record_entry));
+          rec->prev = NULL;
+          rec->next = NULL;
+          rec->type = record_mem;
+          /* Get addr.  */
+          if (read (recfd, &tmpu64, 8) != 8)
+            error (_("Failed to read '%s' for load."), args);
+	  if (BYTE_ORDER == LITTLE_ENDIAN)
+	    tmpu64 = bswap_64 (tmpu64);
+
+          rec->u.mem.addr = tmpu64;
+          /* Get len.  */
+	  /* FIXME: len does not need 8 bytes.  */
+          if (read (recfd, &tmpu64, 8) != 8)
+            error (_("Failed to read '%s' for load."), args);
+	  if (BYTE_ORDER == LITTLE_ENDIAN)
+	    tmpu64 = bswap_64 (tmpu64);
+
+          rec->u.mem.len = tmpu64;
+          rec->u.mem.mem_entry_not_accessible = 0;
+          rec->u.mem.val = (gdb_byte *) xmalloc (rec->u.mem.len);
+          /* Get val.  */
+          if (read (recfd, rec->u.mem.val,
+                    rec->u.mem.len) != rec->u.mem.len)
+            error (_("Failed to read '%s' for load."), args);
+	  if (record_debug)
+	    fprintf_unfiltered (gdb_stdlog, _("\
+  Reading memory 0x%08x (1 plus 8 plus %d bytes)\n"),
+				(unsigned int) rec->u.mem.addr,
+				rec->u.mem.len);
+          record_arch_list_add (rec);
+          break;
+
+        case record_end: /* end */
+	  /* FIXME: restore the contents of record_end rec.  */
+          rec = (struct record_entry *) xmalloc (sizeof (struct record_entry));
+          rec->prev = NULL;
+          rec->next = NULL;
+          rec->type = record_end;
+	  if (record_debug)
+	    fprintf_unfiltered (gdb_stdlog, _("\
+  Reading record_end (one byte)\n"));
+          record_arch_list_add (rec);
+          insn_number ++;
+          break;
+
+        default:
+          error (_("Format of '%s' is not right."), args);
+          break;
+        }
+    }
+
+  discard_cleanups (old_cleanups2);
+
+  /* Add record_arch_list_head to the end of record list.  */
+  for (rec = record_list; rec->next; rec = rec->next);
+  rec->next = record_arch_list_head;
+  record_arch_list_head->prev = rec;
+
+  /* Update record_insn_num and record_insn_max_num.  */
+  record_insn_num += insn_number;
+  if (record_insn_num > record_insn_max_num)
+    {
+      record_insn_max_num = record_insn_num;
+      warning (_("Auto increase record/replay buffer limit to %d."),
+               record_insn_max_num);
+    }
+
+  do_cleanups (old_cleanups);
+#endif
+  /* Succeeded.  */
+  fprintf_filtered (gdb_stdout, "Loaded recfile %s.\n", args);
+  registers_changed ();
+  reinit_frame_cache ();
+  nullify_last_target_wait_ptid ();
+  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
 }
 
 /* Truncate the record log from the present point
@@ -1392,6 +2026,8 @@ record_restore_checkpoint (struct checkpoint_info *cp, int from_tty)
 void
 _initialize_record (void)
 {
+  struct cmd_list_element *c;
+
   /* Init record_first.  */
   record_first.prev = NULL;
   record_first.next = NULL;
@@ -1425,6 +2061,15 @@ _initialize_record (void)
 		  "info record ", 0, &infolist);
   add_alias_cmd ("rec", "record", class_obscure, 1, &infolist);
 
+  c = add_cmd ("dump", class_obscure, cmd_record_dump,
+	       _("Dump the execution log to a file.\n\
+Argument is optional filename.  Default filename is 'rec.<process_id>'."),
+               &record_cmdlist);
+  set_cmd_completer (c, filename_completer);
+  c = add_cmd ("load", class_obscure, cmd_record_load,
+	       _("Load the execution log from a file.  Argument is filename."),
+               &record_cmdlist);
+  set_cmd_completer (c, filename_completer);
 
   add_cmd ("delete", class_obscure, cmd_record_delete,
 	   _("Delete the rest of execution log and start recording it anew."),
@@ -1439,15 +2084,15 @@ _initialize_record (void)
 
   /* Record instructions number limit command.  */
   add_setshow_boolean_cmd ("stop-at-limit", no_class,
-			    &record_stop_at_limit, _("\
+			   &record_stop_at_limit, _("\
 Set whether record/replay stops when record/replay buffer becomes full."), _("\
 Show whether record/replay stops when record/replay buffer becomes full."), _("\
 Default is ON.\n\
 When ON, if the record/replay buffer becomes full, ask user what to do.\n\
 When OFF, if the record/replay buffer becomes full,\n\
 delete the oldest recorded instruction to make room for each new one."),
-			    NULL, NULL,
-                            &set_record_cmdlist, &show_record_cmdlist);
+			   NULL, NULL,
+			   &set_record_cmdlist, &show_record_cmdlist);
   add_setshow_zinteger_cmd ("insn-number-max", no_class,
 			    &record_insn_max_num,
 			    _("Set record/replay buffer limit."),
