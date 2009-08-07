@@ -494,8 +494,9 @@ add_setshow_filename_cmd (char *name, enum command_class class,
 }
 
 /* Add element named NAME to both the set and show command LISTs (the
-   list for set/show or some sublist thereof).  */
-void
+   list for set/show or some sublist thereof).  Return the new "set"
+   command.  */
+struct cmd_list_element *
 add_setshow_string_cmd (char *name, enum command_class class,
 			char **var,
 			const char *set_doc, const char *show_doc,
@@ -505,16 +506,19 @@ add_setshow_string_cmd (char *name, enum command_class class,
 			struct cmd_list_element **set_list,
 			struct cmd_list_element **show_list)
 {
+  struct cmd_list_element *cmd;
   add_setshow_cmd_full (name, class, var_string, var,
 			set_doc, show_doc, help_doc,
 			set_func, show_func,
 			set_list, show_list,
-			NULL, NULL);
+			&cmd, NULL);
+  return cmd;
 }
 
 /* Add element named NAME to both the set and show command LISTs (the
-   list for set/show or some sublist thereof).  */
-void
+   list for set/show or some sublist thereof).  Return the new "set"
+   command.  */
+struct cmd_list_element *
 add_setshow_string_noescape_cmd (char *name, enum command_class class,
 				 char **var,
 				 const char *set_doc, const char *show_doc,
@@ -524,11 +528,13 @@ add_setshow_string_noescape_cmd (char *name, enum command_class class,
 				 struct cmd_list_element **set_list,
 				 struct cmd_list_element **show_list)
 {
+  struct cmd_list_element *cmd;
   add_setshow_cmd_full (name, class, var_string_noescape, var,
 			set_doc, show_doc, help_doc,
 			set_func, show_func,
 			set_list, show_list,
-			NULL, NULL);
+			&cmd, NULL);
+  return cmd;
 }
 
 /* Add element named NAME to both the set and show command LISTs (the
@@ -558,8 +564,9 @@ add_setshow_optional_filename_cmd (char *name, enum command_class class,
 /* Add element named NAME to both the set and show command LISTs (the
    list for set/show or some sublist thereof).  CLASS is as in
    add_cmd.  VAR is address of the variable which will contain the
-   value.  SET_DOC and SHOW_DOC are the documentation strings.  */
-void
+   value.  SET_DOC and SHOW_DOC are the documentation strings.  Return
+   the new "set" command.  */
+struct cmd_list_element *
 add_setshow_integer_cmd (char *name, enum command_class class,
 			 int *var,
 			 const char *set_doc, const char *show_doc,
@@ -569,18 +576,21 @@ add_setshow_integer_cmd (char *name, enum command_class class,
 			 struct cmd_list_element **set_list,
 			 struct cmd_list_element **show_list)
 {
+  struct cmd_list_element *cmd;
   add_setshow_cmd_full (name, class, var_integer, var,
 			set_doc, show_doc, help_doc,
 			set_func, show_func,
 			set_list, show_list,
-			NULL, NULL);
+			&cmd, NULL);
+  return cmd;
 }
 
 /* Add element named NAME to both the set and show command LISTs (the
    list for set/show or some sublist thereof).  CLASS is as in
    add_cmd.  VAR is address of the variable which will contain the
-   value.  SET_DOC and SHOW_DOC are the documentation strings.  */
-void
+   value.  SET_DOC and SHOW_DOC are the documentation strings.  Return
+   the new "set" command.  */
+struct cmd_list_element *
 add_setshow_uinteger_cmd (char *name, enum command_class class,
 			  unsigned int *var,
 			  const char *set_doc, const char *show_doc,
@@ -590,18 +600,21 @@ add_setshow_uinteger_cmd (char *name, enum command_class class,
 			  struct cmd_list_element **set_list,
 			  struct cmd_list_element **show_list)
 {
+  struct cmd_list_element *cmd;
   add_setshow_cmd_full (name, class, var_uinteger, var,
 			set_doc, show_doc, help_doc,
 			set_func, show_func,
 			set_list, show_list,
-			NULL, NULL);
+			&cmd, NULL);
+  return cmd;
 }
 
 /* Add element named NAME to both the set and show command LISTs (the
    list for set/show or some sublist thereof).  CLASS is as in
    add_cmd.  VAR is address of the variable which will contain the
-   value.  SET_DOC and SHOW_DOC are the documentation strings.  */
-void
+   value.  SET_DOC and SHOW_DOC are the documentation strings.  Return
+   the new "set" command.  */
+struct cmd_list_element *
 add_setshow_zinteger_cmd (char *name, enum command_class class,
 			  int *var,
 			  const char *set_doc, const char *show_doc,
@@ -611,18 +624,21 @@ add_setshow_zinteger_cmd (char *name, enum command_class class,
 			  struct cmd_list_element **set_list,
 			  struct cmd_list_element **show_list)
 {
+  struct cmd_list_element *cmd;
   add_setshow_cmd_full (name, class, var_zinteger, var,
 			set_doc, show_doc, help_doc,
 			set_func, show_func,
 			set_list, show_list,
-			NULL, NULL);
+			&cmd, NULL);
+  return cmd;
 }
 
 /* Add element named NAME to both the set and show command LISTs (the
    list for set/show or some sublist thereof).  CLASS is as in
    add_cmd.  VAR is address of the variable which will contain the
-   value.  SET_DOC and SHOW_DOC are the documentation strings.  */
-void
+   value.  SET_DOC and SHOW_DOC are the documentation strings.  Return
+   the new "set" command.  */
+struct cmd_list_element *
 add_setshow_zuinteger_cmd (char *name, enum command_class class,
 			   unsigned int *var,
 			   const char *set_doc, const char *show_doc,
@@ -632,11 +648,13 @@ add_setshow_zuinteger_cmd (char *name, enum command_class class,
 			   struct cmd_list_element **set_list,
 			   struct cmd_list_element **show_list)
 {
+  struct cmd_list_element *cmd;
   add_setshow_cmd_full (name, class, var_zuinteger, var,
 			set_doc, show_doc, help_doc,
 			set_func, show_func,
 			set_list, show_list,
-			NULL, NULL);
+			&cmd, NULL);
+  return cmd;
 }
 
 /* Remove the command named NAME from the command list.  Return the

@@ -260,27 +260,29 @@ extern void add_setshow_filename_cmd (char *name,
 				      struct cmd_list_element **set_list,
 				      struct cmd_list_element **show_list);
 
-extern void add_setshow_string_cmd (char *name,
-				    enum command_class class,
-				    char **var,
-				    const char *set_doc,
-				    const char *show_doc,
-				    const char *help_doc,
-				    cmd_sfunc_ftype *set_func,
-				    show_value_ftype *show_func,
-				    struct cmd_list_element **set_list,
-				    struct cmd_list_element **show_list);
+extern struct cmd_list_element *
+    add_setshow_string_cmd (char *name,
+			    enum command_class class,
+			    char **var,
+			    const char *set_doc,
+			    const char *show_doc,
+			    const char *help_doc,
+			    cmd_sfunc_ftype *set_func,
+			    show_value_ftype *show_func,
+			    struct cmd_list_element **set_list,
+			    struct cmd_list_element **show_list);
 
-extern void add_setshow_string_noescape_cmd (char *name,
-					     enum command_class class,
-					     char **var,
-					     const char *set_doc,
-					     const char *show_doc,
-					     const char *help_doc,
-					     cmd_sfunc_ftype *set_func,
-					     show_value_ftype *show_func,
-					     struct cmd_list_element **set_list,
-					     struct cmd_list_element **show_list);
+extern struct cmd_list_element *
+    add_setshow_string_noescape_cmd (char *name,
+				     enum command_class class,
+				     char **var,
+				     const char *set_doc,
+				     const char *show_doc,
+				     const char *help_doc,
+				     cmd_sfunc_ftype *set_func,
+				     show_value_ftype *show_func,
+				     struct cmd_list_element **set_list,
+				     struct cmd_list_element **show_list);
 
 extern void add_setshow_optional_filename_cmd (char *name,
 					       enum command_class class,
@@ -293,49 +295,53 @@ extern void add_setshow_optional_filename_cmd (char *name,
 					       struct cmd_list_element **set_list,
 					       struct cmd_list_element **show_list);
 
-extern void add_setshow_integer_cmd (char *name,
-				     enum command_class class,
-				     int *var,
-				     const char *set_doc,
-				     const char *show_doc,
-				     const char *help_doc,
-				     cmd_sfunc_ftype *set_func,
-				     show_value_ftype *show_func,
-				     struct cmd_list_element **set_list,
-				     struct cmd_list_element **show_list);
+extern struct cmd_list_element *
+    add_setshow_integer_cmd (char *name,
+			     enum command_class class,
+			     int *var,
+			     const char *set_doc,
+			     const char *show_doc,
+			     const char *help_doc,
+			     cmd_sfunc_ftype *set_func,
+			     show_value_ftype *show_func,
+			     struct cmd_list_element **set_list,
+			     struct cmd_list_element **show_list);
 
-extern void add_setshow_uinteger_cmd (char *name,
-				      enum command_class class,
-				      unsigned int *var,
-				      const char *set_doc,
-				      const char *show_doc,
-				      const char *help_doc,
-				      cmd_sfunc_ftype *set_func,
-				      show_value_ftype *show_func,
-				      struct cmd_list_element **set_list,
-				      struct cmd_list_element **show_list);
+extern struct cmd_list_element *
+    add_setshow_uinteger_cmd (char *name,
+			      enum command_class class,
+			      unsigned int *var,
+			      const char *set_doc,
+			      const char *show_doc,
+			      const char *help_doc,
+			      cmd_sfunc_ftype *set_func,
+			      show_value_ftype *show_func,
+			      struct cmd_list_element **set_list,
+			      struct cmd_list_element **show_list);
 
-extern void add_setshow_zinteger_cmd (char *name,
-				      enum command_class class,
-				      int *var,
-				      const char *set_doc,
-				      const char *show_doc,
-				      const char *help_doc,
-				      cmd_sfunc_ftype *set_func,
-				      show_value_ftype *show_func,
-				      struct cmd_list_element **set_list,
-				      struct cmd_list_element **show_list);
+extern struct cmd_list_element *
+    add_setshow_zinteger_cmd (char *name,
+			      enum command_class class,
+			      int *var,
+			      const char *set_doc,
+			      const char *show_doc,
+			      const char *help_doc,
+			      cmd_sfunc_ftype *set_func,
+			      show_value_ftype *show_func,
+			      struct cmd_list_element **set_list,
+			      struct cmd_list_element **show_list);
 
-extern void add_setshow_zuinteger_cmd (char *name,
-				       enum command_class class,
-				       unsigned int *var,
-				       const char *set_doc,
-				       const char *show_doc,
-				       const char *help_doc,
-				       cmd_sfunc_ftype *set_func,
-				       show_value_ftype *show_func,
-				       struct cmd_list_element **set_list,
-				       struct cmd_list_element **show_list);
+extern struct cmd_list_element *
+    add_setshow_zuinteger_cmd (char *name,
+			       enum command_class class,
+			       unsigned int *var,
+			       const char *set_doc,
+			       const char *show_doc,
+			       const char *help_doc,
+			       cmd_sfunc_ftype *set_func,
+			       show_value_ftype *show_func,
+			       struct cmd_list_element **set_list,
+			       struct cmd_list_element **show_list);
 
 /* Do a "show" command for each thing on a command list.  */
 

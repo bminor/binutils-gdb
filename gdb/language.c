@@ -221,6 +221,20 @@ local or auto    Automatic setting based on source file\n"));
   error (_("Unknown language `%s'."), err_lang);
 }
 
+static char **
+language_completer (struct cmd_list_element *self, char *text, char *word)
+{
+  int i;
+  const char **langnames
+    = (const char **) alloca ((languages_size + 1) * sizeof (const char *));
+
+  for (i = 0; i < languages_size; ++i)
+    langnames[i] = languages[i]->la_name;
+  langnames[i] = NULL;
+
+  return complete_on_enum (langnames, text, word);
+}
+
 /* Show command.  Display a warning if the type setting does
    not match the current language. */
 static void
@@ -315,6 +329,14 @@ set_range_command (char *ignore, int from_tty, struct cmd_list_element *c)
   show_range_command (NULL, from_tty, NULL, NULL);
 }
 
+/* Completer for range and type parameters.  */
+static char **
+range_or_type_completer (struct cmd_list_element *self, char *text, char *word)
+{
+  static const char *values[] = { "on", "off", "warn", "auto", NULL };
+  return complete_on_enum (values, text, word);
+}
+
 /* Show command.  Display a warning if the case sensitivity setting does
    not match the current language. */
 static void
@@ -357,6 +379,14 @@ set_case_command (char *ignore, int from_tty, struct cmd_list_element *c)
      }
    set_case_str();
    show_case_command (NULL, from_tty, NULL, NULL);
+}
+
+/* Completer for case-sensitive parameter.  */
+static char **
+case_completer (struct cmd_list_element *self, char *text, char *word)
+{
+  static const char *values[] = { "on", "off", "auto", NULL };
+  return complete_on_enum (values, text, word);
 }
 
 /* Set the status of range and type checking and case sensitivity based on
@@ -1340,21 +1370,21 @@ language_lookup_primitive_type_by_name (const struct language_defn *la,
 void
 _initialize_language (void)
 {
-  struct cmd_list_element *set, *show;
+  struct cmd_list_element *command;
 
   language_gdbarch_data
     = gdbarch_data_register_post_init (language_gdbarch_post_init);
 
   /* GDB commands for language specific stuff */
 
-  /* FIXME: cagney/2005-02-20: This should be implemented using an
-     enum.  */
-  add_setshow_string_noescape_cmd ("language", class_support, &language, _("\
+  command = add_setshow_string_noescape_cmd ("language", class_support,
+					     &language, _("\
 Set the current source language."), _("\
 Show the current source language."), NULL,
-				   set_language_command,
-				   show_language_command,
-				   &setlist, &showlist);
+					     set_language_command,
+					     show_language_command,
+					     &setlist, &showlist);
+  set_cmd_completer (command, language_completer);
 
   add_prefix_cmd ("check", no_class, set_check,
 		  _("Set the status of the type/range checker."),
@@ -1368,34 +1398,36 @@ Show the current source language."), NULL,
   add_alias_cmd ("c", "check", no_class, 1, &showlist);
   add_alias_cmd ("ch", "check", no_class, 1, &showlist);
 
-  /* FIXME: cagney/2005-02-20: This should be implemented using an
-     enum.  */
-  add_setshow_string_noescape_cmd ("type", class_support, &type, _("\
+  command =
+    add_setshow_string_noescape_cmd ("type", class_support,
+				     &type, _("\
 Set type checking.  (on/warn/off/auto)"), _("\
 Show type checking.  (on/warn/off/auto)"), NULL,
-				   set_type_command,
-				   show_type_command,
-				   &setchecklist, &showchecklist);
+				     set_type_command,
+				     show_type_command,
+				     &setchecklist, &showchecklist);
+  set_cmd_completer (command, range_or_type_completer);
 
-  /* FIXME: cagney/2005-02-20: This should be implemented using an
-     enum.  */
-  add_setshow_string_noescape_cmd ("range", class_support, &range, _("\
+  command =
+    add_setshow_string_noescape_cmd ("range", class_support,
+				     &range, _("\
 Set range checking.  (on/warn/off/auto)"), _("\
 Show range checking.  (on/warn/off/auto)"), NULL,
-				   set_range_command,
-				   show_range_command,
-				   &setchecklist, &showchecklist);
+				     set_range_command,
+				     show_range_command,
+				     &setchecklist, &showchecklist);
+  set_cmd_completer (command, range_or_type_completer);
 
-  /* FIXME: cagney/2005-02-20: This should be implemented using an
-     enum.  */
-  add_setshow_string_noescape_cmd ("case-sensitive", class_support,
-				   &case_sensitive, _("\
+  command =
+    add_setshow_string_noescape_cmd ("case-sensitive", class_support,
+				     &case_sensitive, _("\
 Set case sensitivity in name search.  (on/off/auto)"), _("\
 Show case sensitivity in name search.  (on/off/auto)"), _("\
 For Fortran the default is off; for other languages the default is on."),
-				   set_case_command,
-				   show_case_command,
-				   &setlist, &showlist);
+				     set_case_command,
+				     show_case_command,
+				     &setlist, &showlist);
+  set_cmd_completer (command, case_completer);
 
   add_language (&unknown_language_defn);
   add_language (&local_language_defn);
