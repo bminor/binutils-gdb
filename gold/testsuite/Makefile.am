@@ -115,6 +115,15 @@ gc_comdat_test: gc_comdat_test_1.o gc_comdat_test_2.o gcctestdir/ld
 gc_comdat_test.stdout: gc_comdat_test
 	$(TEST_NM) -C gc_comdat_test > gc_comdat_test.stdout
 
+check_SCRIPTS += gc_tls_test.sh
+check_DATA += gc_tls_test.stdout
+gc_tls_test.o: gc_tls_test.cc
+	$(CXXCOMPILE) -O0 -c -g -o $@ $<
+gc_tls_test:gc_tls_test.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -Wl,--gc-sections gc_tls_test.o
+gc_tls_test.stdout: gc_tls_test
+	$(TEST_NM) -C gc_tls_test > gc_tls_test.stdout
+
 check_SCRIPTS += icf_test.sh
 check_DATA += icf_test.stdout
 icf_test.o: icf_test.cc 

@@ -57,12 +57,12 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 # Test --dynamic-list, --dynamic-list-data, --dynamic-list-cpp-new,
 # and --dynamic-list-cpp-typeinfo
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_1 = gc_comdat_test.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test.sh two_file_shared.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_plt.sh debug_msg.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.sh ver_test_1.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_2.sh ver_test_4.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_5.sh ver_test_7.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_10.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_tls_test.sh icf_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.sh weak_plt.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg.sh undef_symbol.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_1.sh ver_test_2.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_4.sh ver_test_5.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_7.sh ver_test_10.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4.sh \
@@ -75,6 +75,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 # We also want to make sure we do something reasonable when there's no
 # debug info available.  For the best test, we use .so's.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_2 = gc_comdat_test.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_tls_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.dbg \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_plt_shared.so debug_msg.err \
@@ -347,7 +348,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 subdir = testsuite
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in ChangeLog
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/../config/gettext-sister.m4 \
@@ -2318,6 +2319,12 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--gc-sections gc_comdat_test_1.o gc_comdat_test_2.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@gc_comdat_test.stdout: gc_comdat_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) -C gc_comdat_test > gc_comdat_test.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@gc_tls_test.o: gc_tls_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -g -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@gc_tls_test:gc_tls_test.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--gc-sections gc_tls_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@gc_tls_test.stdout: gc_tls_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) -C gc_tls_test > gc_tls_test.stdout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_test.o: icf_test.cc 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_test: icf_test.o gcctestdir/ld

@@ -1,3 +1,12 @@
+2009-08-06  Sriraman Tallam  <tmsriram@google.com>
+
+	* x86_64.cc (Target_x86_64::Relocate::relocate_tls): Check for a
+	valid tls_segment only for non-debug-section relocations.
+	* testsuite/Makefile.am: Add gc_tls_test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/gc_tls_test.cc: New file.
+	* testsuite/gc_tls_test.sh: New file.
+
 2009-08-05  Sriraman Tallam  <tmsriram@google.com>
 	
 	* icf.cc: New file.
