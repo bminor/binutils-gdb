@@ -20,6 +20,8 @@
  
 * Add support for Lattice Mico32 (lm32) architecture.
 
+* Add support for Xilinx MicroBlaze architecture. 
+
 Changes in 2.19:
 
 * New pseudo op .cfi_val_encoded_addr, to record constant addresses in unwind

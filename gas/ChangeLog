@@ -1,3 +1,7 @@
+2009-08-07  Michael Eager <eager@eagercon.com>
+
+	* NEWS: Mention MicroBlaze support.
+
 2009-08-06  Michael Eager <eager@eagercon.com>
 
 	* Makefile.am: add microblaze to CPU_TYPES, config/tc-microblaze.c to
