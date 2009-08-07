@@ -1,3 +1,7 @@
+2009-08-06  Michael Snyder  <msnyder@vmware.com>
+
+	* record.c (record_goto_checkpoint): Call record_exec_entry.
+
 2009-08-04  Hui Zhu  <teawater@gmail.com>
 
 	* record.c (record_exec_entry): New function.

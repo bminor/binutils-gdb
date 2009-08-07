@@ -1334,52 +1334,7 @@ record_goto_checkpoint (struct record_entry *checkpoint,
 
   do
     {
-      /* Set ptid, register and memory according to record_list.  */
-      if (record_list->type == record_reg)
-	{
-	  /* reg */
-	  gdb_byte reg[MAX_REGISTER_SIZE];
-	  if (record_debug > 1)
-	    fprintf_unfiltered (gdb_stdlog,
-				"Process record: record_reg %s to "
-				"inferior num = %d.\n",
-				host_address_to_string (record_list),
-				record_list->u.reg.num);
-	  regcache_cooked_read (regcache, record_list->u.reg.num, reg);
-	  regcache_cooked_write (regcache, record_list->u.reg.num,
-				 record_list->u.reg.val);
-	  memcpy (record_list->u.reg.val, reg, MAX_REGISTER_SIZE);
-	}
-      else if (record_list->type == record_mem)
-	{
-	  /* mem */
-	  gdb_byte *mem = alloca (record_list->u.mem.len);
-	  if (record_debug > 1)
-	    fprintf_unfiltered (gdb_stdlog,
-				"Process record: record_mem %s to "
-				"inferior addr = %s len = %d.\n",
-				host_address_to_string (record_list),
-				paddress (gdbarch, record_list->u.mem.addr),
-				record_list->u.mem.len);
-
-	  if (target_read_memory (record_list->u.mem.addr, 
-				  mem, record_list->u.mem.len))
-	    error (_("Process record: error reading memory at "
-		     "addr = %s len = %d."),
-		   paddress (gdbarch, record_list->u.mem.addr),
-		   record_list->u.mem.len);
-
-	  if (target_write_memory (record_list->u.mem.addr, 
-				   record_list->u.mem.val,
-				   record_list->u.mem.len))
-	    error (_("Process record: error writing memory at "
-		     "addr = %s len = %d."),
-		   paddress (gdbarch, record_list->u.mem.addr),
-		   record_list->u.mem.len);
-
-	  memcpy (record_list->u.mem.val, mem, record_list->u.mem.len);
-	}
-
+      record_exec_entry (regcache, gdbarch, record_list);
       if (dir == EXEC_REVERSE)
 	record_list = record_list->prev;
       else
