@@ -1359,13 +1359,18 @@ record_restore_checkpoint (struct checkpoint_info *cp, int from_tty)
 	checkpoint_index = i;
       if (p == record_list)
 	current_index = i;
-      i++;
+      if (p->type == record_end)
+	i++;
     }
   if (from_tty && info_verbose)
     {
       printf_filtered ("Checkpoint is at index %d\n", checkpoint_index);
       printf_filtered ("Cur point is at index %d\n", current_index);
       printf_filtered ("Counted %d (officially %d)\n", i-1, record_insn_num);
+      if (rp->position->type == record_end)
+	printf_filtered ("Checkpoint is record_end\n");
+      if (record_list->type == record_end)
+	printf_filtered ("record_list is record_end\n");
     }
 
   if (checkpoint_index == 0)
