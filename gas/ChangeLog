@@ -1,3 +1,14 @@
+2009-08-07  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* config/tc-arm.c (marked_pr_dependency, mapstate): Delete global
+	variables.
+	(mapping_state): Use the section's mapstate.
+	(mapping_state_2): Likewise.  Skip special sections.
+	(s_arm_unwind_fnend): Use the section's marked_pr_dependency.
+	(arm_elf_change_section): Do not set deleted globals.
+	* config/tc-arm.h (struct arm_segment_info_type): Document
+	marked_pr_dependency.
+
 2009-08-07  Michael Eager <eager@eagercon.com>
 
 	* NEWS: Mention MicroBlaze support.

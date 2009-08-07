@@ -17,3 +17,4 @@ foo:
         .size   main, .-main
         .ident  ""
 
+	nop

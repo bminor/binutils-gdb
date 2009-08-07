@@ -272,7 +272,12 @@ void mapping_state (enum mstate);
 struct arm_segment_info_type
 {
   enum mstate mapstate;
+
+  /* Bit N indicates that an R_ARM_NONE relocation has been output for
+     __aeabi_unwind_cpp_prN already if set. This enables dependencies to be
+     emitted only once per section, to save unnecessary bloat.  */
   unsigned int marked_pr_dependency;
+
   struct current_it current_it;
 };
 

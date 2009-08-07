@@ -1,3 +1,7 @@
+2009-08-07  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gas/arm/mapping2.s: Test code after .ident.
+
 2009-08-05  Chao-ying Fu  <fu@mips.com>
 
 	* gas/mips/jal-svr4pic.d, gas/mips/jal-xgot.d,

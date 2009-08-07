@@ -77,11 +77,6 @@ static struct
   unsigned	  sp_restored:1;
 } unwind;
 
-/* Bit N indicates that an R_ARM_NONE relocation has been output for
-   __aeabi_unwind_cpp_prN already if set. This enables dependencies to be
-   emitted only once per section, to save unnecessary bloat.  */
-static unsigned int marked_pr_dependency = 0;
-
 #endif /* OBJ_ELF */
 
 /* Results from operand parsing worker functions.  */
@@ -2432,8 +2427,6 @@ s_unreq (int a ATTRIBUTE_UNUSED)
    Note that previously, $a and $t has type STT_FUNC (BSF_OBJECT flag),
    and $d has type STT_OBJECT (BSF_OBJECT flag). Now all three are untyped.  */
 
-static enum mstate mapstate = MAP_UNDEFINED;
-
 /* Create a new mapping symbol for the transition to STATE.  */
 
 static void
@@ -2532,6 +2525,8 @@ static void mapping_state_2 (enum mstate state, int max_chars);
 void
 mapping_state (enum mstate state)
 {
+  enum mstate mapstate = seg_info (now_seg)->tc_segment_info_data.mapstate;
+
 #define TRANSITION(from, to) (mapstate == (from) && state == (to))
 
   if (mapstate == state)
@@ -2565,12 +2560,16 @@ mapping_state (enum mstate state)
 static void
 mapping_state_2 (enum mstate state, int max_chars)
 {
+  enum mstate mapstate = seg_info (now_seg)->tc_segment_info_data.mapstate;
+
+  if (!SEG_NORMAL (now_seg))
+    return;
+
   if (mapstate == state)
     /* The mapping symbol has already been emitted.
        There is nothing else to do.  */
     return;
 
-  mapstate = state;
   seg_info (now_seg)->tc_segment_info_data.mapstate = state;
   make_mapping_symbol (state, (valueT) frag_now_fix () - max_chars, frag_now);
 }
@@ -3421,6 +3420,7 @@ s_arm_unwind_fnend (int ignored ATTRIBUTE_UNUSED)
   long where;
   char *ptr;
   valueT val;
+  unsigned int marked_pr_dependency;
 
   demand_empty_rest_of_line ();
 
@@ -3450,6 +3450,8 @@ s_arm_unwind_fnend (int ignored ATTRIBUTE_UNUSED)
 
   /* Indicate dependency on EHABI-defined personality routines to the
      linker, if it hasn't been done already.  */
+  marked_pr_dependency
+    = seg_info (now_seg)->tc_segment_info_data.marked_pr_dependency;
   if (unwind.personality_index >= 0 && unwind.personality_index < 3
       && !(marked_pr_dependency & (1 << unwind.personality_index)))
     {
@@ -3461,9 +3463,8 @@ s_arm_unwind_fnend (int ignored ATTRIBUTE_UNUSED)
 	};
       symbolS *pr = symbol_find_or_make (name[unwind.personality_index]);
       fix_new (frag_now, where, 0, pr, 0, 1, BFD_RELOC_NONE);
-      marked_pr_dependency |= 1 << unwind.personality_index;
       seg_info (now_seg)->tc_segment_info_data.marked_pr_dependency
-	= marked_pr_dependency;
+	|= 1 << unwind.personality_index;
     }
 
   if (val)
@@ -18557,19 +18558,10 @@ arm_init_frag (fragS * fragP, int max_chars)
 void
 arm_elf_change_section (void)
 {
-  segment_info_type *seginfo;
-
   /* Link an unlinked unwind index table section to the .text section.	*/
   if (elf_section_type (now_seg) == SHT_ARM_EXIDX
       && elf_linked_to_section (now_seg) == NULL)
     elf_linked_to_section (now_seg) = text_section;
-
-  if (!SEG_NORMAL (now_seg))
-    return;
-
-  seginfo = seg_info (now_seg);
-  marked_pr_dependency = seginfo->tc_segment_info_data.marked_pr_dependency;
-  mapstate = seginfo->tc_segment_info_data.mapstate;
 }
 
 int
