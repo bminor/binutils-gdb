@@ -2121,6 +2121,7 @@ microblaze_elf_check_relocs (bfd * abfd,
 
 		    asection *s;
 		    Elf_Internal_Sym *isym;
+		    void *vpp;
 
 		    isym = bfd_sym_from_r_symndx (&htab->sym_sec,
 						  abfd, r_symndx);
@@ -2131,8 +2132,8 @@ microblaze_elf_check_relocs (bfd * abfd,
 		    if (s == NULL)
 		      return FALSE;
 
-		    head = ((struct elf32_mb_dyn_relocs **)
-			    &elf_section_data (s)->local_dynrel);
+		    vpp = &elf_section_data (s)->local_dynrel;
+		    head = (struct elf32_mb_dyn_relocs **) vpp;
 		  }
 
 		p = *head;

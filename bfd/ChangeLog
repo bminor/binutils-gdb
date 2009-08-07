@@ -1,3 +1,8 @@
+2009-08-07  Tom Tromey  <tromey@redhat.com>
+
+	* elf32-microblaze.c (microblaze_elf_check_relocs): Avoid strict
+	aliasing error.
+
 2009-08-06  Michael Eager <eager@eagercon.com>
 
 	* Makefile.am: Add cpu-microblaze.{lo,c}, elf32-microblaze.{lo,c}.
