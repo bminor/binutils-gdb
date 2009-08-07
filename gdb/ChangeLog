@@ -1,3 +1,20 @@
+2009-08-06  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
+
+	* gcore.c (create_gcore_bfd): New function, abstracted 
+	from gcore_command for export.
+	(write_gcore_file): New function, abstracted from 
+	gcore_command for export.
+	(gcore_command): Call helper functions (above).
+
+	(call_target_sbrk): New function, abstracted from 
+	derive_heap_segment.
+	(derive_heap_segment): Call helper function (above).
+
+	(load_core_segments): New function.
+	(load_corefile): New function.
+	(rcore_command): New function.
+	(_initialize_gcore): Add new command "restore-core-file".
+
 2009-08-06  Michael Snyder  <msnyder@vmware.com>
 
 	* record.c (record_goto_checkpoint): Call record_exec_entry.
