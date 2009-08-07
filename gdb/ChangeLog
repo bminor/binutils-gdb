@@ -1,3 +1,12 @@
+2009-08-04  Hui Zhu  <teawater@gmail.com>
+	    Michael Snyder  <msnyder@vmware.com>
+	    (Import from main branch)
+	* record.c (record_mem_entry): New field 'mem_entry_not_accessible'.
+	(record_arch_list_add_mem): Initialize 'mem_entry_not_accessible'.
+	(record_wait): Set 'mem_entry_not_accessible' flag if target
+	memory not readable.  Don't try to change target memory if
+	'mem_entry_not_accessible' is set.
+
 2009-08-06  Michael Snyder  <msnyder@vmware.com>
 
 	* record.c (record_restore_checkpoint): Count instructions, not
