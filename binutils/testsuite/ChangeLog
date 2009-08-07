@@ -1,3 +1,7 @@
+2009-08-07  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* binutils-all/testranges.s: Use %progbits.  Use ";#" for comments.
+
 2009-08-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/10492
