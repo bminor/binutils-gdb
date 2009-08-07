@@ -424,6 +424,89 @@ record_gdb_operation_disable_set (void)
   return old_cleanups;
 }
 
+static inline void
+record_exec_entry (struct regcache *regcache, struct gdbarch *gdbarch,
+                   struct record_entry *entry)
+{
+  switch (entry->type)
+    {
+    case record_reg: /* reg */
+      {
+        gdb_byte reg[MAX_REGISTER_SIZE];
+
+        if (record_debug > 1)
+          fprintf_unfiltered (gdb_stdlog,
+                              "Process record: record_reg %s to "
+                              "inferior num = %d.\n",
+                              host_address_to_string (entry),
+                              entry->u.reg.num);
+
+        regcache_cooked_read (regcache, entry->u.reg.num, reg);
+        regcache_cooked_write (regcache, entry->u.reg.num, entry->u.reg.val);
+        memcpy (entry->u.reg.val, reg, MAX_REGISTER_SIZE);
+      }
+      break;
+
+    case record_mem: /* mem */
+      {
+        if (!record_list->u.mem.mem_entry_not_accessible)
+          {
+            gdb_byte *mem = alloca (entry->u.mem.len);
+
+            if (record_debug > 1)
+              fprintf_unfiltered (gdb_stdlog,
+                                  "Process record: record_mem %s to "
+                                  "inferior addr = %s len = %d.\n",
+                                  host_address_to_string (entry),
+                                  paddress (gdbarch, entry->u.mem.addr),
+                                  record_list->u.mem.len);
+
+            if (target_read_memory (entry->u.mem.addr, mem, entry->u.mem.len))
+              {
+                if (execution_direction == EXEC_REVERSE)
+                  {
+                    record_list->u.mem.mem_entry_not_accessible = 1;
+                    if (record_debug)
+                      warning (_("Process record: error reading memory at "
+                                 "addr = %s len = %d."),
+                               paddress (gdbarch, entry->u.mem.addr),
+                               entry->u.mem.len);
+                  }
+                else
+                  error (_("Process record: error reading memory at "
+                           "addr = %s len = %d."),
+                         paddress (gdbarch, entry->u.mem.addr),
+                        entry->u.mem.len);
+              }
+            else
+              {
+                if (target_write_memory (entry->u.mem.addr, entry->u.mem.val,
+                                         entry->u.mem.len))
+                  {
+                    if (execution_direction == EXEC_REVERSE)
+                      {
+                        record_list->u.mem.mem_entry_not_accessible = 1;
+                        if (record_debug)
+                          warning (_("Process record: error writing memory at "
+                                     "addr = %s len = %d."),
+                                   paddress (gdbarch, entry->u.mem.addr),
+                                   entry->u.mem.len);
+                      }
+                    else
+                      error (_("Process record: error writing memory at "
+                               "addr = %s len = %d."),
+                             paddress (gdbarch, entry->u.mem.addr),
+                            entry->u.mem.len);
+                  }
+              }
+
+            memcpy (entry->u.mem.val, mem, entry->u.mem.len);
+          }
+      }
+      break;
+    }
+}
+
 static void
 record_open (char *name, int from_tty)
 {
@@ -720,76 +803,9 @@ record_wait (struct target_ops *ops,
 	      break;
 	    }
 
-	  /* Set ptid, register and memory according to record_list.  */
-	  if (record_list->type == record_reg)
-	    {
-	      /* reg */
-	      gdb_byte reg[MAX_REGISTER_SIZE];
-	      if (record_debug > 1)
-		fprintf_unfiltered (gdb_stdlog,
-				    "Process record: record_reg %s to "
-				    "inferior num = %d.\n",
-				    host_address_to_string (record_list),
-				    record_list->u.reg.num);
-	      regcache_cooked_read (regcache, record_list->u.reg.num, reg);
-	      regcache_cooked_write (regcache, record_list->u.reg.num,
-				     record_list->u.reg.val);
-	      memcpy (record_list->u.reg.val, reg, MAX_REGISTER_SIZE);
-	    }
-	  else if (record_list->type == record_mem)
-	    {
-	      /* mem */
-	      /* Nothing to do if the entry is flagged not_accessible.  */
-	      if (!record_list->u.mem.mem_entry_not_accessible)
-		{
-		  gdb_byte *mem = alloca (record_list->u.mem.len);
-		  if (record_debug > 1)
-		    fprintf_unfiltered (gdb_stdlog,
-				        "Process record: record_mem %s to "
-				        "inferior addr = %s len = %d.\n",
-				        host_address_to_string (record_list),
-				        paddress (gdbarch,
-					          record_list->u.mem.addr),
-				        record_list->u.mem.len);
+	  record_exec_entry (regcache, gdbarch, record_list);
 
-		  if (target_read_memory (record_list->u.mem.addr, mem,
-		                          record_list->u.mem.len))
-	            {
-		      if (execution_direction != EXEC_REVERSE)
-		        error (_("Process record: error reading memory at "
-			         "addr = %s len = %d."),
-		               paddress (gdbarch, record_list->u.mem.addr),
-		               record_list->u.mem.len);
-		      else
-			/* Read failed -- 
-			   flag entry as not_accessible.  */
-		        record_list->u.mem.mem_entry_not_accessible = 1;
-		    }
-		  else
-		    {
-		      if (target_write_memory (record_list->u.mem.addr,
-			                       record_list->u.mem.val,
-		                               record_list->u.mem.len))
-	                {
-			  if (execution_direction != EXEC_REVERSE)
-			    error (_("Process record: error writing memory at "
-			             "addr = %s len = %d."),
-		                   paddress (gdbarch, record_list->u.mem.addr),
-		                   record_list->u.mem.len);
-			  else
-			    /* Write failed -- 
-			       flag entry as not_accessible.  */
-			    record_list->u.mem.mem_entry_not_accessible = 1;
-			}
-		      else
-		        {
-			  memcpy (record_list->u.mem.val, mem,
-				  record_list->u.mem.len);
-			}
-		    }
-		}
-	    }
-	  else
+ 	  if (record_list->type == record_end)
 	    {
 	      if (record_debug > 1)
 		fprintf_unfiltered (gdb_stdlog,

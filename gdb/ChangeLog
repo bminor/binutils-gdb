@@ -1,4 +1,9 @@
 2009-08-04  Hui Zhu  <teawater@gmail.com>
+
+	* record.c (record_exec_entry): New function.
+	(record_wait): Call 'record_exec_entry'.
+
+2009-08-04  Hui Zhu  <teawater@gmail.com>
 	    Michael Snyder  <msnyder@vmware.com>
 	    (Import from main branch)
 	* record.c (record_mem_entry): New field 'mem_entry_not_accessible'.
