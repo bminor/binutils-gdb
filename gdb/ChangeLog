@@ -1,3 +1,8 @@
+2009-08-06  Michael Snyder  <msnyder@vmware.com>
+
+	* record.c (cmd_record_dump): Clean up draft version.
+	(cmd_record_load): Ditto.
+
 2009-08-06  Hui Zhu  <teawater@gmail.com>
 	    Michael Snyder  <msnyder@vmware.com>
 	(Add record dump/load commands: draft version, not ready for release).
