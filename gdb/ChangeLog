@@ -1,3 +1,8 @@
+2009-08-08  Aleksandar Ristovski  <aristovski@qnx.com>
+            Hui Zhu  <teawater@gmail.com>
+
+	* record.c (record_store_registers): Remove unused variable.
+
 2009-08-07  Tom Tromey  <tromey@redhat.com>
 
 	* language.c (set_language_command): Strip whitespace.

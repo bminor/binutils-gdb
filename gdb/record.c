@@ -959,7 +959,6 @@ record_store_registers (struct target_ops *ops, struct regcache *regcache,
       if (RECORD_IS_REPLAY)
 	{
 	  int n;
-	  struct cleanup *old_cleanups;
 
 	  /* Let user choose if he wants to write register or not.  */
 	  if (regno < 0)
