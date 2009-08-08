@@ -971,25 +971,8 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
       phdr = elf_tdata (abfd)->phdr;
       for (i = 0; i < elf_elfheader (abfd)->e_phnum; i++, phdr++)
 	{
-	  /* This section is part of this segment if its file
-	     offset plus size lies within the segment's memory
-	     span and, if the section is loaded, the extent of the
-	     loaded data lies within the extent of the segment.
-
-	     Note - we used to check the p_paddr field as well, and
-	     refuse to set the LMA if it was 0.  This is wrong
-	     though, as a perfectly valid initialised segment can
-	     have a p_paddr of zero.  Some architectures, eg ARM,
-	     place special significance on the address 0 and
-	     executables need to be able to have a segment which
-	     covers this address.  */
 	  if (phdr->p_type == PT_LOAD
-	      && (bfd_vma) hdr->sh_offset >= phdr->p_offset
-	      && (hdr->sh_offset + hdr->sh_size
-		  <= phdr->p_offset + phdr->p_memsz)
-	      && ((flags & SEC_LOAD) == 0
-		  || (hdr->sh_offset + hdr->sh_size
-		      <= phdr->p_offset + phdr->p_filesz)))
+	      && ELF_IS_SECTION_IN_SEGMENT (hdr, phdr))
 	    {
 	      if ((flags & SEC_LOAD) == 0)
 		newsect->lma = (phdr->p_paddr
