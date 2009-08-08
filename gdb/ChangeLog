@@ -1,3 +1,14 @@
+2009-08-08  Pedro Alves  <pedro@codesourcery.com>
+
+	* bfd-target.c (struct target_bfd_data): New.
+	(target_bfd_xfer_partial): Adjust to get at the section table from
+	the new structure.
+	(target_bfd_get_section_table): Ditto.
+	(target_bfd_xclose): Ditto.  Get the bfd pointer from the
+	target_bfd_data structure, from the section table.
+	(target_bfd_reopen): Store a struct target_bfd_data in the
+	target_ops to_data field, instead of a target_section_table.
+
 2009-08-08  Aleksandar Ristovski  <aristovski@qnx.com>
             Hui Zhu  <teawater@gmail.com>
 

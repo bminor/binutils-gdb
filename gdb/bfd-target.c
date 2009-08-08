@@ -22,6 +22,19 @@
 #include "bfd-target.h"
 #include "exec.h"
 
+/* The object that is stored in the target_ops->to_data field has this
+   type.  */
+struct target_bfd_data
+{
+  /* The BFD we're wrapping.  */
+  struct bfd *bfd;
+
+  /* The section table build from the ALLOC sections in BFD.  Note
+     that we can't rely on extracting the BFD from a random section in
+     the table, since the table can be legitimately empty.  */
+  struct target_section_table table;
+};
+
 static LONGEST
 target_bfd_xfer_partial (struct target_ops *ops,
 			 enum target_object object,
@@ -33,10 +46,11 @@ target_bfd_xfer_partial (struct target_ops *ops,
     {
     case TARGET_OBJECT_MEMORY:
       {
-	struct target_section_table *table = ops->to_data;
-	return section_table_xfer_memory_partial (readbuf, writebuf, offset, len,
-						  table->sections,
-						  table->sections_end,
+	struct target_bfd_data *data = ops->to_data;
+	return section_table_xfer_memory_partial (readbuf, writebuf,
+						  offset, len,
+						  data->table.sections,
+						  data->table.sections_end,
 						  NULL);
       }
     default:
@@ -47,17 +61,18 @@ target_bfd_xfer_partial (struct target_ops *ops,
 static struct target_section_table *
 target_bfd_get_section_table (struct target_ops *ops)
 {
-  return ops->to_data;
+  struct target_bfd_data *data = ops->to_data;
+  return &data->table;
 }
 
 static void
 target_bfd_xclose (struct target_ops *t, int quitting)
 {
-  struct target_section_table *table = t->to_data;
-  if (table->sections)
-    bfd_close (table->sections->bfd);
-  xfree (table->sections);
-  xfree (table);
+  struct target_bfd_data *data = t->to_data;
+
+  bfd_close (data->bfd);
+  xfree (data->table.sections);
+  xfree (data);
   xfree (t);
 }
 
@@ -65,10 +80,11 @@ struct target_ops *
 target_bfd_reopen (struct bfd *bfd)
 {
   struct target_ops *t;
-  struct target_section_table *table;
+  struct target_bfd_data *data;
 
-  table = XZALLOC (struct target_section_table);
-  build_section_table (bfd, &table->sections, &table->sections_end);
+  data = XZALLOC (struct target_bfd_data);
+  data->bfd = bfd;
+  build_section_table (bfd, &data->table.sections, &data->table.sections_end);
 
   t = XZALLOC (struct target_ops);
   t->to_shortname = "bfd";
@@ -77,7 +93,7 @@ target_bfd_reopen (struct bfd *bfd)
   t->to_get_section_table = target_bfd_get_section_table;
   t->to_xfer_partial = target_bfd_xfer_partial;
   t->to_xclose = target_bfd_xclose;
-  t->to_data = table;
+  t->to_data = data;
 
   return t;
 }
