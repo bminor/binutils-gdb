@@ -1,3 +1,13 @@
+2006-08-09  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	From Mike Frysinger <michael.frysinger@analog.com>
+	* elf32-bfin.c (bfin_howto_table, bfin_reloc_map, bfin_check_relocs,
+	bfin_final_link_relocate, bfin_relocate_section, bfin_gc_sweep_hook,
+	_bfinfdpic_emit_got_relocs_plt_entries, bfinfdpic_relocate_section,
+	bfinfdpic_gc_sweep_hook, bfinfdpic_check_relocs,
+	bfin_finish_dynamic_symbol, bfd_bfin_elf32_create_embedded_relocs):
+	Adjust to match the renamed reloc definitions.
+	
 2009-08-08  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 10494

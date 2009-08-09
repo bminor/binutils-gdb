@@ -421,7 +421,7 @@ bfin_bfd_reloc (bfd *abfd,
 static reloc_howto_type bfin_howto_table [] =
 {
   /* This reloc does nothing. .  */
-  HOWTO (R_unused0,		/* type.  */
+  HOWTO (R_BFIN_UNUSED0,	/* type.  */
 	 0,			/* rightshift.  */
 	 2,			/* size (0 = byte, 1 = short, 2 = long).  */
 	 32,			/* bitsize.  */
@@ -429,13 +429,13 @@ static reloc_howto_type bfin_howto_table [] =
 	 0,			/* bitpos.  */
 	 complain_overflow_bitfield, /* complain_on_overflow.  */
 	 bfd_elf_generic_reloc,	/* special_function.  */
-	 "R_unused0",		/* name.  */
+	 "R_BFIN_UNUSED0",	/* name.  */
 	 FALSE,			/* partial_inplace.  */
 	 0,			/* src_mask.  */
 	 0,			/* dst_mask.  */
 	 FALSE),		/* pcrel_offset.  */
 
-  HOWTO (R_pcrel5m2,		/* type.  */
+  HOWTO (R_BFIN_PCREL5M2,	/* type.  */
 	 1,			/* rightshift.  */
 	 1,			/* size (0 = byte, 1 = short, 2 = long)..  */
 	 4,			/* bitsize.  */
@@ -443,13 +443,13 @@ static reloc_howto_type bfin_howto_table [] =
 	 0,			/* bitpos.  */
 	 complain_overflow_unsigned, /* complain_on_overflow.  */
 	 bfin_bfd_reloc,	/* special_function.  */
-	 "R_pcrel5m2",		/* name.  */
+	 "R_BFIN_PCREL5M2",	/* name.  */
 	 FALSE,			/* partial_inplace.  */
 	 0,			/* src_mask.  */
 	 0x0000000F,		/* dst_mask.  */
 	 FALSE),		/* pcrel_offset.  */
 
-  HOWTO (R_unused1,		/* type.  */
+  HOWTO (R_BFIN_UNUSED1,	/* type.  */
 	 0,			/* rightshift.  */
 	 2,			/* size (0 = byte, 1 = short, 2 = long).  */
 	 32,			/* bitsize.  */
@@ -457,13 +457,13 @@ static reloc_howto_type bfin_howto_table [] =
 	 0,			/* bitpos.  */
 	 complain_overflow_bitfield, /* complain_on_overflow.  */
 	 bfd_elf_generic_reloc,	/* special_function.  */
-	 "R_unused1",		/* name.  */
+	 "R_BFIN_UNUSED1",	/* name.  */
 	 FALSE,			/* partial_inplace.  */
 	 0,			/* src_mask.  */
 	 0,			/* dst_mask.  */
 	 FALSE),		/* pcrel_offset.  */
 
-  HOWTO (R_pcrel10,		/* type.  */
+  HOWTO (R_BFIN_PCREL10,	/* type.  */
 	 1,			/* rightshift.  */
 	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
 	 10,			/* bitsize.  */
@@ -471,13 +471,13 @@ static reloc_howto_type bfin_howto_table [] =
 	 0,			/* bitpos.  */
 	 complain_overflow_signed, /* complain_on_overflow.  */
 	 bfin_bfd_reloc,	/* special_function.  */
-	 "R_pcrel10",		/* name.  */
+	 "R_BFIN_PCREL10",	/* name.  */
 	 FALSE,			/* partial_inplace.  */
 	 0,			/* src_mask.  */
 	 0x000003FF,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
 
-  HOWTO (R_pcrel12_jump,	/* type.  */
+  HOWTO (R_BFIN_PCREL12_JUMP,	/* type.  */
 	 1,			/* rightshift.  */
 				/* the offset is actually 13 bit
 				   aligned on a word boundary so
@@ -489,13 +489,13 @@ static reloc_howto_type bfin_howto_table [] =
 	 0,			/* bitpos.  */
 	 complain_overflow_signed, /* complain_on_overflow.  */
 	 bfin_bfd_reloc,	/* special_function.  */
-	 "R_pcrel12_jump",	/* name.  */
+	 "R_BFIN_PCREL12_JUMP",	/* name.  */
 	 FALSE,			/* partial_inplace.  */
 	 0,			/* src_mask.  */
 	 0x0FFF,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
 
-  HOWTO (R_rimm16,		/* type.  */
+  HOWTO (R_BFIN_RIMM16,		/* type.  */
 	 0,			/* rightshift.  */
 	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
 	 16,			/* bitsize.  */
@@ -503,13 +503,13 @@ static reloc_howto_type bfin_howto_table [] =
 	 0,			/* bitpos.  */
 	 complain_overflow_signed, /* complain_on_overflow.  */
 	 bfin_imm16_reloc,	/* special_function.  */
-	 "R_rimm16",		/* name.  */
+	 "R_BFIN_RIMM16",	/* name.  */
 	 FALSE,			/* partial_inplace.  */
 	 0,			/* src_mask.  */
 	 0x0000FFFF,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
 
-  HOWTO (R_luimm16,		/* type.  */
+  HOWTO (R_BFIN_LUIMM16,	/* type.  */
 	 0,			/* rightshift.  */
 	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
 	 16,			/* bitsize.  */
@@ -517,13 +517,13 @@ static reloc_howto_type bfin_howto_table [] =
 	 0,			/* bitpos.  */
 	 complain_overflow_dont, /* complain_on_overflow.  */
 	 bfin_imm16_reloc,	/* special_function.  */
-	 "R_luimm16",		/* name.  */
+	 "R_BFIN_LUIMM16",	/* name.  */
 	 FALSE,			/* partial_inplace.  */
 	 0,			/* src_mask.  */
 	 0x0000FFFF,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
 
-  HOWTO (R_huimm16,		/* type.  */
+  HOWTO (R_BFIN_HUIMM16,	/* type.  */
 	 16,			/* rightshift.  */
 	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
 	 16,			/* bitsize.  */
@@ -531,13 +531,13 @@ static reloc_howto_type bfin_howto_table [] =
 	 0,			/* bitpos.  */
 	 complain_overflow_unsigned, /* complain_on_overflow.  */
 	 bfin_imm16_reloc,	/* special_function.  */
-	 "R_huimm16",		/* name.  */
+	 "R_BFIN_HUIMM16",	/* name.  */
 	 FALSE,			/* partial_inplace.  */
 	 0,			/* src_mask.  */
 	 0x0000FFFF,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
 
-  HOWTO (R_pcrel12_jump_s,	/* type.  */
+  HOWTO (R_BFIN_PCREL12_JUMP_S,	/* type.  */
 	 1,			/* rightshift.  */
 	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
 	 12,			/* bitsize.  */
@@ -545,13 +545,13 @@ static reloc_howto_type bfin_howto_table [] =
 	 0,			/* bitpos.  */
 	 complain_overflow_signed, /* complain_on_overflow.  */
 	 bfin_bfd_reloc,	/* special_function.  */
-	 "R_pcrel12_jump_s",	/* name.  */
+	 "R_BFIN_PCREL12_JUMP_S", /* name.  */
 	 FALSE,			/* partial_inplace.  */
 	 0,			/* src_mask.  */
 	 0x00000FFF,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
 
-  HOWTO (R_pcrel24_jump_x,	/* type.  */
+  HOWTO (R_BFIN_PCREL24_JUMP_X,	/* type.  */
          1,			/* rightshift.  */
          2,			/* size (0 = byte, 1 = short, 2 = long).  */
          24,			/* bitsize.  */
@@ -559,13 +559,13 @@ static reloc_howto_type bfin_howto_table [] =
          0,			/* bitpos.  */
          complain_overflow_signed, /* complain_on_overflow.  */
          bfin_pcrel24_reloc,	/* special_function.  */
-         "R_pcrel24_jump_x",	/* name.  */
+	"R_BFIN_PCREL24_JUMP_X", /* name.  */
 	 FALSE,			/* partial_inplace.  */
 	 0,			/* src_mask.  */
 	 0x00FFFFFF,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
 
-  HOWTO (R_pcrel24,		/* type.  */
+  HOWTO (R_BFIN_PCREL24,	/* type.  */
 	 1,			/* rightshift.  */
 	 2,			/* size (0 = byte, 1 = short, 2 = long).  */
 	 24,			/* bitsize.  */
@@ -573,13 +573,13 @@ static reloc_howto_type bfin_howto_table [] =
 	 0,			/* bitpos.  */
 	 complain_overflow_signed, /* complain_on_overflow.  */
 	 bfin_pcrel24_reloc,	/* special_function.  */
-	 "R_pcrel24",		/* name.  */
+	 "R_BFIN_PCREL24",	/* name.  */
 	 FALSE,			/* partial_inplace.  */
 	 0,			/* src_mask.  */
 	 0x00FFFFFF,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
 
-  HOWTO (R_unusedb,		/* type.  */
+  HOWTO (R_BFIN_UNUSEDB,	/* type.  */
 	 0,			/* rightshift.  */
 	 2,			/* size (0 = byte, 1 = short, 2 = long).  */
 	 32,			/* bitsize.  */
@@ -587,13 +587,13 @@ static reloc_howto_type bfin_howto_table [] =
 	 0,			/* bitpos.  */
 	 complain_overflow_dont, /* complain_on_overflow.  */
 	 bfd_elf_generic_reloc,	/* special_function.  */
-	 "R_unusedb",		/* name.  */
+	 "R_BFIN_UNUSEDB",	/* name.  */
 	 FALSE,			/* partial_inplace.  */
 	 0,			/* src_mask.  */
 	 0,			/* dst_mask.  */
 	 FALSE),		/* pcrel_offset.  */
 
-  HOWTO (R_unusedc,		/* type.  */
+  HOWTO (R_BFIN_UNUSEDC,	/* type.  */
 	 0,			/* rightshift.  */
 	 2,			/* size (0 = byte, 1 = short, 2 = long).  */
 	 32,			/* bitsize.  */
@@ -601,13 +601,13 @@ static reloc_howto_type bfin_howto_table [] =
 	 0,			/* bitpos.  */
 	 complain_overflow_dont, /* complain_on_overflow.  */
 	 bfd_elf_generic_reloc,	/* special_function.  */
-	 "R_unusedc",		/* name.  */
+	 "R_BFIN_UNUSEDC",	/* name.  */
 	 FALSE,			/* partial_inplace.  */
 	 0,			/* src_mask.  */
 	 0,			/* dst_mask.  */
 	 FALSE),		/* pcrel_offset.  */
 
-  HOWTO (R_pcrel24_jump_l,	/* type.  */
+  HOWTO (R_BFIN_PCREL24_JUMP_L,	/* type.  */
 	 1,			/* rightshift.  */
 	 2,			/* size (0 = byte, 1 = short, 2 = long).  */
 	 24,			/* bitsize.  */
@@ -615,13 +615,13 @@ static reloc_howto_type bfin_howto_table [] =
 	 0,			/* bitpos.  */
 	 complain_overflow_signed, /* complain_on_overflow.  */
 	 bfin_pcrel24_reloc,	/* special_function.  */
-	 "R_pcrel24_jump_l",	/* name.  */
+	 "R_BFIN_PCREL24_JUMP_L", /* name.  */
 	 FALSE,			/* partial_inplace.  */
 	 0,			/* src_mask.  */
 	 0x00FFFFFF,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
 
-  HOWTO (R_pcrel24_call_x,	/* type.  */
+  HOWTO (R_BFIN_PCREL24_CALL_X,	/* type.  */
 	 1,			/* rightshift.  */
 	 2,			/* size (0 = byte, 1 = short, 2 = long).  */
 	 24,			/* bitsize.  */
@@ -629,13 +629,13 @@ static reloc_howto_type bfin_howto_table [] =
 	 0,			/* bitpos.  */
 	 complain_overflow_signed, /* complain_on_overflow.  */
 	 bfin_pcrel24_reloc,	/* special_function.  */
-	 "R_pcrel24_call_x",	/* name.  */
+	 "R_BFIN_PCREL24_CALL_X", /* name.  */
 	 FALSE,			/* partial_inplace.  */
 	 0,			/* src_mask.  */
 	 0x00FFFFFF,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
 
-  HOWTO (R_var_eq_symb,		/* type.  */
+  HOWTO (R_BFIN_VAR_EQ_SYMB,	/* type.  */
 	 0,			/* rightshift.  */
 	 2,			/* size (0 = byte, 1 = short, 2 = long).  */
 	 32,			/* bitsize.  */
@@ -643,13 +643,13 @@ static reloc_howto_type bfin_howto_table [] =
 	 0,			/* bitpos.  */
 	 complain_overflow_bitfield, /* complain_on_overflow.  */
 	 bfin_bfd_reloc,	/* special_function.  */
-	 "R_var_eq_symb",		/* name.  */
+	 "R_BFIN_VAR_EQ_SYMB",	/* name.  */
 	 FALSE,			/* partial_inplace.  */
 	 0,			/* src_mask.  */
 	 0,			/* dst_mask.  */
 	 FALSE),		/* pcrel_offset.  */
 
-  HOWTO (R_byte_data,		/* type.  */
+  HOWTO (R_BFIN_BYTE_DATA,	/* type.  */
 	 0,			/* rightshift.  */
 	 0,			/* size (0 = byte, 1 = short, 2 = long).  */
 	 8,			/* bitsize.  */
@@ -657,13 +657,13 @@ static reloc_howto_type bfin_howto_table [] =
 	 0,			/* bitpos.  */
 	 complain_overflow_unsigned, /* complain_on_overflow.  */
 	 bfin_bfd_reloc,	/* special_function.  */
-	 "R_byte_data",		/* name.  */
+	 "R_BFIN_BYTE_DATA",	/* name.  */
 	 FALSE,			/* partial_inplace.  */
 	 0,			/* src_mask.  */
 	 0xFF,			/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
 
-  HOWTO (R_byte2_data,		/* type.  */
+  HOWTO (R_BFIN_BYTE2_DATA,	/* type.  */
 	 0,			/* rightshift.  */
 	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
 	 16,			/* bitsize.  */
@@ -671,13 +671,13 @@ static reloc_howto_type bfin_howto_table [] =
 	 0,			/* bitpos.  */
 	 complain_overflow_signed, /* complain_on_overflow.  */
 	 bfin_bfd_reloc,	/* special_function.  */
-	 "R_byte2_data",	/* name.  */
+	 "R_BFIN_BYTE2_DATA",	/* name.  */
 	 FALSE,			/* partial_inplace.  */
 	 0,			/* src_mask.  */
 	 0xFFFF,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
 
-  HOWTO (R_byte4_data,		/* type.  */
+  HOWTO (R_BFIN_BYTE4_DATA,	/* type.  */
 	 0,			/* rightshift.  */
 	 2,			/* size (0 = byte, 1 = short, 2 = long).  */
 	 32,			/* bitsize.  */
@@ -685,13 +685,13 @@ static reloc_howto_type bfin_howto_table [] =
 	 0,			/* bitpos.  */
 	 complain_overflow_unsigned, /* complain_on_overflow.  */
 	 bfin_byte4_reloc,	/* special_function.  */
-	 "R_byte4_data",	/* name.  */
+	 "R_BFIN_BYTE4_DATA",	/* name.  */
 	 FALSE,			/* partial_inplace.  */
 	 0,			/* src_mask.  */
 	 0xFFFFFFFF,		/* dst_mask.  */
 	 TRUE),			/* pcrel_offset.  */
 
-  HOWTO (R_pcrel11,		/* type.  */
+  HOWTO (R_BFIN_PCREL11,	/* type.  */
 	 1,			/* rightshift.  */
 	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
 	 10,			/* bitsize.  */
@@ -699,7 +699,7 @@ static reloc_howto_type bfin_howto_table [] =
 	 0,			/* bitpos.  */
 	 complain_overflow_unsigned, /* complain_on_overflow.  */
 	 bfin_bfd_reloc,	/* special_function.  */
-	 "R_pcrel11",		/* name.  */
+	 "R_BFIN_PCREL11",	/* name.  */
 	 FALSE,			/* partial_inplace.  */
 	 0,			/* src_mask.  */
 	 0x000003FF,		/* dst_mask.  */
@@ -931,7 +931,7 @@ static reloc_howto_type bfin_howto_table [] =
 
 static reloc_howto_type bfin_gnuext_howto_table [] =
 {
-  HOWTO (R_pltpc,		/* type.  */
+  HOWTO (R_BFIN_PLTPC,		/* type.  */
 	 0,			/* rightshift.  */
 	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
 	 16,			/* bitsize.  */
@@ -939,13 +939,13 @@ static reloc_howto_type bfin_gnuext_howto_table [] =
 	 0,			/* bitpos.  */
 	 complain_overflow_bitfield, /* complain_on_overflow.  */
 	 bfin_pltpc_reloc,	/* special_function.  */
-	 "R_pltpc",		/* name.  */
+	 "R_BFIN_PLTPC",	/* name.  */
 	 FALSE,			/* partial_inplace.  */
 	 0xffff,		/* src_mask.  */
 	 0xffff,		/* dst_mask.  */
 	 FALSE),		/* pcrel_offset.  */
 
-  HOWTO (R_got,			/* type.  */
+  HOWTO (R_BFIN_GOT,		/* type.  */
 	 0,			/* rightshift.  */
 	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
 	 16,			/* bitsize.  */
@@ -953,7 +953,7 @@ static reloc_howto_type bfin_gnuext_howto_table [] =
 	 0,			/* bitpos.  */
 	 complain_overflow_bitfield, /* complain_on_overflow.  */
 	 bfd_elf_generic_reloc,	/* special_function.  */
-	 "R_got",		/* name.  */
+	 "R_BFIN_GOT",		/* name.  */
 	 FALSE,			/* partial_inplace.  */
 	 0x7fff,		/* src_mask.  */
 	 0x7fff,		/* dst_mask.  */
@@ -998,27 +998,27 @@ struct bfin_reloc_map
 
 static const struct bfin_reloc_map bfin_reloc_map [] =
 {
-  { BFD_RELOC_NONE,			R_unused0 },
-  { BFD_RELOC_BFIN_5_PCREL,		R_pcrel5m2 },
-  { BFD_RELOC_NONE,			R_unused1 },
-  { BFD_RELOC_BFIN_10_PCREL,		R_pcrel10 },
-  { BFD_RELOC_BFIN_12_PCREL_JUMP,	R_pcrel12_jump },
-  { BFD_RELOC_BFIN_16_IMM,		R_rimm16 },
-  { BFD_RELOC_BFIN_16_LOW,		R_luimm16 },
-  { BFD_RELOC_BFIN_16_HIGH,		R_huimm16 },
-  { BFD_RELOC_BFIN_12_PCREL_JUMP_S,	R_pcrel12_jump_s },
-  { BFD_RELOC_24_PCREL,			R_pcrel24 },
-  { BFD_RELOC_24_PCREL,			R_pcrel24 },
-  { BFD_RELOC_BFIN_24_PCREL_JUMP_L,	R_pcrel24_jump_l },
-  { BFD_RELOC_NONE,			R_unusedb },
-  { BFD_RELOC_NONE,			R_unusedc },
-  { BFD_RELOC_BFIN_24_PCREL_CALL_X,	R_pcrel24_call_x },
-  { BFD_RELOC_8,			R_byte_data },
-  { BFD_RELOC_16,			R_byte2_data },
-  { BFD_RELOC_32,			R_byte4_data },
-  { BFD_RELOC_BFIN_11_PCREL,		R_pcrel11 },
-  { BFD_RELOC_BFIN_GOT,			R_got },
-  { BFD_RELOC_BFIN_PLTPC,		R_pltpc },
+  { BFD_RELOC_NONE,			R_BFIN_UNUSED0 },
+  { BFD_RELOC_BFIN_5_PCREL,		R_BFIN_PCREL5M2 },
+  { BFD_RELOC_NONE,			R_BFIN_UNUSED1 },
+  { BFD_RELOC_BFIN_10_PCREL,		R_BFIN_PCREL10 },
+  { BFD_RELOC_BFIN_12_PCREL_JUMP,	R_BFIN_PCREL12_JUMP },
+  { BFD_RELOC_BFIN_16_IMM,		R_BFIN_RIMM16 },
+  { BFD_RELOC_BFIN_16_LOW,		R_BFIN_LUIMM16 },
+  { BFD_RELOC_BFIN_16_HIGH,		R_BFIN_HUIMM16 },
+  { BFD_RELOC_BFIN_12_PCREL_JUMP_S,	R_BFIN_PCREL12_JUMP_S },
+  { BFD_RELOC_24_PCREL,			R_BFIN_PCREL24 },
+  { BFD_RELOC_24_PCREL,			R_BFIN_PCREL24 },
+  { BFD_RELOC_BFIN_24_PCREL_JUMP_L,	R_BFIN_PCREL24_JUMP_L },
+  { BFD_RELOC_NONE,			R_BFIN_UNUSEDB },
+  { BFD_RELOC_NONE,			R_BFIN_UNUSEDC },
+  { BFD_RELOC_BFIN_24_PCREL_CALL_X,	R_BFIN_PCREL24_CALL_X },
+  { BFD_RELOC_8,			R_BFIN_BYTE_DATA },
+  { BFD_RELOC_16,			R_BFIN_BYTE2_DATA },
+  { BFD_RELOC_32,			R_BFIN_BYTE4_DATA },
+  { BFD_RELOC_BFIN_11_PCREL,		R_BFIN_PCREL11 },
+  { BFD_RELOC_BFIN_GOT,			R_BFIN_GOT },
+  { BFD_RELOC_BFIN_PLTPC,		R_BFIN_PLTPC },
 
   { BFD_RELOC_BFIN_GOT17M4,      R_BFIN_GOT17M4 },
   { BFD_RELOC_BFIN_GOTHI,      R_BFIN_GOTHI },
@@ -1191,7 +1191,7 @@ bfin_check_relocs (bfd * abfd,
             return FALSE;
           break;
 
-	case R_got:
+	case R_BFIN_GOT:
 	  if (h != NULL
 	      && strcmp (h->root.root.string, "__GLOBAL_OFFSET_TABLE_") == 0)
 	    break;
@@ -1301,7 +1301,7 @@ bfin_final_link_relocate (Elf_Internal_Rela *rel, reloc_howto_type *howto,
 {
   int r_type = ELF32_R_TYPE (rel->r_info);
 
-  if (r_type == R_pcrel24 || r_type == R_pcrel24_jump_l)
+  if (r_type == R_BFIN_PCREL24 || r_type == R_BFIN_PCREL24_JUMP_L)
     {
       bfd_reloc_status_type r = bfd_reloc_ok;
       bfd_vma x;
@@ -1450,7 +1450,7 @@ bfin_relocate_section (bfd * output_bfd,
 	case R_BFIN_GNU_VTENTRY:
 	  return bfd_reloc_ok;
 
-	case R_got:
+	case R_BFIN_GOT:
 	  /* Relocation is to the address of the entry for this symbol
 	     in the global offset table.  */
 	  if (h != NULL
@@ -1543,7 +1543,7 @@ bfin_relocate_section (bfd * output_bfd,
 			outrel.r_offset = (sgot->output_section->vma
 					   + sgot->output_offset + off);
 			outrel.r_info =
-			  ELF32_R_INFO (0, R_pcrel24);
+			  ELF32_R_INFO (0, R_BFIN_PCREL24);
 			outrel.r_addend = relocation;
 			loc = s->contents;
 			loc +=
@@ -1675,7 +1675,7 @@ bfin_gc_sweep_hook (bfd * abfd,
 
       switch (ELF32_R_TYPE (rel->r_info))
 	{
-	case R_got:
+	case R_BFIN_GOT:
 	  r_symndx = ELF32_R_SYM (rel->r_info);
 	  if (r_symndx >= symtab_hdr->sh_info)
 	    {
@@ -1893,7 +1893,7 @@ struct bfinfdpic_relocs_info
      needed for this symbol.  */
   unsigned done:1;
 
-  /* The number of R_byte4_data, R_BFIN_FUNCDESC and R_BFIN_FUNCDESC_VALUE
+  /* The number of R_BFIN_BYTE4_DATA, R_BFIN_FUNCDESC and R_BFIN_FUNCDESC_VALUE
      relocations referencing the symbol.  */
   unsigned relocs32, relocsfd, relocsfdv;
 
@@ -2209,7 +2209,7 @@ _bfinfdpic_emit_got_relocs_plt_entries (struct bfinfdpic_relocs_info *entry,
 				 + bfinfdpic_got_section (info)
 				 ->output_section->vma
 				 + bfinfdpic_got_section (info)->output_offset,
-				 R_byte4_data, idx, ad, entry);
+				 R_BFIN_BYTE4_DATA, idx, ad, entry);
 
       bfd_put_32 (output_bfd, ad,
 		  bfinfdpic_got_section (info)->contents
@@ -2261,7 +2261,7 @@ _bfinfdpic_emit_got_relocs_plt_entries (struct bfinfdpic_relocs_info *entry,
 		 so reference it directly.  */
 	      if (elf_hash_table (info)->dynamic_sections_created)
 		BFD_ASSERT (entry->privfd);
-	      reloc = R_byte4_data;
+	      reloc = R_BFIN_BYTE4_DATA;
 	      idx = elf_section_data (bfinfdpic_got_section (info)
 				      ->output_section)->dynindx;
 	      ad = bfinfdpic_got_section (info)->output_offset
@@ -2665,9 +2665,9 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 
       switch (r_type)
 	{
-	case R_pcrel24:
-	case R_pcrel24_jump_l:
-	case R_byte4_data:
+	case R_BFIN_PCREL24:
+	case R_BFIN_PCREL24_JUMP_L:
+	case R_BFIN_BYTE4_DATA:
 	  if (! IS_FDPIC (output_bfd))
 	    goto non_fdpic;
 
@@ -2727,8 +2727,8 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 
       switch (r_type)
 	{
-	case R_pcrel24:
-	case R_pcrel24_jump_l:
+	case R_BFIN_PCREL24:
+	case R_BFIN_PCREL24_JUMP_L:
 	  check_segment[0] = isec_segment;
 	  if (! IS_FDPIC (output_bfd))
 	    check_segment[1] = isec_segment;
@@ -2826,7 +2826,7 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 		    /* Otherwise, we know we have a private function
 		       descriptor, so reference it directly.  */
 		    BFD_ASSERT (picrel->privfd);
-		    r_type = R_byte4_data;
+		    r_type = R_BFIN_BYTE4_DATA;
 		    dynindx = elf_section_data (bfinfdpic_got_section (info)
 						->output_section)->dynindx;
 		    addend = bfinfdpic_got_section (info)->output_offset
@@ -2893,7 +2893,7 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 		      _bfinfdpic_add_dyn_reloc (output_bfd,
 						bfinfdpic_gotrel_section (info),
 						0,
-						R_unused0,
+						R_BFIN_UNUSED0,
 						dynindx, addend, picrel);
 		    else
 		      _bfinfdpic_add_dyn_reloc (output_bfd,
@@ -2916,7 +2916,7 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 	  check_segment[0] = check_segment[1] = got_segment;
 	  break;
 
-	case R_byte4_data:
+	case R_BFIN_BYTE4_DATA:
 	  if (! IS_FDPIC (output_bfd))
 	    {
 	      check_segment[0] = check_segment[1] = -1;
@@ -3037,7 +3037,7 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 		    if (offset >= (bfd_vma)-2)
 		      _bfinfdpic_add_dyn_reloc (output_bfd,
 						bfinfdpic_gotrel_section (info),
-						0, R_unused0, dynindx, addend, picrel);
+						0, R_BFIN_UNUSED0, dynindx, addend, picrel);
 		    else
 		      _bfinfdpic_add_dyn_reloc (output_bfd,
 						bfinfdpic_gotrel_section (info),
@@ -3153,8 +3153,8 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 
       switch (r_type)
 	{
-	case R_pcrel24:
-	case R_pcrel24_jump_l:
+	case R_BFIN_PCREL24:
+	case R_BFIN_PCREL24_JUMP_L:
 	  if (! IS_FDPIC (output_bfd) || ! picrel->plt)
 	    break;
 	  /* Fall through.  */
@@ -3284,8 +3284,8 @@ bfinfdpic_gc_sweep_hook (bfd *abfd,
 
       switch (ELF32_R_TYPE (rel->r_info))
         {
-	case R_pcrel24:
-	case R_pcrel24_jump_l:
+	case R_BFIN_PCREL24:
+	case R_BFIN_PCREL24_JUMP_L:
 	  picrel->call--;
 	  break;
 
@@ -3295,7 +3295,7 @@ bfinfdpic_gc_sweep_hook (bfd *abfd,
 	    picrel->relocs32++;
 	  /* Fall through.  */
 
-	case R_byte4_data:
+	case R_BFIN_BYTE4_DATA:
 	  picrel->sym--;
 	  if (bfd_get_section_flags (abfd, sec) & SEC_ALLOC)
 	    picrel->relocs32--;
@@ -4653,9 +4653,9 @@ bfinfdpic_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  if (! IS_FDPIC (abfd))
 	    goto bad_reloc;
 	  /* Fall through.  */
-	case R_pcrel24:
-	case R_pcrel24_jump_l:
-	case R_byte4_data:
+	case R_BFIN_PCREL24:
+	case R_BFIN_PCREL24_JUMP_L:
+	case R_BFIN_BYTE4_DATA:
 	  if (IS_FDPIC (abfd) && ! dynobj)
 	    {
 	      elf_hash_table (info)->dynobj = dynobj = abfd;
@@ -4699,8 +4699,8 @@ bfinfdpic_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
       switch (ELF32_R_TYPE (rel->r_info))
         {
-	case R_pcrel24:
-	case R_pcrel24_jump_l:
+	case R_BFIN_PCREL24:
+	case R_BFIN_PCREL24_JUMP_L:
 	  if (IS_FDPIC (abfd))
 	    picrel->call++;
 	  break;
@@ -4711,7 +4711,7 @@ bfinfdpic_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    picrel->relocs32--;
 	  /* Fall through.  */
 
-	case R_byte4_data:
+	case R_BFIN_BYTE4_DATA:
 	  if (! IS_FDPIC (abfd))
 	    break;
 
@@ -4774,10 +4774,10 @@ bfinfdpic_check_relocs (bfd *abfd, struct bfd_link_info *info,
             return FALSE;
           break;
 
-	case R_huimm16:
-	case R_luimm16:
-	case R_pcrel12_jump_s:
-	case R_pcrel10:
+	case R_BFIN_HUIMM16:
+	case R_BFIN_LUIMM16:
+	case R_BFIN_PCREL12_JUMP_S:
+	case R_BFIN_PCREL10:
 	  break;
 
 	default:
@@ -5094,7 +5094,7 @@ bfin_finish_dynamic_symbol (bfd * output_bfd,
 	      || h->dynindx == -1 || h->forced_local) && h->def_regular)
 	{
 	  fprintf(stderr, "*** check this relocation %s\n", __FUNCTION__);
-	  rela.r_info = ELF32_R_INFO (0, R_pcrel24);
+	  rela.r_info = ELF32_R_INFO (0, R_BFIN_PCREL24);
 	  rela.r_addend = bfd_get_signed_32 (output_bfd,
 					     (sgot->contents
 					      +
@@ -5105,7 +5105,7 @@ bfin_finish_dynamic_symbol (bfd * output_bfd,
 	{
 	  bfd_put_32 (output_bfd, (bfd_vma) 0,
 		      sgot->contents + (h->got.offset & ~(bfd_vma) 1));
-	  rela.r_info = ELF32_R_INFO (h->dynindx, R_got);
+	  rela.r_info = ELF32_R_INFO (h->dynindx, R_BFIN_GOT);
 	  rela.r_addend = 0;
 	}
 
@@ -5500,7 +5500,7 @@ bfd_bfin_elf32_create_embedded_relocs (
        characters.  */
 
       /* We can only relocate absolute longword relocs at run time.  */
-      if (ELF32_R_TYPE (irel->r_info) != (int) R_byte4_data)
+      if (ELF32_R_TYPE (irel->r_info) != (int) R_BFIN_BYTE4_DATA)
 	{
 	  *errmsg = _("unsupported reloc type");
 	  bfd_set_error (bfd_error_bad_value);
