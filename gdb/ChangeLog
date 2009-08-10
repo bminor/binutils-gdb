@@ -1,5 +1,21 @@
 2009-08-10  Hui Zhu  <teawater@gmail.com>
 
+	Add process record Linux system call 64 bits support.
+
+        * linux-record.h (linux_record_tdep): Add size_pointer,
+        size_size_t, size_iovec and arg6.  Change the values of
+	size_int, size_long and size_ulong to
+	gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT,
+	gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT,
+	gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT.
+	* i386-linux-tdep.c (i386_linux_init_abi): Ditto.
+	(i386_linux_intx80_sysenter_record): Add a check for system
+	call number.
+        * linux-record.c (record_linux_system_call): Make this
+        function support 64 bits.
+
+2009-08-10  Hui Zhu  <teawater@gmail.com>
+
 	Add AMD64 process record instruction set support.
 
 	* i386-tdep.h (gdbarch_tdep): Add record_regmap for registers

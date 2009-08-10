@@ -19,6 +19,7 @@
 
 #include "defs.h"
 #include "target.h"
+#include "gdbtypes.h"
 #include "regcache.h"
 #include "record.h"
 #include "linux-record.h"
@@ -80,6 +81,134 @@
 #define RECORD_Q_XGETQSTAT	(('5' << 8) + 5)
 #define RECORD_Q_XGETQUOTA	(('3' << 8) + 3)
 
+#define OUTPUT_REG(val, num)      phex_nz ((val), \
+    TYPE_LENGTH (gdbarch_register_type (get_regcache_arch (regcache), (num))))
+
+static int
+record_linux_sockaddr (struct regcache *regcache,
+                       struct linux_record_tdep *tdep, ULONGEST addr,
+                       ULONGEST len)
+{
+  gdb_byte *a;
+  int addrlen;
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
+  if (!addr)
+    return 0;
+
+  a = alloca (tdep->size_int);
+
+  if (record_arch_list_add_mem ((CORE_ADDR) len, tdep->size_int))
+    return -1;
+
+  /* Get the addrlen.  */
+  if (target_read_memory ((CORE_ADDR) len, a, tdep->size_int))
+    {
+      if (record_debug)
+        fprintf_unfiltered (gdb_stdlog,
+                            "Process record: error reading "
+                            "memory at addr = 0x%s len = %d.\n",
+                            phex_nz (len, tdep->size_pointer),
+                            tdep->size_int);
+        return -1;
+    }
+  addrlen = (int) extract_unsigned_integer (a, tdep->size_int, byte_order);
+  if (addrlen <= 0 || addrlen > tdep->size_sockaddr)
+    addrlen = tdep->size_sockaddr;
+
+  if (record_arch_list_add_mem ((CORE_ADDR) addr, addrlen))
+    return -1;
+
+  return 0;
+}
+
+static int
+record_linux_msghdr (struct regcache *regcache,
+                     struct linux_record_tdep *tdep, ULONGEST addr)
+{
+  gdb_byte *a;
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  CORE_ADDR tmpaddr;
+  int tmpint;
+
+  if (!addr)
+    return 0;
+
+  if (record_arch_list_add_mem ((CORE_ADDR) addr, tdep->size_msghdr))
+    return -1;
+
+  a = alloca (tdep->size_msghdr);
+  if (target_read_memory ((CORE_ADDR) addr, a, tdep->size_msghdr))
+    {
+      if (record_debug)
+        fprintf_unfiltered (gdb_stdlog,
+                            "Process record: error reading "
+                            "memory at addr = 0x%s "
+                            "len = %d.\n",
+                            phex_nz (addr, tdep->size_pointer),
+                            tdep->size_msghdr);
+        return -1;
+    }
+
+  /* msg_name msg_namelen */
+  addr = extract_unsigned_integer (a, tdep->size_pointer, byte_order);
+  a += tdep->size_pointer;
+  if (record_arch_list_add_mem ((CORE_ADDR) addr,
+                                (int) extract_unsigned_integer (a,
+				                                tdep->size_int,
+				                                byte_order)))
+    return -1;
+  a += tdep->size_int;
+
+  /* msg_iov msg_iovlen */
+  addr = extract_unsigned_integer (a, tdep->size_pointer, byte_order);
+  a += tdep->size_pointer;
+  if (addr)
+    {
+      ULONGEST i;
+      ULONGEST len = extract_unsigned_integer (a, tdep->size_size_t,
+                                               byte_order);
+      gdb_byte *iov = alloca (tdep->size_iovec);
+
+      for (i = 0; i < len; i++)
+        {
+          if (target_read_memory ((CORE_ADDR) addr, iov, tdep->size_iovec))
+            {
+              if (record_debug)
+                fprintf_unfiltered (gdb_stdlog,
+                                    "Process record: error "
+                                    "reading memory at "
+                                    "addr = 0x%s "
+                                    "len = %d.\n",
+                                    phex_nz (addr,tdep->size_pointer),
+                                    tdep->size_iovec);
+                return -1;
+            }
+          tmpaddr = (CORE_ADDR) extract_unsigned_integer (iov,
+                                                          tdep->size_pointer,
+                                                          byte_order);
+          tmpint = (int) extract_unsigned_integer (iov + tdep->size_pointer,
+                                                   tdep->size_size_t,
+                                                   byte_order);
+          if (record_arch_list_add_mem (tmpaddr, tmpint));
+            return -1;
+          addr += tdep->size_iovec;
+        }
+    }
+  a += tdep->size_size_t;
+
+  /* msg_control msg_controllen */
+  addr = extract_unsigned_integer (a, tdep->size_pointer, byte_order);
+  a += tdep->size_pointer;
+  tmpint = (int) extract_unsigned_integer (a, tdep->size_size_t, byte_order);
+  if (record_arch_list_add_mem ((CORE_ADDR) addr, tmpint));
+    return -1;
+
+  return 0;
+}
+
 /* When the architecture process record get a Linux syscall
    instruction, it will get a Linux syscall number of this
    architecture and convert it to the Linux syscall number "num" which
@@ -94,10 +223,13 @@
 
 int
 record_linux_system_call (int num, struct regcache *regcache,
-			  struct linux_record_tdep *tdep)
+                          struct linux_record_tdep *tdep)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  uint32_t tmpu32;
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  ULONGEST tmpulongest;
+  CORE_ADDR tmpaddr;
+  int tmpint;
 
   switch (num)
     {
@@ -108,15 +240,14 @@ record_linux_system_call (int num, struct regcache *regcache,
       /* sys_exit */
     case 1:
       {
-	int q;
-	target_terminal_ours ();
-	q =
-	  yquery (_ ("The next instruction is syscall exit.  "
-		     "It will make the program exit.  "
-		     "Do you want to stop the program?"));
-	target_terminal_inferior ();
-	if (q)
-	  return 1;
+        int q;
+        target_terminal_ours ();
+        q = yquery (_("The next instruction is syscall exit.  "
+                      "It will make the program exit.  "
+                      "Do you want to stop the program?"));
+        target_terminal_inferior ();
+        if (q)
+          return 1;
       }
       break;
 
@@ -127,11 +258,11 @@ record_linux_system_call (int num, struct regcache *regcache,
       /* sys_read */
     case 3:
       {
-	uint32_t addr, count;
-	regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & addr);
-	regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & count);
-	if (record_arch_list_add_mem (addr, count))
-	  return -1;
+        ULONGEST addr, count;
+        regcache_raw_read_unsigned (regcache, tdep->arg2, &addr);
+        regcache_raw_read_unsigned (regcache, tdep->arg3, &count);
+        if (record_arch_list_add_mem ((CORE_ADDR) addr, (int) count))
+          return -1;
       }
       break;
 
@@ -171,9 +302,10 @@ record_linux_system_call (int num, struct regcache *regcache,
     case 28:
       /* sys_lstat */
     case 84:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size__old_kernel_stat))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size__old_kernel_stat))
+        return -1;
       break;
 
       /* sys_lseek */
@@ -194,16 +326,16 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_ptrace */
     case 26:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (tmpu32 == RECORD_PTRACE_PEEKTEXT
-	  || tmpu32 == RECORD_PTRACE_PEEKDATA
-	  || tmpu32 == RECORD_PTRACE_PEEKUSR)
-	{
-	  regcache_raw_read (regcache, tdep->arg4,
-			     (gdb_byte *) & tmpu32);
-	  if (record_arch_list_add_mem (tmpu32, 4))
-	    return -1;
-	}
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (tmpulongest == RECORD_PTRACE_PEEKTEXT
+          || tmpulongest == RECORD_PTRACE_PEEKDATA
+          || tmpulongest == RECORD_PTRACE_PEEKUSR)
+        {
+          regcache_raw_read_unsigned (regcache, tdep->arg4,
+                                      &tmpulongest);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, 4))
+            return -1;
+        }
       break;
 
       /* sys_alarm */
@@ -240,9 +372,9 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_times */
     case 43:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_tms))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_tms))
+        return -1;
       break;
 
       /* sys_ni_syscall */
@@ -270,149 +402,172 @@ record_linux_system_call (int num, struct regcache *regcache,
       /* sys_ioctl */
     case 54:
       /* XXX Need to add a lot of support of other ioctl requests.  */
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (tmpu32 == tdep->ioctl_FIOCLEX || tmpu32 == tdep->ioctl_FIONCLEX
-	  || tmpu32 == tdep->ioctl_FIONBIO || tmpu32 == tdep->ioctl_FIOASYNC
-	  || tmpu32 == tdep->ioctl_TCSETS || tmpu32 == tdep->ioctl_TCSETSW
-	  || tmpu32 == tdep->ioctl_TCSETSF || tmpu32 == tdep->ioctl_TCSETA
-	  || tmpu32 == tdep->ioctl_TCSETAW || tmpu32 == tdep->ioctl_TCSETAF
-	  || tmpu32 == tdep->ioctl_TCSBRK || tmpu32 == tdep->ioctl_TCXONC
-	  || tmpu32 == tdep->ioctl_TCFLSH || tmpu32 == tdep->ioctl_TIOCEXCL
-	  || tmpu32 == tdep->ioctl_TIOCNXCL
-	  || tmpu32 == tdep->ioctl_TIOCSCTTY
-	  || tmpu32 == tdep->ioctl_TIOCSPGRP || tmpu32 == tdep->ioctl_TIOCSTI
-	  || tmpu32 == tdep->ioctl_TIOCSWINSZ
-	  || tmpu32 == tdep->ioctl_TIOCMBIS || tmpu32 == tdep->ioctl_TIOCMBIC
-	  || tmpu32 == tdep->ioctl_TIOCMSET
-	  || tmpu32 == tdep->ioctl_TIOCSSOFTCAR
-	  || tmpu32 == tdep->ioctl_TIOCCONS
-	  || tmpu32 == tdep->ioctl_TIOCSSERIAL
-	  || tmpu32 == tdep->ioctl_TIOCPKT || tmpu32 == tdep->ioctl_TIOCNOTTY
-	  || tmpu32 == tdep->ioctl_TIOCSETD || tmpu32 == tdep->ioctl_TCSBRKP
-	  || tmpu32 == tdep->ioctl_TIOCTTYGSTRUCT
-	  || tmpu32 == tdep->ioctl_TIOCSBRK || tmpu32 == tdep->ioctl_TIOCCBRK
-	  || tmpu32 == tdep->ioctl_TCSETS2 || tmpu32 == tdep->ioctl_TCSETSW2
-	  || tmpu32 == tdep->ioctl_TCSETSF2
-	  || tmpu32 == tdep->ioctl_TIOCSPTLCK
-	  || tmpu32 == tdep->ioctl_TIOCSERCONFIG
-	  || tmpu32 == tdep->ioctl_TIOCSERGWILD
-	  || tmpu32 == tdep->ioctl_TIOCSERSWILD
-	  || tmpu32 == tdep->ioctl_TIOCSLCKTRMIOS
-	  || tmpu32 == tdep->ioctl_TIOCSERGETMULTI
-	  || tmpu32 == tdep->ioctl_TIOCSERSETMULTI
-	  || tmpu32 == tdep->ioctl_TIOCMIWAIT
-	  || tmpu32 == tdep->ioctl_TIOCSHAYESESP)
-	{
-	  /* Nothing to do.  */
-	}
-      else if (tmpu32 == tdep->ioctl_TCGETS || tmpu32 == tdep->ioctl_TCGETA
-	       || tmpu32 == tdep->ioctl_TIOCGLCKTRMIOS)
-	{
-	  regcache_raw_read (regcache, tdep->arg3,
-			     (gdb_byte *) & tmpu32);
-	  if (record_arch_list_add_mem (tmpu32, tdep->size_termios))
-	    return -1;
-	}
-      else if (tmpu32 == tdep->ioctl_TIOCGPGRP
-	       || tmpu32 == tdep->ioctl_TIOCGSID)
-	{
-	  regcache_raw_read (regcache, tdep->arg3,
-			     (gdb_byte *) & tmpu32);
-	  if (record_arch_list_add_mem (tmpu32, tdep->size_pid_t))
-	    return -1;
-	}
-      else if (tmpu32 == tdep->ioctl_TIOCOUTQ
-	       || tmpu32 == tdep->ioctl_TIOCMGET
-	       || tmpu32 == tdep->ioctl_TIOCGSOFTCAR
-	       || tmpu32 == tdep->ioctl_FIONREAD
-	       || tmpu32 == tdep->ioctl_TIOCINQ
-	       || tmpu32 == tdep->ioctl_TIOCGETD
-	       || tmpu32 == tdep->ioctl_TIOCGPTN
-	       || tmpu32 == tdep->ioctl_TIOCSERGETLSR)
-	{
-	  regcache_raw_read (regcache, tdep->arg3,
-			     (gdb_byte *) & tmpu32);
-	  if (record_arch_list_add_mem (tmpu32, tdep->size_int))
-	    return -1;
-	}
-      else if (tmpu32 == tdep->ioctl_TIOCGWINSZ)
-	{
-	  regcache_raw_read (regcache, tdep->arg3,
-			     (gdb_byte *) & tmpu32);
-	  if (record_arch_list_add_mem (tmpu32, tdep->size_winsize))
-	    return -1;
-	}
-      else if (tmpu32 == tdep->ioctl_TIOCLINUX)
-	{
-	  regcache_raw_read (regcache, tdep->arg3,
-			     (gdb_byte *) & tmpu32);
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (tmpulongest == tdep->ioctl_FIOCLEX
+          || tmpulongest == tdep->ioctl_FIONCLEX
+          || tmpulongest == tdep->ioctl_FIONBIO
+          || tmpulongest == tdep->ioctl_FIOASYNC
+          || tmpulongest == tdep->ioctl_TCSETS
+          || tmpulongest == tdep->ioctl_TCSETSW
+          || tmpulongest == tdep->ioctl_TCSETSF
+          || tmpulongest == tdep->ioctl_TCSETA
+          || tmpulongest == tdep->ioctl_TCSETAW
+          || tmpulongest == tdep->ioctl_TCSETAF
+          || tmpulongest == tdep->ioctl_TCSBRK
+          || tmpulongest == tdep->ioctl_TCXONC
+          || tmpulongest == tdep->ioctl_TCFLSH
+          || tmpulongest == tdep->ioctl_TIOCEXCL
+          || tmpulongest == tdep->ioctl_TIOCNXCL
+          || tmpulongest == tdep->ioctl_TIOCSCTTY
+          || tmpulongest == tdep->ioctl_TIOCSPGRP
+          || tmpulongest == tdep->ioctl_TIOCSTI
+          || tmpulongest == tdep->ioctl_TIOCSWINSZ
+          || tmpulongest == tdep->ioctl_TIOCMBIS
+          || tmpulongest == tdep->ioctl_TIOCMBIC
+          || tmpulongest == tdep->ioctl_TIOCMSET
+          || tmpulongest == tdep->ioctl_TIOCSSOFTCAR
+          || tmpulongest == tdep->ioctl_TIOCCONS
+          || tmpulongest == tdep->ioctl_TIOCSSERIAL
+          || tmpulongest == tdep->ioctl_TIOCPKT
+          || tmpulongest == tdep->ioctl_TIOCNOTTY
+          || tmpulongest == tdep->ioctl_TIOCSETD
+          || tmpulongest == tdep->ioctl_TCSBRKP
+          || tmpulongest == tdep->ioctl_TIOCTTYGSTRUCT
+          || tmpulongest == tdep->ioctl_TIOCSBRK
+          || tmpulongest == tdep->ioctl_TIOCCBRK
+          || tmpulongest == tdep->ioctl_TCSETS2
+          || tmpulongest == tdep->ioctl_TCSETSW2
+          || tmpulongest == tdep->ioctl_TCSETSF2
+          || tmpulongest == tdep->ioctl_TIOCSPTLCK
+          || tmpulongest == tdep->ioctl_TIOCSERCONFIG
+          || tmpulongest == tdep->ioctl_TIOCSERGWILD
+          || tmpulongest == tdep->ioctl_TIOCSERSWILD
+          || tmpulongest == tdep->ioctl_TIOCSLCKTRMIOS
+          || tmpulongest == tdep->ioctl_TIOCSERGETMULTI
+          || tmpulongest == tdep->ioctl_TIOCSERSETMULTI
+          || tmpulongest == tdep->ioctl_TIOCMIWAIT
+          || tmpulongest == tdep->ioctl_TIOCSHAYESESP)
+        {
+          /* Nothing to do.  */
+        }
+      else if (tmpulongest == tdep->ioctl_TCGETS
+               || tmpulongest == tdep->ioctl_TCGETA
+               || tmpulongest == tdep->ioctl_TIOCGLCKTRMIOS)
+        {
+          regcache_raw_read_unsigned (regcache, tdep->arg3,
+                                      &tmpulongest);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        tdep->size_termios))
+            return -1;
+        }
+      else if (tmpulongest == tdep->ioctl_TIOCGPGRP
+               || tmpulongest == tdep->ioctl_TIOCGSID)
+        {
+          regcache_raw_read_unsigned (regcache, tdep->arg3,
+                                      &tmpulongest);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        tdep->size_pid_t))
+            return -1;
+        }
+      else if (tmpulongest == tdep->ioctl_TIOCOUTQ
+               || tmpulongest == tdep->ioctl_TIOCMGET
+               || tmpulongest == tdep->ioctl_TIOCGSOFTCAR
+               || tmpulongest == tdep->ioctl_FIONREAD
+               || tmpulongest == tdep->ioctl_TIOCINQ
+               || tmpulongest == tdep->ioctl_TIOCGETD
+               || tmpulongest == tdep->ioctl_TIOCGPTN
+               || tmpulongest == tdep->ioctl_TIOCSERGETLSR)
+        {
+          regcache_raw_read_unsigned (regcache, tdep->arg3,
+                                      &tmpulongest);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        tdep->size_int))
+            return -1;
+        }
+      else if (tmpulongest == tdep->ioctl_TIOCGWINSZ)
+        {
+          regcache_raw_read_unsigned (regcache, tdep->arg3,
+                                      &tmpulongest);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        tdep->size_winsize))
+            return -1;
+        }
+      else if (tmpulongest == tdep->ioctl_TIOCLINUX)
+        {
+          regcache_raw_read_unsigned (regcache, tdep->arg3,
+                                      &tmpulongest);
           /* This syscall affect a char size memory.  */
-	  if (record_arch_list_add_mem (tmpu32, 1))
-	    return -1;
-	}
-      else if (tmpu32 == tdep->ioctl_TIOCGSERIAL)
-	{
-	  regcache_raw_read (regcache, tdep->arg3,
-			     (gdb_byte *) & tmpu32);
-	  if (record_arch_list_add_mem (tmpu32, tdep->size_serial_struct))
-	    return -1;
-	}
-      else if (tmpu32 == tdep->ioctl_TCGETS2)
-	{
-	  regcache_raw_read (regcache, tdep->arg3,
-			     (gdb_byte *) & tmpu32);
-	  if (record_arch_list_add_mem (tmpu32, tdep->size_termios2))
-	    return -1;
-	}
-      else if (tmpu32 == tdep->ioctl_FIOQSIZE)
-	{
-	  regcache_raw_read (regcache, tdep->arg3,
-			     (gdb_byte *) & tmpu32);
-	  if (record_arch_list_add_mem (tmpu32, tdep->size_loff_t))
-	    return -1;
-	}
-      else if (tmpu32 == tdep->ioctl_TIOCGICOUNT)
-	{
-	  regcache_raw_read (regcache, tdep->arg3,
-			     (gdb_byte *) & tmpu32);
-	  if (record_arch_list_add_mem
-	      (tmpu32, tdep->size_serial_icounter_struct))
-	    return -1;
-	}
-      else if (tmpu32 == tdep->ioctl_TIOCGHAYESESP)
-	{
-	  regcache_raw_read (regcache, tdep->arg3,
-			     (gdb_byte *) & tmpu32);
-	  if (record_arch_list_add_mem (tmpu32, tdep->size_hayes_esp_config))
-	    return -1;
-	}
-      else if (tmpu32 == tdep->ioctl_TIOCSERGSTRUCT)
-	{
-	  printf_unfiltered (_("Process record and replay target doesn't "
-			       "support ioctl request TIOCSERGSTRUCT\n"));
-	  return 1;
-	}
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, 1))
+            return -1;
+        }
+      else if (tmpulongest == tdep->ioctl_TIOCGSERIAL)
+        {
+          regcache_raw_read_unsigned (regcache, tdep->arg3,
+                                      &tmpulongest);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        tdep->size_serial_struct))
+            return -1;
+        }
+      else if (tmpulongest == tdep->ioctl_TCGETS2)
+        {
+          regcache_raw_read_unsigned (regcache, tdep->arg3,
+                                      &tmpulongest);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        tdep->size_termios2))
+            return -1;
+        }
+      else if (tmpulongest == tdep->ioctl_FIOQSIZE)
+        {
+          regcache_raw_read_unsigned (regcache, tdep->arg3,
+                                      &tmpulongest);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        tdep->size_loff_t))
+            return -1;
+        }
+      else if (tmpulongest == tdep->ioctl_TIOCGICOUNT)
+        {
+          regcache_raw_read_unsigned (regcache, tdep->arg3,
+                                      &tmpulongest);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        tdep->size_serial_icounter_struct))
+            return -1;
+        }
+      else if (tmpulongest == tdep->ioctl_TIOCGHAYESESP)
+        {
+          regcache_raw_read_unsigned (regcache, tdep->arg3,
+                                      &tmpulongest);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        tdep->size_hayes_esp_config))
+            return -1;
+        }
+      else if (tmpulongest == tdep->ioctl_TIOCSERGSTRUCT)
+        {
+          printf_unfiltered (_("Process record and replay target doesn't "
+                               "support ioctl request TIOCSERGSTRUCT\n"));
+          return 1;
+        }
       else
-	{
-	  printf_unfiltered (_("Process record and replay target doesn't "
-			       "support ioctl request 0x%s.\n"),
-			     phex_nz (tmpu32, 4));
-	  return 1;
-	}
+        {
+          printf_unfiltered (_("Process record and replay target doesn't "
+                               "support ioctl request 0x%s.\n"),
+                             OUTPUT_REG (tmpulongest, tdep->arg2));
+          return 1;
+        }
       break;
 
       /* sys_fcntl */
     case 55:
       /* XXX */
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
     sys_fcntl:
-      if (tmpu32 == tdep->fcntl_F_GETLK)
-	{
-	  regcache_raw_read (regcache, tdep->arg3,
-			     (gdb_byte *) & tmpu32);
-	  if (record_arch_list_add_mem (tmpu32, tdep->size_flock))
-	    return -1;
-	}
+      if (tmpulongest == tdep->fcntl_F_GETLK)
+        {
+          regcache_raw_read_unsigned (regcache, tdep->arg3,
+                                      &tmpulongest);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        tdep->size_flock))
+            return -1;
+        }
       break;
 
       /* sys_ni_syscall */
@@ -425,9 +580,10 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_olduname */
     case 59:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_oldold_utsname))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_oldold_utsname))
+        return -1;
       break;
 
       /* sys_umask */
@@ -438,9 +594,10 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_ustat */
     case 62:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_ustat))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_ustat))
+        return -1;
       break;
 
       /* sys_dup2 */
@@ -455,9 +612,10 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_sigaction */
     case 67:
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_old_sigaction))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_old_sigaction))
+        return -1;
       break;
 
       /* sys_sgetmask */
@@ -474,9 +632,10 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_sigpending */
     case 73:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_old_sigset_t))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_old_sigset_t))
+        return -1;
       break;
 
       /* sys_sethostname */
@@ -487,26 +646,30 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_old_getrlimit */
     case 76:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_rlimit))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_rlimit))
+        return -1;
       break;
 
       /* sys_getrusage */
     case 77:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_rusage))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_rusage))
+        return -1;
       break;
 
       /* sys_gettimeofday */
     case 78:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_timeval))
-	return -1;
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_timezone))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_timeval))
+        return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_timezone))
+        return -1;
       break;
 
       /* sys_settimeofday */
@@ -515,53 +678,56 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_getgroups16 */
     case 80:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_old_gid_t))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_old_gid_t))
+        return -1;
       break;
 
       /* sys_setgroups16 */
     case 81:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_old_gid_t))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_old_gid_t))
+        return -1;
       break;
 
       /* old_select */
     case 82:
       {
-	struct sel_arg_struct
-	{
-	  CORE_ADDR n;
-	  CORE_ADDR inp;
-	  CORE_ADDR outp;
-	  CORE_ADDR exp;
-	  CORE_ADDR tvp;
-	} sel;
+        struct sel_arg_struct
+        {
+          CORE_ADDR n;
+          CORE_ADDR inp;
+          CORE_ADDR outp;
+          CORE_ADDR exp;
+          CORE_ADDR tvp;
+        } sel;
 
-	regcache_raw_read (regcache, tdep->arg1,
-			   (gdb_byte *) & tmpu32);
-	if (tmpu32)
-	  {
-	    if (target_read_memory (tmpu32, (gdb_byte *) & sel, sizeof (sel)))
-	      {
-		if (record_debug)
-		  fprintf_unfiltered (gdb_stdlog,
-				      "Process record: error reading memory "
-				      "at addr = %s len = %lu.\n",
-				      paddress (gdbarch, tmpu32),
-				      (unsigned long)sizeof (sel));
-		return -1;
-	      }
-	    if (record_arch_list_add_mem (sel.inp, tdep->size_fd_set))
-	      return -1;
-	    if (record_arch_list_add_mem (sel.outp, tdep->size_fd_set))
-	      return -1;
-	    if (record_arch_list_add_mem (sel.exp, tdep->size_fd_set))
-	      return -1;
-	    if (record_arch_list_add_mem (sel.tvp, tdep->size_timeval))
-	      return -1;
-	  }
+        regcache_raw_read_unsigned (regcache, tdep->arg1,
+                                    &tmpulongest);
+        if (tmpulongest)
+          {
+            if (target_read_memory (tmpulongest, (gdb_byte *) &sel,
+                                    sizeof(sel)))
+              {
+                if (record_debug)
+                  fprintf_unfiltered (gdb_stdlog,
+                                      "Process record: error reading memory "
+                                      "at addr = 0x%s len = %lu.\n",
+                                      OUTPUT_REG (tmpulongest, tdep->arg1),
+                                      (unsigned long) sizeof (sel));
+                return -1;
+              }
+            if (record_arch_list_add_mem (sel.inp, tdep->size_fd_set))
+              return -1;
+            if (record_arch_list_add_mem (sel.outp, tdep->size_fd_set))
+              return -1;
+            if (record_arch_list_add_mem (sel.exp, tdep->size_fd_set))
+              return -1;
+            if (record_arch_list_add_mem (sel.tvp, tdep->size_timeval))
+              return -1;
+          }
       }
       break;
 
@@ -572,12 +738,12 @@ record_linux_system_call (int num, struct regcache *regcache,
       /* sys_readlink */
     case 85:
       {
-	uint32_t len;
-	regcache_raw_read (regcache, tdep->arg2,
-			   (gdb_byte *) & tmpu32);
-	regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & len);
-	if (record_arch_list_add_mem (tmpu32, len))
-	  return -1;
+        ULONGEST len;
+        regcache_raw_read_unsigned (regcache, tdep->arg2,
+                                    &tmpulongest);
+        regcache_raw_read_unsigned (regcache, tdep->arg3, &len);
+        if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, (int) len))
+          return -1;
       }
       break;
 
@@ -590,23 +756,24 @@ record_linux_system_call (int num, struct regcache *regcache,
       /* sys_reboot */
     case 88:
       {
-	int q;
-	target_terminal_ours ();
-	q =
-	  yquery (_("The next instruction is syscall reboot.  "
-		    "It will restart the computer.  "
-		    "Do you want to stop the program?"));
-	target_terminal_inferior ();
-	if (q)
-	  return 1;
+        int q;
+        target_terminal_ours ();
+        q =
+          yquery (_("The next instruction is syscall reboot.  "
+                    "It will restart the computer.  "
+                    "Do you want to stop the program?"));
+        target_terminal_inferior ();
+        if (q)
+          return 1;
       }
       break;
 
       /* old_readdir */
     case 89:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_dirent))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_dirent))
+        return -1;
       break;
 
       /* old_mmap */
@@ -616,22 +783,21 @@ record_linux_system_call (int num, struct regcache *regcache,
       /* sys_munmap */
     case 91:
       {
-	int q;
-	uint32_t len;
+        int q;
+        ULONGEST len;
 
-	regcache_raw_read (regcache, tdep->arg1,
-			   (gdb_byte *) & tmpu32);
-	regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & len);
-	target_terminal_ours ();
-	q =
-	  yquery (_("The next instruction is syscall munmap.  "
-		    "It will free the memory addr = %s len = %u.  "
-		    "It will make record target get error.  "
-		    "Do you want to stop the program?"),
-		  paddress (gdbarch, tmpu32), (int)len);
-	target_terminal_inferior ();
-	if (q)
-	  return 1;
+        regcache_raw_read_unsigned (regcache, tdep->arg1,
+                                    &tmpulongest);
+        regcache_raw_read_unsigned (regcache, tdep->arg2, &len);
+        target_terminal_ours ();
+        q = yquery (_("The next instruction is syscall munmap.  "
+                      "It will free the memory addr = 0x%s len = %u.  "
+                      "It will make record target get error.  "
+                      "Do you want to stop the program?"),
+                    OUTPUT_REG (tmpulongest, tdep->arg1), (int) len);
+        target_terminal_inferior ();
+        if (q)
+          return 1;
       }
       break;
 
@@ -655,292 +821,348 @@ record_linux_system_call (int num, struct regcache *regcache,
     case 99:
       /* sys_fstatfs */
     case 100:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_statfs))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_statfs))
+        return -1;
       break;
 
       /* sys_ioperm */
     case 101:
       break;
 
+      /* sys_socket */
+    case 500:
+      /* sys_sendto */
+    case 503:
+      /* sys_sendmsg */
+    case 505:
+      /* sys_shutdown */
+    case 507:
+      /* sys_bind */
+    case 508:
+      /* sys_connect */
+    case 501:
+      /* sys_listen */
+    case 509:
+      /* sys_setsockopt */
+    case 513:
+      break;
+
+      /* sys_accept */
+    case 502:
+      /* sys_getsockname */
+    case 510:
+      /* sys_getpeername */
+    case 511:
+      {
+        ULONGEST len;
+        regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+        regcache_raw_read_unsigned (regcache, tdep->arg3, &len);
+        if (record_linux_sockaddr (regcache, tdep, tmpulongest, len))
+          return -1;
+      }
+      break;
+
+      /* sys_recvfrom */
+    case 504:
+      {
+        ULONGEST len;
+        regcache_raw_read_unsigned (regcache, tdep->arg4, &tmpulongest);
+        regcache_raw_read_unsigned (regcache, tdep->arg5, &len);
+        if (record_linux_sockaddr (regcache, tdep, tmpulongest, len))
+          return -1;
+      }
+      /* sys_recv */
+    case 515:
+      {
+        ULONGEST size;
+        regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+        regcache_raw_read_unsigned (regcache, tdep->arg3, &size);
+        if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, (int) size))
+          return -1;
+      }
+      break;
+
+      /* sys_recvmsg */
+    case 506:
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_linux_msghdr (regcache, tdep, tmpulongest))
+        return -1;
+      break;
+
+      /* sys_socketpair */
+    case 512:
+      regcache_raw_read_unsigned (regcache, tdep->arg4, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_int))
+        return -1;
+      break;
+
+      /* sys_getsockopt */
+    case 514:
+      regcache_raw_read_unsigned (regcache, tdep->arg5, &tmpulongest);
+      if (tmpulongest)
+        {
+          ULONGEST optvalp;
+          gdb_byte *optlenp = alloca (tdep->size_int);
+          if (target_read_memory ((CORE_ADDR) tmpulongest, optlenp,
+                                  tdep->size_int))
+            {
+              if (record_debug)
+                fprintf_unfiltered (gdb_stdlog,
+                                    "Process record: error reading "
+                                    "memory at addr = 0x%s "
+                                    "len = %d.\n",
+                                    OUTPUT_REG (tmpulongest, tdep->arg5),
+                                    tdep->size_int);
+              return -1;
+            }
+          regcache_raw_read_unsigned (regcache, tdep->arg4, &optvalp);
+          tmpint = (int) extract_signed_integer (optlenp, tdep->size_int,
+                                                 byte_order);
+          if (record_arch_list_add_mem ((CORE_ADDR) optvalp, tmpint))
+            return -1;
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        tdep->size_int))
+            return -1;
+        }
+      break;
+
       /* sys_socketcall */
     case 102:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      switch (tmpu32)
-	{
-	case RECORD_SYS_SOCKET:
-	case RECORD_SYS_BIND:
-	case RECORD_SYS_CONNECT:
-	case RECORD_SYS_LISTEN:
-	  break;
-	case RECORD_SYS_ACCEPT:
-	case RECORD_SYS_GETSOCKNAME:
-	case RECORD_SYS_GETPEERNAME:
-	  {
-	    uint32_t a[3];
-	    regcache_raw_read (regcache, tdep->arg2,
-			       (gdb_byte *) & tmpu32);
-	    if (tmpu32)
-	      {
-		if (target_read_memory (tmpu32, (gdb_byte *) a, sizeof (a)))
-		  {
-		    if (record_debug)
-		      fprintf_unfiltered (gdb_stdlog,
-					  "Process record: error reading "
-					  "memory at addr = %s len = %lu.\n",
-					  paddress (gdbarch, tmpu32),
-					  (unsigned long)sizeof (a));
-		    return -1;
-		  }
-		if (record_arch_list_add_mem (a[1], tdep->size_sockaddr))
-		  return -1;
-		if (record_arch_list_add_mem (a[2], tdep->size_int))
-		  return -1;
-	      }
-	  }
-	  break;
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      switch (tmpulongest)
+        {
+        case RECORD_SYS_SOCKET:
+        case RECORD_SYS_BIND:
+        case RECORD_SYS_CONNECT:
+        case RECORD_SYS_LISTEN:
+          break;
+        case RECORD_SYS_ACCEPT:
+        case RECORD_SYS_GETSOCKNAME:
+        case RECORD_SYS_GETPEERNAME:
+          {
+            regcache_raw_read_unsigned (regcache, tdep->arg2,
+                                        &tmpulongest);
+            if (tmpulongest)
+              {
+                gdb_byte *a = alloca (tdep->size_ulong * 2);
+                int addrlen;
+                gdb_byte *addrlenp;
+                ULONGEST len;
 
-	case RECORD_SYS_SOCKETPAIR:
-	  {
-	    uint32_t a[4];
-	    regcache_raw_read (regcache, tdep->arg2,
-			       (gdb_byte *) & tmpu32);
-	    if (tmpu32)
-	      {
-		if (target_read_memory (tmpu32, (gdb_byte *) a, sizeof (a)))
-		  {
-		    if (record_debug)
-		      fprintf_unfiltered (gdb_stdlog,
-					  "Process record: error reading "
-					  "memory at addr = %s len = %lu.\n",
-					  paddress (gdbarch, tmpu32),
-				          (unsigned long)sizeof (a));
-		    return -1;
-		  }
-		if (record_arch_list_add_mem (a[3], tdep->size_int))
-		  return -1;
-	      }
-	  }
-	  break;
-	case RECORD_SYS_SEND:
-	case RECORD_SYS_SENDTO:
-	  break;
-	case RECORD_SYS_RECV:
-	  {
-	    uint32_t a[3];
-	    regcache_raw_read (regcache, tdep->arg2,
-			       (gdb_byte *) & tmpu32);
-	    if (tmpu32)
-	      {
-		if (target_read_memory (tmpu32, (gdb_byte *) a, sizeof (a)))
-		  {
-		    if (record_debug)
-		      fprintf_unfiltered (gdb_stdlog,
-					  "Process record: error reading "
-					  "memory at addr = %s len = %lu.\n",
-					  paddress (gdbarch, tmpu32),
-					  (unsigned long)sizeof (a));
-		    return -1;
-		  }
-		if (a[2])
-		  {
-		    if (target_read_memory
-			(a[2], (gdb_byte *) & (a[2]), sizeof (a[2])))
-		      {
-			if (record_debug)
-			  fprintf_unfiltered (gdb_stdlog,
-					      "Process record: error reading "
-					      "memory at addr = %s "
-					      "len = %lu.\n",
-					      paddress (gdbarch, a[2]),
-					      (unsigned long)sizeof (a[2]));
-			return -1;
-		      }
-		    if (record_arch_list_add_mem (a[1], a[2]))
-		      return -1;
-		  }
-	      }
-	  }
-	  break;
-	case RECORD_SYS_RECVFROM:
-	  {
-	    uint32_t a[6];
-	    regcache_raw_read (regcache, tdep->arg2,
-			       (gdb_byte *) & tmpu32);
-	    if (tmpu32)
-	      {
-		if (target_read_memory (tmpu32, (gdb_byte *) a, sizeof (a)))
-		  {
-		    if (record_debug)
-		      fprintf_unfiltered (gdb_stdlog,
-					  "Process record: error reading "
-					  "memory at addr = %s len = %lu.\n",
-					  paddress (gdbarch, tmpu32),
-					  (unsigned long)sizeof (a));
-		    return -1;
-		  }
-		if (a[2])
-		  {
-		    if (target_read_memory
-			(a[2], (gdb_byte *) & (a[2]), sizeof (a[2])))
-		      {
-			if (record_debug)
-			  fprintf_unfiltered (gdb_stdlog,
-					      "Process record: error reading "
-					      "memory at addr = %s "
-					      "len = %lu.\n",
-					      paddress (gdbarch, a[2]),
-					      (unsigned long)sizeof (a[2]));
-			return -1;
-		      }
-		    if (record_arch_list_add_mem (a[1], a[2]))
-		      return -1;
-		    if (record_arch_list_add_mem (a[4], tdep->size_sockaddr))
-		      return -1;
-		    if (record_arch_list_add_mem (a[5], tdep->size_int))
-		      return -1;
-		  }
-	      }
-	  }
-	  break;
-	case RECORD_SYS_SHUTDOWN:
-	case RECORD_SYS_SETSOCKOPT:
-	  break;
-	case RECORD_SYS_GETSOCKOPT:
-	  {
-	    uint32_t a[5];
-	    uint32_t av;
+                tmpulongest += tdep->size_ulong;
+                if (target_read_memory ((CORE_ADDR) tmpulongest, a,
+                                        tdep->size_ulong * 2))
+                  {
+                    if (record_debug)
+                      fprintf_unfiltered (gdb_stdlog,
+                                          "Process record: error reading "
+                                          "memory at addr = 0x%s len = %d.\n",
+                                          OUTPUT_REG (tmpulongest, tdep->arg2),
+                                          tdep->size_ulong * 2);
+                    return -1;
+                  }
+                tmpulongest = extract_unsigned_integer (a,
+                                                        tdep->size_ulong,
+                                                        byte_order);
+                len = extract_unsigned_integer (a + tdep->size_ulong,
+                                                tdep->size_ulong, byte_order);
+                if (record_linux_sockaddr (regcache, tdep, tmpulongest, len))
+                  return -1;
+              }
+          }
+          break;
 
-	    regcache_raw_read (regcache, tdep->arg2,
-			       (gdb_byte *) & tmpu32);
-	    if (tmpu32)
-	      {
-		if (target_read_memory (tmpu32, (gdb_byte *) a, sizeof (a)))
-		  {
-		    if (record_debug)
-		      fprintf_unfiltered (gdb_stdlog,
-					  "Process record: error reading "
-					  "memory at addr = %s len = %lu.\n",
-					  paddress (gdbarch, tmpu32),
-					  (unsigned long)sizeof (a));
-		    return -1;
-		  }
-		if (a[4])
-		  {
-		    if (target_read_memory
-			(a[4], (gdb_byte *) & av, sizeof (av)))
-		      {
-			if (record_debug)
-			  fprintf_unfiltered (gdb_stdlog,
-					      "Process record: error reading "
-					      "memory at addr = %s "
-					      "len = %lu.\n",
-					      paddress (gdbarch, a[4]),
-					      (unsigned long)sizeof (av));
-			return -1;
-		      }
-		    if (record_arch_list_add_mem (a[3], av))
-		      return -1;
-		    if (record_arch_list_add_mem (a[4], tdep->size_int))
-		      return -1;
-		  }
-	      }
-	  }
-	  break;
-	case RECORD_SYS_SENDMSG:
-	  break;
-	case RECORD_SYS_RECVMSG:
-	  {
-	    uint32_t a[2], i;
-	    struct record_msghdr
-	    {
-	      uint32_t msg_name;
-	      uint32_t msg_namelen;
-	      uint32_t msg_iov;
-	      uint32_t msg_iovlen;
-	      uint32_t msg_control;
-	      uint32_t msg_controllen;
-	      uint32_t msg_flags;
-	    } rec;
-	    struct record_iovec
-	    {
-	      uint32_t iov_base;
-	      uint32_t iov_len;
-	    } iov;
+        case RECORD_SYS_SOCKETPAIR:
+          {
+            gdb_byte *a = alloca (tdep->size_ulong);
+            regcache_raw_read_unsigned (regcache, tdep->arg2,
+                                        &tmpulongest);
+            if (tmpulongest)
+              {
+                tmpulongest += tdep->size_ulong * 3;
+                if (target_read_memory ((CORE_ADDR) tmpulongest, a,
+                                        tdep->size_ulong))
+                  {
+                    if (record_debug)
+                      fprintf_unfiltered (gdb_stdlog,
+                                          "Process record: error reading "
+                                          "memory at addr = 0x%s len = %d.\n",
+                                          OUTPUT_REG (tmpulongest, tdep->arg2),
+                                          tdep->size_ulong);
+                    return -1;
+                  }
+                tmpaddr
+                  = (CORE_ADDR) extract_unsigned_integer (a, tdep->size_ulong,
+                                                          byte_order);
+                if (record_arch_list_add_mem (tmpaddr, tdep->size_int))
+                  return -1;
+              }
+          }
+          break;
+        case RECORD_SYS_SEND:
+        case RECORD_SYS_SENDTO:
+          break;
+        case RECORD_SYS_RECVFROM:
+          regcache_raw_read_unsigned (regcache, tdep->arg2,
+                                      &tmpulongest);
+          if (tmpulongest)
+            {
+              gdb_byte *a = alloca (tdep->size_ulong * 2);
+              int addrlen;
+              gdb_byte *addrlenp;
+              ULONGEST len;
 
-	    regcache_raw_read (regcache, tdep->arg2,
-			       (gdb_byte *) & tmpu32);
-	    if (tmpu32)
-	      {
-		if (target_read_memory (tmpu32, (gdb_byte *) a, sizeof (a)))
-		  {
-		    if (record_debug)
-		      fprintf_unfiltered (gdb_stdlog,
-					  "Process record: error reading "
-					  "memory at addr = %s len = %lu.\n",
-					  paddress (gdbarch, tmpu32),
-					  (unsigned long)sizeof (a));
-		    return -1;
-		  }
-		if (record_arch_list_add_mem (a[1], tdep->size_msghdr))
-		  return -1;
-		if (a[1])
-		  {
-		    if (target_read_memory
-			(a[1], (gdb_byte *) & rec, sizeof (rec)))
-		      {
-			if (record_debug)
-			  fprintf_unfiltered (gdb_stdlog,
-					      "Process record: error reading "
-					      "memory at addr = %s "
-					      "len = %lu.\n",
-					      paddress (gdbarch, a[1]),
-					      (unsigned long)sizeof (rec));
-			return -1;
-		      }
-		    if (record_arch_list_add_mem
-			(rec.msg_name, rec.msg_namelen))
-		      return -1;
-		    if (record_arch_list_add_mem
-			(rec.msg_control, rec.msg_controllen))
-		      return -1;
-		    if (rec.msg_iov)
-		      {
-			for (i = 0; i < rec.msg_iovlen; i++)
-			  {
-			    if (target_read_memory
-				(rec.msg_iov, (gdb_byte *) & iov,
-				 sizeof (iov)))
-			      {
-				if (record_debug)
-				  fprintf_unfiltered (gdb_stdlog,
-						      "Process record: error "
-						      "reading memory at "
-						      "addr = %s "
-						      "len = %lu.\n",
-						      paddress (gdbarch,
-								rec.msg_iov),
-						      (unsigned long)sizeof (iov));
-				return -1;
-			      }
-			    if (record_arch_list_add_mem
-				(iov.iov_base, iov.iov_len))
-			      return -1;
-			    rec.msg_iov += sizeof (struct record_iovec);
-			  }
-		      }
-		  }
-	      }
-	  }
-	  break;
-	default:
-	  printf_unfiltered (_("Process record and replay target "
-			       "doesn't support socketcall call 0x%s\n"),
-			     phex_nz (tmpu32, 4));
-	  return -1;
-	  break;
-	}
+              tmpulongest += tdep->size_ulong * 4;
+              if (target_read_memory ((CORE_ADDR) tmpulongest, a,
+                                      tdep->size_ulong * 2))
+                {
+                  if (record_debug)
+                    fprintf_unfiltered (gdb_stdlog,
+                                        "Process record: error reading "
+                                        "memory at addr = 0x%s len = %d.\n",
+                                        OUTPUT_REG (tmpulongest, tdep->arg2),
+                                        tdep->size_ulong * 2);
+                  return -1;
+                }
+              tmpulongest = extract_unsigned_integer (a, tdep->size_ulong,
+                                                      byte_order);
+              len = extract_unsigned_integer (a + tdep->size_ulong,
+                                              tdep->size_ulong, byte_order);
+              if (record_linux_sockaddr (regcache, tdep, tmpulongest, len))
+                return -1;
+            }
+        case RECORD_SYS_RECV:
+          regcache_raw_read_unsigned (regcache, tdep->arg2,
+                                      &tmpulongest);
+          if (tmpulongest)
+            {
+              gdb_byte *a = alloca (tdep->size_ulong * 2);
+
+              tmpulongest += tdep->size_ulong;
+              if (target_read_memory ((CORE_ADDR) tmpulongest, a,
+                                      tdep->size_ulong))
+                {
+                  if (record_debug)
+                    fprintf_unfiltered (gdb_stdlog,
+                                        "Process record: error reading "
+                                        "memory at addr = 0x%s len = %d.\n",
+                                        OUTPUT_REG (tmpulongest, tdep->arg2),
+                                        tdep->size_ulong);
+                    return -1;
+                }
+              tmpulongest = extract_unsigned_integer (a, tdep->size_ulong,
+                                                      byte_order);
+              if (tmpulongest)
+                {
+                  a += tdep->size_ulong;
+                  tmpint = (int) extract_unsigned_integer (a, tdep->size_ulong,
+                                                           byte_order);
+                  if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                                tmpint))
+                    return -1;
+                }
+            }
+          break;
+        case RECORD_SYS_SHUTDOWN:
+        case RECORD_SYS_SETSOCKOPT:
+          break;
+        case RECORD_SYS_GETSOCKOPT:
+          {
+            gdb_byte *a = alloca (tdep->size_ulong * 2);
+            gdb_byte *av = alloca (tdep->size_int);
+
+            regcache_raw_read_unsigned (regcache, tdep->arg2,
+                                        &tmpulongest);
+            if (tmpulongest)
+              {
+                tmpulongest += tdep->size_ulong * 3;
+                if (target_read_memory ((CORE_ADDR) tmpulongest, a,
+                                        tdep->size_ulong * 2))
+                  {
+                    if (record_debug)
+                      fprintf_unfiltered (gdb_stdlog,
+                                          "Process record: error reading "
+                                          "memory at addr = 0x%s len = %d.\n",
+                                          OUTPUT_REG (tmpulongest, tdep->arg2),
+                                          tdep->size_ulong * 2);
+                    return -1;
+                  }
+                tmpulongest = extract_unsigned_integer (a + tdep->size_ulong,
+                                                        tdep->size_ulong,
+                                                        byte_order);
+                if (tmpulongest)
+                  {
+                    if (target_read_memory ((CORE_ADDR) tmpulongest, av,
+                                            tdep->size_int))
+                      {
+                        if (record_debug)
+                          fprintf_unfiltered (gdb_stdlog,
+                                              "Process record: error reading "
+                                              "memory at addr = 0x%s "
+                                              "len = %d.\n",
+                                              phex_nz (tmpulongest,
+                                                       tdep->size_ulong),
+                                              tdep->size_int);
+                        return -1;
+                      }
+                    tmpaddr
+                      = (CORE_ADDR) extract_unsigned_integer (a,
+                                                              tdep->size_ulong,
+                                                              byte_order);
+                    tmpint = (int) extract_unsigned_integer (av,
+                                                             tdep->size_int,
+                                                             byte_order);
+                    if (record_arch_list_add_mem (tmpaddr, tmpint))
+                      return -1;
+                    a += tdep->size_ulong;
+                    tmpaddr
+                      = (CORE_ADDR) extract_unsigned_integer (a,
+                                                              tdep->size_ulong,
+                                                              byte_order);
+                    if (record_arch_list_add_mem (tmpaddr, tdep->size_int))
+                      return -1;
+                  }
+              }
+          }
+          break;
+        case RECORD_SYS_SENDMSG:
+          break;
+        case RECORD_SYS_RECVMSG:
+          {
+            gdb_byte *a = alloca (tdep->size_ulong);
+
+            regcache_raw_read_unsigned (regcache, tdep->arg2,
+                                        &tmpulongest);
+            if (tmpulongest)
+              {
+                tmpulongest += tdep->size_ulong;
+                if (target_read_memory ((CORE_ADDR) tmpulongest, a,
+                                        tdep->size_ulong))
+                  {
+                    if (record_debug)
+                      fprintf_unfiltered (gdb_stdlog,
+                                          "Process record: error reading "
+                                          "memory at addr = 0x%s len = %d.\n",
+                                          OUTPUT_REG (tmpulongest, tdep->arg2),
+                                          tdep->size_ulong);
+                    return -1;
+                  }
+                tmpulongest = extract_unsigned_integer (a, tdep->size_ulong,
+                                                        byte_order);
+                if (record_linux_msghdr (regcache, tdep, tmpulongest))
+                  return -1;
+              }
+          }
+          break;
+        default:
+          printf_unfiltered (_("Process record and replay target "
+                               "doesn't support socketcall call 0x%s\n"),
+                             OUTPUT_REG (tmpulongest, tdep->arg1));
+          return -1;
+          break;
+        }
       break;
 
       /* sys_syslog */
@@ -949,16 +1171,18 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_setitimer */
     case 104:
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_itimerval))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_itimerval))
+        return -1;
       break;
 
       /* sys_getitimer */
     case 105:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_itimerval))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_itimerval))
+        return -1;
       break;
 
       /* sys_newstat */
@@ -967,16 +1191,19 @@ record_linux_system_call (int num, struct regcache *regcache,
     case 107:
       /* sys_newfstat */
     case 108:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_stat))
-	return -1;
+      /* sys_newfstatat */
+    case 540:
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_stat))
+        return -1;
       break;
 
       /* sys_uname */
     case 109:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_old_utsname))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_old_utsname))
+        return -1;
       break;
 
       /* sys_iopl */
@@ -991,12 +1218,14 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_wait4 */
     case 114:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_int))
-	return -1;
-      regcache_raw_read (regcache, tdep->arg4, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_rusage))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_int))
+        return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg4, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_rusage))
+        return -1;
       break;
 
       /* sys_swapoff */
@@ -1005,47 +1234,121 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_sysinfo */
     case 116:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_sysinfo))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_sysinfo))
+        return -1;
+      break;
+
+      /* sys_shmget */
+    case 520:
+      /* sys_semget */
+    case 523:
+      /* sys_semop */
+    case 524:
+      /* sys_msgget */
+    case 528:
+      /* sys_shmdt */
+      /* XXX maybe need do some record works with sys_shmdt.  */
+    case 527:
+      /* sys_msgsnd */
+    case 529:
+      /* sys_semtimedop */
+    case 532:
+      break;
+
+      /* sys_shmat */
+    case 521:
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_ulong))
+        return -1;
+      break;
+
+      /* sys_shmctl */
+    case 522:
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_shmid_ds))
+        return -1;
+      break;
+
+      /* sys_semctl */
+      /* XXX sys_semctl 525 still not support.  */
+
+      /* sys_msgrcv */
+    case 530:
+      {
+        ULONGEST msgp;
+        regcache_raw_read_signed (regcache, tdep->arg3, &tmpulongest);
+        regcache_raw_read_unsigned (regcache, tdep->arg2, &msgp);
+        tmpint = (int) tmpulongest + tdep->size_long;
+        if (record_arch_list_add_mem ((CORE_ADDR) msgp, tmpint))
+          return -1;
+      }
+      break;
+
+      /* sys_msgctl */
+    case 531:
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_msqid_ds))
+        return -1;
       break;
 
       /* sys_ipc */
     case 117:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      switch (tmpu32)
-	{
-	case RECORD_MSGRCV:
-	  {
-	    int32_t second;
-	    uint32_t ptr;
-	    regcache_raw_read (regcache, tdep->arg3,
-			       (gdb_byte *) & second);
-	    regcache_raw_read (regcache, tdep->arg5,
-			       (gdb_byte *) & ptr);
-	    if (record_arch_list_add_mem (ptr, second + tdep->size_long))
-	      return -1;
-	  }
-	  break;
-	case RECORD_MSGCTL:
-	  regcache_raw_read (regcache, tdep->arg5,
-			     (gdb_byte *) & tmpu32);
-	  if (record_arch_list_add_mem (tmpu32, tdep->size_msqid_ds))
-	    return -1;
-	  break;
-	case RECORD_SHMAT:
-	  regcache_raw_read (regcache, tdep->arg4,
-			     (gdb_byte *) & tmpu32);
-	  if (record_arch_list_add_mem (tmpu32, tdep->size_ulong))
-	    return -1;
-	  break;
-	case RECORD_SHMCTL:
-	  regcache_raw_read (regcache, tdep->arg5,
-			     (gdb_byte *) & tmpu32);
-	  if (record_arch_list_add_mem (tmpu32, tdep->size_shmid_ds))
-	    return -1;
-	  break;
-	}
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      tmpulongest &= 0xffff;
+      switch (tmpulongest)
+        {
+        case RECORD_SEMOP:
+        case RECORD_SEMGET:
+        case RECORD_SEMTIMEDOP:
+        case RECORD_MSGSND:
+        case RECORD_MSGGET:
+          /* XXX maybe need do some record works with RECORD_SHMDT.  */
+        case RECORD_SHMDT:
+        case RECORD_SHMGET:
+          break;
+        case RECORD_MSGRCV:
+          {
+            ULONGEST second;
+            ULONGEST ptr;
+            regcache_raw_read_signed (regcache, tdep->arg3, &second);
+            regcache_raw_read_unsigned (regcache, tdep->arg5, &ptr);
+            tmpint = (int) second + tdep->size_long;
+            if (record_arch_list_add_mem ((CORE_ADDR) ptr, tmpint))
+              return -1;
+          }
+          break;
+        case RECORD_MSGCTL:
+          regcache_raw_read_unsigned (regcache, tdep->arg5,
+                                      &tmpulongest);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        tdep->size_msqid_ds))
+            return -1;
+          break;
+        case RECORD_SHMAT:
+          regcache_raw_read_unsigned (regcache, tdep->arg4,
+                                      &tmpulongest);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        tdep->size_ulong))
+            return -1;
+          break;
+        case RECORD_SHMCTL:
+          regcache_raw_read_unsigned (regcache, tdep->arg5,
+                                      &tmpulongest);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        tdep->size_shmid_ds))
+            return -1;
+          break;
+        default:
+          /* XXX RECORD_SEMCTL still not support.  */
+          printf_unfiltered (_("Process record and replay target doesn't "
+                               "support ipc number %d\n"), (int) tmpulongest);
+          break;
+        }
       break;
 
       /* sys_fsync */
@@ -1060,30 +1363,30 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_newuname */
     case 122:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_new_utsname))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_new_utsname))
+        return -1;
       break;
 
       /* sys_modify_ldt */
     case 123:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (tmpu32 == 0 || tmpu32 == 2)
-	{
-	  uint32_t ptr, bytecount;
-	  regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & ptr);
-	  regcache_raw_read (regcache, tdep->arg3,
-			     (gdb_byte *) & bytecount);
-	  if (record_arch_list_add_mem (ptr, bytecount))
-	    return -1;
-	}
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (tmpulongest == 0 || tmpulongest == 2)
+        {
+          ULONGEST ptr, bytecount;
+          regcache_raw_read_unsigned (regcache, tdep->arg2, &ptr);
+          regcache_raw_read_unsigned (regcache, tdep->arg3, &bytecount);
+          if (record_arch_list_add_mem ((CORE_ADDR) ptr, (int) bytecount))
+            return -1;
+        }
       break;
 
       /* sys_adjtimex */
     case 124:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_timex))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_timex))
+        return -1;
       break;
 
       /* sys_mprotect */
@@ -1092,9 +1395,10 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_sigprocmask */
     case 126:
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_old_sigset_t))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_old_sigset_t))
+        return -1;
       break;
 
       /* sys_ni_syscall */
@@ -1109,35 +1413,39 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_quotactl */
     case 131:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      switch (tmpu32)
-	{
-	case RECORD_Q_GETFMT:
-	  regcache_raw_read (regcache, tdep->arg4,
-			     (gdb_byte *) & tmpu32);
-	  if (record_arch_list_add_mem (tmpu32, 4))
-	    return -1;
-	  break;
-	case RECORD_Q_GETINFO:
-	  regcache_raw_read (regcache, tdep->arg4,
-			     (gdb_byte *) & tmpu32);
-	  if (record_arch_list_add_mem (tmpu32, tdep->size_mem_dqinfo))
-	    return -1;
-	  break;
-	case RECORD_Q_GETQUOTA:
-	  regcache_raw_read (regcache, tdep->arg4,
-			     (gdb_byte *) & tmpu32);
-	  if (record_arch_list_add_mem (tmpu32, tdep->size_if_dqblk))
-	    return -1;
-	  break;
-	case RECORD_Q_XGETQSTAT:
-	case RECORD_Q_XGETQUOTA:
-	  regcache_raw_read (regcache, tdep->arg4,
-			     (gdb_byte *) & tmpu32);
-	  if (record_arch_list_add_mem (tmpu32, tdep->size_fs_quota_stat))
-	    return -1;
-	  break;
-	}
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      switch (tmpulongest)
+        {
+        case RECORD_Q_GETFMT:
+          regcache_raw_read_unsigned (regcache, tdep->arg4,
+                                      &tmpulongest);
+          /* __u32 */
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, 4))
+            return -1;
+          break;
+        case RECORD_Q_GETINFO:
+          regcache_raw_read_unsigned (regcache, tdep->arg4,
+                                      &tmpulongest);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        tdep->size_mem_dqinfo))
+            return -1;
+          break;
+        case RECORD_Q_GETQUOTA:
+          regcache_raw_read_unsigned (regcache, tdep->arg4,
+                                      &tmpulongest);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        tdep->size_if_dqblk))
+            return -1;
+          break;
+        case RECORD_Q_XGETQSTAT:
+        case RECORD_Q_XGETQUOTA:
+          regcache_raw_read_unsigned (regcache, tdep->arg4,
+                                      &tmpulongest);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        tdep->size_fs_quota_stat))
+            return -1;
+          break;
+        }
       break;
 
       /* sys_getpgid */
@@ -1150,15 +1458,15 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_sysfs */
     case 135:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (tmpu32 == 2)
-	{
-	  regcache_raw_read (regcache, tdep->arg3,
-			     (gdb_byte *) & tmpu32);
-	  /*XXX the size of memory is not very clear.  */
-	  if (record_arch_list_add_mem (tmpu32, 10))
-	    return -1;
-	}
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (tmpulongest == 2)
+        {
+          regcache_raw_read_unsigned (regcache, tdep->arg3,
+                                      &tmpulongest);
+          /*XXX the size of memory is not very clear.  */
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, 10))
+            return -1;
+        }
       break;
 
       /* sys_personality */
@@ -1173,37 +1481,43 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_llseek */
     case 140:
-      regcache_raw_read (regcache, tdep->arg4, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_loff_t))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg4, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_loff_t))
+        return -1;
       break;
 
       /* sys_getdents */
     case 141:
       {
-	uint32_t count;
-	regcache_raw_read (regcache, tdep->arg2,
-			   (gdb_byte *) & tmpu32);
-	regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & count);
-	if (record_arch_list_add_mem (tmpu32, tdep->size_dirent * count))
-	  return -1;
+        ULONGEST count;
+        regcache_raw_read_unsigned (regcache, tdep->arg2,
+                                    &tmpulongest);
+        regcache_raw_read_unsigned (regcache, tdep->arg3, &count);
+        if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                      tdep->size_dirent * count))
+          return -1;
       }
       break;
 
       /* sys_select */
     case 142:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_fd_set))
-	return -1;
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_fd_set))
-	return -1;
-      regcache_raw_read (regcache, tdep->arg4, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_fd_set))
-	return -1;
-      regcache_raw_read (regcache, tdep->arg5, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_timeval))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_fd_set))
+        return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_fd_set))
+        return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg4, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_fd_set))
+        return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg5, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_timeval))
+        return -1;
       break;
 
       /* sys_flock */
@@ -1215,36 +1529,40 @@ record_linux_system_call (int num, struct regcache *regcache,
       /* sys_readv */
     case 145:
       {
-	uint32_t vec;
-	uint32_t vlen;
-	struct record_iovec
-	{
-	  uint32_t iov_base;
-	  uint32_t iov_len;
-	} iov;
-	regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & vec);
-	if (vec)
-	  {
-	    regcache_raw_read (regcache, tdep->arg3,
-			       (gdb_byte *) & vlen);
-	    for (tmpu32 = 0; tmpu32 < vlen; tmpu32++)
-	      {
-		if (target_read_memory
-		    (vec, (gdb_byte *) & iov, sizeof (struct record_iovec)))
-		  {
-		    if (record_debug)
-		      fprintf_unfiltered (gdb_stdlog,
-					  "Process record: error reading "
-					  "memory at addr = %s len = %lu.\n",
-					  paddress (gdbarch, vec),
-					  (unsigned long)sizeof (struct record_iovec));
-		    return -1;
-		  }
-		if (record_arch_list_add_mem (iov.iov_base, iov.iov_len))
-		  return -1;
-		vec += sizeof (struct record_iovec);
-	      }
-	  }
+        ULONGEST vec, vlen;
+
+        regcache_raw_read_unsigned (regcache, tdep->arg2, &vec);
+        if (vec)
+          {
+            gdb_byte *iov = alloca (tdep->size_iovec);
+
+            regcache_raw_read_unsigned (regcache, tdep->arg3, &vlen);
+            for (tmpulongest = 0; tmpulongest < vlen; tmpulongest++)
+              {
+                if (target_read_memory ((CORE_ADDR) vec, iov,
+                                        tdep->size_iovec))
+                  {
+                    if (record_debug)
+                      fprintf_unfiltered (gdb_stdlog,
+                                          "Process record: error reading "
+                                          "memory at addr = 0x%s len = %d.\n",
+                                          OUTPUT_REG (vec, tdep->arg2),
+                                          tdep->size_iovec);
+                    return -1;
+                  }
+                tmpaddr
+                  = (CORE_ADDR) extract_unsigned_integer (iov,
+                                                          tdep->size_pointer,
+                                                          byte_order);
+                tmpint
+                  = (int) extract_unsigned_integer (iov + tdep->size_pointer,
+                                                    tdep->size_size_t,
+                                                    byte_order);
+                if (record_arch_list_add_mem (tmpaddr, tmpint))
+                  return -1;
+                vec += tdep->size_iovec;
+              }
+          }
       }
       break;
 
@@ -1270,9 +1588,9 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_sched_getparam */
     case 155:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_int))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_int))
+        return -1;
       break;
 
       /* sys_sched_setscheduler */
@@ -1291,9 +1609,10 @@ record_linux_system_call (int num, struct regcache *regcache,
     case 161:
       /* sys_nanosleep */
     case 162:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_timespec))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_timespec))
+        return -1;
       break;
 
       /* sys_mremap */
@@ -1304,15 +1623,18 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_getresuid16 */
     case 165:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_old_uid_t))
-	return -1;
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_old_uid_t))
-	return -1;
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_old_uid_t))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_old_uid_t))
+        return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_old_uid_t))
+        return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_old_uid_t))
+        return -1;
       break;
 
       /* sys_vm86 */
@@ -1323,32 +1645,32 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_poll */
     case 168:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (tmpu32)
-	{
-	  uint32_t nfds;
-	  regcache_raw_read (regcache, tdep->arg2,
-			     (gdb_byte *) & nfds);
-	  if (record_arch_list_add_mem (tmpu32, tdep->size_pollfd * nfds))
-	    return -1;
-	}
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (tmpulongest)
+        {
+          ULONGEST nfds;
+          regcache_raw_read_unsigned (regcache, tdep->arg2, &nfds);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        tdep->size_pollfd * nfds))
+            return -1;
+        }
       break;
 
       /* sys_nfsservctl */
     case 169:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (tmpu32 == 7 || tmpu32 == 8)
-	{
-	  uint32_t rsize;
-	  if (tmpu32 == 7)
-	    rsize = tdep->size_NFS_FHSIZE;
-	  else
-	    rsize = tdep->size_knfsd_fh;
-	  regcache_raw_read (regcache, tdep->arg3,
-			     (gdb_byte *) & tmpu32);
-	  if (record_arch_list_add_mem (tmpu32, rsize))
-	    return -1;
-	}
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (tmpulongest == 7 || tmpulongest == 8)
+        {
+          int rsize;
+          if (tmpulongest == 7)
+            rsize = tdep->size_NFS_FHSIZE;
+          else
+            rsize = tdep->size_knfsd_fh;
+          regcache_raw_read_unsigned (regcache, tdep->arg3,
+                                      &tmpulongest);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, rsize))
+            return -1;
+        }
       break;
 
       /* sys_setresgid16 */
@@ -1357,35 +1679,40 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_getresgid16 */
     case 171:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_old_gid_t))
-	return -1;
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_old_gid_t))
-	return -1;
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_old_gid_t))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_old_gid_t))
+        return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_old_gid_t))
+        return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_old_gid_t))
+        return -1;
       break;
 
       /* sys_prctl */
     case 172:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      switch (tmpu32)
-	{
-	case 2:
-	  regcache_raw_read (regcache, tdep->arg2,
-			     (gdb_byte *) & tmpu32);
-	  if (record_arch_list_add_mem (tmpu32, tdep->size_int))
-	    return -1;
-	  break;
-	case 16:
-	  regcache_raw_read (regcache, tdep->arg2,
-			     (gdb_byte *) & tmpu32);
-	  if (record_arch_list_add_mem (tmpu32, tdep->size_TASK_COMM_LEN))
-	    return -1;
-	  break;
-	}
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      switch (tmpulongest)
+        {
+        case 2:
+          regcache_raw_read_unsigned (regcache, tdep->arg2,
+                                      &tmpulongest);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        tdep->size_int))
+            return -1;
+          break;
+        case 16:
+          regcache_raw_read_unsigned (regcache, tdep->arg2,
+                                      &tmpulongest);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        tdep->size_TASK_COMM_LEN))
+            return -1;
+          break;
+        }
       break;
 
       /* sys_rt_sigreturn */
@@ -1394,36 +1721,39 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_rt_sigaction */
     case 174:
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_sigaction))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_sigaction))
+        return -1;
       break;
 
       /* sys_rt_sigprocmask */
     case 175:
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_sigset_t))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_sigset_t))
+        return -1;
       break;
 
       /* sys_rt_sigpending */
     case 176:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (tmpu32)
-	{
-	  uint32_t sigsetsize;
-	  regcache_raw_read (regcache, tdep->arg2,
-			     (gdb_byte *) & sigsetsize);
-	  if (record_arch_list_add_mem (tmpu32, sigsetsize))
-	    return -1;
-	}
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (tmpulongest)
+        {
+          ULONGEST sigsetsize;
+          regcache_raw_read_unsigned (regcache, tdep->arg2,&sigsetsize);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        (int) sigsetsize))
+            return -1;
+        }
       break;
 
       /* sys_rt_sigtimedwait */
     case 177:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_siginfo_t))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_siginfo_t))
+        return -1;
       break;
 
       /* sys_rt_sigqueueinfo */
@@ -1434,15 +1764,14 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_pread64 */
     case 180:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (tmpu32)
-	{
-	  uint32_t count;
-	  regcache_raw_read (regcache, tdep->arg3,
-			     (gdb_byte *) & count);
-	  if (record_arch_list_add_mem (tmpu32, count))
-	    return -1;
-	}
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (tmpulongest)
+        {
+          ULONGEST count;
+          regcache_raw_read_unsigned (regcache, tdep->arg3,&count);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, (int) count))
+            return -1;
+        }
       break;
 
       /* sys_pwrite64 */
@@ -1453,22 +1782,22 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_getcwd */
     case 183:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (tmpu32)
-	{
-	  uint32_t size;
-	  regcache_raw_read (regcache, tdep->arg2,
-			     (gdb_byte *) & size);
-	  if (record_arch_list_add_mem (tmpu32, size))
-	    return -1;
-	}
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (tmpulongest)
+        {
+          ULONGEST size;
+          regcache_raw_read_unsigned (regcache, tdep->arg2, &size);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, (int) size))
+            return -1;
+        }
       break;
 
       /* sys_capget */
     case 184:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_cap_user_data_t))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_cap_user_data_t))
+        return -1;
       break;
 
       /* sys_capset */
@@ -1477,16 +1806,18 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_sigaltstack */
     case 186:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_stack_t))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_stack_t))
+        return -1;
       break;
 
       /* sys_sendfile */
     case 187:
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_off_t))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_off_t))
+        return -1;
       break;
 
       /* sys_ni_syscall */
@@ -1499,9 +1830,10 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_getrlimit */
     case 191:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_rlimit))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_rlimit))
+        return -1;
       break;
 
       /* sys_mmap2 */
@@ -1520,9 +1852,10 @@ record_linux_system_call (int num, struct regcache *regcache,
     case 196:
       /* sys_fstat64 */
     case 197:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_stat64))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_stat64))
+        return -1;
       break;
 
       /* sys_lchown */
@@ -1543,16 +1876,16 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_getgroups */
     case 205:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (tmpu32)
-	{
-	  int gidsetsize;
-	  regcache_raw_read (regcache, tdep->arg1,
-			     (gdb_byte *) & gidsetsize);
-	  if (record_arch_list_add_mem
-	      (tmpu32, tdep->size_gid_t * gidsetsize))
-	    return -1;
-	}
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (tmpulongest)
+        {
+          ULONGEST gidsetsize;
+          regcache_raw_read_unsigned (regcache, tdep->arg1,
+                                      &gidsetsize);
+          tmpint = tdep->size_gid_t * (int) gidsetsize;
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tmpint))
+            return -1;
+        }
       break;
 
       /* sys_setgroups */
@@ -1565,15 +1898,15 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_getresuid */
     case 209:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_uid_t))
-	return -1;
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_uid_t))
-	return -1;
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_uid_t))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_uid_t))
+        return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_uid_t))
+        return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_uid_t))
+        return -1;
       break;
 
       /* sys_setresgid */
@@ -1582,15 +1915,15 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_getresgid */
     case 211:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_gid_t))
-	return -1;
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_gid_t))
-	return -1;
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_gid_t))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_gid_t))
+        return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_gid_t))
+        return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_gid_t))
+        return -1;
       break;
 
       /* sys_chown */
@@ -1609,9 +1942,10 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_mincore */
     case 218:
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_PAGE_SIZE))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_PAGE_SIZE))
+        return -1;
       break;
 
       /* sys_madvise */
@@ -1621,30 +1955,32 @@ record_linux_system_call (int num, struct regcache *regcache,
       /* sys_getdents64 */
     case 220:
       {
-	uint32_t count;
-	regcache_raw_read (regcache, tdep->arg2,
-			   (gdb_byte *) & tmpu32);
-	regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & count);
-	if (record_arch_list_add_mem (tmpu32, tdep->size_dirent64 * count))
-	  return -1;
+        ULONGEST count;
+        regcache_raw_read_unsigned (regcache, tdep->arg2,
+                                    &tmpulongest);
+        regcache_raw_read_unsigned (regcache, tdep->arg3, &count);
+        if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                      tdep->size_dirent64 * count))
+          return -1;
       }
       break;
 
       /* sys_fcntl64 */
     case 221:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (tmpu32 == tdep->fcntl_F_GETLK64)
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (tmpulongest == tdep->fcntl_F_GETLK64)
         {
-	  regcache_raw_read (regcache, tdep->arg3,
-			     (gdb_byte *) & tmpu32);
-	  if (record_arch_list_add_mem (tmpu32, tdep->size_flock64))
-	    return -1;
-	}
-      else if (tmpu32 != tdep->fcntl_F_SETLK64
-	       && tmpu32 != tdep->fcntl_F_SETLKW64)
+          regcache_raw_read_unsigned (regcache, tdep->arg3,
+                                      &tmpulongest);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        tdep->size_flock64))
+            return -1;
+        }
+      else if (tmpulongest != tdep->fcntl_F_SETLK64
+               && tmpulongest != tdep->fcntl_F_SETLKW64)
         {
-	  goto sys_fcntl;
-	}
+          goto sys_fcntl;
+        }
       break;
 
       /* sys_ni_syscall */
@@ -1669,15 +2005,14 @@ record_linux_system_call (int num, struct regcache *regcache,
     case 230:
       /* sys_fgetxattr */
     case 231:
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (tmpu32)
-	{
-	  uint32_t size;
-	  regcache_raw_read (regcache, tdep->arg4,
-			     (gdb_byte *) & size);
-	  if (record_arch_list_add_mem (tmpu32, size))
-	    return -1;
-	}
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (tmpulongest)
+        {
+          ULONGEST size;
+          regcache_raw_read_unsigned (regcache, tdep->arg4, &size);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, (int) size))
+            return -1;
+        }
       break;
 
       /* sys_listxattr */
@@ -1686,15 +2021,14 @@ record_linux_system_call (int num, struct regcache *regcache,
     case 233:
       /* sys_flistxattr */
     case 234:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (tmpu32)
-	{
-	  uint32_t size;
-	  regcache_raw_read (regcache, tdep->arg3,
-			     (gdb_byte *) & size);
-	  if (record_arch_list_add_mem (tmpu32, size))
-	    return -1;
-	}
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (tmpulongest)
+        {
+          ULONGEST size;
+          regcache_raw_read_unsigned (regcache, tdep->arg3, &size);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, (int) size))
+            return -1;
+        }
       break;
 
       /* sys_removexattr */
@@ -1709,9 +2043,10 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_sendfile64 */
     case 239:
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_loff_t))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_loff_t))
+        return -1;
       break;
 
       /* sys_futex */
@@ -1722,35 +2057,36 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_sched_getaffinity */
     case 242:
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (tmpu32)
-	{
-	  uint32_t len;
-	  regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & len);
-	  if (record_arch_list_add_mem (tmpu32, len))
-	    return -1;
-	}
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (tmpulongest)
+        {
+          ULONGEST len;
+          regcache_raw_read_unsigned (regcache, tdep->arg2, &len);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, (int) len))
+            return -1;
+        }
       break;
 
       /* sys_set_thread_area */
     case 243:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_int))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_int))
+        return -1;
       break;
 
       /* sys_get_thread_area */
     case 244:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_user_desc))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_user_desc))
+        return -1;
       break;
 
       /* sys_io_setup */
     case 245:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_long))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_long))
+        return -1;
       break;
 
       /* sys_io_destroy */
@@ -1759,49 +2095,57 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_io_getevents */
     case 247:
-      regcache_raw_read (regcache, tdep->arg4, (gdb_byte *) & tmpu32);
-      if (tmpu32)
-	{
-	  int32_t nr;
-	  regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & nr);
-	  if (record_arch_list_add_mem (tmpu32, nr * tdep->size_io_event))
-	    return -1;
-	}
+      regcache_raw_read_unsigned (regcache, tdep->arg4, &tmpulongest);
+      if (tmpulongest)
+        {
+          ULONGEST nr;
+          regcache_raw_read_unsigned (regcache, tdep->arg3, &nr);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        nr * tdep->size_io_event))
+            return -1;
+        }
       break;
 
       /* sys_io_submit */
     case 248:
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (tmpu32)
-	{
-	  int32_t i, nr;
-	  uint32_t *iocbp;
-	  regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & nr);
-	  iocbp = (uint32_t *) alloca (nr * tdep->size_int);
-	  if (target_read_memory
-	      (tmpu32, (gdb_byte *) iocbp, nr * tdep->size_int))
-	    {
-	      if (record_debug)
-		fprintf_unfiltered (gdb_stdlog,
-				    "Process record: error reading memory "
-				    "at addr = %s len = %u.\n",
-				    paddress (gdbarch, tmpu32),
-				    (int)(nr * tdep->size_int));
-	      return -1;
-	    }
-	  for (i = 0; i < nr; i++)
-	    {
-	      if (record_arch_list_add_mem (iocbp[i], tdep->size_iocb))
-		return -1;
-	    }
-	}
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (tmpulongest)
+        {
+          ULONGEST nr, i;
+          gdb_byte *iocbp;
+
+          regcache_raw_read_unsigned (regcache, tdep->arg2, &nr);
+          iocbp = alloca (nr * tdep->size_pointer);
+          if (target_read_memory ((CORE_ADDR) tmpulongest, iocbp,
+                                  nr * tdep->size_pointer))
+            {
+              if (record_debug)
+                fprintf_unfiltered (gdb_stdlog,
+                                    "Process record: error reading memory "
+                                    "at addr = 0x%s len = %u.\n",
+                                    OUTPUT_REG (tmpulongest, tdep->arg2),
+                                    (int) (nr * tdep->size_pointer));
+              return -1;
+            }
+          for (i = 0; i < nr; i++)
+            {
+              tmpaddr
+                = (CORE_ADDR) extract_unsigned_integer (iocbp,
+                                                        tdep->size_pointer,
+                                                        byte_order);
+              if (record_arch_list_add_mem (tmpaddr, tdep->size_iocb))
+                return -1;
+              iocbp += tdep->size_pointer;
+            }
+        }
       break;
 
       /* sys_io_cancel */
     case 249:
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_io_event))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_io_event))
+        return -1;
       break;
 
       /* sys_fadvise64 */
@@ -1813,28 +2157,27 @@ record_linux_system_call (int num, struct regcache *regcache,
       /* sys_exit_group */
     case 252:
       {
-	int q;
-	target_terminal_ours ();
-	q =
-	  yquery (_("The next instruction is syscall exit_group.  "
-		    "It will make the program exit.  "
-		    "Do you want to stop the program?"));
-	target_terminal_inferior ();
-	if (q)
-	  return 1;
+        int q;
+        target_terminal_ours ();
+        q = yquery (_("The next instruction is syscall exit_group.  "
+                      "It will make the program exit.  "
+                      "Do you want to stop the program?"));
+        target_terminal_inferior ();
+        if (q)
+          return 1;
       }
       break;
 
       /* sys_lookup_dcookie */
     case 253:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (tmpu32)
-	{
-	  uint32_t len;
-	  regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & len);
-	  if (record_arch_list_add_mem (tmpu32, len))
-	    return -1;
-	}
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (tmpulongest)
+        {
+          ULONGEST len;
+          regcache_raw_read_unsigned (regcache, tdep->arg3, &len);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, (int) len))
+            return -1;
+        }
       break;
 
       /* sys_epoll_create */
@@ -1845,16 +2188,15 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_epoll_wait */
     case 256:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (tmpu32)
-	{
-	  int32_t maxevents;
-	  regcache_raw_read (regcache, tdep->arg3,
-			     (gdb_byte *) & maxevents);
-	  if (record_arch_list_add_mem
-	      (tmpu32, maxevents * tdep->size_epoll_event))
-	    return -1;
-	}
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (tmpulongest)
+        {
+          ULONGEST maxevents;
+          regcache_raw_read_unsigned (regcache, tdep->arg3, &maxevents);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        maxevents * tdep->size_epoll_event))
+            return -1;
+        }
       break;
 
       /* sys_remap_file_pages */
@@ -1865,23 +2207,25 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_timer_create */
     case 259:
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_int))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_int))
+        return -1;
       break;
 
       /* sys_timer_settime */
     case 260:
-      regcache_raw_read (regcache, tdep->arg4, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_itimerspec))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg4, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_itimerspec))
+        return -1;
       break;
 
       /* sys_timer_gettime */
     case 261:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_itimerspec))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_itimerspec))
+        return -1;
       break;
 
       /* sys_timer_getoverrun */
@@ -1894,32 +2238,36 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_clock_gettime */
     case 265:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_timespec))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_timespec))
+        return -1;
       break;
 
       /* sys_clock_getres */
     case 266:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_timespec))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_timespec))
+        return -1;
       break;
 
       /* sys_clock_nanosleep */
     case 267:
-      regcache_raw_read (regcache, tdep->arg4, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_timespec))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg4, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_timespec))
+        return -1;
       break;
 
       /* sys_statfs64 */
     case 268:
       /* sys_fstatfs64 */
     case 269:
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_statfs64))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_statfs64))
+        return -1;
       break;
 
       /* sys_tgkill */
@@ -1936,18 +2284,18 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_get_mempolicy */
     case 275:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_int))
-	return -1;
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (tmpu32)
-	{
-	  uint32_t maxnode;
-	  regcache_raw_read (regcache, tdep->arg3,
-			     (gdb_byte *) & maxnode);
-	  if (record_arch_list_add_mem (tmpu32, maxnode * tdep->size_long))
-	    return -1;
-	}
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_int))
+        return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (tmpulongest)
+        {
+          ULONGEST maxnode;
+          regcache_raw_read_unsigned (regcache, tdep->arg3, &maxnode);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        maxnode * tdep->size_long))
+            return -1;
+        }
       break;
 
       /* sys_set_mempolicy */
@@ -1962,18 +2310,18 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_mq_timedreceive */
     case 280:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (tmpu32)
-	{
-	  uint32_t msg_len;
-	  regcache_raw_read (regcache, tdep->arg3,
-			     (gdb_byte *) & msg_len);
-	  if (record_arch_list_add_mem (tmpu32, msg_len))
-	    return -1;
-	}
-      regcache_raw_read (regcache, tdep->arg4, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_int))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (tmpulongest)
+        {
+          ULONGEST msg_len;
+          regcache_raw_read_unsigned (regcache, tdep->arg3, &msg_len);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        (int) msg_len))
+            return -1;
+        }
+      regcache_raw_read_unsigned (regcache, tdep->arg4, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_int))
+        return -1;
       break;
 
       /* sys_mq_notify */
@@ -1982,9 +2330,10 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_mq_getsetattr */
     case 282:
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_mq_attr))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_mq_attr))
+        return -1;
       break;
 
       /* sys_kexec_load */
@@ -1993,12 +2342,14 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_waitid */
     case 284:
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_siginfo))
-	return -1;
-      regcache_raw_read (regcache, tdep->arg5, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_rusage))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_siginfo))
+        return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg5, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_rusage))
+        return -1;
       break;
 
       /* sys_ni_syscall */
@@ -2011,20 +2362,20 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_keyctl */
     case 288:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (tmpu32 == 6 || tmpu32 == 11)
-	{
-	  regcache_raw_read (regcache, tdep->arg3,
-			     (gdb_byte *) & tmpu32);
-	  if (tmpu32)
-	    {
-	      uint32_t buflen;
-	      regcache_raw_read (regcache, tdep->arg4,
-				 (gdb_byte *) & buflen);
-	      if (record_arch_list_add_mem (tmpu32, buflen))
-		return -1;
-	    }
-	}
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (tmpulongest == 6 || tmpulongest == 11)
+        {
+          regcache_raw_read_unsigned (regcache, tdep->arg3,
+                                      &tmpulongest);
+          if (tmpulongest)
+            {
+              ULONGEST buflen;
+              regcache_raw_read_unsigned (regcache, tdep->arg4, &buflen);
+              if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                            (int) buflen))
+                return -1;
+            }
+        }
       break;
 
       /* sys_ioprio_set */
@@ -2053,9 +2404,10 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_fstatat64 */
     case 300:
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_stat64))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_stat64))
+        return -1;
       break;
 
       /* sys_unlinkat */
@@ -2070,15 +2422,14 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_readlinkat */
     case 305:
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (tmpu32)
-	{
-	  int32_t bufsiz;
-	  regcache_raw_read (regcache, tdep->arg4,
-			     (gdb_byte *) & bufsiz);
-	  if (record_arch_list_add_mem (tmpu32, bufsiz))
-	    return -1;
-	}
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (tmpulongest)
+        {
+          ULONGEST bufsiz;
+          regcache_raw_read_unsigned (regcache, tdep->arg4, &bufsiz);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, (int) bufsiz))
+            return -1;
+        }
       break;
 
       /* sys_fchmodat */
@@ -2089,34 +2440,39 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_pselect6 */
     case 308:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_fd_set))
-	return -1;
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_fd_set))
-	return -1;
-      regcache_raw_read (regcache, tdep->arg4, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_fd_set))
-	return -1;
-      regcache_raw_read (regcache, tdep->arg5, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_timespec))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_fd_set))
+        return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_fd_set))
+        return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg4, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_fd_set))
+        return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg5, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_timespec))
+        return -1;
       break;
 
       /* sys_ppoll */
     case 309:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (tmpu32)
-	{
-	  uint32_t nfds;
-	  regcache_raw_read (regcache, tdep->arg2,
-			     (gdb_byte *) & nfds);
-	  if (record_arch_list_add_mem (tmpu32, tdep->size_pollfd * nfds))
-	    return -1;
-	}
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_timespec))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (tmpulongest)
+        {
+          ULONGEST nfds;
+          regcache_raw_read_unsigned (regcache, tdep->arg2, &nfds);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        tdep->size_pollfd * nfds))
+            return -1;
+        }
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_timespec))
+        return -1;
       break;
 
       /* sys_unshare */
@@ -2127,22 +2483,24 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_get_robust_list */
     case 312:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_int))
-	return -1;
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_int))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_int))
+        return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_int))
+        return -1;
       break;
 
       /* sys_splice */
     case 313:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_loff_t))
-	return -1;
-      regcache_raw_read (regcache, tdep->arg4, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_loff_t))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_loff_t))
+        return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg4, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_loff_t))
+        return -1;
       break;
 
       /* sys_sync_file_range */
@@ -2155,48 +2513,47 @@ record_linux_system_call (int num, struct regcache *regcache,
 
       /* sys_move_pages */
     case 317:
-      regcache_raw_read (regcache, tdep->arg5, (gdb_byte *) & tmpu32);
-      if (tmpu32)
-	{
-	  uint32_t nr_pages;
-	  regcache_raw_read (regcache, tdep->arg2,
-			     (gdb_byte *) & nr_pages);
-	  if (record_arch_list_add_mem (tmpu32, nr_pages * tdep->size_int))
-	    return -1;
-	}
+      regcache_raw_read_unsigned (regcache, tdep->arg5, &tmpulongest);
+      if (tmpulongest)
+        {
+          ULONGEST nr_pages;
+          regcache_raw_read_unsigned (regcache, tdep->arg2, &nr_pages);
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                        nr_pages * tdep->size_int))
+            return -1;
+        }
       break;
 
       /* sys_getcpu */
     case 318:
-      regcache_raw_read (regcache, tdep->arg1, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_int))
-	return -1;
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_int))
-	return -1;
-      regcache_raw_read (regcache, tdep->arg3, (gdb_byte *) & tmpu32);
-      if (record_arch_list_add_mem (tmpu32, tdep->size_ulong * 2))
-	return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_int))
+        return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_int))
+        return -1;
+      regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
+      if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
+                                    tdep->size_ulong * 2))
+        return -1;
       break;
 
       /* sys_epoll_pwait */
     case 319:
-      regcache_raw_read (regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (tmpu32)
-	{
-	  int32_t maxevents;
-	  regcache_raw_read (regcache, tdep->arg3,
-			     (gdb_byte *) & maxevents);
-	  if (record_arch_list_add_mem
-	      (tmpu32, maxevents * tdep->size_epoll_event))
-	    return -1;
-	}
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (tmpulongest)
+        {
+          ULONGEST maxevents;
+          regcache_raw_read_unsigned (regcache, tdep->arg3, &maxevents);
+          tmpint = (int) maxevents * tdep->size_epoll_event;
+          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tmpint))
+            return -1;
+        }
       break;
 
     default:
       printf_unfiltered (_("Process record and replay target doesn't "
-			   "support syscall number %u\n"),
-			 (int)tmpu32);
+                           "support syscall number %u\n"), num);
       return -1;
       break;
     }

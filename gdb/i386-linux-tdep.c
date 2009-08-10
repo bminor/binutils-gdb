@@ -369,7 +369,14 @@ i386_linux_intx80_sysenter_record (struct regcache *regcache)
   int ret;
   uint32_t tmpu32;
 
-  regcache_raw_read (regcache, I386_EAX_REGNUM, (gdb_byte *)&tmpu32);
+  regcache_raw_read (regcache, I386_EAX_REGNUM, (gdb_byte *) &tmpu32);
+
+  if (tmpu32 > 499)
+    {
+      printf_unfiltered (_("Process record and replay target doesn't "
+                           "support syscall number %u\n"), tmpu32);
+      return -1;
+    }
 
   ret = record_linux_system_call (tmpu32, regcache,
 				  &i386_linux_record_tdep);
@@ -481,6 +488,8 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Initialize the i386_linux_record_tdep.  */
   /* These values are the size of the type that will be used in a system
      call.  They are obtained from Linux Kernel source.  */
+  i386_linux_record_tdep.size_pointer
+    = gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT;
   i386_linux_record_tdep.size__old_kernel_stat = 32;
   i386_linux_record_tdep.size_tms = 16;
   i386_linux_record_tdep.size_loff_t = 8;
@@ -501,9 +510,12 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   i386_linux_record_tdep.size_statfs = 64;
   i386_linux_record_tdep.size_statfs64 = 84;
   i386_linux_record_tdep.size_sockaddr = 16;
-  i386_linux_record_tdep.size_int = 4;
-  i386_linux_record_tdep.size_long = 4;
-  i386_linux_record_tdep.size_ulong = 4;
+  i386_linux_record_tdep.size_int
+    = gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT;
+  i386_linux_record_tdep.size_long
+    = gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT;
+  i386_linux_record_tdep.size_ulong
+    = gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT;
   i386_linux_record_tdep.size_msghdr = 28;
   i386_linux_record_tdep.size_itimerval = 16;
   i386_linux_record_tdep.size_stat = 88;
@@ -536,7 +548,8 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   i386_linux_record_tdep.size_io_event = 32;
   i386_linux_record_tdep.size_iocb = 64;
   i386_linux_record_tdep.size_epoll_event = 12;
-  i386_linux_record_tdep.size_itimerspec = i386_linux_record_tdep.size_timespec * 2;
+  i386_linux_record_tdep.size_itimerspec
+    = i386_linux_record_tdep.size_timespec * 2;
   i386_linux_record_tdep.size_mq_attr = 32;
   i386_linux_record_tdep.size_siginfo = 128;
   i386_linux_record_tdep.size_termios = 36;
@@ -546,6 +559,8 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   i386_linux_record_tdep.size_serial_struct = 60;
   i386_linux_record_tdep.size_serial_icounter_struct = 80;
   i386_linux_record_tdep.size_hayes_esp_config = 12;
+  i386_linux_record_tdep.size_size_t = 4;
+  i386_linux_record_tdep.size_iovec = 8;
 
   /* These values are the second argument of system call "sys_ioctl".
      They are obtained from Linux Kernel source.  */
@@ -627,6 +642,7 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   i386_linux_record_tdep.arg3 = I386_EDX_REGNUM;
   i386_linux_record_tdep.arg4 = I386_ESI_REGNUM;
   i386_linux_record_tdep.arg5 = I386_EDI_REGNUM;
+  i386_linux_record_tdep.arg6 = I386_EBP_REGNUM;
 
   tdep->i386_intx80_record = i386_linux_intx80_sysenter_record;
   tdep->i386_sysenter_record = i386_linux_intx80_sysenter_record;

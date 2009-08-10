@@ -23,6 +23,7 @@
 struct linux_record_tdep
 {
   /* The size of the type that will be used in a system call.  */
+  int size_pointer;
   int size__old_kernel_stat;
   int size_tms;
   int size_loff_t;
@@ -81,7 +82,6 @@ struct linux_record_tdep
   int size_itimerspec;
   int size_mq_attr;
   int size_siginfo;
-
   int size_termios;
   int size_termios2;
   int size_pid_t;
@@ -89,6 +89,8 @@ struct linux_record_tdep
   int size_serial_struct;
   int size_serial_icounter_struct;
   int size_hayes_esp_config;
+  int size_size_t;
+  int size_iovec;
 
   /* The values of the second argument of system call "sys_ioctl".  */
   int ioctl_TCGETS;
@@ -171,6 +173,7 @@ struct linux_record_tdep
   int arg3;
   int arg4;
   int arg5;
+  int arg6;
 };
 
 extern int record_linux_system_call (int num, struct regcache *regcache,
