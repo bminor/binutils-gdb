@@ -1,5 +1,9 @@
 2009-08-10  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.c (ppc_elf_relax_section): Ignore non-code sections.
+
+2009-08-10  Alan Modra  <amodra@bigpond.net.au>
+
 	* elflink.c (_bfd_elf_adjust_dynamic_symbol): Don't clear plt
 	info for STT_GNU_IFUNC.
 	* elf32-ppc.c (ppc_elf_check_relocs): Count a needed plt entry

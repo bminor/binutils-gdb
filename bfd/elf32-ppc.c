@@ -5905,8 +5905,9 @@ ppc_elf_relax_section (bfd *abfd,
   *again = FALSE;
 
   /* Nothing to do if there are no relocations, and no need to do
-     anything with non-alloc sections.  */
+     anything with non-alloc or non-code sections.  */
   if ((isec->flags & SEC_ALLOC) == 0
+      || (isec->flags & SEC_CODE) == 0
       || (isec->flags & SEC_RELOC) == 0
       || isec->reloc_count == 0)
     return TRUE;
