@@ -1070,7 +1070,7 @@ gdb_bfd_unref (struct bfd *abfd)
   if (abfd == NULL)
     return;
 
-  p_refcount = abfd->usrdata;
+  p_refcount = bfd_usrdata (abfd);
 
   /* Valid range for p_refcount: NULL (single owner), or a pointer
      to int counter, which has a value of 1 (single owner) or 2 (shared).  */
@@ -1083,7 +1083,7 @@ gdb_bfd_unref (struct bfd *abfd)
 	return;
     }
   xfree (p_refcount);
-  abfd->usrdata = NULL;  /* Paranoia.  */
+  bfd_usrdata (abfd) = NULL;  /* Paranoia.  */
 
   name = bfd_get_filename (abfd);
   if (!bfd_close (abfd))

@@ -1,3 +1,9 @@
+2009-08-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* objfiles.c (gdb_bfd_unref): Use the bfd_usrdata accessor.
+	* solib.c (symbol_add_stub): Likewise.
+	* symfile.c (symfile_bfd_open): Assert BFD_USRDATA is NULL.
+
 2009-08-10  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* objfiles.c (qsort_cmp): Remove assert.

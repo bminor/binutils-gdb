@@ -459,7 +459,7 @@ symbol_add_stub (struct so_list *so, int flags)
   so->objfile = symbol_file_add_from_bfd (so->abfd, flags, sap, OBJF_SHARED);
   p_refcount = xmalloc (sizeof (*p_refcount));
   *p_refcount = 2;  /* Both solib and objfile refer to this abfd.  */
-  so->abfd->usrdata = p_refcount;
+  bfd_usrdata (so->abfd) = p_refcount;
 
   free_section_addr_info (sap);
 
