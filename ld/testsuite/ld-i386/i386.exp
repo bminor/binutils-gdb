@@ -49,6 +49,54 @@ if {[istarget "i?86-*-vxworks"]} {
     run_dump_test "vxworks1-static"
 }
 
+if [istarget "*-*-go32*"] {
+    run_ld_link_tests {{"go32 stub" "" "" {zero.s} {} "go32stub"}}
+
+    set src "tmpdir/go32stub"
+    set dest "tmpdir/go32stub-copy"
+
+    set test "go32 stub patch the source"
+    set fi [open $src r+]
+    fconfigure $fi -translation binary
+    if {[read $fi 2] != "MZ"} {
+	fail $test
+    } else {
+	pass $test
+	seek $fi 0x40
+	puts -nonewline $fi "objcopy-test-go32stub"
+    }
+    close $fi
+
+    set test "go32 stub objcopy"
+    set status [remote_exec build $OBJCOPY "$OBJCOPYFLAGS $src $dest"]
+    set exec_output [lindex $status 1]
+    set exec_output [prune_warnings $exec_output]
+    if [string match "" $exec_output] then {
+	pass $test
+    } else {
+	send_log "$exec_output\n"
+	verbose "$exec_output" 1
+	fail $test
+    }
+
+    # cmp would compare the whole files and some data after the initial exe
+    # stub could differ.
+    set test "go32 stub comparison after objcopy"
+    set fi [open $src]
+    fconfigure $fi -translation binary
+    set src_stub [read $fi 2048]
+    close $fi
+    set fi [open $dest]
+    fconfigure $fi -translation binary
+    set dest_stub [read $fi 2048]
+    close $fi
+    if {$src_stub == $dest_stub} {
+	pass $test
+    } else {
+	fail $test
+    }
+}
+
 if { !([istarget "i?86-*-elf*"]		
        || ([istarget "i?86-*-linux*"]
 	   && ![istarget "*-*-*aout*"]

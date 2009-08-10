@@ -1,3 +1,10 @@
+2009-08-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix go32 stub preservation by objcopy.
+	* coff-stgo32.c (adjust_filehdr_in_post): Use bfd_malloc.
+	(go32_stubbed_coff_bfd_copy_private_bfd_data): Optionally allocate OBFD
+	go32stub.
+
 2009-08-10  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_size_stubs): Don't die on undefined local

@@ -141,8 +141,9 @@ adjust_filehdr_in_post  (abfd, src, dst)
 
   ADJUST_VAL (filehdr_dst->f_symptr, STUBSIZE);
 
-  /* Save now the stub to be used later.  */
-  bfd_coff_go32stub (abfd) = (PTR) bfd_alloc (abfd, (bfd_size_type) STUBSIZE);
+  /* Save now the stub to be used later.  FIXME: Memory leak as the caller
+     coff_object_p does bfd_release afterwards.  */
+  bfd_coff_go32stub (abfd) = bfd_malloc ((bfd_size_type) STUBSIZE);
 
   /* Since this function returns no status, I do not set here
      any bfd_error_...
@@ -403,13 +404,18 @@ go32_stubbed_coff_bfd_copy_private_bfd_data  (ibfd, obfd)
   if (ibfd->xvec != obfd->xvec)
     return TRUE;
 
-  /* Check if both have a valid stub.  */
-  if (bfd_coff_go32stub (ibfd) == NULL
-      || bfd_coff_go32stub (obfd) == NULL)
+  /* Check if we have a source stub.  */
+  if (bfd_coff_go32stub (ibfd) == NULL)
     return TRUE;
 
+  /* As adjust_filehdr_out_pre may get called only after this function,
+     optionally allocate the output stub.  */
+  if (bfd_coff_go32stub (obfd) == NULL)
+    bfd_coff_go32stub (obfd) = bfd_alloc (obfd, (bfd_size_type) STUBSIZE);
+
   /* Now copy the stub.  */
-  memcpy (bfd_coff_go32stub (obfd), bfd_coff_go32stub (ibfd), STUBSIZE);
+  if (bfd_coff_go32stub (obfd) != NULL)
+    memcpy (bfd_coff_go32stub (obfd), bfd_coff_go32stub (ibfd), STUBSIZE);
 
   return TRUE;
 }

@@ -1,3 +1,9 @@
+2009-08-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Test go32 stub preservation by objcopy.
+	* ld-i386/i386.exp (go32 stub, go32 stub patch the source)
+	(go32 stub objcopy, go32 stub comparison after objcopy): New.
+
 2009-08-10  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-powerpc/relax.s: New.
