@@ -1,3 +1,9 @@
+2009-08-10  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* objfiles.c (qsort_cmp): Remove assert.
+	(preferred_obj_section): New function.
+	(update_section_map): Filter duplicates.
+	
 2009-08-10  Tristan Gingold  <gingold@adacore.com>
 
 	* solib-darwin.c (find_program_interpreter): Simplify the code by
