@@ -406,12 +406,6 @@ spu_elf_relink (void)
 static void
 gld${EMULATION_NAME}_finish (void)
 {
-  int need_laying_out;
-
-  need_laying_out = bfd_elf_discard_info (link_info.output_bfd, &link_info);
-
-  gld${EMULATION_NAME}_map_segments (need_laying_out);
-
   if (is_spu_target ())
     {
       if (params.local_store_lo < params.local_store_hi)

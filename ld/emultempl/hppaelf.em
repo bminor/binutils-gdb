@@ -237,14 +237,13 @@ build_section_lists (lang_statement_union_type *statement)
 }
 
 
-/* Final emulation specific call.  For the PA we use this opportunity
-   to build linker stubs.  */
+/* For the PA we use this opportunity to size and build linker stubs.  */
 
 static void
-gld${EMULATION_NAME}_finish (void)
+gld${EMULATION_NAME}_after_allocation (void)
 {
-  /* bfd_elf_discard_info just plays with debugging sections,
-     ie. doesn't affect any code, so we can delay resizing the
+  /* bfd_elf_discard_info just plays with data and debugging sections,
+     ie. doesn't affect code size, so we can delay resizing the
      sections.  It's likely we'll resize everything in the process of
      adding stubs.  */
   if (bfd_elf_discard_info (link_info.output_bfd, &link_info))
@@ -301,8 +300,6 @@ gld${EMULATION_NAME}_finish (void)
 	    einfo ("%X%P: can not build stubs: %E\n");
 	}
     }
-
-  finish_default ();
 }
 
 
@@ -376,5 +373,5 @@ PARSE_AND_LIST_ARGS_CASES='
 # Put these extra hppaelf routines in ld_${EMULATION_NAME}_emulation
 #
 LDEMUL_AFTER_PARSE=hppaelf_after_parse
-LDEMUL_FINISH=gld${EMULATION_NAME}_finish
+LDEMUL_AFTER_ALLOCATION=gld${EMULATION_NAME}_after_allocation
 LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=hppaelf_create_output_section_statements

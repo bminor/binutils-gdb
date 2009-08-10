@@ -258,18 +258,12 @@ ppc_layout_sections_again (void)
      to recalculate all the section offsets.  This may mean we need to
      add even more stubs.  */
   gld${EMULATION_NAME}_map_segments (TRUE);
-  need_laying_out = -1;
-}
 
-
-/* Call the back-end function to set TOC base after we have placed all
-   the sections.  */
-static void
-gld${EMULATION_NAME}_after_allocation (void)
-{
   if (!link_info.relocatable)
     _bfd_set_gp_value (link_info.output_bfd,
 		       ppc64_elf_toc (link_info.output_bfd));
+
+  need_laying_out = -1;
 }
 
 
@@ -307,18 +301,13 @@ build_section_lists (lang_statement_union_type *statement)
 }
 
 
-/* Final emulation specific call.  */
-
+/* Call the back-end function to set TOC base after we have placed all
+   the sections.  */
 static void
-gld${EMULATION_NAME}_finish (void)
+gld${EMULATION_NAME}_after_allocation (void)
 {
-  /* e_entry on PowerPC64 points to the function descriptor for
-     _start.  If _start is missing, default to the first function
-     descriptor in the .opd section.  */
-  entry_section = ".opd";
-
-  /* bfd_elf_discard_info just plays with debugging sections,
-     ie. doesn't affect any code, so we can delay resizing the
+  /* bfd_elf_discard_info just plays with data and debugging sections,
+     ie. doesn't affect code size, so we can delay resizing the
      sections.  It's likely we'll resize everything in the process of
      adding stubs.  */
   if (bfd_elf_discard_info (link_info.output_bfd, &link_info))
@@ -354,7 +343,25 @@ gld${EMULATION_NAME}_finish (void)
     }
 
   if (need_laying_out != -1)
-    gld${EMULATION_NAME}_map_segments (need_laying_out);
+    {
+      gld${EMULATION_NAME}_map_segments (need_laying_out);
+
+      if (!link_info.relocatable)
+	_bfd_set_gp_value (link_info.output_bfd,
+			   ppc64_elf_toc (link_info.output_bfd));
+    }
+}
+
+
+/* Final emulation specific call.  */
+
+static void
+gld${EMULATION_NAME}_finish (void)
+{
+  /* e_entry on PowerPC64 points to the function descriptor for
+     _start.  If _start is missing, default to the first function
+     descriptor in the .opd section.  */
+  entry_section = ".opd";
 
   if (link_info.relocatable)
     {

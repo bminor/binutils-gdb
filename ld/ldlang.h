@@ -483,6 +483,8 @@ extern lang_output_section_statement_type *lang_enter_output_section_statement
    etree_type *, int);
 extern void lang_final
   (void);
+extern void lang_relax_sections
+  (bfd_boolean);
 extern void lang_process
   (void);
 extern void lang_section_start

@@ -56,10 +56,10 @@ mmix_before_allocation (void)
 static void
 mmix_after_allocation (void)
 {
-  asection *sec
-    = bfd_get_section_by_name (link_info.output_bfd,
-			       MMIX_REG_CONTENTS_SECTION_NAME);
+  asection *sec;
   bfd_signed_vma regvma;
+
+  gld${EMULATION_NAME}_after_allocation ();
 
   /* If there's no register section, we don't need to do anything.  On the
      other hand, if there's a non-standard linker-script without a mapping
@@ -72,6 +72,8 @@ mmix_after_allocation (void)
      that's expected when you play tricks with linker scripts.  The
      "NOCROSSREFS 2" test does not run the output so it does not matter
      there.  */
+  sec = bfd_get_section_by_name (link_info.output_bfd,
+				 MMIX_REG_CONTENTS_SECTION_NAME);
   if (sec == NULL)
     sec
       = bfd_get_section_by_name (link_info.output_bfd,

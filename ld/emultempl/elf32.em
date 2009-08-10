@@ -62,10 +62,9 @@ fragment <<EOF
 static void gld${EMULATION_NAME}_before_parse (void);
 static void gld${EMULATION_NAME}_after_open (void);
 static void gld${EMULATION_NAME}_before_allocation (void);
+static void gld${EMULATION_NAME}_after_allocation (void);
 static lang_output_section_statement_type *gld${EMULATION_NAME}_place_orphan
   (asection *, const char *, int);
-static void gld${EMULATION_NAME}_finish (void);
-
 EOF
 
 if [ "x${USE_LIBPATH}" = xyes ] ; then
@@ -1830,17 +1829,15 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 EOF
 fi
 
-if test x"$LDEMUL_FINISH" != xgld"$EMULATION_NAME"_finish; then
+if test x"$LDEMUL_AFTER_ALLOCATION" != xgld"$EMULATION_NAME"_after_allocation; then
 fragment <<EOF
 
 static void
-gld${EMULATION_NAME}_finish (void)
+gld${EMULATION_NAME}_after_allocation (void)
 {
   bfd_boolean need_layout = bfd_elf_discard_info (link_info.output_bfd,
 						  &link_info);
-
   gld${EMULATION_NAME}_map_segments (need_layout);
-  finish_default ();
 }
 EOF
 fi
@@ -2327,14 +2324,14 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   ${LDEMUL_HLL-hll_default},
   ${LDEMUL_AFTER_PARSE-after_parse_default},
   ${LDEMUL_AFTER_OPEN-gld${EMULATION_NAME}_after_open},
-  ${LDEMUL_AFTER_ALLOCATION-after_allocation_default},
+  ${LDEMUL_AFTER_ALLOCATION-gld${EMULATION_NAME}_after_allocation},
   ${LDEMUL_SET_OUTPUT_ARCH-set_output_arch_default},
   ${LDEMUL_CHOOSE_TARGET-ldemul_default_target},
   ${LDEMUL_BEFORE_ALLOCATION-gld${EMULATION_NAME}_before_allocation},
   ${LDEMUL_GET_SCRIPT-gld${EMULATION_NAME}_get_script},
   "${EMULATION_NAME}",
   "${OUTPUT_FORMAT}",
-  ${LDEMUL_FINISH-gld${EMULATION_NAME}_finish},
+  ${LDEMUL_FINISH-finish_default},
   ${LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS-NULL},
   ${LDEMUL_OPEN_DYNAMIC_ARCHIVE-gld${EMULATION_NAME}_open_dynamic_archive},
   ${LDEMUL_PLACE_ORPHAN-gld${EMULATION_NAME}_place_orphan},

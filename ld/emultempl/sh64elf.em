@@ -244,12 +244,12 @@ sh64_elf_${EMULATION_NAME}_after_allocation (void)
   bfd_vma cranges_growth = 0;
   asection *osec;
   bfd_byte *crangesp;
+  asection *cranges;
 
-  asection *cranges = bfd_get_section_by_name (link_info.output_bfd,
-					       SH64_CRANGES_SECTION_NAME);
+  gld${EMULATION_NAME}_after_allocation ();
 
-  /* If this ever starts doing something, we will pick it up.  */
-  after_allocation_default ();
+  cranges = bfd_get_section_by_name (link_info.output_bfd,
+				     SH64_CRANGES_SECTION_NAME);
 
   /* If there is no .cranges section, it is because it was seen earlier on
      that none was needed.  Otherwise it must have been created then, or
@@ -376,11 +376,6 @@ sh64_elf_${EMULATION_NAME}_after_allocation (void)
       }
     }
 
-  /* ldemul_after_allocation may be called twice.  First directly from
-     lang_process, and the second time when lang_process calls ldemul_finish,
-     which calls gld${EMULATION_NAME}_finish, e.g. gldshelf32_finish, which
-     is defined in emultempl/elf32.em and calls ldemul_after_allocation,
-     if bfd_elf_discard_info returned true.  */
   if (cranges->contents != NULL)
     free (cranges->contents);
 

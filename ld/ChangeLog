@@ -1,3 +1,51 @@
+2009-08-10  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 10474
+	* ldemul.c (after_allocation_default): Run lang_relax_sections.
+	* ldlang.h (lang_relax_sections): Declare.
+	* ldlang.c (relax_sections): Delete.
+	(lang_relax_sections): New function.
+	(lang_process): Don't relax directly from here.
+	* emultempl/alphaelf.em (alpha_finish): Call finish_default.
+	* emultempl/armelf.em (arm_elf_after_allocation): Delete.  Move body..
+	(gld${EMULATION_NAME}_finish): ..to here.  Move existing code..
+	(gld${EMULATION_NAME}_after_allocation): ..to here.  New function.
+	(LDEMUL_AFTER_ALLOCATION): Update.
+	* emultempl/avrelf.em (avr_elf_finish, LDEMUL_FINISH): Delete.
+	(avr_elf_after_allocation): New function.
+	(LDEMUL_AFTER_ALLOCATION): Define.
+	* emultempl/elf-generic.em (gld${EMULATION_NAME}_map_segments): Call
+	lang_relax_sections.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_finish): Delete.  Move..
+	(gld${EMULATION_NAME}_after_allocation): ..code to here.  New function.
+	(LDEMUL_AFTER_ALLOCATION, LDEMUL_FINISH): Update.
+	* emultempl/genelf.em (gld${EMULATION_NAME}_finish): Delete.  Move..
+	(gld${EMULATION_NAME}_after_allocation): ..code to here.  New function.
+	(LDEMUL_FINISH): Delete.
+	(LDEMUL_AFTER_ALLOCATION): Define.
+	* emultempl/hppaelf.em (gld${EMULATION_NAME}_finish): Delete.  Move..
+	(gld${EMULATION_NAME}_after_allocation): ..to here.  New function.
+	(LDEMUL_FINISH): Delete.
+	(LDEMUL_AFTER_ALLOCATION): Define.
+	* emultempl/m68hc1xelf.em (m68hc11elf_finish): Delete.  Move..
+	(m68hc11elf_after_allocation): ..to here.  New function.
+	(LDEMUL_FINISH): Delete.
+	(LDEMUL_AFTER_ALLOCATION): Define.
+	* emultempl/m68kelf.em (m68k_elf_after_allocation): Call
+	gld${EMULATION_NAME}_after_allocation.
+	* emultempl/mmix-elfnmmo.em (mmix_after_allocation): Call
+	gld${EMULATION_NAME}_after_allocation.
+	* emultempl/mmo.em (mmo_finish): Delete.  Move body..
+	(gld${EMULATION_NAME}_after_allocation): ..to here.  New function.
+	(LDEMUL_FINISH): Define.
+	* emultempl/ppc64elf.em (ppc_layout_sections_again): Set elf_gp.
+	(gld${EMULATION_NAME}_finish): Move code sizing sections..
+	(gld${EMULATION_NAME}_after_allocation): ..to here.
+	* emultempl/sh64elf.em (sh64_elf_${EMULATION_NAME}_after_allocation):
+	Call gld${EMULATION_NAME}_after_allocation.
+	* emultempl/spuelf.em (gld${EMULATION_NAME}_finish): Delete
+	bfd_elf_discard_info and map_segments call.
+
 2009-08-06  Michael Eager <eager@eagercon.com>
 
 	* Makefile.am: Add eelf32mb_linux.o, eelf32microblaze.o to 

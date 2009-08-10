@@ -6159,35 +6159,58 @@ lang_find_relro_sections (void)
 
 /* Relax all sections until bfd_relax_section gives up.  */
 
-static void
-relax_sections (void)
+void
+lang_relax_sections (bfd_boolean need_layout)
 {
-  /* Keep relaxing until bfd_relax_section gives up.  */
-  bfd_boolean relax_again;
-
-  link_info.relax_trip = -1;
-  do
+  if (command_line.relax)
     {
-      relax_again = FALSE;
-      link_info.relax_trip++;
+      /* We may need more than one relaxation pass.  */
+      int i = link_info.relax_pass;
 
-      /* Note: pe-dll.c does something like this also.  If you find
-	 you need to change this code, you probably need to change
-	 pe-dll.c also.  DJ  */
+      /* The backend can use it to determine the current pass.  */
+      link_info.relax_pass = 0;
 
-      /* Do all the assignments with our current guesses as to
-	 section sizes.  */
-      lang_do_assignments ();
+      while (i--)
+	{
+	  /* Keep relaxing until bfd_relax_section gives up.  */
+	  bfd_boolean relax_again;
 
-      /* We must do this after lang_do_assignments, because it uses
-	 size.  */
-      lang_reset_memory_regions ();
+	  link_info.relax_trip = -1;
+	  do
+	    {
+	      link_info.relax_trip++;
 
-      /* Perform another relax pass - this time we know where the
-	 globals are, so can make a better guess.  */
-      lang_size_sections (&relax_again, FALSE);
+	      /* Note: pe-dll.c does something like this also.  If you find
+		 you need to change this code, you probably need to change
+		 pe-dll.c also.  DJ  */
+
+	      /* Do all the assignments with our current guesses as to
+		 section sizes.  */
+	      lang_do_assignments ();
+
+	      /* We must do this after lang_do_assignments, because it uses
+		 size.  */
+	      lang_reset_memory_regions ();
+
+	      /* Perform another relax pass - this time we know where the
+		 globals are, so can make a better guess.  */
+	      relax_again = FALSE;
+	      lang_size_sections (&relax_again, FALSE);
+	    }
+	  while (relax_again);
+
+	  link_info.relax_pass++;
+	}
+      need_layout = TRUE;
     }
-  while (relax_again);
+
+  if (need_layout)
+    {
+      /* Final extra sizing to report errors.  */
+      lang_do_assignments ();
+      lang_reset_memory_regions ();
+      lang_size_sections (NULL, TRUE);
+    }
 }
 
 void
@@ -6293,29 +6316,8 @@ lang_process (void)
   /* Size up the sections.  */
   lang_size_sections (NULL, !command_line.relax);
 
-  /* Now run around and relax if we can.  */
-  if (command_line.relax)
-    {
-      /* We may need more than one relaxation pass.  */
-      int i = link_info.relax_pass;
-
-      /* The backend can use it to determine the current pass.  */
-      link_info.relax_pass = 0;
-
-      while (i--)
-	{
-	  relax_sections ();
-	  link_info.relax_pass++;
-	}
-
-      /* Final extra sizing to report errors.  */
-      lang_do_assignments ();
-      lang_reset_memory_regions ();
-      lang_size_sections (NULL, TRUE);
-    }
-
   /* See if anything special should be done now we know how big
-     everything is.  */
+     everything is.  This is where relaxation is done.  */
   ldemul_after_allocation ();
 
   /* Fix any .startof. or .sizeof. symbols.  */

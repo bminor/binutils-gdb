@@ -29,13 +29,6 @@ source_em ${srcdir}/emultempl/elf-generic.em
 fragment <<EOF
 
 static void
-gld${EMULATION_NAME}_finish (void)
-{
-  gld${EMULATION_NAME}_map_segments (FALSE);
-  finish_default ();
-}
-
-static void
 gld${EMULATION_NAME}_after_open (void)
 {
   bfd *ibfd;
@@ -53,8 +46,14 @@ gld${EMULATION_NAME}_after_open (void)
 	      elf_group_id (sec) = syms[sec_data->this_hdr.sh_info - 1];
 	    }
 }
+
+static void
+gld${EMULATION_NAME}_after_allocation (void)
+{
+  gld${EMULATION_NAME}_map_segments (FALSE);
+}
 EOF
 # Put these extra routines in ld_${EMULATION_NAME}_emulation
 #
-LDEMUL_FINISH=gld${EMULATION_NAME}_finish
 LDEMUL_AFTER_OPEN=gld${EMULATION_NAME}_after_open
+LDEMUL_AFTER_ALLOCATION=gld${EMULATION_NAME}_after_allocation

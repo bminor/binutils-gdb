@@ -89,22 +89,6 @@ arm_elf_before_allocation (void)
   gld${EMULATION_NAME}_before_allocation ();
 }
 
-static void
-arm_elf_after_allocation (void)
-{
-  /* Call the standard elf routine.  */
-  after_allocation_default ();
-
-  {
-    LANG_FOR_EACH_INPUT_STATEMENT (is)
-      {
-        /* Figure out where VFP11 erratum veneers (and the labels returning
-           from same) have been placed.  */
-        bfd_elf32_arm_vfp11_fix_veneer_locations (is->the_bfd, &link_info);
-      }
-  }
-}
-
 /* Fake input file for stubs.  */
 static lang_input_statement_type *stub_file;
 
@@ -285,17 +269,16 @@ compare_output_sec_vma (const void *a, const void *b)
 }
 
 static void
-gld${EMULATION_NAME}_finish (void)
+gld${EMULATION_NAME}_after_allocation (void)
 {
-  struct bfd_link_hash_entry * h;
-  unsigned int list_size = 10;
-  asection **sec_list = xmalloc (list_size * sizeof (asection *));
-  unsigned int sec_count = 0;
-
   if (!link_info.relocatable)
     {
       /* Build a sorted list of input text sections, then use that to process
 	 the unwind table index.  */
+      unsigned int list_size = 10;
+      asection **sec_list = xmalloc (list_size * sizeof (asection *));
+      unsigned int sec_count = 0;
+
       LANG_FOR_EACH_INPUT_STATEMENT (is)
 	{
 	  bfd *abfd = is->the_bfd;
@@ -375,6 +358,21 @@ gld${EMULATION_NAME}_finish (void)
 
   if (need_laying_out != -1)
     gld${EMULATION_NAME}_map_segments (need_laying_out);
+}
+
+static void
+gld${EMULATION_NAME}_finish (void)
+{
+  struct bfd_link_hash_entry * h;
+
+  {
+    LANG_FOR_EACH_INPUT_STATEMENT (is)
+      {
+        /* Figure out where VFP11 erratum veneers (and the labels returning
+           from same) have been placed.  */
+        bfd_elf32_arm_vfp11_fix_veneer_locations (is->the_bfd, &link_info);
+      }
+  }
 
   if (! link_info.relocatable)
     {
@@ -659,7 +657,7 @@ PARSE_AND_LIST_ARGS_CASES='
 # We have our own before_allocation etc. functions, but they call
 # the standard routines, so give them a different name.
 LDEMUL_BEFORE_ALLOCATION=arm_elf_before_allocation
-LDEMUL_AFTER_ALLOCATION=arm_elf_after_allocation
+LDEMUL_AFTER_ALLOCATION=gld${EMULATION_NAME}_after_allocation
 LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=arm_elf_create_output_section_statements
 
 # Replace the elf before_parse function with our own.
