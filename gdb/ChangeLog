@@ -1,5 +1,13 @@
 2009-08-10  Tristan Gingold  <gingold@adacore.com>
 
+	* solib-darwin.c (find_program_interpreter): Simplify the code by
+	looking up for the load_dylinker command instead of reading the
+	corresponding (but deprecated) section.
+	(darwin_solib_create_inferior_hook): Adjust: do not free the
+	interpreter path.
+
+2009-08-10  Tristan Gingold  <gingold@adacore.com>
+
 	* i386-darwin-tdep.c (i386_m128_p): New function.
 	(i386_darwin_arg_type_alignment): Ditto.
 	(i386_darwin_push_dummy_call): Ditto.

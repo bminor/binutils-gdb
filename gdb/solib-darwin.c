@@ -159,27 +159,20 @@ lookup_symbol_from_bfd (bfd *abfd, char *symname)
 }
 
 /* Return program interpreter string.  */
+
 static gdb_byte *
 find_program_interpreter (void)
 {
   gdb_byte *buf = NULL;
 
-  /* If we have an exec_bfd, use its section table.  */
+  /* If we have an exec_bfd, get the interpreter from the load commands.  */
   if (exec_bfd)
     {
-      struct bfd_section *dylinker_sect;
+      bfd_mach_o_load_command *cmd;
       
-      dylinker_sect = bfd_get_section_by_name (exec_bfd, "LC_LOAD_DYLINKER");
-      if (dylinker_sect != NULL)
-	{
-	  int sect_size = bfd_section_size (exec_bfd, dylinker_sect);
-
-	  buf = xmalloc (sect_size);
-	  if (bfd_get_section_contents (exec_bfd, dylinker_sect,
-					buf, 0, sect_size))
-	    return buf;
-	  xfree (buf);
-	}
+      if (bfd_mach_o_lookup_command (exec_bfd,
+                                     BFD_MACH_O_LC_LOAD_DYLINKER, &cmd) == 1)
+        return cmd->command.dylinker.name_str;
     }
 
   /* If we didn't find it, read from memory.
@@ -324,11 +317,8 @@ darwin_solib_create_inferior_hook (void)
 	}
     }
   if (!dyld_bfd)
-    {
-      xfree (interp_name);
-      return;
-    }
-
+    return;
+  
   if (!inf->attach_flag)
     {
       /* We find the dynamic linker's base address by examining
@@ -340,9 +330,8 @@ darwin_solib_create_inferior_hook (void)
   else
     {
       /* FIXME: todo.
-	 Get address of __DATA.__dyld in exec_bfd, read address at offset 0
+	 Get address of __DATA.__dyld in exec_bfd, read address at offset 0.
       */
-      xfree (interp_name);
       return;
     }
 
@@ -351,7 +340,6 @@ darwin_solib_create_inferior_hook (void)
     lookup_symbol_from_bfd (dyld_bfd, "_dyld_all_image_infos");
   
   bfd_close (dyld_bfd);
-  xfree (interp_name);
 
   if (dyld_all_image_addr == 0)
     return;
