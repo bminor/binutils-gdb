@@ -1992,6 +1992,11 @@ coff_mkobject_hook (bfd * abfd,
     abfd->flags |= HAS_DEBUG;
 #endif
 
+  if ((internal_f->f_flags & F_GO32STUB) != 0)
+    coff->go32stub = (char *) bfd_alloc (abfd, (bfd_size_type) GO32_STUBSIZE);
+  if (coff->go32stub != NULL)
+    memcpy (coff->go32stub, internal_f->go32stub, GO32_STUBSIZE);
+
   return coff;
 }
 #endif

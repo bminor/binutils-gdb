@@ -1,5 +1,25 @@
 2009-08-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Stop using bfd_usrdata in libbfd.
+	* coff-stgo32.c (bfd_coff_go32stub): Remove.
+	(stub_bytes, comment): Replace STUBSIZE by GO32_STUBSIZE.
+	(adjust_filehdr_in_post): Declare the abfd parameter as unused.
+	Replace STUBSIZE by GO32_STUBSIZE.  Save now the stub in
+	filehdr_dst->u.go32.stub.  New comment with the reason.
+	(adjust_filehdr_out_pre): Replace STUBSIZE by GO32_STUBSIZE.
+	Substitute the removed macro bfd_coff_go32stub.
+	(adjust_filehdr_out_post, adjust_scnhdr_in_post, adjust_scnhdr_out_pre)
+	(adjust_scnhdr_out_post, adjust_aux_in_post, adjust_aux_out_pre)
+	(adjust_aux_out_post): Replace STUBSIZE by GO32_STUBSIZE.
+	(create_go32_stub, go32_stubbed_coff_bfd_copy_private_bfd_data):
+	Replace STUBSIZE by GO32_STUBSIZE.  Substitute the removed macro
+	bfd_coff_go32stub.
+	* coffcode.h (coff_mkobject_hook): Initialize coff->go32stub.
+	* libcoff-in.h (coff_data_type): New field go32stub.
+	* libcoff.h: Regenerated.
+
+2009-08-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix go32 stub preservation by objcopy.
 	* coff-stgo32.c (adjust_filehdr_in_post): Use bfd_malloc.
 	(go32_stubbed_coff_bfd_copy_private_bfd_data): Optionally allocate OBFD
