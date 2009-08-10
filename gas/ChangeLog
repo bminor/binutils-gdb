@@ -1,3 +1,11 @@
+2009-08-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix compilation of i386-*-go32.
+	* config/tc-i386.c (i386_target_format <TE_GO32>): New.
+	(i386_target_format <OBJ_MAYBE_COFF>): Compile only if !TE_GO32.
+	* config/te-go32.h (TARGET_FORMAT): Move the definition ...
+	* config/tc-i386.h <!i386_target_format>: ... here.
+
 2009-08-10  Daniel Gutson  <dgutson@codesourcery.com>
 
 	PR gas/10479

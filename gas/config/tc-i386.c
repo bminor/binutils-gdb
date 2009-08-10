@@ -8087,7 +8087,10 @@ i386_target_format (void)
     case bfd_target_aout_flavour:
       return AOUT_TARGET_FORMAT;
 #endif
-#ifdef OBJ_MAYBE_COFF
+#ifdef TE_GO32
+    case bfd_target_coff_flavour:
+      return "coff-go32";
+#elif defined (OBJ_MAYBE_COFF)
     case bfd_target_coff_flavour:
       return "coff-i386";
 #endif

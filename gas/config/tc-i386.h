@@ -81,6 +81,9 @@ extern unsigned long i386_mach (void);
 extern const char *i386_target_format (void);
 #define TARGET_FORMAT i386_target_format ()
 #else
+#ifdef TE_GO32
+#define TARGET_FORMAT		"coff-go32"
+#endif
 #ifdef OBJ_AOUT
 #define TARGET_FORMAT		AOUT_TARGET_FORMAT
 #endif
