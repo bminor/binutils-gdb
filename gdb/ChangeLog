@@ -1,3 +1,11 @@
+2009-08-10  Tristan Gingold  <gingold@adacore.com>
+
+	* i386-darwin-tdep.c (i386_m128_p): New function.
+	(i386_darwin_arg_type_alignment): Ditto.
+	(i386_darwin_push_dummy_call): Ditto.
+	(i386_darwin_init_abi): Define Darwin specific push_dummy_call.
+	Adjust long_double size.  Adjust pc offset in setjump buffer.
+
 2009-08-10  Hui Zhu  <teawater@gmail.com>
 
 	Add Linux AMD64 process record support.
