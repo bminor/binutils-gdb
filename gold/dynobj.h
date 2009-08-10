@@ -201,7 +201,7 @@ class Sized_dynobj : public Dynobj
   // Not used for dynobj.
   uint64_t
   do_section_entsize(unsigned int )
-  { gold_unreachable(); return 0; }
+  { gold_unreachable(); }
 
   // Return section address.
   uint64_t
