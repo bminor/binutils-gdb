@@ -1,5 +1,18 @@
 2009-08-10  Hui Zhu  <teawater@gmail.com>
 
+	Add Linux AMD64 process record support.
+
+	* amd64-linux-tdep.c (amd64_linux_record_tdep): New variable.
+	This struct has the argument for the function
+	"record_linux_system_call".
+	(amd64_linux_syscall_record): New function. Parse the
+	system call instruction and call function
+	"record_linux_system_call" to record execute log.
+	(i386_linux_init_abi): Initialize "amd64_linux_record_tdep".
+	Set "amd64_linux_syscall_record" to "i386_syscall_record".
+
+2009-08-10  Hui Zhu  <teawater@gmail.com>
+
 	Add process record Linux system call 64 bits support.
 
         * linux-record.h (linux_record_tdep): Add size_pointer,
