@@ -1,5 +1,14 @@
 2009-08-10  Nathan Sidwell  <nathan@codesourcery.com>
 
+	* elf32-arm.c (elf32_arm_size_stubs): Don't die on undefined local
+	symbols.
+	(elf32_arm_final_link_relocate): Treat local undefined symbols the
+	same as global undefined symbols.
+	(elf32_arm_relocate_section): Give an error for local undefined
+	non-weak symbols, unless the reloc will not use the symbol.
+
+2009-08-10  Nathan Sidwell  <nathan@codesourcery.com>
+
 	* elf32-ppc.c (shared_stub_entry, stub_entry): Use r12, not r11.
 	(ppc_elf_relax_section): Use symbol index to distinguish
 	relocatable stubs.

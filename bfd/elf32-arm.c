@@ -4376,6 +4376,11 @@ elf32_arm_size_stubs (bfd *output_bfd,
 		      sym = local_syms + r_indx;
 		      hdr = elf_elfsections (input_bfd)[sym->st_shndx];
 		      sym_sec = hdr->bfd_section;
+		      if (!sym_sec)
+			/* This is an undefined symbol.  It can never
+			   be resolved. */
+			continue;
+		  
 		      if (ELF_ST_TYPE (sym->st_info) != STT_SECTION)
 			sym_value = sym->st_value;
 		      destination = (sym_value + irela->r_addend
@@ -6961,7 +6966,6 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	case R_ARM_PC24:	  /* Arm B/BL instruction.  */
 	case R_ARM_PLT32:
 	  {
-	  bfd_vma from;
 	  bfd_signed_vma branch_offset;
 	  struct elf32_arm_stub_hash_entry *stub_entry = NULL;
 
@@ -6998,6 +7002,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	      || r_type == R_ARM_JUMP24
 	      || r_type == R_ARM_PLT32)
 	    {
+	      bfd_vma from;
+	      
 	      /* If the call goes through a PLT entry, make sure to
 		 check distance to the right destination address.  */
 	      if (h != NULL && splt != NULL && h->plt.offset != (bfd_vma) -1)
@@ -7066,9 +7072,11 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  signed_addend >>= howto->rightshift;
 
 	  /* A branch to an undefined weak symbol is turned into a jump to
-	     the next instruction unless a PLT entry will be created.  */
-	  if (h && h->root.type == bfd_link_hash_undefweak
-	      && !(splt != NULL && h->plt.offset != (bfd_vma) -1))
+	     the next instruction unless a PLT entry will be created.
+	     Do the same for local undefined symbols.  */
+	  if (h ? (h->root.type == bfd_link_hash_undefweak
+		   && !(splt != NULL && h->plt.offset != (bfd_vma) -1))
+	      : bfd_is_und_section (sym_sec))
 	    {
 	      value = (bfd_get_32 (input_bfd, hit_data) & 0xf0000000)
 		      | 0x0affffff;
@@ -8714,6 +8722,25 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 	  sym = local_syms + r_symndx;
 	  sym_type = ELF32_ST_TYPE (sym->st_info);
 	  sec = local_sections[r_symndx];
+
+	  /* An object file might have a reference to a local
+	     undefined symbol.  This is a daft object file, but we
+	     should at least do something about it.  V4BX & NONE
+	     relocations do not use the symbol and are explicitly
+	     allowed to use the undefined symbol, so allow those.  */
+	  if (r_type != R_ARM_V4BX
+	      && r_type != R_ARM_NONE
+	      && bfd_is_und_section (sec)
+	      && ELF_ST_BIND (sym->st_info) != STB_WEAK)
+	    {
+	      if (!info->callbacks->undefined_symbol
+		  (info, bfd_elf_string_from_elf_section
+		   (input_bfd, symtab_hdr->sh_link, sym->st_name),
+		   input_bfd, input_section,
+		   rel->r_offset, TRUE))
+		return FALSE;
+	    }
+	  
 	  if (globals->use_rel)
 	    {
 	      relocation = (sec->output_section->vma
