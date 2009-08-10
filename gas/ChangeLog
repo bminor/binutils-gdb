@@ -1,3 +1,8 @@
+2009-08-10  Daniel Gutson  <dgutson@codesourcery.com>
+
+	PR gas/10479
+	* config/tc-arm.c (do_t_add_sub_w): Fixed constraints.
+
 2009-08-07  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* config/tc-arm.c (marked_pr_dependency, mapstate): Delete global

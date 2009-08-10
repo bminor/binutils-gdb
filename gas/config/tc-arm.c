@@ -8826,9 +8826,12 @@ do_t_add_sub_w (void)
   Rd = inst.operands[0].reg;
   Rn = inst.operands[1].reg;
 
-  /* If Rn is REG_PC, this is ADR; if Rn is REG_SP, then this is the
-     SP-{plus,minute}-immediate form of the instruction.  */
-  reject_bad_reg (Rd);
+  /* If Rn is REG_PC, this is ADR; if Rn is REG_SP, then this
+     is the SP-{plus,minus}-immediate form of the instruction.  */
+  if (Rn == REG_SP)
+    constraint (Rd == REG_PC, BAD_PC);
+  else
+    reject_bad_reg (Rd);
 
   inst.instruction |= (Rn << 16) | (Rd << 8);
   inst.reloc.type = BFD_RELOC_ARM_T32_IMM12;
@@ -10264,6 +10267,11 @@ do_t_mov_cmp (void)
     }
 
   inst.instruction = THUMB_OP16 (inst.instruction);
+
+  /* PR 10443: Do not silently ignore shifted operands.  */
+  constraint (inst.operands[1].shifted,
+	      _("shifts in CMP/MOV instructions are only supported in unified syntax"));
+
   if (inst.operands[1].isreg)
     {
       if (Rn < 8 && Rm < 8)
@@ -18416,7 +18424,9 @@ arm_handle_align (fragS * fragP)
   if (bytes > MAX_MEM_FOR_RS_ALIGN_CODE)
     bytes &= MAX_MEM_FOR_RS_ALIGN_CODE;
 
+#ifdef OBJ_ELF
   gas_assert ((fragP->tc_frag_data.thumb_mode & MODE_RECORDED) != 0);
+#endif
 
   if (fragP->tc_frag_data.thumb_mode & (~ MODE_RECORDED))
     {

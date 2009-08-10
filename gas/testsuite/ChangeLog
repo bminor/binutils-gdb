@@ -1,3 +1,9 @@
+2009-08-10  Daniel Gutson  <dgutson@codesourcery.com>
+
+	PR gas/10479
+	* gas/arm/sp-pc-usage-t.d: New test case.
+	* gas/arm/sp-pc-usage-t.s: New file.
+
 2006-08-09  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	From Mike Frysinger <michael.frysinger@analog.com>
