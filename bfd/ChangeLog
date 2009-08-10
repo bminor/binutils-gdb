@@ -1,3 +1,9 @@
+2009-08-10  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* elf32-ppc.c (shared_stub_entry, stub_entry): Use r12, not r11.
+	(ppc_elf_relax_section): Use symbol index to distinguish
+	relocatable stubs.
+
 2009-08-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_relax_section): Ignore non-code sections.

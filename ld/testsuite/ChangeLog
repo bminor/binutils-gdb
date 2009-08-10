@@ -1,3 +1,10 @@
+2009-08-10  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-powerpc/relax.s: New.
+	* ld-powerpc/relax.d: New.
+	* ld-powerpc/relaxr.d: New.
+	* ld-powerpc/powerpc.exp: Add new tests.
+
 2009-08-06  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-arm/arm-elf.exp: Add new test.

@@ -158,6 +158,12 @@ set ppc64elftests {
       "tlsmark"}
     {"sym@tocbase" "-shared -melf64ppc" "-a64" {symtocbase-1.s symtocbase-2.s}
 	{{objdump -dj.data symtocbase.d}} "symtocbase.so"}
+    {"relaxing" "-melf32ppc --relax -Ttext=0 --defsym far=0x80001234 --defsym near=0x00004320" "" "relax.s"
+     {{objdump -dr relax.d}}
+      "relax"}
+    {"relocatable relaxing" "-melf32ppc -r --relax" "" "relax.s"
+     {{objdump -dr relaxr.d}}
+      "relax"}
 }
 
 

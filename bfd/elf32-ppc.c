@@ -5857,23 +5857,25 @@ ppc_elf_hash_symbol (struct elf_link_hash_entry *h)
 
 #define ARRAY_SIZE(a) (sizeof (a) / sizeof ((a)[0]))
 
+/* Relaxation trampolines.  r12 is available for clobbering (r11, is
+   used for some functions that are allowed to break the ABI).  */
 static const int shared_stub_entry[] =
   {
     0x7c0802a6, /* mflr 0 */
     0x429f0005, /* bcl 20, 31, .Lxxx */
-    0x7d6802a6, /* mflr 11 */
-    0x3d6b0000, /* addis 11, 11, (xxx-.Lxxx)@ha */
-    0x396b0018, /* addi 11, 11, (xxx-.Lxxx)@l */
+    0x7d8802a6, /* mflr 12 */
+    0x3d8c0000, /* addis 12, 12, (xxx-.Lxxx)@ha */
+    0x398c0008, /* addi 12, 12, (xxx-.Lxxx)@l */
     0x7c0803a6, /* mtlr 0 */
-    0x7d6903a6, /* mtctr 11 */
+    0x7d8903a6, /* mtctr 12 */
     0x4e800420, /* bctr */
   };
 
 static const int stub_entry[] =
   {
-    0x3d600000, /* lis 11,xxx@ha */
-    0x396b0000, /* addi 11,11,xxx@l */
-    0x7d6903a6, /* mtctr 11 */
+    0x3d800000, /* lis 12,xxx@ha */
+    0x398c0000, /* addi 12,12,xxx@l */
+    0x7d8903a6, /* mtctr 12 */
     0x4e800420, /* bctr */
   };
 
@@ -5887,6 +5889,8 @@ ppc_elf_relax_section (bfd *abfd,
   {
     struct one_fixup *next;
     asection *tsec;
+    /* Final link, can use the symbol offset.  For a
+       relocatable link we use the symbol's index.  */
     bfd_vma toff;
     bfd_vma trampoff;
   };
@@ -5937,7 +5941,7 @@ ppc_elf_relax_section (bfd *abfd,
   for (irel = internal_relocs; irel < irelend; irel++)
     {
       unsigned long r_type = ELF32_R_TYPE (irel->r_info);
-      bfd_vma symaddr, reladdr, toff, roff;
+      bfd_vma reladdr, toff, roff;
       asection *tsec;
       struct one_fixup *f;
       size_t insn_offset = 0;
@@ -6019,7 +6023,7 @@ ppc_elf_relax_section (bfd *abfd,
 		   || h->root.type == bfd_link_hash_undefweak)
 	    {
 	      tsec = bfd_und_section_ptr;
-	      toff = 0;
+	      toff = link_info->relocatable ? indx : 0;
 	    }
 	  else
 	    continue;
@@ -6120,8 +6124,6 @@ ppc_elf_relax_section (bfd *abfd,
       if (tsec->output_section == NULL)
 	continue;
 
-      symaddr = tsec->output_section->vma + tsec->output_offset + toff;
-
       roff = irel->r_offset;
       reladdr = isec->output_section->vma + isec->output_offset + roff;
 
@@ -6130,9 +6132,15 @@ ppc_elf_relax_section (bfd *abfd,
 	  && (!link_info->relocatable
 	      /* A relocatable link may have sections moved during
 		 final link, so do not presume they remain in range.  */
-	      || tsec->output_section == isec->output_section)
-	  && symaddr - reladdr + max_branch_offset < 2 * max_branch_offset)
-	continue;
+	      || tsec->output_section == isec->output_section))
+	{
+	  bfd_vma symaddr, reladdr;
+
+	  symaddr = tsec->output_section->vma + tsec->output_offset + toff;
+	  reladdr = isec->output_section->vma + isec->output_offset + roff;
+	  if (symaddr - reladdr + max_branch_offset < 2 * max_branch_offset)
+	    continue;
+	}
 
       /* Look for an existing fixup to this address.  */
       for (f = fixups; f ; f = f->next)
