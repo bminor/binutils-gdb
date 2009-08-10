@@ -1,3 +1,28 @@
+2009-08-10  Hui Zhu  <teawater@gmail.com>
+
+	Add AMD64 process record instruction set support.
+
+	* i386-tdep.h (gdbarch_tdep): Add record_regmap for registers
+	because the AMD64's registers order in GDB is not same with
+	I386 instructions.
+	Add i386_syscall_record to be the syscall function handle
+	interface.
+	(record_i386_regnum): Number for record_regmap.
+	* i386-tdep.c (OT_QUAD): For 64 bits.
+	(i386_record_s): Add rex_x, rex_b, rip_offset and
+	popl_esp_hack for AMD64 instruction set. And regmap for
+	record_regmap.
+	(i386_record_lea_modrm_addr): Support AMD64 instruction set
+	64 bits lea.
+	(i386_record_lea_modrm): Ditto.
+	(i386_record_push): New function.  Record the execution log
+	of push.
+	(I386_RECORD_ARCH_LIST_ADD_REG): New macro to record the
+	register.
+	(i386_process_record): Support AMD64 instruction set.
+	* amd64-tdep.c (amd64_record_regmap): For record_regmap.
+	(amd64_init_abi): Set amd64_record_regmap to record_regmap.
+
 2009-08-08  Pedro Alves  <pedro@codesourcery.com>
 
 	* bfd-target.c (struct target_bfd_data): New.

@@ -1989,6 +1989,16 @@ amd64_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
   return 1;
 }
 
+static const int amd64_record_regmap[] =
+{
+  AMD64_RAX_REGNUM, AMD64_RCX_REGNUM, AMD64_RDX_REGNUM, AMD64_RBX_REGNUM,
+  AMD64_RSP_REGNUM, AMD64_RBP_REGNUM, AMD64_RSI_REGNUM, AMD64_RDI_REGNUM,
+  AMD64_R8_REGNUM, AMD64_R9_REGNUM, AMD64_R10_REGNUM, AMD64_R11_REGNUM,
+  AMD64_R12_REGNUM, AMD64_R13_REGNUM, AMD64_R14_REGNUM, AMD64_R15_REGNUM,
+  AMD64_RIP_REGNUM, AMD64_EFLAGS_REGNUM, AMD64_CS_REGNUM, AMD64_SS_REGNUM,
+  AMD64_DS_REGNUM, AMD64_ES_REGNUM, AMD64_FS_REGNUM, AMD64_GS_REGNUM
+};
+
 void
 amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -2050,6 +2060,8 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Avoid wiring in the MMX registers for now.  */
   set_gdbarch_num_pseudo_regs (gdbarch, 0);
   tdep->mm0_regnum = -1;
+
+  tdep->record_regmap = amd64_record_regmap;
 
   set_gdbarch_dummy_id (gdbarch, amd64_dummy_id);
 
