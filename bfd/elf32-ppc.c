@@ -3580,6 +3580,14 @@ ppc_elf_check_relocs (bfd *abfd,
 	    /* This is a global offset table entry for a local symbol.  */
 	    if (!update_local_sym_info (abfd, symtab_hdr, r_symndx, tls_type))
 	      return FALSE;
+
+	  /* We may also need a plt entry if the symbol turns out to be
+	     an ifunc.  */
+	  if (h != NULL && !info->shared)
+	    {
+	      if (!update_plt_info (abfd, &h->plt.plist, NULL, 0))
+		return FALSE;
+	    }
 	  break;
 
 	  /* Indirect .sdata relocation.  */
@@ -4465,6 +4473,14 @@ ppc_elf_gc_sweep_hook (bfd *abfd,
 	    {
 	      if (h->got.refcount > 0)
 		h->got.refcount--;
+	      if (!info->shared)
+		{
+		  struct plt_entry *ent;
+
+		  ent = find_plt_ent (&h->plt.plist, NULL, 0);
+		  if (ent->plt.refcount > 0)
+		    ent->plt.refcount -= 1;
+		}
 	    }
 	  else if (local_got_refcounts != NULL)
 	    {
@@ -4827,6 +4843,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   htab = ppc_elf_hash_table (info);
   BFD_ASSERT (htab->elf.dynobj != NULL
 	      && (h->needs_plt
+		  || h->type == STT_GNU_IFUNC
 		  || h->u.weakdef != NULL
 		  || (h->def_dynamic
 		      && h->ref_regular
@@ -5289,18 +5306,14 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	eh->elf.got.offset = (bfd_vma) -1;
       else
 	{
-	  asection *rsec = NULL;
 	  eh->elf.got.offset = allocate_got (htab, need);
 	  dyn = htab->elf.dynamic_sections_created;
 	  if ((info->shared
 	       || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, &eh->elf))
 	      && (ELF_ST_VISIBILITY (eh->elf.other) == STV_DEFAULT
 		  || eh->elf.root.type != bfd_link_hash_undefweak))
-	    rsec = htab->relgot;
-	  else if (h->type == STT_GNU_IFUNC)
-	    rsec = htab->reliplt;
-	  if (rsec != NULL)
 	    {
+	      asection *rsec = htab->relgot;
 	      /* All the entries we allocated need relocs.
 		 Except LD only needs one.  */
 	      if ((eh->tls_mask & TLS_LD) != 0
@@ -5571,9 +5584,6 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 		if (info->shared)
 		  htab->relgot->size += (need
 					 * (sizeof (Elf32_External_Rela) / 4));
-		else if ((*lgot_masks & PLT_IFUNC) != 0)
-		  htab->reliplt->size += (need
-					  * (sizeof (Elf32_External_Rela) / 4));
 	      }
 	  }
 	else
@@ -7137,7 +7147,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      off &= ~1;
 	    else
 	      {
-		asection *rsec;
 		unsigned int tls_m = (tls_mask
 				      & (TLS_LD | TLS_GD | TLS_DTPREL
 					 | TLS_TPREL | TLS_TPRELGD));
@@ -7176,17 +7185,14 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		      }
 
 		    /* Generate relocs for the dynamic linker.  */
-		    rsec = NULL;
 		    if ((info->shared || indx != 0)
 			&& (offp == &htab->tlsld_got.offset
 			    || h == NULL
 			    || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 			    || h->root.type != bfd_link_hash_undefweak))
-		      rsec = htab->relgot;
-		    else if (ifunc != NULL)
-		      rsec = htab->reliplt;
-		    if (rsec != NULL)
 		      {
+			asection *rsec = htab->relgot;
+
 			outrel.r_offset = (htab->got->output_section->vma
 					   + htab->got->output_offset
 					   + off);

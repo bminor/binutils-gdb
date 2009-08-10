@@ -2605,6 +2605,7 @@ _bfd_elf_adjust_dynamic_symbol (struct elf_link_hash_entry *h, void *data)
      about symbols which are defined by one dynamic object and
      referenced by another one?  */
   if (!h->needs_plt
+      && h->type != STT_GNU_IFUNC
       && (h->def_regular
 	  || !h->def_dynamic
 	  || (!h->ref_regular
