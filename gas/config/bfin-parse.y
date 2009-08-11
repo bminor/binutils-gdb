@@ -394,6 +394,16 @@ gen_multi_instr_1 (INSTR_T dsp32, INSTR_T dsp16_grp1, INSTR_T dsp16_grp2)
 
   if ((mask1 & mask2) || (mask1 & mask3) || (mask2 & mask3))
     yyerror ("resource conflict in multi-issue instruction");
+
+  /* Anomaly 05000074 */
+  if (ENABLE_AC_05000074
+      && (dsp32->value & 0xf780) == 0xc680
+      && ((dsp16_grp1->value & 0xfe40) == 0x9240
+	  || (dsp16_grp1->value & 0xfe08) == 0xba08
+	  || (dsp16_grp1->value & 0xfc00) == 0xbc00))
+    yyerror ("anomaly 05000074 - Multi-Issue Instruction with \
+dsp32shiftimm in slot1 and P-reg Store in slot2 Not Supported");
+
   return bfin_gen_multi_instr (dsp32, dsp16_grp1, dsp16_grp2);
 }
 

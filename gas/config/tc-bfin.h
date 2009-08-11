@@ -78,4 +78,10 @@ extern long md_pcrel_from_section (struct fix *, segT);
 /* This target is buggy, and sets fix size too large.  */
 #define TC_FX_SIZE_SLACK(FIX) 2
 
+extern unsigned int bfin_anomaly_checks;
+
+/* Anomaly checking */
+#define AC_05000074 0x00000001
+#define ENABLE_AC_05000074 (bfin_anomaly_checks & AC_05000074)
+
 /* end of tc-bfin.h */

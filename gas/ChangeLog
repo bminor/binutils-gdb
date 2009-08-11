@@ -12,6 +12,27 @@
 	decode_dsp32alu_0, decode_dsp32shift_0, decode_dsp32shitimm_0,
 	insn_regmask): New functions.
 
+	From Jie Zhang  <jie.zhang@analog.com>
+	* config/tc-bfin.h (bfin_anomaly_checks): Declare.
+	(AC_05000074): Define.
+	(ENABLE_AC_05000074): Define.
+	* config/tc-bfin.c (enum bfin_cpu_type): New.
+	(bfin_cpu_t): Typedef.
+	(bfin_cpu_type): Define.
+	(bfin_si_revision): Define.
+	(bfin_anomaly_checks): Define.
+	(struct bfin_cpu): New.
+	(bfin_cpus[]): New. (struct bfin_cpu_isa): Define.
+	(bfin_isa): New global variable.
+	(OPTION_MCPU): Define.
+	(md_longopts[]): Add -mcpu option.
+	(md_parse_option): Deal with -mcpu option and initialize
+	bfin_anomaly_checks.
+	* doc/c-bfin.texi: Rename BFIN to Blackfin throughout.  Document
+	-mcpu option.
+	* config/bfin-parse.y (gen_multi_instr_1): Check anomaly
+	05000074.
+
 2009-08-11  Mike Frysinger  <vapier@gentoo.org>
 
 	* config/bfin-parse.y (binary): Change "compiler" to "assembler".
