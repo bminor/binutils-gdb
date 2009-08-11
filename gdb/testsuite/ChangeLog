@@ -1,3 +1,9 @@
+2009-08-11  Nathan Froyd  <froydnj@codesourcery.com>
+
+	* gdb.arch/altivec-abi.exp (altivec_abi_tests): Turn on printing of
+	all frame arguments.
+	* gdb.arch/altivec-regs.exp: Likewise.
+
 2009-08-07  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/setshow.exp: Add tests for changes to set language, set

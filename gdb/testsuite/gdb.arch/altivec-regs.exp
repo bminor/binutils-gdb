@@ -70,6 +70,8 @@ if ![runto_main] then {
     gdb_suppress_tests
 }
 
+gdb_test "set print frame-arguments all"
+
 # set all the registers integer portions to 1
 for {set i 0} {$i < 32} {incr i 1} {
         for {set j 0} {$j < 4} {incr j 1} {

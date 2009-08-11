@@ -73,6 +73,7 @@ proc altivec_abi_tests { extra_flags force_abi } {
 	return -1
     }
 
+    gdb_test "set print frame-arguments all"
     gdb_test "set powerpc vector-abi $force_abi"
 
     gdb_test "b marker" "Breakpoint 2 at.*file.*altivec-abi.c, line \[0-9\]+." "break marker"
