@@ -74,18 +74,14 @@ class Output_data_plt_arm;
 // R_ARM_TARGET1
 // R_ARM_PREL31
 // 
-// Coming soon (pending patches):
-// - Defining section symbols __exidx_start and __exidx_stop.
-// - Support interworking.
-// - Mergeing all .ARM.xxx.yyy sections into .ARM.xxx.  Currently, they
-//   are incorrectly merged into an .ARM section.
-//
 // TODOs:
-// - Create a PT_ARM_EXIDX program header for a shared object that
-//   might throw an exception.
+// - Generate various branch stubs.
+// - Support interworking.
+// - Define section symbols __exidx_start and __exidx_stop.
 // - Support more relocation types as needed. 
 // - Make PLTs more flexible for different architecture features like
 //   Thumb-2 and BE8.
+// There are probably a lot more.
 
 // Utilities for manipulating integers of up to 32-bits
 
@@ -1463,6 +1459,25 @@ Target_arm<big_endian>::do_finalize_sections(Layout* layout)
   // relocs.
   if (this->copy_relocs_.any_saved_relocs())
     this->copy_relocs_.emit(this->rel_dyn_section(layout));
+
+  // For the ARM target, we need to add a PT_ARM_EXIDX segment for
+  // the .ARM.exidx section.
+  if (!layout->script_options()->saw_phdrs_clause()
+      && !parameters->options().relocatable())
+    {
+      Output_section* exidx_section =
+	layout->find_output_section(".ARM.exidx");
+
+      if (exidx_section != NULL
+	  && exidx_section->type() == elfcpp::SHT_ARM_EXIDX)
+	{
+	  gold_assert(layout->find_output_segment(elfcpp::PT_ARM_EXIDX, 0, 0)
+		      == NULL);
+	  Output_segment*  exidx_segment =
+	    layout->make_output_segment(elfcpp::PT_ARM_EXIDX, elfcpp::PF_R);
+	  exidx_segment->add_output_section(exidx_section, elfcpp::PF_R);
+	}
+    }
 }
 
 // Return whether a direct absolute static relocation needs to be applied.

@@ -1,3 +1,9 @@
+2009-08-11  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc: Update comments.
+	(Target_arm::do_finalize_sections): Add a special PT_ARM_EXIDX
+	segment to locate the .ARM.exidx section if present.
+
 2009-08-09  Doug Kwan  <dougkwan@google.com>
 
 	* dynobj.h (Sized_dynobj::do_section_entsize): Revert the previous
