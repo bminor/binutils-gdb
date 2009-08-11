@@ -1,3 +1,9 @@
+2009-08-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.in:  Remove elf-ifunc.lo from common ELF files.  Add
+	to x86 and x86_64 configurations.
+	* configure: Regenerate.
+
 2009-08-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Stop using bfd_usrdata in libbfd.
