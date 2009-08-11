@@ -131,6 +131,8 @@ struct dwarf_expr_piece
 
 struct dwarf_expr_context *new_dwarf_expr_context (void);
 void free_dwarf_expr_context (struct dwarf_expr_context *ctx);
+struct cleanup *
+    make_cleanup_free_dwarf_expr_context (struct dwarf_expr_context *ctx);
 
 void dwarf_expr_push (struct dwarf_expr_context *ctx, CORE_ADDR value);
 void dwarf_expr_pop (struct dwarf_expr_context *ctx);

@@ -61,6 +61,22 @@ free_dwarf_expr_context (struct dwarf_expr_context *ctx)
   xfree (ctx);
 }
 
+/* Helper for make_cleanup_free_dwarf_expr_context.  */
+
+static void
+free_dwarf_expr_context_cleanup (void *arg)
+{
+  free_dwarf_expr_context (arg);
+}
+
+/* Return a cleanup that calls free_dwarf_expr_context.  */
+
+struct cleanup *
+make_cleanup_free_dwarf_expr_context (struct dwarf_expr_context *ctx)
+{
+  return make_cleanup (free_dwarf_expr_context_cleanup, ctx);
+}
+
 /* Expand the memory allocated to CTX's stack to contain at least
    NEED more elements than are currently used.  */
 

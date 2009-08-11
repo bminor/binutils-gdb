@@ -1,3 +1,12 @@
+2009-08-11  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc): Make a cleanup.
+	(dwarf2_loc_desc_needs_frame): Likewise.
+	* dwarf2expr.h (make_cleanup_free_dwarf_expr_context): Declare.
+	* dwarf2expr.c (free_dwarf_expr_context_cleanup): New function.
+	(make_cleanup_free_dwarf_expr_context): Likewise.
+	* dwarf2-frame.c (execute_stack_op): Make a cleanup.
+
 2009-08-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* objfiles.c (gdb_bfd_unref): Use the bfd_usrdata accessor.

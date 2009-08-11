@@ -352,8 +352,11 @@ execute_stack_op (gdb_byte *exp, ULONGEST len, int addr_size,
 {
   struct dwarf_expr_context *ctx;
   CORE_ADDR result;
+  struct cleanup *old_chain;
 
   ctx = new_dwarf_expr_context ();
+  old_chain = make_cleanup_free_dwarf_expr_context (ctx);
+
   ctx->gdbarch = get_frame_arch (this_frame);
   ctx->addr_size = addr_size;
   ctx->baton = this_frame;
@@ -369,7 +372,7 @@ execute_stack_op (gdb_byte *exp, ULONGEST len, int addr_size,
   if (ctx->in_reg)
     result = read_reg (this_frame, result);
 
-  free_dwarf_expr_context (ctx);
+  do_cleanups (old_chain);
 
   return result;
 }
