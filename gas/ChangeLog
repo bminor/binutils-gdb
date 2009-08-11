@@ -1,3 +1,17 @@
+2009-08-11  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* config/bfin-parse.y (gen_multi_instr_1): New function.
+	(asm): Use it instead of bfin_gen_multi_instr.
+	(error): Add a format string when calling as_bad.
+	* config/bfin-defs.h (insn_regmask): Declare.
+	* config/tc-bfin.c (DREG_MASK, DREGH_MASK, DREGL_MASK, IREG_MASK): New
+	macros.
+	(decode_ProgCtrl_0, decode_LDSTpmod_0, decode_dagMODim_0,
+	decode_dagMODik_0, decode_dspLDST_0, decode_LDST_0, decode_LDSTiiFP_0,
+	decode_LDSTii_0, decode_dsp32mac_0, decode_dsp32mult_0,
+	decode_dsp32alu_0, decode_dsp32shift_0, decode_dsp32shitimm_0,
+	insn_regmask): New functions.
+
 2009-08-11  Mike Frysinger  <vapier@gentoo.org>
 
 	* config/bfin-parse.y (binary): Change "compiler" to "assembler".

@@ -1164,8 +1164,7 @@ Expr_Node_Gen_Reloc_R (Expr_Node * head)
     }
   return note;
 }
-
-
+
 /* Blackfin opcode generation.  */
 
 /* These functions are called by the generated parser
@@ -1963,4 +1962,744 @@ bfin_force_relocation (struct fix *fixp)
     return TRUE;
 
   return generic_force_reloc (fixp);
+}
+
+/* This is a stripped down version of the disassembler.  The only thing it
+   does is return a mask of registers modified by an instruction.  Only
+   instructions that can occur in a parallel-issue bundle are handled, and
+   only the registers that can cause a conflict are recorded.  */
+
+#define DREG_MASK(n) (0x101 << (n))
+#define DREGH_MASK(n) (0x100 << (n))
+#define DREGL_MASK(n) (0x001 << (n))
+#define IREG_MASK(n) (1 << ((n) + 16))
+
+static int
+decode_ProgCtrl_0 (int iw0)
+{
+  if (iw0 == 0)
+    return 0;
+  abort ();
+}
+
+static int
+decode_LDSTpmod_0 (int iw0)
+{
+  /* LDSTpmod
+     +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+
+     | 1 | 0 | 0 | 0 |.W.|.aop...|.reg.......|.idx.......|.ptr.......|
+     +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+  */
+  int W   = ((iw0 >> LDSTpmod_W_bits) & LDSTpmod_W_mask);
+  int aop = ((iw0 >> LDSTpmod_aop_bits) & LDSTpmod_aop_mask);
+  int idx = ((iw0 >> LDSTpmod_idx_bits) & LDSTpmod_idx_mask);
+  int ptr = ((iw0 >> LDSTpmod_ptr_bits) & LDSTpmod_ptr_mask);
+  int reg = ((iw0 >> LDSTpmod_reg_bits) & LDSTpmod_reg_mask);
+
+  if (aop == 1 && W == 0 && idx == ptr)
+    return DREGL_MASK (reg);
+  else if (aop == 2 && W == 0 && idx == ptr)
+    return DREGH_MASK (reg);
+  else if (aop == 1 && W == 1 && idx == ptr)
+    return 0;
+  else if (aop == 2 && W == 1 && idx == ptr)
+    return 0;
+  else if (aop == 0 && W == 0)
+    return DREG_MASK (reg);
+  else if (aop == 1 && W == 0)
+    return DREGL_MASK (reg);
+  else if (aop == 2 && W == 0)
+    return DREGH_MASK (reg);
+  else if (aop == 3 && W == 0)
+    return DREG_MASK (reg);
+  else if (aop == 3 && W == 1)
+    return DREG_MASK (reg);
+  else if (aop == 0 && W == 1)
+    return 0;
+  else if (aop == 1 && W == 1)
+    return 0;
+  else if (aop == 2 && W == 1)
+    return 0;
+  else
+    return 0;
+
+  return 2;
+}
+
+static int
+decode_dagMODim_0 (int iw0)
+{
+  /* dagMODim
+     +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+
+     | 1 | 0 | 0 | 1 | 1 | 1 | 1 | 0 |.br| 1 | 1 |.op|.m.....|.i.....|
+     +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+  */
+  int i  = ((iw0 >> DagMODim_i_bits) & DagMODim_i_mask);
+  int op  = ((iw0 >> DagMODim_op_bits) & DagMODim_op_mask);
+
+  if (op == 0 || op == 1)
+    return IREG_MASK (i);
+  else
+    return 0;
+
+  return 2;
+}
+
+static int
+decode_dagMODik_0 (int iw0)
+{
+  /* dagMODik
+     +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+
+     | 1 | 0 | 0 | 1 | 1 | 1 | 1 | 1 | 0 | 1 | 1 | 0 |.op....|.i.....|
+     +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+  */
+  int i  = ((iw0 >> DagMODik_i_bits) & DagMODik_i_mask);
+  return IREG_MASK (i);
+}
+
+/* GOOD */
+static int
+decode_dspLDST_0 (int iw0)
+{
+  /* dspLDST
+     +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+
+     | 1 | 0 | 0 | 1 | 1 | 1 |.W.|.aop...|.m.....|.i.....|.reg.......|
+     +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+  */
+  int i   = ((iw0 >> DspLDST_i_bits) & DspLDST_i_mask);
+  int m   = ((iw0 >> DspLDST_m_bits) & DspLDST_m_mask);
+  int W   = ((iw0 >> DspLDST_W_bits) & DspLDST_W_mask);
+  int aop = ((iw0 >> DspLDST_aop_bits) & DspLDST_aop_mask);
+  int reg = ((iw0 >> DspLDST_reg_bits) & DspLDST_reg_mask);
+
+  if (aop == 0 && W == 0 && m == 0)
+    return DREG_MASK (reg) | IREG_MASK (i);
+  else if (aop == 0 && W == 0 && m == 1)
+    return DREGL_MASK (reg) | IREG_MASK (i);
+  else if (aop == 0 && W == 0 && m == 2)
+    return DREGH_MASK (reg) | IREG_MASK (i);
+  else if (aop == 1 && W == 0 && m == 0)
+    return DREG_MASK (reg) | IREG_MASK (i);
+  else if (aop == 1 && W == 0 && m == 1)
+    return DREGL_MASK (reg) | IREG_MASK (i);
+  else if (aop == 1 && W == 0 && m == 2)
+    return DREGH_MASK (reg) | IREG_MASK (i);
+  else if (aop == 2 && W == 0 && m == 0)
+    return DREG_MASK (reg);
+  else if (aop == 2 && W == 0 && m == 1)
+    return DREGL_MASK (reg);
+  else if (aop == 2 && W == 0 && m == 2)
+    return DREGH_MASK (reg);
+  else if (aop == 0 && W == 1 && m == 0)
+    return IREG_MASK (i);
+  else if (aop == 0 && W == 1 && m == 1)
+    return IREG_MASK (i);
+  else if (aop == 0 && W == 1 && m == 2)
+    return IREG_MASK (i);
+  else if (aop == 1 && W == 1 && m == 0)
+    return IREG_MASK (i);
+  else if (aop == 1 && W == 1 && m == 1)
+    return IREG_MASK (i);
+  else if (aop == 1 && W == 1 && m == 2)
+    return IREG_MASK (i);
+  else if (aop == 2 && W == 1 && m == 0)
+    return 0;
+  else if (aop == 2 && W == 1 && m == 1)
+    return 0;
+  else if (aop == 2 && W == 1 && m == 2)
+    return 0;
+  else if (aop == 3 && W == 0)
+    return DREG_MASK (reg) | IREG_MASK (i);
+  else if (aop == 3 && W == 1)
+    return IREG_MASK (i);
+
+  abort ();
+}
+
+/* GOOD */
+static int
+decode_LDST_0 (int iw0)
+{
+  /* LDST
+     +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+
+     | 1 | 0 | 0 | 1 |.sz....|.W.|.aop...|.Z.|.ptr.......|.reg.......|
+     +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+  */
+  int Z   = ((iw0 >> LDST_Z_bits) & LDST_Z_mask);
+  int W   = ((iw0 >> LDST_W_bits) & LDST_W_mask);
+  int sz  = ((iw0 >> LDST_sz_bits) & LDST_sz_mask);
+  int aop = ((iw0 >> LDST_aop_bits) & LDST_aop_mask);
+  int reg = ((iw0 >> LDST_reg_bits) & LDST_reg_mask);
+
+  if (aop == 0 && sz == 0 && Z == 0 && W == 0)
+    return DREG_MASK (reg);
+  else if (aop == 0 && sz == 0 && Z == 1 && W == 0)
+    return 0;
+  else if (aop == 0 && sz == 1 && Z == 0 && W == 0)
+    return DREG_MASK (reg);
+  else if (aop == 0 && sz == 1 && Z == 1 && W == 0)
+    return DREG_MASK (reg);
+  else if (aop == 0 && sz == 2 && Z == 0 && W == 0)
+    return DREG_MASK (reg);
+  else if (aop == 0 && sz == 2 && Z == 1 && W == 0)
+    return DREG_MASK (reg);
+  else if (aop == 1 && sz == 0 && Z == 0 && W == 0)
+    return DREG_MASK (reg);
+  else if (aop == 1 && sz == 0 && Z == 1 && W == 0)
+    return 0;
+  else if (aop == 1 && sz == 1 && Z == 0 && W == 0)
+    return DREG_MASK (reg);
+  else if (aop == 1 && sz == 1 && Z == 1 && W == 0)
+    return DREG_MASK (reg);
+  else if (aop == 1 && sz == 2 && Z == 0 && W == 0)
+    return DREG_MASK (reg);
+  else if (aop == 1 && sz == 2 && Z == 1 && W == 0)
+    return DREG_MASK (reg);
+  else if (aop == 2 && sz == 0 && Z == 0 && W == 0)
+    return DREG_MASK (reg);
+  else if (aop == 2 && sz == 0 && Z == 1 && W == 0)
+    return 0;
+  else if (aop == 2 && sz == 1 && Z == 0 && W == 0)
+    return DREG_MASK (reg);
+  else if (aop == 2 && sz == 1 && Z == 1 && W == 0)
+    return DREG_MASK (reg);
+  else if (aop == 2 && sz == 2 && Z == 0 && W == 0)
+    return DREG_MASK (reg);
+  else if (aop == 2 && sz == 2 && Z == 1 && W == 0)
+    return DREG_MASK (reg);
+  else if (aop == 0 && sz == 0 && Z == 0 && W == 1)
+    return 0;
+  else if (aop == 0 && sz == 0 && Z == 1 && W == 1)
+    return 0;
+  else if (aop == 0 && sz == 1 && Z == 0 && W == 1)
+    return 0;
+  else if (aop == 0 && sz == 2 && Z == 0 && W == 1)
+    return 0;
+  else if (aop == 1 && sz == 0 && Z == 0 && W == 1)
+    return 0;
+  else if (aop == 1 && sz == 0 && Z == 1 && W == 1)
+    return 0;
+  else if (aop == 1 && sz == 1 && Z == 0 && W == 1)
+    return 0;
+  else if (aop == 1 && sz == 2 && Z == 0 && W == 1)
+    return 0;
+  else if (aop == 2 && sz == 0 && Z == 0 && W == 1)
+    return 0;
+  else if (aop == 2 && sz == 0 && Z == 1 && W == 1)
+    return 0;
+  else if (aop == 2 && sz == 1 && Z == 0 && W == 1)
+    return 0;
+  else if (aop == 2 && sz == 2 && Z == 0 && W == 1)
+    return 0;
+
+  abort ();
+}
+
+static int
+decode_LDSTiiFP_0 (int iw0)
+{
+  /* LDSTiiFP
+     +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+
+     | 1 | 0 | 1 | 1 | 1 | 0 |.W.|.offset............|.reg...........|
+     +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+  */
+  int reg = ((iw0 >> LDSTiiFP_reg_bits) & LDSTiiFP_reg_mask);
+  int W = ((iw0 >> LDSTiiFP_W_bits) & LDSTiiFP_W_mask);
+
+  if (W == 0)
+    return reg < 8 ? DREG_MASK (reg) : 0;
+  else
+    return 0;
+}
+
+static int
+decode_LDSTii_0 (int iw0)
+{
+  /* LDSTii
+     +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+
+     | 1 | 0 | 1 |.W.|.op....|.offset........|.ptr.......|.reg.......|
+     +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+  */
+  int reg = ((iw0 >> LDSTii_reg_bit) & LDSTii_reg_mask);
+  int op = ((iw0 >> LDSTii_op_bit) & LDSTii_op_mask);
+  int W = ((iw0 >> LDSTii_W_bit) & LDSTii_W_mask);
+
+  if (W == 0 && op != 3)
+    return DREG_MASK (reg);
+  else if (W == 0 && op == 3)
+   return 0;
+  else if (W == 1 && op == 0)
+    return 0;
+  else if (W == 1 && op == 1)
+    return 0;
+  else if (W == 1 && op == 3)
+    return 0;
+
+  abort ();
+}
+
+static int
+decode_dsp32mac_0 (int iw0, int iw1)
+{
+  int result = 0;
+  /* dsp32mac
+     +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+
+     | 1 | 1 | 0 | 0 |.M.| 0 | 0 |.mmod..........|.MM|.P.|.w1|.op1...|
+     |.h01|.h11|.w0|.op0...|.h00|.h10|.dst.......|.src0......|.src1..|
+     +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+  */
+  int op1  = ((iw0 >> (DSP32Mac_op1_bits - 16)) & DSP32Mac_op1_mask);
+  int w1   = ((iw0 >> (DSP32Mac_w1_bits - 16)) & DSP32Mac_w1_mask);
+  int P    = ((iw0 >> (DSP32Mac_p_bits - 16)) & DSP32Mac_p_mask);
+  int mmod = ((iw0 >> (DSP32Mac_mmod_bits - 16)) & DSP32Mac_mmod_mask);
+  int w0   = ((iw1 >> DSP32Mac_w0_bits) & DSP32Mac_w0_mask);
+  int MM   = ((iw1 >> DSP32Mac_MM_bits) & DSP32Mac_MM_mask);
+  int dst  = ((iw1 >> DSP32Mac_dst_bits) & DSP32Mac_dst_mask);
+  int op0  = ((iw1 >> DSP32Mac_op0_bits) & DSP32Mac_op0_mask);
+
+  if (w0 == 0 && w1 == 0 && op1 == 3 && op0 == 3)
+    return 0;
+
+  if (op1 == 3 && MM)
+    return 0;
+
+  if ((w1 || w0) && mmod == M_W32)
+    return 0;
+
+  if (((1 << mmod) & (P ? 0x131b : 0x1b5f)) == 0)
+    return 0;
+
+  if (w1 == 1 || op1 != 3)
+    {
+      if (w1)
+	{
+	  if (P)
+	    return DREG_MASK (dst + 1);
+	  else
+	    return DREGH_MASK (dst);
+	}
+    }
+
+  if (w0 == 1 || op0 != 3)
+    {
+      if (w0)
+	{
+	  if (P)
+	    return DREG_MASK (dst);
+	  else
+	    return DREGL_MASK (dst);
+	}
+    }
+
+  return result;
+}
+
+static int
+decode_dsp32mult_0 (int iw0, int iw1)
+{
+  /* dsp32mult
+     +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+
+     | 1 | 1 | 0 | 0 |.M.| 0 | 1 |.mmod..........|.MM|.P.|.w1|.op1...|
+     |.h01|.h11|.w0|.op0...|.h00|.h10|.dst.......|.src0......|.src1..|
+     +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+  */
+  int w1   = ((iw0 >> (DSP32Mac_w1_bits - 16)) & DSP32Mac_w1_mask);
+  int P    = ((iw0 >> (DSP32Mac_p_bits - 16)) & DSP32Mac_p_mask);
+  int mmod = ((iw0 >> (DSP32Mac_mmod_bits - 16)) & DSP32Mac_mmod_mask);
+  int w0   = ((iw1 >> DSP32Mac_w0_bits) & DSP32Mac_w0_mask);
+  int dst  = ((iw1 >> DSP32Mac_dst_bits) & DSP32Mac_dst_mask);
+  int result = 0;
+
+  if (w1 == 0 && w0 == 0)
+    return 0;
+
+  if (((1 << mmod) & (P ? 0x313 : 0x1b57)) == 0)
+    return 0;
+
+  if (w1)
+    {
+      if (P)
+	return DREG_MASK (dst | 1);
+      else
+	return DREGH_MASK (dst);
+    }
+
+  if (w0)
+    {
+      if (P)
+	return DREG_MASK (dst);
+      else
+	return DREGL_MASK (dst);
+    }
+
+  return result;
+}
+
+static int
+decode_dsp32alu_0 (int iw0, int iw1)
+{
+  /* dsp32alu
+     +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+
+     | 1 | 1 | 0 | 0 |.M.| 1 | 0 | - | - | - |.HL|.aopcde............|
+     |.aop...|.s.|.x.|.dst0......|.dst1......|.src0......|.src1......|
+     +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+  */
+  int s    = ((iw1 >> DSP32Alu_s_bits) & DSP32Alu_s_mask);
+  int x    = ((iw1 >> DSP32Alu_x_bits) & DSP32Alu_x_mask);
+  int aop  = ((iw1 >> DSP32Alu_aop_bits) & DSP32Alu_aop_mask);
+  int dst0 = ((iw1 >> DSP32Alu_dst0_bits) & DSP32Alu_dst0_mask);
+  int dst1 = ((iw1 >> DSP32Alu_dst1_bits) & DSP32Alu_dst1_mask);
+  int HL   = ((iw0 >> (DSP32Alu_HL_bits - 16)) & DSP32Alu_HL_mask);
+  int aopcde = ((iw0 >> (DSP32Alu_aopcde_bits - 16)) & DSP32Alu_aopcde_mask);
+
+  if (aop == 0 && aopcde == 9 && s == 0)
+    return 0;
+  else if (aop == 2 && aopcde == 9 && HL == 0 && s == 0)
+    return 0;
+  else if (aop >= x * 2 && aopcde == 5)
+    return HL ? DREGH_MASK (dst0) : DREGL_MASK (dst0);
+  else if (HL == 0 && aopcde == 2)
+    return DREGL_MASK (dst0);
+  else if (HL == 1 && aopcde == 2)
+    return DREGH_MASK (dst0);
+  else if (HL == 0 && aopcde == 3)
+    return DREGL_MASK (dst0);
+  else if (HL == 1 && aopcde == 3)
+    return DREGH_MASK (dst0);
+
+  else if (aop == 0 && aopcde == 9 && s == 1)
+    return 0;
+  else if (aop == 1 && aopcde == 9 && s == 0)
+    return 0;
+  else if (aop == 2 && aopcde == 9 && s == 1)
+    return 0;
+  else if (aop == 3 && aopcde == 9 && s == 0)
+    return 0;
+  else if (aopcde == 8)
+    return 0;
+  else if (aop == 0 && aopcde == 11)
+    return DREG_MASK (dst0);
+  else if (aop == 1 && aopcde == 11)
+    return HL ? DREGH_MASK (dst0) : DREGL_MASK (dst0);
+  else if (aopcde == 11)
+    return 0;
+  else if (aopcde == 22)
+    return DREG_MASK (dst0);
+
+  else if ((aop == 0 || aop == 1) && aopcde == 14)
+    return 0;
+  else if (aop == 3 && HL == 0 && aopcde == 14)
+    return 0;
+
+  else if (aop == 3 && HL == 0 && aopcde == 15)
+    return DREG_MASK (dst0);
+
+  else if (aop == 1 && aopcde == 16)
+    return 0;
+
+  else if (aop == 0 && aopcde == 16)
+    return 0;
+
+  else if (aop == 3 && HL == 0 && aopcde == 16)
+    return 0;
+
+  else if (aop == 3 && HL == 0 && aopcde == 7)
+    return DREG_MASK (dst0);
+  else if ((aop == 0 || aop == 1 || aop == 2) && aopcde == 7)
+    return DREG_MASK (dst0);
+
+  else if (aop == 0 && aopcde == 12)
+    return DREG_MASK (dst0);
+  else if (aop == 1 && aopcde == 12)
+    return DREG_MASK (dst0) | DREG_MASK (dst1);
+  else if (aop == 3 && aopcde == 12)
+    return HL ? DREGH_MASK (dst0) : DREGL_MASK (dst0);
+
+  else if (aopcde == 0)
+    return DREG_MASK (dst0);
+  else if (aopcde == 1)
+    return DREG_MASK (dst0) | DREG_MASK (dst1);
+
+  else if (aop == 0 && aopcde == 10)
+    return DREGL_MASK (dst0);
+  else if (aop == 1 && aopcde == 10)
+    return DREGL_MASK (dst0);
+
+  else if ((aop == 1 || aop == 0) && aopcde == 4)
+    return DREG_MASK (dst0);
+  else if (aop == 2 && aopcde == 4)
+    return DREG_MASK (dst0) | DREG_MASK (dst1);
+
+  else if (aop == 0 && aopcde == 17)
+    return DREG_MASK (dst0) | DREG_MASK (dst1);
+  else if (aop == 1 && aopcde == 17)
+    return DREG_MASK (dst0) | DREG_MASK (dst1);
+  else if (aop == 0 && aopcde == 18)
+    return 0;
+  else if (aop == 3 && aopcde == 18)
+    return 0;
+
+  else if ((aop == 0 || aop == 1 || aop == 2) && aopcde == 6)
+    return DREG_MASK (dst0);
+
+  else if ((aop == 0 || aop == 1) && aopcde == 20)
+    return DREG_MASK (dst0);
+
+  else if ((aop == 0 || aop == 1) && aopcde == 21)
+    return DREG_MASK (dst0) | DREG_MASK (dst1);
+
+  else if (aop == 0 && aopcde == 23 && HL == 1)
+    return DREG_MASK (dst0);
+  else if (aop == 0 && aopcde == 23 && HL == 0)
+    return DREG_MASK (dst0);
+
+  else if (aop == 0 && aopcde == 24)
+    return DREG_MASK (dst0);
+  else if (aop == 1 && aopcde == 24) 
+    return DREG_MASK (dst0) | DREG_MASK (dst1);
+  else if (aopcde == 13)
+    return DREG_MASK (dst0) | DREG_MASK (dst1);
+  else
+    return 0;
+
+  return 4;
+}
+
+static int
+decode_dsp32shift_0 (int iw0, int iw1)
+{
+  /* dsp32shift
+     +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+
+     | 1 | 1 | 0 | 0 |.M.| 1 | 1 | 0 | 0 | - | - |.sopcde............|
+     |.sop...|.HLs...|.dst0......| - | - | - |.src0......|.src1......|
+     +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+  */
+  int HLs  = ((iw1 >> DSP32Shift_HLs_bits) & DSP32Shift_HLs_mask);
+  int sop  = ((iw1 >> DSP32Shift_sop_bits) & DSP32Shift_sop_mask);
+  int src0 = ((iw1 >> DSP32Shift_src0_bits) & DSP32Shift_src0_mask);
+  int src1 = ((iw1 >> DSP32Shift_src1_bits) & DSP32Shift_src1_mask);
+  int dst0 = ((iw1 >> DSP32Shift_dst0_bits) & DSP32Shift_dst0_mask);
+  int sopcde = ((iw0 >> (DSP32Shift_sopcde_bits - 16)) & DSP32Shift_sopcde_mask);
+
+  if (sop == 0 && sopcde == 0)
+    return HLs & 2 ? DREGH_MASK (dst0) : DREGL_MASK (dst0);
+  else if (sop == 1 && sopcde == 0)
+    return HLs & 2 ? DREGH_MASK (dst0) : DREGL_MASK (dst0);
+  else if (sop == 2 && sopcde == 0)
+    return HLs & 2 ? DREGH_MASK (dst0) : DREGL_MASK (dst0);
+  else if (sop == 0 && sopcde == 3)
+    return 0;
+  else if (sop == 1 && sopcde == 3)
+    return 0;
+  else if (sop == 2 && sopcde == 3)
+    return 0;
+  else if (sop == 3 && sopcde == 3)
+    return DREG_MASK (dst0);
+  else if (sop == 0 && sopcde == 1)
+    return DREG_MASK (dst0);
+  else if (sop == 1 && sopcde == 1)
+    return DREG_MASK (dst0);
+  else if (sop == 2 && sopcde == 1)
+    return DREG_MASK (dst0);
+  else if (sopcde == 2)
+    return DREG_MASK (dst0);
+  else if (sopcde == 4)
+    return DREG_MASK (dst0);
+  else if (sop == 0 && sopcde == 5)
+    return DREGL_MASK (dst0);
+  else if (sop == 1 && sopcde == 5)
+    return DREGL_MASK (dst0);
+  else if (sop == 2 && sopcde == 5)
+    return DREGL_MASK (dst0);
+  else if (sop == 0 && sopcde == 6)
+    return DREGL_MASK (dst0);
+  else if (sop == 1 && sopcde == 6)
+    return DREGL_MASK (dst0);
+  else if (sop == 3 && sopcde == 6)
+    return DREGL_MASK (dst0);
+  else if (sop == 0 && sopcde == 7)
+    return DREGL_MASK (dst0);
+  else if (sop == 1 && sopcde == 7)
+    return DREGL_MASK (dst0);
+  else if (sop == 2 && sopcde == 7)
+    return DREGL_MASK (dst0);
+  else if (sop == 3 && sopcde == 7)
+    return DREGL_MASK (dst0);
+  else if (sop == 0 && sopcde == 8)
+    return DREG_MASK (src0) | DREG_MASK (src1);
+#if 0
+    {
+      OUTS (outf, "BITMUX (");
+      OUTS (outf, dregs (src0));
+      OUTS (outf, ", ");
+      OUTS (outf, dregs (src1));
+      OUTS (outf, ", A0) (ASR)");
+    }
+#endif
+  else if (sop == 1 && sopcde == 8)
+    return DREG_MASK (src0) | DREG_MASK (src1);
+#if 0
+    {
+      OUTS (outf, "BITMUX (");
+      OUTS (outf, dregs (src0));
+      OUTS (outf, ", ");
+      OUTS (outf, dregs (src1));
+      OUTS (outf, ", A0) (ASL)");
+    }
+#endif
+  else if (sopcde == 9)
+    return sop < 2 ? DREGL_MASK (dst0) : DREG_MASK (dst0);
+  else if (sopcde == 10)
+    return DREG_MASK (dst0);
+  else if (sop == 0 && sopcde == 11)
+    return DREGL_MASK (dst0);
+  else if (sop == 1 && sopcde == 11)
+    return DREGL_MASK (dst0);
+  else if (sop == 0 && sopcde == 12)
+    return 0;
+  else if (sop == 1 && sopcde == 12)
+    return DREGL_MASK (dst0);
+  else if (sop == 0 && sopcde == 13)
+    return DREG_MASK (dst0);
+  else if (sop == 1 && sopcde == 13)
+    return DREG_MASK (dst0);
+  else if (sop == 2 && sopcde == 13)
+    return DREG_MASK (dst0);
+
+  abort ();
+}
+
+static int
+decode_dsp32shiftimm_0 (int iw0, int iw1)
+{
+  /* dsp32shiftimm
+     +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+
+     | 1 | 1 | 0 | 0 |.M.| 1 | 1 | 0 | 1 | - | - |.sopcde............|
+     |.sop...|.HLs...|.dst0......|.immag.................|.src1......|
+     +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+  */
+  int sop      = ((iw1 >> DSP32ShiftImm_sop_bits) & DSP32ShiftImm_sop_mask);
+  int bit8     = ((iw1 >> 8) & 0x1);
+  int dst0     = ((iw1 >> DSP32ShiftImm_dst0_bits) & DSP32ShiftImm_dst0_mask);
+  int sopcde   = ((iw0 >> (DSP32ShiftImm_sopcde_bits - 16)) & DSP32ShiftImm_sopcde_mask);
+  int HLs      = ((iw1 >> DSP32ShiftImm_HLs_bits) & DSP32ShiftImm_HLs_mask);
+
+
+  if (sop == 0 && sopcde == 0)
+    return HLs & 2 ? DREGH_MASK (dst0) : DREGL_MASK (dst0);
+  else if (sop == 1 && sopcde == 0 && bit8 == 0)
+    return HLs & 2 ? DREGH_MASK (dst0) : DREGL_MASK (dst0);
+  else if (sop == 1 && sopcde == 0 && bit8 == 1)
+    return HLs & 2 ? DREGH_MASK (dst0) : DREGL_MASK (dst0);
+  else if (sop == 2 && sopcde == 0 && bit8 == 0)
+    return HLs & 2 ? DREGH_MASK (dst0) : DREGL_MASK (dst0);
+  else if (sop == 2 && sopcde == 0 && bit8 == 1)
+    return HLs & 2 ? DREGH_MASK (dst0) : DREGL_MASK (dst0);
+  else if (sop == 2 && sopcde == 3 && HLs == 1)
+    return 0;
+  else if (sop == 0 && sopcde == 3 && HLs == 0 && bit8 == 0)
+    return 0;
+  else if (sop == 0 && sopcde == 3 && HLs == 0 && bit8 == 1)
+    return 0;
+  else if (sop == 0 && sopcde == 3 && HLs == 1 && bit8 == 0)
+    return 0;
+  else if (sop == 0 && sopcde == 3 && HLs == 1 && bit8 == 1)
+    return 0;
+  else if (sop == 1 && sopcde == 3 && HLs == 0)
+    return 0;
+  else if (sop == 1 && sopcde == 3 && HLs == 1)
+    return 0;
+  else if (sop == 2 && sopcde == 3 && HLs == 0)
+    return 0;
+  else if (sop == 1 && sopcde == 1 && bit8 == 0)
+    return DREG_MASK (dst0);
+  else if (sop == 1 && sopcde == 1 && bit8 == 1)
+    return DREG_MASK (dst0);
+  else if (sop == 2 && sopcde == 1 && bit8 == 1)
+    return DREG_MASK (dst0);
+  else if (sop == 2 && sopcde == 1 && bit8 == 0)
+    return DREG_MASK (dst0);
+  else if (sop == 0 && sopcde == 1)
+    return DREG_MASK (dst0);
+  else if (sop == 1 && sopcde == 2)
+    return DREG_MASK (dst0);
+  else if (sop == 2 && sopcde == 2 && bit8 == 1)
+    return DREG_MASK (dst0);
+  else if (sop == 2 && sopcde == 2 && bit8 == 0)
+    return DREG_MASK (dst0);
+  else if (sop == 3 && sopcde == 2)
+    return DREG_MASK (dst0);
+  else if (sop == 0 && sopcde == 2)
+    return DREG_MASK (dst0);
+
+  abort ();
+}
+
+int
+insn_regmask (int iw0, int iw1)
+{
+  if ((iw0 & 0xf7ff) == 0xc003 && iw1 == 0x1800)
+    return 0; /* MNOP */
+  else if ((iw0 & 0xff00) == 0x0000)
+    return decode_ProgCtrl_0 (iw0);
+  else if ((iw0 & 0xffc0) == 0x0240)
+    abort ();
+  else if ((iw0 & 0xff80) == 0x0100)
+    abort ();
+  else if ((iw0 & 0xfe00) == 0x0400)
+    abort ();
+  else if ((iw0 & 0xfe00) == 0x0600)
+    abort ();
+  else if ((iw0 & 0xf800) == 0x0800)
+    abort ();
+  else if ((iw0 & 0xffe0) == 0x0200)
+    abort ();
+  else if ((iw0 & 0xff00) == 0x0300)
+    abort ();
+  else if ((iw0 & 0xf000) == 0x1000)
+    abort ();
+  else if ((iw0 & 0xf000) == 0x2000)
+    abort ();
+  else if ((iw0 & 0xf000) == 0x3000)
+    abort ();
+  else if ((iw0 & 0xfc00) == 0x4000)
+    abort ();
+  else if ((iw0 & 0xfe00) == 0x4400)
+    abort ();
+  else if ((iw0 & 0xf800) == 0x4800)
+    abort ();
+  else if ((iw0 & 0xf000) == 0x5000)
+    abort ();
+  else if ((iw0 & 0xf800) == 0x6000)
+    abort ();
+  else if ((iw0 & 0xf800) == 0x6800)
+    abort ();
+  else if ((iw0 & 0xf000) == 0x8000)
+    return decode_LDSTpmod_0 (iw0);
+  else if ((iw0 & 0xff60) == 0x9e60)
+    return decode_dagMODim_0 (iw0);
+  else if ((iw0 & 0xfff0) == 0x9f60)
+    return decode_dagMODik_0 (iw0);
+  else if ((iw0 & 0xfc00) == 0x9c00)
+    return decode_dspLDST_0 (iw0);
+  else if ((iw0 & 0xf000) == 0x9000)
+    return decode_LDST_0 (iw0);
+  else if ((iw0 & 0xfc00) == 0xb800)
+    return decode_LDSTiiFP_0 (iw0);
+  else if ((iw0 & 0xe000) == 0xA000)
+    return decode_LDSTii_0 (iw0);
+  else if ((iw0 & 0xff80) == 0xe080 && (iw1 & 0x0C00) == 0x0000)
+    abort ();
+  else if ((iw0 & 0xff00) == 0xe100 && (iw1 & 0x0000) == 0x0000)
+    abort ();
+  else if ((iw0 & 0xfe00) == 0xe200 && (iw1 & 0x0000) == 0x0000)
+    abort ();
+  else if ((iw0 & 0xfc00) == 0xe400 && (iw1 & 0x0000) == 0x0000)
+    abort ();
+  else if ((iw0 & 0xfffe) == 0xe800 && (iw1 & 0x0000) == 0x0000)
+    abort ();
+  else if ((iw0 & 0xf600) == 0xc000 && (iw1 & 0x0000) == 0x0000)
+    return decode_dsp32mac_0 (iw0, iw1);
+  else if ((iw0 & 0xf600) == 0xc200 && (iw1 & 0x0000) == 0x0000)
+    return decode_dsp32mult_0 (iw0, iw1);
+  else if ((iw0 & 0xf7c0) == 0xc400 && (iw1 & 0x0000) == 0x0000)
+    return decode_dsp32alu_0 (iw0, iw1);
+  else if ((iw0 & 0xf780) == 0xc600 && (iw1 & 0x01c0) == 0x0000)
+    return decode_dsp32shift_0 (iw0, iw1);
+  else if ((iw0 & 0xf780) == 0xc680 && (iw1 & 0x0000) == 0x0000)
+    return decode_dsp32shiftimm_0 (iw0, iw1);
+  else if ((iw0 & 0xff00) == 0xf800)
+    abort ();
+  else if ((iw0 & 0xFFC0) == 0xf000 && (iw1 & 0x0000) == 0x0000)
+    abort ();
+
+  abort ();
 }

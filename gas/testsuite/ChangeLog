@@ -1,3 +1,11 @@
+2006-08-11  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* gas/bfin/parallel.s: Add more test cases.
+	* gas/bfin/parallel.d: Update accordingly.
+	* gas/bfin/resource_conflict.l: New test.
+	* gas/bfin/resource_conflict.s: New test.
+	* gas/bfin/bfin.exp: Add resource_conflict.
+
 2009-08-11  Nick Clifton  <nickc@redhat.com>
 
 	PR 10443

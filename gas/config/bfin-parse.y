@@ -385,6 +385,18 @@ is_group2 (INSTR_T x)
   return 0;
 }
 
+static INSTR_T
+gen_multi_instr_1 (INSTR_T dsp32, INSTR_T dsp16_grp1, INSTR_T dsp16_grp2)
+{
+  int mask1 = dsp32 ? insn_regmask (dsp32->value, dsp32->next->value) : 0;
+  int mask2 = dsp16_grp1 ? insn_regmask (dsp16_grp1->value, 0) : 0;
+  int mask3 = dsp16_grp2 ? insn_regmask (dsp16_grp2->value, 0) : 0;
+
+  if ((mask1 & mask2) || (mask1 & mask3) || (mask2 & mask3))
+    yyerror ("resource conflict in multi-issue instruction");
+  return bfin_gen_multi_instr (dsp32, dsp16_grp1, dsp16_grp2);
+}
+
 %}
 
 %union {
@@ -608,27 +620,27 @@ asm: asm_1 SEMICOLON
 	  if (($1->value & 0xf800) == 0xc000)
 	    {
 	      if (is_group1 ($3) && is_group2 ($5))
-		$$ = bfin_gen_multi_instr ($1, $3, $5);
+		$$ = gen_multi_instr_1 ($1, $3, $5);
 	      else if (is_group2 ($3) && is_group1 ($5))
-		$$ = bfin_gen_multi_instr ($1, $5, $3);
+		$$ = gen_multi_instr_1 ($1, $5, $3);
 	      else
 		return yyerror ("Wrong 16 bit instructions groups, slot 2 and slot 3 must be 16-bit instrution group");
 	    }
 	  else if (($3->value & 0xf800) == 0xc000)
 	    {
 	      if (is_group1 ($1) && is_group2 ($5))
-		$$ = bfin_gen_multi_instr ($3, $1, $5);
+		$$ = gen_multi_instr_1 ($3, $1, $5);
 	      else if (is_group2 ($1) && is_group1 ($5))
-		$$ = bfin_gen_multi_instr ($3, $5, $1);
+		$$ = gen_multi_instr_1 ($3, $5, $1);
 	      else
 		return yyerror ("Wrong 16 bit instructions groups, slot 1 and slot 3 must be 16-bit instrution group");
 	    }
 	  else if (($5->value & 0xf800) == 0xc000)
 	    {
 	      if (is_group1 ($1) && is_group2 ($3))
-		$$ = bfin_gen_multi_instr ($5, $1, $3);
+		$$ = gen_multi_instr_1 ($5, $1, $3);
 	      else if (is_group2 ($1) && is_group1 ($3))
-		$$ = bfin_gen_multi_instr ($5, $3, $1);
+		$$ = gen_multi_instr_1 ($5, $3, $1);
 	      else
 		return yyerror ("Wrong 16 bit instructions groups, slot 1 and slot 2 must be 16-bit instrution group");
 	    }
@@ -641,25 +653,25 @@ asm: asm_1 SEMICOLON
 	  if (($1->value & 0xf800) == 0xc000)
 	    {
 	      if (is_group1 ($3))
-		$$ = bfin_gen_multi_instr ($1, $3, 0);
+		$$ = gen_multi_instr_1 ($1, $3, 0);
 	      else if (is_group2 ($3))
-		$$ = bfin_gen_multi_instr ($1, 0, $3);
+		$$ = gen_multi_instr_1 ($1, 0, $3);
 	      else
 		return yyerror ("Wrong 16 bit instructions groups, slot 2 must be the 16-bit instruction group");
 	    }
 	  else if (($3->value & 0xf800) == 0xc000)
 	    {
 	      if (is_group1 ($1))
-		$$ = bfin_gen_multi_instr ($3, $1, 0);
+		$$ = gen_multi_instr_1 ($3, $1, 0);
 	      else if (is_group2 ($1))
-		$$ = bfin_gen_multi_instr ($3, 0, $1);
+		$$ = gen_multi_instr_1 ($3, 0, $1);
 	      else
 		return yyerror ("Wrong 16 bit instructions groups, slot 1 must be the 16-bit instruction group");
 	    }
 	  else if (is_group1 ($1) && is_group2 ($3))
-	      $$ = bfin_gen_multi_instr (0, $1, $3);
+	      $$ = gen_multi_instr_1 (0, $1, $3);
 	  else if (is_group2 ($1) && is_group1 ($3))
-	    $$ = bfin_gen_multi_instr (0, $3, $1);
+	    $$ = gen_multi_instr_1 (0, $3, $1);
 	  else
 	    return yyerror ("Wrong 16 bit instructions groups, slot 1 and slot 2 must be the 16-bit instruction group");
 	}

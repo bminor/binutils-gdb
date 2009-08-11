@@ -28,6 +28,7 @@ if [istarget bfin*-*-*] {
 	run_dump_test "parallel3"
 	run_dump_test "parallel4"
 	run_dump_test "reloc"
+	run_list_test "resource_conflict" ""
 	run_dump_test "shift"
 	run_dump_test "shift2"
 	run_dump_test "stack"

@@ -374,6 +374,7 @@ EXPR_T mkexpr (int, SYMBOL_T);
 /* Defined in bfin-lex.l.  */
 void set_start_state (void);
 
+extern int insn_regmask (int, int);
 #ifdef __cplusplus
 }
 #endif
