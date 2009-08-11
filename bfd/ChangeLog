@@ -1,3 +1,23 @@
+2009-08-11  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	Merge some FRV FDPIC changes into the Blackfin code.
+	* elf32-bfin.c (struct bfinfdpic_elf_link_hash_table): Add pointer to
+	summary reloc information.
+	(bfinfdpic_dynamic_got_plt_info): New.
+	(_bfin_create_got_section): Create the PLT section here.
+	(elf32_bfinfdpic_create_dynamic_sections): Not here.
+	(_bfinfdpic_count_nontls_entries): Move out of...
+	(_bfinfdpic_count_got_plt_entries): ... here.
+	(_bfinfdpic_count_relocs_fixups): Likewise.
+	(_bfinfdpic_reset_got_plt_entries): New.
+	(_bfinfdpic_size_got_plt): Move out of...
+	(elf32_bfinfdpic_size_dynamic_sections): ... here.
+	(bfinfdpic_relocate_section): Be careful not to call
+	_bfinfdpic_add_rofixup or _bfinfdpic_add_dyn_reloc for deleted relocs.
+	(bfinfdpic_check_discarded_relocs, bfinfdpic_elf_discard_info):
+	New functions.
+	(elf_backend_discard_info): Define for FD-PIC.
+
 2009-08-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c: Add FIXMEs for some places that require octets_per_byte
@@ -69,7 +89,7 @@
 	(ppc_elf_size_dynamic_sections): Likewise.
 	(ppc_elf_relocate_section): Likewise.
 
-2006-08-09  Bernd Schmidt  <bernd.schmidt@analog.com>
+2009-08-09  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	From Mike Frysinger <michael.frysinger@analog.com>
 	* elf32-bfin.c (bfin_howto_table, bfin_reloc_map, bfin_check_relocs,
