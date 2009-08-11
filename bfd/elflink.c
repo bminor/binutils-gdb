@@ -7762,6 +7762,7 @@ bfd_elf_perform_complex_relocation (bfd *input_bfd,
   else
     shift = (8 * wordsz) - (start + len);
 
+  /* FIXME: octets_per_byte.  */
   x = get_value (wordsz, chunksz, input_bfd, contents + rel->r_offset);
 
 #ifdef DEBUG
@@ -7793,6 +7794,7 @@ bfd_elf_perform_complex_relocation (bfd *input_bfd,
 	  relocation, (mask << shift),
 	  ((relocation & mask) << shift), x);
 #endif
+  /* FIXME: octets_per_byte.  */
   put_value (wordsz, chunksz, input_bfd, x, contents + rel->r_offset);
   return r;
 }
@@ -8132,6 +8134,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 	  }
 	erel = o->contents;
 	erelend = o->contents + o->size;
+	/* FIXME: octets_per_byte.  */
 	p = sort + o->output_offset / ext_size * sort_elt;
 
 	while (erel < erelend)
@@ -8176,6 +8179,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 
 	erel = o->contents;
 	erelend = o->contents + o->size;
+	/* FIXME: octets_per_byte.  */
 	p = sort + o->output_offset / ext_size * sort_elt;
 	while (erel < erelend)
 	  {
@@ -9697,6 +9701,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 	  break;
 	default:
 	  {
+	    /* FIXME: octets_per_byte.  */
 	    if (! (o->flags & SEC_EXCLUDE)
 		&& ! (o->output_section->flags & SEC_NEVER_LOAD)
 		&& ! bfd_set_section_contents (output_bfd, o->output_section,
@@ -10020,6 +10025,7 @@ elf_fixup_link_order (bfd *abfd, asection *o)
       offset &= ~(bfd_vma) 0 << s->alignment_power;
       s->output_offset = offset;
       sections[n]->offset = offset;
+      /* FIXME: octets_per_byte.  */
       offset += sections[n]->size;
     }
 
@@ -10999,6 +11005,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	       != SHT_STRTAB)
 	      || strcmp (bfd_get_section_name (abfd, o), ".dynstr") != 0)
 	    {
+	      /* FIXME: octets_per_byte.  */
 	      if (! bfd_set_section_contents (abfd, o->output_section,
 					      o->contents,
 					      (file_ptr) o->output_offset,

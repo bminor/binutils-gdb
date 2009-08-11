@@ -537,18 +537,21 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
   local_cies = bfd_zmalloc (num_cies * sizeof (*local_cies));
   REQUIRE (local_cies);
 
+  /* FIXME: octets_per_byte.  */
 #define ENSURE_NO_RELOCS(buf)				\
   REQUIRE (!(cookie->rel < cookie->relend		\
 	     && (cookie->rel->r_offset			\
 		 < (bfd_size_type) ((buf) - ehbuf))	\
 	     && cookie->rel->r_info != 0))
 
+  /* FIXME: octets_per_byte.  */
 #define SKIP_RELOCS(buf)				\
   while (cookie->rel < cookie->relend			\
 	 && (cookie->rel->r_offset			\
 	     < (bfd_size_type) ((buf) - ehbuf)))	\
     cookie->rel++
 
+  /* FIXME: octets_per_byte.  */
 #define GET_RELOC(buf)					\
   ((cookie->rel < cookie->relend			\
     && (cookie->rel->r_offset				\
@@ -911,6 +914,7 @@ mark_entry (struct bfd_link_info *info, asection *sec,
 	    struct eh_cie_fde *ent, elf_gc_mark_hook_fn gc_mark_hook,
 	    struct elf_reloc_cookie *cookie)
 {
+  /* FIXME: octets_per_byte.  */
   for (cookie->rel = cookie->rels + ent->reloc_index;
        cookie->rel < cookie->relend
 	 && cookie->rel->r_offset < ent->offset + ent->size;
@@ -1099,6 +1103,7 @@ _bfd_elf_discard_section_eh_frame
     else if (!ent->cie)
       {
 	cookie->rel = cookie->rels + ent->reloc_index;
+	/* FIXME: octets_per_byte.  */
 	BFD_ASSERT (cookie->rel < cookie->relend
 		    && cookie->rel->r_offset == ent->offset + 8);
 	if (!(*reloc_symbol_deleted_p) (ent->offset + 8, cookie))
@@ -1323,6 +1328,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
   struct eh_cie_fde *ent;
 
   if (sec->sec_info_type != ELF_INFO_TYPE_EH_FRAME)
+    /* FIXME: octets_per_byte.  */
     return bfd_set_section_contents (abfd, sec->output_section, contents,
 				     sec->output_offset, sec->size);
 
@@ -1611,6 +1617,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
   if ((sec->size % ptr_size) != 0)
     abort ();
 
+  /* FIXME: octets_per_byte.  */
   return bfd_set_section_contents (abfd, sec->output_section,
 				   contents, (file_ptr) sec->output_offset,
 				   sec->size);
@@ -1722,6 +1729,7 @@ _bfd_elf_write_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
+  /* FIXME: octets_per_byte.  */
   retval = bfd_set_section_contents (abfd, sec->output_section,
 				     contents, (file_ptr) sec->output_offset,
 				     sec->size);

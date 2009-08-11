@@ -792,6 +792,7 @@ _bfd_write_merged_section (bfd *output_bfd, asection *sec, void *psecinfo)
   if (secinfo->first_str == NULL)
     return TRUE;
 
+  /* FIXME: octets_per_byte.  */
   pos = sec->output_section->filepos + sec->output_offset;
   if (bfd_seek (output_bfd, pos, SEEK_SET) != 0)
     return FALSE;

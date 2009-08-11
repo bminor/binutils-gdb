@@ -1,5 +1,12 @@
 2009-08-11  Alan Modra  <amodra@bigpond.net.au>
 
+	* elflink.c: Add FIXMEs for some places that require octets_per_byte
+	adjustments.
+	* elf-eh-frame.c: Likewise.
+	* merge.c: Likewise.
+
+2009-08-11  Alan Modra  <amodra@bigpond.net.au>
+
 	* configure.in:  Remove elf-ifunc.lo from common ELF files.  Add
 	to x86 and x86_64 configurations.
 	* configure: Regenerate.
