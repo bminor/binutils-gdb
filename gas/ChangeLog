@@ -1,3 +1,8 @@
+2009-08-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* config/bfin-parse.y (binary): Change "compiler" to "assembler".
+	(unary): Likewise.
+
 2009-08-11  Nick Clifton  <nickc@redhat.com>
 
 	PR 10443
