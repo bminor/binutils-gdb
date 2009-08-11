@@ -1,3 +1,9 @@
+2009-08-11  Nick Clifton  <nickc@redhat.com>
+
+	PR 10443
+	* gas/arm/t16-bad.l: Update expected messages for moves with
+	shifted operands.
+
 2009-08-10  Daniel Gutson  <dgutson@codesourcery.com>
 
 	PR gas/10479

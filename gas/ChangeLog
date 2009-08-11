@@ -1,3 +1,9 @@
+2009-08-11  Nick Clifton  <nickc@redhat.com>
+
+	PR 10443
+	* config/tc-arm.c (do_t_mov_cmp): Do not silently ignore shifted
+	operands.
+
 2009-08-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix compilation of i386-*-go32.
