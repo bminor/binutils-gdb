@@ -1529,6 +1529,7 @@ md_estimate_size_before_relax (fragS * fragP, segT segment)
     fragP->fr_subtype = insn_to_subtype (fragP->fr_cgen.insn->base->num);
 
   if (S_GET_SEGMENT (fragP->fr_symbol) != segment
+      || S_IS_WEAK (fragP->fr_symbol)
 #ifdef MEP_IVC2_SUPPORTED
       || (mep_cop == EF_MEP_COP_IVC2
 	  && bfd_get_section_flags (stdoutput, segment) & SEC_MEP_VLIW)
@@ -1764,6 +1765,7 @@ md_convert_frag (bfd *abfd  ATTRIBUTE_UNUSED,
       }
 
   if (S_GET_SEGMENT (fragP->fr_symbol) != seg
+      || S_IS_WEAK (fragP->fr_symbol)
       || operand == MEP_OPERAND_PCABS24A2)
     {
       gas_assert (fragP->fr_cgen.insn != 0);
@@ -1809,6 +1811,7 @@ md_pcrel_from_section (fixS *fixP, segT sec)
 {
   if (fixP->fx_addsy != (symbolS *) NULL
       && (! S_IS_DEFINED (fixP->fx_addsy)
+	  || S_IS_WEAK (fixP->fx_addsy)
 	  || S_GET_SEGMENT (fixP->fx_addsy) != sec))
     /* The symbol is undefined (or is defined but not in this section).
        Let the linker figure it out.  */
@@ -2011,6 +2014,9 @@ mep_force_relocation (fixS *fixp)
 {
   if (   fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
 	 || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
+    return 1;
+
+  if (generic_force_reloc (fixp))
     return 1;
 
   /* Allow branches to global symbols to be resolved at assembly time.

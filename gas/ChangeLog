@@ -1,3 +1,11 @@
+2009-08-11  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-mep.c (md_estimate_size_before_relax): Handle weak
+	symbols correctly.
+	(md_convert_frag): Likewise.
+	(md_pcrel_from_section): Likewise.
+	(mep_force_relocation): Likewise.
+	
 2009-08-11  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	* config/bfin-parse.y (gen_multi_instr_1): New function.
