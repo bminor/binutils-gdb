@@ -1,3 +1,7 @@
+2009-08-12  Nick Clifton  <nickc@redhat.com>
+
+	* po/fi.po: Updated Finnish translation.
+
 2009-08-11  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	Merge some FRV FDPIC changes into the Blackfin code.
