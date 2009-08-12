@@ -1997,6 +1997,7 @@ init_map_userdata (bfd *abfd ATTRIBUTE_UNUSED,
   ASSERT (get_userdata (sec) == NULL);
   get_userdata (sec) = new_data;
   new_data->map_symbol_def_tail = &new_data->map_symbol_def_head;
+  new_data->map_symbol_def_count = 0;
 }
 
 static bfd_boolean
@@ -2024,6 +2025,7 @@ sort_def_symbol (struct bfd_link_hash_entry *hash_entry,
       def->entry = hash_entry;
       *(ud->map_symbol_def_tail) = def;
       ud->map_symbol_def_tail = &def->next;
+      ud->map_symbol_def_count++;
     }
   return TRUE;
 }
@@ -3949,18 +3951,48 @@ print_one_symbol (struct bfd_link_hash_entry *hash_entry, void *ptr)
   return TRUE;
 }
 
+static int
+hash_entry_addr_cmp (const void *a, const void *b)
+{
+  const struct bfd_link_hash_entry *l = *(const struct bfd_link_hash_entry **)a;
+  const struct bfd_link_hash_entry *r = *(const struct bfd_link_hash_entry **)b;
+
+  if (l->u.def.value < r->u.def.value)
+    return -1;
+  else if (l->u.def.value > r->u.def.value)
+    return 1;
+  else
+    return 0;
+}
+
 static void
 print_all_symbols (asection *sec)
 {
   struct fat_user_section_struct *ud = get_userdata (sec);
   struct map_symbol_def *def;
+  struct bfd_link_hash_entry **entries;
+  unsigned int i;
 
   if (!ud)
     return;
 
   *ud->map_symbol_def_tail = 0;
-  for (def = ud->map_symbol_def_head; def; def = def->next)
-    print_one_symbol (def->entry, sec);
+  
+  /* Sort the symbols by address.  */
+  entries = obstack_alloc (&map_obstack,
+                           ud->map_symbol_def_count * sizeof (*entries));
+
+  for (i = 0, def = ud->map_symbol_def_head; def; def = def->next, i++)
+    entries[i] = def->entry;
+
+  qsort (entries, ud->map_symbol_def_count, sizeof (*entries),
+         hash_entry_addr_cmp);
+
+  /* Print the symbols.  */
+  for (i = 0; i < ud->map_symbol_def_count; i++)
+    print_one_symbol (entries[i], sec);
+
+  obstack_free (&map_obstack, entries);
 }
 
 /* Print information about an input section to the map file.  */

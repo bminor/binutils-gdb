@@ -114,6 +114,7 @@ typedef struct fat_user_section_struct {
      list of hash table entries for symbols defined in this section.  */
   struct map_symbol_def *map_symbol_def_head;
   struct map_symbol_def **map_symbol_def_tail;
+  unsigned long map_symbol_def_count;
 } fat_section_userdata_type;
 
 #define get_userdata(x) ((x)->userdata)
