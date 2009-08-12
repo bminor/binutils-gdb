@@ -1,3 +1,15 @@
+2009-08-12  Sriraman Tallam  <tmsriram@google.com>
+
+	* icf.cc (Icf::find_identical_sections): Unfold symbols that have
+	been maked as --keep-unique.
+	(Icf::unfold_section): New function.
+	* icf.h (Icf::unfold_section): New function.
+	* options.h (General_options::keep_unique): New option.
+	* testsuite/Makefile.am: Add commands to build icf_keep_unique_test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/icf_keep_unique_test.sh: New file.
+	* testsuite/icf_keep_unique_test.cc: New file.
+
 2009-08-12  Cary Coutant  <ccoutant@google.com>
 
 	PR 10471

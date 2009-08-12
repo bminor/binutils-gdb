@@ -598,7 +598,45 @@ Icf::find_identical_sections(const Input_objects* input_objects,
                   program_name, num_iterations);
     }
 
+  // Unfold --keep-unique symbols.
+  for (options::String_set::const_iterator p =
+	 parameters->options().keep_unique_begin();
+       p != parameters->options().keep_unique_end();
+       ++p)
+    {
+      const char* name = p->c_str();
+      Symbol* sym = symtab->lookup(name);
+      if (sym != NULL
+	  && sym->source() == Symbol::FROM_OBJECT 
+          && !sym->object()->is_dynamic())
+        {
+          Object* obj = sym->object();
+          bool is_ordinary;
+          unsigned int shndx = sym->shndx(&is_ordinary);
+          if (is_ordinary)
+            {
+	      this->unfold_section(obj, shndx);
+            }
+        }
+
+    }
+
   this->icf_ready();
+}
+
+// Unfolds the section denoted by OBJ and SHNDX if folded.
+
+void
+Icf::unfold_section(Object* obj, unsigned int shndx)
+{
+  Section_id secn(obj, shndx);
+  Uniq_secn_id_map::iterator it = this->section_id_.find(secn);
+  if (it == this->section_id_.end())
+    return;
+  unsigned int section_num = it->second;
+  unsigned int kept_section_id = this->kept_section_id_[section_num];
+  if (kept_section_id != section_num)
+    this->kept_section_id_[section_num] = section_num;
 }
 
 // This function determines if the section corresponding to the

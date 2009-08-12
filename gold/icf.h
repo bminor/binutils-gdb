@@ -87,6 +87,10 @@ class Icf
   is_icf_ready()
   { return this->icf_ready_; }
 
+  // Unfolds the section denoted by OBJ and SHNDX if folded.
+  void
+  unfold_section(Object* obj, unsigned int shndx);
+
   // Returns the kept section corresponding to the 
   // given section.
   bool

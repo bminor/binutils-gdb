@@ -814,7 +814,7 @@ class General_options
                  N_("Do not link against shared libraries"), NULL);
 
   DEFINE_bool(icf, options::TWO_DASHES, '\0', false,
-              N_("Fold identical functions"),
+              N_("Identical Code Folding (Fold identical functions)"),
               N_("Don't fold identical functions (default)"));
 
   DEFINE_uint(icf_iterations, options::TWO_DASHES , '\0', 0,
@@ -823,6 +823,9 @@ class General_options
   DEFINE_bool(print_icf_sections, options::TWO_DASHES, '\0', false,
               N_("List folded identical sections on stderr"),
               N_("Do not list folded identical sections"));
+
+  DEFINE_set(keep_unique, options::TWO_DASHES, '\0',
+	     N_("Do not fold this symbol during ICF"), N_("SYMBOL"));
 
   DEFINE_bool(gc_sections, options::TWO_DASHES, '\0', false,
               N_("Remove unused sections"),

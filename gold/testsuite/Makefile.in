@@ -58,6 +58,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 # and --dynamic-list-cpp-typeinfo
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_1 = gc_comdat_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_tls_test.sh icf_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_keep_unique_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.sh weak_plt.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg.sh undef_symbol.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_1.sh ver_test_2.sh \
@@ -77,6 +78,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_2 = gc_comdat_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_tls_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_keep_unique_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.dbg \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_plt_shared.so debug_msg.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_so.err \
@@ -2337,6 +2339,12 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--icf icf_test.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_test.stdout: icf_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) -C icf_test > icf_test.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@icf_keep_unique_test.o: icf_keep_unique_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@icf_keep_unique_test: icf_keep_unique_test.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--icf -Wl,--keep-unique,_Z11unique_funcv icf_keep_unique_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@icf_keep_unique_test.stdout: icf_keep_unique_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) -C icf_keep_unique_test > icf_keep_unique_test.stdout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@basic_test.o: basic_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@basic_test: basic_test.o gcctestdir/ld

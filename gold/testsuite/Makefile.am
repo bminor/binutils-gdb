@@ -133,6 +133,14 @@ icf_test: icf_test.o gcctestdir/ld
 icf_test.stdout: icf_test
 	$(TEST_NM) -C icf_test > icf_test.stdout
 
+check_SCRIPTS += icf_keep_unique_test.sh
+check_DATA += icf_keep_unique_test.stdout
+icf_keep_unique_test.o: icf_keep_unique_test.cc
+	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
+icf_keep_unique_test: icf_keep_unique_test.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -Wl,--icf -Wl,--keep-unique,_Z11unique_funcv icf_keep_unique_test.o
+icf_keep_unique_test.stdout: icf_keep_unique_test
+	$(TEST_NM) -C icf_keep_unique_test > icf_keep_unique_test.stdout
 
 check_PROGRAMS += basic_test
 check_PROGRAMS += basic_static_test
