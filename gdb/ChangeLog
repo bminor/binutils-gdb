@@ -1,3 +1,22 @@
+2009-08-12  Michael Snyder  <msnyder@vmware.com>
+
+	* remote.c (remote_add_inferior): Remove unused local.
+	(remote_add_thread): Ditto.
+	(read_ptid): Ditto.
+	(remote_current_thread): Ditto.
+	(remote_stop_ns): Ditto.
+	(remote_parse_stop_reply): Ditto.
+	(remote_get_pending_stop_replies): Ditto.
+	(remote_wait_ns): Ditto.
+	(remote_wait_as): Ditto.
+	(send_g_packet): Ditto.
+	(remote_fetch_registers): Ditto.
+	(store_register_using_P): Ditto.
+	(remote_store_registers): Ditto.
+	(remote_remove_breakpoint): Ditto.
+	(remote_write_qxfer): Ditto.
+	(remote_read_qxfer): Ditto.
+
 2009-08-11  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2loc.c (dwarf2_evaluate_loc_desc): Make a cleanup.
