@@ -257,6 +257,20 @@ Symbol_table::resolve(Sized_symbol<size>* to,
       // Record that we've seen this symbol in a regular object.
       to->set_in_reg();
     }
+  else if (to->visibility() == elfcpp::STV_HIDDEN
+           || to->visibility() == elfcpp::STV_INTERNAL)
+    {
+      // A dynamic object cannot reference a hidden or internal symbol
+      // defined in another object.
+      gold_warning(_("%s symbol '%s' in %s is referenced by DSO %s"),
+                   (to->visibility() == elfcpp::STV_HIDDEN
+                    ? "hidden"
+                    : "internal"),
+                   to->demangled_name().c_str(),
+                   to->object()->name().c_str(),
+                   object->name().c_str());
+      return;
+    }
   else
     {
       // Record that we've seen this symbol in a dynamic object.

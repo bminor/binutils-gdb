@@ -324,15 +324,21 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_24 = exclude_libs_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	local_labels_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test
+
+# Test that hidden and internal symbols in the main program cannot be
+# referenced by a shared library.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_25 = exclude_libs_test.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.sh
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	hidden_test.sh
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_26 = exclude_libs_test.syms \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.syms
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	hidden_test.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_27 = exclude_libs_test.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	libexclude_libs_test_1.a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	libexclude_libs_test_2.a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/libexclude_libs_test_3.a \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.syms
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	hidden_test hidden_test.err
 @GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@am__append_28 = large
 @GCC_FALSE@large_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
@@ -2719,6 +2725,12 @@ uninstall-am: uninstall-info-am
 # '-Wa,-L' is required to preserve the local label used for testing.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@discard_locals_test.o: discard_locals_test.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -Wa,-L -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@libhidden.so: hidden_test_1.c gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -Bgcctestdir/ -g -shared -fPIC -w -o $@ $(srcdir)/hidden_test_1.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@hidden_test: hidden_test_main.o libhidden.so gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -Wl,-R,. hidden_test_main.o libhidden.so 2>hidden_test.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@hidden_test.err: hidden_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	@touch hidden_test.err
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

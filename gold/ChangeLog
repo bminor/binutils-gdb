@@ -1,3 +1,14 @@
+2009-08-12  Cary Coutant  <ccoutant@google.com>
+
+	PR 10471
+	* resolve.cc (Symbol_table::resolve): Check for references from
+	dynamic objects to hidden and internal symbols.
+	* testsuite/Makefile.am (hidden_test.sh): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/hidden_test.sh: New script.
+	* testsuite/hidden_test_1.c: New test source.
+	* testsuite/hidden_test_main.c: New test source.
+
 2009-08-11  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc: Update comments.
