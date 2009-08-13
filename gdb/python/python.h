@@ -22,8 +22,6 @@
 
 #include "value.h"
 
-extern struct value *values_in_python;
-
 void eval_python_from_control_command (struct command_line *);
 
 int apply_val_pretty_printer (struct type *type, const gdb_byte *valaddr,
@@ -31,5 +29,7 @@ int apply_val_pretty_printer (struct type *type, const gdb_byte *valaddr,
 			      struct ui_file *stream, int recurse,
 			      const struct value_print_options *options,
 			      const struct language_defn *language);
+
+void preserve_python_values (struct objfile *objfile, htab_t copied_types);
 
 #endif /* GDB_PYTHON_H */

@@ -312,31 +312,6 @@ allocate_repeat_value (struct type *type, int count)
   return allocate_value (array_type);
 }
 
-/* Needed if another module needs to maintain its on list of values.  */
-void
-value_prepend_to_list (struct value **head, struct value *val)
-{
-  val->next = *head;
-  *head = val;
-}
-
-/* Needed if another module needs to maintain its on list of values.  */
-void
-value_remove_from_list (struct value **head, struct value *val)
-{
-  struct value *prev;
-
-  if (*head == val)
-    *head = (*head)->next;
-  else
-    for (prev = *head; prev->next; prev = prev->next)
-      if (prev->next == val)
-      {
-	prev->next = val->next;
-	break;
-      }
-}
-
 struct value *
 allocate_computed_value (struct type *type,
                          struct lval_funcs *funcs,
@@ -1430,7 +1405,7 @@ add_internal_function (const char *name, const char *doc,
 /* Update VALUE before discarding OBJFILE.  COPIED_TYPES is used to
    prevent cycles / duplicates.  */
 
-static void
+void
 preserve_one_value (struct value *value, struct objfile *objfile,
 		    htab_t copied_types)
 {
@@ -1490,8 +1465,7 @@ preserve_values (struct objfile *objfile)
   for (var = internalvars; var; var = var->next)
     preserve_one_internalvar (var, objfile, copied_types);
 
-  for (val = values_in_python; val; val = val->next)
-    preserve_one_value (val, objfile, copied_types);
+  preserve_python_values (objfile, copied_types);
 
   htab_delete (copied_types);
 }

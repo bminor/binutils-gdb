@@ -1,3 +1,27 @@
+2009-08-13  Tom Tromey  <tromey@redhat.com>
+
+	* varobj.c (update_dynamic_varobj_children): Don't use
+	value_copy.
+	* value.h: (preserve_one_value): Declare.
+	(value_prepend_to_list, value_remove_from_list): Remove.
+	* value.c (preserve_one_value): No longer static.
+	(preserve_values): Call preserve_python_values.
+	(value_prepend_to_list): Remove.
+	(value_remove_from_list): Remove.
+	* python/python.h (values_in_python): Don't declare.
+	(preserve_python_values): Declare.
+	* python/python-value.c (values_in_python): Change type.  Move
+	lower.  Now static.
+	(struct value_object): Add struct tag.
+	<next, prev>: New fields.
+	(valpy_dealloc): Update.
+	(note_value): New function.
+	(valpy_new): Use value_incref, note_value.
+	(preserve_python_values): New function.
+	(valpy_positive): Don't use value_copy.
+	(value_to_value_object): Use value_incref, note_value.
+	(convert_value_from_python): Update comment.
+
 2009-08-13  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (remote_pid_to_str): If printing a process id and we
