@@ -1,3 +1,26 @@
+2009-08-13  Pedro Alves  <pedro@codesourcery.com>
+
+	Revert 2009-08-07 changes for PR gdb/8869:
+
+	* language.c (set_language_command): Strip whitespace.
+	(set_type_command): Likewise.
+	(set_range_command): Likewise.
+
+	* language.c (language_completer): New function.
+	(range_or_type_completer): New function.
+	(case_completer): New function.
+	(_initialize_language): Set completers.
+	* cli/cli-decode.c (add_setshow_string_cmd): Return the "set"
+	command.
+	(add_setshow_string_noescape_cmd): Likewise.
+	(add_setshow_integer_cmd): Likewise.
+	(add_setshow_uinteger_cmd): Likewise.
+	(add_setshow_zinteger_cmd): Likewise.
+	(add_setshow_zuinteger_cmd): Likewise.
+	* command.h (add_setshow_string_cmd,
+	add_setshow_string_noescape_cmd, add_setshow_uinteger_cmd,
+	add_setshow_zinteger_cmd, add_setshow_zuinteger_cmd): Update.
+
 2009-08-12  Michael Snyder  <msnyder@vmware.com>
 
 	* remote.c (remote_add_inferior): Remove unused local.
