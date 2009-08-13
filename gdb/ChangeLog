@@ -1,3 +1,8 @@
+2009-08-13  Doug Evans  <dje@google.com>
+
+	* utils.c (gnu_debuglink_crc32): Store crc32_table as unsigned int
+	instead of unsigned long.
+
 2009-08-13  Tom Tromey  <tromey@redhat.com>
 
 	* varobj.c (update_dynamic_varobj_children): Don't use
