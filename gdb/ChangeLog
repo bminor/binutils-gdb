@@ -1,3 +1,7 @@
+2009-08-13  Tom Tromey  <tromey@redhat.com>
+
+	* language.h (longest_raw_hex_string): Remove unused declaration.
+
 2009-08-13  Pedro Alves  <pedro@codesourcery.com>
 
 	PR gdb/8869:
