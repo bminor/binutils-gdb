@@ -606,9 +606,12 @@ Icf::find_identical_sections(const Input_objects* input_objects,
     {
       const char* name = p->c_str();
       Symbol* sym = symtab->lookup(name);
-      if (sym != NULL
-	  && sym->source() == Symbol::FROM_OBJECT 
-          && !sym->object()->is_dynamic())
+      if (sym == NULL)
+	{
+	  gold_warning(_("Could not find symbol %s to unfold\n"), name);
+	}
+      else if (sym->source() == Symbol::FROM_OBJECT 
+               && !sym->object()->is_dynamic())
         {
           Object* obj = sym->object();
           bool is_ordinary;

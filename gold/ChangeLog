@@ -1,5 +1,10 @@
 2009-08-12  Sriraman Tallam  <tmsriram@google.com>
 
+	* icf.cc (Icf::find_identical_sections): Issue a warning when a
+	symbol in the --keep-unique list is not found.
+
+2009-08-12  Sriraman Tallam  <tmsriram@google.com>
+
 	* icf.cc (Icf::find_identical_sections): Unfold symbols that have
 	been maked as --keep-unique.
 	(Icf::unfold_section): New function.
