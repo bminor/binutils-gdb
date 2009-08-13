@@ -1,5 +1,40 @@
 2009-08-13  Pedro Alves  <pedro@codesourcery.com>
 
+	PR gdb/8869:
+
+	* language.c (language, type, range, case_sensitive): Make const.
+	(show_language_command): Don't call deprecated_show_value_hack.
+	Special case "auto".
+	(set_language_command): An unrecognized language is now an
+	internal error instead of a user error.  Don't call set_lang_str.
+	(show_type_command): Don't call deprecated_show_value_hack.
+	Special case "auto".  Use warning.
+	(set_type_command): An unrecognized type is now an internal error
+	instead of a user error.  Output type check mismatch with language
+	here.  Don't call set_type_str.
+	(show_range_command): Don't call deprecated_show_value_hack.
+	Special case "auto".  Use warning.
+	(set_range_command): An unrecognized range check is now an
+	internal error instead of a warning.  Output range check mismatch
+	with language here.  Don't call set_range_str.
+	(show_case_command): Don't call deprecated_show_value_hack.
+	Special case "auto".  Use warning.
+	(set_case_command): Don't call set_case_str.  An unrecognized case
+	check is now an internal error instead of a warning.  Output range
+	check mismatch with language here.  Don't call set_case_str.
+	(set_type_range_case): Don't call set_type_str, set_range_str or
+	set_case_str here.
+	(set_lang_str, set_type_str, set_range_str, set_case_str): Delete.
+	(add_language): Install or reinstall the "set language" command
+	here, and make it an enum command.  Build the enumeration and the
+	help string from the current list of known languages.
+	(_initialize_language): Don't install "set language" here.  Make
+	"set check type", "set check range" and "set case-sensitive" enum
+	commands.  Register the "auto" "local" and "unknown" languages in
+	that order.
+
+2009-08-13  Pedro Alves  <pedro@codesourcery.com>
+
 	Revert 2009-08-07 changes for PR gdb/8869:
 
 	* language.c (set_language_command): Strip whitespace.

@@ -418,7 +418,8 @@ test_prefix_command_help {"set history"} {
     "Generic command for setting command history parameters\.\[\r\n\]+"
 }
 # test help set language
-gdb_test "help set language" "Set the current source language\." "help set language"
+gdb_test "help set language" "Set the current source language\.\[\r\n\]+The currently understood settings are:(\[^\r\n\]*\[\r\n\])+local or auto  *Automatic setting based on source file(\[^\r\n\]*\[\r\n\])+c  *Use the C language(\[^\r\n\]*\[\r\n\])+c\[+\]+  *Use the C\[+\]+ language(\[^\r\n\]*\[\r\n\])+modula-2  *Use the Modula-2 language.*" "help set language"
+
 # test help set listsize
 gdb_test "help set listsize" "Set number of source lines gdb will list by default\." "help set listsize"
 # test help set print "p" abbreviation

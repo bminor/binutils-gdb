@@ -47,14 +47,6 @@
 
 extern void _initialize_language (void);
 
-static void set_case_str (void);
-
-static void set_range_str (void);
-
-static void set_type_str (void);
-
-static void set_lang_str (void);
-
 static void unk_lang_error (char *);
 
 static int unk_lang_parser (void);
@@ -111,16 +103,12 @@ static unsigned languages_size;
 static unsigned languages_allocsize;
 #define	DEFAULT_ALLOCSIZE 4
 
-/* The "set language/type/range" commands all put stuff in these
-   buffers.  This is to make them work as set/show commands.  The
-   user's string is copied here, then the set_* commands look at
-   them and update them to something that looks nice when it is
-   printed out. */
-
-static char *language;
-static char *type;
-static char *range;
-static char *case_sensitive;
+/* The current values of the "set language/type/range" enum
+   commands.  */
+static const char *language;
+static const char *type;
+static const char *range;
+static const char *case_sensitive;
 
 /* Warning issued when current_language and the language of the current
    frame do not match. */
@@ -138,7 +126,15 @@ show_language_command (struct ui_file *file, int from_tty,
 {
   enum language flang;		/* The language of the current frame */
 
-  deprecated_show_value_hack (file, from_tty, c, value);
+  if (language_mode == language_mode_auto)
+    fprintf_filtered (gdb_stdout,
+		      _("The current source language is "
+			"\"auto; currently %s\".\n"),
+		      current_language->la_name);
+  else
+    fprintf_filtered (gdb_stdout, _("The current source language is \"%s\".\n"),
+		      current_language->la_name);
+
   flang = get_frame_language ();
   if (flang != language_unknown &&
       language_mode == language_mode_manual &&
@@ -152,34 +148,6 @@ set_language_command (char *ignore, int from_tty, struct cmd_list_element *c)
 {
   int i;
   enum language flang;
-  char *err_lang;
-
-  if (!language || !language[0])
-    {
-      printf_unfiltered (_("\
-The currently understood settings are:\n\n\
-local or auto    Automatic setting based on source file\n"));
-
-      for (i = 0; i < languages_size; ++i)
-	{
-	  /* Already dealt with these above.  */
-	  if (languages[i]->la_language == language_unknown
-	      || languages[i]->la_language == language_auto)
-	    continue;
-
-	  /* FIXME: i18n: for now assume that the human-readable name
-	     is just a capitalization of the internal name.  */
-	  printf_unfiltered ("%-16s Use the %c%s language\n",
-			     languages[i]->la_name,
-	  /* Capitalize first letter of language
-	     name.  */
-			     toupper (languages[i]->la_name[0]),
-			     languages[i]->la_name + 1);
-	}
-      /* Restore the silly string. */
-      set_language (current_language->la_language);
-      return;
-    }
 
   /* Search the list of languages for a match.  */
   for (i = 0; i < languages_size; i++)
@@ -206,19 +174,15 @@ local or auto    Automatic setting based on source file\n"));
 	      language_mode = language_mode_manual;
 	      current_language = languages[i];
 	      set_type_range_case ();
-	      set_lang_str ();
 	      expected_language = current_language;
 	      return;
 	    }
 	}
     }
 
-  /* Reset the language (esp. the global string "language") to the 
-     correct values. */
-  err_lang = xstrdup (language);
-  make_cleanup (xfree, err_lang);	/* Free it after error */
-  set_language (current_language->la_language);
-  error (_("Unknown language `%s'."), err_lang);
+  internal_error (__FILE__, __LINE__,
+		  "Couldn't find language `%s' in known languages list.",
+		  language);
 }
 
 /* Show command.  Display a warning if the type setting does
@@ -227,10 +191,37 @@ static void
 show_type_command (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
-  deprecated_show_value_hack (file, from_tty, c, value);
-  if (type_check != current_language->la_type_check)
-    printf_unfiltered (
-			"Warning: the current type check setting does not match the language.\n");
+  if (type_mode == type_mode_auto)
+    {
+      char *tmp = NULL;
+
+      switch (type_check)
+	{
+	case type_check_on:
+	  tmp = "on";
+	  break;
+	case type_check_off:
+	  tmp = "off";
+	  break;
+	case type_check_warn:
+	  tmp = "warn";
+	  break;
+	default:
+	  internal_error (__FILE__, __LINE__,
+			  "Unrecognized type check setting.");
+	}
+
+      fprintf_filtered (gdb_stdout,
+			_("Type checking is \"auto; currently %s\".\n"),
+			tmp);
+    }
+  else
+    fprintf_filtered (gdb_stdout, _("Type checking is \"%s\".\n"),
+		      value);
+
+   if (type_check != current_language->la_type_check)
+    warning (_("the current type check setting"
+	       " does not match the language.\n"));
 }
 
 /* Set command.  Change the setting for type checking. */
@@ -256,16 +247,15 @@ set_type_command (char *ignore, int from_tty, struct cmd_list_element *c)
     {
       type_mode = type_mode_auto;
       set_type_range_case ();
-      /* Avoid hitting the set_type_str call below.  We
-         did it in set_type_range_case. */
       return;
     }
   else
-    {
-      warning (_("Unrecognized type check setting: \"%s\""), type);
-    }
-  set_type_str ();
-  show_type_command (NULL, from_tty, NULL, NULL);
+    internal_error (__FILE__, __LINE__,
+		    _("Unrecognized type check setting: \"%s\""), type);
+
+  if (type_check != current_language->la_type_check)
+    warning (_("the current type check setting"
+	       " does not match the language.\n"));
 }
 
 /* Show command.  Display a warning if the range setting does
@@ -274,10 +264,37 @@ static void
 show_range_command (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
 {
-  deprecated_show_value_hack (file, from_tty, c, value);
+  if (range_mode == range_mode_auto)
+    {
+      char *tmp;
+
+      switch (range_check)
+	{
+	case range_check_on:
+	  tmp = "on";
+	  break;
+	case range_check_off:
+	  tmp = "off";
+	  break;
+	case range_check_warn:
+	  tmp = "warn";
+	  break;
+	default:
+	  internal_error (__FILE__, __LINE__,
+			  "Unrecognized range check setting.");
+	}
+
+      fprintf_filtered (gdb_stdout,
+			_("Range checking is \"auto; currently %s\".\n"),
+			tmp);
+    }
+  else
+    fprintf_filtered (gdb_stdout, _("Range checking is \"%s\".\n"),
+		      value);
+
   if (range_check != current_language->la_range_check)
-    printf_unfiltered (
-			"Warning: the current range check setting does not match the language.\n");
+    warning (_("the current range check setting "
+	       "does not match the language.\n"));
 }
 
 /* Set command.  Change the setting for range checking. */
@@ -303,16 +320,16 @@ set_range_command (char *ignore, int from_tty, struct cmd_list_element *c)
     {
       range_mode = range_mode_auto;
       set_type_range_case ();
-      /* Avoid hitting the set_range_str call below.  We
-         did it in set_type_range_case. */
       return;
     }
   else
     {
-      warning (_("Unrecognized range check setting: \"%s\""), range);
+      internal_error (__FILE__, __LINE__,
+		      _("Unrecognized range check setting: \"%s\""), range);
     }
-  set_range_str ();
-  show_range_command (NULL, from_tty, NULL, NULL);
+  if (range_check != current_language->la_range_check)
+    warning (_("the current range check setting "
+	       "does not match the language.\n"));
 }
 
 /* Show command.  Display a warning if the case sensitivity setting does
@@ -321,10 +338,35 @@ static void
 show_case_command (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
-  deprecated_show_value_hack (file, from_tty, c, value);
+  if (case_mode == case_mode_auto)
+    {
+      char *tmp = NULL;
+
+      switch (case_sensitivity)
+	{
+	case case_sensitive_on:
+	  tmp = "on";
+	  break;
+	case case_sensitive_off:
+	  tmp = "off";
+	  break;
+	default:
+	  internal_error (__FILE__, __LINE__,
+			  "Unrecognized case-sensitive setting.");
+	}
+
+      fprintf_filtered (gdb_stdout,
+			_("Case sensitivity in "
+			  "name search is \"auto; currently %s\".\n"),
+			tmp);
+    }
+  else
+    fprintf_filtered (gdb_stdout, _("Case sensitivity in name search is \"%s\".\n"),
+		      value);
+
   if (case_sensitivity != current_language->la_case_sensitivity)
-    printf_unfiltered(
-"Warning: the current case sensitivity setting does not match the language.\n");
+    warning (_("the current case sensitivity setting does not match "
+	       "the language.\n"));
 }
 
 /* Set command.  Change the setting for case sensitivity.  */
@@ -346,17 +388,18 @@ set_case_command (char *ignore, int from_tty, struct cmd_list_element *c)
      {
        case_mode = case_mode_auto;
        set_type_range_case ();
-       /* Avoid hitting the set_case_str call below.  We did it in
-	  set_type_range_case.  */
        return;
      }
    else
      {
-       warning (_("Unrecognized case-sensitive setting: \"%s\""),
-		case_sensitive);
+       internal_error (__FILE__, __LINE__,
+		       "Unrecognized case-sensitive setting: \"%s\"",
+		       case_sensitive);
      }
-   set_case_str();
-   show_case_command (NULL, from_tty, NULL, NULL);
+
+   if (case_sensitivity != current_language->la_case_sensitivity)
+     warning (_("the current case sensitivity setting does not match "
+		"the language.\n"));
 }
 
 /* Set the status of range and type checking and case sensitivity based on
@@ -366,7 +409,6 @@ set_case_command (char *ignore, int from_tty, struct cmd_list_element *c)
 static void
 set_type_range_case (void)
 {
-
   if (range_mode == range_mode_auto)
     range_check = current_language->la_range_check;
 
@@ -375,10 +417,6 @@ set_type_range_case (void)
 
   if (case_mode == case_mode_auto)
     case_sensitivity = current_language->la_case_sensitivity;
-
-  set_type_str ();
-  set_range_str ();
-  set_case_str ();
 }
 
 /* Set current language to (enum language) LANG.  Returns previous language. */
@@ -397,7 +435,6 @@ set_language (enum language lang)
 	{
 	  current_language = languages[i];
 	  set_type_range_case ();
-	  set_lang_str ();
 	  break;
 	}
     }
@@ -405,100 +442,6 @@ set_language (enum language lang)
   return prev_language;
 }
 
-/* This page contains functions that update the global vars
-   language, type and range. */
-static void
-set_lang_str (void)
-{
-  char *prefix = "";
-
-  if (language)
-    xfree (language);
-  if (language_mode == language_mode_auto)
-    prefix = "auto; currently ";
-
-  language = concat (prefix, current_language->la_name, (char *)NULL);
-}
-
-static void
-set_type_str (void)
-{
-  char *tmp = NULL, *prefix = "";
-
-  if (type)
-    xfree (type);
-  if (type_mode == type_mode_auto)
-    prefix = "auto; currently ";
-
-  switch (type_check)
-    {
-    case type_check_on:
-      tmp = "on";
-      break;
-    case type_check_off:
-      tmp = "off";
-      break;
-    case type_check_warn:
-      tmp = "warn";
-      break;
-    default:
-      error (_("Unrecognized type check setting."));
-    }
-
-  type = concat (prefix, tmp, (char *)NULL);
-}
-
-static void
-set_range_str (void)
-{
-  char *tmp, *pref = "";
-
-  if (range_mode == range_mode_auto)
-    pref = "auto; currently ";
-
-  switch (range_check)
-    {
-    case range_check_on:
-      tmp = "on";
-      break;
-    case range_check_off:
-      tmp = "off";
-      break;
-    case range_check_warn:
-      tmp = "warn";
-      break;
-    default:
-      error (_("Unrecognized range check setting."));
-    }
-
-  if (range)
-    xfree (range);
-  range = concat (pref, tmp, (char *)NULL);
-}
-
-static void
-set_case_str (void)
-{
-   char *tmp = NULL, *prefix = "";
-
-   if (case_mode==case_mode_auto)
-      prefix = "auto; currently ";
-
-   switch (case_sensitivity)
-   {
-   case case_sensitive_on:
-     tmp = "on";
-     break;
-   case case_sensitive_off:
-     tmp = "off";
-     break;
-   default:
-     error (_("Unrecognized case-sensitive setting."));
-   }
-
-   xfree (case_sensitive);
-   case_sensitive = concat (prefix, tmp, (char *)NULL);
-}
 
 /* Print out the current language settings: language, range and
    type checking.  If QUIETLY, print only what has changed.  */
@@ -938,6 +881,15 @@ show_check (char *ignore, int from_tty)
 void
 add_language (const struct language_defn *lang)
 {
+  /* For the "set language" command.  */
+  static char **language_names = NULL;
+  /* For the "help set language" command.  */
+  static char *language_set_doc = NULL;
+
+  int i;
+  struct ui_file *tmp_stream;
+  long len;
+
   if (lang->la_magic != LANG_MAGIC)
     {
       fprintf_unfiltered (gdb_stderr, "Magic number of %s language struct wrong\n",
@@ -958,6 +910,52 @@ add_language (const struct language_defn *lang)
 				 languages_allocsize * sizeof (*languages));
     }
   languages[languages_size++] = lang;
+
+  /* Build the language names array, to be used as enumeration in the
+     set language" enum command.  */
+  language_names = xrealloc (language_names,
+			     (languages_size + 1) * sizeof (const char *));
+  for (i = 0; i < languages_size; ++i)
+    language_names[i] = languages[i]->la_name;
+  language_names[i] = NULL;
+
+  /* Build the "help set language" docs.  */
+  tmp_stream = mem_fileopen ();
+
+  fprintf_unfiltered (tmp_stream, _("\
+Set the current source language.\n\
+The currently understood settings are:\n\n\
+local or auto    Automatic setting based on source file\n"));
+
+  for (i = 0; i < languages_size; ++i)
+    {
+      /* Already dealt with these above.  */
+      if (languages[i]->la_language == language_unknown
+	  || languages[i]->la_language == language_auto)
+	continue;
+
+      /* FIXME: i18n: for now assume that the human-readable name
+	 is just a capitalization of the internal name.  */
+      fprintf_unfiltered (tmp_stream, "%-16s Use the %c%s language\n",
+			  languages[i]->la_name,
+			  /* Capitalize first letter of language
+			     name.  */
+			  toupper (languages[i]->la_name[0]),
+			  languages[i]->la_name + 1);
+    }
+
+  xfree (language_set_doc);
+  language_set_doc = ui_file_xstrdup (tmp_stream, &len);
+  ui_file_delete (tmp_stream);
+
+  add_setshow_enum_cmd ("language", class_support,
+			(const char **) language_names,
+			&language,
+			language_set_doc, _("\
+Show the current source language."), NULL,
+			set_language_command,
+			show_language_command,
+			&setlist, &showlist);
 }
 
 /* Iterate through all registered languages looking for and calling
@@ -1340,21 +1338,16 @@ language_lookup_primitive_type_by_name (const struct language_defn *la,
 void
 _initialize_language (void)
 {
-  struct cmd_list_element *set, *show;
+  static const char *type_or_range_names[]
+    = { "on", "off", "warn", "auto", NULL };
+
+  static const char *case_sensitive_names[]
+    = { "on", "off", "auto", NULL };
 
   language_gdbarch_data
     = gdbarch_data_register_post_init (language_gdbarch_post_init);
 
   /* GDB commands for language specific stuff */
-
-  /* FIXME: cagney/2005-02-20: This should be implemented using an
-     enum.  */
-  add_setshow_string_noescape_cmd ("language", class_support, &language, _("\
-Set the current source language."), _("\
-Show the current source language."), NULL,
-				   set_language_command,
-				   show_language_command,
-				   &setlist, &showlist);
 
   add_prefix_cmd ("check", no_class, set_check,
 		  _("Set the status of the type/range checker."),
@@ -1368,38 +1361,33 @@ Show the current source language."), NULL,
   add_alias_cmd ("c", "check", no_class, 1, &showlist);
   add_alias_cmd ("ch", "check", no_class, 1, &showlist);
 
-  /* FIXME: cagney/2005-02-20: This should be implemented using an
-     enum.  */
-  add_setshow_string_noescape_cmd ("type", class_support, &type, _("\
+  add_setshow_enum_cmd ("type", class_support, type_or_range_names, &type, _("\
 Set type checking.  (on/warn/off/auto)"), _("\
 Show type checking.  (on/warn/off/auto)"), NULL,
-				   set_type_command,
-				   show_type_command,
-				   &setchecklist, &showchecklist);
+			set_type_command,
+			show_type_command,
+			&setchecklist, &showchecklist);
 
-  /* FIXME: cagney/2005-02-20: This should be implemented using an
-     enum.  */
-  add_setshow_string_noescape_cmd ("range", class_support, &range, _("\
+  add_setshow_enum_cmd ("range", class_support, type_or_range_names,
+			&range, _("\
 Set range checking.  (on/warn/off/auto)"), _("\
 Show range checking.  (on/warn/off/auto)"), NULL,
-				   set_range_command,
-				   show_range_command,
-				   &setchecklist, &showchecklist);
+			set_range_command,
+			show_range_command,
+			&setchecklist, &showchecklist);
 
-  /* FIXME: cagney/2005-02-20: This should be implemented using an
-     enum.  */
-  add_setshow_string_noescape_cmd ("case-sensitive", class_support,
-				   &case_sensitive, _("\
+  add_setshow_enum_cmd ("case-sensitive", class_support, case_sensitive_names,
+			&case_sensitive, _("\
 Set case sensitivity in name search.  (on/off/auto)"), _("\
 Show case sensitivity in name search.  (on/off/auto)"), _("\
 For Fortran the default is off; for other languages the default is on."),
-				   set_case_command,
-				   show_case_command,
-				   &setlist, &showlist);
+			set_case_command,
+			show_case_command,
+			&setlist, &showlist);
 
-  add_language (&unknown_language_defn);
-  add_language (&local_language_defn);
   add_language (&auto_language_defn);
+  add_language (&local_language_defn);
+  add_language (&unknown_language_defn);
 
   language = xstrdup ("auto");
   type = xstrdup ("auto");

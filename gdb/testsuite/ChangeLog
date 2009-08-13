@@ -1,3 +1,10 @@
+2009-08-13  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/default.exp: Adjust "set language test": it's now an
+	enum command.  Larger help string moved to "help set language".
+	* gdb.base/help.exp: Adjust "help set language" expected output,
+	now lists all known languages.
+
 2009-08-11  Nathan Froyd  <froydnj@codesourcery.com>
 
 	* gdb.arch/altivec-abi.exp (altivec_abi_tests): Turn on printing of
