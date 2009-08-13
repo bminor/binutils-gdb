@@ -1,3 +1,9 @@
+2009-08-13  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (remote_pid_to_str): If printing a process id and we
+	don't know what the remote pid could be, output "Remote target";
+	otherwise, use normal_pid_to_str.
+
 2009-08-13  Tom Tromey  <tromey@redhat.com>
 
 	* language.h (longest_raw_hex_string): Remove unused declaration.

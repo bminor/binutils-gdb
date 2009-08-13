@@ -7835,26 +7835,39 @@ remote_pid_to_str (struct target_ops *ops, ptid_t ptid)
   static char buf[64];
   struct remote_state *rs = get_remote_state ();
 
-  if (ptid_equal (magic_null_ptid, ptid))
+  if (ptid_is_pid (ptid))
     {
-      xsnprintf (buf, sizeof buf, "Thread <main>");
-      return buf;
-    }
-  else if (remote_multi_process_p (rs)
-	   && ptid_get_tid (ptid) != 0 && ptid_get_pid (ptid) != 0)
-    {
-      xsnprintf (buf, sizeof buf, "Thread %d.%ld",
-		 ptid_get_pid (ptid), ptid_get_tid (ptid));
-      return buf;
-    }
-  else if (ptid_get_tid (ptid) != 0)
-    {
-      xsnprintf (buf, sizeof buf, "Thread %ld",
-		 ptid_get_tid (ptid));
-      return buf;
-    }
+      /* Printing an inferior target id.  */
 
-  return normal_pid_to_str (ptid);
+      /* When multi-process extensions are off, there's no way in the
+	 remote protocol to know the remote process id, if there's any
+	 at all.  There's one exception --- when we're connected with
+	 target extended-remote, and we manually attached to a process
+	 with "attach PID".  We don't record anywhere a flag that
+	 allows us to distinguish that case from the case of
+	 connecting with extended-remote and the stub already being
+	 attached to a process, and reporting yes to qAttached, hence
+	 no smart special casing here.  */
+      if (!remote_multi_process_p (rs))
+	{
+	  xsnprintf (buf, sizeof buf, "Remote target");
+	  return buf;
+	}
+
+      return normal_pid_to_str (ptid);
+    }
+  else
+    {
+      if (ptid_equal (magic_null_ptid, ptid))
+	xsnprintf (buf, sizeof buf, "Thread <main>");
+      else if (remote_multi_process_p (rs))
+	xsnprintf (buf, sizeof buf, "Thread %d.%ld",
+		   ptid_get_pid (ptid), ptid_get_tid (ptid));
+      else
+	xsnprintf (buf, sizeof buf, "Thread %ld",
+		   ptid_get_tid (ptid));
+      return buf;
+    }
 }
 
 /* Get the address of the thread local variable in OBJFILE which is
