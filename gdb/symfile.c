@@ -1457,7 +1457,6 @@ find_separate_debug_file (struct objfile *objfile)
 	  xfree (canon_name);
 	  xfree (basename);
 	  xfree (dir);
-	  xfree (canon_name);
 	  return xstrdup (debugfile);
 	}
     }

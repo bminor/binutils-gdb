@@ -1,3 +1,8 @@
+2009-08-14  Doug Evans  <dje@google.com>
+
+	* symfile.c (find_separate_debug_file): Remove double free of
+	canon_name.
+
 2009-08-14  Pedro Alves  <pedro@codesourcery.com>
 
 	* top.c (any_thread_of): Delete.
