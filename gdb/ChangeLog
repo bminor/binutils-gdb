@@ -1,5 +1,14 @@
 2009-08-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* top.c (any_thread_of): Delete.
+	(kill_or_detach): Use any_thread_of_process.
+	* top.c (print_inferior_quit_action): New.
+	(quit_confirm): Rewrite to print info about all inferiors.
+	* target.c (dispose_inferior): New.
+	(target_preopen): Use it.
+
+2009-08-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* ui-file.h (ui_file_xstrdup): Mention that the length argument
 	may be NULL.
 	* ui-file.c (ui_file_xstrdup): Don't dereference LENGTH if it is

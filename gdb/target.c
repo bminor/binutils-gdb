@@ -1904,6 +1904,29 @@ target_pre_inferior (int from_tty)
     }
 }
 
+/* Callback for iterate_over_inferiors.  Gets rid of the given
+   inferior.  */
+
+static int
+dispose_inferior (struct inferior *inf, void *args)
+{
+  struct thread_info *thread;
+
+  thread = any_thread_of_process (inf->pid);
+  if (thread)
+    {
+      switch_to_thread (thread->ptid);
+
+      /* Core inferiors actually should be detached, not killed.  */
+      if (target_has_execution)
+	target_kill ();
+      else
+	target_detach (NULL, 0);
+    }
+
+  return 0;
+}
+
 /* This is to be called by the open routine before it does
    anything.  */
 
@@ -1912,11 +1935,12 @@ target_preopen (int from_tty)
 {
   dont_repeat ();
 
-  if (target_has_execution)
+  if (have_inferiors ())
     {
       if (!from_tty
-          || query (_("A program is being debugged already.  Kill it? ")))
-	target_kill ();
+	  || !have_live_inferiors ()
+	  || query (_("A program is being debugged already.  Kill it? ")))
+	iterate_over_inferiors (dispose_inferior, NULL);
       else
 	error (_("Program not killed."));
     }

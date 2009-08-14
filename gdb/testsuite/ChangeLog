@@ -1,3 +1,8 @@
+2009-08-14  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.threads/killed.exp, gdb.threads/manythreads.exp,
+	gdb.threads/staticthreads.exp: Adjust to "quit" output changes.
+
 2009-08-13  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.base/default.exp: Adjust "set language test": it's now an

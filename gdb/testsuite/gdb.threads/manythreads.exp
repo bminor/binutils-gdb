@@ -160,7 +160,7 @@ gdb_test_multiple "" "stop threads 2" {
 } 
 
 gdb_test_multiple "quit" "GDB exits after stopping multithreaded program" {
-    -re "The program is running.  Quit anyway \\(and kill it\\)\\? \\(y or n\\) $" {
+    -re "Quit anyway\\? \\(y or n\\) $" {
 	send_gdb "y\n"
 	exp_continue
     }

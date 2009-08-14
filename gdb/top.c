@@ -1161,53 +1161,11 @@ set_prompt (char *s)
 }
 
 
-/* If necessary, make the user confirm that we should quit.  Return
-   non-zero if we should quit, zero if we shouldn't.  */
-
-int
-quit_confirm (void)
-{
-  if (! ptid_equal (inferior_ptid, null_ptid) && target_has_execution)
-    {
-      char *s;
-      struct inferior *inf = current_inferior ();
-
-      /* This is something of a hack.  But there's no reliable way to
-         see if a GUI is running.  The `use_windows' variable doesn't
-         cut it.  */
-      if (deprecated_init_ui_hook)
-	s = _("A debugging session is active.\nDo you still want to close the debugger?");
-      else if (inf->attach_flag)
-	s = _("The program is running.  Quit anyway (and detach it)? ");
-      else
-	s = _("The program is running.  Quit anyway (and kill it)? ");
-
-      if (!query ("%s", s))
-	return 0;
-    }
-
-  return 1;
-}
-
 struct qt_args
 {
   char *args;
   int from_tty;
 };
-
-/* Callback for iterate_over_threads.  Finds any thread of inferior
-   given by ARG (really an int*).  */
-
-static int
-any_thread_of (struct thread_info *thread, void *arg)
-{
-  int pid = * (int *)arg;
-
-  if (PIDGET (thread->ptid) == pid)
-    return 1;
-
-  return 0;
-}
 
 /* Callback for iterate_over_inferiors.  Kills or detaches the given
    inferior, depending on how we originally gained control of it.  */
@@ -1218,8 +1176,8 @@ kill_or_detach (struct inferior *inf, void *args)
   struct qt_args *qt = args;
   struct thread_info *thread;
 
-  thread = iterate_over_threads (any_thread_of, &inf->pid);
-  if (thread)
+  thread = any_thread_of_process (inf->pid);
+  if (thread != NULL)
     {
       switch_to_thread (thread->ptid);
 
@@ -1234,6 +1192,67 @@ kill_or_detach (struct inferior *inf, void *args)
     }
 
   return 0;
+}
+
+/* Callback for iterate_over_inferiors.  Prints info about what GDB
+   will do to each inferior on a "quit".  ARG points to a struct
+   ui_out where output is to be collected.  */
+
+static int
+print_inferior_quit_action (struct inferior *inf, void *arg)
+{
+  struct ui_file *stb = arg;
+
+  if (inf->attach_flag)
+    fprintf_filtered (stb,
+		      _("\tInferior %d [%s] will be detached.\n"), inf->num,
+		      target_pid_to_str (pid_to_ptid (inf->pid)));
+  else
+    fprintf_filtered (stb,
+		      _("\tInferior %d [%s] will be killed.\n"), inf->num,
+		      target_pid_to_str (pid_to_ptid (inf->pid)));
+
+  return 0;
+}
+
+/* If necessary, make the user confirm that we should quit.  Return
+   non-zero if we should quit, zero if we shouldn't.  */
+
+int
+quit_confirm (void)
+{
+  struct ui_file *stb;
+  struct cleanup *old_chain;
+  char *str;
+  int qr;
+
+  /* Don't even ask if we're only debugging a core file inferior.  */
+  if (!have_live_inferiors ())
+    return 1;
+
+  /* Build the query string as a single string.  */
+  stb = mem_fileopen ();
+  old_chain = make_cleanup_ui_file_delete (stb);
+
+  /* This is something of a hack.  But there's no reliable way to see
+     if a GUI is running.  The `use_windows' variable doesn't cut
+     it.  */
+  if (deprecated_init_ui_hook)
+    fprintf_filtered (stb, _("A debugging session is active.\n"
+			     "Do you still want to close the debugger?"));
+  else
+    {
+      fprintf_filtered (stb, _("A debugging session is active.\n\n"));
+      iterate_over_inferiors (print_inferior_quit_action, stb);
+      fprintf_filtered (stb, _("\nQuit anyway? "));
+    }
+
+  str = ui_file_xstrdup (stb, NULL);
+  make_cleanup (xfree, str);
+
+  qr = query ("%s", str);
+  do_cleanups (old_chain);
+  return qr;
 }
 
 /* Helper routine for quit_force that requires error handling.  */
