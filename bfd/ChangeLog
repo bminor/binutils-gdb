@@ -1,3 +1,8 @@
+2009-08-13  DJ Delorie  <dj@redhat.com>
+
+	* elf32-m32c.c (m32c_elf_relax_delete_bytes): Adjust symbol sizes
+	if needed.
+
 2009-08-12  Nick Clifton  <nickc@redhat.com>
 
 	* po/fi.po: Updated Finnish translation.

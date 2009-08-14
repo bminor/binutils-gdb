@@ -1951,12 +1951,23 @@ m32c_elf_relax_delete_bytes
 
   for (; isym < isymend; isym++, shndx = (shndx ? shndx + 1 : NULL))
     {
-
+      /* If the symbol is in the range of memory we just moved, we
+	 have to adjust its value.  */
       if ((int) isym->st_shndx == sec_shndx
 	  && isym->st_value > addr
 	  && isym->st_value < toaddr)
 	{
 	  isym->st_value -= count;
+	}
+      /* If the symbol *spans* the bytes we just deleted (i.e. it's
+	 *end* is in the moved bytes but it's *start* isn't), then we
+	 must adjust its size.  */
+      if ((int) isym->st_shndx == sec_shndx
+	    && isym->st_value < addr
+	  && isym->st_value + isym->st_size > addr
+	  && isym->st_value + isym->st_size < toaddr)
+	{
+	  isym->st_size -= count;
 	}
     }
 
@@ -1972,13 +1983,21 @@ m32c_elf_relax_delete_bytes
       struct elf_link_hash_entry * sym_hash = * sym_hashes;
 
       if (sym_hash &&
-	  (   sym_hash->root.type == bfd_link_hash_defined
+	  (sym_hash->root.type == bfd_link_hash_defined
 	   || sym_hash->root.type == bfd_link_hash_defweak)
-	  && sym_hash->root.u.def.section == sec
-	  && sym_hash->root.u.def.value > addr
-	  && sym_hash->root.u.def.value < toaddr)
+	  && sym_hash->root.u.def.section == sec)
 	{
-	  sym_hash->root.u.def.value -= count;
+	  if (sym_hash->root.u.def.value > addr
+	      && sym_hash->root.u.def.value < toaddr)
+	    {
+	      sym_hash->root.u.def.value -= count;
+	    }
+	  if (sym_hash->root.u.def.value < addr
+	      && sym_hash->root.u.def.value + sym_hash->size > addr
+	      && sym_hash->root.u.def.value + sym_hash->size < toaddr)
+	    {
+	      sym_hash->size -= count;
+	    }
 	}
     }
 
