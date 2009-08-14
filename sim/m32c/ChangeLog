@@ -1,3 +1,17 @@
+2009-08-14  DJ Delorie  <dj@redhat.com>
+
+	* configure.in: Check for sys/select.h, termios.h, sys/socket.h,
+	netinet/in.h, and netinet/tcp.h.
+	* configure: Regenerate.
+	* config.in: Add those headers.
+	* main.c: Check for them.
+	(setup_tcp_console): Disable if no networking.
+	(main): Note missing networking or termios.
+	* mem.c: Check for those headers.
+	(stdin_ready): Disable if no termios.
+	(m32c_sim_restore_console): Disable if no termios.
+	(mem_get_byte): Disable console input if no termios.
+	
 2009-01-06  Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* r8c.opc, m32c.opc: Add parentheses to remove warnings.

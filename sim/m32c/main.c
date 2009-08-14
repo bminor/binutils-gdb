@@ -19,6 +19,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
+#include "config.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -26,11 +27,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <assert.h>
 #include <setjmp.h>
 #include <signal.h>
-
 #include <sys/types.h>
+
+#ifdef HAVE_SYS_SOCKET_H
+#ifdef HAVE_NETINET_IN_H
+#ifdef HAVE_NETINET_TCP_H
+#define HAVE_networking
+#endif
+#endif
+#endif
+
+#ifdef HAVE_networking
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#endif
 
 
 #include "bfd.h"
@@ -45,8 +56,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "timer_a.h"
 #endif
 
+#ifdef HAVE_networking
 extern int m32c_console_ofd;
 extern int m32c_console_ifd;
+#endif
 
 int m32c_disassemble = 0;
 static unsigned int cycles = 0;
@@ -63,6 +76,7 @@ done (int exit_code)
   exit (exit_code);
 }
 
+#ifdef HAVE_networking
 static void
 setup_tcp_console (char *portname)
 {
@@ -109,6 +123,7 @@ setup_tcp_console (char *portname)
   printf ("connection from %d.%d.%d.%d\n", a[0], a[1], a[2], a[3]);
   m32c_console_ofd = m32c_console_ifd;
 }
+#endif
 
 int
 main (int argc, char **argv)
@@ -116,7 +131,9 @@ main (int argc, char **argv)
   int o;
   int save_trace;
   bfd *prog;
+#ifdef HAVE_networking
   char *console_port_s = 0;
+#endif
 
   setbuf (stdout, 0);
 
@@ -129,10 +146,18 @@ main (int argc, char **argv)
 	trace++;
 	break;
       case 'c':
+#ifdef HAVE_networking
 	console_port_s = optarg;
+#else
+	fprintf (stderr, "Nework console not available in this build.\n");
+#endif
 	break;
       case 'C':
+#ifdef HAVE_TERMIOS_H
 	m32c_use_raw_console = 1;
+#else
+	fprintf (stderr, "Raw console not available in this build.\n");
+#endif
 	break;
       case 'v':
 	verbose++;
@@ -177,8 +202,10 @@ main (int argc, char **argv)
   m32c_load (prog);
   trace = save_trace;
 
+#ifdef HAVE_networking
   if (console_port_s)
     setup_tcp_console (console_port_s);
+#endif
 
   sim_disasm_init (prog);
 

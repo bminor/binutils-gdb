@@ -19,6 +19,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
+#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -26,8 +27,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
+#ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
+#endif
+#ifdef HAVE_TERMIOS_H
 #include <termios.h>
+#endif
 
 #include "mem.h"
 #include "cpu.h"
@@ -48,9 +53,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 static unsigned char **pt[L1_LEN];
 
+#ifdef HAVE_TERMIOS_H
 int m32c_console_ifd = 0;
+#endif
 int m32c_console_ofd = 1;
+#ifdef HAVE_TERMIOS_H
 int m32c_use_raw_console = 0;
+#endif
 
 #ifdef TIMER_A
 Timer_A timer_a;
@@ -374,6 +383,7 @@ mem_get_pc ()
   return *m;
 }
 
+#ifdef HAVE_TERMIOS_H
 static int console_raw = 0;
 static struct termios oattr;
 
@@ -399,6 +409,7 @@ m32c_sim_restore_console ()
     tcsetattr (m32c_console_ifd, TCSANOW, &oattr);
   console_raw = 0;
 }
+#endif
 
 static unsigned char
 mem_get_byte (int address)
@@ -408,6 +419,7 @@ mem_get_byte (int address)
   m = mem_ptr (address);
   switch (address)
     {
+#ifdef HAVE_TERMIOS_H
     case 0x2ed:		/* m32c uart1c1 */
     case 0x3ad:		/* m16c uart1c1 */
 
@@ -447,6 +459,7 @@ mem_get_byte (int address)
 	  }
 	return c;
       }
+#endif
 
 #ifdef TIMER_A
     case 0x346:		/* TA0low */
@@ -457,6 +470,9 @@ mem_get_byte (int address)
       return timer_a.count;
 #endif
 
+    default:
+      /* In case both cases above are not included.  */
+      ;
     }
 
   S ("=>");
