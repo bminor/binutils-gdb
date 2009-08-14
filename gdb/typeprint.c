@@ -86,7 +86,6 @@ char *
 type_to_string (struct type *type)
 {
   char *s = NULL;
-  long dummy;
   struct ui_file *stb;
   struct cleanup *old_chain;
   volatile struct gdb_exception except;
@@ -97,7 +96,7 @@ type_to_string (struct type *type)
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
       type_print (type, "", stb, -1);
-      s = ui_file_xstrdup (stb, &dummy);
+      s = ui_file_xstrdup (stb, NULL);
     }
   if (except.reason < 0)
     s = NULL;

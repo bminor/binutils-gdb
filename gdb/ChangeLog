@@ -1,3 +1,32 @@
+2009-08-14  Pedro Alves  <pedro@codesourcery.com>
+
+	* ui-file.h (ui_file_xstrdup): Mention that the length argument
+	may be NULL.
+	* ui-file.c (ui_file_xstrdup): Don't dereference LENGTH if it is
+	NULL.
+	* aix-thread.c (aix_thread_extra_thread_info): Pass NULL as length
+	parameter to ui_file_xstrdup.
+	* arm-tdep.c (_initialize_arm_tdep): Ditto.
+	* infrun.c (print_target_wait_results): Ditto.
+	* language.c (add_language): Ditto.
+	* linespec.c (cplusplus_error): Ditto.
+	* remote.c (escape_buffer): Ditto.
+	* typeprint.c (type_to_string): Ditto.
+	* utils.c (error_stream): Ditto.
+	* varobj.c (value_get_print_value): Ditto.
+	* xtensa-tdep.c (xtensa_verify_config): Replace `dummy' local with
+	`length' local.  Pass it to ui_file_xstrdup, and avoid an strlen
+	call.
+	* gdbarch.sh (verify_gdbarch): Ditto.
+	* gdbarch.c: Regenerate.
+	* cli/cli-setshow.c (do_setshow_command): Pass NULL as length
+	parameter to ui_file_xstrdup.
+	* python/python-frame.c (frapy_str): Ditto.
+	* python/python-type.c (typy_str): Use the length local instead of
+	calling strlen.
+	* python/python-value.c (valpy_str): Pass NULL as length parameter
+	to ui_file_xstrdup.
+
 2009-08-13  Doug Evans  <dje@google.com>
 
 	* utils.c (gnu_debuglink_crc32): Store crc32_table as unsigned int

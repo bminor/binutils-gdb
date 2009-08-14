@@ -1943,7 +1943,6 @@ print_target_wait_results (ptid_t waiton_ptid, ptid_t result_ptid,
   char *status_string = target_waitstatus_to_string (ws);
   struct ui_file *tmp_stream = mem_fileopen ();
   char *text;
-  long len;
 
   /* The text is split over several lines because it was getting too long.
      Call fprintf_unfiltered (gdb_stdlog) once so that the text is still
@@ -1963,7 +1962,7 @@ print_target_wait_results (ptid_t waiton_ptid, ptid_t result_ptid,
 		      "infrun:   %s\n",
 		      status_string);
 
-  text = ui_file_xstrdup (tmp_stream, &len);
+  text = ui_file_xstrdup (tmp_stream, NULL);
 
   /* This uses %s in part to handle %'s in the text, but also to avoid
      a gcc error: the format attribute requires a string literal.  */

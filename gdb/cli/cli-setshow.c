@@ -383,8 +383,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	ui_out_field_stream (uiout, "value", stb);
       else
 	{
-	  long length;
-	  char *value = ui_file_xstrdup (stb->stream, &length);
+	  char *value = ui_file_xstrdup (stb->stream, NULL);
 	  make_cleanup (xfree, value);
 	  if (c->show_value_func != NULL)
 	    c->show_value_func (gdb_stdout, from_tty, c, value);

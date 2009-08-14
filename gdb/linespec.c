@@ -150,7 +150,6 @@ static NORETURN void
 cplusplus_error (const char *name, const char *fmt, ...)
 {
   struct ui_file *tmp_stream;
-  long len;
   char *message;
   tmp_stream = mem_fileopen ();
   make_cleanup_ui_file_delete (tmp_stream);
@@ -169,9 +168,9 @@ cplusplus_error (const char *name, const char *fmt, ...)
 		       "(Note leading single quote.)"),
 		      name, name);
 
-  message = ui_file_xstrdup (tmp_stream, &len);                                   
-  make_cleanup (xfree, message);                                              
-  throw_error (NOT_FOUND_ERROR, "%s", message);  
+  message = ui_file_xstrdup (tmp_stream, NULL);
+  make_cleanup (xfree, message);
+  throw_error (NOT_FOUND_ERROR, "%s", message);
 }
 
 /* Return the number of methods described for TYPE, including the

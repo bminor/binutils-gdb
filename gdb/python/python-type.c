@@ -494,13 +494,13 @@ typy_str (PyObject *self)
 {
   volatile struct gdb_exception except;
   char *thetype = NULL;
+  long length = 0;
   PyObject *result;
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
       struct cleanup *old_chain;
       struct ui_file *stb;
-      long length;
 
       stb = mem_fileopen ();
       old_chain = make_cleanup_ui_file_delete (stb);
@@ -516,7 +516,7 @@ typy_str (PyObject *self)
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  result = PyUnicode_Decode (thetype, strlen (thetype), host_charset (), NULL);
+  result = PyUnicode_Decode (thetype, length, host_charset (), NULL);
   xfree (thetype);
 
   return result;

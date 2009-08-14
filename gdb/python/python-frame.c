@@ -80,13 +80,12 @@ static PyObject *
 frapy_str (PyObject *self)
 {
   char *s;
-  long len;
   PyObject *result;
   struct ui_file *strfile;
 
   strfile = mem_fileopen ();
   fprint_frame_id (strfile, ((frame_object *) self)->frame_id);
-  s = ui_file_xstrdup (strfile, &len);
+  s = ui_file_xstrdup (strfile, NULL);
   result = PyString_FromString (s);
   xfree (s);
 

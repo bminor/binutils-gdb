@@ -5947,13 +5947,12 @@ escape_buffer (const char *buf, int n)
   struct cleanup *old_chain;
   struct ui_file *stb;
   char *str;
-  long length;
 
   stb = mem_fileopen ();
   old_chain = make_cleanup_ui_file_delete (stb);
 
   fputstrn_unfiltered (buf, n, 0, stb);
-  str = ui_file_xstrdup (stb, &length);
+  str = ui_file_xstrdup (stb, NULL);
   do_cleanups (old_chain);
   return str;
 }

@@ -6081,7 +6081,7 @@ _initialize_arm_tdep (void)
 		      _("The valid values are:\n"),
 		      regdesc,
 		      _("The default is \"std\"."));
-  helptext = ui_file_xstrdup (stb, &length);
+  helptext = ui_file_xstrdup (stb, NULL);
   ui_file_delete (stb);
 
   add_setshow_enum_cmd("disassembler", no_class,

@@ -838,8 +838,7 @@ fatal (const char *string, ...)
 NORETURN void
 error_stream (struct ui_file *stream)
 {
-  long len;
-  char *message = ui_file_xstrdup (stream, &len);
+  char *message = ui_file_xstrdup (stream, NULL);
   make_cleanup (xfree, message);
   error (("%s"), message);
 }

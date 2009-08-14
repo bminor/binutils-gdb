@@ -888,7 +888,6 @@ add_language (const struct language_defn *lang)
 
   int i;
   struct ui_file *tmp_stream;
-  long len;
 
   if (lang->la_magic != LANG_MAGIC)
     {
@@ -945,7 +944,7 @@ local or auto    Automatic setting based on source file\n"));
     }
 
   xfree (language_set_doc);
-  language_set_doc = ui_file_xstrdup (tmp_stream, &len);
+  language_set_doc = ui_file_xstrdup (tmp_stream, NULL);
   ui_file_delete (tmp_stream);
 
   add_setshow_enum_cmd ("language", class_support,

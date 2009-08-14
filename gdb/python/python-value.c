@@ -348,7 +348,6 @@ static PyObject *
 valpy_str (PyObject *self)
 {
   char *s = NULL;
-  long dummy;
   struct ui_file *stb;
   struct cleanup *old_chain;
   PyObject *result;
@@ -365,7 +364,7 @@ valpy_str (PyObject *self)
     {
       common_val_print (((value_object *) self)->value, stb, 0,
 			&opts, python_language);
-      s = ui_file_xstrdup (stb, &dummy);
+      s = ui_file_xstrdup (stb, NULL);
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 

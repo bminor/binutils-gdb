@@ -1734,7 +1734,6 @@ aix_thread_extra_thread_info (struct thread_info *thread)
   pthdb_suspendstate_t suspendstate;
   pthdb_detachstate_t detachstate;
   int cancelpend;
-  long length;
   static char *ret = NULL;
 
   if (!PD_TID (thread->ptid))
@@ -1775,7 +1774,7 @@ aix_thread_extra_thread_info (struct thread_info *thread)
 
   xfree (ret);			/* Free old buffer.  */
 
-  ret = ui_file_xstrdup (buf, &length);
+  ret = ui_file_xstrdup (buf, NULL);
   ui_file_delete (buf);
 
   return ret;

@@ -285,8 +285,7 @@ do_ui_file_xstrdup (void *context, const char *buffer, long length)
 }
 
 char *
-ui_file_xstrdup (struct ui_file *file,
-		  long *length)
+ui_file_xstrdup (struct ui_file *file, long *length)
 {
   struct accumulated_ui_file acc;
   acc.buffer = NULL;
@@ -294,7 +293,8 @@ ui_file_xstrdup (struct ui_file *file,
   ui_file_put (file, do_ui_file_xstrdup, &acc);
   if (acc.buffer == NULL)
     acc.buffer = xstrdup ("");
-  *length = acc.length;
+  if (length != NULL)
+    *length = acc.length;
   return acc.buffer;
 }
 
