@@ -1,3 +1,8 @@
+2009-08-14  Ian Lance Taylor  <iant@google.com>
+
+	* gold.h (FUNCTION_NAME): Define.
+	(gold_unreachable): Use FUNCTION_NAME.
+
 2009-08-12  Sriraman Tallam  <tmsriram@google.com>
 
 	* icf.cc (Icf::find_identical_sections): Issue a warning when a

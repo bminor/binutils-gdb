@@ -253,11 +253,22 @@ gold_undefined_symbol_at_location(const Symbol*,
 extern void
 gold_nomem() ATTRIBUTE_NORETURN;
 
+// In versions of gcc before 4.3, using __FUNCTION__ in a template
+// function can cause gcc to get confused about whether or not the
+// function can return.  See http://gcc.gnu.org/PR30988.  Use a macro
+// to avoid the problem.  This can be removed when we no longer need
+// to care about gcc versions before 4.3.
+#if defined(__GNUC__) && GCC_VERSION < 4003
+#define FUNCTION_NAME static_cast<const char*>(__FUNCTION__)
+#else 
+#define FUNCTION_NAME __FUNCTION__
+#endif
+
 // This macro and function are used in cases which can not arise if
 // the code is written correctly.
 
 #define gold_unreachable() \
-  (gold::do_gold_unreachable(__FILE__, __LINE__, __FUNCTION__))
+  (gold::do_gold_unreachable(__FILE__, __LINE__, FUNCTION_NAME))
 
 extern void do_gold_unreachable(const char*, int, const char*)
   ATTRIBUTE_NORETURN;
