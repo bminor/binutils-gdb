@@ -703,12 +703,18 @@ bfd_close (bfd *abfd)
   if (! BFD_SEND (abfd, _close_and_cleanup, (abfd)))
     return FALSE;
 
-  /* FIXME: cagney/2004-02-15: Need to implement a BFD_IN_MEMORY io
-     vector.  */
-  if (!(abfd->flags & BFD_IN_MEMORY))
-    ret = abfd->iovec->bclose (abfd);
+  if ((abfd->flags & BFD_IN_MEMORY) != 0)
+    {
+      /* FIXME: cagney/2004-02-15: Need to implement a BFD_IN_MEMORY io
+	 vector.
+	 Until that's done, at least don't leak memory.  */
+      struct bfd_in_memory *bim = abfd->iostream;
+      free (bim->buffer);
+      free (bim);
+      ret = TRUE;
+    }
   else
-    ret = TRUE;
+    ret = abfd->iovec->bclose (abfd);
 
   if (ret)
     _maybe_make_executable (abfd);
