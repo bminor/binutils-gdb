@@ -1,3 +1,9 @@
+2009-08-17  Nick Clifton  <nickc@redhat.com>
+
+	* ld-elf/linkonce1.d: Accept "UNUSED" as part of the name of an
+	unused reloc.
+	* ld-elf/linkonce2.d: Likewise.
+
 2009-08-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Test go32 stub preservation by objcopy.
