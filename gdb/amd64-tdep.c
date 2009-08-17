@@ -1887,6 +1887,89 @@ static const struct frame_base amd64_frame_base =
   amd64_frame_base_address
 };
 
+/* Normal frames, but in a function epilogue.  */
+
+/* The epilogue is defined here as the 'ret' instruction, which will
+   follow any instruction such as 'leave' or 'pop %ebp' that destroys
+   the function's stack frame.  */
+
+static int
+amd64_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  gdb_byte insn;
+
+  if (target_read_memory (pc, &insn, 1))
+    return 0;   /* Can't read memory at pc.  */
+
+  if (insn != 0xc3)     /* 'ret' instruction.  */
+    return 0;
+
+  return 1;
+}
+
+static int
+amd64_epilogue_frame_sniffer (const struct frame_unwind *self,
+			      struct frame_info *this_frame,
+			      void **this_prologue_cache)
+{
+  if (frame_relative_level (this_frame) == 0)
+    return amd64_in_function_epilogue_p (get_frame_arch (this_frame),
+					 get_frame_pc (this_frame));
+  else
+    return 0;
+}
+
+static struct amd64_frame_cache *
+amd64_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
+{
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  struct amd64_frame_cache *cache;
+  gdb_byte buf[4];
+
+  if (*this_cache)
+    return *this_cache;
+
+  cache = amd64_alloc_frame_cache ();
+  *this_cache = cache;
+
+  /* Cache base will be %esp plus cache->sp_offset (-8).  */
+  get_frame_register (this_frame, AMD64_RSP_REGNUM, buf);
+  cache->base = extract_unsigned_integer (buf, 8, 
+					  byte_order) + cache->sp_offset;
+
+  /* Cache pc will be the frame func.  */
+  cache->pc = get_frame_pc (this_frame);
+
+  /* The saved %esp will be at cache->base plus 16.  */
+  cache->saved_sp = cache->base + 16;
+
+  /* The saved %eip will be at cache->base plus 8.  */
+  cache->saved_regs[AMD64_RIP_REGNUM] = cache->base + 8;
+
+  return cache;
+}
+
+static void
+amd64_epilogue_frame_this_id (struct frame_info *this_frame,
+			      void **this_cache,
+			      struct frame_id *this_id)
+{
+  struct amd64_frame_cache *cache = amd64_epilogue_frame_cache (this_frame,
+							       this_cache);
+
+  (*this_id) = frame_id_build (cache->base + 8, cache->pc);
+}
+
+static const struct frame_unwind amd64_epilogue_frame_unwind =
+{
+  NORMAL_FRAME,
+  amd64_epilogue_frame_this_id,
+  amd64_frame_prev_register,
+  NULL, 
+  amd64_epilogue_frame_sniffer
+};
+
 static struct frame_id
 amd64_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
@@ -2065,6 +2148,12 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_dummy_id (gdbarch, amd64_dummy_id);
 
+  /* Hook the function epilogue frame unwinder.  This unwinder is
+     appended to the list first, so that it supercedes the other
+     unwinders in function epilogues.  */
+  frame_unwind_prepend_unwinder (gdbarch, &amd64_epilogue_frame_unwind);
+
+  /* Hook the prologue-based frame unwinders.  */
   frame_unwind_append_unwinder (gdbarch, &amd64_sigtramp_frame_unwind);
   frame_unwind_append_unwinder (gdbarch, &amd64_frame_unwind);
   frame_base_set_default (gdbarch, &amd64_frame_base);

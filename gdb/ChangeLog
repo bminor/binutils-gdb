@@ -1,3 +1,16 @@
+2009-08-17  Michael Snyder  <msnyder@vmware.com>
+
+	* amd64-tdep.c: Add a frame unwinder for function epilogues.
+	(amd64_in_function_epilogue_p): New function.
+	(amd64_epilogue_frame_sniffer): New function.
+	(amd64_epilogue_frame_cache): New function.
+	(amd64_epilogue_frame_this_id): New function.
+	(amd64_epilogue_frame_unwind): New struct frame_unwind.
+	(amd64_init_abi): Hook the new unwinder.
+
+	* amd64-linux-tdep.c (amd64_linux_init_abi): Set gdbarch to use
+	SVR4 method for skip_trampoline_code.
+
 2009-08-17  Pedro Alves  <pedro@codesourcery.com>>
 
 	* objfiles.c (objfile_relocate): Relocate the entry point before

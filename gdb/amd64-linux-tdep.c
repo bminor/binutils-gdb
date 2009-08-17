@@ -1415,6 +1415,9 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
                                              svr4_fetch_objfile_link_map);
 
+  /* GNU/Linux uses SVR4-style shared libraries.  */
+  set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
+
   /* Displaced stepping.  */
   set_gdbarch_displaced_step_copy_insn (gdbarch,
                                         amd64_displaced_step_copy_insn);
