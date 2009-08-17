@@ -2467,13 +2467,13 @@ reread_symbols (void)
 
   if (reread_one)
     {
+      /* Notify objfiles that we've modified objfile sections.  */
+      objfiles_changed ();
+
       clear_symtab_users ();
       /* At least one objfile has changed, so we can consider that
          the executable we're debugging has changed too.  */
       observer_notify_executable_changed ();
-
-      /* Notify objfiles that we've modified objfile sections.  */
-      objfiles_changed ();
     }
 }
 

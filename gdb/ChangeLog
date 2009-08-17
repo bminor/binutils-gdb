@@ -1,3 +1,8 @@
+2009-08-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* symfile.c (reread_symbols): Call objfiles_changed *before*
+	calling clear_symtab_users.
+
 2009-08-17  Michael Snyder  <msnyder@vmware.com>
 
 	* amd64-tdep.c: Add a frame unwinder for function epilogues.
