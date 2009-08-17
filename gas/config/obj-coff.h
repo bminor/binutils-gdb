@@ -413,4 +413,11 @@ extern void obj_coff_init_stab_section   (segT);
 extern void c_section_header             (struct internal_scnhdr *,
 					  char *, long, long, long, long,
 					  long, long, long, long);
+extern void obj_coff_seh_do_final (void);
+
+#ifndef obj_coff_generate_pdata
+#define obj_coff_generate_pdata obj_coff_seh_do_final
+#endif
+
+
 #endif /* OBJ_FORMAT_H */

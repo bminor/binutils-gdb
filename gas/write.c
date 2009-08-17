@@ -560,6 +560,9 @@ size_seg (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
     size = 0;
 
   flags = bfd_get_section_flags (abfd, sec);
+  if (size == 0 && bfd_get_section_size (sec) != 0 &&
+    (flags & SEC_HAS_CONTENTS) != 0)
+    return;
 
   if (size > 0 && ! seginfo->bss)
     flags |= SEC_HAS_CONTENTS;
@@ -1886,16 +1889,17 @@ write_object_file (void)
 #ifdef obj_frob_file
   obj_frob_file ();
 #endif
-
+#ifdef obj_coff_generate_pdata
+  obj_coff_generate_pdata ();
+#endif
   bfd_map_over_sections (stdoutput, write_relocs, (char *) 0);
 
-#ifdef tc_frob_file_after_relocs
+#ifdef tc_frob_file_after_reloc
   tc_frob_file_after_relocs ();
 #endif
 #ifdef obj_frob_file_after_relocs
   obj_frob_file_after_relocs ();
 #endif
-
   bfd_map_over_sections (stdoutput, write_contents, (char *) 0);
 }
 

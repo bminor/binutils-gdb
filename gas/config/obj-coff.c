@@ -53,6 +53,8 @@ static symbolS *def_symbol_in_progress;
 static const char weak_altprefix[] = ".weak.";
 #endif /* TE_PE */
 
+#include "obj-coff-seh.c"
+
 typedef struct
   {
     unsigned long chunk_size;
@@ -1768,7 +1770,6 @@ coff_frob_section (segT sec)
       SF_SET_STATICS (secsym);
       SA_SET_SCN_SCNLEN (secsym, size);
     }
-
   /* FIXME: These should be in a "stabs.h" file, or maybe as.h.  */
 #ifndef STAB_SECTION_NAME
 #define STAB_SECTION_NAME ".stab"
@@ -1876,6 +1877,9 @@ const pseudo_typeS coff_pseudo_table[] =
 #if defined TC_TIC4X
   /* The tic4x uses sdef instead of def.  */
   {"sdef", obj_coff_def, 0},
+#endif
+#if defined(SEH_CMDS)
+  SEH_CMDS
 #endif
   {NULL, NULL, 0}
 };

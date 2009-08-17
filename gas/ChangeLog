@@ -1,3 +1,19 @@
+2009-08-17  Kai Tietz  <kai.tietz@onevision.com>
+
+	* config/obj-coff-seh.c: New file.
+	* config/obj-coff-seh.h: Likewise.
+	* config/obj-coff.c (obj-coff-seh.c): Add include.
+	(coff_pseudo_table): Add new .seh... commands.
+	* config/obj-coff.h (obj_coff_seh_do_final): Add new
+	function prototype.
+	(obj_coff_generate_pdata): New obj-coff hook.
+	* gas/write.c (size_seg): Avoid sizing of already sized
+	sections.
+	(write_object_file): Call conditional hook
+	objc_coff_generate_pdata.
+	* Makefile.am: Add dependencies for new files.
+	* Makefile.in: Regenerated.
+
 2009-08-17  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-microblaze.c: Include safe-ctype.h instad of ctype.h.

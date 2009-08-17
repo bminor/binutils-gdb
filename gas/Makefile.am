@@ -1187,6 +1187,8 @@ DEPTC_arm_coff = \
   $(INCDIR)/opcode/arm.h \
   $(INCDIR)/safe-ctype.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-arm.h \
   dwarf2dbg.h \
   subsegs.h
@@ -1384,6 +1386,8 @@ DEPTC_h8300_coff = \
   $(INCDIR)/opcode/h8300.h \
   $(INCDIR)/safe-ctype.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-h8300.h \
   dwarf2dbg.h \
   subsegs.h
@@ -1474,6 +1478,8 @@ DEPTC_i386_coff = \
   $(srcdir)/../opcodes/i386-init.h \
   $(srcdir)/../opcodes/i386-opc.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-i386-intel.c \
   $(srcdir)/config/tc-i386.h \
   dw2gencfi.h \
@@ -1542,6 +1548,8 @@ DEPTC_i960_coff = \
   $(INCDIR)/opcode/i960.h \
   $(INCDIR)/safe-ctype.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-i960.h
 DEPTC_i960_elf = \
   $(BFDDIR)/elf-bfd.h \
@@ -1702,6 +1710,8 @@ DEPTC_m68k_coff = \
   $(INCDIR)/safe-ctype.h \
   $(srcdir)/config/m68k-parse.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-m68k.h \
   dw2gencfi.h \
   dwarf2dbg.h \
@@ -1736,6 +1746,8 @@ DEPTC_maxq_coff = \
   $(INCDIR)/opcode/maxq.h \
   $(INCDIR)/safe-ctype.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-maxq.h \
   dwarf2dbg.h \
   subsegs.h
@@ -1750,6 +1762,8 @@ DEPTC_mcore_coff = \
   $(INCDIR)/safe-ctype.h \
   $(srcdir)/../opcodes/mcore-opc.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-mcore.h \
   subsegs.h
 DEPTC_mcore_elf = \
@@ -1824,6 +1838,8 @@ DEPTC_mips_coff = \
   $(INCDIR)/opcode/mips.h \
   $(INCDIR)/safe-ctype.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-mips.h \
   dw2gencfi.h \
@@ -1991,6 +2007,8 @@ DEPTC_or32_coff = \
   $(INCDIR)/opcode/or32.h \
   $(INCDIR)/safe-ctype.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-or32.h
 DEPTC_or32_elf = \
   $(BFDDIR)/elf-bfd.h \
@@ -2049,6 +2067,8 @@ DEPTC_ppc_coff = \
   $(INCDIR)/opcode/ppc.h \
   $(INCDIR)/safe-ctype.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-ppc.h \
   dw2gencfi.h \
   subsegs.h
@@ -2119,6 +2139,8 @@ DEPTC_sh_coff = \
   $(INCDIR)/safe-ctype.h \
   $(srcdir)/../opcodes/sh-opc.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-sh.h \
   dw2gencfi.h \
   dwarf2dbg.h \
@@ -2190,6 +2212,8 @@ DEPTC_sparc_coff = \
   $(INCDIR)/opcode/sparc.h \
   $(INCDIR)/safe-ctype.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-sparc.h \
   dw2gencfi.h \
   subsegs.h
@@ -2244,6 +2268,8 @@ DEPTC_tic30_coff = \
   $(INCDIR)/opcode/tic30.h \
   $(INCDIR)/safe-ctype.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-tic30.h
 DEPTC_tic4x_coff = \
   $(BFDDIR)/libcoff.h \
@@ -2256,6 +2282,8 @@ DEPTC_tic4x_coff = \
   $(INCDIR)/opcode/tic4x.h \
   $(INCDIR)/safe-ctype.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-tic4x.h \
   subsegs.h
 DEPTC_tic54x_coff = \
@@ -2269,6 +2297,8 @@ DEPTC_tic54x_coff = \
   $(INCDIR)/opcode/tic54x.h \
   $(INCDIR)/safe-ctype.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-tic54x.h \
   macro.h \
   sb.h \
@@ -2384,6 +2414,8 @@ DEPTC_z80_coff = \
   $(INCDIR)/obstack.h \
   $(INCDIR)/safe-ctype.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-z80.h \
   subsegs.h
 DEPTC_z8k_coff = \
@@ -2396,6 +2428,8 @@ DEPTC_z8k_coff = \
   $(INCDIR)/safe-ctype.h \
   $(srcdir)/../opcodes/z8k-opc.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-z8k.h
 DEPTC_hppa_som = $(srcdir)/config/tc-hppa.h subsegs.h \
   $(INCDIR)/obstack.h $(BFDDIR)/libhppa.h \
@@ -2475,6 +2509,8 @@ DEPOBJ_arm_coff = \
   $(INCDIR)/coff/internal.h \
   $(INCDIR)/obstack.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-arm.h \
   subsegs.h
 DEPOBJ_arm_elf = \
@@ -2659,6 +2695,8 @@ DEPOBJ_h8300_coff = \
   $(INCDIR)/coff/internal.h \
   $(INCDIR)/obstack.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-h8300.h \
   subsegs.h
 DEPOBJ_h8300_elf = \
@@ -2733,6 +2771,8 @@ DEPOBJ_i386_coff = \
   $(INCDIR)/opcode/i386.h \
   $(srcdir)/../opcodes/i386-opc.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-i386.h \
   subsegs.h
 DEPOBJ_i386_elf = \
@@ -2784,6 +2824,8 @@ DEPOBJ_i960_coff = \
   $(INCDIR)/coff/internal.h \
   $(INCDIR)/obstack.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-i960.h \
   subsegs.h
 DEPOBJ_i960_elf = \
@@ -2911,6 +2953,8 @@ DEPOBJ_m68k_coff = \
   $(INCDIR)/coff/m68k.h \
   $(INCDIR)/obstack.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-m68k.h \
   subsegs.h
 DEPOBJ_m68k_elf = \
@@ -2937,6 +2981,8 @@ DEPOBJ_maxq_coff = \
   $(INCDIR)/coff/maxq.h \
   $(INCDIR)/obstack.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-maxq.h \
   subsegs.h
 DEPOBJ_mcore_coff = \
@@ -2948,6 +2994,8 @@ DEPOBJ_mcore_coff = \
   $(INCDIR)/coff/mcore.h \
   $(INCDIR)/obstack.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-mcore.h \
   subsegs.h
 DEPOBJ_mcore_elf = \
@@ -2991,6 +3039,8 @@ DEPOBJ_mips_coff = \
   $(INCDIR)/coff/mipspe.h \
   $(INCDIR)/obstack.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-mips.h \
   subsegs.h
 DEPOBJ_mips_ecoff = \
@@ -3130,6 +3180,8 @@ DEPOBJ_or32_coff = \
   $(INCDIR)/coff/or32.h \
   $(INCDIR)/obstack.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-or32.h \
   subsegs.h
 DEPOBJ_or32_elf = \
@@ -3194,6 +3246,8 @@ DEPOBJ_ppc_coff = \
   $(INCDIR)/obstack.h \
   $(INCDIR)/opcode/ppc.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-ppc.h \
   subsegs.h
 DEPOBJ_ppc_elf = \
@@ -3253,6 +3307,8 @@ DEPOBJ_sh_coff = \
   $(INCDIR)/coff/sh.h \
   $(INCDIR)/obstack.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-sh.h \
   subsegs.h
 DEPOBJ_sh_elf = \
@@ -3306,6 +3362,8 @@ DEPOBJ_sparc_coff = \
   $(INCDIR)/coff/sparc.h \
   $(INCDIR)/obstack.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-sparc.h \
   subsegs.h
 DEPOBJ_sparc_elf = \
@@ -3357,6 +3415,8 @@ DEPOBJ_tic30_coff = \
   $(INCDIR)/coff/tic30.h \
   $(INCDIR)/obstack.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-tic30.h \
   subsegs.h
 DEPOBJ_tic4x_coff = \
@@ -3368,6 +3428,8 @@ DEPOBJ_tic4x_coff = \
   $(INCDIR)/coff/tic4x.h \
   $(INCDIR)/obstack.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-tic4x.h \
   subsegs.h
 DEPOBJ_tic54x_coff = \
@@ -3379,6 +3441,8 @@ DEPOBJ_tic54x_coff = \
   $(INCDIR)/coff/tic54x.h \
   $(INCDIR)/obstack.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-tic54x.h \
   subsegs.h
 DEPOBJ_v850_elf = \
@@ -3477,6 +3541,8 @@ DEPOBJ_z80_coff = \
   $(INCDIR)/coff/z80.h \
   $(INCDIR)/obstack.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-z80.h \
   subsegs.h
 DEPOBJ_z8k_coff = \
@@ -3488,6 +3554,8 @@ DEPOBJ_z8k_coff = \
   $(INCDIR)/coff/z8k.h \
   $(INCDIR)/obstack.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-z8k.h \
   subsegs.h
 DEPOBJ_hppa_som = $(srcdir)/config/obj-som.h subsegs.h \
@@ -3517,6 +3585,8 @@ DEP_alpha_evax = \
   $(INCDIR)/bfdlink.h \
   $(INCDIR)/coff/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-evax.h \
   $(srcdir)/config/tc-alpha.h
 DEP_arc_elf = \
@@ -3529,6 +3599,8 @@ DEP_arc_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-arc.h \
   dwarf2dbg.h
@@ -3544,6 +3616,8 @@ DEP_arm_coff = \
   $(INCDIR)/coff/external.h \
   $(INCDIR)/coff/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-arm.h
 DEP_arm_elf = \
   $(BFDDIR)/elf-bfd.h \
@@ -3563,6 +3637,8 @@ DEP_avr_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-avr.h \
   dwarf2dbg.h
@@ -3576,6 +3652,8 @@ DEP_bfin_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-bfin.h \
   dwarf2dbg.h
@@ -3589,6 +3667,8 @@ DEP_cr16_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-cr16.h \
   dwarf2dbg.h
@@ -3607,6 +3687,8 @@ DEP_cris_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-cris.h \
   dwarf2dbg.h
@@ -3620,6 +3702,8 @@ DEP_crx_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-crx.h \
   dwarf2dbg.h
@@ -3649,6 +3733,8 @@ DEP_dlx_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-dlx.h \
   dwarf2dbg.h
@@ -3662,6 +3748,8 @@ DEP_fr30_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-fr30.h \
   dwarf2dbg.h
@@ -3680,6 +3768,8 @@ DEP_h8300_coff = \
   $(INCDIR)/coff/h8300.h \
   $(INCDIR)/coff/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-h8300.h
 DEP_h8300_elf = \
   $(BFDDIR)/elf-bfd.h \
@@ -3693,6 +3783,8 @@ DEP_h8300_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-h8300.h \
   dwarf2dbg.h
@@ -3718,6 +3810,8 @@ DEP_i370_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-i370.h \
   dwarf2dbg.h
@@ -3737,6 +3831,8 @@ DEP_i386_coff = \
   $(INCDIR)/opcode/i386.h \
   $(srcdir)/../opcodes/i386-opc.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-i386.h
 DEP_i386_elf = \
   $(BFDDIR)/elf-bfd.h \
@@ -3752,6 +3848,8 @@ DEP_i386_elf = \
   $(INCDIR)/opcode/i386.h \
   $(srcdir)/../opcodes/i386-opc.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-i386.h \
   dwarf2dbg.h
@@ -3770,6 +3868,8 @@ DEP_i860_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-i860.h \
   dwarf2dbg.h
@@ -3779,6 +3879,8 @@ DEP_i960_coff = \
   $(INCDIR)/coff/i960.h \
   $(INCDIR)/coff/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-i960.h
 DEP_i960_elf = \
   $(BFDDIR)/elf-bfd.h \
@@ -3791,6 +3893,8 @@ DEP_i960_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-i960.h \
   dwarf2dbg.h
@@ -3815,6 +3919,8 @@ DEP_ip2k_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-ip2k.h \
   dwarf2dbg.h
@@ -3828,6 +3934,8 @@ DEP_lm32_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-lm32.h \
   dwarf2dbg.h
@@ -3841,6 +3949,8 @@ DEP_m32c_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-m32c.h \
   dwarf2dbg.h
@@ -3854,6 +3964,8 @@ DEP_m32r_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-m32r.h \
   dwarf2dbg.h
@@ -3869,6 +3981,8 @@ DEP_m68hc11_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-m68hc11.h \
   dwarf2dbg.h
@@ -3884,6 +3998,8 @@ DEP_m68k_coff = \
   $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/m68k.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-m68k.h
 DEP_m68k_elf = \
   $(BFDDIR)/elf-bfd.h \
@@ -3900,6 +4016,8 @@ DEP_maxq_coff = \
   $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/maxq.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-maxq.h
 DEP_mcore_coff = \
   $(BFDDIR)/libcoff.h \
@@ -3908,6 +4026,8 @@ DEP_mcore_coff = \
   $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/mcore.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-mcore.h
 DEP_mcore_elf = \
   $(BFDDIR)/elf-bfd.h \
@@ -3921,6 +4041,8 @@ DEP_mcore_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-mcore.h \
   dwarf2dbg.h
@@ -3934,6 +4056,8 @@ DEP_mep_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-mep.h \
   dwarf2dbg.h
@@ -3952,6 +4076,8 @@ DEP_mips_coff = \
   $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/mipspe.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-mips.h
 DEP_mips_ecoff = \
   $(INCDIR)/coff/ecoff.h \
@@ -3977,6 +4103,8 @@ DEP_mmix_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-mmix.h \
   dwarf2dbg.h
@@ -3990,6 +4118,8 @@ DEP_mn10200_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-mn10200.h \
   dwarf2dbg.h
@@ -4003,6 +4133,8 @@ DEP_mn10300_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-mn10300.h \
   dwarf2dbg.h
@@ -4016,6 +4148,8 @@ DEP_msp430_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-msp430.h \
   dwarf2dbg.h
@@ -4029,6 +4163,8 @@ DEP_mt_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-mt.h \
   dwarf2dbg.h
@@ -4047,6 +4183,8 @@ DEP_openrisc_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-openrisc.h \
   dwarf2dbg.h
@@ -4056,6 +4194,8 @@ DEP_or32_coff = \
   $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/or32.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-or32.h
 DEP_or32_elf = \
   $(BFDDIR)/elf-bfd.h \
@@ -4068,6 +4208,8 @@ DEP_or32_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-or32.h \
   dwarf2dbg.h
@@ -4086,6 +4228,8 @@ DEP_pdp11_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-pdp11.h \
   dwarf2dbg.h
@@ -4099,6 +4243,8 @@ DEP_pj_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-pj.h \
   dwarf2dbg.h
@@ -4109,6 +4255,8 @@ DEP_ppc_coff = \
   $(INCDIR)/coff/rs6000.h \
   $(INCDIR)/opcode/ppc.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-ppc.h
 DEP_ppc_elf = \
   $(BFDDIR)/elf-bfd.h \
@@ -4122,6 +4270,8 @@ DEP_ppc_elf = \
   $(INCDIR)/elf/internal.h \
   $(INCDIR)/opcode/ppc.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-ppc.h \
   dwarf2dbg.h
@@ -4135,6 +4285,8 @@ DEP_s390_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-s390.h \
   dwarf2dbg.h
@@ -4148,6 +4300,8 @@ DEP_score_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-score.h \
   dwarf2dbg.h
@@ -4158,6 +4312,8 @@ DEP_sh_coff = \
   $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/sh.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-sh.h
 DEP_sh_elf = \
   $(BFDDIR)/elf-bfd.h \
@@ -4191,6 +4347,8 @@ DEP_sparc_coff = \
   $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/sparc.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-sparc.h
 DEP_sparc_elf = \
   $(BFDDIR)/elf-bfd.h \
@@ -4204,6 +4362,8 @@ DEP_sparc_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-sparc.h \
   dwarf2dbg.h
@@ -4219,6 +4379,8 @@ DEP_spu_elf = \
   $(INCDIR)/opcode/spu-insns.h \
   $(INCDIR)/opcode/spu.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-spu.h \
   dwarf2dbg.h
@@ -4234,6 +4396,8 @@ DEP_tic30_coff = \
   $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/tic30.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-tic30.h
 DEP_tic4x_coff = \
   $(BFDDIR)/libcoff.h \
@@ -4242,6 +4406,8 @@ DEP_tic4x_coff = \
   $(INCDIR)/coff/ti.h \
   $(INCDIR)/coff/tic4x.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-tic4x.h
 DEP_tic54x_coff = \
   $(BFDDIR)/libcoff.h \
@@ -4250,6 +4416,8 @@ DEP_tic54x_coff = \
   $(INCDIR)/coff/ti.h \
   $(INCDIR)/coff/tic54x.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-tic54x.h
 DEP_v850_elf = \
   $(BFDDIR)/elf-bfd.h \
@@ -4263,6 +4431,8 @@ DEP_v850_elf = \
   $(INCDIR)/elf/reloc-macros.h \
   $(INCDIR)/elf/v850.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-v850.h \
   dwarf2dbg.h
@@ -4281,6 +4451,8 @@ DEP_vax_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-vax.h \
   dwarf2dbg.h
@@ -4294,6 +4466,8 @@ DEP_xc16x_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-xc16x.h \
   dwarf2dbg.h
@@ -4307,6 +4481,8 @@ DEP_xstormy16_elf = \
   $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/internal.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/obj-elf.h \
   $(srcdir)/config/tc-xstormy16.h \
   dwarf2dbg.h
@@ -4327,6 +4503,8 @@ DEP_z80_coff = \
   $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/z80.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-z80.h
 DEP_z8k_coff = \
   $(BFDDIR)/libcoff.h \
@@ -4335,6 +4513,8 @@ DEP_z8k_coff = \
   $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/z8k.h \
   $(srcdir)/config/obj-coff.h \
+  $(srcdir)/config/obj-coff-seh.h \
+  $(srcdir)/config/obj-coff-seh.c \
   $(srcdir)/config/tc-z8k.h
 DEP_hppa_som = $(BFDDIR)/som.h
 DEP_i386_multi = $(DEP_i386_aout) $(DEP_i386_coff) $(DEP_i386_elf)

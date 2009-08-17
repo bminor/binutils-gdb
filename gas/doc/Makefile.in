@@ -36,6 +36,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
+LIBOBJDIR =
 subdir = doc
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(as_TEXINFOS)
@@ -346,7 +347,7 @@ clean-libtool:
 	-rm -rf .libs _libs
 
 distclean-libtool:
-	-rm -f libtool
+	-rm -f libtool config.lt
 
 as.info: as.texinfo $(as_TEXINFOS)
 	restore=: && backupdir="$(am__leading_dot)am$$$$" && \
