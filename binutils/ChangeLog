@@ -1,3 +1,9 @@
+2009-08-17  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (is_32bit_abs_reloc): Treat R_PARISC_SECREL32 as a
+	32-bit absolute reloc for the purposes of processing debug
+	sections.
+
 2009-08-10  Daniel Gutson  <dgutson@codesourcery.com>
 
 	* readelf.c (get_arm_section_type_name): Added support for

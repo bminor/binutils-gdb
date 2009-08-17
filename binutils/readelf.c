@@ -7939,7 +7939,8 @@ is_32bit_abs_reloc (unsigned int reloc_type)
     case EM_OR32:
       return reloc_type == 1; /* R_OR32_32.  */
     case EM_PARISC:
-      return reloc_type == 1; /* R_PARISC_DIR32.  */
+      return (reloc_type == 1 /* R_PARISC_DIR32.  */
+	      || reloc_type == 41); /* R_PARISC_SECREL32.  */
     case EM_PJ:
     case EM_PJ_OLD:
       return reloc_type == 1; /* R_PJ_DATA_DIR32.  */
