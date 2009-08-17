@@ -26,7 +26,7 @@
 #define DEFINE_TABLE
 #include "../opcodes/microblaze-opc.h"
 #include "../opcodes/microblaze-opcm.h"
-#include <ctype.h>
+#include "safe-ctype.h"
 #include <string.h>
 #include <dwarf2dbg.h>
 #include "aout/stab_gnu.h"
@@ -409,7 +409,7 @@ parse_reg (char * s, unsigned * reg)
   unsigned tmpreg = 0;
 
   /* Strip leading whitespace.  */
-  while (isspace (* s))
+  while (ISSPACE (* s))
     ++ s;
 
   if (strncasecmp (s, "rpc", 3) == 0)
@@ -481,13 +481,13 @@ parse_reg (char * s, unsigned * reg)
   /* MMU registers end.  */
   else if (strncasecmp (s, "rpvr", 4) == 0)
     {
-      if (isdigit (s[4]) && isdigit (s[5]))
+      if (ISDIGIT (s[4]) && ISDIGIT (s[5]))
         {
           tmpreg = (s[4]-'0')*10 + s[5] - '0';
           s += 6;
         }
 
-      else if (isdigit (s[4]))
+      else if (ISDIGIT (s[4]))
         {
           tmpreg = s[4] - '0';
           s += 5;
@@ -510,12 +510,12 @@ parse_reg (char * s, unsigned * reg)
     }
   else if (strncasecmp (s, "rfsl", 4) == 0)
     {
-      if (isdigit (s[4]) && isdigit (s[5]))
+      if (ISDIGIT (s[4]) && ISDIGIT (s[5]))
         {
           tmpreg = (s[4] - '0') * 10 + s[5] - '0';
           s += 6;
         }
-      else if (isdigit (s[4]))
+      else if (ISDIGIT (s[4]))
         {
           tmpreg = s[4] - '0';
           s += 5;
@@ -523,7 +523,7 @@ parse_reg (char * s, unsigned * reg)
       else
 	as_bad (_("register expected, but saw '%.6s'"), s);
 
-      if ((int)tmpreg >= MIN_REGNUM && tmpreg <= MAX_REGNUM)
+      if ((int) tmpreg >= MIN_REGNUM && tmpreg <= MAX_REGNUM)
         *reg = tmpreg;
       else
 	{
@@ -534,14 +534,14 @@ parse_reg (char * s, unsigned * reg)
     }
   else
     {
-      if (tolower (s[0]) == 'r')
+      if (TOLOWER (s[0]) == 'r')
         {
-          if (isdigit (s[1]) && isdigit (s[2]))
+          if (ISDIGIT (s[1]) && ISDIGIT (s[2]))
             {
               tmpreg = (s[1] - '0') * 10 + s[2] - '0';
               s += 3;
             }
-          else if (isdigit (s[1]))
+          else if (ISDIGIT (s[1]))
             {
               tmpreg = s[1] - '0';
               s += 2;
@@ -571,7 +571,7 @@ parse_exp (char *s, expressionS *e)
   char *new;
 
   /* Skip whitespace.  */
-  while (isspace (* s))
+  while (ISSPACE (* s))
     ++ s;
 
   save = input_line_pointer;
@@ -806,7 +806,7 @@ md_assemble (char * str)
   char name[20];
 
   /* Drop leading whitespace.  */
-  while (isspace (* str))
+  while (ISSPACE (* str))
     str ++;
 
   /* Find the op code end.  */
@@ -1612,7 +1612,7 @@ md_assemble (char * str)
     }
 
   /* Drop whitespace after all the operands have been parsed.  */
-  while (isspace (* op_end))
+  while (ISSPACE (* op_end))
     op_end ++;
 
   /* Give warning message if the insn has more operands than required.  */
