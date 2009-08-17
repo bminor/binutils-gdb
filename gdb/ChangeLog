@@ -1,3 +1,9 @@
+2009-08-17  Pedro Alves  <pedro@codesourcery.com>>
+
+	* objfiles.c (objfile_relocate): Relocate the entry point before
+	relocating the section offsets.  Flush the section map before
+	resetting breakpoints.
+
 2009-08-14  Doug Evans  <dje@google.com>
 
 	* symfile.c (find_separate_debug_file): Remove double free of

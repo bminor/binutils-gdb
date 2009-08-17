@@ -666,12 +666,6 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
      to be out of order.  */
   msymbols_sort (objfile);
 
-  {
-    int i;
-    for (i = 0; i < objfile->num_sections; ++i)
-      (objfile->section_offsets)->offsets[i] = ANOFFSET (new_offsets, i);
-  }
-
   if (objfile->ei.entry_point != ~(CORE_ADDR) 0)
     {
       /* Relocate ei.entry_point with its section offset, use SECT_OFF_TEXT
@@ -684,6 +678,15 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
         objfile->ei.entry_point += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
     }
 
+  {
+    int i;
+    for (i = 0; i < objfile->num_sections; ++i)
+      (objfile->section_offsets)->offsets[i] = ANOFFSET (new_offsets, i);
+  }
+
+  /* Rebuild section map next time we need it.  */
+  objfiles_changed_p = 1;
+
   /* Update the table in exec_ops, used to read memory.  */
   ALL_OBJFILE_OSECTIONS (objfile, s)
     {
@@ -695,7 +698,6 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 
   /* Relocate breakpoints as necessary, after things are relocated. */
   breakpoint_re_set ();
-  objfiles_changed_p = 1;  /* Rebuild section map next time we need it.  */
 }
 
 /* Many places in gdb want to test just to see if we have any partial
