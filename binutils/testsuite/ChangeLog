@@ -1,3 +1,8 @@
+2009-08-17  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/strip-10.d: Accept "<OS specific>: 10" for the type
+	of the UNIQUE symbol.
+
 2009-08-07  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* binutils-all/testranges.s: Use %progbits.  Use ";#" for comments.
