@@ -129,7 +129,7 @@ seh_x64_write_xdata (void)
   bfd *abfd = stdoutput;
 
   h = seh_ctx_root;
-  if (h->done)
+  if (!h || h->done)
     return;
   while (h != NULL)
     {
