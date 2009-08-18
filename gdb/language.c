@@ -884,7 +884,7 @@ add_language (const struct language_defn *lang)
   /* For the "set language" command.  */
   static char **language_names = NULL;
   /* For the "help set language" command.  */
-  static char *language_set_doc = NULL;
+  char *language_set_doc = NULL;
 
   int i;
   struct ui_file *tmp_stream;
@@ -943,7 +943,6 @@ local or auto    Automatic setting based on source file\n"));
 			  languages[i]->la_name + 1);
     }
 
-  xfree (language_set_doc);
   language_set_doc = ui_file_xstrdup (tmp_stream, NULL);
   ui_file_delete (tmp_stream);
 
@@ -955,6 +954,8 @@ Show the current source language."), NULL,
 			set_language_command,
 			show_language_command,
 			&setlist, &showlist);
+
+  xfree (language_set_doc);
 }
 
 /* Iterate through all registered languages looking for and calling

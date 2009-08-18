@@ -865,6 +865,9 @@ add_packet_config_cmd (struct packet_config *config, const char *name,
 				set_remote_protocol_packet_cmd,
 				show_remote_protocol_packet_cmd,
 				&remote_set_cmdlist, &remote_show_cmdlist);
+  /* The command code copies the documentation strings.  */
+  xfree (set_doc);
+  xfree (show_doc);
   /* set/show remote NAME-packet {auto,on,off} -- legacy.  */
   if (legacy)
     {

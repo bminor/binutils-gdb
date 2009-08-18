@@ -1098,6 +1098,9 @@ Show whether GDB will quit when an %s is detected"),
 			set_cmd_list,
 			show_cmd_list);
 
+  xfree (set_doc);
+  xfree (show_doc);
+
   set_doc = xstrprintf (_("\
 Set whether GDB should create a core file of GDB when %s is detected"),
 			problem->name);
@@ -1114,6 +1117,9 @@ Show whether GDB will create a core file of GDB when %s is detected"),
 			NULL, /* showfunc */
 			set_cmd_list,
 			show_cmd_list);
+
+  xfree (set_doc);
+  xfree (show_doc);
 }
 
 /* Print the system error message for errno, and also mention STRING

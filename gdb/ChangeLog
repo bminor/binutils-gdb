@@ -1,5 +1,12 @@
 2009-08-18  Tom Tromey  <tromey@redhat.com>
 
+	* utils.c (add_internal_problem_command): Free set_doc and
+	show_doc.
+	* remote.c (add_packet_config_cmd): Free set_doc and show_doc.
+	* language.c (add_language): Free language_set_doc.
+
+2009-08-18  Tom Tromey  <tromey@redhat.com>
+
 	* Makefile.in (ALL_TARGET_OBS): Remove prologue-value.o, solib.o.
 
 2009-08-17  Ulrich Weigand  <uweigand@de.ibm.com>
