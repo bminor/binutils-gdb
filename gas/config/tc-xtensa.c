@@ -5210,16 +5210,18 @@ xtensa_frob_label (symbolS *sym)
 
   /* No target aligning in the absolute section.  */
   if (now_seg != absolute_section
-      && do_align_targets ()
       && !is_unaligned_label (sym)
       && !generating_literals)
     {
       xtensa_set_frag_assembly_state (frag_now);
 
-      frag_var (rs_machine_dependent,
-		0, (int) freq,
-		RELAX_DESIRE_ALIGN_IF_TARGET,
-		frag_now->fr_symbol, frag_now->fr_offset, NULL);
+      if (do_align_targets ())
+	frag_var (rs_machine_dependent, 0, (int) freq,
+		  RELAX_DESIRE_ALIGN_IF_TARGET, frag_now->fr_symbol,
+		  frag_now->fr_offset, NULL);
+      else
+	frag_var (rs_fill, 0, 0, frag_now->fr_subtype,
+		  frag_now->fr_symbol, frag_now->fr_offset, NULL);
       xtensa_set_frag_assembly_state (frag_now);
       xtensa_move_labels (frag_now, 0);
     }
