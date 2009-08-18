@@ -1,3 +1,26 @@
+2009-08-18  Doug Kwan  <dougkwan@google.com>
+
+	* dynobj.cc (Sized_dynobj::setup): Take a Target object instead of
+	an elcpp::Ehdr as parameter.  Adjust call to set_target.
+	* dynobj.h (Sized_dynobj::setup): Take a Target object instead of
+	an elfcpp::Ehdr as parameter.
+	* object.cc (Object::set_target): Remove the version that looks up
+	a target and sets it.
+	(Sized_relobj::setup): Take a Target object instead of
+	an elfcpp::Ehdr as parameter.  Adjust call to set_target.
+	(make_elf_sized_object): Find target and ask target to
+	make an ELF object.
+	* object.h: (Object::set_target): Remove the version that looks up
+	a target and sets it.
+	(Sized_relobj::setup): Take a Target object instead of
+	an elfcpp:Ehdr as parameter.
+	* target.cc: Include dynobj.h.
+	(Target::do_make_elf_object_implementation): New.
+ 	(Target::do_make_elf_object): New.
+	* target.h (Target::make_elf_object): New template declaration.
+	(Target::do_make_elf_object): New method declarations.
+	(Target::do_make_elf_object_implementation): New template declaration.
+
 2009-08-14  Ian Lance Taylor  <iant@google.com>
 
 	* gold.h (FUNCTION_NAME): Define.

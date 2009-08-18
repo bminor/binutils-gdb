@@ -83,13 +83,9 @@ Sized_dynobj<size, big_endian>::Sized_dynobj(
 
 template<int size, bool big_endian>
 void
-Sized_dynobj<size, big_endian>::setup(
-    const elfcpp::Ehdr<size, big_endian>& ehdr)
+Sized_dynobj<size, big_endian>::setup(Target *target)
 {
-  this->set_target(ehdr.get_e_machine(), size, big_endian,
-		   ehdr.get_e_ident()[elfcpp::EI_OSABI],
-		   ehdr.get_e_ident()[elfcpp::EI_ABIVERSION]);
-
+  this->set_target(target);
   const unsigned int shnum = this->elf_file_.shnum();
   this->set_shnum(shnum);
 }

@@ -132,19 +132,6 @@ Xindex::sym_xindex_to_shndx(Object* object, unsigned int symndx)
 
 // Class Object.
 
-// Set the target based on fields in the ELF file header.
-
-void
-Object::set_target(int machine, int size, bool big_endian, int osabi,
-		   int abiversion)
-{
-  Target* target = select_target(machine, size, big_endian, osabi, abiversion);
-  if (target == NULL)
-    gold_fatal(_("%s: unsupported ELF machine number %d"),
-	       this->name().c_str(), machine);
-  this->target_ = target;
-}
-
 // Report an error for this object file.  This is used by the
 // elfcpp::Elf_file interface, and also called by the Object code
 // itself.
@@ -353,12 +340,9 @@ Sized_relobj<size, big_endian>::~Sized_relobj()
 
 template<int size, bool big_endian>
 void
-Sized_relobj<size, big_endian>::setup(
-    const elfcpp::Ehdr<size, big_endian>& ehdr)
+Sized_relobj<size, big_endian>::setup(Target *target)
 {
-  this->set_target(ehdr.get_e_machine(), size, big_endian,
-		   ehdr.get_e_ident()[elfcpp::EI_OSABI],
-		   ehdr.get_e_ident()[elfcpp::EI_ABIVERSION]);
+  this->set_target(target);
 
   const unsigned int shnum = this->elf_file_.shnum();
   this->set_shnum(shnum);
@@ -2237,27 +2221,14 @@ Object*
 make_elf_sized_object(const std::string& name, Input_file* input_file,
 		      off_t offset, const elfcpp::Ehdr<size, big_endian>& ehdr)
 {
-  int et = ehdr.get_e_type();
-  if (et == elfcpp::ET_REL)
-    {
-      Sized_relobj<size, big_endian>* obj =
-	new Sized_relobj<size, big_endian>(name, input_file, offset, ehdr);
-      obj->setup(ehdr);
-      return obj;
-    }
-  else if (et == elfcpp::ET_DYN)
-    {
-      Sized_dynobj<size, big_endian>* obj =
-	new Sized_dynobj<size, big_endian>(name, input_file, offset, ehdr);
-      obj->setup(ehdr);
-      return obj;
-    }
-  else
-    {
-      gold_error(_("%s: unsupported ELF file type %d"),
-		 name.c_str(), et);
-      return NULL;
-    }
+  Target* target = select_target(ehdr.get_e_machine(), size, big_endian,
+				 ehdr.get_e_ident()[elfcpp::EI_OSABI],
+				 ehdr.get_e_ident()[elfcpp::EI_ABIVERSION]);
+  if (target == NULL)
+    gold_fatal(_("%s: unsupported ELF machine number %d"),
+	       name.c_str(), ehdr.get_e_machine());
+  return target->make_elf_object<size, big_endian>(name, input_file, offset,
+						   ehdr);
 }
 
 } // End anonymous namespace.

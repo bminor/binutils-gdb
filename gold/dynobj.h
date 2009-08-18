@@ -161,9 +161,9 @@ class Sized_dynobj : public Dynobj
   Sized_dynobj(const std::string& name, Input_file* input_file, off_t offset,
 	       const typename elfcpp::Ehdr<size, big_endian>&);
 
-  // Set up the object file based on the ELF header.
+  // Set up the object file based on TARGET.
   void
-  setup(const typename elfcpp::Ehdr<size, big_endian>&);
+  setup(Target *target);
 
   // Read the symbols.
   void

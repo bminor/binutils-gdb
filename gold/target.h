@@ -216,6 +216,13 @@ class Target
   is_local_label_name(const char* name) const
   { return this->do_is_local_label_name(name); }
 
+  // Make an ELF object.
+  template<int size, bool big_endian>
+  Object*
+  make_elf_object(const std::string& name, Input_file* input_file,
+		  off_t offset, const elfcpp::Ehdr<size, big_endian>& ehdr)
+  { return this->do_make_elf_object(name, input_file, offset, ehdr); }
+
  protected:
   // This struct holds the constant information for a child class.  We
   // use a struct to avoid the overhead of virtual function calls for
@@ -301,7 +308,46 @@ class Target
   virtual bool
   do_is_local_label_name(const char*) const;
 
+  // make_elf_object hooks.  There are four versions of these for
+  // different address sizes and endianities.
+  
+#ifdef HAVE_TARGET_32_LITTLE
+  // Virtual functions which may be overriden by the child class.
+  virtual Object*
+  do_make_elf_object(const std::string&, Input_file*, off_t,
+		     const elfcpp::Ehdr<32, false>&);
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+  // Virtual functions which may be overriden by the child class.
+  virtual Object*
+  do_make_elf_object(const std::string&, Input_file*, off_t,
+		     const elfcpp::Ehdr<32, true>&);
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+  // Virtual functions which may be overriden by the child class.
+  virtual Object*
+  do_make_elf_object(const std::string&, Input_file*, off_t,
+		     const elfcpp::Ehdr<64, false>& ehdr);
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+  // Virtual functions which may be overriden by the child class.
+  virtual Object*
+  do_make_elf_object(const std::string& name, Input_file* input_file,
+		     off_t offset, const elfcpp::Ehdr<64, true>& ehdr);
+#endif
+
  private:
+  // The implementations of the four do_make_elf_object virtual functions are
+  // almost identical except for their sizes and endianity.  We use a template.
+  // for their implementations.
+  template<int size, bool big_endian>
+  inline Object*
+  do_make_elf_object_implementation(const std::string&, Input_file*, off_t,
+				    const elfcpp::Ehdr<size, big_endian>&);
+
   Target(const Target&);
   Target& operator=(const Target&);
 

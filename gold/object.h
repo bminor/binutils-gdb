@@ -545,11 +545,6 @@ class Object
   virtual void
   do_get_global_symbol_counts(const Symbol_table*, size_t*, size_t*) const = 0;
 
-  // Set the target.
-  void
-  set_target(int machine, int size, bool big_endian, int osabi,
-	     int abiversion);
-
   // Set the number of sections.
   void
   set_shnum(int shnum)
@@ -1311,9 +1306,9 @@ class Sized_relobj : public Relobj
   is_output_section_offset_invalid(unsigned int shndx) const
   { return this->get_output_section_offset(shndx) == invalid_address; }
 
-  // Set up the object file based on the ELF header.
+  // Set up the object file based on TARGET.
   void
-  setup(const typename elfcpp::Ehdr<size, big_endian>&);
+  setup(Target *target);
 
   // Return the number of symbols.  This is only valid after
   // Object::add_symbols has been called.

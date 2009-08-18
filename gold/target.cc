@@ -22,6 +22,7 @@
 
 #include "gold.h"
 #include "target.h"
+#include "dynobj.h"
 
 namespace gold
 {
@@ -54,5 +55,84 @@ Target::do_is_local_label_name (const char* name) const
 
   return false;
 }
+
+// Implementations of methods Target::do_make_elf_object are almost identical
+// except for the address sizes and endianities.  So we extract this
+// into a template.
+
+template<int size, bool big_endian>
+inline Object*
+Target::do_make_elf_object_implementation(
+    const std::string& name,
+    Input_file* input_file,
+    off_t offset,
+    const elfcpp::Ehdr<size, big_endian>& ehdr)
+{
+  int et = ehdr.get_e_type();
+  if (et == elfcpp::ET_REL)
+    {
+      Sized_relobj<size, big_endian>* obj =
+	new Sized_relobj<size, big_endian>(name, input_file, offset, ehdr);
+      obj->setup(this);
+      return obj;
+    }
+  else if (et == elfcpp::ET_DYN)
+    {
+      Sized_dynobj<size, big_endian>* obj =
+	new Sized_dynobj<size, big_endian>(name, input_file, offset, ehdr);
+      obj->setup(this);
+      return obj;
+    }
+  else
+    {
+      gold_error(_("%s: unsupported ELF file type %d"),
+		 name.c_str(), et);
+      return NULL;
+    }
+}
+
+// Make an ELF object called NAME by reading INPUT_FILE at OFFSET.  EHDR
+// is the ELF header of the object.  There are four versions of this
+// for different address sizes and endianities.
+
+#ifdef HAVE_TARGET_32_LITTLE
+Object*
+Target::do_make_elf_object(const std::string& name, Input_file* input_file,
+			   off_t offset, const elfcpp::Ehdr<32, false>& ehdr)
+{
+  return this->do_make_elf_object_implementation<32, false>(name, input_file,
+							    offset, ehdr);
+}
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+Object*
+Target::do_make_elf_object(const std::string& name, Input_file* input_file,
+			   off_t offset, const elfcpp::Ehdr<32, true>& ehdr)
+{
+  return this->do_make_elf_object_implementation<32, true>(name, input_file,
+							   offset, ehdr);
+}
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+Object*
+Target::do_make_elf_object(const std::string& name, Input_file* input_file,
+			   off_t offset, const elfcpp::Ehdr<64, false>& ehdr)
+{
+  return this->do_make_elf_object_implementation<64, false>(name, input_file,
+							    offset, ehdr);
+}
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+Object*
+Target::do_make_elf_object(const std::string& name, Input_file* input_file,
+			   off_t offset, const elfcpp::Ehdr<64, true>& ehdr)
+{
+  return this->do_make_elf_object_implementation<64, true>(name, input_file,
+							   offset, ehdr);
+}
+#endif
 
 } // End namespace gold.
