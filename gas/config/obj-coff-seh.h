@@ -1,3 +1,24 @@
+/* seh pdata/xdata coff object file format
+   Copyright 2009
+   Free Software Foundation, Inc.
+
+   This file is part of GAS.
+
+   GAS is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3, or (at your option)
+   any later version.
+
+   GAS is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
+   02110-1301, USA.  */
+
 /* Short overview:
   There are at the moment three different function entry formats preset.
   The first is the MIPS one. The second version
@@ -159,3 +180,55 @@ static void seh_x64_make_prologue_element (int, int, bfd_vma);
 static void make_function_entry_pdata (seh_context *c);
 
 #define UNDSEC (asection *) &bfd_und_section
+
+/* Check if x64 UNW_... macros are already defined.  */
+#ifndef PEX64_FLAG_NHANDLER
+/* We can't include here coff/pe.h header. So we have to copy macros
+   from coff/pe.h here.  */
+#define PEX64_UNWCODE_CODE(VAL) ((VAL) & 0xf)
+#define PEX64_UNWCODE_INFO(VAL) (((VAL) >> 4) & 0xf)
+
+/* The unwind info.  */
+#define UNW_FLAG_NHANDLER     0
+#define UNW_FLAG_EHANDLER     1
+#define UNW_FLAG_UHANDLER     2
+#define UNW_FLAG_FHANDLER     3
+#define UNW_FLAG_CHAININFO    4
+
+#define UNW_FLAG_MASK         0x1f
+
+/* The unwind codes.  */
+#define UWOP_PUSH_NONVOL      0
+#define UWOP_ALLOC_LARGE      1
+#define UWOP_ALLOC_SMALL      2
+#define UWOP_SET_FPREG        3
+#define UWOP_SAVE_NONVOL      4
+#define UWOP_SAVE_NONVOL_FAR  5
+#define UWOP_SAVE_XMM         6
+#define UWOP_SAVE_XMM_FAR     7
+#define UWOP_SAVE_XMM128      8
+#define UWOP_SAVE_XMM128_FAR  9
+#define UWOP_PUSH_MACHFRAME   10
+
+#define PEX64_UWI_VERSION(VAL)  ((VAL) & 7)
+#define PEX64_UWI_FLAGS(VAL)    (((VAL) >> 3) & 0x1f)
+#define PEX64_UWI_FRAMEREG(VAL) ((VAL) & 0xf)
+#define PEX64_UWI_FRAMEOFF(VAL) (((VAL) >> 4) & 0xf)
+#define PEX64_UWI_SIZEOF_UWCODE_ARRAY(VAL) \
+  ((((VAL) + 1) & ~1) * 2)
+
+#define PEX64_OFFSET_TO_UNWIND_CODE 0x4
+
+#define PEX64_OFFSET_TO_HANDLER_RVA (COUNTOFUNWINDCODES) \
+  (PEX64_OFFSET_TO_UNWIND_CODE + \
+   PEX64_UWI_SIZEOF_UWCODE_ARRAY(COUNTOFUNWINDCODES))
+
+#define PEX64_OFFSET_TO_SCOPE_COUNT(COUNTOFUNWINDCODES) \
+  (PEX64_OFFSET_TO_HANDLER_RVA(COUNTOFUNWINDCODES) + 4)
+
+#define PEX64_SCOPE_ENTRY(COUNTOFUNWINDCODES, IDX) \
+  (PEX64_OFFSET_TO_SCOPE_COUNT(COUNTOFUNWINDCODES) + \
+   PEX64_SCOPE_ENTRY_SIZE * (IDX))
+
+#endif
+

@@ -1,3 +1,9 @@
+2009-08-18  Kai Tietz  <kai.tietz@onevision.com>
+
+	* config/obj-coff-seh.c: Add copyright notice.
+	* config/obj-coff-seh.h: Add copyright notice.
+	Add x64 specific macros from coff/pe.h header.
+
 2009-08-18  Sterling Augustine  <sterling@tensilica.com>
 
 	* config/tc-xtensa.c (xtensa_create_xproperty_segments): Use
