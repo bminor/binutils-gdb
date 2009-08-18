@@ -10490,7 +10490,7 @@ static void add_xt_block_frags
 static bfd_boolean xtensa_frag_flags_is_empty (const frag_flags *);
 static void xtensa_frag_flags_init (frag_flags *);
 static void get_frag_property_flags (const fragS *, frag_flags *);
-static bfd_vma frag_flags_to_number (const frag_flags *);
+static flagword frag_flags_to_number (const frag_flags *);
 static void add_xt_prop_frags (segT, xtensa_block_info **, frag_flags_fn);
 
 /* Set up property tables after relaxation.  */
@@ -10716,7 +10716,7 @@ xtensa_create_xproperty_segments (frag_flags_fn flag_fn,
 				      cur_block->size, 4);
 		  md_number_to_chars (&frag_data[8 + i * 12],
 				      frag_flags_to_number (&cur_block->flags),
-				      4);
+				      sizeof (flagword));
 		  cur_block = cur_block->next;
 		}
 	      frag_wane (frag_now);
@@ -10796,7 +10796,6 @@ add_xt_block_frags (segT sec,
 		    frag_predicate property_function,
 		    frag_predicate end_property_function)
 {
-  bfd_vma seg_offset;
   fragS *fragP;
 
   /* Build it if needed.  */
@@ -10805,8 +10804,6 @@ add_xt_block_frags (segT sec,
   /* We are either at NULL at the beginning or at the end.  */
 
   /* Walk through the frags.  */
-  seg_offset = 0;
-
   if (seg_info (sec)->frchainP)
     {
       for (fragP = seg_info (sec)->frchainP->frch_root;
@@ -10904,10 +10901,10 @@ get_frag_property_flags (const fragS *fragP, frag_flags *prop_flags)
 }
 
 
-static bfd_vma
+static flagword
 frag_flags_to_number (const frag_flags *prop_flags)
 {
-  bfd_vma num = 0;
+  flagword num = 0;
   if (prop_flags->is_literal)
     num |= XTENSA_PROP_LITERAL;
   if (prop_flags->is_insn)
@@ -11053,7 +11050,6 @@ add_xt_prop_frags (segT sec,
 		   xtensa_block_info **xt_block,
 		   frag_flags_fn property_function)
 {
-  bfd_vma seg_offset;
   fragS *fragP;
 
   /* Build it if needed.  */
@@ -11064,8 +11060,6 @@ add_xt_prop_frags (segT sec,
   /* We are either at NULL at the beginning or at the end.  */
 
   /* Walk through the frags.  */
-  seg_offset = 0;
-
   if (seg_info (sec)->frchainP)
     {
       for (fragP = seg_info (sec)->frchainP->frch_root; fragP;
