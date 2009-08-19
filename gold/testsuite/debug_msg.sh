@@ -59,14 +59,17 @@ check debug_msg.err "debug_msg.o: in function fn_array:debug_msg.cc(.data+0x[0-9
 check debug_msg.err "debug_msg.o: in function fn_array:debug_msg.cc(.data+0x[0-9a-fA-F]*): error: undefined reference to 'undef_fn2()'"
 check debug_msg.err "debug_msg.o: in function badref1:debug_msg.cc(.data+0x[0-9a-fA-F]*): error: undefined reference to 'undef_int'"
 
-check debug_msg.err "debug_msg.o: in function Base::virtfn():${srcdir}/debug_msg.cc:50: error: undefined reference to 'undef_fn1()'"
-check debug_msg.err "debug_msg.o: in function Derived::virtfn():${srcdir}/debug_msg.cc:55: error: undefined reference to 'undef_fn2()'"
-check debug_msg.err "debug_msg.o: in function int testfn<int>(int):${srcdir}/debug_msg.cc:43: error: undefined reference to 'undef_fn1()'"
-check debug_msg.err "debug_msg.o: in function int testfn<int>(int):${srcdir}/debug_msg.cc:44: error: undefined reference to 'undef_fn2()'"
-check debug_msg.err "debug_msg.o: in function int testfn<int>(int):${srcdir}/debug_msg.cc:45: error: undefined reference to 'undef_int'"
-check debug_msg.err "debug_msg.o: in function int testfn<double>(double):${srcdir}/debug_msg.cc:43: error: undefined reference to 'undef_fn1()'"
-check debug_msg.err "debug_msg.o: in function int testfn<double>(double):${srcdir}/debug_msg.cc:44: error: undefined reference to 'undef_fn2()'"
-check debug_msg.err "debug_msg.o: in function int testfn<double>(double):${srcdir}/debug_msg.cc:45: error: undefined reference to 'undef_int'"
+# These tests check only for the source file's file name (not the complete
+# path) because use of -fdebug-prefix-map may change the path to the source
+# file recorded in the objects.
+check debug_msg.err "debug_msg.o: in function Base::virtfn():.*/debug_msg.cc:50: error: undefined reference to 'undef_fn1()'"
+check debug_msg.err "debug_msg.o: in function Derived::virtfn():.*/debug_msg.cc:55: error: undefined reference to 'undef_fn2()'"
+check debug_msg.err "debug_msg.o: in function int testfn<int>(int):.*/debug_msg.cc:43: error: undefined reference to 'undef_fn1()'"
+check debug_msg.err "debug_msg.o: in function int testfn<int>(int):.*/debug_msg.cc:44: error: undefined reference to 'undef_fn2()'"
+check debug_msg.err "debug_msg.o: in function int testfn<int>(int):.*/debug_msg.cc:45: error: undefined reference to 'undef_int'"
+check debug_msg.err "debug_msg.o: in function int testfn<double>(double):.*/debug_msg.cc:43: error: undefined reference to 'undef_fn1()'"
+check debug_msg.err "debug_msg.o: in function int testfn<double>(double):.*/debug_msg.cc:44: error: undefined reference to 'undef_fn2()'"
+check debug_msg.err "debug_msg.o: in function int testfn<double>(double):.*/debug_msg.cc:45: error: undefined reference to 'undef_int'"
 
 # Check we detected the ODR (One Definition Rule) violation.
 check debug_msg.err ": symbol 'Ordering::operator()(int, int)' defined in multiple places (possible ODR violation):"
