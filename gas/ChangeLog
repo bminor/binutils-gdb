@@ -1,3 +1,10 @@
+2009-08-19  Sterling Augustine  <sterling@tensilica.com>
+
+	* config/tc-xtensa.h (xtensa_frag_data): Rename unused field fr_prev
+	to no_transform_end.
+	* config/tc-xtensa.c (xtensa_mark_difference_of_two_symbols): Set
+	and use no_transform_end.
+
 2009-08-18  Kai Tietz  <kai.tietz@onevision.com>
 
 	* config/obj-coff-seh.c: Add copyright notice.

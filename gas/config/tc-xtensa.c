@@ -7460,6 +7460,7 @@ xtensa_mark_difference_of_two_symbols (void)
 	    {
 	      fragS *start;
 	      fragS *end;
+	      fragS *walk;
 
 	      if (symbol_get_frag (left)->fr_address 
 		  <= symbol_get_frag (right)->fr_address)
@@ -7472,12 +7473,19 @@ xtensa_mark_difference_of_two_symbols (void)
 		  start = symbol_get_frag (right);
 		  end = symbol_get_frag (left);
 		}
+
+	      if (start->tc_frag_data.no_transform_end != NULL)
+		walk = start->tc_frag_data.no_transform_end;
+	      else
+		walk = start;
 	      do 
 		{
-		  start->tc_frag_data.is_no_transform = 1;
-		  start = start->fr_next;
+		  walk->tc_frag_data.is_no_transform = 1;
+		  walk = walk->fr_next;
 		}
-	      while (start && start->fr_address < end->fr_address);
+	      while (walk && walk->fr_address < end->fr_address);
+
+	      start->tc_frag_data.no_transform_end = walk;
 	    }
 	}
     }
