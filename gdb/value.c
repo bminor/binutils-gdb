@@ -920,8 +920,11 @@ struct internalvar
       /* The internal variable holds a GDB internal convenience function.  */
       INTERNALVAR_FUNCTION,
 
-      /* The variable holds a simple scalar value.  */
-      INTERNALVAR_SCALAR,
+      /* The variable holds an integer value.  */
+      INTERNALVAR_INTEGER,
+
+      /* The variable holds a pointer value.  */
+      INTERNALVAR_POINTER,
 
       /* The variable holds a GDB-provided string.  */
       INTERNALVAR_STRING,
@@ -944,19 +947,22 @@ struct internalvar
 	  int canonical;
 	} fn;
 
-      /* A scalar value used with INTERNALVAR_SCALAR.  */
+      /* An integer value used with INTERNALVAR_INTEGER.  */
       struct
         {
 	  /* If type is non-NULL, it will be used as the type to generate
 	     a value for this internal variable.  If type is NULL, a default
 	     integer type for the architecture is used.  */
 	  struct type *type;
-	  union
-	    {
-	      LONGEST l;    /* Used with TYPE_CODE_INT and NULL types.  */
-	      CORE_ADDR a;  /* Used with TYPE_CODE_PTR types.  */
-	    } val;
-        } scalar;
+	  LONGEST val;
+        } integer;
+
+      /* A pointer value used with INTERNALVAR_POINTER.  */
+      struct
+        {
+	  struct type *type;
+	  CORE_ADDR val;
+        } pointer;
 
       /* A string value used with INTERNALVAR_STRING.  */
       char *string;
@@ -1082,16 +1088,16 @@ value_of_internalvar (struct gdbarch *gdbarch, struct internalvar *var)
       val = allocate_value (builtin_type (gdbarch)->internal_fn);
       break;
 
-    case INTERNALVAR_SCALAR:
-      if (!var->u.scalar.type)
+    case INTERNALVAR_INTEGER:
+      if (!var->u.integer.type)
 	val = value_from_longest (builtin_type (gdbarch)->builtin_int,
-				  var->u.scalar.val.l);
-      else if (TYPE_CODE (var->u.scalar.type) == TYPE_CODE_INT)
-	val = value_from_longest (var->u.scalar.type, var->u.scalar.val.l);
-      else if (TYPE_CODE (var->u.scalar.type) == TYPE_CODE_PTR)
-	val = value_from_pointer (var->u.scalar.type, var->u.scalar.val.a);
+				  var->u.integer.val);
       else
-        internal_error (__FILE__, __LINE__, "bad type");
+	val = value_from_longest (var->u.integer.type, var->u.integer.val);
+      break;
+
+    case INTERNALVAR_POINTER:
+      val = value_from_pointer (var->u.pointer.type, var->u.pointer.val);
       break;
 
     case INTERNALVAR_STRING:
@@ -1145,14 +1151,9 @@ get_internalvar_integer (struct internalvar *var, LONGEST *result)
 {
   switch (var->kind)
     {
-    case INTERNALVAR_SCALAR:
-      if (var->u.scalar.type == NULL
-	  || TYPE_CODE (var->u.scalar.type) == TYPE_CODE_INT)
-	{
-	  *result = var->u.scalar.val.l;
-	  return 1;
-	}
-      /* Fall through.  */
+    case INTERNALVAR_INTEGER:
+      *result = var->u.integer.val;
+      return 1;
 
     default:
       return 0;
@@ -1224,15 +1225,15 @@ set_internalvar (struct internalvar *var, struct value *val)
       break;
 
     case TYPE_CODE_INT:
-      new_kind = INTERNALVAR_SCALAR;
-      new_data.scalar.type = value_type (val);
-      new_data.scalar.val.l = value_as_long (val);
+      new_kind = INTERNALVAR_INTEGER;
+      new_data.integer.type = value_type (val);
+      new_data.integer.val = value_as_long (val);
       break;
 
     case TYPE_CODE_PTR:
-      new_kind = INTERNALVAR_SCALAR;
-      new_data.scalar.type = value_type (val);
-      new_data.scalar.val.a = value_as_address (val);
+      new_kind = INTERNALVAR_POINTER;
+      new_data.pointer.type = value_type (val);
+      new_data.pointer.val = value_as_address (val);
       break;
 
     default:
@@ -1269,9 +1270,9 @@ set_internalvar_integer (struct internalvar *var, LONGEST l)
   /* Clean up old contents.  */
   clear_internalvar (var);
 
-  var->kind = INTERNALVAR_SCALAR;
-  var->u.scalar.type = NULL;
-  var->u.scalar.val.l = l;
+  var->kind = INTERNALVAR_INTEGER;
+  var->u.integer.type = NULL;
+  var->u.integer.val = l;
 }
 
 void
@@ -1426,10 +1427,16 @@ preserve_one_internalvar (struct internalvar *var, struct objfile *objfile,
 {
   switch (var->kind)
     {
-    case INTERNALVAR_SCALAR:
-      if (var->u.scalar.type && TYPE_OBJFILE (var->u.scalar.type) == objfile)
-	var->u.scalar.type
-	  = copy_type_recursive (objfile, var->u.scalar.type, copied_types);
+    case INTERNALVAR_INTEGER:
+      if (var->u.integer.type && TYPE_OBJFILE (var->u.integer.type) == objfile)
+	var->u.integer.type
+	  = copy_type_recursive (objfile, var->u.integer.type, copied_types);
+      break;
+
+    case INTERNALVAR_POINTER:
+      if (TYPE_OBJFILE (var->u.pointer.type) == objfile)
+	var->u.pointer.type
+	  = copy_type_recursive (objfile, var->u.pointer.type, copied_types);
       break;
 
     case INTERNALVAR_VALUE:
@@ -2164,7 +2171,7 @@ struct value *
 value_from_pointer (struct type *type, CORE_ADDR addr)
 {
   struct value *val = allocate_value (type);
-  store_typed_address (value_contents_raw (val), type, addr);
+  store_typed_address (value_contents_raw (val), check_typedef (type), addr);
   return val;
 }
 

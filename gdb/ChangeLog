@@ -1,3 +1,17 @@
+2009-08-19  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* value.c (enum internalvar_kind): Replace INTERNALVAR_SCALAR by
+	INTERNALVAR_INTEGER and INTERNALVAR_POINTER.
+	(union internalvar_data): Replace "scalar" member by "integer"
+	and "pointer".
+	(value_of_internalvar): Handle INTERNALVAR_INTEGER and
+	INTERNALVAR_POINTER instead of INTERNALVAR_SCALAR.
+	(get_internalvar_integer): Likewise.
+	(set_internalvar): Likewise.
+	(set_internalvar_integer): Likewise.
+	(preserve_one_internalvar): Likewise.
+	(value_from_pointer): Handle typedef'd pointer types.
+
 2009-08-18  Tom Tromey  <tromey@redhat.com>
 
 	* utils.c (add_internal_problem_command): Free set_doc and

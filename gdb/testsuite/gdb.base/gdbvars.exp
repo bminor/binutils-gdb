@@ -22,6 +22,15 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
+set testfile "gdbvars"
+set srcfile  ${testfile}.c
+set binfile  ${objdir}/${subdir}/${testfile}
+
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
+    untested gdbvars.exp
+    return -1
+}
+
 proc test_convenience_variables {} {
     global gdb_prompt
 
@@ -101,13 +110,23 @@ proc test_value_history {} {
 	"Use value-history element in arithmetic expression"
 }
 
+proc test_with_program {} {
+    global hex
+    gdb_test "set \$prog_var = p" "" \
+	"Set a new convenience variable to a program variable"
+    gdb_test "print /x \$prog_var" " = $hex" \
+	"Print contents of new convenience variable of program variable"
+}
+
 # Start with a fresh gdb.
 
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile}
 
 send_gdb "set print sevenbit-strings\n" ; gdb_expect -re ".*$gdb_prompt $"
 
 test_value_history
 test_convenience_variables
+test_with_program
