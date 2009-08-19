@@ -257,8 +257,9 @@ Symbol_table::resolve(Sized_symbol<size>* to,
       // Record that we've seen this symbol in a regular object.
       to->set_in_reg();
     }
-  else if (to->visibility() == elfcpp::STV_HIDDEN
-           || to->visibility() == elfcpp::STV_INTERNAL)
+  else if (st_shndx == elfcpp::SHN_UNDEF
+           && (to->visibility() == elfcpp::STV_HIDDEN
+               || to->visibility() == elfcpp::STV_INTERNAL))
     {
       // A dynamic object cannot reference a hidden or internal symbol
       // defined in another object.

@@ -1,3 +1,9 @@
+2009-08-19  Cary Coutant  <ccoutant@google.com>
+
+	* resolve.cc (Symbol_table::resolve): Don't complain about defined
+	symbols in shared libraries overridden by hidden or internal symbols
+	in the main program.
+
 2009-08-19  Chris Demetriou  <cgd@google.com>
 
 	* testsuite/debug_msg.sh: Match .* rather than ${srcdir} when
