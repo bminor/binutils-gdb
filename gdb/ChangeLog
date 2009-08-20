@@ -1,4 +1,31 @@
-2009-07-24  Reid Kleckner  <reid@kleckner.net>
+2009-08-20  Jacob Potter  <jdpotter@google.com>
+
+	Replace dcache with splay tree.
+	Remove partially implemented writeback support.
+	* dcache.c: Include splay-tree.h.
+	(LINE_SIZE_POWER): Change from 5 to 6.
+	(DCACHE_SIZE): Change from 64 to 4096.
+	(ENTRY_INVALID, ENTRY_VALID, ENTRY_DIRTY): Delete.
+	(state_chars): Delete.
+	(struct dcache_block): Clean up; remove state and anydirty fields.
+	(struct dcache_struct): Redefine as a splay tree and linked list.
+	(last_cache): Make static.
+	(dcache_invalidate, dcache_hit): Rewrite for new cache structure.
+	(dcache_read_line, dcache_alloc): Rewrite for new cache structure.
+	(dcache_write_line): Delete.
+	(dcache_writeback): Delete.
+	(dcache_peek_byte): Clean up; remove "invalid" state check.
+	(dcache_poke_byte): Rewrite for new cache structure; clarify comment.
+	(dcache_splay_tree_compare): New function.
+	(dcache_init, dcache_free): Rewrite for new cache structure.
+	(dcache_xfer_memory): Rewrite for new write-through cache structure.
+	(dcache_print_line): New function.
+	(dcache_info): Rewrite for new cache structure.
+	(_initialize_dcache): Update "info dcache" help text.
+	* dcache.h (dcache_xfer_memory): Update declaration.
+	* target.c (memory_xfer_partial): Update calls to dcache_xfer_memory.
+
+2009-08-19  Reid Kleckner  <reid@kleckner.net>
 
 	Add interface for JIT code generation.
 	* NEWS: Announce JIT interface.

@@ -1225,16 +1225,14 @@ memory_xfer_partial (struct target_ops *ops, void *readbuf, const void *writebuf
 
   if (region->attrib.cache)
     {
-      /* FIXME drow/2006-08-09: This call discards OPS, so the raw
-	 memory request will start back at current_target.  */
       if (readbuf != NULL)
-	res = dcache_xfer_memory (target_dcache, memaddr, readbuf,
+	res = dcache_xfer_memory (ops, target_dcache, memaddr, readbuf,
 				  reg_len, 0);
       else
 	/* FIXME drow/2006-08-09: If we're going to preserve const
 	   correctness dcache_xfer_memory should take readbuf and
 	   writebuf.  */
-	res = dcache_xfer_memory (target_dcache, memaddr,
+	res = dcache_xfer_memory (ops, target_dcache, memaddr,
 				  (void *) writebuf,
 				  reg_len, 1);
       if (res <= 0)

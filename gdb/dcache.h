@@ -35,7 +35,7 @@ void dcache_free (DCACHE *);
 
 /* Simple to call from <remote>_xfer_memory */
 
-int dcache_xfer_memory (DCACHE *cache, CORE_ADDR mem, gdb_byte *my,
-			int len, int should_write);
+int dcache_xfer_memory (struct target_ops *ops, DCACHE *cache, CORE_ADDR mem,
+			gdb_byte *my, int len, int should_write);
 
 #endif /* DCACHE_H */
