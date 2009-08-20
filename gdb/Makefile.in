@@ -676,7 +676,8 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	wrapper.c \
 	xml-tdesc.c xml-support.c \
 	inferior.c gdb_usleep.c \
-	record.c
+	record.c \
+	jit.c
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
@@ -745,7 +746,7 @@ config/rs6000/nm-rs6000.h top.h bsd-kvm.h gdb-stabs.h reggroups.h \
 annotate.h sim-regno.h dictionary.h dfp.h main.h frame-unwind.h	\
 remote-fileio.h i386-linux-tdep.h vax-tdep.h objc-lang.h \
 sentinel-frame.h bcache.h symfile.h windows-tdep.h linux-tdep.h \
-gdb_usleep.h
+gdb_usleep.h jit.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -827,7 +828,8 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	solib.o solib-null.o \
 	prologue-value.o memory-map.o xml-support.o \
 	target-descriptions.o target-memory.o xml-tdesc.o xml-builtin.o \
-	inferior.o osdata.o gdb_usleep.o record.o
+	inferior.o osdata.o gdb_usleep.o record.o \
+	jit.o
 
 TSOBS = inflow.o
 

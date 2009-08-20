@@ -120,6 +120,9 @@ enum bptype
     bp_catchpoint,
 
     bp_tracepoint,
+
+    /* Event for JIT compiled code generation or deletion.  */
+    bp_jit_event,
   };
 
 /* States of enablement of breakpoint. */
@@ -554,6 +557,9 @@ enum bpstat_what_main_action
        keep checking.  */
     BPSTAT_WHAT_CHECK_SHLIBS,
 
+    /* Check for new JITed code.  */
+    BPSTAT_WHAT_CHECK_JIT,
+
     /* This is just used to keep track of how many enums there are.  */
     BPSTAT_WHAT_LAST
   };
@@ -864,6 +870,9 @@ extern void breakpoint_set_commands (struct breakpoint *b,
 extern void mark_breakpoints_out (void);
 
 extern void make_breakpoint_permanent (struct breakpoint *);
+
+extern struct breakpoint *create_jit_event_breakpoint (struct gdbarch *,
+                                                       CORE_ADDR);
 
 extern struct breakpoint *create_solib_event_breakpoint (struct gdbarch *,
 							 CORE_ADDR);

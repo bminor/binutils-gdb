@@ -3,6 +3,12 @@
 
 *** Changes since GDB 6.8
 
+* GDB now has an interface for JIT compilation.  Applications that
+dynamically generate code can create symbol files in memory and register
+them with GDB.  For users, the feature should work transparently, and
+for JIT developers, the interface is documented in the GDB manual in the
+"JIT Compilation Interface" chapter.
+
 * Tracepoints may now be conditional.  The syntax is as for
 breakpoints; either an "if" clause appended to the "trace" command,
 or the "condition" command is available.  GDB sends the condition to

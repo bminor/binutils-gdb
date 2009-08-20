@@ -1,3 +1,27 @@
+2009-07-24  Reid Kleckner  <reid@kleckner.net>
+
+	Add interface for JIT code generation.
+	* NEWS: Announce JIT interface.
+	* Makefile.in (SFILES): Add jit.c.
+	(HFILES_NO_SRCDIR): Add jit.h.
+	(COMMON_OBS): Add jit.o.
+	* jit.c: New file.
+	* jit.h: New file.
+	* breakpoint.h (enum bptype): Add bp_jit_event to enum.
+	* breakpoint.c:
+	(update_breakpoints_after_exec): Delete jit breakpoints after exec.
+	(bpstat_what): Update event table for bp_jit_event.
+	(print_it_typical): Added case for bp_jit_event.
+	(print_one_breakpoint_location): Added case for bp_jit_event.
+	(allocate_bp_location): Added case for bp_jit_event.
+	(mention): Added case for bp_jit_event.
+	(delete_command): Added case for bp_jit_event.
+	(breakpoint_re_set_one): Added case for bp_jit_event.
+	(breakpoint_re_set): Added call to jit_inferior_created_hook.
+	(create_jit_event_breakpoint): New.
+	* infrun.c (handle_inferior_event): Add handler for jit event.
+	(follow_exec): Add call to jit_inferior_created_hook.
+
 2009-08-19  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* value.c (enum internalvar_kind): Replace INTERNALVAR_SCALAR by

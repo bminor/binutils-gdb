@@ -159,6 +159,7 @@ software in general.  We will miss him.
 * Emacs::                       Using @value{GDBN} under @sc{gnu} Emacs
 * GDB/MI::                      @value{GDBN}'s Machine Interface.
 * Annotations::                 @value{GDBN}'s annotation interface.
+* JIT Interface::               Using the JIT debugging interface.
 
 * GDB Bugs::                    Reporting bugs in @value{GDBN}
 
@@ -25920,6 +25921,136 @@ line, or @samp{beg} if @var{addr} is at the beginning of the line, and
 source which is being displayed.  @var{addr} is in the form @samp{0x}
 followed by one or more lowercase hex digits (note that this does not
 depend on the language).
+
+@node JIT Interface
+@chapter JIT Compilation Interface
+@cindex just-in-time compilation
+@cindex JIT compilation interface
+
+This chapter documents @value{GDBN}'s @dfn{just-in-time} (JIT) compilation
+interface.  A JIT compiler is a program or library that generates native
+executable code at runtime and executes it, usually in order to achieve good
+performance while maintaining platform independence. 
+
+Programs that use JIT compilation are normally difficult to debug because
+portions of their code are generated at runtime, instead of being loaded from
+object files, which is where @value{GDBN} normally finds the program's symbols
+and debug information.  In order to debug programs that use JIT compilation,
+@value{GDBN} has an interface that allows the program to register in-memory
+symbol files with @value{GDBN} at runtime.
+
+If you are using @value{GDBN} to debug a program that uses this interface, then
+it should work transparently so long as you have not stripped the binary.  If
+you are developing a JIT compiler, then the interface is documented in the rest
+of this chapter.  At this time, the only known client of this interface is the
+LLVM JIT.
+
+Broadly speaking, the JIT interface mirrors the dynamic loader interface.  The
+JIT compiler communicates with @value{GDBN} by writing data into a global
+variable and calling a fuction at a well-known symbol.  When @value{GDBN}
+attaches, it reads a linked list of symbol files from the global variable to
+find existing code, and puts a breakpoint in the function so that it can find
+out about additional code.
+
+@menu
+* Declarations::                Relevant C struct declarations
+* Registering Code::            Steps to register code
+* Unregistering Code::          Steps to unregister code
+@end menu
+
+@node Declarations
+@section JIT Declarations
+
+These are the relevant struct declarations that a C program should include to
+implement the interface:
+
+@smallexample
+typedef enum
+@{
+  JIT_NOACTION = 0,
+  JIT_REGISTER_FN,
+  JIT_UNREGISTER_FN
+@} jit_actions_t;
+
+struct jit_code_entry
+@{
+  struct jit_code_entry *next_entry;
+  struct jit_code_entry *prev_entry;
+  const char *symfile_addr;
+  uint64_t symfile_size;
+@};
+
+struct jit_descriptor
+@{
+  uint32_t version;
+  /* This type should be jit_actions_t, but we use uint32_t
+     to be explicit about the bitwidth.  */
+  uint32_t action_flag;
+  struct jit_code_entry *relevant_entry;
+  struct jit_code_entry *first_entry;
+@};
+
+/* GDB puts a breakpoint in this function.  */
+void __attribute__((noinline)) __jit_debug_register_code() @{ @};
+
+/* Make sure to specify the version statically, because the
+   debugger may check the version before we can set it.  */
+struct jit_descriptor __jit_debug_descriptor = @{ 1, 0, 0, 0 @};
+@end smallexample
+
+If the JIT is multi-threaded, then it is important that the JIT synchronize any
+modifications to this global data properly, which can easily be done by putting
+a global mutex around modifications to these structures.
+
+@node Registering Code
+@section Registering Code
+
+To register code with @value{GDBN}, the JIT should follow this protocol:
+
+@itemize @bullet
+@item
+Generate an object file in memory with symbols and other desired debug
+information.  The file must include the virtual addresses of the sections.
+
+@item
+Create a code entry for the file, which gives the start and size of the symbol
+file.
+
+@item
+Add it to the linked list in the JIT descriptor.
+
+@item
+Point the relevant_entry field of the descriptor at the entry.
+
+@item
+Set @code{action_flag} to @code{JIT_REGISTER} and call
+@code{__jit_debug_register_code}.
+@end itemize
+
+When @value{GDBN} is attached and the breakpoint fires, @value{GDBN} uses the
+@code{relevant_entry} pointer so it doesn't have to walk the list looking for
+new code.  However, the linked list must still be maintained in order to allow
+@value{GDBN} to attach to a running process and still find the symbol files.
+
+@node Unregistering Code
+@section Unregistering Code
+
+If code is freed, then the JIT should use the following protocol:
+
+@itemize @bullet
+@item
+Remove the code entry corresponding to the code from the linked list.
+
+@item
+Point the @code{relevant_entry} field of the descriptor at the code entry.
+
+@item
+Set @code{action_flag} to @code{JIT_UNREGISTER} and call
+@code{__jit_debug_register_code}.
+@end itemize
+
+If the JIT frees or recompiles code without unregistering it, then @value{GDBN}
+and the JIT will leak the memory used for the associated symbol files.
 
 @node GDB Bugs
 @chapter Reporting Bugs in @value{GDBN}
