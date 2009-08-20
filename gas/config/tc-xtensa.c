@@ -527,6 +527,7 @@ static int get_num_stack_literal_bytes (IStack *);
 /* vliw_insn functions.  */
 
 static void xg_init_vinsn (vliw_insn *);
+static void xg_copy_vinsn (vliw_insn *, vliw_insn *);
 static void xg_clear_vinsn (vliw_insn *);
 static bfd_boolean vinsn_has_specific_opcodes (vliw_insn *);
 static void xg_free_vinsn (vliw_insn *);
@@ -6653,7 +6654,6 @@ xg_find_narrowest_format (vliw_insn *vinsn)
 
   xtensa_isa isa = xtensa_default_isa;
   xtensa_format format;
-  vliw_insn v_copy = *vinsn;
   xtensa_opcode nop_opcode = xtensa_nop_opcode;
 
   if (vinsn->num_slots == 1)
@@ -6661,7 +6661,8 @@ xg_find_narrowest_format (vliw_insn *vinsn)
 
   for (format = 0; format < xtensa_isa_num_formats (isa); format++)
     {
-      v_copy = *vinsn;
+      vliw_insn v_copy;
+      xg_copy_vinsn (&v_copy, vinsn);
       if (xtensa_format_num_slots (isa, format) == v_copy.num_slots)
 	{
 	  int slot;
@@ -6696,7 +6697,7 @@ xg_find_narrowest_format (vliw_insn *vinsn)
 	    }
 	  if (fit == v_copy.num_slots)
 	    {
-	      *vinsn = v_copy;
+	      xg_copy_vinsn (vinsn, &v_copy);
 	      xtensa_format_encode (isa, format, vinsn->insnbuf);
 	      vinsn->format = format;
 	      break;
@@ -11699,6 +11700,16 @@ xg_clear_vinsn (vliw_insn *v)
 
   for (i = 0; i < MAX_SLOTS; i++)
     v->slots[i].opcode = XTENSA_UNDEFINED;
+}
+
+
+static void
+xg_copy_vinsn (vliw_insn *dst, vliw_insn *src)
+{
+  memcpy (dst, src, 
+	  offsetof(vliw_insn, slots) + src->num_slots * sizeof(TInsn));
+  dst->insnbuf = src->insnbuf;
+  memcpy (dst->slotbuf, src->slotbuf, src->num_slots * sizeof(xtensa_insnbuf));
 }
 
 

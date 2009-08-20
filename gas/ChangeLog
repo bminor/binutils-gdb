@@ -1,3 +1,8 @@
+2009-08-20  Sterling Augustine  <sterling@jaw.hq.tensilica.com>
+
+	* config/tc-xtensa.c (xg_copy_vinsn): New function.
+	(finish_vinsn): Call xg_copy_vinsn.
+
 2009-08-19  Sterling Augustine  <sterling@tensilica.com>
 
 	* config/tc-xtensa.h (xtensa_frag_data): Rename unused field fr_prev
