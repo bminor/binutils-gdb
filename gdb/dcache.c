@@ -437,8 +437,8 @@ dcache_print_line (int index)
     
   db = (struct dcache_block *) n->value;
 
-  printf_filtered (_("Line %d: address %lx [%d hits]\n"),
-		  index, db->addr, db->refs);
+  printf_filtered (_("Line %d: address %s [%d hits]\n"),
+		   index, paddress (target_gdbarch, db->addr), db->refs);
 
   for (j = 0; j < LINE_SIZE; j++)
     {
@@ -489,8 +489,8 @@ dcache_info (char *exp, int tty)
     {
       struct dcache_block *db = (struct dcache_block *) n->value;
 
-      printf_filtered (_("Line %d: address %lx [%d hits]\n"),
-		       i, db->addr, db->refs);
+      printf_filtered (_("Line %d: address %s [%d hits]\n"),
+		       i, paddress (target_gdbarch, db->addr), db->refs);
       i++;
       refcount += db->refs;
 
