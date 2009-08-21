@@ -436,8 +436,8 @@ jit_event_handler (struct gdbarch *gdbarch)
     case JIT_UNREGISTER:
       objf = jit_find_objf_with_entry_addr (entry_addr);
       if (objf == NULL)
-        printf_unfiltered ("Unable to find JITed code entry at address: %p\n",
-                           (void *) entry_addr);
+	printf_unfiltered (_("Unable to find JITed code entry at address: %s\n"),
+			   paddress (gdbarch, entry_addr));
       else
         jit_unregister_code (objf);
 

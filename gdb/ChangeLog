@@ -1,3 +1,9 @@
+2009-08-21  Ken Werner <ken@linux.vnet.ibm.com>
+	    Doug Evans  <dje@google.com>
+
+	* jit.c (jit_event_handler): Use paddress to print target addresses.
+	Wrap printf string in _().
+
 2009-08-21  Doug Evans  <dje@google.com>
 
 	* jit.c (jit_read_descriptor): New arg gdbarch, all callers updated.
