@@ -1,3 +1,9 @@
+2009-08-21  Daniel Gutson  <dgutson@codesourcery.com>
+
+	* elf32-arm.c (arch_has_thumb2_nop): New function.
+	(arch_has_arm_nop): New function.
+	(elf32_arm_final_link_relocate): NOP opcodes changed.
+
 2009-08-16  Doug Evans  <dje@google.com>
 
 	* opncls.c (bfd_close): Until BFD_IN_MEMORY has an iovec,

@@ -1,3 +1,10 @@
+2009-08-21  Daniel Gutson  <dgutson@codesourcery.com>
+
+	* ld-arm/callweak.d: Opcodes updated.
+	* ld-arm/callweak.s: Architecture specified.
+	* ld-arm/callweak-2.d: New test case.
+	* ld-arm/callweak-2.s: New file.
+
 2009-08-17  Nick Clifton  <nickc@redhat.com>
 
 	* ld-elf/linkonce1.d: Accept "UNUSED" as part of the name of an

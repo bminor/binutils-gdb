@@ -2987,6 +2987,26 @@ using_thumb2 (struct elf32_arm_link_hash_table *globals)
   return arch == TAG_CPU_ARCH_V6T2 || arch >= TAG_CPU_ARCH_V7;
 }
 
+/* Determine what kind of NOPs are available.  */
+
+static bfd_boolean
+arch_has_arm_nop (struct elf32_arm_link_hash_table *globals)
+{
+  const int arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
+					     Tag_CPU_arch);
+  return arch == TAG_CPU_ARCH_V6T2
+	 || arch == TAG_CPU_ARCH_V6K
+	 || arch == TAG_CPU_ARCH_V7;
+}
+
+static bfd_boolean
+arch_has_thumb2_nop (struct elf32_arm_link_hash_table *globals)
+{
+  const int arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
+					     Tag_CPU_arch);
+  return arch == TAG_CPU_ARCH_V6T2 || arch == TAG_CPU_ARCH_V7;
+}
+
 static bfd_boolean
 arm_stub_is_thumb (enum elf32_arm_stub_type stub_type)
 {
@@ -7073,13 +7093,19 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 
 	  /* A branch to an undefined weak symbol is turned into a jump to
 	     the next instruction unless a PLT entry will be created.
-	     Do the same for local undefined symbols.  */
+	     Do the same for local undefined symbols.
+	     The jump to the next instruction is optimized as a NOP depending
+	     on the architecture.  */
 	  if (h ? (h->root.type == bfd_link_hash_undefweak
 		   && !(splt != NULL && h->plt.offset != (bfd_vma) -1))
 	      : bfd_is_und_section (sym_sec))
 	    {
-	      value = (bfd_get_32 (input_bfd, hit_data) & 0xf0000000)
-		      | 0x0affffff;
+	      value = (bfd_get_32 (input_bfd, hit_data) & 0xf0000000);
+
+	      if (arch_has_arm_nop (globals))
+		value |= 0x0320f000;
+	      else
+		value |= 0x01a00000; /* Using pre-UAL nop: mov r0, r0.  */
 	    }
 	  else
 	    {
@@ -7324,15 +7350,25 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	bfd_vma check;
 	bfd_signed_vma signed_check;
 	int bitsize;
-	int thumb2 = using_thumb2 (globals);
+	const int thumb2 = using_thumb2 (globals);
 
 	/* A branch to an undefined weak symbol is turned into a jump to
-	   the next instruction unless a PLT entry will be created.  */
+	   the next instruction unless a PLT entry will be created.
+	   The jump to the next instruction is optimized as a NOP.W for
+	   Thumb-2 enabled architectures.  */
 	if (h && h->root.type == bfd_link_hash_undefweak
 	    && !(splt != NULL && h->plt.offset != (bfd_vma) -1))
 	  {
-	    bfd_put_16 (input_bfd, 0xe000, hit_data);
-	    bfd_put_16 (input_bfd, 0xbf00, hit_data + 2);
+	    if (arch_has_thumb2_nop (globals))
+	      {
+		bfd_put_16 (input_bfd, 0xf3af, hit_data);
+		bfd_put_16 (input_bfd, 0x8000, hit_data + 2);
+	      }
+	    else
+	      {
+		bfd_put_16 (input_bfd, 0xe000, hit_data);
+		bfd_put_16 (input_bfd, 0xbf00, hit_data + 2);
+	      }
 	    return bfd_reloc_ok;
 	  }
 
