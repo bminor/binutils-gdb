@@ -1,3 +1,7 @@
+2009-08-21  Richard Guenther  <rguenther@suse.de>
+
+	* scripttempl/elf.sc: Discard sections with .gnu.lto_ prefix.
+
 2009-08-12  Tristan Gingold  <gingold@adacore.com>
 
 	* ld.h (fat_user_section_struct): Add map_symbol_def_count field.
