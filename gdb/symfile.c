@@ -2333,6 +2333,8 @@ reread_symbols (void)
 		objfile->obfd = bfd_openr (obfd_filename, gnutarget);
 	      if (objfile->obfd == NULL)
 		error (_("Can't open %s to read symbols."), objfile->name);
+	      else
+		objfile->obfd = gdb_bfd_ref (objfile->obfd);
 	      /* bfd_openr sets cacheable to true, which is what we want.  */
 	      if (!bfd_check_format (objfile->obfd, bfd_object))
 		error (_("Can't read symbols from %s: %s."), objfile->name,

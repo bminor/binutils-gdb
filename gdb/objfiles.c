@@ -181,7 +181,7 @@ allocate_objfile (bfd *abfd, int flags)
      that any data that is reference is saved in the per-objfile data
      region. */
 
-  objfile->obfd = abfd;
+  objfile->obfd = gdb_bfd_ref (abfd);
   if (objfile->name != NULL)
     {
       xfree (objfile->name);
@@ -1062,7 +1062,26 @@ objfiles_changed (void)
   objfiles_changed_p = 1;  /* Rebuild section map next time we need it.  */
 }
 
-/* Unreference and possibly close abfd.  */
+/* Add reference to ABFD.  Returns ABFD.  */
+struct bfd *
+gdb_bfd_ref (struct bfd *abfd)
+{
+  int *p_refcount = bfd_usrdata (abfd);
+
+  if (p_refcount != NULL)
+    {
+      *p_refcount += 1;
+      return abfd;
+    }
+
+  p_refcount = xmalloc (sizeof (*p_refcount));
+  *p_refcount = 1;
+  bfd_usrdata (abfd) = p_refcount;
+
+  return abfd;
+}
+
+/* Unreference and possibly close ABFD.  */
 void
 gdb_bfd_unref (struct bfd *abfd)
 {
@@ -1074,16 +1093,14 @@ gdb_bfd_unref (struct bfd *abfd)
 
   p_refcount = bfd_usrdata (abfd);
 
-  /* Valid range for p_refcount: NULL (single owner), or a pointer
-     to int counter, which has a value of 1 (single owner) or 2 (shared).  */
-  gdb_assert (p_refcount == NULL || *p_refcount == 1 || *p_refcount == 2);
+  /* Valid range for p_refcount: a pointer to int counter, which has a
+     value of 1 (single owner) or 2 (shared).  */
+  gdb_assert (*p_refcount == 1 || *p_refcount == 2);
 
-  if (p_refcount != NULL)
-    {
-      *p_refcount -= 1;
-      if (*p_refcount > 0)
-	return;
-    }
+  *p_refcount -= 1;
+  if (*p_refcount > 0)
+    return;
+
   xfree (p_refcount);
   bfd_usrdata (abfd) = NULL;  /* Paranoia.  */
 

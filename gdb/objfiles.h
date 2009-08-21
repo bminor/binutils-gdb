@@ -505,6 +505,7 @@ extern void set_objfile_data (struct objfile *objfile,
 extern void *objfile_data (struct objfile *objfile,
 			   const struct objfile_data *data);
 
+extern struct bfd *gdb_bfd_ref (struct bfd *abfd);
 extern void gdb_bfd_unref (struct bfd *abfd);
 
 

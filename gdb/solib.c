@@ -361,7 +361,7 @@ solib_map_sections (void *arg)
   do_cleanups (old_chain);
 
   /* Leave bfd open, core_xfer_memory and "info files" need it.  */
-  so->abfd = abfd;
+  so->abfd = gdb_bfd_ref (abfd);
 
   /* copy full path name into so_name, so that later symbol_file_add
      can find it */
@@ -444,7 +444,6 @@ static void
 symbol_add_stub (struct so_list *so, int flags)
 {
   struct section_addr_info *sap;
-  int *p_refcount;
 
   /* Have we already loaded this shared object?  */
   ALL_OBJFILES (so->objfile)
@@ -457,10 +456,6 @@ symbol_add_stub (struct so_list *so, int flags)
                                                     so->sections_end);
 
   so->objfile = symbol_file_add_from_bfd (so->abfd, flags, sap, OBJF_SHARED);
-  p_refcount = xmalloc (sizeof (*p_refcount));
-  *p_refcount = 2;  /* Both solib and objfile refer to this abfd.  */
-  bfd_usrdata (so->abfd) = p_refcount;
-
   free_section_addr_info (sap);
 
   return;
