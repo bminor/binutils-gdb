@@ -1,3 +1,8 @@
+2009-08-21  Hui Zhu  <teawater@gmail.com>
+
+	* record.c (record_wait): Change the argument of
+	record_beneath_to_wait to options.
+
 2009-08-20  Jacob Potter  <jdpotter@google.com>
 
 	Replace dcache with splay tree.

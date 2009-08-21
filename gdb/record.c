@@ -598,7 +598,7 @@ record_wait (struct target_ops *ops,
 	{
 	  /* This is a single step.  */
 	  return record_beneath_to_wait (record_beneath_to_wait_ops,
-					 ptid, status, 0);
+					 ptid, status, options);
 	}
       else
 	{
@@ -609,7 +609,7 @@ record_wait (struct target_ops *ops,
 	  while (1)
 	    {
 	      ret = record_beneath_to_wait (record_beneath_to_wait_ops,
-					    ptid, status, 0);
+					    ptid, status, options);
 
 	      if (status->kind == TARGET_WAITKIND_STOPPED
 		  && status->value.sig == TARGET_SIGNAL_TRAP)
