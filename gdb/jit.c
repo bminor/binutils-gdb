@@ -137,17 +137,18 @@ bfd_open_from_target_memory (CORE_ADDR addr, size_t size, char *target)
 /* Helper function for reading the global JIT descriptor from remote memory.  */
 
 static void
-jit_read_descriptor (struct jit_descriptor *descriptor)
+jit_read_descriptor (struct gdbarch *gdbarch,
+		     struct jit_descriptor *descriptor)
 {
   int err;
   struct type *ptr_type;
   int ptr_size;
   int desc_size;
   gdb_byte *desc_buf;
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   /* Figure out how big the descriptor is on the remote and how to read it.  */
-  ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
+  ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
   ptr_size = TYPE_LENGTH (ptr_type);
   desc_size = 8 + 2 * ptr_size;  /* Two 32-bit ints and two pointers.  */
   desc_buf = alloca (desc_size);
@@ -169,17 +170,18 @@ jit_read_descriptor (struct jit_descriptor *descriptor)
 /* Helper function for reading a JITed code entry from remote memory.  */
 
 static void
-jit_read_code_entry (CORE_ADDR code_addr, struct jit_code_entry *code_entry)
+jit_read_code_entry (struct gdbarch *gdbarch,
+		     CORE_ADDR code_addr, struct jit_code_entry *code_entry)
 {
   int err;
   struct type *ptr_type;
   int ptr_size;
   int entry_size;
   gdb_byte *entry_buf;
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   /* Figure out how big the entry is on the remote and how to read it.  */
-  ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
+  ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
   ptr_size = TYPE_LENGTH (ptr_type);
   entry_size = 3 * ptr_size + 8;  /* Three pointers and one 64-bit int.  */
   entry_buf = alloca (entry_size);
@@ -190,7 +192,7 @@ jit_read_code_entry (CORE_ADDR code_addr, struct jit_code_entry *code_entry)
     error (_("Unable to read JIT code entry from remote memory!"));
 
   /* Fix the endianness to match the host.  */
-  ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
+  ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
   code_entry->next_entry = extract_typed_address (&entry_buf[0], ptr_type);
   code_entry->prev_entry =
       extract_typed_address (&entry_buf[ptr_size], ptr_type);
@@ -206,7 +208,8 @@ jit_read_code_entry (CORE_ADDR code_addr, struct jit_code_entry *code_entry)
    a symbol file added by the user.  */
 
 static void
-jit_register_code (CORE_ADDR entry_addr, struct jit_code_entry *code_entry)
+jit_register_code (struct gdbarch *gdbarch,
+		   CORE_ADDR entry_addr, struct jit_code_entry *code_entry)
 {
   bfd *nbfd;
   struct section_addr_info *sai;
@@ -232,7 +235,7 @@ JITed symbol file is not an object file, ignoring it.\n"));
     }
 
   /* Check bfd arch.  */
-  b = gdbarch_bfd_arch_info (target_gdbarch);
+  b = gdbarch_bfd_arch_info (gdbarch);
   if (b->compatible (b, bfd_get_arch_info (nbfd)) != b)
     warning (_("JITed object file architecture %s is not compatible "
                "with target architecture %s."), bfd_get_arch_info
@@ -299,8 +302,11 @@ jit_find_objf_with_entry_addr (CORE_ADDR entry_addr)
   return NULL;
 }
 
-void
-jit_inferior_created_hook (void)
+/* (Re-)Initialize the jit breakpoint handler, and register any already
+   created translations.  */
+
+static void
+jit_inferior_init (struct gdbarch *gdbarch)
 {
   struct minimal_symbol *reg_symbol;
   struct minimal_symbol *desc_symbol;
@@ -336,14 +342,14 @@ jit_inferior_created_hook (void)
 
   /* Read the descriptor so we can check the version number and load any already
      JITed functions.  */
-  jit_read_descriptor (&descriptor);
+  jit_read_descriptor (gdbarch, &descriptor);
 
   /* Check that the version number agrees with that we support.  */
   if (descriptor.version != 1)
     error (_("Unsupported JIT protocol version in descriptor!"));
 
   /* Put a breakpoint in the registration symbol.  */
-  create_jit_event_breakpoint (target_gdbarch, reg_addr);
+  create_jit_event_breakpoint (gdbarch, reg_addr);
 
   /* If we've attached to a running program, we need to check the descriptor to
      register any functions that were already generated.  */
@@ -351,23 +357,40 @@ jit_inferior_created_hook (void)
        cur_entry_addr != 0;
        cur_entry_addr = cur_entry.next_entry)
     {
-      jit_read_code_entry (cur_entry_addr, &cur_entry);
+      jit_read_code_entry (gdbarch, cur_entry_addr, &cur_entry);
 
       /* This hook may be called many times during setup, so make sure we don't
          add the same symbol file twice.  */
       if (jit_find_objf_with_entry_addr (cur_entry_addr) != NULL)
         continue;
 
-      jit_register_code (cur_entry_addr, &cur_entry);
+      jit_register_code (gdbarch, cur_entry_addr, &cur_entry);
     }
+}
+
+/* Exported routine to call when an inferior has been created.  */
+
+void
+jit_inferior_created_hook (void)
+{
+  jit_inferior_init (target_gdbarch);
+}
+
+/* Exported routine to call to re-set the jit breakpoints,
+   e.g. when a program is rerun.  */
+
+void
+jit_breakpoint_re_set (void)
+{
+  jit_inferior_init (target_gdbarch);
 }
 
 /* Wrapper to match the observer function pointer prototype.  */
 
 static void
-jit_inferior_created_hook1 (struct target_ops *objfile, int from_tty)
+jit_inferior_created_observer (struct target_ops *objfile, int from_tty)
 {
-  jit_inferior_created_hook ();
+  jit_inferior_init (target_gdbarch);
 }
 
 /* This function cleans up any code entries left over when the inferior exits.
@@ -390,7 +413,7 @@ jit_inferior_exit_hook (int pid)
 }
 
 void
-jit_event_handler (void)
+jit_event_handler (struct gdbarch *gdbarch)
 {
   struct jit_descriptor descriptor;
   struct jit_code_entry code_entry;
@@ -398,7 +421,7 @@ jit_event_handler (void)
   struct objfile *objf;
 
   /* Read the descriptor from remote memory.  */
-  jit_read_descriptor (&descriptor);
+  jit_read_descriptor (gdbarch, &descriptor);
   entry_addr = descriptor.relevant_entry;
 
   /* Do the corresponding action. */
@@ -407,8 +430,8 @@ jit_event_handler (void)
     case JIT_NOACTION:
       break;
     case JIT_REGISTER:
-      jit_read_code_entry (entry_addr, &code_entry);
-      jit_register_code (entry_addr, &code_entry);
+      jit_read_code_entry (gdbarch, entry_addr, &code_entry);
+      jit_register_code (gdbarch, entry_addr, &code_entry);
       break;
     case JIT_UNREGISTER:
       objf = jit_find_objf_with_entry_addr (entry_addr);
@@ -432,7 +455,7 @@ extern void _initialize_jit (void);
 void
 _initialize_jit (void)
 {
-  observer_attach_inferior_created (jit_inferior_created_hook1);
+  observer_attach_inferior_created (jit_inferior_created_observer);
   observer_attach_inferior_exit (jit_inferior_exit_hook);
   jit_objfile_data = register_objfile_data ();
 }

@@ -69,9 +69,13 @@ struct jit_descriptor
 
 extern void jit_inferior_created_hook (void);
 
+/* Re-establish the jit breakpoint(s).  */
+
+extern void jit_breakpoint_re_set (void);
+
 /* This function is called by handle_inferior_event when it decides that the JIT
    event breakpoint has fired.  */
 
-extern void jit_event_handler (void);
+extern void jit_event_handler (struct gdbarch *gdbarch);
 
 #endif /* JIT_H */

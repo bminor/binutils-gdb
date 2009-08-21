@@ -3550,7 +3550,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
         /* Switch terminal for any messages produced by breakpoint_re_set.  */
         target_terminal_ours_for_output ();
 
-        jit_event_handler ();
+        jit_event_handler (gdbarch);
 
         target_terminal_inferior ();
 

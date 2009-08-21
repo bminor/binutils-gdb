@@ -1,3 +1,17 @@
+2009-08-21  Doug Evans  <dje@google.com>
+
+	* jit.c (jit_read_descriptor): New arg gdbarch, all callers updated.
+	(jit_read_code_entry, jit_register_code): Ditto.
+	(jit_event_handler): Ditto.
+	(jit_inferior_init): Renamed from previous jit_inferior_created_hook.
+	(jit_inferior_created_hook, jit_breakpoint_re_set): New functions.
+	(jit_inferior_created_observer): Renamed from
+	jit_inferior_created_hook1, all callers updated.
+	* jit.h (jit_breakpoint_re_set): Declare.
+	(jit_event_handler): Update prototype.
+	* breakpoint.c (breakpoint_re_set): Call jit_breakpoint_re_set instead
+	of jit_inferior_created_hook.
+
 2009-08-21  Hui Zhu  <teawater@gmail.com>
 
 	* record.c (record_wait): Change the argument of

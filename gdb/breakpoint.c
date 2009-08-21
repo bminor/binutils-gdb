@@ -8053,7 +8053,7 @@ breakpoint_re_set (void)
   set_language (save_language);
   input_radix = save_input_radix;
 
-  jit_inferior_created_hook ();
+  jit_breakpoint_re_set ();
 
   create_overlay_event_breakpoint ("_ovly_debug_event");
   create_longjmp_master_breakpoint ("longjmp");
