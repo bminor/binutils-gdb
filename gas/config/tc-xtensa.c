@@ -587,6 +587,7 @@ static xtensa_opcode xtensa_retw_opcode;
 static xtensa_opcode xtensa_retw_n_opcode;
 static xtensa_opcode xtensa_rsr_lcount_opcode;
 static xtensa_opcode xtensa_waiti_opcode;
+static int config_max_slots = 0;
 
 
 /* Command-line Options.  */
@@ -5104,6 +5105,7 @@ md_begin (void)
   segT current_section = now_seg;
   int current_subsec = now_subseg;
   xtensa_isa isa;
+  int i;
 
   xtensa_default_isa = xtensa_isa_init (0, 0);
   isa = xtensa_default_isa;
@@ -5114,8 +5116,6 @@ md_begin (void)
   memset (&default_lit_sections, 0, sizeof (default_lit_sections));
 
   subseg_set (current_section, current_subsec);
-
-  xg_init_vinsn (&cur_vinsn);
 
   xtensa_addi_opcode = xtensa_opcode_lookup (isa, "addi");
   xtensa_addmi_opcode = xtensa_opcode_lookup (isa, "addmi");
@@ -5148,6 +5148,15 @@ md_begin (void)
   xtensa_retw_n_opcode = xtensa_opcode_lookup (isa, "retw.n");
   xtensa_rsr_lcount_opcode = xtensa_opcode_lookup (isa, "rsr.lcount");
   xtensa_waiti_opcode = xtensa_opcode_lookup (isa, "waiti");
+
+  for (i = 0; i < xtensa_isa_num_formats (isa); i++) 
+    {
+      int format_slots = xtensa_format_num_slots (isa, i);
+      if (format_slots > config_max_slots)
+	config_max_slots = format_slots;
+    }
+
+  xg_init_vinsn (&cur_vinsn);
 
   xtensa_num_pipe_stages = xtensa_isa_num_pipe_stages (isa);
 
@@ -6881,7 +6890,7 @@ total_frag_text_expansion (fragS *fragP)
   int slot;
   int total_expansion = 0;
 
-  for (slot = 0; slot < MAX_SLOTS; slot++)
+  for (slot = 0; slot < config_max_slots; slot++)
     total_expansion += fragP->tc_frag_data.text_expansion[slot];
 
   return total_expansion;
@@ -11675,7 +11684,7 @@ xg_init_vinsn (vliw_insn *v)
   if (v->insnbuf == NULL)
     as_fatal (_("out of memory"));
 
-  for (i = 0; i < MAX_SLOTS; i++)
+  for (i = 0; i < config_max_slots; i++)
     {
       v->slotbuf[i] = xtensa_insnbuf_alloc (isa);
       if (v->slotbuf[i] == NULL)
@@ -11689,7 +11698,8 @@ xg_clear_vinsn (vliw_insn *v)
 {
   int i;
 
-  memset (v, 0, offsetof (vliw_insn, insnbuf));
+  memset (v, 0, offsetof (vliw_insn, slots) 
+                + sizeof(TInsn) * config_max_slots);
 
   v->format = XTENSA_UNDEFINED;
   v->num_slots = 0;
@@ -11698,7 +11708,7 @@ xg_clear_vinsn (vliw_insn *v)
   if (xt_saved_debug_type != DEBUG_NONE)
     debug_type = xt_saved_debug_type;
 
-  for (i = 0; i < MAX_SLOTS; i++)
+  for (i = 0; i < config_max_slots; i++)
     v->slots[i].opcode = XTENSA_UNDEFINED;
 }
 
@@ -11732,7 +11742,7 @@ xg_free_vinsn (vliw_insn *v)
 {
   int i;
   xtensa_insnbuf_free (xtensa_default_isa, v->insnbuf);
-  for (i = 0; i < MAX_SLOTS; i++)
+  for (i = 0; i < config_max_slots; i++)
     xtensa_insnbuf_free (xtensa_default_isa, v->slotbuf[i]);
 }
 

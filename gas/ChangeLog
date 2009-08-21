@@ -1,3 +1,13 @@
+2009-08-21  Sterling Augustine  <sterling@jaw.hq.tensilica.com>
+
+	* config/tc-xtensa.c (config_max_slots): New global variable.
+	(md_begin): Set config_max_slots.
+	(total_frag_text_expansion): Use config_max_slots instead of
+	MAX_SLOTS.
+	(xg_init_vinsn): Likewise.
+	(xg_clear_vinsn): Likewise.
+	(xg_free_vinsn): Likewise.
+
 2009-08-20  Sterling Augustine  <sterling@jaw.hq.tensilica.com>
 
 	* config/tc-xtensa.c (xg_copy_vinsn): New function.
