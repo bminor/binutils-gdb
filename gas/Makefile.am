@@ -10,10 +10,6 @@ tooldir = $(exec_prefix)/$(target_alias)
 YACC = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo @YACC@ ; fi`
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ; else echo @LEX@ ; fi`
 
-# We have to set this, because autoconf 2.59 does not substitute YFLAGS.
-# Autoconf 2.61 does, so this can be removed when we upgrade.
-YFLAGS =
-
 WARN_CFLAGS = @WARN_CFLAGS@
 NO_WERROR = @NO_WERROR@
 AM_CFLAGS = $(WARN_CFLAGS)
@@ -510,7 +506,7 @@ INCDIR = $(BASEDIR)/include
 # Both . and srcdir are used, in that order,
 # so that tm.h and config.h will be found in the compilation
 # subdirectory rather than in the source directory.
-INCLUDES = -I. -I$(srcdir) -I../bfd -I$(srcdir)/config \
+AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(srcdir)/config \
 	-I$(INCDIR) -I$(srcdir)/.. -I$(BFDDIR) @INCINTL@ \
 	-DLOCALEDIR="\"$(datadir)/locale\""
 

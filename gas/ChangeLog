@@ -1,5 +1,10 @@
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* Makefile.am (YFLAGS): Remove, not needed any more.
+	(AM_CPPFLAGS): Renamed from ...
+	(INCLUDES): ... this.
+	* Makefile.in: Regenerate.
+
 	* Makefile.am (AUTOMAKE_OPTIONS): Remove 1.8 cygnus, add 1.11,
 	foreign and no-dist.
 	(all): Remove now-unneeded dependency upon info.

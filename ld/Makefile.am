@@ -90,7 +90,8 @@ CXX_FOR_TARGET = ` \
     fi; \
   fi`
 
-noinst_PROGRAMS = ld-new
+transform = s/^ld-new$$/ld/;@program_transform_name@
+bin_PROGRAMS = ld-new
 info_TEXINFOS = ld.texinfo
 ld_TEXINFOS = configdoc.texi
 noinst_TEXINFOS = ldint.texinfo
@@ -101,7 +102,7 @@ AM_MAKEINFOFLAGS = -I $(srcdir) -I $(BFDDIR)/doc -I ../bfd/doc \
 TEXI2DVI = texi2dvi -I $(srcdir) -I $(BFDDIR)/doc -I ../bfd/doc \
 		    -I $(top_srcdir)/../libiberty
 
-INCLUDES = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
+AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
 	@INCINTL@ $(HDEFINES) $(CFLAGS) \
 	-DLOCALEDIR="\"$(datadir)/locale\""
 
@@ -1924,7 +1925,7 @@ ld.1: $(srcdir)/ld.texinfo configdoc.texi
 	        (rm -f $@.T$$$$ && exit 1)
 	rm -f ld.pod
 
-MAINTAINERCLEANFILES = configdoc.texi
+MAINTAINERCLEANFILES = configdoc.texi ld.1
 
 # We want to reconfigure if configure.host or configure.tgt changes.  We
 # extract version from bfd/configure.in, so we must depend on that also.
@@ -1940,13 +1941,7 @@ CLEANFILES = dep.sed DEP DEPA DEP1 DEP2 spu_ovl.s spu_ovl.o spu_icache.s spu_ica
 .PHONY: install-exec-local install-data-local
 
 install-exec-local: ld-new$(EXEEXT)
-	$(mkinstalldirs) $(DESTDIR)$(bindir) $(DESTDIR)$(tooldir)/bin
-	@list='$(noinst_PROGRAMS)'; for p in $$list; do \
-	  if test -f $$p; then \
-	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/$(EXEEXT)$$//' -e 's/-new//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
-	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed -e 's/$(EXEEXT)$$//' -e 's/-new//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
-	  else :; fi; \
-	done
+	$(mkinstalldirs) $(DESTDIR)$(tooldir)/bin
 	n=`echo ld | sed '$(transform)'`; \
 	if [ "$(bindir)/$$n$(EXEEXT)" != "$(tooldir)/bin/ld$(EXEEXT)" ]; then \
 	  rm -f $(DESTDIR)$(tooldir)/bin/ld$(EXEEXT); \

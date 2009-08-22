@@ -1,5 +1,9 @@
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* Makefile.am (AM_CPPFLAGS): Renamed from ...
+	(INCLUDES): ... this.
+	* Makefile.in: Regenerate.
+
 	* Makefile.am (AUTOMAKE_OPTIONS): Remove cygnus, add 1.11,
 	foreign, no-dist, no-texinfo.tex.
 	(TEXINFO_TEX): New variable.

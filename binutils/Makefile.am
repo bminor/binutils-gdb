@@ -69,7 +69,7 @@ BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
 INCDIR	= $(BASEDIR)/include
 
-INCLUDES = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
+AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
 	 @HDEFINES@ \
 	 @INCINTL@ \
 	 -DLOCALEDIR="\"$(datadir)/locale\"" \
@@ -150,7 +150,7 @@ check-DEJAGNU: site.exp
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi
 
-installcheck:
+installcheck-local:
 	/bin/sh $(srcdir)/sanity.sh $(bindir)
 
 # There's no global DEPENDENCIES.  So, we must explicitly list everything
@@ -263,7 +263,7 @@ sysinfo.o: sysinfo.c
 	fi
 
 bin2c$(EXEEXT_FOR_BUILD):
-	$(CC_FOR_BUILD) -o $@ $(INCLUDES) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) $(srcdir)/bin2c.c $(srcdir)/version.c
+	$(CC_FOR_BUILD) -o $@ $(AM_CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) $(srcdir)/bin2c.c $(srcdir)/version.c
 
 embedspu: embedspu.sh
 	sed "s@^program_transform_name=@program_transform_name=$(program_transform_name)@" < $< > $@

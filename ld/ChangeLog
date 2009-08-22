@@ -1,5 +1,15 @@
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* Makefile.am (bin_PROGRAMS): Renamed from ...
+	(noinst_PROGRAMS): ... this.
+	(transform): Override, including the renaming of ld-new to ld.
+	(install-exec-local): Installation of ld in $(bindir) not needed
+	here any more.
+	(AM_CPPFLAGS): Renamed from ...
+	(INCLUDES): ... this.
+	(MAINTAINERCLEANFILES): Add ld.1.
+	* Makefile.in: Regenerate.
+
 	* Makefile.am (AUTOMAKE_OPTIONS): Remove cygnus.  Add
 	no-texinfo.tex, no-dist, foreign.
 	(TEXINFO_TEX): New variable.

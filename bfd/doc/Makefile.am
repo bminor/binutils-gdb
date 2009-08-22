@@ -56,12 +56,12 @@ bfd_TEXINFOS = $(DOCFILES) bfdsumm.texi
 
 MKDOC = chew$(EXEEXT_FOR_BUILD)
 
-INCLUDES = -I.. -I$(srcdir)/.. -I$(srcdir)/../../include \
+AM_CPPFLAGS = -I.. -I$(srcdir)/.. -I$(srcdir)/../../include \
 	-I$(srcdir)/../../intl -I../../intl
 
 $(MKDOC): $(srcdir)/chew.c
 	$(CC_FOR_BUILD) -o chew.$$$$ $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) \
-	  $(H_CFLAGS) $(INCLUDES) $(srcdir)/chew.c; \
+	  $(H_CFLAGS) $(AM_CPPFLAGS) $(srcdir)/chew.c; \
 	$(SHELL) $(srcdir)/../../move-if-change chew.$$$$ $(MKDOC)
 
 protos: libbfd.h libcoff.h bfd.h

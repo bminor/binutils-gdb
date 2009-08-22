@@ -25,7 +25,6 @@ install_sh_DATA = $(install_sh) -c -m 644
 install_sh_PROGRAM = $(install_sh) -c
 install_sh_SCRIPT = $(install_sh) -c
 INSTALL_HEADER = $(INSTALL_DATA)
-transform = $(program_transform_name)
 NORMAL_INSTALL = :
 PRE_INSTALL = :
 POST_INSTALL = :
@@ -35,7 +34,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-noinst_PROGRAMS = ld-new$(EXEEXT)
+bin_PROGRAMS = ld-new$(EXEEXT)
 
 # Automake 1.9 will only build info files in the objdir if they are
 # mentioned in DISTCLEANFILES.  It doesn't have to be unconditional,
@@ -69,7 +68,9 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = po/Makefile.in
 CONFIG_CLEAN_VPATH_FILES =
-PROGRAMS = $(noinst_PROGRAMS)
+am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(infodir)" \
+	"$(DESTDIR)$(man1dir)"
+PROGRAMS = $(bin_PROGRAMS)
 am_ld_new_OBJECTS = ldgram.$(OBJEXT) ldlex.$(OBJEXT) lexsup.$(OBJEXT) \
 	ldlang.$(OBJEXT) mri.$(OBJEXT) ldctor.$(OBJEXT) \
 	ldmain.$(OBJEXT) ldwrite.$(OBJEXT) ldexp.$(OBJEXT) \
@@ -118,7 +119,6 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	install-pdf-recursive install-ps-recursive install-recursive \
 	installcheck-recursive installdirs-recursive pdf-recursive \
 	ps-recursive uninstall-recursive
-am__installdirs = "$(DESTDIR)$(infodir)" "$(DESTDIR)$(man1dir)"
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -152,6 +152,7 @@ CTAGS = ctags
 DEJATOOL = $(PACKAGE)
 RUNTESTDEFAULTFLAGS = --tool $$tool --srcdir $$srcdir
 DIST_SUBDIRS = $(SUBDIRS)
+transform = s/^ld-new$$/ld/;@program_transform_name@
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AR = @AR@
@@ -388,7 +389,7 @@ AM_MAKEINFOFLAGS = -I $(srcdir) -I $(BFDDIR)/doc -I ../bfd/doc \
 TEXI2DVI = texi2dvi -I $(srcdir) -I $(BFDDIR)/doc -I ../bfd/doc \
 		    -I $(top_srcdir)/../libiberty
 
-INCLUDES = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
+AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
 	@INCINTL@ $(HDEFINES) $(CFLAGS) \
 	-DLOCALEDIR="\"$(datadir)/locale\""
 
@@ -766,7 +767,7 @@ ld_new_SOURCES = ldgram.y ldlex.l lexsup.c ldlang.c mri.c ldctor.c ldmain.c \
 
 ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL_DEP)
 ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
-MAINTAINERCLEANFILES = configdoc.texi ld.info
+MAINTAINERCLEANFILES = configdoc.texi ld.1 ld.info
 
 # We want to reconfigure if configure.host or configure.tgt changes.  We
 # extract version from bfd/configure.in, so we must depend on that also.
@@ -842,9 +843,43 @@ distclean-hdr:
 	-rm -f config.h stamp-h1
 po/Makefile.in: $(top_builddir)/config.status $(top_srcdir)/po/Make-in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
+install-binPROGRAMS: $(bin_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
+	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
+	for p in $$list; do echo "$$p $$p"; done | \
+	sed 's/$(EXEEXT)$$//' | \
+	while read p p1; do if test -f $$p || test -f $$p1; \
+	  then echo "$$p"; echo "$$p"; else :; fi; \
+	done | \
+	sed -e 'p;s,.*/,,;n;h' -e 's|.*|.|' \
+	    -e 'p;x;s,.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/' | \
+	sed 'N;N;N;s,\n, ,g' | \
+	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1 } \
+	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
+	    if ($$2 == $$4) files[d] = files[d] " " $$1; \
+	    else { print "f", $$3 "/" $$4, $$1; } } \
+	  END { for (d in files) print "f", d, files[d] }' | \
+	while read type dir files; do \
+	    if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
+	    test -z "$$files" || { \
+	    echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(bindir)$$dir'"; \
+	    $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(bindir)$$dir" || exit $$?; \
+	    } \
+	; done
 
-clean-noinstPROGRAMS:
-	@list='$(noinst_PROGRAMS)'; test -n "$$list" || exit 0; \
+uninstall-binPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
+	files=`for p in $$list; do echo "$$p"; done | \
+	  sed -e 'h;s,^.*/,,;s/$(EXEEXT)$$//;$(transform)' \
+	      -e 's/$$/$(EXEEXT)/' `; \
+	test -n "$$list" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(bindir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(bindir)" && rm -f $$files
+
+clean-binPROGRAMS:
+	@list='$(bin_PROGRAMS)'; test -n "$$list" || exit 0; \
 	echo " rm -f" $$list; \
 	rm -f $$list || exit $$?; \
 	test -n "$(EXEEXT)" || exit 0; \
@@ -1588,7 +1623,7 @@ check: $(BUILT_SOURCES)
 all-am: Makefile $(INFO_DEPS) $(PROGRAMS) $(MANS) config.h
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(infodir)" "$(DESTDIR)$(man1dir)"; do \
+	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(infodir)" "$(DESTDIR)$(man1dir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: $(BUILT_SOURCES)
@@ -1629,8 +1664,8 @@ maintainer-clean-generic:
 	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
 clean: clean-recursive
 
-clean-am: clean-aminfo clean-generic clean-libtool \
-	clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-aminfo clean-binPROGRAMS clean-generic clean-libtool \
+	mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
@@ -1668,7 +1703,7 @@ install-dvi-am: $(DVIS)
 	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(dvidir)'"; \
 	  $(INSTALL_DATA) $$files "$(DESTDIR)$(dvidir)" || exit $$?; \
 	done
-install-exec-am: install-exec-local
+install-exec-am: install-binPROGRAMS install-exec-local
 
 install-html: install-html-recursive
 
@@ -1777,8 +1812,9 @@ ps: ps-recursive
 
 ps-am: $(PSS)
 
-uninstall-am: uninstall-dvi-am uninstall-html-am uninstall-info-am \
-	uninstall-man uninstall-pdf-am uninstall-ps-am
+uninstall-am: uninstall-binPROGRAMS uninstall-dvi-am uninstall-html-am \
+	uninstall-info-am uninstall-man uninstall-pdf-am \
+	uninstall-ps-am
 
 uninstall-man: uninstall-man1
 
@@ -1788,13 +1824,14 @@ uninstall-man: uninstall-man1
 
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
 	all all-am am--refresh check check-DEJAGNU check-am clean \
-	clean-aminfo clean-generic clean-libtool clean-noinstPROGRAMS \
+	clean-aminfo clean-binPROGRAMS clean-generic clean-libtool \
 	ctags ctags-recursive dist-info distclean distclean-DEJAGNU \
 	distclean-compile distclean-generic distclean-hdr \
 	distclean-libtool distclean-local distclean-tags dvi dvi-am \
-	html html-am info info-am install install-am install-data \
-	install-data-am install-data-local install-dvi install-dvi-am \
-	install-exec install-exec-am install-exec-local install-html \
+	html html-am info info-am install install-am \
+	install-binPROGRAMS install-data install-data-am \
+	install-data-local install-dvi install-dvi-am install-exec \
+	install-exec-am install-exec-local install-html \
 	install-html-am install-info install-info-am install-man \
 	install-man1 install-pdf install-pdf-am install-ps \
 	install-ps-am install-strip installcheck installcheck-am \
@@ -1802,9 +1839,9 @@ uninstall-man: uninstall-man1
 	maintainer-clean-aminfo maintainer-clean-generic mostlyclean \
 	mostlyclean-aminfo mostlyclean-compile mostlyclean-generic \
 	mostlyclean-libtool mostlyclean-local pdf pdf-am ps ps-am tags \
-	tags-recursive uninstall uninstall-am uninstall-dvi-am \
-	uninstall-html-am uninstall-info-am uninstall-man \
-	uninstall-man1 uninstall-pdf-am uninstall-ps-am
+	tags-recursive uninstall uninstall-am uninstall-binPROGRAMS \
+	uninstall-dvi-am uninstall-html-am uninstall-info-am \
+	uninstall-man uninstall-man1 uninstall-pdf-am uninstall-ps-am
 
 
 # Disable -Werror, if it has been enabled, since old versions of bison/
@@ -3223,13 +3260,7 @@ mostlyclean-local:
 .PHONY: install-exec-local install-data-local
 
 install-exec-local: ld-new$(EXEEXT)
-	$(mkinstalldirs) $(DESTDIR)$(bindir) $(DESTDIR)$(tooldir)/bin
-	@list='$(noinst_PROGRAMS)'; for p in $$list; do \
-	  if test -f $$p; then \
-	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/$(EXEEXT)$$//' -e 's/-new//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
-	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(DESTDIR)$(bindir)/`echo $$p|sed -e 's/$(EXEEXT)$$//' -e 's/-new//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
-	  else :; fi; \
-	done
+	$(mkinstalldirs) $(DESTDIR)$(tooldir)/bin
 	n=`echo ld | sed '$(transform)'`; \
 	if [ "$(bindir)/$$n$(EXEEXT)" != "$(tooldir)/bin/ld$(EXEEXT)" ]; then \
 	  rm -f $(DESTDIR)$(tooldir)/bin/ld$(EXEEXT); \

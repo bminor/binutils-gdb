@@ -1,5 +1,17 @@
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* Makefile.am (libopcodes_la_LDFLAGS): Initialize early.
+	[INSTALL_LIBBFD] (bfdlib_LTLIBRARIES): Set only in this condition.
+	[INSTALL_LIBBFD] (bfdinclude_DATA): New.
+	[!INSTALL_LIBBFD] (noinst_LTLIBRARIES): New.
+	[!INSTALL_LIBBFD] (libopcodes_la_LDFLAGS): Ensure libopcodes.la
+	is built shared even if it is not to be installed.
+	(install-bfdlibLTLIBRARIES,uninstall-bfdlibLTLIBRARIES)
+	(install_libopcodes, uninstall_libopcodes): Remove.
+	(AM_CPPFLAGS): Renamed from ...
+	(INCLUDES): ... this.
+	* Makefile.in: Regenerate.
+
 	* Makefile.am (AUTOMAKE_OPTIONS): Remove 1.9 and cygnus, add
 	1.11, foreign, no-dist.
 	(MKDEP, m32c_opc_h): Remove variables.

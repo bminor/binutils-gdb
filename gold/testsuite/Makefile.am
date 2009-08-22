@@ -4,7 +4,8 @@
 # system and the host system are the same.  So these tests will not
 # work when building with a cross-compiler.
 
-AUTOMAKE_OPTIONS = foreign
+# Ignore warning about AM_PROG_CC_C_O due to large_CFLAGS
+AUTOMAKE_OPTIONS = foreign -Wno-portability
 
 # The two_file_test tests -fmerge-constants, so we simply always turn
 # it on.  This may need to be controlled by a configure option
@@ -12,7 +13,7 @@ AUTOMAKE_OPTIONS = foreign
 AM_CFLAGS = $(WARN_CFLAGS) $(LFS_CFLAGS) -fmerge-constants
 AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CFLAGS) -fmerge-constants
 
-INCLUDES = \
+AM_CPPFLAGS = \
 	-I$(srcdir) -I$(srcdir)/.. -I$(srcdir)/../../include \
 	-I$(srcdir)/../../elfcpp -I.. \
 	-DLOCALEDIR="\"$(datadir)/locale\"" \

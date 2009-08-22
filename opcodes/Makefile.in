@@ -16,6 +16,7 @@
 @SET_MAKE@
 
 
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -36,6 +37,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
+@INSTALL_LIBBFD_FALSE@am__append_1 = -rpath $(bfdlibdir)
 subdir = .
 DIST_COMMON = ChangeLog $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/configure $(am__configure_deps) \
@@ -89,14 +91,17 @@ am__nobase_list = $(am__nobase_strip_setup); \
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(bfdlibdir)"
-LTLIBRARIES = $(bfdlib_LTLIBRARIES)
+am__installdirs = "$(DESTDIR)$(bfdlibdir)" \
+	"$(DESTDIR)$(bfdincludedir)"
+LTLIBRARIES = $(bfdlib_LTLIBRARIES) $(noinst_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 am_libopcodes_la_OBJECTS = dis-buf.lo disassemble.lo dis-init.lo
 libopcodes_la_OBJECTS = $(am_libopcodes_la_OBJECTS)
 libopcodes_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libopcodes_la_LDFLAGS) $(LDFLAGS) -o $@
+@INSTALL_LIBBFD_FALSE@am_libopcodes_la_rpath =
+@INSTALL_LIBBFD_TRUE@am_libopcodes_la_rpath = -rpath $(bfdlibdir)
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/../depcomp
 am__depfiles_maybe = depfiles
@@ -119,6 +124,7 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	install-pdf-recursive install-ps-recursive install-recursive \
 	installcheck-recursive installdirs-recursive pdf-recursive \
 	ps-recursive uninstall-recursive
+DATA = $(bfdinclude_DATA)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
@@ -279,7 +285,11 @@ SUBDIRS = po
 INCDIR = $(srcdir)/../include
 BFDDIR = $(srcdir)/../bfd
 AM_CFLAGS = $(WARN_CFLAGS)
-bfdlib_LTLIBRARIES = libopcodes.la
+libopcodes_la_LDFLAGS = $(am__append_1) -release `cat \
+	../bfd/libtool-soversion` @SHARED_LDFLAGS@
+@INSTALL_LIBBFD_TRUE@bfdlib_LTLIBRARIES = libopcodes.la
+@INSTALL_LIBBFD_TRUE@bfdinclude_DATA = $(INCDIR)/dis-asm.h
+@INSTALL_LIBBFD_FALSE@noinst_LTLIBRARIES = libopcodes.la
 
 # This is where bfd.h lives.
 BFD_H = ../bfd/bfd.h
@@ -640,7 +650,7 @@ OFILES = @BFD_MACHINES@
 # We should reconfigure whenever bfd/configure.in changes, because
 # that's where the version number in Makefile comes from.
 CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in
-INCLUDES = -I. -I$(srcdir) -I../bfd -I$(INCDIR) -I$(BFDDIR) @HDEFINES@ @INCINTL@
+AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(INCDIR) -I$(BFDDIR) @HDEFINES@ @INCINTL@
 libopcodes_la_SOURCES = dis-buf.c disassemble.c dis-init.c
 # It's desirable to list ../bfd/libbfd.la in DEPENDENCIES and LIBADD.
 # Unfortunately this causes libtool to add -L$(libdir), referring to the
@@ -650,7 +660,6 @@ libopcodes_la_SOURCES = dis-buf.c disassemble.c dis-init.c
 # hardcoded path to libbfd.so instead of relying on the entries in libbfd.la.
 libopcodes_la_DEPENDENCIES = $(OFILES) @SHARED_DEPENDENCIES@
 libopcodes_la_LIBADD = $(OFILES) @SHARED_LIBADD@
-libopcodes_la_LDFLAGS = -release `cat ../bfd/libtool-soversion` @SHARED_LDFLAGS@
 # Allow dependency tracking to work on all the source files.
 EXTRA_libopcodes_la_SOURCES = $(CFILES)
 
@@ -762,6 +771,28 @@ po/Makefile.in: $(top_builddir)/config.status $(top_srcdir)/po/Make-in
 
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+install-bfdlibLTLIBRARIES: $(bfdlib_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	test -z "$(bfdlibdir)" || $(MKDIR_P) "$(DESTDIR)$(bfdlibdir)"
+	@list='$(bfdlib_LTLIBRARIES)'; test -n "$(bfdlibdir)" || list=; \
+	list2=; for p in $$list; do \
+	  if test -f $$p; then \
+	    list2="$$list2 $$p"; \
+	  else :; fi; \
+	done; \
+	test -z "$$list2" || { \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(bfdlibdir)'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(bfdlibdir)"; \
+	}
+
+uninstall-bfdlibLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(bfdlib_LTLIBRARIES)'; test -n "$(bfdlibdir)" || list=; \
+	for p in $$list; do \
+	  $(am__strip_dir) \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(bfdlibdir)/$$f'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(bfdlibdir)/$$f"; \
+	done
 
 clean-bfdlibLTLIBRARIES:
 	-test -z "$(bfdlib_LTLIBRARIES)" || rm -f $(bfdlib_LTLIBRARIES)
@@ -771,8 +802,17 @@ clean-bfdlibLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
+
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
+	@list='$(noinst_LTLIBRARIES)'; for p in $$list; do \
+	  dir="`echo $$p | sed -e 's|/[^/]*$$||'`"; \
+	  test "$$dir" != "$$p" || dir=.; \
+	  echo "rm -f \"$${dir}/so_locations\""; \
+	  rm -f "$${dir}/so_locations"; \
+	done
 libopcodes.la: $(libopcodes_la_OBJECTS) $(libopcodes_la_DEPENDENCIES) 
-	$(libopcodes_la_LINK) -rpath $(bfdlibdir) $(libopcodes_la_OBJECTS) $(libopcodes_la_LIBADD) $(LIBS)
+	$(libopcodes_la_LINK) $(am_libopcodes_la_rpath) $(libopcodes_la_OBJECTS) $(libopcodes_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -973,6 +1013,26 @@ clean-libtool:
 
 distclean-libtool:
 	-rm -f libtool config.lt
+install-bfdincludeDATA: $(bfdinclude_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(bfdincludedir)" || $(MKDIR_P) "$(DESTDIR)$(bfdincludedir)"
+	@list='$(bfdinclude_DATA)'; test -n "$(bfdincludedir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(bfdincludedir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(bfdincludedir)" || exit $$?; \
+	done
+
+uninstall-bfdincludeDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(bfdinclude_DATA)'; test -n "$(bfdincludedir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(bfdincludedir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(bfdincludedir)" && rm -f $$files
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run `make' without going through this Makefile.
@@ -1110,10 +1170,10 @@ distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 check-am: all-am
 check: check-recursive
-all-am: Makefile $(LIBRARIES) $(LTLIBRARIES) config.h
+all-am: Makefile $(LIBRARIES) $(LTLIBRARIES) $(DATA) config.h
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(bfdlibdir)"; do \
+	for dir in "$(DESTDIR)$(bfdlibdir)" "$(DESTDIR)$(bfdincludedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -1145,7 +1205,7 @@ maintainer-clean-generic:
 clean: clean-recursive
 
 clean-am: clean-bfdlibLTLIBRARIES clean-generic clean-libtool \
-	clean-noinstLIBRARIES mostlyclean-am
+	clean-noinstLIBRARIES clean-noinstLTLIBRARIES mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
@@ -1166,7 +1226,7 @@ info: info-recursive
 
 info-am:
 
-install-data-am: install-bfdlibLTLIBRARIES
+install-data-am: install-bfdincludeDATA install-bfdlibLTLIBRARIES
 
 install-dvi: install-dvi-recursive
 
@@ -1214,7 +1274,7 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-bfdlibLTLIBRARIES
+uninstall-am: uninstall-bfdincludeDATA uninstall-bfdlibLTLIBRARIES
 
 .MAKE: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) all \
 	ctags-recursive install-am install-strip tags-recursive
@@ -1222,19 +1282,20 @@ uninstall-am: uninstall-bfdlibLTLIBRARIES
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
 	all all-am am--refresh check check-am clean \
 	clean-bfdlibLTLIBRARIES clean-generic clean-libtool \
-	clean-noinstLIBRARIES ctags ctags-recursive distclean \
-	distclean-compile distclean-generic distclean-hdr \
-	distclean-libtool distclean-tags dvi dvi-am html html-am info \
-	info-am install install-am install-bfdlibLTLIBRARIES \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs installdirs-am \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	pdf pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
-	uninstall-bfdlibLTLIBRARIES
+	clean-noinstLIBRARIES clean-noinstLTLIBRARIES ctags \
+	ctags-recursive distclean distclean-compile distclean-generic \
+	distclean-hdr distclean-libtool distclean-tags dvi dvi-am html \
+	html-am info info-am install install-am install-bfdincludeDATA \
+	install-bfdlibLTLIBRARIES install-data install-data-am \
+	install-dvi install-dvi-am install-exec install-exec-am \
+	install-html install-html-am install-info install-info-am \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs installdirs-am maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags tags-recursive uninstall uninstall-am \
+	uninstall-bfdincludeDATA uninstall-bfdlibLTLIBRARIES
 
 
 disassemble.lo: disassemble.c
@@ -1257,30 +1318,6 @@ libopcodes.a: stamp-lib ; @true
 po/POTFILES.in: @MAINT@ Makefile
 	for f in $(POTFILES); do echo $$f; done | LC_ALL=C sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
-
-install-bfdlibLTLIBRARIES: @INSTALL_LIBBFD_TRUE@install_libopcodes
-	@$(NORMAL_INSTALL)
-
-uninstall-bfdlibLTLIBRARIES: @INSTALL_LIBBFD_TRUE@uninstall_libopcodes
-	@$(NORMAL_UNINSTALL)
-
-.PHONY: install_libopcodes uninstall_libopcodes
-install_libopcodes: $(bfdlib_LTLIBRARIES)
-	$(mkinstalldirs) $(DESTDIR)$(bfdlibdir)
-	$(mkinstalldirs) $(DESTDIR)$(bfdincludedir)
-	@list='$(bfdlib_LTLIBRARIES)'; for p in $$list; do \
-	  if test -f $$p; then \
-	    echo "$(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(bfdlibdir)/$$p"; \
-	    $(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(bfdlibdir)/$$p; \
-	  else :; fi; \
-	done
-	$(INSTALL_DATA) $(INCDIR)/dis-asm.h $(DESTDIR)$(bfdincludedir)/dis-asm.h
-
-uninstall_libopcodes:
-	list='$(bfdlib_LTLIBRARIES)'; for p in $$list; do \
-	  $(LIBTOOL)  --mode=uninstall rm -f $(DESTDIR)$(bfdlibdir)/$$p; \
-	done
-	rm -f $(DESTDIR)$(bfdincludedir)/dis-asm.h
 
 run-cgen:
 	$(SHELL) $(srcdir)/cgen.sh opcodes $(srcdir) $(CGEN) \

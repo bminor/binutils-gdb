@@ -15,7 +15,14 @@ bfddocdir = doc
 bfdlibdir = @bfdlibdir@
 bfdincludedir = @bfdincludedir@
 
+libbfd_la_LDFLAGS =
+if INSTALL_LIBBFD
 bfdlib_LTLIBRARIES = libbfd.la
+bfdinclude_HEADERS = $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/bfdlink.h
+else !INSTALL_LIBBFD
+noinst_LTLIBRARIES = libbfd.la
+libbfd_la_LDFLAGS += -rpath $(bfdlibdir)
+endif
 
 WARN_CFLAGS = @WARN_CFLAGS@
 NO_WERROR = @NO_WERROR@
@@ -750,7 +757,7 @@ libbfd_la_SOURCES = $(BFD32_LIBS_CFILES)
 EXTRA_libbfd_la_SOURCES = $(CFILES)
 libbfd_la_DEPENDENCIES = $(OFILES) ofiles
 libbfd_la_LIBADD = `cat ofiles` @SHARED_LIBADD@ $(LIBDL)
-libbfd_la_LDFLAGS = -release `cat libtool-soversion` @SHARED_LDFLAGS@
+libbfd_la_LDFLAGS += -release `cat libtool-soversion` @SHARED_LDFLAGS@
 
 # libtool will build .libs/libbfd.a.  We create libbfd.a in the build
 # directory so that we don't have to convert all the programs that use
@@ -861,36 +868,6 @@ $(BFD32_LIBS) \
  $(BFD32_BACKENDS) \
  $(BFD64_BACKENDS) \
  $(OPTIONAL_BACKENDS): $(BFD_H) $(BFD_H_DEPS) $(LOCAL_H_DEPS)
-
-install-bfdlibLTLIBRARIES: @INSTALL_LIBBFD_TRUE@install_libbfd
-	@$(NORMAL_INSTALL)
-
-uninstall-bfdlibLTLIBRARIES: @INSTALL_LIBBFD_TRUE@uninstall_libbfd
-	@$(NORMAL_UNINSTALL)
-
-.PHONY: install_libbfd uninstall_libbfd
-install_libbfd: $(bfdlib_LTLIBRARIES) $(BFD_H)
-	$(mkinstalldirs) $(DESTDIR)$(bfdlibdir)
-	$(mkinstalldirs) $(DESTDIR)$(bfdincludedir)
-	@list='$(bfdlib_LTLIBRARIES)'; for p in $$list; do \
-	  if test -f $$p; then \
-	    echo "$(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(bfdlibdir)/$$p"; \
-	    $(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(bfdlibdir)/$$p; \
-	  else :; fi; \
-	done
-	$(INSTALL_DATA) $(BFD_H) $(DESTDIR)$(bfdincludedir)/bfd.h
-	$(INSTALL_DATA) $(INCDIR)/ansidecl.h $(DESTDIR)$(bfdincludedir)/ansidecl.h
-	$(INSTALL_DATA) $(INCDIR)/symcat.h $(DESTDIR)$(bfdincludedir)/symcat.h
-	$(INSTALL_DATA) $(INCDIR)/bfdlink.h $(DESTDIR)$(bfdincludedir)/bfdlink.h
-
-uninstall_libbfd:
-	list='$(bfdlib_LTLIBRARIES)'; for p in $$list; do \
-	  $(LIBTOOL)  --mode=uninstall rm -f $(DESTDIR)$(bfdlibdir)/$$p; \
-	done
-	rm -f $(DESTDIR)$(bfdincludedir)/bfd.h
-	rm -f $(DESTDIR)$(bfdincludedir)/ansidecl.h
-	rm -f $(DESTDIR)$(bfdincludedir)/symcat.h
-	rm -f $(DESTDIR)$(bfdincludedir)/bfdlink.h
 
 host-aout.lo: Makefile
 

@@ -16,7 +16,7 @@ WARN_CFLAGS = @WARN_CFLAGS@
 NO_WERROR = @NO_WERROR@
 AM_CFLAGS = $(WARN_CFLAGS)
 
-INCLUDES = -DDEBUG -I../bfd -I$(srcdir)/../include \
+AM_CPPFLAGS = -DDEBUG -I../bfd -I$(srcdir)/../include \
 	-I$(srcdir)/../bfd @INCINTL@ -I. \
 	-DLOCALEDIR="\"$(datadir)/locale\""
 

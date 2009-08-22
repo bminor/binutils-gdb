@@ -11,7 +11,7 @@ ACLOCAL_AMFLAGS = -I ../bfd -I ../config
 AM_CFLAGS = $(WARN_CFLAGS) $(LFS_CFLAGS) $(RANDOM_SEED_CFLAGS)
 AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CFLAGS) $(RANDOM_SEED_CFLAGS)
 
-INCLUDES = \
+AM_CPPFLAGS = \
 	-I$(srcdir) -I$(srcdir)/../include -I$(srcdir)/../elfcpp \
 	-DLOCALEDIR="\"$(datadir)/locale\"" \
 	-DBINDIR="\"$(bindir)\"" -DTOOLBINDIR="\"$(tooldir)/bin\"" \

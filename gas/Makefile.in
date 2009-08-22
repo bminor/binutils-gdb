@@ -212,10 +212,7 @@ VERSION = @VERSION@
 WARN_CFLAGS = @WARN_CFLAGS@
 XGETTEXT = @XGETTEXT@
 YACC = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo @YACC@ ; fi`
-
-# We have to set this, because autoconf 2.59 does not substitute YFLAGS.
-# Autoconf 2.61 does, so this can be removed when we upgrade.
-YFLAGS = 
+YFLAGS = @YFLAGS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -762,7 +759,7 @@ INCDIR = $(BASEDIR)/include
 # Both . and srcdir are used, in that order,
 # so that tm.h and config.h will be found in the compilation
 # subdirectory rather than in the source directory.
-INCLUDES = -I. -I$(srcdir) -I../bfd -I$(srcdir)/config \
+AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(srcdir)/config \
 	-I$(INCDIR) -I$(srcdir)/.. -I$(BFDDIR) @INCINTL@ \
 	-DLOCALEDIR="\"$(datadir)/locale\""
 

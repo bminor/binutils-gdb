@@ -1,5 +1,19 @@
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* Makefile.am (libbfd_la_LDFLAGS): Initialize early, to allow
+	appending.
+	[INSTALL_LIBBFD] (bfdlib_LTLIBRARIES, bfdinclude_HEADERS): Set
+	only in this condition.
+	[!INSTALL_LIBBFD] (noinst_LTLIBRARIES, libbfd_la_LDFLAGS): New,
+	to build but not install libbfd.la in this condition.
+	(install-bfdlibLTLIBRARIES, uninstall-bfdlibLTLIBRARIES)
+	(install_libbfd, install_libbfd): Remove.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.am (AM_CPPFLAGS): Renamed from ...
+	(INCLUDES): ... this.
+	($(MKDOC)): Adjust.
+	* doc/Makefile.in: Regenerate.
+
 	* Makefile.am (AUTOMAKE_OPTIONS): Remove cygnus, instead use
 	no-dist and foreign.
 	(EXTRA_libbfd_la_SOURCES): New, list $(CFILES) to allow

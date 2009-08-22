@@ -1,5 +1,12 @@
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* Makefile.am (AM_CPPFLAGS): Renamed from ...
+	(INCLUDES): ... this.
+	* testsuite/Makefile.am (AUTOMAKE_OPTIONS): Add -Wno-portability.
+	(AM_CPPFLAGS): Renamed from ...
+	(INCLUDE): ... this.
+	* Makefile.in, testsuite/Makefile.in: Regenerate.
+
 	* Makefile.in: Regenerate.
 	* aclocal.m4: Likewise.
 	* config.in: Likewise.

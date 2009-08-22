@@ -1,5 +1,12 @@
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* Makefile.am (AM_CPPFLAGS): Renamed from ...
+	(INCLUDES): ... this.
+	(bin2c$(EXEEXT_FOR_BUILD): Adjust rule.
+	(installcheck-local): Renamed from ...
+	(installcheck): ... this.
+	* Makefile.in: Regenerate.
+
 	* Makefile.am (AUTOMAKE_OPTIONS): Remove cygnus, add no-dist and
 	foreign.
 	(MKDEP, CLEANFILES): Remove now-unneeded variables.

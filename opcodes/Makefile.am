@@ -15,7 +15,14 @@ AM_CFLAGS = $(WARN_CFLAGS)
 bfdlibdir = @bfdlibdir@
 bfdincludedir = @bfdincludedir@
 
+libopcodes_la_LDFLAGS =
+if INSTALL_LIBBFD
 bfdlib_LTLIBRARIES = libopcodes.la
+bfdinclude_DATA = $(INCDIR)/dis-asm.h
+else
+noinst_LTLIBRARIES = libopcodes.la
+libopcodes_la_LDFLAGS += -rpath $(bfdlibdir)
+endif
 
 # This is where bfd.h lives.
 BFD_H = ../bfd/bfd.h
@@ -376,7 +383,7 @@ OFILES = @BFD_MACHINES@
 # that's where the version number in Makefile comes from.
 CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in
 
-INCLUDES = -I. -I$(srcdir) -I../bfd -I$(INCDIR) -I$(BFDDIR) @HDEFINES@ @INCINTL@
+AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(INCDIR) -I$(BFDDIR) @HDEFINES@ @INCINTL@
 
 disassemble.lo: disassemble.c
 if am__fastdepCC
@@ -399,7 +406,7 @@ libopcodes_la_SOURCES =  dis-buf.c disassemble.c dis-init.c
 # hardcoded path to libbfd.so instead of relying on the entries in libbfd.la.
 libopcodes_la_DEPENDENCIES = $(OFILES) @SHARED_DEPENDENCIES@
 libopcodes_la_LIBADD = $(OFILES) @SHARED_LIBADD@
-libopcodes_la_LDFLAGS = -release `cat ../bfd/libtool-soversion` @SHARED_LDFLAGS@
+libopcodes_la_LDFLAGS += -release `cat ../bfd/libtool-soversion` @SHARED_LDFLAGS@
 # Allow dependency tracking to work on all the source files.
 EXTRA_libopcodes_la_SOURCES = $(CFILES)
 
@@ -425,30 +432,6 @@ POTFILES = $(HFILES) $(CFILES)
 po/POTFILES.in: @MAINT@ Makefile
 	for f in $(POTFILES); do echo $$f; done | LC_ALL=C sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
-
-install-bfdlibLTLIBRARIES: @INSTALL_LIBBFD_TRUE@install_libopcodes
-	@$(NORMAL_INSTALL)
-
-uninstall-bfdlibLTLIBRARIES: @INSTALL_LIBBFD_TRUE@uninstall_libopcodes
-	@$(NORMAL_UNINSTALL)
-
-.PHONY: install_libopcodes uninstall_libopcodes
-install_libopcodes: $(bfdlib_LTLIBRARIES)
-	$(mkinstalldirs) $(DESTDIR)$(bfdlibdir)
-	$(mkinstalldirs) $(DESTDIR)$(bfdincludedir)
-	@list='$(bfdlib_LTLIBRARIES)'; for p in $$list; do \
-	  if test -f $$p; then \
-	    echo "$(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(bfdlibdir)/$$p"; \
-	    $(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(bfdlibdir)/$$p; \
-	  else :; fi; \
-	done
-	$(INSTALL_DATA) $(INCDIR)/dis-asm.h $(DESTDIR)$(bfdincludedir)/dis-asm.h
-
-uninstall_libopcodes:
-	list='$(bfdlib_LTLIBRARIES)'; for p in $$list; do \
-	  $(LIBTOOL)  --mode=uninstall rm -f $(DESTDIR)$(bfdlibdir)/$$p; \
-	done
-	rm -f $(DESTDIR)$(bfdincludedir)/dis-asm.h
 
 CLEANFILES = \
 	stamp-ip2k stamp-m32c stamp-m32r stamp-fr30 stamp-frv \
