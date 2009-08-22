@@ -42,7 +42,7 @@ DIST_COMMON = README ChangeLog $(srcdir)/Makefile.in \
 	$(srcdir)/Makefile.am $(top_srcdir)/configure \
 	$(am__configure_deps) $(srcdir)/gconfig.in \
 	$(srcdir)/../mkinstalldirs $(top_srcdir)/po/Make-in \
-	$(gprof_TEXINFOS) $(noinst_HEADERS)
+	$(srcdir)/../depcomp $(gprof_TEXINFOS) $(noinst_HEADERS)
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../bfd/warning.m4 \
 	$(top_srcdir)/../config/depstand.m4 \
@@ -63,7 +63,8 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
 CONFIG_HEADER = gconfig.h
 CONFIG_CLEAN_FILES = po/Makefile.in
 CONFIG_CLEAN_VPATH_FILES =
-am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(man1dir)"
+am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(infodir)" \
+	"$(DESTDIR)$(man1dir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__objects_1 = basic_blocks.$(OBJEXT) call_graph.$(OBJEXT) \
 	cg_arcs.$(OBJEXT) cg_dfn.$(OBJEXT) cg_print.$(OBJEXT) \
@@ -77,8 +78,9 @@ am_gprof_OBJECTS = $(am__objects_1) flat_bl.$(OBJEXT) \
 gprof_OBJECTS = $(am_gprof_OBJECTS)
 am__DEPENDENCIES_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@
-depcomp =
-am__depfiles_maybe =
+depcomp = $(SHELL) $(top_srcdir)/../depcomp
+am__depfiles_maybe = depfiles
+am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -90,8 +92,7 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(gprof_SOURCES)
 INFO_DEPS = gprof.info
-TEXINFO_TEX = $(top_srcdir)/../texinfo/texinfo.tex
-am__TEXINFO_TEX_DIR = $(top_srcdir)/../texinfo
+am__TEXINFO_TEX_DIR = $(srcdir)/$(top_srcdir)/../texinfo
 DVIS = gprof.dvi
 PDFS = gprof.pdf
 PSS = gprof.ps
@@ -273,15 +274,15 @@ target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AUTOMAKE_OPTIONS = cygnus
+AUTOMAKE_OPTIONS = 1.11 foreign no-dist no-texinfo.tex
 ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
+TEXINFO_TEX = $(top_srcdir)/../texinfo/texinfo.tex
 SUFFIXES = .m
 SUBDIRS = po
 BASEDIR = $(srcdir)/..
 BFDDIR = $(BASEDIR)/bfd
 INCDIR = $(BASEDIR)/include
 AM_CFLAGS = $(WARN_CFLAGS)
-MKDEP = gcc -MM
 INCLUDES = -DDEBUG -I../bfd -I$(srcdir)/../include \
 	-I$(srcdir)/../bfd @INCINTL@ -I. \
 	-DLOCALEDIR="\"$(datadir)/locale\""
@@ -310,7 +311,6 @@ gprof_TEXINFOS = config.texi
 man_MANS = gprof.1
 AM_MAKEINFOFLAGS = -I "$(srcdir)" -I "$(top_srcdir)/../bfd/doc" -I ../bfd/doc
 TEXI2DVI = texi2dvi -I "$(srcdir)" -I "$(top_srcdir)/../bfd/doc" -I ../bfd/doc
-CLEANFILES = dep.sed DEP DEPA DEP1 DEP2
 MAINTAINERCLEANFILES = gprof.info
 
 # Automake 1.9 will only build info files in the objdir if they are
@@ -428,14 +428,51 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/alpha.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_blocks.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bsd_callg_bl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/call_graph.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cg_arcs.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cg_dfn.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cg_print.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/corefile.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flat_bl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fsf_callg_bl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gmon_io.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gprof.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hertz.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hist.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/i386.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mips.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/search_list.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/source.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sparc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sym_ids.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/symtab.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tahoe.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utils.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vax.Po@am__quote@
+
 .c.o:
-	$(COMPILE) -c $<
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c $<
 
 .c.obj:
-	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
 .c.lo:
-	$(LTCOMPILE) -c -o $@ $<
+@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -584,8 +621,6 @@ maintainer-clean-aminfo:
 	  echo " rm -f $$i $$i-[0-9] $$i-[0-9][0-9] $$i_i[0-9] $$i_i[0-9][0-9]"; \
 	  rm -f $$i $$i-[0-9] $$i-[0-9][0-9] $$i_i[0-9] $$i_i[0-9][0-9]; \
 	done
-
-clean-info: mostlyclean-aminfo clean-aminfo
 install-man1: $(man_MANS)
 	@$(NORMAL_INSTALL)
 	test -z "$(man1dir)" || $(MKDIR_P) "$(DESTDIR)$(man1dir)"
@@ -759,13 +794,13 @@ GTAGS:
 
 distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
-check-am:
+check-am: all-am
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-recursive
-all-am: Makefile $(PROGRAMS) $(MANS) $(HEADERS) gconfig.h
+all-am: Makefile $(INFO_DEPS) $(PROGRAMS) $(MANS) $(HEADERS) gconfig.h
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(man1dir)"; do \
+	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(infodir)" "$(DESTDIR)$(man1dir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: $(BUILT_SOURCES)
@@ -786,7 +821,6 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -805,6 +839,7 @@ clean-am: clean-aminfo clean-binPROGRAMS clean-generic clean-libtool \
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-libtool distclean-tags
@@ -821,7 +856,7 @@ info: info-recursive
 
 info-am: $(INFO_DEPS)
 
-install-data-am: install-data-local install-man
+install-data-am: install-info-am install-man
 
 install-dvi: install-dvi-recursive
 
@@ -928,6 +963,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
+	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-aminfo \
 	maintainer-clean-generic
@@ -957,23 +993,22 @@ uninstall-man: uninstall-man1
 
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
 	all all-am am--refresh check check-am clean clean-aminfo \
-	clean-binPROGRAMS clean-generic clean-info clean-libtool ctags \
+	clean-binPROGRAMS clean-generic clean-libtool ctags \
 	ctags-recursive dist-info distclean distclean-compile \
 	distclean-generic distclean-hdr distclean-libtool \
 	distclean-tags dvi dvi-am html html-am info info-am install \
 	install-am install-binPROGRAMS install-data install-data-am \
-	install-data-local install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-man1 install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs installdirs-am \
-	maintainer-clean maintainer-clean-aminfo \
-	maintainer-clean-generic mostlyclean mostlyclean-aminfo \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	pdf pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-dvi-am uninstall-html-am \
-	uninstall-info-am uninstall-man uninstall-man1 \
-	uninstall-pdf-am uninstall-ps-am
+	install-dvi install-dvi-am install-exec install-exec-am \
+	install-html install-html-am install-info install-info-am \
+	install-man install-man1 install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs installdirs-am maintainer-clean \
+	maintainer-clean-aminfo maintainer-clean-generic mostlyclean \
+	mostlyclean-aminfo mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-recursive \
+	uninstall uninstall-am uninstall-binPROGRAMS uninstall-dvi-am \
+	uninstall-html-am uninstall-info-am uninstall-man \
+	uninstall-man1 uninstall-pdf-am uninstall-ps-am
 
 
 diststuff: $(BUILT_SOURCES) info $(man_MANS)
@@ -1003,458 +1038,6 @@ gprof.1: $(srcdir)/gprof.texi config.texi
 	       mv -f $@.T$$$$ $@) || \
 	       (rm -f $@.T$$$$ && exit 1)
 	rm -f gprof.pod
-
-# We want install to imply install-info as per GNU standards, despite the
-# cygnus option.
-install-data-local: install-info
-
-# Targets to rebuild dependencies in this Makefile.
-# Have to get rid of DEP1 here so that "$?" later includes all sources.
-DEP: dep.sed $(gprof_SOURCES) $(noinst_HEADERS) gconfig.h
-	rm -f DEP1
-	$(MAKE) MKDEP="$(MKDEP)" DEP1
-	echo '# IF YOU PUT ANYTHING HERE IT WILL GO AWAY' >> DEP1
-	if grep ' /' DEP1 > /dev/null 2> /dev/null; then \
-	  echo 'make DEP failed!'; exit 1; \
-	else \
-	  mv -f DEP1 $@; \
-	fi
-
-DEP1: $(gprof_SOURCES)
-	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > DEP2
-	echo '# DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.' >> DEP2
-	for f in $?; do \
-	  $(MKDEP) $(INCLUDES) $(CFLAGS) $$f > DEPA; \
-	  sed -n -e '1s/: .*/: \\/p' -e q < DEPA >> DEP2; \
-	  sed -e '1s/.*: //' -f dep.sed < DEPA | \
-	    LC_ALL=C sort | LC_ALL=C uniq | \
-	    sed -e 's/^[AB]/  /' -e '$$s/ \\$$//' >> DEP2; \
-	done
-	rm -f DEPA
-	mv -f DEP2 $@
-
-dep.sed: dep-in.sed config.status
-	objdir=`pwd`; \
-	sed <$(srcdir)/dep-in.sed >dep.sed	\
-		-e 's!@INCDIR@!$(INCDIR)!'	\
-		-e 's!@BFDDIR@!$(BFDDIR)!'	\
-		-e 's!@SRCDIR@!$(srcdir)!'	\
-		-e "s!@OBJDIR@!$${objdir}!"	\
-		-e 's!@TOPDIR@!'`echo $(srcdir) | sed -e s,/gprof$$,,`'!'
-
-dep: DEP
-	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < Makefile > tmp-Makefile
-	cat DEP >> tmp-Makefile
-	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile Makefile
-
-dep-in: DEP
-	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.in > tmp-Makefile.in
-	cat DEP >> tmp-Makefile.in
-	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile.in $(srcdir)/Makefile.in
-
-dep-am: DEP
-	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.am > tmp-Makefile.am
-	cat DEP >> tmp-Makefile.am
-	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile.am $(srcdir)/Makefile.am
-
-.PHONY: dep dep-in dep-am
-
-# DO NOT DELETE THIS LINE -- mkdep uses it.
-# DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
-basic_blocks.o: \
-  basic_blocks.c \
-  $(BFDDIR)/sysdep.h \
-  $(INCDIR)/ansidecl.h \
-  $(INCDIR)/filenames.h \
-  $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h \
-  $(INCDIR)/symcat.h \
-  ../bfd/bfd.h \
-  ../bfd/config.h \
-  basic_blocks.h \
-  corefile.h \
-  gconfig.h \
-  gmon_io.h \
-  gmon_out.h \
-  gprof.h \
-  search_list.h \
-  source.h \
-  sym_ids.h \
-  symtab.h
-call_graph.o: \
-  call_graph.c \
-  $(BFDDIR)/sysdep.h \
-  $(INCDIR)/ansidecl.h \
-  $(INCDIR)/filenames.h \
-  $(INCDIR)/fopen-same.h \
-  $(INCDIR)/symcat.h \
-  ../bfd/bfd.h \
-  ../bfd/config.h \
-  call_graph.h \
-  cg_arcs.h \
-  corefile.h \
-  gconfig.h \
-  gmon_io.h \
-  gmon_out.h \
-  gprof.h \
-  search_list.h \
-  source.h \
-  sym_ids.h \
-  symtab.h
-cg_arcs.o: \
-  cg_arcs.c \
-  $(BFDDIR)/sysdep.h \
-  $(INCDIR)/ansidecl.h \
-  $(INCDIR)/filenames.h \
-  $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h \
-  $(INCDIR)/symcat.h \
-  ../bfd/bfd.h \
-  ../bfd/config.h \
-  call_graph.h \
-  cg_arcs.h \
-  cg_dfn.h \
-  cg_print.h \
-  gconfig.h \
-  gprof.h \
-  search_list.h \
-  source.h \
-  sym_ids.h \
-  symtab.h \
-  utils.h
-cg_dfn.o: \
-  cg_dfn.c \
-  $(BFDDIR)/sysdep.h \
-  $(INCDIR)/ansidecl.h \
-  $(INCDIR)/filenames.h \
-  $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h \
-  $(INCDIR)/symcat.h \
-  ../bfd/bfd.h \
-  ../bfd/config.h \
-  cg_arcs.h \
-  cg_dfn.h \
-  gconfig.h \
-  gprof.h \
-  search_list.h \
-  source.h \
-  symtab.h \
-  utils.h
-cg_print.o: \
-  cg_print.c \
-  $(BFDDIR)/sysdep.h \
-  $(INCDIR)/ansidecl.h \
-  $(INCDIR)/filenames.h \
-  $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h \
-  $(INCDIR)/symcat.h \
-  ../bfd/bfd.h \
-  ../bfd/config.h \
-  cg_arcs.h \
-  cg_print.h \
-  corefile.h \
-  gconfig.h \
-  gprof.h \
-  hist.h \
-  search_list.h \
-  source.h \
-  symtab.h \
-  utils.h
-corefile.o: \
-  corefile.c \
-  $(BFDDIR)/sysdep.h \
-  $(INCDIR)/ansidecl.h \
-  $(INCDIR)/filenames.h \
-  $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h \
-  $(INCDIR)/safe-ctype.h \
-  $(INCDIR)/symcat.h \
-  ../bfd/bfd.h \
-  ../bfd/config.h \
-  corefile.h \
-  gconfig.h \
-  gprof.h \
-  hist.h \
-  search_list.h \
-  source.h \
-  symtab.h
-gmon_io.o: \
-  gmon_io.c \
-  $(BFDDIR)/sysdep.h \
-  $(INCDIR)/ansidecl.h \
-  $(INCDIR)/binary-io.h \
-  $(INCDIR)/filenames.h \
-  $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h \
-  $(INCDIR)/symcat.h \
-  ../bfd/bfd.h \
-  ../bfd/config.h \
-  basic_blocks.h \
-  call_graph.h \
-  cg_arcs.h \
-  corefile.h \
-  gconfig.h \
-  gmon.h \
-  gmon_io.h \
-  gmon_out.h \
-  gprof.h \
-  hertz.h \
-  hist.h \
-  search_list.h \
-  source.h \
-  symtab.h
-gprof.o: \
-  gprof.c \
-  $(BFDDIR)/sysdep.h \
-  $(INCDIR)/ansidecl.h \
-  $(INCDIR)/demangle.h \
-  $(INCDIR)/filenames.h \
-  $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h \
-  $(INCDIR)/symcat.h \
-  ../bfd/bfd.h \
-  ../bfd/bfdver.h \
-  ../bfd/config.h \
-  basic_blocks.h \
-  call_graph.h \
-  cg_arcs.h \
-  cg_print.h \
-  corefile.h \
-  gconfig.h \
-  gmon_io.h \
-  gprof.h \
-  hertz.h \
-  hist.h \
-  search_list.h \
-  source.h \
-  sym_ids.h \
-  symtab.h
-hertz.o: \
-  hertz.c \
-  $(BFDDIR)/sysdep.h \
-  $(INCDIR)/ansidecl.h \
-  $(INCDIR)/filenames.h \
-  $(INCDIR)/fopen-same.h \
-  $(INCDIR)/symcat.h \
-  ../bfd/bfd.h \
-  ../bfd/config.h \
-  gconfig.h \
-  gprof.h \
-  hertz.h
-hist.o: \
-  hist.c \
-  $(BFDDIR)/sysdep.h \
-  $(INCDIR)/ansidecl.h \
-  $(INCDIR)/filenames.h \
-  $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h \
-  $(INCDIR)/symcat.h \
-  ../bfd/bfd.h \
-  ../bfd/config.h \
-  corefile.h \
-  gconfig.h \
-  gmon_io.h \
-  gmon_out.h \
-  gprof.h \
-  hist.h \
-  search_list.h \
-  source.h \
-  sym_ids.h \
-  symtab.h \
-  utils.h
-source.o: \
-  source.c \
-  $(BFDDIR)/sysdep.h \
-  $(INCDIR)/ansidecl.h \
-  $(INCDIR)/filenames.h \
-  $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h \
-  $(INCDIR)/symcat.h \
-  ../bfd/bfd.h \
-  ../bfd/config.h \
-  gconfig.h \
-  gprof.h \
-  search_list.h \
-  source.h
-search_list.o: \
-  search_list.c \
-  $(BFDDIR)/sysdep.h \
-  $(INCDIR)/ansidecl.h \
-  $(INCDIR)/filenames.h \
-  $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h \
-  $(INCDIR)/symcat.h \
-  ../bfd/bfd.h \
-  ../bfd/config.h \
-  gconfig.h \
-  gprof.h \
-  search_list.h
-symtab.o: \
-  symtab.c \
-  $(BFDDIR)/sysdep.h \
-  $(INCDIR)/ansidecl.h \
-  $(INCDIR)/filenames.h \
-  $(INCDIR)/fopen-same.h \
-  $(INCDIR)/symcat.h \
-  ../bfd/bfd.h \
-  ../bfd/config.h \
-  cg_arcs.h \
-  corefile.h \
-  gconfig.h \
-  gprof.h \
-  search_list.h \
-  source.h \
-  symtab.h
-sym_ids.o: \
-  sym_ids.c \
-  $(BFDDIR)/sysdep.h \
-  $(INCDIR)/ansidecl.h \
-  $(INCDIR)/filenames.h \
-  $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h \
-  $(INCDIR)/safe-ctype.h \
-  $(INCDIR)/symcat.h \
-  ../bfd/bfd.h \
-  ../bfd/config.h \
-  cg_arcs.h \
-  corefile.h \
-  gconfig.h \
-  gprof.h \
-  search_list.h \
-  source.h \
-  sym_ids.h \
-  symtab.h
-utils.o: \
-  utils.c \
-  $(BFDDIR)/sysdep.h \
-  $(INCDIR)/ansidecl.h \
-  $(INCDIR)/demangle.h \
-  $(INCDIR)/filenames.h \
-  $(INCDIR)/fopen-same.h \
-  $(INCDIR)/libiberty.h \
-  $(INCDIR)/symcat.h \
-  ../bfd/bfd.h \
-  ../bfd/config.h \
-  cg_arcs.h \
-  corefile.h \
-  gconfig.h \
-  gprof.h \
-  search_list.h \
-  source.h \
-  symtab.h \
-  utils.h
-i386.o: \
-  i386.c \
-  $(BFDDIR)/sysdep.h \
-  $(INCDIR)/ansidecl.h \
-  $(INCDIR)/filenames.h \
-  $(INCDIR)/fopen-same.h \
-  $(INCDIR)/symcat.h \
-  ../bfd/bfd.h \
-  ../bfd/config.h \
-  cg_arcs.h \
-  corefile.h \
-  gconfig.h \
-  gprof.h \
-  hist.h \
-  search_list.h \
-  source.h \
-  symtab.h
-alpha.o: \
-  alpha.c \
-  $(BFDDIR)/sysdep.h \
-  $(INCDIR)/ansidecl.h \
-  $(INCDIR)/filenames.h \
-  $(INCDIR)/fopen-same.h \
-  $(INCDIR)/symcat.h \
-  ../bfd/bfd.h \
-  ../bfd/config.h \
-  cg_arcs.h \
-  corefile.h \
-  gconfig.h \
-  gprof.h \
-  hist.h \
-  search_list.h \
-  source.h \
-  symtab.h
-vax.o: \
-  vax.c \
-  $(BFDDIR)/sysdep.h \
-  $(INCDIR)/ansidecl.h \
-  $(INCDIR)/filenames.h \
-  $(INCDIR)/fopen-same.h \
-  $(INCDIR)/symcat.h \
-  ../bfd/bfd.h \
-  ../bfd/config.h \
-  cg_arcs.h \
-  corefile.h \
-  gconfig.h \
-  gprof.h \
-  hist.h \
-  search_list.h \
-  source.h \
-  symtab.h
-tahoe.o: \
-  tahoe.c \
-  $(BFDDIR)/sysdep.h \
-  $(INCDIR)/ansidecl.h \
-  $(INCDIR)/filenames.h \
-  $(INCDIR)/fopen-same.h \
-  $(INCDIR)/symcat.h \
-  ../bfd/bfd.h \
-  ../bfd/config.h \
-  cg_arcs.h \
-  corefile.h \
-  gconfig.h \
-  gprof.h \
-  hist.h \
-  search_list.h \
-  source.h \
-  symtab.h
-sparc.o: \
-  sparc.c \
-  $(BFDDIR)/sysdep.h \
-  $(INCDIR)/ansidecl.h \
-  $(INCDIR)/filenames.h \
-  $(INCDIR)/fopen-same.h \
-  $(INCDIR)/symcat.h \
-  ../bfd/bfd.h \
-  ../bfd/config.h \
-  cg_arcs.h \
-  corefile.h \
-  gconfig.h \
-  gprof.h \
-  hist.h \
-  search_list.h \
-  source.h \
-  symtab.h
-mips.o: \
-  mips.c \
-  $(BFDDIR)/sysdep.h \
-  $(INCDIR)/ansidecl.h \
-  $(INCDIR)/filenames.h \
-  $(INCDIR)/fopen-same.h \
-  $(INCDIR)/symcat.h \
-  ../bfd/bfd.h \
-  ../bfd/config.h \
-  cg_arcs.h \
-  corefile.h \
-  gconfig.h \
-  gprof.h \
-  hist.h \
-  search_list.h \
-  source.h \
-  symtab.h
-flat_bl.o: \
-  flat_bl.c \
-  $(INCDIR)/ansidecl.h
-bsd_callg_bl.o: \
-  bsd_callg_bl.c \
-  $(INCDIR)/ansidecl.h
-fsf_callg_bl.o: \
-  fsf_callg_bl.c \
-  $(INCDIR)/ansidecl.h
-# IF YOU PUT ANYTHING HERE IT WILL GO AWAY
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -1,5 +1,15 @@
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* Makefile.am (AUTOMAKE_OPTIONS): Remove cygnus, add 1.11,
+	foreign, no-dist, no-texinfo.tex.
+	(TEXINFO_TEX): New variable.
+	(MKDEP, CLEANFILES): Remove:
+	(DEP, DEP1, dep.sed, dep, dep-in, dep-am): Remove rules.
+	(install-data-local): Remove now-unneeded dependency on
+	install-info.
+	(mkdep section): Remove.
+	* Makefile.in: Regenerate.
+
 	* Makefile.am (pdf__strip_dir, install-pdf, install-pdf-am)
 	(install-pdf-recursive, html__strip_dir, install-html)
 	(install-html-am, install-html-recursive): Remove.
