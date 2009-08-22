@@ -86,6 +86,7 @@ cpu-i960.c
 cpu-ia64.c
 cpu-ip2k.c
 cpu-iq2000.c
+cpu-l1om.c
 cpu-lm32.c
 cpu-m10200.c
 cpu-m10300.c
@@ -98,6 +99,7 @@ cpu-m88k.c
 cpu-maxq.c
 cpu-mcore.c
 cpu-mep.c
+cpu-microblaze.c
 cpu-mips.c
 cpu-mmix.c
 cpu-moxie.c
@@ -108,6 +110,7 @@ cpu-openrisc.c
 cpu-or32.c
 cpu-pdp11.c
 cpu-pj.c
+cpu-plugin.c
 cpu-powerpc.c
 cpu-rs6000.c
 cpu-s390.c
@@ -138,6 +141,7 @@ elf-attrs.c
 elf-bfd.h
 elf-eh-frame.c
 elf-hppa.h
+elf-ifunc.c
 elf-m10200.c
 elf-m10300.c
 elf-strtab.c
@@ -177,6 +181,7 @@ elf32-m68k.c
 elf32-m88k.c
 elf32-mcore.c
 elf32-mep.c
+elf32-microblaze.c
 elf32-mips.c
 elf32-moxie.c
 elf32-msp430.c
@@ -260,6 +265,7 @@ m68klinux.c
 m68knetbsd.c
 m88kmach3.c
 m88kopenbsd.c
+mach-o-i386.c
 mach-o.c
 mach-o.h
 merge.c
@@ -305,6 +311,7 @@ pei-ppc.c
 pei-sh.c
 pei-x86_64.c
 peicode.h
+plugin.c
 ppcboot.c
 reloc.c
 reloc16.c

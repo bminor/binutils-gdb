@@ -1,5 +1,17 @@
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* Makefile.am (AUTOMAKE_OPTIONS): Remove cygnus, instead use
+	no-dist and foreign.
+	(EXTRA_libbfd_la_SOURCES): New, list $(CFILES) to allow
+	dependency tracking to work for them.
+	(targets.lo, archures.lo, dwarf.lo): Rewrite to
+	use automake dependency tracking mechanism.
+	(MKDEP, DEP, DEP1, dep.sed, dep, dep-in, dep-am): Remove.
+	(mkdep section): Remove.
+	(BUILT_SOURCES): New, list $(BUILD_HFILES).
+	* Makefile.in: Regenerate.
+	* po/SRC-POTFILES.in, po/bfd.pot: Regenerate.
+
 	* Makefile.am (datarootdir, docdir, htmldor, pdfdir)
 	(install-pdf, install-pdf-recursive, install-html)
 	(install-html-recursive): Remove.
