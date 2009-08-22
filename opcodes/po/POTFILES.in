@@ -122,6 +122,8 @@ mep-dis.c
 mep-ibld.c
 mep-opc.c
 mep-opc.h
+microblaze-dis.c
+microblaze-opc.h
 mips-dis.c
 mips-opc.c
 mips16-opc.c

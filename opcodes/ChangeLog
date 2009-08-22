@@ -1,5 +1,21 @@
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* Makefile.am (AUTOMAKE_OPTIONS): Remove 1.9 and cygnus, add
+	1.11, foreign, no-dist.
+	(MKDEP, m32c_opc_h): Remove variables.
+	(disassemble.lo): Rewrite using automake-style dependency
+	tracking rules; only list the dependency upon the primary source
+	file, but no included headers.
+	(m32c-asm.lo, m32c-desc.lo, m32c-dis.lo, m32c-ibld.lo, m32c-opc.lo)
+	(i386-gen.o, ia64-gen.o): Remove dependency statements.
+	(EXTRA_libopcodes_la_SOURCES): New variable, list $(CFILES) to
+	ensure all dependency fragments are included in the Makefile.
+	(s390-opc.lo): Depend on s390-opc.tab.
+	(DEP, DEP1, dep.sed, dep, dep-in, dep-am): Remove rules.
+	(mkdep section): Remove.
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 	* Makefile.am (install-pdf, install-html): Remove.
 	* Makefile.in: Regenerate.
 
