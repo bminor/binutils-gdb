@@ -1,5 +1,24 @@
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* Makefile.am (AUTOMAKE_OPTIONS): Remove cygnus, add no-dist and
+	foreign.
+	(MKDEP, CLEANFILES): Remove now-unneeded variables.
+	(DEP, DEP1, dep.sed, dep, dep-in, dep-am): Remove.
+	(mkdep section): Remove.
+	(BUILT_SOURCES): New variable, list $(GENERATED_HFILES).
+	(EXTRA_ar_SOURCES): New, list $(CFILES).
+	(syslex.o): Depend on syslex.c.
+	(sysinfo.o): Depend on sysinfo.c.
+	(arparse.h, defparse.h, nlmheaders.h rcparse.h mcparse.h):
+	Remove dependencies, now tracked by automake.
+	(srconv.o): Depend on sysroff.c.
+	(objdump.o, arparse.o, arlex.o, sysroff.o, defparse.o, deflex.o)
+	(nlmheader.o, rcparse.o, mcparse.o, rclex.o, mclex.o, dlltool.o)
+	(rescoff.o, nlmconv.o): Rewrite using automake-style dependency
+	tracking rules; only list the dependency upon the primary source
+	file, but no included headers.
+	* Makefile.in: Regenerate.
+
 	* Makefile.am (install-pdf, install-pdf-recursive, install-html)
 	(install-html-recursive): Remove.
 	* Makefile.in: Regenerate.
