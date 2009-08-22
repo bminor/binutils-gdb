@@ -4,7 +4,7 @@
 # system and the host system are the same.  So these tests will not
 # work when building with a cross-compiler.
 
-AUTOMAKE_OPTIONS =
+AUTOMAKE_OPTIONS = foreign
 
 # The two_file_test tests -fmerge-constants, so we simply always turn
 # it on.  This may need to be controlled by a configure option

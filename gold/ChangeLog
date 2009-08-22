@@ -1,3 +1,10 @@
+2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* Makefile.am (AUTOMAKE_OPTIONS): Add foreign.
+	* testsuite/Makefile.am (AUTOMAKE_OPTIONS): Add foreign.
+	* Makefile.in: Regenerate.
+	* testsuite/Makefile.in: Regenerate.
+
 2009-08-19  Cary Coutant  <ccoutant@google.com>
 
 	* resolve.cc (Symbol_table::resolve): Don't complain about defined
