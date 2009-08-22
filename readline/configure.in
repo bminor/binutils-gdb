@@ -24,6 +24,8 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_REVISION([for Readline 5.1, version 2.59])
 
+m4_include([../config/override.m4])
+
 AC_INIT(readline, 5.1-release, bug-readline@gnu.org)
 
 dnl make sure we are using a recent autoconf version

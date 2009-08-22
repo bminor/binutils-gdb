@@ -1,5 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
+m4_include([../../../config/override.m4])
+
 AC_INIT(rlfe.c)
 AC_CONFIG_HEADER(config.h)
 VERSION=0.4

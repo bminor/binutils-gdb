@@ -18,6 +18,9 @@
 #
 # SIM_AC_OUTPUT
 
+# Include global overrides and fixes for Autoconf.
+m4_include(../../config/override.m4)
+
 AC_DEFUN([SIM_AC_COMMON],
 [
 # autoconf.info says this should be called right after AC_INIT.
