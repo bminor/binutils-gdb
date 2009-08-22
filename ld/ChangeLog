@@ -1,5 +1,22 @@
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* Makefile.am (AUTOMAKE_OPTIONS): Remove cygnus.  Add
+	no-texinfo.tex, no-dist, foreign.
+	(TEXINFO_TEX): New variable.
+	(install-data-local): Removed, not needed any more.
+	(all): Dependencies upon info and ld.1 not needed any more.
+	(MKDEP, DEP, DEP1, dep.sed, dep, dep-in, dep-am): Removed.
+	(mkdep generated section): Removed.
+	(ldgram.o, ldlex.o, deffilep.o, ldmain.o, ldfile.o): Rewrite to
+	use automake dependency tracking mechanism.
+	(EXTRA_ld_new_SOURCES): Add pep-dll.c, pe-dll.c, and
+	$(ALL_EMULATIONS:.o=.c) $(ALL_64_EMULATIONS:.o=.c) so their
+	dependencies are tracked too.
+	(BUILT_SOURCES): New, list $(GENERATED_HFILES) to ensure they
+	are built early.
+	* configure.in: Use AM_MAINTAINER_MODE.
+	* aclocal.m4, configure, Makefile.in: Regenerate.
+
 	* Makefile.am (pdf__strip_dir, install-pdf, install-pdf-am)
 	(install-pdf-recursive, html__strip_dir, install-html)
 	(install-html-am, install-html-recursive): Remove.
