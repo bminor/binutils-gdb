@@ -1,5 +1,12 @@
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* gdbint.texinfo (Releasing GDB): Point to
+	README-maintainer-mode file for required autoconf version.
+	* configure.ac: Do not substitute datarootdir, htmldir,
+	pdfdir, docdir.  Do not process --with-datarootdir,
+	--with-htmldir, --with-pdfdir, --with-docdir.
+	* configure: Regenerate.
+
 	* configure: Regenerate.
 
 2009-08-20  Reid Kleckner  <reid@kleckner.net>

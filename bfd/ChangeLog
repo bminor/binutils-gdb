@@ -1,5 +1,10 @@
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* Makefile.am (datarootdir, docdir, htmldor, pdfdir)
+	(install-pdf, install-pdf-recursive, install-html)
+	(install-html-recursive): Remove.
+	* Makefile.in: Regenerate.
+
 	* Makefile.in: Regenerate.
 	* aclocal.m4: Likewise.
 	* config.in: Likewise.

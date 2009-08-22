@@ -296,41 +296,6 @@ MAINTAINERCLEANFILES = $(DOCFILES)
 # cygnus option.
 install: install-info
 
-pdf__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
-
-install-pdf: install-pdf-am
- 
-install-pdf-am: $(PDFS)
-	@$(NORMAL_INSTALL)
-	test -z "$(pdfdir)" || $(mkinstalldirs) "$(DESTDIR)$(pdfdir)"
-	@list='$(PDFS)'; for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  f=$(pdf__strip_dir) \
-	  echo " $(INSTALL_DATA) '$$d$$p' '$(DESTDIR)$(pdfdir)/$$f'"; \
-	  $(INSTALL_DATA) "$$d$$p" "$(DESTDIR)$(pdfdir)/$$f"; \
-	done
-
-html__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
-
-install-html: install-html-am
-
-install-html-am: $(HTMLS)
-	@$(NORMAL_INSTALL)
-	test -z "$(htmldir)" || $(mkdir_p) "$(DESTDIR)$(htmldir)"
-	@list='$(HTMLS)'; for p in $$list; do \
-	  if test -f "$$p" || test -d "$$p"; then d=""; else d="$(srcdir)/"; fi; \
-	  f=$(html__strip_dir) \
-	  if test -d "$$d$$p"; then \
-	    echo " $(mkdir_p) '$(DESTDIR)$(htmldir)/$$f'"; \
-	    $(mkdir_p) "$(DESTDIR)$(htmldir)/$$f" || exit 1; \
-	    echo " $(INSTALL_DATA) '$$d$$p'/* '$(DESTDIR)$(htmldir)/$$f'"; \
-	    $(INSTALL_DATA) "$$d$$p"/* "$(DESTDIR)$(htmldir)/$$f"; \
-	  else \
-	    echo " $(INSTALL_DATA) '$$d$$p' '$(DESTDIR)$(htmldir)/$$f'"; \
-	    $(INSTALL_DATA) "$$d$$p" "$(DESTDIR)$(htmldir)/$$f"; \
-	  fi; \
-	done
-
 MAINTAINERCLEANFILES += bfd.info
 
 # Automake 1.9 will only build info files in the objdir if they are

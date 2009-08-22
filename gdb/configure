@@ -912,10 +912,6 @@ with_tk
 with_x
 enable_sim
 enable_multi_ice
-with_datarootdir
-with_docdir
-with_pdfdir
-with_htmldir
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1608,10 +1604,6 @@ Optional Packages:
   --with-tcl              directory containing tcl configuration (tclConfig.sh)
   --with-tk               directory containing tk configuration (tkConfig.sh)
   --with-x                use the X Window System
-  --with-datarootdir      use datarootdir as the data root directory.
-  --with-docdir           install documentation in this directory.
-  --with-pdfdir           install pdf in this directory.
-  --with-htmldir          install html in this directory.
 
 Some influential environment variables:
   CC          C compiler command
@@ -14162,48 +14154,6 @@ ac_config_links="$ac_config_links $ac_config_links_1"
 
 
 $as_echo "#define GDB_DEFAULT_HOST_CHARSET \"UTF-8\"" >>confdefs.h
-
-
-# Flags needed to enable html installing and building
-
-# Check whether --with-datarootdir was given.
-if test "${with_datarootdir+set}" = set; then :
-  withval=$with_datarootdir; datarootdir="\${prefix}/${withval}"
-else
-  datarootdir="\${prefix}/share"
-fi
-
-
-
-# Check whether --with-docdir was given.
-if test "${with_docdir+set}" = set; then :
-  withval=$with_docdir; docdir="\${prefix}/${withval}"
-else
-  docdir="\${datarootdir}/doc"
-fi
-
-
-
-# Check whether --with-pdfdir was given.
-if test "${with_pdfdir+set}" = set; then :
-  withval=$with_pdfdir; pdfdir="\${prefix}/${withval}"
-else
-  pdfdir="\${docdir}"
-fi
-
-
-
-# Check whether --with-htmldir was given.
-if test "${with_htmldir+set}" = set; then :
-  withval=$with_htmldir; htmldir="\${prefix}/${withval}"
-else
-  htmldir="\${docdir}"
-fi
-
-
-
-
-
 
 
 ac_config_files="$ac_config_files Makefile .gdbinit:gdbinit.in gnulib/Makefile"

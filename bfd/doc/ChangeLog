@@ -1,5 +1,9 @@
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* Makefile.am (pdf__strip_dir, install-pdf, install-pdf-am)
+	(html__strip_dir, install-html, install-html-am): Remove.
+	* Makefile.in: Regenerate.
+
 	* Makefile.in: Regenerate.
 
 2009-05-22  Alan Modra  <amodra@bigpond.net.au>

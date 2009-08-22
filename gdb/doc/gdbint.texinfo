@@ -7078,10 +7078,9 @@ Notes:
 @itemize @bullet
 @item
 Check the @code{autoconf} version carefully.  You want to be using the
-version taken from the @file{binutils} snapshot directory, which can be
-found at @uref{ftp://sourceware.org/pub/binutils/}.  It is very
-unlikely that a system installed version of @code{autoconf} (e.g.,
-@file{/usr/bin/autoconf}) is correct.
+version documented in the toplevel @file{README-maintainer-mode} file.
+It is very unlikely that a system installed version of @code{autoconf}
+(e.g., @file{/usr/bin/autoconf}) is correct.
 @end itemize
 
 @subsubheading Check out the relevant modules:

@@ -1,5 +1,8 @@
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* Makefile.am (install-pdf, install-html): Remove.
+	* Makefile.in: Regenerate.
+
 	* Makefile.in: Regenerate.
 	* aclocal.m4: Likewise.
 	* config.in: Likewise.

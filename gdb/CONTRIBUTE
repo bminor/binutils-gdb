@@ -121,7 +121,7 @@ o	If ``gdb/configure.ac'' is modified then you don't
 	``configure''.
 
 	The maintainer will re-generate those files
-	using autoconf (2.59 as of 2005-01-07).
+	using autoconf (2.64 as of 2009-08-22).
 
 
 o	If ``gdb/gdbarch.sh'' is modified, you don't

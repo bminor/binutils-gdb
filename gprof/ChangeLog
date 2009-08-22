@@ -1,5 +1,10 @@
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* Makefile.am (pdf__strip_dir, install-pdf, install-pdf-am)
+	(install-pdf-recursive, html__strip_dir, install-html)
+	(install-html-am, install-html-recursive): Remove.
+	* Makefile.in: Regenerate.
+
 	* Makefile.in: Regenerate.
 	* aclocal.m4: Likewise.
 	* configure: Likewise.
