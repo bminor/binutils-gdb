@@ -14,6 +14,16 @@
 	* configure.ac: Use AC_USE_SYSTEM_EXTENSIONS instead of
 	AC_GNU_SOURCE, AC_AIX, AC_ISC_POSIX.
 
+2009-08-21  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* objfiles.h (gdb_bfd_ref): New prototype.
+	* objfiles.c (gdb_bfd_ref): New function.
+	(allocate_objfile): Call it.
+	(gdb_bfd_unref): Adjust assertion.
+	* solib.c (solib_map_sections): Add reference.
+	(symbol_add_stub): Don't add reference here.
+	* symfile.c (reread_symbols): Add reference.
+
 2009-08-21  Ken Werner <ken@linux.vnet.ibm.com>
 	    Doug Evans  <dje@google.com>
 
