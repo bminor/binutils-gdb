@@ -1,5 +1,8 @@
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* config.in: Regenerate.
+	* configure: Likewise.
+
 	* configure: Regenerate.
 
 2008-11-10  Joel Sherrill <joel.sherrill@oarcorp.com>

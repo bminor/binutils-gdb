@@ -1,5 +1,11 @@
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Likewise.
+	* config.in: Likewise.
+	* configure: Likewise.
+	* testsuite/Makefile.in: Likewise.
+
 	* Makefile.am (AUTOMAKE_OPTIONS): Add foreign.
 	* testsuite/Makefile.am (AUTOMAKE_OPTIONS): Add foreign.
 	* Makefile.in: Regenerate.

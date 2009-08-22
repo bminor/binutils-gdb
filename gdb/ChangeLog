@@ -1,5 +1,10 @@
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* aclocal.m4: Regenerate.
+	* config.in: Likewise.
+	* configure: Likewise.
+	* gnulib/Makefile.in: Likewise.
+
 	* configure.ac: Use AC_USE_SYSTEM_EXTENSIONS instead of
 	AC_GNU_SOURCE, AC_AIX, AC_ISC_POSIX.
 

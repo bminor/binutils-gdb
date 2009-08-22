@@ -1,3 +1,10 @@
+2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Likewise.
+	* configure: Likewise.
+	* gconfig.in: Likewise.
+
 2009-06-16  Homer Xing  <homer.xing@yahoo.com>
 
 	* corefile.c (cmp_symbol_map): New function.

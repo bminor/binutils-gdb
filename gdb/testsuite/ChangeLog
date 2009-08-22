@@ -1,3 +1,14 @@
+2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* configure: Regenerate.
+	* gdb.hp/configure: Likewise.
+	* gdb.hp/gdb.aCC/configure: Likewise.
+	* gdb.hp/gdb.base-hp/configure: Likewise.
+	* gdb.hp/gdb.compat/configure: Likewise.
+	* gdb.hp/gdb.defects/configure: Likewise.
+	* gdb.hp/gdb.objdbg/configure: Likewise.
+	* gdb.stabs/configure: Likewise.
+
 2009-08-19  Doug Evans  <dje@google.com>
 
 	* gdb.base/gdbvars.c: New file.

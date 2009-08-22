@@ -1,3 +1,7 @@
+2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* configure: Regenerate.
+
 2009-01-18  Hans-Peter Nilsson  <hp@axis.com>
 
 	* sim/cris/asm/opterr5.ms, sim/cris/asm/opterr4.ms,

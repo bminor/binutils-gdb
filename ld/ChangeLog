@@ -1,3 +1,10 @@
+2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Likewise.
+	* config.in: Likewise.
+	* configure: Likewise.
+
 2009-08-21  Richard Guenther  <rguenther@suse.de>
 
 	* scripttempl/elf.sc: Discard sections with .gnu.lto_ prefix.

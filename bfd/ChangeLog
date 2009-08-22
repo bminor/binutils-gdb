@@ -1,3 +1,10 @@
+2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Likewise.
+	* config.in: Likewise.
+	* configure: Likewise.
+
 2009-08-21  Daniel Gutson  <dgutson@codesourcery.com>
 
 	* elf32-arm.c (arch_has_thumb2_nop): New function.

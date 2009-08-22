@@ -1,5 +1,7 @@
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* configure: Regenerate.
+
 	* configure.in: m4_include toplevel config/override.m4.
 	* configure: Regenerate.
 

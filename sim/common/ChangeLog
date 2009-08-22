@@ -1,5 +1,8 @@
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* config.in: Regenerate.
+	* configure: Likewise.
+
 	* aclocal.m4 (SIM_CHECK_MEMBER): Replace definition with
 	definition of AC_CHECK_MEMBER.
 
