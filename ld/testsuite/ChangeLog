@@ -1,3 +1,8 @@
+2009-08-23  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* ld-powerpc/relax.d: Fix whitespace.
+	* ld-powerpc/relaxr.d: Likewise.
+
 2009-08-21  Daniel Gutson  <dgutson@codesourcery.com>
 
 	* ld-arm/callweak.d: Opcodes updated.
