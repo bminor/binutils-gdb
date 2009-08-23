@@ -1,5 +1,8 @@
 2009-08-23  Andreas Schwab  <schwab@linux-m68k.org>
 
+	* ld-powerpc/powerpc.exp: Move relaxing and relocatable relaxing
+	tests from ppc64elftest to ppcelftest and pass -a32 to assembler.
+
 	* ld-powerpc/relax.d: Fix whitespace.
 	* ld-powerpc/relaxr.d: Likewise.
 
