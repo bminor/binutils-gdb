@@ -1,3 +1,8 @@
+2009-08-23  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* Makefile.am (syslex.o): Depend on sysinfo.h config.h.
+	* Makefile.in: Regenerate.
+
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.am (AM_CPPFLAGS): Renamed from ...

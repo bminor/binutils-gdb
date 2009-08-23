@@ -248,7 +248,7 @@ sysroff.h: sysinfo$(EXEEXT_FOR_BUILD) sysroff.info
 sysinfo$(EXEEXT_FOR_BUILD): sysinfo.o syslex.o
 	$(CC_FOR_BUILD) $(CFLAGS) $(LDFLAGS) -o $@ sysinfo.o syslex.o
 
-syslex.o: syslex.c
+syslex.o: syslex.c sysinfo.h config.h
 	if [ -r syslex.c ]; then \
 	  $(CC_FOR_BUILD) -c -I. $(AM_CFLAGS) $(CFLAGS) syslex.c -Wno-error ; \
 	else \
