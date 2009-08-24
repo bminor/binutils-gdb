@@ -3836,7 +3836,8 @@ default_make_symbol_completion_list (char *text, char *word)
 	   which are in symbols.  */
 	while (p > text)
 	  {
-	    if (isalnum (p[-1]) || p[-1] == '_' || p[-1] == '\0')
+	    if (isalnum (p[-1]) || p[-1] == '_' || p[-1] == '\0'
+		|| p[-1] == ':')
 	      --p;
 	    else
 	      break;

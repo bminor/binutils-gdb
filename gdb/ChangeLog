@@ -1,3 +1,9 @@
+2009-08-24  Keith Seitz  <keiths@redhat.com>
+
+	* symtab.c (default_make_symbol_completion_list): Keep
+	':', too, so that we can limit searches in namespaces
+	and classes. 
+
 2009-08-24  Tom Tromey  <tromey@redhat.com>
 
 	* python/python-value.c (valpy_richcompare): Don't return from
