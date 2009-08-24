@@ -15,6 +15,40 @@
 
 # This file is part of the gdb testsuite.
 
+# A helper procedure to test location completions restricted by
+# class.
+proc test_class_complete {class expr name matches} {
+    global gdb_prompt
+
+    set matches [lsort $matches]
+    set cmd "complete break ${class}::$expr"
+    set seen {}
+    gdb_test_multiple $cmd $name {
+	"break ${class}::main" { fail "$name (saw global symbol)" }
+	$cmd { exp_continue }
+	-re "break ${class}::\[A-Za-z0-9_~\]+" {
+	    set str $expect_out(0,string)
+	    scan $str "break ${class}::%\[^(\]" method
+	    lappend seen $method
+	    exp_continue
+	}
+	-re "$gdb_prompt $" {
+	    set failed ""
+	    foreach got [lsort $seen] have $matches {
+		if {![string equal $got $have]} {
+		    set failed $have
+		    break
+		}
+	    }
+	    if {[string length $failed] != 0} {
+		fail "$name ($failed not found)"
+	    } else {
+		pass $name
+	    }
+	}
+    }
+}
+
 if $tracelevel then {
 	strace $tracelevel
 }
@@ -58,3 +92,11 @@ gdb_test "complete p foo1.Fo" "p foo1\\.Foofoo"
 
 # Test completion with an anonymous struct.
 gdb_test "complete p a.g" "p a\\.get"
+
+# Test that completion is restricted by class name (all methods)
+test_class_complete Foo "" "complete class methods" \
+    [list Foo Foofoo get_foo set_foo ~Foo]
+
+test_class_complete Foo F "complete class methods beginning with F" \
+    [list Foo Foofoo]
+

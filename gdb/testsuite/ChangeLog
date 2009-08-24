@@ -1,3 +1,9 @@
+2009-08-24  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.cp/cpcompletion.exp (test_class_complete): New procedure.
+	Add two new C++ completer tests which limit the output to a
+	given class. 
+
 2009-08-24  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.base/del.exp: Fix typo in comment.
