@@ -1,5 +1,10 @@
 2009-08-24  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* Makefile.am (ldmain.o, ldfile.o): Fix typos in non-fastdep
+	rules.
+	(eelf32_spu.o): Add dependency tracking.
+	* Makefile.in: Regenerate.
+
 	* Makefile.am (am__skiplex, am__skipyacc): New.
 	* Makefile.in: Regenerate.
 
