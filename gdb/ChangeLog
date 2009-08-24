@@ -1,3 +1,8 @@
+2009-08-24  Tom Tromey  <tromey@redhat.com>
+
+	* python/python-value.c (valpy_richcompare): Don't return from
+	inside a TRY_CATCH.
+
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* CONTRIBUTE: Bump documented Autoconf version.
