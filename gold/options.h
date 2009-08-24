@@ -799,8 +799,9 @@ class General_options
   DEFINE_bool(strip_lto_sections, options::TWO_DASHES, '\0', true,
               N_("Strip LTO intermediate code sections"), NULL);
 
-  DEFINE_bool(no_keep_memory, options::TWO_DASHES, 's', false,
-              N_("Use less memory and more disk I/O (included only for compatibility with GNU ld)"), NULL);
+  DEFINE_bool(no_keep_memory, options::TWO_DASHES, '\0', false,
+              N_("Use less memory and more disk I/O "
+                 "(included only for compatibility with GNU ld)"), NULL);
 
   DEFINE_bool(shared, options::ONE_DASH, '\0', false,
               N_("Generate shared library"), NULL);
