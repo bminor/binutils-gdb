@@ -1,6 +1,7 @@
 2009-08-24  Cary Coutant  <ccoutant@google.com>
 
-	(General_options::no_keep_memory): Remove incorrect short option.
+	* options.h (General_options::no_keep_memory): Remove incorrect
+	short option.
 
 2009-08-24  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
