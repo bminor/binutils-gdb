@@ -10,6 +10,11 @@ tooldir = $(exec_prefix)/$(target_alias)
 YACC = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo @YACC@ ; fi`
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ; else echo @LEX@ ; fi`
 
+# Automake 1.10+ disables lex and yacc output file regeneration if
+# maintainer mode is disabled.  Avoid this.
+am__skiplex =
+am__skipyacc =
+
 WARN_CFLAGS = @WARN_CFLAGS@
 NO_WERROR = @NO_WERROR@
 AM_CFLAGS = $(WARN_CFLAGS)

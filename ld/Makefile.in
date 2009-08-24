@@ -323,6 +323,11 @@ ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
 TEXINFO_TEX = $(top_srcdir)/../texinfo/texinfo.tex
 SUBDIRS = po
 tooldir = $(exec_prefix)/$(target_alias)
+
+# Automake 1.10+ disables lex and yacc output file regeneration if
+# maintainer mode is disabled.  Avoid this.
+am__skiplex = 
+am__skipyacc = 
 AM_CFLAGS = $(WARN_CFLAGS)
 
 # We put the scripts in the directory $(scriptdir)/ldscripts.

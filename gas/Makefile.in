@@ -280,6 +280,11 @@ AUTOMAKE_OPTIONS = 1.11 dejagnu foreign no-dist
 ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
 SUBDIRS = doc po
 tooldir = $(exec_prefix)/$(target_alias)
+
+# Automake 1.10+ disables lex and yacc output file regeneration if
+# maintainer mode is disabled.  Avoid this.
+am__skiplex = 
+am__skipyacc = 
 AM_CFLAGS = $(WARN_CFLAGS)
 TARG_CPU = @target_cpu_type@
 TARG_CPU_C = $(srcdir)/config/tc-@target_cpu_type@.c

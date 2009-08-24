@@ -342,6 +342,11 @@ LIBIBERTY = ../libiberty/libiberty.a
 @PLUGINS_TRUE@LIBDL = -ldl
 @THREADS_TRUE@THREADSLIB = -lpthread
 AM_YFLAGS = -d
+
+# Automake 1.10+ disables lex and yacc output file regeneration if
+# maintainer mode is disabled.  Avoid this.
+am__skiplex = 
+am__skipyacc = 
 noinst_LIBRARIES = libgold.a
 CCFILES = \
 	archive.cc \

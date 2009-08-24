@@ -29,6 +29,11 @@ endif
 
 AM_YFLAGS = -d
 
+# Automake 1.10+ disables lex and yacc output file regeneration if
+# maintainer mode is disabled.  Avoid this.
+am__skiplex =
+am__skipyacc =
+
 noinst_PROGRAMS = ld-new
 noinst_LIBRARIES = libgold.a
 
