@@ -61,13 +61,14 @@ HFILES = \
 	xstormy16-desc.h xstormy16-opc.h \
 	z8k-opc.h
 
-# C source files that correspond to .o's.
-CFILES = \
+# C source files that correspond to .o's ending up in libopcodes
+# for all machines.
+TARGET_LIBOPCODES_CFILES = \
 	alpha-dis.c \
 	alpha-opc.c \
 	arc-dis.c \
-	arc-opc.c \
 	arc-ext.c \
+	arc-opc.c \
 	arm-dis.c \
 	avr-dis.c \
 	bfin-dis.c \
@@ -86,9 +87,6 @@ CFILES = \
 	d30v-dis.c \
 	d30v-opc.c \
 	dlx-dis.c \
-	dis-buf.c \
-	dis-init.c \
-	disassemble.c \
 	fr30-asm.c \
 	fr30-desc.c \
 	fr30-dis.c \
@@ -99,8 +97,6 @@ CFILES = \
 	frv-dis.c \
 	frv-ibld.c \
 	frv-opc.c \
-	moxie-dis.c \
-	moxie-opc.c \
 	h8300-dis.c \
 	h8500-dis.c \
 	hppa-dis.c \
@@ -108,19 +104,10 @@ CFILES = \
 	i370-opc.c \
 	i386-dis.c \
 	i386-opc.c \
-	i386-gen.c \
 	i860-dis.c \
 	i960-dis.c \
 	ia64-dis.c \
-	ia64-opc-a.c \
-	ia64-opc-b.c \
-	ia64-opc-f.c \
-	ia64-opc-i.c \
-	ia64-opc-m.c \
-	ia64-opc-d.c \
 	ia64-opc.c \
-	ia64-gen.c \
-	ia64-asmtab.c \
 	ip2k-asm.c \
 	ip2k-desc.c \
 	ip2k-dis.c \
@@ -137,6 +124,10 @@ CFILES = \
 	lm32-ibld.c \
 	lm32-opc.c \
 	lm32-opinst.c \
+	m10200-dis.c \
+	m10200-opc.c \
+	m10300-dis.c \
+	m10300-opc.c \
 	m32c-asm.c \
 	m32c-desc.c \
 	m32c-dis.c \
@@ -160,16 +151,15 @@ CFILES = \
 	mep-dis.c \
 	mep-ibld.c \
 	mep-opc.c \
-	mips-dis.c \
 	microblaze-dis.c \
+	mips-dis.c \
 	mips-opc.c \
 	mips16-opc.c \
-	m10200-dis.c \
-	m10200-opc.c \
-	m10300-dis.c \
-	m10300-opc.c \
 	mmix-dis.c \
 	mmix-opc.c \
+	moxie-dis.c \
+	moxie-opc.c \
+	msp430-dis.c \
 	mt-asm.c \
 	mt-desc.c \
 	mt-dis.c \
@@ -189,9 +179,8 @@ CFILES = \
 	pj-opc.c \
 	ppc-dis.c \
 	ppc-opc.c \
-	s390-mkopc.c \
-	s390-opc.c \
 	s390-dis.c \
+	s390-opc.c \
 	score-dis.c \
 	score7-dis.c \
 	sh-dis.c \
@@ -223,159 +212,31 @@ CFILES = \
 	xstormy16-opc.c \
 	xtensa-dis.c \
 	z80-dis.c \
-	z8k-dis.c \
+	z8k-dis.c
+
+# C source files that correspond to .o's ending up in libopcodes.
+LIBOPCODES_CFILES = \
+	$(TARGET_LIBOPCODES_CFILES) \
+	dis-buf.c \
+	dis-init.c \
+	disassemble.c
+
+# C source files that correspond to .o's.
+CFILES = \
+	$(LIBOPCODES_CFILES) \
+	i386-gen.c \
+	ia64-asmtab.c \
+	ia64-gen.c \
+	ia64-opc-a.c \
+	ia64-opc-b.c \
+	ia64-opc-f.c \
+	ia64-opc-i.c \
+	ia64-opc-m.c \
+	ia64-opc-d.c \
+	s390-mkopc.c \
 	z8kgen.c
 
-ALL_MACHINES = \
-	alpha-dis.lo \
-	alpha-opc.lo \
-	arc-dis.lo \
-	arc-opc.lo \
-	arc-ext.lo \
-	arm-dis.lo \
-	avr-dis.lo \
-	bfin-dis.lo \
-	cgen-asm.lo \
-	cgen-bitset.lo \
-	cgen-dis.lo \
-	cgen-opc.lo \
-	cr16-dis.lo \
-	cr16-opc.lo \
-	cris-dis.lo \
-	cris-opc.lo \
-	crx-dis.lo \
-	crx-opc.lo \
-	d10v-dis.lo \
-	d10v-opc.lo \
-	d30v-dis.lo \
-	d30v-opc.lo \
-	dlx-dis.lo \
-	fr30-asm.lo \
-	fr30-desc.lo \
-	fr30-dis.lo \
-	fr30-ibld.lo \
-	fr30-opc.lo \
-	frv-asm.lo \
-	frv-desc.lo \
-	frv-dis.lo \
-	frv-ibld.lo \
-	frv-opc.lo \
-	moxie-dis.lo \
-	moxie-opc.lo \
-	h8300-dis.lo \
-	h8500-dis.lo \
-	hppa-dis.lo \
-	i386-dis.lo \
-	i386-opc.lo \
-	i370-dis.lo \
-	i370-opc.lo \
-	i860-dis.lo \
-	i960-dis.lo \
-	ia64-dis.lo \
-	ia64-opc.lo \
-	ip2k-asm.lo \
-	ip2k-desc.lo \
-	ip2k-dis.lo \
-	ip2k-ibld.lo \
-	ip2k-opc.lo \
-	iq2000-asm.lo \
-	iq2000-desc.lo \
-	iq2000-dis.lo \
-	iq2000-ibld.lo \
-	iq2000-opc.lo \
-	lm32-asm.lo \
-	lm32-desc.lo \
-	lm32-dis.lo \
-	lm32-ibld.lo \
-	lm32-opc.lo \
-	lm32-opinst.lo \
-	m32c-asm.lo \
-	m32c-desc.lo \
-	m32c-dis.lo \
-	m32c-ibld.lo \
-	m32c-opc.lo \
-	m32r-asm.lo \
-	m32r-desc.lo \
-	m32r-dis.lo \
-	m32r-ibld.lo \
-	m32r-opc.lo \
-	m32r-opinst.lo \
-	m68hc11-dis.lo \
-	m68hc11-opc.lo \
-	m68k-dis.lo \
-	m68k-opc.lo \
-	m88k-dis.lo \
-	m10200-dis.lo \
-	m10200-opc.lo \
-	m10300-dis.lo \
-	m10300-opc.lo \
-	maxq-dis.lo \
-	mcore-dis.lo \
-	mep-asm.lo \
-	mep-desc.lo \
-	mep-dis.lo \
-	mep-ibld.lo \
-	mep-opc.lo \
-	mips-dis.lo \
-	microblaze-dis.lo \
-	mips-opc.lo \
-	mips16-opc.lo \
-	mmix-dis.lo \
-	mmix-opc.lo \
-	msp430-dis.lo \
-	mt-asm.lo \
-	mt-desc.lo \
-	mt-dis.lo \
-	mt-ibld.lo \
-	mt-opc.lo \
-	ns32k-dis.lo \
-	openrisc-asm.lo \
-	openrisc-desc.lo \
-	openrisc-dis.lo \
-	openrisc-ibld.lo \
-	openrisc-opc.lo \
-	or32-dis.lo \
-	or32-opc.lo \
-	pdp11-dis.lo \
-	pdp11-opc.lo \
-	pj-dis.lo \
-	pj-opc.lo \
-	ppc-dis.lo \
-	ppc-opc.lo \
-	s390-dis.lo \
-	s390-opc.lo \
-	score-dis.lo \
-	score7-dis.lo \
-	sh-dis.lo \
-	sh64-dis.lo \
-	sh64-opc.lo \
-	sparc-dis.lo \
-	sparc-opc.lo \
-	spu-dis.lo \
-	spu-opc.lo \
-	tic30-dis.lo \
-	tic4x-dis.lo \
-	tic54x-dis.lo \
-	tic54x-opc.lo \
-	tic80-dis.lo \
-	tic80-opc.lo \
-	v850-dis.lo \
-	v850-opc.lo \
-	vax-dis.lo \
-	w65-dis.lo \
-	xc16x-asm.lo \
-	xc16x-desc.lo \
-	xc16x-dis.lo \
-	xc16x-ibld.lo \
-	xc16x-opc.lo \
-	xstormy16-asm.lo \
-	xstormy16-desc.lo \
-	xstormy16-dis.lo \
-	xstormy16-ibld.lo \
-	xstormy16-opc.lo \
-	xtensa-dis.lo \
-	z80-dis.lo \
-	z8k-dis.lo
+ALL_MACHINES = $(TARGET_LIBOPCODES_CFILES:.c=.lo)
 
 OFILES = @BFD_MACHINES@
 
@@ -408,7 +269,7 @@ libopcodes_la_DEPENDENCIES = $(OFILES) @SHARED_DEPENDENCIES@
 libopcodes_la_LIBADD = $(OFILES) @SHARED_LIBADD@
 libopcodes_la_LDFLAGS += -release `cat ../bfd/libtool-soversion` @SHARED_LDFLAGS@
 # Allow dependency tracking to work on all the source files.
-EXTRA_libopcodes_la_SOURCES = $(CFILES)
+EXTRA_libopcodes_la_SOURCES = $(LIBOPCODES_CFILES)
 
 # libtool will build .libs/libopcodes.a.  We create libopcodes.a in
 # the build directory so that we don't have to convert all the

@@ -1,3 +1,19 @@
+2009-08-24  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* Makefile.am (TARGET_LIBOPCODES_CFILES): New variable, taken
+	from $(CFILES), sorted, with dis-buf.c, dis-init.c, disassemble.c,
+	i386-gen.c, ia64-opc-a.c, ia64-opc-b.c, ia64-opc-f.c, ia64-opc-i.c,
+	ia64-opc-m.c, ia64-opc-d.c, ia64-gen.c, ia64-asmtab.c removed, and
+	msp430-dis.c added.
+	(LIBOPCODES_CFILES): New variable, adding to
+	TARGET_LIBOPCODES_CFILES also non-target library sources.
+	(CFILES): Factorize based on $(LIBOPCODES_CFILES), adding generator
+	files.
+	(ALL_MACHINES): Factorize based on $(TARGET_LIBOPCODES_CFILES).
+	(EXTRA_libopcodes_la_SOURCES): Use $(LIBOPCODES_CFILES).
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.am (libopcodes_la_LDFLAGS): Initialize early.

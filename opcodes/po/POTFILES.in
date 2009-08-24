@@ -131,6 +131,7 @@ mmix-dis.c
 mmix-opc.c
 moxie-dis.c
 moxie-opc.c
+msp430-dis.c
 mt-asm.c
 mt-desc.c
 mt-desc.h
