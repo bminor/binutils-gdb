@@ -1,3 +1,8 @@
+2009-08-24  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.base/del.exp: Fix typo in comment.
+	* gdb.base/step-bt.exp: Fix cut and paste error in comment.
+
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.

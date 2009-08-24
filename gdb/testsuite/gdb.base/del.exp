@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# The intent of this testcase it to verify that various aliases and
+# The intent of this testcase is to verify that various aliases and
 # shortcuts of the "delete" command never stop working.
 
 if $tracelevel then {
