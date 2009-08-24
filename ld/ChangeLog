@@ -1,3 +1,12 @@
+2009-08-24  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/elfxtensa.sc (DISCARDED): Discard sections with
+	.gnu.lto_ prefix.
+	* scripttempl/armbpabi.sc: Likewise.
+	* scripttempl/elf32sh-symbian.sc: Likewise.
+	* scripttempl/elf64hppa.sc: Likewise.
+	* scripttempl/mep.sc: Likewise.
+
 2009-08-24  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.am (ldmain.o, ldfile.o): Fix typos in non-fastdep
