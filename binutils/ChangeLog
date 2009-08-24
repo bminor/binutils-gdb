@@ -1,3 +1,8 @@
+2009-08-24  Cary Coutant  <ccoutant@google.com>
+
+	* objdump.c (find_symbol_for_address): Avoid costly call to
+	bfd_octets_per_byte.
+
 2009-08-24  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.am (am__skiplex, am__skipyacc): New.

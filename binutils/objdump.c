@@ -747,7 +747,7 @@ find_symbol_for_address (bfd_vma vma,
   aux = (struct objdump_disasm_info *) info->application_data;
   abfd = aux->abfd;
   sec = aux->sec;
-  opb = bfd_octets_per_byte (abfd);
+  opb = info->octets_per_byte;
 
   /* Perform a binary search looking for the closest symbol to the
      required value.  We are searching the range (min, max].  */
