@@ -1,3 +1,9 @@
+2009-08-25  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (Debugging Multiple Inferiors): Add "info inferiors"
+	small example, and describe its columns.  Replace "inferior-id" by
+	"infno" throughout.
+
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* gdbint.texinfo (Releasing GDB): Point to

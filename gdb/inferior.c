@@ -324,9 +324,9 @@ print_inferior (struct ui_out *uiout, int requested_inferior)
 
   old_chain = make_cleanup_ui_out_table_begin_end (uiout, 3, inf_count,
 						   "inferiors");
-  ui_out_table_header (uiout, 3, ui_right, "current", "Cur");
-  ui_out_table_header (uiout, 4, ui_right, "id", "Id");
-  ui_out_table_header (uiout, 7, ui_right, "target-id", "PID");
+  ui_out_table_header (uiout, 1, ui_left, "current", "");
+  ui_out_table_header (uiout, 4, ui_left, "number", "Num");
+  ui_out_table_header (uiout, 17, ui_left, "target-id", "Description");
   ui_out_table_body (uiout);
 
   for (inf = inferior_list; inf; inf = inf->next)
@@ -343,12 +343,18 @@ print_inferior (struct ui_out *uiout, int requested_inferior)
       else
 	ui_out_field_skip (uiout, "current");
 
-      ui_out_field_int (uiout, "id", inf->num);
-      ui_out_field_int (uiout, "target-id", inf->pid);
+      ui_out_field_int (uiout, "number", inf->num);
+      ui_out_field_string (uiout, "target-id",
+			   target_pid_to_str (pid_to_ptid (inf->pid)));
 
       ui_out_text (uiout, "\n");
       do_cleanups (chain2);
     }
+
+  if (inferior_list
+      && ptid_equal (inferior_ptid, null_ptid))
+    ui_out_message (uiout, 0, "\n\
+No selected inferior/thread.  See `help thread' or `help inferior'.\n");
 
   do_cleanups (old_chain);
 }

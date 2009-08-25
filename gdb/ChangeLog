@@ -1,3 +1,10 @@
+2009-08-25  Pedro Alves  <pedro@codesourcery.com>
+
+	* inferior.c (print_inferior): Align columns left.  Remove header
+	for the the "current" column.  Rename column "Id" to "Num".
+	Rename column "PID" to "Description".  Print if there's no selected
+	inferior.
+
 2009-08-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix ia64 start crash when GDB built with -lmcheck.

@@ -2375,17 +2375,40 @@ To find out what inferiors exist at any moment, use @code{info inferiors}:
 @kindex info inferiors
 @item info inferiors
 Print a list of all inferiors currently being managed by @value{GDBN}.
+
+@value{GDBN} displays for each inferior (in this order):
+
+@enumerate
+@item
+the inferior number assigned by @value{GDBN}
+
+@item
+the target system's inferior identifier
+@end enumerate
+
+@noindent
+An asterisk @samp{*} preceding the @value{GDBN} inferior number
+indicates the current inferior.
+
+For example,
 @end table
+@c end table here to get a little more width for example
+
+@smallexample
+(@value{GDBP}) info inferiors
+  Num  Description
+* 1    process 2307
+  2    process 3401
+@end smallexample
 
 To switch focus between inferiors, use the @code{inferior} command:
 
 @table @code
-@kindex inferior @var{inferior-id}
-@item inferior @var{inferior-id}
-Make inferior number @var{inferior-id} the current inferior.  The
-argument @var{inferior-id} is the internal inferior number assigned by
-@value{GDBN}, as shown in the first field of the @samp{info inferiors}
-display.
+@kindex inferior @var{infno}
+@item inferior @var{infno}
+Make inferior number @var{infno} the current inferior.  The argument
+@var{infno} is the inferior number assigned by @value{GDBN}, as shown
+in the first field of the @samp{info inferiors} display.
 @end table
 
 To quit debugging one of the inferiors, you can either detach from it
@@ -2393,15 +2416,15 @@ by using the @w{@code{detach inferior}} command (allowing it to run
 independently), or kill it using the @w{@code{kill inferior}} command:
 
 @table @code
-@kindex detach inferior @var{inferior-id}
-@item detach inferior @var{inferior-id}
+@kindex detach inferior @var{infno}
+@item detach inferior @var{infno}
 Detach from the inferior identified by @value{GDBN} inferior number
-@var{inferior-id}, and remove it from the inferior list.
+@var{infno}, and remove it from the inferior list.
 
-@kindex kill inferior @var{inferior-id}
-@item kill inferior @var{inferior-id}
+@kindex kill inferior @var{infno}
+@item kill inferior @var{infno}
 Kill the inferior identified by @value{GDBN} inferior number
-@var{inferior-id}, and remove it from the inferior list.
+@var{infno}, and remove it from the inferior list.
 @end table
 
 To be notified when inferiors are started or exit under @value{GDBN}'s
