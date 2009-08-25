@@ -1,3 +1,9 @@
+2009-08-25  Keith Seitz  <keiths@redhat.com>
+
+	* c-exp.y (yylex): Add cxx_only check for tokentab2 and tokentab3
+	searches. 
+	(tokentab3): Add cxx_only for DOT_STAR.
+
 2009-08-25  Pedro Alves  <pedro@codesourcery.com>
 
 	* inferior.c (print_inferior): Align columns left.  Remove header

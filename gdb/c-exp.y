@@ -1683,6 +1683,8 @@ static const struct token tokentab2[] =
     {"->", ARROW, BINOP_END, 0},
     {"&&", ANDAND, BINOP_END, 0},
     {"||", OROR, BINOP_END, 0},
+    /* "::" is *not* only C++: gdb overrides its meaning in several
+       different ways, e.g., 'filename'::func, function::variable.  */
     {"::", COLONCOLON, BINOP_END, 0},
     {"<<", LSH, BINOP_END, 0},
     {">>", RSH, BINOP_END, 0},
@@ -1690,7 +1692,7 @@ static const struct token tokentab2[] =
     {"!=", NOTEQUAL, BINOP_END, 0},
     {"<=", LEQ, BINOP_END, 0},
     {">=", GEQ, BINOP_END, 0},
-    {".*", DOT_STAR, BINOP_END, 0}
+    {".*", DOT_STAR, BINOP_END, 1}
   };
 
 /* Identifier-like tokens.  */
@@ -1849,6 +1851,10 @@ yylex (void)
   for (i = 0; i < sizeof tokentab3 / sizeof tokentab3[0]; i++)
     if (strncmp (tokstart, tokentab3[i].operator, 3) == 0)
       {
+	if (tokentab3[i].cxx_only
+	    && parse_language->la_language != language_cplus)
+	  break;
+
 	lexptr += 3;
 	yylval.opcode = tokentab3[i].opcode;
 	return tokentab3[i].token;
@@ -1858,6 +1864,10 @@ yylex (void)
   for (i = 0; i < sizeof tokentab2 / sizeof tokentab2[0]; i++)
     if (strncmp (tokstart, tokentab2[i].operator, 2) == 0)
       {
+	if (tokentab2[i].cxx_only
+	    && parse_language->la_language != language_cplus)
+	  break;
+
 	lexptr += 2;
 	yylval.opcode = tokentab2[i].opcode;
 	if (in_parse_field && tokentab2[i].token == ARROW)
