@@ -1,5 +1,10 @@
 2009-08-24  Keith Seitz  <keiths@redhat.com>
 
+	* c-exp.y (tokentab3): Add new token, ARROW_STAR. Changed all users.
+	(tokentab2): Add new token, DOT_STAR. Changed all users.
+
+2009-08-24  Keith Seitz  <keiths@redhat.com>
+
 	* symtab.c (default_make_symbol_completion_list): Keep
 	':', too, so that we can limit searches in namespaces
 	and classes. 
