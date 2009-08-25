@@ -3671,11 +3671,8 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (arches != NULL)
     return arches->gdbarch;
 
-  tdep = xmalloc (sizeof (struct gdbarch_tdep));
+  tdep = xzalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
-
-  tdep->sigcontext_register_address = 0;
-  tdep->pc_in_sigtramp = 0;
 
   /* According to the ia64 specs, instructions that store long double
      floats in memory use a long-double format different than that

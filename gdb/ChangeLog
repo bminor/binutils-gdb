@@ -1,3 +1,10 @@
+2009-08-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix ia64 start crash when GDB built with -lmcheck.
+	* ia64-tdep.c (ia64_gdbarch_init): Allocate TDEP as cleared.  Remove
+	specific clearing of TDEP SIGCONTEXT_REGISTER_ADDRESS and
+	PC_IN_SIGTRAMP.
+
 2009-08-24  Keith Seitz  <keiths@redhat.com>
 
 	* c-exp.y (tokentab3): Add new token, ARROW_STAR. Changed all users.
