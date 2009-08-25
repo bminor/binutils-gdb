@@ -281,10 +281,16 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = 1.11 foreign no-dist
 ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
-SUBDIRS = po
+
+# Build '.' first so all generated files exist.
+SUBDIRS = . po
 INCDIR = $(srcdir)/../include
 BFDDIR = $(srcdir)/../bfd
 AM_CFLAGS = $(WARN_CFLAGS)
+COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(BUILD_CPPFLAGS) $(BUILD_CFLAGS)
+
+LINK_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o $@
 libopcodes_la_LDFLAGS = $(am__append_1) -release `cat \
 	../bfd/libtool-soversion` @SHARED_LDFLAGS@
 @INSTALL_LIBBFD_TRUE@bfdlib_LTLIBRARIES = libopcodes.la
@@ -296,6 +302,8 @@ BFD_H = ../bfd/bfd.h
 
 # This is where libiberty lives.
 LIBIBERTY = ../libiberty/libiberty.a
+# This is only true when not cross-compiling.
+BUILD_LIBIBERTY = $(LIBIBERTY)
 
 # Header files.
 HFILES = \
@@ -572,6 +580,18 @@ CGEN_CPUS = fr30 frv ip2k m32c m32r mep mt openrisc xc16x xstormy16
 @CGEN_MAINT_TRUE@XC16X_DEPS = stamp-xc16x
 @CGEN_MAINT_FALSE@XSTORMY16_DEPS = 
 @CGEN_MAINT_TRUE@XSTORMY16_DEPS = stamp-xstormy16
+MOSTLYCLEANFILES = i386-gen$(EXEEXT_FOR_BUILD) ia64-gen$(EXEEXT_FOR_BUILD) \
+	s390-mkopc$(EXEEXT_FOR_BUILD) z8kgen$(EXEEXT_FOR_BUILD)
+
+MAINTAINERCLEANFILES = $(srcdir)/i386-tbl.h $(srcdir)/i386-init.h \
+	$(srcdir)/ia64-asmtab.c s390-opc.tab $(srcdir)/z8k-opc.h
+
+
+# Use a helper variable for the dependencies to avoid 'make' issues
+# with continuations in comments, as @MAINT@ can be expanded to '#'.
+ia64_asmtab_deps = ia64-gen$(EXEEXT_FOR_BUILD) ia64-ic.tbl \
+	ia64-raw.tbl ia64-waw.tbl ia64-war.tbl
+
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -1043,6 +1063,7 @@ install-strip:
 	  `test -z '$(STRIP)' || \
 	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
 mostlyclean-generic:
+	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
 
 clean-generic:
 	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
@@ -1054,6 +1075,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
 clean: clean-recursive
 
 clean-am: clean-bfdlibLTLIBRARIES clean-generic clean-libtool \
@@ -1267,30 +1289,55 @@ stamp-xc16x: $(CGENDEPS) $(CPUDIR)/xc16x.cpu $(CPUDIR)/xc16x.opc
 	$(MAKE) run-cgen arch=xc16x prefix=xc16x options= \
 		archfile=$(CPUDIR)/xc16x.cpu opcfile=$(CPUDIR)/xc16x.opc extrafiles=
 
-i386-gen: i386-gen.o
-	$(LINK) i386-gen.o $(LIBIBERTY)
+i386-gen$(EXEEXT_FOR_BUILD): i386-gen.o $(BUILD_LIBIBERTY)
+	$(LINK_FOR_BUILD) i386-gen.o $(BUILD_LIBIBERTY)
+
+i386-gen.o: i386-gen.c i386-opc.h $(srcdir)/../include/opcode/i386.h \
+	$(INCDIR)/ansidecl.h $(INCDIR)/getopt.h $(INCDIR)/hashtab.h \
+	$(INCDIR)/libiberty.h $(INCDIR)/opcode/i386.h $(INCDIR)/safe-ctype.h \
+	config.h i386-opc.h sysdep.h
+	$(COMPILE_FOR_BUILD) -c $(srcdir)/i386-gen.c
 
 $(srcdir)/i386-tbl.h: $(srcdir)/i386-init.h 
 	@echo $@
 
-$(srcdir)/i386-init.h: @MAINT@ i386-gen i386-opc.tbl i386-reg.tbl
-	./i386-gen --srcdir $(srcdir)
+$(srcdir)/i386-init.h: @MAINT@ i386-gen$(EXEEXT_FOR_BUILD) i386-opc.tbl i386-reg.tbl
+	./i386-gen$(EXEEXT_FOR_BUILD) --srcdir $(srcdir)
 
-ia64-gen: ia64-gen.o
-	$(LINK) ia64-gen.o $(LIBIBERTY)
+i386-opc.lo: $(srcdir)/i386-tbl.h
 
-# Don't wrap the line below, as @MAINT@ can be expanded to '#'.
-# Some make versions don't handle line continuations in comments.
-$(srcdir)/ia64-asmtab.c: @MAINT@ ia64-gen ia64-ic.tbl ia64-raw.tbl ia64-waw.tbl ia64-war.tbl
-	./ia64-gen --srcdir $(srcdir) > $@
+ia64-gen$(EXEEXT_FOR_BUILD): ia64-gen.o $(BUILD_LIBIBERTY)
+	$(LINK_FOR_BUILD) ia64-gen.o $(BUILD_LIBIBERTY)
 
-s390-mkopc: s390-mkopc.c
-	$(CC_FOR_BUILD) -o s390-mkopc $(srcdir)/s390-mkopc.c
+ia64-gen.o: ia64-gen.c $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/getopt.h \
+	$(INCDIR)/libiberty.h $(INCDIR)/opcode/ia64.h $(INCDIR)/safe-ctype.h \
+	$(INCDIR)/symcat.h config.h ia64-opc-a.c ia64-opc-b.c \
+	ia64-opc-d.c ia64-opc-f.c ia64-opc-i.c ia64-opc-m.c \
+	ia64-opc-x.c ia64-opc.h sysdep.h
+	$(COMPILE_FOR_BUILD) -c $(srcdir)/ia64-gen.c
+$(srcdir)/ia64-asmtab.c: @MAINT@ $(ia64_asmtab_deps)
+	./ia64-gen$(EXEEXT_FOR_BUILD) --srcdir $(srcdir) > $@
 
-s390-opc.tab: s390-mkopc s390-opc.txt
-	./s390-mkopc < $(srcdir)/s390-opc.txt > s390-opc.tab
+ia64-opc.lo: $(srcdir)/ia64-asmtab.c
+
+s390-mkopc$(EXEEXT_FOR_BUILD): s390-mkopc.c
+	$(COMPILE_FOR_BUILD) -o s390-mkopc $(srcdir)/s390-mkopc.c
+
+s390-opc.tab: s390-mkopc$(EXEEXT_FOR_BUILD) s390-opc.txt
+	./s390-mkopc$(EXEEXT_FOR_BUILD) < $(srcdir)/s390-opc.txt > s390-opc.tab
 
 s390-opc.lo: s390-opc.tab
+
+z8kgen$(EXEEXT_FOR_BUILD): z8kgen.o $(BUILD_LIBIBERTY)
+	$(LINK_FOR_BUILD) z8kgen.o $(BUILD_LIBIBERTY)
+
+z8kgen.o: z8kgen.c
+	$(COMPILE_FOR_BUILD) -c $(srcdir)/z8kgen.c
+
+$(srcdir)/z8k-opc.h: @MAINT@ z8kgen$(EXEEXT_FOR_BUILD)
+	./z8kgen$(EXEEXT_FOR_BUILD) -a > $@
+
+z8k-dis.lo: $(srcdir)/z8k-opc.h
 
 sh-dis.lo: sh-dis.c
 @am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ @archdefs@ $(srcdir)/sh-dis.c

@@ -1,3 +1,28 @@
+2009-08-25  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* Makefile.am (SUBDIRS): Build '.' before 'po'.
+	(COMPILE_FOR_BUILD, LINK_FOR_BUILD, BUILD_LIBIBERTY)
+	(MOSTLYCLEANFILES, MAINTAINERCLEANFILES): New variables.
+	(i386-gen$(EXEEXT_FOR_BUILD)): Renamed from i386-gen, rewrite
+	using *BUILD variables, depend upon $(BUILD_LIBIBERTY).
+	(i386-gen.o): New rule.
+	($(srcdir)/i386-init.h): Adjust.
+	(i386-opc.lo): Depend on $(srcdir)/i386-tbl.h.
+	(ia64-gen$(EXEEXT_FOR_BUILD)): Rename from ia64-gen, adjust likewise.
+	(ia64-gen.o): New rule.
+	(ia64_asmtab_deps): New variable.
+	($(srcdir)/ia64-asmtab.c): Use it; adjust likewise.
+	(ia64-opc.lo): Depend on $(srcdir)/ia64-asmtab.c.
+	(s390-mkopc$(EXEEXT_FOR_BUILD)): Rename from s390-mkopc, adjust
+	likewise.
+	(s390-opc.tab): Adjust.
+	(z8kgen$(EXEEXT_FOR_BUILD), z8kgen.o, $(srcdir)/z8k-opc.h): New
+	rules.
+	(z8k-dis.lo): Depend on $(srcdir)/z8k-opc.h.
+	* Makefile.in: Regenerate.
+	* z8kgen.c (gas): Avoid '/*' in comment.
+	* z8k-opc.h (func): Regenerate.
+
 2009-08-24  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.am (TARGET_LIBOPCODES_CFILES): New variable, taken
