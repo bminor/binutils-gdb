@@ -1479,6 +1479,16 @@ class Command_line
   Command_line(const Command_line&);
   Command_line& operator=(const Command_line&);
 
+  // This is a dummy class to provide a constructor that runs before
+  // the constructor for the General_options.  The Pre_options constructor
+  // is used as a hook to set the flag enabling the options to register
+  // themselves.
+  struct Pre_options {
+    Pre_options();
+  };
+
+  // This must come before options_!
+  Pre_options pre_options_;
   General_options options_;
   Position_dependent_options position_options_;
   Script_options script_options_;

@@ -1,5 +1,16 @@
 2009-08-24  Cary Coutant  <ccoutant@google.com>
 
+	* options.h (Command_line::Pre_options): New class.
+	(Command_line::pre_options): New member.
+	* options.cc (gold::options::ready_to_register): New variable.
+	(One_option::register_option): Do nothing if not registering options.
+	Assert if same short option registered twice.
+	(General_options::General_options): Turn off option registration when
+	done constructing.
+	(Command_line::Pre_options::Pre_options): New constructor.
+
+2009-08-24  Cary Coutant  <ccoutant@google.com>
+
 	* options.h (General_options::no_keep_memory): Remove incorrect
 	short option.
 

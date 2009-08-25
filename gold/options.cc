@@ -47,6 +47,11 @@ Position_dependent_options::default_options_;
 namespace options
 {
 
+// This flag is TRUE if we should register the command-line options as they
+// are constructed.  It is set after contruction of the options within
+// class Position_dependent_options.
+static bool ready_to_register = false;
+
 // This global variable is set up as General_options is constructed.
 static std::vector<const One_option*> registered_options;
 
@@ -60,6 +65,9 @@ static One_option* short_options[128];
 void
 One_option::register_option()
 {
+  if (!ready_to_register)
+    return;
+
   registered_options.push_back(this);
 
   // We can't make long_options a static Option_map because we can't
@@ -75,7 +83,10 @@ One_option::register_option()
   const int shortname_as_int = static_cast<int>(this->shortname);
   gold_assert(shortname_as_int >= 0 && shortname_as_int < 128);
   if (this->shortname != '\0')
-    short_options[shortname_as_int] = this;
+    {
+      gold_assert(short_options[shortname_as_int] == NULL);
+      short_options[shortname_as_int] = this;
+    }
 }
 
 void
@@ -714,6 +725,8 @@ General_options::General_options()
     do_demangle_(false), plugins_(),
     incremental_disposition_(INCREMENTAL_CHECK), implicit_incremental_(false)
 {
+  // Turn off option registration once construction is complete.
+  gold::options::ready_to_register = false;
 }
 
 General_options::Object_format
@@ -1037,6 +1050,13 @@ Input_arguments::end_group()
 
 Command_line::Command_line()
 {
+}
+
+// Pre_options is the hook that sets the ready_to_register flag.
+
+Command_line::Pre_options::Pre_options()
+{
+  gold::options::ready_to_register = true;
 }
 
 // Process the command line options.  For process_one_option, i is the
