@@ -1,6 +1,11 @@
 2009-08-26  Alan Modra  <amodra@bigpond.net.au>
 
 	PR ld/10515
+	* linker.c (bfd_find_version_for_sym): Revert warning.
+
+2009-08-26  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/10515
 	* linker.c (bfd_find_version_for_sym): Override a "*" match by any
 	other wildcard match.  Warn on multiple wildcard matches.
 
