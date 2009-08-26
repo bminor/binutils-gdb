@@ -1,3 +1,8 @@
+2009-08-26  Nick Clifton  <nickc@redhat.com>
+
+	* config/obj-coff-seh.c (seh_arm_write_pdata): Test for
+	seh_ctx_root being NULL.
+
 2009-08-24  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.am (am__skiplex, am__skipyacc): New.

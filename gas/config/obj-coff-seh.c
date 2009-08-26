@@ -59,6 +59,7 @@ static seh_context *seh_ctx = NULL;
 static seh_context *seh_ctx_cur = NULL;
 
 /* Write xdata for arm, sh3, sh4, and ppc.  */
+
 static void
 seh_write_text_eh_data (const char *hnd, const char *hnd_data)
 {
@@ -175,6 +176,7 @@ seh_arm_create_pdata (seh_context *c, unsigned char *data, size_t pdata_offs)
   valueT func_len = 0;
   valueT prolog_len = 0;
   valueT start_len = 0;
+
   func_len = resolve_symbol_value (c->end_addr);
   start_len = resolve_symbol_value (c->start_addr);
   if (c->endprologue_addr)
@@ -209,7 +211,7 @@ seh_arm_write_pdata (void)
   bfd *abfd = stdoutput;
 
   h = seh_ctx_root;
-  if (h->done)
+  if (h == NULL || h->done)
     return;
   while (h != NULL)
     {
@@ -267,13 +269,14 @@ static void
 seh_x64_make_prologue_element (int kind, int reg, bfd_vma off)
 {
   seh_prologue_element *n;
+
   if (seh_ctx_cur == NULL)
     return;
   if (seh_ctx_cur->elems_count == seh_ctx_cur->elems_max)
     {
       seh_ctx_cur->elems = (seh_prologue_element *)
 	xrealloc (seh_ctx_cur->elems,
-	((seh_ctx_cur->elems_max + 8) * sizeof (seh_prologue_element)));
+		  ((seh_ctx_cur->elems_max + 8) * sizeof (seh_prologue_element)));
       seh_ctx_cur->elems_max += 8;
     }
   n = &seh_ctx_cur->elems[seh_ctx_cur->elems_count];
@@ -289,17 +292,17 @@ static int
 seh_x64_read_reg (const char *tok, int kind, int *regno)
 {
   static const char *frame_regs[16] =
-  { "cfa", "rcx", "rdx", "rbx", "rsp", "rbp","rsi","rdi",
-  "r8","r9","r10","r11","r12","r13","r14","r15" };
+    { "cfa", "rcx", "rdx", "rbx", "rsp", "rbp","rsi","rdi",
+      "r8","r9","r10","r11","r12","r13","r14","r15" };
   static const char *int_regs[16] =
-  { "rax", "rcx", "rdx", "rbx", "rsp", "rbp","rsi","rdi",
-  "r8","r9","r10","r11","r12","r13","r14","r15" };
+    { "rax", "rcx", "rdx", "rbx", "rsp", "rbp","rsi","rdi",
+      "r8","r9","r10","r11","r12","r13","r14","r15" };
   static const char *xmm_regs[16] =
-  { "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7",
-  "xmm8", "xmm9", "xmm10","xmm11","xmm12","xmm13","xmm14","xmm15" };
+    { "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7",
+      "xmm8", "xmm9", "xmm10","xmm11","xmm12","xmm13","xmm14","xmm15" };
   static const char *mm_regs[16] =
-  { "xmm0", "mm1", "mm2", "mm3", "mm4", "mm5", "mm6", "mm7",
-  "xmm8", "mm9", "mm10","mm11","mm12","mm13","mm14","mm15" };
+    { "xmm0", "mm1", "mm2", "mm3", "mm4", "mm5", "mm6", "mm7",
+      "xmm8", "mm9", "mm10","mm11","mm12","mm13","mm14","mm15" };
   const char **p = NULL;
   char name_end;
   char *symbol_name = NULL;
@@ -310,40 +313,39 @@ seh_x64_read_reg (const char *tok, int kind, int *regno)
   while (*input_line_pointer == ' ' || *input_line_pointer == '\t')
     input_line_pointer++;
   switch (kind)
-  {
-  case 0:
-    p = frame_regs;
-    break;
-  case 1:
-    p = int_regs;
-    break;
-  case 2:
-    p = mm_regs;
-    break;
-  case 3:
-    p = xmm_regs;
-    break;
-  default:
-    abort ();
-  }
+    {
+    case 0:
+      p = frame_regs;
+      break;
+    case 1:
+      p = int_regs;
+      break;
+    case 2:
+      p = mm_regs;
+      break;
+    case 3:
+      p = xmm_regs;
+      break;
+    default:
+      abort ();
+    }
+
   if (*input_line_pointer == 0 || *input_line_pointer == '\n')
-  {
     return 0;
-  }
+
   if (*input_line_pointer == '%')
     ++input_line_pointer;
   symbol_name = input_line_pointer;
   name_end = get_symbol_end ();
+
   for (i = 0; i < 16; i++)
-  {
     if (! strcasecmp (p[i], symbol_name))
       break;
-  }
+
   if (i == 16)
-  {
     as_warn (_("In %s we found the invalid register name %s.\n"),
-      tok, symbol_name);
-  }
+	     tok, symbol_name);
+
   *input_line_pointer = name_end;
   while (*input_line_pointer == ' ' || *input_line_pointer == '\t')
     input_line_pointer++;
@@ -364,50 +366,50 @@ seh_read_offset (const char *tok, bfd_vma *off)
   while (*input_line_pointer == ' ' || *input_line_pointer == '\t')
     input_line_pointer++;
   if (*input_line_pointer == '0')
-  {
-    ++input_line_pointer;
-    had_one = 1;
-    base = 8;
-    switch ((*input_line_pointer))
     {
-    case 'x':
-    case 'X':
-      base = 16;
       ++input_line_pointer;
-      break;
-    case 'd':
-    case 'D':
-      base = 10;
-      input_line_pointer++;
-      break;
-    case 'o':
-    case 'O':
+      had_one = 1;
       base = 8;
-      input_line_pointer++;
-      break;
+      switch ((*input_line_pointer))
+	{
+	case 'x':
+	case 'X':
+	  base = 16;
+	  ++input_line_pointer;
+	  break;
+	case 'd':
+	case 'D':
+	  base = 10;
+	  input_line_pointer++;
+	  break;
+	case 'o':
+	case 'O':
+	  base = 8;
+	  input_line_pointer++;
+	  break;
+	}
     }
-  }
   while (*input_line_pointer != 0)
-  {
-    if (input_line_pointer[0] >= '0' && input_line_pointer[0] <='9')
-      r = (bfd_vma) (input_line_pointer[0] - '0');
-    else if (base == 16 && input_line_pointer[0] >= 'a' && input_line_pointer[0] <='f')
-      r = (bfd_vma) ((input_line_pointer[0] - 'a') + 10);
-    else if (base == 16 && input_line_pointer[0] >= 'A' && input_line_pointer[0] <='F')
-      r = (bfd_vma) ((input_line_pointer[0] - 'A') + 10);
-    else
-      break;
-    input_line_pointer++;
-    v *= base;
-    v += r;
-    had_one = 1;
-  }
+    {
+      if (input_line_pointer[0] >= '0' && input_line_pointer[0] <='9')
+	r = (bfd_vma) (input_line_pointer[0] - '0');
+      else if (base == 16 && input_line_pointer[0] >= 'a' && input_line_pointer[0] <='f')
+	r = (bfd_vma) ((input_line_pointer[0] - 'a') + 10);
+      else if (base == 16 && input_line_pointer[0] >= 'A' && input_line_pointer[0] <='F')
+	r = (bfd_vma) ((input_line_pointer[0] - 'A') + 10);
+      else
+	break;
+      input_line_pointer++;
+      v *= base;
+      v += r;
+      had_one = 1;
+    }
   *off = v;
   if (had_one == 0)
-  {
-    as_warn (_("In %s we expect a number.\n"),
-      tok);
-  }
+    {
+      as_warn (_("In %s we expect a number.\n"),
+	       tok);
+    }
   while (*input_line_pointer == ' ' || *input_line_pointer == '\t')
     input_line_pointer++;
   if (*input_line_pointer == ',')
@@ -600,10 +602,10 @@ obj_coff_seh_proc (int what ATTRIBUTE_UNUSED)
   char name_end;
 
   if (seh_ctx_cur != NULL)
-  {
-    as_warn (_(".seh_proc has to be closed by .seh_endprog\n"));
-    obj_coff_seh_endproc (0);
-  }
+    {
+      as_warn (_(".seh_proc has to be closed by .seh_endprog\n"));
+      obj_coff_seh_endproc (0);
+    }
 
   if (*input_line_pointer == 0 || *input_line_pointer == '\n')
     {
@@ -639,11 +641,11 @@ static void
 obj_coff_seh_endproc  (int what ATTRIBUTE_UNUSED)
 {
   if (seh_ctx_cur == NULL)
-  {
-    as_warn (_(".seh_endprog without prior .seh_proc (ignored)\n"));
-    demand_empty_rest_of_line ();
-    return;
-  }
+    {
+      as_warn (_(".seh_endprog without prior .seh_proc (ignored)\n"));
+      demand_empty_rest_of_line ();
+      return;
+    }
   seh_ctx->end_symbol = make_seh_text_label (seh_ctx, &(seh_ctx->end_addr));
   seh_ctx->xdata_first = seh_make_xlbl_name (seh_ctx);
   make_function_entry_pdata (seh_ctx);
@@ -656,27 +658,28 @@ obj_coff_seh_push  (int what)
 {
   int reg = 0;
   int kind = -1;
+
   if (seh_ctx_cur == NULL)
-  {
-    as_warn (_(".seh_push used outside of .seh_proc block.\n"));
-    demand_empty_rest_of_line ();
-    return;
-  }
-  /* what 0:reg, 1:pushframe.  */
+    {
+      as_warn (_(".seh_push used outside of .seh_proc block.\n"));
+      demand_empty_rest_of_line ();
+      return;
+    }
+  /* What 0:reg, 1:pushframe.  */
   switch (what)
-  {
-  case 0:
-    if (seh_x64_read_reg (".seh_push", 1, &reg))
-      kind = UWOP_PUSH_NONVOL;
-    else
-      as_warn (_(".seh_pushreg expects register argument."));
-    break;
-  case 1:
-    kind = UWOP_PUSH_MACHFRAME;
-    break;
-  default:
-    abort ();
-  }
+    {
+    case 0:
+      if (seh_x64_read_reg (".seh_push", 1, &reg))
+	kind = UWOP_PUSH_NONVOL;
+      else
+	as_warn (_(".seh_pushreg expects register argument."));
+      break;
+    case 1:
+      kind = UWOP_PUSH_MACHFRAME;
+      break;
+    default:
+      abort ();
+    }
   if (seh_get_target_kind () != seh_kind_x64)
     as_warn (_(".seh_save... is ignored for this target.\n"));
   else if (kind != -1)
@@ -694,29 +697,29 @@ obj_coff_seh_save  (int what)
 
   /* what 0:reg, 1:mm, 2:xmm.  */
   switch (what)
-  {
-  case 0:
-    ok &= seh_x64_read_reg (".seh_savereg", 1, &reg);
-    kind = UWOP_SAVE_NONVOL;
-    break;
-  case 1:
-    ok &= seh_x64_read_reg (".seh_savemm", 2, &reg);
-    kind = UWOP_SAVE_XMM;
-    break;
-  case 2:
-    ok &= seh_x64_read_reg (".seh_savexmm", 3, &reg);
-    kind = UWOP_SAVE_XMM128;
-    break;
-  default:
-    abort ();
-  }
+    {
+    case 0:
+      ok &= seh_x64_read_reg (".seh_savereg", 1, &reg);
+      kind = UWOP_SAVE_NONVOL;
+      break;
+    case 1:
+      ok &= seh_x64_read_reg (".seh_savemm", 2, &reg);
+      kind = UWOP_SAVE_XMM;
+      break;
+    case 2:
+      ok &= seh_x64_read_reg (".seh_savexmm", 3, &reg);
+      kind = UWOP_SAVE_XMM128;
+      break;
+    default:
+      abort ();
+    }
   ok &= seh_read_offset (".seh_save", &off);
   if (seh_ctx_cur == NULL)
-  {
-    as_warn (_(".seh_save used outside of .seh_proc block.\n"));
-    demand_empty_rest_of_line ();
-    return;
-  }
+    {
+      as_warn (_(".seh_save used outside of .seh_proc block.\n"));
+      demand_empty_rest_of_line ();
+      return;
+    }
   if (seh_get_target_kind () != seh_kind_x64)
     as_warn (_(".seh_save... is ignored for this target.\n"));
   else
@@ -728,11 +731,11 @@ static void
 obj_coff_seh_endprologue (int what ATTRIBUTE_UNUSED)
 {
   if (seh_ctx_cur == NULL)
-  {
-    as_warn (_(".seh_endprologue used outside of .seh_proc block.\n"));
-    demand_empty_rest_of_line ();
-    return;
-  }
+    {
+      as_warn (_(".seh_endprologue used outside of .seh_proc block.\n"));
+      demand_empty_rest_of_line ();
+      return;
+    }
   if (seh_ctx_cur->endprologue_symbol != NULL)
     as_warn (_(".seh_endprologue used more then once in .seh_proc block.\n"));
   else
@@ -743,12 +746,13 @@ static void
 obj_coff_seh_stack_alloc (int what ATTRIBUTE_UNUSED)
 {
   bfd_vma size;
+
   if (seh_ctx_cur == NULL)
-  {
-    as_warn (_(".seh_stackalloc used outside of .seh_proc block.\n"));
-    demand_empty_rest_of_line ();
-    return;
-  }
+    {
+      as_warn (_(".seh_stackalloc used outside of .seh_proc block.\n"));
+      demand_empty_rest_of_line ();
+      return;
+    }
   if (seh_read_offset (".seh_stackalloc", &size))
     {
       if (seh_get_target_kind () != seh_kind_x64)
@@ -768,16 +772,16 @@ obj_coff_seh_setframe (int what ATTRIBUTE_UNUSED)
   ok &= seh_x64_read_reg (".seh_setframe", 0, &reg);
   ok &= seh_read_offset (".seh_setframe", &off);
   if (seh_ctx_cur == NULL)
-  {
-    as_warn (_(".seh_setframe used outside of .seh_proc block.\n"));
-    demand_empty_rest_of_line ();
-    return;
-  }
+    {
+      as_warn (_(".seh_setframe used outside of .seh_proc block.\n"));
+      demand_empty_rest_of_line ();
+      return;
+    }
   if (ok)
-  {
-    seh_ctx_cur->framereg = reg;
-    seh_ctx_cur->frameoff = off;
-  }
+    {
+      seh_ctx_cur->framereg = reg;
+      seh_ctx_cur->frameoff = off;
+    }
   if (seh_get_target_kind () != seh_kind_x64)
     as_warn (_(".seh_setframe is ignored for this target.\n"));
   demand_empty_rest_of_line ();
@@ -822,6 +826,7 @@ static void
 seh_symbol_init (bfd *abfd, unsigned int added)
 {
   unsigned int oldcount;
+
   oldcount = bfd_get_symcount (abfd);
   symptr = oldcount;
   symtab = xmalloc ((oldcount + added + 6) * sizeof (asymbol *));
@@ -836,6 +841,7 @@ seh_symbol (bfd *abfd, const char *n1, const char *n2, const char *n3,
   asymbol *sym;
   char *name = xmalloc (strlen (n1) + strlen (n2) + strlen (n3) + 1);
   int ret = symptr;
+
   strcpy (name, n1);
   strcat (name, n2);
   strcat (name, n3);
@@ -853,6 +859,7 @@ quick_section (bfd *abfd, const char *name, int flags, int align)
 {
   asection *sec;
   asymbol *sym;
+
   sec = seh_make_section2 (name, flags);
   bfd_set_section_alignment (abfd, sec, align);
   /* Remember to undo this before trying to link internally!  */
@@ -944,8 +951,8 @@ seh_make_section2 (const char *section_name, unsigned flags)
 
   sec = subseg_new (name, (subsegT) 0);
   bfd_set_section_flags (stdoutput, sec,
-    ((SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_DATA | flags)
-    & bfd_applicable_section_flags (stdoutput)));
+			 ((SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_DATA | flags)
+			  & bfd_applicable_section_flags (stdoutput)));
 
   return sec;
 }
@@ -967,6 +974,7 @@ seh_make_xlbl_name (seh_context *c)
 {
   size_t len = strlen (".seh_xlbl_") + strlen (c->func_name) + 9 + 1;
   char *ret = (char*) xmalloc (len);
+
   if (!ret)
     as_fatal (_("Out of memory for xdata lable for %s"), c->func_name);
   else
@@ -980,16 +988,17 @@ make_seh_text_label (seh_context *c, symbolS **addr)
 {
   char *sym_name;
   size_t len = strlen (".seh_tlbl_") + strlen (c->func_name) + 9 + 1;
+
   sym_name = (char *) xmalloc (len);
   if (!sym_name)
     as_fatal (_("Allocating memory for SEH's text symbol for %s failed"), c->func_name);
   sprintf (sym_name, ".seh_tlbl_%s_%x", c->func_name, c->tlbl_count);
   c->tlbl_count += 1;
   if (addr)
-  {
-    seh_make_globl (sym_name);
-    *addr = colon (sym_name);
-  }
+    {
+      seh_make_globl (sym_name);
+      *addr = colon (sym_name);
+    }
   return sym_name;
 }
 
@@ -1003,21 +1012,22 @@ seh_fill_pcsyms (const seh_context *c, char **names, int *idx)
   valueT start_off = resolve_symbol_value (c->start_addr);
   valueT un_off;
   seh_prologue_element *e = c->elems;
+
   names[0] = c->start_symbol;
   idx[0] = 0;
   if (c->elems_count == 0)
     return;
   for (i = 0; i < c->elems_count; i++)
-  {
-    un_off = resolve_symbol_value (e[i].pc_addr);
-    if ((un_off - start_off) > 255)
     {
-      names[count] = e[i].pc_symbol;
-      idx[count] = (int) i;
-      count++;
-      start_off = un_off;
+      un_off = resolve_symbol_value (e[i].pc_addr);
+      if ((un_off - start_off) > 255)
+	{
+	  names[count] = e[i].pc_symbol;
+	  idx[count] = (int) i;
+	  count++;
+	  start_off = un_off;
+	}
     }
-  }
 }
 
 static int
@@ -1028,17 +1038,18 @@ seh_needed_unwind_info (seh_context *c)
   valueT start_off = resolve_symbol_value (c->start_addr);
   valueT un_off;
   seh_prologue_element *e = c->elems;
+
   if (c->elems_count == 0)
     return count;
   for (i = 0; i < c->elems_count; i++)
-  {
-    un_off = resolve_symbol_value (e[i].pc_addr);
-    if ((un_off - start_off) > 255)
     {
-      count++;
-      start_off = un_off;
+      un_off = resolve_symbol_value (e[i].pc_addr);
+      if ((un_off - start_off) > 255)
+	{
+	  count++;
+	  start_off = un_off;
+	}
     }
-  }
   return count;
 }
 
@@ -1046,6 +1057,7 @@ static size_t
 seh_getelm_data_size (const seh_context *c, int elm_start, int elm_end)
 {
   size_t ret = PEX64_UWI_SIZEOF_UWCODE_ARRAY (elm_end - elm_start);
+
   while (elm_start < elm_end)
     {
       switch (c->elems[elm_start].kind)
@@ -1058,7 +1070,7 @@ seh_getelm_data_size (const seh_context *c, int elm_start, int elm_end)
 	case UWOP_SAVE_XMM:
 	case UWOP_SAVE_XMM128:
 	  if ((c->elems[elm_start].offset & 7) != 0 ||
-	    ((c->elems[elm_start].offset / 8) > 0xffff))
+	      ((c->elems[elm_start].offset / 8) > 0xffff))
 	    ret += 6;
 	  else
 	    ret += 4;
@@ -1078,6 +1090,7 @@ static size_t
 seh_getsize_of_unwind_entry (seh_context *c, int elm_start, int elm_end, int bechain)
 {
   size_t ret = seh_getelm_data_size(c, elm_start, elm_end);
+
   c->count_syms += 1;
   if (bechain)
     {
@@ -1148,6 +1161,7 @@ seh_make_unwind_entry (const seh_context *c, char *name, int elm_start, int elm_
   if (bechain)
     {
       char n[100];
+
       sprintf (n,"%x", no);
       idx = seh_symbol (c->abfd, ".xdata_fct", c->func_name, n, UNDSEC, BSF_GLOBAL, (int) off);
       seh_reloc (c->abfd, off, BFD_RELOC_RVA, idx);
@@ -1234,9 +1248,7 @@ seh_getsize_unwind_data (seh_context *c)
   c->count_syms += 5 * need;
   xdata_sz += (seh_getsize_of_unwind_entry (c, elm_start[0], elm_start[1], 1 != need) + 7) & ~7;
   for (i = 1; i < need; i++)
-  {
     xdata_sz += (seh_getsize_of_unwind_entry (c, elm_start[i], elm_start[i + 1], 1 != need) + 7) & ~7;
-  }
 
   /* Create lable names for .xdata unwind info.  */
   names[0] = c->xdata_first;
@@ -1259,16 +1271,14 @@ seh_create_unwind_data (seh_context *c, unsigned char *data, size_t offs)
   int *elm_start = c->xdata_elm_start;
 
   for (i = 1; i < need; i++)
-    {
-      seh_make_function_entry_xdata (c, pc_syms[i], c->end_symbol, names[i], data, &offs, i);
-    }
+    seh_make_function_entry_xdata (c, pc_syms[i], c->end_symbol, names[i], data, &offs, i);
+
   /* Generate the function entry. Remark, that just
      first is in .pdata section and already emitted.  */
   seh_make_unwind_entry (c, c->xdata_first, elm_start[0], elm_start[1], 1 != need, data, &offs, 1);
   for (i = 1; i < need; i++)
-    {
-      seh_make_unwind_entry (c, names[i], elm_start[i], elm_start[i + 1], (i + 1) != need, data, &offs, i + 1);
-    }
+    seh_make_unwind_entry (c, names[i], elm_start[i], elm_start[i + 1], (i + 1) != need, data, &offs, i + 1);
+
   for (i = 1; i < need; i++)
     free (names[i]);
   free (names);
@@ -1285,6 +1295,7 @@ seh_make_function_entry_xdata (seh_context *c, char *pc_start, char *pc_end, cha
   bfd_vma addr = (bfd_vma) *poffs;
   int idx;
   char s[100];
+
   if (!data)
     return;
   sprintf (s,"%x",no);
@@ -1303,6 +1314,7 @@ seh_x64_makescope_elem (seh_context *c, const char *begin, const char *end,
 			const char *handler, const char *jmp)
 {
   seh_scope_elem *r;
+
   if (!end || !begin)
     return NULL;
   if (c->scope_count >= c->scope_max)
