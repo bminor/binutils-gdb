@@ -184,9 +184,13 @@ proc test_cwd_specification {} {
              "205\\\^done" \
              "environment-cd arg operation"
 
-    mi_gdb_test "206-environment-pwd" \
+    # The canonical name of the working directory may differ on a
+    # remote host from that on the build system.
+    if ![is_remote host] {
+	mi_gdb_test "206-environment-pwd" \
              "206\\\^done,cwd=\"${escapedobjdir}\"" \
              "environment-pwd operation"
+    }
 }
 
 proc test_path_specification {} {

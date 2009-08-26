@@ -1,3 +1,9 @@
+2009-08-26  Joseph Myers  <joseph@codesourcery.com>
+
+	* gdb.mi/mi-basics.exp (test_cwd_specification): Do not test
+	environment-pwd for remote host.
+	* gdb.mi/mi2-basics.exp (test_cwd_specification): Likewise.
+
 2009-08-24  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.cp/cpcompletion.exp (test_class_complete): New procedure.
