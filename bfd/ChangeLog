@@ -1,3 +1,9 @@
+2009-08-26  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/10515
+	* linker.c (bfd_find_version_for_sym): Override a "*" match by any
+	other wildcard match.  Warn on multiple wildcard matches.
+
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.am (libbfd_la_LDFLAGS): Initialize early, to allow

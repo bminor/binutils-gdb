@@ -3271,14 +3271,18 @@ DESCRIPTION
 
 struct bfd_elf_version_tree *
 bfd_find_version_for_sym (struct bfd_elf_version_tree *verdefs,
-		      const char *sym_name,
-		      bfd_boolean *hide)
+			  const char *sym_name,
+			  bfd_boolean *hide)
 {
   struct bfd_elf_version_tree *t;
   struct bfd_elf_version_tree *local_ver, *global_ver, *exist_ver;
+  struct bfd_elf_version_tree *star_local_ver, *star_global_ver;
+  unsigned int match_count = 0;
 
   local_ver = NULL;
   global_ver = NULL;
+  star_local_ver = NULL;
+  star_global_ver = NULL;
   exist_ver = NULL;
   for (t = verdefs; t != NULL; t = t->next)
     {
@@ -3288,14 +3292,21 @@ bfd_find_version_for_sym (struct bfd_elf_version_tree *verdefs,
 
 	  while ((d = (*t->match) (&t->globals, d, sym_name)) != NULL)
 	    {
-	      global_ver = t;
+	      ++match_count;
+	      if (d->literal || strcmp (d->pattern, "*") != 0)
+		global_ver = t;
+	      else
+		star_global_ver = t;
 	      if (d->symver)
 		exist_ver = t;
 	      d->script = 1;
 	      /* If the match is a wildcard pattern, keep looking for
 		 a more explicit, perhaps even local, match.  */
 	      if (d->literal)
-		break;
+		{
+		  match_count = 0;
+		  break;
+		}
 	    }
 
 	  if (d != NULL)
@@ -3308,13 +3319,19 @@ bfd_find_version_for_sym (struct bfd_elf_version_tree *verdefs,
 
 	  while ((d = (*t->match) (&t->locals, d, sym_name)) != NULL)
 	    {
-	      local_ver = t;
+	      ++match_count;
+	      if (d->literal || strcmp (d->pattern, "*") != 0)
+		local_ver = t;
+	      else
+		star_local_ver = t;
 	      /* If the match is a wildcard pattern, keep looking for
 		 a more explicit, perhaps even global, match.  */
 	      if (d->literal)
 		{
 		  /* An exact match overrides a global wildcard.  */
 		  global_ver = NULL;
+		  star_global_ver = NULL;
+		  match_count = 0;
 		  break;
 		}
 	    }
@@ -3323,6 +3340,14 @@ bfd_find_version_for_sym (struct bfd_elf_version_tree *verdefs,
 	    break;
 	}
     }
+
+  if (match_count > 1)
+    (*_bfd_error_handler)
+      (_("warning: multiple wildcard version script matches for %s\n"),
+       sym_name);
+
+  if (global_ver == NULL && local_ver == NULL)
+    global_ver = star_global_ver;
 
   if (global_ver != NULL)
     {
@@ -3334,6 +3359,9 @@ bfd_find_version_for_sym (struct bfd_elf_version_tree *verdefs,
       return global_ver;
     }
 
+  if (local_ver == NULL)
+    local_ver = star_local_ver;
+
   if (local_ver != NULL)
     {
       *hide = TRUE;
@@ -3342,4 +3370,3 @@ bfd_find_version_for_sym (struct bfd_elf_version_tree *verdefs,
 
   return NULL;
 }
-
