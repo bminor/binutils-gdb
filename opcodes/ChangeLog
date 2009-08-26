@@ -1,3 +1,8 @@
+2009-08-26  Philippe De Muyter  <phdm@macqel.be>
+
+	* m68k-dis.c (print_insn_arg): Add movecr register names for
+	coldfire v4e families.
+
 2009-08-25  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.am (SUBDIRS): Build '.' before 'po'.
