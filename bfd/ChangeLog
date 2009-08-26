@@ -1,3 +1,11 @@
+2009-08-26  Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+	* elf32-m68k.c (elf_m68k_copy_indirect_symbol): Propagate
+	non_got_ref value.
+	(elf_m68k_check_relocs): Handle dynamic TLS relocations.
+	Handle non_got_ref field.
+	(elf_m68k_adjust_dynamic_symbol): Handle non_got_ref field.
+
 2009-08-26  Alan Modra  <amodra@bigpond.net.au>
 
 	PR ld/10515

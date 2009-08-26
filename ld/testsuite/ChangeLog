@@ -1,3 +1,13 @@
+2009-08-26  Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+	* ld-m68k/tls-def-1.s: New file.
+	* ld-m68k/tls-def-1.d: New file.
+	* ld-m68k/tls-gd-1.d2: New file.
+	* ld-m68k/tls-gd-1.d3: New file.
+	* ld-m68k/tls-main-1.s: New file.
+	* ld-m68k/tls-main-1.d: New file.
+	* ld-m68k/m68k.exp: Run new TLS tests.
+
 2009-08-23  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* ld-powerpc/powerpc.exp: Move relaxing and relocatable relaxing

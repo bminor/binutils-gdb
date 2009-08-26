@@ -2487,6 +2487,10 @@ elf_m68k_copy_indirect_symbol (struct bfd_link_info *info,
   dir = elf_m68k_hash_entry (_dir);
   ind = elf_m68k_hash_entry (_ind);
 
+  /* Any absolute non-dynamic relocations against an indirect or weak
+     definition will be against the target symbol.  */
+  _dir->non_got_ref |= _ind->non_got_ref;
+
   /* We might have a direct symbol already having entries in the GOTs.
      Update its key only in case indirect symbol has GOT entries and
      assert that both indirect and direct symbols don't have GOT entries
@@ -2580,6 +2584,14 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 	case R_68K_TLS_IE8:
 	case R_68K_TLS_IE16:
 	case R_68K_TLS_IE32:
+
+	case R_68K_TLS_TPREL32:
+	case R_68K_TLS_DTPREL32:
+
+	  if (ELF32_R_TYPE (rel->r_info) == R_68K_TLS_TPREL32
+	      && info->shared)
+	    /* Do the special chorus for libraries with static TLS.  */
+	    info->flags |= DF_STATIC_TLS;
 
 	  /* This symbol requires a global offset table entry.  */
 
@@ -2739,6 +2751,10 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 	      /* Make sure a plt entry is created for this symbol if it
 		 turns out to be a function defined by a dynamic object.  */
 	      h->plt.refcount++;
+
+	      if (!info->shared)
+		/* This symbol needs a non-GOT reference.  */
+		h->non_got_ref = 1;
 	    }
 
 	  /* If we are creating a shared library, we need to copy the
@@ -2945,6 +2961,9 @@ elf_m68k_gc_sweep_hook (bfd *abfd,
 	case R_68K_TLS_IE8:
 	case R_68K_TLS_IE16:
 	case R_68K_TLS_IE32:
+
+	case R_68K_TLS_TPREL32:
+	case R_68K_TLS_DTPREL32:
 
 	  if (got == NULL)
 	    {
@@ -3157,6 +3176,11 @@ elf_m68k_adjust_dynamic_symbol (info, h)
      For such cases we need not do anything here; the relocations will
      be handled correctly by relocate_section.  */
   if (info->shared)
+    return TRUE;
+
+  /* If there are no references to this symbol that do not use the
+     GOT, we don't need to generate a copy reloc.  */
+  if (!h->non_got_ref)
     return TRUE;
 
   if (h->size == 0)
