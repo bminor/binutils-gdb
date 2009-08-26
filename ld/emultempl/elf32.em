@@ -1049,37 +1049,48 @@ gld${EMULATION_NAME}_after_open (void)
 
       abfd = link_info.input_bfds;
 
-      size = gld${EMULATION_NAME}_id_note_section_size (abfd, &link_info);
-      if (size == 0)
+      if (abfd == NULL)
 	{
-	  einfo ("%P: warning: unrecognized --build-id style ignored.\n");
+	  /* PR 10555: If there are no input files do not
+	     try to create a .note.gnu-build-id section.  */
 	  free (link_info.emit_note_gnu_build_id);
 	  link_info.emit_note_gnu_build_id = NULL;
 	}
       else
 	{
-	  s = bfd_make_section_with_flags (abfd, ".note.gnu.build-id",
-					   SEC_ALLOC | SEC_LOAD
-					   | SEC_IN_MEMORY | SEC_LINKER_CREATED
-					   | SEC_READONLY | SEC_DATA);
-	  if (s != NULL && bfd_set_section_alignment (abfd, s, 2))
+	  size = gld${EMULATION_NAME}_id_note_section_size (abfd, &link_info);
+	  if (size == 0)
 	    {
-	      struct elf_obj_tdata *t = elf_tdata (link_info.output_bfd);
-	      struct build_id_info *b = xmalloc (sizeof *b);
-	      b->style = link_info.emit_note_gnu_build_id;
-	      b->sec = s;
-	      elf_section_type (s) = SHT_NOTE;
-	      s->size = size;
-	      t->after_write_object_contents
-		= &gld${EMULATION_NAME}_write_build_id_section;
-	      t->after_write_object_contents_info = b;
+	      einfo ("%P: warning: unrecognized --build-id style ignored.\n");
+	      free (link_info.emit_note_gnu_build_id);
+	      link_info.emit_note_gnu_build_id = NULL;
 	    }
 	  else
 	    {
-	      einfo ("%P: warning: Cannot create .note.gnu.build-id section,"
-		     " --build-id ignored.\n");
-	      free (link_info.emit_note_gnu_build_id);
-	      link_info.emit_note_gnu_build_id = NULL;
+	      s = bfd_make_section_with_flags (abfd, ".note.gnu.build-id",
+					       SEC_ALLOC | SEC_LOAD
+					       | SEC_IN_MEMORY | SEC_LINKER_CREATED
+					       | SEC_READONLY | SEC_DATA);
+	      if (s != NULL && bfd_set_section_alignment (abfd, s, 2))
+		{
+		  struct elf_obj_tdata *t = elf_tdata (link_info.output_bfd);
+		  struct build_id_info *b = xmalloc (sizeof *b);
+
+		  b->style = link_info.emit_note_gnu_build_id;
+		  b->sec = s;
+		  elf_section_type (s) = SHT_NOTE;
+		  s->size = size;
+		  t->after_write_object_contents
+		    = &gld${EMULATION_NAME}_write_build_id_section;
+		  t->after_write_object_contents_info = b;
+		}
+	      else
+		{
+		  einfo ("%P: warning: Cannot create .note.gnu.build-id section,"
+			 " --build-id ignored.\n");
+		  free (link_info.emit_note_gnu_build_id);
+		  link_info.emit_note_gnu_build_id = NULL;
+		}
 	    }
 	}
     }

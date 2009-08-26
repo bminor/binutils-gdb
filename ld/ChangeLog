@@ -1,3 +1,9 @@
+2009-08-26  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/10555
+	* emultempl/elf32.em (_after_open): Do not create a
+	.note.gnu-build-id section if there are no input files.
+
 2009-08-24  Nick Clifton  <nickc@redhat.com>
 
 	* scripttempl/elfxtensa.sc (DISCARDED): Discard sections with
