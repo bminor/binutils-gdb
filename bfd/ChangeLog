@@ -1,5 +1,17 @@
 2009-08-26  Maxim Kuvyrkov  <maxim@codesourcery.com>
 
+	* elf32-m68k.c: Rewrite initialization of GOT entries for TLS
+	relocations.  Rewrite output of dynamic TLS relocations.
+	(DTP_OFFSET, TP_OFFSET): New constants.
+	(dtpoff_base): Update.
+	(tpoff): Rename to tpoff_base, update.
+	(elf_m68k_init_got_entry_static, elf_m68k_init_got_entry_local_shared):
+	New functions.  Move code from elf_m68k_relocate_section here.
+	(elf_m68k_relocate_section): Update.
+	(elf_m68k_finish_dynamic_symbol): Fix handling of local TLS symbols.
+
+2009-08-26  Maxim Kuvyrkov  <maxim@codesourcery.com>
+
 	* elf32-m68k.c (elf_m68k_copy_indirect_symbol): Propagate
 	non_got_ref value.
 	(elf_m68k_check_relocs): Handle dynamic TLS relocations.
