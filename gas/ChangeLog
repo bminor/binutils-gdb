@@ -1,3 +1,12 @@
+2009-08-26  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* Makefile.am (TARGET_CPU_CFILES): Add config/tc-moxie.c.
+	* config/tc-moxie.c (md_assemble): Fix typos in strings.  Fix
+	syntax error.
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Likewise.
+	* po/gas.pot: Likewise.
+
 2009-08-26  Nick Clifton  <nickc@redhat.com>
 
 	* config/obj-coff-seh.c (seh_arm_write_pdata): Test for

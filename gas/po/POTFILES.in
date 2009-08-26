@@ -105,6 +105,7 @@ config/tc-mn10200.c
 config/tc-mn10200.h
 config/tc-mn10300.c
 config/tc-mn10300.h
+config/tc-moxie.c
 config/tc-msp430.c
 config/tc-msp430.h
 config/tc-mt.c

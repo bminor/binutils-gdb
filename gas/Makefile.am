@@ -275,6 +275,7 @@ TARGET_CPU_CFILES = \
 	config/tc-mmix.c \
 	config/tc-mn10200.c \
 	config/tc-mn10300.c \
+	config/tc-moxie.c \
 	config/tc-msp430.c \
 	config/tc-mt.c \
 	config/tc-ns32k.c \

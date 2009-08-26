@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2009-08-22 19:14+0200\n"
+"POT-Creation-Date: 2009-08-26 20:25+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2878,7 +2878,7 @@ msgstr ""
 
 #: config/tc-arm.c:19637 config/tc-arm.c:19652 config/tc-arm.c:19667
 #: config/tc-arm.c:19678 config/tc-arm.c:19701 config/tc-arm.c:20413
-#: config/tc-pj.c:449 config/tc-sh.c:4187
+#: config/tc-moxie.c:664 config/tc-pj.c:449 config/tc-sh.c:4187
 msgid "offset out of range"
 msgstr ""
 
@@ -3011,8 +3011,8 @@ msgid "internal_relocation (type: OFFSET_IMM) not fixed up"
 msgstr ""
 
 #: config/tc-arm.c:20839 config/tc-cris.c:3985 config/tc-mcore.c:1926
-#: config/tc-microblaze.c:1834 config/tc-mmix.c:2862 config/tc-ns32k.c:2248
-#: config/tc-score.c:7484
+#: config/tc-microblaze.c:1834 config/tc-mmix.c:2862 config/tc-moxie.c:759
+#: config/tc-ns32k.c:2248 config/tc-score.c:7484
 msgid "<unknown>"
 msgstr ""
 
@@ -3579,8 +3579,8 @@ msgid "reloc %d not supported by object file format"
 msgstr ""
 
 #: config/tc-avr.c:1350 config/tc-h8300.c:1884 config/tc-mcore.c:881
-#: config/tc-microblaze.c:825 config/tc-msp430.c:1821 config/tc-pj.c:253
-#: config/tc-sh.c:2544 config/tc-z8k.c:1216
+#: config/tc-microblaze.c:825 config/tc-moxie.c:178 config/tc-msp430.c:1821
+#: config/tc-pj.c:253 config/tc-sh.c:2544 config/tc-z8k.c:1216
 msgid "can't find opcode "
 msgstr ""
 
@@ -4096,13 +4096,13 @@ msgstr ""
 msgid "invalid <arch> in --march=<arch>: %s"
 msgstr ""
 
-#: config/tc-cris.c:3937
+#: config/tc-cris.c:3937 config/tc-moxie.c:711
 msgid ""
 "Semantics error.  This type of operand can not be relocated, it must be an "
 "assembly-time constant"
 msgstr ""
 
-#: config/tc-cris.c:3986
+#: config/tc-cris.c:3986 config/tc-moxie.c:760
 #, c-format
 msgid "Cannot generate relocation type for symbol %s, code %s"
 msgstr ""
@@ -7306,7 +7306,7 @@ msgstr ""
 msgid "missing `.end'"
 msgstr ""
 
-#: config/tc-lm32.c:234
+#: config/tc-lm32.c:234 config/tc-moxie.c:575
 msgid "bad call to md_atof"
 msgstr ""
 
@@ -10149,6 +10149,57 @@ msgstr ""
 msgid "Bad relocation fixup type (%d)"
 msgstr ""
 
+#: config/tc-moxie.c:100
+msgid "expecting register"
+msgstr ""
+
+#: config/tc-moxie.c:119 config/tc-moxie.c:135
+msgid "illegal register number"
+msgstr ""
+
+#: config/tc-moxie.c:184 config/tc-pj.c:260
+#, c-format
+msgid "unknown opcode %s"
+msgstr ""
+
+#: config/tc-moxie.c:202 config/tc-moxie.c:221 config/tc-moxie.c:312
+#: config/tc-moxie.c:358
+msgid "expecting comma delimited register operands"
+msgstr ""
+
+#: config/tc-moxie.c:228 config/tc-moxie.c:288 config/tc-moxie.c:300
+#: config/tc-moxie.c:333 config/tc-moxie.c:365 config/tc-moxie.c:398
+#: config/tc-moxie.c:452 config/tc-moxie.c:506 config/tc-moxie.c:516
+#: config/tc-moxie.c:544 config/tc-pj.c:307
+msgid "extra stuff on line ignored"
+msgstr ""
+
+#: config/tc-moxie.c:248 config/tc-moxie.c:388 config/tc-moxie.c:418
+#: config/tc-moxie.c:493
+msgid "expecting comma delimited operands"
+msgstr ""
+
+#: config/tc-moxie.c:316 config/tc-moxie.c:344
+msgid "expecting indirect register `($rA)'"
+msgstr ""
+
+#: config/tc-moxie.c:324 config/tc-moxie.c:352 config/tc-moxie.c:443
+#: config/tc-moxie.c:485
+msgid "missing closing parenthesis"
+msgstr ""
+
+#: config/tc-moxie.c:435 config/tc-moxie.c:477
+msgid "expecting indirect register `($rX)'"
+msgstr ""
+
+#: config/tc-moxie.c:547 config/tc-pj.c:312
+msgid "Something forgot to clean up\n"
+msgstr ""
+
+#: config/tc-moxie.c:651
+msgid "pcrel too far BFD_RELOC_MOXIE_10"
+msgstr ""
+
 #: config/tc-msp430.c:547
 msgid ".profiler pseudo requires at least two operands."
 msgstr ""
@@ -10724,21 +10775,8 @@ msgstr ""
 msgid "can't have relocation for ipush"
 msgstr ""
 
-#: config/tc-pj.c:260
-#, c-format
-msgid "unknown opcode %s"
-msgstr ""
-
 #: config/tc-pj.c:288
 msgid "expected expresssion"
-msgstr ""
-
-#: config/tc-pj.c:307
-msgid "extra stuff on line ignored"
-msgstr ""
-
-#: config/tc-pj.c:312
-msgid "Something forgot to clean up\n"
 msgstr ""
 
 #: config/tc-pj.c:354

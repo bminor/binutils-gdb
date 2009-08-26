@@ -199,7 +199,7 @@ md_assemble (char *str)
 	reg = parse_register_operand (&op_end);
 	iword += (reg << 8);
 	if (*op_end != ',')
-	  as_warn (_("expecting comma delimeted register operands"));
+	  as_warn (_("expecting comma delimited register operands"));
 	op_end++;
 	op_end = parse_exp_save_ilp (op_end, &arg);
 	fix_new_exp (frag_now,
@@ -218,7 +218,7 @@ md_assemble (char *str)
 	int dest, src;
 	dest = parse_register_operand (&op_end);
 	if (*op_end != ',')
-	  as_warn (_("expecting comma delimeted register operands"0);
+	  as_warn (_("expecting comma delimited register operands"));
 	op_end++;
 	src  = parse_register_operand (&op_end);
 	iword += (dest << 4) + src;
@@ -309,7 +309,7 @@ md_assemble (char *str)
 	int a, b;
 	a = parse_register_operand (&op_end);
 	if (*op_end != ',')
-	  as_warn (_("expecting comma delimeted register operands"));
+	  as_warn (_("expecting comma delimited register operands"));
 	op_end++;
 	if (*op_end != '(')
 	  {
@@ -355,7 +355,7 @@ md_assemble (char *str)
 	  }
 	op_end++;
 	if (*op_end != ',')
-	  as_warn (_("expecting comma delimeted register operands"));
+	  as_warn (_("expecting comma delimited register operands"));
 	op_end++;
 	b = parse_register_operand (&op_end);
 	iword += (a << 4) + b;

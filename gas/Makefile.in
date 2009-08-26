@@ -539,6 +539,7 @@ TARGET_CPU_CFILES = \
 	config/tc-mmix.c \
 	config/tc-mn10200.c \
 	config/tc-mn10300.c \
+	config/tc-moxie.c \
 	config/tc-msp430.c \
 	config/tc-mt.c \
 	config/tc-ns32k.c \
@@ -975,6 +976,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-mmix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-mn10200.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-mn10300.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-moxie.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-msp430.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-mt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-ns32k.Po@am__quote@
@@ -1512,6 +1514,20 @@ tc-mn10300.obj: config/tc-mn10300.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-mn10300.c' object='tc-mn10300.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-mn10300.obj `if test -f 'config/tc-mn10300.c'; then $(CYGPATH_W) 'config/tc-mn10300.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-mn10300.c'; fi`
+
+tc-moxie.o: config/tc-moxie.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-moxie.o -MD -MP -MF $(DEPDIR)/tc-moxie.Tpo -c -o tc-moxie.o `test -f 'config/tc-moxie.c' || echo '$(srcdir)/'`config/tc-moxie.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/tc-moxie.Tpo $(DEPDIR)/tc-moxie.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-moxie.c' object='tc-moxie.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-moxie.o `test -f 'config/tc-moxie.c' || echo '$(srcdir)/'`config/tc-moxie.c
+
+tc-moxie.obj: config/tc-moxie.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-moxie.obj -MD -MP -MF $(DEPDIR)/tc-moxie.Tpo -c -o tc-moxie.obj `if test -f 'config/tc-moxie.c'; then $(CYGPATH_W) 'config/tc-moxie.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-moxie.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/tc-moxie.Tpo $(DEPDIR)/tc-moxie.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-moxie.c' object='tc-moxie.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-moxie.obj `if test -f 'config/tc-moxie.c'; then $(CYGPATH_W) 'config/tc-moxie.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-moxie.c'; fi`
 
 tc-msp430.o: config/tc-msp430.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-msp430.o -MD -MP -MF $(DEPDIR)/tc-msp430.Tpo -c -o tc-msp430.o `test -f 'config/tc-msp430.c' || echo '$(srcdir)/'`config/tc-msp430.c
