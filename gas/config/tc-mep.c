@@ -1817,6 +1817,11 @@ md_pcrel_from_section (fixS *fixP, segT sec)
        Let the linker figure it out.  */
     return 0;
 
+  /* If we've got other reasons for emitting this relocation, let the
+     linker handle pc-rel also.  */
+  if (mep_force_relocation (fixP))
+    return 0;
+
   /* Return the address of the opcode - cgen adjusts for opcode size
      itself, to be consistent with the disassembler, which must do
      so.  */

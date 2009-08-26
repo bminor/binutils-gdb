@@ -1,3 +1,8 @@
+2009-08-26  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-mep.c (md_pcrel_from_section): Handle any other
+	forced-relocation cases.
+
 2009-08-26  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.am (TARGET_CPU_CFILES): Add config/tc-moxie.c.
