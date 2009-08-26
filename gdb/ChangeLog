@@ -1,3 +1,8 @@
+2009-08-26  Michael Snyder  <msnyder@vmware.com>
+
+	* i386-tdep.c (i386_process_record): Break out of prefix loop
+	if not amd64.  Otherwise inc/dec instructions are lost.
+
 2009-08-25  Keith Seitz  <keiths@redhat.com>
 
 	* c-exp.y (yylex): Add cxx_only check for tokentab2 and tokentab3

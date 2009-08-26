@@ -3280,23 +3280,23 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	case 0x67:
 	  prefixes |= PREFIX_ADDR;
 	  break;
-        case 0x40:
-        case 0x41:
-        case 0x42:
-        case 0x43:
-        case 0x44:
-        case 0x45:
-        case 0x46:
-        case 0x47:
-        case 0x48:
-        case 0x49:
-        case 0x4a:
-        case 0x4b:
-        case 0x4c:
-        case 0x4d:
-        case 0x4e:
-        case 0x4f:
-          if (ir.regmap[X86_RECORD_R8_REGNUM])
+        case 0x40:	/* i386 inc %eax */
+        case 0x41:	/* i386 inc %ecx */
+        case 0x42:	/* i386 inc %edx */
+        case 0x43:	/* i386 inc %ebx */
+        case 0x44:	/* i386 inc %esp */
+        case 0x45:	/* i386 inc %ebp */
+        case 0x46:	/* i386 inc %esi */
+        case 0x47:	/* i386 inc %edi */
+        case 0x48:	/* i386 dec %eax */
+        case 0x49:	/* i386 dec %ecx */
+        case 0x4a:	/* i386 dec %edx */
+        case 0x4b:	/* i386 dec %ebx */
+        case 0x4c:	/* i386 dec %esp */
+        case 0x4d:	/* i386 dec %ebp */
+        case 0x4e:	/* i386 dec %esi */
+        case 0x4f:	/* i386 dec %edi */
+          if (ir.regmap[X86_RECORD_R8_REGNUM])	/* 64 bit target */
             {
                /* REX */
                rex = 1;
@@ -3305,6 +3305,8 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
                ir.rex_x = (tmpu8 & 0x2) << 2;
                ir.rex_b = (tmpu8 & 0x1) << 3;
             }
+	  else					/* 32 bit target */
+	    goto out_prefixes;
           break;
 	default:
 	  goto out_prefixes;
