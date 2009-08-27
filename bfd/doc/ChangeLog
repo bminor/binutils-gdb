@@ -1,3 +1,7 @@
+2009-08-27  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* Makefile.in: Regenerate.
+
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.am (pdf__strip_dir, install-pdf, install-pdf-am)

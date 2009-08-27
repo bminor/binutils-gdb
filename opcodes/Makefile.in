@@ -37,7 +37,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-@INSTALL_LIBBFD_FALSE@am__append_1 = -rpath $(bfdlibdir)
+@INSTALL_LIBBFD_FALSE@am__append_1 = -rpath $(rpath_bfdlibdir)
 subdir = .
 DIST_COMMON = ChangeLog $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/configure $(am__configure_deps) \
@@ -229,8 +229,11 @@ am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
 archdefs = @archdefs@
-bfdincludedir = @bfdincludedir@
-bfdlibdir = @bfdlibdir@
+@INSTALL_LIBBFD_FALSE@bfdincludedir = 
+@INSTALL_LIBBFD_TRUE@bfdincludedir = @bfdincludedir@
+# Empty these so that the respective installation directories will not be created.
+@INSTALL_LIBBFD_FALSE@bfdlibdir = 
+@INSTALL_LIBBFD_TRUE@bfdlibdir = @bfdlibdir@
 bindir = @bindir@
 build = @build@
 build_alias = @build_alias@
@@ -295,6 +298,7 @@ libopcodes_la_LDFLAGS = $(am__append_1) -release `cat \
 	../bfd/libtool-soversion` @SHARED_LDFLAGS@
 @INSTALL_LIBBFD_TRUE@bfdlib_LTLIBRARIES = libopcodes.la
 @INSTALL_LIBBFD_TRUE@bfdinclude_DATA = $(INCDIR)/dis-asm.h
+@INSTALL_LIBBFD_FALSE@rpath_bfdlibdir = @bfdlibdir@
 @INSTALL_LIBBFD_FALSE@noinst_LTLIBRARIES = libopcodes.la
 
 # This is where bfd.h lives.

@@ -1,3 +1,15 @@
+2009-08-27  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* acinclude.m4 (AM_INSTALL_LIBBFD): Call AM_SUBST_NOTMAKE for
+	bfdlibdir and bfdincludedir.
+	* Makefile.am (bfdlibdir, bfdincludedir): Move definition ...
+	[INSTALL_LIBBFD]: ... here, ...
+	[INSTALL_LIBBFD]: ... and empty overrides here.
+	[!INSTALL_LIBBFD]: (rpath_bfdlibdir): New variable.
+	[!INSTALL_LIBBFD] (libbfd_la_LDFLAGS): Use it.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
 2009-08-26  Maxim Kuvyrkov  <maxim@codesourcery.com>
 
 	* elf32-m68k.c: Rewrite initialization of GOT entries for TLS

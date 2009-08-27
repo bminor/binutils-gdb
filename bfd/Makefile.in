@@ -37,7 +37,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-@INSTALL_LIBBFD_FALSE@am__append_1 = -rpath $(bfdlibdir)
+@INSTALL_LIBBFD_FALSE@am__append_1 = -rpath $(rpath_bfdlibdir)
 subdir = .
 DIST_COMMON = README ChangeLog $(srcdir)/Makefile.in \
 	$(srcdir)/Makefile.am $(top_srcdir)/configure \
@@ -258,8 +258,11 @@ bfd_default_target_size = @bfd_default_target_size@
 bfd_file_ptr = @bfd_file_ptr@
 bfd_machines = @bfd_machines@
 bfd_ufile_ptr = @bfd_ufile_ptr@
-bfdincludedir = @bfdincludedir@
-bfdlibdir = @bfdlibdir@
+@INSTALL_LIBBFD_FALSE@bfdincludedir = 
+@INSTALL_LIBBFD_TRUE@bfdincludedir = @bfdincludedir@
+# Empty these so that the respective installation directories will not be created.
+@INSTALL_LIBBFD_FALSE@bfdlibdir = 
+@INSTALL_LIBBFD_TRUE@bfdlibdir = @bfdlibdir@
 bindir = @bindir@
 build = @build@
 build_alias = @build_alias@
@@ -323,6 +326,7 @@ libbfd_la_LDFLAGS = $(am__append_1) -release `cat libtool-soversion` \
 	@SHARED_LDFLAGS@ $(am__empty)
 @INSTALL_LIBBFD_TRUE@bfdlib_LTLIBRARIES = libbfd.la
 @INSTALL_LIBBFD_TRUE@bfdinclude_HEADERS = $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/bfdlink.h
+@INSTALL_LIBBFD_FALSE@rpath_bfdlibdir = @bfdlibdir@
 @INSTALL_LIBBFD_FALSE@noinst_LTLIBRARIES = libbfd.la
 AM_CFLAGS = $(WARN_CFLAGS)
 AM_CPPFLAGS = -DBINDIR='"$(bindir)"'

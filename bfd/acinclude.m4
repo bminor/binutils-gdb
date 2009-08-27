@@ -64,6 +64,8 @@ AC_DEFUN([AM_INSTALL_LIBBFD],
     bfdincludedir='$(exec_prefix)/$(host_noncanonical)/$(target_noncanonical)/include'
   fi
   AC_SUBST(bfdlibdir)
+  AM_SUBST_NOTMAKE(bfdlibdir)
   AC_SUBST(bfdincludedir)
+  AM_SUBST_NOTMAKE(bfdincludedir)
 ]
 )

@@ -1,3 +1,13 @@
+2009-08-27  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* Makefile.am (bfdlibdir, bfdincludedir): Move definition ...
+	[INSTALL_LIBBFD]: ... here, ...
+	[INSTALL_LIBBFD]: ... and empty overrides here.
+	[!INSTALL_LIBBFD]: (rpath_bfdlibdir): New variable.
+	[!INSTALL_LIBBFD] (libbfd_la_LDFLAGS): Use it.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
 2009-08-26  Philippe De Muyter  <phdm@macqel.be>
 
 	* m68k-dis.c (print_insn_arg): Add movecr register names for

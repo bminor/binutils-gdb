@@ -17,16 +17,19 @@ COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(BUILD_CPPFLAGS) $(BUILD_CFLAGS)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o $@
 
-bfdlibdir = @bfdlibdir@
-bfdincludedir = @bfdincludedir@
-
 libopcodes_la_LDFLAGS =
 if INSTALL_LIBBFD
+bfdlibdir = @bfdlibdir@
+bfdincludedir = @bfdincludedir@
 bfdlib_LTLIBRARIES = libopcodes.la
 bfdinclude_DATA = $(INCDIR)/dis-asm.h
 else
+# Empty these so that the respective installation directories will not be created.
+bfdlibdir =
+bfdincludedir =
+rpath_bfdlibdir = @bfdlibdir@
 noinst_LTLIBRARIES = libopcodes.la
-libopcodes_la_LDFLAGS += -rpath $(bfdlibdir)
+libopcodes_la_LDFLAGS += -rpath $(rpath_bfdlibdir)
 endif
 
 # This is where bfd.h lives.

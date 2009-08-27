@@ -12,16 +12,20 @@ CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
 SUBDIRS = doc po
 
 bfddocdir = doc
-bfdlibdir = @bfdlibdir@
-bfdincludedir = @bfdincludedir@
 
 libbfd_la_LDFLAGS =
 if INSTALL_LIBBFD
+bfdlibdir = @bfdlibdir@
+bfdincludedir = @bfdincludedir@
 bfdlib_LTLIBRARIES = libbfd.la
 bfdinclude_HEADERS = $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/bfdlink.h
 else !INSTALL_LIBBFD
+# Empty these so that the respective installation directories will not be created.
+bfdlibdir =
+bfdincludedir =
+rpath_bfdlibdir = @bfdlibdir@
 noinst_LTLIBRARIES = libbfd.la
-libbfd_la_LDFLAGS += -rpath $(bfdlibdir)
+libbfd_la_LDFLAGS += -rpath $(rpath_bfdlibdir)
 endif
 
 WARN_CFLAGS = @WARN_CFLAGS@
