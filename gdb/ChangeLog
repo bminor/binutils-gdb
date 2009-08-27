@@ -1,3 +1,31 @@
+2009-08-27  Doug Evans  <dje@google.com>
+
+	* NEWS: Add note on "info sharedlibrary".
+	Remove note on "set print symbol-loading".
+	* main.c (captured_main): Pass !batch for from_tty when calling
+	symbol_file_add_main.
+	* objfiles.h (objfile_has_partial_symbols): Declare.
+	(objfile_has_full_symbols): Declare.
+	* objfiles.c (objfile_has_partial_symbols): New function.
+	(have_partial_symbols): Use it.
+	(objfile_has_full_symbols): New function.
+	(have_full_symbols): Use it.
+	* solib.c: Include interps.h.
+	(solib_read_symbols): Back out patch of 2008-07-10.
+	Add test for info_verbose for symbol loading messages for
+	consistency with symfile.c.
+	(info_sharedlibrary_command): Handle optional parameter of regex of
+	libraries to list.  Inform user of libraries without debugging info.
+	Rewrite to use ui_out routines to format output.
+	* symfile.c (print_symbol_loading): Delete.
+	(symbol_file_add_with_addrs_or_offsets): Back out patch of 2008-07-10.
+	Print "no debugging symbols found" only if from_tty || info_verbose;
+	and only check file being loaded, not all files.
+	(reread_symbols): Test file being loaded for whether it has symbols,
+	not all files.
+	(__initialize_symfile): Delete `set print symbol-loading'.
+	* symfile.h (print_symbol_loading): Delete.
+
 2009-08-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* varobj.c (varobj_create): Error if the specified frame was not found

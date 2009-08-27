@@ -1,3 +1,8 @@
+2009-08-27  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Symbols): Delete `set print symbol-loading'.
+	(Files): Add note on new optional regex arg to `info sharedlibrary'.
+
 2009-08-26  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* gdbint.texinfo (Releasing GDB): Fix confusing sentence

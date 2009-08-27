@@ -801,14 +801,14 @@ Excess command line arguments ignored. (%s%s)\n"),
          open it, better only print one error message.
          catch_command_errors returns non-zero on success! */
       if (catch_command_errors (exec_file_attach, execarg, !batch, RETURN_MASK_ALL))
-	catch_command_errors (symbol_file_add_main, symarg, 0, RETURN_MASK_ALL);
+	catch_command_errors (symbol_file_add_main, symarg, !batch, RETURN_MASK_ALL);
     }
   else
     {
       if (execarg != NULL)
 	catch_command_errors (exec_file_attach, execarg, !batch, RETURN_MASK_ALL);
       if (symarg != NULL)
-	catch_command_errors (symbol_file_add_main, symarg, 0, RETURN_MASK_ALL);
+	catch_command_errors (symbol_file_add_main, symarg, !batch, RETURN_MASK_ALL);
     }
 
   if (corearg && pidarg)

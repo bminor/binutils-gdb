@@ -700,6 +700,22 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
   breakpoint_re_set ();
 }
 
+/* Return non-zero if OBJFILE has partial symbols.  */
+
+int
+objfile_has_partial_symbols (struct objfile *objfile)
+{
+  return objfile->psymtabs != NULL;
+}
+
+/* Return non-zero if OBJFILE has full symbols.  */
+
+int
+objfile_has_full_symbols (struct objfile *objfile)
+{
+  return objfile->symtabs != NULL;
+}
+
 /* Many places in gdb want to test just to see if we have any partial
    symbols available.  This function returns zero if none are currently
    available, nonzero otherwise. */
@@ -711,10 +727,8 @@ have_partial_symbols (void)
 
   ALL_OBJFILES (ofp)
   {
-    if (ofp->psymtabs != NULL)
-      {
-	return 1;
-      }
+    if (objfile_has_partial_symbols (ofp))
+      return 1;
   }
   return 0;
 }
@@ -730,10 +744,8 @@ have_full_symbols (void)
 
   ALL_OBJFILES (ofp)
   {
-    if (ofp->symtabs != NULL)
-      {
-	return 1;
-      }
+    if (objfile_has_full_symbols (ofp))
+      return 1;
   }
   return 0;
 }

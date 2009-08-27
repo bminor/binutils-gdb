@@ -48,6 +48,9 @@ remote targets.  To use this feature, specify a system root that begins
 with the `remote:' prefix, either via the `set sysroot' command or via
 the `--with-sysroot' configure-time option.
 
+* "info sharedlibrary" now takes an optional regex of libraries to show,
+and it now reports if a shared library has no debugging information.
+
 * Commands `set debug-file-directory', `set solib-search-path' and `set args'
 now complete on file names.
 
@@ -277,10 +280,6 @@ show spu auto-flush-cache
 set sh calling-convention
 show sh calling-convention
   Control the calling convention used when calling SH target functions.
-
-set print symbol-loading
-show print symbol-loading
-  Control printing of symbol loading messages.
 
 set debug timestamp
 show debug timestamp
