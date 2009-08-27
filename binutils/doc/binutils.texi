@@ -1553,6 +1553,39 @@ distribution and the second a debugging information file which is only
 needed if debugging abilities are required.  The suggested procedure
 to create these files is as follows:
 
+@enumerate
+@item Link the executable as normal.  Assuming that is is called
+@code{foo} then...
+@item Run @code{objcopy --only-keep-debug foo foo.dbg} to
+create a file containing the debugging info.
+@item Run @code{objcopy --strip-debug foo} to create a
+stripped executable.
+@item Run @code{objcopy --add-gnu-debuglink=foo.dbg foo}
+to add a link to the debugging info into the stripped executable.
+@end enumerate
+
+Note---the choice of @code{.dbg} as an extension for the debug info
+file is arbitrary.  Also the @code{--only-keep-debug} step is
+optional.  You could instead do this:
+
+@enumerate
+@item Link the executable as normal.
+@item Copy @code{foo} to  @code{foo.full}
+@item Run @code{objcopy --strip-debug foo}
+@item Run @code{objcopy --add-gnu-debuglink=foo.full foo}
+@end enumerate
+
+i.e., the file pointed to by the @option{--add-gnu-debuglink} can be the
+full executable.  It does not have to be a file created by the
+@option{--only-keep-debug} switch.
+
+Note---this switch is only intended for use on fully linked files.  It
+does not make sense to use it on object files where the debugging
+information may be incomplete.  Besides the gnu_debuglink feature
+currently only supports the presence of one filename containing
+debugging information, not multiple filenames on a one-per-object-file
+basis.
+
 @item --file-alignment @var{num}
 Specify the file alignment.  Sections in the file will always begin at
 file offsets which are multiples of this number.  This defaults to
@@ -1595,39 +1628,6 @@ legal values for @var{which} are @code{native}, @code{windows},
 the subsystem version also.  Numeric values are also accepted for
 @var{which}.
 [This option is specific to PE targets.]
-
-@enumerate
-@item Link the executable as normal.  Assuming that is is called
-@code{foo} then...
-@item Run @code{objcopy --only-keep-debug foo foo.dbg} to
-create a file containing the debugging info.
-@item Run @code{objcopy --strip-debug foo} to create a
-stripped executable.
-@item Run @code{objcopy --add-gnu-debuglink=foo.dbg foo}
-to add a link to the debugging info into the stripped executable.
-@end enumerate
-
-Note---the choice of @code{.dbg} as an extension for the debug info
-file is arbitrary.  Also the @code{--only-keep-debug} step is
-optional.  You could instead do this:
-
-@enumerate
-@item Link the executable as normal.
-@item Copy @code{foo} to  @code{foo.full}
-@item Run @code{objcopy --strip-debug foo}
-@item Run @code{objcopy --add-gnu-debuglink=foo.full foo}
-@end enumerate
-
-i.e., the file pointed to by the @option{--add-gnu-debuglink} can be the
-full executable.  It does not have to be a file created by the
-@option{--only-keep-debug} switch.
-
-Note---this switch is only intended for use on fully linked files.  It
-does not make sense to use it on object files where the debugging
-information may be incomplete.  Besides the gnu_debuglink feature
-currently only supports the presence of one filename containing
-debugging information, not multiple filenames on a one-per-object-file
-basis.
 
 @item --extract-symbol
 Keep the file's section flags and symbols but remove all section data.
