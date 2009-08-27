@@ -1,5 +1,7 @@
 2009-08-27  Doug Evans  <dje@google.com>
 
+	* value.c (free_all_values): Tweak comment.
+
 	* NEWS: Add note on "info sharedlibrary".
 	Remove note on "set print symbol-loading".
 	* main.c (captured_main): Pass !batch for from_tty when calling

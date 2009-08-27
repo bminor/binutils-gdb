@@ -638,7 +638,8 @@ value_free_to_mark (struct value *mark)
 }
 
 /* Free all the values that have been allocated (except for those released).
-   Called after each command, successful or not.  */
+   Call after each command, successful or not.
+   In practice this is called before each command, which is sufficient.  */
 
 void
 free_all_values (void)
