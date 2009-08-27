@@ -1,3 +1,9 @@
+2009-08-26  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.base/i386-reverse.c: New file.
+	* gdb.base/i386-reverse.exp: New file.
+	* gdb.base/Makefile.in: Add new files to be removed.
+
 2009-08-26  Joseph Myers  <joseph@codesourcery.com>
 
 	* gdb.mi/mi-basics.exp (test_cwd_specification): Do not test

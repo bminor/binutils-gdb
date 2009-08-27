@@ -3,7 +3,7 @@ srcdir = @srcdir@
 
 EXECUTABLES   = break-reverse consecutive-reverse finish-reverse \
 	machinestate solib-reverse step-reverse until-reverse \
-	watch-reverse 
+	watch-reverse i386-reverse
 
 MISCELLANEOUS = 
 
