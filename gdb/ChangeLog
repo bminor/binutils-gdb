@@ -1,3 +1,8 @@
+2009-08-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* varobj.c (varobj_create): Error if the specified frame was not found
+	and it is needed.
+
 2009-08-26  Michael Snyder  <msnyder@vmware.com>
 
 	* i386-tdep.c (i386_process_record): Break out of prefix loop

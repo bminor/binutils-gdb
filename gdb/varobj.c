@@ -565,8 +565,15 @@ varobj_create (char *objname,
          we must select the appropriate frame before parsing
          the expression, otherwise the value will not be current.
          Since select_frame is so benign, just call it for all cases. */
-      if (innermost_block && fi != NULL)
+      if (innermost_block)
 	{
+	  /* User could specify explicit FRAME-ADDR which was not found but
+	     EXPRESSION is frame specific and we would not be able to evaluate
+	     it correctly next time.  With VALID_BLOCK set we must also set
+	     FRAME and THREAD_ID.  */
+	  if (fi == NULL)
+	    error (_("Failed to find the specified frame"));
+
 	  var->root->frame = get_frame_id (fi);
 	  var->root->thread_id = pid_to_thread_id (inferior_ptid);
 	  old_fi = get_selected_frame (NULL);

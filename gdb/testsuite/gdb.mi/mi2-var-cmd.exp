@@ -126,6 +126,11 @@ mi_gdb_test "-var-create int * int" \
 	"&\"Attempt to use a type name as an expression.\\\\n\".*\\^error,msg=\"mi_cmd_var_create: unable to create variable object\"" \
 	"create int"
 
+# The number 0 must be an invalid frame address and linteger a local variable.
+mi_gdb_test "-var-create invalidframe 0 linteger" \
+	"\\^error,msg=\"Failed to find the specified frame\"" \
+	"create variable with invalid FRAME-ADDR"
+
 
 #####             #####
 #                     #

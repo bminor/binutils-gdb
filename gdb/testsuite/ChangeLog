@@ -1,3 +1,7 @@
+2009-08-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.mi/mi2-var-cmd.exp (create variable with invalid FRAME-ADDR): New.
+
 2009-08-26  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.base/i386-reverse.c: New file.
