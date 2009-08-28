@@ -1,3 +1,8 @@
+2009-08-28  Hui Zhu  <teawater@gmail.com>
+
+	* record.c (record_list_release_next): Change the first
+	record_reg to record_end.
+
 2009-08-27  Doug Evans  <dje@google.com>
 
 	* value.c (free_all_values): Tweak comment.

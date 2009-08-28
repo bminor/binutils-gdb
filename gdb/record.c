@@ -157,7 +157,7 @@ record_list_release_next (void)
   while (tmp)
     {
       rec = tmp->next;
-      if (tmp->type == record_reg)
+      if (tmp->type == record_end)
 	record_insn_num--;
       else if (tmp->type == record_reg)
 	xfree (tmp->u.reg.val);
