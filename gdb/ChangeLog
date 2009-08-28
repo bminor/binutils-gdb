@@ -1,3 +1,7 @@
+2009-08-28  Doug Evans  <dje@google.com>
+
+	* top.c (execute_command): Remove redundant comment.
+
 2009-08-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	PR gdb/10565

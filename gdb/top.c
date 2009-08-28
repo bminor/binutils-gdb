@@ -345,10 +345,8 @@ do_chdir_cleanup (void *old_dir)
 }
 #endif
 
-/* Execute the line P as a command.
+/* Execute the line P as a command, in the current user context.
    Pass FROM_TTY as second argument to the defining function.  */
-
-/* Execute command P, in the current user context.  */
 
 void
 execute_command (char *p, int from_tty)
