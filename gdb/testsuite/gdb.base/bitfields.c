@@ -63,6 +63,12 @@ void break10 ()
 {
 }
 
+struct container
+{
+  struct fields one;
+  struct fields two;
+} container;
+
 /* This is used by bitfields.exp to determine if the target understands
    signed bitfields.  */
 int i;
@@ -189,6 +195,11 @@ int main ()
   flags.s2 = 0;
   flags.s3 = 0;
   flags.s9 = 0;
+
+  /* Bitfields at a non-zero offset in a containing structure.  */
+  container.one.u3 = 5;
+  container.two.u3 = 3;
+  break5 ();
 
   return 0;
 }

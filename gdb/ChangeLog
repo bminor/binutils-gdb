@@ -1,3 +1,11 @@
+2009-08-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR gdb/10565
+
+	* value.c (value_primitive_field): Do not save value_offset for
+	bitfields.
+	(unpack_bits_as_long): Do not read an entire ULONGEST.
+
 2009-08-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Support constant DW_AT_data_member_location by GCC PR debug/40659.

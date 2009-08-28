@@ -233,6 +233,26 @@ proc bitfield_signedness {} {
     gdb_stop_suppressing_tests;
 }
 
+# Test bitfields at non-zero offsets in a struct.
+
+proc bitfield_at_offset {} {
+    global decimal
+    global hex
+    global gdb_prompt
+    global srcfile
+
+    gdb_breakpoint break5
+    if [gdb_test "cont" "Break.*break5 \\(\\) at .*$srcfile:$decimal.*" "continuing to break5"] {
+	return
+    }
+
+    set one ".*uc = 0 .*, s1 = 0, u1 = 0, s2 = 0, u2 = 0, s3 = 0, u3 = 5, s9 = 0, u9 = 0, sc = 0.*"
+    set two ".*uc = 0 .*, s1 = 0, u1 = 0, s2 = 0, u2 = 0, s3 = 0, u3 = 3, s9 = 0, u9 = 0, sc = 0.*"
+    gdb_test "print container" "$one$two" "distinct bitfields in container"
+    gdb_test "print container.one.u3" ".* = 5"
+    gdb_test "print container.two.u3" ".* = 3"
+}
+
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
@@ -264,3 +284,5 @@ if [istarget "mips-idt-*"] then {
     gdb_load ${binfile}
 }
 bitfield_signedness
+
+bitfield_at_offset

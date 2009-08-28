@@ -1,3 +1,11 @@
+2009-08-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR gdb/10565
+
+	* gdb.base/bitfields.c (struct container, container): New.
+	(main): Initialize it and call break5.
+	* gdb.base/bitfields.exp (bitfield_at_offset): New test.
+
 2009-08-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Support constant DW_AT_data_member_location by GCC PR debug/40659.
