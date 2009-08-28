@@ -1,3 +1,8 @@
+2009-08-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Support constant DW_AT_data_member_location by GCC PR debug/40659.
+	* gdb.dwarf2/dw2-inheritance.exp, gdb.dwarf2/dw2-inheritance.S: New.
+
 2009-08-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.mi/mi2-var-cmd.exp (create variable with invalid FRAME-ADDR): New.

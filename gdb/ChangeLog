@@ -1,3 +1,14 @@
+2009-08-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Support constant DW_AT_data_member_location by GCC PR debug/40659.
+	* dwarf2read.c
+	(dwarf2_add_field <DW_TAG_member> <DW_AT_data_member_location>):
+	Initialize BYTE_OFFSET to 0 by default.  Explicitly check if
+	attr_form_is_block.
+	(dwarf2_add_field <DW_TAG_inheritance> <DW_AT_data_member_location>)
+	(read_common_block <DW_AT_data_member_location>): New variable
+	byte_offset.  Fix crash on non-DW_BLOCK ATTR values.
+
 2009-08-28  Hui Zhu  <teawater@gmail.com>
 
 	* record.c (record_list_release_next): Change the first

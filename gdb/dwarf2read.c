@@ -4385,17 +4385,16 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       attr = dwarf2_attr (die, DW_AT_data_member_location, cu);
       if (attr)
 	{
-          int byte_offset;
+          int byte_offset = 0;
 
           if (attr_form_is_section_offset (attr))
-            {
-              dwarf2_complex_location_expr_complaint ();
-              byte_offset = 0;
-            }
+	    dwarf2_complex_location_expr_complaint ();
           else if (attr_form_is_constant (attr))
             byte_offset = dwarf2_get_attr_constant_value (attr, 0);
-          else
+          else if (attr_form_is_block (attr))
             byte_offset = decode_locdesc (DW_BLOCK (attr), cu);
+	  else
+	    dwarf2_complex_location_expr_complaint ();
 
           SET_FIELD_BITPOS (*fp, byte_offset * bits_per_byte);
 	}
@@ -4490,8 +4489,20 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       /* C++ base class field.  */
       attr = dwarf2_attr (die, DW_AT_data_member_location, cu);
       if (attr)
-	SET_FIELD_BITPOS (*fp, decode_locdesc (DW_BLOCK (attr), cu)
-			       * bits_per_byte);
+	{
+          int byte_offset = 0;
+
+          if (attr_form_is_section_offset (attr))
+	    dwarf2_complex_location_expr_complaint ();
+          else if (attr_form_is_constant (attr))
+            byte_offset = dwarf2_get_attr_constant_value (attr, 0);
+          else if (attr_form_is_block (attr))
+            byte_offset = decode_locdesc (DW_BLOCK (attr), cu);
+	  else
+	    dwarf2_complex_location_expr_complaint ();
+
+          SET_FIELD_BITPOS (*fp, byte_offset * bits_per_byte);
+	}
       FIELD_BITSIZE (*fp) = 0;
       FIELD_TYPE (*fp) = die_type (die, cu);
       FIELD_NAME (*fp) = type_name_no_tag (fp->type);
@@ -5438,8 +5449,18 @@ read_common_block (struct die_info *die, struct dwarf2_cu *cu)
 	  attr = dwarf2_attr (child_die, DW_AT_data_member_location, cu);
 	  if (attr)
 	    {
-	      SYMBOL_VALUE_ADDRESS (sym) =
-		base + decode_locdesc (DW_BLOCK (attr), cu);
+	      CORE_ADDR byte_offset = 0;
+
+	      if (attr_form_is_section_offset (attr))
+		dwarf2_complex_location_expr_complaint ();
+	      else if (attr_form_is_constant (attr))
+		byte_offset = dwarf2_get_attr_constant_value (attr, 0);
+	      else if (attr_form_is_block (attr))
+		byte_offset = decode_locdesc (DW_BLOCK (attr), cu);
+	      else
+		dwarf2_complex_location_expr_complaint ();
+
+	      SYMBOL_VALUE_ADDRESS (sym) = base + byte_offset;
 	      add_symbol_to_list (sym, &global_symbols);
 	    }
 	  child_die = sibling_die (child_die);
