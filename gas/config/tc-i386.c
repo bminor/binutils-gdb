@@ -577,7 +577,7 @@ static const arch_entry cpu_arch[] =
     CPU_CORE2_FLAGS },
   { "corei7", PROCESSOR_COREI7,
     CPU_COREI7_FLAGS },
-  { "l1om", PROCESSOR_GENERIC64,
+  { "l1om", PROCESSOR_L1OM,
     CPU_L1OM_FLAGS },
   { "k6", PROCESSOR_K6,
     CPU_K6_FLAGS },
@@ -995,6 +995,7 @@ i386_align_code (fragS *fragP, int count)
 	    case PROCESSOR_CORE:
 	    case PROCESSOR_CORE2:
 	    case PROCESSOR_COREI7:
+	    case PROCESSOR_L1OM:
 	    case PROCESSOR_GENERIC64:
 	      patt = alt_long_patt;
 	      break;
@@ -1043,6 +1044,7 @@ i386_align_code (fragS *fragP, int count)
 	    case PROCESSOR_CORE:
 	    case PROCESSOR_CORE2:
 	    case PROCESSOR_COREI7:
+	    case PROCESSOR_L1OM:
 	      if (fragP->tc_frag_data.isa_flags.bitfield.cpui686)
 		patt = alt_long_patt;
 	      else
@@ -1977,7 +1979,7 @@ check_cpu_arch_compatible (const char *name ATTRIBUTE_UNUSED,
 	arch = default_arch;
     }
 
-  /* If we are targeting Intel L1OM, wm must enable it.  */
+  /* If we are targeting Intel L1OM, we must enable it.  */
   if (get_elf_backend_data (stdoutput)->elf_machine_code != EM_L1OM
       || new.bitfield.cpul1om)
     return;
@@ -2085,7 +2087,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 enum bfd_architecture
 i386_arch (void)
 {
-  if (cpu_arch_isa_flags.bitfield.cpul1om)
+  if (cpu_arch_isa == PROCESSOR_L1OM)
     {
       if (OUTPUT_FLAVOR != bfd_target_elf_flavour
 	  || flag_code != CODE_64BIT)
@@ -2101,7 +2103,7 @@ i386_mach ()
 {
   if (!strcmp (default_arch, "x86_64"))
     {
-      if (cpu_arch_isa_flags.bitfield.cpul1om)
+      if (cpu_arch_isa == PROCESSOR_L1OM)
 	{
 	  if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
 	    as_fatal (_("Intel L1OM is 64bit ELF only"));
@@ -8102,7 +8104,7 @@ i386_target_format (void)
 	    object_64bit = 1;
 	    use_rela_relocations = 1;
 	  }
-	if (cpu_arch_isa_flags.bitfield.cpul1om)
+	if (cpu_arch_isa == PROCESSOR_L1OM)
 	  {
 	    if (flag_code != CODE_64BIT)
 	      as_fatal (_("Intel L1OM is 64bit only"));

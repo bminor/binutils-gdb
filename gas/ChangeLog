@@ -1,3 +1,15 @@
+2009-08-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Use PROCESSOR_L1OM on "l1om".
+	(i386_align_code): Handle PROCESSOR_L1OM.
+	(check_cpu_arch_compatible): Fix a typo in comments.
+	(set_cpu_arch): Check cpu_arch_isa instead of
+	cpu_arch_isa_flags.bitfield.cpul1om.
+	(i386_mach): Likewise.
+	(i386_target_format): Likewise.
+
+	* config/tc-i386.h (processor_type): Add PROCESSOR_L1OM.
+
 2009-08-26  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-mep.c (md_pcrel_from_section): Handle any other

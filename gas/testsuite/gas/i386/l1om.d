@@ -2,7 +2,8 @@
 #as: -J -march=l1om
 #objdump: -dw --insn-width=7
 #name: l1om
-.*: +file format .*
+
+.*: +file format elf64-l1om.*
 
 Disassembly of section .text:
 
