@@ -1350,7 +1350,7 @@ static char *
 parse_exp (char *s, sh_operand_info *op)
 {
   char *save;
-  char *new;
+  char *new_pointer;
 
   save = input_line_pointer;
   input_line_pointer = s;
@@ -1363,9 +1363,9 @@ parse_exp (char *s, sh_operand_info *op)
 	   || sh_PIC_related_p (op->immediate.X_op_symbol))
     as_bad (_("misplaced PIC operand"));
 #endif
-  new = input_line_pointer;
+  new_pointer = input_line_pointer;
   input_line_pointer = save;
-  return new;
+  return new_pointer;
 }
 
 /* The many forms of operand:

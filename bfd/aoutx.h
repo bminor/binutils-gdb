@@ -1668,12 +1668,12 @@ NAME (aout, make_empty_symbol) (bfd *abfd)
 {
   bfd_size_type amt = sizeof (aout_symbol_type);
 
-  aout_symbol_type *new = bfd_zalloc (abfd, amt);
-  if (!new)
+  aout_symbol_type *new_symbol = (aout_symbol_type *) bfd_zalloc (abfd, amt);
+  if (!new_symbol)
     return NULL;
-  new->symbol.the_bfd = abfd;
+  new_symbol->symbol.the_bfd = abfd;
 
-  return &new->symbol;
+  return &new_symbol->symbol;
 }
 
 /* Translate a set of internal symbols into external symbols.  */

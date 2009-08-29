@@ -1,3 +1,8 @@
+2009-08-29  Martin Thuresson  <martin@mtme.org>
+
+	* chew.c (newentry, add_intrinsic): Rename variable new to
+	new_d.
+
 2009-08-27  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.in: Regenerate.

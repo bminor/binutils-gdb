@@ -594,7 +594,7 @@ static char *
 parse_operand (char *s, expressionS *operandp)
 {
   char *save = input_line_pointer;
-  char *new;
+  char *new_pos;
 
   the_insn.HI = the_insn.LO = 0;
 
@@ -641,9 +641,9 @@ parse_operand (char *s, expressionS *operandp)
       (void) expression (operandp);
     }
 
-  new = input_line_pointer;
+  new_pos = input_line_pointer;
   input_line_pointer = save;
-  return new;
+  return new_pos;
 }
 
 /* Instruction parsing.  Takes a string containing the opcode.

@@ -597,7 +597,7 @@ static struct s7_datafield_range s7_score_df_range[] =
 struct s7_asm_opcode
 {
   /* Instruction name.  */
-  const char *template;
+  const char *template_name;
 
   /* Instruction Opcode.  */
   bfd_vma value;
@@ -2804,7 +2804,7 @@ s7_parse_16_32_inst (char *insnstr, bfd_boolean gen_frag_p)
       s7_inst.size = s7_GET_INSN_SIZE (s7_inst.type);
       s7_inst.relax_size = 0;
       s7_inst.bwarn = 0;
-      sprintf (s7_inst.name, "%s", opcode->template);
+      sprintf (s7_inst.name, "%s", opcode->template_name);
       strcpy (s7_inst.reg, "");
       s7_inst.error = NULL;
       s7_inst.reloc.type = BFD_RELOC_NONE;
@@ -4789,7 +4789,8 @@ s7_do_macro_ldst_label (char *str)
         {
           int ldst_idx = 0;
           ldst_idx = s7_inst.instruction & OPC_PSEUDOLDST_MASK;
-          s7_build_lwst_pic (reg_rd, s7_inst.reloc.exp, s7_score_ldst_insns[ldst_idx * 3 + 0].template);
+          s7_build_lwst_pic (reg_rd, s7_inst.reloc.exp,
+                             s7_score_ldst_insns[ldst_idx * 3 + 0].template_name);
           return;
         }
       else
@@ -5092,20 +5093,22 @@ s7_build_score_ops_hsh (void)
   for (i = 0; i < sizeof (s7_score_insns) / sizeof (struct s7_asm_opcode); i++)
     {
       const struct s7_asm_opcode *insn = s7_score_insns + i;
-      unsigned len = strlen (insn->template);
-      struct s7_asm_opcode *new;
-      char *template;
-      new = obstack_alloc (&insn_obstack, sizeof (struct s7_asm_opcode));
-      template = obstack_alloc (&insn_obstack, len + 1);
+      unsigned len = strlen (insn->template_name);
+      struct s7_asm_opcode *new_opcode;
+      char *template_name;
+      new_opcode = (struct s7_asm_opcode *)
+          obstack_alloc (&insn_obstack, sizeof (struct s7_asm_opcode));
+      template_name = (char *) obstack_alloc (&insn_obstack, len + 1);
 
-      strcpy (template, insn->template);
-      new->template = template;
-      new->parms = insn->parms;
-      new->value = insn->value;
-      new->relax_value = insn->relax_value;
-      new->type = insn->type;
-      new->bitmask = insn->bitmask;
-      hash_insert (s7_score_ops_hsh, new->template, (void *) new);
+      strcpy (template_name, insn->template_name);
+      new_opcode->template_name = template_name;
+      new_opcode->parms = insn->parms;
+      new_opcode->value = insn->value;
+      new_opcode->relax_value = insn->relax_value;
+      new_opcode->type = insn->type;
+      new_opcode->bitmask = insn->bitmask;
+      hash_insert (s7_score_ops_hsh, new_opcode->template_name,
+                   (void *) new_opcode);
     }
 }
 
@@ -5120,14 +5123,18 @@ s7_build_dependency_insn_hsh (void)
     {
       const struct s7_insn_to_dependency *tmp = s7_insn_to_dependency_table + i;
       unsigned len = strlen (tmp->insn_name);
-      struct s7_insn_to_dependency *new;
+      struct s7_insn_to_dependency *new_i2d;
 
-      new = obstack_alloc (&dependency_obstack, sizeof (struct s7_insn_to_dependency));
-      new->insn_name = obstack_alloc (&dependency_obstack, len + 1);
+      new_i2d = (struct s7_insn_to_dependency *)
+          obstack_alloc (&dependency_obstack,
+                         sizeof (struct s7_insn_to_dependency));
+      new_i2d->insn_name = (char *) obstack_alloc (&dependency_obstack,
+                                                   len + 1);
 
-      strcpy (new->insn_name, tmp->insn_name);
-      new->type = tmp->type;
-      hash_insert (s7_dependency_insn_hsh, new->insn_name, (void *) new);
+      strcpy (new_i2d->insn_name, tmp->insn_name);
+      new_i2d->type = tmp->type;
+      hash_insert (s7_dependency_insn_hsh, new_i2d->insn_name,
+                   (void *) new_i2d);
     }
 }
 
@@ -5238,8 +5245,8 @@ s7_b32_relax_to_b16 (fragS * fragp)
 {
   int grows = 0;
   int relaxable_p = 0;
-  int old;
-  int new;
+  int r_old;
+  int r_new;
   int frag_addr = fragp->fr_address + fragp->insn_addr;
 
   addressT symbol_address = 0;
@@ -5253,8 +5260,8 @@ s7_b32_relax_to_b16 (fragS * fragp)
      so in relax stage , it may be wrong to calculate the symbol's offset when the frag's section
      is different from the symbol's.  */
 
-  old = s7_RELAX_OLD (fragp->fr_subtype);
-  new = s7_RELAX_NEW (fragp->fr_subtype);
+  r_old = s7_RELAX_OLD (fragp->fr_subtype);
+  r_new = s7_RELAX_NEW (fragp->fr_subtype);
   relaxable_p = s7_RELAX_OPT (fragp->fr_subtype);
 
   s = fragp->fr_symbol;
@@ -6575,28 +6582,28 @@ s7_convert_frag (bfd * abfd ATTRIBUTE_UNUSED,
 		 segT sec ATTRIBUTE_UNUSED,
 		 fragS * fragp)
 {
-  int old;
-  int new;
+  int r_old;
+  int r_new;
   char backup[20];
   fixS *fixp;
 
-  old = s7_RELAX_OLD (fragp->fr_subtype);
-  new = s7_RELAX_NEW (fragp->fr_subtype);
+  r_old = s7_RELAX_OLD (fragp->fr_subtype);
+  r_new = s7_RELAX_NEW (fragp->fr_subtype);
 
   /* fragp->fr_opcode indicates whether this frag should be relaxed.  */
   if (fragp->fr_opcode == NULL)
     {
-      memcpy (backup, fragp->fr_literal, old);
-      fragp->fr_fix = old;
+      memcpy (backup, fragp->fr_literal, r_old);
+      fragp->fr_fix = r_old;
     }
   else
     {
-      memcpy (backup, fragp->fr_literal + old, new);
-      fragp->fr_fix = new;
+      memcpy (backup, fragp->fr_literal + r_old, r_new);
+      fragp->fr_fix = r_new;
     }
 
   fixp = fragp->tc_frag_data.fixp;
-  while (fixp && fixp->fx_frag == fragp && fixp->fx_where < old)
+  while (fixp && fixp->fx_frag == fragp && fixp->fx_where < r_old)
     {
       if (fragp->fr_opcode)
 	fixp->fx_done = 1;
@@ -6605,7 +6612,7 @@ s7_convert_frag (bfd * abfd ATTRIBUTE_UNUSED,
   while (fixp && fixp->fx_frag == fragp)
     {
       if (fragp->fr_opcode)
-	fixp->fx_where -= old + fragp->insn_addr;
+	fixp->fx_where -= r_old + fragp->insn_addr;
       else
 	fixp->fx_done = 1;
       fixp = fixp->fx_next;

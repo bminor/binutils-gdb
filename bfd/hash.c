@@ -453,16 +453,17 @@ bfd_hash_lookup (struct bfd_hash_table *table,
 
   if (copy)
     {
-      char *new;
+      char *new_string;
 
-      new = objalloc_alloc ((struct objalloc *) table->memory, len + 1);
-      if (!new)
+      new_string = (char *) objalloc_alloc ((struct objalloc *) table->memory,
+                                            len + 1);
+      if (!new_string)
 	{
 	  bfd_set_error (bfd_error_no_memory);
 	  return NULL;
 	}
-      memcpy (new, string, len + 1);
-      string = new;
+      memcpy (new_string, string, len + 1);
+      string = new_string;
     }
 
   return bfd_hash_insert (table, string, hash);

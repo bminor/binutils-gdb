@@ -1691,15 +1691,17 @@ obj_elf_type (int ignore ATTRIBUTE_UNUSED)
     }
   else if (strcmp (typename, "gnu_unique_object") == 0)
     {
-      const struct elf_backend_data *bed;
+      struct elf_backend_data *bed;
 
-      bed = get_elf_backend_data (stdoutput);
+      bed = (struct elf_backend_data *) get_elf_backend_data (stdoutput);
       if (!(bed->elf_osabi == ELFOSABI_LINUX
 	    /* GNU/Linux is still using the default value 0.  */
 	    || bed->elf_osabi == ELFOSABI_NONE))
 	as_bad (_("symbol type \"%s\" is supported only by GNU targets"),
 		typename);
       type = BSF_OBJECT | BSF_GNU_UNIQUE;
+      /* PR 10549: Always set OSABI field to LINUX for objects containing unique symbols.  */
+      bed->elf_osabi = ELFOSABI_LINUX;
     }
 #ifdef md_elf_symbol_type
   else if ((type = md_elf_symbol_type (typename, sym, elfsym)) != -1)

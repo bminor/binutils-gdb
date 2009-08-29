@@ -949,13 +949,13 @@ new_statement (enum statement_enum type,
 	       size_t size,
 	       lang_statement_list_type *list)
 {
-  lang_statement_union_type *new;
+  lang_statement_union_type *new_stmt;
 
-  new = stat_alloc (size);
-  new->header.type = type;
-  new->header.next = NULL;
-  lang_statement_append (list, new, &new->header.next);
-  return new;
+  new_stmt = (lang_statement_union_type *) stat_alloc (size);
+  new_stmt->header.type = type;
+  new_stmt->header.next = NULL;
+  lang_statement_append (list, new_stmt, &new_stmt->header.next);
+  return new_stmt;
 }
 
 /* Build a new input file node for the language.  There are several
@@ -976,10 +976,11 @@ new_afile (const char *name,
   lang_input_statement_type *p;
 
   if (add_to_list)
-    p = new_stat (lang_input_statement, stat_ptr);
+    p = (lang_input_statement_type *) new_stat (lang_input_statement, stat_ptr);
   else
     {
-      p = stat_alloc (sizeof (lang_input_statement_type));
+      p = (lang_input_statement_type *)
+          stat_alloc (sizeof (lang_input_statement_type));
       p->header.type = lang_input_statement_enum;
       p->header.next = NULL;
     }
@@ -1220,7 +1221,7 @@ lang_memory_region_lookup (const char *const name, bfd_boolean create)
 {
   lang_memory_region_name *n;
   lang_memory_region_type *r;
-  lang_memory_region_type *new;
+  lang_memory_region_type *new_region;
 
   /* NAME is NULL for LMA memspecs if no region was specified.  */
   if (name == NULL)
@@ -1239,23 +1240,24 @@ lang_memory_region_lookup (const char *const name, bfd_boolean create)
   if (!create && strcmp (name, DEFAULT_MEMORY_REGION))
     einfo (_("%P:%S: warning: memory region `%s' not declared\n"), name);
 
-  new = stat_alloc (sizeof (lang_memory_region_type));
+  new_region = (lang_memory_region_type *)
+      stat_alloc (sizeof (lang_memory_region_type));
 
-  new->name_list.name = xstrdup (name);
-  new->name_list.next = NULL;
-  new->next = NULL;
-  new->origin = 0;
-  new->length = ~(bfd_size_type) 0;
-  new->current = 0;
-  new->last_os = NULL;
-  new->flags = 0;
-  new->not_flags = 0;
-  new->had_full_message = FALSE;
+  new_region->name_list.name = xstrdup (name);
+  new_region->name_list.next = NULL;
+  new_region->next = NULL;
+  new_region->origin = 0;
+  new_region->length = ~(bfd_size_type) 0;
+  new_region->current = 0;
+  new_region->last_os = NULL;
+  new_region->flags = 0;
+  new_region->not_flags = 0;
+  new_region->had_full_message = FALSE;
 
-  *lang_memory_region_list_tail = new;
-  lang_memory_region_list_tail = &new->next;
+  *lang_memory_region_list_tail = new_region;
+  lang_memory_region_list_tail = &new_region->next;
 
-  return new;
+  return new_region;
 }
 
 void
@@ -2057,10 +2059,10 @@ init_os (lang_output_section_statement_type *s, asection *isec,
 
   if (!link_info.reduce_memory_overheads)
     {
-      fat_section_userdata_type *new
-	= stat_alloc (sizeof (fat_section_userdata_type));
-      memset (new, 0, sizeof (fat_section_userdata_type));
-      get_userdata (s->bfd_section) = new;
+      fat_section_userdata_type *new_userdata = (fat_section_userdata_type *)
+        stat_alloc (sizeof (fat_section_userdata_type));
+      memset (new_userdata, 0, sizeof (fat_section_userdata_type));
+      get_userdata (s->bfd_section) = new_userdata;
     }
 
   /* If there is a base address, make sure that any sections it might
@@ -2196,7 +2198,7 @@ lang_add_section (lang_statement_list_type *ptr,
   if (section->output_section == NULL)
     {
       bfd_boolean first;
-      lang_input_section_type *new;
+      lang_input_section_type *new_section;
       flagword flags;
 
       flags = section->flags;
@@ -2244,9 +2246,9 @@ lang_add_section (lang_statement_list_type *ptr,
 	}
 
       /* Add a section reference to the list.  */
-      new = new_stat (lang_input_section, ptr);
+      new_section = new_stat (lang_input_section, ptr);
 
-      new->section = section;
+      new_section->section = section;
       section->output_section = output->bfd_section;
 
       /* If final link, don't copy the SEC_LINK_ONCE flags, they've
@@ -3250,16 +3252,16 @@ typedef struct bfd_sym_chain ldlang_undef_chain_list_type;
 void
 ldlang_add_undef (const char *const name)
 {
-  ldlang_undef_chain_list_type *new =
-    stat_alloc (sizeof (ldlang_undef_chain_list_type));
+  ldlang_undef_chain_list_type *new_undef = (ldlang_undef_chain_list_type *)
+      stat_alloc (sizeof (ldlang_undef_chain_list_type));
 
-  new->next = ldlang_undef_chain_list_head;
-  ldlang_undef_chain_list_head = new;
+  new_undef->next = ldlang_undef_chain_list_head;
+  ldlang_undef_chain_list_head = new_undef;
 
-  new->name = xstrdup (name);
+  new_undef->name = xstrdup (name);
 
   if (link_info.output_bfd != NULL)
-    insert_undefined (new->name);
+    insert_undefined (new_undef->name);
 }
 
 /* Insert NAME as undefined in the symbol table.  */
@@ -6010,10 +6012,11 @@ lang_enter_output_section_statement (const char *output_section_statement_name,
 void
 lang_final (void)
 {
-  lang_output_statement_type *new;
+  lang_output_statement_type *new_stmt;
 
-  new = new_stat (lang_output_statement, stat_ptr);
-  new->name = output_filename;
+  new_stmt = new_stat (lang_output_statement, stat_ptr);
+  new_stmt->name = output_filename;
+
 }
 
 /* Reset the current counters in the regions.  */
@@ -6377,7 +6380,7 @@ lang_add_wild (struct wildcard_spec *filespec,
 	       bfd_boolean keep_sections)
 {
   struct wildcard_list *curr, *next;
-  lang_wild_statement_type *new;
+  lang_wild_statement_type *new_stmt;
 
   /* Reverse the list as the parser puts it back to front.  */
   for (curr = section_list, section_list = NULL;
@@ -6399,18 +6402,18 @@ lang_add_wild (struct wildcard_spec *filespec,
 	lang_has_input_file = TRUE;
     }
 
-  new = new_stat (lang_wild_statement, stat_ptr);
-  new->filename = NULL;
-  new->filenames_sorted = FALSE;
+  new_stmt = new_stat (lang_wild_statement, stat_ptr);
+  new_stmt->filename = NULL;
+  new_stmt->filenames_sorted = FALSE;
   if (filespec != NULL)
     {
-      new->filename = filespec->name;
-      new->filenames_sorted = filespec->sorted == by_name;
+      new_stmt->filename = filespec->name;
+      new_stmt->filenames_sorted = filespec->sorted == by_name;
     }
-  new->section_list = section_list;
-  new->keep_sections = keep_sections;
-  lang_list_init (&new->children);
-  analyze_walk_wild_section_handler (new);
+  new_stmt->section_list = section_list;
+  new_stmt->keep_sections = keep_sections;
+  lang_list_init (&new_stmt->children);
+  analyze_walk_wild_section_handler (new_stmt);
 }
 
 void
@@ -6455,10 +6458,10 @@ lang_default_entry (const char *name)
 void
 lang_add_target (const char *name)
 {
-  lang_target_statement_type *new;
+  lang_target_statement_type *new_stmt;
 
-  new = new_stat (lang_target_statement, stat_ptr);
-  new->target = name;
+  new_stmt = new_stat (lang_target_statement, stat_ptr);
+  new_stmt->target = name;
 }
 
 void
@@ -6479,20 +6482,20 @@ lang_add_map (const char *name)
 void
 lang_add_fill (fill_type *fill)
 {
-  lang_fill_statement_type *new;
+  lang_fill_statement_type *new_stmt;
 
-  new = new_stat (lang_fill_statement, stat_ptr);
-  new->fill = fill;
+  new_stmt = new_stat (lang_fill_statement, stat_ptr);
+  new_stmt->fill = fill;
 }
 
 void
 lang_add_data (int type, union etree_union *exp)
 {
-  lang_data_statement_type *new;
+  lang_data_statement_type *new_stmt;
 
-  new = new_stat (lang_data_statement, stat_ptr);
-  new->exp = exp;
-  new->type = type;
+  new_stmt = new_stat (lang_data_statement, stat_ptr);
+  new_stmt->exp = exp;
+  new_stmt->type = type;
 }
 
 /* Create a new reloc statement.  RELOC is the BFD relocation type to
@@ -6525,11 +6528,11 @@ lang_add_reloc (bfd_reloc_code_real_type reloc,
 lang_assignment_statement_type *
 lang_add_assignment (etree_type *exp)
 {
-  lang_assignment_statement_type *new;
+  lang_assignment_statement_type *new_stmt;
 
-  new = new_stat (lang_assignment_statement, stat_ptr);
-  new->exp = exp;
-  return new;
+  new_stmt = new_stat (lang_assignment_statement, stat_ptr);
+  new_stmt->exp = exp;
+  return new_stmt;
 }
 
 void
@@ -6714,11 +6717,11 @@ lang_add_output_format (const char *format,
 void
 lang_add_insert (const char *where, int is_before)
 {
-  lang_insert_statement_type *new;
+  lang_insert_statement_type *new_stmt;
 
-  new = new_stat (lang_insert_statement, stat_ptr);
-  new->where = where;
-  new->is_before = is_before;
+  new_stmt = new_stat (lang_insert_statement, stat_ptr);
+  new_stmt->where = where;
+  new_stmt->is_before = is_before;
   saved_script_handle = previous_script_handle;
 }
 
@@ -7261,27 +7264,27 @@ realsymbol (const char *pattern)
     }
 }
 
-/* This is called for each variable name or match expression.  NEW is
+/* This is called for each variable name or match expression.  NEW_NAME is
    the name of the symbol to match, or, if LITERAL_P is FALSE, a glob
    pattern to be matched against symbol names.  */
 
 struct bfd_elf_version_expr *
 lang_new_vers_pattern (struct bfd_elf_version_expr *orig,
-		       const char *new,
+		       const char *new_name,
 		       const char *lang,
 		       bfd_boolean literal_p)
 {
   struct bfd_elf_version_expr *ret;
 
-  ret = xmalloc (sizeof *ret);
+  ret = (struct bfd_elf_version_expr *) xmalloc (sizeof *ret);
   ret->next = orig;
   ret->symver = 0;
   ret->script = 0;
   ret->literal = TRUE;
-  ret->pattern = literal_p ? new : realsymbol (new);
+  ret->pattern = literal_p ? new_name : realsymbol (new_name);
   if (ret->pattern == NULL)
     {
-      ret->pattern = new;
+      ret->pattern = new_name;
       ret->literal = FALSE;
     }
 

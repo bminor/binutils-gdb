@@ -1,3 +1,63 @@
+2009-08-29  Martin Thuresson  <martin@mtme.org>
+
+	* config/tc-arm.c (struct asm_cond, struct asm_psr, struct
+	asm_barrier_opt): Change member template to
+	template_name. (md_begin): Update code to reflect new member
+	names.
+	* config/tc-i386.c (struct templates, struct _i386_insn)
+	(match_template, cpu_flags_match, match_reg_size, match_mem_size)
+	(operand_size_match, md_begin, i386_print_statistics, pi)
+	(build_vex_prefix, md_assemble, parse_insn, optimize_imm)
+	(optimize_disp): Updated code to use new names. (parse_insn):
+	Added casts.
+	* config/tc-ia64.c (dot_template, emit_one_bundle): Updated
+	code to use new names.
+	* config/tc-score.c (struct s3_asm_opcode): Renamed member
+	template to template_name. (s3_parse_16_32_inst, s3_parse_48_inst,
+	s3_do_macro_ldst_label, s3_build_score_ops_hsh): Update code to
+	use new names.
+	* config/tc-score7.c (struct s7_asm_opcode): Renamed member
+	template to template_name. (s7_parse_16_32_inst,
+	s7_do_macro_ldst_label, s7_build_score_ops_hsh): Update code to
+	use new names.
+	* config/tc-tic30.c (md_begin, struct tic30_insn)
+	(md_assemble): Update code to use new names.
+	* config/tc-tic54x.c (struct _tic54x_insn, md_begin)
+	(optimize_insn, tic54x_parse_insn, next_line_shows_parallel):
+	Update code to use new names.
+	* config/tc-arm.c (insert_reg_alias): Rename variable new to
+	new_reg.
+	* config/tc-dlx.c (parse_operand): Rename variable new to
+	new_pos.
+	* config/tc-ia64.c (ia64_gen_real_reloc_type): Rename variable
+	new to newr.
+	* config/tc-mcore.c (parse_exp, parse_imm): Rename variable
+	new to new_pointer.
+	* config/tc-microblaze.c (parse_exp, parse_imm, check_got):
+	Change name from new to new_pointer.
+	* config/tc-or32.c (parse_operand): Rename variable new to
+	new_pointer.
+	* config/tc-pdp11.c (md_assemble): Rename variable new to
+	new_pointer.
+	* config/tc-pj.c (alias): Change argument new to new_name.
+	* config/tc-score.c (s3_build_score_ops_hsh): Rename variable
+	new to new_opcode. (s3_build_dependency_insn_hsh) Rename variable
+	new to new_i2n. (s3_convert): Rename variables old and new to
+	r_old and r_new.
+	* config/tc-score7.c (s7_build_score_ops_hsh): Rename variable
+	new to new_opcode. (s7_build_dependency_insn_hsh): Rename variable
+	new to new_i2d. (s7_b32_relax_to_b16, s7_convert_frag): Rename
+	variables old and new to r_old and r_new.
+	* config/tc-sh.c (parse_exp): Rename variable new to
+	new_pointer.
+	* config/tc-sh64.c (shmedia_parse_exp): Rename variable new to
+	new_pointer.
+	* config/tc-tic4x.c (tic4x_operand_parse): Rename variable new
+	to new_pointer.
+	* config/tc-z8k.c (parse_exp): Rename variable new to
+	new_pointer.
+	* listing.c (listing_newline): Rename variable new to new_i.
+
 2009-08-29  Matt Fleming  <matt@console-pimps.org>
 
 	* config/tc-sh.c (md_apply_fix): Extend sign of the offset value

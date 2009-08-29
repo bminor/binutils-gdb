@@ -1,3 +1,48 @@
+2009-08-29  Martin Thuresson  <martin@mtme.org>
+
+	* elf32-arm.c (struct stub_def): Rename member template to
+	template_sequence. (arm_build_one_stub,
+	find_stub_size_and_template, arm_size_one_stub, arm_map_one_stub):
+	Rename variable template to template_sequence.
+	* elfxx-ia64.c (elfNN_ia64_relax_br, elfNN_ia64_relax_brl):
+	Rename variable template to template_val.
+	* aoutx.h (NAME (aout, make_empty_symbol)): Rename variable
+	new to new_symbol.
+	* coffgen.c (coff_make_empty_symbol)
+	(coff_bfd_make_debug_symbol): Rename variable new to new_symbol.
+	* cpu-ia64-opc.c (ext_reg, ins_imms_scaled): Rename variable
+	new to new_insn.
+	* ecoff.c (_bfd_ecoff_make_empty_symbol): Rename variable new
+	to new_symbol.
+	* elf32-m68k.c (elf_m68k_get_got_entry_type): Rename argument
+	new to new_reloc.
+	* hash.c (bfd_hash_lookup): Rename variable new to new_string.
+	* ieee.c (ieee_make_empty_symbol): Rename variable new to
+	new_symbol.
+	* linker.c (bfd_new_link_order): Rename variable new to
+	new_lo.
+	* mach-o.c (bfd_mach_o_sizeof_headers): Rename variable new to
+	symbol.
+	* oasys.c (oasys_make_empty_symbol): Rename variable new to
+	new_symbol_type.
+	* pdp11.c (NAME (aout, make_empty_symbol)): Rename variable
+	new to new_symbol_type.
+	* plugin.c (bfd_plugin_make_empty_symbol): Rename variable new
+	to new_symbol.
+	* rs6000-core.c (CoreHdr, VmInfo): Rename union member new to
+	new_dump.
+	(read_hdr, rs6000coff_core_p)
+	(rs6000coff_core_file_matches_executable_p)
+	(rs6000coff_core_file_failing_command)
+	(rs6000coff_core_file_failing_signal): Updated function to use new
+	union member name.
+	* som.c (som_make_empty_symbol): Rename variable new to
+	new_symbol_type.
+	* syms.c (_bfd_generic_make_empty_symbol): Rename variable new
+	to new_symbol.
+	* tekhex.c (first_phase, tekhex_make_empty_symbol): Rename
+	variable new to new_symbol.
+
 2009-08-27  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* acinclude.m4 (AM_INSTALL_LIBBFD): Call AM_SUBST_NOTMAKE for

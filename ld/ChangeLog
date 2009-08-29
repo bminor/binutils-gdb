@@ -1,3 +1,19 @@
+2009-08-29  Martin Thuresson  <martin@mtme.org>
+
+	* ldexp.c (exp_intop, exp_bigintop, exp_relop, exp_binop)
+	(exp_trinop, exp_unop, exp_nameop, exp_assop): Rename variable new
+	to new_e.
+	* ldfile.c (ldfile_add_library_path): Rename variable new to
+	new_dirs. (ldfile_add_arch): Rename variable new to new_arch.
+	* ldlang.c (new_statement, lang_final, lang_add_wild)
+	(lang_target, lang_add_fill, lang_add_data, lang_add_assignment)
+	(lang_add_insert): Rename variable new to new_stmt. (new_afile):
+	Added missing cast. (lang_memory_region_lookup): Rename variable
+	new to new_region. (init_os): Rename variable new to
+	new_userdata. (lang_add_section): Rename variable new to
+	new_section. (ldlang_add_undef): Rename variable new to
+	new_undef. (realsymbol): Rename variable new to new_name.
+
 2009-08-26  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/10555

@@ -476,23 +476,23 @@ main (int argc, char **argv)
 		    ++sym->name;
 		  else
 		    {
-		      char *new;
+		      char *new_name;
 
-		      new = xmalloc (strlen (bfd_asymbol_name (sym)) + 1);
-		      new[0] = outlead;
-		      strcpy (new + 1, bfd_asymbol_name (sym) + 1);
-		      sym->name = new;
+		      new_name = xmalloc (strlen (bfd_asymbol_name (sym)) + 1);
+		      new_name[0] = outlead;
+		      strcpy (new_name + 1, bfd_asymbol_name (sym) + 1);
+		      sym->name = new_name;
 		    }
 		}
 	    }
 	  else
 	    {
-	      char *new;
+	      char *new_name;
 
-	      new = xmalloc (strlen (bfd_asymbol_name (sym)) + 2);
-	      new[0] = outlead;
-	      strcpy (new + 1, bfd_asymbol_name (sym));
-	      sym->name = new;
+	      new_name = xmalloc (strlen (bfd_asymbol_name (sym)) + 2);
+	      new_name[0] = outlead;
+	      strcpy (new_name + 1, bfd_asymbol_name (sym));
+	      sym->name = new_name;
 	    }
 	}
 

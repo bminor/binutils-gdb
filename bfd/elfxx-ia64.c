@@ -612,7 +612,7 @@ bfd_elfNN_ia64_after_parse (int itanium)
 static bfd_boolean
 elfNN_ia64_relax_br (bfd_byte *contents, bfd_vma off)
 {
-  unsigned int template, mlx;
+  unsigned int template_val, mlx;
   bfd_vma t0, t1, s0, s1, s2, br_code;
   long br_slot;
   bfd_byte *hit_addr;
@@ -626,7 +626,7 @@ elfNN_ia64_relax_br (bfd_byte *contents, bfd_vma off)
   /* Check if we can turn br into brl.  A label is always at the start
      of the bundle.  Even if there are predicates on NOPs, we still
      perform this optimization.  */
-  template = t0 & 0x1e;
+  template_val = t0 & 0x1e;
   s0 = (t0 >> 5) & 0x1ffffffffffLL;
   s1 = ((t0 >> 46) | (t1 << 18)) & 0x1ffffffffffLL;
   s2 = (t1 >> 23) & 0x1ffffffffffLL;
@@ -642,9 +642,9 @@ elfNN_ia64_relax_br (bfd_byte *contents, bfd_vma off)
     case 1:
       /* Check if slot 2 is NOP. Possible templates are MBB and BBB.
 	 For BBB, slot 0 also has to be nop.b.  */
-      if (!((template == 0x12				/* MBB */
+      if (!((template_val == 0x12				/* MBB */
 	     && IS_NOP_B (s2))
-	    || (template == 0x16			/* BBB */
+	    || (template_val == 0x16			/* BBB */
 		&& IS_NOP_B (s0)
 		&& IS_NOP_B (s2))))
 	return FALSE;
@@ -653,16 +653,16 @@ elfNN_ia64_relax_br (bfd_byte *contents, bfd_vma off)
     case 2:
       /* Check if slot 1 is NOP. Possible templates are MIB, MBB, BBB,
 	 MMB and MFB. For BBB, slot 0 also has to be nop.b.  */
-      if (!((template == 0x10				/* MIB */
+      if (!((template_val == 0x10				/* MIB */
 	     && IS_NOP_I (s1))
-	    || (template == 0x12			/* MBB */
+	    || (template_val == 0x12			/* MBB */
 		&& IS_NOP_B (s1))
-	    || (template == 0x16			/* BBB */
+	    || (template_val == 0x16			/* BBB */
 		&& IS_NOP_B (s0)
 		&& IS_NOP_B (s1))
-	    || (template == 0x18			/* MMB */
+	    || (template_val == 0x18			/* MMB */
 		&& IS_NOP_M (s1))
-	    || (template == 0x1c			/* MFB */
+	    || (template_val == 0x1c			/* MFB */
 		&& IS_NOP_F (s1))))
 	return FALSE;
       br_code = s2;
@@ -686,7 +686,7 @@ elfNN_ia64_relax_br (bfd_byte *contents, bfd_vma off)
   else
     mlx = 0x4;
 
-  if (template == 0x16)
+  if (template_val == 0x16)
     {
       /* For BBB, we need to put nop.m in slot 0.  We keep the original
 	 predicate only if slot 0 isn't br.  */
@@ -715,7 +715,7 @@ elfNN_ia64_relax_br (bfd_byte *contents, bfd_vma off)
 static void
 elfNN_ia64_relax_brl (bfd_byte *contents, bfd_vma off)
 {
-  int template;
+  int template_val;
   bfd_byte *hit_addr;
   bfd_vma t0, t1, i0, i1, i2;
 
@@ -734,10 +734,10 @@ elfNN_ia64_relax_brl (bfd_byte *contents, bfd_vma off)
   /* Turn a MLX bundle into a MBB bundle with the same stop-bit
      variety.  */
   if (t0 & 0x1)
-    template = 0x13;
+    template_val = 0x13;
   else
-    template = 0x12;
-  t0 = (i1 << 46) | (i0 << 5) | template;
+    template_val = 0x12;
+  t0 = (i1 << 46) | (i0 << 5) | template_val;
   t1 = (i2 << 23) | (i1 >> 18);
 
   bfd_putl64 (t0, hit_addr);

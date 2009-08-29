@@ -644,18 +644,18 @@ static asymbol *ecoff_scom_symbol_ptr;
 asymbol *
 _bfd_ecoff_make_empty_symbol (bfd *abfd)
 {
-  ecoff_symbol_type *new;
+  ecoff_symbol_type *new_symbol;
   bfd_size_type amt = sizeof (ecoff_symbol_type);
 
-  new = bfd_zalloc (abfd, amt);
-  if (new == NULL)
+  new_symbol = (ecoff_symbol_type *) bfd_zalloc (abfd, amt);
+  if (new_symbol == NULL)
     return NULL;
-  new->symbol.section = NULL;
-  new->fdr = NULL;
-  new->local = FALSE;
-  new->native = NULL;
-  new->symbol.the_bfd = abfd;
-  return &new->symbol;
+  new_symbol->symbol.section = NULL;
+  new_symbol->fdr = NULL;
+  new_symbol->local = FALSE;
+  new_symbol->native = NULL;
+  new_symbol->symbol.the_bfd = abfd;
+  return &new_symbol->symbol;
 }
 
 /* Set the BFD flags and section for an ECOFF symbol.  */

@@ -183,9 +183,9 @@ fake_opcode (const char *name,
    can have another name.  */
 
 static void
-alias (const char *new, const char *old)
+alias (const char *new_name, const char *old)
 {
-  hash_insert (opcode_hash_control, new,
+  hash_insert (opcode_hash_control, new_name,
 	       (char *) hash_find (opcode_hash_control, old));
 }
 

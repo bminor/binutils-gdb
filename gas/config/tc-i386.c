@@ -97,8 +97,8 @@
   */
 typedef struct
 {
-  const template *start;
-  const template *end;
+  const insn_template *start;
+  const insn_template *end;
 }
 templates;
 
@@ -159,7 +159,7 @@ static void swap_operands (void);
 static void swap_2_operands (int, int);
 static void optimize_imm (void);
 static void optimize_disp (void);
-static const template *match_template (void);
+static const insn_template *match_template (void);
 static int check_string (void);
 static int process_suffix (void);
 static int check_byte_reg (void);
@@ -204,7 +204,7 @@ union i386_op
 struct _i386_insn
   {
     /* TM holds the template for the insn were currently assembling.  */
-    template tm;
+    insn_template tm;
 
     /* SUFFIX holds the instruction size suffix for byte, word, dword
        or qword, if given.  */
@@ -1287,7 +1287,7 @@ cpu_flags_and_not (i386_cpu_flags x, i386_cpu_flags y)
 /* Return CPU flags match bits. */
 
 static int
-cpu_flags_match (const template *t)
+cpu_flags_match (const insn_template *t)
 {
   i386_cpu_flags x = t->cpu_flags;
   int match = cpu_flags_check_cpu64 (x) ? CPU_FLAGS_64BIT_MATCH : 0;
@@ -1471,7 +1471,7 @@ operand_type_check (i386_operand_type t, enum operand_type c)
    operand J for instruction template T.  */
 
 static INLINE int
-match_reg_size (const template *t, unsigned int j)
+match_reg_size (const insn_template *t, unsigned int j)
 {
   return !((i.types[j].bitfield.byte
 	    && !t->operand_types[j].bitfield.byte)
@@ -1487,7 +1487,7 @@ match_reg_size (const template *t, unsigned int j)
    instruction template T.  */
 
 static INLINE int
-match_mem_size (const template *t, unsigned int j)
+match_mem_size (const insn_template *t, unsigned int j)
 {
   return (match_reg_size (t, j)
 	  && !((i.types[j].bitfield.unspecified
@@ -1506,7 +1506,7 @@ match_mem_size (const template *t, unsigned int j)
    instruction template T.  */
 
 static INLINE int
-operand_size_match (const template *t)
+operand_size_match (const insn_template *t)
 {
   unsigned int j;
   int match = 1;
@@ -2127,7 +2127,7 @@ md_begin ()
   op_hash = hash_new ();
 
   {
-    const template *optab;
+    const insn_template *optab;
     templates *core_optab;
 
     /* Setup for loop.  */
@@ -2262,7 +2262,7 @@ i386_print_statistics (FILE *file)
 #ifdef DEBUG386
 
 /* Debugging routines for md_assemble.  */
-static void pte (template *);
+static void pte (insn_template *);
 static void pt (i386_operand_type);
 static void pe (expressionS *);
 static void ps (symbolS *);
@@ -2313,7 +2313,7 @@ pi (char *line, i386_insn *x)
 }
 
 static void
-pte (template *t)
+pte (insn_template *t)
 {
   unsigned int i;
   fprintf (stdout, " %d operands ", t->operands);
@@ -2628,7 +2628,7 @@ intel_float_operand (const char *mnemonic)
 /* Build the VEX prefix.  */
 
 static void
-build_vex_prefix (const template *t)
+build_vex_prefix (const insn_template *t)
 {
   unsigned int register_specifier;
   unsigned int implied_prefix;
@@ -2804,7 +2804,7 @@ md_assemble (char *line)
 {
   unsigned int j;
   char mnemonic[MAX_MNEM_SIZE];
-  const template *t;
+  const insn_template *t;
 
   /* Initialize globals.  */
   memset (&i, '\0', sizeof (i));
@@ -3025,7 +3025,7 @@ parse_insn (char *line, char *mnemonic)
   char *token_start = l;
   char *mnem_p;
   int supported;
-  const template *t;
+  const insn_template *t;
   char *dot_p = NULL;
 
   /* Non-zero if we found a prefix only acceptable with string insns.  */
@@ -3066,7 +3066,7 @@ parse_insn (char *line, char *mnemonic)
 	}
 
       /* Look up instruction (or prefix) via hash table.  */
-      current_templates = hash_find (op_hash, mnemonic);
+      current_templates = (const templates *) hash_find (op_hash, mnemonic);
 
       if (*l != END_OF_INSN
 	  && (!is_space_char (*l) || l[1] != END_OF_INSN)
@@ -3118,7 +3118,7 @@ parse_insn (char *line, char *mnemonic)
 	goto check_suffix;
       mnem_p = dot_p;
       *dot_p = '\0';
-      current_templates = hash_find (op_hash, mnemonic);
+      current_templates = (const templates *) hash_find (op_hash, mnemonic);
     }
 
   if (!current_templates)
@@ -3135,7 +3135,8 @@ check_suffix:
 	case QWORD_MNEM_SUFFIX:
 	  i.suffix = mnem_p[-1];
 	  mnem_p[-1] = '\0';
-	  current_templates = hash_find (op_hash, mnemonic);
+	  current_templates = (const templates *) hash_find (op_hash,
+                                                             mnemonic);
 	  break;
 	case SHORT_MNEM_SUFFIX:
 	case LONG_MNEM_SUFFIX:
@@ -3143,7 +3144,8 @@ check_suffix:
 	    {
 	      i.suffix = mnem_p[-1];
 	      mnem_p[-1] = '\0';
-	      current_templates = hash_find (op_hash, mnemonic);
+	      current_templates = (const templates *) hash_find (op_hash,
+                                                                 mnemonic);
 	    }
 	  break;
 
@@ -3156,7 +3158,8 @@ check_suffix:
 	      else
 		i.suffix = LONG_MNEM_SUFFIX;
 	      mnem_p[-1] = '\0';
-	      current_templates = hash_find (op_hash, mnemonic);
+	      current_templates = (const templates *) hash_find (op_hash,
+                                                                 mnemonic);
 	    }
 	  break;
 	}
@@ -3529,7 +3532,7 @@ optimize_imm (void)
 	       than those matching the insn suffix.  */
 	    {
 	      i386_operand_type mask, allowed;
-	      const template *t;
+	      const insn_template *t;
 
 	      operand_type_set (&mask, 0);
 	      operand_type_set (&allowed, 0);
@@ -3641,11 +3644,11 @@ optimize_disp (void)
       }
 }
 
-static const template *
+static const insn_template *
 match_template (void)
 {
   /* Points to template once we've found it.  */
-  const template *t;
+  const insn_template *t;
   i386_operand_type overlap0, overlap1, overlap2, overlap3;
   i386_operand_type overlap4;
   unsigned int found_reverse_match;

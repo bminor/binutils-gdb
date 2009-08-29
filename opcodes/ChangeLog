@@ -1,3 +1,23 @@
+2009-08-29  Martin Thuresson  <martin@mtme.org>
+
+	* cris-dis.c (bytes_to_skip): Update code to use new name.
+	* i386-dis.c (putop): Update code to use new name.
+	* i386-gen.c (process_i386_opcodes): Update code to use
+	new name.
+	* i386-opc.h (struct template): Rename struct template to
+	insn_template. Update code accordingly.
+	* i386-tbl.h (i386_optab): Update type to use new name.
+	* ia64-dis.c (print_insn_ia64): Rename variable template
+	to template_val.
+	* tic30-dis.c (struct instruction, get_tic30_instruction):
+	Update code to use new name.
+	* tic54x-dis.c (has_lkaddr, get_insn_size)
+	(print_parallel_instruction, print_insn_tic54x, tic54x_get_insn):
+	Update code to use new name.
+	* tic54x-opc.c (tic54x_unknown_opcode, tic54x_optab):
+	Update type to new name.
+	* z8kgen.c (internal, gas): Rename variable new to new_op.
+
 2009-08-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (COMPILE_FOR_BUILD): Remove BUILD_CPPFLAGS.

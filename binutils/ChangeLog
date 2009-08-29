@@ -1,3 +1,7 @@
+2009-08-29  Martin Thuresson  <martin@mtme.org>
+
+	* nlmconv.c (main): Rename variable new to new_name.
+
 2009-08-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (sysinfo$(EXEEXT_FOR_BUILD)): Replace

@@ -4472,13 +4472,13 @@ static asymbol *
 som_make_empty_symbol (bfd *abfd)
 {
   bfd_size_type amt = sizeof (som_symbol_type);
-  som_symbol_type *new = bfd_zalloc (abfd, amt);
+  som_symbol_type *new_symbol_type = bfd_zalloc (abfd, amt);
 
-  if (new == NULL)
+  if (new_symbol_type == NULL)
     return NULL;
-  new->symbol.the_bfd = abfd;
+  new_symbol_type->symbol.the_bfd = abfd;
 
-  return &new->symbol;
+  return &new_symbol_type->symbol;
 }
 
 /* Print symbol information.  */

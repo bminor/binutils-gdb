@@ -342,15 +342,15 @@ static char *
 parse_exp (char *s, expressionS *op)
 {
   char *save = input_line_pointer;
-  char *new;
+  char *new_pointer;
 
   input_line_pointer = s;
   expression (op);
   if (op->X_op == O_absent)
     as_bad (_("missing operand"));
-  new = input_line_pointer;
+  new_pointer = input_line_pointer;
   input_line_pointer = save;
-  return new;
+  return new_pointer;
 }
 
 /* The many forms of operand:

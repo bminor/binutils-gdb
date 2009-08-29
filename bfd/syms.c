@@ -539,10 +539,10 @@ asymbol *
 _bfd_generic_make_empty_symbol (bfd *abfd)
 {
   bfd_size_type amt = sizeof (asymbol);
-  asymbol *new = bfd_zalloc (abfd, amt);
-  if (new)
-    new->the_bfd = abfd;
-  return new;
+  asymbol *new_symbol = (asymbol *) bfd_zalloc (abfd, amt);
+  if (new_symbol)
+    new_symbol->the_bfd = abfd;
+  return new_symbol;
 }
 
 /*

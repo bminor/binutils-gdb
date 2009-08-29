@@ -64,7 +64,7 @@ static unsigned int _pc;
 struct instruction
 {
   int type;
-  template *tm;
+  insn_template *tm;
   partemplate *ptm;
 };
 
@@ -78,7 +78,7 @@ get_tic30_instruction (unsigned long insn_word, struct instruction *insn)
     case THREE_OPERAND:
       insn->type = NORMAL_INSN;
       {
-	template *current_optab = (template *) tic30_optab;
+	insn_template *current_optab = (insn_template *) tic30_optab;
 
 	for (; current_optab < tic30_optab_end; current_optab++)
 	  {
@@ -145,7 +145,7 @@ get_tic30_instruction (unsigned long insn_word, struct instruction *insn)
     case BRANCHES:
       insn->type = NORMAL_INSN;
       {
-	template *current_optab = (template *) tic30_optab;
+	insn_template *current_optab = (insn_template *) tic30_optab;
 
 	for (; current_optab < tic30_optab_end; current_optab++)
 	  {

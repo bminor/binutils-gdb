@@ -98,28 +98,28 @@ is_sysrooted_pathname (const char *name, bfd_boolean notsame)
 void
 ldfile_add_library_path (const char *name, bfd_boolean cmdline)
 {
-  search_dirs_type *new;
+  search_dirs_type *new_dirs;
 
   if (!cmdline && config.only_cmd_line_lib_dirs)
     return;
 
-  new = xmalloc (sizeof (search_dirs_type));
-  new->next = NULL;
-  new->cmdline = cmdline;
-  *search_tail_ptr = new;
-  search_tail_ptr = &new->next;
+  new_dirs = (search_dirs_type *) xmalloc (sizeof (search_dirs_type));
+  new_dirs->next = NULL;
+  new_dirs->cmdline = cmdline;
+  *search_tail_ptr = new_dirs;
+  search_tail_ptr = &new_dirs->next;
 
   /* If a directory is marked as honoring sysroot, prepend the sysroot path
      now.  */
   if (name[0] == '=')
     {
-      new->name = concat (ld_sysroot, name + 1, (const char *) NULL);
-      new->sysrooted = TRUE;
+      new_dirs->name = concat (ld_sysroot, name + 1, (const char *) NULL);
+      new_dirs->sysrooted = TRUE;
     }
   else
     {
-      new->name = xstrdup (name);
-      new->sysrooted = is_sysrooted_pathname (name, FALSE);
+      new_dirs->name = xstrdup (name);
+      new_dirs->sysrooted = is_sysrooted_pathname (name, FALSE);
     }
 }
 
@@ -615,19 +615,20 @@ void
 ldfile_add_arch (const char *in_name)
 {
   char *name = xstrdup (in_name);
-  search_arch_type *new = xmalloc (sizeof (search_arch_type));
+  search_arch_type *new_arch = (search_arch_type *)
+      xmalloc (sizeof (search_arch_type));
 
   ldfile_output_machine_name = in_name;
 
-  new->name = name;
-  new->next = NULL;
+  new_arch->name = name;
+  new_arch->next = NULL;
   while (*name)
     {
       *name = TOLOWER (*name);
       name++;
     }
-  *search_arch_tail_ptr = new;
-  search_arch_tail_ptr = &new->next;
+  *search_arch_tail_ptr = new_arch;
+  search_arch_tail_ptr = &new_arch->next;
 
 }
 

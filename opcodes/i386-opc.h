@@ -524,7 +524,7 @@ typedef union i386_operand_type
   unsigned int array[OTNumOfUints];
 } i386_operand_type;
 
-typedef struct template
+typedef struct insn_template
 {
   /* instruction name sans width suffix ("mov" for movl insns) */
   char *name;
@@ -566,9 +566,9 @@ typedef struct template
      either a register or an immediate operand.  */
   i386_operand_type operand_types[MAX_OPERANDS];
 }
-template;
+insn_template;
 
-extern const template i386_optab[];
+extern const insn_template i386_optab[];
 
 /* these are for register name --> number & type hash lookup */
 typedef struct

@@ -3627,12 +3627,12 @@ static asymbol *
 ieee_make_empty_symbol (bfd *abfd)
 {
   bfd_size_type amt = sizeof (ieee_symbol_type);
-  ieee_symbol_type *new = bfd_zalloc (abfd, amt);
+  ieee_symbol_type *new_symbol = (ieee_symbol_type *) bfd_zalloc (abfd, amt);
 
-  if (!new)
+  if (!new_symbol)
     return NULL;
-  new->symbol.the_bfd = abfd;
-  return &new->symbol;
+  new_symbol->symbol.the_bfd = abfd;
+  return &new_symbol->symbol;
 }
 
 static bfd *

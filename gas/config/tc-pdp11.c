@@ -752,8 +752,8 @@ md_assemble (char *instruction_string)
 
     case PDP11_OPCODE_DISPL:
       {
-	char *new;
-	new = parse_expression (str, &op1);
+	char *new_pointer;
+	new_pointer = parse_expression (str, &op1);
 	op1.code = 0;
 	op1.reloc.pc_rel = 1;
 	op1.reloc.type = BFD_RELOC_PDP11_DISP_8_PCREL;
@@ -767,7 +767,7 @@ md_assemble (char *instruction_string)
 	    err = _("8-bit displacement out of range");
 	    break;
 	  }
-	str = new;
+	str = new_pointer;
 	insn.code |= op1.code;
 	insn.reloc = op1.reloc;
       }
@@ -935,7 +935,7 @@ md_assemble (char *instruction_string)
 
     case PDP11_OPCODE_REG_DISPL:
       {
-	char *new;
+	char *new_pointer;
 	str = parse_reg (str, &op2);
 	if (op2.error)
 	  break;
@@ -946,7 +946,7 @@ md_assemble (char *instruction_string)
 	    op1.error = _("Missing ','");
 	    break;
 	  }
-	new = parse_expression (str, &op1);
+	new_pointer = parse_expression (str, &op1);
 	op1.code = 0;
 	op1.reloc.pc_rel = 1;
 	op1.reloc.type = BFD_RELOC_PDP11_DISP_6_PCREL;
@@ -960,7 +960,7 @@ md_assemble (char *instruction_string)
 	    err = _("6-bit displacement out of range");
 	    break;
 	  }
-	str = new;
+	str = new_pointer;
 	insn.code |= op1.code;
 	insn.reloc = op1.reloc;
       }

@@ -415,7 +415,7 @@ LITTLENUM_TYPE fp_values[NUM_FLOAT_VALS][MAX_LITTLENUMS];
 
 struct asm_cond
 {
-  const char *	 template;
+  const char *	 template_name;
   unsigned long  value;
 };
 
@@ -423,13 +423,13 @@ struct asm_cond
 
 struct asm_psr
 {
-  const char *   template;
+  const char *   template_name;
   unsigned long  field;
 };
 
 struct asm_barrier_opt
 {
-  const char *   template;
+  const char *   template_name;
   unsigned long  value;
 };
 
@@ -548,7 +548,7 @@ const char * const reg_expected_msgs[] =
 struct asm_opcode
 {
   /* Basic string to match.  */
-  const char * template;
+  const char * template_name;
 
   /* Parameters to instruction.	 */
   unsigned char operands[8];
@@ -2048,35 +2048,35 @@ parse_reloc (char **str)
 static struct reg_entry *
 insert_reg_alias (char *str, int number, int type)
 {
-  struct reg_entry *new;
+  struct reg_entry *new_reg;
   const char *name;
 
-  if ((new = hash_find (arm_reg_hsh, str)) != 0)
+  if ((new_reg = (struct reg_entry *) hash_find (arm_reg_hsh, str)) != 0)
     {
-      if (new->builtin)
+      if (new_reg->builtin)
 	as_warn (_("ignoring attempt to redefine built-in register '%s'"), str);
 
       /* Only warn about a redefinition if it's not defined as the
 	 same register.	 */
-      else if (new->number != number || new->type != type)
+      else if (new_reg->number != number || new_reg->type != type)
 	as_warn (_("ignoring redefinition of register alias '%s'"), str);
 
       return NULL;
     }
 
   name = xstrdup (str);
-  new = xmalloc (sizeof (struct reg_entry));
+  new_reg = (struct reg_entry *) xmalloc (sizeof (struct reg_entry));
 
-  new->name = name;
-  new->number = number;
-  new->type = type;
-  new->builtin = FALSE;
-  new->neon = NULL;
+  new_reg->name = name;
+  new_reg->number = number;
+  new_reg->type = type;
+  new_reg->builtin = FALSE;
+  new_reg->neon = NULL;
 
-  if (hash_insert (arm_reg_hsh, name, (void *) new))
+  if (hash_insert (arm_reg_hsh, name, (void *) new_reg))
     abort ();
 
-  return new;
+  return new_reg;
 }
 
 static void
@@ -21296,21 +21296,22 @@ md_begin (void)
     as_fatal (_("virtual memory exhausted"));
 
   for (i = 0; i < sizeof (insns) / sizeof (struct asm_opcode); i++)
-    hash_insert (arm_ops_hsh, insns[i].template, (void *) (insns + i));
+    hash_insert (arm_ops_hsh, insns[i].template_name, (void *) (insns + i));
   for (i = 0; i < sizeof (conds) / sizeof (struct asm_cond); i++)
-    hash_insert (arm_cond_hsh, conds[i].template, (void *) (conds + i));
+    hash_insert (arm_cond_hsh, conds[i].template_name, (void *) (conds + i));
   for (i = 0; i < sizeof (shift_names) / sizeof (struct asm_shift_name); i++)
     hash_insert (arm_shift_hsh, shift_names[i].name, (void *) (shift_names + i));
   for (i = 0; i < sizeof (psrs) / sizeof (struct asm_psr); i++)
-    hash_insert (arm_psr_hsh, psrs[i].template, (void *) (psrs + i));
+    hash_insert (arm_psr_hsh, psrs[i].template_name, (void *) (psrs + i));
   for (i = 0; i < sizeof (v7m_psrs) / sizeof (struct asm_psr); i++)
-    hash_insert (arm_v7m_psr_hsh, v7m_psrs[i].template, (void *) (v7m_psrs + i));
+    hash_insert (arm_v7m_psr_hsh, v7m_psrs[i].template_name,
+                 (void *) (v7m_psrs + i));
   for (i = 0; i < sizeof (reg_names) / sizeof (struct reg_entry); i++)
     hash_insert (arm_reg_hsh, reg_names[i].name, (void *) (reg_names + i));
   for (i = 0;
        i < sizeof (barrier_opt_names) / sizeof (struct asm_barrier_opt);
        i++)
-    hash_insert (arm_barrier_opt_hsh, barrier_opt_names[i].template,
+    hash_insert (arm_barrier_opt_hsh, barrier_opt_names[i].template_name,
 		 (void *) (barrier_opt_names + i));
 #ifdef OBJ_ELF
   for (i = 0; i < sizeof (reloc_names) / sizeof (struct reloc_entry); i++)

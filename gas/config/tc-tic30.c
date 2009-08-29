@@ -117,7 +117,7 @@ md_begin (void)
   op_hash = hash_new ();
 
   {
-    const template *current_optab = tic30_optab;
+    const insn_template *current_optab = tic30_optab;
 
     for (; current_optab < tic30_optab_end; current_optab++)
       {
@@ -257,11 +257,11 @@ typedef struct
   } immediate;
 } operand;
 
-template *opcode;
+insn_template *opcode;
 
 struct tic30_insn
 {
-  template *tm;			/* Template of current instruction.  */
+  insn_template *tm;		/* Template of current instruction.  */
   unsigned opcode;		/* Final opcode.  */
   unsigned int operands;	/* Number of given operands.  */
   /* Type of operand given in instruction.  */
@@ -1416,7 +1416,7 @@ md_operand (expressionS *expressionP ATTRIBUTE_UNUSED)
 void
 md_assemble (char *line)
 {
-  template *opcode;
+  insn_template *opcode;
   char *current_posn;
   char *token_start;
   char save_char;
@@ -1464,7 +1464,7 @@ md_assemble (char *line)
     /* Find instruction.  */
     save_char = *current_posn;
     *current_posn = '\0';
-    opcode = (template *) hash_find (op_hash, token_start);
+    opcode = (insn_template *) hash_find (op_hash, token_start);
     if (opcode)
       {
 	debug ("Found instruction %s\n", opcode->name);

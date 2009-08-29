@@ -568,7 +568,7 @@ static char *
 parse_exp (char *s, expressionS *e)
 {
   char *save;
-  char *new;
+  char *new_pointer;
 
   /* Skip whitespace.  */
   while (ISSPACE (* s))
@@ -582,10 +582,10 @@ parse_exp (char *s, expressionS *e)
   if (e->X_op == O_absent)
     as_fatal (_("missing operand"));
 
-  new = input_line_pointer;
+  new_pointer = input_line_pointer;
   input_line_pointer = save;
 
-  return new;
+  return new_pointer;
 }
 
 /* Symbol modifiers (@GOT, @PLT, @GOTOFF).  */
@@ -600,7 +600,7 @@ static symbolS * GOT_symbol;
 static char *
 parse_imm (char * s, expressionS * e, int min, int max)
 {
-  char *new;
+  char *new_pointer;
   char *atp;
 
   /* Find the start of "@GOT" or "@PLT" suffix (if any) */
@@ -643,7 +643,7 @@ parse_imm (char * s, expressionS * e, int min, int max)
       GOT_symbol = symbol_find_or_make (GOT_SYMBOL_NAME);
     }
 
-  new = parse_exp (s, e);
+  new_pointer = parse_exp (s, e);
 
   if (e->X_op == O_absent)
     ; /* An error message has already been emitted.  */
@@ -659,18 +659,18 @@ parse_imm (char * s, expressionS * e, int min, int max)
   if (atp)
     {
       *atp = '@'; /* restore back (needed?)  */
-      if (new >= atp)
-        new += (e->X_md == IMM_GOTOFF)?7:4;
+      if (new_pointer >= atp)
+        new_pointer += (e->X_md == IMM_GOTOFF)?7:4;
       /* sizeof("@GOTOFF", "@GOT" or "@PLT") */
 
     }
-  return new;
+  return new_pointer;
 }
 
 static char *
 check_got (int * got_type, int * got_len)
 {
-  char *new;
+  char *new_pointer;
   char *atp;
   char *past_got;
   int first, second;
@@ -705,9 +705,9 @@ check_got (int * got_type, int * got_len)
   first = atp - input_line_pointer;
 
   past_got = atp + *got_len + 1;
-  for (new = past_got; !is_end_of_line[(unsigned char) *new++]; )
+  for (new_pointer = past_got; !is_end_of_line[(unsigned char) *new_pointer++];)
     ;
-  second = new - past_got;
+  second = new_pointer - past_got;
   tmpbuf = xmalloc (first + second + 2); /* One extra byte for ' ' and one for NUL.  */
   memcpy (tmpbuf, input_line_pointer, first);
   tmpbuf[first] = ' '; /* @GOTOFF is replaced with a single space.  */

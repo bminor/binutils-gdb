@@ -1084,12 +1084,12 @@ static asymbol *
 oasys_make_empty_symbol (bfd *abfd)
 {
   bfd_size_type amt = sizeof (oasys_symbol_type);
-  oasys_symbol_type *new = bfd_zalloc (abfd, amt);
+  oasys_symbol_type *new_symbol_type = bfd_zalloc (abfd, amt);
 
-  if (!new)
+  if (!new_symbol_type)
     return NULL;
-  new->symbol.the_bfd = abfd;
-  return &new->symbol;
+  new_symbol_type->symbol.the_bfd = abfd;
+  return &new_symbol_type->symbol;
 }
 
 /* User should have checked the file flags; perhaps we should return

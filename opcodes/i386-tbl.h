@@ -21,7 +21,7 @@
 
 /* i386 opcode table.  */
 
-const template i386_optab[] =
+const insn_template i386_optab[] =
 {
   { "mov", 2, 0xa0, None, 1,
     { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 

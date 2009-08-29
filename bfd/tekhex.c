@@ -415,31 +415,33 @@ first_phase (bfd *abfd, int type, char *src)
 	      /* Symbols, add to section.  */
 	      {
 		bfd_size_type amt = sizeof (tekhex_symbol_type);
-		tekhex_symbol_type *new = bfd_alloc (abfd, amt);
+		tekhex_symbol_type *new_symbol = (tekhex_symbol_type *)
+                    bfd_alloc (abfd, amt);
 		char stype = (*src);
 
-		if (!new)
+		if (!new_symbol)
 		  return FALSE;
-		new->symbol.the_bfd = abfd;
+		new_symbol->symbol.the_bfd = abfd;
 		src++;
 		abfd->symcount++;
 		abfd->flags |= HAS_SYMS;
-		new->prev = abfd->tdata.tekhex_data->symbols;
-		abfd->tdata.tekhex_data->symbols = new;
+		new_symbol->prev = abfd->tdata.tekhex_data->symbols;
+		abfd->tdata.tekhex_data->symbols = new_symbol;
 		if (!getsym (sym, &src, &len))
 		  return FALSE;
-		new->symbol.name = bfd_alloc (abfd, (bfd_size_type) len + 1);
-		if (!new->symbol.name)
+		new_symbol->symbol.name = (const char *)
+                    bfd_alloc (abfd, (bfd_size_type) len + 1);
+		if (!new_symbol->symbol.name)
 		  return FALSE;
-		memcpy ((char *) (new->symbol.name), sym, len + 1);
-		new->symbol.section = section;
+		memcpy ((char *) (new_symbol->symbol.name), sym, len + 1);
+		new_symbol->symbol.section = section;
 		if (stype <= '4')
-		  new->symbol.flags = (BSF_GLOBAL | BSF_EXPORT);
+		  new_symbol->symbol.flags = (BSF_GLOBAL | BSF_EXPORT);
 		else
-		  new->symbol.flags = BSF_LOCAL;
+		  new_symbol->symbol.flags = BSF_LOCAL;
 		if (!getvalue (&src, &val))
 		  return FALSE;
-		new->symbol.value = val - section->vma;
+		new_symbol->symbol.value = val - section->vma;
 		break;
 	      }
 	    default:
@@ -880,13 +882,14 @@ static asymbol *
 tekhex_make_empty_symbol (bfd *abfd)
 {
   bfd_size_type amt = sizeof (struct tekhex_symbol_struct);
-  tekhex_symbol_type *new = bfd_zalloc (abfd, amt);
+  tekhex_symbol_type *new_symbol = (tekhex_symbol_type *) bfd_zalloc (abfd,
+                                                                      amt);
 
-  if (!new)
+  if (!new_symbol)
     return NULL;
-  new->symbol.the_bfd = abfd;
-  new->prev =  NULL;
-  return &(new->symbol);
+  new_symbol->symbol.the_bfd = abfd;
+  new_symbol->prev =  NULL;
+  return &(new_symbol->symbol);
 }
 
 static void

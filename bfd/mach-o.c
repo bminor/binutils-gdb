@@ -1255,14 +1255,14 @@ bfd_mach_o_sizeof_headers (bfd *a ATTRIBUTE_UNUSED,
 asymbol *
 bfd_mach_o_make_empty_symbol (bfd *abfd)
 {
-  asymbol *new;
+  asymbol *new_symbol;
 
-  new = bfd_zalloc (abfd, sizeof (bfd_mach_o_asymbol));
-  if (new == NULL)
-    return new;
-  new->the_bfd = abfd;
-  new->udata.i = 0;
-  return new;
+  new_symbol = bfd_zalloc (abfd, sizeof (bfd_mach_o_asymbol));
+  if (new_symbol == NULL)
+    return new_symbol;
+  new_symbol->the_bfd = abfd;
+  new_symbol->udata.i = 0;
+  return new_symbol;
 }
 
 static bfd_boolean

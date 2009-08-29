@@ -1531,7 +1531,7 @@ elf_m68k_get_got_entry (struct elf_m68k_got *got,
 static enum elf_m68k_reloc_type
 elf_m68k_update_got_entry_type (struct elf_m68k_got *got,
 				enum elf_m68k_reloc_type was,
-				enum elf_m68k_reloc_type new)
+				enum elf_m68k_reloc_type new_reloc)
 {
   enum elf_m68k_got_offset_size was_size;
   enum elf_m68k_got_offset_size new_size;
@@ -1543,20 +1543,20 @@ elf_m68k_update_got_entry_type (struct elf_m68k_got *got,
       /* Update all got->n_slots counters, including n_slots[R_32].  */
       was_size = R_LAST;
 
-      was = new;
+      was = new_reloc;
     }
   else
     {
       /* !!! We, probably, should emit an error rather then fail on assert
 	 in such a case.  */
       BFD_ASSERT (elf_m68k_reloc_got_type (was)
-		  == elf_m68k_reloc_got_type (new));
+		  == elf_m68k_reloc_got_type (new_reloc));
 
       was_size = elf_m68k_reloc_got_offset_size (was);
     }
 
-  new_size = elf_m68k_reloc_got_offset_size (new);
-  n_slots = elf_m68k_reloc_got_n_slots (new);
+  new_size = elf_m68k_reloc_got_offset_size (new_reloc);
+  n_slots = elf_m68k_reloc_got_n_slots (new_reloc);
 
   while (was_size > new_size)
     {
@@ -1564,10 +1564,10 @@ elf_m68k_update_got_entry_type (struct elf_m68k_got *got,
       got->n_slots[was_size] += n_slots;
     }
 
-  if (new > was)
+  if (new_reloc > was)
     /* Relocations are ordered from bigger got offset size to lesser,
        so choose the relocation type with lesser offset size.  */
-    was = new;
+    was = new_reloc;
 
   return was;
 }

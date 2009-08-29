@@ -4421,9 +4421,9 @@ dot_endp (int dummy ATTRIBUTE_UNUSED)
 }
 
 static void
-dot_template (int template)
+dot_template (int template_val)
 {
-  CURR_SLOT.user_template = template;
+  CURR_SLOT.user_template = template_val;
 }
 
 static void
@@ -6318,7 +6318,7 @@ emit_one_bundle (void)
   int manual_bundling_off = 0, manual_bundling = 0;
   enum ia64_unit required_unit, insn_unit = 0;
   enum ia64_insn_type type[3], insn_type;
-  unsigned int template, orig_template;
+  unsigned int template_val, orig_template;
   bfd_vma insn[3] = { -1, -1, -1 };
   struct ia64_opcode *idesc;
   int end_of_insn_group = 0, user_template = -1;
@@ -6340,7 +6340,7 @@ emit_one_bundle (void)
      otherwise:  */
 
   if (md.slot[first].user_template >= 0)
-    user_template = template = md.slot[first].user_template;
+    user_template = template_val = md.slot[first].user_template;
   else
     {
       /* Auto select appropriate template.  */
@@ -6353,12 +6353,12 @@ emit_one_bundle (void)
 	  type[i] = md.slot[curr].idesc->type;
 	  curr = (curr + 1) % NUM_SLOTS;
 	}
-      template = best_template[type[0]][type[1]][type[2]];
+      template_val = best_template[type[0]][type[1]][type[2]];
     }
 
   /* initialize instructions with appropriate nops:  */
   for (i = 0; i < 3; ++i)
-    insn[i] = nop[ia64_templ_desc[template].exec_unit[i]];
+    insn[i] = nop[ia64_templ_desc[template_val].exec_unit[i]];
 
   f = frag_more (16);
 
@@ -6452,7 +6452,7 @@ emit_one_bundle (void)
 	     MBB, BBB, MMB, and MFB.  We don't handle anything other
 	     than M and B slots because these are the only kind of
 	     instructions that can have the IA64_OPCODE_LAST bit set.  */
-	  required_template = template;
+	  required_template = template_val;
 	  switch (idesc->type)
 	    {
 	    case IA64_TYPE_M:
@@ -6476,7 +6476,7 @@ emit_one_bundle (void)
 		  || (required_slot == 2 && !manual_bundling_off)
 		  || (user_template >= 0
 		      /* Changing from MMI to M;MI is OK.  */
-		      && (template ^ required_template) > 1)))
+		      && (template_val ^ required_template) > 1)))
 	    {
 	      as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
 			    _("`%s' must be last in instruction group"),
@@ -6489,7 +6489,7 @@ emit_one_bundle (void)
 	    break;
 
 	  i = required_slot;
-	  if (required_template != template)
+	  if (required_template != template_val)
 	    {
 	      /* If we switch the template, we need to reset the NOPs
 	         after slot i.  The slot-types of the instructions ahead
@@ -6502,7 +6502,7 @@ emit_one_bundle (void)
 		 middle, so we don't need another one emitted later.  */
 	      md.slot[curr].end_of_insn_group = 0;
 	    }
-	  template = required_template;
+	  template_val = required_template;
 	}
       if (curr != first && md.slot[curr].label_fixups)
 	{
@@ -6522,18 +6522,18 @@ emit_one_bundle (void)
 	     bundle.  See if we can switch to an other template with
 	     an appropriate boundary.  */
 
-	  orig_template = template;
+	  orig_template = template_val;
 	  if (i == 1 && (user_template == 4
 			 || (user_template < 0
-			     && (ia64_templ_desc[template].exec_unit[0]
+			     && (ia64_templ_desc[template_val].exec_unit[0]
 				 == IA64_UNIT_M))))
 	    {
-	      template = 5;
+	      template_val = 5;
 	      end_of_insn_group = 0;
 	    }
 	  else if (i == 2 && (user_template == 0
 			      || (user_template < 0
-				  && (ia64_templ_desc[template].exec_unit[1]
+				  && (ia64_templ_desc[template_val].exec_unit[1]
 				      == IA64_UNIT_I)))
 		   /* This test makes sure we don't switch the template if
 		      the next instruction is one that needs to be first in
@@ -6546,7 +6546,7 @@ emit_one_bundle (void)
 		      first in the group! --davidm 99/12/16  */
 		   && (idesc->flags & IA64_OPCODE_FIRST) == 0)
 	    {
-	      template = 1;
+	      template_val = 1;
 	      end_of_insn_group = 0;
 	    }
 	  else if (i == 1
@@ -6558,15 +6558,15 @@ emit_one_bundle (void)
 	    /* can't fit this insn */
 	    break;
 
-	  if (template != orig_template)
+	  if (template_val != orig_template)
 	    /* if we switch the template, we need to reset the NOPs
 	       after slot i.  The slot-types of the instructions ahead
 	       of i never change, so we don't need to worry about
 	       changing NOPs in front of this slot.  */
 	    for (j = i; j < 3; ++j)
-	      insn[j] = nop[ia64_templ_desc[template].exec_unit[j]];
+	      insn[j] = nop[ia64_templ_desc[template_val].exec_unit[j]];
 	}
-      required_unit = ia64_templ_desc[template].exec_unit[i];
+      required_unit = ia64_templ_desc[template_val].exec_unit[i];
 
       /* resolve dynamic opcodes such as "break", "hint", and "nop":  */
       if (idesc->type == IA64_TYPE_DYN)
@@ -6607,7 +6607,7 @@ emit_one_bundle (void)
 	    {
 	      insn_unit = IA64_UNIT_M;
 	      if (required_unit == IA64_UNIT_I
-		  || (required_unit == IA64_UNIT_F && template == 6))
+		  || (required_unit == IA64_UNIT_F && template_val == 6))
 		insn_unit = IA64_UNIT_I;
 	    }
 	  else
@@ -6735,7 +6735,7 @@ emit_one_bundle (void)
     {
       as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
 		    _("`%s' does not fit into %s template"),
-		    idesc->name, ia64_templ_desc[template].name);
+		    idesc->name, ia64_templ_desc[template_val].name);
       /* Drop first insn so we don't livelock.  */
       --md.num_slots_in_use;
       know (curr == first);
@@ -6754,7 +6754,7 @@ emit_one_bundle (void)
 	    {
 	      const char *where;
 
-	      if (template == 2)
+	      if (template_val == 2)
 		where = "X slot";
 	      else if (last_slot == 0)
 		where = "slots 2 or 3";
@@ -6762,7 +6762,7 @@ emit_one_bundle (void)
 		where = "slot 3";
 	      as_bad_where (md.slot[curr].src_file, md.slot[curr].src_line,
 			    _("`%s' can't go in %s of %s template"),
-			    idesc->name, where, ia64_templ_desc[template].name);
+			    idesc->name, where, ia64_templ_desc[template_val].name);
 	    }
 	}
       else
@@ -6772,7 +6772,7 @@ emit_one_bundle (void)
 	
   know (md.num_slots_in_use < NUM_SLOTS);
 
-  t0 = end_of_insn_group | (template << 1) | (insn[0] << 5) | (insn[1] << 46);
+  t0 = end_of_insn_group | (template_val << 1) | (insn[0] << 5) | (insn[1] << 46);
   t1 = ((insn[1] >> 18) & 0x7fffff) | (insn[2] << 23);
 
   number_to_chars_littleendian (f + 0, t0, 8);
@@ -10861,7 +10861,7 @@ ia64_cons_fix_new (fragS *f, int where, int nbytes, expressionS *exp)
 static bfd_reloc_code_real_type
 ia64_gen_real_reloc_type (struct symbol *sym, bfd_reloc_code_real_type r_type)
 {
-  bfd_reloc_code_real_type new = 0;
+  bfd_reloc_code_real_type newr = 0;
   const char *type = NULL, *suffix = "";
 
   if (sym == NULL)
@@ -10874,11 +10874,11 @@ ia64_gen_real_reloc_type (struct symbol *sym, bfd_reloc_code_real_type r_type)
     case FUNC_FPTR_RELATIVE:
       switch (r_type)
 	{
-	case BFD_RELOC_IA64_IMM64:	new = BFD_RELOC_IA64_FPTR64I; break;
-	case BFD_RELOC_IA64_DIR32MSB:	new = BFD_RELOC_IA64_FPTR32MSB; break;
-	case BFD_RELOC_IA64_DIR32LSB:	new = BFD_RELOC_IA64_FPTR32LSB; break;
-	case BFD_RELOC_IA64_DIR64MSB:	new = BFD_RELOC_IA64_FPTR64MSB; break;
-	case BFD_RELOC_IA64_DIR64LSB:	new = BFD_RELOC_IA64_FPTR64LSB; break;
+	case BFD_RELOC_IA64_IMM64:	newr = BFD_RELOC_IA64_FPTR64I; break;
+	case BFD_RELOC_IA64_DIR32MSB:	newr = BFD_RELOC_IA64_FPTR32MSB; break;
+	case BFD_RELOC_IA64_DIR32LSB:	newr = BFD_RELOC_IA64_FPTR32LSB; break;
+	case BFD_RELOC_IA64_DIR64MSB:	newr = BFD_RELOC_IA64_FPTR64MSB; break;
+	case BFD_RELOC_IA64_DIR64LSB:	newr = BFD_RELOC_IA64_FPTR64LSB; break;
 	default:			type = "FPTR"; break;
 	}
       break;
@@ -10886,12 +10886,12 @@ ia64_gen_real_reloc_type (struct symbol *sym, bfd_reloc_code_real_type r_type)
     case FUNC_GP_RELATIVE:
       switch (r_type)
 	{
-	case BFD_RELOC_IA64_IMM22:	new = BFD_RELOC_IA64_GPREL22; break;
-	case BFD_RELOC_IA64_IMM64:	new = BFD_RELOC_IA64_GPREL64I; break;
-	case BFD_RELOC_IA64_DIR32MSB:	new = BFD_RELOC_IA64_GPREL32MSB; break;
-	case BFD_RELOC_IA64_DIR32LSB:	new = BFD_RELOC_IA64_GPREL32LSB; break;
-	case BFD_RELOC_IA64_DIR64MSB:	new = BFD_RELOC_IA64_GPREL64MSB; break;
-	case BFD_RELOC_IA64_DIR64LSB:	new = BFD_RELOC_IA64_GPREL64LSB; break;
+	case BFD_RELOC_IA64_IMM22:	newr = BFD_RELOC_IA64_GPREL22; break;
+	case BFD_RELOC_IA64_IMM64:	newr = BFD_RELOC_IA64_GPREL64I; break;
+	case BFD_RELOC_IA64_DIR32MSB:	newr = BFD_RELOC_IA64_GPREL32MSB; break;
+	case BFD_RELOC_IA64_DIR32LSB:	newr = BFD_RELOC_IA64_GPREL32LSB; break;
+	case BFD_RELOC_IA64_DIR64MSB:	newr = BFD_RELOC_IA64_GPREL64MSB; break;
+	case BFD_RELOC_IA64_DIR64LSB:	newr = BFD_RELOC_IA64_GPREL64LSB; break;
 	default:			type = "GPREL"; break;
 	}
       break;
@@ -10899,8 +10899,8 @@ ia64_gen_real_reloc_type (struct symbol *sym, bfd_reloc_code_real_type r_type)
     case FUNC_LT_RELATIVE:
       switch (r_type)
 	{
-	case BFD_RELOC_IA64_IMM22:	new = BFD_RELOC_IA64_LTOFF22; break;
-	case BFD_RELOC_IA64_IMM64:	new = BFD_RELOC_IA64_LTOFF64I; break;
+	case BFD_RELOC_IA64_IMM22:	newr = BFD_RELOC_IA64_LTOFF22; break;
+	case BFD_RELOC_IA64_IMM64:	newr = BFD_RELOC_IA64_LTOFF64I; break;
 	default:			type = "LTOFF"; break;
 	}
       break;
@@ -10908,7 +10908,7 @@ ia64_gen_real_reloc_type (struct symbol *sym, bfd_reloc_code_real_type r_type)
     case FUNC_LT_RELATIVE_X:
       switch (r_type)
 	{
-	case BFD_RELOC_IA64_IMM22:	new = BFD_RELOC_IA64_LTOFF22X; break;
+	case BFD_RELOC_IA64_IMM22:	newr = BFD_RELOC_IA64_LTOFF22X; break;
 	default:			type = "LTOFF"; suffix = "X"; break;
 	}
       break;
@@ -10916,12 +10916,12 @@ ia64_gen_real_reloc_type (struct symbol *sym, bfd_reloc_code_real_type r_type)
     case FUNC_PC_RELATIVE:
       switch (r_type)
 	{
-	case BFD_RELOC_IA64_IMM22:	new = BFD_RELOC_IA64_PCREL22; break;
-	case BFD_RELOC_IA64_IMM64:	new = BFD_RELOC_IA64_PCREL64I; break;
-	case BFD_RELOC_IA64_DIR32MSB:	new = BFD_RELOC_IA64_PCREL32MSB; break;
-	case BFD_RELOC_IA64_DIR32LSB:	new = BFD_RELOC_IA64_PCREL32LSB; break;
-	case BFD_RELOC_IA64_DIR64MSB:	new = BFD_RELOC_IA64_PCREL64MSB; break;
-	case BFD_RELOC_IA64_DIR64LSB:	new = BFD_RELOC_IA64_PCREL64LSB; break;
+	case BFD_RELOC_IA64_IMM22:	newr = BFD_RELOC_IA64_PCREL22; break;
+	case BFD_RELOC_IA64_IMM64:	newr = BFD_RELOC_IA64_PCREL64I; break;
+	case BFD_RELOC_IA64_DIR32MSB:	newr = BFD_RELOC_IA64_PCREL32MSB; break;
+	case BFD_RELOC_IA64_DIR32LSB:	newr = BFD_RELOC_IA64_PCREL32LSB; break;
+	case BFD_RELOC_IA64_DIR64MSB:	newr = BFD_RELOC_IA64_PCREL64MSB; break;
+	case BFD_RELOC_IA64_DIR64LSB:	newr = BFD_RELOC_IA64_PCREL64LSB; break;
 	default:			type = "PCREL"; break;
 	}
       break;
@@ -10929,10 +10929,10 @@ ia64_gen_real_reloc_type (struct symbol *sym, bfd_reloc_code_real_type r_type)
     case FUNC_PLT_RELATIVE:
       switch (r_type)
 	{
-	case BFD_RELOC_IA64_IMM22:	new = BFD_RELOC_IA64_PLTOFF22; break;
-	case BFD_RELOC_IA64_IMM64:	new = BFD_RELOC_IA64_PLTOFF64I; break;
-	case BFD_RELOC_IA64_DIR64MSB:	new = BFD_RELOC_IA64_PLTOFF64MSB;break;
-	case BFD_RELOC_IA64_DIR64LSB:	new = BFD_RELOC_IA64_PLTOFF64LSB;break;
+	case BFD_RELOC_IA64_IMM22:	newr = BFD_RELOC_IA64_PLTOFF22; break;
+	case BFD_RELOC_IA64_IMM64:	newr = BFD_RELOC_IA64_PLTOFF64I; break;
+	case BFD_RELOC_IA64_DIR64MSB:	newr = BFD_RELOC_IA64_PLTOFF64MSB;break;
+	case BFD_RELOC_IA64_DIR64LSB:	newr = BFD_RELOC_IA64_PLTOFF64LSB;break;
 	default:			type = "PLTOFF"; break;
 	}
       break;
@@ -10940,10 +10940,10 @@ ia64_gen_real_reloc_type (struct symbol *sym, bfd_reloc_code_real_type r_type)
     case FUNC_SEC_RELATIVE:
       switch (r_type)
 	{
-	case BFD_RELOC_IA64_DIR32MSB:	new = BFD_RELOC_IA64_SECREL32MSB;break;
-	case BFD_RELOC_IA64_DIR32LSB:	new = BFD_RELOC_IA64_SECREL32LSB;break;
-	case BFD_RELOC_IA64_DIR64MSB:	new = BFD_RELOC_IA64_SECREL64MSB;break;
-	case BFD_RELOC_IA64_DIR64LSB:	new = BFD_RELOC_IA64_SECREL64LSB;break;
+	case BFD_RELOC_IA64_DIR32MSB:	newr = BFD_RELOC_IA64_SECREL32MSB;break;
+	case BFD_RELOC_IA64_DIR32LSB:	newr = BFD_RELOC_IA64_SECREL32LSB;break;
+	case BFD_RELOC_IA64_DIR64MSB:	newr = BFD_RELOC_IA64_SECREL64MSB;break;
+	case BFD_RELOC_IA64_DIR64LSB:	newr = BFD_RELOC_IA64_SECREL64LSB;break;
 	default:			type = "SECREL"; break;
 	}
       break;
@@ -10951,10 +10951,10 @@ ia64_gen_real_reloc_type (struct symbol *sym, bfd_reloc_code_real_type r_type)
     case FUNC_SEG_RELATIVE:
       switch (r_type)
 	{
-	case BFD_RELOC_IA64_DIR32MSB:	new = BFD_RELOC_IA64_SEGREL32MSB;break;
-	case BFD_RELOC_IA64_DIR32LSB:	new = BFD_RELOC_IA64_SEGREL32LSB;break;
-	case BFD_RELOC_IA64_DIR64MSB:	new = BFD_RELOC_IA64_SEGREL64MSB;break;
-	case BFD_RELOC_IA64_DIR64LSB:	new = BFD_RELOC_IA64_SEGREL64LSB;break;
+	case BFD_RELOC_IA64_DIR32MSB:	newr = BFD_RELOC_IA64_SEGREL32MSB;break;
+	case BFD_RELOC_IA64_DIR32LSB:	newr = BFD_RELOC_IA64_SEGREL32LSB;break;
+	case BFD_RELOC_IA64_DIR64MSB:	newr = BFD_RELOC_IA64_SEGREL64MSB;break;
+	case BFD_RELOC_IA64_DIR64LSB:	newr = BFD_RELOC_IA64_SEGREL64LSB;break;
 	default:			type = "SEGREL"; break;
 	}
       break;
@@ -10962,10 +10962,10 @@ ia64_gen_real_reloc_type (struct symbol *sym, bfd_reloc_code_real_type r_type)
     case FUNC_LTV_RELATIVE:
       switch (r_type)
 	{
-	case BFD_RELOC_IA64_DIR32MSB:	new = BFD_RELOC_IA64_LTV32MSB; break;
-	case BFD_RELOC_IA64_DIR32LSB:	new = BFD_RELOC_IA64_LTV32LSB; break;
-	case BFD_RELOC_IA64_DIR64MSB:	new = BFD_RELOC_IA64_LTV64MSB; break;
-	case BFD_RELOC_IA64_DIR64LSB:	new = BFD_RELOC_IA64_LTV64LSB; break;
+	case BFD_RELOC_IA64_DIR32MSB:	newr = BFD_RELOC_IA64_LTV32MSB; break;
+	case BFD_RELOC_IA64_DIR32LSB:	newr = BFD_RELOC_IA64_LTV32LSB; break;
+	case BFD_RELOC_IA64_DIR64MSB:	newr = BFD_RELOC_IA64_LTV64MSB; break;
+	case BFD_RELOC_IA64_DIR64LSB:	newr = BFD_RELOC_IA64_LTV64LSB; break;
 	default:			type = "LTV"; break;
 	}
       break;
@@ -10974,17 +10974,17 @@ ia64_gen_real_reloc_type (struct symbol *sym, bfd_reloc_code_real_type r_type)
       switch (r_type)
 	{
 	case BFD_RELOC_IA64_IMM22:
-	  new = BFD_RELOC_IA64_LTOFF_FPTR22; break;
+	  newr = BFD_RELOC_IA64_LTOFF_FPTR22; break;
 	case BFD_RELOC_IA64_IMM64:
-	  new = BFD_RELOC_IA64_LTOFF_FPTR64I; break;
+	  newr = BFD_RELOC_IA64_LTOFF_FPTR64I; break;
 	case BFD_RELOC_IA64_DIR32MSB:
-	  new = BFD_RELOC_IA64_LTOFF_FPTR32MSB; break;
+	  newr = BFD_RELOC_IA64_LTOFF_FPTR32MSB; break;
 	case BFD_RELOC_IA64_DIR32LSB:
-	  new = BFD_RELOC_IA64_LTOFF_FPTR32LSB; break;
+	  newr = BFD_RELOC_IA64_LTOFF_FPTR32LSB; break;
 	case BFD_RELOC_IA64_DIR64MSB:
-	  new = BFD_RELOC_IA64_LTOFF_FPTR64MSB; break;
+	  newr = BFD_RELOC_IA64_LTOFF_FPTR64MSB; break;
 	case BFD_RELOC_IA64_DIR64LSB:
-	  new = BFD_RELOC_IA64_LTOFF_FPTR64LSB; break;
+	  newr = BFD_RELOC_IA64_LTOFF_FPTR64LSB; break;
 	default:
 	  type = "LTOFF_FPTR"; break;
 	}
@@ -10993,11 +10993,11 @@ ia64_gen_real_reloc_type (struct symbol *sym, bfd_reloc_code_real_type r_type)
     case FUNC_TP_RELATIVE:
       switch (r_type)
 	{
-	case BFD_RELOC_IA64_IMM14:      new = BFD_RELOC_IA64_TPREL14; break;
-	case BFD_RELOC_IA64_IMM22:      new = BFD_RELOC_IA64_TPREL22; break;
-	case BFD_RELOC_IA64_IMM64:      new = BFD_RELOC_IA64_TPREL64I; break;
-	case BFD_RELOC_IA64_DIR64MSB:   new = BFD_RELOC_IA64_TPREL64MSB; break;
-	case BFD_RELOC_IA64_DIR64LSB:   new = BFD_RELOC_IA64_TPREL64LSB; break;
+	case BFD_RELOC_IA64_IMM14:      newr = BFD_RELOC_IA64_TPREL14; break;
+	case BFD_RELOC_IA64_IMM22:      newr = BFD_RELOC_IA64_TPREL22; break;
+	case BFD_RELOC_IA64_IMM64:      newr = BFD_RELOC_IA64_TPREL64I; break;
+	case BFD_RELOC_IA64_DIR64MSB:   newr = BFD_RELOC_IA64_TPREL64MSB; break;
+	case BFD_RELOC_IA64_DIR64LSB:   newr = BFD_RELOC_IA64_TPREL64LSB; break;
 	default:                        type = "TPREL"; break;
 	}
       break;
@@ -11006,7 +11006,7 @@ ia64_gen_real_reloc_type (struct symbol *sym, bfd_reloc_code_real_type r_type)
       switch (r_type)
 	{
 	case BFD_RELOC_IA64_IMM22:
-	  new = BFD_RELOC_IA64_LTOFF_TPREL22; break;
+	  newr = BFD_RELOC_IA64_LTOFF_TPREL22; break;
 	default:
 	  type = "LTOFF_TPREL"; break;
 	}
@@ -11016,9 +11016,9 @@ ia64_gen_real_reloc_type (struct symbol *sym, bfd_reloc_code_real_type r_type)
       switch (r_type)
 	{
 	case BFD_RELOC_IA64_DIR64MSB:
-	  new = BFD_RELOC_IA64_DTPMOD64MSB; break;
+	  newr = BFD_RELOC_IA64_DTPMOD64MSB; break;
 	case BFD_RELOC_IA64_DIR64LSB:
-	  new = BFD_RELOC_IA64_DTPMOD64LSB; break;
+	  newr = BFD_RELOC_IA64_DTPMOD64LSB; break;
 	default:
 	  type = "DTPMOD"; break;
 	}
@@ -11028,7 +11028,7 @@ ia64_gen_real_reloc_type (struct symbol *sym, bfd_reloc_code_real_type r_type)
       switch (r_type)
 	{
 	case BFD_RELOC_IA64_IMM22:
-	  new = BFD_RELOC_IA64_LTOFF_DTPMOD22; break;
+	  newr = BFD_RELOC_IA64_LTOFF_DTPMOD22; break;
 	default:
 	  type = "LTOFF_DTPMOD"; break;
 	}
@@ -11038,19 +11038,19 @@ ia64_gen_real_reloc_type (struct symbol *sym, bfd_reloc_code_real_type r_type)
       switch (r_type)
 	{
 	case BFD_RELOC_IA64_DIR32MSB:
-	  new = BFD_RELOC_IA64_DTPREL32MSB; break;
+	  newr = BFD_RELOC_IA64_DTPREL32MSB; break;
 	case BFD_RELOC_IA64_DIR32LSB:
-	  new = BFD_RELOC_IA64_DTPREL32LSB; break;
+	  newr = BFD_RELOC_IA64_DTPREL32LSB; break;
 	case BFD_RELOC_IA64_DIR64MSB:
-	  new = BFD_RELOC_IA64_DTPREL64MSB; break;
+	  newr = BFD_RELOC_IA64_DTPREL64MSB; break;
 	case BFD_RELOC_IA64_DIR64LSB:
-	  new = BFD_RELOC_IA64_DTPREL64LSB; break;
+	  newr = BFD_RELOC_IA64_DTPREL64LSB; break;
 	case BFD_RELOC_IA64_IMM14:
-	  new = BFD_RELOC_IA64_DTPREL14; break;
+	  newr = BFD_RELOC_IA64_DTPREL14; break;
 	case BFD_RELOC_IA64_IMM22:
-	  new = BFD_RELOC_IA64_DTPREL22; break;
+	  newr = BFD_RELOC_IA64_DTPREL22; break;
 	case BFD_RELOC_IA64_IMM64:
-	  new = BFD_RELOC_IA64_DTPREL64I; break;
+	  newr = BFD_RELOC_IA64_DTPREL64I; break;
 	default:
 	  type = "DTPREL"; break;
 	}
@@ -11060,7 +11060,7 @@ ia64_gen_real_reloc_type (struct symbol *sym, bfd_reloc_code_real_type r_type)
       switch (r_type)
 	{
 	case BFD_RELOC_IA64_IMM22:
-	  new = BFD_RELOC_IA64_LTOFF_DTPREL22; break;
+	  newr = BFD_RELOC_IA64_LTOFF_DTPREL22; break;
 	default:
 	  type = "LTOFF_DTPREL"; break;
 	}
@@ -11079,8 +11079,8 @@ ia64_gen_real_reloc_type (struct symbol *sym, bfd_reloc_code_real_type r_type)
       abort ();
     }
 
-  if (new)
-    return new;
+  if (newr)
+    return newr;
   else
     {
       int width;

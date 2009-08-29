@@ -285,7 +285,7 @@ listing_newline (char *ps)
   unsigned int line;
   static unsigned int last_line = 0xffff;
   static char *last_file = NULL;
-  list_info_type *new = NULL;
+  list_info_type *new_i = NULL;
 
   if (listing == 0)
     return;
@@ -318,7 +318,7 @@ listing_newline (char *ps)
 	  && !(last_file && file && strcmp (file, last_file)))
 	return;
 
-      new = (list_info_type *) xmalloc (sizeof (list_info_type));
+      new_i = (list_info_type *) xmalloc (sizeof (list_info_type));
 
       /* Detect if we are reading from stdin by examining the file
 	 name returned by as_where().
@@ -371,15 +371,15 @@ listing_newline (char *ps)
 	      *dest = 0;
 	    }
 
-	  new->line_contents = copy;
+	  new_i->line_contents = copy;
 	}
       else
-	new->line_contents = NULL;
+	new_i->line_contents = NULL;
     }
   else
     {
-      new = xmalloc (sizeof (list_info_type));
-      new->line_contents = ps;
+      new_i = (list_info_type *) xmalloc (sizeof (list_info_type));
+      new_i->line_contents = ps;
     }
 
   last_line = line;
@@ -388,21 +388,21 @@ listing_newline (char *ps)
   new_frag ();
 
   if (listing_tail)
-    listing_tail->next = new;
+    listing_tail->next = new_i;
   else
-    head = new;
+    head = new_i;
 
-  listing_tail = new;
+  listing_tail = new_i;
 
-  new->frag = frag_now;
-  new->line = line;
-  new->file = file_info (file);
-  new->next = (list_info_type *) NULL;
-  new->message = (char *) NULL;
-  new->edict = EDICT_NONE;
-  new->hll_file = (file_info_type *) NULL;
-  new->hll_line = 0;
-  new->debugging = 0;
+  new_i->frag = frag_now;
+  new_i->line = line;
+  new_i->file = file_info (file);
+  new_i->next = (list_info_type *) NULL;
+  new_i->message = (char *) NULL;
+  new_i->edict = EDICT_NONE;
+  new_i->hll_file = (file_info_type *) NULL;
+  new_i->hll_line = 0;
+  new_i->debugging = 0;
 
   new_frag ();
 
@@ -416,7 +416,7 @@ listing_newline (char *ps)
       segname = segment_name (now_seg);
       if (strncmp (segname, ".debug", sizeof ".debug" - 1) == 0
 	  || strncmp (segname, ".line", sizeof ".line" - 1) == 0)
-	new->debugging = 1;
+	new_i->debugging = 1;
     }
 #endif
 }

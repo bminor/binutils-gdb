@@ -2604,21 +2604,21 @@ struct bfd_link_order *
 bfd_new_link_order (bfd *abfd, asection *section)
 {
   bfd_size_type amt = sizeof (struct bfd_link_order);
-  struct bfd_link_order *new;
+  struct bfd_link_order *new_lo;
 
-  new = bfd_zalloc (abfd, amt);
-  if (!new)
+  new_lo = (struct bfd_link_order *) bfd_zalloc (abfd, amt);
+  if (!new_lo)
     return NULL;
 
-  new->type = bfd_undefined_link_order;
+  new_lo->type = bfd_undefined_link_order;
 
   if (section->map_tail.link_order != NULL)
-    section->map_tail.link_order->next = new;
+    section->map_tail.link_order->next = new_lo;
   else
-    section->map_head.link_order = new;
-  section->map_tail.link_order = new;
+    section->map_head.link_order = new_lo;
+  section->map_tail.link_order = new_lo;
 
-  return new;
+  return new_lo;
 }
 
 /* Default link order processing routine.  Note that we can not handle

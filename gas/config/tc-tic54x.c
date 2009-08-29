@@ -81,7 +81,7 @@ static struct stag
 
 typedef struct _tic54x_insn
 {
-  const template *tm;		/* Opcode template.  */
+  const insn_template *tm;	/* Opcode template.  */
 
   char mnemonic[MAX_LINE];	/* Opcode name/mnemonic.  */
   char parmnemonic[MAX_LINE];   /* 2nd mnemonic of parallel insn.  */
@@ -2989,7 +2989,7 @@ static const math_proc_entry math_procs[] =
 void
 md_begin (void)
 {
-  template *tm;
+  insn_template *tm;
   symbol *sym;
   const subsym_proc_entry *subsym_proc;
   const math_proc_entry *math_proc;
@@ -3018,7 +3018,7 @@ md_begin (void)
     }
 
   op_hash = hash_new ();
-  for (tm = (template *) tic54x_optab; tm->name; tm++)
+  for (tm = (insn_template *) tic54x_optab; tm->name; tm++)
     {
       if (hash_find (op_hash, tm->name))
 	continue;
@@ -3028,7 +3028,7 @@ md_begin (void)
 		  tm->name, hash_err);
     }
   parop_hash = hash_new ();
-  for (tm = (template *) tic54x_paroptab; tm->name; tm++)
+  for (tm = (insn_template *) tic54x_paroptab; tm->name; tm++)
     {
       if (hash_find (parop_hash, tm->name))
 	continue;
@@ -4179,7 +4179,7 @@ optimize_insn (tic54x_insn *insn)
 static int
 tic54x_parse_insn (tic54x_insn *insn, char *line)
 {
-  insn->tm = (template *) hash_find (op_hash, insn->mnemonic);
+  insn->tm = (insn_template *) hash_find (op_hash, insn->mnemonic);
   if (!insn->tm)
     {
       as_bad (_("Unrecognized instruction \"%s\""), insn->mnemonic);
@@ -4202,8 +4202,8 @@ tic54x_parse_insn (tic54x_insn *insn, char *line)
 	  /* SUCCESS! now try some optimizations.  */
 	  if (optimize_insn (insn))
 	    {
-	      insn->tm = (template *) hash_find (op_hash,
-						 insn->mnemonic);
+	      insn->tm = (insn_template *) hash_find (op_hash,
+                                                      insn->mnemonic);
 	      continue;
 	    }
 
@@ -4237,7 +4237,7 @@ next_line_shows_parallel (char *next_line)
 static int
 tic54x_parse_parallel_insn_firstline (tic54x_insn *insn, char *line)
 {
-  insn->tm = (template *) hash_find (parop_hash, insn->mnemonic);
+  insn->tm = (insn_template *) hash_find (parop_hash, insn->mnemonic);
   if (!insn->tm)
     {
       as_bad (_("Unrecognized parallel instruction \"%s\""),

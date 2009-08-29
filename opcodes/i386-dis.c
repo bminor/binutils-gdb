@@ -10184,7 +10184,7 @@ OP_STi (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 
 /* Capital letters in template are macros.  */
 static int
-putop (const char *template, int sizeflag)
+putop (const char *in_template, int sizeflag)
 {
   const char *p;
   int alt = 0;
@@ -10198,7 +10198,7 @@ putop (const char *template, int sizeflag)
   else					\
     abort ();
 
-  for (p = template; *p; p++)
+  for (p = in_template; *p; p++)
     {
       switch (*p)
 	{

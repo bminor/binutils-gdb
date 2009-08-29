@@ -1267,14 +1267,14 @@ dict_type *
 newentry (word)
      char *word;
 {
-  dict_type *new = (dict_type *) malloc (sizeof (dict_type));
-  new->word = word;
-  new->next = root;
-  root = new;
-  new->code = (stinst_type *) malloc (sizeof (stinst_type));
-  new->code_length = 1;
-  new->code_end = 0;
-  return new;
+  dict_type *new_d = (dict_type *) malloc (sizeof (dict_type));
+  new_d->word = word;
+  new_d->next = root;
+  root = new_d;
+  new_d->code = (stinst_type *) malloc (sizeof (stinst_type));
+  new_d->code_length = 1;
+  new_d->code_end = 0;
+  return new_d;
 }
 
 unsigned int
@@ -1299,19 +1299,19 @@ add_intrinsic (name, func)
      char *name;
      void (*func) ();
 {
-  dict_type *new = newentry (name);
-  add_to_definition (new, func);
-  add_to_definition (new, 0);
+  dict_type *new_d = newentry (name);
+  add_to_definition (new_d, func);
+  add_to_definition (new_d, 0);
 }
 
 void
 add_var (name)
      char *name;
 {
-  dict_type *new = newentry (name);
-  add_to_definition (new, push_number);
-  add_to_definition (new, (stinst_type) (&(new->var)));
-  add_to_definition (new, 0);
+  dict_type *new_d = newentry (name);
+  add_to_definition (new_d, push_number);
+  add_to_definition (new_d, (stinst_type) (&(new_d->var)));
+  add_to_definition (new_d, 0);
 }
 
 void

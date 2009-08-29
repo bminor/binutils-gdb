@@ -1794,17 +1794,17 @@ asymbol *
 coff_make_empty_symbol (bfd *abfd)
 {
   bfd_size_type amt = sizeof (coff_symbol_type);
-  coff_symbol_type *new = bfd_zalloc (abfd, amt);
+  coff_symbol_type *new_symbol = (coff_symbol_type *) bfd_zalloc (abfd, amt);
 
-  if (new == NULL)
+  if (new_symbol == NULL)
     return NULL;
-  new->symbol.section = 0;
-  new->native = 0;
-  new->lineno = NULL;
-  new->done_lineno = FALSE;
-  new->symbol.the_bfd = abfd;
+  new_symbol->symbol.section = 0;
+  new_symbol->native = 0;
+  new_symbol->lineno = NULL;
+  new_symbol->done_lineno = FALSE;
+  new_symbol->symbol.the_bfd = abfd;
 
-  return & new->symbol;
+  return & new_symbol->symbol;
 }
 
 /* Make a debugging symbol.  */
@@ -1815,23 +1815,23 @@ coff_bfd_make_debug_symbol (bfd *abfd,
 			    unsigned long sz ATTRIBUTE_UNUSED)
 {
   bfd_size_type amt = sizeof (coff_symbol_type);
-  coff_symbol_type *new = bfd_alloc (abfd, amt);
+  coff_symbol_type *new_symbol = (coff_symbol_type *) bfd_alloc (abfd, amt);
 
-  if (new == NULL)
+  if (new_symbol == NULL)
     return NULL;
   /* @@ The 10 is a guess at a plausible maximum number of aux entries
      (but shouldn't be a constant).  */
   amt = sizeof (combined_entry_type) * 10;
-  new->native = bfd_zalloc (abfd, amt);
-  if (!new->native)
+  new_symbol->native = (combined_entry_type *) bfd_zalloc (abfd, amt);
+  if (!new_symbol->native)
     return NULL;
-  new->symbol.section = bfd_abs_section_ptr;
-  new->symbol.flags = BSF_DEBUGGING;
-  new->lineno = NULL;
-  new->done_lineno = FALSE;
-  new->symbol.the_bfd = abfd;
+  new_symbol->symbol.section = bfd_abs_section_ptr;
+  new_symbol->symbol.flags = BSF_DEBUGGING;
+  new_symbol->lineno = NULL;
+  new_symbol->done_lineno = FALSE;
+  new_symbol->symbol.the_bfd = abfd;
   
-  return & new->symbol;
+  return & new_symbol->symbol;
 }
 
 void

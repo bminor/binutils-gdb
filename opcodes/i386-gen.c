@@ -876,7 +876,7 @@ process_i386_opcodes (FILE *table)
 					 xcalloc, free);
 
   fprintf (table, "\n/* i386 opcode table.  */\n\n");
-  fprintf (table, "const template i386_optab[] =\n{\n");
+  fprintf (table, "const insn_template i386_optab[] =\n{\n");
 
   /* Put everything on opcode array.  */
   while (!feof (fp))

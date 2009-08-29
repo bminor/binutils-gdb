@@ -262,7 +262,7 @@ static char *
 parse_operand (char *s, expressionS *operandp, int opt)
 {
   char *save = input_line_pointer;
-  char *new;
+  char *new_pointer;
 
 #if DEBUG
   printf ("  PROCESS NEW OPERAND(%s) == %c (%d)\n", s, opt ? opt : '!', opt);
@@ -312,14 +312,15 @@ parse_operand (char *s, expressionS *operandp, int opt)
         }
     }
 
-  new = input_line_pointer;
+  new_pointer = input_line_pointer;
   input_line_pointer = save;
 
 #if DEBUG
-  printf ("  %s=parse_operand(%s): operandp->X_op = %u\n", new, s, operandp->X_op);
+  printf ("  %s=parse_operand(%s): operandp->X_op = %u\n", new_pointer, s,
+          operandp->X_op);
 #endif
 
-  return new;
+  return new_pointer;
 }
 
 /* Instruction parsing.  Takes a string containing the opcode.

@@ -154,25 +154,25 @@ new_abs (bfd_vma value)
 etree_type *
 exp_intop (bfd_vma value)
 {
-  etree_type *new = stat_alloc (sizeof (new->value));
-  new->type.node_code = INT;
-  new->type.lineno = lineno;
-  new->value.value = value;
-  new->value.str = NULL;
-  new->type.node_class = etree_value;
-  return new;
+  etree_type *new_e = (etree_type *) stat_alloc (sizeof (new_e->value));
+  new_e->type.node_code = INT;
+  new_e->type.lineno = lineno;
+  new_e->value.value = value;
+  new_e->value.str = NULL;
+  new_e->type.node_class = etree_value;
+  return new_e;
 }
 
 etree_type *
 exp_bigintop (bfd_vma value, char *str)
 {
-  etree_type *new = stat_alloc (sizeof (new->value));
-  new->type.node_code = INT;
-  new->type.lineno = lineno;
-  new->value.value = value;
-  new->value.str = str;
-  new->type.node_class = etree_value;
-  return new;
+  etree_type *new_e = (etree_type *) stat_alloc (sizeof (new_e->value));
+  new_e->type.node_code = INT;
+  new_e->type.lineno = lineno;
+  new_e->value.value = value;
+  new_e->value.str = str;
+  new_e->type.node_class = etree_value;
+  return new_e;
 }
 
 /* Build an expression representing an unnamed relocatable value.  */
@@ -180,13 +180,13 @@ exp_bigintop (bfd_vma value, char *str)
 etree_type *
 exp_relop (asection *section, bfd_vma value)
 {
-  etree_type *new = stat_alloc (sizeof (new->rel));
-  new->type.node_code = REL;
-  new->type.lineno = lineno;
-  new->type.node_class = etree_rel;
-  new->rel.section = section;
-  new->rel.value = value;
-  return new;
+  etree_type *new_e = (etree_type *) stat_alloc (sizeof (new_e->rel));
+  new_e->type.node_code = REL;
+  new_e->type.lineno = lineno;
+  new_e->type.node_class = etree_rel;
+  new_e->rel.section = section;
+  new_e->rel.value = value;
+  return new_e;
 }
 
 static void
@@ -851,7 +851,7 @@ exp_fold_tree_no_dot (etree_type *tree)
 etree_type *
 exp_binop (int code, etree_type *lhs, etree_type *rhs)
 {
-  etree_type value, *new;
+  etree_type value, *new_e;
 
   value.type.node_code = code;
   value.type.lineno = lhs->type.lineno;
@@ -862,15 +862,15 @@ exp_binop (int code, etree_type *lhs, etree_type *rhs)
   if (expld.result.valid_p)
     return exp_intop (expld.result.value);
 
-  new = stat_alloc (sizeof (new->binary));
-  memcpy (new, &value, sizeof (new->binary));
-  return new;
+  new_e = (etree_type *) stat_alloc (sizeof (new_e->binary));
+  memcpy (new_e, &value, sizeof (new_e->binary));
+  return new_e;
 }
 
 etree_type *
 exp_trinop (int code, etree_type *cond, etree_type *lhs, etree_type *rhs)
 {
-  etree_type value, *new;
+  etree_type value, *new_e;
 
   value.type.node_code = code;
   value.type.lineno = lhs->type.lineno;
@@ -882,15 +882,15 @@ exp_trinop (int code, etree_type *cond, etree_type *lhs, etree_type *rhs)
   if (expld.result.valid_p)
     return exp_intop (expld.result.value);
 
-  new = stat_alloc (sizeof (new->trinary));
-  memcpy (new, &value, sizeof (new->trinary));
-  return new;
+  new_e = (etree_type *) stat_alloc (sizeof (new_e->trinary));
+  memcpy (new_e, &value, sizeof (new_e->trinary));
+  return new_e;
 }
 
 etree_type *
 exp_unop (int code, etree_type *child)
 {
-  etree_type value, *new;
+  etree_type value, *new_e;
 
   value.unary.type.node_code = code;
   value.unary.type.lineno = child->type.lineno;
@@ -900,15 +900,15 @@ exp_unop (int code, etree_type *child)
   if (expld.result.valid_p)
     return exp_intop (expld.result.value);
 
-  new = stat_alloc (sizeof (new->unary));
-  memcpy (new, &value, sizeof (new->unary));
-  return new;
+  new_e = (etree_type *) stat_alloc (sizeof (new_e->unary));
+  memcpy (new_e, &value, sizeof (new_e->unary));
+  return new_e;
 }
 
 etree_type *
 exp_nameop (int code, const char *name)
 {
-  etree_type value, *new;
+  etree_type value, *new_e;
 
   value.name.type.node_code = code;
   value.name.type.lineno = lineno;
@@ -919,24 +919,24 @@ exp_nameop (int code, const char *name)
   if (expld.result.valid_p)
     return exp_intop (expld.result.value);
 
-  new = stat_alloc (sizeof (new->name));
-  memcpy (new, &value, sizeof (new->name));
-  return new;
+  new_e = (etree_type *) stat_alloc (sizeof (new_e->name));
+  memcpy (new_e, &value, sizeof (new_e->name));
+  return new_e;
 
 }
 
 etree_type *
 exp_assop (int code, const char *dst, etree_type *src)
 {
-  etree_type *new;
+  etree_type *new_e;
 
-  new = stat_alloc (sizeof (new->assign));
-  new->type.node_code = code;
-  new->type.lineno = src->type.lineno;
-  new->type.node_class = etree_assign;
-  new->assign.src = src;
-  new->assign.dst = dst;
-  return new;
+  new_e = (etree_type *) stat_alloc (sizeof (new_e->assign));
+  new_e->type.node_code = code;
+  new_e->type.lineno = src->type.lineno;
+  new_e->type.node_class = etree_assign;
+  new_e->assign.src = src;
+  new_e->assign.dst = dst;
+  return new_e;
 }
 
 /* Handle PROVIDE.  */

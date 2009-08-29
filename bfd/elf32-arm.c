@@ -2235,7 +2235,7 @@ enum elf32_arm_stub_type {
 
 typedef struct
 {
-  const insn_sequence* template;
+  const insn_sequence* template_sequence;
   int template_size;
 } stub_def;
 
@@ -3443,7 +3443,7 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
   bfd_vma sym_value;
   int template_size;
   int size;
-  const insn_sequence *template;
+  const insn_sequence *template_sequence;
   int i;
   struct elf32_arm_link_hash_table * globals;
   int stub_reloc_idx[MAXRELOCS] = {-1, -1};
@@ -3480,18 +3480,18 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
 	       + stub_entry->target_section->output_offset
 	       + stub_entry->target_section->output_section->vma);
 
-  template = stub_entry->stub_template;
+  template_sequence = stub_entry->stub_template;
   template_size = stub_entry->stub_template_size;
 
   size = 0;
   for (i = 0; i < template_size; i++)
     {
-      switch (template[i].type)
+      switch (template_sequence[i].type)
 	{
 	case THUMB16_TYPE:
 	  {
-	    bfd_vma data = template[i].data;
-	    if (template[i].reloc_addend != 0)
+	    bfd_vma data = (bfd_vma) template_sequence[i].data;
+	    if (template_sequence[i].reloc_addend != 0)
 	      {
                 /* We've borrowed the reloc_addend field to mean we should
                    insert a condition code into this (Thumb-1 branch)
@@ -3505,11 +3505,12 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
 	  break;
 
 	case THUMB32_TYPE:
-          put_thumb_insn (globals, stub_bfd, (template[i].data >> 16) & 0xffff,
+          put_thumb_insn (globals, stub_bfd,
+                          (template_sequence[i].data >> 16) & 0xffff,
                           loc + size);
-          put_thumb_insn (globals, stub_bfd, template[i].data & 0xffff,
+          put_thumb_insn (globals, stub_bfd, template_sequence[i].data & 0xffff,
                           loc + size + 2);
-          if (template[i].r_type != R_ARM_NONE)
+          if (template_sequence[i].r_type != R_ARM_NONE)
             {
               stub_reloc_idx[nrelocs] = i;
               stub_reloc_offset[nrelocs++] = size;
@@ -3518,10 +3519,11 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
           break;
 
 	case ARM_TYPE:
-	  put_arm_insn (globals, stub_bfd, template[i].data, loc + size);
+	  put_arm_insn (globals, stub_bfd, template_sequence[i].data,
+                        loc + size);
 	  /* Handle cases where the target is encoded within the
 	     instruction.  */
-	  if (template[i].r_type == R_ARM_JUMP24)
+	  if (template_sequence[i].r_type == R_ARM_JUMP24)
 	    {
 	      stub_reloc_idx[nrelocs] = i;
 	      stub_reloc_offset[nrelocs++] = size;
@@ -3530,7 +3532,7 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
 	  break;
 
 	case DATA_TYPE:
-	  bfd_put_32 (stub_bfd, template[i].data, loc + size);
+	  bfd_put_32 (stub_bfd, template_sequence[i].data, loc + size);
 	  stub_reloc_idx[nrelocs] = i;
 	  stub_reloc_offset[nrelocs++] = size;
 	  size += 4;
@@ -3557,22 +3559,23 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
   BFD_ASSERT (nrelocs != 0 && nrelocs <= MAXRELOCS);
 
   for (i = 0; i < nrelocs; i++)
-    if (template[stub_reloc_idx[i]].r_type == R_ARM_THM_JUMP24
-	|| template[stub_reloc_idx[i]].r_type == R_ARM_THM_JUMP19
-	|| template[stub_reloc_idx[i]].r_type == R_ARM_THM_CALL
-	|| template[stub_reloc_idx[i]].r_type == R_ARM_THM_XPC22)
+    if (template_sequence[stub_reloc_idx[i]].r_type == R_ARM_THM_JUMP24
+	|| template_sequence[stub_reloc_idx[i]].r_type == R_ARM_THM_JUMP19
+	|| template_sequence[stub_reloc_idx[i]].r_type == R_ARM_THM_CALL
+	|| template_sequence[stub_reloc_idx[i]].r_type == R_ARM_THM_XPC22)
       {
 	Elf_Internal_Rela rel;
 	bfd_boolean unresolved_reloc;
 	char *error_message;
 	int sym_flags
-	  = (template[stub_reloc_idx[i]].r_type != R_ARM_THM_XPC22)
+	  = (template_sequence[stub_reloc_idx[i]].r_type != R_ARM_THM_XPC22)
 	    ? STT_ARM_TFUNC : 0;
 	bfd_vma points_to = sym_value + stub_entry->target_addend;
 
 	rel.r_offset = stub_entry->stub_offset + stub_reloc_offset[i];
-	rel.r_info = ELF32_R_INFO (0, template[stub_reloc_idx[i]].r_type);
-	rel.r_addend = template[stub_reloc_idx[i]].reloc_addend;
+	rel.r_info = ELF32_R_INFO (0,
+                                   template_sequence[stub_reloc_idx[i]].r_type);
+	rel.r_addend = template_sequence[stub_reloc_idx[i]].reloc_addend;
 
 	if (stub_entry->stub_type == arm_stub_a8_veneer_b_cond && i == 0)
 	  /* The first relocation in the elf32_arm_stub_a8_veneer_b_cond[]
@@ -3588,7 +3591,7 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
 	   rather than only for certain relocations listed in the enclosing
 	   conditional, for the sake of consistency.  */
 	elf32_arm_final_link_relocate (elf32_arm_howto_from_type
-	    (template[stub_reloc_idx[i]].r_type),
+	    (template_sequence[stub_reloc_idx[i]].r_type),
 	  stub_bfd, info->output_bfd, stub_sec, stub_sec->contents, &rel,
 	  points_to, info, stub_entry->target_section, "", sym_flags,
 	  (struct elf_link_hash_entry *) stub_entry->h, &unresolved_reloc,
@@ -3597,10 +3600,10 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
     else
       {
 	_bfd_final_link_relocate (elf32_arm_howto_from_type
-	    (template[stub_reloc_idx[i]].r_type), stub_bfd, stub_sec,
+	    (template_sequence[stub_reloc_idx[i]].r_type), stub_bfd, stub_sec,
 	  stub_sec->contents, stub_entry->stub_offset + stub_reloc_offset[i],
 	  sym_value + stub_entry->target_addend,
-	  template[stub_reloc_idx[i]].reloc_addend);
+	  template_sequence[stub_reloc_idx[i]].reloc_addend);
       }
 
   return TRUE;
@@ -3615,17 +3618,17 @@ find_stub_size_and_template (enum elf32_arm_stub_type stub_type,
 			     const insn_sequence **stub_template,
 			     int *stub_template_size)
 {
-  const insn_sequence *template = NULL;
+  const insn_sequence *template_sequence = NULL;
   int template_size = 0, i;
   unsigned int size;
 
-  template = stub_definitions[stub_type].template;
+  template_sequence = stub_definitions[stub_type].template_sequence;
   template_size = stub_definitions[stub_type].template_size;
 
   size = 0;
   for (i = 0; i < template_size; i++)
     {
-      switch (template[i].type)
+      switch (template_sequence[i].type)
 	{
 	case THUMB16_TYPE:
 	  size += 2;
@@ -3644,7 +3647,7 @@ find_stub_size_and_template (enum elf32_arm_stub_type stub_type,
     }
 
   if (stub_template)
-    *stub_template = template;
+    *stub_template = template_sequence;
 
   if (stub_template_size)
     *stub_template_size = template_size;
@@ -3661,7 +3664,7 @@ arm_size_one_stub (struct bfd_hash_entry *gen_entry,
 {
   struct elf32_arm_stub_hash_entry *stub_entry;
   struct elf32_arm_link_hash_table *htab;
-  const insn_sequence *template;
+  const insn_sequence *template_sequence;
   int template_size, size;
 
   /* Massage our args to the form they really have.  */
@@ -3671,11 +3674,11 @@ arm_size_one_stub (struct bfd_hash_entry *gen_entry,
   BFD_ASSERT((stub_entry->stub_type > arm_stub_none)
 	     && stub_entry->stub_type < ARRAY_SIZE(stub_definitions));
 
-  size = find_stub_size_and_template (stub_entry->stub_type, &template,
+  size = find_stub_size_and_template (stub_entry->stub_type, &template_sequence,
 				      &template_size);
 
   stub_entry->stub_size = size;
-  stub_entry->stub_template = template;
+  stub_entry->stub_template = template_sequence;
   stub_entry->stub_template_size = template_size;
 
   size = (size + 7) & ~7;
@@ -4679,7 +4682,7 @@ elf32_arm_size_stubs (bfd *output_bfd,
           unsigned int section_id = a8_fixes[i].section->id;
           asection *link_sec = htab->stub_group[section_id].link_sec;
           asection *stub_sec = htab->stub_group[section_id].stub_sec;
-          const insn_sequence *template;
+          const insn_sequence *template_sequence;
           int template_size, size = 0;
 
           stub_entry = arm_stub_hash_lookup (&htab->stub_hash_table, stub_name,
@@ -4702,11 +4705,12 @@ elf32_arm_size_stubs (bfd *output_bfd,
           stub_entry->orig_insn = a8_fixes[i].orig_insn;
           stub_entry->st_type = STT_ARM_TFUNC;
 
-          size = find_stub_size_and_template (a8_fixes[i].stub_type, &template,
+          size = find_stub_size_and_template (a8_fixes[i].stub_type,
+                                              &template_sequence,
                                               &template_size);
 
           stub_entry->stub_size = size;
-          stub_entry->stub_template = template;
+          stub_entry->stub_template = template_sequence;
           stub_entry->stub_template_size = template_size;
         }
 
@@ -12976,7 +12980,7 @@ arm_map_one_stub (struct bfd_hash_entry * gen_entry,
   bfd_vma addr;
   char *stub_name;
   output_arch_syminfo *osi;
-  const insn_sequence *template;
+  const insn_sequence *template_sequence;
   enum stub_insn_type prev_type;
   int size;
   int i;
@@ -12999,8 +13003,8 @@ arm_map_one_stub (struct bfd_hash_entry * gen_entry,
   addr = (bfd_vma) stub_entry->stub_offset;
   stub_name = stub_entry->output_name;
 
-  template = stub_entry->stub_template;
-  switch (template[0].type)
+  template_sequence = stub_entry->stub_template;
+  switch (template_sequence[0].type)
     {
     case ARM_TYPE:
       if (!elf32_arm_output_stub_sym (osi, stub_name, addr, stub_entry->stub_size))
@@ -13021,7 +13025,7 @@ arm_map_one_stub (struct bfd_hash_entry * gen_entry,
   size = 0;
   for (i = 0; i < stub_entry->stub_template_size; i++)
     {
-      switch (template[i].type)
+      switch (template_sequence[i].type)
 	{
 	case ARM_TYPE:
 	  sym_type = ARM_MAP_ARM;
@@ -13041,14 +13045,14 @@ arm_map_one_stub (struct bfd_hash_entry * gen_entry,
 	  return FALSE;
 	}
 
-      if (template[i].type != prev_type)
+      if (template_sequence[i].type != prev_type)
 	{
-	  prev_type = template[i].type;
+	  prev_type = template_sequence[i].type;
 	  if (!elf32_arm_output_map_sym (osi, sym_type, addr + size))
 	    return FALSE;
 	}
 
-      switch (template[i].type)
+      switch (template_sequence[i].type)
 	{
 	case ARM_TYPE:
 	case THUMB32_TYPE:
