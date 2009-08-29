@@ -945,7 +945,7 @@ dnl
 dnl  ---------------------------------------------------------
 dnl  AGGREGATE.MEMBER is for instance `struct passwd.pw_gecos', shell
 dnl  variables are not a valid argument.
-AC_DEFUN([SIM_CHECK_MEMBER], defn([AC_CHECK_MEMBER]))
+AU_ALIAS([SIM_CHECK_MEMBER], [AC_CHECK_MEMBER])
 dnl
 dnl Translated from a FC2 autoconf-2.59-3 installation.
 dnl  SIM_CHECK_MEMBERS([AGGREGATE.MEMBER, ...])

@@ -1,3 +1,8 @@
+2009-08-29  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* aclocal.m4 (SIM_CHECK_MEMBER): Use AU_ALIAS to define, not defn.
+	* configure: Regenerate.
+
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* config.in: Regenerate.
