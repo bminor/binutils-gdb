@@ -1,3 +1,11 @@
+2009-08-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (COMPILE_FOR_BUILD): Remove BUILD_CPPFLAGS.
+	Replace BUILD_CFLAGS with CFLAGS_FOR_BUILD.
+	(LINK_FOR_BUILD): Replace BUILD_CFLAGS/BUILD_LDFLAGS with
+	CFLAGS_FOR_BUILD/LDFLAGS_FOR_BUILD.
+	* Makefile.in: Regenerated.
+
 2009-08-27  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.am (bfdlibdir, bfdincludedir): Move definition ...

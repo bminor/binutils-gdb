@@ -291,9 +291,11 @@ INCDIR = $(srcdir)/../include
 BFDDIR = $(srcdir)/../bfd
 AM_CFLAGS = $(WARN_CFLAGS)
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(INCLUDES) $(AM_CPPFLAGS) \
-	$(BUILD_CPPFLAGS) $(BUILD_CFLAGS)
+	$(CFLAGS_FOR_BUILD)
 
-LINK_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o $@
+LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) \
+	$(LDFLAGS_FOR_BUILD) -o $@
+
 libopcodes_la_LDFLAGS = $(am__append_1) -release `cat \
 	../bfd/libtool-soversion` @SHARED_LDFLAGS@
 @INSTALL_LIBBFD_TRUE@bfdlib_LTLIBRARIES = libopcodes.la
