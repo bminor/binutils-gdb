@@ -1,3 +1,8 @@
+2009-08-29  Hui Zhu  <teawater@gmail.com>
+
+	* i386-tdep.c (i386_process_record): Fix the error of string
+	ops instructions's handler.
+
 2009-08-28  Doug Evans  <dje@google.com>
 
 	* top.c (execute_command): Remove redundant comment.
