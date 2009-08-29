@@ -1,6 +1,6 @@
 /* tc-sh.c -- Assemble code for the Renesas / SuperH SH
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007  Free Software Foundation, Inc.
+   2003, 2004, 2005, 2006, 2007, 2008, 2009  Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -4183,6 +4183,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	val = ((val >> shift)
 	       | ((long) -1 & ~ ((long) -1 >> shift)));
     }
+
+  /* Extend sign for 64-bit host.  */
+  val = ((val & 0xffffffff) ^ 0x80000000) - 0x80000000;
   if (max != 0 && (val < min || val > max))
     as_bad_where (fixP->fx_file, fixP->fx_line, _("offset out of range"));
   else if (max != 0)

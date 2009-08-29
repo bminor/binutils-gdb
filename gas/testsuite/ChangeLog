@@ -1,3 +1,9 @@
+2009-08-29  Matt Fleming  <matt@console-pimps.org>
+
+	* gas/sh/sign-extension.d: New file.
+	* gas/sh/sign-extension.s: New file.
+	* gas/sh/basic.exp: Run new test.
+
 2009-08-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/l1om.d: Check elf64-l1om format.

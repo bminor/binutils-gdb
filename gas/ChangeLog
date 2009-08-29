@@ -1,3 +1,8 @@
+2009-08-29  Matt Fleming  <matt@console-pimps.org>
+
+	* config/tc-sh.c (md_apply_fix): Extend sign of the offset value
+	for 64-bit host.
+
 2009-08-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (cpu_arch): Use PROCESSOR_L1OM on "l1om".
