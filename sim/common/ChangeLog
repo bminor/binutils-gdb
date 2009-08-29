@@ -1,5 +1,11 @@
 2009-08-29  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
+	* aclocal.m4 (SIM_CHECK_MEMBER, SIM_CHECK_MEMBERS)
+	(SIM_CHECK_MEMBERS_1): Remove.
+	* configure.ac: Replace SIM_CHECK_MEMBERS call with equivalent
+	AC_CHECK_MEMBERS one.
+	* configure: Regenerate.
+
 	* aclocal.m4 (SIM_CHECK_MEMBER): Use AU_ALIAS to define, not defn.
 	* configure: Regenerate.
 

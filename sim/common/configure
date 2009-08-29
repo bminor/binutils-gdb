@@ -4361,8 +4361,8 @@ cat >>confdefs.h <<_ACEOF
 #define HAVE_STRUCT_STAT_ST_DEV 1
 _ACEOF
 
-fi
 
+fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_ino" "ac_cv_member_struct_stat_st_ino" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -4376,8 +4376,8 @@ cat >>confdefs.h <<_ACEOF
 #define HAVE_STRUCT_STAT_ST_INO 1
 _ACEOF
 
-fi
 
+fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_mode" "ac_cv_member_struct_stat_st_mode" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -4391,8 +4391,8 @@ cat >>confdefs.h <<_ACEOF
 #define HAVE_STRUCT_STAT_ST_MODE 1
 _ACEOF
 
-fi
 
+fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_nlink" "ac_cv_member_struct_stat_st_nlink" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -4406,8 +4406,8 @@ cat >>confdefs.h <<_ACEOF
 #define HAVE_STRUCT_STAT_ST_NLINK 1
 _ACEOF
 
-fi
 
+fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_uid" "ac_cv_member_struct_stat_st_uid" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -4421,8 +4421,8 @@ cat >>confdefs.h <<_ACEOF
 #define HAVE_STRUCT_STAT_ST_UID 1
 _ACEOF
 
-fi
 
+fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_gid" "ac_cv_member_struct_stat_st_gid" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -4436,8 +4436,8 @@ cat >>confdefs.h <<_ACEOF
 #define HAVE_STRUCT_STAT_ST_GID 1
 _ACEOF
 
-fi
 
+fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_rdev" "ac_cv_member_struct_stat_st_rdev" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -4451,8 +4451,8 @@ cat >>confdefs.h <<_ACEOF
 #define HAVE_STRUCT_STAT_ST_RDEV 1
 _ACEOF
 
-fi
 
+fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_size" "ac_cv_member_struct_stat_st_size" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -4466,8 +4466,8 @@ cat >>confdefs.h <<_ACEOF
 #define HAVE_STRUCT_STAT_ST_SIZE 1
 _ACEOF
 
-fi
 
+fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_blksize" "ac_cv_member_struct_stat_st_blksize" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -4481,8 +4481,8 @@ cat >>confdefs.h <<_ACEOF
 #define HAVE_STRUCT_STAT_ST_BLKSIZE 1
 _ACEOF
 
-fi
 
+fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_blocks" "ac_cv_member_struct_stat_st_blocks" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -4496,8 +4496,8 @@ cat >>confdefs.h <<_ACEOF
 #define HAVE_STRUCT_STAT_ST_BLOCKS 1
 _ACEOF
 
-fi
 
+fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_atime" "ac_cv_member_struct_stat_st_atime" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -4511,8 +4511,8 @@ cat >>confdefs.h <<_ACEOF
 #define HAVE_STRUCT_STAT_ST_ATIME 1
 _ACEOF
 
-fi
 
+fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_mtime" "ac_cv_member_struct_stat_st_mtime" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -4526,8 +4526,8 @@ cat >>confdefs.h <<_ACEOF
 #define HAVE_STRUCT_STAT_ST_MTIME 1
 _ACEOF
 
-fi
 
+fi
 ac_fn_c_check_member "$LINENO" "struct stat" "st_ctime" "ac_cv_member_struct_stat_st_ctime" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -4540,6 +4540,7 @@ if test "x$ac_cv_member_struct_stat_st_ctime" = x""yes; then :
 cat >>confdefs.h <<_ACEOF
 #define HAVE_STRUCT_STAT_ST_CTIME 1
 _ACEOF
+
 
 fi
 
