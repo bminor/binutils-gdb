@@ -1,3 +1,10 @@
+2009-08-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/10569
+	* ld-elf/commonpage2.d: New.
+	* ld-elf/maxpage4.d: Likewise.
+	* ld-elf/maxpage4.t: Likewise.
+
 2009-08-26  Maxim Kuvyrkov  <maxim@codesourcery.com>
 
 	* ld-m68k/tls-def-1.s: New file.
