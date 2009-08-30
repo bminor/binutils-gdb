@@ -4045,23 +4045,6 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 {
   struct elf_i386_link_hash_table *htab;
 
-  /* PR 10433: STT_GNU_IFUNC symbols must go through the PLT
-     only when they are referenced, not when they are defined.  */
-  if (h->type == STT_GNU_IFUNC
-      && h->def_regular
-      && ! h->ref_regular
-      && ! info->relocatable)
-    {
-      if (! ((h->dynindx != -1
-	      || h->forced_local)
-	     && ((info->shared
-		  && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-		      || h->root.type != bfd_link_hash_undefweak))
-		 || ! h->forced_local)
-	     && elf_hash_table (info)->dynamic_sections_created))
-	return TRUE;
-    }
-
   htab = elf_i386_hash_table (info);
 
   if (h->plt.offset != (bfd_vma) -1)
