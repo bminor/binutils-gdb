@@ -1,3 +1,9 @@
+2009-08-30  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/10569
+	* bfd.c (bfd_emul_get_maxpagesize): Don't abort.
+	(bfd_emul_get_commonpagesize): Likewise.
+
 2009-08-29  Martin Thuresson  <martin@mtme.org>
 
 	* elf32-arm.c (struct stub_def): Rename member template to

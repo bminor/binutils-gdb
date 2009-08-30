@@ -1703,8 +1703,7 @@ DESCRIPTION
 	emulation.
 
 RETURNS
-	Returns the maximum page size in bytes for ELF, abort
-	otherwise.
+	Returns the maximum page size in bytes for ELF, 0 otherwise.
 */
 
 bfd_vma
@@ -1717,7 +1716,6 @@ bfd_emul_get_maxpagesize (const char *emul)
       && target->flavour == bfd_target_elf_flavour)
     return xvec_get_elf_backend_data (target)->maxpagesize;
 
-  abort ();
   return 0;
 }
 
@@ -1776,7 +1774,7 @@ DESCRIPTION
 	emulation.
 
 RETURNS
-	Returns the common page size in bytes for ELF, abort otherwise.
+	Returns the common page size in bytes for ELF, 0 otherwise.
 */
 
 bfd_vma
@@ -1789,7 +1787,6 @@ bfd_emul_get_commonpagesize (const char *emul)
       && target->flavour == bfd_target_elf_flavour)
     return xvec_get_elf_backend_data (target)->commonpagesize;
 
-  abort ();
   return 0;
 }
 
