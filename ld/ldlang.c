@@ -52,6 +52,7 @@ static struct obstack map_obstack;
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free free
 static const char *startup_file;
+static const char *entry_symbol_default = "start";
 static bfd_boolean placed_commons = FALSE;
 static bfd_boolean stripped_excluded_sections = FALSE;
 static lang_output_section_statement_type *default_common_section;
@@ -59,7 +60,6 @@ static bfd_boolean map_option_f;
 static bfd_vma print_dot;
 static lang_input_statement_type *first_file;
 static const char *current_target;
-static const char *output_target;
 static lang_statement_list_type statement_list;
 static struct bfd_hash_table lang_definedness_table;
 static lang_statement_list_type *stat_save[10];
@@ -86,13 +86,13 @@ static void lang_finalize_version_expr_head
   (struct bfd_elf_version_expr_head *);
 
 /* Exported variables.  */
+const char *output_target;
 lang_output_section_statement_type *abs_output_section;
 lang_statement_list_type lang_output_section_statement;
 lang_statement_list_type *stat_ptr = &statement_list;
 lang_statement_list_type file_chain = { NULL, NULL };
 lang_statement_list_type input_file_chain;
 struct bfd_sym_chain entry_symbol = { NULL, NULL };
-static const char *entry_symbol_default = "start";
 const char *entry_section = ".text";
 bfd_boolean entry_from_cmdline;
 bfd_boolean lang_has_input_file = FALSE;

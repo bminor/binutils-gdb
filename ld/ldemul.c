@@ -228,6 +228,9 @@ set_output_arch_default (void)
   /* Set the output architecture and machine if possible.  */
   bfd_set_arch_mach (link_info.output_bfd,
 		     ldfile_output_architecture, ldfile_output_machine);
+
+  bfd_emul_set_maxpagesize (output_target, config.maxpagesize);
+  bfd_emul_set_commonpagesize (output_target, config.commonpagesize);
 }
 
 void

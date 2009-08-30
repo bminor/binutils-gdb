@@ -280,6 +280,8 @@ main (int argc, char **argv)
   emulation = get_emulation (argc, argv);
   ldemul_choose_mode (emulation);
   default_target = ldemul_choose_target (argc, argv);
+  config.maxpagesize = bfd_emul_get_maxpagesize (default_target);
+  config.commonpagesize = bfd_emul_get_commonpagesize (default_target);
   lang_init ();
   ldemul_before_parse ();
   lang_has_input_file = FALSE;

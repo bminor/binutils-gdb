@@ -2178,8 +2178,6 @@ fragment <<EOF
 	  if (*end || (config.maxpagesize & (config.maxpagesize - 1)) != 0)
 	    einfo (_("%P%F: invalid maxium page size \`%s'\n"),
 		   optarg + 14);
-	  ASSERT (default_target != NULL);
-	  bfd_emul_set_maxpagesize (default_target, config.maxpagesize);
 	}
       else if (CONST_STRNEQ (optarg, "common-page-size="))
 	{
@@ -2189,9 +2187,6 @@ fragment <<EOF
 	      || (config.commonpagesize & (config.commonpagesize - 1)) != 0)
 	    einfo (_("%P%F: invalid common page size \`%s'\n"),
 		   optarg + 17);
-	  ASSERT (default_target != NULL);
-	  bfd_emul_set_commonpagesize (default_target,
-				       config.commonpagesize);
 	}
       /* What about the other Solaris -z options? FIXME.  */
       break;

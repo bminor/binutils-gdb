@@ -673,9 +673,9 @@ fold_name (etree_type *tree)
 
     case CONSTANT:
       if (strcmp (tree->name.name, "MAXPAGESIZE") == 0)
-	new_abs (bfd_emul_get_maxpagesize (default_target));
+	new_abs (config.maxpagesize);
       else if (strcmp (tree->name.name, "COMMONPAGESIZE") == 0)
-	new_abs (bfd_emul_get_commonpagesize (default_target));
+	new_abs (config.commonpagesize);
       else
 	einfo (_("%F%S: unknown constant `%s' referenced in expression\n"),
 	       tree->name.name);

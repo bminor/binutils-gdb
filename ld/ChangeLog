@@ -1,3 +1,17 @@
+2009-08-30  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/10569
+	* ldexp.c (fold_name <MAXPAGESIZE>): Return config.maxpagesize.
+	(fold_name <COMMONPAGESIZE>): Similarly.
+	* ldlang.c (output_target): Make global.
+	* ldlang.h (output_target): Declare.
+	* ldmain.c (main): Set config.maxpagesize from bfd_emul_get_maxpagesize.
+	Similarly for config.commonpagesize.
+	* ldemul.c (set_output_arch_default): Call bfd_emul_set_maxpagesize
+	and bfd_emul_set_commonpagesize.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_handle_option): Don't call
+	bfd_emul_set_maxpagesize or bfd_emul_set_commonpagesize here.
+
 2009-08-29  Martin Thuresson  <martin@mtme.org>
 
 	* ldexp.c (exp_intop, exp_bigintop, exp_relop, exp_binop)
