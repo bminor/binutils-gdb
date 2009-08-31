@@ -47,6 +47,10 @@ extern void memory_error (int status, CORE_ADDR memaddr);
 
 extern void read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len);
 
+/* Like target_read_stack, but report an error if can't read.  */
+
+extern void read_stack (CORE_ADDR memaddr, gdb_byte *myaddr, int len);
+
 /* Read an integer from debugged memory, given address and number of
    bytes.  */
 

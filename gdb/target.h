@@ -53,7 +53,6 @@ struct target_section_table;
 
 #include "bfd.h"
 #include "symtab.h"
-#include "dcache.h"
 #include "memattr.h"
 #include "vec.h"
 #include "gdb_signals.h"
@@ -203,6 +202,10 @@ enum target_object
      Target implementations of to_xfer_partial never need to handle
      this object, and most callers should not use it.  */
   TARGET_OBJECT_RAW_MEMORY,
+  /* Memory known to be part of the target's stack.  This is cached even
+     if it is not in a region marked as such, since it is known to be
+     "normal" RAM.  */
+  TARGET_OBJECT_STACK_MEMORY,
   /* Kernel Unwind Table.  See "ia64-tdep.c".  */
   TARGET_OBJECT_UNWIND_TABLE,
   /* Transfer auxilliary vector.  */
@@ -671,11 +674,14 @@ extern void target_store_registers (struct regcache *regcache, int regs);
 #define	target_supports_multi_process()	\
      (*current_target.to_supports_multi_process) ()
 
-extern DCACHE *target_dcache;
+/* Invalidate all target dcaches.  */
+extern void target_dcache_invalidate (void);
 
 extern int target_read_string (CORE_ADDR, char **, int, int *);
 
 extern int target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len);
+
+extern int target_read_stack (CORE_ADDR memaddr, gdb_byte *myaddr, int len);
 
 extern int target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr,
 				int len);

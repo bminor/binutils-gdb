@@ -1,3 +1,65 @@
+2009-08-31  Jacob Potter  <jdpotter@google.com>
+	    Doug Evans  <dje@google.com>
+
+	Implement TARGET_OBJECT_STACK_MEMORY.
+	* NEWS: Add note on new "set stack-cache" option.
+	* corefile.c (read_stack): New function.
+	* dcache.c (dcache_struct): New member ptid.
+	(dcache_enable_p): Mark as obsolete.
+	(show_dcache_enabled_p): Flag option as deprecated.
+	(dcache_invalidate): Update ptid.
+	(dcache_invalidate_line): New function.
+	(dcache_read_line): No longer check cacheable attribute, stack
+	accesses get cached despite attribute.
+	(dcache_init): Set ptid.
+	(dcache_xfer_memory): Flush cache if from different ptid than before.
+	Update cache after write.
+	(dcache_update): New function.
+	(dcache_info): Report ptid.
+	(_initialize_dcache): Update text for `remotecache' to indicate it
+	is obsolete.
+	* dcache.h (dcache_update): Declare.
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc): Mark values on stack with
+	set_value_stack.
+	* frame-unwind.c (frame_unwind_got_memory): Ditto.
+	* gdbcore.h (read_stack): Declare.
+	* memattr.c (mem_enable_command): Call target_dcache_invalidate
+	instead of dcache_invalidate.
+	(mem_disable_command, mem_delete_command): Ditto.
+	* target.c (stack_cache_enabled_p_1): New static global.
+	(stack_cache_enabled_p): New static global.
+	(set_stack_cache_enabled_p): New function.
+	(show_stack_cache_enabled_p): New function.
+	(target_dcache): Make static.
+	(target_dcache_invalidate): New function.
+	(target_load, target_resume): Call target_dcache_invalidate
+	instead of dcache_invalidate.
+	(memory_xfer_partial): New arg object, all callers updated.
+	Check for existing inferior before calling dcache routines.
+	When writing non-TARGET_OBJECT_STACK_MEMORY, notify dcache.
+	(target_xfer_partial): Call memory_xfer_partial for
+	TARGET_OBJECT_STACK_MEMORY.
+	(target_read_stack): New function.
+	(initialize_targets): Install new option `stack-cache'.
+	* target.h: Remove #include of dcache.h.
+	(enum target_object): New value TARGET_OBJECT_STACK_MEMORY.
+	(target_dcache): Delete.
+	(target_dcache_invalidate): Declare.
+	(target_read_stack): Declare.
+	* top.c (prepare_execute_command): New function.
+	(execute_command): Call prepare_execute_command
+	instead of free_all_values.
+	* top.h (prepare_execute_command): Declare.
+	* valops.c (get_value_at): New function.
+	(value_at): Guts moved to get_value_at.
+	(value_at_lazy): Similarly.
+	(value_fetch_lazy): Call read_stack for stack values.
+	* value.c (struct value): New member `stack'.
+	(value_stack, set_value_stack): New functions.
+	* value.h (value_stack, set_value_stack): Declare.
+	* mi/mi-main.c (mi_cmd_execute): Call prepare_execute_command
+	instead of free_all_values.
+
 2009-08-29  Hui Zhu  <teawater@gmail.com>
 
 	* i386-tdep.c (i386_process_record): Fix the error of string

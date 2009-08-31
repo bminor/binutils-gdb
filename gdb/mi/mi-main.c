@@ -1353,7 +1353,8 @@ mi_cmd_execute (struct mi_parse *parse)
   struct cleanup *cleanup;
   int i;
 
-  free_all_values ();
+  prepare_execute_command ();
+
   cleanup = make_cleanup (null_cleanup, NULL);
 
   if (parse->frame != -1 && parse->thread == -1)

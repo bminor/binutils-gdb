@@ -571,7 +571,7 @@ mem_enable_command (char *args, int from_tty)
 
   require_user_regions (from_tty);
 
-  dcache_invalidate (target_dcache);
+  target_dcache_invalidate ();
 
   if (p == 0)
     {
@@ -625,7 +625,7 @@ mem_disable_command (char *args, int from_tty)
 
   require_user_regions (from_tty);
 
-  dcache_invalidate (target_dcache);
+  target_dcache_invalidate ();
 
   if (p == 0)
     {
@@ -686,7 +686,7 @@ mem_delete_command (char *args, int from_tty)
 
   require_user_regions (from_tty);
 
-  dcache_invalidate (target_dcache);
+  target_dcache_invalidate ();
 
   if (p == 0)
     {

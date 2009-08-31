@@ -24,6 +24,7 @@
 #include "gdb_string.h"
 #include "gdbcore.h"
 #include "target.h"
+#include "inferior.h"
 #include "splay-tree.h"
 
 /* The data cache could lead to incorrect results because it doesn't
@@ -103,6 +104,9 @@ struct dcache_struct
 
   /* The number of in-use lines in the cache.  */
   int size;
+
+  /* The ptid of last inferior to use cache or null_ptid.  */
+  ptid_t ptid;
 };
 
 static struct dcache_block *dcache_hit (DCACHE *dcache, CORE_ADDR addr);
@@ -117,15 +121,14 @@ static void dcache_info (char *exp, int tty);
 
 void _initialize_dcache (void);
 
-static int dcache_enabled_p = 0;
+static int dcache_enabled_p = 0; /* OBSOLETE */
 
 static void
 show_dcache_enabled_p (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Cache use for remote targets is %s.\n"), value);
+  fprintf_filtered (file, _("Deprecated remotecache flag is %s.\n"), value);
 }
-
 
 static DCACHE *last_cache; /* Used by info dcache */
 
@@ -152,6 +155,23 @@ dcache_invalidate (DCACHE *dcache)
   dcache->oldest = NULL;
   dcache->newest = NULL;
   dcache->size = 0;
+  dcache->ptid = null_ptid;
+}
+
+/* Invalidate the line associated with ADDR.  */
+
+static void
+dcache_invalidate_line (DCACHE *dcache, CORE_ADDR addr)
+{
+  struct dcache_block *db = dcache_hit (dcache, addr);
+
+  if (db)
+    {
+      splay_tree_remove (dcache->tree, (splay_tree_key) db->addr);
+      db->newer = dcache->freelist;
+      dcache->freelist = db;
+      --dcache->size;
+    }
 }
 
 /* If addr is present in the dcache, return the address of the block
@@ -198,8 +218,9 @@ dcache_read_line (DCACHE *dcache, struct dcache_block *db)
       else
 	reg_len = region->hi - memaddr;
 
-      /* Skip non-cacheable/non-readable regions.  */
-      if (!region->attrib.cache || region->attrib.mode == MEM_WO)
+      /* Skip non-readable regions.  The cache attribute can be ignored,
+         since we may be loading this for a stack access.  */
+      if (region->attrib.mode == MEM_WO)
 	{
 	  memaddr += reg_len;
 	  myaddr  += reg_len;
@@ -296,7 +317,7 @@ dcache_peek_byte (DCACHE *dcache, CORE_ADDR addr, gdb_byte *ptr)
    an area of memory which wasn't present in the cache doesn't cause
    it to be loaded in.
 
-   Always return 1 to simplify dcache_xfer_memory.  */
+   Always return 1 (meaning success) to simplify dcache_xfer_memory.  */
 
 static int
 dcache_poke_byte (DCACHE *dcache, CORE_ADDR addr, gdb_byte *ptr)
@@ -338,6 +359,7 @@ dcache_init (void)
   dcache->newest = NULL;
   dcache->freelist = NULL;
   dcache->size = 0;
+  dcache->ptid = null_ptid;
   last_cache = dcache;
 
   return dcache;
@@ -366,7 +388,7 @@ dcache_free (DCACHE *dcache)
    to or from debugger address MYADDR.  Write to inferior if SHOULD_WRITE is
    nonzero. 
 
-   Returns length of data written or read; 0 for error.  */
+   The meaning of the result is the same as for target_write.  */
 
 int
 dcache_xfer_memory (struct target_ops *ops, DCACHE *dcache,
@@ -378,6 +400,15 @@ dcache_xfer_memory (struct target_ops *ops, DCACHE *dcache,
   int (*xfunc) (DCACHE *dcache, CORE_ADDR addr, gdb_byte *ptr);
   xfunc = should_write ? dcache_poke_byte : dcache_peek_byte;
 
+  /* If this is a different inferior from what we've recorded,
+     flush the cache.  */
+
+  if (! ptid_equal (inferior_ptid, dcache->ptid))
+    {
+      dcache_invalidate (dcache);
+      dcache->ptid = inferior_ptid;
+    }
+
   /* Do write-through first, so that if it fails, we don't write to
      the cache at all.  */
 
@@ -385,14 +416,25 @@ dcache_xfer_memory (struct target_ops *ops, DCACHE *dcache,
     {
       res = target_write (ops, TARGET_OBJECT_RAW_MEMORY,
 			  NULL, myaddr, memaddr, len);
-      if (res < len)
-	return 0;
+      if (res <= 0)
+	return res;
+      /* Update LEN to what was actually written.  */
+      len = res;
     }
       
   for (i = 0; i < len; i++)
     {
       if (!xfunc (dcache, memaddr + i, myaddr + i))
-	return 0;
+	{
+	  /* That failed.  Discard its cache line so we don't have a
+	     partially read line.  */
+	  dcache_invalidate_line (dcache, memaddr + i);
+	  /* If we're writing, we still wrote LEN bytes.  */
+	  if (should_write)
+	    return len;
+	  else
+	    return i;
+	}
     }
     
   return len;
@@ -406,6 +448,18 @@ dcache_xfer_memory (struct target_ops *ops, DCACHE *dcache,
    sufficient since we want to coalesce memory transfers that are
    "logically" connected but not actually a single call to one of the
    memory transfer functions.  */
+
+/* Just update any cache lines which are already present.  This is called
+   by memory_xfer_partial in cases where the access would otherwise not go
+   through the cache.  */
+
+void
+dcache_update (DCACHE *dcache, CORE_ADDR memaddr, gdb_byte *myaddr, int len)
+{
+  int i;
+  for (i = 0; i < len; i++)
+    dcache_poke_byte (dcache, memaddr + i, myaddr + i);
+}
 
 static void
 dcache_print_line (int index)
@@ -474,11 +528,14 @@ dcache_info (char *exp, int tty)
   printf_filtered (_("Dcache line width %d, maximum size %d\n"),
 		   LINE_SIZE, DCACHE_SIZE);
 
-  if (!last_cache)
+  if (!last_cache || ptid_equal (last_cache->ptid, null_ptid))
     {
       printf_filtered (_("No data cache available.\n"));
       return;
     }
+
+  printf_filtered (_("Contains data for %s\n"),
+		   target_pid_to_str (last_cache->ptid));
 
   refcount = 0;
 
@@ -507,11 +564,10 @@ _initialize_dcache (void)
 			   &dcache_enabled_p, _("\
 Set cache use for remote targets."), _("\
 Show cache use for remote targets."), _("\
-When on, use data caching for remote targets.  For many remote targets\n\
-this option can offer better throughput for reading target memory.\n\
-Unfortunately, gdb does not currently know anything about volatile\n\
-registers and thus data caching will produce incorrect results with\n\
-volatile registers are in use.  By default, this option is off."),
+This used to enable the data cache for remote targets.  The cache\n\
+functionality is now controlled by the memory region system and the\n\
+\"stack-cache\" flag; \"remotecache\" now does nothing and\n\
+exists only for compatibility reasons."),
 			   NULL,
 			   show_dcache_enabled_p,
 			   &setlist, &showlist);

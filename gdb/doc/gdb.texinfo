@@ -8421,32 +8421,47 @@ character.
 @section Caching Data of Remote Targets
 @cindex caching data of remote targets
 
-@value{GDBN} can cache data exchanged between the debugger and a
+@value{GDBN} caches data exchanged between the debugger and a
 remote target (@pxref{Remote Debugging}).  Such caching generally improves
 performance, because it reduces the overhead of the remote protocol by
-bundling memory reads and writes into large chunks.  Unfortunately,
-@value{GDBN} does not currently know anything about volatile
-registers, and thus data caching will produce incorrect results when
-volatile registers are in use.
+bundling memory reads and writes into large chunks.  Unfortunately, simply
+caching everything would lead to incorrect results, since @value{GDBN} 
+does not necessarily know anything about volatile values, memory-mapped I/O
+addresses, etc.  Therefore, by default, @value{GDBN} only caches data
+known to be on the stack.  Other regions of memory can be explicitly marked
+cacheable; see @pxref{Memory Region Attributes}.
 
 @table @code
 @kindex set remotecache
 @item set remotecache on
 @itemx set remotecache off
-Set caching state for remote targets.  When @code{ON}, use data
-caching.  By default, this option is @code{OFF}.
+This option no longer does anything; it exists for compatibility
+with old scripts.
 
 @kindex show remotecache
 @item show remotecache
-Show the current state of data caching for remote targets.
+Show the current state of the obsolete remotecache flag.
+
+@kindex set stack-cache
+@item set stack-cache on
+@itemx set stack-cache off
+Enable or disable caching of stack accesses.  When @code{ON}, use
+caching.  By default, this option is @code{ON}.
+
+@kindex show stack-cache
+@item show stack-cache
+Show the current state of data caching for memory accesses.
 
 @kindex info dcache
-@item info dcache
+@item info dcache @r{[}line@r{]}
 Print the information about the data cache performance.  The
-information displayed includes: the dcache width and depth; and for
-each cache line, how many times it was referenced, and its data and
-state (invalid, dirty, valid).  This command is useful for debugging
-the data cache operation.
+information displayed includes the dcache width and depth, and for
+each cache line, its number, address, and how many times it was
+referenced.  This command is useful for debugging the data cache
+operation.
+
+If a line number is specified, the contents of that line will be
+printed in hex.
 @end table
 
 @node Searching Memory

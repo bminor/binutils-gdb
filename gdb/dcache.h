@@ -38,4 +38,7 @@ void dcache_free (DCACHE *);
 int dcache_xfer_memory (struct target_ops *ops, DCACHE *cache, CORE_ADDR mem,
 			gdb_byte *my, int len, int should_write);
 
+void dcache_update (DCACHE *dcache, CORE_ADDR memaddr, gdb_byte *myaddr,
+		    int len);
+
 #endif /* DCACHE_H */

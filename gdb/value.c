@@ -196,6 +196,10 @@ struct value
   /* If value is a variable, is it initialized or not.  */
   int initialized;
 
+  /* If value is from the stack.  If this is set, read_stack will be
+     used instead of read_memory to enable extra caching.  */
+  int stack;
+
   /* Actual contents of the value.  Target byte-order.  NULL or not
      valid if lazy is nonzero.  */
   gdb_byte *contents;
@@ -422,6 +426,18 @@ void
 set_value_lazy (struct value *value, int val)
 {
   value->lazy = val;
+}
+
+int
+value_stack (struct value *value)
+{
+  return value->stack;
+}
+
+void
+set_value_stack (struct value *value, int val)
+{
+  value->stack = val;
 }
 
 const gdb_byte *

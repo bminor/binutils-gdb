@@ -1,3 +1,11 @@
+2009-08-31  Jacob Potter  <jdpotter@google.com>
+	    Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Caching Data of Remote Targets): Update text.
+	Mark `set/show remotecache' options as obsolete.
+	Document new `set/show stack-cache' option.
+	Update text for `info dcache'.
+
 2009-08-27  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Symbols): Delete `set print symbol-loading'.

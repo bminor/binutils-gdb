@@ -153,8 +153,10 @@ struct value *
 frame_unwind_got_memory (struct frame_info *frame, int regnum, CORE_ADDR addr)
 {
   struct gdbarch *gdbarch = frame_unwind_arch (frame);
+  struct value *v = value_at_lazy (register_type (gdbarch, regnum), addr);
 
-  return value_at_lazy (register_type (gdbarch, regnum), addr);
+  set_value_stack (v, 1);
+  return v;
 }
 
 /* Return a value which indicates that FRAME's saved version of

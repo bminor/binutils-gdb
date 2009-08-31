@@ -228,11 +228,23 @@ memory_error (int status, CORE_ADDR memaddr)
 }
 
 /* Same as target_read_memory, but report an error if can't read.  */
+
 void
 read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
 {
   int status;
   status = target_read_memory (memaddr, myaddr, len);
+  if (status != 0)
+    memory_error (status, memaddr);
+}
+
+/* Same as target_read_stack, but report an error if can't read.  */
+
+void
+read_stack (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
+{
+  int status;
+  status = target_read_stack (memaddr, myaddr, len);
   if (status != 0)
     memory_error (status, memaddr);
 }

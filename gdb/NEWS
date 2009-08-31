@@ -394,6 +394,12 @@ show schedule-multiple
   Allow GDB to resume all threads of all processes or only threads of
   the current process.
 
+set stack-cache
+show stack-cache
+  Use more aggressive caching for accesses to the stack.  This improves
+  performance of remote debugging (particularly backtraces) without
+  affecting correctness.
+
 * Removed commands
 
 info forks
