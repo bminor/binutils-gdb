@@ -1894,12 +1894,13 @@ write_object_file (void)
 #endif
   bfd_map_over_sections (stdoutput, write_relocs, (char *) 0);
 
-#ifdef tc_frob_file_after_reloc
+#ifdef tc_frob_file_after_relocs
   tc_frob_file_after_relocs ();
 #endif
 #ifdef obj_frob_file_after_relocs
   obj_frob_file_after_relocs ();
 #endif
+
   bfd_map_over_sections (stdoutput, write_contents, (char *) 0);
 }
 

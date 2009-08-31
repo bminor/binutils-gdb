@@ -1,3 +1,9 @@
+2009-08-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/10570
+	* write.c (write_object_file): Revert the accidental change
+	made in revision 1.124 on 2009-08-17.
+
 2009-08-31  Jan Beulich  <jbeulich@novell.com>
 
 	* config/obj-elf.c (obj_elf_change_section): Set default type
