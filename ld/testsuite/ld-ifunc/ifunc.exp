@@ -122,7 +122,7 @@ proc contains_irelative_reloc { binary_file } {
     #    080496f4  0000002a R_386_IRELATIVE
 
 
-    if { ![regexp "\[0-9a-f\]+\[ \]+\[0-9a-f\]+\[ \]+R_\[_0-9A-Z\]+_IRELATIVE\[ \]*\[0-9a-f\]*\n" [file_contents readelf.out]] } {
+    if { ![regexp "\[0-9a-f\]+\[ \]+\[0-9a-f\]+\[ \]+R_\[_0-9A-Z\]+_IREL(|ATIVE)\[ \]*\[0-9a-f\]*\n" [file_contents readelf.out]] } {
 	return 0
     }
 
