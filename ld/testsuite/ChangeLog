@@ -1,3 +1,7 @@
+2009-08-31  Jie Zhang  <jie.zhang@analog.com>
+
+	* lib/ld-lib.exp (is_elf_format): Return 1 for bfin-*-uclinux.
+
 2009-08-31  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-ifunc/ifunc.exp: Match R_PPC64_JUMP_IREL.
