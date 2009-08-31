@@ -1,3 +1,9 @@
+2009-08-31  Jan Beulich  <jbeulich@novell.com>
+
+	* elf-bfd.h (bfd_elf_get_default_section_type): Declare.
+	* elf.c (bfd_elf_get_default_section_type): New.
+	(elf_fake_sections): Use bfd_elf_get_default_section_type.
+
 2009-08-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_finish_dynamic_symbol): Revert the

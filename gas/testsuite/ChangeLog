@@ -1,3 +1,7 @@
+2009-08-31  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/elf/section5.l: Remove no longer issued warning pattern.
+
 2009-08-29  Matt Fleming  <matt@console-pimps.org>
 
 	* gas/sh/sign-extension.d: New file.

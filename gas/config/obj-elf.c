@@ -685,6 +685,8 @@ obj_elf_change_section (const char *name,
     {
       symbolS *secsym;
 
+      if (type == SHT_NULL)
+	type = bfd_elf_get_default_section_type (flags);
       elf_section_type (sec) = type;
       elf_section_flags (sec) = attr;
 

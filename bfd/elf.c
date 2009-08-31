@@ -2422,6 +2422,18 @@ _bfd_elf_init_reloc_shdr (bfd *abfd,
   return TRUE;
 }
 
+/* Return the default section type based on the passed in section flags.  */
+
+int
+bfd_elf_get_default_section_type (flagword flags)
+{
+  if ((flags & SEC_ALLOC) != 0
+      && ((flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0
+	  || (flags & SEC_NEVER_LOAD) != 0))
+    return SHT_NOBITS;
+  return SHT_PROGBITS;
+}
+
 /* Set up an ELF internal section header for a section.  */
 
 static void
@@ -2471,12 +2483,8 @@ elf_fake_sections (bfd *abfd, asection *asect, void *failedptrarg)
      asect->flags.  */
   if ((asect->flags & SEC_GROUP) != 0)
     sh_type = SHT_GROUP;
-  else if ((asect->flags & SEC_ALLOC) != 0
-	   && (((asect->flags & (SEC_LOAD | SEC_HAS_CONTENTS)) == 0)
-	       || (asect->flags & SEC_NEVER_LOAD) != 0))
-    sh_type = SHT_NOBITS;
   else
-    sh_type = SHT_PROGBITS;
+    sh_type = bfd_elf_get_default_section_type (asect->flags);
 
   if (this_hdr->sh_type == SHT_NULL)
     this_hdr->sh_type = sh_type;
