@@ -1,3 +1,7 @@
+2009-08-31  Jie Zhang  <jie.zhang@analog.com>
+
+	* config/bfin-aux.h: Change format from DOS to UNIX.
+
 2009-08-29  Martin Thuresson  <martin@mtme.org>
 
 	* config/tc-arm.c (struct asm_cond, struct asm_psr, struct
