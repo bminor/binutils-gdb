@@ -1,3 +1,10 @@
+2009-09-01  Hui Zhu  <teawater@gmail.com>
+
+	* record.c (record_resume_siggnal): Deleted.
+	(record_resume): Ditto.
+	(record_wait): Change record_resume_siggnal to
+	TARGET_SIGNAL_0.
+
 2009-08-31  Jacob Potter  <jdpotter@google.com>
 	    Doug Evans  <dje@google.com>
 

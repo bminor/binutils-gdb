@@ -514,7 +514,6 @@ record_close (int quitting)
 }
 
 static int record_resume_step = 0;
-static enum target_signal record_resume_siggnal;
 static int record_resume_error;
 
 static void
@@ -522,7 +521,6 @@ record_resume (struct target_ops *ops, ptid_t ptid, int step,
                enum target_signal siggnal)
 {
   record_resume_step = step;
-  record_resume_siggnal = siggnal;
 
   if (!RECORD_IS_REPLAY)
     {
@@ -638,7 +636,7 @@ record_wait (struct target_ops *ops,
 			}
 		      record_beneath_to_resume (record_beneath_to_resume_ops,
 						ptid, 1,
-						record_resume_siggnal);
+						TARGET_SIGNAL_0);
 		      continue;
 		    }
 		}
