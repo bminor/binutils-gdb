@@ -1,5 +1,5 @@
 #
-# Makefile for libiberty under openVMS
+# Makefile for libiberty under openVMS/Alpha
 #
 # For use with gnu-make for vms
 #
@@ -13,7 +13,7 @@ OBJS=getopt.obj,obstack.obj,xexit.obj,xmalloc.obj,hex.obj,\
     concat.obj,getruntime.obj,getpagesize.obj,getpwd.obj,xstrerror.obj,\
     xmemdup.obj,xstrdup.obj,xatexit.obj,choose-temp.obj,fnmatch.obj,\
     objalloc.obj,safe-ctype.obj,hashtab.obj,lbasename.obj,argv.obj,\
-    lrealpath.obj,make-temp-file.obj,stpcpy.obj,unlink-if-ordinary.obj
+    lrealpath.obj,make-temp-file.obj,unlink-if-ordinary.obj
 
 ifeq ($(CC),gcc)
 CFLAGS=/include=([],[-.include])
