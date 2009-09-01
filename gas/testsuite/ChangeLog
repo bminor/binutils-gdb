@@ -1,3 +1,7 @@
+2009-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/att-regs.s: Remove a tab.
+
 2009-09-01  Jie Zhang  <jie.zhang@analog.com>
 
 	* gas/bfin/expected_comparison_errors.s: Add more cases.

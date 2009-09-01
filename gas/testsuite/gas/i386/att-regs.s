@@ -16,7 +16,7 @@
 	mov	dr0, ax			; add	al, (bx,si)
 	mov	tr0, ax			; add	al, (bx,si)
 	mov	mm0, ax			; add	al, (bx,si)
-	mov	xmm0, ax			; add	al, (bx,si)
+	mov	xmm0, ax		; add	al, (bx,si)
 
 	.arch generic32
 	.code32
