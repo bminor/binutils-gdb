@@ -1,3 +1,7 @@
+2009-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldver.c (ldversion): Change to "Copyright 2009".
+
 2009-09-01  Jie Zhang  <jie.zhang@analog.com>
 
 	* scripttempl/elf.sc: Add ${USER_LABEL_PREFIX} to _start, etext,

@@ -1,3 +1,7 @@
+2009-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* version.c (parse_args): Change to "Copyright 2009".
+
 2009-09-01  Tristan Gingold  <gingold@adacore.com>
 
 	* makefile.vms: Adjust include pathes.  Remove useless vaxctrl
