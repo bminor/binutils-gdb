@@ -1,5 +1,16 @@
 2009-09-01  Jie Zhang  <jie.zhang@analog.com>
 
+	2007-09-28  Bernd Schmidt  <bernd.schmidt@analog.com>
+	* config/tc-bfin.c (bfin_fix_adjustable): Partially revert the
+	2007-08-23 change; BFD_RELOC_BFIN_GOT is not adjustable.
+
+	2007-08-23  Jie Zhang  <jie.zhang@analog.com>
+	* config/tc-bfin.c (bfin_fix_adjustable): Adjust
+	BFD_RELOC_BFIN_GOT, BFD_RELOC_BFIN_GOT17M4 and
+	BFD_RELOC_BFIN_FUNCDESC_GOT17M4.
+
+2009-09-01  Jie Zhang  <jie.zhang@analog.com>
+
 	* read.c (TC_START_LABEL): Add a new argument.
 	(read_a_source_file): Pass the beginning of the symbol through
 	the new argument of TC_START_LABEL.
