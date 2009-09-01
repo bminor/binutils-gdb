@@ -3397,6 +3397,42 @@ Output_file::Output_file(const char* name)
 {
 }
 
+// Try to open an existing file.  Returns false if the file doesn't
+// exist, has a size of 0 or can't be mmapped.
+
+bool
+Output_file::open_for_modification()
+{
+  // The name "-" means "stdout".
+  if (strcmp(this->name_, "-") == 0)
+    return false;
+
+  // Don't bother opening files with a size of zero.
+  struct stat s;
+  if (::stat(this->name_, &s) != 0 || s.st_size == 0)
+    return false;
+
+  int o = open_descriptor(-1, this->name_, O_RDWR, 0);
+  if (o < 0)
+    gold_fatal(_("%s: open: %s"), this->name_, strerror(errno));
+  this->o_ = o;
+  this->file_size_ = s.st_size;
+
+  // If the file can't be mmapped, copying the content to an anonymous
+  // map will probably negate the performance benefits of incremental
+  // linking.  This could be helped by using views and loading only
+  // the necessary parts, but this is not supported as of now.
+  if (!this->map_no_anonymous())
+    {
+      release_descriptor(o, true);
+      this->o_ = -1;
+      this->file_size_ = 0;
+      return false;
+    }
+
+  return true;
+}
+
 // Open the output file.
 
 void
@@ -3465,21 +3501,27 @@ Output_file::resize(off_t file_size)
     }
 }
 
-// Map a block of memory which will later be written to the file.
-// Return a pointer to the memory.
+// Map an anonymous block of memory which will later be written to the
+// file.  Return whether the map succeeded.
 
-void*
+bool
 Output_file::map_anonymous()
 {
-  this->map_is_anonymous_ = true;
-  return ::mmap(NULL, this->file_size_, PROT_READ | PROT_WRITE,
-		MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+  void* base = ::mmap(NULL, this->file_size_, PROT_READ | PROT_WRITE,
+		      MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+  if (base != MAP_FAILED)
+    {
+      this->map_is_anonymous_ = true;
+      this->base_ = static_cast<unsigned char*>(base);
+      return true;
+    }
+  return false;
 }
 
-// Map the file into memory.
+// Map the file into memory.  Return whether the mapping succeeded.
 
-void
-Output_file::map()
+bool
+Output_file::map_no_anonymous()
 {
   const int o = this->o_;
 
@@ -3492,38 +3534,52 @@ Output_file::map()
       || ::fstat(o, &statbuf) != 0
       || !S_ISREG(statbuf.st_mode)
       || this->is_temporary_)
-    base = this->map_anonymous();
-  else
-    {
-      // Ensure that we have disk space available for the file.  If we
-      // don't do this, it is possible that we will call munmap,
-      // close, and exit with dirty buffers still in the cache with no
-      // assigned disk blocks.  If the disk is out of space at that
-      // point, the output file will wind up incomplete, but we will
-      // have already exited.  The alternative to fallocate would be
-      // to use fdatasync, but that would be a more significant
-      // performance hit.
-      if (::posix_fallocate(o, 0, this->file_size_) < 0)
-	gold_fatal(_("%s: %s"), this->name_, strerror(errno));
+    return false;
 
-      // Map the file into memory.
-      this->map_is_anonymous_ = false;
-      base = ::mmap(NULL, this->file_size_, PROT_READ | PROT_WRITE,
-                    MAP_SHARED, o, 0);
+  // Ensure that we have disk space available for the file.  If we
+  // don't do this, it is possible that we will call munmap, close,
+  // and exit with dirty buffers still in the cache with no assigned
+  // disk blocks.  If the disk is out of space at that point, the
+  // output file will wind up incomplete, but we will have already
+  // exited.  The alternative to fallocate would be to use fdatasync,
+  // but that would be a more significant performance hit.
+  if (::posix_fallocate(o, 0, this->file_size_) < 0)
+    gold_fatal(_("%s: %s"), this->name_, strerror(errno));
 
-      // The mmap call might fail because of file system issues: the
-      // file system might not support mmap at all, or it might not
-      // support mmap with PROT_WRITE.  I'm not sure which errno
-      // values we will see in all cases, so if the mmap fails for any
-      // reason try for an anonymous map.
-      if (base == MAP_FAILED)
-	base = this->map_anonymous();
-    }
+  // Map the file into memory.
+  base = ::mmap(NULL, this->file_size_, PROT_READ | PROT_WRITE,
+		MAP_SHARED, o, 0);
+
+  // The mmap call might fail because of file system issues: the file
+  // system might not support mmap at all, or it might not support
+  // mmap with PROT_WRITE.
   if (base == MAP_FAILED)
-    gold_fatal(_("%s: mmap: failed to allocate %lu bytes for output file: %s"),
-	       this->name_, static_cast<unsigned long>(this->file_size_),
-	       strerror(errno));
+    return false;
+
+  this->map_is_anonymous_ = false;
   this->base_ = static_cast<unsigned char*>(base);
+  return true;
+}
+
+// Map the file into memory.
+
+void
+Output_file::map()
+{
+  if (this->map_no_anonymous())
+    return;
+
+  // The mmap call might fail because of file system issues: the file
+  // system might not support mmap at all, or it might not support
+  // mmap with PROT_WRITE.  I'm not sure which errno values we will
+  // see in all cases, so if the mmap fails for any reason and we
+  // don't care about file contents, try for an anonymous map.
+  if (this->map_anonymous())
+    return;
+
+  gold_fatal(_("%s: mmap: failed to allocate %lu bytes for output file: %s"),
+             this->name_, static_cast<unsigned long>(this->file_size_),
+             strerror(errno));
 }
 
 // Unmap the file from memory.

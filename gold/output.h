@@ -3093,16 +3093,24 @@ class Output_file
   set_is_temporary()
   { this->is_temporary_ = true; }
 
+  // Try to open an existing file. Returns false if the file doesn't
+  // exist, has a size of 0 or can't be mmaped.  This method is
+  // thread-unsafe.
+  bool
+  open_for_modification();
+
   // Open the output file.  FILE_SIZE is the final size of the file.
+  // If the file already exists, it is deleted/truncated.  This method
+  // is thread-unsafe.
   void
   open(off_t file_size);
 
-  // Resize the output file.
+  // Resize the output file.  This method is thread-unsafe.
   void
   resize(off_t file_size);
 
   // Close the output file (flushing all buffered data) and make sure
-  // there are no errors.
+  // there are no errors.  This method is thread-unsafe.
   void
   close();
 
@@ -3153,13 +3161,18 @@ class Output_file
   { }
 
  private:
-  // Map the file into memory.
+  // Map the file into memory or, if that fails, allocate anonymous
+  // memory.
   void
   map();
 
   // Allocate anonymous memory for the file.
-  void*
+  bool
   map_anonymous();
+
+  // Map the file into memory.
+  bool
+  map_no_anonymous();
 
   // Unmap the file from memory (and flush to disk buffers).
   void
