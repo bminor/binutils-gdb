@@ -1,3 +1,8 @@
+2009-09-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf64_x86_64_finish_dynamic_symbol): Declare
+	plt earlier.
+
 2009-09-01  Tristan Gingold  <gingold@adacore.com>
 
 	* makefile.vms: Ported to Itanium VMS.  Remove useless variable and
