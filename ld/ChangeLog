@@ -1,3 +1,9 @@
+2009-09-01  Jie Zhang  <jie.zhang@analog.com>
+
+	* scripttempl/elf.sc: Add ${USER_LABEL_PREFIX} to _start, etext,
+	_stack and __bss_start.
+	* emulparams/bfin.sh (ENTRY): Remove.
+
 2009-08-30  Alan Modra  <amodra@bigpond.net.au>
 
 	PR ld/10569
