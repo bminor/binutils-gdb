@@ -97,7 +97,7 @@ extern void mep_prepare_relax_scan (fragS *, offsetT *, relax_substateT);
 #define VTEXT_SECTION_NAME ".vtext"
 
 /* Needed to process pending instructions when a label is encountered.  */
-#define TC_START_LABEL(ch, ptr)    ((ch == ':') && mep_flush_pending_output ())
+#define TC_START_LABEL(ch, s, ptr)    ((ch == ':') && mep_flush_pending_output ())
 
 #define tc_unrecognized_line(c) mep_unrecognized_line (c)
 extern int mep_unrecognized_line (int);

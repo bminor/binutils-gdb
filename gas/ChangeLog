@@ -1,3 +1,18 @@
+2009-09-01  Jie Zhang  <jie.zhang@analog.com>
+
+	* read.c (TC_START_LABEL): Add a new argument.
+	(read_a_source_file): Pass the beginning of the symbol through
+	the new argument of TC_START_LABEL.
+	* config/tc-arm.h (TC_START_LABEL): Add a new argument.
+	* config/tc-bfin.c (bfin_start_label): Only search '(' and '['
+	from the beginning of the symbol.
+	* config/tc-bfin.h (TC_START_LABEL): Add the new argument.
+	* config/tc-d30v.h (TC_START_LABEL): Likewise.
+	* config/tc-fr30.h (TC_START_LABEL): Likewise.
+	* config/tc-m32c.h (TC_START_LABEL): Likewise.
+	* config/tc-m32r.h (TC_START_LABEL): Likewise.
+	* config/tc-mep.h (TC_START_LABEL): Likewise.
+
 2009-08-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/10570

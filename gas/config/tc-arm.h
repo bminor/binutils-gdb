@@ -161,7 +161,7 @@ void arm_copy_symbol_attributes (symbolS *, symbolS *);
   (arm_copy_symbol_attributes (DEST, SRC))
 #endif
 
-#define TC_START_LABEL(C,STR)            (c == ':' || (c == '/' && arm_data_in_code ()))
+#define TC_START_LABEL(C,S,STR)            (C == ':' || (C == '/' && arm_data_in_code ()))
 #define tc_canonicalize_symbol_name(str) arm_canonicalize_symbol_name (str);
 #define obj_adjust_symtab() 		 arm_adjust_symtab ()
 

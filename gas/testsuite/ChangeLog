@@ -1,3 +1,9 @@
+2009-09-01  Jie Zhang  <jie.zhang@analog.com>
+
+	* gas/bfin/stack2.s: Add pop multiple instruction with a label
+	on the same line.
+	* gas/bfin/stack2.d: Adjust accordingly.
+
 2009-08-31  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/elf/section5.l: Remove no longer issued warning pattern.

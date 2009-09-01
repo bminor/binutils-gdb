@@ -2175,15 +2175,14 @@ bfin_eol_in_insn (char *line)
 }
 
 bfd_boolean
-bfin_start_label (char *ptr)
+bfin_start_label (char *s, char *ptr)
 {
-  ptr--;
-  while (!ISSPACE (*ptr) && !is_end_of_line[(unsigned char) *ptr])
-    ptr--;
-
-  ptr++;
-  if (*ptr == '(' || *ptr == '[')
-    return FALSE;
+  while (s != ptr)
+    {
+      if (*s == '(' || *s == '[')
+	return FALSE;
+      s++;
+    }
 
   return TRUE;
 } 
