@@ -1,3 +1,8 @@
+2009-09-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/solib-overlap.exp, gdb.base/solib-overlap-lib.c,
+	gdb.base/solib-overlap-main.c: New.
+
 2009-08-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	PR gdb/10565
