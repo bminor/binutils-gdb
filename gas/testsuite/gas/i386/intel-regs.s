@@ -17,6 +17,7 @@
 	mov	ax, tr0			; add	[bx+si], al
 	mov	ax, mm0			; add	[bx+si], al
 	mov	ax, xmm0		; add	[bx+si], al
+	mov	ax, ymm0		; add	[bx+si], al
 
 	.arch generic32
 	.code32
@@ -52,3 +53,5 @@
 	mov	ax, r8w
 	mov	eax, r8d
 	mov	rax, r8
+ymm8:
+	jmp	ymm8
