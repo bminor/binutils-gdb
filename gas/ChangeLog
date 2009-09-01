@@ -1,3 +1,10 @@
+2009-09-01  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* Makefile.am (m68k-parse.o, bfin-lex.o, itbl-lex.o, itbl-parse.o):
+	Supply correct source file name for generated files which may be
+	in $(srcdir).
+	* Makefile.in: Regenerate.
+
 2009-09-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* version.c (parse_args): Change to "Copyright 2009".

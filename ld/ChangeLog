@@ -1,3 +1,9 @@
+2009-09-01  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* Makefile.am (ldgram.o, ldlex.o, deffilep.o): Supply correct
+	source file name for generated files which may be in $(srcdir).
+	* Makefile.in: Regenerate.
+
 2009-09-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ldver.c (ldversion): Change to "Copyright 2009".
