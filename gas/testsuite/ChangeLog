@@ -302,6 +302,7 @@
 
 2009-06-19  Alan Modra  <amodra@bigpond.net.au>
 
+	PR gas/10255
 	* gas/cfi/cfi-common-7.s: Skip a multiple of four.
 	* gas/cfi/cfi-common-7.d: Adjust.
 
