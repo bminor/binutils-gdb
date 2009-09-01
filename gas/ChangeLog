@@ -1,5 +1,10 @@
 2009-09-01  Jie Zhang  <jie.zhang@analog.com>
 
+	* config/bfin-parse.y (asm_1): Only PREG and DREG are allowed
+	in comparison.
+
+2009-09-01  Jie Zhang  <jie.zhang@analog.com>
+
 	2007-09-28  Bernd Schmidt  <bernd.schmidt@analog.com>
 	* config/tc-bfin.c (bfin_fix_adjustable): Partially revert the
 	2007-08-23 change; BFD_RELOC_BFIN_GOT is not adjustable.

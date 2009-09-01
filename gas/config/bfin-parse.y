@@ -1623,16 +1623,20 @@ asm_1:
 	}
 	| CCREG ASSIGN REG LESS_THAN REG iu_or_nothing
 	{
-	  if (REG_CLASS($3) == REG_CLASS($5))
+	  if ((IS_DREG ($3) && IS_DREG ($5))
+	      || (IS_PREG ($3) && IS_PREG ($5)))
 	    {
 	      notethat ("CCflag: CC = dpregs < dpregs\n");
 	      $$ = CCFLAG (&$3, $5.regno & CODE_MASK, $6.r0, 0, IS_PREG ($3) ? 1 : 0);
 	    }
 	  else
-	    return yyerror ("Compare only of same register class");
+	    return yyerror ("Bad register in comparison");
 	}
 	| CCREG ASSIGN REG LESS_THAN expr iu_or_nothing
 	{
+	  if (!IS_DREG ($3) && !IS_PREG ($3))
+	    return yyerror ("Bad register in comparison");
+
 	  if (($6.r0 == 1 && IS_IMM ($5, 3))
 	      || ($6.r0 == 3 && IS_UIMM ($5, 3)))
 	    {
@@ -1644,16 +1648,20 @@ asm_1:
 	}
 	| CCREG ASSIGN REG _ASSIGN_ASSIGN REG
 	{
-	  if (REG_CLASS($3) == REG_CLASS($5))
+	  if ((IS_DREG ($3) && IS_DREG($5))
+	      || (IS_PREG ($3) && IS_PREG ($3)))
 	    {
 	      notethat ("CCflag: CC = dpregs == dpregs\n");
 	      $$ = CCFLAG (&$3, $5.regno & CODE_MASK, 0, 0, IS_PREG ($3) ? 1 : 0);
 	    }
 	  else
-	    return yyerror ("Compare only of same register class");
+	    return yyerror ("Bad register in comparison");
 	}
 	| CCREG ASSIGN REG _ASSIGN_ASSIGN expr
 	{
+	  if (!IS_DREG ($3) && !IS_PREG ($3))
+	    return yyerror ("Bad register in comparison");
+
 	  if (IS_IMM ($5, 3))
 	    {
 	      notethat ("CCflag: CC = dpregs == imm3\n");
@@ -1674,34 +1682,26 @@ asm_1:
 	}
 	| CCREG ASSIGN REG _LESS_THAN_ASSIGN REG iu_or_nothing
 	{
-	  if (REG_CLASS($3) == REG_CLASS($5))
+	  if ((IS_DREG ($3) && IS_DREG ($5))
+	      || (IS_PREG ($3) && IS_PREG ($5)))
 	    {
-	      notethat ("CCflag: CC = pregs <= pregs (..)\n");
+	      notethat ("CCflag: CC = dpregs <= dpregs (..)\n");
 	      $$ = CCFLAG (&$3, $5.regno & CODE_MASK,
 			   1 + $6.r0, 0, IS_PREG ($3) ? 1 : 0);
 	    }
 	  else
-	    return yyerror ("Compare only of same register class");
+	    return yyerror ("Bad register in comparison");
 	}
 	| CCREG ASSIGN REG _LESS_THAN_ASSIGN expr iu_or_nothing
 	{
+	  if (!IS_DREG ($3) && !IS_PREG ($3))
+	    return yyerror ("Bad register in comparison");
+
 	  if (($6.r0 == 1 && IS_IMM ($5, 3))
 	      || ($6.r0 == 3 && IS_UIMM ($5, 3)))
 	    {
-	      if (IS_DREG ($3))
-		{
-		  notethat ("CCflag: CC = dregs <= (u)imm3\n");
-		  /*    x       y     opc     I     G   */
-		  $$ = CCFLAG (&$3, imm3 ($5), 1 + $6.r0, 1, 0);
-		}
-	      else if (IS_PREG ($3))
-		{
-		  notethat ("CCflag: CC = pregs <= (u)imm3\n");
-		  /*    x       y     opc     I     G   */
-		  $$ = CCFLAG (&$3, imm3 ($5), 1 + $6.r0, 1, 1);
-		}
-	      else
-		return yyerror ("Dreg or Preg expected");
+	      notethat ("CCflag: CC = dpregs <= (u)imm3\n");
+	      $$ = CCFLAG (&$3, imm3 ($5), 1 + $6.r0, 1, IS_PREG ($3) ? 1 : 0);
 	    }
 	  else
 	    return yyerror ("Bad constant value");

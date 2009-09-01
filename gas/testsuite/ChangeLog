@@ -1,5 +1,10 @@
 2009-09-01  Jie Zhang  <jie.zhang@analog.com>
 
+	* gas/bfin/expected_comparison_errors.s: Add more cases.
+	* gas/bfin/expected_comparison_errors.l: Update accordingly.
+
+2009-09-01  Jie Zhang  <jie.zhang@analog.com>
+
 	* gas/bfin/stack2.s: Add pop multiple instruction with a label
 	on the same line.
 	* gas/bfin/stack2.d: Adjust accordingly.
