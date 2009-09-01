@@ -1,3 +1,8 @@
+2009-09-01  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Caching Data of Remote Targets): Add note on
+	non-stop mode's affect on remote caching.
+
 2009-08-31  Jacob Potter  <jdpotter@google.com>
 	    Doug Evans  <dje@google.com>
 

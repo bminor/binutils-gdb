@@ -8427,8 +8427,14 @@ performance, because it reduces the overhead of the remote protocol by
 bundling memory reads and writes into large chunks.  Unfortunately, simply
 caching everything would lead to incorrect results, since @value{GDBN} 
 does not necessarily know anything about volatile values, memory-mapped I/O
-addresses, etc.  Therefore, by default, @value{GDBN} only caches data
-known to be on the stack.  Other regions of memory can be explicitly marked
+addresses, etc.  Furthermore, in non-stop mode (@pxref{Non-Stop Mode})
+memory can be changed @emph{while} a gdb command is executing.
+Therefore, by default, @value{GDBN} only caches data
+known to be on the stack@footnote{In non-stop mode, it is moderately
+rare for a running thread to modify the stack of a stopped thread
+in a way that would interfere with a backtrace, and caching of
+stack reads provides a significant speed up of remote backtraces.}.
+Other regions of memory can be explicitly marked as
 cacheable; see @pxref{Memory Region Attributes}.
 
 @table @code
