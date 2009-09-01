@@ -1,3 +1,13 @@
+2009-09-01  Tristan Gingold  <gingold@adacore.com>
+
+	* makefile.vms: Ported to Itanium VMS.  Remove useless variable and
+	dependencies.  Reindent.
+	* configure.com: Ported to Itanium VMS.  Now generates a build.com
+	to build without make.  Add messages but make edit silent.
+	* hosts/alphavms.h: Add a prototype for stpcpy.
+	* vms.c: Add a missing include for Alpha VMS.
+	* elfxx-ia64.c (ELF_OSABI): Define for OpenVMS.
+
 2009-08-31  Jan Beulich  <jbeulich@novell.com>
 
 	* elf-bfd.h (bfd_elf_get_default_section_type): Declare.

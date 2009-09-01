@@ -24,6 +24,7 @@
 
 #ifdef VMS
 #include <rms.h>
+#include <unixlib.h>
 #include <starlet.h>
 #define RME$C_SETRFM 0x00000001
 #include <unistd.h>

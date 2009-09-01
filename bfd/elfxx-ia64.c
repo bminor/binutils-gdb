@@ -6031,6 +6031,9 @@ elfNN_vms_close_and_cleanup (bfd *abfd)
 
 #undef  elf_backend_want_p_paddr_set_to_zero
 
+#undef ELF_OSABI
+#define ELF_OSABI			ELFOSABI_OPENVMS
+
 #undef  ELF_MAXPAGESIZE
 #define ELF_MAXPAGESIZE			0x10000	/* 64KB */
 

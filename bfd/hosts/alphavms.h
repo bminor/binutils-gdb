@@ -67,7 +67,8 @@ typedef BFD_HOST_64_BIT int64_type;
 #define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
 #endif
 
-extern int getpagesize PARAMS ((void));
+extern int getpagesize (void);
+extern char *stpcpy (char *, const char *);
 
 /* No intl.  */
 #define gettext(Msgid) (Msgid)
