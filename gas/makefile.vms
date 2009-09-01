@@ -5,7 +5,6 @@
 #
 #CC=gcc
 CC=cc
-ARCH=ALPHA
 
 ifeq ($(CC),gcc)
 DEFS=
@@ -16,10 +15,9 @@ else
 #DEFS=/define=("VMS_DEBUG","DEBUG2","DEBUG3","DEBUG5","DEBUG_SYMS","DEBUG_ALPHA")
 OPT=/noopt/debug
 CFLAGS=/names=(as_is,shortened)\
- /include=([],[-.bfd],[.config],[-.include],[-])$(DEFS)$(OPT)\
+ /include=([],[-.bfd],[.config],"../include","../")$(DEFS)$(OPT)\
  /prefix=(all,except=("getopt","optarg","optopt","optind","opterr"))
 #LFLAGS=/debug/map=as.map
-LIBS=,sys$$library:vaxcrtl.olb/lib
 endif
 
 OBJS=targ-cpu.obj,obj-format.obj,atof-targ.obj,app.obj,as.obj,atof-generic.obj,\
@@ -30,10 +28,8 @@ OBJS=targ-cpu.obj,obj-format.obj,atof-targ.obj,app.obj,as.obj,atof-generic.obj,\
   macro.obj,ehopt.obj,dw2gencfi.obj,dwarf2dbg.obj,remap.obj
 
 LIBIBERTY = [-.libiberty]libiberty.olb
-
 LIBBFD = [-.bfd]libbfd.olb
 LIBOPCODES = [-.opcodes]libopcodes.olb
-BFDDEP = [-.bfd]bfd.h
 
 all: as.exe
 

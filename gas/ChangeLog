@@ -1,3 +1,10 @@
+2009-09-01  Tristan Gingold  <gingold@adacore.com>
+
+	* makefile.vms: Adjust include pathes.  Remove useless vaxctrl
+	library.
+	* configure.com: Ported to Itanium VMS.  Create build.com DCL script.
+	Make edit silent.
+
 2009-09-01  Jie Zhang  <jie.zhang@analog.com>
 
 	* config/bfin-parse.y (asm_1): Only PREG and DREG are allowed
