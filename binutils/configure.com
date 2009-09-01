@@ -5,8 +5,9 @@ $! to execute it.
 $!
 $! Written by Klaus K"ampf (kkaempf@rmi.de)
 $!
-$arch_indx = 1 + ((f$getsyi("CPU").ge.128).and.1)      ! vax==1, alpha==2
-$arch = f$element(arch_indx,"|","|VAX|Alpha|")
+$ arch=F$GETSYI("ARCH_NAME")
+$ arch=F$EDIT(arch,"LOWERCASE")
+$ write sys$output "Configuring binutils for ''arch' target"
 $!
 $! Generate config.h
 $!
@@ -44,12 +45,9 @@ $ create config.h
 $!
 $! Add TARGET.
 $!
-$ if arch .eqs. "Alpha"
-$ then
-$   target = "vms-alpha"
-$ else
-$   target = "vms-vax"
-$ endif
+$ if arch .eqs. "ia64" then target = "elf64-ia64-vms"
+$ if arch .eqs. "alpha" then target = "vms-alpha"
+$ if arch .eqs. "vax" then target = "vms-vax"
 $!
 $ open/append tfile config.h
 $ write tfile "#define TARGET """ + target + """"
@@ -58,3 +56,57 @@ $ write sys$output "Created `config.h'"
 $!
 $ copy makefile.vms-in makefile.vms
 $ write sys$output "Created `makefile.vms'"
+$!
+$ write sys$output "Generate binutils build.com"
+$!
+$ create build.com
+$DECK
+$ DEFS=""
+$ OPT="/noopt/debug"
+$ CFLAGS=OPT + "/include=([],""../include"",[-.bfd])" +-
+ "/name=(as_is,shortened)" +-
+ "/prefix=(all,exc=(""getopt"",""optarg"",""optopt"",""optind"",""opterr""))"
+$ BFDLIB = ",[-.bfd]libbfd.olb/lib"
+$ LIBIBERTY = ",[-.libiberty]libiberty.olb/lib"
+$ OPCODES = ",[-.opcodes]libopcodes.olb/lib"
+$ DEBUG_FILES = ",rddbg,debug,stabs,ieee,rdcoff,dwarf"
+$ BULIBS_FILES = ",bucomm,version,filemode"
+$ ALL_FILES="nm,strings,addr2line,size,objdump,prdbg" +-
+   BULIBS_FILES + DEBUG_FILES
+$!
+$ write sys$output "CFLAGS=",CFLAGS
+$ if p1.nes."LINK"
+$ then
+$   NUM = 0
+$   LOOP:
+$     F = F$ELEMENT(NUM,",",ALL_FILES)
+$     IF F.EQS."," THEN GOTO END
+$     write sys$output "Compiling ", F, ".c"
+$     cc 'CFLAGS 'F.c
+$     NUM = NUM + 1
+$     GOTO LOOP
+$   END:
+$ endif
+$ purge
+$!
+$ write sys$output "Building nm.exe"
+$ NM_OBJS="nm.obj" + BULIBS_FILES + BFDLIB + LIBIBERTY
+$ link/exe=nm 'NM_OBJS
+$!
+$ write sys$output "Building strings.exe"
+$ STRINGS_OBJS="strings.obj" + BULIBS_FILES + BFDLIB + LIBIBERTY
+$ link/exe=strings 'STRINGS_OBJS
+$!
+$ write sys$output "Building size.exe"
+$ SIZE_OBJS="size.obj" + BULIBS_FILES + BFDLIB + LIBIBERTY
+$ link/exe=size 'SIZE_OBJS
+$!
+$ write sys$output "Building addr2line.exe"
+$ ADDR2LINE_OBJS="addr2line.obj" + BULIBS_FILES + BFDLIB + LIBIBERTY
+$ link/exe=addr2line 'ADDR2LINE_OBJS
+$!
+$ write sys$output "Building objdump.exe"
+$ OBJDUMP_OBJS="objdump.obj,prdbg.obj" + DEBUG_FILES + BULIBS_FILES +-
+   BFDLIB + OPCODES + LIBIBERTY
+$ link/exe=objdump 'OBJDUMP_OBJS
+$EOD

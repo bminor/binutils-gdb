@@ -1,3 +1,9 @@
+2009-09-01  Tristan Gingold  <gingold@adacore.com>
+
+	* makefile.vms (OBJS): Add stpcpy.
+	* configure.com: New file to create build.com DCL script for
+	Itanium VMS or Alpha VMS.
+
 2009-08-24  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure.ac (AC_PREREQ): Bump to 2.64.

@@ -1,3 +1,10 @@
+2009-09-01  Tristan Gingold  <gingold@adacore.com>
+
+	* makefile.vms: Ported to Itanium VMS.  Remove useless targets and
+	dependencies.  Remove unused FORMAT variable.
+	* configure.com: New file to create build.com DCL script for
+	Itanium VMS or Alpha VMS.
+
 2009-08-29  Martin Thuresson  <martin@mtme.org>
 
 	* cris-dis.c (bytes_to_skip): Update code to use new name.

@@ -7,9 +7,6 @@
 #
 #
 
-# Distribution version, filled in by configure.com
-VERSION=@VERSION@
-
 ifeq ($(CC),gcc)
 DEFS=
 CFLAGS=/include=([],[-.include],[-.bfd])$(DEFS)
@@ -17,14 +14,13 @@ LIBS=,gnu_cc_library:libgcc/lib,sys$$library:vaxcrtl.olb/lib,gnu_cc_library:crt0
 else
 DEFS=
 OPT=/noopt/debug
-CFLAGS=$(OPT)/include=([],[-.include],[-.bfd])$(DEFS)\
+CFLAGS=$(OPT)/include=([],"../include",[-.bfd])$(DEFS)\
  /name=(as_is,shortened)\
  /prefix=(all,except=("getopt","optarg","optopt","optind","opterr"))
-LIBS=,sys$$library:vaxcrtl.olb/lib
 endif
 
-BFDLIB = [-.bfd]libbfd.olb/lib
-BFDLIB_DEP = [-.bfd]libbfd.olb
+LIBBFD = [-.bfd]libbfd.olb/lib
+LIBBFD_DEP = [-.bfd]libbfd.olb
 LIBIBERTY_DEP = [-.libiberty]libiberty.olb
 LIBIBERTY = [-.libiberty]libiberty.olb/lib
 OPCODES_DEP = [-.opcodes]libopcodes.olb
@@ -34,10 +30,10 @@ DEBUG_OBJS = rddbg.obj,debug.obj,stabs.obj,ieee.obj,rdcoff.obj,dwarf.obj
 
 WRITE_DEBUG_OBJS = $(DEBUG_OBJS),wrstabs.obj
 
-BULIBS = []bucomm.obj,version.obj,filemode.obj
+BULIBS = bucomm.obj,version.obj,filemode.obj
 
-ADDL_DEPS = $(BULIBS),$(BFDLIB_DEP),$(LIBIBERTY_DEP)
-ADDL_LIBS = $(BULIBS),$(BFDLIB),$(LIBIBERTY)
+ADDL_DEPS = $(BULIBS),$(LIBBFD_DEP),$(LIBIBERTY_DEP)
+ADDL_LIBS = $(BULIBS),$(LIBBFD),$(LIBIBERTY)
 
 SIZEOBJS = $(ADDL_DEPS),size.obj
 
@@ -52,38 +48,23 @@ OBJDUMPOBJS = $(ADDL_DEPS),objdump.obj,prdbg.obj,$(DEBUG_OBJS),$(OPCODES_DEP)
 all: config.h size.exe strings.exe objdump.exe nm.exe addr2line.exe
 
 size.exe: $(SIZEOBJS)
-	link/exe=$@ size.obj,$(ADDL_LIBS)$(LIBS)
+	link/exe=$@ size.obj,$(ADDL_LIBS)
 
 strings.exe: $(STRINGSOBJS)
-	link/exe=$@ strings.obj,$(ADDL_LIBS)$(LIBS)
+	link/exe=$@ strings.obj,$(ADDL_LIBS)
 
 nm.exe: $(NMOBJS)
-	link/exe=$@ nm.obj,$(ADDL_LIBS)$(LIBS)
+	link/exe=$@ nm.obj,$(ADDL_LIBS)
 
 addr2line.exe: $(ADDR2LINEOBJS)
-	link/exe=$@ addr2line.obj,$(ADDL_LIBS)$(LIBS)
+	link/exe=$@ addr2line.obj,$(ADDL_LIBS)
 
 objdump.exe: $(OBJDUMPOBJS)
-	link/exe=$@ objdump.obj,prdbg.obj,$(DEBUG_OBJS),$(BFDLIB),$(OPCODES),$(ADDL_LIBS)$(LIBS)
+	link/exe=$@ objdump.obj,prdbg.obj,$(DEBUG_OBJS),$(LIBBFD),$(OPCODES),$(ADDL_LIBS)
 
 config.h:
 	$$ @configure
 	$(MAKE) -f makefile.vms "CC=$(CC)"
-
-[-.bfd]libbfd.olb:
-	$(CD) [-.bfd]
-	$(MAKE) -f makefile.vms "CC=$(CC)"
-	$(CD) [-.binutils]
-
-[-.libiberty]libiberty.olb:
-	$(CD) [-.libiberty]
-	$(MAKE) -f makefile.vms "CC=$(CC)"
-	$(CD) [-.binutils]
-
-[-.opcodes]libopcodes.olb:
-	$(CD) [-.opcodes]
-	$(MAKE) -f makefile.vms "CC=$(CC)"
-	$(CD) [-.binutils]
 
 clean:
 	$$ purge

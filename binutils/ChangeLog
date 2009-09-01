@@ -1,3 +1,9 @@
+2009-09-01  Tristan Gingold  <gingold@adacore.com>
+
+	* makefile.vms-in: Remove unused VERSION variable.  Remove unused
+	dependencies.
+	* configure.com: Ported to Itanium VMS.  Create build.com DCL script.
+
 2009-08-29  Martin Thuresson  <martin@mtme.org>
 
 	* nlmconv.c (main): Rename variable new to new_name.
