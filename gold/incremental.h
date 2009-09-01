@@ -50,6 +50,24 @@ enum Incremental_input_type
   INCREMENTAL_INPUT_SCRIPT = 4
 };
 
+// Code invoked early during an incremental link that checks what files need
+// to be relinked.
+class Incremental_checker
+{
+ public:
+  Incremental_checker(const char* output_name)
+    : output_name_(output_name)
+  { }
+
+  // Analyzes the output file to check if incremental linking is possible and
+  // what files needs to be relinked.
+  bool
+  can_incrementally_link_output_file();
+
+ private:
+  const char* output_name_;
+};
+
 // This class contains the information needed during an incremental
 // build about the inputs necessary to build the .gnu_incremental_inputs.
 class Incremental_inputs
@@ -127,11 +145,11 @@ class Incremental_inputs
     {
       // Present if type == INCREMENTAL_INPUT_ARCHIVE.
       Archive* archive;
-  
+
       // Present if type == INCREMENTAL_INPUT_OBJECT or
       // INCREMENTAL_INPUT_SHARED_LIBRARY.
       Object* object;
-  
+
       // Present if type == INCREMENTAL_INPUT_SCRIPT.
       Script_info* script;
     };
@@ -141,7 +159,7 @@ class Incremental_inputs
 
     // Position of the entry information in the output section.
     unsigned int index;
-    
+
     // Last modification time of the file.
     Timespec mtime;
   };
@@ -151,7 +169,7 @@ class Incremental_inputs
   // A lock guarding access to inputs_ during the first phase of linking, when
   // report_ function may be called from multiple threads.
   Lock* lock_;
-  
+
   // The list of input arguments obtained from parsing the command line.
   const Input_arguments* inputs_;
 

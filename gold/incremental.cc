@@ -25,6 +25,7 @@
 #include "output.h"
 #include "incremental.h"
 #include "archive.h"
+#include "output.h"
 
 using elfcpp::Convert;
 
@@ -148,6 +149,18 @@ class Incremental_inputs_entry_write
  private:
   internal::Incremental_inputs_entry_data* p_;
 };
+
+// Analyzes the output file to check if incremental linking is possible and
+// (to be done) what files need to be relinked.
+
+bool
+Incremental_checker::can_incrementally_link_output_file()
+{
+  Output_file output(this->output_name_);
+  if (!output.open_for_modification())
+    return false;
+  return true;
+}
 
 // Add the command line to the string table, setting
 // command_line_key_.  In incremental builds, the command line is

@@ -42,6 +42,7 @@
 #include "defstd.h"
 #include "plugin.h"
 #include "icf.h"
+#include "incremental.h"
 
 namespace gold
 {
@@ -176,6 +177,20 @@ queue_initial_tasks(const General_options& options,
     thread_count = cmdline.number_of_input_files();
   workqueue->set_thread_count(thread_count);
 
+  if (cmdline.options().incremental())
+    {
+      Incremental_checker incremental_checker(
+          parameters->options().output_file_name());
+      if (incremental_checker.can_incrementally_link_output_file())
+        {
+          // TODO: remove when incremental linking implemented.
+          printf("Incremental linking might be possible "
+              "(not implemented yet)\n");
+        }
+      // TODO: If we decide on an incremental build, fewer tasks
+      // should be scheduled.
+    }
+
   // Read the input files.  We have to add the symbols to the symbol
   // table in order.  We do this by creating a separate blocker for
   // each input file.  We associate the blocker with the following
@@ -229,8 +244,8 @@ queue_initial_tasks(const General_options& options,
     }
 }
 
-// Queue up a set of tasks to be done before queueing the middle set 
-// of tasks.  This is only necessary when garbage collection 
+// Queue up a set of tasks to be done before queueing the middle set
+// of tasks.  This is only necessary when garbage collection
 // (--gc-sections) of unused sections is desired.  The relocs are read
 // and processed here early to determine the garbage sections before the
 // relocs can be scanned in later tasks.

@@ -1,3 +1,19 @@
+2009-09-01  Mikolaj Zalewski  <mikolajz@google.com>
+
+	* gold.cc: Include "incremental.h".
+	(queue_initial_tasks): Call Incremental_checker methods.
+	* incremental.cc: Include "output.h".
+	(Incremental_checker::can_incrementally_link_output_file): New
+	method.
+	* incremental.h (Incremental_checker): New class.
+
+	* output.cc (Output_file::open_for_modification): New method.
+	(Output_file::map_anonymous): Changed return type to bool.  Record
+	map in base_ field.
+	(Output_file::map_no_anonymous): New method, broken out of map.
+	(Output_file::map): Use map_no_anonymous and map_anonymous.
+	* output.h (class Output_file): Update declarations.
+
 2009-08-24  Cary Coutant  <ccoutant@google.com>
 
 	* options.h (Command_line::Pre_options): New class.
