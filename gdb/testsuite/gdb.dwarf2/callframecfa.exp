@@ -44,8 +44,12 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-gdb_test "break *func" "Breakpoint 1.*" "set breakpoint for call-frame-cfa"
-gdb_test "run" "" "run for call-frame-cfa"
+if ![runto_main] {
+    return -1
+}
+
+gdb_test "break *func" "Breakpoint 2.*" "set breakpoint for call-frame-cfa"
+gdb_continue_to_breakpoint "continue to breakpoint for call-frame-cfa"
 gdb_test "display arg" "arg = 77" "set display for call-frame-cfa"
 
 # We know how many instructions are in the function.  Note that we
