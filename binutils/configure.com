@@ -54,9 +54,6 @@ $ write tfile "#define TARGET """ + target + """"
 $ close tfile
 $ write sys$output "Created `config.h'"
 $!
-$ copy makefile.vms-in makefile.vms
-$ write sys$output "Created `makefile.vms'"
-$!
 $ write sys$output "Generate binutils build.com"
 $!
 $ create build.com

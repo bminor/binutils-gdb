@@ -28,8 +28,6 @@ OPCODES = [-.opcodes]libopcodes.olb/lib
 
 DEBUG_OBJS = rddbg.obj,debug.obj,stabs.obj,ieee.obj,rdcoff.obj,dwarf.obj
 
-WRITE_DEBUG_OBJS = $(DEBUG_OBJS),wrstabs.obj
-
 BULIBS = bucomm.obj,version.obj,filemode.obj
 
 ADDL_DEPS = $(BULIBS),$(LIBBFD_DEP),$(LIBIBERTY_DEP)
@@ -43,7 +41,7 @@ NMOBJS = $(ADDL_DEPS),nm.obj
 
 ADDR2LINEOBJS = $(ADDL_DEPS),addr2line.obj
 
-OBJDUMPOBJS = $(ADDL_DEPS),objdump.obj,prdbg.obj,$(DEBUG_OBJS),$(OPCODES_DEP)
+OBJDUMPOBJS = objdump.obj,prdbg.obj,$(DEBUG_OBJS),$(ADDL_DEPS),$(OPCODES_DEP)
 
 all: config.h size.exe strings.exe objdump.exe nm.exe addr2line.exe
 
@@ -60,7 +58,7 @@ addr2line.exe: $(ADDR2LINEOBJS)
 	link/exe=$@ addr2line.obj,$(ADDL_LIBS)
 
 objdump.exe: $(OBJDUMPOBJS)
-	link/exe=$@ objdump.obj,prdbg.obj,$(DEBUG_OBJS),$(LIBBFD),$(OPCODES),$(ADDL_LIBS)
+	link/exe=$@ objdump.obj,prdbg.obj,$(DEBUG_OBJS),$(ADDL_LIBS),$(LIBBFD),$(OPCODES)
 
 config.h:
 	$$ @configure

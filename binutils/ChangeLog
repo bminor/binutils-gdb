@@ -1,3 +1,11 @@
+2009-09-02  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.com: Do not copy makefile.vms-in to makefile.vms
+	* makefile.vms-in: Renamed to...
+	* makefile.vms: ... this usual name as it is not processed anymore.
+	Remove WRITE_DEBUG_OBJS (unused) and reorder object files for
+	objdump.exe.
+
 2009-09-01  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.am (arparse.o, arlex.o, sysroff.o, defparse.o)
