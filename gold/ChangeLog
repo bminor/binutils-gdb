@@ -1,3 +1,8 @@
+2009-09-02  Ian Lance Taylor  <iant@google.com>
+
+	* output.cc (Output_file::resize): Call map_no_anonymous rather
+	than map.
+
 2009-09-01  Mikolaj Zalewski  <mikolajz@google.com>
 
 	* gold.cc: Include "incremental.h".

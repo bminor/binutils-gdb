@@ -3497,7 +3497,8 @@ Output_file::resize(off_t file_size)
     {
       this->unmap();
       this->file_size_ = file_size;
-      this->map();
+      if (!this->map_no_anonymous())
+	gold_fatal(_("%s: mmap: %s"), this->name_, strerror(errno));
     }
 }
 
