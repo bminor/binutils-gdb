@@ -518,7 +518,7 @@ static int record_resume_error;
 
 static void
 record_resume (struct target_ops *ops, ptid_t ptid, int step,
-               enum target_signal signal)
+               enum target_signal siggnal)
 {
   record_resume_step = step;
 
@@ -534,7 +534,7 @@ record_resume (struct target_ops *ops, ptid_t ptid, int step,
           return;
         }
       record_beneath_to_resume (record_beneath_to_resume_ops, ptid, 1,
-                                signal);
+                                siggnal);
     }
 }
 

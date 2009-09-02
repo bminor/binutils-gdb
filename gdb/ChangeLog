@@ -1,3 +1,7 @@
+2009-09-02  Hui Zhu  <teawater@gmail.com>
+
+	* record.c (record_resume): Change "signal" to "siggnal".
+
 2009-09-01  Hui Zhu  <teawater@gmail.com>
 
 	* record.c (record_resume): Change "siggnal" to "signal".
