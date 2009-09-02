@@ -62,9 +62,9 @@ static const char * parse_insn_normal
        const char * parse_mep_align  (CGEN_CPU_DESC, const char **, enum cgen_operand_type, long *);
        const char * parse_mep_alignu (CGEN_CPU_DESC, const char **, enum cgen_operand_type, unsigned long *);
 static const char * parse_signed16   (CGEN_CPU_DESC, const char **, int, long *);
-static const char * parse_signed16_range   (CGEN_CPU_DESC, const char **, int, long *);
+static const char * parse_signed16_range   (CGEN_CPU_DESC, const char **, int, long *) ATTRIBUTE_UNUSED;
 static const char * parse_unsigned16 (CGEN_CPU_DESC, const char **, int, unsigned long *);
-static const char * parse_unsigned16_range (CGEN_CPU_DESC, const char **, int, unsigned long *);
+static const char * parse_unsigned16_range (CGEN_CPU_DESC, const char **, int, unsigned long *) ATTRIBUTE_UNUSED;
 static const char * parse_lo16       (CGEN_CPU_DESC, const char **, int, long *, long);
 static const char * parse_unsigned7  (CGEN_CPU_DESC, const char **, enum cgen_operand_type, unsigned long *);
 static const char * parse_zero       (CGEN_CPU_DESC, const char **, int, long *);

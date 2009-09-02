@@ -595,8 +595,8 @@ const CGEN_HW_ENTRY mep_cgen_hw_table[] =
 
 const CGEN_IFLD mep_cgen_ifld_table[] =
 {
-  { MEP_F_NIL, "f-nil", 0, 0, 0, 0, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }  },
-  { MEP_F_ANYOF, "f-anyof", 0, 0, 0, 0, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }  },
+  { MEP_F_NIL, "f-nil", 0, 0, 0, 0, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } } } }  },
+  { MEP_F_ANYOF, "f-anyof", 0, 0, 0, 0, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } } } }  },
   { MEP_F_MAJOR, "f-major", 0, 32, 0, 4, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xd0" } } } }  },
   { MEP_F_RN, "f-rn", 0, 32, 4, 4, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xd0" } } } }  },
   { MEP_F_RN3, "f-rn3", 0, 32, 5, 3, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xd0" } } } }  },
@@ -2746,7 +2746,7 @@ static const CGEN_IBASE mep_cgen_insn_table[MAX_INSNS] =
 /* cpsel $croc,$crqc,$crpc */
   {
     MEP_INSN_CPSEL_C3, "cpsel_C3", "cpsel", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpfsftbi $croc,$crqc,$crpc,$imm3p4 */
   {
@@ -2756,12 +2756,12 @@ static const CGEN_IBASE mep_cgen_insn_table[MAX_INSNS] =
 /* cpfsftbs0 $croc,$crqc,$crpc */
   {
     MEP_INSN_CPFSFTBS0_C3, "cpfsftbs0_C3", "cpfsftbs0", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpfsftbs1 $croc,$crqc,$crpc */
   {
     MEP_INSN_CPFSFTBS1_C3, "cpfsftbs1_C3", "cpfsftbs1", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpunpacku.b $croc,$crqc,$crpc */
   {
@@ -2916,32 +2916,32 @@ static const CGEN_IBASE mep_cgen_insn_table[MAX_INSNS] =
 /* cpsla3.h $croc,$crqc,$crpc */
   {
     MEP_INSN_CPSLA3_H_C3, "cpsla3_h_C3", "cpsla3.h", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpsla3.w $croc,$crqc,$crpc */
   {
     MEP_INSN_CPSLA3_W_C3, "cpsla3_w_C3", "cpsla3.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpsadd3.h $croc,$crqc,$crpc */
   {
     MEP_INSN_CPSADD3_H_C3, "cpsadd3_h_C3", "cpsadd3.h", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpsadd3.w $croc,$crqc,$crpc */
   {
     MEP_INSN_CPSADD3_W_C3, "cpsadd3_w_C3", "cpsadd3.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpssub3.h $croc,$crqc,$crpc */
   {
     MEP_INSN_CPSSUB3_H_C3, "cpssub3_h_C3", "cpssub3.h", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpssub3.w $croc,$crqc,$crpc */
   {
     MEP_INSN_CPSSUB3_W_C3, "cpssub3_w_C3", "cpssub3.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpextuaddu3.b $croc,$crqc,$crpc */
   {
@@ -3091,32 +3091,32 @@ static const CGEN_IBASE mep_cgen_insn_table[MAX_INSNS] =
 /* cpmovfrcsar0 $croc */
   {
     MEP_INSN_CPMOVFRCSAR0_C3, "cpmovfrcsar0_C3", "cpmovfrcsar0", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpmovfrcsar1 $croc */
   {
     MEP_INSN_CPMOVFRCSAR1_C3, "cpmovfrcsar1_C3", "cpmovfrcsar1", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpmovfrcc $croc */
   {
     MEP_INSN_CPMOVFRCC_C3, "cpmovfrcc_C3", "cpmovfrcc", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpmovtocsar0 $crqc */
   {
     MEP_INSN_CPMOVTOCSAR0_C3, "cpmovtocsar0_C3", "cpmovtocsar0", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpmovtocsar1 $crqc */
   {
     MEP_INSN_CPMOVTOCSAR1_C3, "cpmovtocsar1_C3", "cpmovtocsar1", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpmovtocc $crqc */
   {
     MEP_INSN_CPMOVTOCC_C3, "cpmovtocc_C3", "cpmovtocc", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpmov $croc,$crqc */
   {
@@ -3181,7 +3181,7 @@ static const CGEN_IBASE mep_cgen_insn_table[MAX_INSNS] =
 /* cpccadd.b $crqc */
   {
     MEP_INSN_CPCCADD_B_C3, "cpccadd_b_C3", "cpccadd.b", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V8QI, 0 } }, { { CRET_FIRSTCOPY, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V8QI, 0 } }, { { CRET_FIRSTCOPY, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpbcast.b $croc,$crqc */
   {
@@ -3586,12 +3586,12 @@ static const CGEN_IBASE mep_cgen_insn_table[MAX_INSNS] =
 /* cpslai3.h $crqc,$crpc,$imm4p8 */
   {
     MEP_INSN_CPSLAI3_H_C3, "cpslai3_h_C3", "cpslai3.h", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpslai3.w $crqc,$crpc,$imm5p7 */
   {
     MEP_INSN_CPSLAI3_W_C3, "cpslai3_w_C3", "cpslai3.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpclipiu3.w $crqc,$crpc,$imm5p7 */
   {
@@ -3786,77 +3786,77 @@ static const CGEN_IBASE mep_cgen_insn_table[MAX_INSNS] =
 /* cpmova1.b $croc */
   {
     MEP_INSN_CPMOVA1_B_C3, "cpmova1_b_C3", "cpmova1.b", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V8QI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V8QI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpmovua1.h $croc */
   {
     MEP_INSN_CPMOVUA1_H_C3, "cpmovua1_h_C3", "cpmovua1.h", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpmovla1.h $croc */
   {
     MEP_INSN_CPMOVLA1_H_C3, "cpmovla1_h_C3", "cpmovla1.h", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpmovuua1.w $croc */
   {
     MEP_INSN_CPMOVUUA1_W_C3, "cpmovuua1_w_C3", "cpmovuua1.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpmovula1.w $croc */
   {
     MEP_INSN_CPMOVULA1_W_C3, "cpmovula1_w_C3", "cpmovula1.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpmovlua1.w $croc */
   {
     MEP_INSN_CPMOVLUA1_W_C3, "cpmovlua1_w_C3", "cpmovlua1.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpmovlla1.w $croc */
   {
     MEP_INSN_CPMOVLLA1_W_C3, "cpmovlla1_w_C3", "cpmovlla1.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cppacka1u.b $croc */
   {
     MEP_INSN_CPPACKA1U_B_C3, "cppacka1u_b_C3", "cppacka1u.b", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V8UQI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V8UQI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cppacka1.b $croc */
   {
     MEP_INSN_CPPACKA1_B_C3, "cppacka1_b_C3", "cppacka1.b", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V8QI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V8QI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cppackua1.h $croc */
   {
     MEP_INSN_CPPACKUA1_H_C3, "cppackua1_h_C3", "cppackua1.h", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cppackla1.h $croc */
   {
     MEP_INSN_CPPACKLA1_H_C3, "cppackla1_h_C3", "cppackla1.h", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cppackua1.w $croc */
   {
     MEP_INSN_CPPACKUA1_W_C3, "cppackua1_w_C3", "cppackua1.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cppackla1.w $croc */
   {
     MEP_INSN_CPPACKLA1_W_C3, "cppackla1_w_C3", "cppackla1.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpmovhua1.w $croc */
   {
     MEP_INSN_CPMOVHUA1_W_C3, "cpmovhua1_w_C3", "cpmovhua1.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpmovhla1.w $croc */
   {
     MEP_INSN_CPMOVHLA1_W_C3, "cpmovhla1_w_C3", "cpmovhla1.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x10" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_C3), 0 } } } }
   },
 /* cpsrla1 $crqc */
   {
@@ -4171,17 +4171,17 @@ static const CGEN_IBASE mep_cgen_insn_table[MAX_INSNS] =
 /* cpsel $crop,$crqp,$crpp */
   {
     MEP_INSN_CPSEL_P0S_P1, "cpsel_P0S_P1", "cpsel", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x24" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S)|(1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x24" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S)|(1<<SLOTS_P1), 0 } } } }
   },
 /* cpfsftbs0 $crop,$crqp,$crpp */
   {
     MEP_INSN_CPFSFTBS0_P0S_P1, "cpfsftbs0_P0S_P1", "cpfsftbs0", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x24" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S)|(1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x24" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S)|(1<<SLOTS_P1), 0 } } } }
   },
 /* cpfsftbs1 $crop,$crqp,$crpp */
   {
     MEP_INSN_CPFSFTBS1_P0S_P1, "cpfsftbs1_P0S_P1", "cpfsftbs1", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x24" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S)|(1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x24" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S)|(1<<SLOTS_P1), 0 } } } }
   },
 /* cpmov $crop,$crqp */
   {
@@ -4246,7 +4246,7 @@ static const CGEN_IBASE mep_cgen_insn_table[MAX_INSNS] =
 /* cpccadd.b $crqp */
   {
     MEP_INSN_CPCCADD_B_P0S_P1, "cpccadd_b_P0S_P1", "cpccadd.b", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x24" } }, { { CPTYPE_V8QI, 0 } }, { { CRET_FIRSTCOPY, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S)|(1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x24" } }, { { CPTYPE_V8QI, 0 } }, { { CRET_FIRSTCOPY, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S)|(1<<SLOTS_P1), 0 } } } }
   },
 /* cpbcast.b $crop,$crqp */
   {
@@ -4346,32 +4346,32 @@ static const CGEN_IBASE mep_cgen_insn_table[MAX_INSNS] =
 /* cpmovfrcsar0 $crop */
   {
     MEP_INSN_CPMOVFRCSAR0_P0S_P1, "cpmovfrcsar0_P0S_P1", "cpmovfrcsar0", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x24" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S)|(1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x24" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S)|(1<<SLOTS_P1), 0 } } } }
   },
 /* cpmovfrcsar1 $crop */
   {
     MEP_INSN_CPMOVFRCSAR1_P0S_P1, "cpmovfrcsar1_P0S_P1", "cpmovfrcsar1", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x24" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S)|(1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x24" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S)|(1<<SLOTS_P1), 0 } } } }
   },
 /* cpmovfrcc $crop */
   {
     MEP_INSN_CPMOVFRCC_P0S_P1, "cpmovfrcc_P0S_P1", "cpmovfrcc", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x24" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S)|(1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x24" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S)|(1<<SLOTS_P1), 0 } } } }
   },
 /* cpmovtocsar0 $crqp */
   {
     MEP_INSN_CPMOVTOCSAR0_P0S_P1, "cpmovtocsar0_P0S_P1", "cpmovtocsar0", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x24" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S)|(1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x24" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S)|(1<<SLOTS_P1), 0 } } } }
   },
 /* cpmovtocsar1 $crqp */
   {
     MEP_INSN_CPMOVTOCSAR1_P0S_P1, "cpmovtocsar1_P0S_P1", "cpmovtocsar1", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x24" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S)|(1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x24" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S)|(1<<SLOTS_P1), 0 } } } }
   },
 /* cpmovtocc $crqp */
   {
     MEP_INSN_CPMOVTOCC_P0S_P1, "cpmovtocc_P0S_P1", "cpmovtocc", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x24" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S)|(1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x24" } }, { { CPTYPE_CP_DATA_BUS_INT, 0 } }, { { CRET_VOID, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S)|(1<<SLOTS_P1), 0 } } } }
   },
 /* cpcmpeqz.b $crqp,$crpp */
   {
@@ -4596,77 +4596,77 @@ static const CGEN_IBASE mep_cgen_insn_table[MAX_INSNS] =
 /* cpmova0.b $crop */
   {
     MEP_INSN_CPMOVA0_B_P0S, "cpmova0_b_P0S", "cpmova0.b", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V8QI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V8QI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
   },
 /* cpmovua0.h $crop */
   {
     MEP_INSN_CPMOVUA0_H_P0S, "cpmovua0_h_P0S", "cpmovua0.h", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
   },
 /* cpmovla0.h $crop */
   {
     MEP_INSN_CPMOVLA0_H_P0S, "cpmovla0_h_P0S", "cpmovla0.h", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
   },
 /* cpmovuua0.w $crop */
   {
     MEP_INSN_CPMOVUUA0_W_P0S, "cpmovuua0_w_P0S", "cpmovuua0.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
   },
 /* cpmovula0.w $crop */
   {
     MEP_INSN_CPMOVULA0_W_P0S, "cpmovula0_w_P0S", "cpmovula0.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
   },
 /* cpmovlua0.w $crop */
   {
     MEP_INSN_CPMOVLUA0_W_P0S, "cpmovlua0_w_P0S", "cpmovlua0.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
   },
 /* cpmovlla0.w $crop */
   {
     MEP_INSN_CPMOVLLA0_W_P0S, "cpmovlla0_w_P0S", "cpmovlla0.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
   },
 /* cppacka0u.b $crop */
   {
     MEP_INSN_CPPACKA0U_B_P0S, "cppacka0u_b_P0S", "cppacka0u.b", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V8UQI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V8UQI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
   },
 /* cppacka0.b $crop */
   {
     MEP_INSN_CPPACKA0_B_P0S, "cppacka0_b_P0S", "cppacka0.b", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V8QI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V8QI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
   },
 /* cppackua0.h $crop */
   {
     MEP_INSN_CPPACKUA0_H_P0S, "cppackua0_h_P0S", "cppackua0.h", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
   },
 /* cppackla0.h $crop */
   {
     MEP_INSN_CPPACKLA0_H_P0S, "cppackla0_h_P0S", "cppackla0.h", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
   },
 /* cppackua0.w $crop */
   {
     MEP_INSN_CPPACKUA0_W_P0S, "cppackua0_w_P0S", "cppackua0.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
   },
 /* cppackla0.w $crop */
   {
     MEP_INSN_CPPACKLA0_W_P0S, "cppackla0_w_P0S", "cppackla0.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
   },
 /* cpmovhua0.w $crop */
   {
     MEP_INSN_CPMOVHUA0_W_P0S, "cpmovhua0_w_P0S", "cpmovhua0.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
   },
 /* cpmovhla0.w $crop */
   {
     MEP_INSN_CPMOVHLA0_W_P0S, "cpmovhla0_w_P0S", "cpmovhla0.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x20" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0S), 0 } } } }
   },
 /* cpacsuma0 */
   {
@@ -4981,22 +4981,22 @@ static const CGEN_IBASE mep_cgen_insn_table[MAX_INSNS] =
 /* cpsadd3.h $crop,$crqp,$crpp */
   {
     MEP_INSN_CPSADD3_H_P0_P1, "cpsadd3_h_P0_P1", "cpsadd3.h", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0)|(1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0)|(1<<SLOTS_P1), 0 } } } }
   },
 /* cpsadd3.w $crop,$crqp,$crpp */
   {
     MEP_INSN_CPSADD3_W_P0_P1, "cpsadd3_w_P0_P1", "cpsadd3.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0)|(1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0)|(1<<SLOTS_P1), 0 } } } }
   },
 /* cpssub3.h $crop,$crqp,$crpp */
   {
     MEP_INSN_CPSSUB3_H_P0_P1, "cpssub3_h_P0_P1", "cpssub3.h", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0)|(1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0)|(1<<SLOTS_P1), 0 } } } }
   },
 /* cpssub3.w $crop,$crqp,$crpp */
   {
     MEP_INSN_CPSSUB3_W_P0_P1, "cpssub3_w_P0_P1", "cpssub3.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0)|(1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0)|(1<<SLOTS_P1), 0 } } } }
   },
 /* cpextuaddu3.b $crop,$crqp,$crpp */
   {
@@ -5286,12 +5286,12 @@ static const CGEN_IBASE mep_cgen_insn_table[MAX_INSNS] =
 /* cpsla3.h $crop,$crqp,$crpp */
   {
     MEP_INSN_CPSLA3_H_P0_P1, "cpsla3_h_P0_P1", "cpsla3.h", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0)|(1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0)|(1<<SLOTS_P1), 0 } } } }
   },
 /* cpsla3.w $crop,$crqp,$crpp */
   {
     MEP_INSN_CPSLA3_W_P0_P1, "cpsla3_w_P0_P1", "cpsla3.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0)|(1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0)|(1<<SLOTS_P1), 0 } } } }
   },
 /* cpsrli3.b $crop,$crqp,$imm3p5 */
   {
@@ -5356,12 +5356,12 @@ static const CGEN_IBASE mep_cgen_insn_table[MAX_INSNS] =
 /* cpslai3.h $crop,$crqp,$imm4p4 */
   {
     MEP_INSN_CPSLAI3_H_P0_P1, "cpslai3_h_P0_P1", "cpslai3.h", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0)|(1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0)|(1<<SLOTS_P1), 0 } } } }
   },
 /* cpslai3.w $crop,$crqp,$imm5p3 */
   {
     MEP_INSN_CPSLAI3_W_P0_P1, "cpslai3_w_P0_P1", "cpslai3.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0)|(1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P0)|(1<<SLOTS_P1), 0 } } } }
   },
 /* cpclipiu3.w $crop,$crqp,$imm5p3 */
   {
@@ -5556,77 +5556,77 @@ static const CGEN_IBASE mep_cgen_insn_table[MAX_INSNS] =
 /* cpmova1.b $crop */
   {
     MEP_INSN_CPMOVA1_B_P1, "cpmova1_b_P1", "cpmova1.b", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V8QI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V8QI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
   },
 /* cpmovua1.h $crop */
   {
     MEP_INSN_CPMOVUA1_H_P1, "cpmovua1_h_P1", "cpmovua1.h", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
   },
 /* cpmovla1.h $crop */
   {
     MEP_INSN_CPMOVLA1_H_P1, "cpmovla1_h_P1", "cpmovla1.h", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
   },
 /* cpmovuua1.w $crop */
   {
     MEP_INSN_CPMOVUUA1_W_P1, "cpmovuua1_w_P1", "cpmovuua1.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
   },
 /* cpmovula1.w $crop */
   {
     MEP_INSN_CPMOVULA1_W_P1, "cpmovula1_w_P1", "cpmovula1.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
   },
 /* cpmovlua1.w $crop */
   {
     MEP_INSN_CPMOVLUA1_W_P1, "cpmovlua1_w_P1", "cpmovlua1.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
   },
 /* cpmovlla1.w $crop */
   {
     MEP_INSN_CPMOVLLA1_W_P1, "cpmovlla1_w_P1", "cpmovlla1.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
   },
 /* cppacka1u.b $crop */
   {
     MEP_INSN_CPPACKA1U_B_P1, "cppacka1u_b_P1", "cppacka1u.b", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V8UQI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V8UQI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
   },
 /* cppacka1.b $crop */
   {
     MEP_INSN_CPPACKA1_B_P1, "cppacka1_b_P1", "cppacka1.b", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V8QI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V8QI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
   },
 /* cppackua1.h $crop */
   {
     MEP_INSN_CPPACKUA1_H_P1, "cppackua1_h_P1", "cppackua1.h", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
   },
 /* cppackla1.h $crop */
   {
     MEP_INSN_CPPACKLA1_H_P1, "cppackla1_h_P1", "cppackla1.h", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V4HI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
   },
 /* cppackua1.w $crop */
   {
     MEP_INSN_CPPACKUA1_W_P1, "cppackua1_w_P1", "cppackua1.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
   },
 /* cppackla1.w $crop */
   {
     MEP_INSN_CPPACKLA1_W_P1, "cppackla1_w_P1", "cppackla1.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
   },
 /* cpmovhua1.w $crop */
   {
     MEP_INSN_CPMOVHUA1_W_P1, "cpmovhua1_w_P1", "cpmovhua1.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
   },
 /* cpmovhla1.w $crop */
   {
     MEP_INSN_CPMOVHLA1_W_P1, "cpmovhla1_w_P1", "cpmovhla1.w", 32,
-    { 0|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
+    { 0|A(VOLATILE)|A(OPTIONAL_CP_INSN), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x4" } }, { { CPTYPE_V2SI, 0 } }, { { CRET_FIRST, 0 } }, { { 0, 0 } }, { { CONFIG_NONE, 0 } }, { { (1<<SLOTS_P1), 0 } } } }
   },
 /* cpacsuma1 */
   {

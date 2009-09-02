@@ -1,3 +1,9 @@
+2009-09-01  DJ Delorie  <dj@redhat.com>
+
+	* mep-asm.c: Regenerate.
+	* mep-desc.c: Regenerate.
+	* mep-opc.c: Regenerate.
+
 2009-09-01  Tristan Gingold  <gingold@adacore.com>
 
 	* makefile.vms: Ported to Itanium VMS.  Remove useless targets and
