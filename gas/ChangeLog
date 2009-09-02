@@ -1,3 +1,10 @@
+2009-09-02  Jie Zhang  <jie.zhang@analog.com>
+
+	From  Bernd Schmidt  <bernd.schmidt@analog.com>
+	* config/gas/bfin-parse.y (asm_1): Clean up and unify error handling
+	for load and store insns.
+	(neg_value): Delete function.
+
 2009-09-01  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.am (m68k-parse.o, bfin-lex.o, itbl-lex.o, itbl-parse.o):

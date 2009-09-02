@@ -222,12 +222,6 @@ extern int yylex (void);
 
 /* Auxiliary functions.  */
 
-static void
-neg_value (Expr_Node *expr)
-{
-  expr->value.i_value = -expr->value.i_value;
-}
-
 static int
 valid_dreg_pair (Register *reg1, Expr_Node *reg2)
 {
@@ -812,7 +806,7 @@ asm_1:
 	| LPAREN REG COMMA REG RPAREN ASSIGN BYTEOP16M LPAREN REG COLON expr COMMA
 	  REG COLON expr RPAREN aligndir 
 	{
-	  if (!IS_DREG ($2) || !IS_DREG($4))
+	  if (!IS_DREG ($2) || !IS_DREG ($4))
 	    return yyerror ("Dregs expected");
 	  else if (!valid_dreg_pair (&$9, $11))
 	    return yyerror ("Bad dreg pair");
@@ -1648,7 +1642,7 @@ asm_1:
 	}
 	| CCREG ASSIGN REG _ASSIGN_ASSIGN REG
 	{
-	  if ((IS_DREG ($3) && IS_DREG($5))
+	  if ((IS_DREG ($3) && IS_DREG ($5))
 	      || (IS_PREG ($3) && IS_PREG ($3)))
 	    {
 	      notethat ("CCflag: CC = dpregs == dpregs\n");
@@ -2943,76 +2937,105 @@ asm_1:
 
 	| B LBRACK REG post_op RBRACK ASSIGN REG
 	{
-	  if (IS_PREG ($3) && IS_DREG ($7))
-	    {
-	      notethat ("LDST: B [ pregs <post_op> ] = dregs\n");
-	      $$ = LDST (&$3, &$7, $4.x0, 2, 0, 1);
-	    }
-	  else
-	    return yyerror ("Register mismatch");
+	  if (!IS_DREG ($7))
+	    return yyerror ("Dreg expected for source operand");
+	  if (!IS_PREG ($3))
+	    return yyerror ("Preg expected in address");
+
+	  notethat ("LDST: B [ pregs <post_op> ] = dregs\n");
+	  $$ = LDST (&$3, &$7, $4.x0, 2, 0, 1);
 	}
 
 /* LDSTidxI:	B [ pregs + imm16 ] = dregs.  */
 	| B LBRACK REG plus_minus expr RBRACK ASSIGN REG
 	{
-	  if (IS_PREG ($3) && IS_RANGE(16, $5, $4.r0, 1) && IS_DREG ($8))
+	  Expr_Node *tmp = $5;
+
+	  if (!IS_DREG ($8))
+	    return yyerror ("Dreg expected for source operand");
+	  if (!IS_PREG ($3))
+	    return yyerror ("Preg expected in address");
+
+	  if (IS_RELOC ($5))
+	    return yyerror ("Plain symbol used as offset");
+
+	  if ($4.r0)
+	    tmp = unary (Expr_Op_Type_NEG, tmp);
+	    
+	  if (in_range_p (tmp, -32768, 32767, 0))
 	    {
 	      notethat ("LDST: B [ pregs + imm16 ] = dregs\n");
-	      if ($4.r0)
-		neg_value ($5);
 	      $$ = LDSTIDXI (&$3, &$8, 1, 2, 0, $5);
 	    }
 	  else
-	    return yyerror ("Register mismatch or const size wrong");
+	    return yyerror ("Displacement out of range");
 	}
 
 
 /* LDSTii:	W [ pregs + uimm4s2 ] = dregs.  */
 	| W LBRACK REG plus_minus expr RBRACK ASSIGN REG
 	{
-	  if (IS_PREG ($3) && IS_URANGE (4, $5, $4.r0, 2) && IS_DREG ($8))
+	  Expr_Node *tmp = $5;
+
+	  if (!IS_DREG ($8))
+	    return yyerror ("Dreg expected for source operand");
+	  if (!IS_PREG ($3))
+	    return yyerror ("Preg expected in address");
+	  
+	  if ($4.r0)
+	    tmp = unary (Expr_Op_Type_NEG, tmp);
+
+	  if (IS_RELOC ($5))
+	    return yyerror ("Plain symbol used as offset");
+
+	  if (in_range_p (tmp, 0, 30, 1))
 	    {
 	      notethat ("LDSTii: W [ pregs +- uimm5m2 ] = dregs\n");
-	      $$ = LDSTII (&$3, &$8, $5, 1, 1);
+	      $$ = LDSTII (&$3, &$8, tmp, 1, 1);
 	    }
-	  else if (IS_PREG ($3) && IS_RANGE(16, $5, $4.r0, 2) && IS_DREG ($8))
+	  else if (in_range_p (tmp, -65536, 65535, 1))
 	    {
 	      notethat ("LDSTidxI: W [ pregs + imm17m2 ] = dregs\n");
-	      if ($4.r0)
-		neg_value ($5);
-	      $$ = LDSTIDXI (&$3, &$8, 1, 1, 0, $5);
+	      $$ = LDSTIDXI (&$3, &$8, 1, 1, 0, tmp);
 	    }
 	  else
-	    return yyerror ("Bad register(s) or wrong constant size");
+	    return yyerror ("Displacement out of range");
 	}
 
 /* LDST:	W [ pregs <post_op> ] = dregs.  */
 	| W LBRACK REG post_op RBRACK ASSIGN REG
 	{
-	  if (IS_PREG ($3) && IS_DREG ($7))
-	    {
-	      notethat ("LDST: W [ pregs <post_op> ] = dregs\n");
-	      $$ = LDST (&$3, &$7, $4.x0, 1, 0, 1);
-	    }
-	  else
-	    return yyerror ("Bad register(s) for STORE");
+	  if (!IS_DREG ($7))
+	    return yyerror ("Dreg expected for source operand");
+	  if (!IS_PREG ($3))
+	    return yyerror ("Preg expected in address");
+
+	  notethat ("LDST: W [ pregs <post_op> ] = dregs\n");
+	  $$ = LDST (&$3, &$7, $4.x0, 1, 0, 1);
 	}
 
 	| W LBRACK REG post_op RBRACK ASSIGN HALF_REG
 	{
+	  if (!IS_DREG ($7))
+	    return yyerror ("Dreg expected for source operand");
+	  if ($4.x0 == 2)
+	    {
+	      if (!IS_IREG ($3) && !IS_PREG ($3))
+		return yyerror ("Ireg or Preg expected in address");
+	    }
+	  else if (!IS_IREG ($3))
+	    return yyerror ("Ireg expected in address");
+
 	  if (IS_IREG ($3))
 	    {
 	      notethat ("dspLDST: W [ iregs <post_op> ] = dregs_half\n");
 	      $$ = DSPLDST (&$3, 1 + IS_H ($7), &$7, $4.x0, 1);
 	    }
-	  else if ($4.x0 == 2 && IS_PREG ($3) && IS_DREG ($7))
-	    {
-	      notethat ("LDSTpmod: W [ pregs <post_op>] = dregs_half\n");
-	      $$ = LDSTPMOD (&$3, &$7, &$3, 1 + IS_H ($7), 1);
-	      
-	    }
 	  else
-	    return yyerror ("Bad register(s) for STORE");
+	    {
+	      notethat ("LDSTpmod: W [ pregs ] = dregs_half\n");
+	      $$ = LDSTPMOD (&$3, &$7, &$3, 1 + IS_H ($7), 1);
+	    }
 	}
 
 /* LDSTiiFP:	[ FP - const ] = dpregs.  */
@@ -3022,13 +3045,16 @@ asm_1:
 	  int ispreg = IS_PREG ($7);
 
 	  if (!IS_PREG ($2))
-	    return yyerror ("Preg expected for indirect");
+	    return yyerror ("Preg expected in address");
 
 	  if (!IS_DREG ($7) && !ispreg)
-	    return yyerror ("Bad source register for STORE");
+	    return yyerror ("Preg expected for source operand");
 
 	  if ($3.r0)
 	    tmp = unary (Expr_Op_Type_NEG, tmp);
+
+	  if (IS_RELOC ($4))
+	    return yyerror ("Plain symbol used as offset");
 
 	  if (in_range_p (tmp, 0, 63, 3))
 	    {
@@ -3044,105 +3070,128 @@ asm_1:
 	  else if (in_range_p (tmp, -131072, 131071, 3))
 	    {
 	      notethat ("LDSTidxI: [ pregs + imm18m4 ] = dpregs\n");
-	      $$ = LDSTIDXI (&$2, &$7, 1, 0, ispreg ? 1: 0, tmp);
+	      $$ = LDSTIDXI (&$2, &$7, 1, 0, ispreg ? 1 : 0, tmp);
 	    }
 	  else
-	    return yyerror ("Displacement out of range for store");
+	    return yyerror ("Displacement out of range");
 	}
 
 	| REG ASSIGN W LBRACK REG plus_minus expr RBRACK xpmod
 	{
-	  if (IS_DREG ($1) && IS_PREG ($5) && IS_URANGE (4, $7, $6.r0, 2))
+	  Expr_Node *tmp = $7;
+	  if (!IS_DREG ($1))
+	    return yyerror ("Dreg expected for destination operand");
+	  if (!IS_PREG ($5))
+	    return yyerror ("Preg expected in address");
+
+	  if ($6.r0)
+	    tmp = unary (Expr_Op_Type_NEG, tmp);
+
+	  if (IS_RELOC ($7))
+	    return yyerror ("Plain symbol used as offset");
+
+	  if (in_range_p (tmp, 0, 30, 1))
 	    {
-	      notethat ("LDSTii: dregs = W [ pregs + uimm4s2 ] (.)\n");
-	      $$ = LDSTII (&$5, &$1, $7, 0, 1 << $9.r0);
+	      notethat ("LDSTii: dregs = W [ pregs + uimm5m2 ] (.)\n");
+	      $$ = LDSTII (&$5, &$1, tmp, 0, 1 << $9.r0);
 	    }
-	  else if (IS_DREG ($1) && IS_PREG ($5) && IS_RANGE(16, $7, $6.r0, 2))
+	  else if (in_range_p (tmp, -65536, 65535, 1))
 	    {
 	      notethat ("LDSTidxI: dregs = W [ pregs + imm17m2 ] (.)\n");
-	      if ($6.r0)
-		neg_value ($7);
-	      $$ = LDSTIDXI (&$5, &$1, 0, 1, $9.r0, $7);
+	      $$ = LDSTIDXI (&$5, &$1, 0, 1, $9.r0, tmp);
 	    }
 	  else
-	    return yyerror ("Bad register or constant for LOAD");
+	    return yyerror ("Displacement out of range");
 	}	
 
 	| HALF_REG ASSIGN W LBRACK REG post_op RBRACK
 	{
+	  if (!IS_DREG ($1))
+	    return yyerror ("Dreg expected for source operand");
+	  if ($6.x0 == 2)
+	    {
+	      if (!IS_IREG ($5) && !IS_PREG ($5))
+		return yyerror ("Ireg or Preg expected in address");
+	    }
+	  else if (!IS_IREG ($5))
+	    return yyerror ("Ireg expected in address");
+
 	  if (IS_IREG ($5))
 	    {
-	      notethat ("dspLDST: dregs_half = W [ iregs ]\n");
+	      notethat ("dspLDST: dregs_half = W [ iregs <post_op> ]\n");
 	      $$ = DSPLDST(&$5, 1 + IS_H ($1), &$1, $6.x0, 0);
 	    }
-	  else if ($6.x0 == 2 && IS_DREG ($1) && IS_PREG ($5))
+	  else
 	    {
-	      notethat ("LDSTpmod: dregs_half = W [ pregs ]\n");
+	      notethat ("LDSTpmod: dregs_half = W [ pregs <post_op> ]\n");
 	      $$ = LDSTPMOD (&$5, &$1, &$5, 1 + IS_H ($1), 0);
 	    }
-	  else
-	    return yyerror ("Bad register or post_op for LOAD");
 	}
 
 
 	| REG ASSIGN W LBRACK REG post_op RBRACK xpmod
 	{
-	  if (IS_DREG ($1) && IS_PREG ($5))
-	    {
-	      notethat ("LDST: dregs = W [ pregs <post_op> ] (.)\n");
-	      $$ = LDST (&$5, &$1, $6.x0, 1, $8.r0, 0);
-	    }
-	  else
-	    return yyerror ("Bad register for LOAD");
+	  if (!IS_DREG ($1))
+	    return yyerror ("Dreg expected for destination operand");
+	  if (!IS_PREG ($5))
+	    return yyerror ("Preg expected in address");
+
+	  notethat ("LDST: dregs = W [ pregs <post_op> ] (.)\n");
+	  $$ = LDST (&$5, &$1, $6.x0, 1, $8.r0, 0);
 	}
 
 	| REG ASSIGN W LBRACK REG _PLUS_PLUS REG RBRACK xpmod
 	{
-	  if (IS_DREG ($1) && IS_PREG ($5) && IS_PREG ($7))
-	    {
-	      notethat ("LDSTpmod: dregs = W [ pregs ++ pregs ] (.)\n");
-	      $$ = LDSTPMOD (&$5, &$1, &$7, 3, $9.r0);
-	    }
-	  else
-	    return yyerror ("Bad register for LOAD");
+	  if (!IS_DREG ($1))
+	    return yyerror ("Dreg expected for destination operand");
+	  if (!IS_PREG ($5) || !IS_PREG ($7))
+	    return yyerror ("Preg expected in address");
+
+	  notethat ("LDSTpmod: dregs = W [ pregs ++ pregs ] (.)\n");
+	  $$ = LDSTPMOD (&$5, &$1, &$7, 3, $9.r0);
 	}
 
 	| HALF_REG ASSIGN W LBRACK REG _PLUS_PLUS REG RBRACK
 	{
-	  if (IS_DREG ($1) && IS_PREG ($5) && IS_PREG ($7))
-	    {
-	      notethat ("LDSTpmod: dregs_half = W [ pregs ++ pregs ]\n");
-	      $$ = LDSTPMOD (&$5, &$1, &$7, 1 + IS_H ($1), 0);
-	    }
-	  else
-	    return yyerror ("Bad register for LOAD");
+	  if (!IS_DREG ($1))
+	    return yyerror ("Dreg expected for destination operand");
+	  if (!IS_PREG ($5) || !IS_PREG ($7))
+	    return yyerror ("Preg expected in address");
+
+	  notethat ("LDSTpmod: dregs_half = W [ pregs ++ pregs ]\n");
+	  $$ = LDSTPMOD (&$5, &$1, &$7, 1 + IS_H ($1), 0);
 	}
 
 	| LBRACK REG post_op RBRACK ASSIGN REG
 	{
-	  if (IS_IREG ($2) && IS_DREG ($6))
+	  if (!IS_IREG ($2) && !IS_PREG ($2))
+	    return yyerror ("Ireg or Preg expected in address");
+	  else if (IS_IREG ($2) && !IS_DREG ($6))
+	    return yyerror ("Dreg expected for source operand");
+	  else if (IS_PREG ($2) && !IS_DREG ($6) && !IS_PREG ($6))
+	    return yyerror ("Dreg or Preg expected for source operand");
+
+	  if (IS_IREG ($2))
 	    {
 	      notethat ("dspLDST: [ iregs <post_op> ] = dregs\n");
 	      $$ = DSPLDST(&$2, 0, &$6, $3.x0, 1);
 	    }
-	  else if (IS_PREG ($2) && IS_DREG ($6))
+	  else if (IS_DREG ($6))
 	    {
 	      notethat ("LDST: [ pregs <post_op> ] = dregs\n");
 	      $$ = LDST (&$2, &$6, $3.x0, 0, 0, 1);
 	    }
-	  else if (IS_PREG ($2) && IS_PREG ($6))
+	  else
 	    {
 	      notethat ("LDST: [ pregs <post_op> ] = pregs\n");
 	      $$ = LDST (&$2, &$6, $3.x0, 0, 1, 1);
 	    }
-	  else
-	    return yyerror ("Bad register for STORE");
 	}
 
 	| LBRACK REG _PLUS_PLUS REG RBRACK ASSIGN REG
 	{
-	  if (! IS_DREG ($7))
-	    return yyerror ("Expected Dreg for last argument");
+	  if (!IS_DREG ($7))
+	    return yyerror ("Dreg expected for source operand");
 
 	  if (IS_IREG ($2) && IS_MREG ($4))
 	    {
@@ -3155,62 +3204,76 @@ asm_1:
 	      $$ = LDSTPMOD (&$2, &$7, &$4, 0, 1);
 	    }
 	  else
-	    return yyerror ("Bad register for STORE");
+	    return yyerror ("Preg ++ Preg or Ireg ++ Mreg expected in address");
 	}
 			
 	| W LBRACK REG _PLUS_PLUS REG RBRACK ASSIGN HALF_REG
 	{
 	  if (!IS_DREG ($8))
-	    return yyerror ("Expect Dreg as last argument");
+	    return yyerror ("Dreg expected for source operand");
+
 	  if (IS_PREG ($3) && IS_PREG ($5))
 	    {
 	      notethat ("LDSTpmod: W [ pregs ++ pregs ] = dregs_half\n");
 	      $$ = LDSTPMOD (&$3, &$8, &$5, 1 + IS_H ($8), 1);
 	    }
 	  else
-	    return yyerror ("Bad register for STORE");
+	    return yyerror ("Preg ++ Preg expected in address");
 	}
 
 	| REG ASSIGN B LBRACK REG plus_minus expr RBRACK xpmod
 	{
-	  if (IS_DREG ($1) && IS_PREG ($5) && IS_RANGE(16, $7, $6.r0, 1))
+	  Expr_Node *tmp = $7;
+	  if (!IS_DREG ($1))
+	    return yyerror ("Dreg expected for destination operand");
+	  if (!IS_PREG ($5))
+	    return yyerror ("Preg expected in address");
+
+	  if ($6.r0)
+	    tmp = unary (Expr_Op_Type_NEG, tmp);
+
+	  if (IS_RELOC ($7))
+	    return yyerror ("Plain symbol used as offset");
+
+	  if (in_range_p (tmp, -32768, 32767, 0))
 	    {
 	      notethat ("LDSTidxI: dregs = B [ pregs + imm16 ] (%c)\n",
 		       $9.r0 ? 'X' : 'Z');
-	      if ($6.r0)
-		neg_value ($7);
-	      $$ = LDSTIDXI (&$5, &$1, 0, 2, $9.r0, $7);
+	      $$ = LDSTIDXI (&$5, &$1, 0, 2, $9.r0, tmp);
 	    }
 	  else
-	    return yyerror ("Bad register or value for LOAD");
+	    return yyerror ("Displacement out of range");
 	}
 
 	| REG ASSIGN B LBRACK REG post_op RBRACK xpmod
 	{
-	  if (IS_DREG ($1) && IS_PREG ($5))
-	    {
-	      notethat ("LDST: dregs = B [ pregs <post_op> ] (%c)\n",
-		       $8.r0 ? 'X' : 'Z');
-	      $$ = LDST (&$5, &$1, $6.x0, 2, $8.r0, 0);
-	    }
-	  else
-	    return yyerror ("Bad register for LOAD");
+	  if (!IS_DREG ($1))
+	    return yyerror ("Dreg expected for destination operand");
+	  if (!IS_PREG ($5))
+	    return yyerror ("Preg expected in address");
+
+	  notethat ("LDST: dregs = B [ pregs <post_op> ] (%c)\n",
+		    $8.r0 ? 'X' : 'Z');
+	  $$ = LDST (&$5, &$1, $6.x0, 2, $8.r0, 0);
 	}
 			
 	| REG ASSIGN LBRACK REG _PLUS_PLUS REG RBRACK
 	{
-	  if (IS_DREG ($1) && IS_IREG ($4) && IS_MREG ($6))
+	  if (!IS_DREG ($1))
+	    return yyerror ("Dreg expected for destination operand");
+
+	  if (IS_IREG ($4) && IS_MREG ($6))
 	    {
 	      notethat ("dspLDST: dregs = [ iregs ++ mregs ]\n");
 	      $$ = DSPLDST(&$4, $6.regno & CODE_MASK, &$1, 3, 0);
 	    }
-	  else if (IS_DREG ($1) && IS_PREG ($4) && IS_PREG ($6))
+	  else if (IS_PREG ($4) && IS_PREG ($6))
 	    {
 	      notethat ("LDSTpmod: dregs = [ pregs ++ pregs ]\n");
 	      $$ = LDSTPMOD (&$4, &$1, &$6, 0, 0);
 	    }
 	  else
-	    return yyerror ("Bad register for LOAD");
+	    return yyerror ("Preg ++ Preg or Ireg ++ Mreg expected in address");
 	}
 
 	| REG ASSIGN LBRACK REG plus_minus got_or_expr RBRACK
@@ -3220,10 +3283,10 @@ asm_1:
 	  int isgot = IS_RELOC($6);
 
 	  if (!IS_PREG ($4))
-	    return yyerror ("Preg expected for indirect");
+	    return yyerror ("Preg expected in address");
 
 	  if (!IS_DREG ($1) && !ispreg)
-	    return yyerror ("Bad destination register for LOAD");
+	    return yyerror ("Dreg or Preg expected for destination operand");
 
 	  if (tmp->type == Expr_Node_Reloc
 	      && strcmp (tmp->value.s_value,
@@ -3233,10 +3296,11 @@ asm_1:
 	  if ($5.r0)
 	    tmp = unary (Expr_Op_Type_NEG, tmp);
 
-	  if(isgot){
+	  if (isgot)
+	    {
 	      notethat ("LDSTidxI: dpregs = [ pregs + sym@got ]\n");
-	      $$ = LDSTIDXI (&$4, &$1, 0, 0, ispreg ? 1: 0, tmp);
-	  }
+	      $$ = LDSTIDXI (&$4, &$1, 0, 0, ispreg ? 1 : 0, tmp);
+	    }
 	  else if (in_range_p (tmp, 0, 63, 3))
 	    {
 	      notethat ("LDSTii: dpregs = [ pregs + uimm7m4 ]\n");
@@ -3251,26 +3315,34 @@ asm_1:
 	  else if (in_range_p (tmp, -131072, 131071, 3))
 	    {
 	      notethat ("LDSTidxI: dpregs = [ pregs + imm18m4 ]\n");
-	      $$ = LDSTIDXI (&$4, &$1, 0, 0, ispreg ? 1: 0, tmp);
+	      $$ = LDSTIDXI (&$4, &$1, 0, 0, ispreg ? 1 : 0, tmp);
 	      
 	    }
 	  else
-	    return yyerror ("Displacement out of range for load");
+	    return yyerror ("Displacement out of range");
 	}
 
 	| REG ASSIGN LBRACK REG post_op RBRACK
 	{
-	  if (IS_DREG ($1) && IS_IREG ($4))
+	  if (!IS_IREG ($4) && !IS_PREG ($4))
+	    return yyerror ("Ireg or Preg expected in address");
+	  else if (IS_IREG ($4) && !IS_DREG ($1))
+	    return yyerror ("Dreg expected in destination operand");
+	  else if (IS_PREG ($4) && !IS_DREG ($1) && !IS_PREG ($1)
+		   && ($4.regno != REG_SP || !IS_ALLREG ($1) || $5.x0 != 0))
+	    return yyerror ("Dreg or Preg expected in destination operand");
+
+	  if (IS_IREG ($4))
 	    {
 	      notethat ("dspLDST: dregs = [ iregs <post_op> ]\n");
 	      $$ = DSPLDST (&$4, 0, &$1, $5.x0, 0);
 	    }
-	  else if (IS_DREG ($1) && IS_PREG ($4))
+	  else if (IS_DREG ($1))
 	    {
 	      notethat ("LDST: dregs = [ pregs <post_op> ]\n");
 	      $$ = LDST (&$4, &$1, $5.x0, 0, 0, 0);
 	    }
-	  else if (IS_PREG ($1) && IS_PREG ($4))
+	  else if (IS_PREG ($1))
 	    {
 	      if (REG_SAME ($1, $4) && $5.x0 != 2)
 		return yyerror ("Pregs can't be same");
@@ -3278,13 +3350,11 @@ asm_1:
 	      notethat ("LDST: pregs = [ pregs <post_op> ]\n");
 	      $$ = LDST (&$4, &$1, $5.x0, 0, 1, 0);
 	    }
-	  else if ($4.regno == REG_SP && IS_ALLREG ($1) && $5.x0 == 0)
+	  else
 	    {
 	      notethat ("PushPopReg: allregs = [ SP ++ ]\n");
 	      $$ = PUSHPOPREG (&$1, 0);
 	    }
-	  else
-	    return yyerror ("Bad register or value");
 	}
 
 

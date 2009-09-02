@@ -1,3 +1,9 @@
+2009-09-02  Jie Zhang  <jie.zhang@analog.com>
+
+	From  Bernd Schmidt  <bernd.schmidt@analog.com>
+	* gas/bfin/expected_errors.l, gas/bfin/expected_errors.s:
+	Check error messages for invalid load/store insns.
+
 2009-09-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/att-regs.s: Add ymm tests for 16bit and 64bit.
