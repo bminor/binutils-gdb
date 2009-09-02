@@ -1,6 +1,6 @@
 /* tc-maxq.h -- Header file for the assembler(MAXQ)
 
-   Copyright 2004, 2005, 2007  Free Software Foundation, Inc.
+   Copyright 2004, 2005, 2006, 2007  Free Software Foundation, Inc.
 
    Contributed by HCL Technologies Pvt. Ltd.
 

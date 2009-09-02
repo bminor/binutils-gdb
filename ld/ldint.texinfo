@@ -1,7 +1,7 @@
 \input texinfo
 @setfilename ldint.info
 @c Copyright 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-@c 2003, 2007
+@c 2003, 2005, 2006, 2007
 @c Free Software Foundation, Inc.
 
 @ifinfo

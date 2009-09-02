@@ -1,5 +1,5 @@
 /* BFD back-end for MAXQ COFF binaries.
-   Copyright 2004, 2007, 2008  Free Software Foundation, Inc.
+   Copyright 2004, 2005, 2006, 2007, 2008  Free Software Foundation, Inc.
 
    Contributed by Vineet Sharma (vineets@noida.hcltech.com) Inderpreet S.
    (inderpreetb@noida.hcltech.com)

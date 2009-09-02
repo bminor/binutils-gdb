@@ -1,5 +1,5 @@
 /* BFD back-end for NewsOS3 (Sony, 68k) binaries.
-   Copyright 1990, 1991, 1994, 1995, 2000, 2001, 2003, 2007
+   Copyright 1990, 1991, 1994, 1995, 2000, 2001, 2003, 2005, 2007
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.

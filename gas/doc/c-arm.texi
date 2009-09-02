@@ -1,5 +1,5 @@
-@c Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-@c 2008, 2009  Free Software Foundation, Inc.
+@c Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+@c 2006, 2007, 2008, 2009  Free Software Foundation, Inc.
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
 

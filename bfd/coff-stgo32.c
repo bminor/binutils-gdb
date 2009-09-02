@@ -1,5 +1,5 @@
 /* BFD back-end for Intel 386 COFF files (DJGPP variant with a stub).
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2006, 2007
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2005, 2006, 2007, 2009
    Free Software Foundation, Inc.
    Written by Robert Hoehne.
 

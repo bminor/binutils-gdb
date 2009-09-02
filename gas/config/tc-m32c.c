@@ -1,5 +1,5 @@
 /* tc-m32c.c -- Assembler for the Renesas M32C.
-   Copyright (C) 2005, 2006, 2007, 2008 Free Software Foundation.
+   Copyright (C) 2005, 2006, 2007, 2008, 2009 Free Software Foundation.
    Contributed by RedHat.
 
    This file is part of GAS, the GNU Assembler.

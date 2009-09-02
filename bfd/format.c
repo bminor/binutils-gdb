@@ -1,6 +1,6 @@
 /* Generic BFD support for file formats.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1999, 2000, 2001, 2002,
-   2003, 2005, 2007, 2008 Free Software Foundation, Inc.
+   2003, 2005, 2007, 2008, 2009 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.

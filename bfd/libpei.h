@@ -1,6 +1,6 @@
 /* Support for the generic parts of PE/PEI; common header information.
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005,
-   2006, 2007, 2008   Free Software Foundation, Inc.
+   2006, 2007, 2008, 2009  Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
    This file is part of BFD, the Binary File Descriptor library.

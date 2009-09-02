@@ -1,5 +1,5 @@
 /* BFD back-end for OSF/1 core files.
-   Copyright 1993, 1994, 1995, 1998, 1999, 2001, 2002, 2003, 2004, 2006,
+   Copyright 1993, 1994, 1995, 1998, 1999, 2001, 2002, 2003, 2004, 2005, 2006,
    2007 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.

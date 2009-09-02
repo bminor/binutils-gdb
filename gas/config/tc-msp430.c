@@ -1,6 +1,6 @@
 /* tc-msp430.c -- Assembler code for the Texas Instruments MSP430
 
-  Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007
+  Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2009
   Free Software Foundation, Inc.
   Contributed by Dmitry Diky <diwil@mail.ru>
 

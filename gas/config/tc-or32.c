@@ -1,5 +1,5 @@
 /* Assembly backend for the OpenRISC 1000.
-   Copyright (C) 2002, 2003, 2005, 2007
+   Copyright (C) 2002, 2003, 2005, 2007, 2009
    Free Software Foundation, Inc.
    Contributed by Damjan Lampret <lampret@opencores.org>.
    Modified bu Johan Rydberg, <johan.rydberg@netinsight.se>.

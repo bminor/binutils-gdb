@@ -1,5 +1,5 @@
 /* BFD back-end for BSD and Ultrix/VAX (1K page size) a.out-ish binaries.
-   Copyright 2002, 2003, 2007 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2005, 2007 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 

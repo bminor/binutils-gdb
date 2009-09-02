@@ -1,6 +1,6 @@
 /* tc-maxq.c -- assembler code for a MAXQ chip.
 
-   Copyright 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+   Copyright 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 
    Contributed by HCL Technologies Pvt. Ltd.
 

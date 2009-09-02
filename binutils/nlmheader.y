@@ -1,5 +1,5 @@
 %{/* nlmheader.y - parse NLM header specification keywords.
-     Copyright 1993, 1994, 1995, 1997, 1998, 2001, 2002, 2003, 2007
+     Copyright 1993, 1994, 1995, 1997, 1998, 2001, 2002, 2003, 2005, 2007
      Free Software Foundation, Inc.
 
      This file is part of GNU Binutils.

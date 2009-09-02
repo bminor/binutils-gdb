@@ -1,6 +1,6 @@
 /* BFD back-end for HP/UX core files.
-   Copyright 1993, 1994, 1996, 1998, 1999, 2001, 2002, 2003, 2004, 2006,
-   2007 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1996, 1998, 1999, 2001, 2002, 2003, 2004, 2005, 2006,
+   2007, 2008 Free Software Foundation, Inc.
    Written by Stu Grossman, Cygnus Support.
    Converted to back-end form by Ian Lance Taylor, Cygnus SUpport
 

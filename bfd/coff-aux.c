@@ -1,5 +1,5 @@
 /* BFD back-end for Apple M68K COFF A/UX 3.x files.
-   Copyright 1996, 1997, 2000, 2002, 2007, 2008
+   Copyright 1996, 1997, 2000, 2002, 2005, 2007, 2008
    Free Software Foundation, Inc.
    Written by Richard Henderson <rth@tamu.edu>.
 

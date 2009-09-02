@@ -1,5 +1,5 @@
 /* Opcode table for TI TMS320C80 (MVP).
-   Copyright 1996, 1997, 2000, 2007 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 2000, 2005, 2007 Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
 

@@ -1,5 +1,6 @@
 /* BFD back-end for arm PE IMAGE COFF files.
-   Copyright 1995, 1996, 1999, 2002, 2007, 2009 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1999, 2002, 2005, 2006, 2007, 2009
+   Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 

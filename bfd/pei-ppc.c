@@ -1,5 +1,6 @@
 /* BFD back-end for PowerPC PE IMAGE COFF files.
-   Copyright 1995, 1996, 1999, 2007, 2008, 2009  Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1999, 2005, 2007, 2008, 2009
+   Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 

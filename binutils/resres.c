@@ -1,5 +1,5 @@
 /* resres.c: read_res_file and write_res_file implementation for windres.
-   Copyright 1998, 1999, 2001, 2002, 2007, 2008
+   Copyright 1998, 1999, 2001, 2002, 2005, 2007, 2008
    Free Software Foundation, Inc.
    Written by Anders Norlander <anorland@hem2.passagen.se>.
    Rewritten by Kai Tietz, Onevision.

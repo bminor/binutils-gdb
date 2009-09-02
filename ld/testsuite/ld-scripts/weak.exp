@@ -1,6 +1,6 @@
 # Test weak symbols.
 # By Ian Lance Taylor, Cygnus Solutions.
-#   Copyright 1999, 2000, 2002, 2004, 2006, 2007
+#   Copyright 1999, 2000, 2002, 2004, 2005, 2006, 2007, 2009
 #   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.

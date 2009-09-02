@@ -1,6 +1,6 @@
 ; Renesas M32C CPU description.  -*- Scheme -*-
 ;
-; Copyright 2005, 2006, 2007 Free Software Foundation, Inc.
+; Copyright 2005, 2006, 2007, 2009 Free Software Foundation, Inc.
 ;
 ; Contributed by Red Hat Inc; developed under contract from Renesas.
 ;

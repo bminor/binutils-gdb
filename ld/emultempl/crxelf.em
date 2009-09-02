@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2004, 2007
+#   Copyright 2004, 2005, 2007
 #   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.

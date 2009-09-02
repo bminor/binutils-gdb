@@ -1,5 +1,5 @@
 /* mmix-dis.c -- Disassemble MMIX instructions.
-   Copyright 2000, 2001, 2002, 2007 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2005, 2007 Free Software Foundation, Inc.
    Written by Hans-Peter Nilsson (hp@bitrange.com)
 
    This file is part of the GNU opcodes library.

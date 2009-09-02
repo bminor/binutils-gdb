@@ -1,5 +1,5 @@
 /* Disassemble MSP430 instructions.
-   Copyright (C) 2002, 2004, 2005, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2002, 2004, 2005, 2007, 2009 Free Software Foundation, Inc.
    
    Contributed by Dmitry Diky <diwil@mail.ru>
         
