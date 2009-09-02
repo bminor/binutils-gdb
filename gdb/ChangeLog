@@ -1,3 +1,21 @@
+2009-09-02  Tom Tromey  <tromey@redhat.com>
+
+	* frame.h (frame_unwinder_is): Declare.
+	* frame.c (frame_unwinder_is): New function.
+	* dwarf2loc.c: Include dwarf2-frame.h.
+	(dwarf_expr_frame_cfa): New function.
+	(dwarf2_evaluate_loc_desc): Use it.
+	(needs_frame_frame_cfa): New function.
+	(dwarf2_loc_desc_needs_frame): Use it.
+	* dwarf2expr.h (struct dwarf_expr_context) <get_frame_cfa>: New
+	field.
+	* dwarf2expr.c (execute_stack_op) <DW_OP_call_frame_cfa>: New
+	case.
+	* dwarf2-frame.h (dwarf2_frame_cfa): Declare.
+	* dwarf2-frame.c (no_get_frame_cfa): New function.
+	(execute_stack_op): Use it.
+	(dwarf2_frame_cfa): New function.
+
 2009-09-02  Hui Zhu  <teawater@gmail.com>
 
 	* record.c (record_resume): Change "signal" to "siggnal".

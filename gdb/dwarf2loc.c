@@ -36,6 +36,7 @@
 #include "dwarf2.h"
 #include "dwarf2expr.h"
 #include "dwarf2loc.h"
+#include "dwarf2-frame.h"
 
 #include "gdb_string.h"
 #include "gdb_assert.h"
@@ -194,6 +195,16 @@ dwarf_expr_frame_base (void *baton, gdb_byte **start, size_t * length)
 	   SYMBOL_NATURAL_NAME (framefunc));
 }
 
+/* Helper function for dwarf2_evaluate_loc_desc.  Computes the CFA for
+   the frame in BATON.  */
+
+static CORE_ADDR
+dwarf_expr_frame_cfa (void *baton)
+{
+  struct dwarf_expr_baton *debaton = (struct dwarf_expr_baton *) baton;
+  return dwarf2_frame_cfa (debaton->frame);
+}
+
 /* Using the objfile specified in BATON, find the address for the
    current thread's thread-local storage with offset OFFSET.  */
 static CORE_ADDR
@@ -237,6 +248,7 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
   ctx->read_reg = dwarf_expr_read_reg;
   ctx->read_mem = dwarf_expr_read_mem;
   ctx->get_frame_base = dwarf_expr_frame_base;
+  ctx->get_frame_cfa = dwarf_expr_frame_cfa;
   ctx->get_tls_address = dwarf_expr_tls_address;
 
   dwarf_expr_eval (ctx, data, size);
@@ -331,6 +343,16 @@ needs_frame_frame_base (void *baton, gdb_byte **start, size_t * length)
   nf_baton->needs_frame = 1;
 }
 
+/* CFA accesses require a frame.  */
+
+static CORE_ADDR
+needs_frame_frame_cfa (void *baton)
+{
+  struct needs_frame_baton *nf_baton = baton;
+  nf_baton->needs_frame = 1;
+  return 1;
+}
+
 /* Thread-local accesses do require a frame.  */
 static CORE_ADDR
 needs_frame_tls_address (void *baton, CORE_ADDR offset)
@@ -363,6 +385,7 @@ dwarf2_loc_desc_needs_frame (gdb_byte *data, unsigned short size,
   ctx->read_reg = needs_frame_read_reg;
   ctx->read_mem = needs_frame_read_mem;
   ctx->get_frame_base = needs_frame_frame_base;
+  ctx->get_frame_cfa = needs_frame_frame_cfa;
   ctx->get_tls_address = needs_frame_tls_address;
 
   dwarf_expr_eval (ctx, data, size);

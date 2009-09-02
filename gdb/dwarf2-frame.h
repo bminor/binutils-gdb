@@ -118,4 +118,8 @@ extern const struct frame_base *
 
 void dwarf2_frame_build_info (struct objfile *objfile);
 
+/* Compute the DWARF CFA for a frame.  */
+
+CORE_ADDR dwarf2_frame_cfa (struct frame_info *this_frame);
+
 #endif /* dwarf2-frame.h */

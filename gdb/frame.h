@@ -696,4 +696,10 @@ extern struct frame_info *deprecated_safe_get_selected_frame (void);
 
 extern struct frame_info *create_new_frame (CORE_ADDR base, CORE_ADDR pc);
 
+/* Return true if the frame unwinder for frame FI is UNWINDER; false
+   otherwise.  */
+
+extern int frame_unwinder_is (struct frame_info *fi,
+			      const struct frame_unwind *unwinder);
+
 #endif /* !defined (FRAME_H)  */

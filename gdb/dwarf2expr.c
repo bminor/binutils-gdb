@@ -716,6 +716,10 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	  }
 	  break;
 
+	case DW_OP_call_frame_cfa:
+	  result = (ctx->get_frame_cfa) (ctx->baton);
+	  break;
+
 	case DW_OP_GNU_push_tls_address:
 	  /* Variable is at a constant offset in the thread-local
 	  storage block into the objfile for the current thread and

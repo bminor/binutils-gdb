@@ -1,3 +1,8 @@
+2009-09-02  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.dwarf2/callframecfa.exp: New file.
+	* gdb.dwarf2/callframecfa.S: New file.
+
 2009-09-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/solib-overlap.exp, gdb.base/solib-overlap-lib.c,

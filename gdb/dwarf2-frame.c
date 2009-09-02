@@ -309,6 +309,15 @@ no_get_frame_base (void *baton, gdb_byte **start, size_t *length)
 		  _("Support for DW_OP_fbreg is unimplemented"));
 }
 
+/* Helper function for execute_stack_op.  */
+
+static CORE_ADDR
+no_get_frame_cfa (void *baton)
+{
+  internal_error (__FILE__, __LINE__,
+		  _("Support for DW_OP_call_frame_cfa is unimplemented"));
+}
+
 static CORE_ADDR
 no_get_tls_address (void *baton, CORE_ADDR offset)
 {
@@ -363,6 +372,7 @@ execute_stack_op (gdb_byte *exp, ULONGEST len, int addr_size,
   ctx->read_reg = read_reg;
   ctx->read_mem = read_mem;
   ctx->get_frame_base = no_get_frame_base;
+  ctx->get_frame_cfa = no_get_frame_cfa;
   ctx->get_tls_address = no_get_tls_address;
 
   dwarf_expr_push (ctx, initial);
@@ -1249,6 +1259,23 @@ dwarf2_frame_base_sniffer (struct frame_info *this_frame)
     return &dwarf2_frame_base;
 
   return NULL;
+}
+
+/* Compute the CFA for THIS_FRAME, but only if THIS_FRAME came from
+   the DWARF unwinder.  This is used to implement
+   DW_OP_call_frame_cfa.  */
+
+CORE_ADDR
+dwarf2_frame_cfa (struct frame_info *this_frame)
+{
+  while (get_frame_type (this_frame) == INLINE_FRAME)
+    this_frame = get_prev_frame (this_frame);
+  /* This restriction could be lifted if other unwinders are known to
+     compute the frame base in a way compatible with the DWARF
+     unwinder.  */
+  if (! frame_unwinder_is (this_frame, &dwarf2_frame_unwind))
+    error (_("can't compute CFA for this frame"));
+  return get_frame_base (this_frame);
 }
 
 const struct objfile_data *dwarf2_frame_objfile_data;

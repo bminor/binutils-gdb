@@ -55,6 +55,9 @@ struct dwarf_expr_context
      expression evaluation is complete.  */
   void (*get_frame_base) (void *baton, gdb_byte **start, size_t *length);
 
+  /* Return the CFA for the frame.  */
+  CORE_ADDR (*get_frame_cfa) (void *baton);
+
   /* Return the thread-local storage address for
      DW_OP_GNU_push_tls_address.  */
   CORE_ADDR (*get_tls_address) (void *baton, CORE_ADDR offset);

@@ -1843,6 +1843,17 @@ get_frame_args_address (struct frame_info *fi)
   return fi->base->this_args (fi, &fi->base_cache);
 }
 
+/* Return true if the frame unwinder for frame FI is UNWINDER; false
+   otherwise.  */
+
+int
+frame_unwinder_is (struct frame_info *fi, const struct frame_unwind *unwinder)
+{
+  if (fi->unwind == NULL)
+    fi->unwind = frame_unwind_find_by_frame (fi, &fi->prologue_cache);
+  return fi->unwind == unwinder;
+}
+
 /* Level of the selected frame: 0 for innermost, 1 for its caller, ...
    or -1 for a NULL frame.  */
 
