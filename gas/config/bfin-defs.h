@@ -287,7 +287,7 @@ typedef enum
 typedef union
 {
   const char *s_value;		/* if relocation symbol, the text.  */
-  int i_value;			/* if constant, the value.  */
+  long long i_value;		/* if constant, the value.  */
   Expr_Op_Type op_value;	/* if operator, the value.  */
 } Expr_Node_Value;
 

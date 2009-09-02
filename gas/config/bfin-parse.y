@@ -4376,11 +4376,11 @@ mkexpr (int x, SYMBOL_T s)
 static int
 value_match (Expr_Node *expr, int sz, int sign, int mul, int issigned)
 {
-  long umax = (1L << sz) - 1;
-  long min = -1L << (sz - 1);
-  long max = (1L << (sz - 1)) - 1;
+  int umax = (1 << sz) - 1;
+  int min = -1 << (sz - 1);
+  int max = (1 << (sz - 1)) - 1;
 	
-  long v = EXPR_VALUE (expr);
+  int v = (EXPR_VALUE (expr)) & 0xffffffff;
 
   if ((v % mul) != 0)
     {

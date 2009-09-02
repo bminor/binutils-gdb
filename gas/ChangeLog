@@ -1,5 +1,13 @@
 2009-09-02  Jie Zhang  <jie.zhang@analog.com>
 
+	* config/bfin-parse.y (value_match): Use int instead of long.
+
+	From  Michael Frysinger  <michael.frysinger@analog.com>
+	* config/bfin-defs.h (Expr_Node_Value): Declare the i_value
+	member as long long.
+
+2009-09-02  Jie Zhang  <jie.zhang@analog.com>
+
 	From  Bernd Schmidt  <bernd.schmidt@analog.com>
 	* config/gas/bfin-parse.y (asm_1): Clean up and unify error handling
 	for load and store insns.
