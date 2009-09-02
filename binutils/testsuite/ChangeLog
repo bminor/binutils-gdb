@@ -1,3 +1,8 @@
+2009-09-02  Jie Zhang  <jie.zhang@analog.com>
+
+	* binutils-all/bfin/unknown-mode.s: New test.
+	* binutils-all/bfin/objdump.exp: New test.
+
 2009-08-17  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/strip-10.d: Accept "<OS specific>: 10" for the type
