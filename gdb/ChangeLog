@@ -1,3 +1,9 @@
+2009-09-03  Pierre Muller <muller@ics.u-strasbg.fr>
+	    Richard Earnshaw <rearnsha@arm.com>
+
+	* arm-tdep.c (displaced_write_reg): Replace call to abort by call
+	to internal_error.
+
 2009-09-02  Tom Tromey  <tromey@redhat.com>
 
 	* frame.h (frame_unwinder_is): Declare.

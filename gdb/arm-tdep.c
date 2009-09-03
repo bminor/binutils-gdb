@@ -2769,7 +2769,8 @@ displaced_write_reg (struct regcache *regs, struct displaced_step_closure *dsc,
 	  break;
 
 	default:
-	  abort ();
+	  internal_error (__FILE__, __LINE__,
+			  _("Invalid argument to displaced_write_reg"));
 	}
 
       dsc->wrote_to_pc = 1;
