@@ -106,7 +106,7 @@ typedef int * va_list;
 #undef NDEBUG
 #endif
 #if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 6)
-#define __PRETTY_FUNCTION__  ((char*)0)
+#define __PRETTY_FUNCTION__  ((char *) NULL)
 #endif
 #define gas_assert(P) \
   ((void) ((P) ? 0 : (as_assert (__FILE__, __LINE__, __PRETTY_FUNCTION__), 0)))
