@@ -1,3 +1,9 @@
+2009-09-03  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* elf64-mips.c (mips_elf64_howto_table_rela): Add support for
+	R_MIPS_TLS_DTPMOD64 and R_MIPS_TLS_TPREL64, replacing the
+	respective stubs.
+
 2009-09-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf64_x86_64_finish_dynamic_symbol): Declare

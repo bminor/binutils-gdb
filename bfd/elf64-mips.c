@@ -1328,7 +1328,20 @@ static reloc_howto_type mips_elf64_howto_table_rela[] =
   /* TLS relocations.  */
   EMPTY_HOWTO (R_MIPS_TLS_DTPMOD32),
   EMPTY_HOWTO (R_MIPS_TLS_DTPREL32),
-  EMPTY_HOWTO (R_MIPS_TLS_DTPMOD64),
+
+  HOWTO (R_MIPS_TLS_DTPMOD64,	/* type */
+	 0,			/* rightshift */
+	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 _bfd_mips_elf_generic_reloc, /* special_function */
+	 "R_MIPS_TLS_DTPMOD64", /* name */
+	 TRUE,			/* partial_inplace */
+	 MINUS_ONE,		/* src_mask */
+	 MINUS_ONE,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   HOWTO (R_MIPS_TLS_DTPREL64,	/* type */
 	 0,			/* rightshift */
@@ -1419,8 +1432,22 @@ static reloc_howto_type mips_elf64_howto_table_rela[] =
 	 0x0000ffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
+  /* TLS IE dynamic relocations.  */
   EMPTY_HOWTO (R_MIPS_TLS_TPREL32),
-  EMPTY_HOWTO (R_MIPS_TLS_TPREL64),
+
+  HOWTO (R_MIPS_TLS_TPREL64,	/* type */
+	 0,			/* rightshift */
+	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 _bfd_mips_elf_generic_reloc, /* special_function */
+	 "R_MIPS_TLS_TPREL64",	/* name */
+	 TRUE,			/* partial_inplace */
+	 MINUS_ONE,		/* src_mask */
+	 MINUS_ONE,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   /* TLS thread pointer offset.  */
   HOWTO (R_MIPS_TLS_TPREL_HI16,	/* type */
