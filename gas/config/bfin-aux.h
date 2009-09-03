@@ -126,6 +126,9 @@ bfin_gen_loopsetup (Expr_Node *soffset, REG_T c, int rop,
 INSTR_T
 bfin_gen_loop (Expr_Node *expr, REG_T reg, int rop, REG_T preg);
 
+void
+bfin_loop_beginend (Expr_Node *expr, int begin);
+
 INSTR_T
 bfin_gen_pushpopmultiple (int dr, int pr, int d, int p, int w);
 

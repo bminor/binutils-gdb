@@ -39,10 +39,8 @@
 
 #define WORKING_DOT_WORD
 
-extern void bfin_start_line_hook (void);
 extern bfd_boolean bfin_start_label (char *, char *);
 
-#define md_start_line_hook()    bfin_start_line_hook()
 #define md_number_to_chars	number_to_chars_littleendian
 #define md_convert_frag(b,s,f)	as_fatal ("bfin convert_frag\n");
 

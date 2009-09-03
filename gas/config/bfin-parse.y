@@ -3525,6 +3525,27 @@ asm_1:
 	  else
 	    return yyerror ("Bad register or values for LOOP");
 	}
+
+/* LOOP_BEGIN.  */
+	| LOOP_BEGIN expr
+	{
+	  if (!IS_RELOC ($2))
+	    return yyerror ("Invalid expression in LOOP_BEGIN statement");
+
+	  bfin_loop_beginend ($2, 1);
+	  $$ = 0;
+	}
+
+/* LOOP_END.  */
+	| LOOP_END expr
+	{
+	  if (!IS_RELOC ($2))
+	    return yyerror ("Invalid expression in LOOP_END statement");
+
+	  bfin_loop_beginend ($2, 0);
+	  $$ = 0;
+	}
+
 /* pseudoDEBUG.  */
 
 	| DBG

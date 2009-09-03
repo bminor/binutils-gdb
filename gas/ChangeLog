@@ -1,3 +1,12 @@
+2009-09-03  Jie Zhang  <jie.zhang@analog.com>
+
+	* config/bfin-parse.y (asm_1): Add LOOP_BEGIN and LOOP_END.
+	* config/tc-bfin.c (bfin_start_line_hook): Remove.
+	(bfin_loop_beginend): New.
+	* config/tc-bfin.h (bfin_start_line_hook): Don't declare.
+	(md_start_line_hook): Don't define.
+	* config/bfin-aux.h (bfin_loop_beginend): Declare.
+
 2009-09-03  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-ia64.c (ia64_vms_note): Use lbasename instead of basename.

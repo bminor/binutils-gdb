@@ -1016,123 +1016,6 @@ bfin_fix_adjustable (fixS *fixP)
     }     
 }
 
-
-/* Handle the LOOP_BEGIN and LOOP_END statements.
-   Parse the Loop_Begin/Loop_End and create a label.  */
-void
-bfin_start_line_hook ()
-{
-  bfd_boolean maybe_begin = FALSE;
-  bfd_boolean maybe_end = FALSE;
-
-  char *c1, *label_name;
-  symbolS *line_label;
-  char *c = input_line_pointer;
-  int cr_num = 0;
-
-  while (ISSPACE (*c))
-    {
-      if (*c == '\n')
-	cr_num++;
-      c++;
-    }
-
-  /* Look for Loop_Begin or Loop_End statements.  */
-
-  if (*c != 'L' && *c != 'l')
-    return;
-
-  c++;
-  if (*c != 'O' && *c != 'o')
-    return;
-
-  c++;
-  if (*c != 'O' && *c != 'o')
-    return;
- 
-  c++;
-  if (*c != 'P' && *c != 'p')
-    return;
-
-  c++;
-  if (*c != '_')
-    return;
-
-  c++;
-  if (*c == 'E' || *c == 'e')
-    maybe_end = TRUE;
-  else if (*c == 'B' || *c == 'b')
-    maybe_begin = TRUE;
-  else
-    return;
-
-  if (maybe_end)
-    {
-      c++;
-      if (*c != 'N' && *c != 'n')
-	return;
-
-      c++;
-      if (*c != 'D' && *c != 'd')
-        return;
-    }
-
-  if (maybe_begin)
-    {
-      c++;
-      if (*c != 'E' && *c != 'e')
-	return;
-
-      c++;
-      if (*c != 'G' && *c != 'g')
-        return;
-
-      c++;
-      if (*c != 'I' && *c != 'i')
-	return;
-
-      c++;
-      if (*c != 'N' && *c != 'n')
-        return;
-    }
-
-  c++;
-  while (ISSPACE (*c)) c++;
-  c1 = c;
-  while (ISALPHA (*c) || ISDIGIT (*c) || *c == '_') c++;
-
-  if (input_line_pointer[-1] == '\n')
-    bump_line_counters ();
-
-  while (cr_num--)
-    bump_line_counters ();
-
-  input_line_pointer = c;
-  if (maybe_end)
-    {
-      label_name = (char *) xmalloc ((c - c1) + strlen ("__END") + 5);
-      label_name[0] = 0;
-      strcat (label_name, "L$L$");
-      strncat (label_name, c1, c-c1);
-      strcat (label_name, "__END");
-    }
-  else /* maybe_begin.  */
-    {
-      label_name = (char *) xmalloc ((c - c1) + strlen ("__BEGIN") + 5);
-      label_name[0] = 0;
-      strcat (label_name, "L$L$");
-      strncat (label_name, c1, c-c1);
-      strcat (label_name, "__BEGIN");
-    }
-
-  line_label = colon (label_name);
-
-  /* Loop_End follows the last instruction in the loop.
-     Adjust label address.  */
-  if (maybe_end)
-    ((struct local_symbol *) line_label)->lsy_value -= last_insn_size;
-}
-
 /* Special extra functions that help bfin-parse.y perform its job.  */
 
 struct obstack mempool;
@@ -2143,6 +2026,31 @@ bfin_gen_loop (Expr_Node *expr, REG_T reg, int rop, REG_T preg)
   symbol_remove (symbol_find (loopsym), &symbol_rootP, &symbol_lastP);
 
   return bfin_gen_loopsetup(lbegin, reg, rop, lend, preg);
+}
+
+void
+bfin_loop_beginend (Expr_Node *expr, int begin)
+{
+  const char *loopsym;
+  char *label_name;
+  symbolS *line_label;
+  const char *suffix = begin ? "__BEGIN" : "__END";
+
+  loopsym = expr->value.s_value;
+  label_name = (char *) xmalloc (strlen (loopsym) + strlen (suffix) + 5);
+
+  label_name[0] = 0;
+
+  strcat (label_name, "L$L$");
+  strcat (label_name, loopsym);
+  strcat (label_name, suffix);
+
+  line_label = colon (label_name);
+
+  /* LOOP_END follows the last instruction in the loop.
+     Adjust label address.  */
+  if (!begin)
+    ((struct local_symbol *) line_label)->lsy_value -= last_insn_size;
 }
 
 bfd_boolean
