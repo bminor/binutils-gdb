@@ -11667,7 +11667,7 @@ ia64_vms_note (void)
   subsegT subseg = now_subseg;
   Elf_Internal_Note i_note;
   asection *secp = NULL;
-  char *basec, *bname;
+  char *bname;
   char buf [256];
   symbolS *sym;
 
@@ -11679,8 +11679,7 @@ ia64_vms_note (void)
 			 SEC_HAS_CONTENTS | SEC_READONLY);
 
   /* Module header note.  */
-  basec = xstrdup (out_file_name);
-  bname = basename (basec);
+  bname = xstrdup (lbasename (out_file_name));
   if ((p = strrchr (bname, '.')))
     *p = '\0';
 
@@ -11709,6 +11708,7 @@ ia64_vms_note (void)
 
   p = frag_more (strlen (bname) + 1);
   strcpy (p, bname);
+  free (bname);
 
   p = frag_more (5);
   strcpy (p, "V1.0");

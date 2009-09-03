@@ -1,5 +1,10 @@
 2009-09-03  Tristan Gingold  <gingold@adacore.com>
 
+	* config/tc-ia64.c (ia64_vms_note): Use lbasename instead of basename.
+	Call xstrdup on the result and free the buffer after use.
+
+2009-09-03  Tristan Gingold  <gingold@adacore.com>
+
 	* as.h (__PRETTY_FUNCTION__): Use the same definition as bfd/libbfd.h.
 
 2009-09-02  Jie Zhang  <jie.zhang@analog.com>
