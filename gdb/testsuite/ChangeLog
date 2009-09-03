@@ -1,3 +1,7 @@
+2009-09-03  Doug Evans  <dje@google.com>
+
+	* gdb.base/store.exp (check_set): Fix typo in expected value message.
+
 2009-09-02  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.dwarf2/callframecfa.exp: Use gdb_continue_to_breakpoint.

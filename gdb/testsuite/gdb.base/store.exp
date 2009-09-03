@@ -67,7 +67,7 @@ proc check_set { t l r new add } {
     gdb_test "set variable l = 4" "" \
 	"${prefix}; setting l to 4"
     gdb_test "print l" " = ${new}" \
-	"${prefix}; print new l, expecting ${l}"
+	"${prefix}; print new l, expecting ${new}"
     gdb_test "next" "return l \\+ r;" \
 	"${prefix}; next over add call"
     gdb_test "print l" " = ${add}" \
