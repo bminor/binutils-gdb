@@ -1,5 +1,13 @@
 2009-09-03  Jie Zhang  <jie.zhang@analog.com>
 
+	* bfin-dis.c (_print_insn_bfin): Don't declare.
+	(print_insn_bfin): Don't declare.
+	(dregs_pair): Remove.
+	(ignore_bits): Remove.
+	(ccstat): Remove.
+
+2009-09-03  Jie Zhang  <jie.zhang@analog.com>
+
 	* bfin-dis.c (IS_DREG): Define.
 	(IS_PREG): Define.
 	(IS_AREG): Define.

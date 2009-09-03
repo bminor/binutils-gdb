@@ -123,9 +123,6 @@ static struct
   { "huimm32e",  32, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 };
 
-int _print_insn_bfin (bfd_vma pc, disassemble_info * outf);
-int print_insn_bfin (bfd_vma pc, disassemble_info * outf);
-
 static char comment = 0;
 static char parallel = 0;
 
@@ -317,7 +314,6 @@ static enum machine_registers decode_dregs_byte[] =
 };
 
 #define dregs_byte(x) REGNAME (decode_dregs_byte[(x) & 7])
-#define dregs_pair(x) REGNAME (decode_dregs_pair[(x) & 7])
 
 /* P(0..5) SP FP.  */
 static enum machine_registers decode_pregs[] =
@@ -408,9 +404,7 @@ static enum machine_registers decode_statbits[] =
   REG_V, REG_VS, REG_LASTREG, REG_LASTREG, REG_LASTREG, REG_LASTREG, REG_LASTREG, REG_LASTREG,
 };
 
-#define statbits(x)	REGNAME (decode_statbits[(x) & 31])
-#define ignore_bits(x)	REGNAME (decode_ignore_bits[(x) & 7])
-#define ccstat(x)	REGNAME (decode_ccstat[(x) & 0])
+#define statbits(x) REGNAME (decode_statbits[(x) & 31])
 
 /* LC0 LC1.  */
 static enum machine_registers decode_counters[] =
@@ -4624,7 +4618,7 @@ decode_pseudodbg_assert_0 (TIword iw0, TIword iw1, disassemble_info *outf)
   return 4;
 }
 
-int
+static int
 _print_insn_bfin (bfd_vma pc, disassemble_info *outf)
 {
   bfd_byte buf[4];

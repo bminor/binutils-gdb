@@ -1,5 +1,12 @@
 2009-09-03  Jie Zhang  <jie.zhang@analog.com>
 
+	* config/bfin-parse.y: Remove trailing whitespace.
+	(ccstat): Indent.
+	* config/tc-bfin.c (struct bfin_reg_entry): Remove.
+	(bfin_reg_info[]): Remove.
+
+2009-09-03  Jie Zhang  <jie.zhang@analog.com>
+
 	* config/bfin-defs.h (F_REG_ALL): Remove macro.
 	(F_REG_HIGH): Redefine.
 	(F_REG_NONE): New macro.

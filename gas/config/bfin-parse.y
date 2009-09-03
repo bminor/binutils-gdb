@@ -546,7 +546,7 @@ dsp32shiftimm in slot1 and P-reg Store in slot2 Not Supported");
 %type <reg> a_minusassign
 %type <macfunc> multiply_halfregs
 %type <macfunc> assign_macfunc 
-%type <macfunc> a_macfunc 
+%type <macfunc> a_macfunc
 %type <expr> expr_1
 %type <instr> asm_1
 %type <r0> vmod
@@ -4248,27 +4248,27 @@ cc_op:
 ccstat:
 	CCREG cc_op STATUS_REG
 	{
-	$$.r0 = $3.regno;
-	$$.x0 = $2.r0;
-	$$.s0 = 0;
+	  $$.r0 = $3.regno;
+	  $$.x0 = $2.r0;
+	  $$.s0 = 0;
 	}
 	| CCREG cc_op V
 	{
-	$$.r0 = 0x18;
-	$$.x0 = $2.r0;
-	$$.s0 = 0;
+	  $$.r0 = 0x18;
+	  $$.x0 = $2.r0;
+	  $$.s0 = 0;
 	}
 	| STATUS_REG cc_op CCREG
 	{
-	$$.r0 = $1.regno;
-	$$.x0 = $2.r0;
-	$$.s0 = 1;
+	  $$.r0 = $1.regno;
+	  $$.x0 = $2.r0;
+	  $$.s0 = 1;
 	}
 	| V cc_op CCREG
 	{
-	$$.r0 = 0x18;
-	$$.x0 = $2.r0;
-	$$.s0 = 1;
+	  $$.r0 = 0x18;
+	  $$.x0 = $2.r0;
+	  $$.s0 = 1;
 	}
 	;
 
