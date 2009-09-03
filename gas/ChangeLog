@@ -1,5 +1,9 @@
 2009-09-03  Jie Zhang  <jie.zhang@analog.com>
 
+	* config/bfin-lex.l: Remove V as STATUS_REG.
+
+2009-09-03  Jie Zhang  <jie.zhang@analog.com>
+
 	* config/bfin-parse.y: Remove trailing whitespace.
 	(ccstat): Indent.
 	* config/tc-bfin.c (struct bfin_reg_entry): Remove.
