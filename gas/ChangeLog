@@ -1,5 +1,10 @@
 2009-09-03  Jie Zhang  <jie.zhang@analog.com>
 
+	* config/tc-bfin.c (md_parse_option): Call as_fatal for bad
+	-mcpu= option.
+
+2009-09-03  Jie Zhang  <jie.zhang@analog.com>
+
 	* config/bfin-lex.l: Remove V as STATUS_REG.
 
 2009-09-03  Jie Zhang  <jie.zhang@analog.com>

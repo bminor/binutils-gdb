@@ -351,10 +351,7 @@ md_parse_option (int c ATTRIBUTE_UNUSED, char *arg ATTRIBUTE_UNUSED)
 	  }
 
 	if (p == NULL)
-	  {
-	    error ("-mcpu=%s is not valid", arg);
-	    return 0;
-	  }
+	  as_fatal ("-mcpu=%s is not valid", arg);
 
 	bfin_cpu_type = bfin_cpus[i].type;
 
@@ -388,8 +385,7 @@ md_parse_option (int c ATTRIBUTE_UNUSED, char *arg ATTRIBUTE_UNUSED)
 		|| si_major > 0xff || si_minor > 0xff)
 	      {
 	      invalid_silicon_revision:
-		error ("-mcpu=%s has invalid silicon revision", arg);
-		return 0;
+		as_fatal ("-mcpu=%s has invalid silicon revision", arg);
 	      }
 
 	    bfin_si_revision = (si_major << 8) | si_minor;
