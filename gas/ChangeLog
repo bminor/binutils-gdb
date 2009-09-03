@@ -1,5 +1,13 @@
 2009-09-03  Jie Zhang  <jie.zhang@analog.com>
 
+	* config/bfin-defs.h (IS_GENREG): Define.
+	(IS_DAGREG): Define.
+	(IS_SYSREG): Define.
+	* config/bfin-parse.y (asm_1): Check illegal register move
+	instructions.
+
+2009-09-03  Jie Zhang  <jie.zhang@analog.com>
+
 	* config/bfin-parse.y (asm_1): Fix a typo.
 
 2009-09-03  Jie Zhang  <jie.zhang@analog.com>

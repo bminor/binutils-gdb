@@ -1,3 +1,13 @@
+2009-09-03  Jie Zhang  <jie.zhang@analog.com>
+
+	* bfin-dis.c (IS_DREG): Define.
+	(IS_PREG): Define.
+	(IS_AREG): Define.
+	(IS_GENREG): Define.
+	(IS_DAGREG): Define.
+	(IS_SYSREG): Define.
+	(decode_REGMV_0): Check illegal register move instructions.
+
 2009-09-03  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* Makefile.am (BUILD_LIBINTL): New variable.

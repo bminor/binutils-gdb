@@ -1,5 +1,11 @@
 2009-09-03  Jie Zhang  <jie.zhang@analog.com>
 
+	* gas/bfin/expected_move_errors.s,
+	gas/bfin/expected_move_errors.l: Add "LC1 = I0;".
+	* gas/bfin/move.s, gas/bfin/move.d: Remove "CYCLES = A0.W".
+
+2009-09-03  Jie Zhang  <jie.zhang@analog.com>
+
 	* gas/bfin/expected_comparison_errors.l: Expect error on Line 13.
 
 2009-09-03  Jie Zhang  <jie.zhang@analog.com>

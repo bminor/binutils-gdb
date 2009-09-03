@@ -201,6 +201,25 @@ enum reg_class
 #define IS_CREG(r)       ((r).regno == REG_LC0 || (r).regno == REG_LC1)
 #define IS_ALLREG(r)     ((r).regno < T_NOGROUP)
 
+#define IS_GENREG(r) \
+  (IS_DREG (r) || IS_PREG (r)				\
+   || (r).regno == REG_A0x || (r).regno == REG_A0w	\
+   || (r).regno == REG_A1x || (r).regno == REG_A1w)
+
+#define IS_DAGREG(r) \
+  (IS_IREG (r) || IS_MREG (r) || IS_BREG (r) || IS_LREG (r))
+
+#define IS_SYSREG(r) \
+  ((r).regno == REG_ASTAT || (r).regno == REG_SEQSTAT		\
+   || (r).regno == REG_SYSCFG || (r).regno == REG_RETI		\
+   || (r).regno == REG_RETX || (r).regno == REG_RETN		\
+   || (r).regno == REG_RETE || (r).regno == REG_RETS		\
+   || (r).regno == REG_LC0 || (r).regno == REG_LC1		\
+   || (r).regno == REG_LT0 || (r).regno == REG_LT1		\
+   || (r).regno == REG_LB0 || (r).regno == REG_LB1		\
+   || (r).regno == REG_CYCLES || (r).regno == REG_CYCLES2	\
+   || (r).regno == REG_EMUDAT)
+
 /* Expression value macros.  */
 
 typedef enum

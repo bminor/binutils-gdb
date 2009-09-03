@@ -432,8 +432,17 @@ static enum machine_registers decode_allregs[] =
   REG_A0x, REG_A0w, REG_A1x, REG_A1w, REG_GP, REG_LASTREG, REG_ASTAT, REG_RETS,
   REG_LASTREG, REG_LASTREG, REG_LASTREG, REG_LASTREG, REG_LASTREG, REG_LASTREG, REG_LASTREG, REG_LASTREG,
   REG_LC0, REG_LT0, REG_LB0, REG_LC1, REG_LT1, REG_LB1, REG_CYCLES, REG_CYCLES2,
-  REG_USP, REG_SEQSTAT, REG_SYSCFG, REG_RETI, REG_RETX, REG_RETN, REG_RETE, REG_EMUDAT, REG_LASTREG,
+  REG_USP, REG_SEQSTAT, REG_SYSCFG, REG_RETI, REG_RETX, REG_RETN, REG_RETE, REG_EMUDAT,
+  REG_LASTREG,
 };
+
+#define IS_DREG(g,r)	((g) == 0)
+#define IS_PREG(g,r)	((g) == 1)
+#define IS_AREG(g,r)	((g) == 4 && (r) >= 0 && (r) < 4)
+#define IS_GENREG(g,r)	((g) == 0 || (g) == 1 || IS_AREG (g, r))
+#define IS_DAGREG(g,r)	((g) == 2 || (g) == 3)
+#define IS_SYSREG(g,r) \
+  (((g) == 4 && ((r) == 6 || (r) == 7)) || (g) == 6 || (g) == 7)
 
 #define allregs(x,i)	REGNAME (decode_allregs[((i) << 3) | x])
 #define uimm16s4(x)	fmtconst (c_uimm16s4, x, 0, outf)
@@ -1323,6 +1332,19 @@ decode_REGMV_0 (TIword iw0, disassemble_info *outf)
   int gd  = ((iw0 >> RegMv_gd_bits) & RegMv_gd_mask);
   int src = ((iw0 >> RegMv_src_bits) & RegMv_src_mask);
   int dst = ((iw0 >> RegMv_dst_bits) & RegMv_dst_mask);
+
+  if (!((IS_GENREG (gd, dst) && IS_GENREG (gs, src))
+	|| (IS_GENREG (gd, dst) && IS_DAGREG (gs, src))
+	|| (IS_DAGREG (gd, dst) && IS_GENREG (gs, src))
+	|| (IS_DAGREG (gd, dst) && IS_DAGREG (gs, src))
+	|| (IS_GENREG (gd, dst) && gs == 7 && src == 0)
+	|| (gd == 7 && dst == 0 && IS_GENREG (gs, src))
+	|| (IS_DREG (gd, dst) && IS_SYSREG (gs, src))
+	|| (IS_PREG (gd, dst) && IS_SYSREG (gs, src))
+	|| (IS_SYSREG (gd, dst) && IS_DREG (gs, src))
+	|| (IS_SYSREG (gd, dst) && IS_PREG (gs, src))
+	|| (IS_SYSREG (gd, dst) && gs == 7 && src == 0)))
+    return 0;
 
   OUTS (outf, allregs (dst, gd));
   OUTS (outf, " = ");

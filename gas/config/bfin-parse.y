@@ -1720,9 +1720,18 @@ asm_1:
 
 	| REG ASSIGN REG
 	{
-	  if (IS_ALLREG ($1) && IS_ALLREG ($3))
+	  if ((IS_GENREG ($1) && IS_GENREG ($3))
+	      || (IS_GENREG ($1) && IS_DAGREG ($3))
+	      || (IS_DAGREG ($1) && IS_GENREG ($3))
+	      || (IS_DAGREG ($1) && IS_DAGREG ($3))
+	      || (IS_GENREG ($1) && $3.regno == REG_USP)
+	      || ($1.regno == REG_USP && IS_GENREG ($3))
+	      || (IS_DREG ($1) && IS_SYSREG ($3))
+	      || (IS_PREG ($1) && IS_SYSREG ($3))
+	      || (IS_SYSREG ($1) && IS_DREG ($3))
+	      || (IS_SYSREG ($1) && IS_PREG ($3))
+	      || (IS_SYSREG ($1) && $3.regno == REG_USP))
 	    {
-	      notethat ("REGMV: allregs = allregs\n");
 	      $$ = bfin_gen_regmv (&$3, &$1);
 	    }
 	  else
