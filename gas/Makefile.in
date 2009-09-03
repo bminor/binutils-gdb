@@ -2518,7 +2518,7 @@ bfin-lex.o: bfin-lex.c
 
 # Disable -Werror, if it has been enabled, since old versions of bison/
 # yacc will produce working code which contain compile time warnings.
-itbl-lex.o: itbl-lex.c
+itbl-lex.o: itbl-lex.c itbl-parse.h
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `test -f itbl-lex.c || echo $(srcdir)/`itbl-lex.c $(NO_WERROR)
 @am__fastdepCC_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='itbl-lex.c' object='$@' libtool=no @AMDEPBACKSLASH@
@@ -2534,10 +2534,14 @@ itbl-parse.o: itbl-parse.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c `test -f itbl-parse.c || echo $(srcdir)/`itbl-parse.c $(NO_WERROR)
 
-itbl-parse.c itbl-parse.h: $(srcdir)/itbl-parse.y
+itbl-parse.c: $(srcdir)/itbl-parse.y
 	$(SHELL) $(YLWRAP) $(srcdir)/itbl-parse.y y.tab.c itbl-parse.c y.tab.h itbl-parse.h -- $(YACCCOMPILE) -d
 
-itbl-tops.o: itbl-ops.c
+itbl-parse.h: itbl-parse.c ; @true
+
+itbl-ops.o: itbl-parse.h
+
+itbl-tops.o: itbl-ops.c itbl-parse.h
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -o $@ -c -DSTAND_ALONE $(srcdir)/itbl-ops.c
 @am__fastdepCC_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='itbl-ops.c' object='$@' libtool=no @AMDEPBACKSLASH@

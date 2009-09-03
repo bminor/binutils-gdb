@@ -1,3 +1,10 @@
+2009-09-03  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* Makefile.am (itbl-lex.o): Depend on itbl-parse.h.
+	(itbl-ops.o, itbl-tops.o): Likewise.
+	(itbl-parse.h): Use separate rule.
+	* Makefile.in: Regenerate.
+
 2009-09-03  Jie Zhang  <jie.zhang@analog.com>
 
 	* config/tc-bfin.c (md_parse_option): Call as_fatal for bad

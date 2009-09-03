@@ -627,7 +627,7 @@ endif
 
 # Disable -Werror, if it has been enabled, since old versions of bison/
 # yacc will produce working code which contain compile time warnings.
-itbl-lex.o: itbl-lex.c
+itbl-lex.o: itbl-lex.c itbl-parse.h
 if am__fastdepCC
 	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `test -f itbl-lex.c || echo $(srcdir)/`itbl-lex.c $(NO_WERROR)
 	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
@@ -653,8 +653,12 @@ endif
 	$(COMPILE) -c `test -f itbl-parse.c || echo $(srcdir)/`itbl-parse.c $(NO_WERROR)
 endif
 
-itbl-parse.c itbl-parse.h: $(srcdir)/itbl-parse.y
+itbl-parse.c: $(srcdir)/itbl-parse.y
 	$(SHELL) $(YLWRAP) $(srcdir)/itbl-parse.y y.tab.c itbl-parse.c y.tab.h itbl-parse.h -- $(YACCCOMPILE) -d
+
+itbl-parse.h: itbl-parse.c ; @true
+
+itbl-ops.o: itbl-parse.h
 
 # stand-alone itbl assembler & disassembler
 
@@ -662,7 +666,7 @@ EXTRA_PROGRAMS = itbl-test
 itbl_test_SOURCES = itbl-parse.y itbl-lex.l
 itbl_test_LDADD = itbl-tops.o itbl-test.o $(GASLIBS) @LEXLIB@
 
-itbl-tops.o: itbl-ops.c
+itbl-tops.o: itbl-ops.c itbl-parse.h
 if am__fastdepCC
 	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -o $@ -c -DSTAND_ALONE $(srcdir)/itbl-ops.c
 	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
