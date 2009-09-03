@@ -17,6 +17,7 @@ if [istarget bfin*-*-*] {
 	run_dump_test "flow"
 	run_dump_test "flow2"
 	run_list_test "invalid_arith_mode" ""
+	run_list_test "line_number" ""
 	run_dump_test "load"
 	run_dump_test "logical"
 	run_dump_test "logical2"

@@ -1,5 +1,10 @@
 2009-09-03  Jie Zhang  <jie.zhang@analog.com>
 
+	* gas/bfin/line_number.l, gas/bfin/line_number.s: New test.
+	* gas/bfin/bfin.exp: Add the new test.
+
+2009-09-03  Jie Zhang  <jie.zhang@analog.com>
+
 	* gas/bfin/expected_move_errors.s,
 	gas/bfin/expected_move_errors.l: Add "LC1 = I0;".
 	* gas/bfin/move.s, gas/bfin/move.d: Remove "CYCLES = A0.W".

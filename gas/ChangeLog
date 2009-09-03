@@ -1,5 +1,10 @@
 2009-09-03  Jie Zhang  <jie.zhang@analog.com>
 
+	* config/tc-bfin.c (md_assemble): Bump line counters if there is
+	EOL in the instruction.
+
+2009-09-03  Jie Zhang  <jie.zhang@analog.com>
+
 	* config/bfin-defs.h (IS_GENREG): Define.
 	(IS_DAGREG): Define.
 	(IS_SYSREG): Define.

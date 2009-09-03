@@ -712,6 +712,10 @@ md_assemble (char *line)
 #ifdef OBJ_ELF
   dwarf2_emit_insn (insn_size);
 #endif
+
+  while (*line++ != '\0')
+    if (*line == '\n')
+      bump_line_counters ();
 }
 
 /* Parse one line of instructions, and generate opcode for it.
