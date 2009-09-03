@@ -69,6 +69,7 @@ SECTIONS
     ${RELOCATING+ *(.init)}
     *(.text)
     ${R_TEXT}
+    ${RELOCATING+ *(.text.*)}
     *(.glue_7t)
     *(.glue_7)
     ${CONSTRUCTING+. = ALIGN(8);}

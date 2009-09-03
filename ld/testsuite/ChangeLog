@@ -1,3 +1,10 @@
+2009-09-03  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* ld-pe/longsecn.d: Adjusted to match new .text section merging
+	in default PE linker scripts.
+	* ld-pe/longsecn-1.d: Likewise.
+	* ld-pe/longsecn-2.d: Likewise.
+
 2009-08-31  Jie Zhang  <jie.zhang@analog.com>
 
 	* lib/ld-lib.exp (is_elf_format): Return 1 for bfin-*-uclinux.

@@ -52,6 +52,7 @@ SECTIONS
     ${R_TEXT}
     *(.glue_7t)
     *(.glue_7)
+    ${RELOCATING+ *(.text.*)}
     ${CONSTRUCTING+ ___CTOR_LIST__ = .; __CTOR_LIST__ = . ; 
 			LONG (-1); *(.ctors); *(.ctor); LONG (0); }
     ${CONSTRUCTING+ ___DTOR_LIST__ = .; __DTOR_LIST__ = . ; 
