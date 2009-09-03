@@ -1,5 +1,19 @@
 2009-09-03  Jie Zhang  <jie.zhang@analog.com>
 
+	* config/bfin-defs.h (F_REG_ALL): Remove macro.
+	(F_REG_HIGH): Redefine.
+	(F_REG_NONE): New macro.
+	(F_REG_LOW): New macro.
+	(REG_CLASS): Enclose macro argument in parentheses when used.
+	(REG_EVEN): Likewise.
+	(IS_H): Use flags.
+	(IS_HCOMPL): Use flags.
+	* config/bfin-lex.l (SP.L, SP.H, FP.L, FP.H): Set flags.
+	(parse_reg): Set flags.
+	(parse_halfreg): Set flags.
+
+2009-09-03  Jie Zhang  <jie.zhang@analog.com>
+
 	* config/bfin-parse.y (gen_multi_instr_1): Check anomaly
 	05000074 only when both slot1 and slot2 are filled.
 

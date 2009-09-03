@@ -82,8 +82,9 @@ typedef enum
 #define T_NOGROUP     0xa0
 
 /* Flags.  */
-#define F_REG_ALL    0x1000
-#define F_REG_HIGH   0x2000  /* Half register: high half.  */
+#define F_REG_NONE 0
+#define F_REG_HIGH 1
+#define F_REG_LOW 2
 
 enum machine_registers
 {
@@ -180,12 +181,12 @@ enum reg_class
 
 #define REG_SAME(a, b)   ((a).regno == (b).regno)
 #define REG_EQUAL(a, b)  (((a).regno & CODE_MASK) == ((b).regno & CODE_MASK))
-#define REG_CLASS(a)     ((a.regno) & 0xf0)
+#define REG_CLASS(a)     ((a).regno & 0xf0)
 #define IS_A1(a)         ((a).regno == REG_A1)
-#define IS_H(a)          ((a).regno & F_REG_HIGH ? 1: 0)
-#define IS_EVEN(r)       (r.regno % 2 == 0)
+#define IS_H(a)          ((a).flags & F_REG_HIGH ? 1: 0)
+#define IS_EVEN(r)       ((r).regno % 2 == 0)
 #define IS_HCOMPL(a, b)  (REG_EQUAL(a, b) && \
-                         ((a).regno & F_REG_HIGH) != ((b).regno & F_REG_HIGH))
+                         ((a).flags & F_REG_HIGH) != ((b).flags & F_REG_HIGH))
 
 /* register type checking.  */
 #define _TYPECHECK(r, x) (((r).regno & CLASS_MASK) == T_REG_##x)
