@@ -1,5 +1,10 @@
 2009-09-03  Jie Zhang  <jie.zhang@analog.com>
 
+	* config/bfin-parse.y (gen_multi_instr_1): Check anomaly
+	05000074 only when both slot1 and slot2 are filled.
+
+2009-09-03  Jie Zhang  <jie.zhang@analog.com>
+
 	* config/tc-bfin.c (md_assemble): Bump line counters if there is
 	EOL in the instruction.
 

@@ -1,5 +1,10 @@
 2009-09-03  Jie Zhang  <jie.zhang@analog.com>
 
+	* gas/bfin/parallel5.s: New test.
+	* gas/bfin/error.exp: New test.
+
+2009-09-03  Jie Zhang  <jie.zhang@analog.com>
+
 	* gas/bfin/line_number.l, gas/bfin/line_number.s: New test.
 	* gas/bfin/bfin.exp: Add the new test.
 

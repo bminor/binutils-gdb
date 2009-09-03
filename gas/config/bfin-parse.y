@@ -391,6 +391,7 @@ gen_multi_instr_1 (INSTR_T dsp32, INSTR_T dsp16_grp1, INSTR_T dsp16_grp2)
 
   /* Anomaly 05000074 */
   if (ENABLE_AC_05000074
+      && dsp32 != NULL && dsp16_grp1 != NULL
       && (dsp32->value & 0xf780) == 0xc680
       && ((dsp16_grp1->value & 0xfe40) == 0x9240
 	  || (dsp16_grp1->value & 0xfe08) == 0xba08
