@@ -120,7 +120,7 @@ set program_exited 0
 send_gdb "next\n"
 set nexted 0
 gdb_expect {
-    -re "33.*$gdb_prompt $" {
+    -re "33\[ \t\]+\}.*$gdb_prompt $" {
 	# sometimes we stop at the closing brace, if so, do another next
 	if { $nexted } {
 	    fail "step out of main"

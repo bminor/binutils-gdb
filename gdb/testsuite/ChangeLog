@@ -1,3 +1,8 @@
+2009-09-03  Joseph Myers  <joseph@codesourcery.com>
+
+	* gdb.base/ending-run.exp: Restrict regular expression matching
+	line number to require closing brace following.
+
 2009-09-03  Doug Evans  <dje@google.com>
 
 	* gdb.base/store.exp (check_set): Fix typo in expected value message.
