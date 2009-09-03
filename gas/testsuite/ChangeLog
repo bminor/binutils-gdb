@@ -1,5 +1,9 @@
 2009-09-03  Jie Zhang  <jie.zhang@analog.com>
 
+	* gas/bfin/expected_comparison_errors.l: Expect error on Line 13.
+
+2009-09-03  Jie Zhang  <jie.zhang@analog.com>
+
 	* gas/bfin/loop.s, gas/bfin/loop.d: New test.
 	* gas/bfin/loop2.s, gas/bfin/loop2.d: New test.
 	* gas/bfin/loop3.s, gas/bfin/loop3.d: New test.

@@ -11,6 +11,7 @@
 .*:10: Error: Bad register in comparison. Input text was P0.
 .*:11: Error: Bad register in comparison.
 .*:12: Error: Bad register in comparison.
+.*:13: Error: Bad register in comparison. Input text was R0.
 .*:14: Error: Bad register in comparison.
 .*:15: Error: Bad register in comparison.
 .*:16: Error: Bad register in comparison.

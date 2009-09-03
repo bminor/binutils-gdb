@@ -1,5 +1,9 @@
 2009-09-03  Jie Zhang  <jie.zhang@analog.com>
 
+	* config/bfin-parse.y (asm_1): Fix a typo.
+
+2009-09-03  Jie Zhang  <jie.zhang@analog.com>
+
 	* config/bfin-parse.y (asm_1): Add LOOP_BEGIN and LOOP_END.
 	* config/tc-bfin.c (bfin_start_line_hook): Remove.
 	(bfin_loop_beginend): New.

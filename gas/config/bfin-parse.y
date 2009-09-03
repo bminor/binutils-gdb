@@ -1643,7 +1643,7 @@ asm_1:
 	| CCREG ASSIGN REG _ASSIGN_ASSIGN REG
 	{
 	  if ((IS_DREG ($3) && IS_DREG ($5))
-	      || (IS_PREG ($3) && IS_PREG ($3)))
+	      || (IS_PREG ($3) && IS_PREG ($5)))
 	    {
 	      notethat ("CCflag: CC = dpregs == dpregs\n");
 	      $$ = CCFLAG (&$3, $5.regno & CODE_MASK, 0, 0, IS_PREG ($3) ? 1 : 0);
