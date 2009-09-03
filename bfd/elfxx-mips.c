@@ -7503,6 +7503,11 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    }
 	  break;
 
+	  /* This is just a hint; it can safely be ignored.  Don't set
+	     has_static_relocs for the corresponding symbol.  */
+	case R_MIPS_JALR:
+	  break;
+
 	case R_MIPS_32:
 	case R_MIPS_REL32:
 	case R_MIPS_64:

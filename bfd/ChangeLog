@@ -1,3 +1,8 @@
+2009-09-03  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_check_relocs): Don't set
+	has_static_relocs for R_MIPS_JALR.
+
 2009-09-03  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* elf64-mips.c (mips_elf64_howto_table_rela): Add support for
