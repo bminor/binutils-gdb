@@ -1,5 +1,10 @@
 2009-09-03  Adam Nemet  <anemet@caviumnetworks.com>
 
+	* elfxx-mips.c (mips_elf_calculate_relocation): Don't relocate
+	R_MIPS_JALR unless symbol resolves locally.
+
+2009-09-03  Adam Nemet  <anemet@caviumnetworks.com>
+
 	* elfxx-mips.c (_bfd_mips_elf_check_relocs): Don't set
 	has_static_relocs for R_MIPS_JALR.
 

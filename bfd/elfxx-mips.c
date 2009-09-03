@@ -5489,8 +5489,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
     case R_MIPS_JALR:
       /* This relocation is only a hint.  In some cases, we optimize
 	 it into a bal instruction.  But we don't try to optimize
-	 branches to the PLT; that will wind up wasting time.  */
-      if (h != NULL && h->root.plt.offset != (bfd_vma) -1)
+	 when the symbol does not resolve locally.  */
+      if (h != NULL && !SYMBOL_CALLS_LOCAL (info, &h->root))
 	return bfd_reloc_continue;
       value = symbol + addend;
       break;
