@@ -40,6 +40,8 @@ BFD_H = ../bfd/bfd.h
 LIBIBERTY = ../libiberty/libiberty.a
 # This is only true when not cross-compiling.
 BUILD_LIBIBERTY = $(LIBIBERTY)
+# And so is this.
+BUILD_LIBINTL = $(LIBINTL)
 
 # Header files.
 HFILES = \
@@ -455,8 +457,8 @@ MOSTLYCLEANFILES = i386-gen$(EXEEXT_FOR_BUILD) ia64-gen$(EXEEXT_FOR_BUILD) \
 MAINTAINERCLEANFILES = $(srcdir)/i386-tbl.h $(srcdir)/i386-init.h \
 	$(srcdir)/ia64-asmtab.c s390-opc.tab $(srcdir)/z8k-opc.h
 
-i386-gen$(EXEEXT_FOR_BUILD): i386-gen.o $(BUILD_LIBIBERTY)
-	$(LINK_FOR_BUILD) i386-gen.o $(BUILD_LIBIBERTY)
+i386-gen$(EXEEXT_FOR_BUILD): i386-gen.o $(BUILD_LIBIBERTY) $(BUILD_LIBINTL)
+	$(LINK_FOR_BUILD) i386-gen.o $(BUILD_LIBIBERTY) $(BUILD_LIBINTL)
 
 i386-gen.o: i386-gen.c i386-opc.h $(srcdir)/../include/opcode/i386.h \
 	$(INCDIR)/ansidecl.h $(INCDIR)/getopt.h $(INCDIR)/hashtab.h \
@@ -472,8 +474,8 @@ $(srcdir)/i386-init.h: @MAINT@ i386-gen$(EXEEXT_FOR_BUILD) i386-opc.tbl i386-reg
 
 i386-opc.lo: $(srcdir)/i386-tbl.h
 
-ia64-gen$(EXEEXT_FOR_BUILD): ia64-gen.o $(BUILD_LIBIBERTY)
-	$(LINK_FOR_BUILD) ia64-gen.o $(BUILD_LIBIBERTY)
+ia64-gen$(EXEEXT_FOR_BUILD): ia64-gen.o $(BUILD_LIBIBERTY) $(BUILD_LIBINTL)
+	$(LINK_FOR_BUILD) ia64-gen.o $(BUILD_LIBIBERTY) $(BUILD_LIBINTL)
 
 ia64-gen.o: ia64-gen.c $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/getopt.h \
 	$(INCDIR)/libiberty.h $(INCDIR)/opcode/ia64.h $(INCDIR)/safe-ctype.h \
@@ -499,8 +501,8 @@ s390-opc.tab: s390-mkopc$(EXEEXT_FOR_BUILD) s390-opc.txt
 
 s390-opc.lo: s390-opc.tab
 
-z8kgen$(EXEEXT_FOR_BUILD): z8kgen.o $(BUILD_LIBIBERTY)
-	$(LINK_FOR_BUILD) z8kgen.o $(BUILD_LIBIBERTY)
+z8kgen$(EXEEXT_FOR_BUILD): z8kgen.o $(BUILD_LIBIBERTY) $(BUILD_LIBINTL)
+	$(LINK_FOR_BUILD) z8kgen.o $(BUILD_LIBIBERTY) $(BUILD_LIBINTL)
 
 z8kgen.o: z8kgen.c
 	$(COMPILE_FOR_BUILD) -c $(srcdir)/z8kgen.c
