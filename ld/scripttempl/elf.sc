@@ -410,6 +410,7 @@ cat <<EOF
   .text         ${RELOCATING-0} :
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
+    ${RELOCATING+*(.text.unlikely .text.*_unlikely)}
     *(.text .stub${RELOCATING+ .text.* .gnu.linkonce.t.*})
     /* .gnu.warning sections are handled specially by elf32.em.  */
     *(.gnu.warning)

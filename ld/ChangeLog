@@ -1,3 +1,7 @@
+2009-09-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* scripttempl/elf.sc (.text): Add cold text sections.
+
 2009-09-04  Jie Zhang  <jie.zhang@analog.com>
 
 	* emulparams/elf32bfinfd.sh (OTHER_SECTIONS): Add .l2.text
