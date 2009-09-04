@@ -1,3 +1,7 @@
+2009-09-04  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add marker for 2.20.
+
 2009-09-04  Jie Zhang  <jie.zhang@analog.com>
 
 	* config/bfin-parse.y (asm_1): Implement HLT instruction.

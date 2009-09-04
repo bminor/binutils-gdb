@@ -1,4 +1,7 @@
 -*- text -*-
+
+Changes in 2.20:
+
 * Add support for delay importing to dlltool.  Use the --output-delaylib <file>
   switch to create a delay-import library.  The resulting app will load the dll
   as soon as the first function is called.  It will link to __delayLoadHelper2()

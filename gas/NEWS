@@ -1,4 +1,7 @@
 -*- text -*-
+
+Changes in 2.20:
+
 * GNU/Linux targets now supports "gnu_unique_object" as a value in the .type
   pseudo op.  It marks the symbol as being globally unique in the entire
   process.

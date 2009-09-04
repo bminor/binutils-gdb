@@ -1,3 +1,7 @@
+2009-09-04  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add marker for 2.20.
+
 2009-09-04  Timo Kreuzer  <timo.kreuzer@web.de>
 
 	* dlltool.c (delayimp_name): Add new global variable

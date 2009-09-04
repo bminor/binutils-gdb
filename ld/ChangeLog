@@ -1,3 +1,7 @@
+2009-09-04  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add marker for 2.20.
+
 2009-09-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* scripttempl/elf.sc (.text): Add cold text sections.

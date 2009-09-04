@@ -1,4 +1,7 @@
 -*- text -*-
+
+Changes in 2.20:
+
 * GNU/Linux targets now support the STB_GNU_UNIQUE symbol binding.  This is a
   GNU extension to the standard set of ELF symbol bindings.  The binding will
   be passed on to the dynamic linker which will make sure that in the entire
