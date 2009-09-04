@@ -603,15 +603,16 @@ $(srcdir)/config/m68k-parse.h: ; @true
 bfin-parse.c: $(srcdir)/config/bfin-parse.y
 	$(SHELL) $(YLWRAP) $(srcdir)/config/bfin-parse.y y.tab.c bfin-parse.c y.tab.h bfin-parse.h -- $(YACCCOMPILE) -d ;
 bfin-parse.h: bfin-parse.c
-bfin-parse.o: bfin-parse.c bfin-parse.h $(srcdir)/config/bfin-defs.h \
+bfin-parse.o: bfin-parse.c \
+ $(srcdir)/config/bfin-aux.h $(srcdir)/config/bfin-defs.h \
  $(INCDIR)/elf/common.h $(INCDIR)/elf/bfin.h $(BFDDIR)/libbfd.h
 
-bfin-defs.h: ; @true
-$(srcdir)/config/bfin-defs.h: ; @true
+bfin-parse.h: ; @true
+$(srcdir)/config/bfin-parse.h: ; @true
 
 bfin-lex.c: $(srcdir)/config/bfin-lex.l
 	$(SHELL) $(YLWRAP) $(srcdir)/config/bfin-lex.l lex.yy.c bfin-lex.c -- $(LEXCOMPILE)
-bfin-lex.o: bfin-lex.c
+bfin-lex.o: bfin-lex.c bfin-parse.h $(srcdir)/config/bfin-defs.h
 if am__fastdepCC
 	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `test -f bfin-lex.c || echo $(srcdir)/`bfin-lex.c $(NO_WERROR)
 	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po

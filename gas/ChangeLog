@@ -1,3 +1,14 @@
+2009-09-04  Jie Zhang  <jie.zhang@analog.com>
+
+	* Makefile.am (bfin-parse.o): Remove bfin-parse.h from
+	the prerequisite. Add $(srcdir)/config/bfin-aux.h to the
+	prerequisite.
+	(bfin-defs.h, $(srcdir)/config/bfin-defs.h): Rename to ...
+	(bfin-parse.h, $(srcdir)/config/bfin-parse.h): ... these. 
+	(bfin-lex.o): Add bfin-parse.h and $(srcdir)/config/bfin-defs.h
+	to the prerequisite.
+	* Makefile.in: Regenerate.
+
 2009-09-03  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.am (itbl-lex.o): Depend on itbl-parse.h.
