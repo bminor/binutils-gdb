@@ -1,3 +1,8 @@
+2009-09-04  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.in: Bump version to 2.19.90
+	* configure: Regenerated.
+
 2009-09-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (spu_elf_relocate_section): Correct 2009-07-24 logic.
