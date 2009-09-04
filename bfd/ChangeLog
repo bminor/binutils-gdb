@@ -1,7 +1,10 @@
+2009-09-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure: Regenerated.
+
 2009-09-04  Tristan Gingold  <gingold@adacore.com>
 
 	* configure.in: Bump version to 2.20.51
-	* configure: Regenerated.
 
 2009-09-04  Alan Modra  <amodra@bigpond.net.au>
 
