@@ -1,7 +1,13 @@
 -*- text -*-
+* Add support for delay importing to dlltool.  Use the --output-delaylib <file>
+  switch to create a delay-import library.  The resulting app will load the dll
+  as soon as the first function is called.  It will link to __delayLoadHelper2()
+  from the static delayimp library, which will import LoadLibraryA and
+  GetProcAddress from kernel32.
+
 * Add a new command line option, --insn-width=WIDTH, to objdump to specify
-number of bytes to be displayed on a single line when disassembling
-instructions.
+  number of bytes to be displayed on a single line when disassembling
+  instructions.
 
 * Readelf can now display the relocated contents of a section as a sequence
   of bytes via the --relocated-dump=<name|number> command line option.

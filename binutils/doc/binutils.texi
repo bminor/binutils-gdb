@@ -3497,6 +3497,7 @@ dlltool [@option{-d}|@option{--input-def} @var{def-file-name}]
         [@option{-e}|@option{--output-exp} @var{exports-file-name}]
         [@option{-z}|@option{--output-def} @var{def-file-name}]
         [@option{-l}|@option{--output-lib} @var{library-file-name}]
+        [@option{-y}|@option{--output-delaylib} @var{library-file-name}]
         [@option{--export-all-symbols}] [@option{--no-export-all-symbols}]
         [@option{--exclude-symbols} @var{list}]
         [@option{--no-default-excludes}]
@@ -3563,6 +3564,13 @@ will link with in order to access the functions in the DLL (an `import
 library').  This file can be created by giving the @option{-l} option to
 dlltool when it is creating or reading in a @file{.def} file.
 
+If the @option{-y} option is specified, dlltool generates a delay-import
+library that can be used instead of the normal import library to allow
+a program to link to the dll only as soon as an imported function is
+called for the first time. The resulting executable will need to be
+linked to the static delayimp library containing __delayLoadHelper2(),
+which in turn will import LoadLibraryA and GetProcAddress from kernel32.
+
 @command{dlltool} builds the library file by hand, but it builds the
 exports file by creating temporary files containing assembler statements
 and then assembling these.  The @option{-S} command line option can be
@@ -3620,6 +3628,10 @@ Specifies the name of the @file{.def} file to be created by dlltool.
 @item -l @var{filename}
 @itemx --output-lib @var{filename}
 Specifies the name of the library file to be created by dlltool.
+
+@item -y @var{filename}
+@itemx --output-delaylib @var{filename}
+Specifies the name of the delay-import library file to be created by dlltool.
 
 @item --export-all-symbols
 Treat all global and weak defined symbols found in the input object

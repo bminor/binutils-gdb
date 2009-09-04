@@ -1,3 +1,21 @@
+2009-09-04  Timo Kreuzer  <timo.kreuzer@web.de>
+
+	* dlltool.c (delayimp_name): Add new global variable
+	(usage, long_options, main): Add new option "-y" / "--output-delaylib"
+	(struct mac): Add fields how_dljtab_size, how_dljtab_roff1, 
+	how_dljtab_roff2, how_dljtab, trampoline.
+	(i386_dljtab): Add binary stub for x86 delay import.
+	(i386_trampoline): Add text assembly stub for x86 delay import.
+	(mtable): Add delay import data for M386 and MX86 only.
+	(make_delay_head): New function.
+	(make_one_lib_file): New arg delay creates delay-load import stub.
+	(gen_lib_file): New arg delay likewise.
+	(HOW_JTAB, HOW_JTAB_SIZE, HOW_JTAB_ROFF): New arg delay likewise.
+	(HOW_JTAB_ROFF2, HOW_JTAB_ROFF3): New macros for delay import.
+	(make_tail): Convert hard TABS embedded in strings to "\t" escapes.
+	* NEWS: Mention new feature.  Also fix whitespace.
+	* doc/binutils.texi: Updated dlltool documentation.
+
 2009-09-02  Tristan Gingold  <gingold@adacore.com>
 
 	* configure.com: Do not copy makefile.vms-in to makefile.vms
