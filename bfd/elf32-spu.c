@@ -4906,8 +4906,9 @@ spu_elf_relocate_section (bfd *output_bfd,
 	continue;
 
       /* Change "a rt,ra,rb" to "ai rt,ra,0". */
-      if (r_type == R_SPU_ADD_PIC && h != NULL
-	  && (h->def_regular || ELF_COMMON_DEF_P (h)))
+      if (r_type == R_SPU_ADD_PIC
+	  && h != NULL
+	  && !(h->def_regular || ELF_COMMON_DEF_P (h)))
 	{
 	  bfd_byte *loc = contents + rel->r_offset;
 	  loc[0] = 0x1c; 

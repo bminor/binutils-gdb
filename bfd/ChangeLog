@@ -1,3 +1,7 @@
+2009-09-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (spu_elf_relocate_section): Correct 2009-07-24 logic.
+
 2009-09-04  Jie Zhang  <jie.zhang@analog.com>
 
 	* elf32-bfin.c (elf32_bfinfdpic_create_dynamic_sections): Always
