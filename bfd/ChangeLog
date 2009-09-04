@@ -1,3 +1,10 @@
+2009-09-04  Jie Zhang  <jie.zhang@analog.com>
+
+	* elf32-bfin.c (elf32_bfinfdpic_create_dynamic_sections): Always
+	create .rela.bss.
+	(elf32_bfinfdpic_size_dynamic_sections): Set SEC_EXCLUDE flag
+	for empty .rela.bss and .rel.plt sections.
+
 2009-09-03  Adam Nemet  <anemet@caviumnetworks.com>
 
 	* elfxx-mips.c (mips_elf_calculate_relocation): Don't relocate
