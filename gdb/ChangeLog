@@ -1,3 +1,15 @@
+2009-09-03  Nathan Froyd  <froydnj@codesourcery.com>
+
+	* dwarf2loc.c (struct piece_closure): New.
+	(allocate_piece_closure): New function.
+	(read_pieced_value): New function.
+	(write_pieced_value): New function.
+	(copy_pieced_value_closure): New function.
+	(free_pieced_value_closure): New function.
+	(pieced_value_funcs): Define.
+	(dwarf2_evaluate_loc_desc): Return a computed value for a variable
+	described with pieces.
+
 2009-09-03  Pierre Muller <muller@ics.u-strasbg.fr>
 	    Richard Earnshaw <rearnsha@arm.com>
 

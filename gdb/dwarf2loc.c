@@ -215,6 +215,125 @@ dwarf_expr_tls_address (void *baton, CORE_ADDR offset)
   return target_translate_tls_address (debaton->objfile, offset);
 }
 
+struct piece_closure
+{
+  /* The number of pieces used to describe this variable.  */
+  int n_pieces;
+
+  /* The pieces themselves.  */
+  struct dwarf_expr_piece *pieces;
+};
+
+/* Allocate a closure for a value formed from separately-described
+   PIECES.  */
+
+static struct piece_closure *
+allocate_piece_closure (int n_pieces, struct dwarf_expr_piece *pieces)
+{
+  struct piece_closure *c = XZALLOC (struct piece_closure);
+
+  c->n_pieces = n_pieces;
+  c->pieces = XCALLOC (n_pieces, struct dwarf_expr_piece);
+
+  memcpy (c->pieces, pieces, n_pieces * sizeof (struct dwarf_expr_piece));
+
+  return c;
+}
+
+static void
+read_pieced_value (struct value *v)
+{
+  int i;
+  long offset = 0;
+  gdb_byte *contents;
+  struct piece_closure *c = (struct piece_closure *) value_computed_closure (v);
+  struct frame_info *frame = frame_find_by_id (VALUE_FRAME_ID (v));
+
+  contents = value_contents_raw (v);
+  for (i = 0; i < c->n_pieces; i++)
+    {
+      struct dwarf_expr_piece *p = &c->pieces[i];
+
+      if (frame == NULL)
+	{
+	  memset (contents + offset, 0, p->size);
+	  set_value_optimized_out (v, 1);
+	}
+      else if (p->in_reg)
+	{
+	  struct gdbarch *arch = get_frame_arch (frame);
+	  gdb_byte regval[MAX_REGISTER_SIZE];
+	  int gdb_regnum = gdbarch_dwarf2_reg_to_regnum (arch, p->value);
+
+	  get_frame_register (frame, gdb_regnum, regval);
+	  memcpy (contents + offset, regval, p->size);
+	}
+      else
+	{
+	  read_memory (p->value, contents + offset, p->size);
+	}
+      offset += p->size;
+    }
+}
+
+static void
+write_pieced_value (struct value *to, struct value *from)
+{
+  int i;
+  long offset = 0;
+  gdb_byte *contents;
+  struct piece_closure *c = (struct piece_closure *) value_computed_closure (to);
+  struct frame_info *frame = frame_find_by_id (VALUE_FRAME_ID (to));
+
+  if (frame == NULL)
+    {
+      set_value_optimized_out (to, 1);
+      return;
+    }
+
+  contents = value_contents_raw (from);
+  for (i = 0; i < c->n_pieces; i++)
+    {
+      struct dwarf_expr_piece *p = &c->pieces[i];
+      if (p->in_reg)
+	{
+	  struct gdbarch *arch = get_frame_arch (frame);
+	  int gdb_regnum = gdbarch_dwarf2_reg_to_regnum (arch, p->value);
+	  put_frame_register (frame, gdb_regnum, contents + offset);
+	}
+      else
+	{
+	  write_memory (p->value, contents + offset, p->size);
+	}
+      offset += p->size;
+    }
+}
+
+static void *
+copy_pieced_value_closure (struct value *v)
+{
+  struct piece_closure *c = (struct piece_closure *) value_computed_closure (v);
+  
+  return allocate_piece_closure (c->n_pieces, c->pieces);
+}
+
+static void
+free_pieced_value_closure (struct value *v)
+{
+  struct piece_closure *c = (struct piece_closure *) value_computed_closure (v);
+
+  xfree (c->pieces);
+  xfree (c);
+}
+
+/* Functions for accessing a variable described by DW_OP_piece.  */
+static struct lval_funcs pieced_value_funcs = {
+  read_pieced_value,
+  write_pieced_value,
+  copy_pieced_value_closure,
+  free_pieced_value_closure
+};
+
 /* Evaluate a location description, starting at DATA and with length
    SIZE, to find the current location of variable VAR in the context
    of FRAME.  */
@@ -254,29 +373,14 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
   dwarf_expr_eval (ctx, data, size);
   if (ctx->num_pieces > 0)
     {
-      int i;
-      long offset = 0;
-      bfd_byte *contents;
+      struct piece_closure *c;
+      struct frame_id frame_id = get_frame_id (frame);
 
-      retval = allocate_value (SYMBOL_TYPE (var));
-      contents = value_contents_raw (retval);
-      for (i = 0; i < ctx->num_pieces; i++)
-	{
-	  struct dwarf_expr_piece *p = &ctx->pieces[i];
-	  if (p->in_reg)
-	    {
-	      struct gdbarch *arch = get_frame_arch (frame);
-	      bfd_byte regval[MAX_REGISTER_SIZE];
-	      int gdb_regnum = gdbarch_dwarf2_reg_to_regnum (arch, p->value);
-	      get_frame_register (frame, gdb_regnum, regval);
-	      memcpy (contents + offset, regval, p->size);
-	    }
-	  else /* In memory?  */
-	    {
-	      read_memory (p->value, contents + offset, p->size);
-	    }
-	  offset += p->size;
-	}
+      c = allocate_piece_closure (ctx->num_pieces, ctx->pieces);
+      retval = allocate_computed_value (SYMBOL_TYPE (var),
+					&pieced_value_funcs,
+					c);
+      VALUE_FRAME_ID (retval) = frame_id;
     }
   else if (ctx->in_reg)
     {
