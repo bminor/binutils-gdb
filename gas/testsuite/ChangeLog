@@ -1,3 +1,9 @@
+2009-09-04  Jie Zhang  <jie.zhang@analog.com>
+
+	* gas/bfin/arithmetic.s, gas/bfin/arithmetic.d: Add check
+	for (IU) option for multiply and multiply-accumulate to
+	data register instructon.
+
 2009-09-03  Jie Zhang  <jie.zhang@analog.com>
 
 	* gas/bfin/parallel5.s: New test.
