@@ -4,7 +4,7 @@
 @c For copying conditions, see the file as.texinfo.
 @ifset GENERIC
 @page
-@node BFIN-Dependent
+@node Blackfin-Dependent
 @chapter Blackfin Dependent Features
 @end ifset
 @ifclear GENERIC
@@ -34,6 +34,10 @@ is not used in assembler.  It's here such that GCC can easily pass down its
 error message if an attempt is made to assemble an instruction which
 will not execute on the target processor.  The following processor names are
 recognized: 
+@code{bf512},
+@code{bf514},
+@code{bf516},
+@code{bf518},
 @code{bf522},
 @code{bf523},
 @code{bf524},

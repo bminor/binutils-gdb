@@ -30,7 +30,7 @@
 @set ARC
 @set ARM
 @set AVR
-@set BFIN
+@set Blackfin
 @set CR16
 @set CRIS
 @set D10V

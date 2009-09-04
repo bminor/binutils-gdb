@@ -1,5 +1,15 @@
 2009-09-04  Jie Zhang  <jie.zhang@analog.com>
 
+	* doc/all.texi: Replace BFIN with Blackfin.
+	* doc/as.texinfo: Likewise.
+	* doc/c-bfin.texi: Likewise.
+	* doc/asconfig.texi: Likewise.
+
+	* doc/c-bfin.texi: Update -mcpu= option with bf512, bf514,
+	bf516 and bf518.
+
+2009-09-04  Jie Zhang  <jie.zhang@analog.com>
+
 	* Makefile.am (bfin-parse.o): Remove bfin-parse.h from
 	the prerequisite. Add $(srcdir)/config/bfin-aux.h to the
 	prerequisite.
