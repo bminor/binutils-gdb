@@ -1,5 +1,9 @@
 2009-09-04  Tristan Gingold  <gingold@adacore.com>
 
+	* BRANCHES: Add binutils-2_20-branch.
+
+2009-09-04  Tristan Gingold  <gingold@adacore.com>
+
 	* NEWS: Add marker for 2.20.
 
 2009-09-04  Timo Kreuzer  <timo.kreuzer@web.de>
