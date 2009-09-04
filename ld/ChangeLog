@@ -1,3 +1,8 @@
+2009-09-04  Jie Zhang  <jie.zhang@analog.com>
+
+	* emulparams/elf32bfinfd.sh (OTHER_SECTIONS): Add .l2.text
+	and .l2.data.
+
 2009-09-03  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* scripttempl/pe.sc (.text): Add "*(.text.*)" in order to catch
