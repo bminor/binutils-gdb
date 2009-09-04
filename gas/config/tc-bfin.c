@@ -1791,10 +1791,13 @@ bfin_gen_pseudodbg (int fn, int reg, int grp)
 INSTR_T
 bfin_gen_pseudodbg_assert (int dbgop, REG_T regtest, int expected)
 {
+  int grp;
   INIT (PseudoDbg_Assert);
 
   ASSIGN (dbgop);
   ASSIGN_R (regtest);
+  grp = GROUP (regtest);
+  ASSIGN (grp);
   ASSIGN (expected);
 
   return GEN_OPCODE32 ();

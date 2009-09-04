@@ -3588,21 +3588,27 @@ asm_1:
 	  $$ = bfin_gen_pseudodbg (3, 5, 0);
 	}
 
+	| HLT
+	{
+	  notethat ("psedoDEBUG: HLT\n");
+	  $$ = bfin_gen_pseudodbg (3, 4, 0);
+	}
+
 	| DBGA LPAREN HALF_REG COMMA expr RPAREN
 	{
-	  notethat ("pseudodbg_assert: DBGA (dregs_lo , uimm16 )\n");
+	  notethat ("pseudodbg_assert: DBGA (regs_lo/hi , uimm16 )\n");
 	  $$ = bfin_gen_pseudodbg_assert (IS_H ($3), &$3, uimm16 ($5));
 	}
-		
+
 	| DBGAH LPAREN REG COMMA expr RPAREN
 	{
-	  notethat ("pseudodbg_assert: DBGAH (dregs , uimm16 )\n");
+	  notethat ("pseudodbg_assert: DBGAH (regs , uimm16 )\n");
 	  $$ = bfin_gen_pseudodbg_assert (3, &$3, uimm16 ($5));
 	}
 
 	| DBGAL LPAREN REG COMMA expr RPAREN
 	{
-	  notethat ("psedodbg_assert: DBGAL (dregs , uimm16 )\n");
+	  notethat ("psedodbg_assert: DBGAL (regs , uimm16 )\n");
 	  $$ = bfin_gen_pseudodbg_assert (2, &$3, uimm16 ($5));
 	}
 

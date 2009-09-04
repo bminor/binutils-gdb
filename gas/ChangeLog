@@ -1,5 +1,12 @@
 2009-09-04  Jie Zhang  <jie.zhang@analog.com>
 
+	* config/bfin-parse.y (asm_1): Implement HLT instruction.
+	Fix comments for DBGA, DBGAH and DBGAL.
+	* config/tc-bfin.c (bfin_gen_pseudodbg_assert): Change according
+	to the new encoding of DBGA, DBGAH, and DBGAL.
+
+2009-09-04  Jie Zhang  <jie.zhang@analog.com>
+
 	* doc/all.texi: Replace BFIN with Blackfin.
 	* doc/as.texinfo: Likewise.
 	* doc/c-bfin.texi: Likewise.

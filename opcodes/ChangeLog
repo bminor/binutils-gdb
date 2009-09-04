@@ -1,3 +1,9 @@
+2009-09-04  Jie Zhang  <jie.zhang@analog.com>
+
+	* bfin-dis.c (decode_pseudodbg_assert_0): Change according
+	to the new encoding of DBGA, DBGAH, and DBGAL.
+	(_print_insn_bfin): Likewise.
+
 2009-09-03  Jie Zhang  <jie.zhang@analog.com>
 
 	* bfin-dis.c (_print_insn_bfin): Don't declare.
