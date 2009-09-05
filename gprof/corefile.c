@@ -562,7 +562,7 @@ core_create_function_syms (void)
 {
   bfd_vma min_vma = ~ (bfd_vma) 0;
   bfd_vma max_vma = 0;
-  int class;
+  int cxxclass;
   long i;
   struct function_map * found;
 
@@ -598,9 +598,9 @@ core_create_function_syms (void)
     {
       asection *sym_sec;
 
-      class = core_sym_class (core_syms[i]);
+      cxxclass = core_sym_class (core_syms[i]);
 
-      if (!class)
+      if (!cxxclass)
 	{
 	  DBG (AOUTDEBUG,
 	       printf ("[core_create_function_syms] rejecting: 0x%lx %s\n",
@@ -670,7 +670,7 @@ core_create_function_syms (void)
       symtab.limit->is_func = (core_syms[i]->flags & BSF_FUNCTION) != 0; 
       symtab.limit->is_bb_head = TRUE;
 
-      if (class == 't')
+      if (cxxclass == 't')
 	symtab.limit->is_static = TRUE;
 
       /* Keep track of the minimum and maximum vma addresses used by all

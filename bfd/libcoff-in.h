@@ -254,7 +254,7 @@ struct coff_link_hash_entry
   unsigned short type;
 
   /* Symbol class.  */
-  unsigned char class;
+  unsigned char symbol_class;
 
   /* Number of auxiliary entries.  */
   char numaux;
@@ -394,7 +394,7 @@ struct coff_debug_merge_type
   struct coff_debug_merge_type *next;
 
   /* Class of type.  */
-  int class;
+  int type_class;
 
   /* Symbol index where this type is defined.  */
   long indx;
@@ -603,4 +603,3 @@ extern bfd_boolean ppc_allocate_toc_section
   (struct bfd_link_info *);
 extern bfd_boolean ppc_process_before_allocation
   (bfd *, struct bfd_link_info *);
-

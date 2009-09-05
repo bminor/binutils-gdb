@@ -1,3 +1,40 @@
+2009-09-05  Martin Thuresson  <martin@mtme.org>
+
+	* coff-arm.c (coff_arm_relocate_section)
+	(record_thumb_to_arm_glue, bfd_arm_process_before_allocation):
+	Change member name class to symbol_class.
+	* coff-i960.c (coff_i960_relocate_section) Rename variable
+	class to class_val. Change member name class to symbol_class.
+	* coff-rs6000.c (_bfd_xcoff_swap_aux_in)
+	(_bfd_xcoff_swap_aux_out): Rename arguments class to in_class.
+	* coff-stgo32.c (adjust_aux_in_post)
+	(adjust_aux_out_pre, adjust_aux_out_post): Rename arguments class
+	to in_class.
+	* coff64-rs6000.c (_bfd_xcoff64_swap_aux_in)
+	(_bfd_xcoff64_swap_aux_out): Rename arguments class to in_class.
+	* coffcode.h (coff_pointerize_aux_hook): Rename variable class
+	to n_sclass.
+	* coffgen.c (coff_write_symbol, coff_pointerize_aux): Rename
+	variables named class to n_sclass. (coff_write_symbols): Rename
+	variable class to sym_class. (bfd_coff_set_symbol_class): Rename
+	argument class to symbol_class.
+	* cofflink.c (_bfd_coff_link_hash_newfunc)
+	(coff_link_add_symbols, _bfd_coff_link_input_bfd)
+	(_bfd_coff_write_global_sym, _bfd_coff_generic_relocate_section):
+	Update code to use renamed members.
+	* coffswap.h (coff_swap_aux_in, coff_swap_aux_out): Rename
+	argument class to in_class.
+	* libcoff-in.h (struct coff_link_hash_entry, struct
+	coff_debug_merge_type) Renamed members class to symbol_class and
+	type_class.
+	* libcoff.h Regenerated.
+	* peXXigen.c: (_bfd_XXi_swap_aux_in, _bfd_XXi_swap_aux_out):
+	Rename argument class to in_class.
+	* pef.c (bfd_pef_parse_imported_symbol): Update code to use
+	renamed members.
+	* pef.h (struct bfd_pef_imported_symbol): Changed name of
+	member class to symbol_class.
+
 2009-09-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure: Regenerated.

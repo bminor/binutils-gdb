@@ -1,3 +1,22 @@
+2009-09-05  Martin Thuresson  <martin@mtme.org>
+
+	* config/tc-arc.c (struct syntax_classes): Rename member class
+	to s_class. (arc_extinst): Rename variable class to
+	s_class. Update code to use renamed members.
+	* config/tc-mips.c (insn_uses_reg): Rename argument class to
+	regclass.
+	* config/tc-ppc.c (ppc_csect, ppc_change_csect, ppc_function)
+	(ppc_tc, ppc_is_toc_sym, ppc_symbol_new_hook, ppc_frob_label)
+	(ppc_fix_adjustable, md_apply_fix): Update code to use renamed
+	members.
+	* config/tc-ppc.h (struct ppc_tc_sy): Change name of member
+	from class to symbol_class. (OBJ_COPY_SYMBOL_ATTRIBUTES): Update
+	code to use renamed members.
+	* config/tc-score.c (s3_adjust_paritybit): Rename argument
+	class to i_class.
+	* config/tc-score7.c (s7_adjust_paritybit): Rename argument
+	class to i_class.
+
 2009-09-04  Tristan Gingold  <gingold@adacore.com>
 
 	* NEWS: Add marker for 2.20.

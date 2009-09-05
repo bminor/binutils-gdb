@@ -231,7 +231,7 @@ void
 _bfd_XXi_swap_aux_in (bfd *	abfd,
 		      void *	ext1,
 		      int       type,
-		      int       class,
+		      int       in_class,
 		      int	indx ATTRIBUTE_UNUSED,
 		      int	numaux ATTRIBUTE_UNUSED,
 		      void * 	in1)
@@ -239,7 +239,7 @@ _bfd_XXi_swap_aux_in (bfd *	abfd,
   AUXENT *ext = (AUXENT *) ext1;
   union internal_auxent *in = (union internal_auxent *) in1;
 
-  switch (class)
+  switch (in_class)
     {
     case C_FILE:
       if (ext->x_file.x_fname[0] == 0)
@@ -270,7 +270,8 @@ _bfd_XXi_swap_aux_in (bfd *	abfd,
   in->x_sym.x_tagndx.l = H_GET_32 (abfd, ext->x_sym.x_tagndx);
   in->x_sym.x_tvndx = H_GET_16 (abfd, ext->x_sym.x_tvndx);
 
-  if (class == C_BLOCK || class == C_FCN || ISFCN (type) || ISTAG (class))
+  if (in_class == C_BLOCK || in_class == C_FCN || ISFCN (type)
+      || ISTAG (in_class))
     {
       in->x_sym.x_fcnary.x_fcn.x_lnnoptr = GET_FCN_LNNOPTR (abfd, ext);
       in->x_sym.x_fcnary.x_fcn.x_endndx.l = GET_FCN_ENDNDX (abfd, ext);
@@ -302,7 +303,7 @@ unsigned int
 _bfd_XXi_swap_aux_out (bfd *  abfd,
 		       void * inp,
 		       int    type,
-		       int    class,
+		       int    in_class,
 		       int    indx ATTRIBUTE_UNUSED,
 		       int    numaux ATTRIBUTE_UNUSED,
 		       void * extp)
@@ -312,7 +313,7 @@ _bfd_XXi_swap_aux_out (bfd *  abfd,
 
   memset (ext, 0, AUXESZ);
 
-  switch (class)
+  switch (in_class)
     {
     case C_FILE:
       if (in->x_file.x_fname[0] == 0)
@@ -344,7 +345,8 @@ _bfd_XXi_swap_aux_out (bfd *  abfd,
   H_PUT_32 (abfd, in->x_sym.x_tagndx.l, ext->x_sym.x_tagndx);
   H_PUT_16 (abfd, in->x_sym.x_tvndx, ext->x_sym.x_tvndx);
 
-  if (class == C_BLOCK || class == C_FCN || ISFCN (type) || ISTAG (class))
+  if (in_class == C_BLOCK || in_class == C_FCN || ISFCN (type)
+      || ISTAG (in_class))
     {
       PUT_FCN_LNNOPTR (abfd, in->x_sym.x_fcnary.x_fcn.x_lnnoptr,  ext);
       PUT_FCN_ENDNDX  (abfd, in->x_sym.x_fcnary.x_fcn.x_endndx.l, ext);

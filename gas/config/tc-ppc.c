@@ -3338,7 +3338,7 @@ ppc_csect (int ignore ATTRIBUTE_UNUSED)
   if (S_GET_NAME (sym)[0] == '\0')
     {
       /* An unnamed csect is assumed to be [PR].  */
-      symbol_get_tc (sym)->class = XMC_PR;
+      symbol_get_tc (sym)->symbol_class = XMC_PR;
     }
 
   align = 2;
@@ -3374,7 +3374,7 @@ ppc_change_csect (symbolS *sym, offsetT align)
 	 data section.  */
       after_toc = 0;
       is_code = 0;
-      switch (symbol_get_tc (sym)->class)
+      switch (symbol_get_tc (sym)->symbol_class)
 	{
 	case XMC_PR:
 	case XMC_RO:
@@ -3764,8 +3764,8 @@ ppc_function (int ignore ATTRIBUTE_UNUSED)
       symbol_set_value_expression (ext_sym, &exp);
     }
 
-  if (symbol_get_tc (ext_sym)->class == -1)
-    symbol_get_tc (ext_sym)->class = XMC_PR;
+  if (symbol_get_tc (ext_sym)->symbol_class == -1)
+    symbol_get_tc (ext_sym)->symbol_class = XMC_PR;
   symbol_get_tc (ext_sym)->output = 1;
 
   if (*input_line_pointer == ',')
@@ -4198,7 +4198,7 @@ ppc_tc (int ignore ATTRIBUTE_UNUSED)
 	symbolS *label;
 
 	label = symbol_get_tc (ppc_current_csect)->within;
-	if (symbol_get_tc (label)->class != XMC_TC0)
+	if (symbol_get_tc (label)->symbol_class != XMC_TC0)
 	  {
 	    as_bad (_(".tc with no label"));
 	    ignore_rest_of_line ();
@@ -4218,7 +4218,7 @@ ppc_tc (int ignore ATTRIBUTE_UNUSED)
     S_SET_SEGMENT (sym, now_seg);
     symbol_set_frag (sym, frag_now);
     S_SET_VALUE (sym, (valueT) frag_now_fix ());
-    symbol_get_tc (sym)->class = XMC_TC;
+    symbol_get_tc (sym)->symbol_class = XMC_TC;
     symbol_get_tc (sym)->output = 1;
 
     ppc_frob_label (sym);
@@ -4322,7 +4322,7 @@ static int
 ppc_is_toc_sym (symbolS *sym)
 {
 #ifdef OBJ_XCOFF
-  return symbol_get_tc (sym)->class == XMC_TC;
+  return symbol_get_tc (sym)->symbol_class == XMC_TC;
 #endif
 #ifdef OBJ_ELF
   const char *sname = segment_name (S_GET_SEGMENT (sym));
@@ -4972,7 +4972,7 @@ ppc_symbol_new_hook (symbolS *sym)
   tc = symbol_get_tc (sym);
   tc->next = NULL;
   tc->output = 0;
-  tc->class = -1;
+  tc->symbol_class = -1;
   tc->real_name = NULL;
   tc->subseg = 0;
   tc->align = 0;
@@ -4995,55 +4995,55 @@ ppc_symbol_new_hook (symbolS *sym)
     {
     case 'B':
       if (strcmp (s, "BS]") == 0)
-	tc->class = XMC_BS;
+	tc->symbol_class = XMC_BS;
       break;
     case 'D':
       if (strcmp (s, "DB]") == 0)
-	tc->class = XMC_DB;
+	tc->symbol_class = XMC_DB;
       else if (strcmp (s, "DS]") == 0)
-	tc->class = XMC_DS;
+	tc->symbol_class = XMC_DS;
       break;
     case 'G':
       if (strcmp (s, "GL]") == 0)
-	tc->class = XMC_GL;
+	tc->symbol_class = XMC_GL;
       break;
     case 'P':
       if (strcmp (s, "PR]") == 0)
-	tc->class = XMC_PR;
+	tc->symbol_class = XMC_PR;
       break;
     case 'R':
       if (strcmp (s, "RO]") == 0)
-	tc->class = XMC_RO;
+	tc->symbol_class = XMC_RO;
       else if (strcmp (s, "RW]") == 0)
-	tc->class = XMC_RW;
+	tc->symbol_class = XMC_RW;
       break;
     case 'S':
       if (strcmp (s, "SV]") == 0)
-	tc->class = XMC_SV;
+	tc->symbol_class = XMC_SV;
       break;
     case 'T':
       if (strcmp (s, "TC]") == 0)
-	tc->class = XMC_TC;
+	tc->symbol_class = XMC_TC;
       else if (strcmp (s, "TI]") == 0)
-	tc->class = XMC_TI;
+	tc->symbol_class = XMC_TI;
       else if (strcmp (s, "TB]") == 0)
-	tc->class = XMC_TB;
+	tc->symbol_class = XMC_TB;
       else if (strcmp (s, "TC0]") == 0 || strcmp (s, "T0]") == 0)
-	tc->class = XMC_TC0;
+	tc->symbol_class = XMC_TC0;
       break;
     case 'U':
       if (strcmp (s, "UA]") == 0)
-	tc->class = XMC_UA;
+	tc->symbol_class = XMC_UA;
       else if (strcmp (s, "UC]") == 0)
-	tc->class = XMC_UC;
+	tc->symbol_class = XMC_UC;
       break;
     case 'X':
       if (strcmp (s, "XO]") == 0)
-	tc->class = XMC_XO;
+	tc->symbol_class = XMC_XO;
       break;
     }
 
-  if (tc->class == -1)
+  if (tc->symbol_class == -1)
     as_bad (_("Unrecognized symbol suffix"));
 }
 
@@ -5056,8 +5056,8 @@ ppc_frob_label (symbolS *sym)
 {
   if (ppc_current_csect != (symbolS *) NULL)
     {
-      if (symbol_get_tc (sym)->class == -1)
-	symbol_get_tc (sym)->class = symbol_get_tc (ppc_current_csect)->class;
+      if (symbol_get_tc (sym)->symbol_class == -1)
+	symbol_get_tc (sym)->symbol_class = symbol_get_tc (ppc_current_csect)->symbol_class;
 
       symbol_remove (sym, &symbol_rootP, &symbol_lastP);
       symbol_append (sym, symbol_get_tc (ppc_current_csect)->within,
@@ -5180,7 +5180,7 @@ ppc_frob_symbol (symbolS *sym)
       i = S_GET_NUMBER_AUXILIARY (sym);
       S_SET_NUMBER_AUXILIARY (sym, i + 1);
       a = &coffsymbol (symbol_get_bfdsym (sym))->native[i + 1].u.auxent;
-      if (symbol_get_tc (sym)->class == XMC_TC0)
+      if (symbol_get_tc (sym)->symbol_class == XMC_TC0)
 	{
 	  /* This is the TOC table.  */
 	  know (strcmp (S_GET_NAME (sym), "TOC") == 0);
@@ -5209,9 +5209,9 @@ ppc_frob_symbol (symbolS *sym)
 	  a->x_csect.x_scnlen.l = symbol_get_frag (sym)->fr_offset;
 	  a->x_csect.x_smtyp = (symbol_get_tc (sym)->align << 3) | XTY_CM;
 	  if (S_IS_EXTERNAL (sym))
-	    symbol_get_tc (sym)->class = XMC_RW;
+	    symbol_get_tc (sym)->symbol_class = XMC_RW;
 	  else
-	    symbol_get_tc (sym)->class = XMC_BS;
+	    symbol_get_tc (sym)->symbol_class = XMC_BS;
 	}
       else if (S_GET_SEGMENT (sym) == absolute_section)
 	{
@@ -5219,8 +5219,8 @@ ppc_frob_symbol (symbolS *sym)
 	     ppc_adjust_symtab.  */
 	  ppc_saw_abs = TRUE;
 	  a->x_csect.x_smtyp = XTY_LD;
-	  if (symbol_get_tc (sym)->class == -1)
-	    symbol_get_tc (sym)->class = XMC_XO;
+	  if (symbol_get_tc (sym)->symbol_class == -1)
+	    symbol_get_tc (sym)->symbol_class = XMC_XO;
 	}
       else if (! S_IS_DEFINED (sym))
 	{
@@ -5228,17 +5228,17 @@ ppc_frob_symbol (symbolS *sym)
 	  a->x_csect.x_scnlen.l = 0;
 	  a->x_csect.x_smtyp = XTY_ER;
 	}
-      else if (symbol_get_tc (sym)->class == XMC_TC)
+      else if (symbol_get_tc (sym)->symbol_class == XMC_TC)
 	{
 	  symbolS *next;
 
 	  /* This is a TOC definition.  x_scnlen is the size of the
 	     TOC entry.  */
 	  next = symbol_next (sym);
-	  while (symbol_get_tc (next)->class == XMC_TC0)
+	  while (symbol_get_tc (next)->symbol_class == XMC_TC0)
 	    next = symbol_next (next);
 	  if (next == (symbolS *) NULL
-	      || symbol_get_tc (next)->class != XMC_TC)
+	      || symbol_get_tc (next)->symbol_class != XMC_TC)
 	    {
 	      if (ppc_after_toc_frag == (fragS *) NULL)
 		a->x_csect.x_scnlen.l = (bfd_section_size (stdoutput,
@@ -5298,10 +5298,10 @@ ppc_frob_symbol (symbolS *sym)
 
       a->x_csect.x_parmhash = 0;
       a->x_csect.x_snhash = 0;
-      if (symbol_get_tc (sym)->class == -1)
+      if (symbol_get_tc (sym)->symbol_class == -1)
 	a->x_csect.x_smclas = XMC_PR;
       else
-	a->x_csect.x_smclas = symbol_get_tc (sym)->class;
+	a->x_csect.x_smclas = symbol_get_tc (sym)->symbol_class;
       a->x_csect.x_stab = 0;
       a->x_csect.x_snstab = 0;
 
@@ -5506,9 +5506,9 @@ ppc_fix_adjustable (fixS *fix)
 	{
 	  TC_SYMFIELD_TYPE *sy_tc = symbol_get_tc (sy);
 
-	  if (sy_tc->class == XMC_TC0)
+	  if (sy_tc->symbol_class == XMC_TC0)
 	    continue;
-	  if (sy_tc->class != XMC_TC)
+	  if (sy_tc->symbol_class != XMC_TC)
 	    break;
 	  if (val == resolve_symbol_value (sy))
 	    {
@@ -5525,8 +5525,8 @@ ppc_fix_adjustable (fixS *fix)
   /* Possibly adjust the reloc to be against the csect.  */
   tc = symbol_get_tc (fix->fx_addsy);
   if (tc->subseg == 0
-      && tc->class != XMC_TC0
-      && tc->class != XMC_TC
+      && tc->symbol_class != XMC_TC0
+      && tc->symbol_class != XMC_TC
       && symseg != bss_section
       /* Don't adjust if this is a reloc in the toc section.  */
       && (symseg != data_section
@@ -5791,8 +5791,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  && (operand->insert == NULL || ppc_obj64)
 	  && fixP->fx_addsy != NULL
 	  && symbol_get_tc (fixP->fx_addsy)->subseg != 0
-	  && symbol_get_tc (fixP->fx_addsy)->class != XMC_TC
-	  && symbol_get_tc (fixP->fx_addsy)->class != XMC_TC0
+	  && symbol_get_tc (fixP->fx_addsy)->symbol_class != XMC_TC
+	  && symbol_get_tc (fixP->fx_addsy)->symbol_class != XMC_TC0
 	  && S_GET_SEGMENT (fixP->fx_addsy) != bss_section)
 	{
 	  value = fixP->fx_offset;

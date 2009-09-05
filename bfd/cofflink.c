@@ -79,7 +79,7 @@ _bfd_coff_link_hash_newfunc (struct bfd_hash_entry *entry,
       /* Set local fields.  */
       ret->indx = -1;
       ret->type = T_NULL;
-      ret->class = C_NULL;
+      ret->symbol_class = C_NULL;
       ret->numaux = 0;
       ret->auxbfd = NULL;
       ret->aux = NULL;
@@ -488,14 +488,14 @@ coff_link_add_symbols (bfd *abfd,
                  the hash table, or if we are looking at a symbol
                  definition, then update the symbol class and type in
                  the hash table.  */
-  	      if (((*sym_hash)->class == C_NULL
+  	      if (((*sym_hash)->symbol_class == C_NULL
   		   && (*sym_hash)->type == T_NULL)
   		  || sym.n_scnum != 0
   		  || (sym.n_value != 0
   		      && (*sym_hash)->root.type != bfd_link_hash_defined
   		      && (*sym_hash)->root.type != bfd_link_hash_defweak))
   		{
-  		  (*sym_hash)->class = sym.n_sclass;
+  		  (*sym_hash)->symbol_class = sym.n_sclass;
   		  if (sym.n_type != T_NULL)
   		    {
   		      /* We want to warn if the type changed, but not
@@ -1605,7 +1605,7 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *finfo, bfd *input_bfd)
 	  mt = bfd_alloc (input_bfd, amt);
 	  if (mt == NULL)
 	    return FALSE;
-	  mt->class = isym.n_sclass;
+	  mt->type_class = isym.n_sclass;
 
 	  /* Pick up the aux entry, which points to the end of the tag
              entries.  */
@@ -1694,7 +1694,7 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *finfo, bfd *input_bfd)
 		{
 		  struct coff_debug_merge_element *me, *mel;
 
-		  if (mtl->class != mt->class)
+		  if (mtl->type_class != mt->type_class)
 		    continue;
 
 		  for (me = mt->elements, mel = mtl->elements;
@@ -2556,7 +2556,7 @@ _bfd_coff_write_global_sym (struct coff_link_hash_entry *h, void *data)
       isym._n._n_n._n_offset = STRING_SIZE_SIZE + indx;
     }
 
-  isym.n_sclass = h->class;
+  isym.n_sclass = h->symbol_class;
   isym.n_type = h->type;
 
   if (isym.n_sclass == C_NULL)
@@ -2942,7 +2942,7 @@ _bfd_coff_generic_relocate_section (bfd *output_bfd,
 
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    {
-              if (h->class == C_NT_WEAK && h->numaux == 1)
+              if (h->symbol_class == C_NT_WEAK && h->numaux == 1)
 		{
 		  /* See _Microsoft Portable Executable and Common Object
                      File Format Specification_, section 5.5.3.

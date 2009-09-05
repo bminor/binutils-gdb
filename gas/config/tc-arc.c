@@ -47,7 +47,7 @@ const struct syntax_classes
 {
   char *name;
   int  len;
-  int  class;
+  int  s_class;
 } syntaxclass[] =
 {
   { "SYNTAX_3OP|OP1_MUST_BE_IMM", 26, SYNTAX_3OP|OP1_MUST_BE_IMM|SYNTAX_VALID },
@@ -646,7 +646,7 @@ arc_extinst (int ignore ATTRIBUTE_UNUSED)
   int suffixcode = -1;
   int opcode, subopcode;
   int i;
-  int class = 0;
+  int s_class = 0;
   int name_len;
   struct arc_opcode *ext_op;
 
@@ -756,20 +756,20 @@ arc_extinst (int ignore ATTRIBUTE_UNUSED)
     {
       if (!strncmp (syntaxclass[i].name,input_line_pointer, syntaxclass[i].len))
 	{
-	  class = syntaxclass[i].class;
+	  s_class = syntaxclass[i].s_class;
 	  input_line_pointer += syntaxclass[i].len;
 	  break;
 	}
     }
 
-  if (0 == (SYNTAX_VALID & class))
+  if (0 == (SYNTAX_VALID & s_class))
     {
       as_bad (_("invalid syntax class"));
       ignore_rest_of_line ();
       return;
     }
 
-  if ((0x3 == opcode) & (class & SYNTAX_3OP))
+  if ((0x3 == opcode) & (s_class & SYNTAX_3OP))
     {
       as_bad (_("opcode 0x3 and SYNTAX_3OP invalid"));
       ignore_rest_of_line ();
@@ -797,7 +797,7 @@ arc_extinst (int ignore ATTRIBUTE_UNUSED)
       break;
     };
 
-  strcat (syntax, ((opcode == 0x3) ? "%a,%b" : ((class & SYNTAX_3OP) ? "%a,%b,%c" : "%b,%c")));
+  strcat (syntax, ((opcode == 0x3) ? "%a,%b" : ((s_class & SYNTAX_3OP) ? "%a,%b,%c" : "%b,%c")));
   if (suffixcode < 2)
     strcat (syntax, "%F");
   strcat (syntax, "%S%L");
@@ -807,7 +807,7 @@ arc_extinst (int ignore ATTRIBUTE_UNUSED)
 
   ext_op->mask  = I (-1) | ((0x3 == opcode) ? C (-1) : 0);
   ext_op->value = I (opcode) | ((0x3 == opcode) ? C (subopcode) : 0);
-  ext_op->flags = class;
+  ext_op->flags = s_class;
   ext_op->next_asm = arc_ext_opcodes;
   ext_op->next_dis = arc_ext_opcodes;
   arc_ext_opcodes = ext_op;
@@ -829,7 +829,7 @@ arc_extinst (int ignore ATTRIBUTE_UNUSED)
   p = frag_more (1);
   *p = subopcode;
   p = frag_more (1);
-  *p = (class & (OP1_MUST_BE_IMM | OP1_IMM_IMPLIED) ? IGNORE_FIRST_OPD : 0);
+  *p = (s_class & (OP1_MUST_BE_IMM | OP1_IMM_IMPLIED) ? IGNORE_FIRST_OPD : 0);
   p = frag_more (name_len);
   strncpy (p, syntax, name_len);
   p = frag_more (1);

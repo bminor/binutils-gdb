@@ -2620,7 +2620,7 @@ s7_get_insn_class_from_type (enum score_insn_type type)
 }
 
 static unsigned long
-s7_adjust_paritybit (unsigned long m_code, enum insn_class class)
+s7_adjust_paritybit (unsigned long m_code, enum insn_class i_class)
 {
   unsigned long result = 0;
   unsigned long m_code_high = 0;
@@ -2628,22 +2628,22 @@ s7_adjust_paritybit (unsigned long m_code, enum insn_class class)
   unsigned long pb_high = 0;
   unsigned long pb_low = 0;
 
-  if (class == INSN_CLASS_32)
+  if (i_class == INSN_CLASS_32)
     {
       pb_high = 0x80000000;
       pb_low = 0x00008000;
     }
-  else if (class == INSN_CLASS_16)
+  else if (i_class == INSN_CLASS_16)
     {
       pb_high = 0;
       pb_low = 0;
     }
-  else if (class == INSN_CLASS_PCE)
+  else if (i_class == INSN_CLASS_PCE)
     {
       pb_high = 0;
       pb_low = 0x00008000;
     }
-  else if (class == INSN_CLASS_SYN)
+  else if (i_class == INSN_CLASS_SYN)
     {
       /* FIXME.  at this time, INSN_CLASS_SYN must be 32 bit, but, instruction type should
          be changed if macro instruction has been expanded.  */

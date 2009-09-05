@@ -134,7 +134,7 @@ struct ppc_tc_sy
      .globl or .lglobl statement.  */
   int output;
   /* The symbol class.  */
-  int class;
+  int symbol_class;
   /* The real name, if the symbol was renamed.  */
   char *real_name;
   /* For a csect symbol, the subsegment we are using.  This is zero
@@ -195,7 +195,7 @@ do {								\
     S_SET_SEGMENT (dest, S_GET_SEGMENT (src));			\
   symbol_get_tc (dest)->size = symbol_get_tc (src)->size;	\
   symbol_get_tc (dest)->align = symbol_get_tc (src)->align;	\
-  symbol_get_tc (dest)->class = symbol_get_tc (src)->class;	\
+  symbol_get_tc (dest)->symbol_class = symbol_get_tc (src)->symbol_class;	\
   symbol_get_tc (dest)->within = symbol_get_tc (src)->within;	\
 } while (0)
 

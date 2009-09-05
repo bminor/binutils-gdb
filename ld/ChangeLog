@@ -1,3 +1,9 @@
+2009-09-05  Martin Thuresson  <martin@mtme.org>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_load_symbols,
+	gld${EMULATION_NAME}_try_needed): Rename variable class to
+	link_class.
+
 2009-09-04  Tristan Gingold  <gingold@adacore.com>
 
 	* NEWS: Add marker for 2.20.

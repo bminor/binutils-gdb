@@ -361,7 +361,7 @@ bfd_pef_parse_imported_symbol (bfd *abfd ATTRIBUTE_UNUSED,
   BFD_ASSERT (len == 4);
 
   value = bfd_getb32 (buf);
-  symbol->class = value >> 24;
+  symbol->symbol_class = value >> 24;
   symbol->name = value & 0x00ffffff;
 
   return 0;
