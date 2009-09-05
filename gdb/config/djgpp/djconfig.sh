@@ -141,11 +141,13 @@ utod $srcdir/ltmain.sh
 export LD=ld
 export NM=nm
 export CC=gcc
-export CFLAGS="-O2 -g"
+export CXX=gpp
+export CFLAGS="-O2 -ggdb -g3"
 export RANLIB=ranlib
 export DEFAULT_YACC="bison -y"
 export YACC="bison -y"
 export DEFAULT_LEX=flex
+export PATH_SEPARATOR=';'
 # Define explicitly the .exe extension because on W95 with LFN=y
 # the check might fail
 export am_cv_exeext=.exe

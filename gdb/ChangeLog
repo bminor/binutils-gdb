@@ -1,3 +1,8 @@
+2009-09-05  Eli Zaretskii  <eliz@gnu.org>
+
+	* config/djgpp/djconfig.sh: Fix for Autoconf 2.64.
+	* config/djgpp/config.sed: Fix for Autoconf 2.64.
+
 2009-09-05  Hui Zhu  <teawater@gmail.com>
 
 	* i386-tdep.c (i386_record_s): Add orig_addr.
