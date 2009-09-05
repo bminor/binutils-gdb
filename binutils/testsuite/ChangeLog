@@ -1,3 +1,8 @@
+2009-09-04  DJ Delorie  <dj@redhat.com>
+
+	* binutils-all/objdump.exp: Add m16c and m32c to the list of
+	expected cpus.
+
 2009-09-02  Jie Zhang  <jie.zhang@analog.com>
 
 	* binutils-all/bfin/unknown-mode.s: New test.
