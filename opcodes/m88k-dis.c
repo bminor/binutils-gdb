@@ -696,7 +696,7 @@ m88kdis (bfd_vma pc,
   unsigned int opcode;
   const HASHTAB *entry_ptr;
   int opmask;
-  unsigned int class;
+  unsigned int in_class;
 
   if (! ihashtab_initialized)
     {
@@ -706,17 +706,17 @@ m88kdis (bfd_vma pc,
 
   /* Create the appropriate mask to isolate the opcode.  */
   opmask = DEFMASK;
-  class = instruction & DEFMASK;
-  if ((class >= SFU0) && (class <= SFU7))
+  in_class = instruction & DEFMASK;
+  if ((in_class >= SFU0) && (in_class <= SFU7))
     {
       if (instruction < SFU1)
 	opmask = CTRLMASK;
       else
 	opmask = SFUMASK;
     }
-  else if (class == RRR)
+  else if (in_class == RRR)
     opmask = RRRMASK;
-  else if (class == RRI10)
+  else if (in_class == RRI10)
     opmask = RRI10MASK;
 
   /* Isolate the opcode.  */

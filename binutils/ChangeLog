@@ -1,3 +1,8 @@
+2009-09-05  Martin Thuresson  <martin@mtme.org>
+
+	* ieee.c (ieee_read_cxx_misc, ieee_read_cxx_class,
+	ieee_read_reference): Rename variables named class to cxxclass.
+
 2009-09-04  Tristan Gingold  <gingold@adacore.com>
 
 	* NEWS: Add marker for 2.20.

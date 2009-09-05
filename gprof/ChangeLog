@@ -1,3 +1,8 @@
+2009-09-05  Martin Thuresson  <martin@mtme.org>
+
+	* corefile.c (core_create_function_syms): Rename variable
+	class to cxxclass.
+
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.am (AM_CPPFLAGS): Renamed from ...

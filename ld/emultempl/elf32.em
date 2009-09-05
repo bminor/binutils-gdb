@@ -114,30 +114,30 @@ fragment <<EOF
 static bfd_boolean
 gld${EMULATION_NAME}_load_symbols (lang_input_statement_type *entry)
 {
-  int class = 0;
+  int link_class = 0;
 
   /* Tell the ELF linker that we don't want the output file to have a
      DT_NEEDED entry for this file, unless it is used to resolve
      references in a regular object.  */
   if (entry->as_needed)
-    class = DYN_AS_NEEDED;
+    link_class = DYN_AS_NEEDED;
 
   /* Tell the ELF linker that we don't want the output file to have a
      DT_NEEDED entry for any dynamic library in DT_NEEDED tags from
      this file at all.  */
   if (!entry->add_needed)
-    class |= DYN_NO_ADD_NEEDED;
+    link_class |= DYN_NO_ADD_NEEDED;
 
   if (entry->just_syms_flag
       && (bfd_get_file_flags (entry->the_bfd) & DYNAMIC) != 0)
     einfo (_("%P%F: --just-symbols may not be used on DSO: %B\n"),
 	   entry->the_bfd);
 
-  if (!class
+  if (!link_class
       || (bfd_get_file_flags (entry->the_bfd) & DYNAMIC) == 0)
     return FALSE;
 
-  bfd_elf_set_dyn_lib_class (entry->the_bfd, class);
+  bfd_elf_set_dyn_lib_class (entry->the_bfd, link_class);
 
   /* Continue on with normal load_symbols processing.  */
   return FALSE;
@@ -306,7 +306,7 @@ gld${EMULATION_NAME}_try_needed (struct dt_needed *needed,
   bfd *abfd;
   const char *name = needed->name;
   const char *soname;
-  int class;
+  int link_class;
 
   abfd = bfd_openr (name, bfd_get_target (link_info.output_bfd));
   if (abfd == NULL)
@@ -419,16 +419,16 @@ fragment <<EOF
   /* Tell the ELF linker that we don't want the output file to have a
      DT_NEEDED entry for this file, unless it is used to resolve
      references in a regular object.  */
-  class = DYN_DT_NEEDED;
+  link_class = DYN_DT_NEEDED;
 
   /* Tell the ELF linker that we don't want the output file to have a
      DT_NEEDED entry for this file at all if the entry is from a file
      with DYN_NO_ADD_NEEDED.  */
   if (needed->by != NULL
       && (bfd_elf_get_dyn_lib_class (needed->by) & DYN_NO_ADD_NEEDED) != 0)
-    class |= DYN_NO_NEEDED | DYN_NO_ADD_NEEDED;
+    link_class |= DYN_NO_NEEDED | DYN_NO_ADD_NEEDED;
 
-  bfd_elf_set_dyn_lib_class (abfd, class);
+  bfd_elf_set_dyn_lib_class (abfd, link_class);
 
   /* Add this file into the symbol table.  */
   if (! bfd_link_add_symbols (abfd, &link_info))

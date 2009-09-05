@@ -2500,7 +2500,7 @@ ieee_read_cxx_misc (struct ieee_info *info, const bfd_byte **pp,
 
     case 'z':
       {
-	const char *name, *mangled, *class;
+	const char *name, *mangled, *cxx_class;
 	unsigned long namlen, mangledlen, classlen;
 	bfd_vma control;
 
@@ -2508,7 +2508,7 @@ ieee_read_cxx_misc (struct ieee_info *info, const bfd_byte **pp,
 
 	if (! ieee_require_atn65 (info, pp, &name, &namlen)
 	    || ! ieee_require_atn65 (info, pp, &mangled, &mangledlen)
-	    || ! ieee_require_atn65 (info, pp, &class, &classlen)
+	    || ! ieee_require_atn65 (info, pp, &cxx_class, &classlen)
 	    || ! ieee_require_asn (info, pp, &control))
 	  return FALSE;
 
@@ -2533,7 +2533,7 @@ ieee_read_cxx_class (struct ieee_info *info, const bfd_byte **pp,
 		     unsigned long count)
 {
   const bfd_byte *start;
-  bfd_vma class;
+  bfd_vma cxx_class;
   const char *tag;
   unsigned long taglen;
   struct ieee_tag *it;
@@ -2558,7 +2558,7 @@ ieee_read_cxx_class (struct ieee_info *info, const bfd_byte **pp,
 
   start = *pp;
 
-  if (! ieee_require_asn (info, pp, &class))
+  if (! ieee_require_asn (info, pp, &cxx_class))
     return FALSE;
   --count;
 
@@ -3180,7 +3180,7 @@ ieee_read_cxx_class (struct ieee_info *info, const bfd_byte **pp,
      it->slot.  We update it->slot to automatically update all
      references to this struct.  */
   it->slot = debug_make_object_type (dhandle,
-				     class != 'u',
+				     cxx_class != 'u',
 				     debug_get_type_size (dhandle,
 							  it->slot),
 				     fields, baseclasses, dmethods,
@@ -3303,7 +3303,7 @@ ieee_read_reference (struct ieee_info *info, const bfd_byte **pp)
 {
   const bfd_byte *start;
   bfd_vma flags;
-  const char *class, *name;
+  const char *cxx_class, *name;
   unsigned long classlen, namlen;
   debug_type *pslot;
   debug_type target;
@@ -3317,7 +3317,7 @@ ieee_read_reference (struct ieee_info *info, const bfd_byte **pp)
      the spec.  */
   if (flags == 3)
     {
-      if (! ieee_require_atn65 (info, pp, &class, &classlen))
+      if (! ieee_require_atn65 (info, pp, &cxx_class, &classlen))
 	return FALSE;
     }
 
@@ -3407,8 +3407,8 @@ ieee_read_reference (struct ieee_info *info, const bfd_byte **pp)
 
       for (it = info->tags; it != NULL; it = it->next)
 	{
-	  if (it->name[0] == class[0]
-	      && strncmp (it->name, class, classlen) == 0
+	  if (it->name[0] == cxx_class[0]
+	      && strncmp (it->name, cxx_class, classlen) == 0
 	      && strlen (it->name) == classlen)
 	    {
 	      if (it->fslots != NULL)

@@ -2221,20 +2221,20 @@ fixup_has_matching_lo_p (fixS *fixp)
 
 static int
 insn_uses_reg (const struct mips_cl_insn *ip, unsigned int reg,
-	       enum mips_regclass class)
+	       enum mips_regclass regclass)
 {
-  if (class == MIPS16_REG)
+  if (regclass == MIPS16_REG)
     {
       gas_assert (mips_opts.mips16);
       reg = mips16_to_32_reg_map[reg];
-      class = MIPS_GR_REG;
+      regclass = MIPS_GR_REG;
     }
 
   /* Don't report on general register ZERO, since it never changes.  */
-  if (class == MIPS_GR_REG && reg == ZERO)
+  if (regclass == MIPS_GR_REG && reg == ZERO)
     return 0;
 
-  if (class == MIPS_FP_REG)
+  if (regclass == MIPS_FP_REG)
     {
       gas_assert (! mips_opts.mips16);
       /* If we are called with either $f0 or $f1, we must check $f0.

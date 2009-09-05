@@ -353,11 +353,11 @@ _bfd_xcoff64_swap_sym_out (abfd, inp, extp)
 }
 
 static void
-_bfd_xcoff64_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
+_bfd_xcoff64_swap_aux_in (abfd, ext1, type, in_class, indx, numaux, in1)
      bfd *abfd;
      PTR ext1;
      int type;
-     int class;
+     int in_class;
      int indx;
      int numaux;
      PTR in1;
@@ -365,7 +365,7 @@ _bfd_xcoff64_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
   union external_auxent *ext = (union external_auxent *) ext1;
   union internal_auxent *in = (union internal_auxent *) in1;
 
-  switch (class)
+  switch (in_class)
     {
     case C_FILE:
       if (ext->x_file.x_n.x_zeroes[0] == 0)
@@ -420,7 +420,8 @@ _bfd_xcoff64_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
       break;
     }
 
-  if (class == C_BLOCK || class == C_FCN || ISFCN (type) || ISTAG (class))
+  if (in_class == C_BLOCK || in_class == C_FCN || ISFCN (type)
+      || ISTAG (in_class))
     {
       in->x_sym.x_fcnary.x_fcn.x_lnnoptr
 	= H_GET_64 (abfd, ext->x_sym.x_fcnary.x_fcn.x_lnnoptr);
@@ -444,11 +445,11 @@ _bfd_xcoff64_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
 }
 
 static unsigned int
-_bfd_xcoff64_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
+_bfd_xcoff64_swap_aux_out (abfd, inp, type, in_class, indx, numaux, extp)
      bfd *abfd;
      PTR inp;
      int type;
-     int class;
+     int in_class;
      int indx ATTRIBUTE_UNUSED;
      int numaux ATTRIBUTE_UNUSED;
      PTR extp;
@@ -457,7 +458,7 @@ _bfd_xcoff64_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
   union external_auxent *ext = (union external_auxent *) extp;
 
   memset ((PTR) ext, 0, bfd_coff_auxesz (abfd));
-  switch (class)
+  switch (in_class)
     {
     case C_FILE:
       if (in->x_file.x_n.x_zeroes == 0)
@@ -506,7 +507,8 @@ _bfd_xcoff64_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
       break;
     }
 
-  if (class == C_BLOCK || class == C_FCN || ISFCN (type) || ISTAG (class))
+  if (in_class == C_BLOCK || in_class == C_FCN || ISFCN (type)
+      || ISTAG (in_class))
     {
       H_PUT_64 (abfd, in->x_sym.x_fcnary.x_fcn.x_lnnoptr,
 	       ext->x_sym.x_fcnary.x_fcn.x_lnnoptr);

@@ -1,3 +1,10 @@
+2009-09-05  Martin Thuresson  <martin@mtme.org>
+
+	* ia64-dis.c (print_insn_ia64): Update code to use renamed member.
+	* m88k-dis.c (m88kdis): Rename variable class to in_class.
+	* tic80-opc.c (tic80_symbol_to_value, tic80_value_to_symbol):
+	Rename argument class to symbol_class.
+
 2009-09-04  Jie Zhang  <jie.zhang@analog.com>
 
 	* bfin-dis.c (decode_pseudodbg_assert_0): Change according

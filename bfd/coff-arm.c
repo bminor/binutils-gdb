@@ -1332,8 +1332,8 @@ coff_arm_relocate_section (bfd *output_bfd,
 
               if (howto->type == ARM_26)
                 {
-                  if (   h->class == C_THUMBSTATFUNC
-		      || h->class == C_THUMBEXTFUNC)
+                  if (   h->symbol_class == C_THUMBSTATFUNC
+		      || h->symbol_class == C_THUMBEXTFUNC)
 		    {
 		      /* Arm code calling a Thumb function.  */
 		      unsigned long int                 tmp;
@@ -1419,9 +1419,9 @@ coff_arm_relocate_section (bfd *output_bfd,
 	      /* Note: We used to check for ARM_THUMB9 and ARM_THUMB12.  */
               else if (howto->type == ARM_THUMB23)
                 {
-                  if (   h->class == C_EXT
-		      || h->class == C_STAT
-		      || h->class == C_LABEL)
+                  if (   h->symbol_class == C_EXT
+		      || h->symbol_class == C_STAT
+		      || h->symbol_class == C_LABEL)
 		    {
 		      /* Thumb code calling an ARM function.  */
 		      asection *                         s = 0;
@@ -1721,8 +1721,8 @@ coff_arm_relocate_section (bfd *output_bfd,
 	  int patchit = FALSE;
 
 	  if (h != NULL
-	      && (   h->class == C_THUMBSTATFUNC
-		  || h->class == C_THUMBEXTFUNC))
+	      && (   h->symbol_class == C_THUMBSTATFUNC
+		  || h->symbol_class == C_THUMBEXTFUNC))
 	    {
 	      patchit = TRUE;
 	    }
@@ -1932,7 +1932,7 @@ record_thumb_to_arm_glue (struct bfd_link_info *        info,
 
   /* If we mark it 'thumb', the disassembler will do a better job.  */
   myh = (struct coff_link_hash_entry *) bh;
-  myh->class = C_THUMBEXTFUNC;
+  myh->symbol_class = C_THUMBEXTFUNC;
 
   free (tmp_name);
 
@@ -2096,7 +2096,7 @@ bfd_arm_process_before_allocation (bfd *                   abfd,
 		 the target of the call. If it is a thumb target, we
 		 insert glue.  */
 
-	      if (h->class == C_THUMBEXTFUNC)
+	      if (h->symbol_class == C_THUMBEXTFUNC)
 		record_arm_to_thumb_glue (info, h);
 	      break;
 
@@ -2110,7 +2110,7 @@ bfd_arm_process_before_allocation (bfd *                   abfd,
 		 for it.  This is not really a problem, since the link
 		 is doomed anyway.  */
 
-	      switch (h->class)
+	      switch (h->symbol_class)
 		{
 		case C_EXT:
 		case C_STAT:

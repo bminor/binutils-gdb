@@ -79,7 +79,7 @@ enum bfd_pef_imported_library_options
 
 struct bfd_pef_imported_symbol
 {
-  unsigned char class;
+  unsigned char symbol_class;
   unsigned long name;
 };
 typedef struct bfd_pef_imported_symbol bfd_pef_imported_symbol;

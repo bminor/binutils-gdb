@@ -218,54 +218,57 @@ adjust_scnhdr_out_post (abfd, in, out)
 }
 
 static void
-adjust_aux_in_post  (abfd, ext1, type, class, indx, numaux, in1)
+adjust_aux_in_post  (abfd, ext1, type, in_class, indx, numaux, in1)
      bfd *abfd ATTRIBUTE_UNUSED;
      PTR ext1 ATTRIBUTE_UNUSED;
      int type;
-     int class;
+     int in_class;
      int indx ATTRIBUTE_UNUSED;
      int numaux ATTRIBUTE_UNUSED;
      PTR in1;
 {
   union internal_auxent *in = (union internal_auxent *) in1;
 
-  if (class == C_BLOCK || class == C_FCN || ISFCN (type) || ISTAG (class))
+  if (in_class == C_BLOCK || in_class == C_FCN || ISFCN (type)
+      || ISTAG (in_class))
     {
       ADJUST_VAL (in->x_sym.x_fcnary.x_fcn.x_lnnoptr, GO32_STUBSIZE);
     }
 }
 
 static void
-adjust_aux_out_pre  (abfd, inp, type, class, indx, numaux, extp)
+adjust_aux_out_pre  (abfd, inp, type, in_class, indx, numaux, extp)
      bfd *abfd ATTRIBUTE_UNUSED;
      PTR inp;
      int type;
-     int class;
+     int in_class;
      int indx ATTRIBUTE_UNUSED;
      int numaux ATTRIBUTE_UNUSED;
      PTR extp ATTRIBUTE_UNUSED;
 {
   union internal_auxent *in = (union internal_auxent *) inp;
 
-  if (class == C_BLOCK || class == C_FCN || ISFCN (type) || ISTAG (class))
+  if (in_class == C_BLOCK || in_class == C_FCN || ISFCN (type)
+      || ISTAG (in_class))
     {
       ADJUST_VAL (in->x_sym.x_fcnary.x_fcn.x_lnnoptr, -GO32_STUBSIZE);
     }
 }
 
 static void
-adjust_aux_out_post (abfd, inp, type, class, indx, numaux, extp)
+adjust_aux_out_post (abfd, inp, type, in_class, indx, numaux, extp)
      bfd *abfd ATTRIBUTE_UNUSED;
      PTR inp;
      int type;
-     int class;
+     int in_class;
      int indx ATTRIBUTE_UNUSED;
      int numaux ATTRIBUTE_UNUSED;
      PTR extp ATTRIBUTE_UNUSED;
 {
   union internal_auxent *in = (union internal_auxent *) inp;
 
-  if (class == C_BLOCK || class == C_FCN || ISFCN (type) || ISTAG (class))
+  if (in_class == C_BLOCK || in_class == C_FCN || ISFCN (type)
+      || ISTAG (in_class))
     {
       ADJUST_VAL (in->x_sym.x_fcnary.x_fcn.x_lnnoptr, GO32_STUBSIZE);
     }

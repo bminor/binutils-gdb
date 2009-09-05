@@ -488,14 +488,14 @@ coff_i960_relocate_section (output_bfd, info, input_bfd, input_section,
 
       if (howto->type == R_OPTCALL && ! info->relocatable && symndx != -1)
 	{
-	  int class;
+	  int class_val;
 
 	  if (h != NULL)
-	    class = h->class;
+	    class_val = h->symbol_class;
 	  else
-	    class = sym->n_sclass;
+	    class_val = sym->n_sclass;
 
-	  switch (class)
+	  switch (class_val)
 	    {
 	    case C_NULL:
 	      /* This symbol is apparently not from a COFF input file.

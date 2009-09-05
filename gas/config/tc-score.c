@@ -2490,7 +2490,7 @@ s3_get_insn_class_from_type (enum score_insn_type type)
    32-bit instruction: 1, 0.
    16-bit instruction: 0.  */
 static bfd_vma
-s3_adjust_paritybit (bfd_vma m_code, enum insn_class class)
+s3_adjust_paritybit (bfd_vma m_code, enum insn_class i_class)
 {
   bfd_vma result = 0;
   bfd_vma m_code_high = 0;
@@ -2500,7 +2500,7 @@ s3_adjust_paritybit (bfd_vma m_code, enum insn_class class)
   unsigned long pb_middle = 0;
   unsigned long pb_low = 0;
 
-  if (class == INSN_CLASS_48)
+  if (i_class == INSN_CLASS_48)
     {
       pb_high = 0x800000000000LL;
       pb_middle = 0x80000000;
@@ -2512,7 +2512,7 @@ s3_adjust_paritybit (bfd_vma m_code, enum insn_class class)
                pb_middle | (m_code_middle << 1) |
                pb_low | m_code_low;
     }
-  else if (class == INSN_CLASS_32 || class == INSN_CLASS_SYN)
+  else if (i_class == INSN_CLASS_32 || i_class == INSN_CLASS_SYN)
     {
       pb_high = 0x80000000;
       pb_low = 0x00000000;
@@ -2520,7 +2520,7 @@ s3_adjust_paritybit (bfd_vma m_code, enum insn_class class)
       m_code_low = m_code & 0x00007fff;
       result = pb_high | (m_code_high << 1) | pb_low | m_code_low;
     }
-  else if (class == INSN_CLASS_16)
+  else if (i_class == INSN_CLASS_16)
     {
       pb_high = 0;
       pb_low = 0;
@@ -2528,7 +2528,7 @@ s3_adjust_paritybit (bfd_vma m_code, enum insn_class class)
       m_code_low = m_code & 0x00007fff;
       result = pb_high | (m_code_high << 1) | pb_low | m_code_low;
     }
-  else if (class == INSN_CLASS_PCE)
+  else if (i_class == INSN_CLASS_PCE)
     {
       /* Keep original.  */
       pb_high = 0;

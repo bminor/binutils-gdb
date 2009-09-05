@@ -495,11 +495,11 @@ _bfd_xcoff_swap_sym_out (abfd, inp, extp)
 }
 
 void
-_bfd_xcoff_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
+_bfd_xcoff_swap_aux_in (abfd, ext1, type, in_class, indx, numaux, in1)
      bfd *abfd;
      PTR ext1;
      int type;
-     int class;
+     int in_class;
      int indx;
      int numaux;
      PTR in1;
@@ -507,7 +507,7 @@ _bfd_xcoff_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
   AUXENT * ext = (AUXENT *)ext1;
   union internal_auxent *in = (union internal_auxent *)in1;
 
-  switch (class)
+  switch (in_class)
     {
     case C_FILE:
       if (ext->x_file.x_fname[0] == 0)
@@ -573,7 +573,8 @@ _bfd_xcoff_swap_aux_in (abfd, ext1, type, class, indx, numaux, in1)
   in->x_sym.x_tagndx.l = H_GET_32 (abfd, ext->x_sym.x_tagndx);
   in->x_sym.x_tvndx = H_GET_16 (abfd, ext->x_sym.x_tvndx);
 
-  if (class == C_BLOCK || class == C_FCN || ISFCN (type) || ISTAG (class))
+  if (in_class == C_BLOCK || in_class == C_FCN || ISFCN (type)
+      || ISTAG (in_class))
     {
       in->x_sym.x_fcnary.x_fcn.x_lnnoptr =
 	H_GET_32 (abfd, ext->x_sym.x_fcnary.x_fcn.x_lnnoptr);
@@ -614,11 +615,11 @@ unsigned int _bfd_xcoff_swap_aux_out
   PARAMS ((bfd *, PTR, int, int, int, int, PTR));
 
 unsigned int
-_bfd_xcoff_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
+_bfd_xcoff_swap_aux_out (abfd, inp, type, in_class, indx, numaux, extp)
      bfd * abfd;
      PTR   inp;
      int   type;
-     int   class;
+     int   in_class;
      int   indx ATTRIBUTE_UNUSED;
      int   numaux ATTRIBUTE_UNUSED;
      PTR   extp;
@@ -627,7 +628,7 @@ _bfd_xcoff_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
   AUXENT *ext = (AUXENT *)extp;
 
   memset ((PTR)ext, 0, bfd_coff_auxesz (abfd));
-  switch (class)
+  switch (in_class)
     {
     case C_FILE:
       if (in->x_file.x_fname[0] == 0)
@@ -677,7 +678,8 @@ _bfd_xcoff_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
   H_PUT_32 (abfd, in->x_sym.x_tagndx.l, ext->x_sym.x_tagndx);
   H_PUT_16 (abfd, in->x_sym.x_tvndx, ext->x_sym.x_tvndx);
 
-  if (class == C_BLOCK || class == C_FCN || ISFCN (type) || ISTAG (class))
+  if (in_class == C_BLOCK || in_class == C_FCN || ISFCN (type)
+      || ISTAG (in_class))
     {
       H_PUT_32 (abfd, in->x_sym.x_fcnary.x_fcn.x_lnnoptr,
 		ext->x_sym.x_fcnary.x_fcn.x_lnnoptr);

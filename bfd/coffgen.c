@@ -912,7 +912,7 @@ coff_write_symbol (bfd *abfd,
 {
   unsigned int numaux = native->u.syment.n_numaux;
   int type = native->u.syment.n_type;
-  int class = native->u.syment.n_sclass;
+  int n_sclass = native->u.syment.n_sclass;
   void * buf;
   bfd_size_type symesz;
 
@@ -958,7 +958,7 @@ coff_write_symbol (bfd *abfd,
 	{
 	  bfd_coff_swap_aux_out (abfd,
 				 &((native + j + 1)->u.auxent),
-				 type, class, (int) j,
+				 type, n_sclass, (int) j,
 				 native->u.syment.n_numaux,
 				 buf);
 	  if (bfd_bwrite (buf, auxesz, abfd) != auxesz)
@@ -1156,7 +1156,7 @@ coff_write_symbols (bfd *abfd)
 	  if (coff_backend_info (abfd)->_bfd_coff_classify_symbol != NULL)
 	    {
 	      bfd_error_handler_type current_error_handler;
-	      enum coff_symbol_classification class;
+	      enum coff_symbol_classification sym_class;
 	      unsigned char *n_sclass;
 
 	      /* Suppress error reporting by bfd_coff_classify_symbol.
@@ -1164,9 +1164,10 @@ coff_write_symbols (bfd *abfd)
 		 symbol which has no associated section and we do not have to
 		 worry about this, all we need to know is that it is local.  */
 	      current_error_handler = bfd_set_error_handler (null_error_handler);
-	      class = bfd_coff_classify_symbol (abfd, &c_symbol->native->u.syment);
+	      sym_class = bfd_coff_classify_symbol (abfd,
+                                                   &c_symbol->native->u.syment);
 	      (void) bfd_set_error_handler (current_error_handler);
-	  
+
 	      n_sclass = &c_symbol->native->u.syment.n_sclass;
 
 	      /* If the symbol class has been changed (eg objcopy/ld script/etc)
@@ -1178,10 +1179,10 @@ coff_write_symbols (bfd *abfd)
 
 	      if (symbol->flags & BSF_WEAK)
 		*n_sclass = obj_pe (abfd) ? C_NT_WEAK : C_WEAKEXT;
-	      else if (symbol->flags & BSF_LOCAL && class != COFF_SYMBOL_LOCAL)
+	      else if (symbol->flags & BSF_LOCAL && sym_class != COFF_SYMBOL_LOCAL)
 		*n_sclass = C_STAT;
 	      else if (symbol->flags & BSF_GLOBAL
-		       && (class != COFF_SYMBOL_GLOBAL
+		       && (sym_class != COFF_SYMBOL_GLOBAL
 #ifdef COFF_WITH_PE
 			   || *n_sclass == C_NT_WEAK
 #endif
@@ -1390,7 +1391,7 @@ coff_pointerize_aux (bfd *abfd,
 		     combined_entry_type *auxent)
 {
   unsigned int type = symbol->u.syment.n_type;
-  unsigned int class = symbol->u.syment.n_sclass;
+  unsigned int n_sclass = symbol->u.syment.n_sclass;
 
   if (coff_backend_info (abfd)->_bfd_coff_pointerize_aux_hook)
     {
@@ -1400,16 +1401,17 @@ coff_pointerize_aux (bfd *abfd,
     }
 
   /* Don't bother if this is a file or a section.  */
-  if (class == C_STAT && type == T_NULL)
+  if (n_sclass == C_STAT && type == T_NULL)
     return;
-  if (class == C_FILE)
+  if (n_sclass == C_FILE)
     return;
 
   /* Otherwise patch up.  */
 #define N_TMASK coff_data  (abfd)->local_n_tmask
 #define N_BTSHFT coff_data (abfd)->local_n_btshft
   
-  if ((ISFCN (type) || ISTAG (class) || class == C_BLOCK || class == C_FCN)
+  if ((ISFCN (type) || ISTAG (n_sclass) || n_sclass == C_BLOCK
+       || n_sclass == C_FCN)
       && auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l > 0)
     {
       auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.p =
@@ -2316,7 +2318,7 @@ coff_sizeof_headers (bfd *abfd, struct bfd_link_info *info)
 bfd_boolean
 bfd_coff_set_symbol_class (bfd *         abfd,
 			   asymbol *     symbol,
-			   unsigned int  class)
+			   unsigned int  symbol_class)
 {
   coff_symbol_type * csym;
 
@@ -2341,7 +2343,7 @@ bfd_coff_set_symbol_class (bfd *         abfd,
 	return FALSE;
 
       native->u.syment.n_type   = T_NULL;
-      native->u.syment.n_sclass = class;
+      native->u.syment.n_sclass = symbol_class;
 
       if (bfd_is_und_section (symbol->section))
 	{
@@ -2370,7 +2372,7 @@ bfd_coff_set_symbol_class (bfd *         abfd,
       csym->native = native;
     }
   else
-    csym->native->u.syment.n_sclass = class;
+    csym->native->u.syment.n_sclass = symbol_class;
 
   return TRUE;
 }

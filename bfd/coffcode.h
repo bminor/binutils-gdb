@@ -2443,9 +2443,9 @@ coff_pointerize_aux_hook (bfd *abfd ATTRIBUTE_UNUSED,
 			  unsigned int indaux,
 			  combined_entry_type *aux)
 {
-  int class = symbol->u.syment.n_sclass;
+  int n_sclass = symbol->u.syment.n_sclass;
 
-  if (CSECT_SYM_P (class)
+  if (CSECT_SYM_P (n_sclass)
       && indaux + 1 == symbol->u.syment.n_numaux)
     {
       if (SMTYP_SMTYP (aux->u.auxent.x_csect.x_smtyp) == XTY_LD)
