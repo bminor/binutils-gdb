@@ -1,3 +1,8 @@
+2009-09-05  Jie Zhang  <jie.zhang@analog.com>
+
+	* doc/as.texinfo: Document that Blackfin GAS does not
+	accept SYMBOL = VALUE.
+
 2009-09-05  Martin Thuresson  <martin@mtme.org>
 
 	* config/tc-arc.c (struct syntax_classes): Rename member class

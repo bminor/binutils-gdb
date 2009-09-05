@@ -1,3 +1,7 @@
+2009-09-05  Jie Zhang  <jie.zhang@analog.com>
+
+	* ld-elf/sec64k.exp: Use ".set" instead of "=" for bfin-*-*.
+
 2009-09-03  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* ld-pe/longsecn.d: Adjusted to match new .text section merging
