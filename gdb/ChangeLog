@@ -1,3 +1,10 @@
+2009-09-05  Hui Zhu  <teawater@gmail.com>
+
+	* i386-tdep.c (i386_record_s): Add orig_addr.
+	(i386_record_check_override): New function.
+	(i386_record_lea_modrm): Call i386_record_check_override.
+	(i386_process_record): Ditto.
+
 2009-09-03  Nathan Froyd  <froydnj@codesourcery.com>
 
 	* dwarf2loc.c (struct piece_closure): New.

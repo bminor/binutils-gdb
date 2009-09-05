@@ -2867,6 +2867,7 @@ struct i386_record_s
 {
   struct gdbarch *gdbarch;
   struct regcache *regcache;
+  CORE_ADDR orig_addr;
   CORE_ADDR addr;
   int aflag;
   int dflag;
@@ -3147,6 +3148,26 @@ no_rm:
   return 0;
 }
 
+static int
+i386_record_check_override (struct i386_record_s *irp)
+{
+  if (irp->override >= 0 && irp->override != X86_RECORD_DS_REGNUM)
+    {
+      ULONGEST orv, ds;
+
+      regcache_raw_read_unsigned (irp->regcache,
+                                  irp->regmap[irp->override],
+                                  &orv);
+      regcache_raw_read_unsigned (irp->regcache,
+                                  irp->regmap[X86_RECORD_DS_REGNUM],
+                                  &ds);
+      if (orv != ds)
+        return 1;
+    }
+
+  return 0;
+}
+
 /* Record the value of the memory that willbe changed in current instruction
    to "record_arch_list".
    Return -1 if something wrong. */
@@ -3157,13 +3178,12 @@ i386_record_lea_modrm (struct i386_record_s *irp)
   struct gdbarch *gdbarch = irp->gdbarch;
   uint64_t addr;
 
-  if (irp->override >= 0)
+  if (i386_record_check_override (irp))
     {
-      if (record_debug)
-	printf_unfiltered (_("Process record ignores the memory change "
-			     "of instruction at address %s because it "
-			     "can't get the value of the segment register.\n"),
-			   paddress (gdbarch, irp->addr));
+      warning (_("Process record ignores the memory change "
+                 "of instruction at address %s because it "
+                 "can't get the value of the segment register."),
+               paddress (gdbarch, irp->orig_addr));
       return 0;
     }
 
@@ -3221,6 +3241,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   memset (&ir, 0, sizeof (struct i386_record_s));
   ir.regcache = regcache;
   ir.addr = addr;
+  ir.orig_addr = addr;
   ir.aflag = 1;
   ir.dflag = 1;
   ir.override = -1;
@@ -4039,14 +4060,13 @@ reswitch:
       /* mov EAX */
     case 0xa2:
     case 0xa3:
-      if (ir.override >= 0)
+      if (i386_record_check_override (&ir))
         {
-	  if (record_debug)
-	    printf_unfiltered (_("Process record ignores the memory change "
-				 "of instruction at address 0x%s because "
-				 "it can't get the value of the segment "
-				 "register.\n"),
-			       paddress (gdbarch, ir.addr));
+	  warning (_("Process record ignores the memory change "
+                     "of instruction at address 0x%s because "
+                     "it can't get the value of the segment "
+                     "register."),
+                   paddress (gdbarch, ir.orig_addr));
 	}
       else
 	{
@@ -4458,27 +4478,24 @@ reswitch:
                                       ir.regmap[X86_RECORD_REDI_REGNUM],
                                       &tmpulongest);
 
-          regcache_raw_read_unsigned (ir.regcache,
-                                      ir.regmap[X86_RECORD_ES_REGNUM],
-                                      &es);
-          regcache_raw_read_unsigned (ir.regcache,
-                                      ir.regmap[X86_RECORD_DS_REGNUM],
-                                      &ds);
-          if (ir.aflag && (es != ds))
+          ir.override = X86_RECORD_ES_REGNUM;
+          if (ir.aflag && i386_record_check_override (&ir))
             {
               /* addr += ((uint32_t) read_register (I386_ES_REGNUM)) << 4; */
-              if (record_debug)
-                printf_unfiltered (_("Process record ignores the memory "
-				     "change of instruction at address 0x%s "
-				     "because it can't get the value of the "
-				     "ES segment register.\n"),
-                                   paddress (gdbarch, ir.addr));
+              warning (_("Process record ignores the memory "
+                         "change of instruction at address 0x%s "
+                         "because it can't get the value of the "
+                         "ES segment register."),
+                       paddress (gdbarch, ir.orig_addr));
+            }
+          else
+            {
+              if (record_arch_list_add_mem (tmpulongest, 1 << ir.ot))
+                return -1;
             }
 
           if (prefixes & (PREFIX_REPZ | PREFIX_REPNZ))
             I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_RECX_REGNUM);
-          if (record_arch_list_add_mem (tmpulongest, 1 << ir.ot))
-            return -1;
           if (opcode == 0xa4 || opcode == 0xa5)
             I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_RESI_REGNUM);
           I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_REDI_REGNUM);
@@ -5086,15 +5103,14 @@ reswitch:
 		opcode = opcode << 8 | ir.modrm;
 		goto no_support;
 	      }
-	    if (ir.override >= 0)
+	    if (i386_record_check_override (&ir))
 	      {
-		if (record_debug)
-		  printf_unfiltered (_("Process record ignores the memory "
-				       "change of instruction at "
-				       "address %s because it can't get "
-				       "the value of the segment "
-				       "register.\n"),
-				     paddress (gdbarch, ir.addr));
+		warning (_("Process record ignores the memory "
+                           "change of instruction at "
+                           "address %s because it can't get "
+                           "the value of the segment "
+                           "register."),
+                         paddress (gdbarch, ir.orig_addr));
 	      }
 	    else
 	      {
@@ -5138,15 +5154,14 @@ reswitch:
 	  else
 	    {
 	      /* sidt */
-	      if (ir.override >= 0)
+	      if (i386_record_check_override (&ir))
 		{
-		  if (record_debug)
-		    printf_unfiltered (_("Process record ignores the memory "
-					 "change of instruction at "
-					 "address %s because it can't get "
-					 "the value of the segment "
-					 "register.\n"),
-				       paddress (gdbarch, ir.addr));
+		  warning (_("Process record ignores the memory "
+                             "change of instruction at "
+                             "address %s because it can't get "
+                             "the value of the segment "
+                             "register."),
+                           paddress (gdbarch, ir.orig_addr));
 		}
 	      else
 		{
