@@ -3272,6 +3272,10 @@ directive.  @xref{Set,,@code{.set}}.  In the same way, using a double
 equals sign @samp{=}@samp{=} here represents an equivalent of the
 @code{.eqv} directive.  @xref{Eqv,,@code{.eqv}}.
 
+@ifset Blackfin
+Blackfin does not support symbol assignment with @samp{=}.
+@end ifset
+
 @node Symbol Names
 @section Symbol Names
 

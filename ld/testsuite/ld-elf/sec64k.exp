@@ -77,9 +77,17 @@ for { set i 0 } { $i < $max_sec / $secs_per_file } { incr i } {
     puts $ofd "bar_\\secn:"
     puts $ofd "  .dc.a bar_\\secn"
     puts $ofd " .endm"
-    puts $ofd " secn = [expr $i * $secs_per_file]"
+    if {![istarget "bfin-*-*"]} then {
+	puts $ofd " secn = [expr $i * $secs_per_file]"
+    } else {
+	puts $ofd " .set secn, [expr $i * $secs_per_file]"
+    }
     puts $ofd " .rept $secs_per_file"
-    puts $ofd "  secn = secn + 1"
+    if {![istarget "bfin-*-*"]} then {
+	puts $ofd "  secn = secn + 1"
+    } else {
+	puts $ofd "  .set secn, secn + 1"
+    }
     puts $ofd "  sec %(secn), %(secn-1)"
     puts $ofd " .endr"
 
