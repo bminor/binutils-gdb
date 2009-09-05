@@ -1,3 +1,7 @@
+2009-09-05  Eli Zaretskii  <eliz@gnu.org>
+
+	* coffcode.h: Include libiberty.h.
+
 2009-09-05  Martin Thuresson  <martin@mtme.org>
 
 	* coff-arm.c (coff_arm_relocate_section)
