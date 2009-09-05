@@ -1,3 +1,8 @@
+2009-09-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.am (sysdump.o): Depend on sysroff.c.
+	* Makefile.in: Regenerate.
+
 2009-09-05  Martin Thuresson  <martin@mtme.org>
 
 	* ieee.c (ieee_read_cxx_misc, ieee_read_cxx_class,
