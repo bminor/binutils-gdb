@@ -32,6 +32,10 @@ debugS:
 	.uleb128 0x2	;# (DIE (0x6d) DW_TAG_subprogram)
 	.ascii "A\0"	;# DW_AT_name
 	.4byte	range_sub - range	;# DW_AT_ranges
+
+	;# minimal section alignment on alpha-* is 2, ensure no new invalid CU
+	;# will be started.
+	.balign	2
 debugE:
 
 	.section	.debug_abbrev,"",%progbits

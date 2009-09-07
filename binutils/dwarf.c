@@ -1985,9 +1985,22 @@ process_debug_info (struct dwarf_section *section,
 	  abbrev_number = read_leb128 (tags, & bytes_read, 0);
 	  tags += bytes_read;
 
-	  /* A null DIE marks the end of a list of siblings.  */
+	  /* A null DIE marks the end of a list of siblings or it may also be
+	     a section padding.  */
 	  if (abbrev_number == 0)
 	    {
+	      /* Check if it can be a section padding for the last CU.  */
+	      if (level == 0 && start == end)
+		{
+		  unsigned char *chk;
+
+		  for (chk = tags; chk < start; chk++)
+		    if (*chk != 0)
+		      break;
+		  if (chk == start)
+		    break;
+		}
+
 	      --level;
 	      if (level < 0)
 		{

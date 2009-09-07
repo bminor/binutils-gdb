@@ -1,3 +1,7 @@
+2009-09-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf.c (process_debug_info): Support section padding abbrev codes.
+
 2009-09-07  Tristan Gingold  <gingold@adacore.com>
 
 	* po/binutils.pot: Regenerate.
