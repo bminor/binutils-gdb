@@ -1,3 +1,7 @@
+2009-09-07  Tristan Gingold  <gingold@adacore.com>
+
+	* po/ld.pot: Regenerate.
+
 2009-09-05  Martin Thuresson  <martin@mtme.org>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_load_symbols,

@@ -1,3 +1,7 @@
+2009-09-07  Tristan Gingold  <gingold@adacore.com>
+
+	* po/binutils.pot: Regenerate.
+
 2009-09-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* Makefile.am (sysdump.o): Depend on sysroff.c.

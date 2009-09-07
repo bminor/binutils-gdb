@@ -187,6 +187,7 @@ config/te-sun3.h
 config/te-svr4.h
 config/te-symbian.h
 config/te-tmips.h
+config/te-vms.c
 config/te-vxworks.h
 config/te-wince-pe.h
 config/xtensa-relax.c

@@ -344,7 +344,6 @@ vms-misc.c
 vms-tir.c
 vms.c
 vms.h
-vmsutil.c
 xcoff-target.h
 xcofflink.c
 xsym.c
