@@ -1,3 +1,12 @@
+2009-09-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.in (BUILD_LIBS, BUILD_LIB_DEPS): Define and subst.
+	* configure: Regenerate.
+	* Makefile.am (LIBIBERTY, BUILD_LIBIBERTY, BUILD_LIBINTL): Delete.
+	(BUILD_LIBS, BUILD_LIB_DEPS): Define.  Use..
+	(i386-gen, ia64-gen, z8kgen): ..here.
+	* Makefile.in: Regenerate.
+
 2009-09-07  Tristan Gingold  <gingold@adacore.com>
 
 	* z8k-opc.h: Regenerate.
