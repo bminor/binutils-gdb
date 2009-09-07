@@ -101,6 +101,22 @@ AC_CACHE_CHECK(linker --as-needed support, bfd_cv_ld_as_needed,
 
 LT_LIB_M
 
+#Libs for generator progs
+if test "x$cross_compiling" = "xno"; then
+  BUILD_LIBS=../libiberty/libiberty.a
+  BUILD_LIB_DEPS=$BUILD_LIBS
+else
+  # if cross-compiling, assume that the system provides -liberty
+  # and that the version is compatible with new headers.
+  BUILD_LIBS=-liberty
+  BUILD_LIB_DEPS=
+fi
+BUILD_LIBS="$BUILD_LIBS $LIBINTL"
+BUILD_LIB_DEPS="$BUILD_LIB_DEPS $LIBINTL_DEP"
+
+AC_SUBST(BUILD_LIBS)
+AC_SUBST(BUILD_LIB_DEPS)
+
 # Horrible hacks to build DLLs on Windows and a shared library elsewhere.
 SHARED_LDFLAGS=
 SHARED_LIBADD=
