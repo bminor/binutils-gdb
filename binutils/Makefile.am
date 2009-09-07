@@ -432,6 +432,7 @@ endif
 coffdump_SOURCES = coffdump.c coffgrok.c $(BULIBS)
 
 sysdump_SOURCES = sysdump.c $(BULIBS)
+sysdump.o: sysroff.c
 
 # coff/sym.h and coff/ecoff.h won't be found by the automatic dependency
 # scripts, since they are only included conditionally.
