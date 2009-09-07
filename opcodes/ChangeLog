@@ -1,3 +1,8 @@
+2009-09-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* z8kgen.c (func): Stabilize qsort of identically named entries.
+	* z8k-opc.h: Regenerate.
+
 2009-09-07  Tristan Gingold  <gingold@adacore.com>
 
 	* po/opcodes.pot: Regenerate.

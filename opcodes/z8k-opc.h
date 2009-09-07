@@ -1820,14 +1820,6 @@ const opcode_entry_type z8k_table[] = {
 "ldb",OPC_ldb,0,{CLASS_REG_BYTE+(ARG_RD),CLASS_X+(ARG_RS),},
 	{CLASS_BIT+6,CLASS_BIT+0,CLASS_REGN0+(ARG_RS),CLASS_REG+(ARG_RD),CLASS_ADDRESS+(ARG_SRC),0,0,0,0,},2,4,74},
 
-/* 0010 0000 0000 dddd imm8 imm8 *** ldb rbd,imm8 */
-{
-#ifdef NICENAMES
-"ldb rbd,imm8",8,7,0x00,
-#endif
-"ldb",OPC_ldb,0,{CLASS_REG_BYTE+(ARG_RD),CLASS_IMM+(ARG_IMM8),},
-	{CLASS_BIT+2,CLASS_BIT+0,CLASS_BIT+0,CLASS_REG+(ARG_RD),CLASS_IMM+(ARG_IMM8),CLASS_IMM+(ARG_IMM8),0,0,0,},2,4,74},
-
 /* 1100 dddd imm8 *** ldb rbd,imm8 */
 {
 #ifdef NICENAMES
@@ -1835,6 +1827,14 @@ const opcode_entry_type z8k_table[] = {
 #endif
 "ldb",OPC_ldb,0,{CLASS_REG_BYTE+(ARG_RD),CLASS_IMM+(ARG_IMM8),},
 	{CLASS_BIT+0xc,CLASS_REG+(ARG_RD),CLASS_IMM+(ARG_IMM8),0,0,0,0,0,0,},2,2,74},
+
+/* 0010 0000 0000 dddd imm8 imm8 *** ldb rbd,imm8 */
+{
+#ifdef NICENAMES
+"ldb rbd,imm8",8,7,0x00,
+#endif
+"ldb",OPC_ldb,0,{CLASS_REG_BYTE+(ARG_RD),CLASS_IMM+(ARG_IMM8),},
+	{CLASS_BIT+2,CLASS_BIT+0,CLASS_BIT+0,CLASS_REG+(ARG_RD),CLASS_IMM+(ARG_IMM8),CLASS_IMM+(ARG_IMM8),0,0,0,},2,4,74},
 
 /* 1010 0000 ssss dddd *** ldb rbd,rbs */
 {
@@ -3791,7 +3791,7 @@ const opcode_entry_type z8k_table[] = {
 /* 1000 1000 ssss dddd *** xorb rbd,rbs */
 {
 #ifdef NICENAMES
-"xorb rbd,rbs",8,4,0x01,
+"xorb rbd,rbs",8,4,0x1c,
 #endif
 "xorb",OPC_xorb,0,{CLASS_REG_BYTE+(ARG_RD),CLASS_REG_BYTE+(ARG_RS),},
 	{CLASS_BIT+8,CLASS_BIT+8,CLASS_REG+(ARG_RS),CLASS_REG+(ARG_RD),0,0,0,0,0,},2,2,203},
@@ -3799,7 +3799,7 @@ const opcode_entry_type z8k_table[] = {
 /* 1000 1000 ssss dddd *** xorb rbd,rbs */
 {
 #ifdef NICENAMES
-"xorb rbd,rbs",8,4,0x1c,
+"xorb rbd,rbs",8,4,0x01,
 #endif
 "xorb",OPC_xorb,0,{CLASS_REG_BYTE+(ARG_RD),CLASS_REG_BYTE+(ARG_RS),},
 	{CLASS_BIT+8,CLASS_BIT+8,CLASS_REG+(ARG_RS),CLASS_REG+(ARG_RD),0,0,0,0,0,},2,2,203},
