@@ -8163,6 +8163,12 @@ is_none_reloc (unsigned int reloc_type)
     case EM_MN10300: /* R_MN10300_NONE.  */
     case EM_M32R:    /* R_M32R_NONE.  */
       return reloc_type == 0;
+    case EM_XTENSA_OLD:
+    case EM_XTENSA:
+      return reloc_type == 0      /* R_XTENSA_NONE.  */
+	     || reloc_type == 17  /* R_XTENSA_DIFF8.  */
+	     || reloc_type == 18  /* R_XTENSA_DIFF16.  */
+	     || reloc_type == 19; /* R_XTENSA_DIFF32.  */
     }
   return FALSE;
 }
