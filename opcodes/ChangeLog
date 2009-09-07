@@ -1,3 +1,7 @@
+2009-09-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* z8kgen.c (func): Fix thinko last patch.
+
 2009-09-07  Tristan Gingold  <gingold@adacore.com>
 
 	* po/opcodes.pot: Regenerate

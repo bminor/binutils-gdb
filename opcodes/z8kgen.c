@@ -574,7 +574,7 @@ func (const void *p1, const void *p2)
   int ret = strcmp (a->name, b->name);
   if (ret != 0)
     return ret;
-  return p1 > p2;
+  return p1 > p2 ? 1 : -1;
 }
 
 
