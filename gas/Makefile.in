@@ -691,6 +691,9 @@ TARG_ENV_HFILES = \
 	config/te-vxworks.h \
 	config/te-wince-pe.h
 
+TARG_ENV_CFILES = \
+	config/te-vms.c
+
 
 # Multi files in config
 MULTI_CFILES = \
@@ -744,7 +747,8 @@ CONFIG_ATOF_CFILES = \
 	config/atof-vax.c
 
 OBJS = $(CONFIG_OBJS) $(GENERIC_OBJS)
-POTFILES = $(MULTI_CFILES) $(CONFIG_ATOF_CFILES) $(TARG_ENV_HFILES) $(OBJ_FORMAT_HFILES) \
+POTFILES = $(MULTI_CFILES) $(CONFIG_ATOF_CFILES) \
+	$(TARG_ENV_HFILES) $(TARG_ENV_CFILES) $(OBJ_FORMAT_HFILES) \
 	$(OBJ_FORMAT_CFILES) $(TARGET_CPU_HFILES) $(TARGET_CPU_CFILES) \
 	$(HFILES) $(CFILES)
 
@@ -787,8 +791,8 @@ as_new_DEPENDENCIES = $(TARG_CPU_O) $(OBJ_FORMAT_O) $(ATOF_TARG_O) \
 # The m68k operand parser.
 EXTRA_as_new_SOURCES = $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 	$(TARGET_CPU_HFILES) $(OBJ_FORMAT_CFILES) $(OBJ_FORMAT_HFILES) \
-	$(CONFIG_ATOF_CFILES) $(MULTI_CFILES) config/m68k-parse.y \
-	config/bfin-parse.y
+	$(TARG_ENV_CFILES) $(CONFIG_ATOF_CFILES) $(MULTI_CFILES) \
+	config/m68k-parse.y config/bfin-parse.y
 EXPECT = expect
 RUNTEST = runtest
 RUNTESTFLAGS = 
@@ -1001,6 +1005,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-xtensa.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-z80.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-z8k.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/te-vms.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/write.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xtensa-relax.Po@am__quote@
 
@@ -2004,6 +2009,20 @@ obj-som.obj: config/obj-som.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/obj-som.c' object='obj-som.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o obj-som.obj `if test -f 'config/obj-som.c'; then $(CYGPATH_W) 'config/obj-som.c'; else $(CYGPATH_W) '$(srcdir)/config/obj-som.c'; fi`
+
+te-vms.o: config/te-vms.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT te-vms.o -MD -MP -MF $(DEPDIR)/te-vms.Tpo -c -o te-vms.o `test -f 'config/te-vms.c' || echo '$(srcdir)/'`config/te-vms.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/te-vms.Tpo $(DEPDIR)/te-vms.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/te-vms.c' object='te-vms.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o te-vms.o `test -f 'config/te-vms.c' || echo '$(srcdir)/'`config/te-vms.c
+
+te-vms.obj: config/te-vms.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT te-vms.obj -MD -MP -MF $(DEPDIR)/te-vms.Tpo -c -o te-vms.obj `if test -f 'config/te-vms.c'; then $(CYGPATH_W) 'config/te-vms.c'; else $(CYGPATH_W) '$(srcdir)/config/te-vms.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/te-vms.Tpo $(DEPDIR)/te-vms.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/te-vms.c' object='te-vms.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o te-vms.obj `if test -f 'config/te-vms.c'; then $(CYGPATH_W) 'config/te-vms.c'; else $(CYGPATH_W) '$(srcdir)/config/te-vms.c'; fi`
 
 atof-ieee.o: config/atof-ieee.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT atof-ieee.o -MD -MP -MF $(DEPDIR)/atof-ieee.Tpo -c -o atof-ieee.o `test -f 'config/atof-ieee.c' || echo '$(srcdir)/'`config/atof-ieee.c

@@ -9,12 +9,14 @@ $ arch=F$EDIT(arch,"LOWERCASE")
 $ if arch.eqs."alpha"
 $ then
 $   format = "evax"
+$   env = "generic"
 $   target_alias = "alpha-dec-openvms"
 $   target_canonical = "alpha-dec-openvms"
 $ endif
 $ if arch.eqs."ia64"
 $ then
 $   format = "elf"
+$   env = "vms"
 $   target_alias = "ia64-openvms"
 $   target_canonical = "ia64-unknown-openvms"
 $ endif
@@ -33,8 +35,9 @@ $ close outfile
 $!
 $ write sys$output "Generate targ-env.h"
 $!
-$ create targ-env.h
-#include "te-generic.h"
+$ open/write outfile targ-env.h
+$ write outfile "#include ""te-''env'.h"""
+$ close outfile
 $!
 $ write sys$output "Generate obj-format.[ch]"
 $!
@@ -219,7 +222,24 @@ $ LIBBFD = ",[-.bfd]libbfd.olb/lib"
 $ LIBIBERTY = ",[-.libiberty]libiberty.olb/lib"
 $ LIBOPCODES = ",[-.opcodes]libopcodes.olb/lib"
 $!
+$ AS_OBJS="targ-cpu," + FILES 
+$!
 $ write sys$output "CFLAGS=",CFLAGS
+$!
+$EOD
+$!
+$ if arch.eqs."ia64"
+$ then
+$   open/append outfile build.com
+$   write outfile "$ write sys$output ""Compiling te-vms.c"""
+$   write outfile "$ cc 'CFLAGS /obj=te-vme.obj [.config]te-vms.c + " +-
+      "sys$library:sys$lib_c.tlb/lib"
+$   write outfile "$ AS_OBJS=AS_OBJS + "",te-vms.obj"""
+$   close outfile
+$ endif
+$!
+$ append sys$input build.com
+$DECK
 $ if p1.nes."LINK"
 $ then
 $   write sys$output "Compiling targ-cpu.c (/noopt)"
@@ -237,7 +257,8 @@ $ endif
 $ purge
 $!
 $ write sys$output "Building as.exe"
-$ AS_OBJS="targ-cpu," + FILES + LIBOPCODES +  LIBBFD +  LIBIBERTY
+$ AS_OBJS=AS_OBJS + LIBOPCODES +  LIBBFD +  LIBIBERTY
 $ link/exe=as 'AS_OBJS
+$EOD
 $exit
 

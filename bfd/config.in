@@ -192,12 +192,6 @@
 /* Define if struct core_dumpx has member c_impl */
 #undef HAVE_ST_C_IMPL
 
-/* Define if <sys/stat.h> has struct stat.st_mtim.tv_nsec */
-#undef HAVE_ST_MTIM_TV_NSEC
-
-/* Define if <sys/stat.h> has struct stat.st_mtim.tv_sec */
-#undef HAVE_ST_MTIM_TV_SEC
-
 /* Define to 1 if you have the `sysconf' function. */
 #undef HAVE_SYSCONF
 
@@ -226,9 +220,6 @@
 
 /* Define to 1 if you have the <time.h> header file. */
 #undef HAVE_TIME_H
-
-/* Define if <time.h> has struct tm.tm_gmtoff. */
-#undef HAVE_TM_GMTOFF
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
