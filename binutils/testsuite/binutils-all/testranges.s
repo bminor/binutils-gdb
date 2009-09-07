@@ -12,26 +12,26 @@ end:
 range:
 
 range_sub:
-	.long	sub, end
-	.long	0, 0	;# range terminator
+	.4byte	sub, end
+	.4byte	0, 0	;# range terminator
 
 range_cu:
-	.long	start, end
-	.long	0, 0	;# range terminator
+	.4byte	start, end
+	.4byte	0, 0	;# range terminator
 
 	.section	.debug_info,"",%progbits
-	.long	debugE - debugS	;# Length of Compilation Unit Info
+	.4byte	debugE - debugS	;# Length of Compilation Unit Info
 debugS:
 	.short	0x2	;# DWARF version number
-	.long	abbrev0	;# Offset Into Abbrev. Section
+	.4byte	abbrev0	;# Offset Into Abbrev. Section
 	.byte	0x4	;# Pointer Size (in bytes)
 
 	.uleb128 0x1	;# (DIE (0xb) DW_TAG_compile_unit)
-	.long	range_cu - range	;# DW_AT_ranges
+	.4byte	range_cu - range	;# DW_AT_ranges
 
 	.uleb128 0x2	;# (DIE (0x6d) DW_TAG_subprogram)
 	.ascii "A\0"	;# DW_AT_name
-	.long	range_sub - range	;# DW_AT_ranges
+	.4byte	range_sub - range	;# DW_AT_ranges
 debugE:
 
 	.section	.debug_abbrev,"",%progbits

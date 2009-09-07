@@ -1,3 +1,7 @@
+2009-09-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* binutils-all/testranges.s: Replace all .long by .4byte.
+
 2009-09-04  DJ Delorie  <dj@redhat.com>
 
 	* binutils-all/objdump.exp: Add m16c and m32c to the list of
