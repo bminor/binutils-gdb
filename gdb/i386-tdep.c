@@ -3148,26 +3148,6 @@ no_rm:
   return 0;
 }
 
-static int
-i386_record_check_override (struct i386_record_s *irp)
-{
-  if (irp->override >= 0 && irp->override != X86_RECORD_DS_REGNUM)
-    {
-      ULONGEST orv, ds;
-
-      regcache_raw_read_unsigned (irp->regcache,
-                                  irp->regmap[irp->override],
-                                  &orv);
-      regcache_raw_read_unsigned (irp->regcache,
-                                  irp->regmap[X86_RECORD_DS_REGNUM],
-                                  &ds);
-      if (orv != ds)
-        return 1;
-    }
-
-  return 0;
-}
-
 /* Record the value of the memory that willbe changed in current instruction
    to "record_arch_list".
    Return -1 if something wrong. */
@@ -3178,7 +3158,7 @@ i386_record_lea_modrm (struct i386_record_s *irp)
   struct gdbarch *gdbarch = irp->gdbarch;
   uint64_t addr;
 
-  if (i386_record_check_override (irp))
+  if (irp->override >= 0)
     {
       warning (_("Process record ignores the memory change "
                  "of instruction at address %s because it "
@@ -4060,7 +4040,7 @@ reswitch:
       /* mov EAX */
     case 0xa2:
     case 0xa3:
-      if (i386_record_check_override (&ir))
+      if (ir.override >= 0)
         {
 	  warning (_("Process record ignores the memory change "
                      "of instruction at address 0x%s because "
@@ -4478,8 +4458,13 @@ reswitch:
                                       ir.regmap[X86_RECORD_REDI_REGNUM],
                                       &tmpulongest);
 
-          ir.override = X86_RECORD_ES_REGNUM;
-          if (ir.aflag && i386_record_check_override (&ir))
+          regcache_raw_read_unsigned (ir.regcache,
+                                      ir.regmap[X86_RECORD_ES_REGNUM],
+                                      &es);
+          regcache_raw_read_unsigned (ir.regcache,
+                                      ir.regmap[X86_RECORD_DS_REGNUM],
+                                      &ds);
+          if (ir.aflag && (es != ds))
             {
               /* addr += ((uint32_t) read_register (I386_ES_REGNUM)) << 4; */
               warning (_("Process record ignores the memory "
@@ -5103,7 +5088,7 @@ reswitch:
 		opcode = opcode << 8 | ir.modrm;
 		goto no_support;
 	      }
-	    if (i386_record_check_override (&ir))
+	    if (ir.override >= 0)
 	      {
 		warning (_("Process record ignores the memory "
                            "change of instruction at "
@@ -5154,7 +5139,7 @@ reswitch:
 	  else
 	    {
 	      /* sidt */
-	      if (i386_record_check_override (&ir))
+	      if (ir.override >= 0)
 		{
 		  warning (_("Process record ignores the memory "
                              "change of instruction at "
