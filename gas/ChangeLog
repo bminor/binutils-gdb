@@ -1,3 +1,8 @@
+2009-09-07  Daniel Gutson  <dgutson@codesourcery.com>
+
+	* config/tc-arm.c (arm_cpus): cortex-r4f CPU added.
+	* doc/c-arm.texi: cortex-r4f CPU added.
+
 2009-09-07  Tristan Gingold  <gingold@adacore.com>
 
 	* po/POTFILES.in: Regenerate.

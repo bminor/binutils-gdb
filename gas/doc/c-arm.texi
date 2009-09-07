@@ -115,6 +115,7 @@ recognized:
 @code{cortex-a8},
 @code{cortex-a9},
 @code{cortex-r4},
+@code{cortex-r4f},
 @code{cortex-m3},
 @code{cortex-m1},
 @code{cortex-m0},
