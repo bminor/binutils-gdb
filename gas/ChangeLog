@@ -1,3 +1,31 @@
+2009-09-07  Tristan Gingold  <gingold@adacore.com>
+
+	* Makefile.am (TARG_ENV_CFILES): New variable.  Set to te-vms.c
+	(POTFILES): Add $(TARG_ENV_CFILES) in definition.
+	(EXTRA_as_new_SOURCES): Ditto.
+	* Makefile: Regenerate.
+	* acinclude.m4 (BFD_HAVE_TIME_TYPE_MEMBER,
+	BFD_HAVE_SYS_STAT_TYPE_MEMBER): New macro created from bfd/bfd.m4.
+	* configure.in: Add Tests for tm_gmtoff, st_mtim.tv_sec and
+	st_mtim.tv_nsec (from bfd/configure.in).  Check for time.h and
+	sys/stat.h headers.
+	Add te-vms.o in extra_objects if te_file is vms.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* config/te-vms.c: New file, from bfd/vmsutil.c
+	(vms_dwarf2_file_time_name, vms_dwarf2_file_size_name)
+	(vms_dwarf2_file_name): New functions.
+	(vms_file_stats_name): Make it static, add a dirname parameter to
+	locally create the full pathname.
+	* config/te-vms.h: Add a copyright header.
+	Declare the above functions.
+	(DWARF2_FILE_TIME_NAME, DWARF2_FILE_SIZE_NAME, DWARF2_FILE_NAME): Use
+	the above functions in the definition.
+	* makefile.vms (OBJS): Add te-vms.obj.
+	(te-vms.obj): Create a specific target.
+	* configure.com: Create targ-env.h using a per target value.
+	Compile te-vms.c for ia64.
+
 2009-09-05  Jie Zhang  <jie.zhang@analog.com>
 
 	* doc/as.texinfo: Document that Blackfin GAS does not

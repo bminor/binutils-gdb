@@ -223,17 +223,6 @@ AC_CHECK_DECLS(strstr)
 AC_CHECK_DECLS(snprintf)
 AC_CHECK_DECLS(vsnprintf)
 
-# Support for VMS timestamps via cross compile
-
-if test "$ac_cv_header_time_h" = yes; then
-  BFD_HAVE_TIME_TYPE_MEMBER(struct tm, tm_gmtoff)
-fi
-
-if test "$ac_cv_header_sys_stat_h" = yes; then
-    BFD_HAVE_SYS_STAT_TYPE_MEMBER(struct stat, st_mtim, tv_sec)
-    BFD_HAVE_SYS_STAT_TYPE_MEMBER(struct stat, st_mtim, tv_nsec)
-fi
-
 # Link in zlib if we can.  This allows us to read compressed debug sections.
 # This is used only by compress.c.
 AC_SEARCH_LIBS(zlibVersion, z, [AC_CHECK_HEADERS(zlib.h)])
@@ -809,7 +798,7 @@ do
     bfd_elf64_ia64_big_vec)	tb="$tb elf64-ia64.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_ia64_hpux_big_vec) tb="$tb elf64-ia64.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_ia64_little_vec)	tb="$tb elf64-ia64.lo elf64.lo $elf"; target_size=64 ;;
-    bfd_elf64_ia64_vms_vec)	tb="$tb elf64-ia64.lo elf64.lo $elf vmsutil.lo"; target_size=64 ;;
+    bfd_elf64_ia64_vms_vec)	tb="$tb elf64-ia64.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_little_generic_vec) tb="$tb elf64-gen.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_littlemips_vec) 	tb="$tb elf64-mips.lo elf64.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
     bfd_elf64_mmix_vec) 	tb="$tb elf64-mmix.lo elf64.lo $elf" target_size=64 ;;

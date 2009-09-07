@@ -13583,119 +13583,6 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-# Support for VMS timestamps via cross compile
-
-if test "$ac_cv_header_time_h" = yes; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for struct tm.tm_gmtoff in time.h" >&5
-$as_echo_n "checking for struct tm.tm_gmtoff in time.h... " >&6; }
- if test "${bfd_cv_have_time_type_member_tm_gmtoff+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#define _BSD_SOURCE 1
-#include <time.h>
-int
-main ()
-{
-struct tm avar; void* aref = (void*) &avar.tm_gmtoff
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  bfd_cv_have_time_type_member_tm_gmtoff=yes
-else
-  bfd_cv_have_time_type_member_tm_gmtoff=no
-
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-
- if test $bfd_cv_have_time_type_member_tm_gmtoff = yes; then
-
-$as_echo "#define HAVE_TM_GMTOFF 1" >>confdefs.h
-
- fi
- { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_time_type_member_tm_gmtoff" >&5
-$as_echo "$bfd_cv_have_time_type_member_tm_gmtoff" >&6; }
-
-fi
-
-if test "$ac_cv_header_sys_stat_h" = yes; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for struct stat.st_mtim.tv_sec in sys/stat.h" >&5
-$as_echo_n "checking for struct stat.st_mtim.tv_sec in sys/stat.h... " >&6; }
- if test "${bfd_cv_have_sys_stat_type_member_st_mtim_tv_sec+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#define _BSD_SOURCE 1
-#include <sys/stat.h>
-int
-main ()
-{
-struct stat avar; void* aref = (void*) &avar.st_mtim.tv_sec
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  bfd_cv_have_sys_stat_type_member_st_mtim_tv_sec=yes
-else
-  bfd_cv_have_sys_stat_type_member_st_mtim_tv_sec=no
-
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-
- if test $bfd_cv_have_sys_stat_type_member_st_mtim_tv_sec = yes; then
-
-$as_echo "#define HAVE_ST_MTIM_TV_SEC 1" >>confdefs.h
-
- fi
- { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_stat_type_member_st_mtim_tv_sec" >&5
-$as_echo "$bfd_cv_have_sys_stat_type_member_st_mtim_tv_sec" >&6; }
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for struct stat.st_mtim.tv_nsec in sys/stat.h" >&5
-$as_echo_n "checking for struct stat.st_mtim.tv_nsec in sys/stat.h... " >&6; }
- if test "${bfd_cv_have_sys_stat_type_member_st_mtim_tv_nsec+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#define _BSD_SOURCE 1
-#include <sys/stat.h>
-int
-main ()
-{
-struct stat avar; void* aref = (void*) &avar.st_mtim.tv_nsec
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  bfd_cv_have_sys_stat_type_member_st_mtim_tv_nsec=yes
-else
-  bfd_cv_have_sys_stat_type_member_st_mtim_tv_nsec=no
-
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-
- if test $bfd_cv_have_sys_stat_type_member_st_mtim_tv_nsec = yes; then
-
-$as_echo "#define HAVE_ST_MTIM_TV_NSEC 1" >>confdefs.h
-
- fi
- { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_stat_type_member_st_mtim_tv_nsec" >&5
-$as_echo "$bfd_cv_have_sys_stat_type_member_st_mtim_tv_nsec" >&6; }
-
-fi
-
 # Link in zlib if we can.  This allows us to read compressed debug sections.
 # This is used only by compress.c.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing zlibVersion" >&5
@@ -15023,7 +14910,7 @@ do
     bfd_elf64_ia64_big_vec)	tb="$tb elf64-ia64.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_ia64_hpux_big_vec) tb="$tb elf64-ia64.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_ia64_little_vec)	tb="$tb elf64-ia64.lo elf64.lo $elf"; target_size=64 ;;
-    bfd_elf64_ia64_vms_vec)	tb="$tb elf64-ia64.lo elf64.lo $elf vmsutil.lo"; target_size=64 ;;
+    bfd_elf64_ia64_vms_vec)	tb="$tb elf64-ia64.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_little_generic_vec) tb="$tb elf64-gen.lo elf64.lo $elf"; target_size=64 ;;
     bfd_elf64_littlemips_vec) 	tb="$tb elf64-mips.lo elf64.lo elfxx-mips.lo elf-vxworks.lo elf32.lo $elf ecofflink.lo"; target_size=64 ;;
     bfd_elf64_mmix_vec) 	tb="$tb elf64-mmix.lo elf64.lo $elf" target_size=64 ;;

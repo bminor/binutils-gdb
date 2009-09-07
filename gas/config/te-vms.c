@@ -1,4 +1,4 @@
-/* vmsutil.c -- Utilities for VMS.
+/* te-vms.c -- Utilities for VMS.
    Copyright 2009 Free Software Foundation, Inc.
 
    Written by Douglas B Rupp <rupp@gnat.com>
@@ -17,8 +17,8 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
-#include "sysdep.h"
-#include "vmsutil.h"
+#include "as.h"
+#include "te-vms.h"
 
 /* The purspose of the two alternate versions below is to have one that
    works for native VMS and one that works on an NFS mounted filesystem
@@ -107,13 +107,15 @@ to_vms_file_spec (char *filespec)
 
 /* Return VMS file date, size, format, version given a name.  */
 
-int
-vms_file_stats_name (const char *filename,
+static int
+vms_file_stats_name (const char *dirname,
+                     const char *filename,
 		     long long *cdt,
 		     long *siz,
 		     char *rfo,
 		     int *ver)
 {
+  char fullname[strlen (dirname) + strlen (filename) + 1];
 #ifdef VMS
   struct FAB fab;
   struct NAM nam;
@@ -166,7 +168,10 @@ vms_file_stats_name (const char *filename,
       return 0;
     }
 
-  tryfile = to_vms_file_spec ((char *) filename);
+  strcpy (fullname, dirname);
+  strcat (fullname, filename);
+
+  tryfile = to_vms_file_spec (fullname);
 
   /* Allocate and initialize a FAB and NAM structures.  */
   fab = cc$rms_fab;
@@ -248,7 +253,10 @@ vms_file_stats_name (const char *filename,
   struct tm *ts;
   long long gmtoff, secs, nsecs;
 
-  if ((stat (filename, &buff)) != 0)
+  strcpy (fullname, dirname);
+  strcat (fullname, filename);
+
+  if ((stat (fullname, &buff)) != 0)
      return 1;
 
   if (cdt)
@@ -303,3 +311,37 @@ vms_file_stats_name (const char *filename,
   return 0;
 }
 
+bfd_uint64_t
+vms_dwarf2_file_time_name (const char *filename, const char *dirname)
+{
+  long long cdt;
+
+  if (vms_file_stats_name (dirname, filename, &cdt, 0, 0, 0) == 0)
+    return cdt;
+  else
+    return 0;
+}
+
+long
+vms_dwarf2_file_size_name (const char *filename, const char *dirname)
+{
+  long siz;
+
+  if (vms_file_stats_name (dirname, filename, 0, &siz, 0, 0) == 0)
+    return siz;
+  else
+    return 0;
+}
+
+/* VMS debugger needs the filename with version appended.  */
+/* Longest filename on VMS is 255 characters. Largest version is 32768.  */
+char *
+vms_dwarf2_file_name (const char *filename, const char *dirname)
+{
+  int ver;
+  static char buff [255 + 7];
+
+  vms_file_stats_name (dirname, filename, 0, 0, 0, &ver);
+  snprintf (buff, 255 + 7, "%s;%d", filename, ver);     
+  return buff;
+}

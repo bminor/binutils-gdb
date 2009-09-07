@@ -390,7 +390,6 @@ BFD32_BACKENDS = \
 	vms-misc.lo \
 	vms-tir.lo \
 	vms.lo \
-	vmsutil.lo \
 	xcofflink.lo \
 	xsym.lo \
 	xtensa-isa.lo \
@@ -573,7 +572,6 @@ BFD32_BACKENDS_CFILES = \
 	vms-misc.c \
 	vms-tir.c \
 	vms.c \
-	vmsutil.c \
 	xcofflink.c \
 	xsym.c \
 	xtensa-isa.c \

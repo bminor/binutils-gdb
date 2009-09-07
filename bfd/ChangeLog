@@ -1,3 +1,18 @@
+2009-09-07  Tristan Gingold  <gingold@adacore.com>
+
+	* bfd.m4 (BFD_HAVE_TIME_TYPE_MEMBER,
+	BFD_HAVE_SYS_STAT_TYPE_MEMBER): Moved to gas/acinclude.m4
+	* configure.in: Move tests for tm_gmtoff, st_mtim.tv_sec and
+	st_mtim.tv_nsec to gas/configure.in
+	(bfd_elf64_ia64_vms_vec): Remove vmsutil.lo
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* vmsutil.c: Moved to gas/config/te-vms.c
+	* vmsutil.h: Removed.
+	* Makefile.am (BFD32_BACKENDS_CFILES): Remove vmsutil.c
+	(BFD32_BACKENDS): Remove vmsutil.lo
+	* Makefile.in: Regenerate.
+
 2009-09-05  Eli Zaretskii  <eliz@gnu.org>
 
 	* coffcode.h: Include libiberty.h.
@@ -822,7 +837,7 @@
 	BFD_HAVE_SYS_STAT_TYPE_MEMBER): New config functions.
 	* configure.in: Use them.
 	* configure: Regenerate.
-	* config.in: Regnerate.
+	* config.in: Regenerate.
 	* vmsutil.c: Include sysdep.h, remove ansidecl.h.
 	#define _BSD_SOURCE. Add comments.
 	(vms_file_stats_name): Calculate creation date based on available

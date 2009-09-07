@@ -686,7 +686,6 @@ BFD32_BACKENDS = \
 	vms-misc.lo \
 	vms-tir.lo \
 	vms.lo \
-	vmsutil.lo \
 	xcofflink.lo \
 	xsym.lo \
 	xtensa-isa.lo \
@@ -869,7 +868,6 @@ BFD32_BACKENDS_CFILES = \
 	vms-misc.c \
 	vms-tir.c \
 	vms.c \
-	vmsutil.c \
 	xcofflink.c \
 	xsym.c \
 	xtensa-isa.c \
@@ -1477,7 +1475,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vms-misc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vms-tir.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vms.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vmsutil.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xcofflink.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xsym.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xtensa-isa.Plo@am__quote@

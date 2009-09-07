@@ -21,7 +21,7 @@ CFLAGS=/names=(as_is,shortened)\
 endif
 
 OBJS=targ-cpu.obj,obj-format.obj,atof-targ.obj,app.obj,as.obj,atof-generic.obj,\
-  cond.obj,depend.obj,expr.obj,flonum-konst.obj,\
+  te-vms.obj,cond.obj,depend.obj,expr.obj,flonum-konst.obj,\
   flonum-copy.obj,flonum-mult.obj,frags.obj,hash.obj,input-file.obj,\
   input-scrub.obj,literal.obj,messages.obj,output-file.obj,read.obj,\
   subsegs.obj,symbols.obj,write.obj,listing.obj,ecoff.obj,stabs.obj,sb.obj,\
@@ -41,6 +41,9 @@ ifneq ($(CC),gcc)
 targ-cpu.obj: targ-cpu.c targ-cpu.h
 	      $(COMPILE.c) /noopt/obj=$@ $<
 endif
+
+te-vms.obj: [.config]te-vms.c
+	      $(COMPILE.c) /obj=$@ $< + sys$$library:sys$$lib_c.tlb/lib
 
 clean:
 	$$ purge

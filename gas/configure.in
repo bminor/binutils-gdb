@@ -386,6 +386,10 @@ changequote([,])dnl
       te_file=$em
     fi
 
+   case ${te_file} in
+      vms) extra_objects="$extra_objects te-vms.o" ;;
+   esac
+ 
 # From target name and format, produce a list of supported emulations.
 
     case ${generic_target}-${fmt} in
@@ -609,7 +613,7 @@ AM_MAINTAINER_MODE
 AM_CONDITIONAL(GENINSRC_NEVER, false)
 AC_EXEEXT
 
-AC_CHECK_HEADERS(string.h stdlib.h memory.h strings.h unistd.h stdarg.h varargs.h errno.h sys/types.h limits.h)
+AC_CHECK_HEADERS(string.h stdlib.h memory.h strings.h unistd.h stdarg.h varargs.h errno.h sys/types.h limits.h time.h sys/stat.h)
 
 # Put this here so that autoconf's "cross-compiling" message doesn't confuse
 # people who are not cross-compiling but are compiling cross-assemblers.
@@ -696,6 +700,18 @@ GAS_CHECK_DECL_NEEDED(strstr, f, char *(*f)(), $gas_test_headers)
 AC_CHECK_DECLS([vsnprintf])
 
 BFD_BINARY_FOPEN
+
+# Support for VMS timestamps via cross compile
+
+if test "$ac_cv_header_time_h" = yes; then
+  GAS_HAVE_TIME_TYPE_MEMBER(struct tm, tm_gmtoff)
+fi
+
+if test "$ac_cv_header_sys_stat_h" = yes; then
+    GAS_HAVE_SYS_STAT_TYPE_MEMBER(struct stat, st_mtim, tv_sec)
+    GAS_HAVE_SYS_STAT_TYPE_MEMBER(struct stat, st_mtim, tv_nsec)
+fi
+
 
 dnl Required for html, pdf, install-pdf and install-html targets.
 AC_SUBST(datarootdir)
