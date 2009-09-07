@@ -1,3 +1,7 @@
+2009-09-07  Tristan Gingold  <gingold@adacore.com>
+
+	* po/gprof.pot: Regenerate
+
 2009-09-05  Martin Thuresson  <martin@mtme.org>
 
 	* corefile.c (core_create_function_syms): Rename variable

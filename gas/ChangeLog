@@ -1,5 +1,10 @@
 2009-09-07  Tristan Gingold  <gingold@adacore.com>
 
+	* po/gas.pot: Regenerate
+	* po/POTFILES.in: Regenerate
+
+2009-09-07  Tristan Gingold  <gingold@adacore.com>
+
 	* Makefile.am (TARG_ENV_CFILES): New variable.  Set to te-vms.c
 	(POTFILES): Add $(TARG_ENV_CFILES) in definition.
 	(EXTRA_as_new_SOURCES): Ditto.

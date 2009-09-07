@@ -1,5 +1,10 @@
 2009-09-07  Tristan Gingold  <gingold@adacore.com>
 
+	* po/bfd.pot: Regenerate
+	* po/SRC-POTFILES.in: Regenerate
+
+2009-09-07  Tristan Gingold  <gingold@adacore.com>
+
 	* bfd.m4 (BFD_HAVE_TIME_TYPE_MEMBER,
 	BFD_HAVE_SYS_STAT_TYPE_MEMBER): Moved to gas/acinclude.m4
 	* configure.in: Move tests for tm_gmtoff, st_mtim.tv_sec and
