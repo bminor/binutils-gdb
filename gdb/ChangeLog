@@ -1,3 +1,9 @@
+2009-09-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* m68k-tdep.c (m68k_gdbarch_init): Allocate TDEP as cleared.
+	* sparc-tdep.c (sparc32_gdbarch_init): Allocate TDEP as cleared.
+	Remove explicit clearing of TDEP fields.
+
 2009-09-06  Hui Zhu  <teawater@gmail.com>
 
 	* i386-tdep.c (i386_record_check_override): Deleted.

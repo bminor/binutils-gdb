@@ -1377,16 +1377,11 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return arches->gdbarch;
 
   /* Allocate space for the new architecture.  */
-  tdep = XMALLOC (struct gdbarch_tdep);
+  tdep = XZALLOC (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
   tdep->pc_regnum = SPARC32_PC_REGNUM;
   tdep->npc_regnum = SPARC32_NPC_REGNUM;
-  tdep->gregset = NULL;
-  tdep->sizeof_gregset = 0;
-  tdep->fpregset = NULL;
-  tdep->sizeof_fpregset = 0;
-  tdep->plt_entry_size = 0;
   tdep->step_trap = sparc_step_trap;
 
   set_gdbarch_long_double_bit (gdbarch, 128);

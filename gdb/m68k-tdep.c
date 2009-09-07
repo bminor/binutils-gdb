@@ -1160,7 +1160,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
     }
 
-  tdep = xmalloc (sizeof (struct gdbarch_tdep));
+  tdep = xzalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
   tdep->fpregs_present = has_fp;
   tdep->flavour = flavour;
