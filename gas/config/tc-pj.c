@@ -261,6 +261,7 @@ md_assemble (char *str)
       return;
     }
 
+  dwarf2_emit_insn (0);
   if (opcode->opcode == -1)
     {
       /* It's a fake opcode.  Dig out the args and pretend that was

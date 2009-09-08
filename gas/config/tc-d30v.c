@@ -23,6 +23,7 @@
 #include "safe-ctype.h"
 #include "subsegs.h"
 #include "opcode/d30v.h"
+#include "dwarf2dbg.h"
 
 const char comment_chars[]        = ";";
 const char line_comment_chars[]   = "#";
@@ -593,6 +594,7 @@ write_long (struct d30v_insn *opcode ATTRIBUTE_UNUSED,
   int i, where;
   char *f = frag_more (8);
 
+  dwarf2_emit_insn (8);
   insn |= FM11;
   d30v_number_to_chars (f, insn, 8);
 
@@ -620,6 +622,7 @@ write_1_short (struct d30v_insn *opcode,
   char *f = frag_more (8);
   int i, where;
 
+  dwarf2_emit_insn (8);
   if (warn_nops == NOP_ALL)
     as_warn (_("%s NOP inserted"), use_sequential ?
 	     _("sequential") : _("parallel"));
@@ -1087,6 +1090,7 @@ write_2_short (struct d30v_insn *opcode1,
     }
 
   f = frag_more (8);
+  dwarf2_emit_insn (8);
   d30v_number_to_chars (f, insn, 8);
 
   /* If the previous instruction was a 32-bit multiply but it is put into a
@@ -1684,6 +1688,7 @@ md_assemble (char *str)
 	      else
 		{
 		  f = frag_more (8);
+		  dwarf2_emit_insn (8);
 		  d30v_number_to_chars (f, NOP2, 8);
 
 		  if (warn_nops == NOP_ALL || warn_nops == NOP_MULTIPLY)

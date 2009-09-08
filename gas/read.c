@@ -4265,6 +4265,9 @@ emit_expr_fix (expressionS *exp, unsigned int nbytes, fragS *frag, char *p)
       case 2:
 	r = BFD_RELOC_16;
 	break;
+      case 3:
+	r = BFD_RELOC_24;
+	break;
       case 4:
 	r = BFD_RELOC_32;
 	break;

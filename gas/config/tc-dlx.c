@@ -909,6 +909,8 @@ md_assemble (char *str)
   know (str);
   machine_ip (str);
   toP = frag_more (4);
+  dwarf2_emit_insn (4);
+
   /* Put out the opcode.  */
   md_number_to_chars (toP, the_insn.opcode, 4);
 
