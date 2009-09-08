@@ -2713,6 +2713,7 @@ md_assemble (char *instruction_string)
   if (need_pass_2 || goofed)
     return;
 
+  dwarf2_emit_insn (0);
   /* Emit op-code.  */
   /* Remember where it is, in case we want to modify the op-code later.  */
   opcode_low_byteP = frag_more (v.vit_opcode_nbytes);

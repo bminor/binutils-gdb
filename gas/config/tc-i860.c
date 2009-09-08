@@ -408,6 +408,7 @@ md_assemble (char *str)
 	as_warn (_("An instruction was expanded (%s)"), str);
     }
 
+  dwarf2_emit_insn (0);
   i = 0;
   do
     {

@@ -1,3 +1,15 @@
+2009-09-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* read.c (emit_expr_fix): Handle size 3.
+	* config/tc-avr.c (md_assemble): Call dwarf2_emit_insn.
+	* config/tc-d30v.c (write_long, write_1_short,
+	write_2_short, md_assemble): Likewise.
+	* config/tc-dlx.c (md_assemble): Likewise.
+	* config/tc-i860.c (md_assemble): Likewise.
+	* config/tc-mn10200.c (md_assemble): Likewise.
+	* config/tc-pj.c (md_assemble): Likewise.
+	* config/tc-vax.c (md_assemble): Likewise.
+
 2009-09-07  Daniel Gutson  <dgutson@codesourcery.com>
 
 	* config/tc-arm.c (arm_cpus): cortex-r4f CPU added.

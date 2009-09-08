@@ -1366,6 +1366,8 @@ md_assemble (char *str)
   if (!avr_opt.all_opcodes && (opcode->isa & avr_mcu->isa) != opcode->isa)
     as_bad (_("illegal opcode %s for mcu %s"), opcode->name, avr_mcu->name);
 
+  dwarf2_emit_insn (0);
+
   /* We used to set input_line_pointer to the result of get_operands,
      but that is wrong.  Our caller assumes we don't change it.  */
   {
