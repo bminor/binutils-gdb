@@ -1,3 +1,9 @@
+2009-09-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elf/eh5.d: Don't run on hppa64.  Allow non-pcrel encoding.
+	Skip extra CIEs emitted on embedded targets and adjust FDE
+	matches to suit.
+
 2009-09-05  Jie Zhang  <jie.zhang@analog.com>
 
 	* ld-elf/sec64k.exp: Use ".set" instead of "=" for bfin-*-*.
