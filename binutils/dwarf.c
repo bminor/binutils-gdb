@@ -72,6 +72,11 @@ byte_get_little_endian (unsigned char *field, int size)
       return  ((unsigned int) (field[0]))
 	|    (((unsigned int) (field[1])) << 8);
 
+    case 3:
+      return  ((unsigned long) (field[0]))
+	|    (((unsigned long) (field[1])) << 8)
+	|    (((unsigned long) (field[2])) << 16);
+
     case 4:
       return  ((unsigned long) (field[0]))
 	|    (((unsigned long) (field[1])) << 8)
@@ -113,6 +118,11 @@ byte_get_big_endian (unsigned char *field, int size)
 
     case 2:
       return ((unsigned int) (field[1])) | (((int) (field[0])) << 8);
+
+    case 3:
+      return ((unsigned long) (field[2]))
+	|   (((unsigned long) (field[1])) << 8)
+	|   (((unsigned long) (field[0])) << 16);
 
     case 4:
       return ((unsigned long) (field[3]))
@@ -1985,9 +1995,22 @@ process_debug_info (struct dwarf_section *section,
 	  abbrev_number = read_leb128 (tags, & bytes_read, 0);
 	  tags += bytes_read;
 
-	  /* A null DIE marks the end of a list of siblings.  */
+	  /* A null DIE marks the end of a list of siblings or it may also be
+	     a section padding.  */
 	  if (abbrev_number == 0)
 	    {
+	      /* Check if it can be a section padding for the last CU.  */
+	      if (level == 0 && start == end)
+		{
+		  unsigned char *chk;
+
+		  for (chk = tags; chk < start; chk++)
+		    if (*chk != 0)
+		      break;
+		  if (chk == start)
+		    break;
+		}
+
 	      --level;
 	      if (level < 0)
 		{

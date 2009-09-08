@@ -342,6 +342,8 @@ byte_put_little_endian (unsigned char * field, bfd_vma value, int size)
       /* Fall through.  */
     case 4:
       field[3] = (value >> 24) & 0xff;
+      /* Fall through.  */
+    case 3:
       field[2] = (value >> 16) & 0xff;
       /* Fall through.  */
     case 2:
@@ -505,8 +507,11 @@ byte_put_big_endian (unsigned char * field, bfd_vma value, int size)
       /* Fall through.  */
     case 4:
       field[3] = value & 0xff;
-      field[2] = (value >> 8) & 0xff;
-      value >>= 16;
+      value >>= 8;
+      /* Fall through.  */
+    case 3:
+      field[2] = value & 0xff;
+      value >>= 8;
       /* Fall through.  */
     case 2:
       field[1] = value & 0xff;
@@ -8100,6 +8105,22 @@ is_64bit_pcrel_reloc (unsigned int reloc_type)
 }
 
 /* Like is_32bit_abs_reloc except that it returns TRUE iff RELOC_TYPE is
+   a 24-bit absolute RELA relocation used in DWARF debug sections.  */
+
+static bfd_boolean
+is_24bit_abs_reloc (unsigned int reloc_type)
+{
+  switch (elf_header.e_machine)
+    {
+    case EM_CYGNUS_MN10200:
+    case EM_MN10200:
+      return reloc_type == 4; /* R_MN10200_24.  */
+    default:
+      return FALSE;
+    }
+}
+
+/* Like is_32bit_abs_reloc except that it returns TRUE iff RELOC_TYPE is
    a 16-bit absolute RELA relocation used in DWARF debug sections.  */
 
 static bfd_boolean
@@ -8163,6 +8184,12 @@ is_none_reloc (unsigned int reloc_type)
     case EM_MN10300: /* R_MN10300_NONE.  */
     case EM_M32R:    /* R_M32R_NONE.  */
       return reloc_type == 0;
+    case EM_XTENSA_OLD:
+    case EM_XTENSA:
+      return (reloc_type == 0      /* R_XTENSA_NONE.  */
+	      || reloc_type == 17  /* R_XTENSA_DIFF8.  */
+	      || reloc_type == 18  /* R_XTENSA_DIFF16.  */
+	      || reloc_type == 19  /* R_XTENSA_DIFF32.  */);
     }
   return FALSE;
 }
@@ -8244,6 +8271,8 @@ apply_relocations (void * file,
 	  else if (is_64bit_abs_reloc (reloc_type)
 		   || is_64bit_pcrel_reloc (reloc_type))
 	    reloc_size = 8;
+	  else if (is_24bit_abs_reloc (reloc_type))
+	    reloc_size = 3;
 	  else if (is_16bit_abs_reloc (reloc_type))
 	    reloc_size = 2;
 	  else
@@ -8287,7 +8316,17 @@ apply_relocations (void * file,
 	      continue;
 	    }
 
-	  addend = is_rela ? rp->r_addend : byte_get (loc, reloc_size);
+	  addend = 0;
+	  if (is_rela)
+	    addend += rp->r_addend;
+	  /* R_XTENSA_32 and R_PJ_DATA_DIR32 are partial_inplace.  */
+	  if (!is_rela
+	      || (elf_header.e_machine == EM_XTENSA
+		  && reloc_type == 1)
+	      || ((elf_header.e_machine == EM_PJ
+		   || elf_header.e_machine == EM_PJ_OLD)
+		  && reloc_type == 1))
+	    addend += byte_get (loc, reloc_size);
 
 	  if (is_32bit_pcrel_reloc (reloc_type)
 	      || is_64bit_pcrel_reloc (reloc_type))

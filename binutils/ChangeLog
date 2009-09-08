@@ -1,3 +1,23 @@
+2009-09-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* dwarf.c (byte_get_little_endian): Handle size of 3.
+	(byte_get_big_endian): Likewise.
+	* readelf.c (byte_put_little_endian): Likewise.
+	(byte_put_big_endian): Likewise.
+	(is_24bit_abs_reloc): New function.
+	(is_none_reloc): Formatting.
+	(apply_relocations): Use is_24bit_abs_reloc.  Handle pj and xtensa
+	reloc peculiarity.
+
+2009-09-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* readelf.c (is_none_reloc <EM_XTENSA_OLD>, is_none_reloc <EM_XTENSA>):
+	New.
+
+2009-09-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf.c (process_debug_info): Support section padding abbrev codes.
+
 2009-09-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* Makefile.am (sysdump.o): Depend on sysroff.c.
