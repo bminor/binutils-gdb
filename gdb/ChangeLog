@@ -1,5 +1,10 @@
 2009-09-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* ia64-tdep.c (ia64_memory_remove_breakpoint): Call do_cleanups
+	before a return.
+
+2009-09-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* ia64-tdep.c (ia64_memory_insert_breakpoint)
 	(ia64_memory_remove_breakpoint): Return immediately if any of memory
 	reads fail.  Do not combine the VAL values.

@@ -725,6 +725,7 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
       warning (_("Cannot remove breakpoint at address %s, "
 		 "no break instruction at such address."),
 	       paddress (gdbarch, bp_tgt->placed_address));
+      do_cleanups (cleanup);
       return -1;
     }
 
