@@ -1,3 +1,13 @@
+2009-09-08  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* z8kgen.c (struct op): Replace unused flavor with id.
+	(opt): Remove extra xorb entry.
+	(func): Use id field as fallback.
+	(sub): Return new string, caller changed.
+	(internal): Allocate end marker.  Assign unique id before sorting.
+	(gas): Likewise.  Fix loop end condition.
+	* z8k-opc.h: Regenerate.
+
 2009-09-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-opc.c (powerpc_macros <extrdi>): Allow n+b of 64.
