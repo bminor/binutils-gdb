@@ -144,7 +144,13 @@ proc do_comment {} {
     if [all_ones $x1 $x2 $x3] then { pass $testname } else { fail $testname }
 }
 
-do_comment
+# m32c pads out sections, even empty ones.
+case $target_triplet in {
+    { m32c-*-* } { }
+    default {
+	do_comment
+    }
+}
 
 # This test checks the output of the -ag switch. It must detect at least
 # the name of the input file, output file, and options passed.
