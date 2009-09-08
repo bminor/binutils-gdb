@@ -1139,5 +1139,15 @@ hidden_test: hidden_test_main.o libhidden.so gcctestdir/ld
 hidden_test.err: hidden_test
 	@touch hidden_test.err
 
+# Test that if the output file already exists and is empty,
+# it will get execute permission.
+check_PROGRAMS += permission_test
+permission_test: basic_test.o gcctestdir/ld
+	umask 022; \
+	rm -f $@; \
+	touch $@; \
+	chmod 600 $@; \
+	$(CXXLINK) -Bgcctestdir/ basic_test.o
+
 endif GCC
 endif NATIVE_LINKER

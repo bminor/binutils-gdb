@@ -1,3 +1,9 @@
+2009-09-08  Cary Coutant  <ccoutant@google.com>
+
+	* output.cc (Output_file::open): Add execute permission to empty file.
+	* testsuite/Makefile.am (permission_test): New test.
+	* testsuite/Makefile.in: Regenerate.
+
 2009-09-02  Ian Lance Taylor  <iant@google.com>
 
 	* output.cc (Output_file::resize): Call map_no_anonymous rather

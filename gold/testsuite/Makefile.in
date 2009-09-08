@@ -46,7 +46,8 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 	$(am__EXEEXT_7) $(am__EXEEXT_8) $(am__EXEEXT_9) \
 	$(am__EXEEXT_10) $(am__EXEEXT_11) $(am__EXEEXT_12) \
 	$(am__EXEEXT_13) $(am__EXEEXT_14) $(am__EXEEXT_15) \
-	$(am__EXEEXT_16) $(am__EXEEXT_17) $(am__EXEEXT_18)
+	$(am__EXEEXT_16) $(am__EXEEXT_17) $(am__EXEEXT_18) \
+	$(am__EXEEXT_19)
 
 # Test --detect-odr-violations
 
@@ -353,6 +354,10 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
+
+# Test that if the output file already exists and is empty,
+# it will get execute permission.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_29 = permission_test
 subdir = testsuite
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -462,6 +467,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	local_labels_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test$(EXEEXT)
 @GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_18 = large$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_19 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	permission_test$(EXEEXT)
 basic_pic_test_SOURCES = basic_pic_test.c
 basic_pic_test_OBJECTS = basic_pic_test.$(OBJEXT)
 basic_pic_test_LDADD = $(LDADD)
@@ -676,6 +683,12 @@ am_object_unittest_OBJECTS = object_unittest.$(OBJEXT)
 object_unittest_OBJECTS = $(am_object_unittest_OBJECTS)
 object_unittest_LDADD = $(LDADD)
 object_unittest_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+permission_test_SOURCES = permission_test.c
+permission_test_OBJECTS = permission_test.$(OBJEXT)
+permission_test_LDADD = $(LDADD)
+permission_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 plugin_test_1_SOURCES = plugin_test_1.c
@@ -1099,13 +1112,13 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(initpri1_SOURCES) $(justsyms_SOURCES) $(large_SOURCES) \
 	local_labels_test.c many_sections_r_test.c \
 	$(many_sections_test_SOURCES) $(object_unittest_SOURCES) \
-	plugin_test_1.c plugin_test_2.c plugin_test_3.c \
-	plugin_test_4.c $(protected_1_SOURCES) $(protected_2_SOURCES) \
-	$(relro_script_test_SOURCES) $(relro_test_SOURCES) \
-	$(script_test_1_SOURCES) $(script_test_2_SOURCES) \
-	script_test_3.c $(thin_archive_test_1_SOURCES) \
-	$(thin_archive_test_2_SOURCES) $(tls_pic_test_SOURCES) \
-	$(tls_shared_gd_to_ie_test_SOURCES) \
+	permission_test.c plugin_test_1.c plugin_test_2.c \
+	plugin_test_3.c plugin_test_4.c $(protected_1_SOURCES) \
+	$(protected_2_SOURCES) $(relro_script_test_SOURCES) \
+	$(relro_test_SOURCES) $(script_test_1_SOURCES) \
+	$(script_test_2_SOURCES) script_test_3.c \
+	$(thin_archive_test_1_SOURCES) $(thin_archive_test_2_SOURCES) \
+	$(tls_pic_test_SOURCES) $(tls_shared_gd_to_ie_test_SOURCES) \
 	$(tls_shared_gnu2_gd_to_ie_test_SOURCES) \
 	$(tls_shared_gnu2_test_SOURCES) $(tls_shared_ie_test_SOURCES) \
 	$(tls_shared_nonpic_test_SOURCES) $(tls_shared_test_SOURCES) \
@@ -1155,8 +1168,8 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(am__initpri1_SOURCES_DIST) $(am__justsyms_SOURCES_DIST) \
 	$(am__large_SOURCES_DIST) local_labels_test.c \
 	many_sections_r_test.c $(am__many_sections_test_SOURCES_DIST) \
-	$(object_unittest_SOURCES) plugin_test_1.c plugin_test_2.c \
-	plugin_test_3.c plugin_test_4.c \
+	$(object_unittest_SOURCES) permission_test.c plugin_test_1.c \
+	plugin_test_2.c plugin_test_3.c plugin_test_4.c \
 	$(am__protected_1_SOURCES_DIST) \
 	$(am__protected_2_SOURCES_DIST) \
 	$(am__relro_script_test_SOURCES_DIST) \
@@ -1880,6 +1893,12 @@ many_sections_test$(EXEEXT): $(many_sections_test_OBJECTS) $(many_sections_test_
 object_unittest$(EXEEXT): $(object_unittest_OBJECTS) $(object_unittest_DEPENDENCIES) 
 	@rm -f object_unittest$(EXEEXT)
 	$(CXXLINK) $(object_unittest_OBJECTS) $(object_unittest_LDADD) $(LIBS)
+@GCC_FALSE@permission_test$(EXEEXT): $(permission_test_OBJECTS) $(permission_test_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f permission_test$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(permission_test_OBJECTS) $(permission_test_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@permission_test$(EXEEXT): $(permission_test_OBJECTS) $(permission_test_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f permission_test$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(permission_test_OBJECTS) $(permission_test_LDADD) $(LIBS)
 @GCC_FALSE@plugin_test_1$(EXEEXT): $(plugin_test_1_OBJECTS) $(plugin_test_1_DEPENDENCIES) 
 @GCC_FALSE@	@rm -f plugin_test_1$(EXEEXT)
 @GCC_FALSE@	$(LINK) $(plugin_test_1_OBJECTS) $(plugin_test_1_LDADD) $(LIBS)
@@ -2106,6 +2125,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/many_sections_r_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/many_sections_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/object_unittest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/permission_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_3.Po@am__quote@
@@ -2922,6 +2942,12 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -Wl,-R,. hidden_test_main.o libhidden.so 2>hidden_test.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@hidden_test.err: hidden_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	@touch hidden_test.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@permission_test: basic_test.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	umask 022; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	rm -f $@; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	touch $@; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	chmod 600 $@; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ basic_test.o
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

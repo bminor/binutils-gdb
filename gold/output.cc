@@ -30,7 +30,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <algorithm>
-#include "libiberty.h"   // for unlink_if_ordinary()
+#include "libiberty.h"
 
 #include "parameters.h"
 #include "object.h"
@@ -3461,8 +3461,22 @@ Output_file::open(off_t file_size)
       else
 	{
 	  struct stat s;
-	  if (::stat(this->name_, &s) == 0 && s.st_size != 0)
-	    unlink_if_ordinary(this->name_);
+	  if (::stat(this->name_, &s) == 0
+	      && (S_ISREG (s.st_mode) || S_ISLNK (s.st_mode)))
+	    {
+	      if (s.st_size != 0)
+		::unlink(this->name_);
+	      else if (!parameters->options().relocatable())
+		{
+		  // If we don't unlink the existing file, add execute
+		  // permission where read permissions already exist
+		  // and where the umask permits.
+		  int mask = ::umask(0);
+		  ::umask(mask);
+		  s.st_mode |= (s.st_mode & 0444) >> 2;
+		  ::chmod(this->name_, s.st_mode & ~mask);
+		}
+	    }
 
 	  int mode = parameters->options().relocatable() ? 0666 : 0777;
 	  int o = open_descriptor(-1, this->name_, O_RDWR | O_CREAT | O_TRUNC,
