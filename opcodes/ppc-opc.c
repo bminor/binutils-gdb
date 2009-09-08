@@ -5301,8 +5301,8 @@ const int powerpc_num_opcodes =
 const struct powerpc_macro powerpc_macros[] = {
 {"extldi",   4,	PPC64,	"rldicr %0,%1,%3,(%2)-1"},
 {"extldi.",  4,	PPC64,	"rldicr. %0,%1,%3,(%2)-1"},
-{"extrdi",   4,	PPC64,	"rldicl %0,%1,(%2)+(%3),64-(%2)"},
-{"extrdi.",  4,	PPC64,	"rldicl. %0,%1,(%2)+(%3),64-(%2)"},
+{"extrdi",   4,	PPC64,	"rldicl %0,%1,((%2)+(%3))&((%2)+(%3)<>64),64-(%2)"},
+{"extrdi.",  4,	PPC64,	"rldicl. %0,%1,((%2)+(%3))&((%2)+(%3)<>64),64-(%2)"},
 {"insrdi",   4,	PPC64,	"rldimi %0,%1,64-((%2)+(%3)),%3"},
 {"insrdi.",  4,	PPC64,	"rldimi. %0,%1,64-((%2)+(%3)),%3"},
 {"rotrdi",   3,	PPC64,	"rldicl %0,%1,(-(%2)!63)&((%2)|63),0"},

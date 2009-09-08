@@ -1,3 +1,7 @@
+2009-09-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c (powerpc_macros <extrdi>): Allow n+b of 64.
+
 2009-09-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* z8kgen.c (func): Fix thinko last patch.
