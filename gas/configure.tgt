@@ -353,7 +353,11 @@ case ${generic_target} in
     esac ;;
   sh5*-*-netbsd*)			fmt=elf em=nbsd ;;
   sh64*-*-netbsd*)			fmt=elf em=nbsd ;;
-  sh*-*-netbsdelf*)			fmt=elf em=nbsd ;;
+  sh*-*-netbsdelf*)			fmt=elf em=nbsd
+    case ${cpu} in
+      sh*l*)	endian=little ;;
+      *)	endian=big ;;
+    esac ;;
   sh*-*-symbianelf*)			fmt=elf endian=little ;;
   sh-*-elf* | sh-*-uclinux* | sh[12]-*-uclinux*)	fmt=elf ;;
   sh-*-coff*)				fmt=coff ;;
