@@ -1,3 +1,7 @@
+2009-09-08  DJ Delorie  <dj@redhat.com>
+
+	* mep-opc.c: Regenerate.
+
 2009-09-08  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* z8kgen.c (struct op): Replace unused flavor with id.
