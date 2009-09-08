@@ -72,6 +72,11 @@ byte_get_little_endian (unsigned char *field, int size)
       return  ((unsigned int) (field[0]))
 	|    (((unsigned int) (field[1])) << 8);
 
+    case 3:
+      return  ((unsigned long) (field[0]))
+	|    (((unsigned long) (field[1])) << 8)
+	|    (((unsigned long) (field[2])) << 16);
+
     case 4:
       return  ((unsigned long) (field[0]))
 	|    (((unsigned long) (field[1])) << 8)
@@ -113,6 +118,11 @@ byte_get_big_endian (unsigned char *field, int size)
 
     case 2:
       return ((unsigned int) (field[1])) | (((int) (field[0])) << 8);
+
+    case 3:
+      return ((unsigned long) (field[2]))
+	|   (((unsigned long) (field[1])) << 8)
+	|   (((unsigned long) (field[0])) << 16);
 
     case 4:
       return ((unsigned long) (field[3]))
