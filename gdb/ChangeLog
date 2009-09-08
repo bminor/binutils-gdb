@@ -1,3 +1,19 @@
+2009-09-08  Michael Snyder  <msnyder@vmware.com>
+
+	* amd64-linux-tdep.h (enum amd64_syscall): New enum consts, 
+	to replace literal consts used in amd64-linux-tdep.c
+	* linux-record.h (enum gdb_syscall): New enum consts, to replace
+	literal consts used in amd64-linux-tdep.c and linux-record.c.
+	* amd64-linux-tdep.c (amd64_canonicalize_syscall): New function,
+	translate from native amd64 Linux syscall id to internal gdb id.
+	(amd64_linux_syscall_record): Switch statement abstracted out 
+	and replaced with a call to amd64_canonicalize_syscall.
+	* linux-record.c (record_linux_system_call): Replace literal
+	consts with enum consts.
+	* i386-linux-tdep.c (i386_canonicalize_syscall): New function,
+	trivially translate from native i386 Linux syscalls to gdb syscalls.
+	(i386_linux_intx80_sysenter_record): 
+
 2009-09-08  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* gdb/Makefile.in (check//%): Parse 'config.status --version'

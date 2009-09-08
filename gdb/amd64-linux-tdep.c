@@ -274,1106 +274,863 @@ static struct linux_record_tdep amd64_linux_record_tdep;
 #define RECORD_ARCH_GET_FS	0x1003
 #define RECORD_ARCH_GET_GS	0x1004
 
+/* amd64_canonicalize_syscall maps from the native amd64 Linux set 
+   of syscall ids into a canonical set of syscall ids used by 
+   process record.  */
+
+static enum gdb_syscall
+amd64_canonicalize_syscall (enum amd64_syscall syscall)
+{
+  switch (syscall) {
+  case amd64_sys_read:
+    return gdb_sys_read;
+
+  case amd64_sys_write:
+    return gdb_sys_write;
+
+  case amd64_sys_open:
+    return gdb_sys_open;
+
+  case amd64_sys_close:
+    return gdb_sys_close;
+
+  case amd64_sys_newstat:
+    return gdb_sys_newstat;
+
+  case amd64_sys_newfstat:
+    return gdb_sys_newfstat;
+
+  case amd64_sys_newlstat:
+    return gdb_sys_newlstat;
+
+  case amd64_sys_poll:
+    return gdb_sys_poll;
+
+  case amd64_sys_lseek:
+    return gdb_sys_lseek;
+
+  case amd64_sys_mmap:
+    return gdb_sys_mmap2;
+
+  case amd64_sys_mprotect:
+    return gdb_sys_mprotect;
+
+  case amd64_sys_munmap:
+    return gdb_sys_munmap;
+
+  case amd64_sys_brk:
+    return gdb_sys_brk;
+
+  case amd64_sys_rt_sigaction:
+    return gdb_sys_rt_sigaction;
+
+  case amd64_sys_rt_sigprocmask:
+    return gdb_sys_rt_sigprocmask;
+
+  case amd64_sys_rt_sigreturn:
+    return gdb_sys_rt_sigreturn;
+
+  case amd64_sys_ioctl:
+    return gdb_sys_ioctl;
+
+  case amd64_sys_pread64:
+    return gdb_sys_pread64;
+
+  case amd64_sys_pwrite64:
+    return gdb_sys_pwrite64;
+
+  case amd64_sys_readv:
+    return gdb_sys_readv;
+
+  case amd64_sys_writev:
+    return gdb_sys_writev;
+
+  case amd64_sys_access:
+    return gdb_sys_access;
+
+  case amd64_sys_pipe:
+    return gdb_sys_pipe;
+
+  case amd64_sys_select:
+    return gdb_sys_select;
+
+  case amd64_sys_sched_yield:
+    return gdb_sys_sched_yield;
+
+  case amd64_sys_mremap:
+    return gdb_sys_mremap;
+
+  case amd64_sys_msync:
+    return gdb_sys_msync;
+
+  case amd64_sys_mincore:
+    return gdb_sys_mincore;
+
+  case amd64_sys_madvise:
+    return gdb_sys_madvise;
+
+  case amd64_sys_shmget:
+    return gdb_sys_shmget;
+
+  case amd64_sys_shmat:
+    return gdb_sys_shmat;
+
+  case amd64_sys_shmctl:
+    return gdb_sys_shmctl;
+
+  case amd64_sys_dup:
+    return gdb_sys_dup;
+
+  case amd64_sys_dup2:
+    return gdb_sys_dup2;
+
+  case amd64_sys_pause:
+    return gdb_sys_pause;
+
+  case amd64_sys_nanosleep:
+    return gdb_sys_nanosleep;
+
+  case amd64_sys_getitimer:
+    return gdb_sys_getitimer;
+
+  case amd64_sys_alarm:
+    return gdb_sys_alarm;
+
+  case amd64_sys_setitimer:
+    return gdb_sys_setitimer;
+
+  case amd64_sys_getpid:
+    return gdb_sys_getpid;
+
+  case amd64_sys_sendfile64:
+    return gdb_sys_sendfile64;
+
+  case amd64_sys_socket:
+    return gdb_sys_socket;
+
+  case amd64_sys_connect:
+    return gdb_sys_connect;
+
+  case amd64_sys_accept:
+    return gdb_sys_accept;
+
+  case amd64_sys_sendto:
+    return gdb_sys_sendto;
+
+  case amd64_sys_recvfrom:
+    return gdb_sys_recvfrom;
+
+  case amd64_sys_sendmsg:
+    return gdb_sys_sendmsg;
+
+  case amd64_sys_recvmsg:
+    return gdb_sys_recvmsg;
+
+  case amd64_sys_shutdown:
+    return gdb_sys_shutdown;
+
+  case amd64_sys_bind:
+    return gdb_sys_bind;
+
+  case amd64_sys_listen:
+    return gdb_sys_listen;
+
+  case amd64_sys_getsockname:
+    return gdb_sys_getsockname;
+
+  case amd64_sys_getpeername:
+    return gdb_sys_getpeername;
+
+  case amd64_sys_socketpair:
+    return gdb_sys_socketpair;
+
+  case amd64_sys_setsockopt:
+    return gdb_sys_setsockopt;
+
+  case amd64_sys_getsockopt:
+    return gdb_sys_getsockopt;
+
+  case amd64_sys_clone:
+    return gdb_sys_clone;
+
+  case amd64_sys_fork:
+    return gdb_sys_fork;
+
+  case amd64_sys_vfork:
+    return gdb_sys_vfork;
+
+  case amd64_sys_execve:
+    return gdb_sys_execve;
+
+  case amd64_sys_exit:
+    return gdb_sys_exit;
+
+  case amd64_sys_wait4:
+    return gdb_sys_wait4;
+
+  case amd64_sys_kill:
+    return gdb_sys_kill;
+
+  case amd64_sys_uname:
+    return gdb_sys_uname;
+
+  case amd64_sys_semget:
+    return gdb_sys_semget;
+
+  case amd64_sys_semop:
+    return gdb_sys_semop;
+
+  case amd64_sys_semctl:
+    return gdb_sys_semctl;
+
+  case amd64_sys_shmdt:
+    return gdb_sys_shmdt;
+
+  case amd64_sys_msgget:
+    return gdb_sys_msgget;
+
+  case amd64_sys_msgsnd:
+    return gdb_sys_msgsnd;
+
+  case amd64_sys_msgrcv:
+    return gdb_sys_msgrcv;
+
+  case amd64_sys_msgctl:
+    return gdb_sys_msgctl;
+
+  case amd64_sys_fcntl:
+    return gdb_sys_fcntl;
+
+  case amd64_sys_flock:
+    return gdb_sys_flock;
+
+  case amd64_sys_fsync:
+    return gdb_sys_fsync;
+
+  case amd64_sys_fdatasync:
+    return gdb_sys_fdatasync;
+
+  case amd64_sys_truncate:
+    return gdb_sys_truncate;
+
+  case amd64_sys_ftruncate:
+    return gdb_sys_ftruncate;
+
+  case amd64_sys_getdents:
+    return gdb_sys_getdents;
+
+  case amd64_sys_getcwd:
+    return gdb_sys_getcwd;
+
+  case amd64_sys_chdir:
+    return gdb_sys_chdir;
+
+  case amd64_sys_fchdir:
+    return gdb_sys_fchdir;
+
+  case amd64_sys_rename:
+    return gdb_sys_rename;
+
+  case amd64_sys_mkdir:
+    return gdb_sys_mkdir;
+
+  case amd64_sys_rmdir:
+    return gdb_sys_rmdir;
+
+  case amd64_sys_creat:
+    return gdb_sys_creat;
+
+  case amd64_sys_link:
+    return gdb_sys_link;
+
+  case amd64_sys_unlink:
+    return gdb_sys_unlink;
+
+  case amd64_sys_symlink:
+    return gdb_sys_symlink;
+
+  case amd64_sys_readlink:
+    return gdb_sys_readlink;
+
+  case amd64_sys_chmod:
+    return gdb_sys_chmod;
+
+  case amd64_sys_fchmod:
+    return gdb_sys_fchmod;
+
+  case amd64_sys_chown:
+    return gdb_sys_chown;
+
+  case amd64_sys_fchown:
+    return gdb_sys_fchown;
+
+  case amd64_sys_lchown:
+    return gdb_sys_lchown;
+
+  case amd64_sys_umask:
+    return gdb_sys_umask;
+
+  case amd64_sys_gettimeofday:
+    return gdb_sys_gettimeofday;
+
+  case amd64_sys_getrlimit:
+    return gdb_sys_getrlimit;
+
+  case amd64_sys_getrusage:
+    return gdb_sys_getrusage;
+
+  case amd64_sys_sysinfo:
+    return gdb_sys_sysinfo;
+
+  case amd64_sys_times:
+    return gdb_sys_times;
+
+  case amd64_sys_ptrace:
+    return gdb_sys_ptrace;
+
+  case amd64_sys_getuid:
+    return gdb_sys_getuid;
+
+  case amd64_sys_syslog:
+    return gdb_sys_syslog;
+
+  case amd64_sys_getgid:
+    return gdb_sys_getgid;
+
+  case amd64_sys_setuid:
+    return gdb_sys_setuid;
+
+  case amd64_sys_setgid:
+    return gdb_sys_setgid;
+
+  case amd64_sys_geteuid:
+    return gdb_sys_geteuid;
+
+  case amd64_sys_getegid:
+    return gdb_sys_getegid;
+
+  case amd64_sys_setpgid:
+    return gdb_sys_setpgid;
+
+  case amd64_sys_getppid:
+    return gdb_sys_getppid;
+
+  case amd64_sys_getpgrp:
+    return gdb_sys_getpgrp;
+
+  case amd64_sys_setsid:
+    return gdb_sys_setsid;
+
+  case amd64_sys_setreuid:
+    return gdb_sys_setreuid;
+
+  case amd64_sys_setregid:
+    return gdb_sys_setregid;
+
+  case amd64_sys_getgroups:
+    return gdb_sys_getgroups;
+
+  case amd64_sys_setgroups:
+    return gdb_sys_setgroups;
+
+  case amd64_sys_setresuid:
+    return gdb_sys_setresuid;
+
+  case amd64_sys_getresuid:
+    return gdb_sys_getresuid;
+
+  case amd64_sys_setresgid:
+    return gdb_sys_setresgid;
+
+  case amd64_sys_getresgid:
+    return gdb_sys_getresgid;
+
+  case amd64_sys_getpgid:
+    return gdb_sys_getpgid;
+
+  case amd64_sys_setfsuid:
+    return gdb_sys_setfsuid;
+
+  case amd64_sys_setfsgid:
+    return gdb_sys_setfsgid;
+
+  case amd64_sys_getsid:
+    return gdb_sys_getsid;
+
+  case amd64_sys_capget:
+    return gdb_sys_capget;
+
+  case amd64_sys_capset:
+    return gdb_sys_capset;
+
+  case amd64_sys_rt_sigpending:
+    return gdb_sys_rt_sigpending;
+
+  case amd64_sys_rt_sigtimedwait:
+    return gdb_sys_rt_sigtimedwait;
+
+  case amd64_sys_rt_sigqueueinfo:
+    return gdb_sys_rt_sigqueueinfo;
+
+  case amd64_sys_rt_sigsuspend:
+    return gdb_sys_rt_sigsuspend;
+
+  case amd64_sys_sigaltstack:
+    return gdb_sys_sigaltstack;
+
+  case amd64_sys_utime:
+    return gdb_sys_utime;
+
+  case amd64_sys_mknod:
+    return gdb_sys_mknod;
+
+  case amd64_sys_personality:
+    return gdb_sys_personality;
+
+  case amd64_sys_ustat:
+    return gdb_sys_ustat;
+
+  case amd64_sys_statfs:
+    return gdb_sys_statfs;
+
+  case amd64_sys_fstatfs:
+    return gdb_sys_fstatfs;
+
+  case amd64_sys_sysfs:
+    return gdb_sys_sysfs;
+
+  case amd64_sys_getpriority:
+    return gdb_sys_getpriority;
+
+  case amd64_sys_setpriority:
+    return gdb_sys_setpriority;
+
+  case amd64_sys_sched_setparam:
+    return gdb_sys_sched_setparam;
+
+  case amd64_sys_sched_getparam:
+    return gdb_sys_sched_getparam;
+
+  case amd64_sys_sched_setscheduler:
+    return gdb_sys_sched_setscheduler;
+
+  case amd64_sys_sched_getscheduler:
+    return gdb_sys_sched_getscheduler;
+
+  case amd64_sys_sched_get_priority_max:
+    return gdb_sys_sched_get_priority_max;
+
+  case amd64_sys_sched_get_priority_min:
+    return gdb_sys_sched_get_priority_min;
+
+  case amd64_sys_sched_rr_get_interval:
+    return gdb_sys_sched_rr_get_interval;
+
+  case amd64_sys_mlock:
+    return gdb_sys_mlock;
+
+  case amd64_sys_munlock:
+    return gdb_sys_munlock;
+
+  case amd64_sys_mlockall:
+    return gdb_sys_mlockall;
+
+  case amd64_sys_munlockall:
+    return gdb_sys_munlockall;
+
+  case amd64_sys_vhangup:
+    return gdb_sys_vhangup;
+
+  case amd64_sys_modify_ldt:
+    return gdb_sys_modify_ldt;
+
+  case amd64_sys_pivot_root:
+    return gdb_sys_pivot_root;
+
+  case amd64_sys_sysctl:
+    return gdb_sys_sysctl;
+
+  case amd64_sys_prctl:
+    return gdb_sys_prctl;
+
+  case amd64_sys_arch_prctl:
+    return -1;	/* Note */
+
+  case amd64_sys_adjtimex:
+    return gdb_sys_adjtimex;
+
+  case amd64_sys_setrlimit:
+    return gdb_sys_setrlimit;
+
+  case amd64_sys_chroot:
+    return gdb_sys_chroot;
+
+  case amd64_sys_sync:
+    return gdb_sys_sync;
+
+  case amd64_sys_acct:
+    return gdb_sys_acct;
+
+  case amd64_sys_settimeofday:
+    return gdb_sys_settimeofday;
+
+  case amd64_sys_mount:
+    return gdb_sys_mount;
+
+  case amd64_sys_umount:
+    return gdb_sys_umount;
+
+  case amd64_sys_swapon:
+    return gdb_sys_swapon;
+
+  case amd64_sys_swapoff:
+    return gdb_sys_swapoff;
+
+  case amd64_sys_reboot:
+    return gdb_sys_reboot;
+
+  case amd64_sys_sethostname:
+    return gdb_sys_sethostname;
+
+  case amd64_sys_setdomainname:
+    return gdb_sys_setdomainname;
+
+  case amd64_sys_iopl:
+    return gdb_sys_iopl;
+
+  case amd64_sys_ioperm:
+    return gdb_sys_ioperm;
+
+  case amd64_sys_init_module:
+    return gdb_sys_init_module;
+
+  case amd64_sys_delete_module:
+    return gdb_sys_delete_module;
+
+  case amd64_sys_quotactl:
+    return gdb_sys_quotactl;
+
+  case amd64_sys_nfsservctl:
+    return gdb_sys_nfsservctl;
+
+  case amd64_sys_gettid:
+    return gdb_sys_gettid;
+
+  case amd64_sys_readahead:
+    return gdb_sys_readahead;
+
+  case amd64_sys_setxattr:
+    return gdb_sys_setxattr;
+
+  case amd64_sys_lsetxattr:
+    return gdb_sys_lsetxattr;
+
+  case amd64_sys_fsetxattr:
+    return gdb_sys_fsetxattr;
+
+  case amd64_sys_getxattr:
+    return gdb_sys_getxattr;
+
+  case amd64_sys_lgetxattr:
+    return gdb_sys_lgetxattr;
+
+  case amd64_sys_fgetxattr:
+    return gdb_sys_fgetxattr;
+
+  case amd64_sys_listxattr:
+    return gdb_sys_listxattr;
+
+  case amd64_sys_llistxattr:
+    return gdb_sys_llistxattr;
+
+  case amd64_sys_flistxattr:
+    return gdb_sys_flistxattr;
+
+  case amd64_sys_removexattr:
+    return gdb_sys_removexattr;
+
+  case amd64_sys_lremovexattr:
+    return gdb_sys_lremovexattr;
+
+  case amd64_sys_fremovexattr:
+    return gdb_sys_fremovexattr;
+
+  case amd64_sys_tkill:
+    return gdb_sys_tkill;
+
+  case amd64_sys_time:
+    return gdb_sys_time;
+
+  case amd64_sys_futex:
+    return gdb_sys_futex;
+
+  case amd64_sys_sched_setaffinity:
+    return gdb_sys_sched_setaffinity;
+
+  case amd64_sys_sched_getaffinity:
+    return gdb_sys_sched_getaffinity;
+
+  case amd64_sys_io_setup:
+    return gdb_sys_io_setup;
+
+  case amd64_sys_io_destroy:
+    return gdb_sys_io_destroy;
+
+  case amd64_sys_io_getevents:
+    return gdb_sys_io_getevents;
+
+  case amd64_sys_io_submit:
+    return gdb_sys_io_submit;
+
+  case amd64_sys_io_cancel:
+    return gdb_sys_io_cancel;
+
+  case amd64_sys_lookup_dcookie:
+    return gdb_sys_lookup_dcookie;
+
+  case amd64_sys_epoll_create:
+    return gdb_sys_epoll_create;
+
+  case amd64_sys_remap_file_pages:
+    return gdb_sys_remap_file_pages;
+
+  case amd64_sys_getdents64:
+    return gdb_sys_getdents64;
+
+  case amd64_sys_set_tid_address:
+    return gdb_sys_set_tid_address;
+
+  case amd64_sys_restart_syscall:
+    return gdb_sys_restart_syscall;
+
+  case amd64_sys_semtimedop:
+    return gdb_sys_semtimedop;
+
+  case amd64_sys_fadvise64:
+    return gdb_sys_fadvise64;
+
+  case amd64_sys_timer_create:
+    return gdb_sys_timer_create;
+
+  case amd64_sys_timer_settime:
+    return gdb_sys_timer_settime;
+
+  case amd64_sys_timer_gettime:
+    return gdb_sys_timer_gettime;
+
+  case amd64_sys_timer_getoverrun:
+    return gdb_sys_timer_getoverrun;
+
+  case amd64_sys_timer_delete:
+    return gdb_sys_timer_delete;
+
+  case amd64_sys_clock_settime:
+    return gdb_sys_clock_settime;
+
+  case amd64_sys_clock_gettime:
+    return gdb_sys_clock_gettime;
+
+  case amd64_sys_clock_getres:
+    return gdb_sys_clock_getres;
+
+  case amd64_sys_clock_nanosleep:
+    return gdb_sys_clock_nanosleep;
+
+  case amd64_sys_exit_group:
+    return gdb_sys_exit_group;
+
+  case amd64_sys_epoll_wait:
+    return gdb_sys_epoll_wait;
+
+  case amd64_sys_epoll_ctl:
+    return gdb_sys_epoll_ctl;
+
+  case amd64_sys_tgkill:
+    return gdb_sys_tgkill;
+
+  case amd64_sys_utimes:
+    return gdb_sys_utimes;
+
+  case amd64_sys_mbind:
+    return gdb_sys_mbind;
+
+  case amd64_sys_set_mempolicy:
+    return gdb_sys_set_mempolicy;
+
+  case amd64_sys_get_mempolicy:
+    return gdb_sys_get_mempolicy;
+
+  case amd64_sys_mq_open:
+    return gdb_sys_mq_open;
+
+  case amd64_sys_mq_unlink:
+    return gdb_sys_mq_unlink;
+
+  case amd64_sys_mq_timedsend:
+    return gdb_sys_mq_timedsend;
+
+  case amd64_sys_mq_timedreceive:
+    return gdb_sys_mq_timedreceive;
+
+  case amd64_sys_mq_notify:
+    return gdb_sys_mq_notify;
+
+  case amd64_sys_mq_getsetattr:
+    return gdb_sys_mq_getsetattr;
+
+  case amd64_sys_kexec_load:
+    return gdb_sys_kexec_load;
+
+  case amd64_sys_waitid:
+    return gdb_sys_waitid;
+
+  case amd64_sys_add_key:
+    return gdb_sys_add_key;
+
+  case amd64_sys_request_key:
+    return gdb_sys_request_key;
+
+  case amd64_sys_keyctl:
+    return gdb_sys_keyctl;
+
+  case amd64_sys_ioprio_set:
+    return gdb_sys_ioprio_set;
+
+  case amd64_sys_ioprio_get:
+    return gdb_sys_ioprio_get;
+
+  case amd64_sys_inotify_init:
+    return gdb_sys_inotify_init;
+
+  case amd64_sys_inotify_add_watch:
+    return gdb_sys_inotify_add_watch;
+
+  case amd64_sys_inotify_rm_watch:
+    return gdb_sys_inotify_rm_watch;
+
+  case amd64_sys_migrate_pages:
+    return gdb_sys_migrate_pages;
+
+  case amd64_sys_openat:
+    return gdb_sys_openat;
+
+  case amd64_sys_mkdirat:
+    return gdb_sys_mkdirat;
+
+  case amd64_sys_mknodat:
+    return gdb_sys_mknodat;
+
+  case amd64_sys_fchownat:
+    return gdb_sys_fchownat;
+
+  case amd64_sys_futimesat:
+    return gdb_sys_futimesat;
+
+  case amd64_sys_newfstatat:
+    return gdb_sys_newfstatat;
+
+  case amd64_sys_unlinkat:
+    return gdb_sys_unlinkat;
+
+  case amd64_sys_renameat:
+    return gdb_sys_renameat;
+
+  case amd64_sys_linkat:
+    return gdb_sys_linkat;
+
+  case amd64_sys_symlinkat:
+    return gdb_sys_symlinkat;
+
+  case amd64_sys_readlinkat:
+    return gdb_sys_readlinkat;
+
+  case amd64_sys_fchmodat:
+    return gdb_sys_fchmodat;
+
+  case amd64_sys_faccessat:
+    return gdb_sys_faccessat;
+
+  case amd64_sys_pselect6:
+    return gdb_sys_pselect6;
+
+  case amd64_sys_ppoll:
+    return gdb_sys_ppoll;
+
+  case amd64_sys_unshare:
+    return gdb_sys_unshare;
+
+  case amd64_sys_set_robust_list:
+    return gdb_sys_set_robust_list;
+
+  case amd64_sys_get_robust_list:
+    return gdb_sys_get_robust_list;
+
+  case amd64_sys_splice:
+    return gdb_sys_splice;
+
+  case amd64_sys_tee:
+    return gdb_sys_tee;
+
+  case amd64_sys_sync_file_range:
+    return gdb_sys_sync_file_range;
+
+  case amd64_sys_vmsplice:
+    return gdb_sys_vmsplice;
+
+  case amd64_sys_move_pages:
+    return gdb_sys_move_pages;
+
+  default:
+    return -1;
+  }
+}
+
 static int
 amd64_linux_syscall_record (struct regcache *regcache)
 {
-  int ret, num = -1;
-  ULONGEST tmpulongest;
+  int ret;
+  ULONGEST syscall_native;
+  enum gdb_syscall syscall_gdb = -1;
 
-  regcache_raw_read_unsigned (regcache, AMD64_RAX_REGNUM, &tmpulongest);
+  regcache_raw_read_unsigned (regcache, AMD64_RAX_REGNUM, &syscall_native);
 
-  /* Convert tmpulongest to number in record_linux_system_call.  */
-  switch (tmpulongest)
+  syscall_gdb = amd64_canonicalize_syscall (syscall_native);
+
+  if (syscall_native == amd64_sys_arch_prctl) 
     {
-      /* sys_read */
-    case 0:
-      num = 3;
-      break;
-      /* sys_write */
-    case 1:
-      num = 4;
-      break;
-      /* sys_open */
-    case 2:
-      num = 5;
-      break;
-      /* sys_close */
-    case 3:
-      num = 6;
-      break;
-      /* sys_newstat */
-    case 4:
-      num = 106;
-      break;
-      /* sys_newfstat */
-    case 5:
-      num = 108;
-      break;
-      /* sys_newlstat */
-    case 6:
-      num = 107;
-      break;
-      /* sys_poll */
-    case 7:
-      num = 168;
-      break;
-      /* sys_lseek */
-    case 8:
-      num = 19;
-      break;
-      /* sys_mmap */
-    case 9:
-      num = 192;
-      break;
-      /* sys_mprotect */
-    case 10:
-      num = 125;
-      break;
-      /* sys_munmap */
-    case 11:
-      num = 91;
-      break;
-      /* sys_brk */
-    case 12:
-      num = 45;
-      break;
-      /* sys_rt_sigaction */
-    case 13:
-      num = 174;
-      break;
-      /* sys_rt_sigprocmask */
-    case 14:
-      num = 175;
-      break;
-      /* sys_rt_sigreturn */
-    case 15:
-      num = 173;
-      break;
-      /* sys_ioctl */
-    case 16:
-      num = 54;
-      break;
-      /* sys_pread64 */
-    case 17:
-      num = 180;
-      break;
-      /* sys_pwrite64 */
-    case 18:
-      num = 181;
-      break;
-      /* sys_readv */
-    case 19:
-      num = 145;
-      break;
-      /* sys_writev */
-    case 20:
-      num = 146;
-      break;
-      /* sys_access */
-    case 21:
-      num = 33;
-      break;
-      /* sys_pipe */
-    case 22:
-      num = 42;
-      break;
-      /* sys_select */
-    case 23:
-      num = 142;
-      break;
-      /* sys_sched_yield */
-    case 24:
-      num = 158;
-      break;
-      /* sys_mremap */
-    case 25:
-      num = 163;
-      break;
-      /* sys_msync */
-    case 26:
-      num = 144;
-      break;
-      /* sys_mincore */
-    case 27:
-      num = 218;
-      break;
-      /* sys_madvise */
-    case 28:
-      num = 219;
-      break;
-      /* sys_shmget */
-    case 29:
-      num = 520;
-      break;
-      /* sys_shmat */
-    case 30:
-      num = 521;
-      break;
-      /* sys_shmctl */
-    case 31:
-      num = 522;
-      break;
-      /* sys_dup */
-    case 32:
-      num = 41;
-      break;
-      /* sys_dup2 */
-    case 33:
-      num = 63;
-      break;
-      /* sys_pause */
-    case 34:
-      num = 29;
-      break;
-      /* sys_nanosleep */
-    case 35:
-      num = 162;
-      break;
-      /* sys_getitimer */
-    case 36:
-      num = 105;
-      break;
-      /* sys_alarm */
-    case 37:
-      num = 27;
-      break;
-      /* sys_setitimer */
-    case 38:
-      num = 104;
-      break;
-      /* sys_getpid */
-    case 39:
-      num = 20;
-      break;
-      /* sys_sendfile64 */
-    case 40:
-      num = 239;
-      break;
-      /* sys_socket */
-    case 41:
-      num = 500;
-      break;
-      /* sys_connect */
-    case 42:
-      num = 501;
-      break;
-      /* sys_accept */
-    case 43:
-      num = 502;
-      break;
-      /* sys_sendto */
-    case 44:
-      num = 503;
-      break;
-      /* sys_recvfrom */
-    case 45:
-      num = 504;
-      break;
-      /* sys_sendmsg */
-    case 46:
-      num = 505;
-      break;
-      /* sys_recvmsg */
-    case 47:
-      num = 506;
-      break;
-      /* sys_shutdown */
-    case 48:
-      num = 507;
-      break;
-      /* sys_bind */
-    case 49:
-      num = 508;
-      break;
-      /* sys_listen */
-    case 50:
-      num = 509;
-      break;
-      /* sys_getsockname */
-    case 51:
-      num = 510;
-      break;
-      /* sys_getpeername */
-    case 52:
-      num = 511;
-      break;
-      /* sys_socketpair */
-    case 53:
-      num = 512;
-      break;
-      /* sys_setsockopt */
-    case 54:
-      num = 513;
-      break;
-      /* sys_getsockopt */
-    case 55:
-      num = 514;
-      break;
-      /* sys_clone */
-    case 56:
-      num = 120;
-      break;
-      /* sys_fork */
-    case 57:
-      num = 2;
-      break;
-      /* sys_vfork */
-    case 58:
-      num = 190;
-      break;
-      /* sys_execve */
-    case 59:
-      num = 11;
-      break;
-      /* sys_exit */
-    case 60:
-      num = 1;
-      break;
-      /* sys_wait4 */
-    case 61:
-      num = 114;
-      break;
-      /* sys_kill */
-    case 62:
-      num = 37;
-      break;
-      /* sys_uname */
-    case 63:
-      num = 109;
-      break;
-      /* sys_semget */
-    case 64:
-      num = 523;
-      break;
-      /* sys_semop */
-    case 65:
-      num = 524;
-      break;
-      /* sys_semctl */
-    case 66:
-      num = 525;
-      break;
-      /* sys_shmdt */
-    case 67:
-      num = 527;
-      break;
-      /* sys_msgget */
-    case 68:
-      num = 528;
-      break;
-      /* sys_msgsnd */
-    case 69:
-      num = 529;
-      break;
-      /* sys_msgrcv */
-    case 70:
-      num = 530;
-      break;
-      /* sys_msgctl */
-    case 71:
-      num = 531;
-      break;
-      /* sys_fcntl */
-    case 72:
-      num = 55;
-      break;
-      /* sys_flock */
-    case 73:
-      num = 143;
-      break;
-      /* sys_fsync */
-    case 74:
-      num = 118;
-      break;
-      /* sys_fdatasync */
-    case 75:
-      num = 148;
-      break;
-      /* sys_truncate */
-    case 76:
-      num = 92;
-      break;
-      /* sys_ftruncate */
-    case 77:
-      num = 93;
-      break;
-      /* sys_getdents */
-    case 78:
-      num = 141;
-      break;
-      /* sys_getcwd */
-    case 79:
-      num = 183;
-      break;
-      /* sys_chdir */
-    case 80:
-      num = 12;
-      break;
-      /* sys_fchdir */
-    case 81:
-      num = 133;
-      break;
-      /* sys_rename */
-    case 82:
-      num = 38;
-      break;
-      /* sys_mkdir */
-    case 83:
-      num = 39;
-      break;
-      /* sys_rmdir */
-    case 84:
-      num = 40;
-      break;
-      /* sys_creat */
-    case 85:
-      num = 8;
-      break;
-      /* sys_link */
-    case 86:
-      num = 9;
-      break;
-      /* sys_unlink */
-    case 87:
-      num = 10;
-      break;
-      /* sys_symlink */
-    case 88:
-      num = 83;
-      break;
-      /* sys_readlink */
-    case 89:
-      num = 85;
-      break;
-      /* sys_chmod */
-    case 90:
-      num = 15;
-      break;
-      /* sys_fchmod */
-    case 91:
-      num = 94;
-      break;
-      /* sys_chown */
-    case 92:
-      num = 212;
-      break;
-      /* sys_fchown */
-    case 93:
-      num = 207;
-      break;
-      /* sys_lchown */
-    case 94:
-      num = 198;
-      break;
-      /* sys_umask */
-    case 95:
-      num = 60;
-      break;
-      /* sys_gettimeofday */
-    case 96:
-      num = 78;
-      break;
-      /* sys_getrlimit */
-    case 97:
-      num = 191;
-      break;
-      /* sys_getrusage */
-    case 98:
-      num = 77;
-      break;
-      /* sys_sysinfo */
-    case 99:
-      num = 116;
-      break;
-      /* sys_times */
-    case 100:
-      num = 43;
-      break;
-      /* sys_ptrace */
-    case 101:
-      num = 26;
-      break;
-      /* sys_getuid */
-    case 102:
-      num = 199;
-      break;
-      /* sys_syslog */
-    case 103:
-      num = 103;
-      break;
-      /* sys_getgid */
-    case 104:
-      num = 200;
-      break;
-      /* sys_setuid */
-    case 105:
-      num = 213;
-      break;
-      /* sys_setgid */
-    case 106:
-      num = 214;
-      break;
-      /* sys_geteuid */
-    case 107:
-      num = 201;
-      break;
-      /* sys_getegid */
-    case 108:
-      num = 202;
-      break;
-      /* sys_setpgid */
-    case 109:
-      num = 57;
-      break;
-      /* sys_getppid */
-    case 110:
-      num = 64;
-      break;
-      /* sys_getpgrp */
-    case 111:
-      num = 65;
-      break;
-      /* sys_setsid */
-    case 112:
-      num = 66;
-      break;
-      /* sys_setreuid */
-    case 113:
-      num = 203;
-      break;
-      /* sys_setregid */
-    case 114:
-      num = 204;
-      break;
-      /* sys_getgroups */
-    case 115:
-      num = 205;
-      break;
-      /* sys_setgroups */
-    case 116:
-      num = 206;
-      break;
-      /* sys_setresuid */
-    case 117:
-      num = 208;
-      break;
-      /* sys_getresuid */
-    case 118:
-      num = 209;
-      break;
-      /* sys_setresgid */
-    case 119:
-      num = 210;
-      break;
-      /* sys_getresgid */
-    case 120:
-      num = 211;
-      break;
-      /* sys_getpgid */
-    case 121:
-      num = 132;
-      break;
-      /* sys_setfsuid */
-    case 122:
-      num = 215;
-      break;
-      /* sys_setfsgid */
-    case 123:
-      num = 216;
-      break;
-      /* sys_getsid */
-    case 124:
-      num = 147;
-      break;
-      /* sys_capget */
-    case 125:
-      num = 184;
-      break;
-      /* sys_capset */
-    case 126:
-      num = 185;
-      break;
-      /* sys_rt_sigpending */
-    case 127:
-      num = 176;
-      break;
-      /* sys_rt_sigtimedwait */
-    case 128:
-      num = 177;
-      break;
-      /* sys_rt_sigqueueinfo */
-    case 129:
-      num = 178;
-      break;
-      /* sys_rt_sigsuspend */
-    case 130:
-      num = 179;
-      break;
-      /* sys_sigaltstack */
-    case 131:
-      num = 186;
-      break;
-      /* sys_utime */
-    case 132:
-      num = 30;
-      break;
-      /* sys_mknod */
-    case 133:
-      num = 14;
-      break;
-      /* sys_personality */
-    case 135:
-      num = 136;
-      break;
-      /* sys_ustat */
-    case 136:
-      num = 62;
-      break;
-      /* sys_statfs */
-    case 137:
-      num = 99;
-      break;
-      /* sys_fstatfs */
-    case 138:
-      num = 100;
-      break;
-      /* sys_sysfs */
-    case 139:
-      num = 135;
-      break;
-      /* sys_getpriority */
-    case 140:
-      num = 96;
-      break;
-      /* sys_setpriority */
-    case 141:
-      num = 97;
-      break;
-      /* sys_sched_setparam */
-    case 142:
-      num = 154;
-      break;
-      /* sys_sched_getparam */
-    case 143:
-      num = 155;
-      break;
-      /* sys_sched_setscheduler */
-    case 144:
-      num = 156;
-      break;
-      /* sys_sched_getscheduler */
-    case 145:
-      num = 157;
-      break;
-      /* sys_sched_get_priority_max */
-    case 146:
-      num = 159;
-      break;
-      /* sys_sched_get_priority_min */
-    case 147:
-      num = 160;
-      break;
-      /* sys_sched_rr_get_interval */
-    case 148:
-      num = 161;
-      break;
-      /* sys_mlock */
-    case 149:
-      num = 150;
-      break;
-      /* sys_munlock */
-    case 150:
-      num = 151;
-      break;
-      /* sys_mlockall */
-    case 151:
-      num = 152;
-      break;
-      /* sys_munlockall */
-    case 152:
-      num = 153;
-      break;
-      /* sys_vhangup */
-    case 153:
-      num = 111;
-      break;
-      /* sys_modify_ldt */
-    case 154:
-      num = 123;
-      break;
-      /* sys_pivot_root */
-    case 155:
-      num = 217;
-      break;
-      /* sys_sysctl */
-    case 156:
-      num = 149;
-      break;
-      /* sys_prctl */
-    case 157:
-      num = 172;
-      break;
-      /* sys_arch_prctl */
-    case 158:
+      ULONGEST arg3;
+
       regcache_raw_read_unsigned (regcache, amd64_linux_record_tdep.arg3,
-                                  &tmpulongest);
-      if (tmpulongest == RECORD_ARCH_GET_FS
-          || tmpulongest == RECORD_ARCH_GET_GS)
-        {
-          regcache_raw_read_unsigned (regcache, amd64_linux_record_tdep.arg2,
-                                      &tmpulongest);
-          if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
-                                        amd64_linux_record_tdep.size_ulong))
-            return -1;
-        }
-      break;
-      /* sys_adjtimex */
-    case 159:
-      num = 124;
-      break;
-      /* sys_setrlimit */
-    case 160:
-      num = 75;
-      break;
-      /* sys_chroot */
-    case 161:
-      num = 61;
-      break;
-      /* sys_sync */
-    case 162:
-      num = 36;
-      break;
-      /* sys_acct */
-    case 163:
-      num = 51;
-      break;
-      /* sys_settimeofday */
-    case 164:
-      num = 79;
-      break;
-      /* sys_mount */
-    case 165:
-      num = 21;
-      break;
-      /* sys_umount */
-    case 166:
-      num = 52;
-      break;
-      /* sys_swapon */
-    case 167:
-      num = 87;
-      break;
-      /* sys_swapoff */
-    case 168:
-      num = 115;
-      break;
-      /* sys_reboot */
-    case 169:
-      num = 88;
-      break;
-      /* sys_sethostname */
-    case 170:
-      num = 74;
-      break;
-      /* sys_setdomainname */
-    case 171:
-      num = 121;
-      break;
-      /* sys_iopl */
-    case 172:
-      num = 110;
-      break;
-      /* sys_ioperm */
-    case 173:
-      num = 101;
-      break;
-      /* sys_init_module */
-    case 175:
-      num = 128;
-      break;
-      /* sys_delete_module */
-    case 176:
-      num = 129;
-      break;
-      /* sys_quotactl */
-    case 179:
-      num = 131;
-      break;
-      /* sys_nfsservctl */
-    case 180:
-      num = 169;
-      break;
-      /* sys_gettid */
-    case 186:
-      num = 224;
-      break;
-      /* sys_readahead */
-    case 187:
-      num = 225;
-      break;
-      /* sys_setxattr */
-    case 188:
-      num = 226;
-      break;
-      /* sys_lsetxattr */
-    case 189:
-      num = 227;
-      break;
-      /* sys_fsetxattr */
-    case 190:
-      num = 228;
-      break;
-      /* sys_getxattr */
-    case 191:
-      num = 229;
-      break;
-      /* sys_lgetxattr */
-    case 192:
-      num = 230;
-      break;
-      /* sys_fgetxattr */
-    case 193:
-      num = 231;
-      break;
-      /* sys_listxattr */
-    case 194:
-      num = 232;
-      break;
-      /* sys_llistxattr */
-    case 195:
-      num = 233;
-      break;
-      /* sys_flistxattr */
-    case 196:
-      num = 234;
-      break;
-      /* sys_removexattr */
-    case 197:
-      num = 235;
-      break;
-      /* sys_lremovexattr */
-    case 198:
-      num = 236;
-      break;
-      /* sys_fremovexattr */
-    case 199:
-      num = 237;
-      break;
-      /* sys_tkill */
-    case 200:
-      num = 238;
-      break;
-      /* sys_time */
-    case 201:
-      num = 13;
-      break;
-      /* sys_futex */
-    case 202:
-      num = 240;
-      break;
-      /* sys_sched_setaffinity */
-    case 203:
-      num = 241;
-      break;
-      /* sys_sched_getaffinity */
-    case 204:
-      num = 242;
-      break;
-      /* sys_io_setup */
-    case 206:
-      num = 245;
-      break;
-      /* sys_io_destroy */
-    case 207:
-      num = 246;
-      break;
-      /* sys_io_getevents */
-    case 208:
-      num = 247;
-      break;
-      /* sys_io_submit */
-    case 209:
-      num = 248;
-      break;
-      /* sys_io_cancel */
-    case 210:
-      num = 249;
-      break;
-      /* sys_lookup_dcookie */
-    case 212:
-      num = 253;
-      break;
-      /* sys_epoll_create */
-    case 213:
-      num = 254;
-      break;
-      /* sys_remap_file_pages */
-    case 216:
-      num = 257;
-      break;
-      /* sys_getdents64 */
-    case 217:
-      num = 220;
-      break;
-      /* sys_set_tid_address */
-    case 218:
-      num = 258;
-      break;
-      /* sys_restart_syscall */
-    case 219:
-      num = 0;
-      break;
-      /* sys_semtimedop */
-    case 220:
-      num = 532;
-      break;
-      /* sys_fadvise64 */
-    case 221:
-      num = 250;
-      break;
-      /* sys_timer_create */
-    case 222:
-      num = 259;
-      break;
-      /* sys_timer_settime */
-    case 223:
-      num = 260;
-      break;
-      /* sys_timer_gettime */
-    case 224:
-      num = 261;
-      break;
-      /* sys_timer_getoverrun */
-    case 225:
-      num = 262;
-      break;
-      /* sys_timer_delete */
-    case 226:
-      num = 263;
-      break;
-      /* sys_clock_settime */
-    case 227:
-      num = 264;
-      break;
-      /* sys_clock_gettime */
-    case 228:
-      num = 265;
-      break;
-      /* sys_clock_getres */
-    case 229:
-      num = 266;
-      break;
-      /* sys_clock_nanosleep */
-    case 230:
-      num = 267;
-      break;
-      /* sys_exit_group */
-    case 231:
-      num = 252;
-      break;
-      /* sys_epoll_wait */
-    case 232:
-      num = 256;
-      break;
-      /* sys_epoll_ctl */
-    case 233:
-      num = 255;
-      break;
-      /* sys_tgkill */
-    case 234:
-      num = 270;
-      break;
-      /* sys_utimes */
-    case 235:
-      num = 271;
-      break;
-      /* sys_mbind */
-    case 237:
-      num = 274;
-      break;
-      /* sys_set_mempolicy */
-    case 238:
-      num = 276;
-      break;
-      /* sys_get_mempolicy */
-    case 239:
-      num = 275;
-      break;
-      /* sys_mq_open */
-    case 240:
-      num = 277;
-      break;
-      /* sys_mq_unlink */
-    case 241:
-      num = 278;
-      break;
-      /* sys_mq_timedsend */
-    case 242:
-      num = 279;
-      break;
-      /* sys_mq_timedreceive */
-    case 243:
-      num = 280;
-      break;
-      /* sys_mq_notify */
-    case 244:
-      num = 281;
-      break;
-      /* sys_mq_getsetattr */
-    case 245:
-      num = 282;
-      break;
-      /* sys_kexec_load */
-    case 246:
-      num = 283;
-      break;
-      /* sys_waitid */
-    case 247:
-      num = 284;
-      break;
-      /* sys_add_key */
-    case 248:
-      num = 286;
-      break;
-      /* sys_request_key */
-    case 249:
-      num = 287;
-      break;
-      /* sys_keyctl */
-    case 250:
-      num = 288;
-      break;
-      /* sys_ioprio_set */
-    case 251:
-      num = 289;
-      break;
-      /* sys_ioprio_get */
-    case 252:
-      num = 290;
-      break;
-      /* sys_inotify_init */
-    case 253:
-      num = 291;
-      break;
-      /* sys_inotify_add_watch */
-    case 254:
-      num = 292;
-      break;
-      /* sys_inotify_rm_watch */
-    case 255:
-      num = 293;
-      break;
-      /* sys_migrate_pages */
-    case 256:
-      num = 294;
-      break;
-      /* sys_openat */
-    case 257:
-      num = 295;
-      break;
-      /* sys_mkdirat */
-    case 258:
-      num = 296;
-      break;
-      /* sys_mknodat */
-    case 259:
-      num = 297;
-      break;
-      /* sys_fchownat */
-    case 260:
-      num = 298;
-      break;
-      /* sys_futimesat */
-    case 261:
-      num = 299;
-      break;
-      /* sys_newfstatat */
-    case 262:
-      num = 540;
-      break;
-      /* sys_unlinkat */
-    case 263:
-      num = 301;
-      break;
-      /* sys_renameat */
-    case 264:
-      num = 302;
-      break;
-      /* sys_linkat */
-    case 265:
-      num = 303;
-      break;
-      /* sys_symlinkat */
-    case 266:
-      num = 304;
-      break;
-      /* sys_readlinkat */
-    case 267:
-      num = 305;
-      break;
-      /* sys_fchmodat */
-    case 268:
-      num = 306;
-      break;
-      /* sys_faccessat */
-    case 269:
-      num = 307;
-      break;
-      /* sys_pselect6 */
-    case 270:
-      num = 308;
-      break;
-      /* sys_ppoll */
-    case 271:
-      num = 309;
-      break;
-      /* sys_unshare */
-    case 272:
-      num = 310;
-      break;
-      /* sys_set_robust_list */
-    case 273:
-      num = 311;
-      break;
-      /* sys_get_robust_list */
-    case 274:
-      num = 312;
-      break;
-      /* sys_splice */
-    case 275:
-      num = 313;
-      break;
-      /* sys_tee */
-    case 276:
-      num = 315;
-      break;
-      /* sys_sync_file_range */
-    case 277:
-      num = 314;
-      break;
-      /* sys_vmsplice */
-    case 278:
-      num = 316;
-      break;
-      /* sys_move_pages */
-    case 279:
-      num = 317;
-      break;
-    default:
-      printf_unfiltered (_("Process record and replay target doesn't "
-                           "support syscall number %d\n"), (int) tmpulongest);
-      return -1;
-      break;
+				  &arg3);
+      if (arg3 == RECORD_ARCH_GET_FS || arg3 == RECORD_ARCH_GET_GS)
+      {
+	CORE_ADDR addr;
+
+	regcache_raw_read_unsigned (regcache, amd64_linux_record_tdep.arg2,
+				    &addr);
+	if (record_arch_list_add_mem (addr, 
+				      amd64_linux_record_tdep.size_ulong))
+	  return -1;
+      }
+      goto record_regs;
     }
 
-  if (num >= 0)
+  if (syscall_gdb < 0)
     {
-      ret = record_linux_system_call (num, regcache,
+      printf_unfiltered (_("Process record and replay target doesn't "
+                           "support syscall number %s\n"), 
+			 pulongest (syscall_native));
+      return -1;
+    }
+  else
+    {
+      ret = record_linux_system_call (syscall_gdb, regcache,
                                       &amd64_linux_record_tdep);
       if (ret)
         return ret;
     }
 
+ record_regs:
   /* Record the return value of the system call.  */
   if (record_arch_list_add_reg (regcache, AMD64_RCX_REGNUM))
     return -1;

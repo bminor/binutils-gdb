@@ -222,7 +222,8 @@ record_linux_msghdr (struct regcache *regcache,
    Return -1 if something wrong.  */
 
 int
-record_linux_system_call (int num, struct regcache *regcache,
+record_linux_system_call (enum gdb_syscall syscall, 
+			  struct regcache *regcache,
                           struct linux_record_tdep *tdep)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
@@ -231,14 +232,12 @@ record_linux_system_call (int num, struct regcache *regcache,
   CORE_ADDR tmpaddr;
   int tmpint;
 
-  switch (num)
+  switch (syscall)
     {
-      /* sys_restart_syscall */
-    case 0:
+    case gdb_sys_restart_syscall:
       break;
 
-      /* sys_exit */
-    case 1:
+    case gdb_sys_exit:
       {
         int q;
         target_terminal_ours ();
@@ -251,12 +250,10 @@ record_linux_system_call (int num, struct regcache *regcache,
       }
       break;
 
-      /* sys_fork */
-    case 2:
+    case gdb_sys_fork:
       break;
 
-      /* sys_read */
-    case 3:
+    case gdb_sys_read:
       {
         ULONGEST addr, count;
         regcache_raw_read_unsigned (regcache, tdep->arg2, &addr);
@@ -266,66 +263,41 @@ record_linux_system_call (int num, struct regcache *regcache,
       }
       break;
 
-      /* sys_write */
-    case 4:
-      /* sys_open */
-    case 5:
-      /* sys_close */
-    case 6:
-      /* sys_waitpid */
-    case 7:
-      /* sys_creat */
-    case 8:
-      /* sys_link */
-    case 9:
-      /* sys_unlink */
-    case 10:
-      /* sys_execve */
-    case 11:
-      /* sys_chdir */
-    case 12:
-      /* sys_time */
-    case 13:
-      /* sys_mknod */
-    case 14:
-      /* sys_chmod */
-    case 15:
-      /* sys_lchown16 */
-    case 16:
-      /* sys_ni_syscall */
-    case 17:
+    case gdb_sys_write:
+    case gdb_sys_open:
+    case gdb_sys_close:
+    case gdb_sys_waitpid:
+    case gdb_sys_creat:
+    case gdb_sys_link:
+    case gdb_sys_unlink:
+    case gdb_sys_execve:
+    case gdb_sys_chdir:
+    case gdb_sys_time:
+    case gdb_sys_mknod:
+    case gdb_sys_chmod:
+    case gdb_sys_lchown16:
+    case gdb_sys_ni_syscall17:
       break;
 
-      /* sys_stat */
-    case 18:
-      /* sys_fstat */
-    case 28:
-      /* sys_lstat */
-    case 84:
+    case gdb_sys_stat:
+    case gdb_sys_fstat:
+    case gdb_sys_lstat:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size__old_kernel_stat))
         return -1;
       break;
 
-      /* sys_lseek */
-    case 19:
-      /* sys_getpid */
-    case 20:
-      /* sys_mount */
-    case 21:
-      /* sys_oldumount */
-    case 22:
-      /* sys_setuid16 */
-    case 23:
-      /* sys_getuid16 */
-    case 24:
-      /* sys_stime */
-    case 25:
+    case gdb_sys_lseek:
+    case gdb_sys_getpid:
+    case gdb_sys_mount:
+    case gdb_sys_oldumount:
+    case gdb_sys_setuid16:
+    case gdb_sys_getuid16:
+    case gdb_sys_stime:
       break;
 
-      /* sys_ptrace */
-    case 26:
+    case gdb_sys_ptrace:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (tmpulongest == RECORD_PTRACE_PEEKTEXT
           || tmpulongest == RECORD_PTRACE_PEEKDATA
@@ -338,69 +310,42 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_alarm */
-    case 27:
-      /* sys_pause */
-    case 29:
-      /* sys_utime    */
-    case 30:
-      /* sys_ni_syscall */
-    case 31:
-      /* sys_ni_syscall */
-    case 32:
-      /* sys_access */
-    case 33:
-      /* sys_nice */
-    case 34:
-      /* sys_ni_syscall */
-    case 35:
-      /* sys_sync */
-    case 36:
-      /* sys_kill */
-    case 37:
-      /* sys_rename */
-    case 38:
-      /* sys_mkdir */
-    case 39:
-      /* sys_rmdir */
-    case 40:
-      /* sys_dup */
-    case 41:
-      /* sys_pipe */
-    case 42:
+    case gdb_sys_alarm:
+    case gdb_sys_pause:
+    case gdb_sys_utime:
+    case gdb_sys_ni_syscall31:
+    case gdb_sys_ni_syscall32:
+    case gdb_sys_access:
+    case gdb_sys_nice:
+    case gdb_sys_ni_syscall35:
+    case gdb_sys_sync:
+    case gdb_sys_kill:
+    case gdb_sys_rename:
+    case gdb_sys_mkdir:
+    case gdb_sys_rmdir:
+    case gdb_sys_dup:
+    case gdb_sys_pipe:
       break;
 
-      /* sys_times */
-    case 43:
+    case gdb_sys_times:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_tms))
         return -1;
       break;
 
-      /* sys_ni_syscall */
-    case 44:
-      /* sys_brk */
-    case 45:
-      /* sys_setgid16 */
-    case 46:
-      /* sys_getgid16 */
-    case 47:
-      /* sys_signal */
-    case 48:
-      /* sys_geteuid16 */
-    case 49:
-      /* sys_getegid16 */
-    case 50:
-      /* sys_acct */
-    case 51:
-      /* sys_umount */
-    case 52:
-      /* sys_ni_syscall */
-    case 53:
+    case gdb_sys_ni_syscall44:
+    case gdb_sys_brk:
+    case gdb_sys_setgid16:
+    case gdb_sys_getgid16:
+    case gdb_sys_signal:
+    case gdb_sys_geteuid16:
+    case gdb_sys_getegid16:
+    case gdb_sys_acct:
+    case gdb_sys_umount:
+    case gdb_sys_ni_syscall53:
       break;
 
-      /* sys_ioctl */
-    case 54:
+    case gdb_sys_ioctl:
       /* XXX Need to add a lot of support of other ioctl requests.  */
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (tmpulongest == tdep->ioctl_FIOCLEX
@@ -496,7 +441,7 @@ record_linux_system_call (int num, struct regcache *regcache,
         {
           regcache_raw_read_unsigned (regcache, tdep->arg3,
                                       &tmpulongest);
-          /* This syscall affect a char size memory.  */
+	  /* This syscall affects a char-size memory.  */
           if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, 1))
             return -1;
         }
@@ -555,8 +500,7 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_fcntl */
-    case 55:
+    case gdb_sys_fcntl:
       /* XXX */
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
     sys_fcntl:
@@ -570,98 +514,75 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_ni_syscall */
-    case 56:
-      /* sys_setpgid */
-    case 57:
-      /* sys_ni_syscall */
-    case 58:
+    case gdb_sys_ni_syscall56:
+    case gdb_sys_setpgid:
+    case gdb_sys_ni_syscall58:
       break;
 
-      /* sys_olduname */
-    case 59:
+    case gdb_sys_olduname:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_oldold_utsname))
         return -1;
       break;
 
-      /* sys_umask */
-    case 60:
-      /* sys_chroot */
-    case 61:
+    case gdb_sys_umask:
+    case gdb_sys_chroot:
       break;
 
-      /* sys_ustat */
-    case 62:
+    case gdb_sys_ustat:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_ustat))
         return -1;
       break;
 
-      /* sys_dup2 */
-    case 63:
-      /* sys_getppid */
-    case 64:
-      /* sys_getpgrp */
-    case 65:
-      /* sys_setsid */
-    case 66:
+    case gdb_sys_dup2:
+    case gdb_sys_getppid:
+    case gdb_sys_getpgrp:
+    case gdb_sys_setsid:
       break;
 
-      /* sys_sigaction */
-    case 67:
+    case gdb_sys_sigaction:
       regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_old_sigaction))
         return -1;
       break;
 
-      /* sys_sgetmask */
-    case 68:
-      /* sys_ssetmask */
-    case 69:
-      /* sys_setreuid16 */
-    case 70:
-      /* sys_setregid16 */
-    case 71:
-      /* sys_sigsuspend */
-    case 72:
+    case gdb_sys_sgetmask:
+    case gdb_sys_ssetmask:
+    case gdb_sys_setreuid16:
+    case gdb_sys_setregid16:
+    case gdb_sys_sigsuspend:
       break;
 
-      /* sys_sigpending */
-    case 73:
+    case gdb_sys_sigpending:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_old_sigset_t))
         return -1;
       break;
 
-      /* sys_sethostname */
-    case 74:
-      /* sys_setrlimit */
-    case 75:
+    case gdb_sys_sethostname:
+    case gdb_sys_setrlimit:
       break;
 
-      /* sys_old_getrlimit */
-    case 76:
+    case gdb_sys_old_getrlimit:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_rlimit))
         return -1;
       break;
 
-      /* sys_getrusage */
-    case 77:
+    case gdb_sys_getrusage:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_rusage))
         return -1;
       break;
 
-      /* sys_gettimeofday */
-    case 78:
+    case gdb_sys_gettimeofday:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_timeval))
@@ -672,28 +593,24 @@ record_linux_system_call (int num, struct regcache *regcache,
         return -1;
       break;
 
-      /* sys_settimeofday */
-    case 79:
+    case gdb_sys_settimeofday:
       break;
 
-      /* sys_getgroups16 */
-    case 80:
+    case gdb_sys_getgroups16:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_old_gid_t))
         return -1;
       break;
 
-      /* sys_setgroups16 */
-    case 81:
+    case gdb_sys_setgroups16:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_old_gid_t))
         return -1;
       break;
 
-      /* old_select */
-    case 82:
+    case gdb_old_select:
       {
         struct sel_arg_struct
         {
@@ -731,12 +648,10 @@ record_linux_system_call (int num, struct regcache *regcache,
       }
       break;
 
-      /* sys_symlink */
-    case 83:
+    case gdb_sys_symlink:
       break;
 
-      /* sys_readlink */
-    case 85:
+    case gdb_sys_readlink:
       {
         ULONGEST len;
         regcache_raw_read_unsigned (regcache, tdep->arg2,
@@ -747,14 +662,11 @@ record_linux_system_call (int num, struct regcache *regcache,
       }
       break;
 
-      /* sys_uselib */
-    case 86:
-      /* sys_swapon */
-    case 87:
+    case gdb_sys_uselib:
+    case gdb_sys_swapon:
       break;
 
-      /* sys_reboot */
-    case 88:
+    case gdb_sys_reboot:
       {
         int q;
         target_terminal_ours ();
@@ -768,20 +680,17 @@ record_linux_system_call (int num, struct regcache *regcache,
       }
       break;
 
-      /* old_readdir */
-    case 89:
+    case gdb_old_readdir:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_dirent))
         return -1;
       break;
 
-      /* old_mmap */
-    case 90:
+    case gdb_old_mmap:
       break;
 
-      /* sys_munmap */
-    case 91:
+    case gdb_sys_munmap:
       {
         int q;
         ULONGEST len;
@@ -801,60 +710,39 @@ record_linux_system_call (int num, struct regcache *regcache,
       }
       break;
 
-      /* sys_truncate */
-    case 92:
-      /* sys_ftruncate */
-    case 93:
-      /* sys_fchmod */
-    case 94:
-      /* sys_fchown16 */
-    case 95:
-      /* sys_getpriority */
-    case 96:
-      /* sys_setpriority */
-    case 97:
-      /* sys_ni_syscall */
-    case 98:
+    case gdb_sys_truncate:
+    case gdb_sys_ftruncate:
+    case gdb_sys_fchmod:
+    case gdb_sys_fchown16:
+    case gdb_sys_getpriority:
+    case gdb_sys_setpriority:
+    case gdb_sys_ni_syscall98:
       break;
 
-      /* sys_statfs */
-    case 99:
-      /* sys_fstatfs */
-    case 100:
+    case gdb_sys_statfs:
+    case gdb_sys_fstatfs:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_statfs))
         return -1;
       break;
 
-      /* sys_ioperm */
-    case 101:
+    case gdb_sys_ioperm:
       break;
 
-      /* sys_socket */
-    case 500:
-      /* sys_sendto */
-    case 503:
-      /* sys_sendmsg */
-    case 505:
-      /* sys_shutdown */
-    case 507:
-      /* sys_bind */
-    case 508:
-      /* sys_connect */
-    case 501:
-      /* sys_listen */
-    case 509:
-      /* sys_setsockopt */
-    case 513:
+    case gdb_sys_socket:
+    case gdb_sys_sendto:
+    case gdb_sys_sendmsg:
+    case gdb_sys_shutdown:
+    case gdb_sys_bind:
+    case gdb_sys_connect:
+    case gdb_sys_listen:
+    case gdb_sys_setsockopt:
       break;
 
-      /* sys_accept */
-    case 502:
-      /* sys_getsockname */
-    case 510:
-      /* sys_getpeername */
-    case 511:
+    case gdb_sys_accept:
+    case gdb_sys_getsockname:
+    case gdb_sys_getpeername:
       {
         ULONGEST len;
         regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
@@ -864,8 +752,7 @@ record_linux_system_call (int num, struct regcache *regcache,
       }
       break;
 
-      /* sys_recvfrom */
-    case 504:
+    case gdb_sys_recvfrom:
       {
         ULONGEST len;
         regcache_raw_read_unsigned (regcache, tdep->arg4, &tmpulongest);
@@ -873,8 +760,7 @@ record_linux_system_call (int num, struct regcache *regcache,
         if (record_linux_sockaddr (regcache, tdep, tmpulongest, len))
           return -1;
       }
-      /* sys_recv */
-    case 515:
+    case gdb_sys_recv:
       {
         ULONGEST size;
         regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
@@ -884,22 +770,19 @@ record_linux_system_call (int num, struct regcache *regcache,
       }
       break;
 
-      /* sys_recvmsg */
-    case 506:
+    case gdb_sys_recvmsg:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_linux_msghdr (regcache, tdep, tmpulongest))
         return -1;
       break;
 
-      /* sys_socketpair */
-    case 512:
+    case gdb_sys_socketpair:
       regcache_raw_read_unsigned (regcache, tdep->arg4, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_int))
         return -1;
       break;
 
-      /* sys_getsockopt */
-    case 514:
+    case gdb_sys_getsockopt:
       regcache_raw_read_unsigned (regcache, tdep->arg5, &tmpulongest);
       if (tmpulongest)
         {
@@ -928,8 +811,7 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_socketcall */
-    case 102:
+    case gdb_sys_socketcall:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       switch (tmpulongest)
         {
@@ -1165,59 +1047,46 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_syslog */
-    case 103:
+    case gdb_sys_syslog:
       break;
 
-      /* sys_setitimer */
-    case 104:
+    case gdb_sys_setitimer:
       regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_itimerval))
         return -1;
       break;
 
-      /* sys_getitimer */
-    case 105:
+    case gdb_sys_getitimer:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_itimerval))
         return -1;
       break;
 
-      /* sys_newstat */
-    case 106:
-      /* sys_newlstat */
-    case 107:
-      /* sys_newfstat */
-    case 108:
-      /* sys_newfstatat */
-    case 540:
+    case gdb_sys_newstat:
+    case gdb_sys_newlstat:
+    case gdb_sys_newfstat:
+    case gdb_sys_newfstatat:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_stat))
         return -1;
       break;
 
-      /* sys_uname */
-    case 109:
+    case gdb_sys_uname:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_old_utsname))
         return -1;
       break;
 
-      /* sys_iopl */
-    case 110:
-      /* sys_vhangup */
-    case 111:
-      /* sys_ni_syscall */
-    case 112:
-      /* sys_vm86old */
-    case 113:
+    case gdb_sys_iopl:
+    case gdb_sys_vhangup:
+    case gdb_sys_ni_syscall112:
+    case gdb_sys_vm86old:
       break;
 
-      /* sys_wait4 */
-    case 114:
+    case gdb_sys_wait4:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_int))
@@ -1228,56 +1097,44 @@ record_linux_system_call (int num, struct regcache *regcache,
         return -1;
       break;
 
-      /* sys_swapoff */
-    case 115:
+    case gdb_sys_swapoff:
       break;
 
-      /* sys_sysinfo */
-    case 116:
+    case gdb_sys_sysinfo:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_sysinfo))
         return -1;
       break;
 
-      /* sys_shmget */
-    case 520:
-      /* sys_semget */
-    case 523:
-      /* sys_semop */
-    case 524:
-      /* sys_msgget */
-    case 528:
-      /* sys_shmdt */
+    case gdb_sys_shmget:
+    case gdb_sys_semget:
+    case gdb_sys_semop:
+    case gdb_sys_msgget:
       /* XXX maybe need do some record works with sys_shmdt.  */
-    case 527:
-      /* sys_msgsnd */
-    case 529:
-      /* sys_semtimedop */
-    case 532:
+    case gdb_sys_shmdt:
+    case gdb_sys_msgsnd:
+    case gdb_sys_semtimedop:
       break;
 
-      /* sys_shmat */
-    case 521:
+    case gdb_sys_shmat:
       regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_ulong))
         return -1;
       break;
 
-      /* sys_shmctl */
-    case 522:
+    case gdb_sys_shmctl:
       regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_shmid_ds))
         return -1;
       break;
 
+      /* XXX sys_semctl 525 still not supported.  */
       /* sys_semctl */
-      /* XXX sys_semctl 525 still not support.  */
 
-      /* sys_msgrcv */
-    case 530:
+    case gdb_sys_msgrcv:
       {
         ULONGEST msgp;
         regcache_raw_read_signed (regcache, tdep->arg3, &tmpulongest);
@@ -1288,16 +1145,14 @@ record_linux_system_call (int num, struct regcache *regcache,
       }
       break;
 
-      /* sys_msgctl */
-    case 531:
+    case gdb_sys_msgctl:
       regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_msqid_ds))
         return -1;
       break;
 
-      /* sys_ipc */
-    case 117:
+    case gdb_sys_ipc:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       tmpulongest &= 0xffff;
       switch (tmpulongest)
@@ -1307,7 +1162,7 @@ record_linux_system_call (int num, struct regcache *regcache,
         case RECORD_SEMTIMEDOP:
         case RECORD_MSGSND:
         case RECORD_MSGGET:
-          /* XXX maybe need do some record works with RECORD_SHMDT.  */
+	  /* XXX maybe need do some record works with RECORD_SHMDT.  */
         case RECORD_SHMDT:
         case RECORD_SHMGET:
           break;
@@ -1344,33 +1199,28 @@ record_linux_system_call (int num, struct regcache *regcache,
             return -1;
           break;
         default:
-          /* XXX RECORD_SEMCTL still not support.  */
+	  /* XXX RECORD_SEMCTL still not supported.  */
           printf_unfiltered (_("Process record and replay target doesn't "
-                               "support ipc number %d\n"), (int) tmpulongest);
+                               "support ipc number %s\n"), 
+			     pulongest (tmpulongest));
           break;
         }
       break;
 
-      /* sys_fsync */
-    case 118:
-      /* sys_sigreturn */
-    case 119:
-      /* sys_clone */
-    case 120:
-      /* sys_setdomainname */
-    case 121:
+    case gdb_sys_fsync:
+    case gdb_sys_sigreturn:
+    case gdb_sys_clone:
+    case gdb_sys_setdomainname:
       break;
 
-      /* sys_newuname */
-    case 122:
+    case gdb_sys_newuname:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_new_utsname))
         return -1;
       break;
 
-      /* sys_modify_ldt */
-    case 123:
+    case gdb_sys_modify_ldt:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (tmpulongest == 0 || tmpulongest == 2)
         {
@@ -1382,37 +1232,29 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_adjtimex */
-    case 124:
+    case gdb_sys_adjtimex:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_timex))
         return -1;
       break;
 
-      /* sys_mprotect */
-    case 125:
+    case gdb_sys_mprotect:
       break;
 
-      /* sys_sigprocmask */
-    case 126:
+    case gdb_sys_sigprocmask:
       regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_old_sigset_t))
         return -1;
       break;
 
-      /* sys_ni_syscall */
-    case 127:
-      /* sys_init_module */
-    case 128:
-      /* sys_delete_module */
-    case 129:
-      /* sys_ni_syscall */
-    case 130:
+    case gdb_sys_ni_syscall127:
+    case gdb_sys_init_module:
+    case gdb_sys_delete_module:
+    case gdb_sys_ni_syscall130:
       break;
 
-      /* sys_quotactl */
-    case 131:
+    case gdb_sys_quotactl:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       switch (tmpulongest)
         {
@@ -1448,47 +1290,37 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_getpgid */
-    case 132:
-      /* sys_fchdir */
-    case 133:
-      /* sys_bdflush */
-    case 134:
+    case gdb_sys_getpgid:
+    case gdb_sys_fchdir:
+    case gdb_sys_bdflush:
       break;
 
-      /* sys_sysfs */
-    case 135:
+    case gdb_sys_sysfs:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (tmpulongest == 2)
         {
           regcache_raw_read_unsigned (regcache, tdep->arg3,
                                       &tmpulongest);
-          /*XXX the size of memory is not very clear.  */
+	  /*XXX the size of memory is not very clear.  */
           if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, 10))
             return -1;
         }
       break;
 
-      /* sys_personality */
-    case 136:
-      /* sys_ni_syscall */
-    case 137:
-      /* sys_setfsuid16 */
-    case 138:
-      /* sys_setfsgid16 */
-    case 139:
+    case gdb_sys_personality:
+    case gdb_sys_ni_syscall137:
+    case gdb_sys_setfsuid16:
+    case gdb_sys_setfsgid16:
       break;
 
-      /* sys_llseek */
-    case 140:
+    case gdb_sys_llseek:
       regcache_raw_read_unsigned (regcache, tdep->arg4, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_loff_t))
         return -1;
       break;
 
-      /* sys_getdents */
-    case 141:
+    case gdb_sys_getdents:
       {
         ULONGEST count;
         regcache_raw_read_unsigned (regcache, tdep->arg2,
@@ -1500,8 +1332,7 @@ record_linux_system_call (int num, struct regcache *regcache,
       }
       break;
 
-      /* sys_select */
-    case 142:
+    case gdb_sys_select:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_fd_set))
@@ -1520,14 +1351,11 @@ record_linux_system_call (int num, struct regcache *regcache,
         return -1;
       break;
 
-      /* sys_flock */
-    case 143:
-      /* sys_msync */
-    case 144:
+    case gdb_sys_flock:
+    case gdb_sys_msync:
       break;
 
-      /* sys_readv */
-    case 145:
+    case gdb_sys_readv:
       {
         ULONGEST vec, vlen;
 
@@ -1566,63 +1394,43 @@ record_linux_system_call (int num, struct regcache *regcache,
       }
       break;
 
-      /* sys_writev */
-    case 146:
-      /* sys_getsid */
-    case 147:
-      /* sys_fdatasync */
-    case 148:
-      /* sys_sysctl */
-    case 149:
-      /* sys_mlock */
-    case 150:
-      /* sys_munlock */
-    case 151:
-      /* sys_mlockall */
-    case 152:
-      /* sys_munlockall */
-    case 153:
-      /* sys_sched_setparam */
-    case 154:
+    case gdb_sys_writev:
+    case gdb_sys_getsid:
+    case gdb_sys_fdatasync:
+    case gdb_sys_sysctl:
+    case gdb_sys_mlock:
+    case gdb_sys_munlock:
+    case gdb_sys_mlockall:
+    case gdb_sys_munlockall:
+    case gdb_sys_sched_setparam:
       break;
 
-      /* sys_sched_getparam */
-    case 155:
+    case gdb_sys_sched_getparam:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_int))
         return -1;
       break;
 
-      /* sys_sched_setscheduler */
-    case 156:
-      /* sys_sched_getscheduler */
-    case 157:
-      /* sys_sched_yield */
-    case 158:
-      /* sys_sched_get_priority_max */
-    case 159:
-      /* sys_sched_get_priority_min */
-    case 160:
+    case gdb_sys_sched_setscheduler:
+    case gdb_sys_sched_getscheduler:
+    case gdb_sys_sched_yield:
+    case gdb_sys_sched_get_priority_max:
+    case gdb_sys_sched_get_priority_min:
       break;
 
-      /* sys_sched_rr_get_interval */
-    case 161:
-      /* sys_nanosleep */
-    case 162:
+    case gdb_sys_sched_rr_get_interval:
+    case gdb_sys_nanosleep:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_timespec))
         return -1;
       break;
 
-      /* sys_mremap */
-    case 163:
-      /* sys_setresuid16 */
-    case 164:
+    case gdb_sys_mremap:
+    case gdb_sys_setresuid16:
       break;
 
-      /* sys_getresuid16 */
-    case 165:
+    case gdb_sys_getresuid16:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_old_uid_t))
@@ -1637,14 +1445,11 @@ record_linux_system_call (int num, struct regcache *regcache,
         return -1;
       break;
 
-      /* sys_vm86 */
-    case 166:
-      /* sys_ni_syscall */
-    case 167:
+    case gdb_sys_vm86:
+    case gdb_sys_ni_syscall167:
       break;
 
-      /* sys_poll */
-    case 168:
+    case gdb_sys_poll:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (tmpulongest)
         {
@@ -1656,8 +1461,7 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_nfsservctl */
-    case 169:
+    case gdb_sys_nfsservctl:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (tmpulongest == 7 || tmpulongest == 8)
         {
@@ -1673,12 +1477,10 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_setresgid16 */
-    case 170:
+    case gdb_sys_setresgid16:
       break;
 
-      /* sys_getresgid16 */
-    case 171:
+    case gdb_sys_getresgid16:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_old_gid_t))
@@ -1693,8 +1495,7 @@ record_linux_system_call (int num, struct regcache *regcache,
         return -1;
       break;
 
-      /* sys_prctl */
-    case 172:
+    case gdb_sys_prctl:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       switch (tmpulongest)
         {
@@ -1715,28 +1516,24 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_rt_sigreturn */
-    case 173:
+    case gdb_sys_rt_sigreturn:
       break;
 
-      /* sys_rt_sigaction */
-    case 174:
+    case gdb_sys_rt_sigaction:
       regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_sigaction))
         return -1;
       break;
 
-      /* sys_rt_sigprocmask */
-    case 175:
+    case gdb_sys_rt_sigprocmask:
       regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_sigset_t))
         return -1;
       break;
 
-      /* sys_rt_sigpending */
-    case 176:
+    case gdb_sys_rt_sigpending:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (tmpulongest)
         {
@@ -1748,22 +1545,18 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_rt_sigtimedwait */
-    case 177:
+    case gdb_sys_rt_sigtimedwait:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_siginfo_t))
         return -1;
       break;
 
-      /* sys_rt_sigqueueinfo */
-    case 178:
-      /* sys_rt_sigsuspend */
-    case 179:
+    case gdb_sys_rt_sigqueueinfo:
+    case gdb_sys_rt_sigsuspend:
       break;
 
-      /* sys_pread64 */
-    case 180:
+    case gdb_sys_pread64:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (tmpulongest)
         {
@@ -1774,14 +1567,11 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_pwrite64 */
-    case 181:
-      /* sys_chown16 */
-    case 182:
+    case gdb_sys_pwrite64:
+    case gdb_sys_chown16:
       break;
 
-      /* sys_getcwd */
-    case 183:
+    case gdb_sys_getcwd:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (tmpulongest)
         {
@@ -1792,90 +1582,68 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_capget */
-    case 184:
+    case gdb_sys_capget:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_cap_user_data_t))
         return -1;
       break;
 
-      /* sys_capset */
-    case 185:
+    case gdb_sys_capset:
       break;
 
-      /* sys_sigaltstack */
-    case 186:
+    case gdb_sys_sigaltstack:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_stack_t))
         return -1;
       break;
 
-      /* sys_sendfile */
-    case 187:
+    case gdb_sys_sendfile:
       regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_off_t))
         return -1;
       break;
 
-      /* sys_ni_syscall */
-    case 188:
-      /* sys_ni_syscall */
-    case 189:
-      /* sys_vfork */
-    case 190:
+    case gdb_sys_ni_syscall188:
+    case gdb_sys_ni_syscall189:
+    case gdb_sys_vfork:
       break;
 
-      /* sys_getrlimit */
-    case 191:
+    case gdb_sys_getrlimit:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_rlimit))
         return -1;
       break;
 
-      /* sys_mmap2 */
-    case 192:
+    case gdb_sys_mmap2:
       break;
 
-      /* sys_truncate64 */
-    case 193:
-      /* sys_ftruncate64 */
-    case 194:
+    case gdb_sys_truncate64:
+    case gdb_sys_ftruncate64:
       break;
 
-      /* sys_stat64 */
-    case 195:
-      /* sys_lstat64 */
-    case 196:
-      /* sys_fstat64 */
-    case 197:
+    case gdb_sys_stat64:
+    case gdb_sys_lstat64:
+    case gdb_sys_fstat64:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_stat64))
         return -1;
       break;
 
-      /* sys_lchown */
-    case 198:
-      /* sys_getuid */
-    case 199:
-      /* sys_getgid */
-    case 200:
-      /* sys_geteuid */
-    case 201:
-      /* sys_getegid */
-    case 202:
-      /* sys_setreuid */
-    case 203:
-      /* sys_setregid */
-    case 204:
+    case gdb_sys_lchown:
+    case gdb_sys_getuid:
+    case gdb_sys_getgid:
+    case gdb_sys_geteuid:
+    case gdb_sys_getegid:
+    case gdb_sys_setreuid:
+    case gdb_sys_setregid:
       break;
 
-      /* sys_getgroups */
-    case 205:
+    case gdb_sys_getgroups:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (tmpulongest)
         {
@@ -1888,16 +1656,12 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_setgroups */
-    case 206:
-      /* sys_fchown */
-    case 207:
-      /* sys_setresuid */
-    case 208:
+    case gdb_sys_setgroups:
+    case gdb_sys_fchown:
+    case gdb_sys_setresuid:
       break;
 
-      /* sys_getresuid */
-    case 209:
+    case gdb_sys_getresuid:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_uid_t))
         return -1;
@@ -1909,12 +1673,10 @@ record_linux_system_call (int num, struct regcache *regcache,
         return -1;
       break;
 
-      /* sys_setresgid */
-    case 210:
+    case gdb_sys_setresgid:
       break;
 
-      /* sys_getresgid */
-    case 211:
+    case gdb_sys_getresgid:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_gid_t))
         return -1;
@@ -1926,34 +1688,25 @@ record_linux_system_call (int num, struct regcache *regcache,
         return -1;
       break;
 
-      /* sys_chown */
-    case 212:
-      /* sys_setuid */
-    case 213:
-      /* sys_setgid */
-    case 214:
-      /* sys_setfsuid */
-    case 215:
-      /* sys_setfsgid */
-    case 216:
-      /* sys_pivot_root */
-    case 217:
+    case gdb_sys_chown:
+    case gdb_sys_setuid:
+    case gdb_sys_setgid:
+    case gdb_sys_setfsuid:
+    case gdb_sys_setfsgid:
+    case gdb_sys_pivot_root:
       break;
 
-      /* sys_mincore */
-    case 218:
+    case gdb_sys_mincore:
       regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_PAGE_SIZE))
         return -1;
       break;
 
-      /* sys_madvise */
-    case 219:
+    case gdb_sys_madvise:
       break;
 
-      /* sys_getdents64 */
-    case 220:
+    case gdb_sys_getdents64:
       {
         ULONGEST count;
         regcache_raw_read_unsigned (regcache, tdep->arg2,
@@ -1965,8 +1718,7 @@ record_linux_system_call (int num, struct regcache *regcache,
       }
       break;
 
-      /* sys_fcntl64 */
-    case 221:
+    case gdb_sys_fcntl64:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (tmpulongest == tdep->fcntl_F_GETLK64)
         {
@@ -1983,28 +1735,18 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_ni_syscall */
-    case 222:
-      /* sys_ni_syscall */
-    case 223:
-      /* sys_gettid */
-    case 224:
-      /* sys_readahead */
-    case 225:
-      /* sys_setxattr */
-    case 226:
-      /* sys_lsetxattr */
-    case 227:
-      /* sys_fsetxattr */
-    case 228:
+    case gdb_sys_ni_syscall222:
+    case gdb_sys_ni_syscall223:
+    case gdb_sys_gettid:
+    case gdb_sys_readahead:
+    case gdb_sys_setxattr:
+    case gdb_sys_lsetxattr:
+    case gdb_sys_fsetxattr:
       break;
 
-      /* sys_getxattr */
-    case 229:
-      /* sys_lgetxattr */
-    case 230:
-      /* sys_fgetxattr */
-    case 231:
+    case gdb_sys_getxattr:
+    case gdb_sys_lgetxattr:
+    case gdb_sys_fgetxattr:
       regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (tmpulongest)
         {
@@ -2015,12 +1757,9 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_listxattr */
-    case 232:
-      /* sys_llistxattr */
-    case 233:
-      /* sys_flistxattr */
-    case 234:
+    case gdb_sys_listxattr:
+    case gdb_sys_llistxattr:
+    case gdb_sys_flistxattr:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (tmpulongest)
         {
@@ -2031,32 +1770,24 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_removexattr */
-    case 235:
-      /* sys_lremovexattr */
-    case 236:
-      /* sys_fremovexattr */
-    case 237:
-      /* sys_tkill */
-    case 238:
+    case gdb_sys_removexattr:
+    case gdb_sys_lremovexattr:
+    case gdb_sys_fremovexattr:
+    case gdb_sys_tkill:
       break;
 
-      /* sys_sendfile64 */
-    case 239:
+    case gdb_sys_sendfile64:
       regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_loff_t))
         return -1;
       break;
 
-      /* sys_futex */
-    case 240:
-      /* sys_sched_setaffinity */
-    case 241:
+    case gdb_sys_futex:
+    case gdb_sys_sched_setaffinity:
       break;
 
-      /* sys_sched_getaffinity */
-    case 242:
+    case gdb_sys_sched_getaffinity:
       regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (tmpulongest)
         {
@@ -2067,34 +1798,29 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_set_thread_area */
-    case 243:
+    case gdb_sys_set_thread_area:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_int))
         return -1;
       break;
 
-      /* sys_get_thread_area */
-    case 244:
+    case gdb_sys_get_thread_area:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_user_desc))
         return -1;
       break;
 
-      /* sys_io_setup */
-    case 245:
+    case gdb_sys_io_setup:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_long))
         return -1;
       break;
 
-      /* sys_io_destroy */
-    case 246:
+    case gdb_sys_io_destroy:
       break;
 
-      /* sys_io_getevents */
-    case 247:
+    case gdb_sys_io_getevents:
       regcache_raw_read_unsigned (regcache, tdep->arg4, &tmpulongest);
       if (tmpulongest)
         {
@@ -2106,8 +1832,7 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_io_submit */
-    case 248:
+    case gdb_sys_io_submit:
       regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (tmpulongest)
         {
@@ -2140,22 +1865,18 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_io_cancel */
-    case 249:
+    case gdb_sys_io_cancel:
       regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_io_event))
         return -1;
       break;
 
-      /* sys_fadvise64 */
-    case 250:
-      /* sys_ni_syscall */
-    case 251:
+    case gdb_sys_fadvise64:
+    case gdb_sys_ni_syscall251:
       break;
 
-      /* sys_exit_group */
-    case 252:
+    case gdb_sys_exit_group:
       {
         int q;
         target_terminal_ours ();
@@ -2168,8 +1889,7 @@ record_linux_system_call (int num, struct regcache *regcache,
       }
       break;
 
-      /* sys_lookup_dcookie */
-    case 253:
+    case gdb_sys_lookup_dcookie:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (tmpulongest)
         {
@@ -2180,14 +1900,11 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_epoll_create */
-    case 254:
-      /* sys_epoll_ctl */
-    case 255:
+    case gdb_sys_epoll_create:
+    case gdb_sys_epoll_ctl:
       break;
 
-      /* sys_epoll_wait */
-    case 256:
+    case gdb_sys_epoll_wait:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (tmpulongest)
         {
@@ -2199,91 +1916,72 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_remap_file_pages */
-    case 257:
-      /* sys_set_tid_address */
-    case 258:
+    case gdb_sys_remap_file_pages:
+    case gdb_sys_set_tid_address:
       break;
 
-      /* sys_timer_create */
-    case 259:
+    case gdb_sys_timer_create:
       regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_int))
         return -1;
       break;
 
-      /* sys_timer_settime */
-    case 260:
+    case gdb_sys_timer_settime:
       regcache_raw_read_unsigned (regcache, tdep->arg4, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_itimerspec))
         return -1;
       break;
 
-      /* sys_timer_gettime */
-    case 261:
+    case gdb_sys_timer_gettime:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_itimerspec))
         return -1;
       break;
 
-      /* sys_timer_getoverrun */
-    case 262:
-      /* sys_timer_delete */
-    case 263:
-      /* sys_clock_settime */
-    case 264:
+    case gdb_sys_timer_getoverrun:
+    case gdb_sys_timer_delete:
+    case gdb_sys_clock_settime:
       break;
 
-      /* sys_clock_gettime */
-    case 265:
+    case gdb_sys_clock_gettime:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_timespec))
         return -1;
       break;
 
-      /* sys_clock_getres */
-    case 266:
+    case gdb_sys_clock_getres:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_timespec))
         return -1;
       break;
 
-      /* sys_clock_nanosleep */
-    case 267:
+    case gdb_sys_clock_nanosleep:
       regcache_raw_read_unsigned (regcache, tdep->arg4, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_timespec))
         return -1;
       break;
 
-      /* sys_statfs64 */
-    case 268:
-      /* sys_fstatfs64 */
-    case 269:
+    case gdb_sys_statfs64:
+    case gdb_sys_fstatfs64:
       regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_statfs64))
         return -1;
       break;
 
-      /* sys_tgkill */
-    case 270:
-      /* sys_utimes */
-    case 271:
-      /* sys_fadvise64_64 */
-    case 272:
-      /* sys_ni_syscall */
-    case 273:
-      /* sys_mbind */
-    case 274:
+    case gdb_sys_tgkill:
+    case gdb_sys_utimes:
+    case gdb_sys_fadvise64_64:
+    case gdb_sys_ni_syscall273:
+    case gdb_sys_mbind:
       break;
 
-      /* sys_get_mempolicy */
-    case 275:
+    case gdb_sys_get_mempolicy:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_int))
         return -1;
@@ -2298,18 +1996,13 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_set_mempolicy */
-    case 276:
-      /* sys_mq_open */
-    case 277:
-      /* sys_mq_unlink */
-    case 278:
-      /* sys_mq_timedsend */
-    case 279:
+    case gdb_sys_set_mempolicy:
+    case gdb_sys_mq_open:
+    case gdb_sys_mq_unlink:
+    case gdb_sys_mq_timedsend:
       break;
 
-      /* sys_mq_timedreceive */
-    case 280:
+    case gdb_sys_mq_timedreceive:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (tmpulongest)
         {
@@ -2324,24 +2017,20 @@ record_linux_system_call (int num, struct regcache *regcache,
         return -1;
       break;
 
-      /* sys_mq_notify */
-    case 281:
+    case gdb_sys_mq_notify:
       break;
 
-      /* sys_mq_getsetattr */
-    case 282:
+    case gdb_sys_mq_getsetattr:
       regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_mq_attr))
         return -1;
       break;
 
-      /* sys_kexec_load */
-    case 283:
+    case gdb_sys_kexec_load:
       break;
 
-      /* sys_waitid */
-    case 284:
+    case gdb_sys_waitid:
       regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_siginfo))
@@ -2352,16 +2041,12 @@ record_linux_system_call (int num, struct regcache *regcache,
         return -1;
       break;
 
-      /* sys_ni_syscall */
-    case 285:
-      /* sys_add_key */
-    case 286:
-      /* sys_request_key */
-    case 287:
+    case gdb_sys_ni_syscall285:
+    case gdb_sys_add_key:
+    case gdb_sys_request_key:
       break;
 
-      /* sys_keyctl */
-    case 288:
+    case gdb_sys_keyctl:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (tmpulongest == 6 || tmpulongest == 11)
         {
@@ -2378,50 +2063,33 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_ioprio_set */
-    case 289:
-      /* sys_ioprio_get */
-    case 290:
-      /* sys_inotify_init */
-    case 291:
-      /* sys_inotify_add_watch */
-    case 292:
-      /* sys_inotify_rm_watch */
-    case 293:
-      /* sys_migrate_pages */
-    case 294:
-      /* sys_openat */
-    case 295:
-      /* sys_mkdirat */
-    case 296:
-      /* sys_mknodat */
-    case 297:
-      /* sys_fchownat */
-    case 298:
-      /* sys_futimesat */
-    case 299:
+    case gdb_sys_ioprio_set:
+    case gdb_sys_ioprio_get:
+    case gdb_sys_inotify_init:
+    case gdb_sys_inotify_add_watch:
+    case gdb_sys_inotify_rm_watch:
+    case gdb_sys_migrate_pages:
+    case gdb_sys_openat:
+    case gdb_sys_mkdirat:
+    case gdb_sys_mknodat:
+    case gdb_sys_fchownat:
+    case gdb_sys_futimesat:
       break;
 
-      /* sys_fstatat64 */
-    case 300:
+    case gdb_sys_fstatat64:
       regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_stat64))
         return -1;
       break;
 
-      /* sys_unlinkat */
-    case 301:
-      /* sys_renameat */
-    case 302:
-      /* sys_linkat */
-    case 303:
-      /* sys_symlinkat */
-    case 304:
+    case gdb_sys_unlinkat:
+    case gdb_sys_renameat:
+    case gdb_sys_linkat:
+    case gdb_sys_symlinkat:
       break;
 
-      /* sys_readlinkat */
-    case 305:
+    case gdb_sys_readlinkat:
       regcache_raw_read_unsigned (regcache, tdep->arg3, &tmpulongest);
       if (tmpulongest)
         {
@@ -2432,14 +2100,11 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_fchmodat */
-    case 306:
-      /* sys_faccessat */
-    case 307:
+    case gdb_sys_fchmodat:
+    case gdb_sys_faccessat:
       break;
 
-      /* sys_pselect6 */
-    case 308:
+    case gdb_sys_pselect6:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_fd_set))
@@ -2458,8 +2123,7 @@ record_linux_system_call (int num, struct regcache *regcache,
         return -1;
       break;
 
-      /* sys_ppoll */
-    case 309:
+    case gdb_sys_ppoll:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (tmpulongest)
         {
@@ -2475,14 +2139,11 @@ record_linux_system_call (int num, struct regcache *regcache,
         return -1;
       break;
 
-      /* sys_unshare */
-    case 310:
-      /* sys_set_robust_list */
-    case 311:
+    case gdb_sys_unshare:
+    case gdb_sys_set_robust_list:
       break;
 
-      /* sys_get_robust_list */
-    case 312:
+    case gdb_sys_get_robust_list:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_int))
         return -1;
@@ -2491,8 +2152,7 @@ record_linux_system_call (int num, struct regcache *regcache,
         return -1;
       break;
 
-      /* sys_splice */
-    case 313:
+    case gdb_sys_splice:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest,
                                     tdep->size_loff_t))
@@ -2503,16 +2163,12 @@ record_linux_system_call (int num, struct regcache *regcache,
         return -1;
       break;
 
-      /* sys_sync_file_range */
-    case 314:
-      /* sys_tee */
-    case 315:
-      /* sys_vmsplice */
-    case 316:
+    case gdb_sys_sync_file_range:
+    case gdb_sys_tee:
+    case gdb_sys_vmsplice:
       break;
 
-      /* sys_move_pages */
-    case 317:
+    case gdb_sys_move_pages:
       regcache_raw_read_unsigned (regcache, tdep->arg5, &tmpulongest);
       if (tmpulongest)
         {
@@ -2524,8 +2180,7 @@ record_linux_system_call (int num, struct regcache *regcache,
         }
       break;
 
-      /* sys_getcpu */
-    case 318:
+    case gdb_sys_getcpu:
       regcache_raw_read_unsigned (regcache, tdep->arg1, &tmpulongest);
       if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest, tdep->size_int))
         return -1;
@@ -2538,8 +2193,7 @@ record_linux_system_call (int num, struct regcache *regcache,
         return -1;
       break;
 
-      /* sys_epoll_pwait */
-    case 319:
+    case gdb_sys_epoll_pwait:
       regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
       if (tmpulongest)
         {
@@ -2553,7 +2207,7 @@ record_linux_system_call (int num, struct regcache *regcache,
 
     default:
       printf_unfiltered (_("Process record and replay target doesn't "
-                           "support syscall number %u\n"), num);
+                           "support syscall number %d\n"), syscall);
       return -1;
       break;
     }

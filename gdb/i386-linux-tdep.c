@@ -354,6 +354,24 @@ i386_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
   regcache_cooked_write_unsigned (regcache, I386_LINUX_ORIG_EAX_REGNUM, -1);
 }
 
+static struct linux_record_tdep i386_linux_record_tdep;
+
+/* i386_canonicalize_syscall maps from the native i386 Linux set
+   of syscall ids into a canonical set of syscall ids used by
+   process record (a mostly trivial mapping, since the canonical
+   set was originally taken from the i386 set).  */
+
+static enum gdb_syscall
+i386_canonicalize_syscall (int syscall)
+{
+  enum { i386_syscall_max = 499 };
+
+  if (syscall <= i386_syscall_max)
+    return syscall;
+  else
+    return -1;
+}
+
 /* Parse the arguments of current system call instruction and record
    the values of the registers and memory that will be changed into
    "record_arch_list".  This instruction is "int 0x80" (Linux
@@ -361,24 +379,26 @@ i386_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 
    Return -1 if something wrong.  */
 
-static struct linux_record_tdep i386_linux_record_tdep;
-
 static int
 i386_linux_intx80_sysenter_record (struct regcache *regcache)
 {
   int ret;
-  uint32_t tmpu32;
+  LONGEST syscall_native;
+  enum gdb_syscall syscall_gdb;
 
-  regcache_raw_read (regcache, I386_EAX_REGNUM, (gdb_byte *) &tmpu32);
+  regcache_raw_read_signed (regcache, I386_EAX_REGNUM, &syscall_native);
 
-  if (tmpu32 > 499)
+  syscall_gdb = i386_canonicalize_syscall (syscall_native);
+
+  if (syscall_gdb < 0)
     {
       printf_unfiltered (_("Process record and replay target doesn't "
-                           "support syscall number %u\n"), tmpu32);
+                           "support syscall number %s\n"), 
+			 plongest (syscall_native));
       return -1;
     }
 
-  ret = record_linux_system_call (tmpu32, regcache,
+  ret = record_linux_system_call (syscall_gdb, regcache,
 				  &i386_linux_record_tdep);
   if (ret)
     return ret;
