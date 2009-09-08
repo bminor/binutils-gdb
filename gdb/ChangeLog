@@ -1,3 +1,11 @@
+2009-09-08  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* gdb/Makefile.in (check//%): Parse 'config.status --version'
+	output to recreate the configuration from the testsuite directory,
+	rather than running 'config.status --recheck' from a different
+	build directory.  Let configure do the recursion rather than
+	doing it manually.
+
 2009-09-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* ia64-tdep.c (ia64_memory_remove_breakpoint): Call do_cleanups

@@ -888,6 +888,7 @@ check: force
 # a shell that expands alternations within braces.  If GNU make is not
 # used, this rule will harmlessly fail to match.  Used FORCE_PARALLEL to
 # prevent serialized checking due to the passed RUNTESTFLAGS.
+# FIXME: use config.status --config not --version, when available.
 check//%: force
 	@if [ -f testsuite/config.status ]; then \
 	  rootme=`pwd`; export rootme; \
@@ -896,14 +897,14 @@ check//%: force
 	  variant=`echo "$@" | sed 's,^[^/]*//,,'`; \
 	  vardots=`echo "$$variant" | sed 's,/,.,g'`; \
 	  testdir=testsuite.$$vardots; \
-	  if [ ! -f $$testdir/Makefile ]; then \
-	    (cd testsuite && find . -name config.status) | \
-	    sed s,/config.status$$,, | sort | while read subdir; do \
-	      $(SHELL) $(srcdir)/../mkinstalldirs $$testdir/$$subdir && \
-	      (cd $$testdir/$$subdir && \
-	       $(SHELL) $$rootme/testsuite/$$subdir/config.status \
-		 --recheck && \
-	       $(SHELL) ./config.status); done; \
+	  if [ ! -f $$testdir/Makefile ] && [ -f testsuite/config.status ]; then \
+	    configargs=`cd testsuite && ./config.status --version | \
+	      sed -n -e 's,"$$,,' -e 's,^ *with options ",,p'`; \
+	    $(SHELL) $(srcdir)/../mkinstalldirs $$testdir && \
+	    (cd $$testdir && \
+	     eval $(SHELL) "\"\$$rootsrc/testsuite/configure\" $$configargs" \
+			   "\"--srcdir=\$$rootsrc/testsuite\"" \
+	     ); \
 	  else :; fi && cd $$testdir && \
 	  $(MAKE) $(TARGET_FLAGS_TO_PASS) \
 	    RUNTESTFLAGS="--target_board=$$variant $(RUNTESTFLAGS)" \
