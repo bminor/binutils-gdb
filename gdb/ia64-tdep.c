@@ -629,6 +629,11 @@ ia64_memory_insert_breakpoint (struct gdbarch *gdbarch,
      breakpoint instruction bits region.  */
   cleanup = make_show_memory_breakpoints_cleanup (0);
   val = target_read_memory (addr, bundle, BUNDLE_LEN);
+  if (val != 0)
+    {
+      do_cleanups (cleanup);
+      return val;
+    }
 
   /* Slot number 2 may skip at most 2 bytes at the beginning.  */
   bp_tgt->shadow_len = BUNDLE_LEN - 2;
@@ -645,7 +650,12 @@ ia64_memory_insert_breakpoint (struct gdbarch *gdbarch,
      adjacent placed breakpoints.  It is due to our SHADOW_CONTENTS overlapping
      the real breakpoint instruction bits region.  */
   make_show_memory_breakpoints_cleanup (1);
-  val |= target_read_memory (addr, bundle, BUNDLE_LEN);
+  val = target_read_memory (addr, bundle, BUNDLE_LEN);
+  if (val != 0)
+    {
+      do_cleanups (cleanup);
+      return val;
+    }
 
   /* Check for L type instruction in slot 1, if present then bump up the slot
      number to the slot 2.  */
@@ -666,9 +676,8 @@ ia64_memory_insert_breakpoint (struct gdbarch *gdbarch,
 
   bp_tgt->placed_size = bp_tgt->shadow_len;
 
-  if (val == 0)
-    val = target_write_memory (addr + slotnum, bundle + slotnum,
-			       bp_tgt->shadow_len);
+  val = target_write_memory (addr + slotnum, bundle + slotnum,
+			     bp_tgt->shadow_len);
 
   do_cleanups (cleanup);
   return val;
@@ -695,6 +704,11 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
      breakpoint instruction bits region.  */
   cleanup = make_show_memory_breakpoints_cleanup (1);
   val = target_read_memory (addr, bundle_mem, BUNDLE_LEN);
+  if (val != 0)
+    {
+      do_cleanups (cleanup);
+      return val;
+    }
 
   /* Check for L type instruction in slot 1, if present then bump up the slot
      number to the slot 2.  */
@@ -723,8 +737,7 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
   /* In BUNDLE_MEM be careful to modify only the bits belonging to SLOTNUM and
      never any other possibly also stored in SHADOW_CONTENTS.  */
   replace_slotN_contents (bundle_mem, instr_saved, slotnum);
-  if (val == 0)
-    val = target_write_memory (addr, bundle_mem, BUNDLE_LEN);
+  val = target_write_memory (addr, bundle_mem, BUNDLE_LEN);
 
   do_cleanups (cleanup);
   return val;
