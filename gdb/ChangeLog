@@ -1,3 +1,7 @@
+2009-09-07  Michael Snyder  <msnyder@vmware.com>
+
+	* record.c: Minor comment and white space fix-ups.
+
 2009-09-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* m68k-tdep.c (m68k_gdbarch_init): Allocate TDEP as cleared.

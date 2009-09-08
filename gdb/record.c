@@ -32,14 +32,16 @@
 #define RECORD_IS_REPLAY \
      (record_list->next || execution_direction == EXEC_REVERSE)
 
-/* These are the core struct of record function.
+/* These are the core structs of the process record functionality.
 
-   An record_entry is a record of the value change of a register
+   A record_entry is a record of the value change of a register
    ("record_reg") or a part of memory ("record_mem").  And each
-   instruction must has a struct record_entry ("record_end") that points out this
-   is the last struct record_entry of this instruction.
+   instruction must have a struct record_entry ("record_end") that
+   indicates that this is the last struct record_entry of this
+   instruction.
 
-   Each struct record_entry is linked to "record_list" by "prev" and "next". */
+   Each struct record_entry is linked to "record_list" by "prev" and
+   "next" pointers.  */
 
 struct record_reg_entry
 {
@@ -1288,15 +1290,15 @@ _initialize_record (void)
 
   /* Record instructions number limit command.  */
   add_setshow_boolean_cmd ("stop-at-limit", no_class,
-			    &record_stop_at_limit, _("\
+			   &record_stop_at_limit, _("\
 Set whether record/replay stops when record/replay buffer becomes full."), _("\
 Show whether record/replay stops when record/replay buffer becomes full."), _("\
 Default is ON.\n\
 When ON, if the record/replay buffer becomes full, ask user what to do.\n\
 When OFF, if the record/replay buffer becomes full,\n\
 delete the oldest recorded instruction to make room for each new one."),
-			    NULL, NULL,
-                            &set_record_cmdlist, &show_record_cmdlist);
+			   NULL, NULL,
+			   &set_record_cmdlist, &show_record_cmdlist);
   add_setshow_zinteger_cmd ("insn-number-max", no_class,
 			    &record_insn_max_num,
 			    _("Set record/replay buffer limit."),
@@ -1306,6 +1308,6 @@ record/replay buffer.  Zero means unlimited.  Default is 200000."),
 			    set_record_insn_max_num,
 			    NULL, &set_record_cmdlist, &show_record_cmdlist);
   add_cmd ("insn-number", class_obscure, show_record_insn_number,
-	    _("Show the current number of instructions in the "
-	      "record/replay buffer."), &info_record_cmdlist);
+	   _("Show the current number of instructions in the "
+	     "record/replay buffer."), &info_record_cmdlist);
 }
