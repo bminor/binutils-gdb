@@ -48,7 +48,29 @@ gdb_test_multiple "disass main" $test {
 }
 
 gdb_test "b [gdb_get_line_number "break-first"]" "Breakpoint \[0-9\] at .*" "First breakpoint placed"
-gdb_test "b [gdb_get_line_number "break-second"]" "Breakpoint \[0-9\] at .*" "Second breakpoint placed"
+set test "Second breakpoint placed"
+gdb_test_multiple "b [gdb_get_line_number "break-second"]" $test {
+    -re "Breakpoint \[0-9\] at (0x\[0-9a-f\]*):.*" {
+	pass $test
+	set bpt2address $expect_out(1,string)
+    }
+}
+
+if [istarget "ia64-*-*"] then {
+    # Unoptimized code should not use the 3rd slot for the first instruction of
+    # a source line.  This is important for our test, because we want both
+    # breakpoints ("Second breakpoint" and the following one) to be in the same
+    # bundle.
+
+    set test "Second breakpoint address is valid on ia64"
+    if [string match "*\[01\]" $bpt2address] {
+	pass $test
+
+	gdb_test "b *($bpt2address + 1)" "Breakpoint \[0-9\] at .*" "Third breakpoint on ia64 in the Second breakpoint's bundle"
+    } else {
+	unresolved $test
+    }
+}
 
 set test "disassembly with breakpoints"
 gdb_test_multiple "disass main" $test {

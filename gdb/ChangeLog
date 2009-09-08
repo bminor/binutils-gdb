@@ -1,3 +1,11 @@
+2009-09-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix ia64 shadowing of breakpoints in multiple slots of a single bundle.
+	* ia64-tdep.c (ia64_memory_insert_breakpoint): New call
+	of make_show_memory_breakpoints_cleanup with parameter 0.  Move the
+	reading of SHADOW_CONTENTS to this memory state point of code.  Update
+	comment for the memory re-read.
+
 2009-09-07  Michael Snyder  <msnyder@vmware.com>
 
 	* record.c: Minor comment and white space fix-ups.
