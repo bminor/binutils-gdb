@@ -1,3 +1,7 @@
+2009-09-08  Doug Evans  <dje@google.com>
+
+	* target.c (initialize_targets): Fix thinko in stack_cache_enabled_p.
+
 2009-09-08  Michael Snyder  <msnyder@vmware.com>
 
 	* amd64-linux-tdep.h (enum amd64_syscall): New enum consts, 

@@ -3555,7 +3555,7 @@ Tells gdb whether to control the inferior in asynchronous mode."),
 			   &showlist);
 
   add_setshow_boolean_cmd ("stack-cache", class_support,
-			   &stack_cache_enabled_p, _("\
+			   &stack_cache_enabled_p_1, _("\
 Set cache use for stack access."), _("\
 Show cache use for stack access."), _("\
 When on, use the data cache for all stack access, regardless of any\n\
