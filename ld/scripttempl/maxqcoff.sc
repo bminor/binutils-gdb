@@ -2,7 +2,7 @@ test -z "$ENTRY" && ENTRY=_main
 cat <<EOF
 OUTPUT_FORMAT("${OUTPUT_FORMAT}")
 ${LIB_SEARCH_DIRS}
-ENTRY(${ENTRY})
+${RELOCATING+ENTRY (${ENTRY})}
 MEMORY 
   {
   rom (rx)  : ORIGIN = 0, LENGTH = 0x7FFE
