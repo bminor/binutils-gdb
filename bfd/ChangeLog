@@ -1,3 +1,7 @@
+2009-09-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	* configure: Regenerate.
+
 2009-09-09  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_final_link_relocate): Set sym_flags
@@ -7,7 +11,7 @@
 
 2009-09-09  Paolo Bonzini  <bonzini@gnu.org>
 
-	* configure: Regnerate.
+	* configure: Regenerate.
 
 2009-09-09  Nick Clifton  <nickc@redhat.com>
 
