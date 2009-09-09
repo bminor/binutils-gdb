@@ -1,5 +1,16 @@
 2009-09-08  Joel Brobecker  <brobecker@adacore.com>
 
+	Avoid quadratic behavior when computing the value of a register.
+	* frame.c (frame_stash): New static constant.
+	(frame_stash_add, frame_stash_find, frame_stash_invalidate):
+	New functions.
+	(get_frame_id): Minor reformatting. Add the frame to the frame stash.
+	(frame_find_by_id): Search the frame stash first before walking all
+	frames starting from te current_frame.
+	(reinit_frame_stash): Add call to frame_stash_invalidate ();
+
+2009-09-08  Joel Brobecker  <brobecker@adacore.com>
+
 	* block.c (contained_in): Return zero for nested functions.
 	* blockframe.c (block_innermost_frame): Delete unreferenced local
 	variable.

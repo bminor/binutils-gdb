@@ -122,6 +122,40 @@ struct frame_info
   enum unwind_stop_reason stop_reason;
 };
 
+/* A frame stash used to speed up frame lookups.  */
+
+/* We currently only stash one frame at a time, as this seems to be
+   sufficient for now.  */
+static struct frame_info *frame_stash = NULL;
+
+/* Add the following FRAME to the frame stash.  */
+
+static void
+frame_stash_add (struct frame_info *frame)
+{
+  frame_stash = frame;
+}
+
+/* Search the frame stash for an entry with the given frame ID.
+   If found, return that frame.  Otherwise return NULL.  */
+
+static struct frame_info *
+frame_stash_find (struct frame_id id)
+{
+  if (frame_stash && frame_id_eq (frame_stash->this_id.value, id))
+    return frame_stash;
+
+  return NULL;
+}
+
+/* Invalidate the frame stash by removing all entries in it.  */
+
+static void
+frame_stash_invalidate (void)
+{
+  frame_stash = NULL;
+}
+
 /* Flag to control debugging.  */
 
 int frame_debug;
@@ -279,9 +313,8 @@ struct frame_id
 get_frame_id (struct frame_info *fi)
 {
   if (fi == NULL)
-    {
-      return null_frame_id;
-    }
+    return null_frame_id;
+
   if (!fi->this_id.p)
     {
       if (frame_debug)
@@ -300,6 +333,9 @@ get_frame_id (struct frame_info *fi)
 	  fprintf_unfiltered (gdb_stdlog, " }\n");
 	}
     }
+
+  frame_stash_add (fi);
+
   return fi->this_id.value;
 }
 
@@ -513,6 +549,18 @@ frame_find_by_id (struct frame_id id)
      about it.  Should it instead return get_current_frame()?  */
   if (!frame_id_p (id))
     return NULL;
+
+  /* Try using the frame stash first.  Finding it there removes the need
+     to perform the search by looping over all frames, which can be very
+     CPU-intensive if the number of frames is very high (the loop is O(n)
+     and get_prev_frame performs a series of checks that are relatively
+     expensive).  This optimization is particularly useful when this function
+     is called from another function (such as value_fetch_lazy, case
+     VALUE_LVAL (val) == lval_register) which already loops over all frames,
+     making the overall behavior O(n^2).  */
+  frame = frame_stash_find (id);
+  if (frame)
+    return frame;
 
   for (frame = get_current_frame (); ; frame = prev_frame)
     {
@@ -1285,6 +1333,7 @@ reinit_frame_cache (void)
 
   current_frame = NULL;		/* Invalidate cache */
   select_frame (NULL);
+  frame_stash_invalidate ();
   if (frame_debug)
     fprintf_unfiltered (gdb_stdlog, "{ reinit_frame_cache () }\n");
 }
