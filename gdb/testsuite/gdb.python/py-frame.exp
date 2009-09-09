@@ -20,7 +20,7 @@ if $tracelevel then {
     strace $tracelevel
 }
 
-set testfile "python-frame"
+set testfile "py-frame"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {

@@ -1,3 +1,25 @@
+2009-09-08  Thiago Jung Bauermann  <thiago.bauermann@gmail.com>
+
+	* gdb.python/Makefile.in (EXECUTABLES): Adjust to new executable
+	names, add missing ones.
+	* gdb.python/py-cmd.exp: Rename from python-cmd.exp.
+	* gdb.python/py-frame.c: Rename from python-frame.c.
+	* gdb.python/py-frame.exp: Rename from python-frame.exp.  Adjust
+	testfile name.
+	* gdb.python/py-function.exp: Rename from python-function.exp.
+	* gdb.python/py-mi.exp: Rename from python-mi.exp.  Adjust
+	testfile name.
+	* gdb.python/py-prettyprint.c: Rename from python-prettyprint.c.
+	* gdb.python/py-prettyprint.exp: Rename from python-prettyprint.exp.
+	Adjust testfile name.
+	* gdb.python/py-prettyprint.py: Rename from python-prettyprint.py.
+	* gdb.python/py-template.cc: Rename from python-template.cc.
+	* gdb.python/py-template.exp: Rename from python-template.exp.
+	Adjust testfile name.
+	* gdb.python/py-value.c: Rename from python-value.c.
+	* gdb.python/py-value.exp: Rename from python-value.exp.  Adjust
+	testfile name.
+
 2009-09-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/breakpoint-shadow.exp (Second breakpoint placed): Initialize

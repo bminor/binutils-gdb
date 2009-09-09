@@ -1,3 +1,24 @@
+2009-09-08  Thiago Jung Bauermann  <thiago.bauermann@gmail.com>
+
+	* Makefile.in (py-cmd.o): Renamed from python-cmd.o.  Updated
+	references.
+	(py-frame.o): Renamed from python-frame.o.  Updated references.
+	(py-function.o): Renamed from python-function.o.  Updated references.
+	(py-objfile.o): Renamed from python-objfile.o.  Updated references.
+	(py-prettyprint.o): Renamed from python-prettyprint.o.  Updated
+	references.
+	(py-type.o): Renamed from python-type.o.  Updated references.
+	(py-utils.o): Renamed from python-utils.o.  Updated references.
+	(py-value.o): Renamed from python-value.o.  Updated references.
+	* py-cmd.c: Renamed from python-cmd.c.
+	* py-frame.c: Renamed from python-frame.c.
+	* py-function.c: Renamed from python-function.c.
+	* py-objfile.c: Renamed from python-objfile.c.
+	* py-prettyprint.c: Renamed from python-prettyprint.c.
+	* py-type.c: Renamed from python-type.c.
+	* py-utils.c: Renamed from python-utils.c.
+	* py-value.c: Renamed from python-value.c.
+
 2009-09-08  Joel Brobecker  <brobecker@adacore.com>
 
 	Avoid quadratic behavior when computing the value of a register.

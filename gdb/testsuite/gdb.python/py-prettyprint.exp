@@ -20,7 +20,7 @@ if $tracelevel then {
     strace $tracelevel
 }
 
-set testfile "python-prettyprint"
+set testfile "py-prettyprint"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 

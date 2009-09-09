@@ -264,24 +264,24 @@ SUBDIR_TUI_CFLAGS= \
 #
 SUBDIR_PYTHON_OBS = \
 	python.o \
-	python-cmd.o \
-	python-frame.o \
-	python-function.o \
-	python-objfile.o \
-	python-prettyprint.o \
-	python-type.o \
-	python-utils.o \
-	python-value.o
+	py-cmd.o \
+	py-frame.o \
+	py-function.o \
+	py-objfile.o \
+	py-prettyprint.o \
+	py-type.o \
+	py-utils.o \
+	py-value.o
 SUBDIR_PYTHON_SRCS = \
 	python/python.c \
-	python/python-cmd.c \
-	python/python-frame.c \
-	python/python-function.c \
-	python/python-objfile.c \
-	python/python-prettyprint.c \
-	python/python-type.c \
-	python/python-utils.c \
-	python/python-value.c
+	python/py-cmd.c \
+	python/py-frame.c \
+	python/py-function.c \
+	python/py-objfile.c \
+	python/py-prettyprint.c \
+	python/py-type.c \
+	python/py-utils.c \
+	python/py-value.c
 SUBDIR_PYTHON_DEPS =
 SUBDIR_PYTHON_LDFLAGS=
 SUBDIR_PYTHON_CFLAGS=
@@ -1920,36 +1920,36 @@ python.o: $(srcdir)/python/python.c
 	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/python.c
 	$(POSTCOMPILE)
 
-python-cmd.o: $(srcdir)/python/python-cmd.c
-	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/python-cmd.c
+py-cmd.o: $(srcdir)/python/py-cmd.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-cmd.c
 	$(POSTCOMPILE)
 
-python-frame.o: $(srcdir)/python/python-frame.c
-	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/python-frame.c
+py-frame.o: $(srcdir)/python/py-frame.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-frame.c
 	$(POSTCOMPILE)
 
-python-function.o: $(srcdir)/python/python-function.c
-	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/python-function.c
+py-function.o: $(srcdir)/python/py-function.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-function.c
 	$(POSTCOMPILE)
 
-python-objfile.o: $(srcdir)/python/python-objfile.c
-	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/python-objfile.c
+py-objfile.o: $(srcdir)/python/py-objfile.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-objfile.c
 	$(POSTCOMPILE)
 
-python-prettyprint.o: $(srcdir)/python/python-prettyprint.c
-	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/python-prettyprint.c
+py-prettyprint.o: $(srcdir)/python/py-prettyprint.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-prettyprint.c
 	$(POSTCOMPILE)
 
-python-type.o: $(srcdir)/python/python-type.c
-	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/python-type.c
+py-type.o: $(srcdir)/python/py-type.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-type.c
 	$(POSTCOMPILE)
 
-python-utils.o: $(srcdir)/python/python-utils.c
-	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/python-utils.c
+py-utils.o: $(srcdir)/python/py-utils.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-utils.c
 	$(POSTCOMPILE)
 
-python-value.o: $(srcdir)/python/python-value.c
-	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/python-value.c
+py-value.o: $(srcdir)/python/py-value.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-value.c
 	$(POSTCOMPILE)
 
 #

@@ -20,7 +20,7 @@ if $tracelevel then {
     strace $tracelevel
 }
 
-set testfile "python-value"
+set testfile "py-value"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
@@ -257,7 +257,7 @@ proc test_value_in_inferior {} {
 
 # A few objfile tests.
 proc test_objfiles {} {
-    gdb_test "python\nok=False\nfor file in gdb.objfiles():\n  if 'python-value' in file.filename:\n    ok=True\nprint ok\nend" "True"
+    gdb_test "python\nok=False\nfor file in gdb.objfiles():\n  if 'py-value' in file.filename:\n    ok=True\nprint ok\nend" "True"
 
     gdb_test "python print gdb.objfiles()\[0\].pretty_printers" "\\\[\\\]"
 

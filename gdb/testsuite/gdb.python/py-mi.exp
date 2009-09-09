@@ -24,7 +24,7 @@ if [mi_gdb_start] {
     continue
 }
 
-set testfile "python-prettyprint"
+set testfile "py-prettyprint"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DMI}] != "" } {
