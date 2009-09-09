@@ -444,7 +444,8 @@ _bfd_link_hash_newfunc (struct bfd_hash_entry *entry,
      subclass.  */
   if (entry == NULL)
     {
-      entry = bfd_hash_allocate (table, sizeof (struct bfd_link_hash_entry));
+      entry = (struct bfd_hash_entry *)
+          bfd_hash_allocate (table, sizeof (struct bfd_link_hash_entry));
       if (entry == NULL)
 	return entry;
     }
@@ -548,7 +549,7 @@ bfd_wrapped_link_hash_lookup (bfd *abfd,
              references to SYM with references to __wrap_SYM.  */
 
 	  amt = strlen (l) + sizeof WRAP + 1;
-	  n = bfd_malloc (amt);
+	  n = (char *) bfd_malloc (amt);
 	  if (n == NULL)
 	    return NULL;
 
@@ -579,7 +580,7 @@ bfd_wrapped_link_hash_lookup (bfd *abfd,
              with references to SYM.  */
 
 	  amt = strlen (l + sizeof REAL - 1) + 2;
-	  n = bfd_malloc (amt);
+	  n = (char *) bfd_malloc (amt);
 	  if (n == NULL)
 	    return NULL;
 
@@ -678,7 +679,7 @@ _bfd_generic_link_hash_newfunc (struct bfd_hash_entry *entry,
      subclass.  */
   if (entry == NULL)
     {
-      entry =
+      entry = (struct bfd_hash_entry *)
 	bfd_hash_allocate (table, sizeof (struct generic_link_hash_entry));
       if (entry == NULL)
 	return entry;
@@ -707,7 +708,7 @@ _bfd_generic_link_hash_table_create (bfd *abfd)
   struct generic_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct generic_link_hash_table);
 
-  ret = bfd_malloc (amt);
+  ret = (struct generic_link_hash_table *) bfd_malloc (amt);
   if (ret == NULL)
     return NULL;
   if (! _bfd_link_hash_table_init (&ret->root, abfd,
@@ -748,7 +749,8 @@ bfd_generic_link_read_symbols (bfd *abfd)
       symsize = bfd_get_symtab_upper_bound (abfd);
       if (symsize < 0)
 	return FALSE;
-      bfd_get_outsymbols (abfd) = bfd_alloc (abfd, symsize);
+      bfd_get_outsymbols (abfd) = (struct bfd_symbol **) bfd_alloc (abfd,
+                                                                    symsize);
       if (bfd_get_outsymbols (abfd) == NULL && symsize != 0)
 	return FALSE;
       symcount = bfd_canonicalize_symtab (abfd, bfd_get_outsymbols (abfd));
@@ -880,7 +882,8 @@ archive_hash_newfunc (struct bfd_hash_entry *entry,
   /* Allocate the structure if it has not already been allocated by a
      subclass.  */
   if (ret == NULL)
-    ret = bfd_hash_allocate (table, sizeof (struct archive_hash_entry));
+    ret = (struct archive_hash_entry *)
+        bfd_hash_allocate (table, sizeof (struct archive_hash_entry));
   if (ret == NULL)
     return NULL;
 
@@ -1051,7 +1054,7 @@ _bfd_generic_link_add_archive_symbols
 	  if (info->pei386_auto_import)
 	    {
 	      bfd_size_type amt = strlen (h->root.string) + 10;
-	      char *buf = bfd_malloc (amt);
+	      char *buf = (char *) bfd_malloc (amt);
 	      if (buf == NULL)
 		return FALSE;
 
@@ -1242,7 +1245,7 @@ generic_link_check_archive_element (bfd *abfd,
 	     attached to symbfd to ensure that it is in a BFD which
 	     will be linked in.  */
 	  h->type = bfd_link_hash_common;
-	  h->u.c.p =
+	  h->u.c.p = (struct bfd_link_hash_common_entry *)
 	    bfd_hash_allocate (&info->hash->table,
 			       sizeof (struct bfd_link_hash_common_entry));
 	  if (h->u.c.p == NULL)
@@ -1691,7 +1694,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	  if (h->type == bfd_link_hash_new)
 	    bfd_link_add_undef (info->hash, h);
 	  h->type = bfd_link_hash_common;
-	  h->u.c.p =
+	  h->u.c.p = (struct bfd_link_hash_common_entry *)
 	    bfd_hash_allocate (&info->hash->table,
 			       sizeof (struct bfd_link_hash_common_entry));
 	  if (h->u.c.p == NULL)
@@ -1972,7 +1975,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 		char *w;
 		size_t len = strlen (string) + 1;
 
-		w = bfd_hash_allocate (&info->hash->table, len);
+		w = (char *) bfd_hash_allocate (&info->hash->table, len);
 		if (w == NULL)
 		  return FALSE;
 		memcpy (w, string, len);
@@ -2059,7 +2062,7 @@ _bfd_generic_final_link (bfd *abfd, struct bfd_link_info *info)
 						       input_section);
 		  if (relsize < 0)
 		    return FALSE;
-		  relocs = bfd_malloc (relsize);
+		  relocs = (arelent **) bfd_malloc (relsize);
 		  if (!relocs && relsize != 0)
 		    return FALSE;
 		  symbols = _bfd_generic_link_get_symbols (input_bfd);
@@ -2081,7 +2084,7 @@ _bfd_generic_final_link (bfd *abfd, struct bfd_link_info *info)
 
 	      amt = o->reloc_count;
 	      amt *= sizeof (arelent *);
-	      o->orelocation = bfd_alloc (abfd, amt);
+	      o->orelocation = (struct reloc_cache_entry **) bfd_alloc (abfd, amt);
 	      if (!o->orelocation)
 		return FALSE;
 	      o->flags |= SEC_RELOC;
@@ -2135,7 +2138,7 @@ generic_add_output_symbol (bfd *output_bfd, size_t *psymalloc, asymbol *sym)
 	*psymalloc *= 2;
       amt = *psymalloc;
       amt *= sizeof (asymbol *);
-      newsyms = bfd_realloc (bfd_get_outsymbols (output_bfd), amt);
+      newsyms = (asymbol **) bfd_realloc (bfd_get_outsymbols (output_bfd), amt);
       if (newsyms == NULL)
 	return FALSE;
       bfd_get_outsymbols (output_bfd) = newsyms;
@@ -2212,7 +2215,7 @@ _bfd_generic_link_output_symbols (bfd *output_bfd,
 	  || bfd_is_ind_section (bfd_get_section (sym)))
 	{
 	  if (sym->udata.p != NULL)
-	    h = sym->udata.p;
+	    h = (struct generic_link_hash_entry *) sym->udata.p;
 	  else if ((sym->flags & BSF_CONSTRUCTOR) != 0)
 	    {
 	      /* This case normally means that the main linker code
@@ -2451,7 +2454,8 @@ bfd_boolean
 _bfd_generic_link_write_global_symbol (struct generic_link_hash_entry *h,
 				       void *data)
 {
-  struct generic_write_global_symbol_info *wginfo = data;
+  struct generic_write_global_symbol_info *wginfo =
+      (struct generic_write_global_symbol_info *) data;
   asymbol *sym;
 
   if (h->root.type == bfd_link_hash_warning)
@@ -2508,7 +2512,7 @@ _bfd_generic_reloc_link_order (bfd *abfd,
   if (sec->orelocation == NULL)
     abort ();
 
-  r = bfd_alloc (abfd, sizeof (arelent));
+  r = (arelent *) bfd_alloc (abfd, sizeof (arelent));
   if (r == NULL)
     return FALSE;
 
@@ -2556,7 +2560,7 @@ _bfd_generic_reloc_link_order (bfd *abfd,
       file_ptr loc;
 
       size = bfd_get_reloc_size (r->howto);
-      buf = bfd_zmalloc (size);
+      buf = (bfd_byte *) bfd_zmalloc (size);
       if (buf == NULL)
 	return FALSE;
       rstat = _bfd_relocate_contents (r->howto, abfd,
@@ -2671,7 +2675,7 @@ default_data_link_order (bfd *abfd,
   if (fill_size != 0 && fill_size < size)
     {
       bfd_byte *p;
-      fill = bfd_malloc (size);
+      fill = (bfd_byte *) bfd_malloc (size);
       if (fill == NULL)
 	return FALSE;
       p = fill;
@@ -2781,7 +2785,7 @@ default_indirect_link_order (bfd *output_bfd,
 	      /* sym->udata may have been set by
 		 generic_link_add_symbol_list.  */
 	      if (sym->udata.p != NULL)
-		h = sym->udata.p;
+		h = (struct bfd_link_hash_entry *) sym->udata.p;
 	      else if (bfd_is_und_section (bfd_get_section (sym)))
 		h = bfd_wrapped_link_hash_lookup (output_bfd, info,
 						  bfd_asymbol_name (sym),
@@ -2816,7 +2820,7 @@ default_indirect_link_order (bfd *output_bfd,
       sec_size = (input_section->rawsize > input_section->size
 		  ? input_section->rawsize
 		  : input_section->size);
-      contents = bfd_malloc (sec_size);
+      contents = (bfd_byte *) bfd_malloc (sec_size);
       if (contents == NULL && sec_size != 0)
 	goto error_return;
       new_contents = (bfd_get_relocated_section_contents
@@ -2949,7 +2953,8 @@ bfd_section_already_linked_table_insert
 
   /* Allocate the memory from the same obstack as the hash table is
      kept in.  */
-  l = bfd_hash_allocate (&_bfd_section_already_linked_table, sizeof *l);
+  l = (struct bfd_section_already_linked *)
+      bfd_hash_allocate (&_bfd_section_already_linked_table, sizeof *l);
   if (l == NULL)
     return FALSE;
   l->sec = sec;
@@ -2964,7 +2969,8 @@ already_linked_newfunc (struct bfd_hash_entry *entry ATTRIBUTE_UNUSED,
 			const char *string ATTRIBUTE_UNUSED)
 {
   struct bfd_section_already_linked_hash_entry *ret =
-    bfd_hash_allocate (table, sizeof *ret);
+    (struct bfd_section_already_linked_hash_entry *)
+      bfd_hash_allocate (table, sizeof *ret);
 
   if (ret == NULL)
     return NULL;

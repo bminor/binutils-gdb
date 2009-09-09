@@ -110,7 +110,7 @@ _bfd_coff_link_hash_table_create (bfd *abfd)
   struct coff_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct coff_link_hash_table);
 
-  ret = bfd_malloc (amt);
+  ret = (struct coff_link_hash_table *) bfd_malloc (amt);
   if (ret == NULL)
     return NULL;
 
@@ -320,7 +320,7 @@ coff_link_add_symbols (bfd *abfd,
   /* We keep a list of the linker hash table entries that correspond
      to particular symbols.  */
   amt = symcount * sizeof (struct coff_link_hash_entry *);
-  sym_hash = bfd_zalloc (abfd, amt);
+  sym_hash = (struct coff_link_hash_entry **) bfd_zalloc (abfd, amt);
   if (sym_hash == NULL)
     goto error_return;
   obj_coff_sym_hashes (abfd) = sym_hash;
@@ -772,7 +772,7 @@ _bfd_coff_final_link (bfd *abfd,
          the target_index fields are 1 based.  */
       amt = abfd->section_count + 1;
       amt *= sizeof (struct coff_link_section_info);
-      finfo.section_info = bfd_malloc (amt);
+      finfo.section_info = (struct coff_link_section_info *) bfd_malloc (amt);
       if (finfo.section_info == NULL)
 	goto error_return;
       for (i = 0; i <= abfd->section_count; i++)
@@ -815,10 +815,12 @@ _bfd_coff_final_link (bfd *abfd,
 	  BFD_ASSERT (info->relocatable);
 	  amt = o->reloc_count;
 	  amt *= sizeof (struct internal_reloc);
-	  finfo.section_info[o->target_index].relocs = bfd_malloc (amt);
+	  finfo.section_info[o->target_index].relocs =
+              (struct internal_reloc *) bfd_malloc (amt);
 	  amt = o->reloc_count;
 	  amt *= sizeof (struct coff_link_hash_entry *);
-	  finfo.section_info[o->target_index].rel_hashes = bfd_malloc (amt);
+	  finfo.section_info[o->target_index].rel_hashes =
+              (struct coff_link_hash_entry **) bfd_malloc (amt);
 	  if (finfo.section_info[o->target_index].relocs == NULL
 	      || finfo.section_info[o->target_index].rel_hashes == NULL)
 	    goto error_return;
@@ -851,21 +853,21 @@ _bfd_coff_final_link (bfd *abfd,
 
   /* Allocate some buffers used while linking.  */
   amt = max_sym_count * sizeof (struct internal_syment);
-  finfo.internal_syms = bfd_malloc (amt);
+  finfo.internal_syms = (struct internal_syment *) bfd_malloc (amt);
   amt = max_sym_count * sizeof (asection *);
-  finfo.sec_ptrs = bfd_malloc (amt);
+  finfo.sec_ptrs = (asection **) bfd_malloc (amt);
   amt = max_sym_count * sizeof (long);
-  finfo.sym_indices = bfd_malloc (amt);
-  finfo.outsyms = bfd_malloc ((max_sym_count + 1) * symesz);
+  finfo.sym_indices = (long int *) bfd_malloc (amt);
+  finfo.outsyms = (bfd_byte *) bfd_malloc ((max_sym_count + 1) * symesz);
   amt = max_lineno_count * bfd_coff_linesz (abfd);
-  finfo.linenos = bfd_malloc (amt);
-  finfo.contents = bfd_malloc (max_contents_size);
+  finfo.linenos = (bfd_byte *) bfd_malloc (amt);
+  finfo.contents = (bfd_byte *) bfd_malloc (max_contents_size);
   amt = max_reloc_count * relsz;
-  finfo.external_relocs = bfd_malloc (amt);
+  finfo.external_relocs = (bfd_byte *) bfd_malloc (amt);
   if (! info->relocatable)
     {
       amt = max_reloc_count * sizeof (struct internal_reloc);
-      finfo.internal_relocs = bfd_malloc (amt);
+      finfo.internal_relocs = (struct internal_reloc *) bfd_malloc (amt);
     }
   if ((finfo.internal_syms == NULL && max_sym_count > 0)
       || (finfo.sec_ptrs == NULL && max_sym_count > 0)
@@ -1015,7 +1017,7 @@ _bfd_coff_final_link (bfd *abfd,
 	 the symbol indices to use for relocs against them, and we can
 	 finally write out the relocs.  */
       amt = max_output_reloc_count * relsz;
-      external_relocs = bfd_malloc (amt);
+      external_relocs = (bfd_byte *) bfd_malloc (amt);
       if (external_relocs == NULL)
 	goto error_return;
 
@@ -1602,7 +1604,7 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *finfo, bfd *input_bfd)
              out to be a duplicate, we pass this address to
              bfd_release.  */
 	  amt = sizeof (struct coff_debug_merge_type);
-	  mt = bfd_alloc (input_bfd, amt);
+	  mt = (struct coff_debug_merge_type *) bfd_alloc (input_bfd, amt);
 	  if (mt == NULL)
 	    return FALSE;
 	  mt->type_class = isym.n_sclass;
@@ -1629,7 +1631,8 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *finfo, bfd *input_bfd)
 	      bfd_coff_swap_sym_in (input_bfd, esl, islp);
 
 	      amt = sizeof (struct coff_debug_merge_element);
-	      *epp = bfd_alloc (input_bfd, amt);
+	      *epp = (struct coff_debug_merge_element *)
+                  bfd_alloc (input_bfd, amt);
 	      if (*epp == NULL)
 		return FALSE;
 
@@ -1639,7 +1642,7 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *finfo, bfd *input_bfd)
 		return FALSE;
 
 	      amt = strlen (elename) + 1;
-	      name_copy = bfd_alloc (input_bfd, amt);
+	      name_copy = (char *) bfd_alloc (input_bfd, amt);
 	      if (name_copy == NULL)
 		return FALSE;
 	      strcpy (name_copy, elename);
@@ -2729,7 +2732,7 @@ _bfd_coff_reloc_link_order (bfd *output_bfd,
       file_ptr loc;
 
       size = bfd_get_reloc_size (howto);
-      buf = bfd_zmalloc (size);
+      buf = (bfd_byte *) bfd_zmalloc (size);
       if (buf == NULL)
 	return FALSE;
 

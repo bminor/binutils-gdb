@@ -181,7 +181,7 @@ _bfd_generic_mkarchive (bfd *abfd)
 {
   bfd_size_type amt = sizeof (struct artdata);
 
-  abfd->tdata.aout_ar_data = bfd_zalloc (abfd, amt);
+  abfd->tdata.aout_ar_data = (struct artdata *) bfd_zalloc (abfd, amt);
   if (bfd_ardata (abfd) == NULL)
     return FALSE;
 
@@ -319,7 +319,7 @@ _bfd_add_bfd_to_archive_cache (bfd *arch_bfd, file_ptr filepos, bfd *new_elt)
     }
 
   /* Insert new_elt into the hash table by filepos.  */
-  cache = bfd_zalloc (arch_bfd, sizeof (struct ar_cache));
+  cache = (struct ar_cache *) bfd_zalloc (arch_bfd, sizeof (struct ar_cache));
   cache->ptr = filepos;
   cache->arbfd = new_elt;
   *htab_find_slot (hash_table, (const void *) cache, INSERT) = cache;
@@ -462,7 +462,7 @@ _bfd_generic_read_ar_hdr_mag (bfd *abfd, const char *mag)
       allocsize += namelen + 1;
       parsed_size -= namelen;
 
-      allocptr = bfd_zalloc (abfd, allocsize);
+      allocptr = (char *) bfd_zalloc (abfd, allocsize);
       if (allocptr == NULL)
 	return NULL;
       filename = (allocptr
@@ -483,12 +483,12 @@ _bfd_generic_read_ar_hdr_mag (bfd *abfd, const char *mag)
 	 spaces, so only look for ' ' if we don't find '/'.  */
 
       char *e;
-      e = memchr (hdr.ar_name, '\0', ar_maxnamelen (abfd));
+      e = (char *) memchr (hdr.ar_name, '\0', ar_maxnamelen (abfd));
       if (e == NULL)
 	{
-	  e = memchr (hdr.ar_name, '/', ar_maxnamelen (abfd));
+	  e = (char *) memchr (hdr.ar_name, '/', ar_maxnamelen (abfd));
 	  if (e == NULL)
-	    e = memchr (hdr.ar_name, ' ', ar_maxnamelen (abfd));
+	    e = (char *) memchr (hdr.ar_name, ' ', ar_maxnamelen (abfd));
 	}
 
       if (e != NULL)
@@ -505,7 +505,7 @@ _bfd_generic_read_ar_hdr_mag (bfd *abfd, const char *mag)
 
   if (!allocptr)
     {
-      allocptr = bfd_zalloc (abfd, allocsize);
+      allocptr = (char *) bfd_zalloc (abfd, allocsize);
       if (allocptr == NULL)
 	return NULL;
     }
@@ -546,7 +546,7 @@ append_relative_path (bfd *arch, char *elt_name)
     return elt_name;
 
   prefix_len = base_name - arch_name;
-  filename = bfd_alloc (arch, prefix_len + strlen (elt_name) + 1);
+  filename = (char *) bfd_alloc (arch, prefix_len + strlen (elt_name) + 1);
   if (filename == NULL)
     return NULL;
 
@@ -579,7 +579,7 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
   if (0 > bfd_seek (archive, filepos, SEEK_SET))
     return NULL;
 
-  if ((new_areldata = _bfd_read_ar_hdr (archive)) == NULL)
+  if ((new_areldata = (struct areltdata *) _bfd_read_ar_hdr (archive)) == NULL)
     return NULL;
 
   filename = new_areldata->filename;
@@ -745,7 +745,7 @@ bfd_generic_archive_p (bfd *abfd)
   tdata_hold = bfd_ardata (abfd);
 
   amt = sizeof (struct artdata);
-  bfd_ardata (abfd) = bfd_zalloc (abfd, amt);
+  bfd_ardata (abfd) = (struct artdata *) bfd_zalloc (abfd, amt);
   if (bfd_ardata (abfd) == NULL)
     {
       bfd_ardata (abfd) = tdata_hold;
@@ -835,13 +835,13 @@ do_slurp_bsd_armap (bfd *abfd)
   bfd_size_type parsed_size, amt;
   carsym *set;
 
-  mapdata = _bfd_read_ar_hdr (abfd);
+  mapdata = (struct areltdata *) _bfd_read_ar_hdr (abfd);
   if (mapdata == NULL)
     return FALSE;
   parsed_size = mapdata->parsed_size;
   bfd_release (abfd, mapdata);	/* Don't need it any more.  */
 
-  raw_armap = bfd_zalloc (abfd, parsed_size);
+  raw_armap = (bfd_byte *) bfd_zalloc (abfd, parsed_size);
   if (raw_armap == NULL)
     return FALSE;
 
@@ -870,7 +870,7 @@ do_slurp_bsd_armap (bfd *abfd)
 		+ ardata->symdef_count * BSD_SYMDEF_SIZE
 		+ BSD_STRING_COUNT_SIZE);
   amt = ardata->symdef_count * sizeof (carsym);
-  ardata->symdefs = bfd_alloc (abfd, amt);
+  ardata->symdefs = (struct carsym *) bfd_alloc (abfd, amt);
   if (!ardata->symdefs)
     return FALSE;
 
@@ -911,7 +911,7 @@ do_slurp_coff_armap (bfd *abfd)
   bfd_size_type carsym_size, ptrsize;
   unsigned int i;
 
-  mapdata = _bfd_read_ar_hdr (abfd);
+  mapdata = (struct areltdata *) _bfd_read_ar_hdr (abfd);
   if (mapdata == NULL)
     return FALSE;
   parsed_size = mapdata->parsed_size;
@@ -956,14 +956,15 @@ do_slurp_coff_armap (bfd *abfd)
   if (carsym_size + stringsize + 1 <= carsym_size)
     return FALSE;
 
-  ardata->symdefs = bfd_zalloc (abfd, carsym_size + stringsize + 1);
+  ardata->symdefs = (struct carsym *) bfd_zalloc (abfd,
+                                                  carsym_size + stringsize + 1);
   if (ardata->symdefs == NULL)
     return FALSE;
   carsyms = ardata->symdefs;
   stringbase = ((char *) ardata->symdefs) + carsym_size;
 
   /* Allocate and read in the raw offsets.  */
-  raw_armap = bfd_alloc (abfd, ptrsize);
+  raw_armap = (int *) bfd_alloc (abfd, ptrsize);
   if (raw_armap == NULL)
     goto release_symdefs;
   if (bfd_bread (raw_armap, ptrsize, abfd) != ptrsize
@@ -998,7 +999,7 @@ do_slurp_coff_armap (bfd *abfd)
     struct areltdata *tmp;
 
     bfd_seek (abfd, ardata->first_file_filepos, SEEK_SET);
-    tmp = _bfd_read_ar_hdr (abfd);
+    tmp = (struct areltdata *) _bfd_read_ar_hdr (abfd);
     if (tmp != NULL)
       {
 	if (tmp->arch_header[0] == '/'
@@ -1098,12 +1099,12 @@ bfd_slurp_bsd_armap_f2 (bfd *abfd)
       return TRUE;
     }
 
-  mapdata = _bfd_read_ar_hdr (abfd);
+  mapdata = (struct areltdata *) _bfd_read_ar_hdr (abfd);
   if (mapdata == NULL)
     return FALSE;
 
   amt = mapdata->parsed_size;
-  raw_armap = bfd_zalloc (abfd, amt);
+  raw_armap = (bfd_byte *) bfd_zalloc (abfd, amt);
   if (raw_armap == NULL)
     {
     byebye:
@@ -1139,7 +1140,7 @@ bfd_slurp_bsd_armap_f2 (bfd *abfd)
 		+ BSD_STRING_COUNT_SIZE);
   rbase = (bfd_byte *) stringbase + stringsize;
   amt = ardata->symdef_count * BSD_SYMDEF_SIZE;
-  ardata->symdefs = bfd_alloc (abfd, amt);
+  ardata->symdefs = (struct carsym *) bfd_alloc (abfd, amt);
   if (!ardata->symdefs)
     return FALSE;
 
@@ -1196,7 +1197,7 @@ _bfd_slurp_extended_name_table (bfd *abfd)
 	  return TRUE;
 	}
 
-      namedata = _bfd_read_ar_hdr (abfd);
+      namedata = (struct areltdata *) _bfd_read_ar_hdr (abfd);
       if (namedata == NULL)
 	return FALSE;
 
@@ -1205,7 +1206,7 @@ _bfd_slurp_extended_name_table (bfd *abfd)
         goto byebye;
 
       bfd_ardata (abfd)->extended_names_size = amt;
-      bfd_ardata (abfd)->extended_names = bfd_zalloc (abfd, amt + 1);
+      bfd_ardata (abfd)->extended_names = (char *) bfd_zalloc (abfd, amt + 1);
       if (bfd_ardata (abfd)->extended_names == NULL)
 	{
 	byebye:
@@ -1355,7 +1356,7 @@ adjust_relative_path (const char * path, const char * ref_path)
       if (pathbuf != NULL)
 	free (pathbuf);
       pathbuf_len = 0;
-      pathbuf = bfd_malloc (len);
+      pathbuf = (char *) bfd_malloc (len);
       if (pathbuf == NULL)
 	return path;
       pathbuf_len = len;
@@ -1505,7 +1506,7 @@ _bfd_construct_extended_name_table (bfd *abfd,
   if (total_namelen == 0)
     return TRUE;
 
-  *tabloc = bfd_zalloc (abfd, total_namelen);
+  *tabloc = (char *) bfd_zalloc (abfd, total_namelen);
   if (*tabloc == NULL)
     return FALSE;
 
@@ -1639,7 +1640,7 @@ bfd_ar_hdr_from_filesystem (bfd *abfd, const char *filename, bfd *member)
   if (member && (member->flags & BFD_IN_MEMORY) != 0)
     {
       /* Assume we just "made" the member, and fake it.  */
-      struct bfd_in_memory *bim = member->iostream;
+      struct bfd_in_memory *bim = (struct bfd_in_memory *) member->iostream;
       time (&status.st_mtime);
       status.st_uid = getuid ();
       status.st_gid = getgid ();
@@ -1663,7 +1664,7 @@ bfd_ar_hdr_from_filesystem (bfd *abfd, const char *filename, bfd *member)
     }
 
   amt = sizeof (struct ar_hdr) + sizeof (struct areltdata);
-  ared = bfd_zalloc (abfd, amt);
+  ared = (struct areltdata *) bfd_zalloc (abfd, amt);
   if (ared == NULL)
     return NULL;
   hdr = (struct ar_hdr *) (((char *) ared) + sizeof (struct areltdata));
@@ -2088,13 +2089,13 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
   elength += elength % 2;
 
   amt = orl_max * sizeof (struct orl);
-  map = bfd_malloc (amt);
+  map = (struct orl *) bfd_malloc (amt);
   if (map == NULL)
     goto error_return;
 
   /* We put the symbol names on the arch objalloc, and then discard
      them when done.  */
-  first_name = bfd_alloc (arch, 1);
+  first_name = (char *) bfd_alloc (arch, 1);
   if (first_name == NULL)
     goto error_return;
 
@@ -2126,7 +2127,7 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
 		  if (syms_max > 0)
 		    free (syms);
 		  syms_max = storage;
-		  syms = bfd_malloc (syms_max);
+		  syms = (asymbol **) bfd_malloc (syms_max);
 		  if (syms == NULL)
 		    goto error_return;
 		}
@@ -2155,7 +2156,7 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
 			{
 			  orl_max *= 2;
 			  amt = orl_max * sizeof (struct orl);
-			  new_map = bfd_realloc (map, amt);
+			  new_map = (struct orl *) bfd_realloc (map, amt);
 			  if (new_map == NULL)
 			    goto error_return;
 
@@ -2164,10 +2165,11 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
 
 		      namelen = strlen (syms[src_count]->name);
 		      amt = sizeof (char *);
-		      map[orl_count].name = bfd_alloc (arch, amt);
+		      map[orl_count].name = (char **) bfd_alloc (arch, amt);
 		      if (map[orl_count].name == NULL)
 			goto error_return;
-		      *(map[orl_count].name) = bfd_alloc (arch, namelen + 1);
+		      *(map[orl_count].name) = (char *) bfd_alloc (arch,
+                                                                   namelen + 1);
 		      if (*(map[orl_count].name) == NULL)
 			goto error_return;
 		      strcpy (*(map[orl_count].name), syms[src_count]->name);

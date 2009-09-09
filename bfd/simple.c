@@ -109,7 +109,7 @@ simple_save_output_info (bfd *abfd ATTRIBUTE_UNUSED,
 			 asection *section,
 			 void *ptr)
 {
-  struct saved_output_info *output_info = ptr;
+  struct saved_output_info *output_info = (struct saved_output_info *) ptr;
   output_info[section->index].offset = section->output_offset;
   output_info[section->index].section = section->output_section;
   if ((section->flags & SEC_DEBUGGING) != 0
@@ -125,7 +125,7 @@ simple_restore_output_info (bfd *abfd ATTRIBUTE_UNUSED,
 			    asection *section,
 			    void *ptr)
 {
-  struct saved_output_info *output_info = ptr;
+  struct saved_output_info *output_info = (struct saved_output_info *) ptr;
   section->output_offset = output_info[section->index].offset;
   section->output_section = output_info[section->index].section;
 }
@@ -171,7 +171,7 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
       bfd_size_type size = sec->rawsize ? sec->rawsize : sec->size;
 
       if (outbuf == NULL)
-	contents = bfd_malloc (amt);
+	contents = (bfd_byte *) bfd_malloc (amt);
       else
 	contents = outbuf;
 
@@ -211,7 +211,7 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   if (outbuf == NULL)
     {
       bfd_size_type amt = sec->rawsize > sec->size ? sec->rawsize : sec->size;
-      data = bfd_malloc (amt);
+      data = (bfd_byte *) bfd_malloc (amt);
       if (data == NULL)
 	return NULL;
       outbuf = data;
@@ -241,7 +241,7 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
       _bfd_generic_link_add_symbols (abfd, &link_info);
 
       storage_needed = bfd_get_symtab_upper_bound (abfd);
-      symbol_table = bfd_malloc (storage_needed);
+      symbol_table = (asymbol **) bfd_malloc (storage_needed);
       bfd_canonicalize_symtab (abfd, symbol_table);
     }
   else

@@ -143,7 +143,7 @@ mangle_name (bfd *abfd, char *suffix)
 	  + strlen (suffix)
 	  + sizeof "_binary__");
 
-  buf = bfd_alloc (abfd, size);
+  buf = (char *) bfd_alloc (abfd, size);
   if (buf == NULL)
     return "";
 
@@ -167,7 +167,7 @@ binary_canonicalize_symtab (bfd *abfd, asymbol **alocation)
   unsigned int i;
   bfd_size_type amt = BIN_SYMS * sizeof (asymbol);
 
-  syms = bfd_alloc (abfd, amt);
+  syms = (asymbol *) bfd_alloc (abfd, amt);
   if (syms == NULL)
     return -1;
 

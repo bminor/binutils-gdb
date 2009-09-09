@@ -85,6 +85,27 @@ struct elf_strtab_hash;
 struct got_entry;
 struct plt_entry;
 
+union gotplt_union
+  {
+    bfd_signed_vma refcount;
+    bfd_vma offset;
+    struct got_entry *glist;
+    struct plt_entry *plist;
+  };
+
+struct elf_link_virtual_table_entry
+  {
+    /* Virtual table entry use information.  This array is nominally of size
+       size/sizeof(target_void_pointer), though we have to be able to assume
+       and track a size while the symbol is still undefined.  It is indexed
+       via offset/sizeof(target_void_pointer).  */
+    size_t size;
+    bfd_boolean *used;
+
+    /* Virtual table derivation info.  */
+    struct elf_link_hash_entry *parent;
+  };
+
 /* ELF linker hash table entries.  */
 
 struct elf_link_hash_entry
@@ -118,13 +139,7 @@ struct elf_link_hash_entry
      require a global offset table entry.  The second scheme allows
      multiple GOT entries per symbol, managed via a linked list
      pointed to by GLIST.  */
-  union gotplt_union
-    {
-      bfd_signed_vma refcount;
-      bfd_vma offset;
-      struct got_entry *glist;
-      struct plt_entry *plist;
-    } got;
+  union gotplt_union got;
 
   /* Same, but tracks a procedure linkage table entry.  */
   union gotplt_union plt;
@@ -210,18 +225,7 @@ struct elf_link_hash_entry
     struct bfd_elf_version_tree *vertree;
   } verinfo;
 
-  struct
-  {
-    /* Virtual table entry use information.  This array is nominally of size
-       size/sizeof(target_void_pointer), though we have to be able to assume
-       and track a size while the symbol is still undefined.  It is indexed
-       via offset/sizeof(target_void_pointer).  */
-    size_t size;
-    bfd_boolean *used;
-
-    /* Virtual table derivation info.  */
-    struct elf_link_hash_entry *parent;
-  } *vtable;
+  struct elf_link_virtual_table_entry *vtable;
 };
 
 /* Will references to this symbol always reference the symbol

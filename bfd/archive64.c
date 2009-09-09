@@ -95,13 +95,13 @@ bfd_elf64_archive_slurp_armap (bfd *abfd)
   ptrsize = 8 * nsymz;
 
   amt = carsym_size + stringsize + 1;
-  ardata->symdefs = bfd_zalloc (abfd, amt);
+  ardata->symdefs = (struct carsym *) bfd_zalloc (abfd, amt);
   if (ardata->symdefs == NULL)
     return FALSE;
   carsyms = ardata->symdefs;
   stringbase = ((char *) ardata->symdefs) + carsym_size;
 
-  raw_armap = bfd_alloc (abfd, ptrsize);
+  raw_armap = (bfd_byte *) bfd_alloc (abfd, ptrsize);
   if (raw_armap == NULL)
     goto release_symdefs;
 

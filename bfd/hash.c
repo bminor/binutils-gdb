@@ -374,7 +374,8 @@ bfd_hash_table_init_n (struct bfd_hash_table *table,
       bfd_set_error (bfd_error_no_memory);
       return FALSE;
     }
-  table->table = objalloc_alloc ((struct objalloc *) table->memory, alloc);
+  table->table = (struct bfd_hash_entry **)
+      objalloc_alloc ((struct objalloc *) table->memory, alloc);
   if (table->table == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -407,7 +408,7 @@ bfd_hash_table_init (struct bfd_hash_table *table,
 void
 bfd_hash_table_free (struct bfd_hash_table *table)
 {
-  objalloc_free (table->memory);
+  objalloc_free ((struct objalloc *) table->memory);
   table->memory = NULL;
 }
 
@@ -581,7 +582,8 @@ bfd_hash_newfunc (struct bfd_hash_entry *entry,
 		  const char *string ATTRIBUTE_UNUSED)
 {
   if (entry == NULL)
-    entry = bfd_hash_allocate (table, sizeof (* entry));
+    entry = (struct bfd_hash_entry *) bfd_hash_allocate (table,
+                                                         sizeof (* entry));
   return entry;
 }
 
@@ -676,7 +678,8 @@ strtab_hash_newfunc (struct bfd_hash_entry *entry,
   /* Allocate the structure if it has not already been allocated by a
      subclass.  */
   if (ret == NULL)
-    ret = bfd_hash_allocate (table, sizeof (* ret));
+    ret = (struct strtab_hash_entry *) bfd_hash_allocate (table,
+                                                          sizeof (* ret));
   if (ret == NULL)
     return NULL;
 
@@ -708,7 +711,7 @@ _bfd_stringtab_init (void)
   struct bfd_strtab_hash *table;
   bfd_size_type amt = sizeof (* table);
 
-  table = bfd_malloc (amt);
+  table = (struct bfd_strtab_hash *) bfd_malloc (amt);
   if (table == NULL)
     return NULL;
 
@@ -771,7 +774,8 @@ _bfd_stringtab_add (struct bfd_strtab_hash *tab,
     }
   else
     {
-      entry = bfd_hash_allocate (&tab->table, sizeof (* entry));
+      entry = (struct strtab_hash_entry *) bfd_hash_allocate (&tab->table,
+                                                              sizeof (* entry));
       if (entry == NULL)
 	return (bfd_size_type) -1;
       if (! copy)
@@ -780,7 +784,7 @@ _bfd_stringtab_add (struct bfd_strtab_hash *tab,
 	{
 	  char *n;
 
-	  n = bfd_hash_allocate (&tab->table, strlen (str) + 1);
+	  n = (char *) bfd_hash_allocate (&tab->table, strlen (str) + 1);
 	  if (n == NULL)
 	    return (bfd_size_type) -1;
 	  entry->root.string = n;

@@ -5475,7 +5475,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
   if (reloc_size == 0)
     return data;
 
-  reloc_vector = bfd_malloc (reloc_size);
+  reloc_vector = (arelent **) bfd_malloc (reloc_size);
   if (reloc_vector == NULL)
     return NULL;
 

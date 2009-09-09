@@ -89,7 +89,7 @@ bfd_uncompress_section_contents (bfd_byte **buffer, bfd_size_type *size)
   strm.avail_in = compressed_size - header_size;
   strm.next_in = (Bytef*) compressed_buffer + header_size;
   strm.avail_out = uncompressed_size;
-  uncompressed_buffer = bfd_malloc (uncompressed_size);
+  uncompressed_buffer = (bfd_byte *) bfd_malloc (uncompressed_size);
   if (! uncompressed_buffer)
     return FALSE;
 

@@ -937,7 +937,7 @@ bfd_get_unique_section_name (bfd *abfd, const char *templat, int *count)
   char *sname;
 
   len = strlen (templat);
-  sname = bfd_malloc (len + 8);
+  sname = (char *) bfd_malloc (len + 8);
   if (sname == NULL)
     return NULL;
   memcpy (sname, templat, len);
@@ -1495,7 +1495,8 @@ bfd_malloc_and_get_section (bfd *abfd, sec_ptr sec, bfd_byte **buf)
   if (sz == 0)
     return TRUE;
 
-  p = bfd_malloc (sec->rawsize > sec->size ? sec->rawsize : sec->size);
+  p = (bfd_byte *)
+      bfd_malloc (sec->rawsize > sec->size ? sec->rawsize : sec->size);
   if (p == NULL)
     return FALSE;
   *buf = p;

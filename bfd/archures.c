@@ -691,7 +691,7 @@ bfd_arch_list (void)
     }
 
   amt = (vec_length + 1) * sizeof (char **);
-  name_list = bfd_malloc (amt);
+  name_list = (const char **) bfd_malloc (amt);
   if (name_list == NULL)
     return NULL;
 
