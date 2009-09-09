@@ -1,3 +1,7 @@
+2009-09-09  Paolo Bonzini  <bonzini@gnu.org>
+
+	* configure: Regnerate.
+
 2009-09-09  Nick Clifton  <nickc@redhat.com>
 
 	PR 10478:
