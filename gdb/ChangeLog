@@ -1,3 +1,10 @@
+2009-09-08  Joel Brobecker  <brobecker@adacore.com>
+
+	Fix a build failure on AIX.
+	* rs6000-nat.c (vmap_exec): Rewrite using target_get_section_table
+	instead of relying on the to_sections/to_section_end target_ops
+	field, since the latter have been removed in a previous patch.
+
 2009-09-08  Thiago Jung Bauermann  <thiago.bauermann@gmail.com>
 
 	* Makefile.in (py-cmd.o): Renamed from python-cmd.o.  Updated
