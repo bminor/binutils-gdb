@@ -1514,10 +1514,24 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
     case SHT_DYNAMIC:	/* Dynamic linking information.  */
       if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
 	return FALSE;
-      if (hdr->sh_link > elf_numsections (abfd)
-	  || elf_elfsections (abfd)[hdr->sh_link] == NULL)
+      if (hdr->sh_link > elf_numsections (abfd))
+	{
+	  /* PR 10478: Accept sparc binaries with a sh_link
+	     field set to SHN_BEFORE or SHN_AFTER.  */
+	  switch (bfd_get_arch (abfd))
+	    {
+	    case bfd_arch_sparc:
+	      if (hdr->sh_link == (SHN_LORESERVE & 0xffff) /* SHN_BEFORE */
+		  || hdr->sh_link == ((SHN_LORESERVE + 1) & 0xffff) /* SHN_AFTER */)
+		break;
+	      /* Otherwise fall through.  */
+	    default:
+	      return FALSE;
+	    }
+	}
+      else if (elf_elfsections (abfd)[hdr->sh_link] == NULL)
 	return FALSE;
-      if (elf_elfsections (abfd)[hdr->sh_link]->sh_type != SHT_STRTAB)
+      else if (elf_elfsections (abfd)[hdr->sh_link]->sh_type != SHT_STRTAB)
 	{
 	  Elf_Internal_Shdr *dynsymhdr;
 

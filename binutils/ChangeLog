@@ -1,3 +1,12 @@
+2009-09-09  Nick Clifton  <nickc@redhat.com>
+
+	PR 10478:
+	readelf.c (get_elf_section_flags): Add support for SHF_EXCLUDE and
+	SHF_ORDERED.
+	(process_section_headers): Warn about out of range sh_link
+	values.  When displaying detailed section header information
+	annote the SHN_BEFORE and SHN_AFTER values.
+
 2009-09-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* dwarf.c (byte_get_little_endian): Handle size of 3.

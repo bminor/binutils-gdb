@@ -760,7 +760,23 @@ elf_object_p (bfd *abfd)
 
 	  /* Sanity check sh_link and sh_info.  */
 	  if (i_shdrp[shindex].sh_link >= num_sec)
-	    goto got_wrong_format_error;
+	    {
+	      /* PR 10478: Accept sparc binaries with a sh_link
+		 field set to SHN_BEFORE or SHN_AFTER.  */
+	      switch (ebd->elf_machine_code)
+		{
+		case EM_OLD_SPARCV9:
+		case EM_SPARC32PLUS:
+		case EM_SPARCV9:
+		case EM_SPARC:
+		  if (i_shdrp[shindex].sh_link == (SHN_LORESERVE & 0xffff) /* SHN_BEFORE */
+		      || i_shdrp[shindex].sh_link == ((SHN_LORESERVE + 1) & 0xffff) /* SHN_AFTER */)
+		    break;
+		  /* Otherwise fall through.  */
+		default:
+		  goto got_wrong_format_error;
+		}
+	    }
 
 	  if (((i_shdrp[shindex].sh_flags & SHF_INFO_LINK)
 	       || i_shdrp[shindex].sh_type == SHT_RELA

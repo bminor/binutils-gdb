@@ -1,3 +1,11 @@
+2009-09-09  Nick Clifton  <nickc@redhat.com>
+
+	PR 10478:
+	* elf.c (bfd_section_from_shdr): Do not reject sparc binaries with
+	section headers containing sh_link values of SHN_BEFORE or
+	SHN_AFTER.
+	* elfcode.h (elf_object_p): Likewise.
+
 2009-09-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-xtensa.c (elf_xtensa_relax_section): Delete -r check.
