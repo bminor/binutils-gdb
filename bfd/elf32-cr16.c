@@ -1473,6 +1473,20 @@ elf32_cr16_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
                                    unresolved_reloc, warned);
         }
 
+      if (sec != NULL && elf_discarded_section (sec))
+       {
+         /* For relocs against symbols from removed linkonce sections,
+            or sections discarded by a linker script, we just want the
+            section contents zeroed.  Avoid any special processing.  */
+         _bfd_clear_contents (howto, input_bfd, contents + rel->r_offset);
+         rel->r_info = 0;
+         rel->r_addend = 0;
+         continue;
+       }
+
+      if (info->relocatable)
+        continue;
+
       r = cr16_elf_final_link_relocate (howto, input_bfd, output_bfd,
                                         input_section,
                                         contents, rel->r_offset,
