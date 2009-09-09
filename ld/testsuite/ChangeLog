@@ -1,3 +1,7 @@
+2009-09-09  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-arm/farcall-mixed-lib.d: Update.
+
 2009-09-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-elf/sec64k.exp: For frv-linux use "aw" sections.

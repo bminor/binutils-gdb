@@ -7036,6 +7036,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 			   + splt->output_offset
 			   + h->plt.offset);
 		  *unresolved_reloc_p = FALSE;
+		  /* The PLT entry is in ARM mode, regardless of the
+		     target function.  */
+		  sym_flags = STT_FUNC;
 		}
 
 	      from = (input_section->output_section->vma
@@ -7452,10 +7455,14 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
  		/* If the Thumb BLX instruction is available, convert the
 		   BL to a BLX instruction to call the ARM-mode PLT entry.  */
 		lower_insn = (lower_insn & ~0x1000) | 0x0800;
+		sym_flags = STT_FUNC;
  	      }
  	    else
- 	      /* Target the Thumb stub before the ARM PLT entry.  */
- 	      value -= PLT_THUMB_STUB_SIZE;
+	      {
+		/* Target the Thumb stub before the ARM PLT entry.  */
+		value -= PLT_THUMB_STUB_SIZE;
+		sym_flags = STT_ARM_TFUNC;
+	      }
 	    *unresolved_reloc_p = FALSE;
 	  }
 
@@ -11449,13 +11456,13 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	    {
 	      h->root.u.def.section = s;
 	      h->root.u.def.value = h->plt.offset;
-	    }
 
-	  /* Make sure the function is not marked as Thumb, in case
-	     it is the target of an ABS32 relocation, which will
-	     point to the PLT entry.  */
-	  if (ELF_ST_TYPE (h->type) == STT_ARM_TFUNC)
-	    h->type = ELF_ST_INFO (ELF_ST_BIND (h->type), STT_FUNC);
+	      /* Make sure the function is not marked as Thumb, in case
+		 it is the target of an ABS32 relocation, which will
+		 point to the PLT entry.  */
+	      if (ELF_ST_TYPE (h->type) == STT_ARM_TFUNC)
+		h->type = ELF_ST_INFO (ELF_ST_BIND (h->type), STT_FUNC);
+	    }
 
 	  /* Make room for this entry.  */
 	  s->size += htab->plt_entry_size;
