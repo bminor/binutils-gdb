@@ -59,7 +59,7 @@ symbolS abs_symbol;
 #define LOCAL_LABEL_CHAR	'\002'
 
 struct obstack notes;
-#ifdef USE_UNIQUE
+#ifdef TE_PE
 /* The name of an external symbol which is
    used to make weak PE symbol names unique.  */
 const char * an_external_name;
@@ -2204,7 +2204,7 @@ S_SET_EXTERNAL (symbolS *s)
   s->bsym->flags |= BSF_GLOBAL;
   s->bsym->flags &= ~(BSF_LOCAL | BSF_WEAK);
 
-#ifdef USE_UNIQUE
+#ifdef TE_PE
   if (! an_external_name && S_GET_NAME(s)[0] != '.')
     an_external_name = S_GET_NAME (s);
 #endif

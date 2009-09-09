@@ -41,7 +41,7 @@ extern int md_short_jump_size;
 extern int md_long_jump_size;
 #endif
 
-#ifdef USE_UNIQUE
+#ifdef TE_PE
 /* The name of an external symbol which is
    used to make weak PE symbol names unique.  */
 extern const char * an_external_name;
