@@ -52,6 +52,10 @@ contained_in (const struct block *a, const struct block *b)
     {
       if (a == b)
 	return 1;
+      /* If A is a function block, then A cannot be contained in B,
+         except if A was inlined.  */
+      if (BLOCK_FUNCTION (a) != NULL && !block_inlined_p (a))
+        return 0;
       a = BLOCK_SUPERBLOCK (a);
     }
   while (a != NULL);

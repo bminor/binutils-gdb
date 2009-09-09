@@ -363,7 +363,6 @@ block_innermost_frame (struct block *block)
   struct frame_info *frame;
   CORE_ADDR start;
   CORE_ADDR end;
-  CORE_ADDR calling_pc;
 
   if (block == NULL)
     return NULL;
