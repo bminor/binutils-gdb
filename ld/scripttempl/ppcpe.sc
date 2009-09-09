@@ -22,7 +22,7 @@ ${LIB_SEARCH_DIRS}
    "-u mainCRTStartup" to make sure it gets included in the link.
 */
 
-ENTRY(mainCRTStartup)
+${RELOCATING+ENTRY (mainCRTStartup)}
 
 SECTIONS
 {

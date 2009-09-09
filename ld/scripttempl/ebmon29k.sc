@@ -1,6 +1,6 @@
 cat <<EOF
 OUTPUT_FORMAT("${OUTPUT_FORMAT}")
-ENTRY(start)
+${RELOCATING+ENTRY (start)}
 
 SECTIONS {
   .text ${RELOCATING+${TEXT_START_ADDR}} : 

@@ -47,7 +47,7 @@ fi
 cat <<EOF
 ${LIB_SEARCH_DIRS}
 
-ENTRY(_mainCRTStartup)
+${RELOCATING+ENTRY (_mainCRTStartup)}
 
 SECTIONS
 {
