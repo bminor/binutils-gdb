@@ -1,3 +1,7 @@
+2009-09-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-i386.c (i386_target_format): Avoid duplicate case label.
+
 2009-09-08  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* configure.tgt (sh*-*-netbsdelf*): Set endian according to cpu.
