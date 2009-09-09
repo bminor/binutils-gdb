@@ -1,3 +1,11 @@
+2009-09-09  Nick Clifton  <nickc@redhat.com>
+
+	PR 10478:
+	* elf.c (bfd_section_from_shdr): Do not reject sparc binaries with
+	section headers containing sh_link values of SHN_BEFORE or
+	SHN_AFTER.
+	* elfcode.h (elf_object_p): Likewise.
+
 2009-09-09  Tristan Gingold  <gingold@adacore.com>
 
 	Handle DYLD_INFO introduced by Darwin10.
@@ -11,7 +19,6 @@
 	(bfd_mach_o_bfd_print_private_bfd_data): Ditto.
 	(bfd_mach_o_load_command_name): AddB FD_MACH_O_LC_DYLD_INFO.
 	(bfd_mach_o_print_dyld_info): New function.
-
 
 2009-09-09  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 

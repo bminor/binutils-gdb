@@ -3873,26 +3873,29 @@ get_elf_section_flags (bfd_vma sh_flags)
     }
   flags [] =
     {
-	{ "WRITE", 5 },
-	{ "ALLOC", 5 },
-	{ "EXEC", 4 },
-	{ "MERGE", 5 },
-	{ "STRINGS", 7 },
-	{ "INFO LINK", 9 },
-	{ "LINK ORDER", 10 },
-	{ "OS NONCONF", 10 },
-	{ "GROUP", 5 },
-	{ "TLS", 3 },
-	/* IA-64 specific.  */
-	{ "SHORT", 5 },
-	{ "NORECOV", 7 },
-	/* IA-64 OpenVMS specific.  */
-	{ "VMS_GLOBAL", 10 },
-	{ "VMS_OVERLAID", 12 },
-	{ "VMS_SHARED", 10 },
-	{ "VMS_VECTOR", 10 },
-	{ "VMS_ALLOC_64BIT", 15 },
-	{ "VMS_PROTECTED", 13}
+      /*  0 */ { STRING_COMMA_LEN ("WRITE") },
+      /*  1 */ { STRING_COMMA_LEN ("ALLOC") },
+      /*  2 */ { STRING_COMMA_LEN ("EXEC") },
+      /*  3 */ { STRING_COMMA_LEN ("MERGE") },
+      /*  4 */ { STRING_COMMA_LEN ("STRINGS") },
+      /*  5 */ { STRING_COMMA_LEN ("INFO LINK") },
+      /*  6 */ { STRING_COMMA_LEN ("LINK ORDER") },
+      /*  7 */ { STRING_COMMA_LEN ("OS NONCONF") },
+      /*  8 */ { STRING_COMMA_LEN ("GROUP") },
+      /*  9 */ { STRING_COMMA_LEN ("TLS") },
+      /* IA-64 specific.  */
+      /* 10 */ { STRING_COMMA_LEN ("SHORT") },
+      /* 11 */ { STRING_COMMA_LEN ("NORECOV") },
+      /* IA-64 OpenVMS specific.  */
+      /* 12 */ { STRING_COMMA_LEN ("VMS_GLOBAL") },
+      /* 13 */ { STRING_COMMA_LEN ("VMS_OVERLAID") },
+      /* 14 */ { STRING_COMMA_LEN ("VMS_SHARED") },
+      /* 15 */ { STRING_COMMA_LEN ("VMS_VECTOR") },
+      /* 16 */ { STRING_COMMA_LEN ("VMS_ALLOC_64BIT") },
+      /* 17 */ { STRING_COMMA_LEN ("VMS_PROTECTED") },
+      /* SPARC specific.  */
+      /* 18 */ { STRING_COMMA_LEN ("EXCLUDE") },
+      /* 19 */ { STRING_COMMA_LEN ("ORDERED") }
     };
 
   if (do_section_details)
@@ -3926,8 +3929,9 @@ get_elf_section_flags (bfd_vma sh_flags)
 
 	    default:
 	      index = -1;
-	      if (elf_header.e_machine == EM_IA_64)
+	      switch (elf_header.e_machine)
 		{
+		case EM_IA_64:
 		  if (flag == SHF_IA_64_SHORT)
 		    index = 10;
 		  else if (flag == SHF_IA_64_NORECOV)
@@ -3945,8 +3949,20 @@ get_elf_section_flags (bfd_vma sh_flags)
 		      default:                        break;
 		      }
 #endif
+		  break;
+
+		case EM_OLD_SPARCV9:
+		case EM_SPARC32PLUS:
+		case EM_SPARCV9:
+		case EM_SPARC:
+		  if (flag == SHF_EXCLUDE)
+		    index = 18;
+		  else if (flag == SHF_ORDERED)
+		    index = 19;
+		  break;
+		default:
+		  break;
 		}
-	      break;
 	    }
 
 	  if (index != -1)
@@ -4327,6 +4343,8 @@ process_section_headers (FILE * file)
 
       if (is_32bit_elf)
 	{
+	  const char * link_too_big = NULL;
+
 	  print_vma (section->sh_addr, LONG_HEX);
 
 	  printf ( " %6.6lx %6.6lx %2.2lx",
@@ -4339,10 +4357,45 @@ process_section_headers (FILE * file)
 	  else
 	    printf (" %3s ", get_elf_section_flags (section->sh_flags));
 
-	  printf ("%2u %3u %2lu\n",
-		  section->sh_link,
-		  section->sh_info,
-		  (unsigned long) section->sh_addralign);
+	  if (section->sh_link >= elf_header.e_shnum)
+	    {
+	      link_too_big = "";
+	      /* The sh_link value is out of range.  Normally this indicates
+		 an error but it can have special values in SPARC binaries.  */
+	      switch (elf_header.e_machine)
+		{
+		case EM_OLD_SPARCV9:
+		case EM_SPARC32PLUS:
+		case EM_SPARCV9:
+		case EM_SPARC:
+		  if (section->sh_link == (SHN_BEFORE & 0xffff))
+		    link_too_big = "BEFORE";
+		  else if (section->sh_link == (SHN_AFTER & 0xffff))
+		    link_too_big = "AFTER";
+		  break;
+		default:
+		  break;
+		}
+	    }
+
+	  if (do_section_details)
+	    {
+	      if (link_too_big != NULL && * link_too_big)
+		printf ("<%s> ", link_too_big);
+	      else
+		printf ("%2u ", section->sh_link);
+	      printf ("%3u %2lu\n", section->sh_info,
+		      (unsigned long) section->sh_addralign);
+	    }
+	  else
+	    printf ("%2u %3u %2lu\n",
+		    section->sh_link,
+		    section->sh_info,
+		    (unsigned long) section->sh_addralign);
+
+	  if (link_too_big && ! * link_too_big)
+	    warn (_("section %u: sh_link value of %u is larger than the number of sections\n"),
+		  i, section->sh_link);
 	}
       else if (do_wide)
 	{
