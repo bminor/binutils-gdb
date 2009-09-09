@@ -162,9 +162,6 @@
 #endif
 
 #ifdef TE_PE
-/* PE weak symbols need USE_UNIQUE.  */
-#define USE_UNIQUE 1
-
 #define obj_set_weak_hook pecoff_obj_set_weak_hook
 #define obj_clear_weak_hook pecoff_obj_clear_weak_hook
 #endif

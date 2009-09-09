@@ -1117,7 +1117,7 @@ weak_uniquify (const char * name)
   char *ret;
   const char * unique = "";
 
-#ifdef USE_UNIQUE
+#ifdef TE_PE
   if (an_external_name != NULL)
     unique = an_external_name;
 #endif
