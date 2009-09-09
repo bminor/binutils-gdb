@@ -8084,20 +8084,21 @@ i386_target_format (void)
     as_fatal (_("Unknown architecture"));
   switch (OUTPUT_FLAVOR)
     {
-#if defined (TE_PE) || defined (TE_PEP)
-    case bfd_target_coff_flavour:
-      return flag_code == CODE_64BIT ? "pe-x86-64" : "pe-i386";
-#endif
-#ifdef OBJ_MAYBE_AOUT
+#if defined (OBJ_MAYBE_AOUT) || defined (OBJ_AOUT)
     case bfd_target_aout_flavour:
       return AOUT_TARGET_FORMAT;
 #endif
-#ifdef TE_GO32
+#if defined (OBJ_MAYBE_COFF) || defined (OBJ_COFF)
+# if defined (TE_PE) || defined (TE_PEP)
+    case bfd_target_coff_flavour:
+      return flag_code == CODE_64BIT ? "pe-x86-64" : "pe-i386";
+# elif defined (TE_GO32)
     case bfd_target_coff_flavour:
       return "coff-go32";
-#elif defined (OBJ_MAYBE_COFF)
+# else
     case bfd_target_coff_flavour:
       return "coff-i386";
+# endif
 #endif
 #if defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF)
     case bfd_target_elf_flavour:
