@@ -1455,7 +1455,7 @@ bfd_target_list (void)
     vec_length++;
 
   amt = (vec_length + 1) * sizeof (char **);
-  name_ptr = name_list = bfd_malloc (amt);
+  name_ptr = name_list = (const  char **) bfd_malloc (amt);
 
   if (name_list == NULL)
     return NULL;

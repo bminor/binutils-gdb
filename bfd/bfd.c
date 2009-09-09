@@ -35,6 +35,14 @@ SECTION
 
 CODE_FRAGMENT
 .
+.enum bfd_direction
+.  {
+.    no_direction = 0,
+.    read_direction = 1,
+.    write_direction = 2,
+.    both_direction = 3
+.  };
+.
 .struct bfd
 .{
 .  {* A unique identifier of the BFD  *}
@@ -69,14 +77,7 @@ CODE_FRAGMENT
 .  bfd_format format;
 .
 .  {* The direction with which the BFD was opened.  *}
-.  enum bfd_direction
-.    {
-.      no_direction = 0,
-.      read_direction = 1,
-.      write_direction = 2,
-.      both_direction = 3
-.    }
-.  direction;
+.  enum bfd_direction direction;
 .
 .  {* Format_specific flags.  *}
 .  flagword flags;
@@ -438,7 +439,7 @@ bfd_set_error (bfd_error_type error_tag, ...)
 
       va_start (ap, error_tag);
       input_bfd = va_arg (ap, bfd *);
-      input_error = va_arg (ap, int);
+      input_error = (bfd_error_type) va_arg (ap, int);
       if (input_error >= bfd_error_on_input)
 	abort ();
       va_end (ap);
@@ -1448,7 +1449,7 @@ bfd_record_phdr (bfd *abfd,
 
   amt = sizeof (struct elf_segment_map);
   amt += ((bfd_size_type) count - 1) * sizeof (asection *);
-  m = bfd_zalloc (abfd, amt);
+  m = (struct elf_segment_map *) bfd_zalloc (abfd, amt);
   if (m == NULL)
     return FALSE;
 
@@ -1858,7 +1859,7 @@ bfd_demangle (bfd *abfd, const char *name, int options)
   suf = strchr (name, '@');
   if (suf != NULL)
     {
-      alloc = bfd_malloc (suf - name + 1);
+      alloc = (char *) bfd_malloc (suf - name + 1);
       if (alloc == NULL)
 	return NULL;
       memcpy (alloc, name, suf - name);
@@ -1876,7 +1877,7 @@ bfd_demangle (bfd *abfd, const char *name, int options)
       if (skip_lead)
 	{
 	  size_t len = strlen (pre) + 1;
-	  alloc = bfd_malloc (len);
+	  alloc = (char *) bfd_malloc (len);
 	  if (alloc == NULL)
 	    return NULL;
 	  memcpy (alloc, pre, len);
@@ -1896,7 +1897,7 @@ bfd_demangle (bfd *abfd, const char *name, int options)
       if (suf == NULL)
 	suf = res + len;
       suf_len = strlen (suf) + 1;
-      final = bfd_malloc (pre_len + len + suf_len);
+      final = (char *) bfd_malloc (pre_len + len + suf_len);
       if (final != NULL)
 	{
 	  memcpy (final, pre, pre_len);

@@ -780,7 +780,7 @@ pe_ILF_build_a_bfd (bfd *           abfd,
 
      We are going to construct the contents of the BFD in memory,
      so allocate all the space that we will need right now.  */
-  ptr = bfd_zalloc (abfd, (bfd_size_type) ILF_DATA_SIZE);
+  ptr = (bfd_byte *) bfd_zalloc (abfd, (bfd_size_type) ILF_DATA_SIZE);
   if (ptr == NULL)
     return FALSE;
 
@@ -1194,7 +1194,7 @@ pe_ILF_object_p (bfd * abfd)
   /* ptr += 2; */
 
   /* Now read in the two strings that follow.  */
-  ptr = bfd_alloc (abfd, size);
+  ptr = (bfd_byte *) bfd_alloc (abfd, size);
   if (ptr == NULL)
     return NULL;
 

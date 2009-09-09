@@ -215,8 +215,8 @@ write_value (bfd *abfd, bfd_byte *buf, bfd_vma value, int width)
 static int
 cie_eq (const void *e1, const void *e2)
 {
-  const struct cie *c1 = e1;
-  const struct cie *c2 = e2;
+  const struct cie *c1 = (const struct cie *) e1;
+  const struct cie *c2 = (const struct cie *) e2;
 
   if (c1->hash == c2->hash
       && c1->length == c2->length
@@ -246,7 +246,7 @@ cie_eq (const void *e1, const void *e2)
 static hashval_t
 cie_hash (const void *e)
 {
-  const struct cie *c = e;
+  const struct cie *c = (const struct cie *) e;
   return c->hash;
 }
 
@@ -529,12 +529,13 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
       REQUIRE (skip_bytes (&buf, end, hdr_length - 4));
     }
 
-  sec_info = bfd_zmalloc (sizeof (struct eh_frame_sec_info)
-			  + (num_entries - 1) * sizeof (struct eh_cie_fde));
+  sec_info = (struct eh_frame_sec_info *)
+      bfd_zmalloc (sizeof (struct eh_frame_sec_info)
+                   + (num_entries - 1) * sizeof (struct eh_cie_fde));
   REQUIRE (sec_info);
 
   /* We need to have a "struct cie" for each CIE in this section.  */
-  local_cies = bfd_zmalloc (num_cies * sizeof (*local_cies));
+  local_cies = (struct cie *) bfd_zmalloc (num_cies * sizeof (*local_cies));
   REQUIRE (local_cies);
 
   /* FIXME: octets_per_byte.  */
@@ -848,8 +849,8 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	  unsigned int cnt;
 	  bfd_byte *p;
 
-	  this_inf->set_loc = bfd_malloc ((set_loc_count + 1)
-					  * sizeof (unsigned int));
+	  this_inf->set_loc = (unsigned int *)
+              bfd_malloc ((set_loc_count + 1) * sizeof (unsigned int));
 	  REQUIRE (this_inf->set_loc);
 	  this_inf->set_loc[0] = set_loc_count;
 	  p = insns;
@@ -1055,7 +1056,7 @@ find_merged_cie (bfd *abfd, asection *sec,
   if (new_cie == NULL)
     {
       /* Keep CIE_INF and record it in the hash table.  */
-      new_cie = malloc (sizeof (struct cie));
+      new_cie = (struct cie *) malloc (sizeof (struct cie));
       if (new_cie == NULL)
 	return cie_inf;
 
@@ -1246,7 +1247,7 @@ _bfd_elf_eh_frame_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   if (sec->sec_info_type != ELF_INFO_TYPE_EH_FRAME)
     return offset;
-  sec_info = elf_section_data (sec)->sec_info;
+  sec_info = (struct eh_frame_sec_info *) elf_section_data (sec)->sec_info;
 
   if (offset >= sec->rawsize)
     return offset - sec->rawsize + sec->size;
@@ -1336,13 +1337,13 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	      ->elf_backend_eh_frame_address_size (abfd, sec));
   BFD_ASSERT (ptr_size != 0);
 
-  sec_info = elf_section_data (sec)->sec_info;
+  sec_info = (struct eh_frame_sec_info *) elf_section_data (sec)->sec_info;
   htab = elf_hash_table (info);
   hdr_info = &htab->eh_info;
 
   if (hdr_info->table && hdr_info->array == NULL)
-    hdr_info->array
-      = bfd_malloc (hdr_info->fde_count * sizeof(*hdr_info->array));
+    hdr_info->array = (struct eh_frame_array_ent *)
+        bfd_malloc (hdr_info->fde_count * sizeof(*hdr_info->array));
   if (hdr_info->array == NULL)
     hdr_info = NULL;
 
@@ -1629,8 +1630,8 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 static int
 vma_compare (const void *a, const void *b)
 {
-  const struct eh_frame_array_ent *p = a;
-  const struct eh_frame_array_ent *q = b;
+  const struct eh_frame_array_ent *p = (const struct eh_frame_array_ent *) a;
+  const struct eh_frame_array_ent *q = (const struct eh_frame_array_ent *) b;
   if (p->initial_loc > q->initial_loc)
     return 1;
   if (p->initial_loc < q->initial_loc)
@@ -1681,7 +1682,7 @@ _bfd_elf_write_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
   size = EH_FRAME_HDR_SIZE;
   if (hdr_info->array && hdr_info->array_count == hdr_info->fde_count)
     size += 4 + hdr_info->fde_count * 8;
-  contents = bfd_malloc (size);
+  contents = (bfd_byte *) bfd_malloc (size);
   if (contents == NULL)
     return FALSE;
 

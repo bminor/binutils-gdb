@@ -1,3 +1,57 @@
+2009-09-09  Martin Thuresson  <martin@mtme.org>
+
+	Update soruces to compile cleanly with -Wc++-compat:
+	* aoutx.h: Add casts.
+	* archive.c: Add casts.
+	* archive64.c: Add casts.
+	* archures.c: Add casts.
+	* bfd-in2.h: Regenerated.
+	* bfd.c: Add casts. (enum bfd_direction): Move out to top level.
+	* bfdio.c: Add casts.
+	* binary.c: Add casts.
+	* cache.c (cache_bseek,cache_bread_1,cache_bwrite): Updated
+	parameter to use enum value instead of int.
+	* coffcode.h: Add casts.
+	* coffgen.c: Add casts.
+	* cofflink.c: Add casts.
+	* compress.c: Add casts.
+	* dwarf1.c: Add casts.
+	* dwarf2.c: Add casts. (struct dwarf2_debug): Rename member bfd to
+	bfd_ptr. Update code to use new name.
+	* elf-attrs.c: Add casts.
+	* elf-bfd.h (elf_link_virtual_table_entry): Gives name to
+	anonymous struct. (union gotplt_union, struct
+	elf_link_virtual_table_entry): Move to top level.
+	* elf-eh-frame.c: Add casts.
+	* elf-strtab.c: Add casts.
+	* elf.c: Add casts. (_bfd_elm_make_Section_from_phdr): Change
+	argument name from typename to type_name.
+	* elf32-i386.c: Add casts.
+	* elf64-x86-64.c: Add casts.
+	* elfcode.h: Add casts.
+	* elfcore.h: Add casts.
+	* elflink.c: Add casts.
+	* format.c: Add casts.
+	* hash.c: Add casts.
+	* ihex.c: Add casts.
+	* libaout.h (enum aout_subformat, enum aout_magic): Move to top
+	level.
+	* libbfd.c: Add casts.
+	* linker.c: Add casts.
+	* merge.c: Add casts.
+	* opncls.c: Add casts.
+	* peXXigen.c: Add casts.
+	* peicode.h: Add casts.
+	* reloc.c: Add casts.
+	* section.c: Add casts.
+	* simple.c: Add casts.
+	* srec.c: Add casts.
+	* stabs.c: Add casts.
+	* syms.c: Add casts.
+	* targets.c: Add casts.
+	* tekhex.c: Add casts.
+	* verilog.c: Add casts.
+
 2009-09-09  Nick Clifton  <nickc@redhat.com>
 
 	PR 10478:

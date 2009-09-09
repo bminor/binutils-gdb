@@ -517,8 +517,9 @@ elf64_x86_64_link_hash_newfunc (struct bfd_hash_entry *entry,
      subclass.  */
   if (entry == NULL)
     {
-      entry = bfd_hash_allocate (table,
-				 sizeof (struct elf64_x86_64_link_hash_entry));
+      entry = (struct bfd_hash_entry *)
+          bfd_hash_allocate (table,
+                             sizeof (struct elf64_x86_64_link_hash_entry));
       if (entry == NULL)
 	return entry;
     }

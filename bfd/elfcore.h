@@ -190,7 +190,7 @@ elf_core_file_p (bfd *abfd)
 
   /* Allocate space for the program headers.  */
   amt = sizeof (*i_phdrp) * i_ehdrp->e_phnum;
-  i_phdrp = bfd_alloc (abfd, amt);
+  i_phdrp = (Elf_Internal_Phdr *) bfd_alloc (abfd, amt);
   if (!i_phdrp)
     goto fail;
 

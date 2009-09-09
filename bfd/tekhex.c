@@ -324,7 +324,8 @@ find_chunk (bfd *abfd, bfd_vma vma)
   if (!d)
     {
       /* No chunk for this address, so make one up.  */
-      d = bfd_zalloc (abfd, (bfd_size_type) sizeof (struct data_struct));
+      d = (struct data_struct *)
+          bfd_zalloc (abfd, (bfd_size_type) sizeof (struct data_struct));
 
       if (!d)
 	return NULL;
@@ -383,7 +384,7 @@ first_phase (bfd *abfd, int type, char *src)
       section = bfd_get_section_by_name (abfd, sym);
       if (section == NULL)
 	{
-	  char *n = bfd_alloc (abfd, (bfd_size_type) len + 1);
+	  char *n = (char *) bfd_alloc (abfd, (bfd_size_type) len + 1);
 
 	  if (!n)
 	    return FALSE;
@@ -534,7 +535,7 @@ tekhex_mkobject (bfd *abfd)
 {
   tdata_type *tdata;
 
-  tdata = bfd_alloc (abfd, (bfd_size_type) sizeof (tdata_type));
+  tdata = (tdata_type *) bfd_alloc (abfd, (bfd_size_type) sizeof (tdata_type));
   if (!tdata)
     return FALSE;
   abfd->tdata.tekhex_data = tdata;

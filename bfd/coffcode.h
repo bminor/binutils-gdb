@@ -1069,7 +1069,7 @@ handle_COMDAT (bfd * abfd,
 
 		amt = sizeof (struct coff_comdat_info);
 		coff_section_data (abfd, section)->comdat
-		  = bfd_alloc (abfd, amt);
+		  = (struct coff_comdat_info *) bfd_alloc (abfd, amt);
 		if (coff_section_data (abfd, section)->comdat == NULL)
 		  abort ();
 
@@ -1077,7 +1077,7 @@ handle_COMDAT (bfd * abfd,
 		  (esym - esymstart) / bfd_coff_symesz (abfd);
 
 		amt = strlen (symname) + 1;
-		newname = bfd_alloc (abfd, amt);
+		newname = (char *) bfd_alloc (abfd, amt);
 		if (newname == NULL)
 		  abort ();
 
@@ -1712,7 +1712,7 @@ coff_new_section_hook (bfd * abfd, asection * section)
      @@ The 10 is a guess at a plausible maximum number of aux entries
      (but shouldn't be a constant).  */
   amt = sizeof (combined_entry_type) * 10;
-  native = bfd_zalloc (abfd, amt);
+  native = (combined_entry_type *) bfd_zalloc (abfd, amt);
   if (native == NULL)
     return FALSE;
 
@@ -3205,7 +3205,7 @@ coff_compute_section_file_positions (bfd * abfd)
 
     /* We allocate an extra cell to simplify the final loop.  */
     amt = sizeof (struct asection *) * (count + 1);
-    section_list = bfd_malloc (amt);
+    section_list = (asection **) bfd_malloc (amt);
     if (section_list == NULL)
       return FALSE;
 
@@ -4276,7 +4276,7 @@ coff_write_object_contents (bfd * abfd)
     char * buff;
     bfd_size_type amount = bfd_coff_filhsz (abfd);
 
-    buff = bfd_malloc (amount);
+    buff = (char *) bfd_malloc (amount);
     if (buff == NULL)
       return FALSE;
 
@@ -4296,7 +4296,7 @@ coff_write_object_contents (bfd * abfd)
       char * buff;
       bfd_size_type amount = bfd_coff_aoutsz (abfd);
 
-      buff = bfd_malloc (amount);
+      buff = (char *) bfd_malloc (amount);
       if (buff == NULL)
 	return FALSE;
 
@@ -4465,7 +4465,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
   BFD_ASSERT (asect->lineno == NULL);
 
   amt = ((bfd_size_type) asect->lineno_count + 1) * sizeof (alent);
-  lineno_cache = bfd_alloc (abfd, amt);
+  lineno_cache = (alent *) bfd_alloc (abfd, amt);
   if (lineno_cache == NULL)
     return FALSE;
 
@@ -4544,7 +4544,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
       alent *n_lineno_cache;
 
       /* Create a table of functions.  */
-      func_table = bfd_alloc (abfd, nbr_func * sizeof (alent *));
+      func_table = (alent **) bfd_alloc (abfd, nbr_func * sizeof (alent *));
       if (func_table != NULL)
 	{
 	  alent **p = func_table;
@@ -4559,7 +4559,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 
 	  /* Create the new sorted table.  */
 	  amt = ((bfd_size_type) asect->lineno_count + 1) * sizeof (alent);
-	  n_lineno_cache = bfd_alloc (abfd, amt);
+	  n_lineno_cache = (alent *) bfd_alloc (abfd, amt);
 	  if (n_lineno_cache != NULL)
 	    {
 	      alent *n_cache_ptr = n_lineno_cache;
@@ -4613,13 +4613,13 @@ coff_slurp_symbol_table (bfd * abfd)
   /* Allocate enough room for all the symbols in cached form.  */
   amt = obj_raw_syment_count (abfd);
   amt *= sizeof (coff_symbol_type);
-  cached_area = bfd_alloc (abfd, amt);
+  cached_area = (coff_symbol_type *) bfd_alloc (abfd, amt);
   if (cached_area == NULL)
     return FALSE;
 
   amt = obj_raw_syment_count (abfd);
   amt *= sizeof (unsigned int);
-  table_ptr = bfd_alloc (abfd, amt);
+  table_ptr = (unsigned int *) bfd_alloc (abfd, amt);
 
   if (table_ptr == NULL)
     return FALSE;
@@ -5111,7 +5111,7 @@ coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
   amt = (bfd_size_type) bfd_coff_relsz (abfd) * asect->reloc_count;
   native_relocs = (RELOC *) buy_and_read (abfd, asect->rel_filepos, amt);
   amt = (bfd_size_type) asect->reloc_count * sizeof (arelent);
-  reloc_cache = bfd_alloc (abfd, amt);
+  reloc_cache = (arelent *) bfd_alloc (abfd, amt);
 
   if (reloc_cache == NULL || native_relocs == NULL)
     return FALSE;

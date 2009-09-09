@@ -160,7 +160,7 @@ _bfd_XXi_swap_sym_in (bfd * abfd, void * ext1, void * in1)
 
 	  if (name == namebuf)
 	    {
-	      name = bfd_alloc (abfd, strlen (namebuf) + 1);
+	      name = (const char *) bfd_alloc (abfd, strlen (namebuf) + 1);
 	      if (name == NULL)
 		/* FIXME: Return error.  */
 		abort ();
@@ -1263,7 +1263,7 @@ pe_print_idata (bfd * abfd, void * vfile)
 	      else
 		{
 		  ft_idx = first_thunk - (ft_section->vma - extra->ImageBase);
-		  ft_data = bfd_malloc (datasize);
+		  ft_data = (bfd_byte *) bfd_malloc (datasize);
 		  if (ft_data == NULL)
 		    continue;
 
@@ -1432,7 +1432,7 @@ pe_print_edata (bfd * abfd, void * vfile)
   fprintf (file, _("\nThere is an export table in %s at 0x%lx\n"),
 	   section->name, (unsigned long) addr);
 
-  data = bfd_malloc (datasize);
+  data = (bfd_byte *) bfd_malloc (datasize);
   if (data == NULL)
     return FALSE;
 
@@ -1736,7 +1736,7 @@ slurp_symtab (bfd *abfd, sym_cache *psc)
   if (storage < 0)
     return NULL;
   if (storage)
-    sy = bfd_malloc (storage);
+    sy = (asymbol **) bfd_malloc (storage);
 
   psc->symcount = bfd_canonicalize_symtab (abfd, sy);
   if (psc->symcount < 0)
@@ -1857,7 +1857,7 @@ _bfd_XX_print_ce_compressed_pdata (bfd * abfd, void * vfile)
 	    {
 	      int xx = (begin_addr - 8) - tsection->vma;
 
-	      tdata = bfd_malloc (8);
+	      tdata = (bfd_byte *) bfd_malloc (8);
 	      if (bfd_get_section_contents (abfd, tsection, tdata, (bfd_vma) xx, 8))
 		{
 		  bfd_vma eh, eh_data;

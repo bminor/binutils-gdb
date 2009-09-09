@@ -114,7 +114,7 @@ verilog_set_section_contents (bfd *abfd,
   tdata_type *tdata = abfd->tdata.verilog_data;
   verilog_data_list_type *entry;
 
-  entry = bfd_alloc (abfd, sizeof (* entry));
+  entry = (verilog_data_list_type *) bfd_alloc (abfd, sizeof (* entry));
   if (entry == NULL)
     return FALSE;
 
@@ -124,7 +124,7 @@ verilog_set_section_contents (bfd *abfd,
     {
       bfd_byte *data;
 
-      data = bfd_alloc (abfd, bytes_to_do);
+      data = (bfd_byte *) bfd_alloc (abfd, bytes_to_do);
       if (data == NULL)
 	return FALSE;
       memcpy ((void *) data, location, (size_t) bytes_to_do);
@@ -283,7 +283,7 @@ verilog_mkobject (bfd *abfd)
 
   verilog_init ();
 
-  tdata = bfd_alloc (abfd, sizeof (tdata_type));
+  tdata = (tdata_type *) bfd_alloc (abfd, sizeof (tdata_type));
   if (tdata == NULL)
     return FALSE;
 

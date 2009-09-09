@@ -90,7 +90,8 @@ make_a_section_from_file (bfd *abfd,
              strindex does not run us past the end, but right now we
              don't know the length of the string table.  */
 	  strings += strindex;
-	  name = bfd_alloc (abfd, (bfd_size_type) strlen (strings) + 1);
+	  name = (char *) bfd_alloc (abfd,
+                                     (bfd_size_type) strlen (strings) + 1);
 	  if (name == NULL)
 	    return FALSE;
 	  strcpy (name, strings);
@@ -100,7 +101,8 @@ make_a_section_from_file (bfd *abfd,
   if (name == NULL)
     {
       /* Assorted wastage to null-terminate the name, thanks AT&T! */
-      name = bfd_alloc (abfd, (bfd_size_type) sizeof (hdr->s_name) + 1);
+      name = (char *) bfd_alloc (abfd,
+                                 (bfd_size_type) sizeof (hdr->s_name) + 1);
       if (name == NULL)
 	return FALSE;
       strncpy (name, (char *) &hdr->s_name[0], sizeof (hdr->s_name));
@@ -195,7 +197,7 @@ coff_real_object_p (bfd *abfd,
 
   scnhsz = bfd_coff_scnhsz (abfd);
   readsize = (bfd_size_type) nscns * scnhsz;
-  external_sections = bfd_alloc (abfd, readsize);
+  external_sections = (char *) bfd_alloc (abfd, readsize);
   if (!external_sections)
     goto fail;
 
@@ -437,7 +439,7 @@ _bfd_coff_read_internal_relocs (bfd *abfd,
   amt = sec->reloc_count * relsz;
   if (external_relocs == NULL)
     {
-      free_external = bfd_malloc (amt);
+      free_external = (bfd_byte *) bfd_malloc (amt);
       if (free_external == NULL)
 	goto error_return;
       external_relocs = free_external;
@@ -451,7 +453,7 @@ _bfd_coff_read_internal_relocs (bfd *abfd,
     {
       amt = sec->reloc_count;
       amt *= sizeof (struct internal_reloc);
-      free_internal = bfd_malloc (amt);
+      free_internal = (struct internal_reloc *) bfd_malloc (amt);
       if (free_internal == NULL)
 	goto error_return;
       internal_relocs = free_internal;
@@ -651,7 +653,7 @@ coff_renumber_symbols (bfd *bfd_ptr, int *first_undef)
     bfd_size_type amt;
 
     amt = sizeof (asymbol *) * ((bfd_size_type) symbol_count + 1);
-    newsyms = bfd_alloc (bfd_ptr, amt);
+    newsyms = (asymbol **) bfd_alloc (bfd_ptr, amt);
     if (!newsyms)
       return FALSE;
     bfd_ptr->outsymbols = newsyms;
@@ -912,7 +914,7 @@ coff_write_symbol (bfd *abfd,
 {
   unsigned int numaux = native->u.syment.n_numaux;
   int type = native->u.syment.n_type;
-  int n_sclass = native->u.syment.n_sclass;
+  int n_sclass = (int) native->u.syment.n_sclass;
   void * buf;
   bfd_size_type symesz;
 
@@ -1448,7 +1450,7 @@ build_debug_section (bfd *abfd)
     }
 
   sec_size = sect->size;
-  debug_section = bfd_alloc (abfd, sec_size);
+  debug_section = (char *) bfd_alloc (abfd, sec_size);
   if (debug_section == NULL)
     return NULL;
 
@@ -1478,7 +1480,7 @@ copy_name (bfd *abfd, char *name, size_t maxlen)
     if (name[len] == '\0')
       break;
 
-  if ((newname = bfd_alloc (abfd, (bfd_size_type) len + 1)) == NULL)
+  if ((newname = (char *) bfd_alloc (abfd, (bfd_size_type) len + 1)) == NULL)
     return NULL;
 
   strncpy (newname, name, len);
@@ -1573,7 +1575,7 @@ _bfd_coff_read_string_table (bfd *abfd)
       return NULL;
     }
 
-  strings = bfd_malloc (strsize);
+  strings = (char *) bfd_malloc (strsize);
   if (strings == NULL)
     return NULL;
 
@@ -1632,7 +1634,7 @@ coff_get_normalized_symtab (bfd *abfd)
     return obj_raw_syments (abfd);
 
   size = obj_raw_syment_count (abfd) * sizeof (combined_entry_type);
-  internal = bfd_zalloc (abfd, size);
+  internal = (combined_entry_type *) bfd_zalloc (abfd, size);
   if (internal == NULL && size != 0)
     return NULL;
   internal_end = internal + obj_raw_syment_count (abfd);
@@ -1738,7 +1740,7 @@ coff_get_normalized_symtab (bfd *abfd)
 		if (internal_ptr->u.syment._n._n_name[i] == '\0')
 		  break;
 
-	      newstring = bfd_zalloc (abfd, (bfd_size_type) (i + 1));
+	      newstring = (char *) bfd_zalloc (abfd, (bfd_size_type) (i + 1));
 	      if (newstring == NULL)
 		return NULL;
 	      strncpy (newstring, internal_ptr->u.syment._n._n_name, i);
@@ -2338,7 +2340,7 @@ bfd_coff_set_symbol_class (bfd *         abfd,
       combined_entry_type * native;
       bfd_size_type amt = sizeof (* native);
 
-      native = bfd_zalloc (abfd, amt);
+      native = (combined_entry_type *) bfd_zalloc (abfd, amt);
       if (native == NULL)
 	return FALSE;
 

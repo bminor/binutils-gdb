@@ -52,7 +52,7 @@ _bfd_new_bfd (void)
 {
   bfd *nbfd;
 
-  nbfd = bfd_zmalloc (sizeof (bfd));
+  nbfd = (bfd *) bfd_zmalloc (sizeof (bfd));
   if (nbfd == NULL)
     return NULL;
 
@@ -342,7 +342,7 @@ DESCRIPTION
 bfd *
 bfd_openstreamr (const char *filename, const char *target, void *streamarg)
 {
-  FILE *stream = streamarg;
+  FILE *stream = (FILE *) streamarg;
   bfd *nbfd;
   const bfd_target *target_vec;
 
@@ -438,14 +438,14 @@ struct opncls
 static file_ptr
 opncls_btell (struct bfd *abfd)
 {
-  struct opncls *vec = abfd->iostream;
+  struct opncls *vec = (struct opncls *) abfd->iostream;
   return vec->where;
 }
 
 static int
 opncls_bseek (struct bfd *abfd, file_ptr offset, int whence)
 {
-  struct opncls *vec = abfd->iostream;
+  struct opncls *vec = (struct opncls *) abfd->iostream;
   switch (whence)
     {
     case SEEK_SET: vec->where = offset; break;
@@ -458,7 +458,7 @@ opncls_bseek (struct bfd *abfd, file_ptr offset, int whence)
 static file_ptr
 opncls_bread (struct bfd *abfd, void *buf, file_ptr nbytes)
 {
-  struct opncls *vec = abfd->iostream;
+  struct opncls *vec = (struct opncls *) abfd->iostream;
   file_ptr nread = (vec->pread) (abfd, vec->stream, buf, nbytes, vec->where);
   if (nread < 0)
     return nread;
@@ -477,7 +477,7 @@ opncls_bwrite (struct bfd *abfd ATTRIBUTE_UNUSED,
 static int
 opncls_bclose (struct bfd *abfd)
 {
-  struct opncls *vec = abfd->iostream;
+  struct opncls *vec = (struct opncls *) abfd->iostream;
   /* Since the VEC's memory is bound to the bfd deleting the bfd will
      free it.  */
   int status = 0;
@@ -496,7 +496,7 @@ opncls_bflush (struct bfd *abfd ATTRIBUTE_UNUSED)
 static int
 opncls_bstat (struct bfd *abfd, struct stat *sb)
 {
-  struct opncls *vec = abfd->iostream;
+  struct opncls *vec = (struct opncls *) abfd->iostream;
 
   memset (sb, 0, sizeof (*sb));
   if (vec->stat == NULL)
@@ -564,7 +564,7 @@ bfd_openr_iovec (const char *filename, const char *target,
       return NULL;
     }
 
-  vec = bfd_zalloc (nbfd, sizeof (struct opncls));
+  vec = (struct opncls *) bfd_zalloc (nbfd, sizeof (struct opncls));
   vec->stream = stream;
   vec->pread = pread;
   vec->close = close;
@@ -708,7 +708,7 @@ bfd_close (bfd *abfd)
       /* FIXME: cagney/2004-02-15: Need to implement a BFD_IN_MEMORY io
 	 vector.
 	 Until that's done, at least don't leak memory.  */
-      struct bfd_in_memory *bim = abfd->iostream;
+      struct bfd_in_memory *bim = (struct bfd_in_memory *) abfd->iostream;
       free (bim->buffer);
       free (bim);
       ret = TRUE;
@@ -819,7 +819,7 @@ bfd_make_writable (bfd *abfd)
       return FALSE;
     }
 
-  bim = bfd_malloc (sizeof (struct bfd_in_memory));
+  bim = (struct bfd_in_memory *) bfd_malloc (sizeof (struct bfd_in_memory));
   if (bim == NULL)
     return FALSE;	/* bfd_error already set.  */
   abfd->iostream = bim;
@@ -917,7 +917,7 @@ bfd_alloc (bfd *abfd, bfd_size_type size)
       return NULL;
     }
 
-  ret = objalloc_alloc (abfd->memory, (unsigned long) size);
+  ret = objalloc_alloc ((struct objalloc *) abfd->memory, (unsigned long) size);
   if (ret == NULL)
     bfd_set_error (bfd_error_no_memory);
   return ret;
@@ -956,7 +956,7 @@ bfd_alloc2 (bfd *abfd, bfd_size_type nmemb, bfd_size_type size)
       return NULL;
     }
 
-  ret = objalloc_alloc (abfd->memory, (unsigned long) size);
+  ret = objalloc_alloc ((struct objalloc *) abfd->memory, (unsigned long) size);
   if (ret == NULL)
     bfd_set_error (bfd_error_no_memory);
   return ret;
@@ -1266,7 +1266,7 @@ find_separate_debug_file (bfd *abfd, const char *debug_file_directory)
     if (IS_DIR_SEPARATOR (abfd->filename[dirlen - 1]))
       break;
 
-  dir = bfd_malloc (dirlen + 1);
+  dir = (char *) bfd_malloc (dirlen + 1);
   if (dir == NULL)
     {
       free (basename);
@@ -1283,11 +1283,12 @@ find_separate_debug_file (bfd *abfd, const char *debug_file_directory)
       break;
   canon_dir[canon_dirlen] = '\0';
 
-  debugfile = bfd_malloc (strlen (debug_file_directory) + 1
-			  + (canon_dirlen > dirlen ? canon_dirlen : dirlen)
-			  + strlen (".debug/")
-			  + strlen (basename)
-			  + 1);
+  debugfile = (char *)
+      bfd_malloc (strlen (debug_file_directory) + 1
+                  + (canon_dirlen > dirlen ? canon_dirlen : dirlen)
+                  + strlen (".debug/")
+                  + strlen (basename)
+                  + 1);
   if (debugfile == NULL)
     {
       free (basename);
@@ -1507,7 +1508,7 @@ bfd_fill_in_gnu_debuglink_section (bfd *abfd,
   debuglink_size &= ~3;
   debuglink_size += 4;
 
-  contents = bfd_malloc (debuglink_size);
+  contents = (char *) bfd_malloc (debuglink_size);
   if (contents == NULL)
     {
       /* XXX Should we delete the section from the bfd ?  */

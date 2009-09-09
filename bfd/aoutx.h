@@ -464,7 +464,7 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
   const bfd_target *result;
   bfd_size_type amt = sizeof (* rawptr);
 
-  rawptr = bfd_zalloc (abfd, amt);
+  rawptr = (struct aout_data_struct *) bfd_zalloc (abfd, amt);
   if (rawptr == NULL)
     return NULL;
 
@@ -679,7 +679,7 @@ NAME (aout, mkobject) (bfd *abfd)
 
   bfd_set_error (bfd_error_system_call);
 
-  rawptr = bfd_zalloc (abfd, amt);
+  rawptr = (struct aout_data_struct *) bfd_zalloc (abfd, amt);
   if (rawptr == NULL)
     return FALSE;
 
@@ -1309,7 +1309,7 @@ aout_get_external_symbols (bfd *abfd)
       /* We allocate using malloc to make the values easy to free
 	 later on.  If we put them on the objalloc it might not be
 	 possible to free them.  */
-      syms = bfd_malloc (count * EXTERNAL_NLIST_SIZE);
+      syms = (struct external_nlist *) bfd_malloc (count * EXTERNAL_NLIST_SIZE);
       if (syms == NULL)
 	return FALSE;
 
@@ -1349,7 +1349,7 @@ aout_get_external_symbols (bfd *abfd)
 	return FALSE;
       strings = (char *) obj_aout_string_window (abfd).data;
 #else
-      strings = bfd_malloc (stringsize + 1);
+      strings = (char *) bfd_malloc (stringsize + 1);
       if (strings == NULL)
 	return FALSE;
 
@@ -1750,7 +1750,7 @@ NAME (aout, slurp_symbol_table) (bfd *abfd)
     return TRUE;		/* Nothing to do.  */
 
   cached_size *= sizeof (aout_symbol_type);
-  cached = bfd_zmalloc (cached_size);
+  cached = (aout_symbol_type *) bfd_zmalloc (cached_size);
   if (cached == NULL)
     return FALSE;
 
@@ -2311,7 +2311,7 @@ NAME (aout, slurp_reloc_table) (bfd *abfd, sec_ptr asect, asymbol **symbols)
     return TRUE;		/* Nothing to be done.  */
 
   amt = count * sizeof (arelent);
-  reloc_cache = bfd_zmalloc (amt);
+  reloc_cache = (arelent *) bfd_zmalloc (amt);
   if (reloc_cache == NULL)
     return FALSE;
 
@@ -2372,7 +2372,7 @@ NAME (aout, squirt_out_relocs) (bfd *abfd, asection *section)
 
   each_size = obj_reloc_entry_size (abfd);
   natsize = (bfd_size_type) each_size * count;
-  native = bfd_zalloc (abfd, natsize);
+  native = (unsigned char *) bfd_zalloc (abfd, natsize);
   if (!native)
     return FALSE;
 
@@ -2786,7 +2786,7 @@ NAME (aout, find_nearest_line) (bfd *abfd,
     adata (abfd).line_buf = buf = NULL;
   else
     {
-      buf = bfd_malloc (filelen + funclen + 3);
+      buf = (char *) bfd_malloc (filelen + funclen + 3);
       adata (abfd).line_buf = buf;
       if (buf == NULL)
 	return FALSE;
@@ -2880,7 +2880,8 @@ NAME (aout, link_hash_newfunc) (struct bfd_hash_entry *entry,
   /* Allocate the structure if it has not already been allocated by a
      subclass.  */
   if (ret == NULL)
-    ret = bfd_hash_allocate (table, sizeof (* ret));
+    ret = (struct aout_link_hash_entry *) bfd_hash_allocate (table,
+                                                             sizeof (* ret));
   if (ret == NULL)
     return NULL;
 
@@ -2919,7 +2920,7 @@ NAME (aout, link_hash_table_create) (bfd *abfd)
   struct aout_link_hash_table *ret;
   bfd_size_type amt = sizeof (* ret);
 
-  ret = bfd_malloc (amt);
+  ret = (struct aout_link_hash_table *) bfd_malloc (amt);
   if (ret == NULL)
     return NULL;
 
@@ -2974,7 +2975,7 @@ aout_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
      table, but keeping the list is more efficient.  Perhaps this
      should be conditional on info->keep_memory.  */
   amt = sym_count * sizeof (struct aout_link_hash_entry *);
-  sym_hash = bfd_alloc (abfd, amt);
+  sym_hash = (struct aout_link_hash_entry **) bfd_alloc (abfd, amt);
   if (sym_hash == NULL)
     return FALSE;
   obj_aout_sym_hashes (abfd) = sym_hash;
@@ -3338,8 +3339,9 @@ aout_link_check_ar_symbols (bfd *abfd,
 		  /* Turn the current link symbol into a common
 		     symbol.  It is already on the undefs list.  */
 		  h->type = bfd_link_hash_common;
-		  h->u.c.p = bfd_hash_allocate (&info->hash->table,
-						sizeof (struct bfd_link_hash_common_entry));
+		  h->u.c.p = (struct bfd_link_hash_common_entry *)
+                      bfd_hash_allocate (&info->hash->table,
+                                         sizeof (struct bfd_link_hash_common_entry));
 		  if (h->u.c.p == NULL)
 		    return FALSE;
 
@@ -3509,7 +3511,8 @@ aout_link_includes_newfunc (struct bfd_hash_entry *entry,
   /* Allocate the structure if it has not already been allocated by a
      subclass.  */
   if (ret == NULL)
-    ret = bfd_hash_allocate (table, sizeof (* ret));
+    ret = (struct aout_link_includes_entry *)
+        bfd_hash_allocate (table, sizeof (* ret));
   if (ret == NULL)
     return NULL;
 
@@ -3786,7 +3789,7 @@ aout_link_reloc_link_order (struct aout_final_link_info *finfo,
 	  bfd_boolean ok;
 
 	  size = bfd_get_reloc_size (howto);
-	  buf = bfd_zmalloc (size);
+	  buf = (bfd_byte *) bfd_zmalloc (size);
 	  if (buf == NULL)
 	    return FALSE;
 	  r = MY_relocate_contents (howto, finfo->output_bfd,
@@ -5136,7 +5139,8 @@ aout_link_write_symbols (struct aout_final_link_info *finfo, bfd *input_bfd)
 		{
 		  /* This is the first time we have seen this header
                      file with this set of stabs strings.  */
-		  t = bfd_hash_allocate (&finfo->includes.root,
+		  t = (struct aout_link_includes_totals *)
+                      bfd_hash_allocate (&finfo->includes.root,
 					 sizeof *t);
 		  if (t == NULL)
 		    return FALSE;
@@ -5427,11 +5431,11 @@ NAME (aout, final_link) (bfd *abfd,
     goto error_return;
 
   /* Allocate buffers to hold section contents and relocs.  */
-  aout_info.contents = bfd_malloc (max_contents_size);
+  aout_info.contents = (bfd_byte *) bfd_malloc (max_contents_size);
   aout_info.relocs = bfd_malloc (max_relocs_size);
-  aout_info.symbol_map = bfd_malloc (max_sym_count * sizeof (int *));
-  aout_info.output_syms = bfd_malloc ((max_sym_count + 1)
-				      * sizeof (struct external_nlist));
+  aout_info.symbol_map = (int *) bfd_malloc (max_sym_count * sizeof (int *));
+  aout_info.output_syms = (struct external_nlist *)
+      bfd_malloc ((max_sym_count + 1) * sizeof (struct external_nlist));
   if ((aout_info.contents == NULL && max_contents_size != 0)
       || (aout_info.relocs == NULL && max_relocs_size != 0)
       || (aout_info.symbol_map == NULL && max_sym_count != 0)

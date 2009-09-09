@@ -187,7 +187,7 @@ bfd_bread (void *ptr, bfd_size_type size, bfd *abfd)
       struct bfd_in_memory *bim;
       bfd_size_type get;
 
-      bim = abfd->iostream;
+      bim = (struct bfd_in_memory *) abfd->iostream;
       get = size;
       if (abfd->where + get > bim->size)
 	{
@@ -219,7 +219,7 @@ bfd_bwrite (const void *ptr, bfd_size_type size, bfd *abfd)
 
   if ((abfd->flags & BFD_IN_MEMORY) != 0)
     {
-      struct bfd_in_memory *bim = abfd->iostream;
+      struct bfd_in_memory *bim = (struct bfd_in_memory *) abfd->iostream;
 
       size = (size_t) size;
       if (abfd->where + size > bim->size)
@@ -232,7 +232,8 @@ bfd_bwrite (const void *ptr, bfd_size_type size, bfd *abfd)
 	  newsize = (bim->size + 127) & ~(bfd_size_type) 127;
 	  if (newsize > oldsize)
 	    {
-	      bim->buffer = bfd_realloc_or_free (bim->buffer, newsize);
+	      bim->buffer = (bfd_byte *) bfd_realloc_or_free (bim->buffer,
+                                                              newsize);
 	      if (bim->buffer == NULL)
 		{
 		  bim->size = 0;
@@ -338,7 +339,7 @@ bfd_seek (bfd *abfd, file_ptr position, int direction)
     {
       struct bfd_in_memory *bim;
 
-      bim = abfd->iostream;
+      bim = (struct bfd_in_memory *) abfd->iostream;
 
       if (direction == SEEK_SET)
 	abfd->where = position;
@@ -358,7 +359,8 @@ bfd_seek (bfd *abfd, file_ptr position, int direction)
 	      newsize = (bim->size + 127) & ~(bfd_size_type) 127;
 	      if (newsize > oldsize)
 	        {
-		  bim->buffer = bfd_realloc_or_free (bim->buffer, newsize);
+		  bim->buffer = (bfd_byte *) bfd_realloc_or_free (bim->buffer,
+                                                                  newsize);
 		  if (bim->buffer == NULL)
 		    {
 		      bim->size = 0;

@@ -704,8 +704,8 @@ elf_i386_link_hash_newfunc (struct bfd_hash_entry *entry,
      subclass.  */
   if (entry == NULL)
     {
-      entry = bfd_hash_allocate (table,
-				 sizeof (struct elf_i386_link_hash_entry));
+      entry = (struct bfd_hash_entry *)
+          bfd_hash_allocate (table, sizeof (struct elf_i386_link_hash_entry));
       if (entry == NULL)
 	return entry;
     }
@@ -802,7 +802,7 @@ elf_i386_link_hash_table_create (bfd *abfd)
   struct elf_i386_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf_i386_link_hash_table);
 
-  ret = bfd_malloc (amt);
+  ret = (struct elf_i386_link_hash_table *) bfd_malloc (amt);
   if (ret == NULL)
     return NULL;
 
@@ -1511,7 +1511,8 @@ elf_i386_check_relocs (bfd *abfd,
 		    size = symtab_hdr->sh_info;
 		    size *= (sizeof (bfd_signed_vma)
 			     + sizeof (bfd_vma) + sizeof(char));
-		    local_got_refcounts = bfd_zalloc (abfd, size);
+		    local_got_refcounts = (bfd_signed_vma *)
+                        bfd_zalloc (abfd, size);
 		    if (local_got_refcounts == NULL)
 		      return FALSE;
 		    elf_local_got_refcounts (abfd) = local_got_refcounts;
@@ -1687,7 +1688,8 @@ elf_i386_check_relocs (bfd *abfd,
 	      if (p == NULL || p->sec != sec)
 		{
 		  bfd_size_type amt = sizeof *p;
-		  p = bfd_alloc (htab->elf.dynobj, amt);
+		  p = (struct elf_dyn_relocs *) bfd_alloc (htab->elf.dynobj,
+                                                           amt);
 		  if (p == NULL)
 		    return FALSE;
 		  p->next = *head;
@@ -2559,7 +2561,7 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 section's contents are written out.  This should not happen,
 	 but this way if it does, we get a R_386_NONE reloc instead
 	 of garbage.  */
-      s->contents = bfd_zalloc (dynobj, s->size);
+      s->contents = (unsigned char *) bfd_zalloc (dynobj, s->size);
       if (s->contents == NULL)
 	return FALSE;
     }
