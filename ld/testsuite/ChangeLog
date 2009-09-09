@@ -1,3 +1,33 @@
+2009-09-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elf/sec64k.exp: For frv-linux use "aw" sections.
+	* ld-elf/seg.d: Cater for GNU_STACK segment.
+	* ld-elf/symbol1ref.s: Use data section.
+	* ld-elf/symbol2ref.s: Likewise.
+	* ld-scripts/empty-address-1.d: Don't run on frv-linux.
+	* ld-scripts/empty-address-2a.d: Likewise.
+	* ld-scripts/empty-address-2b.d: Likewise.
+	* ld-scripts/empty-aligned.d: Likewise.
+	* ld-elf/extract-symbol-1sym.d: Tolerate extra target supplied syms.
+	* ld-scripts/sort_b_a-1.d: Likewise.
+	* ld-scripts/sort_b_a.d: Likewise.
+	* ld-scripts/sort_b_a_a-1.d: Likewise.
+	* ld-scripts/sort_b_a_a-2.d: Likewise.
+	* ld-scripts/sort_b_a_a-3.d: Likewise.
+	* ld-scripts/sort_b_a_n-1.d: Likewise.
+	* ld-scripts/sort_b_a_n-2.d: Likewise.
+	* ld-scripts/sort_b_a_n-3.d: Likewise.
+	* ld-scripts/sort_b_n-1.d: Likewise.
+	* ld-scripts/sort_b_n.d: Likewise.
+	* ld-scripts/sort_b_n_a-1.d: Likewise.
+	* ld-scripts/sort_b_n_a-2.d: Likewise.
+	* ld-scripts/sort_b_n_a-3.d: Likewise.
+	* ld-scripts/sort_b_n_n-1.d: Likewise.
+	* ld-scripts/sort_b_n_n-2.d: Likewise.
+	* ld-scripts/sort_b_n_n-3.d: Likewise.
+	* ld-scripts/sort_no-1.d: Likewise.
+	* ld-scripts/sort_no-2.d: Likewise.
+
 2009-09-08  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 
         * ld-elf/merge.d: xfail cr16-*-*.
