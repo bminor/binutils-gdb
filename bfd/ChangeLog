@@ -1,3 +1,7 @@
+2009-09-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-xtensa.c (elf_xtensa_relax_section): Delete -r check.
+
 2009-09-07  Tristan Gingold  <gingold@adacore.com>
 
 	* po/bfd.pot: Regenerate
