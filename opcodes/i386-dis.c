@@ -7632,13 +7632,13 @@ static const struct dis386 vex_len_table[][2] = {
     { "(bad)",		{ XX } },
   },
 
-  /* VEX_LEN_AE_R_2_M0 */
+  /* VEX_LEN_AE_R_2_M_0 */
   {
     { "vldmxcsr",	{ Md } },
     { "(bad)",		{ XX } },
   },
 
-  /* VEX_LEN_AE_R_3_M0 */
+  /* VEX_LEN_AE_R_3_M_0 */
   {
     { "vstmxcsr",	{ Md } },
     { "(bad)",		{ XX } },
