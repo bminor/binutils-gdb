@@ -2195,7 +2195,7 @@ static int
 bfd_mach_o_scan_read_str (bfd *abfd, bfd_mach_o_load_command *command)
 {
   bfd_mach_o_str_command *cmd = &command->command.str;
-  char buf[8];
+  char buf[4];
   unsigned long off;
 
   if (bfd_seek (abfd, command->offset + 8, SEEK_SET) != 0
@@ -2211,6 +2211,29 @@ bfd_mach_o_scan_read_str (bfd *abfd, bfd_mach_o_load_command *command)
   if (bfd_seek (abfd, cmd->stroff, SEEK_SET) != 0
       || bfd_bread ((PTR) cmd->str, cmd->str_len, abfd) != cmd->str_len)
     return -1;
+  return 0;
+}
+
+static int
+bfd_mach_o_scan_read_dyld_info (bfd *abfd, bfd_mach_o_load_command *command)
+{
+  bfd_mach_o_dyld_info_command *cmd = &command->command.dyld_info;
+  char buf[40];
+
+  if (bfd_seek (abfd, command->offset + 8, SEEK_SET) != 0
+      || bfd_bread ((PTR) buf, sizeof (buf), abfd) != sizeof (buf))
+    return -1;
+
+  cmd->rebase_off = bfd_get_32 (abfd, buf + 0);
+  cmd->rebase_size = bfd_get_32 (abfd, buf + 4);
+  cmd->bind_off = bfd_get_32 (abfd, buf + 8);
+  cmd->bind_size = bfd_get_32 (abfd, buf + 12);
+  cmd->weak_bind_off = bfd_get_32 (abfd, buf + 16);
+  cmd->weak_bind_size = bfd_get_32 (abfd, buf + 20);
+  cmd->lazy_bind_off = bfd_get_32 (abfd, buf + 24);
+  cmd->lazy_bind_size = bfd_get_32 (abfd, buf + 28);
+  cmd->export_off = bfd_get_32 (abfd, buf + 32);
+  cmd->export_size = bfd_get_32 (abfd, buf + 36);
   return 0;
 }
 
@@ -2382,6 +2405,10 @@ bfd_mach_o_scan_read_command (bfd *abfd, bfd_mach_o_load_command *command)
     case BFD_MACH_O_LC_CODE_SIGNATURE:
     case BFD_MACH_O_LC_SEGMENT_SPLIT_INFO:
       if (bfd_mach_o_scan_read_linkedit (abfd, command) != 0)
+	return -1;
+      break;
+    case BFD_MACH_O_LC_DYLD_INFO:
+      if (bfd_mach_o_scan_read_dyld_info (abfd, command) != 0)
 	return -1;
       break;
     default:
@@ -3183,6 +3210,7 @@ static bfd_mach_o_xlat_name bfd_mach_o_load_command_name[] =
   { "reexport_dylib", BFD_MACH_O_LC_REEXPORT_DYLIB},
   { "lazy_load_dylib", BFD_MACH_O_LC_LAZY_LOAD_DYLIB},
   { "encryption_info", BFD_MACH_O_LC_ENCRYPTION_INFO},
+  { "dyld_info", BFD_MACH_O_LC_DYLD_INFO},
   { NULL, 0}
 };
 
@@ -3538,6 +3566,24 @@ bfd_mach_o_print_dysymtab (bfd *abfd ATTRIBUTE_UNUSED,
 
 }
 
+static void
+bfd_mach_o_print_dyld_info (bfd *abfd ATTRIBUTE_UNUSED,
+                            bfd_mach_o_load_command *cmd, FILE *file)
+{
+  bfd_mach_o_dyld_info_command *info = &cmd->command.dyld_info;
+
+  fprintf (file, "       rebase: off: 0x%08x  size: %-8u\n",
+           info->rebase_off, info->rebase_size);
+  fprintf (file, "         bind: off: 0x%08x  size: %-8u\n",
+           info->bind_off, info->bind_size);
+  fprintf (file, "    weak bind: off: 0x%08x  size: %-8u\n",
+           info->weak_bind_off, info->weak_bind_size);
+  fprintf (file, "    lazy bind: off: 0x%08x  size: %-8u\n",
+           info->lazy_bind_off, info->lazy_bind_size);
+  fprintf (file, "       export: off: 0x%08x  size: %-8u\n",
+           info->export_off, info->export_size);
+}
+
 bfd_boolean
 bfd_mach_o_bfd_print_private_bfd_data (bfd *abfd, PTR ptr)
 {
@@ -3660,6 +3706,10 @@ bfd_mach_o_bfd_print_private_bfd_data (bfd *abfd, PTR ptr)
               }
             break;
           }
+	case BFD_MACH_O_LC_DYLD_INFO:
+          fprintf (file, "\n");
+          bfd_mach_o_print_dyld_info (abfd, cmd, file);
+          break;
 	default:
 	  fprintf (file, "\n");
 	  break;

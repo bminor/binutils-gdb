@@ -1,3 +1,18 @@
+2009-09-09  Tristan Gingold  <gingold@adacore.com>
+
+	Handle DYLD_INFO introduced by Darwin10.
+	* mach-o.h (bfd_mach_o_load_command_type): Add
+	BFD_MACH_O_LC_DYLD_INFO.
+	(bfd_mach_o_dyld_info_command): New type.
+	(bfd_mach_o_load_command): Add dyld_info field.
+	* mach-o.c (bfd_mach_o_scan_read_str): Reduce size of buf.
+	(bfd_mach_o_scan_read_dyld_info): New function.
+	(bfd_mach_o_scan_read_command): Handle BFD_MACH_O_LC_DYLD_INFO.
+	(bfd_mach_o_bfd_print_private_bfd_data): Ditto.
+	(bfd_mach_o_load_command_name): AddB FD_MACH_O_LC_DYLD_INFO.
+	(bfd_mach_o_print_dyld_info): New function.
+
+
 2009-09-09  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 
 	* elf32-cr16.c (elf32_cr16_relocate_section): Add code to discard the
