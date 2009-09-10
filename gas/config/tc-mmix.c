@@ -1673,7 +1673,10 @@ md_assemble (char *str)
       break;
 
     case mmix_operands_xyz_opt:
-      /* SWYM, TRIP, TRAP: zero, one, two or three operands.  */
+      /* SWYM, TRIP, TRAP: zero, one, two or three operands.  It's
+	 unspecified whether operands are registers or constants, but
+	 when we find register syntax, we require operands to be literal and
+	 within 0..255.  */
       if (n_operands == 0 && ! mmix_gnu_syntax)
 	/* Zeros are in place - nothing needs to be done for zero
 	   operands.  We don't allow this in GNU syntax mode, because it
@@ -1684,7 +1687,7 @@ md_assemble (char *str)
 	{
 	  if (exp[0].X_op == O_constant)
 	    {
-	      if (exp[0].X_add_number > 255*255*255
+	      if (exp[0].X_add_number > 255*256*256
 		  || exp[0].X_add_number < 0)
 		{
 		  as_bad (_("invalid operands to opcode %s: `%s'"),
@@ -1726,7 +1729,7 @@ md_assemble (char *str)
 
 	  if (exp[1].X_op == O_constant)
 	    {
-	      if (exp[1].X_add_number > 255*255
+	      if (exp[1].X_add_number > 255*256
 		  || exp[1].X_add_number < 0)
 		{
 		  as_bad (_("invalid operands to opcode %s: `%s'"),
@@ -1798,12 +1801,15 @@ md_assemble (char *str)
 	    fix_new_exp (opc_fragP, opcodep - opc_fragP->fr_literal + 3,
 			 1, exp + 2, 0, BFD_RELOC_8);
 	}
-      else if (n_operands <= 3
-	       && (strcmp (instruction->name, "trip") == 0
-		   || strcmp (instruction->name, "trap") == 0))
+      else
 	{
-	  /* The meaning of operands to TRIP and TRAP are not defined, so
-	     we add combinations not handled above here as we find them.  */
+	  /* We can't get here for other cases.  */
+	  gas_assert (n_operands <= 3);
+
+	  /* The meaning of operands to TRIP and TRAP is not defined (and
+	     SWYM operands aren't enforced in mmixal, so let's avoid
+	     that).  We add combinations not handled above here as we find
+	     them and as they're reported.  */
 	  if (n_operands == 3)
 	    {
 	      /* Don't require non-register operands.  Always generate
@@ -1811,48 +1817,47 @@ md_assemble (char *str)
 		 maintenance problems.  TRIP is supposed to be a rare
 		 instruction, so the overhead should not matter.  We
 		 aren't allowed to fix_new_exp for an expression which is
-		 an  O_register at this point, however.  */
+		 an O_register at this point, however.
+
+		 Don't use BFD_RELOC_MMIX_REG_OR_BYTE as that modifies
+		 the insn for a register in the Z field and we want
+		 consistency.  */
 	      if (exp[0].X_op == O_register)
 		opcodep[1] = exp[0].X_add_number;
 	      else
 		fix_new_exp (opc_fragP, opcodep - opc_fragP->fr_literal + 1,
-			     1, exp, 0, BFD_RELOC_MMIX_REG_OR_BYTE);
+			     1, exp, 0, BFD_RELOC_8);
 	      if (exp[1].X_op == O_register)
 		opcodep[2] = exp[1].X_add_number;
 	      else
 		fix_new_exp (opc_fragP, opcodep - opc_fragP->fr_literal + 2,
-			     1, exp + 1, 0, BFD_RELOC_MMIX_REG_OR_BYTE);
+			     1, exp + 1, 0, BFD_RELOC_8);
 	      if (exp[2].X_op == O_register)
 		opcodep[3] = exp[2].X_add_number;
 	      else
 		fix_new_exp (opc_fragP, opcodep - opc_fragP->fr_literal + 3,
-			     1, exp + 2, 0, BFD_RELOC_MMIX_REG_OR_BYTE);
+			     1, exp + 2, 0, BFD_RELOC_8);
 	    }
 	  else if (n_operands == 2)
 	    {
 	      if (exp[0].X_op == O_register)
-		opcodep[2] = exp[0].X_add_number;
+		opcodep[1] = exp[0].X_add_number;
 	      else
-		fix_new_exp (opc_fragP, opcodep - opc_fragP->fr_literal + 2,
-			     1, exp, 0, BFD_RELOC_MMIX_REG_OR_BYTE);
+		fix_new_exp (opc_fragP, opcodep - opc_fragP->fr_literal + 1,
+			     1, exp, 0, BFD_RELOC_8);
 	      if (exp[1].X_op == O_register)
 		opcodep[3] = exp[1].X_add_number;
 	      else
-		fix_new_exp (opc_fragP, opcodep - opc_fragP->fr_literal + 3,
-			     1, exp + 1, 0, BFD_RELOC_MMIX_REG_OR_BYTE);
+		fix_new_exp (opc_fragP, opcodep - opc_fragP->fr_literal + 2,
+			     2, exp + 1, 0, BFD_RELOC_16);
 	    }
 	  else
 	    {
-	      as_bad (_("unsupported operands to %s: `%s'"),
-		      instruction->name, operands);
-	      return;
+	      /* We can't get here for other cases.  */
+	      gas_assert (n_operands == 1 && exp[0].X_op == O_register);
+
+	      opcodep[3] = exp[0].X_add_number;
 	    }
-	}
-      else
-	{
-	  as_bad (_("invalid operands to opcode %s: `%s'"),
-		  instruction->name, operands);
-	  return;
 	}
       break;
 

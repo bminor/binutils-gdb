@@ -1,3 +1,11 @@
+2009-09-11  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	PR gas/10623
+	* config/tc-mmix.c (md_assemble) <case mmix_operands_xyz_opt>:
+	Allow register operands for SWYM as for TRIP and TRAP.  Correct
+	operand handling and error checking.  Never emit
+	BFD_RELOC_MMIX_REG_OR_BYTE for operands to these insns.
+
 2009-09-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-d10v.c: Include dwarf2dbg.h.
