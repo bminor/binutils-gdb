@@ -1,5 +1,5 @@
 /* BFD support for the ARC processor
-   Copyright 1994, 1995, 1997, 2001, 2002, 2007
+   Copyright 1994, 1995, 1997, 1998, 2000, 2001, 2002, 2005, 2006, 2007, 2008, 2009
    Free Software Foundation, Inc.
    Contributed by Doug Evans (dje@cygnus.com).
 
@@ -42,15 +42,16 @@
 
 static const bfd_arch_info_type arch_info_struct[] =
 {
-  ARC ( bfd_mach_arc_5, "arc5", FALSE, &arch_info_struct[1] ),
-  ARC ( bfd_mach_arc_5, "base", FALSE, &arch_info_struct[2] ),
-  ARC ( bfd_mach_arc_6, "arc6", FALSE, &arch_info_struct[3] ),
-  ARC ( bfd_mach_arc_7, "arc7", FALSE, &arch_info_struct[4] ),
-  ARC ( bfd_mach_arc_8, "arc8", FALSE, NULL ),
+  ARC ( bfd_mach_arc_a4,     "A4",     FALSE, &arch_info_struct[1] ),
+  ARC ( bfd_mach_arc_a5,     "A5",     FALSE, &arch_info_struct[2] ),
+  ARC ( bfd_mach_arc_arc600, "ARC600", FALSE, &arch_info_struct[3] ),
+  ARC ( bfd_mach_arc_arc600, "A6",     FALSE, &arch_info_struct[4] ),
+  ARC ( bfd_mach_arc_arc700, "ARC700", FALSE, &arch_info_struct[5] ),
+  ARC ( bfd_mach_arc_arc700, "A7",     FALSE, NULL),
 };
 
 const bfd_arch_info_type bfd_arc_arch =
-  ARC ( bfd_mach_arc_6, "arc", TRUE, &arch_info_struct[0] );
+  ARC ( bfd_mach_arc_arc700, "ARC700", TRUE, &arch_info_struct[0] );
 
 /* Utility routines.  */
 

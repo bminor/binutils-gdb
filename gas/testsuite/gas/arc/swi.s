@@ -2,5 +2,5 @@
 
 main:
 	add	r0,r1,r2
-	swi
+	trap0
 	sub	r3,r4,r5

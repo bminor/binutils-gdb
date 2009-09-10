@@ -1923,10 +1923,10 @@ enum bfd_architecture
 #define bfd_mach_v850e         'E'
 #define bfd_mach_v850e1        '1'
   bfd_arch_arc,       /* ARC Cores */
-#define bfd_mach_arc_5         5
-#define bfd_mach_arc_6         6
-#define bfd_mach_arc_7         7
-#define bfd_mach_arc_8         8
+#define bfd_mach_arc_a4         0
+#define bfd_mach_arc_a5         1
+#define bfd_mach_arc_arc600     2
+#define bfd_mach_arc_arc700     3
  bfd_arch_m32c,     /* Renesas M16C/M32C.  */
 #define bfd_mach_m16c        0x75
 #define bfd_mach_m32c        0x78
@@ -3182,6 +3182,112 @@ through 7 of the instruction.  */
 stored in the instruction.  The high 24 bits are installed in bits 23
 through 0.  */
   BFD_RELOC_ARC_B26,
+
+/* ARCompact 21 bit pc-relative branch.  The lowest bit must be zero and is
+not stored in the instruction.  The remaining 20 bits are installed in 
+2 groups of 10 bits each.  The high 10 bits are installed in bits 26 
+through 17 and the remaining 10 bits in bits 15 through 6.  */
+  BFD_RELOC_ARC_S21H_PCREL,
+
+/* ARCompact 21 bit pc-relative branch. The lowest two bits must be zero and 
+are not stored in the instruction.  The remaining 19 bits are installed in
+2 groups of 9 and 10 bits each.  The high 9 bits are installed in bits 26
+through 18 and the remaining 10 bits in bits 15 through 6.  */
+  BFD_RELOC_ARC_S21W_PCREL,
+
+/* ARCompact 25 bit pc-relative branch. The lowest bit must be zero and is
+not stored in the instruction.  The remaining 24 bits are installed in 
+3 groups of 10 bits, 10 bits and 4 bits each.  The high 10 bits are
+installed in bits 26 through 17, next 10 bits in bits 15 through 6 and the 
+remaining 4 bits in bits 3 through 0.  */
+  BFD_RELOC_ARC_S25H_PCREL,
+
+/* ARCompact 25 bit pc-relative branch. The lowest two bits must be zero and
+are not stored in the instruction.  The remaining 23 bits are installed in
+3 groups of 10 bits, 9 bits and 4 bits each.  The high 9 bits are installed
+in bits 26 through 18, next 10 bits in bits 15 through 6 and the
+remaining 4 bits in bits 3 through 0.  */
+  BFD_RELOC_ARC_S25W_PCREL,
+
+/* ARCompact 13 bit pc-relative branch. The lowest 2 bits must be zero and
+are not stored in the the instruction.  The upper 11 bits are installed
+in bits 10 through 0.  */
+  BFD_RELOC_ARC_S13_PCREL,
+
+/* ARCompact Middle-endian 32 bit word relocation  */
+  BFD_RELOC_ARC_32_ME,
+
+/* ARCompact PC Relative 32 bit relocation.  */
+  BFD_RELOC_ARC_PC32 ,
+
+/* ARC 700 GOT specific relocation. This computes the distance from the current 
+pcl to the symbol's global offset table entry.  */
+  BFD_RELOC_ARC_GOTPC32,
+
+/* ARC 700 PLT specific relocation. This computes the distance from the base 
+of the PLT to the symbols PLT entry.  */
+  BFD_RELOC_ARC_PLT32 ,
+
+/* ARC 700 Copy relocation. This refers to a location in the writable segment 
+and during execution the dynamic linker copies data associated with the shared
+objects symbol to the location specified by the offset. Created for 
+dynamic linking by the linker .  */
+  BFD_RELOC_ARC_COPY,
+
+/* ARC 700 Global Data relocaton.This is to set a GOT entry to the address
+of the specified symbol . This allows one to determine the correspondence
+between symbols and GOT entries.  */
+  BFD_RELOC_ARC_GLOB_DAT,
+
+/* This gives the location of a PLT entrys GOT entry. The dynamic linker 
+modifies the GOT entry so that the PLT will transfer control to the designated
+symbols address. Created by the linker.  */
+  BFD_RELOC_ARC_JMP_SLOT,
+
+/* This gives the location of a value representing a relative address. 
+The dynamic linker adds the load address of the shared library to 
+the relative address to compute the final address.  */
+  BFD_RELOC_ARC_RELATIVE,
+
+/* This gives the difference between a symbols value and the address of the 
+Global Offset Table This causes the linker to build the GOT.  */
+  BFD_RELOC_ARC_GOTOFF,
+
+/* This gives the difference between the address of the GOT base and the 
+current PC. The symbol referenced is _GLOBAL_OFFSET_TABLE .  */
+  BFD_RELOC_ARC_GOTPC,
+
+/* ARC 700 GOT specific relocation. This computes the distance from the base
+of the GOT to the symbol's global offset table entry.  */
+  BFD_RELOC_ARC_GOT32,
+
+/* small data reloc 1  */
+  BFD_RELOC_ARC_SDA,
+
+/* small data reloc 2  */
+  BFD_RELOC_ARC_SDA32,
+
+/* small data reloc 3  */
+  BFD_RELOC_ARC_SDA_LDST,
+
+/* small data reloc 4  */
+  BFD_RELOC_ARC_SDA_LDST1,
+
+/* small data reloc 5  */
+  BFD_RELOC_ARC_SDA_LDST2,
+
+/* small data reloc 6  */
+  BFD_RELOC_ARC_SDA16_LD,
+
+/* small data reloc 7  */
+  BFD_RELOC_ARC_SDA16_LD1,
+
+/* small data reloc 8  */
+  BFD_RELOC_ARC_SDA16_LD2,
+
+/* small data reloc 9  */
+  BFD_RELOC_ARC_SDA32_ME,
+
 
 /* ADI Blackfin 16 bit immediate absolute reloc.  */
   BFD_RELOC_BFIN_16_IMM,

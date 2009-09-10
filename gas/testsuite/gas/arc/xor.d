@@ -60,9 +60,9 @@ Disassembly of section .text:
   c8:	01 00 00 00 
   cc:	0d 06 7f 78 	787f060d     xor.hi     r3,3,r3
   d0:	03 00 00 00 
-  d4:	0e 08 df 7f 	7fdf080e     xor.ls     0,4,r4
+  d4:	0e 08 ff 7f 	7fff080e     xor.ls     0,4,r4
   d8:	04 00 00 00 
-  dc:	0f fc c2 7f 	7fc2fc0f     xor.pnz    0,r5,5
+  dc:	0f fc e2 7f 	7fe2fc0f     xor.pnz    0,r5,5
   e0:	05 00 00 00 
   e4:	00 85 00 78 	78008500     xor.f      r0,r1,r2
   e8:	01 fa 00 78 	7800fa01     xor.f      r0,r1,1
@@ -77,9 +77,8 @@ Disassembly of section .text:
  10c:	00 00 00 00 
  110:	0b 05 1f 78 	781f050b     xor.lt.f   r0,0,r2
  114:	00 00 00 00 
- 118:	09 85 c0 7f 	7fc08509     xor.gt.f   0,r1,r2
- 11c:	00 00 00 00 	00000000                
- 120:	0c fd 00 78 	7800fd0c     xor.le.f   r0,r1,0x200
- 124:	00 02 00 00 
- 128:	0a 05 1f 78 	781f050a     xor.ge.f   r0,0x200,r2
- 12c:	00 02 00 00 
+ 118:	09 85 e0 7f 	7fe08509     xor.gt.f   0,r1,r2
+ 11c:	0c fd 00 78 	7800fd0c     xor.le.f   r0,r1,0x200
+ 120:	00 02 00 00 
+ 124:	0a 05 1f 78 	781f050a     xor.ge.f   r0,0x200,r2
+ 128:	00 02 00 00 

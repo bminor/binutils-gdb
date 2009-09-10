@@ -1,4 +1,4 @@
-#as: -EL -marc6
+#as: -EL -mARC600
 #objdump: -dr -EL
 
 .*: +file format elf32-.*arc
@@ -6,20 +6,10 @@
 Disassembly of section .text:
 
 00000000 <text_label>:
-   0:	40 02 1f 38 	381f0240     jl         0 <text_label>
+   0:	22 20 80 0f 00 00 00 00 	jl         0 <text_label>
 
-   4:	00 00 00 00 
-			4: R_ARC_B26	.text
-   8:	40 03 1f 38 	381f0340     jl.f       0 <text_label>
+			4: R_ARC_32_ME	.text
+   8:	e2 20 42 00             	jlnz       [r1]
+   c:	e2 20 80 0f 00 00 00 00 	jl         0 <text_label>
 
-   c:	00 00 00 00 
-			c: R_ARC_B26	.text
-  10:	02 82 00 38 	38008202     jlnz       \[r1\]
-  14:	40 02 1f 38 	381f0240     jl         0 <text_label>
-
-  18:	00 00 00 00 
-			18: R_ARC_B26	.text
-  1c:	40 03 1f 38 	381f0340     jl.f       0 <text_label>
-
-  20:	00 00 00 00 
-			20: R_ARC_B26	.text
+			10: R_ARC_32_ME	.text

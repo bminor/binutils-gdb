@@ -50,7 +50,7 @@ Disassembly of section .text:
   a0:	09 78 9e 67 	679e7809     mov.gt     lp_count,lp_count
   a4:	0a 7c 1f 60 	601f7c0a     mov.ge     r0,0
   a8:	00 00 00 00 
-  ac:	0c 7c df 67 	67df7c0c     mov.le     0,2
+  ac:	0c 7c ff 67 	67ff7c0c     mov.le     0,2
   b0:	02 00 00 00 
   b4:	0d 86 61 60 	6061860d     mov.hi     r3,r3
   b8:	0e 08 82 60 	6082080e     mov.ls     r4,r4
@@ -61,7 +61,7 @@ Disassembly of section .text:
   cc:	00 09 e2 67 	67e20900     mov.f      0,r4
   d0:	00 7d bf 60 	60bf7d00     mov.f      r5,0x200
   d4:	00 02 00 00 
-  d8:	00 7d df 67 	67df7d00     mov.f      0,0x200
+  d8:	00 7d ff 67 	67ff7d00     mov.f      0,0x200
   dc:	00 02 00 00 
   e0:	01 83 00 60 	60008301     mov.z.f    r0,r1
   e4:	02 7d 3f 60 	603f7d02     mov.nz.f   r1,0

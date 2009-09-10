@@ -1,5 +1,5 @@
 /* Disassembler structures definitions for the ARC.
-   Copyright 1994, 1995, 1997, 1998, 2000, 2001, 2007
+   Copyright 1994, 1995, 1997, 1998, 2000, 2001, 2009
    Free Software Foundation, Inc.
    Contributed by Doug Evans (dje@cygnus.com).
 
@@ -19,14 +19,25 @@
    along with this program; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
-#ifndef ARCDIS_H
-#define ARCDIS_H
+#ifndef ARC_DIS_H
+#define ARC_DIS_H
 
-enum 
+enum NullifyMode
 {
   BR_exec_when_no_jump,
   BR_exec_always,
   BR_exec_when_jump
+};
+
+enum ARC_Debugger_OperandType
+{
+    ARC_UNDEFINED,
+    ARC_LIMM,
+    ARC_SHIMM,
+    ARC_REGISTER,
+    ARCOMPACT_REGISTER /* Valid only for the 
+                          registers allowed in
+                          16 bit mode */
 };
 
 enum Flow 
@@ -54,7 +65,15 @@ struct arcDisState
   
   unsigned char* instruction;
   unsigned index;
-  const char *comm[6]; /* instr name, cond, NOP, 3 operands  */
+  const char *comm[6]; /* instr name, cond, NOP, 3 operands */
+
+  union {
+    unsigned int registerNum;
+    unsigned int shortimm;
+    unsigned int longimm;
+  } source_operand;
+  enum ARC_Debugger_OperandType sourceType;
+
   int opWidth;
   int targets[4];
   int addresses[4];
@@ -69,15 +88,21 @@ struct arcDisState
   char instrBuffer[40];
   char operandBuffer[allOperandsSize];
   char _ea_present;
+  char _addrWriteBack; /* Address writeback */
   char _mem_load;
   char _load_len;
-  char nullifyMode;
+  enum NullifyMode nullifyMode;
   unsigned char commNum;
   unsigned char isBranch;
   unsigned char tcnt;
   unsigned char acnt;
 };
 
-#define __TRANSLATION_REQUIRED(state) ((state).acnt != 0)
-
+#if 0
+int ARCTangent_decodeInstr(bfd_vma address, disassemble_info* info);
 #endif
+int ARCompact_decodeInstr (bfd_vma address, disassemble_info* info);
+
+#define __TRANSLATION_REQUIRED(state)	((state).acnt != 0)
+
+#endif /* ARC_DIS_H */

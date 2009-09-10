@@ -85,7 +85,7 @@ static enum debug_info_type (*md_debug_format_selector) (int *) = MD_DEBUG_FORMA
 int max_macro_nest = 100;
 
 /* argv[0]  */
-static char * myname;
+char * myname;
 
 /* The default obstack chunk size.  If we set this to zero, the
    obstack code will use whatever will fit in a 4096 byte block.  */

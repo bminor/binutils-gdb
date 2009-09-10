@@ -62,6 +62,9 @@ CFILES = \
 	arc-dis.c \
 	arc-opc.c \
 	arc-ext.c \
+	arc-dis-cgen.c \
+	arc-desc.c \
+	arcompact-dis.c \
 	arm-dis.c \
 	avr-dis.c \
 	bfin-dis.c \
@@ -216,6 +219,9 @@ ALL_MACHINES = \
 	arc-dis.lo \
 	arc-opc.lo \
 	arc-ext.lo \
+	arc-dis-cgen.lo \
+	arc-desc.lo \
+	arcompact-dis.lo \
 	arm-dis.lo \
 	avr-dis.lo \
 	bfin-dis.lo \
@@ -661,7 +667,13 @@ arc-dis.lo: arc-dis.c $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
   $(INCDIR)/opcode/arc.h $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/arc.h $(INCDIR)/elf/reloc-macros.h opintl.h \
-  arc-dis.h arc-ext.h
+  arc-dis.h arcompact-dis.h arc-ext.h
+arcompact-dis.lo: arcompact-dis.c $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/ansidecl.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h \
+  $(INCDIR)/opcode/arc.h $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/elf/arc.h $(INCDIR)/elf/reloc-macros.h opintl.h \
+  arc-dis.h arcompact-dis.h arc-ext.h
 arc-opc.lo: arc-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h $(INCDIR)/opcode/arc.h \
   opintl.h

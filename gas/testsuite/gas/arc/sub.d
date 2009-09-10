@@ -60,9 +60,9 @@ Disassembly of section .text:
   c8:	01 00 00 00 
   cc:	0d 06 7f 50 	507f060d     sub.hi     r3,3,r3
   d0:	03 00 00 00 
-  d4:	0e 08 df 57 	57df080e     sub.ls     0,4,r4
+  d4:	0e 08 ff 57 	57ff080e     sub.ls     0,4,r4
   d8:	04 00 00 00 
-  dc:	0f fc c2 57 	57c2fc0f     sub.pnz    0,r5,5
+  dc:	0f fc e2 57 	57e2fc0f     sub.pnz    0,r5,5
   e0:	05 00 00 00 
   e4:	00 85 00 50 	50008500     sub.f      r0,r1,r2
   e8:	01 fa 00 50 	5000fa01     sub.f      r0,r1,1
@@ -77,9 +77,8 @@ Disassembly of section .text:
  10c:	00 00 00 00 
  110:	0b 05 1f 50 	501f050b     sub.lt.f   r0,0,r2
  114:	00 00 00 00 
- 118:	09 85 c0 57 	57c08509     sub.gt.f   0,r1,r2
- 11c:	00 00 00 00 	00000000                
- 120:	0c fd 00 50 	5000fd0c     sub.le.f   r0,r1,0x200
- 124:	00 02 00 00 
- 128:	0a 05 1f 50 	501f050a     sub.ge.f   r0,0x200,r2
- 12c:	00 02 00 00 
+ 118:	09 85 e0 57 	57e08509     sub.gt.f   0,r1,r2
+ 11c:	0c fd 00 50 	5000fd0c     sub.le.f   r0,r1,0x200
+ 120:	00 02 00 00 
+ 124:	0a 05 1f 50 	501f050a     sub.ge.f   r0,0x200,r2
+ 128:	00 02 00 00 

@@ -3,7 +3,7 @@
 AUTOMAKE_OPTIONS = 1.8 cygnus dejagnu
 ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
 
-SUBDIRS = doc po
+SUBDIRS = doc po config/extlib
 # Automake should figure this out on its own.  It doesn't, because
 # of the "cygnus" option.  But distclean still wants it.
 DIST_SUBDIRS = $(SUBDIRS)

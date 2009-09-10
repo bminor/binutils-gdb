@@ -713,7 +713,7 @@ dnl the build directory which include the right .h file.  Make sure
 dnl the old symlinks don't exist, so that a reconfigure in an existing
 dnl directory behaves reasonably.
 
-AC_CONFIG_FILES(Makefile doc/Makefile po/Makefile.in:po/Make-in)
+AC_CONFIG_FILES(Makefile config/extlib/Makefile doc/Makefile po/Makefile.in:po/Make-in)
 AC_CONFIG_COMMANDS([default],
 [rm -f targ-cpu.c targ-cpu.h obj-format.h obj-format.c targ-env.h atof-targ.c itbl-cpu.h
  echo '#include "tc-'"${target_cpu_type}"'.h"' > targ-cpu.h

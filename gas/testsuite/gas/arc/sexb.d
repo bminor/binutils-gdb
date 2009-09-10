@@ -38,14 +38,13 @@ Disassembly of section .text:
   70:	00 0b e2 1f 	1fe20b00     sexb.f     0,r4
   74:	00 0b bf 18 	18bf0b00     sexb.f     r5,0x200
   78:	00 02 00 00 
-  7c:	00 0b df 1f 	1fdf0b00     sexb.f     0,0x200
+  7c:	00 0b ff 1f 	1fff0b00     sexb.f     0,0x200
   80:	00 02 00 00 
   84:	01 8b 00 18 	18008b01     sexb.z.f   r0,r1
   88:	02 0b 3f 18 	183f0b02     sexb.nz.f  r1,0
   8c:	00 00 00 00 
-  90:	0b 0b c1 1f 	1fc10b0b     sexb.lt.f  0,r2
-  94:	00 00 00 00 	00000000                
-  98:	0c 0b 1f 18 	181f0b0c     sexb.le.f  r0,0x200
-  9c:	00 02 00 00 
-  a0:	04 0b df 1f 	1fdf0b04     sexb.n.f   0,0x200
-  a4:	00 02 00 00 
+  90:	0b 0b e1 1f 	1fe10b0b     sexb.lt.f  0,r2
+  94:	0c 0b 1f 18 	181f0b0c     sexb.le.f  r0,0x200
+  98:	00 02 00 00 
+  9c:	04 0b ff 1f 	1fff0b04     sexb.n.f   0,0x200
+  a0:	00 02 00 00 

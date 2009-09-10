@@ -208,3 +208,7 @@ void symbol_set_obj (symbolS *, OBJ_SYMFIELD_TYPE *);
 TC_SYMFIELD_TYPE *symbol_get_tc (symbolS *);
 void symbol_set_tc (symbolS *, TC_SYMFIELD_TYPE *);
 #endif
+
+/* tc-arc.c still needs this.  */
+extern struct local_symbol *
+local_symbol_make (const char *name, segT section, valueT value, fragS *frag);

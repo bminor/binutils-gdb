@@ -376,6 +376,9 @@ ALL_EMULATIONS = \
 	eaixrs6.o \
 	ealpha.o \
 	earcelf.o \
+	earcelf_prof.o \
+	earclinux.o \
+	earclinux_prof.o \
 	earm_epoc_pe.o \
 	earm_wince_pe.o \
 	earmaoutb.o \
@@ -1366,8 +1369,18 @@ ealpha.c: $(srcdir)/emulparams/alpha.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/alpha.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} alpha "$(tdir_alpha)"
 earcelf.c: $(srcdir)/emulparams/arcelf.sh \
-  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elfarc.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} arcelf "$(tdir_arcelf)"
+earcelf_prof.c: $(srcdir)/emulparams/arcelf_prof.sh \
+  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elfarc.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} arcelf_prof "$(tdir_arcelf_prof)"
+#for linux on arc
+earclinux.c: $(srcdir)/emulparams/arclinux.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/arclinux.em $(srcdir)/scripttempl/arclinux.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} arclinux "$(tdir_arclinux)"
+earclinux_prof.c: $(srcdir)/emulparams/arclinux_prof.sh \
+  $(ELF_DEPS) $(srcdir)/emultempl/arclinux.em $(srcdir)/scripttempl/arclinux.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} arclinux_prof "$(tdir_arclinux_prof)"
 earmelf.c: $(srcdir)/emulparams/armelf.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}

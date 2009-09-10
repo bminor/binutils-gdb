@@ -201,7 +201,7 @@ case "${targ}" in
     targ_defvec=bfd_elf32_am33lin_vec
     ;;
 
-  arc-*-elf*)
+  arc-*-elf* | arc-*-linux-uclibc*)
     targ_defvec=bfd_elf32_littlearc_vec
     targ_selvecs=bfd_elf32_bigarc_vec
     ;;

@@ -102,6 +102,7 @@ case ${generic_target} in
   alpha-*-openbsd*)			fmt=elf em=obsd ;;
 
   arc-*-elf*)				fmt=elf ;;
+  arc-*-linux-uclibc*)			fmt=elf bfd_gas=yes ;;
 
   arm-*-aout)				fmt=aout ;;
   arm-*-coff | thumb-*-coff)		fmt=coff ;;

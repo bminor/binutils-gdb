@@ -187,7 +187,7 @@ static unsigned long local_symbol_conversion_count;
 
 /* Create a local symbol and insert it into the local hash table.  */
 
-static struct local_symbol *
+struct local_symbol *
 local_symbol_make (const char *name, segT section, valueT value, fragS *frag)
 {
   char *name_copy;

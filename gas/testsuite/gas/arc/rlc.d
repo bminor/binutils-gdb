@@ -50,7 +50,7 @@ Disassembly of section .text:
   a0:	09 78 9e 4f 	4f9e7809     rlc.gt     lp_count,lp_count
   a4:	0a 7c 1f 48 	481f7c0a     rlc.ge     r0,0
   a8:	00 00 00 00 
-  ac:	0c 7c df 4f 	4fdf7c0c     rlc.le     0,2
+  ac:	0c 7c ff 4f 	4fff7c0c     rlc.le     0,2
   b0:	02 00 00 00 
   b4:	0d 86 61 48 	4861860d     rlc.hi     r3,r3
   b8:	0e 08 82 48 	4882080e     rlc.ls     r4,r4
@@ -61,7 +61,7 @@ Disassembly of section .text:
   cc:	00 09 e2 4f 	4fe20900     rlc.f      0,r4
   d0:	00 7d bf 48 	48bf7d00     rlc.f      r5,0x200
   d4:	00 02 00 00 
-  d8:	00 7d df 4f 	4fdf7d00     rlc.f      0,0x200
+  d8:	00 7d ff 4f 	4fff7d00     rlc.f      0,0x200
   dc:	00 02 00 00 
   e0:	01 83 00 48 	48008301     rlc.z.f    r0,r1
   e4:	02 7d 3f 48 	483f7d02     rlc.nz.f   r1,0

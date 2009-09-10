@@ -1,0 +1,10 @@
+all:
+	install @srcdir@/*.s .
+install:
+	install -d @prefix@/extlib
+	install @srcdir@/*.s @prefix@/extlib
+
+check:
+clean:
+info:
+install-info:

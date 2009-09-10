@@ -41,7 +41,9 @@ alpha*-*-netware*)	targ_emul=alpha ;;
 alpha*-*-netbsd*)	targ_emul=elf64alpha_nbsd ;;
 alpha*-*-openbsd*)	targ_emul=elf64alpha
 			;;
-arc-*-elf*)		targ_emul=arcelf
+arc-*-elf* | arc-*-linux-uclibc*)
+			targ_emul=arcelf 
+			targ_extra_emuls="arcelf_prof arclinux arclinux_prof"
 			;;
 arm-epoc-pe)		targ_emul=arm_epoc_pe ;	targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 arm-wince-pe | arm-*-wince) targ_emul=arm_wince_pe ; targ_extra_ofiles="deffilep.o pe-dll.o" ;;

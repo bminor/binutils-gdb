@@ -15146,7 +15146,7 @@ esac
 
 
 
-                              ac_config_files="$ac_config_files Makefile doc/Makefile po/Makefile.in:po/Make-in"
+                                        ac_config_files="$ac_config_files Makefile config/extlib/Makefile doc/Makefile po/Makefile.in:po/Make-in"
 
           ac_config_commands="$ac_config_commands default"
 
@@ -15983,6 +15983,7 @@ do
   "gdb.ini" ) CONFIG_FILES="$CONFIG_FILES gdb.ini:gdbinit.in" ;;
   ".gdbinit" ) CONFIG_FILES="$CONFIG_FILES .gdbinit:gdbinit.in" ;;
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+  "config/extlib/Makefile" ) CONFIG_FILES="$CONFIG_FILES config/extlib/Makefile" ;;
   "doc/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
   "po/Makefile.in" ) CONFIG_FILES="$CONFIG_FILES po/Makefile.in:po/Make-in" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;

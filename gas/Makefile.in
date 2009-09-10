@@ -45,6 +45,7 @@ DIST_COMMON = $(srcdir)/../config.guess $(srcdir)/../config.sub NEWS \
 	$(top_srcdir)/configure $(am__configure_deps) \
 	$(srcdir)/config.in $(srcdir)/../mkinstalldirs \
 	$(srcdir)/gdbinit.in $(srcdir)/gdbinit.in \
+	$(top_srcdir)/config/extlib/Makefile.in \
 	$(top_srcdir)/po/Make-in m68k-parse.c bfin-parse.c \
 	itbl-parse.c itbl-lex.c $(srcdir)/../ylwrap \
 	$(srcdir)/../ltmain.sh $(srcdir)/../config.guess \
@@ -72,7 +73,8 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno configure.status.lineno
 mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES = gdb.ini .gdbinit po/Makefile.in
+CONFIG_CLEAN_FILES = gdb.ini .gdbinit config/extlib/Makefile \
+	po/Makefile.in
 PROGRAMS = $(noinst_PROGRAMS)
 am__objects_1 = app.$(OBJEXT) as.$(OBJEXT) atof-generic.$(OBJEXT) \
 	cond.$(OBJEXT) depend.$(OBJEXT) dwarf2dbg.$(OBJEXT) \
@@ -275,7 +277,7 @@ target_vendor = @target_vendor@
 te_file = @te_file@
 AUTOMAKE_OPTIONS = 1.8 cygnus dejagnu
 ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
-SUBDIRS = doc po
+SUBDIRS = doc po config/extlib
 # Automake should figure this out on its own.  It doesn't, because
 # of the "cygnus" option.  But distclean still wants it.
 DIST_SUBDIRS = $(SUBDIRS)
@@ -2216,6 +2218,8 @@ distclean-hdr:
 gdb.ini: $(top_builddir)/config.status $(srcdir)/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 .gdbinit: $(top_builddir)/config.status $(srcdir)/gdbinit.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+config/extlib/Makefile: $(top_builddir)/config.status $(top_srcdir)/config/extlib/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 po/Makefile.in: $(top_builddir)/config.status $(top_srcdir)/po/Make-in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
