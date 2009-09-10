@@ -1,3 +1,8 @@
+2009-09-10  Doug Evans  <dje@google.com>
+
+	* gdb.base/breakpoint-shadow.exp: Fix intermittent failures.
+	Add $gdb_prompt to second breakpoint regexp.
+
 2009-09-08  Thiago Jung Bauermann  <thiago.bauermann@gmail.com>
 
 	* gdb.python/Makefile.in (EXECUTABLES): Adjust to new executable

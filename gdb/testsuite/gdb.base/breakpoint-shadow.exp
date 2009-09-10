@@ -50,7 +50,7 @@ gdb_test_multiple "disass main" $test {
 gdb_test "b [gdb_get_line_number "break-first"]" "Breakpoint \[0-9\] at .*" "First breakpoint placed"
 set test "Second breakpoint placed"
 gdb_test_multiple "b [gdb_get_line_number "break-second"]" $test {
-    -re "Breakpoint \[0-9\] at (0x\[0-9a-f\]*):.*" {
+    -re "Breakpoint \[0-9\] at (0x\[0-9a-f\]*):.*$gdb_prompt $" {
 	pass $test
 	set bpt2address $expect_out(1,string)
     }
