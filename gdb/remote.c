@@ -1000,6 +1000,8 @@ enum {
   PACKET_qXfer_siginfo_write,
   PACKET_qAttached,
   PACKET_ConditionalTracepoints,
+  PACKET_bc,
+  PACKET_bs,
   PACKET_MAX
 };
 
@@ -3051,6 +3053,10 @@ static struct protocol_feature remote_protocol_features[] = {
     PACKET_qXfer_siginfo_write },
   { "ConditionalTracepoints", PACKET_DISABLE, remote_cond_tracepoint_feature,
     PACKET_ConditionalTracepoints },
+  { "ReverseContinue", PACKET_DISABLE, remote_supported_packet,
+    PACKET_bc },
+  { "ReverseStep", PACKET_DISABLE, remote_supported_packet,
+    PACKET_bs },
 };
 
 static void
@@ -3801,8 +3807,10 @@ remote_resume (struct target_ops *ops,
   remote_pass_signals ();
 
   /* The vCont packet doesn't need to specify threads via Hc.  */
-  if (remote_vcont_resume (ptid, step, siggnal))
-    goto done;
+  /* No reverse support (yet) for vCont.  */
+  if (execution_direction != EXEC_REVERSE)
+    if (remote_vcont_resume (ptid, step, siggnal))
+      goto done;
 
   /* All other supported resume packets do use Hc, so set the continue
      thread.  */
@@ -3818,6 +3826,14 @@ remote_resume (struct target_ops *ops,
       if (info_verbose && siggnal != TARGET_SIGNAL_0)
 	warning (" - Can't pass signal %d to target in reverse: ignored.\n",
 		 siggnal);
+
+      if (step 
+	  && remote_protocol_packets[PACKET_bs].support == PACKET_DISABLE)
+	error (_("Remote reverse-step not supported."));
+      if (!step
+	  && remote_protocol_packets[PACKET_bc].support == PACKET_DISABLE)
+	error ("_(Remote reverse-continue not supported."));
+
       strcpy (buf, step ? "bs" : "bc");
     }
   else if (siggnal != TARGET_SIGNAL_0)
@@ -8730,12 +8746,14 @@ remote_command (char *args, int from_tty)
   help_list (remote_cmdlist, "remote ", -1, gdb_stdout);
 }
 
-static int remote_target_can_reverse = 1;
-
 static int
 remote_can_execute_reverse (void)
 {
-  return remote_target_can_reverse;
+  if (remote_protocol_packets[PACKET_bs].support == PACKET_ENABLE
+      || remote_protocol_packets[PACKET_bc].support == PACKET_ENABLE)
+    return 1;
+  else
+    return 0;
 }
 
 static int
@@ -9164,6 +9182,12 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qGetTLSAddr],
 			 "qGetTLSAddr", "get-thread-local-storage-address",
 			 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_bc],
+			 "bc", "reverse-continue", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_bs],
+			 "bs", "reverse-step", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qSupported],
 			 "qSupported", "supported-packets", 0);

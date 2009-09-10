@@ -309,6 +309,14 @@ show remote write-siginfo-object
   Control use of remote protocol `qXfer:siginfo:write' (write-siginfo-object)
   packet.
 
+set remote reverse-continue
+show remote reverse-continue
+  Control use of remote protocol 'bc' (reverse-continue) packet.
+
+set remote reverse-step
+show remote reverse-step
+  Control use of remote protocol 'bs' (reverse-step) packet.
+
 set displaced-stepping
 show displaced-stepping
   Control displaced stepping mode.  Displaced stepping is a way to

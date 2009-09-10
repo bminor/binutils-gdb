@@ -1,3 +1,11 @@
+2009-09-10  Michael Snyder  <msnyder@vmware.com>
+
+	* remote.c (PACKET_bc, PACKET_bs): New enums.
+	(remote_protocol_features): Add ReverseStep, ReverseContinue.
+	(remote_resume): Check for reverse capability.
+	(_initialize_remote): Add packet config for "bs" and "bc" packets.
+	* NEWS (new options): Mention set/show for "bs" and "bc" packets.
+
 2009-09-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* top.c (interactive_mode): New static variable.
