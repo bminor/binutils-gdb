@@ -28,6 +28,7 @@
 #include "libbfd.h"
 #include "elf/common.h"
 #include "elf/frv.h"
+#include "dwarf2dbg.h"
 
 /* Structure to hold all of the different components describing
    an individual instruction.  */
@@ -1801,6 +1802,7 @@ frv_frob_label (symbolS *this_label)
 {
   struct vliw_insn_list *vliw_insn_list_entry;
 
+  dwarf2_emit_label (this_label);
   if (frv_mach != bfd_mach_frvtomcat)
     return;
 

@@ -1873,6 +1873,8 @@ d30v_frob_label (symbolS *lab)
   /* Record this label for future adjustment after we find out what
      kind of data it references, and the required alignment therewith.  */
   d30v_last_label = lab;
+
+  dwarf2_emit_label (lab);
 }
 
 /* Hook into cons for capturing alignment changes.  */

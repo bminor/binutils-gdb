@@ -1,3 +1,8 @@
+2009-09-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-d30v.c (d30v_frob_label): Call dwarf2_emit_label.
+	* config/tc-frv.c (frv_frob_label): Likewise.
+
 2009-09-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/obj-coff.h (USE_UNIQUE): Don't define.
