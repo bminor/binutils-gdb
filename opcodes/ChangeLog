@@ -1,5 +1,9 @@
 2009-09-10  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 	
+	* s390-dis.c (print_insn_s390): Avoid 'long long'.
+
+2009-09-10  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+	
 	* s390-dis.c (s390_extract_operand): Remove the shift for pcrel operands.
 	(print_insn_s390): Signextend and shift pcrel operands before printing.
 

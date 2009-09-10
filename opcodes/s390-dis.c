@@ -222,8 +222,8 @@ print_insn_s390 (bfd_vma memaddr, struct disassemble_info *info)
 	      else if (operand->flags & S390_OPERAND_CR)
 		(*info->fprintf_func) (info->stream, "%%c%i", value);
 	      else if (operand->flags & S390_OPERAND_PCREL)
-		(*info->print_address_func) (memaddr +
-					     (((long long)(int)value) << 1), info);
+		(*info->print_address_func) (memaddr + (int)value + (int)value,
+					     info);
 	      else if (operand->flags & S390_OPERAND_SIGNED)
 		(*info->fprintf_func) (info->stream, "%i", (int) value);
 	      else
