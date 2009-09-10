@@ -672,7 +672,7 @@ sort_symbols_by_size (bfd *abfd, bfd_boolean dynamic, void *minisyms,
 
   /* We are going to return a special set of symbols and sizes to
      print.  */
-  symsizes = xmalloc (symcount * sizeof (struct size_sym));
+  symsizes = (struct size_sym *) xmalloc (symcount * sizeof (struct size_sym));
   *symsizesp = symsizes;
 
   /* Note that filter_symbols has already removed all absolute and
@@ -773,7 +773,7 @@ get_relocs (bfd *abfd, asection *sec, void *dataarg)
       if (relsize < 0)
 	bfd_fatal (bfd_get_filename (abfd));
 
-      *data->relocs = xmalloc (relsize);
+      *data->relocs = (arelent **) xmalloc (relsize);
       *data->relcount = bfd_canonicalize_reloc (abfd, sec, *data->relocs,
 						data->syms);
       if (*data->relcount < 0)
@@ -828,7 +828,7 @@ print_symbol (bfd *abfd, asymbol *sym, bfd_vma ssize, bfd *archive_bfd)
 	  symsize = bfd_get_symtab_upper_bound (abfd);
 	  if (symsize < 0)
 	    bfd_fatal (bfd_get_filename (abfd));
-	  syms = xmalloc (symsize);
+	  syms = (asymbol **) xmalloc (symsize);
 	  symcount = bfd_canonicalize_symtab (abfd, syms);
 	  if (symcount < 0)
 	    bfd_fatal (bfd_get_filename (abfd));
@@ -865,9 +865,9 @@ print_symbol (bfd *abfd, asymbol *sym, bfd_vma ssize, bfd *archive_bfd)
 
 	      seccount = bfd_count_sections (abfd);
 
-	      secs = xmalloc (seccount * sizeof *secs);
-	      relocs = xmalloc (seccount * sizeof *relocs);
-	      relcount = xmalloc (seccount * sizeof *relcount);
+	      secs = (asection **) xmalloc (seccount * sizeof *secs);
+	      relocs = (arelent ***) xmalloc (seccount * sizeof *relocs);
+	      relcount = (long *) xmalloc (seccount * sizeof *relcount);
 
 	      info.secs = secs;
 	      info.relocs = relocs;
@@ -1025,18 +1025,18 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
       if (dynamic)
 	{
 	  dyn_count = symcount;
-	  dyn_syms = minisyms;
+	  dyn_syms = (asymbol **) minisyms;
 	}
       else
 	{
 	  long storage = bfd_get_dynamic_symtab_upper_bound (abfd);
 
 	  static_count = symcount;
-	  static_syms = minisyms;
+	  static_syms = (asymbol **) minisyms;
 
 	  if (storage > 0)
 	    {
-	      dyn_syms = xmalloc (storage);
+	      dyn_syms = (asymbol **) xmalloc (storage);
 	      dyn_count = bfd_canonicalize_dynamic_symtab (abfd, dyn_syms);
 	      if (dyn_count < 0)
 		bfd_fatal (bfd_get_filename (abfd));
@@ -1051,7 +1051,7 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
 	  long i;
 
 	  new_mini = xmalloc ((symcount + synth_count + 1) * sizeof (*symp));
-	  symp = new_mini;
+	  symp = (asymbol **) new_mini;
 	  memcpy (symp, minisyms, symcount * sizeof (*symp));
 	  symp += symcount;
 	  for (i = 0; i < synth_count; i++)

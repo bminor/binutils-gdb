@@ -1,6 +1,6 @@
 /* addr2line.c -- convert addresses to line number and function name
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
+   2007, 2009  Free Software Foundation, Inc.
    Contributed by Ulrich Lauther <Ulrich.Lauther@mchp.siemens.de>
 
    This file is part of GNU Binutils.
@@ -102,13 +102,14 @@ slurp_symtab (bfd *abfd)
 {
   long symcount;
   unsigned int size;
+  void *minisyms = &syms;
 
   if ((bfd_get_file_flags (abfd) & HAS_SYMS) == 0)
     return;
 
-  symcount = bfd_read_minisymbols (abfd, FALSE, (void *) &syms, &size);
+  symcount = bfd_read_minisymbols (abfd, FALSE, &minisyms, &size);
   if (symcount == 0)
-    symcount = bfd_read_minisymbols (abfd, TRUE /* dynamic */, (void *) &syms, &size);
+    symcount = bfd_read_minisymbols (abfd, TRUE /* dynamic */, &minisyms, &size);
 
   if (symcount < 0)
     bfd_fatal (bfd_get_filename (abfd));

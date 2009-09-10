@@ -1,6 +1,6 @@
 /* wrstabs.c -- Output stabs debugging information
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006,
+   2007, 2009   Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -1545,7 +1545,7 @@ stab_class_static_member (void *p, const char *name, const char *physname,
 /* Add a base class to the class on the type stack.  */
 
 static bfd_boolean
-stab_class_baseclass (void *p, bfd_vma bitpos, bfd_boolean virtual,
+stab_class_baseclass (void *p, bfd_vma bitpos, bfd_boolean is_virtual,
 		      enum debug_visibility visibility)
 {
   struct stab_write_handle *info = (struct stab_write_handle *) p;
@@ -1561,7 +1561,7 @@ stab_class_baseclass (void *p, bfd_vma bitpos, bfd_boolean virtual,
   /* Build the base class specifier.  */
 
   buf = (char *) xmalloc (strlen (s) + 25);
-  buf[0] = virtual ? '1' : '0';
+  buf[0] = is_virtual ? '1' : '0';
   switch (visibility)
     {
     default:

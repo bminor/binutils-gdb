@@ -467,7 +467,7 @@ slurp_symtab (bfd *abfd)
   if (storage < 0)
     bfd_fatal (bfd_get_filename (abfd));
   if (storage)
-    sy = xmalloc (storage);
+    sy = (asymbol **) xmalloc (storage);
 
   symcount = bfd_canonicalize_symtab (abfd, sy);
   if (symcount < 0)
@@ -496,7 +496,7 @@ slurp_dynamic_symtab (bfd *abfd)
       bfd_fatal (bfd_get_filename (abfd));
     }
   if (storage)
-    sy = xmalloc (storage);
+    sy = (asymbol **) xmalloc (storage);
 
   dynsymcount = bfd_canonicalize_dynamic_symtab (abfd, sy);
   if (dynsymcount < 0)
@@ -1040,7 +1040,7 @@ slurp_file (const char *fn, size_t *size)
       return map; 
     }
 #endif
-  map = malloc (*size);
+  map = (const char *) malloc (*size);
   if (!map || (size_t) read (fd, (char *)map, *size) != *size) 
     { 
       free ((void *)map);
@@ -1095,7 +1095,7 @@ index_file (const char *map, size_t size, unsigned int *maxline)
 	  if (line_map_size < lineno + 1)
 	    line_map_size = lineno + 1;
 	  newsize = line_map_size * sizeof (char *);
-	  linemap = xrealloc (linemap, newsize);
+	  linemap = (const char **) xrealloc (linemap, newsize);
 	}
 
       linemap[lineno++] = lstart; 
@@ -1114,7 +1114,7 @@ try_print_file_open (const char *origname, const char *modname)
 {
   struct print_file_list *p;
 
-  p = xmalloc (sizeof (struct print_file_list));
+  p = (struct print_file_list *) xmalloc (sizeof (struct print_file_list));
 
   p->map = slurp_file (modname, &p->mapsize);
   if (p->map == NULL)
@@ -1333,7 +1333,7 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
     {
       if (prev_functionname != NULL)
 	free (prev_functionname);
-      prev_functionname = xmalloc (strlen (functionname) + 1);
+      prev_functionname = (char *) xmalloc (strlen (functionname) + 1);
       strcpy (prev_functionname, functionname);
     }
 
@@ -1369,7 +1369,7 @@ objdump_sprintf (SFILE *f, const char *format, ...)
 	break;
       
       f->alloc = (f->alloc + n) * 2;
-      f->buffer = xrealloc (f->buffer, f->alloc);
+      f->buffer = (char *) xrealloc (f->buffer, f->alloc);
     }
   f->pos += n;
   
@@ -1419,7 +1419,7 @@ disassemble_bytes (struct disassemble_info * info,
   section = aux->sec;
 
   sfile.alloc = 120;
-  sfile.buffer = xmalloc (sfile.alloc);
+  sfile.buffer = (char *) xmalloc (sfile.alloc);
   sfile.pos = 0;
   
   if (insn_width)
@@ -1835,7 +1835,7 @@ disassemble_section (bfd *abfd, asection *section, void *info)
 
 	  if (relsize > 0)
 	    {
-	      rel_ppstart = rel_pp = xmalloc (relsize);
+	      rel_ppstart = rel_pp = (arelent **) xmalloc (relsize);
 	      rel_count = bfd_canonicalize_reloc (abfd, section, rel_pp, syms);
 	      if (rel_count < 0)
 		bfd_fatal (bfd_get_filename (abfd));
@@ -1847,7 +1847,7 @@ disassemble_section (bfd *abfd, asection *section, void *info)
     }
   rel_ppend = rel_pp + rel_count;
 
-  data = xmalloc (datasize);
+  data = (bfd_byte *) xmalloc (datasize);
 
   bfd_get_section_contents (abfd, section, data, 0, datasize);
 
@@ -1886,7 +1886,9 @@ disassemble_section (bfd *abfd, asection *section, void *info)
 
   /* Find the nearest symbol forwards from our current position.  */
   paux->require_sec = TRUE;
-  sym = find_symbol_for_address (section->vma + addr_offset, info, &place);
+  sym = (asymbol *) find_symbol_for_address (section->vma + addr_offset,
+                                             (struct disassemble_info *) info,
+                                             &place);
   paux->require_sec = FALSE;
 
   /* PR 9774: If the target used signed 32-bit addresses then we must make
@@ -2023,7 +2025,8 @@ disassemble_data (bfd *abfd)
   /* We make a copy of syms to sort.  We don't want to sort syms
      because that will screw up the relocs.  */
   sorted_symcount = symcount ? symcount : dynsymcount;
-  sorted_syms = xmalloc ((sorted_symcount + synthcount) * sizeof (asymbol *));
+  sorted_syms = (asymbol **) xmalloc ((sorted_symcount + synthcount)
+                                      * sizeof (asymbol *));
   memcpy (sorted_syms, symcount ? syms : dynsyms,
 	  sorted_symcount * sizeof (asymbol *));
 
@@ -2064,7 +2067,7 @@ disassemble_data (bfd *abfd)
     {
       struct bfd_target *xvec;
 
-      xvec = xmalloc (sizeof (struct bfd_target));
+      xvec = (struct bfd_target *) xmalloc (sizeof (struct bfd_target));
       memcpy (xvec, abfd->xvec, sizeof (struct bfd_target));
       xvec->byteorder = endian;
       abfd->xvec = xvec;
@@ -2112,7 +2115,7 @@ disassemble_data (bfd *abfd)
 
       if (relsize > 0)
 	{
-	  aux.dynrelbuf = xmalloc (relsize);
+	  aux.dynrelbuf = (arelent **) xmalloc (relsize);
 	  aux.dynrelcount = bfd_canonicalize_dynamic_reloc (abfd,
 							    aux.dynrelbuf,
 							    dynsyms);
@@ -2139,7 +2142,7 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
 			     asection *sec, void *file)
 {
   struct dwarf_section *section = &debug_displays [debug].section;
-  bfd *abfd = file;
+  bfd *abfd = (bfd *) file;
   bfd_boolean ret;
   int section_is_compressed;
 
@@ -2151,7 +2154,7 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
 
   section->address = 0;
   section->size = bfd_get_section_size (sec);
-  section->start = xmalloc (section->size);
+  section->start = (unsigned char *) xmalloc (section->size);
 
   if (is_relocatable && debug_displays [debug].relocate)
     ret = bfd_simple_get_relocated_section_contents (abfd,
@@ -2189,7 +2192,7 @@ int
 load_debug_section (enum dwarf_section_display_enum debug, void *file)
 {
   struct dwarf_section *section = &debug_displays [debug].section;
-  bfd *abfd = file;
+  bfd *abfd = (bfd *) file;
   asection *sec;
 
   /* If it is already loaded, do nothing.  */
@@ -2232,7 +2235,7 @@ dump_dwarf_section (bfd *abfd, asection *section,
 {
   const char *name = bfd_get_section_name (abfd, section);
   const char *match;
-  enum dwarf_section_display_enum i;
+  int i;
 
   if (CONST_STRNEQ (name, ".gnu.linkonce.wi."))
     match = ".debug_info";
@@ -2251,12 +2254,13 @@ dump_dwarf_section (bfd *abfd, asection *section,
 	  sec->name = sec->uncompressed_name;
 	else
 	  sec->name = sec->compressed_name;
-	if (load_specific_debug_section (i, section, abfd))
+	if (load_specific_debug_section ((enum dwarf_section_display_enum) i,
+                                         section, abfd))
 	  {
 	    debug_displays [i].display (sec, abfd);
 	    
 	    if (i != info && i != abbrev)
-	      free_debug_section (i);
+	      free_debug_section ((enum dwarf_section_display_enum) i);
 	  }
 	break;
       }
@@ -2309,7 +2313,7 @@ read_section_stabs (bfd *abfd, const char *sect_name, bfd_size_type *size_ptr)
     }
 
   size = bfd_section_size (abfd, stabsect);
-  contents  = xmalloc (size);
+  contents  = (char *) xmalloc (size);
 
   if (! bfd_get_section_contents (abfd, stabsect, contents, 0, size))
     {
@@ -2574,7 +2578,7 @@ dump_section (bfd *abfd, asection *section, void *dummy ATTRIBUTE_UNUSED)
 	    (unsigned long) (section->filepos + start_offset));
   printf ("\n");
 
-  data = xmalloc (datasize);
+  data = (bfd_byte *) xmalloc (datasize);
 
   bfd_get_section_contents (abfd, section, data, 0, datasize);
 
@@ -2865,7 +2869,7 @@ dump_relocs_in_section (bfd *abfd,
       return;
     }
 
-  relpp = xmalloc (relsize);
+  relpp = (arelent **) xmalloc (relsize);
   relcount = bfd_canonicalize_reloc (abfd, section, relpp, syms);
 
   if (relcount < 0)
@@ -2904,7 +2908,7 @@ dump_dynamic_relocs (bfd *abfd)
     printf (" (none)\n\n");
   else
     {
-      relpp = xmalloc (relsize);
+      relpp = (arelent **) xmalloc (relsize);
       relcount = bfd_canonicalize_dynamic_reloc (abfd, relpp, dynsyms);
 
       if (relcount < 0)
@@ -2929,8 +2933,8 @@ add_include_path (const char *path)
   if (path[0] == 0)
     return;
   include_path_count++;
-  include_paths = xrealloc (include_paths,
-			    include_path_count * sizeof (*include_paths));
+  include_paths = (const char **)
+      xrealloc (include_paths, include_path_count * sizeof (*include_paths));
 #ifdef HAVE_DOS_BASED_FILE_SYSTEM
   if (path[1] == ':' && path[2] == 0)
     path = concat (path, ".", (const char *) 0);
@@ -3205,7 +3209,7 @@ main (int argc, char **argv)
 	  if (only_used == only_size)
 	    {
 	      only_size += 8;
-	      only = xrealloc (only, only_size * sizeof (char *));
+	      only = (char **) xrealloc (only, only_size * sizeof (char *));
 	    }
 	  only [only_used++] = optarg;
 	  break;

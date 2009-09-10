@@ -59,6 +59,16 @@ struct ieee_blockstack
 
 /* This structure holds information for a variable.  */
 
+enum ieee_var_kind
+  {
+    IEEE_UNKNOWN,
+    IEEE_EXTERNAL,
+    IEEE_GLOBAL,
+    IEEE_STATIC,
+    IEEE_LOCAL,
+    IEEE_FUNCTION
+  };
+
 struct ieee_var
 {
   /* Start of name.  */
@@ -70,15 +80,7 @@ struct ieee_var
   /* Slot if we make an indirect type.  */
   debug_type *pslot;
   /* Kind of variable or function.  */
-  enum
-    {
-      IEEE_UNKNOWN,
-      IEEE_EXTERNAL,
-      IEEE_GLOBAL,
-      IEEE_STATIC,
-      IEEE_LOCAL,
-      IEEE_FUNCTION
-    } kind;
+  enum ieee_var_kind kind;
 };
 
 /* This structure holds all the variables.  */
@@ -5451,7 +5453,7 @@ ieee_pointer_type (void *p)
 
   if (! localp)
     {
-      m = ieee_get_modified_info (p, indx);
+      m = ieee_get_modified_info ((struct ieee_handle *) p, indx);
       if (m == NULL)
 	return FALSE;
 
@@ -5509,7 +5511,7 @@ ieee_function_type (void *p, int argcount, bfd_boolean varargs)
   m = NULL;
   if (argcount < 0 && ! localp)
     {
-      m = ieee_get_modified_info (p, retindx);
+      m = ieee_get_modified_info ((struct ieee_handle *) p, retindx);
       if (m == NULL)
 	return FALSE;
 
@@ -6199,7 +6201,7 @@ ieee_class_static_member (void *p, const char *name, const char *physname,
 /* Add a base class to a class.  */
 
 static bfd_boolean
-ieee_class_baseclass (void *p, bfd_vma bitpos, bfd_boolean virtual,
+ieee_class_baseclass (void *p, bfd_vma bitpos, bfd_boolean is_virtual,
 		      enum debug_visibility visibility)
 {
   struct ieee_handle *info = (struct ieee_handle *) p;
@@ -6225,7 +6227,7 @@ ieee_class_baseclass (void *p, bfd_vma bitpos, bfd_boolean virtual,
      class.  The stabs debugging reader will create a field named
      _vb$CLASS for a virtual base class, so we just use that.  FIXME:
      we should not depend upon a detail of stabs debugging.  */
-  if (virtual)
+  if (is_virtual)
     {
       fname = (char *) xmalloc (strlen (bname) + sizeof "_vb$");
       sprintf (fname, "_vb$%s", bname);
@@ -6293,7 +6295,7 @@ ieee_class_method_var (struct ieee_handle *info, const char *physname,
 {
   unsigned int flags;
   unsigned int nindx;
-  bfd_boolean virtual;
+  bfd_boolean is_virtual;
 
   /* We don't need the type of the method.  An IEEE consumer which
      wants the type must track down the function by the physical name
@@ -6323,18 +6325,18 @@ ieee_class_method_var (struct ieee_handle *info, const char *physname,
 
   nindx = info->type_stack->type.classdef->indx;
 
-  virtual = context || voffset > 0;
+  is_virtual = context || voffset > 0;
 
   if (! ieee_change_buffer (info,
 			    &info->type_stack->type.classdef->pmiscbuf)
-      || ! ieee_write_asn (info, nindx, virtual ? 'v' : 'm')
+      || ! ieee_write_asn (info, nindx, is_virtual ? 'v' : 'm')
       || ! ieee_write_asn (info, nindx, flags)
       || ! ieee_write_atn65 (info, nindx,
 			     info->type_stack->type.classdef->method)
       || ! ieee_write_atn65 (info, nindx, physname))
     return FALSE;
 
-  if (virtual)
+  if (is_virtual)
     {
       if (voffset > info->type_stack->type.classdef->voffset)
 	info->type_stack->type.classdef->voffset = voffset;

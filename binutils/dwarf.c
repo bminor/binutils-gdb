@@ -464,7 +464,7 @@ add_abbrev (unsigned long number, unsigned long tag, int children)
 {
   abbrev_entry *entry;
 
-  entry = malloc (sizeof (*entry));
+  entry = (abbrev_entry *) malloc (sizeof (*entry));
 
   if (entry == NULL)
     /* ugg */
@@ -490,7 +490,7 @@ add_abbrev_attr (unsigned long attribute, unsigned long form)
 {
   abbrev_attr *attr;
 
-  attr = malloc (sizeof (*attr));
+  attr = (abbrev_attr *) malloc (sizeof (*attr));
 
   if (attr == NULL)
     /* ugg */
@@ -1334,11 +1334,11 @@ read_and_display_attr_value (unsigned long attribute,
 	      if (max == 0 || num >= max)
 		{
 		  max += 1024;
-		  debug_info_p->loc_offsets
-		    = xcrealloc (debug_info_p->loc_offsets,
+		  debug_info_p->loc_offsets = (long unsigned int *)
+                      xcrealloc (debug_info_p->loc_offsets,
 				 max, sizeof (*debug_info_p->loc_offsets));
-		  debug_info_p->have_frame_base
-		    = xcrealloc (debug_info_p->have_frame_base,
+		  debug_info_p->have_frame_base = (int *)
+                      xcrealloc (debug_info_p->have_frame_base,
 				 max, sizeof (*debug_info_p->have_frame_base));
 		  debug_info_p->max_loc_offsets = max;
 		}
@@ -1363,8 +1363,8 @@ read_and_display_attr_value (unsigned long attribute,
 	      if (max == 0 || num >= max)
 		{
 		  max += 1024;
-		  debug_info_p->range_lists
-		    = xcrealloc (debug_info_p->range_lists,
+		  debug_info_p->range_lists = (long unsigned int *)
+                      xcrealloc (debug_info_p->range_lists,
 				 max, sizeof (*debug_info_p->range_lists));
 		  debug_info_p->max_range_lists = max;
 		}
@@ -1858,8 +1858,8 @@ process_debug_info (struct dwarf_section *section,
 	}
 
       /* Then allocate an array to hold the information.  */
-      debug_information = cmalloc (num_units,
-				   sizeof (* debug_information));
+      debug_information = (debug_info *) cmalloc (num_units,
+                                                  sizeof (* debug_information));
       if (debug_information == NULL)
 	{
 	  error (_("Not enough memory for a debug info array of %u entries"),
@@ -2524,7 +2524,8 @@ display_debug_lines_decoded (struct dwarf_section *section,
 	    }
 
           /* Go through the directory table again to save the directories.  */
-          directory_table = xmalloc (n_directories * sizeof (unsigned char *));
+          directory_table = (unsigned char **)
+              xmalloc (n_directories * sizeof (unsigned char *));
 
           i = 0;
           while (*ptr_directory_table != 0)
@@ -2562,7 +2563,7 @@ display_debug_lines_decoded (struct dwarf_section *section,
             }
 
           /* Go through the file table again to save the strings.  */
-          file_table = xmalloc (n_files * sizeof (File_Entry));
+          file_table = (File_Entry *) xmalloc (n_files * sizeof (File_Entry));
 
           i = 0;
           while (*ptr_file_name_table != 0)
@@ -2782,7 +2783,7 @@ display_debug_lines_decoded (struct dwarf_section *section,
 
               if ((fileNameLength > MAX_FILENAME_LENGTH) && (!do_wide))
                 {
-                  newFileName = xmalloc (MAX_FILENAME_LENGTH + 1);
+                  newFileName = (char *) xmalloc (MAX_FILENAME_LENGTH + 1);
                   /* Truncate file name */
                   strncpy (newFileName,
                            fileName + fileNameLength - MAX_FILENAME_LENGTH,
@@ -2790,7 +2791,7 @@ display_debug_lines_decoded (struct dwarf_section *section,
                 }
               else
                 {
-                  newFileName = xmalloc (fileNameLength + 1);
+                  newFileName = (char *) xmalloc (fileNameLength + 1);
                   strncpy (newFileName, fileName, fileNameLength + 1);
                 }
 
@@ -2979,7 +2980,7 @@ display_debug_macinfo (struct dwarf_section *section,
       unsigned int lineno;
       const char *string;
 
-      op = *curr;
+      op = (enum dwarf_macinfo_record_type) *curr;
       curr++;
 
       switch (op)
@@ -3500,8 +3501,8 @@ struct range_entry
 static int
 range_entry_compar (const void *ap, const void *bp)
 {
-  const struct range_entry *a_re = ap;
-  const struct range_entry *b_re = bp;
+  const struct range_entry *a_re = (const struct range_entry *) ap;
+  const struct range_entry *b_re = (const struct range_entry *) bp;
   const unsigned long a = a_re->ranges_offset;
   const unsigned long b = b_re->ranges_offset;
 
@@ -3542,7 +3543,8 @@ display_debug_ranges (struct dwarf_section *section,
   if (num_range_list == 0)
     error (_("No range lists in .debug_info section!\n"));
 
-  range_entries = xmalloc (sizeof (*range_entries) * num_range_list);
+  range_entries = (struct range_entry *)
+      xmalloc (sizeof (*range_entries) * num_range_list);
   range_entry_fill = range_entries;
 
   for (i = 0; i < num_debug_info_entries; i++)
@@ -3693,8 +3695,9 @@ frame_need_space (Frame_Chunk *fc, unsigned int reg)
     return -1;
 
   fc->ncols = reg + 1;
-  fc->col_type = xcrealloc (fc->col_type, fc->ncols, sizeof (short int));
-  fc->col_offset = xcrealloc (fc->col_offset, fc->ncols, sizeof (int));
+  fc->col_type = (short int *) xcrealloc (fc->col_type, fc->ncols,
+                                          sizeof (short int));
+  fc->col_offset = (int *) xcrealloc (fc->col_offset, fc->ncols, sizeof (int));
 
   while (prev < fc->ncols)
     {
@@ -3928,15 +3931,15 @@ display_debug_frames (struct dwarf_section *section,
 	{
 	  int version;
 
-	  fc = xmalloc (sizeof (Frame_Chunk));
+	  fc = (Frame_Chunk *) xmalloc (sizeof (Frame_Chunk));
 	  memset (fc, 0, sizeof (Frame_Chunk));
 
 	  fc->next = chunks;
 	  chunks = fc;
 	  fc->chunk_start = saved_start;
 	  fc->ncols = 0;
-	  fc->col_type = xmalloc (sizeof (short int));
-	  fc->col_offset = xmalloc (sizeof (int));
+	  fc->col_type = (short int *) xmalloc (sizeof (short int));
+	  fc->col_offset = (int *) xmalloc (sizeof (int));
 	  frame_need_space (fc, max_regs - 1);
 
 	  version = *start++;
@@ -4059,8 +4062,8 @@ display_debug_frames (struct dwarf_section *section,
 	      warn ("Invalid CIE pointer %#08lx in FDE at %#08lx\n",
 		    cie_id, (unsigned long)(saved_start - section_start));
 	      fc->ncols = 0;
-	      fc->col_type = xmalloc (sizeof (short int));
-	      fc->col_offset = xmalloc (sizeof (int));
+	      fc->col_type = (short int *) xmalloc (sizeof (short int));
+	      fc->col_offset = (int *) xmalloc (sizeof (int));
 	      frame_need_space (fc, max_regs - 1);
 	      cie = fc;
 	      fc->augmentation = "";
@@ -4069,8 +4072,8 @@ display_debug_frames (struct dwarf_section *section,
 	  else
 	    {
 	      fc->ncols = cie->ncols;
-	      fc->col_type = xcmalloc (fc->ncols, sizeof (short int));
-	      fc->col_offset = xcmalloc (fc->ncols, sizeof (int));
+	      fc->col_type = (short int *) xcmalloc (fc->ncols, sizeof (short int));
+	      fc->col_offset =  (int *) xcmalloc (fc->ncols, sizeof (int));
 	      memcpy (fc->col_type, cie->col_type, fc->ncols * sizeof (short int));
 	      memcpy (fc->col_offset, cie->col_offset, fc->ncols * sizeof (int));
 	      fc->augmentation = cie->augmentation;
@@ -4444,10 +4447,11 @@ display_debug_frames (struct dwarf_section *section,
 	    case DW_CFA_remember_state:
 	      if (! do_debug_frames_interp)
 		printf ("  DW_CFA_remember_state\n");
-	      rs = xmalloc (sizeof (Frame_Chunk));
+	      rs = (Frame_Chunk *) xmalloc (sizeof (Frame_Chunk));
 	      rs->ncols = fc->ncols;
-	      rs->col_type = xcmalloc (rs->ncols, sizeof (short int));
-	      rs->col_offset = xcmalloc (rs->ncols, sizeof (int));
+	      rs->col_type = (short int *) xcmalloc (rs->ncols,
+                                                     sizeof (short int));
+	      rs->col_offset = (int *) xcmalloc (rs->ncols, sizeof (int));
 	      memcpy (rs->col_type, fc->col_type, rs->ncols);
 	      memcpy (rs->col_offset, fc->col_offset, rs->ncols * sizeof (int));
 	      rs->next = remembered_state;
@@ -4726,12 +4730,12 @@ warn (const char *message, ...)
 void
 free_debug_memory (void)
 {
-  enum dwarf_section_display_enum i;
+  unsigned int i;
 
   free_abbrevs ();
 
   for (i = 0; i < max; i++)
-    free_debug_section (i);
+    free_debug_section ((enum dwarf_section_display_enum) i);
 
   if (debug_information != NULL)
     {

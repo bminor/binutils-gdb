@@ -1,3 +1,48 @@
+2009-09-10  Martin Thuresson  <martin@mtme.org>
+
+	Update soruces to compile cleanly with -Wc++-compat:
+
+	* addr2line.c (slurp_symtab): Fix casts. Introduce variable
+	minisyms to avoid aliasing varning.
+	* ar.c: Add casts.
+	(normalize): Use name del instead of delete.
+	(display_target_list,display_info_table): Change loop counter
+	variable a to int.
+	* bucomm.c: Add casts.
+	* debug.c: Update function to use new names.
+	(struct debug_baseclass): Rename member from virtual to
+	is_virtual.
+	(struct debug_type_s, struct debug_field_s, struct
+	debug_baseclass_s, struct debug_method_s, struct
+	debug_method_variant_s, struct debug_type_s): Rename struct from
+	avoid name collision.
+        * debug.h: Use new struct names.
+	* dwarf.c: Add casts.
+	(free_debug_memory): Change loop counter variable a to int.
+	* ieee.c: Add casts.
+	(enum ieee_var_kind): Move to top level.
+	(ieee_class_baseclass): Rename parameter virtual to is_virtual.
+	(ieee_class_method_var): Rename variable virtual to is_virtual.
+	* nm.c: Add casts.
+	* objcopy.c: Add casts.
+	(copy_archive): Rename variable	delete to del.
+	* objdump.c: Add casts.
+	(dump_dwarf_section): Change loop counter variable i to int.
+	* prdbg.c: Add casts.
+	(pr_class_baseclass,tg_class_baseclass): Rename parameters virtual
+	to is_virtual.
+	* readelf.c: Add casts.
+	(struct ia64_unw_table_entry,struct hppa_unw_table_entry): Move to
+	top level.
+	* size.c: Add casts.
+	* stabs.c (parse_stab_type, parse_stab_range_type,
+	(parse_stab_cpp_abbrev): Rename parameter from typename to
+	type_name.
+	(parse_stab_baseclasses): Rename variable virtual to is_virtual.
+	* strings.c: Add casts.
+	* wrstabs.c (stab_class_baseclass): Rename parameter virtual to
+	is_virtual.
+
 2009-09-09  Nick Clifton  <nickc@redhat.com>
 
 	PR 10478:
@@ -828,7 +873,7 @@
 
 	Cleanup code related to --identify option.
 
-	* binutils/dlltool.c (file scope): Removed globals identify_ms,
+	* dlltool.c (file scope): Removed globals identify_ms,
 	identify_member_contains_symname_result,
 	identify_dll_name_list_head, and identify_dll_name_list_tail.
 	Renamed existing typedef dll_name_list_type to
