@@ -663,6 +663,7 @@ sim_bitsize
 sim_assert
 sim_alignment
 sim_environment
+DTC
 target_alias
 host_alias
 build_alias
@@ -713,6 +714,11 @@ enable_sim_trace
 enable_sim_profile
 with_pkgversion
 with_bugurl
+enable_sim_endian
+enable_sim_alignment
+enable_sim_hostendian
+enable_sim_environment
+enable_sim_inline
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1348,6 +1354,11 @@ Optional Features:
   --enable-sim-stdio			Specify whether to use stdio for console input/output.
   --enable-sim-trace=opts		Enable tracing flags
   --enable-sim-profile=opts		Enable profiling flags
+  --enable-sim-endian=endian		Specify target byte endian orientation.
+  --enable-sim-alignment=align		Specify strict,  nonstrict or forced alignment of memory accesses.
+  --enable-sim-hostendian=end		Specify host byte endian orientation.
+  --enable-sim-environment=environment	Specify mixed, user, virtual or operating environment.
+  --enable-sim-inline=inlines		Specify which functions should be inlined.
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -2146,6 +2157,99 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 ac_config_headers="$ac_config_headers config.h:config.in"
 
 
+if test -n "$ac_tool_prefix"; then
+  # Extract the first word of "${ac_tool_prefix}dtc", so it can be a program name with args.
+set dummy ${ac_tool_prefix}dtc; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_prog_DTC+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$DTC"; then
+  ac_cv_prog_DTC="$DTC" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_DTC="${ac_tool_prefix}dtc"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+DTC=$ac_cv_prog_DTC
+if test -n "$DTC"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $DTC" >&5
+$as_echo "$DTC" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+fi
+if test -z "$ac_cv_prog_DTC"; then
+  ac_ct_DTC=$DTC
+  # Extract the first word of "dtc", so it can be a program name with args.
+set dummy dtc; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_prog_ac_ct_DTC+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$ac_ct_DTC"; then
+  ac_cv_prog_ac_ct_DTC="$ac_ct_DTC" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_ac_ct_DTC="dtc"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+ac_ct_DTC=$ac_cv_prog_ac_ct_DTC
+if test -n "$ac_ct_DTC"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_ct_DTC" >&5
+$as_echo "$ac_ct_DTC" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+  if test "x$ac_ct_DTC" = x; then
+    DTC=""
+  else
+    case $cross_compiling:$ac_tool_warned in
+yes:)
+{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: using cross tools not prefixed with host triplet" >&5
+$as_echo "$as_me: WARNING: using cross tools not prefixed with host triplet" >&2;}
+ac_tool_warned=yes ;;
+esac
+    DTC=$ac_ct_DTC
+  fi
+else
+  DTC="$ac_cv_prog_DTC"
+fi
+
+
 # This file contains common code used by all simulators.
 #
 # SIM_AC_COMMON invokes AC macros used by all simulators and by the common
@@ -2167,13 +2271,6 @@ ac_config_headers="$ac_config_headers config.h:config.in"
 # SIM_AC_OUTPUT
 
 # Include global overrides and fixes for Autoconf.
-
-
-
-
-
-
-
 
 
 
@@ -2384,7 +2481,6 @@ sim_inline="-DDEFAULT_INLINE=0"
 #
 # Sets the shell variable have_gnat to yes or no as appropriate, and
 # substitutes GNATBIND and GNATMAKE.
-
 
 
 
@@ -2905,10 +3001,12 @@ done
 
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-
+#include <stdio.h>
 int
 main ()
 {
+FILE *f = fopen ("conftest.out", "w");
+ return ferror (f) || fclose (f) != 0;
 
   ;
   return 0;
@@ -4495,6 +4593,409 @@ sim_link_files="${sim_link_files} ${TARG_VALS_DEF}"
 sim_link_links="${sim_link_links} targ-vals.def"
 
 
+
+wire_endian="BIG_ENDIAN"
+default_endian=""
+# Check whether --enable-sim-endian was given.
+if test "${enable_sim_endian+set}" = set; then :
+  enableval=$enable_sim_endian; case "${enableval}" in
+  b*|B*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BIG_ENDIAN";;
+  l*|L*) sim_endian="-DWITH_TARGET_BYTE_ORDER=LITTLE_ENDIAN";;
+  yes)	 if test x"$wire_endian" != x; then
+	   sim_endian="-DWITH_TARGET_BYTE_ORDER=${wire_endian}"
+	 else
+           if test x"$default_endian" != x; then
+	     sim_endian="-DWITH_TARGET_BYTE_ORDER=${default_endian}"
+	   else
+	     echo "No hard-wired endian for target $target" 1>&6
+	     sim_endian="-DWITH_TARGET_BYTE_ORDER=0"
+	   fi
+	 fi;;
+  no)	 if test x"$default_endian" != x; then
+	   sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=${default_endian}"
+	 else
+	   if test x"$wire_endian" != x; then
+	     sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=${wire_endian}"
+	   else
+	     echo "No default endian for target $target" 1>&6
+	     sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=0"
+	   fi
+	 fi;;
+  *)	 as_fn_error "\"Unknown value $enableval for --enable-sim-endian\"" "$LINENO" 5; sim_endian="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_endian" != x""; then
+  echo "Setting endian flags = $sim_endian" 6>&1
+fi
+else
+  if test x"$default_endian" != x; then
+  sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=${default_endian}"
+else
+  if test x"$wire_endian" != x; then
+    sim_endian="-DWITH_TARGET_BYTE_ORDER=${wire_endian}"
+  else
+    sim_endian=
+  fi
+fi
+fi
+
+wire_alignment="STRICT_ALIGNMENT"
+default_alignment=""
+
+# Check whether --enable-sim-alignment was given.
+if test "${enable_sim_alignment+set}" = set; then :
+  enableval=$enable_sim_alignment; case "${enableval}" in
+  strict | STRICT)       sim_alignment="-DWITH_ALIGNMENT=STRICT_ALIGNMENT";;
+  nonstrict | NONSTRICT) sim_alignment="-DWITH_ALIGNMENT=NONSTRICT_ALIGNMENT";;
+  forced | FORCED)       sim_alignment="-DWITH_ALIGNMENT=FORCED_ALIGNMENT";;
+  yes) if test x"$wire_alignment" != x; then
+	 sim_alignment="-DWITH_ALIGNMENT=${wire_alignment}"
+       else
+         if test x"$default_alignment" != x; then
+           sim_alignment="-DWITH_ALIGNMENT=${default_alignment}"
+         else
+	   echo "No hard-wired alignment for target $target" 1>&6
+	   sim_alignment="-DWITH_ALIGNMENT=0"
+         fi
+       fi;;
+  no)  if test x"$default_alignment" != x; then
+	 sim_alignment="-DWITH_DEFAULT_ALIGNMENT=${default_alignment}"
+       else
+         if test x"$wire_alignment" != x; then
+	   sim_alignment="-DWITH_DEFAULT_ALIGNMENT=${wire_alignment}"
+         else
+           echo "No default alignment for target $target" 1>&6
+           sim_alignment="-DWITH_DEFAULT_ALIGNMENT=0"
+         fi
+       fi;;
+  *)   as_fn_error "\"Unknown value $enableval passed to --enable-sim-alignment\"" "$LINENO" 5; sim_alignment="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_alignment" != x""; then
+  echo "Setting alignment flags = $sim_alignment" 6>&1
+fi
+else
+  if test x"$default_alignment" != x; then
+  sim_alignment="-DWITH_DEFAULT_ALIGNMENT=${default_alignment}"
+else
+  if test x"$wire_alignment" != x; then
+    sim_alignment="-DWITH_ALIGNMENT=${wire_alignment}"
+  else
+    sim_alignment=
+  fi
+fi
+fi
+
+
+# Check whether --enable-sim-hostendian was given.
+if test "${enable_sim_hostendian+set}" = set; then :
+  enableval=$enable_sim_hostendian; case "${enableval}" in
+  no)	 sim_hostendian="-DWITH_HOST_BYTE_ORDER=0";;
+  b*|B*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=BIG_ENDIAN";;
+  l*|L*) sim_hostendian="-DWITH_HOST_BYTE_ORDER=LITTLE_ENDIAN";;
+  *)	 as_fn_error "\"Unknown value $enableval for --enable-sim-hostendian\"" "$LINENO" 5; sim_hostendian="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_hostendian" != x""; then
+  echo "Setting hostendian flags = $sim_hostendian" 6>&1
+fi
+else
+
+if test "x$cross_compiling" = "xno"; then
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether byte ordering is bigendian" >&5
+$as_echo_n "checking whether byte ordering is bigendian... " >&6; }
+if test "${ac_cv_c_bigendian+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_cv_c_bigendian=unknown
+    # See if we're dealing with a universal compiler.
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#ifndef __APPLE_CC__
+	       not a universal capable compiler
+	     #endif
+	     typedef int dummy;
+
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+
+	# Check for potential -arch flags.  It is not universal unless
+	# there are at least two -arch flags with different values.
+	ac_arch=
+	ac_prev=
+	for ac_word in $CC $CFLAGS $CPPFLAGS $LDFLAGS; do
+	 if test -n "$ac_prev"; then
+	   case $ac_word in
+	     i?86 | x86_64 | ppc | ppc64)
+	       if test -z "$ac_arch" || test "$ac_arch" = "$ac_word"; then
+		 ac_arch=$ac_word
+	       else
+		 ac_cv_c_bigendian=universal
+		 break
+	       fi
+	       ;;
+	   esac
+	   ac_prev=
+	 elif test "x$ac_word" = "x-arch"; then
+	   ac_prev=arch
+	 fi
+       done
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    if test $ac_cv_c_bigendian = unknown; then
+      # See if sys/param.h defines the BYTE_ORDER macro.
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/types.h>
+	     #include <sys/param.h>
+
+int
+main ()
+{
+#if ! (defined BYTE_ORDER && defined BIG_ENDIAN \
+		     && defined LITTLE_ENDIAN && BYTE_ORDER && BIG_ENDIAN \
+		     && LITTLE_ENDIAN)
+	      bogus endian macros
+	     #endif
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  # It does; now see whether it defined to BIG_ENDIAN or not.
+	 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/types.h>
+		#include <sys/param.h>
+
+int
+main ()
+{
+#if BYTE_ORDER != BIG_ENDIAN
+		 not big endian
+		#endif
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ac_cv_c_bigendian=yes
+else
+  ac_cv_c_bigendian=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    fi
+    if test $ac_cv_c_bigendian = unknown; then
+      # See if <limits.h> defines _LITTLE_ENDIAN or _BIG_ENDIAN (e.g., Solaris).
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <limits.h>
+
+int
+main ()
+{
+#if ! (defined _LITTLE_ENDIAN || defined _BIG_ENDIAN)
+	      bogus endian macros
+	     #endif
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  # It does; now see whether it defined to _BIG_ENDIAN or not.
+	 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <limits.h>
+
+int
+main ()
+{
+#ifndef _BIG_ENDIAN
+		 not big endian
+		#endif
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ac_cv_c_bigendian=yes
+else
+  ac_cv_c_bigendian=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    fi
+    if test $ac_cv_c_bigendian = unknown; then
+      # Compile a test program.
+      if test "$cross_compiling" = yes; then :
+  # Try to guess by grepping values from an object file.
+	 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+short int ascii_mm[] =
+		  { 0x4249, 0x4765, 0x6E44, 0x6961, 0x6E53, 0x7953, 0 };
+		short int ascii_ii[] =
+		  { 0x694C, 0x5454, 0x656C, 0x6E45, 0x6944, 0x6E61, 0 };
+		int use_ascii (int i) {
+		  return ascii_mm[i] + ascii_ii[i];
+		}
+		short int ebcdic_ii[] =
+		  { 0x89D3, 0xE3E3, 0x8593, 0x95C5, 0x89C4, 0x9581, 0 };
+		short int ebcdic_mm[] =
+		  { 0xC2C9, 0xC785, 0x95C4, 0x8981, 0x95E2, 0xA8E2, 0 };
+		int use_ebcdic (int i) {
+		  return ebcdic_mm[i] + ebcdic_ii[i];
+		}
+		extern int foo;
+
+int
+main ()
+{
+return use_ascii (foo) == use_ebcdic (foo);
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  if grep BIGenDianSyS conftest.$ac_objext >/dev/null; then
+	      ac_cv_c_bigendian=yes
+	    fi
+	    if grep LiTTleEnDian conftest.$ac_objext >/dev/null ; then
+	      if test "$ac_cv_c_bigendian" = unknown; then
+		ac_cv_c_bigendian=no
+	      else
+		# finding both strings is unlikely to happen, but who knows?
+		ac_cv_c_bigendian=unknown
+	      fi
+	    fi
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$ac_includes_default
+int
+main ()
+{
+
+	     /* Are we little or big endian?  From Harbison&Steele.  */
+	     union
+	     {
+	       long int l;
+	       char c[sizeof (long int)];
+	     } u;
+	     u.l = 1;
+	     return u.c[sizeof (long int) - 1] == 1;
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  ac_cv_c_bigendian=no
+else
+  ac_cv_c_bigendian=yes
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+    fi
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_c_bigendian" >&5
+$as_echo "$ac_cv_c_bigendian" >&6; }
+ case $ac_cv_c_bigendian in #(
+   yes)
+     $as_echo "#define WORDS_BIGENDIAN 1" >>confdefs.h
+;; #(
+   no)
+      ;; #(
+   universal)
+
+$as_echo "#define AC_APPLE_UNIVERSAL_BUILD 1" >>confdefs.h
+
+     ;; #(
+   *)
+     as_fn_error "unknown endianness
+ presetting ac_cv_c_bigendian=no (or yes) will help" "$LINENO" 5 ;;
+ esac
+
+  if test $ac_cv_c_bigendian = yes; then
+    sim_hostendian="-DWITH_HOST_BYTE_ORDER=BIG_ENDIAN"
+  else
+    sim_hostendian="-DWITH_HOST_BYTE_ORDER=LITTLE_ENDIAN"
+  fi
+else
+  sim_hostendian="-DWITH_HOST_BYTE_ORDER=0"
+fi
+fi
+
+
+# Check whether --enable-sim-environment was given.
+if test "${enable_sim_environment+set}" = set; then :
+  enableval=$enable_sim_environment; case "${enableval}" in
+  all | ALL)             sim_environment="-DWITH_ENVIRONMENT=ALL_ENVIRONMENT";;
+  user | USER)           sim_environment="-DWITH_ENVIRONMENT=USER_ENVIRONMENT";;
+  virtual | VIRTUAL)     sim_environment="-DWITH_ENVIRONMENT=VIRTUAL_ENVIRONMENT";;
+  operating | OPERATING) sim_environment="-DWITH_ENVIRONMENT=OPERATING_ENVIRONMENT";;
+  *)   as_fn_error "\"Unknown value $enableval passed to --enable-sim-environment\"" "$LINENO" 5;
+       sim_environment="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_environment" != x""; then
+  echo "Setting sim environment = $sim_environment" 6>&1
+fi
+else
+  sim_environment="-DWITH_ENVIRONMENT=ALL_ENVIRONMENT"
+fi
+
+
+default_sim_inline=""
+# Check whether --enable-sim-inline was given.
+if test "${enable_sim_inline+set}" = set; then :
+  enableval=$enable_sim_inline; sim_inline=""
+case "$enableval" in
+  no)		sim_inline="-DDEFAULT_INLINE=0";;
+  0)		sim_inline="-DDEFAULT_INLINE=0";;
+  yes | 2)	sim_inline="-DDEFAULT_INLINE=ALL_C_INLINE";;
+  1)		sim_inline="-DDEFAULT_INLINE=INLINE_LOCALS";;
+  *) for x in `echo "$enableval" | sed -e "s/,/ /g"`; do
+       new_flag=""
+       case "$x" in
+	 *_INLINE=*)	new_flag="-D$x";;
+	 *=*)		new_flag=`echo "$x" | sed -e "s/=/_INLINE=/" -e "s/^/-D/"`;;
+	 *_INLINE)	new_flag="-D$x=ALL_C_INLINE";;
+	 *)		new_flag="-D$x""_INLINE=ALL_C_INLINE";;
+       esac
+       if test x"$sim_inline" = x""; then
+	 sim_inline="$new_flag"
+       else
+	 sim_inline="$sim_inline $new_flag"
+       fi
+     done;;
+esac
+if test x"$silent" != x"yes" && test x"$sim_inline" != x""; then
+  echo "Setting inline flags = $sim_inline" 6>&1
+fi
+else
+
+if test "x$cross_compiling" = "xno"; then
+  if test x"$GCC" != "x" -a x"${default_sim_inline}" != "x" ; then
+    sim_inline="${default_sim_inline}"
+    if test x"$silent" != x"yes"; then
+      echo "Setting inline flags = $sim_inline" 6>&1
+    fi
+  else
+    sim_inline=""
+  fi
+else
+  sim_inline="-DDEFAULT_INLINE=0"
+fi
+fi
+
+
 for ac_header in unistd.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "unistd.h" "ac_cv_header_unistd_h" "$ac_includes_default"
@@ -4628,6 +5129,7 @@ done
 LIBOBJS=$ac_libobjs
 
 LTLIBOBJS=$ac_ltlibobjs
+
 
 
 

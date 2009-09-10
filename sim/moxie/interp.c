@@ -28,6 +28,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "libiberty.h"
 #include "gdb/remote-sim.h"
 
+#include "sim-main.h"
+#include "sim-base.h"
+
 typedef int word;
 typedef unsigned int uword;
 
@@ -39,10 +42,11 @@ FILE *tracefile;
    instruction.  */
 #define INST2OFFSET(o) ((((signed short)((o & ((1<<10)-1))<<6))>>6)<<1)
 
-#define EXTRACT_WORD(addr) (((addr)[0] << 24) \
-			    + ((addr)[1] << 16) \
-			    + ((addr)[2] << 8) \
-			    + ((addr)[3]))
+#define EXTRACT_WORD(addr) \
+  ((sim_core_read_aligned_1 (scpu, cia, read_map, addr) << 24) \
+   + (sim_core_read_aligned_1 (scpu, cia, read_map, addr+1) << 16) \
+   + (sim_core_read_aligned_1 (scpu, cia, read_map, addr+2) << 8) \
+   + (sim_core_read_aligned_1 (scpu, cia, read_map, addr+3)))
 
 unsigned long
 moxie_extract_unsigned_integer (addr, len)
@@ -111,8 +115,6 @@ struct moxie_regset
   word		  sregs[256];             /* special registers */
   word            cc;                   /* the condition code reg */
   int		  exception;
-  unsigned long   msize;
-  unsigned char * memory;
   unsigned long long insts;                /* instruction counter */
 };
 
@@ -132,65 +134,20 @@ static char *myname;
 static SIM_OPEN_KIND sim_kind;
 static int issue_messages = 0;
 
-/* Default to a 16 Mbyte (== 2^23) memory space.  */
-static int sim_memory_size = 24;
-
-#define	MEM_SIZE_FLOOR	64
 void
-sim_size (power)
-     int power;
+sim_size (int s)
 {
-  sim_memory_size = power;
-  cpu.asregs.msize = 1 << sim_memory_size;
-
-  if (cpu.asregs.memory)
-    free (cpu.asregs.memory);
-
-  /* Watch out for the '0 count' problem. There's probably a better
-     way.. e.g., why do we use 64 here?  */
-  if (cpu.asregs.msize < 64)	/* Ensure a boundary.  */
-    cpu.asregs.memory = (unsigned char *) calloc (64, (64 + cpu.asregs.msize) / 64);
-  else
-    cpu.asregs.memory = (unsigned char *) calloc (64, cpu.asregs.msize / 64);
-
-  if (!cpu.asregs.memory)
-    {
-      if (issue_messages)
-	fprintf (stderr,
-		 "Not enough VM for simulation of %d bytes of RAM\n",
-		 cpu.asregs.msize);
-
-      cpu.asregs.msize = 1;
-      cpu.asregs.memory = (unsigned char *) calloc (1, 1);
-    }
 }
-
-static void
-init_pointers ()
-{
-  if (cpu.asregs.msize != (1 << sim_memory_size))
-    sim_size (sim_memory_size);
-}
-
 
 static void
 set_initial_gprs ()
 {
   int i;
   long space;
-  unsigned long memsize;
   
-  init_pointers ();
-
   /* Set up machine just out of reset.  */
   cpu.asregs.regs[PC_REGNO] = 0;
   
-  memsize = cpu.asregs.msize / (1024 * 1024);
-
-  if (issue_messages > 1)
-    fprintf (stderr, "Simulated memory of %d Mbytes (0x0 .. 0x%08x)\n",
-	     memsize, cpu.asregs.msize - 1);
-
   /* Clean out the register contents.  */
   for (i = 0; i < NUM_MOXIE_REGS; i++)
     cpu.asregs.regs[i] = 0;
@@ -207,168 +164,61 @@ interrupt ()
 /* Write a 1 byte value to memory.  */
 
 static void INLINE 
-wbat (pc, x, v)
-     word pc, x, v;
+wbat (sim_cpu *scpu, word pc, word x, word v)
 {
-  if (((uword)x) >= cpu.asregs.msize)
-    {
-      if (issue_messages)
-	fprintf (stderr, "byte write to 0x%x outside memory range\n", x);
-      
-      cpu.asregs.exception = SIGSEGV;
-    }
-  else
-    {
-      {
-	unsigned char * p = cpu.asregs.memory + x;
-	*p = v;
-      }
-    }
+  address_word cia = CIA_GET (scpu);
+  
+  sim_core_write_aligned_1 (scpu, cia, write_map, x, v);
 }
 
 /* Write a 2 byte value to memory.  */
 
 static void INLINE 
-wsat (pc, x, v)
-     word pc, x, v;
+wsat (sim_cpu *scpu, word pc, word x, word v)
 {
-  if (((uword)x) >= cpu.asregs.msize)
-    {
-      if (issue_messages)
-	fprintf (stderr, "short word write to 0x%x outside memory range\n", x);
-      
-      cpu.asregs.exception = SIGSEGV;
-    }
-  else
-    {
-      if ((x & 1) != 0)
-	{
-	  if (issue_messages)
-	    fprintf (stderr, "short word write to unaligned memory address: 0x%x\n", x);
-      
-	  cpu.asregs.exception = SIGBUS;
-	}
-      {
-	unsigned char * p = cpu.asregs.memory + x;
-	p[0] = v >> 8;
-	p[1] = v;
-      }
-    }
+  address_word cia = CIA_GET (scpu);
+  
+  sim_core_write_aligned_2 (scpu, cia, write_map, x, v);
 }
 
 /* Write a 4 byte value to memory.  */
 
 static void INLINE 
-wlat (pc, x, v)
-     word pc, x, v;
+wlat (sim_cpu *scpu, word pc, word x, word v)
 {
-  if (((uword)x) >= cpu.asregs.msize)
-    {
-      if (issue_messages)
-	fprintf (stderr, "word write to 0x%x outside memory range\n", x);
-      
-      cpu.asregs.exception = SIGSEGV;
-    }
-  else
-    {
-      if ((x & 1) != 0)
-	{
-	  if (issue_messages)
-	    fprintf (stderr, "word write to unaligned memory address: 0x%x\n", x);
-      
-	  cpu.asregs.exception = SIGBUS;
-	}
-      {
-	unsigned char * p = cpu.asregs.memory + x;
-	p[0] = v >> 24;
-	p[1] = v >> 16;
-	p[2] = v >> 8;
-	p[3] = v;
-      }
-    }
+  address_word cia = CIA_GET (scpu);
+	
+  sim_core_write_aligned_4 (scpu, cia, write_map, x, v);
 }
 
 /* Read 2 bytes from memory.  */
 
 static int INLINE 
-rsat (pc, x)
-     word pc, x;
+rsat (sim_cpu *scpu, word pc, word x)
 {
-  if (((uword) x) >= cpu.asregs.msize)
-    {
-      if (issue_messages)
-	fprintf (stderr, "short word read from 0x%x outside memory range\n", x);
-      
-      cpu.asregs.exception = SIGSEGV;
-      return 0;
-    }
-  else
-    {
-      if ((x & 1) != 0)
-	{
-	  if (issue_messages)
-	    fprintf (stderr, "short word read from unaligned address: 0x%x\n", x);
-      
-	  cpu.asregs.exception = SIGBUS;
-	  return 0;
-	}
-      {
-	unsigned char * p = cpu.asregs.memory + x;
-	return (p[0] << 8) | p[1];
-      }
-    }
+  address_word cia = CIA_GET (scpu);
+  
+  return (sim_core_read_aligned_2 (scpu, cia, read_map, x));
 }
 
 /* Read 1 byte from memory.  */
 
 static int INLINE 
-rbat (pc, x)
-     word pc, x;
+rbat (sim_cpu *scpu, word pc, word x)
 {
-  if (((uword) x) >= cpu.asregs.msize)
-    {
-      if (issue_messages)
-	fprintf (stderr, "byte read from 0x%x outside memory range\n", x);
-      
-      cpu.asregs.exception = SIGSEGV;
-      return 0;
-    }
-  else
-    {
-      unsigned char * p = cpu.asregs.memory + x;
-      return *p;
-    }
+  address_word cia = CIA_GET (scpu);
+  
+  return (sim_core_read_aligned_1 (scpu, cia, read_map, x));
 }
 
 /* Read 4 bytes from memory.  */
 
 static int INLINE 
-rlat (pc, x)
-     word pc, x;
+rlat (sim_cpu *scpu, word pc, word x)
 {
-  if (((uword) x) >= cpu.asregs.msize)
-    {
-      if (issue_messages)
-	fprintf (stderr, "word read from 0x%x outside memory range\n", x);
-      
-      cpu.asregs.exception = SIGSEGV;
-      return 0;
-    }
-  else
-    {
-      if ((x & 3) != 0)
-	{
-	  if (issue_messages)
-	    fprintf (stderr, "word read from unaligned address: 0x%x\n", x);
-      
-	  cpu.asregs.exception = SIGBUS;
-	  return 0;
-	}
-      {
-	unsigned char * p = cpu.asregs.memory + x;
-	return (EXTRACT_WORD(p));
-      }
-    }
+  address_word cia = CIA_GET (scpu);
+  
+  return (sim_core_read_aligned_4 (scpu, cia, read_map, x));
 }
 
 #define CHECK_FLAG(T,H) if (tflags & T) { hflags |= H; tflags ^= T; }
@@ -407,12 +257,13 @@ sim_resume (sd, step, siggnal)
   unsigned long long insts;
   unsigned short inst;
   void (* sigsave)();
+  sim_cpu *scpu = STATE_CPU (sd, 0); /* FIXME */
+  address_word cia = CIA_GET (scpu);
 
   sigsave = signal (SIGINT, interrupt);
   cpu.asregs.exception = step ? SIGTRAP: 0;
   pc = cpu.asregs.regs[PC_REGNO];
   insts = cpu.asregs.insts;
-  unsigned char *memory = cpu.asregs.memory;
 
   /* Run instructions here. */
   do 
@@ -420,7 +271,8 @@ sim_resume (sd, step, siggnal)
       opc = pc;
 
       /* Fetch the instruction at pc.  */
-      inst = (memory[pc] << 8) + memory[pc + 1];
+      inst = (sim_core_read_aligned_1 (scpu, cia, read_map, pc) << 8)
+	+ sim_core_read_aligned_1 (scpu, cia, read_map, pc+1);
 
       /* Decode instruction.  */
       if (inst & (1 << 15))
@@ -568,7 +420,7 @@ sim_resume (sd, step, siggnal)
 	      {
 		int reg = (inst >> 4) & 0xf;
 		TRACE("ldi.l");
-		unsigned int val = EXTRACT_WORD(&(memory[pc + 2]));
+		unsigned int val = EXTRACT_WORD(pc+2);
 		cpu.asregs.regs[reg] = val;
 		pc += 4;
 	      }
@@ -583,7 +435,7 @@ sim_resume (sd, step, siggnal)
 	      break;
  	    case 0x03: /* jsra */
  	      {
- 		unsigned int fn = EXTRACT_WORD(&(memory[pc + 2]));
+ 		unsigned int fn = EXTRACT_WORD(pc+2);
  		unsigned int sp = cpu.asregs.regs[1];
 		TRACE("jsra");
  		/* Save a slot for the static chain.  */
@@ -591,11 +443,11 @@ sim_resume (sd, step, siggnal)
 
  		/* Push the return address.  */
 		sp -= 4;
- 		wlat (opc, sp, pc + 6);
+ 		wlat (scpu, opc, sp, pc + 6);
  		
  		/* Push the current frame pointer.  */
  		sp -= 4;
- 		wlat (opc, sp, cpu.asregs.regs[0]);
+ 		wlat (scpu, opc, sp, cpu.asregs.regs[0]);
  
  		/* Uncache the stack pointer and set the pc and $fp.  */
 		cpu.asregs.regs[1] = sp;
@@ -610,11 +462,11 @@ sim_resume (sd, step, siggnal)
 		TRACE("ret");
  
  		/* Pop the frame pointer.  */
- 		cpu.asregs.regs[0] = rlat (opc, sp);
+ 		cpu.asregs.regs[0] = rlat (scpu, opc, sp);
  		sp += 4;
  		
  		/* Pop the return address.  */
- 		pc = rlat (opc, sp) - 2;
+ 		pc = rlat (scpu, opc, sp) - 2;
  		sp += 4;
 
 		/* Skip over the static chain slot.  */
@@ -640,7 +492,7 @@ sim_resume (sd, step, siggnal)
 		int b = inst & 0xf;
 		int sp = cpu.asregs.regs[a] - 4;
 		TRACE("push");
-		wlat (opc, sp, cpu.asregs.regs[b]);
+		wlat (scpu, opc, sp, cpu.asregs.regs[b]);
 		cpu.asregs.regs[a] = sp;
 	      }
 	      break;
@@ -650,25 +502,25 @@ sim_resume (sd, step, siggnal)
 		int b = inst & 0xf;
 		int sp = cpu.asregs.regs[a];
 		TRACE("pop");
-		cpu.asregs.regs[b] = rlat (opc, sp);
+		cpu.asregs.regs[b] = rlat (scpu, opc, sp);
 		cpu.asregs.regs[a] = sp + 4;
 	      }
 	      break;
 	    case 0x08: /* lda.l */
 	      {
 		int reg = (inst >> 4) & 0xf;
-		unsigned int addr = EXTRACT_WORD(&memory[pc+2]);
+		unsigned int addr = EXTRACT_WORD(pc+2);
 		TRACE("lda.l");
-		cpu.asregs.regs[reg] = rlat (opc, addr);
+		cpu.asregs.regs[reg] = rlat (scpu, opc, addr);
 		pc += 4;
 	      }
 	      break;
 	    case 0x09: /* sta.l */
 	      {
 		int reg = (inst >> 4) & 0xf;
-		unsigned int addr = EXTRACT_WORD(&memory[pc+2]);
+		unsigned int addr = EXTRACT_WORD(pc+2);
 		TRACE("sta.l");
-		wlat (opc, addr, cpu.asregs.regs[reg]);
+		wlat (scpu, opc, addr, cpu.asregs.regs[reg]);
 		pc += 4;
 	      }
 	      break;
@@ -679,7 +531,7 @@ sim_resume (sd, step, siggnal)
 		int xv;
 		TRACE("ld.l");
 		xv = cpu.asregs.regs[src];
-		cpu.asregs.regs[dest] = rlat (opc, xv);
+		cpu.asregs.regs[dest] = rlat (scpu, opc, xv);
 	      }
 	      break;
 	    case 0x0b: /* st.l */
@@ -687,28 +539,28 @@ sim_resume (sd, step, siggnal)
 		int dest = (inst >> 4) & 0xf;
 		int val  = inst & 0xf;
 		TRACE("st.l");
-		wlat (opc, cpu.asregs.regs[dest], cpu.asregs.regs[val]);
+		wlat (scpu, opc, cpu.asregs.regs[dest], cpu.asregs.regs[val]);
 	      }
 	      break;
 	    case 0x0c: /* ldo.l */
 	      {
-		unsigned int addr = EXTRACT_WORD(&memory[pc+2]);
+		unsigned int addr = EXTRACT_WORD(pc+2);
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 		TRACE("ldo.l");
 		addr += cpu.asregs.regs[b];
-		cpu.asregs.regs[a] = rlat(opc, addr);
+		cpu.asregs.regs[a] = rlat (scpu, opc, addr);
 		pc += 4;
 	      }
 	      break;
 	    case 0x0d: /* sto.l */
 	      {
-		unsigned int addr = EXTRACT_WORD(&memory[pc+2]);
+		unsigned int addr = EXTRACT_WORD(pc+2);
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 		TRACE("sto.l");
 		addr += cpu.asregs.regs[a];
-		wlat(opc, addr, cpu.asregs.regs[b]);
+		wlat (scpu, opc, addr, cpu.asregs.regs[b]);
 		pc += 4;
 	      }
 	      break;
@@ -763,11 +615,11 @@ sim_resume (sd, step, siggnal)
 
 		/* Push the return address.  */
 		sp -= 4;
-		wlat (opc, sp, pc + 2);
+		wlat (scpu, opc, sp, pc + 2);
 		
 		/* Push the current frame pointer.  */
 		sp -= 4;
-		wlat (opc, sp, cpu.asregs.regs[0]);
+		wlat (scpu, opc, sp, cpu.asregs.regs[0]);
 
 		/* Uncache the stack pointer and set the fp & pc.  */
 		cpu.asregs.regs[1] = sp;
@@ -777,7 +629,7 @@ sim_resume (sd, step, siggnal)
 	      break;
 	    case 0x1a: /* jmpa */
 	      {
-		unsigned int tgt = EXTRACT_WORD(&memory[pc+2]);
+		unsigned int tgt = EXTRACT_WORD(pc+2);
 		TRACE("jmpa");
 		pc = tgt - 2;
 	      }
@@ -786,7 +638,7 @@ sim_resume (sd, step, siggnal)
 	      {
 		int reg = (inst >> 4) & 0xf;
 
-		unsigned int val = EXTRACT_WORD(&(memory[pc + 2]));
+		unsigned int val = EXTRACT_WORD(pc+2);
 		TRACE("ldi.b");
 		cpu.asregs.regs[reg] = val;
 		pc += 4;
@@ -799,15 +651,15 @@ sim_resume (sd, step, siggnal)
 		int xv;
 		TRACE("ld.b");
 		xv = cpu.asregs.regs[src];
-		cpu.asregs.regs[dest] = rbat (opc, xv);
+		cpu.asregs.regs[dest] = rbat (scpu, opc, xv);
 	      }
 	      break;
 	    case 0x1d: /* lda.b */
 	      {
 		int reg = (inst >> 4) & 0xf;
-		unsigned int addr = EXTRACT_WORD(&memory[pc+2]);
+		unsigned int addr = EXTRACT_WORD(pc+2);
 		TRACE("lda.b");
-		cpu.asregs.regs[reg] = rbat (opc, addr);
+		cpu.asregs.regs[reg] = rbat (scpu, opc, addr);
 		pc += 4;
 	      }
 	      break;
@@ -816,15 +668,15 @@ sim_resume (sd, step, siggnal)
 		int dest = (inst >> 4) & 0xf;
 		int val  = inst & 0xf;
 		TRACE("st.b");
-		wbat (opc, cpu.asregs.regs[dest], cpu.asregs.regs[val]);
+		wbat (scpu, opc, cpu.asregs.regs[dest], cpu.asregs.regs[val]);
 	      }
 	      break;
 	    case 0x1f: /* sta.b */
 	      {
 		int reg = (inst >> 4) & 0xf;
-		unsigned int addr = EXTRACT_WORD(&memory[pc+2]);
+		unsigned int addr = EXTRACT_WORD(pc+2);
 		TRACE("sta.b");
-		wbat (opc, addr, cpu.asregs.regs[reg]);
+		wbat (scpu, opc, addr, cpu.asregs.regs[reg]);
 		pc += 4;
 	      }
 	      break;
@@ -832,7 +684,7 @@ sim_resume (sd, step, siggnal)
 	      {
 		int reg = (inst >> 4) & 0xf;
 
-		unsigned int val = EXTRACT_WORD(&(memory[pc + 2]));
+		unsigned int val = EXTRACT_WORD(pc+2);
 		TRACE("ldi.s");
 		cpu.asregs.regs[reg] = val;
 		pc += 4;
@@ -845,15 +697,15 @@ sim_resume (sd, step, siggnal)
 		int xv;
 		TRACE("ld.s");
 		xv = cpu.asregs.regs[src];
-		cpu.asregs.regs[dest] = rsat (opc, xv);
+		cpu.asregs.regs[dest] = rsat (scpu, opc, xv);
 	      }
 	      break;
 	    case 0x22: /* lda.s */
 	      {
 		int reg = (inst >> 4) & 0xf;
-		unsigned int addr = EXTRACT_WORD(&memory[pc+2]);
+		unsigned int addr = EXTRACT_WORD(pc+2);
 		TRACE("lda.s");
-		cpu.asregs.regs[reg] = rsat (opc, addr);
+		cpu.asregs.regs[reg] = rsat (scpu, opc, addr);
 		pc += 4;
 	      }
 	      break;
@@ -862,15 +714,15 @@ sim_resume (sd, step, siggnal)
 		int dest = (inst >> 4) & 0xf;
 		int val  = inst & 0xf;
 		TRACE("st.s");
-		wsat (opc, cpu.asregs.regs[dest], cpu.asregs.regs[val]);
+		wsat (scpu, opc, cpu.asregs.regs[dest], cpu.asregs.regs[val]);
 	      }
 	      break;
 	    case 0x24: /* sta.s */
 	      {
 		int reg = (inst >> 4) & 0xf;
-		unsigned int addr = EXTRACT_WORD(&memory[pc+2]);
+		unsigned int addr = EXTRACT_WORD(pc+2);
 		TRACE("sta.s");
-		wsat (opc, addr, cpu.asregs.regs[reg]);
+		wsat (scpu, opc, addr, cpu.asregs.regs[reg]);
 		pc += 4;
 	      }
 	      break;
@@ -984,8 +836,11 @@ sim_resume (sd, step, siggnal)
 	      break;
 	    case 0x30: /* swi */
 	      {
-		unsigned int inum = EXTRACT_WORD(&memory[pc+2]);
+		unsigned int inum = EXTRACT_WORD(pc+2);
 		TRACE("swi");
+		/* Set the special registers appropriately.  */
+		cpu.asregs.sregs[2] = 3; /* MOXIE_EX_SWI */
+	        cpu.asregs.sregs[3] = inum;
 		switch (inum)
 		  {
 		  case 0x1: /* SYS_exit */
@@ -995,10 +850,12 @@ sim_resume (sd, step, siggnal)
 		    }
 		  case 0x2: /* SYS_open */
 		    {
-		      char *fname = &memory[cpu.asregs.regs[2]];
+		      char fname[1024];
 		      int mode = (int) convert_target_flags ((unsigned) cpu.asregs.regs[3]);
 		      int perm = (int) cpu.asregs.regs[4];
 		      int fd = open (fname, mode, perm);
+		      sim_core_read_buffer (sd, scpu, read_map, fname,
+					    cpu.asregs.regs[2], 1024);
 		      /* FIXME - set errno */
 		      cpu.asregs.regs[2] = fd;
 		      break;
@@ -1006,17 +863,24 @@ sim_resume (sd, step, siggnal)
 		  case 0x4: /* SYS_read */
 		    {
 		      int fd = cpu.asregs.regs[2];
-		      char *buf = &memory[cpu.asregs.regs[3]];
 		      unsigned len = (unsigned) cpu.asregs.regs[4];
+		      char *buf = malloc (len);
 		      cpu.asregs.regs[2] = read (fd, buf, len);
+		      sim_core_write_buffer (sd, scpu, write_map, buf,
+					     cpu.asregs.regs[3], len);
+		      free (buf);
 		      break;
 		    }
 		  case 0x5: /* SYS_write */
 		    {
-		      char *str = &memory[cpu.asregs.regs[3]];
+		      char *str;
 		      /* String length is at 0x12($fp) */
 		      unsigned count, len = (unsigned) cpu.asregs.regs[4];
+		      str = malloc (len);
+		      sim_core_read_buffer (sd, scpu, read_map, str,
+					    cpu.asregs.regs[3], len);
 		      count = write (cpu.asregs.regs[2], str, len);
+		      free (str);
 		      cpu.asregs.regs[2] = count;
 		      break;
 		    }
@@ -1024,18 +888,17 @@ sim_resume (sd, step, siggnal)
 		    {
 		      unsigned int handler = cpu.asregs.sregs[1];
 		      unsigned int sp = cpu.asregs.regs[1];
-		      cpu.asregs.sregs[2] = 3; /* MOXIE_EX_SWI */
 
 		      /* Save a slot for the static chain.  */
 		      sp -= 4;
 
 		      /* Push the return address.  */
 		      sp -= 4;
-		      wlat (opc, sp, pc + 6);
+		      wlat (scpu, opc, sp, pc + 6);
 		
 		      /* Push the current frame pointer.  */
 		      sp -= 4;
-		      wlat (opc, sp, cpu.asregs.regs[0]);
+		      wlat (scpu, opc, sp, cpu.asregs.regs[0]);
 
 		      /* Uncache the stack pointer and set the fp & pc.  */
 		      cpu.asregs.regs[1] = sp;
@@ -1095,45 +958,45 @@ sim_resume (sd, step, siggnal)
 	      break;
 	    case 0x36: /* ldo.b */
 	      {
-		unsigned int addr = EXTRACT_WORD(&memory[pc+2]);
+		unsigned int addr = EXTRACT_WORD(pc+2);
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 		TRACE("ldo.b");
 		addr += cpu.asregs.regs[b];
-		cpu.asregs.regs[a] = rbat(opc, addr);
+		cpu.asregs.regs[a] = rbat (scpu, opc, addr);
 		pc += 4;
 	      }
 	      break;
 	    case 0x37: /* sto.b */
 	      {
-		unsigned int addr = EXTRACT_WORD(&memory[pc+2]);
+		unsigned int addr = EXTRACT_WORD(pc+2);
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 		TRACE("sto.b");
 		addr += cpu.asregs.regs[a];
-		wbat(opc, addr, cpu.asregs.regs[b]);
+		wbat (scpu, opc, addr, cpu.asregs.regs[b]);
 		pc += 4;
 	      }
 	      break;
 	    case 0x38: /* ldo.s */
 	      {
-		unsigned int addr = EXTRACT_WORD(&memory[pc+2]);
+		unsigned int addr = EXTRACT_WORD(pc+2);
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 		TRACE("ldo.s");
 		addr += cpu.asregs.regs[b];
-		cpu.asregs.regs[a] = rsat(opc, addr);
+		cpu.asregs.regs[a] = rsat (scpu, opc, addr);
 		pc += 4;
 	      }
 	      break;
 	    case 0x39: /* sto.s */
 	      {
-		unsigned int addr = EXTRACT_WORD(&memory[pc+2]);
+		unsigned int addr = EXTRACT_WORD(pc+2);
 		int a = (inst >> 4) & 0xf;
 		int b = inst & 0xf;
 		TRACE("sto.s");
 		addr += cpu.asregs.regs[a];
-		wsat(opc, addr, cpu.asregs.regs[b]);
+		wsat (scpu, opc, addr, cpu.asregs.regs[b]);
 		pc += 4;
 	      }
 	      break;
@@ -1164,11 +1027,10 @@ sim_write (sd, addr, buffer, size)
      unsigned char * buffer;
      int size;
 {
-  int i;
-  init_pointers ();
-  
-  memcpy (& cpu.asregs.memory[addr], buffer, size);
-  
+  sim_cpu *scpu = STATE_CPU (sd, 0); /* FIXME */
+
+  sim_core_write_buffer (sd, scpu, write_map, buffer, addr, size);
+
   return size;
 }
 
@@ -1179,10 +1041,9 @@ sim_read (sd, addr, buffer, size)
      unsigned char * buffer;
      int size;
 {
-  int i;
-  init_pointers ();
-  
-  memcpy (buffer, & cpu.asregs.memory[addr], size);
+  sim_cpu *scpu = STATE_CPU (sd, 0); /* FIXME */
+
+  sim_core_read_buffer (sd, scpu, read_map, buffer, addr, size);
   
   return size;
 }
@@ -1195,8 +1056,6 @@ sim_store_register (sd, rn, memory, length)
      unsigned char * memory;
      int length;
 {
-  init_pointers ();
-
   if (rn < NUM_MOXIE_REGS && rn >= 0)
     {
       if (length == 4)
@@ -1221,8 +1080,6 @@ sim_fetch_register (sd, rn, memory, length)
      unsigned char * memory;
      int length;
 {
-  init_pointers ();
-  
   if (rn < NUM_MOXIE_REGS && rn >= 0)
     {
       if (length == 4)
@@ -1301,21 +1158,25 @@ sim_open (kind, cb, abfd, argv)
      struct bfd * abfd;
      char ** argv;
 {
-  int osize = sim_memory_size;
+  SIM_DESC sd = sim_state_alloc (kind, cb);
+  printf ("0x%x 0x%x\n", sd, STATE_MAGIC(sd));
+  SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
+    return 0;
+
+  sim_do_command(sd," memory region 0x00000000,0x4000000") ; 
+  sim_do_command(sd," memory region 0xE0000000,0x10000") ; 
+
   myname = argv[0];
   callback = cb;
   
   if (kind == SIM_OPEN_STANDALONE)
     issue_messages = 1;
   
-  /* Discard and reacquire memory -- start with a clean slate.  */
-  sim_size (1);		/* small */
-  sim_size (osize);	/* and back again */
-
   set_initial_gprs ();	/* Reset the GPR registers.  */
   
-  /* Fudge our descriptor for now.  */
-  return (SIM_DESC) 1;
+  return sd;
 }
 
 void
@@ -1324,6 +1185,35 @@ sim_close (sd, quitting)
      int quitting;
 {
   /* nothing to do */
+}
+
+
+/* Load the device tree blob.  */
+
+static void
+load_dtb (SIM_DESC sd, const char *filename)
+{
+  int size = 0;
+  FILE *f = fopen (filename, "rb");
+  char *buf;
+  sim_cpu *scpu = STATE_CPU (sd, 0); /* FIXME */ 
+ if (f == NULL)
+    {
+      printf ("WARNING: ``%s'' could not be opened.\n", filename);
+      return;
+    }
+  fseek (f, 0, SEEK_END);
+  size = ftell(f);
+  fseek (f, 0, SEEK_SET);
+  buf = alloca (size);
+  if (size != fread (buf, 1, size, f))
+    {
+      printf ("ERROR: error reading ``%s''.\n", filename);
+      return;
+    }
+  sim_core_write_buffer (sd, scpu, write_map, buf, 0xE0000000, size);
+  cpu.asregs.sregs[9] = 0xE0000000;
+  fclose (f);
 }
 
 SIM_RC
@@ -1389,6 +1279,7 @@ sim_create_inferior (sd, prog_bfd, argv, env)
 {
   char ** avp;
   int l, argc, i, tp;
+  sim_cpu *scpu = STATE_CPU (sd, 0); /* FIXME */
 
   /* Set the initial register set.  */
   l = issue_messages;
@@ -1412,8 +1303,8 @@ sim_create_inferior (sd, prog_bfd, argv, env)
      0x0000???? zero word 
      0x0000???? start of data pointed to by argv  */
 
-  wlat (0, 0, 0);
-  wlat (0, 4, argc);
+  wlat (scpu, 0, 0, 0);
+  wlat (scpu, 0, 4, argc);
 
   /* tp is the offset of our first argv data.  */
   tp = 4 + 4 + argc * 4 + 4;
@@ -1421,14 +1312,17 @@ sim_create_inferior (sd, prog_bfd, argv, env)
   for (i = 0; i < argc; i++)
     {
       /* Set the argv value.  */
-      wlat (0, 4 + 4 + i * 4, tp);
+      wlat (scpu, 0, 4 + 4 + i * 4, tp);
 
       /* Store the string.  */
-      strcpy (&cpu.asregs.memory[tp], argv[i]);
+      sim_core_write_buffer (sd, scpu, write_map, argv[i],
+			     tp, strlen(argv[i])+1);
       tp += strlen (argv[i]) + 1;
     }
 
-  wlat (0, 4 + 4 + i * 4, 0);
+  wlat (scpu, 0, 4 + 4 + i * 4, 0);
+
+  load_dtb (sd, DTB);
 
   return SIM_RC_OK;
 }
@@ -1446,26 +1340,10 @@ sim_do_command (sd, cmd)
      SIM_DESC sd;
      char * cmd;
 {
-  /* Nothing there yet; it's all an error.  */
-  
-  if (cmd != NULL)
-    {
-      char ** simargv = buildargv (cmd);
-      if (strcmp (simargv[0], "verbose") == 0)
-	{
-	  issue_messages = 2;
-	}
-      else
-	{
-	  fprintf (stderr,"Error: \"%s\" is not a valid moxie simulator command.\n",
+  if (sim_args_command (sd, cmd) != SIM_RC_OK)
+    sim_io_printf (sd, 
+		   "Error: \"%s\" is not a valid moxie simulator command.\n",
 		   cmd);
-	}
-    }
-  else
-    {
-      fprintf (stderr, "moxie sim commands: \n");
-      fprintf (stderr, "  verbose\n");
-    }
 }
 
 void

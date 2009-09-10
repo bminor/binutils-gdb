@@ -1,3 +1,20 @@
+2009-09-10  Anthony Green  <green@moxielogic.com>
+
+	* Makefile.in (install-dtb): New target.
+	(moxie-gdb.dtb): New target.
+	(SIM_CFLAGS): Define DTB macro on command line.
+	(SIM_OBJS): Use common infrastructire.
+	(dtbdir): Define install location for dtb file.
+
+	* sim-main.h: New file.
+	* moxie-gdb.dts: New file.
+	* configure.ac: Check for dtc.  Install dtb file.  Remove some old
+	cruft.
+	* configure: Regenerate.
+	* interp.c: Many changes to use common memory infrastructure.
+	(load_dtb): New function.
+	(sim_create_inferior): Call it.
+
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* config.in: Regenerate.
