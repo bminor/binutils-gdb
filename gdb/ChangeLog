@@ -1,5 +1,14 @@
 2009-09-10  Joel Brobecker  <brobecker@adacore.com>
 
+	* top.c (interactive_mode): New static variable.
+	(show_interactive_mode): New function.
+	(input_from_terminal_p): If interactive_mode is not auto, then
+	use that rather than checking the stdin settings.
+	(init_main): Add "set/show interactive-mode" command.
+	* NEWS: Add entry for new "set/show interactive-mode" command.
+
+2009-09-10  Joel Brobecker  <brobecker@adacore.com>
+
 	* configure.ac: Fix the names of the python source and object files
 	following the renaming done in an earlier change.
 	* configure: Regenerate.

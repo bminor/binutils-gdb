@@ -1318,12 +1318,38 @@ quit_force (char *args, int from_tty)
   exit (exit_code);
 }
 
+/* If OFF, the debugger will run in non-interactive mode, which means
+   that it will automatically select the default answer to all the
+   queries made to the user.  If ON, gdb will wait for the user to
+   answer all queries.  If AUTO, gdb will determine whether to run
+   in interactive mode or not depending on whether stdin is a terminal
+   or not.  */
+static enum auto_boolean interactive_mode = AUTO_BOOLEAN_AUTO;
+
+/* Implement the "show interactive-mode" option.  */
+
+static void
+show_interactive_mode (struct ui_file *file, int from_tty,
+                       struct cmd_list_element *c,
+                       const char *value)
+{
+  if (interactive_mode == AUTO_BOOLEAN_AUTO)
+    fprintf_filtered (file, "\
+Debugger's interactive mode is %s (currently %s).\n",
+                      value, input_from_terminal_p () ? "on" : "off");
+  else
+    fprintf_filtered (file, "Debugger's interactive mode is %s.\n", value);
+}
+
 /* Returns whether GDB is running on a terminal and input is
    currently coming from that terminal.  */
 
 int
 input_from_terminal_p (void)
 {
+  if (interactive_mode != AUTO_BOOLEAN_AUTO)
+    return interactive_mode == AUTO_BOOLEAN_TRUE;
+
   if (gdb_has_a_terminal () && instream == stdin)
     return 1;
 
@@ -1654,6 +1680,18 @@ Use \"on\" to enable the notification, and \"off\" to disable it."),
 			   NULL,
 			   show_exec_done_display_p,
 			   &setlist, &showlist);
+
+  add_setshow_auto_boolean_cmd ("interactive-mode", class_support,
+                                &interactive_mode, _("\
+Set whether GDB should run in interactive mode or not"), _("\
+Show whether GDB runs in interactive mode"), _("\
+If on, run in interactive mode and wait for the user to answer\n\
+all queries.  If off, run in non-interactive mode and automatically\n\
+assume the default answer to all queries.  If auto (the default),\n\
+determine which mode to use based on the standard input settings"),
+                        NULL,
+                        show_interactive_mode,
+                        &setlist, &showlist);
 
   add_setshow_filename_cmd ("data-directory", class_maintenance,
                            &gdb_datadir, _("Set GDB's data directory."),

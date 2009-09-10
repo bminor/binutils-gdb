@@ -400,6 +400,14 @@ show stack-cache
   performance of remote debugging (particularly backtraces) without
   affecting correctness.
 
+set interactive-mode (on|off|auto)
+show interactive-mode
+  Control whether GDB runs in interactive mode (on) or not (off).
+  When in interactive mode, GDB waits for the user to answer all
+  queries.  Otherwise, GDB does not wait and assumes the default
+  answer.  When set to auto (the default), GDB determines which
+  mode to use based on the stdin settings.
+
 * Removed commands
 
 info forks
