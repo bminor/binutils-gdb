@@ -1,3 +1,8 @@
+2009-09-10  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* arc-opc-cgen.c (arc_cgen_init_opcode_table): Comment out
+	warning-generating no-op.
+
 2008-04-09  J"orn Rennecke  <joern.rennecke@arc.com>
 
 	Copy from configure:
