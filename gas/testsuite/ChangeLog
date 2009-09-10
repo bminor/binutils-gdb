@@ -1,3 +1,8 @@
+2009-09-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/lns/lns-common-1.s: Use two nops between each .loc.
+	* gas/lns/lns.exp: Don't exclude d10v.
+
 2009-09-09  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* gas/sh/sh64/syntax-1.s: Regenerate.

@@ -1,5 +1,13 @@
 2009-09-10  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-d10v.c: Include dwarf2dbg.h.
+	(write_long, write_1_short, write_2_short): Call dwarf2_emit_insn.
+	(d10v_frob_label): New function.
+	* config/tc-d10v.h (d10v_frob_label): Declare.
+	(tc_frob_label): Define as d10v_frob_label.
+
+2009-09-10  Alan Modra  <amodra@bigpond.net.au>
+
 	* config/tc-d30v.c (d30v_frob_label): Call dwarf2_emit_label.
 	* config/tc-frv.c (frv_frob_label): Likewise.
 

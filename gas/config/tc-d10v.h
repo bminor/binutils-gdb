@@ -1,5 +1,5 @@
 /* tc-d10v.h -- Header file for tc-d10v.c.
-   Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2003, 2005, 2007
+   Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2003, 2005, 2007, 2009
    Free Software Foundation, Inc.
    Written by Martin Hunt, Cygnus Support.
 
@@ -46,17 +46,11 @@ long md_pcrel_from_section (struct fix *, segT);
 #define md_number_to_chars	     number_to_chars_bigendian
 
 int d10v_cleanup (void);
+void d10v_frob_label (symbolS *);
 #define md_after_pass_hook()	     d10v_cleanup ()
 #define md_cleanup()		     d10v_cleanup ()
 #define md_do_align(a,b,c,d,e)	     d10v_cleanup ()
-#define tc_frob_label(sym)				\
-  do							\
-    {							\
-      d10v_cleanup ();					\
-      symbol_set_frag (sym, frag_now);			\
-      S_SET_VALUE (sym, (valueT) frag_now_fix ());	\
-    }							\
-  while (0)
+#define tc_frob_label(sym)	     d10v_frob_label (sym)
 
 #define tc_fix_adjustable(FIX) d10v_fix_adjustable(FIX)
 bfd_boolean d10v_fix_adjustable (struct fix *);
