@@ -17620,6 +17620,7 @@ described here.
 * ABI::                         Configuring the current ABI
 * Messages/Warnings::           Optional warnings and messages
 * Debugging Output::            Optional messages about internal happenings
+* Other Misc Settings::         Other Miscellaneous Settings
 @end menu
 
 @node Prompt
@@ -18248,6 +18249,28 @@ debugging info.
 Turns on or off debugging messages for built-in XML parsers.
 @item show debug xml
 Displays the current state of XML debugging messages.
+@end table
+
+@node Other Misc Settings
+@section Other Miscellaneous Settings
+@cindex miscellaneous settings
+
+@table @code
+@kindex set interactive-mode
+@item set interactive-mode
+If @code{on}, forces @value{GDBN} to operate interactively.
+If @code{off}, forces @value{GDBN} to operate non-interactively,
+If @code{auto} (the default), @value{GDBN} guesses which mode to use,
+based on whether the debugger was started in a terminal or not.
+
+In the vast majority of cases, the debugger should be able to guess
+correctly which mode should be used.  But this setting can be useful
+in certain specific cases, such as running a MinGW @value{GDBN}
+inside a cygwin window.
+
+@kindex show interactive-mode
+@item show interactive-mode
+Displays whether the debugger is operating in interactive mode or not.
 @end table
 
 @node Extending GDB

@@ -1,3 +1,8 @@
+2009-09-10  Joel Brobecker  <brobecker@adacore.com>
+
+	Add documentation for set/show interactive-mode.
+	* gdb.texinfo (Other Misc Settings): New node.
+
 2009-09-01  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Caching Data of Remote Targets): Add note on
