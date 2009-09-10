@@ -332,7 +332,7 @@ normalize (const char *file, bfd *abfd)
       char *s;
 
       /* Space leak.  */
-      s = xmalloc (abfd->xvec->ar_max_namelen + 1);
+      s = (char *) xmalloc (abfd->xvec->ar_max_namelen + 1);
       memcpy (s, filename, abfd->xvec->ar_max_namelen);
       s[abfd->xvec->ar_max_namelen] = '\0';
       filename = s;
@@ -372,7 +372,7 @@ main (int argc, char **argv)
   char c;
   enum
     {
-      none = 0, delete, replace, print_table,
+      none = 0, del, replace, print_table,
       print_files, extract, move, quick_append
     } operation = none;
   int arg_index;
@@ -540,7 +540,7 @@ main (int argc, char **argv)
 	      switch (c)
 		{
 		case 'd':
-		  operation = delete;
+		  operation = del;
 		  operation_alters_arch = TRUE;
 		  break;
 		case 'm':
@@ -673,7 +673,7 @@ main (int argc, char **argv)
 
       if (counted_name_mode)
 	{
-	  if (operation != extract && operation != delete)
+	  if (operation != extract && operation != del)
 	     fatal (_("`N' is only meaningful with the `x' and `d' options."));
 	  counted_name_counter = atoi (argv[arg_index++]);
 	  if (counted_name_counter <= 0)
@@ -705,7 +705,7 @@ main (int argc, char **argv)
 	  map_over_members (arch, extract_file, files, file_count);
 	  break;
 
-	case delete:
+	case del:
 	  if (files != NULL)
 	    delete_members (arch, files);
 	  else
@@ -843,7 +843,7 @@ static void
 print_contents (bfd *abfd)
 {
   size_t ncopied = 0;
-  char *cbuf = xmalloc (BUFSIZE);
+  char *cbuf = (char *) xmalloc (BUFSIZE);
   struct stat buf;
   size_t size;
   if (bfd_stat_arch_elt (abfd, &buf) != 0)
@@ -895,7 +895,7 @@ void
 extract_file (bfd *abfd)
 {
   FILE *ostream;
-  char *cbuf = xmalloc (BUFSIZE);
+  char *cbuf = (char *) xmalloc (BUFSIZE);
   size_t nread, tocopy;
   size_t ncopied = 0;
   size_t size;
@@ -989,7 +989,7 @@ write_archive (bfd *iarch)
   char *old_name, *new_name;
   bfd *contents_head = iarch->archive_next;
 
-  old_name = xmalloc (strlen (bfd_get_filename (iarch)) + 1);
+  old_name = (char *) xmalloc (strlen (bfd_get_filename (iarch)) + 1);
   strcpy (old_name, bfd_get_filename (iarch));
   new_name = make_tempname (old_name);
 

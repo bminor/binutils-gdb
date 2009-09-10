@@ -273,7 +273,7 @@ calculate_common_size (bfd *abfd)
   if (storage < 0)
     bfd_fatal (bfd_get_filename (abfd));
   if (storage)
-    syms = xmalloc (storage);
+    syms = (asymbol **) xmalloc (storage);
 
   symcount = bfd_canonicalize_symtab (abfd, syms);
   if (symcount < 0)

@@ -102,13 +102,14 @@ slurp_symtab (bfd *abfd)
 {
   long symcount;
   unsigned int size;
+  void *minisyms = &syms;
 
   if ((bfd_get_file_flags (abfd) & HAS_SYMS) == 0)
     return;
 
-  symcount = bfd_read_minisymbols (abfd, FALSE, (void *) &syms, &size);
+  symcount = bfd_read_minisymbols (abfd, FALSE, &minisyms, &size);
   if (symcount == 0)
-    symcount = bfd_read_minisymbols (abfd, TRUE /* dynamic */, (void *) &syms, &size);
+    symcount = bfd_read_minisymbols (abfd, TRUE /* dynamic */, &minisyms, &size);
 
   if (symcount < 0)
     bfd_fatal (bfd_get_filename (abfd));

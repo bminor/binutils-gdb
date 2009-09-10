@@ -132,32 +132,32 @@ enum debug_visibility
 
 /* A type.  */
 
-typedef struct debug_type *debug_type;
+typedef struct debug_type_s *debug_type;
 
 #define DEBUG_TYPE_NULL ((debug_type) NULL)
 
 /* A field in a struct or union.  */
 
-typedef struct debug_field *debug_field;
+typedef struct debug_field_s *debug_field;
 
 #define DEBUG_FIELD_NULL ((debug_field) NULL)
 
 /* A base class for an object.  */
 
-typedef struct debug_baseclass *debug_baseclass;
+typedef struct debug_baseclass_s *debug_baseclass;
 
 #define DEBUG_BASECLASS_NULL ((debug_baseclass) NULL)
 
 /* A method of an object.  */
 
-typedef struct debug_method *debug_method;
+typedef struct debug_method_s *debug_method;
 
 #define DEBUG_METHOD_NULL ((debug_method) NULL)
 
 /* The arguments to a method function of an object.  These indicate
    which method to run.  */
 
-typedef struct debug_method_variant *debug_method_variant;
+typedef struct debug_method_variant_s *debug_method_variant;
 
 #define DEBUG_METHOD_VARIANT_NULL ((debug_method_variant) NULL)
 

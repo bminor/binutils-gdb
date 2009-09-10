@@ -640,7 +640,7 @@ parse_flags (const char *s)
 	{
 	  char *copy;
 
-	  copy = xmalloc (len + 1);
+	  copy = (char *) xmalloc (len + 1);
 	  strncpy (copy, s, len);
 	  copy[len] = '\0';
 	  non_fatal (_("unrecognized section flag `%s'"), copy);
@@ -669,7 +669,7 @@ find_section_list (const char *name, bfd_boolean add)
   if (! add)
     return NULL;
 
-  p = xmalloc (sizeof (struct section_list));
+  p = (struct section_list *) xmalloc (sizeof (struct section_list));
   p->name = name;
   p->used = FALSE;
   p->remove = FALSE;
@@ -692,7 +692,7 @@ find_section_list (const char *name, bfd_boolean add)
 static int
 eq_string (const void *s1, const void *s2)
 {
-  return strcmp (s1, s2) == 0;
+  return strcmp ((const char *) s1, (const char *) s2) == 0;
 }
 
 static htab_t
@@ -742,7 +742,7 @@ add_specific_symbols (const char *filename, htab_t htab)
       return;
     }
 
-  buffer = xmalloc (size + 2);
+  buffer = (char *) xmalloc (size + 2);
   f = fopen (filename, FOPEN_RT);
   if (f == NULL)
     fatal (_("cannot open '%s': %s"), filename, strerror (errno));
@@ -843,8 +843,9 @@ add_specific_symbols (const char *filename, htab_t htab)
 static int
 is_specified_symbol_predicate (void **slot, void *data)
 {
-  struct is_specified_symbol_predicate_data *d = data;
-  const char *slot_name = *slot;
+  struct is_specified_symbol_predicate_data *d =
+      (struct is_specified_symbol_predicate_data *) data;
+  const char *slot_name = (char *) *slot;
 
   if (*slot_name != '!')
     {
@@ -1056,8 +1057,8 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
         {
           char *n, *ptr;
 
-          ptr = n = xmalloc (1 + strlen (prefix_symbols_string)
-			     + strlen (name) + 1);
+          ptr = n = (char *) xmalloc (1 + strlen (prefix_symbols_string)
+                                      + strlen (name) + 1);
           if (add_leading_char)
 	    *ptr++ = bfd_get_symbol_leading_char (obfd);
 
@@ -1208,7 +1209,7 @@ redefine_list_append (const char *cause, const char *source, const char *target)
 	       cause, target);
     }
 
-  new_node = xmalloc (sizeof (struct redefine_node));
+  new_node = (struct redefine_node *) xmalloc (sizeof (struct redefine_node));
 
   new_node->source = strdup (source);
   new_node->target = strdup (target);
@@ -1236,7 +1237,7 @@ add_redefine_syms_file (const char *filename)
 	   filename, strerror (errno));
 
   bufsize = 100;
-  buf = xmalloc (bufsize);
+  buf = (char *) xmalloc (bufsize);
 
   lineno = 1;
   c = getc (file);
@@ -1253,7 +1254,7 @@ add_redefine_syms_file (const char *filename)
 	  if (len >= bufsize)
 	    {
 	      bufsize *= 2;
-	      buf = xrealloc (buf, bufsize);
+	      buf = (char *) xrealloc (buf, bufsize);
 	    }
 	  c = getc (file);
 	}
@@ -1279,7 +1280,7 @@ add_redefine_syms_file (const char *filename)
 	  if (len >= bufsize)
 	    {
 	      bufsize *= 2;
-	      buf = xrealloc (buf, bufsize);
+	      buf = (char *) xrealloc (buf, bufsize);
 	    }
 	  c = getc (file);
 	}
@@ -1364,7 +1365,7 @@ copy_unknown_object (bfd *ibfd, bfd *obfd)
     printf (_("copy from `%s' [unknown] to `%s' [unknown]\n"),
 	    bfd_get_archive_filename (ibfd), bfd_get_filename (obfd));
 
-  cbuf = xmalloc (BUFSIZE);
+  cbuf = (char *) xmalloc (BUFSIZE);
   ncopied = 0;
   while (ncopied < size)
     {
@@ -1558,7 +1559,7 @@ copy_object (bfd *ibfd, bfd *obfd)
       return FALSE;
     }
 
-  osympp = isympp = xmalloc (symsize);
+  osympp = isympp = (asymbol **) xmalloc (symsize);
   symcount = bfd_canonicalize_symtab (ibfd, isympp);
   if (symcount < 0)
     {
@@ -1712,13 +1713,13 @@ copy_object (bfd *ibfd, bfd *obfd)
 	 We write out the gap contents below.  */
 
       c = bfd_count_sections (obfd);
-      osections = xmalloc (c * sizeof (asection *));
+      osections = (asection **) xmalloc (c * sizeof (asection *));
       set = osections;
       bfd_map_over_sections (obfd, get_sections, &set);
 
       qsort (osections, c, sizeof (asection *), compare_section_lma);
 
-      gaps = xmalloc (c * sizeof (bfd_size_type));
+      gaps = (bfd_size_type *) xmalloc (c * sizeof (bfd_size_type));
       memset (gaps, 0, c * sizeof (bfd_size_type));
 
       if (gap_fill_set)
@@ -1819,7 +1820,7 @@ copy_object (bfd *ibfd, bfd *obfd)
 	bfd_map_over_sections (ibfd,
 			       mark_symbols_used_in_relocations,
 			       isympp);
-      osympp = xmalloc ((symcount + 1) * sizeof (asymbol *));
+      osympp = (asymbol **) xmalloc ((symcount + 1) * sizeof (asymbol *));
       symcount = filter_symbols (ibfd, obfd, osympp, isympp, symcount);
     }
 
@@ -1872,7 +1873,7 @@ copy_object (bfd *ibfd, bfd *obfd)
       /* Fill in the gaps.  */
       if (max_gap > 8192)
 	max_gap = 8192;
-      buf = xmalloc (max_gap);
+      buf = (bfd_byte *) xmalloc (max_gap);
       memset (buf, gap_fill, max_gap);
 
       c = bfd_count_sections (obfd);
@@ -1995,7 +1996,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
       bfd *last_element;
       struct stat buf;
       int stat_status = 0;
-      bfd_boolean delete = TRUE;
+      bfd_boolean del = TRUE;
 
       /* Create an output file for this member.  */
       output_name = concat (dir, "/",
@@ -2009,7 +2010,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	    fatal (_("cannot create tempdir for archive copying (error: %s)"),
 		   strerror (errno));
 
-	  l = xmalloc (sizeof (struct name_list));
+	  l = (struct name_list *) xmalloc (sizeof (struct name_list));
 	  l->name = output_name;
 	  l->next = list;
 	  l->obfd = NULL;
@@ -2027,7 +2028,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 		       bfd_get_filename (this_element));
 	}
 
-      l = xmalloc (sizeof (struct name_list));
+      l = (struct name_list *) xmalloc (sizeof (struct name_list));
       l->name = output_name;
       l->next = list;
       l->obfd = NULL;
@@ -2049,9 +2050,9 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	      return;
 	    }
 
-	  delete = ! copy_object (this_element, output_bfd);
+	  del = ! copy_object (this_element, output_bfd);
 
-	  if (! delete
+	  if (! del
 	      || bfd_get_arch (this_element) != bfd_arch_unknown)
 	    {
 	      if (!bfd_close (output_bfd))
@@ -2071,7 +2072,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 
 	  output_bfd = bfd_openw (output_name, output_target);
 copy_unknown_element:
-	  delete = !copy_unknown_object (this_element, output_bfd);
+	  del = !copy_unknown_object (this_element, output_bfd);
 	  if (!bfd_close_all_done (output_bfd))
 	    {
 	      bfd_nonfatal_message (output_name, NULL, NULL, NULL);
@@ -2080,7 +2081,7 @@ copy_unknown_element:
 	    }
 	}
 
-      if (delete)
+      if (del)
 	{
 	  unlink (output_name);
 	  status = 1;
@@ -2299,7 +2300,7 @@ add_section_rename (const char * old_name, const char * new_name,
 	fatal (_("Multiple renames of section %s"), old_name);
       }
 
-  rename = xmalloc (sizeof (* rename));
+  rename = (section_rename *) xmalloc (sizeof (* rename));
 
   rename->old_name = old_name;
   rename->new_name = new_name;
@@ -2361,7 +2362,7 @@ setup_bfd_headers (bfd *ibfd, bfd *obfd)
 static void
 setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 {
-  bfd *obfd = obfdarg;
+  bfd *obfd = (bfd *) obfdarg;
   struct section_list *p;
   sec_ptr osection;
   bfd_size_type size;
@@ -2394,7 +2395,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
     {
       char *n;
 
-      n = xmalloc (strlen (prefix) + strlen (name) + 1);
+      n = (char *) xmalloc (strlen (prefix) + strlen (name) + 1);
       strcpy (n, prefix);
       strcat (n, name);
       name = n;
@@ -2531,7 +2532,7 @@ loser:
 static void
 copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 {
-  bfd *obfd = obfdarg;
+  bfd *obfd = (bfd *) obfdarg;
   struct section_list *p;
   arelent **relpp;
   long relcount;
@@ -2588,7 +2589,7 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
     bfd_set_reloc (obfd, osection, NULL, 0);
   else
     {
-      relpp = xmalloc (relsize);
+      relpp = (arelent **) xmalloc (relsize);
       relcount = bfd_canonicalize_reloc (ibfd, isection, relpp, isympp);
       if (relcount < 0)
 	{
@@ -2606,7 +2607,7 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	  long temp_relcount = 0;
 	  long i;
 
-	  temp_relpp = xmalloc (relsize);
+	  temp_relpp = (arelent **) xmalloc (relsize);
 	  for (i = 0; i < relcount; i++)
 	    if (is_specified_symbol (bfd_asymbol_name (*relpp[i]->sym_ptr_ptr),
 				     keep_specific_htab))
@@ -2663,7 +2664,7 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	{
 	  /* Keep only every `copy_byte'th byte in MEMHUNK.  */
 	  char *from = (char *) memhunk + copy_byte;
-	  char *to = memhunk;
+	  char *to = (char *) memhunk;
 	  char *end = (char *) memhunk + size;
 
 	  for (; from < end; from += interleave)
@@ -2708,7 +2709,7 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 static void
 get_sections (bfd *obfd ATTRIBUTE_UNUSED, asection *osection, void *secppparg)
 {
-  asection ***secppp = secppparg;
+  asection ***secppp = (asection ***) secppparg;
 
   **secppp = osection;
   ++(*secppp);
@@ -2721,8 +2722,8 @@ get_sections (bfd *obfd ATTRIBUTE_UNUSED, asection *osection, void *secppparg)
 static int
 compare_section_lma (const void *arg1, const void *arg2)
 {
-  const asection *const *sec1 = arg1;
-  const asection *const *sec2 = arg2;
+  const asection *const *sec1 = (const asection * const *) arg1;
+  const asection *const *sec2 = (const asection * const *) arg2;
   flagword flags1, flags2;
 
   /* Sort non loadable sections to the front.  */
@@ -2765,7 +2766,7 @@ compare_section_lma (const void *arg1, const void *arg2)
 static void
 mark_symbols_used_in_relocations (bfd *ibfd, sec_ptr isection, void *symbolsarg)
 {
-  asymbol **symbols = symbolsarg;
+  asymbol **symbols = (asymbol **) symbolsarg;
   long relsize;
   arelent **relpp;
   long relcount, i;
@@ -2786,7 +2787,7 @@ mark_symbols_used_in_relocations (bfd *ibfd, sec_ptr isection, void *symbolsarg)
   if (relsize == 0)
     return;
 
-  relpp = xmalloc (relsize);
+  relpp = (arelent **) xmalloc (relsize);
   relcount = bfd_canonicalize_reloc (ibfd, isection, relpp, symbols);
   if (relcount < 0)
     bfd_fatal (bfd_get_filename (ibfd));
@@ -3312,17 +3313,17 @@ copy_main (int argc, char *argv[])
 		break;
 	      }
 
-	    pa = xmalloc (sizeof (struct section_add));
+	    pa = (struct section_add *) xmalloc (sizeof (struct section_add));
 
 	    len = s - optarg;
-	    name = xmalloc (len + 1);
+	    name = (char *) xmalloc (len + 1);
 	    strncpy (name, optarg, len);
 	    name[len] = '\0';
 	    pa->name = name;
 
 	    pa->filename = s + 1;
 	    pa->size = size;
-	    pa->contents = xmalloc (size);
+	    pa->contents = (bfd_byte *) xmalloc (size);
 
 	    f = fopen (pa->filename, FOPEN_RB);
 
@@ -3382,7 +3383,7 @@ copy_main (int argc, char *argv[])
 	      }
 
 	    len = s - optarg;
-	    name = xmalloc (len + 1);
+	    name = (char *) xmalloc (len + 1);
 	    strncpy (name, optarg, len);
 	    name[len] = '\0';
 
@@ -3480,13 +3481,13 @@ copy_main (int argc, char *argv[])
 	      fatal (_("bad format for %s"), "--redefine-sym");
 
 	    len = s - optarg;
-	    source = xmalloc (len + 1);
+	    source = (char *) xmalloc (len + 1);
 	    strncpy (source, optarg, len);
 	    source[len] = '\0';
 
 	    nextarg = s + 1;
 	    len = strlen (nextarg);
-	    target = xmalloc (len + 1);
+	    target = (char *) xmalloc (len + 1);
 	    strcpy (target, nextarg);
 
 	    redefine_list_append ("--redefine-sym", source, target);
@@ -3511,7 +3512,7 @@ copy_main (int argc, char *argv[])
 	      fatal (_("bad format for %s"), "--set-section-flags");
 
 	    len = s - optarg;
-	    name = xmalloc (len + 1);
+	    name = (char *) xmalloc (len + 1);
 	    strncpy (name, optarg, len);
 	    name[len] = '\0';
 
@@ -3538,7 +3539,7 @@ copy_main (int argc, char *argv[])
 	    if (len == 0)
 	      fatal (_("bad format for %s"), "--rename-section");
 
-	    old_name = xmalloc (len + 1);
+	    old_name = (char *) xmalloc (len + 1);
 	    strncpy (old_name, optarg, len);
 	    old_name[len] = 0;
 
@@ -3558,7 +3559,7 @@ copy_main (int argc, char *argv[])
 	    if (len == 0)
 	      fatal (_("bad format for %s"), "--rename-section");
 
-	    new_name = xmalloc (len + 1);
+	    new_name = (char *) xmalloc (len + 1);
 	    strncpy (new_name, eq, len);
 	    new_name[len] = 0;
 

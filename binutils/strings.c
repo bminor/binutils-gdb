@@ -362,7 +362,7 @@ strings_a_section (bfd *abfd, asection *sect, void *arg)
       got_a_section = TRUE;
 
       print_strings (filename_and_sizep->filename, NULL, sect->filepos,
-		     0, sectsize, mem);
+		     0, sectsize, (char *) mem);
     }
 
   free (mem);

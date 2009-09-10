@@ -1142,7 +1142,7 @@ parse_stab_string (void *dhandle, struct stab_handle *info, int stabtype,
    store the slot used if the type is being defined.  */
 
 static debug_type
-parse_stab_type (void *dhandle, struct stab_handle *info, const char *typename, const char **pp, debug_type **slotp)
+parse_stab_type (void *dhandle, struct stab_handle *info, const char *type_name, const char **pp, debug_type **slotp)
 {
   const char *orig;
   int typenums[2];
@@ -1306,9 +1306,9 @@ parse_stab_type (void *dhandle, struct stab_handle *info, const char *typename, 
 	       fleep:T20=xsfleep:
 	   which define structures in terms of themselves.  We need to
 	   tell the caller to avoid building a circular structure.  */
-	if (typename != NULL
-	    && strncmp (typename, *pp, p - *pp) == 0
-	    && typename[p - *pp] == '\0')
+	if (type_name != NULL
+	    && strncmp (type_name, *pp, p - *pp) == 0
+	    && type_name[p - *pp] == '\0')
 	  info->self_crossref = TRUE;
 
 	dtype = stab_find_tagged_type (dhandle, info, *pp, p - *pp, code);
@@ -1539,7 +1539,7 @@ parse_stab_type (void *dhandle, struct stab_handle *info, const char *typename, 
 
     case 'r':
       /* Range type.  */
-      dtype = parse_stab_range_type (dhandle, info, typename, pp, typenums);
+      dtype = parse_stab_range_type (dhandle, info, type_name, pp, typenums);
       break;
 
     case 'b':
@@ -1561,7 +1561,7 @@ parse_stab_type (void *dhandle, struct stab_handle *info, const char *typename, 
     case 's':
     case 'u':
       /* Struct or union type.  */
-      dtype = parse_stab_struct_type (dhandle, info, typename, pp,
+      dtype = parse_stab_struct_type (dhandle, info, type_name, pp,
 				      descriptor == 's', typenums);
       break;
 
@@ -1651,7 +1651,7 @@ parse_stab_type_number (const char **pp, int *typenums)
 /* Parse a range type.  */
 
 static debug_type
-parse_stab_range_type (void *dhandle, struct stab_handle *info, const char *typename, const char **pp, const int *typenums)
+parse_stab_range_type (void *dhandle, struct stab_handle *info, const char *type_name, const char **pp, const int *typenums)
 {
   const char *orig;
   int rangenums[2];
@@ -1750,11 +1750,11 @@ parse_stab_range_type (void *dhandle, struct stab_handle *info, const char *type
 	         long long int:t6=r1;0;-1;
 		 long long unsigned int:t7=r1;0;-1;
 	     We hack here to handle this reasonably.  */
-	  if (typename != NULL)
+	  if (type_name != NULL)
 	    {
-	      if (strcmp (typename, "long long int") == 0)
+	      if (strcmp (type_name, "long long int") == 0)
 		return debug_make_int_type (dhandle, 8, FALSE);
-	      else if (strcmp (typename, "long long unsigned int") == 0)
+	      else if (strcmp (type_name, "long long unsigned int") == 0)
 		return debug_make_int_type (dhandle, 8, TRUE);
 	    }
 	  /* FIXME: The size here really depends upon the target.  */
@@ -2117,7 +2117,7 @@ parse_stab_baseclasses (void *dhandle, struct stab_handle *info,
 
   for (i = 0; i < c; i++)
     {
-      bfd_boolean virtual;
+      bfd_boolean is_virtual;
       enum debug_visibility visibility;
       bfd_vma bitpos;
       debug_type type;
@@ -2125,14 +2125,14 @@ parse_stab_baseclasses (void *dhandle, struct stab_handle *info,
       switch (**pp)
 	{
 	case '0':
-	  virtual = FALSE;
+	  is_virtual = FALSE;
 	  break;
 	case '1':
-	  virtual = TRUE;
+	  is_virtual = TRUE;
 	  break;
 	default:
 	  warn_stab (orig, _("unknown virtual character for baseclass"));
-	  virtual = FALSE;
+	  is_virtual = FALSE;
 	  break;
 	}
       ++*pp;
@@ -2171,7 +2171,7 @@ parse_stab_baseclasses (void *dhandle, struct stab_handle *info,
       if (type == DEBUG_TYPE_NULL)
 	return FALSE;
 
-      classes[i] = debug_make_baseclass (dhandle, type, bitpos, virtual,
+      classes[i] = debug_make_baseclass (dhandle, type, bitpos, is_virtual,
 					 visibility);
       if (classes[i] == DEBUG_BASECLASS_NULL)
 	return FALSE;
@@ -2296,7 +2296,7 @@ parse_stab_cpp_abbrev (void *dhandle, struct stab_handle *info,
   int cpp_abbrev;
   debug_type context;
   const char *name;
-  const char *typename;
+  const char *type_name;
   debug_type type;
   bfd_vma bitpos;
 
@@ -2332,13 +2332,13 @@ parse_stab_cpp_abbrev (void *dhandle, struct stab_handle *info,
       break;
     case 'b':
       /* $vb -- a virtual bsomethingorother */
-      typename = debug_get_type_name (dhandle, context);
-      if (typename == NULL)
+      type_name = debug_get_type_name (dhandle, context);
+      if (type_name == NULL)
 	{
 	  warn_stab (orig, _("unnamed $vb type"));
-	  typename = "FOO";
+	  type_name = "FOO";
 	}
-      name = concat ("_vb$", typename, (const char *) NULL);
+      name = concat ("_vb$", type_name, (const char *) NULL);
       break;
     default:
       warn_stab (orig, _("unrecognized C++ abbreviation"));

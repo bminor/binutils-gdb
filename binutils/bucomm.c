@@ -238,7 +238,7 @@ display_target_list (void)
     {
       const bfd_target *p = bfd_target_vector[t];
       bfd *abfd = bfd_openw (dummy_name, p->name);
-      enum bfd_architecture a;
+      int a;
 
       printf ("%s\n (header %s, data %s)\n", p->name,
 	      endian_string (p->header_byteorder),
@@ -284,7 +284,7 @@ display_info_table (int first, int last)
   int t;
   int ret = 1;
   char *dummy_name;
-  enum bfd_architecture a;
+  int a;
 
   /* Print heading of target names.  */
   printf ("\n%*s", (int) LONGEST_ARCH, " ");
@@ -294,10 +294,11 @@ display_info_table (int first, int last)
 
   dummy_name = make_temp_file (NULL);
   for (a = bfd_arch_obscure + 1; a < bfd_arch_last; a++)
-    if (strcmp (bfd_printable_arch_mach (a, 0), "UNKNOWN!") != 0)
+    if (strcmp (bfd_printable_arch_mach ((enum bfd_architecture) a, 0),
+                "UNKNOWN!") != 0)
       {
 	printf ("%*s ", (int) LONGEST_ARCH - 1,
-		bfd_printable_arch_mach (a, 0));
+		bfd_printable_arch_mach ((enum bfd_architecture) a, 0));
 	for (t = first; t < last && bfd_target_vector[t]; t++)
 	  {
 	    const bfd_target *p = bfd_target_vector[t];
@@ -326,7 +327,7 @@ display_info_table (int first, int last)
 
 	    if (ok)
 	      {
-		if (! bfd_set_arch_mach (abfd, a, 0))
+		if (! bfd_set_arch_mach (abfd, (enum bfd_architecture) a, 0))
 		  ok = FALSE;
 	      }
 
@@ -461,7 +462,7 @@ template_in_dir (const char *path)
   if (slash != (char *) NULL)
     {
       len = slash - path;
-      tmpname = xmalloc (len + sizeof (template) + 2);
+      tmpname = (char *) xmalloc (len + sizeof (template) + 2);
       memcpy (tmpname, path, len);
 
 #ifdef HAVE_DOS_BASED_FILE_SYSTEM
@@ -475,7 +476,7 @@ template_in_dir (const char *path)
     }
   else
     {
-      tmpname = xmalloc (sizeof (template));
+      tmpname = (char *) xmalloc (sizeof (template));
       len = 0;
     }
 
@@ -595,7 +596,7 @@ bfd_get_archive_filename (const bfd *abfd)
       if (curr)
 	free (buf);
       curr = needed + (needed >> 1);
-      buf = bfd_malloc (curr);
+      buf = (char *) bfd_malloc (curr);
       /* If we can't malloc, fail safe by returning just the file name.
 	 This function is only used when building error messages.  */
       if (!buf)
