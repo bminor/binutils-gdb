@@ -1,3 +1,9 @@
+2009-09-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure.ac: Fix the names of the python source and object files
+	following the renaming done in an earlier change.
+	* configure: Regenerate.
+
 2009-09-08  Joel Brobecker  <brobecker@adacore.com>
 
 	Fix a build failure on AIX.

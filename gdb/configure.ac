@@ -683,8 +683,8 @@ if test "${have_libpython}" = yes; then
 else
   # Even if Python support is not compiled in, we need to have these files
   # included in order to recognize the GDB command "python".
-  CONFIG_OBS="$CONFIG_OBS python.o python-value.o python-prettyprint.o"
-  CONFIG_SRCS="$CONFIG_SRCS python/python.c python/python-value.c python/python-prettyprint.c"
+  CONFIG_OBS="$CONFIG_OBS python.o py-value.o py-prettyprint.o"
+  CONFIG_SRCS="$CONFIG_SRCS python/python.c python/py-value.c python/py-prettyprint.c"
 fi
 AC_SUBST(PYTHON_CFLAGS)
 
