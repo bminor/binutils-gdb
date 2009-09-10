@@ -1,3 +1,8 @@
+2009-09-10  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+	
+	* s390-dis.c (s390_extract_operand): Remove the shift for pcrel operands.
+	(print_insn_s390): Signextend and shift pcrel operands before printing.
+
 2009-09-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (vex_len_table): Change VEX_LEN_AE_R_X_M0 to
