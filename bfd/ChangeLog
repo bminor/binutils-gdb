@@ -1,3 +1,8 @@
+2009-09-10  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.in: Bump version to 2.19.91
+	* configure: Regenerate.
+
 2009-09-09  Martin Thuresson  <martin@mtme.org>
 
 	Update soruces to compile cleanly with -Wc++-compat:
