@@ -3832,7 +3832,7 @@ remote_resume (struct target_ops *ops,
 	error (_("Remote reverse-step not supported."));
       if (!step
 	  && remote_protocol_packets[PACKET_bc].support == PACKET_DISABLE)
-	error ("_(Remote reverse-continue not supported."));
+	error (_("Remote reverse-continue not supported."));
 
       strcpy (buf, step ? "bs" : "bc");
     }
