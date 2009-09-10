@@ -1,3 +1,8 @@
+2009-09-10  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.texinfo (qSupported): Mention new ReverseContinue and
+	ReverseStep replies to the qSupported query.
+
 2009-09-10  Joel Brobecker  <brobecker@adacore.com>
 
 	Add documentation for set/show interactive-mode.

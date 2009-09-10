@@ -27516,16 +27516,18 @@ breakpoint at @var{addr}.
 Don't use this packet.  Use the @samp{Z} and @samp{z} packets instead
 (@pxref{insert breakpoint or watchpoint packet}).
 
-@item bc
 @cindex @samp{bc} packet
+@anchor{bc}
+@item bc
 Backward continue.  Execute the target system in reverse.  No parameter.
 @xref{Reverse Execution}, for more information.
 
 Reply:
 @xref{Stop Reply Packets}, for the reply specifications.
 
-@item bs
 @cindex @samp{bs} packet
+@anchor{bs}
+@item bs
 Backward single step.  Execute one instruction in reverse.  No parameter.
 @xref{Reverse Execution}, for more information.
 
@@ -28769,6 +28771,16 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab No
 
+@item @samp{ReverseContinue}
+@tab No
+@tab @samp{+}
+@tab No
+
+@item @samp{ReverseStep}
+@tab No
+@tab @samp{+}
+@tab No
+
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -28849,6 +28861,14 @@ The remote stub understands the @samp{qXfer:osdata:read} packet
 @item ConditionalTracepoints
 The remote stub accepts and implements conditional expressions defined
 for tracepoints (@pxref{Tracepoint Conditions}).
+
+@item ReverseContinue
+The remote stub accepts and implements the reverse continue packet
+(@pxref{bc}).
+
+@item ReverseStep
+The remote stub accepts and implements the reverse step packet
+(@pxref{bs}).
 
 @end table
 
