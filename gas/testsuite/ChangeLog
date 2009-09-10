@@ -1,3 +1,11 @@
+2009-09-11  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	PR gas/10623
+	* gas/mmix/err-swym1.s, gas/mmix/swym-opreg1.d,
+	gas/mmix/swym-opreg1.s, gas/mmix/swym-opreg2.d,
+	gas/mmix/swym-opreg2.s: New tests.
+	* gas/mmix/odd-1.d: Adjust for reloc change.
+
 2009-09-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/lns/lns-common-1.s: Use two nops between each .loc.
