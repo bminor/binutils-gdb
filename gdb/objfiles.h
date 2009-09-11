@@ -500,9 +500,18 @@ extern int in_plt_section (CORE_ADDR, char *);
 /* Keep a registry of per-objfile data-pointers required by other GDB
    modules.  */
 
+/* Allocate an entry in the per-objfile registry.  */
 extern const struct objfile_data *register_objfile_data (void);
+
+/* Allocate an entry in the per-objfile registry.
+   SAVE and FREE are called when clearing objfile data.
+   First all registered SAVE functions are called.
+   Then all registered FREE functions are called.
+   Either or both of SAVE, FREE may be NULL.  */
 extern const struct objfile_data *register_objfile_data_with_cleanup
-  (void (*cleanup) (struct objfile *, void *));
+  (void (*save) (struct objfile *, void *),
+   void (*free) (struct objfile *, void *));
+
 extern void clear_objfile_data (struct objfile *objfile);
 extern void set_objfile_data (struct objfile *objfile,
 			      const struct objfile_data *data, void *value);

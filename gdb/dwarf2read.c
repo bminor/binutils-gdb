@@ -11837,7 +11837,7 @@ munmap_section_buffer (struct dwarf2_section_info *info)
 /* munmap debug sections for OBJFILE, if necessary.  */
 
 static void
-dwarf2_per_objfile_cleanup (struct objfile *objfile, void *d)
+dwarf2_per_objfile_free (struct objfile *objfile, void *d)
 {
   struct dwarf2_per_objfile *data = d;
   munmap_section_buffer (&data->info);
@@ -11857,7 +11857,7 @@ void
 _initialize_dwarf2_read (void)
 {
   dwarf2_objfile_data_key
-    = register_objfile_data_with_cleanup (dwarf2_per_objfile_cleanup);
+    = register_objfile_data_with_cleanup (NULL, dwarf2_per_objfile_free);
 
   add_prefix_cmd ("dwarf2", class_maintenance, set_dwarf2_cmd, _("\
 Set DWARF 2 specific variables.\n\

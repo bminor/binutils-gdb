@@ -975,7 +975,8 @@ in_plt_section (CORE_ADDR pc, char *name)
 struct objfile_data
 {
   unsigned index;
-  void (*cleanup) (struct objfile *, void *);
+  void (*save) (struct objfile *, void *);
+  void (*free) (struct objfile *, void *);
 };
 
 struct objfile_data_registration
@@ -993,7 +994,8 @@ struct objfile_data_registry
 static struct objfile_data_registry objfile_data_registry = { NULL, 0 };
 
 const struct objfile_data *
-register_objfile_data_with_cleanup (void (*cleanup) (struct objfile *, void *))
+register_objfile_data_with_cleanup (void (*save) (struct objfile *, void *),
+				    void (*free) (struct objfile *, void *))
 {
   struct objfile_data_registration **curr;
 
@@ -1005,7 +1007,8 @@ register_objfile_data_with_cleanup (void (*cleanup) (struct objfile *, void *))
   (*curr)->next = NULL;
   (*curr)->data = XMALLOC (struct objfile_data);
   (*curr)->data->index = objfile_data_registry.num_registrations++;
-  (*curr)->data->cleanup = cleanup;
+  (*curr)->data->save = save;
+  (*curr)->data->free = free;
 
   return (*curr)->data;
 }
@@ -1013,7 +1016,7 @@ register_objfile_data_with_cleanup (void (*cleanup) (struct objfile *, void *))
 const struct objfile_data *
 register_objfile_data (void)
 {
-  return register_objfile_data_with_cleanup (NULL);
+  return register_objfile_data_with_cleanup (NULL, NULL);
 }
 
 static void
@@ -1041,11 +1044,21 @@ clear_objfile_data (struct objfile *objfile)
 
   gdb_assert (objfile->data != NULL);
 
+  /* Process all the save handlers.  */
+
   for (registration = objfile_data_registry.registrations, i = 0;
        i < objfile->num_data;
        registration = registration->next, i++)
-    if (objfile->data[i] != NULL && registration->data->cleanup)
-      registration->data->cleanup (objfile, objfile->data[i]);
+    if (objfile->data[i] != NULL && registration->data->save != NULL)
+      registration->data->save (objfile, objfile->data[i]);
+
+  /* Now process all the free handlers.  */
+
+  for (registration = objfile_data_registry.registrations, i = 0;
+       i < objfile->num_data;
+       registration = registration->next, i++)
+    if (objfile->data[i] != NULL && registration->data->free != NULL)
+      registration->data->free (objfile, objfile->data[i]);
 
   memset (objfile->data, 0, objfile->num_data * sizeof (void *));
 }

@@ -527,7 +527,7 @@ typy_str (PyObject *self)
 static const struct objfile_data *typy_objfile_data_key;
 
 static void
-clean_up_objfile_types (struct objfile *objfile, void *datum)
+save_objfile_types (struct objfile *objfile, void *datum)
 {
   type_object *obj = datum;
   htab_t copied_types;
@@ -643,7 +643,7 @@ gdbpy_initialize_types (void)
   int i;
 
   typy_objfile_data_key
-    = register_objfile_data_with_cleanup (clean_up_objfile_types);
+    = register_objfile_data_with_cleanup (save_objfile_types, NULL);
 
   if (PyType_Ready (&type_object_type) < 0)
     return;

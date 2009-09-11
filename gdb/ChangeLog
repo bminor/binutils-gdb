@@ -1,3 +1,21 @@
+2009-09-11  Doug Evans  <dje@google.com>
+
+	* objfiles.c (struct objfile_data): Delete member cleanup and replace
+	with save, free.
+	(register_objfile_data_with_cleanup): Delete arg cleanup and replace
+	with save, free.  All callers updated.
+	(clear_objfile_data): Replace cleanup loop with separate save and
+	free loops.
+	* objfiles.h (register_objfile_data_with_cleanup): Update.
+	* arm-tdep.c (arm_objfile_data_free): Renamed from
+	arm_objfile_data_cleanup, all callers updated.
+	* dwarf2read.c (dwarf2_per_objfile_free): Renamed from
+	dwarf2_per_objfile_cleanup, all callers updated.
+	* python/py-objfile.c (py_free_objfile): Renamed from clean_up_objfile,
+	all callers updated.
+	* python/py-type.c (save_objfile_types): Renamed from
+	clean_up_objfile_types, all callers updated.
+
 2009-09-11  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2loc.c (struct piece_closure) <arch>: New field.

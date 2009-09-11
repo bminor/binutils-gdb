@@ -118,7 +118,7 @@ objfpy_set_printers (PyObject *o, PyObject *value, void *ignore)
 /* Clear the OBJFILE pointer in an Objfile object and remove the
    reference.  */
 static void
-clean_up_objfile (struct objfile *objfile, void *datum)
+py_free_objfile (struct objfile *objfile, void *datum)
 {
   struct cleanup *cleanup;
   objfile_object *object = datum;
@@ -166,7 +166,7 @@ void
 gdbpy_initialize_objfile (void)
 {
   objfpy_objfile_data_key
-    = register_objfile_data_with_cleanup (clean_up_objfile);
+    = register_objfile_data_with_cleanup (NULL, py_free_objfile);
 
   if (PyType_Ready (&objfile_object_type) < 0)
     return;

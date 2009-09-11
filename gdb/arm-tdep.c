@@ -5240,7 +5240,7 @@ arm_coff_make_msymbol_special(int val, struct minimal_symbol *msym)
 }
 
 static void
-arm_objfile_data_cleanup (struct objfile *objfile, void *arg)
+arm_objfile_data_free (struct objfile *objfile, void *arg)
 {
   struct arm_per_objfile *data = arg;
   unsigned int i;
@@ -6032,7 +6032,7 @@ _initialize_arm_tdep (void)
   gdbarch_register (bfd_arch_arm, arm_gdbarch_init, arm_dump_tdep);
 
   arm_objfile_data_key
-    = register_objfile_data_with_cleanup (arm_objfile_data_cleanup);
+    = register_objfile_data_with_cleanup (NULL, arm_objfile_data_free);
 
   /* Register an ELF OS ABI sniffer for ARM binaries.  */
   gdbarch_register_osabi_sniffer (bfd_arch_arm,
