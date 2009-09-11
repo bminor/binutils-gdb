@@ -1,5 +1,8 @@
 2009-09-11  Doug Evans  <dje@google.com>
 
+	* dwarf2expr.c (execute_stack_op, case DW_OP_piece): Delete unused
+	local addr_or_regnum.
+
 	* objfiles.c (struct objfile_data): Delete member cleanup and replace
 	with save, free.
 	(register_objfile_data_with_cleanup): Delete arg cleanup and replace

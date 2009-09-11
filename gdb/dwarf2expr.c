@@ -794,7 +794,6 @@ execute_stack_op (struct dwarf_expr_context *ctx,
         case DW_OP_piece:
           {
             ULONGEST size;
-            CORE_ADDR addr_or_regnum;
 
             /* Record the piece.  */
             op_ptr = read_uleb128 (op_ptr, op_end, &size);
