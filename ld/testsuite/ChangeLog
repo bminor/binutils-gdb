@@ -1,3 +1,8 @@
+2009-09-11  Jie Zhang  <jie.zhang@analog.com>
+
+	* ld-elf/warn2.d: `Foo' appears in section 3 when target
+	is bfin-*-linux-uclibc.
+
 2009-09-09  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ld-arm/farcall-mixed-lib.d: Update.
