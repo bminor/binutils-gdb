@@ -467,7 +467,7 @@ get_filenum (const char *filename, unsigned int num)
 		     xrealloc (dirs, (dir + 32) * sizeof (const char *));
 	    }
 
-	  dirs[dir] = xmalloc (dir_len + 1);
+	  dirs[dir] = (char *) xmalloc (dir_len + 1);
 	  memcpy (dirs[dir], filename, dir_len);
 	  dirs[dir][dir_len] = '\0';
 	  dirs_in_use = dir + 1;

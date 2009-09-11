@@ -393,7 +393,7 @@ get_any_string (int idx, sb *in, sb *out)
 	}
       else
 	{
-	  char *br_buf = xmalloc(1);
+	  char *br_buf = (char *) xmalloc(1);
 	  char *in_br = br_buf;
 
 	  *in_br = '\0';
@@ -424,7 +424,7 @@ get_any_string (int idx, sb *in, sb *out)
 		    --in_br;
 		  else
 		    {
-		      br_buf = xmalloc(strlen(in_br) + 2);
+		      br_buf = (char *) xmalloc(strlen(in_br) + 2);
 		      strcpy(br_buf + 1, in_br);
 		      free(in_br);
 		      in_br = br_buf;
@@ -457,7 +457,7 @@ new_formal (void)
 {
   formal_entry *formal;
 
-  formal = xmalloc (sizeof (formal_entry));
+  formal = (formal_entry *) xmalloc (sizeof (formal_entry));
 
   sb_new (&formal->name);
   sb_new (&formal->def);
@@ -1273,7 +1273,7 @@ delete_macro (const char *name)
   /* We can only ask hash_delete to free memory if we are deleting
      macros in reverse order to their definition.
      So just clear out the entry.  */
-  if ((macro = hash_find (macro_hash, copy)) != NULL)
+  if ((macro = (macro_entry *) hash_find (macro_hash, copy)) != NULL)
     {
       hash_jam (macro_hash, copy, NULL);
       free_macro (macro);

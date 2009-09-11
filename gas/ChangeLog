@@ -1,3 +1,42 @@
+2009-09-11  Nick Clifton  <nickc@redhat.com>
+
+	* po/gas.pot: Updated by the Translation project.
+
+2009-09-11  Martin Thuresson  <martint@google.com>
+
+	Updated sources to compile cleanly with -Wc++-compat:
+	* app.c: Add casts.
+	* as.c: Add casts.
+	* config/obj-elf.c: Add casts.
+	(obj_elf_type): Rename variable typename to type_name.
+	* config/tc-i386-intel.c (i386_operators): Rename member operator to op.
+	* config/tc-i386.c: Add casts.
+	(check_cpu_arch_compatible): Rename argument new to new_flag.
+	(gotrel): Update variable to use enum name instead of integer value.
+	* dw2gencfi.c: Add casts.
+	(struct cfi_escape_data): Move to top level.
+	* dwarf2dbg.c: Add cast.
+	* dwarf2dbg.h (dwarf2_loc_directive_seen): Make variable extern.
+	* ehopt.c Add casts.
+	(enum frame_state): Move to top level.
+	* expr.c (operatorf): Rename function operator to operatorf.
+	(operand): Rename variable operator to op.
+	(expr_set_rank): Rename argument operator to op.
+	* frags.c: Add cast.
+	* hash.c: Add casts.
+	* input-scrub.c: Add cast.
+	* listing.c: Add casts.
+	(enum edict_enum): Move to top level.
+	* macro.c: Add casts.
+	* macro.h (enum formal_type): Move to top level.
+	* read.c: Add casts.
+	(s_include): Rename variable try to try_file.
+	* remap.c: Add cast.
+	* stabs.c: Add casts.
+	* subsegs.c: Add casts.
+	* symbols.c: Add casts.
+	* write.c: Add casts.
+
 2009-09-11  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	PR gas/10623

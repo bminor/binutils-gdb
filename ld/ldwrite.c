@@ -57,7 +57,7 @@ build_link_order (lang_statement_union_type *statement)
 
 	link_order->type = bfd_data_link_order;
 	link_order->offset = statement->data_statement.output_offset;
-	link_order->u.data.contents = xmalloc (QUAD_SIZE);
+	link_order->u.data.contents = (bfd_byte *) xmalloc (QUAD_SIZE);
 
 	value = statement->data_statement.value;
 
@@ -198,7 +198,8 @@ build_link_order (lang_statement_union_type *statement)
 	link_order->offset = rs->output_offset;
 	link_order->size = bfd_get_reloc_size (rs->howto);
 
-	link_order->u.reloc.p = xmalloc (sizeof (struct bfd_link_order_reloc));
+	link_order->u.reloc.p = (struct bfd_link_order_reloc *)
+            xmalloc (sizeof (struct bfd_link_order_reloc));
 
 	link_order->u.reloc.p->reloc = rs->reloc;
 	link_order->u.reloc.p->addend = rs->addend_value;
@@ -333,7 +334,7 @@ clone_section (bfd *abfd, asection *s, const char *name, int *count)
   /* Invent a section name from the section name and a dotted numeric
      suffix.   */
   len = strlen (name);
-  tname = xmalloc (len + 1);
+  tname = (char *) xmalloc (len + 1);
   memcpy (tname, name, len + 1);
   /* Remove a dotted number suffix, from a previous split link. */
   while (len && ISDIGIT (tname[len-1]))

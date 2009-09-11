@@ -1,5 +1,9 @@
 2009-09-11  Nick Clifton  <nickc@redhat.com>
 
+	* po/bfd.pot: Updated by the Translation project.
+
+2009-09-11  Nick Clifton  <nickc@redhat.com>
+
 	* rs6000-core.c (read_hdr): Fix typo in recent C++ compatibility
 	changes.
 

@@ -227,6 +227,19 @@ get_cie_info (struct cie_info *info)
   return 1;
 }
 
+enum frame_state
+{
+  state_idle,
+  state_saw_size,
+  state_saw_cie_offset,
+  state_saw_pc_begin,
+  state_seeing_aug_size,
+  state_skipping_aug,
+  state_wait_loc4,
+  state_saw_loc4,
+  state_error,
+};
+
 /* This function is called from emit_expr.  It looks for cases which
    we can optimize.
 
@@ -245,18 +258,7 @@ check_eh_frame (expressionS *exp, unsigned int *pnbytes)
 {
   struct frame_data
   {
-    enum frame_state
-    {
-      state_idle,
-      state_saw_size,
-      state_saw_cie_offset,
-      state_saw_pc_begin,
-      state_seeing_aug_size,
-      state_skipping_aug,
-      state_wait_loc4,
-      state_saw_loc4,
-      state_error,
-    } state;
+    enum frame_state state;
 
     int cie_info_ok;
     struct cie_info cie_info;
@@ -324,7 +326,7 @@ check_eh_frame (expressionS *exp, unsigned int *pnbytes)
     case state_saw_size:
     case state_saw_cie_offset:
       /* Assume whatever form it appears in, it appears atomically.  */
-      d->state += 1;
+      d->state = (enum frame_state) (d->state + 1);
       break;
 
     case state_saw_pc_begin:

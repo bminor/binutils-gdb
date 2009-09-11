@@ -1,3 +1,26 @@
+2009-09-11  Nick Clifton  <nickc@redhat.com>
+
+	* po/ld.pot: Updated by the Translation project.
+	* po/fi.po: Updated Finnish translation.
+
+2009-09-11  Martin Thuresson  <martint@google.com>
+
+	Updated sources to compile cleanly with -Wc++-compat:
+	* ld.h (enum endian_enum,enum symbolic_enum,enum
+	dynamic_list_enum): Move to top level.
+	* ldcref.c: Add casts.
+	* ldctor.c: Add casts.
+	* ldexp.c
+	* ldexp.h (enum node_tree_enum,enum phase_enum): Move to top level.
+	* ldlang.c: Add casts. (lang_insert_orphan): Use enum name instead
+	of integer.
+	* ldlang.h (enum statement_enum): Move to top level.
+	* ldmain.c: Add casts.
+	* ldwrite.c: Add casts.
+	* lexsup.c: Add casts. (enum control_enum): Move to top level.
+	* mri.c: Add casts. (mri_draw_tree): Use enum name instead of
+	integer.
+
 2009-09-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* scripttempl/aix.sc: Only provide ENTRY on final link.

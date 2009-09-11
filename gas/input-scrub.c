@@ -165,7 +165,8 @@ input_scrub_push (char *saved_position)
   buffer_length = input_file_buffer_size ();
   sb_index = -1;
 
-  buffer_start = xmalloc ((BEFORE_SIZE + buffer_length + buffer_length + AFTER_SIZE));
+  buffer_start = (char *) xmalloc ((BEFORE_SIZE + buffer_length
+                                    + buffer_length + AFTER_SIZE));
   memcpy (buffer_start, BEFORE_STRING, (int) BEFORE_SIZE);
 
   return saved;
@@ -209,7 +210,8 @@ input_scrub_begin (void)
 
   buffer_length = input_file_buffer_size ();
 
-  buffer_start = xmalloc ((BEFORE_SIZE + buffer_length + buffer_length + AFTER_SIZE));
+  buffer_start = (char *) xmalloc ((BEFORE_SIZE + buffer_length
+                                    + buffer_length + AFTER_SIZE));
   memcpy (buffer_start, BEFORE_STRING, (int) BEFORE_SIZE);
 
   /* Line number things.  */
@@ -363,10 +365,10 @@ input_scrub_next_buffer (char **bufp)
 
 	  limoff = limit - buffer_start;
 	  buffer_length += input_file_buffer_size ();
-	  buffer_start = xrealloc (buffer_start,
-				   (BEFORE_SIZE
-				    + 2 * buffer_length
-				    + AFTER_SIZE));
+	  buffer_start = (char *) xrealloc (buffer_start,
+                                            (BEFORE_SIZE
+                                             + 2 * buffer_length
+                                             + AFTER_SIZE));
 	  *bufp = buffer_start + BEFORE_SIZE;
 	  limit = input_file_give_next_buffer (buffer_start + limoff);
 

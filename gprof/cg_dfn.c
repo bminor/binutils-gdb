@@ -217,7 +217,8 @@ pre_visit (Sym *parent)
   if (dfn_depth >= dfn_maxdepth)
     {
       dfn_maxdepth += DFN_INCR_DEPTH;
-      dfn_stack = xrealloc (dfn_stack, dfn_maxdepth * sizeof *dfn_stack);
+      dfn_stack = (DFN_Stack *) xrealloc (dfn_stack,
+                                          dfn_maxdepth * sizeof *dfn_stack);
     }
 
   dfn_stack[dfn_depth].sym = parent;

@@ -48,7 +48,7 @@ static void mri_char_constant (expressionS *);
 static void current_location (expressionS *);
 static void clean_up_expression (expressionS * expressionP);
 static segT operand (expressionS *, enum expr_mode);
-static operatorT operator (int *);
+static operatorT operatorf (int *);
 
 extern const char EXP_CHARS[], FLT_CHARS[];
 
@@ -1228,9 +1228,9 @@ operand (expressionS *expressionP, enum expr_mode mode)
 
 #ifdef md_operator
 	  {
-	    operatorT operator = md_operator (name, 1, &c);
+	    operatorT op = md_operator (name, 1, &c);
 
-	    switch (operator)
+	    switch (op)
 	      {
 	      case O_uminus:
 		*input_line_pointer = c;
@@ -1250,14 +1250,14 @@ operand (expressionS *expressionP, enum expr_mode mode)
 	      default:
 		break;
 	      }
-	    if (operator != O_absent && operator != O_illegal)
+	    if (op != O_absent && op != O_illegal)
 	      {
 		*input_line_pointer = c;
 		expr (9, expressionP, mode);
 		expressionP->X_add_symbol = make_expr_symbol (expressionP);
 		expressionP->X_op_symbol = NULL;
 		expressionP->X_add_number = 0;
-		expressionP->X_op = operator;
+		expressionP->X_op = op;
 		break;
 	      }
 	  }
@@ -1546,10 +1546,10 @@ expr_set_precedence (void)
 }
 
 void
-expr_set_rank (operatorT operator, operator_rankT rank)
+expr_set_rank (operatorT op, operator_rankT rank)
 {
-  gas_assert (operator >= O_md1 && operator < ARRAY_SIZE (op_rank));
-  op_rank[operator] = rank;
+  gas_assert (op >= O_md1 && op < ARRAY_SIZE (op_rank));
+  op_rank[op] = rank;
 }
 
 /* Initialize the expression parser.  */
@@ -1572,7 +1572,7 @@ expr_begin (void)
    Does not advance INPUT_LINE_POINTER.  */
 
 static inline operatorT
-operator (int *num_chars)
+operatorf (int *num_chars)
 {
   int c;
   operatorT ret;
@@ -1732,7 +1732,7 @@ expr (int rankarg,		/* Larger # is higher rank.  */
   /* operand () gobbles spaces.  */
   know (*input_line_pointer != ' ');
 
-  op_left = operator (&op_chars);
+  op_left = operatorf (&op_chars);
   while (op_left != O_illegal && op_rank[(int) op_left] > rank)
     {
       segT rightseg;
@@ -1763,7 +1763,7 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	    }
 	}
 
-      op_right = operator (&op_chars);
+      op_right = operatorf (&op_chars);
 
       know (op_right == O_illegal || op_left == O_index
 	    || op_rank[(int) op_right] <= op_rank[(int) op_left]);

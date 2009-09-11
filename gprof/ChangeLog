@@ -1,3 +1,19 @@
+2009-09-11  Nick Clifton  <nickc@redhat.com>
+
+	* po/gprof.pot: Updated by the Translation project.
+	* po/sv.po: Updated Swedish translation.
+
+2009-09-11  Martin Thuresson  <martint@google.com>
+
+	Updated sources to compile cleanly with -Wc++-compat:
+	* basic_blocks.c: Add casts.
+	* cg_dfn.c: Add cast.
+	* corefile.c: Add casts.
+	* gmon_io.c: Add casts.
+	* hist.c: Add cast.
+	* source.c: Add cast.
+	* sym_ids.c (struct match): Moved to top level.
+
 2009-09-07  Tristan Gingold  <gingold@adacore.com>
 
 	* po/gprof.pot: Regenerate

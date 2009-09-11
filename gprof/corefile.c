@@ -140,7 +140,7 @@ read_function_mappings (const char *filename)
 	}
 
       /* dummy has the filename, go ahead and copy it.  */
-      symbol_map[count].file_name = xmalloc (strlen (dummy) + 1);
+      symbol_map[count].file_name = (char *) xmalloc (strlen (dummy) + 1);
       strcpy (symbol_map[count].file_name, dummy);
 
       /* Now we need the function name.  */
@@ -148,7 +148,7 @@ read_function_mappings (const char *filename)
       if (!matches)
 	parse_error (filename);
       tmp = strrchr (dummy, ' ') + 1;
-      symbol_map[count].function_name = xmalloc (strlen (tmp) + 1);
+      symbol_map[count].function_name = (char *) xmalloc (strlen (tmp) + 1);
       strcpy (symbol_map[count].function_name, tmp);
       count++;
     }
@@ -227,7 +227,7 @@ core_init (const char * aout_name)
       long i;
 
       new_size = (core_num_syms + synth_count + 1) * sizeof (*core_syms);
-      core_syms = xrealloc (core_syms, new_size);
+      core_syms = (asymbol **) xrealloc (core_syms, new_size);
       symp = core_syms + core_num_syms;
       core_num_syms += synth_count;
       for (i = 0; i < synth_count; i++)
@@ -577,8 +577,10 @@ core_create_function_syms (void)
       /* Don't create a symtab entry for a function that has
 	 a mapping to a file, unless it's the first function
 	 in the file.  */
-      found = bsearch (core_syms[i]->name, symbol_map, symbol_map_count,
-		       sizeof (struct function_map), search_mapped_symbol);
+      found = (struct function_map *) bsearch (core_syms[i]->name, symbol_map,
+                                               symbol_map_count,
+                                               sizeof (struct function_map),
+                                               search_mapped_symbol);
       if (found == NULL || found->is_first)
 	++symtab.len;
     }
@@ -609,7 +611,8 @@ core_create_function_syms (void)
 	  continue;
 	}
 
-      found = bsearch (core_syms[i]->name, symbol_map, symbol_map_count,
+      found = (struct function_map *) bsearch (core_syms[i]->name, symbol_map,
+                                               symbol_map_count,
 		       sizeof (struct function_map), search_mapped_symbol);
       if (found && ! found->is_first)
 	continue;
@@ -726,8 +729,8 @@ core_create_line_syms (void)
      BFD would provide an iterator for enumerating all line infos.  */
   prev_name_len = PATH_MAX;
   prev_filename_len = PATH_MAX;
-  prev_name = xmalloc (prev_name_len);
-  prev_filename = xmalloc (prev_filename_len);
+  prev_name = (char *) xmalloc (prev_name_len);
+  prev_filename = (char *) xmalloc (prev_filename_len);
   ltab.len = 0;
   prev_line_num = 0;
 
@@ -751,7 +754,7 @@ core_create_line_syms (void)
 	{
 	  prev_name_len = len + 1024;
 	  free (prev_name);
-	  prev_name = xmalloc (prev_name_len);
+	  prev_name = (char *) xmalloc (prev_name_len);
 	}
 
       strcpy (prev_name, dummy.name);
@@ -761,7 +764,7 @@ core_create_line_syms (void)
 	{
 	  prev_filename_len = len + 1024;
 	  free (prev_filename);
-	  prev_filename = xmalloc (prev_filename_len);
+	  prev_filename = (char *) xmalloc (prev_filename_len);
 	}
 
       strcpy (prev_filename, filename);

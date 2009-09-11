@@ -258,7 +258,7 @@ app_push (void)
     saved->saved_input = NULL;
   else
     {
-      saved->saved_input = xmalloc (saved_input_len);
+      saved->saved_input = (char *) xmalloc (saved_input_len);
       memcpy (saved->saved_input, saved_input, saved_input_len);
       saved->saved_input_len = saved_input_len;
     }

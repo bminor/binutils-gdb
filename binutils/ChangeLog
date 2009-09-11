@@ -1,7 +1,10 @@
+2009-09-11  Nick Clifton  <nickc@redhat.com>
+
+	* po/binutils.pot: Updated by the Translation project.
+
 2009-09-10  Martin Thuresson  <martin@mtme.org>
 
 	Update soruces to compile cleanly with -Wc++-compat:
-
 	* addr2line.c (slurp_symtab): Fix casts. Introduce variable
 	minisyms to avoid aliasing varning.
 	* ar.c: Add casts.

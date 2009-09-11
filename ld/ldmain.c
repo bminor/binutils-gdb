@@ -399,7 +399,7 @@ main (int argc, char **argv)
 	{
 	  static const int ld_bufsz = 8193;
 	  size_t n;
-	  char *buf = xmalloc (ld_bufsz);
+	  char *buf = (char *) xmalloc (ld_bufsz);
 
 	  rewind (saved_script_handle);
 	  while ((n = fread (buf, 1, ld_bufsz - 1, saved_script_handle)) > 0)
@@ -503,9 +503,9 @@ main (int argc, char **argv)
 	      FILE *src;
 	      FILE *dst;
 	      const int bsize = 4096;
-	      char *buf = xmalloc (bsize);
+	      char *buf = (char *) xmalloc (bsize);
 	      int l;
-	      char *dst_name = xmalloc (len + 5);
+	      char *dst_name = (char *) xmalloc (len + 5);
 
 	      strcpy (dst_name, output_filename);
 	      strcat (dst_name, ".exe");
@@ -540,7 +540,7 @@ main (int argc, char **argv)
   if (config.stats)
     {
 #ifdef HAVE_SBRK
-      char *lim = sbrk (0);
+      char *lim = (char *) sbrk (0);
 #endif
       long run_time = get_run_time () - start_time;
 
@@ -672,7 +672,8 @@ add_ysym (const char *name)
 {
   if (link_info.notice_hash == NULL)
     {
-      link_info.notice_hash = xmalloc (sizeof (struct bfd_hash_table));
+      link_info.notice_hash =
+          (struct bfd_hash_table *) xmalloc (sizeof (struct bfd_hash_table));
       if (!bfd_hash_table_init_n (link_info.notice_hash,
 				  bfd_hash_newfunc,
 				  sizeof (struct bfd_hash_entry),
@@ -691,7 +692,8 @@ add_wrap (const char *name)
 {
   if (link_info.wrap_hash == NULL)
     {
-      link_info.wrap_hash = xmalloc (sizeof (struct bfd_hash_table));
+      link_info.wrap_hash =
+          (struct bfd_hash_table *) xmalloc (sizeof (struct bfd_hash_table));
       if (!bfd_hash_table_init_n (link_info.wrap_hash,
 				  bfd_hash_newfunc,
 				  sizeof (struct bfd_hash_entry),
@@ -724,13 +726,14 @@ add_keepsyms_file (const char *filename)
       return;
     }
 
-  link_info.keep_hash = xmalloc (sizeof (struct bfd_hash_table));
+  link_info.keep_hash = (struct bfd_hash_table *)
+      xmalloc (sizeof (struct bfd_hash_table));
   if (!bfd_hash_table_init (link_info.keep_hash, bfd_hash_newfunc,
 			    sizeof (struct bfd_hash_entry)))
     einfo (_("%P%F: bfd_hash_table_init failed: %E\n"));
 
   bufsize = 100;
-  buf = xmalloc (bufsize);
+  buf = (char *) xmalloc (bufsize);
 
   c = getc (file);
   while (c != EOF)
@@ -749,7 +752,7 @@ add_keepsyms_file (const char *filename)
 	      if (len >= bufsize)
 		{
 		  bufsize *= 2;
-		  buf = xrealloc (buf, bufsize);
+		  buf = (char *) xrealloc (buf, bufsize);
 		}
 	      c = getc (file);
 	    }
@@ -780,7 +783,8 @@ add_archive_element (struct bfd_link_info *info,
 {
   lang_input_statement_type *input;
 
-  input = xcalloc (1, sizeof (lang_input_statement_type));
+  input = (lang_input_statement_type *)
+      xcalloc (1, sizeof (lang_input_statement_type));
   input->filename = abfd->filename;
   input->local_sym_name = abfd->filename;
   input->the_bfd = abfd;
@@ -1127,7 +1131,7 @@ warning_callback (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 static void
 warning_find_reloc (bfd *abfd, asection *sec, void *iarg)
 {
-  struct warning_callback_info *info = iarg;
+  struct warning_callback_info *info = (struct warning_callback_info *) iarg;
   long relsize;
   arelent **relpp;
   long relcount;
@@ -1142,7 +1146,7 @@ warning_find_reloc (bfd *abfd, asection *sec, void *iarg)
   if (relsize == 0)
     return;
 
-  relpp = xmalloc (relsize);
+  relpp = (arelent **) xmalloc (relsize);
   relcount = bfd_canonicalize_reloc (abfd, sec, relpp, info->asymbols);
   if (relcount < 0)
     einfo (_("%B%F: could not read relocs: %E\n"), abfd);
@@ -1190,7 +1194,8 @@ undefined_symbol (struct bfd_link_info *info ATTRIBUTE_UNUSED,
       /* Only warn once about a particular undefined symbol.  */
       if (hash == NULL)
 	{
-	  hash = xmalloc (sizeof (struct bfd_hash_table));
+	  hash = (struct bfd_hash_table *)
+              xmalloc (sizeof (struct bfd_hash_table));
 	  if (!bfd_hash_table_init (hash, bfd_hash_newfunc,
 				    sizeof (struct bfd_hash_entry)))
 	    einfo (_("%F%P: bfd_hash_table_init failed: %E\n"));
@@ -1376,7 +1381,7 @@ notice (struct bfd_link_info *info,
   if (name == NULL)
     {
       if (command_line.cref || nocrossref_list != NULL)
-	return handle_asneeded_cref (abfd, value);
+	return handle_asneeded_cref (abfd, (enum notice_asneeded_action) value);
       return TRUE;
     }
 

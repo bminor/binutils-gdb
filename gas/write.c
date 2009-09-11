@@ -156,7 +156,7 @@ fix_new_internal (fragS *frag,		/* Which frag?  */
 
   n_fixups++;
 
-  fixP = obstack_alloc (&notes, sizeof (fixS));
+  fixP = (fixS *) obstack_alloc (&notes, sizeof (fixS));
 
   fixP->fx_frag = frag;
   fixP->fx_where = where;
@@ -1170,7 +1170,7 @@ write_relocs (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 	rp = &r->next;
     }
 
-  relocs = xcalloc (n, sizeof (arelent *));
+  relocs = (arelent **) xcalloc (n, sizeof (arelent *));
 
   i = 0;
   for (fixp = seginfo->fix_root; fixp != (fixS *) NULL; fixp = fixp->fx_next)
@@ -1398,7 +1398,7 @@ set_symtab (void)
       int i;
       bfd_size_type amt = (bfd_size_type) nsyms * sizeof (asymbol *);
 
-      asympp = bfd_alloc (stdoutput, amt);
+      asympp = (asymbol **) bfd_alloc (stdoutput, amt);
       symp = symbol_rootP;
       for (i = 0; i < nsyms; i++, symp = symbol_next (symp))
 	{

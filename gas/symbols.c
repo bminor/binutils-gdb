@@ -109,7 +109,7 @@ save_symbol_name (const char *name)
 
   name_length = strlen (name) + 1;	/* +1 for \0.  */
   obstack_grow (&notes, name, name_length);
-  ret = obstack_finish (&notes);
+  ret = (char *) obstack_finish (&notes);
 
 #ifdef tc_canonicalize_symbol_name
   ret = tc_canonicalize_symbol_name (ret);
@@ -137,7 +137,7 @@ symbol_create (const char *name, /* It is copied, the caller can destroy/modify.
 
   preserved_copy_of_name = save_symbol_name (name);
 
-  symbolP = obstack_alloc (&notes, sizeof (symbolS));
+  symbolP = (symbolS *) obstack_alloc (&notes, sizeof (symbolS));
 
   /* symbol must be born in some fixed state.  This seems as good as any.  */
   memset (symbolP, 0, sizeof (symbolS));
@@ -197,7 +197,7 @@ local_symbol_make (const char *name, segT section, valueT value, fragS *frag)
 
   name_copy = save_symbol_name (name);
 
-  ret = obstack_alloc (&notes, sizeof *ret);
+  ret = (struct local_symbol *) obstack_alloc (&notes, sizeof *ret);
   ret->lsy_marker = NULL;
   ret->lsy_name = name_copy;
   ret->lsy_section = section;
@@ -563,7 +563,7 @@ symbol_clone (symbolS *orgsymP, int replace)
     orgsymP = local_symbol_convert ((struct local_symbol *) orgsymP);
   bsymorg = orgsymP->bsym;
 
-  newsymP = obstack_alloc (&notes, sizeof (*newsymP));
+  newsymP = (symbolS *) obstack_alloc (&notes, sizeof (*newsymP));
   *newsymP = *orgsymP;
   bsymnew = bfd_make_empty_symbol (bfd_asymbol_bfd (bsymorg));
   if (bsymnew == NULL)
@@ -1453,7 +1453,7 @@ static void
 resolve_local_symbol (const char *key ATTRIBUTE_UNUSED, void *value)
 {
   if (value != NULL)
-    resolve_symbol_value (value);
+    resolve_symbol_value ((symbolS *) value);
 }
 
 /* Resolve all local symbols.  */
@@ -1603,7 +1603,7 @@ define_dollar_label (long label)
     {
       dollar_labels = (long *) xmalloc (DOLLAR_LABEL_BUMP_BY * sizeof (long));
       dollar_label_instances = (long *) xmalloc (DOLLAR_LABEL_BUMP_BY * sizeof (long));
-      dollar_label_defines = xmalloc (DOLLAR_LABEL_BUMP_BY);
+      dollar_label_defines = (char *) xmalloc (DOLLAR_LABEL_BUMP_BY);
       dollar_label_max = DOLLAR_LABEL_BUMP_BY;
       dollar_label_count = 0;
     }
@@ -1614,7 +1614,7 @@ define_dollar_label (long label)
 					 dollar_label_max * sizeof (long));
       dollar_label_instances = (long *) xrealloc ((char *) dollar_label_instances,
 					  dollar_label_max * sizeof (long));
-      dollar_label_defines = xrealloc (dollar_label_defines, dollar_label_max);
+      dollar_label_defines = (char *) xrealloc (dollar_label_defines, dollar_label_max);
     }				/* if we needed to grow  */
 
   dollar_labels[dollar_label_count] = label;
@@ -1887,7 +1887,7 @@ decode_local_label_name (char *s)
     instance_number = (10 * instance_number) + *p - '0';
 
   message_format = _("\"%d\" (instance number %d of a %s label)");
-  symbol_decode = obstack_alloc (&notes, strlen (message_format) + 30);
+  symbol_decode = (char *) obstack_alloc (&notes, strlen (message_format) + 30);
   sprintf (symbol_decode, message_format, label_number, instance_number, type);
 
   return symbol_decode;

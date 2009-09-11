@@ -946,7 +946,7 @@ exp_provide (const char *dst, etree_type *src, bfd_boolean hidden)
 {
   etree_type *n;
 
-  n = stat_alloc (sizeof (n->assign));
+  n = (etree_type *) stat_alloc (sizeof (n->assign));
   n->assign.type.node_code = '=';
   n->assign.type.lineno = src->type.lineno;
   n->assign.type.node_class = etree_provide;
@@ -963,7 +963,7 @@ exp_assert (etree_type *exp, const char *message)
 {
   etree_type *n;
 
-  n = stat_alloc (sizeof (n->assert_s));
+  n = (etree_type *) stat_alloc (sizeof (n->assert_s));
   n->assert_s.type.node_code = '!';
   n->assert_s.type.lineno = exp->type.lineno;
   n->assert_s.type.node_class = etree_assert;
@@ -1095,7 +1095,7 @@ exp_get_fill (etree_type *tree, fill_type *def, char *name)
     {
       unsigned char *dst;
       unsigned char *s;
-      fill = xmalloc ((len + 1) / 2 + sizeof (*fill) - 1);
+      fill = (fill_type *) xmalloc ((len + 1) / 2 + sizeof (*fill) - 1);
       fill->size = (len + 1) / 2;
       dst = fill->data;
       s = (unsigned char *) expld.result.str;
@@ -1120,7 +1120,7 @@ exp_get_fill (etree_type *tree, fill_type *def, char *name)
     }
   else
     {
-      fill = xmalloc (4 + sizeof (*fill) - 1);
+      fill = (fill_type *) xmalloc (4 + sizeof (*fill) - 1);
       val = expld.result.value;
       fill->data[0] = (val >> 24) & 0xff;
       fill->data[1] = (val >> 16) & 0xff;
