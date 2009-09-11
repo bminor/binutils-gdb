@@ -1,4 +1,4 @@
-2009-09-04  Jie Zhang  <jie.zhang@analog.com>
+2009-09-11  Jie Zhang  <jie.zhang@analog.com>
 
 	* elf32-bfin.c (bfinfdpic_relocs_info_find): Just return
 	NULL if `ht' is NULL.
