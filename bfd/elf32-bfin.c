@@ -1950,8 +1950,12 @@ bfinfdpic_relocs_info_find (struct htab *ht,
 			   const struct bfinfdpic_relocs_info *entry,
 			   enum insert_option insert)
 {
-  struct bfinfdpic_relocs_info **loc =
-    (struct bfinfdpic_relocs_info **) htab_find_slot (ht, entry, insert);
+  struct bfinfdpic_relocs_info **loc;
+
+  if (!ht)
+    return NULL;
+
+  loc = (struct bfinfdpic_relocs_info **) htab_find_slot (ht, entry, insert);
 
   if (! loc)
     return NULL;

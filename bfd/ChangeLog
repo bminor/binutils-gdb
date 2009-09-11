@@ -1,3 +1,8 @@
+2009-09-11  Jie Zhang  <jie.zhang@analog.com>
+
+	* elf32-bfin.c (bfinfdpic_relocs_info_find): Just return
+	NULL if `ht' is NULL.
+
 2009-09-10  Tristan Gingold  <gingold@adacore.com>
 
 	* configure.in: Bump version to 2.19.91
