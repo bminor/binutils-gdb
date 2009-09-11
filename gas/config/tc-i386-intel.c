@@ -65,7 +65,7 @@ intel_state;
 static struct
   {
     const char *name;
-    operatorT operator;
+    operatorT op;
     unsigned int operands;
   }
 const i386_operators[] =
@@ -91,7 +91,7 @@ const i386_operators[] =
 static struct
   {
     const char *name;
-    operatorT operator;
+    operatorT op;
     unsigned short sz[3];
   }
 const i386_types[] =
@@ -158,7 +158,7 @@ operatorT i386_operator (const char *name, unsigned int operands, char *pc)
 	if (i386_operators[j].operands
 	    && i386_operators[j].operands != operands)
 	  return O_illegal;
-	return i386_operators[j].operator;
+	return i386_operators[j].op;
       }
 
   for (j = 0; i386_types[j].name; ++j)
@@ -175,7 +175,7 @@ operatorT i386_operator (const char *name, unsigned int operands, char *pc)
 	  *pc = c;
 	  if (intel_syntax > 0 || operands != 1)
 	    return O_illegal;
-	  return i386_types[j].operator;
+	  return i386_types[j].op;
 	}
 
       *input_line_pointer = c;

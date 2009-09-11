@@ -506,7 +506,8 @@ parse_args (int * pargc, char *** pargv)
      dependent list.  Include space for an extra NULL option and
      always NULL terminate.  */
   shortopts = concat (std_shortopts, md_shortopts, (char *) NULL);
-  longopts = xmalloc (sizeof (std_longopts) + md_longopts_size + sizeof (struct option));
+  longopts = (struct option *) xmalloc (sizeof (std_longopts)
+                                        + md_longopts_size + sizeof (struct option));
   memcpy (longopts, std_longopts, sizeof (std_longopts));
   memcpy (((char *) longopts) + sizeof (std_longopts), md_longopts, md_longopts_size);
   memset (((char *) longopts) + sizeof (std_longopts) + md_longopts_size,
@@ -517,7 +518,7 @@ parse_args (int * pargc, char *** pargv)
   old_argv = *pargv;
 
   /* Initialize a new argv that contains no options.  */
-  new_argv = xmalloc (sizeof (char *) * (old_argc + 1));
+  new_argv = (char **) xmalloc (sizeof (char *) * (old_argc + 1));
   new_argv[0] = old_argv[0];
   new_argc = 1;
   new_argv[new_argc] = NULL;
@@ -646,7 +647,7 @@ This program has absolutely no warranty.\n"));
 	      as_fatal (_("bad defsym; format is --defsym name=value"));
 	    *s++ = '\0';
 	    i = bfd_scan_vma (s, (const char **) NULL, 0);
-	    n = xmalloc (sizeof *n);
+	    n = (struct defsym_list *) xmalloc (sizeof *n);
 	    n->next = defsyms;
 	    n->name = optarg;
 	    n->value = i;
@@ -1157,6 +1158,8 @@ main (int argc, char ** argv)
 #endif
 
   itbl_init ();
+
+  dwarf2_init ();
 
   /* Now that we have fully initialized, and have created the output
      file, define any symbols requested by --defsym command line

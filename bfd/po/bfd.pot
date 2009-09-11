@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2009-09-07 12:07+0200\n"
+"POT-Creation-Date: 2009-09-07 14:05+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -367,7 +367,7 @@ msgstr ""
 msgid "Relocation `%s' not yet implemented\n"
 msgstr ""
 
-#: coff-i860.c:605 coff-tic54x.c:398 coffcode.h:5145
+#: coff-i860.c:605 coff-tic54x.c:398 coffcode.h:5143
 msgid "%B: warning: illegal symbol index %ld in relocs"
 msgstr ""
 
@@ -437,56 +437,56 @@ msgstr ""
 msgid "ignoring reloc %s\n"
 msgstr ""
 
-#: coffcode.h:962
+#: coffcode.h:960
 msgid "%B: warning: COMDAT symbol '%s' does not match section name '%s'"
 msgstr ""
 
 #. Generate a warning message rather using the 'unhandled'
 #. variable as this will allow some .sys files generate by
 #. other toolchains to be processed.  See bugzilla issue 196.
-#: coffcode.h:1178
+#: coffcode.h:1176
 msgid ""
 "%B: Warning: Ignoring section flag IMAGE_SCN_MEM_NOT_PAGED in section %s"
 msgstr ""
 
-#: coffcode.h:1242
+#: coffcode.h:1240
 msgid "%B (%s): Section flag %s (0x%x) ignored"
 msgstr ""
 
-#: coffcode.h:2384
+#: coffcode.h:2382
 #, c-format
 msgid "Unrecognized TI COFF target id '0x%x'"
 msgstr ""
 
-#: coffcode.h:2698
+#: coffcode.h:2696
 msgid "%B: reloc against a non-existant symbol index: %ld"
 msgstr ""
 
-#: coffcode.h:3671
+#: coffcode.h:3669
 msgid "%B: section %s: string table overflow at offset %ld"
 msgstr ""
 
-#: coffcode.h:4479
+#: coffcode.h:4477
 msgid "%B: warning: line number table read failed"
 msgstr ""
 
-#: coffcode.h:4509
+#: coffcode.h:4507
 msgid "%B: warning: illegal symbol index %ld in line numbers"
 msgstr ""
 
-#: coffcode.h:4523
+#: coffcode.h:4521
 msgid "%B: warning: duplicate line number information for `%s'"
 msgstr ""
 
-#: coffcode.h:4914
+#: coffcode.h:4912
 msgid "%B: Unrecognized storage class %d for %s symbol `%s'"
 msgstr ""
 
-#: coffcode.h:5040
+#: coffcode.h:5038
 msgid "warning: %B: local symbol `%s' has no section"
 msgstr ""
 
-#: coffcode.h:5183
+#: coffcode.h:5181
 msgid "%B: illegal relocation type %d at address 0x%lx"
 msgstr ""
 

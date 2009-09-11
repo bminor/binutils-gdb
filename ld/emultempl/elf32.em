@@ -137,7 +137,8 @@ gld${EMULATION_NAME}_load_symbols (lang_input_statement_type *entry)
       || (bfd_get_file_flags (entry->the_bfd) & DYNAMIC) == 0)
     return FALSE;
 
-  bfd_elf_set_dyn_lib_class (entry->the_bfd, link_class);
+  bfd_elf_set_dyn_lib_class (entry->the_bfd,
+                             (enum dynamic_lib_link_class) link_class);
 
   /* Continue on with normal load_symbols processing.  */
   return FALSE;
@@ -428,7 +429,7 @@ fragment <<EOF
       && (bfd_elf_get_dyn_lib_class (needed->by) & DYN_NO_ADD_NEEDED) != 0)
     link_class |= DYN_NO_NEEDED | DYN_NO_ADD_NEEDED;
 
-  bfd_elf_set_dyn_lib_class (abfd, link_class);
+  bfd_elf_set_dyn_lib_class (abfd, (enum dynamic_lib_link_class) link_class);
 
   /* Add this file into the symbol table.  */
   if (! bfd_link_add_symbols (abfd, &link_info))
@@ -930,7 +931,7 @@ static bfd_boolean
 gld${EMULATION_NAME}_write_build_id_section (bfd *abfd)
 {
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-  struct build_id_info *info =
+  struct build_id_info *info = (struct build_id_info *)
     elf_tdata (abfd)->after_write_object_contents_info;
   asection *asec;
   Elf_Internal_Shdr *i_shdr;
@@ -950,13 +951,13 @@ gld${EMULATION_NAME}_write_build_id_section (bfd *abfd)
   if (i_shdr->contents == NULL)
     {
       if (asec->contents == NULL)
-	asec->contents = xmalloc (asec->size);
+	asec->contents = (unsigned char *) xmalloc (asec->size);
       contents = asec->contents;
     }
   else
     contents = i_shdr->contents + asec->output_offset;
 
-  e_note = (void *) contents;
+  e_note = (Elf_External_Note *) contents;
   size = offsetof (Elf_External_Note, name[sizeof "GNU"]);
   size = (size + 3) & -(bfd_size_type) 4;
   id_bits = contents + size;
@@ -1075,7 +1076,8 @@ gld${EMULATION_NAME}_after_open (void)
 	      if (s != NULL && bfd_set_section_alignment (abfd, s, 2))
 		{
 		  struct elf_obj_tdata *t = elf_tdata (link_info.output_bfd);
-		  struct build_id_info *b = xmalloc (sizeof *b);
+		  struct build_id_info *b =
+                      (struct build_id_info *) xmalloc (sizeof *b);
 
 		  b->style = link_info.emit_note_gnu_build_id;
 		  b->sec = s;
@@ -1453,7 +1455,7 @@ ${ELF_INTERPRETER_SET_DEFAULT}
 	  continue;
 
 	sz = s->size;
-	msg = xmalloc ((size_t) (sz + 1));
+	msg = (char *) xmalloc ((size_t) (sz + 1));
 	if (! bfd_get_section_contents (is->the_bfd, s,	msg,
 					(file_ptr) 0, sz))
 	  einfo ("%F%B: Can't read contents of section .gnu.warning: %E\n",

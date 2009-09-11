@@ -30,21 +30,23 @@ typedef struct {
   bfd_boolean valid_p;
 } etree_value_type;
 
+enum node_tree_enum {
+  etree_binary,
+  etree_trinary,
+  etree_unary,
+  etree_name,
+  etree_assign,
+  etree_provide,
+  etree_provided,
+  etree_value,
+  etree_assert,
+  etree_rel
+};
+
 typedef struct {
   int node_code;
   unsigned int lineno;
-  enum {
-    etree_binary,
-    etree_trinary,
-    etree_unary,
-    etree_name,
-    etree_assign,
-    etree_provide,
-    etree_provided,
-    etree_value,
-    etree_assert,
-    etree_rel
-  } node_class;
+  enum  node_tree_enum node_class;
 } node_type;
 
 typedef union etree_union {
@@ -100,6 +102,21 @@ typedef enum {
 
 union lang_statement_union;
 
+enum phase_enum {
+  exp_dataseg_none,
+  exp_dataseg_align_seen,
+  exp_dataseg_relro_seen,
+  exp_dataseg_end_seen,
+  exp_dataseg_relro_adjust,
+  exp_dataseg_adjust
+};
+
+enum relro_enum {
+  exp_dataseg_relro_none,
+  exp_dataseg_relro_start,
+  exp_dataseg_relro_end,
+};
+
 struct ldexp_control {
   /* Modify expression evaluation depending on this.  */
   lang_phase_type phase;
@@ -117,22 +134,11 @@ struct ldexp_control {
 
   /* State machine and results for DATASEG.  */
   struct {
-    enum {
-      exp_dataseg_none,
-      exp_dataseg_align_seen,
-      exp_dataseg_relro_seen,
-      exp_dataseg_end_seen,
-      exp_dataseg_relro_adjust,
-      exp_dataseg_adjust
-    } phase;
+    enum phase_enum phase;
 
     bfd_vma base, min_base, relro_end, end, pagesize, maxpagesize;
 
-    enum {
-      exp_dataseg_relro_none,
-      exp_dataseg_relro_start,
-      exp_dataseg_relro_end,
-    } relro;
+    enum relro_enum relro;
 
     union lang_statement_union *relro_start_stat;
     union lang_statement_union *relro_end_stat;

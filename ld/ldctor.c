@@ -70,7 +70,7 @@ ldctor_add_set_entry (struct bfd_link_hash_entry *h,
 
   if (p == NULL)
     {
-      p = xmalloc (sizeof (struct set_info));
+      p = (struct set_info *) xmalloc (sizeof (struct set_info));
       p->next = sets;
       sets = p;
       p->h = h;
@@ -106,7 +106,7 @@ ldctor_add_set_entry (struct bfd_link_hash_entry *h,
 	}
     }
 
-  e = xmalloc (sizeof (struct set_element));
+  e = (struct set_element *) xmalloc (sizeof (struct set_element));
   e->next = NULL;
   e->name = name;
   e->section = section;
@@ -153,8 +153,10 @@ ctor_prio (const char *name)
 static int
 ctor_cmp (const void *p1, const void *p2)
 {
-  const struct set_element * const *pe1 = p1;
-  const struct set_element * const *pe2 = p2;
+  const struct set_element * const *pe1 =
+      (const struct set_element * const *) p1;
+  const struct set_element * const *pe2 =
+      (const struct set_element * const *) p2;
   const char *n1;
   const char *n2;
   int prio1;
@@ -223,7 +225,7 @@ ldctor_build_sets (void)
 	  for (e = p->elements; e != NULL; e = e->next)
 	    ++c;
 
-	  array = xmalloc (c * sizeof *array);
+	  array = (struct set_element **) xmalloc (c * sizeof *array);
 
 	  i = 0;
 	  for (e = p->elements; e != NULL; e = e->next)

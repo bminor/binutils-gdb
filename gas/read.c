@@ -1034,7 +1034,7 @@ read_a_source_file (char *name)
 		     that goes with this #APP  There is one.  The specs
 		     guarantee it...  */
 		  tmp_len = buffer_limit - s;
-		  tmp_buf = xmalloc (tmp_len + 1);
+		  tmp_buf = (char *) xmalloc (tmp_len + 1);
 		  memcpy (tmp_buf, s, tmp_len);
 		  do
 		    {
@@ -1050,7 +1050,7 @@ read_a_source_file (char *name)
 		      else
 			num = buffer_limit - buffer;
 
-		      tmp_buf = xrealloc (tmp_buf, tmp_len + num);
+		      tmp_buf = (char *) xrealloc (tmp_buf, tmp_len + num);
 		      memcpy (tmp_buf + tmp_len, buffer, num);
 		      tmp_len += num;
 		    }
@@ -1087,7 +1087,7 @@ read_a_source_file (char *name)
 		      break;
 		    }
 
-		  new_buf = xrealloc (new_buf, new_length + 100);
+		  new_buf = (char *) xrealloc (new_buf, new_length + 100);
 		  new_tmp = new_buf + new_length;
 		  new_length += 100;
 		}
@@ -2097,7 +2097,7 @@ s_vendor_attribute (int vendor)
       if (i == 0)
 	goto bad;
 
-      name = alloca (i + 1);
+      name = (char *) alloca (i + 1);
       memcpy (name, s, i);
       name[i] = '\0';
 
@@ -3857,7 +3857,7 @@ s_reloc (int ignore ATTRIBUTE_UNUSED)
   int c;
   struct reloc_list *reloc;
 
-  reloc = xmalloc (sizeof (*reloc));
+  reloc = (struct reloc_list *) xmalloc (sizeof (*reloc));
 
   if (flag_mri)
     stop = mri_comment_field (&stopc);
@@ -5407,7 +5407,7 @@ demand_copy_string (int *lenP)
       /* JF this next line is so demand_copy_C_string will return a
 	 null terminated string.  */
       obstack_1grow (&notes, '\0');
-      retval = obstack_finish (&notes);
+      retval = (char *) obstack_finish (&notes);
     }
   else
     {
@@ -5516,7 +5516,7 @@ s_incbin (int x ATTRIBUTE_UNUSED)
     {
       int i;
 
-      path = xmalloc ((unsigned long) len + include_dir_maxlen + 5);
+      path = (char *) xmalloc ((unsigned long) len + include_dir_maxlen + 5);
 
       for (i = 0; i < include_dir_count; i++)
 	{
@@ -5586,7 +5586,7 @@ s_include (int arg ATTRIBUTE_UNUSED)
 {
   char *filename;
   int i;
-  FILE *try;
+  FILE *try_file;
   char *path;
 
   if (!flag_m68k_mri)
@@ -5613,22 +5613,23 @@ s_include (int arg ATTRIBUTE_UNUSED)
 	}
 
       obstack_1grow (&notes, '\0');
-      filename = obstack_finish (&notes);
+      filename = (char *) obstack_finish (&notes);
       while (!is_end_of_line[(unsigned char) *input_line_pointer])
 	++input_line_pointer;
     }
 
   demand_empty_rest_of_line ();
-  path = xmalloc ((unsigned long) i + include_dir_maxlen + 5 /* slop */ );
+  path = (char *) xmalloc ((unsigned long) i
+                           + include_dir_maxlen + 5 /* slop */ );
 
   for (i = 0; i < include_dir_count; i++)
     {
       strcpy (path, include_dirs[i]);
       strcat (path, "/");
       strcat (path, filename);
-      if (0 != (try = fopen (path, FOPEN_RT)))
+      if (0 != (try_file = fopen (path, FOPEN_RT)))
 	{
-	  fclose (try);
+	  fclose (try_file);
 	  goto gotit;
 	}
     }

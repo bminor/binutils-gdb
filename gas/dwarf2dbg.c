@@ -168,6 +168,10 @@ struct line_seg {
 
 /* Collects data for all line table entries during assembly.  */
 static struct line_seg *all_segs;
+/* Hash used to quickly lookup a segment by name, avoiding the need to search
+   through the all_segs list.  */
+static struct hash_control *all_segs_hash;
+static struct line_seg **last_seg_ptr;
 
 struct file_entry {
   const char *filename;
@@ -230,23 +234,25 @@ get_line_subseg (segT seg, subsegT subseg)
   static subsegT last_subseg;
   static struct line_subseg *last_line_subseg;
 
-  struct line_seg **ps, *s;
+  struct line_seg *s;
   struct line_subseg **pss, *ss;
 
   if (seg == last_seg && subseg == last_subseg)
     return last_line_subseg;
 
-  for (ps = &all_segs; (s = *ps) != NULL; ps = &s->next)
-    if (s->seg == seg)
-      goto found_seg;
+  s = (struct line_seg *) hash_find (all_segs_hash, seg->name);
+  if (s == NULL)
+    {
+      s = (struct line_seg *) xmalloc (sizeof (*s));
+      s->next = NULL;
+      s->seg = seg;
+      s->head = NULL;
+      *last_seg_ptr = s;
+      last_seg_ptr = &s->next;
+      hash_insert (all_segs_hash, seg->name, s);
+    }
+  gas_assert (seg == s->seg);
 
-  s = (struct line_seg *) xmalloc (sizeof (*s));
-  s->next = NULL;
-  s->seg = seg;
-  s->head = NULL;
-  *ps = s;
-
- found_seg:
   for (pss = &s->head; (ss = *pss) != NULL ; pss = &ss->next)
     {
       if (ss->subseg == subseg)
@@ -467,7 +473,7 @@ get_filenum (const char *filename, unsigned int num)
 		     xrealloc (dirs, (dir + 32) * sizeof (const char *));
 	    }
 
-	  dirs[dir] = xmalloc (dir_len + 1);
+	  dirs[dir] = (char *) xmalloc (dir_len + 1);
 	  memcpy (dirs[dir], filename, dir_len);
 	  dirs[dir][dir_len] = '\0';
 	  dirs_in_use = dir + 1;
@@ -1701,6 +1707,14 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT ranges_seg)
 
   symbol_set_value_now (info_end);
 }
+
+void
+dwarf2_init (void)
+{
+  all_segs_hash = hash_new ();
+  last_seg_ptr = &all_segs;
+}
+
 
 /* Finish the dwarf2 debug sections.  We emit .debug.line if there
    were any .file/.loc directives, or --gdwarf2 was given, or if the

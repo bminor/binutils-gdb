@@ -1,3 +1,7 @@
+2009-09-11  Nick Clifton  <nickc@redhat.com>
+
+	* po/gold.pot: Updated by the Translation project.
+
 2009-09-08  Cary Coutant  <ccoutant@google.com>
 
 	* output.cc (Output_file::open): Add execute permission to empty file.

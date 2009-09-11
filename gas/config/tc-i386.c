@@ -1851,7 +1851,7 @@ add_prefix (unsigned int prefix)
 static void
 set_code_flag (int value)
 {
-  flag_code = value;
+  flag_code = (enum flag_code) value;
   if (flag_code == CODE_64BIT)
     {
       cpu_arch_flags.bitfield.cpu64 = 1;
@@ -1876,7 +1876,7 @@ set_code_flag (int value)
 static void
 set_16bit_gcc_code_flag (int new_code_flag)
 {
-  flag_code = new_code_flag;
+  flag_code = (enum flag_code) new_code_flag;
   if (flag_code != CODE_16BIT)
     abort ();
   cpu_arch_flags.bitfield.cpu64 = 0;
@@ -1961,7 +1961,7 @@ set_sse_check (int dummy ATTRIBUTE_UNUSED)
 
 static void
 check_cpu_arch_compatible (const char *name ATTRIBUTE_UNUSED,
-			   i386_cpu_flags new ATTRIBUTE_UNUSED)
+			   i386_cpu_flags new_flag ATTRIBUTE_UNUSED)
 {
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   static const char *arch;
@@ -1981,7 +1981,7 @@ check_cpu_arch_compatible (const char *name ATTRIBUTE_UNUSED,
 
   /* If we are targeting Intel L1OM, we must enable it.  */
   if (get_elf_backend_data (stdoutput)->elf_machine_code != EM_L1OM
-      || new.bitfield.cpul1om)
+      || new_flag.bitfield.cpul1om)
     return;
   
   as_bad (_("`%s' is not supported on `%s'"), name, arch);
@@ -6019,28 +6019,28 @@ lex_got (enum bfd_reloc_code_real *reloc,
     const enum bfd_reloc_code_real rel[2];
     const i386_operand_type types64;
   } gotrel[] = {
-    { "PLTOFF",   { 0,
+    { "PLTOFF",   { _dummy_first_bfd_reloc_code_real,
 		    BFD_RELOC_X86_64_PLTOFF64 },
       OPERAND_TYPE_IMM64 },
     { "PLT",      { BFD_RELOC_386_PLT32,
 		    BFD_RELOC_X86_64_PLT32    },
       OPERAND_TYPE_IMM32_32S_DISP32 },
-    { "GOTPLT",   { 0,
+    { "GOTPLT",   { _dummy_first_bfd_reloc_code_real,
 		    BFD_RELOC_X86_64_GOTPLT64 },
       OPERAND_TYPE_IMM64_DISP64 },
     { "GOTOFF",   { BFD_RELOC_386_GOTOFF,
 		    BFD_RELOC_X86_64_GOTOFF64 },
       OPERAND_TYPE_IMM64_DISP64 },
-    { "GOTPCREL", { 0,
+    { "GOTPCREL", { _dummy_first_bfd_reloc_code_real,
 		    BFD_RELOC_X86_64_GOTPCREL },
       OPERAND_TYPE_IMM32_32S_DISP32 },
     { "TLSGD",    { BFD_RELOC_386_TLS_GD,
 		    BFD_RELOC_X86_64_TLSGD    },
       OPERAND_TYPE_IMM32_32S_DISP32 },
     { "TLSLDM",   { BFD_RELOC_386_TLS_LDM,
-		    0                         },
+		    _dummy_first_bfd_reloc_code_real },
       OPERAND_TYPE_NONE },
-    { "TLSLD",    { 0,
+    { "TLSLD",    { _dummy_first_bfd_reloc_code_real,
 		    BFD_RELOC_X86_64_TLSLD    },
       OPERAND_TYPE_IMM32_32S_DISP32 },
     { "GOTTPOFF", { BFD_RELOC_386_TLS_IE_32,
@@ -6050,17 +6050,17 @@ lex_got (enum bfd_reloc_code_real *reloc,
 		    BFD_RELOC_X86_64_TPOFF32  },
       OPERAND_TYPE_IMM32_32S_64_DISP32_64 },
     { "NTPOFF",   { BFD_RELOC_386_TLS_LE,
-		    0                         },
+		    _dummy_first_bfd_reloc_code_real },
       OPERAND_TYPE_NONE },
     { "DTPOFF",   { BFD_RELOC_386_TLS_LDO_32,
 		    BFD_RELOC_X86_64_DTPOFF32 },
 
       OPERAND_TYPE_IMM32_32S_64_DISP32_64 },
     { "GOTNTPOFF",{ BFD_RELOC_386_TLS_GOTIE,
-		    0                         },
+		    _dummy_first_bfd_reloc_code_real },
       OPERAND_TYPE_NONE },
     { "INDNTPOFF",{ BFD_RELOC_386_TLS_IE,
-		    0                         },
+		    _dummy_first_bfd_reloc_code_real },
       OPERAND_TYPE_NONE },
     { "GOT",      { BFD_RELOC_386_GOT32,
 		    BFD_RELOC_X86_64_GOT32    },
@@ -6125,7 +6125,7 @@ lex_got (enum bfd_reloc_code_real *reloc,
 
 	      /* Allocate and copy string.  The trailing NUL shouldn't
 		 be necessary, but be safe.  */
-	      tmpbuf = xmalloc (first + second + 2);
+	      tmpbuf = (char *) xmalloc (first + second + 2);
 	      memcpy (tmpbuf, input_line_pointer, first);
 	      if (second != 0 && *past_reloc != ' ')
 		/* Replace the relocation token with ' ', so that
@@ -7104,7 +7104,7 @@ md_estimate_size_before_relax (fragP, segment)
       int old_fr_fix;
 
       if (fragP->fr_var != NO_RELOC)
-	reloc_type = fragP->fr_var;
+	reloc_type = (enum bfd_reloc_code_real) fragP->fr_var;
       else if (size == 2)
 	reloc_type = BFD_RELOC_16_PCREL;
       else
@@ -7553,7 +7553,7 @@ parse_real_register (char *reg_string, char **end_op)
 	      if (*s == ')')
 		{
 		  *end_op = s + 1;
-		  r = hash_find (reg_hash, "st(0)");
+		  r = (const reg_entry *) hash_find (reg_hash, "st(0)");
 		  know (r);
 		  return r + fpr;
 		}

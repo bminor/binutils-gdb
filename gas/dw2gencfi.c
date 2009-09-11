@@ -63,6 +63,10 @@
 # define DWARF2_ADDR_SIZE(bfd) (bfd_arch_bits_per_address (bfd) / 8)
 #endif
 
+struct cfi_escape_data {
+  struct cfi_escape_data *next;
+  expressionS exp;
+};
 
 struct cfi_insn_data
 {
@@ -87,10 +91,7 @@ struct cfi_insn_data
       symbolS *lab2;
     } ll;
 
-    struct cfi_escape_data {
-      struct cfi_escape_data *next;
-      expressionS exp;
-    } *esc;
+    struct cfi_escape_data *esc;
 
     struct {
       unsigned reg, encoding;
@@ -155,9 +156,11 @@ struct frch_cfi_data
 static struct fde_entry *
 alloc_fde_entry (void)
 {
-  struct fde_entry *fde = xcalloc (1, sizeof (struct fde_entry));
+  struct fde_entry *fde = (struct fde_entry *)
+      xcalloc (1, sizeof (struct fde_entry));
 
-  frchain_now->frch_cfi_data = xcalloc (1, sizeof (struct frch_cfi_data));
+  frchain_now->frch_cfi_data = (struct frch_cfi_data *)
+      xcalloc (1, sizeof (struct frch_cfi_data));
   frchain_now->frch_cfi_data->cur_fde_data = fde;
   *last_fde_data = fde;
   last_fde_data = &fde->next;
@@ -179,7 +182,8 @@ alloc_fde_entry (void)
 static struct cfi_insn_data *
 alloc_cfi_insn_data (void)
 {
-  struct cfi_insn_data *insn = xcalloc (1, sizeof (struct cfi_insn_data));
+  struct cfi_insn_data *insn = (struct cfi_insn_data *)
+      xcalloc (1, sizeof (struct cfi_insn_data));
   struct fde_entry *cur_fde_data = frchain_now->frch_cfi_data->cur_fde_data;
 
   *cur_fde_data->last = insn;
@@ -353,7 +357,7 @@ cfi_add_CFA_remember_state (void)
 
   cfi_add_CFA_insn (DW_CFA_remember_state);
 
-  p = xmalloc (sizeof (*p));
+  p = (struct cfa_save_data *) xmalloc (sizeof (*p));
   p->cfa_offset = frchain_now->frch_cfi_data->cur_cfa_offset;
   p->next = frchain_now->frch_cfi_data->cfa_save_stack;
   frchain_now->frch_cfi_data->cfa_save_stack = p;
@@ -637,7 +641,7 @@ dot_cfi_escape (int ignored ATTRIBUTE_UNUSED)
   tail = &head;
   do
     {
-      e = xmalloc (sizeof (*e));
+      e = (struct cfi_escape_data *) xmalloc (sizeof (*e));
       do_parse_cons_expression (&e->exp, 1);
       *tail = e;
       tail = &e->next;
@@ -1454,7 +1458,7 @@ select_cie_for_fde (struct fde_entry *fde, struct cfi_insn_data **pfirst)
     fail:;
     }
 
-  cie = xmalloc (sizeof (struct cie_entry));
+  cie = (struct cie_entry *) xmalloc (sizeof (struct cie_entry));
   cie->next = cie_root;
   cie_root = cie;
   cie->return_column = fde->return_column;

@@ -1,3 +1,56 @@
+2009-09-11  Nick Clifton  <nickc@redhat.com>
+
+	* po/gas.pot: Updated by the Translation project.
+
+2009-09-11  Martin Thuresson  <martint@google.com>
+
+	* as.c (main): Call dwarf2_init.
+	* config/obj-elf.c (struct group_list): New field.
+	(build_group_lists): Use hash lookup.
+	(free_section_idx): New function.
+	(elf_frob_file): Adjust.
+	* dwarf2dbg.c (all_segs_hash, last_seg_ptr): New variables.
+	(get_line_subseg): Adjust.
+	(dwarf2_init): New function.
+	* dwarf2dbg.h (dwarf2_init): New declaration.
+
+2009-09-11  Martin Thuresson  <martint@google.com>
+
+	Updated sources to compile cleanly with -Wc++-compat:
+	* app.c: Add casts.
+	* as.c: Add casts.
+	* config/obj-elf.c: Add casts.
+	(obj_elf_type): Rename variable typename to type_name.
+	* config/tc-i386-intel.c (i386_operators): Rename member operator to op.
+	* config/tc-i386.c: Add casts.
+	(check_cpu_arch_compatible): Rename argument new to new_flag.
+	(gotrel): Update variable to use enum name instead of integer value.
+	* dw2gencfi.c: Add casts.
+	(struct cfi_escape_data): Move to top level.
+	* dwarf2dbg.c: Add cast.
+	* dwarf2dbg.h (dwarf2_loc_directive_seen): Make variable extern.
+	* ehopt.c Add casts.
+	(enum frame_state): Move to top level.
+	* expr.c (operatorf): Rename function operator to operatorf.
+	(operand): Rename variable operator to op.
+	(expr_set_rank): Rename argument operator to op.
+	* frags.c: Add cast.
+	* hash.c: Add casts.
+	* input-scrub.c: Add cast.
+	* listing.c: Add casts.
+	(enum edict_enum): Move to top level.
+	* macro.c: Add casts.
+	* macro.h (enum formal_type): Move to top level.
+	* read.c: Add casts.
+	(s_include): Rename variable try to try_file.
+	* remap.c: Add cast.
+	* stabs.c: Add casts.
+	* subsegs.c: Add casts.
+	* symbols.c: Add casts.
+	* write.c: Add casts.
+	* libiberty/regex.c (byte_re_match_2_internal): Introduce extra scope to avoid
+	initialization warning from goto.
+
 2009-09-11  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	PR gas/10623
@@ -225,7 +278,7 @@
 2009-09-02  Jie Zhang  <jie.zhang@analog.com>
 
 	From  Bernd Schmidt  <bernd.schmidt@analog.com>
-	* config/gas/bfin-parse.y (asm_1): Clean up and unify error handling
+	* config/bfin-parse.y (asm_1): Clean up and unify error handling
 	for load and store insns.
 	(neg_value): Delete function.
 
@@ -427,7 +480,7 @@
 	Remove.
 	(mkdep section): Remove.
 	* Makefile.in: Regenerate.
-	* gas/po/POTFILES.in, gas/po/gas.pot: Regenerate.
+	* po/POTFILES.in, po/gas.pot: Regenerate.
 
 	* Makefile.am (install-pdf, install-pdf-recursive, install-html)
 	(install-html-recursive): Remove.
@@ -492,7 +545,7 @@
 	* config/obj-coff.h (obj_coff_seh_do_final): Add new
 	function prototype.
 	(obj_coff_generate_pdata): New obj-coff hook.
-	* gas/write.c (size_seg): Avoid sizing of already sized
+	* write.c (size_seg): Avoid sizing of already sized
 	sections.
 	(write_object_file): Call conditional hook
 	objc_coff_generate_pdata.
@@ -990,28 +1043,28 @@
 
 2009-06-22  Martin Thuresson  <martin@mtme.org>
 
-	* gas/app, gas/as.c, gas/as.h, gas/atof-generic.c, gas/cgen.c,
-	gas/config/atof-ieee.c, gas/config/obj-aout.c,
-	gas/config/obj-coff.c, gas/config/obj-ecoff.c,
-	gas/config/obj-elf.c, gas/config/obj-som.c, gas/config/tc-alpha.c,
-	gas/config/tc-arc.c, gas/config/tc-arm.c, gas/config/tc-cr16.c,
-	gas/config/tc-cris.c, gas/config/tc-crx.c, gas/config/tc-d30v.c,
-	gas/config/tc-dlx.c, gas/config/tc-hppa.c, gas/config/tc-i370.c,
-	gas/config/tc-i386-intel.c, gas/config/tc-i386.c,
-	gas/config/tc-i860.c, gas/config/tc-i960.c, gas/config/tc-ia64.c,
-	gas/config/tc-iq2000.c, gas/config/tc-m32c.c,
-	gas/config/tc-m32r.c, gas/config/tc-m68hc11.c,
-	gas/config/tc-m68k.c, gas/config/tc-maxq.c, gas/config/tc-mcore.c,
-	gas/config/tc-mep.c, gas/config/tc-mips.c, gas/config/tc-mmix.c,
-	gas/config/tc-mn10300.c, gas/config/tc-moxie.c,
-	gas/config/tc-ns32k.c, gas/config/tc-pj.c, gas/config/tc-ppc.c,
-	gas/config/tc-s390.c, gas/config/tc-score.c,
-	gas/config/tc-score7.c, gas/config/tc-sh.c, gas/config/tc-sparc.c,
-	gas/config/tc-spu.c, gas/config/tc-tic30.c, gas/config/tc-vax.c,
-	gas/config/tc-xtensa.c, gas/config/xtensa-relax.c,
-	gas/dw2gencfi.c, gas/dwarf2dbg.c, gas/ehopt.c, gas/expr.c,
-	gas/frags.c, gas/input-file.c, gas/read.c, gas/sb.c,
-	gas/subsegs.c, gas/symbols.c, gas/write.c: Change the name of the
+	* app, as.c, as.h, atof-generic.c, cgen.c,
+	config/atof-ieee.c, config/obj-aout.c,
+	config/obj-coff.c, config/obj-ecoff.c,
+	config/obj-elf.c, config/obj-som.c, config/tc-alpha.c,
+	config/tc-arc.c, config/tc-arm.c, config/tc-cr16.c,
+	config/tc-cris.c, config/tc-crx.c, config/tc-d30v.c,
+	config/tc-dlx.c, config/tc-hppa.c, config/tc-i370.c,
+	config/tc-i386-intel.c, config/tc-i386.c,
+	config/tc-i860.c, config/tc-i960.c, config/tc-ia64.c,
+	config/tc-iq2000.c, config/tc-m32c.c,
+	config/tc-m32r.c, config/tc-m68hc11.c,
+	config/tc-m68k.c, config/tc-maxq.c, config/tc-mcore.c,
+	config/tc-mep.c, config/tc-mips.c, config/tc-mmix.c,
+	config/tc-mn10300.c, config/tc-moxie.c,
+	config/tc-ns32k.c, config/tc-pj.c, config/tc-ppc.c,
+	config/tc-s390.c, config/tc-score.c,
+	config/tc-score7.c, config/tc-sh.c, config/tc-sparc.c,
+	config/tc-spu.c, config/tc-tic30.c, config/tc-vax.c,
+	config/tc-xtensa.c, config/xtensa-relax.c,
+	dw2gencfi.c, dwarf2dbg.c, ehopt.c, expr.c,
+	frags.c, input-file.c, read.c, sb.c,
+	subsegs.c, symbols.c, write.c: Change the name of the
 	gas macro `assert' to `gas_assert'.
 
 2009-06-22  Daniel Gutson <dgutson@codesourcery.com>
@@ -1084,7 +1137,7 @@
 2009-06-18  Nick Clifton  <nickc@redhat.com>
 
 	PR 10169
-	* gas/tc-arm.c (do_t_ssat): Move common code from here...
+	* tc-arm.c (do_t_ssat): Move common code from here...
 	(do_t_usat): ... and here to...
 	(do_t_ssat_usat): New function: ... here.  Add code to check that
 	the shift value, if present, is in range.

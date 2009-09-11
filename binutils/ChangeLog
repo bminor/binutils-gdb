@@ -1,3 +1,7 @@
+2009-09-11  Nick Clifton  <nickc@redhat.com>
+
+	* po/binutils.pot: Updated by the Translation project.
+
 2009-09-11  Philippe De Muyter  <phdm@macqel.be>
 
 	* obcopy.c (copy_object): New parameter `input_arch', architecture

@@ -130,6 +130,18 @@ typedef struct file_info_struct
   int                       at_end;
 } file_info_type;
 
+enum edict_enum
+{
+  EDICT_NONE,
+  EDICT_SBTTL,
+  EDICT_TITLE,
+  EDICT_NOLIST,
+  EDICT_LIST,
+  EDICT_NOLIST_NEXT,
+  EDICT_EJECT
+};
+
+
 /* This structure remembers which line from which file goes into which
    frag.  */
 struct list_info_struct
@@ -160,16 +172,7 @@ struct list_info_struct
   /* Pointer to any error message associated with this line.  */
   char *message;
 
-  enum
-    {
-      EDICT_NONE,
-      EDICT_SBTTL,
-      EDICT_TITLE,
-      EDICT_NOLIST,
-      EDICT_LIST,
-      EDICT_NOLIST_NEXT,
-      EDICT_EJECT
-    } edict;
+  enum edict_enum edict;
   char *edict_arg;
 
   /* Nonzero if this line is to be omitted because it contains
@@ -260,7 +263,7 @@ file_info (const char *file_name)
     }
 
   /* Make new entry.  */
-  p = xmalloc (sizeof (file_info_type));
+  p = (file_info_type *) xmalloc (sizeof (file_info_type));
   p->next = file_info_head;
   file_info_head = p;
   p->filename = xstrdup (file_name);
@@ -352,7 +355,7 @@ listing_newline (char *ps)
 
 	  len = (copy - input_line_pointer) + 2;
 
-	  copy = xmalloc (len);
+	  copy = (char *) xmalloc (len);
 
 	  if (copy != NULL)
 	    {
@@ -1147,8 +1150,8 @@ listing_listing (char *name ATTRIBUTE_UNUSED)
   int show_listing = 1;
   unsigned int width;
 
-  buffer = xmalloc (listing_rhs_width);
-  data_buffer = xmalloc (MAX_BYTES);
+  buffer = (char *) xmalloc (listing_rhs_width);
+  data_buffer = (char *) xmalloc (MAX_BYTES);
   eject = 1;
   list = head->next;
 
@@ -1509,7 +1512,7 @@ listing_title (int depth)
 	  if (listing)
 	    {
 	      length = input_line_pointer - start;
-	      ttl = xmalloc (length + 1);
+	      ttl = (char *) xmalloc (length + 1);
 	      memcpy (ttl, start, length);
 	      ttl[length] = 0;
 	      listing_tail->edict = depth ? EDICT_SBTTL : EDICT_TITLE;

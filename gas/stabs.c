@@ -498,7 +498,7 @@ stabs_generate_asm_file (void)
       char *dir2;
 
       dir = remap_debug_filename (getpwd ());
-      dir2 = alloca (strlen (dir) + 2);
+      dir2 = (char *) alloca (strlen (dir) + 2);
       sprintf (dir2, "%s%s", dir, "/");
       generate_asm_file (N_SO, dir2);
     }
@@ -536,7 +536,7 @@ generate_asm_file (int type, char *file)
   /* Allocate enough space for the file name (possibly extended with
      doubled up backslashes), the symbol name, and the other characters
      that make up a stabs file directive.  */
-  bufp = buf = xmalloc (2 * strlen (file) + strlen (sym) + 12);
+  bufp = buf = (char *) xmalloc (2 * strlen (file) + strlen (sym) + 12);
 
   *bufp++ = '"';
 
