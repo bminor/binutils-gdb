@@ -220,6 +220,9 @@ struct piece_closure
   /* The number of pieces used to describe this variable.  */
   int n_pieces;
 
+  /* The architecture, used only for DWARF_VALUE_STACK.  */
+  struct gdbarch *arch;
+
   /* The pieces themselves.  */
   struct dwarf_expr_piece *pieces;
 };
@@ -228,11 +231,13 @@ struct piece_closure
    PIECES.  */
 
 static struct piece_closure *
-allocate_piece_closure (int n_pieces, struct dwarf_expr_piece *pieces)
+allocate_piece_closure (int n_pieces, struct dwarf_expr_piece *pieces,
+			struct gdbarch *arch)
 {
   struct piece_closure *c = XZALLOC (struct piece_closure);
 
   c->n_pieces = n_pieces;
+  c->arch = arch;
   c->pieces = XCALLOC (n_pieces, struct dwarf_expr_piece);
 
   memcpy (c->pieces, pieces, n_pieces * sizeof (struct dwarf_expr_piece));
@@ -253,24 +258,49 @@ read_pieced_value (struct value *v)
   for (i = 0; i < c->n_pieces; i++)
     {
       struct dwarf_expr_piece *p = &c->pieces[i];
+      switch (p->location)
+	{
+	case DWARF_VALUE_REGISTER:
+	  {
+	    struct gdbarch *arch = get_frame_arch (frame);
+	    bfd_byte regval[MAX_REGISTER_SIZE];
+	    int gdb_regnum = gdbarch_dwarf2_reg_to_regnum (arch,
+							   p->v.value);
+	    get_frame_register (frame, gdb_regnum, regval);
+	    memcpy (contents + offset, regval, p->size);
+	  }
+	  break;
 
-      if (frame == NULL)
-	{
-	  memset (contents + offset, 0, p->size);
-	  set_value_optimized_out (v, 1);
-	}
-      else if (p->in_reg)
-	{
-	  struct gdbarch *arch = get_frame_arch (frame);
-	  gdb_byte regval[MAX_REGISTER_SIZE];
-	  int gdb_regnum = gdbarch_dwarf2_reg_to_regnum (arch, p->value);
+	case DWARF_VALUE_MEMORY:
+	  read_memory (p->v.value, contents + offset, p->size);
+	  break;
 
-	  get_frame_register (frame, gdb_regnum, regval);
-	  memcpy (contents + offset, regval, p->size);
-	}
-      else
-	{
-	  read_memory (p->value, contents + offset, p->size);
+	case DWARF_VALUE_STACK:
+	  {
+	    gdb_byte bytes[sizeof (ULONGEST)];
+	    size_t n;
+	    int addr_size = gdbarch_addr_bit (c->arch) / 8;
+	    store_unsigned_integer (bytes, addr_size,
+				    gdbarch_byte_order (c->arch),
+				    p->v.value);
+	    n = p->size;
+	    if (n > addr_size)
+	      n = addr_size;
+	    memcpy (contents + offset, bytes, n);
+	  }
+	  break;
+
+	case DWARF_VALUE_LITERAL:
+	  {
+	    size_t n = p->size;
+	    if (n > p->v.literal.length)
+	      n = p->v.literal.length;
+	    memcpy (contents + offset, p->v.literal.data, n);
+	  }
+	  break;
+
+	default:
+	  internal_error (__FILE__, __LINE__, _("invalid location type"));
 	}
       offset += p->size;
     }
@@ -295,15 +325,21 @@ write_pieced_value (struct value *to, struct value *from)
   for (i = 0; i < c->n_pieces; i++)
     {
       struct dwarf_expr_piece *p = &c->pieces[i];
-      if (p->in_reg)
+      switch (p->location)
 	{
-	  struct gdbarch *arch = get_frame_arch (frame);
-	  int gdb_regnum = gdbarch_dwarf2_reg_to_regnum (arch, p->value);
-	  put_frame_register (frame, gdb_regnum, contents + offset);
-	}
-      else
-	{
-	  write_memory (p->value, contents + offset, p->size);
+	case DWARF_VALUE_REGISTER:
+	  {
+	    struct gdbarch *arch = get_frame_arch (frame);
+	    int gdb_regnum = gdbarch_dwarf2_reg_to_regnum (arch, p->v.value);
+	    put_frame_register (frame, gdb_regnum, contents + offset);
+	  }
+	  break;
+	case DWARF_VALUE_MEMORY:
+	  write_memory (p->v.value, contents + offset, p->size);
+	  break;
+	default:
+	  set_value_optimized_out (to, 1);
+	  return;
 	}
       offset += p->size;
     }
@@ -314,7 +350,7 @@ copy_pieced_value_closure (struct value *v)
 {
   struct piece_closure *c = (struct piece_closure *) value_computed_closure (v);
   
-  return allocate_piece_closure (c->n_pieces, c->pieces);
+  return allocate_piece_closure (c->n_pieces, c->pieces, c->arch);
 }
 
 static void
@@ -376,28 +412,71 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
       struct piece_closure *c;
       struct frame_id frame_id = get_frame_id (frame);
 
-      c = allocate_piece_closure (ctx->num_pieces, ctx->pieces);
+      c = allocate_piece_closure (ctx->num_pieces, ctx->pieces, ctx->gdbarch);
       retval = allocate_computed_value (SYMBOL_TYPE (var),
 					&pieced_value_funcs,
 					c);
       VALUE_FRAME_ID (retval) = frame_id;
     }
-  else if (ctx->in_reg)
-    {
-      struct gdbarch *arch = get_frame_arch (frame);
-      CORE_ADDR dwarf_regnum = dwarf_expr_fetch (ctx, 0);
-      int gdb_regnum = gdbarch_dwarf2_reg_to_regnum (arch, dwarf_regnum);
-      retval = value_from_register (SYMBOL_TYPE (var), gdb_regnum, frame);
-    }
   else
     {
-      CORE_ADDR address = dwarf_expr_fetch (ctx, 0);
+      switch (ctx->location)
+	{
+	case DWARF_VALUE_REGISTER:
+	  {
+	    struct gdbarch *arch = get_frame_arch (frame);
+	    CORE_ADDR dwarf_regnum = dwarf_expr_fetch (ctx, 0);
+	    int gdb_regnum = gdbarch_dwarf2_reg_to_regnum (arch, dwarf_regnum);
+	    retval = value_from_register (SYMBOL_TYPE (var), gdb_regnum, frame);
+	  }
+	  break;
 
-      retval = allocate_value (SYMBOL_TYPE (var));
-      VALUE_LVAL (retval) = lval_memory;
-      set_value_lazy (retval, 1);
-      set_value_stack (retval, 1);
-      set_value_address (retval, address);
+	case DWARF_VALUE_MEMORY:
+	  {
+	    CORE_ADDR address = dwarf_expr_fetch (ctx, 0);
+
+	    retval = allocate_value (SYMBOL_TYPE (var));
+	    VALUE_LVAL (retval) = lval_memory;
+	    set_value_lazy (retval, 1);
+	    set_value_stack (retval, 1);
+	    set_value_address (retval, address);
+	  }
+	  break;
+
+	case DWARF_VALUE_STACK:
+	  {
+	    gdb_byte bytes[sizeof (ULONGEST)];
+	    ULONGEST value = (ULONGEST) dwarf_expr_fetch (ctx, 0);
+	    bfd_byte *contents;
+	    size_t n = ctx->addr_size;
+
+	    store_unsigned_integer (bytes, ctx->addr_size,
+				    gdbarch_byte_order (ctx->gdbarch),
+				    value);
+	    retval = allocate_value (SYMBOL_TYPE (var));
+	    contents = value_contents_raw (retval);
+	    if (n > TYPE_LENGTH (SYMBOL_TYPE (var)))
+	      n = TYPE_LENGTH (SYMBOL_TYPE (var));
+	    memcpy (contents, bytes, n);
+	  }
+	  break;
+
+	case DWARF_VALUE_LITERAL:
+	  {
+	    bfd_byte *contents;
+	    size_t n = ctx->len;
+
+	    retval = allocate_value (SYMBOL_TYPE (var));
+	    contents = value_contents_raw (retval);
+	    if (n > TYPE_LENGTH (SYMBOL_TYPE (var)))
+	      n = TYPE_LENGTH (SYMBOL_TYPE (var));
+	    memcpy (contents, ctx->data, n);
+	  }
+	  break;
+
+	default:
+	  internal_error (__FILE__, __LINE__, _("invalid location type"));
+	}
     }
 
   set_value_initialized (retval, ctx->initialized);
@@ -494,7 +573,7 @@ dwarf2_loc_desc_needs_frame (gdb_byte *data, unsigned short size,
 
   dwarf_expr_eval (ctx, data, size);
 
-  in_reg = ctx->in_reg;
+  in_reg = ctx->location == DWARF_VALUE_REGISTER;
 
   if (ctx->num_pieces > 0)
     {
@@ -503,7 +582,7 @@ dwarf2_loc_desc_needs_frame (gdb_byte *data, unsigned short size,
       /* If the location has several pieces, and any of them are in
          registers, then we will need a frame to fetch them from.  */
       for (i = 0; i < ctx->num_pieces; i++)
-        if (ctx->pieces[i].in_reg)
+        if (ctx->pieces[i].location == DWARF_VALUE_REGISTER)
           in_reg = 1;
     }
 

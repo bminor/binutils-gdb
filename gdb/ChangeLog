@@ -1,3 +1,28 @@
+2009-09-11  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2loc.c (struct piece_closure) <arch>: New field.
+	(dwarf2_evaluate_loc_desc): Update.
+	(dwarf2_loc_desc_needs_frame): Likewise.
+	(allocate_piece_closure): Initialize new field.
+	(read_pieced_value): Update.
+	(write_pieced_value): Update.
+	(copy_pieced_value_closure): Update.
+	* dwarf2expr.h (enum dwarf_value_location): New.
+	(struct dwarf_expr_context) <in_reg>: Remove.
+	<location, len, data>: New fields.
+	(struct dwarf_expr_piece) <in_reg, value>: Remove.
+	<location, v>: New fields.
+	* dwarf2expr.c (add_piece): Remove in_reg, value arguments.
+	Update.
+	(require_composition): New function.
+	(execute_stack_op): Update.
+	<DW_OP_implicit_value, DW_OP_stack_value>: New cases.
+	<DW_OP_reg0>: Set location, not in_reg.
+	<DW_OP_regx>: Likewise.  Use require_composition.
+	<DW_OP_fbreg>: Update.
+	<DW_OP_piece>: Likewise.
+	* dwarf2-frame.c (execute_stack_op): Update.
+
 2009-09-10  Anthony Green  <green@moxielogic.com>
 
 	* moxie-tdep.c (moxie_analyze_prologue): Recognize new prologue

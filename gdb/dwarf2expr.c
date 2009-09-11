@@ -125,8 +125,7 @@ dwarf_expr_fetch (struct dwarf_expr_context *ctx, int n)
 
 /* Add a new piece to CTX's piece list.  */
 static void
-add_piece (struct dwarf_expr_context *ctx,
-           int in_reg, CORE_ADDR value, ULONGEST size)
+add_piece (struct dwarf_expr_context *ctx, ULONGEST size)
 {
   struct dwarf_expr_piece *p;
 
@@ -141,9 +140,15 @@ add_piece (struct dwarf_expr_context *ctx,
                            * sizeof (struct dwarf_expr_piece));
 
   p = &ctx->pieces[ctx->num_pieces - 1];
-  p->in_reg = in_reg;
-  p->value = value;
+  p->location = ctx->location;
   p->size = size;
+  if (p->location == DWARF_VALUE_LITERAL)
+    {
+      p->v.literal.data = ctx->data;
+      p->v.literal.length = ctx->len;
+    }
+  else
+    p->v.value = dwarf_expr_fetch (ctx, 0);
 }
 
 /* Evaluate the expression at ADDR (LEN bytes long) using the context
@@ -287,6 +292,23 @@ signed_address_type (struct gdbarch *gdbarch, int addr_size)
     }
 }
 
+
+/* Check that the current operator is either at the end of an
+   expression, or that it is followed by a composition operator.  */
+
+static void
+require_composition (gdb_byte *op_ptr, gdb_byte *op_end, const char *op_name)
+{
+  /* It seems like DW_OP_GNU_uninit should be handled here.  However,
+     it doesn't seem to make sense for DW_OP_*_value, and it was not
+     checked at the other place that this function is called.  */
+  if (op_ptr != op_end && *op_ptr != DW_OP_piece && *op_ptr != DW_OP_bit_piece)
+    error (_("DWARF-2 expression error: `%s' operations must be "
+	     "used either alone or in conjuction with DW_OP_piece "
+	     "or DW_OP_bit_piece."),
+	   op_name);
+}
+
 /* The engine for the expression evaluator.  Using the context in CTX,
    evaluate the expression between OP_PTR and OP_END.  */
 
@@ -295,8 +317,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 		  gdb_byte *op_ptr, gdb_byte *op_end)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (ctx->gdbarch);
-
-  ctx->in_reg = 0;
+  ctx->location = DWARF_VALUE_MEMORY;
   ctx->initialized = 1;  /* Default is initialized.  */
 
   if (ctx->recursion_depth > ctx->max_recursion_depth)
@@ -436,19 +457,35 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 		   "used either alone or in conjuction with DW_OP_piece."));
 
 	  result = op - DW_OP_reg0;
-	  ctx->in_reg = 1;
-
+	  ctx->location = DWARF_VALUE_REGISTER;
 	  break;
 
 	case DW_OP_regx:
 	  op_ptr = read_uleb128 (op_ptr, op_end, &reg);
-	  if (op_ptr != op_end && *op_ptr != DW_OP_piece)
-	    error (_("DWARF-2 expression error: DW_OP_reg operations must be "
-		   "used either alone or in conjuction with DW_OP_piece."));
+	  require_composition (op_ptr, op_end, "DW_OP_regx");
 
 	  result = reg;
-	  ctx->in_reg = 1;
+	  ctx->location = DWARF_VALUE_REGISTER;
 	  break;
+
+	case DW_OP_implicit_value:
+	  {
+	    ULONGEST len;
+	    op_ptr = read_uleb128 (op_ptr, op_end, &len);
+	    if (op_ptr + len > op_end)
+	      error (_("DW_OP_implicit_value: too few bytes available."));
+	    ctx->len = len;
+	    ctx->data = op_ptr;
+	    ctx->location = DWARF_VALUE_LITERAL;
+	    op_ptr += len;
+	    require_composition (op_ptr, op_end, "DW_OP_implicit_value");
+	  }
+	  goto no_push;
+
+	case DW_OP_stack_value:
+	  ctx->location = DWARF_VALUE_STACK;
+	  require_composition (op_ptr, op_end, "DW_OP_stack_value");
+	  goto no_push;
 
 	case DW_OP_breg0:
 	case DW_OP_breg1:
@@ -513,12 +550,15 @@ execute_stack_op (struct dwarf_expr_context *ctx,
                specific this_base method.  */
 	    (ctx->get_frame_base) (ctx->baton, &datastart, &datalen);
 	    dwarf_expr_eval (ctx, datastart, datalen);
+	    if (ctx->location == DWARF_VALUE_LITERAL
+		|| ctx->location == DWARF_VALUE_STACK)
+	      error (_("Not implemented: computing frame base using explicit value operator"));
 	    result = dwarf_expr_fetch (ctx, 0);
-	    if (ctx->in_reg)
+	    if (ctx->location == DWARF_VALUE_REGISTER)
 	      result = (ctx->read_reg) (ctx->baton, result);
 	    result = result + offset;
 	    ctx->stack_len = before_stack_len;
-	    ctx->in_reg = 0;
+	    ctx->location = DWARF_VALUE_MEMORY;
 	  }
 	  break;
 	case DW_OP_dup:
@@ -758,12 +798,13 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
             /* Record the piece.  */
             op_ptr = read_uleb128 (op_ptr, op_end, &size);
-            addr_or_regnum = dwarf_expr_fetch (ctx, 0);
-            add_piece (ctx, ctx->in_reg, addr_or_regnum, size);
+	    add_piece (ctx, size);
 
-            /* Pop off the address/regnum, and clear the in_reg flag.  */
-            dwarf_expr_pop (ctx);
-            ctx->in_reg = 0;
+            /* Pop off the address/regnum, and reset the location
+	       type.  */
+	    if (ctx->location != DWARF_VALUE_LITERAL)
+	      dwarf_expr_pop (ctx);
+            ctx->location = DWARF_VALUE_MEMORY;
           }
           goto no_push;
 
