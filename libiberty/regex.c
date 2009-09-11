@@ -5908,24 +5908,22 @@ byte_re_match_2_internal (struct re_pattern_buffer *bufp,
              longest match, try backtracking.  */
           if (d != end_match_2)
 	    {
+	      /* 1 if this match ends in the same string (string1 or string2)
+		 as the best previous match.  */
+	      boolean same_str_p = (FIRST_STRING_P (match_end)
+				    == MATCHING_IN_FIRST_STRING);
 	      /* 1 if this match is the best seen so far.  */
 	      boolean best_match_p;
 
-              {
-                /* 1 if this match ends in the same string (string1 or string2)
-                   as the best previous match.  */
-                boolean same_str_p = (FIRST_STRING_P (match_end)
-                                      == MATCHING_IN_FIRST_STRING);
+	      /* AIX compiler got confused when this was combined
+		 with the previous declaration.  */
+	      if (same_str_p)
+		best_match_p = d > match_end;
+	      else
+		best_match_p = !MATCHING_IN_FIRST_STRING;
 
-                /* AIX compiler got confused when this was combined
-                   with the previous declaration.  */
-                if (same_str_p)
-                  best_match_p = d > match_end;
-                else
-                  best_match_p = !MATCHING_IN_FIRST_STRING;
+              DEBUG_PRINT1 ("backtracking.\n");
 
-                DEBUG_PRINT1 ("backtracking.\n");
-              }
               if (!FAIL_STACK_EMPTY ())
                 { /* More failure points to try.  */
 
