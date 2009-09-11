@@ -191,7 +191,21 @@ proc delete_breakpoints {} {
 proc gdb_run_cmd {args} {
     global gdb_prompt
 
-    if [target_info exists gdb_init_command] {
+
+    send_gdb "target sim\n"
+    gdb_expect 120 {
+        -re "Connected to the simulator.*$gdb_prompt $" {
+	    verbose "Connected to simulator." 2
+        }
+    }
+
+    send_gdb "load\n"
+    gdb_expect 120 {
+        -re ".*$gdb_prompt $" {
+        }
+    }
+
+  if [target_info exists gdb_init_command] {
 	send_gdb "[target_info gdb_init_command]\n";
 	gdb_expect 30 {
 	    -re "$gdb_prompt $" { }

@@ -1,3 +1,10 @@
+2009-03-20  J"orn Rennecke  <joern.rennecke@arc.com>
+
+	* sim-if.c: Fixed some of the formatting issues.
+	(stack_setup): Always push environment.
+	(sim_create_inferior): Clear envp if PUSH_ENVIRONMENT_ONTO_STACK
+	is not set.
+
 2008-11-18  J"orn Rennecke  <joern.rennecke@arc.com>
 
 	* sem5.c, sem6.c, sem7.c: Regenerate.

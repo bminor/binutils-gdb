@@ -1603,15 +1603,25 @@ default_print_registers_info (struct gdbarch *gdbarch,
 	    continue;
 	}
 
-      /* If the register name is empty, it is undefined for this
-         processor, so don't display anything.  */
-      if (gdbarch_register_name (gdbarch, i) == NULL
-	  || *(gdbarch_register_name (gdbarch, i)) == '\0')
-	continue;
+      {
+        /* richards ARC 29/10/27 gdb bug: 9884
+           call the gdbarch_register_name once only!
+         */
+        const char* name = gdbarch_register_name (gdbarch, i);
 
-      fputs_filtered (gdbarch_register_name (gdbarch, i), file);
-      print_spaces_filtered (15 - strlen (gdbarch_register_name
-					  (gdbarch, i)), file);
+        /* If the register name is empty, it is undefined for this
+           processor, so don't display anything.  */
+        if (name == NULL || *name == '\0')
+	  continue;
+
+        fputs_filtered (name, file);
+
+        /* richards ARC 29/9/08 gdb bug: 9885
+           Some ARC register names are longer than 15 chars!
+           There should be a gdbarch_max_register_name_length function
+           which could be called here instead of using an integer literal.  */
+        print_spaces_filtered (22 - strlen (name), file);
+      }
 
       /* Get the data in raw format.  */
       if (! frame_register_read (frame, i, buffer))

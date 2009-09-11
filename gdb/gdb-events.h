@@ -55,6 +55,9 @@ typedef void (gdb_events_tracepoint_create_ftype) (int number);
 typedef void (gdb_events_tracepoint_delete_ftype) (int number);
 typedef void (gdb_events_tracepoint_modify_ftype) (int number);
 typedef void (gdb_events_architecture_changed_ftype) (void);
+// begin ARC
+typedef void (gdb_events_reg_architecture_changed_ftype) (void);
+// end ARC
 
 
 /* gdb-events: object. */
@@ -68,6 +71,9 @@ struct gdb_events
     gdb_events_tracepoint_delete_ftype *tracepoint_delete;
     gdb_events_tracepoint_modify_ftype *tracepoint_modify;
     gdb_events_architecture_changed_ftype *architecture_changed;
+// begin ARC 
+    gdb_events_reg_architecture_changed_ftype *reg_architecture_changed;
+// end ARC
   };
 
 
@@ -81,6 +87,9 @@ extern void tracepoint_create_event (int number);
 extern void tracepoint_delete_event (int number);
 extern void tracepoint_modify_event (int number);
 extern void architecture_changed_event (void);
+// begin ARC 
+extern void reg_architecture_changed_event (void);
+// end ARC
 
 /* Install custom gdb-events hooks.  */
 extern struct gdb_events *deprecated_set_gdb_event_hooks (struct gdb_events *vector);

@@ -48,12 +48,6 @@ switch -glob -- [istarget] {
     "*arm-*-*" {
         set asm-arch arm
     }
-    "arc-*-*" {
-	set asm-arch arc
-        set asm-flags "-I${srcdir}/${subdir} -I${objdir}/${subdir}"
-	set debug-flags "-gdwarf-2"
-	append link-flags " -marclinux"
-    }
     "xscale-*-*" {
         set asm-arch arm
     }

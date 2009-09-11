@@ -26,11 +26,16 @@ srv_hostio_err_objs="hostio-errno.o"
 # Input is taken from the "${target}" variable.
 
 case "${target}" in
-  arc*-*-linux*)	srv_regobj=reg-arc.o
-			srv_tgtobj="linux-low.o linux-arc-low.o"
-			srv_linux_usrregs=yes
-			srv_linux_thread_db=yes
-			;;
+  arc*-*-linux*)       srv_regobj=reg-arc.o
+                       srv_tgtobj="linux-low.o linux-arc-low.o"
+                       srv_linux_usrregs=yes
+                       srv_linux_thread_db=yes
+                       ;;
+  arc*-*)              srv_regobj=reg-arc.o
+                       srv_tgtobj="linux-low.o linux-arc-low.o"
+                       srv_linux_usrregs=yes
+                       srv_linux_thread_db=yes
+                       ;;       
   arm*-*-linux*)	srv_tgtobj="linux-low.o linux-arm-low.o"
 			srv_linux_usrregs=yes
 			srv_linux_regsets=yes

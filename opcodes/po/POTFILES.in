@@ -1,8 +1,16 @@
 alpha-dis.c
 alpha-opc.c
+arc-asm.c
+arc-desc.c
+arc-desc.h
 arc-dis.c
+arc-dis-cgen.c
 arc-ext.c
+arc-ibld.c
+arcompact-dis.c
 arc-opc.c
+arc-opc.h
+arc-opinst.c
 arm-dis.c
 avr-dis.c
 bfin-dis.c

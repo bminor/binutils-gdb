@@ -44,4 +44,6 @@ MODULE_INSTALL_FN dv_sockser_install;
    one of -scache/-pbb.  */
 #define WITH_SCACHE_PBB 1
 
+#define SIM_HAVE_BIENDIAN 1
+
 #endif /* ARC_TCONFIG_H */

@@ -1,5 +1,5 @@
 /* Instruction printing code for the ARC.
-   Copyright (C) 1994, 1995, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1994, 1995, 1997, 1998, 2009 Free Software Foundation, Inc.
    Contributed by Doug Evans (dje@cygnus.com).
 
    Sources derived from work done by Sankhya Technologies (www.sankhya.com)
@@ -9,41 +9,45 @@
    Ramana Radhakrishnan(ramana.radhakrishnan@codito.com)
 
 
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
-   MA 02110-1301, USA.  */
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#include <ansidecl.h>
-#include "dis-asm.h"
-#include "opcode/arc.h"
-#include "elf-bfd.h"
-#include "elf/arc.h"
-#include <string.h>
 
 #include <ctype.h>
 #include <stdarg.h>
-#include "arc-dis.h"
+#include <ansidecl.h>
+#include <string.h>
+
+#include "dis-asm.h"
+#include "opcode/arc.h"
 #include "arc-ext.h"
+#include "arc-dis.h"
+#include "arcompact-dis.h"
+#include "elf-bfd.h"
+#include "elf/arc.h"
+
+
+/* Prototypes */
+static bfd_vma bfd_getm32 (unsigned int data);
+/*static bfd_vma bfd_getm32_ac (unsigned int data); UNUSED*/
 
   /*
+    Ravi:
     warning: implicit declaration of function `printf_unfiltered'
     if dbg is 1 then this definition is required
   */
   void printf_unfiltered (const char *,...);
-static bfd_vma bfd_getm32 (unsigned int);
-static bfd_vma bfd_getm32_ac (unsigned int) ATTRIBUTE_UNUSED;
-struct arcDisState arcAnalyzeInstr (bfd_vma, disassemble_info*);
 
 
 #ifndef dbg
@@ -70,28 +74,28 @@ struct arcDisState arcAnalyzeInstr (bfd_vma, disassemble_info*);
 
 #define BIT(word,n)       ((word) & (1 << n))
 #define BITS(word,s,e)    (((word) << (31-e)) >> (s+(31-e)))
-#define OPCODE(word)      (BITS ((word), 27, 31))
-#define FIELDA(word)      (BITS ((word), 0, 5))
-#define FIELDb(word)      (BITS ((word), 24, 26))
-#define FIELDB(word)      (BITS ((word), 12, 14))
-#define FIELDC(word)      (BITS ((word), 6, 11))
-#define OPCODE_AC(word)   (BITS ((word), 11, 15))
-#define FIELDA_AC(word)   (BITS ((word), 0, 2))
-#define FIELDB_AC(word)   (BITS ((word), 8, 10))
-#define FIELDC_AC(word)   (BITS ((word), 5, 7))
-#define FIELDU_AC(word)   (BITS ((word), 0, 4))
+#define OPCODE(word)      (BITS((word),27,31))
+#define FIELDA(word)      (BITS((word),0,5))
+#define FIELDb(word)      (BITS((word),24,26))
+#define FIELDB(word)      (BITS((word),12,14))
+#define FIELDC(word)      (BITS((word),6,11))
+#define OPCODE_AC(word)   (BITS((word),11,15))
+#define FIELDA_AC(word)   (BITS((word),0,2))
+#define FIELDB_AC(word)   (BITS((word),8,10))
+#define FIELDC_AC(word)   (BITS((word),5,7))
+#define FIELDU_AC(word)   (BITS((word),0,4))
 
 /*
  * FIELDS_AC is the 11-bit signed immediate value used for
  * GP-relative instructions.
  */
-#define FIELDS_AC(word)   (BITS (((signed int) word), 0, 8))
+#define FIELDS_AC(word)   (BITS(((signed int)word),0,8))
 
 /*
  * FIELDD is signed in all of its uses, so we make sure argument is
  * treated as signed for bit shifting purposes.
  */
-#define FIELDD(word)      (BITS (((signed int) word), 16, 23))
+#define FIELDD(word)      (BITS(((signed int)word),16,23))
 
 /*
  * FIELDD9 is the 9-bit signed immediate value used for
@@ -184,14 +188,6 @@ struct arcDisState arcAnalyzeInstr (bfd_vma, disassemble_info*);
 	  fieldCisReg = 0; 			\
 	}					\
 	}
-/********** Aurora SIMD ARC 8 - bit constant **********/
-#define FIELD_U8() {                            \
-                                                \
-          fieldC  = BITS(state->words[0],15,16);\
-          fieldC  = fieldC <<6;                 \
-          fieldC |= FIELDC(state->words[0]);    \
-          fieldCisReg = 0;                      \
-        }
 
 #define CHECK_FIELD_B() {			\
 	fieldB = (FIELDB(state->words[0]) << 3);\
@@ -250,9 +246,6 @@ struct arcDisState arcAnalyzeInstr (bfd_vma, disassemble_info*);
 
 #define IS_SMALL(x) (((field##x) < 256) && ((field##x) > -257))
 #define IS_REG(x)   (field##x##isReg)
-#define IS_SIMD_128_REG(x)  (usesSimdReg##x == 1)
-#define IS_SIMD_16_REG(x)   (usesSimdReg##x == 2)
-#define IS_SIMD_DATA_REG(x) (usesSimdReg##x == 3)
 #define WRITE_FORMAT_LB_Rx_RB(x)     WRITE_FORMAT(x,"[","]","","")
 #define WRITE_FORMAT_x_COMMA_LB(x)   WRITE_FORMAT(x,"",",[","",",[")
 #define WRITE_FORMAT_COMMA_x_RB(x)   WRITE_FORMAT(x,",","]",",","]")
@@ -260,13 +253,10 @@ struct arcDisState arcAnalyzeInstr (bfd_vma, disassemble_info*);
 #define WRITE_FORMAT_COMMA_x(x)      WRITE_FORMAT(x,",","",",","")
 #define WRITE_FORMAT_x_COMMA(x)      WRITE_FORMAT(x,"",",","",",")
 #define WRITE_FORMAT_x(x)            WRITE_FORMAT(x,"","","","")
-#define WRITE_FORMAT(x,cb1,ca1,cb,ca) strcat(formatString,              \
-                                     (IS_SIMD_128_REG(x) ? cb1"%S"ca1:  \
-                                      IS_SIMD_16_REG(x)  ? cb1"%I"ca1:  \
-                                      IS_SIMD_DATA_REG(x)? cb1"%D"ca1:  \
-                                      IS_REG(x)          ? cb1"%r"ca1:  \
-                                      usesAuxReg         ?  cb"%a"ca :  \
-                                      IS_SMALL(x) ? cb"%d"ca : cb"%h"ca))
+#define WRITE_FORMAT(x,cb1,ca1,cb,ca) strcat(formatString,		\
+				     (IS_REG(x) ? cb1"%r"ca1 :		\
+				      usesAuxReg ? cb"%a"ca :		\
+				      IS_SMALL(x) ? cb"%d"ca : cb"%h"ca))
 
 #define WRITE_FORMAT_LB() strcat(formatString, "[")
 #define WRITE_FORMAT_RB() strcat(formatString, "]")
@@ -280,7 +270,6 @@ struct arcDisState arcAnalyzeInstr (bfd_vma, disassemble_info*);
 #define add_target(x) 	(state->targets[state->tcnt++] = (x))
 
 static char comment_prefix[] = "\t; ";
-short int enable_simd = 0;
 
 static const char *
 core_reg_name(struct arcDisState *state, int val)
@@ -325,8 +314,8 @@ static const char *
 post_address(struct arcDisState *state, int addr)
 {
   static char id[3*_NELEM(state->addresses)];
-  unsigned int j, i = state->acnt;
-  if (i < _NELEM(state->addresses)) {
+  int j, i = state->acnt;
+  if ((unsigned)i < _NELEM(state->addresses)) {
     state->addresses[i] = addr;
     ++state->acnt;
     j = i*3;
@@ -456,11 +445,14 @@ my_sprintf (struct arcDisState *state, char *buf, const char*format, ...)
 	  {
 	  /* Aux Register. */
 	    int val = va_arg(ap,int);
+// The arc_aux_reg_name fucntion does not appear to exist anywwhere!
+#if 0
 	    char *ret;
 	    ret = arc_aux_reg_name(val);
 	    if(ret)
 	      sprintf(bp,"%s",ret);
 	    else
+#endif
 	      {
 		const char *ext;
 		  ext = aux_reg_name(state, val);
@@ -473,45 +465,18 @@ my_sprintf (struct arcDisState *state, char *buf, const char*format, ...)
 	  break;
 	case 's':
 	  {
-	    sprintf(bp,"%s",va_arg(ap,char*));
-	    inc_bp();
+	    sprintf (bp,"%s", va_arg (ap, char *));
+	    inc_bp ();
 	  }
 	  break;
 	case '*':
 	  {
-	    va_arg(ap,char*);
-	    inc_bp();
-	    break;
-	  }
-
-	  /* SIMD operands follow*/
-	case 'S':
-	  {
-	    int val = va_arg (ap,int);
-
-	    sprintf (bp, "vr%d",val);
+	    (void) va_arg (ap, char *);
 	    inc_bp ();
 	    break;
 	  }
-	case 'I':
-	  {
-	    int val = va_arg (ap,int);
-
-	    sprintf (bp, "i%d",val);
-	    inc_bp ();
-	    break;
-	  }
-	case 'D':
-	  {
-	    int val = va_arg (ap,int);
-
-	    sprintf (bp, "dr%d",val);
-	    inc_bp ();
-	    break;
-	  }
-	  /* SIMD operands end */
 	default:
-	  fprintf(stderr,"?? format %c\n",p[-1]);
+	  fprintf (stderr, "?? format %c\n", p[-1]);
 	  break;
 	}
     }
@@ -579,7 +544,8 @@ write_instr_name_(struct arcDisState *state,
     }
   if (flag) strcat(state->instrBuffer, ".f");
   if (state->nullifyMode)
-    strcat(state->instrBuffer, ".d");
+    if (strstr(state->instrBuffer, ".d") == NULL)
+       strcat(state->instrBuffer, ".d");
   if (signExtend)    strcat(state->instrBuffer, ".x");
   switch (addrWriteBack)
   {
@@ -591,14 +557,14 @@ write_instr_name_(struct arcDisState *state,
 }
 
 #define write_instr_name()	{\
-  write_instr_name_(state, instrName,cond, condCodeIsPartOfName, flag, signExtend, addrWriteBack, directMem); \
+  write_instr_name_(state, instrName, cond, condCodeIsPartOfName, flag, signExtend, addrWriteBack, directMem); \
  formatString[0] = '\0'; \
 }
 
 enum
 {
   op_BC = 0, op_BLC = 1, op_LD  = 2, op_ST = 3, op_MAJOR_4  = 4,
-  op_MAJOR_5 = 5, op_SIMD=6,      op_LD_ADD = 12, op_ADD_SUB_SHIFT  = 13,
+  op_MAJOR_5 = 5, op_LD_ADD = 12, op_ADD_SUB_SHIFT  = 13,
   op_ADD_MOV_CMP = 14, op_S = 15, op_LD_S = 16, op_LDB_S = 17,
   op_LDW_S = 18, op_LDWX_S  = 19, op_ST_S = 20, op_STB_S = 21,
   op_STW_S = 22, op_Su5     = 23, op_SP   = 24, op_GP    = 25, op_Pcl = 26,
@@ -611,6 +577,9 @@ extern disassemble_info tm_print_insn_info;
  * bfd_getm32 - To retrieve the upper 16-bits of the ARCtangent-A5
  *              basecase (32-bit) instruction
  */
+
+
+
 static bfd_vma
 bfd_getm32 (data)
      unsigned int data;
@@ -626,6 +595,7 @@ bfd_getm32 (data)
  * bfd_getm32_ac - To retrieve the upper 8-bits of the ARCompact
  *                 16-bit instruction
  */
+/*	UNUSED
 static bfd_vma
 bfd_getm32_ac (data)
      unsigned int data;
@@ -635,7 +605,7 @@ bfd_getm32_ac (data)
    value = ((data & 0xff) << 8 | (data & 0xff00) >> 8);
    return value;
 }
-
+*/
 /*
  * sign_extend - Sign Extend the value
  *
@@ -675,8 +645,7 @@ dsmOneArcInst (bfd_vma addr, struct arcDisState *state, disassemble_info * info)
   int is_linked=0;
   int offset=0;
   int usesAuxReg = 0;
-  int usesSimdRegA= 0, usesSimdRegB=0, usesSimdRegC=0,simd_scale_u8=-1;
-  int flags = !E_ARC_MACH_A4;
+  int flags;
   char formatString[60];
 
   state->nullifyMode = BR_exec_when_no_jump;
@@ -689,6 +658,8 @@ dsmOneArcInst (bfd_vma addr, struct arcDisState *state, disassemble_info * info)
   state->ea_reg2 = no_reg;
   state->_offset = 0;
   state->_addrWriteBack = 0;
+
+  state->sourceType = ARC_UNDEFINED;
 
   state->instructionLen = info->bytes_per_line;
 
@@ -733,7 +704,7 @@ dsmOneArcInst (bfd_vma addr, struct arcDisState *state, disassemble_info * info)
    */
 
   switch (state->_opcode)
-    {
+  {
     case op_BC:
     /* Branch Conditionally */
       instrName = "b";
@@ -813,50 +784,37 @@ dsmOneArcInst (bfd_vma addr, struct arcDisState *state, disassemble_info * info)
       decodingClass = 0;  /* Default for 3 operand instructions */
       subopcode = BITS(state->words[0],16,21);
       switch (subopcode)
-        {
-	case 0: instrName = "add";  break;
-	case 1: instrName = "adc";  break;
-	case 2: instrName = "sub";  break;
-	case 3: instrName = "sbc";  break;
-	case 4: instrName = "and";  break;
-	case 5: instrName = "or";   break;
-	case 6: instrName = "bic";  break;
-	case 7: instrName = "xor";  break;
-	case 8: instrName = "max";  break;
-	case 9: instrName = "min";  break;
-	case 10:
-	  {
-	    if(state->words[0] == 0x264a7000)
-	      {
-		instrName = "nop";
-		decodingClass = 26;
-	      }
-	    else
-	      {
-		instrName = "mov";
-		decodingClass = 12;
-	      }
-	    break;
-	  }
-	case 11: instrName = "tst"; decodingClass = 2; break;
-	case 12: instrName = "cmp"; decodingClass = 2; break;
-	case 13: instrName = "rcmp"; decodingClass = 2; break;
-	case 14: instrName = "rsub"; break;
-	case 15: instrName = "bset"; break;
-	case 16: instrName = "bclr"; break;
-	case 17: instrName = "btst"; decodingClass = 2; break;
-	case 18: instrName = "bxor"; break;
-	case 19: instrName = "bmsk"; break;
-	case 20: instrName = "add1"; break;
-	case 21: instrName = "add2"; break;
-	case 22: instrName = "add3"; break;
-	case 23: instrName = "sub1"; break;
-	case 24: instrName = "sub2"; break;
-	case 25: instrName = "sub3"; break;
-	case 26: instrName = "mpylo"; break;
-	case 27: instrName = "mpyhi"; break;
-	case 28: instrName = "mpyhiu";break;
-	case 29: instrName = "mpylou";break;
+      {
+        case 0: instrName = "add";  break;
+        case 1: instrName = "adc";  break;
+        case 2: instrName = "sub";  break;
+        case 3: instrName = "sbc";  break;
+        case 4: instrName = "and";  break;
+        case 5: instrName = "or";   break;
+        case 6: instrName = "bic";  break;
+        case 7: instrName = "xor";  break;
+      case 8: instrName = "max";  break;
+      case 9: instrName = "min";  break;
+      case 10: instrName = "mov"; decodingClass = 12; break;
+      case 11: instrName = "tst"; decodingClass = 2; break;
+      case 12: instrName = "cmp"; decodingClass = 2; break;
+      case 13: instrName = "rcmp"; decodingClass = 2; break;
+      case 14: instrName = "rsub"; break;
+      case 15: instrName = "bset"; break;
+      case 16: instrName = "bclr"; break;
+      case 17: instrName = "btst"; decodingClass = 2; break;
+      case 18: instrName = "bxor"; break;
+      case 19: instrName = "bmsk"; break;
+      case 20: instrName = "add1"; break;
+      case 21: instrName = "add2"; break;
+      case 22: instrName = "add3"; break;
+      case 23: instrName = "sub1"; break;
+      case 24: instrName = "sub2"; break;
+      case 25: instrName = "sub3"; break;
+      case 26: instrName = "mpylo"; break;
+      case 27: instrName = "mpyhi"; break;
+      case 28: instrName = "mpyhiu";break;
+      case 29: instrName = "mpylou";break;
         case 32:
         case 33:
 	  instrName = "j";
@@ -917,11 +875,6 @@ dsmOneArcInst (bfd_vma addr, struct arcDisState *state, disassemble_info * info)
 		break;
 	      case 4 : instrName = "rtie" ; break;
 	      case 5 : instrName = "brk"; break;
-	      default:
-
-		instrName = "???";
-		state->flow=invalid_instr;
-		break;
 	      }
 	    break;
 	  }
@@ -983,10 +936,6 @@ dsmOneArcInst (bfd_vma addr, struct arcDisState *state, disassemble_info * info)
 
 
 	  case 8: instrName = "normw"; decodingClass = 1; break;
-	  default:
-	    instrName = "???";
-	    state->flow =invalid_instr;
-	    break;
 
 	  }
 	break;
@@ -996,981 +945,6 @@ dsmOneArcInst (bfd_vma addr, struct arcDisState *state, disassemble_info * info)
 	break;
       }
     break;
-
-
-    /* Aurora SIMD instruction support*/
-  case op_SIMD:
-
-    if (enable_simd)
-      {
-	decodingClass = 42;
-	subopcode     = BITS(state->words[0], 17, 23);
-
-	switch (subopcode)
-	  {
-
-	  case 68:
-	    instrName = "vld32";
-	    decodingClass = 37;
-	    usesSimdRegA=1;
-	    usesSimdRegB=2;
-	    usesSimdRegC=0;
-	    simd_scale_u8 = 2;
-	    break;
-
-	  case 72:
-	    instrName = "vld64";
-	    decodingClass = 37;
-	    usesSimdRegA  = 1;
-	    usesSimdRegB  = 2;
-	    usesSimdRegC  = 0;
-	    simd_scale_u8 = 3;
-	    break;
-
-	  case 74:
-	    instrName = "vld64w";
-	    decodingClass = 37;
-	    usesSimdRegA  = 1;
-	    usesSimdRegB  = 2;
-	    usesSimdRegC  = 0;
-	    simd_scale_u8 = 3;
-	    break;
-
-	  case 70:
-	    instrName = "vld32wl";
-	    decodingClass = 37;
-	    usesSimdRegA  = 1;
-	    usesSimdRegB  = 2;
-	    usesSimdRegC  = 0;
-	    simd_scale_u8 = 2;
-	    break;
-
-	  case 66:
-	    instrName = "vld32wh";
-	    decodingClass = 37;
-	    usesSimdRegA  = 1;
-	    usesSimdRegB  = 2;
-	    usesSimdRegC  = 0;
-	    simd_scale_u8 = 2;
-	    break;
-
-	  case 76:
-	    instrName = "vld128";
-	    decodingClass = 37;
-	    usesSimdRegA  = 1;
-	    usesSimdRegB  = 2;
-	    usesSimdRegC  = 0;
-	    simd_scale_u8 = 4;
-	    break;
-
-	  case 78:
-	    {
-	      short  sub_subopcode = BITS(state->words[0], 15, 16);
-	      switch (sub_subopcode)
-		{
-		case 0:
-		  instrName = "vld128r";
-		  decodingClass = 38;
-		  usesSimdRegA  = 1;
-		  usesSimdRegB  = usesSimdRegC = 0;
-		  break;
-		default:
-		  instrName = "SIMD";
-		  state->flow = invalid_instr;
-		}
-	    }
-	    break;
-	  case 71:
-	    instrName = "vst16_0";
-	    decodingClass = 37;
-	    usesSimdRegA = 1;
-	    usesSimdRegB = 2;
-	    usesSimdRegC = 0;
-	    simd_scale_u8 = 1;
-	    break;
-
-	  case 81:
-	    instrName = "vst16_1";
-	    decodingClass = 37;
-	    usesSimdRegA = 1;
-	    usesSimdRegB = 2;
-	    usesSimdRegC = 0;
-	    simd_scale_u8 = 1;
-	    break;
-
-	  case 67:
-	    instrName = "vst16_2";
-	    decodingClass = 37;
-	    usesSimdRegA = 1;
-	    usesSimdRegB = 2;
-	    usesSimdRegC = 0;
-	    simd_scale_u8 = 1;
-	    break;
-
-	  case 75:
-	    instrName = "vst16_3";
-	    decodingClass = 37;
-	    usesSimdRegA = 1;
-	    usesSimdRegB = 2;
-	    usesSimdRegC = 0;
-	    simd_scale_u8 = 1;
-	    break;
-
-	  case 83:
-	    instrName = "vst16_4";
-	    decodingClass = 37;
-	    usesSimdRegA = 1;
-	    usesSimdRegB = 2;
-	    usesSimdRegC = 0;
-	    simd_scale_u8 = 1;
-	    break;
-
-	  case 89:
-	    instrName = "vst16_5";
-	    decodingClass = 37;
-	    usesSimdRegA = 1;
-	    usesSimdRegB = 2;
-	    usesSimdRegC = 0;
-	    simd_scale_u8 = 1;
-	    break;
-
-	  case 91:
-	    instrName = "vst16_6";
-	    decodingClass = 37;
-	    usesSimdRegA = 1;
-	    usesSimdRegB = 2;
-	    usesSimdRegC = 0;
-	    simd_scale_u8 = 1;
-	    break;
-
-	  case 93:
-	    instrName = "vst16_7";
-	    decodingClass = 37;
-	    usesSimdRegA = 1;
-	    usesSimdRegB = 2;
-	    usesSimdRegC = 0;
-	    simd_scale_u8 = 1;
-	    break;
-
-	  case 69:
-	    instrName = "vst32_0";
-	    decodingClass = 37;
-	    usesSimdRegA  = 1;
-	    usesSimdRegB  = 2;
-	    usesSimdRegC  = 0;
-	    simd_scale_u8 = 2;
-	    break;
-
-	  case 82:
-	    instrName = "vst32_2";
-	    decodingClass = 37;
-	    usesSimdRegA  = 1;
-	    usesSimdRegB  = 2;
-	    usesSimdRegC  = 0;
-	    simd_scale_u8 = 2;
-	    break;
-
-	  case 86:
-	    instrName = "vst32_4";
-	    decodingClass = 37;
-	    usesSimdRegA  = 1;
-	    usesSimdRegB  = 2;
-	    usesSimdRegC  = 0;
-	    simd_scale_u8 = 2;
-	    break;
-
-	  case 88:
-	    instrName = "vst32_6";
-	    decodingClass = 37;
-	    usesSimdRegA  = 1;
-	    usesSimdRegB  = 2;
-	    usesSimdRegC  = 0;
-	    simd_scale_u8 = 2;
-	    break;
-
-	  case 73:
-	    instrName = "vst64";
-	    decodingClass = 37 ;
-	    usesSimdRegA  = 1;
-	    usesSimdRegB  = 2;
-	    usesSimdRegC  = 0;
-	    simd_scale_u8 = 3;
-	    break;
-
-	  case 77:
-	    instrName = "vst128";
-	    decodingClass = 37;
-	    usesSimdRegA  = 1;
-	    usesSimdRegB  = 2;
-	    usesSimdRegC  = 0;
-	    simd_scale_u8 = 4;
-	    break;
-
-	  case 79:
-	    {
-	      short sub_subopcode = BITS(state->words[0], 15, 16);
-	      switch (sub_subopcode)
-		{
-		case 0:
-		  instrName = "vst128r";
-		  decodingClass = 38;
-		  usesSimdRegA = 1;
-		  usesSimdRegB = usesSimdRegC = 0;
-		  break;
-
-		default:
-		  instrName = "SIMD";
-		  state->flow = invalid_instr;
-		}
-
-	    }
-	    break;
-	  case 80:
-	    instrName = "vmvw";
-	    usesSimdRegA = usesSimdRegB = 1;
-	    usesSimdRegC = 0;
-	    decodingClass = 39;
-	    break;
-
-	  case 84:
-	    instrName = "vmvzw";
-	    decodingClass = 39;
-	    usesSimdRegA = usesSimdRegB = 1;
-	    usesSimdRegC = 0;
-	    break;
-
-	  case 90:
-	    instrName = "vmovw";
-	    decodingClass = 39;
-	    usesSimdRegA  = 1;
-	    usesSimdRegB  = usesSimdRegC = 0;
-	    break;
-
-	  case 94:
-	    instrName = "vmovzw";
-	    decodingClass = 39;
-	    usesSimdRegA  = 1;
-	    usesSimdRegB  = usesSimdRegC = 0;
-	    break;
-
-	  case 85:
-	    instrName = "vmvaw";
-	    decodingClass = 39;
-	    usesSimdRegA  = usesSimdRegB = 1;
-	    usesSimdRegC  = 0;
-	    break;
-
-	  case 95:
-	    instrName = "vmovaw";
-	    decodingClass = 39;
-	    usesSimdRegA  = 1;
-	    usesSimdRegB  = usesSimdRegC = 0;
-	    break;
-
-	  case 10:
-	    {
-	      short sub_subopcode = BITS(state->words[0], 15, 16);
-	      switch (sub_subopcode)
-		{
-		case 0:
-		  instrName = "vaddw"; decodingClass = 42;
-		  usesSimdRegA = usesSimdRegB = usesSimdRegC =1;
-		  break;
-
-		case 1:
-		  instrName = "vaddaw"; decodingClass = 42;
-		  usesSimdRegA = usesSimdRegB = usesSimdRegC =1;
-		  break;
-
-		case 2:
-		  instrName = "vbaddw"; decodingClass = 42;
-		  usesSimdRegA = usesSimdRegB = 1;
-		  usesSimdRegC = 0;
-		  break;
-		}
-	      break;
-	    }
-
-	  case 11:
-	    {
-	      short sub_subopcode = BITS(state->words[0], 15, 16);
-	      switch (sub_subopcode)
-		{
-		case 0:
-		  instrName = "vsubw";
-		  decodingClass = 42;
-		  usesSimdRegA  = usesSimdRegB = usesSimdRegC = 1;
-		  break;
-
-		case 1:
-		  instrName = "vsubaw";
-		  decodingClass = 42;
-		  usesSimdRegA  = usesSimdRegB = usesSimdRegC = 1;
-		  break;
-
-		case 2:
-		  instrName = "vbsubw";
-		  decodingClass = 42;
-		  usesSimdRegA  = usesSimdRegB = 1;
-		  usesSimdRegC  = 0;
-		  break;
-		}
-	    }
-	    break;
-
-	  case 12:
-	    {
-	      short sub_subopcode = BITS(state->words[0], 15, 16);
-	      switch (sub_subopcode)
-		{
-		case 0:
-		  instrName = "vmulw";
-		  decodingClass = 42;
-		  usesSimdRegA  = usesSimdRegB = usesSimdRegC = 1;
-		  break;
-
-		case 1:
-		  instrName = "vmulaw";
-		  decodingClass = 42;
-		  usesSimdRegA  = usesSimdRegB = usesSimdRegC = 1;
-		  break;
-
-		case 2:
-		  instrName = "vbmulw";
-		  decodingClass = 42;
-		  usesSimdRegA  = usesSimdRegB = 1;
-		  usesSimdRegC  = 0;
-		  break;
-
-		case 3:
-		  instrName = "vbmulaw";
-		  decodingClass = 42;
-		  usesSimdRegA  = usesSimdRegB = 1;
-		  usesSimdRegC  = 0;
-		  break;
-		}
-	    }
-	    break;
-
-	  case 13:
-	    {
-	      short sub_subopcode = BITS(state->words[0], 15, 16);
-	      switch (sub_subopcode)
-		{
-		case 0:
-		  instrName = "vmulfw";
-		  decodingClass = 42;
-		  usesSimdRegA  = usesSimdRegB = usesSimdRegC = 1;
-		  break;
-
-		case 1:
-		  instrName = "vmulfaw";
-		  decodingClass = 42;
-		  usesSimdRegA  = usesSimdRegB = usesSimdRegC = 1;
-		  break;
-
-		case 2:
-		  instrName = "vbmulfw";
-		  decodingClass = 42;
-		  usesSimdRegA  = usesSimdRegB = 1;
-		  usesSimdRegC  = 0;
-		  break;
-		}
-	    }
-	    break;
-
-	  case 15:
-	    {
-	      short sub_subopcode = BITS(state->words[0], 15, 16);
-	      switch (sub_subopcode)
-		{
-		case 0:
-		  instrName = "vsummw";
-		  decodingClass = 42;
-		  usesSimdRegA = usesSimdRegB = usesSimdRegC = 1;
-		  break;
-		case 2:
-		  instrName = "vbrsubw";
-		  decodingClass = 42;
-		  usesSimdRegA  = usesSimdRegB = 1;
-		  usesSimdRegC  = 0;
-		  break;
-		}
-	    }
-	    break;
-
-	  case 23:
-	    {
-	      short sub_subopcode = BITS(state->words[0], 15, 16);
-	      switch (sub_subopcode)
-		{
-		case 0:
-		  instrName = "vmr7w";
-		  decodingClass = 42;
-		  usesSimdRegA  = usesSimdRegB = usesSimdRegC = 1;
-		  break;
-
-		case 1:
-		  instrName = "vmr7aw";
-		  decodingClass = 42;
-		  usesSimdRegA  = usesSimdRegB = usesSimdRegC = 1;
-		  break;
-
-
-		case 2:
-		  switch (BITS(state->words[0], 0, 5))
-		    {
-		    case 0:
-		      instrName = "vaddsuw";
-		      decodingClass = 40;
-		      usesSimdRegC  = usesSimdRegB = 1;
-		      usesSimdRegA  = 0;
-		      break;
-
-		    case 1:
-		      instrName = "vabsw";
-		      decodingClass = 40;
-		      usesSimdRegC  = usesSimdRegB = 1;
-		      usesSimdRegA  = 0;
-		      break;
-
-		    case 2:
-		      instrName = "vsignw";
-		      decodingClass = 40;
-		      usesSimdRegC  = usesSimdRegB = 1;
-		      usesSimdRegA  = 0;
-		      break;
-
-		    case 3:
-		      instrName = "vupbw";
-		      decodingClass = 40;
-		      usesSimdRegC  = usesSimdRegB = 1;
-		      usesSimdRegA  = 0;
-		      break;
-
-		    case 4:
-		      instrName = "vexch1";
-		      decodingClass = 40;
-		      usesSimdRegC  = usesSimdRegB = 1;
-		      usesSimdRegA  = 0;
-		      break;
-
-		    case 5:
-		      instrName = "vexch2";
-		      decodingClass = 40;
-		      usesSimdRegC  = usesSimdRegB = 1;
-		      usesSimdRegA  = 0;
-		      break;
-
-		    case 6:
-		      instrName = "vexch4";
-		      decodingClass = 40;
-		      usesSimdRegC  = usesSimdRegB = 1;
-		      usesSimdRegA  = 0;
-		      break;
-
-		    case 7:
-		      instrName = "vupsbw";
-		      decodingClass = 40;
-		      usesSimdRegC  = usesSimdRegB = 1;
-		      usesSimdRegA  = 0;
-		      break;
-
-		    case 8:
-		      instrName = "vdirun";
-		      decodingClass = 40;
-		      usesSimdRegC  = usesSimdRegB = usesSimdRegA = 0;
-		      break;
-
-		    case 9:
-		      instrName = "vdorun";
-		      decodingClass = 40;
-		      usesSimdRegC  = usesSimdRegB = usesSimdRegA = 0;
-		      break;
-
-		    case 10:
-		      instrName = "vdiwr";
-		      decodingClass = 40;
-		      usesSimdRegB  = 3;
-		      usesSimdRegA  = usesSimdRegC = 0;
-		      fieldCisReg   = 1;
-		      break;
-
-		    case 11:
-		      instrName = "vdowr";
-		      decodingClass = 40;
-		      usesSimdRegB  = 3;
-		      usesSimdRegA  = usesSimdRegC = 0;
-		      fieldCisReg   = 1;
-		      break;
-
-		    case 12:
-		      instrName = "vdird";
-		      decodingClass = 40;
-		      usesSimdRegB  = 1;
-		      usesSimdRegC  = 3;
-		      usesSimdRegA  = 0;
-		      break;
-
-		    case 13:
-		      instrName = "vdord";
-		      decodingClass = 40;
-		      usesSimdRegB  = 1;
-		      usesSimdRegC  = 3;
-		      usesSimdRegA  = 0;
-		      break;
-
-		    case 63:
-		      {
-			switch (BITS(state->words[0], 24, 25))
-			  {
-			  case 0:
-			    instrName = "vrec";
-			    decodingClass = 43;
-			    usesSimdRegC  = 0;
-			    usesSimdRegB  = usesSimdRegA = 0;
-			    break;
-
-			  case 1:
-			    instrName = "vrecrun";
-			    decodingClass = 43;
-			    usesSimdRegC  = 0;
-			    usesSimdRegA  = usesSimdRegB = 0;
-			    break;
-
-			  case 2:
-			    instrName = "vrun";
-			    decodingClass = 43;
-			    usesSimdRegC  = 0;
-			    usesSimdRegB  = usesSimdRegA = 0;
-			    break;
-
-			  case 3:
-			    instrName = "vendrec";
-			    decodingClass = 43;
-			    usesSimdRegC  = 0;
-			    usesSimdRegB  = usesSimdRegA = 0;
-			    break;
-			  }
-		      }
-		      break;
-		    }
-		  break;
-
-		case 3:
-		  switch (BITS(state->words[0], 0, 2))
-		    {
-		    case 1:
-		      instrName = "vabsaw";
-		      decodingClass = 40;
-		      usesSimdRegC  = usesSimdRegB = 1;
-		      usesSimdRegA  = 0;
-		      break;
-		    case 3:
-		      instrName = "vupbaw";
-		      decodingClass = 40;
-		      usesSimdRegC  = usesSimdRegB = 1;
-		      usesSimdRegA  = 0;
-		      break;
-		    case 7:
-		      instrName = "vupsbaw";
-		      decodingClass = 40;
-		      usesSimdRegC  = usesSimdRegB = 1;
-		      usesSimdRegA  = 0;
-		      break;
-		    }
-		  break;
-		}
-	    }
-	    break;
-
-	  case 16:
-	    instrName = "vasrw";
-	    decodingClass = 42;
-	    usesSimdRegA  = usesSimdRegB = 1;
-	    usesSimdRegC  = 2;
-	    break;
-
-	  case 48:
-	    {
-	      short sub_subopcode = BITS(state->words[0], 15, 16);
-	      switch (sub_subopcode)
-		{
-		case 0:
-		  instrName = "vasrwi";
-		  decodingClass = 41;
-		  usesSimdRegA  = usesSimdRegB = 1;
-		  usesSimdRegC  = 0;
-		  break;
-		case 2:
-		  instrName = "vasrrwi";
-		  decodingClass = 41;
-		  usesSimdRegA  = usesSimdRegB = 1;
-		  usesSimdRegC  = 0;
-		  break;
-		}
-	    }
-	    break;
-
-	  case 59:
-	    instrName = "vasrsrwi";
-	    decodingClass = 41;
-	    usesSimdRegA  = usesSimdRegB = 1;
-	    usesSimdRegC  = 0;
-	    break;
-
-	  case 18:
-	    {
-	      short sub_subopcode = BITS(state->words[0], 15, 16);
-	      switch (sub_subopcode)
-		{
-		case 0:
-		  instrName = "vmaxw";
-		  usesSimdRegC = 1;
-		  break;
-		case 1:
-		  instrName = "vmaxaw";
-		  usesSimdRegC = 1;
-		  break;
-		case 2:
-		  instrName = "vbmaxw";
-		  usesSimdRegC = 0;
-		  break;
-		}
-	      decodingClass = 42;
-	      usesSimdRegA  = usesSimdRegB = 1;
-	      break;
-	    }
-
-	  case 19:
-	    {
-	      short sub_subopcode = BITS(state->words[0], 15, 16);
-	      switch (sub_subopcode)
-		{
-		case 0:
-		  instrName = "vminw";
-		  usesSimdRegC = 1;
-		  break;
-		case 1:
-		  instrName = "vminaw";
-		  usesSimdRegC = 0;
-		  break;
-		case 2:
-		  instrName = "vbminw";
-		  usesSimdRegC = 0;
-		  break;
-		}
-	      decodingClass = 42;
-	      usesSimdRegA  = usesSimdRegB = 1;
-	      break;
-	    }
-
-	  case 14:
-	    {
-	      short sub_subopcode = BITS(state->words[0], 15, 16);
-	      switch (sub_subopcode)
-		{
-		case 0:
-		  instrName = "vdifw";
-		  break;
-		case 1:
-		  instrName = "vdifaw";
-		  break;
-		case 2:
-		  instrName = "vmrb";
-		  break;
-		}
-	      decodingClass = 42;
-	      usesSimdRegA  = usesSimdRegB = usesSimdRegC = 1;
-	      break;
-	    }
-
-	  case 24:
-	    {
-	      short sub_subopcode = BITS(state->words[0], 15, 16);
-	      switch (sub_subopcode)
-		{
-		case 0:
-		  instrName = "vand";
-		  decodingClass = 42;
-		  usesSimdRegA = usesSimdRegB = usesSimdRegC = 1;
-		  break;
-		case 1:
-		  instrName = "vandaw";
-		  decodingClass = 42;
-		  usesSimdRegA = usesSimdRegB = usesSimdRegC = 1;
-		  break;
-		}
-	      break;
-	    }
-
-	  case 25:
-	    {
-	      short sub_subopcode = BITS(state->words[0], 15, 16);
-	      switch (sub_subopcode)
-		{
-		case 0:
-		  instrName = "vor";
-		  decodingClass = 42;
-		  usesSimdRegA  = usesSimdRegB = usesSimdRegC = 1;
-		  break;
-		}
-	      break;
-	    }
-
-	  case 26:
-	    {
-	      short sub_subopcode = BITS(state->words[0], 15, 16);
-	      switch (sub_subopcode)
-		{
-		case 0:
-		  instrName = "vxor";
-		  break;
-		case 1:
-		  instrName = "vxoraw";
-		  break;
-		}
-	      decodingClass = 42;
-	      usesSimdRegA  = usesSimdRegB = usesSimdRegC = 1;
-	      break;
-	    }
-
-	  case 27:
-	    {
-	      short sub_subopcode = BITS(state->words[0], 15, 16);
-	      switch (sub_subopcode)
-		{
-		case 0:
-		  instrName = "vbic";
-		  break;
-		case 1:
-		  instrName = "vbicaw";
-		  break;
-		}
-	      decodingClass = 42;
-	      usesSimdRegA  = usesSimdRegB = usesSimdRegC = 1;
-	      break;
-	    }
-
-	  case 4:
-	    {
-	      short sub_subopcode = BITS(state->words[0], 15, 16);
-	      switch (sub_subopcode)
-		{
-		case 0:
-		  instrName = "vavb";
-		  break;
-		case 2:
-		  instrName = "vavrb";
-		  break;
-		}
-	      decodingClass = 42;
-	      usesSimdRegA  = usesSimdRegB = usesSimdRegC = 1;
-	      break;
-	    }
-
-	  case 28:
-	    instrName = "veqw";
-	    decodingClass = 42;
-	    usesSimdRegA  = usesSimdRegB = usesSimdRegC = 1;
-	    break;
-
-	  case 29:
-	    instrName = "vnew";
-	    decodingClass = 42;
-	    usesSimdRegA  = usesSimdRegB = usesSimdRegC = 1;
-	    break;
-
-	  case 30:
-	    instrName = "vlew";
-	    decodingClass = 42;
-	    usesSimdRegA  = usesSimdRegB = usesSimdRegC = 1;
-	    break;
-
-	  case 31:
-	    instrName = "vltw";
-	    decodingClass = 42;
-	    usesSimdRegA  = usesSimdRegB = usesSimdRegC = 1;
-	    break;
-
-	  case 49:
-	    {
-	      short sub_subopcode = BITS(state->words[0], 15, 16);
-	      switch (sub_subopcode)
-		{
-		case 0:
-		  instrName = "vasrpwbi";
-		  decodingClass = 41;
-		  usesSimdRegA  = usesSimdRegB = 1;
-		  usesSimdRegC  = 0;
-		  break;
-		case 2:
-		  instrName = "vasrrpwbi";
-		  decodingClass = 41;
-		  usesSimdRegA  = usesSimdRegB = 1;
-		  usesSimdRegC  = 0;
-		  break;
-		}
-	      break;
-	    }
-
-	  case 5:
-	    {
-	      short sub_subopcode = BITS(state->words[0], 15, 16);
-	      switch (sub_subopcode)
-		{
-		case 0:
-		  instrName = "vsr8";
-		  decodingClass = 42;
-		  usesSimdRegA  = usesSimdRegB = 1;
-		  usesSimdRegC  = 2;
-		  break;
-
-		case 1:
-		  instrName = "vsr8aw";
-		  decodingClass = 42;
-		  usesSimdRegA  = usesSimdRegB = 1;
-		  usesSimdRegC  = 2;
-		  break;
-		}
-	      break;
-	    }
-
-	  case 37:
-	    {
-	      short sub_subopcode = BITS(state->words[0], 15, 16);
-	      switch (sub_subopcode)
-		{
-		case 0:
-		  instrName = "vsr8i";
-		  decodingClass = 41;
-		  usesSimdRegA  = usesSimdRegB = 1;
-		  usesSimdRegC  = 0;
-		  break;
-
-		case 1:
-		  instrName = "vsr8awi";
-		  decodingClass = 41;
-		  usesSimdRegA  = usesSimdRegB = 1;
-		  usesSimdRegC  = 0;
-		  break;
-		}
-	      break;
-	    }
-
-	  case 20:
-	  case 21:
-	  case 22:
-	    {
-	      short subopcode2 = BITS(state->words[0], 15, 18);
-	      switch (subopcode2)
-		{
-		case 0:
-		  instrName = "vmr1w";
-		  break;
-
-		case 2:
-		  instrName = "vmr2w";
-		  break;
-
-		case 4:
-		  instrName = "vmr3w";
-		  break;
-
-		case 6:
-		  instrName = "vmr4w";
-		  break;
-
-		case 8:
-		  instrName = "vmr5w";
-		  break;
-
-		case 10:
-		  instrName = "vmr6w";
-		  break;
-
-		case 1:
-		  instrName = "vmr1aw";
-		  break;
-
-		case 3:
-		  instrName = "vmr2aw";
-		  break;
-
-		case 5:
-		  instrName = "vmr3aw";
-		  break;
-
-		case 7:
-		  instrName = "vmr4aw";
-		  break;
-
-		case 9:
-		  instrName = "vmr5aw";
-		  break;
-
-		case 11:
-		  instrName = "vmr6aw";
-		  break;
-
-		}
-
-	      decodingClass = 42;
-	      usesSimdRegA  = usesSimdRegB = usesSimdRegC = 1;
-	      break;
-	    }
-
-
-	  case 7:
-	  case 6:
-	    {
-	      switch (BITS(state->words[0], 16, 19))
-		{
-		case 15:
-		  instrName = "vh264ft";
-		  break;
-		case 14:
-		  instrName = "vh264f";
-		  break;
-		case 13:
-		  instrName = "vvc1ft";
-		  break;
-		case 12:
-		  instrName = "vvc1f";
-		  break;
-		}
-	      decodingClass = 42;
-	      usesSimdRegA  = usesSimdRegB = usesSimdRegC = 1;
-	      break;
-
-	    }
-
-	  case 92:
-	    instrName = "vd6tapf";
-	    decodingClass = 39;
-	    usesSimdRegA  = usesSimdRegB = 1;
-	    usesSimdRegC  = 0;
-	    break;
-
-	  case 55:
-	    instrName = "vinti";
-	    decodingClass = 43;
-	    usesSimdRegA  = usesSimdRegB = usesSimdRegC = 0;
-	    break;
-
-	  default:
-	    instrName = "SIMD";
-	    state->flow = invalid_instr;
-	    break;
-	  }
-      }
-    else
-      {
-	instrName = "???_SIMD";
-	state->flow = invalid_instr;
-      }
-	break;
-
 
     case op_LD_ADD:
     /* Load/Add resister-register */
@@ -2039,9 +1013,6 @@ dsmOneArcInst (bfd_vma addr, struct arcDisState *state, disassemble_info * info)
           	     state->isBranch = 1;
 		     state->nullifyMode = BR_exec_always;
 		     break;
-            case 6 : instrName = "sub_s.ne";
-	             decodingClass = 35;
-	             break;
             case 7 :
 	      decodingClass = 26;
               switch(BITS(state->words[0],8,10))
@@ -2049,7 +1020,7 @@ dsmOneArcInst (bfd_vma addr, struct arcDisState *state, disassemble_info * info)
               	case 0 : instrName = "nop_s"; break;
 
 		  /* Unimplemented instruction reserved in ARC700 */
-	        case 1: instrName = "unimp_s";break;
+	        case 1: instrName = "unimp";break;
 
 
 	        case 4: instrName = "jeq_s [blink]";
@@ -2115,7 +1086,7 @@ dsmOneArcInst (bfd_vma addr, struct arcDisState *state, disassemble_info * info)
       }
       break;
 
-       case op_LD_S:
+    case op_LD_S:
     /* ARCompact 16-bit Load with offset, Major Opcode 0x10 */
       instrName = "ld_s";
       decodingClass = 28;
@@ -2274,76 +1245,14 @@ dsmOneArcInst (bfd_vma addr, struct arcDisState *state, disassemble_info * info)
       break;
 
     default:
-      instrName = instruction_name (state, state->_opcode, 0, &flags);
-      if (!instrName)
-	{
-	  instrName = "???";
-	  state->flow=invalid_instr;
-	}
+      instrName = instruction_name(state,state->_opcode,0,&flags);
+      if (!instrName) instrName = "???", state->flow=invalid_instr;
       break;
   }
 
-  /* Maybe we should be checking for extension instructions over here
-   * instead of all over this crazy switch case. */
-  if (state->flow == invalid_instr)
-    {
-      if (!((state->_opcode == op_SIMD) && enable_simd))
-	instrName = instruction_name(state,state->_opcode,
-				     state->words[0],
-				     &flags);
-
-      if (state->instructionLen == 2)
-	{
-	  switch (flags)
-	    {
-	    case AC_SYNTAX_3OP:
-	      decodingClass = 22;
-	      break;
-	    case AC_SYNTAX_2OP:
-	      decodingClass = 14;
-	      break;
-	    case AC_SYNTAX_1OP:
-	      decodingClass = 36;
-	      break;
-	    case AC_SYNTAX_NOP:
-	      decodingClass = 26;
-	      break;
-	    default:
-	      mwerror(state, "Invalid syntax class\n");
-	    }
-	}
-      else
-	{
-/* Must do the above for this one too */
-	  switch (flags)
-	    {
-	    case AC_SYNTAX_3OP:
-	      decodingClass = 0;
-	      break;
-	    case AC_SYNTAX_2OP:
-	      decodingClass = 1;
-	      break;
-	    case AC_SYNTAX_1OP:
-	      decodingClass = 32;
-	      break;
-	    case AC_SYNTAX_NOP:
-	      break;
-	    case AC_SYNTAX_SIMD:
-	      break;
-	    default:
-	      mwerror(state, "Invalid syntax class\n");
-	    }
-	}
-
-      if (!instrName)
-	{
-	  instrName = "???";
-	  state->flow=invalid_instr;
-	}
-    }
-
   fieldAisReg = fieldBisReg = fieldCisReg = 1; /* assume regs for now */
   flag = cond = is_shimm = is_limm = 0;
+  //state->nullifyMode = BR_exec_when_no_jump;	/* 0 */
   signExtend = addrWriteBack = directMem = 0;
   usesAuxReg = 0;
 
@@ -2669,10 +1578,7 @@ dsmOneArcInst (bfd_vma addr, struct arcDisState *state, disassemble_info * info)
       state->_mem_load = 1;
 
       directMem     = BIT(state->words[0],15);
-      /* Check if address writeback is allowed before decoding the
-	 address writeback field of a load instruction.*/
-      if (fieldBisReg && (fieldB != 62))
-        addrWriteBack = BITS(state->words[0],22,23);
+      addrWriteBack = BITS(state->words[0],22,23);
       signExtend    = BIT(state->words[0],16);
 
       write_instr_name();
@@ -2723,10 +1629,7 @@ dsmOneArcInst (bfd_vma addr, struct arcDisState *state, disassemble_info * info)
       else state->_offset += fieldB, state->_ea_present = 0;
 
       directMem     = BIT(state->words[0],11);
-      /* Check if address writeback is allowed before decoding the
-	 address writeback field of a load instruction.*/
-      if (fieldBisReg && (fieldB != 62))
-        addrWriteBack = BITS(state->words[0],9,10);
+      addrWriteBack = BITS(state->words[0],9,10);
       signExtend    = BIT(state->words[0],6);
 
       write_instr_name();
@@ -2753,12 +1656,12 @@ dsmOneArcInst (bfd_vma addr, struct arcDisState *state, disassemble_info * info)
 
     case 7:
       /* ST instruction. */
-      CHECK_FIELD_B ();
-      CHECK_FIELD_C ();
+      CHECK_FIELD_B();
+      CHECK_FIELD_C();
       state->source_operand.registerNum = fieldC;
-      state->sourceType = fieldCisReg ? ARC_REGISTER : ARC_LIMM;
-      fieldA  = FIELDD9 (state->words[0]); /* shimm */
-      fieldAisReg = 0;
+      state->sourceType = fieldCisReg? ARC_REGISTER : ARC_LIMM ;
+      fieldA  = FIELDD9(state->words[0]); /* shimm */
+      fieldAisReg=0;
 
       /* [B,A offset] */
       if (dbg) printf_unfiltered("7:b reg %d %x off %x\n",
@@ -2774,11 +1677,11 @@ dsmOneArcInst (bfd_vma addr, struct arcDisState *state, disassemble_info * info)
       else
 	state->_offset += fieldB, state->_ea_present = 0;
 
-      directMem     = BIT (state->words[0], 5);
-      addrWriteBack = BITS (state->words[0], 3, 4);
+      directMem     = BIT(state->words[0],5);
+      addrWriteBack = BITS(state->words[0],3,4);
       state->_addrWriteBack = addrWriteBack;
-      write_instr_name ();
-      WRITE_FORMAT_x_COMMA_LB (C);
+      write_instr_name();
+      WRITE_FORMAT_x_COMMA_LB(C);
       if (fieldA == 0)
       {
         WRITE_FORMAT_x_RB(B);
@@ -3299,14 +2202,13 @@ dsmOneArcInst (bfd_vma addr, struct arcDisState *state, disassemble_info * info)
 
       FIELD_B_AC();
       fieldC = (BITS(state->words[0],0,6)) << 1;
-      fieldC = sign_extend (fieldC, 8);
-
       fieldC += (addr & ~0x3);
       fieldA = fieldAisReg = fieldCisReg = 0;
 
       write_instr_name();
       /* This address could be a label we know.  Convert it. */
       add_target(fieldC); /* For debugger. */
+      state->flow = direct_jump;
 
       WRITE_FORMAT_x(B);
       WRITE_FORMAT_COMMA_x(A);
@@ -3328,11 +2230,14 @@ dsmOneArcInst (bfd_vma addr, struct arcDisState *state, disassemble_info * info)
 
       /* j_s instruction */
 
-      FIELD_B_AC ();
+      FIELD_B_AC();
+
+      /*printf("OPCODES: j_s.d");*/
       state->register_for_indirect_jump = fieldB;
-      write_instr_name ();
-      strcat (formatString,"[%r]");
-      my_sprintf (state, state->operandBuffer, formatString, fieldB);
+
+      write_instr_name();
+      strcat(formatString,"[%r]");
+      my_sprintf(state, state->operandBuffer, formatString, fieldB);
       break;
 
     case 28:
@@ -3485,6 +2390,8 @@ dsmOneArcInst (bfd_vma addr, struct arcDisState *state, disassemble_info * info)
     if (fieldCisReg)
       state->ea_reg1 = fieldC;
 
+
+
     write_instr_name();
     WRITE_FORMAT_x_COMMA_LB(B);
 
@@ -3495,133 +2402,11 @@ dsmOneArcInst (bfd_vma addr, struct arcDisState *state, disassemble_info * info)
     write_comments();
     break;
 
-  case 35:
-
-    /* sub_s.ne instruction */
-
-    FIELD_B_AC();
-    write_instr_name();
-    strcat(formatString,"%r,%r,%r");
-    my_sprintf(state, state->operandBuffer, formatString, fieldB, fieldB, fieldB);
     break;
-
-  case 36:
-
-    FIELD_B_AC();
-
-    write_instr_name();
-
-    WRITE_FORMAT_x(B);
-    WRITE_NOP_COMMENT();
-    my_sprintf(state, state->operandBuffer, formatString, fieldB);
-
-    break;
-    /*******SIMD instructions decoding follows*************/
-  case 37:
-  case 39:
-  case 41:
-    /*fieldA is vr register
-      fieldB is I register
-      fieldC is a constant
-      %*,[%(,%<]
-      or
-      %*,%(,%<
-      or
-      %*,%(,%u
-    */
-
-    CHECK_FIELD_A();
-
-    CHECK_FIELD_B();
-    if (decodingClass == 41)
-       {
-	 FIELD_C();
-       }
-    else
-      {
-	FIELD_U8();
-
-	if (simd_scale_u8>0)
-	  fieldC = fieldC << simd_scale_u8;
-      }
-
-    fieldCisReg = 0;
-
-    write_instr_name();
-    (decodingClass == 37 ? WRITE_FORMAT_x_COMMA_LB(A) :
-                           WRITE_FORMAT_x_COMMA(A));
-    WRITE_FORMAT_x_COMMA(B);
-    (decodingClass == 37 ?  WRITE_FORMAT_x_RB(C):
-                            WRITE_FORMAT_x(C));
-    WRITE_NOP_COMMENT();
-    my_sprintf(state,state->operandBuffer, formatString, fieldA, fieldB, fieldC);
-
-
-    break;
-  case 38:
-    /* fieldA is a vr register
-       fieldB is a ARC700 basecase register.
-       %*,[%b]
-    */
-    CHECK_FIELD_A();
-    CHECK_FIELD_B();
-
-    write_instr_name();
-    WRITE_FORMAT_x_COMMA_LB(A);
-    WRITE_FORMAT_x_RB(B);
-    WRITE_NOP_COMMENT();
-    my_sprintf(state,state->operandBuffer, formatString, fieldA, fieldB);
-
-    break;
-  case 40:
-    /* fieldB & fieldC are vr registers
-       %(,%)
-       or
-       %B,%C
-       or
-       %(,%C
-    */
-    CHECK_FIELD_B();
-    CHECK_FIELD_C();
-
-    write_instr_name();
-    WRITE_FORMAT_x(B);
-    WRITE_FORMAT_COMMA_x(C);
-    my_sprintf(state, state->operandBuffer, formatString, fieldB, fieldC);
-    break;
-
-  case 42:
-    /* fieldA, fieldB, fieldC are all vr registers
-       %*, %(, %) */
-    CHECK_FIELD_A();
-    CHECK_FIELD_B();
-    FIELD_C();
-
-    write_instr_name();
-    WRITE_FORMAT_x(A);
-    WRITE_FORMAT_COMMA_x(B);
-    WRITE_FORMAT_COMMA_x(C);
-    my_sprintf(state, state->operandBuffer, formatString, fieldA, fieldB, fieldC);
-    break;
-
-  case 43:
-    /* Only fieldC is a register
-     %C*/
-    CHECK_FIELD_C();
-
-    if (BITS(state->words[0], 17, 23) == 55)
-      fieldCisReg = 0;
-
-    write_instr_name();
-    WRITE_FORMAT_x(C);
-    my_sprintf(state, state->operandBuffer, formatString, fieldC);
-    break;
-
-    /***************SIMD decoding ends*********************/
-  default:
-    mwerror(state, "Bad decoding class in ARC disassembler");
-    break;
-  }
+    default:
+      mwerror(state, "Bad decoding class in ARC disassembler");
+      break;
+    }
 
   state->_cond = cond;
   return state->instructionLen = offset;
@@ -3632,11 +2417,14 @@ dsmOneArcInst (bfd_vma addr, struct arcDisState *state, disassemble_info * info)
  * _coreRegName - Returns the name the user specified core extension
  *                register.
  */
+
+
+
 static const char *
 _coreRegName
 (
- void *_this ATTRIBUTE_UNUSED, /* C++ this pointer */
- int v                         /* Register value */
+ ATTRIBUTE_UNUSED void *_this,                /* C++ this pointer */
+ int v                       /* Register value */
  )
 {
   return arcExtMap_coreRegName(v);
@@ -3648,8 +2436,8 @@ _coreRegName
  */
 static const char *
 _auxRegName
-( void *_this ATTRIBUTE_UNUSED, /* C++ this pointer */
-  int v                         /* Register value */
+( ATTRIBUTE_UNUSED void *_this,                /* C++ this pointer */
+  int v                       /* Register value */
   )
 {
   return arcExtMap_auxRegName(v);
@@ -3663,8 +2451,8 @@ _auxRegName
 static const char *
 _condCodeName
 (
- void *_this ATTRIBUTE_UNUSED, /* C++ this pointer */
- int v                         /* Register value */
+ ATTRIBUTE_UNUSED void *_this,                /* C++ this pointer */
+ int v                       /* Register value */
  )
 {
   return arcExtMap_condCodeName(v);
@@ -3677,22 +2465,145 @@ _condCodeName
 static const char *
 _instName
 (
- void *_this ATTRIBUTE_UNUSED, /* C++ this pointer */
- int op1,                      /* major opcode value */
- int op2,                      /* minor opcode value */
- int *flags                    /* instruction flags */
+ ATTRIBUTE_UNUSED void *_this,                /* C++ this pointer */
+ int op1,                    /* major opcode value */
+ int op2,                    /* minor opcode value */
+ int *flags                  /* instruction flags */
  )
 {
   return arcExtMap_instName(op1, op2, flags);
 }
 
-static void
-parse_disassembler_options (char *options)
+
+/*
+ * decodeInstr - Decode an instruction returning the size of the
+ *		instruction in bytes or zero if unrecognized.
+ */
+static int
+decodeInstr
+(
+ bfd_vma address,		/* Address of this instruction */
+ disassemble_info* info
+ )
 {
-  if (!strncasecmp (options, "simd",4))
+  int status;
+  bfd_byte buffer[4];
+  struct arcDisState s;	/* ARC Disassembler state */
+  void *stream = info->stream; /* output stream */
+  fprintf_ftype func = info->fprintf_func;
+  int bytes;
+  int lowbyte, highbyte;
+  char buf[256];
+
+  lowbyte = ((info->endian == BFD_ENDIAN_LITTLE) ? 1 : 0);
+  highbyte = ((info->endian == BFD_ENDIAN_LITTLE) ? 0 : 1);
+
+  memset(&s, 0, sizeof(struct arcDisState));
+
+  /* read first instruction */
+  status = (*info->read_memory_func) (address, buffer, 2, info);
+
+  if (status != 0)
     {
-      enable_simd = 1;
+      (*info->memory_error_func) (status, address, info);
+      return -1;
     }
+
+  if ((buffer[lowbyte] & 0xf8) > 0x38)
+  {
+    info->bytes_per_line = 2;
+    s.words[0] = (buffer[lowbyte] << 8) | buffer[highbyte];
+    status = (*info->read_memory_func) (address + 2, buffer, 4, info);
+    if (info->endian == BFD_ENDIAN_LITTLE)
+      s.words[1] = bfd_getl32(buffer);
+    else
+      s.words[1] = bfd_getb32(buffer);
+  }
+  else
+  {
+    info->bytes_per_line = 4;
+    status = (*info->read_memory_func) (address + 2, &buffer[2], 2, info);
+    if (status != 0)
+    {
+      (*info->memory_error_func) (status, address + 2, info);
+      return -1;
+    }
+    if (info->endian == BFD_ENDIAN_LITTLE)
+      s.words[0] = bfd_getl32(buffer);
+    else
+      s.words[0] = bfd_getb32(buffer);
+
+    /* always read second word in case of limm */
+    /* we ignore the result since last insn may not have a limm */
+    status = (*info->read_memory_func) (address + 4, buffer, 4, info);
+    if (info->endian == BFD_ENDIAN_LITTLE)
+      s.words[1] = bfd_getl32(buffer);
+    else
+      s.words[1] = bfd_getb32(buffer);
+  }
+
+  s._this = &s;
+  s.coreRegName = _coreRegName;
+  s.auxRegName = _auxRegName;
+  s.condCodeName = _condCodeName;
+  s.instName = _instName;
+
+  /* disassemble */
+  bytes = dsmOneArcInst(address, (void *)&s, info);
+
+  /* display the disassembled instruction */
+
+  {
+    char* instr   = s.instrBuffer;
+    char* operand = s.operandBuffer;
+    char* space   = strchr(instr, ' ');
+ 
+    if (s.instructionLen == 2)
+      (*func) (stream, "    %04x ", (unsigned int) s.words[0]);
+    else
+      (*func) (stream, "%08x ", (unsigned int) s.words[0]);
+
+    (*func) (stream, "    ");
+
+    /* if the operand is actually in the instruction buffer */
+    if ((space != NULL) && (operand[0] == '\0'))
+      {
+          *space  = '\0';
+          operand = space + 1;
+      }
+
+    if (__TRANSLATION_REQUIRED(s))
+      {
+        bfd_vma addr;
+        int i = 1;
+
+        (*func) (stream, "%-10s ", instr);
+
+        if (operand[0] != '@')
+        {
+          char *tmpBuffer;
+	  /* Branch instruction with 3 operands, Translation is required
+             only for the third operand. Print the first 2 operands */
+          strcpy(buf, operand);
+	  tmpBuffer = strtok(buf,"@");
+          (*func) (stream, "%s", tmpBuffer);
+	  i = strlen(tmpBuffer) + 1;
+        }
+
+        addr = s.addresses[operand[i] - '0'];
+        (*info->print_address_func) ((bfd_vma) addr, info);
+      }
+    else
+      {
+        if (operand[0] == '\0')
+          (*func) (stream, "%s", instr);
+        else
+          (*func) (stream, "%-10s %s", instr, operand);
+      }
+  }
+
+  return s.instructionLen;
+
 }
 
 /*
@@ -3711,12 +2622,16 @@ arcAnalyzeInstr
   int status;
   bfd_byte buffer[4];
   struct arcDisState s;	/* ARC Disassembler state */
+  /* void *stream = info->stream; - unused and hence commented  output stream */
+  /*  fprintf_ftype func = info->fprintf_func; - unused hence commented out */
+  int bytes;
   int lowbyte, highbyte;
+  /*char buf[256]; - unused hence commented out*/
 
   lowbyte = ((info->endian == BFD_ENDIAN_LITTLE) ? 1 : 0);
   highbyte = ((info->endian == BFD_ENDIAN_LITTLE) ? 0 : 1);
 
-  memset (&s, 0, sizeof (struct arcDisState));
+  memset(&s, 0, sizeof(struct arcDisState));
 
   /* read first instruction */
   status = (*info->read_memory_func) (address, buffer, 2, info);
@@ -3729,38 +2644,38 @@ arcAnalyzeInstr
     }
 
   if ((buffer[lowbyte] & 0xf8) > 0x38)
-    {
-      info->bytes_per_line = 2;
-      s.words[0] = (buffer[lowbyte] << 8) | buffer[highbyte];
-      status = (*info->read_memory_func) (address + 2, buffer, 4, info);
-      if (info->endian == BFD_ENDIAN_LITTLE)
-	s.words[1] = bfd_getl32 (buffer);
-      else
-	s.words[1] = bfd_getb32 (buffer);
-    }
+  {
+    info->bytes_per_line = 2;
+    s.words[0] = (buffer[lowbyte] << 8) | buffer[highbyte];
+    status = (*info->read_memory_func) (address + 2, buffer, 4, info);
+    if (info->endian == BFD_ENDIAN_LITTLE)
+      s.words[1] = bfd_getl32(buffer);
+    else
+      s.words[1] = bfd_getb32(buffer);
+  }
   else
+  {
+    info->bytes_per_line = 4;
+    status = (*info->read_memory_func) (address + 2, &buffer[2], 2, info);
+    if (status != 0)
     {
-      info->bytes_per_line = 4;
-      status = (*info->read_memory_func) (address + 2, &buffer[2], 2, info);
-      if (status != 0)
-	{
-	  (*info->memory_error_func) (status, address + 2, info);
-	  s.instructionLen = -1;
-	  return s;
-	}
-      if (info->endian == BFD_ENDIAN_LITTLE)
-	s.words[0] = bfd_getl32(buffer);
-      else
-	s.words[0] = bfd_getb32(buffer);
-
-      /* Always read second word in case of limm.  */
-      /* We ignore the result since the last insn may not have a limm.  */
-      status = (*info->read_memory_func) (address + 4, buffer, 4, info);
-      if (info->endian == BFD_ENDIAN_LITTLE)
-	s.words[1] = bfd_getl32(buffer);
-      else
-	s.words[1] = bfd_getb32(buffer);
+      (*info->memory_error_func) (status, address + 2, info);
+      s.instructionLen = -1;
+      return s;
     }
+    if (info->endian == BFD_ENDIAN_LITTLE)
+      s.words[0] = bfd_getl32(buffer);
+    else
+      s.words[0] = bfd_getb32(buffer);
+
+    /* always read second word in case of limm */
+    /* we ignore the result since last insn may not have a limm */
+    status = (*info->read_memory_func) (address + 4, buffer, 4, info);
+    if (info->endian == BFD_ENDIAN_LITTLE)
+      s.words[1] = bfd_getl32(buffer);
+    else
+      s.words[1] = bfd_getb32(buffer);
+  }
 
   s._this = &s;
   s.coreRegName = _coreRegName;
@@ -3769,65 +2684,20 @@ arcAnalyzeInstr
   s.instName = _instName;
 
   /* disassemble */
-  dsmOneArcInst (address, (void *)&s, info);
+  bytes = dsmOneArcInst(address, (void *)&s, info);
 
   return s;
 }
 
-/* ARCompact_decodeInstr - Decode an ARCompact instruction returning the
-   size of the instruction in bytes or zero if unrecognized.  */
-int
-ARCompact_decodeInstr (address, info)
-     bfd_vma address; /* Address of this instruction.  */
-     disassemble_info* info;
+
+/* Return the print_insn function to use.  */
+
+/* Side effect:                            */
+/* load (possibly empty) extension section */
+
+disassembler_ftype
+arcompact_get_disassembler (void *ptr)
 {
-  void *stream = info->stream; /* output stream */
-  fprintf_ftype func = info->fprintf_func;
-  char buf[256];
-
-  if (info->disassembler_options)
-    {
-      parse_disassembler_options (info->disassembler_options);
-
-      /* To avoid repeated parsing of these options, we remove them here.  */
-      info->disassembler_options = NULL;
-    }
-
-  s = arcAnalyzeInstr (address, info);
-
-  if (!s.this)
-    return -1;
-
-  /* display the disassembly instruction */
-
-  if (s.instructionLen == 2)
-    (*func) (stream, "        ");
-
-  (*func) (stream, "%08x ", s.words[0]);
-  (*func) (stream, "    ");
-
-  (*func) (stream, "%-10s ", s.instrBuffer);
-
-  if (__TRANSLATION_REQUIRED(s))
-    {
-      bfd_vma addr;
-      char *tmpBuffer;
-      int i = 1;
-      if (s.operandBuffer[0] != '@')
-	{
-	  /* Branch instruction with 3 operands, Translation is required
-	     only for the third operand. Print the first 2 operands */
-	  strcpy (buf, s.operandBuffer);
-	  tmpBuffer = strtok (buf,"@");
-	  (*func) (stream, "%s",tmpBuffer);
-	  i = strlen (tmpBuffer)+1;
-	}
-      addr = s.addresses[s.operandBuffer[i] - '0'];
-      (*info->print_address_func) ((bfd_vma) addr, info);
-      (*func) (stream, "\n");
-    }
-  else
-    (*func) (stream, "%s",s.operandBuffer);
-  return s.instructionLen;
-
+  build_ARC_extmap(ptr);
+  return decodeInstr;
 }

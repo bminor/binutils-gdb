@@ -21,7 +21,7 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-ARC5_OBJS = arc5.o cpu5.o decode5.o sem5.o model5.o mloop5.o
+ARC5_OBJS = arc5.o cpu5.o decode5.o sem5.o model5.o mloop5.o arc-sim-registers.o
 ARC6_OBJS = arc6.o cpu6.o decode6.o sem6.o model6.o mloop6.o
 ARC7_OBJS = arc7.o cpu7.o decode7.o sem7.o model7.o mloop7.o
 TRAPS_OBJ = @traps_obj@
@@ -75,9 +75,11 @@ devices.o: devices.c $(SIM_MAIN_DEPS)
 
 ARC5_INCLUDE_DEPS = \
 	$(CGEN_MAIN_CPU_DEPS) \
-	cpu5.h decode5.h eng5.h
+	cpu5.h decode5.h eng5.h arc-sim-registers.h
 
 arc5.o: arc5.c $(ARC5_INCLUDE_DEPS)
+
+arc-sim-registers.o: arc-sim-registers.c arc-sim-registers.h arc-sim.h
 
 # FIXME: Use of `mono' is wip.
 mloop5.c eng5.h: stamp-5mloop

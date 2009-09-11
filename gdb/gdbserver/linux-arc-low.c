@@ -113,7 +113,7 @@ arc_breakpoint_at (CORE_ADDR where)
 {
   unsigned long insn;
 
-  (*the_target->read_memory) (where, (char *) &insn, arc_breakpoint_len);
+  (*the_target->read_memory) (where, (unsigned char *) &insn, arc_breakpoint_len);
   if (insn == arc_breakpoint)
     return 1;
 
@@ -141,7 +141,7 @@ struct linux_target_ops the_low_target = {
   arc_cannot_store_register,
   arc_get_pc,
   arc_set_pc,
-  (const char *) &arc_breakpoint,
+  (const unsigned char *) &arc_breakpoint,
   arc_breakpoint_len,
   arc_reinsert_addr,
   0,

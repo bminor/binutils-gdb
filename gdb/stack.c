@@ -831,7 +831,8 @@ parse_frame_specification_1 (const char *frame_exp, const char *message,
   {
     int i;
     for (i = 0; i < numargs; i++)
-      addrs[i] = value_as_address (args[0]);
+      addrs[i] = value_as_address (args[i]);  // ARC BUG FIX  29/9/08
+                                              // see http://sourceware.org/ml/gdb-patches/2009-01/msg00476.html
   }
 
   /* Assume that the single arg[0] is an address, use that to identify
@@ -892,8 +893,29 @@ frame_info (char *addr_exp, int from_tty)
   const char *pc_regname;
   int selected_frame_p;
   struct gdbarch *gdbarch;
+  CORE_ADDR pc;
 
   fi = parse_frame_specification_1 (addr_exp, "No stack.", &selected_frame_p);
+
+  /* richards ARC 22/9/2008
+   * Try to detect that an invalid frame has been selected (e.g. a frame
+   * number has been given, but there is no such frame on the stack);
+   * N.B. this works for the ARC gdb port, but 0 might be a valid code
+   *      address on other processors, so this needs more investigation!
+   *
+   * We should not try to submit this fix to the FSF until we know that it
+   * is generally valid.
+   *
+   * gdb bug: 9458
+   * ARC bug: 95315
+   */
+  pc = get_frame_pc (fi);
+  if (pc == 0)
+    {
+      warning("invalid frame");
+      return;
+    }
+
   gdbarch = get_frame_arch (fi);
 
   /* Name of the value returned by get_frame_pc().  Per comments, "pc"
@@ -914,7 +936,7 @@ frame_info (char *addr_exp, int from_tty)
   func = get_frame_function (fi);
   /* FIXME: cagney/2002-11-28: Why bother?  Won't sal.symtab contain
      the same value?  */
-  s = find_pc_symtab (get_frame_pc (fi));
+  s = find_pc_symtab (pc);
   if (func)
     {
       /* It seems appropriate to use SYMBOL_PRINT_NAME() here, to

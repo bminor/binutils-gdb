@@ -330,7 +330,7 @@ spu-low.o: spu-low.c $(server_h)
 
 reg-arc.o : reg-arc.c $(regdef_h)
 reg-arc.c : $(srcdir)/../regformats/reg-arc.dat $(regdat_sh)
-	sh $(regdat_sh) $(srcdir)/../regformats/reg-arc.dat reg-arc.c
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-arc.dat reg-arc.c
 reg-arm.o : reg-arm.c $(regdef_h)
 reg-arm.c : $(srcdir)/../regformats/reg-arm.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-arm.dat reg-arm.c

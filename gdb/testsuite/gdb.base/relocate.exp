@@ -78,7 +78,7 @@ set static_bar_addr [get_var_address static_bar]
 
 # Make sure they have different addresses.
 if { "${static_foo_addr}" == "${static_bar_addr}" } {
-  fail "static variables have different addresses"
+  fail "static variables have same address"
 } else {
   pass "static variables have different addresses"
 }
@@ -89,7 +89,7 @@ set global_bar_addr [get_var_address global_bar]
 
 # Make sure they have different addresses.
 if { "${global_foo_addr}" == "${global_bar_addr}" } {
-  fail "global variables have different addresses"
+  fail "global variables have same address"
 } else {
   pass "global variables have different addresses"
 }
@@ -100,7 +100,7 @@ set function_bar_addr [get_var_address function_bar]
 
 # Make sure they have different addresses.
 if { "${function_foo_addr}" == "${function_bar_addr}" } {
-  fail "functions have different addresses"
+  fail "functions have same address"
 } else {
   pass "functions have different addresses"
 }
@@ -126,7 +126,7 @@ set new_function_foo_addr [get_var_address function_foo]
 
 # Make sure they have different addresses.
 if { "${function_foo_addr}" == "${new_function_foo_addr}" } {
-  fail "function foo has a different address"
+  fail "function foo has the same address"
 } else {
   pass "function foo has a different address"
 }

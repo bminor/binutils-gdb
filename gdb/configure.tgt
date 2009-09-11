@@ -61,15 +61,19 @@ alpha*-*-*)
 	;;
 
 arc*-*-linux*)
+	# Target: ARC Linux based targets
 	gdb_target_obs="arc-tdep.o arc-linux-tdep.o solib.o solib-svr4.o \
-			solib-legacy.o corelow.o"
+			corelow.o"
 	build_gdbserver=yes
 	;;
-arc-a4-*)
-	gdb_target_obs="arc-tdep.o arc-jtag.o arc-jtag-tdep.o arc-jtag-ops.o"
-	;;
+
 arc*-*-*)
-	gdb_target_obs="arc-tdep.o arc-jtag.o arc-jtag-tdep.o arc-jtag-ops.o"
+	# Target: ARC elf32 based target
+	gdb_target_obs="arc-tdep.o arc-jtag.o arc-elf32-tdep.o arc-jtag-ops.o \
+			arc-jtag-actionpoints.o arc-remote-fileio.o arc-xiss.o \
+			arc-registers.o arc-architecture.o arc-board.o \
+			arc-memory.o arc-arguments.o arc-gpio.o arc-inst-tracing.o"
+	gdb_sim=../sim/arc/libsim.a
 	;;
 
 am33_2.0*-*-linux*)

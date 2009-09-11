@@ -313,7 +313,7 @@ ac_includes_default="\
 ac_subdirs_all="$ac_subdirs_all gdbtk"
 ac_subdirs_all="$ac_subdirs_all multi-ice"
 ac_subdirs_all="$ac_subdirs_all gdbserver"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT localedir PACKAGE subdirs TARGET_OBS AWK INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S RANLIB ac_ct_RANLIB YACC AR ac_ct_AR DLLTOOL ac_ct_DLLTOOL WINDRES ac_ct_WINDRES MIG ac_ct_MIG READLINE READLINE_DEPS READLINE_CFLAGS HAVE_LIBEXPAT LIBEXPAT LTLIBEXPAT ALLOCA CONFIG_LDFLAGS TARGET_SYSTEM_ROOT TARGET_SYSTEM_ROOT_DEFINE WARN_CFLAGS WERROR_CFLAGS SER_HARDWIRE WIN32LIBS LIBGUI GUI_CFLAGS_X WIN32LDAPP TCL_VERSION TCL_MAJOR_VERSION TCL_MINOR_VERSION TCL_CC TCL_DEFS TCL_SHLIB_CFLAGS TCL_SHLIB_LD TCL_SHLIB_LD_LIBS TCL_SHLIB_SUFFIX TCL_DL_LIBS TCL_LD_FLAGS TCL_LD_SEARCH_FLAGS TCL_CC_SEARCH_FLAGS TCL_COMPAT_OBJS TCL_RANLIB TCL_BUILD_LIB_SPEC TCL_LIB_SPEC TCL_LIB_VERSIONS_OK TK_VERSION TK_DEFS TK_BUILD_INCLUDES TK_XINCLUDES TK_XLIBSW TK_BUILD_LIB_SPEC TK_LIB_SPEC TCLHDIR TKHDIR ITCLHDIR ITKHDIR ITCL_VERSION ITCL_DEFS ITCL_BUILD_INCLUDES ITCL_BUILD_LIB_SPEC ITCL_LIB_SPEC ITK_VERSION ITK_DEFS ITK_BUILD_INCLUDES ITK_BUILD_LIB_SPEC ITK_LIB_SPEC X_CFLAGS X_LDFLAGS X_LIBS TCL_DEPS TK_DEPS ITCLLIB ITCL_DEPS ITKLIB ITK_DEPS GDBTKLIBS GDBTK_CFLAGS GDBTK_SRC_DIR SIM SIM_OBS ENABLE_CFLAGS PROFILE_CFLAGS CONFIG_OBS CONFIG_DEPS CONFIG_SRCS CONFIG_ALL CONFIG_CLEAN CONFIG_INSTALL CONFIG_UNINSTALL target_subdir frags nm_h LIBICONV LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT localedir PACKAGE subdirs TARGET_OBS AWK INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S RANLIB ac_ct_RANLIB YACC AR ac_ct_AR DLLTOOL ac_ct_DLLTOOL WINDRES ac_ct_WINDRES MIG ac_ct_MIG READLINE READLINE_DEPS READLINE_CFLAGS HAVE_LIBEXPAT LIBEXPAT LTLIBEXPAT XISS_INCLUDES ALLOCA CONFIG_LDFLAGS TARGET_SYSTEM_ROOT TARGET_SYSTEM_ROOT_DEFINE WARN_CFLAGS WERROR_CFLAGS SER_HARDWIRE WIN32LIBS LIBGUI GUI_CFLAGS_X WIN32LDAPP TCL_VERSION TCL_MAJOR_VERSION TCL_MINOR_VERSION TCL_CC TCL_DEFS TCL_SHLIB_CFLAGS TCL_SHLIB_LD TCL_SHLIB_LD_LIBS TCL_SHLIB_SUFFIX TCL_DL_LIBS TCL_LD_FLAGS TCL_LD_SEARCH_FLAGS TCL_CC_SEARCH_FLAGS TCL_COMPAT_OBJS TCL_RANLIB TCL_BUILD_LIB_SPEC TCL_LIB_SPEC TCL_LIB_VERSIONS_OK TK_VERSION TK_DEFS TK_BUILD_INCLUDES TK_XINCLUDES TK_XLIBSW TK_BUILD_LIB_SPEC TK_LIB_SPEC TCLHDIR TKHDIR ITCLHDIR ITKHDIR ITCL_VERSION ITCL_DEFS ITCL_BUILD_INCLUDES ITCL_BUILD_LIB_SPEC ITCL_LIB_SPEC ITK_VERSION ITK_DEFS ITK_BUILD_INCLUDES ITK_BUILD_LIB_SPEC ITK_LIB_SPEC X_CFLAGS X_LDFLAGS X_LIBS TCL_DEPS TK_DEPS ITCLLIB ITCL_DEPS ITKLIB ITK_DEPS GDBTKLIBS GDBTK_CFLAGS GDBTK_SRC_DIR SIM SIM_OBS ENABLE_CFLAGS PROFILE_CFLAGS CONFIG_OBS CONFIG_DEPS CONFIG_SRCS CONFIG_ALL CONFIG_CLEAN CONFIG_INSTALL CONFIG_UNINSTALL target_subdir frags nm_h LIBICONV LIBOBJS LTLIBOBJS'
 ac_subst_files='host_makefile_frag'
 
 # Initialize some variables set by options.
@@ -884,6 +884,7 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld default=no
   --with-libexpat-prefix[=DIR]  search for libexpat in DIR/include and DIR/lib
   --without-libexpat-prefix     don't search for libexpat in includedir and libdir
+  --with-xiss             include xiss support (auto/yes/no)
   --without-included-regex don't use included regex; this is the default
                           on systems with version 2 of the GNU C library
                           (use with caution on other system)
@@ -5573,9 +5574,179 @@ _ACEOF
 fi
 
 
+echo "$as_me:$LINENO: checking for inflate" >&5
+echo $ECHO_N "checking for inflate... $ECHO_C" >&6
+if test "${ac_cv_func_inflate+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+/* Define inflate to an innocuous variant, in case <limits.h> declares inflate.
+   For example, HP-UX 11i <limits.h> declares gettimeofday.  */
+#define inflate innocuous_inflate
+
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char inflate (); below.
+    Prefer <limits.h> to <assert.h> if __STDC__ is defined, since
+    <limits.h> exists even on freestanding compilers.  */
+
+#ifdef __STDC__
+# include <limits.h>
+#else
+# include <assert.h>
+#endif
+
+#undef inflate
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char inflate ();
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_inflate) || defined (__stub___inflate)
+choke me
+#else
+char (*f) () = inflate;
+#endif
+#ifdef __cplusplus
+}
+#endif
+
+int
+main ()
+{
+return f != inflate;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_func_inflate=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_func_inflate=no
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+fi
+echo "$as_me:$LINENO: result: $ac_cv_func_inflate" >&5
+echo "${ECHO_T}$ac_cv_func_inflate" >&6
+if test $ac_cv_func_inflate = yes; then
+  :
+else
+
+echo "$as_me:$LINENO: checking for inflate in -lz" >&5
+echo $ECHO_N "checking for inflate in -lz... $ECHO_C" >&6
+if test "${ac_cv_lib_z_inflate+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lz  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char inflate ();
+int
+main ()
+{
+inflate ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_z_inflate=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_lib_z_inflate=no
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_z_inflate" >&5
+echo "${ECHO_T}$ac_cv_lib_z_inflate" >&6
+if test $ac_cv_lib_z_inflate = yes; then
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBZ 1
+_ACEOF
+
+  LIBS="-lz $LIBS"
+
+fi
+
+fi
+
+
 # We need to link with -lw to get `wctype' on Solaris before Solaris
 # 2.6.  Solaris 2.6 and beyond have this function in libc, and have a
-# libw that some versions of the GNU linker cannot hanle (GNU ld 2.9.1
+# libw that some versions of the GNU linker cannot handle (GNU ld 2.9.1
 # is known to have this problem).  Therefore we avoid libw if we can.
 echo "$as_me:$LINENO: checking for wctype" >&5
 echo $ECHO_N "checking for wctype... $ECHO_C" >&6
@@ -7227,6 +7398,52 @@ done
     LIBS=$save_LIBS
   fi
 fi
+
+
+
+# Check whether --with-xiss or --without-xiss was given.
+if test "${with_xiss+set}" = set; then
+  withval="$with_xiss"
+
+else
+  with_xiss=auto
+fi;
+echo "$as_me:$LINENO: checking whether to use xiss" >&5
+echo $ECHO_N "checking whether to use xiss... $ECHO_C" >&6
+echo "$as_me:$LINENO: result: $with_xiss" >&5
+echo "${ECHO_T}$with_xiss" >&6
+
+if test "${with_xiss}" = yes; then
+  HAVE_LIBXISS=yes
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_LIBXISS 1
+_ACEOF
+
+  XISS_INCLUDES="-I${with_xiss_prefix}/include"
+
+else
+  { echo "$as_me:$LINENO: WARNING: xiss support disabled; target arcxiss will be unavailable." >&5
+echo "$as_me: WARNING: xiss support disabled; target arcxiss will be unavailable." >&2;}
+  HAVE_LIBXISS=no
+fi
+
+
+if test "${target}" = "arc-unknown-elf32"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define ARC_ELF32_TARGET 1
+_ACEOF
+
+fi
+if test "${target}" = "arc-unknown-linux-uclibc"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define ARC_LINUX_TARGET 1
+_ACEOF
+
+fi
+
 
 # ------------------------- #
 # Checks for header files.  #
@@ -22997,7 +23214,7 @@ OLD_LIBS=$LIBS
 CFLAGS="$CFLAGS -I${srcdir}/../include -I../bfd -I${srcdir}/../bfd"
 LDFLAGS="$LDFLAGS -L../bfd -L../libiberty"
 intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
-LIBS="$LIBS -lbfd -liberty $intl"
+LIBS="$LIBS -lbfd -liberty $intl -lz"
 echo "$as_me:$LINENO: checking for ELF support in BFD" >&5
 echo $ECHO_N "checking for ELF support in BFD... $ECHO_C" >&6
 if test "${gdb_cv_var_elf+set}" = set; then
@@ -24235,7 +24452,7 @@ ac_x_header_dirs='
 /usr/openwin/share/include'
 
 if test "$ac_x_includes" = no; then
-  # Guess where to find include files, by looking for Intrinsic.h.
+  # Guess where to find include files, by looking for Xlib.h.
   # First, try using that file with no special directory specified.
   cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
@@ -24243,7 +24460,7 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-#include <X11/Intrinsic.h>
+#include <X11/Xlib.h>
 _ACEOF
 if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
   (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
@@ -24270,7 +24487,7 @@ else
 sed 's/^/| /' conftest.$ac_ext >&5
 
   for ac_dir in $ac_x_header_dirs; do
-  if test -r "$ac_dir/X11/Intrinsic.h"; then
+  if test -r "$ac_dir/X11/Xlib.h"; then
     ac_x_includes=$ac_dir
     break
   fi
@@ -24284,18 +24501,18 @@ if test "$ac_x_libraries" = no; then
   # See if we find them without any special options.
   # Don't add to $LIBS permanently.
   ac_save_LIBS=$LIBS
-  LIBS="-lXt $LIBS"
+  LIBS="-lX11 $LIBS"
   cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-#include <X11/Intrinsic.h>
+#include <X11/Xlib.h>
 int
 main ()
 {
-XtMalloc (0)
+XrmInitialize ()
   ;
   return 0;
 }
@@ -25524,6 +25741,7 @@ s,@READLINE_CFLAGS@,$READLINE_CFLAGS,;t t
 s,@HAVE_LIBEXPAT@,$HAVE_LIBEXPAT,;t t
 s,@LIBEXPAT@,$LIBEXPAT,;t t
 s,@LTLIBEXPAT@,$LTLIBEXPAT,;t t
+s,@XISS_INCLUDES@,$XISS_INCLUDES,;t t
 s,@ALLOCA@,$ALLOCA,;t t
 s,@CONFIG_LDFLAGS@,$CONFIG_LDFLAGS,;t t
 s,@TARGET_SYSTEM_ROOT@,$TARGET_SYSTEM_ROOT,;t t

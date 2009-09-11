@@ -248,7 +248,7 @@ arc_syscall (host_callback *cb, CB_SYSCALL *s)
 
       if (s->arg1 == 0)
 	s->result = current_cpu->endbrk;
-      else if (s->arg1 <= sd->heap_end)
+      else if (s->arg1 <= sd->memory.heap_end)
 	current_cpu->endbrk = s->arg1;
       else
 	{

@@ -1977,7 +1977,7 @@ enum bfd_architecture
 #define bfd_mach_v850e         'E'
 #define bfd_mach_v850e1        '1'
   bfd_arch_arc,       /* ARC Cores */
-#define bfd_mach_arc_a4         0
+#define bfd_mach_arc_unknown    0
 #define bfd_mach_arc_a5         1
 #define bfd_mach_arc_arc600     2
 #define bfd_mach_arc_arc700     3
@@ -3254,11 +3254,11 @@ are not stored in the the instruction.  The upper 11 bits are installed
 in bits 10 through 0.  */
   BFD_RELOC_ARC_S13_PCREL,
 
-/* ARCompact Middle-endian 32 bit word relocation  */
+/* ARCompact Middle-endian 32 bit word relocation.  */
   BFD_RELOC_ARC_32_ME,
 
 /* ARCompact PC Relative 32 bit relocation.  */
-  BFD_RELOC_ARC_PC32 ,
+  BFD_RELOC_ARC_PC32,
 
 /* ARC 700 GOT specific relocation. This computes the distance from the current 
 pcl to the symbol's global offset table entry.  */
@@ -3266,12 +3266,12 @@ pcl to the symbol's global offset table entry.  */
 
 /* ARC 700 PLT specific relocation. This computes the distance from the base 
 of the PLT to the symbols PLT entry.  */
-  BFD_RELOC_ARC_PLT32 ,
+  BFD_RELOC_ARC_PLT32,
 
 /* ARC 700 Copy relocation. This refers to a location in the writable segment 
 and during execution the dynamic linker copies data associated with the shared
 objects symbol to the location specified by the offset. Created for 
-dynamic linking by the linker .  */
+dynamic linking by the linker.  */
   BFD_RELOC_ARC_COPY,
 
 /* ARC 700 Global Data relocaton.This is to set a GOT entry to the address
@@ -3294,7 +3294,7 @@ Global Offset Table This causes the linker to build the GOT.  */
   BFD_RELOC_ARC_GOTOFF,
 
 /* This gives the difference between the address of the GOT base and the 
-current PC. The symbol referenced is _GLOBAL_OFFSET_TABLE .  */
+current PC. The symbol referenced is _GLOBAL_OFFSET_TABLE.  */
   BFD_RELOC_ARC_GOTPC,
 
 /* ARC 700 GOT specific relocation. This computes the distance from the base

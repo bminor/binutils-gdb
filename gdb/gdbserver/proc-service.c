@@ -28,6 +28,7 @@
 #include "linux-low.h"
 
 #include "gdb_proc_service.h"
+typedef unsigned long paddr_t;
 
 typedef struct ps_prochandle *gdb_ps_prochandle_t;
 typedef void *gdb_ps_read_buf_t;
@@ -61,7 +62,7 @@ gregset_info(void)
 
 ps_err_e
 ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *obj,
-		   const char *name, psaddr_t *sym_addr)
+		   const char *name, paddr_t *sym_addr)
 {
   CORE_ADDR addr;
   char *uscorename;
@@ -89,7 +90,8 @@ ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *obj,
 	return PS_NOSYM;
     }
 
-  *sym_addr = (psaddr_t) (unsigned long) addr;
+  *sym_addr = (paddr_t) (unsigned long) addr;
+
   return PS_OK;
 }
 

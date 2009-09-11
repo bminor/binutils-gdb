@@ -1,5 +1,5 @@
 # Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-# 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
+# 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
 # Free Software Foundation, Inc.
 
 # This file is part of GDB.
@@ -140,6 +140,9 @@ READLINE_CFLAGS = @READLINE_CFLAGS@
 
 # Where is expat?  This will be empty if expat was not available.
 LIBEXPAT = @LIBEXPAT@
+
+# Where are the ARC xISS header files?
+XISS_INCLUDES = @XISS_INCLUDES@
 
 WARN_CFLAGS = @WARN_CFLAGS@
 WERROR_CFLAGS = @WERROR_CFLAGS@
@@ -364,7 +367,8 @@ INTERNAL_CFLAGS_BASE = \
 	$(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
 	$(BFD_CFLAGS) $(INCLUDE_CFLAGS) $(LIBDECNUMBER_CFLAGS) \
-	$(INTL_CFLAGS) $(ENABLE_CFLAGS) $(INTERNAL_CPPFLAGS)
+	$(INTL_CFLAGS) $(ENABLE_CFLAGS) $(INTERNAL_CPPFLAGS) \
+        $(XISS_INCLUDES)
 INTERNAL_WARN_CFLAGS = $(INTERNAL_CFLAGS_BASE) $(GDB_WARN_CFLAGS)
 INTERNAL_CFLAGS = $(INTERNAL_WARN_CFLAGS) $(GDB_WERROR_CFLAGS)
 
@@ -392,7 +396,7 @@ INSTALLED_LIBS=-lbfd -lreadline -lopcodes -liberty -ldecnumber \
 CLIBS = $(SIM) $(READLINE) $(OPCODES) $(BFD) $(INTL) $(LIBIBERTY) $(LIBDECNUMBER) \
 	$(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) @LIBS@ \
 	$(LIBICONV) $(LIBEXPAT) \
-	$(LIBIBERTY) $(WIN32LIBS)
+	$(LIBIBERTY) $(WIN32LIBS) -lz
 CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) \
 	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS)
 
@@ -411,7 +415,8 @@ RUNTESTFLAGS=
 
 # XML files to build in to GDB.
 XMLFILES = $(srcdir)/features/gdb-target.dtd $(srcdir)/features/xinclude.dtd \
-	$(srcdir)/features/library-list.dtd
+	$(srcdir)/features/library-list.dtd \
+	$(srcdir)/features/arc-registers.dtd 
 
 # This is ser-unix.o for any system which supports a v7/BSD/SYSV/POSIX
 # interface to the serial port.  Hopefully if get ported to OS/2, VMS,
@@ -423,7 +428,7 @@ SER_HARDWIRE = @SER_HARDWIRE@
 
 # The `remote' debugging target is supported for most architectures,
 # but not all (e.g. 960)
-REMOTE_OBS = remote.o dcache.o tracepoint.o ax-general.o ax-gdb.o remote-fileio.o
+REMOTE_OBS = remote.o dcache.o tracepoint.o ax-general.o ax-gdb.o remote-fileio.o target-fileio.o
 
 # This is remote-sim.o if a simulator is to be linked in.
 SIM_OBS = @SIM_OBS@
@@ -624,7 +629,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
 	solib.c solib-null.c source.c \
 	stabsread.c stack.c std-regs.c symfile.c symfile-mem.c symmisc.c \
 	symtab.c \
-	target.c target-descriptions.c target-memory.c \
+	target.c target-descriptions.c target-fileio.c target-memory.c \
 	thread.c top.c tracepoint.c \
 	trad-frame.c \
 	tramp-frame.c \
@@ -647,6 +652,7 @@ aout_stabs_gnu_h =	$(INCLUDE_DIR)/aout/stabs_gnu.h
 getopt_h =	$(INCLUDE_DIR)/getopt.h
 floatformat_h =	$(INCLUDE_DIR)/floatformat.h
 bfd_h =		$(BFD_DIR)/bfd.h
+bfd_in2_h =		$(BFD_DIR)/bfd-in2.h
 coff_sym_h =	$(INCLUDE_DIR)/coff/sym.h
 coff_symconst_h =	$(INCLUDE_DIR)/coff/symconst.h
 coff_ecoff_h =	$(INCLUDE_DIR)/coff/ecoff.h
@@ -731,10 +737,25 @@ annotate_h = annotate.h $(symtab_h) $(gdbtypes_h)
 arch_utils_h = arch-utils.h
 arm_linux_tdep_h = arm-linux-tdep.h
 arm_tdep_h = arm-tdep.h
+arc_board_h = arc-board.h
+arc_gpio_h = arc-gpio.h
 arc_tdep_h = arc-tdep.h
 arc_jtag_h = arc-jtag.h
+arc_xiss_h = arc-xiss.h
+arc_inst_tracing_h = arc-inst-tracing.h
+arc_memory_h = arc-memory.h
+arc_arguments_h = arc-arguments.h
+arc_elf32_tdep_h = arc-elf32-tdep.h
+arc_linux_tdep_h = arc-linux-tdep.h
 arc_jtag_ops_h = arc-jtag-ops.h
-arc_regnums_defs_h = arc-regnums-defs.h
+arc_tm_linux_h = config/arc/tm-linux.h
+arc_tm_embed_h = config/arc/tm-embed.h
+arc_sim_registers_h = ../sim/arc/arc-sim-registers.h
+arc_jtag_actionpoints_h = arc-jtag-actionpoints.h
+arc_registers_h = arc-registers.h
+arc_remote_fileio_h = arc-remote-fileio.h
+arc_architecture_h = arc-architecture.h
+arc_support_h = arc-support.h
 auxv_h = auxv.h
 ax_gdb_h = ax-gdb.h
 ax_h = ax.h $(doublest_h)
@@ -849,6 +870,8 @@ nto_tdep_h = nto-tdep.h $(solist_h) $(osabi_h) $(regset_h)
 objc_lang_h = objc-lang.h
 objfiles_h = objfiles.h $(gdb_obstack_h) $(symfile_h)
 obsd_tdep_h = obsd-tdep.h
+opcodes_arc_dis_h = $(OPCODES_DIR)/arc-dis.h
+opcodes_arcompact_dis_h = $(OPCODES_DIR)/arcompact-dis.h
 osabi_h = osabi.h
 parser_defs_h = parser-defs.h $(doublest_h)
 p_lang_h = p-lang.h
@@ -895,6 +918,7 @@ symfile_h = symfile.h $(symtab_h)
 symtab_h = symtab.h
 target_h = target.h $(bfd_h) $(symtab_h) $(dcache_h) $(memattr_h) $(vec_h)
 target_descriptions_h = target-descriptions.h
+target_fileio_h = target-fileio.h
 terminal_h = terminal.h
 top_h = top.h
 tracepoint_h = tracepoint.h
@@ -1535,8 +1559,11 @@ ALLDEPFILES = \
 	amd64obsd-nat.c amd64obsd-tdep.c \
 	amd64-linux-nat.c amd64-linux-tdep.c \
 	amd64-sol2-tdep.c \
-	arc-tdep.c arc-linux-tdep.c arc-jtag.c \
-	arc-jtag-ops.c arc-jtag.c \
+	arc-jtag-actionpoints.c arc-remote-fileio.c \
+	arc-tdep.c arc-linux-tdep.c arc-jtag.c arc-architecture.c \
+	arc-jtag-ops.c arc-jtag.c arc-registers.c arc-board.c \
+	arc-xiss.c arc-gpio.c arc-memory.c arc-arguments.c \
+	arc-inst-tracing.c \
 	arm-linux-nat.c arm-linux-tdep.c arm-tdep.c \
 	armnbsd-nat.c armbsd-tdep.c armnbsd-tdep.c armobsd-tdep.c \
 	avr-tdep.c \
@@ -1901,20 +1928,78 @@ arch-utils.o: arch-utils.c $(defs_h) $(arch_utils_h) $(buildsym_h) \
 	$(gdbcmd_h) $(inferior_h) $(gdb_string_h) $(regcache_h) \
 	$(gdb_assert_h) $(sim_regno_h) $(gdbcore_h) $(osabi_h) $(version_h) \
 	$(floatformat_h) $(target_descriptions_h)
-arc-jtag.o:arc-jtag.c $(arc_jtag_h) $(defs_h) $(gdbcore_h) \
-	$(arc_regnums_defs_h) $(gdbcmd_h)
-arc-jtag-ops.o: arc-jtag-ops.c $(arc_jtag_ops_h) $(arc_tdep_h)
-arc-jtag-tdep.o:arc-jtag-tdep.c $(arc_tdep_h) $(arc_jtag_h) $(defs_h) \
-	$(osabi_h) $(frame_h) $(regcache_h) $(gdb_assert_h) $(inferior_h) \
-	$(arc_tdep_h) $(arc_jtag_h)
-arc-linux-tdep.o: arc-linux-tdep.c $(defs_h) $(osabi_h) $(frame_h) \
-	$(regcache_h) $(gdb_assert_h) $(inferior_h) $(reggroups_h) \
-	$(solib_svr4_h) $(symtab_h) $(objfiles_h) $(block_h) $(arc_tdep_h)
-arc-tdep.o: arc-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) $(inferior_h) \
-	$(gdbcmd_h) $(gdbcore_h) $(gdb_string_h) $(dis_asm_h) $(regcache_h) \
-	$(doublest_h) $(value_h)  $(frame_unwind_h) $(frame_base_h) \
-	$(trad_frame_h) $(arc_tdep_h)  $(elf_bfd_h) $(elf_arc_h) \
-	$(opcode_arc_h) $(gdb_assert_h) $(bfd_in2_h) $(observer_h)
+arc-architecture.o: arc-architecture.c \
+	$(arc_architecture_h) $(arc_registers_h) $(arch_utils_h) \
+	$(arc_elf32_tdep_h) $(arc_support_h) $(arc_tdep_h) $(bfd_in2_h) \
+	$(defs_h) $(gdbarch_h) $(gdb_events_h) $(objfiles_h) $(breakpoint_h) \
+	$(target_h) $(gdb_assert_h)
+	$(CC) -c $(INTERNAL_CFLAGS) -Wno-format-nonliteral $<
+arc-registers.o: arc-registers.c \
+	$(arc_architecture_h) $(arc_registers_h) $(arc_elf32_tdep_h) \
+	$(arc_sim_registers_h) $(arc_support_h) $(arc_tdep_h) \
+	$(arc_tm_embed_h) $(bfd_in2_h) $(defs_h) $(gdbarch_h) $(gdbcmd_h) \
+	$(inferior_h) $(objfiles_h) $(regcache_h) \
+	$(target_h) $(xml_support_h) $(breakpoint_h) $(gdb_assert_h)
+	$(CC) -c $(INTERNAL_CFLAGS) -Wno-format-nonliteral $<
+arc-board.o: arc-board.c $(arc_architecture_h) $(arc_registers_h) \
+	$(arc_board_h) $(arc_gpio_h) $(arc_jtag_h) $(arc_jtag_ops_h) \
+	$(arc_support_h) $(arc_tdep_h) $(bfd_in2_h) \
+	$(completer_h) $(defs_h) $(gdbarch_h) $(gdbcmd_h) $(objfiles_h)
+	$(CC) -c $(INTERNAL_CFLAGS) -Wno-format-nonliteral $<
+arc-gpio.o: arc-gpio.c \
+	$(arc_gpio_h) $(arc_support_h) $(defs_h)
+arc-jtag.o: arc-jtag.c \
+	$(arc_architecture_h) $(arc_registers_h) $(arc_board_h) \
+	$(arc_gpio_h) $(arc_jtag_actionpoints_h) $(arc_jtag_h) \
+	$(arc_jtag_ops_h) $(arc_elf32_tdep_h) $(arc_support_h) $(arc_tdep_h) \
+	$(arc_tm_embed_h) $(bfd_in2_h) $(breakpoint_h) $(defs_h) $(gdbarch_h) \
+	$(gdbcmd_h) $(inferior_h) $(libiberty_h) $(objfiles_h) $(target_h) \
+	$(gdb_assert_h)
+arc-arguments.o: arc-arguments.c $(arc_arguments_h) $(arc_support_h) \
+	$(arc_tdep_h) $(defs_h) $(objfiles_h) \
+	$(regcache_h) $(symtab_h) $(target_h)
+arc-memory.o: arc-memory.c \
+	$(arc_memory_h) $(arc_tdep_h) $(arc_support_h) $(defs_h)
+arc-inst-tracing.o: arc-inst-tracing.c \
+	$(arc_inst_tracing_h) $(arc_tdep_h) $(arc_support_h)
+arc-xiss.o: arc-xiss.c \
+	$(arc_architecture_h) $(arc_elf32_tdep_h) $(arc_registers_h) \
+	$(arc_support_h) $(arc_tdep_h) $(arc_tm_embed_h) $(arc_xiss_h) \
+	$(arc_inst_tracing_h) $(bfd_in2_h) $(breakpoint_h) $(defs_h) \
+	$(disasm_h) $(gdbarch_h) $(gdbcmd_h) $(inferior_h) $(libiberty_h) \
+	$(objfiles_h) $(completer_h) $(target_h) $(gdb_assert_h)
+arc-jtag-ops.o: arc-jtag-ops.c $(arc_gpio_h) $(arc_jtag_h) $(arc_jtag_ops_h) \
+	$(arc_support_h) $(defs_h) $(gdb_assert_h)
+arc-elf32-tdep.o:arc-elf32-tdep.c $(arc_architecture_h) $(arc_registers_h) \
+	$(arch_utils_h) $(arc_remote_fileio_h) $(arc_memory_h) \
+	$(arc_elf32_tdep_h) $(arc_support_h) $(arc_tdep_h) $(arc_tm_embed_h) \
+	$(arc_arguments_h) $(bfd_in2_h) $(defs_h) $(gdbarch_h) $(gdbcmd_h) \
+	$(gdb_events_h) $(inferior_h) $(objfiles_h) \
+	$(observer_h) $(exceptions_h) $(regcache_h) $(reggroups_h) \
+	$(gdbcore_h) $(breakpoint_h) $(target_h) $(gdb_assert_h)
+	$(CC) -c $(INTERNAL_CFLAGS) -Wno-format-nonliteral $<
+arc-linux-tdep.o: arc-linux-tdep.c $(arc_linux_tdep_h) $(arc_support_h) \
+	$(arc_tdep_h) $(arc_tm_linux_h) $(block_h) $(defs_h) $(dis_asm_h) \
+	$(gdbarch_h) $(inferior_h) $(opcode_arc_h) $(osabi_h) $(regcache_h) \
+	$(reggroups_h) $(regset_h) $(solib_svr4_h) $(gdb_assert_h)
+arc-tdep.o: arc-tdep.c $(arch_utils_h) $(arc_support_h) $(arc_tdep_h) \
+	$(arc_tm_linux_h) $(arc_tm_embed_h) \
+	$(block_h) $(defs_h) $(demangle_h) $(dictionary_h) $(dis_asm_h) \
+	$(dwarf2_frame_h) $(frame_h) $(frame_unwind_h) $(gdbcmd_h) \
+	$(gdbcore_h) $(inferior_h) $(language_h) \
+	$(objfiles_h) $(observer_h) $(opcode_arc_h) $(opcodes_arc_dis_h) \
+	$(opcodes_arcompact_dis_h) $(osabi_h) $(regcache_h) $(reggroups_h) \
+	$(trad_frame_h) $(gdb_assert_h)
+arc-jtag-actionpoints.o: arc-jtag-actionpoints.c $(arc_architecture_h) \
+	$(arc_registers_h) $(arc_jtag_actionpoints_h) $(arc_jtag_h) \
+	$(arc_jtag_ops_h) $(arc_support_h) $(arc_tdep_h) $(arc_elf32_tdep_h) \
+	$(bfd_in2_h) $(defs_h) $(gdbarch_h) $(gdb_assert_h) $(inferior_h) \
+	$(target_h) $(breakpoint_h)
+arc-remote-fileio.o:  arc-remote-fileio.c \
+	$(arc_remote_fileio_h) $(arc_support_h) $(arc_tm_embed_h) \
+	$(block_h) $(defs_h) $(frame_h) $(target_h) \
+	$(gdb_fileio_h) $(symtab_h) $(target_fileio_h) $(exceptions_h)
+	$(CC) -c $(INTERNAL_CFLAGS) -Wno-format-nonliteral $<
 arm-linux-nat.o: arm-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(gdb_string_h) $(regcache_h) $(arm_tdep_h) $(gregset_h) \
 	$(target_h) $(linux_nat_h) $(gdb_proc_service_h) $(arm_linux_tdep_h) \
@@ -2645,8 +2730,8 @@ remote.o: remote.c $(defs_h) $(gdb_string_h) $(inferior_h) $(bfd_h) \
 	$(cli_decode_h) $(cli_setshow_h) $(memory_map_h) \
 	$(target_descriptions_h) $(gdb_fileio_h)
 remote-fileio.o: remote-fileio.c $(defs_h) $(gdb_string_h) $(gdbcmd_h) \
-	$(remote_h) $(gdb_fileio_h) $(gdb_wait_h) $(gdb_stat_h) \
-	$(exceptions_h) $(remote_fileio_h)
+	$(remote_h) $(gdb_fileio_h) \
+	$(exceptions_h) $(remote_fileio_h) $(target_fileio_h)
 remote-m32r-sdi.o: remote-m32r-sdi.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(target_h) $(regcache_h) $(gdb_string_h) $(serial_h)
 remote-mips.o: remote-mips.c $(defs_h) $(inferior_h) $(bfd_h) $(symfile_h) \
@@ -2898,6 +2983,9 @@ target-descriptions.o: target-descriptions.c $(defs_h) $(arch_utils_h) \
 	$(target_h) $(target_descriptions_h) $(vec_h) $(xml_tdesc_h) \
 	$(gdbcmd_h) $(gdb_assert_h) $(gdbtypes_h) $(reggroups_h) \
 	$(xml_support_h) $(gdb_obstack_h) $(hashtab_h)
+target-fileio.o: target-fileio.c $(defs_h) $(exceptions_h) $(gdbcmd_h) \
+	$(gdb_fileio_h) $(gdb_stat_h) $(gdb_string_h) $(gdb_wait_h) \
+	$(target_fileio_h)
 target-memory.o: target-memory.c $(defs_h) $(vec_h) $(target_h) \
 	$(memory_map_h) $(gdb_assert_h)
 thread.o: thread.c $(defs_h) $(symtab_h) $(frame_h) $(inferior_h) \

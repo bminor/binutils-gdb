@@ -1,5 +1,6 @@
 /* Main header for the arc.
-   Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation, Inc.  */
+   Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009
+   Free Software Foundation, Inc.  */
 
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
@@ -72,14 +73,25 @@ struct _sim_cpu {
 
 /* The sim_state struct.  */
 
+
+struct sim_memory {
+  USI heap_start;
+  USI heap_end;
+  USI stack_start;
+  USI stack_top;
+  USI total_size;
+  USI argument_data_start;
+  USI num_arguments;
+};
+
 struct sim_state {
   sim_cpu *cpu;
 #define STATE_CPU(sd, n) (/*&*/ (sd)->cpu)
 
   CGEN_STATE cgen_state;
-  unsigned int heap_start;
-  unsigned int heap_end;
-  unsigned int stack_top;
+
+  struct sim_memory memory;
+  int memory_regions_defined_by_user;
 
   sim_state_base base;
 };

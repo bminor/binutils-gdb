@@ -592,10 +592,6 @@ bad CFI data; mismatched DW_CFA_restore_state at 0x%s"), paddr (fs->pc));
 	      fs->regs.reg[reg].loc.offset = -offset;
 	      break;
 
-	    case DW_CFA_MWARC_info:
-	      /* Ignored.  */
-	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &utmp);
-	      break;
 	    default:
 	      internal_error (__FILE__, __LINE__, _("Unknown CFI encountered."));
 	    }
@@ -1719,8 +1715,6 @@ decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p)
 	  augmentation += 2;
 	}
 
-      if (augmentation[0] == 'H' && augmentation [1] == 'C')
-      augmentation += 2;
       cie->code_alignment_factor =
 	read_unsigned_leb128 (unit->abfd, buf, &bytes_read);
       buf += bytes_read;

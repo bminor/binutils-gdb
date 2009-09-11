@@ -39,6 +39,10 @@
 #include "gdbcore.h"
 #include "exceptions.h"
 #include "target-descriptions.h"
+// begin ARC
+#include "observer.h"
+#include "cli/cli-decode.h"
+// end ARC
 
 static void target_info (char *, int);
 
@@ -228,9 +232,28 @@ target_command (char *arg, int from_tty)
 
 /* Add a possible target architecture to the list.  */
 
+// begin ARC
+static void
+pre_open_notify (char *name, int from_tty)
+{
+    observer_notify_target_pre_connect(&current_target);
+}
+
+static void
+post_open_notify (char *name, int from_tty)
+{
+    observer_notify_target_post_connect(&current_target);
+}
+// end ARC
+
+
 void
 add_target (struct target_ops *t)
 {
+// begin ARC
+  struct cmd_list_element *cmd;
+// end ARC
+
   /* Provide default values for all "must have" methods.  */
   if (t->to_xfer_partial == NULL)
     t->to_xfer_partial = default_xfer_partial;
@@ -258,7 +281,16 @@ Remaining arguments are interpreted by the target protocol.  For more\n\
 information on the arguments for a particular protocol, type\n\
 `help target ' followed by the protocol name."),
 		    &targetlist, "target ", 0, &cmdlist);
+
+// begin ARC
+  cmd = 
+// end ARC
   add_cmd (t->to_shortname, no_class, t->to_open, t->to_doc, &targetlist);
+
+// begin ARC
+  (void) add_cmd ("", no_class, pre_open_notify,  "", &cmd->hook_pre);
+  (void) add_cmd ("", no_class, post_open_notify, "", &cmd->hook_post);
+// end ARC
 }
 
 /* Stub functions */
@@ -389,6 +421,7 @@ update_current_target (void)
       INHERIT (to_shortname, t);
       INHERIT (to_longname, t);
       INHERIT (to_doc, t);
+      INHERIT (to_data, t);     // ARC 16/02/2009   gdb bug: 9886
       INHERIT (to_open, t);
       INHERIT (to_close, t);
       INHERIT (to_attach, t);
@@ -645,6 +678,10 @@ update_current_target (void)
 
   if (targetdebug)
     setup_target_debug ();
+
+// begin ARC
+  observer_notify_target_updated(&current_target);
+// end ARC
 }
 
 /* Mark OPS as a running target.  This reverses the effect
@@ -685,7 +722,7 @@ target_mark_exited (struct target_ops *ops)
       break;
   if (t == NULL)
     internal_error (__FILE__, __LINE__,
-		    "Attempted to mark unpushed target \"%s\" as running",
+		    "Attempted to mark unpushed target \"%s\" as non-running",   // ARC 17/11/08 correct message   gdb bug: 9887
 		    ops->to_shortname);
 
   ops->to_has_execution = 0;
@@ -1649,6 +1686,9 @@ void
 target_detach (char *args, int from_tty)
 {
   (current_target.to_detach) (args, from_tty);
+// begin ARC
+  observer_notify_target_post_disconnect(&current_target);
+// end ARC
 }
 
 void
@@ -1760,7 +1800,13 @@ find_default_attach (char *args, int from_tty)
   struct target_ops *t;
 
   t = find_default_run_target ("attach");
+// begin ARC
+  observer_notify_target_pre_connect(t);
+// end ARC
   (t->to_attach) (args, from_tty);
+// begin ARC
+  observer_notify_target_post_connect(t);
+// end ARC
   return;
 }
 
@@ -2060,6 +2106,9 @@ debug_to_close (int quitting)
 {
   target_close (&debug_target, quitting);
   fprintf_unfiltered (gdb_stdlog, "target_close (%d)\n", quitting);
+// begin ARC
+  observer_notify_target_post_disconnect(&debug_target);
+// end ARC
 }
 
 void
@@ -2069,6 +2118,9 @@ target_close (struct target_ops *targ, int quitting)
     targ->to_xclose (targ, quitting);
   else if (targ->to_close != NULL)
     targ->to_close (quitting);
+// begin ARC
+  observer_notify_target_post_disconnect(targ);
+// end ARC
 }
 
 static void
@@ -2092,6 +2144,9 @@ static void
 debug_to_detach (char *args, int from_tty)
 {
   debug_target.to_detach (args, from_tty);
+// begin ARC
+  observer_notify_target_post_disconnect(&debug_target);
+// end ARC
 
   fprintf_unfiltered (gdb_stdlog, "target_detach (%s, %d)\n", args, from_tty);
 }

@@ -20,7 +20,7 @@ $shell ${srccom}/gentvals.sh "" signal ${srcroot}/newlib/libc/include \
 	"signal.h sys/signal.h" 'SIG[A-Z0-9]*' "${cpp}"
 
 $shell ${srccom}/gentvals.sh "arc" open ${srcroot}/newlib/libc/include \
-	"../sys/arc/sys/fcntl.h" 'O_[A-Z0-9]*' "${cpp}"
+        "../sys/arc/sys/fcntl.h" 'O_[A-Z0-9]*' "${cpp}"
 
 $shell ${srccom}/gentvals.sh "" open ${srcroot}/newlib/libc/include \
 	"fcntl.h sys/fcntl.h" 'O_[A-Z0-9]*' "${cpp}"
@@ -34,7 +34,7 @@ $shell ${srccom}/gentvals.sh "" open ${srcroot}/newlib/libc/include \
 
 dir=libgloss/arc target=arc
 $shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
-	"syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"
+        "syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"
 
 dir=newlib/libc/sys/d10v/sys target=d10v
 $shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \

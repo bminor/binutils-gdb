@@ -173,7 +173,8 @@ if test x${all_targets} = xfalse ; then
 	archdefs="$archdefs -DARCH_$ad"
 	case "$arch" in
 	bfd_alpha_arch)		ta="$ta alpha-dis.lo alpha-opc.lo" ;;
-	bfd_arc_arch)		ta="$ta arc-asm.lo arc-desc.lo arc-dis.lo arc-ibld.lo arc-opc.lo arc-opinst.lo arc-ext.lo" using_cgen=yes ;;
+	#bfd_arc_arch)		ta="$ta arc-dis.lo arc-opc.lo arc-ext.lo" ;;
+	bfd_arc_arch)		ta="$ta arc-asm.lo arcompact-dis.lo arc-ext.lo arc-desc.lo arc-dis.lo arc-dis-cgen.lo arc-ibld.lo arc-opc.lo arc-opinst.lo" using_cgen=yes ;;
 	bfd_arm_arch)		ta="$ta arm-dis.lo" ;;
 	bfd_avr_arch)		ta="$ta avr-dis.lo" ;;
 	bfd_bfin_arch)		ta="$ta bfin-dis.lo" ;;

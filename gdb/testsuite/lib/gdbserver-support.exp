@@ -250,10 +250,6 @@ proc gdbserver_start { options arguments } {
 proc gdbserver_spawn { child_args } {
     set target_exec [gdbserver_download]
 
-    if [target_info exists tests_dir] {
-        set tests_dir [target_info tests_dir]
-        set gdbserver_server_exec $tests_dir/$gdbserver_server_exec
-    }
     # Fire off the debug agent.  This flavour of gdbserver takes as
     # arguments the port information, the name of the executable file to
     # be debugged, and any arguments.

@@ -169,9 +169,7 @@ remote_open (char *name)
       }
 #endif
 
-/* #ifdef HAVE_SGTTY */
-      /* soam */
-#if 0
+#ifdef HAVE_SGTTY
       {
 	struct sgttyb sg;
 
@@ -773,8 +771,7 @@ getpkt (char *buf)
       c1 = fromhex (readchar ());
       c2 = fromhex (readchar ());
 
-/*       if (csum == (c1 << 4) + c2) */
-      if(1)				     /* (soam) for testing */
+      if (csum == (c1 << 4) + c2)
 	break;
 
       fprintf (stderr, "Bad checksum, sentsum=0x%x, csum=0x%x, buf=%s\n",

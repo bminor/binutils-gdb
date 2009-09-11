@@ -361,13 +361,16 @@ os_read (p, fd, buf, len)
   return result;
 }
 
+/* Descriptors 0 / 1 / 2 might have been subject to freopen, as in
+   27_io/objects/char/12048-[1-4].cc , and thus correspond to a different
+   host file descriptor.  */
 static int 
 os_read_stdin (p, buf, len)
      host_callback *p;
      char *buf;
      int len;
 {
-  return wrap (p, read (0, buf, len));
+  os_read (p, 0, buf, len);
 }
 
 static int 
@@ -433,10 +436,10 @@ os_write (p, fd, buf, len)
       result = wrap (p, write (real_fd, buf, len));
       break;
     case 1:
-      result = p->write_stdout (p, buf, len);
+      result = fwrite (buf, 1, len, stdout);
       break;
     case 2:
-      result = p->write_stderr (p, buf, len);
+      result = fwrite (buf, 1, len, stderr);
       break;
     }
   return result;
@@ -448,7 +451,7 @@ os_write_stdout (p, buf, len)
      const char *buf;
      int len;
 {
-  return fwrite (buf, 1, len, stdout);
+  os_write (p, 1, buf, len);
 }
 
 static void
@@ -464,7 +467,7 @@ os_write_stderr (p, buf, len)
      const char *buf;
      int len;
 {
-  return fwrite (buf, 1, len, stderr);
+  os_write (p, 2, buf, len);
 }
 
 static void
@@ -1135,22 +1138,4 @@ sim_cb_eprintf (host_callback *p, const char *fmt, ...)
   va_start (ap, fmt);
   p->evprintf_filtered (p, fmt, ap);
   va_end (ap);
-}
-
-int
-cb_is_stdin (host_callback *cb, int fd)
-{
-  return fdbad (cb, fd) ? 0 : fdmap (cb, fd) == 0;
-}
-
-int
-cb_is_stdout (host_callback *cb, int fd)
-{
-  return fdbad (cb, fd) ? 0 : fdmap (cb, fd) == 1;
-}
-
-int
-cb_is_stderr (host_callback *cb, int fd)
-{
-  return fdbad (cb, fd) ? 0 : fdmap (cb, fd) == 2;
 }

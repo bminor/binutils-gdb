@@ -21,11 +21,6 @@
 #ifndef ARC_SIM_H
 #define ARC_SIM_H
 
-/* GDB register numbers.  */
-#define STATUS32_REGNUM	61
-#define PC_REGNUM	63
-#define AUX0_REGNUM 64
-#define AUXLAST_REGNUM 2111
 
 extern int arc_decode_gdb_ctrl_regnum (int);
 

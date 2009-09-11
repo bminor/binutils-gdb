@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE target SYSTEM "gdb-target.dtd">
+<target version="1.0">
+<architecture>ARC700</architecture>
+<feature name="org.gnu.gdb.arc.registers">
+
+  <auxregister name="STATUS"               description="Status (obsolete)"                           number="0x0"   mask ="0xFEFFFFFF" access="RO">
+     <field name="PC" description="program counter (PC[25:2])"    size="24" offset="0"  access="RO" />
+     <field name="H"  description="halt bit"                      size="1"  offset="25" access="RO"  >
+         <meaning value="1" description="processor is halted"/>
+     </field>
+     <field name="E1" description="interrupt mask bit"            size="1"  offset="26" access="RO" />
+     <field name="E2" description="interrupt mask bit"            size="1"  offset="27" access="RO" />
+     <field name="V"  description="overflow flag"                 size="1"  offset="28" access="RO" />
+     <field name="C"  description="carry flag"                    size="1"  offset="29" access="RO" />
+     <field name="N"  description="negative flag"                 size="1"  offset="30" access="RO" />
+     <field name="Z"  description="zero flag"                     size="1"  offset="31" access="RO" />
+  </auxregister>
+
+  <auxregister name="LP_START"             description="Loop Start"                                  number="0x2"   mask ="0xFFFFFFFE" access="RW" >
+     <field name="reserved" onwrite="0" size="1"  offset="0" access="RW" />
+  </auxregister>
+
+  <auxregister name="LP_END"               description="Loop End"                                    number="0x3"   mask ="0xFFFFFFFE" access="RW" >
+     <field name="reserved" onwrite="0" size="1"  offset="0" access="RW" />
+  </auxregister>
+
+  <auxregister name="IDENTITY"             description="Identity"                                    number="0x4"   mask ="0xFFFFFFFF" access="RO">
+     <field name="CHIPID" description="unique chip identifier"     size="16" offset="16" access="RO" />
+     <field name="ARCNUM" description="additional identity number" size= "8" offset= "8" access="RO" />
+     <field name="ARCVER" description="basecase version number"    size= "8" offset= "0" access="RO" />
+  </auxregister>
+
+  <auxregister name="DEBUG"                description="Debug"                                       number="0x5"   mask ="0xF0800802" access="RW">
+     <field name ="FH" description="force halt"      size="1" offset="1"  access="WO"/>
+     <field name ="IS" description="single step"     size="1" offset="11" access="RW">
+         <meaning value="1" description="single instruction stepping is in force"/>
+     </field>
+     <field name ="ZZ" description="sleep mode"      size="1" offset="23" access="RO">
+         <meaning value="1" description="processor is in sleep mode"/>
+     </field>
+     <field name ="UB" description="user mode BRK"   size="1" offset="28" access="RW">
+         <meaning value="0" description="BRK instructions can not be used in User mode"/>
+         <meaning value="1" description="BRK instructions can be used in User mode"/>
+     </field>
+     <field name ="BH" description="breakpoint halt" size="1" offset="29" access="RO">
+         <meaning value="1" description="a BRK instruction has been triggered"/>
+     </field>
+     <field name ="SH" description="self halt"       size="1" offset="30" access="RO">
+         <meaning value="1" description="processor has halted itself"/>
+     </field>
+     <field name ="LD" description="load pending"    size="1" offset="31" access="RO">
+         <meaning value="1" description="a delayed load is waiting to complete"/>
+     </field>
+
+<!-- for testing
+     <field name ="LD" description="duplicate!"  size="1" offset="10" access="RO"/>
+     <field name ="OV" description="overlap!"    size="3" offset="27" access="RO"/>
+     <field name ="BG" description="too big!"    size="8" offset="27" access="RO"/>
+ -->
+  </auxregister>
+
+  <auxregister name="PC"                   description="program counter"                             number="0x6"   mask ="0xFFFFFFFE" access="RW"/>
+
+  <auxregister name="STATUS32"             description="status flags"                                number="0xA"   mask ="0x00001FFF" access="RW" >
+     <field name="H"  description="halt bit"               size="1"  offset= "0" access="RO" >
+         <meaning value="1" description="processor is halted"/>
+     </field>
+     <field name="E1" description="level 1 interrupt mask bit" size="1"  offset= "1" access="RW" >
+         <meaning value="0" description="level 1 interrupts are enabled"/>
+         <meaning value="1" description="level 1 interrupts are disabled"/>
+     </field>
+     <field name="E2" description="level 2 interrupt mask bit" size="1"  offset= "2" access="RW" >
+         <meaning value="0" description="level 2 interrupts are enabled"/>
+         <meaning value="1" description="level 2 interrupts are disabled"/>
+     </field>
+     <field name="A1" description="level 1 interrupt bit"  size="1"  offset= "3" access="RO" >
+         <meaning value="1" description="a level 1 interrupt service routine is active"/>
+     </field>
+     <field name="A2" description="level 2 interrupt bit"  size="1"  offset= "4" access="RO" >
+         <meaning value="1" description="a level 2 interrupt service routine is active"/>
+     </field>
+     <field name="AE" description="exception bit"          size="1"  offset= "5" access="RO" >
+         <meaning value="1" description="an exception is active"/>
+     </field>
+     <field name="DE" description="delay slot bit"         size="1"  offset= "6" access="RO" >
+         <meaning value="1" description="instruction addressed by PC32 is in the delay slot of a taken branch"/>
+     </field>
+     <field name="U"  description="User mode bit"          size="1"  offset= "7" access="RW" >
+         <meaning value="0" description="processor is in Kernel mode"/>
+         <meaning value="1" description="processor is in User mode"/>
+     </field>
+     <field name="V"  description="overflow flag"          size="1"  offset= "8" access="RO" />
+     <field name="C"  description="carry flag"             size="1"  offset= "9" access="RO" />
+     <field name="N"  description="negative flag"          size="1"  offset="10" access="RO" />
+     <field name="Z"  description="zero flag"              size="1"  offset="11" access="RO" />
+     <field name="L"  description="zero overhead loop bit" size="1"  offset="12" access="RO"  >
+         <meaning value="0" description="zero overhead loop mechanism is enabled"/>
+         <meaning value="1" description="zero overhead loop mechanism is disabled"/>
+     </field>
+  </auxregister>
+
+  <auxregister name="STATUS32_L1"          description="STATUS32 register in case of L1 interrupts"  number="0xB"   mask ="0x00001FFE" access="RW" >
+     <field name="reserved" onwrite="0" size="1"  offset="0" access="RW" />
+     <field name="E1" description="level 1 interrupt mask bit" size="1"  offset= "1" access="RW"  >
+         <meaning value="0" description="level 1 interrupts are enabled"/>
+         <meaning value="1" description="level 1 interrupts are disabled"/>
+     </field>
+     <field name="E2" description="level 2 interrupt mask bit" size="1"  offset= "2" access="RW"  >
+         <meaning value="0" description="level 2 interrupts are enabled"/>
+         <meaning value="1" description="level 2 interrupts are disabled"/>
+     </field>
+     <field name="A1" description="level 1 interrupt bit"  size="1"  offset= "3" access="RO"  >
+         <meaning value="1" description="a level 1 interrupt service routine is active"/>
+     </field>
+     <field name="A2" description="level 2 interrupt bit"  size="1"  offset= "4" access="RO" >
+         <meaning value="1" description="a level 2 interrupt service routine is active"/>
+     </field>
+     <field name="AE" description="exception bit"          size="1"  offset= "5" access="RO" >
+         <meaning value="1" description="an exception is active"/>
+     </field>
+     <field name="DE" description="delay slot bit"         size="1"  offset= "6" access="RO" >
+         <meaning value="1" description="instruction addressed by PC32 is in the delay slot of a taken branch"/>
+     </field>
+     <field name="U"  description="User mode bit"          size="1"  offset= "7" access="RW"  >
+         <meaning value="0" description="processor is in Kernel mode"/>
+         <meaning value="1" description="processor is in User mode"/>
+     </field>
+     <field name="V"  description="overflow flag"          size="1"  offset= "8" access="RO" />
+     <field name="C"  description="carry flag"             size="1"  offset= "9" access="RO" />
+     <field name="N"  description="negative flag"          size="1"  offset="10" access="RO" />
+     <field name="Z"  description="zero flag"              size="1"  offset="11" access="RO" />
+     <field name="L"  description="zero overhead loop bit" size="1"  offset="12" access="RO"  >
+         <meaning value="0" description="zero overhead loop mechanism is enabled"/>
+         <meaning value="1" description="zero overhead loop mechanism is disabled"/>
+     </field>
+  </auxregister>
+
+  <auxregister name="STATUS32_L2"          description="STATUS32 register in case of L2 interrupts"  number="0xC"   mask ="0x00001FFE" access="RW" >
+     <field name="reserved" onwrite="0" size="1"  offset="0" access="RW" />
+     <field name="E1" description="level 1 interrupt mask bit" size="1"  offset= "1" access="RW" >
+         <meaning value="0" description="level 1 interrupts are enabled"/>
+         <meaning value="1" description="level 1 interrupts are disabled"/>
+     </field>
+     <field name="E2" description="level 2 interrupt mask bit" size="1"  offset= "2" access="RW" >
+         <meaning value="0" description="level 2 interrupts are enabled"/>
+         <meaning value="1" description="level 2 interrupts are disabled"/>
+     </field>
+     <field name="A1" description="level 1 interrupt bit"  size="1"  offset= "3" access="RO" >
+         <meaning value="1" description="a level 1 interrupt service routine is active"/>
+     </field>
+     <field name="A2" description="level 2 interrupt bit"  size="1"  offset= "4" access="RO" >
+         <meaning value="1" description="a level 2 interrupt service routine is active"/>
+     </field>
+     <field name="AE" description="exception bit"          size="1"  offset= "5" access="RO" >
+         <meaning value="1" description="an exception is active"/>
+     </field>
+     <field name="DE" description="delay slot bit"         size="1"  offset= "6" access="RO" >
+         <meaning value="1" description="instruction addressed by PC32 is in the delay slot of a taken branch"/>
+     </field>
+     <field name="U"  description="User mode bit"          size="1"  offset= "7" access="RW"  >
+         <meaning value="0" description="processor is in Kernel mode"/>
+         <meaning value="1" description="processor is in User mode"/>
+     </field>
+     <field name="V"  description="overflow flag"          size="1"  offset= "8" access="RO" />
+     <field name="C"  description="carry flag"             size="1"  offset= "9" access="RO" />
+     <field name="N"  description="negative flag"          size="1"  offset="10" access="RO" />
+     <field name="Z"  description="zero flag"              size="1"  offset="11" access="RO" />
+     <field name="L"  description="zero overhead loop bit" size="1"  offset="12" access="RO"  >
+         <meaning value="0" description="zero overhead loop mechanism is enabled"  />
+         <meaning value="1" description="zero overhead loop mechanism is disabled" />
+     </field>
+  </auxregister>
+
+  <auxregister name="COUNT0"               description="Processor Timer 0 Count Value"               number="0x21"  mask ="0xFFFFFFFF" access="RW"/>
+
+  <auxregister name="CONTROL0"             description="Processor Timer 0 Control Value"             number="0x22"  mask ="0x0000000F" access="RW" >
+     <field name="IE"  description="Interrupt Enable flag"  size="1"  offset="0" access="RW" >
+         <meaning value="1" description="interrupt will be generated after timer reaches limit condition"/>
+     </field>
+     <field name="NH"  description="Not Halted mode flag"   size="1"  offset="1" access="RW" >
+         <meaning value="0" description="timer counts every clock cycle"/>
+         <meaning value="1" description="timer counts clock cycles only when processor is running"/>
+     </field>
+     <field name="W"  description="Watchdog mode flag"      size="1"  offset="2" access="RW" >
+         <meaning value="1" description="system Reset signal will be generated after timer reaches limit condition"/>
+     </field>
+  </auxregister>
+
+  <auxregister name="LIMIT0"               description="Processor Timer 0 Limit Value"               number="0x23"  mask ="0xFFFFFFFF" access="RW"/>
+  <auxregister name="INT_VECTOR_BASE"      description="Interrupt Vector Base Register"              number="0x25"  mask ="0xFFFFFC00" access="RW"/>
+
+  <auxregister name="AUX_MACMODE"          description="Aux MAC Mode"                                number="0x41"  mask ="0xFFFFFFFF" access="RW" >
+     <field name="CS"  description="" size="1"  offset="1" access="RW"  >
+     </field>
+     <field name="S2"  description="channel 2 saturation flag" size="1"  offset="4" access="RO" >
+         <meaning value="1" description="channel 2 has saturated"/>
+     </field>
+     <field name="S1"  description="channel 1 saturation flag" size="1"  offset="9" access="RO" >
+         <meaning value="1" description="channel 1 has saturated"/>
+     </field>
+  </auxregister>
+
+  <auxregister name="AUX_IRQ_LV12"         description="Aux IRQ Level 2"                             number="0x43"  mask ="0x00000003" access="RW" >
+     <field name="L1"  description="level 1 interrupt status bit" size="1"  offset="0" access="RW" >
+         <meaning value="1" description="level 1 interrupt has been taken"/>
+     </field>
+     <field name="L2"  description="level 2 interrupt status bit" size="1"  offset="1" access="RW" >
+         <meaning value="1" description="level 2 interrupt has been taken"/>
+     </field>
+  </auxregister>
+
+  <auxregister name="COUNT1"               description="Processor Timer 1 Count Value"               number="0x100" mask ="0xFFFFFFFF" access="RW"/>
+
+  <auxregister name="CONTROL1"             description="Processor Timer 1 Control Value"             number="0x101" mask ="0x0000000F" access="RW" >
+     <field name="IE"  description="Interrupt Enable flag"  size="1"  offset="0" access="RW" >
+         <meaning value="1" description="interrupt will be generated after timer reaches limit condition"/>
+     </field>
+     <field name="NH"  description="Not Halted mode flag"   size="1"  offset="1" access="RW" >
+         <meaning value="0" description="timer counts every clock cycle"/>
+         <meaning value="1" description="timer counts clock cycles only when processor is running"/>
+     </field>
+     <field name="W"  description="Watchdog mode flag"      size="1"  offset="2" access="RW" >
+         <meaning value="1" description="system Reset signal will be generated after timer reaches limit condition"/>
+     </field>
+  </auxregister>
+
+  <auxregister name="LIMIT1"               description="Processor Timer 1 Limit Value"               number="0x102" mask ="0xFFFFFFFF" access="RW"/>
+
+  <auxregister name="AUX_IRQ_LEV"          description="Interrupt Level programming"                 number="0x200" mask ="0xFFFFFFF8" access="RW" >
+     <field name="reserved" onwrite="0" size="3"  offset="0" access="RW" />
+  </auxregister>
+
+  <auxregister name="AUX_IRQ_HINT"         description="Software Triggered Interrupt"                number="0x201" mask ="0x0000001F" access="RW"/>
+
+  <auxregister name="ERET"                 description="Exception Return"                            number="0x400" mask ="0xFFFFFFFE" access="RW" >
+     <field name="reserved" onwrite="0" size="1"  offset="0" access="RW" />
+  </auxregister>
+
+  <auxregister name="ERBTA"                description="Exception BTA"                               number="0x401" mask ="0xFFFFFFFE" access="RW"/>
+
+  <auxregister name="ERSTATUS"             description="Exception Return Status"                     number="0x402" mask ="0x00001FFE" access="RW" >
+     <field name="reserved" onwrite="0" size="1"  offset="0" access="RW" />
+  </auxregister>
+
+  <auxregister name="ECR"                  description="Exception Cause Register"                    number="0x403" mask ="0x00FFFFFF" access="RO">
+     <field name="Vector Number" description=""                         size="8" offset="16" access="RO" />
+     <field name="Cause Code"    description="exact cause of exception" size="8" offset="8"  access="RO" />
+     <field name="Parameter"     description="additional information"   size="8" offset="0"  access="RO" />
+  </auxregister>
+  <auxregister name="EFA"                  description="Exception Fault Address"                     number="0x404" mask ="0xFFFFFFFF" access="RW"/>
+  <auxregister name="ICAUSE1"              description="Interrupt Cause (Level 1)"                   number="0x40A" mask ="0x0000001F" access="RO"/>
+  <auxregister name="ICAUSE2"              description="Interrupt Cause (Level 2)"                   number="0x40B" mask ="0x0000001F" access="RO"/>
+
+  <auxregister name="AUX_IENABLE"          description="Interrupt Mask Programming"                  number="0x40C" mask ="0xFFFFFFF8" access="RW" >
+     <field name="reserved" onwrite="7" size="3"  offset="0" access="RW" />
+  </auxregister>
+
+  <auxregister name="AUX_ITRIGGER"         description="Interrupt Sensitivity Programming"           number="0x40D" mask ="0xFFFFFFF8" access="RW" >
+     <field name="reserved" onwrite="7" size="3"  offset="0" access="RW" />
+  </auxregister>
+
+  <auxregister name="XPU"                  description="User Mode Extension Permissions"             number="0x410" mask ="0xFFFFFFFF" access="RW"/>
+
+  <auxregister name="BTA"                  description="Branch Target Address"                       number="0x412" mask ="0xFFFFFFFE" access="RO" >
+     <field name="reserved" onwrite="0" size="1"  offset="0" access="RO" />
+  </auxregister>
+
+  <auxregister name="BTA_L1"               description="Branch Target Address in Level 1"            number="0x413" mask ="0xFFFFFFFE" access="RW" >
+     <field name="reserved" onwrite="0" size="1"  offset="0" access="RW" />
+  </auxregister>
+
+  <auxregister name="BTA_L2"               description="Branch Target Address in Level 2"            number="0x414" mask ="0xFFFFFFFE" access="RW" >
+     <field name="reserved" onwrite="0" size="1"  offset="0" access="RW" />
+  </auxregister>
+
+  <auxregister name="AUX_IRQ_PULSE_CANCEL" description="Interrupt Pulse Cancel"                      number="0x415" mask ="0xFFFFFFFA" access="WO" >
+     <field name="reserved" onwrite="0" size="1"  offset="0" access="WO" />
+     <field name="reserved" onwrite="0" size="1"  offset="2" access="WO" />
+  </auxregister>
+
+  <auxregister name="AUX_IRQ_PENDING"      description="Interrupt Pending Register"                  number="0x416" mask ="0xFFFFFFF8" access="RO"/>
+
+
+  <!-- cache control registers -->
+
+  <auxregister name="IC_IVIC"             description="Instruction Cache Invalidation Register"      number="0x10" mask ="0xFFFFFFFF" access="WO"/>
+  <auxregister name="IC_CTRL"             description="Instruction Cache Control Register"           number="0x11" mask ="0x0000003F" access="RW" >
+     <field name="DC"       description="enables/disables the cache"      size="1"  offset="0" access="RW"  >
+         <meaning value="0" description="cache is enabled"  />
+         <meaning value="1" description="cache is disabled" />
+     </field>
+     <field name="EB"       description="enables/disables cache bypass"   size="1"  offset="1" access="RO" >
+         <meaning value="0" description="bypass is disabled" />
+         <meaning value="1" description="bypass is enabled"  />
+     </field>
+     <field name="reserved" onwrite="0"    size="1"  offset="2" />
+     <field name="SB"       description="success of last cache operation" size="1"  offset="3" access="RW"  >
+         <meaning value="0" description="last cache operation failed"    />
+         <meaning value="1" description="last cache operation succeeded" />
+     </field>
+     <field name="RA"       description="replacement algorithm"           size="1"  offset="4" access="RO"  >
+         <meaning value="0" description="random replacement" />
+     </field>
+     <field name="AT"       description="address debug type"              size="1"  offset="5" access="RW"  >
+         <meaning value="0" description="Direct Cache RAM Access"     />
+         <meaning value="1" description="Cache Controlled RAM Access" />
+     </field>
+     <field name="reserved" onwrite="0"                                   size="26" offset="6" />
+  </auxregister>
+  <auxregister name="DC_IVDC"             description="Data Cache Invalidation Register"             number="0x47" mask ="0x00000001" access="WO" >
+     <field name="IV"       description="invalidates the entire cache"    size="1"  offset="0" access="WO"  >
+         <meaning value="0" description="no action"            />
+         <meaning value="1" description="invalidate the cache" />
+     </field>
+     <field name="reserved" onwrite="0"    size="31"  offset="1" />
+  </auxregister>
+  <auxregister name="DC_CTRL"             description="Data Cache Control Register"                  number="0x48" mask ="0x000001FF" access="RW" >
+     <field name="DC"       description="enables/disables the cache"      size="1"  offset="0" access="RW"  >
+         <meaning value="0" description="cache is enabled"  />
+         <meaning value="1" description="cache is disabled" />
+     </field>
+     <field name="EB"       description="enables/disables cache bypass"   size="1"  offset="1" access="RO" >
+         <meaning value="0" description="bypass is disabled" />
+         <meaning value="1" description="bypass is enabled"  />
+     </field>
+     <field name="SB"       description="success of last cache operation" size="1"  offset="2" access="RW"  >
+         <meaning value="0" description="last cache operation failed"    />
+         <meaning value="1" description="last cache operation succeeded" />
+     </field>
+     <field name="RA"       description="replacement algorithm"           size="2"  offset="3" access="RO"  >
+         <meaning value="0" description="random replacement" />
+     </field>
+     <field name="AT"       description="address debug type"              size="1"  offset="5" access="RW"  >
+         <meaning value="0" description="Direct Cache RAM Access"     />
+         <meaning value="1" description="Cache Controlled RAM Access" />
+     </field>
+     <field name="IM"       description="invalidate mode"                 size="1"  offset="6" access="RW"  >
+         <meaning value="0" description="invalidate data cache only"                    />
+         <meaning value="1" description="invalidate data cache and flush dirty entries" />
+     </field>
+     <field name="LM"       description="lock mode"                       size="1"  offset="7" access="RW"  >
+         <meaning value="0" description="disable flush on locked entry" />
+         <meaning value="1" description="enable flush on locked entry"  />
+     </field>
+     <field name="FS"       description="flush status"                    size="1"  offset="8" access="RO"  >
+         <meaning value="0" description="idle"                           />
+         <meaning value="1" description="flush operation is in progress" />
+     </field>
+     <field name="reserved" onwrite="0"                                   size="23" offset="9" />
+  </auxregister>
+
+
+  <!-- actionpoint 0 registers -->
+
+  <auxregister name="AMV0"                description="Actionpoint 0 Match Value Register"           number="0x220" mask ="0xFFFFFFFF" access="RW"/>
+  <auxregister name="AMM0"                description="Actionpoint 0 Match Mask Register"            number="0x221" mask ="0xFFFFFFFF" access="RW"/>
+  <auxregister name="AC0"                 description="Actionpoint 0 Control Register"               number="0x222" mask ="0xFFFFFFFF" access="RW"/>
+
+
+  <!-- Build Configuration Registers -->
+
+  <bcr name="BCR_VER"              description="Build Configuration Registers Version"          number="0x60"  mask="0xFFFFFFFF"/>
+  <bcr name="DCCM_BASE_BUILD"      description="Base Address for Data Closely Coupled Memory"   number="0x61"  mask="0xFFFFFFFF"/>
+  <bcr name="CRC_BASE_BUILD"       description="CRC Unit BCR"                                   number="0x62"  mask="0xFFFFFFFF"/>
+  <bcr name="BTA_LINK_BUILD"       description="Interrupt Link Registers available for BTA"     number="0x63"  mask="0xFFFFFFFF"/>
+  <bcr name="DVBF_BUILD"           description="Dual Viterbi Instruction BCR"                   number="0x64"  mask="0xFFFFFFFF"/>
+  <bcr name="TEL_INSTR_BUILD"      description="Extended Arithmetic Instructions BCR"           number="0x65"  mask="0xFFFFFFFF"/>
+  <bcr name="unused"               description="unused"                                         number="0x66"  mask="0xFFFFFFFF"/>
+  <bcr name="MEMSUBSYS"            description="Memory Subsystem BCR"                           number="0x67"  mask="0xFFFFFFFF"/>
+  <bcr name="VECBASE_AC_BUILD"     description="Interrupt Vector Base BCR"                      number="0x68"  mask="0xFFFFFFFF"/> 
+  <bcr name="P_BASE_ADDRESS"       description="Peripheral Base Address"                        number="0x69"  mask="0xFFFFFFFF"/> 
+  <bcr name="unused"               description="unused"                                         number="0x6A"  mask="0xFFFFFFFF"/>
+  <bcr name="unused"               description="unused"                                         number="0x6B"  mask="0xFFFFFFFF"/>
+  <bcr name="unused"               description="unused"                                         number="0x6C"  mask="0xFFFFFFFF"/>
+  <bcr name="unused"               description="unused"                                         number="0x6D"  mask="0xFFFFFFFF"/>
+  <bcr name="RF_BUILD"             description="Core Registers BCR"                             number="0x6E"  mask="0xFFFFFFFF"/>
+  <bcr name="MMU_BUILD"            description="Memory Management Unit BCR"                     number="0x6F"  mask="0xFFFFFFFF"/>
+  <bcr name="ARCANGEL_BUILD"       description="ARCAngel BCR"                                   number="0x70"  mask="0xFFFFFFFF"/>
+  <bcr name="unused"               description="unused"                                         number="0x71"  mask="0xFFFFFFFF"/>
+  <bcr name="DCACHE_BUILD"         description="Data Cache BCR"                                 number="0x72"  mask="0xFFFFFFFF"/>
+  <bcr name="MADI_BUILD"           description="Multiple ARC Debug Interface"                   number="0x73"  mask="0xFFFFFFFF"/>
+  <bcr name="DCCM_BUILD"           description="Data Closely Coupled Memory BCR"                number="0x74"  mask="0xFFFFFFFF"/>
+  <bcr name="TIMER_BUILD"          description="Timers BCR"                                     number="0x75"  mask="0xFFFFFFFF"/>
+  <bcr name="AP_BUILD"             description="Actionpoints BCR"                               number="0x76"  mask="0xFFFFFFFF"/>
+  <bcr name="ICACHE_BUILD"         description="Instruction Cache BCR"                          number="0x77"  mask="0xFFFFFFFF"/>
+  <bcr name="ICCM_BUILD"           description="Instruction Closely Coupled Memory BCR"         number="0x78"  mask="0xFFFFFFFF"/>
+  <bcr name="DSPRAM_BUILD"         description="DSP RAM BCR"                                    number="0x79"  mask="0xFFFFFFFF"/>
+  <bcr name="MAC_BUILD"            description="MAC Unit BCR"                                   number="0x7A"  mask="0xFFFFFFFF"/>
+  <bcr name="MULTIPLY_BUILD"       description="(32 X 32) Multiply Unit BCR"                    number="0x7B"  mask="0xFFFFFFFF"/>
+  <bcr name="SWAP_BUILD"           description="SWAP BCR"                                       number="0x7C"  mask="0xFFFFFFFF"/>
+  <bcr name="NORM_BUILD"           description="NORM Unit BCR"                                  number="0x7D"  mask="0xFFFFFFFF"/>
+  <bcr name="MINMAX_BUILD"         description="Minmax Unit BCR"                                number="0x7E"  mask="0xFFFFFFFF"/>
+  <bcr name="BARREL_BUILD"         description="Barrel Shifter BCR"                             number="0x7F"  mask="0xFFFFFFFF"/> 
+
+<!-- for testing
+
+  <auxregister name="TEST"   description="any old bucket of bits"   number="0x99999" mask ="0xFFFFFFFF" access="RW">
+     <field name ="AA"        description=""    size="1" offset="5"  access="RO">
+         <meaning value="0" description="value is 0"/>
+         <meaning value="1" description="value is 1"/>
+     </field>
+     <field name ="BBBB"      description=""    size="3" offset="8"  access="RO">
+         <meaning value="0" description="value is 0"/>
+         <meaning value="1" description="value is 1"/>
+         <meaning value="3" description="value is 3"/>
+         <meaning value="7" description="value is 7"/>
+     </field>
+     <field name ="CCCCCCCCC" description=""    size="8" offset="17" access="RO">
+     </field>
+  </auxregister>
+ -->
+
+</feature>
+</target>

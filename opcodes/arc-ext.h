@@ -18,84 +18,74 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
-#ifndef ARCEXT_H
-#define ARCEXT_H
+/******************************************************************************/
+/*                                                                            */
+/* Outline:                                                                   */
+/*     This header file defines a table of extensions to the ARC processor    */
+/*     architecture.  These extensions are read from the '.arcextmap' or      */
+/*     '.gnu.linkonce.arcextmap.<type>.<N>' sections in the ELF file which is */
+/*     identified by the bfd parameter to the build_ARC_extmap function.      */
+/*                                                                            */
+/*     These extensions may include:                                          */
+/*         core registers                                                     */
+/*         auxiliary registers                                                */
+/*         instructions                                                       */
+/*         condition codes                                                    */
+/*                                                                            */
+/*     Once the table has been constructed, accessor functions may be used to */
+/*     retrieve information from it.                                          */
+/*                                                                            */
+/*     The build_ARC_extmap constructor function build_ARC_extmap may be      */
+/*     called as many times as required; it will re-initialize the table each */
+/*     time.                                                                  */
+/*                                                                            */
+/******************************************************************************/
 
+#ifndef ARC_EXTENSIONS_H
+#define ARC_EXTENSIONS_H
 
-enum { INST_HASH_BITS = 6 };
-enum {NUM_EXT_CORE = 59-32+1};
-enum {NUM_EXT_COND = 0x1f-0x10+1};
-
-enum { INST_HASH_SIZE = 1 << INST_HASH_BITS };
-#define INST_HASH(MAJOR,MINOR) \
-  ((((MAJOR) << 3) ^ (MINOR)) & ((INST_HASH_SIZE) - 1))
-
-enum ExtOperType
-  {
-    EXT_INSTRUCTION,
-    EXT_CORE_REGISTER,
-    EXT_AUX_REGISTER,
-    EXT_COND_CODE,
-    EXT_AC_INSTRUCTION,
-    EXT_LONG_CORE_REGISTER = 0x06
-  };
+#define IGNORE_FIRST_OPD 1
 
 /* Define this if we do not want to encode instructions based on the
    ARCompact Programmer's Reference.  */
 #define UNMANGLED
 
-struct ExtInstruction
+
+/* this defines the kinds of extensions which may be read from the sections in
+ * the executable files
+ */
+enum ExtOperType
 {
-  char major;
-  char minor;
-  char flags;
-  char *name;
-  struct ExtInstruction *next;
+  EXT_INSTRUCTION,
+  EXT_CORE_REGISTER,
+  EXT_AUX_REGISTER,
+  EXT_COND_CODE,
+  EXT_AC_INSTRUCTION,
+  EXT_LONG_CORE_REGISTER = 0x06
 };
 
-struct ExtAuxRegister
-{
-  long address;
-  char *name;
-  struct ExtAuxRegister *next;
-};
 
 enum ExtReadWrite
-  {
-    REG_INVALID,
-    REG_READ,
-    REG_WRITE,
-    REG_READWRITE
-  };
-
-struct ExtCoreRegister
 {
-  short number;
-  enum ExtReadWrite rw;
-  char *name;
+  REG_INVALID,
+  REG_READ,
+  REG_WRITE,
+  REG_READWRITE
 };
 
-struct arcExtMap
-{
-  struct ExtAuxRegister *auxRegisters;
-  struct ExtInstruction *instructions[INST_HASH_SIZE];
-  struct ExtCoreRegister coreRegisters[NUM_EXT_CORE];
-  char *condCodes[NUM_EXT_COND];
-};
 
-extern int arcExtMap_add(void*, unsigned long);
-extern enum ExtReadWrite arcExtMap_coreReadWrite (int);
-extern const char *arcExtMap_coreRegName(int);
-extern const char *arcExtMap_auxRegName(long);
-extern const char *arcExtMap_condCodeName(int);
-extern const char *arcExtMap_instName(int, int, int*);
+/* constructor function */
+extern void build_ARC_extmap (bfd* text_bfd);
 
-/* Ravi:
-   warning: implicit declaration of function `build_ARC_extmap'
-*/
-extern void build_ARC_extmap (bfd *);
+/* accessor functions */
+extern enum ExtReadWrite arcExtMap_coreReadWrite (int  regnum);
+extern const char*       arcExtMap_coreRegName   (int  regnum);
+extern const char*       arcExtMap_auxRegName    (long regnum);
+extern const char*       arcExtMap_condCodeName  (int  code);
+extern const char*       arcExtMap_instName      (int  opcode, int insn, int* flags);
 
+/* dump function (for debugging) */
+extern void dump_ARC_extmap (void);
 
-#define IGNORE_FIRST_OPD 1
-
-#endif /* __arcExtMap_h__ */
+#endif /* ARC_EXTENSIONS_H */
+/******************************************************************************/

@@ -265,8 +265,89 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
   return retval;
 }
 
+// begin ARC
+static CORE_ADDR
+dwarf2_find_address (struct symbol *var, struct frame_info *frame,
+                     gdb_byte *data, unsigned short size,
+                     struct objfile *objfile)
+{
+  struct gdbarch *arch = get_frame_arch (frame);
+  struct value *retval;
+  struct dwarf_expr_baton baton;
+  struct dwarf_expr_context *ctx;
+  CORE_ADDR address;
+
+  /* optimised out */
+  if (size == 0)
+     return 0;
+
+  baton.frame   = frame;
+  baton.objfile = objfile;
+
+  ctx = new_dwarf_expr_context ();
+  ctx->baton           = &baton;
+  ctx->read_reg        = dwarf_expr_read_reg;
+  ctx->read_mem        = dwarf_expr_read_mem;
+  ctx->get_frame_base  = dwarf_expr_frame_base;
+  ctx->get_tls_address = dwarf_expr_tls_address;
+
+  dwarf_expr_eval (ctx, data, size);
+  if (ctx->num_pieces > 0)
+    {
+      /* what should we do here? */
+      address = 0;
+    }
+  else if (ctx->in_reg)
+    address = 0;
+  else
+    address = dwarf_expr_fetch (ctx, 0);
+
+  free_dwarf_expr_context (ctx);
+
+  return address;
+}
 
 
+static unsigned int
+dwarf2_find_size (struct symbol *var, struct frame_info *frame,
+                  gdb_byte *data, unsigned short size,
+                  struct objfile *objfile)
+{
+  struct gdbarch *arch = get_frame_arch (frame);
+  struct dwarf_expr_baton baton;
+  struct dwarf_expr_context *ctx;
+  unsigned int sz;
+
+  /* optimised out */
+  if (size == 0)
+     return 0;
+
+  baton.frame   = frame;
+  baton.objfile = objfile;
+
+  ctx = new_dwarf_expr_context ();
+  ctx->baton           = &baton;
+  ctx->read_reg        = dwarf_expr_read_reg;
+  ctx->read_mem        = dwarf_expr_read_mem;
+  ctx->get_frame_base  = dwarf_expr_frame_base;
+  ctx->get_tls_address = dwarf_expr_tls_address;
+
+  dwarf_expr_eval (ctx, data, size);
+  if (ctx->num_pieces > 0)
+    {
+      /* what should we do here? */
+      sz = 0;
+    }
+  else if (ctx->in_reg)
+    sz = 0;
+  else
+    sz = TYPE_LENGTH (SYMBOL_TYPE (var));
+
+  free_dwarf_expr_context (ctx);
+
+  return sz;
+}
+// end ARC
 
 
 /* Helper functions and baton for dwarf2_loc_desc_needs_frame.  */
@@ -434,6 +515,30 @@ locexpr_read_variable (struct symbol *symbol, struct frame_info *frame)
   return val;
 }
 
+// begin ARC
+/* Return the address of SYMBOL in FRAME using the DWARF-2 expression
+   evaluator to calculate the location.  */
+static CORE_ADDR
+locexpr_get_variable_address (struct symbol *symbol, struct frame_info *frame)
+{
+  struct dwarf2_locexpr_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
+
+  return dwarf2_find_address (symbol, frame, dlbaton->data, dlbaton->size,
+                              dlbaton->objfile);
+}
+
+/* Return the size of SYMBOL in FRAME using the DWARF-2 expression
+   evaluator to calculate the location.  */
+static unsigned int
+locexpr_get_variable_size(struct symbol *symbol, struct frame_info *frame)
+{
+  struct dwarf2_locexpr_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
+
+  return dwarf2_find_size (symbol, frame, dlbaton->data, dlbaton->size,
+                           dlbaton->objfile);
+}
+// end ARC
+
 /* Return non-zero iff we need a frame to evaluate SYMBOL.  */
 static int
 locexpr_read_needs_frame (struct symbol *symbol)
@@ -516,6 +621,10 @@ locexpr_tracepoint_var_ref (struct symbol * symbol, struct agent_expr * ax,
    evaluator.  */
 const struct symbol_ops dwarf2_locexpr_funcs = {
   locexpr_read_variable,
+// begin ARC
+  locexpr_get_variable_address,
+  locexpr_get_variable_size,
+// end ARC
   locexpr_read_needs_frame,
   locexpr_describe_location,
   locexpr_tracepoint_var_ref
@@ -550,6 +659,46 @@ loclist_read_variable (struct symbol *symbol, struct frame_info *frame)
 
   return val;
 }
+
+// begin ARC
+/* Return the address of SYMBOL in FRAME using the DWARF-2 expression
+   evaluator to calculate the location.  */
+static CORE_ADDR
+loclist_get_variable_address (struct symbol *symbol, struct frame_info *frame)
+{ 
+  struct dwarf2_loclist_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
+  struct value *val;
+  gdb_byte *data;
+  size_t size;
+
+  data = find_location_expression (dlbaton, &size,
+                                   frame ? get_frame_address_in_block (frame)
+                                   : 0);
+  if (data == NULL)
+      return 0;
+
+  return dwarf2_find_address(symbol, frame, data, size, dlbaton->objfile);
+}
+
+/* Return the size of SYMBOL in FRAME using the DWARF-2 expression
+   evaluator to calculate the location.  */
+static unsigned int
+loclist_get_variable_size(struct symbol *symbol, struct frame_info *frame)
+{
+  struct dwarf2_loclist_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
+  struct value *val;
+  gdb_byte *data;
+  size_t size;
+
+  data = find_location_expression (dlbaton, &size,
+                                   frame ? get_frame_address_in_block (frame)
+                                   : 0);
+  if (data == NULL)
+      return 0;
+
+  return dwarf2_find_size(symbol, frame, data, size, dlbaton->objfile);
+}
+// end ARC
 
 /* Return non-zero iff we need a frame to evaluate SYMBOL.  */
 static int
@@ -594,6 +743,10 @@ loclist_tracepoint_var_ref (struct symbol * symbol, struct agent_expr * ax,
    evaluator and location lists.  */
 const struct symbol_ops dwarf2_loclist_funcs = {
   loclist_read_variable,
+// begin ARC
+  loclist_get_variable_address,
+  loclist_get_variable_size,
+// end ARC
   loclist_read_needs_frame,
   loclist_describe_location,
   loclist_tracepoint_var_ref

@@ -1,0 +1,71 @@
+<!-- Copyright (C) 2008, 2009 Free Software Foundation, Inc.
+
+     Copying and distribution of this file, with or without modification,
+     are permitted in any medium without royalty provided the copyright
+     notice and this notice are preserved.  -->
+
+<!-- The root element of an ARC registers description is <target>.  -->
+
+<!-- Auxiliary Registers  -->
+
+<!ELEMENT target	(architecture?, feature*)>
+<!ATTLIST target
+	version		CDATA	#FIXED "1.0">
+
+<!ELEMENT architecture	(#PCDATA)>
+
+<!ELEMENT feature	(auxregister*,bcr*,ecr*)>
+<!ATTLIST feature
+	name		ID	#REQUIRED>
+
+<!ELEMENT auxregister	(field*)>
+<!ATTLIST auxregister
+	name		CDATA	#REQUIRED
+	description	CDATA   #IMPLIED
+	number		CDATA	#REQUIRED
+	mask		CDATA	#IMPLIED
+	access		(RO | RW | WO) 'RW'
+	>
+
+<!ELEMENT field		(meaning*)>
+<!ATTLIST field
+	name		CDATA	#REQUIRED
+	description	CDATA	#IMPLIED
+	onwrite		CDATA	#IMPLIED
+	offset		CDATA   #REQUIRED
+	size		CDATA   #REQUIRED
+	access		(RO | RW | WO) 'RW'
+	>
+
+<!ELEMENT meaning		EMPTY>
+<!ATTLIST meaning
+	description	CDATA	#REQUIRED
+	value		CDATA   #REQUIRED
+	>
+
+<!-- Build Configuration Registers  -->
+
+<!ELEMENT bcr      (bcrfield*)>
+<!ATTLIST bcr
+        name            CDATA   #REQUIRED
+        description     CDATA   #IMPLIED
+        number          CDATA   #REQUIRED
+        mask            CDATA   #IMPLIED
+        >
+
+<!ELEMENT bcrfield         >
+<!ATTLIST bcrfield
+        name            CDATA   #REQUIRED
+        description     CDATA   #IMPLIED
+        offset          CDATA   #REQUIRED
+        size            CDATA   #REQUIRED
+       >
+
+<!-- Extension Core Registers  -->
+
+<!ELEMENT ecr>
+<!ATTLIST ecr
+        number          CDATA   #REQUIRED
+        mask            CDATA   #IMPLIED
+	access		(RO | RW | WO) 'RW'
+        >

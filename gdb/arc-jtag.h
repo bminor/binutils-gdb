@@ -1,76 +1,64 @@
-/* Target dependent code for ARC700, for GDB, the GNU debugger.
+/* Target dependent code for ARC processor family, for GDB, the GNU debugger.
 
-   Copyright 2005 Free Software Foundation, Inc.
+   Copyright 2005, 2008, 2009 Free Software Foundation, Inc.
 
    Contributed by Codito Technologies Pvt. Ltd. (www.codito.com)
 
-   Authors: 
-      Soam Vasani <soam.vasani@codito.com>
+   Authors:
+      Soam Vasani     <soam.vasani@codito.com>
+      Richard Stuckey <richard.stuckey@arc.com>
 
    This file is part of GDB.
-   
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
+   the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
-*/
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#define ARC_DEBUG_REG_SH_BIT 	0x40000000
+/******************************************************************************/
+/*                                                                            */
+/* Outline:                                                                   */
+/*     This header file defines some operations provided by the ARC JTAG      */
+/*     module.                                                                */
+/*                                                                            */
+/******************************************************************************/
 
-#define RAUX(name, hwregno , desc, gdbregno, version)  ARC_HW_##name##_REGNUM = hwregno , 
-#define RBCR(name, hwregno , desc, gdbregno, version)  ARC_HW_##name##_REGNUM = hwregno , 
+#ifndef ARC_JTAG_H
+#define ARC_JTAG_H
 
-
-enum arc_hw_regnums
-  {
-    #include "arc-regnums-defs.h"
-    /* Specific ARCAngel Registers for Caches.  */
-    ARC_HW_ICACHE_IVIC = 0x10 , /* Invalidate Cache. */
-    ARC_HW_ICACHE_CONTROL = 0x11 , /* Disable ICache. ICache control. */
-    ARC_HW_DCACHE_IVIC = 0x47, /* Invalidate Cache. */
-    ARC_HW_DCACHE_CONTROL = 0x48 , /* Disable DCache. DCache Control. */
-  };
-
-#undef RBCR
-#undef RAUX
-
-#define ARC_TARGET_OBJECT_AUXREGS 	-1
-
-#define target_read_aux_reg(readbuf, offset, len)               \
-         (current_target.to_xfer_partial(&current_target,        \
-                                         ARC_TARGET_OBJECT_AUXREGS, NULL, readbuf, NULL, offset, len))
-	  
-#define target_write_aux_reg(writebuf, offset, len)             \
-         (current_target.to_xfer_partial(&current_target,        \
-                                         ARC_TARGET_OBJECT_AUXREGS, NULL, NULL, writebuf, offset, len))
+/* ARC header files */
+#include "arc-support.h"
 
 
-static inline int 
-is_arc700 (void)
-{
-  struct gdbarch_tdep * tdep = gdbarch_tdep (current_gdbarch);
-  if(tdep->arc_processor_variant_info->arcprocessorversion == ARC700)
-    return 1;
-  return 0;
-  
-}
+/* Operations for reading/writing core/auxiliary registers; these must be used
+   when access to the registers *specifically* via the JTAG i/f is required.
 
-static inline int 
-is_arc600 (void)
-{
-  struct gdbarch_tdep * tdep = gdbarch_tdep (current_gdbarch);
-  if(tdep->arc_processor_variant_info->arcprocessorversion == ARC600)
-    return 1;
-  return 0;
-  
-}
- int debug_arc_jtag_target_message;
+   N.B. the register contents returned by these functions, or supplied to them,
+        are in host byte order.  */
+
+Boolean arc_read_jtag_core_register  (ARC_RegisterNumber    hw_regno,
+                                      ARC_RegisterContents *contents,
+                                      Boolean               warn_on_failure);
+
+Boolean arc_write_jtag_core_register (ARC_RegisterNumber    hw_regno,
+                                      ARC_RegisterContents  contents,
+                                      Boolean               warn_on_failure);
+
+Boolean arc_read_jtag_aux_register   (ARC_RegisterNumber    hw_regno,
+                                      ARC_RegisterContents *contents,
+                                      Boolean               warn_on_failure);
+
+Boolean arc_write_jtag_aux_register  (ARC_RegisterNumber    hw_regno,
+                                      ARC_RegisterContents  contents,
+                                      Boolean               warn_on_failure);
+
+#endif /* ARC_JTAG_H */
+/******************************************************************************/

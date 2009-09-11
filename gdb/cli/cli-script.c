@@ -287,8 +287,15 @@ execute_user_command (struct cmd_list_element *c, char *args)
 
   cmdlines = c->user_commands;
   if (cmdlines == 0)
+  {
     /* Null command */
+// begin ARC
+   /* If there are no user commands to be executed, execute the
+      callback function instead.  */
+    c->func(c, NULL, 0);
+// end ARC
     return;
+  }
 
   if (++user_call_depth > max_user_call_depth)
     error (_("Max user call depth exceeded -- command aborted."));

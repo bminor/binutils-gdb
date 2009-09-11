@@ -1,3 +1,17 @@
+2007-11-13  Irfan Rafiq     <irfan.rafiq@arc.com>
+
+	* Ingegrating CGEN simulator with gdb.
+		- model5.c, model6.c, model7.c : Synchronizing model strings like A7 with GDB internal DS.
+
+2007-11-05  Irfan Rafiq     <irfan.rafiq@arc.com>
+	* Ingegrating CGEN simulator with gdb.
+		- tconfig.in		       : defined SIM_HAVE_BIENDIAN 1
+
+2007-10-26  Irfan Rafiq     <irfan.rafiq@arc.com>
+	* Ingegrating CGEN simulator with gdb.
+		- sim-if.c		       : Fix of crash
+		- sim-main.c		       : For arc-opc-cgen.h
+	
 2007-09-17  J"orn Rennecke  <joern.rennecke@arc.com>
 
 	* gentvals.sh: Allow target-specific definitions to override
@@ -8,8 +22,7 @@
 
 2007-08-22  J"orn Rennecke  <joern.rennecke@arc.com>
 
-	* cgen-trace.c (sim_cgen_disassemble_insn):
-	Check for CGEN_INSN_DISASM_BITSIZE.
+	* (cgen-trace.c): Check for CGEN_INSN_DISASM_BITSIZE.
 
 2007-08-21  J"orn Rennecke  <joern.rennecke@arc.com>
 

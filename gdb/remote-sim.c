@@ -469,13 +469,17 @@ gdbsim_create_inferior (char *exec_file, char *args, char **env, int from_tty)
     }
   else
     argv = NULL;
-  sim_create_inferior (gdbsim_desc, exec_bfd, argv, env);
 
-  inferior_ptid = pid_to_ptid (42);
-  target_mark_running (&gdbsim_ops);
-  insert_breakpoints ();	/* Needed to get correct instruction in cache */
+  // ARC 12/01/09 check return status
+  // GDB Bug #9734
+  if (sim_create_inferior (gdbsim_desc, exec_bfd, argv, env) == SIM_RC_OK)
+    {
+      inferior_ptid = pid_to_ptid (42);
+      target_mark_running (&gdbsim_ops);
+      insert_breakpoints ();	/* Needed to get correct instruction in cache */
 
-  clear_proceed_status ();
+      clear_proceed_status ();
+    }
 }
 
 /* The open routine takes the rest of the parameters from the command,

@@ -98,6 +98,23 @@ The inferior has stopped for real.
 The target's register contents have changed.
 @end deftypefun
 
+@deftypefun void target_pre_connect (struct target_ops *@var{target})
+Connection to the target is about to be performed.
+@end deftypefun
+
+@deftypefun void target_post_connect (struct target_ops *@var{target})
+Ccnnection to the target has just been performed.
+@end deftypefun
+
+@deftypefun void target_post_disconnect (struct target_ops *@var{target})
+Disconnection from the target has just been performed.
+@end deftypefun
+
+@deftypefun void target_updated (struct target_ops *@var{target})
+The target has been updated.
+@end deftypefun
+
+
 @deftypefun void executable_changed (void *@var{unused_args})
 The executable being debugged by GDB has changed: The user decided
 to debug a different program, or the program he was debugging has
