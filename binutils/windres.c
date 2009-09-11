@@ -46,11 +46,6 @@
 #include "obstack.h"
 #include "windres.h"
 
-/* Defined in bfd/binary.c.  Used to set architecture and machine of input
-   binary files.  */
-extern enum bfd_architecture  bfd_external_binary_architecture;
-extern unsigned long          bfd_external_machine;
-
 /* Used by resrc.c at least.  */
 
 int verbose = 0;

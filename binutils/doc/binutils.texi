@@ -1134,9 +1134,9 @@ translation.  @xref{Target Selection}, for more information.
 
 @item -B @var{bfdarch}
 @itemx --binary-architecture=@var{bfdarch}
-Useful when transforming a raw binary input file into an object file.
-In this case the output architecture can be set to @var{bfdarch}. This
-option will be ignored if the input file has a known @var{bfdarch}. You
+Useful when transforming a architecture-less input file into an object file.
+In this case the output architecture can be set to @var{bfdarch}.  This
+option will be ignored if the input file has a known @var{bfdarch}.  You
 can access this binary data inside a program by referencing the special
 symbols that are created by the conversion process.  These symbols are
 called _binary_@var{objfile}_start, _binary_@var{objfile}_end and

@@ -1,3 +1,20 @@
+2009-09-11  Philippe De Muyter  <phdm@macqel.be>
+
+	* obcopy.c (copy_object): New parameter `input_arch', architecture
+	of input file, if not specified in input file itself; all callers
+	updated; `binary_architecture' hack removed.
+	(copy_archive, copy_file): New parameter `input_arch', for
+	`copy_object' usage.
+	(copy_main): Accept `-B' (`--binary-architecture') option also
+	for any arch-less input ifile format, not only `binary'; remove
+	bfd_external_binary_architecture hack; instead, add `input_arch'
+	to calls to `copy_file'.
+	* windres.c, windmc.c : Obsolete and useless external references
+	to `bfd_external_binary_architecture' or `bfd_external_machine'
+	removed.
+	* doc/binutils.texi: Mention that -B parameter can be used for any
+	input file type which does not have its own architecture.
+
 2009-09-10  Martin Thuresson  <martin@mtme.org>
 
 	Update soruces to compile cleanly with -Wc++-compat:

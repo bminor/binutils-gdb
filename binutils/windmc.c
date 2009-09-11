@@ -1,5 +1,5 @@
 /* windmc.c -- a program to compile Windows message files.
-   Copyright 2007, 2008
+   Copyright 2007, 2008, 2009
    Free Software Foundation, Inc.
    Written by Kai Tietz, Onevision.
 
@@ -50,11 +50,6 @@ typedef struct mc_msg_item
   rc_uint_type res_off;
   struct bin_messagetable_item *res;
 } mc_msg_item;
-
-/* Defined in bfd/binary.c.  Used to set architecture and machine of input
-   binary files.  */
-extern enum bfd_architecture  bfd_external_binary_architecture;
-extern unsigned long          bfd_external_machine;
 
 int target_is_bigendian = 0;
 const char *def_target_arch;

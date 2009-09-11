@@ -442,11 +442,6 @@ extern unsigned int Chunk;
    on by the --srec-forceS3 command line switch.  */
 extern bfd_boolean S3Forced;
 
-/* Defined in bfd/binary.c.  Used to set architecture and machine of input
-   binary files.  */
-extern enum bfd_architecture  bfd_external_binary_architecture;
-extern unsigned long          bfd_external_machine;
-
 /* Forward declarations.  */
 static void setup_section (bfd *, asection *, void *);
 static void setup_bfd_headers (bfd *, bfd *);
@@ -466,7 +461,7 @@ copy_usage (FILE *stream, int exit_status)
   fprintf (stream, _("\
   -I --input-target <bfdname>      Assume input file is in format <bfdname>\n\
   -O --output-target <bfdname>     Create an output file in format <bfdname>\n\
-  -B --binary-architecture <arch>  Set arch of output file, when input is binary\n\
+  -B --binary-architecture <arch>  Set output arch, when input is arch-less\n\
   -F --target <bfdname>            Set both input and output format to <bfdname>\n\
      --debugging                   Convert debugging information, if possible\n\
   -p --preserve-dates              Copy modified/access timestamps to the output\n\
@@ -1401,7 +1396,7 @@ copy_unknown_object (bfd *ibfd, bfd *obfd)
    Returns TRUE upon success, FALSE otherwise.  */
 
 static bfd_boolean
-copy_object (bfd *ibfd, bfd *obfd)
+copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 {
   bfd_vma start;
   long symcount;
@@ -1466,6 +1461,18 @@ copy_object (bfd *ibfd, bfd *obfd)
   /* Copy architecture of input file to output file.  */
   iarch = bfd_get_arch (ibfd);
   imach = bfd_get_mach (ibfd);
+  if (input_arch)
+    {
+      if (bfd_get_arch_info (ibfd) == NULL
+	  || bfd_get_arch_info (ibfd)->arch == bfd_arch_unknown)
+	{
+	  iarch = input_arch->arch;
+	  imach = input_arch->mach;
+	}
+      else
+	non_fatal (_("Input file `%s' ignores binary architecture parameter."),
+		   bfd_get_archive_filename (ibfd));
+    }
   if (!bfd_set_arch_mach (obfd, iarch, imach)
       && (ibfd->target_defaulted
 	  || bfd_get_arch (ibfd) != bfd_get_arch (obfd)))
@@ -1956,7 +1963,8 @@ copy_object (bfd *ibfd, bfd *obfd)
 
 static void
 copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
-	      bfd_boolean force_output_target)
+	      bfd_boolean force_output_target,
+	      const bfd_arch_info_type *input_arch)
 {
   struct name_list
     {
@@ -2050,7 +2058,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	      return;
 	    }
 
-	  del = ! copy_object (this_element, output_bfd);
+ 	  del = ! copy_object (this_element, output_bfd, input_arch);
 
 	  if (! del
 	      || bfd_get_arch (this_element) != bfd_arch_unknown)
@@ -2155,7 +2163,8 @@ set_long_section_mode (bfd *output_bfd, bfd *input_bfd, enum long_section_name_h
 
 static void
 copy_file (const char *input_filename, const char *output_filename,
-	   const char *input_target,   const char *output_target)
+	   const char *input_target,   const char *output_target,
+	   const bfd_arch_info_type *input_arch)
 {
   bfd *ibfd;
   char **obj_matching;
@@ -2206,7 +2215,7 @@ copy_file (const char *input_filename, const char *output_filename,
       /* This is a no-op on non-Coff targets.  */
       set_long_section_mode (obfd, ibfd, long_section_names);
 
-      copy_archive (ibfd, obfd, output_target, force_output_target);
+      copy_archive (ibfd, obfd, output_target, force_output_target, input_arch);
     }
   else if (bfd_check_format_matches (ibfd, bfd_object, &obj_matching))
     {
@@ -2228,7 +2237,7 @@ copy_file (const char *input_filename, const char *output_filename,
       /* This is a no-op on non-Coff targets.  */
       set_long_section_mode (obfd, ibfd, long_section_names);
 
-      if (! copy_object (ibfd, obfd))
+      if (! copy_object (ibfd, obfd, input_arch))
 	status = 1;
 
       if (!bfd_close (obfd))
@@ -3009,7 +3018,7 @@ strip_main (int argc, char *argv[])
 	}
 
       status = 0;
-      copy_file (argv[i], tmpname, input_target, output_target);
+      copy_file (argv[i], tmpname, input_target, output_target, NULL);
       if (status == 0)
 	{
 	  if (preserve_dates)
@@ -3144,7 +3153,6 @@ convert_efi_target (char *efi)
 static int
 copy_main (int argc, char *argv[])
 {
-  char * binary_architecture = NULL;
   char *input_filename = NULL;
   char *output_filename = NULL;
   char *tmpname;
@@ -3156,6 +3164,7 @@ copy_main (int argc, char *argv[])
   int c;
   struct section_list *p;
   struct stat statbuf;
+  const bfd_arch_info_type *input_arch = NULL;
 
   while ((c = getopt_long (argc, argv, "b:B:i:I:j:K:N:s:O:d:F:L:G:R:SpgxXHhVvW:w",
 			   copy_options, (int *) 0)) != EOF)
@@ -3169,7 +3178,9 @@ copy_main (int argc, char *argv[])
 	  break;
 
 	case 'B':
-	  binary_architecture = optarg;
+	  input_arch = bfd_scan_arch (optarg);
+	  if (input_arch == NULL)
+	    fatal (_("architecture %s unknown"), optarg);
 	  break;
 
 	case 'i':
@@ -3824,29 +3835,6 @@ copy_main (int argc, char *argv[])
       convert_efi_target (efi);
     }
 
-  if (binary_architecture != NULL)
-    {
-      if (input_target && strcmp (input_target, "binary") == 0)
-	{
-	  const bfd_arch_info_type * temp_arch_info;
-
-	  temp_arch_info = bfd_scan_arch (binary_architecture);
-
-	  if (temp_arch_info != NULL)
-	    {
-	      bfd_external_binary_architecture = temp_arch_info->arch;
-	      bfd_external_machine             = temp_arch_info->mach;
-	    }
-	  else
-	    fatal (_("architecture %s unknown"), binary_architecture);
-	}
-      else
-	{
-	  non_fatal (_("Warning: input target 'binary' required for binary architecture parameter."));
-	  non_fatal (_(" Argument %s ignored"), binary_architecture);
-	}
-    }
-
   if (preserve_dates)
     if (stat (input_filename, & statbuf) < 0)
       fatal (_("warning: could not locate '%s'.  System error message: %s"),
@@ -3863,7 +3851,7 @@ copy_main (int argc, char *argv[])
     fatal (_("warning: could not create temporary file whilst copying '%s', (error: %s)"),
 	   input_filename, strerror (errno));
 
-  copy_file (input_filename, tmpname, input_target, output_target);
+  copy_file (input_filename, tmpname, input_target, output_target, input_arch);
   if (status == 0)
     {
       if (preserve_dates)
