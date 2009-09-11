@@ -1,3 +1,8 @@
+2009-09-11  Nick Clifton  <nickc@redhat.com>
+
+	* rs6000-core.c (read_hdr): Fix typo in recent C++ compatibility
+	changes.
+
 2009-09-11  Jie Zhang  <jie.zhang@analog.com>
 
 	* elf32-bfin.c (bfinfdpic_relocs_info_find): Just return
