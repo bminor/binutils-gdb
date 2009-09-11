@@ -18,6 +18,11 @@
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@gnu.org
 
+# This only works with on Linux targets.
+if ![istarget *-*-linux*] then {
+    return
+}
+
 if { [prepare_for_testing current-lwp-dead.exp current-lwp-dead] } {
     return -1
 }
