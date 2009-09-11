@@ -291,7 +291,7 @@ read_hdr (bfd *abfd, CoreHdr *core)
 
   /* Read the trailing portion of the structure.  */
   if (CORE_NEW (*core))
-    size = sizeof (core->new_core);
+    size = sizeof (core->new_dump);
   else
     size = sizeof (core->old);
   size -= CORE_COMMONSZ;
