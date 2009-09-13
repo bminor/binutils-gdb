@@ -1,3 +1,8 @@
+2009-09-12  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.reverse/step-reverse.exp: Explicitly check for targets
+	that can support reverse debuggnig.
+
 2009-09-11  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.dwarf2/valop.S: New file.
