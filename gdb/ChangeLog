@@ -1,3 +1,29 @@
+2009-09-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* frame.c (get_frame_id): Default to outer_frame_id if the this_id
+	method does not supply an ID.  Assert that the result is not
+	null_frame_id.
+	(outer_frame_id): New.
+	(frame_id_p): Accept outer_frame_id.
+	(frame_id_eq): Allow outer_frame_id to be equal to itself.
+	(frame_find_by_id): Revert previous local workarounds.
+	(get_prev_frame_1): Adjust end-of-stack check to test outer_frame_id.
+	* frame.h (null_frame_id, frame_id_p): Update comments.
+	(outer_frame_id): Declare.
+	* infrun.c (handle_inferior_event): Do not treat all steps from the
+	outermost frame as subroutine calls.
+
+	* libunwind-frame.c (libunwind_frame_this_id): Do not clear THIS_ID.
+	* hppa-tdep.c (hppa_stub_frame_this_id): Likewise.
+	* ia64-tdep.c (ia64_frame_this_id): Likewise.
+	(ia64_libunwind_frame_this_id, ia64_libunwind_sigtramp_frame_this_id):
+	Use outer_frame_id instead of null_frame_id.
+	* amd64obsd-tdep.c (amd64obsd_trapframe_cache): Use outer_frame_id.
+	* i386obsd-tdep.c (i386obsd_trapframe_cache): Likewise.
+	* inline-frame.c (inline_frame_this_id): Refuse outer_frame_id.
+	* thread.c (restore_selected_frame): Update comment and remove
+	frame_id_p check.
+
 2009-09-11  Doug Evans  <dje@google.com>
 
 	* dwarf2expr.c (execute_stack_op, case DW_OP_piece): Delete unused

@@ -1774,9 +1774,7 @@ ia64_frame_this_id (struct frame_info *this_frame, void **this_cache,
     ia64_frame_cache (this_frame, this_cache);
 
   /* If outermost frame, mark with null frame id.  */
-  if (cache->base == 0)
-    (*this_id) = null_frame_id;
-  else
+  if (cache->base != 0)
     (*this_id) = frame_id_build_special (cache->base, cache->pc, cache->bsp);
   if (gdbarch_debug >= 1)
     fprintf_unfiltered (gdb_stdlog,
@@ -2790,15 +2788,14 @@ ia64_libunwind_frame_this_id (struct frame_info *this_frame, void **this_cache,
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct frame_id id;
+  struct frame_id id = outer_frame_id;
   char buf[8];
   CORE_ADDR bsp;
 
-
   libunwind_frame_this_id (this_frame, this_cache, &id);
-  if (frame_id_eq (id, null_frame_id))
+  if (frame_id_eq (id, outer_frame_id))
     {
-      (*this_id) = null_frame_id;
+      (*this_id) = outer_frame_id;
       return;
     }
 
@@ -2923,13 +2920,13 @@ ia64_libunwind_sigtramp_frame_this_id (struct frame_info *this_frame,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   char buf[8];
   CORE_ADDR bsp;
-  struct frame_id id;
+  struct frame_id id = outer_frame_id;
   CORE_ADDR prev_ip;
 
   libunwind_frame_this_id (this_frame, this_cache, &id);
-  if (frame_id_eq (id, null_frame_id))
+  if (frame_id_eq (id, outer_frame_id))
     {
-      (*this_id) = null_frame_id;
+      (*this_id) = outer_frame_id;
       return;
     }
 

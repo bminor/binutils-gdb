@@ -3796,10 +3796,22 @@ infrun: not switching back to stepped thread, it has vanished\n");
      NOTE: frame_id_eq will never report two invalid frame IDs as
      being equal, so to get into this block, both the current and
      previous frame must have valid frame IDs.  */
+  /* The outer_frame_id check is a heuristic to detect stepping
+     through startup code.  If we step over an instruction which
+     sets the stack pointer from an invalid value to a valid value,
+     we may detect that as a subroutine call from the mythical
+     "outermost" function.  This could be fixed by marking
+     outermost frames as !stack_p,code_p,special_p.  Then the
+     initial outermost frame, before sp was valid, would
+     have code_addr == &_start.  See the commend in frame_id_eq
+     for more.  */
   if (!frame_id_eq (get_stack_frame_id (frame),
 		    ecs->event_thread->step_stack_frame_id)
-      && frame_id_eq (frame_unwind_caller_id (frame),
-		      ecs->event_thread->step_stack_frame_id))
+      && (frame_id_eq (frame_unwind_caller_id (get_current_frame ()),
+		       ecs->event_thread->step_stack_frame_id)
+	  && (!frame_id_eq (ecs->event_thread->step_stack_frame_id,
+			    outer_frame_id)
+	      || step_start_function != find_pc_function (stop_pc))))
     {
       CORE_ADDR real_stop_pc;
 

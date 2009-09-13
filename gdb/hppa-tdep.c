@@ -2427,8 +2427,6 @@ hppa_stub_frame_this_id (struct frame_info *this_frame,
 
   if (info)
     *this_id = frame_id_build (info->base, get_frame_func (this_frame));
-  else
-    *this_id = null_frame_id;
 }
 
 static struct value *

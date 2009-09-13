@@ -2042,8 +2042,16 @@ address as its caller.  On some platforms, a third address is part of
 the ID to further disambiguate frames---for instance, on IA-64
 the separate register stack address is included in the ID.
 
-An invalid frame ID (@code{null_frame_id}) returned from the
+An invalid frame ID (@code{outer_frame_id}) returned from the
 @code{this_id} method means to stop unwinding after this frame.
+
+@code{null_frame_id} is another invalid frame ID which should be used
+when there is no frame.  For instance, certain breakpoints are attached
+to a specific frame, and that frame is identified through its frame ID
+(we use this to implement the "finish" command).  Using
+@code{null_frame_id} as the frame ID for a given breakpoint means
+that the breakpoint is not specific to any frame.  The @code{this_id}
+method should never return @code{null_frame_id}.
 
 @section Unwinding Registers
 

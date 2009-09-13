@@ -885,15 +885,11 @@ restore_selected_frame (struct frame_id a_frame_id, int frame_level)
   frame = find_relative_frame (get_current_frame (), &count);
   if (count == 0
       && frame != NULL
-      /* Either the frame ids match, of they're both invalid.  The
-	 latter case is not failsafe, but since it's highly unlikely
+      /* The frame ids must match - either both valid or both outer_frame_id.
+	 The latter case is not failsafe, but since it's highly unlikely
 	 the search by level finds the wrong frame, it's 99.9(9)% of
 	 the time (for all practical purposes) safe.  */
-      && (frame_id_eq (get_frame_id (frame), a_frame_id)
-	  /* Note: could be better to check every frame_id
-	     member for equality here.  */
-	  || (!frame_id_p (get_frame_id (frame))
-	      && !frame_id_p (a_frame_id))))
+      && frame_id_eq (get_frame_id (frame), a_frame_id))
     {
       /* Cool, all is fine.  */
       select_frame (frame);

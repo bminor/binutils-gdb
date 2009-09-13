@@ -148,6 +148,10 @@ inline_frame_this_id (struct frame_info *this_frame,
      frame").  This will take work.  */
   gdb_assert (frame_id_p (*this_id));
 
+  /* For now, require we don't match outer_frame_id either (see
+     comment above).  */
+  gdb_assert (!frame_id_eq (*this_id, outer_frame_id));
+
   /* Future work NOTE: Alexandre Oliva applied a patch to GCC 4.3
      which generates DW_AT_entry_pc for inlined functions when
      possible.  If this attribute is available, we should use it

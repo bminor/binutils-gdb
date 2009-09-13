@@ -380,7 +380,7 @@ amd64obsd_trapframe_cache (struct frame_info *this_frame, void **this_cache)
   if ((cs & I386_SEL_RPL) == I386_SEL_UPL)
     {
       /* Trap from user space; terminate backtrace.  */
-      trad_frame_set_id (cache, null_frame_id);
+      trad_frame_set_id (cache, outer_frame_id);
     }
   else
     {

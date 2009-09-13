@@ -1,3 +1,7 @@
+2009-09-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdbint.texinfo (Unwinding the Frame ID): Reference outer_frame_id.
+
 2009-09-10  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.texinfo (qSupported): Mention new ReverseContinue and
