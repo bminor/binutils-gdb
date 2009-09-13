@@ -1,3 +1,16 @@
+2009-09-13  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* ld-mips-elf/eh-frame1-n32.d: Change "the section \.eh_frame"
+	to "the \.eh_frame section".
+	* ld-mips-elf/eh-frame1-n64.d: Likewise.
+	* ld-mips-elf/eh-frame2-n32.d: Likewise.
+	* ld-mips-elf/eh-frame2-n64.d: Likewise.
+	* ld-mips-elf/eh-frame3.d: Likewise.
+	* ld-mips-elf/eh-frame4.d: Likewise.
+	* ld-mips-elf/elf-rel-got-n32.d: Expect bals.
+	* ld-mips-elf/elf-rel-xgot-n32.d: Likewise.
+	* ld-mips-elf/mips-elf.exp: Force the MIPS16 PIC tests to use -mips1.
+
 2009-09-11  Jie Zhang  <jie.zhang@analog.com>
 
 	* ld-elf/warn2.d: `Foo' appears in section 3 when target

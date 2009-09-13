@@ -9,7 +9,7 @@
 # combination of 32-bit objects and 64-bit FDE addresses.
 #
 
-Contents of the section \.eh_frame:
+Contents of the \.eh_frame section:
 
 00000000 0000000c 00000000 CIE
   Version:               1
