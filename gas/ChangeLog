@@ -1,3 +1,12 @@
+2009-09-13  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.c (MIPS_JALR_HINT_P): Take an expr argument.
+	Require the target to be a bare symbol on targets with
+	in-place addends.
+	(macro_build_jalr): Update accordingly.
+	(mips_fix_adjustable): Don't reduce R_MIPS_JALRs on targets
+	with in-place addends.
+
 2009-09-11  Nick Clifton  <nickc@redhat.com>
 
 	* po/gas.pot: Updated by the Translation project.

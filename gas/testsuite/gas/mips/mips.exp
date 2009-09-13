@@ -706,6 +706,7 @@ if { [istarget mips*-*-vxworks*] } {
 
 	run_list_test "tls-ill" "-32"
 	run_dump_test "tls-o32"
+	run_dump_test "jalr2"
     }
 
     if $has_newabi {
