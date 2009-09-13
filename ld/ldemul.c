@@ -192,9 +192,35 @@ ldemul_default_target (int argc ATTRIBUTE_UNUSED, char **argv ATTRIBUTE_UNUSED)
   return ld_emulation->target_name;
 }
 
+/* If the entry point was not specified as an address, then add the
+   symbol as undefined.  This will cause ld to extract an archive
+   element defining the entry if ld is linking against such an archive.
+
+   We don't do this when generating shared libraries unless given -e
+   on the command line, because most shared libs are not designed to
+   be run as an executable.  However, some are, eg. glibc ld.so and
+   may rely on the default linker script supplying ENTRY.  So we can't
+   remove the ENTRY from the script, but would rather not insert
+   undefined _start syms.  */
+
 void
 after_parse_default (void)
 {
+  if (entry_symbol.name != NULL
+      && (link_info.executable || entry_from_cmdline))
+    {
+      bfd_boolean is_vma = FALSE;
+
+      if (entry_from_cmdline)
+	{
+	  const char *send;
+
+	  bfd_scan_vma (entry_symbol.name, &send, 0);
+	  is_vma = *send == '\0';
+	}
+      if (!is_vma)
+	ldlang_add_undef (entry_symbol.name);
+    }
 }
 
 void

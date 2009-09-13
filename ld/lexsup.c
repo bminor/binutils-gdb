@@ -832,7 +832,6 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case 'e':
 	  lang_add_entry (optarg, TRUE);
-	  ldlang_add_undef (optarg);
 	  break;
 	case 'f':
 	  if (command_line.auxiliary_filters == NULL)

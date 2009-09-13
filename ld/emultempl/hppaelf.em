@@ -59,6 +59,8 @@ hppaelf_after_parse (void)
      			  lang_input_file_is_l_enum,
 			  NULL);
   */
+
+  after_parse_default ();
 }
 
 /* This is called before the input files are opened.  We create a new

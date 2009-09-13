@@ -877,27 +877,13 @@ gld_${EMULATION_NAME}_set_symbols (void)
 static void
 gld_${EMULATION_NAME}_after_parse (void)
 {
-  /* The Windows libraries are designed for the linker to treat the
-     entry point as an undefined symbol.  Otherwise, the .obj that
-     defines mainCRTStartup is brought in because it is the first
-     encountered in libc.lib and it has other symbols in it which will
-     be pulled in by the link process.  To avoid this, we act as
-     though the user specified -u with the entry point symbol.
-
-     This function is called after the linker script and command line
-     options have been read, so at this point we know the right entry
-     point.  This function is called before the input files are
-     opened, so registering the symbol as undefined will make a
-     difference.  */
-
-  if (! link_info.relocatable && entry_symbol.name != NULL)
-    ldlang_add_undef (entry_symbol.name);
-
   /* PR ld/6744:  Warn the user if they have used an ELF-only
      option hoping it will work on PE.  */
   if (link_info.export_dynamic)
     einfo (_("%P: warning: --export-dynamic is not supported for PE "
       "targets, did you mean --export-all-symbols?\n"));
+
+  after_parse_default ();
 }
 
 /* pe-dll.c directly accesses pe_data_import_dll,

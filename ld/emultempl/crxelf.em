@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2004, 2005, 2007
+#   Copyright 2004, 2005, 2007, 2009
 #   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
@@ -45,6 +45,8 @@ crxelf_after_parse (void)
      meaninful in CRX embedded systems. Moreover, when magic_demand_paged
      is true the link sometimes fails.  */
   config.magic_demand_paged = FALSE;
+
+  after_parse_default ();
 }
 
 /* This is called after the sections have been attached to output

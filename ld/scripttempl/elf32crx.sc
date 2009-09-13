@@ -10,14 +10,8 @@ cat <<EOF
 
 /* Example Linker Script for linking NS CRX elf32 files. */
 
-/* The next line forces the entry point (${ENTRY} in this script)
-   to be entered in the output file as an undefined symbol.
-   It is needed in case the entry point is not called explicitly
-   (which is the usual case) AND is in an archive.  */
-
 OUTPUT_FORMAT("${OUTPUT_FORMAT}")
 OUTPUT_ARCH(${ARCH})
-${RELOCATING+EXTERN(${ENTRY})}
 ${RELOCATING+ENTRY(${ENTRY})}
 
 /* Define memory regions.  */

@@ -7,12 +7,6 @@ cat <<EOF
    elf32 files, which were compiled with either the near data
    model or the default data model.  */
 
-/* Force the entry point to be entered in the output file as
-   an undefined symbol. This is needed in case the entry point
-   (which is not called explicitly) is in an archive (which is
-   the usual case).  */
-
-${RELOCATING+EXTERN(${ENTRY})}
 ${RELOCATING+ENTRY(${ENTRY})}
 
 MEMORY
