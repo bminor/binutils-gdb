@@ -80,6 +80,8 @@ alpha_after_parse (void)
 				   exp_intop (ALPHA_TEXT_START_32BIT),
 				   exp_nameop (SIZEOF_HEADERS, NULL)),
 			NULL);
+
+  after_parse_default ();
 }
 
 static void

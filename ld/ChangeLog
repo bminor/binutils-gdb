@@ -1,3 +1,21 @@
+2009-09-13  Alan Modra  <amodra@bigpond.net.au>
+
+     	PR ld/6766
+	* lexsup.c (parse_args <-e>): Revert 2009-03-18 change.
+	* ldemul.c (after_parse_default): Add entry symbol as undef.
+	* emultempl/alphaelf.em (alpha_after_parse): Call after_parse_default.
+	* emultempl/cr16elf.em (cr16elf_after_parse): Likewise.
+	* emultempl/crxelf.em (crxelf_after_parse): Likewise.
+	* emultempl/hppaelf.em (hppaelf_after_parse): Likewise.
+	* emultempl/ia64elf.em (gld${EMULATION_NAME}_after_parse): Likewise.
+	* emultempl/pe.em (gld_${EMULATION_NAME}_after_parse): Call
+	after_parse_default and delete now duplicate code.
+	* emultempl/pep.em (gld_${EMULATION_NAME}_after_parse): Likewise.
+	* scripttempl/elf32cr16.sc: No need to make entry extern.
+	* scripttempl/elf32cr16c.sc: Likewise.
+	* scripttempl/elf32crx.sc: Likewise.
+	* scripttempl/elf32xc16xs.sc: Only provide ENTRY on final link.
+
 2009-09-11  Nick Clifton  <nickc@redhat.com>
 
 	* po/ld.pot: Updated by the Translation project.
