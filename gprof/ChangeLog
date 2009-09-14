@@ -1,3 +1,8 @@
+2009-09-14  Nick Clifton  <nickc@redhat.com>
+
+	* po/de.po: Updated German translation.
+	* po/nl.po: Update Dutch translation.
+
 2009-09-11  Nick Clifton  <nickc@redhat.com>
 
 	* po/gprof.pot: Updated by the Translation project.
