@@ -6852,8 +6852,8 @@ process_version_sections (FILE * file)
 		      break;
 
 		    default:
-		      nn = printf ("%4x%c", data[cnt + j] & 0x7fff,
-				   data[cnt + j] & 0x8000 ? 'h' : ' ');
+		      nn = printf ("%4x%c", data[cnt + j] & VERSYM_VERSION,
+				   data[cnt + j] & VERSYM_HIDDEN ? 'h' : ' ');
 
 		      check_def = 1;
 		      check_need = 1;
@@ -6947,10 +6947,10 @@ process_version_sections (FILE * file)
 
 			      offset += ivd.vd_next;
 			    }
-			  while (ivd.vd_ndx != (data[cnt + j] & 0x7fff)
+			  while (ivd.vd_ndx != (data[cnt + j] & VERSYM_VERSION)
 				 && ivd.vd_next != 0);
 
-			  if (ivd.vd_ndx == (data[cnt + j] & 0x7fff))
+			  if (ivd.vd_ndx == (data[cnt + j] & VERSYM_VERSION))
 			    {
 			      Elf_External_Verdaux evda;
 			      Elf_Internal_Verdaux ivda;
@@ -7564,7 +7564,7 @@ process_symbol_table (FILE * file)
 
 		  check_def = (psym->st_shndx != SHN_UNDEF);
 
-		  if ((vers_data & 0x8000) || vers_data > 1)
+		  if ((vers_data & VERSYM_HIDDEN) || vers_data > 1)
 		    {
 		      if (version_info[DT_VERSIONTAGIDX (DT_VERNEED)]
 			  && (is_nobits || ! check_def))
@@ -7656,7 +7656,7 @@ process_symbol_table (FILE * file)
 
 				  offset += ivd.vd_next;
 				}
-			      while (ivd.vd_ndx != (vers_data & 0x7fff)
+			      while (ivd.vd_ndx != (vers_data & VERSYM_VERSION)
 				     && ivd.vd_next != 0);
 
 			      offset -= ivd.vd_next;
@@ -7668,7 +7668,7 @@ process_symbol_table (FILE * file)
 			      ivda.vda_name = BYTE_GET (evda.vda_name);
 
 			      if (psym->st_name != ivda.vda_name)
-				printf ((vers_data & 0x8000)
+				printf ((vers_data & VERSYM_HIDDEN)
 					? "@%s" : "@@%s",
 					ivda.vda_name < strtab_size
 					? strtab + ivda.vda_name : "<corrupt>");
