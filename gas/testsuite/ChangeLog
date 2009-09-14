@@ -1,3 +1,7 @@
+2009-09-14  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* gas/mips/mips16-dwarf2-n32.d: Expect odd addresses.
+
 2009-09-11  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	PR gas/10623

@@ -17,7 +17,7 @@ Relocation section '\.rel\.dyn' .*:
 0003008b  [0-9a-f]+ R_MIPS_REL32      00000000   foo
 000300cc  [0-9a-f]+ R_MIPS_REL32      00000000   foo
 0003010a  [0-9a-f]+ R_MIPS_REL32      00000000   foo
-Contents of the section \.eh_frame:
+Contents of the \.eh_frame section:
 
 00000000 00000010 00000000 CIE
   Version:               1

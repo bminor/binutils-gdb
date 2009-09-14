@@ -33,7 +33,7 @@ Relocation section '\.rel\.dyn' .*:
 000000030192  [0-9a-f]+ R_MIPS_REL32      0000000000000000 foo
  *Type2: R_MIPS_64 *
  *Type3: R_MIPS_NONE *
-Contents of the section \.eh_frame:
+Contents of the \.eh_frame section:
 
 00000000 00000014 00000000 CIE
   Version:               1
