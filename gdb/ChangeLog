@@ -1,10 +1,17 @@
 2009-09-14  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
+	*minsyms.c (lookup_minimal_symbol_by_pc_section_1): Assert non-NULL
+	section.
+	(lookup_minimal_symbol_by_pc_section): Check for NULL section.
+	(lookup_minimal_symbol_by_pc): Adjust.
+
+2009-09-14  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
 	* objfiles.c (qsort_cmp): Remove asserts.
 	(insert_section_p, filter_debuginfo_sections): New function.
 	(filter_overlapping_sections): Likewise.
 	(update_section_map): Adjust.	
-	
+
 2009-09-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* frame.c (get_frame_id): Default to outer_frame_id if the this_id
