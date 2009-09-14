@@ -1,5 +1,14 @@
 2009-09-14  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gas/10637
+	* config/tc-i386-intel.c (intel_state): Add has_offset.
+	(i386_intel_simplify): Set intel_state.has_offset to 1 for
+	O_offset.
+	(i386_intel_operand): Turn on intel_state.is_mem if
+	intel_state.has_offset is 0 and the last char is ']'.
+
+2009-09-14  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/10636
 	* config/tc-i386.c (optimize_disp): Set disp32 for 64bit only
 	if there is an ADDR_PREFIX.

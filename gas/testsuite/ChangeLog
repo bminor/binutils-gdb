@@ -1,5 +1,20 @@
 2009-09-14  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gas/10637
+	* gas/i386/disp.s: Add tests for Intel syntax.
+	* gas/i386/x86-64-disp.s: Likewise.
+
+	* gas/i386/disp.d: Updated.
+	* gas/i386/intelok.d: Likewise.
+	* gas/i386/x86-64-disp.d: Likewise.
+
+	* gas/i386/disp-intel.d: New.
+	* gas/i386/x86-64-disp-intel.d: Likewise.
+
+	* gas/i386/i386.exp: Run disp-intel and x86-64-disp-intel.
+
+2009-09-14  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* gas/i386/merom.[ds]: Renamed to ...
 	* gas/i386/ssse3.[ds]: This.
 
