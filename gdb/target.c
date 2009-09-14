@@ -1289,19 +1289,6 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
 	}
     }
 
-  /* Make sure the cache gets updated no matter what - if we are writing
-     to the stack, even if this write is not tagged as such, we still need
-     to update the cache. */
-
-  if (inf != NULL
-      && readbuf == NULL
-      && !region->attrib.cache
-      && stack_cache_enabled_p
-      && object != TARGET_OBJECT_STACK_MEMORY)
-    {
-      dcache_update (target_dcache, memaddr, (void *) writebuf, reg_len);
-    }
-
   /* If none of those methods found the memory we wanted, fall back
      to a target partial transfer.  Normally a single call to
      to_xfer_partial is enough; if it doesn't recognize an object
@@ -1330,6 +1317,20 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
 
   if (readbuf && !show_memory_breakpoints)
     breakpoint_restore_shadows (readbuf, memaddr, reg_len);
+
+  /* Make sure the cache gets updated no matter what - if we are writing
+     to the stack.  Even if this write is not tagged as such, we still need
+     to update the cache.  */
+
+  if (res > 0
+      && inf != NULL
+      && writebuf != NULL
+      && !region->attrib.cache
+      && stack_cache_enabled_p
+      && object != TARGET_OBJECT_STACK_MEMORY)
+    {
+      dcache_update (target_dcache, memaddr, (void *) writebuf, reg_len);
+    }
 
   /* If we still haven't got anything, return the last error.  We
      give up.  */
