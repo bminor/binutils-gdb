@@ -51,6 +51,7 @@
 #include "arch-utils.h"
 #include "exec.h"
 #include "observer.h"
+#include "complaints.h"
 
 /* Prototypes for local functions */
 
@@ -802,16 +803,72 @@ qsort_cmp (const void *a, const void *b)
   const CORE_ADDR sect2_addr = obj_section_addr (sect2);
 
   if (sect1_addr < sect2_addr)
-    {
-      gdb_assert (obj_section_endaddr (sect1) <= sect2_addr);
-      return -1;
-    }
+    return -1;
   else if (sect1_addr > sect2_addr)
-    {
-      gdb_assert (sect1_addr >= obj_section_endaddr (sect2));
-      return 1;
-    }
+    return 1;
+  else
+   {
+     /* Sections are at the same address.  This could happen if
+	A) we have an objfile and a separate debuginfo.
+	B) we are confused, and have added sections without proper relocation,
+	or something like that. */
 
+     const struct objfile *const objfile1 = sect1->objfile;
+     const struct objfile *const objfile2 = sect2->objfile;
+
+     if (objfile1->separate_debug_objfile == objfile2
+	 || objfile2->separate_debug_objfile == objfile1)
+       {
+	 /* Case A.  The ordering doesn't matter: separate debuginfo files
+	    will be filtered out later.  */
+
+	 return 0;
+       }
+
+     /* Case B.  Maintain stable sort order, so bugs in GDB are easier to
+	triage.  This section could be slow (since we iterate over all
+	objfiles in each call to qsort_cmp), but this shouldn't happen
+	very often (GDB is already in a confused state; one hopes this
+	doesn't happen at all).  If you discover that significant time is
+	spent in the loops below, do 'set complaints 100' and examine the
+	resulting complaints.  */
+
+     if (objfile1 == objfile2)
+       {
+	 /* Both sections came from the same objfile.  We are really confused.
+	    Sort on sequence order of sections within the objfile.  */
+
+	 const struct obj_section *osect;
+
+	 ALL_OBJFILE_OSECTIONS (objfile1, osect)
+	   if (osect == sect1)
+	     return -1;
+	   else if (osect == sect2)
+	     return 1;
+
+	 /* We should have found one of the sections before getting here.  */
+	 gdb_assert (0);
+       }
+     else
+       {
+	 /* Sort on sequence number of the objfile in the chain.  */
+
+	 const struct objfile *objfile;
+
+	 ALL_OBJFILES (objfile)
+	   if (objfile == objfile1)
+	     return -1;
+	   else if (objfile == objfile2)
+	     return 1;
+
+	 /* We should have found one of the objfiles before getting here.  */
+	 gdb_assert (0);
+       }
+
+   }
+
+  /* Unreachable.  */
+  gdb_assert (0);
   return 0;
 }
 
@@ -835,12 +892,146 @@ preferred_obj_section (struct obj_section *a, struct obj_section *b)
   return b;
 }
 
-/* Update PMAP, PMAP_SIZE with non-TLS sections from all objfiles.  */
+/* Return 1 if SECTION should be inserted into the section map.
+   We want to insert only non-overlay and non-TLS section.  */
+
+static int
+insert_section_p (const struct bfd *abfd,
+		  const struct bfd_section *section)
+{
+  const bfd_vma lma = bfd_section_lma (abfd, section);
+
+  if (lma != 0 && lma != bfd_section_vma (abfd, section)
+      && (bfd_get_file_flags (abfd) & BFD_IN_MEMORY) == 0)
+    /* This is an overlay section.  IN_MEMORY check is needed to avoid
+       discarding sections from the "system supplied DSO" (aka vdso)
+       on some Linux systems (e.g. Fedora 11).  */
+    return 0;
+  if ((bfd_get_section_flags (abfd, section) & SEC_THREAD_LOCAL) != 0)
+    /* This is a TLS section.  */
+    return 0;
+
+  return 1;
+}
+
+/* Filter out overlapping sections where one section came from the real
+   objfile, and the other from a separate debuginfo file.
+   Return the size of table after redundant sections have been eliminated.  */
+
+static int
+filter_debuginfo_sections (struct obj_section **map, int map_size)
+{
+  int i, j;
+
+  for (i = 0, j = 0; i < map_size - 1; i++)
+    {
+      struct obj_section *const sect1 = map[i];
+      struct obj_section *const sect2 = map[i + 1];
+      const struct objfile *const objfile1 = sect1->objfile;
+      const struct objfile *const objfile2 = sect2->objfile;
+      const CORE_ADDR sect1_addr = obj_section_addr (sect1);
+      const CORE_ADDR sect2_addr = obj_section_addr (sect2);
+
+      if (sect1_addr == sect2_addr
+	  && (objfile1->separate_debug_objfile == objfile2
+	      || objfile2->separate_debug_objfile == objfile1))
+	{
+	  map[j++] = preferred_obj_section (sect1, sect2);
+	  ++i;
+	}
+      else
+	map[j++] = sect1;
+    }
+
+  if (i < map_size)
+    {
+      gdb_assert (i == map_size - 1);
+      map[j++] = map[i];
+    }
+
+  /* The map should not have shrunk to less than half the original size.  */
+  gdb_assert (map_size / 2 <= j);
+
+  return j;
+}
+
+/* Filter out overlapping sections, issuing a warning if any are found.
+   Overlapping sections could really be overlay sections which we didn't
+   classify as such in insert_section_p, or we could be dealing with a
+   corrupt binary.  */
+
+static int
+filter_overlapping_sections (struct obj_section **map, int map_size)
+{
+  int i, j;
+
+  for (i = 0, j = 0; i < map_size - 1; )
+    {
+      int k;
+
+      map[j++] = map[i];
+      for (k = i + 1; k < map_size; k++)
+	{
+	  struct obj_section *const sect1 = map[i];
+	  struct obj_section *const sect2 = map[k];
+	  const CORE_ADDR sect1_addr = obj_section_addr (sect1);
+	  const CORE_ADDR sect2_addr = obj_section_addr (sect2);
+	  const CORE_ADDR sect1_endaddr = obj_section_endaddr (sect1);
+
+	  gdb_assert (sect1_addr <= sect2_addr);
+
+	  if (sect1_endaddr <= sect2_addr)
+	    break;
+	  else
+	    {
+	      /* We have an overlap.  Report it.  */
+
+	      struct objfile *const objf1 = sect1->objfile;
+	      struct objfile *const objf2 = sect2->objfile;
+
+	      const struct bfd *const abfd1 = objf1->obfd;
+	      const struct bfd *const abfd2 = objf2->obfd;
+
+	      const struct bfd_section *const bfds1 = sect1->the_bfd_section;
+	      const struct bfd_section *const bfds2 = sect2->the_bfd_section;
+
+	      const CORE_ADDR sect2_endaddr = obj_section_endaddr (sect2);
+
+	      struct gdbarch *const gdbarch = get_objfile_arch (objf1);
+
+	      complaint (&symfile_complaints,
+			 _("unexpected overlap between:\n"
+			   " (A) section `%s' from `%s' [%s, %s)\n"
+			   " (B) section `%s' from `%s' [%s, %s).\n"
+			   "Will ignore section B"),
+			 bfd_section_name (abfd1, bfds1), objf1->name,
+			 paddress (gdbarch, sect1_addr),
+			 paddress (gdbarch, sect1_endaddr),
+			 bfd_section_name (abfd2, bfds2), objf2->name,
+			 paddress (gdbarch, sect2_addr),
+			 paddress (gdbarch, sect2_endaddr));
+	    }
+	}
+      i = k;
+    }
+
+  if (i < map_size)
+    {
+      gdb_assert (i == map_size - 1);
+      map[j++] = map[i];
+    }
+
+  return j;
+}
+
+
+/* Update PMAP, PMAP_SIZE with sections from all objfiles, excluding any
+   TLS, overlay and overlapping sections.  */
 
 static void
 update_section_map (struct obj_section ***pmap, int *pmap_size)
 {
-  int map_size, i, j;
+  int alloc_size, map_size, i;
   struct obj_section *s, **map;
   struct objfile *objfile;
 
@@ -849,55 +1040,27 @@ update_section_map (struct obj_section ***pmap, int *pmap_size)
   map = *pmap;
   xfree (map);
 
-#define insert_p(objf, sec) \
-  ((bfd_get_section_flags ((objf)->obfd, (sec)->the_bfd_section) \
-    & SEC_THREAD_LOCAL) == 0)
-
-  map_size = 0;
+  alloc_size = 0;
   ALL_OBJSECTIONS (objfile, s)
-    if (insert_p (objfile, s))
-      map_size += 1;
+    if (insert_section_p (objfile->obfd, s->the_bfd_section))
+      alloc_size += 1;
 
-  map = xmalloc (map_size * sizeof (*map));
+  map = xmalloc (alloc_size * sizeof (*map));
 
   i = 0;
   ALL_OBJSECTIONS (objfile, s)
-    if (insert_p (objfile, s))
+    if (insert_section_p (objfile->obfd, s->the_bfd_section))
       map[i++] = s;
 
-#undef insert_p
+  qsort (map, alloc_size, sizeof (*map), qsort_cmp);
+  map_size = filter_debuginfo_sections(map, alloc_size);
+  map_size = filter_overlapping_sections(map, map_size);
 
-  qsort (map, map_size, sizeof (*map), qsort_cmp);
-
-  /* With separate debuginfo files, we may have up to two (almost)
-     identical copies of some obj_sections in the map.
-     Filter out duplicates.  */
-  for (i = 0, j = 0; i < map_size; ++i)
-    {
-      struct obj_section *sect1 = map[i];
-      struct obj_section *sect2 = (i + 1 < map_size) ? map[i + 1] : NULL;
-
-      if (sect2 == NULL
-	  || obj_section_addr (sect1) != obj_section_addr (sect2))
-	map[j++] = sect1;
-      else
-	{
-	  map[j++] = preferred_obj_section (sect1, sect2);
-	  ++i;
-	}
-    }
-
-  if (j < map_size)
-    {
-      /* Some duplicates were eliminated.
-	 The new size shouldn't be less than half of the original. */
-      gdb_assert (map_size / 2 <= j);
-      map_size = j;
-
-      map = xrealloc (map, map_size * sizeof (*map));  /* Trim excess space.  */
-    }
+  if (map_size < alloc_size)
+    /* Some sections were eliminated.  Trim excess space.  */
+    map = xrealloc (map, map_size * sizeof (*map));
   else
-    gdb_assert (j == map_size);
+    gdb_assert (alloc_size == map_size);
 
   *pmap = map;
   *pmap_size = map_size;
