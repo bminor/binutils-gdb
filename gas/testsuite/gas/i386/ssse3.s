@@ -1,4 +1,4 @@
-#Merom New Instructions
+# SSSE3 New Instructions
 
 	.text
 foo:

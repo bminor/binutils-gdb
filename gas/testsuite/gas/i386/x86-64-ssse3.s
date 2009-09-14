@@ -1,4 +1,4 @@
-#Merom New Instructions
+# 64bit SSSE3 New Instructions
 
 	.text
 foo:

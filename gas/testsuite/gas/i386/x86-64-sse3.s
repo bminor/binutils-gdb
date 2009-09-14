@@ -1,4 +1,4 @@
-#Prescott New Instructions
+# 64bit SSE3 New Instructions
 
 	.text
 foo:

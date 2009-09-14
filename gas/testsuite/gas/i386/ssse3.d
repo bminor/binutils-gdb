@@ -1,5 +1,5 @@
 #objdump: -dw
-#name: i386 merom
+#name: i386 SSSE3
 
 .*: +file format .*
 

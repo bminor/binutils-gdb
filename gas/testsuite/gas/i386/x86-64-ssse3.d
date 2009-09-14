@@ -1,5 +1,5 @@
 #objdump: -dw
-#name: x86-64 merom
+#name: x86-64 SSSE3
 
 .*: +file format .*
 

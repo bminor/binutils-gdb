@@ -1,5 +1,30 @@
 2009-09-14  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* gas/i386/merom.[ds]: Renamed to ...
+	* gas/i386/ssse3.[ds]: This.
+
+	* gas/i386/nops-1-merom.d: Renamed to ...
+	* gas/i386/nops-1-core2.d: This.
+
+	* gas/i386/nops-2-merom.d: Renamed to ...
+	* gas/i386/nops-2-core2.d: This.
+
+	* gas/i386/prescott.[ds]: Renamed to ...
+	* gas/i386/sse3.[ds]: This.
+
+	* gas/i386/x86-64-merom.[ds]: Renamed to ...
+	* gas/i386/x86-64-ssse3.[ds]: This.
+
+	* gas/i386/x86-64-nops-1-merom.d: Renamed to ...
+	* gas/i386/x86-64-nops-1-core2.d: This.
+
+	* gas/i386/x86-64-prescott.[ds]: Renamed to ...
+	* gas/i386/x86-64-sse3.[ds]: This.
+
+	* gas/i386/i386.exp: Updated.
+
+2009-09-14  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/10636
 	* gas/i386/disp.d: New.
 	* gas/i386/disp.s: Likewise.

@@ -1,5 +1,5 @@
 #objdump: -dw
-#name: i386 prescott
+#name: i386 SSE3
 
 .*: +file format .*
 

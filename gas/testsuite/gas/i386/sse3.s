@@ -1,4 +1,4 @@
-#Prescott New Instructions
+# SSE3 New Instructions
 
 	.text
 foo:

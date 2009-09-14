@@ -1,5 +1,5 @@
 #objdump: -dw
-#name: x86-64 prescott
+#name: x86-64 SSE3
 
 .*: +file format .*
 
