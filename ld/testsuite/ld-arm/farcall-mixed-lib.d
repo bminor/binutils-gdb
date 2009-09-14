@@ -39,9 +39,9 @@ Disassembly of section .text:
 
 .* <lib_func2>:
  .*:	f000 e80e 	blx	1000350 <__app_func_from_thumb>
- .*:	f000 e818 	blx	1000368 <__app_func_weak_from_thumb>
- .*:	f000 e810 	blx	100035c <__lib_func3_from_thumb>
- .*:	f000 e81a 	blx	1000374 <__lib_func4_from_thumb>
+ .*:	f000 e81a 	blx	100036c <__app_func_weak_from_thumb>
+ .*:	f000 e810 	blx	100035c <__lib_func3_veneer>
+ .*:	f000 e81c 	blx	1000378 <__lib_func4_from_thumb>
  .*:	4770      	bx	lr
  .*:	46c0      	nop			; \(mov r8, r8\)
  .*:	46c0      	nop			; \(mov r8, r8\)
@@ -56,20 +56,21 @@ Disassembly of section .text:
  .*:	e08ff00c 	add	pc, pc, ip
  .*:	feffff84 	.word	0xfeffff84
 
-.* <__lib_func3_from_thumb>:
- .*:	e59fc000 	ldr	ip, \[pc, #0\]	; 1000364 <__lib_func3_from_thumb\+0x8>
- .*:	e08ff00c 	add	pc, pc, ip
- .*:	feffff90 	.word	0xfeffff90
+.* <__lib_func3_veneer>:
+ .*:	e59fc004 	ldr	ip, \[pc, #4\]	; 1000368 <__lib_func3_veneer\+0xc>
+ .*:	e08fc00c 	add	ip, pc, ip
+ .*:	e12fff1c 	bx	ip
+ .*:	feffff91 	.word	0xfeffff91
 
 .* <__app_func_weak_from_thumb>:
- .*:	e59fc000 	ldr	ip, \[pc, #0\]	; 1000370 <__app_func_weak_from_thumb\+0x8>
+ .*:	e59fc000 	ldr	ip, \[pc, #0\]	; 1000374 <__app_func_weak_from_thumb\+0x8>
  .*:	e08ff00c 	add	pc, pc, ip
- .*:	feffff78 	.word	0xfeffff78
+ .*:	feffff74 	.word	0xfeffff74
 
 .* <__lib_func4_from_thumb>:
- .*:	e59fc000 	ldr	ip, \[pc, #0\]	; 100037c <__lib_func4_from_thumb\+0x8>
+ .*:	e59fc000 	ldr	ip, \[pc, #0\]	; 1000380 <__lib_func4_from_thumb\+0x8>
  .*:	e08ff00c 	add	pc, pc, ip
- .*:	feffff84 	.word	0xfeffff84
+ .*:	feffff80 	.word	0xfeffff80
 	...
 
 .* <lib_func3>:

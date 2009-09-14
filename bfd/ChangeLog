@@ -1,3 +1,10 @@
+2009-09-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_final_link_relocate): Set sym_flags
+	for the mode of target PLT entries.
+	(allocate_dynrelocs): Only adjust symbol type if setting its
+	value.
+
 2009-09-14  Nick Clifton  <nickc@redhat.com>
 
 	* po/fi.po: Updated Finnish translation.
