@@ -1,0 +1,9 @@
+	mov 0x7fffffff(%rax),%ebx
+	mov -0x80000000(%rax),%ebx
+	mov -0x80000000,%ebx
+	mov 0xffffffff80000000,%ebx
+	mov 0x7fffffff,%ebx
+	mov -0x80000000,%eax
+	mov 0xffffffff80000000,%eax
+	mov 0x7fffffff,%eax
+	mov 0x80000000,%eax

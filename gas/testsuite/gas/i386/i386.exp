@@ -47,6 +47,7 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_dump_test "prescott"
     run_dump_test "sib"
     run_dump_test "sib-intel"
+    run_dump_test "disp"
     run_dump_test "vmx"
     run_dump_test "smx"
     run_dump_test "suffix"
@@ -280,6 +281,7 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-reg-intel"
     run_dump_test "x86-64-sib"
     run_dump_test "x86-64-sib-intel"
+    run_dump_test "x86-64-disp"
     if { ![istarget "*-*-mingw*"] } then {
       run_dump_test "x86-64-opcode-inval"
       run_dump_test "x86-64-opcode-inval-intel"

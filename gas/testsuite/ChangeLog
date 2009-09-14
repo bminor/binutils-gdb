@@ -1,3 +1,25 @@
+2009-09-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/10636
+	* gas/i386/disp.d: New.
+	* gas/i386/disp.s: Likewise.
+	* gas/i386/x86-64-disp.d: Likewise.
+	* gas/i386/x86-64-disp.s: Likewise.
+
+	* gas/i386/i386.exp: Run disp and x86-64-disp.
+
+	* gas/i386/x86-64-addr32.s: Add high 32bit displacement tests.
+
+	* gas/i386/x86-64-addr32.d: Updated.
+	* gas/i386/x86-64-addr32-intel.d: Likewise.
+	* gas/i386/x86-64-inval.l: Likewise.
+	* gas/i386/x86-64-prescott.d: Likewise.
+
+	* gas/i386/x86-64-inval.s: Add invalid displacement tests.
+
+	* gas/i386/x86-64-prescott.s: Replace 0x90909090 displacement
+	with 0x909090.
+
 2009-09-13  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* gas/mips/jalr2.s, gas/mips/jalr2.d: New test.

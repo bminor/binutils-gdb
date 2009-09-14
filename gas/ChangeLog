@@ -1,3 +1,11 @@
+2009-09-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/10636
+	* config/tc-i386.c (optimize_disp): Set disp32 for 64bit only
+	if there is an ADDR_PREFIX.
+	(i386_finalize_displacement): Repor error if signed 32bit
+	displacement is out of range.
+
 2009-09-13  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* config/tc-mips.c (MIPS_JALR_HINT_P): Take an expr argument.

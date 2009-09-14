@@ -3618,7 +3618,8 @@ optimize_disp (void)
 		    i.types[op].bitfield.disp64 = 0;
 		    i.types[op].bitfield.disp32s = 1;
 		  }
-		if (fits_in_unsigned_long (disp))
+		if (i.prefix[ADDR_PREFIX]
+		    && fits_in_unsigned_long (disp))
 		  i.types[op].bitfield.disp32 = 1;
 	      }
 	    if ((i.types[op].bitfield.disp32
@@ -6565,6 +6566,25 @@ i386_finalize_displacement (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
       as_bad (_("missing or invalid displacement expression `%s'"),
 	      disp_start);
       ret = 0;
+    }
+
+  else if (flag_code == CODE_64BIT
+	   && !i.prefix[ADDR_PREFIX]
+	   && exp->X_op == O_constant)
+    {
+      /* Since displacement is signed extended to 64bit, don't allow
+	 disp32 and turn off disp32s if they are out of range.  */
+      i.types[this_operand].bitfield.disp32 = 0;
+      if (!fits_in_signed_long (exp->X_add_number))
+	{
+	  i.types[this_operand].bitfield.disp32s = 0;
+	  if (i.types[this_operand].bitfield.baseindex)
+	    {
+	      as_bad (_("0x%lx out range of signed 32bit displacement"),
+		      (long) exp->X_add_number);
+	      ret = 0;
+	    }
+	}
     }
 
 #if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT))
