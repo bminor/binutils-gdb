@@ -357,7 +357,8 @@ register %s (#%d) at %s"),
 
 static CORE_ADDR
 execute_stack_op (gdb_byte *exp, ULONGEST len, int addr_size,
-		  struct frame_info *this_frame, CORE_ADDR initial)
+		  struct frame_info *this_frame, CORE_ADDR initial,
+		  int initial_in_stack_memory)
 {
   struct dwarf_expr_context *ctx;
   CORE_ADDR result;
@@ -375,7 +376,7 @@ execute_stack_op (gdb_byte *exp, ULONGEST len, int addr_size,
   ctx->get_frame_cfa = no_get_frame_cfa;
   ctx->get_tls_address = no_get_tls_address;
 
-  dwarf_expr_push (ctx, initial);
+  dwarf_expr_push (ctx, initial, initial_in_stack_memory);
   dwarf_expr_eval (ctx, exp, len);
   result = dwarf_expr_fetch (ctx, 0);
 
@@ -975,7 +976,7 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
     case CFA_EXP:
       cache->cfa =
 	execute_stack_op (fs->regs.cfa_exp, fs->regs.cfa_exp_len,
-			  cache->addr_size, this_frame, 0);
+			  cache->addr_size, this_frame, 0, 0);
       break;
 
     default:
@@ -1131,7 +1132,7 @@ dwarf2_frame_prev_register (struct frame_info *this_frame, void **this_cache,
     case DWARF2_FRAME_REG_SAVED_EXP:
       addr = execute_stack_op (cache->reg[regnum].loc.exp,
 			       cache->reg[regnum].exp_len,
-			       cache->addr_size, this_frame, cache->cfa);
+			       cache->addr_size, this_frame, cache->cfa, 1);
       return frame_unwind_got_memory (this_frame, regnum, addr);
 
     case DWARF2_FRAME_REG_SAVED_VAL_OFFSET:
@@ -1141,7 +1142,7 @@ dwarf2_frame_prev_register (struct frame_info *this_frame, void **this_cache,
     case DWARF2_FRAME_REG_SAVED_VAL_EXP:
       addr = execute_stack_op (cache->reg[regnum].loc.exp,
 			       cache->reg[regnum].exp_len,
-			       cache->addr_size, this_frame, cache->cfa);
+			       cache->addr_size, this_frame, cache->cfa, 1);
       return frame_unwind_got_constant (this_frame, regnum, addr);
 
     case DWARF2_FRAME_REG_UNSPECIFIED:

@@ -265,14 +265,17 @@ read_pieced_value (struct value *v)
 	    struct gdbarch *arch = get_frame_arch (frame);
 	    bfd_byte regval[MAX_REGISTER_SIZE];
 	    int gdb_regnum = gdbarch_dwarf2_reg_to_regnum (arch,
-							   p->v.value);
+							   p->v.expr.value);
 	    get_frame_register (frame, gdb_regnum, regval);
 	    memcpy (contents + offset, regval, p->size);
 	  }
 	  break;
 
 	case DWARF_VALUE_MEMORY:
-	  read_memory (p->v.value, contents + offset, p->size);
+	  if (p->v.expr.in_stack_memory)
+	    read_stack (p->v.expr.value, contents + offset, p->size);
+	  else
+	    read_memory (p->v.expr.value, contents + offset, p->size);
 	  break;
 
 	case DWARF_VALUE_STACK:
@@ -282,7 +285,7 @@ read_pieced_value (struct value *v)
 	    int addr_size = gdbarch_addr_bit (c->arch) / 8;
 	    store_unsigned_integer (bytes, addr_size,
 				    gdbarch_byte_order (c->arch),
-				    p->v.value);
+				    p->v.expr.value);
 	    n = p->size;
 	    if (n > addr_size)
 	      n = addr_size;
@@ -330,12 +333,12 @@ write_pieced_value (struct value *to, struct value *from)
 	case DWARF_VALUE_REGISTER:
 	  {
 	    struct gdbarch *arch = get_frame_arch (frame);
-	    int gdb_regnum = gdbarch_dwarf2_reg_to_regnum (arch, p->v.value);
+	    int gdb_regnum = gdbarch_dwarf2_reg_to_regnum (arch, p->v.expr.value);
 	    put_frame_register (frame, gdb_regnum, contents + offset);
 	  }
 	  break;
 	case DWARF_VALUE_MEMORY:
-	  write_memory (p->v.value, contents + offset, p->size);
+	  write_memory (p->v.expr.value, contents + offset, p->size);
 	  break;
 	default:
 	  set_value_optimized_out (to, 1);
@@ -434,11 +437,13 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
 	case DWARF_VALUE_MEMORY:
 	  {
 	    CORE_ADDR address = dwarf_expr_fetch (ctx, 0);
+	    int in_stack_memory = dwarf_expr_fetch_in_stack_memory (ctx, 0);
 
 	    retval = allocate_value (SYMBOL_TYPE (var));
 	    VALUE_LVAL (retval) = lval_memory;
 	    set_value_lazy (retval, 1);
-	    set_value_stack (retval, 1);
+	    if (in_stack_memory)
+	      set_value_stack (retval, 1);
 	    set_value_address (retval, address);
 	  }
 	  break;
@@ -485,10 +490,6 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
 
   return retval;
 }
-
-
-
-
 
 /* Helper functions and baton for dwarf2_loc_desc_needs_frame.  */
 

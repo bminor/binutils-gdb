@@ -1,5 +1,34 @@
 2009-09-15  Doug Evans  <dje@google.com>
 
+	* dwarf2expr.h (dwarf_value_location): Add more comments describing
+	enum values.
+	(struct dwarf_stack_value): New struct.
+	(struct dwarf_expr_context): Change type of `stack' from CORE_ADDR*
+	to struct dwarf_stack_value*.
+	(struct dwarf_expr_piece): Move `v.value' into its own struct, v.expr,
+	all uses updated.  Add v.expr.in_stack_memory.
+	(dwarf_expr_push): Update declaration.
+	(dwarf_expr_fetch_in_stack_memory): Declare.
+	* dwarf2expr.c (dwarf_expr_grow_stack): Update calculation of
+	size of stack value.
+	(dwarf_expr_push): New arg in_stack_memory, all callers updated.
+	(dwarf_expr_fetch_in_stack_memory): New function.
+	(add_piece): Set in_stack_memory for non-literal values.
+	(execute_stack_op): Allow ops to specify whether the value is on the
+	program's stack.
+	(execute_stack_op, case DW_OP_fbreg): Mark value as in stack memory.
+	(execute_stack_op, case DW_OP_call_frame_cfa): Ditto.
+	(execute_stack_op, case DW_OP_dup): Copy in_stack_memory flag.
+	(execute_stack_op, cases DW_OP_pick, DW_OP_over): Ditto.
+	(execute_stack_op, cases DW_OP_swap, DW_OP_rot): Update type of
+	dwarf stack value.
+	* dwarf2loc.c (read_pieced_value): Call read_stack for values known
+	to be on the program's stack.
+	(dwarf2_evaluate_loc_desc, case DWARF_VALUE_MEMORY): Call
+	set_value_stack only for objects known to be in stack memory.
+	* dwarf2-frame.c (execute_stack_op): New arg initial_in_stack_memory,
+	all callers updated.
+
 	* target.c (memory_xfer_partial): Pass correct length to dcache_update.
 
 2009-09-15  Jan Kratochvil  <jan.kratochvil@redhat.com>

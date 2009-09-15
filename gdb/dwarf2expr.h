@@ -26,14 +26,33 @@
 /* The location of a value.  */
 enum dwarf_value_location
 {
-  /* The piece is in memory.  */
+  /* The piece is in memory.
+     The value on the dwarf stack is its address.  */
   DWARF_VALUE_MEMORY,
-  /* The piece is in a register.  */
+
+  /* The piece is in a register.
+     The value on the dwarf stack is the register number.  */
   DWARF_VALUE_REGISTER,
-  /* The piece is on the stack.  */
+
+  /* The piece is on the dwarf stack.  */
   DWARF_VALUE_STACK,
+
   /* The piece is a literal.  */
   DWARF_VALUE_LITERAL
+};
+
+/* The dwarf expression stack.  */
+
+struct dwarf_stack_value
+{
+  CORE_ADDR value;
+
+  /* Non-zero if the piece is in memory and is known to be
+     on the program's stack.  It is always ok to set this to zero.
+     This is used, for example, to optimize memory access from the target.
+     It can vastly speed up backtraces on long latency connections when
+     "set stack-cache on".  */
+  int in_stack_memory;
 };
 
 /* The expression evaluator works with a dwarf_expr_context, describing
@@ -41,7 +60,7 @@ enum dwarf_value_location
 struct dwarf_expr_context
 {
   /* The stack of values, allocated with xmalloc.  */
-  CORE_ADDR *stack;
+  struct dwarf_stack_value *stack;
 
   /* The number of values currently pushed on the stack, and the
      number of elements allocated to the stack.  */
@@ -111,7 +130,7 @@ struct dwarf_expr_context
      Each time DW_OP_piece is executed, we add a new element to the
      end of this array, recording the current top of the stack, the
      current location, and the size given as the operand to
-     DW_OP_piece.  We then pop the top value from the stack, rest the
+     DW_OP_piece.  We then pop the top value from the stack, reset the
      location, and resume evaluation.
 
      The Dwarf spec doesn't say whether DW_OP_piece pops the top value
@@ -140,8 +159,14 @@ struct dwarf_expr_piece
 
   union
   {
-    /* This piece's address or register number.  */
-    CORE_ADDR value;
+    struct
+    {
+      /* This piece's address or register number.  */
+      CORE_ADDR value;
+      /* Non-zero if the piece is known to be in memory and on
+	 the program's stack.  */
+      int in_stack_memory;
+    } expr;
 
     struct
     {
@@ -162,11 +187,13 @@ void free_dwarf_expr_context (struct dwarf_expr_context *ctx);
 struct cleanup *
     make_cleanup_free_dwarf_expr_context (struct dwarf_expr_context *ctx);
 
-void dwarf_expr_push (struct dwarf_expr_context *ctx, CORE_ADDR value);
+void dwarf_expr_push (struct dwarf_expr_context *ctx, CORE_ADDR value,
+		      int in_stack_memory);
 void dwarf_expr_pop (struct dwarf_expr_context *ctx);
 void dwarf_expr_eval (struct dwarf_expr_context *ctx, unsigned char *addr,
 		      size_t len);
 CORE_ADDR dwarf_expr_fetch (struct dwarf_expr_context *ctx, int n);
+int dwarf_expr_fetch_in_stack_memory (struct dwarf_expr_context *ctx, int n);
 
 
 gdb_byte *read_uleb128 (gdb_byte *buf, gdb_byte *buf_end, ULONGEST * r);
