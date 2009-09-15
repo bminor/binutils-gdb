@@ -1,5 +1,10 @@
 2009-09-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386-intel.c (i386_intel_operand): Initialize
+	intel_state.has_offset to 0.
+
+2009-09-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (offset_in_range): Sign extend offset only
 	for 32bit address mode.
 

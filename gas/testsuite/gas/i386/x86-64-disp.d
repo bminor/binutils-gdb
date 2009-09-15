@@ -16,6 +16,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	8b 04 25 00 00 00 80 	mov    0xffffffff80000000,%eax
 [ 	]*[a-f0-9]+:	8b 04 25 ff ff ff 7f 	mov    0x7fffffff,%eax
 [ 	]*[a-f0-9]+:	a1 00 00 00 80 00 00 00 00 	mov    0x80000000,%eax
+[ 	]*[a-f0-9]+:	b8 f0 00 e0 0e       	mov    \$0xee000f0,%eax
 [ 	]*[a-f0-9]+:	89 98 f0 00 e0 0e    	mov    %ebx,0xee000f0\(%rax\)
 [ 	]*[a-f0-9]+:	89 98 f0 00 e0 0e    	mov    %ebx,0xee000f0\(%rax\)
 [ 	]*[a-f0-9]+:	65 89 98 f0 00 e0 0e 	mov    %ebx,%gs:0xee000f0\(%rax\)

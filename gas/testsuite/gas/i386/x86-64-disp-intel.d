@@ -17,6 +17,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	8b 04 25 00 00 00 80 	mov    eax,DWORD PTR ds:0xffffffff80000000
 [ 	]*[a-f0-9]+:	8b 04 25 ff ff ff 7f 	mov    eax,DWORD PTR ds:0x7fffffff
 [ 	]*[a-f0-9]+:	a1 00 00 00 80 00 00 00 00 	mov    eax,ds:0x80000000
+[ 	]*[a-f0-9]+:	b8 f0 00 e0 0e       	mov    eax,0xee000f0
 [ 	]*[a-f0-9]+:	89 98 f0 00 e0 0e    	mov    DWORD PTR \[rax\+0xee000f0\],ebx
 [ 	]*[a-f0-9]+:	89 98 f0 00 e0 0e    	mov    DWORD PTR \[rax\+0xee000f0\],ebx
 [ 	]*[a-f0-9]+:	65 89 98 f0 00 e0 0e 	mov    DWORD PTR gs:\[rax\+0xee000f0\],ebx

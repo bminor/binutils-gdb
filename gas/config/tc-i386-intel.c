@@ -466,6 +466,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
   /* Initialize state structure.  */
   intel_state.op_modifier = O_absent;
   intel_state.is_mem = 0;
+  intel_state.has_offset = 0;
   intel_state.base = NULL;
   intel_state.index = NULL;
   intel_state.seg = NULL;

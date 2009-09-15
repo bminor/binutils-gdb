@@ -10,6 +10,8 @@
 	mov 0x80000000,%eax
 
 	.intel_syntax noprefix
+	mov eax, offset 0xEE000F0
+
 	mov DWORD PTR [rax+0xEE000F0], ebx
 	mov [rax+0xEE000F0], ebx
 	mov DWORD PTR gs:[rax+0xEE000F0], ebx

@@ -1,3 +1,16 @@
+2009-09-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/disp.s: Add an offset test.
+	* gas/i386/x86-64-disp.s: Likewise.
+
+	* gas/i386/intelbad.s: Comment out "byte ptr [1]" test.
+
+	* gas/i386/disp.d: Updated.
+	* gas/i386/disp-intel.d: Likewise.
+	* gas/i386/intelbad.l: Likewise.
+	* gas/i386/x86-64-disp.d: Likewise.
+	* gas/i386/x86-64-disp-intel.d: Likewise.
+
 2009-09-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/10637
