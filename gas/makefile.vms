@@ -20,12 +20,16 @@ CFLAGS=/names=(as_is,shortened)\
 #LFLAGS=/debug/map=as.map
 endif
 
-OBJS=targ-cpu.obj,obj-format.obj,atof-targ.obj,app.obj,as.obj,atof-generic.obj,\
-  te-vms.obj,cond.obj,depend.obj,expr.obj,flonum-konst.obj,\
+OBJS:=targ-cpu.obj,obj-format.obj,atof-targ.obj,app.obj,as.obj,\
+  atof-generic.obj,cond.obj,depend.obj,expr.obj,flonum-konst.obj,\
   flonum-copy.obj,flonum-mult.obj,frags.obj,hash.obj,input-file.obj,\
   input-scrub.obj,literal.obj,messages.obj,output-file.obj,read.obj,\
   subsegs.obj,symbols.obj,write.obj,listing.obj,ecoff.obj,stabs.obj,sb.obj,\
   macro.obj,ehopt.obj,dw2gencfi.obj,dwarf2dbg.obj,remap.obj
+
+ifeq ($(ARCH),IA64)
+OBJS:=$(OBJS),te-vms.obj
+endif
 
 LIBIBERTY = [-.libiberty]libiberty.olb
 LIBBFD = [-.bfd]libbfd.olb
