@@ -1,5 +1,5 @@
 # Expect script for ld-gc tests
-#   Copyright 2008
+#   Copyright 2008, 2009
 #   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
@@ -44,8 +44,18 @@ proc test_gc { testname filename linker ldflags} {
     }
 
     set outfile "tmpdir/$filename"
+    set options "-L$srcdir/$subdir $ldflags $objfile"
 
-    if ![ld_simple_link $linker $outfile "-L$srcdir/$subdir $ldflags $objfile"] {
+    # SH64 targets needs an extra ld option for this test.
+    if [istarget sh64*-*-*] {
+	if [istarget sh64*l*-*-*] {
+	    set options "-mshlelf32 $options"
+	} else {
+	    set options "-mshelf32 $options"
+	}
+    }
+
+    if ![ld_simple_link $linker $outfile $options] {
 	fail $testname
 	return
     }
