@@ -1,3 +1,8 @@
+2009-09-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (OP_E_memory): Don't print '-' in Intel mode if
+	disp == -disp.
+
 2009-09-14  Nick Clifton  <nickc@redhat.com>
 
 	* po/nl.po: Updated Dutch translation.

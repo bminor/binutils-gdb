@@ -11107,7 +11107,7 @@ OP_E_memory (int bytemode, int sizeflag)
 		  *obufp++ = '+';
 		  *obufp = '\0';
 		}
-	      else if (modrm.mod != 1)
+	      else if (modrm.mod != 1 && disp != -disp)
 		{
 		  *obufp++ = '-';
 		  *obufp = '\0';
