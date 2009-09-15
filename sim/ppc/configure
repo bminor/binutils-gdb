@@ -589,6 +589,7 @@ ac_includes_default="\
 #endif"
 
 ac_subst_vars='LTLIBOBJS
+sim_hwflags
 sim_fpu
 sim_fpu_cflags
 sim_targ_vals
@@ -3740,7 +3741,9 @@ else
 fi
 
 if test x"$ac_cv_has_union_semun" = x"yes" -a x"$ac_cv_sysv_sem" = x"yes" ; then
-  sim_hwflags="-DHAS_UNION_SEMUN";
+  sim_hwflags="-DHAS_UNION_SEMUN"
+else
+  sim_hwflags=""
 fi
 
 
@@ -5964,6 +5967,7 @@ esac
 else
   RANLIB="$ac_cv_prog_RANLIB"
 fi
+
 
 
 

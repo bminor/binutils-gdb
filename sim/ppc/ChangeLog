@@ -1,3 +1,11 @@
+2009-09-15  Andreas Tobler <andreast-list@fgznet.ch>
+	    Doug Evans  <dje@google.com>
+
+	* configure.ac (sim_hwflags): Clean up definition, AC_SUBST it.
+	* configure: Regenerate.
+	* Makefile.in (SIM_HWFLAGS): New variable.
+	(STD_CFLAGS, NOWARN_CFLAGS): Add it.
+
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* config.in: Regenerate.
