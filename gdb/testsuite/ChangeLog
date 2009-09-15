@@ -1,3 +1,37 @@
+2009-09-15  Tom Tromey  <tromey@redhat.com>
+
+	* lib/mi-support.exp (mi_create_varobj): Update.
+	(mi_create_floating_varobj): Likewise.
+	(mi_create_dynamic_varobj): New proc.
+	(mi_varobj_update): Update.
+	(mi_varobj_update_with_type_change): Likewise.
+	(mi_varobj_update_kv_helper): New proc.
+	(mi_varobj_update_dynamic_helper): Rewrite.
+	(mi_varobj_update_dynamic): New proc.
+	(mi_list_varobj_children): Update.
+	(mi_list_varobj_children_range): Add 'from' and 'to' arguments.
+	* gdb.python/python-prettyprint.py (pp_outer): New class.
+	(pp_nullstr): Likewise.
+	(lookup_function): Register new printers.
+	* gdb.python/python-prettyprint.c (struct substruct): New type.
+	(struct outerstruct): Likewise.
+	(substruct_test): New function.
+	(struct nullstr): New type.
+	(string_1, string_2): New globals.
+	(main): Add new tests.
+	* gdb.python/python-mi.exp: Added regression tests.
+	* gdb.mi/mi2-var-display.exp: Update.
+	* gdb.mi/mi2-var-cmd.exp: Update.
+	* gdb.mi/mi2-var-child.exp: Update.
+	* gdb.mi/mi2-var-block.exp: Update.
+	* gdb.mi/mi-var-invalidate.exp: Update.
+	* gdb.mi/mi-var-display.exp: Update.
+	* gdb.mi/mi-var-cmd.exp: Update.
+	* gdb.mi/mi-var-child.exp: Update.
+	* gdb.mi/mi-var-block.exp: Update.
+	* gdb.mi/mi-break.exp: Update.
+	* gdb.mi/gdb701.exp: Update.
+
 2009-09-14  Sergio Durigan Junior <sergiodj@linux.vnet.ibm.com>
 
 	* Makefile.in: Inclusion of catch-syscall object.

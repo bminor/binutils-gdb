@@ -1195,13 +1195,13 @@ proc mi_list_breakpoints { expected test } {
 # Name cannot be "-".
 proc mi_create_varobj { name expression testname } {
     mi_gdb_test "-var-create $name * $expression" \
-        "\\^done,name=\"$name\",numchild=\"\[0-9\]+\",value=\".*\",type=.*" \
+        "\\^done,name=\"$name\",numchild=\"\[0-9\]+\",value=\".*\",type=.*,has_more=\"0\"" \
         $testname
 }
 
 proc mi_create_floating_varobj { name expression testname } {
     mi_gdb_test "-var-create $name @ $expression" \
-        "\\^done,name=\"$name\",numchild=\"\[0-9\]+\",value=\".*\",type=.*" \
+        "\\^done,name=\"$name\",numchild=\"\(-1\|\[0-9\]+\)\",value=\".*\",type=.*" \
         $testname
 }
 
@@ -1211,6 +1211,14 @@ proc mi_create_floating_varobj { name expression testname } {
 proc mi_create_varobj_checked { name expression type testname } {
     mi_gdb_test "-var-create $name * $expression" \
         "\\^done,name=\"$name\",numchild=\"\[0-9\]+\",value=\".*\",type=\"$type\".*" \
+        $testname
+}
+
+# Same as mi_create_floating_varobj, but assumes the test is creating
+# a dynamic varobj that has children, so the value must be "{...}".
+proc mi_create_dynamic_varobj {name expression testname} {
+    mi_gdb_test "-var-create $name @ $expression" \
+        "\\^done,name=\"$name\",numchild=\"\(-1\|\[0-9\]+\)\",value=\"{\\.\\.\\.}\",type=.*" \
         $testname
 }
 
@@ -1229,7 +1237,7 @@ proc mi_varobj_update { name expected testname } {
     set er "\\^done,changelist=\\\["
     set first 1
     foreach item $expected {
-        set v "{name=\"$item\",in_scope=\"true\",type_changed=\"false\"}"
+        set v "{name=\"$item\",in_scope=\"true\",type_changed=\"false\",has_more=\".\"}"
         if {$first == 1} {
             set er "$er$v"
             set first 0
@@ -1244,22 +1252,70 @@ proc mi_varobj_update { name expected testname } {
 }
 
 proc mi_varobj_update_with_type_change { name new_type new_children testname } {
-    set v "{name=\"$name\",in_scope=\"true\",type_changed=\"true\",new_type=\"$new_type\",new_num_children=\"$new_children\"}"
+    set v "{name=\"$name\",in_scope=\"true\",type_changed=\"true\",new_type=\"$new_type\",new_num_children=\"$new_children\",has_more=\".\"}"
     set er "\\^done,changelist=\\\[$v\\\]"
     verbose -log "Expecting: $er"
     mi_gdb_test "-var-update $name" $er $testname
 }
 
-# Update a dynamic varobj named NAME.  CHILDREN is a list of children,
-# in the same form as mi_list_varobj_children.  TESTNAME is the name
-# of the test.
-proc mi_varobj_update_dynamic {name children testname} {
-    set children_exp_j [mi_child_regexp $children 0]
+# A helper that turns a key/value list into a regular expression
+# matching some MI output.
+proc mi_varobj_update_kv_helper {list} {
+    set first 1
+    set rx ""
+    foreach {key value} $list {
+	if {!$first} {
+	    append rx ,
+	}
+	set first 0
+	if {$key == "new_children"} {
+	    append rx "$key=\\\[$value\\\]"
+	} else {
+	    append rx "$key=\"$value\""
+	}
+    }
+    return $rx
+}
 
-    set er "\\^done,changelist=\\\["
+# A helper for mi_varobj_update_dynamic that computes a match
+# expression given a child list.
+proc mi_varobj_update_dynamic_helper {children} {
+    set crx ""
 
-    append er "{name=\"$name\",in_scope=\"true\",type_changed=\"false\""
-    append er ",children=\\\[$children_exp_j.*\\\]}\\\]"
+    set first 1
+    foreach child $children {
+	if {!$first} {
+	    append crx ,
+	}
+	set first 0
+	append crx "{"
+	append crx [mi_varobj_update_kv_helper $child]
+	append crx "}"
+    }
+
+    return $crx
+}
+
+# Update a dynamic varobj named NAME.  CHILDREN is a list of children
+# that have been updated; NEW_CHILDREN is a list of children that were
+# added to the primary varobj.  Each child is a list of key/value
+# pairs that are expected.  SELF is a key/value list holding
+# information about the varobj itself.  TESTNAME is the name of the
+# test.
+proc mi_varobj_update_dynamic {name testname self children new_children} {
+    if {[llength $new_children]} {
+	set newrx [mi_varobj_update_dynamic_helper $new_children]
+	lappend self new_children $newrx
+    }
+    set selfrx [mi_varobj_update_kv_helper $self]
+    set crx [mi_varobj_update_dynamic_helper $children]
+
+    set er "\\^done,changelist=\\\[\{name=\"$name\",in_scope=\"true\""
+    append er ",$selfrx\}"
+    if {"$crx" != ""} {
+	append er ",$crx"
+    }
+    append er "\\\]"
 
     verbose -log "Expecting: $er"
     mi_gdb_test "-var-update $name" $er $testname
@@ -1329,14 +1385,13 @@ proc mi_child_regexp {children add_child} {
 # have no value.
 #
 proc mi_list_varobj_children { varname children testname } {
-    mi_list_varobj_children_range $varname [llength $children] $children \
+    mi_list_varobj_children_range $varname "" "" [llength $children] $children \
       $testname
 }
 
-# Like mi_list_varobj_children, but assumes that a subrange has been
-# selected with -var-set-child-range.  NUMCHILDREN is the total number
-# of children.
-proc mi_list_varobj_children_range {varname numchildren children testname} {
+# Like mi_list_varobj_children, but sets a subrange.  NUMCHILDREN is
+# the total number of children.
+proc mi_list_varobj_children_range {varname from to numchildren children testname} {
     set options ""
     if {[llength $varname] == 2} {
         set options [lindex $varname 1]
@@ -1352,9 +1407,18 @@ proc mi_list_varobj_children_range {varname numchildren children testname} {
         set expected "\\^done,numchild=\"0\""
     }
 
+    if {"$to" == ""} {
+        append expected ",has_more=\"0\""
+    } elseif {$to >= 0 && $numchildren > $to} {
+        append expected ",has_more=\"1\""
+    } else {
+        append expected ",has_more=\"0\""
+    }
+
     verbose -log "Expecting: $expected"
 
-    mi_gdb_test "-var-list-children $options $varname" $expected $testname
+    mi_gdb_test "-var-list-children $options $varname $from $to" \
+      $expected $testname
 }
 
 # Verifies that variable object VARNAME has NUMBER children,

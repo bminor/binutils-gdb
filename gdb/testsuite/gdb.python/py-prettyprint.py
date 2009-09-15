@@ -92,6 +92,13 @@ class pp_vbase1:
     def to_string (self):
         return "pp class name: " + self.val.type.tag
 
+class pp_nullstr:
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        return self.val['s'].string(gdb.parameter('target-charset'))
+
 class pp_ns:
     "Print a std::basic_string of some kind"
 
@@ -105,11 +112,24 @@ class pp_ns:
     def display_hint (self):
         return 'string'
 
+class pp_outer:
+    "Print struct outer"
+
+    def __init__ (self, val):
+        self.val = val
+
+    def to_string (self):
+        return "x = %s" % self.val['x']
+
+    def children (self):
+        yield 's', self.val['s']
+        yield 'x', self.val['x']
+
 def lookup_function (val):
     "Look-up and return a pretty-printer that can print val."
 
     # Get the type.
-    type = val.type;
+    type = val.type
 
     # If it points to a reference, get the reference.
     if type.code == gdb.TYPE_CODE_REF:
@@ -148,6 +168,9 @@ def register_pretty_printers ():
     
     pretty_printers_dict[re.compile ('^VirtualTest$')] =  pp_multiple_virtual
     pretty_printers_dict[re.compile ('^Vbase1$')] =  pp_vbase1
+
+    pretty_printers_dict[re.compile ('^struct nullstr$')] = pp_nullstr
+    pretty_printers_dict[re.compile ('^nullstr$')] = pp_nullstr
     
     # Note that we purposely omit the typedef names here.
     # Printer lookup is based on canonical name.
@@ -160,6 +183,10 @@ def register_pretty_printers ():
     
     pretty_printers_dict[re.compile ('^struct ns$')]  = pp_ns
     pretty_printers_dict[re.compile ('^ns$')]  = pp_ns
+
+    pretty_printers_dict[re.compile ('^struct outerstruct$')]  = pp_outer
+    pretty_printers_dict[re.compile ('^outerstruct$')]  = pp_outer
+
 pretty_printers_dict = {}
 
 register_pretty_printers ()

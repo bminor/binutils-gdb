@@ -558,7 +558,7 @@ mi_gdb_test "-var-info-num-children e" \
 # Test: c_variable-7.55
 # Desc: children of e
 mi_gdb_test "-var-list-children e" \
-	"\\^done,numchild=\"0\"" \
+	"\\^done,numchild=\"0\",has_more=\"0\"" \
 	"get children of e"
 
 # Test: c_variable-7.60
@@ -600,7 +600,7 @@ mi_gdb_test "-var-info-num-children anone" \
 # Test: c_variable-7.75
 # Desc: children of anone
 mi_gdb_test "-var-list-children anone" \
-	"\\^done,numchild=\"0\"" \
+	"\\^done,numchild=\"0\",has_more=\"0\"" \
 	"get children of anone"
 
 

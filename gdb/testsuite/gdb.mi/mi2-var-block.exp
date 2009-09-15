@@ -74,7 +74,7 @@ mi_step_to "do_block_tests" "" "var-cmd.c" \
 # Test: c_variable-3.4
 # Desc: check foo, cb changed
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"foo\",in_scope=\"true\",type_changed=\"false\"\},\{name=\"cb\",in_scope=\"true\",type_changed=\"false\"\}\\\]" \
+	"\\^done,changelist=\\\[\{name=\"foo\",in_scope=\"true\",type_changed=\"false\",has_more=\"0\"\},\{name=\"cb\",in_scope=\"true\",type_changed=\"false\",has_more=\"0\"\}\\\]" \
 	"update all vars: cb foo changed"
 
 # step to "foo = 321;"

@@ -175,7 +175,7 @@ proc test_error {} {
     # containing function call, the internal breakpoint created to handle
     # function call would be reported, messing up MI output.
     mi_gdb_test "-var-create V * return_1()" \
-        "\\^done,name=\"V\",numchild=\"0\",value=\"1\",type=\"int\"" \
+        "\\^done,name=\"V\",numchild=\"0\",value=\"1\",type=\"int\",has_more=\"0\"" \
         "create varobj for function call"
 
     mi_gdb_test "-var-update *" \

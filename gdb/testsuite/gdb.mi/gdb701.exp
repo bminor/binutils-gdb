@@ -54,7 +54,7 @@ mi_gdb_test "-var-list-children fooPtr" \
 
 foreach i [list x y z] {
   mi_gdb_test "-var-list-children fooPtr.$i" \
-    "(&\".*\"\r\n)*\\^done,numchild=\"0\"" \
+    "(&\".*\"\r\n)*\\^done,numchild=\"0\",has_more=\"0\"" \
     "list children of fooPtr.$i"
 }
 

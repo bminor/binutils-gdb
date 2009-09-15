@@ -1,3 +1,65 @@
+2009-09-15  Tom Tromey  <tromey@redhat.com>
+
+	* varobj.h (varobj_update_result_t) <new>: New field.
+	(varobj_get_child_range, varobj_set_child_range): Declare.
+	(varobj_list_children): Update.
+	(varobj_enable_pretty_printing, varobj_has_more)
+	(varobj_pretty_printed_p): Declare.
+	* varobj.c (pretty_printing): New global.
+	(varobj_enable_pretty_printing): New function.
+	(struct varobj_root) <from, to, constructor, child_iter,
+	saved_item>: New fields.
+	(varobj_create): Don't call install_default_visualizer.
+	(instantiate_pretty_printer): Don't use value_copy.
+	(varobj_has_more): New function.
+	(restrict_range): New function.
+	(install_dynamic_child): Likewise.
+	(dynamic_varobj_has_child_method): Likewise.
+	(update_dynamic_varobj_children): Remove 'new_and_unchanged'
+	argument; add 'new', 'unchanged', 'from', and 'to' arguments.
+	Rewrite.
+	(varobj_get_num_children): Call update_dynamic_varobj_children.
+	(varobj_list_children): Add 'from' and 'to' arguments.  Ignore
+	result of update_dynamic_varobj_children.  Don't call
+	install_default_visualizer.  Restrict result range.
+	(varobj_add_child): Don't call install_default_visualizer.
+	(varobj_pretty_printed_p): New function.
+	(install_visualizer): Rewrite.  Move earlier in file.
+	(install_default_visualizer): Likewise.
+	(construct_visualizer): New function.
+	(install_new_value_visualizer): Likewise.
+	(install_new_value): Don't call release_value.  Special case
+	pretty-printed objects.  Use value_incref.  Rearrange "changed"
+	logic.
+	(varobj_get_child_range): New function.
+	(varobj_set_child_range): Likewise.
+	(varobj_set_visualizer): Rewrite.
+	(varobj_update): Rewrite pretty-printing logic.
+	(new_variable): Initialize new fields.
+	(free_variable): Destroy new fields.
+	(value_of_root): Copy 'from' and 'to'.
+	(my_value_of_variable): Handle pretty-printers.
+	(value_get_print_value): Rework pretty-printing logic.
+	(cplus_describe_child): Don't use release_value.
+	* mi/mi-cmds.h (mi_cmd_enable_pretty_printing)
+	(mi_cmd_var_set_update_range): Declare.
+	* mi/mi-cmds.c (mi_cmds): Add enable-pretty-printing and
+	var-set-update-range.
+	* mi/mi-cmd-var.c (print_varobj): Update.  Emit "dynamic"
+	attribute.
+	(mi_cmd_var_create): Emit "has_more" attribute.
+	(mi_cmd_var_set_format): Plug memory leak.
+	(mi_print_value_p): Replace 'type' argument with 'var'.  Handle
+	pretty-printed varobjs.
+	(mi_cmd_var_list_children): Accept 'from' and 'to' arguments.
+	Emit "has_more" attribute.
+	(mi_cmd_var_evaluate_expression): Plug memory leak.
+	(mi_cmd_var_assign): Likewise.
+	(varobj_update_one): Likewise.  Emit "dynamic", "has_more", and
+	"new_children" attributes.
+	(mi_cmd_enable_pretty_printing): New function.
+	(mi_cmd_var_set_update_range): Likewise.
+
 2009-09-15  Doug Evans  <dje@google.com>
 
 	* dwarf2expr.h (dwarf_value_location): Add more comments describing

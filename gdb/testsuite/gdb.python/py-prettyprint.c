@@ -15,6 +15,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include <string.h>
+
 struct s
 {
   int a;
@@ -79,6 +81,29 @@ class Derived : public Vbase1, public Vbase2, public Vbase3
 };
 
 #endif
+
+struct substruct {
+  int a;
+  int b;
+};
+
+struct outerstruct {
+  struct substruct s;
+  int x;
+};
+
+struct outerstruct
+substruct_test (void)
+{
+  struct outerstruct outer;
+  outer.s.a = 0;
+  outer.s.b = 0;
+  outer.x = 0;
+
+  outer.s.a = 3;		/* MI outer breakpoint here */
+
+  return outer;  
+}
 
 typedef struct string_repr
 {
@@ -148,6 +173,14 @@ void do_nothing(void)
   c = 23;			/* Another MI breakpoint */
 }
 
+struct nullstr
+{
+  char *s;
+};
+
+struct string_repr string_1 = { { "one" } };
+struct string_repr string_2 = { { "two" } };
+
 int
 main ()
 {
@@ -155,11 +188,15 @@ main ()
   struct ss  ssa[2];
   string x = make_string ("this is x");
   zzz_type c = make_container ("container");
+  zzz_type c2 = make_container ("container2");
   const struct string_repr cstring = { { "const string" } };
+  /* Clearing by being `static' could invoke an other GDB C++ bug.  */
+  struct nullstr nullstr;
 
   init_ss(&ss, 1, 2);
   init_ss(ssa+0, 3, 4);
   init_ss(ssa+1, 5, 6);
+  memset (&nullstr, 0, sizeof nullstr);
 
   struct ns  ns;
   ns.null_str = "embedded\0null\0string";
@@ -193,6 +230,14 @@ main ()
   add_item (&c, 72);
 
 #ifdef MI
+  add_item (&c, 1011);
+  c.elements[0] = 1023;
+  c.elements[0] = 2323;
+
+  add_item (&c2, 2222);
+  add_item (&c2, 3333);
+
+  substruct_test ();
   do_nothing ();
 #endif
 

@@ -1,3 +1,9 @@
+2009-09-15  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (GDB/MI Variable Objects): Document
+	-enable-pretty-printing, -var-set-update-range, dynamic varobjs.
+	Expand -var-update documentation.
+
 2009-09-14  Sergio Durigan Junior <sergiodj@linux.vnet.ibm.com>
 
 	* gdb.texinfo (Set Catchpoints): Documentation about the catch syscall

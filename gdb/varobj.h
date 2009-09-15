@@ -78,6 +78,12 @@ typedef struct varobj_update_result_t
      new value of varobj is already computed and installed, or has to
      be yet installed.  Don't use this outside varobj.c */
   int value_installed;  
+
+  /* This will be non-NULL when new children were added to the varobj.
+     It lists the new children (which must necessarily come at the end
+     of the child list) added during an update.  The caller is
+     responsible for freeing this vector.  */
+  VEC (varobj_p) *new;
 } varobj_update_result;
 
 DEF_VEC_O (varobj_update_result);
@@ -112,13 +118,24 @@ extern void varobj_set_frozen (struct varobj *var, int frozen);
 
 extern int varobj_get_frozen (struct varobj *var);
 
+extern void varobj_get_child_range (struct varobj *var, int *from, int *to);
+
+extern void varobj_set_child_range (struct varobj *var, int from, int to);
+
 extern char *varobj_get_display_hint (struct varobj *var);
 
 extern int varobj_get_num_children (struct varobj *var);
 
-/* Return the list of children of VAR.  The returned vector
-   should not be modified in any way.  */
-extern VEC (varobj_p)* varobj_list_children (struct varobj *var);
+/* Return the list of children of VAR.  The returned vector should not
+   be modified in any way.  FROM and TO are in/out parameters
+   indicating the range of children to return.  If either *FROM or *TO
+   is less than zero on entry, then all children will be returned.  On
+   return, *FROM and *TO will be updated to indicate the real range
+   that was returned.  The resulting VEC will contain at least the
+   children from *FROM to just before *TO; it might contain more
+   children, depending on whether any more were available.  */
+extern VEC (varobj_p)* varobj_list_children (struct varobj *var,
+					     int *from, int *to);
 
 extern char *varobj_get_type (struct varobj *var);
 
@@ -149,6 +166,13 @@ extern int varobj_editable_p (struct varobj *var);
 
 extern int varobj_floating_p (struct varobj *var);
 
-extern void varobj_set_visualizer (struct varobj *var, const char *visualizer);
+extern void 
+varobj_set_visualizer (struct varobj *var, const char *visualizer);
+
+extern void varobj_enable_pretty_printing (void);
+
+extern int varobj_has_more (struct varobj *var, int to);
+
+extern int varobj_pretty_printed_p (struct varobj *var);
 
 #endif /* VAROBJ_H */
