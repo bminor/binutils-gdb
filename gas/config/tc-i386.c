@@ -1766,9 +1766,9 @@ offset_in_range (offsetT val, int size)
   /* If BFD64, sign extend val for 32bit address mode.  */
   if (flag_code != CODE_64BIT
       || i.prefix[ADDR_PREFIX])
-#endif
     if ((val & ~(((addressT) 2 << 31) - 1)) == 0)
       val = (val ^ ((addressT) 1 << 31)) - ((addressT) 1 << 31);
+#endif
 
   if ((val & ~mask) != 0 && (val & ~mask) != ~mask)
     {
