@@ -1,3 +1,8 @@
+2009-09-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (offset_in_range): Sign extend offset only
+	for 32bit address mode.
+
 2009-09-15  Tristan Gingold  <gingold@adacore.com>
 
 	* makefile.vms (OBJS): Compile te-vms.c only on Itanium.

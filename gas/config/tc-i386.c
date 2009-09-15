@@ -1762,8 +1762,11 @@ offset_in_range (offsetT val, int size)
     default: abort ();
     }
 
-  /* If BFD64, sign extend val.  */
-  if (!use_rela_relocations)
+#ifdef BFD64
+  /* If BFD64, sign extend val for 32bit address mode.  */
+  if (flag_code != CODE_64BIT
+      || i.prefix[ADDR_PREFIX])
+#endif
     if ((val & ~(((addressT) 2 << 31) - 1)) == 0)
       val = (val ^ ((addressT) 1 << 31)) - ((addressT) 1 << 31);
 
