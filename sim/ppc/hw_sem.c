@@ -100,7 +100,7 @@ typedef struct _hw_sem_device {
   int count;
 } hw_sem_device;
 
-#if !HAS_UNION_SEMUN
+#ifndef HAVE_UNION_SEMUN
 union semun {
   int val;
   struct semid_ds *buf;

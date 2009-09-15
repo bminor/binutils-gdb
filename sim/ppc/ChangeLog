@@ -1,10 +1,11 @@
 2009-09-15  Andreas Tobler <andreast-list@fgznet.ch>
 	    Doug Evans  <dje@google.com>
 
-	* configure.ac (sim_hwflags): Clean up definition, AC_SUBST it.
+	* configure.ac (sim_hwflags): Use AC_DEFINE to define HAVE_UNION_SEMUN.
 	* configure: Regenerate.
-	* Makefile.in (SIM_HWFLAGS): New variable.
-	(STD_CFLAGS, NOWARN_CFLAGS): Add it.
+	* config.in: Regenerate.
+	* hw_sem.c: #include "config.h".
+	(HAVE_UNION_SEMUN): Renamed from HAS_UNION_SEMUN.
 
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 

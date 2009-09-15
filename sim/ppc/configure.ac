@@ -301,9 +301,8 @@ else
 fi
 
 if test x"$ac_cv_has_union_semun" = x"yes" -a x"$ac_cv_sysv_sem" = x"yes" ; then
-  sim_hwflags="-DHAS_UNION_SEMUN"
-else
-  sim_hwflags=""
+  AC_DEFINE(HAVE_UNION_SEMUN, 1,
+	    [Define if union semun is defined in <sys/sem.h>])
 fi
 
 
@@ -903,7 +902,6 @@ AC_SUBST(sim_callback)
 AC_SUBST(sim_targ_vals)
 AC_SUBST(sim_fpu_cflags)
 AC_SUBST(sim_fpu)
-AC_SUBST(sim_hwflags)
 
 AC_OUTPUT(Makefile,
 [case x$CONFIG_HEADERS in xconfig.h:config.in) echo > stamp-h ;; esac])
