@@ -335,24 +335,27 @@ enum exp_opcode
     OP_DECFLOAT,
 
      /* First extension operator.  Individual language modules define
-        extra operators they need as constants with values 
-        OP_LANGUAGE_SPECIFIC0 + k, for k >= 0, using a separate 
-        enumerated type definition:
-           enum foo_extension_operator {
+	extra operators in *.inc include files below always starting with
+	numbering at OP_EXTENDED0:
              BINOP_MOGRIFY = OP_EXTENDED0,
  	     BINOP_FROB,
- 	     ...
-           };      */
+ 	     ...  */
     OP_EXTENDED0,
   
     /* Last possible extension operator.  Defined to provide an
        explicit and finite number of extended operators. */
-    OP_EXTENDED_LAST = 0xff
+    OP_EXTENDED_LAST = 0xff,
     /* NOTE: Eventually, we expect to convert to an object-oriented 
        formulation for expression operators that does away with the
        need for these extension operators, and indeed for this
        entire enumeration type.  Therefore, consider the OP_EXTENDED
        definitions to be a temporary measure. */
+
+    /* Each language specific set of operators starts at OP_EXTENDED0.  */
+#include "ada-operator.inc"
+
+    /* Existing only to swallow the last comma (',') from last .inc file.  */
+    OP_UNUSED_LAST
   };
 
 union exp_element

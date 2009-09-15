@@ -546,20 +546,17 @@ struct attr_abbrev
     ENUM_BITFIELD(dwarf_form) form : 16;
   };
 
-/* Additional GDB-specific attribute forms.  */
-enum
-  {
-    /* A string which has been updated to GDB's internal
-       representation (e.g. converted to canonical form) and does not
-       need to be updated again.  */
-    GDB_FORM_cached_string = 0xff
-  };
-
 /* Attributes have a name and a value */
 struct attribute
   {
     ENUM_BITFIELD(dwarf_attribute) name : 16;
-    ENUM_BITFIELD(dwarf_form) form : 16;
+    ENUM_BITFIELD(dwarf_form) form : 15;
+
+    /* Has DW_STRING already been updated by dwarf2_canonicalize_name?  This
+       field should be in u.str (existing only for DW_STRING) but it is kept
+       here for better struct attribute alignment.  */
+    unsigned int string_is_canonical : 1;
+
     union
       {
 	char *str;
@@ -613,6 +610,7 @@ struct function_range
 /* Get at parts of an attribute structure */
 
 #define DW_STRING(attr)    ((attr)->u.str)
+#define DW_STRING_IS_CANONICAL(attr) ((attr)->string_is_canonical)
 #define DW_UNSND(attr)     ((attr)->u.unsnd)
 #define DW_BLOCK(attr)     ((attr)->u.blk)
 #define DW_SND(attr)       ((attr)->u.snd)
@@ -7006,11 +7004,13 @@ read_attribute_value (struct attribute *attr, unsigned form,
       break;
     case DW_FORM_string:
       DW_STRING (attr) = read_string (abfd, info_ptr, &bytes_read);
+      DW_STRING_IS_CANONICAL (attr) = 0;
       info_ptr += bytes_read;
       break;
     case DW_FORM_strp:
       DW_STRING (attr) = read_indirect_string (abfd, info_ptr, cu_header,
 					       &bytes_read);
+      DW_STRING_IS_CANONICAL (attr) = 0;
       info_ptr += bytes_read;
       break;
     case DW_FORM_block:
@@ -9020,12 +9020,12 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 	 to canonicalize them.  */
       return DW_STRING (attr);
     default:
-      if (attr->form != GDB_FORM_cached_string)
+      if (!DW_STRING_IS_CANONICAL (attr))
 	{
 	  DW_STRING (attr)
 	    = dwarf2_canonicalize_name (DW_STRING (attr), cu,
 					&cu->objfile->objfile_obstack);
-	  attr->form = GDB_FORM_cached_string;
+	  DW_STRING_IS_CANONICAL (attr) = 1;
 	}
       return DW_STRING (attr);
     }
@@ -9536,8 +9536,6 @@ dwarf_form_name (unsigned form)
       return "DW_FORM_flag_present";
     case DW_FORM_sig8:
       return "DW_FORM_sig8";
-    case GDB_FORM_cached_string:
-      return "GDB_FORM_cached_string";
     default:
       return "DW_FORM_<unknown>";
     }
@@ -10090,10 +10088,10 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	  break;
 	case DW_FORM_string:
 	case DW_FORM_strp:
-	case GDB_FORM_cached_string:
-	  fprintf_unfiltered (f, "string: \"%s\"",
+	  fprintf_unfiltered (f, "string: \"%s\" (%s canonicalized)",
 		   DW_STRING (&die->attrs[i])
-		   ? DW_STRING (&die->attrs[i]) : "");
+		   ? DW_STRING (&die->attrs[i]) : "",
+		   DW_STRING_IS_CANONICAL (&die->attrs[i]) ? "is" : "not");
 	  break;
 	case DW_FORM_flag:
 	  if (DW_UNSND (&die->attrs[i]))

@@ -1,3 +1,24 @@
+2009-09-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix gcc-4.5 HEAD warnings for enum ada_operator.
+	* Makefile.in (HFILES_NO_SRCDIR): Add ada-operator.inc.
+	* ada-lang.h (enum ada_operator): Move it to ...
+	* ada-operator.inc: ... a new file.
+	* expression.h (enum exp_opcode): Include ada-operator.inc.
+	New element OP_UNUSED_LAST.  Update comment for OP_EXTENDED0.
+
+	Fix gcc-4.5 HEAD warnings for GDB_FORM_cached_string.
+	* dwarf2read.c (GDB_FORM_cached_string)
+	(dwarf_form_name <GDB_FORM_cached_string>): Remove.
+	(struct attribute <dwarf_form>): Reduce the bit width.
+	(struct attribute <string_is_canonical>, DW_STRING_IS_CANONICAL): New.
+	(read_attribute_value <DW_FORM_string>)
+	(read_attribute_value <DW_FORM_strp>): Initialize
+	DW_STRING_IS_CANONICAL.
+	(dwarf2_name, dump_die_shallow <DW_FORM_string>)
+	(dump_die_shallow <DW_FORM_strp>): Update the code using former
+	GDB_FORM_cached_string.
+
 2009-09-14  Sergio Durigan Junior <sergiodj@linux.vnet.ibm.com>
 
 	* amd64-linux-tdep.c: Include xml-syscall.h header, define the XML
