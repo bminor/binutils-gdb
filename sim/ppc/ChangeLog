@@ -4,8 +4,7 @@
 	* configure.ac (sim_hwflags): Use AC_DEFINE to define HAVE_UNION_SEMUN.
 	* configure: Regenerate.
 	* config.in: Regenerate.
-	* hw_sem.c: #include "config.h".
-	(HAVE_UNION_SEMUN): Renamed from HAS_UNION_SEMUN.
+	* hw_sem.c: (HAVE_UNION_SEMUN): Renamed from HAS_UNION_SEMUN.
 
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
