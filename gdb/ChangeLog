@@ -1,3 +1,117 @@
+2009-09-14  Sergio Durigan Junior <sergiodj@linux.vnet.ibm.com>
+
+	* amd64-linux-tdep.c: Include xml-syscall.h header, define the XML
+	syscall name for the architecture.
+	(amd64_linux_get_syscall_number): New function.
+	(amd64_linux_init_abi): Register the correct functions for syscall
+	catchpoint; set the correct syscall file name.
+	* breakpoint.c: New include: xml-syscall.h.
+	(set_raw_breakpoint_without_location): Setting the parameters
+	for the catch syscall feature.
+	(insert_catch_syscall): New.
+	(remove_catch_syscall): New.
+	(breakpoint_hit_catch_syscall): New.
+	(print_it_catch_syscall): New.
+	(print_one_catch_syscall): New.
+	(print_mention_catch_syscall): New.
+	(catch_syscall_breakpoint_ops): New.
+	(syscall_catchpoint_p): New.
+	(create_catchpoint_without_mention): New.
+	(create_catchpoint): Modified in order to use
+	create_catchpoint_without_mention.
+	(create_syscall_event_catchpoint): New.
+	(clean_up_filters): New.
+	(catch_syscall_split_args): New.
+	(catch_syscall_command_1): New.
+	(delete_breakpoint): Add cleanup for catch syscall.
+	(is_syscall_catchpoint_enabled): New.
+	(catch_syscall_enabled): New.
+	(catching_syscall_number): New.
+	(catch_syscall_completer): New completer function.
+	(add_catch_command): Add the completer function for catchpoints.
+	* breakpoint.h (syscalls_to_be_caught): New vector.
+	(catch_syscall_enabled): New.
+	(catching_syscall_number): New.
+	* gdbarch.c: Regenerated.
+	* gdbarch.h: Regenerated.
+	* gdbarch.sh: Add syscall catchpoint functions and structures.
+	(get_syscall_number): New.
+	(UNKNOWN_SYSCALL): New definition.
+	* i386-linux-nat.c (i386_linux_resume): Select the proper request
+	to be made for ptrace() considering if we are catching syscalls
+	or not.
+	* i386-linux-tdep.c: Include xml-syscall.h header, define the XML
+	syscall name for the architecture.
+	(i386_linux_get_syscall_number): New.
+	(i386_linux_init_abi): Register the correct functions for syscall
+	catchpoint; set the correct syscall file name.
+	* inf-child.c (inf_child_set_syscall_catchpoint): New.
+	(inf_child_target): Assign default values to target_ops.
+	* inf-ptrace.c (inf_ptrace_resume): Select the proper request
+	to be made for ptrace() considering if we are catching syscalls
+	or not.
+	* inferior.h (struct inferior): Included new variables
+	any_syscall_count, syscalls_counts and total_syscalls_count,
+	used to keep track of requested syscall catchpoints.
+	* infrun.c (resume): Add syscall catchpoint.
+	(deal_with_syscall_event): New.
+	(handle_inferior_event): Add syscall entry/return events.
+	(inferior_has_called_syscall): New.
+	* linux-nat.c: Define some helpful variables to track wether we have
+	support for the needed ptrace option.
+	(linux_test_for_tracesysgood): New.
+	(linux_supports_tracesysgood): New.
+	(linux_enable_tracesysgood): New.
+	(linux_enable_event_reporting): Save the current used ptrace
+	options.
+	(linux_child_post_attach): Calling linux_enable_tracesysgood.
+	(linux_child_post_startup_inferior): Likewise.
+	(linux_child_set_syscall_catchpoint): New function.
+	(linux_handle_extended_wait): Handle the case which the inferior stops
+	because it has called or returned from a syscall.
+	(linux_target_install_ops): Install the necessary functions to handle
+	syscall catchpoints.
+	* linux-nat.h (struct lwp_info): Include syscall_state into the
+	structure, which indicates if we are in a syscall entry or return.
+	* ppc-linux-tdep.c: Include xml-syscall.h header, define the XML
+	syscall filename for the arch.
+	(ppc_linux_get_syscall_number): New.
+	(ppc_linux_init_abi): Register the correct functions for syscall
+	catchpoint; setting the correct name for the XML syscall file.
+	* target.c (update_current_target): Update/copy functions related to
+	syscall catchpoint.
+	(target_waitstatus_to_string): Add syscall catchpoint entry/return
+	events.
+	* target.h (struct target_waitstatus): Add syscall number.
+	(struct syscall): New struct to hold information about syscalls
+	in the system.
+	(struct target_ops): Add ops for syscall catchpoint.
+	(inferior_has_called_syscall): New.
+	(target_set_syscall_catchpoint): New.
+	* xml-support.c (xml_fetch_content_from_file): New function,
+	transferred from xml-tdesc.c.
+	* xml-support.h (xml_fetch_content_from_file): New.
+	* xml-tdesc.c (fetch_xml_from_file): Function removed;
+	transferred to xml-support.c.
+	(file_read_description_xml): Updated to use the new
+	xml_fetch_content_from_file function.
+	* syscalls/gdb-syscalls.dtd: New definition file for syscall's XML
+	support.
+	* syscalls/amd64-linux.xml: New file containing information about
+	syscalls for GNU/Linux systems that use amd64 architecture.
+	* syscalls/i386-linux.xml: New file containing information about
+	syscalls for GNU/Linux systems that use i386 architecture.
+	* syscalls/ppc-linux.xml: New file containing information about
+	syscalls for GNU/Linux systems that use PPC architecture.
+	* syscalls/ppc64-linux.xml: New file containing information about
+	syscalls for GNU/Linux systems that use PPC64 architecture.
+	* xml-syscall.c: New file containing functions for manipulating
+	syscall's XML files.
+	* xml-syscall.h: New file, exporting the functions above mentioned.
+	* Makefile.in: Support for relocatable GDB datadir and XML
+	syscall.
+	* NEWS: Added information about the catch syscall feature.
+
 2009-09-14  Doug Evans  <dje@google.com>
 
 	* target.c (memory_xfer_partial): Only update dcache after we know

@@ -647,6 +647,7 @@ update_current_target (void)
       /* Do not inherit to_follow_fork.  */
       INHERIT (to_insert_exec_catchpoint, t);
       INHERIT (to_remove_exec_catchpoint, t);
+      INHERIT (to_set_syscall_catchpoint, t);
       INHERIT (to_has_exited, t);
       /* Do not inherit to_mourn_inferiour.  */
       INHERIT (to_can_run, t);
@@ -788,6 +789,9 @@ update_current_target (void)
 	    tcomplain);
   de_fault (to_remove_exec_catchpoint,
 	    (int (*) (int))
+	    tcomplain);
+  de_fault (to_set_syscall_catchpoint,
+	    (int (*) (int, int, int, int, int *))
 	    tcomplain);
   de_fault (to_has_exited,
 	    (int (*) (int, int, int *))
@@ -2866,9 +2870,9 @@ target_waitstatus_to_string (const struct target_waitstatus *ws)
     case TARGET_WAITKIND_EXECD:
       return xstrprintf ("%sexecd", kind_str);
     case TARGET_WAITKIND_SYSCALL_ENTRY:
-      return xstrprintf ("%ssyscall-entry", kind_str);
+      return xstrprintf ("%sentered syscall", kind_str);
     case TARGET_WAITKIND_SYSCALL_RETURN:
-      return xstrprintf ("%ssyscall-return", kind_str);
+      return xstrprintf ("%sexited syscall", kind_str);
     case TARGET_WAITKIND_SPURIOUS:
       return xstrprintf ("%sspurious", kind_str);
     case TARGET_WAITKIND_IGNORE:

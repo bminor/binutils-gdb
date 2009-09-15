@@ -426,69 +426,6 @@ tdesc_parse_xml (const char *document, xml_fetch_another fetcher,
 #endif /* HAVE_LIBEXPAT */
 
 
-/* Open FILENAME, read all its text into memory, close it, and return
-   the text.  If something goes wrong, return NULL and warn.  */
-
-static char *
-fetch_xml_from_file (const char *filename, void *baton)
-{
-  const char *dirname = baton;
-  FILE *file;
-  struct cleanup *back_to;
-  char *text;
-  size_t len, offset;
-
-  if (dirname && *dirname)
-    {
-      char *fullname = concat (dirname, "/", filename, (char *) NULL);
-      if (fullname == NULL)
-	nomem (0);
-      file = fopen (fullname, FOPEN_RT);
-      xfree (fullname);
-    }
-  else
-    file = fopen (filename, FOPEN_RT);
-
-  if (file == NULL)
-    return NULL;
-
-  back_to = make_cleanup_fclose (file);
-
-  /* Read in the whole file, one chunk at a time.  */
-  len = 4096;
-  offset = 0;
-  text = xmalloc (len);
-  make_cleanup (free_current_contents, &text);
-  while (1)
-    {
-      size_t bytes_read;
-
-      /* Continue reading where the last read left off.  Leave at least
-	 one byte so that we can NUL-terminate the result.  */
-      bytes_read = fread (text + offset, 1, len - offset - 1, file);
-      if (ferror (file))
-	{
-	  warning (_("Read error from \"%s\""), filename);
-	  do_cleanups (back_to);
-	  return NULL;
-	}
-
-      offset += bytes_read;
-
-      if (feof (file))
-	break;
-
-      len = len * 2;
-      text = xrealloc (text, len);
-    }
-
-  fclose (file);
-  discard_cleanups (back_to);
-
-  text[offset] = '\0';
-  return text;
-}
-
 /* Read an XML target description from FILENAME.  Parse it, and return
    the parsed description.  */
 
@@ -500,7 +437,7 @@ file_read_description_xml (const char *filename)
   struct cleanup *back_to;
   char *dirname;
 
-  tdesc_str = fetch_xml_from_file (filename, NULL);
+  tdesc_str = xml_fetch_content_from_file (filename, NULL);
   if (tdesc_str == NULL)
     {
       warning (_("Could not open \"%s\""), filename);
@@ -513,7 +450,7 @@ file_read_description_xml (const char *filename)
   if (dirname != NULL)
     make_cleanup (xfree, dirname);
 
-  tdesc = tdesc_parse_xml (tdesc_str, fetch_xml_from_file, dirname);
+  tdesc = tdesc_parse_xml (tdesc_str, xml_fetch_content_from_file, dirname);
   do_cleanups (back_to);
 
   return tdesc;

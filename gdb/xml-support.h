@@ -240,4 +240,10 @@ extern void obstack_xml_printf (struct obstack *obstack,
                                const char *format, ...)
   ATTRIBUTE_PRINTF_2;
 
+/* Open FILENAME, read all its text into memory, close it, and return
+   the text.  If something goes wrong, return NULL and warn.  */
+
+extern char *xml_fetch_content_from_file (const char *filename,
+                                          void *baton);
+
 #endif

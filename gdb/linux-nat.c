@@ -67,6 +67,10 @@
 # endif
 #endif /* HAVE_PERSONALITY */
 
+/* To be used when one needs to know wether a
+   WSTOPSIG (status) is a syscall */
+#define TRAP_IS_SYSCALL (SIGTRAP | 0x80)
+
 /* This comment documents high-level logic of this file. 
 
 Waiting for events in sync mode
@@ -279,6 +283,11 @@ struct simple_pid_list *stopped_pids;
 
 static int linux_supports_tracefork_flag = -1;
 
+/* This variable is a tri-state flag: -1 for unknown, 0 if PTRACE_O_TRACESYSGOOD
+   can not be used, 1 if it can.  */
+
+static int linux_supports_tracesysgood_flag = -1;
+
 /* If we have PTRACE_O_TRACEFORK, this flag indicates whether we also have
    PTRACE_O_TRACEVFORKDONE.  */
 
@@ -289,6 +298,9 @@ static int linux_supports_tracevforkdone_flag = -1;
 /* Zero if the async mode, although enabled, is masked, which means
    linux_nat_wait should behave as if async mode was off.  */
 static int linux_nat_async_mask_value = 1;
+
+/* Stores the current used ptrace() options.  */
+static int current_ptrace_options = 0;
 
 /* The read/write ends of the pipe registered as waitable file in the
    event loop.  */
@@ -525,6 +537,43 @@ linux_test_for_tracefork (int original_pid)
   restore_child_signals_mask (&prev_mask);
 }
 
+/* Determine if PTRACE_O_TRACESYSGOOD can be used to follow syscalls.
+
+   We try to enable syscall tracing on ORIGINAL_PID.  If this fails,
+   we know that the feature is not available.  This may change the tracing
+   options for ORIGINAL_PID, but we'll be setting them shortly anyway.  */
+
+static void
+linux_test_for_tracesysgood (int original_pid)
+{
+  int ret;
+  sigset_t prev_mask;
+
+  /* We don't want those ptrace calls to be interrupted.  */
+  block_child_signals (&prev_mask);
+
+  linux_supports_tracesysgood_flag = 0;
+
+  ret = ptrace (PTRACE_SETOPTIONS, original_pid, 0, PTRACE_O_TRACESYSGOOD);
+  if (ret != 0)
+    goto out;
+
+  linux_supports_tracesysgood_flag = 1;
+out:
+  restore_child_signals_mask (&prev_mask);
+}
+
+/* Determine wether we support PTRACE_O_TRACESYSGOOD option available.
+   This function also sets linux_supports_tracesysgood_flag.  */
+
+static int
+linux_supports_tracesysgood (int pid)
+{
+  if (linux_supports_tracesysgood_flag == -1)
+    linux_test_for_tracesysgood (pid);
+  return linux_supports_tracesysgood_flag;
+}
+
 /* Return non-zero iff we have tracefork functionality available.
    This function also sets linux_supports_tracefork_flag.  */
 
@@ -544,12 +593,27 @@ linux_supports_tracevforkdone (int pid)
   return linux_supports_tracevforkdone_flag;
 }
 
+static void
+linux_enable_tracesysgood (ptid_t ptid)
+{
+  int pid = ptid_get_lwp (ptid);
+
+  if (pid == 0)
+    pid = ptid_get_pid (ptid);
+
+  if (linux_supports_tracesysgood (pid) == 0)
+    return;
+
+  current_ptrace_options |= PTRACE_O_TRACESYSGOOD;
+
+  ptrace (PTRACE_SETOPTIONS, pid, 0, current_ptrace_options);
+}
+
 
 void
 linux_enable_event_reporting (ptid_t ptid)
 {
   int pid = ptid_get_lwp (ptid);
-  int options;
 
   if (pid == 0)
     pid = ptid_get_pid (ptid);
@@ -557,15 +621,16 @@ linux_enable_event_reporting (ptid_t ptid)
   if (! linux_supports_tracefork (pid))
     return;
 
-  options = PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK | PTRACE_O_TRACEEXEC
-    | PTRACE_O_TRACECLONE;
+  current_ptrace_options |= PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK
+    | PTRACE_O_TRACEEXEC | PTRACE_O_TRACECLONE;
+
   if (linux_supports_tracevforkdone (pid))
-    options |= PTRACE_O_TRACEVFORKDONE;
+    current_ptrace_options |= PTRACE_O_TRACEVFORKDONE;
 
   /* Do not enable PTRACE_O_TRACEEXIT until GDB is more prepared to support
      read-only process state.  */
 
-  ptrace (PTRACE_SETOPTIONS, pid, 0, options);
+  ptrace (PTRACE_SETOPTIONS, pid, 0, current_ptrace_options);
 }
 
 static void
@@ -573,6 +638,7 @@ linux_child_post_attach (int pid)
 {
   linux_enable_event_reporting (pid_to_ptid (pid));
   check_for_thread_db ();
+  linux_enable_tracesysgood (pid_to_ptid (pid));
 }
 
 static void
@@ -580,6 +646,7 @@ linux_child_post_startup_inferior (ptid_t ptid)
 {
   linux_enable_event_reporting (ptid);
   check_for_thread_db ();
+  linux_enable_tracesysgood (ptid);
 }
 
 static int
@@ -808,6 +875,20 @@ linux_child_insert_exec_catchpoint (int pid)
 {
   if (!linux_supports_tracefork (pid))
     error (_("Your system does not support exec catchpoints."));
+}
+
+static int
+linux_child_set_syscall_catchpoint (int pid, int needed, int any_count,
+				    int table_size, int *table)
+{
+  if (! linux_supports_tracesysgood (pid))
+    error (_("Your system does not support syscall catchpoints."));
+  /* On GNU/Linux, we ignore the arguments.  It means that we only
+     enable the syscall catchpoints, but do not disable them.
+     
+     Also, we do not use the `table' information because we do not
+     filter system calls here.  We let GDB do the logic for us.  */
+  return 0;
 }
 
 /* On GNU/Linux there are no real LWP's.  The closest thing to LWP's
@@ -1982,6 +2063,47 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
       return 0;
     }
 
+  /* Used for 'catch syscall' feature.  */
+  if (WSTOPSIG (status) == TRAP_IS_SYSCALL)
+    {
+      if (catch_syscall_enabled () == 0)
+	  ourstatus->kind = TARGET_WAITKIND_IGNORE;
+      else
+	{
+	  struct regcache *regcache = get_thread_regcache (lp->ptid);
+	  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+
+	  ourstatus->value.syscall_number =
+	    (int) gdbarch_get_syscall_number (gdbarch, lp->ptid);
+
+	  /* If we are catching this specific syscall number, then we
+	     should update the target_status to reflect which event
+	     has occurred.  But if this syscall is not to be caught,
+	     then we can safely mark the event as a SYSCALL_RETURN.
+
+	     This is particularly needed if:
+
+	       - We are catching any syscalls, or
+	       - We are catching the syscall "exit"
+
+	     In this case, as the syscall "exit" *doesn't* return,
+	     then GDB would be confused because it would mark the last
+	     syscall event as a SYSCALL_ENTRY.  After that, if we re-ran the
+	     inferior GDB will think that the first syscall event is
+	     the opposite of a SYSCALL_ENTRY, which is the SYSCALL_RETURN.
+	     Therefore, GDB would report inverted syscall events.  */
+	  if (catching_syscall_number (ourstatus->value.syscall_number))
+	    ourstatus->kind = 
+	      (lp->syscall_state == TARGET_WAITKIND_SYSCALL_ENTRY) ?
+	      TARGET_WAITKIND_SYSCALL_RETURN : TARGET_WAITKIND_SYSCALL_ENTRY;
+	  else
+	    ourstatus->kind = TARGET_WAITKIND_SYSCALL_RETURN;
+
+	  lp->syscall_state = ourstatus->kind;
+	}
+      return 0;
+    }
+
   internal_error (__FILE__, __LINE__,
 		  _("unknown ptrace event %d"), event);
 }
@@ -2580,11 +2702,16 @@ linux_nat_filter_event (int lwpid, int status, int options)
     }
 
   /* Save the trap's siginfo in case we need it later.  */
-  if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP)
+  if (WIFSTOPPED (status)
+      && (WSTOPSIG (status) == SIGTRAP || WSTOPSIG (status) == TRAP_IS_SYSCALL))
     save_siginfo (lp);
 
-  /* Handle GNU/Linux's extended waitstatus for trace events.  */
-  if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP && status >> 16 != 0)
+  /* Handle GNU/Linux's extended waitstatus for trace events.
+     It is necessary to check if WSTOPSIG is signaling that
+     the inferior is entering/exiting a system call.  */
+  if (WIFSTOPPED (status)
+      && ((WSTOPSIG (status) == TRAP_IS_SYSCALL)
+          || (WSTOPSIG (status) == SIGTRAP && status >> 16 != 0)))
     {
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
@@ -4510,6 +4637,7 @@ linux_target_install_ops (struct target_ops *t)
   t->to_insert_fork_catchpoint = linux_child_insert_fork_catchpoint;
   t->to_insert_vfork_catchpoint = linux_child_insert_vfork_catchpoint;
   t->to_insert_exec_catchpoint = linux_child_insert_exec_catchpoint;
+  t->to_set_syscall_catchpoint = linux_child_set_syscall_catchpoint;
   t->to_pid_to_exec_file = linux_child_pid_to_exec_file;
   t->to_post_startup_inferior = linux_child_post_startup_inferior;
   t->to_post_attach = linux_child_post_attach;

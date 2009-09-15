@@ -752,7 +752,12 @@ i386_linux_resume (struct target_ops *ops,
 {
   int pid = PIDGET (ptid);
 
-  int request = PTRACE_CONT;
+  int request;
+
+  if (catch_syscall_enabled () > 0)
+   request = PTRACE_SYSCALL;
+  else
+    request = PTRACE_CONT;
 
   if (step)
     {

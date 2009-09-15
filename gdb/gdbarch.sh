@@ -724,6 +724,11 @@ M:struct type *:get_siginfo_type:void:
 # Record architecture-specific information from the symbol table.
 M:void:record_special_symbol:struct objfile *objfile, asymbol *sym:objfile, sym
 
+# Function for the 'catch syscall' feature.
+
+# Get architecture-specific system calls information from registers.
+M:LONGEST:get_syscall_number:ptid_t ptid:ptid
+
 # True if the list of shared libraries is one and only for all
 # processes, as opposed to a list of shared libraries per inferior.
 # This usually means that all processes, although may or may not share
@@ -848,6 +853,7 @@ struct bp_target_info;
 struct target_desc;
 struct displaced_step_closure;
 struct core_regset_section;
+struct syscall;
 
 /* The architecture associated with the connection to the target.
  
@@ -925,6 +931,9 @@ done
 
 # close it off
 cat <<EOF
+
+/* Definition for an unknown syscall, used basically in error-cases.  */
+#define UNKNOWN_SYSCALL (-1)
 
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 

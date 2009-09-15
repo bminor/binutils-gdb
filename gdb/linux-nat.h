@@ -70,6 +70,13 @@ struct lwp_info
      or to a local variable in lin_lwp_wait.  */
   struct target_waitstatus waitstatus;
 
+  /* Signal wether we are in a SYSCALL_ENTRY or
+     in a SYSCALL_RETURN event.
+     Values:
+     - TARGET_WAITKIND_SYSCALL_ENTRY
+     - TARGET_WAITKIND_SYSCALL_RETURN */
+  int syscall_state;
+
   /* Next LWP in list.  */
   struct lwp_info *next;
 };

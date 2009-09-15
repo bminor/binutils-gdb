@@ -1,3 +1,9 @@
+2009-09-14  Sergio Durigan Junior <sergiodj@linux.vnet.ibm.com>
+
+	* Makefile.in: Inclusion of catch-syscall object.
+	* gdb.base/catch-syscall.c: New file.
+	* gdb.base/catch-syscall.exp: New file.
+
 2009-09-12  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.reverse/step-reverse.exp: Explicitly check for targets

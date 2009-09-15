@@ -35,6 +35,10 @@
 
 #include "amd64-tdep.h"
 #include "solib-svr4.h"
+#include "xml-syscall.h"
+
+/* The syscall's XML filename for i386.  */
+#define XML_SYSCALL_FILENAME_AMD64 "syscalls/amd64-linux.xml"
 
 #include "record.h"
 #include "linux-record.h"
@@ -173,6 +177,28 @@ amd64_linux_sigcontext_addr (struct frame_info *this_frame)
   return sp + AMD64_LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
 }
 
+
+static LONGEST
+amd64_linux_get_syscall_number (struct gdbarch *gdbarch,
+                                ptid_t ptid)
+{
+  struct regcache *regcache = get_thread_regcache (ptid);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  /* The content of a register.  */
+  gdb_byte buf[8];
+  /* The result.  */
+  LONGEST ret;
+
+  /* Getting the system call number from the register.
+     When dealing with x86_64 architecture, this information
+     is stored at %rax register.  */
+  regcache_cooked_read (regcache, AMD64_LINUX_ORIG_RAX_REGNUM, buf);
+
+  ret = extract_signed_integer (buf, 8, byte_order);
+
+  return ret;
+}
+
 
 /* From <asm/sigcontext.h>.  */
 static int amd64_linux_sc_reg_offset[] =
@@ -1167,6 +1193,11 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_register_name (gdbarch, amd64_linux_register_name);
   set_gdbarch_register_type (gdbarch, amd64_linux_register_type);
   set_gdbarch_register_reggroup_p (gdbarch, amd64_linux_register_reggroup_p);
+
+  /* Functions for 'catch syscall'.  */
+  set_xml_syscall_file_name (XML_SYSCALL_FILENAME_AMD64);
+  set_gdbarch_get_syscall_number (gdbarch,
+                                  amd64_linux_get_syscall_number);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,

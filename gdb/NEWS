@@ -234,6 +234,16 @@ powerpc-linux or powerpc64-linux and the spu-elf targets, using the
 
 * New commands (for set/show, see "New options" below)
 
+catch syscall [NAME(S) | NUMBER(S)]
+  Catch system calls.  Arguments, which should be names of system
+  calls or their numbers, mean catch only those syscalls.  Without
+  arguments, every syscall will be caught.  When the inferior issues
+  any of the specified syscalls, GDB will stop and announce the system
+  call, both when it is called and when its call returns.  This
+  feature is currently available with a native GDB running on the
+  Linux Kernel, under the following architectures: x86, x86_64,
+  PowerPC and PowerPC64.
+
 find [/size-char] [/max-count] start-address, end-address|+search-space-size,
     val1 [, val2, ...]
   Search memory for a sequence of bytes.

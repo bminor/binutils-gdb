@@ -3685,6 +3685,137 @@ A failed Ada assertion.
 A call to @code{exec}.  This is currently only available for HP-UX
 and @sc{gnu}/Linux.
 
+@item syscall
+@itemx syscall @r{[}@var{name} @r{|} @var{number}@r{]} @r{...}
+@cindex break on a system call.
+A call to or return from a system call, a.k.a.@: @dfn{syscall}.  A
+syscall is a mechanism for application programs to request a service
+from the operating system (OS) or one of the OS system services.
+@value{GDBN} can catch some or all of the syscalls issued by the
+debuggee, and show the related information for each syscall.  If no
+argument is specified, calls to and returns from all system calls
+will be caught.
+
+@var{name} can be any system call name that is valid for the
+underlying OS.  Just what syscalls are valid depends on the OS.  On
+GNU and Unix systems, you can find the full list of valid syscall
+names on @file{/usr/include/asm/unistd.h}.
+
+@c For MS-Windows, the syscall names and the corresponding numbers
+@c can be found, e.g., on this URL:
+@c http://www.metasploit.com/users/opcode/syscalls.html
+@c but we don't support Windows syscalls yet.
+
+Normally, @value{GDBN} knows in advance which syscalls are valid for
+each OS, so you can use the @value{GDBN} command-line completion
+facilities (@pxref{Completion,, command completion}) to list the
+available choices.
+
+You may also specify the system call numerically.  A syscall's
+number is the value passed to the OS's syscall dispatcher to
+identify the requested service.  When you specify the syscall by its
+name, @value{GDBN} uses its database of syscalls to convert the name
+into the corresponding numeric code, but using the number directly
+may be useful if @value{GDBN}'s database does not have the complete
+list of syscalls on your system (e.g., because @value{GDBN} lags
+behind the OS upgrades).
+
+The example below illustrates how this command works if you don't provide
+arguments to it:
+
+@smallexample
+(@value{GDBP}) catch syscall
+Catchpoint 1 (syscall)
+(@value{GDBP}) r
+Starting program: /tmp/catch-syscall
+
+Catchpoint 1 (call to syscall 'close'), \
+	   0xffffe424 in __kernel_vsyscall ()
+(@value{GDBP}) c
+Continuing.
+
+Catchpoint 1 (returned from syscall 'close'), \
+	0xffffe424 in __kernel_vsyscall ()
+(@value{GDBP})
+@end smallexample
+
+Here is an example of catching a system call by name:
+
+@smallexample
+(@value{GDBP}) catch syscall chroot
+Catchpoint 1 (syscall 'chroot' [61])
+(@value{GDBP}) r
+Starting program: /tmp/catch-syscall
+
+Catchpoint 1 (call to syscall 'chroot'), \
+		   0xffffe424 in __kernel_vsyscall ()
+(@value{GDBP}) c
+Continuing.
+
+Catchpoint 1 (returned from syscall 'chroot'), \
+	0xffffe424 in __kernel_vsyscall ()
+(@value{GDBP})
+@end smallexample
+
+An example of specifying a system call numerically.  In the case
+below, the syscall number has a corresponding entry in the XML
+file, so @value{GDBN} finds its name and prints it:
+
+@smallexample
+(@value{GDBP}) catch syscall 252
+Catchpoint 1 (syscall(s) 'exit_group')
+(@value{GDBP}) r
+Starting program: /tmp/catch-syscall
+
+Catchpoint 1 (call to syscall 'exit_group'), \
+		   0xffffe424 in __kernel_vsyscall ()
+(@value{GDBP}) c
+Continuing.
+
+Program exited normally.
+(@value{GDBP})
+@end smallexample
+
+However, there can be situations when there is no corresponding name
+in XML file for that syscall number.  In this case, @value{GDBN} prints
+a warning message saying that it was not able to find the syscall name,
+but the catchpoint will be set anyway.  See the example below:
+
+@smallexample
+(@value{GDBP}) catch syscall 764
+warning: The number '764' does not represent a known syscall.
+Catchpoint 2 (syscall 764)
+(@value{GDBP})
+@end smallexample
+
+If you configure @value{GDBN} using the @samp{--without-expat} option,
+it will not be able to display syscall names.  Also, if your
+architecture does not have an XML file describing its system calls,
+you will not be able to see the syscall names.  It is important to
+notice that these two features are used for accessing the syscall
+name database.  In either case, you will see a warning like this:
+
+@smallexample
+(@value{GDBP}) catch syscall
+warning: Could not open "syscalls/i386-linux.xml"
+warning: Could not load the syscall XML file 'syscalls/i386-linux.xml'.
+GDB will not be able to display syscall names.
+Catchpoint 1 (syscall)
+(@value{GDBP})
+@end smallexample
+
+Of course, the file name will change depending on your architecture and system.
+
+Still using the example above, you can also try to catch a syscall by its
+number.  In this case, you would see something like:
+
+@smallexample
+(@value{GDBP}) catch syscall 252
+Catchpoint 1 (syscall(s) 252)
+@end smallexample
+
+Again, in this case @value{GDBN} would not be able to display syscall's names.
+
 @item fork
 A call to @code{fork}.  This is currently only available for HP-UX
 and @sc{gnu}/Linux.

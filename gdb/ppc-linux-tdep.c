@@ -47,6 +47,7 @@
 #include "exceptions.h"
 #include "arch-utils.h"
 #include "spu-tdep.h"
+#include "xml-syscall.h"
 
 #include "features/rs6000/powerpc-32l.c"
 #include "features/rs6000/powerpc-altivec32l.c"
@@ -64,6 +65,9 @@
 #include "features/rs6000/powerpc-isa205-vsx64l.c"
 #include "features/rs6000/powerpc-e500l.c"
 
+/* The syscall's XML filename for PPC and PPC64.  */
+#define XML_SYSCALL_FILENAME_PPC "syscalls/ppc-linux.xml"
+#define XML_SYSCALL_FILENAME_PPC64 "syscalls/ppc64-linux.xml"
 
 /* ppc_linux_memory_remove_breakpoints attempts to remove a breakpoint
    in much the same fashion as memory_remove_breakpoint in mem-break.c,
@@ -1066,6 +1070,39 @@ ppc_linux_trap_reg_p (struct gdbarch *gdbarch)
          && register_size (gdbarch, PPC_TRAP_REGNUM) > 0;
 }
 
+/* Return the current system call's number present in the
+   r0 register.  When the function fails, it returns -1.  */
+static LONGEST
+ppc_linux_get_syscall_number (struct gdbarch *gdbarch,
+                              ptid_t ptid)
+{
+  struct regcache *regcache = get_thread_regcache (ptid);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  struct cleanup *cleanbuf;
+  /* The content of a register */
+  gdb_byte *buf;
+  /* The result */
+  LONGEST ret;
+
+  /* Make sure we're in a 32- or 64-bit machine */
+  gdb_assert (tdep->wordsize == 4 || tdep->wordsize == 8);
+
+  buf = (gdb_byte *) xmalloc (tdep->wordsize * sizeof (gdb_byte));
+
+  cleanbuf = make_cleanup (xfree, buf);
+
+  /* Getting the system call number from the register.
+     When dealing with PowerPC architecture, this information
+     is stored at 0th register.  */
+  regcache_cooked_read (regcache, tdep->ppc_gp0_regnum, buf);
+
+  ret = extract_signed_integer (buf, tdep->wordsize, byte_order);
+  do_cleanups (cleanbuf);
+
+  return ret;
+}
+
 static void
 ppc_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
@@ -1435,6 +1472,9 @@ ppc_linux_init_abi (struct gdbarch_info info,
   /* Handle inferior calls during interrupted system calls.  */
   set_gdbarch_write_pc (gdbarch, ppc_linux_write_pc);
 
+  /* Get the syscall number from the arch's register.  */
+  set_gdbarch_get_syscall_number (gdbarch, ppc_linux_get_syscall_number);
+
   if (tdep->wordsize == 4)
     {
       /* Until November 2001, gcc did not comply with the 32 bit SysV
@@ -1453,6 +1493,9 @@ ppc_linux_init_abi (struct gdbarch_info info,
       set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
       set_solib_svr4_fetch_link_map_offsets
         (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+
+      /* Setting the correct XML syscall filename.  */
+      set_xml_syscall_file_name (XML_SYSCALL_FILENAME_PPC);
 
       /* Trampolines.  */
       tramp_frame_prepend_unwinder (gdbarch, &ppc32_linux_sigaction_tramp_frame);
@@ -1476,6 +1519,9 @@ ppc_linux_init_abi (struct gdbarch_info info,
       set_gdbarch_skip_trampoline_code (gdbarch, ppc64_skip_trampoline_code);
       set_solib_svr4_fetch_link_map_offsets
         (gdbarch, svr4_lp64_fetch_link_map_offsets);
+
+      /* Setting the correct XML syscall filename.  */
+      set_xml_syscall_file_name (XML_SYSCALL_FILENAME_PPC64);
 
       /* Trampolines.  */
       tramp_frame_prepend_unwinder (gdbarch, &ppc64_linux_sigaction_tramp_frame);

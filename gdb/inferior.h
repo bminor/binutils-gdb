@@ -425,6 +425,20 @@ struct inferior
 
   /* Private data used by the target vector implementation.  */
   struct private_inferior *private;
+
+  /* We keep a count of the number of times the user has requested a
+     particular syscall to be tracked, and pass this information to the
+     target.  This lets capable targets implement filtering directly.  */
+
+  /* Number of times that "any" syscall is requested.  */
+  int any_syscall_count;
+
+  /* Count of each system call.  */
+  VEC(int) *syscalls_counts;
+
+  /* This counts all syscall catch requests, so we can readily determine
+     if any catching is necessary.  */
+  int total_syscalls_count;
 };
 
 /* Create an empty inferior list, or empty the existing one.  */

@@ -1036,6 +1036,66 @@ obstack_xml_printf (struct obstack *obstack, const char *format, ...)
   va_end (ap);
 }
 
+char *
+xml_fetch_content_from_file (const char *filename, void *baton)
+{
+  const char *dirname = baton;
+  FILE *file;
+  struct cleanup *back_to;
+  char *text;
+  size_t len, offset;
+
+  if (dirname && *dirname)
+    {
+      char *fullname = concat (dirname, "/", filename, (char *) NULL);
+      if (fullname == NULL)
+	nomem (0);
+      file = fopen (fullname, FOPEN_RT);
+      xfree (fullname);
+    }
+  else
+    file = fopen (filename, FOPEN_RT);
+
+  if (file == NULL)
+    return NULL;
+
+  back_to = make_cleanup_fclose (file);
+
+  /* Read in the whole file, one chunk at a time.  */
+  len = 4096;
+  offset = 0;
+  text = xmalloc (len);
+  make_cleanup (free_current_contents, &text);
+  while (1)
+    {
+      size_t bytes_read;
+
+      /* Continue reading where the last read left off.  Leave at least
+	 one byte so that we can NUL-terminate the result.  */
+      bytes_read = fread (text + offset, 1, len - offset - 1, file);
+      if (ferror (file))
+	{
+	  warning (_("Read error from \"%s\""), filename);
+	  do_cleanups (back_to);
+	  return NULL;
+	}
+
+      offset += bytes_read;
+
+      if (feof (file))
+	break;
+
+      len = len * 2;
+      text = xrealloc (text, len);
+    }
+
+  fclose (file);
+  discard_cleanups (back_to);
+
+  text[offset] = '\0';
+  return text;
+}
+
 void _initialize_xml_support (void);
 
 void

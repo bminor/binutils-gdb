@@ -60,6 +60,7 @@
 #include "wrapper.h"
 #include "valprint.h"
 #include "jit.h"
+#include "xml-syscall.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -203,6 +204,8 @@ static void update_global_location_list_nothrow (int);
 static int is_hardware_watchpoint (struct breakpoint *bpt);
 
 static void insert_breakpoint_locations (void);
+
+static int syscall_catchpoint_p (struct breakpoint *b);
 
 static void tracepoints_info (char *, int);
 
@@ -4445,6 +4448,7 @@ set_raw_breakpoint_without_location (struct gdbarch *gdbarch,
   b->frame_id = null_frame_id;
   b->forked_inferior_pid = null_ptid;
   b->exec_pathname = NULL;
+  b->syscalls_to_be_caught = NULL;
   b->ops = NULL;
   b->condition_not_parsed = 0;
 
@@ -4939,7 +4943,266 @@ static struct breakpoint_ops catch_vfork_breakpoint_ops =
   print_mention_catch_vfork
 };
 
-/* Create a new breakpoint of the bp_catchpoint kind and return it.
+/* Implement the "insert" breakpoint_ops method for syscall
+   catchpoints.  */
+
+static void
+insert_catch_syscall (struct breakpoint *b)
+{
+  struct inferior *inf = current_inferior ();
+
+  ++inf->total_syscalls_count;
+  if (!b->syscalls_to_be_caught)
+    ++inf->any_syscall_count;
+  else
+    {
+      int i, iter;
+      for (i = 0;
+           VEC_iterate (int, b->syscalls_to_be_caught, i, iter);
+           i++)
+	{
+          int elem;
+	  if (iter >= VEC_length (int, inf->syscalls_counts))
+	    {
+              int old_size = VEC_length (int, inf->syscalls_counts);
+              uintptr_t vec_addr_offset = old_size * ((uintptr_t) sizeof (int));
+              uintptr_t vec_addr;
+              VEC_safe_grow (int, inf->syscalls_counts, iter + 1);
+              vec_addr = (uintptr_t) VEC_address (int, inf->syscalls_counts) +
+		vec_addr_offset;
+              memset ((void *) vec_addr, 0,
+                      (iter + 1 - old_size) * sizeof (int));
+	    }
+          elem = VEC_index (int, inf->syscalls_counts, iter);
+          VEC_replace (int, inf->syscalls_counts, iter, ++elem);
+	}
+    }
+
+  target_set_syscall_catchpoint (PIDGET (inferior_ptid),
+				 inf->total_syscalls_count != 0,
+				 inf->any_syscall_count,
+				 VEC_length (int, inf->syscalls_counts),
+				 VEC_address (int, inf->syscalls_counts));
+}
+
+/* Implement the "remove" breakpoint_ops method for syscall
+   catchpoints.  */
+
+static int
+remove_catch_syscall (struct breakpoint *b)
+{
+  struct inferior *inf = current_inferior ();
+
+  --inf->total_syscalls_count;
+  if (!b->syscalls_to_be_caught)
+    --inf->any_syscall_count;
+  else
+    {
+      int i, iter;
+      for (i = 0;
+           VEC_iterate (int, b->syscalls_to_be_caught, i, iter);
+           i++)
+	{
+          int elem;
+	  if (iter >= VEC_length (int, inf->syscalls_counts))
+	    /* Shouldn't happen.  */
+	    continue;
+          elem = VEC_index (int, inf->syscalls_counts, iter);
+          VEC_replace (int, inf->syscalls_counts, iter, --elem);
+        }
+    }
+
+  return target_set_syscall_catchpoint (PIDGET (inferior_ptid),
+					inf->total_syscalls_count != 0,
+					inf->any_syscall_count,
+					VEC_length (int, inf->syscalls_counts),
+					VEC_address (int, inf->syscalls_counts));
+}
+
+/* Implement the "breakpoint_hit" breakpoint_ops method for syscall
+   catchpoints.  */
+
+static int
+breakpoint_hit_catch_syscall (struct breakpoint *b)
+{
+  /* We must check if we are catching specific syscalls in this breakpoint.
+     If we are, then we must guarantee that the called syscall is the same
+     syscall we are catching.  */
+  int syscall_number = 0;
+
+  if (!inferior_has_called_syscall (inferior_ptid, &syscall_number))
+    return 0;
+
+  /* Now, checking if the syscall is the same.  */
+  if (b->syscalls_to_be_caught)
+    {
+      int i, iter;
+      for (i = 0;
+           VEC_iterate (int, b->syscalls_to_be_caught, i, iter);
+           i++)
+	if (syscall_number == iter)
+	  break;
+      /* Not the same.  */
+      if (!iter)
+	return 0;
+    }
+
+  return 1;
+}
+
+/* Implement the "print_it" breakpoint_ops method for syscall
+   catchpoints.  */
+
+static enum print_stop_action
+print_it_catch_syscall (struct breakpoint *b)
+{
+  /* These are needed because we want to know in which state a
+     syscall is.  It can be in the TARGET_WAITKIND_SYSCALL_ENTRY
+     or TARGET_WAITKIND_SYSCALL_RETURN, and depending on it we
+     must print "called syscall" or "returned from syscall".  */
+  ptid_t ptid;
+  struct target_waitstatus last;
+  struct syscall s;
+  struct cleanup *old_chain;
+  char *syscall_id;
+
+  get_last_target_status (&ptid, &last);
+
+  get_syscall_by_number (last.value.syscall_number, &s);
+
+  annotate_catchpoint (b->number);
+
+  if (s.name == NULL)
+    syscall_id = xstrprintf ("%d", last.value.syscall_number);
+  else
+    syscall_id = xstrprintf ("'%s'", s.name);
+
+  old_chain = make_cleanup (xfree, syscall_id);
+
+  if (last.kind == TARGET_WAITKIND_SYSCALL_ENTRY)
+    printf_filtered (_("\nCatchpoint %d (call to syscall %s), "),
+                     b->number, syscall_id);
+  else if (last.kind == TARGET_WAITKIND_SYSCALL_RETURN)
+    printf_filtered (_("\nCatchpoint %d (returned from syscall %s), "),
+                     b->number, syscall_id);
+
+  do_cleanups (old_chain);
+
+  return PRINT_SRC_AND_LOC;
+}
+
+/* Implement the "print_one" breakpoint_ops method for syscall
+   catchpoints.  */
+
+static void
+print_one_catch_syscall (struct breakpoint *b,
+                         struct bp_location **last_loc)
+{
+  struct value_print_options opts;
+
+  get_user_print_options (&opts);
+  /* Field 4, the address, is omitted (which makes the columns
+     not line up too nicely with the headers, but the effect
+     is relatively readable).  */
+  if (opts.addressprint)
+    ui_out_field_skip (uiout, "addr");
+  annotate_field (5);
+
+  if (b->syscalls_to_be_caught
+      && VEC_length (int, b->syscalls_to_be_caught) > 1)
+    ui_out_text (uiout, "syscalls \"");
+  else
+    ui_out_text (uiout, "syscall \"");
+
+  if (b->syscalls_to_be_caught)
+    {
+      int i, iter;
+      char *text = xstrprintf ("%s", "");
+      for (i = 0;
+           VEC_iterate (int, b->syscalls_to_be_caught, i, iter);
+           i++)
+        {
+          char *x = text;
+          struct syscall s;
+          get_syscall_by_number (iter, &s);
+
+          if (s.name != NULL)
+            text = xstrprintf ("%s%s, ", text, s.name);
+          else
+            text = xstrprintf ("%s%d, ", text, iter);
+
+          /* We have to xfree the last 'text' (now stored at 'x')
+             because xstrprintf dinamically allocates new space for it
+             on every call.  */
+	  xfree (x);
+        }
+      /* Remove the last comma.  */
+      text[strlen (text) - 2] = '\0';
+      ui_out_field_string (uiout, "what", text);
+    }
+  else
+    ui_out_field_string (uiout, "what", "<any syscall>");
+  ui_out_text (uiout, "\" ");
+}
+
+/* Implement the "print_mention" breakpoint_ops method for syscall
+   catchpoints.  */
+
+static void
+print_mention_catch_syscall (struct breakpoint *b)
+{
+  if (b->syscalls_to_be_caught)
+    {
+      int i, iter;
+
+      if (VEC_length (int, b->syscalls_to_be_caught) > 1)
+        printf_filtered (_("Catchpoint %d (syscalls"), b->number);
+      else
+        printf_filtered (_("Catchpoint %d (syscall"), b->number);
+
+      for (i = 0;
+           VEC_iterate (int, b->syscalls_to_be_caught, i, iter);
+           i++)
+        {
+          struct syscall s;
+          get_syscall_by_number (iter, &s);
+
+          if (s.name)
+            printf_filtered (" '%s' [%d]", s.name, s.number);
+          else
+            printf_filtered (" %d", s.number);
+        }
+      printf_filtered (")");
+    }
+  else
+    printf_filtered (_("Catchpoint %d (any syscall)"),
+                     b->number);
+}
+
+/* The breakpoint_ops structure to be used in syscall catchpoints.  */
+
+static struct breakpoint_ops catch_syscall_breakpoint_ops =
+{
+  insert_catch_syscall,
+  remove_catch_syscall,
+  breakpoint_hit_catch_syscall,
+  print_it_catch_syscall,
+  print_one_catch_syscall,
+  print_mention_catch_syscall
+};
+
+/* Returns non-zero if 'b' is a syscall catchpoint.  */
+
+static int
+syscall_catchpoint_p (struct breakpoint *b)
+{
+  return (b->ops == &catch_syscall_breakpoint_ops);
+}
+
+/* Create a new breakpoint of the bp_catchpoint kind and return it,
+   but does NOT mention it nor update the global location list.
+   This is useful if you need to fill more fields in the
+   struct breakpoint before calling mention.
  
    If TEMPFLAG is non-zero, then make the breakpoint temporary.
    If COND_STRING is not NULL, then store it in the breakpoint.
@@ -4947,16 +5210,14 @@ static struct breakpoint_ops catch_vfork_breakpoint_ops =
    to the catchpoint.  */
 
 static struct breakpoint *
-create_catchpoint (struct gdbarch *gdbarch, int tempflag,
-		   char *cond_string, struct breakpoint_ops *ops)
+create_catchpoint_without_mention (struct gdbarch *gdbarch, int tempflag,
+				   char *cond_string,
+				   struct breakpoint_ops *ops)
 {
   struct symtab_and_line sal;
   struct breakpoint *b;
 
   init_sal (&sal);
-  sal.pc = 0;
-  sal.symtab = NULL;
-  sal.line = 0;
 
   b = set_raw_breakpoint (gdbarch, sal, bp_catchpoint);
   set_breakpoint_count (breakpoint_count + 1);
@@ -4968,6 +5229,23 @@ create_catchpoint (struct gdbarch *gdbarch, int tempflag,
   b->enable_state = bp_enabled;
   b->disposition = tempflag ? disp_del : disp_donttouch;
   b->ops = ops;
+
+  return b;
+}
+
+/* Create a new breakpoint of the bp_catchpoint kind and return it.
+ 
+   If TEMPFLAG is non-zero, then make the breakpoint temporary.
+   If COND_STRING is not NULL, then store it in the breakpoint.
+   OPS, if not NULL, is the breakpoint_ops structure associated
+   to the catchpoint.  */
+
+static struct breakpoint *
+create_catchpoint (struct gdbarch *gdbarch, int tempflag,
+		   char *cond_string, struct breakpoint_ops *ops)
+{
+  struct breakpoint *b =
+    create_catchpoint_without_mention (gdbarch, tempflag, cond_string, ops);
 
   mention (b);
   update_global_location_list (1);
@@ -5054,6 +5332,22 @@ static struct breakpoint_ops catch_exec_breakpoint_ops =
   print_one_catch_exec,
   print_mention_catch_exec
 };
+
+static void
+create_syscall_event_catchpoint (int tempflag, VEC(int) *filter,
+                                 struct breakpoint_ops *ops)
+{
+  struct gdbarch *gdbarch = get_current_arch ();
+  struct breakpoint *b =
+    create_catchpoint_without_mention (gdbarch, tempflag, NULL, ops);
+
+  b->syscalls_to_be_caught = filter;
+
+  /* Now, we have to mention the breakpoint and update the global
+     location list.  */
+  mention (b);
+  update_global_location_list (1);
+}
 
 static int
 hw_breakpoint_used_count (void)
@@ -7150,6 +7444,113 @@ catch_ada_exception_command (char *arg, int from_tty,
                                    from_tty);
 }
 
+/* Cleanup function for a syscall filter list.  */
+static void
+clean_up_filters (void *arg)
+{
+  VEC(int) *iter = *(VEC(int) **) arg;
+  VEC_free (int, iter);
+}
+
+/* Splits the argument using space as delimiter.  Returns an xmalloc'd
+   filter list, or NULL if no filtering is required.  */
+static VEC(int) *
+catch_syscall_split_args (char *arg)
+{
+  VEC(int) *result = NULL;
+  struct cleanup *cleanup = make_cleanup (clean_up_filters, &result);
+
+  while (*arg != '\0')
+    {
+      int i, syscall_number;
+      char *endptr;
+      char cur_name[128];
+      struct syscall s;
+
+      /* Skip whitespace.  */
+      while (isspace (*arg))
+	arg++;
+
+      for (i = 0; i < 127 && arg[i] && !isspace (arg[i]); ++i)
+	cur_name[i] = arg[i];
+      cur_name[i] = '\0';
+      arg += i;
+
+      /* Check if the user provided a syscall name or a number.  */
+      syscall_number = (int) strtol (cur_name, &endptr, 0);
+      if (*endptr == '\0')
+	{
+	  get_syscall_by_number (syscall_number, &s);
+
+	  if (s.name == NULL)
+	    /* We can issue just a warning, but still create the catchpoint.
+	       This is because, even not knowing the syscall name that
+	       this number represents, we can still try to catch the syscall
+	       number.  */
+	    warning (_("The number '%d' does not represent a known syscall."),
+		     syscall_number);
+	}
+      else
+	{
+	  /* We have a name.  Let's check if it's valid and convert it
+	     to a number.  */
+	  get_syscall_by_name (cur_name, &s);
+
+	  if (s.number == UNKNOWN_SYSCALL)
+	    /* Here we have to issue an error instead of a warning, because
+	       GDB cannot do anything useful if there's no syscall number to
+	       be caught.  */
+	    error (_("Unknown syscall name '%s'."), cur_name);
+	}
+
+      /* Ok, it's valid.  */
+      VEC_safe_push (int, result, s.number);
+    }
+
+  discard_cleanups (cleanup);
+  return result;
+}
+
+/* Implement the "catch syscall" command.  */
+
+static void
+catch_syscall_command_1 (char *arg, int from_tty, struct cmd_list_element *command)
+{
+  int tempflag;
+  VEC(int) *filter;
+  struct syscall s;
+  struct gdbarch *gdbarch = get_current_arch ();
+
+  /* Checking if the feature if supported.  */
+  if (gdbarch_get_syscall_number_p (gdbarch) == 0)
+    error (_("The feature 'catch syscall' is not supported on \
+this architeture yet."));
+
+  tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+
+  ep_skip_leading_whitespace (&arg);
+
+  /* We need to do this first "dummy" translation in order
+     to get the syscall XML file loaded or, most important,
+     to display a warning to the user if there's no XML file
+     for his/her architecture.  */
+  get_syscall_by_number (0, &s);
+
+  /* The allowed syntax is:
+     catch syscall
+     catch syscall <name | number> [<name | number> ... <name | number>]
+
+     Let's check if there's a syscall name.  */
+
+  if (arg != NULL)
+    filter = catch_syscall_split_args (arg);
+  else
+    filter = NULL;
+
+  create_syscall_event_catchpoint (tempflag, filter,
+				   &catch_syscall_breakpoint_ops);
+}
+
 /* Implement the "catch assert" command.  */
 
 static void
@@ -7616,6 +8017,7 @@ delete_breakpoint (struct breakpoint *bpt)
     xfree (bpt->source_file);
   if (bpt->exec_pathname != NULL)
     xfree (bpt->exec_pathname);
+  clean_up_filters (&bpt->syscalls_to_be_caught);
 
   /* Be sure no bpstat's are pointing at it after it's been freed.  */
   /* FIXME, how can we find all bpstat's?
@@ -8552,6 +8954,60 @@ single_step_breakpoint_inserted_here_p (CORE_ADDR pc)
   return 0;
 }
 
+/* Returns 0 if 'bp' is NOT a syscall catchpoint,
+   non-zero otherwise.  */
+static int
+is_syscall_catchpoint_enabled (struct breakpoint *bp)
+{
+  if (syscall_catchpoint_p (bp)
+      && bp->enable_state != bp_disabled
+      && bp->enable_state != bp_call_disabled)
+    return 1;
+  else
+    return 0;
+}
+
+int
+catch_syscall_enabled (void)
+{
+  struct inferior *inf = current_inferior ();
+
+  return inf->total_syscalls_count != 0;
+}
+
+int
+catching_syscall_number (int syscall_number)
+{
+  struct breakpoint *bp;
+
+  ALL_BREAKPOINTS (bp)
+    if (is_syscall_catchpoint_enabled (bp))
+      {
+	if (bp->syscalls_to_be_caught)
+	  {
+            int i, iter;
+            for (i = 0;
+                 VEC_iterate (int, bp->syscalls_to_be_caught, i, iter);
+                 i++)
+	      if (syscall_number == iter)
+		return 1;
+	  }
+	else
+	  return 1;
+      }
+
+  return 0;
+}
+
+/* Complete syscall names.  Used by "catch syscall".  */
+static char **
+catch_syscall_completer (struct cmd_list_element *cmd,
+                         char *text, char *word)
+{
+  const char **list = get_syscall_names ();
+  return (list == NULL) ? NULL : complete_on_enum (list, text, word);
+}
+
 /* Tracepoint-specific operations.  */
 
 /* Set tracepoint count to NUM.  */
@@ -8903,6 +9359,8 @@ static void
 add_catch_command (char *name, char *docstring,
 		   void (*sfunc) (char *args, int from_tty,
 				  struct cmd_list_element *command),
+                   char **(*completer) (struct cmd_list_element *cmd,
+                                         char *text, char *word),
 		   void *user_data_catch,
 		   void *user_data_tcatch)
 {
@@ -8912,11 +9370,13 @@ add_catch_command (char *name, char *docstring,
 		     &catch_cmdlist);
   set_cmd_sfunc (command, sfunc);
   set_cmd_context (command, user_data_catch);
+  set_cmd_completer (command, completer);
 
   command = add_cmd (name, class_breakpoint, NULL, docstring,
 		     &tcatch_cmdlist);
   set_cmd_sfunc (command, sfunc);
   set_cmd_context (command, user_data_tcatch);
+  set_cmd_completer (command, completer);
 }
 
 void
@@ -9190,36 +9650,53 @@ Set temporary catchpoints to catch events."),
 Catch an exception, when caught.\n\
 With an argument, catch only exceptions with the given name."),
 		     catch_catch_command,
+                     NULL,
 		     CATCH_PERMANENT,
 		     CATCH_TEMPORARY);
   add_catch_command ("throw", _("\
 Catch an exception, when thrown.\n\
 With an argument, catch only exceptions with the given name."),
 		     catch_throw_command,
+                     NULL,
 		     CATCH_PERMANENT,
 		     CATCH_TEMPORARY);
   add_catch_command ("fork", _("Catch calls to fork."),
 		     catch_fork_command_1,
+                     NULL,
 		     (void *) (uintptr_t) catch_fork_permanent,
 		     (void *) (uintptr_t) catch_fork_temporary);
   add_catch_command ("vfork", _("Catch calls to vfork."),
 		     catch_fork_command_1,
+                     NULL,
 		     (void *) (uintptr_t) catch_vfork_permanent,
 		     (void *) (uintptr_t) catch_vfork_temporary);
   add_catch_command ("exec", _("Catch calls to exec."),
 		     catch_exec_command_1,
+                     NULL,
+		     CATCH_PERMANENT,
+		     CATCH_TEMPORARY);
+  add_catch_command ("syscall", _("\
+Catch system calls by their names and/or numbers.\n\
+Arguments say which system calls to catch.  If no arguments\n\
+are given, every system call will be caught.\n\
+Arguments, if given, should be one or more system call names\n\
+(if your system supports that), or system call numbers."),
+		     catch_syscall_command_1,
+		     catch_syscall_completer,
 		     CATCH_PERMANENT,
 		     CATCH_TEMPORARY);
   add_catch_command ("exception", _("\
 Catch Ada exceptions, when raised.\n\
 With an argument, catch only exceptions with the given name."),
 		     catch_ada_exception_command,
+                     NULL,
 		     CATCH_PERMANENT,
 		     CATCH_TEMPORARY);
   add_catch_command ("assert", _("\
 Catch failed Ada assertions, when raised.\n\
 With an argument, catch only exceptions with the given name."),
 		     catch_assert_command,
+                     NULL,
 		     CATCH_PERMANENT,
 		     CATCH_TEMPORARY);
 

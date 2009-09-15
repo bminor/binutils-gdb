@@ -142,14 +142,15 @@ struct target_waitstatus
   {
     enum target_waitkind kind;
 
-    /* Forked child pid, execd pathname, exit status or signal number.  */
+    /* Forked child pid, execd pathname, exit status, signal number or
+       syscall number.  */
     union
       {
 	int integer;
 	enum target_signal sig;
 	ptid_t related_pid;
 	char *execd_pathname;
-	int syscall_id;
+	int syscall_number;
       }
     value;
   };
@@ -160,6 +161,21 @@ struct target_waitstatus
    options is not requested, target_wait blocks waiting for an
    event.  */
 #define TARGET_WNOHANG 1
+
+/* The structure below stores information about a system call.
+   It is basically used in the "catch syscall" command, and in
+   every function that gives information about a system call.
+   
+   It's also good to mention that its fields represent everything
+   that we currently know about a syscall in GDB.  */
+struct syscall
+  {
+    /* The syscall number.  */
+    int number;
+
+    /* The syscall name.  */
+    const char *name;
+  };
 
 /* Return a pretty printed form of target_waitstatus.
    Space for the result is malloc'd, caller must free.  */
@@ -406,6 +422,7 @@ struct target_ops
     int (*to_follow_fork) (struct target_ops *, int);
     void (*to_insert_exec_catchpoint) (int);
     int (*to_remove_exec_catchpoint) (int);
+    int (*to_set_syscall_catchpoint) (int, int, int, int, int *);
     int (*to_has_exited) (int, int, int *);
     void (*to_mourn_inferior) (struct target_ops *);
     int (*to_can_run) (void);
@@ -748,6 +765,8 @@ extern int inferior_has_vforked (ptid_t pid, ptid_t *child_pid);
 
 extern int inferior_has_execd (ptid_t pid, char **execd_pathname);
 
+extern int inferior_has_called_syscall (ptid_t pid, int *syscall_number);
+
 /* Print a line about the current target.  */
 
 #define	target_files_info()	\
@@ -899,6 +918,27 @@ int target_follow_fork (int follow_child);
 
 #define target_remove_exec_catchpoint(pid) \
      (*current_target.to_remove_exec_catchpoint) (pid)
+
+/* Syscall catch.
+
+   NEEDED is nonzero if any syscall catch (of any kind) is requested.
+   If NEEDED is zero, it means the target can disable the mechanism to
+   catch system calls because there are no more catchpoints of this type.
+
+   ANY_COUNT is nonzero if a generic (filter-less) syscall catch is
+   being requested.  In this case, both TABLE_SIZE and TABLE should
+   be ignored.
+
+   TABLE_SIZE is the number of elements in TABLE.  It only matters if
+   ANY_COUNT is zero.
+
+   TABLE is an array of ints, indexed by syscall number.  An element in
+   this array is nonzero if that syscall should be caught.  This argument
+   only matters if ANY_COUNT is zero.  */
+
+#define target_set_syscall_catchpoint(pid, needed, any_count, table_size, table) \
+     (*current_target.to_set_syscall_catchpoint) (pid, needed, any_count, \
+						  table_size, table)
 
 /* Returns TRUE if PID has exited.  And, also sets EXIT_STATUS to the
    exit code of PID, if any.  */

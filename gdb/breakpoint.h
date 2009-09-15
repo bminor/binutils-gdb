@@ -33,7 +33,8 @@ struct block;
 
 #define	BREAKPOINT_MAX	16
 
-/* Type of breakpoint. */
+
+/* Type of breakpoint.  */
 /* FIXME In the future, we should fold all other breakpoint-like things into
    here.  This includes:
 
@@ -359,6 +360,9 @@ enum watchpoint_triggered
   watch_triggered_yes  
 };
 
+/* This is used to declare the VEC syscalls_to_be_caught.  */
+DEF_VEC_I(int);
+
 typedef struct bp_location *bp_location_p;
 DEF_VEC_P(bp_location_p);
 
@@ -468,6 +472,12 @@ struct breakpoint
        This field is only valid immediately after this catchpoint has
        triggered.  */
     char *exec_pathname;
+
+    /* Syscall numbers used for the 'catch syscall' feature.
+       If no syscall has been specified for filtering, its value is NULL.
+       Otherwise, it holds a list of all syscalls to be caught.
+       The list elements are allocated with xmalloc.  */
+    VEC(int) *syscalls_to_be_caught;
 
     /* Methods associated with this breakpoint.  */
     struct breakpoint_ops *ops;
@@ -923,6 +933,15 @@ extern int breakpoints_always_inserted_mode (void);
    Retires previously deleted breakpoint locations that
    in our opinion won't ever trigger.  */
 extern void breakpoint_retire_moribund (void);
+
+/* Checks if we are catching syscalls or not.
+   Returns 0 if not, greater than 0 if we are.  */
+extern int catch_syscall_enabled (void);
+
+/* Checks if we are catching syscalls with the specific
+   syscall_number.  Used for "filtering" the catchpoints.
+   Returns 0 if not, greater than 0 if we are.  */
+extern int catching_syscall_number (int syscall_number);
 
 /* Tell a breakpoint to be quiet.  */
 extern void make_breakpoint_silent (struct breakpoint *);

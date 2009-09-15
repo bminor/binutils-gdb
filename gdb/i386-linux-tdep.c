@@ -37,6 +37,10 @@
 #include "symtab.h"
 #include "arch-utils.h"
 #include "regset.h"
+#include "xml-syscall.h"
+
+/* The syscall's XML filename for i386.  */
+#define XML_SYSCALL_FILENAME_I386 "syscalls/i386-linux.xml"
 
 #include "record.h"
 #include "linux-record.h"
@@ -411,6 +415,27 @@ i386_linux_intx80_sysenter_record (struct regcache *regcache)
 }
 
 
+static LONGEST
+i386_linux_get_syscall_number (struct gdbarch *gdbarch,
+                               ptid_t ptid)
+{
+  struct regcache *regcache = get_thread_regcache (ptid);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  /* The content of a register.  */
+  gdb_byte buf[4];
+  /* The result.  */
+  LONGEST ret;
+
+  /* Getting the system call number from the register.
+     When dealing with x86 architecture, this information
+     is stored at %eax register.  */
+  regcache_cooked_read (regcache, I386_LINUX_ORIG_EAX_REGNUM, buf);
+
+  ret = extract_signed_integer (buf, 4, byte_order);
+
+  return ret;
+}
+
 /* The register sets used in GNU/Linux ELF core-dumps are identical to
    the register sets in `struct user' that are used for a.out
    core-dumps.  These are also used by ptrace(2).  The corresponding
@@ -696,6 +721,11 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
                                            simple_displaced_step_free_closure);
   set_gdbarch_displaced_step_location (gdbarch,
                                        displaced_step_at_entry_point);
+
+  /* Functions for 'catch syscall'.  */
+  set_xml_syscall_file_name (XML_SYSCALL_FILENAME_I386);
+  set_gdbarch_get_syscall_number (gdbarch,
+                                  i386_linux_get_syscall_number);
 
   set_gdbarch_get_siginfo_type (gdbarch, linux_get_siginfo_type);
 }

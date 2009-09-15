@@ -52,6 +52,7 @@ struct bp_target_info;
 struct target_desc;
 struct displaced_step_closure;
 struct core_regset_section;
+struct syscall;
 
 /* The architecture associated with the connection to the target.
  
@@ -853,6 +854,15 @@ typedef void (gdbarch_record_special_symbol_ftype) (struct gdbarch *gdbarch, str
 extern void gdbarch_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile, asymbol *sym);
 extern void set_gdbarch_record_special_symbol (struct gdbarch *gdbarch, gdbarch_record_special_symbol_ftype *record_special_symbol);
 
+/* Function for the 'catch syscall' feature.
+   Get architecture-specific system calls information from registers. */
+
+extern int gdbarch_get_syscall_number_p (struct gdbarch *gdbarch);
+
+typedef LONGEST (gdbarch_get_syscall_number_ftype) (struct gdbarch *gdbarch, ptid_t ptid);
+extern LONGEST gdbarch_get_syscall_number (struct gdbarch *gdbarch, ptid_t ptid);
+extern void set_gdbarch_get_syscall_number (struct gdbarch *gdbarch, gdbarch_get_syscall_number_ftype *get_syscall_number);
+
 /* True if the list of shared libraries is one and only for all
    processes, as opposed to a list of shared libraries per inferior.
    This usually means that all processes, although may or may not share
@@ -869,6 +879,9 @@ extern void set_gdbarch_has_global_solist (struct gdbarch *gdbarch, int has_glob
 
 extern int gdbarch_has_global_breakpoints (struct gdbarch *gdbarch);
 extern void set_gdbarch_has_global_breakpoints (struct gdbarch *gdbarch, int has_global_breakpoints);
+
+/* Definition for an unknown syscall, used basically in error-cases.  */
+#define UNKNOWN_SYSCALL (-1)
 
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 

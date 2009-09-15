@@ -1,3 +1,8 @@
+2009-09-14  Sergio Durigan Junior <sergiodj@linux.vnet.ibm.com>
+
+	* gdb.texinfo (Set Catchpoints): Documentation about the catch syscall
+	feature.
+
 2009-09-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdbint.texinfo (Unwinding the Frame ID): Reference outer_frame_id.
