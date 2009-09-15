@@ -1,3 +1,7 @@
+2009-09-15  Doug Evans  <dje@google.com>
+
+	* target.c (memory_xfer_partial): Pass correct length to dcache_update.
+
 2009-09-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix gcc-4.5 HEAD warnings for enum ada_operator.

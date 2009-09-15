@@ -1333,7 +1333,7 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
       && stack_cache_enabled_p
       && object != TARGET_OBJECT_STACK_MEMORY)
     {
-      dcache_update (target_dcache, memaddr, (void *) writebuf, reg_len);
+      dcache_update (target_dcache, memaddr, (void *) writebuf, res);
     }
 
   /* If we still haven't got anything, return the last error.  We
