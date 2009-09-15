@@ -1,3 +1,9 @@
+2009-09-15  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* ld-elfcomm/elfcomm.exp: Add appropriate emulation option
+	for sh64*-*-*.
+	* ld-gc/gc.exp (test_gc): Likewise.
+
 2009-09-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-undefined/entry-7.d: New.
