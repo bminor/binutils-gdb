@@ -93,8 +93,6 @@
 	* subsegs.c: Add casts.
 	* symbols.c: Add casts.
 	* write.c: Add casts.
-	* libiberty/regex.c (byte_re_match_2_internal): Introduce extra scope to avoid
-	initialization warning from goto.
 
 2009-09-11  Hans-Peter Nilsson  <hp@bitrange.com>
 
