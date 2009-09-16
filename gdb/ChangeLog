@@ -1,5 +1,10 @@
 2009-09-16  Joel Brobecker  <brobecker@adacore.com>
 
+	* README: Update GDB version number to 6.8.91.
+	* version.in: Likewise.
+
+2009-09-16  Joel Brobecker  <brobecker@adacore.com>
+
 	GDB 7.0 branch created (branch timestamp: 2009-09-16 19:00 UTC)
 	* version.in: Bump version to 6.8.90.20090916-cvs.
 
