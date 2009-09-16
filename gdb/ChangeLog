@@ -1,3 +1,8 @@
+2009-09-16  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.0 branch created (branch timestamp: 2009-09-16 19:00 UTC)
+	* version.in: Bump version to 6.8.90.20090916-cvs.
+
 2009-09-15  Tom Tromey  <tromey@redhat.com>
 
 	* varobj.h (varobj_update_result_t) <new>: New field.
