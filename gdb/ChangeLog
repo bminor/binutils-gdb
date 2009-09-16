@@ -1,3 +1,10 @@
+2009-09-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gdb/10649
+	* Makefile.in (GDB_DATADIR_PATH): Renamed to ...
+	(GDB_DATADIR): This.
+	(xml-syscall-install): Updated.
+
 2009-09-16  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 7.0 branch created (branch timestamp: 2009-09-16 19:00 UTC)
