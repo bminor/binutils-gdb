@@ -42,7 +42,7 @@ endif
 # .o's), but not all of them (such as .so's and .err files).  We
 # improve on that here.  automake-1.9 info docs say "mostlyclean" is
 # the right choice for files 'make' builds that people rebuild.
-MOSTLYCLEANFILES = *.so
+MOSTLYCLEANFILES = *.so *.syms *.stdout
 
 
 # We will add to these later, for each individual test.  Note
@@ -107,6 +107,7 @@ flagstest_ndebug.o: constructor_test.cc
 
 check_SCRIPTS += gc_comdat_test.sh
 check_DATA += gc_comdat_test.stdout
+MOSTLYCLEANFILES += gc_comdat_test
 gc_comdat_test_1.o: gc_comdat_test_1.cc 
 	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
 gc_comdat_test_2.o: gc_comdat_test_2.cc 
@@ -118,6 +119,7 @@ gc_comdat_test.stdout: gc_comdat_test
 
 check_SCRIPTS += gc_tls_test.sh
 check_DATA += gc_tls_test.stdout
+MOSTLYCLEANFILES += gc_tls_test
 gc_tls_test.o: gc_tls_test.cc
 	$(CXXCOMPILE) -O0 -c -g -o $@ $<
 gc_tls_test:gc_tls_test.o gcctestdir/ld
@@ -127,6 +129,7 @@ gc_tls_test.stdout: gc_tls_test
 
 check_SCRIPTS += icf_test.sh
 check_DATA += icf_test.stdout
+MOSTLYCLEANFILES += icf_test
 icf_test.o: icf_test.cc 
 	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
 icf_test: icf_test.o gcctestdir/ld
@@ -136,6 +139,7 @@ icf_test.stdout: icf_test
 
 check_SCRIPTS += icf_keep_unique_test.sh
 check_DATA += icf_keep_unique_test.stdout
+MOSTLYCLEANFILES += icf_keep_unique_test
 icf_keep_unique_test.o: icf_keep_unique_test.cc
 	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
 icf_keep_unique_test: icf_keep_unique_test.o gcctestdir/ld
@@ -268,6 +272,7 @@ two_file_relocatable.o: gcctestdir/ld two_file_test_1.o two_file_test_1b.o two_f
 
 check_SCRIPTS += two_file_shared.sh
 check_DATA += two_file_shared.dbg
+MOSTLYCLEANFILES += two_file_shared.dbg
 two_file_shared.dbg: two_file_shared.so
 	$(TEST_READELF) -w $< >$@ 2>/dev/null
 
@@ -423,6 +428,7 @@ weak_test_DEPENDENCIES = gcctestdir/ld
 weak_test_LDFLAGS = -Bgcctestdir/
 
 check_PROGRAMS += weak_undef_test
+MOSTLYCLEANFILES += alt/weak_undef_lib.so
 weak_undef_test_SOURCES = weak_undef_test.cc
 weak_undef_test_DEPENDENCIES = gcctestdir/ld weak_undef_lib.so alt/weak_undef_lib.so
 weak_undef_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,alt
@@ -439,6 +445,7 @@ alt/weak_undef_lib.so: weak_undef_file2.o
 
 if FN_PTRS_IN_SO_WITHOUT_PIC
 check_PROGRAMS += weak_undef_nonpic_test
+MOSTLYCLEANFILES += alt/weak_undef_lib_nonpic.so
 weak_undef_nonpic_test_SOURCES = weak_undef_test.cc
 weak_undef_nonpic_test_DEPENDENCIES = gcctestdir/ld weak_undef_lib_nonpic.so alt/weak_undef_lib_nonpic.so
 weak_undef_nonpic_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,alt
@@ -633,6 +640,7 @@ many_sections_test_DEPENDENCIES = gcctestdir/ld
 many_sections_test_LDFLAGS = -Bgcctestdir/ -rdynamic
 
 BUILT_SOURCES += many_sections_define.h
+MOSTLYCLEANFILES += many_sections_define.h
 many_sections_define.h:
 	(for i in `seq 1 70000`; do \
 	   echo "int var_$$i __attribute__((section(\"section_$$i\"))) = $$i;"; \
@@ -640,6 +648,7 @@ many_sections_define.h:
 	mv -f $@.tmp $@
 
 BUILT_SOURCES += many_sections_check.h
+MOSTLYCLEANFILES += many_sections_check.h
 many_sections_check.h:
 	(for i in `seq 1 1000 70000`; do \
 	   echo "assert(var_$$i == $$i);"; \
@@ -860,6 +869,7 @@ ver_test_10.so: gcctestdir/ld ver_test_2.o ver_test_10.script
 	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_10.script ver_test_2.o
 
 check_PROGRAMS += ver_test_11
+MOSTLYCLEANFILES += ver_test_11.a
 ver_test_11_SOURCES = ver_test_main_2.cc
 ver_test_11_DEPENDENCIES = gcctestdir/ld ver_test_11.a
 ver_test_11_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
@@ -927,6 +937,7 @@ justsyms_2r.o: justsyms_2.o gcctestdir/ld $(srcdir)/justsyms.t
 	gcctestdir/ld -o $@ -r -T $(srcdir)/justsyms.t justsyms_2.o
 
 check_PROGRAMS += binary_test
+MOSTLYCLEANFILES += binary.txt
 binary_test_SOURCES = binary_test.cc
 binary_test_DEPENDENCIES = gcctestdir/ld binary.txt
 binary_test_LDFLAGS = -Bgcctestdir/ -Wl,--format,binary,binary.txt,--format,elf
@@ -955,7 +966,7 @@ script_test_3.stdout: script_test_3
 
 check_SCRIPTS += script_test_4.sh
 check_DATA += script_test_4.stdout
-MOSTLYCLEANFILES += script_test_4.stdout
+MOSTLYCLEANFILES += script_test_4
 script_test_4: basic_test.o gcctestdir/ld $(srcdir)/script_test_4.t
 	$(CXXLINK) -Bgcctestdir/ basic_test.o -T $(srcdir)/script_test_4.t
 script_test_4.stdout: script_test_4
@@ -963,7 +974,7 @@ script_test_4.stdout: script_test_4
 
 check_SCRIPTS += script_test_5.sh
 check_DATA += script_test_5.stdout
-MOSTLYCLEANFILES += script_test_5.stdout
+MOSTLYCLEANFILES += script_test_5
 script_test_5: script_test_5.o gcctestdir/ld $(srcdir)/script_test_5.t
 	$(CXXLINK) -Bgcctestdir/ script_test_5.o -T $(srcdir)/script_test_5.t
 script_test_5.stdout: script_test_5
@@ -974,7 +985,7 @@ script_test_5.stdout: script_test_5
 
 check_SCRIPTS += dynamic_list.sh
 check_DATA += dynamic_list.stdout
-MOSTLYCLEANFILES += dynamic_list.stdout
+MOSTLYCLEANFILES += dynamic_list dynamic_list.stdout
 dynamic_list: basic_test.o gcctestdir/ld $(srcdir)/dynamic_list.t
 	$(CXXLINK) -Bgcctestdir/ basic_test.o \
 	  -Wl,--dynamic-list $(srcdir)/dynamic_list.t \
@@ -985,6 +996,9 @@ dynamic_list.stdout: dynamic_list
 	$(TEST_READELF) -DWs dynamic_list > dynamic_list.stdout
 
 check_PROGRAMS += thin_archive_test_1
+MOSTLYCLEANFILES += libthin1.a libthin3.a libthinall.a \
+	alt/thin_archive_test_2.o alt/thin_archive_test_4.o \
+	alt/libthin2.a alt/libthin4.a
 thin_archive_test_1_SOURCES = thin_archive_main.cc
 thin_archive_test_1_DEPENDENCIES = gcctestdir/ld libthin1.a alt/libthin2.a
 thin_archive_test_1_LDFLAGS = -Bgcctestdir/ -Lalt
@@ -1050,7 +1064,7 @@ plugin_test_3.err: plugin_test_3
 check_PROGRAMS += plugin_test_4
 check_SCRIPTS += plugin_test_4.sh
 check_DATA += plugin_test_4.err
-MOSTLYCLEANFILES += plugin_test_4.err
+MOSTLYCLEANFILES += plugin_test_4.a plugin_test_4.err
 plugin_test_4: two_file_test_main.o plugin_test_4.a gcctestdir/ld plugin_test.so
 	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_main.o -Wl,--whole-archive,plugin_test_4.a,--no-whole-archive 2>plugin_test_4.err
 plugin_test_4.err: plugin_test_4

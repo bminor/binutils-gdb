@@ -91,7 +91,12 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_5.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list.stdout
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_3 = basic_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_3 = gc_comdat_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_tls_test icf_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_keep_unique_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.dbg \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/weak_undef_lib.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_4 = basic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_test basic_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	constructor_test \
@@ -146,14 +151,14 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 
 # The nonpic tests will fail on platforms which can not put non-PIC
 # code into shared libraries, so we just don't run them in that case.
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_4 = two_file_shared_1_nonpic_test \
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_5 = two_file_shared_1_nonpic_test \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared_2_nonpic_test \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_same_shared_nonpic_test \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_12_nonpic_test \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_21_nonpic_test \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_shared_test \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_2_shared_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_5 = two_file_strip_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_6 = two_file_strip_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_same_shared_strip_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	common_test_1 exception_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_static_test \
@@ -197,20 +202,21 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_6 = weak_undef_nonpic_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_7 = weak_alias_test weak_plt \
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_7 = weak_undef_nonpic_test
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_8 = alt/weak_undef_lib_nonpic.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_9 = weak_alias_test weak_plt \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	copy_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_8 = tls_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_10 = tls_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_ie_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_gd_to_ie_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@am__append_9 = tls_shared_gnu2_gd_to_ie_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_DESCRIPTORS_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@am__append_10 = tls_shared_gnu2_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@am__append_11 = tls_static_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@am__append_11 = tls_shared_gnu2_gd_to_ie_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_DESCRIPTORS_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@am__append_12 = tls_shared_gnu2_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@am__append_13 = tls_static_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@	tls_static_pic_test
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_12 = tls_shared_nonpic_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_13 = many_sections_test \
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_14 = tls_shared_nonpic_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_15 = many_sections_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_r_test
 @GCC_FALSE@many_sections_test_DEPENDENCIES = libgoldtest.a \
 @GCC_FALSE@	../libgold.a ../../libiberty/libiberty.a \
@@ -221,9 +227,24 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_14 = many_sections_define.h \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_16 = many_sections_define.h \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_check.h
-@CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_15 = initpri1
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_17 = many_sections_define.h \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_check.h \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg.err debug_msg_so.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err ver_test_11.a \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	binary.txt \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4 script_test_5 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list dynamic_list.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	libthin1.a libthin3.a \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	libthinall.a \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/thin_archive_test_2.o \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/thin_archive_test_4.o \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/libthin2.a alt/libthin4.a
+@CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_18 = initpri1
 @CONSTRUCTOR_PRIORITY_FALSE@initpri1_DEPENDENCIES = libgoldtest.a \
 @CONSTRUCTOR_PRIORITY_FALSE@	../libgold.a \
 @CONSTRUCTOR_PRIORITY_FALSE@	../../libiberty/libiberty.a \
@@ -238,28 +259,19 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_16 = debug_msg.err \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_so.err \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.stdout \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.stdout \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4.stdout \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_5.stdout \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list.stdout
 
 # Test -o when emitting to a special file (such as something in /dev).
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_17 = flagstest_o_specialfile
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_19 = flagstest_o_specialfile
 
 # Test --compress-debug-sections.  FIXME: check we actually compress.
 
 # The specialfile output has a tricky case when we also compress debug
 # sections, because it requires output-file resizing.
-@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@am__append_18 = flagstest_compress_debug_sections \
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@am__append_20 = flagstest_compress_debug_sections \
 @GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections
 
 # Test symbol versioning.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_19 = ver_test ver_test_2 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_21 = ver_test ver_test_2 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_6 ver_test_8 ver_test_9 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_11 protected_1 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_2 relro_test \
@@ -302,45 +314,46 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_FALSE@thin_archive_test_2_DEPENDENCIES =
 @NATIVE_LINKER_FALSE@thin_archive_test_2_DEPENDENCIES =
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_20 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_22 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_1 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_2 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_3 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_4
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_21 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_23 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_1.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_2.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_3.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_4.sh
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_22 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_24 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_1.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_2.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_3.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_4.err
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_23 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_25 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_1.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_2.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_3.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_4.a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_4.err
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_24 = exclude_libs_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_26 = exclude_libs_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	local_labels_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test
 
 # Test that hidden and internal symbols in the main program cannot be
 # referenced by a shared library.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_25 = exclude_libs_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_27 = exclude_libs_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	hidden_test.sh
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_26 = exclude_libs_test.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_28 = exclude_libs_test.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	hidden_test.err
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_27 = exclude_libs_test.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_29 = exclude_libs_test.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	libexclude_libs_test_1.a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	libexclude_libs_test_2.a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/libexclude_libs_test_3.a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	hidden_test hidden_test.err
-@GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@am__append_28 = large
+@GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@am__append_30 = large
 @GCC_FALSE@large_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 @GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
@@ -357,7 +370,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 
 # Test that if the output file already exists and is empty,
 # it will get execute permission.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_29 = permission_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_31 = permission_test
 subdir = testsuite
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -1377,15 +1390,16 @@ TEST_NM = $(top_builddir)/../binutils/nm-new
 # .o's), but not all of them (such as .so's and .err files).  We
 # improve on that here.  automake-1.9 info docs say "mostlyclean" is
 # the right choice for files 'make' builds that people rebuild.
-MOSTLYCLEANFILES = *.so $(am__append_16) $(am__append_23) \
-	$(am__append_27)
+MOSTLYCLEANFILES = *.so *.syms *.stdout $(am__append_3) \
+	$(am__append_8) $(am__append_17) $(am__append_25) \
+	$(am__append_29)
 
 # We will add to these later, for each individual test.  Note
 # that we add each test under check_SCRIPTS or check_PROGRAMS;
 # the TESTS variable is automatically populated from these.
-check_SCRIPTS = $(am__append_1) $(am__append_21) $(am__append_25)
-check_DATA = $(am__append_2) $(am__append_22) $(am__append_26)
-BUILT_SOURCES = $(am__append_14)
+check_SCRIPTS = $(am__append_1) $(am__append_23) $(am__append_27)
+check_DATA = $(am__append_2) $(am__append_24) $(am__append_28)
+BUILT_SOURCES = $(am__append_16)
 TESTS = $(check_SCRIPTS) $(check_PROGRAMS)
 
 # ---------------------------------------------------------------------
