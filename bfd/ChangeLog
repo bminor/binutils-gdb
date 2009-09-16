@@ -1,3 +1,17 @@
+2009-09-16  Tristan Gingold  <gingold@adacore.com>
+	
+	* mach-o.h (bfd_mach_o_filetype): Add new constants from darwin10.
+	Reindent.
+	* mach-o.c (bfd_mach_o_cpu_name): Reindent.
+	(bfd_mach_o_filetype_name): Complete with new constants.  Reindent.
+	(bfd_mach_o_print_private_header): Use fputs instead of fprintf
+	when possible to avoid warnings.
+	(bfd_mach_o_print_section_map): Ditto.
+	(bfd_mach_o_section_get_entry_size): New function.
+	(bfd_mach_o_section_get_nbr_indirect): Simplify using the newly
+	added function.
+	(bfd_mach_o_print_dysymtab): Print address of indirect symbols.
+
 2009-09-14  Nick Clifton  <nickc@redhat.com>
 
 	* po/fi.po: Updated Finnish translation.

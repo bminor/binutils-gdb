@@ -166,14 +166,17 @@ bfd_mach_o_cpu_subtype;
 
 typedef enum bfd_mach_o_filetype
 {
-  BFD_MACH_O_MH_OBJECT = 1,
-  BFD_MACH_O_MH_EXECUTE = 2,
-  BFD_MACH_O_MH_FVMLIB = 3,
-  BFD_MACH_O_MH_CORE = 4,
-  BFD_MACH_O_MH_PRELOAD = 5,
-  BFD_MACH_O_MH_DYLIB = 6,
-  BFD_MACH_O_MH_DYLINKER = 7,
-  BFD_MACH_O_MH_BUNDLE = 8
+  BFD_MACH_O_MH_OBJECT      = 0x01,
+  BFD_MACH_O_MH_EXECUTE     = 0x02,
+  BFD_MACH_O_MH_FVMLIB      = 0x03,
+  BFD_MACH_O_MH_CORE        = 0x04,
+  BFD_MACH_O_MH_PRELOAD     = 0x05,
+  BFD_MACH_O_MH_DYLIB       = 0x06,
+  BFD_MACH_O_MH_DYLINKER    = 0x07,
+  BFD_MACH_O_MH_BUNDLE      = 0x08,
+  BFD_MACH_O_MH_DYLIB_STUB  = 0x09,
+  BFD_MACH_O_MH_DSYM        = 0x0a,
+  BFD_MACH_O_MH_KEXT_BUNDLE = 0x0b
 }
 bfd_mach_o_filetype;
 
