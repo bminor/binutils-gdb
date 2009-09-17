@@ -1,3 +1,7 @@
+2009-09-17  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.base/default.exp: Fix "show convenience".
+
 2009-09-15  Tom Tromey  <tromey@redhat.com>
 
 	* lib/mi-support.exp (mi_create_varobj): Update.

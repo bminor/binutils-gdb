@@ -1,3 +1,8 @@
+2009-09-17  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.texinfo (convenince variables): Mention
+	$_siginfo could be empty.
+	
 2009-09-15  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (GDB/MI Variable Objects): Document

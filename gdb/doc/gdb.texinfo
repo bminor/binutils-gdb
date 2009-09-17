@@ -7819,8 +7819,10 @@ the program being debugged terminates.
 
 @item $_siginfo
 @vindex $_siginfo@r{, convenience variable}
-The variable @code{$_siginfo} is bound to extra signal information
-inspection (@pxref{extra signal information}).
+The variable @code{$_siginfo} contains extra signal information
+(@pxref{extra signal information}).  Note that @code{$_siginfo}
+could be empty, if the application has not yet received any signals.
+For example, it will be empty before you execute the @code{run} command.
 @end table
 
 On HP-UX systems, if you refer to a function or variable name that

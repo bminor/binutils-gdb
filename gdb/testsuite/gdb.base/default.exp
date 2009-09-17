@@ -598,7 +598,7 @@ gdb_test "show complaints" "Max number of complaints about incorrect symbols is 
 #test show confirm
 gdb_test "show confirm" "Whether to confirm potentially dangerous operations is o\[a-z\]*." "show confirm"
 #test show convenience
-gdb_test "show convenience" "No debugger convenience variables now defined.(\[^\r\n\]*\[\r\n\])+Convenience variables have names starting with \".\";(\[^\r\n\]*\[\r\n\])+use \"set\" as in \"set .foo = 5\" to define them." "show convenience"
+gdb_test "show convenience" "\\\$_siginfo = void" "show convenience"
 #test show directories
 gdb_test "show directories" "Source directories searched: .cdir\[:;\].cwd" "show directories"
 #test show editing
