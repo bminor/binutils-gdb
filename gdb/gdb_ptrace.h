@@ -106,6 +106,17 @@
 # endif
 #endif
 
+/* For systems such as HP/UX that do not provide PT_SYSCALL, define it
+   here as an alias for PT_CONTINUE.  This is what the PT_SYSCALL
+   request is expected to do, in addition to stopping when entering/
+   exiting a system call.  Chances are, if the system supports system
+   call tracing, enabling this feature is probably done separately;
+   and there is probably no special request that we would be required
+   to use when resuming the execution of our program.  */
+#ifndef PT_SYSCALL
+# define PT_SYSCALL PT_CONTINUE
+#endif
+
 /* Some systems, in particular DEC OSF/1, Digital Unix, Compaq Tru64
    or whatever it's called these days, don't provide a prototype for
    ptrace.  Provide one to silence compiler warnings.  */
