@@ -1104,7 +1104,7 @@ inf_ttrace_wait (struct target_ops *ops,
 	  inf_ttrace_disable_page_protections (tts.tts_pid);
 	}
       ourstatus->kind = TARGET_WAITKIND_SYSCALL_ENTRY;
-      ourstatus->value.syscall_id = tts.tts_scno;
+      ourstatus->value.syscall_number = tts.tts_scno;
       break;
 
     case TTEVT_SYSCALL_RETURN:
@@ -1119,7 +1119,7 @@ inf_ttrace_wait (struct target_ops *ops,
 	  inf_ttrace_num_lwps_in_syscall--;
 	}
       ourstatus->kind = TARGET_WAITKIND_SYSCALL_RETURN;
-      ourstatus->value.syscall_id = tts.tts_scno;
+      ourstatus->value.syscall_number = tts.tts_scno;
       break;
 
     default:
