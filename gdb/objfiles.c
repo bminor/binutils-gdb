@@ -459,8 +459,8 @@ free_objfile (struct objfile *objfile)
 
   unlink_objfile (objfile);
 
-  /* If we are going to free the runtime common objfile, mark it
-     as unallocated.  */
+  if (objfile == symfile_objfile)
+    symfile_objfile = NULL;
 
   if (objfile == rt_common_objfile)
     rt_common_objfile = NULL;
