@@ -117,6 +117,23 @@ namespace utils
     return as_signed > max || as_signed < min;
   }
 
+  // Detects overflow of an NO_BITS integer stored in a uint32_t when it
+  // fits in the given number of bits as either a signed or unsigned value.
+  // For example, has_signed_unsigned_overflow<8> would check
+  // -128 <= bits <= 255
+  template<int no_bits>
+  static inline bool
+  has_signed_unsigned_overflow(uint32_t bits)
+  {
+    gold_assert(no_bits >= 2 && no_bits <= 32);
+    if (no_bits == 32)
+      return false;
+    int32_t max = static_cast<int32_t>((1U << no_bits) - 1);
+    int32_t min = -(1 << (no_bits - 1));
+    int32_t as_signed = static_cast<int32_t>(bits);
+    return as_signed > max || as_signed < min;
+  }
+
   // Select bits from A and B using bits in MASK.  For each n in [0..31],
   // the n-th bit in the result is chosen from the n-th bits of A and B.
   // A zero selects A and a one selects B.
@@ -555,6 +572,26 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
   }
 
  public:
+
+  // R_ARM_ABS8: S + A
+  static inline typename This::Status
+  abs8(unsigned char *view,
+       const Sized_relobj<32, big_endian>* object,
+       const Symbol_value<32>* psymval, bool has_thumb_bit)
+  {
+    typedef typename elfcpp::Swap<8, big_endian>::Valtype Valtype;
+    typedef typename elfcpp::Swap<32, big_endian>::Valtype Reltype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype val = elfcpp::Swap<8, big_endian>::readval(wv);
+    Reltype addend = utils::sign_extend<8>(val);
+    Reltype x = This::arm_symbol_value(object, psymval, addend, has_thumb_bit);
+    val = utils::bit_select(val, x, 0xffU);
+    elfcpp::Swap<8, big_endian>::writeval(wv, val);
+    return (utils::has_signed_unsigned_overflow<8>(x)
+	    ? This::STATUS_OVERFLOW
+	    : This::STATUS_OKAY);
+  }
+
   // R_ARM_ABS32: (S + A) | T
   static inline typename This::Status
   abs32(unsigned char *view,
@@ -1074,6 +1111,15 @@ Target_arm<big_endian>::Scan::local(const General_options&,
     case elfcpp::R_ARM_NONE:
       break;
 
+    case elfcpp::R_ARM_ABS8:
+      if (parameters->options().output_is_position_independent())
+	{
+	  // FIXME: Create a dynamic relocation for this location.
+	  gold_error(_("%s: gold bug: need dynamic ABS8 reloc"),
+		     object->name().c_str());
+	}
+      break;
+
     case elfcpp::R_ARM_ABS32:
       // If building a shared library (or a position-independent
       // executable), we need to create a dynamic relocation for
@@ -1185,6 +1231,16 @@ Target_arm<big_endian>::Scan::global(const General_options&,
   switch (r_type)
     {
     case elfcpp::R_ARM_NONE:
+      break;
+
+    case elfcpp::R_ARM_ABS8:
+      // Make a dynamic relocation if necessary.
+      if (gsym->needs_dynamic_reloc(Symbol::ABSOLUTE_REF))
+	{
+	  // FIXME: Create a dynamic relocation for this location.
+	  gold_error(_("%s: gold bug: need dynamic ABS8 reloc for %s"),
+		     object->name().c_str(), gsym->demangled_name().c_str());
+	}
       break;
 
     case elfcpp::R_ARM_ABS32:
@@ -1595,6 +1651,13 @@ Target_arm<big_endian>::Relocate::relocate(
     case elfcpp::R_ARM_NONE:
       break;
 
+    case elfcpp::R_ARM_ABS8:
+      if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, false,
+				    output_section))
+	reloc_status = Arm_relocate_functions::abs8(view, object, psymval,
+						    has_thumb_bit);
+      break;
+
     case elfcpp::R_ARM_ABS32:
       if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, true,
 				    output_section))
@@ -1763,6 +1826,9 @@ Target_arm<big_endian>::Relocatable_size_for_reloc::get_size_for_reloc(
     {
     case elfcpp::R_ARM_NONE:
       return 0;
+
+    case elfcpp::R_ARM_ABS8:
+      return 1;
 
     case elfcpp::R_ARM_ABS32:
     case elfcpp::R_ARM_REL32:

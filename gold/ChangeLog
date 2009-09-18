@@ -1,3 +1,13 @@
+2009-09-17  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
+
+	* arm.cc (has_signed_unsigned_overflow): New function.
+	(Arm_relocate_functions::abs8): New function.
+	(Target_arm::Scan::local): Handle R_ARM_ABS8.
+	(Target_arm::Scan::global): Likewise.
+	(Target_arm::relocate::relocate): Likewise.
+	(Target_arm::Relocatable_size_for_reloc::get_size_for_reloc):
+	Likewise.
+
 2009-09-08  Cary Coutant  <ccoutant@google.com>
 
 	* testsuite/Makefile.am (MOSTLYCLEANFILES): Add more generated files.
