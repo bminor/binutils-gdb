@@ -786,7 +786,7 @@ syms_from_objfile (struct objfile *objfile,
       if (symfile_objfile != NULL)
 	{
 	  free_objfile (symfile_objfile);
-	  symfile_objfile = NULL;
+	  gdb_assert (symfile_objfile == NULL);
 	}
 
       /* Currently we keep symbols from the add-symbol-file command.
@@ -1150,7 +1150,7 @@ symbol_file_clear (int from_tty)
      descriptors as well.  */
   no_shared_libraries (NULL, from_tty);
 
-  symfile_objfile = NULL;
+  gdb_assert (symfile_objfile == NULL);
   if (from_tty)
     printf_unfiltered (_("No symbol file now.\n"));
 }

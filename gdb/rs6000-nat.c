@@ -915,7 +915,7 @@ If in fact that file has symbols which the mapped files listed by\n\
 symbols to the proper address)."),
 	       symfile_objfile->name);
       free_objfile (symfile_objfile);
-      symfile_objfile = NULL;
+      gdb_assert (symfile_objfile == NULL);
     }
   breakpoint_re_set ();
 }
