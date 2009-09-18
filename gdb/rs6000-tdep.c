@@ -2311,6 +2311,7 @@ rs6000_builtin_type_vec128 (struct gdbarch *gdbarch)
 
 	 type = union __ppc_builtin_type_vec128 {
 	     uint128_t uint128;
+	     double v2_double[2];
 	     float v4_float[4];
 	     int32_t v4_int32[4];
 	     int16_t v8_int16[8];
@@ -2323,6 +2324,8 @@ rs6000_builtin_type_vec128 (struct gdbarch *gdbarch)
       t = arch_composite_type (gdbarch,
 			       "__ppc_builtin_type_vec128", TYPE_CODE_UNION);
       append_composite_type_field (t, "uint128", bt->builtin_uint128);
+      append_composite_type_field (t, "v2_double",
+				   init_vector_type (bt->builtin_double, 2));
       append_composite_type_field (t, "v4_float",
 				   init_vector_type (bt->builtin_float, 4));
       append_composite_type_field (t, "v4_int32",

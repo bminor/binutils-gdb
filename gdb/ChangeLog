@@ -1,3 +1,8 @@
+2009-08-19  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* rs6000-tdep.c (rs6000_builtin_type_vec128): Add v2_double
+	union member.
+
 2009-09-17  Joel Brobecker  <brobecker@adacore.com>
 
 	Fix a build failure on pa-hpux:
