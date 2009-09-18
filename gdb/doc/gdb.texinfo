@@ -23547,6 +23547,9 @@ Once enabled, this feature cannot be disabled.
 Note that if Python support has not been compiled into @value{GDBN},
 this command will still succeed (and do nothing).
 
+This feature is currently (as of @value{GDBN} 7.0) experimental, and
+may work differently in future versions of @value{GDBN}.
+
 @subheading The @code{-var-create} Command
 @findex -var-create
 

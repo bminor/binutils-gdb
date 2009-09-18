@@ -1,3 +1,8 @@
+2009-09-18  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (GDB/MI Variable Objects): -enable-pretty-printing
+	is experimental.
+
 2009-09-15  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (GDB/MI Variable Objects): Document
@@ -7032,7 +7037,7 @@ Wed Feb 26 18:04:40 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in, configure.in: removed traces of namesubdir,
 	  -subdirs, $(subdir), $(unsubdir), some rcs triggers.  Forced
-	  copyrights to '92, changed some from Cygnus to FSF.
+	  copyrights to '92, '09, changed some from Cygnus to FSF.
 
 Fri Dec 13 09:47:31 1991  John Gilmore  (gnu at cygnus.com)
 
