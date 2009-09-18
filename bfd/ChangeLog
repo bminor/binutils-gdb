@@ -1,3 +1,23 @@
+2009-09-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (follow_link, elf_follow_link, ppc_follow_link): New
+	functions.  Use throughout.
+	(ppc64_elf_copy_indirect_symbol): Set direct symbol "oh" field
+	from indirect symbol.
+	(lookup_fdh): Rename from get_fdh.  Follow indirect sym links.
+	(add_symbol_adjust): Simplify.
+	(defined_code_entry, defined_func_desc): New functions.
+	(ppc64_elf_gc_keep): Follow indirect sym links.  Use defined_code_entry.
+	(ppc64_elf_gc_mark_dynamic_ref): Use defined_func_desc and
+	defined_code_entry to follow indirect sym links.
+	(ppc64_elf_gc_mark_hook, func_desc_adjust): Likewise.
+	(ppc_type_of_stub): Follow indirect sym links.
+	(toc_adjusting_stub_needed): Likewise.
+	(ppc_build_one_stub): Likewise.  Make undefined dot-symbols weak
+	rather than defining them at stub.
+	(ppc64_elf_relocate_section): Rewrite call test to avoid multiple
+	assignments in test.
+
 2009-09-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_final_link_relocate): Set sym_flags
