@@ -4282,6 +4282,29 @@ ppc64_elf_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
   return TRUE;
 }
 
+/* Follow indirect and warning symbol links.  */
+
+static inline struct bfd_link_hash_entry *
+follow_link (struct bfd_link_hash_entry *h)
+{
+  while (h->type == bfd_link_hash_indirect
+	 || h->type == bfd_link_hash_warning)
+    h = h->u.i.link;
+  return h;
+}
+
+static inline struct elf_link_hash_entry *
+elf_follow_link (struct elf_link_hash_entry *h)
+{
+  return (struct elf_link_hash_entry *) follow_link (&h->root);
+}
+
+static inline struct ppc_link_hash_entry *
+ppc_follow_link (struct ppc_link_hash_entry *h)
+{
+  return (struct ppc_link_hash_entry *) follow_link (&h->elf.root);
+}
+
 /* Merge PLT info on FROM with that on TO.  */
 
 static void
@@ -4364,6 +4387,8 @@ ppc64_elf_copy_indirect_symbol (struct bfd_link_info *info,
   edir->is_func |= eind->is_func;
   edir->is_func_descriptor |= eind->is_func_descriptor;
   edir->tls_mask |= eind->tls_mask;
+  if (eind->oh != NULL)
+    edir->oh = ppc_follow_link (eind->oh);
 
   /* If called to transfer flags for a weakdef during processing
      of elf_adjust_dynamic_symbol, don't copy NON_GOT_REF.
@@ -4433,7 +4458,7 @@ ppc64_elf_copy_indirect_symbol (struct bfd_link_info *info,
    hash entry FH.  Link the entries via their OH fields.  */
 
 static struct ppc_link_hash_entry *
-get_fdh (struct ppc_link_hash_entry *fh, struct ppc_link_hash_table *htab)
+lookup_fdh (struct ppc_link_hash_entry *fh, struct ppc_link_hash_table *htab)
 {
   struct ppc_link_hash_entry *fdh = fh->oh;
 
@@ -4443,16 +4468,16 @@ get_fdh (struct ppc_link_hash_entry *fh, struct ppc_link_hash_table *htab)
 
       fdh = (struct ppc_link_hash_entry *)
 	elf_link_hash_lookup (&htab->elf, fd_name, FALSE, FALSE, FALSE);
-      if (fdh != NULL)
-	{
-	  fdh->is_func_descriptor = 1;
-	  fdh->oh = fh;
-	  fh->is_func = 1;
-	  fh->oh = fdh;
-	}
+      if (fdh == NULL)
+	return fdh;
+
+      fdh->is_func_descriptor = 1;
+      fdh->oh = fh;
+      fh->is_func = 1;
+      fh->oh = fdh;
     }
 
-  return fdh;
+  return ppc_follow_link (fdh);
 }
 
 /* Make a fake function descriptor sym for the code sym FH.  */
@@ -4574,23 +4599,24 @@ add_symbol_adjust (struct ppc_link_hash_entry *eh, struct bfd_link_info *info)
     abort ();
 
   htab = ppc_hash_table (info);
-  fdh = get_fdh (eh, htab);
-  if (fdh == NULL
-      && !info->relocatable
-      && (eh->elf.root.type == bfd_link_hash_undefined
-	  || eh->elf.root.type == bfd_link_hash_undefweak)
-      && eh->elf.ref_regular)
+  fdh = lookup_fdh (eh, htab);
+  if (fdh == NULL)
     {
-      /* Make an undefweak function descriptor sym, which is enough to
-	 pull in an --as-needed shared lib, but won't cause link
-	 errors.  Archives are handled elsewhere.  */
-      fdh = make_fdh (info, eh);
-      if (fdh == NULL)
-	return FALSE;
-      else
-	fdh->elf.ref_regular = 1;
+      if (!info->relocatable
+	  && (eh->elf.root.type == bfd_link_hash_undefined
+	      || eh->elf.root.type == bfd_link_hash_undefweak)
+	  && eh->elf.ref_regular)
+	{
+	  /* Make an undefweak function descriptor sym, which is enough to
+	     pull in an --as-needed shared lib, but won't cause link
+	     errors.  Archives are handled elsewhere.  */
+	  fdh = make_fdh (info, eh);
+	  if (fdh == NULL)
+	    return FALSE;
+	  fdh->elf.ref_regular = 1;
+	}
     }
-  else if (fdh != NULL)
+  else
     {
       unsigned entry_vis = ELF_ST_VISIBILITY (eh->elf.other) - 1;
       unsigned descr_vis = ELF_ST_VISIBILITY (fdh->elf.other) - 1;
@@ -4839,9 +4865,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       else
 	{
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	  h = elf_follow_link (h);
 	}
 
       tls_type = 0;
@@ -5199,7 +5223,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		{
 		  if (h->root.root.string[0] == '.'
 		      && h->root.root.string[1] != 0
-		      && get_fdh ((struct ppc_link_hash_entry *) h, htab))
+		      && lookup_fdh ((struct ppc_link_hash_entry *) h, htab))
 		    ;
 		  else
 		    ((struct ppc_link_hash_entry *) h)->is_func = 1;
@@ -5452,9 +5476,7 @@ opd_entry_value (asection *opd_sec,
 
 		  sym_hashes = elf_sym_hashes (opd_bfd);
 		  rh = sym_hashes[symndx - symtab_hdr->sh_info];
-		  while (rh->root.type == bfd_link_hash_indirect
-			 || rh->root.type == bfd_link_hash_warning)
-		    rh = ((struct elf_link_hash_entry *) rh->root.u.i.link);
+		  rh = elf_follow_link (rh);
 		  BFD_ASSERT (rh->root.type == bfd_link_hash_defined
 			      || rh->root.type == bfd_link_hash_defweak);
 		  val = rh->root.u.def.value;
@@ -5475,6 +5497,39 @@ opd_entry_value (asection *opd_sec,
   return val;
 }
 
+/* If FDH is a function descriptor symbol, return the associated code
+   entry symbol if it is defined.  Return NULL otherwise.  */
+
+static struct ppc_link_hash_entry *
+defined_code_entry (struct ppc_link_hash_entry *fdh)
+{
+  if (fdh->is_func_descriptor)
+    {
+      struct ppc_link_hash_entry *fh = ppc_follow_link (fdh->oh);
+      if (fh->elf.root.type == bfd_link_hash_defined
+	  || fh->elf.root.type == bfd_link_hash_defweak)
+	return fh;
+    }
+  return NULL;
+}
+
+/* If FH is a function code entry symbol, return the associated
+   function descriptor symbol if it is defined.  Return NULL otherwise.  */
+
+static struct ppc_link_hash_entry *
+defined_func_desc (struct ppc_link_hash_entry *fh)
+{
+  if (fh->oh != NULL
+      && fh->oh->is_func_descriptor)
+    {
+      struct ppc_link_hash_entry *fdh = ppc_follow_link (fh->oh);
+      if (fdh->elf.root.type == bfd_link_hash_defined
+	  || fdh->elf.root.type == bfd_link_hash_defweak)
+	return fdh;
+    }
+  return NULL;
+}
+
 /* Mark all our entry sym sections, both opd and code section.  */
 
 static void
@@ -5485,22 +5540,21 @@ ppc64_elf_gc_keep (struct bfd_link_info *info)
 
   for (sym = info->gc_sym_list; sym != NULL; sym = sym->next)
     {
-      struct ppc_link_hash_entry *eh;
+      struct ppc_link_hash_entry *eh, *fh;
       asection *sec;
 
       eh = (struct ppc_link_hash_entry *)
-	elf_link_hash_lookup (&htab->elf, sym->name, FALSE, FALSE, FALSE);
+	elf_link_hash_lookup (&htab->elf, sym->name, FALSE, FALSE, TRUE);
       if (eh == NULL)
 	continue;
       if (eh->elf.root.type != bfd_link_hash_defined
 	  && eh->elf.root.type != bfd_link_hash_defweak)
 	continue;
 
-      if (eh->is_func_descriptor
-	  && (eh->oh->elf.root.type == bfd_link_hash_defined
-	      || eh->oh->elf.root.type == bfd_link_hash_defweak))
+      fh = defined_code_entry (eh);
+      if (fh != NULL)
 	{
-	  sec = eh->oh->elf.root.u.def.section;
+	  sec = fh->elf.root.u.def.section;
 	  sec->flags |= SEC_KEEP;
 	}
       else if (get_opd_info (eh->elf.root.u.def.section) != NULL
@@ -5523,16 +5577,15 @@ ppc64_elf_gc_mark_dynamic_ref (struct elf_link_hash_entry *h, void *inf)
 {
   struct bfd_link_info *info = (struct bfd_link_info *) inf;
   struct ppc_link_hash_entry *eh = (struct ppc_link_hash_entry *) h;
+  struct ppc_link_hash_entry *fdh;
 
   if (eh->elf.root.type == bfd_link_hash_warning)
     eh = (struct ppc_link_hash_entry *) eh->elf.root.u.i.link;
 
   /* Dynamic linking info is on the func descriptor sym.  */
-  if (eh->oh != NULL
-      && eh->oh->is_func_descriptor
-      && (eh->oh->elf.root.type == bfd_link_hash_defined
-	  || eh->oh->elf.root.type == bfd_link_hash_defweak))
-    eh = eh->oh;
+  fdh = defined_func_desc (eh);
+  if (fdh != NULL)
+    eh = fdh;
 
   if ((eh->elf.root.type == bfd_link_hash_defined
        || eh->elf.root.type == bfd_link_hash_defweak)
@@ -5543,15 +5596,18 @@ ppc64_elf_gc_mark_dynamic_ref (struct elf_link_hash_entry *h, void *inf)
 	      && ELF_ST_VISIBILITY (eh->elf.other) != STV_HIDDEN)))
     {
       asection *code_sec;
+      struct ppc_link_hash_entry *fh;
 
       eh->elf.root.u.def.section->flags |= SEC_KEEP;
 
       /* Function descriptor syms cause the associated
 	 function code sym section to be marked.  */
-      if (eh->is_func_descriptor
-	  && (eh->oh->elf.root.type == bfd_link_hash_defined
-	      || eh->oh->elf.root.type == bfd_link_hash_defweak))
-	eh->oh->elf.root.u.def.section->flags |= SEC_KEEP;
+      fh = defined_code_entry (eh);
+      if (fh != NULL)
+	{
+	  code_sec = fh->elf.root.u.def.section;
+	  code_sec->flags |= SEC_KEEP;
+	}
       else if (get_opd_info (eh->elf.root.u.def.section) != NULL
 	       && opd_entry_value (eh->elf.root.u.def.section,
 				   eh->elf.root.u.def.value,
@@ -5583,7 +5639,7 @@ ppc64_elf_gc_mark_hook (asection *sec,
   if (h != NULL)
     {
       enum elf_ppc64_reloc_type r_type;
-      struct ppc_link_hash_entry *eh;
+      struct ppc_link_hash_entry *eh, *fh, *fdh;
 
       r_type = ELF64_R_TYPE (rel->r_info);
       switch (r_type)
@@ -5598,22 +5654,19 @@ ppc64_elf_gc_mark_hook (asection *sec,
 	    case bfd_link_hash_defined:
 	    case bfd_link_hash_defweak:
 	      eh = (struct ppc_link_hash_entry *) h;
-	      if (eh->oh != NULL
-		  && eh->oh->is_func_descriptor
-		  && (eh->oh->elf.root.type == bfd_link_hash_defined
-		      || eh->oh->elf.root.type == bfd_link_hash_defweak))
-		eh = eh->oh;
+	      fdh = defined_func_desc (eh);
+	      if (fdh != NULL)
+		eh = fdh;
 
 	      /* Function descriptor syms cause the associated
 		 function code sym section to be marked.  */
-	      if (eh->is_func_descriptor
-		  && (eh->oh->elf.root.type == bfd_link_hash_defined
-		      || eh->oh->elf.root.type == bfd_link_hash_defweak))
+	      fh = defined_code_entry (eh);
+	      if (fh != NULL)
 		{
 		  /* They also mark their opd section.  */
 		  eh->elf.root.u.def.section->gc_mark = 1;
 
-		  rsec = eh->oh->elf.root.u.def.section;
+		  rsec = fh->elf.root.u.def.section;
 		}
 	      else if (get_opd_info (eh->elf.root.u.def.section) != NULL
 		       && opd_entry_value (eh->elf.root.u.def.section,
@@ -5693,9 +5746,7 @@ ppc64_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 	  struct ppc_dyn_relocs *p;
 
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
-	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	  h = elf_follow_link (h);
 	  eh = (struct ppc_link_hash_entry *) h;
 
 	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
@@ -6081,18 +6132,17 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
      in dynamic objects are handled elsewhere.  */
   if (fh->elf.root.type == bfd_link_hash_undefweak
       && fh->was_undefined
-      && (fh->oh->elf.root.type == bfd_link_hash_defined
-	  || fh->oh->elf.root.type == bfd_link_hash_defweak)
-      && get_opd_info (fh->oh->elf.root.u.def.section) != NULL
-      && opd_entry_value (fh->oh->elf.root.u.def.section,
-			  fh->oh->elf.root.u.def.value,
+      && (fdh = defined_func_desc (fh)) != NULL
+      && get_opd_info (fdh->elf.root.u.def.section) != NULL
+      && opd_entry_value (fdh->elf.root.u.def.section,
+			  fdh->elf.root.u.def.value,
 			  &fh->elf.root.u.def.section,
 			  &fh->elf.root.u.def.value) != (bfd_vma) -1)
     {
-      fh->elf.root.type = fh->oh->elf.root.type;
+      fh->elf.root.type = fdh->elf.root.type;
       fh->elf.forced_local = 1;
-      fh->elf.def_regular = fh->oh->elf.def_regular;
-      fh->elf.def_dynamic = fh->oh->elf.def_dynamic;
+      fh->elf.def_regular = fdh->elf.def_regular;
+      fh->elf.def_dynamic = fdh->elf.def_dynamic;
     }
 
   /* If this is a function code symbol, transfer dynamic linking
@@ -6111,12 +6161,7 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
   /* Find the corresponding function descriptor symbol.  Create it
      as undefined if necessary.  */
 
-  fdh = get_fdh (fh, htab);
-  if (fdh != NULL)
-    while (fdh->elf.root.type == bfd_link_hash_indirect
-	   || fdh->elf.root.type == bfd_link_hash_warning)
-      fdh = (struct ppc_link_hash_entry *) fdh->elf.root.u.i.link;
-
+  fdh = lookup_fdh (fh, htab);
   if (fdh == NULL
       && !info->executable
       && (fh->elf.root.type == bfd_link_hash_undefined
@@ -6454,9 +6499,7 @@ get_sym_h (struct elf_link_hash_entry **hp,
       struct elf_link_hash_entry *h;
 
       h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-      while (h->root.type == bfd_link_hash_indirect
-	     || h->root.type == bfd_link_hash_warning)
-	h = (struct elf_link_hash_entry *) h->root.u.i.link;
+      h = elf_follow_link (h);
 
       if (hp != NULL)
 	*hp = h;
@@ -7024,8 +7067,8 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
 		  if (h != NULL
 		      && h->root.root.string[0] == '.')
 		    {
-		      fdh = get_fdh ((struct ppc_link_hash_entry *) h,
-				     ppc_hash_table (info));
+		      fdh = lookup_fdh ((struct ppc_link_hash_entry *) h,
+					ppc_hash_table (info));
 		      if (fdh != NULL
 			  && fdh->elf.root.type != bfd_link_hash_defined
 			  && fdh->elf.root.type != bfd_link_hash_defweak)
@@ -7208,9 +7251,7 @@ branch_reloc_hash_match (const bfd *ibfd,
       struct elf_link_hash_entry *h;
 
       h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-      while (h->root.type == bfd_link_hash_indirect
-	     || h->root.type == bfd_link_hash_warning)
-	h = (struct elf_link_hash_entry *) h->root.u.i.link;
+      h = elf_follow_link (h);
       if (h == &hash1->elf || h == &hash2->elf)
 	return TRUE;
     }
@@ -8668,9 +8709,9 @@ ppc_type_of_stub (asection *input_sec,
     {
       struct plt_entry *ent;
       struct ppc_link_hash_entry *fdh = h;
-      if (fdh->oh != NULL
-	  && fdh->oh->is_func_descriptor)
-	fdh = fdh->oh;
+      if (h->oh != NULL
+	  && h->oh->is_func_descriptor)
+	fdh = ppc_follow_link (h->oh);
 
       for (ent = fdh->elf.plt.plist; ent != NULL; ent = ent->next)
 	if (ent->addend == rel->r_addend
@@ -8944,7 +8985,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	      hashes[symndx] = &h->elf;
 	      r->r_info = ELF64_R_INFO (symndx, R_PPC64_REL24);
 	      if (h->oh != NULL && h->oh->is_func)
-		h = h->oh;
+		h = ppc_follow_link (h->oh);
 	      if (h->elf.root.u.def.section != stub_entry->target_section)
 		/* H is an opd symbol.  The addend must be zero.  */
 		r->r_addend = 0;
@@ -9109,22 +9150,20 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       break;
 
     case ppc_stub_plt_call:
-      /* Do the best we can for shared libraries built without
-	 exporting ".foo" for each "foo".  This can happen when symbol
-	 versioning scripts strip all bar a subset of symbols.  */
       if (stub_entry->h != NULL
-	  && stub_entry->h->oh != NULL
-	  && stub_entry->h->oh->elf.root.type != bfd_link_hash_defined
-	  && stub_entry->h->oh->elf.root.type != bfd_link_hash_defweak)
+	  && stub_entry->h->is_func_descriptor
+	  && stub_entry->h->oh != NULL)
 	{
-	  /* Point the symbol at the stub.  There may be multiple stubs,
-	     we don't really care;  The main thing is to make this sym
-	     defined somewhere.  Maybe defining the symbol in the stub
-	     section is a silly idea.  If we didn't do this, htab->top_id
-	     could disappear.  */
-	  stub_entry->h->oh->elf.root.type = bfd_link_hash_defined;
-	  stub_entry->h->oh->elf.root.u.def.section = stub_entry->stub_sec;
-	  stub_entry->h->oh->elf.root.u.def.value = stub_entry->stub_offset;
+	  struct ppc_link_hash_entry *fh = ppc_follow_link (stub_entry->h->oh);
+
+	  /* If the old-ABI "dot-symbol" is undefined make it weak so
+	     we don't get a link error from RELOC_FOR_GLOBAL_SYMBOL.
+	     FIXME: We used to define the symbol on one of the call
+	     stubs instead, which is why we test symbol section id
+	     against htab->top_id in various places.  Likely all
+	     these checks could now disappear.  */
+	  if (fh->elf.root.type == bfd_link_hash_undefined)
+	    fh->elf.root.type = bfd_link_hash_undefweak;
 	}
 
       /* Now build the stub.  */
@@ -9561,7 +9600,7 @@ toc_adjusting_stub_needed (struct bfd_link_info *info, asection *isec)
       if (eh != NULL
 	  && (eh->elf.plt.plist != NULL
 	      || (eh->oh != NULL
-		  && eh->oh->elf.plt.plist != NULL)))
+		  && ppc_follow_link (eh->oh)->elf.plt.plist != NULL)))
 	{
 	  ret = 1;
 	  break;
@@ -10000,7 +10039,7 @@ ppc64_elf_size_stubs (bfd *output_bfd,
 			 use the func descriptor sym instead if it is
 			 defined.  */
 		      if (hash->elf.root.root.string[0] == '.'
-			  && (fdh = get_fdh (hash, htab)) != NULL)
+			  && (fdh = lookup_fdh (hash, htab)) != NULL)
 			{
 			  if (fdh->elf.root.type == bfd_link_hash_defined
 			      || fdh->elf.root.type == bfd_link_hash_defweak)
@@ -11188,10 +11227,12 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	     base pointer.  */
 	  stub_entry = NULL;
 	  fdh = h;
-	  if (((h != NULL
-		&& (((fdh = h->oh) != NULL
-		     && fdh->elf.plt.plist != NULL)
-		    || (fdh = h)->elf.plt.plist != NULL))
+	  if (h != NULL
+	      && h->oh != NULL
+	      && h->oh->is_func_descriptor)
+	    fdh = ppc_follow_link (h->oh);
+	  if (((fdh != NULL
+		&& fdh->elf.plt.plist != NULL)
 	       || (sec != NULL
 		   && sec->output_section != NULL
 		   && sec->id <= htab->top_id
