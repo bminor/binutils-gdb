@@ -1,3 +1,21 @@
+2009-09-18  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/10406
+	* elf32-ppc.c (ppc_elf_howto_raw): Make R_PPC_EMB_SDAI16 and
+	R_PPC_EMB_SDA2I16 complain_overflow_signed.
+	(create_sdata_sym): Pass info rather than htab.
+	Update all callers.  Ensure symbols are hidden.
+	(ppc_elf_check_relocs): Allow SDAREL16 when shared.
+	(ppc_elf_size_dynamic_sections): When shared, equate _SDA_BASE_ to
+	_GLOBAL_OFFSET_TABLE_.
+	(elf_finish_pointer_linker_section): Don't assume that sdata base
+	symbol is always at 0x8000 offset.  Don't subtract the addend here.
+	(is_static_defined): New function.
+	(ppc_elf_relocate_section): Verify symbol base used in SDA relocs
+	is statically defined.  Clear addend for EMB_SDAI16 and EMB_SDA2I16
+	relocs.  Downgrade error on unexpected section for EMB_SDA2REL
+	reloc symbols to a warning.
+
 2009-09-18  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.
