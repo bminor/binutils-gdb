@@ -6962,22 +6962,23 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	     the _r_debug structure. Its symbol value will be set in
 	     _bfd_mips_elf_finish_dynamic_symbol.  */
 	  s = bfd_get_section_by_name (abfd, ".rld_map");
-	  BFD_ASSERT (s != NULL);
+	  if (s != NULL)
+	    {
+	      name = SGI_COMPAT (abfd) ? "__rld_map" : "__RLD_MAP";
+	      bh = NULL;
+	      if (!(_bfd_generic_link_add_one_symbol
+		    (info, abfd, name, BSF_GLOBAL, s, 0, NULL, FALSE,
+		     get_elf_backend_data (abfd)->collect, &bh)))
+		return FALSE;
 
-	  name = SGI_COMPAT (abfd) ? "__rld_map" : "__RLD_MAP";
-	  bh = NULL;
-	  if (!(_bfd_generic_link_add_one_symbol
-		(info, abfd, name, BSF_GLOBAL, s, 0, NULL, FALSE,
-		 get_elf_backend_data (abfd)->collect, &bh)))
-	    return FALSE;
+	      h = (struct elf_link_hash_entry *) bh;
+	      h->non_elf = 0;
+	      h->def_regular = 1;
+	      h->type = STT_OBJECT;
 
-	  h = (struct elf_link_hash_entry *) bh;
-	  h->non_elf = 0;
-	  h->def_regular = 1;
-	  h->type = STT_OBJECT;
-
-	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
-	    return FALSE;
+	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
+		return FALSE;
+	    }
 	}
     }
 

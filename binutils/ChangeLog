@@ -1,3 +1,7 @@
+2009-09-18  Nick Clifton  <nickc@redhat.com>
+
+	* po/es.po: Updated Spanish translation.
+
 2009-09-11  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* readelf.c (process_version_sections, process_symbol_table):

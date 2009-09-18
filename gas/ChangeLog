@@ -1,3 +1,7 @@
+2009-09-18  Nick Clifton  <nickc@redhat.com>
+
+	* po/es.po: Updated Spanish translation.
+
 2009-09-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (offset_in_range): Sign extend offset only

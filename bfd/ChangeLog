@@ -1,3 +1,7 @@
+2009-09-18  Nick Clifton  <nickc@redhat.com>
+
+	* po/es.po: Updated Spanish translation.
+
 2009-09-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (follow_link, elf_follow_link, ppc_follow_link): New
