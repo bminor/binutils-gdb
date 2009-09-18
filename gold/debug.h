@@ -36,8 +36,10 @@ namespace gold
 const int DEBUG_TASK = 0x1;
 const int DEBUG_SCRIPT = 0x2;
 const int DEBUG_FILES = 0x4;
+const int DEBUG_RELAXATION = 0x8;
 
-const int DEBUG_ALL = DEBUG_TASK | DEBUG_SCRIPT | DEBUG_FILES;
+const int DEBUG_ALL = (DEBUG_TASK | DEBUG_SCRIPT | DEBUG_FILES
+		       | DEBUG_RELAXATION);
 
 // Convert a debug string to the appropriate enum.
 inline int
@@ -49,6 +51,7 @@ debug_string_to_enum(const char* arg)
     { "task", DEBUG_TASK },
     { "script", DEBUG_SCRIPT },
     { "files", DEBUG_FILES },
+    { "relaxation", DEBUG_RELAXATION },
     { "all", DEBUG_ALL }
   };
 

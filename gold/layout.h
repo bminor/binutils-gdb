@@ -47,6 +47,8 @@ class Symbol_table;
 class Output_section_data;
 class Output_section;
 class Output_section_headers;
+class Output_segment_headers;
+class Output_file_header;
 class Output_segment;
 class Output_data;
 class Output_data_dynamic;
@@ -285,6 +287,12 @@ class Layout
 {
  public:
   Layout(int number_of_input_files, Script_options*);
+
+  ~Layout()
+  {
+    delete this->relaxation_debug_check_;
+    delete this->segment_states_;
+  }
 
   // Given an input section SHNDX, named NAME, with data in SHDR, from
   // the object file OBJECT, return the output section where this
@@ -585,6 +593,15 @@ class Layout
   void
   attach_sections_to_segments();
 
+  // For relaxation clean up, we need to know output section data created
+  // from a linker script.
+  void
+  new_output_section_data_from_script(Output_section_data* posd)
+  {
+    if (this->record_output_section_data_from_script_)
+      this->script_output_section_data_list_.push_back(posd);
+  }
+
  private:
   Layout(const Layout&);
   Layout& operator=(const Layout&);
@@ -777,9 +794,41 @@ class Layout
   Output_segment*
   set_section_addresses_from_script(Symbol_table*);
 
+  // Find appropriate places or orphan sections in a script.
+  void
+  place_orphan_sections_in_script();
+
   // Return whether SEG1 comes before SEG2 in the output file.
   static bool
   segment_precedes(const Output_segment* seg1, const Output_segment* seg2);
+
+  // Use to save and restore segments during relaxation. 
+  typedef Unordered_map<const Output_segment*, const Output_segment*>
+    Segment_states;
+
+  // Save states of current output segments.
+  void
+  save_segments(Segment_states*);
+
+  // Restore output segment states.
+  void
+  restore_segments(const Segment_states*);
+
+  // Clean up after relaxation so that it is possible to lay out the
+  // sections and segments again.
+  void
+  clean_up_after_relaxation();
+
+  // Doing preparation work for relaxation.  This is factored out to make
+  // Layout::finalized a bit smaller and easier to read.
+  void
+  prepare_for_relaxation();
+
+  // Main body of the relaxation loop, which lays out the section.
+  off_t
+  relaxation_loop_body(int, Target*, Symbol_table*, Output_segment**,
+		       Output_segment*, Output_segment_headers*,
+		       Output_file_header*, unsigned int*);
 
   // A mapping used for kept comdats/.gnu.linkonce group signatures.
   typedef Unordered_map<std::string, Kept_section> Signatures;
@@ -805,6 +854,47 @@ class Layout
     bool
     operator()(const Output_segment* seg1, const Output_segment* seg2)
     { return Layout::segment_precedes(seg1, seg2); }
+  };
+
+  typedef std::vector<Output_section_data*> Output_section_data_list;
+
+  // Debug checker class.
+  class Relaxation_debug_check
+  {
+   public:
+    Relaxation_debug_check()
+      : section_infos_()
+    { }
+ 
+    // Check that sections and special data are in reset states.
+    void
+    check_output_data_for_reset_values(const Layout::Section_list&,
+				       const Layout::Data_list&);
+  
+    // Record information of a section list.
+    void
+    read_sections(const Layout::Section_list&);
+
+    // Verify a section list with recorded information.
+    void
+    verify_sections(const Layout::Section_list&);
+ 
+   private:
+    // Information we care about a section.
+    struct Section_info
+    {
+      // Output section described by this.
+      Output_section* output_section;
+      // Load address.
+      uint64_t address;
+      // Data size.
+      off_t data_size;
+      // File offset.
+      off_t offset;
+    };
+
+    // Section information.
+    std::vector<Section_info> section_infos_;
   };
 
   // The number of input files, for sizing tables.
@@ -889,6 +979,14 @@ class Layout
   // In incremental build, holds information check the inputs and build the
   // .gnu_incremental_inputs section.
   Incremental_inputs* incremental_inputs_;
+  // Whether we record output section data created in script
+  bool record_output_section_data_from_script_;
+  // List of output data that needs to be removed at relexation clean up.
+  Output_section_data_list script_output_section_data_list_;
+  // Structure to save segment states before entering the relaxation loop.
+  Segment_states* segment_states_;
+  // A relaxation debug checker.  We only create one when in debugging mode.
+  Relaxation_debug_check* relaxation_debug_check_;
 };
 
 // This task handles writing out data in output sections which is not

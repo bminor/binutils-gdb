@@ -36,6 +36,7 @@
 #include "elfcpp.h"
 #include "options.h"
 #include "parameters.h"
+#include "debug.h"
 
 namespace gold
 {
@@ -223,6 +224,28 @@ class Target
 		  off_t offset, const elfcpp::Ehdr<size, big_endian>& ehdr)
   { return this->do_make_elf_object(name, input_file, offset, ehdr); }
 
+  // Return true if target wants to perform relaxation.
+  bool
+  may_relax() const
+  {
+    // Run the dummy relaxation pass twice if relaxation debugging is enabled.
+    if (is_debugging_enabled(DEBUG_RELAXATION))
+      return true;
+
+     return this->do_may_relax();
+  }
+
+  // Perform a relaxation pass.  Return true if layout may be changed.
+  bool
+  relax(int pass)
+  {
+    // Run the dummy relaxation pass twice if relaxation debugging is enabled.
+    if (is_debugging_enabled(DEBUG_RELAXATION))
+      return pass < 2;
+
+    return this->do_relax(pass);
+  } 
+
  protected:
   // This struct holds the constant information for a child class.  We
   // use a struct to avoid the overhead of virtual function calls for
@@ -338,6 +361,16 @@ class Target
   do_make_elf_object(const std::string& name, Input_file* input_file,
 		     off_t offset, const elfcpp::Ehdr<64, true>& ehdr);
 #endif
+
+  // Virtual function which may be overriden by the child class.
+  virtual bool
+  do_may_relax() const
+  { return parameters->options().relax(); }
+
+  // Virtual function which may be overriden by the child class.
+  virtual bool
+  do_relax(int)
+  { return false; }
 
  private:
   // The implementations of the four do_make_elf_object virtual functions are

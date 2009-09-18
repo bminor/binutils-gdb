@@ -54,7 +54,7 @@ class Output_data
   explicit Output_data()
     : address_(0), data_size_(0), offset_(-1),
       is_address_valid_(false), is_data_size_valid_(false),
-      is_offset_valid_(false),
+      is_offset_valid_(false), is_data_size_fixed_(false),
       dynamic_reloc_count_(0)
   { }
 
@@ -80,6 +80,11 @@ class Output_data
     return this->data_size_;
   }
 
+  // Return true if data size is fixed.
+  bool
+  is_data_size_fixed() const
+  { return this->is_data_size_fixed_; }
+  
   // Return the file offset.  This is only valid after
   // Layout::finalize is finished.  For some non-allocated sections,
   // it may not be valid until near the end of the link.
@@ -97,9 +102,16 @@ class Output_data
   {
     this->is_address_valid_ = false;
     this->is_offset_valid_ = false;
-    this->is_data_size_valid_ = false;
+    if (!this->is_data_size_fixed_)
+      this->is_data_size_valid_ = false;
     this->do_reset_address_and_file_offset();
   }
+
+  // Return true if address and file offset already have reset values. In
+  // other words, calling reset_address_and_file_offset will not change them.
+  bool
+  address_and_file_offset_have_reset_values() const
+  { return this->do_address_and_file_offset_have_reset_values(); }
 
   // Return the required alignment.
   uint64_t
@@ -311,6 +323,14 @@ class Output_data
   do_reset_address_and_file_offset()
   { }
 
+  // Return true if address and file offset already have reset values. In
+  // other words, calling reset_address_and_file_offset will not change them.
+  // A child class overriding do_reset_address_and_file_offset may need to
+  // also override this.
+  virtual bool
+  do_address_and_file_offset_have_reset_values() const
+  { return !this->is_address_valid_ && !this->is_offset_valid_; }
+
   // Set the TLS offset.  Called only for SHT_TLS sections.
   virtual void
   do_set_tls_offset(uint64_t)
@@ -341,9 +361,19 @@ class Output_data
   void
   set_data_size(off_t data_size)
   {
-    gold_assert(!this->is_data_size_valid_);
+    gold_assert(!this->is_data_size_valid_
+		&& !this->is_data_size_fixed_);
     this->data_size_ = data_size;
     this->is_data_size_valid_ = true;
+  }
+
+  // Fix the data size.  Once it is fixed, it cannot be changed
+  // and the data size remains always valid. 
+  void
+  fix_data_size()
+  {
+    gold_assert(this->is_data_size_valid_);
+    this->is_data_size_fixed_ = true;
   }
 
   // Get the current data size--this is for the convenience of
@@ -390,6 +420,8 @@ class Output_data
   bool is_data_size_valid_;
   // Whether offset_ is valid.
   bool is_offset_valid_;
+  // Whether data size is fixed.
+  bool is_data_size_fixed_;
   // Count of dynamic relocations applied to this section.
   unsigned int dynamic_reloc_count_;
 };
@@ -421,11 +453,20 @@ class Output_section_headers : public Output_data
   do_print_to_mapfile(Mapfile* mapfile) const
   { mapfile->print_output_data(this, _("** section headers")); }
 
+  // Set final data size.
+  void
+  set_final_data_size()
+  { this->set_data_size(this->do_size()); }
+
  private:
   // Write the data to the file with the right size and endianness.
   template<int size, bool big_endian>
   void
   do_sized_write(Output_file*);
+
+  // Compute data size.
+  off_t
+  do_size() const;
 
   const Layout* layout_;
   const Layout::Segment_list* segment_list_;
@@ -457,11 +498,20 @@ class Output_segment_headers : public Output_data
   do_print_to_mapfile(Mapfile* mapfile) const
   { mapfile->print_output_data(this, _("** segment headers")); }
 
+  // Set final data size.
+  void
+  set_final_data_size()
+  { this->set_data_size(this->do_size()); }
+
  private:
   // Write the data to the file with the right size and endianness.
   template<int size, bool big_endian>
   void
   do_sized_write(Output_file*);
+
+  // Compute the current size.
+  off_t
+  do_size() const;
 
   const Layout::Segment_list& segment_list_;
 };
@@ -496,6 +546,11 @@ class Output_file_header : public Output_data
   do_print_to_mapfile(Mapfile* mapfile) const
   { mapfile->print_output_data(this, _("** file header")); }
 
+  // Set final data size.
+  void
+  set_final_data_size(void)
+  { this->set_data_size(this->do_size()); }
+
  private:
   // Write the data to the file with the right size and endianness.
   template<int size, bool big_endian>
@@ -506,6 +561,10 @@ class Output_file_header : public Output_data
   template<int size>
   typename elfcpp::Elf_types<size>::Elf_Addr
   entry();
+
+  // Compute the current data size.
+  off_t
+  do_size() const;
 
   const Target* target_;
   const Symbol_table* symtab_;
@@ -523,9 +582,14 @@ class Output_file_header : public Output_data
 class Output_section_data : public Output_data
 {
  public:
-  Output_section_data(off_t data_size, uint64_t addralign)
+  Output_section_data(off_t data_size, uint64_t addralign,
+		      bool is_data_size_fixed)
     : Output_data(), output_section_(NULL), addralign_(addralign)
-  { this->set_data_size(data_size); }
+  {
+    this->set_data_size(data_size);
+    if (is_data_size_fixed)
+      this->fix_data_size();
+  }
 
   Output_section_data(uint64_t addralign)
     : Output_data(), output_section_(NULL), addralign_(addralign)
@@ -675,15 +739,15 @@ class Output_data_const : public Output_section_data
 {
  public:
   Output_data_const(const std::string& data, uint64_t addralign)
-    : Output_section_data(data.size(), addralign), data_(data)
+    : Output_section_data(data.size(), addralign, true), data_(data)
   { }
 
   Output_data_const(const char* p, off_t len, uint64_t addralign)
-    : Output_section_data(len, addralign), data_(p, len)
+    : Output_section_data(len, addralign, true), data_(p, len)
   { }
 
   Output_data_const(const unsigned char* p, off_t len, uint64_t addralign)
-    : Output_section_data(len, addralign),
+    : Output_section_data(len, addralign, true),
       data_(reinterpret_cast<const char*>(p), len)
   { }
 
@@ -714,7 +778,7 @@ class Output_data_const_buffer : public Output_section_data
  public:
   Output_data_const_buffer(const unsigned char* p, off_t len,
 			   uint64_t addralign, const char* map_name)
-    : Output_section_data(len, addralign),
+    : Output_section_data(len, addralign, true),
       p_(p), map_name_(map_name)
   { }
 
@@ -749,7 +813,7 @@ class Output_data_fixed_space : public Output_section_data
  public:
   Output_data_fixed_space(off_t data_size, uint64_t addralign,
 			  const char* map_name)
-    : Output_section_data(data_size, addralign),
+    : Output_section_data(data_size, addralign, true),
       map_name_(map_name)
   { }
 
@@ -812,7 +876,7 @@ class Output_data_zero_fill : public Output_section_data
 {
  public:
   Output_data_zero_fill(off_t data_size, uint64_t addralign)
-    : Output_section_data(data_size, addralign)
+    : Output_section_data(data_size, addralign, true)
   { }
 
  protected:
@@ -1531,6 +1595,11 @@ class Output_data_group : public Output_section_data
   do_print_to_mapfile(Mapfile* mapfile) const
   { mapfile->print_output_data(this, _("** group")); }
 
+  // Set final data size.
+  void
+  set_final_data_size()
+  { this->set_data_size((this->input_shndxes_.size() + 1) * 4); }
+
  private:
   // The input object.
   Sized_relobj<size, big_endian>* relobj_;
@@ -1814,6 +1883,11 @@ class Output_data_dynamic : public Output_section_data
       : tag_(tag), offset_(DYNAMIC_STRING)
     { this->u_.str = str; }
 
+    // Return the tag of this entry.
+    elfcpp::DT
+    tag() const
+    { return this->tag_; }
+
     // Write the dynamic entry to an output view.
     template<int size, bool big_endian>
     void
@@ -1880,7 +1954,7 @@ class Output_symtab_xindex : public Output_section_data
 {
  public:
   Output_symtab_xindex(size_t symcount)
-    : Output_section_data(symcount * 4, 4),
+    : Output_section_data(symcount * 4, 4, true),
       entries_()
   { }
 
@@ -1910,6 +1984,33 @@ class Output_symtab_xindex : public Output_section_data
 
   // The entries we need.
   Xindex_entries entries_;
+};
+
+// A relaxed input section.
+class Output_relaxed_input_section : public Output_section_data
+{
+ public:
+  // We would like to call relobj->section_addralign(shndx) to get the
+  // alignment but we do not want the constructor to fail.  So callers
+  // are repsonsible for ensuring that.
+  Output_relaxed_input_section(Relobj* relobj, unsigned int shndx,
+			       uint64_t addralign)
+    : Output_section_data(addralign), relobj_(relobj), shndx_(shndx)
+  { }
+ 
+  // Return the Relobj of this relaxed input section.
+  Relobj*
+  relobj() const
+  { return this->relobj_; }
+ 
+  // Return the section index of this relaxed input section.
+  unsigned int
+  shndx() const
+  { return this->shndx_; }
+
+ private:
+  Relobj* relobj_;
+  unsigned int shndx_;
 };
 
 // An output section.  We don't expect to have too many output
@@ -2310,6 +2411,69 @@ class Output_section : public Output_data
 
   // The next few calls are for linker script support.
 
+  // We need to export the input sections to linker scripts.  Previously
+  // we export a pair of Relobj pointer and section index.  We now need to
+  // handle relaxed input sections as well.  So we use this class.
+  class Simple_input_section
+  {
+   private:
+    static const unsigned int invalid_shndx = static_cast<unsigned int>(-1);
+
+   public:
+    Simple_input_section(Relobj *relobj, unsigned int shndx)
+      : shndx_(shndx)
+    {
+      gold_assert(shndx != invalid_shndx);
+      this->u_.relobj = relobj;
+    }
+ 
+    Simple_input_section(Output_relaxed_input_section* section)
+      : shndx_(invalid_shndx)
+    { this->u_.relaxed_input_section = section; }
+
+    // Whether this is a relaxed section.
+    bool
+    is_relaxed_input_section() const
+    { return this->shndx_ == invalid_shndx; }
+
+    // Return object of an input section.
+    Relobj*
+    relobj() const
+    {
+      return ((this->shndx_ != invalid_shndx)
+	      ? this->u_.relobj
+	      : this->u_.relaxed_input_section->relobj());
+    }
+
+    // Return index of an input section.
+    unsigned int
+    shndx() const
+    {
+      return ((this->shndx_ != invalid_shndx)
+	      ? this->shndx_
+	      : this->u_.relaxed_input_section->shndx());
+    }
+
+    // Return the Output_relaxed_input_section object of a relaxed section.
+    Output_relaxed_input_section*
+    relaxed_input_section() const
+    {
+      gold_assert(this->shndx_ == invalid_shndx);
+      return this->u_.relaxed_input_section;
+    }
+
+   private:
+    // Pointer to either an Relobj or an Output_relaxed_input_section.
+    union
+    {
+      Relobj* relobj;
+      Output_relaxed_input_section* relaxed_input_section;
+    } u_;
+    // Section index for an non-relaxed section or invalid_shndx for
+    // a relaxed section.
+    unsigned int shndx_;
+  };
+ 
   // Store the list of input sections for this Output_section into the
   // list passed in.  This removes the input sections, leaving only
   // any Output_section_data elements.  This returns the size of those
@@ -2318,11 +2482,11 @@ class Output_section : public Output_data
   // any spaces between the remaining Output_section_data elements.
   uint64_t
   get_input_sections(uint64_t address, const std::string& fill,
-		     std::list<std::pair<Relobj*, unsigned int > >*);
+		     std::list<Simple_input_section>*);
 
   // Add an input section from a script.
   void
-  add_input_section_for_script(Relobj* object, unsigned int shndx,
+  add_input_section_for_script(const Simple_input_section& input_section,
 			       off_t data_size, uint64_t addralign);
 
   // Set the current size of the output section.
@@ -2336,6 +2500,15 @@ class Output_section : public Output_data
   { return this->current_data_size_for_child(); }
 
   // End of linker script support.
+
+  // Save states before doing section layout.
+  // This is used for relaxation.
+  void
+  save_states();
+
+  // Restore states prior to section layout.
+  void
+  restore_states();
 
   // Print merge statistics to stderr.
   void
@@ -2373,6 +2546,11 @@ class Output_section : public Output_data
   // Reset the address and file offset.
   void
   do_reset_address_and_file_offset();
+
+  // Return true if address and file offset already have reset values. In
+  // other words, calling reset_address_and_file_offset will not change them.
+  bool
+  do_address_and_file_offset_have_reset_values() const;
 
   // Write the data to the file.  For a typical Output_section, this
   // does nothing: the data is written out by calling Object::Relocate
@@ -2476,7 +2654,8 @@ class Output_section : public Output_data
     {
       gold_assert(shndx != OUTPUT_SECTION_CODE
 		  && shndx != MERGE_DATA_SECTION_CODE
-		  && shndx != MERGE_STRING_SECTION_CODE);
+		  && shndx != MERGE_STRING_SECTION_CODE
+		  && shndx != RELAXED_INPUT_SECTION_CODE);
       this->u1_.data_size = data_size;
       this->u2_.object = object;
     }
@@ -2500,6 +2679,14 @@ class Output_section : public Output_data
       this->u2_.posd = posd;
     }
 
+    // For a relaxed input section.
+    Input_section(Output_relaxed_input_section *psection)
+      : shndx_(RELAXED_INPUT_SECTION_CODE), p2align_(0)
+    {
+      this->u1_.data_size = 0;
+      this->u2_.poris = psection;
+    }
+
     // The required alignment.
     uint64_t
     addralign() const
@@ -2521,7 +2708,8 @@ class Output_section : public Output_data
     {
       return (this->shndx_ != OUTPUT_SECTION_CODE
 	      && this->shndx_ != MERGE_DATA_SECTION_CODE
-	      && this->shndx_ != MERGE_STRING_SECTION_CODE);
+	      && this->shndx_ != MERGE_STRING_SECTION_CODE
+	      && this->shndx_ != RELAXED_INPUT_SECTION_CODE);
     }
 
     // Return whether this is a merge section which matches the
@@ -2535,6 +2723,18 @@ class Output_section : public Output_data
 			       : MERGE_DATA_SECTION_CODE)
 	      && this->u1_.entsize == entsize
               && this->addralign() == addralign);
+    }
+
+    // Return whether this is a relaxed input section.
+    bool
+    is_relaxed_input_section() const
+    { return this->shndx_ == RELAXED_INPUT_SECTION_CODE; }
+
+    // Return whether this is a generic Output_section_data.
+    bool
+    is_output_section_data() const
+    {
+      return this->shndx_ == OUTPUT_SECTION_CODE;
     }
 
     // Return the object for an input section.
@@ -2553,12 +2753,31 @@ class Output_section : public Output_data
       return this->shndx_;
     }
 
+    // For non-input-sections, return the associated Output_section_data
+    // object.
+    Output_section_data*
+    output_section_data() const
+    {
+      gold_assert(!this->is_input_section());
+      return this->u2_.posd;
+    }
+ 
+    // Return the Output_relaxed_input_section object.
+    Output_relaxed_input_section*
+    relaxed_input_section() const
+    {
+      gold_assert(this->is_relaxed_input_section());
+      return this->u2_.poris;
+    }
+
     // Set the output section.
     void
     set_output_section(Output_section* os)
     {
       gold_assert(!this->is_input_section());
-      this->u2_.posd->set_output_section(os);
+      Output_section_data *posd = 
+        this->is_relaxed_input_section() ? this->u2_.poris : this->u2_.posd;
+      posd->set_output_section(os);
     }
 
     // Set the address and file offset.  This is called during
@@ -2636,7 +2855,9 @@ class Output_section : public Output_data
       MERGE_DATA_SECTION_CODE = -2U,
       // An Output_section_data for an SHF_MERGE section with
       // SHF_STRINGS set.
-      MERGE_STRING_SECTION_CODE = -3U
+      MERGE_STRING_SECTION_CODE = -3U,
+      // An Output_section_data for a relaxed input section.
+      RELAXED_INPUT_SECTION_CODE = -4U
     };
 
     // For an ordinary input section, this is the section index in the
@@ -2650,8 +2871,8 @@ class Output_section : public Output_data
     {
       // For an ordinary input section, the section size.
       off_t data_size;
-      // For OUTPUT_SECTION_CODE, this is not used.  For
-      // MERGE_DATA_SECTION_CODE or MERGE_STRING_SECTION_CODE, the
+      // For OUTPUT_SECTION_CODE or RELAXED_INPUT_SECTION_CODE, this is not
+      // used.  For MERGE_DATA_SECTION_CODE or MERGE_STRING_SECTION_CODE, the
       // entity size.
       uint64_t entsize;
     } u1_;
@@ -2663,11 +2884,97 @@ class Output_section : public Output_data
       // For OUTPUT_SECTION_CODE or MERGE_DATA_SECTION_CODE or
       // MERGE_STRING_SECTION_CODE, the data.
       Output_section_data* posd;
+      // For RELAXED_INPUT_SECTION_CODE, the data.
+      Output_relaxed_input_section* poris;
     } u2_;
   };
 
   typedef std::vector<Input_section> Input_section_list;
 
+  // We only save enough information to undo the effects of section layout.
+  class Checkpoint_output_section
+  {
+   public:
+    Checkpoint_output_section(uint64_t addralign, elfcpp::Elf_Xword flags,
+			      const Input_section_list& input_sections,
+			      off_t first_input_offset,
+			      bool attached_input_sections_are_sorted)
+      : addralign_(addralign), flags_(flags),
+	input_sections_(input_sections),
+	input_sections_size_(input_sections_.size()),
+	input_sections_copy_(), first_input_offset_(first_input_offset),
+	attached_input_sections_are_sorted_(attached_input_sections_are_sorted)
+    { }
+
+    virtual
+    ~Checkpoint_output_section()
+    { }
+
+    // Return the address alignment.
+    uint64_t
+    addralign() const
+    { return this->addralign_; }
+
+    // Return the section flags.
+    elfcpp::Elf_Xword
+    flags() const
+    { return this->flags_; }
+
+    // Return a reference to the input section list copy.
+    const Input_section_list&
+    input_sections() const
+    { return this->input_sections_copy_; }
+
+    // Return the size of input_sections at the time when checkpoint is
+    // taken.
+    size_t
+    input_sections_size() const
+    { return this->input_sections_size_; }
+
+    // Whether input sections are copied.
+    bool
+    input_sections_saved() const
+    { return this->input_sections_copy_.size() == this->input_sections_size_; }
+
+    off_t
+    first_input_offset() const
+    { return this->first_input_offset_; }
+
+    bool
+    attached_input_sections_are_sorted() const
+    { return this->attached_input_sections_are_sorted_; }
+
+    // Save input sections.
+    void
+    save_input_sections()
+    {
+      this->input_sections_copy_.reserve(this->input_sections_size_);
+      this->input_sections_copy_.clear();
+      Input_section_list::const_iterator p = this->input_sections_.begin();
+      gold_assert(this->input_sections_size_ >= this->input_sections_.size());
+      for(size_t i = 0; i < this->input_sections_size_ ; i++, ++p)
+	this->input_sections_copy_.push_back(*p);
+    }
+
+   private:
+    // The section alignment.
+    uint64_t addralign_;
+    // The section flags.
+    elfcpp::Elf_Xword flags_;
+    // Reference to the input sections to be checkpointed.
+    const Input_section_list& input_sections_;
+    // Size of the checkpointed portion of input_sections_;
+    size_t input_sections_size_;
+    // Copy of input sections.
+    Input_section_list input_sections_copy_;
+    // The offset of the first entry in input_sections_.
+    off_t first_input_offset_;
+    // True if the input sections attached to this output section have
+    // already been sorted.
+    bool attached_input_sections_are_sorted_;
+  };
+
+ private:
   // This class is used to sort the input sections.
   class Input_section_sort_entry;
 
@@ -2728,6 +3035,10 @@ class Output_section : public Output_data
   void
   add_output_merge_section(Output_section_data* posd, bool is_string,
 			   uint64_t entsize);
+
+  // Relax an existing input section.
+  void
+  relax_input_section(Output_relaxed_input_section*);
 
   // Sort the attached input sections.
   void
@@ -2836,11 +3147,19 @@ class Output_section : public Output_data
   // For SHT_TLS sections, the offset of this section relative to the base
   // of the TLS segment.
   uint64_t tls_offset_;
+  // Saved checkpoint.
+  Checkpoint_output_section* checkpoint_;
 };
 
 // An output segment.  PT_LOAD segments are built from collections of
 // output sections.  Other segments typically point within PT_LOAD
 // segments, and are built directly as needed.
+//
+// NOTE: We want to use the copy constructor for this class.  During
+// relaxation, we may try built the segments multiple times.  We do
+// that by copying the original segment list before lay-out, doing
+// a trial lay-out and roll-back to the saved copied if we need to
+// to the lay-out again.
 
 class Output_segment
 {
@@ -2998,9 +3317,6 @@ class Output_segment
   print_sections_to_mapfile(Mapfile*) const;
 
  private:
-  Output_segment(const Output_segment&);
-  Output_segment& operator=(const Output_segment&);
-
   typedef std::list<Output_data*> Output_data_list;
 
   // Find the maximum alignment in an Output_data_list.
@@ -3043,6 +3359,9 @@ class Output_segment
   void
   print_section_list_to_mapfile(Mapfile*, const Output_data_list*) const;
 
+  // NOTE: We want to use the copy constructor.  Currently, shallow copy
+  // works for us so we do not need to write our own copy constructor.
+  
   // The list of output data with contents attached to this segment.
   Output_data_list output_data_;
   // The list of output data without contents attached to this segment.

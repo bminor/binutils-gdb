@@ -1,3 +1,159 @@
+2009-09-17  Doug Kwan  <dougkwan@google.com>
+
+	* debug.h (DEBUG_RELAXATION): New constant.
+	(DEBUG_ALL): Add DEBUG_RELAXATION.
+	(debug_string_to_enum): Add relaxation debug option.
+	* layout.cc
+	(Layout::Relaxation_debug_check::check_output_data_for_reset_values,
+	Layout::Relaxation_debug_check::read_sections,
+	Layout::Relaxation_debug_check::read_sections): New method definitions.
+	(Layout::Layout): Initialize data members
+	record_output_section_data_from_scrips_,
+	script_output_section_data_list_ and relaxation_debug_check_.
+	(Layout::save_segments, Layout::restore_segments,
+	Layout::clean_up_after_relaxation, Layout::prepare_for_relaxation,
+	Layout::relaxation_loop_body): New method definitions.
+	(Layout::finalize): Support relaxation.  Move section layout code to
+	Layout::relaxation_loop_body.
+	(Layout::set_asection_address_from_script): Move code for orphan
+	section placement out.
+	(Layout::place_orphan_sections_in_script): New method definition.
+	* layout.h (Output_segment_headers, Output_file_header):
+	New forward class declarations.
+	(Layout::~Layout): Define.
+	(Layout::new_output_section_data_from_script): New method definition.
+	(Layout::place_orphan_sections_in_script): New method declaration.
+	(Layout::Segment_states): New type declaration.
+	(Layout::save_segments, Layout::restore_segments,
+	Layout::clean_up_after_relaxation, Layout::prepare_for_relaxation,
+	Layout::relaxation_loop_body): New method declarations.
+	(Layout::Output_section_data_list): New type declaration.
+	(Layout::Relaxation_debug_check): New class definition.
+	(Layout::record_output_section_data_from_script_,
+	Layout::script_output_section_data_list_, Layout::segment_states_,
+	Layout::relaxation_debug_check_): New data members.
+	* output.cc: (Output_section_headers::do_size): New method definition.
+	(Output_section_headers::Output_section_headers): Move size
+	computation to Output_section_headers::do_size.
+	(Output_segment_headers::do_size): New method definition.
+	(Output_file_header::Output_file_header): Move size computation to 
+	Output_file_header::do_size and call it.
+	(Output_file_header::do_size): New method definition.
+	(Output_data_group::Output_data_group): Adjust call to
+	Output_section_data.
+	(Output_data_dynamic::set_final_data_size): Add DT_NULL tag only once.
+	(Output_symtab_xindex::do_write): Add array bound check.
+ 	(Output_section::Input_section::print_to_mapfile): Handle
+	RELAXED_INPUT_SECTION_CODE.
+	(Output_section::Output_section): Initialize data member checkpoint_.
+	(Output_section::~Output_section): Delete checkpoint object pointed
+	by checkpoint_.
+	(Output_section::add_input_section): Always add an Input_section if
+	relaxing.
+	(Output_section::add_merge_input_section): Add assert.
+	(Output_section::relax_input_section): New method definition.
+	(Output_section::set_final_data_size): Set load address to zero for
+	an unallocated section.
+	(Output_section::do_address_and_file_offset_have_reset_values):
+	New method definition.
+	(Output_section::Input_section_sort_enty::Input_section_sort_enty):
+	Handle relaxed input section.
+	(Output_section::sort_attached_input_sections): Checkpoint input
+	section list lazily.
+	(Output_section::get_input_sections): Change type of input_sections to
+	list of Simple_input_section pointers.  Checkpoint input section list
+	lazily.  Also handle relaxed input sections.
+	(Output_section::add_input_section_for_script): Take a reference to
+	a Simple_input_section object instead of Relobj pointer and section
+	index as parameter.  Handle relaxed input sections.
+	(Output_section::save_states, Output_section::restore_states): New
+	method definitions.
+	* output.h (Output_data::Output_data): Initialize is_data_size_fixed_.
+	(Output_data::is_data_size_fixed): New method definition.
+	(Output_data::reset_addresss_and_file_offset): Do not reset data size
+	if it is fixed.
+	(Output_data::address_and_file_offset_have_reset_values): New method
+	definition.
+	(Output_data::do_address_and_file_offset_have_reset_values): New method
+	definition.
+	(Output_data::set_data_size): Check that data size is not fixed.
+	(Output_data::fix_data_size): New method definition.
+	(Output_data::is_data_size_fixed_): New data member.
+	(Output_section_headers::set_final_data_size): New method definition.
+	(Output_section_headers::do_size): New method declaration.
+	(Output_segment_headers::set_final_data_size): New method definition.
+	(Output_segment_headers::do_size): New method declaration.
+	(Output_file_header::set_final_data_size)::New method definition.
+	(Output_file_header::do_size)::New method declaration.
+	(Output_section_data::Output_section_data): Add new parameter
+	is_data_size_fixed and use it to fix data size.
+	(Output_data_const::Output_data_const): Adjust call to base class
+	constructor and fix data size.
+	(Output_data_const_buffer::Output_data_const_buffer): Adjust call to
+	base class constructor and fix data size.
+	(Output_data_fixed_space::Output_data_fixed_space): Adjust call to
+	base class constructor and fix data size.
+	(Output_data_zero_fill::Output_data_zero_fill): Adjust call to base
+	class constructor and fix data size.
+	(Output_data_group::set_final_data_size): New method definition.
+	(Output_data_dynamic::Dynamic_entry::tag): New method definition.
+	(Output_symtab_xindex::Output_symtab_xindex): Adjust call to base
+	class constructor and fix data size.
+	(Output_relaxed_input_section): New class definition.
+	(Output_section::Simple_input_section): New class definition.
+	(Output_section::get_input_sections): Adjust parameter list.
+	(Output_section::add_input_section_for_script): Same.
+	(Output_section::save_states, Output_section::restore_states,
+	Output_section::do_address_and_file_offset_have_reset_values,
+	(Output_section::Input_section::Input_section): Handle
+	RELAXED_INPUT_SECTION_CODE.  Add new overload for
+	Output_relaxed_input_section.
+	(Output_section::Input_section::is_input_section,
+	Output_section::Input_section::set_output_section): Handle relaxed
+	input section.
+	(Output_section::Input_section::is_relaxed_input_section,
+	Output_section::Input_section::output_section_data,
+	Output_section::Input_section::relaxed_input_section): New method
+	definitions.
+	(Output_section::Input_section::RELAXED_INPUT_SECTION_CODE): New enum
+	value.
+	(Output_section::Input_section::u1_): Update comments.
+	(Output_section::Input_section::u2_): Add new union member poris.
+	(Output_section::Checkpoint_output_section): New classs definition.
+	(Output_section::relax_input_section): New method declaration.
+	(Output_section::checkpoint_): New data member.
+	(Output_segment): Update comments.
+	(Output_segment::Output_segment): Un-privatize copy constructor.
+	(Output_segment::operator=): Un-privatize.
+	* script-sections.cc (Output_section_element::Input_section_list):
+	Change element type to Output_section::Simple_input_section.
+	(Output_section_element_dot_assignment::set_section_addresses):
+	Register output section data for relaxation clean up.
+	(Output_data_exression::Output_data_expression): Adjust call to base
+	constructor to fix data size.
+	(Output_section_element_data::set_section_addresses): Register
+	Output_data_expression object for relaxation clean up.
+	(struct Input_section_info): Replace Relobj pointer and section index
+	pair with Output_section::Simple_input_section and Convert struct to a
+	class.
+	(Input_section_sorter::operator()): Adjust access to
+	Input_section_info data member to use accessors. 
+	(Output_section_element_input::set_section_addresses): Use layout
+	parameter.  Adjust code to use Output_section::Simple_input_section
+	and Input_secction_info classes.  Register filler for relaxation
+	clean up.
+	(Orphan_output_section::set_section_addresses): Replace Relobj pointer
+	and section index pair with Output_section::Simple_input_section
+	class.  Adjust code accordingly.
+	(Phdrs_element::release_segment): New method definition.
+	(Script_sections::attach_sections_using_phdrs_clause): Do not modify
+	segment list.
+	(Script_sections::release_segments): New method definition.
+	* gold/script-sections.h (Script_sections::release_segments): New
+	method declaration.
+	* gold/target.h (Target::may_relax, Target::relax,
+	Target::do_may_relax, Target::do_relax): New method definitions.
+
 2009-09-17  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
 
 	* arm.cc (has_signed_unsigned_overflow): New function.
