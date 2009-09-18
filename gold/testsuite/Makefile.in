@@ -341,18 +341,25 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 
 # Test that hidden and internal symbols in the main program cannot be
 # referenced by a shared library.
+
+# Test -retain-symbols-file.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_27 = exclude_libs_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	hidden_test.sh
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	hidden_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test.sh
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_28 = exclude_libs_test.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.syms \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	hidden_test.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	hidden_test.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test.stdout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_29 = exclude_libs_test.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	libexclude_libs_test_1.a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	libexclude_libs_test_2.a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/libexclude_libs_test_3.a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.syms \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	hidden_test hidden_test.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	hidden_test hidden_test.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test.in \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test.stdout
 @GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@am__append_30 = large
 @GCC_FALSE@large_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
@@ -2956,6 +2963,16 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -Wl,-R,. hidden_test_main.o libhidden.so 2>hidden_test.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@hidden_test.err: hidden_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	@touch hidden_test.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@retain_symbols_file_test.so: basic_pic_test.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	echo 'main' > retain_symbols_file_test.in
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	echo 't1' >> retain_symbols_file_test.in
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	echo '_ZN4t16bC1Ev' >> retain_symbols_file_test.in
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	echo '_ZNK4t20a3getEv' >> retain_symbols_file_test.in
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	echo '_Z3t18v' >> retain_symbols_file_test.in
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	echo '__tcf_0' >> retain_symbols_file_test.in	
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared -Wl,-retain-symbols-file,retain_symbols_file_test.in basic_pic_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@retain_symbols_file_test.stdout: retain_symbols_file_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) -C retain_symbols_file_test.so > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@permission_test: basic_test.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	umask 022; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	rm -f $@; \

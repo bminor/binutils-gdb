@@ -1,3 +1,17 @@
+2009-09-18  Craig Silverstein  <csilvers@google.com>
+
+	* object.cc (Sized_relobj::do_count): Test should_retain_symbol map.
+	* options.cc: Include <cerrno> and <fstream>.
+	(General_options::finalize): Parse -retain-symbols-file tag.
+	* options.h: New flag.
+	(General_options): New method should_retain_symbol, new
+	variable symbols_to_retain.
+	* symtab.cc (Symbol_table::sized_finalize_symbol): Test
+	should_retain_symbol map.
+	* testsuite/Makefile.am (retain_symbols_file_test): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/retain_symbols_file_test.sh: New file.
+
 2009-09-18  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.
@@ -168,7 +182,7 @@
 	(Target_arm::Relocatable_size_for_reloc::get_size_for_reloc):
 	Likewise.
 
-2009-09-08  Cary Coutant  <ccoutant@google.com>
+2009-09-16  Cary Coutant  <ccoutant@google.com>
 
 	* testsuite/Makefile.am (MOSTLYCLEANFILES): Add more generated files.
 	* testsuite/Makefile.in: Regenerate.

@@ -774,6 +774,9 @@ class General_options
   DEFINE_bool(relax, options::TWO_DASHES, '\0', false,
 	      N_("Relax branches on certain targets"), NULL);
 
+  DEFINE_string(retain_symbols_file, options::EXACTLY_ONE_DASH, '\0', NULL,
+                N_("keep only symbols listed in this file"), N_("[file]"));
+
   // -R really means -rpath, but can mean --just-symbols for
   // compatibility with GNU ld.  -rpath is always -rpath, so we list
   // it separately.
@@ -1021,6 +1024,15 @@ class General_options
   bool
   is_in_system_directory(const std::string& name) const;
 
+  // RETURN whether SYMBOL_NAME should be kept, according to symbols_to_retain_.
+  bool
+  should_retain_symbol(const char* symbol_name) const
+    {
+      if (symbols_to_retain_.empty())    // means flag wasn't specified
+        return true;
+      return symbols_to_retain_.find(symbol_name) != symbols_to_retain_.end();
+    }
+
   // These are the best way to get access to the execstack state,
   // not execstack() and noexecstack() which are hard to use properly.
   bool
@@ -1132,8 +1144,10 @@ class General_options
   // build (--incremental-changed, --incremental-unchanged or
   // --incremental-unknown)
   bool implicit_incremental_;
-  // Libraries excluded from automatic export via --exclude-libs
+  // Libraries excluded from automatic export, via --exclude-libs.
   Unordered_set<std::string> excluded_libs_;
+  // List of symbol-names to keep, via -retain-symbol-info.
+  Unordered_set<std::string> symbols_to_retain_;
 };
 
 // The position-dependent options.  We use this to store the state of

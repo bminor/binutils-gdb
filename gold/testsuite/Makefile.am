@@ -1153,6 +1153,23 @@ hidden_test: hidden_test_main.o libhidden.so gcctestdir/ld
 hidden_test.err: hidden_test
 	@touch hidden_test.err
 
+# Test -retain-symbols-file.
+check_SCRIPTS += retain_symbols_file_test.sh
+check_DATA += retain_symbols_file_test.stdout
+MOSTLYCLEANFILES += retain_symbols_file_test retain_symbols_file_test.in \
+                    retain_symbols_file_test.stdout
+retain_symbols_file_test.so: basic_pic_test.o gcctestdir/ld
+	echo 'main' > retain_symbols_file_test.in
+	echo 't1' >> retain_symbols_file_test.in
+	echo '_ZN4t16bC1Ev' >> retain_symbols_file_test.in
+	echo '_ZNK4t20a3getEv' >> retain_symbols_file_test.in
+	echo '_Z3t18v' >> retain_symbols_file_test.in
+	echo '__tcf_0' >> retain_symbols_file_test.in	
+	$(CXXLINK) -Bgcctestdir/ -shared -Wl,-retain-symbols-file,retain_symbols_file_test.in basic_pic_test.o
+retain_symbols_file_test.stdout: retain_symbols_file_test.so
+	$(TEST_NM) -C retain_symbols_file_test.so > $@
+
+
 # Test that if the output file already exists and is empty,
 # it will get execute permission.
 check_PROGRAMS += permission_test

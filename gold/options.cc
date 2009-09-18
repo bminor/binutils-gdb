@@ -22,8 +22,10 @@
 
 #include "gold.h"
 
+#include <cerrno>
 #include <cstdlib>
 #include <cstring>
+#include <fstream>
 #include <vector>
 #include <iostream>
 #include <sys/stat.h>
@@ -938,6 +940,25 @@ General_options::finalize()
       this->add_to_library_path_with_sysroot("/usr/lib");
     }
 
+  // Parse the contents of -retain-symbols-file into a set.
+  if (this->retain_symbols_file())
+    {
+      std::ifstream in;
+      in.open(this->retain_symbols_file());
+      if (!in)
+        gold_fatal(_("unable to open -retain-symbols-file file %s: %s"),
+                   this->retain_symbols_file(), strerror(errno));
+      std::string line;
+      std::getline(in, line);   // this chops off the trailing \n, if any
+      while (in)
+        {
+          if (!line.empty() && line[line.length() - 1] == '\r')   // Windows
+            line.resize(line.length() - 1);
+          this->symbols_to_retain_.insert(line);
+          std::getline(in, line);
+        }
+    }
+
   if (this->shared() && !this->user_set_allow_shlib_undefined())
     this->set_allow_shlib_undefined(true);
 
@@ -951,6 +972,10 @@ General_options::finalize()
 
   if (this->shared() && this->relocatable())
     gold_fatal(_("-shared and -r are incompatible"));
+
+  // TODO: implement support for -retain-symbols-file with -r, if needed.
+  if (this->relocatable() && this->retain_symbols_file())
+    gold_fatal(_("-retain-symbols-file does not yet work with -r"));
 
   if (this->oformat_enum() != General_options::OBJECT_FORMAT_ELF
       && (this->shared() || this->relocatable()))

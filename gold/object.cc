@@ -1562,6 +1562,14 @@ Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
 	  continue;
 	}
 
+      // Discard the local symbol if -retain_symbols_file is specified
+      // and the local symbol is not in that file.
+      if (!parameters->options().should_retain_symbol(name))
+        {
+          lv.set_no_output_symtab_entry();
+          continue;
+        }
+
       // Add the symbol to the symbol table string pool.
       pool->add(name, true, NULL);
       ++count;

@@ -2521,7 +2521,8 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
 
   sym->set_value(value);
 
-  if (parameters->options().strip_all())
+  if (parameters->options().strip_all()
+      || !parameters->options().should_retain_symbol(sym->name()))
     {
       sym->set_symtab_index(-1U);
       return false;
