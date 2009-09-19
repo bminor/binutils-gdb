@@ -1,3 +1,7 @@
+2009-09-18  Maxim Grigoriev  <maxim2405@gmail.com>
+
+        * xtensa-tdep.c (call0_analyze_prologue): Replace INT_MAX by UNIT_MAX.
+
 2009-09-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* objfiles.c (free_objfile): Clear SYMFILE_OBJFILE if it is OBJFILE.

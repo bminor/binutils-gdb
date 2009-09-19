@@ -2125,7 +2125,7 @@ call0_analyze_prologue (struct gdbarch *gdbarch,
      Assume we may be in the prologue until we hit a flow control instr.  */
 
   rtmp = NULL;
-  body_pc = INT_MAX;
+  body_pc = UINT_MAX;
   end_pc = 0;
 
   /* Find out, if we have an information about the prologue from DWARF.  */
