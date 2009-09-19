@@ -304,6 +304,17 @@ if {$embedded_elf} {
     run_dump_test "eh-frame3"
     run_dump_test "eh-frame4"
 }
+if {$linux_gnu} {
+    set eh_frame5_test {
+	{"MIPS eh-frame 5"
+	 "-melf32btsmip -shared -Teh-frame5.ld"
+	 "-32 -EB"
+	 {eh-frame5.s}
+	 {{readelf {--relocs -wf} eh-frame5.d}}
+	 "eh-frame5.so"}
+    }
+    run_ld_link_tests $eh_frame5_test
+}
 
 run_dump_test "jaloverflow"
 run_dump_test "jaloverflow-2"

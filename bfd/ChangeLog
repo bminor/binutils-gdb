@@ -1,3 +1,23 @@
+2009-09-19  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* elf-bfd.h (eh_cie_fde): Add personality_offset and
+	make_per_encoding_relative to the CIE structure.  Add a padding field.
+	* elf-eh-frame.c (_bfd_elf_eh_frame_section_offset): Use 0x70
+	rather than 0xf0 when masking out the base address encoding
+	Record the offset of personality data from the start of the CIE.
+	Remove a repeated elf_backend_can_make_relative_eh_frame check.
+	(find_merged_cie): Take an info argument.  If the personality
+	binds locally, try converting an absolute personality into
+	a local one.
+	(_bfd_elf_discard_section_eh_frame): Use 0x70 rather than 0xf0
+	when masking out the base address encoding.  Update the call to
+	find_merged_cie.
+	(_bfd_elf_eh_frame_section_offset): Discard relocations against
+	the personality data if we are converting into PC-relative form.
+	(_bfd_elf_write_section_eh_frame): Use 0x70 rather than 0xf0
+	when masking out the base address encoding.  Handle
+	make_per_encoding_relative.
+
 2009-09-18  Alan Modra  <amodra@bigpond.net.au>
 
 	PR ld/10406
