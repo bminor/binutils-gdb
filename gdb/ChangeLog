@@ -1,3 +1,7 @@
+2009-09-19  Eli Zaretskii  <eliz@gnu.org>
+
+	* config/djgpp/fnchange.lst: Add missing edits.
+
 2009-09-18  Maxim Grigoriev  <maxim2405@gmail.com>
 
         * xtensa-tdep.c (call0_analyze_prologue): Replace INT_MAX by UNIT_MAX.
