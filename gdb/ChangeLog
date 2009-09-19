@@ -1,3 +1,7 @@
+2009-09-9  Eli Zaretskii  <eliz@gnu.org>
+
+	* config/djgpp/fnchange.lst: Add missing edits.
+
 2009-09-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* objfiles.c (free_objfile): Clear SYMFILE_OBJFILE if it is OBJFILE.
