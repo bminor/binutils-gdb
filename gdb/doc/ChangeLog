@@ -1,3 +1,8 @@
+2009-09-19  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Stack Manipulation): Document
+	-stack-list-variables.
+
 2009-09-18  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (GDB/MI Variable Objects): -enable-pretty-printing

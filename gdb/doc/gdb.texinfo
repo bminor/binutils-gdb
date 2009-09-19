@@ -23130,6 +23130,9 @@ The @var{show-values} argument must have a value of 0 or 1.  A value of
 0 means that only the names of the arguments are listed, a value of 1
 means that both names and values of the arguments are printed.
 
+Use of this command to obtain arguments in a single frame is
+deprecated in favor of the @samp{-stack-list-variables} command.
+
 @subsubheading @value{GDBN} Command
 
 @value{GDBN} does not have an equivalent command.  @code{gdbtk} has a
@@ -23314,6 +23317,9 @@ display the value of simple data types and create variable objects for
 other data types when the user wishes to explore their values in
 more detail.
 
+This command is deprecated in favor of the
+@samp{-stack-list-variables} command.
+
 @subsubheading @value{GDBN} Command
 
 @samp{info locals} in @value{GDBN}, @samp{gdb_get_locals} in @code{gdbtk}.
@@ -23331,6 +23337,31 @@ more detail.
 -stack-list-locals --simple-values
 ^done,locals=[@{name="A",type="int",value="1"@},
   @{name="B",type="int",value="2"@},@{name="C",type="int [3]"@}]
+(gdb)
+@end smallexample
+
+@subheading The @code{-stack-list-variables} Command
+@findex -stack-list-variables
+
+@subsubheading Synopsis
+
+@smallexample
+ -stack-list-variables @var{print-values}
+@end smallexample
+
+Display the names of local variables and function arguments for the selected frame.  If
+@var{print-values} is 0 or @code{--no-values}, print only the names of
+the variables; if it is 1 or @code{--all-values}, print also their
+values; and if it is 2 or @code{--simple-values}, print the name,
+type and value for simple data types and the name and type for arrays,
+structures and unions.  
+
+@subsubheading Example
+
+@smallexample
+(gdb)
+-stack-list-variables --thread 1 --frame 0 --all-values
+^done,variables=[{name="x",value="11"},{name="s",value="{a = 1, b = 2}"}]
 (gdb)
 @end smallexample
 
