@@ -1,5 +1,10 @@
 2009-09-19  Vladimir Prus  <vladimir@codesourcery.com>
 
+	* mi/mi-cmd-stack.c (list_args_or_locals): Workaround
+	gcc warning.
+
+2009-09-19  Vladimir Prus  <vladimir@codesourcery.com>
+
 	* mi/mi-cmds.h (mi_cmd_stack_list_variables): Declare.
 	* mi/mi-cmds.c (mi_cmds): Register -stack-list-variables.
 	* mi/mi-cmd-stack.c (enum what_to_list): New.

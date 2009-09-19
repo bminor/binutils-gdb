@@ -261,6 +261,8 @@ list_args_or_locals (enum what_to_list what, int values, struct frame_info *fi)
       name_of_result = "args"; break;
     case all:
       name_of_result = "variables"; break;
+    default:
+      gdb_assert (("unexpected value", 0));
     }
 
   cleanup_list = make_cleanup_ui_out_list_begin_end (uiout, name_of_result);
