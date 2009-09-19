@@ -1758,7 +1758,7 @@ VEC(varobj_update_result) *varobj_update (struct varobj **varp, int explicit)
       if (v->pretty_printer)
 	{
 	  VEC (varobj_p) *changed = 0, *new = 0, *unchanged = 0;
-	  int i, children_changed;
+	  int i, children_changed = 0;
 
 	  if (v->frozen)
 	    continue;
