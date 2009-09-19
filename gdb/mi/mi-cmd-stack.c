@@ -32,7 +32,11 @@
 #include "language.h"
 #include "valprint.h"
 
-static void list_args_or_locals (int locals, int values, struct frame_info *fi);
+
+enum what_to_list { locals, arguments, all };
+
+static void list_args_or_locals (enum what_to_list what, 
+				 int values, struct frame_info *fi);
 
 /* Print a list of the stack frames. Args can be none, in which case
    we want to print the whole backtrace, or a pair of numbers
@@ -148,7 +152,7 @@ mi_cmd_stack_list_locals (char *command, char **argv, int argc)
 
    frame = get_selected_frame (NULL);
 
-   list_args_or_locals (1, parse_print_values (argv[0]), frame);
+   list_args_or_locals (locals, parse_print_values (argv[0]), frame);
 }
 
 /* Print a list of the arguments for the current frame. With argument
@@ -204,19 +208,37 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
       QUIT;
       cleanup_frame = make_cleanup_ui_out_tuple_begin_end (uiout, "frame");
       ui_out_field_int (uiout, "level", i);
-      list_args_or_locals (0, print_values, fi);
+      list_args_or_locals (arguments, print_values, fi);
       do_cleanups (cleanup_frame);
     }
 
   do_cleanups (cleanup_stack_args);
 }
 
+/* Print a list of the local variables (including arguments) for the 
+   current frame. With argument of 0, print only the names, with 
+   argument of 1 print also the values. */
+void
+mi_cmd_stack_list_variables (char *command, char **argv, int argc)
+{
+  struct frame_info *frame;
+  enum print_values print_values;
+
+  if (argc != 1)
+    error (_("Usage: PRINT_VALUES"));
+
+   frame = get_selected_frame (NULL);
+
+   list_args_or_locals (all, parse_print_values (argv[0]), frame);
+}
+
+
 /* Print a list of the locals or the arguments for the currently
    selected frame.  If the argument passed is 0, printonly the names
    of the variables, if an argument of 1 is passed, print the values
    as well. */
 static void
-list_args_or_locals (int locals, int values, struct frame_info *fi)
+list_args_or_locals (enum what_to_list what, int values, struct frame_info *fi)
 {
   struct block *block;
   struct symbol *sym;
@@ -225,12 +247,23 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
   struct cleanup *cleanup_list;
   static struct ui_stream *stb = NULL;
   struct type *type;
+  char *name_of_result;
 
   stb = ui_out_stream_new (uiout);
 
   block = get_frame_block (fi, 0);
 
-  cleanup_list = make_cleanup_ui_out_list_begin_end (uiout, locals ? "locals" : "args");
+  switch (what)
+    {
+    case locals:
+      name_of_result = "locals"; break;
+    case arguments:
+      name_of_result = "args"; break;
+    case all:
+      name_of_result = "variables"; break;
+    }
+
+  cleanup_list = make_cleanup_ui_out_list_begin_end (uiout, name_of_result);
 
   while (block != 0)
     {
@@ -259,8 +292,12 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 	    case LOC_STATIC:	/* static                */
 	    case LOC_REGISTER:	/* register              */
 	    case LOC_COMPUTED:	/* computed location     */
-	      if (SYMBOL_IS_ARGUMENT (sym) ? !locals : locals)
+	      if (what == all)
 		print_me = 1;
+	      else if (what == locals)
+		print_me = !SYMBOL_IS_ARGUMENT (sym);
+	      else
+		print_me = SYMBOL_IS_ARGUMENT (sym);
 	      break;
 	    }
 	  if (print_me)
@@ -273,7 +310,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 		  make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 	      ui_out_field_string (uiout, "name", SYMBOL_PRINT_NAME (sym));
 
-	      if (!locals)
+	      if (SYMBOL_IS_ARGUMENT (sym))
 		sym2 = lookup_symbol (SYMBOL_NATURAL_NAME (sym),
 				      block, VAR_DOMAIN,
 				      (int *) NULL);
