@@ -1,4 +1,4 @@
-2009-09-9  Eli Zaretskii  <eliz@gnu.org>
+2009-09-19  Eli Zaretskii  <eliz@gnu.org>
 
 	* config/djgpp/fnchange.lst: Add missing edits.
 
