@@ -1,3 +1,8 @@
+2009-09-20  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* ld-mips-elf/elf-rel-got-n64-linux.d: Expect BALs.
+	* ld-mips-elf/elf-rel-xgot-n64-linux.d: Likewise.
+
 2009-09-19  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* ld-mips-elf/eh-frame5.s, ld-mips-elf/eh-frame5.ld,
