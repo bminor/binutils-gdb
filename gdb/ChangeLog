@@ -1,3 +1,9 @@
+2009-09-18  Keith Seitz  <keiths@redhat.com>
+
+	* cp-support.h (cp_validate_operator): Declare new function.
+	* cp-support.c (cp_validate_operator): New function.
+	* linespec.c (decode_compound): For C++ check for a valid operator.
+
 2009-09-21  Keith Seitz  <keiths@redhat.com>
 
 	* c-exp.y (qualified_name): Call CHECK_TYPEDEF before deciding

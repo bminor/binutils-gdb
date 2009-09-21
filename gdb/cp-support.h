@@ -72,6 +72,8 @@ extern struct symbol **make_symbol_overload_list (const char *,
 extern struct type *cp_lookup_rtti_type (const char *name,
 					 struct block *block);
 
+extern int cp_validate_operator (const char *input);
+
 /* Functions/variables from cp-namespace.c.  */
 
 extern int cp_is_anonymous (const char *namespace);
