@@ -1,3 +1,8 @@
+2009-09-21  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* elf-eh-frame.c (make_pc_relative): New function.
+	(_bfd_elf_write_section_eh_frame): Use it.
+
 2009-09-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (TLS_GET_ADDR_GLINK_SIZE): Define.

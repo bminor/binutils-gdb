@@ -423,6 +423,28 @@ skip_non_nops (bfd_byte *buf, bfd_byte *end, unsigned int encoded_ptr_width,
   return last;
 }
 
+/* Convert absolute encoding ENCODING into PC-relative form.
+   SIZE is the size of a pointer.  */
+
+static unsigned char
+make_pc_relative (unsigned char encoding, unsigned int ptr_size)
+{
+  if ((encoding & 0x7f) == DW_EH_PE_absptr)
+    switch (ptr_size)
+      {
+      case 2:
+	encoding |= DW_EH_PE_sdata2;
+	break;
+      case 4:
+	encoding |= DW_EH_PE_sdata4;
+	break;
+      case 8:
+	encoding |= DW_EH_PE_sdata8;
+	break;
+      }
+  return encoding | DW_EH_PE_pcrel;
+}
+
 /* Called before calling _bfd_elf_parse_eh_frame on every input bfd's
    .eh_frame section.  */
 
@@ -1454,7 +1476,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 		{
 		  BFD_ASSERT (action & 1);
 		  *aug++ = 'R';
-		  *buf++ = DW_EH_PE_pcrel;
+		  *buf++ = make_pc_relative (DW_EH_PE_absptr, ptr_size);
 		  action &= ~1;
 		}
 
@@ -1465,7 +1487,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 		    if (action & 2)
 		      {
 			BFD_ASSERT (*buf == ent->lsda_encoding);
-			*buf |= DW_EH_PE_pcrel;
+			*buf = make_pc_relative (*buf, ptr_size);
 			action &= ~2;
 		      }
 		    buf++;
@@ -1506,7 +1528,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 		    if (action & 1)
 		      {
 			BFD_ASSERT (*buf == ent->fde_encoding);
-			*buf |= DW_EH_PE_pcrel;
+			*buf = make_pc_relative (*buf, ptr_size);
 			action &= ~1;
 		      }
 		    buf++;
