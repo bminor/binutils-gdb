@@ -1,3 +1,8 @@
+2009-09-21  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* python/py-value.c (valpy_getitem): Test value before allowing
+	subscript operation.
+
 2009-09-21  Hui Zhu  <teawater@gmail.com>
 	    Michael Snyder  <msnyder@vmware.com>
 

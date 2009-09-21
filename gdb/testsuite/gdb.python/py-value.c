@@ -37,6 +37,13 @@ typedef struct s *PTR;
 
 enum e evalue = TWO;
 
+#ifdef __cplusplus
+void ptr_ref(int*& rptr_int)
+{
+  return; /* break to inspect pointer by reference. */
+}
+#endif
+
 int
 main (int argc, char *argv[])
 {
@@ -46,10 +53,18 @@ main (int argc, char *argv[])
   PTR x = &s;
   char st[17] = "divide et impera";
   char nullst[17] = "divide\0et\0impera";
+  int a[3] = {1,2,3};
+  int *p = a;
+  int i = 2;
+  int *ptr_i = &i;
 
   s.a = 3;
   s.b = 5;
   u.a = 7;
+
+#ifdef __cplusplus
+  ptr_ref(ptr_i);
+#endif
 
   return 0;      /* break to inspect struct and union */
 }
