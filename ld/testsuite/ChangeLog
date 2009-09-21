@@ -1,5 +1,11 @@
 2009-09-21  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	PR ld/10681
+	* ld-elf/eh6.d: Expect absolute pointers in shared libraries to
+	be converted into PC-relative form.
+
+2009-09-21  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* ld-mips-elf/eh-frame5.d: Expect PC-relative encodings
 	to include DW_EH_PE_sdata4.
 
