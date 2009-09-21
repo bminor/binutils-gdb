@@ -1,3 +1,7 @@
+2009-09-21  Ben Elliston  <bje@au.ibm.com>
+
+	* gas/ppc/e500mc.d: Remove blank line at the end of file.
+
 2009-09-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/disp.s: Add an offset test.
