@@ -1195,6 +1195,7 @@ PowerPC options:\n\
 -mppc64, -m620		generate code for PowerPC 620/625/630\n\
 -mppc64bridge		generate code for PowerPC 64, including bridge insns\n\
 -mbooke			generate code for 32-bit PowerPC BookE\n\
+-mppca2			generate code for A2 architecture\n\
 -mpower4		generate code for Power4 architecture\n\
 -mpower5		generate code for Power5 architecture\n\
 -mpower6		generate code for Power6 architecture\n\

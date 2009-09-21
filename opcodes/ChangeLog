@@ -1,3 +1,16 @@
+2009-09-21  Ben Elliston  <bje@au.ibm.com>
+	    Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-dis.c (ppc_opts): Add "ppca2" entry.
+	* ppc-opc.c (powerpc_opcodes): Add eratilx, eratsx, eratsx.,
+	eratre, wchkall, eratwe, ldawx., mdfcrx., mfdcr. mtdcrx., icswx,
+	icswx., mtdcr., dci, wclrone, wclrall, wclr, erativax, tlbsrx.,
+	ici mnemonics.
+	(ERAT_T): New operand.
+	(XWC_MASK): New mask.
+	(XOPL2): New macro.
+	(PPCA2): Define.
+
 2009-09-18  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.

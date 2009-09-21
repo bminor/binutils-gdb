@@ -1,4 +1,11 @@
 2009-09-21  Ben Elliston  <bje@au.ibm.com>
+	    Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gas/ppc/a2.s: New.
+	* gas/ppc/a2.d: Likewise.
+	* gas/ppc/ppc.exp: Run the a2 dump test.
+
+2009-09-21  Ben Elliston  <bje@au.ibm.com>
 
 	* gas/ppc/e500mc.d: Remove blank line at the end of file.
 
