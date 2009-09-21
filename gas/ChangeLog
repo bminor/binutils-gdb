@@ -1,3 +1,9 @@
+2009-09-21  Ben Elliston  <bje@au.ibm.com>
+	    Peter Bergner  <bergner@vnet.ibm.com>
+
+	* config/tc-ppc.c (md_show_usage): Document -mpcca2.
+	* doc/c-ppc.texi (PowerPC-Opts): Document -mppca2.
+
 2009-09-18  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.
