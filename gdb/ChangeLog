@@ -1,6 +1,20 @@
 2009-09-21  Hui Zhu  <teawater@gmail.com>
 	    Michael Snyder  <msnyder@vmware.com>
 
+	* record.c (record_end_entry): New struct.
+	(record_type): Add end.
+	(record_arch_list_add_end): Set rec->u.end.sigval to
+	TARGET_SIGNAL_0.
+	(record_message_args): New struct.
+	(record_message): Call gdbarch_process_record_signal.
+	(do_record_message): Add argument "signal".
+	(record_resume): Ditto.
+	(record_wait): Ditto.  Check record_list->u.end.sigval
+	in replay mode.
+
+2009-09-21  Hui Zhu  <teawater@gmail.com>
+	    Michael Snyder  <msnyder@vmware.com>
+
 	* gdbarch.sh (process_record_signal): New interface.
 
 2009-09-19  Matt Rice <ratmice@gmail.com>  (tiny change)

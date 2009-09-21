@@ -59,6 +59,11 @@ struct record_mem_entry
   gdb_byte *val;
 };
 
+struct record_end_entry
+{
+  enum target_signal sigval;
+};
+
 enum record_type
 {
   record_end = 0,
@@ -77,6 +82,8 @@ struct record_entry
     struct record_reg_entry reg;
     /* mem */
     struct record_mem_entry mem;
+    /* end */
+    struct record_end_entry end;
   } u;
 };
 
@@ -314,6 +321,7 @@ record_arch_list_add_end (void)
   rec->prev = NULL;
   rec->next = NULL;
   rec->type = record_end;
+  rec->u.end.sigval = TARGET_SIGNAL_0;
 
   record_arch_list_add (rec);
 
@@ -360,11 +368,17 @@ record_message_cleanups (void *ignore)
   record_list_release (record_arch_list_tail);
 }
 
+struct record_message_args {
+  struct regcache *regcache;
+  enum target_signal signal;
+};
+
 static int
 record_message (void *args)
 {
   int ret;
-  struct regcache *regcache = args;
+  struct record_message_args *myargs = args;
+  struct gdbarch *gdbarch = get_regcache_arch (myargs->regcache);
   struct cleanup *old_cleanups = make_cleanup (record_message_cleanups, 0);
 
   record_arch_list_head = NULL;
@@ -373,9 +387,44 @@ record_message (void *args)
   /* Check record_insn_num.  */
   record_check_insn_num (1);
 
-  ret = gdbarch_process_record (get_regcache_arch (regcache),
-				regcache,
-				regcache_read_pc (regcache));
+  /* If gdb sends a signal value to target_resume,
+     save it in the 'end' field of the previous instruction.
+
+     Maybe process record should record what really happened,
+     rather than what gdb pretends has happened.
+
+     So if Linux delivered the signal to the child process during
+     the record mode, we will record it and deliver it again in
+     the replay mode.
+
+     If user says "ignore this signal" during the record mode, then
+     it will be ignored again during the replay mode (no matter if
+     the user says something different, like "deliver this signal"
+     during the replay mode).
+
+     User should understand that nothing he does during the replay
+     mode will change the behavior of the child.  If he tries,
+     then that is a user error.
+
+     But we should still deliver the signal to gdb during the replay,
+     if we delivered it during the recording.  Therefore we should
+     record the signal during record_wait, not record_resume.  */
+  if (record_list != &record_first)    /* FIXME better way to check */
+    {
+      gdb_assert (record_list->type == record_end);
+      record_list->u.end.sigval = myargs->signal;
+    }
+
+  if (myargs->signal == TARGET_SIGNAL_0
+      || !gdbarch_process_record_signal_p (gdbarch))
+    ret = gdbarch_process_record (gdbarch,
+				  myargs->regcache,
+				  regcache_read_pc (myargs->regcache));
+  else
+    ret = gdbarch_process_record_signal (gdbarch,
+					 myargs->regcache,
+					 myargs->signal);
+
   if (ret > 0)
     error (_("Process record: inferior program stopped."));
   if (ret < 0)
@@ -396,9 +445,14 @@ record_message (void *args)
 }
 
 static int
-do_record_message (struct regcache *regcache)
+do_record_message (struct regcache *regcache,
+		   enum target_signal signal)
 {
-  return catch_errors (record_message, regcache, NULL, RETURN_MASK_ALL);
+  struct record_message_args args;
+
+  args.regcache = regcache;
+  args.signal = signal;
+  return catch_errors (record_message, &args, NULL, RETURN_MASK_ALL);
 }
 
 /* Set to 1 if record_store_registers and record_xfer_partial
@@ -520,13 +574,13 @@ static int record_resume_error;
 
 static void
 record_resume (struct target_ops *ops, ptid_t ptid, int step,
-               enum target_signal siggnal)
+               enum target_signal signal)
 {
   record_resume_step = step;
 
   if (!RECORD_IS_REPLAY)
     {
-      if (do_record_message (get_current_regcache ()))
+      if (do_record_message (get_current_regcache (), signal))
         {
           record_resume_error = 0;
         }
@@ -536,7 +590,7 @@ record_resume (struct target_ops *ops, ptid_t ptid, int step,
           return;
         }
       record_beneath_to_resume (record_beneath_to_resume_ops, ptid, 1,
-                                siggnal);
+                                signal);
     }
 }
 
@@ -611,15 +665,16 @@ record_wait (struct target_ops *ops,
 	      ret = record_beneath_to_wait (record_beneath_to_wait_ops,
 					    ptid, status, options);
 
+	      /* Is this a SIGTRAP?  */
 	      if (status->kind == TARGET_WAITKIND_STOPPED
 		  && status->value.sig == TARGET_SIGNAL_TRAP)
 		{
-		  /* Check if there is a breakpoint.  */
+		  /* Yes -- check if there is a breakpoint.  */
 		  registers_changed ();
 		  tmp_pc = regcache_read_pc (get_current_regcache ());
 		  if (breakpoint_inserted_here_p (tmp_pc))
 		    {
-		      /* There is a breakpoint.  */
+		      /* There is a breakpoint.  GDB will want to stop.  */
 		      CORE_ADDR decr_pc_after_break =
 			gdbarch_decr_pc_after_break
 			(get_regcache_arch (get_current_regcache ()));
@@ -631,8 +686,12 @@ record_wait (struct target_ops *ops,
 		    }
 		  else
 		    {
-		      /* There is not a breakpoint.  */
-		      if (!do_record_message (get_current_regcache ()))
+		      /* There is not a breakpoint, and gdb is not
+		         stepping, therefore gdb will not stop.
+			 Therefore we will not return to gdb.
+		         Record the insn and resume.  */
+		      if (!do_record_message (get_current_regcache (),
+					      TARGET_SIGNAL_0))
 			{
                           break;
 			}
@@ -827,6 +886,10 @@ record_wait (struct target_ops *ops,
 					   gdbarch_decr_pc_after_break (gdbarch));
 		      continue_flag = 0;
 		    }
+		  /* Check target signal */
+		  if (record_list->u.end.sigval != TARGET_SIGNAL_0)
+		    /* FIXME: better way to check */
+		    continue_flag = 0;
 		}
 	    }
 
@@ -851,6 +914,9 @@ record_wait (struct target_ops *ops,
 replay_out:
       if (record_get_sig)
 	status->value.sig = TARGET_SIGNAL_INT;
+      else if (record_list->u.end.sigval != TARGET_SIGNAL_0)
+	/* FIXME: better way to check */
+	status->value.sig = record_list->u.end.sigval;
       else
 	status->value.sig = TARGET_SIGNAL_TRAP;
 
