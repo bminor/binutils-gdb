@@ -222,14 +222,14 @@ proc gas_test_error { file as_opts testname } {
     global comp_output
 
     gas_run $file $as_opts ">/dev/null"
-    if ![string match "" $comp_output] then {
-	send_log "$comp_output\n"
-	verbose "$comp_output" 3
-    }
-    if [string match "" $comp_output] then {
-	fail "$testname"
-    } else {
+    send_log "$comp_output\n"
+    verbose "$comp_output" 3
+    if { ![string match "" $comp_output]
+	 && ![string match "*Assertion failure*" $comp_output]
+	 && ![string match "*Internal error*" $comp_output] } then {
 	pass "$testname"
+    } else {
+	fail "$testname"
     }
 }
 

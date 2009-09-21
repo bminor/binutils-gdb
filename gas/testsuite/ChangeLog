@@ -1,3 +1,9 @@
+2009-09-21  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* lib/gas-defs.exp (gas_test_error): Mark internal error/assertion
+	failures seen in output as fails.  Also record output being
+	matched for fails.
+
 2009-09-21  Ben Elliston  <bje@au.ibm.com>
 	    Peter Bergner  <bergner@vnet.ibm.com>
 
