@@ -1,5 +1,11 @@
 2009-09-21  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* lib/gas-defs.exp (gas_test_error): Mark internal error/assertion
+	failures seen in output as fails.  Also record output being
+	matched for fails.
+
+2009-09-21  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* gas/mips/eret-1.d: Adjust regexps for robustness.
 	* gas/mips/eret-2.d: Likewise.
 	* gas/mips/eret-3.d: Likewise.
