@@ -1,3 +1,7 @@
+2009-09-22  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* windows-nat.c (ctrl_c_handler): Also handle CTRL_BREAK_EVENT.
+
 2009-09-18  Keith Seitz  <keiths@redhat.com>
 
 	* cp-support.h (cp_validate_operator): Declare new function.
