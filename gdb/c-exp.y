@@ -703,6 +703,7 @@ variable:	block COLONCOLON name
 qualified_name:	typebase COLONCOLON name
 			{
 			  struct type *type = $1;
+			  CHECK_TYPEDEF (type);
 			  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
 			      && TYPE_CODE (type) != TYPE_CODE_UNION
 			      && TYPE_CODE (type) != TYPE_CODE_NAMESPACE)
@@ -718,6 +719,7 @@ qualified_name:	typebase COLONCOLON name
 			{
 			  struct type *type = $1;
 			  struct stoken tmp_token;
+			  CHECK_TYPEDEF (type);
 			  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
 			      && TYPE_CODE (type) != TYPE_CODE_UNION
 			      && TYPE_CODE (type) != TYPE_CODE_NAMESPACE)

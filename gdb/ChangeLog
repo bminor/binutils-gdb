@@ -1,3 +1,8 @@
+2009-09-21  Keith Seitz  <keiths@redhat.com>
+
+	* c-exp.y (qualified_name): Call CHECK_TYPEDEF before deciding
+	that a type is not an aggregate type.
+
 2009-09-21  Jason Orendorff  <jason.orendorff@gmail.com>
 
 	PR python/10666:
