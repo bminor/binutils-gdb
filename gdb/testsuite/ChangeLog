@@ -1,5 +1,10 @@
 2009-09-21  Keith Seitz  <keiths@redhat.com>
 
+	* gdb.cp/cplusfuncs.exp (do_tests): Add check for proper error message
+	with invalid operator.
+
+2009-09-21  Keith Seitz  <keiths@redhat.com>
+
 	* gdb.cp/classes.exp (do_tests): Add tests to print a constructor
 	and destructor using typedef name of class.
 	* gdb.cp/classes.cc (class Base1): Add a destructor.

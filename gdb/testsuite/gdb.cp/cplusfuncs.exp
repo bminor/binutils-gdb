@@ -534,6 +534,7 @@ proc do_tests {} {
     global srcdir
     global binfile
     global gdb_prompt
+    global dm_type_int_star
 
     set prms_id 0
     set bug_id 0
@@ -557,6 +558,10 @@ proc do_tests {} {
     test_paddr_operator_functions
     test_paddr_hairy_functions
     test_lookup_operator_functions
+
+    # A regression test on errors involving operators
+    gdb_test "list foo::operator $dm_type_int_star" \
+	".*the class foo does not have any method named operator $dm_type_int_star.*"
 }
 
 do_tests
