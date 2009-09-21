@@ -1494,7 +1494,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 		    break;
 		  case 'P':
 		    if (ent->u.cie.make_per_encoding_relative)
-		      *buf |= DW_EH_PE_pcrel;
+		      *buf = make_pc_relative (*buf, ptr_size);
 		    per_encoding = *buf++;
 		    per_width = get_DW_EH_PE_width (per_encoding, ptr_size);
 		    BFD_ASSERT (per_width != 0);

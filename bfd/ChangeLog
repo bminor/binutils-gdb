@@ -1,5 +1,10 @@
 2009-09-21  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elf-eh-frame.c (_bfd_elf_write_section_eh_frame): Extend previous
+	patch to handle the new personality relaxation.
+
+2009-09-21  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elf-eh-frame.c (make_pc_relative): New function.
 	(_bfd_elf_write_section_eh_frame): Use it.
 

@@ -46,12 +46,12 @@ Contents of the \.eh_frame section:
   Data alignment factor: -4
   Return address column: 31
 #
-# 0xc12: DW_EH_PE_pcrel for personality encoding
+# 0xc12: DW_EH_PE_pcrel | DW_EH_PE_sdata4 for personality encoding
 # 0xc13: 0x820 - 0xc13 (local_pers - .)
-# 0xc17: DW_EH_PE_pcrel for LDSA encoding
+# 0xc17: DW_EH_PE_pcrel | DW_EH_PE_sdata4 for LDSA encoding
 # 0xc18: DW_EH_PE_pcrel | DW_EH_PE_sdata4 for FDE encoding
 #
-  Augmentation data:     10 ff ff fc 0d 10 1b
+  Augmentation data:     1b ff ff fc 0d 1b 1b
 
   DW_CFA_def_cfa_register: r29
   DW_CFA_nop
@@ -76,12 +76,12 @@ Contents of the \.eh_frame section:
   Data alignment factor: -4
   Return address column: 31
 #
-# 0xc46: DW_EH_PE_pcrel for personality encoding
+# 0xc46: DW_EH_PE_pcrel | DW_EH_PE_sdata4 for personality encoding
 # 0xc47: 0x824 - 0xc47 (hidden_pers - .)
-# 0xc4d: DW_EH_PE_pcrel for LDSA encoding
+# 0xc4d: DW_EH_PE_pcrel | DW_EH_PE_sdata4 for LDSA encoding
 # 0xc4e: DW_EH_PE_pcrel | DW_EH_PE_sdata4 for FDE encoding
 #
-  Augmentation data:     10 ff ff fb dd 10 1b
+  Augmentation data:     1b ff ff fb dd 1b 1b
 
   DW_CFA_def_cfa_register: r29
   DW_CFA_nop
@@ -108,10 +108,10 @@ Contents of the \.eh_frame section:
 #
 # 0xc7a: DW_EH_PE_absptr for personality encoding
 # 0xc7b: global_pers (reloc above)
-# 0xc7f: DW_EH_PE_pcrel for LDSA encoding
+# 0xc7f: DW_EH_PE_pcrel | DW_EH_PE_sdata4 for LDSA encoding
 # 0xc80: DW_EH_PE_pcrel | DW_EH_PE_sdata4 for FDE encoding
 #
-  Augmentation data:     00 00 00 00 00 10 1b
+  Augmentation data:     00 00 00 00 00 1b 1b
 
   DW_CFA_def_cfa_register: r29
   DW_CFA_nop
@@ -138,10 +138,10 @@ Contents of the \.eh_frame section:
 #
 # 0xcae: DW_EH_PE_absptr for personality encoding
 # 0xcaf: extern_pers (reloc above)
-# 0xcb3: DW_EH_PE_pcrel for LDSA encoding
+# 0xcb3: DW_EH_PE_pcrel | DW_EH_PE_sdata4 for LDSA encoding
 # 0xcb4: DW_EH_PE_pcrel | DW_EH_PE_sdata4 for FDE encoding
 #
-  Augmentation data:     00 00 00 00 00 10 1b
+  Augmentation data:     00 00 00 00 00 1b 1b
 
   DW_CFA_def_cfa_register: r29
   DW_CFA_nop
@@ -166,12 +166,13 @@ Contents of the \.eh_frame section:
   Data alignment factor: -4
   Return address column: 31
 #
-# 0xce2: DW_EH_PE_indirect | DW_EH_PE_pcrel for personality encoding
+# 0xce2: DW_EH_PE_indirect | DW_EH_PE_pcrel | DW_EH_PE_sdata4
+#          for personality encoding
 # 0xce3: 0x10000 - 0xce3 (local_indirect_ptr - .)
-# 0xce7: DW_EH_PE_pcrel for LDSA encoding
+# 0xce7: DW_EH_PE_pcrel | DW_EH_PE_sdata4 for LDSA encoding
 # 0xce8: DW_EH_PE_pcrel | DW_EH_PE_sdata4 for FDE encoding
 #
-  Augmentation data:     90 00 00 f3 1d 10 1b
+  Augmentation data:     9b 00 00 f3 1d 1b 1b
 
   DW_CFA_def_cfa_register: r29
   DW_CFA_nop
@@ -196,12 +197,12 @@ Contents of the \.eh_frame section:
   Data alignment factor: -4
   Return address column: 31
 #
-# 0xd16: DW_EH_PE_pcrel for personality encoding
+# 0xd16: DW_EH_PE_pcrel | DW_EH_PE_sdata4 for personality encoding
 # 0xd17: 0x10004 - 0xd17 (hidden_indirect_ptr - .)
-# 0xd1d: DW_EH_PE_pcrel for LDSA encoding
+# 0xd1d: DW_EH_PE_pcrel | DW_EH_PE_sdata4 for LDSA encoding
 # 0xd1e: DW_EH_PE_pcrel | DW_EH_PE_sdata4 for FDE encoding
 #
-  Augmentation data:     90 00 00 f2 ed 10 1b
+  Augmentation data:     9b 00 00 f2 ed 1b 1b
 
   DW_CFA_def_cfa_register: r29
   DW_CFA_nop
@@ -228,10 +229,10 @@ Contents of the \.eh_frame section:
 #
 # 0xd4a: DW_EH_PE_indirect | DW_EH_PE_absptr for personality encoding
 # 0xd4b: global_indirect_ptr (reloc above)
-# 0xd4f: DW_EH_PE_pcrel for LDSA encoding
+# 0xd4f: DW_EH_PE_pcrel | DW_EH_PE_sdata4 for LDSA encoding
 # 0xd50: DW_EH_PE_pcrel | DW_EH_PE_sdata4 for FDE encoding
 #
-  Augmentation data:     80 00 00 00 00 10 1b
+  Augmentation data:     80 00 00 00 00 1b 1b
 
   DW_CFA_def_cfa_register: r29
   DW_CFA_nop
@@ -258,10 +259,10 @@ Contents of the \.eh_frame section:
 #
 # 0xd7e: DW_EH_PE_indirect | DW_EH_PE_absptr for personality encoding
 # 0xd7f: extern_indirect_ptr (reloc above)
-# 0xd83: DW_EH_PE_pcrel for LDSA encoding
+# 0xd83: DW_EH_PE_pcrel | DW_EH_PE_sdata4 for LDSA encoding
 # 0xd84: DW_EH_PE_pcrel | DW_EH_PE_sdata4 for FDE encoding
 #
-  Augmentation data:     80 00 00 00 00 10 1b
+  Augmentation data:     80 00 00 00 00 1b 1b
 
   DW_CFA_def_cfa_register: r29
   DW_CFA_nop
