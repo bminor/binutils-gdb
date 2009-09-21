@@ -1,5 +1,12 @@
 2009-09-21  Phil Muldoon  <pmuldoon@redhat.com>
 
+	PR python/10633
+
+	* c-lang.c (c_printstr): Do not loop past  options->print_max when
+	iterating with wchar_iterate.
+
+2009-09-21  Phil Muldoon  <pmuldoon@redhat.com>
+
 	* python/py-value.c (valpy_getitem): Test value before allowing
 	subscript operation.
 

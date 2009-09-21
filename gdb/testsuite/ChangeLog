@@ -1,5 +1,13 @@
 2009-09-21  Phil Muldoon  <pmuldoon@redhat.com>
 
+	PR python/10633
+
+	* gdb.python/py-prettyprint.exp (gdb_py_test_silent_cmd): New
+	Function.
+	(run_lang_tests): Add print elements test.
+
+2009-09-21  Phil Muldoon  <pmuldoon@redhat.com>
+
 	* gdb.python/py-value.exp (test_subscript_regression): New
 	function.  Test for invalid subscripts.
 	* gdb.python/py-value.c (main): Add test array, and pointer to it.
