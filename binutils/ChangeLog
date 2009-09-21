@@ -1,3 +1,8 @@
+2009-09-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* readelf.c (get_ppc_dynamic_type): Add TLSOPT.
+	(get_ppc64_dynamic_type): Likewise.
+
 2009-09-18  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.

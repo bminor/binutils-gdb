@@ -1,3 +1,19 @@
+2009-09-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/ppc32elf.em (no_tls_get_addr_opt): New var.
+	(ppc_before_allocation): Pass to ppc_elf_tls_setup.
+	(OPTION_NO_TLS_GET_ADDR_OPT): Define.  Redefine other options in
+	terms of previous option.
+	(PARSE_AND_LIST_LONGOPTS, PARSE_AND_LIST_OPTIONS): Add
+	--no-tls-get-addr-optimize.
+	(PARSE_AND_LIST_ARGS_CASES): Handle it.
+	* emultempl/ppc64elf.em (no_tls_get_addr_opt): New var.
+	(ppc_before_allocation): Pass to ppc64_elf_tls_setup.
+	(OPTION_NO_TLS_GET_ADDR_OPT): Define.
+	(PARSE_AND_LIST_LONGOPTS, PARSE_AND_LIST_OPTIONS): Add
+	--no-tls-get-addr-optimize.
+	(PARSE_AND_LIST_ARGS_CASES): Handle it.
+
 2009-09-18  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.

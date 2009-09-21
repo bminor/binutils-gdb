@@ -33,6 +33,7 @@ fragment <<EOF
 
 /* Whether to run tls optimization.  */
 static int notlsopt = 0;
+static int no_tls_get_addr_opt = 0;
 
 /* Whether to emit symbols for stubs.  */
 static int emit_stub_syms = 0;
@@ -103,7 +104,9 @@ ppc_before_allocation (void)
 {
   if (is_ppc_elf (link_info.output_bfd))
     {
-      if (ppc_elf_tls_setup (link_info.output_bfd, &link_info) && !notlsopt)
+      if (ppc_elf_tls_setup (link_info.output_bfd, &link_info,
+			     no_tls_get_addr_opt)
+	  && !notlsopt)
 	{
 	  if (!ppc_elf_tls_optimize (link_info.output_bfd, &link_info))
 	    {
@@ -174,15 +177,17 @@ fi
 #
 PARSE_AND_LIST_PROLOGUE='
 #define OPTION_NO_TLS_OPT		301
-#define OPTION_NEW_PLT			302
-#define OPTION_OLD_PLT			303
-#define OPTION_OLD_GOT			304
-#define OPTION_STUBSYMS			305
+#define OPTION_NO_TLS_GET_ADDR_OPT	(OPTION_NO_TLS_OPT + 1)
+#define OPTION_NEW_PLT			(OPTION_NO_TLS_GET_ADDR_OPT + 1)
+#define OPTION_OLD_PLT			(OPTION_NEW_PLT + 1)
+#define OPTION_OLD_GOT			(OPTION_OLD_PLT + 1)
+#define OPTION_STUBSYMS			(OPTION_OLD_GOT + 1)
 '
 
 PARSE_AND_LIST_LONGOPTS='
   { "emit-stub-syms", no_argument, NULL, OPTION_STUBSYMS },
   { "no-tls-optimize", no_argument, NULL, OPTION_NO_TLS_OPT },
+  { "no-tls-get-addr-optimize", no_argument, NULL, OPTION_NO_TLS_GET_ADDR_OPT },
   { "secure-plt", no_argument, NULL, OPTION_NEW_PLT },
   { "bss-plt", no_argument, NULL, OPTION_OLD_PLT },
   { "sdata-got", no_argument, NULL, OPTION_OLD_GOT },
@@ -192,6 +197,7 @@ PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("\
   --emit-stub-syms            Label linker stubs with a symbol.\n\
   --no-tls-optimize           Don'\''t try to optimize TLS accesses.\n\
+  --no-tls-get-addr-optimize  Don'\''t use a special __tls_get_addr call.\n\
   --secure-plt                Use new-style PLT if possible.\n\
   --bss-plt                   Force old-style BSS PLT.\n\
   --sdata-got                 Force GOT location just before .sdata.\n"
@@ -205,6 +211,10 @@ PARSE_AND_LIST_ARGS_CASES='
 
     case OPTION_NO_TLS_OPT:
       notlsopt = 1;
+      break;
+
+    case OPTION_NO_TLS_GET_ADDR_OPT:
+      no_tls_get_addr_opt = 1;
       break;
 
     case OPTION_NEW_PLT:
