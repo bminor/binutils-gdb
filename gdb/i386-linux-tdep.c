@@ -358,7 +358,32 @@ i386_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
   regcache_cooked_write_unsigned (regcache, I386_LINUX_ORIG_EAX_REGNUM, -1);
 }
 
-static struct linux_record_tdep i386_linux_record_tdep;
+/* Record all registers but IP register for process-record.  */
+
+static int
+i386_all_but_ip_registers_record (struct regcache *regcache)
+{
+  if (record_arch_list_add_reg (regcache, I386_EAX_REGNUM))
+    return -1;
+  if (record_arch_list_add_reg (regcache, I386_ECX_REGNUM))
+    return -1;
+  if (record_arch_list_add_reg (regcache, I386_EDX_REGNUM))
+    return -1;
+  if (record_arch_list_add_reg (regcache, I386_EBX_REGNUM))
+    return -1;
+  if (record_arch_list_add_reg (regcache, I386_ESP_REGNUM))
+    return -1;
+  if (record_arch_list_add_reg (regcache, I386_EBP_REGNUM))
+    return -1;
+  if (record_arch_list_add_reg (regcache, I386_ESI_REGNUM))
+    return -1;
+  if (record_arch_list_add_reg (regcache, I386_EDI_REGNUM))
+    return -1;
+  if (record_arch_list_add_reg (regcache, I386_EFLAGS_REGNUM))
+    return -1;
+
+  return 0;
+}
 
 /* i386_canonicalize_syscall maps from the native i386 Linux set
    of syscall ids into a canonical set of syscall ids used by
@@ -383,6 +408,8 @@ i386_canonicalize_syscall (int syscall)
 
    Return -1 if something wrong.  */
 
+static struct linux_record_tdep i386_linux_record_tdep;
+
 static int
 i386_linux_intx80_sysenter_record (struct regcache *regcache)
 {
@@ -402,6 +429,14 @@ i386_linux_intx80_sysenter_record (struct regcache *regcache)
       return -1;
     }
 
+  if (syscall_gdb == gdb_sys_sigreturn
+      || syscall_gdb == gdb_sys_rt_sigreturn)
+   {
+     if (i386_all_but_ip_registers_record (regcache))
+       return -1;
+     return 0;
+   }
+
   ret = record_linux_system_call (syscall_gdb, regcache,
 				  &i386_linux_record_tdep);
   if (ret)
@@ -409,6 +444,40 @@ i386_linux_intx80_sysenter_record (struct regcache *regcache)
 
   /* Record the return value of the system call.  */
   if (record_arch_list_add_reg (regcache, I386_EAX_REGNUM))
+    return -1;
+
+  return 0;
+}
+
+#define I386_LINUX_xstate	270
+#define I386_LINUX_frame_size	732
+
+int
+i386_linux_record_signal (struct gdbarch *gdbarch,
+                          struct regcache *regcache,
+                          enum target_signal signal)
+{
+  ULONGEST esp;
+
+  if (i386_all_but_ip_registers_record (regcache))
+    return -1;
+
+  if (record_arch_list_add_reg (regcache, I386_EIP_REGNUM))
+    return -1;
+
+  /* Record the change in the stack.  */
+  regcache_raw_read_unsigned (regcache, I386_ESP_REGNUM, &esp);
+  /* This is for xstate.
+     sp -= sizeof (struct _fpstate);  */
+  esp -= I386_LINUX_xstate;
+  /* This is for frame_size.
+     sp -= sizeof (struct rt_sigframe);  */
+  esp -= I386_LINUX_frame_size;
+  if (record_arch_list_add_mem (esp,
+                                I386_LINUX_xstate + I386_LINUX_frame_size))
+    return -1;
+
+  if (record_arch_list_add_end ())
     return -1;
 
   return 0;
@@ -529,6 +598,7 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sc_num_regs = ARRAY_SIZE (i386_linux_sc_reg_offset);
 
   set_gdbarch_process_record (gdbarch, i386_process_record);
+  set_gdbarch_process_record_signal (gdbarch, i386_linux_record_signal);
 
   /* Initialize the i386_linux_record_tdep.  */
   /* These values are the size of the type that will be used in a system

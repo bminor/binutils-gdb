@@ -1,6 +1,18 @@
 2009-09-21  Hui Zhu  <teawater@gmail.com>
 	    Michael Snyder  <msnyder@vmware.com>
 
+	* i386-linux-tdep.c (i386_all_but_ip_registers_record): New
+	function.
+	(i386_linux_intx80_sysenter_record): Call
+	i386_all_but_ip_registers_record if syscall is sys_sigreturn
+	or sys_rt_sigreturn.
+	(I386_LINUX_xstate, I386_LINUX_frame_size): New macros.
+	(i386_linux_record_signal): New function.
+	(i386_linux_init_abi): Call set_gdbarch_process_record_signal.
+
+2009-09-21  Hui Zhu  <teawater@gmail.com>
+	    Michael Snyder  <msnyder@vmware.com>
+
 	* record.c (record_end_entry): New struct.
 	(record_type): Add end.
 	(record_arch_list_add_end): Set rec->u.end.sigval to
