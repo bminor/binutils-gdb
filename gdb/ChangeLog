@@ -1,6 +1,19 @@
 2009-09-21  Hui Zhu  <teawater@gmail.com>
 	    Michael Snyder  <msnyder@vmware.com>
 
+	* amd64-linux-tdep.c (amd64_all_but_ip_registers_record): New
+	function.
+	(amd64_linux_syscall_record): Call
+	amd64_all_but_ip_registers_record if syscall is
+	sys_rt_sigreturn.
+	(AMD64_LINUX_redzone, AMD64_LINUX_xstate,
+	AMD64_LINUX_frame_size): New macros.
+	(amd64_linux_record_signal): New function.
+	(amd64_linux_init_abi): Call set_gdbarch_process_record_signal.
+
+2009-09-21  Hui Zhu  <teawater@gmail.com>
+	    Michael Snyder  <msnyder@vmware.com>
+
 	* i386-linux-tdep.c (i386_all_but_ip_registers_record): New
 	function.
 	(i386_linux_intx80_sysenter_record): Call
