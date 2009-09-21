@@ -23361,7 +23361,7 @@ structures and unions.
 @smallexample
 (gdb)
 -stack-list-variables --thread 1 --frame 0 --all-values
-^done,variables=[{name="x",value="11"},{name="s",value="{a = 1, b = 2}"}]
+^done,variables=[@{name="x",value="11"@},@{name="s",value="@{a = 1, b = 2@}"@}]
 (gdb)
 @end smallexample
 

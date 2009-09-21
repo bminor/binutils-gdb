@@ -1,3 +1,7 @@
+2009-09-21  Jie Zhang  <jie.zhang@analog.com>
+
+	* doc/gdb.texinfo: Escape "{" and "}".
+
 2009-09-21  Phil Muldoon <pmuldoon@redhat.com>
 
 	PR python/10633
