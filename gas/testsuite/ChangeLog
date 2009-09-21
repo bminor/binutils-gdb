@@ -1,3 +1,7 @@
+2009-09-21  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* gas/mips/mips.exp: Fix a typo.
+
 2009-09-21  Ben Elliston  <bje@au.ibm.com>
 	    Peter Bergner  <bergner@vnet.ibm.com>
 

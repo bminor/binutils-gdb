@@ -85,7 +85,7 @@
 proc mips_arch_init {} {
     global mips_arches
 
-    # Catch becuase the variable won't be set the first time through.
+    # Catch because the variable won't be set the first time through.
     catch {unset mips_arches}
 }
 
