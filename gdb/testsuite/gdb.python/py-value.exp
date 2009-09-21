@@ -292,6 +292,75 @@ proc test_value_after_death {} {
     "print value's type"
 }
 
+# Regression test for invalid subscript operations.  The bug was that
+# the type of the value was not being checked before allowing a
+# subscript operation to proceed.
+
+proc test_subscript_regression {lang} {
+
+ global srcdir subdir srcfile binfile testfile hex
+ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable "debug $lang"] != "" } {
+     untested "Couldn't compile ${srcfile} in $lang mode"
+     return -1
+ }
+
+ # Start with a fresh gdb.
+ gdb_exit
+ gdb_start
+ gdb_reinitialize_dir $srcdir/$subdir
+ gdb_load ${binfile}
+
+ if ![runto_main ] then {
+     perror "couldn't run to breakpoint"
+     return
+ }
+
+ if {$lang == "c++"} {
+     gdb_breakpoint [gdb_get_line_number "break to inspect pointer by reference"]
+     gdb_continue_to_breakpoint "break to inspect pointer by reference"
+
+     gdb_py_test_silent_cmd "print rptr_int" \
+	 "Obtain address" 1
+     gdb_py_test_silent_cmd "python rptr = gdb.history(0)" \
+	 "Obtains value from GDB" 1
+     gdb_test "python print rptr\[0\]" "2" "Check pointer passed as reference"
+ }
+
+ gdb_breakpoint [gdb_get_line_number "break to inspect struct and union"]
+ gdb_continue_to_breakpoint "break to inspect struct and union"
+
+ gdb_py_test_silent_cmd "python intv = gdb.Value(1)" \
+     "Create a value for subscript test" 1
+ gdb_py_test_silent_cmd "python stringv = gdb.Value(\"foo\")" \
+     "Create a value for subscript test" 1
+
+ # Try to access an int with a subscript.  This should fail.
+ gdb_test "python print intv" "1" "Baseline print of a Python value"
+ gdb_test "python print intv\[0\]" "RuntimeError: Cannot subscript requested type.*" \
+     "Attempt to access an integer with a subscript"
+
+ # Try to access a string with a subscript.  This should pass.
+ gdb_test "python print stringv" "foo." "Baseline print of a Python value"
+ gdb_test "python print stringv\[0\]" "f." "Attempt to access a string with a subscript"
+
+ # Try to access an int array via a pointer with a subscript.  This should pass.
+ gdb_py_test_silent_cmd "print p" "Build pointer to array" 1
+ gdb_py_test_silent_cmd "python pointer = gdb.history(0)" "" 1
+ gdb_test "python print pointer\[0\]" "1" "Access array via pointer with int subscript"
+ gdb_test "python print pointer\[intv\]" "2" "Access array via pointer with value subscript"
+
+ # Try to access a single dimension array with a subscript to the
+ # result.  This should fail.
+ gdb_test "python print pointer\[intv\]\[0\]" "RuntimeError: Cannot subscript requested type.*" \
+     "Attempt to access an integer with a subscript"
+
+ # Lastly, test subscript access to an array with multiple
+ # dimensions.  This should pass.
+ gdb_py_test_silent_cmd "print {\"fu \",\"foo\",\"bar\"}" "Build array" 1
+ gdb_py_test_silent_cmd "python marray = gdb.history(0)" "" 1
+ gdb_test "python print marray\[1\]\[2\]" "o." "Test multiple subscript"
+}
+
 # Start with a fresh gdb.
 
 gdb_exit
@@ -322,3 +391,8 @@ if ![runto_main] then {
 
 test_value_in_inferior
 test_value_after_death
+
+# The following test recompiles the binary to test either C or C++
+# values. 
+test_subscript_regression "c++"
+test_subscript_regression "c"
