@@ -16,10 +16,10 @@ Section Headers:
  +\[[ 0-9]+\] \.dynstr +.*
  +\[[ 0-9]+\] \.rela\.dyn +.*
  +\[[ 0-9]+\] \.rela\.plt +.*
- +\[[ 0-9]+\] \.text +PROGBITS .* 0+f8 0+ +AX +0 +0 +8
+ +\[[ 0-9]+\] \.text +PROGBITS .* 0+130 0+ +AX +0 +0 +8
  +\[[ 0-9]+\] \.tdata +PROGBITS .* 0+38 0+ WAT +0 +0 +8
  +\[[ 0-9]+\] \.tbss +NOBITS .* 0+38 0+ WAT +0 +0 +8
- +\[[ 0-9]+\] \.dynamic +DYNAMIC .* 0+150 10 +WA +4 +0 +8
+ +\[[ 0-9]+\] \.dynamic +DYNAMIC .* 0+160 10 +WA +4 +0 +8
  +\[[ 0-9]+\] \.branch_lt + PROGBITS .* 0+ 0+ +WA +0 +0 +8
  +\[[ 0-9]+\] \.got +PROGBITS .* 0+30 08 +WA +0 +0 +8
  +\[[ 0-9]+\] \.plt +.*
@@ -59,16 +59,16 @@ Relocation section '\.rela\.dyn' at offset .* contains 3 entries:
 
 Relocation section '\.rela\.plt' at offset .* contains 1 entries:
  +Offset +Info +Type +Symbol's Value +Symbol's Name \+ Addend
-[0-9a-f ]+R_PPC64_JMP_SLOT +0+ __tls_get_addr \+ 0
+[0-9a-f ]+R_PPC64_JMP_SLOT +0+ __tls_get_addr_opt \+ 0
 
 Symbol table '\.dynsym' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
 .* NOTYPE +LOCAL +DEFAULT +UND 
 .* TLS +GLOBAL DEFAULT +UND gd
-.* FUNC +GLOBAL DEFAULT +UND __tls_get_addr
 .* TLS +GLOBAL DEFAULT +UND ld
 .* TLS +GLOBAL DEFAULT +9 ld2
 .* NOTYPE +GLOBAL DEFAULT +ABS __bss_start
+.* FUNC +GLOBAL DEFAULT +UND __tls_get_addr_opt
 .* NOTYPE +GLOBAL DEFAULT +ABS _edata
 .* NOTYPE +GLOBAL DEFAULT +ABS _end
 
@@ -96,10 +96,9 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* TLS +LOCAL +DEFAULT +8 le4
 .* TLS +LOCAL +DEFAULT +8 le5
 .* OBJECT +LOCAL +HIDDEN +10 _DYNAMIC
-.* FUNC +LOCAL +DEFAULT +UND \.__tls_get_addr
+.* (FUNC|NOTYPE) +LOCAL +DEFAULT +UND \.__tls_get_addr(|_opt)
 .* GLOBAL DEFAULT +UND gd
 .* GLOBAL DEFAULT +9 le0
-.* GLOBAL DEFAULT +UND __tls_get_addr
 .* GLOBAL DEFAULT +9 ld0
 .* GLOBAL DEFAULT +9 le1
 .* GLOBAL DEFAULT +UND ld
@@ -107,6 +106,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* TLS +GLOBAL DEFAULT +9 ld2
 .* TLS +GLOBAL DEFAULT +9 ld1
 .* NOTYPE +GLOBAL DEFAULT +ABS __bss_start
+.* FUNC +GLOBAL +DEFAULT +UND __tls_get_addr_opt
 .* NOTYPE +GLOBAL DEFAULT +ABS _edata
 .* NOTYPE +GLOBAL DEFAULT +ABS _end
 .* TLS +GLOBAL DEFAULT +9 gd0

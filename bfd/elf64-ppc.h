@@ -24,7 +24,7 @@ void ppc64_elf_init_stub_bfd
 bfd_boolean ppc64_elf_edit_opd
   (bfd *, struct bfd_link_info *, bfd_boolean);
 asection *ppc64_elf_tls_setup
-  (bfd *, struct bfd_link_info *);
+(bfd *, struct bfd_link_info *, int);
 bfd_boolean ppc64_elf_tls_optimize
   (bfd *, struct bfd_link_info *);
 bfd_boolean ppc64_elf_edit_toc

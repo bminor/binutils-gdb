@@ -1,3 +1,33 @@
+2009-09-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (TLS_GET_ADDR_GLINK_SIZE): Define.
+	(ADD_3_12_2, BEQLR, CMPWI_11_0, LWZ_11_3, LWZ_12_3): Define.
+	(MR_0_3, MR_3_0): Define.
+	(struct ppc_elf_link_hash_table): Add no_tls_get_addr_opt.
+	(ppc_elf_select_plt_layout): Save emit_stub_syms param earlier.
+	(ppc_elf_tls_setup): Add no_tls_get_addr_opt param and save to hash
+	table.  Check for presense of __tls_get_addr_opt
+	(allocate_dynrelocs): Increase glink entry size for __tls_get_addr.
+	(ppc_elf_size_dynamic_sections): Add DT_PPC_TLS_OPT tag.
+	(write_glink_stub): Add param p.
+	(ppc_elf_relocate_section): Adjust write_glink_stub call.
+	(ppc_elf_finish_dynamic_symbol): Emit special glink call stub for
+	__tls_get_addr.
+	* elf32-ppc.h (ppc_elf_tls_setup): Update prototype.
+	* elf64-ppc.c (struct ppc_link_hash_table): Add no_tls_get_addr_opt.
+	(ppc64_elf_tls_setup): Add no_tls_get_addr_opt param and save to hash
+	table.  Check for presense of __tls_get_addr_opt.
+	(ppc64_elf_size_dynamic_sections): Add DT_PPC64_TLS_OPT tag.
+	(LD_R11_0R3, LD_R12_0R3, MR_R0_R3, CMPDI_R11_0, ADD_R3_R12_R13,
+	BEQLR, MR_R3_R0, MFLR_R11, STD_R11_0R1, BCTRL, LD_R11_0R1,
+	LD_R2_0R1, MTLR_R11): Define.
+	(build_tls_get_addr_stub): New function.
+	(ppc_build_one_stub): Call it.
+	(ppc_size_one_stub): Add extra size for __tls_get_addr stub.
+	(ppc64_elf_relocate_section): Don't change nop to ld 2,40(1) for
+	__tls_get_addr plt call.
+	* elf64-ppc.h (ppc64_elf_tls_setup): Update prototype.
+
 2009-09-19  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* elf-bfd.h (eh_cie_fde): Add personality_offset and

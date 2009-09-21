@@ -47,6 +47,7 @@ static int dotsyms = 1;
 
 /* Whether to run tls optimization.  */
 static int no_tls_opt = 0;
+static int no_tls_get_addr_opt = 0;
 
 /* Whether to run opd optimization.  */
 static int no_opd_opt = 0;
@@ -106,7 +107,8 @@ ppc_before_allocation (void)
 				  non_overlapping_opd))
 	einfo ("%X%P: can not edit %s %E\n", "opd");
 
-      if (ppc64_elf_tls_setup (link_info.output_bfd, &link_info)
+      if (ppc64_elf_tls_setup (link_info.output_bfd, &link_info,
+			       no_tls_get_addr_opt)
 	  && !no_tls_opt)
 	{
 	  /* Size the sections.  This is premature, but we want to know the
@@ -488,7 +490,8 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_DOTSYMS			(OPTION_STUBSYMS + 1)
 #define OPTION_NO_DOTSYMS		(OPTION_DOTSYMS + 1)
 #define OPTION_NO_TLS_OPT		(OPTION_NO_DOTSYMS + 1)
-#define OPTION_NO_OPD_OPT		(OPTION_NO_TLS_OPT + 1)
+#define OPTION_NO_TLS_GET_ADDR_OPT	(OPTION_NO_TLS_OPT + 1)
+#define OPTION_NO_OPD_OPT		(OPTION_NO_TLS_GET_ADDR_OPT + 1)
 #define OPTION_NO_TOC_OPT		(OPTION_NO_OPD_OPT + 1)
 #define OPTION_NO_MULTI_TOC		(OPTION_NO_TOC_OPT + 1)
 #define OPTION_NON_OVERLAPPING_OPD	(OPTION_NO_MULTI_TOC + 1)
@@ -500,6 +503,7 @@ PARSE_AND_LIST_LONGOPTS='
   { "dotsyms", no_argument, NULL, OPTION_DOTSYMS },
   { "no-dotsyms", no_argument, NULL, OPTION_NO_DOTSYMS },
   { "no-tls-optimize", no_argument, NULL, OPTION_NO_TLS_OPT },
+  { "no-tls-get-addr-optimize", no_argument, NULL, OPTION_NO_TLS_GET_ADDR_OPT },
   { "no-opd-optimize", no_argument, NULL, OPTION_NO_OPD_OPT },
   { "no-toc-optimize", no_argument, NULL, OPTION_NO_TOC_OPT },
   { "no-multi-toc", no_argument, NULL, OPTION_NO_MULTI_TOC },
@@ -531,6 +535,9 @@ PARSE_AND_LIST_OPTIONS='
 		   ));
   fprintf (file, _("\
   --no-tls-optimize           Don'\''t try to optimize TLS accesses.\n"
+		   ));
+  fprintf (file, _("\
+  --no-tls-get-addr-optimize  Don'\''t use a special __tls_get_addr call.\n"
 		   ));
   fprintf (file, _("\
   --no-opd-optimize           Don'\''t optimize the OPD section.\n"
@@ -571,6 +578,10 @@ PARSE_AND_LIST_ARGS_CASES='
 
     case OPTION_NO_TLS_OPT:
       no_tls_opt = 1;
+      break;
+
+    case OPTION_NO_TLS_GET_ADDR_OPT:
+      no_tls_get_addr_opt = 1;
       break;
 
     case OPTION_NO_OPD_OPT:

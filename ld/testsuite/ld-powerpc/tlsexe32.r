@@ -57,16 +57,16 @@ Relocation section '\.rela\.dyn' at offset .* contains 2 entries:
 
 Relocation section '\.rela\.plt' at offset .* contains 1 entries:
  Offset +Info +Type +Sym\. Value +Symbol's Name \+ Addend
-[0-9a-f ]+R_PPC_JMP_SLOT[0-9a-f ]+__tls_get_addr \+ 0
+[0-9a-f ]+R_PPC_JMP_SLOT[0-9a-f ]+__tls_get_addr_opt \+ 0
 
 Symbol table '\.dynsym' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
 .* NOTYPE +LOCAL +DEFAULT +UND 
 .* TLS +GLOBAL DEFAULT +UND gd
-.* FUNC +GLOBAL DEFAULT +UND __tls_get_addr
 .* TLS +GLOBAL DEFAULT +UND ld
 .* NOTYPE +GLOBAL DEFAULT +ABS __end
 .* NOTYPE +GLOBAL DEFAULT +ABS __bss_start
+.* FUNC +GLOBAL DEFAULT +UND __tls_get_addr_opt
 .* NOTYPE +GLOBAL DEFAULT +ABS _edata
 .* NOTYPE +GLOBAL DEFAULT +ABS _end
 
@@ -96,7 +96,6 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* OBJECT +LOCAL +HIDDEN +11 _GLOBAL_OFFSET_TABLE_
 .* TLS +GLOBAL DEFAULT +UND gd
 .* TLS +GLOBAL DEFAULT +9 le0
-.* FUNC +GLOBAL DEFAULT +UND __tls_get_addr
 .* TLS +GLOBAL DEFAULT +9 ld0
 .* TLS +GLOBAL DEFAULT +9 le1
 .* TLS +GLOBAL DEFAULT +UND ld
@@ -105,6 +104,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* TLS +GLOBAL DEFAULT +9 ld2
 .* TLS +GLOBAL DEFAULT +9 ld1
 .* NOTYPE +GLOBAL DEFAULT +ABS __bss_start
+.* FUNC +GLOBAL DEFAULT +UND __tls_get_addr_opt
 .* NOTYPE +GLOBAL DEFAULT +ABS _edata
 .* NOTYPE +GLOBAL DEFAULT +ABS _end
 .* TLS +GLOBAL DEFAULT +9 gd0

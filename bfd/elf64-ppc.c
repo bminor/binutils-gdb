@@ -3771,6 +3771,9 @@ struct ppc_link_hash_table
   /* Set if we should emit symbols for stubs.  */
   unsigned int emit_stub_syms:1;
 
+  /* Set if __tls_get_addr optimization should not be done.  */
+  unsigned int no_tls_get_addr_opt:1;
+
   /* Support for multiple toc sections.  */
   unsigned int no_multi_toc:1;
   unsigned int multi_toc_needed:1;
@@ -7218,7 +7221,9 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
 /* Set htab->tls_get_addr and call the generic ELF tls_setup function.  */
 
 asection *
-ppc64_elf_tls_setup (bfd *obfd, struct bfd_link_info *info)
+ppc64_elf_tls_setup (bfd *obfd,
+		     struct bfd_link_info *info,
+		     int no_tls_get_addr_opt)
 {
   struct ppc_link_hash_table *htab;
 
@@ -7226,9 +7231,83 @@ ppc64_elf_tls_setup (bfd *obfd, struct bfd_link_info *info)
   htab->tls_get_addr = ((struct ppc_link_hash_entry *)
 			elf_link_hash_lookup (&htab->elf, ".__tls_get_addr",
 					      FALSE, FALSE, TRUE));
+  /* Move dynamic linking info to the function descriptor sym.  */
+  if (htab->tls_get_addr != NULL)
+    func_desc_adjust (&htab->tls_get_addr->elf, info);
   htab->tls_get_addr_fd = ((struct ppc_link_hash_entry *)
 			   elf_link_hash_lookup (&htab->elf, "__tls_get_addr",
 						 FALSE, FALSE, TRUE));
+  if (!no_tls_get_addr_opt)
+    {
+      struct elf_link_hash_entry *opt, *opt_fd, *tga, *tga_fd;
+
+      opt = elf_link_hash_lookup (&htab->elf, ".__tls_get_addr_opt",
+				  FALSE, FALSE, TRUE);
+      if (opt != NULL)
+	func_desc_adjust (opt, info);
+      opt_fd = elf_link_hash_lookup (&htab->elf, "__tls_get_addr_opt",
+				     FALSE, FALSE, TRUE);
+      if (opt_fd != NULL
+	  && (opt_fd->root.type == bfd_link_hash_defined
+	      || opt_fd->root.type == bfd_link_hash_defweak))
+	{
+	  /* If glibc supports an optimized __tls_get_addr call stub,
+	     signalled by the presence of __tls_get_addr_opt, and we'll
+	     be calling __tls_get_addr via a plt call stub, then
+	     make __tls_get_addr point to __tls_get_addr_opt.  */
+	  tga_fd = &htab->tls_get_addr_fd->elf;
+	  if (htab->elf.dynamic_sections_created
+	      && tga_fd != NULL
+	      && (tga_fd->type == STT_FUNC
+		  || tga_fd->needs_plt)
+	      && !(SYMBOL_CALLS_LOCAL (info, tga_fd)
+		   || (ELF_ST_VISIBILITY (tga_fd->other) != STV_DEFAULT
+		       && tga_fd->root.type == bfd_link_hash_undefweak)))
+	    {
+	      struct plt_entry *ent;
+
+	      for (ent = tga_fd->plt.plist; ent != NULL; ent = ent->next)
+		if (ent->plt.refcount > 0)
+		  break;
+	      if (ent != NULL)
+		{
+		  tga_fd->root.type = bfd_link_hash_indirect;
+		  tga_fd->root.u.i.link = &opt_fd->root;
+		  ppc64_elf_copy_indirect_symbol (info, opt_fd, tga_fd);
+		  if (opt_fd->dynindx != -1)
+		    {
+		      /* Use __tls_get_addr_opt in dynamic relocations.  */
+		      opt_fd->dynindx = -1;
+		      _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
+					      opt_fd->dynstr_index);
+		      if (!bfd_elf_link_record_dynamic_symbol (info, opt_fd))
+			return FALSE;
+		    }
+		  htab->tls_get_addr_fd = (struct ppc_link_hash_entry *) opt_fd;
+		  tga = &htab->tls_get_addr->elf;
+		  if (opt != NULL && tga != NULL)
+		    {
+		      tga->root.type = bfd_link_hash_indirect;
+		      tga->root.u.i.link = &opt->root;
+		      ppc64_elf_copy_indirect_symbol (info, opt, tga);
+		      _bfd_elf_link_hash_hide_symbol (info, opt,
+						      tga->forced_local);
+		      htab->tls_get_addr = (struct ppc_link_hash_entry *) opt;
+		    }
+		  htab->tls_get_addr_fd->oh = htab->tls_get_addr;
+		  htab->tls_get_addr_fd->is_func_descriptor = 1;
+		  if (htab->tls_get_addr != NULL)
+		    {
+		      htab->tls_get_addr->oh = htab->tls_get_addr_fd;
+		      htab->tls_get_addr->is_func = 1;
+		    }
+		}
+	    }
+	}
+      else
+	no_tls_get_addr_opt = TRUE;
+    }
+  htab->no_tls_get_addr_opt = no_tls_get_addr_opt;
   return _bfd_elf_tls_setup (obfd, info);
 }
 
@@ -8666,6 +8745,12 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	    return FALSE;
 	}
 
+      if (!htab->no_tls_get_addr_opt
+	  && htab->tls_get_addr_fd != NULL
+	  && htab->tls_get_addr_fd->elf.plt.plist != NULL
+	  && !add_dynamic_entry (DT_PPC64_TLSOPT, 0))
+	return FALSE;
+
       if (relocs)
 	{
 	  if (!add_dynamic_entry (DT_RELA, 0)
@@ -8856,6 +8941,49 @@ build_plt_stub (bfd *obfd, bfd_byte *p, int offset, Elf_Internal_Rela *r)
       bfd_put_32 (obfd, LD_R2_0R2 | PPC_LO (offset + 8), p),	p += 4;
       bfd_put_32 (obfd, BCTR, p),				p += 4;
     }
+  return p;
+}
+
+/* Build a special .plt call stub for __tls_get_addr.  */
+
+#define LD_R11_0R3	0xe9630000
+#define LD_R12_0R3	0xe9830000
+#define MR_R0_R3	0x7c601b78
+#define CMPDI_R11_0	0x2c2b0000
+#define ADD_R3_R12_R13	0x7c6c6a14
+#define BEQLR		0x4d820020
+#define MR_R3_R0	0x7c030378
+#define MFLR_R11	0x7d6802a6
+#define STD_R11_0R1	0xf9610000
+#define BCTRL		0x4e800421
+#define LD_R11_0R1	0xe9610000
+#define LD_R2_0R1	0xe8410000
+#define MTLR_R11	0x7d6803a6
+
+static inline bfd_byte *
+build_tls_get_addr_stub (bfd *obfd, bfd_byte *p, int offset,
+			 Elf_Internal_Rela *r)
+{
+  bfd_put_32 (obfd, LD_R11_0R3 + 0, p),		p += 4;
+  bfd_put_32 (obfd, LD_R12_0R3 + 8, p),		p += 4;
+  bfd_put_32 (obfd, MR_R0_R3, p),		p += 4;
+  bfd_put_32 (obfd, CMPDI_R11_0, p),		p += 4;
+  bfd_put_32 (obfd, ADD_R3_R12_R13, p),		p += 4;
+  bfd_put_32 (obfd, BEQLR, p),			p += 4;
+  bfd_put_32 (obfd, MR_R3_R0, p),		p += 4;
+  bfd_put_32 (obfd, MFLR_R11, p),		p += 4;
+  bfd_put_32 (obfd, STD_R11_0R1 + 32, p),	p += 4;
+
+  if (r != NULL)
+    r[0].r_offset += 9 * 4;
+  p = build_plt_stub (obfd, p, offset, r);
+  bfd_put_32 (obfd, BCTRL, p - 4);
+
+  bfd_put_32 (obfd, LD_R11_0R1 + 32, p),	p += 4;
+  bfd_put_32 (obfd, LD_R2_0R1 + 40, p),		p += 4;
+  bfd_put_32 (obfd, MTLR_R11, p),		p += 4;
+  bfd_put_32 (obfd, BLR, p),			p += 4;
+
   return p;
 }
 
@@ -9227,7 +9355,13 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	    r[0].r_offset += 2;
 	  r[0].r_addend = dest;
 	}
-      p = build_plt_stub (htab->stub_bfd, loc, off, r);
+      if (stub_entry->h != NULL
+	  && (stub_entry->h == htab->tls_get_addr_fd
+	      || stub_entry->h == htab->tls_get_addr)
+	  && !htab->no_tls_get_addr_opt)
+	p = build_tls_get_addr_stub (htab->stub_bfd, loc, off, r);
+      else
+	p = build_plt_stub (htab->stub_bfd, loc, off, r);
       size = p - loc;
       break;
 
@@ -9316,6 +9450,11 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	size -= 4;
       if (PPC_HA (off + 16) != PPC_HA (off))
 	size += 4;
+      if (stub_entry->h != NULL
+	  && (stub_entry->h == htab->tls_get_addr_fd
+	      || stub_entry->h == htab->tls_get_addr)
+	  && !htab->no_tls_get_addr_opt)
+	size += 13 * 4;
       if (info->emitrelocations)
 	{
 	  stub_entry->stub_sec->reloc_count
@@ -11255,8 +11394,16 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  if (nop == NOP
 		      || nop == CROR_151515 || nop == CROR_313131)
 		    {
-		      bfd_put_32 (input_bfd, LD_R2_40R1,
-				  contents + rel->r_offset + 4);
+		      if (h != NULL
+			  && (h == htab->tls_get_addr_fd
+			      || h == htab->tls_get_addr)
+			  && !htab->no_tls_get_addr_opt)
+			{
+			  /* Special stub used, leave nop alone.  */
+			}
+		      else
+			bfd_put_32 (input_bfd, LD_R2_40R1,
+				    contents + rel->r_offset + 4);
 		      can_plt_call = TRUE;
 		    }
 		}
