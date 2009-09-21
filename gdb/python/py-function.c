@@ -112,11 +112,10 @@ fnpy_init (PyObject *self, PyObject *args, PyObject *kwds)
     {
       PyObject *ds_obj = PyObject_GetAttrString (self, "__doc__");
       if (ds_obj && gdbpy_is_string (ds_obj))
-	/* Nothing ever frees this.  */
 	docstring = python_string_to_host_string (ds_obj);
     }
   if (! docstring)
-    docstring = _("This function is not documented.");
+    docstring = xstrdup (_("This function is not documented."));
 
   add_internal_function (name, docstring, fnpy_call, self);
   return 0;

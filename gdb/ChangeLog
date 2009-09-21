@@ -1,3 +1,8 @@
+2009-09-21  Jason Orendorff  <jason.orendorff@gmail.com>
+
+	PR python/10666:
+	* python/py-function.c (fnpy_init): Use xstrdup.
+
 2009-09-21  Jie Zhang  <jie.zhang@analog.com>
 
 	* doc/gdb.texinfo: Escape "{" and "}".
