@@ -6,13 +6,13 @@
 
 Disassembly of section \.text:
 
-00000000 <\.text>:
-   0:	42000018 	eret
-   4:	00000000 	nop
-   8:	1000fffd 	b	0x0
-   c:	00000000 	nop
-  10:	42000018 	eret
-  14:	00000000 	nop
-  18:	1000fffd 	b	0x10
-  1c:	00000000 	nop
+[0-9a-f]+ <foo>:
+[ 0-9a-f]+:	42000018 	eret
+[ 0-9a-f]+:	00000000 	nop
+[ 0-9a-f]+:	1000fffd 	b	[0-9a-f]+ <foo>
+[ 0-9a-f]+:	00000000 	nop
+[ 0-9a-f]+:	42000018 	eret
+[ 0-9a-f]+:	00000000 	nop
+[ 0-9a-f]+:	1000fffd 	b	[0-9a-f]+ <foo\+0x10>
+[ 0-9a-f]+:	00000000 	nop
 	\.\.\.

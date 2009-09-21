@@ -1,3 +1,4 @@
+foo:
 	.set	noreorder
 1:	eret
 	.set	reorder
