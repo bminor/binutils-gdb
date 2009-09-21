@@ -822,6 +822,15 @@ typedef int (gdbarch_process_record_ftype) (struct gdbarch *gdbarch, struct regc
 extern int gdbarch_process_record (struct gdbarch *gdbarch, struct regcache *regcache, CORE_ADDR addr);
 extern void set_gdbarch_process_record (struct gdbarch *gdbarch, gdbarch_process_record_ftype *process_record);
 
+/* Save process state after a signal.
+   Return -1 if something goes wrong, 0 otherwise. */
+
+extern int gdbarch_process_record_signal_p (struct gdbarch *gdbarch);
+
+typedef int (gdbarch_process_record_signal_ftype) (struct gdbarch *gdbarch, struct regcache *regcache, enum target_signal signal);
+extern int gdbarch_process_record_signal (struct gdbarch *gdbarch, struct regcache *regcache, enum target_signal signal);
+extern void set_gdbarch_process_record_signal (struct gdbarch *gdbarch, gdbarch_process_record_signal_ftype *process_record_signal);
+
 /* Signal translation: translate inferior's signal (host's) number into
    GDB's representation. */
 

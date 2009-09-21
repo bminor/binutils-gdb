@@ -1,3 +1,8 @@
+2009-09-21  Hui Zhu  <teawater@gmail.com>
+	    Michael Snyder  <msnyder@vmware.com>
+
+	* gdbarch.sh (process_record_signal): New interface.
+
 2009-09-19  Matt Rice <ratmice@gmail.com>  (tiny change)
 
 	Checked in by Joel Brobecker  <brobecker@gnat.com>
