@@ -630,6 +630,7 @@ T Spec<T, T*>::spec (T * tp)
 template<class T, char sz>
 class Baz {
 public:
+  ~Baz () { };
   int x;
   T t;
   T baz (int, T);
@@ -642,6 +643,8 @@ template<class T, char sz> T Baz<T, sz>::baz (int i, T tt)
   else
     return 0;
 }
+
+typedef Baz<int, 1> intBazOne;
 
 // Template with char * parameter
 template<class T, char * sz>
@@ -777,6 +780,8 @@ int main()
   i=GetMax<int>(x,y);
   n=GetMax<long>(l,m);
 
+  intBazOne ibo;
+  z = ibo.baz (2, 21);
   return 0;
     
 }

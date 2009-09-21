@@ -195,6 +195,14 @@ proc test_template_calls {} {
     }
 }
 
+proc test_template_typedef {} {
+
+    gdb_test "print intBazOne::baz" ".*baz\\(int, int\\)>" \
+	"print method of template typedef"
+
+    gdb_test "print intBazOne::~Baz" ".*~Baz(\\(\\))?>" \
+	"print destructor of template typedef"
+}
 
 proc do_tests {} {
     global prms_id
@@ -223,6 +231,7 @@ proc do_tests {} {
 
     test_ptype_of_templates
     test_template_breakpoints
+    test_template_typedef
 
     if [ runto_main] {
 	test_template_calls

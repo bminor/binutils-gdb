@@ -1,3 +1,16 @@
+2009-09-21  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.cp/classes.exp (do_tests): Add tests to print a constructor
+	and destructor using typedef name of class.
+	* gdb.cp/classes.cc (class Base1): Add a destructor.
+	(base1): New typedef.
+	(use_methods): Instanitate an object of type base1.
+	* gdb.cp/templates.exp (test_template_typedef): New procedure.
+	(do_tests): Call test_template_typedef.
+	* gdb.cp/templates.cc (Baz::~Baz): New method.
+	(intBazOne): New typedef.
+	(main): Instantiate intBazOne.
+
 2009-09-21  Phil Muldoon <pmuldoon@redhat.com>
 
 	PR python/10633

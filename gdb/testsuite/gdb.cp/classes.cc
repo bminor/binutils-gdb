@@ -400,7 +400,10 @@ class Base1 {
  public:
   int x;
   Base1(int i) { x = i; }
+  ~Base1 () { }
 };
+
+typedef Base1 base1;
 
 class Foo
 {
@@ -564,6 +567,8 @@ void use_methods ()
   i = class_param.Aref_x (g_A);
   i = class_param.Aval_a (g_A);
   i = class_param.Aval_x (g_A);
+
+  base1 b (3);
 }
 
 
