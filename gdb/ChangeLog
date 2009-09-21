@@ -1,3 +1,47 @@
+2009-09-21  Hui Zhu  <teawater@gmail.com>
+	    Michael Snyder  <msnyder@vmware.com>
+
+	* amd64-linux-tdep.c (amd64_all_but_ip_registers_record): New
+	function.
+	(amd64_linux_syscall_record): Call
+	amd64_all_but_ip_registers_record if syscall is
+	sys_rt_sigreturn.
+	(AMD64_LINUX_redzone, AMD64_LINUX_xstate,
+	AMD64_LINUX_frame_size): New macros.
+	(amd64_linux_record_signal): New function.
+	(amd64_linux_init_abi): Call set_gdbarch_process_record_signal.
+
+2009-09-21  Hui Zhu  <teawater@gmail.com>
+	    Michael Snyder  <msnyder@vmware.com>
+
+	* i386-linux-tdep.c (i386_all_but_ip_registers_record): New
+	function.
+	(i386_linux_intx80_sysenter_record): Call
+	i386_all_but_ip_registers_record if syscall is sys_sigreturn
+	or sys_rt_sigreturn.
+	(I386_LINUX_xstate, I386_LINUX_frame_size): New macros.
+	(i386_linux_record_signal): New function.
+	(i386_linux_init_abi): Call set_gdbarch_process_record_signal.
+
+2009-09-21  Hui Zhu  <teawater@gmail.com>
+	    Michael Snyder  <msnyder@vmware.com>
+
+	* record.c (record_end_entry): New struct.
+	(record_type): Add end.
+	(record_arch_list_add_end): Set rec->u.end.sigval to
+	TARGET_SIGNAL_0.
+	(record_message_args): New struct.
+	(record_message): Call gdbarch_process_record_signal.
+	(do_record_message): Add argument "signal".
+	(record_resume): Ditto.
+	(record_wait): Ditto.  Check record_list->u.end.sigval
+	in replay mode.
+
+2009-09-21  Hui Zhu  <teawater@gmail.com>
+	    Michael Snyder  <msnyder@vmware.com>
+
+	* gdbarch.sh (process_record_signal): New interface.
+
 2009-09-19  Maxim Grigoriev  <maxim2405@gmail.com>
 
 	* xtensa-tdep.c (call0_analyze_prologue): Replace INT_MAX by UNIT_MAX.

@@ -709,6 +709,10 @@ v:int:sofun_address_maybe_missing:::0:0::0
 # Return -1 if something goes wrong, 0 otherwise.
 M:int:process_record:struct regcache *regcache, CORE_ADDR addr:regcache, addr
 
+# Save process state after a signal.
+# Return -1 if something goes wrong, 0 otherwise.
+M:int:process_record_signal:struct regcache *regcache, enum target_signal signal:regcache, signal
+
 # Signal translation: translate inferior's signal (host's) number into
 # GDB's representation.
 m:enum target_signal:target_signal_from_host:int signo:signo::default_target_signal_from_host::0
