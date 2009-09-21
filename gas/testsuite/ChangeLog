@@ -1,5 +1,14 @@
 2009-09-21  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* gas/mips/eret-1.s: Add trailing padding.
+	* gas/mips/eret-2.s: Likewise.
+	* gas/mips/eret-3.s: Likewise.
+	* gas/mips/eret-1.d: Adjust accordingly.  Force a 32-bit ABI.
+	* gas/mips/eret-2.d: Likewise.
+	* gas/mips/eret-3.d: Likewise.
+
+2009-09-21  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* gas/mips/mips.exp: Fix a typo.
 
 2009-09-21  Ben Elliston  <bje@au.ibm.com>

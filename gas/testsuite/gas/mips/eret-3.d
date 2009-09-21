@@ -1,6 +1,6 @@
 #objdump: -d
 #name: MIPS eret-3 disassembly
-#as: -mfix-24k -march=24kc --no-warn
+#as: -mabi=32 -mfix-24k -march=24kc --no-warn
 
 .*\.o:     file format .*mips.*
 
@@ -16,3 +16,4 @@ Disassembly of section \.text:
   10:	aca40000 	sw	a0,0\(a1\)
   14:	03e00008 	jr	ra
   18:	00000000 	nop
+	\.\.\.

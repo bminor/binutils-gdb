@@ -25,3 +25,6 @@
 	li $t4, 3
 1:	li $t4, 3
 	eret
+
+# Force at least 8 (non-delay-slot) zero bytes, to make 'objdump' print ...
+        .space	8
