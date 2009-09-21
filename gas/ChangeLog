@@ -1,3 +1,7 @@
+2009-09-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c: Remove white spaces.
+
 2009-09-21  Ben Elliston  <bje@au.ibm.com>
 	    Peter Bergner  <bergner@vnet.ibm.com>
 

@@ -1062,7 +1062,7 @@ i386_align_code (fragS *fragP, int count)
 	     ones.  Otherwise, we use a jump instruction and adjust
 	     its offset.   */
 	  int limit;
-	  
+
 	  /* For 64bit, the limit is 3 bytes.  */
 	  if (flag_code == CODE_64BIT
 	      && fragP->tc_frag_data.isa_flags.bitfield.cpulm)
@@ -1986,7 +1986,7 @@ check_cpu_arch_compatible (const char *name ATTRIBUTE_UNUSED,
   if (get_elf_backend_data (stdoutput)->elf_machine_code != EM_L1OM
       || new_flag.bitfield.cpul1om)
     return;
-  
+
   as_bad (_("`%s' is not supported on `%s'"), name, arch);
 #endif
 }
@@ -4884,8 +4884,8 @@ build_modrm_byte (void)
       dest = i.operands - 1;
       nds = dest - 1;
 
-      /* This instruction must have 4 register operands 
-	 or 3 register operands plus 1 memory operand.  
+      /* This instruction must have 4 register operands
+	 or 3 register operands plus 1 memory operand.
 	 It must have VexNDS and VexImmExt.  */
       gas_assert ((i.reg_operands == 4
 		      || (i.reg_operands == 3 && i.mem_operands == 1))
@@ -4911,7 +4911,7 @@ build_modrm_byte (void)
 	{
 	  source = 1;
 	  reg = 0;
-	}      
+	}
       /* FMA4 swaps REG and NDS.  */
       if (i.tm.cpu_flags.bitfield.cpufma4)
 	{
@@ -4919,17 +4919,17 @@ build_modrm_byte (void)
 	  tmp = reg;
 	  reg = nds;
 	  nds = tmp;
-	}      
+	}
       gas_assert ((operand_type_equal (&i.tm.operand_types[reg], &regxmm)
 		   || operand_type_equal (&i.tm.operand_types[reg],
-					  &regymm)) 
+					  &regymm))
 		  && (operand_type_equal (&i.tm.operand_types[nds], &regxmm)
-		      || operand_type_equal (&i.tm.operand_types[nds], 
+		      || operand_type_equal (&i.tm.operand_types[nds],
 					     &regymm)));
       exp->X_op = O_constant;
       exp->X_add_number
 	= ((i.op[reg].regs->reg_num
-	    + ((i.op[reg].regs->reg_flags & RegRex) ? 8 : 0)) << 4);      
+	    + ((i.op[reg].regs->reg_flags & RegRex) ? 8 : 0)) << 4);
       i.vex.register_specifier = i.op[nds].regs;
     }
   else
@@ -5319,7 +5319,7 @@ build_modrm_byte (void)
 	      gas_assert (i.reg_operands == 2);
 
 	      if (!operand_type_equal (&i.tm.operand_types[vex_reg],
-				       & regxmm)
+				       &regxmm)
 		  && !operand_type_equal (&i.tm.operand_types[vex_reg],
 					  &regymm))
 		abort ();
