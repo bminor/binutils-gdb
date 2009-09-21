@@ -459,7 +459,7 @@ c_printstr (struct ui_file *stream, struct type *type, const gdb_byte *string,
 	 single character in isolation.  This makes the code simpler
 	 and probably does the sensible thing in the majority of
 	 cases.  */
-      while (num_chars == 1)
+      while (num_chars == 1 && things_printed < options->print_max)
 	{
 	  /* Count the number of repetitions.  */
 	  unsigned int reps = 0;

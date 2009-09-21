@@ -35,6 +35,17 @@ gdb_test_multiple "python print 'hello, world!'" "verify python support" {
     -re "$gdb_prompt $"	{}
 }
 
+# Run a command in GDB, and report a failure if a Python exception is thrown.
+# If report_pass is true, report a pass if no exception is thrown.
+proc gdb_py_test_silent_cmd {cmd name report_pass} {
+  global gdb_prompt
+
+  gdb_test_multiple $cmd $name {
+      -re "Traceback.*$gdb_prompt $"  { fail $name }
+      -re "$gdb_prompt $"	      { if $report_pass { pass $name } }
+  }
+}
+
 proc run_lang_tests {lang} {
     global srcdir subdir srcfile binfile testfile hex
     if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable "debug $lang"] != "" } {
@@ -79,6 +90,11 @@ proc run_lang_tests {lang} {
 	gdb_test "print derived" \
 	    " = \{.*<Vbase1> = pp class name: Vbase1.*<Vbase2> = \{.*<VirtualTest> = pp value variable is: 1,.*members of Vbase2:.*_vptr.Vbase2 = $hex.*<Vbase3> = \{.*members of Vbase3.*members of Derived:.*value = 2.*"
 	gdb_test "print ns " "\"embedded\\\\000null\\\\000string\""
+	gdb_py_test_silent_cmd "set print elements 3" "" 1
+	gdb_test "print ns" "emb\.\.\.."
+	gdb_py_test_silent_cmd "set print elements 10" "" 1
+	gdb_test "print ns" "embedded\\\\000n\.\.\.."
+	gdb_py_test_silent_cmd "set print elements 200" "" 1
     }
 
     gdb_test "print x" " = $hex \"this is x\""
