@@ -292,10 +292,14 @@ static int file_ase_mips16;
 
 /* True if we want to create R_MIPS_JALR for jalr $25.  */
 #ifdef TE_IRIX
-#define MIPS_JALR_HINT_P HAVE_NEWABI
+#define MIPS_JALR_HINT_P(EXPR) HAVE_NEWABI
 #else
-/* As a GNU extension, we use R_MIPS_JALR for o32 too.  */
-#define MIPS_JALR_HINT_P 1
+/* As a GNU extension, we use R_MIPS_JALR for o32 too.  However,
+   because there's no place for any addend, the only acceptable
+   expression is a bare symbol.  */
+#define MIPS_JALR_HINT_P(EXPR) \
+  (!HAVE_IN_PLACE_ADDENDS \
+   || ((EXPR)->X_op == O_symbol && (EXPR)->X_add_number == 0))
 #endif
 
 /* True if -mips3d was passed or implied by arguments passed on the
@@ -3930,13 +3934,13 @@ macro_build_jalr (expressionS *ep)
 {
   char *f = NULL;
 
-  if (MIPS_JALR_HINT_P)
+  if (MIPS_JALR_HINT_P (ep))
     {
       frag_grow (8);
       f = frag_more (0);
     }
   macro_build (NULL, "jalr", "d,s", RA, PIC_CALL_REG);
-  if (MIPS_JALR_HINT_P)
+  if (MIPS_JALR_HINT_P (ep))
     fix_new_exp (frag_now, f - frag_now->fr_literal,
 		 4, ep, FALSE, BFD_RELOC_MIPS_JALR);
 }
@@ -14095,6 +14099,10 @@ mips_fix_adjustable (fixS *fixp)
        || reloc_needs_lo_p (fixp->fx_r_type))
       && HAVE_IN_PLACE_ADDENDS
       && (S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_MERGE) != 0)
+    return 0;
+
+  /* There is no place to store an in-place offset for JALR relocations.  */
+  if (fixp->fx_r_type == BFD_RELOC_MIPS_JALR && HAVE_IN_PLACE_ADDENDS)
     return 0;
 
 #ifdef OBJ_ELF

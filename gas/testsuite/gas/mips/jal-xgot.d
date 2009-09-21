@@ -27,7 +27,7 @@ Disassembly of section .text:
 0+0034 <[^>]*> addiu	t9,t9,0
 [ 	]*34: R_MIPS_LO16	.text
 0+0038 <[^>]*> jalr	t9
-[ 	]*38: R_MIPS_JALR	.text
+[ 	]*38: R_MIPS_JALR	text_label
 0+003c <[^>]*> nop
 0+0040 <[^>]*> lw	gp,0\(sp\)
 0+0044 <[^>]*> lui	t9,0x0
