@@ -1,3 +1,9 @@
+2009-09-22  Tom Tromey  <tromey@redhat.com>
+
+	PR python/10680:
+	* eval.c (evaluate_subexp_standard) <do_call_it>: Handle internal
+	functions in EVAL_AVOID_SIDE_EFFECTS case.
+
 2009-09-22  Jie Zhang  <jie.zhang@analog.com>
 
 	* MAINTAINERS: Add myself under Write After Approval.

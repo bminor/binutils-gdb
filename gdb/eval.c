@@ -1513,11 +1513,18 @@ evaluate_subexp_standard (struct type *expect_type,
 	     gdb isn't asked for it's opinion (ie. through "whatis"),
 	     it won't offer it. */
 
-	  struct type *ftype =
-	  TYPE_TARGET_TYPE (value_type (argvec[0]));
+	  struct type *ftype = value_type (argvec[0]);
 
-	  if (ftype)
-	    return allocate_value (TYPE_TARGET_TYPE (value_type (argvec[0])));
+	  if (TYPE_CODE (ftype) == TYPE_CODE_INTERNAL_FUNCTION)
+	    {
+	      /* We don't know anything about what the internal
+		 function might return, but we have to return
+		 something.  */
+	      return value_zero (builtin_type (exp->gdbarch)->builtin_int,
+				 not_lval);
+	    }
+	  else if (TYPE_TARGET_TYPE (ftype))
+	    return allocate_value (TYPE_TARGET_TYPE (ftype));
 	  else
 	    error (_("Expression of type other than \"Function returning ...\" used as function"));
 	}
