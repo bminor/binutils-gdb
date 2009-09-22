@@ -1,3 +1,7 @@
+2009-09-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* solib.c (solib_bfd_open): Relax a bit the compatibility check.
+
 2009-09-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* source.c (forget_cached_source_info): Clear last_source_visited.

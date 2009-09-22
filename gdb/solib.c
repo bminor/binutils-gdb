@@ -310,7 +310,7 @@ solib_bfd_open (char *pathname)
 
   /* Check bfd arch.  */
   b = gdbarch_bfd_arch_info (target_gdbarch);
-  if (b->compatible (b, bfd_get_arch_info (abfd)) != b)
+  if (!b->compatible (b, bfd_get_arch_info (abfd)))
     warning (_("`%s': Shared library architecture %s is not compatible "
                "with target architecture %s."), found_pathname,
              bfd_get_arch_info (abfd)->printable_name, b->printable_name);
