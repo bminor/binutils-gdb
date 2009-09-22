@@ -1,3 +1,7 @@
+2009-09-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/ppc/a2.d: Match PPC64 relocs.
+
 2009-09-21  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* lib/gas-defs.exp (gas_test_error): Mark internal error/assertion
