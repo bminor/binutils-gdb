@@ -1,5 +1,11 @@
 2009-09-22  Tom Tromey  <tromey@redhat.com>
 
+	PR gdb/10583:
+	* python/py-value.c (valpy_int): Use PyLong_FromLongLong.
+	(valpy_long): Likewise.
+
+2009-09-22  Tom Tromey  <tromey@redhat.com>
+
 	PR python/10680:
 	* eval.c (evaluate_subexp_standard) <do_call_it>: Handle internal
 	functions in EVAL_AVOID_SIDE_EFFECTS case.

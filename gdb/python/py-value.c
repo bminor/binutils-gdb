@@ -784,6 +784,13 @@ valpy_int (PyObject *self)
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 
+#ifdef HAVE_LONG_LONG		/* Defined by Python.  */
+  /* If we have 'long long', and the value overflows a 'long', use a
+     Python Long; otherwise use a Python Int.  */
+  if (sizeof (l) > sizeof (long) && (l > PyInt_GetMax ()
+				     || l < (- (LONGEST) PyInt_GetMax ()) - 1))
+    return PyLong_FromLongLong (l);
+#endif
   return PyInt_FromLong (l);
 }
 
@@ -808,7 +815,11 @@ valpy_long (PyObject *self)
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 
+#ifdef HAVE_LONG_LONG		/* Defined by Python.  */
+  return PyLong_FromLongLong (l);
+#else
   return PyLong_FromLong (l);
+#endif
 }
 
 /* Implements conversion to float.  */
