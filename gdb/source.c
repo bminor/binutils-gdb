@@ -346,6 +346,8 @@ forget_cached_source_info (void)
 	  }
       }
     }
+
+  last_source_visited = NULL;
 }
 
 void
@@ -356,12 +358,6 @@ init_source_path (void)
   sprintf (buf, "$cdir%c$cwd", DIRNAME_SEPARATOR);
   source_path = xstrdup (buf);
   forget_cached_source_info ();
-}
-
-void
-init_last_source_visited (void)
-{
-  last_source_visited = NULL;
 }
 
 /* Add zero or more directories to the front of the source path.  */
@@ -382,11 +378,10 @@ directory_command (char *dirname, int from_tty)
   else
     {
       mod_path (dirname, &source_path);
-      last_source_visited = NULL;
+      forget_cached_source_info ();
     }
   if (from_tty)
     show_directories ((char *) 0, from_tty);
-  forget_cached_source_info ();
 }
 
 /* Add a path given with the -d command line switch.
@@ -1883,6 +1878,8 @@ unset_substitute_path_command (char *args, int from_tty)
 
   if (from != NULL && !rule_found)
     error (_("No substitution rule defined for `%s'"), from);
+
+  forget_cached_source_info ();
 }
 
 /* Add a new source path substitution rule.  */
@@ -1921,6 +1918,7 @@ set_substitute_path_command (char *args, int from_tty)
   /* Insert the new substitution rule.  */
 
   add_substitute_path_rule (argv[0], argv[1]);
+  forget_cached_source_info ();
 }
 
 

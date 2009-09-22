@@ -630,8 +630,6 @@ extern char *source_path;
 
 extern void init_source_path (void);
 
-extern void init_last_source_visited (void);
-
 /* From exec.c */
 
 /* Take over the 'find_mapped_memory' vector from exec.c. */

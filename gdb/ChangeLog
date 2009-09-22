@@ -1,3 +1,15 @@
+2009-09-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* source.c (forget_cached_source_info): Clear last_source_visited.
+	(init_last_source_visited): Delete.
+	(directory_command): Do not clear last_source_visited.  Call
+	forget_cached_source_info only if required.
+	(unset_substitute_path_command, set_substitute_path_command): Call
+	forget_cached_source_info.
+	* mi/mi-cmd-env.c (mi_cmd_env_dir): Do not call
+	init_last_source_visited.
+	* defs.h (init_last_source_visited): Delete declaration.
+
 2009-09-22  Tom Tromey  <tromey@redhat.com>
 
 	PR gdb/10583:
