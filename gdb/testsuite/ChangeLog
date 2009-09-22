@@ -1,3 +1,7 @@
+2009-09-22  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.python/py-function.exp: Add regression tests.
+
 2009-09-21  Phil Muldoon  <pmuldoon@redhat.com>
 
 	PR python/10633
