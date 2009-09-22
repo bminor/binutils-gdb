@@ -45,19 +45,19 @@ Disassembly of section \.text:
   84:	74 a4 00 06 	andis\.  r4,r5,6
   88:	00 00 02 00 	attn
   8c:	48 00 00 02 	ba      0 <start>
-			8c: R_PPC_ADDR24	label_abs
+			8c: R_PPC(|64)_ADDR24	label_abs
   90:	40 01 00 00 	bdnzf   gt,90 <start\+0x90>
-			90: R_PPC_REL14	foo
+			90: R_PPC(|64)_REL14	foo
   94:	40 01 00 00 	bdnzf   gt,94 <start\+0x94>
-			94: R_PPC_REL14	foo
+			94: R_PPC(|64)_REL14	foo
   98:	40 01 00 00 	bdnzf   gt,98 <start\+0x98>
-			98: R_PPC_REL14	foo
+			98: R_PPC(|64)_REL14	foo
   9c:	40 85 00 02 	blea    cr1,0 <start>
-			9c: R_PPC_ADDR14	foo_abs
+			9c: R_PPC(|64)_ADDR14	foo_abs
   a0:	40 c5 00 02 	blea-   cr1,0 <start>
-			a0: R_PPC_ADDR14	foo_abs
+			a0: R_PPC(|64)_ADDR14	foo_abs
   a4:	40 e5 00 02 	blea\+   cr1,0 <start>
-			a4: R_PPC_ADDR14	foo_abs
+			a4: R_PPC(|64)_ADDR14	foo_abs
   a8:	4c 86 0c 20 	bcctr   4,4\*cr1\+eq,1
   ac:	4c 86 04 20 	bnectr  cr1
   b0:	4c a6 04 20 	bcctr\+  4,4\*cr1\+eq
@@ -65,17 +65,17 @@ Disassembly of section \.text:
   b8:	4c 86 04 21 	bnectrl cr1
   bc:	4c a6 04 21 	bcctrl\+ 4,4\*cr1\+eq
   c0:	40 01 00 01 	bdnzfl  gt,c0 <start\+0xc0>
-			c0: R_PPC_REL14	foo
+			c0: R_PPC(|64)_REL14	foo
   c4:	40 01 00 01 	bdnzfl  gt,c4 <start\+0xc4>
-			c4: R_PPC_REL14	foo
+			c4: R_PPC(|64)_REL14	foo
   c8:	40 01 00 01 	bdnzfl  gt,c8 <start\+0xc8>
-			c8: R_PPC_REL14	foo
+			c8: R_PPC(|64)_REL14	foo
   cc:	40 85 00 03 	blela   cr1,0 <start>
-			cc: R_PPC_ADDR14	foo_abs
+			cc: R_PPC(|64)_ADDR14	foo_abs
   d0:	40 c5 00 03 	blela-  cr1,0 <start>
-			d0: R_PPC_ADDR14	foo_abs
+			d0: R_PPC(|64)_ADDR14	foo_abs
   d4:	40 e5 00 03 	blela\+  cr1,0 <start>
-			d4: R_PPC_ADDR14	foo_abs
+			d4: R_PPC(|64)_ADDR14	foo_abs
   d8:	4c 86 08 20 	bclr    4,4\*cr1\+eq,1
   dc:	4c 86 00 20 	bnelr   cr1
   e0:	4c a6 00 20 	bclr\+   4,4\*cr1\+eq
@@ -83,11 +83,11 @@ Disassembly of section \.text:
   e8:	4c 86 00 21 	bnelrl  cr1
   ec:	4c a6 00 21 	bclrl\+  4,4\*cr1\+eq
   f0:	48 00 00 00 	b       f0 <start\+0xf0>
-			f0: R_PPC_REL24	label
+			f0: R_PPC(|64)_REL24	label
   f4:	48 00 00 03 	bla     0 <start>
-			f4: R_PPC_ADDR24	label_abs
+			f4: R_PPC(|64)_ADDR24	label_abs
   f8:	48 00 00 01 	bl      f8 <start\+0xf8>
-			f8: R_PPC_REL24	label
+			f8: R_PPC(|64)_REL24	label
   fc:	7d 6a 61 f8 	bpermd  r10,r11,r12
  100:	7c a7 40 00 	cmpd    cr1,r7,r8
  104:	7d 6a 63 f8 	cmpb    r10,r11,r12
