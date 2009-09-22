@@ -5775,14 +5775,6 @@ xtensa_elf_section_change_hook (void)
 bfd_boolean
 xtensa_fix_adjustable (fixS *fixP)
 {
-  /* An offset is not allowed in combination with the difference of two
-     symbols, but that cannot be easily detected after a local symbol
-     has been adjusted to a (section+offset) form.  Return 0 so that such
-     an fix will not be adjusted.  */
-  if (fixP->fx_subsy && fixP->fx_addsy && fixP->fx_offset
-      && relaxable_section (S_GET_SEGMENT (fixP->fx_subsy)))
-    return 0;
-
   /* We need the symbol name for the VTABLE entries.  */
   if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
@@ -5842,15 +5834,6 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	    default:
 	      break;
 	    }
-
-	  /* An offset is only allowed when it results from adjusting a
-	     local symbol into a section-relative offset.  If the offset
-	     came from the original expression, tc_fix_adjustable will have
-	     prevented the fix from being converted to a section-relative
-	     form so that we can flag the error here.  */
-	  if (fixP->fx_offset != 0 && !symbol_section_p (fixP->fx_addsy))
-	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("cannot represent subtraction with an offset"));
 
 	  val = (S_GET_VALUE (fixP->fx_addsy) + fixP->fx_offset
 		 - S_GET_VALUE (fixP->fx_subsy));
