@@ -1891,13 +1891,13 @@ disassemble_section (bfd *abfd, asection *section, void *info)
                                              &place);
   paux->require_sec = FALSE;
 
-  /* PR 9774: If the target used signed 32-bit addresses then we must make
-     sure that we sign extend the value that we calculate for 'addr' in the
-     loop below.  */
+  /* PR 9774: If the target used signed addresses then we must make
+     sure that we sign extend the value that we calculate for 'addr'
+     in the loop below.  */
   if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
       && (bed = get_elf_backend_data (abfd)) != NULL
       && bed->sign_extend_vma)
-    sign_adjust = 0x80000000;
+    sign_adjust = (bfd_vma) 1 << (bed->s->arch_size - 1);
 
   /* Disassemble a block of instructions up to the address associated with
      the symbol we have just found.  Then print the symbol and find the
