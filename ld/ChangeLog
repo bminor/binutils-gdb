@@ -1,3 +1,11 @@
+2009-09-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* scripttempl/a29k.sc: Delete.
+	* scripttempl/ebmon29k.sc: Delete.
+	* scripttempl/m68klynx.sc: Delete.
+	* scripttempl/sa29200.sc: Delete.
+	* scripttempl/sparclynx.sc: Delete.
+
 2009-09-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/ppc32elf.em (no_tls_get_addr_opt): New var.
