@@ -27,18 +27,18 @@
 
 check_present()
 {
-    if ! grep -q "$1" retain_symbols_file_test.out
+    if ! grep -q "$1" retain_symbols_file_test.stdout
     then
-        echo "Did not find expected symbol $1 in retain_symbols_file_test.out"
+        echo "Did not find expected symbol $1 in retain_symbols_file_test.stdout"
         exit 1
     fi
 }
 
 check_absent()
 {
-    if grep -q "$1" retain_symbols_file_test.out
+    if grep -q "$1" retain_symbols_file_test.stdout
     then
-        echo "Found unexpected symbol $1 in retain_symbols_file_test.out"
+        echo "Found unexpected symbol $1 in retain_symbols_file_test.stdout"
         exit 1
     fi
 }

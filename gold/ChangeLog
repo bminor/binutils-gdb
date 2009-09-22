@@ -1,3 +1,9 @@
+2009-09-22  Mikolaj Zalewski  <mikolajz@google.com>
+
+	* testsuite/retain_symbols_file_test.sh (check_present): Change
+	output file name to retain_symbols_file_test.stdout.
+	(check_absent): Likewise.
+
 2009-09-18  Craig Silverstein  <csilvers@google.com>
 
 	* object.cc (Sized_relobj::do_count): Test should_retain_symbol map.
