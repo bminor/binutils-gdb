@@ -1,3 +1,7 @@
+2009-09-22  Joel Sherrill  <joel.sherrill@oarcorp.com>
+
+	* main.c: Fix spelling error.
+
 2009-09-15  Andreas Tobler <andreast-list@fgznet.ch>
 	    Doug Evans  <dje@google.com>
 
