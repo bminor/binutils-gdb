@@ -622,6 +622,7 @@ command_line_handler (char *rl)
 
   if (p > linebuffer && *(p - 1) == '\\')
     {
+      *p = '\0';
       p--;			/* Put on top of '\'.  */
 
       readline_input_state.linebuffer = xstrdup (linebuffer);
