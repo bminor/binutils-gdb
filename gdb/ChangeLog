@@ -1,3 +1,9 @@
+2009-09-23  John Wright  <john.wright@hp.com>
+
+	PR gdb/10684:
+	* event-top.c (command_line_handler): Terminate linebuffer before
+	xstrdup.
+
 2009-09-22  Joel Brobecker  <brobecker@adacore.com>
 
 	* solib.c (solib_bfd_open): Relax a bit the compatibility check.
