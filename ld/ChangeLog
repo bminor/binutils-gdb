@@ -1,3 +1,7 @@
+2009-09-23  Nick Clifton  <nickc@redhat.com>
+
+	* po/vi.po: Updated Vietnamese translation.
+
 2009-09-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* scripttempl/a29k.sc: Delete.
