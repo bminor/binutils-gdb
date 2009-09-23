@@ -1,3 +1,22 @@
+2009-09-23  Doug Evans  <dje@sebabeach.org>
+
+	* m32r.cpu (sth-plus): Fix address mode and calculation.
+	(stb-plus): Ditto.
+	(clrpsw): Fix mask calculation.
+	(bset, bclr, btst): Make mode in bit calculation match expression.
+
+	* xc16x.cpu (rtl-version): Set to 0.8.
+	(gr-names, ext-names,psw-names): Update, print-name -> enum-prefix,
+	make uppercase.  Remove unnecessary name-prefix spec.
+	(grb-names, conditioncode-names, extconditioncode-names): Ditto.
+	(grb8-names, r8-names, regmem8-names, regdiv8-names): Ditto.
+	(reg0-name, reg0-name1, regbmem8-names, memgr8-names): Ditto.
+	(h-cr): New hardware.
+	(muls): Comment out parts that won't compile, add fixme.
+	(mulu, divl, divlu, jmpabs, jmpa-, jmprel, jbc, jnbs, callr): Ditto.
+	(scxti, scxtmg, scxtm, bclear, bclr18, bset19, bitset, bmov): Ditto.
+	(bmovn, band, bor, bxor, bcmp, bfldl, bfldh): Ditto.
+
 2009-07-16  Doug Evans  <dje@sebabeach.org>
 
 	* cpu/simplify.inc (*): One line doc strings don't need \n.
