@@ -97,6 +97,10 @@ if test "${enable_sim}" != no; then
            AC_CONFIG_SUBDIRS(mcore)
 	   testsuite=yes
 	   ;;
+       microblaze-*-*)
+           AC_CONFIG_SUBDIRS(microblaze)
+	   testsuite=yes
+	   ;;
        mips*-*-*)
            AC_CONFIG_SUBDIRS(mips)
 	   testsuite=yes

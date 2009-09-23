@@ -646,6 +646,7 @@ m32c
 m32r
 m68hc11
 mcore
+microblaze
 mips
 mn10300
 moxie
@@ -3675,6 +3676,11 @@ subdirs="$subdirs arm"
 	   ;;
        mcore-*-*)
            subdirs="$subdirs mcore"
+
+	   testsuite=yes
+	   ;;
+       microblaze-*-*)
+           subdirs="$subdirs microblaze"
 
 	   testsuite=yes
 	   ;;
