@@ -137,10 +137,10 @@ if { ([istarget "*-*-*elf*"]
     if {   [istarget "msp*-*-*"]
 	|| [istarget "arm*-*-*"]
 	|| [istarget "xscale*-*-*"]} then {
-	    run_elf_list_test "type-noifunc" "" "" "-s" "| grep \"1 \\\[FONTC\\\]\""
+	    run_elf_list_test "type-noifunc" "" "" "-s" "| grep \"1 *\\\[FONTC\\\]\""
     } else {
     	    run_dump_test ifunc-1
-	    run_elf_list_test "type" "" "" "-s" "| grep \"1 \\\[FIONTCU\\\]\""
+	    run_elf_list_test "type" "" "" "-s" "| grep \"1 *\\\[FIONTCU\\\]\""
     }
 
     run_dump_test "section6" 

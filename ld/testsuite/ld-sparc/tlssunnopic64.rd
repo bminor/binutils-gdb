@@ -52,29 +52,29 @@ Relocation section '.rela.dyn' at offset 0x[0-9a-f]+ contains 14 entries:
 [0-9a-f ]+R_SPARC_TLS_TPOFF64 +0+ +sg2 \+ 0
 
 Symbol table '\.dynsym' contains [0-9]+ entries:
- +Num: +Value +Size Type +Bind +Vis +Ndx Name
+ +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
 .* NOTYPE +LOCAL +DEFAULT +UND *
-.* SECTION LOCAL +DEFAULT +5 *
-.* SECTION LOCAL +DEFAULT +6 *
-.* SECTION LOCAL +DEFAULT +8 *
-.* FUNC +GLOBAL DEFAULT +5 fn3
-.* TLS +GLOBAL DEFAULT +UND sg1
-.* NOTYPE +GLOBAL DEFAULT +ABS __bss_start
-.* TLS +GLOBAL DEFAULT +UND sg2
-.* NOTYPE +GLOBAL DEFAULT +ABS _edata
-.* NOTYPE +GLOBAL DEFAULT +ABS _end
+.* SECTION +LOCAL +DEFAULT +5 *
+.* SECTION +LOCAL +DEFAULT +6 *
+.* SECTION +LOCAL +DEFAULT +8 *
+.* FUNC +GLOBAL +DEFAULT +5 fn3
+.* TLS +GLOBAL +DEFAULT +UND sg1
+.* NOTYPE +GLOBAL +DEFAULT +ABS __bss_start
+.* TLS +GLOBAL +DEFAULT +UND sg2
+.* NOTYPE +GLOBAL +DEFAULT +ABS _edata
+.* NOTYPE +GLOBAL +DEFAULT +ABS _end
 
 Symbol table '\.symtab' contains [0-9]+ entries:
- +Num: +Value +Size Type +Bind +Vis +Ndx Name
+ +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
 .* NOTYPE +LOCAL +DEFAULT +UND *
-.* SECTION LOCAL +DEFAULT +1 *
-.* SECTION LOCAL +DEFAULT +2 *
-.* SECTION LOCAL +DEFAULT +3 *
-.* SECTION LOCAL +DEFAULT +4 *
-.* SECTION LOCAL +DEFAULT +5 *
-.* SECTION LOCAL +DEFAULT +6 *
-.* SECTION LOCAL +DEFAULT +7 *
-.* SECTION LOCAL +DEFAULT +8 *
+.* SECTION +LOCAL +DEFAULT +1 *
+.* SECTION +LOCAL +DEFAULT +2 *
+.* SECTION +LOCAL +DEFAULT +3 *
+.* SECTION +LOCAL +DEFAULT +4 *
+.* SECTION +LOCAL +DEFAULT +5 *
+.* SECTION +LOCAL +DEFAULT +6 *
+.* SECTION +LOCAL +DEFAULT +7 *
+.* SECTION +LOCAL +DEFAULT +8 *
 .* TLS +LOCAL +DEFAULT +6 bl1
 .* TLS +LOCAL +DEFAULT +6 bl2
 .* TLS +LOCAL +DEFAULT +6 bl3
@@ -87,9 +87,9 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* TLS +LOCAL +HIDDEN +6 sh1
 .* OBJECT +LOCAL +HIDDEN +ABS _GLOBAL_OFFSET_TABLE_
 .* TLS +LOCAL +HIDDEN +6 sh2
-.* FUNC +GLOBAL DEFAULT +5 fn3
-.* TLS +GLOBAL DEFAULT +UND sg1
-.* NOTYPE +GLOBAL DEFAULT +ABS __bss_start
-.* TLS +GLOBAL DEFAULT +UND sg2
-.* NOTYPE +GLOBAL DEFAULT +ABS _edata
-.* NOTYPE +GLOBAL DEFAULT +ABS _end
+.* FUNC +GLOBAL +DEFAULT +5 fn3
+.* TLS +GLOBAL +DEFAULT +UND sg1
+.* NOTYPE +GLOBAL +DEFAULT +ABS __bss_start
+.* TLS +GLOBAL +DEFAULT +UND sg2
+.* NOTYPE +GLOBAL +DEFAULT +ABS _edata
+.* NOTYPE +GLOBAL +DEFAULT +ABS _end

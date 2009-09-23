@@ -1,3 +1,32 @@
+2009-09-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/arm/thumbver.d: Tolerate some whitespace differences.
+	* gas/elf/elf.exp: Likewise.
+	* gas/elf/section2.e: Likewise.
+	* gas/elf/section2.e-armeabi: Likewise.
+	* gas/elf/section2.e-armelf: Likewise.
+	* gas/elf/section2.e-m32r: Likewise.
+	* gas/elf/section2.e-mips: Likewise.
+	* gas/elf/section2.e-miwmmxt: Likewise.
+	* gas/elf/section2.e-score: Likewise.
+	* gas/elf/section2.e-xtensa: Likewise.
+	* gas/elf/type-noifunc.e: Likewise.
+	* gas/elf/type.e: Likewise.
+	* gas/ia64/alias-ilp32.d: Likewise.
+	* gas/ia64/alias.d: Likewise.
+	* gas/ia64/global.d: Likewise.
+	* gas/mips/mips16-vis-1.d: Likewise.
+	* gas/mmix/bspec-1.d: Likewise.
+	* gas/mmix/byte-1.d: Likewise.
+	* gas/mmix/comment-1.d: Likewise.
+	* gas/mmix/loc-1.d: Likewise.
+	* gas/mmix/loc-2.d: Likewise.
+	* gas/mmix/loc-3.d: Likewise.
+	* gas/mmix/loc-4.d: Likewise.
+	* gas/mmix/loc-5.d: Likewise.
+	* gas/mmix/loc-6.d: Likewise.
+	* gas/mmix/loc-7.d: Likewise.
+
 2009-09-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/ppc/a2.d: Match PPC64 relocs.
@@ -1206,9 +1235,9 @@
 2009-01-15  Nick Clifton  <nickc@redhat.com>
 
 	PR 9722
-	* gas/testsuite/gas/arm/archv6m.d: Update expected NOP opcode.
-	* gas/testsuite/gas/arm/pr9722.s: New test.
-	* gas/testsuite/gas/arm/pr9722.d: Expected disassembly.
+	* gas/arm/archv6m.d: Update expected NOP opcode.
+	* gas/arm/pr9722.s: New test.
+	* gas/arm/pr9722.d: Expected disassembly.
 
 2009-01-14  Peter Bergner  <bergner@vnet.ibm.com>
 

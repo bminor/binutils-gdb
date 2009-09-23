@@ -1,3 +1,13 @@
+2009-09-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* binutils-all/readelf.s: Tolerate some whitespace differences.
+	* binutils-all/readelf.s-64: Likewise.
+	* binutils-all/readelf.ss: Likewise.
+	* binutils-all/readelf.ss-64: Likewise.
+	* binutils-all/readelf.ss-mips: Likewise.
+	* binutils-all/readelf.ss-tmips: Likewise.
+	* binutils-all/strip-10.d: Likewise.
+
 2009-09-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* binutils-all/objdump.exp (cpus_expected): Add ms1.
