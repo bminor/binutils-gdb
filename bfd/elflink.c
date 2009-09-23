@@ -3234,6 +3234,8 @@ elf_finalize_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 	case DT_RUNPATH:
 	case DT_FILTER:
 	case DT_AUXILIARY:
+	case DT_AUDIT:
+	case DT_DEPAUDIT:
 	  dyn.d_un.d_val = _bfd_elf_strtab_offset (dynstr, dyn.d_un.d_val);
 	  break;
 	default:
@@ -3525,6 +3527,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
     {
       asection *s;
       const char *soname = NULL;
+      char *audit = NULL;
       struct bfd_link_needed_list *rpath = NULL, *runpath = NULL;
       int ret;
 
@@ -3653,6 +3656,11 @@ error_free_dyn:
 		    ;
 		  *pn = n;
 		}
+	      if (dyn.d_tag == DT_AUDIT)
+		{
+		  unsigned int tagv = dyn.d_un.d_val;
+		  audit = bfd_elf_string_from_elf_section (abfd, shlink, tagv);
+		}
 	    }
 
 	  free (dynbuf);
@@ -3705,6 +3713,9 @@ error_free_dyn:
 	 particular dynamic object more than once.  */
       if (ret > 0)
 	return TRUE;
+
+      /* Save the DT_AUDIT entry for the linker emulation code. */
+      elf_dt_audit (abfd) = audit; 
     }
 
   /* If this is a dynamic object, we always link against the .dynsym
@@ -5451,6 +5462,8 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 			       const char *soname,
 			       const char *rpath,
 			       const char *filter_shlib,
+			       const char *audit,
+			       const char *depaudit,
 			       const char * const *auxiliary_filters,
 			       struct bfd_link_info *info,
 			       asection **sinterpptr,
@@ -5601,6 +5614,28 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 		  || !_bfd_elf_add_dynamic_entry (info, DT_AUXILIARY, indx))
 		return FALSE;
 	    }
+	}
+
+      if (audit != NULL)
+	{
+	  bfd_size_type indx;
+
+	  indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr, audit,
+				      TRUE);
+	  if (indx == (bfd_size_type) -1
+	      || !_bfd_elf_add_dynamic_entry (info, DT_AUDIT, indx))
+	    return FALSE;
+	}
+
+      if (depaudit != NULL)
+	{
+	  bfd_size_type indx;
+
+	  indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr, depaudit,
+				      TRUE);
+	  if (indx == (bfd_size_type) -1
+	      || !_bfd_elf_add_dynamic_entry (info, DT_DEPAUDIT, indx))
+	    return FALSE;
 	}
 
       eif.info = info;

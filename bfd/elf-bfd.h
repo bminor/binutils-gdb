@@ -1503,6 +1503,10 @@ struct elf_obj_tdata
      one.  */
   const char *dt_name;
 
+  /* The linker emulation needs to know what audit libs
+     are used by a dynamic object.  */ 
+  const char *dt_audit;
+
   /* Records the result of `get_program_header_size'.  */
   bfd_size_type program_header_size;
 
@@ -1632,6 +1636,7 @@ struct elf_obj_tdata
 #define elf_local_got_offsets(bfd) (elf_tdata(bfd) -> local_got.offsets)
 #define elf_local_got_ents(bfd) (elf_tdata(bfd) -> local_got.ents)
 #define elf_dt_name(bfd)	(elf_tdata(bfd) -> dt_name)
+#define elf_dt_audit(bfd)	(elf_tdata(bfd) -> dt_audit)
 #define elf_dyn_lib_class(bfd)	(elf_tdata(bfd) -> dyn_lib_class)
 #define elf_bad_symtab(bfd)	(elf_tdata(bfd) -> bad_symtab)
 #define elf_flags_init(bfd)	(elf_tdata(bfd) -> flags_init)

@@ -1,3 +1,15 @@
+2009-09-23  Matt Rice  <ratmice@gmail.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_add_options): Add --audit,
+	--depaudit, and -P options.
+	(gld${EULATION_NAME}_handle_options): Ditto.
+	(gld${EULATION_NAME}_list_options): Ditto.
+	(gld${EMULATION_NAME}_append_to_separated_string): New function for
+	handling rpath-like colon separated strings.
+	(gld${EMULATION_NAME}_before_allocation): Pass the audit and depaudit
+	libs to bfd.  Propagate DT_AUDIT from needed libs to depaudit.
+	* ld.texinfo: Document new options.
+
 2009-09-23  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: Updated Vietnamese translation.
@@ -311,13 +323,13 @@
 
 2009-08-06  Michael Eager <eager@eagercon.com>
 
-	* Makefile.am: Add eelf32mb_linux.o, eelf32microblaze.o to 
+	* Makefile.am: Add eelf32mb_linux.o, eelf32microblaze.o to
 	ALL_EMULATIONS, targets.
 	* Makefile.in: Regenerate.
 	* configure.tgt: Add microblaze*-linux*, microblaze* targets.
 	* emulparams/elf32mb_linux.sh: New.
 	* emulparams/elf32microblaze.sh. New.
-	* scripttempl/elfmicroblaze.sc: New. 
+	* scripttempl/elfmicroblaze.sc: New.
 
 2009-08-05  Trevor Smigiel  <Trevor_Smigiel@playstation.sony.com>
 
@@ -408,7 +420,7 @@
 
 	* scripttempl/pep.sc: Put .eh_frame in its own section.
 	* scripttempl/pe.sc: Ditto.
-	
+
 2009-06-26  Kai Tietz  <kai.tietz@onevision.com>
 
 	* scripttempl/pe.sc (.debug_pubtypes): Added section rule.
@@ -941,7 +953,7 @@
 2009-02-24  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* ld.texinfo (Options): Correct typos in example.  Recommend
-	using joined forms of syntax for passing options with arguments 
+	using joined forms of syntax for passing options with arguments
 	from a driver.
 	(-a): Use consistent syntax for documenting option arguments.
 	Clean up indexing and markup.
