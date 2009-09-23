@@ -246,6 +246,17 @@ local_symbol_convert (struct local_symbol *locsym)
   return ret;
 }
 
+static void
+define_sym_at_dot (symbolS *symbolP)
+{
+  symbolP->sy_frag = frag_now;
+#ifdef OBJ_VMS
+  S_SET_OTHER (symbolP, const_flag);
+#endif
+  S_SET_VALUE (symbolP, (valueT) frag_now_fix ());
+  S_SET_SEGMENT (symbolP, now_seg);
+}
+
 /* We have just seen "<name>:".
    Creates a struct symbol unless it already exists.
 
@@ -343,12 +354,7 @@ colon (/* Just seen "x:" - rattle symbols & frags.  */
 	    }
 	  if (S_GET_VALUE (symbolP) == 0)
 	    {
-	      symbolP->sy_frag = frag_now;
-#ifdef OBJ_VMS
-	      S_SET_OTHER (symbolP, const_flag);
-#endif
-	      S_SET_VALUE (symbolP, (valueT) frag_now_fix ());
-	      S_SET_SEGMENT (symbolP, now_seg);
+	      define_sym_at_dot (symbolP);
 #ifdef N_UNDF
 	      know (N_UNDF == 0);
 #endif /* if we have one, it better be zero.  */
@@ -393,12 +399,7 @@ colon (/* Just seen "x:" - rattle symbols & frags.  */
 		    {
 		      /* It is a .comm/.lcomm being converted to initialized
 			 data.  */
-		      symbolP->sy_frag = frag_now;
-#ifdef OBJ_VMS
-		      S_SET_OTHER (symbolP, const_flag);
-#endif
-		      S_SET_VALUE (symbolP, (valueT) frag_now_fix ());
-		      S_SET_SEGMENT (symbolP, now_seg);	/* Keep N_EXT bit.  */
+		      define_sym_at_dot (symbolP);
 		    }
 		}
 	      else
@@ -431,6 +432,7 @@ colon (/* Just seen "x:" - rattle symbols & frags.  */
 	    {
 	      as_bad (_("symbol `%s' is already defined"), sym_name);
 	      symbolP = symbol_clone (symbolP, 0);
+	      define_sym_at_dot (symbolP);
 	    }
 	}
 
