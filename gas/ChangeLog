@@ -1,6 +1,6 @@
 2009-09-23  Tim E. Sneddon  <tsneddon@kednos.com>
 
-	* gas/configure.com: Fix a typo.
+	* configure.com: Fix a typo.
 
 2009-09-23  Alan Modra  <amodra@bigpond.net.au>
 
