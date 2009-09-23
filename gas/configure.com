@@ -232,7 +232,7 @@ $ if arch.eqs."ia64"
 $ then
 $   open/append outfile build.com
 $   write outfile "$ write sys$output ""Compiling te-vms.c"""
-$   write outfile "$ cc 'CFLAGS /obj=te-vme.obj [.config]te-vms.c + " +-
+$   write outfile "$ cc 'CFLAGS /obj=te-vms.obj [.config]te-vms.c + " +-
       "sys$library:sys$lib_c.tlb/lib"
 $   write outfile "$ AS_OBJS=AS_OBJS + "",te-vms.obj"""
 $   close outfile
