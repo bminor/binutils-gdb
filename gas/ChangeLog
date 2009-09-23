@@ -1,3 +1,9 @@
+2009-09-23  Sterling Augustine  <sterling@jaw.hq.tensilica.com>
+
+	* config/tc-xtensa.c (md_apply_fix): Remove check for constant with
+	difference of of two symbols.
+	(xtensa_fix_adjustable): Likewise.
+
 2009-09-23  Tim E. Sneddon  <tsneddon@kednos.com>
 
 	* configure.com: Fix a typo.
