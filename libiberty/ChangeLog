@@ -1,3 +1,7 @@
+2009-09-23  Tristan Gingold  <gingold@adacore.com>
+
+	* config.h-vms: Remove HAVE_STDINT_H which was committed by mistake.
+
 2009-09-23  Matthew Gingell  <gingell@adacore.com>
 
 	* cplus-dem.c (ada_demangle): Ensure demangled is freed.
