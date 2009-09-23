@@ -1,3 +1,7 @@
+2009-09-23  Jie Zhang  <jie.zhang@analog.com>
+
+	* ld-srec/srec.exp: Add xfails for bfin-*-linux-uclibc.
+
 2009-09-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/tlslib.s: Delete dot-symbol entry syms.  Add
