@@ -1,3 +1,7 @@
+2009-09-23  Nick Clifton  <nickc@redhat.com>
+
+	* po/vi.po: Updated Vietnamese translation.
+
 2009-09-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/ppc32elf.em (no_tls_get_addr_opt): New var.
