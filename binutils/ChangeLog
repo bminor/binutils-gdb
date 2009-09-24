@@ -1,3 +1,9 @@
+2009-09-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* readelf.c (print_dynamic_symbol): Format entries as for
+	normal symbol table.
+	(process_symbol_table): Use -7s format string for visibility.
+
 2009-09-22  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* objdump.c (disassemble_section): Use bfd_get_arch_size
@@ -57,7 +63,7 @@
 	debug_baseclass_s, struct debug_method_s, struct
 	debug_method_variant_s, struct debug_type_s): Rename struct from
 	avoid name collision.
-        * debug.h: Use new struct names.
+	* debug.h: Use new struct names.
 	* dwarf.c: Add casts.
 	(free_debug_memory): Change loop counter variable a to int.
 	* ieee.c: Add casts.
@@ -66,7 +72,7 @@
 	(ieee_class_method_var): Rename variable virtual to is_virtual.
 	* nm.c: Add casts.
 	* objcopy.c: Add casts.
-	(copy_archive): Rename variable	delete to del.
+	(copy_archive): Rename variable delete to del.
 	* objdump.c: Add casts.
 	(dump_dwarf_section): Change loop counter variable i to int.
 	* prdbg.c: Add casts.
@@ -139,7 +145,7 @@
 
 	* dlltool.c (delayimp_name): Add new global variable
 	(usage, long_options, main): Add new option "-y" / "--output-delaylib"
-	(struct mac): Add fields how_dljtab_size, how_dljtab_roff1, 
+	(struct mac): Add fields how_dljtab_size, how_dljtab_roff1,
 	how_dljtab_roff2, how_dljtab, trampoline.
 	(i386_dljtab): Add binary stub for x86 delay import.
 	(i386_trampoline): Add text assembly stub for x86 delay import.
@@ -672,7 +678,7 @@
 2009-03-27  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (display_debug_ranges): Add the base address to the
-	displayed values for 'Begin' and 'End'. 
+	displayed values for 'Begin' and 'End'.
 
 2009-03-25  Ryan Mansfield  <rmansfield@qnx.com>
 
