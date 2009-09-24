@@ -1,3 +1,16 @@
+2009-09-24  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf.c (get_TAG_name): Add missing DWARF-3 and new DWARF-4 tags.
+	(get_FORM_name): Add new DWARF-4 forms.
+	(read_and_display_attr_value): Add DW_FORM_ref_sig8, DW_LANG_Python.
+	(get_AT_name): Add new DWARF-4 and GNU-specific attributes.
+	(process_debug_info): Add do_types parameter; change all callers.
+	Add support for .debug_types sections.
+	(display_debug_types): New function.
+	(debug_displays): Add .debug_types section.
+	* readelf.c (process_section_headers): Add .debug_types section.
+	(display_debug_section): Simplify call to streq.
+
 2009-09-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* readelf.c (print_dynamic_symbol): Format entries as for

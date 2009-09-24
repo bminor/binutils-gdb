@@ -4276,6 +4276,7 @@ process_section_headers (FILE * file)
 
 	  if (do_debugging
 	      || (do_debug_info     && streq (name, "info"))
+	      || (do_debug_info     && streq (name, "types"))
 	      || (do_debug_abbrevs  && streq (name, "abbrev"))
 	      || (do_debug_lines    && streq (name, "line"))
 	      || (do_debug_pubnames && streq (name, "pubnames"))
@@ -8817,7 +8818,7 @@ display_debug_section (Elf_Internal_Shdr * section, FILE * file)
 	if (secondary)
 	  free_debug_section ((enum dwarf_section_display_enum) i);
 
-	if (streq (debug_displays[i].section.uncompressed_name, name))
+	if (streq (sec->uncompressed_name, name))
 	  sec->name = sec->uncompressed_name;
 	else
 	  sec->name = sec->compressed_name;
