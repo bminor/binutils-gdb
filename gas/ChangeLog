@@ -1,5 +1,10 @@
 2009-09-24  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (build_vex_prefix): Check vex == 2 instead
+	of vex256.
+
+2009-09-24  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/10677
 	* config/tc-i386.h (TC_FORCE_RELOCATION_LOCAL): Return true
 	for BFD_RELOC_X86_64_GOTPCREL.

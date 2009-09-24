@@ -2678,7 +2678,7 @@ build_vex_prefix (const insn_template *t)
       i.tm = t[1];
     }
 
-  vector_length = i.tm.opcode_modifier.vex256 ? 1 : 0;
+  vector_length = i.tm.opcode_modifier.vex == 2 ? 1 : 0;
 
   switch ((i.tm.base_opcode >> 8) & 0xff)
     {

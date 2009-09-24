@@ -1,3 +1,16 @@
+2009-09-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (opcode_modifiers): Remove Vex256.
+	(set_bitfield): Handle XXX=V.
+
+	* i386-opc.h (Vex): Update comments.
+	(Vex256): Removed.
+	(VexNDS): Updated.
+	(i386_opcode_modifier): Change vex to 2 bits.  Remove vex256. 
+
+	* i386-opc.tbl: Replace "Vex|Vex256" with Vex=2.
+	* i386-tbl.h: Regenerated.
+
 2009-09-23  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.

@@ -347,7 +347,6 @@ static bitfield opcode_modifiers[] =
   BITFIELD (Rex64),
   BITFIELD (Ugh),
   BITFIELD (Vex),
-  BITFIELD (Vex256),
   BITFIELD (VexNDS),
   BITFIELD (VexNDD),
   BITFIELD (VexW0),
@@ -539,6 +538,29 @@ set_bitfield (const char *f, bitfield *array, int value,
 	array[i].value = value;
 	return;
       }
+
+  if (value)
+    {
+      const char *v = strchr (f, '=');
+
+      if (v)
+	{
+	  size_t n = v - f;
+	  char *end;
+
+	  for (i = 0; i < size; i++)
+	    if (strncasecmp (array[i].name, f, n) == 0)
+	      {
+		value = strtol (v + 1, &end, 0);
+		if (*end == '\0')
+		  {
+		    array[i].value = value;
+		    return;
+		  }
+		break;
+	      }
+	}
+    }
 
   if (lineno != -1)
     fail (_("%s: %d: Unknown bitfield: %s\n"), filename, lineno, f);
