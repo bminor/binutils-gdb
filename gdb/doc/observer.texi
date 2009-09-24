@@ -122,6 +122,8 @@ haven't been loaded yet.
 
 @deftypefun void solib_unloaded (struct so_list *@var{solib})
 The shared library specified by @var{solib} has been unloaded.
+Note that when @value{GDBN} calls this observer, the library's
+symbols have not been unloaded yet, and thus are still available.
 @end deftypefun
 
 @deftypefun void new_objfile (struct objfile *@var{objfile})

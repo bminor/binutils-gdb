@@ -1,3 +1,8 @@
+2009-09-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* observer.texi (solib_unloaded): Document explicitly the fact that
+	this observer is called before the associated symbols are unloaded.
+
 2009-09-19  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Stack Manipulation): Document
