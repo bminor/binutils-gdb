@@ -92,8 +92,8 @@ Symbol table '\.symtab' contains [0-9]+ entries:
  +[0-9]+: [0-9a-f]+ +0 +TLS +LOCAL +DEFAULT +8 sl6
  +[0-9]+: [0-9a-f]+ +0 +TLS +LOCAL +DEFAULT +8 sl7
  +[0-9]+: [0-9a-f]+ +0 +TLS +LOCAL +DEFAULT +8 sl8
- +[0-9]+: 0+ +0 +TLS +LOCAL +HIDDEN +8 _TLS_MODULE_BASE_
- +[0-9]+: [0-9a-f]+ +0 +OBJECT +LOCAL +HIDDEN +9 _DYNAMIC
+ +[0-9]+: 0+ +0 +TLS +LOCAL +DEFAULT +8 _TLS_MODULE_BASE_
+ +[0-9]+: [0-9a-f]+ +0 +OBJECT +LOCAL +DEFAULT +9 _DYNAMIC
  +[0-9]+: [0-9a-f]+ +0 +TLS +GLOBAL +DEFAULT +8 sg8
  +[0-9]+: [0-9a-f]+ +0 +TLS +GLOBAL +DEFAULT +8 sg3
  +[0-9]+: [0-9a-f]+ +0 +TLS +GLOBAL +HIDDEN +8 sh3

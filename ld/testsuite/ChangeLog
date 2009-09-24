@@ -1,3 +1,75 @@
+2009-09-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/10630
+	* ld-alpha/tlsbin.rd: Remove HIDDEN/.hidden on local symbols.
+	* ld-alpha/tlsbinr.rd: Likewise.
+	* ld-alpha/tlspic.rd: Likewise.
+	* ld-cris/libdso-2.d: Likewise.
+	* ld-cris/locref1.d: Likewise.
+	* ld-cris/locref2.d: Likewise.
+	* ld-cris/tls-e-20a.d: Likewise.
+	* ld-cris/tls-e-20.d: Likewise.
+	* ld-cris/tls-e-80.d: Likewise.
+	* ld-cris/tls-gc-68.d: Likewise.
+	* ld-cris/tls-gc-69.d: Likewise.
+	* ld-cris/tls-gc-70.d: Likewise.
+	* ld-cris/tls-gc-75.d: Likewise.
+	* ld-cris/tls-gc-76.d: Likewise.
+	* ld-cris/tls-gc-79.d: Likewise.
+	* ld-cris/tls-gd-1h.d: Likewise.
+	* ld-cris/tls-gd-2h.d: Likewise.
+	* ld-cris/tls-ld-4.d: Likewise.
+	* ld-cris/tls-ld-5.d: Likewise.
+	* ld-cris/tls-ld-6.d: Likewise.
+	* ld-cris/tls-ld-7.d: Likewise.
+	* ld-cris/tls-ldgd-14.d: Likewise.
+	* ld-cris/tls-ldgd-15.d: Likewise.
+	* ld-cris/tls-local-63.d: Likewise.
+	* ld-cris/tls-local-64.d: Likewise.
+	* ld-elf/pr9676.rd: Likewise.
+	* ld-elf/pr9679.rd: Likewise.
+	* ld-elfvsb/hidden2.d: Likewise.
+	* ld-i386/tlsbindesc.rd: Likewise.
+	* ld-i386/tlsbin.rd: Likewise.
+	* ld-i386/tlsdesc.rd: Likewise.
+	* ld-i386/tlsgdesc.rd: Likewise.
+	* ld-i386/tlsnopic.rd: Likewise.
+	* ld-i386/tlspic.rd: Likewise.
+	* ld-ia64/tlsbin.rd: Likewise.
+	* ld-ia64/tlspic.rd: Likewise.
+	* ld-powerpc/tlsexe32.r: Likewise.
+	* ld-powerpc/tlsexe.r: Likewise.
+	* ld-powerpc/tlsexetoc.r: Likewise.
+	* ld-powerpc/tlsso32.r: Likewise.
+	* ld-powerpc/tlsso.r: Likewise.
+	* ld-powerpc/tlstocso.r: Likewise.
+	* ld-s390/tlsbin_64.rd: Likewise.
+	* ld-s390/tlsbin.rd: Likewise.
+	* ld-s390/tlspic_64.rd: Likewise.
+	* ld-s390/tlspic.rd: Likewise.
+	* ld-sparc/gotop32.rd: Likewise.
+	* ld-sparc/gotop64.rd: Likewise.
+	* ld-sparc/tlssunbin32.rd: Likewise.
+	* ld-sparc/tlssunbin64.rd: Likewise.
+	* ld-sparc/tlssunnopic32.rd: Likewise.
+	* ld-sparc/tlssunnopic64.rd: Likewise.
+	* ld-sparc/tlssunpic32.rd: Likewise.
+	* ld-sparc/tlssunpic64.rd: Likewise.
+	* ld-x86-64/tlsbindesc.rd: Likewise.
+	* ld-x86-64/tlsbin.rd: Likewise.
+	* ld-x86-64/tlsdesc.rd: Likewise.
+	* ld-x86-64/tlsgdesc.rd: Likewise.
+	* ld-x86-64/tlspic.rd: Likewise.
+	* ld-xtensa/tlsbin.rd: Likewise.
+	* ld-xtensa/tlspic.rd: Likewise.
+
+	* ld-elf/local1.d: New.
+	* ld-elf/local1.map: Likewise.
+	* ld-elf/local1.s: Likewise.
+	* ld-ia64/local1.d: Likewise.
+	* ld-ia64/local1.map: Likewise.
+	* ld-ia64/local1.s: Likewise.
+
 2009-09-23  Matt Rice  <ratmice@gmail.com>
 
 	* ld-elf/audit.exp: New.

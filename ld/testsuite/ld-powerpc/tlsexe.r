@@ -95,7 +95,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* TLS +LOCAL +DEFAULT +8 ie4
 .* TLS +LOCAL +DEFAULT +8 le4
 .* TLS +LOCAL +DEFAULT +8 le5
-.* OBJECT +LOCAL +HIDDEN +10 _DYNAMIC
+.* OBJECT +LOCAL +DEFAULT +10 _DYNAMIC
 .* (FUNC|NOTYPE) +LOCAL +DEFAULT +UND \.__tls_get_addr(|_opt)
 .* GLOBAL +DEFAULT +UND gd
 .* GLOBAL +DEFAULT +9 le0

@@ -116,25 +116,25 @@ Symbol table '\.symtab' contains [0-9]+ entries:
  +[0-9]+: 0+34 +0 +TLS +LOCAL +DEFAULT +7 sl6
  +[0-9]+: 0+38 +0 +TLS +LOCAL +DEFAULT +7 sl7
  +[0-9]+: 0+3c +0 +TLS +LOCAL +DEFAULT +7 sl8
- +[0-9]+: 0+60 +0 +TLS +LOCAL +HIDDEN +8 sH1
- +[0-9]+: 0+ +0 +TLS +LOCAL +HIDDEN +7 _TLS_MODULE_BASE_
- +[0-9]+: [0-9a-f]+ +0 +OBJECT +LOCAL +HIDDEN +ABS _DYNAMIC
- +[0-9]+: 0+48 +0 +TLS +LOCAL +HIDDEN +7 sh3
- +[0-9]+: 0+64 +0 +TLS +LOCAL +HIDDEN +8 sH2
- +[0-9]+: 0+78 +0 +TLS +LOCAL +HIDDEN +8 sH7
- +[0-9]+: 0+58 +0 +TLS +LOCAL +HIDDEN +7 sh7
- +[0-9]+: 0+5c +0 +TLS +LOCAL +HIDDEN +7 sh8
- +[0-9]+: 0+6c +0 +TLS +LOCAL +HIDDEN +8 sH4
- +[0-9]+: 0+4c +0 +TLS +LOCAL +HIDDEN +7 sh4
- +[0-9]+: 0+68 +0 +TLS +LOCAL +HIDDEN +8 sH3
- +[0-9]+: 0+50 +0 +TLS +LOCAL +HIDDEN +7 sh5
- +[0-9]+: 0+70 +0 +TLS +LOCAL +HIDDEN +8 sH5
- +[0-9]+: 0+74 +0 +TLS +LOCAL +HIDDEN +8 sH6
- +[0-9]+: 0+7c +0 +TLS +LOCAL +HIDDEN +8 sH8
- +[0-9]+: 0+40 +0 +TLS +LOCAL +HIDDEN +7 sh1
- +[0-9]+: [0-9a-f]+ +0 +OBJECT +LOCAL +HIDDEN +ABS _GLOBAL_OFFSET_TABLE_
- +[0-9]+: 0+44 +0 +TLS +LOCAL +HIDDEN +7 sh2
- +[0-9]+: 0+54 +0 +TLS +LOCAL +HIDDEN +7 sh6
+ +[0-9]+: 0+60 +0 +TLS +LOCAL +DEFAULT +8 sH1
+ +[0-9]+: 0+ +0 +TLS +LOCAL +DEFAULT +7 _TLS_MODULE_BASE_
+ +[0-9]+: [0-9a-f]+ +0 +OBJECT +LOCAL +DEFAULT +ABS _DYNAMIC
+ +[0-9]+: 0+48 +0 +TLS +LOCAL +DEFAULT +7 sh3
+ +[0-9]+: 0+64 +0 +TLS +LOCAL +DEFAULT +8 sH2
+ +[0-9]+: 0+78 +0 +TLS +LOCAL +DEFAULT +8 sH7
+ +[0-9]+: 0+58 +0 +TLS +LOCAL +DEFAULT +7 sh7
+ +[0-9]+: 0+5c +0 +TLS +LOCAL +DEFAULT +7 sh8
+ +[0-9]+: 0+6c +0 +TLS +LOCAL +DEFAULT +8 sH4
+ +[0-9]+: 0+4c +0 +TLS +LOCAL +DEFAULT +7 sh4
+ +[0-9]+: 0+68 +0 +TLS +LOCAL +DEFAULT +8 sH3
+ +[0-9]+: 0+50 +0 +TLS +LOCAL +DEFAULT +7 sh5
+ +[0-9]+: 0+70 +0 +TLS +LOCAL +DEFAULT +8 sH5
+ +[0-9]+: 0+74 +0 +TLS +LOCAL +DEFAULT +8 sH6
+ +[0-9]+: 0+7c +0 +TLS +LOCAL +DEFAULT +8 sH8
+ +[0-9]+: 0+40 +0 +TLS +LOCAL +DEFAULT +7 sh1
+ +[0-9]+: [0-9a-f]+ +0 +OBJECT +LOCAL +DEFAULT +ABS _GLOBAL_OFFSET_TABLE_
+ +[0-9]+: 0+44 +0 +TLS +LOCAL +DEFAULT +7 sh2
+ +[0-9]+: 0+54 +0 +TLS +LOCAL +DEFAULT +7 sh6
  +[0-9]+: 0+1c +0 +TLS +GLOBAL +DEFAULT +7 sg8
  +[0-9]+: 0+8 +0 +TLS +GLOBAL +DEFAULT +7 sg3
  +[0-9]+: 0+c +0 +TLS +GLOBAL +DEFAULT +7 sg4

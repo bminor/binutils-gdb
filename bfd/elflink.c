@@ -8632,7 +8632,11 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
   sym.st_size = h->size;
   sym.st_other = h->other;
   if (h->forced_local)
-    sym.st_info = ELF_ST_INFO (STB_LOCAL, h->type);
+    {
+      sym.st_info = ELF_ST_INFO (STB_LOCAL, h->type);
+      /* Turn off visibility on local symbol.  */
+      sym.st_other &= ~ELF_ST_VISIBILITY (-1);
+    }
   else if (h->unique_global)
     sym.st_info = ELF_ST_INFO (STB_GNU_UNIQUE, h->type);
   else if (h->root.type == bfd_link_hash_undefweak
@@ -10704,13 +10708,11 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      asection *s;
 	      bfd_byte *dest;
 
-	      sym.st_size = e->isym.st_size;
-	      sym.st_other = e->isym.st_other;
-
-	      /* Copy the internal symbol as is.
+	      /* Copy the internal symbol and turn off visibility.
 		 Note that we saved a word of storage and overwrote
 		 the original st_name with the dynstr_index.  */
 	      sym = e->isym;
+	      sym.st_other &= ~ELF_ST_VISIBILITY (-1);
 
 	      s = bfd_section_from_elf_index (e->input_bfd,
 					      e->isym.st_shndx);

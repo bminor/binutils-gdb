@@ -91,9 +91,9 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 [0-9 ]+: [0-9a-f]+ +0 +TLS +LOCAL +DEFAULT +10 bl6
 [0-9 ]+: [0-9a-f]+ +0 +TLS +LOCAL +DEFAULT +10 bl7
 [0-9 ]+: [0-9a-f]+ +0 +TLS +LOCAL +DEFAULT +10 bl8
-[0-9 ]+: [0-9a-f]+ +0 +OBJECT +LOCAL +HIDDEN +11 _DYNAMIC
-[0-9 ]+: [0-9a-f]+ +0 +OBJECT +LOCAL +HIDDEN +12 _PROCEDURE_LINKAGE_TABLE_
-[0-9 ]+: [0-9a-f]+ +0 +OBJECT +LOCAL +HIDDEN +13 _GLOBAL_OFFSET_TABLE_
+[0-9 ]+: [0-9a-f]+ +0 +OBJECT +LOCAL +DEFAULT +11 _DYNAMIC
+[0-9 ]+: [0-9a-f]+ +0 +OBJECT +LOCAL +DEFAULT +12 _PROCEDURE_LINKAGE_TABLE_
+[0-9 ]+: [0-9a-f]+ +0 +OBJECT +LOCAL +DEFAULT +13 _GLOBAL_OFFSET_TABLE_
 [0-9 ]+: [0-9a-f]+ +0 +TLS +GLOBAL +DEFAULT +9 sg8
 [0-9 ]+: [0-9a-f]+ +0 +TLS +GLOBAL +DEFAULT +10 bg8
 [0-9 ]+: [0-9a-f]+ +0 +TLS +GLOBAL +DEFAULT +10 bg6

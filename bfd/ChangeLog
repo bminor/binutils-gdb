@@ -1,3 +1,11 @@
+2009-09-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/10630
+	* elflink.c (elf_link_output_extsym): Turn off visibility on
+	local symbol.
+	(bfd_elf_final_link): Turn off visibility on dynamic local
+	symbol.
+
 2009-09-24  Alan Modra  <amodra@bigpond.net.au>
 
 	PR binutils/10654

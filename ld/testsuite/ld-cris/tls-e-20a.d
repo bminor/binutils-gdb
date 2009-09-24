@@ -41,7 +41,7 @@ SYMBOL TABLE:
 0+82168 l    d  \.got	0+ \.got
 0+821a4 l    d  \.data	0+ \.data
 0+ l       \.tdata	0+80 tls128
-0+82168 l     O \.got	0+ \.hidden _GLOBAL_OFFSET_TABLE_
+0+82168 l     O \.got	0+ _GLOBAL_OFFSET_TABLE_
 0+80 g       \.tdata	0+4 \.hidden x
 0+800c4 g     F \.text	0+6 tlsdsofn2
 0+821b4 g     O \.data	0+4 got7var5
