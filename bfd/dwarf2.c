@@ -1495,95 +1495,27 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 static bfd_boolean
 lookup_address_in_line_info_table (struct line_info_table *table,
 				   bfd_vma addr,
-				   struct funcinfo *function,
 				   const char **filename_ptr,
 				   unsigned int *linenumber_ptr)
 {
   /* Note: table->last_line should be a descendingly sorted list. */
-  struct line_info* next_line = table->last_line;
-  struct line_info* each_line = NULL;
-  *filename_ptr = NULL;
+  struct line_info *each_line;
 
-  if (!next_line)
-    return FALSE;
+  for (each_line = table->last_line;
+       each_line;
+       each_line = each_line->prev_line)
+    if (addr >= each_line->address)
+      break;
 
-  each_line = next_line->prev_line;
-
-  /* Check for large addresses */
-  if (addr > next_line->address)
-    each_line = NULL; /* ensure we skip over the normal case */
-
-  /* Normal case: search the list; save  */
-  while (each_line && next_line)
+  if (each_line
+      && !(each_line->end_sequence || each_line == table->last_line))
     {
-      /* If we have an address match, save this info.  This allows us
-	 to return as good as results as possible for strange debugging
-	 info.  */
-      bfd_boolean addr_match = FALSE;
-      if (each_line->address <= addr && addr < next_line->address)
-	{
-	  addr_match = TRUE;
-
-	  /* If this line appears to span functions, and addr is in the
-	     later function, return the first line of that function instead
-	     of the last line of the earlier one.  This check is for GCC
-	     2.95, which emits the first line number for a function late.  */
-
-	  if (function != NULL)
-	    {
-	      bfd_vma lowest_pc;
-	      struct arange *arange;
-
-	      /* Find the lowest address in the function's range list */
-	      lowest_pc = function->arange.low;
-	      for (arange = &function->arange;
-		   arange;
-		   arange = arange->next)
-		{
-		  if (function->arange.low < lowest_pc)
-		    lowest_pc = function->arange.low;
-		}
-	      /* Check for spanning function and set outgoing line info */
-	      if (addr >= lowest_pc
-		  && each_line->address < lowest_pc
-		  && next_line->address > lowest_pc)
-		{
-		  *filename_ptr = next_line->filename;
-		  *linenumber_ptr = next_line->line;
-		}
-	      else
-		{
-		  *filename_ptr = each_line->filename;
-		  *linenumber_ptr = each_line->line;
-		}
-	    }
-	  else
-	    {
-	      *filename_ptr = each_line->filename;
-	      *linenumber_ptr = each_line->line;
-	    }
-	}
-
-      if (addr_match && !each_line->end_sequence)
-	return TRUE; /* we have definitely found what we want */
-
-      next_line = each_line;
-      each_line = each_line->prev_line;
-    }
-
-  /* At this point each_line is NULL but next_line is not.  If we found
-     a candidate end-of-sequence point in the loop above, we can return
-     that (compatibility with a bug in the Intel compiler); otherwise,
-     assuming that we found the containing function for this address in
-     this compilation unit, return the first line we have a number for
-     (compatibility with GCC 2.95).  */
-  if (*filename_ptr == NULL && function != NULL)
-    {
-      *filename_ptr = next_line->filename;
-      *linenumber_ptr = next_line->line;
+      *filename_ptr = each_line->filename;
+      *linenumber_ptr = each_line->line;
       return TRUE;
     }
 
+  *filename_ptr = NULL;
   return FALSE;
 }
 
@@ -2298,7 +2230,7 @@ comp_unit_find_nearest_line (struct comp_unit *unit,
   if (func_p && (function->tag == DW_TAG_inlined_subroutine))
     stash->inliner_chain = function;
   line_p = lookup_address_in_line_info_table (unit->line_table, addr,
-					      function, filename_ptr,
+					      filename_ptr,
 					      linenumber_ptr);
   return line_p || func_p;
 }
