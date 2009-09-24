@@ -149,14 +149,12 @@ extern int tc_i386_fix_adjustable (struct fix *);
 /* This expression evaluates to true if the relocation is for a local
    object for which we still want to do the relocation at runtime.
    False if we are willing to perform this relocation while building
-   the .o file.  GOTOFF does not need to be checked here because it is
-   not pcrel.  I am not sure if some of the others are ever used with
-   pcrel, but it is easier to be safe than sorry.  */
+   the .o file.  GOTOFF and GOT32 do not need to be checked here because 
+   they are not pcrel.  .*/
 
 #define TC_FORCE_RELOCATION_LOCAL(FIX)			\
   (!(FIX)->fx_pcrel					\
    || (FIX)->fx_r_type == BFD_RELOC_386_PLT32		\
-   || (FIX)->fx_r_type == BFD_RELOC_386_GOT32		\
    || (FIX)->fx_r_type == BFD_RELOC_386_GOTPC		\
    || TC_FORCE_RELOCATION (FIX))
 
