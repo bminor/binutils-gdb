@@ -1,3 +1,8 @@
+2009-09-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* record.c (record_open, record_store_registers, record_xfer_partial):
+	Replace calls to nquery by calls to query.
+
 2009-09-23  John Wright  <john.wright@hp.com>
 
 	PR gdb/10684:
