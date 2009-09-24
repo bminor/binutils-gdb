@@ -497,7 +497,7 @@ record_open (char *name, int from_tty)
   /* Check if record target is already running.  */
   if (current_target.to_stratum == record_stratum)
     {
-      if (!nquery
+      if (!query
 	  (_("Process record target already running, do you want to delete "
 	     "the old record log?")))
 	return;
@@ -1029,15 +1029,15 @@ record_store_registers (struct target_ops *ops, struct regcache *regcache,
 	  /* Let user choose if he wants to write register or not.  */
 	  if (regno < 0)
 	    n =
-	      nquery (_("Because GDB is in replay mode, changing the "
-			"value of a register will make the execution "
-			"log unusable from this point onward.  "
-			"Change all registers?"));
+	      query (_("Because GDB is in replay mode, changing the "
+		       "value of a register will make the execution "
+		       "log unusable from this point onward.  "
+		       "Change all registers?"));
 	  else
 	    n =
-	      nquery (_("Because GDB is in replay mode, changing the value "
-			"of a register will make the execution log unusable "
-			"from this point onward.  Change register %s?"),
+	      query (_("Because GDB is in replay mode, changing the value "
+		       "of a register will make the execution log unusable "
+		       "from this point onward.  Change register %s?"),
 		      gdbarch_register_name (get_regcache_arch (regcache),
 					       regno));
 
@@ -1085,9 +1085,9 @@ record_xfer_partial (struct target_ops *ops, enum target_object object,
       if (RECORD_IS_REPLAY)
 	{
 	  /* Let user choose if he wants to write memory or not.  */
-	  if (!nquery (_("Because GDB is in replay mode, writing to memory "
-		         "will make the execution log unusable from this "
-		         "point onward.  Write memory at address %s?"),
+	  if (!query (_("Because GDB is in replay mode, writing to memory "
+		        "will make the execution log unusable from this "
+		        "point onward.  Write memory at address %s?"),
 		       paddress (target_gdbarch, offset)))
 	    error (_("Process record canceled the operation."));
 
