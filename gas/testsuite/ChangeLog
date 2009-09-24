@@ -1,3 +1,11 @@
+2009-09-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/10677
+	* gas/i386/i386.exp: Run x86-64-localpic.
+
+	* gas/i386/x86-64-localpic.d: New.
+	* gas/i386/x86-64-localpic.s: Likewise.
+
 2009-09-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/localpic.d: Updated.

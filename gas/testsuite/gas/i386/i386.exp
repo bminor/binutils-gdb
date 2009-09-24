@@ -338,21 +338,17 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
 	run_dump_test "rex"
     }
 
-    # For ELF targets verify that @unwind works.
-    if { ([istarget "*-*-elf*"] || [istarget "*-*-linux*"]
-	  || [istarget "*-*-solaris2.*"])
-	 && ![istarget *-*-linux*aout*]
-	 && ![istarget *-*-linux*oldld*] } then {
-	run_dump_test "x86-64-unwind"
-    }
-
     # ELF specific tests
     if [is_elf_format] then {
+	# Verify that @unwind works.
+	run_dump_test "x86-64-unwind"
+
 	run_dump_test "reloc64"
 	run_list_test "reloc64" "--defsym _bad_=1"
 	run_dump_test "mixed-mode-reloc64"
 	run_dump_test "x86-64-ifunc"
 	run_dump_test "l1om"
+	run_dump_test "x86-64-localpic"
     }
 
     set ASFLAGS "$old_ASFLAGS"
