@@ -1,3 +1,18 @@
+2009-09-25  Martin Thuresson  <martint@google.com>
+
+	Update soruces to make alpha and arm targets compile cleanly with
+	-Wc++-compat:
+	* ecoff.c: Add casts.
+	* ecofflink.c: Add casts.
+	* elf64-alpha.c: Add casts.
+	(struct alpha_elf_got_entry, struct alpha_elf_reloc_entry): Move
+	to top level.
+	(SKIP_HOWTO): Use enum name.
+	* elf32-arm.c: Add casts.
+	(elf32_arm_vxworks_bed): Update code to avoid multiple
+	declarations.
+	(struct map_stub): Move to top level.
+
 2009-09-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/10630

@@ -75,10 +75,15 @@
 #define MAX_INSN_FIXUPS		 2
 #define MAX_INSN_ARGS		 5
 
+/* Used since new relocation types are introduced in this
+   file (DUMMY_RELOC_LITUSE_*) */
+typedef int extended_bfd_reloc_code_real_type;
+
 struct alpha_fixup
 {
   expressionS exp;
-  bfd_reloc_code_real_type reloc;
+  /* bfd_reloc_code_real_type reloc; */
+  extended_bfd_reloc_code_real_type reloc;
 #ifdef OBJ_EVAX
   symbolS *xtrasym, *procsym;
 #endif
@@ -444,7 +449,7 @@ static const struct alpha_reloc_op_tag
   const char *name;				/* String to lookup.  */
   size_t length;				/* Size of the string.  */
   operatorT op;					/* Which operator to use.  */
-  bfd_reloc_code_real_type reloc;		/* Relocation before frob.  */
+  extended_bfd_reloc_code_real_type reloc;
   unsigned int require_seq : 1;			/* Require a sequence number.  */
   unsigned int allow_seq : 1;			/* Allow a sequence number.  */
 }
@@ -565,7 +570,7 @@ static const char * const mskXh_op[] = { NULL,    "mskwh", "msklh", "mskqh" };
 static const char * const stX_op[] = { "stb", "stw", "stl", "stq" };
 static const char * const ldXu_op[] = { "ldbu", "ldwu", NULL, NULL };
 
-static void assemble_insn (const struct alpha_opcode *, const expressionS *, int, struct alpha_insn *, bfd_reloc_code_real_type);
+static void assemble_insn (const struct alpha_opcode *, const expressionS *, int, struct alpha_insn *, extended_bfd_reloc_code_real_type);
 static void emit_insn (struct alpha_insn *);
 static void assemble_tokens (const char *, const expressionS *, int, int);
 #ifdef OBJ_EVAX
@@ -587,7 +592,8 @@ get_alpha_reloc_tag (long sequence)
       size_t len = strlen (buffer);
       const char *errmsg;
 
-      info = xcalloc (sizeof (struct alpha_reloc_tag) + len, 1);
+      info = (struct alpha_reloc_tag *)
+          xcalloc (sizeof (struct alpha_reloc_tag) + len, 1);
 
       info->segment = now_seg;
       info->sequence = sequence;
@@ -1764,8 +1770,9 @@ emit_insn (struct alpha_insn *insn)
 	}
       else
 	{
-	  reloc_howto_type *reloc_howto
-	    = bfd_reloc_type_lookup (stdoutput, fixup->reloc);
+	  reloc_howto_type *reloc_howto =
+              bfd_reloc_type_lookup (stdoutput,
+                                     (bfd_reloc_code_real_type) fixup->reloc);
 	  gas_assert (reloc_howto);
 
 	  size = bfd_get_reloc_size (reloc_howto);
@@ -1787,7 +1794,7 @@ emit_insn (struct alpha_insn *insn)
 	}
 
       fixP = fix_new_exp (frag_now, f - frag_now->fr_literal, size,
-			  &fixup->exp, pcrel, fixup->reloc);
+			  &fixup->exp, pcrel, (bfd_reloc_code_real_type) fixup->reloc);
 
       /* Turn off complaints that the addend is too large for some fixups,
          and copy in the sequence number for the explicit relocations.  */
@@ -2002,7 +2009,7 @@ assemble_insn (const struct alpha_opcode *opcode,
 	       const expressionS *tok,
 	       int ntok,
 	       struct alpha_insn *insn,
-	       bfd_reloc_code_real_type reloc)
+	       extended_bfd_reloc_code_real_type reloc)
 {
   const struct alpha_operand *reloc_operand = NULL;
   const expressionS *reloc_exp = NULL;
@@ -2125,7 +2132,8 @@ assemble_insn (const struct alpha_opcode *opcode,
       else if (reloc < BFD_RELOC_UNUSED && reloc > 0)
 	{
 	  reloc_howto_type *reloc_howto
-	    = bfd_reloc_type_lookup (stdoutput, reloc);
+              = bfd_reloc_type_lookup (stdoutput,
+                                       (bfd_reloc_code_real_type) reloc);
 	  if (reloc_operand == NULL
 	      || reloc_howto->bitsize != reloc_operand->bits)
 	    {
@@ -2168,7 +2176,7 @@ emit_ir_load (const expressionS *tok,
     basereg = tok[2].X_add_number;
 
   lituse = load_expression (tok[0].X_add_number, &tok[1],
-			    &basereg, &newtok[1], opname);
+			    &basereg, &newtok[1], (const char *) opname);
 
   if (basereg == alpha_gp_register &&
       (symlen > 4 && strcmp (&symname [symlen - 4], "..lk") == 0))
@@ -2215,7 +2223,7 @@ emit_loadstore (const expressionS *tok,
 	as_bad (_("macro requires $at register while noat in effect"));
 
       lituse = load_expression (AXP_REG_AT, &tok[1], 
-				&basereg, &newtok[1], opname);
+				&basereg, &newtok[1], (const char *) opname);
     }
   else
     {
@@ -3290,7 +3298,7 @@ assemble_tokens (const char *opname,
   const struct alpha_opcode *opcode;
   const struct alpha_macro *macro;
   int cpumatch = 1;
-  bfd_reloc_code_real_type reloc = BFD_RELOC_UNUSED;
+  extended_bfd_reloc_code_real_type reloc = BFD_RELOC_UNUSED;
 
 #ifdef RELOC_OP_P
   /* If a user-specified relocation is present, this is not a macro.  */
@@ -3723,7 +3731,8 @@ s_alpha_ent (int dummy ATTRIBUTE_UNUSED)
 	  sym = symbol_find_or_make (name);
 	  symbol_get_bfdsym (sym)->flags |= BSF_FUNCTION;
 
-	  cur_frame_data = calloc (1, sizeof (*cur_frame_data));
+	  cur_frame_data = (struct alpha_elf_frame_data *)
+              calloc (1, sizeof (*cur_frame_data));
 	  cur_frame_data->func_sym = sym;
 
 	  /* Provide sensible defaults.  */
@@ -3779,7 +3788,7 @@ s_alpha_end (int dummy ATTRIBUTE_UNUSED)
 	  if (sym && cur_frame_data)
 	    {
 	      OBJ_SYMFIELD_TYPE *obj = symbol_get_obj (sym);
-	      expressionS *exp = xmalloc (sizeof (expressionS));
+	      expressionS *exp = (expressionS *) xmalloc (sizeof (expressionS));
 
 	      obj->size = exp;
 	      exp->X_op = O_subtract;
@@ -3947,7 +3956,7 @@ s_alpha_file (int ignore ATTRIBUTE_UNUSED)
       discard_rest_of_line ();
 
       len = input_line_pointer - start;
-      first_file_directive = xmalloc (len + 1);
+      first_file_directive = (char *) xmalloc (len + 1);
       memcpy (first_file_directive, start, len);
       first_file_directive[len] = '\0';
 
@@ -5425,7 +5434,7 @@ md_begin (void)
 
       if ((slash = strchr (name, '/')) != NULL)
 	{
-	  char *p = xmalloc (strlen (name));
+	  char *p = (char *) xmalloc (strlen (name));
 
 	  memcpy (p, name, slash - name);
 	  strcpy (p + (slash - name), slash + 1);
@@ -6207,8 +6216,8 @@ tc_gen_reloc (asection *sec ATTRIBUTE_UNUSED,
 {
   arelent *reloc;
 
-  reloc = xmalloc (sizeof (* reloc));
-  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  reloc = (arelent *) xmalloc (sizeof (* reloc));
+  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 

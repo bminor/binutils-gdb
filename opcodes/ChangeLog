@@ -1,3 +1,12 @@
+2009-09-25  Martin Thuresson  <martint@google.com>
+
+	Update soruces to make arc and arm targets compile cleanly with
+	-Wc++-compat:
+	* arc-dis.c Fix casts.
+	* arc-ext.c: Add casts.
+	* arm-dis.c (enum opcode_sentinel_enum): Gave name to anonymous
+	enum.
+
 2009-09-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (opcode_modifiers): Remove Vex256.

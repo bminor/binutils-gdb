@@ -1,5 +1,5 @@
 /* Instruction printing code for the ARC.
-   Copyright 1994, 1995, 1997, 1998, 2000, 2001, 2002, 2005, 2007
+   Copyright 1994, 1995, 1997, 1998, 2000, 2001, 2002, 2005, 2007, 2009
    Free Software Foundation, Inc.
    Contributed by Doug Evans (dje@cygnus.com).
 
@@ -1201,7 +1201,7 @@ decodeInstr (bfd_vma            address, /* Address of this instruction.  */
   s.instName = _instName;
 
   /* Disassemble.  */
-  bytes = dsmOneArcInst (address, (void *)& s);
+  bytes = dsmOneArcInst (address, & s);
 
   /* Display the disassembly instruction.  */
   (*func) (stream, "%08lx ", s.words[0]);
@@ -1228,6 +1228,6 @@ disassembler_ftype
 arc_get_disassembler (void *ptr)
 {
   if (ptr)
-    build_ARC_extmap (ptr);
+    build_ARC_extmap ((struct bfd *) ptr);
   return decodeInstr;
 }

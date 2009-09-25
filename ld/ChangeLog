@@ -1,3 +1,9 @@
+2009-09-25  Martin Thuresson  <martint@google.com>
+
+	Update soruces to make arm targets compile cleanly with
+	-Wc++-compat:
+	* emultempl/armelf.em: Add casts.
+
 2009-09-23  Matt Rice  <ratmice@gmail.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_add_options): Add --audit,

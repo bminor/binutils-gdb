@@ -1367,7 +1367,7 @@ parse_typed_reg_or_scalar (char **ccp, enum arm_reg_type type,
               || reg->type == REG_TYPE_NQ))
       || (type == REG_TYPE_MMXWC
 	  && (reg->type == REG_TYPE_MMXWCG)))
-    type = reg->type;
+    type = (enum arm_reg_type) reg->type;
 
   if (type != reg->type)
     return FAIL;
@@ -1661,7 +1661,7 @@ parse_vfp_reg_list (char **ccp, unsigned int *pbase, enum reg_list_els etype)
   char *str = *ccp;
   int base_reg;
   int new_base;
-  enum arm_reg_type regtype = 0;
+  enum arm_reg_type regtype = (enum arm_reg_type) 0;
   int max_regs = 0;
   int count = 0;
   int warned = 0;
@@ -2036,7 +2036,8 @@ parse_reloc (char **str)
   if (*q != ')')
     return -1;
 
-  if ((r = hash_find_n (arm_reloc_hsh, p, q - p)) == NULL)
+  if ((r = (struct reloc_entry *)
+       hash_find_n (arm_reloc_hsh, p, q - p)) == NULL)
     return -1;
 
   *str = q + 1;
@@ -2093,7 +2094,8 @@ insert_neon_reg_alias (char *str, int number, int type,
 
   if (atype)
     {
-      reg->neon = xmalloc (sizeof (struct neon_typed_alias));
+      reg->neon = (struct neon_typed_alias *)
+          xmalloc (sizeof (struct neon_typed_alias));
       *reg->neon = *atype;
     }
 }
@@ -2122,7 +2124,7 @@ create_register_alias (char * newname, char *p)
   if (*oldname == '\0')
     return FALSE;
 
-  old = hash_find (arm_reg_hsh, oldname);
+  old = (struct reg_entry *) hash_find (arm_reg_hsh, oldname);
   if (!old)
     {
       as_warn (_("unknown register '%s' -- .req ignored"), oldname);
@@ -2139,7 +2141,7 @@ create_register_alias (char * newname, char *p)
   nlen = strlen (newname);
 #endif
 
-  nbuf = alloca (nlen + 1);
+  nbuf = (char *) alloca (nlen + 1);
   memcpy (nbuf, newname, nlen);
   nbuf[nlen] = '\0';
 
@@ -2291,7 +2293,7 @@ create_neon_reg_alias (char *newname, char *p)
     }
 
   namelen = nameend - newname;
-  namebuf = alloca (namelen + 1);
+  namebuf = (char *) alloca (namelen + 1);
   strncpy (namebuf, newname, namelen);
   namebuf[namelen] = '\0';
 
@@ -2364,7 +2366,8 @@ s_unreq (int a ATTRIBUTE_UNUSED)
     as_bad (_("invalid syntax for .unreq directive"));
   else
     {
-      struct reg_entry *reg = hash_find (arm_reg_hsh, name);
+      struct reg_entry *reg = (struct reg_entry *) hash_find (arm_reg_hsh,
+                                                              name);
 
       if (!reg)
 	as_bad (_("unknown register alias '%s'"), name);
@@ -2389,7 +2392,7 @@ s_unreq (int a ATTRIBUTE_UNUSED)
 	  nbuf = strdup (name);
 	  for (p = nbuf; *p; p++)
 	    *p = TOUPPER (*p);
-	  reg = hash_find (arm_reg_hsh, nbuf);
+	  reg = (struct reg_entry *) hash_find (arm_reg_hsh, nbuf);
 	  if (reg)
 	    {
 	      hash_delete (arm_reg_hsh, nbuf, FALSE);
@@ -2401,7 +2404,7 @@ s_unreq (int a ATTRIBUTE_UNUSED)
 
 	  for (p = nbuf; *p; p++)
 	    *p = TOLOWER (*p);
-	  reg = hash_find (arm_reg_hsh, nbuf);
+	  reg = (struct reg_entry *) hash_find (arm_reg_hsh, nbuf);
 	  if (reg)
 	    {
 	      hash_delete (arm_reg_hsh, nbuf, FALSE);
@@ -2762,7 +2765,7 @@ s_thumb_set (int equiv)
       if (listing & LISTING_SYMBOLS)
 	{
 	  extern struct list_info_struct * listing_tail;
-	  fragS * dummy_frag = xmalloc (sizeof (fragS));
+	  fragS * dummy_frag = (fragS * ) xmalloc (sizeof (fragS));
 
 	  memset (dummy_frag, 0, sizeof (fragS));
 	  dummy_frag->fr_type = rs_fill;
@@ -2931,7 +2934,7 @@ find_or_make_literal_pool (void)
   if (pool == NULL)
     {
       /* Create a new pool.  */
-      pool = xmalloc (sizeof (* pool));
+      pool = (literal_pool *) xmalloc (sizeof (* pool));
       if (! pool)
 	return NULL;
 
@@ -3025,7 +3028,7 @@ symbol_locate (symbolS *    symbolP,
 
   name_length = strlen (name) + 1;   /* +1 for \0.  */
   obstack_grow (&notes, name, name_length);
-  preserved_copy_of_name = obstack_finish (&notes);
+  preserved_copy_of_name = (char *) obstack_finish (&notes);
 
 #ifdef tc_canonicalize_symbol_name
   preserved_copy_of_name =
@@ -3159,7 +3162,9 @@ s_arm_elf_cons (int nbytes)
 	    emit_expr (&exp, (unsigned int) nbytes);
 	  else
 	    {
-	      reloc_howto_type *howto = bfd_reloc_type_lookup (stdoutput, reloc);
+	      reloc_howto_type *howto = (reloc_howto_type *)
+                  bfd_reloc_type_lookup (stdoutput,
+                                         (bfd_reloc_code_real_type) reloc);
 	      int size = bfd_get_reloc_size (howto);
 
 	      if (reloc == BFD_RELOC_ARM_PLT32)
@@ -3180,7 +3185,7 @@ s_arm_elf_cons (int nbytes)
 		     XXX Surely there is a cleaner way to do this.  */
 		  char *p = input_line_pointer;
 		  int offset;
-		  char *save_buf = alloca (input_line_pointer - base);
+		  char *save_buf = (char *) alloca (input_line_pointer - base);
 		  memcpy (save_buf, base, input_line_pointer - base);
 		  memmove (base + (input_line_pointer - before_reloc),
 			   base, before_reloc - base);
@@ -3192,7 +3197,7 @@ s_arm_elf_cons (int nbytes)
 		  offset = nbytes - size;
 		  p = frag_more ((int) nbytes);
 		  fix_new_exp (frag_now, p - frag_now->fr_literal + offset,
-			       size, &exp, 0, reloc);
+			       size, &exp, 0, (enum bfd_reloc_code_real) reloc);
 		}
 	    }
 	}
@@ -4623,7 +4628,8 @@ parse_shift (char **str, int i, enum parse_shift_mode mode)
       return FAIL;
     }
 
-  shift_name = hash_find_n (arm_shift_hsh, *str, p - *str);
+  shift_name = (const struct asm_shift_name *) hash_find_n (arm_shift_hsh, *str,
+                                                            p - *str);
 
   if (shift_name == NULL)
     {
@@ -4906,7 +4912,7 @@ parse_shifter_operand_group_reloc (char **str, int i)
         return PARSE_OPERAND_FAIL_NO_BACKTRACK;
 
       /* Record the relocation type (always the ALU variant here).  */
-      inst.reloc.type = entry->alu_code;
+      inst.reloc.type = (bfd_reloc_code_real_type) entry->alu_code;
       gas_assert (inst.reloc.type != 0);
 
       return PARSE_OPERAND_SUCCESS;
@@ -5054,15 +5060,15 @@ parse_address_main (char **str, int i, int group_relocations,
               switch (group_type)
                 {
                   case GROUP_LDR:
-	            inst.reloc.type = entry->ldr_code;
+	            inst.reloc.type = (bfd_reloc_code_real_type) entry->ldr_code;
                     break;
 
                   case GROUP_LDRS:
-	            inst.reloc.type = entry->ldrs_code;
+	            inst.reloc.type = (bfd_reloc_code_real_type) entry->ldrs_code;
                     break;
 
                   case GROUP_LDC:
-	            inst.reloc.type = entry->ldc_code;
+	            inst.reloc.type = (bfd_reloc_code_real_type) entry->ldc_code;
                     break;
 
                   default:
@@ -5168,7 +5174,7 @@ parse_address_main (char **str, int i, int group_relocations,
 static int
 parse_address (char **str, int i)
 {
-  return parse_address_main (str, i, 0, 0) == PARSE_OPERAND_SUCCESS
+  return parse_address_main (str, i, 0, GROUP_LDR) == PARSE_OPERAND_SUCCESS
          ? SUCCESS : FAIL;
 }
 
@@ -5244,7 +5250,8 @@ parse_psr (char **str)
 	p++;
       while (ISALNUM (*p) || *p == '_');
 
-      psr = hash_find_n (arm_v7m_psr_hsh, start, p - start);
+      psr = (const struct asm_psr *) hash_find_n (arm_v7m_psr_hsh, start,
+                                                  p - start);
       if (!psr)
 	return FAIL;
 
@@ -5263,7 +5270,8 @@ parse_psr (char **str)
 	p++;
       while (ISALNUM (*p) || *p == '_');
 
-      psr = hash_find_n (arm_psr_hsh, start, p - start);
+      psr = (const struct asm_psr *) hash_find_n (arm_psr_hsh, start,
+                                                  p - start);
       if (!psr)
 	goto error;
 
@@ -5404,7 +5412,7 @@ parse_cond (char **str)
       n++;
     }
 
-  c = hash_find_n (arm_cond_hsh, cond, n);
+  c = (const struct asm_cond *) hash_find_n (arm_cond_hsh, cond, n);
   if (!c)
     {
       inst.error = _("condition required");
@@ -5427,7 +5435,8 @@ parse_barrier (char **str)
   while (ISALPHA (*q))
     q++;
 
-  o = hash_find_n (arm_barrier_opt_hsh, p, q - p);
+  o = (const struct asm_barrier_opt *) hash_find_n (arm_barrier_opt_hsh, p,
+                                                    q - p);
   if (!o)
     return FAIL;
 
@@ -6789,7 +6798,7 @@ encode_arm_cp_address (int i, int wb_ok, int unind_ok, int reloc_override)
     }
 
   if (reloc_override)
-    inst.reloc.type = reloc_override;
+    inst.reloc.type = (bfd_reloc_code_real_type) reloc_override;
   else if ((inst.reloc.type < BFD_RELOC_ARM_ALU_PC_G0_NC
             || inst.reloc.type > BFD_RELOC_ARM_LDC_SB_G2)
            && inst.reloc.type != BFD_RELOC_ARM_LDR_PC_G0)
@@ -7094,7 +7103,7 @@ encode_branch (int default_reloc)
     }
   else
     {
-      inst.reloc.type = default_reloc;
+      inst.reloc.type = (bfd_reloc_code_real_type) default_reloc;
     }
   inst.reloc.pc_rel = 1;
 }
@@ -8717,88 +8726,88 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
    holds variant (1).
    Also contains several pseudo-instructions used during relaxation.  */
 #define T16_32_TAB				\
-  X(adc,   4140, eb400000),			\
-  X(adcs,  4140, eb500000),			\
-  X(add,   1c00, eb000000),			\
-  X(adds,  1c00, eb100000),			\
-  X(addi,  0000, f1000000),			\
-  X(addis, 0000, f1100000),			\
-  X(add_pc,000f, f20f0000),			\
-  X(add_sp,000d, f10d0000),			\
-  X(adr,   000f, f20f0000),			\
-  X(and,   4000, ea000000),			\
-  X(ands,  4000, ea100000),			\
-  X(asr,   1000, fa40f000),			\
-  X(asrs,  1000, fa50f000),			\
-  X(b,     e000, f000b000),			\
-  X(bcond, d000, f0008000),			\
-  X(bic,   4380, ea200000),			\
-  X(bics,  4380, ea300000),			\
-  X(cmn,   42c0, eb100f00),			\
-  X(cmp,   2800, ebb00f00),			\
-  X(cpsie, b660, f3af8400),			\
-  X(cpsid, b670, f3af8600),			\
-  X(cpy,   4600, ea4f0000),			\
-  X(dec_sp,80dd, f1ad0d00),			\
-  X(eor,   4040, ea800000),			\
-  X(eors,  4040, ea900000),			\
-  X(inc_sp,00dd, f10d0d00),			\
-  X(ldmia, c800, e8900000),			\
-  X(ldr,   6800, f8500000),			\
-  X(ldrb,  7800, f8100000),			\
-  X(ldrh,  8800, f8300000),			\
-  X(ldrsb, 5600, f9100000),			\
-  X(ldrsh, 5e00, f9300000),			\
-  X(ldr_pc,4800, f85f0000),			\
-  X(ldr_pc2,4800, f85f0000),			\
-  X(ldr_sp,9800, f85d0000),			\
-  X(lsl,   0000, fa00f000),			\
-  X(lsls,  0000, fa10f000),			\
-  X(lsr,   0800, fa20f000),			\
-  X(lsrs,  0800, fa30f000),			\
-  X(mov,   2000, ea4f0000),			\
-  X(movs,  2000, ea5f0000),			\
-  X(mul,   4340, fb00f000),                     \
-  X(muls,  4340, ffffffff), /* no 32b muls */	\
-  X(mvn,   43c0, ea6f0000),			\
-  X(mvns,  43c0, ea7f0000),			\
-  X(neg,   4240, f1c00000), /* rsb #0 */	\
-  X(negs,  4240, f1d00000), /* rsbs #0 */	\
-  X(orr,   4300, ea400000),			\
-  X(orrs,  4300, ea500000),			\
-  X(pop,   bc00, e8bd0000), /* ldmia sp!,... */	\
-  X(push,  b400, e92d0000), /* stmdb sp!,... */	\
-  X(rev,   ba00, fa90f080),			\
-  X(rev16, ba40, fa90f090),			\
-  X(revsh, bac0, fa90f0b0),			\
-  X(ror,   41c0, fa60f000),			\
-  X(rors,  41c0, fa70f000),			\
-  X(sbc,   4180, eb600000),			\
-  X(sbcs,  4180, eb700000),			\
-  X(stmia, c000, e8800000),			\
-  X(str,   6000, f8400000),			\
-  X(strb,  7000, f8000000),			\
-  X(strh,  8000, f8200000),			\
-  X(str_sp,9000, f84d0000),			\
-  X(sub,   1e00, eba00000),			\
-  X(subs,  1e00, ebb00000),			\
-  X(subi,  8000, f1a00000),			\
-  X(subis, 8000, f1b00000),			\
-  X(sxtb,  b240, fa4ff080),			\
-  X(sxth,  b200, fa0ff080),			\
-  X(tst,   4200, ea100f00),			\
-  X(uxtb,  b2c0, fa5ff080),			\
-  X(uxth,  b280, fa1ff080),			\
-  X(nop,   bf00, f3af8000),			\
-  X(yield, bf10, f3af8001),			\
-  X(wfe,   bf20, f3af8002),			\
-  X(wfi,   bf30, f3af8003),			\
-  X(sev,   bf40, f3af8004),
+  X(_adc,   4140, eb400000),			\
+  X(_adcs,  4140, eb500000),			\
+  X(_add,   1c00, eb000000),			\
+  X(_adds,  1c00, eb100000),			\
+  X(_addi,  0000, f1000000),			\
+  X(_addis, 0000, f1100000),			\
+  X(_add_pc,000f, f20f0000),			\
+  X(_add_sp,000d, f10d0000),			\
+  X(_adr,   000f, f20f0000),			\
+  X(_and,   4000, ea000000),			\
+  X(_ands,  4000, ea100000),			\
+  X(_asr,   1000, fa40f000),			\
+  X(_asrs,  1000, fa50f000),			\
+  X(_b,     e000, f000b000),			\
+  X(_bcond, d000, f0008000),			\
+  X(_bic,   4380, ea200000),			\
+  X(_bics,  4380, ea300000),			\
+  X(_cmn,   42c0, eb100f00),			\
+  X(_cmp,   2800, ebb00f00),			\
+  X(_cpsie, b660, f3af8400),			\
+  X(_cpsid, b670, f3af8600),			\
+  X(_cpy,   4600, ea4f0000),			\
+  X(_dec_sp,80dd, f1ad0d00),			\
+  X(_eor,   4040, ea800000),			\
+  X(_eors,  4040, ea900000),			\
+  X(_inc_sp,00dd, f10d0d00),			\
+  X(_ldmia, c800, e8900000),			\
+  X(_ldr,   6800, f8500000),			\
+  X(_ldrb,  7800, f8100000),			\
+  X(_ldrh,  8800, f8300000),			\
+  X(_ldrsb, 5600, f9100000),			\
+  X(_ldrsh, 5e00, f9300000),			\
+  X(_ldr_pc,4800, f85f0000),			\
+  X(_ldr_pc2,4800, f85f0000),			\
+  X(_ldr_sp,9800, f85d0000),			\
+  X(_lsl,   0000, fa00f000),			\
+  X(_lsls,  0000, fa10f000),			\
+  X(_lsr,   0800, fa20f000),			\
+  X(_lsrs,  0800, fa30f000),			\
+  X(_mov,   2000, ea4f0000),			\
+  X(_movs,  2000, ea5f0000),			\
+  X(_mul,   4340, fb00f000),                     \
+  X(_muls,  4340, ffffffff), /* no 32b muls */	\
+  X(_mvn,   43c0, ea6f0000),			\
+  X(_mvns,  43c0, ea7f0000),			\
+  X(_neg,   4240, f1c00000), /* rsb #0 */	\
+  X(_negs,  4240, f1d00000), /* rsbs #0 */	\
+  X(_orr,   4300, ea400000),			\
+  X(_orrs,  4300, ea500000),			\
+  X(_pop,   bc00, e8bd0000), /* ldmia sp!,... */	\
+  X(_push,  b400, e92d0000), /* stmdb sp!,... */	\
+  X(_rev,   ba00, fa90f080),			\
+  X(_rev16, ba40, fa90f090),			\
+  X(_revsh, bac0, fa90f0b0),			\
+  X(_ror,   41c0, fa60f000),			\
+  X(_rors,  41c0, fa70f000),			\
+  X(_sbc,   4180, eb600000),			\
+  X(_sbcs,  4180, eb700000),			\
+  X(_stmia, c000, e8800000),			\
+  X(_str,   6000, f8400000),			\
+  X(_strb,  7000, f8000000),			\
+  X(_strh,  8000, f8200000),			\
+  X(_str_sp,9000, f84d0000),			\
+  X(_sub,   1e00, eba00000),			\
+  X(_subs,  1e00, ebb00000),			\
+  X(_subi,  8000, f1a00000),			\
+  X(_subis, 8000, f1b00000),			\
+  X(_sxtb,  b240, fa4ff080),			\
+  X(_sxth,  b200, fa0ff080),			\
+  X(_tst,   4200, ea100f00),			\
+  X(_uxtb,  b2c0, fa5ff080),			\
+  X(_uxth,  b280, fa1ff080),			\
+  X(_nop,   bf00, f3af8000),			\
+  X(_yield, bf10, f3af8001),			\
+  X(_wfe,   bf20, f3af8002),			\
+  X(_wfi,   bf30, f3af8003),			\
+  X(_sev,   bf40, f3af8004),
 
 /* To catch errors in encoding functions, the codes are all offset by
    0xF800, putting them in one of the 32-bit prefix ranges, ergo undefined
    as 16-bit instructions.  */
-#define X(a,b,c) T_MNEM_##a
+#define X(a,b,c) T_MNEM##a
 enum t16_32_codes { T16_32_OFFSET = 0xF7FF, T16_32_TAB };
 #undef X
 
@@ -11569,7 +11578,7 @@ neon_select_shape (enum neon_shape shape, ...)
 
   va_start (ap, shape);
 
-  for (; shape != NS_NULL; shape = va_arg (ap, int))
+  for (; shape != NS_NULL; shape = (enum neon_shape) va_arg (ap, int))
     {
       unsigned j;
       int matches = 1;
@@ -11822,7 +11831,8 @@ modify_types_allowed (unsigned allowed, unsigned mods)
 
   for (i = 1; i <= N_MAX_NONSPECIAL; i <<= 1)
     {
-      if (el_type_of_type_chk (&type, &size, allowed & i) == SUCCESS)
+      if (el_type_of_type_chk (&type, &size,
+                               (enum neon_type_mask) (allowed & i)) == SUCCESS)
         {
           neon_modify_type_size (mods, &type, &size);
           destmask |= type_chk_of_el_type (type, size);
@@ -12037,7 +12047,7 @@ do_vfp_nsyn_opcode (const char *opname)
 {
   const struct asm_opcode *opcode;
 
-  opcode = hash_find (arm_ops_hsh, opname);
+  opcode = (const struct asm_opcode *) hash_find (arm_ops_hsh, opname);
 
   if (!opcode)
     abort ();
@@ -12776,7 +12786,7 @@ do_neon_logic (void)
       enum neon_shape rs = neon_select_shape (NS_DI, NS_QI, NS_NULL);
       struct neon_type_el et = neon_check_type (2, rs,
         N_I8 | N_I16 | N_I32 | N_I64 | N_F32 | N_KEY, N_EQK);
-      enum neon_opc opcode = inst.instruction & 0x0fffffff;
+      enum neon_opc opcode = (enum neon_opc) inst.instruction & 0x0fffffff;
       unsigned immbits;
       int cmode;
 
@@ -14727,12 +14737,13 @@ fix_new_arm (fragS *	   frag,
     case O_symbol:
     case O_add:
     case O_subtract:
-      new_fix = fix_new_exp (frag, where, size, exp, pc_rel, reloc);
+      new_fix = fix_new_exp (frag, where, size, exp, pc_rel,
+                             (enum bfd_reloc_code_real) reloc);
       break;
 
     default:
-      new_fix = fix_new (frag, where, size, make_expr_symbol (exp), 0,
-			 pc_rel, reloc);
+      new_fix = (fixS *) fix_new (frag, where, size, make_expr_symbol (exp), 0,
+                                  pc_rel, (enum bfd_reloc_code_real) reloc);
       break;
     }
 
@@ -14989,7 +15000,8 @@ opcode_lookup (char **str)
     *str = end;
 
   /* Look for unaffixed or special-case affixed mnemonic.  */
-  opcode = hash_find_n (arm_ops_hsh, base, end - base);
+  opcode = (const struct asm_opcode *) hash_find_n (arm_ops_hsh, base,
+                                                    end - base);
   if (opcode)
     {
       /* step U */
@@ -15002,7 +15014,7 @@ opcode_lookup (char **str)
       if (warn_on_deprecated && unified_syntax)
 	as_warn (_("conditional infixes are deprecated in unified syntax"));
       affix = base + (opcode->tag - OT_odd_infix_0);
-      cond = hash_find_n (arm_cond_hsh, affix, 2);
+      cond = (const struct asm_cond *) hash_find_n (arm_cond_hsh, affix, 2);
       gas_assert (cond);
 
       inst.cond = cond->value;
@@ -15016,8 +15028,9 @@ opcode_lookup (char **str)
 
   /* Look for suffixed mnemonic.  */
   affix = end - 2;
-  cond = hash_find_n (arm_cond_hsh, affix, 2);
-  opcode = hash_find_n (arm_ops_hsh, base, affix - base);
+  cond = (const struct asm_cond *) hash_find_n (arm_cond_hsh, affix, 2);
+  opcode = (const struct asm_opcode *) hash_find_n (arm_ops_hsh, base,
+                                                    affix - base);
   if (opcode && cond)
     {
       /* step CE */
@@ -15064,13 +15077,14 @@ opcode_lookup (char **str)
 
   /* Look for infixed mnemonic in the usual position.  */
   affix = base + 3;
-  cond = hash_find_n (arm_cond_hsh, affix, 2);
+  cond = (const struct asm_cond *) hash_find_n (arm_cond_hsh, affix, 2);
   if (!cond)
     return NULL;
 
   memcpy (save, affix, 2);
   memmove (affix, affix + 2, (end - affix) - 2);
-  opcode = hash_find_n (arm_ops_hsh, base, (end - base) - 2);
+  opcode = (const struct asm_opcode *) hash_find_n (arm_ops_hsh, base,
+                                                    (end - base) - 2);
   memmove (affix + 2, affix, (end - affix) - 2);
   memcpy (affix, save, 2);
 
@@ -15986,7 +16000,7 @@ static struct asm_barrier_opt barrier_opt_names[] =
 
 /* The normal sort of mnemonic; has a Thumb variant; takes a conditional suffix.  */
 #define TxCE(mnem, op, top, nops, ops, ae, te) \
-  { #mnem, OPS##nops ops, OT_csuffix, 0x##op, top, ARM_VARIANT, \
+  { mnem, OPS##nops ops, OT_csuffix, 0x##op, top, ARM_VARIANT, \
     THUMB_VARIANT, do_##ae, do_##te }
 
 /* Two variants of the above - TCE for a numeric Thumb opcode, tCE for
@@ -15994,29 +16008,29 @@ static struct asm_barrier_opt barrier_opt_names[] =
 #define TCE(mnem, aop, top, nops, ops, ae, te) \
       TxCE (mnem, aop, 0x##top, nops, ops, ae, te)
 #define tCE(mnem, aop, top, nops, ops, ae, te) \
-      TxCE (mnem, aop, T_MNEM_##top, nops, ops, ae, te)
+      TxCE (mnem, aop, T_MNEM##top, nops, ops, ae, te)
 
 /* Second most common sort of mnemonic: has a Thumb variant, takes a conditional
    infix after the third character.  */
 #define TxC3(mnem, op, top, nops, ops, ae, te) \
-  { #mnem, OPS##nops ops, OT_cinfix3, 0x##op, top, ARM_VARIANT, \
+  { mnem, OPS##nops ops, OT_cinfix3, 0x##op, top, ARM_VARIANT, \
     THUMB_VARIANT, do_##ae, do_##te }
 #define TxC3w(mnem, op, top, nops, ops, ae, te) \
-  { #mnem, OPS##nops ops, OT_cinfix3_deprecated, 0x##op, top, ARM_VARIANT, \
+  { mnem, OPS##nops ops, OT_cinfix3_deprecated, 0x##op, top, ARM_VARIANT, \
     THUMB_VARIANT, do_##ae, do_##te }
 #define TC3(mnem, aop, top, nops, ops, ae, te) \
       TxC3 (mnem, aop, 0x##top, nops, ops, ae, te)
 #define TC3w(mnem, aop, top, nops, ops, ae, te) \
       TxC3w (mnem, aop, 0x##top, nops, ops, ae, te)
 #define tC3(mnem, aop, top, nops, ops, ae, te) \
-      TxC3 (mnem, aop, T_MNEM_##top, nops, ops, ae, te)
+      TxC3 (mnem, aop, T_MNEM##top, nops, ops, ae, te)
 #define tC3w(mnem, aop, top, nops, ops, ae, te) \
-      TxC3w (mnem, aop, T_MNEM_##top, nops, ops, ae, te)
+      TxC3w (mnem, aop, T_MNEM##top, nops, ops, ae, te)
 
 /* Mnemonic with a conditional infix in an unusual place.  Each and every variant has to
    appear in the condition table.  */
 #define TxCM_(m1, m2, m3, op, top, nops, ops, ae, te)	\
-  { #m1 #m2 #m3, OPS##nops ops, sizeof (#m2) == 1 ? OT_odd_infix_unc : OT_odd_infix_0 + sizeof (#m1) - 1, \
+  { m1 #m2 m3, OPS##nops ops, sizeof (#m2) == 1 ? OT_odd_infix_unc : OT_odd_infix_0 + sizeof (m1) - 1, \
     0x##op, top, ARM_VARIANT, THUMB_VARIANT, do_##ae, do_##te }
 
 #define TxCM(m1, m2, op, top, nops, ops, ae, te)	\
@@ -16043,24 +16057,24 @@ static struct asm_barrier_opt barrier_opt_names[] =
 #define TCM(m1,m2, aop, top, nops, ops, ae, te)		\
       TxCM (m1,m2, aop, 0x##top, nops, ops, ae, te)
 #define tCM(m1,m2, aop, top, nops, ops, ae, te)		\
-      TxCM (m1,m2, aop, T_MNEM_##top, nops, ops, ae, te)
+      TxCM (m1,m2, aop, T_MNEM##top, nops, ops, ae, te)
 
 /* Mnemonic that cannot be conditionalized.  The ARM condition-code
    field is still 0xE.  Many of the Thumb variants can be executed
    conditionally, so this is checked separately.  */
 #define TUE(mnem, op, top, nops, ops, ae, te)				\
-  { #mnem, OPS##nops ops, OT_unconditional, 0x##op, 0x##top, ARM_VARIANT, \
+  { mnem, OPS##nops ops, OT_unconditional, 0x##op, 0x##top, ARM_VARIANT, \
     THUMB_VARIANT, do_##ae, do_##te }
 
 /* Mnemonic that cannot be conditionalized, and bears 0xF in its ARM
    condition code field.  */
 #define TUF(mnem, op, top, nops, ops, ae, te)				\
-  { #mnem, OPS##nops ops, OT_unconditionalF, 0x##op, 0x##top, ARM_VARIANT, \
+  { mnem, OPS##nops ops, OT_unconditionalF, 0x##op, 0x##top, ARM_VARIANT, \
     THUMB_VARIANT, do_##ae, do_##te }
 
 /* ARM-only variants of all the above.  */
 #define CE(mnem,  op, nops, ops, ae)	\
-  { #mnem, OPS##nops ops, OT_csuffix, 0x##op, 0x0, ARM_VARIANT, 0, do_##ae, NULL }
+  { mnem, OPS##nops ops, OT_csuffix, 0x##op, 0x0, ARM_VARIANT, 0, do_##ae, NULL }
 
 #define C3(mnem, op, nops, ops, ae)	\
   { #mnem, OPS##nops ops, OT_cinfix3, 0x##op, 0x0, ARM_VARIANT, 0, do_##ae, NULL }
@@ -16068,29 +16082,29 @@ static struct asm_barrier_opt barrier_opt_names[] =
 /* Legacy mnemonics that always have conditional infix after the third
    character.  */
 #define CL(mnem, op, nops, ops, ae)	\
-  { #mnem, OPS##nops ops, OT_cinfix3_legacy, \
+  { mnem, OPS##nops ops, OT_cinfix3_legacy, \
     0x##op, 0x0, ARM_VARIANT, 0, do_##ae, NULL }
 
 /* Coprocessor instructions.  Isomorphic between Arm and Thumb-2.  */
 #define cCE(mnem,  op, nops, ops, ae)	\
-  { #mnem, OPS##nops ops, OT_csuffix, 0x##op, 0xe##op, ARM_VARIANT, ARM_VARIANT, do_##ae, do_##ae }
+  { mnem, OPS##nops ops, OT_csuffix, 0x##op, 0xe##op, ARM_VARIANT, ARM_VARIANT, do_##ae, do_##ae }
 
 /* Legacy coprocessor instructions where conditional infix and conditional
    suffix are ambiguous.  For consistency this includes all FPA instructions,
    not just the potentially ambiguous ones.  */
 #define cCL(mnem, op, nops, ops, ae)	\
-  { #mnem, OPS##nops ops, OT_cinfix3_legacy, \
+  { mnem, OPS##nops ops, OT_cinfix3_legacy, \
     0x##op, 0xe##op, ARM_VARIANT, ARM_VARIANT, do_##ae, do_##ae }
 
 /* Coprocessor, takes either a suffix or a position-3 infix
    (for an FPA corner case). */
 #define C3E(mnem, op, nops, ops, ae) \
-  { #mnem, OPS##nops ops, OT_csuf_or_in3, \
+  { mnem, OPS##nops ops, OT_csuf_or_in3, \
     0x##op, 0xe##op, ARM_VARIANT, ARM_VARIANT, do_##ae, do_##ae }
 
 #define xCM_(m1, m2, m3, op, nops, ops, ae)	\
-  { #m1 #m2 #m3, OPS##nops ops, \
-    sizeof (#m2) == 1 ? OT_odd_infix_unc : OT_odd_infix_0 + sizeof (#m1) - 1, \
+  { m1 #m2 m3, OPS##nops ops, \
+    sizeof (#m2) == 1 ? OT_odd_infix_unc : OT_odd_infix_0 + sizeof (m1) - 1, \
     0x##op, 0x0, ARM_VARIANT, 0, do_##ae, NULL }
 
 #define CM(m1, m2, op, nops, ops, ae)	\
@@ -16130,7 +16144,7 @@ static struct asm_barrier_opt barrier_opt_names[] =
 /* Neon data processing, version which indirects through neon_enc_tab for
    the various overloaded versions of opcodes.  */
 #define nUF(mnem, op, nops, ops, enc)					\
-  { #mnem, OPS##nops ops, OT_unconditionalF, N_MNEM_##op, N_MNEM_##op,	\
+  { #mnem, OPS##nops ops, OT_unconditionalF, N_MNEM##op, N_MNEM##op,	\
     ARM_VARIANT, THUMB_VARIANT, do_##enc, do_##enc }
 
 /* Neon insn with conditional suffix for the ARM version, non-overloaded
@@ -16147,7 +16161,7 @@ static struct asm_barrier_opt barrier_opt_names[] =
 
 /* Neon insn with conditional suffix for the ARM version, overloaded types.  */
 #define nCE_tag(mnem, op, nops, ops, enc, tag)				\
-  { #mnem, OPS##nops ops, tag, N_MNEM_##op, N_MNEM_##op,		\
+  { #mnem, OPS##nops ops, tag, N_MNEM##op, N_MNEM##op,		\
     ARM_VARIANT, THUMB_VARIANT, do_##enc, do_##enc }
 
 #define nCE(mnem, op, nops, ops, enc)					\
@@ -16165,107 +16179,107 @@ static const struct asm_opcode insns[] =
 {
 #define ARM_VARIANT &arm_ext_v1 /* Core ARM Instructions.  */
 #define THUMB_VARIANT &arm_ext_v4t
- tCE(and,	0000000, and,      3, (RR, oRR, SH), arit, t_arit3c),
- tC3(ands,	0100000, ands,	   3, (RR, oRR, SH), arit, t_arit3c),
- tCE(eor,	0200000, eor,	   3, (RR, oRR, SH), arit, t_arit3c),
- tC3(eors,	0300000, eors,	   3, (RR, oRR, SH), arit, t_arit3c),
- tCE(sub,	0400000, sub,	   3, (RR, oRR, SH), arit, t_add_sub),
- tC3(subs,	0500000, subs,	   3, (RR, oRR, SH), arit, t_add_sub),
- tCE(add,	0800000, add,	   3, (RR, oRR, SHG), arit, t_add_sub),
- tC3(adds,	0900000, adds,	   3, (RR, oRR, SHG), arit, t_add_sub),
- tCE(adc,	0a00000, adc,	   3, (RR, oRR, SH), arit, t_arit3c),
- tC3(adcs,	0b00000, adcs,	   3, (RR, oRR, SH), arit, t_arit3c),
- tCE(sbc,	0c00000, sbc,	   3, (RR, oRR, SH), arit, t_arit3),
- tC3(sbcs,	0d00000, sbcs,	   3, (RR, oRR, SH), arit, t_arit3),
- tCE(orr,	1800000, orr,	   3, (RR, oRR, SH), arit, t_arit3c),
- tC3(orrs,	1900000, orrs,	   3, (RR, oRR, SH), arit, t_arit3c),
- tCE(bic,	1c00000, bic,	   3, (RR, oRR, SH), arit, t_arit3),
- tC3(bics,	1d00000, bics,	   3, (RR, oRR, SH), arit, t_arit3),
+ tCE("and",	0000000, _and,     3, (RR, oRR, SH), arit, t_arit3c),
+ tC3("ands",	0100000, _ands,	   3, (RR, oRR, SH), arit, t_arit3c),
+ tCE("eor",	0200000, _eor,	   3, (RR, oRR, SH), arit, t_arit3c),
+ tC3("eors",	0300000, _eors,	   3, (RR, oRR, SH), arit, t_arit3c),
+ tCE("sub",	0400000, _sub,	   3, (RR, oRR, SH), arit, t_add_sub),
+ tC3("subs",	0500000, _subs,	   3, (RR, oRR, SH), arit, t_add_sub),
+ tCE("add",	0800000, _add,	   3, (RR, oRR, SHG), arit, t_add_sub),
+ tC3("adds",	0900000, _adds,	   3, (RR, oRR, SHG), arit, t_add_sub),
+ tCE("adc",	0a00000, _adc,	   3, (RR, oRR, SH), arit, t_arit3c),
+ tC3("adcs",	0b00000, _adcs,	   3, (RR, oRR, SH), arit, t_arit3c),
+ tCE("sbc",	0c00000, _sbc,	   3, (RR, oRR, SH), arit, t_arit3),
+ tC3("sbcs",	0d00000, _sbcs,	   3, (RR, oRR, SH), arit, t_arit3),
+ tCE("orr",	1800000, _orr,	   3, (RR, oRR, SH), arit, t_arit3c),
+ tC3("orrs",	1900000, _orrs,	   3, (RR, oRR, SH), arit, t_arit3c),
+ tCE("bic",	1c00000, _bic,	   3, (RR, oRR, SH), arit, t_arit3),
+ tC3("bics",	1d00000, _bics,	   3, (RR, oRR, SH), arit, t_arit3),
 
  /* The p-variants of tst/cmp/cmn/teq (below) are the pre-V6 mechanism
     for setting PSR flag bits.  They are obsolete in V6 and do not
     have Thumb equivalents. */
- tCE(tst,	1100000, tst,	   2, (RR, SH),      cmp,  t_mvn_tst),
- tC3w(tsts,	1100000, tst,	   2, (RR, SH),      cmp,  t_mvn_tst),
-  CL(tstp,	110f000,     	   2, (RR, SH),      cmp),
- tCE(cmp,	1500000, cmp,	   2, (RR, SH),      cmp,  t_mov_cmp),
- tC3w(cmps,	1500000, cmp,	   2, (RR, SH),      cmp,  t_mov_cmp),
-  CL(cmpp,	150f000,     	   2, (RR, SH),      cmp),
- tCE(cmn,	1700000, cmn,	   2, (RR, SH),      cmp,  t_mvn_tst),
- tC3w(cmns,	1700000, cmn,	   2, (RR, SH),      cmp,  t_mvn_tst),
-  CL(cmnp,	170f000,     	   2, (RR, SH),      cmp),
+ tCE("tst",	1100000, _tst,	   2, (RR, SH),      cmp,  t_mvn_tst),
+ tC3w("tsts",	1100000, _tst,	   2, (RR, SH),      cmp,  t_mvn_tst),
+  CL("tstp",	110f000,     	   2, (RR, SH),      cmp),
+ tCE("cmp",	1500000, _cmp,	   2, (RR, SH),      cmp,  t_mov_cmp),
+ tC3w("cmps",	1500000, _cmp,	   2, (RR, SH),      cmp,  t_mov_cmp),
+  CL("cmpp",	150f000,     	   2, (RR, SH),      cmp),
+ tCE("cmn",	1700000, _cmn,	   2, (RR, SH),      cmp,  t_mvn_tst),
+ tC3w("cmns",	1700000, _cmn,	   2, (RR, SH),      cmp,  t_mvn_tst),
+  CL("cmnp",	170f000,     	   2, (RR, SH),      cmp),
 
- tCE(mov,	1a00000, mov,	   2, (RR, SH),      mov,  t_mov_cmp),
- tC3(movs,	1b00000, movs,	   2, (RR, SH),      mov,  t_mov_cmp),
- tCE(mvn,	1e00000, mvn,	   2, (RR, SH),      mov,  t_mvn_tst),
- tC3(mvns,	1f00000, mvns,	   2, (RR, SH),      mov,  t_mvn_tst),
+ tCE("mov",	1a00000, _mov,	   2, (RR, SH),      mov,  t_mov_cmp),
+ tC3("movs",	1b00000, _movs,	   2, (RR, SH),      mov,  t_mov_cmp),
+ tCE("mvn",	1e00000, _mvn,	   2, (RR, SH),      mov,  t_mvn_tst),
+ tC3("mvns",	1f00000, _mvns,	   2, (RR, SH),      mov,  t_mvn_tst),
 
- tCE(ldr,	4100000, ldr,	   2, (RR, ADDRGLDR),ldst, t_ldst),
- tC3(ldrb,	4500000, ldrb,	   2, (RR, ADDRGLDR),ldst, t_ldst),
- tCE(str,	4000000, str,	   2, (RR, ADDRGLDR),ldst, t_ldst),
- tC3(strb,	4400000, strb,	   2, (RR, ADDRGLDR),ldst, t_ldst),
+ tCE("ldr",	4100000, _ldr,	   2, (RR, ADDRGLDR),ldst, t_ldst),
+ tC3("ldrb",	4500000, _ldrb,	   2, (RR, ADDRGLDR),ldst, t_ldst),
+ tCE("str",	4000000, _str,	   2, (RR, ADDRGLDR),ldst, t_ldst),
+ tC3("strb",	4400000, _strb,	   2, (RR, ADDRGLDR),ldst, t_ldst),
 
- tCE(stm,	8800000, stmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
- tC3(stmia,	8800000, stmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
- tC3(stmea,	8800000, stmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
- tCE(ldm,	8900000, ldmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
- tC3(ldmia,	8900000, ldmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
- tC3(ldmfd,	8900000, ldmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
+ tCE("stm",	8800000, _stmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
+ tC3("stmia",	8800000, _stmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
+ tC3("stmea",	8800000, _stmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
+ tCE("ldm",	8900000, _ldmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
+ tC3("ldmia",	8900000, _ldmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
+ tC3("ldmfd",	8900000, _ldmia,    2, (RRw, REGLST), ldmstm, t_ldmstm),
 
- TCE(swi,	f000000, df00,     1, (EXPi),        swi, t_swi),
- TCE(svc,	f000000, df00,     1, (EXPi),        swi, t_swi),
- tCE(b,		a000000, b,	   1, (EXPr),	     branch, t_branch),
- TCE(bl,	b000000, f000f800, 1, (EXPr),	     bl, t_branch23),
+ TCE("swi",	f000000, df00,     1, (EXPi),        swi, t_swi),
+ TCE("svc",	f000000, df00,     1, (EXPi),        swi, t_swi),
+ tCE("b",	a000000, _b,	   1, (EXPr),	     branch, t_branch),
+ TCE("bl",	b000000, f000f800, 1, (EXPr),	     bl, t_branch23),
 
   /* Pseudo ops.  */
- tCE(adr,	28f0000, adr,	   2, (RR, EXP),     adr,  t_adr),
+ tCE("adr",	28f0000, _adr,	   2, (RR, EXP),     adr,  t_adr),
   C3(adrl,	28f0000,           2, (RR, EXP),     adrl),
- tCE(nop,	1a00000, nop,	   1, (oI255c),	     nop,  t_nop),
+ tCE("nop",	1a00000, _nop,	   1, (oI255c),	     nop,  t_nop),
 
   /* Thumb-compatibility pseudo ops.  */
- tCE(lsl,	1a00000, lsl,	   3, (RR, oRR, SH), shift, t_shift),
- tC3(lsls,	1b00000, lsls,	   3, (RR, oRR, SH), shift, t_shift),
- tCE(lsr,	1a00020, lsr,	   3, (RR, oRR, SH), shift, t_shift),
- tC3(lsrs,	1b00020, lsrs,	   3, (RR, oRR, SH), shift, t_shift),
- tCE(asr,	1a00040, asr,	   3, (RR, oRR, SH), shift, t_shift),
- tC3(asrs,      1b00040, asrs,     3, (RR, oRR, SH), shift, t_shift),
- tCE(ror,	1a00060, ror,	   3, (RR, oRR, SH), shift, t_shift),
- tC3(rors,	1b00060, rors,	   3, (RR, oRR, SH), shift, t_shift),
- tCE(neg,	2600000, neg,	   2, (RR, RR),      rd_rn, t_neg),
- tC3(negs,	2700000, negs,	   2, (RR, RR),      rd_rn, t_neg),
- tCE(push,	92d0000, push,     1, (REGLST),	     push_pop, t_push_pop),
- tCE(pop,	8bd0000, pop,	   1, (REGLST),	     push_pop, t_push_pop),
+ tCE("lsl",	1a00000, _lsl,	   3, (RR, oRR, SH), shift, t_shift),
+ tC3("lsls",	1b00000, _lsls,	   3, (RR, oRR, SH), shift, t_shift),
+ tCE("lsr",	1a00020, _lsr,	   3, (RR, oRR, SH), shift, t_shift),
+ tC3("lsrs",	1b00020, _lsrs,	   3, (RR, oRR, SH), shift, t_shift),
+ tCE("asr",	1a00040, _asr,	   3, (RR, oRR, SH), shift, t_shift),
+ tC3("asrs",      1b00040, _asrs,     3, (RR, oRR, SH), shift, t_shift),
+ tCE("ror",	1a00060, _ror,	   3, (RR, oRR, SH), shift, t_shift),
+ tC3("rors",	1b00060, _rors,	   3, (RR, oRR, SH), shift, t_shift),
+ tCE("neg",	2600000, _neg,	   2, (RR, RR),      rd_rn, t_neg),
+ tC3("negs",	2700000, _negs,	   2, (RR, RR),      rd_rn, t_neg),
+ tCE("push",	92d0000, _push,     1, (REGLST),	     push_pop, t_push_pop),
+ tCE("pop",	8bd0000, _pop,	   1, (REGLST),	     push_pop, t_push_pop),
 
  /* These may simplify to neg.  */
- TCE(rsb,	0600000, ebc00000, 3, (RR, oRR, SH), arit, t_rsb),
- TC3(rsbs,	0700000, ebd00000, 3, (RR, oRR, SH), arit, t_rsb),
+ TCE("rsb",	0600000, ebc00000, 3, (RR, oRR, SH), arit, t_rsb),
+ TC3("rsbs",	0700000, ebd00000, 3, (RR, oRR, SH), arit, t_rsb),
 
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_v6
 
- TCE(cpy,       1a00000, 4600,     2, (RR, RR),      rd_rm, t_cpy),
+ TCE("cpy",       1a00000, 4600,     2, (RR, RR),      rd_rm, t_cpy),
 
  /* V1 instructions with no Thumb analogue prior to V6T2.  */
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_v6t2
 
- TCE(teq,	1300000, ea900f00, 2, (RR, SH),      cmp,  t_mvn_tst),
- TC3w(teqs,	1300000, ea900f00, 2, (RR, SH),      cmp,  t_mvn_tst),
-  CL(teqp,	130f000,           2, (RR, SH),      cmp),
+ TCE("teq",	1300000, ea900f00, 2, (RR, SH),      cmp,  t_mvn_tst),
+ TC3w("teqs",	1300000, ea900f00, 2, (RR, SH),      cmp,  t_mvn_tst),
+  CL("teqp",	130f000,           2, (RR, SH),      cmp),
 
- TC3(ldrt,	4300000, f8500e00, 2, (RR, ADDR),    ldstt, t_ldstt),
- TC3(ldrbt,	4700000, f8100e00, 2, (RR, ADDR),    ldstt, t_ldstt),
- TC3(strt,	4200000, f8400e00, 2, (RR, ADDR),    ldstt, t_ldstt),
- TC3(strbt,	4600000, f8000e00, 2, (RR, ADDR),    ldstt, t_ldstt),
+ TC3("ldrt",	4300000, f8500e00, 2, (RR, ADDR),    ldstt, t_ldstt),
+ TC3("ldrbt",	4700000, f8100e00, 2, (RR, ADDR),    ldstt, t_ldstt),
+ TC3("strt",	4200000, f8400e00, 2, (RR, ADDR),    ldstt, t_ldstt),
+ TC3("strbt",	4600000, f8000e00, 2, (RR, ADDR),    ldstt, t_ldstt),
 
- TC3(stmdb,	9000000, e9000000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
- TC3(stmfd,     9000000, e9000000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
+ TC3("stmdb",	9000000, e9000000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
+ TC3("stmfd",     9000000, e9000000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
 
- TC3(ldmdb,	9100000, e9100000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
- TC3(ldmea,	9100000, e9100000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
+ TC3("ldmdb",	9100000, e9100000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
+ TC3("ldmea",	9100000, e9100000, 2, (RRw, REGLST), ldmstm, t_ldmstm),
 
  /* V1 instructions with no Thumb analogue at all.  */
-  CE(rsc,	0e00000,	   3, (RR, oRR, SH), arit),
+  CE("rsc",	0e00000,	   3, (RR, oRR, SH), arit),
   C3(rscs,	0f00000,	   3, (RR, oRR, SH), arit),
 
   C3(stmib,	9800000,	   2, (RRw, REGLST), ldmstm),
@@ -16282,28 +16296,28 @@ static const struct asm_opcode insns[] =
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_v4t
 
- tCE(mul,	0000090, mul,	   3, (RRnpc, RRnpc, oRR), mul, t_mul),
- tC3(muls,	0100090, muls,	   3, (RRnpc, RRnpc, oRR), mul, t_mul),
+ tCE("mul",	0000090, _mul,	   3, (RRnpc, RRnpc, oRR), mul, t_mul),
+ tC3("muls",	0100090, _muls,	   3, (RRnpc, RRnpc, oRR), mul, t_mul),
 
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_v6t2
 
- TCE(mla,	0200090, fb000000, 4, (RRnpc, RRnpc, RRnpc, RRnpc), mlas, t_mla),
+ TCE("mla",	0200090, fb000000, 4, (RRnpc, RRnpc, RRnpc, RRnpc), mlas, t_mla),
   C3(mlas,	0300090,           4, (RRnpc, RRnpc, RRnpc, RRnpc), mlas),
 
   /* Generic coprocessor instructions.	*/
- TCE(cdp,	e000000, ee000000, 6, (RCP, I15b, RCN, RCN, RCN, oI7b), cdp,    cdp),
- TCE(ldc,	c100000, ec100000, 3, (RCP, RCN, ADDRGLDC),	        lstc,   lstc),
- TC3(ldcl,	c500000, ec500000, 3, (RCP, RCN, ADDRGLDC),	        lstc,   lstc),
- TCE(stc,	c000000, ec000000, 3, (RCP, RCN, ADDRGLDC),	        lstc,   lstc),
- TC3(stcl,	c400000, ec400000, 3, (RCP, RCN, ADDRGLDC),	        lstc,   lstc),
- TCE(mcr,	e000010, ee000010, 6, (RCP, I7b, RR, RCN, RCN, oI7b),   co_reg, co_reg),
- TCE(mrc,	e100010, ee100010, 6, (RCP, I7b, RR, RCN, RCN, oI7b),   co_reg, co_reg),
+ TCE("cdp",	e000000, ee000000, 6, (RCP, I15b, RCN, RCN, RCN, oI7b), cdp,    cdp),
+ TCE("ldc",	c100000, ec100000, 3, (RCP, RCN, ADDRGLDC),	        lstc,   lstc),
+ TC3("ldcl",	c500000, ec500000, 3, (RCP, RCN, ADDRGLDC),	        lstc,   lstc),
+ TCE("stc",	c000000, ec000000, 3, (RCP, RCN, ADDRGLDC),	        lstc,   lstc),
+ TC3("stcl",	c400000, ec400000, 3, (RCP, RCN, ADDRGLDC),	        lstc,   lstc),
+ TCE("mcr",	e000010, ee000010, 6, (RCP, I7b, RR, RCN, RCN, oI7b),   co_reg, co_reg),
+ TCE("mrc",	e100010, ee100010, 6, (RCP, I7b, RR, RCN, RCN, oI7b),   co_reg, co_reg),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & arm_ext_v2s /* ARM 3 - swp instructions.  */
 
-  CE(swp,	1000090,           3, (RRnpc, RRnpc, RRnpcb), rd_rm_rn),
+  CE("swp",	1000090,           3, (RRnpc, RRnpc, RRnpcb), rd_rm_rn),
   C3(swpb,	1400090,           3, (RRnpc, RRnpc, RRnpcb), rd_rm_rn),
 
 #undef  ARM_VARIANT
@@ -16311,34 +16325,34 @@ static const struct asm_opcode insns[] =
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_msr
 
- TCE(mrs,	10f0000, f3ef8000, 2, (APSR_RR, RVC_PSR), mrs, t_mrs),
- TCE(msr,	120f000, f3808000, 2, (RVC_PSR, RR_EXi), msr, t_msr),
+ TCE("mrs",	10f0000, f3ef8000, 2, (APSR_RR, RVC_PSR), mrs, t_mrs),
+ TCE("msr",	120f000, f3808000, 2, (RVC_PSR, RR_EXi), msr, t_msr),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT    & arm_ext_v3m	 /* ARM 7M long multiplies.  */
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_v6t2
 
- TCE(smull,	0c00090, fb800000, 4, (RRnpc, RRnpc, RRnpc, RRnpc), mull, t_mull),
-  CM(smull,s,	0d00090,           4, (RRnpc, RRnpc, RRnpc, RRnpc), mull),
- TCE(umull,	0800090, fba00000, 4, (RRnpc, RRnpc, RRnpc, RRnpc), mull, t_mull),
-  CM(umull,s,	0900090,           4, (RRnpc, RRnpc, RRnpc, RRnpc), mull),
- TCE(smlal,	0e00090, fbc00000, 4, (RRnpc, RRnpc, RRnpc, RRnpc), mull, t_mull),
-  CM(smlal,s,	0f00090,           4, (RRnpc, RRnpc, RRnpc, RRnpc), mull),
- TCE(umlal,	0a00090, fbe00000, 4, (RRnpc, RRnpc, RRnpc, RRnpc), mull, t_mull),
-  CM(umlal,s,	0b00090,           4, (RRnpc, RRnpc, RRnpc, RRnpc), mull),
+ TCE("smull",	0c00090, fb800000, 4, (RRnpc, RRnpc, RRnpc, RRnpc), mull, t_mull),
+  CM("smull","s",	0d00090,           4, (RRnpc, RRnpc, RRnpc, RRnpc), mull),
+ TCE("umull",	0800090, fba00000, 4, (RRnpc, RRnpc, RRnpc, RRnpc), mull, t_mull),
+  CM("umull","s",	0900090,           4, (RRnpc, RRnpc, RRnpc, RRnpc), mull),
+ TCE("smlal",	0e00090, fbc00000, 4, (RRnpc, RRnpc, RRnpc, RRnpc), mull, t_mull),
+  CM("smlal","s",	0f00090,           4, (RRnpc, RRnpc, RRnpc, RRnpc), mull),
+ TCE("umlal",	0a00090, fbe00000, 4, (RRnpc, RRnpc, RRnpc, RRnpc), mull, t_mull),
+  CM("umlal","s",	0b00090,           4, (RRnpc, RRnpc, RRnpc, RRnpc), mull),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT    & arm_ext_v4	/* ARM Architecture 4.	*/
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_v4t
 
- tC3(ldrh,	01000b0, ldrh,     2, (RR, ADDRGLDRS), ldstv4, t_ldst),
- tC3(strh,	00000b0, strh,     2, (RR, ADDRGLDRS), ldstv4, t_ldst),
- tC3(ldrsh,	01000f0, ldrsh,    2, (RR, ADDRGLDRS), ldstv4, t_ldst),
- tC3(ldrsb,	01000d0, ldrsb,    2, (RR, ADDRGLDRS), ldstv4, t_ldst),
- tCM(ld,sh,	01000f0, ldrsh,    2, (RR, ADDRGLDRS), ldstv4, t_ldst),
- tCM(ld,sb,	01000d0, ldrsb,    2, (RR, ADDRGLDRS), ldstv4, t_ldst),
+ tC3("ldrh",	01000b0, _ldrh,     2, (RR, ADDRGLDRS), ldstv4, t_ldst),
+ tC3("strh",	00000b0, _strh,     2, (RR, ADDRGLDRS), ldstv4, t_ldst),
+ tC3("ldrsh",	01000f0, _ldrsh,    2, (RR, ADDRGLDRS), ldstv4, t_ldst),
+ tC3("ldrsb",	01000d0, _ldrsb,    2, (RR, ADDRGLDRS), ldstv4, t_ldst),
+ tCM("ld","sh",	01000f0, _ldrsh,    2, (RR, ADDRGLDRS), ldstv4, t_ldst),
+ tCM("ld","sb",	01000d0, _ldrsb,    2, (RR, ADDRGLDRS), ldstv4, t_ldst),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & arm_ext_v4t_5
@@ -16346,7 +16360,7 @@ static const struct asm_opcode insns[] =
   /* ARM Architecture 4T.  */
   /* Note: bx (and blx) are required on V5, even if the processor does
      not support Thumb.	 */
- TCE(bx,	12fff10, 4700, 1, (RR),	bx, t_bx),
+ TCE("bx",	12fff10, 4700, 1, (RR),	bx, t_bx),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT    & arm_ext_v5 /*  ARM Architecture 5T.	 */
@@ -16355,254 +16369,254 @@ static const struct asm_opcode insns[] =
 
   /* Note: blx has 2 variants; the .value coded here is for
      BLX(2).  Only this variant has conditional execution.  */
- TCE(blx,	12fff30, 4780, 1, (RR_EXr),			    blx,  t_blx),
- TUE(bkpt,	1200070, be00, 1, (oIffffb),			    bkpt, t_bkpt),
+ TCE("blx",	12fff30, 4780, 1, (RR_EXr),			    blx,  t_blx),
+ TUE("bkpt",	1200070, be00, 1, (oIffffb),			    bkpt, t_bkpt),
 
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_v6t2
 
- TCE(clz,	16f0f10, fab0f080, 2, (RRnpc, RRnpc),		        rd_rm,  t_clz),
- TUF(ldc2,	c100000, fc100000, 3, (RCP, RCN, ADDRGLDC),	        lstc,	lstc),
- TUF(ldc2l,	c500000, fc500000, 3, (RCP, RCN, ADDRGLDC),		        lstc,	lstc),
- TUF(stc2,	c000000, fc000000, 3, (RCP, RCN, ADDRGLDC),	        lstc,	lstc),
- TUF(stc2l,	c400000, fc400000, 3, (RCP, RCN, ADDRGLDC),		        lstc,	lstc),
- TUF(cdp2,	e000000, fe000000, 6, (RCP, I15b, RCN, RCN, RCN, oI7b), cdp,    cdp),
- TUF(mcr2,	e000010, fe000010, 6, (RCP, I7b, RR, RCN, RCN, oI7b),   co_reg, co_reg),
- TUF(mrc2,	e100010, fe100010, 6, (RCP, I7b, RR, RCN, RCN, oI7b),   co_reg, co_reg),
+ TCE("clz",	16f0f10, fab0f080, 2, (RRnpc, RRnpc),		        rd_rm,  t_clz),
+ TUF("ldc2",	c100000, fc100000, 3, (RCP, RCN, ADDRGLDC),	        lstc,	lstc),
+ TUF("ldc2l",	c500000, fc500000, 3, (RCP, RCN, ADDRGLDC),		        lstc,	lstc),
+ TUF("stc2",	c000000, fc000000, 3, (RCP, RCN, ADDRGLDC),	        lstc,	lstc),
+ TUF("stc2l",	c400000, fc400000, 3, (RCP, RCN, ADDRGLDC),		        lstc,	lstc),
+ TUF("cdp2",	e000000, fe000000, 6, (RCP, I15b, RCN, RCN, RCN, oI7b), cdp,    cdp),
+ TUF("mcr2",	e000010, fe000010, 6, (RCP, I7b, RR, RCN, RCN, oI7b),   co_reg, co_reg),
+ TUF("mrc2",	e100010, fe100010, 6, (RCP, I7b, RR, RCN, RCN, oI7b),   co_reg, co_reg),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & arm_ext_v5exp /*  ARM Architecture 5TExP.  */
 
- TCE(smlabb,	1000080, fb100000, 4, (RRnpc, RRnpc, RRnpc, RRnpc),   smla, t_mla),
- TCE(smlatb,	10000a0, fb100020, 4, (RRnpc, RRnpc, RRnpc, RRnpc),   smla, t_mla),
- TCE(smlabt,	10000c0, fb100010, 4, (RRnpc, RRnpc, RRnpc, RRnpc),   smla, t_mla),
- TCE(smlatt,	10000e0, fb100030, 4, (RRnpc, RRnpc, RRnpc, RRnpc),   smla, t_mla),
+ TCE("smlabb",	1000080, fb100000, 4, (RRnpc, RRnpc, RRnpc, RRnpc),   smla, t_mla),
+ TCE("smlatb",	10000a0, fb100020, 4, (RRnpc, RRnpc, RRnpc, RRnpc),   smla, t_mla),
+ TCE("smlabt",	10000c0, fb100010, 4, (RRnpc, RRnpc, RRnpc, RRnpc),   smla, t_mla),
+ TCE("smlatt",	10000e0, fb100030, 4, (RRnpc, RRnpc, RRnpc, RRnpc),   smla, t_mla),
 
- TCE(smlawb,	1200080, fb300000, 4, (RRnpc, RRnpc, RRnpc, RRnpc),   smla, t_mla),
- TCE(smlawt,	12000c0, fb300010, 4, (RRnpc, RRnpc, RRnpc, RRnpc),   smla, t_mla),
+ TCE("smlawb",	1200080, fb300000, 4, (RRnpc, RRnpc, RRnpc, RRnpc),   smla, t_mla),
+ TCE("smlawt",	12000c0, fb300010, 4, (RRnpc, RRnpc, RRnpc, RRnpc),   smla, t_mla),
 
- TCE(smlalbb,	1400080, fbc00080, 4, (RRnpc, RRnpc, RRnpc, RRnpc),   smlal, t_mlal),
- TCE(smlaltb,	14000a0, fbc000a0, 4, (RRnpc, RRnpc, RRnpc, RRnpc),   smlal, t_mlal),
- TCE(smlalbt,	14000c0, fbc00090, 4, (RRnpc, RRnpc, RRnpc, RRnpc),   smlal, t_mlal),
- TCE(smlaltt,	14000e0, fbc000b0, 4, (RRnpc, RRnpc, RRnpc, RRnpc),   smlal, t_mlal),
+ TCE("smlalbb",	1400080, fbc00080, 4, (RRnpc, RRnpc, RRnpc, RRnpc),   smlal, t_mlal),
+ TCE("smlaltb",	14000a0, fbc000a0, 4, (RRnpc, RRnpc, RRnpc, RRnpc),   smlal, t_mlal),
+ TCE("smlalbt",	14000c0, fbc00090, 4, (RRnpc, RRnpc, RRnpc, RRnpc),   smlal, t_mlal),
+ TCE("smlaltt",	14000e0, fbc000b0, 4, (RRnpc, RRnpc, RRnpc, RRnpc),   smlal, t_mlal),
 
- TCE(smulbb,	1600080, fb10f000, 3, (RRnpc, RRnpc, RRnpc),	    smul, t_simd),
- TCE(smultb,	16000a0, fb10f020, 3, (RRnpc, RRnpc, RRnpc),	    smul, t_simd),
- TCE(smulbt,	16000c0, fb10f010, 3, (RRnpc, RRnpc, RRnpc),	    smul, t_simd),
- TCE(smultt,	16000e0, fb10f030, 3, (RRnpc, RRnpc, RRnpc),	    smul, t_simd),
+ TCE("smulbb",	1600080, fb10f000, 3, (RRnpc, RRnpc, RRnpc),	    smul, t_simd),
+ TCE("smultb",	16000a0, fb10f020, 3, (RRnpc, RRnpc, RRnpc),	    smul, t_simd),
+ TCE("smulbt",	16000c0, fb10f010, 3, (RRnpc, RRnpc, RRnpc),	    smul, t_simd),
+ TCE("smultt",	16000e0, fb10f030, 3, (RRnpc, RRnpc, RRnpc),	    smul, t_simd),
 
- TCE(smulwb,	12000a0, fb30f000, 3, (RRnpc, RRnpc, RRnpc),	    smul, t_simd),
- TCE(smulwt,	12000e0, fb30f010, 3, (RRnpc, RRnpc, RRnpc),	    smul, t_simd),
+ TCE("smulwb",	12000a0, fb30f000, 3, (RRnpc, RRnpc, RRnpc),	    smul, t_simd),
+ TCE("smulwt",	12000e0, fb30f010, 3, (RRnpc, RRnpc, RRnpc),	    smul, t_simd),
 
- TCE(qadd,	1000050, fa80f080, 3, (RRnpc, RRnpc, RRnpc),	    rd_rm_rn, t_simd),
- TCE(qdadd,	1400050, fa80f090, 3, (RRnpc, RRnpc, RRnpc),	    rd_rm_rn, t_simd),
- TCE(qsub,	1200050, fa80f0a0, 3, (RRnpc, RRnpc, RRnpc),	    rd_rm_rn, t_simd),
- TCE(qdsub,	1600050, fa80f0b0, 3, (RRnpc, RRnpc, RRnpc),	    rd_rm_rn, t_simd),
+ TCE("qadd",	1000050, fa80f080, 3, (RRnpc, RRnpc, RRnpc),	    rd_rm_rn, t_simd),
+ TCE("qdadd",	1400050, fa80f090, 3, (RRnpc, RRnpc, RRnpc),	    rd_rm_rn, t_simd),
+ TCE("qsub",	1200050, fa80f0a0, 3, (RRnpc, RRnpc, RRnpc),	    rd_rm_rn, t_simd),
+ TCE("qdsub",	1600050, fa80f0b0, 3, (RRnpc, RRnpc, RRnpc),	    rd_rm_rn, t_simd),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & arm_ext_v5e /*  ARM Architecture 5TE.  */
 
- TUF(pld,	450f000, f810f000, 1, (ADDR),		     pld,  t_pld),
- TC3(ldrd,	00000d0, e8500000, 3, (RRnpc, oRRnpc, ADDRGLDRS), ldrd, t_ldstd),
- TC3(strd,	00000f0, e8400000, 3, (RRnpc, oRRnpc, ADDRGLDRS), ldrd, t_ldstd),
+ TUF("pld",	450f000, f810f000, 1, (ADDR),		     pld,  t_pld),
+ TC3("ldrd",	00000d0, e8500000, 3, (RRnpc, oRRnpc, ADDRGLDRS), ldrd, t_ldstd),
+ TC3("strd",	00000f0, e8400000, 3, (RRnpc, oRRnpc, ADDRGLDRS), ldrd, t_ldstd),
 
- TCE(mcrr,	c400000, ec400000, 5, (RCP, I15b, RRnpc, RRnpc, RCN), co_reg2c, co_reg2c),
- TCE(mrrc,	c500000, ec500000, 5, (RCP, I15b, RRnpc, RRnpc, RCN), co_reg2c, co_reg2c),
+ TCE("mcrr",	c400000, ec400000, 5, (RCP, I15b, RRnpc, RRnpc, RCN), co_reg2c, co_reg2c),
+ TCE("mrrc",	c500000, ec500000, 5, (RCP, I15b, RRnpc, RRnpc, RCN), co_reg2c, co_reg2c),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & arm_ext_v5j /*  ARM Architecture 5TEJ.  */
 
- TCE(bxj,	12fff20, f3c08f00, 1, (RR),			  bxj, t_bxj),
+ TCE("bxj",	12fff20, f3c08f00, 1, (RR),			  bxj, t_bxj),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT    & arm_ext_v6 /*  ARM V6.  */
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_v6
 
- TUF(cpsie,     1080000, b660,     2, (CPSF, oI31b),              cpsi,   t_cpsi),
- TUF(cpsid,     10c0000, b670,     2, (CPSF, oI31b),              cpsi,   t_cpsi),
- tCE(rev,       6bf0f30, rev,      2, (RRnpc, RRnpc),             rd_rm,  t_rev),
- tCE(rev16,     6bf0fb0, rev16,    2, (RRnpc, RRnpc),             rd_rm,  t_rev),
- tCE(revsh,     6ff0fb0, revsh,    2, (RRnpc, RRnpc),             rd_rm,  t_rev),
- tCE(sxth,      6bf0070, sxth,     3, (RRnpc, RRnpc, oROR),       sxth,   t_sxth),
- tCE(uxth,      6ff0070, uxth,     3, (RRnpc, RRnpc, oROR),       sxth,   t_sxth),
- tCE(sxtb,      6af0070, sxtb,     3, (RRnpc, RRnpc, oROR),       sxth,   t_sxth),
- tCE(uxtb,      6ef0070, uxtb,     3, (RRnpc, RRnpc, oROR),       sxth,   t_sxth),
- TUF(setend,    1010000, b650,     1, (ENDI),                     setend, t_setend),
+ TUF("cpsie",     1080000, b660,     2, (CPSF, oI31b),              cpsi,   t_cpsi),
+ TUF("cpsid",     10c0000, b670,     2, (CPSF, oI31b),              cpsi,   t_cpsi),
+ tCE("rev",       6bf0f30, _rev,      2, (RRnpc, RRnpc),             rd_rm,  t_rev),
+ tCE("rev16",     6bf0fb0, _rev16,    2, (RRnpc, RRnpc),             rd_rm,  t_rev),
+ tCE("revsh",     6ff0fb0, _revsh,    2, (RRnpc, RRnpc),             rd_rm,  t_rev),
+ tCE("sxth",      6bf0070, _sxth,     3, (RRnpc, RRnpc, oROR),       sxth,   t_sxth),
+ tCE("uxth",      6ff0070, _uxth,     3, (RRnpc, RRnpc, oROR),       sxth,   t_sxth),
+ tCE("sxtb",      6af0070, _sxtb,     3, (RRnpc, RRnpc, oROR),       sxth,   t_sxth),
+ tCE("uxtb",      6ef0070, _uxtb,     3, (RRnpc, RRnpc, oROR),       sxth,   t_sxth),
+ TUF("setend",    1010000, b650,     1, (ENDI),                     setend, t_setend),
 
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_v6t2
 
- TCE(ldrex,	1900f9f, e8500f00, 2, (RRnpc, ADDR),		  ldrex, t_ldrex),
- TCE(strex,	1800f90, e8400000, 3, (RRnpc, RRnpc, ADDR),	   strex,  t_strex),
- TUF(mcrr2,	c400000, fc400000, 5, (RCP, I15b, RRnpc, RRnpc, RCN), co_reg2c, co_reg2c),
- TUF(mrrc2,	c500000, fc500000, 5, (RCP, I15b, RRnpc, RRnpc, RCN), co_reg2c, co_reg2c),
+ TCE("ldrex",	1900f9f, e8500f00, 2, (RRnpc, ADDR),		  ldrex, t_ldrex),
+ TCE("strex",	1800f90, e8400000, 3, (RRnpc, RRnpc, ADDR),	   strex,  t_strex),
+ TUF("mcrr2",	c400000, fc400000, 5, (RCP, I15b, RRnpc, RRnpc, RCN), co_reg2c, co_reg2c),
+ TUF("mrrc2",	c500000, fc500000, 5, (RCP, I15b, RRnpc, RRnpc, RCN), co_reg2c, co_reg2c),
 
- TCE(ssat,	6a00010, f3000000, 4, (RRnpc, I32, RRnpc, oSHllar),ssat,   t_ssat),
- TCE(usat,	6e00010, f3800000, 4, (RRnpc, I31, RRnpc, oSHllar),usat,   t_usat),
+ TCE("ssat",	6a00010, f3000000, 4, (RRnpc, I32, RRnpc, oSHllar),ssat,   t_ssat),
+ TCE("usat",	6e00010, f3800000, 4, (RRnpc, I31, RRnpc, oSHllar),usat,   t_usat),
 
 /*  ARM V6 not included in V7M (eg. integer SIMD).  */
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_v6_notm
 
- TUF(cps,	1020000, f3af8100, 1, (I31b),			  imm0, t_cps),
- TCE(pkhbt,	6800010, eac00000, 4, (RRnpc, RRnpc, RRnpc, oSHll),   pkhbt, t_pkhbt),
- TCE(pkhtb,	6800050, eac00020, 4, (RRnpc, RRnpc, RRnpc, oSHar),   pkhtb, t_pkhtb),
- TCE(qadd16,	6200f10, fa90f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(qadd8,	6200f90, fa80f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(qasx,	6200f30, faa0f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TUF("cps",	1020000, f3af8100, 1, (I31b),			  imm0, t_cps),
+ TCE("pkhbt",	6800010, eac00000, 4, (RRnpc, RRnpc, RRnpc, oSHll),   pkhbt, t_pkhbt),
+ TCE("pkhtb",	6800050, eac00020, 4, (RRnpc, RRnpc, RRnpc, oSHar),   pkhtb, t_pkhtb),
+ TCE("qadd16",	6200f10, fa90f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("qadd8",	6200f90, fa80f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("qasx",	6200f30, faa0f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  /* Old name for QASX.  */
- TCE(qaddsubx,	6200f30, faa0f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(qsax,	6200f50, fae0f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("qaddsubx",	6200f30, faa0f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("qsax",	6200f50, fae0f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  /* Old name for QSAX.  */
- TCE(qsubaddx,	6200f50, fae0f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(qsub16,	6200f70, fad0f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(qsub8,	6200ff0, fac0f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(sadd16,	6100f10, fa90f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(sadd8,	6100f90, fa80f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(sasx,	6100f30, faa0f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("qsubaddx",	6200f50, fae0f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("qsub16",	6200f70, fad0f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("qsub8",	6200ff0, fac0f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("sadd16",	6100f10, fa90f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("sadd8",	6100f90, fa80f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("sasx",	6100f30, faa0f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  /* Old name for SASX.  */
- TCE(saddsubx,	6100f30, faa0f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(shadd16,	6300f10, fa90f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(shadd8,	6300f90, fa80f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(shasx,     6300f30, faa0f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("saddsubx",	6100f30, faa0f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("shadd16",	6300f10, fa90f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("shadd8",	6300f90, fa80f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("shasx",     6300f30, faa0f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  /* Old name for SHASX.  */
- TCE(shaddsubx, 6300f30, faa0f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(shsax,      6300f50, fae0f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("shaddsubx", 6300f30, faa0f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("shsax",      6300f50, fae0f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  /* Old name for SHSAX.  */
- TCE(shsubaddx, 6300f50, fae0f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(shsub16,	6300f70, fad0f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(shsub8,	6300ff0, fac0f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(ssax,	6100f50, fae0f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("shsubaddx", 6300f50, fae0f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("shsub16",	6300f70, fad0f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("shsub8",	6300ff0, fac0f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("ssax",	6100f50, fae0f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  /* Old name for SSAX.  */
- TCE(ssubaddx,	6100f50, fae0f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(ssub16,	6100f70, fad0f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(ssub8,	6100ff0, fac0f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(uadd16,	6500f10, fa90f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(uadd8,	6500f90, fa80f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(uasx,	6500f30, faa0f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("ssubaddx",	6100f50, fae0f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("ssub16",	6100f70, fad0f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("ssub8",	6100ff0, fac0f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("uadd16",	6500f10, fa90f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("uadd8",	6500f90, fa80f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("uasx",	6500f30, faa0f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  /* Old name for UASX.  */
- TCE(uaddsubx,	6500f30, faa0f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(uhadd16,	6700f10, fa90f060, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(uhadd8,	6700f90, fa80f060, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(uhasx,     6700f30, faa0f060, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("uaddsubx",	6500f30, faa0f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("uhadd16",	6700f10, fa90f060, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("uhadd8",	6700f90, fa80f060, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("uhasx",     6700f30, faa0f060, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  /* Old name for UHASX.  */
- TCE(uhaddsubx, 6700f30, faa0f060, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(uhsax,     6700f50, fae0f060, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("uhaddsubx", 6700f30, faa0f060, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("uhsax",     6700f50, fae0f060, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  /* Old name for UHSAX.  */
- TCE(uhsubaddx, 6700f50, fae0f060, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(uhsub16,	6700f70, fad0f060, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(uhsub8,	6700ff0, fac0f060, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(uqadd16,	6600f10, fa90f050, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(uqadd8,	6600f90, fa80f050, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(uqasx,     6600f30, faa0f050, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("uhsubaddx", 6700f50, fae0f060, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("uhsub16",	6700f70, fad0f060, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("uhsub8",	6700ff0, fac0f060, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("uqadd16",	6600f10, fa90f050, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("uqadd8",	6600f90, fa80f050, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("uqasx",     6600f30, faa0f050, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  /* Old name for UQASX.  */
- TCE(uqaddsubx, 6600f30, faa0f050, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(uqsax,     6600f50, fae0f050, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("uqaddsubx", 6600f30, faa0f050, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("uqsax",     6600f50, fae0f050, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  /* Old name for UQSAX.  */
- TCE(uqsubaddx, 6600f50, fae0f050, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(uqsub16,	6600f70, fad0f050, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(uqsub8,	6600ff0, fac0f050, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(usub16,	6500f70, fad0f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(usax,	6500f50, fae0f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("uqsubaddx", 6600f50, fae0f050, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("uqsub16",	6600f70, fad0f050, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("uqsub8",	6600ff0, fac0f050, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("usub16",	6500f70, fad0f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("usax",	6500f50, fae0f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  /* Old name for USAX.  */
- TCE(usubaddx,	6500f50, fae0f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(usub8,	6500ff0, fac0f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TUF(rfeia,	8900a00, e990c000, 1, (RRw),			   rfe, rfe),
+ TCE("usubaddx",	6500f50, fae0f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("usub8",	6500ff0, fac0f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TUF("rfeia",	8900a00, e990c000, 1, (RRw),			   rfe, rfe),
   UF(rfeib,	9900a00,           1, (RRw),			   rfe),
   UF(rfeda,	8100a00,           1, (RRw),			   rfe),
- TUF(rfedb,	9100a00, e810c000, 1, (RRw),			   rfe, rfe),
- TUF(rfefd,	8900a00, e990c000, 1, (RRw),			   rfe, rfe),
+ TUF("rfedb",	9100a00, e810c000, 1, (RRw),			   rfe, rfe),
+ TUF("rfefd",	8900a00, e990c000, 1, (RRw),			   rfe, rfe),
   UF(rfefa,	9900a00,           1, (RRw),			   rfe),
   UF(rfeea,	8100a00,           1, (RRw),			   rfe),
- TUF(rfeed,	9100a00, e810c000, 1, (RRw),			   rfe, rfe),
- TCE(sxtah,	6b00070, fa00f080, 4, (RRnpc, RRnpc, RRnpc, oROR), sxtah, t_sxtah),
- TCE(sxtab16,	6800070, fa20f080, 4, (RRnpc, RRnpc, RRnpc, oROR), sxtah, t_sxtah),
- TCE(sxtab,	6a00070, fa40f080, 4, (RRnpc, RRnpc, RRnpc, oROR), sxtah, t_sxtah),
- TCE(sxtb16,	68f0070, fa2ff080, 3, (RRnpc, RRnpc, oROR),	   sxth,  t_sxth),
- TCE(uxtah,	6f00070, fa10f080, 4, (RRnpc, RRnpc, RRnpc, oROR), sxtah, t_sxtah),
- TCE(uxtab16,	6c00070, fa30f080, 4, (RRnpc, RRnpc, RRnpc, oROR), sxtah, t_sxtah),
- TCE(uxtab,	6e00070, fa50f080, 4, (RRnpc, RRnpc, RRnpc, oROR), sxtah, t_sxtah),
- TCE(uxtb16,	6cf0070, fa3ff080, 3, (RRnpc, RRnpc, oROR),	   sxth,  t_sxth),
- TCE(sel,	6800fb0, faa0f080, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE(smlad,	7000010, fb200000, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smla, t_mla),
- TCE(smladx,	7000030, fb200010, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smla, t_mla),
- TCE(smlald,	7400010, fbc000c0, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smlal,t_mlal),
- TCE(smlaldx,	7400030, fbc000d0, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smlal,t_mlal),
- TCE(smlsd,	7000050, fb400000, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smla, t_mla),
- TCE(smlsdx,	7000070, fb400010, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smla, t_mla),
- TCE(smlsld,	7400050, fbd000c0, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smlal,t_mlal),
- TCE(smlsldx,	7400070, fbd000d0, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smlal,t_mlal),
- TCE(smmla,	7500010, fb500000, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smla, t_mla),
- TCE(smmlar,	7500030, fb500010, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smla, t_mla),
- TCE(smmls,	75000d0, fb600000, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smla, t_mla),
- TCE(smmlsr,	75000f0, fb600010, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smla, t_mla),
- TCE(smmul,	750f010, fb50f000, 3, (RRnpc, RRnpc, RRnpc),	   smul, t_simd),
- TCE(smmulr,	750f030, fb50f010, 3, (RRnpc, RRnpc, RRnpc),	   smul, t_simd),
- TCE(smuad,	700f010, fb20f000, 3, (RRnpc, RRnpc, RRnpc),	   smul, t_simd),
- TCE(smuadx,	700f030, fb20f010, 3, (RRnpc, RRnpc, RRnpc),	   smul, t_simd),
- TCE(smusd,	700f050, fb40f000, 3, (RRnpc, RRnpc, RRnpc),	   smul, t_simd),
- TCE(smusdx,	700f070, fb40f010, 3, (RRnpc, RRnpc, RRnpc),	   smul, t_simd),
- TUF(srsia,	8c00500, e980c000, 2, (oRRw, I31w),		   srs,  srs),
+ TUF("rfeed",	9100a00, e810c000, 1, (RRw),			   rfe, rfe),
+ TCE("sxtah",	6b00070, fa00f080, 4, (RRnpc, RRnpc, RRnpc, oROR), sxtah, t_sxtah),
+ TCE("sxtab16",	6800070, fa20f080, 4, (RRnpc, RRnpc, RRnpc, oROR), sxtah, t_sxtah),
+ TCE("sxtab",	6a00070, fa40f080, 4, (RRnpc, RRnpc, RRnpc, oROR), sxtah, t_sxtah),
+ TCE("sxtb16",	68f0070, fa2ff080, 3, (RRnpc, RRnpc, oROR),	   sxth,  t_sxth),
+ TCE("uxtah",	6f00070, fa10f080, 4, (RRnpc, RRnpc, RRnpc, oROR), sxtah, t_sxtah),
+ TCE("uxtab16",	6c00070, fa30f080, 4, (RRnpc, RRnpc, RRnpc, oROR), sxtah, t_sxtah),
+ TCE("uxtab",	6e00070, fa50f080, 4, (RRnpc, RRnpc, RRnpc, oROR), sxtah, t_sxtah),
+ TCE("uxtb16",	6cf0070, fa3ff080, 3, (RRnpc, RRnpc, oROR),	   sxth,  t_sxth),
+ TCE("sel",	6800fb0, faa0f080, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("smlad",	7000010, fb200000, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smla, t_mla),
+ TCE("smladx",	7000030, fb200010, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smla, t_mla),
+ TCE("smlald",	7400010, fbc000c0, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smlal,t_mlal),
+ TCE("smlaldx",	7400030, fbc000d0, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smlal,t_mlal),
+ TCE("smlsd",	7000050, fb400000, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smla, t_mla),
+ TCE("smlsdx",	7000070, fb400010, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smla, t_mla),
+ TCE("smlsld",	7400050, fbd000c0, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smlal,t_mlal),
+ TCE("smlsldx",	7400070, fbd000d0, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smlal,t_mlal),
+ TCE("smmla",	7500010, fb500000, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smla, t_mla),
+ TCE("smmlar",	7500030, fb500010, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smla, t_mla),
+ TCE("smmls",	75000d0, fb600000, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smla, t_mla),
+ TCE("smmlsr",	75000f0, fb600010, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smla, t_mla),
+ TCE("smmul",	750f010, fb50f000, 3, (RRnpc, RRnpc, RRnpc),	   smul, t_simd),
+ TCE("smmulr",	750f030, fb50f010, 3, (RRnpc, RRnpc, RRnpc),	   smul, t_simd),
+ TCE("smuad",	700f010, fb20f000, 3, (RRnpc, RRnpc, RRnpc),	   smul, t_simd),
+ TCE("smuadx",	700f030, fb20f010, 3, (RRnpc, RRnpc, RRnpc),	   smul, t_simd),
+ TCE("smusd",	700f050, fb40f000, 3, (RRnpc, RRnpc, RRnpc),	   smul, t_simd),
+ TCE("smusdx",	700f070, fb40f010, 3, (RRnpc, RRnpc, RRnpc),	   smul, t_simd),
+ TUF("srsia",	8c00500, e980c000, 2, (oRRw, I31w),		   srs,  srs),
   UF(srsib,	9c00500,           2, (oRRw, I31w),		   srs),
   UF(srsda,	8400500,	   2, (oRRw, I31w),		   srs),
- TUF(srsdb,	9400500, e800c000, 2, (oRRw, I31w),		   srs,  srs),
- TCE(ssat16,	6a00f30, f3200000, 3, (RRnpc, I16, RRnpc),	   ssat16, t_ssat16),
- TCE(umaal,	0400090, fbe00060, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smlal,  t_mlal),
- TCE(usad8,	780f010, fb70f000, 3, (RRnpc, RRnpc, RRnpc),	   smul,   t_simd),
- TCE(usada8,	7800010, fb700000, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smla,   t_mla),
- TCE(usat16,	6e00f30, f3a00000, 3, (RRnpc, I15, RRnpc),	   usat16, t_usat16),
+ TUF("srsdb",	9400500, e800c000, 2, (oRRw, I31w),		   srs,  srs),
+ TCE("ssat16",	6a00f30, f3200000, 3, (RRnpc, I16, RRnpc),	   ssat16, t_ssat16),
+ TCE("umaal",	0400090, fbe00060, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smlal,  t_mlal),
+ TCE("usad8",	780f010, fb70f000, 3, (RRnpc, RRnpc, RRnpc),	   smul,   t_simd),
+ TCE("usada8",	7800010, fb700000, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smla,   t_mla),
+ TCE("usat16",	6e00f30, f3a00000, 3, (RRnpc, I15, RRnpc),	   usat16, t_usat16),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT   & arm_ext_v6k
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT & arm_ext_v6k
 
- tCE(yield,	320f001, yield,    0, (), noargs, t_hint),
- tCE(wfe,	320f002, wfe,      0, (), noargs, t_hint),
- tCE(wfi,	320f003, wfi,      0, (), noargs, t_hint),
- tCE(sev,	320f004, sev,      0, (), noargs, t_hint),
+ tCE("yield",	320f001, _yield,    0, (), noargs, t_hint),
+ tCE("wfe",	320f002, _wfe,      0, (), noargs, t_hint),
+ tCE("wfi",	320f003, _wfi,      0, (), noargs, t_hint),
+ tCE("sev",	320f004, _sev,      0, (), noargs, t_hint),
 
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_v6_notm
 
- TCE(ldrexd,	1b00f9f, e8d0007f, 3, (RRnpc, oRRnpc, RRnpcb),        ldrexd, t_ldrexd),
- TCE(strexd,	1a00f90, e8c00070, 4, (RRnpc, RRnpc, oRRnpc, RRnpcb), strexd, t_strexd),
+ TCE("ldrexd",	1b00f9f, e8d0007f, 3, (RRnpc, oRRnpc, RRnpcb),        ldrexd, t_ldrexd),
+ TCE("strexd",	1a00f90, e8c00070, 4, (RRnpc, RRnpc, oRRnpc, RRnpcb), strexd, t_strexd),
 
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_v6t2
 
- TCE(ldrexb,	1d00f9f, e8d00f4f, 2, (RRnpc, RRnpcb),	              rd_rn,  rd_rn),
- TCE(ldrexh,	1f00f9f, e8d00f5f, 2, (RRnpc, RRnpcb),	              rd_rn,  rd_rn),
- TCE(strexb,	1c00f90, e8c00f40, 3, (RRnpc, RRnpc, ADDR),           strex,  rm_rd_rn),
- TCE(strexh,	1e00f90, e8c00f50, 3, (RRnpc, RRnpc, ADDR),           strex,  rm_rd_rn),
- TUF(clrex,	57ff01f, f3bf8f2f, 0, (),			      noargs, noargs),
+ TCE("ldrexb",	1d00f9f, e8d00f4f, 2, (RRnpc, RRnpcb),	              rd_rn,  rd_rn),
+ TCE("ldrexh",	1f00f9f, e8d00f5f, 2, (RRnpc, RRnpcb),	              rd_rn,  rd_rn),
+ TCE("strexb",	1c00f90, e8c00f40, 3, (RRnpc, RRnpc, ADDR),           strex,  rm_rd_rn),
+ TCE("strexh",	1e00f90, e8c00f50, 3, (RRnpc, RRnpc, ADDR),           strex,  rm_rd_rn),
+ TUF("clrex",	57ff01f, f3bf8f2f, 0, (),			      noargs, noargs),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & arm_ext_v6z
 
- TCE(smc,	1600070, f7f08000, 1, (EXPi), smc, t_smc),
+ TCE("smc",	1600070, f7f08000, 1, (EXPi), smc, t_smc),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & arm_ext_v6t2
 
- TCE(bfc,	7c0001f, f36f0000, 3, (RRnpc, I31, I32),	   bfc, t_bfc),
- TCE(bfi,	7c00010, f3600000, 4, (RRnpc, RRnpc_I0, I31, I32), bfi, t_bfi),
- TCE(sbfx,	7a00050, f3400000, 4, (RR, RR, I31, I32),	   bfx, t_bfx),
- TCE(ubfx,	7e00050, f3c00000, 4, (RR, RR, I31, I32),	   bfx, t_bfx),
+ TCE("bfc",	7c0001f, f36f0000, 3, (RRnpc, I31, I32),	   bfc, t_bfc),
+ TCE("bfi",	7c00010, f3600000, 4, (RRnpc, RRnpc_I0, I31, I32), bfi, t_bfi),
+ TCE("sbfx",	7a00050, f3400000, 4, (RR, RR, I31, I32),	   bfx, t_bfx),
+ TCE("ubfx",	7e00050, f3c00000, 4, (RR, RR, I31, I32),	   bfx, t_bfx),
 
- TCE(mls,	0600090, fb000010, 4, (RRnpc, RRnpc, RRnpc, RRnpc), mlas, t_mla),
- TCE(movw,	3000000, f2400000, 2, (RRnpc, HALF),		    mov16, t_mov16),
- TCE(movt,	3400000, f2c00000, 2, (RRnpc, HALF),		    mov16, t_mov16),
- TCE(rbit,	6ff0f30, fa90f0a0, 2, (RR, RR),			    rd_rm, t_rbit),
+ TCE("mls",	0600090, fb000010, 4, (RRnpc, RRnpc, RRnpc, RRnpc), mlas, t_mla),
+ TCE("movw",	3000000, f2400000, 2, (RRnpc, HALF),		    mov16, t_mov16),
+ TCE("movt",	3400000, f2c00000, 2, (RRnpc, HALF),		    mov16, t_mov16),
+ TCE("rbit",	6ff0f30, fa90f0a0, 2, (RR, RR),			    rd_rm, t_rbit),
 
- TC3(ldrht,	03000b0, f8300e00, 2, (RR, ADDR), ldsttv4, t_ldstt),
- TC3(ldrsht,	03000f0, f9300e00, 2, (RR, ADDR), ldsttv4, t_ldstt),
- TC3(ldrsbt,	03000d0, f9100e00, 2, (RR, ADDR), ldsttv4, t_ldstt),
- TC3(strht,	02000b0, f8200e00, 2, (RR, ADDR), ldsttv4, t_ldstt),
+ TC3("ldrht",	03000b0, f8300e00, 2, (RR, ADDR), ldsttv4, t_ldstt),
+ TC3("ldrsht",	03000f0, f9300e00, 2, (RR, ADDR), ldsttv4, t_ldstt),
+ TC3("ldrsbt",	03000d0, f9100e00, 2, (RR, ADDR), ldsttv4, t_ldstt),
+ TC3("strht",	02000b0, f8200e00, 2, (RR, ADDR), ldsttv4, t_ldstt),
 
-  UT(cbnz,      b900,    2, (RR, EXP), t_cbz),
-  UT(cbz,       b100,    2, (RR, EXP), t_cbz),
+  UT("cbnz",      b900,    2, (RR, EXP), t_cbz),
+  UT("cbz",       b100,    2, (RR, EXP), t_cbz),
 
  /* ARM does not really have an IT instruction, so always allow it.
     The opcode is copied from Thumb in order to allow warnings in
@@ -16610,42 +16624,42 @@ static const struct asm_opcode insns[] =
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & arm_ext_v1
 
- TUE(it,        bf08,        bf08,     1, (COND),   it,    t_it),
- TUE(itt,       bf0c,        bf0c,     1, (COND),   it,    t_it),
- TUE(ite,       bf04,        bf04,     1, (COND),   it,    t_it),
- TUE(ittt,      bf0e,        bf0e,     1, (COND),   it,    t_it),
- TUE(itet,      bf06,        bf06,     1, (COND),   it,    t_it),
- TUE(itte,      bf0a,        bf0a,     1, (COND),   it,    t_it),
- TUE(itee,      bf02,        bf02,     1, (COND),   it,    t_it),
- TUE(itttt,     bf0f,        bf0f,     1, (COND),   it,    t_it),
- TUE(itett,     bf07,        bf07,     1, (COND),   it,    t_it),
- TUE(ittet,     bf0b,        bf0b,     1, (COND),   it,    t_it),
- TUE(iteet,     bf03,        bf03,     1, (COND),   it,    t_it),
- TUE(ittte,     bf0d,        bf0d,     1, (COND),   it,    t_it),
- TUE(itete,     bf05,        bf05,     1, (COND),   it,    t_it),
- TUE(ittee,     bf09,        bf09,     1, (COND),   it,    t_it),
- TUE(iteee,     bf01,        bf01,     1, (COND),   it,    t_it),
+ TUE("it",        bf08,        bf08,     1, (COND),   it,    t_it),
+ TUE("itt",       bf0c,        bf0c,     1, (COND),   it,    t_it),
+ TUE("ite",       bf04,        bf04,     1, (COND),   it,    t_it),
+ TUE("ittt",      bf0e,        bf0e,     1, (COND),   it,    t_it),
+ TUE("itet",      bf06,        bf06,     1, (COND),   it,    t_it),
+ TUE("itte",      bf0a,        bf0a,     1, (COND),   it,    t_it),
+ TUE("itee",      bf02,        bf02,     1, (COND),   it,    t_it),
+ TUE("itttt",     bf0f,        bf0f,     1, (COND),   it,    t_it),
+ TUE("itett",     bf07,        bf07,     1, (COND),   it,    t_it),
+ TUE("ittet",     bf0b,        bf0b,     1, (COND),   it,    t_it),
+ TUE("iteet",     bf03,        bf03,     1, (COND),   it,    t_it),
+ TUE("ittte",     bf0d,        bf0d,     1, (COND),   it,    t_it),
+ TUE("itete",     bf05,        bf05,     1, (COND),   it,    t_it),
+ TUE("ittee",     bf09,        bf09,     1, (COND),   it,    t_it),
+ TUE("iteee",     bf01,        bf01,     1, (COND),   it,    t_it),
  /* ARM/Thumb-2 instructions with no Thumb-1 equivalent.  */
- TC3(rrx,       01a00060, ea4f0030, 2, (RR, RR), rd_rm, t_rrx),
- TC3(rrxs,      01b00060, ea5f0030, 2, (RR, RR), rd_rm, t_rrx),
+ TC3("rrx",       01a00060, ea4f0030, 2, (RR, RR), rd_rm, t_rrx),
+ TC3("rrxs",      01b00060, ea5f0030, 2, (RR, RR), rd_rm, t_rrx),
 
  /* Thumb2 only instructions.  */
 #undef  ARM_VARIANT
 #define ARM_VARIANT  NULL
 
- TCE(addw,	0, f2000000, 3, (RR, RR, EXPi), 0, t_add_sub_w),
- TCE(subw,	0, f2a00000, 3, (RR, RR, EXPi), 0, t_add_sub_w),
- TCE(orn,       0, ea600000, 3, (RR, oRR, SH),  0, t_orn),
- TCE(orns,      0, ea700000, 3, (RR, oRR, SH),  0, t_orn),
- TCE(tbb,       0, e8d0f000, 1, (TB), 0, t_tb),
- TCE(tbh,       0, e8d0f010, 1, (TB), 0, t_tb),
+ TCE("addw",	0, f2000000, 3, (RR, RR, EXPi), 0, t_add_sub_w),
+ TCE("subw",	0, f2a00000, 3, (RR, RR, EXPi), 0, t_add_sub_w),
+ TCE("orn",       0, ea600000, 3, (RR, oRR, SH),  0, t_orn),
+ TCE("orns",      0, ea700000, 3, (RR, oRR, SH),  0, t_orn),
+ TCE("tbb",       0, e8d0f000, 1, (TB), 0, t_tb),
+ TCE("tbh",       0, e8d0f010, 1, (TB), 0, t_tb),
 
  /* Thumb-2 hardware division instructions (R and M profiles only).  */
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_div
 
- TCE(sdiv,	0, fb90f0f0, 3, (RR, oRR, RR), 0, t_div),
- TCE(udiv,	0, fbb0f0f0, 3, (RR, oRR, RR), 0, t_div),
+ TCE("sdiv",	0, fb90f0f0, 3, (RR, oRR, RR), 0, t_div),
+ TCE("udiv",	0, fbb0f0f0, 3, (RR, oRR, RR), 0, t_div),
 
  /* ARM V6M/V7 instructions.  */
 #undef  ARM_VARIANT
@@ -16653,9 +16667,9 @@ static const struct asm_opcode insns[] =
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_barrier
 
- TUF(dmb,	57ff050, f3bf8f50, 1, (oBARRIER), barrier,  t_barrier),
- TUF(dsb,	57ff040, f3bf8f40, 1, (oBARRIER), barrier,  t_barrier),
- TUF(isb,	57ff060, f3bf8f60, 1, (oBARRIER), barrier,  t_barrier),
+ TUF("dmb",	57ff050, f3bf8f50, 1, (oBARRIER), barrier,  t_barrier),
+ TUF("dsb",	57ff040, f3bf8f40, 1, (oBARRIER), barrier,  t_barrier),
+ TUF("isb",	57ff060, f3bf8f60, 1, (oBARRIER), barrier,  t_barrier),
 
  /* ARM V7 instructions.  */
 #undef  ARM_VARIANT
@@ -16663,570 +16677,570 @@ static const struct asm_opcode insns[] =
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_v7
 
- TUF(pli,	450f000, f910f000, 1, (ADDR),	  pli,	    t_pld),
- TCE(dbg,	320f0f0, f3af80f0, 1, (I15),	  dbg,	    t_dbg),
+ TUF("pli",	450f000, f910f000, 1, (ADDR),	  pli,	    t_pld),
+ TCE("dbg",	320f0f0, f3af80f0, 1, (I15),	  dbg,	    t_dbg),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_fpa_ext_v1  /* Core FPA instruction set (V1).  */
 
- cCE(wfs,	e200110, 1, (RR),	     rd),
- cCE(rfs,	e300110, 1, (RR),	     rd),
- cCE(wfc,	e400110, 1, (RR),	     rd),
- cCE(rfc,	e500110, 1, (RR),	     rd),
+ cCE("wfs",	e200110, 1, (RR),	     rd),
+ cCE("rfs",	e300110, 1, (RR),	     rd),
+ cCE("wfc",	e400110, 1, (RR),	     rd),
+ cCE("rfc",	e500110, 1, (RR),	     rd),
 
- cCL(ldfs,	c100100, 2, (RF, ADDRGLDC),  rd_cpaddr),
- cCL(ldfd,	c108100, 2, (RF, ADDRGLDC),  rd_cpaddr),
- cCL(ldfe,	c500100, 2, (RF, ADDRGLDC),  rd_cpaddr),
- cCL(ldfp,	c508100, 2, (RF, ADDRGLDC),  rd_cpaddr),
+ cCL("ldfs",	c100100, 2, (RF, ADDRGLDC),  rd_cpaddr),
+ cCL("ldfd",	c108100, 2, (RF, ADDRGLDC),  rd_cpaddr),
+ cCL("ldfe",	c500100, 2, (RF, ADDRGLDC),  rd_cpaddr),
+ cCL("ldfp",	c508100, 2, (RF, ADDRGLDC),  rd_cpaddr),
 
- cCL(stfs,	c000100, 2, (RF, ADDRGLDC),  rd_cpaddr),
- cCL(stfd,	c008100, 2, (RF, ADDRGLDC),  rd_cpaddr),
- cCL(stfe,	c400100, 2, (RF, ADDRGLDC),  rd_cpaddr),
- cCL(stfp,	c408100, 2, (RF, ADDRGLDC),  rd_cpaddr),
+ cCL("stfs",	c000100, 2, (RF, ADDRGLDC),  rd_cpaddr),
+ cCL("stfd",	c008100, 2, (RF, ADDRGLDC),  rd_cpaddr),
+ cCL("stfe",	c400100, 2, (RF, ADDRGLDC),  rd_cpaddr),
+ cCL("stfp",	c408100, 2, (RF, ADDRGLDC),  rd_cpaddr),
 
- cCL(mvfs,	e008100, 2, (RF, RF_IF),     rd_rm),
- cCL(mvfsp,	e008120, 2, (RF, RF_IF),     rd_rm),
- cCL(mvfsm,	e008140, 2, (RF, RF_IF),     rd_rm),
- cCL(mvfsz,	e008160, 2, (RF, RF_IF),     rd_rm),
- cCL(mvfd,	e008180, 2, (RF, RF_IF),     rd_rm),
- cCL(mvfdp,	e0081a0, 2, (RF, RF_IF),     rd_rm),
- cCL(mvfdm,	e0081c0, 2, (RF, RF_IF),     rd_rm),
- cCL(mvfdz,	e0081e0, 2, (RF, RF_IF),     rd_rm),
- cCL(mvfe,	e088100, 2, (RF, RF_IF),     rd_rm),
- cCL(mvfep,	e088120, 2, (RF, RF_IF),     rd_rm),
- cCL(mvfem,	e088140, 2, (RF, RF_IF),     rd_rm),
- cCL(mvfez,	e088160, 2, (RF, RF_IF),     rd_rm),
+ cCL("mvfs",	e008100, 2, (RF, RF_IF),     rd_rm),
+ cCL("mvfsp",	e008120, 2, (RF, RF_IF),     rd_rm),
+ cCL("mvfsm",	e008140, 2, (RF, RF_IF),     rd_rm),
+ cCL("mvfsz",	e008160, 2, (RF, RF_IF),     rd_rm),
+ cCL("mvfd",	e008180, 2, (RF, RF_IF),     rd_rm),
+ cCL("mvfdp",	e0081a0, 2, (RF, RF_IF),     rd_rm),
+ cCL("mvfdm",	e0081c0, 2, (RF, RF_IF),     rd_rm),
+ cCL("mvfdz",	e0081e0, 2, (RF, RF_IF),     rd_rm),
+ cCL("mvfe",	e088100, 2, (RF, RF_IF),     rd_rm),
+ cCL("mvfep",	e088120, 2, (RF, RF_IF),     rd_rm),
+ cCL("mvfem",	e088140, 2, (RF, RF_IF),     rd_rm),
+ cCL("mvfez",	e088160, 2, (RF, RF_IF),     rd_rm),
 
- cCL(mnfs,	e108100, 2, (RF, RF_IF),     rd_rm),
- cCL(mnfsp,	e108120, 2, (RF, RF_IF),     rd_rm),
- cCL(mnfsm,	e108140, 2, (RF, RF_IF),     rd_rm),
- cCL(mnfsz,	e108160, 2, (RF, RF_IF),     rd_rm),
- cCL(mnfd,	e108180, 2, (RF, RF_IF),     rd_rm),
- cCL(mnfdp,	e1081a0, 2, (RF, RF_IF),     rd_rm),
- cCL(mnfdm,	e1081c0, 2, (RF, RF_IF),     rd_rm),
- cCL(mnfdz,	e1081e0, 2, (RF, RF_IF),     rd_rm),
- cCL(mnfe,	e188100, 2, (RF, RF_IF),     rd_rm),
- cCL(mnfep,	e188120, 2, (RF, RF_IF),     rd_rm),
- cCL(mnfem,	e188140, 2, (RF, RF_IF),     rd_rm),
- cCL(mnfez,	e188160, 2, (RF, RF_IF),     rd_rm),
+ cCL("mnfs",	e108100, 2, (RF, RF_IF),     rd_rm),
+ cCL("mnfsp",	e108120, 2, (RF, RF_IF),     rd_rm),
+ cCL("mnfsm",	e108140, 2, (RF, RF_IF),     rd_rm),
+ cCL("mnfsz",	e108160, 2, (RF, RF_IF),     rd_rm),
+ cCL("mnfd",	e108180, 2, (RF, RF_IF),     rd_rm),
+ cCL("mnfdp",	e1081a0, 2, (RF, RF_IF),     rd_rm),
+ cCL("mnfdm",	e1081c0, 2, (RF, RF_IF),     rd_rm),
+ cCL("mnfdz",	e1081e0, 2, (RF, RF_IF),     rd_rm),
+ cCL("mnfe",	e188100, 2, (RF, RF_IF),     rd_rm),
+ cCL("mnfep",	e188120, 2, (RF, RF_IF),     rd_rm),
+ cCL("mnfem",	e188140, 2, (RF, RF_IF),     rd_rm),
+ cCL("mnfez",	e188160, 2, (RF, RF_IF),     rd_rm),
 
- cCL(abss,	e208100, 2, (RF, RF_IF),     rd_rm),
- cCL(abssp,	e208120, 2, (RF, RF_IF),     rd_rm),
- cCL(abssm,	e208140, 2, (RF, RF_IF),     rd_rm),
- cCL(abssz,	e208160, 2, (RF, RF_IF),     rd_rm),
- cCL(absd,	e208180, 2, (RF, RF_IF),     rd_rm),
- cCL(absdp,	e2081a0, 2, (RF, RF_IF),     rd_rm),
- cCL(absdm,	e2081c0, 2, (RF, RF_IF),     rd_rm),
- cCL(absdz,	e2081e0, 2, (RF, RF_IF),     rd_rm),
- cCL(abse,	e288100, 2, (RF, RF_IF),     rd_rm),
- cCL(absep,	e288120, 2, (RF, RF_IF),     rd_rm),
- cCL(absem,	e288140, 2, (RF, RF_IF),     rd_rm),
- cCL(absez,	e288160, 2, (RF, RF_IF),     rd_rm),
+ cCL("abss",	e208100, 2, (RF, RF_IF),     rd_rm),
+ cCL("abssp",	e208120, 2, (RF, RF_IF),     rd_rm),
+ cCL("abssm",	e208140, 2, (RF, RF_IF),     rd_rm),
+ cCL("abssz",	e208160, 2, (RF, RF_IF),     rd_rm),
+ cCL("absd",	e208180, 2, (RF, RF_IF),     rd_rm),
+ cCL("absdp",	e2081a0, 2, (RF, RF_IF),     rd_rm),
+ cCL("absdm",	e2081c0, 2, (RF, RF_IF),     rd_rm),
+ cCL("absdz",	e2081e0, 2, (RF, RF_IF),     rd_rm),
+ cCL("abse",	e288100, 2, (RF, RF_IF),     rd_rm),
+ cCL("absep",	e288120, 2, (RF, RF_IF),     rd_rm),
+ cCL("absem",	e288140, 2, (RF, RF_IF),     rd_rm),
+ cCL("absez",	e288160, 2, (RF, RF_IF),     rd_rm),
 
- cCL(rnds,	e308100, 2, (RF, RF_IF),     rd_rm),
- cCL(rndsp,	e308120, 2, (RF, RF_IF),     rd_rm),
- cCL(rndsm,	e308140, 2, (RF, RF_IF),     rd_rm),
- cCL(rndsz,	e308160, 2, (RF, RF_IF),     rd_rm),
- cCL(rndd,	e308180, 2, (RF, RF_IF),     rd_rm),
- cCL(rnddp,	e3081a0, 2, (RF, RF_IF),     rd_rm),
- cCL(rnddm,	e3081c0, 2, (RF, RF_IF),     rd_rm),
- cCL(rnddz,	e3081e0, 2, (RF, RF_IF),     rd_rm),
- cCL(rnde,	e388100, 2, (RF, RF_IF),     rd_rm),
- cCL(rndep,	e388120, 2, (RF, RF_IF),     rd_rm),
- cCL(rndem,	e388140, 2, (RF, RF_IF),     rd_rm),
- cCL(rndez,	e388160, 2, (RF, RF_IF),     rd_rm),
+ cCL("rnds",	e308100, 2, (RF, RF_IF),     rd_rm),
+ cCL("rndsp",	e308120, 2, (RF, RF_IF),     rd_rm),
+ cCL("rndsm",	e308140, 2, (RF, RF_IF),     rd_rm),
+ cCL("rndsz",	e308160, 2, (RF, RF_IF),     rd_rm),
+ cCL("rndd",	e308180, 2, (RF, RF_IF),     rd_rm),
+ cCL("rnddp",	e3081a0, 2, (RF, RF_IF),     rd_rm),
+ cCL("rnddm",	e3081c0, 2, (RF, RF_IF),     rd_rm),
+ cCL("rnddz",	e3081e0, 2, (RF, RF_IF),     rd_rm),
+ cCL("rnde",	e388100, 2, (RF, RF_IF),     rd_rm),
+ cCL("rndep",	e388120, 2, (RF, RF_IF),     rd_rm),
+ cCL("rndem",	e388140, 2, (RF, RF_IF),     rd_rm),
+ cCL("rndez",	e388160, 2, (RF, RF_IF),     rd_rm),
 
- cCL(sqts,	e408100, 2, (RF, RF_IF),     rd_rm),
- cCL(sqtsp,	e408120, 2, (RF, RF_IF),     rd_rm),
- cCL(sqtsm,	e408140, 2, (RF, RF_IF),     rd_rm),
- cCL(sqtsz,	e408160, 2, (RF, RF_IF),     rd_rm),
- cCL(sqtd,	e408180, 2, (RF, RF_IF),     rd_rm),
- cCL(sqtdp,	e4081a0, 2, (RF, RF_IF),     rd_rm),
- cCL(sqtdm,	e4081c0, 2, (RF, RF_IF),     rd_rm),
- cCL(sqtdz,	e4081e0, 2, (RF, RF_IF),     rd_rm),
- cCL(sqte,	e488100, 2, (RF, RF_IF),     rd_rm),
- cCL(sqtep,	e488120, 2, (RF, RF_IF),     rd_rm),
- cCL(sqtem,	e488140, 2, (RF, RF_IF),     rd_rm),
- cCL(sqtez,	e488160, 2, (RF, RF_IF),     rd_rm),
+ cCL("sqts",	e408100, 2, (RF, RF_IF),     rd_rm),
+ cCL("sqtsp",	e408120, 2, (RF, RF_IF),     rd_rm),
+ cCL("sqtsm",	e408140, 2, (RF, RF_IF),     rd_rm),
+ cCL("sqtsz",	e408160, 2, (RF, RF_IF),     rd_rm),
+ cCL("sqtd",	e408180, 2, (RF, RF_IF),     rd_rm),
+ cCL("sqtdp",	e4081a0, 2, (RF, RF_IF),     rd_rm),
+ cCL("sqtdm",	e4081c0, 2, (RF, RF_IF),     rd_rm),
+ cCL("sqtdz",	e4081e0, 2, (RF, RF_IF),     rd_rm),
+ cCL("sqte",	e488100, 2, (RF, RF_IF),     rd_rm),
+ cCL("sqtep",	e488120, 2, (RF, RF_IF),     rd_rm),
+ cCL("sqtem",	e488140, 2, (RF, RF_IF),     rd_rm),
+ cCL("sqtez",	e488160, 2, (RF, RF_IF),     rd_rm),
 
- cCL(logs,	e508100, 2, (RF, RF_IF),     rd_rm),
- cCL(logsp,	e508120, 2, (RF, RF_IF),     rd_rm),
- cCL(logsm,	e508140, 2, (RF, RF_IF),     rd_rm),
- cCL(logsz,	e508160, 2, (RF, RF_IF),     rd_rm),
- cCL(logd,	e508180, 2, (RF, RF_IF),     rd_rm),
- cCL(logdp,	e5081a0, 2, (RF, RF_IF),     rd_rm),
- cCL(logdm,	e5081c0, 2, (RF, RF_IF),     rd_rm),
- cCL(logdz,	e5081e0, 2, (RF, RF_IF),     rd_rm),
- cCL(loge,	e588100, 2, (RF, RF_IF),     rd_rm),
- cCL(logep,	e588120, 2, (RF, RF_IF),     rd_rm),
- cCL(logem,	e588140, 2, (RF, RF_IF),     rd_rm),
- cCL(logez,	e588160, 2, (RF, RF_IF),     rd_rm),
+ cCL("logs",	e508100, 2, (RF, RF_IF),     rd_rm),
+ cCL("logsp",	e508120, 2, (RF, RF_IF),     rd_rm),
+ cCL("logsm",	e508140, 2, (RF, RF_IF),     rd_rm),
+ cCL("logsz",	e508160, 2, (RF, RF_IF),     rd_rm),
+ cCL("logd",	e508180, 2, (RF, RF_IF),     rd_rm),
+ cCL("logdp",	e5081a0, 2, (RF, RF_IF),     rd_rm),
+ cCL("logdm",	e5081c0, 2, (RF, RF_IF),     rd_rm),
+ cCL("logdz",	e5081e0, 2, (RF, RF_IF),     rd_rm),
+ cCL("loge",	e588100, 2, (RF, RF_IF),     rd_rm),
+ cCL("logep",	e588120, 2, (RF, RF_IF),     rd_rm),
+ cCL("logem",	e588140, 2, (RF, RF_IF),     rd_rm),
+ cCL("logez",	e588160, 2, (RF, RF_IF),     rd_rm),
 
- cCL(lgns,	e608100, 2, (RF, RF_IF),     rd_rm),
- cCL(lgnsp,	e608120, 2, (RF, RF_IF),     rd_rm),
- cCL(lgnsm,	e608140, 2, (RF, RF_IF),     rd_rm),
- cCL(lgnsz,	e608160, 2, (RF, RF_IF),     rd_rm),
- cCL(lgnd,	e608180, 2, (RF, RF_IF),     rd_rm),
- cCL(lgndp,	e6081a0, 2, (RF, RF_IF),     rd_rm),
- cCL(lgndm,	e6081c0, 2, (RF, RF_IF),     rd_rm),
- cCL(lgndz,	e6081e0, 2, (RF, RF_IF),     rd_rm),
- cCL(lgne,	e688100, 2, (RF, RF_IF),     rd_rm),
- cCL(lgnep,	e688120, 2, (RF, RF_IF),     rd_rm),
- cCL(lgnem,	e688140, 2, (RF, RF_IF),     rd_rm),
- cCL(lgnez,	e688160, 2, (RF, RF_IF),     rd_rm),
+ cCL("lgns",	e608100, 2, (RF, RF_IF),     rd_rm),
+ cCL("lgnsp",	e608120, 2, (RF, RF_IF),     rd_rm),
+ cCL("lgnsm",	e608140, 2, (RF, RF_IF),     rd_rm),
+ cCL("lgnsz",	e608160, 2, (RF, RF_IF),     rd_rm),
+ cCL("lgnd",	e608180, 2, (RF, RF_IF),     rd_rm),
+ cCL("lgndp",	e6081a0, 2, (RF, RF_IF),     rd_rm),
+ cCL("lgndm",	e6081c0, 2, (RF, RF_IF),     rd_rm),
+ cCL("lgndz",	e6081e0, 2, (RF, RF_IF),     rd_rm),
+ cCL("lgne",	e688100, 2, (RF, RF_IF),     rd_rm),
+ cCL("lgnep",	e688120, 2, (RF, RF_IF),     rd_rm),
+ cCL("lgnem",	e688140, 2, (RF, RF_IF),     rd_rm),
+ cCL("lgnez",	e688160, 2, (RF, RF_IF),     rd_rm),
 
- cCL(exps,	e708100, 2, (RF, RF_IF),     rd_rm),
- cCL(expsp,	e708120, 2, (RF, RF_IF),     rd_rm),
- cCL(expsm,	e708140, 2, (RF, RF_IF),     rd_rm),
- cCL(expsz,	e708160, 2, (RF, RF_IF),     rd_rm),
- cCL(expd,	e708180, 2, (RF, RF_IF),     rd_rm),
- cCL(expdp,	e7081a0, 2, (RF, RF_IF),     rd_rm),
- cCL(expdm,	e7081c0, 2, (RF, RF_IF),     rd_rm),
- cCL(expdz,	e7081e0, 2, (RF, RF_IF),     rd_rm),
- cCL(expe,	e788100, 2, (RF, RF_IF),     rd_rm),
- cCL(expep,	e788120, 2, (RF, RF_IF),     rd_rm),
- cCL(expem,	e788140, 2, (RF, RF_IF),     rd_rm),
- cCL(expdz,	e788160, 2, (RF, RF_IF),     rd_rm),
+ cCL("exps",	e708100, 2, (RF, RF_IF),     rd_rm),
+ cCL("expsp",	e708120, 2, (RF, RF_IF),     rd_rm),
+ cCL("expsm",	e708140, 2, (RF, RF_IF),     rd_rm),
+ cCL("expsz",	e708160, 2, (RF, RF_IF),     rd_rm),
+ cCL("expd",	e708180, 2, (RF, RF_IF),     rd_rm),
+ cCL("expdp",	e7081a0, 2, (RF, RF_IF),     rd_rm),
+ cCL("expdm",	e7081c0, 2, (RF, RF_IF),     rd_rm),
+ cCL("expdz",	e7081e0, 2, (RF, RF_IF),     rd_rm),
+ cCL("expe",	e788100, 2, (RF, RF_IF),     rd_rm),
+ cCL("expep",	e788120, 2, (RF, RF_IF),     rd_rm),
+ cCL("expem",	e788140, 2, (RF, RF_IF),     rd_rm),
+ cCL("expdz",	e788160, 2, (RF, RF_IF),     rd_rm),
 
- cCL(sins,	e808100, 2, (RF, RF_IF),     rd_rm),
- cCL(sinsp,	e808120, 2, (RF, RF_IF),     rd_rm),
- cCL(sinsm,	e808140, 2, (RF, RF_IF),     rd_rm),
- cCL(sinsz,	e808160, 2, (RF, RF_IF),     rd_rm),
- cCL(sind,	e808180, 2, (RF, RF_IF),     rd_rm),
- cCL(sindp,	e8081a0, 2, (RF, RF_IF),     rd_rm),
- cCL(sindm,	e8081c0, 2, (RF, RF_IF),     rd_rm),
- cCL(sindz,	e8081e0, 2, (RF, RF_IF),     rd_rm),
- cCL(sine,	e888100, 2, (RF, RF_IF),     rd_rm),
- cCL(sinep,	e888120, 2, (RF, RF_IF),     rd_rm),
- cCL(sinem,	e888140, 2, (RF, RF_IF),     rd_rm),
- cCL(sinez,	e888160, 2, (RF, RF_IF),     rd_rm),
+ cCL("sins",	e808100, 2, (RF, RF_IF),     rd_rm),
+ cCL("sinsp",	e808120, 2, (RF, RF_IF),     rd_rm),
+ cCL("sinsm",	e808140, 2, (RF, RF_IF),     rd_rm),
+ cCL("sinsz",	e808160, 2, (RF, RF_IF),     rd_rm),
+ cCL("sind",	e808180, 2, (RF, RF_IF),     rd_rm),
+ cCL("sindp",	e8081a0, 2, (RF, RF_IF),     rd_rm),
+ cCL("sindm",	e8081c0, 2, (RF, RF_IF),     rd_rm),
+ cCL("sindz",	e8081e0, 2, (RF, RF_IF),     rd_rm),
+ cCL("sine",	e888100, 2, (RF, RF_IF),     rd_rm),
+ cCL("sinep",	e888120, 2, (RF, RF_IF),     rd_rm),
+ cCL("sinem",	e888140, 2, (RF, RF_IF),     rd_rm),
+ cCL("sinez",	e888160, 2, (RF, RF_IF),     rd_rm),
 
- cCL(coss,	e908100, 2, (RF, RF_IF),     rd_rm),
- cCL(cossp,	e908120, 2, (RF, RF_IF),     rd_rm),
- cCL(cossm,	e908140, 2, (RF, RF_IF),     rd_rm),
- cCL(cossz,	e908160, 2, (RF, RF_IF),     rd_rm),
- cCL(cosd,	e908180, 2, (RF, RF_IF),     rd_rm),
- cCL(cosdp,	e9081a0, 2, (RF, RF_IF),     rd_rm),
- cCL(cosdm,	e9081c0, 2, (RF, RF_IF),     rd_rm),
- cCL(cosdz,	e9081e0, 2, (RF, RF_IF),     rd_rm),
- cCL(cose,	e988100, 2, (RF, RF_IF),     rd_rm),
- cCL(cosep,	e988120, 2, (RF, RF_IF),     rd_rm),
- cCL(cosem,	e988140, 2, (RF, RF_IF),     rd_rm),
- cCL(cosez,	e988160, 2, (RF, RF_IF),     rd_rm),
+ cCL("coss",	e908100, 2, (RF, RF_IF),     rd_rm),
+ cCL("cossp",	e908120, 2, (RF, RF_IF),     rd_rm),
+ cCL("cossm",	e908140, 2, (RF, RF_IF),     rd_rm),
+ cCL("cossz",	e908160, 2, (RF, RF_IF),     rd_rm),
+ cCL("cosd",	e908180, 2, (RF, RF_IF),     rd_rm),
+ cCL("cosdp",	e9081a0, 2, (RF, RF_IF),     rd_rm),
+ cCL("cosdm",	e9081c0, 2, (RF, RF_IF),     rd_rm),
+ cCL("cosdz",	e9081e0, 2, (RF, RF_IF),     rd_rm),
+ cCL("cose",	e988100, 2, (RF, RF_IF),     rd_rm),
+ cCL("cosep",	e988120, 2, (RF, RF_IF),     rd_rm),
+ cCL("cosem",	e988140, 2, (RF, RF_IF),     rd_rm),
+ cCL("cosez",	e988160, 2, (RF, RF_IF),     rd_rm),
 
- cCL(tans,	ea08100, 2, (RF, RF_IF),     rd_rm),
- cCL(tansp,	ea08120, 2, (RF, RF_IF),     rd_rm),
- cCL(tansm,	ea08140, 2, (RF, RF_IF),     rd_rm),
- cCL(tansz,	ea08160, 2, (RF, RF_IF),     rd_rm),
- cCL(tand,	ea08180, 2, (RF, RF_IF),     rd_rm),
- cCL(tandp,	ea081a0, 2, (RF, RF_IF),     rd_rm),
- cCL(tandm,	ea081c0, 2, (RF, RF_IF),     rd_rm),
- cCL(tandz,	ea081e0, 2, (RF, RF_IF),     rd_rm),
- cCL(tane,	ea88100, 2, (RF, RF_IF),     rd_rm),
- cCL(tanep,	ea88120, 2, (RF, RF_IF),     rd_rm),
- cCL(tanem,	ea88140, 2, (RF, RF_IF),     rd_rm),
- cCL(tanez,	ea88160, 2, (RF, RF_IF),     rd_rm),
+ cCL("tans",	ea08100, 2, (RF, RF_IF),     rd_rm),
+ cCL("tansp",	ea08120, 2, (RF, RF_IF),     rd_rm),
+ cCL("tansm",	ea08140, 2, (RF, RF_IF),     rd_rm),
+ cCL("tansz",	ea08160, 2, (RF, RF_IF),     rd_rm),
+ cCL("tand",	ea08180, 2, (RF, RF_IF),     rd_rm),
+ cCL("tandp",	ea081a0, 2, (RF, RF_IF),     rd_rm),
+ cCL("tandm",	ea081c0, 2, (RF, RF_IF),     rd_rm),
+ cCL("tandz",	ea081e0, 2, (RF, RF_IF),     rd_rm),
+ cCL("tane",	ea88100, 2, (RF, RF_IF),     rd_rm),
+ cCL("tanep",	ea88120, 2, (RF, RF_IF),     rd_rm),
+ cCL("tanem",	ea88140, 2, (RF, RF_IF),     rd_rm),
+ cCL("tanez",	ea88160, 2, (RF, RF_IF),     rd_rm),
 
- cCL(asns,	eb08100, 2, (RF, RF_IF),     rd_rm),
- cCL(asnsp,	eb08120, 2, (RF, RF_IF),     rd_rm),
- cCL(asnsm,	eb08140, 2, (RF, RF_IF),     rd_rm),
- cCL(asnsz,	eb08160, 2, (RF, RF_IF),     rd_rm),
- cCL(asnd,	eb08180, 2, (RF, RF_IF),     rd_rm),
- cCL(asndp,	eb081a0, 2, (RF, RF_IF),     rd_rm),
- cCL(asndm,	eb081c0, 2, (RF, RF_IF),     rd_rm),
- cCL(asndz,	eb081e0, 2, (RF, RF_IF),     rd_rm),
- cCL(asne,	eb88100, 2, (RF, RF_IF),     rd_rm),
- cCL(asnep,	eb88120, 2, (RF, RF_IF),     rd_rm),
- cCL(asnem,	eb88140, 2, (RF, RF_IF),     rd_rm),
- cCL(asnez,	eb88160, 2, (RF, RF_IF),     rd_rm),
+ cCL("asns",	eb08100, 2, (RF, RF_IF),     rd_rm),
+ cCL("asnsp",	eb08120, 2, (RF, RF_IF),     rd_rm),
+ cCL("asnsm",	eb08140, 2, (RF, RF_IF),     rd_rm),
+ cCL("asnsz",	eb08160, 2, (RF, RF_IF),     rd_rm),
+ cCL("asnd",	eb08180, 2, (RF, RF_IF),     rd_rm),
+ cCL("asndp",	eb081a0, 2, (RF, RF_IF),     rd_rm),
+ cCL("asndm",	eb081c0, 2, (RF, RF_IF),     rd_rm),
+ cCL("asndz",	eb081e0, 2, (RF, RF_IF),     rd_rm),
+ cCL("asne",	eb88100, 2, (RF, RF_IF),     rd_rm),
+ cCL("asnep",	eb88120, 2, (RF, RF_IF),     rd_rm),
+ cCL("asnem",	eb88140, 2, (RF, RF_IF),     rd_rm),
+ cCL("asnez",	eb88160, 2, (RF, RF_IF),     rd_rm),
 
- cCL(acss,	ec08100, 2, (RF, RF_IF),     rd_rm),
- cCL(acssp,	ec08120, 2, (RF, RF_IF),     rd_rm),
- cCL(acssm,	ec08140, 2, (RF, RF_IF),     rd_rm),
- cCL(acssz,	ec08160, 2, (RF, RF_IF),     rd_rm),
- cCL(acsd,	ec08180, 2, (RF, RF_IF),     rd_rm),
- cCL(acsdp,	ec081a0, 2, (RF, RF_IF),     rd_rm),
- cCL(acsdm,	ec081c0, 2, (RF, RF_IF),     rd_rm),
- cCL(acsdz,	ec081e0, 2, (RF, RF_IF),     rd_rm),
- cCL(acse,	ec88100, 2, (RF, RF_IF),     rd_rm),
- cCL(acsep,	ec88120, 2, (RF, RF_IF),     rd_rm),
- cCL(acsem,	ec88140, 2, (RF, RF_IF),     rd_rm),
- cCL(acsez,	ec88160, 2, (RF, RF_IF),     rd_rm),
+ cCL("acss",	ec08100, 2, (RF, RF_IF),     rd_rm),
+ cCL("acssp",	ec08120, 2, (RF, RF_IF),     rd_rm),
+ cCL("acssm",	ec08140, 2, (RF, RF_IF),     rd_rm),
+ cCL("acssz",	ec08160, 2, (RF, RF_IF),     rd_rm),
+ cCL("acsd",	ec08180, 2, (RF, RF_IF),     rd_rm),
+ cCL("acsdp",	ec081a0, 2, (RF, RF_IF),     rd_rm),
+ cCL("acsdm",	ec081c0, 2, (RF, RF_IF),     rd_rm),
+ cCL("acsdz",	ec081e0, 2, (RF, RF_IF),     rd_rm),
+ cCL("acse",	ec88100, 2, (RF, RF_IF),     rd_rm),
+ cCL("acsep",	ec88120, 2, (RF, RF_IF),     rd_rm),
+ cCL("acsem",	ec88140, 2, (RF, RF_IF),     rd_rm),
+ cCL("acsez",	ec88160, 2, (RF, RF_IF),     rd_rm),
 
- cCL(atns,	ed08100, 2, (RF, RF_IF),     rd_rm),
- cCL(atnsp,	ed08120, 2, (RF, RF_IF),     rd_rm),
- cCL(atnsm,	ed08140, 2, (RF, RF_IF),     rd_rm),
- cCL(atnsz,	ed08160, 2, (RF, RF_IF),     rd_rm),
- cCL(atnd,	ed08180, 2, (RF, RF_IF),     rd_rm),
- cCL(atndp,	ed081a0, 2, (RF, RF_IF),     rd_rm),
- cCL(atndm,	ed081c0, 2, (RF, RF_IF),     rd_rm),
- cCL(atndz,	ed081e0, 2, (RF, RF_IF),     rd_rm),
- cCL(atne,	ed88100, 2, (RF, RF_IF),     rd_rm),
- cCL(atnep,	ed88120, 2, (RF, RF_IF),     rd_rm),
- cCL(atnem,	ed88140, 2, (RF, RF_IF),     rd_rm),
- cCL(atnez,	ed88160, 2, (RF, RF_IF),     rd_rm),
+ cCL("atns",	ed08100, 2, (RF, RF_IF),     rd_rm),
+ cCL("atnsp",	ed08120, 2, (RF, RF_IF),     rd_rm),
+ cCL("atnsm",	ed08140, 2, (RF, RF_IF),     rd_rm),
+ cCL("atnsz",	ed08160, 2, (RF, RF_IF),     rd_rm),
+ cCL("atnd",	ed08180, 2, (RF, RF_IF),     rd_rm),
+ cCL("atndp",	ed081a0, 2, (RF, RF_IF),     rd_rm),
+ cCL("atndm",	ed081c0, 2, (RF, RF_IF),     rd_rm),
+ cCL("atndz",	ed081e0, 2, (RF, RF_IF),     rd_rm),
+ cCL("atne",	ed88100, 2, (RF, RF_IF),     rd_rm),
+ cCL("atnep",	ed88120, 2, (RF, RF_IF),     rd_rm),
+ cCL("atnem",	ed88140, 2, (RF, RF_IF),     rd_rm),
+ cCL("atnez",	ed88160, 2, (RF, RF_IF),     rd_rm),
 
- cCL(urds,	ee08100, 2, (RF, RF_IF),     rd_rm),
- cCL(urdsp,	ee08120, 2, (RF, RF_IF),     rd_rm),
- cCL(urdsm,	ee08140, 2, (RF, RF_IF),     rd_rm),
- cCL(urdsz,	ee08160, 2, (RF, RF_IF),     rd_rm),
- cCL(urdd,	ee08180, 2, (RF, RF_IF),     rd_rm),
- cCL(urddp,	ee081a0, 2, (RF, RF_IF),     rd_rm),
- cCL(urddm,	ee081c0, 2, (RF, RF_IF),     rd_rm),
- cCL(urddz,	ee081e0, 2, (RF, RF_IF),     rd_rm),
- cCL(urde,	ee88100, 2, (RF, RF_IF),     rd_rm),
- cCL(urdep,	ee88120, 2, (RF, RF_IF),     rd_rm),
- cCL(urdem,	ee88140, 2, (RF, RF_IF),     rd_rm),
- cCL(urdez,	ee88160, 2, (RF, RF_IF),     rd_rm),
+ cCL("urds",	ee08100, 2, (RF, RF_IF),     rd_rm),
+ cCL("urdsp",	ee08120, 2, (RF, RF_IF),     rd_rm),
+ cCL("urdsm",	ee08140, 2, (RF, RF_IF),     rd_rm),
+ cCL("urdsz",	ee08160, 2, (RF, RF_IF),     rd_rm),
+ cCL("urdd",	ee08180, 2, (RF, RF_IF),     rd_rm),
+ cCL("urddp",	ee081a0, 2, (RF, RF_IF),     rd_rm),
+ cCL("urddm",	ee081c0, 2, (RF, RF_IF),     rd_rm),
+ cCL("urddz",	ee081e0, 2, (RF, RF_IF),     rd_rm),
+ cCL("urde",	ee88100, 2, (RF, RF_IF),     rd_rm),
+ cCL("urdep",	ee88120, 2, (RF, RF_IF),     rd_rm),
+ cCL("urdem",	ee88140, 2, (RF, RF_IF),     rd_rm),
+ cCL("urdez",	ee88160, 2, (RF, RF_IF),     rd_rm),
 
- cCL(nrms,	ef08100, 2, (RF, RF_IF),     rd_rm),
- cCL(nrmsp,	ef08120, 2, (RF, RF_IF),     rd_rm),
- cCL(nrmsm,	ef08140, 2, (RF, RF_IF),     rd_rm),
- cCL(nrmsz,	ef08160, 2, (RF, RF_IF),     rd_rm),
- cCL(nrmd,	ef08180, 2, (RF, RF_IF),     rd_rm),
- cCL(nrmdp,	ef081a0, 2, (RF, RF_IF),     rd_rm),
- cCL(nrmdm,	ef081c0, 2, (RF, RF_IF),     rd_rm),
- cCL(nrmdz,	ef081e0, 2, (RF, RF_IF),     rd_rm),
- cCL(nrme,	ef88100, 2, (RF, RF_IF),     rd_rm),
- cCL(nrmep,	ef88120, 2, (RF, RF_IF),     rd_rm),
- cCL(nrmem,	ef88140, 2, (RF, RF_IF),     rd_rm),
- cCL(nrmez,	ef88160, 2, (RF, RF_IF),     rd_rm),
+ cCL("nrms",	ef08100, 2, (RF, RF_IF),     rd_rm),
+ cCL("nrmsp",	ef08120, 2, (RF, RF_IF),     rd_rm),
+ cCL("nrmsm",	ef08140, 2, (RF, RF_IF),     rd_rm),
+ cCL("nrmsz",	ef08160, 2, (RF, RF_IF),     rd_rm),
+ cCL("nrmd",	ef08180, 2, (RF, RF_IF),     rd_rm),
+ cCL("nrmdp",	ef081a0, 2, (RF, RF_IF),     rd_rm),
+ cCL("nrmdm",	ef081c0, 2, (RF, RF_IF),     rd_rm),
+ cCL("nrmdz",	ef081e0, 2, (RF, RF_IF),     rd_rm),
+ cCL("nrme",	ef88100, 2, (RF, RF_IF),     rd_rm),
+ cCL("nrmep",	ef88120, 2, (RF, RF_IF),     rd_rm),
+ cCL("nrmem",	ef88140, 2, (RF, RF_IF),     rd_rm),
+ cCL("nrmez",	ef88160, 2, (RF, RF_IF),     rd_rm),
 
- cCL(adfs,	e000100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(adfsp,	e000120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(adfsm,	e000140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(adfsz,	e000160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(adfd,	e000180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(adfdp,	e0001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(adfdm,	e0001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(adfdz,	e0001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(adfe,	e080100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(adfep,	e080120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(adfem,	e080140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(adfez,	e080160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("adfs",	e000100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("adfsp",	e000120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("adfsm",	e000140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("adfsz",	e000160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("adfd",	e000180, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("adfdp",	e0001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("adfdm",	e0001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("adfdz",	e0001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("adfe",	e080100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("adfep",	e080120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("adfem",	e080140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("adfez",	e080160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
- cCL(sufs,	e200100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(sufsp,	e200120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(sufsm,	e200140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(sufsz,	e200160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(sufd,	e200180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(sufdp,	e2001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(sufdm,	e2001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(sufdz,	e2001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(sufe,	e280100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(sufep,	e280120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(sufem,	e280140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(sufez,	e280160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("sufs",	e200100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("sufsp",	e200120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("sufsm",	e200140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("sufsz",	e200160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("sufd",	e200180, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("sufdp",	e2001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("sufdm",	e2001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("sufdz",	e2001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("sufe",	e280100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("sufep",	e280120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("sufem",	e280140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("sufez",	e280160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
- cCL(rsfs,	e300100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rsfsp,	e300120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rsfsm,	e300140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rsfsz,	e300160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rsfd,	e300180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rsfdp,	e3001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rsfdm,	e3001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rsfdz,	e3001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rsfe,	e380100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rsfep,	e380120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rsfem,	e380140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rsfez,	e380160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rsfs",	e300100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rsfsp",	e300120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rsfsm",	e300140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rsfsz",	e300160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rsfd",	e300180, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rsfdp",	e3001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rsfdm",	e3001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rsfdz",	e3001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rsfe",	e380100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rsfep",	e380120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rsfem",	e380140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rsfez",	e380160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
- cCL(mufs,	e100100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(mufsp,	e100120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(mufsm,	e100140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(mufsz,	e100160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(mufd,	e100180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(mufdp,	e1001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(mufdm,	e1001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(mufdz,	e1001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(mufe,	e180100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(mufep,	e180120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(mufem,	e180140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(mufez,	e180160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("mufs",	e100100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("mufsp",	e100120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("mufsm",	e100140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("mufsz",	e100160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("mufd",	e100180, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("mufdp",	e1001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("mufdm",	e1001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("mufdz",	e1001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("mufe",	e180100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("mufep",	e180120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("mufem",	e180140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("mufez",	e180160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
- cCL(dvfs,	e400100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(dvfsp,	e400120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(dvfsm,	e400140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(dvfsz,	e400160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(dvfd,	e400180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(dvfdp,	e4001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(dvfdm,	e4001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(dvfdz,	e4001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(dvfe,	e480100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(dvfep,	e480120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(dvfem,	e480140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(dvfez,	e480160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("dvfs",	e400100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("dvfsp",	e400120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("dvfsm",	e400140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("dvfsz",	e400160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("dvfd",	e400180, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("dvfdp",	e4001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("dvfdm",	e4001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("dvfdz",	e4001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("dvfe",	e480100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("dvfep",	e480120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("dvfem",	e480140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("dvfez",	e480160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
- cCL(rdfs,	e500100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rdfsp,	e500120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rdfsm,	e500140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rdfsz,	e500160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rdfd,	e500180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rdfdp,	e5001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rdfdm,	e5001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rdfdz,	e5001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rdfe,	e580100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rdfep,	e580120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rdfem,	e580140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rdfez,	e580160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rdfs",	e500100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rdfsp",	e500120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rdfsm",	e500140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rdfsz",	e500160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rdfd",	e500180, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rdfdp",	e5001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rdfdm",	e5001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rdfdz",	e5001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rdfe",	e580100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rdfep",	e580120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rdfem",	e580140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rdfez",	e580160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
- cCL(pows,	e600100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(powsp,	e600120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(powsm,	e600140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(powsz,	e600160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(powd,	e600180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(powdp,	e6001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(powdm,	e6001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(powdz,	e6001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(powe,	e680100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(powep,	e680120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(powem,	e680140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(powez,	e680160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("pows",	e600100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("powsp",	e600120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("powsm",	e600140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("powsz",	e600160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("powd",	e600180, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("powdp",	e6001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("powdm",	e6001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("powdz",	e6001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("powe",	e680100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("powep",	e680120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("powem",	e680140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("powez",	e680160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
- cCL(rpws,	e700100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rpwsp,	e700120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rpwsm,	e700140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rpwsz,	e700160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rpwd,	e700180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rpwdp,	e7001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rpwdm,	e7001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rpwdz,	e7001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rpwe,	e780100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rpwep,	e780120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rpwem,	e780140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rpwez,	e780160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rpws",	e700100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rpwsp",	e700120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rpwsm",	e700140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rpwsz",	e700160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rpwd",	e700180, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rpwdp",	e7001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rpwdm",	e7001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rpwdz",	e7001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rpwe",	e780100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rpwep",	e780120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rpwem",	e780140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rpwez",	e780160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
- cCL(rmfs,	e800100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rmfsp,	e800120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rmfsm,	e800140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rmfsz,	e800160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rmfd,	e800180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rmfdp,	e8001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rmfdm,	e8001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rmfdz,	e8001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rmfe,	e880100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rmfep,	e880120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rmfem,	e880140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(rmfez,	e880160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rmfs",	e800100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rmfsp",	e800120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rmfsm",	e800140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rmfsz",	e800160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rmfd",	e800180, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rmfdp",	e8001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rmfdm",	e8001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rmfdz",	e8001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rmfe",	e880100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rmfep",	e880120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rmfem",	e880140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("rmfez",	e880160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
- cCL(fmls,	e900100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(fmlsp,	e900120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(fmlsm,	e900140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(fmlsz,	e900160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(fmld,	e900180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(fmldp,	e9001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(fmldm,	e9001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(fmldz,	e9001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(fmle,	e980100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(fmlep,	e980120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(fmlem,	e980140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(fmlez,	e980160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("fmls",	e900100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("fmlsp",	e900120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("fmlsm",	e900140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("fmlsz",	e900160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("fmld",	e900180, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("fmldp",	e9001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("fmldm",	e9001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("fmldz",	e9001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("fmle",	e980100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("fmlep",	e980120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("fmlem",	e980140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("fmlez",	e980160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
- cCL(fdvs,	ea00100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(fdvsp,	ea00120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(fdvsm,	ea00140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(fdvsz,	ea00160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(fdvd,	ea00180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(fdvdp,	ea001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(fdvdm,	ea001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(fdvdz,	ea001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(fdve,	ea80100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(fdvep,	ea80120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(fdvem,	ea80140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(fdvez,	ea80160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("fdvs",	ea00100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("fdvsp",	ea00120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("fdvsm",	ea00140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("fdvsz",	ea00160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("fdvd",	ea00180, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("fdvdp",	ea001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("fdvdm",	ea001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("fdvdz",	ea001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("fdve",	ea80100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("fdvep",	ea80120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("fdvem",	ea80140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("fdvez",	ea80160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
- cCL(frds,	eb00100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(frdsp,	eb00120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(frdsm,	eb00140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(frdsz,	eb00160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(frdd,	eb00180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(frddp,	eb001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(frddm,	eb001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(frddz,	eb001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(frde,	eb80100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(frdep,	eb80120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(frdem,	eb80140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(frdez,	eb80160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("frds",	eb00100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("frdsp",	eb00120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("frdsm",	eb00140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("frdsz",	eb00160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("frdd",	eb00180, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("frddp",	eb001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("frddm",	eb001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("frddz",	eb001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("frde",	eb80100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("frdep",	eb80120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("frdem",	eb80140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("frdez",	eb80160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
- cCL(pols,	ec00100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(polsp,	ec00120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(polsm,	ec00140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(polsz,	ec00160, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(pold,	ec00180, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(poldp,	ec001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(poldm,	ec001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(poldz,	ec001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(pole,	ec80100, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(polep,	ec80120, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(polem,	ec80140, 3, (RF, RF, RF_IF), rd_rn_rm),
- cCL(polez,	ec80160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("pols",	ec00100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("polsp",	ec00120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("polsm",	ec00140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("polsz",	ec00160, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("pold",	ec00180, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("poldp",	ec001a0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("poldm",	ec001c0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("poldz",	ec001e0, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("pole",	ec80100, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("polep",	ec80120, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("polem",	ec80140, 3, (RF, RF, RF_IF), rd_rn_rm),
+ cCL("polez",	ec80160, 3, (RF, RF, RF_IF), rd_rn_rm),
 
- cCE(cmf,	e90f110, 2, (RF, RF_IF),     fpa_cmp),
- C3E(cmfe,	ed0f110, 2, (RF, RF_IF),     fpa_cmp),
- cCE(cnf,	eb0f110, 2, (RF, RF_IF),     fpa_cmp),
- C3E(cnfe,	ef0f110, 2, (RF, RF_IF),     fpa_cmp),
+ cCE("cmf",	e90f110, 2, (RF, RF_IF),     fpa_cmp),
+ C3E("cmfe",	ed0f110, 2, (RF, RF_IF),     fpa_cmp),
+ cCE("cnf",	eb0f110, 2, (RF, RF_IF),     fpa_cmp),
+ C3E("cnfe",	ef0f110, 2, (RF, RF_IF),     fpa_cmp),
 
- cCL(flts,	e000110, 2, (RF, RR),	     rn_rd),
- cCL(fltsp,	e000130, 2, (RF, RR),	     rn_rd),
- cCL(fltsm,	e000150, 2, (RF, RR),	     rn_rd),
- cCL(fltsz,	e000170, 2, (RF, RR),	     rn_rd),
- cCL(fltd,	e000190, 2, (RF, RR),	     rn_rd),
- cCL(fltdp,	e0001b0, 2, (RF, RR),	     rn_rd),
- cCL(fltdm,	e0001d0, 2, (RF, RR),	     rn_rd),
- cCL(fltdz,	e0001f0, 2, (RF, RR),	     rn_rd),
- cCL(flte,	e080110, 2, (RF, RR),	     rn_rd),
- cCL(fltep,	e080130, 2, (RF, RR),	     rn_rd),
- cCL(fltem,	e080150, 2, (RF, RR),	     rn_rd),
- cCL(fltez,	e080170, 2, (RF, RR),	     rn_rd),
+ cCL("flts",	e000110, 2, (RF, RR),	     rn_rd),
+ cCL("fltsp",	e000130, 2, (RF, RR),	     rn_rd),
+ cCL("fltsm",	e000150, 2, (RF, RR),	     rn_rd),
+ cCL("fltsz",	e000170, 2, (RF, RR),	     rn_rd),
+ cCL("fltd",	e000190, 2, (RF, RR),	     rn_rd),
+ cCL("fltdp",	e0001b0, 2, (RF, RR),	     rn_rd),
+ cCL("fltdm",	e0001d0, 2, (RF, RR),	     rn_rd),
+ cCL("fltdz",	e0001f0, 2, (RF, RR),	     rn_rd),
+ cCL("flte",	e080110, 2, (RF, RR),	     rn_rd),
+ cCL("fltep",	e080130, 2, (RF, RR),	     rn_rd),
+ cCL("fltem",	e080150, 2, (RF, RR),	     rn_rd),
+ cCL("fltez",	e080170, 2, (RF, RR),	     rn_rd),
 
   /* The implementation of the FIX instruction is broken on some
      assemblers, in that it accepts a precision specifier as well as a
      rounding specifier, despite the fact that this is meaningless.
      To be more compatible, we accept it as well, though of course it
      does not set any bits.  */
- cCE(fix,	e100110, 2, (RR, RF),	     rd_rm),
- cCL(fixp,	e100130, 2, (RR, RF),	     rd_rm),
- cCL(fixm,	e100150, 2, (RR, RF),	     rd_rm),
- cCL(fixz,	e100170, 2, (RR, RF),	     rd_rm),
- cCL(fixsp,	e100130, 2, (RR, RF),	     rd_rm),
- cCL(fixsm,	e100150, 2, (RR, RF),	     rd_rm),
- cCL(fixsz,	e100170, 2, (RR, RF),	     rd_rm),
- cCL(fixdp,	e100130, 2, (RR, RF),	     rd_rm),
- cCL(fixdm,	e100150, 2, (RR, RF),	     rd_rm),
- cCL(fixdz,	e100170, 2, (RR, RF),	     rd_rm),
- cCL(fixep,	e100130, 2, (RR, RF),	     rd_rm),
- cCL(fixem,	e100150, 2, (RR, RF),	     rd_rm),
- cCL(fixez,	e100170, 2, (RR, RF),	     rd_rm),
+ cCE("fix",	e100110, 2, (RR, RF),	     rd_rm),
+ cCL("fixp",	e100130, 2, (RR, RF),	     rd_rm),
+ cCL("fixm",	e100150, 2, (RR, RF),	     rd_rm),
+ cCL("fixz",	e100170, 2, (RR, RF),	     rd_rm),
+ cCL("fixsp",	e100130, 2, (RR, RF),	     rd_rm),
+ cCL("fixsm",	e100150, 2, (RR, RF),	     rd_rm),
+ cCL("fixsz",	e100170, 2, (RR, RF),	     rd_rm),
+ cCL("fixdp",	e100130, 2, (RR, RF),	     rd_rm),
+ cCL("fixdm",	e100150, 2, (RR, RF),	     rd_rm),
+ cCL("fixdz",	e100170, 2, (RR, RF),	     rd_rm),
+ cCL("fixep",	e100130, 2, (RR, RF),	     rd_rm),
+ cCL("fixem",	e100150, 2, (RR, RF),	     rd_rm),
+ cCL("fixez",	e100170, 2, (RR, RF),	     rd_rm),
 
   /* Instructions that were new with the real FPA, call them V2.  */
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_fpa_ext_v2
 
- cCE(lfm,	c100200, 3, (RF, I4b, ADDR), fpa_ldmstm),
- cCL(lfmfd,	c900200, 3, (RF, I4b, ADDR), fpa_ldmstm),
- cCL(lfmea,	d100200, 3, (RF, I4b, ADDR), fpa_ldmstm),
- cCE(sfm,	c000200, 3, (RF, I4b, ADDR), fpa_ldmstm),
- cCL(sfmfd,	d000200, 3, (RF, I4b, ADDR), fpa_ldmstm),
- cCL(sfmea,	c800200, 3, (RF, I4b, ADDR), fpa_ldmstm),
+ cCE("lfm",	c100200, 3, (RF, I4b, ADDR), fpa_ldmstm),
+ cCL("lfmfd",	c900200, 3, (RF, I4b, ADDR), fpa_ldmstm),
+ cCL("lfmea",	d100200, 3, (RF, I4b, ADDR), fpa_ldmstm),
+ cCE("sfm",	c000200, 3, (RF, I4b, ADDR), fpa_ldmstm),
+ cCL("sfmfd",	d000200, 3, (RF, I4b, ADDR), fpa_ldmstm),
+ cCL("sfmea",	c800200, 3, (RF, I4b, ADDR), fpa_ldmstm),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_vfp_ext_v1xd  /* VFP V1xD (single precision).  */
 
   /* Moves and type conversions.  */
- cCE(fcpys,	eb00a40, 2, (RVS, RVS),	      vfp_sp_monadic),
- cCE(fmrs,	e100a10, 2, (RR, RVS),	      vfp_reg_from_sp),
- cCE(fmsr,	e000a10, 2, (RVS, RR),	      vfp_sp_from_reg),
- cCE(fmstat,	ef1fa10, 0, (),		      noargs),
- cCE(fsitos,	eb80ac0, 2, (RVS, RVS),	      vfp_sp_monadic),
- cCE(fuitos,	eb80a40, 2, (RVS, RVS),	      vfp_sp_monadic),
- cCE(ftosis,	ebd0a40, 2, (RVS, RVS),	      vfp_sp_monadic),
- cCE(ftosizs,	ebd0ac0, 2, (RVS, RVS),	      vfp_sp_monadic),
- cCE(ftouis,	ebc0a40, 2, (RVS, RVS),	      vfp_sp_monadic),
- cCE(ftouizs,	ebc0ac0, 2, (RVS, RVS),	      vfp_sp_monadic),
- cCE(fmrx,	ef00a10, 2, (RR, RVC),	      rd_rn),
- cCE(fmxr,	ee00a10, 2, (RVC, RR),	      rn_rd),
+ cCE("fcpys",	eb00a40, 2, (RVS, RVS),	      vfp_sp_monadic),
+ cCE("fmrs",	e100a10, 2, (RR, RVS),	      vfp_reg_from_sp),
+ cCE("fmsr",	e000a10, 2, (RVS, RR),	      vfp_sp_from_reg),
+ cCE("fmstat",	ef1fa10, 0, (),		      noargs),
+ cCE("fsitos",	eb80ac0, 2, (RVS, RVS),	      vfp_sp_monadic),
+ cCE("fuitos",	eb80a40, 2, (RVS, RVS),	      vfp_sp_monadic),
+ cCE("ftosis",	ebd0a40, 2, (RVS, RVS),	      vfp_sp_monadic),
+ cCE("ftosizs",	ebd0ac0, 2, (RVS, RVS),	      vfp_sp_monadic),
+ cCE("ftouis",	ebc0a40, 2, (RVS, RVS),	      vfp_sp_monadic),
+ cCE("ftouizs",	ebc0ac0, 2, (RVS, RVS),	      vfp_sp_monadic),
+ cCE("fmrx",	ef00a10, 2, (RR, RVC),	      rd_rn),
+ cCE("fmxr",	ee00a10, 2, (RVC, RR),	      rn_rd),
 
   /* Memory operations.	 */
- cCE(flds,	d100a00, 2, (RVS, ADDRGLDC),  vfp_sp_ldst),
- cCE(fsts,	d000a00, 2, (RVS, ADDRGLDC),  vfp_sp_ldst),
- cCE(fldmias,	c900a00, 2, (RRw, VRSLST),    vfp_sp_ldstmia),
- cCE(fldmfds,	c900a00, 2, (RRw, VRSLST),    vfp_sp_ldstmia),
- cCE(fldmdbs,	d300a00, 2, (RRw, VRSLST),    vfp_sp_ldstmdb),
- cCE(fldmeas,	d300a00, 2, (RRw, VRSLST),    vfp_sp_ldstmdb),
- cCE(fldmiax,	c900b00, 2, (RRw, VRDLST),    vfp_xp_ldstmia),
- cCE(fldmfdx,	c900b00, 2, (RRw, VRDLST),    vfp_xp_ldstmia),
- cCE(fldmdbx,	d300b00, 2, (RRw, VRDLST),    vfp_xp_ldstmdb),
- cCE(fldmeax,	d300b00, 2, (RRw, VRDLST),    vfp_xp_ldstmdb),
- cCE(fstmias,	c800a00, 2, (RRw, VRSLST),    vfp_sp_ldstmia),
- cCE(fstmeas,	c800a00, 2, (RRw, VRSLST),    vfp_sp_ldstmia),
- cCE(fstmdbs,	d200a00, 2, (RRw, VRSLST),    vfp_sp_ldstmdb),
- cCE(fstmfds,	d200a00, 2, (RRw, VRSLST),    vfp_sp_ldstmdb),
- cCE(fstmiax,	c800b00, 2, (RRw, VRDLST),    vfp_xp_ldstmia),
- cCE(fstmeax,	c800b00, 2, (RRw, VRDLST),    vfp_xp_ldstmia),
- cCE(fstmdbx,	d200b00, 2, (RRw, VRDLST),    vfp_xp_ldstmdb),
- cCE(fstmfdx,	d200b00, 2, (RRw, VRDLST),    vfp_xp_ldstmdb),
+ cCE("flds",	d100a00, 2, (RVS, ADDRGLDC),  vfp_sp_ldst),
+ cCE("fsts",	d000a00, 2, (RVS, ADDRGLDC),  vfp_sp_ldst),
+ cCE("fldmias",	c900a00, 2, (RRw, VRSLST),    vfp_sp_ldstmia),
+ cCE("fldmfds",	c900a00, 2, (RRw, VRSLST),    vfp_sp_ldstmia),
+ cCE("fldmdbs",	d300a00, 2, (RRw, VRSLST),    vfp_sp_ldstmdb),
+ cCE("fldmeas",	d300a00, 2, (RRw, VRSLST),    vfp_sp_ldstmdb),
+ cCE("fldmiax",	c900b00, 2, (RRw, VRDLST),    vfp_xp_ldstmia),
+ cCE("fldmfdx",	c900b00, 2, (RRw, VRDLST),    vfp_xp_ldstmia),
+ cCE("fldmdbx",	d300b00, 2, (RRw, VRDLST),    vfp_xp_ldstmdb),
+ cCE("fldmeax",	d300b00, 2, (RRw, VRDLST),    vfp_xp_ldstmdb),
+ cCE("fstmias",	c800a00, 2, (RRw, VRSLST),    vfp_sp_ldstmia),
+ cCE("fstmeas",	c800a00, 2, (RRw, VRSLST),    vfp_sp_ldstmia),
+ cCE("fstmdbs",	d200a00, 2, (RRw, VRSLST),    vfp_sp_ldstmdb),
+ cCE("fstmfds",	d200a00, 2, (RRw, VRSLST),    vfp_sp_ldstmdb),
+ cCE("fstmiax",	c800b00, 2, (RRw, VRDLST),    vfp_xp_ldstmia),
+ cCE("fstmeax",	c800b00, 2, (RRw, VRDLST),    vfp_xp_ldstmia),
+ cCE("fstmdbx",	d200b00, 2, (RRw, VRDLST),    vfp_xp_ldstmdb),
+ cCE("fstmfdx",	d200b00, 2, (RRw, VRDLST),    vfp_xp_ldstmdb),
 
   /* Monadic operations.  */
- cCE(fabss,	eb00ac0, 2, (RVS, RVS),	      vfp_sp_monadic),
- cCE(fnegs,	eb10a40, 2, (RVS, RVS),	      vfp_sp_monadic),
- cCE(fsqrts,	eb10ac0, 2, (RVS, RVS),	      vfp_sp_monadic),
+ cCE("fabss",	eb00ac0, 2, (RVS, RVS),	      vfp_sp_monadic),
+ cCE("fnegs",	eb10a40, 2, (RVS, RVS),	      vfp_sp_monadic),
+ cCE("fsqrts",	eb10ac0, 2, (RVS, RVS),	      vfp_sp_monadic),
 
   /* Dyadic operations.	 */
- cCE(fadds,	e300a00, 3, (RVS, RVS, RVS),  vfp_sp_dyadic),
- cCE(fsubs,	e300a40, 3, (RVS, RVS, RVS),  vfp_sp_dyadic),
- cCE(fmuls,	e200a00, 3, (RVS, RVS, RVS),  vfp_sp_dyadic),
- cCE(fdivs,	e800a00, 3, (RVS, RVS, RVS),  vfp_sp_dyadic),
- cCE(fmacs,	e000a00, 3, (RVS, RVS, RVS),  vfp_sp_dyadic),
- cCE(fmscs,	e100a00, 3, (RVS, RVS, RVS),  vfp_sp_dyadic),
- cCE(fnmuls,	e200a40, 3, (RVS, RVS, RVS),  vfp_sp_dyadic),
- cCE(fnmacs,	e000a40, 3, (RVS, RVS, RVS),  vfp_sp_dyadic),
- cCE(fnmscs,	e100a40, 3, (RVS, RVS, RVS),  vfp_sp_dyadic),
+ cCE("fadds",	e300a00, 3, (RVS, RVS, RVS),  vfp_sp_dyadic),
+ cCE("fsubs",	e300a40, 3, (RVS, RVS, RVS),  vfp_sp_dyadic),
+ cCE("fmuls",	e200a00, 3, (RVS, RVS, RVS),  vfp_sp_dyadic),
+ cCE("fdivs",	e800a00, 3, (RVS, RVS, RVS),  vfp_sp_dyadic),
+ cCE("fmacs",	e000a00, 3, (RVS, RVS, RVS),  vfp_sp_dyadic),
+ cCE("fmscs",	e100a00, 3, (RVS, RVS, RVS),  vfp_sp_dyadic),
+ cCE("fnmuls",	e200a40, 3, (RVS, RVS, RVS),  vfp_sp_dyadic),
+ cCE("fnmacs",	e000a40, 3, (RVS, RVS, RVS),  vfp_sp_dyadic),
+ cCE("fnmscs",	e100a40, 3, (RVS, RVS, RVS),  vfp_sp_dyadic),
 
   /* Comparisons.  */
- cCE(fcmps,	eb40a40, 2, (RVS, RVS),	      vfp_sp_monadic),
- cCE(fcmpzs,	eb50a40, 1, (RVS),	      vfp_sp_compare_z),
- cCE(fcmpes,	eb40ac0, 2, (RVS, RVS),	      vfp_sp_monadic),
- cCE(fcmpezs,	eb50ac0, 1, (RVS),	      vfp_sp_compare_z),
+ cCE("fcmps",	eb40a40, 2, (RVS, RVS),	      vfp_sp_monadic),
+ cCE("fcmpzs",	eb50a40, 1, (RVS),	      vfp_sp_compare_z),
+ cCE("fcmpes",	eb40ac0, 2, (RVS, RVS),	      vfp_sp_monadic),
+ cCE("fcmpezs",	eb50ac0, 1, (RVS),	      vfp_sp_compare_z),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_vfp_ext_v1 /* VFP V1 (Double precision).  */
 
   /* Moves and type conversions.  */
- cCE(fcpyd,	eb00b40, 2, (RVD, RVD),	      vfp_dp_rd_rm),
- cCE(fcvtds,	eb70ac0, 2, (RVD, RVS),	      vfp_dp_sp_cvt),
- cCE(fcvtsd,	eb70bc0, 2, (RVS, RVD),	      vfp_sp_dp_cvt),
- cCE(fmdhr,	e200b10, 2, (RVD, RR),	      vfp_dp_rn_rd),
- cCE(fmdlr,	e000b10, 2, (RVD, RR),	      vfp_dp_rn_rd),
- cCE(fmrdh,	e300b10, 2, (RR, RVD),	      vfp_dp_rd_rn),
- cCE(fmrdl,	e100b10, 2, (RR, RVD),	      vfp_dp_rd_rn),
- cCE(fsitod,	eb80bc0, 2, (RVD, RVS),	      vfp_dp_sp_cvt),
- cCE(fuitod,	eb80b40, 2, (RVD, RVS),	      vfp_dp_sp_cvt),
- cCE(ftosid,	ebd0b40, 2, (RVS, RVD),	      vfp_sp_dp_cvt),
- cCE(ftosizd,	ebd0bc0, 2, (RVS, RVD),	      vfp_sp_dp_cvt),
- cCE(ftouid,	ebc0b40, 2, (RVS, RVD),	      vfp_sp_dp_cvt),
- cCE(ftouizd,	ebc0bc0, 2, (RVS, RVD),	      vfp_sp_dp_cvt),
+ cCE("fcpyd",	eb00b40, 2, (RVD, RVD),	      vfp_dp_rd_rm),
+ cCE("fcvtds",	eb70ac0, 2, (RVD, RVS),	      vfp_dp_sp_cvt),
+ cCE("fcvtsd",	eb70bc0, 2, (RVS, RVD),	      vfp_sp_dp_cvt),
+ cCE("fmdhr",	e200b10, 2, (RVD, RR),	      vfp_dp_rn_rd),
+ cCE("fmdlr",	e000b10, 2, (RVD, RR),	      vfp_dp_rn_rd),
+ cCE("fmrdh",	e300b10, 2, (RR, RVD),	      vfp_dp_rd_rn),
+ cCE("fmrdl",	e100b10, 2, (RR, RVD),	      vfp_dp_rd_rn),
+ cCE("fsitod",	eb80bc0, 2, (RVD, RVS),	      vfp_dp_sp_cvt),
+ cCE("fuitod",	eb80b40, 2, (RVD, RVS),	      vfp_dp_sp_cvt),
+ cCE("ftosid",	ebd0b40, 2, (RVS, RVD),	      vfp_sp_dp_cvt),
+ cCE("ftosizd",	ebd0bc0, 2, (RVS, RVD),	      vfp_sp_dp_cvt),
+ cCE("ftouid",	ebc0b40, 2, (RVS, RVD),	      vfp_sp_dp_cvt),
+ cCE("ftouizd",	ebc0bc0, 2, (RVS, RVD),	      vfp_sp_dp_cvt),
 
   /* Memory operations.	 */
- cCE(fldd,	d100b00, 2, (RVD, ADDRGLDC),  vfp_dp_ldst),
- cCE(fstd,	d000b00, 2, (RVD, ADDRGLDC),  vfp_dp_ldst),
- cCE(fldmiad,	c900b00, 2, (RRw, VRDLST),    vfp_dp_ldstmia),
- cCE(fldmfdd,	c900b00, 2, (RRw, VRDLST),    vfp_dp_ldstmia),
- cCE(fldmdbd,	d300b00, 2, (RRw, VRDLST),    vfp_dp_ldstmdb),
- cCE(fldmead,	d300b00, 2, (RRw, VRDLST),    vfp_dp_ldstmdb),
- cCE(fstmiad,	c800b00, 2, (RRw, VRDLST),    vfp_dp_ldstmia),
- cCE(fstmead,	c800b00, 2, (RRw, VRDLST),    vfp_dp_ldstmia),
- cCE(fstmdbd,	d200b00, 2, (RRw, VRDLST),    vfp_dp_ldstmdb),
- cCE(fstmfdd,	d200b00, 2, (RRw, VRDLST),    vfp_dp_ldstmdb),
+ cCE("fldd",	d100b00, 2, (RVD, ADDRGLDC),  vfp_dp_ldst),
+ cCE("fstd",	d000b00, 2, (RVD, ADDRGLDC),  vfp_dp_ldst),
+ cCE("fldmiad",	c900b00, 2, (RRw, VRDLST),    vfp_dp_ldstmia),
+ cCE("fldmfdd",	c900b00, 2, (RRw, VRDLST),    vfp_dp_ldstmia),
+ cCE("fldmdbd",	d300b00, 2, (RRw, VRDLST),    vfp_dp_ldstmdb),
+ cCE("fldmead",	d300b00, 2, (RRw, VRDLST),    vfp_dp_ldstmdb),
+ cCE("fstmiad",	c800b00, 2, (RRw, VRDLST),    vfp_dp_ldstmia),
+ cCE("fstmead",	c800b00, 2, (RRw, VRDLST),    vfp_dp_ldstmia),
+ cCE("fstmdbd",	d200b00, 2, (RRw, VRDLST),    vfp_dp_ldstmdb),
+ cCE("fstmfdd",	d200b00, 2, (RRw, VRDLST),    vfp_dp_ldstmdb),
 
   /* Monadic operations.  */
- cCE(fabsd,	eb00bc0, 2, (RVD, RVD),	      vfp_dp_rd_rm),
- cCE(fnegd,	eb10b40, 2, (RVD, RVD),	      vfp_dp_rd_rm),
- cCE(fsqrtd,	eb10bc0, 2, (RVD, RVD),	      vfp_dp_rd_rm),
+ cCE("fabsd",	eb00bc0, 2, (RVD, RVD),	      vfp_dp_rd_rm),
+ cCE("fnegd",	eb10b40, 2, (RVD, RVD),	      vfp_dp_rd_rm),
+ cCE("fsqrtd",	eb10bc0, 2, (RVD, RVD),	      vfp_dp_rd_rm),
 
   /* Dyadic operations.	 */
- cCE(faddd,	e300b00, 3, (RVD, RVD, RVD),  vfp_dp_rd_rn_rm),
- cCE(fsubd,	e300b40, 3, (RVD, RVD, RVD),  vfp_dp_rd_rn_rm),
- cCE(fmuld,	e200b00, 3, (RVD, RVD, RVD),  vfp_dp_rd_rn_rm),
- cCE(fdivd,	e800b00, 3, (RVD, RVD, RVD),  vfp_dp_rd_rn_rm),
- cCE(fmacd,	e000b00, 3, (RVD, RVD, RVD),  vfp_dp_rd_rn_rm),
- cCE(fmscd,	e100b00, 3, (RVD, RVD, RVD),  vfp_dp_rd_rn_rm),
- cCE(fnmuld,	e200b40, 3, (RVD, RVD, RVD),  vfp_dp_rd_rn_rm),
- cCE(fnmacd,	e000b40, 3, (RVD, RVD, RVD),  vfp_dp_rd_rn_rm),
- cCE(fnmscd,	e100b40, 3, (RVD, RVD, RVD),  vfp_dp_rd_rn_rm),
+ cCE("faddd",	e300b00, 3, (RVD, RVD, RVD),  vfp_dp_rd_rn_rm),
+ cCE("fsubd",	e300b40, 3, (RVD, RVD, RVD),  vfp_dp_rd_rn_rm),
+ cCE("fmuld",	e200b00, 3, (RVD, RVD, RVD),  vfp_dp_rd_rn_rm),
+ cCE("fdivd",	e800b00, 3, (RVD, RVD, RVD),  vfp_dp_rd_rn_rm),
+ cCE("fmacd",	e000b00, 3, (RVD, RVD, RVD),  vfp_dp_rd_rn_rm),
+ cCE("fmscd",	e100b00, 3, (RVD, RVD, RVD),  vfp_dp_rd_rn_rm),
+ cCE("fnmuld",	e200b40, 3, (RVD, RVD, RVD),  vfp_dp_rd_rn_rm),
+ cCE("fnmacd",	e000b40, 3, (RVD, RVD, RVD),  vfp_dp_rd_rn_rm),
+ cCE("fnmscd",	e100b40, 3, (RVD, RVD, RVD),  vfp_dp_rd_rn_rm),
 
   /* Comparisons.  */
- cCE(fcmpd,	eb40b40, 2, (RVD, RVD),	      vfp_dp_rd_rm),
- cCE(fcmpzd,	eb50b40, 1, (RVD),	      vfp_dp_rd),
- cCE(fcmped,	eb40bc0, 2, (RVD, RVD),	      vfp_dp_rd_rm),
- cCE(fcmpezd,	eb50bc0, 1, (RVD),	      vfp_dp_rd),
+ cCE("fcmpd",	eb40b40, 2, (RVD, RVD),	      vfp_dp_rd_rm),
+ cCE("fcmpzd",	eb50b40, 1, (RVD),	      vfp_dp_rd),
+ cCE("fcmped",	eb40bc0, 2, (RVD, RVD),	      vfp_dp_rd_rm),
+ cCE("fcmpezd",	eb50bc0, 1, (RVD),	      vfp_dp_rd),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_vfp_ext_v2
 
- cCE(fmsrr,	c400a10, 3, (VRSLST, RR, RR), vfp_sp2_from_reg2),
- cCE(fmrrs,	c500a10, 3, (RR, RR, VRSLST), vfp_reg2_from_sp2),
- cCE(fmdrr,	c400b10, 3, (RVD, RR, RR),    vfp_dp_rm_rd_rn),
- cCE(fmrrd,	c500b10, 3, (RR, RR, RVD),    vfp_dp_rd_rn_rm),
+ cCE("fmsrr",	c400a10, 3, (VRSLST, RR, RR), vfp_sp2_from_reg2),
+ cCE("fmrrs",	c500a10, 3, (RR, RR, VRSLST), vfp_reg2_from_sp2),
+ cCE("fmdrr",	c400b10, 3, (RVD, RR, RR),    vfp_dp_rm_rd_rn),
+ cCE("fmrrd",	c500b10, 3, (RR, RR, RVD),    vfp_dp_rd_rn_rm),
 
 /* Instructions which may belong to either the Neon or VFP instruction sets.
    Individual encoder functions perform additional architecture checks.  */
@@ -17238,22 +17252,22 @@ static const struct asm_opcode insns[] =
   /* These mnemonics are unique to VFP.  */
  NCE(vsqrt,     0,       2, (RVSD, RVSD),       vfp_nsyn_sqrt),
  NCE(vdiv,      0,       3, (RVSD, RVSD, RVSD), vfp_nsyn_div),
- nCE(vnmul,     vnmul,   3, (RVSD, RVSD, RVSD), vfp_nsyn_nmul),
- nCE(vnmla,     vnmla,   3, (RVSD, RVSD, RVSD), vfp_nsyn_nmul),
- nCE(vnmls,     vnmls,   3, (RVSD, RVSD, RVSD), vfp_nsyn_nmul),
- nCE(vcmp,      vcmp,    2, (RVSD, RVSD_I0),    vfp_nsyn_cmp),
- nCE(vcmpe,     vcmpe,   2, (RVSD, RVSD_I0),    vfp_nsyn_cmp),
+ nCE(vnmul,     _vnmul,   3, (RVSD, RVSD, RVSD), vfp_nsyn_nmul),
+ nCE(vnmla,     _vnmla,   3, (RVSD, RVSD, RVSD), vfp_nsyn_nmul),
+ nCE(vnmls,     _vnmls,   3, (RVSD, RVSD, RVSD), vfp_nsyn_nmul),
+ nCE(vcmp,      _vcmp,    2, (RVSD, RVSD_I0),    vfp_nsyn_cmp),
+ nCE(vcmpe,     _vcmpe,   2, (RVSD, RVSD_I0),    vfp_nsyn_cmp),
  NCE(vpush,     0,       1, (VRSDLST),          vfp_nsyn_push),
  NCE(vpop,      0,       1, (VRSDLST),          vfp_nsyn_pop),
  NCE(vcvtz,     0,       2, (RVSD, RVSD),       vfp_nsyn_cvtz),
 
   /* Mnemonics shared by Neon and VFP.  */
- nCEF(vmul,     vmul,    3, (RNSDQ, oRNSDQ, RNSDQ_RNSC), neon_mul),
- nCEF(vmla,     vmla,    3, (RNSDQ, oRNSDQ, RNSDQ_RNSC), neon_mac_maybe_scalar),
- nCEF(vmls,     vmls,    3, (RNSDQ, oRNSDQ, RNSDQ_RNSC), neon_mac_maybe_scalar),
+ nCEF(vmul,     _vmul,    3, (RNSDQ, oRNSDQ, RNSDQ_RNSC), neon_mul),
+ nCEF(vmla,     _vmla,    3, (RNSDQ, oRNSDQ, RNSDQ_RNSC), neon_mac_maybe_scalar),
+ nCEF(vmls,     _vmls,    3, (RNSDQ, oRNSDQ, RNSDQ_RNSC), neon_mac_maybe_scalar),
 
- nCEF(vadd,     vadd,    3, (RNSDQ, oRNSDQ, RNSDQ), neon_addsub_if_i),
- nCEF(vsub,     vsub,    3, (RNSDQ, oRNSDQ, RNSDQ), neon_addsub_if_i),
+ nCEF(vadd,     _vadd,    3, (RNSDQ, oRNSDQ, RNSDQ), neon_addsub_if_i),
+ nCEF(vsub,     _vsub,    3, (RNSDQ, oRNSDQ, RNSDQ), neon_addsub_if_i),
 
  NCEF(vabs,     1b10300, 2, (RNSDQ, RNSDQ), neon_abs_neg),
  NCEF(vneg,     1b10380, 2, (RNSDQ, RNSDQ), neon_abs_neg),
@@ -17267,9 +17281,9 @@ static const struct asm_opcode insns[] =
  NCE(vldr,      d100b00, 2, (RVSD, ADDRGLDC), neon_ldr_str),
  NCE(vstr,      d000b00, 2, (RVSD, ADDRGLDC), neon_ldr_str),
 
- nCEF(vcvt,     vcvt,    3, (RNSDQ, RNSDQ, oI32b), neon_cvt),
- nCEF(vcvtb,	vcvt,	 2, (RVS, RVS), neon_cvtb),
- nCEF(vcvtt,	vcvt,	 2, (RVS, RVS), neon_cvtt),
+ nCEF(vcvt,     _vcvt,    3, (RNSDQ, RNSDQ, oI32b), neon_cvt),
+ nCEF(vcvtb,	_vcvt,	 2, (RVS, RVS), neon_cvtb),
+ nCEF(vcvtt,	_vcvt,	 2, (RVS, RVS), neon_cvtt),
 
 
   /* NOTE: All VMOV encoding is special-cased!  */
@@ -17303,21 +17317,21 @@ static const struct asm_opcode insns[] =
   /* If not immediate, fall back to neon_dyadic_i64_su.
      shl_imm should accept I8 I16 I32 I64,
      qshl_imm should accept S8 S16 S32 S64 U8 U16 U32 U64.  */
- nUF(vshl,      vshl,    3, (RNDQ, oRNDQ, RNDQ_I63b), neon_shl_imm),
- nUF(vshlq,     vshl,    3, (RNQ,  oRNQ,  RNDQ_I63b), neon_shl_imm),
- nUF(vqshl,     vqshl,   3, (RNDQ, oRNDQ, RNDQ_I63b), neon_qshl_imm),
- nUF(vqshlq,    vqshl,   3, (RNQ,  oRNQ,  RNDQ_I63b), neon_qshl_imm),
+ nUF(vshl,      _vshl,    3, (RNDQ, oRNDQ, RNDQ_I63b), neon_shl_imm),
+ nUF(vshlq,     _vshl,    3, (RNQ,  oRNQ,  RNDQ_I63b), neon_shl_imm),
+ nUF(vqshl,     _vqshl,   3, (RNDQ, oRNDQ, RNDQ_I63b), neon_qshl_imm),
+ nUF(vqshlq,    _vqshl,   3, (RNQ,  oRNQ,  RNDQ_I63b), neon_qshl_imm),
   /* Logic ops, types optional & ignored.  */
- nUF(vand,      vand,    2, (RNDQ, NILO),        neon_logic),
- nUF(vandq,     vand,    2, (RNQ,  NILO),        neon_logic),
- nUF(vbic,      vbic,    2, (RNDQ, NILO),        neon_logic),
- nUF(vbicq,     vbic,    2, (RNQ,  NILO),        neon_logic),
- nUF(vorr,      vorr,    2, (RNDQ, NILO),        neon_logic),
- nUF(vorrq,     vorr,    2, (RNQ,  NILO),        neon_logic),
- nUF(vorn,      vorn,    2, (RNDQ, NILO),        neon_logic),
- nUF(vornq,     vorn,    2, (RNQ,  NILO),        neon_logic),
- nUF(veor,      veor,    3, (RNDQ, oRNDQ, RNDQ), neon_logic),
- nUF(veorq,     veor,    3, (RNQ,  oRNQ,  RNQ),  neon_logic),
+ nUF(vand,      _vand,    2, (RNDQ, NILO),        neon_logic),
+ nUF(vandq,     _vand,    2, (RNQ,  NILO),        neon_logic),
+ nUF(vbic,      _vbic,    2, (RNDQ, NILO),        neon_logic),
+ nUF(vbicq,     _vbic,    2, (RNQ,  NILO),        neon_logic),
+ nUF(vorr,      _vorr,    2, (RNDQ, NILO),        neon_logic),
+ nUF(vorrq,     _vorr,    2, (RNQ,  NILO),        neon_logic),
+ nUF(vorn,      _vorn,    2, (RNDQ, NILO),        neon_logic),
+ nUF(vornq,     _vorn,    2, (RNQ,  NILO),        neon_logic),
+ nUF(veor,      _veor,    3, (RNDQ, oRNDQ, RNDQ), neon_logic),
+ nUF(veorq,     _veor,    3, (RNQ,  oRNQ,  RNQ),  neon_logic),
   /* Bitfield ops, untyped.  */
  NUF(vbsl,      1100110, 3, (RNDQ, RNDQ, RNDQ), neon_bitfield),
  NUF(vbslq,     1100110, 3, (RNQ,  RNQ,  RNQ),  neon_bitfield),
@@ -17326,45 +17340,45 @@ static const struct asm_opcode insns[] =
  NUF(vbif,      1300110, 3, (RNDQ, RNDQ, RNDQ), neon_bitfield),
  NUF(vbifq,     1300110, 3, (RNQ,  RNQ,  RNQ),  neon_bitfield),
   /* Int and float variants, types S8 S16 S32 U8 U16 U32 F32.  */
- nUF(vabd,      vabd,    3, (RNDQ, oRNDQ, RNDQ), neon_dyadic_if_su),
- nUF(vabdq,     vabd,    3, (RNQ,  oRNQ,  RNQ),  neon_dyadic_if_su),
- nUF(vmax,      vmax,    3, (RNDQ, oRNDQ, RNDQ), neon_dyadic_if_su),
- nUF(vmaxq,     vmax,    3, (RNQ,  oRNQ,  RNQ),  neon_dyadic_if_su),
- nUF(vmin,      vmin,    3, (RNDQ, oRNDQ, RNDQ), neon_dyadic_if_su),
- nUF(vminq,     vmin,    3, (RNQ,  oRNQ,  RNQ),  neon_dyadic_if_su),
+ nUF(vabd,      _vabd,    3, (RNDQ, oRNDQ, RNDQ), neon_dyadic_if_su),
+ nUF(vabdq,     _vabd,    3, (RNQ,  oRNQ,  RNQ),  neon_dyadic_if_su),
+ nUF(vmax,      _vmax,    3, (RNDQ, oRNDQ, RNDQ), neon_dyadic_if_su),
+ nUF(vmaxq,     _vmax,    3, (RNQ,  oRNQ,  RNQ),  neon_dyadic_if_su),
+ nUF(vmin,      _vmin,    3, (RNDQ, oRNDQ, RNDQ), neon_dyadic_if_su),
+ nUF(vminq,     _vmin,    3, (RNQ,  oRNQ,  RNQ),  neon_dyadic_if_su),
   /* Comparisons. Types S8 S16 S32 U8 U16 U32 F32. Non-immediate versions fall
      back to neon_dyadic_if_su.  */
- nUF(vcge,      vcge,    3, (RNDQ, oRNDQ, RNDQ_I0), neon_cmp),
- nUF(vcgeq,     vcge,    3, (RNQ,  oRNQ,  RNDQ_I0), neon_cmp),
- nUF(vcgt,      vcgt,    3, (RNDQ, oRNDQ, RNDQ_I0), neon_cmp),
- nUF(vcgtq,     vcgt,    3, (RNQ,  oRNQ,  RNDQ_I0), neon_cmp),
- nUF(vclt,      vclt,    3, (RNDQ, oRNDQ, RNDQ_I0), neon_cmp_inv),
- nUF(vcltq,     vclt,    3, (RNQ,  oRNQ,  RNDQ_I0), neon_cmp_inv),
- nUF(vcle,      vcle,    3, (RNDQ, oRNDQ, RNDQ_I0), neon_cmp_inv),
- nUF(vcleq,     vcle,    3, (RNQ,  oRNQ,  RNDQ_I0), neon_cmp_inv),
+ nUF(vcge,      _vcge,    3, (RNDQ, oRNDQ, RNDQ_I0), neon_cmp),
+ nUF(vcgeq,     _vcge,    3, (RNQ,  oRNQ,  RNDQ_I0), neon_cmp),
+ nUF(vcgt,      _vcgt,    3, (RNDQ, oRNDQ, RNDQ_I0), neon_cmp),
+ nUF(vcgtq,     _vcgt,    3, (RNQ,  oRNQ,  RNDQ_I0), neon_cmp),
+ nUF(vclt,      _vclt,    3, (RNDQ, oRNDQ, RNDQ_I0), neon_cmp_inv),
+ nUF(vcltq,     _vclt,    3, (RNQ,  oRNQ,  RNDQ_I0), neon_cmp_inv),
+ nUF(vcle,      _vcle,    3, (RNDQ, oRNDQ, RNDQ_I0), neon_cmp_inv),
+ nUF(vcleq,     _vcle,    3, (RNQ,  oRNQ,  RNDQ_I0), neon_cmp_inv),
   /* Comparison. Type I8 I16 I32 F32.  */
- nUF(vceq,      vceq,    3, (RNDQ, oRNDQ, RNDQ_I0), neon_ceq),
- nUF(vceqq,     vceq,    3, (RNQ,  oRNQ,  RNDQ_I0), neon_ceq),
+ nUF(vceq,      _vceq,    3, (RNDQ, oRNDQ, RNDQ_I0), neon_ceq),
+ nUF(vceqq,     _vceq,    3, (RNQ,  oRNQ,  RNDQ_I0), neon_ceq),
   /* As above, D registers only.  */
- nUF(vpmax,     vpmax,   3, (RND, oRND, RND), neon_dyadic_if_su_d),
- nUF(vpmin,     vpmin,   3, (RND, oRND, RND), neon_dyadic_if_su_d),
+ nUF(vpmax,     _vpmax,   3, (RND, oRND, RND), neon_dyadic_if_su_d),
+ nUF(vpmin,     _vpmin,   3, (RND, oRND, RND), neon_dyadic_if_su_d),
   /* Int and float variants, signedness unimportant.  */
- nUF(vmlaq,     vmla,    3, (RNQ,  oRNQ,  RNDQ_RNSC), neon_mac_maybe_scalar),
- nUF(vmlsq,     vmls,    3, (RNQ,  oRNQ,  RNDQ_RNSC), neon_mac_maybe_scalar),
- nUF(vpadd,     vpadd,   3, (RND,  oRND,  RND),       neon_dyadic_if_i_d),
+ nUF(vmlaq,     _vmla,    3, (RNQ,  oRNQ,  RNDQ_RNSC), neon_mac_maybe_scalar),
+ nUF(vmlsq,     _vmls,    3, (RNQ,  oRNQ,  RNDQ_RNSC), neon_mac_maybe_scalar),
+ nUF(vpadd,     _vpadd,   3, (RND,  oRND,  RND),       neon_dyadic_if_i_d),
   /* Add/sub take types I8 I16 I32 I64 F32.  */
- nUF(vaddq,     vadd,    3, (RNQ,  oRNQ,  RNQ),  neon_addsub_if_i),
- nUF(vsubq,     vsub,    3, (RNQ,  oRNQ,  RNQ),  neon_addsub_if_i),
+ nUF(vaddq,     _vadd,    3, (RNQ,  oRNQ,  RNQ),  neon_addsub_if_i),
+ nUF(vsubq,     _vsub,    3, (RNQ,  oRNQ,  RNQ),  neon_addsub_if_i),
   /* vtst takes sizes 8, 16, 32.  */
  NUF(vtst,      0000810, 3, (RNDQ, oRNDQ, RNDQ), neon_tst),
  NUF(vtstq,     0000810, 3, (RNQ,  oRNQ,  RNQ),  neon_tst),
   /* VMUL takes I8 I16 I32 F32 P8.  */
- nUF(vmulq,     vmul,     3, (RNQ,  oRNQ,  RNDQ_RNSC), neon_mul),
+ nUF(vmulq,     _vmul,     3, (RNQ,  oRNQ,  RNDQ_RNSC), neon_mul),
   /* VQD{R}MULH takes S16 S32.  */
- nUF(vqdmulh,   vqdmulh,  3, (RNDQ, oRNDQ, RNDQ_RNSC), neon_qdmulh),
- nUF(vqdmulhq,  vqdmulh,  3, (RNQ,  oRNQ,  RNDQ_RNSC), neon_qdmulh),
- nUF(vqrdmulh,  vqrdmulh, 3, (RNDQ, oRNDQ, RNDQ_RNSC), neon_qdmulh),
- nUF(vqrdmulhq, vqrdmulh, 3, (RNQ,  oRNQ,  RNDQ_RNSC), neon_qdmulh),
+ nUF(vqdmulh,   _vqdmulh,  3, (RNDQ, oRNDQ, RNDQ_RNSC), neon_qdmulh),
+ nUF(vqdmulhq,  _vqdmulh,  3, (RNQ,  oRNQ,  RNDQ_RNSC), neon_qdmulh),
+ nUF(vqrdmulh,  _vqrdmulh, 3, (RNDQ, oRNDQ, RNDQ_RNSC), neon_qdmulh),
+ nUF(vqrdmulhq, _vqrdmulh, 3, (RNQ,  oRNQ,  RNDQ_RNSC), neon_qdmulh),
  NUF(vacge,     0000e10,  3, (RNDQ, oRNDQ, RNDQ), neon_fcmp_absolute),
  NUF(vacgeq,    0000e10,  3, (RNQ,  oRNQ,  RNQ),  neon_fcmp_absolute),
  NUF(vacgt,     0200e10,  3, (RNDQ, oRNDQ, RNDQ), neon_fcmp_absolute),
@@ -17412,12 +17426,12 @@ static const struct asm_opcode insns[] =
  NUF(vshrn,     0800810, 3, (RND, RNQ, I32z), neon_rshift_narrow),
  NUF(vrshrn,    0800850, 3, (RND, RNQ, I32z), neon_rshift_narrow),
   /* Special case. Types S8 S16 S32 U8 U16 U32. Handles max shift variant.  */
- nUF(vshll,     vshll,   3, (RNQ, RND, I32),  neon_shll),
+ nUF(vshll,     _vshll,   3, (RNQ, RND, I32),  neon_shll),
   /* CVT with optional immediate for fixed-point variant.  */
- nUF(vcvtq,     vcvt,    3, (RNQ, RNQ, oI32b), neon_cvt),
+ nUF(vcvtq,     _vcvt,    3, (RNQ, RNQ, oI32b), neon_cvt),
 
- nUF(vmvn,      vmvn,    2, (RNDQ, RNDQ_IMVNb), neon_mvn),
- nUF(vmvnq,     vmvn,    2, (RNQ,  RNDQ_IMVNb), neon_mvn),
+ nUF(vmvn,      _vmvn,    2, (RNDQ, RNDQ_IMVNb), neon_mvn),
+ nUF(vmvnq,     _vmvn,    2, (RNQ,  RNDQ_IMVNb), neon_mvn),
 
   /* Data processing, three registers of different lengths.  */
   /* Dyadic, long insns. Types S8 S16 S32 U8 U16 U32.  */
@@ -17427,8 +17441,8 @@ static const struct asm_opcode insns[] =
  NUF(vsubl,     0800200, 3, (RNQ, RND, RND),  neon_dyadic_long),
   /* If not scalar, fall back to neon_dyadic_long.
      Vector types as above, scalar types S16 S32 U16 U32.  */
- nUF(vmlal,     vmlal,   3, (RNQ, RND, RND_RNSC), neon_mac_maybe_scalar_long),
- nUF(vmlsl,     vmlsl,   3, (RNQ, RND, RND_RNSC), neon_mac_maybe_scalar_long),
+ nUF(vmlal,     _vmlal,   3, (RNQ, RND, RND_RNSC), neon_mac_maybe_scalar_long),
+ nUF(vmlsl,     _vmlsl,   3, (RNQ, RND, RND_RNSC), neon_mac_maybe_scalar_long),
   /* Dyadic, widening insns. Types S8 S16 S32 U8 U16 U32.  */
  NUF(vaddw,     0800100, 3, (RNQ, oRNQ, RND), neon_dyadic_wide),
  NUF(vsubw,     0800300, 3, (RNQ, oRNQ, RND), neon_dyadic_wide),
@@ -17438,12 +17452,12 @@ static const struct asm_opcode insns[] =
  NUF(vsubhn,    0800600, 3, (RND, RNQ, RNQ),  neon_dyadic_narrow),
  NUF(vrsubhn,   1800600, 3, (RND, RNQ, RNQ),  neon_dyadic_narrow),
   /* Saturating doubling multiplies. Types S16 S32.  */
- nUF(vqdmlal,   vqdmlal, 3, (RNQ, RND, RND_RNSC), neon_mul_sat_scalar_long),
- nUF(vqdmlsl,   vqdmlsl, 3, (RNQ, RND, RND_RNSC), neon_mul_sat_scalar_long),
- nUF(vqdmull,   vqdmull, 3, (RNQ, RND, RND_RNSC), neon_mul_sat_scalar_long),
+ nUF(vqdmlal,   _vqdmlal, 3, (RNQ, RND, RND_RNSC), neon_mul_sat_scalar_long),
+ nUF(vqdmlsl,   _vqdmlsl, 3, (RNQ, RND, RND_RNSC), neon_mul_sat_scalar_long),
+ nUF(vqdmull,   _vqdmull, 3, (RNQ, RND, RND_RNSC), neon_mul_sat_scalar_long),
   /* VMULL. Vector types S8 S16 S32 U8 U16 U32 P8, scalar types
      S16 S32 U16 U32.  */
- nUF(vmull,     vmull,   3, (RNQ, RND, RND_RNSC), neon_vmull),
+ nUF(vmull,     _vmull,   3, (RNQ, RND, RND_RNSC), neon_vmull),
 
   /* Extract. Size 8.  */
  NUF(vext,      0b00000, 4, (RNDQ, oRNDQ, RNDQ, I15), neon_ext),
@@ -17458,16 +17472,16 @@ static const struct asm_opcode insns[] =
  NUF(vrev16,    1b00100, 2, (RNDQ, RNDQ),     neon_rev),
  NUF(vrev16q,   1b00100, 2, (RNQ,  RNQ),      neon_rev),
   /* Vector replicate. Sizes 8 16 32.  */
- nCE(vdup,      vdup,    2, (RNDQ, RR_RNSC),  neon_dup),
- nCE(vdupq,     vdup,    2, (RNQ,  RR_RNSC),  neon_dup),
+ nCE(vdup,      _vdup,    2, (RNDQ, RR_RNSC),  neon_dup),
+ nCE(vdupq,     _vdup,    2, (RNQ,  RR_RNSC),  neon_dup),
   /* VMOVL. Types S8 S16 S32 U8 U16 U32.  */
  NUF(vmovl,     0800a10, 2, (RNQ, RND),       neon_movl),
   /* VMOVN. Types I16 I32 I64.  */
- nUF(vmovn,     vmovn,   2, (RND, RNQ),       neon_movn),
+ nUF(vmovn,     _vmovn,   2, (RND, RNQ),       neon_movn),
   /* VQMOVN. Types S16 S32 S64 U16 U32 U64.  */
- nUF(vqmovn,    vqmovn,  2, (RND, RNQ),       neon_qmovn),
+ nUF(vqmovn,    _vqmovn,  2, (RND, RNQ),       neon_qmovn),
   /* VQMOVUN. Types S16 S32 S64.  */
- nUF(vqmovun,   vqmovun, 2, (RND, RNQ),       neon_qmovun),
+ nUF(vqmovun,   _vqmovun, 2, (RND, RNQ),       neon_qmovun),
   /* VZIP / VUZP. Sizes 8 16 32.  */
  NUF(vzip,      1b20180, 2, (RNDQ, RNDQ),     neon_zip_uzp),
  NUF(vzipq,     1b20180, 2, (RNQ,  RNQ),      neon_zip_uzp),
@@ -17501,8 +17515,8 @@ static const struct asm_opcode insns[] =
  NUF(vswp,      1b20000, 2, (RNDQ, RNDQ),     neon_swp),
  NUF(vswpq,     1b20000, 2, (RNQ,  RNQ),      neon_swp),
   /* VTRN. Sizes 8 16 32.  */
- nUF(vtrn,      vtrn,    2, (RNDQ, RNDQ),     neon_trn),
- nUF(vtrnq,     vtrn,    2, (RNQ,  RNQ),      neon_trn),
+ nUF(vtrn,      _vtrn,    2, (RNDQ, RNDQ),     neon_trn),
+ nUF(vtrnq,     _vtrn,    2, (RNQ,  RNQ),      neon_trn),
 
   /* Table lookup. Size 8.  */
  NUF(vtbl,      1b00800, 3, (RND, NRDLST, RND), neon_tbl_tbx),
@@ -17514,358 +17528,358 @@ static const struct asm_opcode insns[] =
 #define ARM_VARIANT    & fpu_vfp_v3_or_neon_ext
 
   /* Neon element/structure load/store.  */
- nUF(vld1,      vld1,    2, (NSTRLST, ADDR),  neon_ldx_stx),
- nUF(vst1,      vst1,    2, (NSTRLST, ADDR),  neon_ldx_stx),
- nUF(vld2,      vld2,    2, (NSTRLST, ADDR),  neon_ldx_stx),
- nUF(vst2,      vst2,    2, (NSTRLST, ADDR),  neon_ldx_stx),
- nUF(vld3,      vld3,    2, (NSTRLST, ADDR),  neon_ldx_stx),
- nUF(vst3,      vst3,    2, (NSTRLST, ADDR),  neon_ldx_stx),
- nUF(vld4,      vld4,    2, (NSTRLST, ADDR),  neon_ldx_stx),
- nUF(vst4,      vst4,    2, (NSTRLST, ADDR),  neon_ldx_stx),
+ nUF(vld1,      _vld1,    2, (NSTRLST, ADDR),  neon_ldx_stx),
+ nUF(vst1,      _vst1,    2, (NSTRLST, ADDR),  neon_ldx_stx),
+ nUF(vld2,      _vld2,    2, (NSTRLST, ADDR),  neon_ldx_stx),
+ nUF(vst2,      _vst2,    2, (NSTRLST, ADDR),  neon_ldx_stx),
+ nUF(vld3,      _vld3,    2, (NSTRLST, ADDR),  neon_ldx_stx),
+ nUF(vst3,      _vst3,    2, (NSTRLST, ADDR),  neon_ldx_stx),
+ nUF(vld4,      _vld4,    2, (NSTRLST, ADDR),  neon_ldx_stx),
+ nUF(vst4,      _vst4,    2, (NSTRLST, ADDR),  neon_ldx_stx),
 
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & fpu_vfp_ext_v3
 #undef  ARM_VARIANT
 #define ARM_VARIANT    & fpu_vfp_ext_v3
 
- cCE(fconsts,   eb00a00, 2, (RVS, I255),      vfp_sp_const),
- cCE(fconstd,   eb00b00, 2, (RVD, I255),      vfp_dp_const),
- cCE(fshtos,    eba0a40, 2, (RVS, I16z),      vfp_sp_conv_16),
- cCE(fshtod,    eba0b40, 2, (RVD, I16z),      vfp_dp_conv_16),
- cCE(fsltos,    eba0ac0, 2, (RVS, I32),       vfp_sp_conv_32),
- cCE(fsltod,    eba0bc0, 2, (RVD, I32),       vfp_dp_conv_32),
- cCE(fuhtos,    ebb0a40, 2, (RVS, I16z),      vfp_sp_conv_16),
- cCE(fuhtod,    ebb0b40, 2, (RVD, I16z),      vfp_dp_conv_16),
- cCE(fultos,    ebb0ac0, 2, (RVS, I32),       vfp_sp_conv_32),
- cCE(fultod,    ebb0bc0, 2, (RVD, I32),       vfp_dp_conv_32),
- cCE(ftoshs,    ebe0a40, 2, (RVS, I16z),      vfp_sp_conv_16),
- cCE(ftoshd,    ebe0b40, 2, (RVD, I16z),      vfp_dp_conv_16),
- cCE(ftosls,    ebe0ac0, 2, (RVS, I32),       vfp_sp_conv_32),
- cCE(ftosld,    ebe0bc0, 2, (RVD, I32),       vfp_dp_conv_32),
- cCE(ftouhs,    ebf0a40, 2, (RVS, I16z),      vfp_sp_conv_16),
- cCE(ftouhd,    ebf0b40, 2, (RVD, I16z),      vfp_dp_conv_16),
- cCE(ftouls,    ebf0ac0, 2, (RVS, I32),       vfp_sp_conv_32),
- cCE(ftould,    ebf0bc0, 2, (RVD, I32),       vfp_dp_conv_32),
+ cCE("fconsts",   eb00a00, 2, (RVS, I255),      vfp_sp_const),
+ cCE("fconstd",   eb00b00, 2, (RVD, I255),      vfp_dp_const),
+ cCE("fshtos",    eba0a40, 2, (RVS, I16z),      vfp_sp_conv_16),
+ cCE("fshtod",    eba0b40, 2, (RVD, I16z),      vfp_dp_conv_16),
+ cCE("fsltos",    eba0ac0, 2, (RVS, I32),       vfp_sp_conv_32),
+ cCE("fsltod",    eba0bc0, 2, (RVD, I32),       vfp_dp_conv_32),
+ cCE("fuhtos",    ebb0a40, 2, (RVS, I16z),      vfp_sp_conv_16),
+ cCE("fuhtod",    ebb0b40, 2, (RVD, I16z),      vfp_dp_conv_16),
+ cCE("fultos",    ebb0ac0, 2, (RVS, I32),       vfp_sp_conv_32),
+ cCE("fultod",    ebb0bc0, 2, (RVD, I32),       vfp_dp_conv_32),
+ cCE("ftoshs",    ebe0a40, 2, (RVS, I16z),      vfp_sp_conv_16),
+ cCE("ftoshd",    ebe0b40, 2, (RVD, I16z),      vfp_dp_conv_16),
+ cCE("ftosls",    ebe0ac0, 2, (RVS, I32),       vfp_sp_conv_32),
+ cCE("ftosld",    ebe0bc0, 2, (RVD, I32),       vfp_dp_conv_32),
+ cCE("ftouhs",    ebf0a40, 2, (RVS, I16z),      vfp_sp_conv_16),
+ cCE("ftouhd",    ebf0b40, 2, (RVD, I16z),      vfp_dp_conv_16),
+ cCE("ftouls",    ebf0ac0, 2, (RVS, I32),       vfp_sp_conv_32),
+ cCE("ftould",    ebf0bc0, 2, (RVD, I32),       vfp_dp_conv_32),
 
 #undef THUMB_VARIANT
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & arm_cext_xscale /* Intel XScale extensions.  */
 
- cCE(mia,	e200010, 3, (RXA, RRnpc, RRnpc), xsc_mia),
- cCE(miaph,	e280010, 3, (RXA, RRnpc, RRnpc), xsc_mia),
- cCE(miabb,	e2c0010, 3, (RXA, RRnpc, RRnpc), xsc_mia),
- cCE(miabt,	e2d0010, 3, (RXA, RRnpc, RRnpc), xsc_mia),
- cCE(miatb,	e2e0010, 3, (RXA, RRnpc, RRnpc), xsc_mia),
- cCE(miatt,	e2f0010, 3, (RXA, RRnpc, RRnpc), xsc_mia),
- cCE(mar,	c400000, 3, (RXA, RRnpc, RRnpc), xsc_mar),
- cCE(mra,	c500000, 3, (RRnpc, RRnpc, RXA), xsc_mra),
+ cCE("mia",	e200010, 3, (RXA, RRnpc, RRnpc), xsc_mia),
+ cCE("miaph",	e280010, 3, (RXA, RRnpc, RRnpc), xsc_mia),
+ cCE("miabb",	e2c0010, 3, (RXA, RRnpc, RRnpc), xsc_mia),
+ cCE("miabt",	e2d0010, 3, (RXA, RRnpc, RRnpc), xsc_mia),
+ cCE("miatb",	e2e0010, 3, (RXA, RRnpc, RRnpc), xsc_mia),
+ cCE("miatt",	e2f0010, 3, (RXA, RRnpc, RRnpc), xsc_mia),
+ cCE("mar",	c400000, 3, (RXA, RRnpc, RRnpc), xsc_mar),
+ cCE("mra",	c500000, 3, (RRnpc, RRnpc, RXA), xsc_mra),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & arm_cext_iwmmxt /* Intel Wireless MMX technology.  */
 
- cCE(tandcb,	e13f130, 1, (RR),		    iwmmxt_tandorc),
- cCE(tandch,	e53f130, 1, (RR),		    iwmmxt_tandorc),
- cCE(tandcw,	e93f130, 1, (RR),		    iwmmxt_tandorc),
- cCE(tbcstb,	e400010, 2, (RIWR, RR),		    rn_rd),
- cCE(tbcsth,	e400050, 2, (RIWR, RR),		    rn_rd),
- cCE(tbcstw,	e400090, 2, (RIWR, RR),		    rn_rd),
- cCE(textrcb,	e130170, 2, (RR, I7),		    iwmmxt_textrc),
- cCE(textrch,	e530170, 2, (RR, I7),		    iwmmxt_textrc),
- cCE(textrcw,	e930170, 2, (RR, I7),		    iwmmxt_textrc),
- cCE(textrmub,	e100070, 3, (RR, RIWR, I7),	    iwmmxt_textrm),
- cCE(textrmuh,	e500070, 3, (RR, RIWR, I7),	    iwmmxt_textrm),
- cCE(textrmuw,	e900070, 3, (RR, RIWR, I7),	    iwmmxt_textrm),
- cCE(textrmsb,	e100078, 3, (RR, RIWR, I7),	    iwmmxt_textrm),
- cCE(textrmsh,	e500078, 3, (RR, RIWR, I7),	    iwmmxt_textrm),
- cCE(textrmsw,	e900078, 3, (RR, RIWR, I7),	    iwmmxt_textrm),
- cCE(tinsrb,	e600010, 3, (RIWR, RR, I7),	    iwmmxt_tinsr),
- cCE(tinsrh,	e600050, 3, (RIWR, RR, I7),	    iwmmxt_tinsr),
- cCE(tinsrw,	e600090, 3, (RIWR, RR, I7),	    iwmmxt_tinsr),
- cCE(tmcr,	e000110, 2, (RIWC_RIWG, RR),	    rn_rd),
- cCE(tmcrr,	c400000, 3, (RIWR, RR, RR),	    rm_rd_rn),
- cCE(tmia,	e200010, 3, (RIWR, RR, RR),	    iwmmxt_tmia),
- cCE(tmiaph,	e280010, 3, (RIWR, RR, RR),	    iwmmxt_tmia),
- cCE(tmiabb,	e2c0010, 3, (RIWR, RR, RR),	    iwmmxt_tmia),
- cCE(tmiabt,	e2d0010, 3, (RIWR, RR, RR),	    iwmmxt_tmia),
- cCE(tmiatb,	e2e0010, 3, (RIWR, RR, RR),	    iwmmxt_tmia),
- cCE(tmiatt,	e2f0010, 3, (RIWR, RR, RR),	    iwmmxt_tmia),
- cCE(tmovmskb,	e100030, 2, (RR, RIWR),		    rd_rn),
- cCE(tmovmskh,	e500030, 2, (RR, RIWR),		    rd_rn),
- cCE(tmovmskw,	e900030, 2, (RR, RIWR),		    rd_rn),
- cCE(tmrc,	e100110, 2, (RR, RIWC_RIWG),	    rd_rn),
- cCE(tmrrc,	c500000, 3, (RR, RR, RIWR),	    rd_rn_rm),
- cCE(torcb,	e13f150, 1, (RR),		    iwmmxt_tandorc),
- cCE(torch,	e53f150, 1, (RR),		    iwmmxt_tandorc),
- cCE(torcw,	e93f150, 1, (RR),		    iwmmxt_tandorc),
- cCE(waccb,	e0001c0, 2, (RIWR, RIWR),	    rd_rn),
- cCE(wacch,	e4001c0, 2, (RIWR, RIWR),	    rd_rn),
- cCE(waccw,	e8001c0, 2, (RIWR, RIWR),	    rd_rn),
- cCE(waddbss,	e300180, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(waddb,	e000180, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(waddbus,	e100180, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(waddhss,	e700180, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(waddh,	e400180, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(waddhus,	e500180, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(waddwss,	eb00180, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(waddw,	e800180, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(waddwus,	e900180, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(waligni,	e000020, 4, (RIWR, RIWR, RIWR, I7), iwmmxt_waligni),
- cCE(walignr0,	e800020, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(walignr1,	e900020, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(walignr2,	ea00020, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(walignr3,	eb00020, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wand,	e200000, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wandn,	e300000, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wavg2b,	e800000, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wavg2br,	e900000, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wavg2h,	ec00000, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wavg2hr,	ed00000, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wcmpeqb,	e000060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wcmpeqh,	e400060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wcmpeqw,	e800060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wcmpgtub,	e100060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wcmpgtuh,	e500060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wcmpgtuw,	e900060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wcmpgtsb,	e300060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wcmpgtsh,	e700060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wcmpgtsw,	eb00060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wldrb,	c100000, 2, (RIWR, ADDR),	    iwmmxt_wldstbh),
- cCE(wldrh,	c500000, 2, (RIWR, ADDR),	    iwmmxt_wldstbh),
- cCE(wldrw,	c100100, 2, (RIWR_RIWC, ADDR),	    iwmmxt_wldstw),
- cCE(wldrd,	c500100, 2, (RIWR, ADDR),	    iwmmxt_wldstd),
- cCE(wmacs,	e600100, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wmacsz,	e700100, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wmacu,	e400100, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wmacuz,	e500100, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wmadds,	ea00100, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wmaddu,	e800100, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wmaxsb,	e200160, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wmaxsh,	e600160, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wmaxsw,	ea00160, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wmaxub,	e000160, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wmaxuh,	e400160, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wmaxuw,	e800160, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wminsb,	e300160, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wminsh,	e700160, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wminsw,	eb00160, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wminub,	e100160, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wminuh,	e500160, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wminuw,	e900160, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wmov,	e000000, 2, (RIWR, RIWR),	    iwmmxt_wmov),
- cCE(wmulsm,	e300100, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wmulsl,	e200100, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wmulum,	e100100, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wmulul,	e000100, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wor,	e000000, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wpackhss,	e700080, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wpackhus,	e500080, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wpackwss,	eb00080, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wpackwus,	e900080, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wpackdss,	ef00080, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wpackdus,	ed00080, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wrorh,	e700040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
- cCE(wrorhg,	e700148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
- cCE(wrorw,	eb00040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
- cCE(wrorwg,	eb00148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
- cCE(wrord,	ef00040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
- cCE(wrordg,	ef00148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
- cCE(wsadb,	e000120, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wsadbz,	e100120, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wsadh,	e400120, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wsadhz,	e500120, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wshufh,	e0001e0, 3, (RIWR, RIWR, I255),	    iwmmxt_wshufh),
- cCE(wsllh,	e500040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
- cCE(wsllhg,	e500148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
- cCE(wsllw,	e900040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
- cCE(wsllwg,	e900148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
- cCE(wslld,	ed00040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
- cCE(wslldg,	ed00148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
- cCE(wsrah,	e400040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
- cCE(wsrahg,	e400148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
- cCE(wsraw,	e800040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
- cCE(wsrawg,	e800148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
- cCE(wsrad,	ec00040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
- cCE(wsradg,	ec00148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
- cCE(wsrlh,	e600040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
- cCE(wsrlhg,	e600148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
- cCE(wsrlw,	ea00040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
- cCE(wsrlwg,	ea00148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
- cCE(wsrld,	ee00040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
- cCE(wsrldg,	ee00148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
- cCE(wstrb,	c000000, 2, (RIWR, ADDR),	    iwmmxt_wldstbh),
- cCE(wstrh,	c400000, 2, (RIWR, ADDR),	    iwmmxt_wldstbh),
- cCE(wstrw,	c000100, 2, (RIWR_RIWC, ADDR),	    iwmmxt_wldstw),
- cCE(wstrd,	c400100, 2, (RIWR, ADDR),	    iwmmxt_wldstd),
- cCE(wsubbss,	e3001a0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wsubb,	e0001a0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wsubbus,	e1001a0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wsubhss,	e7001a0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wsubh,	e4001a0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wsubhus,	e5001a0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wsubwss,	eb001a0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wsubw,	e8001a0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wsubwus,	e9001a0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wunpckehub,e0000c0, 2, (RIWR, RIWR),	    rd_rn),
- cCE(wunpckehuh,e4000c0, 2, (RIWR, RIWR),	    rd_rn),
- cCE(wunpckehuw,e8000c0, 2, (RIWR, RIWR),	    rd_rn),
- cCE(wunpckehsb,e2000c0, 2, (RIWR, RIWR),	    rd_rn),
- cCE(wunpckehsh,e6000c0, 2, (RIWR, RIWR),	    rd_rn),
- cCE(wunpckehsw,ea000c0, 2, (RIWR, RIWR),	    rd_rn),
- cCE(wunpckihb, e1000c0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wunpckihh, e5000c0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wunpckihw, e9000c0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wunpckelub,e0000e0, 2, (RIWR, RIWR),	    rd_rn),
- cCE(wunpckeluh,e4000e0, 2, (RIWR, RIWR),	    rd_rn),
- cCE(wunpckeluw,e8000e0, 2, (RIWR, RIWR),	    rd_rn),
- cCE(wunpckelsb,e2000e0, 2, (RIWR, RIWR),	    rd_rn),
- cCE(wunpckelsh,e6000e0, 2, (RIWR, RIWR),	    rd_rn),
- cCE(wunpckelsw,ea000e0, 2, (RIWR, RIWR),	    rd_rn),
- cCE(wunpckilb, e1000e0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wunpckilh, e5000e0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wunpckilw, e9000e0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wxor,	e100000, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE(wzero,	e300000, 1, (RIWR),		    iwmmxt_wzero),
+ cCE("tandcb",	e13f130, 1, (RR),		    iwmmxt_tandorc),
+ cCE("tandch",	e53f130, 1, (RR),		    iwmmxt_tandorc),
+ cCE("tandcw",	e93f130, 1, (RR),		    iwmmxt_tandorc),
+ cCE("tbcstb",	e400010, 2, (RIWR, RR),		    rn_rd),
+ cCE("tbcsth",	e400050, 2, (RIWR, RR),		    rn_rd),
+ cCE("tbcstw",	e400090, 2, (RIWR, RR),		    rn_rd),
+ cCE("textrcb",	e130170, 2, (RR, I7),		    iwmmxt_textrc),
+ cCE("textrch",	e530170, 2, (RR, I7),		    iwmmxt_textrc),
+ cCE("textrcw",	e930170, 2, (RR, I7),		    iwmmxt_textrc),
+ cCE("textrmub",	e100070, 3, (RR, RIWR, I7),	    iwmmxt_textrm),
+ cCE("textrmuh",	e500070, 3, (RR, RIWR, I7),	    iwmmxt_textrm),
+ cCE("textrmuw",	e900070, 3, (RR, RIWR, I7),	    iwmmxt_textrm),
+ cCE("textrmsb",	e100078, 3, (RR, RIWR, I7),	    iwmmxt_textrm),
+ cCE("textrmsh",	e500078, 3, (RR, RIWR, I7),	    iwmmxt_textrm),
+ cCE("textrmsw",	e900078, 3, (RR, RIWR, I7),	    iwmmxt_textrm),
+ cCE("tinsrb",	e600010, 3, (RIWR, RR, I7),	    iwmmxt_tinsr),
+ cCE("tinsrh",	e600050, 3, (RIWR, RR, I7),	    iwmmxt_tinsr),
+ cCE("tinsrw",	e600090, 3, (RIWR, RR, I7),	    iwmmxt_tinsr),
+ cCE("tmcr",	e000110, 2, (RIWC_RIWG, RR),	    rn_rd),
+ cCE("tmcrr",	c400000, 3, (RIWR, RR, RR),	    rm_rd_rn),
+ cCE("tmia",	e200010, 3, (RIWR, RR, RR),	    iwmmxt_tmia),
+ cCE("tmiaph",	e280010, 3, (RIWR, RR, RR),	    iwmmxt_tmia),
+ cCE("tmiabb",	e2c0010, 3, (RIWR, RR, RR),	    iwmmxt_tmia),
+ cCE("tmiabt",	e2d0010, 3, (RIWR, RR, RR),	    iwmmxt_tmia),
+ cCE("tmiatb",	e2e0010, 3, (RIWR, RR, RR),	    iwmmxt_tmia),
+ cCE("tmiatt",	e2f0010, 3, (RIWR, RR, RR),	    iwmmxt_tmia),
+ cCE("tmovmskb",	e100030, 2, (RR, RIWR),		    rd_rn),
+ cCE("tmovmskh",	e500030, 2, (RR, RIWR),		    rd_rn),
+ cCE("tmovmskw",	e900030, 2, (RR, RIWR),		    rd_rn),
+ cCE("tmrc",	e100110, 2, (RR, RIWC_RIWG),	    rd_rn),
+ cCE("tmrrc",	c500000, 3, (RR, RR, RIWR),	    rd_rn_rm),
+ cCE("torcb",	e13f150, 1, (RR),		    iwmmxt_tandorc),
+ cCE("torch",	e53f150, 1, (RR),		    iwmmxt_tandorc),
+ cCE("torcw",	e93f150, 1, (RR),		    iwmmxt_tandorc),
+ cCE("waccb",	e0001c0, 2, (RIWR, RIWR),	    rd_rn),
+ cCE("wacch",	e4001c0, 2, (RIWR, RIWR),	    rd_rn),
+ cCE("waccw",	e8001c0, 2, (RIWR, RIWR),	    rd_rn),
+ cCE("waddbss",	e300180, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("waddb",	e000180, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("waddbus",	e100180, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("waddhss",	e700180, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("waddh",	e400180, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("waddhus",	e500180, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("waddwss",	eb00180, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("waddw",	e800180, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("waddwus",	e900180, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("waligni",	e000020, 4, (RIWR, RIWR, RIWR, I7), iwmmxt_waligni),
+ cCE("walignr0",	e800020, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("walignr1",	e900020, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("walignr2",	ea00020, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("walignr3",	eb00020, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wand",	e200000, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wandn",	e300000, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wavg2b",	e800000, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wavg2br",	e900000, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wavg2h",	ec00000, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wavg2hr",	ed00000, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wcmpeqb",	e000060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wcmpeqh",	e400060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wcmpeqw",	e800060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wcmpgtub",	e100060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wcmpgtuh",	e500060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wcmpgtuw",	e900060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wcmpgtsb",	e300060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wcmpgtsh",	e700060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wcmpgtsw",	eb00060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wldrb",	c100000, 2, (RIWR, ADDR),	    iwmmxt_wldstbh),
+ cCE("wldrh",	c500000, 2, (RIWR, ADDR),	    iwmmxt_wldstbh),
+ cCE("wldrw",	c100100, 2, (RIWR_RIWC, ADDR),	    iwmmxt_wldstw),
+ cCE("wldrd",	c500100, 2, (RIWR, ADDR),	    iwmmxt_wldstd),
+ cCE("wmacs",	e600100, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wmacsz",	e700100, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wmacu",	e400100, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wmacuz",	e500100, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wmadds",	ea00100, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wmaddu",	e800100, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wmaxsb",	e200160, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wmaxsh",	e600160, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wmaxsw",	ea00160, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wmaxub",	e000160, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wmaxuh",	e400160, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wmaxuw",	e800160, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wminsb",	e300160, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wminsh",	e700160, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wminsw",	eb00160, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wminub",	e100160, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wminuh",	e500160, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wminuw",	e900160, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wmov",	e000000, 2, (RIWR, RIWR),	    iwmmxt_wmov),
+ cCE("wmulsm",	e300100, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wmulsl",	e200100, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wmulum",	e100100, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wmulul",	e000100, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wor",	e000000, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wpackhss",	e700080, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wpackhus",	e500080, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wpackwss",	eb00080, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wpackwus",	e900080, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wpackdss",	ef00080, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wpackdus",	ed00080, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wrorh",	e700040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
+ cCE("wrorhg",	e700148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
+ cCE("wrorw",	eb00040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
+ cCE("wrorwg",	eb00148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
+ cCE("wrord",	ef00040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
+ cCE("wrordg",	ef00148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
+ cCE("wsadb",	e000120, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wsadbz",	e100120, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wsadh",	e400120, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wsadhz",	e500120, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wshufh",	e0001e0, 3, (RIWR, RIWR, I255),	    iwmmxt_wshufh),
+ cCE("wsllh",	e500040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
+ cCE("wsllhg",	e500148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
+ cCE("wsllw",	e900040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
+ cCE("wsllwg",	e900148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
+ cCE("wslld",	ed00040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
+ cCE("wslldg",	ed00148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
+ cCE("wsrah",	e400040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
+ cCE("wsrahg",	e400148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
+ cCE("wsraw",	e800040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
+ cCE("wsrawg",	e800148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
+ cCE("wsrad",	ec00040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
+ cCE("wsradg",	ec00148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
+ cCE("wsrlh",	e600040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
+ cCE("wsrlhg",	e600148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
+ cCE("wsrlw",	ea00040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
+ cCE("wsrlwg",	ea00148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
+ cCE("wsrld",	ee00040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
+ cCE("wsrldg",	ee00148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
+ cCE("wstrb",	c000000, 2, (RIWR, ADDR),	    iwmmxt_wldstbh),
+ cCE("wstrh",	c400000, 2, (RIWR, ADDR),	    iwmmxt_wldstbh),
+ cCE("wstrw",	c000100, 2, (RIWR_RIWC, ADDR),	    iwmmxt_wldstw),
+ cCE("wstrd",	c400100, 2, (RIWR, ADDR),	    iwmmxt_wldstd),
+ cCE("wsubbss",	e3001a0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wsubb",	e0001a0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wsubbus",	e1001a0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wsubhss",	e7001a0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wsubh",	e4001a0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wsubhus",	e5001a0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wsubwss",	eb001a0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wsubw",	e8001a0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wsubwus",	e9001a0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wunpckehub",e0000c0, 2, (RIWR, RIWR),	    rd_rn),
+ cCE("wunpckehuh",e4000c0, 2, (RIWR, RIWR),	    rd_rn),
+ cCE("wunpckehuw",e8000c0, 2, (RIWR, RIWR),	    rd_rn),
+ cCE("wunpckehsb",e2000c0, 2, (RIWR, RIWR),	    rd_rn),
+ cCE("wunpckehsh",e6000c0, 2, (RIWR, RIWR),	    rd_rn),
+ cCE("wunpckehsw",ea000c0, 2, (RIWR, RIWR),	    rd_rn),
+ cCE("wunpckihb", e1000c0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wunpckihh", e5000c0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wunpckihw", e9000c0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wunpckelub",e0000e0, 2, (RIWR, RIWR),	    rd_rn),
+ cCE("wunpckeluh",e4000e0, 2, (RIWR, RIWR),	    rd_rn),
+ cCE("wunpckeluw",e8000e0, 2, (RIWR, RIWR),	    rd_rn),
+ cCE("wunpckelsb",e2000e0, 2, (RIWR, RIWR),	    rd_rn),
+ cCE("wunpckelsh",e6000e0, 2, (RIWR, RIWR),	    rd_rn),
+ cCE("wunpckelsw",ea000e0, 2, (RIWR, RIWR),	    rd_rn),
+ cCE("wunpckilb", e1000e0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wunpckilh", e5000e0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wunpckilw", e9000e0, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wxor",	e100000, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wzero",	e300000, 1, (RIWR),		    iwmmxt_wzero),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & arm_cext_iwmmxt2 /* Intel Wireless MMX technology, version 2.  */
 
- cCE(torvscb,   e12f190, 1, (RR),		    iwmmxt_tandorc),
- cCE(torvsch,   e52f190, 1, (RR),		    iwmmxt_tandorc),
- cCE(torvscw,   e92f190, 1, (RR),		    iwmmxt_tandorc),
- cCE(wabsb,     e2001c0, 2, (RIWR, RIWR),           rd_rn),
- cCE(wabsh,     e6001c0, 2, (RIWR, RIWR),           rd_rn),
- cCE(wabsw,     ea001c0, 2, (RIWR, RIWR),           rd_rn),
- cCE(wabsdiffb, e1001c0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wabsdiffh, e5001c0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wabsdiffw, e9001c0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(waddbhusl, e2001a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(waddbhusm, e6001a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(waddhc,    e600180, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(waddwc,    ea00180, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(waddsubhx, ea001a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wavg4,	e400000, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wavg4r,    e500000, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmaddsn,   ee00100, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmaddsx,   eb00100, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmaddun,   ec00100, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmaddux,   e900100, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmerge,    e000080, 4, (RIWR, RIWR, RIWR, I7), iwmmxt_wmerge),
- cCE(wmiabb,    e0000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmiabt,    e1000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmiatb,    e2000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmiatt,    e3000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmiabbn,   e4000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmiabtn,   e5000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmiatbn,   e6000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmiattn,   e7000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmiawbb,   e800120, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmiawbt,   e900120, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmiawtb,   ea00120, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmiawtt,   eb00120, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmiawbbn,  ec00120, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmiawbtn,  ed00120, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmiawtbn,  ee00120, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmiawttn,  ef00120, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmulsmr,   ef00100, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmulumr,   ed00100, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmulwumr,  ec000c0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmulwsmr,  ee000c0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmulwum,   ed000c0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmulwsm,   ef000c0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wmulwl,    eb000c0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wqmiabb,   e8000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wqmiabt,   e9000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wqmiatb,   ea000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wqmiatt,   eb000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wqmiabbn,  ec000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wqmiabtn,  ed000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wqmiatbn,  ee000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wqmiattn,  ef000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wqmulm,    e100080, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wqmulmr,   e300080, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wqmulwm,   ec000e0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wqmulwmr,  ee000e0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
- cCE(wsubaddhx, ed001c0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("torvscb",   e12f190, 1, (RR),		    iwmmxt_tandorc),
+ cCE("torvsch",   e52f190, 1, (RR),		    iwmmxt_tandorc),
+ cCE("torvscw",   e92f190, 1, (RR),		    iwmmxt_tandorc),
+ cCE("wabsb",     e2001c0, 2, (RIWR, RIWR),           rd_rn),
+ cCE("wabsh",     e6001c0, 2, (RIWR, RIWR),           rd_rn),
+ cCE("wabsw",     ea001c0, 2, (RIWR, RIWR),           rd_rn),
+ cCE("wabsdiffb", e1001c0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wabsdiffh", e5001c0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wabsdiffw", e9001c0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("waddbhusl", e2001a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("waddbhusm", e6001a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("waddhc",    e600180, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("waddwc",    ea00180, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("waddsubhx", ea001a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wavg4",	e400000, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wavg4r",    e500000, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmaddsn",   ee00100, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmaddsx",   eb00100, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmaddun",   ec00100, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmaddux",   e900100, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmerge",    e000080, 4, (RIWR, RIWR, RIWR, I7), iwmmxt_wmerge),
+ cCE("wmiabb",    e0000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmiabt",    e1000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmiatb",    e2000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmiatt",    e3000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmiabbn",   e4000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmiabtn",   e5000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmiatbn",   e6000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmiattn",   e7000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmiawbb",   e800120, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmiawbt",   e900120, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmiawtb",   ea00120, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmiawtt",   eb00120, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmiawbbn",  ec00120, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmiawbtn",  ed00120, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmiawtbn",  ee00120, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmiawttn",  ef00120, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmulsmr",   ef00100, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmulumr",   ed00100, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmulwumr",  ec000c0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmulwsmr",  ee000c0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmulwum",   ed000c0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmulwsm",   ef000c0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wmulwl",    eb000c0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wqmiabb",   e8000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wqmiabt",   e9000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wqmiatb",   ea000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wqmiatt",   eb000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wqmiabbn",  ec000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wqmiabtn",  ed000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wqmiatbn",  ee000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wqmiattn",  ef000a0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wqmulm",    e100080, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wqmulmr",   e300080, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wqmulwm",   ec000e0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wqmulwmr",  ee000e0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
+ cCE("wsubaddhx", ed001c0, 3, (RIWR, RIWR, RIWR),     rd_rn_rm),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & arm_cext_maverick /* Cirrus Maverick instructions.  */
 
- cCE(cfldrs,	c100400, 2, (RMF, ADDRGLDC),	      rd_cpaddr),
- cCE(cfldrd,	c500400, 2, (RMD, ADDRGLDC),	      rd_cpaddr),
- cCE(cfldr32,	c100500, 2, (RMFX, ADDRGLDC),	      rd_cpaddr),
- cCE(cfldr64,	c500500, 2, (RMDX, ADDRGLDC),	      rd_cpaddr),
- cCE(cfstrs,	c000400, 2, (RMF, ADDRGLDC),	      rd_cpaddr),
- cCE(cfstrd,	c400400, 2, (RMD, ADDRGLDC),	      rd_cpaddr),
- cCE(cfstr32,	c000500, 2, (RMFX, ADDRGLDC),	      rd_cpaddr),
- cCE(cfstr64,	c400500, 2, (RMDX, ADDRGLDC),	      rd_cpaddr),
- cCE(cfmvsr,	e000450, 2, (RMF, RR),		      rn_rd),
- cCE(cfmvrs,	e100450, 2, (RR, RMF),		      rd_rn),
- cCE(cfmvdlr,	e000410, 2, (RMD, RR),		      rn_rd),
- cCE(cfmvrdl,	e100410, 2, (RR, RMD),		      rd_rn),
- cCE(cfmvdhr,	e000430, 2, (RMD, RR),		      rn_rd),
- cCE(cfmvrdh,	e100430, 2, (RR, RMD),		      rd_rn),
- cCE(cfmv64lr,	e000510, 2, (RMDX, RR),		      rn_rd),
- cCE(cfmvr64l,	e100510, 2, (RR, RMDX),		      rd_rn),
- cCE(cfmv64hr,	e000530, 2, (RMDX, RR),		      rn_rd),
- cCE(cfmvr64h,	e100530, 2, (RR, RMDX),		      rd_rn),
- cCE(cfmval32,	e200440, 2, (RMAX, RMFX),	      rd_rn),
- cCE(cfmv32al,	e100440, 2, (RMFX, RMAX),	      rd_rn),
- cCE(cfmvam32,	e200460, 2, (RMAX, RMFX),	      rd_rn),
- cCE(cfmv32am,	e100460, 2, (RMFX, RMAX),	      rd_rn),
- cCE(cfmvah32,	e200480, 2, (RMAX, RMFX),	      rd_rn),
- cCE(cfmv32ah,	e100480, 2, (RMFX, RMAX),	      rd_rn),
- cCE(cfmva32,	e2004a0, 2, (RMAX, RMFX),	      rd_rn),
- cCE(cfmv32a,	e1004a0, 2, (RMFX, RMAX),	      rd_rn),
- cCE(cfmva64,	e2004c0, 2, (RMAX, RMDX),	      rd_rn),
- cCE(cfmv64a,	e1004c0, 2, (RMDX, RMAX),	      rd_rn),
- cCE(cfmvsc32,	e2004e0, 2, (RMDS, RMDX),	      mav_dspsc),
- cCE(cfmv32sc,	e1004e0, 2, (RMDX, RMDS),	      rd),
- cCE(cfcpys,	e000400, 2, (RMF, RMF),		      rd_rn),
- cCE(cfcpyd,	e000420, 2, (RMD, RMD),		      rd_rn),
- cCE(cfcvtsd,	e000460, 2, (RMD, RMF),		      rd_rn),
- cCE(cfcvtds,	e000440, 2, (RMF, RMD),		      rd_rn),
- cCE(cfcvt32s,	e000480, 2, (RMF, RMFX),	      rd_rn),
- cCE(cfcvt32d,	e0004a0, 2, (RMD, RMFX),	      rd_rn),
- cCE(cfcvt64s,	e0004c0, 2, (RMF, RMDX),	      rd_rn),
- cCE(cfcvt64d,	e0004e0, 2, (RMD, RMDX),	      rd_rn),
- cCE(cfcvts32,	e100580, 2, (RMFX, RMF),	      rd_rn),
- cCE(cfcvtd32,	e1005a0, 2, (RMFX, RMD),	      rd_rn),
- cCE(cftruncs32,e1005c0, 2, (RMFX, RMF),	      rd_rn),
- cCE(cftruncd32,e1005e0, 2, (RMFX, RMD),	      rd_rn),
- cCE(cfrshl32,	e000550, 3, (RMFX, RMFX, RR),	      mav_triple),
- cCE(cfrshl64,	e000570, 3, (RMDX, RMDX, RR),	      mav_triple),
- cCE(cfsh32,	e000500, 3, (RMFX, RMFX, I63s),	      mav_shift),
- cCE(cfsh64,	e200500, 3, (RMDX, RMDX, I63s),	      mav_shift),
- cCE(cfcmps,	e100490, 3, (RR, RMF, RMF),	      rd_rn_rm),
- cCE(cfcmpd,	e1004b0, 3, (RR, RMD, RMD),	      rd_rn_rm),
- cCE(cfcmp32,	e100590, 3, (RR, RMFX, RMFX),	      rd_rn_rm),
- cCE(cfcmp64,	e1005b0, 3, (RR, RMDX, RMDX),	      rd_rn_rm),
- cCE(cfabss,	e300400, 2, (RMF, RMF),		      rd_rn),
- cCE(cfabsd,	e300420, 2, (RMD, RMD),		      rd_rn),
- cCE(cfnegs,	e300440, 2, (RMF, RMF),		      rd_rn),
- cCE(cfnegd,	e300460, 2, (RMD, RMD),		      rd_rn),
- cCE(cfadds,	e300480, 3, (RMF, RMF, RMF),	      rd_rn_rm),
- cCE(cfaddd,	e3004a0, 3, (RMD, RMD, RMD),	      rd_rn_rm),
- cCE(cfsubs,	e3004c0, 3, (RMF, RMF, RMF),	      rd_rn_rm),
- cCE(cfsubd,	e3004e0, 3, (RMD, RMD, RMD),	      rd_rn_rm),
- cCE(cfmuls,	e100400, 3, (RMF, RMF, RMF),	      rd_rn_rm),
- cCE(cfmuld,	e100420, 3, (RMD, RMD, RMD),	      rd_rn_rm),
- cCE(cfabs32,	e300500, 2, (RMFX, RMFX),	      rd_rn),
- cCE(cfabs64,	e300520, 2, (RMDX, RMDX),	      rd_rn),
- cCE(cfneg32,	e300540, 2, (RMFX, RMFX),	      rd_rn),
- cCE(cfneg64,	e300560, 2, (RMDX, RMDX),	      rd_rn),
- cCE(cfadd32,	e300580, 3, (RMFX, RMFX, RMFX),	      rd_rn_rm),
- cCE(cfadd64,	e3005a0, 3, (RMDX, RMDX, RMDX),	      rd_rn_rm),
- cCE(cfsub32,	e3005c0, 3, (RMFX, RMFX, RMFX),	      rd_rn_rm),
- cCE(cfsub64,	e3005e0, 3, (RMDX, RMDX, RMDX),	      rd_rn_rm),
- cCE(cfmul32,	e100500, 3, (RMFX, RMFX, RMFX),	      rd_rn_rm),
- cCE(cfmul64,	e100520, 3, (RMDX, RMDX, RMDX),	      rd_rn_rm),
- cCE(cfmac32,	e100540, 3, (RMFX, RMFX, RMFX),	      rd_rn_rm),
- cCE(cfmsc32,	e100560, 3, (RMFX, RMFX, RMFX),	      rd_rn_rm),
- cCE(cfmadd32,	e000600, 4, (RMAX, RMFX, RMFX, RMFX), mav_quad),
- cCE(cfmsub32,	e100600, 4, (RMAX, RMFX, RMFX, RMFX), mav_quad),
- cCE(cfmadda32, e200600, 4, (RMAX, RMAX, RMFX, RMFX), mav_quad),
- cCE(cfmsuba32, e300600, 4, (RMAX, RMAX, RMFX, RMFX), mav_quad),
+ cCE("cfldrs",	c100400, 2, (RMF, ADDRGLDC),	      rd_cpaddr),
+ cCE("cfldrd",	c500400, 2, (RMD, ADDRGLDC),	      rd_cpaddr),
+ cCE("cfldr32",	c100500, 2, (RMFX, ADDRGLDC),	      rd_cpaddr),
+ cCE("cfldr64",	c500500, 2, (RMDX, ADDRGLDC),	      rd_cpaddr),
+ cCE("cfstrs",	c000400, 2, (RMF, ADDRGLDC),	      rd_cpaddr),
+ cCE("cfstrd",	c400400, 2, (RMD, ADDRGLDC),	      rd_cpaddr),
+ cCE("cfstr32",	c000500, 2, (RMFX, ADDRGLDC),	      rd_cpaddr),
+ cCE("cfstr64",	c400500, 2, (RMDX, ADDRGLDC),	      rd_cpaddr),
+ cCE("cfmvsr",	e000450, 2, (RMF, RR),		      rn_rd),
+ cCE("cfmvrs",	e100450, 2, (RR, RMF),		      rd_rn),
+ cCE("cfmvdlr",	e000410, 2, (RMD, RR),		      rn_rd),
+ cCE("cfmvrdl",	e100410, 2, (RR, RMD),		      rd_rn),
+ cCE("cfmvdhr",	e000430, 2, (RMD, RR),		      rn_rd),
+ cCE("cfmvrdh",	e100430, 2, (RR, RMD),		      rd_rn),
+ cCE("cfmv64lr",	e000510, 2, (RMDX, RR),		      rn_rd),
+ cCE("cfmvr64l",	e100510, 2, (RR, RMDX),		      rd_rn),
+ cCE("cfmv64hr",	e000530, 2, (RMDX, RR),		      rn_rd),
+ cCE("cfmvr64h",	e100530, 2, (RR, RMDX),		      rd_rn),
+ cCE("cfmval32",	e200440, 2, (RMAX, RMFX),	      rd_rn),
+ cCE("cfmv32al",	e100440, 2, (RMFX, RMAX),	      rd_rn),
+ cCE("cfmvam32",	e200460, 2, (RMAX, RMFX),	      rd_rn),
+ cCE("cfmv32am",	e100460, 2, (RMFX, RMAX),	      rd_rn),
+ cCE("cfmvah32",	e200480, 2, (RMAX, RMFX),	      rd_rn),
+ cCE("cfmv32ah",	e100480, 2, (RMFX, RMAX),	      rd_rn),
+ cCE("cfmva32",	e2004a0, 2, (RMAX, RMFX),	      rd_rn),
+ cCE("cfmv32a",	e1004a0, 2, (RMFX, RMAX),	      rd_rn),
+ cCE("cfmva64",	e2004c0, 2, (RMAX, RMDX),	      rd_rn),
+ cCE("cfmv64a",	e1004c0, 2, (RMDX, RMAX),	      rd_rn),
+ cCE("cfmvsc32",	e2004e0, 2, (RMDS, RMDX),	      mav_dspsc),
+ cCE("cfmv32sc",	e1004e0, 2, (RMDX, RMDS),	      rd),
+ cCE("cfcpys",	e000400, 2, (RMF, RMF),		      rd_rn),
+ cCE("cfcpyd",	e000420, 2, (RMD, RMD),		      rd_rn),
+ cCE("cfcvtsd",	e000460, 2, (RMD, RMF),		      rd_rn),
+ cCE("cfcvtds",	e000440, 2, (RMF, RMD),		      rd_rn),
+ cCE("cfcvt32s",	e000480, 2, (RMF, RMFX),	      rd_rn),
+ cCE("cfcvt32d",	e0004a0, 2, (RMD, RMFX),	      rd_rn),
+ cCE("cfcvt64s",	e0004c0, 2, (RMF, RMDX),	      rd_rn),
+ cCE("cfcvt64d",	e0004e0, 2, (RMD, RMDX),	      rd_rn),
+ cCE("cfcvts32",	e100580, 2, (RMFX, RMF),	      rd_rn),
+ cCE("cfcvtd32",	e1005a0, 2, (RMFX, RMD),	      rd_rn),
+ cCE("cftruncs32",e1005c0, 2, (RMFX, RMF),	      rd_rn),
+ cCE("cftruncd32",e1005e0, 2, (RMFX, RMD),	      rd_rn),
+ cCE("cfrshl32",	e000550, 3, (RMFX, RMFX, RR),	      mav_triple),
+ cCE("cfrshl64",	e000570, 3, (RMDX, RMDX, RR),	      mav_triple),
+ cCE("cfsh32",	e000500, 3, (RMFX, RMFX, I63s),	      mav_shift),
+ cCE("cfsh64",	e200500, 3, (RMDX, RMDX, I63s),	      mav_shift),
+ cCE("cfcmps",	e100490, 3, (RR, RMF, RMF),	      rd_rn_rm),
+ cCE("cfcmpd",	e1004b0, 3, (RR, RMD, RMD),	      rd_rn_rm),
+ cCE("cfcmp32",	e100590, 3, (RR, RMFX, RMFX),	      rd_rn_rm),
+ cCE("cfcmp64",	e1005b0, 3, (RR, RMDX, RMDX),	      rd_rn_rm),
+ cCE("cfabss",	e300400, 2, (RMF, RMF),		      rd_rn),
+ cCE("cfabsd",	e300420, 2, (RMD, RMD),		      rd_rn),
+ cCE("cfnegs",	e300440, 2, (RMF, RMF),		      rd_rn),
+ cCE("cfnegd",	e300460, 2, (RMD, RMD),		      rd_rn),
+ cCE("cfadds",	e300480, 3, (RMF, RMF, RMF),	      rd_rn_rm),
+ cCE("cfaddd",	e3004a0, 3, (RMD, RMD, RMD),	      rd_rn_rm),
+ cCE("cfsubs",	e3004c0, 3, (RMF, RMF, RMF),	      rd_rn_rm),
+ cCE("cfsubd",	e3004e0, 3, (RMD, RMD, RMD),	      rd_rn_rm),
+ cCE("cfmuls",	e100400, 3, (RMF, RMF, RMF),	      rd_rn_rm),
+ cCE("cfmuld",	e100420, 3, (RMD, RMD, RMD),	      rd_rn_rm),
+ cCE("cfabs32",	e300500, 2, (RMFX, RMFX),	      rd_rn),
+ cCE("cfabs64",	e300520, 2, (RMDX, RMDX),	      rd_rn),
+ cCE("cfneg32",	e300540, 2, (RMFX, RMFX),	      rd_rn),
+ cCE("cfneg64",	e300560, 2, (RMDX, RMDX),	      rd_rn),
+ cCE("cfadd32",	e300580, 3, (RMFX, RMFX, RMFX),	      rd_rn_rm),
+ cCE("cfadd64",	e3005a0, 3, (RMDX, RMDX, RMDX),	      rd_rn_rm),
+ cCE("cfsub32",	e3005c0, 3, (RMFX, RMFX, RMFX),	      rd_rn_rm),
+ cCE("cfsub64",	e3005e0, 3, (RMDX, RMDX, RMDX),	      rd_rn_rm),
+ cCE("cfmul32",	e100500, 3, (RMFX, RMFX, RMFX),	      rd_rn_rm),
+ cCE("cfmul64",	e100520, 3, (RMDX, RMDX, RMDX),	      rd_rn_rm),
+ cCE("cfmac32",	e100540, 3, (RMFX, RMFX, RMFX),	      rd_rn_rm),
+ cCE("cfmsc32",	e100560, 3, (RMFX, RMFX, RMFX),	      rd_rn_rm),
+ cCE("cfmadd32",	e000600, 4, (RMAX, RMFX, RMFX, RMFX), mav_quad),
+ cCE("cfmsub32",	e100600, 4, (RMAX, RMFX, RMFX, RMFX), mav_quad),
+ cCE("cfmadda32", e200600, 4, (RMAX, RMAX, RMFX, RMFX), mav_quad),
+ cCE("cfmsuba32", e300600, 4, (RMAX, RMAX, RMFX, RMFX), mav_quad),
 };
 #undef ARM_VARIANT
 #undef THUMB_VARIANT
@@ -18115,7 +18129,7 @@ md_convert_frag (bfd *abfd, segT asec ATTRIBUTE_UNUSED, fragS *fragp)
       abort ();
     }
   fixp = fix_new_exp (fragp, fragp->fr_fix, fragp->fr_var, &exp, pc_rel,
-		      reloc_type);
+		      (enum bfd_reloc_code_real) reloc_type);
   fixp->fx_file = fragp->fr_file;
   fixp->fx_line = fragp->fr_line;
   fragp->fr_fix += fragp->fr_var;
@@ -18617,10 +18631,10 @@ add_unwind_opcode (valueT op, int length)
     {
       unwind.opcode_alloc += ARM_OPCODE_CHUNK_SIZE;
       if (unwind.opcodes)
-	unwind.opcodes = xrealloc (unwind.opcodes,
-				   unwind.opcode_alloc);
+	unwind.opcodes = (unsigned char *) xrealloc (unwind.opcodes,
+                                                     unwind.opcode_alloc);
       else
-	unwind.opcodes = xmalloc (unwind.opcode_alloc);
+	unwind.opcodes = (unsigned char *) xmalloc (unwind.opcode_alloc);
     }
   while (length > 0)
     {
@@ -18759,7 +18773,7 @@ start_unwind_section (const segT text_seg, int idx)
   prefix_len = strlen (prefix);
   text_len = strlen (text_name);
   sec_name_len = prefix_len + text_len;
-  sec_name = xmalloc (sec_name_len + 1);
+  sec_name = (char *) xmalloc (sec_name_len + 1);
   memcpy (sec_name, prefix, prefix_len);
   memcpy (sec_name + prefix_len, text_name, text_len);
   sec_name[prefix_len + text_len] = '\0';
@@ -20630,9 +20644,9 @@ tc_gen_reloc (asection *section, fixS *fixp)
   arelent * reloc;
   bfd_reloc_code_real_type code;
 
-  reloc = xmalloc (sizeof (arelent));
+  reloc = (arelent *) xmalloc (sizeof (arelent));
 
-  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
@@ -22002,7 +22016,8 @@ struct arm_long_option_table
 static bfd_boolean
 arm_parse_extension (char * str, const arm_feature_set **opt_p)
 {
-  arm_feature_set *ext_set = xmalloc (sizeof (arm_feature_set));
+  arm_feature_set *ext_set = (arm_feature_set *)
+      xmalloc (sizeof (arm_feature_set));
 
   /* Copy the feature set, so that we can modify it.  */
   *ext_set = **opt_p;

@@ -276,7 +276,8 @@ gld${EMULATION_NAME}_after_allocation (void)
       /* Build a sorted list of input text sections, then use that to process
 	 the unwind table index.  */
       unsigned int list_size = 10;
-      asection **sec_list = xmalloc (list_size * sizeof (asection *));
+      asection **sec_list = (asection **)
+          xmalloc (list_size * sizeof (asection *));
       unsigned int sec_count = 0;
 
       LANG_FOR_EACH_INPUT_STATEMENT (is)
@@ -302,8 +303,8 @@ gld${EMULATION_NAME}_after_allocation (void)
 		  if (sec_count == list_size)
 		    {
 		      list_size *= 2;
-		      sec_list = xrealloc (sec_list,
-					   list_size * sizeof (asection *));
+		      sec_list = (asection **) 
+                          xrealloc (sec_list, list_size * sizeof (asection *));
 		    }
 
 		  sec_list[sec_count++] = sec;

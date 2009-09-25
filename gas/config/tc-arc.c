@@ -540,7 +540,8 @@ arc_extoper (int opertype)
       return;
     }
 
-  ext_oper = xmalloc (sizeof (struct arc_ext_operand_value));
+  ext_oper = (struct arc_ext_operand_value *)
+      xmalloc (sizeof (struct arc_ext_operand_value));
 
   if (opertype)
     {
@@ -802,7 +803,7 @@ arc_extinst (int ignore ATTRIBUTE_UNUSED)
     strcat (syntax, "%F");
   strcat (syntax, "%S%L");
 
-  ext_op = xmalloc (sizeof (struct arc_opcode));
+  ext_op = (struct arc_opcode *) xmalloc (sizeof (struct arc_opcode));
   ext_op->syntax = xstrdup (syntax);
 
   ext_op->mask  = I (-1) | ((0x3 == opcode) ? C (-1) : 0);
@@ -1196,7 +1197,8 @@ arc_cons_fix_new (fragS *frag,
 
       /* This may be a special ARC reloc (eg: %st()).  */
       reloc_type = get_arc_exp_reloc_type (1, BFD_RELOC_32, exp, &exptmp);
-      fix_new_exp (frag, where, nbytes, &exptmp, 0, reloc_type);
+      fix_new_exp (frag, where, nbytes, &exptmp, 0,
+                   (enum bfd_reloc_code_real) reloc_type);
     }
   else
     {
@@ -1350,8 +1352,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED,
 {
   arelent *reloc;
 
-  reloc = xmalloc (sizeof (arelent));
-  reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
+  reloc = (arelent *) xmalloc (sizeof (arelent));
+  reloc->sym_ptr_ptr = (asymbol **) xmalloc (sizeof (asymbol *));
 
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixP->fx_addsy);
   reloc->address = fixP->fx_frag->fr_address + fixP->fx_where;
@@ -1568,7 +1570,8 @@ md_assemble (char *str)
 	      if ((suf = get_ext_suffix (s)))
 		ext_suffix_p = 1;
 	      else
-		suf = hash_find (arc_suffix_hash, s);
+		suf = (const struct arc_operand_value *)
+                    hash_find (arc_suffix_hash, s);
 	      if (!suf)
 		{
 		  /* This can happen in "blle foo" and we're currently using

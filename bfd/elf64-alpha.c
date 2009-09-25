@@ -1,6 +1,6 @@
 /* Alpha specific support for 64-bit ELF
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007, 2008 Free Software Foundation, Inc.
+   2006, 2007, 2008, 2009  Free Software Foundation, Inc.
    Contributed by Richard Henderson <rth@tamu.edu>.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -103,6 +103,57 @@ bfd_boolean elf64_alpha_use_secureplt = FALSE;
 
 #define ELF_DYNAMIC_INTERPRETER "/usr/lib/ld.so"
 
+
+/* Used to implement multiple .got subsections.  */
+struct alpha_elf_got_entry
+{
+  struct alpha_elf_got_entry *next;
+
+  /* Which .got subsection?  */
+  bfd *gotobj;
+
+  /* The addend in effect for this entry.  */
+  bfd_vma addend;
+
+  /* The .got offset for this entry.  */
+  int got_offset;
+
+  /* The .plt offset for this entry.  */
+  int plt_offset;
+
+  /* How many references to this entry?  */
+  int use_count;
+
+  /* The relocation type of this entry.  */
+  unsigned char reloc_type;
+
+  /* How a LITERAL is used.  */
+  unsigned char flags;
+
+  /* Have we initialized the dynamic relocation for this entry?  */
+  unsigned char reloc_done;
+
+  /* Have we adjusted this entry for SEC_MERGE?  */
+  unsigned char reloc_xlated;
+};
+
+struct alpha_elf_reloc_entry
+{
+  struct alpha_elf_reloc_entry *next;
+
+  /* Which .reloc section? */
+  asection *srel;
+
+  /* What kind of relocation? */
+  unsigned int rtype;
+
+  /* Is this against read-only section? */
+  unsigned int reltext : 1;
+
+  /* How many did we find?  */
+  unsigned long count;
+};
+
 struct alpha_elf_link_hash_entry
 {
   struct elf_link_hash_entry root;
@@ -125,56 +176,11 @@ struct alpha_elf_link_hash_entry
 #define ALPHA_ELF_LINK_HASH_TLS_IE	 0x80
 
   /* Used to implement multiple .got subsections.  */
-  struct alpha_elf_got_entry
-  {
-    struct alpha_elf_got_entry *next;
-
-    /* Which .got subsection?  */
-    bfd *gotobj;
-
-    /* The addend in effect for this entry.  */
-    bfd_vma addend;
-
-    /* The .got offset for this entry.  */
-    int got_offset;
-
-    /* The .plt offset for this entry.  */
-    int plt_offset;
-
-    /* How many references to this entry?  */
-    int use_count;
-
-    /* The relocation type of this entry.  */
-    unsigned char reloc_type;
-
-    /* How a LITERAL is used.  */
-    unsigned char flags;
-
-    /* Have we initialized the dynamic relocation for this entry?  */
-    unsigned char reloc_done;
-
-    /* Have we adjusted this entry for SEC_MERGE?  */
-    unsigned char reloc_xlated;
-  } *got_entries;
+  struct alpha_elf_got_entry *got_entries;
 
   /* Used to count non-got, non-plt relocations for delayed sizing
      of relocation sections.  */
-  struct alpha_elf_reloc_entry
-  {
-    struct alpha_elf_reloc_entry *next;
-
-    /* Which .reloc section? */
-    asection *srel;
-
-    /* What kind of relocation? */
-    unsigned int rtype;
-
-    /* Is this against read-only section? */
-    unsigned int reltext : 1;
-
-    /* How many did we find?  */
-    unsigned long count;
-  } *reloc_entries;
+  struct alpha_elf_reloc_entry *reloc_entries;
 };
 
 /* Alpha ELF linker hash table.  */
@@ -458,8 +464,9 @@ elf64_alpha_reloc_gpdisp (bfd *abfd, arelent *reloc_entry,
    from smaller values.  Start with zero, widen, *then* decrement.  */
 #define MINUS_ONE	(((bfd_vma)0) - 1)
 
+
 #define SKIP_HOWTO(N) \
-  HOWTO(N, 0, 0, 0, 0, 0, 0, elf64_alpha_reloc_bad, 0, 0, 0, 0, 0)
+  HOWTO(N, 0, 0, 0, 0, 0, complain_overflow_dont, elf64_alpha_reloc_bad, 0, 0, 0, 0, 0)
 
 static reloc_howto_type elf64_alpha_howto_table[] =
 {
@@ -5062,7 +5069,7 @@ elf64_alpha_final_link (bfd *abfd, struct bfd_link_info *info)
 		 interesting information, try to find the symbol in
 		 the linker global hash table and save the information
 		 for the output external symbols.  */
-	      eraw_src = input_debug.external_ext;
+	      eraw_src = (char *) input_debug.external_ext;
 	      eraw_end = (eraw_src
 			  + (input_debug.symbolic_header.iextMax
 			     * input_swap->external_ext_size));

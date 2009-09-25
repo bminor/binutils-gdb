@@ -61,8 +61,6 @@
 #define ARM_ELF_ABI_VERSION		0
 #define ARM_ELF_OS_ABI_VERSION		ELFOSABI_ARM
 
-static struct elf_backend_data elf32_arm_vxworks_bed;
-
 static bfd_boolean elf32_arm_write_section (bfd *output_bfd,
 					    struct bfd_link_info *link_info,
 					    asection *sec,
@@ -2523,6 +2521,17 @@ struct elf32_arm_link_hash_entry
   ((struct elf32_arm_stub_hash_entry *) \
    bfd_hash_lookup ((table), (string), (create), (copy)))
 
+/* Array to keep track of which stub sections have been created, and
+   information on stub grouping.  */
+struct map_stub
+{
+  /* This is the section to which stubs in the group will be
+     attached.  */
+  asection *link_sec;
+  /* The stub section.  */
+  asection *stub_sec;
+};
+
 /* ARM ELF linker hash table.  */
 struct elf32_arm_link_hash_table
 {
@@ -2638,14 +2647,7 @@ struct elf32_arm_link_hash_table
 
   /* Array to keep track of which stub sections have been created, and
      information on stub grouping.  */
-  struct map_stub
-  {
-    /* This is the section to which stubs in the group will be
-       attached.  */
-    asection *link_sec;
-    /* The stub section.  */
-    asection *stub_sec;
-  } *stub_group;
+  struct map_stub *stub_group;
 
   /* Assorted information used by elf32_arm_size_stubs.  */
   unsigned int bfd_count;
@@ -2666,7 +2668,8 @@ elf32_arm_link_hash_newfunc (struct bfd_hash_entry * entry,
   /* Allocate the structure if it has not already been allocated by a
      subclass.  */
   if (ret == NULL)
-    ret = bfd_hash_allocate (table, sizeof (struct elf32_arm_link_hash_entry));
+    ret = (struct elf32_arm_link_hash_entry *)
+        bfd_hash_allocate (table, sizeof (struct elf32_arm_link_hash_entry));
   if (ret == NULL)
     return (struct bfd_hash_entry *) ret;
 
@@ -2700,8 +2703,8 @@ stub_hash_newfunc (struct bfd_hash_entry *entry,
      subclass.  */
   if (entry == NULL)
     {
-      entry = bfd_hash_allocate (table,
-				 sizeof (struct elf32_arm_stub_hash_entry));
+      entry = (struct bfd_hash_entry *)
+          bfd_hash_allocate (table, sizeof (struct elf32_arm_stub_hash_entry));
       if (entry == NULL)
 	return entry;
     }
@@ -2882,7 +2885,7 @@ elf32_arm_link_hash_table_create (bfd *abfd)
   struct elf32_arm_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf32_arm_link_hash_table);
 
-  ret = bfd_malloc (amt);
+  ret = (struct elf32_arm_link_hash_table *) bfd_malloc (amt);
   if (ret == NULL)
     return NULL;
 
@@ -3248,7 +3251,7 @@ elf32_arm_stub_name (const asection *input_section,
   if (hash)
     {
       len = 8 + 1 + strlen (hash->root.root.root.string) + 1 + 8 + 1;
-      stub_name = bfd_malloc (len);
+      stub_name = (char *) bfd_malloc (len);
       if (stub_name != NULL)
 	sprintf (stub_name, "%08x_%s+%x",
 		 input_section->id & 0xffffffff,
@@ -3258,7 +3261,7 @@ elf32_arm_stub_name (const asection *input_section,
   else
     {
       len = 8 + 1 + 8 + 1 + 8 + 1 + 8 + 1;
-      stub_name = bfd_malloc (len);
+      stub_name = (char *) bfd_malloc (len);
       if (stub_name != NULL)
 	sprintf (stub_name, "%08x_%x:%x+%x",
 		 input_section->id & 0xffffffff,
@@ -3343,7 +3346,7 @@ elf32_arm_create_or_find_stub_sec (asection **link_sec_p, asection *section,
 
 	  namelen = strlen (link_sec->name);
 	  len = namelen + sizeof (STUB_SUFFIX);
-	  s_name = bfd_alloc (htab->stub_bfd, len);
+	  s_name = (char *) bfd_alloc (htab->stub_bfd, len);
 	  if (s_name == NULL)
 	    return NULL;
 
@@ -3725,7 +3728,7 @@ elf32_arm_setup_section_lists (bfd *output_bfd,
   htab->bfd_count = bfd_count;
 
   amt = sizeof (struct map_stub) * (top_id + 1);
-  htab->stub_group = bfd_zmalloc (amt);
+  htab->stub_group = (struct map_stub *) bfd_zmalloc (amt);
   if (htab->stub_group == NULL)
     return -1;
 
@@ -3742,7 +3745,7 @@ elf32_arm_setup_section_lists (bfd *output_bfd,
 
   htab->top_index = top_index;
   amt = sizeof (asection *) * (top_index + 1);
-  input_list = bfd_malloc (amt);
+  input_list = (asection **) bfd_malloc (amt);
   htab->input_list = input_list;
   if (input_list == NULL)
     return -1;
@@ -3899,7 +3902,8 @@ group_sections (struct elf32_arm_link_hash_table *htab,
 static int
 a8_reloc_compare (const void *a, const void *b)
 {
-  const struct a8_erratum_reloc *ra = a, *rb = b;
+  const struct a8_erratum_reloc *ra = (const struct a8_erratum_reloc *) a;
+  const struct a8_erratum_reloc *rb = (const struct a8_erratum_reloc *) b;
 
   if (ra->from < rb->from)
     return -1;
@@ -4024,9 +4028,10 @@ cortex_a8_erratum_scan (bfd *input_bfd,
                   struct a8_erratum_reloc key, *found;
 
                   key.from = base_vma + i;
-                  found = bsearch (&key, a8_relocs, num_a8_relocs,
-                                   sizeof (struct a8_erratum_reloc),
-                                   &a8_reloc_compare);
+                  found = (struct a8_erratum_reloc *)
+                      bsearch (&key, a8_relocs, num_a8_relocs,
+                               sizeof (struct a8_erratum_reloc),
+                               &a8_reloc_compare);
 
 		  if (found)
 		    {
@@ -4143,9 +4148,10 @@ cortex_a8_erratum_scan (bfd *input_bfd,
                           if (num_a8_fixes == a8_fix_table_size)
                             {
                               a8_fix_table_size *= 2;
-                              a8_fixes = bfd_realloc (a8_fixes,
-                                sizeof (struct a8_erratum_fix)
-                                * a8_fix_table_size);
+                              a8_fixes = (struct a8_erratum_fix *)
+                                  bfd_realloc (a8_fixes,
+                                               sizeof (struct a8_erratum_fix)
+                                               * a8_fix_table_size);
                             }
 
 			  if (num_a8_fixes < prev_num_a8_fixes)
@@ -4166,7 +4172,7 @@ cortex_a8_erratum_scan (bfd *input_bfd,
 
 			  if (!stub_name)
 			    {
-			      stub_name = bfd_malloc (8 + 1 + 8 + 1);
+			      stub_name = (char *) bfd_malloc (8 + 1 + 8 + 1);
 			      if (stub_name != NULL)
 				sprintf (stub_name, "%x:%x", section->id, i);
 			    }
@@ -4225,10 +4231,10 @@ elf32_arm_size_stubs (bfd *output_bfd,
 
   if (htab->fix_cortex_a8)
     {
-      a8_fixes = bfd_zmalloc (sizeof (struct a8_erratum_fix)
-                              * a8_fix_table_size);
-      a8_relocs = bfd_zmalloc (sizeof (struct a8_erratum_reloc)
-                               * a8_reloc_table_size);
+      a8_fixes = (struct a8_erratum_fix *)
+          bfd_zmalloc (sizeof (struct a8_erratum_fix) * a8_fix_table_size);
+      a8_relocs = (struct a8_erratum_reloc *)
+          bfd_zmalloc (sizeof (struct a8_erratum_reloc) * a8_reloc_table_size);
     }
 
   /* Propagate mach to stub bfd, because it may not have been
@@ -4539,8 +4545,8 @@ elf32_arm_size_stubs (bfd *output_bfd,
 
                       if (sym_name == NULL)
                 	sym_name = "unnamed";
-                      stub_entry->output_name
-                	= bfd_alloc (htab->stub_bfd,
+                      stub_entry->output_name = (char *)
+                          bfd_alloc (htab->stub_bfd,
                                      sizeof (THUMB2ARM_GLUE_ENTRY_NAME)
                                      + strlen (sym_name));
                       if (stub_entry->output_name == NULL)
@@ -4591,9 +4597,10 @@ elf32_arm_size_stubs (bfd *output_bfd,
                           if (num_a8_relocs == a8_reloc_table_size)
                             {
                               a8_reloc_table_size *= 2;
-                              a8_relocs = bfd_realloc (a8_relocs,
-                                sizeof (struct a8_erratum_reloc)
-                                * a8_reloc_table_size);
+                              a8_relocs = (struct a8_erratum_reloc *)
+                                  bfd_realloc (a8_relocs,
+                                               sizeof (struct a8_erratum_reloc)
+                                               * a8_reloc_table_size);
                             }
 
                           a8_relocs[num_a8_relocs].from = from;
@@ -4757,7 +4764,7 @@ elf32_arm_build_stubs (struct bfd_link_info *info)
 
       /* Allocate memory to hold the linker stubs.  */
       size = stub_sec->size;
-      stub_sec->contents = bfd_zalloc (htab->stub_bfd, size);
+      stub_sec->contents = (unsigned char *) bfd_zalloc (htab->stub_bfd, size);
       if (stub_sec->contents == NULL && size != 0)
 	return FALSE;
       stub_sec->size = 0;
@@ -4790,8 +4797,8 @@ find_thumb_glue (struct bfd_link_info *link_info,
   /* We need a pointer to the armelf specific hash table.  */
   hash_table = elf32_arm_hash_table (link_info);
 
-  tmp_name = bfd_malloc ((bfd_size_type) strlen (name)
-			 + strlen (THUMB2ARM_GLUE_ENTRY_NAME) + 1);
+  tmp_name = (char *) bfd_malloc ((bfd_size_type) strlen (name)
+                                  + strlen (THUMB2ARM_GLUE_ENTRY_NAME) + 1);
 
   BFD_ASSERT (tmp_name);
 
@@ -4824,8 +4831,8 @@ find_arm_glue (struct bfd_link_info *link_info,
   /* We need a pointer to the elfarm specific hash table.  */
   hash_table = elf32_arm_hash_table (link_info);
 
-  tmp_name = bfd_malloc ((bfd_size_type) strlen (name)
-			 + strlen (ARM2THUMB_GLUE_ENTRY_NAME) + 1);
+  tmp_name = (char *) bfd_malloc ((bfd_size_type) strlen (name)
+                                  + strlen (ARM2THUMB_GLUE_ENTRY_NAME) + 1);
 
   BFD_ASSERT (tmp_name);
 
@@ -4935,7 +4942,7 @@ arm_allocate_glue_section_space (bfd * abfd, bfd_size_type size, const char * na
   s = bfd_get_section_by_name (abfd, name);
   BFD_ASSERT (s != NULL);
 
-  contents = bfd_alloc (abfd, size);
+  contents = (bfd_byte *) bfd_alloc (abfd, size);
 
   BFD_ASSERT (s->size == size);
   s->contents = contents;
@@ -4994,7 +5001,8 @@ record_arm_to_thumb_glue (struct bfd_link_info * link_info,
 
   BFD_ASSERT (s != NULL);
 
-  tmp_name = bfd_malloc ((bfd_size_type) strlen (name) + strlen (ARM2THUMB_GLUE_ENTRY_NAME) + 1);
+  tmp_name = (char *) bfd_malloc ((bfd_size_type) strlen (name)
+                                  + strlen (ARM2THUMB_GLUE_ENTRY_NAME) + 1);
 
   BFD_ASSERT (tmp_name);
 
@@ -5071,7 +5079,8 @@ record_arm_bx_glue (struct bfd_link_info * link_info, int reg)
   BFD_ASSERT (s != NULL);
 
   /* Add symbol for veneer.  */
-  tmp_name = bfd_malloc ((bfd_size_type) strlen (ARM_BX_GLUE_ENTRY_NAME) + 1);
+  tmp_name = (char *)
+      bfd_malloc ((bfd_size_type) strlen (ARM_BX_GLUE_ENTRY_NAME) + 1);
 
   BFD_ASSERT (tmp_name);
 
@@ -5108,7 +5117,8 @@ elf32_arm_section_map_add (asection *sec, char type, bfd_vma vma)
 
   if (sec_data->map == NULL)
     {
-      sec_data->map = bfd_malloc (sizeof (elf32_arm_section_map));
+      sec_data->map = (elf32_arm_section_map *)
+          bfd_malloc (sizeof (elf32_arm_section_map));
       sec_data->mapcount = 0;
       sec_data->mapsize = 1;
     }
@@ -5118,8 +5128,9 @@ elf32_arm_section_map_add (asection *sec, char type, bfd_vma vma)
   if (sec_data->mapcount > sec_data->mapsize)
     {
       sec_data->mapsize *= 2;
-      sec_data->map = bfd_realloc_or_free (sec_data->map, sec_data->mapsize
-					   * sizeof (elf32_arm_section_map));
+      sec_data->map = (elf32_arm_section_map *)
+          bfd_realloc_or_free (sec_data->map, sec_data->mapsize
+                               * sizeof (elf32_arm_section_map));
     }
 
   if (sec_data->map)
@@ -5162,8 +5173,8 @@ record_vfp11_erratum_veneer (struct bfd_link_info *link_info,
 
   BFD_ASSERT (s != NULL);
 
-  tmp_name = bfd_malloc ((bfd_size_type) strlen
-			 (VFP11_ERRATUM_VENEER_ENTRY_NAME) + 10);
+  tmp_name = (char *) bfd_malloc ((bfd_size_type) strlen
+                                  (VFP11_ERRATUM_VENEER_ENTRY_NAME) + 10);
 
   BFD_ASSERT (tmp_name);
 
@@ -5187,7 +5198,8 @@ record_vfp11_erratum_veneer (struct bfd_link_info *link_info,
 
   /* Link veneer back to calling location.  */
   errcount = ++(sec_data->erratumcount);
-  newerr = bfd_zmalloc (sizeof (elf32_vfp11_erratum_list));
+  newerr = (elf32_vfp11_erratum_list *)
+      bfd_zmalloc (sizeof (elf32_vfp11_erratum_list));
 
   newerr->type = VFP11_ERRATUM_ARM_VENEER;
   newerr->vma = -1;
@@ -6033,8 +6045,8 @@ bfd_elf32_arm_vfp11_erratum_scan (bfd *abfd, struct bfd_link_info *link_info)
 
               if (state == 3)
                 {
-                  elf32_vfp11_erratum_list *newerr
-                    = bfd_zmalloc (sizeof (elf32_vfp11_erratum_list));
+                  elf32_vfp11_erratum_list *newerr =(elf32_vfp11_erratum_list *)
+                      bfd_zmalloc (sizeof (elf32_vfp11_erratum_list));
                   int errcount;
 
                   errcount = ++(elf32_arm_section_data (sec)->erratumcount);
@@ -6102,8 +6114,8 @@ bfd_elf32_arm_vfp11_fix_veneer_locations (bfd *abfd,
 
   globals = elf32_arm_hash_table (link_info);
 
-  tmp_name = bfd_malloc ((bfd_size_type) strlen
-			   (VFP11_ERRATUM_VENEER_ENTRY_NAME) + 10);
+  tmp_name = (char *) bfd_malloc ((bfd_size_type) strlen
+                                  (VFP11_ERRATUM_VENEER_ENTRY_NAME) + 10);
 
   for (sec = abfd->sections; sec != NULL; sec = sec->next)
     {
@@ -8092,7 +8104,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	    (_("%B(%A+0x%lx): R_ARM_TLS_LE32 relocation not permitted in shared object"),
 	     input_bfd, input_section,
 	     (long) rel->r_offset, howto->name);
-	  return FALSE;
+	  return (bfd_reloc_status_type) FALSE;
 	}
       else
 	value = tpoff (info, value);
@@ -9042,7 +9054,8 @@ add_unwind_table_edit (arm_unwind_table_edit **head,
 		       asection *linked_section,
 		       unsigned int index)
 {
-  arm_unwind_table_edit *new_edit = xmalloc (sizeof (arm_unwind_table_edit));
+  arm_unwind_table_edit *new_edit = (arm_unwind_table_edit *)
+      xmalloc (sizeof (arm_unwind_table_edit));
   
   new_edit->type = type;
   new_edit->linked_section = linked_section;
@@ -9539,7 +9552,7 @@ set_secondary_compatible_arch (bfd *abfd, int arch)
   /* Note: the tag and its argument below are uleb128 values, though
      currently-defined values fit in one byte for each.  */
   if (!attr->s)
-    attr->s = bfd_alloc (abfd, 3);
+    attr->s = (char *) bfd_alloc (abfd, 3);
   attr->s[0] = Tag_CPU_arch;
   attr->s[1] = arch;
   attr->s[2] = '\0';
@@ -10195,225 +10208,7 @@ elf32_arm_versions_compatible (unsigned iver, unsigned over)
    object file when linking.  */
 
 static bfd_boolean
-elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
-{
-  flagword out_flags;
-  flagword in_flags;
-  bfd_boolean flags_compatible = TRUE;
-  asection *sec;
-
-  /* Check if we have the same endianess.  */
-  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
-    return FALSE;
-
-  if (! is_arm_elf (ibfd) || ! is_arm_elf (obfd))
-    return TRUE;
-
-  if (!elf32_arm_merge_eabi_attributes (ibfd, obfd))
-    return FALSE;
-
-  /* The input BFD must have had its flags initialised.  */
-  /* The following seems bogus to me -- The flags are initialized in
-     the assembler but I don't think an elf_flags_init field is
-     written into the object.  */
-  /* BFD_ASSERT (elf_flags_init (ibfd)); */
-
-  in_flags  = elf_elfheader (ibfd)->e_flags;
-  out_flags = elf_elfheader (obfd)->e_flags;
-
-  /* In theory there is no reason why we couldn't handle this.  However
-     in practice it isn't even close to working and there is no real
-     reason to want it.  */
-  if (EF_ARM_EABI_VERSION (in_flags) >= EF_ARM_EABI_VER4
-      && !(ibfd->flags & DYNAMIC)
-      && (in_flags & EF_ARM_BE8))
-    {
-      _bfd_error_handler (_("error: %B is already in final BE8 format"),
-			  ibfd);
-      return FALSE;
-    }
-
-  if (!elf_flags_init (obfd))
-    {
-      /* If the input is the default architecture and had the default
-	 flags then do not bother setting the flags for the output
-	 architecture, instead allow future merges to do this.  If no
-	 future merges ever set these flags then they will retain their
-         uninitialised values, which surprise surprise, correspond
-         to the default values.  */
-      if (bfd_get_arch_info (ibfd)->the_default
-	  && elf_elfheader (ibfd)->e_flags == 0)
-	return TRUE;
-
-      elf_flags_init (obfd) = TRUE;
-      elf_elfheader (obfd)->e_flags = in_flags;
-
-      if (bfd_get_arch (obfd) == bfd_get_arch (ibfd)
-	  && bfd_get_arch_info (obfd)->the_default)
-	return bfd_set_arch_mach (obfd, bfd_get_arch (ibfd), bfd_get_mach (ibfd));
-
-      return TRUE;
-    }
-
-  /* Determine what should happen if the input ARM architecture
-     does not match the output ARM architecture.  */
-  if (! bfd_arm_merge_machines (ibfd, obfd))
-    return FALSE;
-
-  /* Identical flags must be compatible.  */
-  if (in_flags == out_flags)
-    return TRUE;
-
-  /* Check to see if the input BFD actually contains any sections.  If
-     not, its flags may not have been initialised either, but it
-     cannot actually cause any incompatiblity.  Do not short-circuit
-     dynamic objects; their section list may be emptied by
-    elf_link_add_object_symbols.
-
-    Also check to see if there are no code sections in the input.
-    In this case there is no need to check for code specific flags.
-    XXX - do we need to worry about floating-point format compatability
-    in data sections ?  */
-  if (!(ibfd->flags & DYNAMIC))
-    {
-      bfd_boolean null_input_bfd = TRUE;
-      bfd_boolean only_data_sections = TRUE;
-
-      for (sec = ibfd->sections; sec != NULL; sec = sec->next)
-	{
-	  /* Ignore synthetic glue sections.  */
-	  if (strcmp (sec->name, ".glue_7")
-	      && strcmp (sec->name, ".glue_7t"))
-	    {
-	      if ((bfd_get_section_flags (ibfd, sec)
-		   & (SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS))
-		  == (SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS))
-	    	only_data_sections = FALSE;
-
-	      null_input_bfd = FALSE;
-	      break;
-	    }
-	}
-
-      if (null_input_bfd || only_data_sections)
-	return TRUE;
-    }
-
-  /* Complain about various flag mismatches.  */
-  if (!elf32_arm_versions_compatible (EF_ARM_EABI_VERSION (in_flags),
-				      EF_ARM_EABI_VERSION (out_flags)))
-    {
-      _bfd_error_handler
-	(_("error: Source object %B has EABI version %d, but target %B has EABI version %d"),
-	 ibfd, obfd,
-	 (in_flags & EF_ARM_EABIMASK) >> 24,
-	 (out_flags & EF_ARM_EABIMASK) >> 24);
-      return FALSE;
-    }
-
-  /* Not sure what needs to be checked for EABI versions >= 1.  */
-  /* VxWorks libraries do not use these flags.  */
-  if (get_elf_backend_data (obfd) != &elf32_arm_vxworks_bed
-      && get_elf_backend_data (ibfd) != &elf32_arm_vxworks_bed
-      && EF_ARM_EABI_VERSION (in_flags) == EF_ARM_EABI_UNKNOWN)
-    {
-      if ((in_flags & EF_ARM_APCS_26) != (out_flags & EF_ARM_APCS_26))
-	{
-	  _bfd_error_handler
-	    (_("error: %B is compiled for APCS-%d, whereas target %B uses APCS-%d"),
-	     ibfd, obfd,
-	     in_flags & EF_ARM_APCS_26 ? 26 : 32,
-	     out_flags & EF_ARM_APCS_26 ? 26 : 32);
-	  flags_compatible = FALSE;
-	}
-
-      if ((in_flags & EF_ARM_APCS_FLOAT) != (out_flags & EF_ARM_APCS_FLOAT))
-	{
-	  if (in_flags & EF_ARM_APCS_FLOAT)
-	    _bfd_error_handler
-	      (_("error: %B passes floats in float registers, whereas %B passes them in integer registers"),
-	       ibfd, obfd);
-	  else
-	    _bfd_error_handler
-	      (_("error: %B passes floats in integer registers, whereas %B passes them in float registers"),
-	       ibfd, obfd);
-
-	  flags_compatible = FALSE;
-	}
-
-      if ((in_flags & EF_ARM_VFP_FLOAT) != (out_flags & EF_ARM_VFP_FLOAT))
-	{
-	  if (in_flags & EF_ARM_VFP_FLOAT)
-	    _bfd_error_handler
-	      (_("error: %B uses VFP instructions, whereas %B does not"),
-	       ibfd, obfd);
-	  else
-	    _bfd_error_handler
-	      (_("error: %B uses FPA instructions, whereas %B does not"),
-	       ibfd, obfd);
-
-	  flags_compatible = FALSE;
-	}
-
-      if ((in_flags & EF_ARM_MAVERICK_FLOAT) != (out_flags & EF_ARM_MAVERICK_FLOAT))
-	{
-	  if (in_flags & EF_ARM_MAVERICK_FLOAT)
-	    _bfd_error_handler
-	      (_("error: %B uses Maverick instructions, whereas %B does not"),
-	       ibfd, obfd);
-	  else
-	    _bfd_error_handler
-	      (_("error: %B does not use Maverick instructions, whereas %B does"),
-	       ibfd, obfd);
-
-	  flags_compatible = FALSE;
-	}
-
-#ifdef EF_ARM_SOFT_FLOAT
-      if ((in_flags & EF_ARM_SOFT_FLOAT) != (out_flags & EF_ARM_SOFT_FLOAT))
-	{
-	  /* We can allow interworking between code that is VFP format
-	     layout, and uses either soft float or integer regs for
-	     passing floating point arguments and results.  We already
-	     know that the APCS_FLOAT flags match; similarly for VFP
-	     flags.  */
-	  if ((in_flags & EF_ARM_APCS_FLOAT) != 0
-	      || (in_flags & EF_ARM_VFP_FLOAT) == 0)
-	    {
-	      if (in_flags & EF_ARM_SOFT_FLOAT)
-		_bfd_error_handler
-		  (_("error: %B uses software FP, whereas %B uses hardware FP"),
-		   ibfd, obfd);
-	      else
-		_bfd_error_handler
-		  (_("error: %B uses hardware FP, whereas %B uses software FP"),
-		   ibfd, obfd);
-
-	      flags_compatible = FALSE;
-	    }
-	}
-#endif
-
-      /* Interworking mismatch is only a warning.  */
-      if ((in_flags & EF_ARM_INTERWORK) != (out_flags & EF_ARM_INTERWORK))
-	{
-	  if (in_flags & EF_ARM_INTERWORK)
-	    {
-	      _bfd_error_handler
-		(_("Warning: %B supports interworking, whereas %B does not"),
-		 ibfd, obfd);
-	    }
-	  else
-	    {
-	      _bfd_error_handler
-		(_("Warning: %B does not support interworking, whereas %B does"),
-		 ibfd, obfd);
-	    }
-	}
-    }
-
-  return flags_compatible;
-}
+elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd);
 
 /* Display the flags field.  */
 
@@ -10838,7 +10633,8 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 		      size = symtab_hdr->sh_info;
 		      size *= (sizeof (bfd_signed_vma) + sizeof (char));
-		      local_got_refcounts = bfd_zalloc (abfd, size);
+		      local_got_refcounts = (bfd_signed_vma *)
+                          bfd_zalloc (abfd, size);
 		      if (local_got_refcounts == NULL)
 			return FALSE;
 		      elf_local_got_refcounts (abfd) = local_got_refcounts;
@@ -11037,7 +10833,8 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  {
 		    bfd_size_type amt = sizeof *p;
 
-		    p = bfd_alloc (htab->root.dynobj, amt);
+		    p = (struct elf32_arm_relocs_copied *)
+                        bfd_alloc (htab->root.dynobj, amt);
 		    if (p == NULL)
 		      return FALSE;
 		    p->next = *head;
@@ -11811,7 +11608,8 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 	{
 	  struct elf32_arm_relocs_copied *p;
 
-	  for (p = elf_section_data (s)->local_dynrel; p != NULL; p = p->next)
+	  for (p = (struct elf32_arm_relocs_copied *)
+                   elf_section_data (s)->local_dynrel; p != NULL; p = p->next)
 	    {
 	      if (!bfd_is_abs_section (p->section)
 		  && bfd_is_abs_section (p->section->output_section))
@@ -11965,7 +11763,7 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 	continue;
 
       /* Allocate memory for the section contents.  */
-      s->contents = bfd_zalloc (dynobj, s->size);
+      s->contents = (unsigned char *) bfd_zalloc (dynobj, s->size);
       if (s->contents == NULL)
 	return FALSE;
     }
@@ -12760,7 +12558,7 @@ record_section_with_arm_elf_section_data (asection * sec)
 {
   struct section_list * entry;
 
-  entry = bfd_malloc (sizeof (* entry));
+  entry = (struct section_list *) bfd_malloc (sizeof (* entry));
   if (entry == NULL)
     return;
   entry->sec = sec;
@@ -13224,7 +13022,7 @@ elf32_arm_new_section_hook (bfd *abfd, asection *sec)
       _arm_elf_section_data *sdata;
       bfd_size_type amt = sizeof (*sdata);
 
-      sdata = bfd_zalloc (abfd, amt);
+      sdata = (_arm_elf_section_data *) bfd_zalloc (abfd, amt);
       if (sdata == NULL)
 	return FALSE;
       sec->used_by_bfd = sdata;
@@ -13516,7 +13314,7 @@ elf32_arm_write_section (bfd *output_bfd,
          size (before we merged duplicate entries and inserted EXIDX_CANTUNWIND
 	 markers) was sec->rawsize.  (This isn't the case if we perform no
 	 edits, then rawsize will be zero and we should use size).  */
-      bfd_byte *edited_contents = bfd_malloc (sec->size);
+      bfd_byte *edited_contents = (bfd_byte *) bfd_malloc (sec->size);
       unsigned int input_size = sec->rawsize ? sec->rawsize : sec->size;
       unsigned int in_index, out_index;
       bfd_vma add_to_offsets = 0;
@@ -13789,7 +13587,8 @@ elf32_arm_modify_segment_map (bfd *abfd,
 	m = m->next;
       if (!m)
 	{
-	  m = bfd_zalloc (abfd, sizeof (struct elf_segment_map));
+	  m = (struct elf_segment_map *)
+              bfd_zalloc (abfd, sizeof (struct elf_segment_map));
 	  if (m == NULL)
 	    return FALSE;
 	  m->p_type = PT_ARM_EXIDX;
@@ -13999,6 +13798,231 @@ elf32_arm_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
 #define ELF_MAXPAGESIZE			0x1000
 
 #include "elf32-target.h"
+
+
+/* Merge backend specific data from an object file to the output
+   object file when linking.  */
+
+static bfd_boolean
+elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
+{
+  flagword out_flags;
+  flagword in_flags;
+  bfd_boolean flags_compatible = TRUE;
+  asection *sec;
+
+  /* Check if we have the same endianess.  */
+  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
+    return FALSE;
+
+  if (! is_arm_elf (ibfd) || ! is_arm_elf (obfd))
+    return TRUE;
+
+  if (!elf32_arm_merge_eabi_attributes (ibfd, obfd))
+    return FALSE;
+
+  /* The input BFD must have had its flags initialised.  */
+  /* The following seems bogus to me -- The flags are initialized in
+     the assembler but I don't think an elf_flags_init field is
+     written into the object.  */
+  /* BFD_ASSERT (elf_flags_init (ibfd)); */
+
+  in_flags  = elf_elfheader (ibfd)->e_flags;
+  out_flags = elf_elfheader (obfd)->e_flags;
+
+  /* In theory there is no reason why we couldn't handle this.  However
+     in practice it isn't even close to working and there is no real
+     reason to want it.  */
+  if (EF_ARM_EABI_VERSION (in_flags) >= EF_ARM_EABI_VER4
+      && !(ibfd->flags & DYNAMIC)
+      && (in_flags & EF_ARM_BE8))
+    {
+      _bfd_error_handler (_("error: %B is already in final BE8 format"),
+			  ibfd);
+      return FALSE;
+    }
+
+  if (!elf_flags_init (obfd))
+    {
+      /* If the input is the default architecture and had the default
+	 flags then do not bother setting the flags for the output
+	 architecture, instead allow future merges to do this.  If no
+	 future merges ever set these flags then they will retain their
+         uninitialised values, which surprise surprise, correspond
+         to the default values.  */
+      if (bfd_get_arch_info (ibfd)->the_default
+	  && elf_elfheader (ibfd)->e_flags == 0)
+	return TRUE;
+
+      elf_flags_init (obfd) = TRUE;
+      elf_elfheader (obfd)->e_flags = in_flags;
+
+      if (bfd_get_arch (obfd) == bfd_get_arch (ibfd)
+	  && bfd_get_arch_info (obfd)->the_default)
+	return bfd_set_arch_mach (obfd, bfd_get_arch (ibfd), bfd_get_mach (ibfd));
+
+      return TRUE;
+    }
+
+  /* Determine what should happen if the input ARM architecture
+     does not match the output ARM architecture.  */
+  if (! bfd_arm_merge_machines (ibfd, obfd))
+    return FALSE;
+
+  /* Identical flags must be compatible.  */
+  if (in_flags == out_flags)
+    return TRUE;
+
+  /* Check to see if the input BFD actually contains any sections.  If
+     not, its flags may not have been initialised either, but it
+     cannot actually cause any incompatiblity.  Do not short-circuit
+     dynamic objects; their section list may be emptied by
+    elf_link_add_object_symbols.
+
+    Also check to see if there are no code sections in the input.
+    In this case there is no need to check for code specific flags.
+    XXX - do we need to worry about floating-point format compatability
+    in data sections ?  */
+  if (!(ibfd->flags & DYNAMIC))
+    {
+      bfd_boolean null_input_bfd = TRUE;
+      bfd_boolean only_data_sections = TRUE;
+
+      for (sec = ibfd->sections; sec != NULL; sec = sec->next)
+	{
+	  /* Ignore synthetic glue sections.  */
+	  if (strcmp (sec->name, ".glue_7")
+	      && strcmp (sec->name, ".glue_7t"))
+	    {
+	      if ((bfd_get_section_flags (ibfd, sec)
+		   & (SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS))
+		  == (SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS))
+	    	only_data_sections = FALSE;
+
+	      null_input_bfd = FALSE;
+	      break;
+	    }
+	}
+
+      if (null_input_bfd || only_data_sections)
+	return TRUE;
+    }
+
+  /* Complain about various flag mismatches.  */
+  if (!elf32_arm_versions_compatible (EF_ARM_EABI_VERSION (in_flags),
+				      EF_ARM_EABI_VERSION (out_flags)))
+    {
+      _bfd_error_handler
+	(_("error: Source object %B has EABI version %d, but target %B has EABI version %d"),
+	 ibfd, obfd,
+	 (in_flags & EF_ARM_EABIMASK) >> 24,
+	 (out_flags & EF_ARM_EABIMASK) >> 24);
+      return FALSE;
+    }
+
+  /* Not sure what needs to be checked for EABI versions >= 1.  */
+  /* VxWorks libraries do not use these flags.  */
+  if (get_elf_backend_data (obfd) != &elf32_arm_vxworks_bed
+      && get_elf_backend_data (ibfd) != &elf32_arm_vxworks_bed
+      && EF_ARM_EABI_VERSION (in_flags) == EF_ARM_EABI_UNKNOWN)
+    {
+      if ((in_flags & EF_ARM_APCS_26) != (out_flags & EF_ARM_APCS_26))
+	{
+	  _bfd_error_handler
+	    (_("error: %B is compiled for APCS-%d, whereas target %B uses APCS-%d"),
+	     ibfd, obfd,
+	     in_flags & EF_ARM_APCS_26 ? 26 : 32,
+	     out_flags & EF_ARM_APCS_26 ? 26 : 32);
+	  flags_compatible = FALSE;
+	}
+
+      if ((in_flags & EF_ARM_APCS_FLOAT) != (out_flags & EF_ARM_APCS_FLOAT))
+	{
+	  if (in_flags & EF_ARM_APCS_FLOAT)
+	    _bfd_error_handler
+	      (_("error: %B passes floats in float registers, whereas %B passes them in integer registers"),
+	       ibfd, obfd);
+	  else
+	    _bfd_error_handler
+	      (_("error: %B passes floats in integer registers, whereas %B passes them in float registers"),
+	       ibfd, obfd);
+
+	  flags_compatible = FALSE;
+	}
+
+      if ((in_flags & EF_ARM_VFP_FLOAT) != (out_flags & EF_ARM_VFP_FLOAT))
+	{
+	  if (in_flags & EF_ARM_VFP_FLOAT)
+	    _bfd_error_handler
+	      (_("error: %B uses VFP instructions, whereas %B does not"),
+	       ibfd, obfd);
+	  else
+	    _bfd_error_handler
+	      (_("error: %B uses FPA instructions, whereas %B does not"),
+	       ibfd, obfd);
+
+	  flags_compatible = FALSE;
+	}
+
+      if ((in_flags & EF_ARM_MAVERICK_FLOAT) != (out_flags & EF_ARM_MAVERICK_FLOAT))
+	{
+	  if (in_flags & EF_ARM_MAVERICK_FLOAT)
+	    _bfd_error_handler
+	      (_("error: %B uses Maverick instructions, whereas %B does not"),
+	       ibfd, obfd);
+	  else
+	    _bfd_error_handler
+	      (_("error: %B does not use Maverick instructions, whereas %B does"),
+	       ibfd, obfd);
+
+	  flags_compatible = FALSE;
+	}
+
+#ifdef EF_ARM_SOFT_FLOAT
+      if ((in_flags & EF_ARM_SOFT_FLOAT) != (out_flags & EF_ARM_SOFT_FLOAT))
+	{
+	  /* We can allow interworking between code that is VFP format
+	     layout, and uses either soft float or integer regs for
+	     passing floating point arguments and results.  We already
+	     know that the APCS_FLOAT flags match; similarly for VFP
+	     flags.  */
+	  if ((in_flags & EF_ARM_APCS_FLOAT) != 0
+	      || (in_flags & EF_ARM_VFP_FLOAT) == 0)
+	    {
+	      if (in_flags & EF_ARM_SOFT_FLOAT)
+		_bfd_error_handler
+		  (_("error: %B uses software FP, whereas %B uses hardware FP"),
+		   ibfd, obfd);
+	      else
+		_bfd_error_handler
+		  (_("error: %B uses hardware FP, whereas %B uses software FP"),
+		   ibfd, obfd);
+
+	      flags_compatible = FALSE;
+	    }
+	}
+#endif
+
+      /* Interworking mismatch is only a warning.  */
+      if ((in_flags & EF_ARM_INTERWORK) != (out_flags & EF_ARM_INTERWORK))
+	{
+	  if (in_flags & EF_ARM_INTERWORK)
+	    {
+	      _bfd_error_handler
+		(_("Warning: %B supports interworking, whereas %B does not"),
+		 ibfd, obfd);
+	    }
+	  else
+	    {
+	      _bfd_error_handler
+		(_("Warning: %B does not support interworking, whereas %B does"),
+		 ibfd, obfd);
+	    }
+	}
+    }
+
+  return flags_compatible;
+}
 
 
 /* Symbian OS Targets.  */

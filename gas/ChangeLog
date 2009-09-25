@@ -1,9 +1,27 @@
+2009-09-25  Martin Thuresson  <martint@google.com>
+
+	Update soruces to make alpha, arc and arm targets compile cleanly
+	with -Wc++-compat:
+	* config/tc-alpha.c: Add casts.
+	(extended_bfd_reloc_code_real_type): New type. Used to avoid
+	enumeration conversion warnings.
+	(struct alpha_fixup, void assemble_insn, assemble_insn)
+	(assemble_tokens): Use new type.
+	* ecoff.c: Add casts. (mark_stabs): Use enumeration names.
+	* config/obj-elf.c: Add cast
+	* config/tc-arc.c: Add casts.
+	* config/obj-aout.h (text_section,data_section,bss_section):
+	Make extern.
+	* config/obj-elf.c: Add cast.
+	* config/tc-arm.c: Add casts.
+	(X, TxCE, TxCE, TxC3, TxC3w, TxCM_, TxCM, TUE, TUF, CE, CL, cCE)
+	(cCL, C3E, xCM_, nUF, nCE_tag): Change input format to avoid the
+	need for keywords as arguments.
+
 2009-09-25  Nick Hudson  <nick.hudson@gmx.co.uk>
 
 	* doc/c-mips.texi: Fix the singlefloat and doublefloat kindex
-	entries. 
-
-2009-09-24  H.J. Lu  <hongjiu.lu@intel.com>
+	entries2009-09-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (build_vex_prefix): Check vex == 2 instead
 	of vex256.

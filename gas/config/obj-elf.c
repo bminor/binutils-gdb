@@ -2054,7 +2054,7 @@ build_group_lists (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
   list->num_group += 1;
 
   /* Add index to hash.  */
-  idx_ptr = xmalloc (sizeof (unsigned int));
+  idx_ptr = (unsigned int *) xmalloc (sizeof (unsigned int));
   *idx_ptr = i;
   hash_insert (list->indexes, group_name, idx_ptr);
 }

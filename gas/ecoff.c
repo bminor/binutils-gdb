@@ -3323,7 +3323,7 @@ mark_stabs (int ignore ATTRIBUTE_UNUSED)
     {
       /* Add a dummy @stabs dymbol.  */
       stabs_seen = 1;
-      (void) add_ecoff_symbol (stabs_symbol, stNil, scInfo,
+      (void) add_ecoff_symbol (stabs_symbol, st_Nil, sc_Info,
 			       (symbolS *) NULL,
 			       (bfd_vma) 0, (symint_t) -1,
 			       ECOFF_MARK_STAB (0));
@@ -3616,7 +3616,7 @@ ecoff_add_bytes (char **buf,
   if (need < PAGE_SIZE)
     need = PAGE_SIZE;
   want = (*bufend - *buf) + need;
-  *buf = xrealloc (*buf, want);
+  *buf = (char *) xrealloc (*buf, want);
   *bufend = *buf + want;
   return *buf + at;
 }
@@ -4129,7 +4129,7 @@ ecoff_build_symbols (const struct ecoff_debug_swap *backend,
 			sym_ptr->ecoff_sym.asym.iss =
 			  begin_ptr->ecoff_sym.asym.iss;
 
-		      begin_type = begin_ptr->ecoff_sym.asym.st;
+		      begin_type = (st_t) begin_ptr->ecoff_sym.asym.st;
 		      if (begin_type == st_File
 			  || begin_type == st_Block)
 			{
@@ -4697,7 +4697,7 @@ ecoff_build_debug (HDRR *hdr,
 
   /* Build the symbolic information.  */
   offset = 0;
-  buf = xmalloc (PAGE_SIZE);
+  buf = (char *) xmalloc (PAGE_SIZE);
   bufend = buf + PAGE_SIZE;
 
   /* Build the line number information.  */

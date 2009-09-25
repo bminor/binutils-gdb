@@ -106,7 +106,7 @@ struct opcode16
 			(print "32" when 0)
    %r			print register offset address for wldt/wstr instruction.  */
 
-enum
+enum opcode_sentinel_enum
 {
   SENTINEL_IWMMXT_START = 1,
   SENTINEL_IWMMXT_END,
