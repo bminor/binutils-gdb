@@ -1,3 +1,7 @@
+2009-09-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* m32r.cpu (stb-plus): Typo fix.
+
 2009-09-23  Doug Evans  <dje@sebabeach.org>
 
 	* m32r.cpu (sth-plus): Fix address mode and calculation.

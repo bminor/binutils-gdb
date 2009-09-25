@@ -2108,7 +2108,7 @@
      (sequence ((WI new-src2))
 	       (set new-src2 src2)
 	       (set (mem QI new-src2) src1)
-	       (set src2 (add new-src2 (const 1)))
+	       (set src2 (add new-src2 (const 1))))
      ((m32rx (unit u-store)
            (unit u-exec (in dr src2) (out dr src2) (cycles 0)))
       (m32r2 (unit u-store)
