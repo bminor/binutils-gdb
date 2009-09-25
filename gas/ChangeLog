@@ -1,3 +1,8 @@
+2009-09-25  Nick Hudson  <nick.hudson@gmx.co.uk>
+
+	* doc/c-mips.texi: Fix the singlefloat and doublefloat kindex
+	entries. 
+
 2009-09-23  Tim E. Sneddon  <tsneddon@kednos.com>
 
 	* configure.com: Fix a typo.
