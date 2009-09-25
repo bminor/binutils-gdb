@@ -50,10 +50,10 @@ char ebcdic_us_string[NUM_CHARS];
 char ibm1047_string[NUM_CHARS];
 
 /* We make a phony wchar_t and then pretend that this platform uses
-   UCS-4 (or UCS-2, depending on the size -- same difference for the
+   UTF-32 (or UTF-16, depending on the size -- same difference for the
    purposes of this test).  */
 typedef unsigned int wchar_t;
-wchar_t ucs_4_string[NUM_CHARS];
+wchar_t utf_32_string[NUM_CHARS];
 
 /* We also define a couple phony types for testing the u'' and U''
    support.  It is ok if these have the wrong size on some platforms
@@ -103,12 +103,12 @@ fill_run (char string[], int start, int len, int first)
 
 
 void
-init_ucs4 ()
+init_utf32 ()
 {
   int i;
 
   for (i = 0; i < NUM_CHARS; ++i)
-    ucs_4_string[i] = iso_8859_1_string[i] & 0xff;
+    utf_32_string[i] = iso_8859_1_string[i] & 0xff;
 }
 
 int main ()
@@ -171,9 +171,9 @@ int main ()
   /* The digits, at least, are contiguous.  */
   fill_run (ibm1047_string, 59, 10, 240);
 
-  init_ucs4 ();
+  init_utf32 ();
 
-  myvar = ucs_4_string[7];
+  myvar = utf_32_string[7];
 
   return 0;            /* all strings initialized */
 }

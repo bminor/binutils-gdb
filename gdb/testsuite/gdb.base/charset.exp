@@ -375,10 +375,10 @@ gdb_expect {
 set wchar_size [get_sizeof wchar_t 99]
 set wchar_ok 0
 if {$wchar_size == 2} {
-    lappend charset_subset UCS-2
+    lappend charset_subset UTF-16
     set wchar_ok 1
 } elseif {$wchar_size == 4} {
-    lappend charset_subset UCS-4
+    lappend charset_subset UTF-32
     set wchar_ok 1
 }
 
@@ -388,7 +388,7 @@ foreach target_charset $charset_subset {
 	continue
     }
 
-    if {$target_charset == "UCS-4" || $target_charset == "UCS-2"} {
+    if {$target_charset == "UTF-32" || $target_charset == "UTF-16"} {
 	set param target-wide-charset
 	set L L
     } else {
@@ -424,10 +424,10 @@ foreach target_charset $charset_subset {
     # a string in $target_charset.  The variable's name is the
     # character set's name, in lower-case, with all non-identifier
     # characters replaced with '_', with "_string" stuck on the end.
-    if {$target_charset == "UCS-2"} {
-	# We still use the ucs_4_string variable -- but the size is
-	# correct for UCS-2.
-	set var_name ucs_4_string
+    if {$target_charset == "UTF-16"} {
+	# We still use the utf_32_string variable -- but the size is
+	# correct for UTF-16.
+	set var_name utf_32_string
     } else {
 	set var_name [string tolower "${target_charset}_string"]
 	regsub -all -- "\[^a-z0-9_\]" $var_name "_" var_name
@@ -556,7 +556,7 @@ gdb_test "print '\\9'" " = \[0-9\]+ '9'"
 gdb_test "print \"\\1011\"" " = \"A1\""
 
 # Tests for wide- or unicode- strings.  L is the prefix letter to use,
-# either "L" (for wide strings), "u" (for UCS-2), or "U" (for UCS-4).
+# either "L" (for wide strings), "u" (for UTF-16), or "U" (for UTF-32).
 # NAME is used in the test names and should be related to the prefix
 # letter in some easy-to-undestand way.
 proc test_wide_or_unicode {L name} {
@@ -582,12 +582,12 @@ if {$wchar_ok} {
 
 set ucs2_ok [expr {[get_sizeof char16_t 99] == 2}]
 if {$ucs2_ok} {
-    test_wide_or_unicode u UCS-2
+    test_wide_or_unicode u UTF-16
 }
 
 set ucs4_ok [expr {[get_sizeof char32_t 99] == 4}]
 if {$ucs4_ok} {
-    test_wide_or_unicode U UCS-4
+    test_wide_or_unicode U UTF-32
 }
 
 # Test an invalid string combination.
@@ -598,16 +598,16 @@ proc test_combination {L1 name1 L2 name2} {
 }
 
 if {$wchar_ok && $ucs2_ok} {
-    test_combination L wide u UCS-2
+    test_combination L wide u UTF-16
 }
 if {$wchar_ok && $ucs4_ok} {
-    test_combination L wide U UCS-4
+    test_combination L wide U UTF-32
   # Regression test for a typedef to a typedef.
   gdb_test "print myvar" "= \[0-9\]+ L'A'" \
       "typedef to wchar_t"
 }
 if {$ucs2_ok && $ucs4_ok} {
-    test_combination u UCS-2 U UCS-4
+    test_combination u UTF-16 U UTF-32
 }
 
 # Regression test for a cleanup bug in the charset code.

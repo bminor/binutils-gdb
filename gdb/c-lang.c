@@ -52,17 +52,17 @@ charset_for_string_type (enum c_string_type str_type,
     case C_WIDE_STRING:
       return target_wide_charset (byte_order);
     case C_STRING_16:
-      /* FIXME: UCS-2 is not always correct.  */
+      /* FIXME: UTF-16 is not always correct.  */
       if (byte_order == BFD_ENDIAN_BIG)
-	return "UCS-2BE";
+	return "UTF-16BE";
       else
-	return "UCS-2LE";
+	return "UTF-16LE";
     case C_STRING_32:
-      /* FIXME: UCS-4 is not always correct.  */
+      /* FIXME: UTF-32 is not always correct.  */
       if (byte_order == BFD_ENDIAN_BIG)
-	return "UCS-4BE";
+	return "UTF-32BE";
       else
-	return "UCS-4LE";
+	return "UTF-32LE";
     }
   internal_error (__FILE__, __LINE__, "unhandled c_string_type");
 }
@@ -763,7 +763,7 @@ convert_ucn (char *p, char *limit, const char *dest_charset,
       result >>= 8;
     }
 
-  convert_between_encodings ("UCS-4BE", dest_charset, data, 4, 4, output,
+  convert_between_encodings ("UTF-32BE", dest_charset, data, 4, 4, output,
 			     translit_none);
 
   return p;

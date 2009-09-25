@@ -1,3 +1,13 @@
+2009-09-25  Tom Tromey  <tromey@redhat.com>
+
+	* charset.c (iconv_open): Use UTF-16 and UTF-32, not UCS-2 and
+	UCS-4.
+	(iconv): Rename 'ucs_flag'.
+	(GDB_DEFAULT_TARGET_WIDE_CHARSET): Use UTF-32.
+	* c-lang.c (charset_for_string_type): Use UTF-16 and UTF-32, not
+	UCS-2 and UCS-4.
+	(convert_ucn): Use UTF-32.
+
 2009-09-25  Nick Roberts  <nickrob@snap.net.nz>
 
 	* mi/gdb-mi.el: Remove file.

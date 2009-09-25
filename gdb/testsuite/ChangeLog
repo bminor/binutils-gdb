@@ -1,3 +1,11 @@
+2009-09-25  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/charset.exp: Use UTF-16 and UTF-32, not UCS-2 and
+	UCS-4.
+	* gdb.base/charset.c (utf_32_string): Rename.
+	(init_utf32): Rename.
+	(main): Update.
+
 2009-09-22  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.python/py-function.exp: Add regression tests.

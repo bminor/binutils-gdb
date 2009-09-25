@@ -102,17 +102,17 @@
 iconv_t
 iconv_open (const char *to, const char *from)
 {
-  /* We allow conversions from UCS-4BE, wchar_t, and the host charset.
+  /* We allow conversions from UTF-32BE, wchar_t, and the host charset.
      We allow conversions to wchar_t and the host charset.  */
-  if (strcmp (from, "UCS-4BE") && strcmp (from, "wchar_t")
+  if (strcmp (from, "UTF-32BE") && strcmp (from, "wchar_t")
       && strcmp (from, GDB_DEFAULT_HOST_CHARSET))
     return -1;
   if (strcmp (to, "wchar_t") && strcmp (to, GDB_DEFAULT_HOST_CHARSET))
     return -1;
 
-  /* Return 1 if we are converting from UCS-4BE, 0 otherwise.  This is
+  /* Return 1 if we are converting from UTF-32BE, 0 otherwise.  This is
      used as a flag in calls to iconv.  */
-  return !strcmp (from, "UCS-4BE");
+  return !strcmp (from, "UTF-32BE");
 }
 
 int
@@ -122,10 +122,10 @@ iconv_close (iconv_t arg)
 }
 
 size_t
-iconv (iconv_t ucs_flag, const char **inbuf, size_t *inbytesleft,
+iconv (iconv_t utf_flag, const char **inbuf, size_t *inbytesleft,
        char **outbuf, size_t *outbytesleft)
 {
-  if (ucs_flag)
+  if (utf_flag)
     {
       while (*inbytesleft >= 4)
 	{
@@ -193,7 +193,7 @@ iconv (iconv_t ucs_flag, const char **inbuf, size_t *inbytesleft,
 #endif
 
 #ifndef GDB_DEFAULT_TARGET_WIDE_CHARSET
-#define GDB_DEFAULT_TARGET_WIDE_CHARSET "UCS-4"
+#define GDB_DEFAULT_TARGET_WIDE_CHARSET "UTF-32"
 #endif
 
 static const char *auto_host_charset_name = GDB_DEFAULT_HOST_CHARSET;
