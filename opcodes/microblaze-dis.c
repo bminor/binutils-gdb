@@ -34,6 +34,13 @@
 #define get_int_field_imm(instr)   ((instr & IMM_MASK) >> IMM_LOW)
 #define get_int_field_r1(instr)    ((instr & RA_MASK) >> RA_LOW)
 
+
+enum microblaze_instr get_insn_microblaze (long, bfd_boolean *, 
+					   enum microblaze_instr_type *, short *);
+unsigned long microblaze_get_target_address (long, bfd_boolean, int, long, long,
+					     long, bfd_boolean *, bfd_boolean *);
+enum microblaze_instr microblaze_decode_insn (long insn, int *rd, int *ra, int *rb, int *imm);
+
 static char *
 get_field (long instr, long mask, unsigned short low)
 {
@@ -388,8 +395,8 @@ print_insn_microblaze (bfd_vma memaddr, struct disassemble_info * info)
   /* Say how many bytes we consumed.  */
   return 4;
 }
-#if 0
-static enum microblaze_instr
+
+enum microblaze_instr
 get_insn_microblaze (long inst,
   		     bfd_boolean *isunsignedimm,
   		     enum microblaze_instr_type *insn_type,
@@ -412,21 +419,6 @@ get_insn_microblaze (long inst,
       *delay_slots = op->delay_slots;
       return op->instr;
     }
-}
-
-short
-get_delay_slots_microblaze (long inst)
-{
-  bfd_boolean isunsignedimm;
-  enum microblaze_instr_type insn_type;
-  enum microblaze_instr op;
-  short delay_slots;
-
-  op = get_insn_microblaze (inst, &isunsignedimm, &insn_type, &delay_slots);
-  if (op == invalid_inst)
-    return 0;
-  else
-    return delay_slots;
 }
 
 enum microblaze_instr
@@ -524,4 +516,3 @@ microblaze_get_target_address (long inst, bfd_boolean immfound, int immval,
     *targetvalid = FALSE;
   return targetaddr;
 }
-#endif

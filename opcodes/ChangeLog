@@ -1,3 +1,9 @@
+2009-09-25  Michael Eager  <eager@eagercon.com>
+
+	* microblaze-dis.c (get_insn_microblaze, microblaze_get_target_address, 
+	microblaze_decode_insn): Add declarations.  
+	(get_delay_slots_microblaze): Remove. 
+
 2009-09-25  Martin Thuresson  <martint@google.com>
 
 	Update soruces to make arc and arm targets compile cleanly with
