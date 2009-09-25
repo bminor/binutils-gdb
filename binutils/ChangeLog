@@ -1,3 +1,9 @@
+2009-09-25  Dimitry Gorbachev  <d.g.gorbachev@gmail.com>
+
+	PR 10656
+	* readelf.c: Remove duplicate declaration of variable do_wide.
+	* dwarf.h: Add export of do_wide.
+
 2009-09-24  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf.c (get_TAG_name): Add missing DWARF-3 and new DWARF-4 tags.

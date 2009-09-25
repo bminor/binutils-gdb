@@ -149,7 +149,6 @@
 #include "filenames.h"
 
 char * program_name = "readelf";
-int do_wide;
 static long archive_file_offset;
 static unsigned long archive_file_size;
 static unsigned long dynamic_addr;

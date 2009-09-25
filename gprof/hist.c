@@ -1,6 +1,6 @@
 /* hist.c  -  Histogram related operations.
 
-   Copyright 1999, 2000, 2001, 2002, 2004, 2005, 2007
+   Copyright 1999, 2000, 2001, 2002, 2004, 2005, 2007, 2009
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -48,6 +48,8 @@ extern void flat_blurb (FILE * fp);
 static histogram *find_histogram (bfd_vma lowpc, bfd_vma highpc);
 static histogram *find_histogram_for_pc (bfd_vma pc);
 
+histogram * histograms;
+unsigned num_histograms;
 double hist_scale;
 static char hist_dimension[16] = "seconds";
 static char hist_dimension_abbrev = 's';

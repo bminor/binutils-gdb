@@ -1,3 +1,10 @@
+2009-09-25  Dimitry Gorbachev  <d.g.gorbachev@gmail.com>
+
+	PR 10656
+	* hist.h: Move declaration of histograms and num_histograms
+	variables from here to...
+	* hist.c: ...here.
+
 2009-09-23  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: Updated Vietnamese translation.
