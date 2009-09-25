@@ -1,3 +1,7 @@
+2009-09-25  Nick Roberts  <nickrob@snap.net.nz>
+
+	* mi/gdb-mi.el: Remove file.
+
 2009-09-23  Joel Brobecker  <brobecker@adacore.com>
 
 	* record.c (record_open, record_store_registers, record_xfer_partial):
