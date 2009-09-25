@@ -1,5 +1,9 @@
 2009-09-25  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/charset.exp: Test utf-16 strings with Python.
+
+2009-09-25  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.base/charset.exp: Use UTF-16 and UTF-32, not UCS-2 and
 	UCS-4.
 	* gdb.base/charset.c (utf_32_string): Rename.

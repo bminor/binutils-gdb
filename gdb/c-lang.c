@@ -618,7 +618,7 @@ c_printstr (struct ui_file *stream, struct type *type, const gdb_byte *string,
 
 void
 c_get_string (struct value *value, gdb_byte **buffer, int *length,
-	      const char **charset)
+	      struct type **char_type, const char **charset)
 {
   int err, width;
   unsigned int fetchlimit;
@@ -626,6 +626,7 @@ c_get_string (struct value *value, gdb_byte **buffer, int *length,
   struct type *element_type = TYPE_TARGET_TYPE (type);
   int req_length = *length;
   enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
+  enum c_string_type kind;
 
   if (element_type == NULL)
     goto error;
@@ -652,13 +653,11 @@ c_get_string (struct value *value, gdb_byte **buffer, int *length,
     /* We work only with arrays and pointers.  */
     goto error;
 
-  element_type = check_typedef (element_type);
-  if (TYPE_CODE (element_type) != TYPE_CODE_INT
-      && TYPE_CODE (element_type) != TYPE_CODE_CHAR)
-    /* If the elements are not integers or characters, we don't consider it
-       a string.  */
+  if (! c_textual_element_type (element_type, 0))
     goto error;
-
+  kind = classify_type (element_type,
+			gdbarch_byte_order (get_type_arch (element_type)),
+			charset);
   width = TYPE_LENGTH (element_type);
 
   /* If the string lives in GDB's memory instead of the inferior's, then we
@@ -717,7 +716,7 @@ c_get_string (struct value *value, gdb_byte **buffer, int *length,
   if (*length != 0)
      *length = *length / width;
 
-  *charset = target_charset ();
+  *char_type = element_type;
 
   return;
 

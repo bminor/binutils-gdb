@@ -54,7 +54,7 @@ print_function_pointer_address (struct gdbarch *gdbarch, CORE_ADDR address,
 }
 
 
-/* A helper for textual_element_type.  This checks the name of the
+/* A helper for c_textual_element_type.  This checks the name of the
    typedef.  This is bogus but it isn't apparent that the compiler
    provides us the help we may need.  */
 
@@ -77,8 +77,8 @@ textual_name (const char *name)
    vector types is not.  The user can override this by using the /s
    format letter.  */
 
-static int
-textual_element_type (struct type *type, char format)
+int
+c_textual_element_type (struct type *type, char format)
 {
   struct type *true_type, *iter_type;
 
@@ -178,7 +178,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	    }
 
 	  /* Print arrays of textual chars with a string syntax.  */
-          if (textual_element_type (unresolved_elttype, options->format))
+          if (c_textual_element_type (unresolved_elttype, options->format))
 	    {
 	      /* If requested, look for the first null char and only print
 	         elements up to it.  */
@@ -278,7 +278,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	  /* For a pointer to a textual type, also print the string
 	     pointed to, unless pointer is null.  */
 
-	  if (textual_element_type (unresolved_elttype, options->format)
+	  if (c_textual_element_type (unresolved_elttype, options->format)
 	      && addr != 0)
 	    {
 	      i = val_print_string (unresolved_elttype, addr, -1, stream,
@@ -491,7 +491,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	     Since we don't know whether the value is really intended to
 	     be used as an integer or a character, print the character
 	     equivalent as well.  */
-	  if (textual_element_type (unresolved_type, options->format))
+	  if (c_textual_element_type (unresolved_type, options->format))
 	    {
 	      fputs_filtered (" ", stream);
 	      LA_PRINT_CHAR ((unsigned char) unpack_long (type, valaddr + embedded_offset),
@@ -613,7 +613,7 @@ c_value_print (struct value *val, struct ui_file *stream,
     {
       /* Hack:  remove (char *) for char strings.  Their
          type is indicated by the quoted string anyway.
-         (Don't use textual_element_type here; quoted strings
+         (Don't use c_textual_element_type here; quoted strings
          are always exactly (char *), (wchar_t *), or the like.  */
       if (TYPE_CODE (val_type) == TYPE_CODE_PTR
 	  && TYPE_NAME (val_type) == NULL

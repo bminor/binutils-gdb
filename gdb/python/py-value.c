@@ -238,6 +238,7 @@ valpy_string (PyObject *self, PyObject *args, PyObject *kw)
   const char *errors = NULL;
   const char *user_encoding = NULL;
   const char *la_encoding = NULL;
+  struct type *char_type;
   static char *keywords[] = { "encoding", "errors", "length" };
 
   if (!PyArg_ParseTupleAndKeywords (args, kw, "|ssi", keywords,
@@ -246,12 +247,13 @@ valpy_string (PyObject *self, PyObject *args, PyObject *kw)
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
-      LA_GET_STRING (value, &buffer, &length, &la_encoding);
+      LA_GET_STRING (value, &buffer, &length, &char_type, &la_encoding);
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 
   encoding = (user_encoding && *user_encoding) ? user_encoding : la_encoding;
-  unicode = PyUnicode_Decode (buffer, length, encoding, errors);
+  unicode = PyUnicode_Decode (buffer, length * TYPE_LENGTH (char_type),
+			      encoding, errors);
   xfree (buffer);
 
   return unicode;

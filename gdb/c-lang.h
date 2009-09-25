@@ -106,5 +106,9 @@ extern int cp_is_vtbl_ptr_type (struct type *);
 
 extern int cp_is_vtbl_member (struct type *);
 
+/* These are in c-valprint.c.  */
+
+extern int c_textual_element_type (struct type *, char);
+
 
 #endif /* !defined (C_LANG_H) */

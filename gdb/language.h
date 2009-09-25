@@ -294,7 +294,7 @@ struct language_defn
        Otherwise *LENGTH will include all characters - including any nulls.
        CHARSET will hold the encoding used in the string.  */
     void (*la_get_string) (struct value *value, gdb_byte **buffer, int *length,
-			  const char **charset);
+			   struct type **chartype, const char **charset);
 
     /* Add fields above this point, so the magic number is always last. */
     /* Magic number for compat checking */
@@ -394,8 +394,8 @@ extern enum language set_language (enum language);
 				 force_ellipses,options))
 #define LA_EMIT_CHAR(ch, type, stream, quoter) \
   (current_language->la_emitchar(ch, type, stream, quoter))
-#define LA_GET_STRING(value, buffer, length, encoding) \
-  (current_language->la_get_string(value, buffer, length, encoding))
+#define LA_GET_STRING(value, buffer, length, chartype, encoding) \
+  (current_language->la_get_string(value, buffer, length, chartype, encoding))
 
 #define LA_PRINT_ARRAY_INDEX(index_value, stream, optins) \
   (current_language->la_print_array_index(index_value, stream, options))
@@ -497,9 +497,9 @@ void default_print_typedef (struct type *type, struct symbol *new_symbol,
 			    struct ui_file *stream);
 
 void default_get_string (struct value *value, gdb_byte **buffer, int *length,
-			 const char **charset);
+			 struct type **char_type, const char **charset);
 
 void c_get_string (struct value *value, gdb_byte **buffer, int *length,
-		   const char **charset);
+		   struct type **char_type, const char **charset);
 
 #endif /* defined (LANGUAGE_H) */

@@ -1,5 +1,18 @@
 2009-09-25  Tom Tromey  <tromey@redhat.com>
 
+	PR python/10664:
+	* language.h (struct language_defn) <la_get_string>: Add
+	'char_type' argument.
+	(LA_GET_STRING): Likewise.
+	(default_get_string, c_get_string): Update.
+	* language.c (default_get_string): Add 'char_type' argument.
+	* c-valprint.c (c_textual_element_type): Rename from
+	textual_element_type.  No longer static.  Update callers.
+	* c-lang.h (c_textual_element_type): Declare.
+	* c-lang.c (c_get_string): Add 'char_type' argument.
+
+2009-09-25  Tom Tromey  <tromey@redhat.com>
+
 	* charset.c (iconv_open): Use UTF-16 and UTF-32, not UCS-2 and
 	UCS-4.
 	(iconv): Rename 'ucs_flag'.

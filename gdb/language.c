@@ -1045,7 +1045,7 @@ default_print_array_index (struct value *index_value, struct ui_file *stream,
 
 void
 default_get_string (struct value *value, gdb_byte **buffer, int *length,
-		    const char **charset)
+		    struct type **char_type, const char **charset)
 {
   error (_("Getting a string is unsupported in this language."));
 }

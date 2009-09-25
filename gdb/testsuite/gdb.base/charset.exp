@@ -610,6 +610,26 @@ if {$ucs2_ok && $ucs4_ok} {
     test_combination u UTF-16 U UTF-32
 }
 
+if {$ucs2_ok} {
+    set go 1
+    gdb_test_multiple "python print 'hello, world!'" \
+	"verify python support for charset tests" {
+	    -re "not supported.*$gdb_prompt $"	{
+		unsupported "python support is disabled"
+		set go 0
+	    }
+	    -re "$gdb_prompt $"	{}
+	}
+
+    if {$go} {
+	gdb_test "print u\"abcdef\"" " = u\"abcdef\"" \
+	    "set up for python printing of utf-16 string"
+
+	gdb_test "python print gdb.history(0).string()" "abcdef" \
+	    "extract utf-16 string using python"
+    }
+}
+
 # Regression test for a cleanup bug in the charset code.
 gdb_test "print 'a' == 'a' || 'b' == 'b'" \
   ".* = 1" \
