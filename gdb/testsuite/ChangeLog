@@ -1,3 +1,10 @@
+2009-09-26  Pierre Muller  <muller@ics.u-strasbg.fr>
+	
+	New test for two watchpoints, with disabling of
+	the first inserted.
+	* testsuite/gdb.base/watchpoints.c: New file.
+	* testsuite/gdb.base/watchpoints.exp: New file.
+
 2009-09-22  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.python/py-function.exp: Add regression tests.
