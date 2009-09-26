@@ -555,7 +555,10 @@ i386_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
 	     that GDB doesn't call the target_stopped_data_address
 	     method except for data watchpoints.  In other words, I'm
 	     being paranoiac.  */
-	  && I386_DR_GET_RW_LEN (i) != 0)
+	  && I386_DR_GET_RW_LEN (i) != 0
+	  /* This third condition makes sure DRi is not vacant, this
+	     avoids false positives in windows-nat.c.  */
+	  && !I386_DR_VACANT (i))
 	{
 	  addr = dr_mirror[i];
 	  rc = 1;

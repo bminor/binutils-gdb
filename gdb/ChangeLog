@@ -1,3 +1,8 @@
+2009-09-26  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* i386-nat.c (i386_stopped_data_address): Also check that
+	hitted watch register is not vacant.
+
 2009-09-25  Tom Tromey  <tromey@redhat.com>
 
 	PR python/10664:
