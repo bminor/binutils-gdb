@@ -1,3 +1,7 @@
+2009-09-26  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gdb.texinfo (Cygwin Native): Mention support for Ctrl-BREAK.
+
 2009-09-23  Joel Brobecker  <brobecker@adacore.com>
 
 	* observer.texi (solib_unloaded): Document explicitly the fact that
