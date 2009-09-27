@@ -491,10 +491,24 @@ enum
     op_bas   = 0x4d,
     op_bcr   = 0x07,
     op_bc    = 0x0d,
+    op_bctr  = 0x06,
+    op_bctgr = 0xb946,
+    op_bct   = 0x46,
+    op1_bctg = 0xe3,   op2_bctg = 0x46,
+    op_bxh   = 0x86,
+    op1_bxhg = 0xeb,   op2_bxhg = 0x44,
+    op_bxle  = 0x87,
+    op1_bxleg= 0xeb,   op2_bxleg= 0x45,
     op1_bras = 0xa7,   op2_bras = 0x05,
     op1_brasl= 0xc0,   op2_brasl= 0x05,
     op1_brc  = 0xa7,   op2_brc  = 0x04,
     op1_brcl = 0xc0,   op2_brcl = 0x04,
+    op1_brct = 0xa7,   op2_brct = 0x06,
+    op1_brctg= 0xa7,   op2_brctg= 0x07,
+    op_brxh  = 0x84,
+    op1_brxhg= 0xec,   op2_brxhg= 0x44,
+    op_brxle = 0x85,
+    op1_brxlg= 0xec,   op2_brxlg= 0x45,
   };
 
 
@@ -627,6 +641,41 @@ is_rsy (bfd_byte *insn, int op1, int op2,
       /* The 'long displacement' is a 20-bit signed integer.  */
       *d2 = ((((insn[2] & 0xf) << 8) | insn[3] | (insn[4] << 12)) 
 		^ 0x80000) - 0x80000;
+      return 1;
+    }
+  else
+    return 0;
+}
+
+
+static int
+is_rsi (bfd_byte *insn, int op,
+        unsigned int *r1, unsigned int *r3, int *i2)
+{
+  if (insn[0] == op)
+    {
+      *r1 = (insn[1] >> 4) & 0xf;
+      *r3 = insn[1] & 0xf;
+      /* i2 is a 16-bit signed quantity.  */
+      *i2 = (((insn[2] << 8) | insn[3]) ^ 0x8000) - 0x8000;
+      return 1;
+    }
+  else
+    return 0;
+}
+
+
+static int
+is_rie (bfd_byte *insn, int op1, int op2,
+        unsigned int *r1, unsigned int *r3, int *i2)
+{
+  if (insn[0] == op1
+      && insn[5] == op2)
+    {
+      *r1 = (insn[1] >> 4) & 0xf;
+      *r3 = insn[1] & 0xf;
+      /* i2 is a 16-bit signed quantity.  */
+      *i2 = (((insn[2] << 8) | insn[3]) ^ 0x8000) - 0x8000;
       return 1;
     }
   else
@@ -1159,6 +1208,109 @@ s390_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   return 0;
 }
 
+/* Displaced stepping.  */
+
+/* Fix up the state of registers and memory after having single-stepped
+   a displaced instruction.  */
+static void
+s390_displaced_step_fixup (struct gdbarch *gdbarch,
+			   struct displaced_step_closure *closure,
+			   CORE_ADDR from, CORE_ADDR to,
+			   struct regcache *regs)
+{
+  /* Since we use simple_displaced_step_copy_insn, our closure is a
+     copy of the instruction.  */
+  gdb_byte *insn = (gdb_byte *) closure;
+  static int s390_instrlen[] = { 2, 4, 4, 6 };
+  int insnlen = s390_instrlen[insn[0] >> 6];
+
+  /* Fields for various kinds of instructions.  */
+  unsigned int b2, r1, r2, x2, r3;
+  int i2, d2;
+
+  /* Get current PC and addressing mode bit.  */
+  CORE_ADDR pc = regcache_read_pc (regs);
+  CORE_ADDR amode = 0;
+
+  if (register_size (gdbarch, S390_PSWA_REGNUM) == 4)
+    {
+      regcache_cooked_read_unsigned (regs, S390_PSWA_REGNUM, &amode);
+      amode &= 0x80000000;
+    }
+
+  if (debug_displaced)
+    fprintf_unfiltered (gdb_stdlog,
+			"displaced: (s390) fixup (%s, %s) pc %s amode 0x%x\n",
+			paddress (gdbarch, from), paddress (gdbarch, to),
+			paddress (gdbarch, pc), (int) amode);
+
+  /* Handle absolute branch and save instructions.  */
+  if (is_rr (insn, op_basr, &r1, &r2)
+      || is_rx (insn, op_bas, &r1, &d2, &x2, &b2))
+    {
+      /* Recompute saved return address in R1.  */
+      regcache_cooked_write_unsigned (regs, S390_R0_REGNUM + r1,
+				      amode | (from + insnlen));
+    }
+
+  /* Handle absolute branch instructions.  */
+  else if (is_rr (insn, op_bcr, &r1, &r2)
+	   || is_rx (insn, op_bc, &r1, &d2, &x2, &b2)
+	   || is_rr (insn, op_bctr, &r1, &r2)
+	   || is_rre (insn, op_bctgr, &r1, &r2)
+	   || is_rx (insn, op_bct, &r1, &d2, &x2, &b2)
+	   || is_rxy (insn, op1_bctg, op2_brctg, &r1, &d2, &x2, &b2)
+	   || is_rs (insn, op_bxh, &r1, &r3, &d2, &b2)
+	   || is_rsy (insn, op1_bxhg, op2_bxhg, &r1, &r3, &d2, &b2)
+	   || is_rs (insn, op_bxle, &r1, &r3, &d2, &b2)
+	   || is_rsy (insn, op1_bxleg, op2_bxleg, &r1, &r3, &d2, &b2))
+    {
+      /* Update PC iff branch was *not* taken.  */
+      if (pc == to + insnlen)
+	regcache_write_pc (regs, from + insnlen);
+    }
+
+  /* Handle PC-relative branch and save instructions.  */
+  else if (is_ri (insn, op1_bras, op2_bras, &r1, &i2)
+           || is_ril (insn, op1_brasl, op2_brasl, &r1, &i2))
+    {
+      /* Update PC.  */
+      regcache_write_pc (regs, pc - to + from);
+      /* Recompute saved return address in R1.  */
+      regcache_cooked_write_unsigned (regs, S390_R0_REGNUM + r1,
+				      amode | (from + insnlen));
+    }
+
+  /* Handle PC-relative branch instructions.  */
+  else if (is_ri (insn, op1_brc, op2_brc, &r1, &i2)
+	   || is_ril (insn, op1_brcl, op2_brcl, &r1, &i2)
+	   || is_ri (insn, op1_brct, op2_brct, &r1, &i2)
+	   || is_ri (insn, op1_brctg, op2_brctg, &r1, &i2)
+	   || is_rsi (insn, op_brxh, &r1, &r3, &i2)
+	   || is_rie (insn, op1_brxhg, op2_brxhg, &r1, &r3, &i2)
+	   || is_rsi (insn, op_brxle, &r1, &r3, &i2)
+	   || is_rie (insn, op1_brxlg, op2_brxlg, &r1, &r3, &i2))
+    {
+      /* Update PC.  */
+      regcache_write_pc (regs, pc - to + from);
+    }
+
+  /* Handle LOAD ADDRESS RELATIVE LONG.  */
+  else if (is_ril (insn, op1_larl, op2_larl, &r1, &i2))
+    {
+      /* Recompute output address in R1.  */ 
+      regcache_cooked_write_unsigned (regs, S390_R0_REGNUM + r1,
+				      amode | (from + insnlen + i2*2));
+    }
+
+  /* If we executed a breakpoint instruction, point PC right back at it.  */
+  else if (insn[0] == 0x0 && insn[1] == 0x1)
+    regcache_write_pc (regs, from);
+
+  /* For any other insn, PC points right after the original instruction.  */
+  else
+    regcache_write_pc (regs, from + insnlen);
+}
 
 /* Normal stack frames.  */
 
@@ -2397,6 +2549,16 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   frame_base_set_default (gdbarch, &s390_frame_base);
   set_gdbarch_unwind_pc (gdbarch, s390_unwind_pc);
   set_gdbarch_unwind_sp (gdbarch, s390_unwind_sp);
+
+  /* Displaced stepping.  */
+  set_gdbarch_displaced_step_copy_insn (gdbarch,
+                                        simple_displaced_step_copy_insn);
+  set_gdbarch_displaced_step_fixup (gdbarch, s390_displaced_step_fixup);
+  set_gdbarch_displaced_step_free_closure (gdbarch,
+                                           simple_displaced_step_free_closure);
+  set_gdbarch_displaced_step_location (gdbarch,
+                                       displaced_step_at_entry_point);
+  set_gdbarch_max_insn_length (gdbarch, S390_MAX_INSTR_SIZE);
 
   switch (info.bfd_arch_info->mach)
     {

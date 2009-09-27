@@ -1,5 +1,15 @@
 2009-09-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* s390-tdep.c (op_bctr, op_bctgr, op_bct, op1_bctg, op2_bctg,
+	op_bxh, op1_bxhg, op2_bxhg, op_bxle, op1_bxleg, op2_bxleg,
+	op1_brct, op2_brct, op1_brctg, op2_brctg, op_brxh, op1_brxhg,
+	op2_brxhg, op_brxle, op1_brxlg, op2_brxlg): New enum values.
+	(is_rsi, is_rie): New insn format decoder routines.
+	(s390_displaced_step_fixup): New function.
+	(s390_gdbarch_init): Install displaced stepping routines.
+
+2009-09-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* configure.tgt (powerpc-*-linux* | powerpc64-*-linux*):
 	Add linux-tdep.o to gdb_target_obs.
 	(s390*-*-*): Likewise.
