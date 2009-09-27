@@ -1,5 +1,12 @@
 2009-09-27  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
+	* gdb.threads/manythreads.c (main): Increase thread stack size
+	to 2*PTHREAD_STACK_MIN.
+	* gdb.threads/multi-create.c (main): Likewise.
+	(create_function): Likewise.
+
+2009-09-27  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
 	* gdb.base/dump.exp: Pass difference of pointer types instead
 	of integer types as offset to restore in intarr3.srec case.
 
