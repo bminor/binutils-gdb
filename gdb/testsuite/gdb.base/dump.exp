@@ -504,7 +504,7 @@ if ![string compare $is64bitonly "no"] then {
 
   # restore with expressions 
   test_restore_saved_value \
-	"intarr3.srec ${array2_start}-${array_start} &intarray\[3\] &intarray\[4\]" \
+	"intarr3.srec (char*)${array2_start}-(char*)${array_start} &intarray\[3\] &intarray\[4\]" \
 	"array partial with expressions" 4 "intarray2\[3\]"
 
   gdb_test "print intarray2\[2\] == 0" " = 1" "element 2 not changed, == 4"

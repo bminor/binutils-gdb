@@ -1,5 +1,10 @@
 2009-09-27  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
+	* gdb.base/dump.exp: Pass difference of pointer types instead
+	of integer types as offset to restore in intarr3.srec case.
+
+2009-09-27  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
 	* gdb.cp/gdb2495.exp: Skip test on spu*-*-*.
 
 2009-09-27  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
