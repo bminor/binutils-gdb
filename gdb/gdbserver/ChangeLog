@@ -1,3 +1,9 @@
+2009-09-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* spu-low.c (spu_kill): Wait for inferior to terminate.
+	Call clear_inferiors.
+	(spu_detach): Call clear_inferiors.
+
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* aclocal.m4: Regenerate.
