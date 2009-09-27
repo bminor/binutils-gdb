@@ -56,7 +56,7 @@ struct score_frame_cache
 
 static int target_mach = bfd_mach_score7;
 
-#if WITH_SIM
+#if 0
 int
 score_target_can_use_watch (int type, int cnt, int othertype)
 {

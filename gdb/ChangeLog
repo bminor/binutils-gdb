@@ -1,3 +1,8 @@
+2009-09-27  Don Lee  <don.lee@sunplusct.com>
+
+	* score-tdep.c: Comment out some simulator dependent codes.
+	* score-tdep.h: Delete some simulator dependent macro definitions.
+
 2009-09-27  Hui Zhu  <teawater@gmail.com>
 
 	* record.c (record_open): Change "query" to "error".
