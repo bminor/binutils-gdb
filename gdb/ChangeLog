@@ -1,3 +1,8 @@
+2009-09-27  Hui Zhu  <teawater@gmail.com>
+
+	* record.c (record_open): Change "query" to "error".
+	(cmd_record_stop): Change "query" to "printf_unfiltered".
+
 2009-09-26  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* i386-nat.c (i386_stopped_data_address): Also check that

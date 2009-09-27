@@ -496,12 +496,8 @@ record_open (char *name, int from_tty)
 
   /* Check if record target is already running.  */
   if (current_target.to_stratum == record_stratum)
-    {
-      if (!query
-	  (_("Process record target already running, do you want to delete "
-	     "the old record log?")))
-	return;
-    }
+    error (_("Process record target already running.  Use \"record stop\" to "
+             "stop record target first."));
 
   /*Reset the beneath function pointers.  */
   record_beneath_to_resume = NULL;
@@ -1249,9 +1245,9 @@ cmd_record_stop (char *args, int from_tty)
 {
   if (current_target.to_stratum == record_stratum)
     {
-      if (!record_list || !from_tty || query (_("Delete recorded log and "
-	                                        "stop recording?")))
-	unpush_target (&record_ops);
+      unpush_target (&record_ops);
+      printf_unfiltered (_("Process record is stoped and all execution "
+                           "log is deleted.\n"));
     }
   else
     printf_unfiltered (_("Process record is not started.\n"));
