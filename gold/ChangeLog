@@ -1,3 +1,8 @@
+2009-09-26  Ian Lance Taylor  <iant@google.com>
+
+	* testsuite/initpri1.c: Don't try to use constructor priorities if
+	compiling with gcc before 4.3.
+
 2009-09-22  Mikolaj Zalewski  <mikolajz@google.com>
 
 	* testsuite/retain_symbols_file_test.sh (check_present): Change

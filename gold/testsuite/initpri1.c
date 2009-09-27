@@ -1,6 +1,6 @@
 /* initpri1.c -- test constructor priorities.
 
-   Copyright 2007, 2008 Free Software Foundation, Inc.
+   Copyright 2007, 2008, 2009 Free Software Foundation, Inc.
    Copied from the gcc testsuite, where the test was contributed by
    Mark Mitchell <mark@codesourcery.com>.
 
@@ -19,13 +19,15 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
-   MA 02110-1301, USA.
+   MA 02110-1301, USA.  */
 
-   This is a test of a common symbol in the main program and a
-   versioned symbol in a shared library.  The common symbol in the
-   main program should override the shared library symbol.  */
+/* This tests that the linker handles constructor and destructor
+   priorities correctly.  */
 
 #include <stdlib.h>
+
+/* Constructor priorities in attributes were added in gcc 4.3.  */
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)
 
 int i;
 int j;
@@ -93,3 +95,11 @@ int main (void) {
     abort ();
   return 0;
 }
+
+#else /* !(__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)) */
+
+int main (void) {
+  exit (0);
+}
+
+#endif /* !(__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2)) */
