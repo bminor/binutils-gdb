@@ -1,3 +1,10 @@
+2009-09-27  Christopher Faylor  <me+cygwin@cgf.cx>
+
+	* ldlang.c (lang_size_sections_1): Always force output vma to zero for
+	relocatable sections.
+	(lang_size_sections_1): Revert previous COFF-only accommodation for
+	relocatable sections.
+
 2009-09-25  Martin Thuresson  <martint@google.com>
 
 	Update soruces to make arm targets compile cleanly with
