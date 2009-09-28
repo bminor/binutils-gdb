@@ -1,3 +1,8 @@
+2009-09-28  Hui Zhu  <teawater@gmail.com>
+
+	* i386-tdep.c (i386_process_record): Remove "0x" that
+	don't need.
+
 2009-09-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* s390-tdep.c (op_bctr, op_bctgr, op_bct, op1_bctg, op2_bctg,

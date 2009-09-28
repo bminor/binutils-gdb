@@ -4043,7 +4043,7 @@ reswitch:
       if (ir.override >= 0)
         {
 	  warning (_("Process record ignores the memory change "
-                     "of instruction at address 0x%s because "
+                     "of instruction at address %s because "
                      "it can't get the value of the segment "
                      "register."),
                    paddress (gdbarch, ir.orig_addr));
@@ -4468,7 +4468,7 @@ reswitch:
             {
               /* addr += ((uint32_t) read_register (I386_ES_REGNUM)) << 4; */
               warning (_("Process record ignores the memory "
-                         "change of instruction at address 0x%s "
+                         "change of instruction at address %s "
                          "because it can't get the value of the "
                          "ES segment register."),
                        paddress (gdbarch, ir.orig_addr));
