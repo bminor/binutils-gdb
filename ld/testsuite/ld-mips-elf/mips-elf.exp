@@ -466,6 +466,11 @@ run_ld_link_tests $mips16_intermix_test
 
 run_dump_test "mips16-local-stubs-1"
 
+# The elf32btsmip target is only supported on linux and netbsd style targets.
+if {! [istarget "mips*-*-*linux"] } {
+    return
+}
+
 run_dump_test "attr-gnu-4-00"
 run_dump_test "attr-gnu-4-01"
 run_dump_test "attr-gnu-4-02"
