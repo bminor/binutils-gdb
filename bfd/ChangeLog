@@ -1,3 +1,10 @@
+2009-09-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 10478: Accepting Solaris binaries.
+	* elf.c (bfd_section_from_shdr): Allow SHN_BEFORE and SHN_AFTER
+	section link values in x86 binaries.
+	* elfcode.h (elf_object_p): Likewise.
+
 2009-09-28  Philippe De Muyter  <phdm@macqel.be>
 
 	* elf32-m68k.c (elf_m68k_final_write_processing): New function.

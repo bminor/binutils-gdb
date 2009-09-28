@@ -1,3 +1,10 @@
+2009-09-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 10478
+	* readelf.c (get_elf_section_flags): Allow SHN_BEFORE and
+	SHN_AFTER section link values in x86 binaries.
+	(process_section_headers): Likewise.
+
 2009-09-25  Dimitry Gorbachev  <d.g.gorbachev@gmail.com>
 
 	PR 10656

@@ -3971,6 +3971,9 @@ get_elf_section_flags (bfd_vma sh_flags)
 #endif
 		  break;
 
+		case EM_386:
+		case EM_486:
+		case EM_X86_64:
 		case EM_OLD_SPARCV9:
 		case EM_SPARC32PLUS:
 		case EM_SPARCV9:
@@ -4384,9 +4387,12 @@ process_section_headers (FILE * file)
 	    {
 	      link_too_big = "";
 	      /* The sh_link value is out of range.  Normally this indicates
-		 an error but it can have special values in SPARC binaries.  */
+		 an error but it can have special values in Solaris binaries.  */
 	      switch (elf_header.e_machine)
 		{
+		case EM_386:
+		case EM_486:
+		case EM_X86_64:
 		case EM_OLD_SPARCV9:
 		case EM_SPARC32PLUS:
 		case EM_SPARCV9:

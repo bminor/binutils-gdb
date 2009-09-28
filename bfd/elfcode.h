@@ -761,10 +761,13 @@ elf_object_p (bfd *abfd)
 	  /* Sanity check sh_link and sh_info.  */
 	  if (i_shdrp[shindex].sh_link >= num_sec)
 	    {
-	      /* PR 10478: Accept sparc binaries with a sh_link
+	      /* PR 10478: Accept Solaris binaries with a sh_link
 		 field set to SHN_BEFORE or SHN_AFTER.  */
 	      switch (ebd->elf_machine_code)
 		{
+		case EM_386:
+		case EM_486:
+		case EM_X86_64:
 		case EM_OLD_SPARCV9:
 		case EM_SPARC32PLUS:
 		case EM_SPARCV9:

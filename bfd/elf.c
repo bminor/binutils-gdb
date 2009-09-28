@@ -1518,10 +1518,11 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	return FALSE;
       if (hdr->sh_link > elf_numsections (abfd))
 	{
-	  /* PR 10478: Accept sparc binaries with a sh_link
+	  /* PR 10478: Accept Solaris binaries with a sh_link
 	     field set to SHN_BEFORE or SHN_AFTER.  */
 	  switch (bfd_get_arch (abfd))
 	    {
+	    case bfd_arch_i386:
 	    case bfd_arch_sparc:
 	      if (hdr->sh_link == (SHN_LORESERVE & 0xffff) /* SHN_BEFORE */
 		  || hdr->sh_link == ((SHN_LORESERVE + 1) & 0xffff) /* SHN_AFTER */)
