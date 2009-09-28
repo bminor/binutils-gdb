@@ -980,8 +980,14 @@ status_to_str (int status)
   static char buf[64];
 
   if (WIFSTOPPED (status))
-    snprintf (buf, sizeof (buf), "%s (stopped)",
-	      strsignal (WSTOPSIG (status)));
+    {
+      if (WSTOPSIG (status) == TRAP_IS_SYSCALL)
+	snprintf (buf, sizeof (buf), "%s (stopped at syscall)",
+		  strsignal (SIGTRAP));
+      else
+	snprintf (buf, sizeof (buf), "%s (stopped)",
+		  strsignal (WSTOPSIG (status)));
+    }
   else if (WIFSIGNALED (status))
     snprintf (buf, sizeof (buf), "%s (terminated)",
 	      strsignal (WSTOPSIG (status)));
