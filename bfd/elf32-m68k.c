@@ -1080,7 +1080,68 @@ elf32_m68k_object_p (bfd *abfd)
   return TRUE;
 }
 
+/* Somewhat reverse of elf32_m68k_object_p, this sets the e_flag
+   field based on the machine number.  */
+
+static void
+elf_m68k_final_write_processing (bfd *abfd,
+				 bfd_boolean linker ATTRIBUTE_UNUSED)
+{
+  int mach = bfd_get_mach (abfd);
+  unsigned long e_flags = elf_elfheader (abfd)->e_flags;
+
+  if (!e_flags)
+    {
+      unsigned int arch_mask;
+
+      arch_mask = bfd_m68k_mach_to_features (mach);
+
+      if (arch_mask & m68000)
+	e_flags = EF_M68K_M68000;
+      else if (arch_mask & cpu32)
+	e_flags = EF_M68K_CPU32;
+      else if (arch_mask & fido_a)
+	e_flags = EF_M68K_FIDO;
+      else
+	{
+	  switch (arch_mask
+		  & (mcfisa_a | mcfisa_aa | mcfisa_b | mcfisa_c | mcfhwdiv | mcfusp))
+	    {
+	    case mcfisa_a:
+	      e_flags |= EF_M68K_CF_ISA_A_NODIV;
+	      break;
+	    case mcfisa_a | mcfhwdiv:
+	      e_flags |= EF_M68K_CF_ISA_A;
+	      break;
+	    case mcfisa_a | mcfisa_aa | mcfhwdiv | mcfusp:
+	      e_flags |= EF_M68K_CF_ISA_A_PLUS;
+	      break;
+	    case mcfisa_a | mcfisa_b | mcfhwdiv:
+	      e_flags |= EF_M68K_CF_ISA_B_NOUSP;
+	      break;
+	    case mcfisa_a | mcfisa_b | mcfhwdiv | mcfusp:
+	      e_flags |= EF_M68K_CF_ISA_B;
+	      break;
+	    case mcfisa_a | mcfisa_c | mcfhwdiv | mcfusp:
+	      e_flags |= EF_M68K_CF_ISA_C;
+	      break;
+	    case mcfisa_a | mcfisa_c | mcfusp:
+	      e_flags |= EF_M68K_CF_ISA_C_NODIV;
+	      break;
+	    }
+	  if (arch_mask & mcfmac)
+	    e_flags |= EF_M68K_CF_MAC;
+	  else if (arch_mask & mcfemac)
+	    e_flags |= EF_M68K_CF_EMAC;
+	  if (arch_mask & cfloat)
+	    e_flags |= EF_M68K_CF_FLOAT | EF_M68K_CFV4E;
+	}
+      elf_elfheader (abfd)->e_flags = e_flags;
+    }
+}
+
 /* Keep m68k-specific flags in the ELF header.  */
+
 static bfd_boolean
 elf32_m68k_set_private_flags (abfd, flags)
      bfd *abfd;
@@ -4764,6 +4825,7 @@ elf_m68k_plt_sym_val (bfd_vma i, const asection *plt,
 					elf_m68k_adjust_dynamic_symbol
 #define elf_backend_size_dynamic_sections \
 					elf_m68k_size_dynamic_sections
+#define elf_backend_final_write_processing	elf_m68k_final_write_processing
 #define elf_backend_init_index_section	_bfd_elf_init_1_index_section
 #define elf_backend_relocate_section	elf_m68k_relocate_section
 #define elf_backend_finish_dynamic_symbol \

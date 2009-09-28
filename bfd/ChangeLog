@@ -1,3 +1,8 @@
+2009-09-28  Philippe De Muyter  <phdm@macqel.be>
+
+	* elf32-m68k.c (elf_m68k_final_write_processing): New function.
+	(elf_backend_final_write_processing): Macro defined as above function.
+
 2009-09-25  Martin Thuresson  <martint@google.com>
 
 	Update soruces to make alpha and arm targets compile cleanly with
