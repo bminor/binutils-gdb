@@ -1,3 +1,23 @@
+2009-09-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix ia64 breakpoints in the L-X slot.
+	* ia64-tdep.c (ia64_memory_insert_breakpoint): Extend the comment.
+	New variable shadow_slotnum, use it appropriately instead of slotnum.
+	Move shadow_len initialization before SLOTNUM adjustment, cover now the
+	whole remaining bundle.  Error now on breakpoints requested for the
+	slot 2 of L-X bundles.  Better sanity check the requested slot 1 of L-X
+	bundles.
+	(ia64_memory_remove_breakpoint): New variable shadow_slotnum, use it
+	appropriately instead of slotnum.  Warn now on breakpoints requested
+	for the slot 2 of L-X bundles.  Better sanity check the requested slot
+	1 of L-X bundles.  Update the assertio check of PLACED_SIZE.
+	(ia64_breakpoint_from_pc): New variable shadow_slotnum, use it
+	appropriately instead of slotnum.  Move *lenptr initialization before
+	SLOTNUM adjustment, cover now the whole remaining bundle.  Error now
+	on breakpoints requested for the slot 2 of L-X bundles.  Better sanity
+	check the requested slot 1 of L-X bundles.  Simplify the returned
+	expression.
+
 2009-09-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* ia64-tdep.c (ia64_memory_insert_breakpoint): Check the slotnum

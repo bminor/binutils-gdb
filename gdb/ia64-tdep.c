@@ -592,8 +592,12 @@ fetch_instruction (CORE_ADDR addr, instruction_type *it, long long *instr)
    The current addressing used by the code below:
    original PC   placed_address   placed_size             required    covered
                                   == bp_tgt->shadow_len   reqd \subset covered
-   0xABCDE0      0xABCDE0         0xE                     <0x0...0x5> <0x0..0xD>
-   0xABCDE1      0xABCDE1         0xE                     <0x5...0xA> <0x1..0xE>
+   0xABCDE0      0xABCDE0         0x10                    <0x0...0x5> <0x0..0xF>
+   0xABCDE1      0xABCDE1         0xF                     <0x5...0xA> <0x1..0xF>
+   0xABCDE1 L-X  0xABCDE1 L-X     0xF                     <0xA...0xF> <0x1..0xF>
+     L is always in slot 1 and X is always in slot 2, while the address is
+     using slot 1 the breakpoint instruction must be placed
+     to the slot 2 (requiring to shadow tha last byte 0xF).
    0xABCDE2      0xABCDE2         0xE                     <0xA...0xF> <0x2..0xF>
    
    `objdump -d' and some other tools show a bit unjustified offsets:
@@ -611,7 +615,7 @@ ia64_memory_insert_breakpoint (struct gdbarch *gdbarch,
 {
   CORE_ADDR addr = bp_tgt->placed_address;
   gdb_byte bundle[BUNDLE_LEN];
-  int slotnum = (int) (addr & 0x0f) / SLOT_MULTIPLIER;
+  int slotnum = (int) (addr & 0x0f) / SLOT_MULTIPLIER, shadow_slotnum;
   long long instr_breakpoint;
   int val;
   int template;
@@ -635,18 +639,30 @@ ia64_memory_insert_breakpoint (struct gdbarch *gdbarch,
       return val;
     }
 
+  /* SHADOW_SLOTNUM saves the original slot number as expected by the caller
+     for addressing the SHADOW_CONTENTS placement.  */
+  shadow_slotnum = slotnum;
+
+  /* Cover always the last byte of the bundle for the L-X slot case.  */
+  bp_tgt->shadow_len = BUNDLE_LEN - shadow_slotnum;
+
   /* Check for L type instruction in slot 1, if present then bump up the slot
      number to the slot 2.  */
   template = extract_bit_field (bundle, 0, 5);
-  if (slotnum == 1 && template_encoding_table[template][slotnum] == L)
-    slotnum = 2;
-
-  /* Slot number 2 may skip at most 2 bytes at the beginning.  */
-  bp_tgt->shadow_len = BUNDLE_LEN - 2;
+  if (template_encoding_table[template][slotnum] == X)
+    {
+      gdb_assert (slotnum == 2);
+      error (_("Can't insert breakpoint for non-existing slot X"));
+    }
+  if (template_encoding_table[template][slotnum] == L)
+    {
+      gdb_assert (slotnum == 1);
+      slotnum = 2;
+    }
 
   /* Store the whole bundle, except for the initial skipped bytes by the slot
      number interpreted as bytes offset in PLACED_ADDRESS.  */
-  memcpy (bp_tgt->shadow_contents, bundle + slotnum, bp_tgt->shadow_len);
+  memcpy (bp_tgt->shadow_contents, bundle + shadow_slotnum, bp_tgt->shadow_len);
 
   /* Re-read the same bundle as above except that, this time, read it in order
      to compute the new bundle inside which we will be inserting the
@@ -676,7 +692,7 @@ ia64_memory_insert_breakpoint (struct gdbarch *gdbarch,
 
   bp_tgt->placed_size = bp_tgt->shadow_len;
 
-  val = target_write_memory (addr + slotnum, bundle + slotnum,
+  val = target_write_memory (addr + shadow_slotnum, bundle + shadow_slotnum,
 			     bp_tgt->shadow_len);
 
   do_cleanups (cleanup);
@@ -689,7 +705,7 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
 {
   CORE_ADDR addr = bp_tgt->placed_address;
   gdb_byte bundle_mem[BUNDLE_LEN], bundle_saved[BUNDLE_LEN];
-  int slotnum = (addr & 0x0f) / SLOT_MULTIPLIER;
+  int slotnum = (addr & 0x0f) / SLOT_MULTIPLIER, shadow_slotnum;
   long long instr_breakpoint, instr_saved;
   int val;
   int template;
@@ -710,13 +726,29 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
       return val;
     }
 
+  /* SHADOW_SLOTNUM saves the original slot number as expected by the caller
+     for addressing the SHADOW_CONTENTS placement.  */
+  shadow_slotnum = slotnum;
+
   /* Check for L type instruction in slot 1, if present then bump up the slot
      number to the slot 2.  */
   template = extract_bit_field (bundle_mem, 0, 5);
-  if (slotnum == 1 && template_encoding_table[template][slotnum] == L)
-    slotnum = 2;
+  if (template_encoding_table[template][slotnum] == X)
+    {
+      gdb_assert (slotnum == 2);
+      warning (_("Cannot remove breakpoint at address %s "
+		 "from non-existing slot X, memory has changed underneath"),
+	       paddress (gdbarch, bp_tgt->placed_address));
+      do_cleanups (cleanup);
+      return -1;
+    }
+  if (template_encoding_table[template][slotnum] == L)
+    {
+      gdb_assert (slotnum == 1);
+      slotnum = 2;
+    }
 
-  gdb_assert (bp_tgt->placed_size == BUNDLE_LEN - 2);
+  gdb_assert (bp_tgt->placed_size == BUNDLE_LEN - shadow_slotnum);
   gdb_assert (bp_tgt->placed_size == bp_tgt->shadow_len);
 
   instr_breakpoint = slotN_contents (bundle_mem, slotnum);
@@ -732,7 +764,8 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
   /* Extract the original saved instruction from SLOTNUM normalizing its
      bit-shift for INSTR_SAVED.  */
   memcpy (bundle_saved, bundle_mem, BUNDLE_LEN);
-  memcpy (bundle_saved + slotnum, bp_tgt->shadow_contents, bp_tgt->shadow_len);
+  memcpy (bundle_saved + shadow_slotnum, bp_tgt->shadow_contents,
+	  bp_tgt->shadow_len);
   instr_saved = slotN_contents (bundle_saved, slotnum);
 
   /* In BUNDLE_MEM be careful to modify only the bits belonging to SLOTNUM and
@@ -755,7 +788,7 @@ ia64_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 {
   CORE_ADDR addr = *pcptr;
   static gdb_byte bundle[BUNDLE_LEN];
-  int slotnum = (int) (*pcptr & 0x0f) / SLOT_MULTIPLIER;
+  int slotnum = (int) (*pcptr & 0x0f) / SLOT_MULTIPLIER, shadow_slotnum;
   long long instr_fetched;
   int val;
   int template;
@@ -777,11 +810,26 @@ ia64_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
   if (val != 0)
     return NULL;
 
+  /* SHADOW_SLOTNUM saves the original slot number as expected by the caller
+     for addressing the SHADOW_CONTENTS placement.  */
+  shadow_slotnum = slotnum;
+
+  /* Cover always the last byte of the bundle for the L-X slot case.  */
+  *lenptr = BUNDLE_LEN - shadow_slotnum;
+
   /* Check for L type instruction in slot 1, if present then bump up the slot
      number to the slot 2.  */
   template = extract_bit_field (bundle, 0, 5);
-  if (slotnum == 1 && template_encoding_table[template][slotnum] == L)
-    slotnum = 2;
+  if (template_encoding_table[template][slotnum] == X)
+    {
+      gdb_assert (slotnum == 2);
+      error (_("Can't insert breakpoint for non-existing slot X"));
+    }
+  if (template_encoding_table[template][slotnum] == L)
+    {
+      gdb_assert (slotnum == 1);
+      slotnum = 2;
+    }
 
   /* A break instruction has its all its opcode bits cleared except for
      the parameter value.  For L+X slot pair we are at the X slot (slot 2) so
@@ -790,10 +838,7 @@ ia64_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
   instr_fetched &= 0x1003ffffc0LL;
   replace_slotN_contents (bundle, instr_fetched, slotnum);
 
-  *lenptr = BUNDLE_LEN - 2;
-
-  /* SLOTNUM is possibly already locally modified - use caller's *PCPTR.  */
-  return bundle + (*pcptr & 0x0f);
+  return bundle + shadow_slotnum;
 }
 
 static CORE_ADDR
