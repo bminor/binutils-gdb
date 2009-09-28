@@ -1,3 +1,8 @@
+2009-09-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.in: Don't invoke configure.tgt on $enable_targets.
+	* configure: Regenerate.
+
 2009-09-28  Nick Clifton  <nickc@redhat.com>
 
 	PR 10478
