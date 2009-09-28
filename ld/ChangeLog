@@ -1,3 +1,30 @@
+2009-09-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* scripttempl/elf32cr16.sc: Emit empty script for ld -r and ld -Ur.
+	* scripttempl/elf32cr16c.sc: Likewise.
+	* scripttempl/elf32crx.sc: Likewise.
+	* scripttempl/aix.sc: Delete ${RELOCATING-0}.
+	* scripttempl/avr.sc: Likewise.
+	* scripttempl/elf32msp430.sc: Likewise.
+	* scripttempl/elf32msp430_3.sc: Likewise.
+	* scripttempl/elf32sh-symbian.sc: Likewise.
+	* scripttempl/elf_chaos.sc: Likewise.
+	* scripttempl/elfi370.sc: Likewise.
+	* scripttempl/nw.sc: Likewise.
+	* scripttempl/psos.sc: Likewise.
+	* scripttempl/armbpabi.sc: Delete ${RELOCATING-0} and ${CONSTRUCTING-0}.
+	* scripttempl/elf.sc: Likewise.
+	* scripttempl/elf64hppa.sc: Likewise.
+	* scripttempl/elfd10v.sc: Likewise.
+	* scripttempl/elfd30v.sc: Likewise.
+	* scripttempl/elfm68hc11.sc: Likewise.
+	* scripttempl/elfm68hc12.sc: Likewise.
+	* scripttempl/elfmicroblaze.sc: Likewise.
+	* scripttempl/elfxtensa.sc: Likewise.
+	* scripttempl/iq2000.sc: Likewise.
+	* scripttempl/mep.sc: Likewise.
+	* scripttempl/xstormy16.sc: Likewise.
+
 2009-09-27  Christopher Faylor  <me+cygwin@cgf.cx>
 
 	* ldlang.c (lang_size_sections_1): Always force output vma to zero for

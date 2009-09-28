@@ -1,4 +1,5 @@
 # Linker Script for National Semiconductor's CR16-ELF32.
+test -z "$RELOCATING" && exit 0
 
 # The next line should be uncommented if it is desired to link
 # without libstart.o and directly enter main.
@@ -12,7 +13,7 @@ cat <<EOF
 
 OUTPUT_FORMAT("${OUTPUT_FORMAT}")
 OUTPUT_ARCH(${ARCH})
-${RELOCATING+ENTRY(${ENTRY})}
+ENTRY(${ENTRY})
 
 /* Define memory regions.  */
 MEMORY
