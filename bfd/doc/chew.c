@@ -130,7 +130,7 @@ init_string_with_size (buffer, size)
 {
   buffer->write_idx = 0;
   buffer->size = size;
-  buffer->ptr = malloc (size);
+  buffer->ptr = (char *) malloc (size);
 }
 
 static void
@@ -201,7 +201,7 @@ catchar (buffer, ch)
   if (buffer->write_idx == buffer->size)
     {
       buffer->size *= 2;
-      buffer->ptr = realloc (buffer->ptr, buffer->size);
+      buffer->ptr = (char *) realloc (buffer->ptr, buffer->size);
     }
 
   buffer->ptr[buffer->write_idx++] = ch;
@@ -228,7 +228,7 @@ catbuf (buffer, buf, len)
     {
       while (buffer->write_idx + len >= buffer->size)
 	buffer->size *= 2;
-      buffer->ptr = realloc (buffer->ptr, buffer->size);
+      buffer->ptr = (char *) realloc (buffer->ptr, buffer->size);
     }
   memcpy (buffer->ptr + buffer->write_idx, buf, len);
   buffer->write_idx += len;
@@ -1177,7 +1177,7 @@ nextword (string, word)
 	}
     }
 
-  *word = malloc (length + 1);
+  *word = (char *) malloc (length + 1);
 
   dst = *word;
   src = word_start;

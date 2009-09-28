@@ -1,3 +1,9 @@
+2009-09-25  Martin Thuresson  <martint@google.com>
+
+	Update soruces to make alpha targets compile cleanly with
+	-Wc++-compat:
+	* chew.c: Add casts.
+
 2009-08-29  Martin Thuresson  <martin@mtme.org>
 
 	* chew.c (newentry, add_intrinsic): Rename variable new to
