@@ -3,6 +3,7 @@
 	* scripttempl/elf32cr16.sc: Emit empty script for ld -r and ld -Ur.
 	* scripttempl/elf32cr16c.sc: Likewise.
 	* scripttempl/elf32crx.sc: Likewise.
+	* scripttempl/tic54xcoff.sc: Likewise.
 	* scripttempl/aix.sc: Delete ${RELOCATING-0}.
 	* scripttempl/avr.sc: Likewise.
 	* scripttempl/elf32msp430.sc: Likewise.
