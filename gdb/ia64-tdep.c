@@ -635,6 +635,12 @@ ia64_memory_insert_breakpoint (struct gdbarch *gdbarch,
       return val;
     }
 
+  /* Check for L type instruction in slot 1, if present then bump up the slot
+     number to the slot 2.  */
+  template = extract_bit_field (bundle, 0, 5);
+  if (slotnum == 1 && template_encoding_table[template][slotnum] == L)
+    slotnum = 2;
+
   /* Slot number 2 may skip at most 2 bytes at the beginning.  */
   bp_tgt->shadow_len = BUNDLE_LEN - 2;
 
@@ -656,12 +662,6 @@ ia64_memory_insert_breakpoint (struct gdbarch *gdbarch,
       do_cleanups (cleanup);
       return val;
     }
-
-  /* Check for L type instruction in slot 1, if present then bump up the slot
-     number to the slot 2.  */
-  template = extract_bit_field (bundle, 0, 5);
-  if (slotnum == 1 && template_encoding_table[template][slotnum] == L)
-    slotnum = 2;
 
   /* Breakpoints already present in the code will get deteacted and not get
      reinserted by bp_loc_is_permanent.  Multiple breakpoints at the same
