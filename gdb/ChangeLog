@@ -1,6 +1,9 @@
 2009-09-28  Doug Evans  <dje@google.com>
 
 	* linux-nat.c (status_to_str): Handle TRAP_IS_SYSCALL.
+	(TRAP_REMOVE_SYSCALL_FLAG): New macro.
+	(linux_nat_wait_1): Mask off is-syscall bit in wait status for
+	TRAP_IS_SYSCALL before passing value to caller.
 
 2009-09-28  Ulrich Weigand  <uweigand@de.ibm.com>
 

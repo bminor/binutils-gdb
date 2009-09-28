@@ -70,6 +70,7 @@
 /* To be used when one needs to know wether a
    WSTOPSIG (status) is a syscall */
 #define TRAP_IS_SYSCALL (SIGTRAP | 0x80)
+#define TRAP_REMOVE_SYSCALL_FLAG(status) ((status) & ~(0x80 << 8))
 
 /* This comment documents high-level logic of this file. 
 
@@ -3011,6 +3012,12 @@ retry:
 	    }
 
 	  lp = linux_nat_filter_event (lwpid, status, options);
+
+	  /* If this was a syscall trap, we no longer need or want
+	     the 0x80 flag, remove it.  */
+	  if (WIFSTOPPED (status)
+	      && WSTOPSIG (status) == TRAP_IS_SYSCALL)
+	    status = TRAP_REMOVE_SYSCALL_FLAG (status);
 
 	  if (lp
 	      && ptid_is_pid (ptid)
