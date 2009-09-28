@@ -1,3 +1,9 @@
+2009-09-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* ia64-tdep.c (ia64_memory_insert_breakpoint): Check the slotnum
+	and the type of instruction before deciding which slot to save
+	in the breakpoint shadown contents.
+
 2009-09-28  Hui Zhu  <teawater@gmail.com>
 
 	* i386-tdep.c (i386_process_record): Remove "0x" that
