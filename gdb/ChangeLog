@@ -1,5 +1,10 @@
 2009-09-29  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* s390-tdep.c (s390_displaced_step_fixup): Use type ULONGEST
+	instead of CORE_ADDR for "amode".
+
+2009-09-29  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbarch.sh (displaced_step_hw_singlestep): New callback.
 	* gdbarch.c, gdbarch.h: Regenerate.
 	* arch-utils.c (default_displaced_step_hw_singlestep): New function.
