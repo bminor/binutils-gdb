@@ -1230,7 +1230,7 @@ s390_displaced_step_fixup (struct gdbarch *gdbarch,
 
   /* Get current PC and addressing mode bit.  */
   CORE_ADDR pc = regcache_read_pc (regs);
-  CORE_ADDR amode = 0;
+  ULONGEST amode = 0;
 
   if (register_size (gdbarch, S390_PSWA_REGNUM) == 4)
     {

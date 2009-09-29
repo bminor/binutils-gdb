@@ -1,3 +1,8 @@
+2009-09-29  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* s390-tdep.c (s390_displaced_step_fixup): Use type ULONGEST
+	instead of CORE_ADDR for "amode".
+
 2009-09-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* ia64-tdep.c: Update the comments on how we insert/remove
