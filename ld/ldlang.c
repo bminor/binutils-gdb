@@ -4665,7 +4665,7 @@ lang_size_sections_1
 	    lang_memory_region_type *r;
 
 	    os = &s->output_section_statement;
-	    if (link_info.relocatable)
+	    if (os->addr_tree == NULL && link_info.relocatable)
 	      os->addr_tree = exp_intop (0);
 	    if (os->addr_tree != NULL)
 	      {

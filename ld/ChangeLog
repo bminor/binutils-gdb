@@ -1,3 +1,8 @@
+2009-09-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (lang_size_sections_1): Allow scripts to specify a
+	non-zero vma even when relocatable.
+
 2009-09-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* scripttempl/elf32cr16.sc: Emit empty script for ld -r and ld -Ur.
@@ -85,7 +90,7 @@
 
 2009-09-13  Alan Modra  <amodra@bigpond.net.au>
 
-     	PR ld/6766
+	PR ld/6766
 	* lexsup.c (parse_args <-e>): Revert 2009-03-18 change.
 	* ldemul.c (after_parse_default): Add entry symbol as undef.
 	* emultempl/alphaelf.em (alpha_after_parse): Call after_parse_default.
@@ -385,7 +390,7 @@
 
 2009-08-04  Alan Modra  <amodra@bigpond.net.au>
 
-   	PR 10474
+	PR 10474
 	* emultempl/ppc32elf.em (ppc_before_allocation): Test rawsize,
 	not size, after lang_reset_memory_regions.
 
@@ -706,7 +711,7 @@
 
 2009-04-25  Alan Modra  <amodra@bigpond.net.au>
 
-     	PR 10061
+	PR 10061
 	* genscripts.sh: Don't pass $EMULATION_NAME as $CUSTOMIZER_SCRIPT
 	param.
 
