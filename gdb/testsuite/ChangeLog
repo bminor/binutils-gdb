@@ -1,5 +1,9 @@
 2009-09-28  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
+	* gdb.cp/gdb2495.exp: Skip test on spu*-*-*.
+
+2009-09-28  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
 	* gdb.base/pie-support.exp: Pass "quiet" flag to gdb_compile.
 
 2009-09-26  Pierre Muller  <muller@ics.u-strasbg.fr>
