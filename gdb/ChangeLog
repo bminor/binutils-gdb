@@ -1,3 +1,7 @@
+2009-09-29  Tom Tromey  <tromey@redhat.com>
+
+	* python/py-value.c (valpy_string): NULL-terminate 'keywords'.
+
 2009-09-29  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* s390-tdep.c (s390_displaced_step_fixup): Use type ULONGEST
