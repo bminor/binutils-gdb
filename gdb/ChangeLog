@@ -1,3 +1,8 @@
+2009-09-29  Hui Zhu  <teawater@gmail.com>
+
+	* record.c (record_open): Change "query" to "error".
+	(cmd_record_stop): Change "query" to "printf_unfiltered".
+
 2009-09-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* ia64-tdep.c: Update the comments on how we insert/remove
