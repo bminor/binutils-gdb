@@ -1,4 +1,4 @@
-# Copyright 2008, 2009 Free Software Foundation, Inc.
+# Copyright 2009 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,8 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-set testfile breakpoint-shadow
-set srcfile ${testfile}.c
+if ![istarget "ia64-*-*"] {
+    verbose "Skipping ia64-breakpoint-shadow test."
+    return
+}
+
+set testfile ia64-breakpoint-shadow
+set srcfile ${testfile}.S
 set binfile ${objdir}/${subdir}/${testfile}
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
     untested "Couldn't compile test program"
@@ -47,8 +52,20 @@ gdb_test_multiple "disass main" $test {
     }
 }
 
-gdb_test "b [gdb_get_line_number "break-first"]" "Breakpoint \[0-9\] at .*" "First breakpoint placed"
-gdb_test "b [gdb_get_line_number "break-second"]" "Breakpoint \[0-9\] at .*" "Second breakpoint placed"
+set test "slot 0 breakpoint placed"
+gdb_test_multiple "b bundle" $test {
+    -re "Breakpoint \[0-9\] at (0x\[0-9a-f\]*0):.*$gdb_prompt $" {
+	pass $test
+	set bpt2address $expect_out(1,string)
+    }
+}
+
+if ![info exists bpt2address] {
+    return -1
+}
+
+gdb_test "b *($bpt2address + 1)" "Breakpoint \[0-9\] at .*" "slot 1 breakpoint placed"
+gdb_test "b *($bpt2address + 2)" "Can't insert breakpoint for non-existing slot X" "slot 2 (slot X) breakpoint refusal"
 
 set test "disassembly with breakpoints"
 gdb_test_multiple "disass main" $test {

@@ -1,3 +1,9 @@
+2009-09-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/breakpoint-shadow.exp: Move the ia64 part into ...
+	* gdb.arch/ia64-breakpoint-shadow.exp: ... a new file, with new tests.
+	* gdb.arch/ia64-breakpoint-shadow.S: New file.
+
 2009-09-29  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.objc/basicclass.exp: Disable pending breakpoint query.
