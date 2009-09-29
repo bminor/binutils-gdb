@@ -827,6 +827,9 @@ value_assign (struct value *toval, struct value *fromval)
 
 	if (value_bitsize (toval))
 	  {
+	    struct value *parent = value_parent (toval);
+	    changed_addr = value_address (parent) + value_offset (toval);
+
 	    changed_len = (value_bitpos (toval)
 			   + value_bitsize (toval)
 			   + HOST_CHAR_BIT - 1)
@@ -838,17 +841,16 @@ value_assign (struct value *toval, struct value *fromval)
 	       registers.  */
 	    if (changed_len < TYPE_LENGTH (type)
 		&& TYPE_LENGTH (type) <= (int) sizeof (LONGEST)
-		&& ((LONGEST) value_address (toval) % TYPE_LENGTH (type)) == 0)
+		&& ((LONGEST) changed_addr % TYPE_LENGTH (type)) == 0)
 	      changed_len = TYPE_LENGTH (type);
 
 	    if (changed_len > (int) sizeof (LONGEST))
 	      error (_("Can't handle bitfields which don't fit in a %d bit word."),
 		     (int) sizeof (LONGEST) * HOST_CHAR_BIT);
 
-	    read_memory (value_address (toval), buffer, changed_len);
+	    read_memory (changed_addr, buffer, changed_len);
 	    modify_field (type, buffer, value_as_long (fromval),
 			  value_bitpos (toval), value_bitsize (toval));
-	    changed_addr = value_address (toval);
 	    dest_buffer = buffer;
 	  }
 	else
@@ -891,6 +893,8 @@ value_assign (struct value *toval, struct value *fromval)
 	  {
 	    if (value_bitsize (toval))
 	      {
+		struct value *parent = value_parent (toval);
+		int offset = value_offset (parent) + value_offset (toval);
 		int changed_len;
 		gdb_byte buffer[sizeof (LONGEST)];
 
@@ -903,15 +907,13 @@ value_assign (struct value *toval, struct value *fromval)
 		  error (_("Can't handle bitfields which don't fit in a %d bit word."),
 			 (int) sizeof (LONGEST) * HOST_CHAR_BIT);
 
-		get_frame_register_bytes (frame, value_reg,
-					  value_offset (toval),
+		get_frame_register_bytes (frame, value_reg, offset,
 					  changed_len, buffer);
 
 		modify_field (type, buffer, value_as_long (fromval),
 			      value_bitpos (toval), value_bitsize (toval));
 
-		put_frame_register_bytes (frame, value_reg,
-					  value_offset (toval),
+		put_frame_register_bytes (frame, value_reg, offset,
 					  changed_len, buffer);
 	      }
 	    else

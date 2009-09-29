@@ -1,5 +1,10 @@
 2009-09-28  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* valops.c (value_assign): Respect parent offset when
+	assigning to a bitfield.
+
+2009-09-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* s390-tdep.c (op_bctr, op_bctgr, op_bct, op1_bctg, op2_bctg,
 	op_bxh, op1_bxhg, op2_bxhg, op_bxle, op1_bxleg, op2_bxleg,
 	op1_brct, op2_brct, op1_brctg, op2_brctg, op_brxh, op1_brxhg,
