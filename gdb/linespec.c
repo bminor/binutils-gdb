@@ -1171,11 +1171,19 @@ decode_objc (char **argptr, int funfirstline, struct symtab *file_symtab,
 	}
       else
 	{
-	  /* The only match was a non-debuggable symbol.  */
-	  values.sals[0].symtab = NULL;
-	  values.sals[0].line = 0;
-	  values.sals[0].end = 0;
-	  values.sals[0].pc = SYMBOL_VALUE_ADDRESS (sym_arr[0]);
+	  /* The only match was a non-debuggable symbol, which might point
+	     to a function descriptor; resolve it to the actual code address
+	     instead.  */
+	  struct minimal_symbol *msymbol = (struct minimal_symbol *)sym_arr[0];
+	  struct objfile *objfile = msymbol_objfile (msymbol);
+	  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+	  CORE_ADDR pc = SYMBOL_VALUE_ADDRESS (msymbol);
+
+	  pc = gdbarch_convert_from_func_ptr_addr (gdbarch, pc,
+						   &current_target);
+
+	  init_sal (&values.sals[0]);
+	  values.sals[0].pc = pc;
 	}
       return values;
     }
