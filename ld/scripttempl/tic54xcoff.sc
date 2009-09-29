@@ -1,5 +1,6 @@
 # default linker script for c54x, TI COFF(1).
 # patterned after description in TI Assembler Tools PDF, SPRU102C, 7-53
+test -z "$RELOCATING" && exit 0
 test -z "$ENTRY" && ENTRY=_c_int00
 
 cat <<EOF
@@ -12,7 +13,7 @@ MEMORY
 	/*PAGE 1 : */ data (W) : ORIGIN = 0x01000080, LENGTH = 0xFF80
 }
 
-${RELOCATING+ENTRY (${ENTRY})}
+ENTRY (${ENTRY})
 
 SECTIONS 				
 { 					

@@ -110,42 +110,42 @@ if test -n "${COMMONPAGESIZE}"; then
   DATA_SEGMENT_RELRO_END=". = DATA_SEGMENT_RELRO_END (${SEPARATE_GOTPLT-0}, .);"
 fi
 if test -z "${INITIAL_READONLY_SECTIONS}${CREATE_SHLIB}"; then
-  INITIAL_READONLY_SECTIONS=".interp       ${RELOCATING-0} : { *(.interp) }"
+  INITIAL_READONLY_SECTIONS=".interp        : { *(.interp) }"
 fi
 if test -z "$PLT"; then
-  IPLT=".iplt         ${RELOCATING-0} : { *(.iplt) }"
-  PLT=".plt          ${RELOCATING-0} : { *(.plt)${IREL_IN_PLT+ *(.iplt)} }
+  IPLT=".iplt          : { *(.iplt) }"
+  PLT=".plt           : { *(.plt)${IREL_IN_PLT+ *(.iplt)} }
   ${IREL_IN_PLT-$IPLT}"
 fi
 test -n "${DATA_PLT-${BSS_PLT-text}}" && TEXT_PLT=yes
 if test -z "$GOT"; then
   if test -z "$SEPARATE_GOTPLT"; then
-    GOT=".got          ${RELOCATING-0} : { *(.got.plt) *(.igot.plt) *(.got) *(.igot) }"
+    GOT=".got           : { *(.got.plt) *(.igot.plt) *(.got) *(.igot) }"
   else
-    GOT=".got          ${RELOCATING-0} : { *(.got) *(.igot) }"
-    GOTPLT=".got.plt      ${RELOCATING-0} : { *(.got.plt)  *(.igot.plt) }"
+    GOT=".got           : { *(.got) *(.igot) }"
+    GOTPLT=".got.plt       : { *(.got.plt)  *(.igot.plt) }"
   fi
 fi
-REL_IFUNC=".rel.ifunc    ${RELOCATING-0} : { *(.rel.ifunc) }"
-RELA_IFUNC=".rela.ifunc   ${RELOCATING-0} : { *(.rela.ifunc) }"
-REL_IPLT=".rel.iplt     ${RELOCATING-0} :
+REL_IFUNC=".rel.ifunc     : { *(.rel.ifunc) }"
+RELA_IFUNC=".rela.ifunc    : { *(.rela.ifunc) }"
+REL_IPLT=".rel.iplt      :
     {
       ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__rel_iplt_start = .);}}
       *(.rel.iplt)
       ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__rel_iplt_end = .);}}
     }"
-RELA_IPLT=".rela.iplt    ${RELOCATING-0} :
+RELA_IPLT=".rela.iplt     :
     {
       ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__rela_iplt_start = .);}}
       *(.rela.iplt)
       ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__rela_iplt_end = .);}}
     }"
-DYNAMIC=".dynamic      ${RELOCATING-0} : { *(.dynamic) }"
-RODATA=".rodata       ${RELOCATING-0} : { *(.rodata${RELOCATING+ .rodata.* .gnu.linkonce.r.*}) }"
+DYNAMIC=".dynamic       : { *(.dynamic) }"
+RODATA=".rodata        : { *(.rodata${RELOCATING+ .rodata.* .gnu.linkonce.r.*}) }"
 DATARELRO=".data.rel.ro : { *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*) *(.data.rel.ro* .gnu.linkonce.d.rel.ro.*) }"
 DISCARDED="/DISCARD/ : { *(.note.GNU-stack) *(.gnu_debuglink) *(.gnu.lto_*) }"
 if test -z "${NO_SMALL_DATA}"; then
-  SBSS=".sbss         ${RELOCATING-0} :
+  SBSS=".sbss          :
   {
     ${RELOCATING+${SBSS_START_SYMBOLS}}
     ${CREATE_SHLIB+*(.sbss2 .sbss2.* .gnu.linkonce.sb2.*)}
@@ -154,29 +154,29 @@ if test -z "${NO_SMALL_DATA}"; then
     *(.scommon)
     ${RELOCATING+${SBSS_END_SYMBOLS}}
   }"
-  SBSS2=".sbss2        ${RELOCATING-0} : { *(.sbss2${RELOCATING+ .sbss2.* .gnu.linkonce.sb2.*}) }"
+  SBSS2=".sbss2         : { *(.sbss2${RELOCATING+ .sbss2.* .gnu.linkonce.sb2.*}) }"
   SDATA="/* We want the small data sections together, so single-instruction offsets
      can access them all, and initialized data all before uninitialized, so
      we can shorten the on-disk segment size.  */
-  .sdata        ${RELOCATING-0} : 
+  .sdata         : 
   {
     ${RELOCATING+${SDATA_START_SYMBOLS}}
     ${CREATE_SHLIB+*(.sdata2 .sdata2.* .gnu.linkonce.s2.*)}
     *(.sdata${RELOCATING+ .sdata.* .gnu.linkonce.s.*})
   }"
-  SDATA2=".sdata2       ${RELOCATING-0} :
+  SDATA2=".sdata2        :
   {
     ${RELOCATING+${SDATA2_START_SYMBOLS}}
     *(.sdata2${RELOCATING+ .sdata2.* .gnu.linkonce.s2.*})
   }"
-  REL_SDATA=".rel.sdata    ${RELOCATING-0} : { *(.rel.sdata${RELOCATING+ .rel.sdata.* .rel.gnu.linkonce.s.*}) }
-  .rela.sdata   ${RELOCATING-0} : { *(.rela.sdata${RELOCATING+ .rela.sdata.* .rela.gnu.linkonce.s.*}) }"
-  REL_SBSS=".rel.sbss     ${RELOCATING-0} : { *(.rel.sbss${RELOCATING+ .rel.sbss.* .rel.gnu.linkonce.sb.*}) }
-  .rela.sbss    ${RELOCATING-0} : { *(.rela.sbss${RELOCATING+ .rela.sbss.* .rela.gnu.linkonce.sb.*}) }"
-  REL_SDATA2=".rel.sdata2   ${RELOCATING-0} : { *(.rel.sdata2${RELOCATING+ .rel.sdata2.* .rel.gnu.linkonce.s2.*}) }
-  .rela.sdata2  ${RELOCATING-0} : { *(.rela.sdata2${RELOCATING+ .rela.sdata2.* .rela.gnu.linkonce.s2.*}) }"
-  REL_SBSS2=".rel.sbss2    ${RELOCATING-0} : { *(.rel.sbss2${RELOCATING+ .rel.sbss2.* .rel.gnu.linkonce.sb2.*}) }
-  .rela.sbss2   ${RELOCATING-0} : { *(.rela.sbss2${RELOCATING+ .rela.sbss2.* .rela.gnu.linkonce.sb2.*}) }"
+  REL_SDATA=".rel.sdata     : { *(.rel.sdata${RELOCATING+ .rel.sdata.* .rel.gnu.linkonce.s.*}) }
+  .rela.sdata    : { *(.rela.sdata${RELOCATING+ .rela.sdata.* .rela.gnu.linkonce.s.*}) }"
+  REL_SBSS=".rel.sbss      : { *(.rel.sbss${RELOCATING+ .rel.sbss.* .rel.gnu.linkonce.sb.*}) }
+  .rela.sbss     : { *(.rela.sbss${RELOCATING+ .rela.sbss.* .rela.gnu.linkonce.sb.*}) }"
+  REL_SDATA2=".rel.sdata2    : { *(.rel.sdata2${RELOCATING+ .rel.sdata2.* .rel.gnu.linkonce.s2.*}) }
+  .rela.sdata2   : { *(.rela.sdata2${RELOCATING+ .rela.sdata2.* .rela.gnu.linkonce.s2.*}) }"
+  REL_SBSS2=".rel.sbss2     : { *(.rel.sbss2${RELOCATING+ .rel.sbss2.* .rel.gnu.linkonce.sb2.*}) }
+  .rela.sbss2    : { *(.rela.sbss2${RELOCATING+ .rela.sbss2.* .rela.gnu.linkonce.sb2.*}) }"
 else
   NO_SMALL_DATA=" "
 fi
@@ -192,31 +192,31 @@ if test -z "${SDATA_GOT}"; then
 fi
 test -n "$SEPARATE_GOTPLT" && SEPARATE_GOTPLT=" "
 test "${LARGE_SECTIONS}" = "yes" && REL_LARGE="
-  .rel.ldata    ${RELOCATING-0} : { *(.rel.ldata${RELOCATING+ .rel.ldata.* .rel.gnu.linkonce.l.*}) }
-  .rela.ldata   ${RELOCATING-0} : { *(.rela.ldata${RELOCATING+ .rela.ldata.* .rela.gnu.linkonce.l.*}) }
-  .rel.lbss     ${RELOCATING-0} : { *(.rel.lbss${RELOCATING+ .rel.lbss.* .rel.gnu.linkonce.lb.*}) }
-  .rela.lbss    ${RELOCATING-0} : { *(.rela.lbss${RELOCATING+ .rela.lbss.* .rela.gnu.linkonce.lb.*}) }
-  .rel.lrodata  ${RELOCATING-0} : { *(.rel.lrodata${RELOCATING+ .rel.lrodata.* .rel.gnu.linkonce.lr.*}) }
-  .rela.lrodata ${RELOCATING-0} : { *(.rela.lrodata${RELOCATING+ .rela.lrodata.* .rela.gnu.linkonce.lr.*}) }"
+  .rel.ldata     : { *(.rel.ldata${RELOCATING+ .rel.ldata.* .rel.gnu.linkonce.l.*}) }
+  .rela.ldata    : { *(.rela.ldata${RELOCATING+ .rela.ldata.* .rela.gnu.linkonce.l.*}) }
+  .rel.lbss      : { *(.rel.lbss${RELOCATING+ .rel.lbss.* .rel.gnu.linkonce.lb.*}) }
+  .rela.lbss     : { *(.rela.lbss${RELOCATING+ .rela.lbss.* .rela.gnu.linkonce.lb.*}) }
+  .rel.lrodata   : { *(.rel.lrodata${RELOCATING+ .rel.lrodata.* .rel.gnu.linkonce.lr.*}) }
+  .rela.lrodata  : { *(.rela.lrodata${RELOCATING+ .rela.lrodata.* .rela.gnu.linkonce.lr.*}) }"
 test "${LARGE_SECTIONS}" = "yes" && OTHER_BSS_SECTIONS="
   ${OTHER_BSS_SECTIONS}
-  .lbss ${RELOCATING-0} :
+  .lbss  :
   {
     *(.dynlbss)
     *(.lbss${RELOCATING+ .lbss.* .gnu.linkonce.lb.*})
     *(LARGE_COMMON)
   }"
 test "${LARGE_SECTIONS}" = "yes" && LARGE_SECTIONS="
-  .lrodata ${RELOCATING-0} ${RELOCATING+ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))} :
+  .lrodata  ${RELOCATING+ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))} :
   {
     *(.lrodata${RELOCATING+ .lrodata.* .gnu.linkonce.lr.*})
   }
-  .ldata ${RELOCATING-0} ${RELOCATING+ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))} :
+  .ldata  ${RELOCATING+ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))} :
   {
     *(.ldata${RELOCATING+ .ldata.* .gnu.linkonce.l.*})
     ${RELOCATING+. = ALIGN(. != 0 ? ${ALIGNMENT} : 1);}
   }"
-CTOR=".ctors        ${CONSTRUCTING-0} : 
+CTOR=".ctors         : 
   {
     ${CONSTRUCTING+${CTOR_START}}
     /* gcc uses crtbegin.o to find the start of
@@ -242,7 +242,7 @@ CTOR=".ctors        ${CONSTRUCTING-0} :
     KEEP (*(.ctors))
     ${CONSTRUCTING+${CTOR_END}}
   }"
-DTOR=".dtors        ${CONSTRUCTING-0} :
+DTOR=".dtors         :
   {
     ${CONSTRUCTING+${DTOR_START}}
     KEEP (*crtbegin.o(.dtors))
@@ -252,7 +252,7 @@ DTOR=".dtors        ${CONSTRUCTING-0} :
     KEEP (*(.dtors))
     ${CONSTRUCTING+${DTOR_END}}
   }"
-STACK="  .stack        ${RELOCATING-0}${RELOCATING+${STACK_ADDR}} :
+STACK="  .stack        ${RELOCATING+${STACK_ADDR}} :
   {
     ${RELOCATING+${USER_LABEL_PREFIX}_stack = .;}
     *(.stack)
@@ -277,10 +277,6 @@ ${RELOCATING+ENTRY(${ENTRY})}
 ${RELOCATING+${LIB_SEARCH_DIRS}}
 ${RELOCATING+${EXECUTABLE_SYMBOLS}}
 ${RELOCATING+${INPUT_FILES}}
-${RELOCATING- /* For some reason, the Solaris linker makes bad executables
-  if gld -r is used and the intermediate file has sections starting
-  at non-zero addresses.  Could be a Solaris ld bug, could be a GNU ld
-  bug.  But for now assigning the zero vmas works.  */}
 
 SECTIONS
 {
@@ -296,13 +292,13 @@ test -n "${RELOCATING+0}" || unset NON_ALLOC_DYN
 test -z "${NON_ALLOC_DYN}" || TEXT_DYNAMIC=
 cat > ldscripts/dyntmp.$$ <<EOF
   ${TEXT_DYNAMIC+${DYNAMIC}}
-  .hash         ${RELOCATING-0} : { *(.hash) }
-  .gnu.hash     ${RELOCATING-0} : { *(.gnu.hash) }
-  .dynsym       ${RELOCATING-0} : { *(.dynsym) }
-  .dynstr       ${RELOCATING-0} : { *(.dynstr) }
-  .gnu.version  ${RELOCATING-0} : { *(.gnu.version) }
-  .gnu.version_d ${RELOCATING-0}: { *(.gnu.version_d) }
-  .gnu.version_r ${RELOCATING-0}: { *(.gnu.version_r) }
+  .hash          : { *(.hash) }
+  .gnu.hash      : { *(.gnu.hash) }
+  .dynsym        : { *(.dynsym) }
+  .dynstr        : { *(.dynstr) }
+  .gnu.version   : { *(.gnu.version) }
+  .gnu.version_d : { *(.gnu.version_d) }
+  .gnu.version_r : { *(.gnu.version_r) }
 EOF
 
 if [ "x$COMBRELOC" = x ]; then
@@ -311,36 +307,36 @@ else
   COMBRELOCCAT="cat > $COMBRELOC"
 fi
 eval $COMBRELOCCAT <<EOF
-  .rel.init     ${RELOCATING-0} : { *(.rel.init) }
-  .rela.init    ${RELOCATING-0} : { *(.rela.init) }
-  .rel.text     ${RELOCATING-0} : { *(.rel.text${RELOCATING+ .rel.text.* .rel.gnu.linkonce.t.*}) }
-  .rela.text    ${RELOCATING-0} : { *(.rela.text${RELOCATING+ .rela.text.* .rela.gnu.linkonce.t.*}) }
-  .rel.fini     ${RELOCATING-0} : { *(.rel.fini) }
-  .rela.fini    ${RELOCATING-0} : { *(.rela.fini) }
-  .rel.rodata   ${RELOCATING-0} : { *(.rel.rodata${RELOCATING+ .rel.rodata.* .rel.gnu.linkonce.r.*}) }
-  .rela.rodata  ${RELOCATING-0} : { *(.rela.rodata${RELOCATING+ .rela.rodata.* .rela.gnu.linkonce.r.*}) }
+  .rel.init      : { *(.rel.init) }
+  .rela.init     : { *(.rela.init) }
+  .rel.text      : { *(.rel.text${RELOCATING+ .rel.text.* .rel.gnu.linkonce.t.*}) }
+  .rela.text     : { *(.rela.text${RELOCATING+ .rela.text.* .rela.gnu.linkonce.t.*}) }
+  .rel.fini      : { *(.rel.fini) }
+  .rela.fini     : { *(.rela.fini) }
+  .rel.rodata    : { *(.rel.rodata${RELOCATING+ .rel.rodata.* .rel.gnu.linkonce.r.*}) }
+  .rela.rodata   : { *(.rela.rodata${RELOCATING+ .rela.rodata.* .rela.gnu.linkonce.r.*}) }
   ${OTHER_READONLY_RELOC_SECTIONS}
-  .rel.data.rel.ro ${RELOCATING-0} : { *(.rel.data.rel.ro${RELOCATING+* .rel.gnu.linkonce.d.rel.ro.*}) }
-  .rela.data.rel.ro ${RELOCATING-0} : { *(.rela.data.rel.ro${RELOCATING+* .rela.gnu.linkonce.d.rel.ro.*}) }
-  .rel.data     ${RELOCATING-0} : { *(.rel.data${RELOCATING+ .rel.data.* .rel.gnu.linkonce.d.*}) }
-  .rela.data    ${RELOCATING-0} : { *(.rela.data${RELOCATING+ .rela.data.* .rela.gnu.linkonce.d.*}) }
-  .rel.tdata	${RELOCATING-0} : { *(.rel.tdata${RELOCATING+ .rel.tdata.* .rel.gnu.linkonce.td.*}) }
-  .rela.tdata	${RELOCATING-0} : { *(.rela.tdata${RELOCATING+ .rela.tdata.* .rela.gnu.linkonce.td.*}) }
-  .rel.tbss	${RELOCATING-0} : { *(.rel.tbss${RELOCATING+ .rel.tbss.* .rel.gnu.linkonce.tb.*}) }
-  .rela.tbss	${RELOCATING-0} : { *(.rela.tbss${RELOCATING+ .rela.tbss.* .rela.gnu.linkonce.tb.*}) }
-  .rel.ctors    ${RELOCATING-0} : { *(.rel.ctors) }
-  .rela.ctors   ${RELOCATING-0} : { *(.rela.ctors) }
-  .rel.dtors    ${RELOCATING-0} : { *(.rel.dtors) }
-  .rela.dtors   ${RELOCATING-0} : { *(.rela.dtors) }
-  .rel.got      ${RELOCATING-0} : { *(.rel.got) }
-  .rela.got     ${RELOCATING-0} : { *(.rela.got) }
+  .rel.data.rel.ro  : { *(.rel.data.rel.ro${RELOCATING+* .rel.gnu.linkonce.d.rel.ro.*}) }
+  .rela.data.rel.ro  : { *(.rela.data.rel.ro${RELOCATING+* .rela.gnu.linkonce.d.rel.ro.*}) }
+  .rel.data      : { *(.rel.data${RELOCATING+ .rel.data.* .rel.gnu.linkonce.d.*}) }
+  .rela.data     : { *(.rela.data${RELOCATING+ .rela.data.* .rela.gnu.linkonce.d.*}) }
+  .rel.tdata	 : { *(.rel.tdata${RELOCATING+ .rel.tdata.* .rel.gnu.linkonce.td.*}) }
+  .rela.tdata	 : { *(.rela.tdata${RELOCATING+ .rela.tdata.* .rela.gnu.linkonce.td.*}) }
+  .rel.tbss	 : { *(.rel.tbss${RELOCATING+ .rel.tbss.* .rel.gnu.linkonce.tb.*}) }
+  .rela.tbss	 : { *(.rela.tbss${RELOCATING+ .rela.tbss.* .rela.gnu.linkonce.tb.*}) }
+  .rel.ctors     : { *(.rel.ctors) }
+  .rela.ctors    : { *(.rela.ctors) }
+  .rel.dtors     : { *(.rel.dtors) }
+  .rela.dtors    : { *(.rela.dtors) }
+  .rel.got       : { *(.rel.got) }
+  .rela.got      : { *(.rela.got) }
   ${OTHER_GOT_RELOC_SECTIONS}
   ${REL_SDATA}
   ${REL_SBSS}
   ${REL_SDATA2}
   ${REL_SBSS2}
-  .rel.bss      ${RELOCATING-0} : { *(.rel.bss${RELOCATING+ .rel.bss.* .rel.gnu.linkonce.b.*}) }
-  .rela.bss     ${RELOCATING-0} : { *(.rela.bss${RELOCATING+ .rela.bss.* .rela.gnu.linkonce.b.*}) }
+  .rel.bss       : { *(.rel.bss${RELOCATING+ .rel.bss.* .rel.gnu.linkonce.b.*}) }
+  .rela.bss      : { *(.rela.bss${RELOCATING+ .rela.bss.* .rela.gnu.linkonce.b.*}) }
   ${REL_LARGE}
   ${IREL_IN_PLT+$REL_IFUNC}
   ${IREL_IN_PLT+$RELA_IFUNC}
@@ -350,13 +346,13 @@ EOF
 
 if [ -n "$COMBRELOC" ]; then
 cat >> ldscripts/dyntmp.$$ <<EOF
-  .rel.dyn      ${RELOCATING-0} :
+  .rel.dyn       :
     {
 EOF
 sed -e '/^[ 	]*[{}][ 	]*$/d;/:[ 	]*$/d;/\.rela\./d;s/^.*: { *\(.*\)}$/      \1/' $COMBRELOC >> ldscripts/dyntmp.$$
 cat >> ldscripts/dyntmp.$$ <<EOF
     }
-  .rela.dyn     ${RELOCATING-0} :
+  .rela.dyn      :
     {
 EOF
 sed -e '/^[ 	]*[{}][ 	]*$/d;/:[ 	]*$/d;/\.rel\./d;s/^.*: { *\(.*\)}/      \1/' $COMBRELOC >> ldscripts/dyntmp.$$
@@ -366,14 +362,14 @@ EOF
 fi
 
 cat >> ldscripts/dyntmp.$$ <<EOF
-  .rel.plt      ${RELOCATING-0} :
+  .rel.plt       :
     {
       *(.rel.plt)
       ${IREL_IN_PLT+${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__rel_iplt_start = .);}}}
       ${IREL_IN_PLT+${RELOCATING+*(.rel.iplt)}}
       ${IREL_IN_PLT+${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__rel_iplt_end = .);}}}
     }
-  .rela.plt     ${RELOCATING-0} :
+  .rela.plt      :
     {
       *(.rela.plt)
       ${IREL_IN_PLT+${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__rela_iplt_start = .);}}}
@@ -398,7 +394,7 @@ if test -z "${NON_ALLOC_DYN}"; then
 fi
 
 cat <<EOF
-  .init         ${RELOCATING-0} : 
+  .init          : 
   { 
     ${RELOCATING+${INIT_START}}
     KEEP (*(.init))
@@ -407,7 +403,7 @@ cat <<EOF
 
   ${TEXT_PLT+${PLT}}
   ${TINY_READONLY_SECTION}
-  .text         ${RELOCATING-0} :
+  .text          :
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
     ${RELOCATING+*(.text.unlikely .text.*_unlikely)}
@@ -416,7 +412,7 @@ cat <<EOF
     *(.gnu.warning)
     ${RELOCATING+${OTHER_TEXT_SECTIONS}}
   } =${NOP-0}
-  .fini         ${RELOCATING-0} :
+  .fini          :
   {
     ${RELOCATING+${FINI_START}}
     KEEP (*(.fini))
@@ -426,13 +422,13 @@ cat <<EOF
   ${RELOCATING+PROVIDE (_${ETEXT_NAME} = .);}
   ${RELOCATING+PROVIDE (${ETEXT_NAME} = .);}
   ${WRITABLE_RODATA-${RODATA}}
-  .rodata1      ${RELOCATING-0} : { *(.rodata1) }
+  .rodata1       : { *(.rodata1) }
   ${CREATE_SHLIB-${SDATA2}}
   ${CREATE_SHLIB-${SBSS2}}
   ${OTHER_READONLY_SECTIONS}
   .eh_frame_hdr : { *(.eh_frame_hdr) }
-  .eh_frame     ${RELOCATING-0} : ONLY_IF_RO { KEEP (*(.eh_frame)) }
-  .gcc_except_table ${RELOCATING-0} : ONLY_IF_RO { *(.gcc_except_table .gcc_except_table.*) }
+  .eh_frame      : ONLY_IF_RO { KEEP (*(.eh_frame)) }
+  .gcc_except_table  : ONLY_IF_RO { *(.gcc_except_table .gcc_except_table.*) }
 
   /* Adjust the address for the data segment.  We want to adjust up to
      the same address within the page on the next page up.  */
@@ -441,27 +437,27 @@ cat <<EOF
   ${CREATE_PIE+${RELOCATING+. = ${SHLIB_DATA_ADDR-${DATA_SEGMENT_ALIGN}};}}
 
   /* Exception handling  */
-  .eh_frame     ${RELOCATING-0} : ONLY_IF_RW { KEEP (*(.eh_frame)) }
-  .gcc_except_table ${RELOCATING-0} : ONLY_IF_RW { *(.gcc_except_table .gcc_except_table.*) }
+  .eh_frame      : ONLY_IF_RW { KEEP (*(.eh_frame)) }
+  .gcc_except_table  : ONLY_IF_RW { *(.gcc_except_table .gcc_except_table.*) }
 
   /* Thread Local Storage sections  */
-  .tdata	${RELOCATING-0} : { *(.tdata${RELOCATING+ .tdata.* .gnu.linkonce.td.*}) }
-  .tbss		${RELOCATING-0} : { *(.tbss${RELOCATING+ .tbss.* .gnu.linkonce.tb.*})${RELOCATING+ *(.tcommon)} }
+  .tdata	 : { *(.tdata${RELOCATING+ .tdata.* .gnu.linkonce.td.*}) }
+  .tbss		 : { *(.tbss${RELOCATING+ .tbss.* .gnu.linkonce.tb.*})${RELOCATING+ *(.tcommon)} }
 
-  .preinit_array   ${RELOCATING-0} :
+  .preinit_array    :
   {
     ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__preinit_array_start = .);}}
     KEEP (*(.preinit_array))
     ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__preinit_array_end = .);}}
   }
-  .init_array   ${RELOCATING-0} :
+  .init_array    :
   {
      ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__init_array_start = .);}}
      KEEP (*(SORT(.init_array.*)))
      KEEP (*(.init_array))
      ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__init_array_end = .);}}
   }
-  .fini_array   ${RELOCATING-0} :
+  .fini_array    :
   {
     ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (${USER_LABEL_PREFIX}__fini_array_start = .);}}
     KEEP (*(.fini_array))
@@ -470,7 +466,7 @@ cat <<EOF
   }
   ${SMALL_DATA_CTOR-${RELOCATING+${CTOR}}}
   ${SMALL_DATA_DTOR-${RELOCATING+${DTOR}}}
-  .jcr          ${RELOCATING-0} : { KEEP (*(.jcr)) }
+  .jcr           : { KEEP (*(.jcr)) }
 
   ${RELOCATING+${DATARELRO}}
   ${OTHER_RELRO_SECTIONS}
@@ -484,13 +480,13 @@ cat <<EOF
 
   ${DATA_PLT+${PLT_BEFORE_GOT-${PLT}}}
 
-  .data         ${RELOCATING-0} :
+  .data          :
   {
     ${RELOCATING+${DATA_START_SYMBOLS}}
     *(.data${RELOCATING+ .data.* .gnu.linkonce.d.*})
     ${CONSTRUCTING+SORT(CONSTRUCTORS)}
   }
-  .data1        ${RELOCATING-0} : { *(.data1) }
+  .data1         : { *(.data1) }
   ${WRITABLE_RODATA+${RODATA}}
   ${OTHER_READWRITE_SECTIONS}
   ${SMALL_DATA_CTOR+${RELOCATING+${CTOR}}}
@@ -506,7 +502,7 @@ cat <<EOF
   ${RELOCATING+${OTHER_BSS_SYMBOLS}}
   ${SBSS}
   ${BSS_PLT+${PLT}}
-  .bss          ${RELOCATING-0} :
+  .bss           :
   {
    *(.dynbss)
    *(.bss${RELOCATING+ .bss.* .gnu.linkonce.b.*})

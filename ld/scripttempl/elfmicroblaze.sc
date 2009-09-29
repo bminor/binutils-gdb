@@ -5,7 +5,7 @@ test -z "$ENTRY" && ENTRY=_start
 
 #test -z "$TEXT_START_ADDR" && TEXT_START_ADDR="0x0"
 
-CTOR=".ctors ${CONSTRUCTING-0} : 
+CTOR=".ctors  : 
   {
     ${CONSTRUCTING+${CTOR_START}}
     /* gcc uses crtbegin.o to find the start of
@@ -31,7 +31,7 @@ CTOR=".ctors ${CONSTRUCTING-0} :
     ${CONSTRUCTING+${CTOR_END}}
   }"
 
-DTOR=" .dtors       ${CONSTRUCTING-0} :
+DTOR=" .dtors        :
   {
     ${CONSTRUCTING+${DTOR_START}}
     KEEP (*crtbegin.o(.dtors))

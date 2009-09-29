@@ -1,3 +1,43 @@
+2009-09-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (lang_size_sections_1): Allow scripts to specify a
+	non-zero vma even when relocatable.
+
+2009-09-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* scripttempl/elf32cr16.sc: Emit empty script for ld -r and ld -Ur.
+	* scripttempl/elf32cr16c.sc: Likewise.
+	* scripttempl/elf32crx.sc: Likewise.
+	* scripttempl/tic54xcoff.sc: Likewise.
+	* scripttempl/aix.sc: Delete ${RELOCATING-0}.
+	* scripttempl/avr.sc: Likewise.
+	* scripttempl/elf32msp430.sc: Likewise.
+	* scripttempl/elf32msp430_3.sc: Likewise.
+	* scripttempl/elf32sh-symbian.sc: Likewise.
+	* scripttempl/elf_chaos.sc: Likewise.
+	* scripttempl/elfi370.sc: Likewise.
+	* scripttempl/nw.sc: Likewise.
+	* scripttempl/psos.sc: Likewise.
+	* scripttempl/armbpabi.sc: Delete ${RELOCATING-0} and ${CONSTRUCTING-0}.
+	* scripttempl/elf.sc: Likewise.
+	* scripttempl/elf64hppa.sc: Likewise.
+	* scripttempl/elfd10v.sc: Likewise.
+	* scripttempl/elfd30v.sc: Likewise.
+	* scripttempl/elfm68hc11.sc: Likewise.
+	* scripttempl/elfm68hc12.sc: Likewise.
+	* scripttempl/elfmicroblaze.sc: Likewise.
+	* scripttempl/elfxtensa.sc: Likewise.
+	* scripttempl/iq2000.sc: Likewise.
+	* scripttempl/mep.sc: Likewise.
+	* scripttempl/xstormy16.sc: Likewise.
+
+2009-09-27  Christopher Faylor  <me+cygwin@cgf.cx>
+
+	* ldlang.c (lang_size_sections_1): Always force output vma to zero for
+	relocatable sections.
+	(lang_size_sections_1): Revert previous COFF-only accommodation for
+	relocatable sections.
+
 2009-09-23  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: Updated Vietnamese translation.
@@ -24,7 +64,7 @@
 
 2009-09-13  Alan Modra  <amodra@bigpond.net.au>
 
-     	PR ld/6766
+	PR ld/6766
 	* lexsup.c (parse_args <-e>): Revert 2009-03-18 change.
 	* ldemul.c (after_parse_default): Add entry symbol as undef.
 	* emultempl/alphaelf.em (alpha_after_parse): Call after_parse_default.
@@ -303,13 +343,13 @@
 
 2009-08-06  Michael Eager <eager@eagercon.com>
 
-	* Makefile.am: Add eelf32mb_linux.o, eelf32microblaze.o to 
+	* Makefile.am: Add eelf32mb_linux.o, eelf32microblaze.o to
 	ALL_EMULATIONS, targets.
 	* Makefile.in: Regenerate.
 	* configure.tgt: Add microblaze*-linux*, microblaze* targets.
 	* emulparams/elf32mb_linux.sh: New.
 	* emulparams/elf32microblaze.sh. New.
-	* scripttempl/elfmicroblaze.sc: New. 
+	* scripttempl/elfmicroblaze.sc: New.
 
 2009-08-05  Trevor Smigiel  <Trevor_Smigiel@playstation.sony.com>
 
@@ -324,7 +364,7 @@
 
 2009-08-04  Alan Modra  <amodra@bigpond.net.au>
 
-   	PR 10474
+	PR 10474
 	* emultempl/ppc32elf.em (ppc_before_allocation): Test rawsize,
 	not size, after lang_reset_memory_regions.
 
@@ -400,7 +440,7 @@
 
 	* scripttempl/pep.sc: Put .eh_frame in its own section.
 	* scripttempl/pe.sc: Ditto.
-	
+
 2009-06-26  Kai Tietz  <kai.tietz@onevision.com>
 
 	* scripttempl/pe.sc (.debug_pubtypes): Added section rule.
@@ -645,7 +685,7 @@
 
 2009-04-25  Alan Modra  <amodra@bigpond.net.au>
 
-     	PR 10061
+	PR 10061
 	* genscripts.sh: Don't pass $EMULATION_NAME as $CUSTOMIZER_SCRIPT
 	param.
 
@@ -933,7 +973,7 @@
 2009-02-24  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* ld.texinfo (Options): Correct typos in example.  Recommend
-	using joined forms of syntax for passing options with arguments 
+	using joined forms of syntax for passing options with arguments
 	from a driver.
 	(-a): Use consistent syntax for documenting option arguments.
 	Clean up indexing and markup.

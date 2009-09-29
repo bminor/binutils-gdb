@@ -27,12 +27,12 @@ if test -n "${COMMONPAGESIZE}"; then
   fi
 fi
 INTERP=".interp       0 : { *(.interp) }"
-PLT=".plt          ${RELOCATING-0} : { *(.plt) }"
-RODATA=".rodata       ${RELOCATING-0} : { *(.rodata${RELOCATING+ .rodata.* .gnu.linkonce.r.*}) }"
+PLT=".plt           : { *(.plt) }"
+RODATA=".rodata        : { *(.rodata${RELOCATING+ .rodata.* .gnu.linkonce.r.*}) }"
 DATARELRO=".data.rel.ro : { *(.data.rel.ro.local) *(.data.rel.ro*) }"
 DISCARDED="/DISCARD/ : { *(.note.GNU-stack) *(.gnu_debuglink)  *(.gnu.lto_*) }"
 if test -z "${NO_SMALL_DATA}"; then
-  SBSS=".sbss         ${RELOCATING-0} :
+  SBSS=".sbss          :
   {
     ${RELOCATING+PROVIDE (__sbss_start = .);}
     ${RELOCATING+PROVIDE (___sbss_start = .);}
@@ -42,29 +42,29 @@ if test -z "${NO_SMALL_DATA}"; then
     ${RELOCATING+PROVIDE (__sbss_end = .);}
     ${RELOCATING+PROVIDE (___sbss_end = .);}
   }"
-  SBSS2=".sbss2        ${RELOCATING-0} : { *(.sbss2${RELOCATING+ .sbss2.* .gnu.linkonce.sb2.*}) }"
+  SBSS2=".sbss2         : { *(.sbss2${RELOCATING+ .sbss2.* .gnu.linkonce.sb2.*}) }"
   SDATA="/* We want the small data sections together, so single-instruction offsets
      can access them all, and initialized data all before uninitialized, so
      we can shorten the on-disk segment size.  */
-  .sdata        ${RELOCATING-0} : 
+  .sdata         : 
   {
     ${RELOCATING+${SDATA_START_SYMBOLS}}
     *(.sdata${RELOCATING+ .sdata.* .gnu.linkonce.s.*})
   }"
-  SDATA2=".sdata2       ${RELOCATING-0} : { *(.sdata2${RELOCATING+ .sdata2.* .gnu.linkonce.s2.*}) }"
-  REL_SDATA=".rel.sdata    ${RELOCATING-0} : { *(.rel.sdata${RELOCATING+ .rel.sdata.* .rel.gnu.linkonce.s.*}) }
-  .rela.sdata   ${RELOCATING-0} : { *(.rela.sdata${RELOCATING+ .rela.sdata.* .rela.gnu.linkonce.s.*}) }"
-  REL_SBSS=".rel.sbss     ${RELOCATING-0} : { *(.rel.sbss${RELOCATING+ .rel.sbss.* .rel.gnu.linkonce.sb.*}) }
-  .rela.sbss    ${RELOCATING-0} : { *(.rela.sbss${RELOCATING+ .rela.sbss.* .rela.gnu.linkonce.sb.*}) }"
-  REL_SDATA2=".rel.sdata2   ${RELOCATING-0} : { *(.rel.sdata2${RELOCATING+ .rel.sdata2.* .rel.gnu.linkonce.s2.*}) }
-  .rela.sdata2  ${RELOCATING-0} : { *(.rela.sdata2${RELOCATING+ .rela.sdata2.* .rela.gnu.linkonce.s2.*}) }"
-  REL_SBSS2=".rel.sbss2    ${RELOCATING-0} : { *(.rel.sbss2${RELOCATING+ .rel.sbss2.* .rel.gnu.linkonce.sb2.*}) }
-  .rela.sbss2   ${RELOCATING-0} : { *(.rela.sbss2${RELOCATING+ .rela.sbss2.* .rela.gnu.linkonce.sb2.*}) }"
+  SDATA2=".sdata2        : { *(.sdata2${RELOCATING+ .sdata2.* .gnu.linkonce.s2.*}) }"
+  REL_SDATA=".rel.sdata     : { *(.rel.sdata${RELOCATING+ .rel.sdata.* .rel.gnu.linkonce.s.*}) }
+  .rela.sdata    : { *(.rela.sdata${RELOCATING+ .rela.sdata.* .rela.gnu.linkonce.s.*}) }"
+  REL_SBSS=".rel.sbss      : { *(.rel.sbss${RELOCATING+ .rel.sbss.* .rel.gnu.linkonce.sb.*}) }
+  .rela.sbss     : { *(.rela.sbss${RELOCATING+ .rela.sbss.* .rela.gnu.linkonce.sb.*}) }"
+  REL_SDATA2=".rel.sdata2    : { *(.rel.sdata2${RELOCATING+ .rel.sdata2.* .rel.gnu.linkonce.s2.*}) }
+  .rela.sdata2   : { *(.rela.sdata2${RELOCATING+ .rela.sdata2.* .rela.gnu.linkonce.s2.*}) }"
+  REL_SBSS2=".rel.sbss2     : { *(.rel.sbss2${RELOCATING+ .rel.sbss2.* .rel.gnu.linkonce.sb2.*}) }
+  .rela.sbss2    : { *(.rela.sbss2${RELOCATING+ .rela.sbss2.* .rela.gnu.linkonce.sb2.*}) }"
 else
   NO_SMALL_DATA=" "
 fi
 test -n "$SEPARATE_GOTPLT" && SEPARATE_GOTPLT=" "
-CTOR=".ctors        ${CONSTRUCTING-0} : 
+CTOR=".ctors         : 
   {
     ${CONSTRUCTING+${CTOR_START}}
     /* gcc uses crtbegin.o to find the start of
@@ -90,7 +90,7 @@ CTOR=".ctors        ${CONSTRUCTING-0} :
     KEEP (*(.ctors))
     ${CONSTRUCTING+${CTOR_END}}
   }"
-DTOR=".dtors        ${CONSTRUCTING-0} :
+DTOR=".dtors         :
   {
     ${CONSTRUCTING+${DTOR_START}}
     KEEP (*crtbegin.o(.dtors))
@@ -100,7 +100,7 @@ DTOR=".dtors        ${CONSTRUCTING-0} :
     KEEP (*(.dtors))
     ${CONSTRUCTING+${DTOR_END}}
   }"
-STACK="  .stack        ${RELOCATING-0}${RELOCATING+${STACK_ADDR}} :
+STACK="  .stack        ${RELOCATING+${STACK_ADDR}} :
   {
     ${RELOCATING+_stack = .;}
     *(.stack)
@@ -131,10 +131,6 @@ ${RELOCATING+/* Do we need any of these for elf?
    __DYNAMIC = 0; ${STACKZERO+${STACKZERO}} ${SHLIB_PATH+${SHLIB_PATH}}  */}
 ${RELOCATING+${EXECUTABLE_SYMBOLS}}
 ${RELOCATING+${INPUT_FILES}}
-${RELOCATING- /* For some reason, the Solaris linker makes bad executables
-  if gld -r is used and the intermediate file has sections starting
-  at non-zero addresses.  Could be a Solaris ld bug, could be a GNU ld
-  bug.  But for now assigning the zero vmas works.  */}
 
 /* ARM's proprietary toolchain generate these symbols to match the start 
    and end of particular sections of the image.  SymbianOS uses these
@@ -173,13 +169,13 @@ SECTIONS
 
 EOF
 cat <<EOF
-  .init         ${RELOCATING-0} : 
+  .init          : 
   { 
     ${RELOCATING+${INIT_START}}
     KEEP (*(.init))
     ${RELOCATING+${INIT_END}}
   } =${NOP-0}
-  .text         ${RELOCATING-0} :
+  .text          :
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
     *(.text .stub${RELOCATING+ .text.* .gnu.linkonce.t.*})
@@ -187,7 +183,7 @@ cat <<EOF
     *(.gnu.warning)
     ${RELOCATING+${OTHER_TEXT_SECTIONS}}
   } =${NOP-0}
-  .fini         ${RELOCATING-0} :
+  .fini          :
   {
     ${RELOCATING+${FINI_START}}
     KEEP (*(.fini))
@@ -204,7 +200,7 @@ cat <<EOF
   ${RELOCATING+PROVIDE (Image\$\$ER_RO\$\$Limit = .);}
 
   ${WRITABLE_RODATA-${RODATA}}
-  .rodata1      ${RELOCATING-0} : { *(.rodata1) }
+  .rodata1       : { *(.rodata1) }
   ${CREATE_SHLIB-${SDATA2}}
   ${CREATE_SHLIB-${SBSS2}}
 
@@ -212,13 +208,13 @@ cat <<EOF
      segment; there is no runtime relocation applied to these
      arrays.  */
 
-  .preinit_array   ${RELOCATING-0} :
+  .preinit_array    :
   {
     ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (__preinit_array_start = .);}}
     KEEP (*(.preinit_array))
     ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (__preinit_array_end = .);}}
   }
-  .init_array   ${RELOCATING-0} :
+  .init_array    :
   {
     /* SymbianOS uses this symbol.  */
     ${RELOCATING+PROVIDE (SHT\$\$INIT_ARRAY\$\$Base = .);}
@@ -229,7 +225,7 @@ cat <<EOF
     /* SymbianOS uses this symbol.  */
     ${RELOCATING+PROVIDE (SHT\$\$INIT_ARRAY\$\$Limit = .);}
   }
-  .fini_array   ${RELOCATING-0} :
+  .fini_array    :
   {
     ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (__fini_array_start = .);}}
     KEEP (*(.fini_array))
@@ -239,8 +235,8 @@ cat <<EOF
 
   ${OTHER_READONLY_SECTIONS}
   .eh_frame_hdr : { *(.eh_frame_hdr) }
-  .eh_frame     ${RELOCATING-0} : ONLY_IF_RO { KEEP (*(.eh_frame)) }
-  .gcc_except_table ${RELOCATING-0} : ONLY_IF_RO { KEEP (*(.gcc_except_table)) *(.gcc_except_table.*) }
+  .eh_frame      : ONLY_IF_RO { KEEP (*(.eh_frame)) }
+  .gcc_except_table  : ONLY_IF_RO { KEEP (*(.gcc_except_table)) *(.gcc_except_table.*) }
 
   /* Adjust the address for the data segment.  We want to adjust up to
      the same address within the page on the next page up.  */
@@ -249,16 +245,16 @@ cat <<EOF
   ${CREATE_PIE+${RELOCATING+. = ${SHLIB_DATA_ADDR};}}
 
   /* Exception handling  */
-  .eh_frame     ${RELOCATING-0} : ONLY_IF_RW { KEEP (*(.eh_frame)) }
-  .gcc_except_table ${RELOCATING-0} : ONLY_IF_RW { KEEP (*(.gcc_except_table)) *(.gcc_except_table.*) }
+  .eh_frame      : ONLY_IF_RW { KEEP (*(.eh_frame)) }
+  .gcc_except_table  : ONLY_IF_RW { KEEP (*(.gcc_except_table)) *(.gcc_except_table.*) }
 
   /* Thread Local Storage sections  */
-  .tdata	${RELOCATING-0} : { *(.tdata${RELOCATING+ .tdata.* .gnu.linkonce.td.*}) }
-  .tbss		${RELOCATING-0} : { *(.tbss${RELOCATING+ .tbss.* .gnu.linkonce.tb.*})${RELOCATING+ *(.tcommon)} }
+  .tdata	 : { *(.tdata${RELOCATING+ .tdata.* .gnu.linkonce.td.*}) }
+  .tbss		 : { *(.tbss${RELOCATING+ .tbss.* .gnu.linkonce.tb.*})${RELOCATING+ *(.tcommon)} }
 
   ${RELOCATING+${CTOR}}
   ${RELOCATING+${DTOR}}
-  .jcr          ${RELOCATING-0} : { KEEP (*(.jcr)) }
+  .jcr           : { KEEP (*(.jcr)) }
 
   ${RELOCATING+${DATARELRO}}
   ${OTHER_RELRO_SECTIONS}
@@ -266,13 +262,13 @@ cat <<EOF
 
   ${DATA_PLT+${PLT_BEFORE_GOT-${PLT}}}
 
-  .data         ${RELOCATING-0} :
+  .data          :
   {
     ${RELOCATING+${DATA_START_SYMBOLS}}
     *(.data${RELOCATING+ .data.* .gnu.linkonce.d.*})
     ${CONSTRUCTING+SORT(CONSTRUCTORS)}
   }
-  .data1        ${RELOCATING-0} : { *(.data1) }
+  .data1         : { *(.data1) }
   ${WRITABLE_RODATA+${RODATA}}
   ${OTHER_READWRITE_SECTIONS}
   ${DATA_PLT+${PLT_BEFORE_GOT+${PLT}}}
@@ -287,7 +283,7 @@ cat <<EOF
   ${RELOCATING+${OTHER_BSS_SYMBOLS}}
   ${SBSS}
   ${BSS_PLT+${PLT}}
-  .bss          ${RELOCATING-0} :
+  .bss           :
   {
    *(.dynbss)
    *(.bss${RELOCATING+ .bss.* .gnu.linkonce.b.*})
