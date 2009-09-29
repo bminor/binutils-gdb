@@ -238,7 +238,7 @@ valpy_string (PyObject *self, PyObject *args, PyObject *kw)
   const char *errors = NULL;
   const char *user_encoding = NULL;
   const char *la_encoding = NULL;
-  static char *keywords[] = { "encoding", "errors", "length" };
+  static char *keywords[] = { "encoding", "errors", "length", NULL };
 
   if (!PyArg_ParseTupleAndKeywords (args, kw, "|ssi", keywords,
 				    &user_encoding, &errors, &length))
