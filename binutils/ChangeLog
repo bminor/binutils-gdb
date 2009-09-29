@@ -1,3 +1,8 @@
+2009-09-29  Nick Clifton  <nickc@redhat.com>
+
+	* doc/binutils.texi (c++filt): Remove spurious description of
+	nonexistent --java command line switch for cxxfilt.
+
 2009-09-29  DJ Delorie  <dj@redhat.com>
 
 	* readelf.c: Add support for RX target.
