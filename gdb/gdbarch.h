@@ -734,6 +734,20 @@ typedef struct displaced_step_closure * (gdbarch_displaced_step_copy_insn_ftype)
 extern struct displaced_step_closure * gdbarch_displaced_step_copy_insn (struct gdbarch *gdbarch, CORE_ADDR from, CORE_ADDR to, struct regcache *regs);
 extern void set_gdbarch_displaced_step_copy_insn (struct gdbarch *gdbarch, gdbarch_displaced_step_copy_insn_ftype *displaced_step_copy_insn);
 
+/* Return true if GDB should use hardware single-stepping to execute
+   the displaced instruction identified by CLOSURE.  If false,
+   GDB will simply restart execution at the displaced instruction
+   location, and it is up to the target to ensure GDB will receive
+   control again (e.g. by placing a software breakpoint instruction
+   into the displaced instruction buffer).
+  
+   The default implementation returns false on all targets that
+   provide a gdbarch_software_single_step routine, and true otherwise. */
+
+typedef int (gdbarch_displaced_step_hw_singlestep_ftype) (struct gdbarch *gdbarch, struct displaced_step_closure *closure);
+extern int gdbarch_displaced_step_hw_singlestep (struct gdbarch *gdbarch, struct displaced_step_closure *closure);
+extern void set_gdbarch_displaced_step_hw_singlestep (struct gdbarch *gdbarch, gdbarch_displaced_step_hw_singlestep_ftype *displaced_step_hw_singlestep);
+
 /* Fix up the state resulting from successfully single-stepping a
    displaced instruction, to give the result we would have gotten from
    stepping the instruction in its original location.

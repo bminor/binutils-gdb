@@ -654,6 +654,17 @@ V:ULONGEST:max_insn_length:::0:0
 # here.
 M:struct displaced_step_closure *:displaced_step_copy_insn:CORE_ADDR from, CORE_ADDR to, struct regcache *regs:from, to, regs
 
+# Return true if GDB should use hardware single-stepping to execute
+# the displaced instruction identified by CLOSURE.  If false,
+# GDB will simply restart execution at the displaced instruction
+# location, and it is up to the target to ensure GDB will receive
+# control again (e.g. by placing a software breakpoint instruction
+# into the displaced instruction buffer).
+#
+# The default implementation returns false on all targets that
+# provide a gdbarch_software_single_step routine, and true otherwise.
+m:int:displaced_step_hw_singlestep:struct displaced_step_closure *closure:closure::default_displaced_step_hw_singlestep::0
+
 # Fix up the state resulting from successfully single-stepping a
 # displaced instruction, to give the result we would have gotten from
 # stepping the instruction in its original location.

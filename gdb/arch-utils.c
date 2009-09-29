@@ -67,6 +67,12 @@ simple_displaced_step_free_closure (struct gdbarch *gdbarch,
   xfree (closure);
 }
 
+int
+default_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
+				      struct displaced_step_closure *closure)
+{
+  return !gdbarch_software_single_step_p (gdbarch);
+}
 
 CORE_ADDR
 displaced_step_at_entry_point (struct gdbarch *gdbarch)

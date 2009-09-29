@@ -49,6 +49,11 @@ extern void
   simple_displaced_step_free_closure (struct gdbarch *gdbarch,
                                       struct displaced_step_closure *closure);
 
+/* Default implementation of gdbarch_displaced_hw_singlestep.  */
+extern int
+  default_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
+					struct displaced_step_closure *closure);
+
 /* Possible value for gdbarch_displaced_step_location:
    Place displaced instructions at the program's entry point,
    leaving space for inferior function call return breakpoints.  */

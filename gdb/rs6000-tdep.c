@@ -1058,6 +1058,15 @@ ppc_displaced_step_fixup (struct gdbarch *gdbarch,
 				    from + offset);
 }
 
+/* Always use hardware single-stepping to execute the
+   displaced instruction.  */
+static int
+ppc_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
+				  struct displaced_step_closure *closure)
+{
+  return 1;
+}
+
 /* Instruction masks used during single-stepping of atomic sequences.  */
 #define LWARX_MASK 0xfc0007fe
 #define LWARX_INSTRUCTION 0x7c000028
@@ -3898,6 +3907,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Setup displaced stepping.  */
   set_gdbarch_displaced_step_copy_insn (gdbarch,
 					simple_displaced_step_copy_insn);
+  set_gdbarch_displaced_step_hw_singlestep (gdbarch,
+					    ppc_displaced_step_hw_singlestep);
   set_gdbarch_displaced_step_fixup (gdbarch, ppc_displaced_step_fixup);
   set_gdbarch_displaced_step_free_closure (gdbarch,
 					   simple_displaced_step_free_closure);
