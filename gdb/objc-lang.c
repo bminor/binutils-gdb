@@ -1173,16 +1173,18 @@ find_methods (struct symtab *symtab, char type,
 
       ALL_OBJFILE_MSYMBOLS (objfile, msymbol)
 	{
+	  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+	  CORE_ADDR pc = SYMBOL_VALUE_ADDRESS (msymbol);
+
 	  QUIT;
 
-	  if ((MSYMBOL_TYPE (msymbol) != mst_text)
-	      && (MSYMBOL_TYPE (msymbol) != mst_file_text))
-	    /* Not a function or method.  */
-	    continue;
+	  /* The minimal symbol might point to a function descriptor;
+	     resolve it to the actual code address instead.  */
+	  pc = gdbarch_convert_from_func_ptr_addr (gdbarch, pc,
+						   &current_target);
 
 	  if (symtab)
-	    if ((SYMBOL_VALUE_ADDRESS (msymbol) <  BLOCK_START (block)) ||
-		(SYMBOL_VALUE_ADDRESS (msymbol) >= BLOCK_END (block)))
+	    if (pc < BLOCK_START (block) || pc >= BLOCK_END (block))
 	      /* Not in the specified symtab.  */
 	      continue;
 
@@ -1221,7 +1223,7 @@ find_methods (struct symtab *symtab, char type,
 	      ((nselector == NULL) || (strcmp (selector, nselector) != 0)))
 	    continue;
 
-	  sym = find_pc_function (SYMBOL_VALUE_ADDRESS (msymbol));
+	  sym = find_pc_function (pc);
 	  if (sym != NULL)
 	    {
 	      const char *newsymname = SYMBOL_NATURAL_NAME (sym);

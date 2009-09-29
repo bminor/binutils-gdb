@@ -1161,8 +1161,13 @@ evaluate_subexp_standard (struct type *expect_type,
 	if (addr)
 	  {
 	    struct symbol *sym = NULL;
-	    /* Is it a high_level symbol?  */
 
+	    /* The address might point to a function descriptor;
+	       resolve it to the actual code address instead.  */
+	    addr = gdbarch_convert_from_func_ptr_addr (exp->gdbarch, addr,
+						       &current_target);
+
+	    /* Is it a high_level symbol?  */
 	    sym = find_pc_function (addr);
 	    if (sym != NULL) 
 	      method = value_of_variable (sym, 0);
@@ -1216,11 +1221,20 @@ evaluate_subexp_standard (struct type *expect_type,
 	  {
 	    if (TYPE_CODE (value_type (method)) != TYPE_CODE_FUNC)
 	      error (_("method address has symbol information with non-function type; skipping"));
+
+	    /* Create a function pointer of the appropriate type, and replace
+	       its value with the value of msg_send or msg_send_stret.  We must
+	       use a pointer here, as msg_send and msg_send_stret are of pointer
+	       type, and the representation may be different on systems that use
+	       function descriptors.  */
 	    if (struct_return)
-	      set_value_address (method, value_as_address (msg_send_stret));
+	      called_method
+		= value_from_pointer (lookup_pointer_type (value_type (method)),
+				      value_as_address (msg_send_stret));
 	    else
-	      set_value_address (method, value_as_address (msg_send));
-	    called_method = method;
+	      called_method
+		= value_from_pointer (lookup_pointer_type (value_type (method)),
+				      value_as_address (msg_send));
 	  }
 	else
 	  {
@@ -1275,7 +1289,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  {
 	    /* Function objc_msg_lookup returns a pointer.  */
 	    deprecated_set_value_type (argvec[0],
-				       lookup_function_type (lookup_pointer_type (value_type (argvec[0]))));
+				       lookup_pointer_type (lookup_function_type (value_type (argvec[0]))));
 	    argvec[0] = call_function_by_hand (argvec[0], nargs + 2, argvec + 1);
 	  }
 

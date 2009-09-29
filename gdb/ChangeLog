@@ -1,3 +1,16 @@
+2009-09-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* eval.c (evaluate_subexp_standard) [OP_OBJC_MSGCALL]: Support
+	platforms that use function descriptors.  Prefer to use function
+	pointer types instead of function types.
+	* linespec.c (decode_objc): Support function descriptors.  Fully
+	initialize SAL result.
+	* objc-lang.c (find_methods): Support function descriptors.
+	Do not require function symbol to point to text section.
+
+	* ppc-sysv-tdep.c (ppc64_sysv_abi_push_dummy_call): When calling
+	via a function pointer, use the descriptor it points to.
+
 2009-09-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix ia64 breakpoints in the L-X slot.
