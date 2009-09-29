@@ -1,3 +1,10 @@
+2009-09-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* ia64-tdep.c: Update the comments on how we insert/remove
+	breakpoints for L-X instructions.
+	(ia64_memory_insert_breakpoint, ia64_memory_remove_breakpoint):
+	Update the comments inside these functions.
+
 2009-09-28  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* eval.c (evaluate_subexp_standard) [OP_OBJC_MSGCALL]: Support
