@@ -321,11 +321,20 @@ spu_attach (unsigned long  pid)
 static int
 spu_kill (int pid)
 {
+  int status, ret;
   struct process_info *process = find_process_pid (pid);
   if (process == NULL)
     return -1;
 
   ptrace (PTRACE_KILL, pid, 0, 0);
+
+  do {
+    ret = waitpid (pid, &status, 0);
+    if (WIFEXITED (status) || WIFSIGNALED (status))
+      break;
+  } while (ret != -1 || errno != ECHILD);
+
+  clear_inferiors ();
   remove_process (process);
   return 0;
 }
@@ -339,6 +348,8 @@ spu_detach (int pid)
     return -1;
 
   ptrace (PTRACE_DETACH, pid, 0, 0);
+
+  clear_inferiors ();
   remove_process (process);
   return 0;
 }
