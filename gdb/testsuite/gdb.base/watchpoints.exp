@@ -45,6 +45,11 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $binfile
 
+    # Disable hardware watchpoints if necessary.
+    if [target_info exists gdb,no_hardware_watchpoints] {
+        gdb_test "set can-use-hw-watchpoints 0" "" ""
+    }
+
     runto_main
     gdb_test "watch ival1" "" ""
     gdb_test "watch ival3" "" ""

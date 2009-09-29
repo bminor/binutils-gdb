@@ -1,3 +1,11 @@
+2009-09-29  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.base/watchpoints.exp: Respect gdb,no_hardware_watchpoints
+	target_info setting.
+
+	* gdb.threads/thread-specific.exp (get_thread_list): Support targets
+	that detect new threads during "info threads".
+
 2009-09-27  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.threads/manythreads.c (main): Increase thread stack size
