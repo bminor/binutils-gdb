@@ -2543,6 +2543,16 @@ is_32bit_relative_branch (bfd_byte *contents, bfd_vma offset)
 	      && (contents [offset - 1] & 0xf0) == 0x80));
 }
 
+static void
+elf64_x86_64_append_rela (bfd *abfd, asection *s, Elf_Internal_Rela *rel)
+{
+  bfd_byte *loc = s->contents;
+  loc += s->reloc_count++ * sizeof (Elf64_External_Rela);
+  BFD_ASSERT (loc + sizeof (Elf64_External_Rela)
+	      <= s->contents + s->size);
+  bfd_elf64_swap_reloca_out (abfd, rel, loc);
+}
+
 /* Relocate an x86_64 ELF section.  */
 
 static bfd_boolean
@@ -2712,7 +2722,6 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      if (info->shared && h->non_got_ref)
 		{
 		  Elf_Internal_Rela outrel;
-		  bfd_byte *loc;
 		  asection *sreloc;
 
 		  /* Need a dynamic relocation to get the real function
@@ -2745,10 +2754,7 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		    }
 
 		  sreloc = htab->elf.irelifunc;
-		  loc = sreloc->contents;
-		  loc += (sreloc->reloc_count++
-			  * sizeof (Elf64_External_Rela));
-		  bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
+		  elf64_x86_64_append_rela (output_bfd, sreloc, &outrel);
 
 		  /* If this reloc is against an external symbol, we
 		     do not want to fiddle with the addend.  Otherwise,
@@ -2931,7 +2937,6 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		    {
 		      asection *s;
 		      Elf_Internal_Rela outrel;
-		      bfd_byte *loc;
 
 		      /* We need to generate a R_X86_64_RELATIVE reloc
 			 for the dynamic linker.  */
@@ -2944,9 +2949,7 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 					 + off);
 		      outrel.r_info = ELF64_R_INFO (0, R_X86_64_RELATIVE);
 		      outrel.r_addend = relocation;
-		      loc = s->contents;
-		      loc += s->reloc_count++ * sizeof (Elf64_External_Rela);
-		      bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
+		      elf64_x86_64_append_rela (output_bfd, s, &outrel);
 		    }
 
 		  local_got_offsets[r_symndx] |= 1;
@@ -3135,7 +3138,6 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		      || h->root.type == bfd_link_hash_undefined)))
 	    {
 	      Elf_Internal_Rela outrel;
-	      bfd_byte *loc;
 	      bfd_boolean skip, relocate;
 	      asection *sreloc;
 
@@ -3219,9 +3221,7 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 	      BFD_ASSERT (sreloc != NULL && sreloc->contents != NULL);
 
-	      loc = sreloc->contents;
-	      loc += sreloc->reloc_count++ * sizeof (Elf64_External_Rela);
-	      bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
+	      elf64_x86_64_append_rela (output_bfd, sreloc, &outrel);
 
 	      /* If this reloc is against an external symbol, we do
 		 not want to fiddle with the addend.  Otherwise, we
@@ -3392,7 +3392,6 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  else
 	    {
 	      Elf_Internal_Rela outrel;
-	      bfd_byte *loc;
 	      int dr_type, indx;
 	      asection *sreloc;
 
@@ -3411,16 +3410,11 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 				     + offplt
 				     + htab->sgotplt_jump_table_size);
 		  sreloc = htab->elf.srelplt;
-		  loc = sreloc->contents;
-		  loc += sreloc->reloc_count++
-		    * sizeof (Elf64_External_Rela);
-		  BFD_ASSERT (loc + sizeof (Elf64_External_Rela)
-			      <= sreloc->contents + sreloc->size);
 		  if (indx == 0)
 		    outrel.r_addend = relocation - elf64_x86_64_dtpoff_base (info);
 		  else
 		    outrel.r_addend = 0;
-		  bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
+		  elf64_x86_64_append_rela (output_bfd, sreloc, &outrel);
 		}
 
 	      sreloc = htab->elf.srelgot;
@@ -3442,11 +3436,7 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		outrel.r_addend = relocation - elf64_x86_64_dtpoff_base (info);
 	      outrel.r_info = ELF64_R_INFO (indx, dr_type);
 
-	      loc = sreloc->contents;
-	      loc += sreloc->reloc_count++ * sizeof (Elf64_External_Rela);
-	      BFD_ASSERT (loc + sizeof (Elf64_External_Rela)
-			  <= sreloc->contents + sreloc->size);
-	      bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
+	      elf64_x86_64_append_rela (output_bfd, sreloc, &outrel);
 
 	      if (GOT_TLS_GD_P (tls_type))
 		{
@@ -3464,11 +3454,8 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		      outrel.r_info = ELF64_R_INFO (indx,
 						    R_X86_64_DTPOFF64);
 		      outrel.r_offset += GOT_ENTRY_SIZE;
-		      sreloc->reloc_count++;
-		      loc += sizeof (Elf64_External_Rela);
-		      BFD_ASSERT (loc + sizeof (Elf64_External_Rela)
-				  <= sreloc->contents + sreloc->size);
-		      bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
+		      elf64_x86_64_append_rela (output_bfd, sreloc,
+						&outrel);
 		    }
 		}
 
@@ -3608,7 +3595,6 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  else
 	    {
 	      Elf_Internal_Rela outrel;
-	      bfd_byte *loc;
 
 	      if (htab->elf.srelgot == NULL)
 		abort ();
@@ -3622,9 +3608,8 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			  htab->elf.sgot->contents + off + GOT_ENTRY_SIZE);
 	      outrel.r_info = ELF64_R_INFO (0, R_X86_64_DTPMOD64);
 	      outrel.r_addend = 0;
-	      loc = htab->elf.srelgot->contents;
-	      loc += htab->elf.srelgot->reloc_count++ * sizeof (Elf64_External_Rela);
-	      bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
+	      elf64_x86_64_append_rela (output_bfd, htab->elf.srelgot,
+					&outrel);
 	      htab->tls_ld_got.offset |= 1;
 	    }
 	  relocation = htab->elf.sgot->output_section->vma
@@ -3858,7 +3843,6 @@ elf64_x86_64_finish_dynamic_symbol (bfd *output_bfd,
       && elf64_x86_64_hash_entry (h)->tls_type != GOT_TLS_IE)
     {
       Elf_Internal_Rela rela;
-      bfd_byte *loc;
 
       /* This symbol has an entry in the global offset table.  Set it
 	 up.  */
@@ -3921,15 +3905,12 @@ do_glob_dat:
 	  rela.r_addend = 0;
 	}
 
-      loc = htab->elf.srelgot->contents;
-      loc += htab->elf.srelgot->reloc_count++ * sizeof (Elf64_External_Rela);
-      bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
+      elf64_x86_64_append_rela (output_bfd, htab->elf.srelgot, &rela);
     }
 
   if (h->needs_copy)
     {
       Elf_Internal_Rela rela;
-      bfd_byte *loc;
 
       /* This symbol needs a copy reloc.  Set it up.  */
 
@@ -3944,9 +3925,7 @@ do_glob_dat:
 		       + h->root.u.def.section->output_offset);
       rela.r_info = ELF64_R_INFO (h->dynindx, R_X86_64_COPY);
       rela.r_addend = 0;
-      loc = htab->srelbss->contents;
-      loc += htab->srelbss->reloc_count++ * sizeof (Elf64_External_Rela);
-      bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
+      elf64_x86_64_append_rela (output_bfd, htab->srelbss, &rela);
     }
 
   /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.  SYM may
