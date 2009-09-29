@@ -586,6 +586,23 @@ fetch_instruction (CORE_ADDR addr, instruction_type *it, long long *instr)
    SLOTNUM (`adress & 0x0f', value in the range <0..2>).  We need to know
    SLOTNUM in ia64_memory_remove_breakpoint.
 
+   There is one special case where we need to be extra careful:
+   L-X instructions, which are instructions that occupy 2 slots
+   (The L part is always in slot 1, and the X part is always in
+   slot 2).  We must refuse to insert breakpoints for an address
+   that points at slot 2 of a bundle where an L-X instruction is
+   present, since there is logically no instruction at that address.
+   However, to make things more interesting, the opcode of L-X
+   instructions is located in slot 2.  This means that, to insert
+   a breakpoint at an address that points to slot 1, we actually
+   need to write the breakpoint in slot 2!  Slot 1 is actually
+   the extended operand, so writing the breakpoint there would not
+   have the desired effect.  Another side-effect of this issue
+   is that we need to make sure that the shadow contents buffer
+   does save byte 15 of our instruction bundle (this is the tail
+   end of slot 2, which wouldn't be saved if we were to insert
+   the breakpoint in slot 1).
+   
    ia64 16-byte bundle layout:
    | 5 bits | slot 0 with 41 bits | slot 1 with 41 bits | slot 2 with 41 bits |
    
@@ -594,12 +611,11 @@ fetch_instruction (CORE_ADDR addr, instruction_type *it, long long *instr)
                                   == bp_tgt->shadow_len   reqd \subset covered
    0xABCDE0      0xABCDE0         0x10                    <0x0...0x5> <0x0..0xF>
    0xABCDE1      0xABCDE1         0xF                     <0x5...0xA> <0x1..0xF>
-   0xABCDE1 L-X  0xABCDE1 L-X     0xF                     <0xA...0xF> <0x1..0xF>
-     L is always in slot 1 and X is always in slot 2, while the address is
-     using slot 1 the breakpoint instruction must be placed
-     to the slot 2 (requiring to shadow that last byte at 0xF).
    0xABCDE2      0xABCDE2         0xE                     <0xA...0xF> <0x2..0xF>
-   
+
+   L-X instructions are treated a little specially, as explained above:
+   0xABCDE1      0xABCDE1         0xF                     <0xA...0xF> <0x1..0xF>
+
    `objdump -d' and some other tools show a bit unjustified offsets:
    original PC   byte where starts the instruction   objdump offset
    0xABCDE0      0xABCDE0                            0xABCDE0
@@ -643,19 +659,25 @@ ia64_memory_insert_breakpoint (struct gdbarch *gdbarch,
      for addressing the SHADOW_CONTENTS placement.  */
   shadow_slotnum = slotnum;
 
-  /* Cover always the last byte of the bundle for the L-X slot case.  */
+  /* Always cover the last byte of the bundle in case we are inserting
+     a breakpoint on an L-X instruction.  */
   bp_tgt->shadow_len = BUNDLE_LEN - shadow_slotnum;
 
-  /* Check for L type instruction in slot 1, if present then bump up the slot
-     number to the slot 2.  */
   template = extract_bit_field (bundle, 0, 5);
   if (template_encoding_table[template][slotnum] == X)
     {
+      /* X unit types can only be used in slot 2, and are actually
+	 part of a 2-slot L-X instruction.  We cannot break at this
+	 address, as this is the second half of an instruction that
+	 lives in slot 1 of that bundle.  */
       gdb_assert (slotnum == 2);
       error (_("Can't insert breakpoint for non-existing slot X"));
     }
   if (template_encoding_table[template][slotnum] == L)
     {
+      /* L unit types can only be used in slot 1.  But the associated
+	 opcode for that instruction is in slot 2, so bump the slot number
+	 accordingly.  */
       gdb_assert (slotnum == 1);
       slotnum = 2;
     }
@@ -730,20 +752,26 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
      for addressing the SHADOW_CONTENTS placement.  */
   shadow_slotnum = slotnum;
 
-  /* Check for L type instruction in slot 1, if present then bump up the slot
-     number to the slot 2.  */
   template = extract_bit_field (bundle_mem, 0, 5);
   if (template_encoding_table[template][slotnum] == X)
     {
+      /* X unit types can only be used in slot 2, and are actually
+	 part of a 2-slot L-X instruction.  We refuse to insert
+	 breakpoints at this address, so there should be no reason
+	 for us attempting to remove one there, except if the program's
+	 code somehow got modified in memory.  */
       gdb_assert (slotnum == 2);
-      warning (_("Cannot remove breakpoint at address %s "
-		 "from non-existing slot X, memory has changed underneath"),
+      warning (_("Cannot remove breakpoint at address %s from non-existing "
+		 "X-type slot, memory has changed underneath"),
 	       paddress (gdbarch, bp_tgt->placed_address));
       do_cleanups (cleanup);
       return -1;
     }
   if (template_encoding_table[template][slotnum] == L)
     {
+      /* L unit types can only be used in slot 1.  But the breakpoint
+	 was actually saved using slot 2, so update the slot number
+	 accordingly.  */
       gdb_assert (slotnum == 1);
       slotnum = 2;
     }
@@ -768,8 +796,8 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
 	  bp_tgt->shadow_len);
   instr_saved = slotN_contents (bundle_saved, slotnum);
 
-  /* In BUNDLE_MEM be careful to modify only the bits belonging to SLOTNUM and
-     never any other possibly also stored in SHADOW_CONTENTS.  */
+  /* In BUNDLE_MEM, be careful to modify only the bits belonging to SLOTNUM
+     and not any of the other ones that are stored in SHADOW_CONTENTS.  */
   replace_slotN_contents (bundle_mem, instr_saved, slotnum);
   val = target_write_memory (addr, bundle_mem, BUNDLE_LEN);
 
