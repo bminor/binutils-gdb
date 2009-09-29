@@ -56,6 +56,10 @@ proc do_objc_tests {} {
 
 do_objc_tests
 
+# Disable pending breakpoint query to avoid timeouts
+# if Obj-C symbols cannot be found
+gdb_test "set breakpoint pending off" "" "set breakpoint pending"
+
 #
 # Break on multiply defined non-debuggable symbol (PR objc/1236)
 #

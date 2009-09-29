@@ -1,5 +1,10 @@
 2009-09-29  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
+	* gdb.objc/basicclass.exp: Disable pending breakpoint query.
+	* gdb.objc/nondebug.exp: Likewise.
+
+2009-09-29  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
 	* gdb.base/watchpoints.exp: Respect gdb,no_hardware_watchpoints
 	target_info setting.
 

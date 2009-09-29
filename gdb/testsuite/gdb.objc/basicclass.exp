@@ -102,6 +102,11 @@ do_objc_tests
 #
 # Breakpoint tests
 #
+
+# Disable pending breakpoint query to avoid timeouts
+# if Obj-C symbols cannot be found
+gdb_test "set breakpoint pending off" "" "set breakpoint pending"
+
 gdb_test "break doIt" \
     "Breakpoint.*at.* file .*$srcfile, line.29.*" \
     "breakpoint method"
