@@ -1,3 +1,8 @@
+2009-09-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* ia64-tdep.c (ia64_convert_from_func_ptr_addr): New variable buf.
+	Check first the descriptor memory is readable.
+
 2009-09-29  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	Revert 2009-09-28 commit:

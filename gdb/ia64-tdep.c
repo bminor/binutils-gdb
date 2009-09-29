@@ -3510,6 +3510,7 @@ ia64_convert_from_func_ptr_addr (struct gdbarch *gdbarch, CORE_ADDR addr,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct obj_section *s;
+  gdb_byte buf[8];
 
   s = find_pc_section (addr);
 
@@ -3520,10 +3521,12 @@ ia64_convert_from_func_ptr_addr (struct gdbarch *gdbarch, CORE_ADDR addr,
   /* Normally, functions live inside a section that is executable.
      So, if ADDR points to a non-executable section, then treat it
      as a function descriptor and return the target address iff
-     the target address itself points to a section that is executable.  */
-  if (s && (s->the_bfd_section->flags & SEC_CODE) == 0)
+     the target address itself points to a section that is executable.
+     Check first the memory of the whole length of 8 bytes is readable.  */
+  if (s && (s->the_bfd_section->flags & SEC_CODE) == 0
+      && target_read_memory (addr, buf, 8) == 0)
     {
-      CORE_ADDR pc = read_memory_unsigned_integer (addr, 8, byte_order);
+      CORE_ADDR pc = extract_unsigned_integer (buf, 8, byte_order);
       struct obj_section *pc_section = find_pc_section (pc);
 
       if (pc_section && (pc_section->the_bfd_section->flags & SEC_CODE))
