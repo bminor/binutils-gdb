@@ -4456,8 +4456,6 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"mulo",	XO(31,107,1,0),	XO_MASK,     M601,	PPCNONE,	{RT, RA, RB}},
 {"mulo.",	XO(31,107,1,1),	XO_MASK,     M601,	PPCNONE,	{RT, RA, RB}},
 
-{"lxsdux",	X(31,620),	XX1_MASK,    PPCVSX,	PPCNONE,	{XT6, RA, RB}},
-
 {"mfsri",	X(31,627),	X_MASK,      PWRCOM,	PPCNONE,	{RT, RA, RB}},
 
 {"dclst",	X(31,630),	XRB_MASK,    PWRCOM,	PPCNONE,	{RS, RA}},
@@ -4549,8 +4547,6 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"stqfcmux",	APU(31,743,0), 	APU_MASK,    PPC405,	PPCNONE,	{FCRT, RA, RB}},
 
-{"stxsdux",	X(31,748),	XX1_MASK,    PPCVSX,	PPCNONE,	{XS6, RA, RB}},
-
 {"subfmeo",	XO(31,232,1,0),	XORB_MASK,   PPCCOM,	PPCNONE,	{RT, RA}},
 {"sfmeo",	XO(31,232,1,0),	XORB_MASK,   PWRCOM,	PPCNONE,	{RT, RA}},
 {"subfmeo.",	XO(31,232,1,1),	XORB_MASK,   PPCCOM,	PPCNONE,	{RT, RA}},
@@ -4611,8 +4607,6 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"lvrxl",	X(31,807),	X_MASK,      CELL,	PPCNONE,	{VD, RA0, RB}},
 
-{"lxvw4ux",	X(31,812),	XX1_MASK,    PPCVSX,	PPCNONE,	{XT6, RA, RB}},
-
 {"rac",		X(31,818),	X_MASK,      PWRCOM,	PPCNONE,	{RT, RA, RB}},
 
 {"erativax",	X(31,819),	X_MASK,	     PPCA2,	PPCNONE,	{RS, RA0, RB}},
@@ -4653,8 +4647,6 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"divso",	XO(31,363,1,0),	XO_MASK,     M601,	PPCNONE,	{RT, RA, RB}},
 {"divso.",	XO(31,363,1,1),	XO_MASK,     M601,	PPCNONE,	{RT, RA, RB}},
-
-{"lxvd2ux",	X(31,876),	XX1_MASK,    PPCVSX,	PPCNONE,	{XT6, RA, RB}},
 
 {"ldcix",	X(31,885),	X_MASK,      POWER6,	PPCNONE,	{RT, RA0, RB}},
 
@@ -4701,8 +4693,6 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"divdeo.",	XO(31,425,1,1),	XO_MASK,     POWER7,	PPCNONE,	{RT, RA, RB}},
 {"divweo",	XO(31,427,1,0),	XO_MASK,     POWER7,	PPCNONE,	{RT, RA, RB}},
 {"divweo.",	XO(31,427,1,1),	XO_MASK,     POWER7,	PPCNONE,	{RT, RA, RB}},
-
-{"stxvw4ux",	X(31,940),	XX1_MASK,    PPCVSX,	PPCNONE,	{XS6, RA, RB}},
 
 {"tlbrehi",	XTLB(31,946,0),	XTLB_MASK,   PPC403,	PPCA2,		{RT, RA}},
 {"tlbrelo",	XTLB(31,946,1),	XTLB_MASK,   PPC403,	PPCA2,		{RT, RA}},
@@ -4755,8 +4745,6 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"divwo",	XO(31,491,1,0),	XO_MASK,     PPC,	PPCNONE,	{RT, RA, RB}},
 {"divwo.",	XO(31,491,1,1),	XO_MASK,     PPC,	PPCNONE,	{RT, RA, RB}},
-
-{"stxvd2ux",	X(31,1004),	XX1_MASK,    PPCVSX,	PPCNONE,	{XS6, RA, RB}},
 
 {"tlbli",	X(31,1010),	XRTRA_MASK,  PPC,	PPCNONE,	{RB}},
 
