@@ -44,7 +44,7 @@ main (int argc, char **argv)
   pthread_attr_init (&attr);
 
 #ifdef PTHREAD_STACK_MIN
-  pthread_attr_setstacksize (&attr, PTHREAD_STACK_MIN);
+  pthread_attr_setstacksize (&attr, 2*PTHREAD_STACK_MIN);
 #endif
 
   /* Create a ton of quick-executing threads, then wait for them to
