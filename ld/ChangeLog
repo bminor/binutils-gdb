@@ -1,3 +1,8 @@
+2009-09-29  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* emulparams/m68kelf.sh (NOP): Use 0x4e71 (nop) rather than 0x4e75
+	(rts).
+
 2009-09-29  DJ Delorie  <dj@redhat.com>
 
 	* Makefile.am: Add rules to build RX emulation.
