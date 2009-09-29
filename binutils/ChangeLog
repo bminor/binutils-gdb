@@ -1,3 +1,8 @@
+2009-09-29  DJ Delorie  <dj@redhat.com>
+
+	* readelf.c: Add support for RX target.
+	* MAINTAINERS: Add DJ and NickC as maintainers for RX.
+
 2009-09-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* configure.in: Don't invoke configure.tgt on $enable_targets.

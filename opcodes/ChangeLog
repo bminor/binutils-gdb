@@ -1,3 +1,15 @@
+2009-09-29  DJ Delorie  <dj@redhat.com>
+
+	* Makefile.am: Add RX files.
+	* configure.in: Add support for RX target.
+	* disassemble.c: Likewise.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* opc2c.c: New file.
+	* rx-decode.c: New file.
+	* rx-decode.opc: New file.
+	* rx-dis.c: New file.
+
 2009-09-29  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-opc.c (powerpc_opcodes): Remove support for the the "lxsdux",

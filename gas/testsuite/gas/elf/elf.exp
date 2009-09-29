@@ -62,6 +62,9 @@ if { ([istarget "*-*-*elf*"]
     if {[istarget "xtensa*-*-*"]} then {
 	set target_machine -xtensa
     }
+    if {[istarget "rx-*-*"]} then {
+	set target_machine -rx
+    }
     if { ([istarget "*arm*-*-*"]
 	  || [istarget "xscale*-*-*"]) } {
 	
@@ -111,6 +114,7 @@ if { ([istarget "*-*-*elf*"]
 	{ mn10200-*-* } { }
 	{ mn10300-*-* } { }
 	{ *c54x*-*-* } { }
+	{ rx-*-* } { }
 	default {
 	    # The next test can fail if the target does not convert fixups
 	    # against ordinary symbols into relocations against section symbols.

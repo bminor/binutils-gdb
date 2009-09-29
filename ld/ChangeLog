@@ -1,3 +1,12 @@
+2009-09-29  DJ Delorie  <dj@redhat.com>
+
+	* Makefile.am: Add rules to build RX emulation.
+	* configure.tgt: Likewise.
+	* NEWS: Mention support for RX architecture.
+	* Makefile.in: Regenerate.
+	* emulparams/elf32rx.sh: New file.
+	* emultempl/rxelf.em: New file.
+
 2009-09-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (lang_size_sections_1): Allow scripts to specify a

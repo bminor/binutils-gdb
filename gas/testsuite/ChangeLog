@@ -1,3 +1,13 @@
+2009-09-29  DJ Delorie  <dj@redhat.com>
+
+	* gas/rx: New directory.
+	* gas/rx/*: New set of test cases.
+	* gas/elf/section2.e-rx: New expected output file.
+	* gas/all/gas.exp: Add support for RX target.
+	* gas/elf/elf.exp: Likewise.
+	* gas/lns/lns.exp: Likewise.
+	* gas/macros/macros.exp: Likewise.
+
 2009-09-29  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* gas/ppc/vsx.s ("lxsdux", "lxvd2ux", "lxvw4ux", "stxsdux", 

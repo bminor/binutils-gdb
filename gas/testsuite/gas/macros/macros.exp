@@ -65,6 +65,7 @@ case $target_triplet in {
     { m68*-*-* } { }
     { m88*-*-* } { }
     { mmix-* } { }
+    { rx-*-* } { }
     { z80-* } { }
     default { run_list_test dot "-alm" }
 }

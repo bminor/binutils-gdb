@@ -12332,6 +12332,7 @@ if test x${all_targets} = xfalse ; then
 	bfd_pyramid_arch)	;;
 	bfd_romp_arch)		;;
 	bfd_rs6000_arch)	ta="$ta ppc-dis.lo ppc-opc.lo" ;;
+	bfd_rx_arch)		ta="$ta rx-dis.lo rx-decode.lo";;
 	bfd_s390_arch)		ta="$ta s390-dis.lo s390-opc.lo" ;;
 	bfd_score_arch)         ta="$ta score-dis.lo score7-dis.lo" ;;
 	bfd_sh_arch)

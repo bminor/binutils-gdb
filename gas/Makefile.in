@@ -347,6 +347,7 @@ CPU_TYPES = \
 	pdp11 \
 	pj \
 	ppc \
+	rx \
 	s390 \
 	score \
 	sh \
@@ -548,6 +549,7 @@ TARGET_CPU_CFILES = \
 	config/tc-pdp11.c \
 	config/tc-pj.c \
 	config/tc-ppc.c \
+	config/tc-rx.c \
 	config/tc-s390.c \
 	config/tc-score.c \
 	config/tc-sh.c \
@@ -610,6 +612,7 @@ TARGET_CPU_HFILES = \
 	config/tc-pdp11.h \
 	config/tc-pj.h \
 	config/tc-ppc.h \
+	config/tc-rx.h \
 	config/tc-s390.h \
 	config/tc-score.h \
 	config/tc-sh.h \
@@ -755,7 +758,8 @@ POTFILES = $(MULTI_CFILES) $(CONFIG_ATOF_CFILES) \
 noinst_SCRIPTS = $(GDBINIT)
 EXTRA_SCRIPTS = .gdbinit
 EXTRA_DIST = m68k-parse.c itbl-parse.c itbl-parse.h itbl-lex.c \
-	bfin-parse.c bfin-parse.h bfin-lex.c
+	bfin-parse.c bfin-parse.h bfin-lex.c \
+	rx-parse.c rx-parse.h
 
 DISTCLEANFILES = targ-cpu.h obj-format.h targ-env.h itbl-cpu.h cgen-desc.h
 
@@ -989,6 +993,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-pdp11.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-pj.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-ppc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-rx.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-s390.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-score.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-sh.Po@am__quote@
@@ -1645,6 +1650,20 @@ tc-ppc.obj: config/tc-ppc.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-ppc.c' object='tc-ppc.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-ppc.obj `if test -f 'config/tc-ppc.c'; then $(CYGPATH_W) 'config/tc-ppc.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-ppc.c'; fi`
+
+tc-rx.o: config/tc-rx.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-rx.o -MD -MP -MF $(DEPDIR)/tc-rx.Tpo -c -o tc-rx.o `test -f 'config/tc-rx.c' || echo '$(srcdir)/'`config/tc-rx.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/tc-rx.Tpo $(DEPDIR)/tc-rx.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-rx.c' object='tc-rx.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-rx.o `test -f 'config/tc-rx.c' || echo '$(srcdir)/'`config/tc-rx.c
+
+tc-rx.obj: config/tc-rx.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-rx.obj -MD -MP -MF $(DEPDIR)/tc-rx.Tpo -c -o tc-rx.obj `if test -f 'config/tc-rx.c'; then $(CYGPATH_W) 'config/tc-rx.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-rx.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/tc-rx.Tpo $(DEPDIR)/tc-rx.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-rx.c' object='tc-rx.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-rx.obj `if test -f 'config/tc-rx.c'; then $(CYGPATH_W) 'config/tc-rx.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-rx.c'; fi`
 
 tc-s390.o: config/tc-s390.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-s390.o -MD -MP -MF $(DEPDIR)/tc-s390.Tpo -c -o tc-s390.o `test -f 'config/tc-s390.c' || echo '$(srcdir)/'`config/tc-s390.c
@@ -2533,6 +2552,15 @@ bfin-lex.o: bfin-lex.c bfin-parse.h $(srcdir)/config/bfin-defs.h
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='bfin-lex.c' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c `test -f bfin-lex.c || echo $(srcdir)/`bfin-lex.c $(NO_WERROR)
+
+rx-parse.c: $(srcdir)/config/rx-parse.y
+	$(SHELL) $(YLWRAP) $(srcdir)/config/rx-parse.y y.tab.c rx-parse.c y.tab.h rx-parse.h -- $(YACCCOMPILE) -d ;
+rx-parse.h: rx-parse.c
+rx-parse.o: rx-parse.c rx-parse.h $(srcdir)/config/rx-defs.h \
+ $(INCDIR)/elf/common.h $(INCDIR)/elf/rx.h $(BFDDIR)/libbfd.h
+
+rx-defs.h: ; @true
+$(srcdir)/config/rx-defs.h: ; @true
 
 # The instruction table specification lexical analyzer and parser.
 

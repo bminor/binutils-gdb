@@ -12029,6 +12029,13 @@ _ACEOF
 	fi
 	;;
 
+      rx)
+        echo ${extra_objects} | grep -s "rx-parse.o"
+        if test $? -ne 0 ; then
+          extra_objects="$extra_objects rx-parse.o"
+        fi
+	;;
+
       xstormy16)
 	using_cgen=yes
 	;;

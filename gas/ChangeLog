@@ -1,3 +1,23 @@
+2009-09-29  DJ Delorie  <dj@redhat.com>
+
+	* Makefile.am: Add RX target.
+	* configure.in: Likewise.
+	* configure.tgt: Likewise.
+	* read.c (do_repeat_with_expander): New function.
+	* read.h: Provide a prototype for do_repeat_with_expander.
+	* doc/Makefile.am: Add RX target documentation.
+	* doc/all.texi: Likewise.
+	* doc/as.texinfo: Likewise.
+	* Makefile.in: Regenerate.
+	* NEWS: Mention support for RX architecture.
+	* configure: Regenerate.
+	* doc/Makefile.in: Regenerate.
+	* config/rx-defs.h: New file.
+	* config/rx-parse.y: New file.
+	* config/tc-rx.h: New file.
+	* config/tc-rx.c: New file.
+	* doc/c-rx.texi: New file.
+
 2009-09-25  Martin Thuresson  <martint@google.com>
 
 	Update soruces to make alpha, arc and arm targets compile cleanly

@@ -188,6 +188,8 @@ TARGET_LIBOPCODES_CFILES = \
 	pj-opc.c \
 	ppc-dis.c \
 	ppc-opc.c \
+	rx-decode.c \
+	rx-dis.c \
 	s390-dis.c \
 	s390-opc.c \
 	score-dis.c \
@@ -434,6 +436,14 @@ stamp-iq2000: $(CGENDEPS) $(srcdir)/../cpu/iq2000.cpu \
 	$(MAKE) run-cgen arch=iq2000 prefix=iq2000 options= \
 		archfile=$(srcdir)/../cpu/iq2000.cpu \
 		opcfile=$(srcdir)/../cpu/iq2000.opc extrafiles=
+
+$(srcdir)/rx-decode.c : $(srcdir)/rx-decode.opc opc2c$(EXEEXT)
+	./opc2c$(EXEEXT) $(srcdir)/rx-decode.opc > $(srcdir)/rx-decode.c
+
+rx-dis.lo : rx-dis.c sysdep.h config.h $(BFD_H) $(INCDIR)/opcode/rx.h
+
+opc2c$(EXEEXT) : $(srcdir)/opc2c.c
+	gcc $(srcdir)/opc2c.c -o opc2c$(EXEEXT)
 
 $(srcdir)/xstormy16-desc.h $(srcdir)/xstormy16-desc.c $(srcdir)/xstormy16-opc.h $(srcdir)/xstormy16-opc.c $(srcdir)/xstormy16-ibld.c $(srcdir)/xstormy16-asm.c $(srcdir)/xstormy16-dis.c: $(XSTORMY16_DEPS)
 	@true

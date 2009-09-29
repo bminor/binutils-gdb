@@ -209,6 +209,7 @@ ALL_EMULATIONS = \
 	eelf32ppcsim.o \
 	eelf32ppcwindiss.o \
 	eelf32ppcvxworks.o \
+	eelf32rx.o \
 	eelf32vax.o \
         eelf32xc16x.o \
         eelf32xc16xl.o \
@@ -787,6 +788,10 @@ eelf32xstormy16.c: $(srcdir)/emulparams/elf32xstormy16.sh \
 eelf32am33lin.c: $(srcdir)/emulparams/elf32am33lin.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32am33lin "$(tdir_mn10300)"
+eelf32rx.c: $(srcdir)/emulparams/elf32rx.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32rx "$(tdir_elf32rx)"
+	@true end-sanitize-rx
 eelf32vax.c: $(srcdir)/emulparams/elf32vax.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32vax "$(tdir_elf32vax)"

@@ -58,6 +58,7 @@
 @set PDP11
 @set PJ
 @set PPC
+@set RX
 @set S390
 @set SCORE
 @set SH

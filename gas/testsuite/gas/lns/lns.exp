@@ -13,6 +13,7 @@ if {
      && ![istarget i960-*-*]
      && ![istarget mcore-*-*]
      && ![istarget or32-*-*]
+     && ![istarget rx-*-*]
      && ![istarget s390*-*-*]
 } {
     # Use alternate file for targets using DW_LNS_fixed_advance_pc opcodes.

@@ -81,6 +81,7 @@ CPU_TYPES = \
 	pdp11 \
 	pj \
 	ppc \
+	rx \
 	s390 \
 	score \
 	sh \
@@ -284,6 +285,7 @@ TARGET_CPU_CFILES = \
 	config/tc-pdp11.c \
 	config/tc-pj.c \
 	config/tc-ppc.c \
+	config/tc-rx.c \
 	config/tc-s390.c \
 	config/tc-score.c \
 	config/tc-sh.c \
@@ -346,6 +348,7 @@ TARGET_CPU_HFILES = \
 	config/tc-pdp11.h \
 	config/tc-pj.h \
 	config/tc-ppc.h \
+	config/tc-rx.h \
 	config/tc-s390.h \
 	config/tc-score.h \
 	config/tc-sh.h \
@@ -499,7 +502,8 @@ noinst_SCRIPTS = $(GDBINIT)
 EXTRA_SCRIPTS = .gdbinit
 
 EXTRA_DIST = m68k-parse.c itbl-parse.c itbl-parse.h itbl-lex.c \
-	bfin-parse.c bfin-parse.h bfin-lex.c
+	bfin-parse.c bfin-parse.h bfin-lex.c \
+	rx-parse.c rx-parse.h
 
 diststuff: $(EXTRA_DIST) info
 
@@ -627,6 +631,15 @@ if AMDEP
 endif
 	$(COMPILE) -c `test -f bfin-lex.c || echo $(srcdir)/`bfin-lex.c $(NO_WERROR)
 endif
+
+rx-parse.c: $(srcdir)/config/rx-parse.y
+	$(SHELL) $(YLWRAP) $(srcdir)/config/rx-parse.y y.tab.c rx-parse.c y.tab.h rx-parse.h -- $(YACCCOMPILE) -d ;
+rx-parse.h: rx-parse.c
+rx-parse.o: rx-parse.c rx-parse.h $(srcdir)/config/rx-defs.h \
+ $(INCDIR)/elf/common.h $(INCDIR)/elf/rx.h $(BFDDIR)/libbfd.h
+
+rx-defs.h: ; @true
+$(srcdir)/config/rx-defs.h: ; @true
 
 # The instruction table specification lexical analyzer and parser.
 

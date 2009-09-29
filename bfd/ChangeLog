@@ -1,3 +1,24 @@
+2009-09-29  DJ Delorie  <dj@redhat.com>
+
+	* Makefile.am (ALL_MACHINES): Add cpu-rx.lo.
+	(ALL_MACHINES_CFILES): Add cpu-rx.c.
+	(BFD32_BACKENDS): Add elf32-rx.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-rx.c.
+	* archures.c (bfd_architecture): Add bfd_arch_rx and bfd_mach_rx.
+	Export bfd_rx_arch.
+	(bfd_archures_list): Add bfd_rx_arch.
+	* config.bfd: Add entry for rx-*-elf.
+	* configure.in: Add entries for bfd_elf32_rx_le_vec and
+	bfd_elf32_rx_be_vec.
+	* reloc.c: Add RX relocations.
+	* targets.c: Add RX target vectors.
+	* Makefile.in: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* configure: Regenerate.
+	* libbfd.h: Regenerate.
+	* cpu-rx.c: New file.
+	* elf32-rx.c: New file.
+
 2009-09-29 M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 
 	* elf32-cr16.c (elf32_cr16_relocate_section): Removed
