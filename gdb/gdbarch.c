@@ -232,6 +232,7 @@ struct gdbarch
   gdbarch_skip_permanent_breakpoint_ftype *skip_permanent_breakpoint;
   ULONGEST max_insn_length;
   gdbarch_displaced_step_copy_insn_ftype *displaced_step_copy_insn;
+  gdbarch_displaced_step_hw_singlestep_ftype *displaced_step_hw_singlestep;
   gdbarch_displaced_step_fixup_ftype *displaced_step_fixup;
   gdbarch_displaced_step_free_closure_ftype *displaced_step_free_closure;
   gdbarch_displaced_step_location_ftype *displaced_step_location;
@@ -371,6 +372,7 @@ struct gdbarch startup_gdbarch =
   0,  /* skip_permanent_breakpoint */
   0,  /* max_insn_length */
   0,  /* displaced_step_copy_insn */
+  default_displaced_step_hw_singlestep,  /* displaced_step_hw_singlestep */
   0,  /* displaced_step_fixup */
   NULL,  /* displaced_step_free_closure */
   NULL,  /* displaced_step_location */
@@ -464,6 +466,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->elf_make_msymbol_special = default_elf_make_msymbol_special;
   gdbarch->coff_make_msymbol_special = default_coff_make_msymbol_special;
   gdbarch->register_reggroup_p = default_register_reggroup_p;
+  gdbarch->displaced_step_hw_singlestep = default_displaced_step_hw_singlestep;
   gdbarch->displaced_step_fixup = NULL;
   gdbarch->displaced_step_free_closure = NULL;
   gdbarch->displaced_step_location = NULL;
@@ -627,6 +630,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of skip_permanent_breakpoint, has predicate */
   /* Skip verify of max_insn_length, has predicate */
   /* Skip verify of displaced_step_copy_insn, has predicate */
+  /* Skip verify of displaced_step_hw_singlestep, invalid_p == 0 */
   /* Skip verify of displaced_step_fixup, has predicate */
   if ((! gdbarch->displaced_step_free_closure) != (! gdbarch->displaced_step_copy_insn))
     fprintf_unfiltered (log, "\n\tdisplaced_step_free_closure");
@@ -790,6 +794,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: displaced_step_free_closure = <%s>\n",
                       host_address_to_string (gdbarch->displaced_step_free_closure));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: displaced_step_hw_singlestep = <%s>\n",
+                      host_address_to_string (gdbarch->displaced_step_hw_singlestep));
   fprintf_unfiltered (file,
                       "gdbarch_dump: displaced_step_location = <%s>\n",
                       host_address_to_string (gdbarch->displaced_step_location));
@@ -3142,6 +3149,23 @@ set_gdbarch_displaced_step_copy_insn (struct gdbarch *gdbarch,
                                       gdbarch_displaced_step_copy_insn_ftype displaced_step_copy_insn)
 {
   gdbarch->displaced_step_copy_insn = displaced_step_copy_insn;
+}
+
+int
+gdbarch_displaced_step_hw_singlestep (struct gdbarch *gdbarch, struct displaced_step_closure *closure)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->displaced_step_hw_singlestep != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_displaced_step_hw_singlestep called\n");
+  return gdbarch->displaced_step_hw_singlestep (gdbarch, closure);
+}
+
+void
+set_gdbarch_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
+                                          gdbarch_displaced_step_hw_singlestep_ftype displaced_step_hw_singlestep)
+{
+  gdbarch->displaced_step_hw_singlestep = displaced_step_hw_singlestep;
 }
 
 int

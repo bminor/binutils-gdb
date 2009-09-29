@@ -1002,10 +1002,11 @@ displaced_step_fixup (ptid_t event_ptid, enum target_signal signal)
 	      displaced_step_dump_bytes (gdb_stdlog, buf, sizeof (buf));
 	    }
 
-	  if (gdbarch_software_single_step_p (gdbarch))
-	    target_resume (ptid, 0, TARGET_SIGNAL_0);
-	  else
+	  if (gdbarch_displaced_step_hw_singlestep
+		(gdbarch, displaced_step_closure))
 	    target_resume (ptid, 1, TARGET_SIGNAL_0);
+	  else
+	    target_resume (ptid, 0, TARGET_SIGNAL_0);
 
 	  /* Done, we're stepping a thread.  */
 	  break;
@@ -1114,19 +1115,15 @@ maybe_software_singlestep (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   int hw_step = 1;
 
-  if (gdbarch_software_single_step_p (gdbarch))
+  if (gdbarch_software_single_step_p (gdbarch)
+      && gdbarch_software_single_step (gdbarch, get_current_frame ()))
     {
-      if (use_displaced_stepping (gdbarch))
-        hw_step = 0;
-      else if (gdbarch_software_single_step (gdbarch, get_current_frame ()))
-	{
-	  hw_step = 0;
-	  /* Do not pull these breakpoints until after a `wait' in
-	     `wait_for_inferior' */
-	  singlestep_breakpoints_inserted_p = 1;
-	  singlestep_ptid = inferior_ptid;
-	  singlestep_pc = pc;
-	}
+      hw_step = 0;
+      /* Do not pull these breakpoints until after a `wait' in
+	 `wait_for_inferior' */
+      singlestep_breakpoints_inserted_p = 1;
+      singlestep_ptid = inferior_ptid;
+      singlestep_pc = pc;
     }
   return hw_step;
 }
@@ -1208,10 +1205,13 @@ a command like `return' or `jump' to continue execution."));
 	  discard_cleanups (old_cleanups);
 	  return;
 	}
+
+      step = gdbarch_displaced_step_hw_singlestep
+	       (gdbarch, displaced_step_closure);
     }
 
   /* Do we need to do it the hard way, w/temp breakpoints?  */
-  if (step)
+  else if (step)
     step = maybe_software_singlestep (gdbarch, pc);
 
   if (should_resume)

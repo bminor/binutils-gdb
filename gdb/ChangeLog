@@ -1,3 +1,19 @@
+2009-09-29  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbarch.sh (displaced_step_hw_singlestep): New callback.
+	* gdbarch.c, gdbarch.h: Regenerate.
+	* arch-utils.c (default_displaced_step_hw_singlestep): New function.
+	* arch-utils.h (default_displaced_step_hw_singlestep): Add prototype.
+
+	* ppc-linux-tdep.c (ppc_displaced_step_hw_singlestep): New function.
+	(rs6000_gdbarch_init): Install it.
+
+	* infrun.c (displaced_step_fixup): Use new callback to determine
+	whether to "step" or "continue" displaced copy.
+	(resume): Likewise.  Do not call maybe_software_singlestep
+	for displaced stepping.
+	(maybe_software_singlestep): Do not handle displaced stepping.
+
 2009-09-29  Hui Zhu  <teawater@gmail.com>
 
 	* record.c (record_open): Change "query" to "error".
