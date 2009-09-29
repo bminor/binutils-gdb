@@ -1,13 +1,9 @@
 	.section	".text"
 power7:
 	lxvd2x    3,4,5
-	lxvd2ux   3,4,5
 	lxvd2x    43,4,5
-	lxvd2ux   43,4,5
 	stxvd2x   3,4,5
-	stxvd2ux  3,4,5
 	stxvd2x   43,4,5
-	stxvd2ux  43,4,5
 	xxmrghd   3,4,5
 	xxmrghd   43,44,45
 	xxmrgld   3,4,5

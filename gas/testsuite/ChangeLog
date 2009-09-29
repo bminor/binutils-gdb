@@ -1,3 +1,11 @@
+2009-09-29  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gas/ppc/vsx.s ("lxsdux", "lxvd2ux", "lxvw4ux", "stxsdux", 
+	"stxvd2ux", "stxvw4ux"): Remove tests.
+	* gas/ppc/vsx.d: Likewise.
+	* gas/ppc/power7.s: Likewise.
+	* gas/ppc/power7.d: Likewise.
+
 2009-09-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/ppc/a2.d: Match PPC64 relocs.
