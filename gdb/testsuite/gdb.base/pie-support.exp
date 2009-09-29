@@ -18,11 +18,11 @@ set srcfile ${testfile}.c
 set objfile ${objdir}/${subdir}/${testfile}.o
 set binfile ${objdir}/${subdir}/${testfile}
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${objfile}" object {debug additional_flags=-fpie}] != "" } {
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${objfile}" object {quiet debug additional_flags=-fpie}] != "" } {
     untested "Couldn't compile test PIE object file."
     return -1
 }
-if  { [gdb_compile "${objfile}" "${binfile}" executable {debug additional_flags=-pie}] != "" } {
+if  { [gdb_compile "${objfile}" "${binfile}" executable {quiet debug additional_flags=-pie}] != "" } {
     untested "Couldn't compile test PIE binary."
     return -1
 }
