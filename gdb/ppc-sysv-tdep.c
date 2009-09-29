@@ -1326,14 +1326,10 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   regcache_cooked_write_signed (regcache, tdep->ppc_lr_regnum, bp_addr);
 
   /* Use the func_addr to find the descriptor, and use that to find
-     the TOC.  If we're calling via a function pointer, the pointer
-     itself identifies the descriptor.  */
+     the TOC.  */
   {
-    struct type *ftype = check_typedef (value_type (function));
-    CORE_ADDR desc_addr = value_as_address (function);
-
-    if (TYPE_CODE (ftype) == TYPE_CODE_PTR
-	|| convert_code_addr_to_desc_addr (func_addr, &desc_addr))
+    CORE_ADDR desc_addr;
+    if (convert_code_addr_to_desc_addr (func_addr, &desc_addr))
       {
 	/* The TOC is the second double word in the descriptor.  */
 	CORE_ADDR toc =
