@@ -15898,10 +15898,20 @@ counts of various errors encountered so far.
 @cindex Cygwin-specific commands
 
 @value{GDBN} supports native debugging of MS Windows programs, including
-DLLs with and without symbolic debugging information.  There are various
-additional Cygwin-specific commands, described in this section.
-Working with DLLs that have no debugging symbols is described in
-@ref{Non-debug DLL Symbols}.
+DLLs with and without symbolic debugging information.
+
+@cindex Ctrl-BREAK, MS-Windows
+@cindex interrupt debuggee on MS-Windows
+MS-Windows programs that call @code{SetConsoleMode} to switch off the
+special meaning of the @samp{Ctrl-C} keystroke cannot be interrupted
+by typing @kbd{C-c}.  For this reason, @value{GDBN} on MS-Windows
+supports @kbd{C-@key{BREAK}} as an alternative interrupt key
+sequence, which can be used to interrupt the debuggee even if it
+ignores @kbd{C-c}.
+
+There are various additional Cygwin-specific commands, described in
+this section.  Working with DLLs that have no debugging symbols is
+described in @ref{Non-debug DLL Symbols}.
 
 @table @code
 @kindex info w32

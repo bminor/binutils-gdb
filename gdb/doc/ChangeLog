@@ -1,3 +1,7 @@
+2009-09-30  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gdb.texinfo (Cygwin Native): Mention support for Ctrl-BREAK.
+
 2009-09-18  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (GDB/MI Variable Objects): -enable-pretty-printing
