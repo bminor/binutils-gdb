@@ -1,3 +1,64 @@
+2009-09-30  Ian Lance Taylor  <iant@google.com>
+
+	* object.h (class Object): Remove target_ field, and target,
+	sized_target, and set_target methods.
+	(Object::sized_target): Remove.
+	(class Sized_relobj): Update declarations.  Remove sized_target.
+	* object.cc (Sized_relobj::setup): Remove target parameter.
+	Change all callers.
+	(Input_objects::add_object): Don't do anything with the target.
+	(make_elf_sized_object): Add punconfigured parameter.  Change all
+	callers.  Set or test parameter target.
+	* dynobj.cc (Sized_dynobj::target): Remove target parameter.
+	Change all callers.
+	* parameters.cc (Parameters::set_target): Change parameter type to
+	be non-const.
+	(Parameters::default_target): Remove.
+	(set_parameters_target): Change parameter type to be non-const.
+	(parameters_force_valid_target): New function.
+	(parameters_clear_target): New function.
+	* parameters.h (class Parameters): Update declarations.  Remove
+	default_target method.  Add sized_target and clear_target
+	methods.  Change target_ to be non-const.
+	(set_parameters_target): Update declaration.
+	(parameters_force_valid_target): Declare.
+	(parameters_clear_target): Declare.
+	* readsyms.cc (Read_symbols::do_read_symbols): Pass punconfigured
+	as NULL if we aren't searching.
+	(Add_symbols::run): Don't check for compatible target.
+	* fileread.cc (Input_file::open_binary): Call
+	parameters_force_valid_target.
+	* gold.cc (queue_middle_tasks): Likewise.
+	* plugin.cc (make_sized_plugin_object): Likewise.  Don't call
+	set_target on object.
+	* dynobj.h (class Sized_dynobj): Update declarations.
+	* archive.cc (Archive::get_elf_object_for_member): Return NULL if
+	make_elf_object returns NULL.
+	(Archive::include_member): Don't check whether object target is
+	compatible.
+	* output.cc (Output_section::add_input_section): Get target from
+	parameters.
+	(Output_section::relax_input_section): Likewise.
+	* reloc.cc (Sized_relobj::do_gc_process_relocs): Get target from
+	parameters.
+	(Sized_relobj::do_scan_relocs): Likewise.
+	(Sized_relobj::relocate_sections): Likewise.
+	* resolve.cc (Symbol_table::resolve): Likewise.
+	* symtab.cc (Symbol_table::wrap_symbol): Likewise.  Remove object
+	parameter.  Change all callers.
+	(Symbol_table::add_from_object): Get target from parameters.
+	(Symbol_table::add_from_relobj): Don't check object target.
+	(Symbol_table::add_from_dynobj): Likewise.
+	(Symbol_table::define_special_symbol): Get target from
+	parameters.
+	* symtab.h (class Symbol_table): Update declaration.
+	* testsuite/binary_unittest.cc (gold_testsuite): Remove target
+	parameter.  Change all callers.  Clear parameter target.
+	(Binary_test): Test target here.
+	* testsuite/object_unittest.cc (gold_testsuite): Remove
+	target_test_pointer parameter.  Change all callers.
+	(Object_test): Test target here.
+
 2009-09-26  Ian Lance Taylor  <iant@google.com>
 
 	* testsuite/initpri1.c: Don't try to use constructor priorities if

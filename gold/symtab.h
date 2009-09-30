@@ -1450,7 +1450,7 @@ class Symbol_table
 
   // Adjust NAME and *NAME_KEY for wrapping.
   const char*
-  wrap_symbol(Object* object, const char*, Stringpool::Key* name_key);
+  wrap_symbol(const char* name, Stringpool::Key* name_key);
 
   // Whether we should override a symbol, based on flags in
   // resolve.cc.

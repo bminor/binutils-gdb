@@ -363,7 +363,8 @@ Sized_relobj<size, big_endian>::do_gc_process_relocs(const General_options& opti
 					       Layout* layout,
 					       Read_relocs_data* rd)
 {  
-  Sized_target<size, big_endian>* target = this->sized_target();
+  Sized_target<size, big_endian>* target =
+    parameters->sized_target<size, big_endian>();
 
   const unsigned char* local_symbols;
   if (rd->local_symbols == NULL)
@@ -403,7 +404,8 @@ Sized_relobj<size, big_endian>::do_scan_relocs(const General_options& options,
 					       Layout* layout,
 					       Read_relocs_data* rd)
 {
-  Sized_target<size, big_endian>* target = this->sized_target();
+  Sized_target<size, big_endian>* target =
+    parameters->sized_target<size, big_endian>();
 
   const unsigned char* local_symbols;
   if (rd->local_symbols == NULL)
@@ -802,7 +804,8 @@ Sized_relobj<size, big_endian>::relocate_sections(
     Views* pviews)
 {
   unsigned int shnum = this->shnum();
-  Sized_target<size, big_endian>* target = this->sized_target();
+  Sized_target<size, big_endian>* target =
+    parameters->sized_target<size, big_endian>();
 
   const Output_sections& out_sections(this->output_sections());
   const std::vector<Address>& out_offsets(this->section_offsets_);

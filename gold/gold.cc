@@ -382,7 +382,7 @@ queue_middle_tasks(const General_options& options,
   // pass an empty archive to the linker and get an empty object file
   // out.  In order to do this we need to use a default target.
   if (input_objects->number_of_input_objects() == 0)
-    set_parameters_target(&parameters->default_target());
+    parameters_force_valid_target();
 
   int thread_count = options.thread_count_middle();
   if (thread_count == 0)

@@ -1895,7 +1895,7 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
   if (aligned_offset_in_section > offset_in_section
       && !have_sections_script
       && (sh_flags & elfcpp::SHF_EXECINSTR) != 0
-      && object->target()->has_code_fill())
+      && parameters->target().has_code_fill())
     {
       // We need to add some fill data.  Using fill_list_ when
       // possible is an optimization, since we will often have fill
@@ -1907,7 +1907,7 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
         {
           // FIXME: When relaxing, the size needs to adjust to
           // maintain a constant alignment.
-          std::string fill_data(object->target()->code_fill(fill_len));
+          std::string fill_data(parameters->target().code_fill(fill_len));
           Output_data_const* odc = new Output_data_const(fill_data, 1);
           this->input_sections_.push_back(Input_section(odc));
         }
@@ -1925,7 +1925,7 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
       || this->may_sort_attached_input_sections()
       || this->must_sort_attached_input_sections()
       || parameters->options().user_set_Map()
-      || object->target()->may_relax())
+      || parameters->target().may_relax())
     this->input_sections_.push_back(Input_section(object, shndx,
 						  shdr.get_sh_size(),
 						  addralign));
@@ -2041,7 +2041,7 @@ Output_section::relax_input_section(Output_relaxed_input_section *psection)
   Relobj* relobj = psection->relobj();
   unsigned int shndx = psection->shndx();
 
-  gold_assert(relobj->target()->may_relax());
+  gold_assert(parameters->target().may_relax());
 
   // This is not very efficient if we a going to relax a number of sections
   // in an Output_section with lot of Input_sections.

@@ -980,17 +980,14 @@ message(int level, const char * format, ...)
 static Pluginobj*
 make_sized_plugin_object(Input_file* input_file, off_t offset, off_t filesize)
 {
-  Target* target;
   Pluginobj* obj = NULL;
 
-  if (parameters->target_valid())
-    target = const_cast<Target*>(&parameters->target());
-  else
-    target = const_cast<Target*>(&parameters->default_target());
+  parameters_force_valid_target();
+  const Target& target(parameters->target());
 
-  if (target->get_size() == 32)
+  if (target.get_size() == 32)
     {
-      if (target->is_big_endian())
+      if (target.is_big_endian())
 #ifdef HAVE_TARGET_32_BIG
         obj = new Sized_pluginobj<32, true>(input_file->filename(),
                                             input_file, offset, filesize);
@@ -1009,9 +1006,9 @@ make_sized_plugin_object(Input_file* input_file, off_t offset, off_t filesize)
 		   input_file->filename().c_str());
 #endif
     }
-  else if (target->get_size() == 64)
+  else if (target.get_size() == 64)
     {
-      if (target->is_big_endian())
+      if (target.is_big_endian())
 #ifdef HAVE_TARGET_64_BIG
         obj = new Sized_pluginobj<64, true>(input_file->filename(),
                                             input_file, offset, filesize);
@@ -1032,7 +1029,6 @@ make_sized_plugin_object(Input_file* input_file, off_t offset, off_t filesize)
     }
 
   gold_assert(obj != NULL);
-  obj->set_target(target);
   return obj;
 }
 

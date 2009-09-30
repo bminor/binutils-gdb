@@ -564,6 +564,8 @@ Archive::get_elf_object_for_member(off_t off, bool* punconfigured)
 				 + "(" + member_name + ")"),
 				input_file, memoff, ehdr, read_size,
 				punconfigured);
+  if (obj == NULL)
+    return NULL;
   obj->set_no_export(this->no_export());
   return obj;
 }
@@ -807,11 +809,6 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
     {
       Object *obj = p->second.obj_;
 
-      if (!this->included_member_
-	  && this->searched_for()
-	  && !parameters->is_compatible_target(obj->target()))
-	return false;
-
       Read_symbols_data *sd = p->second.sd_;
       if (mapfile != NULL)
         mapfile->report_include_archive_member(obj->name(), sym, why);
@@ -830,9 +827,8 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
 
   if (!this->included_member_
       && this->searched_for()
-      && (obj == NULL
-	  ? unconfigured
-	  : !parameters->is_compatible_target(obj->target())))
+      && obj == NULL
+      && unconfigured)
     {
       if (obj != NULL)
 	delete obj;

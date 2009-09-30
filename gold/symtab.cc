@@ -688,13 +688,12 @@ Symbol_table::force_local(Symbol* sym)
 // option was used.
 
 const char*
-Symbol_table::wrap_symbol(Object* object, const char* name,
-			  Stringpool::Key* name_key)
+Symbol_table::wrap_symbol(const char* name, Stringpool::Key* name_key)
 {
   // For some targets, we need to ignore a specific character when
   // wrapping, and add it back later.
   char prefix = '\0';
-  if (name[0] == object->target()->wrap_char())
+  if (name[0] == parameters->target().wrap_char())
     {
       prefix = name[0];
       ++name;
@@ -864,7 +863,7 @@ Symbol_table::add_from_object(Object* object,
   if (orig_st_shndx == elfcpp::SHN_UNDEF
       && parameters->options().any_wrap())
     {
-      const char* wrap_name = this->wrap_symbol(object, name, &name_key);
+      const char* wrap_name = this->wrap_symbol(name, &name_key);
       if (wrap_name != name)
 	{
 	  // If we see a reference to malloc with version GLIBC_2.0,
@@ -945,7 +944,7 @@ Symbol_table::add_from_object(Object* object,
 	  was_common = false;
 
 	  Sized_target<size, big_endian>* target =
-	    object->sized_target<size, big_endian>();
+	    parameters->sized_target<size, big_endian>();
 	  if (!target->has_make_symbol())
 	    ret = new Sized_symbol<size>();
 	  else
@@ -1033,7 +1032,6 @@ Symbol_table::add_from_relobj(
 {
   *defined = 0;
 
-  gold_assert(size == relobj->target()->get_size());
   gold_assert(size == parameters->target().get_size());
 
   const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
@@ -1272,7 +1270,6 @@ Symbol_table::add_from_dynobj(
 {
   *defined = 0;
 
-  gold_assert(size == dynobj->target()->get_size());
   gold_assert(size == parameters->target().get_size());
 
   if (dynobj->just_symbols())
@@ -1661,11 +1658,8 @@ Symbol_table::define_special_symbol(const char** pname, const char** pversion,
     sym = new Sized_symbol<size>();
   else
     {
-      gold_assert(target.get_size() == size);
-      gold_assert(target.is_big_endian() ? big_endian : !big_endian);
-      typedef Sized_target<size, big_endian> My_target;
-      const My_target* sized_target =
-          static_cast<const My_target*>(&target);
+      Sized_target<size, big_endian>* sized_target =
+	parameters->sized_target<size, big_endian>();
       sym = sized_target->make_symbol();
       if (sym == NULL)
         return NULL;

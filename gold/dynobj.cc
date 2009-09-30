@@ -83,9 +83,8 @@ Sized_dynobj<size, big_endian>::Sized_dynobj(
 
 template<int size, bool big_endian>
 void
-Sized_dynobj<size, big_endian>::setup(Target *target)
+Sized_dynobj<size, big_endian>::setup()
 {
-  this->set_target(target);
   const unsigned int shnum = this->elf_file_.shnum();
   this->set_shnum(shnum);
 }

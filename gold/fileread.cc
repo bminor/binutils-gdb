@@ -898,15 +898,12 @@ Input_file::open_binary(const Task* task, const std::string& name)
   // In order to open a binary file, we need machine code, size, and
   // endianness.  We may not have a valid target at this point, in
   // which case we use the default target.
-  const Target* target;
-  if (parameters->target_valid())
-    target = &parameters->target();
-  else
-    target = &parameters->default_target();
+  parameters_force_valid_target();
+  const Target& target(parameters->target());
 
-  Binary_to_elf binary_to_elf(target->machine_code(),
-			      target->get_size(),
-			      target->is_big_endian(),
+  Binary_to_elf binary_to_elf(target.machine_code(),
+			      target.get_size(),
+			      target.is_big_endian(),
 			      name);
   if (!binary_to_elf.convert(task))
     return false;

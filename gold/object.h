@@ -195,7 +195,7 @@ class Object
   Object(const std::string& name, Input_file* input_file, bool is_dynamic,
 	 off_t offset = 0)
     : name_(name), input_file_(input_file), offset_(offset), shnum_(-1U),
-      is_dynamic_(is_dynamic), target_(NULL), xindex_(NULL), no_export_(false)
+      is_dynamic_(is_dynamic), xindex_(NULL), no_export_(false)
   { input_file->file().add_object(); }
 
   virtual ~Object()
@@ -221,11 +221,6 @@ class Object
   Pluginobj*
   pluginobj()
   { return this->do_pluginobj(); }
-
-  // Return the target structure associated with this object.
-  Target*
-  target() const
-  { return this->target_; }
 
   // Get the file.  We pass on const-ness.
   Input_file*
@@ -265,13 +260,6 @@ class Object
   bool
   just_symbols() const
   { return this->input_file()->just_symbols(); }
-
-  // Return the sized target structure associated with this object.
-  // This is like the target method but it returns a pointer of
-  // appropriate checked type.
-  template<int size, bool big_endian>
-  Sized_target<size, big_endian>*
-  sized_target() const;
 
   // Get the number of sections.
   unsigned int
@@ -453,11 +441,6 @@ class Object
 			   size_t* used) const
   { this->do_get_global_symbol_counts(symtab, defined, used); }
 
-  // Set the target.
-  void
-  set_target(Target* target)
-  { this->target_ = target; }
-
   // Return whether this object was found in a system directory.
   bool
   is_in_system_directory() const
@@ -589,26 +572,12 @@ class Object
   unsigned int shnum_;
   // Whether this is a dynamic object.
   bool is_dynamic_;
-  // Target functions--may be NULL if the target is not known.
-  Target* target_;
   // Many sections for objects with more than SHN_LORESERVE sections.
   Xindex* xindex_;
   // True if exclude this object from automatic symbol export.
   // This is used only for archive objects.
   bool no_export_;
 };
-
-// Implement sized_target inline for efficiency.  This approach breaks
-// static type checking, but is made safe using asserts.
-
-template<int size, bool big_endian>
-inline Sized_target<size, big_endian>*
-Object::sized_target() const
-{
-  gold_assert(this->target_->get_size() == size);
-  gold_assert(this->target_->is_big_endian() ? big_endian : !big_endian);
-  return static_cast<Sized_target<size, big_endian>*>(this->target_);
-}
 
 // A regular object (ET_REL).  This is an abstract base class itself.
 // The implementation is the template class Sized_relobj.
@@ -1308,7 +1277,7 @@ class Sized_relobj : public Relobj
 
   // Set up the object file based on TARGET.
   void
-  setup(Target *target);
+  setup();
 
   // Return the number of symbols.  This is only valid after
   // Object::add_symbols has been called.
@@ -1372,11 +1341,6 @@ class Sized_relobj : public Relobj
     gold_assert(sym < this->local_values_.size());
     return this->local_values_[sym].input_shndx(is_ordinary);
   }
-
-  // Return the appropriate Sized_target structure.
-  Sized_target<size, big_endian>*
-  sized_target()
-  { return this->Object::sized_target<size, big_endian>(); }
 
   // Record that local symbol SYM needs a dynamic symbol entry.
   void

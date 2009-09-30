@@ -73,14 +73,14 @@ Target::do_make_elf_object_implementation(
     {
       Sized_relobj<size, big_endian>* obj =
 	new Sized_relobj<size, big_endian>(name, input_file, offset, ehdr);
-      obj->setup(this);
+      obj->setup();
       return obj;
     }
   else if (et == elfcpp::ET_DYN)
     {
       Sized_dynobj<size, big_endian>* obj =
 	new Sized_dynobj<size, big_endian>(name, input_file, offset, ehdr);
-      obj->setup(this);
+      obj->setup();
       return obj;
     }
   else

@@ -336,14 +336,12 @@ Sized_relobj<size, big_endian>::~Sized_relobj()
 }
 
 // Set up an object file based on the file header.  This sets up the
-// target and reads the section information.
+// section information.
 
 template<int size, bool big_endian>
 void
-Sized_relobj<size, big_endian>::setup(Target *target)
+Sized_relobj<size, big_endian>::setup()
 {
-  this->set_target(target);
-
   const unsigned int shnum = this->elf_file_.shnum();
   this->set_shnum(shnum);
 }
@@ -2067,16 +2065,6 @@ Sized_relobj<size, big_endian>::do_get_global_symbol_counts(
 bool
 Input_objects::add_object(Object* obj)
 {
-  // Set the global target from the first object file we recognize.
-  Target* target = obj->target();
-  if (!parameters->target_valid())
-    set_parameters_target(target);
-  else if (target != &parameters->target())
-    {
-      obj->error(_("incompatible target"));
-      return false;
-    }
-
   // Print the filename if the -t/--trace option is selected.
   if (parameters->options().trace())
     gold_info("%s", obj->name().c_str());
@@ -2227,7 +2215,8 @@ using namespace gold;
 template<int size, bool big_endian>
 Object*
 make_elf_sized_object(const std::string& name, Input_file* input_file,
-		      off_t offset, const elfcpp::Ehdr<size, big_endian>& ehdr)
+		      off_t offset, const elfcpp::Ehdr<size, big_endian>& ehdr,
+		      bool* punconfigured)
 {
   Target* target = select_target(ehdr.get_e_machine(), size, big_endian,
 				 ehdr.get_e_ident()[elfcpp::EI_OSABI],
@@ -2235,6 +2224,18 @@ make_elf_sized_object(const std::string& name, Input_file* input_file,
   if (target == NULL)
     gold_fatal(_("%s: unsupported ELF machine number %d"),
 	       name.c_str(), ehdr.get_e_machine());
+
+  if (!parameters->target_valid())
+    set_parameters_target(target);
+  else if (target != &parameters->target())
+    {
+      if (punconfigured != NULL)
+	*punconfigured = true;
+      else
+	gold_error(_("%s: incompatible target"), name.c_str());
+      return NULL;
+    }
+
   return target->make_elf_object<size, big_endian>(name, input_file, offset,
 						   ehdr);
 }
@@ -2337,7 +2338,7 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 #ifdef HAVE_TARGET_32_BIG
 	  elfcpp::Ehdr<32, true> ehdr(p);
 	  return make_elf_sized_object<32, true>(name, input_file,
-						 offset, ehdr);
+						 offset, ehdr, punconfigured);
 #else
 	  if (punconfigured != NULL)
 	    *punconfigured = true;
@@ -2353,7 +2354,7 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 #ifdef HAVE_TARGET_32_LITTLE
 	  elfcpp::Ehdr<32, false> ehdr(p);
 	  return make_elf_sized_object<32, false>(name, input_file,
-						  offset, ehdr);
+						  offset, ehdr, punconfigured);
 #else
 	  if (punconfigured != NULL)
 	    *punconfigured = true;
@@ -2377,7 +2378,7 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 #ifdef HAVE_TARGET_64_BIG
 	  elfcpp::Ehdr<64, true> ehdr(p);
 	  return make_elf_sized_object<64, true>(name, input_file,
-						 offset, ehdr);
+						 offset, ehdr, punconfigured);
 #else
 	  if (punconfigured != NULL)
 	    *punconfigured = true;
@@ -2393,7 +2394,7 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 #ifdef HAVE_TARGET_64_LITTLE
 	  elfcpp::Ehdr<64, false> ehdr(p);
 	  return make_elf_sized_object<64, false>(name, input_file,
-						  offset, ehdr);
+						  offset, ehdr, punconfigured);
 #else
 	  if (punconfigured != NULL)
 	    *punconfigured = true;
