@@ -1,5 +1,9 @@
 2009-09-30  Joel Brobecker  <brobecker@adacore.com>
 
+	GDB 6.8.92 released.
+
+2009-09-30  Joel Brobecker  <brobecker@adacore.com>
+
 	* README: Update GDB version number to 6.8.92.
 	* version.in: Likewise.
 
