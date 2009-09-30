@@ -1,3 +1,7 @@
+2009-09-30  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.com: Use hosts/alphavms.h on both alpha and ia64 VMS.
+
 2009-09-24  Alan Modra  <amodra@bigpond.net.au>
 
 	PR binutils/10654

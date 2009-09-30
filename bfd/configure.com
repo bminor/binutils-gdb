@@ -318,6 +318,9 @@ $ create []config.h
 /* Disable NLS  */
 #undef ENABLE_NLS
 $!
+$ write sys$output "Copy sysdep.h"
+$ copy [.hosts]alphavms.h sysdep.h
+$
 $ write sys$output "Generate build.com"
 $!
 $ if ARCH.eqs."alpha"
@@ -362,7 +365,6 @@ $ write sys$output "Generate elf64-target.h from elfxx-target.h"
 $ edit/tpu/nojournal/nosection/nodisplay/command=substxx.tpu -
         []elfXX-target.h /output=[]elf64-target.h
 $ del substxx.tpu;*
-$ copy [.hosts]alphavms.h sysdep.h
 $ endif
 $ append sys$input build.com
 $DECK
