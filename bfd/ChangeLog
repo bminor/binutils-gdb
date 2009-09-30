@@ -1,3 +1,7 @@
+2009-09-30  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.com: Use hosts/alphavms.h on both alpha and ia64 VMS.
+
 2009-09-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf64_x86_64_append_rela): New.
