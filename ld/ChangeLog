@@ -1,3 +1,9 @@
+2009-09-30  Matthias Klose  <doko@ubuntu.com>
+
+        PR ld/9863
+        * emulparams/armelf_linux.sh (DATA_START_SYMBOLS): Use PROVIDE
+        with __data_start.
+
 2009-09-29  Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* emulparams/m68kelf.sh (NOP): Use 0x4e71 (nop) rather than 0x4e75
