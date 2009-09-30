@@ -1,3 +1,7 @@
+2009-09-30  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* hashtab.c [HAVE_INTTYPES_H]: Include <inttypes.h>.
+
 2009-09-23  Tristan Gingold  <gingold@adacore.com>
 
 	* config.h-vms: Remove HAVE_STDINT_H which was committed by mistake.
