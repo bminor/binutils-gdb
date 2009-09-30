@@ -1,5 +1,9 @@
 2009-09-30  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Set version to 6.8.92.20090930-cvs.
+
+2009-09-30  Joel Brobecker  <brobecker@adacore.com>
+
 	GDB 6.8.92 released.
 
 2009-09-30  Joel Brobecker  <brobecker@adacore.com>
