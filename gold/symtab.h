@@ -726,6 +726,18 @@ class Symbol
   set_is_forced_local()
   { this->is_forced_local_ = true; }
 
+  // Return true if this may need a COPY relocation.
+  // References from an executable object to non-function symbols
+  // defined in a dynamic object may need a COPY relocation.
+  bool
+  may_need_copy_reloc() const
+  {
+    return (!parameters->options().shared()
+	    && parameters->options().copyreloc()
+	    && this->is_from_dynobj()
+	    && this->type() != elfcpp::STT_FUNC);
+  }
+
  protected:
   // Instances of this class should always be created at a specific
   // size.

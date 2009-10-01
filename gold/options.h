@@ -928,6 +928,9 @@ class General_options
 	      NULL);
   DEFINE_uint64(max_page_size, options::DASH_Z, '\0', 0,
                 N_("Set maximum page size to SIZE"), N_("SIZE"));
+  DEFINE_bool(copyreloc, options::DASH_Z, '\0', true,
+	      NULL,
+	      N_("Do not create copy relocs"));
   DEFINE_bool(nodefaultlib, options::DASH_Z, '\0', false,
 	      N_("Mark object not to use default search paths"),
 	      NULL);

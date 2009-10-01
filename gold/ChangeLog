@@ -1,3 +1,27 @@
+2009-09-30  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Target_arm::may_need_copy_reloc): Check for THUMB function
+	symbol and call Symbol::may_need_copy_reloc to determine if
+	a copy reloc is needed.
+	* copy-relocs.cc (Copy_relocs::need_copy_reloc): Return false if -z
+	nocopyreloc is given in command line.
+	(Copy_relocs::emit_copy_reloc): Assert that -z nocopyreloc is not
+	given in command line.
+	* i386.cc (Target_i386::may_need_copy_reloc): Remove.
+	(Target_i386::Scan::global): Use Symbol::may_need_copy_reloc instead
+	of the removed Target_i386::may_need_copy_reloc.
+	* options.h (copyreloc): New option with default value false.
+	* powerpc.cc (Target_powerpc::may_need_copy_reloc): Remove.
+	(Target_powerpc::Scan::global): Use Symbol::may_need_copy_reloc
+	instead of the removed Target_powerpc::may_need_copy_reloc.
+	* sparc.cc (Target_powerpc::may_need_copy_reloc): Remove.
+	(Target_sparc::Scan::global): Use Symbol::may_need_copy_reloc
+	instead of the removed Target_sparc::may_need_copy_reloc.
+	* symtab.h (Symbol::may_need_copy_reloc): New method definition.
+	* x86_64.cc (Target_powerpc::may_need_copy_reloc): Remove.
+	(Target_x86_64::Scan::global): Use Symbol::may_need_copy_reloc
+	instead of the removed Target_x86_64::may_need_copy_reloc.
+
 2009-09-30  Ian Lance Taylor  <iant@google.com>
 
 	* object.h (class Object): Remove target_ field, and target,

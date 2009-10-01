@@ -84,7 +84,8 @@ Copy_relocs<sh_type, size, big_endian>::need_copy_reloc(
     Sized_relobj<size, big_endian>* object,
     unsigned int shndx) const
 {
-  // FIXME: Handle -z nocopyrelocs.
+  if (!parameters->options().copyreloc())
+    return false;
 
   if (sym->symsize() == 0)
     return false;
@@ -109,6 +110,9 @@ Copy_relocs<sh_type, size, big_endian>::emit_copy_reloc(
     Sized_symbol<size>* sym,
     Output_data_reloc<sh_type, true, size, big_endian>* reloc_section)
 {
+  // We should not be here if -z nocopyreloc is given.
+  gold_assert(parameters->options().copyreloc());
+
   typename elfcpp::Elf_types<size>::Elf_WXword symsize = sym->symsize();
 
   // There is no defined way to determine the required alignment of

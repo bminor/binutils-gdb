@@ -405,10 +405,8 @@ class Target_arm : public Sized_target<32, big_endian>
   bool
   may_need_copy_reloc(Symbol* gsym)
   {
-    return (!parameters->options().shared()
-	    && gsym->is_from_dynobj()
-	    && gsym->type() != elfcpp::STT_FUNC
-	    && gsym->type() != elfcpp::STT_ARM_TFUNC);
+    return (gsym->type() != elfcpp::STT_ARM_TFUNC
+	    && gsym->may_need_copy_reloc());
   }
 
   // Add a potential copy relocation.

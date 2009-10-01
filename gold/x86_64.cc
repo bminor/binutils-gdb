@@ -375,17 +375,6 @@ class Target_x86_64 : public Target_freebsd<64, false>
   Reloc_section*
   rela_dyn_section(Layout*);
 
-  // Return true if the symbol may need a COPY relocation.
-  // References from an executable object to non-function symbols
-  // defined in a dynamic object may need a COPY relocation.
-  bool
-  may_need_copy_reloc(Symbol* gsym)
-  {
-    return (!parameters->options().shared()
-            && gsym->is_from_dynobj()
-            && gsym->type() != elfcpp::STT_FUNC);
-  }
-
   // Add a potential copy relocation.
   void
   copy_reloc(Symbol_table* symtab, Layout* layout,
@@ -1323,7 +1312,7 @@ Target_x86_64::Scan::global(const General_options&,
         // Make a dynamic relocation if necessary.
         if (gsym->needs_dynamic_reloc(Symbol::ABSOLUTE_REF))
           {
-            if (target->may_need_copy_reloc(gsym))
+            if (gsym->may_need_copy_reloc())
               {
                 target->copy_reloc(symtab, layout, object,
                                    data_shndx, output_section, gsym, reloc);
@@ -1363,7 +1352,7 @@ Target_x86_64::Scan::global(const General_options&,
           flags |= Symbol::FUNCTION_CALL;
         if (gsym->needs_dynamic_reloc(flags))
           {
-            if (target->may_need_copy_reloc(gsym))
+            if (gsym->may_need_copy_reloc())
               {
                 target->copy_reloc(symtab, layout, object,
                                    data_shndx, output_section, gsym, reloc);
