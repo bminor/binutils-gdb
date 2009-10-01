@@ -1,3 +1,7 @@
+2009-10-01  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* ld-spu/icache1.d: Update to new section layout.
+
 2009-09-28  Nick Clifton  <nickc@redhat.com>
 
 	* ld-mips-elf/mips-elf.exp: Only run attribute tests on Linux

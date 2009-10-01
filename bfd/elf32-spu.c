@@ -678,9 +678,10 @@ spu_elf_find_overlays (struct bfd_link_info *info)
   ovl_end = alloc_sec[0]->vma + alloc_sec[0]->size;
   if (htab->params->ovly_flavour == ovly_soft_icache)
     {
+      unsigned int prev_buf = 0, set_id = 0;
+
       /* Look for an overlapping vma to find the first overlay section.  */
       bfd_vma vma_start = 0;
-      bfd_vma lma_start = 0;
 
       for (i = 1; i < n; i++)
 	{
@@ -689,10 +690,6 @@ spu_elf_find_overlays (struct bfd_link_info *info)
 	    {
 	      asection *s0 = alloc_sec[i - 1];
 	      vma_start = s0->vma;
-	      if (strncmp (s0->name, ".ovl.init", 9) != 0)
-		lma_start = s0->lma;
-	      else
-		lma_start = s->lma;
 	      ovl_end = (s0->vma
 			 + ((bfd_vma) 1
 			    << (htab->num_lines_log2 + htab->line_size_log2)));
@@ -717,8 +714,10 @@ spu_elf_find_overlays (struct bfd_link_info *info)
 	  if (strncmp (s->name, ".ovl.init", 9) != 0)
 	    {
 	      num_buf = ((s->vma - vma_start) >> htab->line_size_log2) + 1;
-	      if (((s->vma - vma_start) & (htab->params->line_size - 1))
-		  || ((s->lma - lma_start) & (htab->params->line_size - 1)))
+	      set_id = (num_buf == prev_buf)? set_id + 1 : 0;
+	      prev_buf = num_buf;
+
+	      if ((s->vma - vma_start) & (htab->params->line_size - 1))
 		{
 		  info->callbacks->einfo (_("%X%P: overlay section %A "
 					    "does not start on a cache line.\n"),
@@ -737,7 +736,7 @@ spu_elf_find_overlays (struct bfd_link_info *info)
 
 	      alloc_sec[ovl_index++] = s;
 	      spu_elf_section_data (s)->u.o.ovl_index
-		= ((s->lma - lma_start) >>  htab->line_size_log2) + 1;
+		= (set_id << htab->num_lines_log2) + num_buf;
 	      spu_elf_section_data (s)->u.o.ovl_buf = num_buf;
 	    }
 	}
@@ -4531,13 +4530,12 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
 
   script = htab->params->spu_elf_open_overlay_script ();
 
-  if (fprintf (script, "SECTIONS\n{\n") <= 0)
-    goto file_err;
-
   if (htab->params->ovly_flavour == ovly_soft_icache)
     {
+      if (fprintf (script, "SECTIONS\n{\n") <= 0)
+	goto file_err;
+
       if (fprintf (script,
-		   " .data.icache ALIGN (16) : { *(.ovtab) *(.data.icache) }\n"
 		   " . = ALIGN (%u);\n"
 		   " .ovl.init : { *(.ovl.init) }\n"
 		   " . = ABSOLUTE (ADDR (.ovl.init));\n",
@@ -4552,10 +4550,10 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
 	  unsigned int vma, lma;
 
 	  vma = (indx & (htab->params->num_lines - 1)) << htab->line_size_log2;
-	  lma = indx << htab->line_size_log2;
+	  lma = vma + (((indx >> htab->num_lines_log2) + 1) << 18);
 
 	  if (fprintf (script, " .ovly%u ABSOLUTE (ADDR (.ovl.init)) + %u "
-		       ": AT (ALIGN (LOADADDR (.ovl.init) + SIZEOF (.ovl.init), 16) + %u) {\n",
+			       ": AT (LOADADDR (.ovl.init) + %u) {\n",
 		       ovlynum, vma, lma) <= 0)
 	    goto file_err;
 
@@ -4573,9 +4571,15 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
       if (fprintf (script, " . = ABSOLUTE (ADDR (.ovl.init)) + %u;\n",
 		   1 << (htab->num_lines_log2 + htab->line_size_log2)) <= 0)
 	goto file_err;
+
+      if (fprintf (script, "}\nINSERT AFTER .toe;\n") <= 0)
+	goto file_err;
     }
   else
     {
+      if (fprintf (script, "SECTIONS\n{\n") <= 0)
+	goto file_err;
+
       if (fprintf (script,
 		   " . = ALIGN (16);\n"
 		   " .ovl.init : { *(.ovl.init) }\n"
@@ -4627,13 +4631,13 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
 	    goto file_err;
 	}
 
+      if (fprintf (script, "}\nINSERT BEFORE .text;\n") <= 0)
+	goto file_err;
     }
 
   free (ovly_map);
   free (ovly_sections);
 
-  if (fprintf (script, "}\nINSERT BEFORE .text;\n") <= 0)
-    goto file_err;
   if (fclose (script) != 0)
     goto file_err;
 
