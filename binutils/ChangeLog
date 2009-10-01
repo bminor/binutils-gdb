@@ -1,3 +1,7 @@
+2009-10-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* addr2line.c (slurp_symtab): Don't use bfd_read_minisymbols.
+
 2009-09-29  Nick Clifton  <nickc@redhat.com>
 
 	* doc/binutils.texi (c++filt): Remove spurious description of
@@ -24,7 +28,7 @@
 
 2009-09-10  Martin Thuresson  <martin@mtme.org>
 
-	Update soruces to compile cleanly with -Wc++-compat:
+	Update sources to compile cleanly with -Wc++-compat:
 	* addr2line.c (slurp_symtab): Fix casts. Introduce variable
 	minisyms to avoid aliasing varning.
 	* ar.c: Add casts.
@@ -39,7 +43,7 @@
 	debug_baseclass_s, struct debug_method_s, struct
 	debug_method_variant_s, struct debug_type_s): Rename struct from
 	avoid name collision.
-        * debug.h: Use new struct names.
+	* debug.h: Use new struct names.
 	* dwarf.c: Add casts.
 	(free_debug_memory): Change loop counter variable a to int.
 	* ieee.c: Add casts.
@@ -48,7 +52,7 @@
 	(ieee_class_method_var): Rename variable virtual to is_virtual.
 	* nm.c: Add casts.
 	* objcopy.c: Add casts.
-	(copy_archive): Rename variable	delete to del.
+	(copy_archive): Rename variable delete to del.
 	* objdump.c: Add casts.
 	(dump_dwarf_section): Change loop counter variable i to int.
 	* prdbg.c: Add casts.
@@ -102,7 +106,7 @@
 
 2009-09-07  Tristan Gingold  <gingold@adacore.com>
 
-	* po/binutils.pot: Regenerate
+	* po/binutils.pot: Regenerate.
 
 2009-09-05  Martin Thuresson  <martin@mtme.org>
 
@@ -117,7 +121,7 @@
 
 	* dlltool.c (delayimp_name): Add new global variable
 	(usage, long_options, main): Add new option "-y" / "--output-delaylib"
-	(struct mac): Add fields how_dljtab_size, how_dljtab_roff1, 
+	(struct mac): Add fields how_dljtab_size, how_dljtab_roff1,
 	how_dljtab_roff2, how_dljtab, trampoline.
 	(i386_dljtab): Add binary stub for x86 delay import.
 	(i386_trampoline): Add text assembly stub for x86 delay import.
@@ -650,7 +654,7 @@
 2009-03-27  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (display_debug_ranges): Add the base address to the
-	displayed values for 'Begin' and 'End'. 
+	displayed values for 'Begin' and 'End'.
 
 2009-03-25  Ryan Mansfield  <rmansfield@qnx.com>
 
@@ -892,7 +896,7 @@
 
 	Cleanup code related to --identify option.
 
-	* binutils/dlltool.c (file scope): Removed globals identify_ms,
+	* dlltool.c (file scope): Removed globals identify_ms,
 	identify_member_contains_symname_result,
 	identify_dll_name_list_head, and identify_dll_name_list_tail.
 	Renamed existing typedef dll_name_list_type to
