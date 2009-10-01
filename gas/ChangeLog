@@ -1,3 +1,8 @@
+2009-10-01  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* config/tc-ppc.c (md_show_usage): Rename "ppca2" to "a2".
+	* doc/c-ppc.texi (PowerPC-Opts): Likewise.
+
 2009-10-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (x86_cons): Reformat.

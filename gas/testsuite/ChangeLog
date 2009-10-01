@@ -1,3 +1,7 @@
+2009-10-01  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gas/ppc/a2.d: Rename "ppca2" to "a2".
+
 2009-09-29  DJ Delorie  <dj@redhat.com>
 
 	* gas/rx: New directory.

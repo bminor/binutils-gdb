@@ -1933,7 +1933,7 @@ extract_dm (unsigned long insn,
 #define PPCCHLK PPC_OPCODE_CACHELCK
 #define PPCRFMCI	PPC_OPCODE_RFMCI
 #define E500MC  PPC_OPCODE_E500MC
-#define PPCA2	PPC_OPCODE_PPCA2
+#define PPCA2	PPC_OPCODE_A2
 
 /* The opcode table.
 

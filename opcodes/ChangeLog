@@ -1,3 +1,9 @@
+2009-10-01  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-opc.c (PPCA2): Use renamed mask PPC_OPCODE_A2.
+	* ppc-dis.c (ppc_opts): Likewise.
+	Rename "ppca2" to "a2".
+
 2009-10-01  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 
 	* crx-dis.c (match_opcode): Truncate mcode to 32-bit.

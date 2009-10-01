@@ -1,6 +1,6 @@
-#as: -mppca2
-#objdump: -dr -Mppca2
-#name: PPCA2 tests
+#as: -ma2
+#objdump: -dr -Ma2
+#name: A2 tests
 
 
 .*: +file format elf(32)?(64)?-powerpc.*
