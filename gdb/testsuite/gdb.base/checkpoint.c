@@ -40,9 +40,9 @@ main()
   for (i = 0; ; i++)
     {
       if (ftell (in) != i)
-	fprintf (stderr, "Input error at %d\n", i);
+	fprintf (stderr, "Input error at %ld\n", i);
       if (ftell (out) != i)
-	fprintf (stderr, "Output error at %d\n", i);
+	fprintf (stderr, "Output error at %ld\n", i);
       c = fgetc (in);
       if (c == '\n')
 	lines++;	/* breakpoint 1 */

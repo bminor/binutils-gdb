@@ -231,13 +231,13 @@ test_lseek ()
     }
   else
     {
-      printf ("lseek 1: ret = %d, errno = %d %s\n", ret, errno,
+      printf ("lseek 1: ret = %ld, errno = %d %s\n", (long) ret, errno,
 	      strerrno (errno));
       stop ();
-      printf ("lseek 2: ret = %d, errno = %d %s\n", ret, errno,
+      printf ("lseek 2: ret = %ld, errno = %d %s\n", (long) ret, errno,
 	      strerrno (errno));
       stop ();
-      printf ("lseek 3: ret = %d, errno = %d %s\n", ret, errno,
+      printf ("lseek 3: ret = %ld, errno = %d %s\n", (long) ret, errno,
 	      strerrno (errno));
     }
   /* Seeking on an invalid file descriptor */
@@ -473,7 +473,7 @@ test_unlink ()
 		  strerrno (errno));
         }
       else
-	printf ("unlink 2: ret = %d chmod failed\n", ret, errno);
+	printf ("unlink 2: ret = %d chmod failed, errno= %d\n", ret, errno);
     }
   else
     printf ("unlink 2: ret = %d, errno = %d\n", ret, errno);

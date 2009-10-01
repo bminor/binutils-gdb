@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <stdio.h>
+#include <string.h>
 
 /* Red Hat BZ PR 197584.c */
 

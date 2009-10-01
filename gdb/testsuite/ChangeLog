@@ -1,3 +1,11 @@
+2009-10-01  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gdb.base/fileio.c (test_lseek): typecast ofs_t ret variable to
+	long type.
+	(test_unlink): Correct printf string.
+	* gdb.base/checkpoint.c (main): Correct fprintf string for variable i.
+	* gdb.threads/attachstop-mt.c: Add #include <string.h>.
+
 2009-09-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/breakpoint-shadow.exp: Move the ia64 part into ...
