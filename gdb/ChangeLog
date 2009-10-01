@@ -1,5 +1,10 @@
 2009-10-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* MAINTAINERS: Move Don Lee to the correct section (Write After
+	Approval).
+
+2009-10-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* configure.ac: Disable -Werror by default.
 	* configure: Regenerate.
 
