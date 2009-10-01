@@ -1,3 +1,11 @@
+2009-10-01  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* elf32-spu.c (spu_elf_auto_overlay): Insert icache linker script
+	after .toe instead of before .text section.  Set the LMA of all
+	overlay sections to their icache IA address.
+	(spu_elf_find_overlays): Determine icache set id without reference
+	to the LMA.
+
 2009-09-30  Tristan Gingold  <gingold@adacore.com>
 
 	* configure.com: Use hosts/alphavms.h on both alpha and ia64 VMS.
