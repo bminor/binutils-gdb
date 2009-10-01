@@ -6201,7 +6201,8 @@ x86_cons (expressionS *exp, int size)
 }
 #endif
 
-static void signed_cons (int size)
+static void
+signed_cons (int size)
 {
   if (flag_code == CODE_64BIT)
     cons_sign = 1;

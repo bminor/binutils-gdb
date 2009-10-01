@@ -1,3 +1,7 @@
+2009-10-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (x86_cons): Reformat.
+
 2009-09-29  DJ Delorie  <dj@redhat.com>
 
 	* Makefile.am: Add RX target.
@@ -41,7 +45,9 @@
 2009-09-25  Nick Hudson  <nick.hudson@gmx.co.uk>
 
 	* doc/c-mips.texi: Fix the singlefloat and doublefloat kindex
-	entries2009-09-24  H.J. Lu  <hongjiu.lu@intel.com>
+	entries
+
+2009-09-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (build_vex_prefix): Check vex == 2 instead
 	of vex256.
