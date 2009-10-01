@@ -100,17 +100,27 @@ usage (FILE *stream, int status)
 static void
 slurp_symtab (bfd *abfd)
 {
+  long storage;
   long symcount;
-  unsigned int size;
-  void *minisyms = &syms;
+  bfd_boolean dynamic = FALSE;
 
   if ((bfd_get_file_flags (abfd) & HAS_SYMS) == 0)
     return;
 
-  symcount = bfd_read_minisymbols (abfd, FALSE, &minisyms, &size);
-  if (symcount == 0)
-    symcount = bfd_read_minisymbols (abfd, TRUE /* dynamic */, &minisyms, &size);
+  storage = bfd_get_symtab_upper_bound (abfd);
+  if (storage == 0)
+    {
+      storage = bfd_get_dynamic_symtab_upper_bound (abfd);
+      dynamic = TRUE;
+    }
+  if (storage < 0)
+    bfd_fatal (bfd_get_filename (abfd));
 
+  syms = (asymbol **) xmalloc (storage);
+  if (dynamic)
+    symcount = bfd_canonicalize_dynamic_symtab (abfd, syms);
+  else
+    symcount = bfd_canonicalize_symtab (abfd, syms);
   if (symcount < 0)
     bfd_fatal (bfd_get_filename (abfd));
 }

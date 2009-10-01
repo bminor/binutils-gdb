@@ -1,3 +1,7 @@
+2009-10-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* addr2line.c (slurp_symtab): Don't use bfd_read_minisymbols.
+
 2009-09-29  Nick Clifton  <nickc@redhat.com>
 
 	* doc/binutils.texi (c++filt): Remove spurious description of
@@ -88,8 +92,7 @@
 
 2009-09-10  Martin Thuresson  <martin@mtme.org>
 
-	Update soruces to compile cleanly with -Wc++-compat:
-
+	Update sources to compile cleanly with -Wc++-compat:
 	* addr2line.c (slurp_symtab): Fix casts. Introduce variable
 	minisyms to avoid aliasing varning.
 	* ar.c: Add casts.
