@@ -25,7 +25,7 @@ int x;
   sg = 6.6;
   sgi++;
   sgs = 8;
-  printf("address of sgs is 0x%x\n", &sgs);
+  printf("address of sgs is %p\n", &sgs);
   return 2*x;
 }
 

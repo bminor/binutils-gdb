@@ -27,7 +27,6 @@
 # define dlsym(handle, func) GetProcAddress (handle, func)
 #endif
 #define dlclose(handle) FreeLibrary (handle)
-#define dlerror() "error %d occurred", GetLastError ()
 #else
 #include <dlfcn.h>
 #endif
@@ -53,7 +52,11 @@ int main()
 
   if (!unloadshr)
     {
-      fprintf (stderr, dlerror ());
+#ifdef __WIN32__
+      fprintf (stderr, "error %d occurred", GetLastError ());
+#else
+      fprintf (stderr, "%s", dlerror ());
+#endif
       exit (1);
     }
 
