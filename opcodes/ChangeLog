@@ -1,3 +1,7 @@
+2009-10-01  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+	* crx-dis.c (match_opcode): Truncate mcode to 32-bit.
+
 2009-09-29  DJ Delorie  <dj@redhat.com>
 
 	* Makefile.am: Add RX files.
