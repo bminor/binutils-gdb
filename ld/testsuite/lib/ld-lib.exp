@@ -352,6 +352,47 @@ proc default_ld_nm { nm nmflags object } {
     }
 }
 
+# Define various symbols needed when not linking against all
+# target libs.
+proc ld_simple_link_defsyms {} {
+
+    set flags "--defsym __stack_chk_fail=0"
+
+    # ARM targets call __gccmain
+    if {[istarget arm*-*-*]       || \
+        [istarget strongarm*-*-*] || \
+        [istarget xscale*-*-*]    || \
+        [istarget thumb-*-*] } {
+        append flags " --defsym __gccmain=0"
+    }
+
+    # PowerPC EABI code calls __eabi.
+    if {[istarget powerpc*-*-eabi*] || [istarget powerpc*-*-rtems*]} {
+	append flags " --defsym __eabi=0"
+    }
+
+    # mn10200 code calls __truncsipsi2_d0_d2.
+    if {[istarget mn10200*-*-*]} then {
+	append flags " --defsym __truncsipsi2_d0_d2=0"
+    }
+
+    # m6811/m6812 code has references to soft registers.
+    if {[istarget m6811-*-*] || [istarget m6812-*-*]} {
+	append flags " --defsym _.frame=0 --defsym _.d1=0 --defsym _.d2=0"
+	append flags " --defsym _.d3=0 --defsym _.d4=0"
+	append flags " --defsym _.tmp=0 --defsym _.xy=0 --defsym _.z=0"
+    }
+
+    # Some OpenBSD targets have ProPolice and reference __guard and
+    # __stack_smash_handler.
+    if [istarget *-*-openbsd*] {
+	append flags " --defsym __guard=0"
+	append flags " --defsym __stack_smash_handler=0"
+    }
+
+    return $flags
+}
+
 # True if the object format is known to be ELF.
 #
 proc is_elf_format {} {

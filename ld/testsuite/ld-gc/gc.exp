@@ -44,7 +44,8 @@ proc test_gc { testname filename linker ldflags} {
     }
 
     set outfile "tmpdir/$filename"
-    set options "-L$srcdir/$subdir $ldflags $objfile"
+    set options "-L$srcdir/$subdir"
+    append options " " $ldflags " " [ld_simple_link_defsyms] " " $objfile
 
     # SH64 targets needs an extra ld option for this test.
     if [istarget sh64*-*-*] {
