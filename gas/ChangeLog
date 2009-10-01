@@ -1,3 +1,8 @@
+2009-10-01  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* config/tc-ppc.c (md_show_usage): Rename "ppca2" to "a2".
+	* doc/c-ppc.texi (PowerPC-Opts): Likewise.
+
 2009-09-25  Nick Hudson  <nick.hudson@gmx.co.uk>
 
 	* doc/c-mips.texi: Fix the singlefloat and doublefloat kindex

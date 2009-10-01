@@ -73,7 +73,7 @@ Generate code for PowerPC 64, including bridge insns.
 @item -mbooke
 Generate code for 32-bit BookE.
 
-@item -mppca2
+@item -ma2
 Generate code for A2 architecture.
 
 @item -me300
