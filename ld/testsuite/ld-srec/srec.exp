@@ -229,9 +229,9 @@ proc run_srec_test { test objs } {
     global host_triplet
 
     # Tell the ELF linker to not do anything clever with .eh_frame,
-    # not to put anything in small data, and define a symbol referenced
-    # by gcc -fstack-protector code.
-    set flags "--traditional-format -G 0 --defsym __stack_chk_fail=0"
+    # not to put anything in small data, and define various symbols.
+    set flags "--traditional-format -G 0 "
+    append flags [ld_simple_link_defsyms]
 
     # If the linker script uses SIZEOF_HEADERS, use a -Ttext argument
     # to force both the normal link and the S-record link to be put in
@@ -244,7 +244,7 @@ proc run_srec_test { test objs } {
 
     if [istarget sh64*-*-elf] {
         # This is what gcc passes to ld by default.
-        set flags "-mshelf32"
+        set flags "$flags -mshelf32"
         # SH64 targets cannot convert format in the linker 
         # using the -oformat command line switch.
 	setup_xfail "sh64*-*-*"
@@ -254,32 +254,11 @@ proc run_srec_test { test objs } {
         [istarget strongarm*-*-*] || \
         [istarget xscale*-*-*]    || \
         [istarget thumb-*-*] } {
-    
-        # ARM targets call __gccmain
-        set flags "$flags --defsym __gccmain=0"
-
         # ARM targets cannot convert format in the linker 
         # using the --oformat command line switch
 	setup_xfail "*arm*-*-*"
 	setup_xfail "xscale-*-*"
 	setup_xfail "thumb-*-*"
-    }
-
-    # PowerPC EABI code calls __eabi.
-    if [istarget powerpc*-*-eabi*] {
-	set flags "$flags --defsym __eabi=0"
-    }
-
-    # mn10200 code calls __truncsipsi2_d0_d2.
-    if {[istarget mn10200*-*-*]} then {
-	set flags "$flags --defsym __truncsipsi2_d0_d2=0"
-    }
-
-    # m6811/m6812 code has references to soft registers.
-    if {[istarget m6811-*-*] || [istarget m6812-*-*]} {
-	set flags "$flags --defsym _.frame=0 --defsym _.d1=0 --defsym _.d2=0"
-	set flags "$flags --defsym _.d3=0 --defsym _.d4=0"
-	set flags "$flags --defsym _.tmp=0 --defsym _.xy=0 --defsym _.z=0"
     }
 
     # V850 targets need libgcc.a
@@ -290,13 +269,6 @@ proc run_srec_test { test objs } {
     # Xtensa ELF targets relax by default; S-Record linker does not
     if [istarget xtensa*-*-*] {
 	set flags "$flags -no-relax"
-    }
-
-    # Some OpenBSD targets have ProPolice and reference __guard and
-    # __stack_smash_handler.
-    if [istarget *-*-openbsd*] {
-	set flags "$flags --defsym __guard=0"
-	set flags "$flags --defsym __stack_smash_handler=0"
     }
 
     if { ![ld_simple_link $ld tmpdir/sr1 "$flags $objs"] \
