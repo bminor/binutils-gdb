@@ -1,3 +1,8 @@
+2009-10-01  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* infcall.c (call_function_by_hand): Add a new cleanup branch for
+	std::terminate breakpoints.
+
 2009-09-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* ia64-tdep.c (ia64_convert_from_func_ptr_addr): New variable buf.
