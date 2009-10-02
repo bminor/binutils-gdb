@@ -52,6 +52,9 @@ Generate code for PowerPC 403/405.
 @item -m440
 Generate code for PowerPC 440.  BookE and some 405 instructions.
 
+@item -m476
+Generate code for PowerPC 476.
+
 @item -m7400, -m7410, -m7450, -m7455
 Generate code for PowerPC 7400/7410/7450/7455.
 

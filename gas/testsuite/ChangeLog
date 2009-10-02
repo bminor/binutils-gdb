@@ -1,3 +1,9 @@
+2009-10-02  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gas/ppc/476.s: New test.
+	* gas/ppc/476.d: Likewise.
+	* gas/ppc/ppc.exp: Run the 476 test.
+
 2009-10-01  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* gas/ppc/a2.d: Rename "ppca2" to "a2".
