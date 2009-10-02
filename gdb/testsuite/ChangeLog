@@ -11,9 +11,9 @@
 
 2009-10-01  Pierre Muller  <muller@ics.u-strasbg.fr>
 
-	* src/gdb/testsuite/gdb.base/shr1.c: Use %p in format string.
-	* src/gdb/testsuite/gdb.base/unload.c: Avoid warning in fprintf.
-	* src/gdb/testsuite/gdb.base/watchpoint-solib.c: Idem.
+	* gdb.base/shr1.c: Use %p in format string.
+	* gdb.base/unload.c: Avoid warning in fprintf.
+	* gdb.base/watchpoint-solib.c: Idem.
 
 2009-10-01  Pierre Muller  <muller@ics.u-strasbg.fr>
 
