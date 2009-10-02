@@ -1,3 +1,7 @@
+2009-10-02  Ralf Corsepius <ralf.corsepius@rtems.org>
+
+	* Make-common.in: Add datarootdir.
+
 2009-08-29  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* aclocal.m4 (SIM_CHECK_MEMBER, SIM_CHECK_MEMBERS)
