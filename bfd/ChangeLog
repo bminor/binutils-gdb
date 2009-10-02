@@ -1,3 +1,19 @@
+2009-10-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* aout-cris.c (N_SHARED_LIB): Don't define.
+	* hp300bsd.c (N_SHARED_LIB): Don't define.
+	* i386bsd.c (N_SHARED_LIB): Don't define.
+	* i386linux.c (N_SHARED_LIB): Don't define.
+	* i386lynx.c (N_SHARED_LIB): Don't define.
+	* m68klinux.c (N_SHARED_LIB): Don't define.
+	* m88kmach3.c (N_SHARED_LIB): Don't define.
+	* mipsbsd.c (N_SHARED_LIB): Don't define.
+	* newsos3.c (N_SHARED_LIB): Don't define.
+	* pc532-mach.c (N_SHARED_LIB): Don't define.
+	* pdp11.c (N_SHARED_LIB): Don't define.
+	* sparclinux.c (N_SHARED_LIB): Don't define.
+	* vaxbsd.c (N_SHARED_LIB): Don't define.
+
 2009-10-01  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* cofflink.c (_bfd_coff_generic_relocate_section): Look for the aux
@@ -61,7 +77,7 @@
 
 2009-09-25  Martin Thuresson  <martint@google.com>
 
-	Update soruces to make alpha and arm targets compile cleanly with
+	Update sources to make alpha and arm targets compile cleanly with
 	-Wc++-compat:
 	* ecoff.c: Add casts.
 	* ecofflink.c: Add casts.
@@ -252,7 +268,7 @@
 
 2009-09-09  Martin Thuresson  <martin@mtme.org>
 
-	Update soruces to compile cleanly with -Wc++-compat:
+	Update sources to compile cleanly with -Wc++-compat:
 	* aoutx.h: Add casts.
 	* archive.c: Add casts.
 	* archive64.c: Add casts.

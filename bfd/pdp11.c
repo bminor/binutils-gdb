@@ -58,9 +58,6 @@
 /* The header is not included in the text segment.  */
 #define N_HEADER_IN_TEXT(x)	0
 
-/* There are no shared libraries.  */
-#define N_SHARED_LIB(x) 	0
-
 /* There is no flags field.  */
 #define N_FLAGS(exec)		0
 

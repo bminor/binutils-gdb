@@ -1,6 +1,6 @@
 /* BFD back-end for i386 a.out binaries under LynxOS.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2001, 2002,
-   2003, 2005, 2007 Free Software Foundation, Inc.
+   2003, 2005, 2007, 2009 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -18,8 +18,6 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
-
-#define N_SHARED_LIB(x) 0
 
 #define TEXT_START_ADDR 0
 #define TARGET_PAGE_SIZE 4096
