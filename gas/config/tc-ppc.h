@@ -249,6 +249,12 @@ extern int ppc_parse_name (const char *, struct expressionS *);
 #define md_cleanup() ppc_cleanup ()
 extern void ppc_cleanup (void);
 
+/* ppc uses different register numbers between .eh_frame and .debug_frame.
+   This macro translates the .eh_frame register numbers to .debug_frame
+   register numbers.  */
+#define md_reg_eh_frame_to_debug_frame(regno) \
+  ((regno) == 70 ? 64 /* cr2 */ : (regno))
+
 #define TARGET_USE_CFIPOP 1
 
 #define tc_cfi_frame_initial_instructions ppc_cfi_frame_initial_instructions

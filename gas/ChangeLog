@@ -1,3 +1,21 @@
+2009-10-02  Jakub Jelinek  <jakub@redhat.com>
+
+	* dw2gencfi.c: Include dwarf2dbg.h.
+	(DWARF2_FORMAT): Define if not defined.
+	(dot_cfi_sections): New function.
+	(cfi_pseudo_table): Handle .cfi_sections.
+	(CFI_EMIT_eh_frame, CFI_EMIT_debug_frame): Define.
+	(cfi_sections): New variable.
+	(output_cie, output_fde, select_cie_for_fde): Add eh_frame
+	argument, add supporting for outputting .debug_frame
+	section.
+	(cfi_change_reg_numbers): New function or macro.
+	(cfi_finish): Only emit .eh_frame if
+	cfi_sections & CFI_EMIT_eh_frame.  Emit .debug_frame if
+	cfi_sections & CFI_EMIT_debug_frame.
+	* config/tc-ppc.h (md_reg_eh_frame_to_debug_frame): Define.
+	* doc/as.texinfo (CFI directives): Document .cfi_sections.
+
 2009-10-01  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* config/tc-ppc.c (md_show_usage): Rename "ppca2" to "a2".
