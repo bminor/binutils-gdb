@@ -1,3 +1,14 @@
+2009-10-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/tlsexe.d: Update.
+	* ld-powerpc/tlsexe.r: Update.
+	* ld-powerpc/tlsexetoc.d: Update.
+	* ld-powerpc/tlsexetoc.r: Update.
+	* ld-powerpc/tlsso.d: Update.
+	* ld-powerpc/tlsso.r: Update.
+	* ld-powerpc/tlstocso.d: Update.
+	* ld-powerpc/tlstocso.r: Update.
+
 2009-10-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* lib/ld-lib.exp (ld_simple_link_defsyms): New proc, adding

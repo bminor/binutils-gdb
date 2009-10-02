@@ -1,8 +1,21 @@
+2009-10-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/ppc32elf.em (emit_stub_syms): Init to -1.
+	(ppc_after_open): Set emit_stubs_syms by default when shared.
+	(OPTION_NO_STUBSYMS): Define.
+	(PARSE_AND_LIST_LONGOPTS, PARSE_AND_LIST_OPTIONS,
+	PARSE_AND_LIST_ARGS_CASES): Handle --no-emit-stub-syms.
+	* emultempl/ppc64elf.em (emit_stub_syms): Init to -1.
+	(gld${EMULATION_NAME}_finish): Set emit_stubs_syms by default.
+	(OPTION_NO_STUBSYMS): Define.
+	(PARSE_AND_LIST_LONGOPTS, PARSE_AND_LIST_OPTIONS,
+	PARSE_AND_LIST_ARGS_CASES): Handle --no-emit-stub-syms.
+
 2009-09-30  Matthias Klose  <doko@ubuntu.com>
 
-        PR ld/9863
-        * emulparams/armelf_linux.sh (DATA_START_SYMBOLS): Use PROVIDE
-        with __data_start.
+	PR ld/9863
+	* emulparams/armelf_linux.sh (DATA_START_SYMBOLS): Use PROVIDE
+	with __data_start.
 
 2009-09-29  Joel Sherrill <joel.sherrill@oarcorp.com>
 

@@ -59,7 +59,7 @@ static int no_toc_opt = 0;
 static int no_multi_toc = 0;
 
 /* Whether to emit symbols for stubs.  */
-static int emit_stub_syms = 0;
+static int emit_stub_syms = -1;
 
 static asection *toc_section = 0;
 
@@ -378,7 +378,8 @@ gld${EMULATION_NAME}_finish (void)
       char *msg = NULL;
       char *line, *endline;
 
-      emit_stub_syms |= link_info.emitrelocations;
+      if (emit_stub_syms < 0)
+	emit_stub_syms = 1;
       if (!ppc64_elf_build_stubs (emit_stub_syms, &link_info,
 				  config.stats ? &msg : NULL))
 	einfo ("%X%P: can not build stubs: %E\n");
@@ -487,7 +488,8 @@ fi
 PARSE_AND_LIST_PROLOGUE='
 #define OPTION_STUBGROUP_SIZE		301
 #define OPTION_STUBSYMS			(OPTION_STUBGROUP_SIZE + 1)
-#define OPTION_DOTSYMS			(OPTION_STUBSYMS + 1)
+#define OPTION_NO_STUBSYMS		(OPTION_STUBSYMS + 1)
+#define OPTION_DOTSYMS			(OPTION_NO_STUBSYMS + 1)
 #define OPTION_NO_DOTSYMS		(OPTION_DOTSYMS + 1)
 #define OPTION_NO_TLS_OPT		(OPTION_NO_DOTSYMS + 1)
 #define OPTION_NO_TLS_GET_ADDR_OPT	(OPTION_NO_TLS_OPT + 1)
@@ -500,6 +502,7 @@ PARSE_AND_LIST_PROLOGUE='
 PARSE_AND_LIST_LONGOPTS='
   { "stub-group-size", required_argument, NULL, OPTION_STUBGROUP_SIZE },
   { "emit-stub-syms", no_argument, NULL, OPTION_STUBSYMS },
+  { "no-emit-stub-syms", no_argument, NULL, OPTION_NO_STUBSYMS },
   { "dotsyms", no_argument, NULL, OPTION_DOTSYMS },
   { "no-dotsyms", no_argument, NULL, OPTION_NO_DOTSYMS },
   { "no-tls-optimize", no_argument, NULL, OPTION_NO_TLS_OPT },
@@ -523,6 +526,9 @@ PARSE_AND_LIST_OPTIONS='
 		   ));
   fprintf (file, _("\
   --emit-stub-syms            Label linker stubs with a symbol.\n"
+		   ));
+  fprintf (file, _("\
+  --no-emit-stub-syms         Don'\''t label linker stubs with a symbol.\n"
 		   ));
   fprintf (file, _("\
   --dotsyms                   For every version pattern \"foo\" in a version\n\
@@ -566,6 +572,10 @@ PARSE_AND_LIST_ARGS_CASES='
 
     case OPTION_STUBSYMS:
       emit_stub_syms = 1;
+      break;
+
+    case OPTION_NO_STUBSYMS:
+      emit_stub_syms = 0;
       break;
 
     case OPTION_DOTSYMS:

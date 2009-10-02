@@ -36,7 +36,7 @@ static int notlsopt = 0;
 static int no_tls_get_addr_opt = 0;
 
 /* Whether to emit symbols for stubs.  */
-static int emit_stub_syms = 0;
+static int emit_stub_syms = -1;
 
 /* Chooses the correct place for .plt and .got.  */
 static enum ppc_elf_plt_type plt_style = PLT_UNSET;
@@ -55,7 +55,8 @@ ppc_after_open (void)
       lang_output_section_statement_type *plt_os[2];
       lang_output_section_statement_type *got_os[2];
 
-      emit_stub_syms |= link_info.emitrelocations;
+      if (emit_stub_syms < 0)
+	emit_stub_syms = link_info.emitrelocations || link_info.shared;
       new_plt = ppc_elf_select_plt_layout (link_info.output_bfd, &link_info,
 					   plt_style, emit_stub_syms);
       if (new_plt < 0)
@@ -182,10 +183,12 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_OLD_PLT			(OPTION_NEW_PLT + 1)
 #define OPTION_OLD_GOT			(OPTION_OLD_PLT + 1)
 #define OPTION_STUBSYMS			(OPTION_OLD_GOT + 1)
+#define OPTION_NO_STUBSYMS		(OPTION_STUBSYMS + 1)
 '
 
 PARSE_AND_LIST_LONGOPTS='
   { "emit-stub-syms", no_argument, NULL, OPTION_STUBSYMS },
+  { "no-emit-stub-syms", no_argument, NULL, OPTION_NO_STUBSYMS },
   { "no-tls-optimize", no_argument, NULL, OPTION_NO_TLS_OPT },
   { "no-tls-get-addr-optimize", no_argument, NULL, OPTION_NO_TLS_GET_ADDR_OPT },
   { "secure-plt", no_argument, NULL, OPTION_NEW_PLT },
@@ -196,6 +199,7 @@ PARSE_AND_LIST_LONGOPTS='
 PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("\
   --emit-stub-syms            Label linker stubs with a symbol.\n\
+  --no-emit-stub-syms         Don'\''t label linker stubs with a symbol.\n\
   --no-tls-optimize           Don'\''t try to optimize TLS accesses.\n\
   --no-tls-get-addr-optimize  Don'\''t use a special __tls_get_addr call.\n\
   --secure-plt                Use new-style PLT if possible.\n\
@@ -207,6 +211,10 @@ PARSE_AND_LIST_OPTIONS='
 PARSE_AND_LIST_ARGS_CASES='
     case OPTION_STUBSYMS:
       emit_stub_syms = 1;
+      break;
+
+    case OPTION_NO_STUBSYMS:
+      emit_stub_syms = 0;
       break;
 
     case OPTION_NO_TLS_OPT:
