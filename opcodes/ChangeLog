@@ -1,3 +1,9 @@
+2009-10-02  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-dis.c (ppc_opts): Add "476" entry.
+	* ppc-opc.c (PPC476): Define.
+	(powerpc_opcodes): Update mnemonics where required for 476.
+
 2009-10-02  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 
 	* crx-dis.c (match_opcode): Truncate mcode to 32-bit.

@@ -1188,6 +1188,7 @@ PowerPC options:\n\
 -m405			generate code for PowerPC 405\n\
 -m440			generate code for PowerPC 440\n\
 -m464			generate code for PowerPC 464\n\
+-m476			generate code for PowerPC 476\n\
 -m7400, -m7410, -m7450, -m7455\n\
 			generate code for PowerPC 7400/7410/7450/7455\n\
 -m750cl			generate code for PowerPC 750cl\n"));
