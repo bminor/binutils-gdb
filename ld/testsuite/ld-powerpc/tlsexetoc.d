@@ -8,7 +8,7 @@
 
 Disassembly of section \.text:
 
-.* <_start-0x4c>:
+.* <00000010\.plt_call\.__tls_get_addr(|_opt)\+0>:
 .*	e9 63 00 00 	ld      r11,0\(r3\)
 .*	e9 83 00 08 	ld      r12,8\(r3\)
 .*	7c 60 1b 78 	mr      r0,r3
@@ -55,6 +55,7 @@ Disassembly of section \.text:
 .*	60 00 00 00 	nop
 .*	00 00 00 00 .*
 .*	00 01 02 28 .*
+.* <__glink_PLTresolve>:
 .*	7d 88 02 a6 	mflr    r12
 .*	42 9f 00 05 	bcl-    20,4\*cr7\+so,.*
 .*	7d 68 02 a6 	mflr    r11
