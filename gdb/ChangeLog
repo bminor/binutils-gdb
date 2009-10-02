@@ -1,3 +1,34 @@
+2009-10-02  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-nat.c (TRAP_IS_SYSCALL, TRAP_REMOVE_SYSCALL_FLAG): Delete.
+	(SYSCALL_SIGTRAP): New.
+	(status_to_str): Adjust.
+	(get_pending_status): Pending events in lp->waitstatus don't map
+	to any signal.  Simplify.
+	(linux_handle_syscall_trap): New.
+	(linux_handle_extended_wait): When handling PTRACE_EVENT_CLONE
+	events, use linux_ops->to_resume instead of direct ptrace with
+	PTRACE_CONT.  Remove all TRAP_IS_SYSCALL handling.
+	(wait_lwp): Handle syscall traps with linux_handle_syscall_trap,
+	and clear the sysgood bit.
+	(status_callback): Make it clearer and add comments.
+	(cancel_breakpoints_callback): Ignore if LP has waitstatus set.
+	(linux_nat_filter_event): Handle syscall traps with
+	linux_handle_syscall_trap, and clear the sysgood bit.  Move the
+	check for storing siginfo to after handling extended statuses and
+	syscall traps.  Store status in the lwp object.
+	(linux_wait_1): Don't swap the pending status out of the lwp
+	object until after deciding we found an lwp with an interesting
+	event.  Requeue a new pending signal if we find one while getting
+	rid or a pending SIGSTOP we sent ourselves.  Don't clear the
+	sysgood bit here.
+
+	* infrun.c (deal_with_syscall_event): Rename to ...
+	(handle_syscall_event): ... this.  Always context switch and set
+	stop_pc, even if not catching the syscall.  If not catching the
+	syscall, always resume with keep_going.
+	(handle_inferior_event): Adjust.
+
 2009-10-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix compatibility of --with-system-readline and readline-6.0+.

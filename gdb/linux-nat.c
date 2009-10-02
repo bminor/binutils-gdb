@@ -67,11 +67,6 @@
 # endif
 #endif /* HAVE_PERSONALITY */
 
-/* To be used when one needs to know wether a
-   WSTOPSIG (status) is a syscall */
-#define TRAP_IS_SYSCALL (SIGTRAP | 0x80)
-#define TRAP_REMOVE_SYSCALL_FLAG(status) ((status) & ~(0x80 << 8))
-
 /* This comment documents high-level logic of this file. 
 
 Waiting for events in sync mode
@@ -188,6 +183,11 @@ blocked.  */
 #define PTRACE_EVENT_EXIT	6
 
 #endif /* PTRACE_EVENT_FORK */
+
+/* Unlike other extended result codes, WSTOPSIG (status) on
+   PTRACE_O_TRACESYSGOOD syscall events doesn't return SIGTRAP, but
+   instead SIGTRAP with bit 7 set.  */
+#define SYSCALL_SIGTRAP (SIGTRAP | 0x80)
 
 /* We can't always assume that this flag is available, but all systems
    with the ptrace event handlers also have __WALL, so it's safe to use
@@ -982,7 +982,7 @@ status_to_str (int status)
 
   if (WIFSTOPPED (status))
     {
-      if (WSTOPSIG (status) == TRAP_IS_SYSCALL)
+      if (WSTOPSIG (status) == SYSCALL_SIGTRAP)
 	snprintf (buf, sizeof (buf), "%s (stopped at syscall)",
 		  strsignal (SIGTRAP));
       else
@@ -1514,74 +1514,78 @@ linux_nat_attach (struct target_ops *ops, char *args, int from_tty)
 static int
 get_pending_status (struct lwp_info *lp, int *status)
 {
-  struct target_waitstatus last;
-  ptid_t last_ptid;
+  enum target_signal signo = TARGET_SIGNAL_0;
 
-  get_last_target_status (&last_ptid, &last);
+  /* If we paused threads momentarily, we may have stored pending
+     events in lp->status or lp->waitstatus (see stop_wait_callback),
+     and GDB core hasn't seen any signal for those threads.
+     Otherwise, the last signal reported to the core is found in the
+     thread object's stop_signal.
 
-  /* If this lwp is the ptid that GDB is processing an event from, the
-     signal will be in stop_signal.  Otherwise, we may cache pending
-     events in lp->status while trying to stop all threads (see
-     stop_wait_callback).  */
+     There's a corner case that isn't handled here at present.  Only
+     if the thread stopped with a TARGET_WAITKIND_STOPPED does
+     stop_signal make sense as a real signal to pass to the inferior.
+     Some catchpoint related events, like
+     TARGET_WAITKIND_(V)FORK|EXEC|SYSCALL, have their stop_signal set
+     to TARGET_SIGNAL_SIGTRAP when the catchpoint triggers.  But,
+     those traps are debug API (ptrace in our case) related and
+     induced; the inferior wouldn't see them if it wasn't being
+     traced.  Hence, we should never pass them to the inferior, even
+     when set to pass state.  Since this corner case isn't handled by
+     infrun.c when proceeding with a signal, for consistency, neither
+     do we handle it here (or elsewhere in the file we check for
+     signal pass state).  Normally SIGTRAP isn't set to pass state, so
+     this is really a corner case.  */
 
-  *status = 0;
-
-  if (non_stop)
+  if (lp->waitstatus.kind != TARGET_WAITKIND_IGNORE)
+    signo = TARGET_SIGNAL_0; /* a pending ptrace event, not a real signal.  */
+  else if (lp->status)
+    signo = target_signal_from_host (WSTOPSIG (lp->status));
+  else if (non_stop && !is_executing (lp->ptid))
     {
-      enum target_signal signo = TARGET_SIGNAL_0;
-
-      if (is_executing (lp->ptid))
-	{
-	  /* If the core thought this lwp was executing --- e.g., the
-	     executing property hasn't been updated yet, but the
-	     thread has been stopped with a stop_callback /
-	     stop_wait_callback sequence (see linux_nat_detach for
-	     example) --- we can only have pending events in the local
-	     queue.  */
-	  signo = target_signal_from_host (WSTOPSIG (lp->status));
-	}
-      else
-	{
-	  /* If the core knows the thread is not executing, then we
-	     have the last signal recorded in
-	     thread_info->stop_signal.  */
-
-	  struct thread_info *tp = find_thread_ptid (lp->ptid);
-	  signo = tp->stop_signal;
-	}
-
-      if (signo != TARGET_SIGNAL_0
-	  && !signal_pass_state (signo))
-	{
-	  if (debug_linux_nat)
-	    fprintf_unfiltered (gdb_stdlog, "\
-GPT: lwp %s had signal %s, but it is in no pass state\n",
-				target_pid_to_str (lp->ptid),
-				target_signal_to_string (signo));
-	}
-      else
-	{
-	  if (signo != TARGET_SIGNAL_0)
-	    *status = W_STOPCODE (target_signal_to_host (signo));
-
-	  if (debug_linux_nat)
-	    fprintf_unfiltered (gdb_stdlog,
-				"GPT: lwp %s as pending signal %s\n",
-				target_pid_to_str (lp->ptid),
-				target_signal_to_string (signo));
-	}
+      struct thread_info *tp = find_thread_ptid (lp->ptid);
+      signo = tp->stop_signal;
     }
-  else
+  else if (!non_stop)
     {
+      struct target_waitstatus last;
+      ptid_t last_ptid;
+
+      get_last_target_status (&last_ptid, &last);
+
       if (GET_LWP (lp->ptid) == GET_LWP (last_ptid))
 	{
 	  struct thread_info *tp = find_thread_ptid (lp->ptid);
-	  if (tp->stop_signal != TARGET_SIGNAL_0
-	      && signal_pass_state (tp->stop_signal))
-	    *status = W_STOPCODE (target_signal_to_host (tp->stop_signal));
+	  signo = tp->stop_signal;
 	}
-      else
-	*status = lp->status;
+    }
+
+  *status = 0;
+
+  if (signo == TARGET_SIGNAL_0)
+    {
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog,
+			    "GPT: lwp %s has no pending signal\n",
+			    target_pid_to_str (lp->ptid));
+    }
+  else if (!signal_pass_state (signo))
+    {
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog, "\
+GPT: lwp %s had signal %s, but it is in no pass state\n",
+			    target_pid_to_str (lp->ptid),
+			    target_signal_to_string (signo));
+    }
+  else
+    {
+      *status = W_STOPCODE (target_signal_to_host (signo));
+
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog,
+			    "GPT: lwp %s has pending signal %s\n",
+			    target_pid_to_str (lp->ptid),
+			    target_signal_to_string (signo));
     }
 
   return 0;
@@ -1893,6 +1897,133 @@ kill_lwp (int lwpid, int signo)
   return kill (lwpid, signo);
 }
 
+/* Handle a GNU/Linux syscall trap wait response.  If we see a syscall
+   event, check if the core is interested in it: if not, ignore the
+   event, and keep waiting; otherwise, we need to toggle the LWP's
+   syscall entry/exit status, since the ptrace event itself doesn't
+   indicate it, and report the trap to higher layers.  */
+
+static int
+linux_handle_syscall_trap (struct lwp_info *lp, int stopping)
+{
+  struct target_waitstatus *ourstatus = &lp->waitstatus;
+  struct gdbarch *gdbarch = target_thread_architecture (lp->ptid);
+  int syscall_number = (int) gdbarch_get_syscall_number (gdbarch, lp->ptid);
+
+  if (stopping)
+    {
+      /* If we're stopping threads, there's a SIGSTOP pending, which
+	 makes it so that the LWP reports an immediate syscall return,
+	 followed by the SIGSTOP.  Skip seeing that "return" using
+	 PTRACE_CONT directly, and let stop_wait_callback collect the
+	 SIGSTOP.  Later when the thread is resumed, a new syscall
+	 entry event.  If we didn't do this (and returned 0), we'd
+	 leave a syscall entry pending, and our caller, by using
+	 PTRACE_CONT to collect the SIGSTOP, skips the syscall return
+	 itself.  Later, when the user re-resumes this LWP, we'd see
+	 another syscall entry event and we'd mistake it for a return.
+
+	 If stop_wait_callback didn't force the SIGSTOP out of the LWP
+	 (leaving immediately with LWP->signalled set, without issuing
+	 a PTRACE_CONT), it would still be problematic to leave this
+	 syscall enter pending, as later when the thread is resumed,
+	 it would then see the same syscall exit mentioned above,
+	 followed by the delayed SIGSTOP, while the syscall didn't
+	 actually get to execute.  It seems it would be even more
+	 confusing to the user.  */
+
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog,
+			    "LHST: ignoring syscall %d "
+			    "for LWP %ld (stopping threads), "
+			    "resuming with PTRACE_CONT for SIGSTOP\n",
+			    syscall_number,
+			    GET_LWP (lp->ptid));
+
+      lp->syscall_state = TARGET_WAITKIND_IGNORE;
+      ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0, 0);
+      return 1;
+    }
+
+  if (catch_syscall_enabled ())
+    {
+      /* Always update the entry/return state, even if this particular
+	 syscall isn't interesting to the core now.  In async mode,
+	 the user could install a new catchpoint for this syscall
+	 between syscall enter/return, and we'll need to know to
+	 report a syscall return if that happens.  */
+      lp->syscall_state = (lp->syscall_state == TARGET_WAITKIND_SYSCALL_ENTRY
+			   ? TARGET_WAITKIND_SYSCALL_RETURN
+			   : TARGET_WAITKIND_SYSCALL_ENTRY);
+
+      if (catching_syscall_number (syscall_number))
+	{
+	  /* Alright, an event to report.  */
+	  ourstatus->kind = lp->syscall_state;
+	  ourstatus->value.syscall_number = syscall_number;
+
+	  if (debug_linux_nat)
+	    fprintf_unfiltered (gdb_stdlog,
+				"LHST: stopping for %s of syscall %d"
+				" for LWP %ld\n",
+				lp->syscall_state == TARGET_WAITKIND_SYSCALL_ENTRY
+				? "entry" : "return",
+				syscall_number,
+				GET_LWP (lp->ptid));
+	  return 0;
+	}
+
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog,
+			    "LHST: ignoring %s of syscall %d "
+			    "for LWP %ld\n",
+			    lp->syscall_state == TARGET_WAITKIND_SYSCALL_ENTRY
+			    ? "entry" : "return",
+			    syscall_number,
+			    GET_LWP (lp->ptid));
+    }
+  else
+    {
+      /* If we had been syscall tracing, and hence used PT_SYSCALL
+	 before on this LWP, it could happen that the user removes all
+	 syscall catchpoints before we get to process this event.
+	 There are two noteworthy issues here:
+
+	 - When stopped at a syscall entry event, resuming with
+	   PT_STEP still resumes executing the syscall and reports a
+	   syscall return.
+
+	 - Only PT_SYSCALL catches syscall enters.  If we last
+	   single-stepped this thread, then this event can't be a
+	   syscall enter.  If we last single-stepped this thread, this
+	   has to be a syscall exit.
+
+	 The points above mean that the next resume, be it PT_STEP or
+	 PT_CONTINUE, can not trigger a syscall trace event.  */
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog,
+			    "LHST: caught syscall event with no syscall catchpoints."
+			    " %d for LWP %ld, ignoring\n",
+			    syscall_number,
+			    GET_LWP (lp->ptid));
+      lp->syscall_state = TARGET_WAITKIND_IGNORE;
+    }
+
+  /* The core isn't interested in this event.  For efficiency, avoid
+     stopping all threads only to have the core resume them all again.
+     Since we're not stopping threads, if we're still syscall tracing
+     and not stepping, we can't use PTRACE_CONT here, as we'd miss any
+     subsequent syscall.  Simply resume using the inf-ptrace layer,
+     which knows when to use PT_SYSCALL or PT_CONTINUE.  */
+
+  /* Note that gdbarch_get_syscall_number may access registers, hence
+     fill a regcache.  */
+  registers_changed ();
+  linux_ops->to_resume (linux_ops, pid_to_ptid (GET_LWP (lp->ptid)),
+			lp->step, TARGET_SIGNAL_0);
+  return 1;
+}
+
 /* Handle a GNU/Linux extended wait response.  If we see a clone
    event, we need to add the new LWP to our list (and not report the
    trap to higher layers).  This function returns non-zero if the
@@ -2018,19 +2149,30 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 		}
 	    }
 
+	  /* Note the need to use the low target ops to resume, to
+	     handle resuming with PT_SYSCALL if we have syscall
+	     catchpoints.  */
 	  if (!stopping)
 	    {
+	      int signo;
+
 	      new_lp->stopped = 0;
 	      new_lp->resumed = 1;
-	      ptrace (PTRACE_CONT, new_pid, 0,
-		      status ? WSTOPSIG (status) : 0);
+
+	      signo = (status
+		       ? target_signal_from_host (WSTOPSIG (status))
+		       : TARGET_SIGNAL_0);
+
+	      linux_ops->to_resume (linux_ops, pid_to_ptid (new_pid),
+				    0, signo);
 	    }
 
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
 				"LHEW: Got clone event from LWP %ld, resuming\n",
 				GET_LWP (lp->ptid));
-	  ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0, 0);
+	  linux_ops->to_resume (linux_ops, pid_to_ptid (GET_LWP (lp->ptid)),
+				0, TARGET_SIGNAL_0);
 
 	  return 1;
 	}
@@ -2067,47 +2209,6 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 	 parent on a vfork, because detach_breakpoints would think
 	 that breakpoints are not inserted.  */
       mark_breakpoints_out ();
-      return 0;
-    }
-
-  /* Used for 'catch syscall' feature.  */
-  if (WSTOPSIG (status) == TRAP_IS_SYSCALL)
-    {
-      if (catch_syscall_enabled () == 0)
-	  ourstatus->kind = TARGET_WAITKIND_IGNORE;
-      else
-	{
-	  struct regcache *regcache = get_thread_regcache (lp->ptid);
-	  struct gdbarch *gdbarch = get_regcache_arch (regcache);
-
-	  ourstatus->value.syscall_number =
-	    (int) gdbarch_get_syscall_number (gdbarch, lp->ptid);
-
-	  /* If we are catching this specific syscall number, then we
-	     should update the target_status to reflect which event
-	     has occurred.  But if this syscall is not to be caught,
-	     then we can safely mark the event as a SYSCALL_RETURN.
-
-	     This is particularly needed if:
-
-	       - We are catching any syscalls, or
-	       - We are catching the syscall "exit"
-
-	     In this case, as the syscall "exit" *doesn't* return,
-	     then GDB would be confused because it would mark the last
-	     syscall event as a SYSCALL_ENTRY.  After that, if we re-ran the
-	     inferior GDB will think that the first syscall event is
-	     the opposite of a SYSCALL_ENTRY, which is the SYSCALL_RETURN.
-	     Therefore, GDB would report inverted syscall events.  */
-	  if (catching_syscall_number (ourstatus->value.syscall_number))
-	    ourstatus->kind = 
-	      (lp->syscall_state == TARGET_WAITKIND_SYSCALL_ENTRY) ?
-	      TARGET_WAITKIND_SYSCALL_RETURN : TARGET_WAITKIND_SYSCALL_ENTRY;
-	  else
-	    ourstatus->kind = TARGET_WAITKIND_SYSCALL_RETURN;
-
-	  lp->syscall_state = ourstatus->kind;
-	}
       return 0;
     }
 
@@ -2175,6 +2276,18 @@ wait_lwp (struct lwp_info *lp)
     }
 
   gdb_assert (WIFSTOPPED (status));
+
+  /* Handle GNU/Linux's syscall SIGTRAPs.  */
+  if (WIFSTOPPED (status) && WSTOPSIG (status) == SYSCALL_SIGTRAP)
+    {
+      /* No longer need the sysgood bit.  The ptrace event ends up
+	 recorded in lp->waitstatus if we care for it.  We can carry
+	 on handling the event like a regular SIGTRAP from here
+	 on.  */
+      status = W_STOPCODE (SIGTRAP);
+      if (linux_handle_syscall_trap (lp, 1))
+	return wait_lwp (lp);
+    }
 
   /* Handle GNU/Linux's extended waitstatus for trace events.  */
   if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP && status >> 16 != 0)
@@ -2442,12 +2555,23 @@ status_callback (struct lwp_info *lp, void *data)
 {
   /* Only report a pending wait status if we pretend that this has
      indeed been resumed.  */
-  /* We check for lp->waitstatus in addition to lp->status, because we
-     can have pending process exits recorded in lp->waitstatus, and
-     W_EXITCODE(0,0) == 0.  */
-  return ((lp->status != 0
-	   || lp->waitstatus.kind != TARGET_WAITKIND_IGNORE)
-	  && lp->resumed);
+  if (!lp->resumed)
+    return 0;
+
+  if (lp->waitstatus.kind != TARGET_WAITKIND_IGNORE)
+    {
+      /* A ptrace event, like PTRACE_FORK|VFORK|EXEC, syscall event,
+	 or a a pending process exit.  Note that `W_EXITCODE(0,0) ==
+	 0', so a clean process exit can not be stored pending in
+	 lp->status, it is indistinguishable from
+	 no-pending-status.  */
+      return 1;
+    }
+
+  if (lp->status != 0)
+    return 1;
+
+  return 0;
 }
 
 /* Return non-zero if LP isn't stopped.  */
@@ -2557,7 +2681,8 @@ cancel_breakpoints_callback (struct lwp_info *lp, void *data)
      delete or disable the breakpoint, but the LWP will have already
      tripped on it.  */
 
-  if (lp->status != 0
+  if (lp->waitstatus.kind == TARGET_WAITKIND_IGNORE
+      && lp->status != 0
       && WIFSTOPPED (lp->status) && WSTOPSIG (lp->status) == SIGTRAP
       && cancel_breakpoint (lp))
     /* Throw away the SIGTRAP.  */
@@ -2708,17 +2833,20 @@ linux_nat_filter_event (int lwpid, int status, int options)
       add_thread (lp->ptid);
     }
 
-  /* Save the trap's siginfo in case we need it later.  */
-  if (WIFSTOPPED (status)
-      && (WSTOPSIG (status) == SIGTRAP || WSTOPSIG (status) == TRAP_IS_SYSCALL))
-    save_siginfo (lp);
+  /* Handle GNU/Linux's syscall SIGTRAPs.  */
+  if (WIFSTOPPED (status) && WSTOPSIG (status) == SYSCALL_SIGTRAP)
+    {
+      /* No longer need the sysgood bit.  The ptrace event ends up
+	 recorded in lp->waitstatus if we care for it.  We can carry
+	 on handling the event like a regular SIGTRAP from here
+	 on.  */
+      status = W_STOPCODE (SIGTRAP);
+      if (linux_handle_syscall_trap (lp, 0))
+	return NULL;
+    }
 
-  /* Handle GNU/Linux's extended waitstatus for trace events.
-     It is necessary to check if WSTOPSIG is signaling that
-     the inferior is entering/exiting a system call.  */
-  if (WIFSTOPPED (status)
-      && ((WSTOPSIG (status) == TRAP_IS_SYSCALL)
-          || (WSTOPSIG (status) == SIGTRAP && status >> 16 != 0)))
+  /* Handle GNU/Linux's extended waitstatus for trace events.  */
+  if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP && status >> 16 != 0)
     {
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
@@ -2727,6 +2855,10 @@ linux_nat_filter_event (int lwpid, int status, int options)
       if (linux_handle_extended_wait (lp, status, 0))
 	return NULL;
     }
+
+  /* Save the trap's siginfo in case we need it later.  */
+  if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP)
+    save_siginfo (lp);
 
   /* Check if the thread has exited.  */
   if ((WIFEXITED (status) || WIFSIGNALED (status))
@@ -2849,6 +2981,7 @@ linux_nat_filter_event (int lwpid, int status, int options)
 
   /* An interesting event.  */
   gdb_assert (lp);
+  lp->status = status;
   return lp;
 }
 
@@ -2908,13 +3041,10 @@ retry:
       lp = iterate_over_lwps (ptid, status_callback, NULL);
       if (lp)
 	{
-	  status = lp->status;
-	  lp->status = 0;
-
-	  if (debug_linux_nat && status)
+	  if (debug_linux_nat && lp->status)
 	    fprintf_unfiltered (gdb_stdlog,
 				"LLW: Using pending wait status %s for %s.\n",
-				status_to_str (status),
+				status_to_str (lp->status),
 				target_pid_to_str (lp->ptid));
 	}
 
@@ -2933,13 +3063,11 @@ retry:
       /* We have a specific LWP to check.  */
       lp = find_lwp_pid (ptid);
       gdb_assert (lp);
-      status = lp->status;
-      lp->status = 0;
 
-      if (debug_linux_nat && status)
+      if (debug_linux_nat && lp->status)
 	fprintf_unfiltered (gdb_stdlog,
 			    "LLW: Using pending wait status %s for %s.\n",
-			    status_to_str (status),
+			    status_to_str (lp->status),
 			    target_pid_to_str (lp->ptid));
 
       /* If we have to wait, take into account whether PID is a cloned
@@ -2952,7 +3080,7 @@ retry:
 	 because we can have pending process exits recorded in
 	 lp->status and W_EXITCODE(0,0) == 0.  We should probably have
 	 an additional lp->status_p flag.  */
-      if (status == 0 && lp->waitstatus.kind == TARGET_WAITKIND_IGNORE)
+      if (lp->status == 0 && lp->waitstatus.kind == TARGET_WAITKIND_IGNORE)
 	lp = NULL;
     }
 
@@ -2980,8 +3108,26 @@ retry:
       lp->stopped = 0;
       gdb_assert (lp->resumed);
 
-      /* This should catch the pending SIGSTOP.  */
+      /* Catch the pending SIGSTOP.  */
+      status = lp->status;
+      lp->status = 0;
+
       stop_wait_callback (lp, NULL);
+
+      /* If the lp->status field isn't empty, we caught another signal
+	 while flushing the SIGSTOP.  Return it back to the event
+	 queue of the LWP, as we already have an event to handle.  */
+      if (lp->status)
+	{
+	  if (debug_linux_nat)
+	    fprintf_unfiltered (gdb_stdlog,
+				"LLW: kill %s, %s\n",
+				target_pid_to_str (lp->ptid),
+				status_to_str (lp->status));
+	  kill_lwp (GET_LWP (lp->ptid), WSTOPSIG (lp->status));
+	}
+
+      lp->status = status;
     }
 
   if (!target_can_async_p ())
@@ -3013,12 +3159,6 @@ retry:
 
 	  lp = linux_nat_filter_event (lwpid, status, options);
 
-	  /* If this was a syscall trap, we no longer need or want
-	     the 0x80 flag, remove it.  */
-	  if (WIFSTOPPED (status)
-	      && WSTOPSIG (status) == TRAP_IS_SYSCALL)
-	    status = TRAP_REMOVE_SYSCALL_FLAG (status);
-
 	  if (lp
 	      && ptid_is_pid (ptid)
 	      && ptid_get_pid (lp->ptid) != ptid_get_pid (ptid))
@@ -3027,12 +3167,10 @@ retry:
 		fprintf (stderr, "LWP %ld got an event %06x, leaving pending.\n",
 			 ptid_get_lwp (lp->ptid), status);
 
-	      if (WIFSTOPPED (status))
+	      if (WIFSTOPPED (lp->status))
 		{
-		  if (WSTOPSIG (status) != SIGSTOP)
+		  if (WSTOPSIG (lp->status) != SIGSTOP)
 		    {
-		      lp->status = status;
-
 		      stop_callback (lp, NULL);
 
 		      /* Resume in order to collect the sigstop.  */
@@ -3059,7 +3197,6 @@ retry:
 		     about the exit code/signal, leave the status
 		     pending for the next time we're able to report
 		     it.  */
-		  lp->status = status;
 
 		  /* Prevent trying to stop this thread again.  We'll
 		     never try to resume it because it has a pending
@@ -3072,7 +3209,7 @@ retry:
 
 		  /* Store the pending event in the waitstatus as
 		     well, because W_EXITCODE(0,0) == 0.  */
-		  store_waitstatus (&lp->waitstatus, status);
+		  store_waitstatus (&lp->waitstatus, lp->status);
 		}
 
 	      /* Keep looking.  */
@@ -3127,6 +3264,9 @@ retry:
     clear_sigint_trap ();
 
   gdb_assert (lp);
+
+  status = lp->status;
+  lp->status = 0;
 
   /* Don't report signals that GDB isn't interested in, such as
      signals that are neither printed nor stopped upon.  Stopping all

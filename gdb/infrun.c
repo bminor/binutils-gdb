@@ -2386,13 +2386,22 @@ stepped_in_from (struct frame_info *frame, struct frame_id step_frame_id)
    It returns 1 if the inferior should keep going (and GDB
    should ignore the event), or 0 if the event deserves to be
    processed.  */
+
 static int
-deal_with_syscall_event (struct execution_control_state *ecs)
+handle_syscall_event (struct execution_control_state *ecs)
 {
-  struct regcache *regcache = get_thread_regcache (ecs->ptid);
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  int syscall_number = gdbarch_get_syscall_number (gdbarch,
-                                                   ecs->ptid);
+  struct regcache *regcache;
+  struct gdbarch *gdbarch;
+  int syscall_number;
+
+  if (!ptid_equal (ecs->ptid, inferior_ptid))
+    context_switch (ecs->ptid);
+
+  regcache = get_thread_regcache (ecs->ptid);
+  gdbarch = get_regcache_arch (regcache);
+  syscall_number = gdbarch_get_syscall_number (gdbarch, ecs->ptid);
+  stop_pc = regcache_read_pc (regcache);
+
   target_last_waitstatus.value.syscall_number = syscall_number;
 
   if (catch_syscall_enabled () > 0
@@ -2401,35 +2410,22 @@ deal_with_syscall_event (struct execution_control_state *ecs)
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: syscall number = '%d'\n",
                             syscall_number);
-      ecs->event_thread->stop_signal = TARGET_SIGNAL_TRAP;
-
-      if (!ptid_equal (ecs->ptid, inferior_ptid))
-        {
-          context_switch (ecs->ptid);
-          reinit_frame_cache ();
-        }
-
-      stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
 
       ecs->event_thread->stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
-
       ecs->random_signal = !bpstat_explains_signal (ecs->event_thread->stop_bpstat);
 
-      /* If no catchpoint triggered for this, then keep going.  */
-      if (ecs->random_signal)
-        {
-          ecs->event_thread->stop_signal = TARGET_SIGNAL_0;
-          keep_going (ecs);
-          return 1;
-        }
-      return 0;
+      if (!ecs->random_signal)
+	{
+	  /* Catchpoint hit.  */
+	  ecs->event_thread->stop_signal = TARGET_SIGNAL_TRAP;
+	  return 0;
+	}
     }
-  else
-    {
-      resume (0, TARGET_SIGNAL_0);
-      prepare_to_wait (ecs);
-      return 1;
-    }
+
+  /* If no catchpoint triggered for this, then keep going.  */
+  ecs->event_thread->stop_signal = TARGET_SIGNAL_0;
+  keep_going (ecs);
+  return 1;
 }
 
 /* Given an execution control state that has been freshly filled in
@@ -2753,10 +2749,9 @@ handle_inferior_event (struct execution_control_state *ecs)
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_SYSCALL_ENTRY\n");
       /* Getting the current syscall number */
-      if (deal_with_syscall_event (ecs) != 0)
+      if (handle_syscall_event (ecs) != 0)
         return;
       goto process_event_stop_test;
-      break;
 
       /* Before examining the threads further, step this thread to
          get it entirely out of the syscall.  (We get notice of the
@@ -2766,10 +2761,9 @@ handle_inferior_event (struct execution_control_state *ecs)
     case TARGET_WAITKIND_SYSCALL_RETURN:
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_SYSCALL_RETURN\n");
-      if (deal_with_syscall_event (ecs) != 0)
+      if (handle_syscall_event (ecs) != 0)
         return;
       goto process_event_stop_test;
-      break;
 
     case TARGET_WAITKIND_STOPPED:
       if (debug_infrun)
