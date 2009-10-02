@@ -1,3 +1,8 @@
+2009-10-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.tbl: Drop Disp64 on jump and loop instructions.
+	* i386-tbl.h: Regenerated.
+
 2009-10-02  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-dis.c (ppc_opts): Add "476" entry.

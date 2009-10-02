@@ -330,7 +330,7 @@ call, 1, 0xff, 0x3, 1, 0, Modrm|DefaultSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_q
 lcall, 2, 0x9a, None, 1, CpuNo64, JumpInterSegment|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm16, Imm16|Imm32 }
 lcall, 1, 0xff, 0x3, 1, 0, Modrm|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|JumpAbsolute }
 
-jmp, 1, 0xeb, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
+jmp, 1, 0xeb, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
 jmp, 1, 0xff, 0x4, 1, CpuNo64, Modrm|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg16|Reg32|Word|Dword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|JumpAbsolute }
 jmp, 1, 0xff, 0x4, 1, Cpu64, Modrm|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, { Reg16|Reg64|Word|Qword|Unspecified|BaseIndex|Disp8|Disp32|Disp32S|JumpAbsolute }
 // Intel Syntax.
@@ -356,57 +356,57 @@ leave, 0, 0xc9, None, 1, Cpu186|CpuNo64, DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_
 leave, 0, 0xc9, None, 1, Cpu64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, { 0 }
 
 // Conditional jumps.
-jo, 1, 0x70, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jno, 1, 0x71, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jb, 1, 0x72, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jc, 1, 0x72, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jnae, 1, 0x72, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jnb, 1, 0x73, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jnc, 1, 0x73, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jae, 1, 0x73, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-je, 1, 0x74, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jz, 1, 0x74, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jne, 1, 0x75, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jnz, 1, 0x75, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jbe, 1, 0x76, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jna, 1, 0x76, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jnbe, 1, 0x77, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-ja, 1, 0x77, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-js, 1, 0x78, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jns, 1, 0x79, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jp, 1, 0x7a, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jpe, 1, 0x7a, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jnp, 1, 0x7b, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jpo, 1, 0x7b, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jl, 1, 0x7c, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jnge, 1, 0x7c, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jnl, 1, 0x7d, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jge, 1, 0x7d, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jle, 1, 0x7e, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jng, 1, 0x7e, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jnle, 1, 0x7f, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
-jg, 1, 0x7f, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
+jo, 1, 0x70, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jno, 1, 0x71, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jb, 1, 0x72, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jc, 1, 0x72, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jnae, 1, 0x72, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jnb, 1, 0x73, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jnc, 1, 0x73, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jae, 1, 0x73, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+je, 1, 0x74, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jz, 1, 0x74, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jne, 1, 0x75, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jnz, 1, 0x75, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jbe, 1, 0x76, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jna, 1, 0x76, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jnbe, 1, 0x77, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+ja, 1, 0x77, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+js, 1, 0x78, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jns, 1, 0x79, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jp, 1, 0x7a, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jpe, 1, 0x7a, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jnp, 1, 0x7b, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jpo, 1, 0x7b, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jl, 1, 0x7c, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jnge, 1, 0x7c, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jnl, 1, 0x7d, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jge, 1, 0x7d, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jle, 1, 0x7e, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jng, 1, 0x7e, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jnle, 1, 0x7f, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
+jg, 1, 0x7f, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S }
 
 // jcxz vs. jecxz is chosen on the basis of the address size prefix.
 jcxz, 1, 0xe3, None, 1, CpuNo64, JumpByte|Size16|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32 }
 jecxz, 1, 0xe3, None, 1, CpuNo64, JumpByte|Size32|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32 }
-jecxz, 1, 0x67e3, None, 2, Cpu64, JumpByte|Size32|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp32|Disp32S|Disp64 }
-jrcxz, 1, 0xe3, None, 1, Cpu64, JumpByte|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Disp8|Disp32|Disp32S|Disp64 }
+jecxz, 1, 0x67e3, None, 2, Cpu64, JumpByte|Size32|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp32|Disp32S }
+jrcxz, 1, 0xe3, None, 1, Cpu64, JumpByte|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Disp8|Disp32|Disp32S }
 
 // The loop instructions also use the address size prefix to select
 // %cx rather than %ecx for the loop count, so the `w' form of these
 // instructions emit an address size prefix rather than a data size
 //  prefix.
 loop, 1, 0xe2, None, 1, CpuNo64, JumpByte|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32 }
-loop, 1, 0xe2, None, 1, Cpu64, JumpByte|No_bSuf|No_wSuf|No_sSuf|No_ldSuf|NoRex64, { Disp8|Disp32|Disp32S|Disp64 }
+loop, 1, 0xe2, None, 1, Cpu64, JumpByte|No_bSuf|No_wSuf|No_sSuf|No_ldSuf|NoRex64, { Disp8|Disp32|Disp32S }
 loopz, 1, 0xe1, None, 1, CpuNo64, JumpByte|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32 }
-loopz, 1, 0xe1, None, 1, Cpu64, JumpByte|No_bSuf|No_wSuf|No_sSuf|No_ldSuf|NoRex64, { Disp8|Disp32|Disp32S|Disp64 }
+loopz, 1, 0xe1, None, 1, Cpu64, JumpByte|No_bSuf|No_wSuf|No_sSuf|No_ldSuf|NoRex64, { Disp8|Disp32|Disp32S }
 loope, 1, 0xe1, None, 1, CpuNo64, JumpByte|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32 }
-loope, 1, 0xe1, None, 1, Cpu64, JumpByte|No_bSuf|No_wSuf|No_sSuf|No_ldSuf|NoRex64, { Disp8|Disp32|Disp32S|Disp64 }
+loope, 1, 0xe1, None, 1, Cpu64, JumpByte|No_bSuf|No_wSuf|No_sSuf|No_ldSuf|NoRex64, { Disp8|Disp32|Disp32S }
 loopnz, 1, 0xe0, None, 1, CpuNo64, JumpByte|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32 }
-loopnz, 1, 0xe0, None, 1, Cpu64, JumpByte|No_bSuf|No_wSuf|No_sSuf|No_ldSuf|NoRex64, { Disp8|Disp32|Disp32S|Disp64 }
+loopnz, 1, 0xe0, None, 1, Cpu64, JumpByte|No_bSuf|No_wSuf|No_sSuf|No_ldSuf|NoRex64, { Disp8|Disp32|Disp32S }
 loopne, 1, 0xe0, None, 1, CpuNo64, JumpByte|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32 }
-loopne, 1, 0xe0, None, 1, Cpu64, JumpByte|No_bSuf|No_wSuf|No_sSuf|No_ldSuf|NoRex64, { Disp8|Disp32|Disp32S|Disp64 }
+loopne, 1, 0xe0, None, 1, Cpu64, JumpByte|No_bSuf|No_wSuf|No_sSuf|No_ldSuf|NoRex64, { Disp8|Disp32|Disp32S }
 
 // Set byte on flag instructions.
 seto, 1, 0xf90, 0x0, 2, Cpu386, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg8|Byte|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
