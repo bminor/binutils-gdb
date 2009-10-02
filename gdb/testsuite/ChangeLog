@@ -1,3 +1,9 @@
+2009-10-02  Pierre Muller  <muller@ics.u-strasbg.fr>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* lib/gdb.exp (gdb_compile): Avoid adding 
+	gdb_saved_unbuffered_mode_obj if -nostdlib option is used.
+
 2009-10-01  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* src/gdb/testsuite/gdb.base/shr1.c: Use %p in format string.

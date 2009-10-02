@@ -1824,7 +1824,11 @@ proc gdb_compile {source dest type options} {
 	    # reverse link order.  In that case, we can use ldflags to
 	    # avoid copying the object file to the host multiple
 	    # times.
-	    lappend options "ldflags=$gdb_saved_set_unbuffered_mode_obj"
+	    # This object can only be added if standard libraries are
+	    # used. Thus, we need to disable it if -nostdlib option is used
+	    if {[lsearch -regexp $options "-nostdlib"] < 0 } {
+		lappend options "ldflags=$gdb_saved_set_unbuffered_mode_obj"
+	    }
 	}
     }
 
