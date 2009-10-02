@@ -1,3 +1,10 @@
+2009-10-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gdb/10649
+	* Makefile.in (GDB_DATADIR_PATH): Renamed to ...
+	(GDB_DATADIR): This.
+	(xml-syscall-install): Updated.
+
 2009-10-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* MAINTAINERS: Move Don Lee to the correct section (Write After

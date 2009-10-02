@@ -167,7 +167,7 @@ TARGET_SYSTEM_ROOT = @TARGET_SYSTEM_ROOT@
 TARGET_SYSTEM_ROOT_DEFINE = @TARGET_SYSTEM_ROOT_DEFINE@
 
 # Did the user give us a --with-gdb-datadir option?
-GDB_DATADIR_PATH = @GDB_DATADIR_PATH@
+GDB_DATADIR = @GDB_DATADIR@
 
 # Helper code from gnulib.
 LIBGNU = gnulib/libgnu.a
@@ -899,13 +899,13 @@ xml-syscall-copy:
 .PHONY: xml-syscall-install
 xml-syscall-install:
 	$(SHELL) $(srcdir)/../mkinstalldirs \
-		$(DESTDIR)$(GDB_DATADIR_PATH)/$(XML_SYSCALLS_DIR) ; \
+		$(DESTDIR)$(GDB_DATADIR)/$(XML_SYSCALLS_DIR) ; \
 	list='$(XML_SYSCALLS_FILES)' ; \
 	for file in $$list ; do \
 	  f=$(srcdir)/$(XML_SYSCALLS_DIR)/$$file ; \
 	  if test -f $$f ; then \
 	    $(INSTALL_DATA) $$f \
-	    	$(DESTDIR)$(GDB_DATADIR_PATH)/$(XML_SYSCALLS_DIR) ; \
+	    	$(DESTDIR)$(GDB_DATADIR)/$(XML_SYSCALLS_DIR) ; \
 	  fi ; \
 	done ;
 
