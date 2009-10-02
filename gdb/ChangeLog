@@ -1,3 +1,11 @@
+2009-10-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix compatibility of --with-system-readline and readline-6.0+.
+	* configure.ac <--with-system-readline> (for readline_echoing_p): New
+	test.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2009-10-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* MAINTAINERS: Move Don Lee to the correct section (Write After

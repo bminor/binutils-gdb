@@ -534,6 +534,21 @@ if test "$with_system_readline" = yes; then
   READLINE=-lreadline
   READLINE_DEPS=
   READLINE_CFLAGS=
+
+  # readline-6.0 started to use the name `_rl_echoing_p'.
+  # `$(READLINE_DIR)/' of bundled readline would not resolve in configure.
+
+  AC_MSG_CHECKING([for readline_echoing_p])
+  save_LIBS=$LIBS
+  LIBS="$LIBS $READLINE"
+  AC_LINK_IFELSE(AC_LANG_PROGRAM(,[[extern int readline_echoing_p;
+				    return readline_echoing_p;]]),
+		 [READLINE_ECHOING_P=yes],
+		 [READLINE_ECHOING_P=no
+		  AC_DEFINE([readline_echoing_p], [_rl_echoing_p],
+			    [readline-6.0 started to use different name.])])
+  LIBS="$save_LIBS"
+  AC_MSG_RESULT([$READLINE_ECHOING_P])
 else
   READLINE='$(READLINE_DIR)/libreadline.a'
   READLINE_DEPS='$(READLINE)'

@@ -792,6 +792,9 @@
 /* Define to `int' if <sys/types.h> does not define. */
 #undef pid_t
 
+/* readline-6.0 started to use different name. */
+#undef readline_echoing_p
+
 /* Define to the equivalent of the C99 'restrict' keyword, or to
    nothing if this is not supported.  Do not define if restrict is
    supported directly.  */

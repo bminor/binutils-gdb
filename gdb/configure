@@ -8431,6 +8431,39 @@ if test "$with_system_readline" = yes; then
   READLINE=-lreadline
   READLINE_DEPS=
   READLINE_CFLAGS=
+
+  # readline-6.0 started to use the name `_rl_echoing_p'.
+  # `$(READLINE_DIR)/' of bundled readline would not resolve in configure.
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for readline_echoing_p" >&5
+$as_echo_n "checking for readline_echoing_p... " >&6; }
+  save_LIBS=$LIBS
+  LIBS="$LIBS $READLINE"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+extern int readline_echoing_p;
+				    return readline_echoing_p;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  READLINE_ECHOING_P=yes
+else
+  READLINE_ECHOING_P=no
+
+$as_echo "#define readline_echoing_p _rl_echoing_p" >>confdefs.h
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+  LIBS="$save_LIBS"
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $READLINE_ECHOING_P" >&5
+$as_echo "$READLINE_ECHOING_P" >&6; }
 else
   READLINE='$(READLINE_DIR)/libreadline.a'
   READLINE_DEPS='$(READLINE)'
