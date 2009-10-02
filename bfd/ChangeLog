@@ -1,3 +1,8 @@
+2009-10-01  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* cofflink.c (_bfd_coff_generic_relocate_section): Look for the aux
+	symbol for a weak undef in the auxbfd, not the input bfd.
+
 2009-10-01  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* elf32-spu.c (spu_elf_auto_overlay): Insert icache linker script

@@ -2959,7 +2959,7 @@ _bfd_coff_generic_relocate_section (bfd *output_bfd,
 		     See also linker.c: generic_link_check_archive_element. */
 		  asection *sec;
 		  struct coff_link_hash_entry *h2 =
-		    input_bfd->tdata.coff_obj_data->sym_hashes[
+		    h->auxbfd->tdata.coff_obj_data->sym_hashes[
 		    h->aux->x_sym.x_tagndx.l];
 
 		  if (!h2 || h2->root.type == bfd_link_hash_undefined)
