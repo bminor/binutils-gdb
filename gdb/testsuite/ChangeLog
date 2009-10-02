@@ -1,4 +1,9 @@
 2009-10-02  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* lib/gdb.exp (gdb_compile): Add --enable-auto-import option for 
+	mingw and cygwin targets.
+
+2009-10-02  Pierre Muller  <muller@ics.u-strasbg.fr>
 	    Pedro Alves  <pedro@codesourcery.com>
 
 	* lib/gdb.exp (gdb_compile): Avoid adding 
