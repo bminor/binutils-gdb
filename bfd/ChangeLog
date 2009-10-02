@@ -135,7 +135,7 @@
 
 2009-09-09  Martin Thuresson  <martin@mtme.org>
 
-	Update soruces to compile cleanly with -Wc++-compat:
+	Update sources to compile cleanly with -Wc++-compat:
 	* aoutx.h: Add casts.
 	* archive.c: Add casts.
 	* archive64.c: Add casts.

@@ -11,7 +11,7 @@
 2009-09-25  Nick Hudson  <nick.hudson@gmx.co.uk>
 
 	* doc/c-mips.texi: Fix the singlefloat and doublefloat kindex
-	entries. 
+	entries.
 
 2009-09-23  Tim E. Sneddon  <tsneddon@kednos.com>
 
@@ -215,7 +215,7 @@
 	the prerequisite. Add $(srcdir)/config/bfin-aux.h to the
 	prerequisite.
 	(bfin-defs.h, $(srcdir)/config/bfin-defs.h): Rename to ...
-	(bfin-parse.h, $(srcdir)/config/bfin-parse.h): ... these. 
+	(bfin-parse.h, $(srcdir)/config/bfin-parse.h): ... these.
 	(bfin-lex.o): Add bfin-parse.h and $(srcdir)/config/bfin-defs.h
 	to the prerequisite.
 	* Makefile.in: Regenerate.
@@ -563,7 +563,7 @@
 
 2009-08-17  Sterling Augustine  <sterling@tensilica.com>
 
-	* config/tc-xtensa.c (xtensa_frob_label): move call to 
+	* config/tc-xtensa.c (xtensa_frob_label): move call to
 	do_align_targets to set frag_type only.
 
 2009-08-17  Kai Tietz  <kai.tietz@onevision.com>
@@ -674,14 +674,14 @@
 2009-08-06  Michael Eager <eager@eagercon.com>
 
 	* Makefile.am: add microblaze to CPU_TYPES, config/tc-microblaze.c to
-	TARGET_CPU_CFILES, config/tc-microblaze.h to TARGET_CPU_HFILES, add 
+	TARGET_CPU_CFILES, config/tc-microblaze.h to TARGET_CPU_HFILES, add
 	DEP_microblaze_elf target.
 	* Makefile.in: Regenerate.
 	* config/tc-microblaze.c: Add MicroBlaze assembler.
 	* config/tc-microblaze.h: Add header for tc-microblaze.c.
 	* configure.in: Add microblaze target.
 	* configure: Regenerate.
-	* configure.tgt: Same. 
+	* configure.tgt: Same.
 	* doc/Makefile.am: Add c-microblaze.texi to CPU_DOCS.
 	* doc/Makefile.in: Same.
 	* doc/all.texi: Set MICROBLAZE.
@@ -795,7 +795,7 @@
 	* config/tc-cr16.c (md_apply_fix): Put the addend value alone in to
 	object file without symbol values.
 	(tc_gen_reloc): For local symbols resolved or its absolute symbol,
-	then set the relocation type as NULL. 
+	then set the relocation type as NULL.
 
 2009-07-25  H.J. Lu  <hongjiu.lu@intel.com>
 
