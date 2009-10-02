@@ -33,13 +33,13 @@
 
 2009-09-25  Michael Eager  <eager@eagercon.com>
 
-	* microblaze-dis.c (get_insn_microblaze, microblaze_get_target_address, 
-	microblaze_decode_insn): Add declarations.  
-	(get_delay_slots_microblaze): Remove. 
+	* microblaze-dis.c (get_insn_microblaze, microblaze_get_target_address,
+	microblaze_decode_insn): Add declarations.
+	(get_delay_slots_microblaze): Remove.
 
 2009-09-25  Martin Thuresson  <martint@google.com>
 
-	Update soruces to make arc and arm targets compile cleanly with
+	Update sources to make arc and arm targets compile cleanly with
 	-Wc++-compat:
 	* arc-dis.c Fix casts.
 	* arc-ext.c: Add casts.
@@ -54,7 +54,7 @@
 	* i386-opc.h (Vex): Update comments.
 	(Vex256): Removed.
 	(VexNDS): Updated.
-	(i386_opcode_modifier): Change vex to 2 bits.  Remove vex256. 
+	(i386_opcode_modifier): Change vex to 2 bits.  Remove vex256.
 
 	* i386-opc.tbl: Replace "Vex|Vex256" with Vex=2.
 	* i386-tbl.h: Regenerated.
@@ -110,11 +110,11 @@
 	* mri.c: Add casts. (mri_draw_tree): Use enum name instead of integer.
 
 2009-09-10  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
-	
+
 	* s390-dis.c (print_insn_s390): Avoid 'long long'.
 
 2009-09-10  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
-	
+
 	* s390-dis.c (s390_extract_operand): Remove the shift for pcrel operands.
 	(print_insn_s390): Signextend and shift pcrel operands before printing.
 
@@ -348,7 +348,7 @@
 	* Makefile.in: Regenerate.
 	* configure.in: Add bfd_microblaze_arch target.
 	* configure: Regenerate.
-	* disassemble.c: Define ARCH_microblaze, return 
+	* disassemble.c: Define ARCH_microblaze, return
 	print_insn_microblaze().
 	* microblaze-dis.c: New MicroBlaze disassembler.
 	* microblaze-opc.h: New MicroBlaze opcode definitions.
@@ -429,7 +429,7 @@
 	* m32r-opc.h, * m32r-opinst.c, * mt-desc.c, * mt-desc.h,
 	* mt-opc.c, * mt-opc.h, * openrisc-desc.c, * openrisc-desc.h,
 	* openrisc-opc.c, * openrisc-opc.h, * xc16x-desc.c, * xc16x-desc.h,
-	* xc16x-opc.c, * xc16x-opc.h, * xstormy16-desc.c, * xstormy16-desc.h, 
+	* xc16x-opc.c, * xc16x-opc.h, * xstormy16-desc.c, * xstormy16-desc.h,
 	* xstormy16-opc.c, * xstormy16-opc.h: Regenerate.
 
 2009-07-07  Chung-Lin Tang  <cltang@pllab.cs.nthu.edu.tw>
@@ -474,7 +474,7 @@
 	(VEX_LEN_3A7E_P_2,VEX_LEN_3A7F_P_2): New.
 	(get_vex_imm8): New. handle FMA4.
 	(OP_EX_VexReg): Ditto.
-	
+
 2009-06-30  Nick Clifton  <nickc@redhat.com>
 
 	PR 10288
@@ -503,7 +503,7 @@
 	(print_insn_arm): Likewise.
 	(print_insn_thumb16): Likewise.
 	(print_insn_thumb32): Likewise.
-	
+
 	PR 10297
 	* arm-dis.c (UNDEFINED_INSTRUCTION): New macro for a description
 	of an undefined instruction.
@@ -671,7 +671,7 @@
 	(OP_DREX_FCMP): Delete.
 	(DREX_*): Delete.
 	(THREE_BYTE_0F24, THREE_BYTE_0F25, THREE_BYTE_0f7B): Delete.
-	
+
 2009-05-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
@@ -976,7 +976,7 @@
 
 2009-01-28  Chao-ying Fu  <fu@mips.com>
 
-        * mips-opc.c (suxc1): Add the flag of FP_D.
+	* mips-opc.c (suxc1): Add the flag of FP_D.
 
 2009-01-20  Alan Modra  <amodra@bigpond.net.au>
 
@@ -1137,7 +1137,7 @@
 	(PREFIX_VEX_3ADF): Likewise.
 	(VEX_LEN_3ADF_P_2): Likewise.
 	(prefix_table): Remove PREFIX_VEX_3A48...PREFIX_VEX_3A4A,
-	PREFIX_VEX_3A5C...PREFIX_VEX_3A5F, 
+	PREFIX_VEX_3A5C...PREFIX_VEX_3A5F,
 	PREFIX_VEX_3A68...PREFIX_VEX_3A6F and
 	PREFIX_VEX_3A78...PREFIX_VEX_3A7F.  Add
 	PREFIX_VEX_3896...PREFIX_VEX_389F,
@@ -1155,10 +1155,10 @@
 	instructions.  Add new FMA instructions.
 	* i386-tbl.h: Regenerated.
 
-2009-01-02  Matthias Klose  <doko@ubuntu.com> 
+2009-01-02  Matthias Klose  <doko@ubuntu.com>
 
-	* or32-opc.c (or32_print_register, or32_print_immediate, 
-	disassemble_insn): Don't rely on undefined sprintf behaviour. 
+	* or32-opc.c (or32_print_register, or32_print_immediate,
+	disassemble_insn): Don't rely on undefined sprintf behaviour.
 
 For older changes see ChangeLog-2008
 

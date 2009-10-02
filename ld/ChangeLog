@@ -67,7 +67,7 @@
 
 2009-09-25  Martin Thuresson  <martint@google.com>
 
-	Update soruces to make arm targets compile cleanly with
+	Update sources to make arm targets compile cleanly with
 	-Wc++-compat:
 	* emultempl/armelf.em: Add casts.
 
