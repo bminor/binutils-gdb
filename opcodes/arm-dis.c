@@ -4267,8 +4267,7 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
 
   /* First check the full symtab for a mapping symbol, even if there
      are no usable non-mapping symbols for this address.  */
-  if (info->symtab != NULL
-      && * info->symtab
+  if (info->symtab_size != 0
       && bfd_asymbol_flavour (*info->symtab) == bfd_target_elf_flavour)
     {
       bfd_vma addr;

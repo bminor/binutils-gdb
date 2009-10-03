@@ -1,3 +1,7 @@
+2009-10-03  Paul Reed  <paulreed@paddedcell.com>
+
+	* arm-dis.c (print_insn): Check symtab_size not *symtab.
+
 2009-10-02  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-dis.c (ppc_opts): Add "476" entry.
