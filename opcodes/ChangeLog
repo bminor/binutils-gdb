@@ -1,12 +1,3 @@
-2009-10-03  H.J. Lu  <hongjiu.lu@intel.com>
-
-	* Makefile.am ($(srcdir)/rx-decode.c): Add @MAINT@.
-	(rx-dis.lo): Remove a space.
-	(pc2c$(EXEEXT)): Remove a space. Use $(LINK_FOR_BUILD) instead
-	of gcc.
-	(MAINTAINERCLEANFILES): Add $(srcdir)/rx-decode.c.
-	* Makefile.in: Regenerated.
-
 2009-10-03  Paul Reed  <paulreed@paddedcell.com>
 
 	* arm-dis.c (print_insn): Check symtab_size not *symtab.
