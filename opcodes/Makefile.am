@@ -437,13 +437,13 @@ stamp-iq2000: $(CGENDEPS) $(srcdir)/../cpu/iq2000.cpu \
 		archfile=$(srcdir)/../cpu/iq2000.cpu \
 		opcfile=$(srcdir)/../cpu/iq2000.opc extrafiles=
 
-$(srcdir)/rx-decode.c : $(srcdir)/rx-decode.opc opc2c$(EXEEXT)
+$(srcdir)/rx-decode.c: @MAINT@ $(srcdir)/rx-decode.opc opc2c$(EXEEXT)
 	./opc2c$(EXEEXT) $(srcdir)/rx-decode.opc > $(srcdir)/rx-decode.c
 
-rx-dis.lo : rx-dis.c sysdep.h config.h $(BFD_H) $(INCDIR)/opcode/rx.h
+rx-dis.lo: rx-dis.c sysdep.h config.h $(BFD_H) $(INCDIR)/opcode/rx.h
 
-opc2c$(EXEEXT) : $(srcdir)/opc2c.c
-	gcc $(srcdir)/opc2c.c -o opc2c$(EXEEXT)
+opc2c$(EXEEXT): $(srcdir)/opc2c.c
+	$(LINK_FOR_BUILD) $(srcdir)/opc2c.c -o opc2c$(EXEEXT)
 
 $(srcdir)/xstormy16-desc.h $(srcdir)/xstormy16-desc.c $(srcdir)/xstormy16-opc.h $(srcdir)/xstormy16-opc.c $(srcdir)/xstormy16-ibld.c $(srcdir)/xstormy16-asm.c $(srcdir)/xstormy16-dis.c: $(XSTORMY16_DEPS)
 	@true
@@ -461,7 +461,8 @@ MOSTLYCLEANFILES = i386-gen$(EXEEXT_FOR_BUILD) ia64-gen$(EXEEXT_FOR_BUILD) \
 	s390-mkopc$(EXEEXT_FOR_BUILD) z8kgen$(EXEEXT_FOR_BUILD)
 
 MAINTAINERCLEANFILES = $(srcdir)/i386-tbl.h $(srcdir)/i386-init.h \
-	$(srcdir)/ia64-asmtab.c s390-opc.tab $(srcdir)/z8k-opc.h
+	$(srcdir)/ia64-asmtab.c $(srcdir)/rx-decode.c s390-opc.tab \
+	$(srcdir)/z8k-opc.h
 
 i386-gen$(EXEEXT_FOR_BUILD): i386-gen.o $(BUILD_LIB_DEPS)
 	$(LINK_FOR_BUILD) i386-gen.o $(BUILD_LIBS)
