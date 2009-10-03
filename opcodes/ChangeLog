@@ -1,3 +1,7 @@
+2009-10-03  Paul Reed  <paulreed@paddedcell.com>
+
+	* arm-dis.c (print_insn): Check symtab_size not *symtab.
+
 2009-10-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.tbl: Drop Disp64 on jump and loop instructions.
