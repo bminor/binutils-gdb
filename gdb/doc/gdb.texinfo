@@ -28220,16 +28220,14 @@ Step.
 Step with signal @var{sig}.  The signal @var{sig} should be two hex digits.
 @item t
 Stop.
-@item T @var{sig}
-Stop with signal @var{sig}.  The signal @var{sig} should be two hex digits.
 @end table
 
 The optional argument @var{addr} normally associated with the 
 @samp{c}, @samp{C}, @samp{s}, and @samp{S} packets is
 not supported in @samp{vCont}.
 
-The @samp{t} and @samp{T} actions are only relevant in non-stop mode
-(@pxref{Remote Non-Stop}) and may be ignored by the stub otherwise.  
+The @samp{t} action is only relevant in non-stop mode
+(@pxref{Remote Non-Stop}) and may be ignored by the stub otherwise.
 A stop reply should be generated for any affected thread not already stopped.
 When a thread is stopped by means of a @samp{t} action,
 the corresponding stop reply should indicate that the thread has stopped with
