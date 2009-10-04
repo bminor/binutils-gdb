@@ -232,6 +232,20 @@ Cell/B.E. debugging, you need to configure GDB to support both the
 powerpc-linux or powerpc64-linux and the spu-elf targets, using the
 --enable-targets configure option.
 
+* Non-stop mode debugging.
+
+  For some targets, GDB now supports an optional mode of operation in
+  which you can examine stopped threads while other threads continue
+  to execute freely.  This is referred to as non-stop mode, with the
+  old mode referred to as all-stop mode.  See the "Non-Stop Mode"
+  section in the user manual for more information.
+
+  To be able to support remote non-stop debugging, a remote stub needs
+  to implement the non-stop mode remote protocol extensions, as
+  described in the "Remote Non-Stop" section of the user manual.  The
+  GDB remote stub, gdbserver, has been adjusted to support these
+  extensions on linux targets.
+
 * New commands (for set/show, see "New options" below)
 
 catch syscall [NAME(S) | NUMBER(S)]
