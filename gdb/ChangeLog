@@ -1,3 +1,7 @@
+2009-10-04  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdbinit.in: Set data-directory to @srcdir@.
+
 2009-10-02  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-nat.c (TRAP_IS_SYSCALL, TRAP_REMOVE_SYSCALL_FLAG): Delete.
