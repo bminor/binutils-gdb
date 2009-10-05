@@ -1,3 +1,8 @@
+2009-10-05  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* lib/gdb.exp (default_gdb_init): Set current value of match_max 
+	to default.
+
 2009-10-02  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* lib/gdb.exp (gdb_compile): Add --enable-auto-import option for 

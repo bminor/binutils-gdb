@@ -2333,6 +2333,8 @@ proc default_gdb_init { args } {
     # a very large amount of output.  We therefore increase the expect
     # buffer size to be able to contain the entire test output.
     match_max -d 30000
+    # Also set this value for the currently running GDB. 
+    match_max [match_max -d]
 
     # We want to add the name of the TCL testcase to the PASS/FAIL messages.
     if { [llength $args] > 0 } {
