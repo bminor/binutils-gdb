@@ -1,5 +1,10 @@
 2009-10-06  Alan Modra  <amodra@bigpond.net.au>
 
+	PR gas/10704
+	* symbols.c (snapshot_symbol): Revert 2006-01-09 patch for PR2117.
+
+2009-10-06  Alan Modra  <amodra@bigpond.net.au>
+
 	* read.c (s_reloc): Don't use expression_and_evaluate.
 
 2009-10-02  Peter Bergner  <bergner@vnet.ibm.com>
