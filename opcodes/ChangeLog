@@ -1,3 +1,21 @@
+2009-10-03  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* opc2c.c: Include "libiberty.h" and <errno.h>.
+	(orig_filename): Constify.
+	(dump_lines): Fix line number directive.
+	(main): Set orig_filename to basename of input file.  Use
+	xstrerror.
+
+	* Makefile.am (rx-dis.lo): Remove explicit dependencies.
+	($(srcdir)/rx-decode.c): Use @MAINT@.  Use $(EXEEXT_FOR_BUILD)
+	instead of $(EXEEXT).
+	(opc2c$(EXEEXT_FOR_BUILD)): Renamed from opc2c$(EXEEXT) and use
+	$(LINK_FOR_BUILD).  Link with libiberty.
+	(MOSTLYCLEANFILES): Add opc2c$(EXEEXT_FOR_BUILD).
+	(MAINTAINERCLEANFILES): Add $(srcdir)/rx-decode.c.
+	* Makefile.in: Regenerated.
+	* rx-decode.c: Regenerated.
+
 2009-10-03  Paul Reed  <paulreed@paddedcell.com>
 
 	* arm-dis.c (print_insn): Check symtab_size not *symtab.

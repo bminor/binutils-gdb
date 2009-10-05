@@ -437,14 +437,6 @@ stamp-iq2000: $(CGENDEPS) $(srcdir)/../cpu/iq2000.cpu \
 		archfile=$(srcdir)/../cpu/iq2000.cpu \
 		opcfile=$(srcdir)/../cpu/iq2000.opc extrafiles=
 
-$(srcdir)/rx-decode.c : $(srcdir)/rx-decode.opc opc2c$(EXEEXT)
-	./opc2c$(EXEEXT) $(srcdir)/rx-decode.opc > $(srcdir)/rx-decode.c
-
-rx-dis.lo : rx-dis.c sysdep.h config.h $(BFD_H) $(INCDIR)/opcode/rx.h
-
-opc2c$(EXEEXT) : $(srcdir)/opc2c.c
-	gcc $(srcdir)/opc2c.c -o opc2c$(EXEEXT)
-
 $(srcdir)/xstormy16-desc.h $(srcdir)/xstormy16-desc.c $(srcdir)/xstormy16-opc.h $(srcdir)/xstormy16-opc.c $(srcdir)/xstormy16-ibld.c $(srcdir)/xstormy16-asm.c $(srcdir)/xstormy16-dis.c: $(XSTORMY16_DEPS)
 	@true
 stamp-xstormy16: $(CGENDEPS) $(CPUDIR)/xstormy16.cpu $(CPUDIR)/xstormy16.opc
@@ -458,10 +450,12 @@ stamp-xc16x: $(CGENDEPS) $(CPUDIR)/xc16x.cpu $(CPUDIR)/xc16x.opc
 		archfile=$(CPUDIR)/xc16x.cpu opcfile=$(CPUDIR)/xc16x.opc extrafiles=
 
 MOSTLYCLEANFILES = i386-gen$(EXEEXT_FOR_BUILD) ia64-gen$(EXEEXT_FOR_BUILD) \
-	s390-mkopc$(EXEEXT_FOR_BUILD) z8kgen$(EXEEXT_FOR_BUILD)
+	s390-mkopc$(EXEEXT_FOR_BUILD) z8kgen$(EXEEXT_FOR_BUILD) \
+	opc2c$(EXEEXT_FOR_BUILD)
 
 MAINTAINERCLEANFILES = $(srcdir)/i386-tbl.h $(srcdir)/i386-init.h \
-	$(srcdir)/ia64-asmtab.c s390-opc.tab $(srcdir)/z8k-opc.h
+	$(srcdir)/ia64-asmtab.c s390-opc.tab $(srcdir)/z8k-opc.h \
+	$(srcdir)/rx-decode.c
 
 i386-gen$(EXEEXT_FOR_BUILD): i386-gen.o $(BUILD_LIB_DEPS)
 	$(LINK_FOR_BUILD) i386-gen.o $(BUILD_LIBS)
@@ -498,6 +492,15 @@ $(srcdir)/ia64-asmtab.c: @MAINT@ $(ia64_asmtab_deps)
 	./ia64-gen$(EXEEXT_FOR_BUILD) --srcdir $(srcdir) > $@
 
 ia64-opc.lo: $(srcdir)/ia64-asmtab.c
+
+$(srcdir)/rx-decode.c: @MAINT@ $(srcdir)/rx-decode.opc opc2c$(EXEEXT_FOR_BUILD)
+	./opc2c$(EXEEXT_FOR_BUILD) $(srcdir)/rx-decode.opc > $(srcdir)/rx-decode.c
+
+opc2c$(EXEEXT_FOR_BUILD): opc2c.o $(BUILD_LIBS_DEPS)
+	$(LINK_FOR_BUILD) opc2c.o $(BUILD_LIBS)
+
+opc2c.o: opc2c.c $(INCDIR)/libiberty.h
+	$(COMPILE_FOR_BUILD) -c $(srcdir)/opc2c.c
 
 s390-mkopc$(EXEEXT_FOR_BUILD): s390-mkopc.c
 	$(COMPILE_FOR_BUILD) -o s390-mkopc $(srcdir)/s390-mkopc.c

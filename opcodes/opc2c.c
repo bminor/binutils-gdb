@@ -23,6 +23,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <errno.h>
+#include "libiberty.h"
 
 static char * line_buf = NULL;
 static int line_buf_size = 0;
@@ -288,7 +290,7 @@ dump_lines (opcode * op, int level, Indirect * ind)
 	    }
 	  *np = 0;
 	  varnames[vn++] = strdup (name);
-	  printf ("#line %d \"%s\"\n", op->lineno, orig_filename);
+	  printf ("#line %d \"%s\"\n", op->lineno + 1, orig_filename);
 	  if (mask & ~0xff)
 	    {
 	      fprintf (stderr, "Error: variable %s spans bytes: %s\n",
@@ -586,19 +588,19 @@ main (int argc, char ** argv)
       exit (1);
     }
 
-  orig_filename = argv[1];
+  orig_filename = lbasename (argv[1]);
   in = fopen (argv[1], "r");
   if (!in)
     {
-      fprintf (stderr, "Unable to open file %s for reading\n", argv[1]);
-      perror ("The error was");
+      fprintf (stderr, "Unable to open file %s for reading: %s\n", argv[1],
+	       xstrerror (errno));
       exit (1);
     }
 
   n_opcodes = 0;
   opcodes = (opcode **) malloc (sizeof (opcode *));
   op = &prefix_text;
-  op->lineno = 1;
+  op->lineno = 0;
   while ((line = safe_fgets (in)) != 0)
     {
       lineno++;
