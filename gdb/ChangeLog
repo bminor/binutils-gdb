@@ -1,3 +1,9 @@
+2009-10-05  Pedro Alves  <pedro@codesourcery.com>
+
+	Revert:
+	2009-10-04  Pedro Alves  <pedro@codesourcery.com>
+	* gdbinit.in: Set data-directory to @srcdir@.
+
 2009-10-04  Pedro Alves  <pedro@codesourcery.com>
 
 	* NEWS: Mention non-stop mode.

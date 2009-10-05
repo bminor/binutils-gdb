@@ -16,8 +16,6 @@ dir @srcdir@
 dir .
 set prompt (top-gdb) 
 
-set data-directory @srcdir@
-
 define pdie
   if $argc == 1
     call dump_die ($arg0, 1)
