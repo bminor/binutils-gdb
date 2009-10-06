@@ -147,6 +147,34 @@ static struct inferior *darwin_inf_fake_stop;
 /* This controls output of inferior debugging.  */
 static int darwin_debug_flag = 0;
 
+/* Create a __TEXT __info_plist section in the executable so that gdb could
+   be signed.  This is required to get an authorization for task_for_pid.
+
+   Once gdb is built, you can either:
+   * make it setgid procmod
+   * or codesign it with any system-trusted signing authority.
+   See taskgated(8) for details.  */
+static const unsigned char info_plist[]
+__attribute__ ((section ("__TEXT,__info_plist"),used)) =
+  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+  "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\""
+  " \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+  "<plist version=\"1.0\">\n"
+  "<dict>\n"
+  "  <key>CFBundleIdentifier</key>\n"
+  "  <string>org.gnu.gdb</string>\n"
+  "  <key>CFBundleName</key>\n"
+  "  <string>gdb</string>\n"
+  "  <key>CFBundleVersion</key>\n"
+  "  <string>1.0</string>\n"
+  "  <key>SecTaskAccess</key>\n"
+  "  <array>\n"
+  "    <string>allowed</string>\n"
+  "    <string>debug</string>\n"
+  "  </array>\n"
+  "</dict>\n"
+  "</plist>\n";
+
 static void
 inferior_debug (int level, const char *fmt, ...)
 {
@@ -1323,7 +1351,7 @@ darwin_attach_pid (struct inferior *inf)
 	}
 
       error (_("Unable to find Mach task port for process-id %d: %s (0x%lx).\n"
-	       " (please check gdb is setgid procmod)"),
+	       " (please check gdb is codesigned - see taskgated(8))"),
              inf->pid, mach_error_string (kret), (unsigned long) kret);
     }
 
