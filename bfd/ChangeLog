@@ -1,3 +1,8 @@
+2009-10-06  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.in: Bump version to 2.19.92
+	* configure: Regenerate.
+
 2009-10-01  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* cofflink.c (_bfd_coff_generic_relocate_section): Look for the aux
