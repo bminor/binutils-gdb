@@ -2047,7 +2047,7 @@ enum bfd_architecture
 #define bfd_mach_cris_v0_v10   255
 #define bfd_mach_cris_v32      32
 #define bfd_mach_cris_v10_v32  1032
-  bfd_arch_rx,     /* Renesas RX.  */
+  bfd_arch_rx,        /* Renesas RX.  */
 #define bfd_mach_rx            0x75
   bfd_arch_s390,      /* IBM s390 */
 #define bfd_mach_s390_31       31

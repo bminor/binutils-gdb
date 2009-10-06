@@ -1,3 +1,7 @@
+2009-10-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd-in2.h: Regenerated.
+
 2009-10-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* aout-cris.c (N_SHARED_LIB): Don't define.
