@@ -1,5 +1,9 @@
 2009-10-06  Joel Brobecker  <brobecker@adacore.com>
 
+	* MAINTAINERS: Add Tristan Gingold as Maintainer of the Darwin port.
+
+2009-10-06  Joel Brobecker  <brobecker@adacore.com>
+
 	* MAINTAINERS: Add Jan Kratochvil as Maintainer of the ia64 target.
 
 2009-10-05  Pedro Alves  <pedro@codesourcery.com>
