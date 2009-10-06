@@ -4197,6 +4197,15 @@ should have an entry in @code{.eh_frame}. It initializes some internal
 data structures. Don't forget to close the function by
 @code{.cfi_endproc}.
 
+@section @code{.cfi_sections @var{section_list}}
+@cindex @code{cfi_sections} directive
+@code{.cfi_sections} may be used to specify whether CFI directives
+should emit @code{.eh_frame} section and/or @code{.debug_frame} section.
+If @var{section_list} is @code{.eh_frame}, @code{.eh_frame} is emitted,
+if @var{section_list} is @code{.debug_frame}, @code{.debug_frame} is emitted.
+To emit both use @code{.eh_frame, .debug_frame}.  The default if this
+directive is not used is @code{.cfi_sections .eh_frame}.
+
 Unless @code{.cfi_startproc} is used along with parameter @code{simple} 
 it also emits some architecture dependent initial CFI instructions.
  
