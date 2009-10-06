@@ -1,3 +1,9 @@
+2009-10-06  Michael Eager  <eager@eagercon.com>
+
+	* gdb.texinfo (Contributors): Add self for Xilinx MicroBlaze.
+	(Embedded Processors): Add MicroBlaze.
+	(MicroBlaze): New.  Describe Xilinx MicroBlaze
+
 2009-10-04  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.texinfo (Remote Protocol): Don't mention vCont;T.

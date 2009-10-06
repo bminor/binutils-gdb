@@ -517,6 +517,9 @@ Tensilica, Inc.@: contributed support for Xtensa processors.  Others
 who have worked on the Xtensa port of @value{GDBN} in the past include
 Steve Tjiang, John Newlin, and Scott Foehner.
 
+Michael Eager and staff of Xilinx, Inc., contributed support for the
+Xilinx MicroBlaze architecture.
+
 @node Sample Session
 @chapter A Sample @value{GDBN} Session
 
@@ -16570,6 +16573,7 @@ acceptable commands.
 * ARM::                         ARM RDI
 * M32R/D::                      Renesas M32R/D
 * M68K::                        Motorola M68K
+* MicroBlaze::			Xilinx MicroBlaze
 * MIPS Embedded::               MIPS Embedded
 * OpenRISC 1000::               OpenRisc 1000
 * PA::                          HP PA Embedded
@@ -16819,6 +16823,44 @@ target command for the following ROM monitor.
 @item target dbug @var{dev}
 dBUG ROM monitor for Motorola ColdFire.
 
+@end table
+
+@node MicroBlaze
+@subsection MicroBlaze
+@cindex Xilinx MicroBlaze
+@cindex XMD, Xilinx Microprocessor Debugger
+
+The MicroBlaze is a soft-core processor supported on various Xilinx
+FPGAs, such as Spartan or Virtex series.  Boards with these processors
+usually have JTAG ports which connect to a host system running the Xilinx
+Embedded Development Kit (EDK) or Software Development Kit (SDK).
+This host system is used to download the configuration bitstream to
+the target FPGA.  The Xilinx Microprocessor Debugger (XMD) program
+communicates with the target board using the JTAG interface and
+presents a @code{gdbserver} interface to the board.  By default
+@code{xmd} uses port @code{1234}.  (While it is possible to change 
+this default port, it requires the use of undocumented @code{xmd} 
+commands.  Contact Xilinx support if you need to do this.)
+
+Use these GDB commands to connect to the MicroBlaze target processor.
+
+@table @code
+@item target remote :1234
+Use this command to connect to the target if you are running @value{GDBN}
+on the same system as @code{xmd}.
+
+@item target remote @var{xmd-host}:1234
+Use this command to connect to the target if it is connected to @code{xmd}
+running on a different system named @var{xmd-host}.
+
+@item load
+Use this command to download a program to the MicroBlaze target.
+
+@item set debug microblaze @var{n}
+Enable MicroBlaze-specific debugging messages if non-zero.
+
+@item show debug microblaze @var{n}
+Show MicroBlaze-specific debugging level.
 @end table
 
 @node MIPS Embedded
