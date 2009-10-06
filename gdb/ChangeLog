@@ -1,5 +1,9 @@
 2009-10-06  Joel Brobecker  <brobecker@adacore.com>
 
+	* NEWS: Change "Changes since GDB 6.8" into "Changes in GDB 7.0".
+
+2009-10-06  Joel Brobecker  <brobecker@adacore.com>
+
 	* README: Update GDB version number to 7.0.
 	* version.in: Likewise.
 
