@@ -1,3 +1,12 @@
+2009-10-06   Rafael Espindola  <espindola@google.com>
+
+	* plugin.cc (add_input_library): New.
+	(Plugin::load): Add add_input_library to tv.
+	(Plugin_manager::add_input_file): Add the is_lib argument.
+	(add_input_file): Update call to Plugin_manager::add_input_file.
+	(add_input_library): New.
+	* plugin.h (Plugin_manager::add_input_file): Add the is_lib argument.
+
 2009-09-30  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Target_arm::may_need_copy_reloc): Check for THUMB function

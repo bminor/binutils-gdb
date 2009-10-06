@@ -74,6 +74,9 @@ static enum ld_plugin_status
 add_input_file(char *pathname);
 
 static enum ld_plugin_status
+add_input_library(char *pathname);
+
+static enum ld_plugin_status
 message(int level, const char *format, ...);
 
 };
@@ -118,7 +121,7 @@ Plugin::load()
   sscanf(ver, "%d.%d", &major, &minor);
 
   // Allocate and populate a transfer vector.
-  const int tv_fixed_size = 13;
+  const int tv_fixed_size = 14;
   int tv_size = this->args_.size() + tv_fixed_size;
   ld_plugin_tv *tv = new ld_plugin_tv[tv_size];
 
@@ -183,6 +186,10 @@ Plugin::load()
   ++i;
   tv[i].tv_tag = LDPT_ADD_INPUT_FILE;
   tv[i].tv_u.tv_add_input_file = add_input_file;
+
+  ++i;
+  tv[i].tv_tag = LDPT_ADD_INPUT_LIBRARY;
+  tv[i].tv_u.tv_add_input_library = add_input_library;
 
   ++i;
   tv[i].tv_tag = LDPT_NULL;
@@ -401,9 +408,9 @@ Plugin_manager::release_input_file(unsigned int handle)
 // Add a new input file.
 
 ld_plugin_status
-Plugin_manager::add_input_file(char *pathname)
+Plugin_manager::add_input_file(char *pathname, bool is_lib)
 {
-  Input_file_argument file(pathname, false, "", false, this->options_);
+  Input_file_argument file(pathname, is_lib, "", false, this->options_);
   Input_argument* input_argument = new Input_argument(file);
   Task_token* next_blocker = new Task_token(true);
   next_blocker->add_blocker();
@@ -941,7 +948,16 @@ static enum ld_plugin_status
 add_input_file(char *pathname)
 {
   gold_assert(parameters->options().has_plugins());
-  return parameters->options().plugins()->add_input_file(pathname);
+  return parameters->options().plugins()->add_input_file(pathname, false);
+}
+
+// Add a new (real) library required by a plugin.
+
+static enum ld_plugin_status
+add_input_library(char *pathname)
+{
+  gold_assert(parameters->options().has_plugins());
+  return parameters->options().plugins()->add_input_file(pathname, true);
 }
 
 // Issue a diagnostic message from a plugin.
