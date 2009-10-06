@@ -1,3 +1,12 @@
+2009-10-06  Ian Lance Taylor  <iant@google.com>
+
+	* i386.cc (class Target_i386::Relocate): Add ldo_addrs_ field.
+	(Target_i386::Relocate::relocate_tls): Call fix_up_ldo before
+	changing local_dynamic_type_ from LOCAL_DYNAMIC_NONE.  When
+	handling R_386_TLS_LDO_32, if local_dynamic_type_ is NONE, push
+	the address on ldo_addrs_.
+	(Target_i386::Relocate::fix_up_ldo): New function.
+
 2009-10-06   Rafael Espindola  <espindola@google.com>
 
 	* plugin.cc (add_input_library): New.

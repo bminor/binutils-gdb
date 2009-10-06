@@ -212,7 +212,7 @@ class Target_i386 : public Target_freebsd<32, false>
    public:
     Relocate()
       : skip_call_tls_get_addr_(false),
-	local_dynamic_type_(LOCAL_DYNAMIC_NONE)
+	local_dynamic_type_(LOCAL_DYNAMIC_NONE), ldo_addrs_()
     { }
 
     ~Relocate()
@@ -307,6 +307,10 @@ class Target_i386 : public Target_freebsd<32, false>
 		 unsigned char* view,
 		 section_size_type view_size);
 
+    // Fix up LDO_32 relocations we've already seen.
+    void
+    fix_up_ldo(const Relocate_info<32, false>*);
+
     // We need to keep track of which type of local dynamic relocation
     // we have seen, so that we can optimize R_386_TLS_LDO_32 correctly.
     enum Local_dynamic_type
@@ -322,6 +326,8 @@ class Target_i386 : public Target_freebsd<32, false>
     // The type of local dynamic relocation we have seen in the section
     // being relocated, if any.
     Local_dynamic_type local_dynamic_type_;
+    // A list of LDO_32 offsets, in case we find LDM after LDO_32.
+    std::vector<unsigned char*> ldo_addrs_;
   };
 
   // A class which returns the size required for a relocation type,
@@ -1922,6 +1928,8 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 
     case elfcpp::R_386_TLS_GOTDESC:      // Global-dynamic (from ~oliva url)
     case elfcpp::R_386_TLS_DESC_CALL:
+      if (this->local_dynamic_type_ == LOCAL_DYNAMIC_NONE)
+	this->fix_up_ldo(relinfo);
       this->local_dynamic_type_ = LOCAL_DYNAMIC_GNU;
       if (optimized_type == tls::TLSOPT_TO_LE)
         {
@@ -1980,6 +1988,8 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 				   "TLS relocations"));
 	  break;
 	}
+      else if (this->local_dynamic_type_ == LOCAL_DYNAMIC_NONE)
+	this->fix_up_ldo(relinfo);
       this->local_dynamic_type_ = LOCAL_DYNAMIC_GNU;
       if (optimized_type == tls::TLSOPT_TO_LE)
 	{
@@ -2012,6 +2022,11 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 	{
           gold_assert(tls_segment != NULL);
           value -= tls_segment->memsz();
+	}
+      else
+	{
+	  // We may see the LDM later.
+	  this->ldo_addrs_.push_back(view);
 	}
       Relocate_functions<32, false>::rel32(view, value);
       break;
@@ -2417,6 +2432,24 @@ Target_i386::Relocate::tls_ie_to_le(const Relocate_info<32, false>* relinfo,
     value = - value;
 
   Relocate_functions<32, false>::rel32(view, value);
+}
+
+// If we see an LDM reloc after we handled any LDO_32 relocs, fix up
+// the LDO_32 relocs.
+
+void
+Target_i386::Relocate::fix_up_ldo(const Relocate_info<32, false>* relinfo)
+{
+  if (this->ldo_addrs_.empty())
+    return;
+  Output_segment* tls_segment = relinfo->layout->tls_segment();
+  gold_assert(tls_segment != NULL);
+  elfcpp::Elf_types<32>::Elf_Addr value = - tls_segment->memsz();
+  for (std::vector<unsigned char*>::const_iterator p = this->ldo_addrs_.begin();
+       p != this->ldo_addrs_.end();
+       ++p)
+    Relocate_functions<32, false>::rel32(*p, value);
+  this->ldo_addrs_.clear();
 }
 
 // Relocate section data.
