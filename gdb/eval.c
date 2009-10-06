@@ -884,8 +884,8 @@ evaluate_subexp_standard (struct type *expect_type,
 	  LONGEST low_bound, high_bound;
 
 	  /* get targettype of elementtype */
-	  while (TYPE_CODE (check_type) == TYPE_CODE_RANGE ||
-		 TYPE_CODE (check_type) == TYPE_CODE_TYPEDEF)
+	  while (TYPE_CODE (check_type) == TYPE_CODE_RANGE
+		 || TYPE_CODE (check_type) == TYPE_CODE_TYPEDEF)
 	    check_type = TYPE_TARGET_TYPE (check_type);
 
 	  if (get_discrete_bounds (element_type, &low_bound, &high_bound) < 0)
@@ -919,14 +919,14 @@ evaluate_subexp_standard (struct type *expect_type,
 		range_low_type = TYPE_TARGET_TYPE (range_low_type);
 	      if (TYPE_CODE (range_high_type) == TYPE_CODE_RANGE)
 		range_high_type = TYPE_TARGET_TYPE (range_high_type);
-	      if ((TYPE_CODE (range_low_type) != TYPE_CODE (range_high_type)) ||
-		  (TYPE_CODE (range_low_type) == TYPE_CODE_ENUM &&
-		   (range_low_type != range_high_type)))
+	      if ((TYPE_CODE (range_low_type) != TYPE_CODE (range_high_type))
+		  || (TYPE_CODE (range_low_type) == TYPE_CODE_ENUM
+		      && (range_low_type != range_high_type)))
 		/* different element modes */
 		error (_("POWERSET tuple elements of different mode"));
-	      if ((TYPE_CODE (check_type) != TYPE_CODE (range_low_type)) ||
-		  (TYPE_CODE (check_type) == TYPE_CODE_ENUM &&
-		   range_low_type != check_type))
+	      if ((TYPE_CODE (check_type) != TYPE_CODE (range_low_type))
+		  || (TYPE_CODE (check_type) == TYPE_CODE_ENUM
+		      && range_low_type != check_type))
 		error (_("incompatible POWERSET tuple elements"));
 	      if (range_low > range_high)
 		{
@@ -1662,8 +1662,8 @@ evaluate_subexp_standard (struct type *expect_type,
 	struct value_print_options opts;
 
 	get_user_print_options (&opts);
-        if (opts.objectprint && TYPE_TARGET_TYPE(type) &&
-            (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CLASS))
+        if (opts.objectprint && TYPE_TARGET_TYPE(type)
+            && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CLASS))
           {
             real_type = value_rtti_target_type (arg1, &full, &top, &using_enc);
             if (real_type)

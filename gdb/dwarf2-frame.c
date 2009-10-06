@@ -2112,8 +2112,8 @@ dwarf2_build_frame_info (struct objfile *objfile)
           obstack_grow (&objfile->objfile_obstack, &fde_table.entries[j],
                         sizeof (fde_table.entries[0]));
           while (++j < fde_table.num_entries
-                 && (fde_table.entries[k]->initial_location ==
-                     fde_table.entries[j]->initial_location))
+                 && (fde_table.entries[k]->initial_location
+                     == fde_table.entries[j]->initial_location))
             /* Skip.  */;
         }
       fde_table2->entries = obstack_finish (&objfile->objfile_obstack);

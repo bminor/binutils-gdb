@@ -413,8 +413,8 @@ print_subexp_standard (struct expression *exp, int *pos,
       (*pos) += 2;
       if ((int) prec > (int) PREC_PREFIX)
 	fputs_filtered ("(", stream);
-      if (TYPE_CODE (exp->elts[pc + 1].type) == TYPE_CODE_FUNC &&
-	  exp->elts[pc + 3].opcode == OP_LONG)
+      if (TYPE_CODE (exp->elts[pc + 1].type) == TYPE_CODE_FUNC
+	  && exp->elts[pc + 3].opcode == OP_LONG)
 	{
 	  struct value_print_options opts;
 

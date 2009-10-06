@@ -778,8 +778,8 @@ floatformat_from_length (struct gdbarch *gdbarch, int len)
      both in processor and in memory.  
      The code below accepts the real bit size.  */ 
   else if ((gdbarch_long_double_format (gdbarch) != NULL)
-	   && (len * TARGET_CHAR_BIT ==
-               gdbarch_long_double_format (gdbarch)[0]->totalsize))
+	   && (len * TARGET_CHAR_BIT
+               == gdbarch_long_double_format (gdbarch)[0]->totalsize))
     format = gdbarch_long_double_format (gdbarch)
 	       [gdbarch_byte_order (gdbarch)];
   else

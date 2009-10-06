@@ -1,3 +1,15 @@
+2009-10-07  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	ARI fix: OP eol rule.
+	* doublest.c (floatformat_from_length): Avoid operator at end of line.
+	* dwarf2-frame.c (dwarf2_build_frame_info): Idem.
+	* dwarf2read.c (read_array_order, dwarf_decode_macros): Idem.
+	* eval.c (evaluate_subexp_standard): Idem.
+	* event-loop.c (create_timer, handle_timer_event): Idem.
+	* expprint.c (print_subexp_standard): Idem.
+	* f-exp.y (variable): Idem.
+	* f-typeprint.c (f_print_type): Idem.
+
 2009-10-06  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	ARI fix: OP eol rule.
