@@ -61,7 +61,7 @@ class Target_test : public Sized_target<size, big_endian>
   relocate_section(const Relocate_info<size, big_endian>*, unsigned int,
 		   const unsigned char*, size_t, Output_section*, bool,
 		   unsigned char*, typename elfcpp::Elf_types<size>::Elf_Addr,
-		   section_size_type)
+		   section_size_type, const Reloc_symbol_changes*)
   { ERROR("call to Target_test::relocate_section"); }
 
   void

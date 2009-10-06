@@ -668,6 +668,16 @@ LDFLAGS
 CFLAGS
 CC
 TARGETOBJS
+DEFAULT_TARGET_X86_64_FALSE
+DEFAULT_TARGET_X86_64_TRUE
+DEFAULT_TARGET_SPARC_FALSE
+DEFAULT_TARGET_SPARC_TRUE
+DEFAULT_TARGET_POWERPC_FALSE
+DEFAULT_TARGET_POWERPC_TRUE
+DEFAULT_TARGET_I386_FALSE
+DEFAULT_TARGET_I386_TRUE
+DEFAULT_TARGET_ARM_FALSE
+DEFAULT_TARGET_ARM_TRUE
 PLUGINS_FALSE
 PLUGINS_TRUE
 THREADS_FALSE
@@ -3354,6 +3364,47 @@ for targ in $target $canon_targets; do
 	default_size=$targ_size
 	default_big_endian=$targ_big_endian
 	default_osabi=$targ_osabi
+
+	 if test "$targ_obj" = "arm"; then
+  DEFAULT_TARGET_ARM_TRUE=
+  DEFAULT_TARGET_ARM_FALSE='#'
+else
+  DEFAULT_TARGET_ARM_TRUE='#'
+  DEFAULT_TARGET_ARM_FALSE=
+fi
+
+	 if test "$targ_obj" = "i386"; then
+  DEFAULT_TARGET_I386_TRUE=
+  DEFAULT_TARGET_I386_FALSE='#'
+else
+  DEFAULT_TARGET_I386_TRUE='#'
+  DEFAULT_TARGET_I386_FALSE=
+fi
+
+	 if test "$targ_obj" = "powerpc"; then
+  DEFAULT_TARGET_POWERPC_TRUE=
+  DEFAULT_TARGET_POWERPC_FALSE='#'
+else
+  DEFAULT_TARGET_POWERPC_TRUE='#'
+  DEFAULT_TARGET_POWERPC_FALSE=
+fi
+
+	 if test "$targ_obj" = "sparc"; then
+  DEFAULT_TARGET_SPARC_TRUE=
+  DEFAULT_TARGET_SPARC_FALSE='#'
+else
+  DEFAULT_TARGET_SPARC_TRUE='#'
+  DEFAULT_TARGET_SPARC_FALSE=
+fi
+
+	 if test "$targ_obj" = "x86_64"; then
+  DEFAULT_TARGET_X86_64_TRUE=
+  DEFAULT_TARGET_X86_64_FALSE='#'
+else
+  DEFAULT_TARGET_X86_64_TRUE='#'
+  DEFAULT_TARGET_X86_64_FALSE=
+fi
+
       fi
     fi
   fi
@@ -6968,6 +7019,26 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${PLUGINS_TRUE}" && test -z "${PLUGINS_FALSE}"; then
   as_fn_error "conditional \"PLUGINS\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${DEFAULT_TARGET_ARM_TRUE}" && test -z "${DEFAULT_TARGET_ARM_FALSE}"; then
+  as_fn_error "conditional \"DEFAULT_TARGET_ARM\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${DEFAULT_TARGET_I386_TRUE}" && test -z "${DEFAULT_TARGET_I386_FALSE}"; then
+  as_fn_error "conditional \"DEFAULT_TARGET_I386\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${DEFAULT_TARGET_POWERPC_TRUE}" && test -z "${DEFAULT_TARGET_POWERPC_FALSE}"; then
+  as_fn_error "conditional \"DEFAULT_TARGET_POWERPC\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${DEFAULT_TARGET_SPARC_TRUE}" && test -z "${DEFAULT_TARGET_SPARC_FALSE}"; then
+  as_fn_error "conditional \"DEFAULT_TARGET_SPARC\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${DEFAULT_TARGET_X86_64_TRUE}" && test -z "${DEFAULT_TARGET_X86_64_FALSE}"; then
+  as_fn_error "conditional \"DEFAULT_TARGET_X86_64\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${AMDEP_TRUE}" && test -z "${AMDEP_FALSE}"; then

@@ -812,6 +812,10 @@ class General_options
   DEFINE_bool(Bshareable, options::ONE_DASH, '\0', false,
               N_("Generate shared library"), NULL);
 
+  DEFINE_uint(split_stack_adjust_size, options::TWO_DASHES, '\0', 0x4000,
+	      N_("Stack size when -fsplit-stack function calls non-split"),
+	      N_("SIZE"));
+
   // This is not actually special in any way, but I need to give it
   // a non-standard accessor-function name because 'static' is a keyword.
   DEFINE_special(static, options::ONE_DASH, '\0',

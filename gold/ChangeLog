@@ -1,5 +1,80 @@
 2009-10-06  Ian Lance Taylor  <iant@google.com>
 
+	* options.h (class General_options): Define
+	split_stack_adjust_size parameter.
+	* object.h (class Object): Add uses_split_stack_ and
+	has_no_split_stack_ fields.  Add uses_split_stack and
+	has_no_split_stack accessor functions.  Declare
+	handle_split_stack_section.
+	(class Reloc_symbol_changes): Define.
+	(class Sized_relobj): Define Function_offsets.  Declare
+	split_stack_adjust, split_stack_adjust_reltype, and
+	find_functions.
+	* object.cc (Object::handle_split_stack_section): New function.
+	(Sized_relobj::do_layout): Call handle_split_stack_section.
+	* dynobj.cc (Sized_dynobj::do_layout): Call
+	handle_split_stack_section.
+	* reloc.cc (Sized_relobj::relocate_sections): Call
+	split_stack_adjust for executable sections in split_stack
+	objects.  Pass reloc_map to relocate_section.
+	(Sized_relobj::split_stack_adjust): New function.
+	(Sized_relobj::split_stack_adjust_reltype): New function.
+	(Sized_relobj::find_functions): New function.
+	* target-reloc.h: Include "object.h".
+	(relocate_section): Add reloc_symbol_changes parameter.  Change
+	all callers.
+	* target.h (class Target): Add calls_non_split method.  Declare
+	do_calls_non_split virtual method.  Declare match_view and
+	set_view_to_nop.
+	* target.cc: Include "elfcpp.h".
+	(Target::do_calls_non_split): New function.
+	(Target::match_view): New function.
+	(Target::set_view_to_nop): New function.
+	* gold.cc (queue_middle_tasks): Give an error if mixing
+	split-stack and non-split-stack objects with -r.
+	* i386.cc (Target_i386::relocate_section): Add
+	reloc_symbol_changes parameter.
+	(Target_i386::do_calls_non_split): New function.
+	* x86_64.cc (Target_x86_64::relocate_section): Add
+	reloc_symbol_changes parameter.
+	(Target_x86_64::do_calls_non_split): New function.
+	* arm.cc (Target_arm::relocate_section): Add reloc_symbol_changes
+	parameter.
+	* powerpc.cc (Target_powerpc::relocate_section): Add
+	reloc_symbol_changes parameter.
+	* sparc.cc (Target_sparc::relocate_section): Add
+	reloc_symbol_changes parameter.
+	* configure.ac: Call AM_CONDITIONAL for the default target.
+	* configure: Rebuild.
+	* testsuite/Makefile.am (TEST_AS): New variable.
+	(check_SCRIPTS): Add split_i386.sh and split_x86_64.sh.
+	(check_DATA): Add split_i386 and split_x86_64 files.
+	(SPLIT_DEFSYMS): Define.
+	(split_i386_[1234n].o): New targets.
+	(split_i386_[124]): New targets.
+	(split_i386_[1234r].stdout): New targets.
+	(split_x86_64_[1234n].o): New targets.
+	(split_x86_64_[124]): New targets.
+	(split_x86_64_[1234r].stdout): New targets.
+	(MOSTLYCLEANFILES): Add new executables.
+	* testsuite/split_i386.sh: New file.
+	* testsuite/split_x86_64.sh: New file.
+	* testsuite/split_i386_1.s: New file.
+	* testsuite/split_i386_2.s: New file.
+	* testsuite/split_i386_3.s: New file.
+	* testsuite/split_i386_4.s: New file.
+	* testsuite/split_i386_n.s: New file.
+	* testsuite/split_x86_64_1.s: New file.
+	* testsuite/split_x86_64_2.s: New file.
+	* testsuite/split_x86_64_3.s: New file.
+	* testsuite/split_x86_64_4.s: New file.
+	* testsuite/split_x86_64_n.s: New file.
+	* testsuite/testfile.cc (Target_test): Update relocation_section
+	function.
+	* testsuite/Makefile.in: Rebuild.
+
+2009-10-06  Ian Lance Taylor  <iant@google.com>
+
 	* i386.cc (class Target_i386::Relocate): Add ldo_addrs_ field.
 	(Target_i386::Relocate::relocate_tls): Call fix_up_ldo before
 	changing local_dynamic_type_ from LOCAL_DYNAMIC_NONE.  When

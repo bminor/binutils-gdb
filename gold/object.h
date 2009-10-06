@@ -195,7 +195,8 @@ class Object
   Object(const std::string& name, Input_file* input_file, bool is_dynamic,
 	 off_t offset = 0)
     : name_(name), input_file_(input_file), offset_(offset), shnum_(-1U),
-      is_dynamic_(is_dynamic), xindex_(NULL), no_export_(false)
+      is_dynamic_(is_dynamic), uses_split_stack_(false),
+      has_no_split_stack_(false), xindex_(NULL), no_export_(false)
   { input_file->file().add_object(); }
 
   virtual ~Object()
@@ -215,6 +216,17 @@ class Object
   bool
   is_dynamic() const
   { return this->is_dynamic_; }
+
+  // Return whether this object was compiled with -fsplit-stack.
+  bool
+  uses_split_stack() const
+  { return this->uses_split_stack_; }
+
+  // Return whether this object contains any functions compiled with
+  // the no_split_stack attribute.
+  bool
+  has_no_split_stack() const
+  { return this->has_no_split_stack_; }
 
   // Returns NULL for Objects that are not plugin objects.  This method
   // is overridden in the Pluginobj class.
@@ -556,6 +568,12 @@ class Object
   handle_gnu_warning_section(const char* name, unsigned int shndx,
 			     Symbol_table*);
 
+  // If NAME is the name of the special section which indicates that
+  // this object was compiled with -fstack-split, mark it accordingly,
+  // and return true.  Otherwise return false.
+  bool
+  handle_split_stack_section(const char* name);
+
  private:
   // This class may not be copied.
   Object(const Object&);
@@ -572,6 +590,11 @@ class Object
   unsigned int shnum_;
   // Whether this is a dynamic object.
   bool is_dynamic_;
+  // Whether this object was compiled with -fsplit-stack.
+  bool uses_split_stack_;
+  // Whether this object contains any functions compiled with the
+  // no_split_stack attribute.
+  bool has_no_split_stack_;
   // Many sections for objects with more than SHN_LORESERVE sections.
   Xindex* xindex_;
   // True if exclude this object from automatic symbol export.
@@ -1252,6 +1275,30 @@ class Got_offset_list
   Got_offset_list* got_next_;
 };
 
+// This type is used to modify relocations for -fsplit-stack.  It is
+// indexed by relocation index, and means that the relocation at that
+// index should use the symbol from the vector, rather than the one
+// indicated by the relocation.
+
+class Reloc_symbol_changes
+{
+ public:
+  Reloc_symbol_changes(size_t count)
+    : vec_(count, NULL)
+  { }
+
+  void
+  set(size_t i, Symbol* sym)
+  { this->vec_[i] = sym; }
+
+  const Symbol*
+  operator[](size_t i) const
+  { return this->vec_[i]; }
+
+ private:
+  std::vector<Symbol*> vec_;
+};
+
 // A regular object file.  This is size and endian specific.
 
 template<int size, bool big_endian>
@@ -1670,6 +1717,30 @@ class Sized_relobj : public Relobj
 		      section_size_type view_size,
 		      unsigned char* reloc_view,
 		      section_size_type reloc_view_size);
+
+  // A type shared by split_stack_adjust_reltype and find_functions.
+  typedef std::map<section_offset_type, section_size_type> Function_offsets;
+
+  // Check for -fsplit-stack routines calling non-split-stack routines.
+  void
+  split_stack_adjust(const Symbol_table*, const unsigned char* pshdrs,
+		     unsigned int sh_type, unsigned int shndx,
+		     const unsigned char* prelocs, size_t reloc_count,
+		     unsigned char* view, section_size_type view_size,
+		     Reloc_symbol_changes** reloc_map);
+
+  template<int sh_type>
+  void
+  split_stack_adjust_reltype(const Symbol_table*, const unsigned char* pshdrs,
+			     unsigned int shndx, const unsigned char* prelocs,
+			     size_t reloc_count, unsigned char* view,
+			     section_size_type view_size,
+			     Reloc_symbol_changes** reloc_map);
+
+  // Find all functions in a section.
+  void
+  find_functions(const unsigned char* pshdrs, unsigned int shndx,
+		 Function_offsets*);
 
   // Initialize input to output maps for section symbols in merged
   // sections.

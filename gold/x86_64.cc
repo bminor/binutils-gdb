@@ -120,7 +120,8 @@ class Target_x86_64 : public Target_freebsd<64, false>
 		   bool needs_special_offset_handling,
 		   unsigned char* view,
 		   elfcpp::Elf_types<64>::Elf_Addr view_address,
-		   section_size_type view_size);
+		   section_size_type view_size,
+		   const Reloc_symbol_changes*);
 
   // Scan the relocs during a relocatable link.
   void
@@ -161,6 +162,13 @@ class Target_x86_64 : public Target_freebsd<64, false>
   bool
   do_is_defined_by_abi(const Symbol* sym) const
   { return strcmp(sym->name(), "__tls_get_addr") == 0; }
+
+  // Adjust -fstack-split code which calls non-stack-split code.
+  void
+  do_calls_non_split(Relobj* object, unsigned int shndx,
+		     section_offset_type fnoffset, section_size_type fnsize,
+		     unsigned char* view, section_size_type view_size,
+		     std::string* from, std::string* to) const;
 
   // Return the size of the GOT section.
   section_size_type
@@ -2417,15 +2425,17 @@ Target_x86_64::Relocate::tls_ie_to_le(const Relocate_info<64, false>* relinfo,
 // Relocate section data.
 
 void
-Target_x86_64::relocate_section(const Relocate_info<64, false>* relinfo,
-                                unsigned int sh_type,
-                                const unsigned char* prelocs,
-                                size_t reloc_count,
-				Output_section* output_section,
-				bool needs_special_offset_handling,
-                                unsigned char* view,
-                                elfcpp::Elf_types<64>::Elf_Addr address,
-                                section_size_type view_size)
+Target_x86_64::relocate_section(
+    const Relocate_info<64, false>* relinfo,
+    unsigned int sh_type,
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    Output_section* output_section,
+    bool needs_special_offset_handling,
+    unsigned char* view,
+    elfcpp::Elf_types<64>::Elf_Addr address,
+    section_size_type view_size,
+    const Reloc_symbol_changes* reloc_symbol_changes)
 {
   gold_assert(sh_type == elfcpp::SHT_RELA);
 
@@ -2439,7 +2449,8 @@ Target_x86_64::relocate_section(const Relocate_info<64, false>* relinfo,
     needs_special_offset_handling,
     view,
     address,
-    view_size);
+    view_size,
+    reloc_symbol_changes);
 }
 
 // Return the size of a relocation while scanning during a relocatable
@@ -2655,6 +2666,63 @@ Target_x86_64::do_code_fill(section_size_type length) const
   };
 
   return std::string(nops[length], length);
+}
+
+// FNOFFSET in section SHNDX in OBJECT is the start of a function
+// compiled with -fstack-split.  The function calls non-stack-split
+// code.  We have to change the function so that it always ensures
+// that it has enough stack space to run some random function.
+
+void
+Target_x86_64::do_calls_non_split(Relobj* object, unsigned int shndx,
+				  section_offset_type fnoffset,
+				  section_size_type fnsize,
+				  unsigned char* view,
+				  section_size_type view_size,
+				  std::string* from,
+				  std::string* to) const
+{
+  // The function starts with a comparison of the stack pointer and a
+  // field in the TCB.  This is followed by a jump.
+
+  // cmp %fs:NN,%rsp
+  if (this->match_view(view, view_size, fnoffset, "\x64\x48\x3b\x24\x25", 5)
+      && fnsize > 9)
+    {
+      // We will call __morestack if the carry flag is set after this
+      // comparison.  We turn the comparison into an stc instruction
+      // and some nops.
+      view[fnoffset] = '\xf9';
+      this->set_view_to_nop(view, view_size, fnoffset + 1, 8);
+    }
+  // lea NN(%rsp),%r10
+  else if (this->match_view(view, view_size, fnoffset, "\x4c\x8d\x94\x24", 4)
+	   && fnsize > 8)
+    {
+      // This is loading an offset from the stack pointer for a
+      // comparison.  The offset is negative, so we decrease the
+      // offset by the amount of space we need for the stack.  This
+      // means we will avoid calling __morestack if there happens to
+      // be plenty of space on the stack already.
+      unsigned char* pval = view + fnoffset + 4;
+      uint32_t val = elfcpp::Swap_unaligned<32, false>::readval(pval);
+      val -= parameters->options().split_stack_adjust_size();
+      elfcpp::Swap_unaligned<32, false>::writeval(pval, val);
+    }
+  else
+    {
+      if (!object->has_no_split_stack())
+	object->error(_("failed to match split-stack sequence at "
+			"section %u offset %0zx"),
+		      shndx, fnoffset);
+      return;
+    }
+
+  // We have to change the function so that it calls
+  // __morestack_non_split instead of __morestack.  The former will
+  // allocate additional stack space.
+  *from = "__morestack";
+  *to = "__morestack_non_split";
 }
 
 // The selector for x86_64 object files.

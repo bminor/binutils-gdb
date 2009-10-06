@@ -110,7 +110,8 @@ class Target_powerpc : public Sized_target<size, big_endian>
 		   bool needs_special_offset_handling,
 		   unsigned char* view,
 		   typename elfcpp::Elf_types<size>::Elf_Addr view_address,
-		   section_size_type view_size);
+		   section_size_type view_size,
+		   const Reloc_symbol_changes*);
 
   // Scan the relocs during a relocatable link.
   void
@@ -1854,7 +1855,8 @@ Target_powerpc<size, big_endian>::relocate_section(
 			bool needs_special_offset_handling,
 			unsigned char* view,
 			typename elfcpp::Elf_types<size>::Elf_Addr address,
-			section_size_type view_size)
+			section_size_type view_size,
+			const Reloc_symbol_changes* reloc_symbol_changes)
 {
   typedef Target_powerpc<size, big_endian> Powerpc;
   typedef typename Target_powerpc<size, big_endian>::Relocate Powerpc_relocate;
@@ -1871,7 +1873,8 @@ Target_powerpc<size, big_endian>::relocate_section(
     needs_special_offset_handling,
     view,
     address,
-    view_size);
+    view_size,
+    reloc_symbol_changes);
 }
 
 // Return the size of a relocation while scanning during a relocatable

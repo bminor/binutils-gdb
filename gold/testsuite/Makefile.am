@@ -25,6 +25,7 @@ TEST_CXXFILT = $(top_builddir)/../binutils/cxxfilt
 TEST_STRIP = $(top_builddir)/../binutils/strip-new
 TEST_AR = $(top_builddir)/../binutils/ar
 TEST_NM = $(top_builddir)/../binutils/nm-new
+TEST_AS = $(top_builddir)/../gas/as-new
 
 if PLUGINS
 LIBDL = -ldl
@@ -1182,3 +1183,79 @@ permission_test: basic_test.o gcctestdir/ld
 
 endif GCC
 endif NATIVE_LINKER
+
+# These tests work with cross linkers.
+
+if DEFAULT_TARGET_I386
+
+check_SCRIPTS += split_i386.sh
+check_DATA += split_i386_1.stdout split_i386_2.stdout \
+	split_i386_3.stdout split_i386_4.stdout split_i386_r.stdout
+SPLIT_DEFSYMS = --defsym __morestack=0x100 --defsym __morestack_non_split=0x200
+split_i386_1.o: split_i386_1.s
+	$(TEST_AS) -o $@ $<
+split_i386_2.o: split_i386_2.s
+	$(TEST_AS) -o $@ $<
+split_i386_3.o: split_i386_3.s
+	$(TEST_AS) -o $@ $<
+split_i386_4.o: split_i386_4.s
+	$(TEST_AS) -o $@ $<
+split_i386_n.o: split_i386_n.s
+	$(TEST_AS) -o $@ $<
+split_i386_1: split_i386_1.o split_i386_n.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_i386_1.o split_i386_n.o
+split_i386_1.stdout: split_i386_1
+	$(TEST_OBJDUMP) -d $< > $@
+split_i386_2: split_i386_2.o split_i386_n.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_i386_2.o split_i386_n.o
+split_i386_2.stdout: split_i386_2
+	$(TEST_OBJDUMP) -d $< > $@
+split_i386_3.stdout: split_i386_3.o split_i386_n.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o split_i386_3 split_i386_3.o split_i386_n.o > $@ 2>&1 || exit 0
+split_i386_4: split_i386_4.o split_i386_n.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_i386_4.o split_i386_n.o
+split_i386_4.stdout: split_i386_4
+	$(TEST_OBJDUMP) -d $< > $@
+split_i386_r.stdout: split_i386_1.o split_i386_n.o ../ld-new
+	../ld-new -r split_i386_1.o split_i386_n.o -o split_i386_r > $@ 2>&1 || exit 0
+MOSTLYCLEANFILES += split_i386_1 split_i386_2 split_i386_3 \
+	split_i386_4 split_i386_r
+
+endif DEFAULT_TARGET_I386
+
+if DEFAULT_TARGET_X86_64
+
+check_SCRIPTS += split_x86_64.sh
+check_DATA += split_x86_64_1.stdout split_x86_64_2.stdout \
+	split_x86_64_3.stdout split_x86_64_4.stdout split_x86_64_r.stdout
+SPLIT_DEFSYMS = --defsym __morestack=0x100 --defsym __morestack_non_split=0x200
+split_x86_64_1.o: split_x86_64_1.s
+	$(TEST_AS) -o $@ $<
+split_x86_64_2.o: split_x86_64_2.s
+	$(TEST_AS) -o $@ $<
+split_x86_64_3.o: split_x86_64_3.s
+	$(TEST_AS) -o $@ $<
+split_x86_64_4.o: split_x86_64_4.s
+	$(TEST_AS) -o $@ $<
+split_x86_64_n.o: split_x86_64_n.s
+	$(TEST_AS) -o $@ $<
+split_x86_64_1: split_x86_64_1.o split_x86_64_n.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_x86_64_1.o split_x86_64_n.o
+split_x86_64_1.stdout: split_x86_64_1
+	$(TEST_OBJDUMP) -d $< > $@
+split_x86_64_2: split_x86_64_2.o split_x86_64_n.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_x86_64_2.o split_x86_64_n.o
+split_x86_64_2.stdout: split_x86_64_2
+	$(TEST_OBJDUMP) -d $< > $@
+split_x86_64_3.stdout: split_x86_64_3.o split_x86_64_n.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o split_x86_64_3 split_x86_64_3.o split_x86_64_n.o > $@ 2>&1 || exit 0
+split_x86_64_4: split_x86_64_4.o split_x86_64_n.o ../ld-new
+	../ld-new $(SPLIT_DEFSYMS) -o $@ split_x86_64_4.o split_x86_64_n.o
+split_x86_64_4.stdout: split_x86_64_4
+	$(TEST_OBJDUMP) -d $< > $@
+split_x86_64_r.stdout: split_x86_64_1.o split_x86_64_n.o ../ld-new
+	../ld-new -r split_x86_64_1.o split_x86_64_n.o -o split_x86_64_r > $@ 2>&1 || exit 0
+MOSTLYCLEANFILES += split_x86_64_1 split_x86_64_2 split_x86_64_3 \
+	split_x86_64_4 split_x86_64_r
+
+endif DEFAULT_TARGET_X86_64

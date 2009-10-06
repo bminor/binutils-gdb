@@ -408,7 +408,7 @@ Sized_dynobj<size, big_endian>::do_initialize_xindex()
 
 // Lay out the input sections for a dynamic object.  We don't want to
 // include sections from a dynamic object, so all that we actually do
-// here is check for .gnu.warning sections.
+// here is check for .gnu.warning and .note.GNU-split-stack sections.
 
 template<int size, bool big_endian>
 void
@@ -443,6 +443,7 @@ Sized_dynobj<size, big_endian>::do_layout(Symbol_table* symtab,
       const char* name = pnames + shdr.get_sh_name();
 
       this->handle_gnu_warning_section(name, i, symtab);
+      this->handle_split_stack_section(name);
     }
 
   delete sd->section_headers;

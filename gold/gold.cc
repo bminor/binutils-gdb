@@ -408,6 +408,23 @@ queue_middle_tasks(const General_options& options,
     gold_fatal(_("cannot use non-ELF output format with dynamic object %s"),
 	       (*input_objects->dynobj_begin())->name().c_str());
 
+  if (parameters->options().relocatable())
+    {
+      Input_objects::Relobj_iterator p = input_objects->relobj_begin();
+      if (p != input_objects->relobj_end())
+	{
+	  bool uses_split_stack = (*p)->uses_split_stack();
+	  for (++p; p != input_objects->relobj_end(); ++p)
+	    {
+	      if ((*p)->uses_split_stack() != uses_split_stack)
+		gold_fatal(_("cannot mix split-stack '%s' and "
+			     "non-split-stack '%s' when using -r"),
+			   (*input_objects->relobj_begin())->name().c_str(),
+			   (*p)->name().c_str());
+	    }
+	}
+    }
+
   if (is_debugging_enabled(DEBUG_SCRIPT))
     layout->script_options()->print(stderr);
 

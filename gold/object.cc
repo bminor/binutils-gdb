@@ -231,6 +231,25 @@ Object::handle_gnu_warning_section(const char* name, unsigned int shndx,
   return false;
 }
 
+// If NAME is the name of the special section which indicates that
+// this object was compiled with -fstack-split, mark it accordingly.
+
+bool
+Object::handle_split_stack_section(const char* name)
+{
+  if (strcmp(name, ".note.GNU-split-stack") == 0)
+    {
+      this->uses_split_stack_ = true;
+      return true;
+    }
+  if (strcmp(name, ".note.GNU-no-split-stack") == 0)
+    {
+      this->has_no_split_stack_ = true;
+      return true;
+    }
+  return false;
+}
+
 // Class Relobj
 
 // To copy the symbols data read from the file to a local data structure.
@@ -1108,6 +1127,16 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 	      gnu_stack_flags |= shdr.get_sh_flags();
 	      omit[i] = true;
             }
+
+	  // The .note.GNU-split-stack section is also special.  It
+	  // indicates that the object was compiled with
+	  // -fsplit-stack.
+	  if (this->handle_split_stack_section(name))
+	    {
+	      if (!parameters->options().relocatable()
+		  && !parameters->options().shared())
+		omit[i] = true;
+	    }
 
           bool discard = omit[i];
           if (!discard)

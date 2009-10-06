@@ -888,39 +888,36 @@ Sized_relobj<size, big_endian>::relocate_sections(
 
       relinfo.reloc_shndx = i;
       relinfo.data_shndx = index;
+      unsigned char* view = (*pviews)[index].view;
+      Address address = (*pviews)[index].address;
+      section_size_type view_size = (*pviews)[index].view_size;
+
+      Reloc_symbol_changes* reloc_map = NULL;
+      if (this->uses_split_stack() && output_offset != invalid_address)
+	{
+	  typename This::Shdr data_shdr(pshdrs + index * This::shdr_size);
+	  if ((data_shdr.get_sh_flags() & elfcpp::SHF_EXECINSTR) != 0)
+	    this->split_stack_adjust(symtab, pshdrs, sh_type, index,
+				     prelocs, reloc_count, view, view_size,
+				     &reloc_map);
+	}
+
       if (!parameters->options().relocatable())
 	{
-	  target->relocate_section(&relinfo,
-				   sh_type,
-				   prelocs,
-				   reloc_count,
-				   os,
+	  target->relocate_section(&relinfo, sh_type, prelocs, reloc_count, os,
 				   output_offset == invalid_address,
-				   (*pviews)[index].view,
-				   (*pviews)[index].address,
-				   (*pviews)[index].view_size);
+				   view, address, view_size, reloc_map);
 	  if (parameters->options().emit_relocs())
 	    this->emit_relocs(&relinfo, i, sh_type, prelocs, reloc_count,
-			      os, output_offset,
-			      (*pviews)[index].view,
-			      (*pviews)[index].address,
-			      (*pviews)[index].view_size,
-			      (*pviews)[i].view,
-			      (*pviews)[i].view_size);
+			      os, output_offset, view, address, view_size,
+			      (*pviews)[i].view, (*pviews)[i].view_size);
 	}
       else
 	{
 	  Relocatable_relocs* rr = this->relocatable_relocs(i);
-	  target->relocate_for_relocatable(&relinfo,
-					   sh_type,
-					   prelocs,
-					   reloc_count,
-					   os,
-					   output_offset,
-					   rr,
-					   (*pviews)[index].view,
-					   (*pviews)[index].address,
-					   (*pviews)[index].view_size,
+	  target->relocate_for_relocatable(&relinfo, sh_type, prelocs,
+					   reloc_count, os, output_offset, rr,
+					   view, address, view_size,
 					   (*pviews)[i].view,
 					   (*pviews)[i].view_size);
 	}
@@ -1022,6 +1019,244 @@ Sized_relobj<size, big_endian>::free_input_to_output_maps()
     {
       Symbol_value<size>& lv(this->local_values_[i]);
       lv.free_input_to_output_map();
+    }
+}
+
+// If an object was compiled with -fsplit-stack, this is called to
+// check whether any relocations refer to functions defined in objects
+// which were not compiled with -fsplit-stack.  If they were, then we
+// need to apply some target-specific adjustments to request
+// additional stack space.
+
+template<int size, bool big_endian>
+void
+Sized_relobj<size, big_endian>::split_stack_adjust(
+    const Symbol_table* symtab,
+    const unsigned char* pshdrs,
+    unsigned int sh_type,
+    unsigned int shndx,
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    unsigned char* view,
+    section_size_type view_size,
+    Reloc_symbol_changes** reloc_map)
+{
+  if (sh_type == elfcpp::SHT_REL)
+    this->split_stack_adjust_reltype<elfcpp::SHT_REL>(symtab, pshdrs, shndx,
+						      prelocs, reloc_count,
+						      view, view_size,
+						      reloc_map);
+  else
+    {
+      gold_assert(sh_type == elfcpp::SHT_RELA);
+      this->split_stack_adjust_reltype<elfcpp::SHT_RELA>(symtab, pshdrs, shndx,
+							 prelocs, reloc_count,
+							 view, view_size,
+							 reloc_map);
+    }
+}
+
+// Adjust for -fsplit-stack, templatized on the type of the relocation
+// section.
+
+template<int size, bool big_endian>
+template<int sh_type>
+void
+Sized_relobj<size, big_endian>::split_stack_adjust_reltype(
+    const Symbol_table* symtab,
+    const unsigned char* pshdrs,
+    unsigned int shndx,
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    unsigned char* view,
+    section_size_type view_size,
+    Reloc_symbol_changes** reloc_map)
+{
+  typedef typename Reloc_types<sh_type, size, big_endian>::Reloc Reltype;
+  const int reloc_size = Reloc_types<sh_type, size, big_endian>::reloc_size;
+
+  size_t local_count = this->local_symbol_count();
+
+  std::vector<section_offset_type> non_split_refs;
+
+  const unsigned char* pr = prelocs;
+  for (size_t i = 0; i < reloc_count; ++i, pr += reloc_size)
+    {
+      Reltype reloc(pr);
+
+      typename elfcpp::Elf_types<size>::Elf_WXword r_info = reloc.get_r_info();
+      unsigned int r_sym = elfcpp::elf_r_sym<size>(r_info);
+      if (r_sym < local_count)
+	continue;
+
+      const Symbol* gsym = this->global_symbol(r_sym);
+      gold_assert(gsym != NULL);
+      if (gsym->is_forwarder())
+	gsym = symtab->resolve_forwards(gsym);
+
+      // See if this relocation refers to a function defined in an
+      // object compiled without -fsplit-stack.  Note that we don't
+      // care about the type of relocation--this means that in some
+      // cases we will ask for a large stack unnecessarily, but this
+      // is not fatal.  FIXME: Some targets have symbols which are
+      // functions but are not type STT_FUNC, e.g., STT_ARM_TFUNC.
+      if (gsym->type() == elfcpp::STT_FUNC
+	  && !gsym->is_undefined()
+	  && gsym->source() == Symbol::FROM_OBJECT
+	  && !gsym->object()->uses_split_stack())
+	{
+	  section_offset_type offset =
+	    convert_to_section_size_type(reloc.get_r_offset());
+	  non_split_refs.push_back(offset);
+	}
+    }
+
+  if (non_split_refs.empty())
+    return;
+
+  // At this point, every entry in NON_SPLIT_REFS indicates a
+  // relocation which refers to a function in an object compiled
+  // without -fsplit-stack.  We now have to convert that list into a
+  // set of offsets to functions.  First, we find all the functions.
+
+  Function_offsets function_offsets;
+  this->find_functions(pshdrs, shndx, &function_offsets);
+  if (function_offsets.empty())
+    return;
+
+  // Now get a list of the function with references to non split-stack
+  // code.
+
+  Function_offsets calls_non_split;
+  for (std::vector<section_offset_type>::const_iterator p
+	 = non_split_refs.begin();
+       p != non_split_refs.end();
+       ++p)
+    {
+      Function_offsets::const_iterator low = function_offsets.lower_bound(*p);
+      if (low == function_offsets.end())
+	--low;
+      else if (low->first == *p)
+	;
+      else if (low == function_offsets.begin())
+	continue;
+      else
+	--low;
+
+      calls_non_split.insert(*low);
+    }
+  if (calls_non_split.empty())
+    return;
+
+  // Now we have a set of functions to adjust.  The adjustments are
+  // target specific.  Besides changing the output section view
+  // however, it likes, the target may request a relocation change
+  // from one global symbol name to another.
+
+  for (Function_offsets::const_iterator p = calls_non_split.begin();
+       p != calls_non_split.end();
+       ++p)
+    {
+      std::string from;
+      std::string to;
+      parameters->target().calls_non_split(this, shndx, p->first, p->second,
+					   view, view_size, &from, &to);
+      if (!from.empty())
+	{
+	  gold_assert(!to.empty());
+	  Symbol* tosym = NULL;
+
+	  // Find relocations in the relevant function which are for
+	  // FROM.
+	  pr = prelocs;
+	  for (size_t i = 0; i < reloc_count; ++i, pr += reloc_size)
+	    {
+	      Reltype reloc(pr);
+
+	      typename elfcpp::Elf_types<size>::Elf_WXword r_info =
+		reloc.get_r_info();
+	      unsigned int r_sym = elfcpp::elf_r_sym<size>(r_info);
+	      if (r_sym < local_count)
+		continue;
+
+	      section_offset_type offset =
+		convert_to_section_size_type(reloc.get_r_offset());
+	      if (offset < p->first
+		  || (offset
+		      >= (p->first
+			  + static_cast<section_offset_type>(p->second))))
+		continue;
+
+	      const Symbol* gsym = this->global_symbol(r_sym);
+	      if (from == gsym->name())
+		{
+		  if (tosym == NULL)
+		    {
+		      tosym = symtab->lookup(to.c_str());
+		      if (tosym == NULL)
+			{
+			  this->error(_("could not convert call "
+					"to '%s' to '%s'"),
+				      from.c_str(), to.c_str());
+			  break;
+			}
+		    }
+
+		  if (*reloc_map == NULL)
+		    *reloc_map = new Reloc_symbol_changes(reloc_count);
+		  (*reloc_map)->set(i, tosym);
+		}
+	    }
+	}
+    }
+}
+
+// Find all the function in this object defined in section SHNDX.
+// Store their offsets in the section in FUNCTION_OFFSETS.
+
+template<int size, bool big_endian>
+void
+Sized_relobj<size, big_endian>::find_functions(
+    const unsigned char* pshdrs,
+    unsigned int shndx,
+    Sized_relobj<size, big_endian>::Function_offsets* function_offsets)
+{
+  // We need to read the symbols to find the functions.  If we wanted
+  // to, we could cache reading the symbols across all sections in the
+  // object.
+  const unsigned int symtab_shndx = this->symtab_shndx_;
+  typename This::Shdr symtabshdr(pshdrs + symtab_shndx * This::shdr_size);
+  gold_assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
+
+  typename elfcpp::Elf_types<size>::Elf_WXword sh_size =
+    symtabshdr.get_sh_size();
+  const unsigned char* psyms = this->get_view(symtabshdr.get_sh_offset(),
+					      sh_size, true, true);
+
+  const int sym_size = This::sym_size;
+  const unsigned int symcount = sh_size / sym_size;
+  for (unsigned int i = 0; i < symcount; ++i, psyms += sym_size)
+    {
+      typename elfcpp::Sym<size, big_endian> isym(psyms);
+
+      // FIXME: Some targets can have functions which do not have type
+      // STT_FUNC, e.g., STT_ARM_TFUNC.
+      if (isym.get_st_type() != elfcpp::STT_FUNC
+	  || isym.get_st_size() == 0)
+	continue;
+
+      bool is_ordinary;
+      unsigned int sym_shndx = this->adjust_sym_shndx(i, isym.get_st_shndx(),
+						      &is_ordinary);
+      if (!is_ordinary || sym_shndx != shndx)
+	continue;
+
+      section_offset_type value =
+	convert_to_section_size_type(isym.get_st_value());
+      section_size_type fnsize =
+	convert_to_section_size_type(isym.get_st_size());
+
+      (*function_offsets)[value] = fnsize;
     }
 }
 
