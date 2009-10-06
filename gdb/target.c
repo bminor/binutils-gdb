@@ -3367,8 +3367,8 @@ debug_to_thread_architecture (struct target_ops *ops, ptid_t ptid)
 
   retval = debug_target.to_thread_architecture (ops, ptid);
 
-  fprintf_unfiltered (gdb_stdlog, "target_thread_architecture (%s) = %p [%s]\n",
-		      target_pid_to_str (ptid), retval,
+  fprintf_unfiltered (gdb_stdlog, "target_thread_architecture (%s) = %s [%s]\n",
+		      target_pid_to_str (ptid), host_address_to_string (retval),
 		      gdbarch_bfd_arch_info (retval)->printable_name);
   return retval;
 }

@@ -1,3 +1,9 @@
+2009-10-06  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* ARI fix: "%p" rule.
+	target.c (debug_to_thread_architecture): Replace %p by %s using
+	host_address_to_string function.
+
 2009-10-06  Tristan Gingold  <gingold@adacore.com>
 
 	* darwin-nat.c: Add __TEXT __info_plist content.
