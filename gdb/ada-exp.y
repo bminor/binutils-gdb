@@ -1021,8 +1021,8 @@ block_lookup (struct block *context, char *raw_name)
     name = ada_encode (raw_name);
 
   nsyms = ada_lookup_symbol_list (name, context, VAR_DOMAIN, &syms);
-  if (context == NULL &&
-      (nsyms == 0 || SYMBOL_CLASS (syms[0].sym) != LOC_BLOCK))
+  if (context == NULL
+      && (nsyms == 0 || SYMBOL_CLASS (syms[0].sym) != LOC_BLOCK))
     symtab = lookup_symtab (name);
   else
     symtab = NULL;

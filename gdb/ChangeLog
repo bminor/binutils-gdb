@@ -1,3 +1,12 @@
+2009-10-06  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	ARI fix: OP eol rule.
+	* ada-exp.y (block_lookup): Avoid operator at end of line.
+	* aix-thread.c (pd_enable): Idem.
+	* alpha-tdep.c (alpha_next_pc): Idem.
+	* arm-tdep.c (arm_skip_prologue, arm_scan_prologue): Idem.
+	(condition_true, coff_sym_is_thumb): Idem.
+
 2009-10-06  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 7.0 released.

@@ -893,8 +893,8 @@ pd_enable (void)
   stub_name = NULL;
   status = pthdb_session_pthreaded (PD_USER, PTHDB_FLAG_REGS,
 				    &pd_callbacks, &stub_name);
-  if ((status != PTHDB_SUCCESS && 
-       status != PTHDB_NOT_PTHREADED) || !stub_name)
+  if ((status != PTHDB_SUCCESS
+       && status != PTHDB_NOT_PTHREADED) || !stub_name)
     return;
 
   /* Set a breakpoint on the returned stub function.  */

@@ -610,14 +610,14 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       if ((inst & 0xfffff000) == 0xe24dd000)	/* sub sp, sp, #nn */
 	continue;
 
-      if ((inst & 0xffffc000) == 0xe54b0000 ||	/* strb r(0123),[r11,#-nn] */
-	  (inst & 0xffffc0f0) == 0xe14b00b0 ||	/* strh r(0123),[r11,#-nn] */
-	  (inst & 0xffffc000) == 0xe50b0000)	/* str  r(0123),[r11,#-nn] */
+      if ((inst & 0xffffc000) == 0xe54b0000	/* strb r(0123),[r11,#-nn] */
+	  || (inst & 0xffffc0f0) == 0xe14b00b0	/* strh r(0123),[r11,#-nn] */
+	  || (inst & 0xffffc000) == 0xe50b0000)	/* str  r(0123),[r11,#-nn] */
 	continue;
 
-      if ((inst & 0xffffc000) == 0xe5cd0000 ||	/* strb r(0123),[sp,#nn] */
-	  (inst & 0xffffc0f0) == 0xe1cd00b0 ||	/* strh r(0123),[sp,#nn] */
-	  (inst & 0xffffc000) == 0xe58d0000)	/* str  r(0123),[sp,#nn] */
+      if ((inst & 0xffffc000) == 0xe5cd0000	/* strb r(0123),[sp,#nn] */
+	  || (inst & 0xffffc0f0) == 0xe1cd00b0	/* strh r(0123),[sp,#nn] */
+	  || (inst & 0xffffc000) == 0xe58d0000)	/* str  r(0123),[sp,#nn] */
 	continue;
 
       /* Un-recognized instruction; stop scanning.  */
@@ -917,16 +917,16 @@ arm_scan_prologue (struct frame_info *this_frame,
 		pv_area_store (stack, regs[ARM_SP_REGNUM], 4, regs[regno]);
 	      }
 	}
-      else if ((insn & 0xffffc000) == 0xe54b0000 ||	/* strb rx,[r11,#-n] */
-	       (insn & 0xffffc0f0) == 0xe14b00b0 ||	/* strh rx,[r11,#-n] */
-	       (insn & 0xffffc000) == 0xe50b0000)	/* str  rx,[r11,#-n] */
+      else if ((insn & 0xffffc000) == 0xe54b0000	/* strb rx,[r11,#-n] */
+	       || (insn & 0xffffc0f0) == 0xe14b00b0	/* strh rx,[r11,#-n] */
+	       || (insn & 0xffffc000) == 0xe50b0000)	/* str  rx,[r11,#-n] */
 	{
 	  /* No need to add this to saved_regs -- it's just an arg reg.  */
 	  continue;
 	}
-      else if ((insn & 0xffffc000) == 0xe5cd0000 ||	/* strb rx,[sp,#n] */
-	       (insn & 0xffffc0f0) == 0xe1cd00b0 ||	/* strh rx,[sp,#n] */
-	       (insn & 0xffffc000) == 0xe58d0000)	/* str  rx,[sp,#n] */
+      else if ((insn & 0xffffc000) == 0xe5cd0000	/* strb rx,[sp,#n] */
+	       || (insn & 0xffffc0f0) == 0xe1cd00b0	/* strh rx,[sp,#n] */
+	       || (insn & 0xffffc000) == 0xe58d0000)	/* str  rx,[sp,#n] */
 	{
 	  /* No need to add this to saved_regs -- it's just an arg reg.  */
 	  continue;
@@ -2172,11 +2172,13 @@ condition_true (unsigned long cond, unsigned long status_reg)
     case INST_LT:
       return (((status_reg & FLAG_N) == 0) != ((status_reg & FLAG_V) == 0));
     case INST_GT:
-      return (((status_reg & FLAG_Z) == 0) &&
-	      (((status_reg & FLAG_N) == 0) == ((status_reg & FLAG_V) == 0)));
+      return (((status_reg & FLAG_Z) == 0)
+	      && (((status_reg & FLAG_N) == 0)
+		  == ((status_reg & FLAG_V) == 0)));
     case INST_LE:
-      return (((status_reg & FLAG_Z) != 0) ||
-	      (((status_reg & FLAG_N) == 0) != ((status_reg & FLAG_V) == 0)));
+      return (((status_reg & FLAG_Z) != 0)
+	      || (((status_reg & FLAG_N) == 0)
+		  != ((status_reg & FLAG_V) == 0)));
     }
   return 1;
 }
@@ -5208,11 +5210,11 @@ set_disassembly_style (void)
 static int
 coff_sym_is_thumb (int val)
 {
-  return (val == C_THUMBEXT ||
-	  val == C_THUMBSTAT ||
-	  val == C_THUMBEXTFUNC ||
-	  val == C_THUMBSTATFUNC ||
-	  val == C_THUMBLABEL);
+  return (val == C_THUMBEXT
+	  || val == C_THUMBSTAT
+	  || val == C_THUMBEXTFUNC
+	  || val == C_THUMBSTATFUNC
+	  || val == C_THUMBLABEL);
 }
 
 /* arm_coff_make_msymbol_special()

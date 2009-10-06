@@ -1390,8 +1390,8 @@ alpha_next_pc (struct frame_info *frame, CORE_ADDR pc)
     {
       /* Branch format: target PC is:
 	 (new PC) + (4 * sext(displacement))  */
-      if (op == 0x30 ||		/* BR */
-	  op == 0x34)		/* BSR */
+      if (op == 0x30		/* BR */
+	  || op == 0x34)	/* BSR */
 	{
  branch_taken:
           offset = (insn & 0x001fffff);
