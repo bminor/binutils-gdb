@@ -3128,8 +3128,8 @@ move_reg_to_mem_movem_op (unsigned short inst, inst_env_type *inst_env)
     {
       /* The assign value is the value after the increment.  Normally, the
          assign value is the value before the increment.  */
-      if ((cris_get_operand1 (inst) == REG_PC) &&
-          (cris_get_mode (inst) == PREFIX_ASSIGN_MODE))
+      if ((cris_get_operand1 (inst) == REG_PC)
+          && (cris_get_mode (inst) == PREFIX_ASSIGN_MODE))
         {
           /* The prefix handles the problem if we are in a delay slot.  */
           inst_env->reg[REG_PC] = inst_env->prefix_value;

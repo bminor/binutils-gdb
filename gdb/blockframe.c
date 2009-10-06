@@ -253,9 +253,9 @@ find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
 	  psb = find_pc_sect_psymbol (pst, mapped_pc, section);
 
 	  if (psb
-	      && (msymbol == NULL ||
-		  (SYMBOL_VALUE_ADDRESS (psb)
-		   >= SYMBOL_VALUE_ADDRESS (msymbol))))
+	      && (msymbol == NULL
+		  || (SYMBOL_VALUE_ADDRESS (psb)
+		      >= SYMBOL_VALUE_ADDRESS (msymbol))))
 	    {
 	      /* This case isn't being cached currently. */
 	      if (address)

@@ -1,6 +1,21 @@
 2009-10-06  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	ARI fix: OP eol rule.
+	* blockframe.c (find_pc_partial_function): Avoid operator at end of
+	line.
+	* buildsym.c (find_symbol_in_list): Idem.
+	(start_subfile, patch_subfile_names): Idem.
+	* c-exp.y (variable, yylex): Idem.
+	* c-typeprint.c (c_print_type, c_type_print_base): Idem.
+	* c-valprint.c (c_val_print): Idem.
+	* coffread.c (patch_opaque_types, process_coff_symbol): Idem.
+	* corelow.c (core_open): Idem.
+	* cris-tdep.c (move_reg_to_mem_movem_op): Idem.
+	* cli/cli-decode.c (help_cmd_list, find_command_name_length): Idem.
+
+2009-10-06  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	ARI fix: OP eol rule.
 	* ada-exp.y (block_lookup): Avoid operator at end of line.
 	* aix-thread.c (pd_enable): Idem.
 	* alpha-tdep.c (alpha_next_pc): Idem.

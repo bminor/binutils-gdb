@@ -291,8 +291,8 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 
 	      struct minimal_symbol *msymbol =
 	      lookup_minimal_symbol_by_pc (vt_address);
-	      if ((msymbol != NULL) &&
-		  (vt_address == SYMBOL_VALUE_ADDRESS (msymbol)))
+	      if ((msymbol != NULL)
+		  && (vt_address == SYMBOL_VALUE_ADDRESS (msymbol)))
 		{
 		  fputs_filtered (" <", stream);
 		  fputs_filtered (SYMBOL_PRINT_NAME (msymbol), stream);

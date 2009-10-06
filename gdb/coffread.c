@@ -1434,10 +1434,10 @@ patch_opaque_types (struct symtab *s)
          Remove syms from the chain when their types are stored,
          but search the whole chain, as there may be several syms
          from different files with the same name.  */
-      if (SYMBOL_CLASS (real_sym) == LOC_TYPEDEF &&
-	  SYMBOL_DOMAIN (real_sym) == VAR_DOMAIN &&
-	  TYPE_CODE (SYMBOL_TYPE (real_sym)) == TYPE_CODE_PTR &&
-	  TYPE_LENGTH (TYPE_TARGET_TYPE (SYMBOL_TYPE (real_sym))) != 0)
+      if (SYMBOL_CLASS (real_sym) == LOC_TYPEDEF
+	  && SYMBOL_DOMAIN (real_sym) == VAR_DOMAIN
+	  && TYPE_CODE (SYMBOL_TYPE (real_sym)) == TYPE_CODE_PTR
+	  && TYPE_LENGTH (TYPE_TARGET_TYPE (SYMBOL_TYPE (real_sym))) != 0)
 	{
 	  char *name = SYMBOL_LINKAGE_NAME (real_sym);
 	  int hash = hashname (name);
@@ -1446,8 +1446,8 @@ patch_opaque_types (struct symtab *s)
 	  prev = 0;
 	  for (sym = opaque_type_chain[hash]; sym;)
 	    {
-	      if (name[0] == SYMBOL_LINKAGE_NAME (sym)[0] &&
-		  strcmp (name + 1, SYMBOL_LINKAGE_NAME (sym) + 1) == 0)
+	      if (name[0] == SYMBOL_LINKAGE_NAME (sym)[0]
+		  && strcmp (name + 1, SYMBOL_LINKAGE_NAME (sym) + 1) == 0)
 		{
 		  if (prev)
 		    {
@@ -1632,10 +1632,10 @@ process_coff_symbol (struct coff_symbol *cs,
 	     simple forward reference (TYPE_CODE_UNDEF) is not an
 	     empty structured type, though; the forward references
 	     work themselves out via the magic of coff_lookup_type.  */
-	  if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_PTR &&
-	      TYPE_LENGTH (TYPE_TARGET_TYPE (SYMBOL_TYPE (sym))) == 0 &&
-	      TYPE_CODE (TYPE_TARGET_TYPE (SYMBOL_TYPE (sym))) !=
-	      TYPE_CODE_UNDEF)
+	  if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_PTR
+	      && TYPE_LENGTH (TYPE_TARGET_TYPE (SYMBOL_TYPE (sym))) == 0
+	      && TYPE_CODE (TYPE_TARGET_TYPE (SYMBOL_TYPE (sym)))
+	         != TYPE_CODE_UNDEF)
 	    {
 	      int i = hashname (SYMBOL_LINKAGE_NAME (sym));
 

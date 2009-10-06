@@ -321,8 +321,8 @@ core_open (char *filename, int from_tty)
   if (temp_bfd == NULL)
     perror_with_name (filename);
 
-  if (!bfd_check_format (temp_bfd, bfd_core) &&
-      !gdb_check_format (temp_bfd))
+  if (!bfd_check_format (temp_bfd, bfd_core)
+      && !gdb_check_format (temp_bfd))
     {
       /* Do it after the err msg */
       /* FIXME: should be checking for errors from bfd_close (for one thing,
