@@ -1,3 +1,7 @@
+2009-10-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* MAINTAINERS: Add Jan Kratochvil as Maintainer of the ia64 target.
+
 2009-10-05  Pedro Alves  <pedro@codesourcery.com>
 
 	Revert:
