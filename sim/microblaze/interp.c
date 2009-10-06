@@ -29,6 +29,7 @@
 #include "gdb/remote-sim.h"
 #include "sim-main.h"
 #include "sim-utils.h"
+#include "microblaze-dis.h"
 
 
 #ifndef NUM_ELEM

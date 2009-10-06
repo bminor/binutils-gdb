@@ -1,3 +1,7 @@
+2009-10-06  Michael Eager  <eager@eagercon.com>
+
+	* microblaze/interp.c: Add include microblaze-dis.h.
+	
 2009-09-23  Michael Eager  <eager@eagercon.com>
 
 	* configure: Add microblaze-*.* (not regenerated).
