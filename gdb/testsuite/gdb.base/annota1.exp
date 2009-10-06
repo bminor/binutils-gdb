@@ -297,12 +297,6 @@ if [target_info exists gdb,nosignals] {
     # test:
     # annotate-signal-handler-caller
     #
-    verbose "match_max local is: [match_max]"
-    verbose "match_max default is: [match_max -d]"
-    # This is necessary because a 2000 buffer is not enought to get everything
-    # up to the prompt ad the test gets a timeout.
-    match_max 3000
-    verbose "match_max now is: [match_max]"
     send_gdb "backtrace\n"
     gdb_expect {
 	-re "frame-begin 0 $hex\r\n#0.*frame-end.*frame-begin 1 $hex\r\n#1.*(\032\032signal-handler-caller\r\n.signal handler called.\r\n\r\n)+\032\032frame-end\r\n\r\n\032\032frame-begin 2 $hex\r\n#2.*(frame-begin 3 $hex\r\n#3.*)*frame-end.*$gdb_prompt$" {

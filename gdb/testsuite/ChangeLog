@@ -1,3 +1,9 @@
+2009-10-06  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gdb.base/annota1.exp: Remove obsolete match_max increase.
+	* gdb.base/annota3.exp: Idem.
+	* gdb.base/maint.exp: Idem.
+
 2009-10-05  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* lib/gdb.exp (default_gdb_init): Set current value of match_max 

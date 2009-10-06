@@ -96,8 +96,6 @@ if ![runto_main] then {
 send_gdb "set height 0\n"
 gdb_expect -re "$gdb_prompt $"
 
-# use a larger expect input buffer for long help outputs.
-match_max 6000
 
 #
 # this command does not produce any output

@@ -258,12 +258,6 @@ if [target_info exists gdb,nosignals] {
     #
     # test:
     #
-    verbose "match_max local is: [match_max]"
-    verbose "match_max default is: [match_max -d]"
-    # This is necessary because a 2000 buffer is not enought to get everything
-    # up to the prompt ad the test gets a timeout.
-    match_max 3000
-    verbose "match_max now is: [match_max]"
     send_gdb "backtrace\n"
     gdb_expect_list "backtrace @ signal handler" "$gdb_prompt$" {
 	"#0 +handle_USR1 \[^\r\n\]+\r\n"
