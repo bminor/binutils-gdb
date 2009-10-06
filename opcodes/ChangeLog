@@ -1,3 +1,7 @@
+2009-10-06  Nick Clifton  <nickc@redhat.com>
+
+	* po/fi.po: Updated Finnish translation.
+
 2009-10-03  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* opc2c.c: Include "libiberty.h" and <errno.h>.
