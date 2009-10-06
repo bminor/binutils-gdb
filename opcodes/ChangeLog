@@ -1,3 +1,7 @@
+2009-10-06  Nick Clifton  <nickc@redhat.com>
+
+	* po/fi.po: Updated Finnish translation.
+
 2009-10-03  Paul Reed  <paulreed@paddedcell.com>
 
 	* arm-dis.c (print_insn): Check symtab_size not *symtab.
