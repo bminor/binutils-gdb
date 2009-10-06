@@ -1,3 +1,7 @@
+2009-10-06  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.0 released.
+
 2009-10-06  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	ARI fix: "%p" rule.
