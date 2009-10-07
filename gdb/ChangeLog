@@ -1,4 +1,8 @@
-2009-10-09  Joel Brobecker  <brobecker@adacore.com>
+2009-10-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* i386-nat.c (i386_stopped_by_hwbp): Remove.
+
+2009-10-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Update following the GDB 7.0 release.
 

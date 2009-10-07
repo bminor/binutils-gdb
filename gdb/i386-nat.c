@@ -581,27 +581,6 @@ i386_stopped_by_watchpoint (void)
   return i386_stopped_data_address (&current_target, &addr);
 }
 
-/* Return non-zero if the inferior has some break/watchpoint that
-   triggered.  */
-
-static int
-i386_stopped_by_hwbp (void)
-{
-  int i;
-
-  dr_status_mirror = i386_dr_low.get_status ();
-  if (maint_show_dr)
-    i386_show_dr ("stopped_by_hwbp", 0, 0, hw_execute);
-
-  ALL_DEBUG_REGISTERS(i)
-    {
-      if (I386_DR_WATCH_HIT (i))
-	return 1;
-    }
-
-  return 0;
-}
-
 /* Insert a hardware-assisted breakpoint at BP_TGT->placed_address.
    Return 0 on success, EBUSY on failure.  */
 static int
