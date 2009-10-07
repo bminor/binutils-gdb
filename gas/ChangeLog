@@ -1,3 +1,7 @@
+2009-10-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* read.c (s_reloc): Don't use expression_and_evaluate.
+
 2009-10-06  Jakub Jelinek  <jakub@redhat.com>
 
 	* dw2gencfi.c: Include dwarf2dbg.h.

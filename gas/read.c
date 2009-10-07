@@ -3911,7 +3911,7 @@ s_reloc (int ignore ATTRIBUTE_UNUSED)
   if (*input_line_pointer == ',')
     {
       ++input_line_pointer;
-      expression_and_evaluate (&exp);
+      expression (&exp);
     }
   switch (exp.X_op)
     {
