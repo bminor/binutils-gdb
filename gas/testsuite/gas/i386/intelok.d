@@ -204,4 +204,6 @@ Disassembly of section .text:
 [ 	]*[0-9a-f]+:	ea 03 00 00 00 05 00[ 	]+l?jmp[ 	]+0x5[,:]0x3
 [ 	]*[0-9a-f]+:	ff 15 00 00 00 00[ 	]+call[ 	]+DWORD PTR (ds:)?(0x)?0
 [ 	]*[0-9a-f]+:	66 ff 25 00 00 00 00[ 	]+jmp[ 	]+WORD PTR (ds:)?(0x)?0
+[ 	]*[a-f0-9]+:	ff 24 85 3c 05 00 00 	jmp    DWORD PTR \[eax\*4\+0x53c\]
+[ 	]*[a-f0-9]+:	8d 83 4a 05 00 00    	lea    eax,\[ebx\+0x54a\]
 #pass

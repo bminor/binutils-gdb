@@ -1,3 +1,9 @@
+2009-10-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/10704
+	* gas/i386/intelok.s: Add 2 new tests.
+	* gas/i386/intelok.d: Updated.
+
 2009-10-02  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* gas/ppc/476.s: New test.
