@@ -1,3 +1,8 @@
+2009-10-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/watchpoints.c: Add copyright header.  Reformat one
+	of the comments.
+
 2009-10-06  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gdb.base/annota1.exp: Remove obsolete match_max increase.
