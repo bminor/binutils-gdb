@@ -68,11 +68,13 @@ class Output_data_plt_arm;
 // R_ARM_RELATIVE
 // R_ARM_GOTOFF32
 // R_ARM_GOT_BREL
+// R_ARM_GOT_PREL
 // R_ARM_PLT32
 // R_ARM_CALL
 // R_ARM_JUMP24
 // R_ARM_TARGET1
 // R_ARM_PREL31
+// R_ARM_ABS8
 // 
 // TODOs:
 // - Generate various branch stubs.
@@ -679,6 +681,16 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
     return This::STATUS_OKAY;
   }
 
+  // R_ARM_GOT_PREL: GOT(S) + A – P
+  static inline typename This::Status
+  got_prel(unsigned char* view,
+	   typename elfcpp::Swap<32, big_endian>::Valtype got_offset,
+	   elfcpp::Elf_types<32>::Elf_Addr address)
+  {
+    Base::rel32(view, got_offset - address);
+    return This::STATUS_OKAY;
+  }
+
   // R_ARM_PLT32: (S + A) | T - P
   static inline typename This::Status
   plt32(unsigned char *view,
@@ -1156,6 +1168,7 @@ Target_arm<big_endian>::Scan::local(const General_options&,
       break;
 
     case elfcpp::R_ARM_GOT_BREL:
+    case elfcpp::R_ARM_GOT_PREL:
       {
 	// The symbol requires a GOT entry.
 	Output_data_got<32, big_endian>* got =
@@ -1351,6 +1364,7 @@ Target_arm<big_endian>::Scan::global(const General_options&,
       break;
       
     case elfcpp::R_ARM_GOT_BREL:
+    case elfcpp::R_ARM_GOT_PREL:
       {
 	// The symbol requires a GOT entry.
 	Output_data_got<32, big_endian>* got =
@@ -1623,6 +1637,7 @@ Target_arm<big_endian>::Relocate::relocate(
   switch (r_type)
     {
     case elfcpp::R_ARM_GOT_BREL:
+    case elfcpp::R_ARM_GOT_PREL:
       if (gsym != NULL)
 	{
 	  gold_assert(gsym->has_got_offset(GOT_TYPE_STANDARD));
@@ -1706,6 +1721,18 @@ Target_arm<big_endian>::Relocate::relocate(
     case elfcpp::R_ARM_GOT_BREL:
       gold_assert(have_got_offset);
       reloc_status = Arm_relocate_functions::got_brel(view, got_offset);
+      break;
+
+    case elfcpp::R_ARM_GOT_PREL:
+      gold_assert(have_got_offset);
+      // Get the address origin for GOT PLT, which is allocated right
+      // after the GOT section, to calculate an absolute address of
+      // the symbol GOT entry (got_origin + got_offset).
+      elfcpp::Elf_types<32>::Elf_Addr got_origin;
+      got_origin = target->got_plt_section()->address();
+      reloc_status = Arm_relocate_functions::got_prel(view,
+						      got_origin + got_offset,
+						      address);
       break;
 
     case elfcpp::R_ARM_PLT32:
@@ -1837,6 +1864,7 @@ Target_arm<big_endian>::Relocatable_size_for_reloc::get_size_for_reloc(
     case elfcpp::R_ARM_GOTOFF32:
     case elfcpp::R_ARM_BASE_PREL:
     case elfcpp::R_ARM_GOT_BREL:
+    case elfcpp::R_ARM_GOT_PREL:
     case elfcpp::R_ARM_PLT32:
     case elfcpp::R_ARM_CALL:
     case elfcpp::R_ARM_JUMP24:

@@ -1,3 +1,10 @@
+2009-10-07  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
+
+	* arm.cc (Arm_relocate_functions::got_prel) New function.
+	(Scan::local, Scan::global): Handle R_ARM_GOT_PREL.
+	(Relocate::relocate): Likewise.
+	(Relocatable_size_for_reloc::get_size_for_reloc): Likewise.
+
 2009-10-06  Ian Lance Taylor  <iant@google.com>
 
 	* options.h (class General_options): Define
