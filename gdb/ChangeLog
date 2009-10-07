@@ -1,3 +1,7 @@
+2009-10-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Update following the GDB 7.0 release.
+
 2009-10-07  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	ARI fix: OP eol rule.

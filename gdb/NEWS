@@ -1,7 +1,9 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 6.8
+*** Changes since GDB 7.0
+
+*** Changes in GDB 7.0
 
 * GDB now has an interface for JIT compilation.  Applications that
 dynamically generate code can create symbol files in memory and register
