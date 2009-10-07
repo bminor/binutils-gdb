@@ -1,3 +1,7 @@
+2009-10-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/hbreak.exp, gdb.base/hbreak.c: New.
+
 2009-10-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/watchpoints.c: Add copyright header.  Reformat one
