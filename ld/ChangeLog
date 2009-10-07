@@ -1,3 +1,10 @@
+2009-10-06  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ldlang.c (lang_new_phdr): Check PHDRS and FILEHDR in loadable
+	segments do not appear after a different loadable segment.
+	* ld.texinfo (PHDRS): Document order of processing segments.
+	Document where PHDRS and FILEHDR may appear.
+
 2009-10-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/ppc32elf.em (emit_stub_syms): Init to -1.

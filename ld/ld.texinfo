@@ -4710,7 +4710,8 @@ The @var{name} is used only for reference in the @code{SECTIONS} command
 of the linker script.  It is not put into the output file.  Program
 header names are stored in a separate name space, and will not conflict
 with symbol names, file names, or section names.  Each program header
-must have a distinct name.
+must have a distinct name.  The headers are processed in order and it
+is usual for them to map to sections in ascending load address order.
 
 Certain program header types describe segments of memory which the
 system loader will load from the file.  In the linker script, you
@@ -4734,11 +4735,12 @@ segment at all.
 
 @kindex FILEHDR
 @kindex PHDRS
-You may use the @code{FILEHDR} and @code{PHDRS} keywords appear after
+You may use the @code{FILEHDR} and @code{PHDRS} keywords after
 the program header type to further describe the contents of the segment.
 The @code{FILEHDR} keyword means that the segment should include the ELF
 file header.  The @code{PHDRS} keyword means that the segment should
-include the ELF program headers themselves.
+include the ELF program headers themselves.  If applied to a loadable
+segment (@code{PT_LOAD}), it must be the first loadable segment.
 
 The @var{type} may be one of the following.  The numbers indicate the
 value of the keyword.

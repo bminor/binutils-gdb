@@ -6765,6 +6765,7 @@ lang_new_phdr (const char *name,
 	       etree_type *flags)
 {
   struct lang_phdr *n, **pp;
+  bfd_boolean hdrs;
 
   n = (struct lang_phdr *) stat_alloc (sizeof (struct lang_phdr));
   n->next = NULL;
@@ -6774,9 +6775,16 @@ lang_new_phdr (const char *name,
   n->phdrs = phdrs;
   n->at = at;
   n->flags = flags;
+  
+  hdrs = n->type == 1 && (phdrs || filehdr);
 
   for (pp = &lang_phdr_list; *pp != NULL; pp = &(*pp)->next)
-    ;
+    if (hdrs && (*pp)->type == 1)
+      {
+	einfo (_("%X%P:%S: PHDRS and FILEHDR are only permitted for the first PT_LOAD segment\n"));
+	hdrs = FALSE;
+      }
+
   *pp = n;
 }
 
