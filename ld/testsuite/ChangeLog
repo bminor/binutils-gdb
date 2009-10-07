@@ -1,3 +1,9 @@
+2009-10-06  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-scripts/phdrs3.d: New.
+	* ld-scripts/phdrs3.t: New.
+	* ld-scripts/phdrs3.exp: New.
+
 2009-10-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/tlsexe.d: Update.
