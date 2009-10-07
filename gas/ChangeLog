@@ -1,5 +1,8 @@
 2009-10-07  Nathan Sidwell  <nathan@codesourcery.com>
 
+	* config/tc-arm.c (mapping_state, mapping_state_2): Make dummy
+	versions slightly more than nothing.
+
 	* doc/c-arm.texi (ARM Options): Correctly name the two mapcs options.
 
 2009-10-07  Alan Modra  <amodra@bigpond.net.au>

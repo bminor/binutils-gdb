@@ -2577,8 +2577,8 @@ mapping_state_2 (enum mstate state, int max_chars)
   make_mapping_symbol (state, (valueT) frag_now_fix () - max_chars, frag_now);
 }
 #else
-#define mapping_state(x) /* nothing */
-#define mapping_state_2(x, y) /* nothing */
+#define mapping_state(x) ((void)0)
+#define mapping_state_2(x, y) ((void)0)
 #endif
 
 /* Find the real, Thumb encoded start of a Thumb function.  */
