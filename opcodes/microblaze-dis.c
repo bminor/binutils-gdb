@@ -24,9 +24,10 @@
 #define STATIC_TABLE
 #define DEFINE_TABLE
 
-#include "microblaze-opc.h"
 #include "dis-asm.h"
 #include <strings.h>
+#include "microblaze-opc.h"
+#include "microblaze-dis.h"
 
 #define get_field_rd(instr)        get_field (instr, RD_MASK, RD_LOW)
 #define get_field_r1(instr)        get_field (instr, RA_MASK, RA_LOW)
@@ -35,11 +36,6 @@
 #define get_int_field_r1(instr)    ((instr & RA_MASK) >> RA_LOW)
 
 
-enum microblaze_instr get_insn_microblaze (long, bfd_boolean *, 
-					   enum microblaze_instr_type *, short *);
-unsigned long microblaze_get_target_address (long, bfd_boolean, int, long, long,
-					     long, bfd_boolean *, bfd_boolean *);
-enum microblaze_instr microblaze_decode_insn (long insn, int *rd, int *ra, int *rb, int *imm);
 
 static char *
 get_field (long instr, long mask, unsigned short low)

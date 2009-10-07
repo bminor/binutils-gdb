@@ -1,3 +1,9 @@
+2009-10-07  Michael Eager  <eager@eagercon.com>
+
+	* opcodes/microblaze-dis.c: Add include for microblaze-dis.h,
+	eliminate local extern decls.
+	* opcodes/microblaze-dis.h: New.
+
 2009-10-06  Nick Clifton  <nickc@redhat.com>
 
 	* po/fi.po: Updated Finnish translation.
