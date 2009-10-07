@@ -1,5 +1,24 @@
 2009-10-07  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
 
+	* arm.cc (Arm_relocate_functions::extract_arm_movw_movt_addend):
+	New function.
+	(Arm_relocate_functions::insert_val_arm_movw_movt): New function.
+	(Arm_relocate_functions::extract_thumb_movw_movt_addend): New
+	function.
+	(Arm_relocate_functions::insert_val_thumb_movw_movt): New
+	function.
+	(Arm_relocate_functions::movw_abs_nc): New function.
+	(Arm_relocate_functions::movt_abs): New function.
+	(Arm_relocate_functions::thm_movw_abs_nc): New function.
+	(Arm_relocate_functions::thm_movt_abs): New function.
+	(Scan::local): Handle R_ARM_MOVW_ABS_NC, R_ARM_MOVT_ABS,
+	R_ARM_THM_MOVW_ABS_NC, R_ARM_THM_MOVT_ABS.
+	(Scan::global): Likewise.
+	(Relocate::relocate): Likewise.
+	(Relocatable_size_for_reloc::get_size_for_reloc): Likewise.
+
+2009-10-07  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
+
 	* arm.cc (Arm_relocate_functions::got_prel) New function.
 	(Scan::local, Scan::global): Handle R_ARM_GOT_PREL.
 	(Relocate::relocate): Likewise.
