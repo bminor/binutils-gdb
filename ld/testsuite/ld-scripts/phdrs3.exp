@@ -34,5 +34,6 @@ if { [istarget spu*-*-*] } {
 }
 
 run_dump_test "phdrs3"
+run_dump_test "phdrs3a"
 
 set LDFLAGS $old_ldflags
