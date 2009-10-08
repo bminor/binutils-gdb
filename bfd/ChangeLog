@@ -1,3 +1,7 @@
+2009-10-08  Tristan Gingold  <gingold@adacore.com>
+
+	* config.bfd: Add bfd_mach_o_i386_vec in x86_64-darwin targ_selvecs.
+
 2009-10-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfd-in2.h: Regenerated.
