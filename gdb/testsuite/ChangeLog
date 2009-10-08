@@ -1,3 +1,8 @@
+2009-10-08  Pedro Alves  <pedro@codesourcery.com>
+
+	* lib/gdb.exp (gdb_compile): Remove dead aix and irix related
+	bits.
+
 2009-10-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/hbreak.exp, gdb.base/hbreak.c: New.

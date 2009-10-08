@@ -1723,18 +1723,12 @@ proc gdb_compile {source dest type options} {
             } else {
                lappend source $shlib_name
             }
-            if {$shlib_found == 0} {
+            if { $shlib_found == 0 } {
                 set shlib_found 1
-                if { ([test_compiler_info "gcc-*"]
-                      &&  ([istarget "powerpc*-*-aix*"]
-                        || [istarget "rs6000*-*-aix*"] )) } {
-                    lappend options "additional_flags=-L${outdir}"
-                } elseif { [istarget "mips-sgi-irix*"] } {
-                    lappend options "additional_flags=-rpath ${outdir}"
-                } elseif { ([istarget "*-*-mingw*"]
-			    || [istarget *-*-cygwin*]) } {
+		if { ([istarget "*-*-mingw*"]
+		      || [istarget *-*-cygwin*]) } {
 		    lappend new_options "additional_flags=-Wl,--enable-auto-import"
-		} 
+		}
             }
 	} elseif { $opt == "shlib_load" } {
 	    if { ([istarget "*-*-mingw*"]
