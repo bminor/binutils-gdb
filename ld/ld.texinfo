@@ -4740,7 +4740,8 @@ the program header type to further describe the contents of the segment.
 The @code{FILEHDR} keyword means that the segment should include the ELF
 file header.  The @code{PHDRS} keyword means that the segment should
 include the ELF program headers themselves.  If applied to a loadable
-segment (@code{PT_LOAD}), it must be the first loadable segment.
+segment (@code{PT_LOAD}), all prior loadable segments must have one of
+these keywords.
 
 The @var{type} may be one of the following.  The numbers indicate the
 value of the keyword.

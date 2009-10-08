@@ -1,3 +1,10 @@
+2009-10-08  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/10744
+	* ldlang.c (lang_new_phdr): Allow FILEHDR/PHDRS on more than the
+	first PT_LOAD header.
+	* ld.texinfo: Update.
+
 2009-10-06  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ldlang.c (lang_new_phdr): Check PHDRS and FILEHDR in loadable

@@ -6779,9 +6779,11 @@ lang_new_phdr (const char *name,
   hdrs = n->type == 1 && (phdrs || filehdr);
 
   for (pp = &lang_phdr_list; *pp != NULL; pp = &(*pp)->next)
-    if (hdrs && (*pp)->type == 1)
+    if (hdrs
+	&& (*pp)->type == 1
+	&& !((*pp)->filehdr || (*pp)->phdrs))
       {
-	einfo (_("%X%P:%S: PHDRS and FILEHDR are only permitted for the first PT_LOAD segment\n"));
+	einfo (_("%X%P:%S: PHDRS and FILEHDR are not supported when prior PT_LOAD headers lack them\n"));
 	hdrs = FALSE;
       }
 
