@@ -1,3 +1,7 @@
+2009-10-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdbint.texinfo (i386_stopped_by_hwbp): Remove.
+
 2009-10-06  Michael Eager  <eager@eagercon.com>
 
 	* gdb.texinfo (Contributors): Add self for Xilinx MicroBlaze.

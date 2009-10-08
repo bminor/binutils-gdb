@@ -986,13 +986,6 @@ the debug registers to watch instruction execution, and each
 hardware-assisted breakpoint always requires exactly one debug
 register.
 
-@findex i386_stopped_by_hwbp
-@item i386_stopped_by_hwbp (void)
-This function returns non-zero if the inferior has some watchpoint or
-hardware breakpoint that triggered.  It works like
-@code{i386_stopped_data_address}, except that it doesn't record the
-address whose watchpoint triggered.
-
 @findex i386_cleanup_dregs
 @item i386_cleanup_dregs (void)
 This function clears all the reference counts, addresses, and control
