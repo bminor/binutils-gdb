@@ -215,8 +215,3 @@ start:
 	jmp	5:[3]
 	call	dword ptr xtrn
 	jmp	word ptr xtrn
-
-.L11:
-        jmp     DWORD PTR[ .L11  + eax * 4 ]
-.LC0:
-        lea     eax, DWORD PTR[ .LC0@GOTOFF + ebx ]

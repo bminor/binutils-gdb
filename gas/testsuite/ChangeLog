@@ -1,3 +1,12 @@
+2009-10-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/10704
+	* gas/i386/intelok.s: Move 2 PIC tests to ...
+	* gas/i386/intelpic.s: Here.
+
+	* gas/i386/intelok.d: Updated.
+	* gas/i386/intelpic.d: Likewise.
+
 2009-10-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/10704
