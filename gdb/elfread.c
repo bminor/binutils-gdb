@@ -535,7 +535,7 @@ elf_symtab_read (struct objfile *objfile, int type,
 
 	      if (len > 4 && strcmp (sym->name + len - 4, "@plt") == 0)
 		{
-		  char *base_name = alloca (len - 4 + 1);
+		  char *base_name = xmalloc (len - 4 + 1);
 		  struct minimal_symbol *mtramp;
 
 		  memcpy (base_name, sym->name, len - 4);
@@ -543,6 +543,7 @@ elf_symtab_read (struct objfile *objfile, int type,
 		  mtramp = record_minimal_symbol (base_name, symaddr,
 						  mst_solib_trampoline,
 						  sym->section, objfile);
+		  xfree (base_name);
 		  if (mtramp)
 		    {
 		      MSYMBOL_SIZE (mtramp) = MSYMBOL_SIZE (msym);
