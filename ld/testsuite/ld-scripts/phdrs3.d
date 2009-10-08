@@ -1,4 +1,4 @@
 # name: PHDRS headers
 # source: phdrs.s
 # ld: -T phdrs3.t
-# error: \A[^ \n:]*:[^:\n]*:5: PHDRS and FILEHDR are only permitted for the first PT_LOAD segment\Z
+# error: \A[^ \n:]*:[^:\n]*:5: PHDRS and FILEHDR.*
