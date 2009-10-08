@@ -1,3 +1,8 @@
+2009-10-08  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	PR gdb/10457
+	* elfread.c (elf_symtab_read): Don't use alloca in a loop.
+	
 2009-10-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* i386-nat.c (i386_stopped_by_hwbp): Remove.
