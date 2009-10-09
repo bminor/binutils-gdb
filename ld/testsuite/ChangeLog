@@ -1,3 +1,10 @@
+2009-10-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/10749
+	* ld-elf/relocatable.d: New.
+	* ld-elf/relocatable.t: Likewise.
+	* ld-elf/simple.s: Likewise.
+
 2009-10-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/10744
