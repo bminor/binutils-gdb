@@ -1,5 +1,10 @@
 2009-10-09  Pedro Alves  <pedro@codesourcery.com>
 
+	* procfs.c (procfs_make_note_section): Always output a NT_PSTATUS
+	note when NEW_PROC_API is defined.
+
+2009-10-09  Pedro Alves  <pedro@codesourcery.com>
+
 	* corelow.c (core_has_fake_pid): New.
 	(core_close): Clear it.
 	(add_to_thread_list): Fake a pid if one is not found on a Solaris

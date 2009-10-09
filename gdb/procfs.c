@@ -6126,6 +6126,7 @@ procfs_make_note_section (bfd *obfd, int *note_size)
   struct procfs_corefile_thread_data thread_args;
   gdb_byte *auxv;
   int auxv_len;
+  enum target_signal stop_signal;
 
   if (get_exec_file (0))
     {
@@ -6150,7 +6151,9 @@ procfs_make_note_section (bfd *obfd, int *note_size)
 					       fname,
 					       psargs);
 
-#ifdef UNIXWARE
+  stop_signal = find_stop_signal ();
+
+#ifdef NEW_PROC_API
   fill_gregset (get_current_regcache (), &gregs, -1);
   note_data = elfcore_write_pstatus (obfd, note_data, note_size,
 				     PIDGET (inferior_ptid),
@@ -6160,7 +6163,7 @@ procfs_make_note_section (bfd *obfd, int *note_size)
   thread_args.obfd = obfd;
   thread_args.note_data = note_data;
   thread_args.note_size = note_size;
-  thread_args.stop_signal = find_stop_signal ();
+  thread_args.stop_signal = stop_signal;
   proc_iterate_over_threads (pi, procfs_corefile_thread_callback, &thread_args);
 
   /* There should be always at least one thread.  */
