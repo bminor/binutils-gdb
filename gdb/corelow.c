@@ -75,6 +75,9 @@ struct gdbarch *core_gdbarch = NULL;
    unix child targets.  */
 static struct target_section_table *core_data;
 
+/* True if we needed to fake the pid of the loaded core inferior.  */
+static int core_has_fake_pid = 0;
+
 static void core_files_info (struct target_ops *);
 
 static struct core_fns *sniff_core_bfd (bfd *);
@@ -214,6 +217,7 @@ core_close (int quitting)
       xfree (core_data->sections);
       xfree (core_data);
       core_data = NULL;
+      core_has_fake_pid = 0;
 
       name = bfd_get_filename (core_bfd);
       if (!bfd_close (core_bfd))
@@ -239,32 +243,44 @@ static void
 add_to_thread_list (bfd *abfd, asection *asect, void *reg_sect_arg)
 {
   ptid_t ptid;
-  int thread_id;
+  int core_tid;
+  int pid, lwpid;
   asection *reg_sect = (asection *) reg_sect_arg;
 
   if (strncmp (bfd_section_name (abfd, asect), ".reg/", 5) != 0)
     return;
 
-  thread_id = atoi (bfd_section_name (abfd, asect) + 5);
+  core_tid = atoi (bfd_section_name (abfd, asect) + 5);
 
   if (core_gdbarch
       && gdbarch_core_reg_section_encodes_pid (core_gdbarch))
     {
-      uint32_t merged_pid = thread_id;
-      ptid = ptid_build (merged_pid & 0xffff,
-			 merged_pid >> 16, 0);
+      uint32_t merged_pid = core_tid;
+      pid = merged_pid & 0xffff;
+      lwpid = merged_pid >> 16;
+
+      /* This can happen on solaris core, for example, if we don't
+	 find a NT_PRSTATUS note in the core, but do find NT_LWPSTATUS
+	 notes.  */
+      if (pid == 0)
+	{
+	  core_has_fake_pid = 1;
+	  pid = CORELOW_PID;
+	}
     }
   else
-    ptid = ptid_build (ptid_get_pid (inferior_ptid), thread_id, 0);
+    {
+      core_has_fake_pid = 1;
+      pid = CORELOW_PID;
+      lwpid = core_tid;
+    }
 
-  if (ptid_get_lwp (inferior_ptid) == 0)
-    /* The main thread has already been added before getting here, and
-       this is the first time we hear about a thread id.  Assume this
-       is the main thread.  */
-    thread_change_ptid (inferior_ptid, ptid);
-  else
-    /* Nope, really a new thread.  */
-    add_thread (ptid);
+  if (!in_inferior_list (pid))
+    add_inferior_silent (pid);
+
+  ptid = ptid_build (pid, lwpid, 0);
+
+  add_thread (ptid);
 
 /* Warning, Will Robinson, looking at BFD private data! */
 
@@ -371,21 +387,14 @@ core_open (char *filename, int from_tty)
   push_target (&core_ops);
   discard_cleanups (old_chain);
 
-  add_inferior_silent (corelow_pid);
-
   /* Do this before acknowledging the inferior, so if
      post_create_inferior throws (can happen easilly if you're loading
      a core file with the wrong exec), we aren't left with threads
      from the previous inferior.  */
   init_thread_list ();
 
-  /* Set INFERIOR_PTID early, so an upper layer can rely on it being
-     set while in the target_find_new_threads call below.  */
-  inferior_ptid = pid_to_ptid (corelow_pid);
-
-  /* Assume ST --- Add a main task.  We'll later detect when we go
-     from ST to MT.  */
-  add_thread_silent (inferior_ptid);
+  inferior_ptid = null_ptid;
+  core_has_fake_pid = 0;
 
   /* Need to flush the register cache (and the frame cache) from a
      previous debug session.  If inferior_ptid ends up the same as the
@@ -400,6 +409,25 @@ core_open (char *filename, int from_tty)
      section. */
   bfd_map_over_sections (core_bfd, add_to_thread_list,
 			 bfd_get_section_by_name (core_bfd, ".reg"));
+
+  if (ptid_equal (inferior_ptid, null_ptid))
+    {
+      /* Either we found no .reg/NN section, and hence we have a
+	 non-threaded core (single-threaded, from gdb's perspective),
+	 or for some reason add_to_thread_list couldn't determine
+	 which was the "main" thread.  The latter case shouldn't
+	 usually happen, but we're dealing with input here, which can
+	 always be broken in different ways.  */
+      struct thread_info *thread = first_thread_of_process (-1);
+      if (thread == NULL)
+	{
+	  add_inferior_silent (CORELOW_PID);
+	  inferior_ptid = pid_to_ptid (CORELOW_PID);
+	  add_thread_silent (inferior_ptid);
+	}
+      else
+	switch_to_thread (thread->ptid);
+    }
 
   post_create_inferior (&core_ops, from_tty);
 
@@ -496,9 +524,13 @@ get_core_register_section (struct regcache *regcache,
       && gdbarch_core_reg_section_encodes_pid (core_gdbarch))
     {
       uint32_t merged_pid;
+      int pid = ptid_get_pid (inferior_ptid);
+
+      if (core_has_fake_pid)
+	pid = 0;
 
       merged_pid = ptid_get_lwp (inferior_ptid);
-      merged_pid = merged_pid << 16 | ptid_get_pid (inferior_ptid);
+      merged_pid = merged_pid << 16 | pid;
 
       section_name = xstrprintf ("%s/%s", name, plongest (merged_pid));
     }

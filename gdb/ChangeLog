@@ -1,3 +1,14 @@
+2009-10-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* corelow.c (core_has_fake_pid): New.
+	(core_close): Clear it.
+	(add_to_thread_list): Fake a pid if one is not found on a Solaris
+	core.  Add the inferior here.  Always add the thread, don't use
+	thread_change_ptid.
+	(core_open): Don't add the main thread or the inferior here unless
+	we find that the core had no .reg/NN sections.
+	(get_core_register_section): Handle Solaris cores with fake pids.
+
 2009-10-08  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	PR gdb/10457
