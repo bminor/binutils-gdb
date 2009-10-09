@@ -1,3 +1,8 @@
+2009-10-09  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/10749
+	* ldlang.c (lang_size_sections_1): Zero section vmas only for COFF.
+
 2009-10-08  Alan Modra  <amodra@bigpond.net.au>
 
 	PR ld/10744
@@ -74,6 +79,7 @@
 
 2009-09-27  Christopher Faylor  <me+cygwin@cgf.cx>
 
+	PR ld/10634
 	* ldlang.c (lang_size_sections_1): Always force output vma to zero for
 	relocatable sections.
 	(lang_size_sections_1): Revert previous COFF-only accommodation for
