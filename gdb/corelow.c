@@ -260,7 +260,7 @@ add_to_thread_list (bfd *abfd, asection *asect, void *reg_sect_arg)
       lwpid = merged_pid >> 16;
 
       /* This can happen on solaris core, for example, if we don't
-	 find a NT_PRSTATUS note in the core, but do find NT_LWPSTATUS
+	 find a NT_PSTATUS note in the core, but do find NT_LWPSTATUS
 	 notes.  */
       if (pid == 0)
 	{

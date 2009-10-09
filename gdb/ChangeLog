@@ -9,6 +9,8 @@
 	we find that the core had no .reg/NN sections.
 	(get_core_register_section): Handle Solaris cores with fake pids.
 
+	* corelow.c (add_to_thread_list): Fix typo.
+
 2009-10-08  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	PR gdb/10457
