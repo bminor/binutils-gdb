@@ -1,5 +1,26 @@
 2009-10-09  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
 
+	* arm.cc (Target_arm::relocate::reloc_is_non_pic): Return true for
+	R_ARM_THM_ABS5, R_ARM_ABS8, R_ARM_ABS12, R_ARM_ABS16,
+	R_ARM_BASE_ABS.
+	(Arm_relocate_functions::abs8): Remove has_thumb_bit parameter.
+	(Arm_relocate_functions::thm_abs5): New function.
+	(Arm_relocate_functions::abs12): New function.
+	(Arm_relocate_functions::abs16): New function.
+	(Arm_relocate_functions::base_abs): New function.
+	(Scan::check_non_pic): Handle R_ARM_ABS32_NOI.
+	(Scan::local): Remove special handling of R_ARM_ABS8.  Handle
+	R_ARM_ABS32_NOI, R_ARM_THM_ABS5, R_ARM_ABS12, R_ARM_ABS16, and
+	R_ARM_BASE_ABS.
+	(Scan::global): Likewise.
+	(Relocate::relocate): Handle R_ARM_ABS12, R_ARM_ABS16,
+	R_ARM_ABS32_NOI, R_ARM_THM_ABS5, and R_ARM_BASE_ABS.
+	(Relocatable_size_for_reloc::get_size_for_reloc): Handle
+	R_ARM_ABS16, R_ARM_THM_ABS5, R_ARM_ABS32_NOI, R_ARM_ABS12, and
+	R_ARM_BASE_ABS.
+
+2009-10-09  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
+
 	* arm.cc (Arm_relocate_functions::movw_prel_nc): New function.
 	(Arm_relocate_functions::movt_prel): New function.
 	(Arm_relocate_functions::thm_movw_prel_nc): New function.
