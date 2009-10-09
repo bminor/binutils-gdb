@@ -870,7 +870,11 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
         this->debug_info_->set_abbreviations(this->debug_abbrev_);
     }
  else
-    os = new Output_section(name, type, flags);
+    {
+      // FIXME: const_cast is ugly.
+      Target* target = const_cast<Target*>(&parameters->target());
+      os = target->make_output_section(name, type, flags);
+    }
 
   parameters->target().new_output_section(os);
 
@@ -1592,7 +1596,8 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
 				       &shndx);
       pass++;
     }
-  while (target->may_relax() && target->relax(pass));
+  while (target->may_relax()
+	 && target->relax(pass, input_objects, symtab, this));
 
   // Set the file offsets of all the non-data sections we've seen so
   // far which don't have to wait for the input sections.  We need

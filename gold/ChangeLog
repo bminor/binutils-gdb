@@ -1,3 +1,105 @@
+2009-10-09  Doug Kwan  <dougkwan@google.com>
+
+	* layout.cc (Layout::make_output_section): Call target hook to make
+	ordinary output section.
+	(Layout::finalize): Adjust parameter list of call the
+	Target::may_relax().
+	* layout.h (class Layout::section_list): New method.
+	* merge.h (Output_merge_base::entsize): Change visibility to public.
+	(Output_merge_base::is_string, Output_merge_base::do_is_string):
+	New methods.
+	(Output_merge_string::do_is_string): New method.
+	* object.cc (Sized_relobj::do_setup): renamed from
+	Sized_relobj::set_up.
+	* object.h (Sized_relobj::adjust_shndx,
+	Sized_relobj::initializ_input_to_output_maps,
+	Sized_relobj::free_input_to_output_maps): Change visibilities to
+	protected.
+	(Sized_relobj::setup): Virtualize.
+	(Sized_relobj::do_setup): New method declaration.
+	(Sized_relobj::invalidate_section_offset,
+	Sized_relobj::do_invalidate_section_offset): New method decfinitions.
+	(Sized_relobj::elf_file, Sized_relobj::local_values): New methods.
+	* options.cc (parse_int): New function.
+	* options.h (parse_int): New declaration.
+	(DEFINE_int): New macro.
+	(stub_group_size): New option.
+	* output.cc (Output_section::Output_section): Initialize memebers
+	merge_section_map_, merge_section_by_properties_map_,
+	relaxed_input_section_map_, is_relaxed_input_section_map_valid_.
+	(Output_section::add_input_section): Handled deferred code-fill
+	generation and remove an old comment.
+	(Output_section::add_relaxed_input_section): New method definition.
+	(Output_section::add_merge_input_section): Use merge section by
+	properties map to speed to search.  Update merge section maps
+	as appropriate.
+	(Output_section::build_relaxation_map): New method definition.
+	(Output_section::convert_input_sections_in_list_to_relaxed_sections):
+	Same.
+	(Output_section::relax_input_section): Renamed to
+	Output_section::convert_input_sections_to_relaxed_sections and change
+	interface to take a vector of pointers to relaxed sections.
+	(Output_section::find_merge_section,
+	Output_section::find_relaxed_input_section): New method definitions.
+	(Output_section::is_input_address_mapped,
+	Output_section::output_offset, Output_section::output_address):
+	Use output section data maps to speed up searching.
+	(Output_section::find_starting_output_address): Add comments.
+	(Output_section::do_write,
+	Output_section::write_to_postprocessing_buffer): Do code-fill
+	generation as appropriate.
+	(Output_section::get_input_sections): Invalidate relaxed input section
+	map.
+	(Output_section::restore_states): Adjust type of checkpoint .
+	Invalidate relaxed input section map.
+	* output.h (Output_merge_base): New class declaration.
+	(Input_section_specifier): New class defintion.
+	(class Output_relaxed_input_section) Change base class to
+	Output_section_data_build.
+	(Output_relaxed_input_section::Output_relaxed_input_section): Adjust
+	base class initializer.
+	(Output_section::add_relaxed_input_section): New method declaration.
+	(Output_section::Input_section): Change visibility to protected.
+     	(Output_section::Input_section::relobj,
+	Output_section::Input_section::shndx): Handle relaxed input sections.
+	Output_section::input_sections) Change visibility to protected.  Also
+	define overload to return a non-const pointer.
+	(Output_section::Merge_section_properties): New class defintion.
+	(Output_section::Merge_section_by_properties_map,
+	Output_section::Output_section_data_by_input_section_map,
+	Output_section::Relaxation_map): New types.
+	(Output_section::relax_input_section): Rename method to
+	Output_section::convert_input_sections_to_relaxed_sections and change
+	interface to take a vector of relaxed section pointers.
+	(Output_section::find_merge_section,
+	Output_section::find_relaxed_input_section,
+	Output_section::build_relaxation_map,
+	Output_section::convert_input_sections_in_list_to_relaxed_sections):
+	New method declarations.
+	(Output_section::merge_section_map_
+	Output_section::merge_section_by_properties_map_,
+	Output_section::relaxed_input_section_map_,
+	Output_section::is_relaxed_input_section_map_valid_,
+	Output_section::generate_code_fills_at_write_): New data members.
+	* script-sections.cc
+	(Output_section_element_input::set_section_addresses): Call
+	current_data_size and addralign methods of relaxed input sections.
+	(Orphan_output_section::set_section_addresses): Call current_data_size
+	and addralign methods of relaxed input sections.
+	* symtab.cc (Symbol_table::compute_final_value): Extract template
+	from the body of Symbol_table::sized_finalize_symbol.
+	(Symbol_table::sized_finalized_symbol): Call
+	Symbol_table::compute_final_value.
+	* symtab.h (Symbol_table::Compute_final_value_status): New enum type.
+	(Symbol_table::compute_final_value): New templated method declaration.
+	* target.cc (Target::do_make_output_section): New method defintion.
+	* target.h (Target::make_output_section): New method declaration.
+	(Target::relax): Add more parameters for input objects, symbol table
+	and layout.  Adjust call to do_relax.
+	(Target::do_make_output_section): New method declaration.
+	(Target::do_relax): Add parameters for input objects, symbol table
+	and layout.
+
 2009-10-09  Andrew Pinski  <andrew_pinski@playstation.sony.com>
 
 	* pread.c: Include stdio.h.

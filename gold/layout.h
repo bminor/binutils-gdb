@@ -602,6 +602,11 @@ class Layout
       this->script_output_section_data_list_.push_back(posd);
   }
 
+  // Return section list.
+  const Section_list&
+  section_list() const
+  { return this->section_list_; }
+
  private:
   Layout(const Layout&);
   Layout& operator=(const Layout&);

@@ -1325,10 +1325,17 @@ Output_section_element_input::set_section_addresses(
 
 	isi.set_section_name(relobj->section_name(shndx));
 	if (p->is_relaxed_input_section())
-	  isi.set_size(p->relaxed_input_section()->data_size());
+	  {
+	    // We use current data size because relxed section sizes may not
+	    // have finalized yet.
+	    isi.set_size(p->relaxed_input_section()->current_data_size());
+	    isi.set_addralign(p->relaxed_input_section()->addralign());
+	  }
 	else
-	  isi.set_size(relobj->section_size(shndx));
-	isi.set_addralign(relobj->section_addralign(shndx));
+	  {
+	    isi.set_size(relobj->section_size(shndx));
+	    isi.set_addralign(relobj->section_addralign(shndx));
+	  }
       }
 
       if (!this->match_file_name(relobj->name().c_str()))
@@ -2292,7 +2299,9 @@ Orphan_output_section::set_section_addresses(Symbol_table*, Layout*,
 	Task_lock_obj<Object> tl(task, p->relobj());
 	addralign = p->relobj()->section_addralign(p->shndx());
 	if (p->is_relaxed_input_section())
-	  size = p->relaxed_input_section()->data_size();
+	  // We use current data size because relxed section sizes may not
+	  // have finalized yet.
+	  size = p->relaxed_input_section()->current_data_size();
 	else
 	  size = p->relobj()->section_size(p->shndx());
       }

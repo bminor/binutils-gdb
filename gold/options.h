@@ -83,6 +83,9 @@ extern void
 parse_bool(const char* option_name, const char* arg, bool* retval);
 
 extern void
+parse_int(const char* option_name, const char* arg, int* retval);
+
+extern void
 parse_uint(const char* option_name, const char* arg, int* retval);
 
 extern void
@@ -332,6 +335,12 @@ struct Struct_special : public Struct_var
     options::One_option option;                                          \
   };                                                                     \
   Struct_disable_##varname__ disable_##varname__##_initializer_
+
+#define DEFINE_int(varname__, dashes__, shortname__, default_value__,   \
+                   helpstring__, helparg__)                             \
+  DEFINE_var(varname__, dashes__, shortname__, default_value__,         \
+             #default_value__, helpstring__, helparg__, false,		\
+             int, int, options::parse_int)
 
 #define DEFINE_uint(varname__, dashes__, shortname__, default_value__,  \
                    helpstring__, helparg__)                             \
@@ -801,6 +810,12 @@ class General_options
                  "(at least versions <= 6.7)"), NULL);
   DEFINE_bool(strip_lto_sections, options::TWO_DASHES, '\0', true,
               N_("Strip LTO intermediate code sections"), NULL);
+
+  DEFINE_int(stub_group_size, options::TWO_DASHES , '\0', 1,
+             N_("(ARM only) The maximum distance from instructions in a group "
+		"of sections to their stubs.  Negative values mean stubs "
+		"are always after the group. 1 means using default size.\n"),
+	     N_("SIZE"));
 
   DEFINE_bool(no_keep_memory, options::TWO_DASHES, '\0', false,
               N_("Use less memory and more disk I/O "

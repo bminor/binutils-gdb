@@ -1324,7 +1324,8 @@ class Sized_relobj : public Relobj
 
   // Set up the object file based on TARGET.
   void
-  setup();
+  setup()
+  { this->do_setup(); }
 
   // Return the number of symbols.  This is only valid after
   // Object::add_symbols has been called.
@@ -1462,7 +1463,16 @@ class Sized_relobj : public Relobj
   Address
   map_to_kept_section(unsigned int shndx, bool* found) const;
 
+  // Make section offset invalid.  This is needed for relaxation.
+  void
+  invalidate_section_offset(unsigned int shndx)
+  { this->do_invalidate_section_offset(shndx); }
+
  protected:
+  // Set up.
+  virtual void
+  do_setup();
+
   // Read the symbols.
   void
   do_read_symbols(Read_symbols_data*);
@@ -1596,6 +1606,48 @@ class Sized_relobj : public Relobj
     this->section_offsets_[shndx] = convert_types<Address, uint64_t>(off);
   }
 
+  // Set the offset of a section to invalid_address.
+  virtual void
+  do_invalidate_section_offset(unsigned int shndx)
+  {
+    gold_assert(shndx < this->section_offsets_.size());
+    this->section_offsets_[shndx] = invalid_address;
+  }
+
+  // Adjust a section index if necessary.
+  unsigned int
+  adjust_shndx(unsigned int shndx)
+  {
+    if (shndx >= elfcpp::SHN_LORESERVE)
+      shndx += this->elf_file_.large_shndx_offset();
+    return shndx;
+  }
+
+  // Initialize input to output maps for section symbols in merged
+  // sections.
+  void
+  initialize_input_to_output_maps();
+
+  // Free the input to output maps for section symbols in merged
+  // sections.
+  void
+  free_input_to_output_maps();
+
+  // Return symbol table section index.
+  unsigned int
+  symtab_shndx() const
+  { return this->symtab_shndx_; }
+
+  // Allow a child class to access the ELF file.
+  elfcpp::Elf_file<size, big_endian, Object>*
+  elf_file()
+  { return &this->elf_file_; }
+  
+  // Allow a child class to access the local values.
+  Local_values*
+  local_values()
+  { return &this->local_values_; }
+
  private:
   // For convenience.
   typedef Sized_relobj<size, big_endian> This;
@@ -1617,15 +1669,6 @@ class Sized_relobj : public Relobj
   };
   typedef std::map<unsigned int, Kept_comdat_section>
       Kept_comdat_section_table;
-
-  // Adjust a section index if necessary.
-  unsigned int
-  adjust_shndx(unsigned int shndx)
-  {
-    if (shndx >= elfcpp::SHN_LORESERVE)
-      shndx += this->elf_file_.large_shndx_offset();
-    return shndx;
-  }
 
   // Find the SHT_SYMTAB section, given the section headers.
   void
@@ -1741,16 +1784,6 @@ class Sized_relobj : public Relobj
   void
   find_functions(const unsigned char* pshdrs, unsigned int shndx,
 		 Function_offsets*);
-
-  // Initialize input to output maps for section symbols in merged
-  // sections.
-  void
-  initialize_input_to_output_maps();
-
-  // Free the input to output maps for section symbols in merged
-  // sections.
-  void
-  free_input_to_output_maps();
 
   // Write out the local symbols.
   void

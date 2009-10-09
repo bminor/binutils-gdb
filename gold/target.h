@@ -242,6 +242,12 @@ class Target
 		  off_t offset, const elfcpp::Ehdr<size, big_endian>& ehdr)
   { return this->do_make_elf_object(name, input_file, offset, ehdr); }
 
+  // Make an output section.
+  Output_section*
+  make_output_section(const char* name, elfcpp::Elf_Word type,
+		      elfcpp::Elf_Xword flags)
+  { return this->do_make_output_section(name, type, flags); }
+
   // Return true if target wants to perform relaxation.
   bool
   may_relax() const
@@ -255,14 +261,15 @@ class Target
 
   // Perform a relaxation pass.  Return true if layout may be changed.
   bool
-  relax(int pass)
+  relax(int pass, const Input_objects* input_objects, Symbol_table* symtab,
+	Layout* layout)
   {
     // Run the dummy relaxation pass twice if relaxation debugging is enabled.
     if (is_debugging_enabled(DEBUG_RELAXATION))
       return pass < 2;
 
-    return this->do_relax(pass);
-  }
+    return this->do_relax(pass, input_objects, symtab, layout);
+  } 
 
  protected:
   // This struct holds the constant information for a child class.  We
@@ -386,6 +393,11 @@ class Target
 		     off_t offset, const elfcpp::Ehdr<64, true>& ehdr);
 #endif
 
+  // Virtual functions which may be overriden by the child class.
+  virtual Output_section*
+  do_make_output_section(const char* name, elfcpp::Elf_Word type,
+			 elfcpp::Elf_Xword flags);
+
   // Virtual function which may be overriden by the child class.
   virtual bool
   do_may_relax() const
@@ -393,7 +405,7 @@ class Target
 
   // Virtual function which may be overriden by the child class.
   virtual bool
-  do_relax(int)
+  do_relax(int, const Input_objects*, Symbol_table*, Layout*)
   { return false; }
 
   // A function for targets to call.  Return whether BYTES/LEN matches

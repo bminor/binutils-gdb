@@ -23,6 +23,7 @@
 #include "gold.h"
 #include "target.h"
 #include "dynobj.h"
+#include "output.h"
 #include "elfcpp.h"
 
 namespace gold
@@ -135,6 +136,13 @@ Target::do_make_elf_object(const std::string& name, Input_file* input_file,
 							   offset, ehdr);
 }
 #endif
+
+Output_section*
+Target::do_make_output_section(const char* name, elfcpp::Elf_Word type,
+			       elfcpp::Elf_Xword flags)
+{
+  return new Output_section(name, type, flags);
+}
 
 // Default conversion for -fsplit-stack is to give an error.
 

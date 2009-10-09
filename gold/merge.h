@@ -219,6 +219,17 @@ class Output_merge_base : public Output_section_data
     : Output_section_data(addralign), merge_map_(), entsize_(entsize)
   { }
 
+  // Return the entry size.
+  uint64_t
+  entsize() const
+  { return this->entsize_; }
+
+  // Whether this is a merge string section.  This is only true of
+  // Output_merge_string.
+  bool
+  is_string()
+  { return this->do_is_string(); }
+
  protected:
   // Return the output offset for an input offset.
   bool
@@ -230,11 +241,6 @@ class Output_merge_base : public Output_section_data
   bool
   do_is_merge_section_for(const Relobj*, unsigned int shndx) const;
 
-  // Return the entry size.
-  uint64_t
-  entsize() const
-  { return this->entsize_; }
-
   // Add a mapping from an OFFSET in input section SHNDX in object
   // OBJECT to an OUTPUT_OFFSET in the output section.  OUTPUT_OFFSET
   // is the offset from the start of the merged data in the output
@@ -245,6 +251,11 @@ class Output_merge_base : public Output_section_data
   {
     this->merge_map_.add_mapping(object, shndx, offset, length, output_offset);
   }
+
+  // This may be overriden by the child class.
+  virtual bool
+  do_is_string()
+  { return false; }
 
  private:
   // A mapping from input object/section/offset to offset in output
@@ -423,6 +434,11 @@ class Output_merge_string : public Output_merge_base
   void
   clear_stringpool()
   { this->stringpool_.clear(); }
+
+  // Whether this is a merge string section.
+  virtual bool
+  do_is_string()
+  { return true; }
 
  private:
   // The name of the string type, for stats.

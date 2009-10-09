@@ -1377,6 +1377,26 @@ class Symbol_table
   finalize(off_t off, off_t dynoff, size_t dyn_global_index, size_t dyncount,
 	   Stringpool* pool, unsigned int *plocal_symcount);
 
+  // Status code of Symbol_table::compute_final_value.
+  enum Compute_final_value_status
+  {
+    // No error.
+    CFVS_OK,
+    // Unspported symbol section.
+    CFVS_UNSUPPORTED_SYMBOL_SECTION,
+    // No output section.
+    CFVS_NO_OUTPUT_SECTION
+  };
+
+  // Compute the final value of SYM and store status in location PSTATUS.
+  // During relaxation, this may be called multiple times for a symbol to 
+  // compute its would-be final value in each relaxation pass.
+
+  template<int size>
+  typename Sized_symbol<size>::Value_type
+  compute_final_value(const Sized_symbol<size>* sym,
+		      Compute_final_value_status* pstatus) const;
+
   // Write out the global symbols.
   void
   write_globals(const Stringpool*, const Stringpool*,

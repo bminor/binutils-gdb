@@ -359,7 +359,7 @@ Sized_relobj<size, big_endian>::~Sized_relobj()
 
 template<int size, bool big_endian>
 void
-Sized_relobj<size, big_endian>::setup()
+Sized_relobj<size, big_endian>::do_setup()
 {
   const unsigned int shnum = this->elf_file_.shnum();
   this->set_shnum(shnum);

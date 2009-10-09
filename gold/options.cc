@@ -195,6 +195,16 @@ parse_uint(const char* option_name, const char* arg, int* retval)
 }
 
 void
+parse_int(const char* option_name, const char* arg, int* retval)
+{
+  char* endptr;
+  *retval = strtol(arg, &endptr, 0);
+  if (*endptr != '\0')
+    gold_fatal(_("%s: invalid option value (expected an integer): %s"),
+               option_name, arg);
+}
+
+void
 parse_uint64(const char* option_name, const char* arg, uint64_t *retval)
 {
   char* endptr;
