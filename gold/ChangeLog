@@ -1,3 +1,18 @@
+2009-10-09  Andrew Pinski  <andrew_pinski@playstation.sony.com>
+
+	* dwarf_reader.cc (Sized_dwarf_line_info::Sized_dwarf_line_info):
+	Change read_shndx type to unsigned int.
+	(Sized_dwarf_line_info::read_lines): Change shndx type to unsigned
+	int.
+	(Sized_dwarf_line_info::read_line_mappings): Likewise.
+	* dwarf_reader.h (Sized_dwarf_line_info::Sized_dwarf_line_info):
+	Change read_shndx type to unsigned int.
+	(Sized_dwarf_line_info::read_lines): Change shndx type to unsigned
+	int.
+	(Sized_dwarf_line_info::read_line_mappings): Likewise.
+	* layout.cc (Layout::create_symtab_sections): Cast the result of
+	local_symcount * symsize to off_t in the gold_assert.
+
 2009-10-09  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
 
 	* arm.cc (Target_arm::relocate::reloc_is_non_pic): Return true for

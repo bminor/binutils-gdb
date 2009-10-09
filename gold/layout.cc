@@ -2542,7 +2542,7 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
     }
 
   unsigned int local_symcount = local_symbol_index;
-  gold_assert(local_symcount * symsize == off - startoff);
+  gold_assert(static_cast<off_t>(local_symcount * symsize) == off - startoff);
 
   off_t dynoff;
   size_t dyn_global_index;
