@@ -1,5 +1,10 @@
 2009-10-09  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o.c (bfd_mach_o_read_command): Handle BFD_MACH_O_LC_RPATH.
+	(bfd_mach_o_bfd_print_private_bfd_data): Ditto.
+
+2009-10-09  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o.c (bfd_mach_o_scan_read_symtab_symbols): Rename to
 	bfd_mach_o_read_symtab_symbols.
 	(bfd_mach_o_scan_write_thread): Rename to bfd_mach_o_write_thread.

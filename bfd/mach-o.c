@@ -2523,6 +2523,7 @@ bfd_mach_o_read_command (bfd *abfd, bfd_mach_o_load_command *command)
     case BFD_MACH_O_LC_SUB_UMBRELLA:
     case BFD_MACH_O_LC_SUB_LIBRARY:
     case BFD_MACH_O_LC_SUB_CLIENT:
+    case BFD_MACH_O_LC_RPATH:
       if (bfd_mach_o_read_str (abfd, command) != 0)
         return -1;
       break;
@@ -3788,6 +3789,7 @@ bfd_mach_o_bfd_print_private_bfd_data (bfd *abfd, PTR ptr)
         case BFD_MACH_O_LC_SUB_UMBRELLA:
         case BFD_MACH_O_LC_SUB_LIBRARY:
         case BFD_MACH_O_LC_SUB_CLIENT:
+        case BFD_MACH_O_LC_RPATH:
 	  {
 	    bfd_mach_o_str_command *str = &cmd->command.str;
 	    fprintf (file, " %s\n", str->str);
