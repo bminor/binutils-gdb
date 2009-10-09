@@ -858,7 +858,7 @@ bfd_mach_o_backend_data;
   ((bfd_mach_o_backend_data*)(abfd)->xvec->backend_data)
 
 bfd_boolean bfd_mach_o_valid (bfd *);
-int bfd_mach_o_scan_read_dysymtab_symbol (bfd *, bfd_mach_o_dysymtab_command *, bfd_mach_o_symtab_command *, bfd_mach_o_asymbol *, unsigned long);
+int bfd_mach_o_read_dysymtab_symbol (bfd *, bfd_mach_o_dysymtab_command *, bfd_mach_o_symtab_command *, bfd_mach_o_asymbol *, unsigned long);
 int bfd_mach_o_scan_start_address (bfd *);
 int bfd_mach_o_scan (bfd *, bfd_mach_o_header *, bfd_mach_o_data_struct *);
 bfd_boolean bfd_mach_o_mkobject_init (bfd *);

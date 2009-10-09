@@ -1,5 +1,51 @@
 2009-10-09  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o.c (bfd_mach_o_scan_read_symtab_symbols): Rename to
+	bfd_mach_o_read_symtab_symbols.
+	(bfd_mach_o_scan_write_thread): Rename to bfd_mach_o_write_thread.
+	(bfd_mach_o_scan_write_relocs): Rename to bfd_mach_o_write_relocs.
+	(bfd_mach_o_scan_write_section_32): Rename to
+	bfd_mach_o_write_section_32.
+	(bfd_mach_o_scan_write_section_64): Rename to
+	bfd_mach_o_write_section_64.
+	(bfd_mach_o_scan_write_segment_32): Rename to
+	bfd_mach_o_write_segment_32.
+	(bfd_mach_o_scan_write_segment_64): Rename to
+	bfd_mach_o_write_segment_64.
+	(bfd_mach_o_scan_write_symtab): Rename to bfd_mach_o_write_symtab.
+	(bfd_mach_o_scan_read_section_32): Rename to
+	bfd_mach_o_read_section_32.
+	(bfd_mach_o_scan_read_section_64): Rename to
+	bfd_mach_o_read_section_64.
+	(bfd_mach_o_scan_read_section): Rename to bfd_mach_o_read_section.
+	(bfd_mach_o_scan_read_symtab_strtab): Rename to
+	bfd_mach_o_read_symtab_strtab.
+	(bfd_mach_o_scan_read_symtab_symbol): Rename to
+	bfd_mach_o_read_symtab_symbol.
+	(bfd_mach_o_scan_read_dysymtab_symbol): Rename to
+	bfd_mach_o_read_dysymtab_symbol.
+	(bfd_mach_o_scan_read_dylinker): Rename to bfd_mach_o_read_dylinker.
+	(bfd_mach_o_scan_read_dylib): Rename to bfd_mach_o_read_dylib.
+	(bfd_mach_o_scan_read_prebound_dylib): Rename to
+	bfd_mach_o_read_prebound_dylib.
+	(bfd_mach_o_scan_read_thread): Rename to bfd_mach_o_read_thread.
+	(bfd_mach_o_scan_read_dysymtab): Rename to bfd_mach_o_read_dysymtab.
+	(bfd_mach_o_scan_read_symtab): Rename to bfd_mach_o_read_symtab.
+	(bfd_mach_o_scan_read_uuid): Rename to bfd_mach_o_read_uuid.
+	(bfd_mach_o_scan_read_linkedit): Rename to bfd_mach_o_read_linkedit.
+	(bfd_mach_o_scan_read_str): Rename to bfd_mach_o_read_str.
+	(bfd_mach_o_scan_read_dyld_info): Rename to bfd_mach_o_read_dyld_info.
+	(bfd_mach_o_scan_read_segment): Rename to bfd_mach_o_read_segment.
+	(bfd_mach_o_scan_read_segment_32): Rename to
+	bfd_mach_o_read_segment_32.
+	(bfd_mach_o_scan_read_segment_64): Rename to
+	bfd_mach_o_read_segment_64.
+	(bfd_mach_o_scan_read_command): Rename to bfd_mach_o_read_command.
+	* mach-o.h (bfd_mach_o_scan_read_dysymtab_symbol): Rename to
+	bfd_mach_o_read_dysymtab_symbol.
+
+2009-10-09  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o.c (bfd_mach_o_section_get_entry_size): Moved.
 	(bfd_mach_o_section_get_nbr_indirect): Ditto.
 	(bfd_mach_o_get_synthetic_symtab): New function.
