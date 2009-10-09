@@ -5,7 +5,7 @@ ${RELOCATING+${LIB_SEARCH_DIRS}}
 
 SECTIONS
 {
-  .text  ${RELOCATING+${TEXT_START_ADDR}} : {
+  .text ${RELOCATING:-0} ${RELOCATING+${TEXT_START_ADDR}} : {
     ${RELOCATING+ start = DEFINED(_START) ? _START : DEFINED(_start) ? _start : .;}
     ${RELOCATING+ PROVIDE(__text = .);}
     *(.text);
@@ -31,14 +31,14 @@ SECTIONS
     ${RELOCATING+ PROVIDE(__etext = .);}
     ${RELOCATING+ PROVIDE(_etext = .);}
   }
-  .data  : ${RELOCATING+ AT(ADDR(.text) + SIZEOF(.text))} {
+  .data ${RELOCATING:-0} : ${RELOCATING+ AT(ADDR(.text) + SIZEOF(.text))} {
     ${RELOCATING+ PROVIDE(__data = .);}
     *(.data);
     *(vars);
     ${RELOCATING+ PROVIDE(__edata = .);}
     ${RELOCATING+ PROVIDE(_edata = .);}
   }
-  .bss  :
+  .bss ${RELOCATING:-0} :
   { 					
     ${RELOCATING+ PROVIDE(__bss = .);}
     *(.bss);

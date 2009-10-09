@@ -1,5 +1,5 @@
 
-CTOR=".ctors  : 
+CTOR=".ctors ${CONSTRUCTING-0} : 
   {
     ${CONSTRUCTING+ __CTOR_LIST__ = .; }
     /* gcc uses crtbegin.o to find the start of
@@ -26,7 +26,7 @@ CTOR=".ctors  :
     ${CONSTRUCTING+ __CTOR_END__ = .; }
   } ${RELOCATING+ > ${DATA_MEMORY}}"
 
-DTOR="  .dtors	 :
+DTOR="  .dtors	${CONSTRUCTING-0} :
   {
     ${CONSTRUCTING+ __DTOR_LIST__ = .; }
     KEEP (*crtbegin.o(.dtors))
@@ -53,57 +53,57 @@ SECTIONS
 {
   /* Read-only sections, merged into text segment: */
   ${TEXT_DYNAMIC+${DYNAMIC}}
-  .hash			 : { *(.hash) }
-  .dynsym		 : { *(.dynsym) }
-  .dynstr		 : { *(.dynstr) }
-  .gnu.version		 : { *(.gnu.version) }
-  .gnu.version_d	 : { *(.gnu.version_d) }
-  .gnu.version_r	 : { *(.gnu.version_r) }
+  .hash			${RELOCATING-0} : { *(.hash) }
+  .dynsym		${RELOCATING-0} : { *(.dynsym) }
+  .dynstr		${RELOCATING-0} : { *(.dynstr) }
+  .gnu.version		${RELOCATING-0} : { *(.gnu.version) }
+  .gnu.version_d	${RELOCATING-0} : { *(.gnu.version_d) }
+  .gnu.version_r	${RELOCATING-0} : { *(.gnu.version_r) }
 
-  .rel.text		 : { *(.rel.text) *(.rel.gnu.linkonce.t*) }
-  .rela.text		 : { *(.rela.text) *(.rela.gnu.linkonce.t*) }
-  .rel.data		 : { *(.rel.data) *(.rel.gnu.linkonce.d*) }
-  .rela.data		 : { *(.rela.data) *(.rela.gnu.linkonce.d*) }
-  .rel.rodata		 : { *(.rel.rodata) *(.rel.gnu.linkonce.r*) }
-  .rela.rodata		 : { *(.rela.rodata) *(.rela.gnu.linkonce.r*) }
-  .rel.stext		 : { *(.rel.stest) }
-  .rela.stext		 : { *(.rela.stest) }
-  .rel.etext		 : { *(.rel.etest) }
-  .rela.etext		 : { *(.rela.etest) }
-  .rel.sdata		 : { *(.rel.sdata) }
-  .rela.sdata		 : { *(.rela.sdata) }
-  .rel.edata		 : { *(.rel.edata) }
-  .rela.edata		 : { *(.rela.edata) }
-  .rel.eit_v		 : { *(.rel.eit_v) }
-  .rela.eit_v		 : { *(.rela.eit_v) }
-  .rel.sbss		 : { *(.rel.sbss) }
-  .rela.sbss		 : { *(.rela.sbss) }
-  .rel.ebss		 : { *(.rel.ebss) }
-  .rela.ebss		 : { *(.rela.ebss) }
-  .rel.srodata		 : { *(.rel.srodata) }
-  .rela.srodata		 : { *(.rela.srodata) }
-  .rel.erodata		 : { *(.rel.erodata) }
-  .rela.erodata		 : { *(.rela.erodata) }
-  .rel.got		 : { *(.rel.got) }
-  .rela.got		 : { *(.rela.got) }
-  .rel.ctors		 : { *(.rel.ctors) }
-  .rela.ctors		 : { *(.rela.ctors) }
-  .rel.dtors		 : { *(.rel.dtors) }
-  .rela.dtors		 : { *(.rela.dtors) }
-  .rel.init		 : { *(.rel.init) }
-  .rela.init		 : { *(.rela.init) }
-  .rel.fini		 : { *(.rel.fini) }
-  .rela.fini		 : { *(.rela.fini) }
-  .rel.bss		 : { *(.rel.bss) }
-  .rela.bss		 : { *(.rela.bss) }
-  .rel.plt		 : { *(.rel.plt) }
-  .rela.plt		 : { *(.rela.plt) }
+  .rel.text		${RELOCATING-0} : { *(.rel.text) *(.rel.gnu.linkonce.t*) }
+  .rela.text		${RELOCATING-0} : { *(.rela.text) *(.rela.gnu.linkonce.t*) }
+  .rel.data		${RELOCATING-0} : { *(.rel.data) *(.rel.gnu.linkonce.d*) }
+  .rela.data		${RELOCATING-0} : { *(.rela.data) *(.rela.gnu.linkonce.d*) }
+  .rel.rodata		${RELOCATING-0} : { *(.rel.rodata) *(.rel.gnu.linkonce.r*) }
+  .rela.rodata		${RELOCATING-0} : { *(.rela.rodata) *(.rela.gnu.linkonce.r*) }
+  .rel.stext		${RELOCATING-0} : { *(.rel.stest) }
+  .rela.stext		${RELOCATING-0} : { *(.rela.stest) }
+  .rel.etext		${RELOCATING-0} : { *(.rel.etest) }
+  .rela.etext		${RELOCATING-0} : { *(.rela.etest) }
+  .rel.sdata		${RELOCATING-0} : { *(.rel.sdata) }
+  .rela.sdata		${RELOCATING-0} : { *(.rela.sdata) }
+  .rel.edata		${RELOCATING-0} : { *(.rel.edata) }
+  .rela.edata		${RELOCATING-0} : { *(.rela.edata) }
+  .rel.eit_v		${RELOCATING-0} : { *(.rel.eit_v) }
+  .rela.eit_v		${RELOCATING-0} : { *(.rela.eit_v) }
+  .rel.sbss		${RELOCATING-0} : { *(.rel.sbss) }
+  .rela.sbss		${RELOCATING-0} : { *(.rela.sbss) }
+  .rel.ebss		${RELOCATING-0} : { *(.rel.ebss) }
+  .rela.ebss		${RELOCATING-0} : { *(.rela.ebss) }
+  .rel.srodata		${RELOCATING-0} : { *(.rel.srodata) }
+  .rela.srodata		${RELOCATING-0} : { *(.rela.srodata) }
+  .rel.erodata		${RELOCATING-0} : { *(.rel.erodata) }
+  .rela.erodata		${RELOCATING-0} : { *(.rela.erodata) }
+  .rel.got		${RELOCATING-0} : { *(.rel.got) }
+  .rela.got		${RELOCATING-0} : { *(.rela.got) }
+  .rel.ctors		${RELOCATING-0} : { *(.rel.ctors) }
+  .rela.ctors		${RELOCATING-0} : { *(.rela.ctors) }
+  .rel.dtors		${RELOCATING-0} : { *(.rel.dtors) }
+  .rela.dtors		${RELOCATING-0} : { *(.rela.dtors) }
+  .rel.init		${RELOCATING-0} : { *(.rel.init) }
+  .rela.init		${RELOCATING-0} : { *(.rela.init) }
+  .rel.fini		${RELOCATING-0} : { *(.rel.fini) }
+  .rela.fini		${RELOCATING-0} : { *(.rela.fini) }
+  .rel.bss		${RELOCATING-0} : { *(.rel.bss) }
+  .rela.bss		${RELOCATING-0} : { *(.rela.bss) }
+  .rel.plt		${RELOCATING-0} : { *(.rel.plt) }
+  .rela.plt		${RELOCATING-0} : { *(.rela.plt) }
 
-  .init			 : { *(.init) } =${NOP-0}
+  .init			${RELOCATING-0} : { *(.init) } =${NOP-0}
   ${DATA_PLT-${PLT}}
 
   /* Internal text space */
-  .stext	 : { *(.stext) }		${RELOCATING+ > text}
+  .stext	${RELOCATING-0} : { *(.stext) }		${RELOCATING+ > text}
 
   /* Internal text space or external memory */
   .text :
@@ -116,23 +116,23 @@ SECTIONS
   } ${RELOCATING+ > ${TEXT_MEMORY}}
 
   /* Internal data space */
-  .srodata	 : { *(.srodata) }	${RELOCATING+ > data}
-  .sdata	 : { *(.sdata) }		${RELOCATING+ > data}
+  .srodata	${RELOCATING-0} : { *(.srodata) }	${RELOCATING+ > data}
+  .sdata	${RELOCATING-0} : { *(.sdata) }		${RELOCATING+ > data}
 
   /* Internal data space or external memory */
-  .rodata	 : { *(.rodata) }	${RELOCATING+ > ${DATA_MEMORY}}
+  .rodata	${RELOCATING-0} : { *(.rodata) }	${RELOCATING+ > ${DATA_MEMORY}}
 
   /* C++ exception support.  */
-  .eh_frame	 : { KEEP (*(.eh_frame)) }	${RELOCATING+ > ${DATA_MEMORY}}
-  .gcc_except_table  : { *(.gcc_except_table) }	${RELOCATING+ > ${DATA_MEMORY}}
+  .eh_frame	${RELOCATING-0} : { KEEP (*(.eh_frame)) }	${RELOCATING+ > ${DATA_MEMORY}}
+  .gcc_except_table ${RELOCATING-0} : { *(.gcc_except_table) }	${RELOCATING+ > ${DATA_MEMORY}}
 
   /* Java class registration support.  */
-  .jcr		 : { KEEP (*(.jcr)) }	${RELOCATING+ >${DATA_MEMORY}}
+  .jcr		${RELOCATING-0} : { KEEP (*(.jcr)) }	${RELOCATING+ >${DATA_MEMORY}}
 
   ${RELOCATING+${CTOR}}
   ${RELOCATING+${DTOR}}
 
-  .data		 :
+  .data		${RELOCATING-0} :
   {
     *(.data)
     *(.gnu.linkonce.d*)
@@ -141,31 +141,31 @@ SECTIONS
   } ${RELOCATING+ > ${DATA_MEMORY}}
 
   /* External memory */
-  .etext	 :
+  .etext	${RELOCATING-0} :
   {
     ${RELOCATING+ PROVIDE (__etext_start = .) ; }
     *(.etext)
     ${RELOCATING+ PROVIDE (__etext_end = .) ; }
   } ${RELOCATING+ > emem}
 
-  .erodata	 : { *(.erodata) }	${RELOCATING+ > emem}
-  .edata	 : { *(.edata) }		${RELOCATING+ > emem}
+  .erodata	${RELOCATING-0} : { *(.erodata) }	${RELOCATING+ > emem}
+  .edata	${RELOCATING-0} : { *(.edata) }		${RELOCATING+ > emem}
 
-  .sbss		 :
+  .sbss		${RELOCATING-0} :
   {
     ${RELOCATING+ PROVIDE (__sbss_start = .) ; }
     *(.sbss)
     ${RELOCATING+ PROVIDE (__sbss_end = .) ;  }
   } ${RELOCATING+ > data}
 
-  .ebss		 :
+  .ebss		${RELOCATING-0} :
   {
     ${RELOCATING+ PROVIDE (__ebss_start = .) ; }
     *(.ebss)
     ${RELOCATING+ PROVIDE (__ebss_end = .) ;  }
   } ${RELOCATING+ > data}
 
-  .bss		 :
+  .bss		${RELOCATING-0} :
   {
     ${RELOCATING+ PROVIDE (__bss_start = .) ; }
     *(.bss)
@@ -174,7 +174,7 @@ SECTIONS
     ${RELOCATING+ _end = . ;  }
   } ${RELOCATING+ > ${DATA_MEMORY}}
 
-  .eit_v	 :
+  .eit_v	${RELOCATING-0} :
   {
     ${RELOCATING+ PROVIDE (__eit_start = .) ; }
     *(.eit_v)

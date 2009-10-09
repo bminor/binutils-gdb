@@ -12,7 +12,7 @@ SECTIONS
   .pad 0 : { *(.pad) }
 
   . = 0x10000000;
-  .text  : {
+  .text ${RELOCATING-0} : {
     ${RELOCATING+PROVIDE (_text = .);}
     *(.text)
     *(.pr)

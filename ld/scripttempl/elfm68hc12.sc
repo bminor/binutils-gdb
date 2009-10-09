@@ -24,7 +24,7 @@ test -z "${LITTLE_OUTPUT_FORMAT}" && LITTLE_OUTPUT_FORMAT=${OUTPUT_FORMAT}
 if [ -z "$MACHINE" ]; then OUTPUT_ARCH=${ARCH}; else OUTPUT_ARCH=${ARCH}:${MACHINE}; fi
 test "$LD_FLAG" = "N" && DATA_ADDR=.
 
-CTOR=".ctors  : 
+CTOR=".ctors ${CONSTRUCTING-0} : 
   {
     ${CONSTRUCTING+ PROVIDE (__CTOR_LIST__ = .); }
     ${CONSTRUCTING+${CTOR_START}}
@@ -34,7 +34,7 @@ CTOR=".ctors  :
     ${CONSTRUCTING+ PROVIDE(__CTOR_END__ = .); }
   } ${RELOCATING+ > ${TEXT_MEMORY}}"
 
-DTOR="  .dtors	 :
+DTOR="  .dtors	${CONSTRUCTING-0} :
   {
     ${CONSTRUCTING+ PROVIDE(__DTOR_LIST__ = .); }
     KEEP (*(.dtors))
@@ -127,34 +127,34 @@ PRE_COMPUTE_DATA_SIZE="
 "
 
 INSTALL_RELOC="
-  .install0  : { *(.install0) }
-  .install1  : { *(.install1) }
-  .install2  : { *(.install2) }
-  .install3  : { *(.install3) }
-  .install4  : { *(.install4) }
+  .install0 0 : { *(.install0) }
+  .install1 0 : { *(.install1) }
+  .install2 0 : { *(.install2) }
+  .install3 0 : { *(.install3) }
+  .install4 0 : { *(.install4) }
 "
 
 FINISH_RELOC="
-  .fini0  : { *(.fini0) }
-  .fini1  : { *(.fini1) }
-  .fini2  : { *(.fini2) }
-  .fini3  : { *(.fini3) }
-  .fini4  : { *(.fini4) }
+  .fini0 0 : { *(.fini0) }
+  .fini1 0 : { *(.fini1) }
+  .fini2 0 : { *(.fini2) }
+  .fini3 0 : { *(.fini3) }
+  .fini4 0 : { *(.fini4) }
 "
 
 BSS_DATA_RELOC="
-  .data1  : { *(.data1) }
+  .data1 0 : { *(.data1) }
 
   /* We want the small data sections together, so single-instruction offsets
      can access them all, and initialized data all before uninitialized, so
      we can shorten the on-disk segment size.  */
-  .sdata    : { *(.sdata) }
-  .sbss     : { *(.sbss) }
-  .scommon  : { *(.scommon) }
+  .sdata   0 : { *(.sdata) }
+  .sbss    0 : { *(.sbss) }
+  .scommon 0 : { *(.scommon) }
 "
 
 SOFT_REGS_RELOC="
-  .softregs  : { *(.softregs) }
+  .softregs 0 : { *(.softregs) }
 "
 
 cat <<EOF
@@ -172,113 +172,113 @@ ${RELOCATING+${MEMORY_DEF}}
 
 SECTIONS
 {
-  .hash         : { *(.hash)		}
-  .dynsym       : { *(.dynsym)		}
-  .dynstr       : { *(.dynstr)		}
-  .gnu.version		 : { *(.gnu.version) }
-  .gnu.version_d	 : { *(.gnu.version_d) }
-  .gnu.version_r	 : { *(.gnu.version_r) }
+  .hash        ${RELOCATING-0} : { *(.hash)		}
+  .dynsym      ${RELOCATING-0} : { *(.dynsym)		}
+  .dynstr      ${RELOCATING-0} : { *(.dynstr)		}
+  .gnu.version		${RELOCATING-0} : { *(.gnu.version) }
+  .gnu.version_d	${RELOCATING-0} : { *(.gnu.version_d) }
+  .gnu.version_r	${RELOCATING-0} : { *(.gnu.version_r) }
 
-  .rel.text     :
+  .rel.text    ${RELOCATING-0} :
     {
       *(.rel.text)
       ${RELOCATING+*(.rel.text.*)}
       ${RELOCATING+*(.rel.gnu.linkonce.t.*)}
     }
-  .rela.text    :
+  .rela.text   ${RELOCATING-0} :
     {
       *(.rela.text)
       ${RELOCATING+*(.rela.text.*)}
       ${RELOCATING+*(.rela.gnu.linkonce.t.*)}
     }
-  .rel.data     :
+  .rel.data    ${RELOCATING-0} :
     {
       *(.rel.data)
       ${RELOCATING+*(.rel.data.*)}
       ${RELOCATING+*(.rel.gnu.linkonce.d.*)}
     }
-  .rela.data    :
+  .rela.data   ${RELOCATING-0} :
     {
       *(.rela.data)
       ${RELOCATING+*(.rela.data.*)}
       ${RELOCATING+*(.rela.gnu.linkonce.d.*)}
     }
-  .rel.rodata   :
+  .rel.rodata  ${RELOCATING-0} :
     {
       *(.rel.rodata)
       ${RELOCATING+*(.rel.rodata.*)}
       ${RELOCATING+*(.rel.gnu.linkonce.r.*)}
     }
-  .rela.rodata  :
+  .rela.rodata ${RELOCATING-0} :
     {
       *(.rela.rodata)
       ${RELOCATING+*(.rela.rodata.*)}
       ${RELOCATING+*(.rela.gnu.linkonce.r.*)}
     }
-  .rel.sdata    :
+  .rel.sdata   ${RELOCATING-0} :
     {
       *(.rel.sdata)
       ${RELOCATING+*(.rel.sdata.*)}
       ${RELOCATING+*(.rel.gnu.linkonce.s.*)}
     }
-  .rela.sdata    :
+  .rela.sdata   ${RELOCATING-0} :
     {
       *(.rela.sdata)
       ${RELOCATING+*(.rela.sdata.*)}
       ${RELOCATING+*(.rela.gnu.linkonce.s.*)}
     }
-  .rel.sbss     :
+  .rel.sbss    ${RELOCATING-0} :
     { 
       *(.rel.sbss)
       ${RELOCATING+*(.rel.sbss.*)}
       ${RELOCATING+*(.rel.gnu.linkonce.sb.*)}
     }
-  .rela.sbss    :
+  .rela.sbss   ${RELOCATING-0} :
     {
       *(.rela.sbss)
       ${RELOCATING+*(.rela.sbss.*)}
       ${RELOCATING+*(.rel.gnu.linkonce.sb.*)}
     }
-  .rel.bss      : 
+  .rel.bss     ${RELOCATING-0} : 
     { 
       *(.rel.bss)
       ${RELOCATING+*(.rel.bss.*)}
       ${RELOCATING+*(.rel.gnu.linkonce.b.*)}
     }
-  .rela.bss     : 
+  .rela.bss    ${RELOCATING-0} : 
     { 
       *(.rela.bss)
       ${RELOCATING+*(.rela.bss.*)}
       ${RELOCATING+*(.rela.gnu.linkonce.b.*)}
     }
-  .rel.stext		 : { *(.rel.stest) }
-  .rela.stext		 : { *(.rela.stest) }
-  .rel.etext		 : { *(.rel.etest) }
-  .rela.etext		 : { *(.rela.etest) }
-  .rel.sdata		 : { *(.rel.sdata) }
-  .rela.sdata		 : { *(.rela.sdata) }
-  .rel.edata		 : { *(.rel.edata) }
-  .rela.edata		 : { *(.rela.edata) }
-  .rel.eit_v		 : { *(.rel.eit_v) }
-  .rela.eit_v		 : { *(.rela.eit_v) }
-  .rel.ebss		 : { *(.rel.ebss) }
-  .rela.ebss		 : { *(.rela.ebss) }
-  .rel.srodata		 : { *(.rel.srodata) }
-  .rela.srodata		 : { *(.rela.srodata) }
-  .rel.erodata		 : { *(.rel.erodata) }
-  .rela.erodata		 : { *(.rela.erodata) }
-  .rel.got		 : { *(.rel.got) }
-  .rela.got		 : { *(.rela.got) }
-  .rel.ctors		 : { *(.rel.ctors) }
-  .rela.ctors		 : { *(.rela.ctors) }
-  .rel.dtors		 : { *(.rel.dtors) }
-  .rela.dtors		 : { *(.rela.dtors) }
-  .rel.init		 : { *(.rel.init) }
-  .rela.init		 : { *(.rela.init) }
-  .rel.fini		 : { *(.rel.fini) }
-  .rela.fini		 : { *(.rela.fini) }
-  .rel.plt		 : { *(.rel.plt) }
-  .rela.plt		 : { *(.rela.plt) }
+  .rel.stext		${RELOCATING-0} : { *(.rel.stest) }
+  .rela.stext		${RELOCATING-0} : { *(.rela.stest) }
+  .rel.etext		${RELOCATING-0} : { *(.rel.etest) }
+  .rela.etext		${RELOCATING-0} : { *(.rela.etest) }
+  .rel.sdata		${RELOCATING-0} : { *(.rel.sdata) }
+  .rela.sdata		${RELOCATING-0} : { *(.rela.sdata) }
+  .rel.edata		${RELOCATING-0} : { *(.rel.edata) }
+  .rela.edata		${RELOCATING-0} : { *(.rela.edata) }
+  .rel.eit_v		${RELOCATING-0} : { *(.rel.eit_v) }
+  .rela.eit_v		${RELOCATING-0} : { *(.rela.eit_v) }
+  .rel.ebss		${RELOCATING-0} : { *(.rel.ebss) }
+  .rela.ebss		${RELOCATING-0} : { *(.rela.ebss) }
+  .rel.srodata		${RELOCATING-0} : { *(.rel.srodata) }
+  .rela.srodata		${RELOCATING-0} : { *(.rela.srodata) }
+  .rel.erodata		${RELOCATING-0} : { *(.rel.erodata) }
+  .rela.erodata		${RELOCATING-0} : { *(.rela.erodata) }
+  .rel.got		${RELOCATING-0} : { *(.rel.got) }
+  .rela.got		${RELOCATING-0} : { *(.rela.got) }
+  .rel.ctors		${RELOCATING-0} : { *(.rel.ctors) }
+  .rela.ctors		${RELOCATING-0} : { *(.rela.ctors) }
+  .rel.dtors		${RELOCATING-0} : { *(.rel.dtors) }
+  .rela.dtors		${RELOCATING-0} : { *(.rela.dtors) }
+  .rel.init		${RELOCATING-0} : { *(.rel.init) }
+  .rela.init		${RELOCATING-0} : { *(.rela.init) }
+  .rel.fini		${RELOCATING-0} : { *(.rel.fini) }
+  .rela.fini		${RELOCATING-0} : { *(.rela.fini) }
+  .rel.plt		${RELOCATING-0} : { *(.rel.plt) }
+  .rela.plt		${RELOCATING-0} : { *(.rela.plt) }
 
   /* Concatenate .page0 sections.  Put them in the page0 memory bank
      unless we are creating a relocatable file.  */
@@ -288,12 +288,12 @@ SECTIONS
   } ${RELOCATING+ > page0}
 
   /* Start of text section.  */
-  .stext  : 
+  .stext ${RELOCATING-0} : 
   {
     *(.stext)
   } ${RELOCATING+ > ${TEXT_MEMORY}}
 
-  .init	 :
+  .init	${RELOCATING-0} :
   {
     *(.init) 
   } ${RELOCATING+=${NOP-0}}
@@ -301,7 +301,7 @@ SECTIONS
   ${RELOCATING-${INSTALL_RELOC}}
   ${RELOCATING-${FINISH_RELOC}}
 
-  .text :
+  .text ${RELOCATING-0}:
   {
     /* Put startup code at beginning so that _start keeps same address.  */
     ${RELOCATING+${STARTUP_CODE}}
@@ -322,17 +322,17 @@ SECTIONS
     ${RELOCATING+. = ALIGN(2);}
   } ${RELOCATING+ > ${TEXT_MEMORY} =0xa7a7a7a7}
 
-  .eh_frame  :
+  .eh_frame ${RELOCATING-0} :
   {
     KEEP (*(.eh_frame))
   } ${RELOCATING+ > ${TEXT_MEMORY}}
 
-  .gcc_except_table  :
+  .gcc_except_table ${RELOCATING-0} :
   {
     *(.gcc_except_table)
   } ${RELOCATING+ > ${TEXT_MEMORY}}
 
-  .rodata   :
+  .rodata  ${RELOCATING-0} :
   {
     *(.rodata)
     ${RELOCATING+*(.rodata.*)}
@@ -340,7 +340,7 @@ SECTIONS
     ${RELOCATING+. = ALIGN(2);}
   } ${RELOCATING+ > ${TEXT_MEMORY} =0xffffffff}
 
-  .rodata1  :
+  .rodata1 ${RELOCATING-0} :
   {
     *(.rodata1)
     ${RELOCATING+. = ALIGN(2);}
@@ -350,7 +350,7 @@ SECTIONS
   ${RELOCATING+${CTOR}}
   ${RELOCATING+${DTOR}}
 
-  .jcr  :
+  .jcr ${RELOCATING-0} :
   {
     KEEP (*(.jcr))
   } ${RELOCATING+ > ${TEXT_MEMORY}}
@@ -363,7 +363,7 @@ SECTIONS
      We construct the DATA image section in PROM at end of all these
      read-only sections.  The data image must be copied at init time.
      Refer to GNU ld, Section 3.6.8.2 Output Section LMA.  */
-  .data   : ${RELOCATING+AT (__data_image)}
+  .data  ${RELOCATING-0} : ${RELOCATING+AT (__data_image)}
   {
     ${RELOCATING+__data_section_start = .;}
     ${RELOCATING+PROVIDE (__data_section_start = .);}
@@ -387,7 +387,7 @@ SECTIONS
 
   ${RELOCATING+${PRE_COMPUTE_DATA_SIZE}}
 
-  /* .install :
+  /* .install ${RELOCATING-0}:
   {
     . = _data_image_end;
   } ${RELOCATING+ > ${TEXT_MEMORY}} */
@@ -396,7 +396,7 @@ SECTIONS
   ${RELOCATING-${BSS_DATA_RELOC}}
   ${RELOCATING-${SOFT_REGS_RELOC}}
 
-  .bss  :
+  .bss ${RELOCATING-0} :
   {
     ${RELOCATING+__bss_start = .;}
     ${RELOCATING+*(.softregs)}
@@ -413,7 +413,7 @@ SECTIONS
   ${RELOCATING+__bss_size = SIZEOF(.bss);}
   ${RELOCATING+PROVIDE (__bss_size = SIZEOF(.bss));}
 
-  .eeprom  :
+  .eeprom ${RELOCATING-0} :
   {
     *(.eeprom)
     *(.eeprom.*)

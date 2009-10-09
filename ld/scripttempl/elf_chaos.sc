@@ -71,12 +71,12 @@ test -z "${ELFSIZE}" && ELFSIZE=32
 test -z "${ALIGNMENT}" && ALIGNMENT="${ELFSIZE} / 8"
 test -z "$ATTRS_SECTIONS" && ATTRS_SECTIONS=".gnu.attributes 0 : { KEEP (*(.gnu.attributes)) }"
 test "$LD_FLAG" = "N" && DATA_ADDR=.
-INTERP=".interp        : { *(.interp) }"
-PLT=".plt           : { *(.plt) }"
-DYNAMIC=".dynamic       : { *(.dynamic) }"
-RODATA=".rodata        : { *(.rodata${RELOCATING+ .rodata.* .gnu.linkonce.r.*}) }"
+INTERP=".interp       ${RELOCATING-0} : { *(.interp) }"
+PLT=".plt          ${RELOCATING-0} : { *(.plt) }"
+DYNAMIC=".dynamic      ${RELOCATING-0} : { *(.dynamic) }"
+RODATA=".rodata       ${RELOCATING-0} : { *(.rodata${RELOCATING+ .rodata.* .gnu.linkonce.r.*}) }"
 if test -z "${NO_SMALL_DATA}"; then
-  SBSS=".sbss          :
+  SBSS=".sbss         ${RELOCATING-0} :
   {
     ${RELOCATING+PROVIDE (__sbss_start = .);}
     ${RELOCATING+PROVIDE (___sbss_start = .);}
@@ -86,24 +86,24 @@ if test -z "${NO_SMALL_DATA}"; then
     ${RELOCATING+PROVIDE (__sbss_end = .);}
     ${RELOCATING+PROVIDE (___sbss_end = .);}
   }"
-  SBSS2=".sbss2         : { *(.sbss2${RELOCATING+ .sbss2.* .gnu.linkonce.sb2.*}) }"
+  SBSS2=".sbss2        ${RELOCATING-0} : { *(.sbss2${RELOCATING+ .sbss2.* .gnu.linkonce.sb2.*}) }"
   SDATA="/* We want the small data sections together, so single-instruction offsets
      can access them all, and initialized data all before uninitialized, so
      we can shorten the on-disk segment size.  */
-  .sdata         : 
+  .sdata        ${RELOCATING-0} : 
   {
     ${RELOCATING+${SDATA_START_SYMBOLS}}
     *(.sdata${RELOCATING+ .sdata.* .gnu.linkonce.s.*})
   }"
-  SDATA2=".sdata2        : { *(.sdata2${RELOCATING+ .sdata2.* .gnu.linkonce.s2.*}) }"
-  REL_SDATA=".rel.sdata     : { *(.rel.sdata${RELOCATING+ .rel.sdata.* .rel.gnu.linkonce.s.*}) }
-  .rela.sdata    : { *(.rela.sdata${RELOCATING+ .rela.sdata.* .rela.gnu.linkonce.s.*}) }"
-  REL_SBSS=".rel.sbss      : { *(.rel.sbss${RELOCATING+ .rel.sbss.* .rel.gnu.linkonce.sb.*}) }
-  .rela.sbss     : { *(.rela.sbss${RELOCATING+ .rela.sbss.* .rela.gnu.linkonce.sb.*}) }"
-  REL_SDATA2=".rel.sdata2    : { *(.rel.sdata2${RELOCATING+ .rel.sdata2.* .rel.gnu.linkonce.s2.*}) }
-  .rela.sdata2   : { *(.rela.sdata2${RELOCATING+ .rela.sdata2.* .rela.gnu.linkonce.s2.*}) }"
-  REL_SBSS2=".rel.sbss2     : { *(.rel.sbss2${RELOCATING+ .rel.sbss2.* .rel.gnu.linkonce.sb2.*}) }
-  .rela.sbss2    : { *(.rela.sbss2${RELOCATING+ .rela.sbss2.* .rela.gnu.linkonce.sb2.*}) }"
+  SDATA2=".sdata2       ${RELOCATING-0} : { *(.sdata2${RELOCATING+ .sdata2.* .gnu.linkonce.s2.*}) }"
+  REL_SDATA=".rel.sdata    ${RELOCATING-0} : { *(.rel.sdata${RELOCATING+ .rel.sdata.* .rel.gnu.linkonce.s.*}) }
+  .rela.sdata   ${RELOCATING-0} : { *(.rela.sdata${RELOCATING+ .rela.sdata.* .rela.gnu.linkonce.s.*}) }"
+  REL_SBSS=".rel.sbss     ${RELOCATING-0} : { *(.rel.sbss${RELOCATING+ .rel.sbss.* .rel.gnu.linkonce.sb.*}) }
+  .rela.sbss    ${RELOCATING-0} : { *(.rela.sbss${RELOCATING+ .rela.sbss.* .rela.gnu.linkonce.sb.*}) }"
+  REL_SDATA2=".rel.sdata2   ${RELOCATING-0} : { *(.rel.sdata2${RELOCATING+ .rel.sdata2.* .rel.gnu.linkonce.s2.*}) }
+  .rela.sdata2  ${RELOCATING-0} : { *(.rela.sdata2${RELOCATING+ .rela.sdata2.* .rela.gnu.linkonce.s2.*}) }"
+  REL_SBSS2=".rel.sbss2    ${RELOCATING-0} : { *(.rel.sbss2${RELOCATING+ .rel.sbss2.* .rel.gnu.linkonce.sb2.*}) }
+  .rela.sbss2   ${RELOCATING-0} : { *(.rela.sbss2${RELOCATING+ .rela.sbss2.* .rela.gnu.linkonce.sb2.*}) }"
 fi
 CTOR="
     ${CONSTRUCTING+${CTOR_START}}
@@ -139,7 +139,7 @@ DTOR="
     KEEP (*(.dtors))
     ${CONSTRUCTING+${DTOR_END}}
 "
-STACK="  .stack        ${RELOCATING+${STACK_ADDR}} :
+STACK="  .stack        ${RELOCATING-0}${RELOCATING+${STACK_ADDR}} :
   {
     ${RELOCATING+_stack = .;}
     *(.stack)
@@ -158,6 +158,10 @@ ${RELOCATING+/* Do we need any of these for elf?
    __DYNAMIC = 0; ${STACKZERO+${STACKZERO}} ${SHLIB_PATH+${SHLIB_PATH}}  */}
 ${RELOCATING+${EXECUTABLE_SYMBOLS}}
 ${RELOCATING+${INPUT_FILES}}
+${RELOCATING- /* For some reason, the Solaris linker makes bad executables
+  if gld -r is used and the intermediate file has sections starting
+  at non-zero addresses.  Could be a Solaris ld bug, could be a GNU ld
+  bug.  But for now assigning the zero vmas works.  */}
 
 SECTIONS
 {
@@ -167,12 +171,12 @@ SECTIONS
   ${CREATE_SHLIB-${INTERP}}
   ${INITIAL_READONLY_SECTIONS}
   ${TEXT_DYNAMIC+${DYNAMIC}}
-  .hash          : { *(.hash) }
-  .dynsym        : { *(.dynsym) }
-  .dynstr        : { *(.dynstr) }
-  .gnu.version   : { *(.gnu.version) }
-  .gnu.version_d : { *(.gnu.version_d) }
-  .gnu.version_r : { *(.gnu.version_r) }
+  .hash         ${RELOCATING-0} : { *(.hash) }
+  .dynsym       ${RELOCATING-0} : { *(.dynsym) }
+  .dynstr       ${RELOCATING-0} : { *(.dynstr) }
+  .gnu.version  ${RELOCATING-0} : { *(.gnu.version) }
+  .gnu.version_d ${RELOCATING-0}: { *(.gnu.version_d) }
+  .gnu.version_r ${RELOCATING-0}: { *(.gnu.version_r) }
 
 EOF
 if [ "x$COMBRELOC" = x ]; then
@@ -181,40 +185,40 @@ else
   COMBRELOCCAT="cat > $COMBRELOC"
 fi
 eval $COMBRELOCCAT <<EOF
-  .rel.init      : { *(.rel.init) }
-  .rela.init     : { *(.rela.init) }
-  .rel.text      : { *(.rel.text${RELOCATING+ .rel.text.* .rel.gnu.linkonce.t.*}) }
-  .rela.text     : { *(.rela.text${RELOCATING+ .rela.text.* .rela.gnu.linkonce.t.*}) }
-  .rel.fini      : { *(.rel.fini) }
-  .rela.fini     : { *(.rela.fini) }
-  .rel.rodata    : { *(.rel.rodata${RELOCATING+ .rel.rodata.* .rel.gnu.linkonce.r.*}) }
-  .rela.rodata   : { *(.rela.rodata${RELOCATING+ .rela.rodata.* .rela.gnu.linkonce.r.*}) }
+  .rel.init     ${RELOCATING-0} : { *(.rel.init) }
+  .rela.init    ${RELOCATING-0} : { *(.rela.init) }
+  .rel.text     ${RELOCATING-0} : { *(.rel.text${RELOCATING+ .rel.text.* .rel.gnu.linkonce.t.*}) }
+  .rela.text    ${RELOCATING-0} : { *(.rela.text${RELOCATING+ .rela.text.* .rela.gnu.linkonce.t.*}) }
+  .rel.fini     ${RELOCATING-0} : { *(.rel.fini) }
+  .rela.fini    ${RELOCATING-0} : { *(.rela.fini) }
+  .rel.rodata   ${RELOCATING-0} : { *(.rel.rodata${RELOCATING+ .rel.rodata.* .rel.gnu.linkonce.r.*}) }
+  .rela.rodata  ${RELOCATING-0} : { *(.rela.rodata${RELOCATING+ .rela.rodata.* .rela.gnu.linkonce.r.*}) }
   ${OTHER_READONLY_RELOC_SECTIONS}
-  .rel.data      : { *(.rel.data${RELOCATING+ .rel.data.* .rel.gnu.linkonce.d.*}) }
-  .rela.data     : { *(.rela.data${RELOCATING+ .rela.data.* .rela.gnu.linkonce.d.*}) }
-  .rel.ctors     : { *(.rel.ctors) }
-  .rela.ctors    : { *(.rela.ctors) }
-  .rel.dtors     : { *(.rel.dtors) }
-  .rela.dtors    : { *(.rela.dtors) }
-  .rel.got       : { *(.rel.got) }
-  .rela.got      : { *(.rela.got) }
+  .rel.data     ${RELOCATING-0} : { *(.rel.data${RELOCATING+ .rel.data.* .rel.gnu.linkonce.d.*}) }
+  .rela.data    ${RELOCATING-0} : { *(.rela.data${RELOCATING+ .rela.data.* .rela.gnu.linkonce.d.*}) }
+  .rel.ctors    ${RELOCATING-0} : { *(.rel.ctors) }
+  .rela.ctors   ${RELOCATING-0} : { *(.rela.ctors) }
+  .rel.dtors    ${RELOCATING-0} : { *(.rel.dtors) }
+  .rela.dtors   ${RELOCATING-0} : { *(.rela.dtors) }
+  .rel.got      ${RELOCATING-0} : { *(.rel.got) }
+  .rela.got     ${RELOCATING-0} : { *(.rela.got) }
   ${OTHER_GOT_RELOC_SECTIONS}
   ${REL_SDATA}
   ${REL_SBSS}
   ${REL_SDATA2}
   ${REL_SBSS2}
-  .rel.bss       : { *(.rel.bss${RELOCATING+ .rel.bss.* .rel.gnu.linkonce.b.*}) }
-  .rela.bss      : { *(.rela.bss${RELOCATING+ .rela.bss.* .rela.gnu.linkonce.b.*}) }
+  .rel.bss      ${RELOCATING-0} : { *(.rel.bss${RELOCATING+ .rel.bss.* .rel.gnu.linkonce.b.*}) }
+  .rela.bss     ${RELOCATING-0} : { *(.rela.bss${RELOCATING+ .rela.bss.* .rela.gnu.linkonce.b.*}) }
 EOF
 if [ -n "$COMBRELOC" ]; then
 cat <<EOF
-  .rel.dyn       :
+  .rel.dyn      ${RELOCATING-0} :
     {
 EOF
 sed -e '/^[ 	]*[{}][ 	]*$/d;/:[ 	]*$/d;/\.rela\./d;s/^.*: { *\(.*\)}$/      \1/' $COMBRELOC
 cat <<EOF
     }
-  .rela.dyn      :
+  .rela.dyn     ${RELOCATING-0} :
     {
 EOF
 sed -e '/^[ 	]*[{}][ 	]*$/d;/:[ 	]*$/d;/\.rel\./d;s/^.*: { *\(.*\)}/      \1/' $COMBRELOC
@@ -224,11 +228,11 @@ EOF
 fi
 cat <<EOF
   . = ALIGN(0x1000);
-  .rel.plt       : { *(.rel.plt) }
-  .rela.plt      : { *(.rela.plt) }
+  .rel.plt      ${RELOCATING-0} : { *(.rel.plt) }
+  .rela.plt     ${RELOCATING-0} : { *(.rela.plt) }
   ${OTHER_PLT_RELOC_SECTIONS}
   ${DATA_PLT-${BSS_PLT-${PLT}}}
-  .text          :
+  .text         ${RELOCATING-0} :
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
     *(.text .stub${RELOCATING+ .text.* .gnu.linkonce.t.*})
@@ -236,7 +240,7 @@ cat <<EOF
     *(.gnu.warning)
     ${RELOCATING+${OTHER_TEXT_SECTIONS}}
   } =${NOP-0}
-  .fini          :
+  .fini         ${RELOCATING-0} :
   {
     ${RELOCATING+${FINI_START}}
     KEEP (*(.fini))
@@ -252,7 +256,7 @@ cat <<EOF
   .eh_frame_hdr : { *(.eh_frame_hdr) }
 
   . = ALIGN(0x1000);
-  .data          :
+  .data         ${RELOCATING-0} :
   {
     *(.rodata .rodata.*)
     *(.rodata1)
@@ -266,15 +270,15 @@ cat <<EOF
     ${DTOR}
     KEEP (*(.jcr))
   }
-  .data1         : { *(.data1) }
+  .data1        ${RELOCATING-0} : { *(.data1) }
   . = ALIGN(0x1000);
-  .gcc_except_table  : { *(.gcc_except_table) }
+  .gcc_except_table ${RELOCATING-0} : { *(.gcc_except_table) }
   ${WRITABLE_RODATA+${RODATA}}
   ${OTHER_READWRITE_SECTIONS}
   ${TEXT_DYNAMIC-${DYNAMIC}}
   ${DATA_PLT+${PLT}}
   ${RELOCATING+${OTHER_GOT_SYMBOLS}}
-  .got           : { *(.got.plt) *(.got) }
+  .got          ${RELOCATING-0} : { *(.got.plt) *(.got) }
   ${OTHER_GOT_SECTIONS}
   ${CREATE_SHLIB+${SDATA2}}
   ${CREATE_SHLIB+${SBSS2}}
@@ -287,7 +291,7 @@ cat <<EOF
   ${SBSS}
   ${BSS_PLT+${PLT}}
   . = ALIGN(0x1000);
-  .bss           :
+  .bss          ${RELOCATING-0} :
   {
    *(.dynbss)
    *(.bss${RELOCATING+ .bss.* .gnu.linkonce.b.*})

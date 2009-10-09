@@ -1,3 +1,33 @@
+2009-10-09  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/10749
+	* ldlang.c (lang_size_sections_1): Zero section vmas only for COFF.
+	* scripttempl/elf32cr16.sc: Revert 2009-09-28 change.
+	* scripttempl/elf32cr16c.sc: Likewise.
+	* scripttempl/elf32crx.sc: Likewise.
+	* scripttempl/tic54xcoff.sc: Likewise.
+	* scripttempl/aix.sc: Likewise.
+	* scripttempl/avr.sc: Likewise.
+	* scripttempl/elf32msp430.sc: Likewise.
+	* scripttempl/elf32msp430_3.sc: Likewise.
+	* scripttempl/elf32sh-symbian.sc: Likewise.
+	* scripttempl/elf_chaos.sc: Likewise.
+	* scripttempl/elfi370.sc: Likewise.
+	* scripttempl/nw.sc: Likewise.
+	* scripttempl/psos.sc: Likewise.
+	* scripttempl/armbpabi.sc: Likewise.
+	* scripttempl/elf.sc: Likewise.
+	* scripttempl/elf64hppa.sc: Likewise.
+	* scripttempl/elfd10v.sc: Likewise.
+	* scripttempl/elfd30v.sc: Likewise.
+	* scripttempl/elfm68hc11.sc: Likewise.
+	* scripttempl/elfm68hc12.sc: Likewise.
+	* scripttempl/elfmicroblaze.sc: Likewise.
+	* scripttempl/elfxtensa.sc: Likewise.
+	* scripttempl/iq2000.sc: Likewise.
+	* scripttempl/mep.sc: Likewise.
+	* scripttempl/xstormy16.sc: Likewise.
+
 2009-10-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/ppc32elf.em (emit_stub_syms): Init to -1.
@@ -57,6 +87,7 @@
 
 2009-09-27  Christopher Faylor  <me+cygwin@cgf.cx>
 
+	PR ld/10634
 	* ldlang.c (lang_size_sections_1): Always force output vma to zero for
 	relocatable sections.
 	(lang_size_sections_1): Revert previous COFF-only accommodation for
@@ -167,7 +198,7 @@
 
 2009-09-07  Tristan Gingold  <gingold@adacore.com>
 
-	* po/ld.pot: Regenerate
+	* po/ld.pot: Regenerate.
 
 2009-09-05  Martin Thuresson  <martin@mtme.org>
 

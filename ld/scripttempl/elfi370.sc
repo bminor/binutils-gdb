@@ -27,10 +27,10 @@ test -z "${BIG_OUTPUT_FORMAT}" && BIG_OUTPUT_FORMAT=${OUTPUT_FORMAT}
 test -z "${LITTLE_OUTPUT_FORMAT}" && LITTLE_OUTPUT_FORMAT=${OUTPUT_FORMAT}
 test -z "$ATTRS_SECTIONS" && ATTRS_SECTIONS=".gnu.attributes 0 : { KEEP (*(.gnu.attributes)) }"
 test "$LD_FLAG" = "N" && DATA_ADDR=.
-SBSS2=".sbss2  : { *(.sbss2) }"
-SDATA2=".sdata2  : { *(.sdata2) }"
-INTERP=".interp  : { *(.interp) }"
-PLT=".plt  : { *(.plt) }"
+SBSS2=".sbss2 ${RELOCATING-0} : { *(.sbss2) }"
+SDATA2=".sdata2 ${RELOCATING-0} : { *(.sdata2) }"
+INTERP=".interp ${RELOCATING-0} : { *(.interp) }"
+PLT=".plt ${RELOCATING-0} : { *(.plt) }"
 cat <<EOF
 OUTPUT_FORMAT("${OUTPUT_FORMAT}", "${BIG_OUTPUT_FORMAT}",
 	      "${LITTLE_OUTPUT_FORMAT}")
@@ -41,6 +41,10 @@ ${RELOCATING+${LIB_SEARCH_DIRS}}
 ${RELOCATING+/* Do we need any of these for elf?
    __DYNAMIC = 0; ${STACKZERO+${STACKZERO}} ${SHLIB_PATH+${SHLIB_PATH}}  */}
 ${RELOCATING+${EXECUTABLE_SYMBOLS}}
+${RELOCATING- /* For some reason, the Solaris linker makes bad executables
+  if gld -r is used and the intermediate file has sections starting
+  at non-zero addresses.  Could be a Solaris ld bug, could be a GNU ld
+  bug.  But for now assigning the zero vmas works.  */}
 
 ${RELOCATING+PROVIDE (__stack = 0);}
 SECTIONS
@@ -49,32 +53,32 @@ SECTIONS
   ${CREATE_SHLIB-${RELOCATING+. = ${TEXT_START_ADDR} + SIZEOF_HEADERS;}}
   ${CREATE_SHLIB+${RELOCATING+. = SIZEOF_HEADERS;}}
   ${CREATE_SHLIB-${INTERP}}
-  .hash		 : { *(.hash)		}
-  .dynsym	 : { *(.dynsym)		}
-  .dynstr	 : { *(.dynstr)		}
-  .gnu.version  : { *(.gnu.version)      }
-  .gnu.version_d  : { *(.gnu.version_d)  }
-  .gnu.version_r  : { *(.gnu.version_r)  }
-  .rela.text    :
+  .hash		${RELOCATING-0} : { *(.hash)		}
+  .dynsym	${RELOCATING-0} : { *(.dynsym)		}
+  .dynstr	${RELOCATING-0} : { *(.dynstr)		}
+  .gnu.version ${RELOCATING-0} : { *(.gnu.version)      }
+  .gnu.version_d ${RELOCATING-0} : { *(.gnu.version_d)  }
+  .gnu.version_r ${RELOCATING-0} : { *(.gnu.version_r)  }
+  .rela.text   ${RELOCATING-0} :
     { *(.rela.text) *(.rela.gnu.linkonce.t*) }
-  .rela.data    :
+  .rela.data   ${RELOCATING-0} :
     { *(.rela.data) *(.rela.gnu.linkonce.d*) }
-  .rela.rodata  :
+  .rela.rodata ${RELOCATING-0} :
     { *(.rela.rodata) *(.rela.gnu.linkonce.r*) }
-  .rela.got	 : { *(.rela.got)	}
-  .rela.got1	 : { *(.rela.got1)	}
-  .rela.got2	 : { *(.rela.got2)	}
-  .rela.ctors	 : { *(.rela.ctors)	}
-  .rela.dtors	 : { *(.rela.dtors)	}
-  .rela.init	 : { *(.rela.init)	}
-  .rela.fini	 : { *(.rela.fini)	}
-  .rela.bss	 : { *(.rela.bss)	}
-  .rela.plt	 : { *(.rela.plt)	}
-  .rela.sdata	 : { *(.rela.sdata)	}
-  .rela.sbss	 : { *(.rela.sbss)	}
-  .rela.sdata2	 : { *(.rela.sdata2)	}
-  .rela.sbss2	 : { *(.rela.sbss2)	}
-  .text     :
+  .rela.got	${RELOCATING-0} : { *(.rela.got)	}
+  .rela.got1	${RELOCATING-0} : { *(.rela.got1)	}
+  .rela.got2	${RELOCATING-0} : { *(.rela.got2)	}
+  .rela.ctors	${RELOCATING-0} : { *(.rela.ctors)	}
+  .rela.dtors	${RELOCATING-0} : { *(.rela.dtors)	}
+  .rela.init	${RELOCATING-0} : { *(.rela.init)	}
+  .rela.fini	${RELOCATING-0} : { *(.rela.fini)	}
+  .rela.bss	${RELOCATING-0} : { *(.rela.bss)	}
+  .rela.plt	${RELOCATING-0} : { *(.rela.plt)	}
+  .rela.sdata	${RELOCATING-0} : { *(.rela.sdata)	}
+  .rela.sbss	${RELOCATING-0} : { *(.rela.sbss)	}
+  .rela.sdata2	${RELOCATING-0} : { *(.rela.sdata2)	}
+  .rela.sbss2	${RELOCATING-0} : { *(.rela.sbss2)	}
+  .text    ${RELOCATING-0} :
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
     *(.text)
@@ -82,10 +86,10 @@ SECTIONS
     *(.gnu.warning)
     *(.gnu.linkonce.t*)
   } =${NOP-0}
-  .init		 : { *(.init)		} =${NOP-0}
-  .fini		 : { *(.fini)		} =${NOP-0}
-  .rodata	 : { *(.rodata) *(.gnu.linkonce.r*) }
-  .rodata1	 : { *(.rodata1) }
+  .init		${RELOCATING-0} : { *(.init)		} =${NOP-0}
+  .fini		${RELOCATING-0} : { *(.fini)		} =${NOP-0}
+  .rodata	${RELOCATING-0} : { *(.rodata) *(.gnu.linkonce.r*) }
+  .rodata1	${RELOCATING-0} : { *(.rodata1) }
   ${RELOCATING+_etext = .;}
   ${RELOCATING+PROVIDE (etext = .);}
   ${CREATE_SHLIB-${SDATA2}}
@@ -108,42 +112,42 @@ SECTIONS
      be referenced).  */
   ${RELOCATING+. = ${DATA_ADDR- ALIGN(8) + ${MAXPAGESIZE}};}
 
-  .data   :
+  .data  ${RELOCATING-0} :
   {
     ${RELOCATING+${DATA_START_SYMBOLS}}
     *(.data)
     *(.gnu.linkonce.d*)
     ${CONSTRUCTING+CONSTRUCTORS}
   }
-  .data1  : { *(.data1) }
+  .data1 ${RELOCATING-0} : { *(.data1) }
   ${OTHER_READWRITE_SECTIONS}
 
-  .got1		 : { *(.got1) }
-  .dynamic	 : { *(.dynamic) }
+  .got1		${RELOCATING-0} : { *(.got1) }
+  .dynamic	${RELOCATING-0} : { *(.dynamic) }
 
   /* Put .ctors and .dtors next to the .got2 section, so that the pointers
      get relocated with -mrelocatable. Also put in the .fixup pointers.
      The current compiler no longer needs this, but keep it around for 2.7.2  */
 
 		${RELOCATING+PROVIDE (_GOT2_START_ = .);}
-  .got2		 :  { *(.got2) }
+  .got2		${RELOCATING-0} :  { *(.got2) }
 
 		${RELOCATING+PROVIDE (__CTOR_LIST__ = .);}
-  .ctors	 : { *(.ctors) }
+  .ctors	${RELOCATING-0} : { *(.ctors) }
 		${RELOCATING+PROVIDE (__CTOR_END__ = .);}
 
 		${RELOCATING+PROVIDE (__DTOR_LIST__ = .);}
-  .dtors	 : { *(.dtors) }
+  .dtors	${RELOCATING-0} : { *(.dtors) }
 		${RELOCATING+PROVIDE (__DTOR_END__ = .);}
 
 		${RELOCATING+PROVIDE (_FIXUP_START_ = .);}
-  .fixup	 : { *(.fixup) }
+  .fixup	${RELOCATING-0} : { *(.fixup) }
 		${RELOCATING+PROVIDE (_FIXUP_END_ = .);}
 		${RELOCATING+PROVIDE (_GOT2_END_ = .);}
 
 		${RELOCATING+PROVIDE (_GOT_START_ = .);}
-  .got		 : { *(.got) }
-  .got.plt	 : { *(.got.plt) }
+  .got		${RELOCATING-0} : { *(.got) }
+  .got.plt	${RELOCATING-0} : { *(.got.plt) }
   ${CREATE_SHLIB+${SDATA2}}
   ${CREATE_SHLIB+${SBSS2}}
 		${RELOCATING+PROVIDE (_GOT_END_ = .);}
@@ -151,10 +155,10 @@ SECTIONS
   /* We want the small data sections together, so single-instruction offsets
      can access them all, and initialized data all before uninitialized, so
      we can shorten the on-disk segment size.  */
-  .sdata	 : { *(.sdata) }
+  .sdata	${RELOCATING-0} : { *(.sdata) }
   ${RELOCATING+_edata  =  .;}
   ${RELOCATING+PROVIDE (edata = .);}
-  .sbss     :
+  .sbss    ${RELOCATING-0} :
   {
     ${RELOCATING+PROVIDE (__sbss_start = .);}
     *(.sbss)
@@ -163,7 +167,7 @@ SECTIONS
     ${RELOCATING+PROVIDE (__sbss_end = .);}
   }
   ${PLT}
-  .bss      :
+  .bss     ${RELOCATING-0} :
   {
    ${RELOCATING+${OTHER_BSS_SYMBOLS}}
    ${RELOCATING+PROVIDE (__bss_start = .);}

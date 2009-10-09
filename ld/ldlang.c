@@ -4665,7 +4665,13 @@ lang_size_sections_1
 	    lang_memory_region_type *r;
 
 	    os = &s->output_section_statement;
-	    if (os->addr_tree == NULL && link_info.relocatable)
+	    /* FIXME: We shouldn't need to zero section vmas for ld -r
+	       here, in lang_insert_orphan, or in the default linker scripts.
+	       This is covering for coff backend linker bugs.  See PR6945.  */
+	    if (os->addr_tree == NULL
+		&& link_info.relocatable
+		&& (bfd_get_flavour (link_info.output_bfd)
+		    == bfd_target_coff_flavour))
 	      os->addr_tree = exp_intop (0);
 	    if (os->addr_tree != NULL)
 	      {
