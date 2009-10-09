@@ -1,3 +1,8 @@
+2009-10-09  Andrew Pinski  <andrew_pinski@playstation.sony.com>
+
+	* elfcpp/elfcpp_file.h (Elf_file::section_name): Change shstr_size
+	to Elf_WXword.
+
 2009-10-09  Mikolaj Zalewski  <mikolajz@google.com>
 
 	* elf_file.h: (class Elf_strtab): New class.

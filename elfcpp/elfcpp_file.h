@@ -490,7 +490,7 @@ Elf_file<size, big_endian, File>::section_name(unsigned int shndx)
 
   // Get the file offset for the section name string table data.
   off_t shstr_off;
-  off_t shstr_size;
+  typename Elf_types<size>::Elf_WXword shstr_size;
   {
     const unsigned int shstrndx = this->shstrndx_;
     typename File::View v(file->view(this->section_header_offset(shstrndx),
