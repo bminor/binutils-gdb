@@ -3255,6 +3255,17 @@ retry:
 	      sigsuspend (&suspend_mask);
 	    }
 	}
+      else if (target_options & TARGET_WNOHANG)
+	{
+	  /* No interesting event for PID yet.  */
+	  ourstatus->kind = TARGET_WAITKIND_IGNORE;
+
+	  if (debug_linux_nat_async)
+	    fprintf_unfiltered (gdb_stdlog, "LLW: exit (ignore)\n");
+
+	  restore_child_signals_mask (&prev_mask);
+	  return minus_one_ptid;
+	}
 
       /* We shouldn't end up here unless we want to try again.  */
       gdb_assert (lp == NULL);

@@ -2443,9 +2443,25 @@ handle_inferior_event (struct execution_control_state *ecs)
   struct symtab_and_line stop_pc_sal;
   enum stop_kind stop_soon;
 
+  if (ecs->ws.kind == TARGET_WAITKIND_IGNORE)
+    {
+      /* We had an event in the inferior, but we are not interested in
+	 handling it at this level.  The lower layers have already
+	 done what needs to be done, if anything.
+
+	 One of the possible circumstances for this is when the
+	 inferior produces output for the console.  The inferior has
+	 not stopped, and we are ignoring the event.  Another possible
+	 circumstance is any event which the lower level knows will be
+	 reported multiple times without an intervening resume.  */
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_IGNORE\n");
+      prepare_to_wait (ecs);
+      return;
+    }
+
   if (ecs->ws.kind != TARGET_WAITKIND_EXITED
-      && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED
-      && ecs->ws.kind != TARGET_WAITKIND_IGNORE)
+      && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED)
     {
       struct inferior *inf = find_inferior_pid (ptid_get_pid (ecs->ptid));
       gdb_assert (inf);
@@ -2479,22 +2495,19 @@ handle_inferior_event (struct execution_control_state *ecs)
   /* Dependent on the current PC value modified by adjust_pc_after_break.  */
   reinit_frame_cache ();
 
-  if (ecs->ws.kind != TARGET_WAITKIND_IGNORE)
-    {
-      breakpoint_retire_moribund ();
+  breakpoint_retire_moribund ();
 
-      /* Mark the non-executing threads accordingly.  In all-stop, all
-	 threads of all processes are stopped when we get any event
-	 reported.  In non-stop mode, only the event thread stops.  If
-	 we're handling a process exit in non-stop mode, there's
-	 nothing to do, as threads of the dead process are gone, and
-	 threads of any other process were left running.  */
-      if (!non_stop)
-	set_executing (minus_one_ptid, 0);
-      else if (ecs->ws.kind != TARGET_WAITKIND_SIGNALLED
-	       && ecs->ws.kind != TARGET_WAITKIND_EXITED)
-	set_executing (inferior_ptid, 0);
-    }
+  /* Mark the non-executing threads accordingly.  In all-stop, all
+     threads of all processes are stopped when we get any event
+     reported.  In non-stop mode, only the event thread stops.  If
+     we're handling a process exit in non-stop mode, there's nothing
+     to do, as threads of the dead process are gone, and threads of
+     any other process were left running.  */
+  if (!non_stop)
+    set_executing (minus_one_ptid, 0);
+  else if (ecs->ws.kind != TARGET_WAITKIND_SIGNALLED
+	   && ecs->ws.kind != TARGET_WAITKIND_EXITED)
+    set_executing (inferior_ptid, 0);
 
   switch (infwait_state)
     {
@@ -2776,21 +2789,6 @@ handle_inferior_event (struct execution_control_state *ecs)
       stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
       print_stop_reason (NO_HISTORY, 0);
       stop_stepping (ecs);
-      return;
-
-      /* We had an event in the inferior, but we are not interested
-         in handling it at this level. The lower layers have already
-         done what needs to be done, if anything.
-
-         One of the possible circumstances for this is when the
-         inferior produces output for the console. The inferior has
-         not stopped, and we are ignoring the event.  Another possible
-         circumstance is any event which the lower level knows will be
-         reported multiple times without an intervening resume.  */
-    case TARGET_WAITKIND_IGNORE:
-      if (debug_infrun)
-        fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_IGNORE\n");
-      prepare_to_wait (ecs);
       return;
     }
 

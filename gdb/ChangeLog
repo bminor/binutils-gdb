@@ -1,5 +1,12 @@
 2009-10-09  Pedro Alves  <pedro@codesourcery.com>
 
+	* linux-nat.c (linux_nat_wait_1): Bail out, if TARGET_WNOHANG and
+	we found no event while waiting for a specific LWP.
+	* infrun.c (handle_inferior_event): Handle TARGET_WAITKIND_IGNORE
+	before anything else.
+
+2009-10-09  Pedro Alves  <pedro@codesourcery.com>
+
 	* procfs.c (procfs_make_note_section): Always output a NT_PSTATUS
 	note when NEW_PROC_API is defined.
 
