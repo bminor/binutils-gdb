@@ -40,6 +40,15 @@
 #include "descriptors.h"
 #include "fileread.h"
 
+#ifndef HAVE_READV
+struct iovec { void* iov_base; size_t iov_len };
+ssize_t
+readv(int, const iovec*, int)
+{
+  gold_unreachable();
+}
+#endif
+
 namespace gold
 {
 

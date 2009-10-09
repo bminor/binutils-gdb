@@ -370,7 +370,13 @@ class File_read
   { return (file_size + (page_size - 1)) & ~ (page_size - 1); }
 
   // The maximum number of entries we will pass to ::readv.
+#ifdef HAVE_READV
   static const size_t max_readv_entries = 128;
+#else
+  // On targets that don't have readv set the max to 1 so readv is not
+  // used.
+  static const size_t max_readv_entries = 1;
+#endif
 
   // Use readv to read data.
   void
