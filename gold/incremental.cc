@@ -21,11 +21,15 @@
 // MA 02110-1301, USA.
 
 #include "gold.h"
+
+#include <cstdarg>
+
 #include "elfcpp.h"
 #include "output.h"
 #include "incremental.h"
 #include "archive.h"
 #include "output.h"
+#include "target-select.h"
 
 using elfcpp::Convert;
 
@@ -150,6 +154,162 @@ class Incremental_inputs_entry_write
   internal::Incremental_inputs_entry_data* p_;
 };
 
+// Inform the user why we don't do an incremental link.  Not called in
+// the obvious case of missing output file.  TODO: Is this helpful?
+
+void
+vexplain_no_incremental(const char* format, va_list args)
+{
+  char* buf = NULL;
+  if (vasprintf(&buf, format, args) < 0)
+    gold_nomem();
+  gold_info(_("the link might take longer: "
+              "cannot perform incremental link: %s"), buf);
+  free(buf);
+}
+
+void
+explain_no_incremental(const char* format, ...)
+{
+  va_list args;
+  va_start(args, format);
+  vexplain_no_incremental(format, args);
+  va_end(args);
+}
+
+// Report an error.
+
+void
+Incremental_binary::error(const char* format, ...) const
+{
+  va_list args;
+  va_start(args, format);
+  // Current code only checks if the file can be used for incremental linking,
+  // so errors shouldn't fail the build, but only result in a fallback to a
+  // full build.
+  // TODO: when we implement incremental editing of the file, we may need a
+  // flag that will cause errors to be treated seriously.
+  vexplain_no_incremental(format, args);
+  va_end(args);
+}
+
+template<int size, bool big_endian>
+bool
+Sized_incremental_binary<size, big_endian>::do_find_incremental_inputs_section(
+    Location* location)
+{
+  unsigned int shndx = this->elf_file_.find_section_by_type(
+      elfcpp::SHT_GNU_INCREMENTAL_INPUTS);
+  if (shndx == elfcpp::SHN_UNDEF)  // Not found.
+    return false;
+  *location = this->elf_file_.section_contents(shndx);
+  return true;
+}
+
+namespace
+{
+
+// Create a Sized_incremental_binary object of the specified size and
+// endianness. Fails if the target architecture is not supported.
+
+template<int size, bool big_endian>
+Incremental_binary*
+make_sized_incremental_binary(Output_file* file,
+                              const elfcpp::Ehdr<size, big_endian>& ehdr)
+{
+  Target* target = select_target(ehdr.get_e_machine(), size, big_endian,
+                                 ehdr.get_e_ident()[elfcpp::EI_OSABI],
+                                 ehdr.get_e_ident()[elfcpp::EI_ABIVERSION]);
+  if (target == NULL)
+    {
+      explain_no_incremental(_("unsupported ELF machine number %d"),
+               ehdr.get_e_machine());
+      return NULL;
+    }
+
+  return new Sized_incremental_binary<size, big_endian>(file, ehdr, target);
+}
+
+}  // End of anonymous namespace.
+
+// Create an Incremental_binary object for FILE. Returns NULL is this is not
+// possible, e.g. FILE is not an ELF file or has an unsupported target. FILE
+// should be opened.
+
+Incremental_binary*
+open_incremental_binary(Output_file* file)
+{
+  off_t filesize = file->filesize();
+  int want = elfcpp::Elf_recognizer::max_header_size;
+  if (filesize < want)
+    want = filesize;
+
+  const unsigned char* p = file->get_input_view(0, want);
+  if (!elfcpp::Elf_recognizer::is_elf_file(p, want))
+    {
+      explain_no_incremental(_("output is not an ELF file."));
+      return NULL;
+    }
+
+  int size;
+  bool big_endian;
+  std::string error;
+  if (!elfcpp::Elf_recognizer::is_valid_header(p, want, &size, &big_endian,
+                                               &error))
+    {
+      explain_no_incremental(error.c_str());
+      return NULL;
+    }
+
+  Incremental_binary* result = NULL;
+  if (size == 32)
+    {
+      if (big_endian)
+        {
+#ifdef HAVE_TARGET_32_BIG
+          result = make_sized_incremental_binary<32, true>(
+              file, elfcpp::Ehdr<32, true>(p));
+#else
+          explain_no_incremental(_("unsupported file: 32-bit, big-endian"));
+#endif
+        }
+      else
+        {
+#ifdef HAVE_TARGET_32_LITTLE
+          result = make_sized_incremental_binary<32, false>(
+              file, elfcpp::Ehdr<32, false>(p));
+#else
+          explain_no_incremental(_("unsupported file: 32-bit, little-endian"));
+#endif
+        }
+    }
+  else if (size == 64)
+    {
+      if (big_endian)
+        {
+#ifdef HAVE_TARGET_64_BIG
+          result = make_sized_incremental_binary<64, true>(
+              file, elfcpp::Ehdr<64, true>(p));
+#else
+          explain_no_incremental(_("unsupported file: 64-bit, big-endian"));
+#endif
+        }
+      else
+        {
+#ifdef HAVE_TARGET_64_LITTLE
+          result = make_sized_incremental_binary<64, false>(
+              file, elfcpp::Ehdr<64, false>(p));
+#else
+          explain_no_incremental(_("unsupported file: 64-bit, little-endian"));
+#endif
+        }
+    }
+  else
+    gold_unreachable();
+
+  return result;
+}
+
 // Analyzes the output file to check if incremental linking is possible and
 // (to be done) what files need to be relinked.
 
@@ -159,6 +319,16 @@ Incremental_checker::can_incrementally_link_output_file()
   Output_file output(this->output_name_);
   if (!output.open_for_modification())
     return false;
+  Incremental_binary* binary = open_incremental_binary(&output);
+  if (binary == NULL)
+    return false;
+  Incremental_binary::Location inputs_location;
+  if (!binary->find_incremental_inputs_section(&inputs_location))
+    {
+      explain_no_incremental("no incremental data from previous build");
+      delete binary;
+      return false;
+    }
   return true;
 }
 
@@ -391,5 +561,27 @@ Incremental_inputs::sized_create_inputs_section_data()
   return new Output_data_const_buffer(buffer, sz, 8,
 				      "** incremental link inputs list");
 }
+
+// Instantiate the templates we need.
+
+#ifdef HAVE_TARGET_32_LITTLE
+template
+class Sized_incremental_binary<32, false>;
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+class Sized_incremental_binary<32, true>;
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+class Sized_incremental_binary<64, false>;
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+class Sized_incremental_binary<64, true>;
+#endif
 
 } // End namespace gold.

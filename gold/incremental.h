@@ -26,9 +26,11 @@
 #include <map>
 #include <vector>
 
+#include "elfcpp_file.h"
 #include "stringpool.h"
 #include "workqueue.h"
 #include "fileread.h"
+#include "output.h"
 
 namespace gold
 {
@@ -49,6 +51,117 @@ enum Incremental_input_type
   INCREMENTAL_INPUT_SHARED_LIBRARY = 3,
   INCREMENTAL_INPUT_SCRIPT = 4
 };
+
+// An object representing the ELF file we edit during an incremental build.
+// Similar to Object or Dynobj, but operates on Output_file and contains
+// method specific to file edition (TBD). This is the abstract parent class
+// implemented in Sized_incremental_binary<size, big_endian> for a specific
+// endianness and size.
+
+class Incremental_binary
+{
+ public:
+  Incremental_binary(Output_file* output, Target* target)
+    : output_(output), target_(target)
+  { }
+
+  virtual
+  ~Incremental_binary()
+  { }
+
+  // Functions and types for the elfcpp::Elf_file interface.  This
+  // permit us to use Incremental_binary as the File template parameter for
+  // elfcpp::Elf_file.
+
+  // The View class is returned by view.  It must support a single
+  // method, data().  This is trivial, because Output_file::get_output_view
+  // does what we need.
+  class View
+  {
+   public:
+    View(const unsigned char* p)
+      : p_(p)
+    { }
+
+    const unsigned char*
+    data() const
+    { return this->p_; }
+
+   private:
+    const unsigned char* p_;
+  };
+
+  // Return a View.
+  View
+  view(off_t file_offset, section_size_type data_size)
+  { return View(this->output_->get_input_view(file_offset, data_size)); }
+
+  // A location in the file.
+  struct Location
+  {
+    off_t file_offset;
+    off_t data_size;
+
+    Location(off_t fo, section_size_type ds)
+      : file_offset(fo), data_size(ds)
+    { }
+
+    Location()
+      : file_offset(0), data_size(0)
+    { }
+  };
+
+  // Get a View given a Location.
+  View view(Location loc)
+  { return View(this->view(loc.file_offset, loc.data_size)); }
+
+  // Report an error.
+  void
+  error(const char* format, ...) const ATTRIBUTE_PRINTF_2;
+
+
+  // Find the .gnu_incremental_inputs section.  It selects the first section
+  // of type SHT_GNU_INCREMENTAL_INPUTS.  Returns false if such a section
+  // is not found.
+  bool
+  find_incremental_inputs_section(Location* location)
+  { return do_find_incremental_inputs_section(location); }
+
+ protected:
+  // Find incremental inputs section.
+  virtual bool
+  do_find_incremental_inputs_section(Location* location) = 0;
+
+ private:
+  // Edited output file object.
+  Output_file* output_;
+  // Target of the output file.
+  Target* target_;
+};
+
+template<int size, bool big_endian>
+class Sized_incremental_binary : public Incremental_binary
+{
+ public:
+  Sized_incremental_binary(Output_file* output,
+                           const elfcpp::Ehdr<size, big_endian>& ehdr,
+                           Target* target)
+    : Incremental_binary(output, target), elf_file_(this, ehdr)
+  { }
+
+ protected:
+  virtual bool
+  do_find_incremental_inputs_section(Location* location);
+
+ private:
+  // Output as an ELF file.
+  elfcpp::Elf_file<size, big_endian, Incremental_binary> elf_file_;
+};
+
+// Create an Incremental_binary object for FILE. Returns NULL is this is not
+// possible, e.g. FILE is not an ELF file or has an unsupported target.
+Incremental_binary*
+open_incremental_binary(Output_file* file);
 
 // Code invoked early during an incremental link that checks what files need
 // to be relinked.

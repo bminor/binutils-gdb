@@ -1,3 +1,24 @@
+2009-10-09  Mikolaj Zalewski  <mikolajz@google.com>
+
+	* incremental.cc: Include <cstdarg> and "target-select.h".
+	(vexplain_no_incremental): New function.
+	(explain_no_incremental): New function.
+	(Incremental_binary::error): New method.
+	(Sized_incremental_binary::do_find_incremental_inputs_section): New
+	method.
+	(make_sized_incremental_binary): New function.
+	(open_incremental_binary): New function.
+	(can_incrementally_link_file): Add checks if output is ELF and has
+	inputs section.
+	* incremental.h: Include "elfcpp_file.h" and "output.h".
+	(Incremental_binary): New class.
+	(Sized_incremental_binary): New class.
+	(open_incremental_binary): Declare.
+	* object.cc (is_elf_object): Use
+	elfcpp::Elf_recognizer::is_elf_file.
+	(make_elf_object): Use elfcpp::Elf_recognizer::is_valid_header.
+	* output.h (Output_file::filesize): New method.
+
 2009-10-07  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
 
 	* arm.cc (Arm_relocate_functions::extract_arm_movw_movt_addend):

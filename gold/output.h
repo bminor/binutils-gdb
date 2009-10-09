@@ -3433,6 +3433,11 @@ class Output_file
   void
   close();
 
+  // Return the size of this file.
+  off_t
+  filesize()
+  { return this->file_size_; }
+
   // We currently always use mmap which makes the view handling quite
   // simple.  In the future we may support other approaches.
 

@@ -2281,7 +2281,7 @@ is_elf_object(Input_file* input_file, off_t offset,
 	      const unsigned char** start, int *read_size)
 {
   off_t filesize = input_file->file().filesize();
-  int want = elfcpp::Elf_sizes<64>::ehdr_size;
+  int want = elfcpp::Elf_recognizer::max_header_size;
   if (filesize - offset < want)
     want = filesize - offset;
 
@@ -2290,15 +2290,7 @@ is_elf_object(Input_file* input_file, off_t offset,
   *start = p;
   *read_size = want;
 
-  if (want < 4)
-    return false;
-
-  static unsigned char elfmagic[4] =
-    {
-      elfcpp::ELFMAG0, elfcpp::ELFMAG1,
-      elfcpp::ELFMAG2, elfcpp::ELFMAG3
-    };
-  return memcmp(p, elfmagic, 4) == 0;
+  return elfcpp::Elf_recognizer::is_elf_file(p, want);
 }
 
 // Read an ELF file and return the appropriate instance of Object.
@@ -2311,57 +2303,18 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
   if (punconfigured != NULL)
     *punconfigured = false;
 
-  if (bytes < elfcpp::EI_NIDENT)
+  std::string error;
+  bool big_endian;
+  int size;
+  if (!elfcpp::Elf_recognizer::is_valid_header(p, bytes, &size,
+                                               &big_endian, &error))
     {
-      gold_error(_("%s: ELF file too short"), name.c_str());
+      gold_error(_("%s: %s"), name.c_str(), error.c_str());
       return NULL;
     }
 
-  int v = p[elfcpp::EI_VERSION];
-  if (v != elfcpp::EV_CURRENT)
+  if (size == 32)
     {
-      if (v == elfcpp::EV_NONE)
-	gold_error(_("%s: invalid ELF version 0"), name.c_str());
-      else
-	gold_error(_("%s: unsupported ELF version %d"), name.c_str(), v);
-      return NULL;
-    }
-
-  int c = p[elfcpp::EI_CLASS];
-  if (c == elfcpp::ELFCLASSNONE)
-    {
-      gold_error(_("%s: invalid ELF class 0"), name.c_str());
-      return NULL;
-    }
-  else if (c != elfcpp::ELFCLASS32
-	   && c != elfcpp::ELFCLASS64)
-    {
-      gold_error(_("%s: unsupported ELF class %d"), name.c_str(), c);
-      return NULL;
-    }
-
-  int d = p[elfcpp::EI_DATA];
-  if (d == elfcpp::ELFDATANONE)
-    {
-      gold_error(_("%s: invalid ELF data encoding"), name.c_str());
-      return NULL;
-    }
-  else if (d != elfcpp::ELFDATA2LSB
-	   && d != elfcpp::ELFDATA2MSB)
-    {
-      gold_error(_("%s: unsupported ELF data encoding %d"), name.c_str(), d);
-      return NULL;
-    }
-
-  bool big_endian = d == elfcpp::ELFDATA2MSB;
-
-  if (c == elfcpp::ELFCLASS32)
-    {
-      if (bytes < elfcpp::Elf_sizes<32>::ehdr_size)
-	{
-	  gold_error(_("%s: ELF file too short"), name.c_str());
-	  return NULL;
-	}
       if (big_endian)
 	{
 #ifdef HAVE_TARGET_32_BIG
@@ -2395,13 +2348,8 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 #endif
 	}
     }
-  else
+  else if (size == 64)
     {
-      if (bytes < elfcpp::Elf_sizes<64>::ehdr_size)
-	{
-	  gold_error(_("%s: ELF file too short"), name.c_str());
-	  return NULL;
-	}
       if (big_endian)
 	{
 #ifdef HAVE_TARGET_64_BIG
@@ -2435,6 +2383,8 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 #endif
 	}
     }
+  else
+    gold_unreachable();
 }
 
 // Instantiate the templates we need.
