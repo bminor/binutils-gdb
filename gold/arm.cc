@@ -78,7 +78,11 @@ class Output_data_plt_arm;
 // R_ARM_MOVW_ABS_NC
 // R_ARM_MOVT_ABS
 // R_ARM_THM_MOVW_ABS_NC
-// R_ARM_THM_MOVT_ABS 
+// R_ARM_THM_MOVT_ABS
+// R_ARM_MOVW_PREL_NC
+// R_ARM_MOVT_PREL
+// R_ARM_THM_MOVW_PREL_NC
+// R_ARM_THM_MOVT_PREL
 // 
 // TODOs:
 // - Generate various branch stubs.
@@ -896,6 +900,85 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
     return This::STATUS_OKAY;
   }
 
+  // R_ARM_MOVW_PREL_NC: (S + A) | T - P
+  static inline typename This::Status
+  movw_prel_nc(unsigned char *view,
+	       const Sized_relobj<32, big_endian>* object,
+	       const Symbol_value<32>* psymval,
+	       elfcpp::Elf_types<32>::Elf_Addr address,
+	       bool has_thumb_bit)
+  {
+    typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype val = elfcpp::Swap<32, big_endian>::readval(wv);
+    Valtype addend = This::extract_arm_movw_movt_addend(val);
+    Valtype x = (This::arm_symbol_value(object, psymval, addend, has_thumb_bit)
+                 - address);
+    val = This::insert_val_arm_movw_movt(val, x);
+    elfcpp::Swap<32, big_endian>::writeval(wv, val);
+    return This::STATUS_OKAY;
+  }
+
+  // R_ARM_MOVT_PREL: S + A - P
+  static inline typename This::Status
+  movt_prel(unsigned char *view,
+	    const Sized_relobj<32, big_endian>* object,
+	    const Symbol_value<32>* psymval,
+            elfcpp::Elf_types<32>::Elf_Addr address)
+  {
+    typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype val = elfcpp::Swap<32, big_endian>::readval(wv);
+    Valtype addend = This::extract_arm_movw_movt_addend(val);
+    Valtype x = (This::arm_symbol_value(object, psymval, addend, 0)
+                 - address) >> 16;
+    val = This::insert_val_arm_movw_movt(val, x);
+    elfcpp::Swap<32, big_endian>::writeval(wv, val);
+    return This::STATUS_OKAY;
+  }
+
+  // R_ARM_THM_MOVW_PREL_NC: (S + A) | T - P
+  static inline typename This::Status
+  thm_movw_prel_nc(unsigned char *view,
+	           const Sized_relobj<32, big_endian>* object,
+	           const Symbol_value<32>* psymval,
+	           elfcpp::Elf_types<32>::Elf_Addr address,
+	           bool has_thumb_bit)
+  {
+    typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
+    typedef typename elfcpp::Swap<32, big_endian>::Valtype Reltype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Reltype val = (elfcpp::Swap<16, big_endian>::readval(wv) << 16)
+		  | elfcpp::Swap<16, big_endian>::readval(wv + 1);
+    Reltype addend = This::extract_thumb_movw_movt_addend(val);
+    Reltype x = (This::arm_symbol_value(object, psymval, addend, has_thumb_bit)
+                 - address);
+    val = This::insert_val_thumb_movw_movt(val, x);
+    elfcpp::Swap<16, big_endian>::writeval(wv, val >> 16);
+    elfcpp::Swap<16, big_endian>::writeval(wv + 1, val & 0xffff);
+    return This::STATUS_OKAY;
+  }
+
+  // R_ARM_THM_MOVT_PREL: S + A - P
+  static inline typename This::Status
+  thm_movt_prel(unsigned char *view,
+	        const Sized_relobj<32, big_endian>* object,
+	        const Symbol_value<32>* psymval,
+	        elfcpp::Elf_types<32>::Elf_Addr address)
+  {
+    typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
+    typedef typename elfcpp::Swap<32, big_endian>::Valtype Reltype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Reltype val = (elfcpp::Swap<16, big_endian>::readval(wv) << 16)
+		  | elfcpp::Swap<16, big_endian>::readval(wv + 1);
+    Reltype addend = This::extract_thumb_movw_movt_addend(val);
+    Reltype x = (This::arm_symbol_value(object, psymval, addend, 0)
+                 - address) >> 16;
+    val = This::insert_val_thumb_movw_movt(val, x);
+    elfcpp::Swap<16, big_endian>::writeval(wv, val >> 16);
+    elfcpp::Swap<16, big_endian>::writeval(wv + 1, val & 0xffff);
+    return This::STATUS_OKAY;
+  }
 };
 
 // Get the GOT section, creating it if necessary.
@@ -1310,6 +1393,10 @@ Target_arm<big_endian>::Scan::local(const General_options&,
     case elfcpp::R_ARM_MOVT_ABS:
     case elfcpp::R_ARM_THM_MOVW_ABS_NC:
     case elfcpp::R_ARM_THM_MOVT_ABS:
+    case elfcpp::R_ARM_MOVW_PREL_NC:
+    case elfcpp::R_ARM_MOVT_PREL:
+    case elfcpp::R_ARM_THM_MOVW_PREL_NC:
+    case elfcpp::R_ARM_THM_MOVT_PREL:
       break;
 
     case elfcpp::R_ARM_GOTOFF32:
@@ -1444,6 +1531,10 @@ Target_arm<big_endian>::Scan::global(const General_options&,
     case elfcpp::R_ARM_MOVT_ABS:
     case elfcpp::R_ARM_THM_MOVW_ABS_NC:
     case elfcpp::R_ARM_THM_MOVT_ABS:
+    case elfcpp::R_ARM_MOVW_PREL_NC:
+    case elfcpp::R_ARM_MOVT_PREL:
+    case elfcpp::R_ARM_THM_MOVW_PREL_NC:
+    case elfcpp::R_ARM_THM_MOVT_PREL:
       break;
 
     case elfcpp::R_ARM_REL32:
@@ -1880,6 +1971,28 @@ Target_arm<big_endian>::Relocate::relocate(
 		     "making a shared object; recompile with -fPIC"));
       break;
 
+    case elfcpp::R_ARM_MOVW_PREL_NC:
+      reloc_status = Arm_relocate_functions::movw_prel_nc(view, object,
+							  psymval, address,
+							  has_thumb_bit);
+      break;
+
+    case elfcpp::R_ARM_MOVT_PREL:
+      reloc_status = Arm_relocate_functions::movt_prel(view, object,
+                                                       psymval, address);
+      break;
+
+    case elfcpp::R_ARM_THM_MOVW_PREL_NC:
+      reloc_status = Arm_relocate_functions::thm_movw_prel_nc(view, object,
+							      psymval, address,
+							      has_thumb_bit);
+      break;
+
+    case elfcpp::R_ARM_THM_MOVT_PREL:
+      reloc_status = Arm_relocate_functions::thm_movt_prel(view, object,
+							   psymval, address);
+      break;
+	
     case elfcpp::R_ARM_REL32:
       reloc_status = Arm_relocate_functions::rel32(view, object, psymval,
 						   address, has_thumb_bit);
@@ -2074,6 +2187,10 @@ Target_arm<big_endian>::Relocatable_size_for_reloc::get_size_for_reloc(
     case elfcpp::R_ARM_MOVT_ABS:
     case elfcpp::R_ARM_THM_MOVW_ABS_NC:
     case elfcpp::R_ARM_THM_MOVT_ABS:
+    case elfcpp::R_ARM_MOVW_PREL_NC:
+    case elfcpp::R_ARM_MOVT_PREL:
+    case elfcpp::R_ARM_THM_MOVW_PREL_NC:
+    case elfcpp::R_ARM_THM_MOVT_PREL:
       return 4;
 
     case elfcpp::R_ARM_TARGET1:
