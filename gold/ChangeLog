@@ -1,5 +1,9 @@
 2009-10-09  Andrew Pinski  <andrew_pinski@playstation.sony.com>
 
+	* pread.c: Include stdio.h.
+
+2009-10-09  Andrew Pinski  <andrew_pinski@playstation.sony.com>
+
 	* plugin.cc: Don't include dlfcn.h when ENABLE_PLUGINS is not
 	defined.
 
