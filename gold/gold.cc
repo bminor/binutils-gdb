@@ -180,7 +180,8 @@ queue_initial_tasks(const General_options& options,
   if (cmdline.options().incremental())
     {
       Incremental_checker incremental_checker(
-          parameters->options().output_file_name());
+          parameters->options().output_file_name(),
+          layout->incremental_inputs());
       if (incremental_checker.can_incrementally_link_output_file())
         {
           // TODO: remove when incremental linking implemented.

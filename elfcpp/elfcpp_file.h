@@ -228,6 +228,33 @@ class Elf_file
   int large_shndx_offset_;
 };
 
+// A small wrapper around SHT_STRTAB data mapped to memory. It checks that the
+// index is not out of bounds and the string is NULL-terminated.
+
+class Elf_strtab
+{
+ public:
+  // Construct an Elf_strtab for a section with contents *P and size SIZE.
+  Elf_strtab(const unsigned char* p, size_t size);
+
+  // Return the file offset to the section headers.
+  bool
+  get_c_string(size_t offset, const char** cstring) const
+  {
+    if (offset >= this->usable_size_)
+      return false;
+    *cstring = this->base_ + offset;
+    return true;
+  }
+
+ private:
+  // Contents of the section mapped to memory.
+  const char* base_;
+  // One larger that the position of the last NULL character in the section.
+  // For valid SHT_STRTAB sections, this is the size of the section.
+  size_t usable_size_;
+};
+
 // Inline function definitions.
 
 // Check for presence of the ELF magic number.
@@ -640,6 +667,18 @@ Elf_file<size, big_endian, File>::section_addralign(unsigned int shndx)
 
   Ef_shdr shdr(v.data());
   return shdr.get_sh_addralign();
+}
+
+inline
+Elf_strtab::Elf_strtab(const unsigned char* p, size_t size)
+{
+  // Check if the section is NUL-terminated. If it isn't, we ignore
+  // the last part to make sure we don't return non-NUL-terminated
+  // strings.
+  while (size > 0 && p[size - 1] != 0)
+    size--;
+  this->base_ = reinterpret_cast<const char*>(p);
+  this->usable_size_ = size;
 }
 
 } // End namespace elfcpp.

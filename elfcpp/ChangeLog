@@ -1,5 +1,9 @@
 2009-10-09  Mikolaj Zalewski  <mikolajz@google.com>
 
+	* elf_file.h: (class Elf_strtab): New class.
+
+2009-10-09  Mikolaj Zalewski  <mikolajz@google.com>
+
 	* elfcpp_file.h: Fix header guard.  Include <cstdio>.
 	(class Elf_recognizer): New class, code from gold/object.cc.
 	(Elf_file::find_section_by_type): New method.

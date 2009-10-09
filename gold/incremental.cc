@@ -37,7 +37,7 @@ namespace gold {
 
 // Version information. Will change frequently during the development, later
 // we could think about backward (and forward?) compatibility.
-const int INCREMENTAL_LINK_VERSION = 1;
+const unsigned int INCREMENTAL_LINK_VERSION = 1;
 
 namespace internal {
 
@@ -84,7 +84,42 @@ struct Incremental_inputs_entry_data
 
 // Accessors.
 
-// See internal::Incremental_input_header for fields descriptions.
+// Reader class for .gnu_incremental_inputs header. See
+// internal::Incremental_input_header for fields descriptions.
+
+template<int size, bool big_endian>
+class Incremental_inputs_header
+{
+ public:
+  Incremental_inputs_header(const unsigned char *p)
+    : p_(reinterpret_cast<const internal::Incremental_inputs_header_data*>(p))
+  { }
+
+  static const int data_size = sizeof(internal::Incremental_inputs_header_data);
+
+  elfcpp::Elf_Word
+  get_version() const
+  { return Convert<32, big_endian>::convert_host(this->p_->version); }
+
+  elfcpp::Elf_Word
+  get_input_file_count() const
+  { return Convert<32, big_endian>::convert_host(this->p_->input_file_count); }
+
+  elfcpp::Elf_Word
+  get_command_line_offset() const
+  { return Convert<32, big_endian>::convert_host(this->p_->command_line_offset); }
+
+  elfcpp::Elf_Word
+  get_reserved() const
+  { return Convert<32, big_endian>::convert_host(this->p_->reserved); }
+
+ private:
+  const internal::Incremental_inputs_header_data* p_;
+};
+
+// Writer class for .gnu_incremental_inputs header. See
+// internal::Incremental_input_header for fields descriptions.
+
 template<int size, bool big_endian>
 class Incremental_inputs_header_write
 {
@@ -115,7 +150,48 @@ class Incremental_inputs_header_write
   internal::Incremental_inputs_header_data* p_;
 };
 
-// See internal::Incremental_input_entry for fields descriptions.
+// Reader class for an .gnu_incremental_inputs entry. See
+// internal::Incremental_input_entry for fields descriptions.
+template<int size, bool big_endian>
+class Incremental_inputs_entry
+{
+ public:
+  Incremental_inputs_entry(const unsigned char *p)
+    : p_(reinterpret_cast<const internal::Incremental_inputs_entry_data*>(p))
+  { }
+
+  static const int data_size = sizeof(internal::Incremental_inputs_entry_data);
+
+  elfcpp::Elf_Word
+  get_filename_offset(elfcpp::Elf_Word v)
+  { return Convert<32, big_endian>::convert_host(this->p_->filename_offset); }
+
+  elfcpp::Elf_Word
+  get_data_offset(elfcpp::Elf_Word v)
+  { return Convert<32, big_endian>::convert_host(this->p_->data_offset); }
+
+  elfcpp::Elf_Xword
+  get_timestamp_sec(elfcpp::Elf_Xword v)
+  { return Convert<64, big_endian>::convert_host(this->p_->timestamp_sec); }
+
+  elfcpp::Elf_Word
+  get_timestamp_nsec(elfcpp::Elf_Word v)
+  { return Convert<32, big_endian>::convert_host(this->p_->timestamp_nsec); }
+
+  elfcpp::Elf_Word
+  get_input_type(elfcpp::Elf_Word v)
+  { return Convert<32, big_endian>::convert_host(this->p_->input_type); }
+
+  elfcpp::Elf_Word
+  get_reserved(elfcpp::Elf_Word v)
+  { return Convert<32, big_endian>::convert_host(this->p_->reserved); }
+
+ private:
+  const internal::Incremental_inputs_entry_data* p_;
+};
+
+// Writer class for an .gnu_incremental_inputs entry. See
+// internal::Incremental_input_entry for fields descriptions.
 template<int size, bool big_endian>
 class Incremental_inputs_entry_write
 {
@@ -196,13 +272,74 @@ Incremental_binary::error(const char* format, ...) const
 template<int size, bool big_endian>
 bool
 Sized_incremental_binary<size, big_endian>::do_find_incremental_inputs_section(
-    Location* location)
+    Location* location,
+    unsigned int* strtab_shndx)
 {
   unsigned int shndx = this->elf_file_.find_section_by_type(
       elfcpp::SHT_GNU_INCREMENTAL_INPUTS);
   if (shndx == elfcpp::SHN_UNDEF)  // Not found.
     return false;
+  *strtab_shndx = this->elf_file_.section_link(shndx);
   *location = this->elf_file_.section_contents(shndx);
+  return true;
+}
+
+template<int size, bool big_endian>
+bool
+Sized_incremental_binary<size, big_endian>::do_check_inputs(
+    Incremental_inputs* incremental_inputs)
+{
+  const int entry_size =
+      Incremental_inputs_entry_write<size, big_endian>::data_size;
+  const int header_size =
+      Incremental_inputs_header_write<size, big_endian>::data_size;
+
+  unsigned int strtab_shndx;
+  Location location;
+
+  if (!do_find_incremental_inputs_section(&location, &strtab_shndx))
+    {
+      explain_no_incremental(_("no incremental data from previous build"));
+      return false;
+    }
+  if (location.data_size < header_size
+      || strtab_shndx >= this->elf_file_.shnum()
+      || this->elf_file_.section_type(strtab_shndx) != elfcpp::SHT_STRTAB)
+    {
+      explain_no_incremental(_("invalid incremental build data"));
+      return false;
+    }
+
+  Location strtab_location(this->elf_file_.section_contents(strtab_shndx));
+  View data_view(view(location));
+  View strtab_view(view(strtab_location));
+  elfcpp::Elf_strtab strtab(strtab_view.data(), strtab_location.data_size);
+  Incremental_inputs_header<size, big_endian> header(data_view.data());
+
+  if (header.get_version() != INCREMENTAL_LINK_VERSION)
+    {
+      explain_no_incremental(_("different version of incremental build data"));
+      return false;
+    }
+
+  const char* command_line;
+  // We divide instead of multiplying to make sure there is no integer
+  // overflow.
+  size_t max_input_entries = (location.data_size - header_size) / entry_size;
+  if (header.get_input_file_count() > max_input_entries
+      || !strtab.get_c_string(header.get_command_line_offset(), &command_line))
+    {
+      explain_no_incremental(_("invalid incremental build data"));
+      return false;
+    }
+
+  if (incremental_inputs->command_line() != command_line)
+    {
+      explain_no_incremental(_("command line changed"));
+      return false;
+    }
+
+  // TODO: compare incremental_inputs->inputs() with entries in data_view.
   return true;
 }
 
@@ -322,14 +459,7 @@ Incremental_checker::can_incrementally_link_output_file()
   Incremental_binary* binary = open_incremental_binary(&output);
   if (binary == NULL)
     return false;
-  Incremental_binary::Location inputs_location;
-  if (!binary->find_incremental_inputs_section(&inputs_location))
-    {
-      explain_no_incremental("no incremental data from previous build");
-      delete binary;
-      return false;
-    }
-  return true;
+  return binary->check_inputs(this->incremental_inputs_);
 }
 
 // Add the command line to the string table, setting
@@ -366,7 +496,10 @@ Incremental_inputs::report_command_line(int argc, const char* const* argv)
         }
       args.append("'");
     }
-  this->strtab_->add(args.c_str(), true, &this->command_line_key_);
+
+  this->command_line_ = args;
+  this->strtab_->add(this->command_line_.c_str(), false,
+                     &this->command_line_key_);
 }
 
 // Record that the input argument INPUT is an achive ARCHIVE.  This is

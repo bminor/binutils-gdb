@@ -1,5 +1,36 @@
 2009-10-09  Mikolaj Zalewski  <mikolajz@google.com>
 
+	* gold.cc: (queue_initial_tasks): Pass incremental_inputs to
+	Incremental_checker.
+	* incremental.cc: (INCREMENTAL_LINK_VERSION): Change type to
+	unsigned int.
+	(class Incremental_inputs_header): New class.
+	(Incremental_inputs_header_writer): Edit comment.
+	(Incremental_inputs_entry): New class.
+	(Incremental_inputs_entry_writer): Edit comment.
+	(Sized_incremental_binary::do_find_incremental_inputs_section):
+	Add *strtab_shndx parameter, fill it.
+	(Sized_incremental_binary::do_check_inputs): New method.
+	(Incremental_checker::can_incrementally_link_output_file): Use
+	Sized_incremental_binary::check_inputs.
+	(Incremental_inputs::report_command_line): Save command line in
+	command_line_.
+	* incremental.h:
+	(Incremental_binary::find_incremental_inputs_section): New
+	method.
+	(Incremental_binary::do_find_incremental_inputs_section): Add
+	strtab_shndx parameter.
+	(Incremental_binary::do_check_inputs): New pure virtual method.
+	(Sized_incremental_binary::do_check_inputs): Declare.
+	(Incremental_checker::Incremental_checker): Add incremental_inputs
+	parameter, use it to initialize incremental_inputs_.
+	(Incremental_checker::incremental_inputs_): New field.
+	(Incremental_checker::command_line): New method.
+	(Incremental_checker::inputs): New method.
+	(Incremental_checker::command_line_): New field.
+
+2009-10-09  Mikolaj Zalewski  <mikolajz@google.com>
+
 	* incremental.cc: Include <cstdarg> and "target-select.h".
 	(vexplain_no_incremental): New function.
 	(explain_no_incremental): New function.

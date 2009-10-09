@@ -119,18 +119,34 @@ class Incremental_binary
   void
   error(const char* format, ...) const ATTRIBUTE_PRINTF_2;
 
-
   // Find the .gnu_incremental_inputs section.  It selects the first section
   // of type SHT_GNU_INCREMENTAL_INPUTS.  Returns false if such a section
   // is not found.
   bool
-  find_incremental_inputs_section(Location* location)
-  { return do_find_incremental_inputs_section(location); }
+  find_incremental_inputs_section(Location* location,
+                                  unsigned int* strtab_shndx)
+  { return do_find_incremental_inputs_section(location, strtab_shndx); }
+
+  // Check the .gnu_incremental_inputs section to see whether an incremental
+  // build is possible.
+  // TODO: on success, should report what files needs to be rebuilt.
+  // INCREMENTAL_INPUTS is used to read the canonical form of the command line
+  // and read the input arguments.  TODO: for items that don't need to be
+  // rebuilt, we should also copy the incremental input information.
+  virtual bool
+  check_inputs(Incremental_inputs* incremental_inputs)
+  { return do_check_inputs(incremental_inputs); }
 
  protected:
   // Find incremental inputs section.
   virtual bool
-  do_find_incremental_inputs_section(Location* location) = 0;
+  do_find_incremental_inputs_section(Location* location,
+                                     unsigned int* strtab_shndx) = 0;
+
+  // Check the .gnu_incremental_inputs section to see whether an incremental
+  // build is possible.
+  virtual bool
+  do_check_inputs(Incremental_inputs* incremental_inputs) = 0;
 
  private:
   // Edited output file object.
@@ -151,7 +167,11 @@ class Sized_incremental_binary : public Incremental_binary
 
  protected:
   virtual bool
-  do_find_incremental_inputs_section(Location* location);
+  do_find_incremental_inputs_section(Location* location,
+                                     unsigned int* strtab_shndx);
+
+  virtual bool
+  do_check_inputs(Incremental_inputs* incremental_inputs);
 
  private:
   // Output as an ELF file.
@@ -168,8 +188,14 @@ open_incremental_binary(Output_file* file);
 class Incremental_checker
 {
  public:
-  Incremental_checker(const char* output_name)
-    : output_name_(output_name)
+  // Check if the file named OUTPUT_NAME can be linked incrementally.
+  // INCREMENTAL_INPUTS must have the canonical form of the command line
+  // and input arguments filled - at this point of linking other fields are
+  // probably not filled yet.  TODO: for inputs that don't need to be
+  // rebuilt, this function should fill the incremental input information.
+  Incremental_checker(const char* output_name,
+                      Incremental_inputs* incremental_inputs)
+    : output_name_(output_name), incremental_inputs_(incremental_inputs)
   { }
 
   // Analyzes the output file to check if incremental linking is possible and
@@ -178,7 +204,12 @@ class Incremental_checker
   can_incrementally_link_output_file();
 
  private:
+  // Name of the output file to analyze.
   const char* output_name_;
+
+  // The Incremental_inputs object. At this stage of link, only the command
+  // line and inputs are filled.
+  Incremental_inputs* incremental_inputs_;
 };
 
 // This class contains the information needed during an incremental
@@ -226,6 +257,17 @@ class Incremental_inputs
   Stringpool*
   get_stringpool()
   { return this->strtab_; }
+
+  // Return the canonical form of the command line, as will be stored in
+  // .gnu_incremental_strtab.
+  const std::string&
+  command_line()
+  { return this->command_line_; }
+
+  // Return the input files found in the command line.
+  const Input_arguments*
+  inputs()
+  { return this->inputs_; }
 
  private:
   // Code for each of the four possible variants of create_inputs_section_data.
@@ -289,8 +331,13 @@ class Incremental_inputs
   // A map containing additional information about the input elements.
   Inputs_info_map inputs_map_;
 
+  // Canonical form of the command line, as will be stored in
+  // .gnu_incremental_strtab.
+  std::string command_line_;
+
   // The key of the command line string in the string pool.
   Stringpool::Key command_line_key_;
+
   // The .gnu_incremental_strtab string pool associated with the
   // .gnu_incremental_inputs.
   Stringpool* strtab_;
