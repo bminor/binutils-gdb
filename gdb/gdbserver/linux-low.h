@@ -47,18 +47,12 @@ struct siginfo;
 
 struct process_info_private
 {
-  /* True if this process has loaded thread_db, and it is active.  */
-  int thread_db_active;
-
-  /* Structure that identifies the child process for the
-     <proc_service.h> interface.  */
-  struct ps_prochandle proc_handle;
-
-  /* Connection to the libthread_db library.  */
-  td_thragent_t *thread_agent;
-
   /* Arch-specific additions.  */
   struct arch_process_info *arch_private;
+
+  /* libthread_db-specific additions.  Not NULL if this process has loaded
+     thread_db, and it is active.  */
+  struct thread_db *thread_db;
 };
 
 struct lwp_info;
@@ -203,9 +197,11 @@ char *linux_child_pid_to_exec_file (int pid);
 int elf_64_file_p (const char *file);
 
 void linux_attach_lwp (unsigned long pid);
+struct lwp_info *find_lwp_pid (ptid_t ptid);
 
+/* From thread-db.c  */
 int thread_db_init (int use_events);
+void thread_db_free (struct process_info *);
+int thread_db_handle_monitor_command (char *);
 int thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
 			       CORE_ADDR load_module, CORE_ADDR *address);
-
-struct lwp_info *find_lwp_pid (ptid_t ptid);

@@ -1,3 +1,28 @@
+2009-10-08  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* acinclude.m4: (SRV_CHECK_THREAD_DB, SRV_CHECK_TLS_GET_ADDR): Remove.
+	* configure.ac: Adjust.
+	* linux-low.h (struct process_info_private): Move members to struct
+	thread_db.
+	(thread_db_free, thread_db_handle_monitor_command): New prototype.
+	* linux-low.c (linux_remove_process): Adjust.
+	(linux_wait_for_event_1, linux_look_up_symbols): Likewise.
+	* server.c (handle_query): Move code ...
+	(handle_monitor_command): ... here. New function.
+	* target.h (struct target_ops): New member.
+	* thread-db.c (struct thread_db): New.
+	(libthread_db_search_path): New variable.
+	(thread_db_create_event, thread_db_enable_reporting)
+	(find_one_thread, maybe_attach_thread, find_new_threads_callback)
+	(thread_db_find_new_threads, (thread_db_get_tls_address): Adjust.
+	(try_thread_db_load_1, dladdr_to_soname): New functions.
+	(try_thread_db_load, thread_db_load_search): New functions.
+	(thread_db_init): Search for libthread_db.
+	(thread_db_free): New function.
+	(thread_db_handle_monitor_command): Likewise.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	
 2009-09-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* spu-low.c (spu_kill): Wait for inferior to terminate.

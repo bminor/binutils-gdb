@@ -140,23 +140,13 @@ srv_libs=
 USE_THREAD_DB=
 
 if test "$srv_linux_thread_db" = "yes"; then
-  SRV_CHECK_THREAD_DB
-  if test "$srv_cv_thread_db" = no; then
-    AC_WARN([Could not find libthread_db.])
-    AC_WARN([Disabling thread support in gdbserver.])
-    srv_linux_thread_db=no
-  else
-    srv_libs="$srv_cv_thread_db"
-    SRV_CHECK_TLS_GET_ADDR
-  fi
+  srv_libs="-ldl"
   old_LDFLAGS="$LDFLAGS"
   LDFLAGS="$LDFLAGS -rdynamic"
   AC_TRY_LINK([], [], [RDYNAMIC=-rdynamic], [RDYNAMIC=])
   AC_SUBST(RDYNAMIC)
   LDFLAGS="$old_LDFLAGS"
-fi
 
-if test "$srv_linux_thread_db" = "yes"; then
   srv_thread_depfiles="thread-db.o proc-service.o"
   USE_THREAD_DB="-DUSE_THREAD_DB"
   AC_CACHE_CHECK([for TD_VERSION], gdbsrv_cv_have_td_version,
@@ -165,10 +155,6 @@ if test "$srv_linux_thread_db" = "yes"; then
 		  [gdbsrv_cv_have_td_version=no])])
   if test $gdbsrv_cv_have_td_version = yes; then
     AC_DEFINE(HAVE_TD_VERSION, 1, [Define if TD_VERSION is available.])
-  fi
-
-  if test "$srv_cv_tls_get_addr" = yes; then
-    AC_DEFINE(HAVE_TD_THR_TLS_GET_ADDR, 1, [Define if td_thr_tls_get_addr is available.])
   fi
 fi
 

@@ -27,13 +27,51 @@ extern int debug_threads;
 
 static int thread_db_use_events;
 
-#ifdef HAVE_THREAD_DB_H
-#include <thread_db.h>
-#endif
-
 #include "gdb_proc_service.h"
+#include "../gdb_thread_db.h"
 
+#include <dlfcn.h>
 #include <stdint.h>
+#include <limits.h>
+#include <ctype.h>
+
+struct thread_db
+{
+  /* Structure that identifies the child process for the
+     <proc_service.h> interface.  */
+  struct ps_prochandle proc_handle;
+
+  /* Connection to the libthread_db library.  */
+  td_thragent_t *thread_agent;
+
+  /* Handle of the libthread_db from dlopen.  */
+  void *handle;
+
+  /* Addresses of libthread_db functions.  */
+  td_err_e (*td_ta_new_p) (struct ps_prochandle * ps, td_thragent_t **ta);
+  td_err_e (*td_ta_event_getmsg_p) (const td_thragent_t *ta,
+				    td_event_msg_t *msg);
+  td_err_e (*td_ta_set_event_p) (const td_thragent_t *ta,
+				 td_thr_events_t *event);
+  td_err_e (*td_ta_event_addr_p) (const td_thragent_t *ta,
+				  td_event_e event, td_notify_t *ptr);
+  td_err_e (*td_ta_map_lwp2thr_p) (const td_thragent_t *ta, lwpid_t lwpid,
+				   td_thrhandle_t *th);
+  td_err_e (*td_thr_get_info_p) (const td_thrhandle_t *th,
+				 td_thrinfo_t *infop);
+  td_err_e (*td_thr_event_enable_p) (const td_thrhandle_t *th, int event);
+  td_err_e (*td_ta_thr_iter_p) (const td_thragent_t *ta,
+				td_thr_iter_f *callback, void *cbdata_p,
+				td_thr_state_e state, int ti_pri,
+				sigset_t *ti_sigmask_p,
+				unsigned int ti_user_flags);
+  td_err_e (*td_thr_tls_get_addr_p) (const td_thrhandle_t *th,
+				     void *map_address,
+				     size_t offset, void **address);
+  const char ** (*td_symbol_list_p) (void);
+};
+
+static char *libthread_db_search_path;
 
 static int find_one_thread (ptid_t);
 static int find_new_threads_callback (const td_thrhandle_t *th_p, void *data);
@@ -130,7 +168,10 @@ thread_db_create_event (CORE_ADDR where)
   td_event_msg_t msg;
   td_err_e err;
   struct lwp_info *lwp;
-  struct process_info_private *proc = current_process()->private;
+  struct thread_db *thread_db = current_process ()->private->thread_db;
+
+  if (thread_db->td_ta_event_getmsg_p == NULL)
+    fatal ("unexpected thread_db->td_ta_event_getmsg_p == NULL");
 
   if (debug_threads)
     fprintf (stderr, "Thread creation event.\n");
@@ -139,7 +180,7 @@ thread_db_create_event (CORE_ADDR where)
      In the LinuxThreads implementation, this is safe,
      because all events come from the manager thread
      (except for its own creation, of course).  */
-  err = td_ta_event_getmsg (proc->thread_agent, &msg);
+  err = thread_db->td_ta_event_getmsg_p (thread_db->thread_agent, &msg);
   if (err != TD_OK)
     fprintf (stderr, "thread getmsg err: %s\n",
 	     thread_db_err_str (err));
@@ -158,36 +199,25 @@ thread_db_create_event (CORE_ADDR where)
   return 0;
 }
 
-#if 0
-static int
-thread_db_death_event (CORE_ADDR where)
-{
-  if (debug_threads)
-    fprintf (stderr, "Thread death event.\n");
-
-  return 0;
-}
-#endif
-
 static int
 thread_db_enable_reporting ()
 {
   td_thr_events_t events;
   td_notify_t notify;
   td_err_e err;
-  struct process_info_private *proc = current_process()->private;
+  struct thread_db *thread_db = current_process ()->private->thread_db;
+
+  if (thread_db->td_ta_set_event_p == NULL
+      || thread_db->td_ta_event_addr_p == NULL
+      || thread_db->td_ta_event_getmsg_p == NULL)
+    /* This libthread_db is missing required support.  */
+    return 0;
 
   /* Set the process wide mask saying which events we're interested in.  */
   td_event_emptyset (&events);
   td_event_addset (&events, TD_CREATE);
 
-#if 0
-  /* This is reported to be broken in glibc 2.1.3.  A different approach
-     will be necessary to support that.  */
-  td_event_addset (&events, TD_DEATH);
-#endif
-
-  err = td_ta_set_event (proc->thread_agent, &events);
+  err = thread_db->td_ta_set_event_p (thread_db->thread_agent, &events);
   if (err != TD_OK)
     {
       warning ("Unable to set global thread event mask: %s",
@@ -196,7 +226,8 @@ thread_db_enable_reporting ()
     }
 
   /* Get address for thread creation breakpoint.  */
-  err = td_ta_event_addr (proc->thread_agent, TD_CREATE, &notify);
+  err = thread_db->td_ta_event_addr_p (thread_db->thread_agent, TD_CREATE,
+				       &notify);
   if (err != TD_OK)
     {
       warning ("Unable to get location for thread creation breakpoint: %s",
@@ -205,22 +236,6 @@ thread_db_enable_reporting ()
     }
   set_breakpoint_at ((CORE_ADDR) (unsigned long) notify.u.bptaddr,
 		     thread_db_create_event);
-
-#if 0
-  /* Don't concern ourselves with reported thread deaths, only
-     with actual thread deaths (via wait).  */
-
-  /* Get address for thread death breakpoint.  */
-  err = td_ta_event_addr (proc->thread_agent, TD_DEATH, &notify);
-  if (err != TD_OK)
-    {
-      warning ("Unable to get location for thread death breakpoint: %s",
-	       thread_db_err_str (err));
-      return;
-    }
-  set_breakpoint_at ((CORE_ADDR) (unsigned long) notify.u.bptaddr,
-		     thread_db_death_event);
-#endif
 
   return 1;
 }
@@ -233,7 +248,7 @@ find_one_thread (ptid_t ptid)
   td_err_e err;
   struct thread_info *inferior;
   struct lwp_info *lwp;
-  struct process_info_private *proc;
+  struct thread_db *thread_db = current_process ()->private->thread_db;
   int lwpid = ptid_get_lwp (ptid);
 
   inferior = (struct thread_info *) find_inferior_id (&all_threads, ptid);
@@ -242,13 +257,12 @@ find_one_thread (ptid_t ptid)
     return 1;
 
   /* Get information about this thread.  */
-  proc = get_thread_process (inferior)->private;
-  err = td_ta_map_lwp2thr (proc->thread_agent, lwpid, &th);
+  err = thread_db->td_ta_map_lwp2thr_p (thread_db->thread_agent, lwpid, &th);
   if (err != TD_OK)
     error ("Cannot get thread handle for LWP %d: %s",
 	   lwpid, thread_db_err_str (err));
 
-  err = td_thr_get_info (&th, &ti);
+  err = thread_db->td_thr_get_info_p (&th, &ti);
   if (err != TD_OK)
     error ("Cannot get thread info for LWP %d: %s",
 	   lwpid, thread_db_err_str (err));
@@ -266,7 +280,7 @@ find_one_thread (ptid_t ptid)
 
   if (thread_db_use_events)
     {
-      err = td_thr_event_enable (&th, 1);
+      err = thread_db->td_thr_event_enable_p (&th, 1);
       if (err != TD_OK)
 	error ("Cannot enable thread event reporting for %d: %s",
 	       ti.ti_lid, thread_db_err_str (err));
@@ -310,7 +324,8 @@ maybe_attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
 
   if (thread_db_use_events)
     {
-      err = td_thr_event_enable (th_p, 1);
+      struct thread_db *thread_db = current_process ()->private->thread_db;
+      err = thread_db->td_thr_event_enable_p (th_p, 1);
       if (err != TD_OK)
 	error ("Cannot enable thread event reporting for %d: %s",
 	       ti_p->ti_lid, thread_db_err_str (err));
@@ -322,8 +337,9 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
 {
   td_thrinfo_t ti;
   td_err_e err;
+  struct thread_db *thread_db = current_process ()->private->thread_db;
 
-  err = td_thr_get_info (th_p, &ti);
+  err = thread_db->td_thr_get_info_p (th_p, &ti);
   if (err != TD_OK)
     error ("Cannot get thread info: %s", thread_db_err_str (err));
 
@@ -341,7 +357,7 @@ thread_db_find_new_threads (void)
 {
   td_err_e err;
   ptid_t ptid = ((struct inferior_list_entry *) current_inferior)->id;
-  struct process_info_private *proc = current_process()->private;
+  struct thread_db *thread_db = current_process ()->private->thread_db;
 
   /* This function is only called when we first initialize thread_db.
      First locate the initial thread.  If it is not ready for
@@ -350,10 +366,10 @@ thread_db_find_new_threads (void)
     return;
 
   /* Iterate over all user-space threads to discover new threads.  */
-  err = td_ta_thr_iter (proc->thread_agent,
-			find_new_threads_callback, NULL,
-			TD_THR_ANY_STATE, TD_THR_LOWEST_PRIORITY,
-			TD_SIGNO_MASK, TD_THR_ANY_USER_FLAGS);
+  err = thread_db->td_ta_thr_iter_p (thread_db->thread_agent,
+				     find_new_threads_callback, NULL,
+				     TD_THR_ANY_STATE, TD_THR_LOWEST_PRIORITY,
+				     TD_SIGNO_MASK, TD_THR_ANY_USER_FLAGS);
   if (err != TD_OK)
     error ("Cannot find new threads: %s", thread_db_err_str (err));
 }
@@ -366,10 +382,11 @@ thread_db_find_new_threads (void)
 static void
 thread_db_look_up_symbols (void)
 {
-  const char **sym_list = td_symbol_list ();
+  struct thread_db *thread_db = current_process ()->private->thread_db;
+  const char **sym_list;
   CORE_ADDR unused;
 
-  for (sym_list = td_symbol_list (); *sym_list; sym_list++)
+  for (sym_list = thread_db->td_symbol_list_p (); *sym_list; sym_list++)
     look_up_one_symbol (*sym_list, &unused);
 }
 
@@ -377,15 +394,22 @@ int
 thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
 			   CORE_ADDR load_module, CORE_ADDR *address)
 {
-#if HAVE_TD_THR_TLS_GET_ADDR
   psaddr_t addr;
   td_err_e err;
   struct lwp_info *lwp;
   struct thread_info *saved_inferior;
+  struct process_info *proc;
+  struct thread_db *thread_db;
+
+  proc = get_thread_process (thread);
+  thread_db = proc->private->thread_db;
 
   /* If the thread layer is not (yet) initialized, fail.  */
-  if (!get_thread_process (thread)->all_symbols_looked_up)
+  if (!proc->all_symbols_looked_up)
     return TD_ERR;
+
+  if (thread_db->td_thr_tls_get_addr_p == NULL)
+    return -1;
 
   lwp = get_thread_lwp (thread);
   if (!lwp->thread_known)
@@ -398,8 +422,9 @@ thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
   /* Note the cast through uintptr_t: this interface only works if
      a target address fits in a psaddr_t, which is a host pointer.
      So a 32-bit debugger can not access 64-bit TLS through this.  */
-  err = td_thr_tls_get_addr (&lwp->th, (psaddr_t) (uintptr_t) load_module,
-			     offset, &addr);
+  err = thread_db->td_thr_tls_get_addr_p (&lwp->th,
+					  (psaddr_t) (uintptr_t) load_module,
+					  offset, &addr);
   current_inferior = saved_inferior;
   if (err == TD_OK)
     {
@@ -408,17 +433,190 @@ thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
     }
   else
     return err;
-#else
-  return -1;
-#endif
+}
+
+static int
+try_thread_db_load_1 (void *handle)
+{
+  td_err_e err;
+  struct thread_db tdb;
+  struct process_info *proc = current_process ();
+
+  if (proc->private->thread_db != NULL)
+    fatal ("unexpected: proc->private->thread_db != NULL");
+
+  tdb.handle = handle;
+
+  /* Initialize pointers to the dynamic library functions we will use.
+     Essential functions first.  */
+
+#define CHK(required, a)					\
+  do								\
+    {								\
+      if ((a) == NULL)						\
+	{							\
+	  if (debug_threads)					\
+	    fprintf (stderr, "dlsym: %s\n", dlerror ());	\
+	  if (required)						\
+	    return 0;						\
+	}							\
+    }								\
+  while (0)
+
+  CHK (1, tdb.td_ta_new_p = dlsym (handle, "td_ta_new"));
+
+  /* Attempt to open a connection to the thread library.  */
+  err = tdb.td_ta_new_p (&tdb.proc_handle, &tdb.thread_agent);
+  if (err != TD_OK)
+    {
+      if (debug_threads)
+	fprintf (stderr, "td_ta_new(): %s\n", thread_db_err_str (err));
+      return 0;
+    }
+
+  CHK (1, tdb.td_ta_map_lwp2thr_p = dlsym (handle, "td_ta_map_lwp2thr"));
+  CHK (1, tdb.td_thr_get_info_p = dlsym (handle, "td_thr_get_info"));
+  CHK (1, tdb.td_ta_thr_iter_p = dlsym (handle, "td_ta_thr_iter"));
+  CHK (1, tdb.td_symbol_list_p = dlsym (handle, "td_symbol_list"));
+
+  /* This is required only when thread_db_use_events is on.  */
+  CHK (thread_db_use_events,
+       tdb.td_thr_event_enable_p = dlsym (handle, "td_thr_event_enable"));
+
+  /* These are not essential.  */
+  CHK (0, tdb.td_ta_event_addr_p = dlsym (handle, "td_ta_event_addr"));
+  CHK (0, tdb.td_ta_set_event_p = dlsym (handle, "td_ta_set_event"));
+  CHK (0, tdb.td_ta_event_getmsg_p = dlsym (handle, "td_ta_event_getmsg"));
+  CHK (0, tdb.td_thr_tls_get_addr_p = dlsym (handle, "td_thr_tls_get_addr"));
+
+#undef CHK
+
+  proc->private->thread_db = xmalloc (sizeof (tdb));
+  memcpy (proc->private->thread_db, &tdb, sizeof (tdb));
+
+  return 1;
+}
+
+/* Lookup a library in which given symbol resides.
+   Note: this is looking in the GDBSERVER process, not in the inferior.
+   Returns library name, or NULL.  */
+
+static const char *
+dladdr_to_soname (const void *addr)
+{
+  Dl_info info;
+
+  if (dladdr (addr, &info) != 0)
+    return info.dli_fname;
+  return NULL;
+}
+
+static int
+try_thread_db_load (const char *library)
+{
+  void *handle;
+
+  if (debug_threads)
+    fprintf (stderr, "Trying host libthread_db library: %s.\n",
+	     library);
+  handle = dlopen (library, RTLD_NOW);
+  if (handle == NULL)
+    {
+      if (debug_threads)
+	fprintf (stderr, "dlopen failed: %s.\n", dlerror ());
+      return 0;
+    }
+
+  if (debug_threads && strchr (library, '/') == NULL)
+    {
+      void *td_init;
+
+      td_init = dlsym (handle, "td_init");
+      if (td_init != NULL)
+	{
+	  const char *const libpath = dladdr_to_soname (td_init);
+
+	  if (libpath != NULL)
+	    fprintf (stderr, "Host %s resolved to: %s.\n",
+		     library, libpath);
+	}
+    }
+
+  if (try_thread_db_load_1 (handle))
+    return 1;
+
+  /* This library "refused" to work on current inferior.  */
+  dlclose (handle);
+  return 0;
+}
+
+static int
+thread_db_load_search (void)
+{
+  char path[PATH_MAX];
+  const char *search_path;
+  int rc = 0;
+
+  if (libthread_db_search_path == NULL)
+    libthread_db_search_path = xstrdup (LIBTHREAD_DB_SEARCH_PATH);
+
+  search_path = libthread_db_search_path;
+  while (*search_path)
+    {
+      const char *end = strchr (search_path, ':');
+      if (end)
+	{
+	  size_t len = end - search_path;
+	  if (len + 1 + strlen (LIBTHREAD_DB_SO) + 1 > sizeof (path))
+	    {
+	      char *cp = xmalloc (len + 1);
+	      memcpy (cp, search_path, len);
+	      cp[len] = '\0';
+	      warning ("libthread_db_search_path component too long, "
+		       "ignored: %s.", cp);
+	      free (cp);
+	      search_path += len + 1;
+	      continue;
+	    }
+	  memcpy (path, search_path, len);
+	  path[len] = '\0';
+	  search_path += len + 1;
+	}
+      else
+	{
+	  size_t len = strlen (search_path);
+
+	  if (len + 1 + strlen (LIBTHREAD_DB_SO) + 1 > sizeof (path))
+	    {
+	      warning ("libthread_db_search_path component too long,"
+		       " ignored: %s.", search_path);
+	      break;
+	    }
+	  memcpy (path, search_path, len + 1);
+	  search_path += len;
+	}
+      strcat (path, "/");
+      strcat (path, LIBTHREAD_DB_SO);
+      if (debug_threads)
+	fprintf (stderr, "thread_db_load_search trying %s\n", path);
+      if (try_thread_db_load (path))
+	{
+	  rc = 1;
+	  break;
+	}
+    }
+  if (rc == 0)
+    rc = try_thread_db_load (LIBTHREAD_DB_SO);
+
+  if (debug_threads)
+    fprintf (stderr, "thread_db_load_search returning %d\n", rc);
+  return rc;
 }
 
 int
 thread_db_init (int use_events)
 {
-  int err;
   struct process_info *proc = current_process ();
-  struct process_info_private *priv = proc->private;
 
   /* FIXME drow/2004-10-16: This is the "overall process ID", which
      GNU/Linux calls tgid, "thread group ID".  When we support
@@ -433,27 +631,68 @@ thread_db_init (int use_events)
 
   thread_db_use_events = use_events;
 
-  err = td_ta_new (&priv->proc_handle, &priv->thread_agent);
-  switch (err)
+  if (thread_db_load_search ())
     {
-    case TD_NOLIBTHREAD:
-      /* No thread library was detected.  */
-      return 0;
-
-    case TD_OK:
-      /* The thread library was detected.  */
-
       if (use_events && thread_db_enable_reporting () == 0)
-	return 0;
+	{
+	  /* Keep trying; maybe event reporting will work later.  */
+	  thread_db_free (proc);
+	  return 0;
+	}
       thread_db_find_new_threads ();
       thread_db_look_up_symbols ();
       proc->all_symbols_looked_up = 1;
       return 1;
-
-    default:
-      warning ("error initializing thread_db library: %s",
-	       thread_db_err_str (err));
     }
 
+  return 0;
+}
+
+/* Disconnect from libthread_db and free resources.  */
+
+void
+thread_db_free (struct process_info *proc)
+{
+  struct thread_db *thread_db = proc->private->thread_db;
+  if (thread_db)
+    {
+      td_err_e (*td_ta_delete_p) (td_thragent_t *);
+
+      td_ta_delete_p = dlsym (thread_db->handle, "td_ta_delete");
+      if (td_ta_delete_p != NULL)
+	(*td_ta_delete_p) (thread_db->thread_agent);
+
+      dlclose (thread_db->handle);
+      free (thread_db);
+      proc->private->thread_db = NULL;
+    }
+}
+
+/* Handle "set libthread-db-search-path" monitor command and return 1.
+   For any other command, return 0.  */
+
+int
+thread_db_handle_monitor_command (char *mon)
+{
+  if (strncmp (mon, "set libthread-db-search-path ", 29) == 0)
+    {
+      const char *cp = mon + 29;
+
+      if (libthread_db_search_path != NULL)
+	free (libthread_db_search_path);
+
+      /* Skip leading space (if any).  */
+      while (isspace (*cp))
+	++cp;
+
+      libthread_db_search_path = xstrdup (cp);
+
+      monitor_output ("libthread-db-search-path set to `");
+      monitor_output (libthread_db_search_path);
+      monitor_output ("'\n");
+      return 1;
+    }
+
+  /* Tell server.c to perform default processing.  */
   return 0;
 }

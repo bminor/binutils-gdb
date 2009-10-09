@@ -14903,6 +14903,13 @@ Disable or enable general debugging messages.
 Disable or enable specific debugging messages associated with the remote
 protocol (@pxref{Remote Protocol}).
 
+@item monitor set libthread-db-search-path [PATH]
+@cindex gdbserver, search path for @code{libthread_db}
+When this command is issued, @var{path} is a colon-separated list of
+directories to search for @code{libthread_db} (@pxref{Threads,,set
+libthread-db-search-path}).  If you omit @var{path},
+@samp{libthread-db-search-path} will be reset to an empty list.
+
 @item monitor exit
 Tell gdbserver to exit immediately.  This command should be followed by
 @code{disconnect} to close the debugging session.  @code{gdbserver} will

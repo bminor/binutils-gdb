@@ -261,8 +261,14 @@ linux_add_process (int pid, int attached)
 static void
 linux_remove_process (struct process_info *process)
 {
-  free (process->private->arch_private);
-  free (process->private);
+  struct process_info_private *priv = process->private;
+
+#ifdef USE_THREAD_DB
+  thread_db_free (process);
+#endif
+
+  free (priv->arch_private);
+  free (priv);
   remove_process (process);
 }
 
@@ -1122,7 +1128,7 @@ linux_wait_for_event_1 (ptid_t ptid, int *wstat, int options)
 	  && !event_child->stepping
 	  && (
 #ifdef USE_THREAD_DB
-	      (current_process ()->private->thread_db_active
+	      (current_process ()->private->thread_db != NULL
 	       && (WSTOPSIG (*wstat) == __SIGRTMIN
 		   || WSTOPSIG (*wstat) == __SIGRTMIN + 1))
 	      ||
@@ -2642,11 +2648,10 @@ linux_look_up_symbols (void)
 #ifdef USE_THREAD_DB
   struct process_info *proc = current_process ();
 
-  if (proc->private->thread_db_active)
+  if (proc->private->thread_db != NULL)
     return;
 
-  proc->private->thread_db_active
-    = thread_db_init (!linux_supports_tracefork_flag);
+  thread_db_init (!linux_supports_tracefork_flag);
 #endif
 }
 
@@ -3171,7 +3176,12 @@ static struct target_ops linux_target_ops = {
   linux_supports_non_stop,
   linux_async,
   linux_start_non_stop,
-  linux_supports_multi_process
+  linux_supports_multi_process,
+#ifdef USE_THREAD_DB
+  thread_db_handle_monitor_command
+#else
+  NULL
+#endif
 };
 
 static void

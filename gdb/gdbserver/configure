@@ -4210,125 +4210,7 @@ srv_libs=
 USE_THREAD_DB=
 
 if test "$srv_linux_thread_db" = "yes"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libthread_db" >&5
-$as_echo_n "checking for libthread_db... " >&6; }
-if test "${srv_cv_thread_db+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  old_LIBS="$LIBS"
-  LIBS="$LIBS -lthread_db"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-void ps_pglobal_lookup() {}
-   void ps_pdread() {}
-   void ps_pdwrite() {}
-   void ps_lgetregs() {}
-   void ps_lsetregs() {}
-   void ps_lgetfpregs() {}
-   void ps_lsetfpregs() {}
-   void ps_get_thread_area() {}
-   void ps_getpid() {}
-int
-main ()
-{
-td_ta_new();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  srv_cv_thread_db="-lthread_db"
-else
-  srv_cv_thread_db=no
-
- if test "$prefix" = "/usr" || test "$prefix" = "NONE"; then
-  thread_db="/lib/libthread_db.so.1"
- else
-  thread_db='$prefix/lib/libthread_db.so.1'
- fi
- LIBS="$old_LIBS `eval echo "$thread_db"`"
- cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-void ps_pglobal_lookup() {}
-   void ps_pdread() {}
-   void ps_pdwrite() {}
-   void ps_lgetregs() {}
-   void ps_lsetregs() {}
-   void ps_lgetfpregs() {}
-   void ps_lsetfpregs() {}
-   void ps_get_thread_area() {}
-   void ps_getpid() {}
-int
-main ()
-{
-td_ta_new();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  srv_cv_thread_db="$thread_db"
-else
-  srv_cv_thread_db=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
- LIBS="$old_LIBS"
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $srv_cv_thread_db" >&5
-$as_echo "$srv_cv_thread_db" >&6; }
-  if test "$srv_cv_thread_db" = no; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Could not find libthread_db." >&5
-$as_echo "$as_me: WARNING: Could not find libthread_db." >&2;}
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Disabling thread support in gdbserver." >&5
-$as_echo "$as_me: WARNING: Disabling thread support in gdbserver." >&2;}
-    srv_linux_thread_db=no
-  else
-    srv_libs="$srv_cv_thread_db"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for thread_db_tls_get_addr" >&5
-$as_echo_n "checking for thread_db_tls_get_addr... " >&6; }
-if test "${srv_cv_tls_get_addr+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  old_LIBS="$LIBS"
-  LIBS="$LIBS $srv_cv_thread_db"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-void ps_pglobal_lookup() {}
-    void ps_pdread() {}
-    void ps_pdwrite() {}
-    void ps_lgetregs() {}
-    void ps_lsetregs() {}
-    void ps_lgetfpregs() {}
-    void ps_lsetfpregs() {}
-    void ps_get_thread_area() {}
-    void ps_getpid() {}
-int
-main ()
-{
-td_thr_tls_get_addr();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  srv_cv_tls_get_addr=yes
-else
-  srv_cv_tls_get_addr=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-  LIBS="$old_LIBS"
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $srv_cv_tls_get_addr" >&5
-$as_echo "$srv_cv_tls_get_addr" >&6; }
-  fi
+  srv_libs="-ldl"
   old_LDFLAGS="$LDFLAGS"
   LDFLAGS="$LDFLAGS -rdynamic"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -4351,9 +4233,7 @@ rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 
   LDFLAGS="$old_LDFLAGS"
-fi
 
-if test "$srv_linux_thread_db" = "yes"; then
   srv_thread_depfiles="thread-db.o proc-service.o"
   USE_THREAD_DB="-DUSE_THREAD_DB"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for TD_VERSION" >&5
@@ -4384,12 +4264,6 @@ $as_echo "$gdbsrv_cv_have_td_version" >&6; }
   if test $gdbsrv_cv_have_td_version = yes; then
 
 $as_echo "#define HAVE_TD_VERSION 1" >>confdefs.h
-
-  fi
-
-  if test "$srv_cv_tls_get_addr" = yes; then
-
-$as_echo "#define HAVE_TD_THR_TLS_GET_ADDR 1" >>confdefs.h
 
   fi
 fi

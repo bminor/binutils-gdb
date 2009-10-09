@@ -660,6 +660,53 @@ handle_search_memory (char *own_buf, int packet_len)
       return;					\
     }
 
+/* Handle monitor commands not handled by target-specific handlers.  */
+
+static void
+handle_monitor_command (char *mon)
+{
+  if (strcmp (mon, "set debug 1") == 0)
+    {
+      debug_threads = 1;
+      monitor_output ("Debug output enabled.\n");
+    }
+  else if (strcmp (mon, "set debug 0") == 0)
+    {
+      debug_threads = 0;
+      monitor_output ("Debug output disabled.\n");
+    }
+  else if (strcmp (mon, "set debug-hw-points 1") == 0)
+    {
+      debug_hw_points = 1;
+      monitor_output ("H/W point debugging output enabled.\n");
+    }
+  else if (strcmp (mon, "set debug-hw-points 0") == 0)
+    {
+      debug_hw_points = 0;
+      monitor_output ("H/W point debugging output disabled.\n");
+    }
+  else if (strcmp (mon, "set remote-debug 1") == 0)
+    {
+      remote_debug = 1;
+      monitor_output ("Protocol debug output enabled.\n");
+    }
+  else if (strcmp (mon, "set remote-debug 0") == 0)
+    {
+      remote_debug = 0;
+      monitor_output ("Protocol debug output disabled.\n");
+    }
+  else if (strcmp (mon, "help") == 0)
+    monitor_show_help ();
+  else if (strcmp (mon, "exit") == 0)
+    exit_requested = 1;
+  else
+    {
+      monitor_output ("Unknown monitor command.\n\n");
+      monitor_show_help ();
+      write_enn (own_buf);
+    }
+}
+
 /* Handle all of the extended 'q' packets.  */
 void
 handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
@@ -1211,46 +1258,10 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
       write_ok (own_buf);
 
-      if (strcmp (mon, "set debug 1") == 0)
-	{
-	  debug_threads = 1;
-	  monitor_output ("Debug output enabled.\n");
-	}
-      else if (strcmp (mon, "set debug 0") == 0)
-	{
-	  debug_threads = 0;
-	  monitor_output ("Debug output disabled.\n");
-	}
-      else if (strcmp (mon, "set debug-hw-points 1") == 0)
-	{
-	  debug_hw_points = 1;
-	  monitor_output ("H/W point debugging output enabled.\n");
-	}
-      else if (strcmp (mon, "set debug-hw-points 0") == 0)
-	{
-	  debug_hw_points = 0;
-	  monitor_output ("H/W point debugging output disabled.\n");
-	}
-      else if (strcmp (mon, "set remote-debug 1") == 0)
-	{
-	  remote_debug = 1;
-	  monitor_output ("Protocol debug output enabled.\n");
-	}
-      else if (strcmp (mon, "set remote-debug 0") == 0)
-	{
-	  remote_debug = 0;
-	  monitor_output ("Protocol debug output disabled.\n");
-	}
-      else if (strcmp (mon, "help") == 0)
-	monitor_show_help ();
-      else if (strcmp (mon, "exit") == 0)
-	exit_requested = 1;
-      else
-	{
-	  monitor_output ("Unknown monitor command.\n\n");
-	  monitor_show_help ();
-	  write_enn (own_buf);
-	}
+      if (the_target->handle_monitor_command == NULL
+	  || (*the_target->handle_monitor_command) (mon) == 0)
+	/* Default processing.  */
+	handle_monitor_command (mon);
 
       free (mon);
       return;
