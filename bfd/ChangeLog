@@ -1,3 +1,13 @@
+2009-10-09  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_section_get_entry_size): Moved.
+	(bfd_mach_o_section_get_nbr_indirect): Ditto.
+	(bfd_mach_o_get_synthetic_symtab): New function.
+	(bfd_mach_o_print_private_header): Print the number of commands
+	in decimal.
+	* mach-o.h (bfd_mach_o_get_synthetic_symtab): Add prototype.
+	* mach-o-target.c: Do not defined bfd_mach_o_get_synthetic_symtab.
+
 2009-10-08  Tristan Gingold  <gingold@adacore.com>
 
 	* config.bfd: Add bfd_mach_o_i386_vec in x86_64-darwin targ_selvecs.

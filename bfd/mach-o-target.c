@@ -70,7 +70,6 @@
 
 #define bfd_mach_o_get_dynamic_symtab_upper_bound     bfd_mach_o_get_symtab_upper_bound
 #define bfd_mach_o_canonicalize_dynamic_symtab	      bfd_mach_o_canonicalize_symtab
-#define bfd_mach_o_get_synthetic_symtab		      _bfd_nodynamic_get_synthetic_symtab
 
 #define TARGET_NAME_BACKEND XCONCAT2(TARGET_NAME,_backend)
 

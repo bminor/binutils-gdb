@@ -254,6 +254,43 @@ bfd_mach_o_convert_section_name_to_mach_o (bfd *abfd ATTRIBUTE_UNUSED,
   section->sectname[len] = 0;
 }
 
+/* Return the size of an entry for section SEC.
+   Must be called only for symbol pointer section and symbol stubs
+   sections.  */
+
+static unsigned int
+bfd_mach_o_section_get_entry_size (bfd *abfd, bfd_mach_o_section *sec)
+{
+  switch (sec->flags & BFD_MACH_O_SECTION_TYPE_MASK)
+    {
+    case BFD_MACH_O_S_NON_LAZY_SYMBOL_POINTERS:
+    case BFD_MACH_O_S_LAZY_SYMBOL_POINTERS:
+      return bfd_mach_o_wide_p (abfd) ? 8 : 4;
+    case BFD_MACH_O_S_SYMBOL_STUBS:
+      return sec->reserved2;
+    default:
+      BFD_FAIL ();
+      return 0;
+    }
+}
+
+/* Return the number of indirect symbols for a section.
+   Must be called only for symbol pointer section and symbol stubs
+   sections.  */
+
+static unsigned int
+bfd_mach_o_section_get_nbr_indirect (bfd *abfd, bfd_mach_o_section *sec)
+{
+  unsigned int elsz;
+
+  elsz = bfd_mach_o_section_get_entry_size (abfd, sec);
+  if (elsz == 0)
+    return 0;
+  else
+    return sec->size / elsz;
+}
+
+
 /* Copy any private info we understand from the input symbol
    to the output symbol.  */
 
@@ -342,6 +379,105 @@ bfd_mach_o_canonicalize_symtab (bfd *abfd, asymbol **alocation)
   alocation[j] = NULL;
 
   return nsyms;
+}
+
+long
+bfd_mach_o_get_synthetic_symtab (bfd *abfd,
+                                 long symcount ATTRIBUTE_UNUSED,
+                                 asymbol **syms ATTRIBUTE_UNUSED,
+                                 long dynsymcount ATTRIBUTE_UNUSED,
+                                 asymbol **dynsyms ATTRIBUTE_UNUSED,
+                                 asymbol **ret)
+{
+  bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
+  bfd_mach_o_dysymtab_command *dysymtab = mdata->dysymtab;
+  bfd_mach_o_symtab_command *symtab = mdata->symtab;
+  asymbol *s;
+  unsigned long count, i, j, n;
+  size_t size;
+  char *names;
+  char *nul_name;
+
+  *ret = NULL;
+
+  if (dysymtab == NULL || symtab == NULL || symtab->symbols == NULL)
+    return 0;
+
+  if (dysymtab->nindirectsyms == 0)
+    return 0;
+
+  count = dysymtab->nindirectsyms;
+  size = count * sizeof (asymbol) + 1;
+
+  for (j = 0; j < count; j++)
+    {
+      unsigned int isym = dysymtab->indirect_syms[j];
+              
+      if (isym < symtab->nsyms && symtab->symbols[isym].symbol.name)
+        size += strlen (symtab->symbols[isym].symbol.name) + sizeof ("$stub");
+    }
+
+  s = *ret = (asymbol *) bfd_malloc (size);
+  if (s == NULL)
+    return -1;
+  names = (char *) (s + count);
+  nul_name = names;
+  *names++ = 0;
+  
+  n = 0;
+  for (i = 0; i < mdata->nsects; i++)
+    {
+      bfd_mach_o_section *sec = mdata->sections[i];
+      unsigned int j, first, last;
+      bfd_mach_o_symtab_command *symtab = mdata->symtab;
+      bfd_vma addr;
+      bfd_vma entry_size;
+      
+      switch (sec->flags & BFD_MACH_O_SECTION_TYPE_MASK)
+        {
+        case BFD_MACH_O_S_NON_LAZY_SYMBOL_POINTERS:
+        case BFD_MACH_O_S_LAZY_SYMBOL_POINTERS:
+        case BFD_MACH_O_S_SYMBOL_STUBS:
+          first = sec->reserved1;
+          last = first + bfd_mach_o_section_get_nbr_indirect (abfd, sec);
+          addr = sec->addr;
+          entry_size = bfd_mach_o_section_get_entry_size (abfd, sec);
+          for (j = first; j < last; j++)
+            {
+              unsigned int isym = dysymtab->indirect_syms[j];
+
+              s->flags = BSF_GLOBAL | BSF_SYNTHETIC;
+              s->section = sec->bfdsection;
+              s->value = addr - sec->addr;
+              s->udata.p = NULL;
+              
+              if (isym < symtab->nsyms
+                  && symtab->symbols[isym].symbol.name)
+                {
+                  const char *sym = symtab->symbols[isym].symbol.name;
+                  size_t len;
+
+                  s->name = names;
+                  len = strlen (sym);
+                  memcpy (names, sym, len);
+                  names += len;
+                  memcpy (names, "$stub", sizeof ("$stub"));
+                  names += sizeof ("$stub");
+                }
+              else
+                s->name = nul_name;
+
+              addr += entry_size;
+              s++;
+              n++;
+            }
+          break;
+        default:
+          break;
+        }
+    }
+
+  return n;
 }
 
 void
@@ -3231,7 +3367,7 @@ bfd_mach_o_print_private_header (bfd *abfd, FILE *file)
   fprintf (file, _(" filetype  : %08lx (%s)\n"),
            h->filetype,
            bfd_mach_o_get_name (bfd_mach_o_filetype_name, h->filetype));
-  fprintf (file, _(" ncmds     : %08lx\n"), h->ncmds);
+  fprintf (file, _(" ncmds     : %08lx (%lu)\n"), h->ncmds, h->ncmds);
   fprintf (file, _(" sizeofcmds: %08lx\n"), h->sizeofcmds);
   fprintf (file, _(" flags     : %08lx ("), h->flags);
   bfd_mach_o_print_flags (bfd_mach_o_header_flags_name, h->flags, file);
@@ -3279,42 +3415,6 @@ bfd_mach_o_print_section_map (bfd *abfd, FILE *file)
 	  fprintf (file, " %08lx\n", sec->flags);
 	}
     }
-}
-
-/* Return the size of an entry for section SEC.
-   Must be called only for symbol pointer section and symbol stubs
-   sections.  */
-
-static unsigned int
-bfd_mach_o_section_get_entry_size (bfd *abfd, bfd_mach_o_section *sec)
-{
-  switch (sec->flags & BFD_MACH_O_SECTION_TYPE_MASK)
-    {
-    case BFD_MACH_O_S_NON_LAZY_SYMBOL_POINTERS:
-    case BFD_MACH_O_S_LAZY_SYMBOL_POINTERS:
-      return bfd_mach_o_wide_p (abfd) ? 8 : 4;
-    case BFD_MACH_O_S_SYMBOL_STUBS:
-      return sec->reserved2;
-    default:
-      BFD_FAIL ();
-      return 0;
-    }
-}
-
-/* Return the number of indirect symbols for a section.
-   Must be called only for symbol pointer section and symbol stubs
-   sections.  */
-
-static unsigned int
-bfd_mach_o_section_get_nbr_indirect (bfd *abfd, bfd_mach_o_section *sec)
-{
-  unsigned int elsz;
-
-  elsz = bfd_mach_o_section_get_entry_size (abfd, sec);
-  if (elsz == 0)
-    return 0;
-  else
-    return sec->size / elsz;
 }
 
 static void
