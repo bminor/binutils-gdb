@@ -1,5 +1,10 @@
 2009-10-09  Andrew Pinski  <andrew_pinski@playstation.sony.com>
 
+	* plugin.cc: Don't include dlfcn.h when ENABLE_PLUGINS is not
+	defined.
+
+2009-10-09  Andrew Pinski  <andrew_pinski@playstation.sony.com>
+
 	* dwarf_reader.cc (Sized_dwarf_line_info::Sized_dwarf_line_info):
 	Change read_shndx type to unsigned int.
 	(Sized_dwarf_line_info::read_lines): Change shndx type to unsigned

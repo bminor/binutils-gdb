@@ -25,7 +25,10 @@
 #include <cstring>
 #include <string>
 #include <vector>
+
+#ifdef ENABLE_PLUGINS
 #include <dlfcn.h>
+#endif
 
 #include "gold.h"
 #include "parameters.h"
