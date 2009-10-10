@@ -1514,11 +1514,13 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *finfo, bfd *input_bfd)
       /* Skip section symbols for sections which are not going to be
 	 emitted.  */
       if (!skip
-	  && dont_skip_symbol == 0
+	  && !dont_skip_symbol
 	  && isym.n_sclass == C_STAT
 	  && isym.n_type == T_NULL
-          && isym.n_numaux > 0
-	  && (*secpp)->output_section == bfd_abs_section_ptr)
+	  && isym.n_numaux > 0
+	  && ((*secpp)->output_section == bfd_abs_section_ptr
+	      || bfd_section_removed_from_list (output_bfd,
+						(*secpp)->output_section)))
 	skip = TRUE;
 #endif
 
