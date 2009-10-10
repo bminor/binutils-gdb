@@ -1,3 +1,10 @@
+2009-10-09  Andrew Pinski  <andrew_pinski@playstation.sony.com>
+	    Ian Lance Taylor  <iant@google.com>
+
+	* descriptor.cc: Include <cstdio> and "binary-io.h".
+	(Descriptors::open): Open the files in binary mode always.
+	* script.cc (Lex::get_token): Treat \r as whitespace.
+
 2009-10-09  Ian Lance Taylor  <iant@google.com>
 
 	* testsuite/retain_symbols_file_test.sh: Don't test for __tcf_0.

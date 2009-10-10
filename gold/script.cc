@@ -743,7 +743,7 @@ Lex::get_token(const char** pp)
 	}
 
       // Skip whitespace quickly.
-      while (*p == ' ' || *p == '\t')
+      while (*p == ' ' || *p == '\t' || *p == '\r')
 	++p;
 
       if (*p == '\n')
