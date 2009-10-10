@@ -3,11 +3,11 @@ test -z "${BIG_OUTPUT_FORMAT}" && BIG_OUTPUT_FORMAT=${OUTPUT_FORMAT}
 test -z "${LITTLE_OUTPUT_FORMAT}" && LITTLE_OUTPUT_FORMAT=${OUTPUT_FORMAT}
 if [ -z "$MACHINE" ]; then OUTPUT_ARCH=${ARCH}; else OUTPUT_ARCH=${ARCH}:${MACHINE}; fi
 test "$LD_FLAG" = "N" && DATA_ADDR=.
-INTERP=".interp    : { *(.interp) 	}"
-PLT=".plt     : { *(.plt)	}"
+INTERP=".interp   ${RELOCATING-0} : { *(.interp) 	}"
+PLT=".plt    ${RELOCATING-0} : { *(.plt)	}"
 
 
-CTOR=".ctors  : 
+CTOR=".ctors ${CONSTRUCTING-0} : 
   {
     ${CONSTRUCTING+${CTOR_START}}
     /* gcc uses crtbegin.o to find the start of
@@ -34,7 +34,7 @@ CTOR=".ctors  :
     ${CONSTRUCTING+${CTOR_END}}
   }"
 
-DTOR=" .dtors        :
+DTOR=" .dtors       ${CONSTRUCTING-0} :
   {
     ${CONSTRUCTING+${DTOR_START}}
     KEEP (*crtbegin.o(.dtors))
@@ -106,12 +106,12 @@ SECTIONS
     *(.rodata.*)
   } ${RELOCATING+ >DATA}
 
-  .rodata1  : {
+  .rodata1 ${RELOCATING-0} : {
     *(.rodata1)
     *(.rodata1.*)
    } ${RELOCATING+ >DATA}
 
-  .data   :
+  .data  ${RELOCATING-0} :
   {
     ${RELOCATING+${DATA_START_SYMBOLS}}
     *(.data)
@@ -120,7 +120,7 @@ SECTIONS
     ${CONSTRUCTING+CONSTRUCTORS}
   } ${RELOCATING+ >DATA}
 
-  .data1  : {
+  .data1 ${RELOCATING-0} : {
     *(.data1)
     *(.data1.*)
   } ${RELOCATING+ >DATA}
@@ -131,7 +131,7 @@ SECTIONS
   /* We want the small data sections together, so single-instruction offsets
      can access them all, and initialized data all before uninitialized, so
      we can shorten the on-disk segment size.  */
-  .sdata    : {
+  .sdata   ${RELOCATING-0} : {
     *(.sdata)
     *(.sdata.*)
   } ${RELOCATING+ >DATA}
@@ -139,8 +139,8 @@ SECTIONS
   ${RELOCATING+_edata = .;}
   ${RELOCATING+PROVIDE (edata = .);}
   ${RELOCATING+__bss_start = .;}
-  .sbss     : { *(.sbss) *(.scommon) } ${RELOCATING+ >DATA}
-  .bss      :
+  .sbss    ${RELOCATING-0} : { *(.sbss) *(.scommon) } ${RELOCATING+ >DATA}
+  .bss     ${RELOCATING-0} :
   {
    *(.dynbss)
    *(.dynbss.*)

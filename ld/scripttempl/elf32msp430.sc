@@ -5,7 +5,7 @@ HEAP_MEMORY_MSP430=" "
 
 if test ${GOT_HEAP_MSP-0} -ne 0 
 then 
-HEAP_SECTION_MSP430=".heap  :
+HEAP_SECTION_MSP430=".heap ${RELOCATING-0} :
   {
     ${RELOCATING+ PROVIDE (__heap_data_start = .) ; }
     *(.heap*)
@@ -37,63 +37,63 @@ SECTIONS
 {
   /* Read-only sections, merged into text segment.  */
   ${TEXT_DYNAMIC+${DYNAMIC}}
-  .hash         : { *(.hash)             }
-  .dynsym       : { *(.dynsym)           }
-  .dynstr       : { *(.dynstr)           }
-  .gnu.version  : { *(.gnu.version)      }
-  .gnu.version_d  : { *(.gnu.version_d)  }
-  .gnu.version_r  : { *(.gnu.version_r)  }
+  .hash        ${RELOCATING-0} : { *(.hash)             }
+  .dynsym      ${RELOCATING-0} : { *(.dynsym)           }
+  .dynstr      ${RELOCATING-0} : { *(.dynstr)           }
+  .gnu.version ${RELOCATING-0} : { *(.gnu.version)      }
+  .gnu.version_d ${RELOCATING-0} : { *(.gnu.version_d)  }
+  .gnu.version_r ${RELOCATING-0} : { *(.gnu.version_r)  }
 
-  .rel.init     : { *(.rel.init) }
-  .rela.init    : { *(.rela.init) }
-  .rel.text     :
+  .rel.init    ${RELOCATING-0} : { *(.rel.init) }
+  .rela.init   ${RELOCATING-0} : { *(.rela.init) }
+  .rel.text    ${RELOCATING-0} :
     {
       *(.rel.text)
       ${RELOCATING+*(.rel.text.*)}
       ${RELOCATING+*(.rel.gnu.linkonce.t*)}
     }
-  .rela.text    :
+  .rela.text   ${RELOCATING-0} :
     {
       *(.rela.text)
       ${RELOCATING+*(.rela.text.*)}
       ${RELOCATING+*(.rela.gnu.linkonce.t*)}
     }
-  .rel.fini     : { *(.rel.fini) }
-  .rela.fini    : { *(.rela.fini) }
-  .rel.rodata   :
+  .rel.fini    ${RELOCATING-0} : { *(.rel.fini) }
+  .rela.fini   ${RELOCATING-0} : { *(.rela.fini) }
+  .rel.rodata  ${RELOCATING-0} :
     {
       *(.rel.rodata)
       ${RELOCATING+*(.rel.rodata.*)}
       ${RELOCATING+*(.rel.gnu.linkonce.r*)}
     }
-  .rela.rodata  :
+  .rela.rodata ${RELOCATING-0} :
     {
       *(.rela.rodata)
       ${RELOCATING+*(.rela.rodata.*)}
       ${RELOCATING+*(.rela.gnu.linkonce.r*)}
     }
-  .rel.data     :
+  .rel.data    ${RELOCATING-0} :
     {
       *(.rel.data)
       ${RELOCATING+*(.rel.data.*)}
       ${RELOCATING+*(.rel.gnu.linkonce.d*)}
     }
-  .rela.data    :
+  .rela.data   ${RELOCATING-0} :
     {
       *(.rela.data)
       ${RELOCATING+*(.rela.data.*)}
       ${RELOCATING+*(.rela.gnu.linkonce.d*)}
     }
-  .rel.ctors    : { *(.rel.ctors)        }
-  .rela.ctors   : { *(.rela.ctors)       }
-  .rel.dtors    : { *(.rel.dtors)        }
-  .rela.dtors   : { *(.rela.dtors)       }
-  .rel.got      : { *(.rel.got)          }
-  .rela.got     : { *(.rela.got)         }
-  .rel.bss      : { *(.rel.bss)          }
-  .rela.bss     : { *(.rela.bss)         }
-  .rel.plt      : { *(.rel.plt)          }
-  .rela.plt     : { *(.rela.plt)         }
+  .rel.ctors   ${RELOCATING-0} : { *(.rel.ctors)        }
+  .rela.ctors  ${RELOCATING-0} : { *(.rela.ctors)       }
+  .rel.dtors   ${RELOCATING-0} : { *(.rel.dtors)        }
+  .rela.dtors  ${RELOCATING-0} : { *(.rela.dtors)       }
+  .rel.got     ${RELOCATING-0} : { *(.rel.got)          }
+  .rela.got    ${RELOCATING-0} : { *(.rela.got)         }
+  .rel.bss     ${RELOCATING-0} : { *(.rel.bss)          }
+  .rela.bss    ${RELOCATING-0} : { *(.rela.bss)         }
+  .rel.plt     ${RELOCATING-0} : { *(.rel.plt)          }
+  .rela.plt    ${RELOCATING-0} : { *(.rela.plt)         }
 
   /* Internal text space.  */
   .text :
@@ -139,7 +139,7 @@ SECTIONS
     _etext = .;
   } ${RELOCATING+ > text}
 
-  .data  : ${RELOCATING+AT (ADDR (.text) + SIZEOF (.text))}
+  .data ${RELOCATING-0} : ${RELOCATING+AT (ADDR (.text) + SIZEOF (.text))}
   {  
     ${RELOCATING+ PROVIDE (__data_start = .) ; }
     ${RELOCATING+. = ALIGN(2);}
@@ -151,7 +151,7 @@ SECTIONS
   } ${RELOCATING+ > data}
   
   /* Bootloader.  */
-  .bootloader  :
+  .bootloader ${RELOCATING-0} :
   {
     ${RELOCATING+ PROVIDE (__boot_start = .) ; }
     *(.bootloader)
@@ -160,7 +160,7 @@ SECTIONS
   } ${RELOCATING+ > bootloader}
   
   /* Information memory.  */
-  .infomem  :
+  .infomem ${RELOCATING-0} :
   {
     *(.infomem)
     ${RELOCATING+. = ALIGN(2);}
@@ -168,7 +168,7 @@ SECTIONS
   } ${RELOCATING+ > infomem}
 
   /* Information memory (not loaded into MPU).  */
-  .infomemnobits  :
+  .infomemnobits ${RELOCATING-0} :
   {
     *(.infomemnobits)
     ${RELOCATING+. = ALIGN(2);}
@@ -193,7 +193,7 @@ SECTIONS
     ${RELOCATING+ _end = . ;  }
   } ${RELOCATING+ > data}
 
-  .vectors :
+  .vectors ${RELOCATING-0}:
   {
     ${RELOCATING+ PROVIDE (__vectors_start = .) ; }
     *(.vectors*)

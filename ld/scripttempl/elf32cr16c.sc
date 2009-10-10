@@ -1,5 +1,4 @@
 # Linker Script for National Semiconductor's CR16C-ELF32.
-test -z "$RELOCATING" && exit 0
 
 test -z "$ENTRY" && ENTRY=_start
 cat <<EOF
@@ -8,7 +7,7 @@ cat <<EOF
    elf32 files, which were compiled with either the near data
    model or the default data model.  */
 
-ENTRY(${ENTRY})
+${RELOCATING+ENTRY(${ENTRY})}
 
 MEMORY
 {

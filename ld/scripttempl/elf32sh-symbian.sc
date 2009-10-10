@@ -84,7 +84,7 @@ fi
 DYNAMIC=".dynamic        : { *(.dynamic) } :dynamic :dyn"
  RODATA=".rodata    ALIGN(4) : { *(.rodata${RELOCATING+ .rodata.* .gnu.linkonce.r.*}) }"
 DISCARDED="/DISCARD/ : { *(.note.GNU-stack) *(.gnu_debuglink) *(.directive)  *(.gnu.lto_*) }"
-test -z "$GOT" && GOT=".got           : { *(.got.plt) *(.got) } :dynamic :dyn"
+test -z "$GOT" && GOT=".got          ${RELOCATING-0} : { *(.got.plt) *(.got) } :dynamic :dyn"
 CTOR=".ctors     ALIGN(4) : 
   {
     ${CONSTRUCTING+${CTOR_START}}
@@ -121,7 +121,7 @@ DTOR=".dtors        ALIGN(4) :
     KEEP (*(.dtors))
     ${CONSTRUCTING+${DTOR_END}}
   } :text"
-STACK="  .stack        ${RELOCATING+${STACK_ADDR}} :
+STACK="  .stack        ${RELOCATING-0}${RELOCATING+${STACK_ADDR}} :
   {
     ${RELOCATING+_stack = .;}
     *(.stack)
@@ -145,6 +145,10 @@ ${RELOCATING+/* Do we need any of these for elf?
    __DYNAMIC = 0; ${STACKZERO+${STACKZERO}} ${SHLIB_PATH+${SHLIB_PATH}}  */}
 ${RELOCATING+${EXECUTABLE_SYMBOLS}}
 ${RELOCATING+${INPUT_FILES}}
+${RELOCATING- /* For some reason, the Solaris linker makes bad executables
+  if gld -r is used and the intermediate file has sections starting
+  at non-zero addresses.  Could be a Solaris ld bug, could be a GNU ld
+  bug.  But for now assigning the zero vmas works.  */}
 
 PHDRS
 {
@@ -204,20 +208,20 @@ SECTIONS
   /* Adjust the address for the data segment.  We want to adjust up to
      the same address within the page on the next page up.  */
   . = ALIGN(128) + (. & (128 - 1));
-  .preinit_array    :
+  .preinit_array   ${RELOCATING-0} :
   {
     ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (__preinit_array_start = .);}}
     KEEP (*(.preinit_array))
     ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (__preinit_array_end = .);}}
   }
-  .init_array    :
+  .init_array   ${RELOCATING-0} :
   {
      ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (__init_array_start = .);}}
      KEEP (*(SORT(.init_array.*)))
      KEEP (*(.init_array))
      ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (__init_array_end = .);}}
   }
-  .fini_array    :
+  .fini_array   ${RELOCATING-0} :
   {
     ${RELOCATING+${CREATE_SHLIB-PROVIDE_HIDDEN (__fini_array_start = .);}}
     KEEP (*(.fini_array))
@@ -269,14 +273,14 @@ SECTIONS
 
   ${TEXT_DYNAMIC-${DYNAMIC}}
   ${TEXT_DYNAMIC+${DYNAMIC}}
-  .hash          : { *(.hash) } :dynamic :dyn
-  .dynsym        : { *(.dynsym) } :dynamic :dyn
-  .dynstr        : { *(.dynstr) } :dynamic :dyn
+  .hash         ${RELOCATING-0} : { *(.hash) } :dynamic :dyn
+  .dynsym       ${RELOCATING-0} : { *(.dynsym) } :dynamic :dyn
+  .dynstr       ${RELOCATING-0} : { *(.dynstr) } :dynamic :dyn
   ${DATA_PLT-${BSS_PLT-${PLT}}}
   .got.plt	  : { *(.got.plt) } :dynamic :dyn
-  .gnu.version   : { *(.gnu.version) }
-  .gnu.version_d : { *(.gnu.version_d) }
-  .gnu.version_r : { *(.gnu.version_r) }
+  .gnu.version  ${RELOCATING-0} : { *(.gnu.version) }
+  .gnu.version_d ${RELOCATING-0}: { *(.gnu.version_d) }
+  .gnu.version_r ${RELOCATING-0}: { *(.gnu.version_r) }
 EOF
 if [ "x$COMBRELOC" = x ]; then
   COMBRELOCCAT=cat
@@ -284,40 +288,40 @@ else
   COMBRELOCCAT="cat > $COMBRELOC"
 fi
 eval $COMBRELOCCAT <<EOF
-  .rel.init      : { *(.rel.init) }
-  .rela.init     : { *(.rela.init) }
-  .rel.text      : { *(.rel.text${RELOCATING+ .rel.text.* .rel.gnu.linkonce.t.*}) }
-  .rela.text     : { *(.rela.text${RELOCATING+ .rela.text.* .rela.gnu.linkonce.t.*}) }
-  .rel.fini      : { *(.rel.fini) }
-  .rela.fini     : { *(.rela.fini) }
-  .rel.rodata    : { *(.rel.rodata${RELOCATING+ .rel.rodata.* .rel.gnu.linkonce.r.*}) }
-  .rela.rodata   : { *(.rela.rodata${RELOCATING+ .rela.rodata.* .rela.gnu.linkonce.r.*}) }
+  .rel.init     ${RELOCATING-0} : { *(.rel.init) }
+  .rela.init    ${RELOCATING-0} : { *(.rela.init) }
+  .rel.text     ${RELOCATING-0} : { *(.rel.text${RELOCATING+ .rel.text.* .rel.gnu.linkonce.t.*}) }
+  .rela.text    ${RELOCATING-0} : { *(.rela.text${RELOCATING+ .rela.text.* .rela.gnu.linkonce.t.*}) }
+  .rel.fini     ${RELOCATING-0} : { *(.rel.fini) }
+  .rela.fini    ${RELOCATING-0} : { *(.rela.fini) }
+  .rel.rodata   ${RELOCATING-0} : { *(.rel.rodata${RELOCATING+ .rel.rodata.* .rel.gnu.linkonce.r.*}) }
+  .rela.rodata  ${RELOCATING-0} : { *(.rela.rodata${RELOCATING+ .rela.rodata.* .rela.gnu.linkonce.r.*}) }
   ${OTHER_READONLY_RELOC_SECTIONS}
-  .rel.data      : { *(.rel.data${RELOCATING+ .rel.data.* .rel.gnu.linkonce.d.*}) }
-  .rela.data     : { *(.rela.data${RELOCATING+ .rela.data.* .rela.gnu.linkonce.d.*}) }
-  .rel.tdata	 : { *(.rel.tdata${RELOCATING+ .rel.tdata.* .rel.gnu.linkonce.td.*}) }
-  .rela.tdata	 : { *(.rela.tdata${RELOCATING+ .rela.tdata.* .rela.gnu.linkonce.td.*}) }
-  .rel.tbss	 : { *(.rel.tbss${RELOCATING+ .rel.tbss.* .rel.gnu.linkonce.tb.*}) }
-  .rela.tbss	 : { *(.rela.tbss${RELOCATING+ .rela.tbss.* .rela.gnu.linkonce.tb.*}) }
-  .rel.ctors     : { *(.rel.ctors) }
-  .rela.ctors    : { *(.rela.ctors) }
-  .rel.dtors     : { *(.rel.dtors) }
-  .rela.dtors    : { *(.rela.dtors) }
-  .rel.got       : { *(.rel.got) }
-  .rela.got      : { *(.rela.got) }
+  .rel.data     ${RELOCATING-0} : { *(.rel.data${RELOCATING+ .rel.data.* .rel.gnu.linkonce.d.*}) }
+  .rela.data    ${RELOCATING-0} : { *(.rela.data${RELOCATING+ .rela.data.* .rela.gnu.linkonce.d.*}) }
+  .rel.tdata	${RELOCATING-0} : { *(.rel.tdata${RELOCATING+ .rel.tdata.* .rel.gnu.linkonce.td.*}) }
+  .rela.tdata	${RELOCATING-0} : { *(.rela.tdata${RELOCATING+ .rela.tdata.* .rela.gnu.linkonce.td.*}) }
+  .rel.tbss	${RELOCATING-0} : { *(.rel.tbss${RELOCATING+ .rel.tbss.* .rel.gnu.linkonce.tb.*}) }
+  .rela.tbss	${RELOCATING-0} : { *(.rela.tbss${RELOCATING+ .rela.tbss.* .rela.gnu.linkonce.tb.*}) }
+  .rel.ctors    ${RELOCATING-0} : { *(.rel.ctors) }
+  .rela.ctors   ${RELOCATING-0} : { *(.rela.ctors) }
+  .rel.dtors    ${RELOCATING-0} : { *(.rel.dtors) }
+  .rela.dtors   ${RELOCATING-0} : { *(.rela.dtors) }
+  .rel.got      ${RELOCATING-0} : { *(.rel.got) }
+  .rela.got     ${RELOCATING-0} : { *(.rela.got) }
   ${OTHER_GOT_RELOC_SECTIONS}
-  .rel.bss       : { *(.rel.bss${RELOCATING+ .rel.bss.* .rel.gnu.linkonce.b.*}) }
-  .rela.bss      : { *(.rela.bss${RELOCATING+ .rela.bss.* .rela.gnu.linkonce.b.*}) }
+  .rel.bss      ${RELOCATING-0} : { *(.rel.bss${RELOCATING+ .rel.bss.* .rel.gnu.linkonce.b.*}) }
+  .rela.bss     ${RELOCATING-0} : { *(.rela.bss${RELOCATING+ .rela.bss.* .rela.gnu.linkonce.b.*}) }
 EOF
 if [ -n "$COMBRELOC" ]; then
 cat <<EOF
-  .rel.dyn       :
+  .rel.dyn      ${RELOCATING-0} :
     {
 EOF
 sed -e '/^[ 	]*[{}][ 	]*$/d;/:[ 	]*$/d;/\.rela\./d;s/^.*: { *\(.*\)}$/      \1/' $COMBRELOC
 cat <<EOF
     }
-  .rela.dyn      :
+  .rela.dyn     ${RELOCATING-0} :
     {
 EOF
 sed -e '/^[ 	]*[{}][ 	]*$/d;/:[ 	]*$/d;/\.rel\./d;s/^.*: { *\(.*\)}/      \1/' $COMBRELOC
@@ -326,8 +330,8 @@ cat <<EOF
 EOF
 fi
 cat <<EOF
-  .rel.plt       : { *(.rel.plt) }
-  .rela.plt      : { *(.rela.plt) }
+  .rel.plt      ${RELOCATING-0} : { *(.rel.plt) }
+  .rela.plt     ${RELOCATING-0} : { *(.rela.plt) }
   ${OTHER_PLT_RELOC_SECTIONS}
 
 

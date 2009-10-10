@@ -54,7 +54,7 @@ test -z "${LITTLE_OUTPUT_FORMAT}" && LITTLE_OUTPUT_FORMAT=${OUTPUT_FORMAT}
 if [ -z "$MACHINE" ]; then OUTPUT_ARCH=${ARCH}; else OUTPUT_ARCH=${ARCH}:${MACHINE}; fi
 test -z "${ELFSIZE}" && ELFSIZE=32
 test -z "${ALIGNMENT}" && ALIGNMENT="${ELFSIZE} / 8"
-CTOR=".ctors  : 
+CTOR=".ctors ${CONSTRUCTING-0} : 
   {
     ${CONSTRUCTING+${CTOR_START}}
     /* gcc uses crtbegin.o to find the start of
@@ -81,7 +81,7 @@ CTOR=".ctors  :
     ${CONSTRUCTING+${CTOR_END}}
   } > ROM"
 
-DTOR=" .dtors        :
+DTOR=" .dtors       ${CONSTRUCTING-0} :
   {
     ${CONSTRUCTING+${DTOR_START}}
     KEEP (*crtbegin.o(.dtors))
@@ -101,6 +101,10 @@ ${RELOCATING+ENTRY(${ENTRY})}
 ${RELOCATING+${LIB_SEARCH_DIRS}}
 ${RELOCATING+${EXECUTABLE_SYMBOLS}}
 ${RELOCATING+${INPUT_FILES}}
+${RELOCATING- /* For some reason, the Solaris linker makes bad executables
+  if gld -r is used and the intermediate file has sections starting
+  at non-zero addresses.  Could be a Solaris ld bug, could be a GNU ld
+  bug.  But for now assigning the zero vmas works.  */}
 
 /* There are two memory regions we care about, one from 0 through 0x7F00
    that is RAM and one from 0x8000 up which is ROM.  */
@@ -112,7 +116,7 @@ MEMORY
 
 SECTIONS
 {
-  .data   :
+  .data  ${RELOCATING-0} :
   {
     ${RELOCATING+__rdata = .;}
     ${RELOCATING+__data = .;}
@@ -129,7 +133,7 @@ SECTIONS
   ${RELOCATING+PROVIDE (edata = .);}
   ${RELOCATING+__bss_start = .;}
   ${RELOCATING+${OTHER_BSS_SYMBOLS}}
-  .bss      :
+  .bss     ${RELOCATING-0} :
   {
    *(.dynbss)
    *(.bss)
@@ -149,9 +153,9 @@ SECTIONS
   ${RELOCATING+PROVIDE (end = .);}
 
   /* Read-only sections in ROM.  */
-  .int_vec      : { *(.int_vec)	} ${RELOCATING+> ROM}
+  .int_vec     ${RELOCATING-0} : { *(.int_vec)	} ${RELOCATING+> ROM}
 
-  .rodata  : { *(.rodata) ${RELOCATING+*(.rodata.*)} ${RELOCATING+*(.gnu.linkonce.r.*)} } ${RELOCATING+> ROM}
+  .rodata ${RELOCATING-0} : { *(.rodata) ${RELOCATING+*(.rodata.*)} ${RELOCATING+*(.gnu.linkonce.r.*)} } ${RELOCATING+> ROM}
   ${RELOCATING+${CTOR}}
   ${RELOCATING+${DTOR}}
   .jcr : { KEEP (*(.jcr)) } ${RELOCATING+> ROM}
@@ -159,7 +163,7 @@ SECTIONS
   .gcc_except_table : { *(.gcc_except_table) } ${RELOCATING+> ROM}
   .plt : { *(.plt) } ${RELOCATING+> ROM}
 
-  .text     :
+  .text    ${RELOCATING-0} :
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
     *(.text)
@@ -170,13 +174,13 @@ SECTIONS
     ${RELOCATING+*(.gnu.linkonce.t.*)}
     ${RELOCATING+${OTHER_TEXT_SECTIONS}}
   } ${RELOCATING+> ROM =${NOP-0}}
-  .init         : 
+  .init        ${RELOCATING-0} : 
   { 
     ${RELOCATING+${INIT_START}}
     KEEP (*(.init))
     ${RELOCATING+${INIT_END}}
   } ${RELOCATING+> ROM =${NOP-0}}
-  .fini     :
+  .fini    ${RELOCATING-0} :
   {
     ${RELOCATING+${FINI_START}}
     KEEP (*(.fini))
