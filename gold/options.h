@@ -1228,9 +1228,20 @@ class Position_dependent_options
 class Input_file_argument
 {
  public:
+  enum Input_file_type
+  {
+    // A regular file, name used as-is, not searched.
+    INPUT_FILE_TYPE_FILE,
+    // A library name.  When used, "lib" will be prepended and ".so" or
+    // ".a" appended to make a filename, and that filename will be searched
+    // for using the -L paths.
+    INPUT_FILE_TYPE_LIBRARY,
+    // A regular file, name used as-is, but searched using the -L paths.
+    INPUT_FILE_TYPE_SEARCHED_FILE
+  };
+
   // name: file name or library name
-  // is_lib: true if name is a library name: that is, emits the leading
-  //         "lib" and trailing ".so"/".a" from the name
+  // type: the type of this input file.
   // extra_search_path: an extra directory to look for the file, prior
   //         to checking the normal library search path.  If this is "",
   //         then no extra directory is added.
@@ -1238,15 +1249,15 @@ class Input_file_argument
   // options: The position dependent options at this point in the
   //         command line, such as --whole-archive.
   Input_file_argument()
-    : name_(), is_lib_(false), extra_search_path_(""), just_symbols_(false),
-      options_()
+    : name_(), type_(INPUT_FILE_TYPE_FILE), extra_search_path_(""),
+      just_symbols_(false), options_()
   { }
 
-  Input_file_argument(const char* name, bool is_lib,
+  Input_file_argument(const char* name, Input_file_type type,
                       const char* extra_search_path,
                       bool just_symbols,
                       const Position_dependent_options& options)
-    : name_(name), is_lib_(is_lib), extra_search_path_(extra_search_path),
+    : name_(name), type_(type), extra_search_path_(extra_search_path),
       just_symbols_(just_symbols), options_(options)
   { }
 
@@ -1254,11 +1265,11 @@ class Input_file_argument
   // Position_dependent_options.  In that case, we extract the
   // position-independent vars from the General_options and only store
   // those.
-  Input_file_argument(const char* name, bool is_lib,
+  Input_file_argument(const char* name, Input_file_type type,
                       const char* extra_search_path,
                       bool just_symbols,
                       const General_options& options)
-    : name_(name), is_lib_(is_lib), extra_search_path_(extra_search_path),
+    : name_(name), type_(type), extra_search_path_(extra_search_path),
       just_symbols_(just_symbols), options_(options)
   { }
 
@@ -1272,7 +1283,11 @@ class Input_file_argument
 
   bool
   is_lib() const
-  { return this->is_lib_; }
+  { return type_ == INPUT_FILE_TYPE_LIBRARY; }
+
+  bool
+  is_searched_file() const
+  { return type_ == INPUT_FILE_TYPE_SEARCHED_FILE; }
 
   const char*
   extra_search_path() const
@@ -1291,14 +1306,18 @@ class Input_file_argument
   // options.
   bool
   may_need_search() const
-  { return this->is_lib_ || !this->extra_search_path_.empty(); }
+  {
+    return (this->is_lib()
+	    || this->is_searched_file()
+	    || !this->extra_search_path_.empty());
+  }
 
  private:
   // We use std::string, not const char*, here for convenience when
   // using script files, so that we do not have to preserve the string
   // in that case.
   std::string name_;
-  bool is_lib_;
+  Input_file_type type_;
   std::string extra_search_path_;
   bool just_symbols_;
   Position_dependent_options options_;

@@ -1,3 +1,29 @@
+2009-10-10  Chris Demetriou  <cgd@google.com>
+
+	* options.h (Input_file_argument::Input_file_type): New enum.
+	(Input_file_argument::is_lib_): Replace with...
+	(Input_file_argument::type_): New member.
+	(Input_file_argument::Input_file_argument): Take Input_file_type
+	'type' rather than boolean 'is_lib' as second argument.
+	(Input_file_argument::is_lib): Use type_.
+	(Input_file_argument::is_searched_file): New function.
+	(Input_file_argument::may_need_search): Handle is_searched_file.
+	* options.cc (General_options::parse_library): Support -l:filename.
+	(General_options::parse_just_symbols): Update for Input_file_argument
+	changes.
+	(Command_line::process): Likewise.
+	* archive.cc (Archive::get_file_and_offset): Likewise.
+	* plugin.cc (Plugin_manager::release_input_file): Likewise.
+	* script.cc (read_script_file, script_add_file): Likewise.
+	* fileread.cc (Input_file::Input_file): Likewise.
+	(Input_file::will_search_for): Handle is_searched_file.
+	(Input_file::open): Likewise.
+	* readsyms.cc (Read_symbols::get_name): Likewise.
+	* testsuite/Makefile.am (searched_file_test): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/searched_file_test.cc: New file.
+	* testsuite/searched_file_test_lib.cc: New file.
+
 2009-10-09  Andrew Pinski  <andrew_pinski@playstation.sony.com>
 	    Ian Lance Taylor  <iant@google.com>
 

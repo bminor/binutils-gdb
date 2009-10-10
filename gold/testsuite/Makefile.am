@@ -1181,6 +1181,20 @@ permission_test: basic_test.o gcctestdir/ld
 	chmod 600 $@; \
 	$(CXXLINK) -Bgcctestdir/ basic_test.o
 
+# Check -l:foo.a
+check_PROGRAMS += searched_file_test
+MOSTLYCLEANFILES += searched_file_test searched_file_test_lib.o \
+                    alt/searched_file_test_lib.a
+searched_file_test_SOURCES = searched_file_test.cc
+searched_file_test_DEPENDENCIES = alt/searched_file_test_lib.a
+searched_file_test_LDFLAGS = -Bgcctestdir/ -Lalt
+searched_file_test_LDADD = -l:searched_file_test_lib.a
+searched_file_test_lib.o: searched_file_test_lib.cc
+	$(CXXCOMPILE) -c -o $@ $<
+alt/searched_file_test_lib.a: searched_file_test_lib.o
+	test -d alt || mkdir -p alt
+	$(TEST_AR) rc $@ $^
+
 endif GCC
 endif NATIVE_LINKER
 

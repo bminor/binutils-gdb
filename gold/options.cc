@@ -341,7 +341,19 @@ void
 General_options::parse_library(const char*, const char* arg,
                                Command_line* cmdline)
 {
-  Input_file_argument file(arg, true, "", false, *this);
+  Input_file_argument::Input_file_type type;
+  const char *name;
+  if (arg[0] == ':')
+    {
+      type = Input_file_argument::INPUT_FILE_TYPE_SEARCHED_FILE;
+      name = arg + 1;
+    }
+  else
+    {
+      type = Input_file_argument::INPUT_FILE_TYPE_LIBRARY;
+      name = arg;
+    }
+  Input_file_argument file(name, type, "", false, *this);
   cmdline->inputs().add_file(file);
 }
 
@@ -378,7 +390,8 @@ void
 General_options::parse_just_symbols(const char*, const char* arg,
                                     Command_line* cmdline)
 {
-  Input_file_argument file(arg, false, "", true, *this);
+  Input_file_argument file(arg, Input_file_argument::INPUT_FILE_TYPE_FILE,
+			   "", true, *this);
   cmdline->inputs().add_file(file);
 }
 
@@ -1157,8 +1170,9 @@ Command_line::process(int argc, const char** argv)
       this->position_options_.copy_from_options(this->options());
       if (no_more_options || argv[i][0] != '-')
         {
-          Input_file_argument file(argv[i], false, "", false,
-                                   this->position_options_);
+	  Input_file_argument file(argv[i],
+				   Input_file_argument::INPUT_FILE_TYPE_FILE,
+				   "", false, this->position_options_);
           this->inputs_.add_file(file);
           ++i;
         }

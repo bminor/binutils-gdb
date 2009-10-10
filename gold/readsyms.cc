@@ -398,6 +398,8 @@ Read_symbols::get_name() const
       std::string ret("Read_symbols ");
       if (this->input_argument_->file().is_lib())
 	ret += "-l";
+      else if (this->input_argument_->file().is_searched_file())
+	ret += "-l:";
       ret += this->input_argument_->file().name();
       return ret;
     }
@@ -590,6 +592,8 @@ Read_script::get_name() const
   std::string ret("Read_script ");
   if (this->input_argument_->file().is_lib())
     ret += "-l";
+  else if (this->input_argument_->file().is_searched_file())
+    ret += "-l:";
   ret += this->input_argument_->file().name();
   return ret;
 }

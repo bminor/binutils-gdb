@@ -726,8 +726,8 @@ Input_file::Input_file(const Task* task, const char* name,
   : file_()
 {
   this->input_argument_ =
-    new Input_file_argument(name, false, "", false,
-			    Position_dependent_options());
+    new Input_file_argument(name, Input_file_argument::INPUT_FILE_TYPE_FILE,
+                            "", false, Position_dependent_options());
   bool ok = this->file_.open(task, name, contents, size);
   gold_assert(ok);
 }
@@ -774,6 +774,7 @@ Input_file::will_search_for() const
 {
   return (!IS_ABSOLUTE_PATH(this->input_argument_->name())
 	  && (this->input_argument_->is_lib()
+	      || this->input_argument_->is_searched_file()
 	      || this->input_argument_->extra_search_path() != NULL));
 }
 
@@ -798,9 +799,10 @@ File_read::get_mtime()
 
 // If the filename is not absolute, we assume it is in the current
 // directory *except* when:
-//    A) input_argument_->is_lib() is true; or
-//    B) input_argument_->extra_search_path() is not empty.
-// In both cases, we look in extra_search_path + library_path to find
+//    A) input_argument_->is_lib() is true;
+//    B) input_argument_->is_searched_file() is true; or
+//    C) input_argument_->extra_search_path() is not empty.
+// In each, we look in extra_search_path + library_path to find
 // the file location, rather than the current directory.
 
 bool
@@ -809,35 +811,43 @@ Input_file::open(const Dirsearch& dirpath, const Task* task, int *pindex)
   std::string name;
 
   // Case 1: name is an absolute file, just try to open it
-  // Case 2: name is relative but is_lib is false and extra_search_path
-  //         is empty
+  // Case 2: name is relative but is_lib is false, is_searched_file is false,
+  //         and extra_search_path is empty
   if (IS_ABSOLUTE_PATH(this->input_argument_->name())
       || (!this->input_argument_->is_lib()
+	  && !this->input_argument_->is_searched_file()
 	  && this->input_argument_->extra_search_path() == NULL))
     {
       name = this->input_argument_->name();
       this->found_name_ = name;
     }
-  // Case 3: is_lib is true
-  else if (this->input_argument_->is_lib())
+  // Case 3: is_lib is true or is_searched_file is true
+  else if (this->input_argument_->is_lib()
+	   || this->input_argument_->is_searched_file())
     {
       // We don't yet support extra_search_path with -l.
       gold_assert(this->input_argument_->extra_search_path() == NULL);
-      std::string n1("lib");
-      n1 += this->input_argument_->name();
-      std::string n2;
-      if (parameters->options().is_static()
-	  || !this->input_argument_->options().Bdynamic())
-	n1 += ".a";
-      else
+      std::string n1, n2;
+      if (this->input_argument_->is_lib())
 	{
-	  n2 = n1 + ".a";
-	  n1 += ".so";
+	  n1 = "lib";
+	  n1 += this->input_argument_->name();
+	  if (parameters->options().is_static()
+	      || !this->input_argument_->options().Bdynamic())
+	    n1 += ".a";
+	  else
+	    {
+	      n2 = n1 + ".a";
+	      n1 += ".so";
+	    }
 	}
+      else
+	n1 = this->input_argument_->name();
       name = dirpath.find(n1, n2, &this->is_in_sysroot_, pindex);
       if (name.empty())
 	{
-	  gold_error(_("cannot find -l%s"),
+	  gold_error(_("cannot find %s%s"),
+	             this->input_argument_->is_lib() ? "-l" : "",
 		     this->input_argument_->name());
 	  return false;
 	}

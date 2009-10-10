@@ -359,7 +359,10 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	hidden_test hidden_test.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test.in \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	searched_file_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	searched_file_test_lib.o \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/searched_file_test_lib.a
 @GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@am__append_30 = large
 @GCC_FALSE@large_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
@@ -377,7 +380,12 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 
 # Test that if the output file already exists and is empty,
 # it will get execute permission.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_31 = permission_test
+
+# Check -l:foo.a
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_31 = permission_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	searched_file_test
+@GCC_FALSE@searched_file_test_DEPENDENCIES =
+@NATIVE_LINKER_FALSE@searched_file_test_DEPENDENCIES =
 
 # These tests work with cross linkers.
 @DEFAULT_TARGET_I386_TRUE@am__append_32 = split_i386.sh
@@ -504,7 +512,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test$(EXEEXT)
 @GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_18 = large$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_19 =  \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	permission_test$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	permission_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	searched_file_test$(EXEEXT)
 basic_pic_test_SOURCES = basic_pic_test.c
 basic_pic_test_OBJECTS = basic_pic_test.$(OBJEXT)
 basic_pic_test_LDADD = $(LDADD)
@@ -802,6 +811,12 @@ script_test_3_LDADD = $(LDADD)
 script_test_3_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am__searched_file_test_SOURCES_DIST = searched_file_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_searched_file_test_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	searched_file_test.$(OBJEXT)
+searched_file_test_OBJECTS = $(am_searched_file_test_OBJECTS)
+searched_file_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(searched_file_test_LDFLAGS) $(LDFLAGS) -o $@
 am__thin_archive_test_1_SOURCES_DIST = thin_archive_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_thin_archive_test_1_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_main.$(OBJEXT)
@@ -1153,8 +1168,9 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(protected_2_SOURCES) $(relro_script_test_SOURCES) \
 	$(relro_test_SOURCES) $(script_test_1_SOURCES) \
 	$(script_test_2_SOURCES) script_test_3.c \
-	$(thin_archive_test_1_SOURCES) $(thin_archive_test_2_SOURCES) \
-	$(tls_pic_test_SOURCES) $(tls_shared_gd_to_ie_test_SOURCES) \
+	$(searched_file_test_SOURCES) $(thin_archive_test_1_SOURCES) \
+	$(thin_archive_test_2_SOURCES) $(tls_pic_test_SOURCES) \
+	$(tls_shared_gd_to_ie_test_SOURCES) \
 	$(tls_shared_gnu2_gd_to_ie_test_SOURCES) \
 	$(tls_shared_gnu2_test_SOURCES) $(tls_shared_ie_test_SOURCES) \
 	$(tls_shared_nonpic_test_SOURCES) $(tls_shared_test_SOURCES) \
@@ -1212,6 +1228,7 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(am__relro_test_SOURCES_DIST) \
 	$(am__script_test_1_SOURCES_DIST) \
 	$(am__script_test_2_SOURCES_DIST) script_test_3.c \
+	$(am__searched_file_test_SOURCES_DIST) \
 	$(am__thin_archive_test_1_SOURCES_DIST) \
 	$(am__thin_archive_test_2_SOURCES_DIST) \
 	$(am__tls_pic_test_SOURCES_DIST) \
@@ -1768,6 +1785,10 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@large_CFLAGS = -mcmodel=medium
 @GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@large_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@large_LDFLAGS = -Bgcctestdir/
+@GCC_TRUE@@NATIVE_LINKER_TRUE@searched_file_test_SOURCES = searched_file_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@searched_file_test_DEPENDENCIES = alt/searched_file_test_lib.a
+@GCC_TRUE@@NATIVE_LINKER_TRUE@searched_file_test_LDFLAGS = -Bgcctestdir/ -Lalt
+@GCC_TRUE@@NATIVE_LINKER_TRUE@searched_file_test_LDADD = -l:searched_file_test_lib.a
 @DEFAULT_TARGET_I386_TRUE@SPLIT_DEFSYMS = --defsym __morestack=0x100 --defsym __morestack_non_split=0x200
 @DEFAULT_TARGET_X86_64_TRUE@SPLIT_DEFSYMS = --defsym __morestack=0x100 --defsym __morestack_non_split=0x200
 all: $(BUILT_SOURCES)
@@ -2001,6 +2022,9 @@ script_test_2$(EXEEXT): $(script_test_2_OBJECTS) $(script_test_2_DEPENDENCIES)
 @NATIVE_LINKER_FALSE@script_test_3$(EXEEXT): $(script_test_3_OBJECTS) $(script_test_3_DEPENDENCIES) 
 @NATIVE_LINKER_FALSE@	@rm -f script_test_3$(EXEEXT)
 @NATIVE_LINKER_FALSE@	$(LINK) $(script_test_3_OBJECTS) $(script_test_3_LDADD) $(LIBS)
+searched_file_test$(EXEEXT): $(searched_file_test_OBJECTS) $(searched_file_test_DEPENDENCIES) 
+	@rm -f searched_file_test$(EXEEXT)
+	$(searched_file_test_LINK) $(searched_file_test_OBJECTS) $(searched_file_test_LDADD) $(LIBS)
 thin_archive_test_1$(EXEEXT): $(thin_archive_test_1_OBJECTS) $(thin_archive_test_1_DEPENDENCIES) 
 	@rm -f thin_archive_test_1$(EXEEXT)
 	$(thin_archive_test_1_LINK) $(thin_archive_test_1_OBJECTS) $(thin_archive_test_1_LDADD) $(LIBS)
@@ -2182,6 +2206,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_2a.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_2b.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_3.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/searched_file_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testfile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testmain.Po@am__quote@
@@ -3000,6 +3025,11 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	touch $@; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	chmod 600 $@; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ basic_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@searched_file_test_lib.o: searched_file_test_lib.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@alt/searched_file_test_lib.a: searched_file_test_lib.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	test -d alt || mkdir -p alt
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AR) rc $@ $^
 @DEFAULT_TARGET_I386_TRUE@split_i386_1.o: split_i386_1.s
 @DEFAULT_TARGET_I386_TRUE@	$(TEST_AS) -o $@ $<
 @DEFAULT_TARGET_I386_TRUE@split_i386_2.o: split_i386_2.s

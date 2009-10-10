@@ -1452,7 +1452,9 @@ read_script_file(const char* filename, Command_line* cmdline,
   Position_dependent_options posdep = cmdline->position_dependent_options();
   if (posdep.format_enum() == General_options::OBJECT_FORMAT_BINARY)
     posdep.set_format_enum(General_options::OBJECT_FORMAT_ELF);
-  Input_file_argument input_argument(filename, false, "", false, posdep);
+  Input_file_argument input_argument(filename,
+				     Input_file_argument::INPUT_FILE_TYPE_FILE,
+				     "", false, posdep);
   Input_file input_file(&input_argument);
   int dummy = 0;
   if (!input_file.open(dirsearch, task, &dummy))
@@ -2179,8 +2181,10 @@ script_add_file(void* closurev, const char* name, size_t length)
 	}
     }
 
-  Input_file_argument file(name_string.c_str(), false, extra_search_path,
-			   false, closure->position_dependent_options());
+  Input_file_argument file(name_string.c_str(),
+			   Input_file_argument::INPUT_FILE_TYPE_FILE,
+			   extra_search_path, false,
+			   closure->position_dependent_options());
   closure->inputs()->add_file(file);
 }
 

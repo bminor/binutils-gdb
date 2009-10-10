@@ -413,7 +413,11 @@ Plugin_manager::release_input_file(unsigned int handle)
 ld_plugin_status
 Plugin_manager::add_input_file(char *pathname, bool is_lib)
 {
-  Input_file_argument file(pathname, is_lib, "", false, this->options_);
+  Input_file_argument file(pathname,
+                           (is_lib
+                            ? Input_file_argument::INPUT_FILE_TYPE_LIBRARY
+                            : Input_file_argument::INPUT_FILE_TYPE_FILE),
+                           "", false, this->options_);
   Input_argument* input_argument = new Input_argument(file);
   Task_token* next_blocker = new Task_token(true);
   next_blocker->add_blocker();
