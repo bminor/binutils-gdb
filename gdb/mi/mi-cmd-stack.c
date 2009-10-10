@@ -256,13 +256,17 @@ list_args_or_locals (enum what_to_list what, int values, struct frame_info *fi)
   switch (what)
     {
     case locals:
-      name_of_result = "locals"; break;
+      name_of_result = "locals";
+      break;
     case arguments:
-      name_of_result = "args"; break;
+      name_of_result = "args";
+      break;
     case all:
-      name_of_result = "variables"; break;
+      name_of_result = "variables";
+      break;
     default:
-      gdb_assert (("unexpected value", 0));
+      internal_error (__FILE__, __LINE__,
+		      "unexpected what_to_list: %d", (int) what);
     }
 
   cleanup_list = make_cleanup_ui_out_list_begin_end (uiout, name_of_result);

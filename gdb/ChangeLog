@@ -1,3 +1,8 @@
+2009-10-10  Pedro Alves  <pedro@codesourcery.com>
+
+	* mi/mi-cmd-stack.c (list_args_or_locals): Use internal_error.
+	Put "break" statements on their own line.
+
 2009-10-09  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-nat.c (linux_nat_wait_1): Bail out, if TARGET_WNOHANG and
