@@ -1,3 +1,7 @@
+2009-10-10  Michael Snyder  <msnyder@vmware.com>
+
+	* i386-tdep.c (i386_process_record): Or-equals, not not-equals.
+
 2009-10-10  Pedro Alves  <pedro@codesourcery.com>
 
 	* mi/mi-cmd-stack.c (list_args_or_locals): Use internal_error.
