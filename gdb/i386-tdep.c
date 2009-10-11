@@ -4146,7 +4146,7 @@ reswitch:
 	return -1;
       if (ir.mod == 3)
 	{
-	  ir.rm != ir.rex_b;
+	  ir.rm |= ir.rex_b;
 	  if (ir.ot == OT_BYTE && !ir.regmap[X86_RECORD_R8_REGNUM])
 	    ir.rm &= 0x3;
 	  I386_RECORD_ARCH_LIST_ADD_REG (ir.rm);
