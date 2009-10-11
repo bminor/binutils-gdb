@@ -1,3 +1,7 @@
+2009-10-11  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* features/xinclude.dtd: Correct EMPTY typo.
+
 2009-10-10  Michael Snyder  <msnyder@vmware.com>
 
 	* i386-tdep.c (i386_process_record): Or-equals, not not-equals.
