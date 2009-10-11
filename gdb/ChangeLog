@@ -1,3 +1,8 @@
+2009-10-11  Pedro Alves  <pedro@codesourcery.com>
+
+	* procfs.c (procfs_make_note_section): Go back to only outputing
+	an NT_PSTATUS note when UNIXWARE is defined.
+
 2009-10-11  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* features/xinclude.dtd: Correct EMPTY typo.

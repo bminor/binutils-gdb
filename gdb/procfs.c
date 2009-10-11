@@ -6153,7 +6153,7 @@ procfs_make_note_section (bfd *obfd, int *note_size)
 
   stop_signal = find_stop_signal ();
 
-#ifdef NEW_PROC_API
+#ifdef UNIXWARE
   fill_gregset (get_current_regcache (), &gregs, -1);
   note_data = elfcore_write_pstatus (obfd, note_data, note_size,
 				     PIDGET (inferior_ptid),
