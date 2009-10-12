@@ -1,3 +1,8 @@
+2009-10-12  Jiang Jilin  <freephp@gmail.com>
+
+	* i386-tdep.c (i386_process_record): Add xgetbv/xsetbv
+	instructions support.
+
 2009-10-11  Pedro Alves  <pedro@codesourcery.com>
 
 	* procfs.c (procfs_make_note_section): Go back to only outputing
