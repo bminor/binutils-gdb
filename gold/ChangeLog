@@ -1,3 +1,7 @@
+2009-10-11  Ian Lance Taylor  <iant@google.com>
+
+	* plugin.cc: Include "gold.h" before other header files.
+
 2009-10-10  Chris Demetriou  <cgd@google.com>
 
 	* options.h (Input_file_argument::Input_file_type): New enum.

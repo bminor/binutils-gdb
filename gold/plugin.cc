@@ -20,6 +20,8 @@
 // Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 // MA 02110-1301, USA.
 
+#include "gold.h"
+
 #include <cstdio>
 #include <cstdarg>
 #include <cstring>
@@ -30,7 +32,6 @@
 #include <dlfcn.h>
 #endif
 
-#include "gold.h"
 #include "parameters.h"
 #include "errors.h"
 #include "fileread.h"
