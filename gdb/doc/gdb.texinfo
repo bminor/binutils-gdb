@@ -29193,12 +29193,12 @@ These are the currently defined stub features and their properties:
 
 @item @samp{ReverseContinue}
 @tab No
-@tab @samp{+}
+@tab @samp{-}
 @tab No
 
 @item @samp{ReverseStep}
 @tab No
-@tab @samp{+}
+@tab @samp{-}
 @tab No
 
 @end multitable
