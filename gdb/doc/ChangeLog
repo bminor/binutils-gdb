@@ -3,6 +3,10 @@
 	* gdb.texinfo (ReverseStep): Show default as "unsupported".
 	(ReverseContinue): Ditto.
 
+2009-10-08  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.texinfo (Server): Document libthread-db-search-path.
+	
 2009-10-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdbint.texinfo (i386_stopped_by_hwbp): Remove.
