@@ -1,5 +1,13 @@
 2009-10-13  Tristan Gingold  <gingold@adacore.com>
 
+	* machoread.c: Add an empty line after comment for functions.
+	(oso_el_compare_name): New function.
+	(macho_add_oso_symfile): New function.
+	(macho_oso_symfile): Use macho_add_oso_symfile.  Sort the oso
+	and optimize accesses to libraries.
+
+2009-10-13  Tristan Gingold  <gingold@adacore.com>
+
 	* objfiles.c (objfile_has_symbols): New function.
 	* objfiles.h (objfile_has_symbols): Add prototype.
 	* symfile.c (symbol_file_add_with_addrs_or_offsets): Call
