@@ -687,6 +687,9 @@ class General_options
 	      N_("Treat warnings as errors"),
 	      N_("Do not treat warnings as errors"));
 
+  DEFINE_string(fini, options::ONE_DASH, '\0', "_fini",
+                N_("Call SYMBOL at unload-time"), N_("SYMBOL"));
+
   DEFINE_string(soname, options::ONE_DASH, 'h', NULL,
                 N_("Set shared library name"), N_("FILENAME"));
 
@@ -713,6 +716,9 @@ class General_options
 
   DEFINE_special(incremental_unknown, options::TWO_DASHES, '\0',
                  N_("Use timestamps to check files (default)"), NULL);
+
+  DEFINE_string(init, options::ONE_DASH, '\0', "_init",
+                N_("Call SYMBOL at load-time"), N_("SYMBOL"));
 
   DEFINE_special(just_symbols, options::TWO_DASHES, '\0',
                  N_("Read only symbol values from FILE"), N_("FILE"));

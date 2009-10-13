@@ -3096,12 +3096,11 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
 	odyn->add_string(elfcpp::DT_SONAME, soname);
     }
 
-  // FIXME: Support --init and --fini.
-  Symbol* sym = symtab->lookup("_init");
+  Symbol* sym = symtab->lookup(parameters->options().init());
   if (sym != NULL && sym->is_defined() && !sym->is_from_dynobj())
     odyn->add_symbol(elfcpp::DT_INIT, sym);
 
-  sym = symtab->lookup("_fini");
+  sym = symtab->lookup(parameters->options().fini());
   if (sym != NULL && sym->is_defined() && !sym->is_from_dynobj())
     odyn->add_symbol(elfcpp::DT_FINI, sym);
 

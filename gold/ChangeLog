@@ -1,3 +1,9 @@
+2009-10-13  Bernhard Reutner-Fischer  <aldot@gcc.gnu.org>
+
+	* options.h (class General_options): Add -init and -fini.
+	* layout.cc (Layout::finish_dynamic_section): Emit
+	given init and fini functions.
+
 2009-10-13  Sriraman Tallam  <tmsriram@google.com>
 
 	* gc.h (gc_process_relocs): Check if icf is enabled using new
