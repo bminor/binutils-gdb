@@ -1,3 +1,7 @@
+2009-10-13  Pedro Alves  <pedro@codesourcery.com>
+
+	* infcall.c (call_function_by_hand): Formatting.
+
 2009-10-13  Tristan Gingold  <gingold@adacore.com>
 
 	* solib-darwin.c: Add an empty line after comment for functions.

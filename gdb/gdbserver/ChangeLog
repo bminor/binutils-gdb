@@ -1,3 +1,7 @@
+2009-10-13  Pedro Alves  <pedro@codesourcery.com>
+
+	* proc-service.c (ps_lgetregs): Formatting.
+
 2009-10-08  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* acinclude.m4: (SRV_CHECK_THREAD_DB, SRV_CHECK_TLS_GET_ADDR): Remove.

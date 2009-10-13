@@ -111,7 +111,7 @@ ps_lgetregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, prgregset_t gregset)
   current_inferior = reg_inferior;
 
   the_target->fetch_registers (-1);
-  gregset_info()->fill_function (gregset);
+  gregset_info ()->fill_function (gregset);
 
   current_inferior = save_inferior;
   return PS_OK;

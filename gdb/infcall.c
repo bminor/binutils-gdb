@@ -940,7 +940,7 @@ When the function is done executing, GDB will silently stop."),
 		 user.  */
 
 	      if (terminate_bp != NULL
-		  && (inferior_thread()->stop_bpstat->breakpoint_at->address
+		  && (inferior_thread ()->stop_bpstat->breakpoint_at->address
 		      == terminate_bp->loc->address))
 		{
 		  /* We must get back to the frame we were before the
