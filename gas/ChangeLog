@@ -1,5 +1,10 @@
 2009-10-13  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/10766
+	* config/tc-i386.c (build_modrm_byte): Declare exp earlier.
+
+2009-10-13  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/10740
 	* config/tc-i386-intel.c (i386_intel_operand): Handle call
 	and jump with 2 immediate operands.

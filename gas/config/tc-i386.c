@@ -4873,6 +4873,7 @@ build_modrm_byte (void)
   if (vex_3_sources)
     {
       unsigned int nds, reg;
+      expressionS *exp;
 
       if (i.tm.opcode_modifier.veximmext
 	  && i.tm.opcode_modifier.immext)
@@ -4896,7 +4897,7 @@ build_modrm_byte (void)
 
       /* Generate an 8bit immediate operand to encode the register
 	 operand.  */
-      expressionS *exp = &im_expressions[i.imm_operands++];
+      exp = &im_expressions[i.imm_operands++];
       i.op[i.operands].imms = exp;
       i.types[i.operands] = imm8;
       i.operands++;
