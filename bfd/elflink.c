@@ -1110,19 +1110,19 @@ _bfd_elf_merge_symbol (bfd *abfd,
 
       if (tdef && ntdef)
 	(*_bfd_error_handler)
-	  (_("%s: TLS definition in %B section %A mismatches non-TLS definition in %B section %A"),
+	  (_("%B: TLS definition in %B section %A mismatches non-TLS definition in %B section %A"),
 	   tbfd, tsec, ntbfd, ntsec, h->root.root.string);
       else if (!tdef && !ntdef)
 	(*_bfd_error_handler)
-	  (_("%s: TLS reference in %B mismatches non-TLS reference in %B"),
+	  (_("%B: TLS reference in %B mismatches non-TLS reference in %B"),
 	   tbfd, ntbfd, h->root.root.string);
       else if (tdef)
 	(*_bfd_error_handler)
-	  (_("%s: TLS definition in %B section %A mismatches non-TLS reference in %B"),
+	  (_("%B: TLS definition in %B section %A mismatches non-TLS reference in %B"),
 	   tbfd, tsec, ntbfd, h->root.root.string);
       else
 	(*_bfd_error_handler)
-	  (_("%s: TLS reference in %B mismatches non-TLS definition in %B section %A"),
+	  (_("%B: TLS reference in %B mismatches non-TLS definition in %B section %A"),
 	   tbfd, ntbfd, ntsec, h->root.root.string);
 
       bfd_set_error (bfd_error_bad_value);
@@ -4448,7 +4448,7 @@ error_free_dyn:
 	      if ((elf_dyn_lib_class (abfd) & DYN_NO_NEEDED) != 0)
 		{
 		  (*_bfd_error_handler)
-		    (_("%s: invalid DSO for symbol `%s' definition"),
+		    (_("%B: invalid DSO for symbol `%s' definition"),
 		     abfd, name);
 		  bfd_set_error (bfd_error_bad_value);
 		  goto error_free_vers;
@@ -12532,7 +12532,7 @@ _bfd_elf_get_dynamic_reloc_section (bfd *       abfd,
    section does not exist it is created and attached to the DYNOBJ
    bfd and stored in the SRELOC field of SEC's elf_section_data
    structure.
-   
+
    ALIGNMENT is the alignment for the newly created section and
    IS_RELA defines whether the name should be .rela.<SEC's name>
    or .rel.<SEC's name>.  The section name is looked up in the

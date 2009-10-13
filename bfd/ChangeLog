@@ -1,3 +1,8 @@
+2009-10-12  Roland McGrath  <roland@frob.com>
+
+	* elflink.c (elf_link_add_object_symbols, _bfd_elf_merge_symbol):
+	Fix %s that should be %B in several message formats.
+
 2009-10-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* cofflink.c (_bfd_coff_link_input_bfd): Skip section symbols for
@@ -135,7 +140,7 @@
 2009-09-29 M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 
 	* elf32-cr16.c (elf32_cr16_relocate_section): Removed
-	info->relocatable to fix the ld/testsuites/ld-elf/linkonce1 test case. 
+	info->relocatable to fix the ld/testsuites/ld-elf/linkonce1 test case.
 
 2009-09-28  Nick Clifton  <nickc@redhat.com>
 
