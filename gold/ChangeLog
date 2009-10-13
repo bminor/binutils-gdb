@@ -1,3 +1,15 @@
+2009-10-12  Sriraman Tallam  <tmsriram@google.com>
+
+	* symtab.h: Check for GOLD_SYMTAB_H before header includes. Remove
+	includes to gc.h and icf.h.
+	* arm.cc: Include gc.h.
+	* gold.cc: Likewise.
+	* i386.cc: Likewise.
+	* powerpc.cc: Likewise.
+	* sparc.cc: Likewise.
+	* x86_64.cc: Likewise.
+	* gc.h: Include icf.h.
+
 2009-10-11  Ian Lance Taylor  <iant@google.com>
 
 	* plugin.cc: Include "gold.h" before other header files.

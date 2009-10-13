@@ -40,6 +40,7 @@
 #include "target-select.h"
 #include "tls.h"
 #include "errors.h"
+#include "gc.h"
 
 namespace
 {

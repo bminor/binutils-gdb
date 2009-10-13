@@ -42,6 +42,7 @@
 #include "target-select.h"
 #include "tls.h"
 #include "defstd.h"
+#include "gc.h"
 
 namespace
 {

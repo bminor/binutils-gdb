@@ -23,19 +23,17 @@
 // Symbol_table
 //   The symbol table.
 
+#ifndef GOLD_SYMTAB_H
+#define GOLD_SYMTAB_H
+
 #include <string>
 #include <utility>
 #include <vector>
 
-#include "gc.h"
-#include "icf.h"
 #include "elfcpp.h"
 #include "parameters.h"
 #include "stringpool.h"
 #include "object.h"
-
-#ifndef GOLD_SYMTAB_H
-#define GOLD_SYMTAB_H
 
 namespace gold
 {

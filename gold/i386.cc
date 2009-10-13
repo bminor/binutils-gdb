@@ -38,6 +38,7 @@
 #include "target-select.h"
 #include "tls.h"
 #include "freebsd.h"
+#include "gc.h"
 
 namespace
 {

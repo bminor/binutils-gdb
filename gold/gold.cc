@@ -41,6 +41,7 @@
 #include "reloc.h"
 #include "defstd.h"
 #include "plugin.h"
+#include "gc.h"
 #include "icf.h"
 #include "incremental.h"
 

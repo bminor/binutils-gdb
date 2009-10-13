@@ -28,6 +28,7 @@
 
 #include "elfcpp.h"
 #include "symtab.h"
+#include "icf.h"
 
 namespace gold
 {
