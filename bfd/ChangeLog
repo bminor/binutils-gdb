@@ -1,3 +1,9 @@
+2009-10-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/10763
+	* elf32-i386.c (elf_i386_finish_dynamic_symbol): Declare plt
+	earlier.
+
 2009-10-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (_bfd_elf_merge_symbol): Revert previous patch.
