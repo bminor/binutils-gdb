@@ -717,6 +717,30 @@ objfile_has_full_symbols (struct objfile *objfile)
   return objfile->symtabs != NULL;
 }
 
+/* Return non-zero if OBJFILE has full or partial symbols, either directly
+   or throught its separate debug file.  */
+
+int
+objfile_has_symbols (struct objfile *objfile)
+{
+  struct objfile *separate_objfile;
+
+  if (objfile_has_partial_symbols (objfile)
+      || objfile_has_full_symbols (objfile))
+    return 1;
+
+  separate_objfile = objfile->separate_debug_objfile;
+  if (separate_objfile == NULL)
+    return 0;
+
+  if (objfile_has_partial_symbols (separate_objfile)
+      || objfile_has_full_symbols (separate_objfile))
+    return 1;
+
+  return 0;
+}
+
+
 /* Many places in gdb want to test just to see if we have any partial
    symbols available.  This function returns zero if none are currently
    available, nonzero otherwise. */

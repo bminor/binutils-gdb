@@ -476,6 +476,8 @@ extern int objfile_has_partial_symbols (struct objfile *objfile);
 
 extern int objfile_has_full_symbols (struct objfile *objfile);
 
+extern int objfile_has_symbols (struct objfile *objfile);
+
 extern int have_partial_symbols (void);
 
 extern int have_full_symbols (void);

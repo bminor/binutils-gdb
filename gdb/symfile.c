@@ -1040,8 +1040,7 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd,
     }
 
   if ((from_tty || info_verbose)
-      && !objfile_has_partial_symbols (objfile)
-      && !objfile_has_full_symbols (objfile))
+      && !objfile_has_symbols (objfile))
     {
       wrap_here ("");
       printf_unfiltered (_("(no debugging symbols found)..."));
@@ -2422,8 +2421,7 @@ reread_symbols (void)
 	         zero is OK since dbxread.c also does what it needs to do if
 	         objfile->global_psymbols.size is 0.  */
 	      (*objfile->sf->sym_read) (objfile, 0);
-	      if (!objfile_has_partial_symbols (objfile)
-		  && !objfile_has_full_symbols (objfile))
+	      if (!objfile_has_symbols (objfile))
 		{
 		  wrap_here ("");
 		  printf_unfiltered (_("(no debugging symbols found)\n"));

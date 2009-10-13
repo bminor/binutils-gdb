@@ -1,3 +1,11 @@
+2009-10-13  Tristan Gingold  <gingold@adacore.com>
+
+	* objfiles.c (objfile_has_symbols): New function.
+	* objfiles.h (objfile_has_symbols): Add prototype.
+	* symfile.c (symbol_file_add_with_addrs_or_offsets): Call
+	objfile_has_symbols.
+	(reread_symbols): Ditto.
+
 2009-10-12  Jiang Jilin  <freephp@gmail.com>
 
 	* i386-tdep.c (i386_process_record): Add xgetbv/xsetbv
