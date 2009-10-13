@@ -9687,15 +9687,16 @@ print_insn (bfd_vma pc, disassemble_info *info)
       modrm.rm = *codep & 7;
     }
 
+   need_vex = 0;
+   need_vex_reg = 0;
+   vex_w_done = 0;
+
   if (dp->name == NULL && dp->op[0].bytemode == FLOATCODE)
     {
       dofloat (sizeflag);
     }
   else
     {
-      need_vex = 0;
-      need_vex_reg = 0;
-      vex_w_done = 0;
       dp = get_valid_dis386 (dp, info);
       if (dp != NULL && putop (dp->name, sizeflag) == 0)
         {

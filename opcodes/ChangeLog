@@ -1,8 +1,13 @@
+2009-10-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (print_insn): Always clear need_vex, need_vex_reg
+	and vex_w_done.
+
 2009-10-07  Michael Eager  <eager@eagercon.com>
 
-	* opcodes/microblaze-dis.c: Add include for microblaze-dis.h,
+	* microblaze-dis.c: Add include for microblaze-dis.h,
 	eliminate local extern decls.
-	* opcodes/microblaze-dis.h: New.
+	* microblaze-dis.h: New.
 
 2009-10-06  Nick Clifton  <nickc@redhat.com>
 
