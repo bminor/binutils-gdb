@@ -1,3 +1,7 @@
+2009-10-14  Ben Elliston  <bje@gnu.org>
+
+	* MAINTAINERS (common): Move myself to "past maintainers" section.
+
 2009-10-06  Michael Eager  <eager@eagercon.com>
 
 	* microblaze/interp.c: Add include microblaze-dis.h.
