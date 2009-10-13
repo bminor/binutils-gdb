@@ -519,7 +519,7 @@ Symbol_table::Symbol_table_eq::operator()(const Symbol_table_key& k1,
 bool
 Symbol_table::is_section_folded(Object* obj, unsigned int shndx) const
 {
-  return (parameters->options().icf()
+  return (parameters->options().icf_enabled()
           && this->icf_->is_section_folded(obj, shndx));
 }
 

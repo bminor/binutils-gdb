@@ -163,7 +163,7 @@ gc_process_relocs(
   std::vector<std::pair<long long, long long> >* addendvec = NULL;
   bool is_icf_tracked = false;
 
-  if (parameters->options().icf()
+  if (parameters->options().icf_enabled()
       && is_prefix_of(".text.", (src_obj)->section_name(src_indx).c_str()))
     {
       is_icf_tracked = true;

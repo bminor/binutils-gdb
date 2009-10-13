@@ -220,7 +220,7 @@ main(int argc, char** argv)
   if (parameters->options().gc_sections())
     symtab.set_gc(&gc);
 
-  if (parameters->options().icf())
+  if (parameters->options().icf_enabled())
     symtab.set_icf(&icf);
 
   // The layout object.

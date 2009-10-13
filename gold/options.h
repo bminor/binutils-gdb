@@ -836,9 +836,11 @@ class General_options
   DEFINE_special(static, options::ONE_DASH, '\0',
                  N_("Do not link against shared libraries"), NULL);
 
-  DEFINE_bool(icf, options::TWO_DASHES, '\0', false,
-              N_("Identical Code Folding (Fold identical functions)"),
-              N_("Don't fold identical functions (default)"));
+  DEFINE_enum(icf, options::TWO_DASHES, '\0', "none",
+              N_("Identical Code Folding. "
+                 "\'--icf=safe\' folds only ctors and dtors."),
+	      ("[none,all,safe]"),	
+              {"none", "all", "safe"});
 
   DEFINE_uint(icf_iterations, options::TWO_DASHES , '\0', 0,
               N_("Number of iterations of ICF (default 2)"), N_("COUNT"));
@@ -1065,6 +1067,14 @@ class General_options
   is_stack_executable() const
   { return this->execstack_status_ == EXECSTACK_YES; }
 
+  bool
+  icf_enabled() const
+  { return this->icf_status_ != ICF_NONE; }
+
+  bool
+  icf_safe_folding() const
+  { return this->icf_status_ == ICF_SAFE; }
+
   // The --demangle option takes an optional string, and there is also
   // a --no-demangle option.  This is the best way to decide whether
   // to demangle or not.
@@ -1115,6 +1125,20 @@ class General_options
     EXECSTACK_NO
   };
 
+  enum Icf_status
+  {
+    // Do not fold any functions (Default or --icf=none).
+    ICF_NONE,
+    // All functions are candidates for folding. (--icf=all).
+    ICF_ALL,	
+    // Only ctors and dtors are candidates for folding. (--icf=safe).
+    ICF_SAFE
+  };
+
+  void
+  set_icf_status(Icf_status value)
+  { this->icf_status_ = value; }
+
   void
   set_execstack_status(Execstack value)
   { this->execstack_status_ = value; }
@@ -1148,6 +1172,8 @@ class General_options
   bool printed_version_;
   // Whether to mark the stack as executable.
   Execstack execstack_status_;
+  // Whether to do code folding.
+  Icf_status icf_status_;
   // Whether to do a static link.
   bool static_;
   // Whether to do demangling.

@@ -134,7 +134,7 @@ MOSTLYCLEANFILES += icf_test
 icf_test.o: icf_test.cc 
 	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
 icf_test: icf_test.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -Wl,--icf icf_test.o
+	$(CXXLINK) -Bgcctestdir/ -Wl,--icf=all icf_test.o
 icf_test.stdout: icf_test
 	$(TEST_NM) -C icf_test > icf_test.stdout
 
@@ -144,9 +144,19 @@ MOSTLYCLEANFILES += icf_keep_unique_test
 icf_keep_unique_test.o: icf_keep_unique_test.cc
 	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
 icf_keep_unique_test: icf_keep_unique_test.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -Wl,--icf -Wl,--keep-unique,_Z11unique_funcv icf_keep_unique_test.o
+	$(CXXLINK) -Bgcctestdir/ -Wl,--icf=all -Wl,--keep-unique,_Z11unique_funcv icf_keep_unique_test.o
 icf_keep_unique_test.stdout: icf_keep_unique_test
 	$(TEST_NM) -C icf_keep_unique_test > icf_keep_unique_test.stdout
+
+check_SCRIPTS += icf_safe_test.sh
+check_DATA += icf_safe_test.stdout
+MOSTLYCLEANFILES += icf_safe_test
+icf_safe_test.o: icf_safe_test.cc 
+	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
+icf_safe_test: icf_safe_test.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -Wl,--icf=safe icf_safe_test.o
+icf_safe_test.stdout: icf_safe_test
+	$(TEST_NM) icf_safe_test > icf_safe_test.stdout
 
 check_PROGRAMS += basic_test
 check_PROGRAMS += basic_static_test

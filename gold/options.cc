@@ -874,6 +874,15 @@ General_options::finalize()
   else if (this->noexecstack())
     this->set_execstack_status(EXECSTACK_NO);
 
+  // icf_status_ is a three-state variable; update it based on the
+  // value of this->icf().
+  if (strcmp(this->icf(), "none") == 0)
+    this->set_icf_status(ICF_NONE);
+  else if (strcmp(this->icf(), "safe") == 0)
+    this->set_icf_status(ICF_SAFE);
+  else
+    this->set_icf_status(ICF_ALL);
+
   // Handle the optional argument for --demangle.
   if (this->user_set_demangle())
     {

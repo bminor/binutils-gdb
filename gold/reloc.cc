@@ -31,6 +31,7 @@
 #include "object.h"
 #include "target-reloc.h"
 #include "reloc.h"
+#include "icf.h"
 
 namespace gold
 {
@@ -68,7 +69,8 @@ Read_relocs::run(Workqueue* workqueue)
   // If garbage collection or identical comdat folding is desired, we  
   // process the relocs first before scanning them.  Scanning of relocs is
   // done only after garbage or identical sections is identified.
-  if (parameters->options().gc_sections() || parameters->options().icf())
+  if (parameters->options().gc_sections()
+      || parameters->options().icf_enabled())
     {
       workqueue->queue_next(new Gc_process_relocs(this->options_,
                                                   this->symtab_,
@@ -420,7 +422,8 @@ Sized_relobj<size, big_endian>::do_scan_relocs(const General_options& options,
       // When garbage collection is on, unreferenced sections are not included
       // in the link that would have been included normally. This is known only
       // after Read_relocs hence this check has to be done again.
-      if (parameters->options().gc_sections() || parameters->options().icf())
+      if (parameters->options().gc_sections()
+	  || parameters->options().icf_enabled())
         {
           if (p->output_section == NULL)
             continue;

@@ -1,3 +1,29 @@
+2009-10-13  Sriraman Tallam  <tmsriram@google.com>
+
+	* gc.h (gc_process_relocs): Check if icf is enabled using new
+	function.
+	* gold.cc (queue_initial_tasks): Likewise.
+	(queue_middle_tasks): Likewise.
+	* object.cc (do_layout): Likewise.
+	* symtab.cc (is_section_folded): Likewise.
+	* main.cc (main): Likewise.
+	* reloc.cc (Read_relocs::run): Likewise.
+	(Sized_relobj::do_scan_relocs): Likewise.
+	* icf.cc (is_function_ctor_or_dtor): New function.
+	(Icf::find_identical_sections): Check if function is ctor or dtor when
+	safe icf is chosen.
+	* options.h (General_options::icf): Change option to be an enum.
+	(Icf_status): New enum.
+	(icf_enabled): New method.
+	(icf_safe_folding): New method.
+	(set_icf_status): New method.
+	(icf_status_): New variable.
+	* (options.cc) (General_options::finalize): Set icf_status_.
+	* testsuite/Makefile.am: Add commands to build icf_safe_test. Modify
+	icf_test and icf_keep_unique_test to use the --icf enum flag.
+	* testsuite/icf_safe_test.sh: New file.
+	* testsuite/icf_safe_test.cc: New file.	
+
 2009-10-12  Sriraman Tallam  <tmsriram@google.com>
 
 	* symtab.h: Check for GOLD_SYMTAB_H before header includes. Remove

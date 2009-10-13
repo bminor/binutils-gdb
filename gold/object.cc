@@ -934,16 +934,16 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
   const unsigned int shnum = this->shnum();
   bool is_gc_pass_one = ((parameters->options().gc_sections() 
                           && !symtab->gc()->is_worklist_ready())
-                         || (parameters->options().icf()
+                         || (parameters->options().icf_enabled()
                              && !symtab->icf()->is_icf_ready()));
  
   bool is_gc_pass_two = ((parameters->options().gc_sections() 
                           && symtab->gc()->is_worklist_ready())
-                         || (parameters->options().icf()
+                         || (parameters->options().icf_enabled()
                              && symtab->icf()->is_icf_ready()));
 
   bool is_gc_or_icf = (parameters->options().gc_sections()
-                       || parameters->options().icf()); 
+                       || parameters->options().icf_enabled()); 
 
   // Both is_gc_pass_one and is_gc_pass_two should not be true.
   gold_assert(!(is_gc_pass_one  && is_gc_pass_two));
@@ -1238,7 +1238,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
               }
         }
 
-      if (is_gc_pass_two && parameters->options().icf())
+      if (is_gc_pass_two && parameters->options().icf_enabled())
         {
           if (out_sections[i] == NULL)
             {

@@ -221,10 +221,12 @@ queue_initial_tasks(const General_options& options,
     }
 
   if (parameters->options().relocatable()
-      && (parameters->options().gc_sections() || parameters->options().icf()))
+      && (parameters->options().gc_sections()
+	  || parameters->options().icf_enabled()))
     gold_error(_("cannot mix -r with --gc-sections or --icf"));
 
-  if (parameters->options().gc_sections() || parameters->options().icf())
+  if (parameters->options().gc_sections()
+      || parameters->options().icf_enabled())
     {
       workqueue->queue(new Task_function(new Gc_runner(options,
                                                        input_objects,
@@ -332,7 +334,7 @@ queue_middle_tasks(const General_options& options,
   // If identical code folding (--icf) is chosen it makes sense to do it 
   // only after garbage collection (--gc-sections) as we do not want to 
   // be folding sections that will be garbage.
-  if (parameters->options().icf())
+  if (parameters->options().icf_enabled())
     {
       symtab->icf()->find_identical_sections(input_objects, symtab);
     }
@@ -342,7 +344,8 @@ queue_middle_tasks(const General_options& options,
   // --gc-sections or --icf is turned on, Object::layout is 
   // called twice.  It is called the first time when the 
   // symbols are added.
-  if (parameters->options().gc_sections() || parameters->options().icf())
+  if (parameters->options().gc_sections()
+      || parameters->options().icf_enabled())
     {
       for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
            p != input_objects->relobj_end();
@@ -360,7 +363,8 @@ queue_middle_tasks(const General_options& options,
       plugins->layout_deferred_objects();
     }     
 
-  if (parameters->options().gc_sections() || parameters->options().icf())
+  if (parameters->options().gc_sections()
+      || parameters->options().icf_enabled())
     {
       for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
            p != input_objects->relobj_end();
@@ -472,7 +476,8 @@ queue_middle_tasks(const General_options& options,
 
   // If doing garbage collection, the relocations have already been read.
   // Otherwise, read and scan the relocations.
-  if (parameters->options().gc_sections() || parameters->options().icf())
+  if (parameters->options().gc_sections()
+      || parameters->options().icf_enabled())
     {
       for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
            p != input_objects->relobj_end();

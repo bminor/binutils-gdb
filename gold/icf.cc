@@ -114,6 +114,7 @@
 #include "icf.h"
 #include "symtab.h"
 #include "libiberty.h"
+#include "demangle.h"
 
 namespace gold
 {
@@ -530,6 +531,22 @@ match_sections(unsigned int iteration_num,
   return converged;
 }
 
+// During safe icf (--icf=safe), only fold functions that are ctors or dtors.
+// This function returns true if the mangled function name is a ctor or a
+// dtor.
+
+static bool
+is_function_ctor_or_dtor(const char* mangled_func_name)
+{
+  if ((is_prefix_of("_ZN", mangled_func_name)
+       || is_prefix_of("_ZZ", mangled_func_name))
+      && (is_gnu_v3_mangled_ctor(mangled_func_name)
+          || is_gnu_v3_mangled_dtor(mangled_func_name)))
+    {
+      return true;
+    }
+  return false;
+}
 
 // This is the main ICF function called in gold.cc.  This does the
 // initialization and calls match_sections repeatedly (twice by default)
@@ -552,14 +569,19 @@ Icf::find_identical_sections(const Input_objects* input_objects,
     {
       for (unsigned int i = 0;i < (*p)->shnum(); ++i)
         {
+	  const char* section_name = (*p)->section_name(i).c_str();
           // Only looking to fold functions, so just look at .text sections.
-          if (!is_prefix_of(".text.", (*p)->section_name(i).c_str()))
+          if (!is_prefix_of(".text.", section_name))
             continue;
           if (!(*p)->is_section_included(i))
             continue;
           if (parameters->options().gc_sections()
               && symtab->gc()->is_section_garbage(*p, i))
               continue;
+	  // With --icf=safe, check if mangled name is a ctor or a dtor.
+	  if (parameters->options().icf_safe_folding()
+	      && !is_function_ctor_or_dtor(section_name + 6))
+	    continue;
           this->id_section_.push_back(Section_id(*p, i));
           this->section_id_[Section_id(*p, i)] = section_num;
           this->kept_section_id_.push_back(section_num);
