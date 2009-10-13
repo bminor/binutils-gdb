@@ -1,6 +1,6 @@
 2009-10-13  H.J. Lu  <hongjiu.lu@intel.com>
 
-	PR binutils/10766
+	PR gas/10766
 	* config/tc-i386.c (build_modrm_byte): Declare exp earlier.
 
 2009-10-13  H.J. Lu  <hongjiu.lu@intel.com>
