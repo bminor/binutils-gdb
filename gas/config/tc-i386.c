@@ -6287,8 +6287,9 @@ i386_finalize_immediate (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
 {
   if (exp->X_op == O_absent || exp->X_op == O_illegal || exp->X_op == O_big)
     {
-      as_bad (_("missing or invalid immediate expression `%s'"),
-	      imm_start);
+      if (imm_start)
+	as_bad (_("missing or invalid immediate expression `%s'"),
+		imm_start);
       return 0;
     }
   else if (exp->X_op == O_constant)
@@ -6316,7 +6317,8 @@ i386_finalize_immediate (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
 #endif
   else if (!intel_syntax && exp->X_op == O_register)
     {
-      as_bad (_("illegal immediate register operand %s"), imm_start);
+      if (imm_start)
+	as_bad (_("illegal immediate register operand %s"), imm_start);
       return 0;
     }
   else

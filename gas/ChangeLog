@@ -1,3 +1,12 @@
+2009-10-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/10740
+	* config/tc-i386-intel.c (i386_intel_operand): Handle call
+	and jump with 2 immediate operands.
+
+	* config/tc-i386.c (i386_finalize_immediate): Don't generate
+	error message if operand string is NULL.
+
 2009-10-013  Vincent Riviere  <vincent.riviere@freesbee.fr>	
 
 	PR gas/3041

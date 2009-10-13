@@ -1,3 +1,12 @@
+2009-10-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/10740
+	* gas/i386/jump.s: Add new tests.
+	* gas/i386/jump16.s: Likewise.
+
+	* gas/i386/jump.d: Updated.
+	* gas/i386/jump16.d: Likewise.
+
 2009-10-13  Vincent Riviere  <vincent.riviere@freesbee.fr>	
 
 	PR gas/3041

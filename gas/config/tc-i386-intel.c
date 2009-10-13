@@ -721,6 +721,51 @@ i386_intel_operand (char *operand_string, int got_a_float)
       if (i.mem_operands
 	  >= 2 - !current_templates->start->opcode_modifier.isstring)
 	{
+	  /* Handle
+
+	     call	0x9090,0x90909090
+	     lcall	0x9090,0x90909090
+	     jmp	0x9090,0x90909090
+	     ljmp	0x9090,0x90909090
+	   */
+
+	  if ((current_templates->start->opcode_modifier.jumpintersegment
+	       || current_templates->start->opcode_modifier.jumpdword
+	       || current_templates->start->opcode_modifier.jump)
+	      && this_operand == 1
+	      && intel_state.seg == NULL
+	      && i.mem_operands == 1
+	      && i.disp_operands == 1
+	      && intel_state.op_modifier == O_absent)
+	    {
+	      /* Try to process the first operand as immediate,  */
+	      this_operand = 0;
+	      if (i386_finalize_immediate (exp_seg, i.op[0].imms,
+					   intel_state.reloc_types,
+					   NULL))
+		{
+		  this_operand = 1;
+		  expP = &im_expressions[0];
+		  i.op[this_operand].imms = expP;
+		  *expP = exp;
+
+		  /* Try to process the second operand as immediate,  */
+		  if (i386_finalize_immediate (exp_seg, expP,
+					       intel_state.reloc_types,
+					       NULL))
+		    {
+		      i.mem_operands = 0;
+		      i.disp_operands = 0;
+		      i.imm_operands = 2;
+		      i.types[0].bitfield.mem = 0;
+		      i.types[0].bitfield.disp16 = 0;
+		      i.types[0].bitfield.disp32 = 0;
+		      i.types[0].bitfield.disp32s = 0;
+		      return 1;
+		    }
+		}
+	    }
+
 	  as_bad (_("too many memory references for `%s'"),
 		  current_templates->start->name);
 	  return 0;
