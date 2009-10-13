@@ -1,3 +1,10 @@
+2009-10-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-tdep.c (arm_push_dummy_call): Set the low bit of LR for
+	a Thumb entry point.
+	(thumb_get_next_pc): Handle Thumb-2 and ARM v6 instructions.  Refuse
+	to single step into IT blocks.
+
 2009-10-13  Pedro Alves  <pedro@codesourcery.com>
 
 	* infcall.c (call_function_by_hand): Formatting.
