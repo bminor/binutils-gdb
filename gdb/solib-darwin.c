@@ -52,7 +52,8 @@ struct gdb_dyld_image_info
   unsigned long mtime;
 };
 
-/* Content of inferior dyld_all_image_infos structure.  */
+/* Content of inferior dyld_all_image_infos structure.
+   See /usr/include/mach-o/dyld_images.h for the documentation.  */
 struct gdb_dyld_all_image_infos
 {
   /* Version (1).  */
@@ -66,7 +67,8 @@ struct gdb_dyld_all_image_infos
 };
 
 /* Current all_image_infos version.  */
-#define DYLD_VERSION 1
+#define DYLD_VERSION_MIN 1
+#define DYLD_VERSION_MAX 7
 
 /* Address of structure dyld_all_image_infos in inferior.  */
 static CORE_ADDR dyld_all_image_addr;
@@ -74,7 +76,17 @@ static CORE_ADDR dyld_all_image_addr;
 /* Gdb copy of dyld_all_info_infos.  */
 static struct gdb_dyld_all_image_infos dyld_all_image;
 
+/* Return non-zero if the version in dyld_all_image is known.  */
+
+static int
+darwin_dyld_version_ok (void)
+{
+  return dyld_all_image.version >= DYLD_VERSION_MIN
+    && dyld_all_image.version >= DYLD_VERSION_MAX;
+}
+
 /* Read dyld_all_image from inferior.  */
+
 static void
 darwin_load_image_infos (void)
 {
@@ -99,7 +111,7 @@ darwin_load_image_infos (void)
 
   /* Extract the fields.  */
   dyld_all_image.version = extract_unsigned_integer (buf, 4, byte_order);
-  if (dyld_all_image.version != DYLD_VERSION)
+  if (!darwin_dyld_version_ok ())
     return;
 
   dyld_all_image.count = extract_unsigned_integer (buf + 4, 4, byte_order);
@@ -125,6 +137,7 @@ struct darwin_so_list
 };
 
 /* Lookup the value for a specific symbol.  */
+
 static CORE_ADDR
 lookup_symbol_from_bfd (bfd *abfd, char *symname)
 {
@@ -183,6 +196,7 @@ find_program_interpreter (void)
 /*  Not used.  I don't see how the main symbol file can be found: the
     interpreter name is needed and it is known from the executable file.
     Note that darwin-nat.c implements pid_to_exec_file.  */
+
 static int
 open_symbol_file_object (void *from_ttyp)
 {
@@ -190,6 +204,7 @@ open_symbol_file_object (void *from_ttyp)
 }
 
 /* Build a list of currently loaded shared objects.  See solib-svr4.c  */
+
 static struct so_list *
 darwin_current_sos (void)
 {
@@ -204,7 +219,7 @@ darwin_current_sos (void)
   /* Be sure image infos are loaded.  */
   darwin_load_image_infos ();
 
-  if (dyld_all_image.version != DYLD_VERSION)
+  if (!darwin_dyld_version_ok ())
     return NULL;
 
   image_info_size = ptr_len * 3;
@@ -262,6 +277,7 @@ darwin_current_sos (void)
 
 /* Return 1 if PC lies in the dynamic symbol resolution code of the
    run time loader.  */
+
 int
 darwin_in_dynsym_resolve_code (CORE_ADDR pc)
 {
@@ -270,12 +286,14 @@ darwin_in_dynsym_resolve_code (CORE_ADDR pc)
 
 
 /* No special symbol handling.  */
+
 static void
 darwin_special_symbol_handling (void)
 {
 }
 
 /* Shared library startup support.  See documentation in solib-svr4.c  */
+
 static void
 darwin_solib_create_inferior_hook (void)
 {
@@ -348,7 +366,7 @@ darwin_solib_create_inferior_hook (void)
 
   darwin_load_image_infos ();
 
-  if (dyld_all_image.version == DYLD_VERSION)
+  if (darwin_dyld_version_ok ())
     create_solib_event_breakpoint (target_gdbarch, dyld_all_image.notifier);
 }
 
@@ -366,6 +384,7 @@ darwin_free_so (struct so_list *so)
 
 /* The section table is built from bfd sections using bfd VMAs.
    Relocate these VMAs according to solib info.  */
+
 static void
 darwin_relocate_section_addresses (struct so_list *so,
 				   struct target_section *sec)

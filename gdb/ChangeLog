@@ -1,5 +1,16 @@
 2009-10-13  Tristan Gingold  <gingold@adacore.com>
 
+	* solib-darwin.c: Add an empty line after comment for functions.
+	(struct gdb_dyld_all_image_infos): Improve comment.
+	(DYLD_VERSION): Removed and replaced by ...
+	(DYLD_VERSION_MAX, DYLD_VERSION_MIN): ... New macros.
+	(darwin_dyld_version_ok): New function.
+	(darwin_load_image_infos): Call darwin_dyld_version_ok.
+	(darwin_current_sos): Ditto.
+	(darwin_solib_create_inferior_hook): Ditto.
+
+2009-10-13  Tristan Gingold  <gingold@adacore.com>
+
 	* machoread.c: Add an empty line after comment for functions.
 	(oso_el_compare_name): New function.
 	(macho_add_oso_symfile): New function.
