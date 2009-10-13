@@ -61,6 +61,9 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
+if { $gdb_file_cmd_debug_info != "debug" } then {
+    fail "No debug information found."
+}
 
 if [target_info exists gdb_stub] {
     gdb_step_for_stub;

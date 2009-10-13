@@ -1,3 +1,7 @@
+2009-10-13  Tristan Gingold  <gingold@adacore.com>
+
+	* gdb.base/sepdebug.exp: Check debug info are found.
+
 2009-10-08  Pedro Alves  <pedro@codesourcery.com>
 
 	* lib/gdb.exp (gdb_compile): Remove dead aix and irix related
