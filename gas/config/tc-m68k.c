@@ -1326,10 +1326,29 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 	   && fixp->fx_addsy
 	   && S_IS_WEAK (fixp->fx_addsy)
 	   && ! bfd_is_und_section (S_GET_SEGMENT (fixp->fx_addsy)))
-    /* PR gas/3041 Adjust addend in order to force bfd_install_relocation()
-       to put the symbol offset into frags referencing a weak symbol.  */
-    reloc->addend = fixp->fx_addnumber
-		    - (S_GET_VALUE (fixp->fx_addsy) * 2);
+    {
+      /* PR gas/3041 References to weak symbols must be treated as extern
+	 in order to be overridable by the linker, even if they are defined
+	 in the same object file. So the original addend must be written
+	 "as is" into the output section without further processing.
+	 The addend value must be hacked here in order to force
+	 bfd_install_relocation() to write the original value into the
+	 output section.
+	 1) MD_APPLY_SYM_VALUE() is set to 1 for m68k/a.out, so the symbol
+	 value has already been added to the addend in fixup_segment(). We
+	 have to remove it.
+	 2) bfd_install_relocation() will incorrectly treat this symbol as
+	 resolved, so it will write the symbol value plus its addend and
+	 section VMA. As a workaround we can tweak the addend value here in
+	 order to get the original value in the section after the call to
+	 bfd_install_relocation().  */
+      reloc->addend = fixp->fx_addnumber
+		      /* Fix because of MD_APPLY_SYM_VALUE() */
+		      - S_GET_VALUE (fixp->fx_addsy)
+		      /* Fix for bfd_install_relocation() */
+		      - (S_GET_VALUE (fixp->fx_addsy)
+			 + S_GET_SEGMENT (fixp->fx_addsy)->vma);
+    }
   else
     reloc->addend = 0;
 #else

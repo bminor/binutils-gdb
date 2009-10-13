@@ -1,3 +1,9 @@
+2009-10-013  Vincent Riviere  <vincent.riviere@freesbee.fr>	
+
+	PR gas/3041
+	* config/tc-m68k.c (tc_gen_reloc): Fix addend for relocations
+	located in data section an referencing a weak symbol.
+
 2009-10-07  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* config/tc-arm.c (mapping_state, mapping_state_2): Make dummy
