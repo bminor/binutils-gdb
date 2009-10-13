@@ -1,3 +1,15 @@
+2009-10-13  Alan Modra  <amodra@bigpond.net.au>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/2117
+	* config/tc-ia64.c (parse_operand): Use expression rather than
+	expression_and_evalute.
+	(parse_operand_and_eval): New function.  Replace all uses of
+	parse_operand outside of parse_operands with this function.
+	(parse_operans_maybe_eval): New function.  Replace uses of
+	parse_operand in parse_operands, except for the dummy, with
+	this function.
+
 2009-10-06  Alan Modra  <amodra@bigpond.net.au>
 
 	PR gas/10704

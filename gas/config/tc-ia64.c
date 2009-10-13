@@ -784,7 +784,7 @@ typedef void (*vbyte_func) (int, char *, char *);
 
 /* Forward declarations:  */
 static void dot_alias (int);
-static int parse_operand (expressionS *, int);
+static int parse_operand_and_eval (expressionS *, int);
 static void emit_one_bundle (void);
 static bfd_reloc_code_real_type ia64_gen_real_reloc_type (struct symbol *,
 							  bfd_reloc_code_real_type);
@@ -2891,7 +2891,7 @@ ia64_convert_frag (fragS *frag)
 static int
 parse_predicate_and_operand (expressionS *e, unsigned *qp, const char *po)
 {
-  int sep = parse_operand (e, ',');
+  int sep = parse_operand_and_eval (e, ',');
 
   *qp = e->X_add_number - REG_P;
   if (e->X_op != O_register || *qp > 63)
@@ -2902,7 +2902,7 @@ parse_predicate_and_operand (expressionS *e, unsigned *qp, const char *po)
   else if (*qp == 0)
     as_warn (_("Pointless use of p0 as first operand to .%s"), po);
   if (sep == ',')
-    sep = parse_operand (e, ',');
+    sep = parse_operand_and_eval (e, ',');
   else
     e->X_op = O_absent;
   return sep;
@@ -3155,7 +3155,7 @@ dot_fframe (int dummy ATTRIBUTE_UNUSED)
   if (!in_prologue ("fframe"))
     return;
 
-  sep = parse_operand (&e, ',');
+  sep = parse_operand_and_eval (&e, ',');
 
   if (e.X_op != O_constant)
     {
@@ -3175,7 +3175,7 @@ dot_vframe (int dummy ATTRIBUTE_UNUSED)
   if (!in_prologue ("vframe"))
     return;
 
-  sep = parse_operand (&e, ',');
+  sep = parse_operand_and_eval (&e, ',');
   reg = e.X_add_number - REG_GR;
   if (e.X_op != O_register || reg > 127)
     {
@@ -3202,7 +3202,7 @@ dot_vframesp (int psp)
   if (!in_prologue ("vframesp"))
     return;
 
-  sep = parse_operand (&e, ',');
+  sep = parse_operand_and_eval (&e, ',');
   if (e.X_op != O_constant)
     {
       as_bad (_("Operand to .vframesp must be a constant (sp-relative offset)"));
@@ -3222,9 +3222,9 @@ dot_save (int dummy ATTRIBUTE_UNUSED)
   if (!in_prologue ("save"))
     return;
 
-  sep = parse_operand (&e1, ',');
+  sep = parse_operand_and_eval (&e1, ',');
   if (sep == ',')
-    sep = parse_operand (&e2, ',');
+    sep = parse_operand_and_eval (&e2, ',');
   else
     e2.X_op = O_absent;
 
@@ -3311,7 +3311,7 @@ dot_restore (int dummy ATTRIBUTE_UNUSED)
   if (!in_body ("restore"))
     return;
 
-  sep = parse_operand (&e1, ',');
+  sep = parse_operand_and_eval (&e1, ',');
   if (e1.X_op != O_register || e1.X_add_number != REG_GR + 12)
     as_bad (_("First operand to .restore must be stack pointer (sp)"));
 
@@ -3319,7 +3319,7 @@ dot_restore (int dummy ATTRIBUTE_UNUSED)
     {
       expressionS e2;
 
-      sep = parse_operand (&e2, ',');
+      sep = parse_operand_and_eval (&e2, ',');
       if (e2.X_op != O_constant || e2.X_add_number < 0)
 	{
 	  as_bad (_("Second operand to .restore must be a constant >= 0"));
@@ -3360,7 +3360,7 @@ dot_restorereg (int pred)
     sep = parse_predicate_and_operand (&e, &qp, po);
   else
     {
-      sep = parse_operand (&e, ',');
+      sep = parse_operand_and_eval (&e, ',');
       qp = 0;
     }
   convert_expr_to_ab_reg (&e, &ab, &reg, po, 1 + pred);
@@ -3606,7 +3606,7 @@ dot_altrp (int dummy ATTRIBUTE_UNUSED)
   if (!in_prologue ("altrp"))
     return;
 
-  parse_operand (&e, 0);
+  parse_operand_and_eval (&e, 0);
   reg = e.X_add_number - REG_BR;
   if (e.X_op != O_register || reg > 7)
     {
@@ -3627,9 +3627,9 @@ dot_savemem (int psprel)
   if (!in_prologue (po))
     return;
 
-  sep = parse_operand (&e1, ',');
+  sep = parse_operand_and_eval (&e1, ',');
   if (sep == ',')
-    sep = parse_operand (&e2, ',');
+    sep = parse_operand_and_eval (&e2, ',');
   else
     e2.X_op = O_absent;
 
@@ -3727,7 +3727,7 @@ dot_saveg (int dummy ATTRIBUTE_UNUSED)
   if (!in_prologue ("save.g"))
     return;
 
-  sep = parse_operand (&e, ',');
+  sep = parse_operand_and_eval (&e, ',');
 
   grmask = e.X_add_number;
   if (e.X_op != O_constant
@@ -3743,7 +3743,7 @@ dot_saveg (int dummy ATTRIBUTE_UNUSED)
       unsigned reg;
       int n = popcount (grmask);
 
-      parse_operand (&e, 0);
+      parse_operand_and_eval (&e, 0);
       reg = e.X_add_number - REG_GR;
       if (e.X_op != O_register || reg > 127)
 	{
@@ -3769,7 +3769,7 @@ dot_savef (int dummy ATTRIBUTE_UNUSED)
   if (!in_prologue ("save.f"))
     return;
 
-  parse_operand (&e, 0);
+  parse_operand_and_eval (&e, 0);
 
   if (e.X_op != O_constant
       || e.X_add_number <= 0
@@ -3791,7 +3791,7 @@ dot_saveb (int dummy ATTRIBUTE_UNUSED)
   if (!in_prologue ("save.b"))
     return;
 
-  sep = parse_operand (&e, ',');
+  sep = parse_operand_and_eval (&e, ',');
 
   brmask = e.X_add_number;
   if (e.X_op != O_constant
@@ -3807,7 +3807,7 @@ dot_saveb (int dummy ATTRIBUTE_UNUSED)
       unsigned reg;
       int n = popcount (brmask);
 
-      parse_operand (&e, 0);
+      parse_operand_and_eval (&e, 0);
       reg = e.X_add_number - REG_GR;
       if (e.X_op != O_register || reg > 127)
 	{
@@ -3833,8 +3833,8 @@ dot_savegf (int dummy ATTRIBUTE_UNUSED)
   if (!in_prologue ("save.gf"))
     return;
 
-  if (parse_operand (&e1, ',') == ',')
-    parse_operand (&e2, 0);
+  if (parse_operand_and_eval (&e1, ',') == ',')
+    parse_operand_and_eval (&e2, 0);
   else
     e2.X_op = O_absent;
 
@@ -3871,7 +3871,7 @@ dot_spill (int dummy ATTRIBUTE_UNUSED)
   if (!in_prologue ("spill"))
     return;
 
-  parse_operand (&e, 0);
+  parse_operand_and_eval (&e, 0);
 
   if (e.X_op != O_constant)
     {
@@ -3896,13 +3896,13 @@ dot_spillreg (int pred)
     sep = parse_predicate_and_operand (&e, &qp, po);
   else
     {
-      sep = parse_operand (&e, ',');
+      sep = parse_operand_and_eval (&e, ',');
       qp = 0;
     }
   convert_expr_to_ab_reg (&e, &ab, &reg, po, 1 + pred);
 
   if (sep == ',')
-    sep = parse_operand (&e, ',');
+    sep = parse_operand_and_eval (&e, ',');
   else
     e.X_op = O_absent;
   convert_expr_to_xy_reg (&e, &xy, &treg, po, 2 + pred);
@@ -3933,13 +3933,13 @@ dot_spillmem (int psprel)
     sep = parse_predicate_and_operand (&e, &qp, po);
   else
     {
-      sep = parse_operand (&e, ',');
+      sep = parse_operand_and_eval (&e, ',');
       qp = 0;
     }
   convert_expr_to_ab_reg (&e, &ab, &reg, po, 1 + pred);
 
   if (sep == ',')
-    sep = parse_operand (&e, ',');
+    sep = parse_operand_and_eval (&e, ',');
   else
     e.X_op = O_absent;
   if (e.X_op != O_constant)
@@ -4014,7 +4014,7 @@ dot_label_state (int dummy ATTRIBUTE_UNUSED)
   if (!in_body ("label_state"))
     return;
 
-  parse_operand (&e, 0);
+  parse_operand_and_eval (&e, 0);
   if (e.X_op == O_constant)
     save_prologue_count (e.X_add_number, unwind.prologue_count);
   else
@@ -4033,7 +4033,7 @@ dot_copy_state (int dummy ATTRIBUTE_UNUSED)
   if (!in_body ("copy_state"))
     return;
 
-  parse_operand (&e, 0);
+  parse_operand_and_eval (&e, 0);
   if (e.X_op == O_constant)
     unwind.prologue_count = get_saved_prologue_count (e.X_add_number);
   else
@@ -4053,9 +4053,9 @@ dot_unwabi (int dummy ATTRIBUTE_UNUSED)
   if (!in_prologue ("unwabi"))
     return;
 
-  sep = parse_operand (&e1, ',');
+  sep = parse_operand_and_eval (&e1, ',');
   if (sep == ',')
-    parse_operand (&e2, 0);
+    parse_operand_and_eval (&e2, 0);
   else
     e2.X_op = O_absent;
 
@@ -4198,7 +4198,7 @@ dot_prologue (int dummy ATTRIBUTE_UNUSED)
   if (!is_it_end_of_statement ())
     {
       expressionS e;
-      int n, sep = parse_operand (&e, ',');
+      int n, sep = parse_operand_and_eval (&e, ',');
 
       if (e.X_op != O_constant
 	  || e.X_add_number < 0
@@ -4211,7 +4211,7 @@ dot_prologue (int dummy ATTRIBUTE_UNUSED)
 	n = popcount (mask);
 
       if (sep == ',')
-	parse_operand (&e, 0);
+	parse_operand_and_eval (&e, 0);
       else
 	e.X_op = O_absent;
       if (e.X_op == O_constant
@@ -4947,7 +4947,7 @@ dot_pred_rel (int type)
       int sep, regno;
       expressionS pr, *pr1, *pr2;
 
-      sep = parse_operand (&pr, ',');
+      sep = parse_operand_and_eval (&pr, ',');
       if (pr.X_op == O_register
 	  && pr.X_add_number >= REG_P
 	  && pr.X_add_number <= REG_P + 63)
@@ -5851,10 +5851,42 @@ parse_operand (expressionS *e, int more)
   memset (e, 0, sizeof (*e));
   e->X_op = O_absent;
   SKIP_WHITESPACE ();
-  expression_and_evaluate (e);
+  expression (e);
   sep = *input_line_pointer;
   if (more && (sep == ',' || sep == more))
     ++input_line_pointer;
+  return sep;
+}
+
+static int
+parse_operand_and_eval (expressionS *e, int more)
+{
+  int sep = parse_operand (e, more);
+  resolve_expression (e);
+  return sep;
+}
+
+static int
+parse_operand_maybe_eval (expressionS *e, int more, enum ia64_opnd op)
+{
+  int sep = parse_operand (e, more);
+  switch (op)
+    {
+    case IA64_OPND_IMM14:
+    case IA64_OPND_IMM22:
+    case IA64_OPND_IMMU64:
+    case IA64_OPND_TGT25:
+    case IA64_OPND_TGT25b:
+    case IA64_OPND_TGT25c:
+    case IA64_OPND_TGT64:
+    case IA64_OPND_TAG13:
+    case IA64_OPND_TAG13b:
+    case IA64_OPND_LDXMOV:
+      break;
+    default:
+      resolve_expression (e);
+      break;
+    }
   return sep;
 }
 
@@ -5912,7 +5944,8 @@ parse_operands (struct ia64_opcode *idesc)
     {
       if (i < NELEMS (CURR_SLOT.opnd)) 
 	{
-	  sep = parse_operand (CURR_SLOT.opnd + i, '=');
+	  sep = parse_operand_maybe_eval (CURR_SLOT.opnd + i, '=',
+					  idesc->operands[i]);
 	  if (CURR_SLOT.opnd[i].X_op == O_absent)
 	    break;
 	}
@@ -5966,7 +5999,8 @@ parse_operands (struct ia64_opcode *idesc)
       /* now we can parse the first arg:  */
       saved_input_pointer = input_line_pointer;
       input_line_pointer = first_arg;
-      sep = parse_operand (CURR_SLOT.opnd + 0, '=');
+      sep = parse_operand_maybe_eval (CURR_SLOT.opnd + 0, '=',
+				      idesc->operands[0]);
       if (sep != '=')
 	--num_outputs;	/* force error */
       input_line_pointer = saved_input_pointer;
