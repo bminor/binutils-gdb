@@ -1,3 +1,7 @@
+2009-10-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (_bfd_elf_merge_symbol): Revert previous patch.
+
 2009-10-12  Roland McGrath  <roland@frob.com>
 
 	* elflink.c (elf_link_add_object_symbols, _bfd_elf_merge_symbol):

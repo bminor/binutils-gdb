@@ -1110,19 +1110,19 @@ _bfd_elf_merge_symbol (bfd *abfd,
 
       if (tdef && ntdef)
 	(*_bfd_error_handler)
-	  (_("%B: TLS definition in %B section %A mismatches non-TLS definition in %B section %A"),
+	  (_("%s: TLS definition in %B section %A mismatches non-TLS definition in %B section %A"),
 	   tbfd, tsec, ntbfd, ntsec, h->root.root.string);
       else if (!tdef && !ntdef)
 	(*_bfd_error_handler)
-	  (_("%B: TLS reference in %B mismatches non-TLS reference in %B"),
+	  (_("%s: TLS reference in %B mismatches non-TLS reference in %B"),
 	   tbfd, ntbfd, h->root.root.string);
       else if (tdef)
 	(*_bfd_error_handler)
-	  (_("%B: TLS definition in %B section %A mismatches non-TLS reference in %B"),
+	  (_("%s: TLS definition in %B section %A mismatches non-TLS reference in %B"),
 	   tbfd, tsec, ntbfd, h->root.root.string);
       else
 	(*_bfd_error_handler)
-	  (_("%B: TLS reference in %B mismatches non-TLS definition in %B section %A"),
+	  (_("%s: TLS reference in %B mismatches non-TLS definition in %B section %A"),
 	   tbfd, ntbfd, ntsec, h->root.root.string);
 
       bfd_set_error (bfd_error_bad_value);
