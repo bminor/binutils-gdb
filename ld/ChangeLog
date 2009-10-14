@@ -1,3 +1,7 @@
+2009-10-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/netbsd.em (gldnetbsd_before_parse): Typo fix.
+
 2009-10-14  Ryan Mansfield  <rmansfield@qnx.com>
 
 	* ldlang.c (load_symbols): Set whole_archive from entry when

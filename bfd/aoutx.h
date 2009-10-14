@@ -3284,7 +3284,7 @@ aout_link_check_ar_symbols (bfd *abfd,
 	    {
 	      int skip = 0;
 
-	      switch (info->common_skip_ar_aymbols)
+	      switch (info->common_skip_ar_symbols)
 		{
 		case bfd_link_common_skip_text:
 		  skip = (type == (N_TEXT | N_EXT));

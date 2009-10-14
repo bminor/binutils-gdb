@@ -1,3 +1,7 @@
+2009-10-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* aoutx.h (aout_link_check_ar_symbols): Typo fix.
+
 2009-10-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/10763
