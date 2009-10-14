@@ -1,6 +1,5 @@
 2009-10-14  Pedro Alves  <pedro@codesourcery.com>
 
-	gdb/
 	* configure.ac (build_warnings): Add -Wunused-value.
 	* configure: Regenerate.
 
