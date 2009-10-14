@@ -1,3 +1,8 @@
+2009-10-14  Tomas Hurka  <tom@hukatronic.cz>
+
+	PR 969
+	* m68k-opc.c (m68k_opcodes): Correct mask for macl and msacl.
+
 2009-10-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (print_insn): Always clear need_vex, need_vex_reg
