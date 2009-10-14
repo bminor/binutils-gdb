@@ -1,3 +1,9 @@
+2009-10-14  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* ldlex.l (yy_input): Remove second argument and return the value
+	instead.
+	(YY_INPUT): Adjust.
+
 2009-10-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/netbsd.em (gldnetbsd_before_parse): Typo fix.
