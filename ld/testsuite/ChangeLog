@@ -1,3 +1,7 @@
+2009-10-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elf/pr349-1.s, * ld-elf/pr349-2.s, * ld-elf/pr349.d: New.
+
 2009-10-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/10749
