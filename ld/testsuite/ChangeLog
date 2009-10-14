@@ -1,3 +1,7 @@
+2009-10-14  Joseph Myers  <joseph@codesourcery.com>
+
+	* ld-scripts/phdrs3.d: Allow colon in name of linker binary.
+
 2009-10-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-elf/pr349-1.s, * ld-elf/pr349-2.s, * ld-elf/pr349.d: New.
