@@ -82,7 +82,7 @@ static int
 darwin_dyld_version_ok (void)
 {
   return dyld_all_image.version >= DYLD_VERSION_MIN
-    && dyld_all_image.version >= DYLD_VERSION_MAX;
+    && dyld_all_image.version <= DYLD_VERSION_MAX;
 }
 
 /* Read dyld_all_image from inferior.  */
@@ -154,7 +154,7 @@ lookup_symbol_from_bfd (bfd *abfd, char *symname)
 
   symbol_table = (asymbol **) xmalloc (storage_needed);
   number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
-  
+
   for (i = 0; i < number_of_symbols; i++)
     {
       asymbol *sym = symbol_table[i];
@@ -182,7 +182,7 @@ find_program_interpreter (void)
   if (exec_bfd)
     {
       bfd_mach_o_load_command *cmd;
-      
+
       if (bfd_mach_o_lookup_command (exec_bfd,
                                      BFD_MACH_O_LC_LOAD_DYLINKER, &cmd) == 1)
         return cmd->command.dylinker.name_str;
@@ -336,7 +336,7 @@ darwin_solib_create_inferior_hook (void)
     }
   if (!dyld_bfd)
     return;
-  
+
   if (!inf->attach_flag)
     {
       /* We find the dynamic linker's base address by examining
@@ -356,7 +356,7 @@ darwin_solib_create_inferior_hook (void)
   /* Now try to set a breakpoint in the dynamic linker.  */
   dyld_all_image_addr =
     lookup_symbol_from_bfd (dyld_bfd, "_dyld_all_image_infos");
-  
+
   bfd_close (dyld_bfd);
 
   if (dyld_all_image_addr == 0)

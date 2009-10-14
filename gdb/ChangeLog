@@ -1,3 +1,8 @@
+2009-10-14  Tristan Gingold  <gingold@adacore.com>
+
+	* solib-darwin.c: Remove trailing whitespaces.
+	(darwin_dyld_version_ok): Fix typo.
+
 2009-10-14  Andrew Stubbs  <ams@codesourcery.com>
 
 	* sh-tdep.c (sh_gdbarch_init): Add show_regs settings for
