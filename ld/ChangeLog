@@ -1,3 +1,8 @@
+2009-10-14  Ryan Mansfield  <rmansfield@qnx.com>
+
+	* ldlang.c (load_symbols): Set whole_archive from entry when
+	parsing a linker script.
+
 2009-10-09  Alan Modra  <amodra@bigpond.net.au>
 
 	PR ld/10749
