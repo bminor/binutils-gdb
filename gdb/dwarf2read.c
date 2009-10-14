@@ -3365,7 +3365,7 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
       return;
     }
 
-  imported_die = follow_die_ref (die, import_attr, &cu);
+  imported_die = follow_die_ref_or_sig (die, import_attr, &cu);
   imported_name = dwarf2_name (imported_die, cu);
   if (imported_name == NULL)
     {

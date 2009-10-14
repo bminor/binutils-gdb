@@ -1,3 +1,7 @@
+2009-10-14  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf2read.c (read_import_statement): Call follow_die_ref_or_sig.
+
 2009-10-14  Keith Seitz  <keiths@redhat.com>
 
 	* dwarf2read.c (dwarf2_const_value): Fix order of arguments to
