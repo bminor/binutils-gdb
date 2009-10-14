@@ -1,3 +1,9 @@
+2009-10-14  Pedro Alves  <pedro@codesourcery.com>
+
+	gdb/
+	* configure.ac (build_warnings): Add -Wunused-value.
+	* configure: Regenerate.
+
 2009-10-14  Tristan Gingold  <gingold@adacore.com>
 
 	* solib-darwin.c: Remove trailing whitespaces.
