@@ -1,3 +1,12 @@
+2009-10-14  Andrew Stubbs  <ams@codesourcery.com>
+
+	* sh-tdep.c (sh_gdbarch_init): Add show_regs settings for
+	bfd_mach_sh3_nommu, bfd_mach_sh2a_nofpu_or_sh3_nommu,
+	bfd_mach_sh2a_or_sh3e, bfd_mach_sh2a_or_sh4, bfd_mach_sh4_nommu_nofpu,
+	and bfd_mach_sh2a_nofpu_or_sh4_nommu_nofpu.
+	Move bfd_mach_sh2a_or_sh4 to use the same configuration as
+	bfd_mach_sh4.
+
 2009-10-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* arm-tdep.c (arm_push_dummy_call): Set the low bit of LR for

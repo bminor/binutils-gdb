@@ -2762,10 +2762,13 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
 
     case bfd_mach_sh3:
+    case bfd_mach_sh3_nommu:
+    case bfd_mach_sh2a_nofpu_or_sh3_nommu:
       sh_show_regs = sh3_show_regs;
       break;
 
     case bfd_mach_sh3e:
+    case bfd_mach_sh2a_or_sh3e:
       sh_show_regs = sh3e_show_regs;
       break;
 
@@ -2776,11 +2779,14 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
     case bfd_mach_sh4:
     case bfd_mach_sh4a:
+    case bfd_mach_sh2a_or_sh4:
       sh_show_regs = sh4_show_regs;
       break;
 
     case bfd_mach_sh4_nofpu:
+    case bfd_mach_sh4_nommu_nofpu:
     case bfd_mach_sh4a_nofpu:
+    case bfd_mach_sh2a_nofpu_or_sh4_nommu_nofpu:
       sh_show_regs = sh4_nofpu_show_regs;
       break;
 
@@ -2914,6 +2920,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
     case bfd_mach_sh4:
     case bfd_mach_sh4a:
+    case bfd_mach_sh2a_or_sh4:
       set_gdbarch_register_name (gdbarch, sh_sh4_register_name);
       set_gdbarch_register_type (gdbarch, sh_sh4_register_type);
       set_gdbarch_fp0_regnum (gdbarch, 25);
@@ -2928,7 +2935,6 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case bfd_mach_sh4a_nofpu:
     case bfd_mach_sh4_nommu_nofpu:
     case bfd_mach_sh2a_nofpu_or_sh4_nommu_nofpu:
-    case bfd_mach_sh2a_or_sh4:
       set_gdbarch_register_name (gdbarch, sh_sh4_nofpu_register_name);
       break;
 
