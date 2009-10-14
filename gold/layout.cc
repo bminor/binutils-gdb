@@ -2144,7 +2144,7 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
   uint64_t addr;
   if (parameters->options().user_set_Ttext())
     addr = parameters->options().Ttext();
-  else if (parameters->options().shared())
+  else if (parameters->options().output_is_position_independent())
     addr = 0;
   else
     addr = target->default_text_segment_address();

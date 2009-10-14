@@ -176,6 +176,11 @@ basic_pic_test: basic_pic_test.o gcctestdir/ld
 basic_static_pic_test: basic_pic_test.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -static basic_pic_test.o
 
+check_PROGRAMS += basic_pie_test
+basic_pie_test.o: basic_test.cc
+	$(CXXCOMPILE) -O0 -c -fpie -o $@ $<
+basic_pie_test: basic_pie_test.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -pie basic_pie_test.o
 
 check_PROGRAMS += constructor_test
 check_PROGRAMS += constructor_static_test
@@ -280,6 +285,19 @@ two_file_relocatable_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 two_file_relocatable_test_LDADD = two_file_relocatable.o
 two_file_relocatable.o: gcctestdir/ld two_file_test_1.o two_file_test_1b.o two_file_test_2.o
 	gcctestdir/ld -r -o $@ two_file_test_1.o two_file_test_1b.o two_file_test_2.o
+
+check_PROGRAMS += two_file_pie_test
+two_file_test_1_pie.o: two_file_test_1.cc
+	$(CXXCOMPILE) -c -fpie -o $@ $<
+two_file_test_1b_pie.o: two_file_test_1b.cc
+	$(CXXCOMPILE) -c -fpie -o $@ $<
+two_file_test_2_pie.o: two_file_test_2.cc
+	$(CXXCOMPILE) -c -fpie -o $@ $<
+two_file_test_main_pie.o: two_file_test_main.cc
+	$(CXXCOMPILE) -c -fpie -o $@ $<
+two_file_pie_test: two_file_test_1_pie.o two_file_test_1b_pie.o \
+		two_file_test_2_pie.o two_file_test_main_pie.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -pie two_file_test_1_pie.o two_file_test_1b_pie.o two_file_test_2_pie.o two_file_test_main_pie.o
 
 check_SCRIPTS += two_file_shared.sh
 check_DATA += two_file_shared.dbg

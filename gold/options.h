@@ -763,6 +763,12 @@ class General_options
   DEFINE_string(oformat, options::EXACTLY_TWO_DASHES, '\0', "elf",
 		N_("Set output format"), N_("[binary]"));
 
+  DEFINE_bool(pie, options::ONE_DASH, '\0', false,
+	      N_("Create a position independent executable"), NULL);
+  DEFINE_bool_alias(pic_executable, pie, options::TWO_DASHES, '\0',
+		    N_("Create a position independent executable"), NULL,
+		    false);
+
 #ifdef ENABLE_PLUGINS
   DEFINE_special(plugin, options::TWO_DASHES, '\0',
                  N_("Load a plugin library"), N_("PLUGIN"));
@@ -1009,7 +1015,7 @@ class General_options
   // the output is position-independent or not.
   bool
   output_is_position_independent() const
-  { return this->shared(); }
+  { return this->shared() || this->pie(); }
 
   // Return true if the output is something that can be exec()ed, such
   // as a static executable, or a position-dependent or
@@ -1017,13 +1023,7 @@ class General_options
   // object file.
   bool
   output_is_executable() const
-  { return !this->shared() || this->output_is_pie(); }
-
-  // Return true if the output is a position-independent executable.
-  // This is currently not supported.
-  bool
-  output_is_pie() const
-  { return false; }
+  { return !this->shared() && !this->relocatable(); }
 
   // This would normally be static(), and defined automatically, but
   // since static is a keyword, we need to come up with our own name.

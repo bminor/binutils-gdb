@@ -692,7 +692,7 @@ Output_data_plt_i386::do_write(Output_file* of)
   elfcpp::Elf_types<32>::Elf_Addr plt_address = this->address();
   elfcpp::Elf_types<32>::Elf_Addr got_address = this->got_plt_->address();
 
-  if (parameters->options().shared())
+  if (parameters->options().output_is_position_independent())
     memcpy(pov, dyn_first_plt_entry, plt_entry_size);
   else
     {
@@ -724,7 +724,7 @@ Output_data_plt_i386::do_write(Output_file* of)
     {
       // Set and adjust the PLT entry itself.
 
-      if (parameters->options().shared())
+      if (parameters->options().output_is_position_independent())
 	{
 	  memcpy(pov, dyn_plt_entry, plt_entry_size);
 	  elfcpp::Swap_unaligned<32, false>::writeval(pov + 2, got_offset);

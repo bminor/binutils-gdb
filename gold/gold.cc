@@ -396,8 +396,9 @@ queue_middle_tasks(const General_options& options,
   workqueue->set_thread_count(thread_count);
 
   // Now we have seen all the input files.
-  const bool doing_static_link = (!input_objects->any_dynamic()
-				  && !parameters->options().shared());
+  const bool doing_static_link =
+    (!input_objects->any_dynamic()
+     && !parameters->options().output_is_position_independent());
   set_parameters_doing_static_link(doing_static_link);
   if (!doing_static_link && options.is_static())
     {

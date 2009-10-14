@@ -394,7 +394,8 @@ Symbol::final_value_is_known() const
 {
   // If we are not generating an executable, then no final values are
   // known, since they will change at runtime.
-  if (parameters->options().shared() || parameters->options().relocatable())
+  if (parameters->options().output_is_position_independent()
+      || parameters->options().relocatable())
     return false;
 
   // If the symbol is not from an object file, and is not undefined,

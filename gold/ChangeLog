@@ -1,3 +1,33 @@
+2009-10-13  Ian Lance Taylor  <iant@google.com>
+
+	Add support for -pie.
+	* options.h (class General_options): Add -pie and
+	--pic-executable.
+	(General_options::output_is_position_independent): Test -pie.
+	(General_options::output_is_executable): Return true if not shared
+	and not relocatable.
+	(General_options::output_is_pie): Remove.
+	* options.cc (General_options::finalize): Reject incompatible uses
+	of -pie.
+	* gold.cc (queue_middle_tasks): A -pie link is not static.
+	* symtab.h (Symbol::needs_plt_entry): Return false if -pie.
+	* symtab.cc (Symbol::final_value_is_known): Return false if
+	output_is_position_independent.
+	* layout.cc (Layout::set_segment_offsets): Start at address 0 if
+	output_is_position_independent.
+	* output.cc (Output_file_header::do_sized_write): Use ET_DYN if
+	output_is_position_independent.
+	* i386.cc (Output_data_plt_i386::do_write): Use the PIC PLT if
+	output_is_position_independent.
+	* testsuite/Makefile.am (check_PROGRAMS): Add basic_pie_test and
+	two_file_pie_test.
+	(basic_pie_test.o, basic_pie_test): New targets.
+	(two_file_test_1_pie.o, two_file_test_1b_pie.o): New targets.
+	(two_file_test_2_pie.o, two_file_test_main_pie.o): New targets.
+	(two_file_pie_test): New target.
+	* testsuite/Makefile.in: Rebuild.
+	* README: Remove note saying that -pie is not supported.
+
 2009-10-13  Bernhard Reutner-Fischer  <aldot@gcc.gnu.org>
 
 	* options.h (class General_options): Add -init and -fini.

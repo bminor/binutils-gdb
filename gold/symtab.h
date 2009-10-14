@@ -533,7 +533,7 @@ class Symbol
   // Return true if this symbol is a function that needs a PLT entry.
   // If the symbol is defined in a dynamic object or if it is subject
   // to pre-emption, we need to make a PLT entry. If we're doing a
-  // static link, we don't create PLT entries.
+  // static link or a -pie link, we don't create PLT entries.
   bool
   needs_plt_entry() const
   {
@@ -542,6 +542,7 @@ class Symbol
       return false;
 
     return (!parameters->doing_static_link()
+	    && !parameters->options().pie()
             && this->type() == elfcpp::STT_FUNC
             && (this->is_from_dynobj()
                 || this->is_undefined()

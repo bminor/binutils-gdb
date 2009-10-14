@@ -442,7 +442,7 @@ Output_file_header::do_sized_write(Output_file* of)
   elfcpp::ET e_type;
   if (parameters->options().relocatable())
     e_type = elfcpp::ET_REL;
-  else if (parameters->options().shared())
+  else if (parameters->options().output_is_position_independent())
     e_type = elfcpp::ET_DYN;
   else
     e_type = elfcpp::ET_EXEC;

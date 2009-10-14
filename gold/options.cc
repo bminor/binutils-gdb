@@ -1001,17 +1001,24 @@ General_options::finalize()
   // Now that we've normalized the options, check for contradictory ones.
   if (this->shared() && this->is_static())
     gold_fatal(_("-shared and -static are incompatible"));
+  if (this->shared() && this->pie())
+    gold_fatal(_("-shared and -pie are incompatible"));
 
   if (this->shared() && this->relocatable())
     gold_fatal(_("-shared and -r are incompatible"));
+  if (this->pie() && this->relocatable())
+    gold_fatal(_("-pie and -r are incompatible"));
 
   // TODO: implement support for -retain-symbols-file with -r, if needed.
   if (this->relocatable() && this->retain_symbols_file())
     gold_fatal(_("-retain-symbols-file does not yet work with -r"));
 
   if (this->oformat_enum() != General_options::OBJECT_FORMAT_ELF
-      && (this->shared() || this->relocatable()))
-    gold_fatal(_("binary output format not compatible with -shared or -r"));
+      && (this->shared()
+	  || this->pie()
+	  || this->relocatable()))
+    gold_fatal(_("binary output format not compatible "
+		 "with -shared or -pie or -r"));
 
   if (this->user_set_hash_bucket_empty_fraction()
       && (this->hash_bucket_empty_fraction() < 0.0
