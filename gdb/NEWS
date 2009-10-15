@@ -3,6 +3,14 @@
 
 *** Changes since GDB 7.0
 
+* New targets
+
+Xilinx MicroBlaze		microblaze-*-*
+
+* New Simulators
+
+Xilinx MicroBlaze		microblaze
+
 *** Changes in GDB 7.0
 
 * GDB now has an interface for JIT compilation.  Applications that

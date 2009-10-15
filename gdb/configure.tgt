@@ -313,6 +313,19 @@ mep-*-*)
 	# No sim needed. Target uses SID.
 	;;
 
+microblaze*-linux-*)
+	# Target: Xilinx MicroBlaze running Linux
+	gdb_target_obs="microblaze-tdep.o microblaze-linux-tdep.o microblaze-rom.o \
+			monitor.o dsrec.o solib.o solib-svr4.o corelow.o \
+			symfile-mem.o"
+	gdb_sim=../sim/microblaze/libsim.a
+	;;
+microblaze*-xilinx-*)
+	# Target: Xilinx MicroBlaze running standalone
+	gdb_target_obs="microblaze-tdep.o microblaze-rom.o monitor.o dsrec.o"
+	gdb_sim=../sim/microblaze/libsim.a
+	;;
+
 mips*-sgi-irix5*)
 	# Target: MIPS SGI running Irix 5
 	gdb_target_obs="mips-tdep.o mips-irix-tdep.o solib.o solib-irix.o"

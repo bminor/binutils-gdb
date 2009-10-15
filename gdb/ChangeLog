@@ -1,3 +1,18 @@
+2009-10-15  Michael Eager  <eager@eagercon.com>
+
+	* config/djgpp/fnchange.lst: Add translations for cpu-microblaze.c,
+	elf32-microblaze.c, microblaze-rom.c, microblaze-linux-tdep.c,
+	microblaze-tdep.h, microblaze-tdep.c, microblaze-opc.h,
+	microblaze-opcm.h, microblaze-dis.c, microblaze-dis.h, sim/microblaze,
+	microblaze.h, and microblaze.isa.
+	* configure.tgt: Add targets microblaze*-linux-*, microblaze*-xilinx-*.
+	* Makefile.in: Build microblaze-tdep.o, microblaze-linux-tdep.o.
+	HFILES_NO_SRCDIR: Add microblaze-tdep.h.
+	* microblaze-linux-tdep.c: New.
+	* microblaze-tdep.c: New.
+	* microblaze-tdep.h: New.
+	* NEWS: Announce Xilinx MicroBlaze support.
+
 2009-10-15  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	PR gdb/10757

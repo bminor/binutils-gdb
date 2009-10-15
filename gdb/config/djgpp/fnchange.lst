@@ -18,6 +18,7 @@
 @V@/bfd/cpu-cr16.c @V@/bfd/cpucr16.c
 @V@/bfd/cpu-cr16c.c @V@/bfd/cpucr16c.c
 @V@/bfd/cpu-ia64-opc.c @V@/bfd/cpuia64-opc.c
+@V@/bfd/cpu-microblaze.c @V@/bfd/cpumb.c
 @V@/bfd/cpu-m68hc11.c @V@/bfd/cm68hc11.c
 @V@/bfd/cpu-m68hc12.c @V@/bfd/cm68hc12.c
 @V@/bfd/efi-app-ia32.c @V@/bfd/efiia32app.c
@@ -34,6 +35,7 @@
 @V@/bfd/elf32-frv.c @V@/bfd/elf32fv.c
 @V@/bfd/elf32-i370.c @V@/bfd/e32i370.c
 @V@/bfd/elf32-i386.c @V@/bfd/e32i86.c
+@V@/bfd/elf32-microblaze.c @V@e32mb.c
 @V@/bfd/elf32-m32c.c @V@/bfd/em32c.c
 @V@/bfd/elf32-m32r.c @V@/bfd/em32r.c
 @V@/bfd/elf32-m68hc11.c @V@/bfd/em68hc11.c
@@ -279,6 +281,10 @@
 @V@/gdb/m68kbsd-tdep.c @V@/gdb/m68bsd-tdep.c
 @V@/gdb/m68knbsd-nat.c @V@/gdb/m6nbsd-nat.c
 @V@/gdb/m68knbsd-tdep.c @V@/gdb/m6nbsd-tdep.c
+@V@/gdb/microblaze-rom.c @V@/gdb/mb-rom.c
+@V@/gdb/microblaze-linux-tdep.c @V@/gdb/mbl-tdep.c
+@V@/gdb/microblaze-tdep.h @V@/gdb/mb-tdep.h
+@V@/gdb/microblaze-tdep.c @V@/gdb/mb-tdep.c
 @V@/gdb/mips-linux-nat.c @V@/gdb/mipslnxnat.c
 @V@/gdb/mips-linux-tdep.c @V@/gdb/mipslnxtdep.c
 @V@/gdb/mipsnbsd-nat.c @V@/gdb/mipsnbnat.c
@@ -511,6 +517,10 @@
 @V@/opcodes/ia64-opc.c @V@/opcodes/ia64-opc.c
 @V@/opcodes/iq2000-desc.c @V@/opcodes/iq2000desc.c
 @V@/opcodes/iq2000-dis.c @V@/opcodes/iq2000dis.c
+@V@/opcodes/microblaze-opc.h @V@/opcodes/mb-opc.h
+@V@/opcodes/microblaze-dis.c @V@/opcodes/mb-dis.c
+@V@/opcodes/microblaze-dis.h @V@/opcodes/mb-dis.h
+@V@/opcodes/microblaze-opcm.h @V@/opcodes/mb-opcm.h
 @V@/opcodes/m68hc11-dis.c @V@/opcodes/m68hc11dis.c
 @V@/opcodes/m68hc11-opc.c @V@/opcodes/m68hc11opc.c
 @V@/opcodes/microblaze-opc.h @V@/opcodes/mbl-opc.h
@@ -540,6 +550,9 @@
 @V@/sim/frv/profile-fr500.h @V@/sim/frv/fr500-profile.h
 @V@/sim/frv/profile-fr550.c @V@/sim/frv/fr550-profile.c
 @V@/sim/frv/profile-fr550.h @V@/sim/frv/fr550-profile.h
+@V@/sim/microblaze @V@/sim/mb
+@V@/sim/microblaze/microblaze.h @V@/sim/mb/mb.h
+@V@/sim/microblaze/microblaze.isa @V@/sim/mb/mb.isa
 @V@/sim/m68hc11/dv-m68hc11eepr.c @V@/sim/m68hc11/dv-eepr.c
 @V@/sim/m68hc11/dv-m68hc11sio.c @V@/sim/m68hc11/dv-sio.c
 @V@/sim/m68hc11/dv-m68hc11spi.c @V@/sim/m68hc11/dv-spi.c

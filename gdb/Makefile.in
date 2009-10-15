@@ -501,6 +501,7 @@ ALL_TARGET_OBS = \
 	m68kbsd-tdep.o m68klinux-tdep.o m68k-tdep.o \
 	m88k-tdep.o \
 	mep-tdep.o \
+	microblaze-tdep.o microblaze-linux-tdep.o \
 	mips-irix-tdep.o mips-linux-tdep.o \
 	mipsnbsd-tdep.o mips-tdep.o \
 	mn10300-linux-tdep.o mn10300-tdep.o \
@@ -750,7 +751,7 @@ config/rs6000/nm-rs6000.h top.h bsd-kvm.h gdb-stabs.h reggroups.h \
 annotate.h sim-regno.h dictionary.h dfp.h main.h frame-unwind.h	\
 remote-fileio.h i386-linux-tdep.h vax-tdep.h objc-lang.h \
 sentinel-frame.h bcache.h symfile.h windows-tdep.h linux-tdep.h \
-gdb_usleep.h jit.h xml-syscall.h ada-operator.inc
+gdb_usleep.h jit.h xml-syscall.h ada-operator.inc microblaze-tdep.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -1434,6 +1435,7 @@ ALLDEPFILES = \
 	m68kbsd-nat.c m68kbsd-tdep.c \
 	m68klinux-nat.c m68klinux-tdep.c \
 	m88k-tdep.c m88kbsd-nat.c \
+	microblaze-tdep.c microblaze-linux-tdep.c \
 	mingw-hdep.c \
 	mips-linux-nat.c mips-linux-tdep.c \
 	mips-irix-tdep.c \
