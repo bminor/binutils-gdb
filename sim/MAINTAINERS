@@ -15,6 +15,7 @@ frv		Dave Brolley <brolley@redhat.com>
 igen		(igen simulators)
 lm32		Jon Beniston <jon@beniston.com>
 m68hc11		Stephane Carrez <stcarrez@nerim.fr>
+microblaze	Michael Eager <eager@eagercon.com>
 mips		Thiemo Seufer <ths@networkno.de>
 moxie		Anthony Green <green@moxielogic.com>
 sh		(global maintainers)
