@@ -1,4 +1,10 @@
 2009-10-15  H.J. Lu  <hongjiu.lu@intel.com>
+	    Ineiev <ineiev@gmail.com>
+
+	PR binutils/10767
+	* i386-dis.c: Use enum instead of nested macros.
+
+2009-10-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (MAX_BYTEMODE): Removed.
 
