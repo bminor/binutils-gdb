@@ -1,3 +1,10 @@
+2009-10-12  Michael Snyder  <msnyder@vmware.com>
+
+	* record.c (record_list_release_first): Do not decrement
+	record_insn_num.
+	(set_insn_num_max): Remove printf.
+	Decrement record_insn_num in the loop.
+
 2009-10-14  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf2read.c (read_import_statement): Call follow_die_ref_or_sig.

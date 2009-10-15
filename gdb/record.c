@@ -177,6 +177,11 @@ record_list_release_next (void)
     }
 }
 
+/* Delete the first instruction from the beginning of the log, to make
+   room for adding a new instruction at the end of the log.
+
+   Note -- this function does not modify record_insn_num.  */
+
 static void
 record_list_release_first (void)
 {
@@ -209,8 +214,6 @@ record_list_release_first (void)
       if (type == record_end)
 	break;
     }
-
-  record_insn_num--;
 }
 
 /* Add a struct record_entry to record_arch_list.  */
@@ -1260,12 +1263,12 @@ set_record_insn_max_num (char *args, int from_tty, struct cmd_list_element *c)
 {
   if (record_insn_num > record_insn_max_num && record_insn_max_num)
     {
-      printf_unfiltered (_("Record instructions number is bigger than "
-		           "record instructions max number.  Auto delete "
-		           "the first ones?\n"));
-
+      /* Count down record_insn_num while releasing records from list.  */
       while (record_insn_num > record_insn_max_num)
-	record_list_release_first ();
+	{
+	  record_list_release_first ();
+	  record_insn_num--;
+	}
     }
 }
 
