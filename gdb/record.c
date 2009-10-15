@@ -98,7 +98,7 @@ static struct record_entry *record_arch_list_tail = NULL;
 
 /* 1 ask user. 0 auto delete the last struct record_entry.  */
 static int record_stop_at_limit = 1;
-static int record_insn_max_num = DEFAULT_RECORD_INSN_MAX_NUM;
+static unsigned int record_insn_max_num = DEFAULT_RECORD_INSN_MAX_NUM;
 static int record_insn_num = 0;
 
 /* The target_ops of process record.  */
@@ -1438,7 +1438,7 @@ When OFF, if the record/replay buffer becomes full,\n\
 delete the oldest recorded instruction to make room for each new one."),
 			   NULL, NULL,
 			   &set_record_cmdlist, &show_record_cmdlist);
-  add_setshow_zinteger_cmd ("insn-number-max", no_class,
+  add_setshow_uinteger_cmd ("insn-number-max", no_class,
 			    &record_insn_max_num,
 			    _("Set record/replay buffer limit."),
 			    _("Show record/replay buffer limit."), _("\

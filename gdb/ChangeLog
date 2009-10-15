@@ -1,5 +1,11 @@
 2009-10-15  Michael Snyder  <msnyder@vmware.com>
 
+	* record.c (record_insn_max_num): Make unsigned.
+	(_initialize_record): Use uinteger instead of zinteger for
+	set command, so that it will report "unlimited" for zero.
+
+2009-10-15  Michael Snyder  <msnyder@vmware.com>
+
 	* record.c (record_reg_alloc): New function.
 	(record_reg_release): New function.
 	(record_mem_alloc): New function.
