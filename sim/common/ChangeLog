@@ -1,3 +1,7 @@
+2009-10-15  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* sim-inline.h: Fix spelling error.
+
 2009-10-02  Ralf Corsepius <ralf.corsepius@rtems.org>
 
 	* Make-common.in: Add datarootdir.
