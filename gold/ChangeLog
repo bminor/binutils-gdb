@@ -1,3 +1,10 @@
+2009-10-15  Doug Kwan  <dougkwan@google.com>
+
+	* layout.cc (Layout::finish_dynamic_section): Generate tags
+	DT_FINI_ARRAY, DT_FINI_ARRAYSZ, DT_INIT_ARRAY, DT_INIT_ARRAYSZ,
+	DT_PREINIT_ARRAY, DT_PREINIT_ARRAYSZ as needed. If -Bsymbolic is
+	used, add DT_SYMBOLIC and set DF_SYMBOLIC in DT_FLAGS.
+
 2009-10-14  Ian Lance Taylor  <iant@google.com>
 
 	* object.h (class Relocate_info): Add reloc_shdr and data_shdr

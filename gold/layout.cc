@@ -3104,8 +3104,29 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
   if (sym != NULL && sym->is_defined() && !sym->is_from_dynobj())
     odyn->add_symbol(elfcpp::DT_FINI, sym);
 
-  // FIXME: Support DT_INIT_ARRAY and DT_FINI_ARRAY.
-
+  // Look for .init_array, .preinit_array and .fini_array by checking
+  // section types.
+  for(Layout::Section_list::const_iterator p = this->section_list_.begin();
+      p != this->section_list_.end();
+      ++p)
+    switch((*p)->type())
+      {
+      case elfcpp::SHT_FINI_ARRAY:
+	odyn->add_section_address(elfcpp::DT_FINI_ARRAY, *p);
+	odyn->add_section_size(elfcpp::DT_FINI_ARRAYSZ, *p); 
+	break;
+      case elfcpp::SHT_INIT_ARRAY:
+	odyn->add_section_address(elfcpp::DT_INIT_ARRAY, *p);
+	odyn->add_section_size(elfcpp::DT_INIT_ARRAYSZ, *p); 
+	break;
+      case elfcpp::SHT_PREINIT_ARRAY:
+	odyn->add_section_address(elfcpp::DT_PREINIT_ARRAY, *p);
+	odyn->add_section_size(elfcpp::DT_PREINIT_ARRAYSZ, *p); 
+	break;
+      default:
+	break;
+      }
+  
   // Add a DT_RPATH entry if needed.
   const General_options::Dir_list& rpath(parameters->options().rpath());
   if (!rpath.empty())
@@ -3186,6 +3207,12 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
     flags |= elfcpp::DF_STATIC_TLS;
   if (parameters->options().origin())
     flags |= elfcpp::DF_ORIGIN;
+  if (parameters->options().Bsymbolic())
+    {
+      flags |= elfcpp::DF_SYMBOLIC;
+      // Add DT_SYMBOLIC for compatibility with older loaders.
+      odyn->add_constant(elfcpp::DT_SYMBOLIC, 0);
+    }
   if (parameters->options().now())
     flags |= elfcpp::DF_BIND_NOW;
   odyn->add_constant(elfcpp::DT_FLAGS, flags);
