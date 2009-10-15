@@ -129,50 +129,143 @@ static int (*record_beneath_to_insert_breakpoint) (struct gdbarch *,
 static int (*record_beneath_to_remove_breakpoint) (struct gdbarch *,
 						   struct bp_target_info *);
 
+/* Alloc and free functions for record_reg, record_mem, and record_end 
+   entries.  */
+
+/* Alloc a record_reg record entry.  */
+
+static inline struct record_entry *
+record_reg_alloc (struct regcache *regcache, int regnum)
+{
+  struct record_entry *rec;
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+
+  rec = (struct record_entry *) xcalloc (1, sizeof (struct record_entry));
+  rec->type = record_reg;
+  rec->u.reg.num = regnum;
+  rec->u.reg.val = (gdb_byte *) xmalloc (MAX_REGISTER_SIZE);
+
+  return rec;
+}
+
+/* Free a record_reg record entry.  */
+
+static inline void
+record_reg_release (struct record_entry *rec)
+{
+  gdb_assert (rec->type == record_reg);
+  xfree (rec->u.reg.val);
+  xfree (rec);
+}
+
+/* Alloc a record_mem record entry.  */
+
+static inline struct record_entry *
+record_mem_alloc (CORE_ADDR addr, int len)
+{
+  struct record_entry *rec;
+
+  rec = (struct record_entry *) xcalloc (1, sizeof (struct record_entry));
+  rec->type = record_mem;
+  rec->u.mem.addr = addr;
+  rec->u.mem.len = len;
+  rec->u.mem.val = (gdb_byte *) xmalloc (len);
+
+  return rec;
+}
+
+/* Free a record_mem record entry.  */
+
+static inline void
+record_mem_release (struct record_entry *rec)
+{
+  gdb_assert (rec->type == record_mem);
+  xfree (rec->u.mem.val);
+  xfree (rec);
+}
+
+/* Alloc a record_end record entry.  */
+
+static inline struct record_entry *
+record_end_alloc (void)
+{
+  struct record_entry *rec;
+
+  rec = (struct record_entry *) xcalloc (1, sizeof (struct record_entry));
+  rec->type = record_end;
+
+  return rec;
+}
+
+/* Free a record_end record entry.  */
+
+static inline void
+record_end_release (struct record_entry *rec)
+{
+  xfree (rec);
+}
+
+/* Free one record entry, any type.
+   Return entry->type, in case caller wants to know.  */
+
+static inline enum record_type
+record_entry_release (struct record_entry *rec)
+{
+  enum record_type type = rec->type;
+
+  switch (type) {
+  case record_reg:
+    record_reg_release (rec);
+    break;
+  case record_mem:
+    record_mem_release (rec);
+    break;
+  case record_end:
+    record_end_release (rec);
+    break;
+  }
+  return type;
+}
+
+/* Free all record entries in list pointed to by REC.  */
+
 static void
 record_list_release (struct record_entry *rec)
 {
-  struct record_entry *tmp;
-
   if (!rec)
     return;
 
   while (rec->next)
-    {
-      rec = rec->next;
-    }
+    rec = rec->next;
 
   while (rec->prev)
     {
-      tmp = rec;
       rec = rec->prev;
-      if (tmp->type == record_reg)
-	xfree (tmp->u.reg.val);
-      else if (tmp->type == record_mem)
-	xfree (tmp->u.mem.val);
-      xfree (tmp);
+      record_entry_release (rec->next);
     }
 
-  if (rec != &record_first)
-    xfree (rec);
+  if (rec == &record_first)
+    {
+      record_insn_num = 0;
+      record_first.next = NULL;
+    }
+  else
+    record_entry_release (rec);
 }
 
+/* Free all record entries forward of the given list position.  */
+
 static void
-record_list_release_next (void)
+record_list_release_following (struct record_entry *rec)
 {
-  struct record_entry *rec = record_list;
   struct record_entry *tmp = rec->next;
+
   rec->next = NULL;
   while (tmp)
     {
       rec = tmp->next;
-      if (tmp->type == record_end)
+      if (record_entry_release (tmp) == record_end)
 	record_insn_num--;
-      else if (tmp->type == record_reg)
-	xfree (tmp->u.reg.val);
-      else if (tmp->type == record_mem)
-	xfree (tmp->u.mem.val);
-      xfree (tmp);
       tmp = rec;
     }
 }
@@ -185,34 +278,31 @@ record_list_release_next (void)
 static void
 record_list_release_first (void)
 {
-  struct record_entry *tmp = NULL;
-  enum record_type type;
+  struct record_entry *tmp;
 
   if (!record_first.next)
     return;
 
+  /* Loop until a record_end.  */
   while (1)
     {
-      type = record_first.next->type;
-
-      if (type == record_reg)
-	xfree (record_first.next->u.reg.val);
-      else if (type == record_mem)
-	xfree (record_first.next->u.mem.val);
+      /* Cut record_first.next out of the linked list.  */
       tmp = record_first.next;
       record_first.next = tmp->next;
-      xfree (tmp);
+      tmp->next->prev = &record_first;
+
+      /* tmp is now isolated, and can be deleted.  */
+      if (record_entry_release (tmp) == record_end)
+	{
+	  record_insn_num--;
+	  break;	/* End loop at first record_end.  */
+	}
 
       if (!record_first.next)
 	{
 	  gdb_assert (record_insn_num == 1);
-	  break;
+	  break;	/* End loop when list is empty.  */
 	}
-
-      record_first.next->prev = &record_first;
-
-      if (type == record_end)
-	break;
     }
 }
 
@@ -239,10 +329,10 @@ record_arch_list_add (struct record_entry *rec)
     }
 }
 
-/* Record the value of a register NUM to record_arch_list.  */
+/* Record the value of a register REGNUM to record_arch_list.  */
 
 int
-record_arch_list_add_reg (struct regcache *regcache, int num)
+record_arch_list_add_reg (struct regcache *regcache, int regnum)
 {
   struct record_entry *rec;
 
@@ -250,16 +340,11 @@ record_arch_list_add_reg (struct regcache *regcache, int num)
     fprintf_unfiltered (gdb_stdlog,
 			"Process record: add register num = %d to "
 			"record list.\n",
-			num);
+			regnum);
 
-  rec = (struct record_entry *) xmalloc (sizeof (struct record_entry));
-  rec->u.reg.val = (gdb_byte *) xmalloc (MAX_REGISTER_SIZE);
-  rec->prev = NULL;
-  rec->next = NULL;
-  rec->type = record_reg;
-  rec->u.reg.num = num;
+  rec = record_reg_alloc (regcache, regnum);
 
-  regcache_raw_read (regcache, num, rec->u.reg.val);
+  regcache_raw_read (regcache, regnum, rec->u.reg.val);
 
   record_arch_list_add (rec);
 
@@ -280,17 +365,10 @@ record_arch_list_add_mem (CORE_ADDR addr, int len)
 			"record list.\n",
 			paddress (target_gdbarch, addr), len);
 
-  if (!addr)
+  if (!addr)	/* FIXME: Why?  Some arch must permit it... */
     return 0;
 
-  rec = (struct record_entry *) xmalloc (sizeof (struct record_entry));
-  rec->u.mem.val = (gdb_byte *) xmalloc (len);
-  rec->prev = NULL;
-  rec->next = NULL;
-  rec->type = record_mem;
-  rec->u.mem.addr = addr;
-  rec->u.mem.len = len;
-  rec->u.mem.mem_entry_not_accessible = 0;
+  rec = record_mem_alloc (addr, len);
 
   if (target_read_memory (addr, rec->u.mem.val, len))
     {
@@ -299,8 +377,7 @@ record_arch_list_add_mem (CORE_ADDR addr, int len)
 			    "Process record: error reading memory at "
 			    "addr = %s len = %d.\n",
 			    paddress (target_gdbarch, addr), len);
-      xfree (rec->u.mem.val);
-      xfree (rec);
+      record_mem_release (rec);
       return -1;
     }
 
@@ -320,10 +397,7 @@ record_arch_list_add_end (void)
     fprintf_unfiltered (gdb_stdlog,
 			"Process record: add end to arch list.\n");
 
-  rec = (struct record_entry *) xmalloc (sizeof (struct record_entry));
-  rec->prev = NULL;
-  rec->next = NULL;
-  rec->type = record_end;
+  rec = record_end_alloc ();
   rec->u.end.sigval = TARGET_SIGNAL_0;
 
   record_arch_list_add (rec);
@@ -818,7 +892,7 @@ record_wait (struct target_ops *ops,
 		  else
 		    {
 		      if (target_write_memory (record_list->u.mem.addr,
-			                       record_list->u.mem.val,
+					       record_list->u.mem.val,
 		                               record_list->u.mem.len))
 	                {
 			  if (execution_direction != EXEC_REVERSE)
@@ -1059,7 +1133,7 @@ record_store_registers (struct target_ops *ops, struct regcache *regcache,
 	    }
 
 	  /* Destroy the record from here forward.  */
-	  record_list_release_next ();
+	  record_list_release_following (record_list);
 	}
 
       record_registers_change (regcache, regno);
@@ -1091,7 +1165,7 @@ record_xfer_partial (struct target_ops *ops, enum target_object object,
 	    error (_("Process record canceled the operation."));
 
 	  /* Destroy the record from here forward.  */
-	  record_list_release_next ();
+	  record_list_release_following (record_list);
 	}
 
       /* Check record_insn_num */
@@ -1231,7 +1305,7 @@ cmd_record_delete (char *args, int from_tty)
 	  if (!from_tty || query (_("Delete the log from this point forward "
 		                    "and begin to record the running message "
 		                    "at current PC?")))
-	    record_list_release_next ();
+	    record_list_release_following (record_list);
 	}
       else
 	  printf_unfiltered (_("Already at end of record list.\n"));

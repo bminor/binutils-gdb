@@ -1,4 +1,22 @@
-2009-10-12  Michael Snyder  <msnyder@vmware.com>
+2009-10-15  Michael Snyder  <msnyder@vmware.com>
+
+	* record.c (record_reg_alloc): New function.
+	(record_reg_release): New function.
+	(record_mem_alloc): New function.
+	(record_mem_release): New function.
+	(record_end_alloc): New function.
+	(record_end_release): New function.
+	(record_entry_release): New function.
+	(record_list_release): Simplify, call record_entry_release.
+	(record_list_release_next): Rename to record_list_release_following.
+	Simplify and call record_entry_release.
+	(record_list_release_first): Simplify, comment, and use
+	record_entry_release.
+	(record_arch_list_add_reg): Simplify, call record_reg_alloc.
+	(record_arch_list_add_mem): Simplify, call record_mem_alloc.
+	(record_arch_list_add_end): Simplify, call record_end_alloc.
+
+2009-10-14  Michael Snyder  <msnyder@vmware.com>
 
 	* record.c (record_list_release_first): Do not decrement
 	record_insn_num.
