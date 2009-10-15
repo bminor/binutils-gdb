@@ -1,3 +1,10 @@
+2009-10-15  Alan Modra  <amodra@bigpond.net.au>
+
+	PR gas/1491
+	* gas/macros/dot.s: Don't start macro invocations is first column.
+	* gas/macros/dot.l: Update.
+	* gas/macros/macros.exp: Run dot test on more targets.
+
 2009-10-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/10740

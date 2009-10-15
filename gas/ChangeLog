@@ -1,3 +1,15 @@
+2009-10-15  Alan Modra  <amodra@bigpond.net.au>
+
+	PR gas/1491
+	* macro.c: Delete unnecessary function declarations.
+	(buffer_and_nest): Support multiple labels per line for
+	LABELS_WITHOUT_COLONS targets if the labels do have colons.
+	(free_macro): Move so that we don't need forward declaration.
+	* read.c (read_a_source_file): Take a copy of macro expansion line
+	before we trim labels.
+	* listing.c (listing_newline): Adjust stdin line save for
+	input_line_pointer still at start of line.
+
 2009-10-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/10766

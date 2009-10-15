@@ -21,8 +21,8 @@ labelZ:labelY : labelX :labelW: .xyz arg.1-arg.2
  .skip arg.1*arg.2
 label9:label8 : label7 :label6: .endm
 
-m 4, 2
+ m 4, 2
 
  .purgem .xyz, x.y.z
  .xyz 0
-x.y.z 0
+ x.y.z 0

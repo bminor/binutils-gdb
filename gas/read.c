@@ -620,19 +620,57 @@ read_a_source_file (char *name)
 #endif
       while (input_line_pointer < buffer_limit)
 	{
+	  bfd_boolean was_new_line;
 	  /* We have more of this buffer to parse.  */
 
 	  /* We now have input_line_pointer->1st char of next line.
 	     If input_line_pointer [-1] == '\n' then we just
 	     scanned another line: so bump line counters.  */
-	  if (is_end_of_line[(unsigned char) input_line_pointer[-1]])
+	  was_new_line = is_end_of_line[(unsigned char) input_line_pointer[-1]];
+	  if (was_new_line)
 	    {
 #ifdef md_start_line_hook
 	      md_start_line_hook ();
 #endif
 	      if (input_line_pointer[-1] == '\n')
 		bump_line_counters ();
+	    }
 
+#ifndef NO_LISTING
+	  /* If listing is on, and we are expanding a macro, then give
+	     the listing code the contents of the expanded line.  */
+	  if (listing)
+	    {
+	      if ((listing & LISTING_MACEXP) && macro_nest > 0)
+		{
+		  /* Find the end of the current expanded macro line.  */
+		  s = find_end_of_line (input_line_pointer, flag_m68k_mri);
+
+		  if (s != last_eol)
+		    {
+		      char *copy;
+		      int len;
+
+		      last_eol = s;
+		      /* Copy it for safe keeping.  Also give an indication of
+			 how much macro nesting is involved at this point.  */
+		      len = s - input_line_pointer;
+		      copy = (char *) xmalloc (len + macro_nest + 2);
+		      memset (copy, '>', macro_nest);
+		      copy[macro_nest] = ' ';
+		      memcpy (copy + macro_nest + 1, input_line_pointer, len);
+		      copy[macro_nest + 1 + len] = '\0';
+
+		      /* Install the line with the listing facility.  */
+		      listing_newline (copy);
+		    }
+		}
+	      else
+		listing_newline (NULL);
+	    }
+#endif
+	  if (was_new_line)
+	    {
 	      line_label = NULL;
 
 	      if (LABELS_WITHOUT_COLONS || flag_m68k_mri)
@@ -645,7 +683,6 @@ read_a_source_file (char *name)
 		      char c;
 		      int mri_line_macro;
 
-		      LISTING_NEWLINE ();
 		      HANDLE_CONDITIONAL_ASSEMBLY ();
 
 		      c = get_symbol_end ();
@@ -712,39 +749,6 @@ read_a_source_file (char *name)
 	    c = *input_line_pointer++;
 	  while (c == '\t' || c == ' ' || c == '\f');
 
-#ifndef NO_LISTING
-	  /* If listing is on, and we are expanding a macro, then give
-	     the listing code the contents of the expanded line.  */
-	  if (listing)
-	    {
-	      if ((listing & LISTING_MACEXP) && macro_nest > 0)
-		{
-		  char *copy;
-		  int len;
-
-		  /* Find the end of the current expanded macro line.  */
-		  s = find_end_of_line (input_line_pointer - 1, flag_m68k_mri);
-
-		  if (s != last_eol)
-		    {
-		      last_eol = s;
-		      /* Copy it for safe keeping.  Also give an indication of
-			 how much macro nesting is involved at this point.  */
-		      len = s - (input_line_pointer - 1);
-		      copy = (char *) xmalloc (len + macro_nest + 2);
-		      memset (copy, '>', macro_nest);
-		      copy[macro_nest] = ' ';
-		      memcpy (copy + macro_nest + 1, input_line_pointer - 1, len);
-		      copy[macro_nest + 1 + len] = '\0';
-
-		      /* Install the line with the listing facility.  */
-		      listing_newline (copy);
-		    }
-		}
-	      else
-		listing_newline (NULL);
-	    }
-#endif
 	  /* C is the 1st significant character.
 	     Input_line_pointer points after that character.  */
 	  if (is_name_beginner (c))

@@ -30,21 +30,6 @@
 /* The routines in this file handle macro definition and expansion.
    They are called by gas.  */
 
-/* Internal functions.  */
-
-static int get_token (int, sb *, sb *);
-static int getstring (int, sb *, sb *);
-static int get_any_string (int, sb *, sb *);
-static formal_entry *new_formal (void);
-static void del_formal (formal_entry *);
-static int do_formals (macro_entry *, int, sb *);
-static int get_apost_token (int, sb *, sb *, int);
-static int sub_actual (int, sb *, sb *, struct hash_control *, int, sb *, int);
-static const char *macro_expand_body
-  (sb *, sb *, formal_entry *, struct hash_control *, const macro_entry *);
-static const char *macro_expand (int, sb *, macro_entry *, sb *);
-static void free_macro(macro_entry *);
-
 #define ISWHITE(x) ((x) == ' ' || (x) == '\t')
 
 #define ISSEP(x) \
@@ -146,6 +131,7 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
     {
       /* Try to find the first pseudo op on the line.  */
       int i = line_start;
+      bfd_boolean had_colon = FALSE;
 
       /* With normal syntax we can suck what we want till we get
 	 to the dot.  With the alternate, labels have to start in
@@ -169,19 +155,24 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
 	    i++;
 	  if (i < ptr->len && is_name_ender (ptr->ptr[i]))
 	    i++;
-	  if (LABELS_WITHOUT_COLONS)
-	    break;
 	  /* Skip whitespace.  */
 	  while (i < ptr->len && ISWHITE (ptr->ptr[i]))
 	    i++;
 	  /* Check for the colon.  */
 	  if (i >= ptr->len || ptr->ptr[i] != ':')
 	    {
+	      /* LABELS_WITHOUT_COLONS doesn't mean we cannot have a
+		 colon after a label.  If we do have a colon on the
+		 first label then handle more than one label on the
+		 line, assuming that each label has a colon.  */
+	      if (LABELS_WITHOUT_COLONS && !had_colon)
+		break;
 	      i = line_start;
 	      break;
 	    }
 	  i++;
 	  line_start = i;
+	  had_colon = TRUE;
 	}
 
       /* Skip trailing whitespace.  */
@@ -604,6 +595,26 @@ do_formals (macro_entry *macro, int idx, sb *in)
     }
 
   return idx;
+}
+
+/* Free the memory allocated to a macro.  */
+
+static void
+free_macro (macro_entry *macro)
+{
+  formal_entry *formal;
+
+  for (formal = macro->formals; formal; )
+    {
+      formal_entry *f;
+
+      f = formal;
+      formal = formal->next;
+      del_formal (f);
+    }
+  hash_die (macro->formal_hash);
+  sb_kill (&macro->sub);
+  free (macro);
 }
 
 /* Define a new macro.  Returns NULL on success, otherwise returns an
@@ -1233,26 +1244,6 @@ check_macro (const char *line, sb *expand,
     *info = macro;
 
   return 1;
-}
-
-/* Free the memory allocated to a macro.  */
-
-static void
-free_macro(macro_entry *macro)
-{
-  formal_entry *formal;
-
-  for (formal = macro->formals; formal; )
-    {
-      formal_entry *f;
-
-      f = formal;
-      formal = formal->next;
-      del_formal (f);
-    }
-  hash_die (macro->formal_hash);
-  sb_kill (&macro->sub);
-  free (macro);
 }
 
 /* Delete a macro.  */
