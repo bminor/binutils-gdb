@@ -1,5 +1,6 @@
 2009-10-15  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
+	PR gdb/10757
 	* linux-nat.c (linux_nat_post_attach_wait): Adjust assert.
 	(lin_lwp_attach_lwp, linux_nat_attach): Handle disappearing LWP.
 	
