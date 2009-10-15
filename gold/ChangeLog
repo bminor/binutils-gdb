@@ -1,3 +1,14 @@
+2009-10-14  Ian Lance Taylor  <iant@google.com>
+
+	* object.h (class Relocate_info): Add reloc_shdr and data_shdr
+	fields.
+	* object.cc (Sized_relobj::relocate_sections): Set reloc_shdr and
+	data_shdr fields of relinfo.
+	* i386.cc (class Target_i386::Relocate): Remove ldo_addrs_ field.
+	(Target_i386::Relocate::relocate_tls): Don't call fix_up_ldo.  For
+	R_386_TLS_LDO_32, adjust based on section flags.
+	(Target_i386::Relocate::fix_up_ldo): Remove.
+
 2009-10-13  Ian Lance Taylor  <iant@google.com>
 
 	Add support for -pie.

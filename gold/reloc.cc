@@ -890,7 +890,9 @@ Sized_relobj<size, big_endian>::relocate_sections(
 		  || this->relocs_must_follow_section_writes());
 
       relinfo.reloc_shndx = i;
+      relinfo.reloc_shdr = p;
       relinfo.data_shndx = index;
+      relinfo.data_shdr = pshdrs + index * This::shdr_size;
       unsigned char* view = (*pviews)[index].view;
       Address address = (*pviews)[index].address;
       section_size_type view_size = (*pviews)[index].view_size;

@@ -2007,8 +2007,12 @@ struct Relocate_info
   Sized_relobj<size, big_endian>* object;
   // Section index of relocation section.
   unsigned int reloc_shndx;
+  // Section header of relocation section.
+  const unsigned char* reloc_shdr;
   // Section index of section being relocated.
   unsigned int data_shndx;
+  // Section header of data section.
+  const unsigned char* data_shdr;
 
   // Return a string showing the location of a relocation.  This is
   // only used for error messages.
