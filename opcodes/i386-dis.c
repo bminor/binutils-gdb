@@ -505,8 +505,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define z_mode_ax_reg		(rDI_reg + 1)
 #define indir_dx_reg		(z_mode_ax_reg + 1)
 
-#define MAX_BYTEMODE	indir_dx_reg
-
 
 #define FLOATCODE		1
 #define USE_REG_TABLE		(FLOATCODE + 1)

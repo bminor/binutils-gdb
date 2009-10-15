@@ -1,3 +1,7 @@
+2009-10-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (MAX_BYTEMODE): Removed.
+
 2009-10-14  Tomas Hurka  <tom@hukatronic.cz>
 
 	PR 969
