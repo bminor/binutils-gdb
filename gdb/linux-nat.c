@@ -1338,7 +1338,16 @@ linux_nat_post_attach_wait (ptid_t ptid, int first, int *cloned,
       *cloned = 1;
     }
 
-  gdb_assert (pid == new_pid && WIFSTOPPED (status));
+  gdb_assert (pid == new_pid);
+
+  if (!WIFSTOPPED (status))
+    {
+      /* The pid we tried to attach has apparently just exited.  */
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog, "LNPAW: Failed to stop %d: %s",
+			    pid, status_to_str (status));
+      return status;
+    }
 
   if (WSTOPSIG (status) != SIGSTOP)
     {
@@ -1396,6 +1405,9 @@ lin_lwp_attach_lwp (ptid_t ptid)
 			    target_pid_to_str (ptid));
 
       status = linux_nat_post_attach_wait (ptid, 0, &cloned, &signalled);
+      if (!WIFSTOPPED (status))
+	return -1;
+
       lp = add_lwp (ptid);
       lp->stopped = 1;
       lp->cloned = cloned;
@@ -1495,6 +1507,39 @@ linux_nat_attach (struct target_ops *ops, char *args, int from_tty)
 
   status = linux_nat_post_attach_wait (lp->ptid, 1, &lp->cloned,
 				       &lp->signalled);
+  if (!WIFSTOPPED (status))
+    {
+      if (WIFEXITED (status))
+	{
+	  int exit_code = WEXITSTATUS (status);
+
+	  target_terminal_ours ();
+	  target_mourn_inferior ();
+	  if (exit_code == 0)
+	    error (_("Unable to attach: program exited normally."));
+	  else
+	    error (_("Unable to attach: program exited with code %d."),
+		   exit_code);
+	}
+      else if (WIFSIGNALED (status))
+	{
+	  enum target_signal signo;
+
+	  target_terminal_ours ();
+	  target_mourn_inferior ();
+
+	  signo = target_signal_from_host (WTERMSIG (status));
+	  error (_("Unable to attach: program terminated with signal "
+		   "%s, %s."),
+		 target_signal_to_name (signo),
+		 target_signal_to_string (signo));
+	}
+
+      internal_error (__FILE__, __LINE__,
+		      _("unexpected status %d for PID %ld"),
+		      status, (long) GET_LWP (ptid));
+    }
+
   lp->stopped = 1;
 
   /* Save the wait status to report later.  */

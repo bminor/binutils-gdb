@@ -1,3 +1,8 @@
+2009-10-15  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* linux-nat.c (linux_nat_post_attach_wait): Adjust assert.
+	(lin_lwp_attach_lwp, linux_nat_attach): Handle disappearing LWP.
+	
 2009-10-15  Michael Snyder  <msnyder@vmware.com>
 
 	* record.c (record_insn_max_num): Make unsigned.
