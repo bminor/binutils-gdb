@@ -6,7 +6,7 @@
 	* microblaze-tdep.c: Remove MICROBLAZE_REGISTER_SIZE.
 	* microblaze-tdep.h: Add MICROBLAZE_REGISTER_SIZE.
 
-2008-10-15  Steven G. Kargl  <kargl@gcc.gnu.org>
+2008-10-15  Steven G. Kargl  <kargl@gcc.gnu.org>  (tiny patch)
 
 	* amd64fbsd-nat.c (amd64fbsd_supply_pcb): Conditionally compile in
 	support for pcb->pcb_{fs,ds,es,gs} on FreeBSD older than 8.0.
