@@ -1,3 +1,8 @@
+2009-10-16  Rafael Avila de Espindola  <espindola@google.com>
+
+	* bootstrap.exp: Detect if plugins are enabled. Skip the static
+	link test and add -ldl to the remaining tests if they are.
+
 2009-10-14  Joseph Myers  <joseph@codesourcery.com>
 
 	* ld-scripts/phdrs3.d: Allow colon in name of linker binary.

@@ -30,6 +30,16 @@ if ![isnative] {
     return
 }
 
+# Determine if plugin support is present.
+remote_exec host "$nm --help" "" "/dev/null" "plugin-support"
+set tmp [file_contents "plugin-support"]
+regexp ".*\(--plugin\).*\n" $tmp foo plugins
+if [info exists plugins] then {
+    set plugins "yes"
+} else {
+    set plugins "no"
+}
+
 # Bootstrap ld.  First link the object files together using -r, in
 # order to test -r.  Then link the result into an executable, ld1, to
 # really test -r.  Use ld1 to link a fresh ld, ld2.  Use ld2 to link a
@@ -61,8 +71,15 @@ foreach flags {"" "strip" "--static" "--traditional-format"
 	continue
     }
 
+    # Plugin support requires linking with a dynamic library which
+    # means that these
+    if { $flags == "--static" && $plugins == "yes" } then {
+	untested $testname
+	continue
+    }
+
     # If we only have a shared libbfd, we probably can't run the
-    # --static test.
+    # --static test.will fail.
     if { $flags == "--static" && ! [string match "*libbfd.a*" $BFDLIB] } then {
 	untested $testname
 	continue
@@ -89,6 +106,11 @@ foreach flags {"" "strip" "--static" "--traditional-format"
 	if {"$flags" == "--static"} {
 	    set extralibs "-liconv"
 	}
+    }
+
+    # Plugin support requires linking with libdl.
+    if { $plugins == "yes" } {
+	set extralibs "$extralibs -ldl"
     }
 
     # On Irix 5, linking with --static only works if all the files are
