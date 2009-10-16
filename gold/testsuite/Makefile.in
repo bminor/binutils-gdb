@@ -354,14 +354,19 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 # referenced by a shared library.
 
 # Test -retain-symbols-file.
+
+# Test that no .gnu.version sections are created when 
+# symbol versioning is not used.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_27 = exclude_libs_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	hidden_test.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test.sh
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	no_version_test.sh
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_28 = exclude_libs_test.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	hidden_test.err \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	no_version_test.stdout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_29 = exclude_libs_test.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	libexclude_libs_test_1.a \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	libexclude_libs_test_2.a \
@@ -373,7 +378,9 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	retain_symbols_file_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	searched_file_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	searched_file_test_lib.o \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/searched_file_test_lib.a
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/searched_file_test_lib.a \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	libno_version_test.so \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	no_version_test.stdout
 @GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@am__append_30 = large
 @GCC_FALSE@large_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
@@ -3104,6 +3111,14 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@alt/searched_file_test_lib.a: searched_file_test_lib.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	test -d alt || mkdir -p alt
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_AR) rc $@ $^
+# We invoke the linker directly since gcc may include additional objects that
+# uses symbol versioning.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@libno_version_test.so: no_version_test.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -shared -o $@ no_version_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@no_version_test.o: no_version_test.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -o $@ -c -fPIC $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@no_version_test.stdout: libno_version_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_OBJDUMP) -h $< > $@
 @DEFAULT_TARGET_I386_TRUE@split_i386_1.o: split_i386_1.s
 @DEFAULT_TARGET_I386_TRUE@	$(TEST_AS) -o $@ $<
 @DEFAULT_TARGET_I386_TRUE@split_i386_2.o: split_i386_2.s

@@ -1249,6 +1249,20 @@ alt/searched_file_test_lib.a: searched_file_test_lib.o
 	test -d alt || mkdir -p alt
 	$(TEST_AR) rc $@ $^
 
+# Test that no .gnu.version sections are created when 
+# symbol versioning is not used.
+check_SCRIPTS += no_version_test.sh
+check_DATA += no_version_test.stdout
+MOSTLYCLEANFILES += libno_version_test.so no_version_test.stdout
+# We invoke the linker directly since gcc may include additional objects that
+# uses symbol versioning.
+libno_version_test.so: no_version_test.o gcctestdir/ld
+	gcctestdir/ld -shared -o $@ no_version_test.o
+no_version_test.o: no_version_test.c
+	$(COMPILE) -o $@ -c -fPIC $<
+no_version_test.stdout: libno_version_test.so
+	$(TEST_OBJDUMP) -h $< > $@
+
 endif GCC
 endif NATIVE_LINKER
 

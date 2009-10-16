@@ -1,5 +1,23 @@
 2009-10-16  Doug Kwan  <dougkwan@google.com>
 
+	* dynobj.cc (Versions::Versions): Initialize version_script_.
+	Only insert base version symbol definition for a shared object
+	if version script defines any version versions.
+	(Versions::define_base_version): New method definition.
+	(Versions::add_def): Check that base version is not needed.
+	(Versions::add_need): Define base version lazily.
+	* dynobj.h (Versions::define_base_version): New method declaration.
+	(Versions::needs_base_version_): New data member declaration.
+	* testsuite/Makefile.am (check_SCRIPTS): Add no_version_test.sh
+	(check_DATA): Add no_version_test.stdout.
+	(libno_version_test.so, no_version_test.o no_version_test.stdout):
+	New make rules.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/no_version_test.c: New file.
+	* testsuite/no_version_test.sh: Ditto.
+
+2009-10-16  Doug Kwan  <dougkwan@google.com>
+
 	* expression.cc (class Segment_start_expression): New class definition.
 	(Segment_start_expression::value): New method definition.
 	(script_exp_function_segment_start): Return a new
