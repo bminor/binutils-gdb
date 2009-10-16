@@ -1,6 +1,6 @@
 // script.cc -- handle linker scripts for gold.
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -1070,10 +1070,11 @@ Script_options::add_symbol_assignment(const char* name, size_t length,
     {
       if (provide || hidden)
 	gold_error(_("invalid use of PROVIDE for dot symbol"));
-      if (!this->script_sections_.in_sections_clause())
-	gold_error(_("invalid assignment to dot outside of SECTIONS"));
-      else
-	this->script_sections_.add_dot_assignment(value);
+
+      // The GNU linker permits assignments to dot outside of SECTIONS
+      // clauses and treats them as occurring inside, so we don't
+      // check in_sections_clause here.
+      this->script_sections_.add_dot_assignment(value);
     }
 }
 

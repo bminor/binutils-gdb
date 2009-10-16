@@ -2540,6 +2540,15 @@ Script_sections::add_dot_assignment(Expression* val)
     this->output_section_->add_dot_assignment(val);
   else
     {
+      // The GNU linker permits assignments to . to appears outside of
+      // a SECTIONS clause, and treats it as appearing inside, so
+      // sections_elements_ may be NULL here.
+      if (this->sections_elements_ == NULL)
+	{
+	  this->sections_elements_ = new Sections_elements;
+	  this->saw_sections_clause_ = true;
+	}
+
       Sections_element* p = new Sections_element_dot_assignment(val);
       this->sections_elements_->push_back(p);
     }

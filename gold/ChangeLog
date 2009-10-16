@@ -1,5 +1,10 @@
 2009-10-15  Ian Lance Taylor  <iant@google.com>
 
+	* script.cc (Script_options::add_symbol_assignment): Always add a
+	dot assginment to script_sections_.
+	* script-sections.cc (Script_sections::add_dot_assignment):
+	Initialize if necessary.
+
 	* layout.cc (Layout::relaxation_loop_body): Don't crash if we see
 	program headers with no load segment if there is a linker script.
 
