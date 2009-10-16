@@ -1,6 +1,6 @@
 // script.cc -- handle linker scripts for gold.
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -743,7 +743,7 @@ Lex::get_token(const char** pp)
 	}
 
       // Skip whitespace quickly.
-      while (*p == ' ' || *p == '\t')
+      while (*p == ' ' || *p == '\t' || *p == '\r')
 	++p;
 
       if (*p == '\n')
@@ -1070,10 +1070,11 @@ Script_options::add_symbol_assignment(const char* name, size_t length,
     {
       if (provide || hidden)
 	gold_error(_("invalid use of PROVIDE for dot symbol"));
-      if (!this->script_sections_.in_sections_clause())
-	gold_error(_("invalid assignment to dot outside of SECTIONS"));
-      else
-	this->script_sections_.add_dot_assignment(value);
+
+      // The GNU linker permits assignments to dot outside of SECTIONS
+      // clauses and treats them as occurring inside, so we don't
+      // check in_sections_clause here.
+      this->script_sections_.add_dot_assignment(value);
     }
 }
 
@@ -1452,7 +1453,9 @@ read_script_file(const char* filename, Command_line* cmdline,
   Position_dependent_options posdep = cmdline->position_dependent_options();
   if (posdep.format_enum() == General_options::OBJECT_FORMAT_BINARY)
     posdep.set_format_enum(General_options::OBJECT_FORMAT_ELF);
-  Input_file_argument input_argument(filename, false, "", false, posdep);
+  Input_file_argument input_argument(filename,
+				     Input_file_argument::INPUT_FILE_TYPE_FILE,
+				     "", false, posdep);
   Input_file input_file(&input_argument);
   int dummy = 0;
   if (!input_file.open(dirsearch, task, &dummy))
@@ -2179,8 +2182,10 @@ script_add_file(void* closurev, const char* name, size_t length)
 	}
     }
 
-  Input_file_argument file(name_string.c_str(), false, extra_search_path,
-			   false, closure->position_dependent_options());
+  Input_file_argument file(name_string.c_str(),
+			   Input_file_argument::INPUT_FILE_TYPE_FILE,
+			   extra_search_path, false,
+			   closure->position_dependent_options());
   closure->inputs()->add_file(file);
 }
 

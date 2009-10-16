@@ -163,7 +163,7 @@ class Sized_dynobj : public Dynobj
 
   // Set up the object file based on TARGET.
   void
-  setup(Target *target);
+  setup();
 
   // Read the symbols.
   void

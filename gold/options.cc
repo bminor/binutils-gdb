@@ -22,8 +22,10 @@
 
 #include "gold.h"
 
+#include <cerrno>
 #include <cstdlib>
 #include <cstring>
+#include <fstream>
 #include <vector>
 #include <iostream>
 #include <sys/stat.h>
@@ -193,6 +195,16 @@ parse_uint(const char* option_name, const char* arg, int* retval)
 }
 
 void
+parse_int(const char* option_name, const char* arg, int* retval)
+{
+  char* endptr;
+  *retval = strtol(arg, &endptr, 0);
+  if (*endptr != '\0')
+    gold_fatal(_("%s: invalid option value (expected an integer): %s"),
+               option_name, arg);
+}
+
+void
 parse_uint64(const char* option_name, const char* arg, uint64_t *retval)
 {
   char* endptr;
@@ -329,7 +341,19 @@ void
 General_options::parse_library(const char*, const char* arg,
                                Command_line* cmdline)
 {
-  Input_file_argument file(arg, true, "", false, *this);
+  Input_file_argument::Input_file_type type;
+  const char *name;
+  if (arg[0] == ':')
+    {
+      type = Input_file_argument::INPUT_FILE_TYPE_SEARCHED_FILE;
+      name = arg + 1;
+    }
+  else
+    {
+      type = Input_file_argument::INPUT_FILE_TYPE_LIBRARY;
+      name = arg;
+    }
+  Input_file_argument file(name, type, "", false, *this);
   cmdline->inputs().add_file(file);
 }
 
@@ -366,7 +390,8 @@ void
 General_options::parse_just_symbols(const char*, const char* arg,
                                     Command_line* cmdline)
 {
-  Input_file_argument file(arg, false, "", true, *this);
+  Input_file_argument file(arg, Input_file_argument::INPUT_FILE_TYPE_FILE,
+			   "", true, *this);
   cmdline->inputs().add_file(file);
 }
 
@@ -849,6 +874,15 @@ General_options::finalize()
   else if (this->noexecstack())
     this->set_execstack_status(EXECSTACK_NO);
 
+  // icf_status_ is a three-state variable; update it based on the
+  // value of this->icf().
+  if (strcmp(this->icf(), "none") == 0)
+    this->set_icf_status(ICF_NONE);
+  else if (strcmp(this->icf(), "safe") == 0)
+    this->set_icf_status(ICF_SAFE);
+  else
+    this->set_icf_status(ICF_ALL);
+
   // Handle the optional argument for --demangle.
   if (this->user_set_demangle())
     {
@@ -938,6 +972,25 @@ General_options::finalize()
       this->add_to_library_path_with_sysroot("/usr/lib");
     }
 
+  // Parse the contents of -retain-symbols-file into a set.
+  if (this->retain_symbols_file())
+    {
+      std::ifstream in;
+      in.open(this->retain_symbols_file());
+      if (!in)
+        gold_fatal(_("unable to open -retain-symbols-file file %s: %s"),
+                   this->retain_symbols_file(), strerror(errno));
+      std::string line;
+      std::getline(in, line);   // this chops off the trailing \n, if any
+      while (in)
+        {
+          if (!line.empty() && line[line.length() - 1] == '\r')   // Windows
+            line.resize(line.length() - 1);
+          this->symbols_to_retain_.insert(line);
+          std::getline(in, line);
+        }
+    }
+
   if (this->shared() && !this->user_set_allow_shlib_undefined())
     this->set_allow_shlib_undefined(true);
 
@@ -948,13 +1001,24 @@ General_options::finalize()
   // Now that we've normalized the options, check for contradictory ones.
   if (this->shared() && this->is_static())
     gold_fatal(_("-shared and -static are incompatible"));
+  if (this->shared() && this->pie())
+    gold_fatal(_("-shared and -pie are incompatible"));
 
   if (this->shared() && this->relocatable())
     gold_fatal(_("-shared and -r are incompatible"));
+  if (this->pie() && this->relocatable())
+    gold_fatal(_("-pie and -r are incompatible"));
+
+  // TODO: implement support for -retain-symbols-file with -r, if needed.
+  if (this->relocatable() && this->retain_symbols_file())
+    gold_fatal(_("-retain-symbols-file does not yet work with -r"));
 
   if (this->oformat_enum() != General_options::OBJECT_FORMAT_ELF
-      && (this->shared() || this->relocatable()))
-    gold_fatal(_("binary output format not compatible with -shared or -r"));
+      && (this->shared()
+	  || this->pie()
+	  || this->relocatable()))
+    gold_fatal(_("binary output format not compatible "
+		 "with -shared or -pie or -r"));
 
   if (this->user_set_hash_bucket_empty_fraction()
       && (this->hash_bucket_empty_fraction() < 0.0
@@ -1122,8 +1186,9 @@ Command_line::process(int argc, const char** argv)
       this->position_options_.copy_from_options(this->options());
       if (no_more_options || argv[i][0] != '-')
         {
-          Input_file_argument file(argv[i], false, "", false,
-                                   this->position_options_);
+	  Input_file_argument file(argv[i],
+				   Input_file_argument::INPUT_FILE_TYPE_FILE,
+				   "", false, this->position_options_);
           this->inputs_.add_file(file);
           ++i;
         }

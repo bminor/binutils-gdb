@@ -23,6 +23,8 @@
 #include "gold.h"
 #include "target.h"
 #include "dynobj.h"
+#include "output.h"
+#include "elfcpp.h"
 
 namespace gold
 {
@@ -73,14 +75,14 @@ Target::do_make_elf_object_implementation(
     {
       Sized_relobj<size, big_endian>* obj =
 	new Sized_relobj<size, big_endian>(name, input_file, offset, ehdr);
-      obj->setup(this);
+      obj->setup();
       return obj;
     }
   else if (et == elfcpp::ET_DYN)
     {
       Sized_dynobj<size, big_endian>* obj =
 	new Sized_dynobj<size, big_endian>(name, input_file, offset, ehdr);
-      obj->setup(this);
+      obj->setup();
       return obj;
     }
   else
@@ -134,5 +136,58 @@ Target::do_make_elf_object(const std::string& name, Input_file* input_file,
 							   offset, ehdr);
 }
 #endif
+
+Output_section*
+Target::do_make_output_section(const char* name, elfcpp::Elf_Word type,
+			       elfcpp::Elf_Xword flags)
+{
+  return new Output_section(name, type, flags);
+}
+
+// Default conversion for -fsplit-stack is to give an error.
+
+void
+Target::do_calls_non_split(Relobj* object, unsigned int, section_offset_type,
+			   section_size_type, unsigned char*, section_size_type,
+			   std::string*, std::string*) const
+{
+  static bool warned;
+  if (!warned)
+    {
+      gold_error(_("linker does not include stack split support "
+		   "required by %s"),
+		 object->name().c_str());
+      warned = true;
+    }
+}
+
+//  Return whether BYTES/LEN matches VIEW/VIEW_SIZE at OFFSET.
+
+bool
+Target::match_view(const unsigned char* view, section_size_type view_size,
+		   section_offset_type offset, const char* bytes,
+		   size_t len) const
+{
+  if (offset + len > view_size)
+    return false;
+  return memcmp(view + offset, bytes, len) == 0;
+}
+
+// Set the contents of a VIEW/VIEW_SIZE to nops starting at OFFSET
+// for LEN bytes.
+
+void
+Target::set_view_to_nop(unsigned char* view, section_size_type view_size,
+			section_offset_type offset, size_t len) const
+{
+  gold_assert(offset >= 0 && offset + len <= view_size);
+  if (!this->has_code_fill())
+    memset(view + offset, 0, len);
+  else
+    {
+      std::string fill = this->code_fill(len);
+      memcpy(view + offset, fill.data(), len);
+    }
+}
 
 } // End namespace gold.

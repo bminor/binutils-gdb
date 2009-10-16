@@ -17,7 +17,7 @@
 // combinations without any restriction coming from the use of this
 // file.  (The Library Public License restrictions do apply in other
 // respects; for example, they cover modification of the file, and
-/// distribution when not linked into a combined executable.)
+// distribution when not linked into a combined executable.)
 
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -657,7 +657,7 @@ enum DT
   DT_RUNPATH = 29,
   DT_FLAGS = 30,
   DT_ENCODING = 32,
-  DT_PREINIT_ARRAY = 33,
+  DT_PREINIT_ARRAY = 32,
   DT_PREINIT_ARRAYSZ = 33,
   DT_LOOS = 0x6000000d,
   DT_HIOS = 0x6ffff000,

@@ -151,6 +151,12 @@ for targ in $target $canon_targets; do
 	default_size=$targ_size
 	default_big_endian=$targ_big_endian
 	default_osabi=$targ_osabi
+
+	AM_CONDITIONAL(DEFAULT_TARGET_ARM, test "$targ_obj" = "arm")
+	AM_CONDITIONAL(DEFAULT_TARGET_I386, test "$targ_obj" = "i386")
+	AM_CONDITIONAL(DEFAULT_TARGET_POWERPC, test "$targ_obj" = "powerpc")
+	AM_CONDITIONAL(DEFAULT_TARGET_SPARC, test "$targ_obj" = "sparc")
+	AM_CONDITIONAL(DEFAULT_TARGET_X86_64, test "$targ_obj" = "x86_64")
       fi
     fi
   fi
@@ -332,7 +338,7 @@ AC_LANG_PUSH(C++)
 AC_CHECK_HEADERS(tr1/unordered_set tr1/unordered_map)
 AC_CHECK_HEADERS(ext/hash_map ext/hash_set)
 AC_CHECK_HEADERS(byteswap.h)
-AC_CHECK_FUNCS(mallinfo posix_fallocate)
+AC_CHECK_FUNCS(mallinfo posix_fallocate readv)
 AC_CHECK_DECLS([basename, ffs, asprintf, vasprintf, snprintf, vsnprintf, strverscmp, strndup, memmem])
 
 # Use of ::std::tr1::unordered_map::rehash causes undefined symbols

@@ -83,6 +83,9 @@ extern void
 parse_bool(const char* option_name, const char* arg, bool* retval);
 
 extern void
+parse_int(const char* option_name, const char* arg, int* retval);
+
+extern void
 parse_uint(const char* option_name, const char* arg, int* retval);
 
 extern void
@@ -332,6 +335,12 @@ struct Struct_special : public Struct_var
     options::One_option option;                                          \
   };                                                                     \
   Struct_disable_##varname__ disable_##varname__##_initializer_
+
+#define DEFINE_int(varname__, dashes__, shortname__, default_value__,   \
+                   helpstring__, helparg__)                             \
+  DEFINE_var(varname__, dashes__, shortname__, default_value__,         \
+             #default_value__, helpstring__, helparg__, false,		\
+             int, int, options::parse_int)
 
 #define DEFINE_uint(varname__, dashes__, shortname__, default_value__,  \
                    helpstring__, helparg__)                             \
@@ -678,6 +687,9 @@ class General_options
 	      N_("Treat warnings as errors"),
 	      N_("Do not treat warnings as errors"));
 
+  DEFINE_string(fini, options::ONE_DASH, '\0', "_fini",
+                N_("Call SYMBOL at unload-time"), N_("SYMBOL"));
+
   DEFINE_string(soname, options::ONE_DASH, 'h', NULL,
                 N_("Set shared library name"), N_("FILENAME"));
 
@@ -704,6 +716,9 @@ class General_options
 
   DEFINE_special(incremental_unknown, options::TWO_DASHES, '\0',
                  N_("Use timestamps to check files (default)"), NULL);
+
+  DEFINE_string(init, options::ONE_DASH, '\0', "_init",
+                N_("Call SYMBOL at load-time"), N_("SYMBOL"));
 
   DEFINE_special(just_symbols, options::TWO_DASHES, '\0',
                  N_("Read only symbol values from FILE"), N_("FILE"));
@@ -748,6 +763,12 @@ class General_options
   DEFINE_string(oformat, options::EXACTLY_TWO_DASHES, '\0', "elf",
 		N_("Set output format"), N_("[binary]"));
 
+  DEFINE_bool(pie, options::ONE_DASH, '\0', false,
+	      N_("Create a position independent executable"), NULL);
+  DEFINE_bool_alias(pic_executable, pie, options::TWO_DASHES, '\0',
+		    N_("Create a position independent executable"), NULL,
+		    false);
+
 #ifdef ENABLE_PLUGINS
   DEFINE_special(plugin, options::TWO_DASHES, '\0',
                  N_("Load a plugin library"), N_("PLUGIN"));
@@ -774,6 +795,9 @@ class General_options
   DEFINE_bool(relax, options::TWO_DASHES, '\0', false,
 	      N_("Relax branches on certain targets"), NULL);
 
+  DEFINE_string(retain_symbols_file, options::EXACTLY_ONE_DASH, '\0', NULL,
+                N_("keep only symbols listed in this file"), N_("[file]"));
+
   // -R really means -rpath, but can mean --just-symbols for
   // compatibility with GNU ld.  -rpath is always -rpath, so we list
   // it separately.
@@ -799,6 +823,12 @@ class General_options
   DEFINE_bool(strip_lto_sections, options::TWO_DASHES, '\0', true,
               N_("Strip LTO intermediate code sections"), NULL);
 
+  DEFINE_int(stub_group_size, options::TWO_DASHES , '\0', 1,
+             N_("(ARM only) The maximum distance from instructions in a group "
+		"of sections to their stubs.  Negative values mean stubs "
+		"are always after the group. 1 means using default size.\n"),
+	     N_("SIZE"));
+
   DEFINE_bool(no_keep_memory, options::TWO_DASHES, '\0', false,
               N_("Use less memory and more disk I/O "
                  "(included only for compatibility with GNU ld)"), NULL);
@@ -809,14 +839,20 @@ class General_options
   DEFINE_bool(Bshareable, options::ONE_DASH, '\0', false,
               N_("Generate shared library"), NULL);
 
+  DEFINE_uint(split_stack_adjust_size, options::TWO_DASHES, '\0', 0x4000,
+	      N_("Stack size when -fsplit-stack function calls non-split"),
+	      N_("SIZE"));
+
   // This is not actually special in any way, but I need to give it
   // a non-standard accessor-function name because 'static' is a keyword.
   DEFINE_special(static, options::ONE_DASH, '\0',
                  N_("Do not link against shared libraries"), NULL);
 
-  DEFINE_bool(icf, options::TWO_DASHES, '\0', false,
-              N_("Identical Code Folding (Fold identical functions)"),
-              N_("Don't fold identical functions (default)"));
+  DEFINE_enum(icf, options::TWO_DASHES, '\0', "none",
+              N_("Identical Code Folding. "
+                 "\'--icf=safe\' folds only ctors and dtors."),
+	      ("[none,all,safe]"),	
+              {"none", "all", "safe"});
 
   DEFINE_uint(icf_iterations, options::TWO_DASHES , '\0', 0,
               N_("Number of iterations of ICF (default 2)"), N_("COUNT"));
@@ -925,6 +961,9 @@ class General_options
 	      NULL);
   DEFINE_uint64(max_page_size, options::DASH_Z, '\0', 0,
                 N_("Set maximum page size to SIZE"), N_("SIZE"));
+  DEFINE_bool(copyreloc, options::DASH_Z, '\0', true,
+	      NULL,
+	      N_("Do not create copy relocs"));
   DEFINE_bool(nodefaultlib, options::DASH_Z, '\0', false,
 	      N_("Mark object not to use default search paths"),
 	      NULL);
@@ -976,7 +1015,7 @@ class General_options
   // the output is position-independent or not.
   bool
   output_is_position_independent() const
-  { return this->shared(); }
+  { return this->shared() || this->pie(); }
 
   // Return true if the output is something that can be exec()ed, such
   // as a static executable, or a position-dependent or
@@ -984,13 +1023,7 @@ class General_options
   // object file.
   bool
   output_is_executable() const
-  { return !this->shared() || this->output_is_pie(); }
-
-  // Return true if the output is a position-independent executable.
-  // This is currently not supported.
-  bool
-  output_is_pie() const
-  { return false; }
+  { return !this->shared() && !this->relocatable(); }
 
   // This would normally be static(), and defined automatically, but
   // since static is a keyword, we need to come up with our own name.
@@ -1021,6 +1054,15 @@ class General_options
   bool
   is_in_system_directory(const std::string& name) const;
 
+  // RETURN whether SYMBOL_NAME should be kept, according to symbols_to_retain_.
+  bool
+  should_retain_symbol(const char* symbol_name) const
+    {
+      if (symbols_to_retain_.empty())    // means flag wasn't specified
+        return true;
+      return symbols_to_retain_.find(symbol_name) != symbols_to_retain_.end();
+    }
+
   // These are the best way to get access to the execstack state,
   // not execstack() and noexecstack() which are hard to use properly.
   bool
@@ -1030,6 +1072,14 @@ class General_options
   bool
   is_stack_executable() const
   { return this->execstack_status_ == EXECSTACK_YES; }
+
+  bool
+  icf_enabled() const
+  { return this->icf_status_ != ICF_NONE; }
+
+  bool
+  icf_safe_folding() const
+  { return this->icf_status_ == ICF_SAFE; }
 
   // The --demangle option takes an optional string, and there is also
   // a --no-demangle option.  This is the best way to decide whether
@@ -1081,6 +1131,20 @@ class General_options
     EXECSTACK_NO
   };
 
+  enum Icf_status
+  {
+    // Do not fold any functions (Default or --icf=none).
+    ICF_NONE,
+    // All functions are candidates for folding. (--icf=all).
+    ICF_ALL,	
+    // Only ctors and dtors are candidates for folding. (--icf=safe).
+    ICF_SAFE
+  };
+
+  void
+  set_icf_status(Icf_status value)
+  { this->icf_status_ = value; }
+
   void
   set_execstack_status(Execstack value)
   { this->execstack_status_ = value; }
@@ -1114,6 +1178,8 @@ class General_options
   bool printed_version_;
   // Whether to mark the stack as executable.
   Execstack execstack_status_;
+  // Whether to do code folding.
+  Icf_status icf_status_;
   // Whether to do a static link.
   bool static_;
   // Whether to do demangling.
@@ -1132,8 +1198,10 @@ class General_options
   // build (--incremental-changed, --incremental-unchanged or
   // --incremental-unknown)
   bool implicit_incremental_;
-  // Libraries excluded from automatic export via --exclude-libs
+  // Libraries excluded from automatic export, via --exclude-libs.
   Unordered_set<std::string> excluded_libs_;
+  // List of symbol-names to keep, via -retain-symbol-info.
+  Unordered_set<std::string> symbols_to_retain_;
 };
 
 // The position-dependent options.  We use this to store the state of
@@ -1192,9 +1260,20 @@ class Position_dependent_options
 class Input_file_argument
 {
  public:
+  enum Input_file_type
+  {
+    // A regular file, name used as-is, not searched.
+    INPUT_FILE_TYPE_FILE,
+    // A library name.  When used, "lib" will be prepended and ".so" or
+    // ".a" appended to make a filename, and that filename will be searched
+    // for using the -L paths.
+    INPUT_FILE_TYPE_LIBRARY,
+    // A regular file, name used as-is, but searched using the -L paths.
+    INPUT_FILE_TYPE_SEARCHED_FILE
+  };
+
   // name: file name or library name
-  // is_lib: true if name is a library name: that is, emits the leading
-  //         "lib" and trailing ".so"/".a" from the name
+  // type: the type of this input file.
   // extra_search_path: an extra directory to look for the file, prior
   //         to checking the normal library search path.  If this is "",
   //         then no extra directory is added.
@@ -1202,15 +1281,15 @@ class Input_file_argument
   // options: The position dependent options at this point in the
   //         command line, such as --whole-archive.
   Input_file_argument()
-    : name_(), is_lib_(false), extra_search_path_(""), just_symbols_(false),
-      options_()
+    : name_(), type_(INPUT_FILE_TYPE_FILE), extra_search_path_(""),
+      just_symbols_(false), options_()
   { }
 
-  Input_file_argument(const char* name, bool is_lib,
+  Input_file_argument(const char* name, Input_file_type type,
                       const char* extra_search_path,
                       bool just_symbols,
                       const Position_dependent_options& options)
-    : name_(name), is_lib_(is_lib), extra_search_path_(extra_search_path),
+    : name_(name), type_(type), extra_search_path_(extra_search_path),
       just_symbols_(just_symbols), options_(options)
   { }
 
@@ -1218,11 +1297,11 @@ class Input_file_argument
   // Position_dependent_options.  In that case, we extract the
   // position-independent vars from the General_options and only store
   // those.
-  Input_file_argument(const char* name, bool is_lib,
+  Input_file_argument(const char* name, Input_file_type type,
                       const char* extra_search_path,
                       bool just_symbols,
                       const General_options& options)
-    : name_(name), is_lib_(is_lib), extra_search_path_(extra_search_path),
+    : name_(name), type_(type), extra_search_path_(extra_search_path),
       just_symbols_(just_symbols), options_(options)
   { }
 
@@ -1236,7 +1315,11 @@ class Input_file_argument
 
   bool
   is_lib() const
-  { return this->is_lib_; }
+  { return type_ == INPUT_FILE_TYPE_LIBRARY; }
+
+  bool
+  is_searched_file() const
+  { return type_ == INPUT_FILE_TYPE_SEARCHED_FILE; }
 
   const char*
   extra_search_path() const
@@ -1255,14 +1338,18 @@ class Input_file_argument
   // options.
   bool
   may_need_search() const
-  { return this->is_lib_ || !this->extra_search_path_.empty(); }
+  {
+    return (this->is_lib()
+	    || this->is_searched_file()
+	    || !this->extra_search_path_.empty());
+  }
 
  private:
   // We use std::string, not const char*, here for convenience when
   // using script files, so that we do not have to preserve the string
   // in that case.
   std::string name_;
-  bool is_lib_;
+  Input_file_type type_;
   std::string extra_search_path_;
   bool just_symbols_;
   Position_dependent_options options_;

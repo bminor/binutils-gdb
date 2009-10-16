@@ -18,7 +18,6 @@ gold--are:
   * MEMORY regions in linker scripts
   * MRI compatible linker scripts
   * cross-reference reports (--cref)
-  * position independent executables (-pie)
   * various other minor options
 
 

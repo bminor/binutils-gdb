@@ -40,6 +40,7 @@
 #include "target-select.h"
 #include "tls.h"
 #include "errors.h"
+#include "gc.h"
 
 namespace
 {
@@ -112,7 +113,8 @@ class Target_sparc : public Sized_target<size, big_endian>
 		   bool needs_special_offset_handling,
 		   unsigned char* view,
 		   typename elfcpp::Elf_types<size>::Elf_Addr view_address,
-		   section_size_type view_size);
+		   section_size_type view_size,
+		   const Reloc_symbol_changes*);
 
   // Scan the relocs during a relocatable link.
   void
@@ -304,17 +306,6 @@ class Target_sparc : public Sized_target<size, big_endian>
   // Get the dynamic reloc section, creating it if necessary.
   Reloc_section*
   rela_dyn_section(Layout*);
-
-  // Return true if the symbol may need a COPY relocation.
-  // References from an executable object to non-function symbols
-  // defined in a dynamic object may need a COPY relocation.
-  bool
-  may_need_copy_reloc(Symbol* gsym)
-  {
-    return (!parameters->options().shared()
-            && gsym->is_from_dynobj()
-            && gsym->type() != elfcpp::STT_FUNC);
-  }
 
   // Copy a relocation against a global symbol.
   void
@@ -1984,7 +1975,7 @@ Target_sparc<size, big_endian>::Scan::global(
 	  flags |= Symbol::FUNCTION_CALL;
 	if (gsym->needs_dynamic_reloc(flags))
 	  {
-	    if (target->may_need_copy_reloc(gsym))
+	    if (gsym->may_need_copy_reloc())
 	      {
 		target->copy_reloc(symtab, layout, object,
 				   data_shndx, output_section, gsym,
@@ -2040,7 +2031,7 @@ Target_sparc<size, big_endian>::Scan::global(
         // Make a dynamic relocation if necessary.
         if (gsym->needs_dynamic_reloc(Symbol::ABSOLUTE_REF))
           {
-            if (target->may_need_copy_reloc(gsym))
+            if (gsym->may_need_copy_reloc())
               {
 	        target->copy_reloc(symtab, layout, object,
 	                           data_shndx, output_section, gsym, reloc);
@@ -3117,7 +3108,8 @@ Target_sparc<size, big_endian>::relocate_section(
 			bool needs_special_offset_handling,
 			unsigned char* view,
 			typename elfcpp::Elf_types<size>::Elf_Addr address,
-			section_size_type view_size)
+			section_size_type view_size,
+			const Reloc_symbol_changes* reloc_symbol_changes)
 {
   typedef Target_sparc<size, big_endian> Sparc;
   typedef typename Target_sparc<size, big_endian>::Relocate Sparc_relocate;
@@ -3134,7 +3126,8 @@ Target_sparc<size, big_endian>::relocate_section(
     needs_special_offset_handling,
     view,
     address,
-    view_size);
+    view_size,
+    reloc_symbol_changes);
 }
 
 // Return the size of a relocation while scanning during a relocatable

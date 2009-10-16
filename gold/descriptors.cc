@@ -23,6 +23,7 @@
 #include "gold.h"
 
 #include <cerrno>
+#include <cstdio>
 #include <cstring>
 #include <fcntl.h>
 #include <unistd.h>
@@ -31,6 +32,7 @@
 #include "options.h"
 #include "gold-threads.h"
 #include "descriptors.h"
+#include "binary-io.h"
 
 // Very old systems may not define FD_CLOEXEC.
 #ifndef FD_CLOEXEC
@@ -97,6 +99,9 @@ Descriptors::open(int descriptor, const char* name, int flags, int mode)
       // We always want to set the close-on-exec flag; we don't
       // require callers to pass it.
       flags |= O_CLOEXEC;
+
+      // Always open the file as a binary file.
+      flags |= O_BINARY;
 
       int new_descriptor = ::open(name, flags, mode);
       if (new_descriptor < 0

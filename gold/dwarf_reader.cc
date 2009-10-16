@@ -1,6 +1,6 @@
 // dwarf_reader.cc -- parse dwarf2/3 debug information
 
-// Copyright 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -129,7 +129,7 @@ ResetLineStateMachine(struct LineStateMachine* lsm, bool default_is_stmt)
 
 template<int size, bool big_endian>
 Sized_dwarf_line_info<size, big_endian>::Sized_dwarf_line_info(Object* object,
-                                                               off_t read_shndx)
+                                                               unsigned int read_shndx)
   : data_valid_(false), buffer_(NULL), symtab_buffer_(NULL),
     directories_(), files_(), current_header_index_(-1)
 {
@@ -508,7 +508,7 @@ Sized_dwarf_line_info<size, big_endian>::process_one_opcode(
 template<int size, bool big_endian>
 unsigned const char*
 Sized_dwarf_line_info<size, big_endian>::read_lines(unsigned const char* lineptr,
-                                                    off_t shndx)
+                                                    unsigned int shndx)
 {
   struct LineStateMachine lsm;
 
@@ -595,7 +595,7 @@ Sized_dwarf_line_info<size, big_endian>::read_relocs(Object* object)
 template<int size, bool big_endian>
 void
 Sized_dwarf_line_info<size, big_endian>::read_line_mappings(Object* object,
-							    off_t shndx)
+							    unsigned int shndx)
 {
   gold_assert(this->data_valid_ == true);
 

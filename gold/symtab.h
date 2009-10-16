@@ -23,19 +23,17 @@
 // Symbol_table
 //   The symbol table.
 
+#ifndef GOLD_SYMTAB_H
+#define GOLD_SYMTAB_H
+
 #include <string>
 #include <utility>
 #include <vector>
 
-#include "gc.h"
-#include "icf.h"
 #include "elfcpp.h"
 #include "parameters.h"
 #include "stringpool.h"
 #include "object.h"
-
-#ifndef GOLD_SYMTAB_H
-#define GOLD_SYMTAB_H
 
 namespace gold
 {
@@ -535,7 +533,7 @@ class Symbol
   // Return true if this symbol is a function that needs a PLT entry.
   // If the symbol is defined in a dynamic object or if it is subject
   // to pre-emption, we need to make a PLT entry. If we're doing a
-  // static link, we don't create PLT entries.
+  // static link or a -pie link, we don't create PLT entries.
   bool
   needs_plt_entry() const
   {
@@ -544,6 +542,7 @@ class Symbol
       return false;
 
     return (!parameters->doing_static_link()
+	    && !parameters->options().pie()
             && this->type() == elfcpp::STT_FUNC
             && (this->is_from_dynobj()
                 || this->is_undefined()
@@ -725,6 +724,18 @@ class Symbol
   void
   set_is_forced_local()
   { this->is_forced_local_ = true; }
+
+  // Return true if this may need a COPY relocation.
+  // References from an executable object to non-function symbols
+  // defined in a dynamic object may need a COPY relocation.
+  bool
+  may_need_copy_reloc() const
+  {
+    return (!parameters->options().shared()
+	    && parameters->options().copyreloc()
+	    && this->is_from_dynobj()
+	    && this->type() != elfcpp::STT_FUNC);
+  }
 
  protected:
   // Instances of this class should always be created at a specific
@@ -1365,6 +1376,26 @@ class Symbol_table
   finalize(off_t off, off_t dynoff, size_t dyn_global_index, size_t dyncount,
 	   Stringpool* pool, unsigned int *plocal_symcount);
 
+  // Status code of Symbol_table::compute_final_value.
+  enum Compute_final_value_status
+  {
+    // No error.
+    CFVS_OK,
+    // Unspported symbol section.
+    CFVS_UNSUPPORTED_SYMBOL_SECTION,
+    // No output section.
+    CFVS_NO_OUTPUT_SECTION
+  };
+
+  // Compute the final value of SYM and store status in location PSTATUS.
+  // During relaxation, this may be called multiple times for a symbol to 
+  // compute its would-be final value in each relaxation pass.
+
+  template<int size>
+  typename Sized_symbol<size>::Value_type
+  compute_final_value(const Sized_symbol<size>* sym,
+		      Compute_final_value_status* pstatus) const;
+
   // Write out the global symbols.
   void
   write_globals(const Stringpool*, const Stringpool*,
@@ -1450,7 +1481,7 @@ class Symbol_table
 
   // Adjust NAME and *NAME_KEY for wrapping.
   const char*
-  wrap_symbol(Object* object, const char*, Stringpool::Key* name_key);
+  wrap_symbol(const char* name, Stringpool::Key* name_key);
 
   // Whether we should override a symbol, based on flags in
   // resolve.cc.

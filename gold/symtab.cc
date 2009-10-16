@@ -394,7 +394,8 @@ Symbol::final_value_is_known() const
 {
   // If we are not generating an executable, then no final values are
   // known, since they will change at runtime.
-  if (parameters->options().shared() || parameters->options().relocatable())
+  if (parameters->options().output_is_position_independent()
+      || parameters->options().relocatable())
     return false;
 
   // If the symbol is not from an object file, and is not undefined,
@@ -519,7 +520,7 @@ Symbol_table::Symbol_table_eq::operator()(const Symbol_table_key& k1,
 bool
 Symbol_table::is_section_folded(Object* obj, unsigned int shndx) const
 {
-  return (parameters->options().icf()
+  return (parameters->options().icf_enabled()
           && this->icf_->is_section_folded(obj, shndx));
 }
 
@@ -688,13 +689,12 @@ Symbol_table::force_local(Symbol* sym)
 // option was used.
 
 const char*
-Symbol_table::wrap_symbol(Object* object, const char* name,
-			  Stringpool::Key* name_key)
+Symbol_table::wrap_symbol(const char* name, Stringpool::Key* name_key)
 {
   // For some targets, we need to ignore a specific character when
   // wrapping, and add it back later.
   char prefix = '\0';
-  if (name[0] == object->target()->wrap_char())
+  if (name[0] == parameters->target().wrap_char())
     {
       prefix = name[0];
       ++name;
@@ -864,7 +864,7 @@ Symbol_table::add_from_object(Object* object,
   if (orig_st_shndx == elfcpp::SHN_UNDEF
       && parameters->options().any_wrap())
     {
-      const char* wrap_name = this->wrap_symbol(object, name, &name_key);
+      const char* wrap_name = this->wrap_symbol(name, &name_key);
       if (wrap_name != name)
 	{
 	  // If we see a reference to malloc with version GLIBC_2.0,
@@ -945,7 +945,7 @@ Symbol_table::add_from_object(Object* object,
 	  was_common = false;
 
 	  Sized_target<size, big_endian>* target =
-	    object->sized_target<size, big_endian>();
+	    parameters->sized_target<size, big_endian>();
 	  if (!target->has_make_symbol())
 	    ret = new Sized_symbol<size>();
 	  else
@@ -1033,7 +1033,6 @@ Symbol_table::add_from_relobj(
 {
   *defined = 0;
 
-  gold_assert(size == relobj->target()->get_size());
   gold_assert(size == parameters->target().get_size());
 
   const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
@@ -1272,7 +1271,6 @@ Symbol_table::add_from_dynobj(
 {
   *defined = 0;
 
-  gold_assert(size == dynobj->target()->get_size());
   gold_assert(size == parameters->target().get_size());
 
   if (dynobj->just_symbols())
@@ -1661,11 +1659,8 @@ Symbol_table::define_special_symbol(const char** pname, const char** pversion,
     sym = new Sized_symbol<size>();
   else
     {
-      gold_assert(target.get_size() == size);
-      gold_assert(target.is_big_endian() ? big_endian : !big_endian);
-      typedef Sized_target<size, big_endian> My_target;
-      const My_target* sized_target =
-          static_cast<const My_target*>(&target);
+      Sized_target<size, big_endian>* sized_target =
+	parameters->sized_target<size, big_endian>();
       sym = sized_target->make_symbol();
       if (sym == NULL)
         return NULL;
@@ -2361,30 +2356,17 @@ Symbol_table::sized_finalize(off_t off, Stringpool* pool,
   return off;
 }
 
-// Finalize the symbol SYM.  This returns true if the symbol should be
-// added to the symbol table, false otherwise.
+// Compute the final value of SYM and store status in location PSTATUS.
+// During relaxation, this may be called multiple times for a symbol to
+// compute its would-be final value in each relaxation pass.
 
 template<int size>
-bool
-Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
+typename Sized_symbol<size>::Value_type
+Symbol_table::compute_final_value(
+    const Sized_symbol<size>* sym,
+    Compute_final_value_status* pstatus) const
 {
   typedef typename Sized_symbol<size>::Value_type Value_type;
-
-  Sized_symbol<size>* sym = static_cast<Sized_symbol<size>*>(unsized_sym);
-
-  // The default version of a symbol may appear twice in the symbol
-  // table.  We only need to finalize it once.
-  if (sym->has_symtab_index())
-    return false;
-
-  if (!sym->in_reg())
-    {
-      gold_assert(!sym->has_symtab_index());
-      sym->set_symtab_index(-1U);
-      gold_assert(sym->dynsym_index() == -1U);
-      return false;
-    }
-
   Value_type value;
 
   switch (sym->source())
@@ -2398,9 +2380,8 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
 	    && shndx != elfcpp::SHN_ABS
 	    && !Symbol::is_common_shndx(shndx))
 	  {
-	    gold_error(_("%s: unsupported symbol section 0x%x"),
-		       sym->demangled_name().c_str(), shndx);
-	    shndx = elfcpp::SHN_UNDEF;
+	    *pstatus = CFVS_UNSUPPORTED_SYMBOL_SECTION;
+	    return 0;
 	  }
 
 	Object* symobj = sym->object();
@@ -2441,12 +2422,12 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
 
  	    if (os == NULL)
 	      {
-		sym->set_symtab_index(-1U);
                 bool static_or_reloc = (parameters->doing_static_link() ||
                                         parameters->options().relocatable());
                 gold_assert(static_or_reloc || sym->dynsym_index() == -1U);
 
-		return false;
+		*pstatus = CFVS_NO_OUTPUT_SECTION;
+		return 0;
 	      }
 
             if (secoff64 == -1ULL)
@@ -2519,9 +2500,61 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
       gold_unreachable();
     }
 
+  *pstatus = CFVS_OK;
+  return value;
+}
+
+// Finalize the symbol SYM.  This returns true if the symbol should be
+// added to the symbol table, false otherwise.
+
+template<int size>
+bool
+Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
+{
+  typedef typename Sized_symbol<size>::Value_type Value_type;
+
+  Sized_symbol<size>* sym = static_cast<Sized_symbol<size>*>(unsized_sym);
+
+  // The default version of a symbol may appear twice in the symbol
+  // table.  We only need to finalize it once.
+  if (sym->has_symtab_index())
+    return false;
+
+  if (!sym->in_reg())
+    {
+      gold_assert(!sym->has_symtab_index());
+      sym->set_symtab_index(-1U);
+      gold_assert(sym->dynsym_index() == -1U);
+      return false;
+    }
+
+  // Compute final symbol value.
+  Compute_final_value_status status;
+  Value_type value = this->compute_final_value(sym, &status);
+
+  switch (status)
+    {
+    case CFVS_OK:
+      break;
+    case CFVS_UNSUPPORTED_SYMBOL_SECTION:
+      {
+	bool is_ordinary;
+	unsigned int shndx = sym->shndx(&is_ordinary);
+	gold_error(_("%s: unsupported symbol section 0x%x"),
+		   sym->demangled_name().c_str(), shndx);
+      }
+      break;
+    case CFVS_NO_OUTPUT_SECTION:
+      sym->set_symtab_index(-1U);
+      return false;
+    default:
+      gold_unreachable();
+    }
+
   sym->set_value(value);
 
-  if (parameters->options().strip_all())
+  if (parameters->options().strip_all()
+      || !parameters->options().should_retain_symbol(sym->name()))
     {
       sym->set_symtab_index(-1U);
       return false;

@@ -244,10 +244,10 @@ Symbol_table::resolve(Sized_symbol<size>* to,
 		      unsigned int orig_st_shndx,
 		      Object* object, const char* version)
 {
-  if (object->target()->has_resolve())
+  if (parameters->target().has_resolve())
     {
       Sized_target<size, big_endian>* sized_target;
-      sized_target = object->sized_target<size, big_endian>();
+      sized_target = parameters->sized_target<size, big_endian>();
       sized_target->resolve(to, sym, object, version);
       return;
     }

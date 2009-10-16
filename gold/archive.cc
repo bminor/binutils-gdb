@@ -489,8 +489,9 @@ Archive::get_file_and_offset(off_t off, Input_file** input_file, off_t* memoff,
       else
         {
           Input_file_argument* input_file_arg =
-            new Input_file_argument(member_name->c_str(), false, "", false,
-                                    parameters->options());
+            new Input_file_argument(member_name->c_str(),
+                                    Input_file_argument::INPUT_FILE_TYPE_FILE,
+                                    "", false, parameters->options());
           *input_file = new Input_file(input_file_arg);
 	  int dummy = 0;
           if (!(*input_file)->open(*this->dirpath_, this->task_, &dummy))
@@ -509,8 +510,9 @@ Archive::get_file_and_offset(off_t off, Input_file** input_file, off_t* memoff,
   // This is an external member of a thin archive.  Open the
   // file as a regular relocatable object file.
   Input_file_argument* input_file_arg =
-      new Input_file_argument(member_name->c_str(), false, "", false,
-                              this->input_file_->options());
+      new Input_file_argument(member_name->c_str(),
+                              Input_file_argument::INPUT_FILE_TYPE_FILE,
+                              "", false, this->input_file_->options());
   *input_file = new Input_file(input_file_arg);
   int dummy = 0;
   if (!(*input_file)->open(*this->dirpath_, this->task_, &dummy))
@@ -564,6 +566,8 @@ Archive::get_elf_object_for_member(off_t off, bool* punconfigured)
 				 + "(" + member_name + ")"),
 				input_file, memoff, ehdr, read_size,
 				punconfigured);
+  if (obj == NULL)
+    return NULL;
   obj->set_no_export(this->no_export());
   return obj;
 }
@@ -807,11 +811,6 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
     {
       Object *obj = p->second.obj_;
 
-      if (!this->included_member_
-	  && this->searched_for()
-	  && !parameters->is_compatible_target(obj->target()))
-	return false;
-
       Read_symbols_data *sd = p->second.sd_;
       if (mapfile != NULL)
         mapfile->report_include_archive_member(obj->name(), sym, why);
@@ -830,9 +829,8 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
 
   if (!this->included_member_
       && this->searched_for()
-      && (obj == NULL
-	  ? unconfigured
-	  : !parameters->is_compatible_target(obj->target())))
+      && obj == NULL
+      && unconfigured)
     {
       if (obj != NULL)
 	delete obj;

@@ -231,6 +231,25 @@ Object::handle_gnu_warning_section(const char* name, unsigned int shndx,
   return false;
 }
 
+// If NAME is the name of the special section which indicates that
+// this object was compiled with -fstack-split, mark it accordingly.
+
+bool
+Object::handle_split_stack_section(const char* name)
+{
+  if (strcmp(name, ".note.GNU-split-stack") == 0)
+    {
+      this->uses_split_stack_ = true;
+      return true;
+    }
+  if (strcmp(name, ".note.GNU-no-split-stack") == 0)
+    {
+      this->has_no_split_stack_ = true;
+      return true;
+    }
+  return false;
+}
+
 // Class Relobj
 
 // To copy the symbols data read from the file to a local data structure.
@@ -336,14 +355,12 @@ Sized_relobj<size, big_endian>::~Sized_relobj()
 }
 
 // Set up an object file based on the file header.  This sets up the
-// target and reads the section information.
+// section information.
 
 template<int size, bool big_endian>
 void
-Sized_relobj<size, big_endian>::setup(Target *target)
+Sized_relobj<size, big_endian>::do_setup()
 {
-  this->set_target(target);
-
   const unsigned int shnum = this->elf_file_.shnum();
   this->set_shnum(shnum);
 }
@@ -917,16 +934,16 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
   const unsigned int shnum = this->shnum();
   bool is_gc_pass_one = ((parameters->options().gc_sections() 
                           && !symtab->gc()->is_worklist_ready())
-                         || (parameters->options().icf()
+                         || (parameters->options().icf_enabled()
                              && !symtab->icf()->is_icf_ready()));
  
   bool is_gc_pass_two = ((parameters->options().gc_sections() 
                           && symtab->gc()->is_worklist_ready())
-                         || (parameters->options().icf()
+                         || (parameters->options().icf_enabled()
                              && symtab->icf()->is_icf_ready()));
 
   bool is_gc_or_icf = (parameters->options().gc_sections()
-                       || parameters->options().icf()); 
+                       || parameters->options().icf_enabled()); 
 
   // Both is_gc_pass_one and is_gc_pass_two should not be true.
   gold_assert(!(is_gc_pass_one  && is_gc_pass_two));
@@ -1111,6 +1128,16 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 	      omit[i] = true;
             }
 
+	  // The .note.GNU-split-stack section is also special.  It
+	  // indicates that the object was compiled with
+	  // -fsplit-stack.
+	  if (this->handle_split_stack_section(name))
+	    {
+	      if (!parameters->options().relocatable()
+		  && !parameters->options().shared())
+		omit[i] = true;
+	    }
+
           bool discard = omit[i];
           if (!discard)
             {
@@ -1211,7 +1238,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
               }
         }
 
-      if (is_gc_pass_two && parameters->options().icf())
+      if (is_gc_pass_two && parameters->options().icf_enabled())
         {
           if (out_sections[i] == NULL)
             {
@@ -1561,6 +1588,14 @@ Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
 	  lv.set_no_output_symtab_entry();
 	  continue;
 	}
+
+      // Discard the local symbol if -retain_symbols_file is specified
+      // and the local symbol is not in that file.
+      if (!parameters->options().should_retain_symbol(name))
+        {
+          lv.set_no_output_symtab_entry();
+          continue;
+        }
 
       // Add the symbol to the symbol table string pool.
       pool->add(name, true, NULL);
@@ -2059,16 +2094,6 @@ Sized_relobj<size, big_endian>::do_get_global_symbol_counts(
 bool
 Input_objects::add_object(Object* obj)
 {
-  // Set the global target from the first object file we recognize.
-  Target* target = obj->target();
-  if (!parameters->target_valid())
-    set_parameters_target(target);
-  else if (target != &parameters->target())
-    {
-      obj->error(_("incompatible target"));
-      return false;
-    }
-
   // Print the filename if the -t/--trace option is selected.
   if (parameters->options().trace())
     gold_info("%s", obj->name().c_str());
@@ -2219,7 +2244,8 @@ using namespace gold;
 template<int size, bool big_endian>
 Object*
 make_elf_sized_object(const std::string& name, Input_file* input_file,
-		      off_t offset, const elfcpp::Ehdr<size, big_endian>& ehdr)
+		      off_t offset, const elfcpp::Ehdr<size, big_endian>& ehdr,
+		      bool* punconfigured)
 {
   Target* target = select_target(ehdr.get_e_machine(), size, big_endian,
 				 ehdr.get_e_ident()[elfcpp::EI_OSABI],
@@ -2227,6 +2253,18 @@ make_elf_sized_object(const std::string& name, Input_file* input_file,
   if (target == NULL)
     gold_fatal(_("%s: unsupported ELF machine number %d"),
 	       name.c_str(), ehdr.get_e_machine());
+
+  if (!parameters->target_valid())
+    set_parameters_target(target);
+  else if (target != &parameters->target())
+    {
+      if (punconfigured != NULL)
+	*punconfigured = true;
+      else
+	gold_error(_("%s: incompatible target"), name.c_str());
+      return NULL;
+    }
+
   return target->make_elf_object<size, big_endian>(name, input_file, offset,
 						   ehdr);
 }
@@ -2243,7 +2281,7 @@ is_elf_object(Input_file* input_file, off_t offset,
 	      const unsigned char** start, int *read_size)
 {
   off_t filesize = input_file->file().filesize();
-  int want = elfcpp::Elf_sizes<64>::ehdr_size;
+  int want = elfcpp::Elf_recognizer::max_header_size;
   if (filesize - offset < want)
     want = filesize - offset;
 
@@ -2252,15 +2290,7 @@ is_elf_object(Input_file* input_file, off_t offset,
   *start = p;
   *read_size = want;
 
-  if (want < 4)
-    return false;
-
-  static unsigned char elfmagic[4] =
-    {
-      elfcpp::ELFMAG0, elfcpp::ELFMAG1,
-      elfcpp::ELFMAG2, elfcpp::ELFMAG3
-    };
-  return memcmp(p, elfmagic, 4) == 0;
+  return elfcpp::Elf_recognizer::is_elf_file(p, want);
 }
 
 // Read an ELF file and return the appropriate instance of Object.
@@ -2273,63 +2303,24 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
   if (punconfigured != NULL)
     *punconfigured = false;
 
-  if (bytes < elfcpp::EI_NIDENT)
+  std::string error;
+  bool big_endian;
+  int size;
+  if (!elfcpp::Elf_recognizer::is_valid_header(p, bytes, &size,
+                                               &big_endian, &error))
     {
-      gold_error(_("%s: ELF file too short"), name.c_str());
+      gold_error(_("%s: %s"), name.c_str(), error.c_str());
       return NULL;
     }
 
-  int v = p[elfcpp::EI_VERSION];
-  if (v != elfcpp::EV_CURRENT)
+  if (size == 32)
     {
-      if (v == elfcpp::EV_NONE)
-	gold_error(_("%s: invalid ELF version 0"), name.c_str());
-      else
-	gold_error(_("%s: unsupported ELF version %d"), name.c_str(), v);
-      return NULL;
-    }
-
-  int c = p[elfcpp::EI_CLASS];
-  if (c == elfcpp::ELFCLASSNONE)
-    {
-      gold_error(_("%s: invalid ELF class 0"), name.c_str());
-      return NULL;
-    }
-  else if (c != elfcpp::ELFCLASS32
-	   && c != elfcpp::ELFCLASS64)
-    {
-      gold_error(_("%s: unsupported ELF class %d"), name.c_str(), c);
-      return NULL;
-    }
-
-  int d = p[elfcpp::EI_DATA];
-  if (d == elfcpp::ELFDATANONE)
-    {
-      gold_error(_("%s: invalid ELF data encoding"), name.c_str());
-      return NULL;
-    }
-  else if (d != elfcpp::ELFDATA2LSB
-	   && d != elfcpp::ELFDATA2MSB)
-    {
-      gold_error(_("%s: unsupported ELF data encoding %d"), name.c_str(), d);
-      return NULL;
-    }
-
-  bool big_endian = d == elfcpp::ELFDATA2MSB;
-
-  if (c == elfcpp::ELFCLASS32)
-    {
-      if (bytes < elfcpp::Elf_sizes<32>::ehdr_size)
-	{
-	  gold_error(_("%s: ELF file too short"), name.c_str());
-	  return NULL;
-	}
       if (big_endian)
 	{
 #ifdef HAVE_TARGET_32_BIG
 	  elfcpp::Ehdr<32, true> ehdr(p);
 	  return make_elf_sized_object<32, true>(name, input_file,
-						 offset, ehdr);
+						 offset, ehdr, punconfigured);
 #else
 	  if (punconfigured != NULL)
 	    *punconfigured = true;
@@ -2345,7 +2336,7 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 #ifdef HAVE_TARGET_32_LITTLE
 	  elfcpp::Ehdr<32, false> ehdr(p);
 	  return make_elf_sized_object<32, false>(name, input_file,
-						  offset, ehdr);
+						  offset, ehdr, punconfigured);
 #else
 	  if (punconfigured != NULL)
 	    *punconfigured = true;
@@ -2357,19 +2348,14 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 #endif
 	}
     }
-  else
+  else if (size == 64)
     {
-      if (bytes < elfcpp::Elf_sizes<64>::ehdr_size)
-	{
-	  gold_error(_("%s: ELF file too short"), name.c_str());
-	  return NULL;
-	}
       if (big_endian)
 	{
 #ifdef HAVE_TARGET_64_BIG
 	  elfcpp::Ehdr<64, true> ehdr(p);
 	  return make_elf_sized_object<64, true>(name, input_file,
-						 offset, ehdr);
+						 offset, ehdr, punconfigured);
 #else
 	  if (punconfigured != NULL)
 	    *punconfigured = true;
@@ -2385,7 +2371,7 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 #ifdef HAVE_TARGET_64_LITTLE
 	  elfcpp::Ehdr<64, false> ehdr(p);
 	  return make_elf_sized_object<64, false>(name, input_file,
-						  offset, ehdr);
+						  offset, ehdr, punconfigured);
 #else
 	  if (punconfigured != NULL)
 	    *punconfigured = true;
@@ -2397,6 +2383,8 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
 #endif
 	}
     }
+  else
+    gold_unreachable();
 }
 
 // Instantiate the templates we need.

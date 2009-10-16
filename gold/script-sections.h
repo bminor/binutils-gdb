@@ -187,6 +187,10 @@ class Script_sections
                           uint64_t* load_address, uint64_t* addralign,
                           uint64_t* size) const;
 
+  // Release all Output_segments.  This is used in relaxation.
+  void
+  release_segments();
+
   // Print the contents to the FILE.  This is for debugging.
   void
   print(FILE*) const;

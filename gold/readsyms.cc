@@ -266,13 +266,16 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
     {
       // This is an ELF object.
 
-      bool unconfigured;
+      bool unconfigured = false;
+      bool* punconfigured = (input_file->will_search_for()
+			     ? &unconfigured
+			     : NULL);
       Object* obj = make_elf_object(input_file->filename(),
 				    input_file, 0, ehdr, read_size,
-				    &unconfigured);
+				    punconfigured);
       if (obj == NULL)
 	{
-	  if (unconfigured && input_file->will_search_for())
+	  if (unconfigured)
 	    {
 	      Read_symbols::incompatible_warning(this->input_argument_,
 						 input_file);
@@ -395,6 +398,8 @@ Read_symbols::get_name() const
       std::string ret("Read_symbols ");
       if (this->input_argument_->file().is_lib())
 	ret += "-l";
+      else if (this->input_argument_->file().is_searched_file())
+	ret += "-l:";
       ret += this->input_argument_->file().name();
       return ret;
     }
@@ -447,7 +452,7 @@ Add_symbols::locks(Task_locker* tl)
 // Add the symbols in the object to the symbol table.
 
 void
-Add_symbols::run(Workqueue* workqueue)
+Add_symbols::run(Workqueue*)
 {
   Pluginobj* pluginobj = this->object_->pluginobj();
   if (pluginobj != NULL)
@@ -456,21 +461,7 @@ Add_symbols::run(Workqueue* workqueue)
       return;
     }
 
-  // If this file has an incompatible format, try for another file
-  // with the same name.
-  if (this->object_->searched_for()
-      && !parameters->is_compatible_target(this->object_->target()))
-    {
-      Read_symbols::incompatible_warning(this->input_argument_,
-					 this->object_->input_file());
-      Read_symbols::requeue(workqueue, this->input_objects_, this->symtab_,
-			    this->layout_, this->dirpath_, this->dirindex_,
-			    this->mapfile_, this->input_argument_,
-			    this->input_group_, this->next_blocker_);
-      this->object_->release();
-      delete this->object_;
-    }
-  else if (!this->input_objects_->add_object(this->object_))
+  if (!this->input_objects_->add_object(this->object_))
     {
       this->object_->release();
       delete this->object_;
@@ -601,6 +592,8 @@ Read_script::get_name() const
   std::string ret("Read_script ");
   if (this->input_argument_->file().is_lib())
     ret += "-l";
+  else if (this->input_argument_->file().is_searched_file())
+    ret += "-l:";
   ret += this->input_argument_->file().name();
   return ret;
 }

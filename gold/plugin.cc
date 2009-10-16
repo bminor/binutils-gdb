@@ -20,14 +20,18 @@
 // Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 // MA 02110-1301, USA.
 
+#include "gold.h"
+
 #include <cstdio>
 #include <cstdarg>
 #include <cstring>
 #include <string>
 #include <vector>
-#include <dlfcn.h>
 
-#include "gold.h"
+#ifdef ENABLE_PLUGINS
+#include <dlfcn.h>
+#endif
+
 #include "parameters.h"
 #include "errors.h"
 #include "fileread.h"
@@ -74,6 +78,9 @@ static enum ld_plugin_status
 add_input_file(char *pathname);
 
 static enum ld_plugin_status
+add_input_library(char *pathname);
+
+static enum ld_plugin_status
 message(int level, const char *format, ...);
 
 };
@@ -118,7 +125,7 @@ Plugin::load()
   sscanf(ver, "%d.%d", &major, &minor);
 
   // Allocate and populate a transfer vector.
-  const int tv_fixed_size = 13;
+  const int tv_fixed_size = 14;
   int tv_size = this->args_.size() + tv_fixed_size;
   ld_plugin_tv *tv = new ld_plugin_tv[tv_size];
 
@@ -183,6 +190,10 @@ Plugin::load()
   ++i;
   tv[i].tv_tag = LDPT_ADD_INPUT_FILE;
   tv[i].tv_u.tv_add_input_file = add_input_file;
+
+  ++i;
+  tv[i].tv_tag = LDPT_ADD_INPUT_LIBRARY;
+  tv[i].tv_u.tv_add_input_library = add_input_library;
 
   ++i;
   tv[i].tv_tag = LDPT_NULL;
@@ -401,9 +412,13 @@ Plugin_manager::release_input_file(unsigned int handle)
 // Add a new input file.
 
 ld_plugin_status
-Plugin_manager::add_input_file(char *pathname)
+Plugin_manager::add_input_file(char *pathname, bool is_lib)
 {
-  Input_file_argument file(pathname, false, "", false, this->options_);
+  Input_file_argument file(pathname,
+                           (is_lib
+                            ? Input_file_argument::INPUT_FILE_TYPE_LIBRARY
+                            : Input_file_argument::INPUT_FILE_TYPE_FILE),
+                           "", false, this->options_);
   Input_argument* input_argument = new Input_argument(file);
   Task_token* next_blocker = new Task_token(true);
   next_blocker->add_blocker();
@@ -941,7 +956,16 @@ static enum ld_plugin_status
 add_input_file(char *pathname)
 {
   gold_assert(parameters->options().has_plugins());
-  return parameters->options().plugins()->add_input_file(pathname);
+  return parameters->options().plugins()->add_input_file(pathname, false);
+}
+
+// Add a new (real) library required by a plugin.
+
+static enum ld_plugin_status
+add_input_library(char *pathname)
+{
+  gold_assert(parameters->options().has_plugins());
+  return parameters->options().plugins()->add_input_file(pathname, true);
 }
 
 // Issue a diagnostic message from a plugin.
@@ -980,17 +1004,14 @@ message(int level, const char * format, ...)
 static Pluginobj*
 make_sized_plugin_object(Input_file* input_file, off_t offset, off_t filesize)
 {
-  Target* target;
   Pluginobj* obj = NULL;
 
-  if (parameters->target_valid())
-    target = const_cast<Target*>(&parameters->target());
-  else
-    target = const_cast<Target*>(&parameters->default_target());
+  parameters_force_valid_target();
+  const Target& target(parameters->target());
 
-  if (target->get_size() == 32)
+  if (target.get_size() == 32)
     {
-      if (target->is_big_endian())
+      if (target.is_big_endian())
 #ifdef HAVE_TARGET_32_BIG
         obj = new Sized_pluginobj<32, true>(input_file->filename(),
                                             input_file, offset, filesize);
@@ -1009,9 +1030,9 @@ make_sized_plugin_object(Input_file* input_file, off_t offset, off_t filesize)
 		   input_file->filename().c_str());
 #endif
     }
-  else if (target->get_size() == 64)
+  else if (target.get_size() == 64)
     {
-      if (target->is_big_endian())
+      if (target.is_big_endian())
 #ifdef HAVE_TARGET_64_BIG
         obj = new Sized_pluginobj<64, true>(input_file->filename(),
                                             input_file, offset, filesize);
@@ -1032,7 +1053,6 @@ make_sized_plugin_object(Input_file* input_file, off_t offset, off_t filesize)
     }
 
   gold_assert(obj != NULL);
-  obj->set_target(target);
   return obj;
 }
 

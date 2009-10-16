@@ -29,6 +29,8 @@ namespace gold
 class General_options;
 class Errors;
 class Target;
+template<int size, bool big_endian>
+class Sized_target;
 
 // Here we define the Parameters class which simply holds simple
 // general parameters which apply to the entire link.  We use a global
@@ -61,7 +63,7 @@ class Parameters
   set_options(const General_options* options);
 
   void
-  set_target(const Target* target);
+  set_target(Target* target);
 
   void
   set_doing_static_link(bool doing_static_link);
@@ -98,10 +100,20 @@ class Parameters
     return *this->target_;
   }
 
-  // When we don't have an output file to associate a target, make a
-  // default one, with guesses about size and endianness.
-  const Target&
-  default_target() const;
+  // The Sized_target of the output file.  The caller must request the
+  // right size and endianness.
+  template<int size, bool big_endian>
+  Sized_target<size, big_endian>*
+  sized_target() const
+  {
+    gold_assert(this->target_valid());
+    return static_cast<Sized_target<size, big_endian>*>(this->target_);
+  }
+
+  // Clear the target, for testing.
+  void
+  clear_target()
+  { this->target_ = NULL; }
 
   // Return true if TARGET is compatible with the current target.
   bool
@@ -140,7 +152,7 @@ class Parameters
  private:
   Errors* errors_;
   const General_options* options_;
-  const Target* target_;
+  Target* target_;
   bool doing_static_link_valid_;
   bool doing_static_link_;
   int debug_;
@@ -159,11 +171,22 @@ extern void
 set_parameters_options(const General_options* options);
 
 extern void
-set_parameters_target(const Target* target);
+set_parameters_target(Target* target);
 
 extern void
 set_parameters_doing_static_link(bool doing_static_link);
-  
+
+// Ensure that the target to be valid by using the default target if
+// necessary.
+
+extern void
+parameters_force_valid_target();
+
+// Clear the current target, for testing.
+
+extern void
+parameters_clear_target();
+
 // Return whether we are doing a particular debugging type.  The
 // argument is one of the flags from debug.h.
 
