@@ -88,6 +88,7 @@ responsibility among the other maintainers.
   ix86 PE/COFF	   Dave Korn <dave.korn.cygwin@gmail.com>
   ix86 INTEL MODE  Jan Beulich <jbeulich@novell.com>
   LM32             Jon Beniston <jon@beniston.com>
+  M32R             Doug Evans <dje@sebabeach.org>
   M68HC11 M68HC12  Stephane Carrez <stcarrez@nerim.fr>
   M88k		   Mark Kettenis <kettenis@gnu.org>
   MACH-O           Tristan Gingold <gingold@adacore.com>
