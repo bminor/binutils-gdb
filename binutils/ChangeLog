@@ -1,3 +1,16 @@
+2009-10-16  Yann Droneaud  <yann@droneaud.fr>
+
+	PR 10768
+	* dlltool.c (bfd_get_errmsg): New macro.
+	(scan_obj_file): Use it.
+	(make_one_lib_file): Use it.
+	(make_head): Use it.
+	(make_delay_head): Use it.
+	(make_tail): Use it.
+	(gen_lib_file): Use it.
+	(identify_dll_for_implib): Use it.
+	(identify_search_archive):  Use it.
+
 2009-10-16  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (usage): Add mention of --debug-dump=frames-interp.

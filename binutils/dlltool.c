@@ -243,6 +243,7 @@
 
 #define PAGE_SIZE ((bfd_vma) 4096)
 #define PAGE_MASK ((bfd_vma) (-4096))
+
 #include "sysdep.h"
 #include "bfd.h"
 #include "libiberty.h"
@@ -265,6 +266,9 @@
 #ifdef DLLTOOL_MX86_64
 #include "coff/x86_64.h"
 #endif
+
+/* get current BFD error message */
+#define bfd_get_errmsg() (bfd_errmsg (bfd_get_error ()))
 
 /* Forward references.  */
 static char *look_for_prog (const char *, const char *, int);
@@ -331,7 +335,7 @@ typedef struct ifunct
 
 typedef struct iheadt
 {
-  char          *dllname;  /* Name of dll file imported from.  */
+  char *         dllname;  /* Name of dll file imported from.  */
   long           nfuncs;   /* Number of functions in list.  */
   struct ifunct *funchead; /* First function in list.  */
   struct ifunct *functail; /* Last  function in list.  */
@@ -342,12 +346,9 @@ typedef struct iheadt
    (qv "ihead structure").  */
 
 static iheadtype *import_list = NULL;
-
 static char *as_name = NULL;
 static char * as_flags = "";
-
 static char *tmp_prefix;
-
 static int no_idata4;
 static int no_idata5;
 static char *exp_name;
@@ -365,6 +366,7 @@ typedef struct dll_name_list_node_t
   char *                        dllname;
   struct dll_name_list_node_t * next;
 } dll_name_list_node_type;
+
 typedef struct dll_name_list_t
 {
   dll_name_list_node_type * head;
@@ -377,6 +379,7 @@ typedef struct symname_search_data_t
   const char * symname;
   bfd_boolean  found;
 } symname_search_data_type;
+
 typedef struct identify_data_t
 {
    dll_name_list_type * list;
@@ -387,7 +390,6 @@ typedef struct identify_data_t
 static char *head_label;
 static char *imp_name_lab;
 static char *dll_name;
-
 static int add_indirect = 0;
 static int add_underscore = 0;
 static int add_stdcall_underscore = 0;
@@ -584,31 +586,31 @@ static const char i386_trampoline[] =
   "\tjmp *%%eax\n";
 
 struct mac
-  {
-    const char *type;
-    const char *how_byte;
-    const char *how_short;
-    const char *how_long;
-    const char *how_asciz;
-    const char *how_comment;
-    const char *how_jump;
-    const char *how_global;
-    const char *how_space;
-    const char *how_align_short;
-    const char *how_align_long;
-    const char *how_default_as_switches;
-    const char *how_bfd_target;
-    enum bfd_architecture how_bfd_arch;
-    const unsigned char *how_jtab;
-    int how_jtab_size; /* Size of the jtab entry.  */
-    int how_jtab_roff; /* Offset into it for the ind 32 reloc into idata 5.  */
-    const unsigned char *how_dljtab;
-    int how_dljtab_size; /* Size of the dljtab entry.  */
-    int how_dljtab_roff1; /* Offset for the ind 32 reloc into idata 5.  */
-    int how_dljtab_roff2; /* Offset for the ind 32 reloc into idata 5.  */
-    int how_dljtab_roff3; /* Offset for the ind 32 reloc into idata 5.  */
-    const char *trampoline;
-  };
+{
+  const char *type;
+  const char *how_byte;
+  const char *how_short;
+  const char *how_long;
+  const char *how_asciz;
+  const char *how_comment;
+  const char *how_jump;
+  const char *how_global;
+  const char *how_space;
+  const char *how_align_short;
+  const char *how_align_long;
+  const char *how_default_as_switches;
+  const char *how_bfd_target;
+  enum bfd_architecture how_bfd_arch;
+  const unsigned char *how_jtab;
+  int how_jtab_size; /* Size of the jtab entry.  */
+  int how_jtab_roff; /* Offset into it for the ind 32 reloc into idata 5.  */
+  const unsigned char *how_dljtab;
+  int how_dljtab_size; /* Size of the dljtab entry.  */
+  int how_dljtab_roff1; /* Offset for the ind 32 reloc into idata 5.  */
+  int how_dljtab_roff2; /* Offset for the ind 32 reloc into idata 5.  */
+  int how_dljtab_roff3; /* Offset for the ind 32 reloc into idata 5.  */
+  const char *trampoline;
+};
 
 static const struct mac
 mtable[] =
@@ -741,19 +743,19 @@ typedef struct dlist
 dlist_type;
 
 typedef struct export
-  {
-    const char *name;
-    const char *internal_name;
-    const char *import_name;
-    int ordinal;
-    int constant;
-    int noname;		/* Don't put name in image file.  */
-    int private;	/* Don't put reference in import lib.  */
-    int data;
-    int hint;
-    int forward;	/* Number of forward label, 0 means no forward.  */
-    struct export *next;
-  }
+{
+  const char *name;
+  const char *internal_name;
+  const char *import_name;
+  int ordinal;
+  int constant;
+  int noname;		/* Don't put name in image file.  */
+  int private;	/* Don't put reference in import lib.  */
+  int data;
+  int hint;
+  int forward;	/* Number of forward label, 0 means no forward.  */
+  struct export *next;
+}
 export_type;
 
 /* A list of symbols which we should not export.  */
@@ -1620,7 +1622,7 @@ scan_obj_file (const char *filename)
 
   if (!f)
     /* xgettext:c-format */
-    fatal (_("Unable to open object file: %s"), filename);
+    fatal (_("Unable to open object file: %s: %s"), filename, bfd_get_errmsg ());
 
   /* xgettext:c-format */
   inform (_("Scanning object file %s"), filename);
@@ -1654,7 +1656,7 @@ scan_obj_file (const char *filename)
   bfd_close (f);
 }
 
-/**********************************************************************/
+
 
 static void
 dump_def_info (FILE *f)
@@ -2367,7 +2369,8 @@ make_one_lib_file (export_type *exp, int i, int delay)
 
   if (!abfd)
     /* xgettext:c-format */
-    fatal (_("bfd_open failed open stub file: %s"), outname);
+    fatal (_("bfd_open failed open stub file: %s: %s"),
+	   outname, bfd_get_errmsg ());
 
   /* xgettext:c-format */
   inform (_("Creating stub file: %s"), outname);
@@ -2388,7 +2391,7 @@ make_one_lib_file (export_type *exp, int i, int delay)
       sinfo *si = secdata + i;
 
       if (si->id != i)
-	abort();
+	abort ();
       si->sec = bfd_make_section_old_way (abfd, si->name);
       bfd_set_section_flags (abfd,
 			     si->sec,
@@ -2824,6 +2827,11 @@ make_one_lib_file (export_type *exp, int i, int delay)
   bfd_set_symtab (abfd, ptrs, oidx);
   bfd_close (abfd);
   abfd = bfd_openr (outname, HOW_BFD_READ_TARGET);
+  if (!abfd)
+    /* xgettext:c-format */
+    fatal (_("bfd_open failed reopen stub file: %s: %s"),
+	   outname, bfd_get_errmsg ());
+ 
   return abfd;
 }
 
@@ -2831,6 +2839,7 @@ static bfd *
 make_head (void)
 {
   FILE *f = fopen (TMP_HEAD_S, FOPEN_WT);
+  bfd *abfd;
 
   if (f == NULL)
     {
@@ -2893,13 +2902,20 @@ make_head (void)
 
   assemble_file (TMP_HEAD_S, TMP_HEAD_O);
 
-  return bfd_openr (TMP_HEAD_O, HOW_BFD_READ_TARGET);
+  abfd = bfd_openr (TMP_HEAD_O, HOW_BFD_READ_TARGET);
+  if (abfd == NULL)
+    /* xgettext:c-format */
+    fatal (_("failed to open temporary head file: %s: %s"),
+	   TMP_HEAD_O, bfd_get_errmsg ());
+
+  return abfd;
 }
 
 bfd *
 make_delay_head (void)
 {
   FILE *f = fopen (TMP_HEAD_S, FOPEN_WT);
+  bfd *abfd;
 
   if (f == NULL)
     {
@@ -2966,13 +2982,20 @@ make_delay_head (void)
 
   assemble_file (TMP_HEAD_S, TMP_HEAD_O);
 
-  return bfd_openr (TMP_HEAD_O, HOW_BFD_READ_TARGET);
+  abfd = bfd_openr (TMP_HEAD_O, HOW_BFD_READ_TARGET);
+  if (abfd == NULL)
+    /* xgettext:c-format */
+    fatal (_("failed to open temporary head file: %s: %s"),
+	   TMP_HEAD_O, bfd_get_errmsg ());
+
+  return abfd;
 }
 
 static bfd *
 make_tail (void)
 {
   FILE *f = fopen (TMP_TAIL_S, FOPEN_WT);
+  bfd *abfd;
 
   if (f == NULL)
     {
@@ -3030,7 +3053,13 @@ make_tail (void)
 
   assemble_file (TMP_TAIL_S, TMP_TAIL_O);
 
-  return bfd_openr (TMP_TAIL_O, HOW_BFD_READ_TARGET);
+  abfd = bfd_openr (TMP_TAIL_O, HOW_BFD_READ_TARGET);
+  if (abfd == NULL)
+    /* xgettext:c-format */
+    fatal (_("failed to open temporary tail file: %s: %s"),
+	   TMP_TAIL_O, bfd_get_errmsg ());
+
+  return abfd;
 }
 
 static void
@@ -3049,7 +3078,8 @@ gen_lib_file (int delay)
 
   if (!outarch)
     /* xgettext:c-format */
-    fatal (_("Can't open .lib file: %s"), imp_name);
+    fatal (_("Can't create .lib file: %s: %s"),
+	   imp_name, bfd_get_errmsg ());
 
   /* xgettext:c-format */
   inform (_("Creating library file: %s"), imp_name);
@@ -3359,7 +3389,9 @@ identify_dll_for_implib (void)
 
   abfd = bfd_openr (identify_imp_name, 0);
   if (abfd == NULL)
-    bfd_fatal (identify_imp_name);
+    /* xgettext:c-format */
+    fatal (_("Can't open .lib file: %s: %s"),
+	   identify_imp_name, bfd_get_errmsg ());
 
   if (! bfd_check_format (abfd, bfd_archive))
     {
