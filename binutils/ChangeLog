@@ -1,3 +1,10 @@
+2009-10-16  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (usage): Add mention of --debug-dump=frames-interp.
+	Wrap output to 80 columns.
+	* objdump.c (usage): Likewise.
+	* doc/binutils.texi (readelf): Add note about =frames-interp.
+
 2009-10-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* addr2line.c (slurp_symtab): Don't use bfd_read_minisymbols.

@@ -2929,7 +2929,8 @@ usage (FILE * stream)
   -R --relocated-dump=<number|name>\n\
                          Dump the contents of section <number|name> as relocated bytes\n\
   -w[lLiaprmfFsoR] or\n\
-  --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=str,=loc,=Ranges]\n\
+  --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,\n\
+               =frames-interp,=str,=loc,=Ranges]\n\
                          Display the contents of DWARF2 debug sections\n"));
 #ifdef SUPPORT_DISASSEMBLY
   fprintf (stream, _("\

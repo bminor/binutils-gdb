@@ -201,7 +201,8 @@ usage (FILE *stream, int status)
   -e, --debugging-tags     Display debug information using ctags style\n\
   -G, --stabs              Display (in raw form) any STABS info in the file\n\
   -W[lLiaprmfFsoR] or\n\
-  --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=str,=loc,=Ranges]\n\
+  --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,\n\
+          =frames-interp,=str,=loc,=Ranges]\n\
                            Display DWARF info in the file\n\
   -t, --syms               Display the contents of the symbol table(s)\n\
   -T, --dynamic-syms       Display the contents of the dynamic symbol table\n\

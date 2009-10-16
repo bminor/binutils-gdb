@@ -4032,6 +4032,10 @@ Note: the @option{=decodedline} option will display the interpreted
 contents of a .debug_line section whereas the @option{=rawline} option
 dumps the contents in a raw format.
 
+Note: the @option{=frames-interp} option will display the interpreted
+contents of a .debug_frame section whereas the @option{=frames} option
+dumps the contents in a raw format.
+
 @item -I
 @itemx --histogram
 Display a histogram of bucket list lengths when displaying the contents
