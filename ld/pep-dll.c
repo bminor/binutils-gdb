@@ -29,6 +29,7 @@
 #define pe_dll_compat_implib        pep_dll_compat_implib
 #define pe_dll_extra_pe_debug       pep_dll_extra_pe_debug
 #define pe_dll_export_everything    pep_dll_export_everything
+#define pe_dll_exclude_all_symbols  pep_dll_exclude_all_symbols
 #define pe_dll_do_default_excludes  pep_dll_do_default_excludes
 #define pe_dll_kill_ats             pep_dll_kill_ats
 #define pe_dll_stdcall_aliases      pep_dll_stdcall_aliases

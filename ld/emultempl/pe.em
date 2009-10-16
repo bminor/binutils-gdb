@@ -196,7 +196,8 @@ fragment <<EOF
 #define OPTION_OUT_DEF			(OPTION_SUPPORT_OLD_CODE + 1)
 #define OPTION_EXPORT_ALL		(OPTION_OUT_DEF + 1)
 #define OPTION_EXCLUDE_SYMBOLS		(OPTION_EXPORT_ALL + 1)
-#define OPTION_KILL_ATS			(OPTION_EXCLUDE_SYMBOLS + 1)
+#define OPTION_EXCLUDE_ALL_SYMBOLS	(OPTION_EXCLUDE_SYMBOLS + 1)
+#define OPTION_KILL_ATS			(OPTION_EXCLUDE_ALL_SYMBOLS + 1)
 #define OPTION_STDCALL_ALIASES		(OPTION_KILL_ATS + 1)
 #define OPTION_ENABLE_STDCALL_FIXUP	(OPTION_STDCALL_ALIASES + 1)
 #define OPTION_DISABLE_STDCALL_FIXUP	(OPTION_ENABLE_STDCALL_FIXUP + 1)
@@ -276,6 +277,7 @@ gld${EMULATION_NAME}_add_options
     {"output-def", required_argument, NULL, OPTION_OUT_DEF},
     {"export-all-symbols", no_argument, NULL, OPTION_EXPORT_ALL},
     {"exclude-symbols", required_argument, NULL, OPTION_EXCLUDE_SYMBOLS},
+    {"exclude-all-symbols", no_argument, NULL, OPTION_EXCLUDE_ALL_SYMBOLS},
     {"exclude-libs", required_argument, NULL, OPTION_EXCLUDE_LIBS},
     {"exclude-modules-for-implib", required_argument, NULL, OPTION_EXCLUDE_MODULES_FOR_IMPLIB},
     {"kill-at", no_argument, NULL, OPTION_KILL_ATS},
@@ -389,6 +391,7 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
   fprintf (file, _("  --disable-stdcall-fixup            Don't link _sym to _sym@nn\n"));
   fprintf (file, _("  --enable-stdcall-fixup             Link _sym to _sym@nn without warnings\n"));
   fprintf (file, _("  --exclude-symbols sym,sym,...      Exclude symbols from automatic export\n"));
+  fprintf (file, _("  --exclude-all-symbols              Exclude all symbols from automatic export\n"));
   fprintf (file, _("  --exclude-libs lib,lib,...         Exclude libraries from automatic export\n"));
   fprintf (file, _("  --exclude-modules-for-implib mod,mod,...\n"));
   fprintf (file, _("                                     Exclude objects, archive members from auto\n"));
@@ -668,6 +671,9 @@ gld${EMULATION_NAME}_handle_option (int optc)
       break;
     case OPTION_EXCLUDE_SYMBOLS:
       pe_dll_add_excludes (optarg, EXCLUDESYMS);
+      break;
+    case OPTION_EXCLUDE_ALL_SYMBOLS:
+      pe_dll_exclude_all_symbols = 1;
       break;
     case OPTION_EXCLUDE_LIBS:
       pe_dll_add_excludes (optarg, EXCLUDELIBS);

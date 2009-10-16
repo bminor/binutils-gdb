@@ -149,6 +149,7 @@ static void add_bfd_to_link (bfd *, const char *, struct bfd_link_info *);
 
 def_file * pe_def_file = 0;
 int pe_dll_export_everything = 0;
+int pe_dll_exclude_all_symbols = 0;
 int pe_dll_do_default_excludes = 1;
 int pe_dll_kill_ats = 0;
 int pe_dll_stdcall_aliases = 0;
@@ -664,14 +665,15 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 	}
     }
 
-  /* If we are not building a DLL, when there are no exports
-     we do not build an export table at all.  */
-  if (!pe_dll_export_everything && pe_def_file->num_exports == 0
-      && info->executable)
+  /* If we are building an executable and there is nothing
+     to export, we do not build an export table at all.  */
+  if (info->executable && pe_def_file->num_exports == 0
+      && (!pe_dll_export_everything || pe_dll_exclude_all_symbols))
     return;
 
   /* Now, maybe export everything else the default way.  */
-  if (pe_dll_export_everything || pe_def_file->num_exports == 0)
+  if ((pe_dll_export_everything || pe_def_file->num_exports == 0)
+      && !pe_dll_exclude_all_symbols)
     {
       for (b = info->input_bfds; b; b = b->link_next)
 	{

@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add --exlcude-all-symbols option to PE based linkers.  This prevents all
+  symbols from automatically being exported.
+
 * Add support for the Renesas RX processor.
 
 Changes in 2.20:

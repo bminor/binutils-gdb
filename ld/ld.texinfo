@@ -2224,6 +2224,11 @@ Specifies a list of symbols which should not be automatically
 exported.  The symbol names may be delimited by commas or colons.
 [This option is specific to the i386 PE targeted port of the linker]
 
+@kindex --exclude-all-symbols
+@item --exclude-all-symbols
+Specifies no symbols should be automatically exported.
+[This option is specific to the i386 PE targeted port of the linker]
+
 @kindex --file-alignment
 @item --file-alignment
 Specify the file alignment.  Sections in the file will always begin at
