@@ -3503,15 +3503,20 @@ Output_segment::set_section_list_addresses(const Layout* layout, bool reset,
 	      else
 		{
 		  Output_section* os = (*p)->output_section();
+
+		  // Cast to unsigned long long to avoid format warnings.
+		  unsigned long long previous_dot =
+		    static_cast<unsigned long long>(addr + (off - startoff));
+		  unsigned long long dot =
+		    static_cast<unsigned long long>((*p)->address());
+
 		  if (os == NULL)
 		    gold_error(_("dot moves backward in linker script "
-				 "from 0x%llx to 0x%llx"),
-			       addr + (off - startoff), (*p)->address());
+				 "from 0x%llx to 0x%llx"), previous_dot, dot);
 		  else
 		    gold_error(_("address of section '%s' moves backward "
 				 "from 0x%llx to 0x%llx"),
-			       os->name(), addr + (off - startoff),
-			       (*p)->address());
+			       os->name(), previous_dot, dot);
 		}
 	    }
 	  (*p)->set_file_offset(off);
