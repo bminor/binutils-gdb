@@ -1,3 +1,12 @@
+2009-10-16  Alan Modra  <amodra@bigpond.net.au>
+
+	PR binutils/10785
+	* coff-alpha.c (alpha_ecoff_get_elt_at_filepos): Don't bfd_alloc
+	bim and bim->buffer.  bfd_malloc instead.
+	* peicode.h (pe_ILF_build_a_bfd): Similarly.
+	(ILF_DATA_SIZE): Don't include bim.
+	* opncls.c (bfd_close): Test bim->buffer non-NULL before freeing.
+
 2009-10-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* aoutx.h (aout_link_check_ar_symbols): Typo fix.

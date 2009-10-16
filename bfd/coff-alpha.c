@@ -2120,6 +2120,7 @@ alpha_ecoff_get_elt_at_filepos (archive, filepos)
   bfd_byte *buf, *p;
   struct bfd_in_memory *bim;
 
+  buf = NULL;
   nbfd = _bfd_get_elt_at_filepos (archive, filepos);
   if (nbfd == NULL)
     goto error_return;
@@ -2151,16 +2152,14 @@ alpha_ecoff_get_elt_at_filepos (archive, filepos)
     goto error_return;
   size = H_GET_64 (nbfd, ab);
 
-  if (size == 0)
-    buf = NULL;
-  else
+  if (size != 0)
     {
       bfd_size_type left;
       bfd_byte dict[4096];
       unsigned int h;
       bfd_byte b;
 
-      buf = (bfd_byte *) bfd_alloc (nbfd, size);
+      buf = (bfd_byte *) bfd_malloc (size);
       if (buf == NULL)
 	goto error_return;
       p = buf;
@@ -2214,7 +2213,7 @@ alpha_ecoff_get_elt_at_filepos (archive, filepos)
 
   /* Now the uncompressed file contents are in buf.  */
   bim = ((struct bfd_in_memory *)
-	 bfd_alloc (nbfd, (bfd_size_type) sizeof (struct bfd_in_memory)));
+	 bfd_malloc ((bfd_size_type) sizeof (struct bfd_in_memory)));
   if (bim == NULL)
     goto error_return;
   bim->size = size;
@@ -2230,6 +2229,8 @@ alpha_ecoff_get_elt_at_filepos (archive, filepos)
   return nbfd;
 
  error_return:
+  if (buf != NULL)
+    free (buf);
   if (nbfd != NULL)
     bfd_close (nbfd);
   return NULL;

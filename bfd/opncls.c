@@ -709,7 +709,9 @@ bfd_close (bfd *abfd)
 	 vector.
 	 Until that's done, at least don't leak memory.  */
       struct bfd_in_memory *bim = (struct bfd_in_memory *) abfd->iostream;
-      free (bim->buffer);
+
+      if (bim->buffer != NULL)
+	free (bim->buffer);
       free (bim);
       ret = TRUE;
     }
