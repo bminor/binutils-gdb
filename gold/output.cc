@@ -3100,36 +3100,41 @@ Output_segment::add_output_section(Output_section* os,
       && (os->flags() & elfcpp::SHF_TLS) != 0)
     {
       pdl = &this->output_data_;
-      bool nobits = os->type() == elfcpp::SHT_NOBITS;
-      bool sawtls = false;
-      Output_segment::Output_data_list::iterator p = pdl->end();
-      do
+      if (!pdl->empty())
 	{
-	  --p;
-	  bool insert;
-	  if ((*p)->is_section_flag_set(elfcpp::SHF_TLS))
+	  bool nobits = os->type() == elfcpp::SHT_NOBITS;
+	  bool sawtls = false;
+	  Output_segment::Output_data_list::iterator p = pdl->end();
+	  gold_assert(p != pdl->begin());
+	  do
 	    {
-	      sawtls = true;
-	      // Put a NOBITS section after the first TLS section.
-	      // Put a PROGBITS section after the first TLS/PROGBITS
-	      // section.
-	      insert = nobits || !(*p)->is_section_type(elfcpp::SHT_NOBITS);
-	    }
-	  else
-	    {
-	      // If we've gone past the TLS sections, but we've seen a
-	      // TLS section, then we need to insert this section now.
-	      insert = sawtls;
-	    }
+	      --p;
+	      bool insert;
+	      if ((*p)->is_section_flag_set(elfcpp::SHF_TLS))
+		{
+		  sawtls = true;
+		  // Put a NOBITS section after the first TLS section.
+		  // Put a PROGBITS section after the first
+		  // TLS/PROGBITS section.
+		  insert = nobits || !(*p)->is_section_type(elfcpp::SHT_NOBITS);
+		}
+	      else
+		{
+		  // If we've gone past the TLS sections, but we've
+		  // seen a TLS section, then we need to insert this
+		  // section now.
+		  insert = sawtls;
+		}
 
-	  if (insert)
-	    {
-	      ++p;
-	      pdl->insert(p, os);
-	      return;
+	      if (insert)
+		{
+		  ++p;
+		  pdl->insert(p, os);
+		  return;
+		}
 	    }
+	  while (p != pdl->begin());
 	}
-      while (p != pdl->begin());
 
       // There are no TLS sections yet; put this one at the requested
       // location in the section list.
@@ -3489,8 +3494,26 @@ Output_segment::set_section_list_addresses(const Layout* layout, bool reset,
 	{
 	  // The script may have inserted a skip forward, but it
 	  // better not have moved backward.
-	  gold_assert((*p)->address() >= addr + (off - startoff));
-	  off += (*p)->address() - (addr + (off - startoff));
+	  if ((*p)->address() >= addr + (off - startoff))
+	    off += (*p)->address() - (addr + (off - startoff));
+	  else
+	    {
+	      if (!layout->script_options()->saw_sections_clause())
+		gold_unreachable();
+	      else
+		{
+		  Output_section* os = (*p)->output_section();
+		  if (os == NULL)
+		    gold_error(_("dot moves backward in linker script "
+				 "from 0x%llx to 0x%llx"),
+			       addr + (off - startoff), (*p)->address());
+		  else
+		    gold_error(_("address of section '%s' moves backward "
+				 "from 0x%llx to 0x%llx"),
+			       os->name(), addr + (off - startoff),
+			       (*p)->address());
+		}
+	    }
 	  (*p)->set_file_offset(off);
 	  (*p)->finalize_data_size();
 	}

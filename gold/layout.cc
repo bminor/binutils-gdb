@@ -2237,6 +2237,19 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 	  if (!parameters->options().nmagic()
 	      && !parameters->options().omagic())
 	    off = align_file_offset(off, addr, abi_pagesize);
+	  else if (load_seg == NULL)
+	    {
+	      // This is -N or -n with a section script which prevents
+	      // us from using a load segment.  We need to ensure that
+	      // the file offset is aligned to the alignment of the
+	      // segment.  This is because the linker script
+	      // implicitly assumed a zero offset.  If we don't align
+	      // here, then the alignment of the sections in the
+	      // linker script may not match the alignment of the
+	      // sections in the set_section_addresses call below,
+	      // causing an error about dot moving backward.
+	      off = align_address(off, (*p)->maximum_alignment());
+	    }
 
 	  unsigned int shndx_hold = *pshndx;
 	  uint64_t new_addr = (*p)->set_section_addresses(this, false, addr,

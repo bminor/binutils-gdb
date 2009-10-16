@@ -1,3 +1,16 @@
+2009-10-15  Ian Lance Taylor  <iant@google.com>
+
+	* layout.cc (Layout::set_segment_offsets): Align the file offset
+	to the segment aligment for -N or -n with no load segment.
+	* output.cc (Output_segment::add_output_section): Don't crash if
+	the first section is a TLS section.
+	(Output_segment::set_section_list_addresses): Print an error
+	message if the address moves backward in a linker script.
+	* script-sections.cc
+	(Output_section_element_input::set_section_addresses): Don't
+	increase *dot_value for a SHF_TLS/SHT_NOBITS section.
+	(Orphan_output_section::set_section_addresses): Likewise.
+
 2009-10-15  Doug Kwan  <dougkwan@google.com>
 
 	* layout.cc (Layout::finish_dynamic_section): Generate tags

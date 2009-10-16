@@ -1372,6 +1372,7 @@ Output_section_element_input::set_section_addresses(
   // sections are otherwise equal.  Add each input section to the
   // output section.
 
+  uint64_t dot = *dot_value;
   for (size_t i = 0; i < input_pattern_count; ++i)
     {
       if (matching_sections[i].empty())
@@ -1396,12 +1397,12 @@ Output_section_element_input::set_section_addresses(
 	  if (this_subalign < subalign)
 	    this_subalign = subalign;
 
-	  uint64_t address = align_address(*dot_value, this_subalign);
+	  uint64_t address = align_address(dot, this_subalign);
 
-	  if (address > *dot_value && !fill->empty())
+	  if (address > dot && !fill->empty())
 	    {
 	      section_size_type length =
-		convert_to_section_size_type(address - *dot_value);
+		convert_to_section_size_type(address - dot);
 	      std::string this_fill = this->get_fill_string(fill, length);
 	      Output_section_data* posd = new Output_data_const(this_fill, 0);
 	      output_section->add_output_section_data(posd);
@@ -1412,9 +1413,16 @@ Output_section_element_input::set_section_addresses(
 						       p->size(),
 						       this_subalign);
 
-	  *dot_value = address + p->size();
+	  dot = address + p->size();
 	}
     }
+
+  // An SHF_TLS/SHT_NOBITS section does not take up any
+  // address space.
+  if (output_section == NULL
+      || (output_section->flags() & elfcpp::SHF_TLS) == 0
+      || output_section->type() != elfcpp::SHT_NOBITS)
+    *dot_value = dot;
 
   this->final_dot_value_ = *dot_value;
   this->final_dot_section_ = *dot_section;
@@ -2311,12 +2319,18 @@ Orphan_output_section::set_section_addresses(Symbol_table*, Layout*,
       address += size;
     }
 
-  if (!have_load_address)
-    *load_address = address;
-  else
-    *load_address += address - *dot_value;
+  // An SHF_TLS/SHT_NOBITS section does not take up any address space.
+  if (this->os_ == NULL
+      || (this->os_->flags() & elfcpp::SHF_TLS) == 0
+      || this->os_->type() != elfcpp::SHT_NOBITS)
+    {
+      if (!have_load_address)
+	*load_address = address;
+      else
+	*load_address += address - *dot_value;
 
-  *dot_value = address;
+      *dot_value = address;
+    }
 }
 
 // Get the list of segments to use for an allocated section when using
