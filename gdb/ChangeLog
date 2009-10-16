@@ -1,3 +1,11 @@
+2009-10-16  Michael Eager  <eager@eagercon.com>
+
+	* microblaze-linux-tdep.c:
+	microblaze_linux_memory_remove_breakpoint(): Add gdbarch to param,
+	replace frame_pc_unwind with get_frame_address_in_block.
+	* microblaze-tdep.c: Remove MICROBLAZE_REGISTER_SIZE.
+	* microblaze-tdep.h: Add MICROBLAZE_REGISTER_SIZE.
+
 2008-10-15  Steven G. Kargl  <kargl@gcc.gnu.org>
 
 	* amd64fbsd-nat.c (amd64fbsd_supply_pcb): Conditionally compile in

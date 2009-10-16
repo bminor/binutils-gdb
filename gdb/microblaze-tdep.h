@@ -110,6 +110,9 @@ enum microblaze_regnum
   MICROBLAZE_RTLBHI_REGNUM
 };
 
+/* All registers are 32 bits.  */
+#define MICROBLAZE_REGISTER_SIZE 4
+
 /* MICROBLAZE_BREAKPOINT defines the breakpoint that should be used.
    Only used for native debugging.  */
 #define MICROBLAZE_BREAKPOINT {0xb9, 0xcc, 0x00, 0x60}

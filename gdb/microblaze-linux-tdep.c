@@ -38,7 +38,8 @@
 
 
 static int
-microblaze_linux_memory_remove_breakpoint (struct bp_target_info *bp_tgt)
+microblaze_linux_memory_remove_breakpoint (struct gdbarch *gdbarch, 
+					   struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr = bp_tgt->placed_address;
   const gdb_byte *bp;
@@ -74,8 +75,8 @@ microblaze_linux_sigtramp_cache (struct frame_info *next_frame,
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  base = frame_unwind_register_unsigned (next_frame, SP_REGNUM);
-  if (bias > 0 && frame_pc_unwind (next_frame) != func)
+  base = frame_unwind_register_unsigned (next_frame, MICROBLAZE_SP_REGNUM);
+  if (bias > 0 && get_frame_address_in_block (next_frame) != func)
     /* See below, some signal trampolines increment the stack as their
        first instruction, need to compensate for that.  */
     base -= bias;

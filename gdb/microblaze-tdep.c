@@ -63,9 +63,6 @@
 #define IS_SAVE_HIDDEN_PTR(op, rd, ra, rb) \
 	((op == add || op == addik) && ra == MICROBLAZE_FIRST_ARGREG && rb == 0)
 
-/* All registers are 32 bits.  */
-#define MICROBLAZE_REGISTER_SIZE 4
-
 /* The registers of the Xilinx microblaze processor.  */
 
 static const char *microblaze_register_names[] =
