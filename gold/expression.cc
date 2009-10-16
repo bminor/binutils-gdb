@@ -1113,17 +1113,62 @@ script_exp_function_sizeof_headers()
   return new Sizeof_headers_expression();
 }
 
-// In the GNU linker SEGMENT_START basically returns the value for
-// -Ttext, -Tdata, or -Tbss.  We could implement this by copying the
-// values from General_options to Parameters.  But I doubt that
-// anybody actually uses it.  The point of it for the GNU linker was
-// because -Ttext set the address of the .text section rather than the
-// text segment.  In gold -Ttext sets the text segment address anyhow.
+// SEGMENT_START.
+
+class Segment_start_expression : public Unary_expression
+{
+ public:
+  Segment_start_expression(const char* segment_name, size_t segment_name_len,
+			   Expression* default_value)
+    : Unary_expression(default_value),
+      segment_name_(segment_name, segment_name_len)
+  { }
+
+  uint64_t
+  value(const Expression_eval_info*);
+
+  void
+  print(FILE* f) const
+  {
+    fprintf(f, "SEGMENT_START(\"%s\", ", this->segment_name_.c_str());
+    this->arg_print(f);
+    fprintf(f, ")");
+  }
+
+ private:
+  std::string segment_name_;
+};
+
+uint64_t
+Segment_start_expression::value(const Expression_eval_info* eei)
+{
+  // Check for command line overrides.
+  if (parameters->options().user_set_Ttext()
+      && this->segment_name_ == ".text")
+    return parameters->options().Ttext();
+  else if (parameters->options().user_set_Tdata()
+	   && this->segment_name_ == ".data")
+    return parameters->options().Tdata();
+  else if (parameters->options().user_set_Tbss()
+	   && this->segment_name_ == ".bss")
+    return parameters->options().Tbss();
+  else
+    {
+      Output_section* dummy;
+      uint64_t ret = this->arg_value(eei, &dummy);
+      // Force the value to be absolute.
+      *eei->result_section_pointer = NULL;
+      return ret;
+    }
+}
 
 extern "C" Expression*
-script_exp_function_segment_start(const char*, size_t, Expression*)
+script_exp_function_segment_start(const char* segment_name,
+				  size_t segment_name_len,
+				  Expression* default_value)
 {
-  gold_fatal(_("SEGMENT_START not implemented"));
+  return new Segment_start_expression(segment_name, segment_name_len,
+				      default_value);
 }
 
 // Functions for memory regions.  These can not be implemented unless

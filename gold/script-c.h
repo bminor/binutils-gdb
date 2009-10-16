@@ -389,6 +389,11 @@ script_data_segment_align(void* closure);
 extern void
 script_data_segment_relro_end(void* closure);
 
+/* Record the fact that a SEGMENT_START expression is seen.  */
+
+extern void
+script_saw_segment_start_expression(void* closure);
+
 /* Called by the bison parser for expressions.  */
 
 extern Expression_ptr

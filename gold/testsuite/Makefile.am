@@ -1009,6 +1009,32 @@ script_test_5: script_test_5.o gcctestdir/ld $(srcdir)/script_test_5.t
 script_test_5.stdout: script_test_5
 	$(TEST_READELF) -SW script_test_5 > script_test_5.stdout
 
+check_SCRIPTS += script_test_6.sh
+check_DATA += script_test_6.stdout
+MOSTLYCLEANFILES += script_test_6
+script_test_6: basic_test.o gcctestdir/ld $(srcdir)/script_test_6.t
+	$(CXXLINK) -Bgcctestdir/ basic_test.o -T $(srcdir)/script_test_6.t \
+	-Wl,-Ttext=0x10001000 -Wl,-Tdata=0x10200000 -Wl,-Tbss=0x10400000
+script_test_6.stdout: script_test_6
+	$(TEST_READELF) -SlW script_test_6 > script_test_6.stdout
+
+check_SCRIPTS += script_test_7.sh
+check_DATA += script_test_7.stdout
+MOSTLYCLEANFILES += script_test_7
+script_test_7: basic_test.o gcctestdir/ld $(srcdir)/script_test_7.t
+	$(CXXLINK) -Bgcctestdir/ basic_test.o -T $(srcdir)/script_test_7.t
+script_test_7.stdout: script_test_7
+	$(TEST_READELF) -SlW script_test_7 > script_test_7.stdout
+
+check_SCRIPTS += script_test_8.sh
+check_DATA += script_test_8.stdout
+MOSTLYCLEANFILES += script_test_8
+script_test_8: basic_test.o gcctestdir/ld $(srcdir)/script_test_7.t
+	$(CXXLINK) -Bgcctestdir/ basic_test.o -T $(srcdir)/script_test_7.t \
+	-Wl,-Ttext=0x20001000 -Wl,-Tdata=0x20200000 -Wl,-Tbss=0x20400000
+script_test_8.stdout: script_test_8
+	$(TEST_READELF) -SlW script_test_8 > script_test_8.stdout
+
 # Test --dynamic-list, --dynamic-list-data, --dynamic-list-cpp-new,
 # and --dynamic-list-cpp-typeinfo
 

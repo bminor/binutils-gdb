@@ -2487,7 +2487,8 @@ Script_sections::Script_sections()
     orphan_section_placement_(NULL),
     data_segment_align_start_(),
     saw_data_segment_align_(false),
-    saw_relro_end_(false)
+    saw_relro_end_(false),
+    saw_segment_start_expression_(false)
 {
 }
 
@@ -2850,10 +2851,52 @@ Script_sections::set_section_addresses(Symbol_table* symtab, Layout* layout)
   // For a relocatable link, we implicitly set dot to zero.
   uint64_t dot_value = 0;
   uint64_t load_address = 0;
+
+  // Check to see if we want to use any of -Ttext, -Tdata and -Tbss options
+  // to set section addresses.  If the script has any SEGMENT_START
+  // expression, we do not set the section addresses.
+  bool use_tsection_options =
+    (!this->saw_segment_start_expression_
+     && (parameters->options().user_set_Ttext()
+	 || parameters->options().user_set_Tdata()
+	 || parameters->options().user_set_Tbss()));
+
   for (Sections_elements::iterator p = this->sections_elements_->begin();
        p != this->sections_elements_->end();
        ++p)
-    (*p)->set_section_addresses(symtab, layout, &dot_value, &load_address);
+    {
+      Output_section* os = (*p)->get_output_section();
+
+      // Handle -Ttext, -Tdata and -Tbss options.  We do this by looking for
+      // the special sections by names and doing dot assignments. 
+      if (use_tsection_options
+	  && os != NULL
+	  && (os->flags() & elfcpp::SHF_ALLOC) != 0)
+	{
+	  uint64_t new_dot_value = dot_value;
+
+	  if (parameters->options().user_set_Ttext()
+	      && strcmp(os->name(), ".text") == 0)
+	    new_dot_value = parameters->options().Ttext();
+	  else if (parameters->options().user_set_Tdata()
+	      && strcmp(os->name(), ".data") == 0)
+	    new_dot_value = parameters->options().Tdata();
+	  else if (parameters->options().user_set_Tbss()
+	      && strcmp(os->name(), ".bss") == 0)
+	    new_dot_value = parameters->options().Tbss();
+
+	  // Update dot and load address if necessary.
+	  if (new_dot_value < dot_value)
+	    gold_error(_("dot may not move backward"));
+	  else if (new_dot_value != dot_value)
+	    {
+	      dot_value = new_dot_value;
+	      load_address = new_dot_value;
+	    }
+	}
+
+      (*p)->set_section_addresses(symtab, layout, &dot_value, &load_address);
+    } 
 
   if (this->phdrs_elements_ != NULL)
     {

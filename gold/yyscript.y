@@ -861,6 +861,10 @@ exp:
 	| SEGMENT_START '(' string ',' exp ')'
 	    {
 	      $$ = script_exp_function_segment_start($3.value, $3.length, $5);
+	      /* We need to take note of any SEGMENT_START expressions
+		 because they change the behaviour of -Ttext, -Tdata and
+		 -Tbss options.  */
+	      script_saw_segment_start_expression(closure);
 	    }
 	| ASSERT_K '(' exp ',' string ')'
 	    { $$ = script_exp_function_assert($3, $5.value, $5.length); }

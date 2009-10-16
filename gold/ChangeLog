@@ -1,5 +1,39 @@
 2009-10-16  Doug Kwan  <dougkwan@google.com>
 
+	* expression.cc (class Segment_start_expression): New class definition.
+	(Segment_start_expression::value): New method definition.
+	(script_exp_function_segment_start): Return a new
+	Segment_start_expression.
+	* gold/script-c.h (script_saw_segment_start_expression): New function
+	prototype.
+	* script-sections.cc (Script_sections::Script_sections): Initialize
+	SAW_SEGMENT_START_EXPRESSION_ to false.
+	(Script_sections::set_section_addresses): Use -Ttext, -Tdata
+	and -Tbbs options to specify section addresses if given in
+	command line and no SEGMENT_START expression is seen in a script.
+	* script-sections.h (Script_sections::saw_segment_start_expression,
+	Script_sections::set_saw_segment_start_expression): New method
+	definition.
+	(Script_sections::saw_segment_start_expression_): New data member
+	declaration.
+	* script.cc (script_saw_segment_start_expression): New function.
+	* yyscript.y (SEGMENT_START): Call script_saw_segment_start_expression.
+	* testsuite/Makefile.am (check_SCRIPTS): Add script_test_6.sh,
+	script_test_7.sh and script_test_8.sh.
+	(check_DATA): Add script_test_6.stdout, script_test_7.stdout and
+	script_test_8.stdout.
+	(MOSTLYCLEANFILES): Add script_test_6, script_test_7 and script_test_8.
+	(script_test_6, script_test_6.stdout, script_test_7,
+	script_test_7.stdout, script_test_8, script_test_8.stdout): New rules.
+	* Makefile.in: Regenerate.
+	* testsuite/script_test_6.sh: New file.
+	* testsuite/script_test_6.t: Same.
+	* testsuite/script_test_7.sh: Same.
+	* testsuite/script_test_7.t: Same.
+	* testsuite/script_test_8.sh: Same.
+
+2009-10-16  Doug Kwan  <dougkwan@google.com>
+
 	* output.cc (Output_segment::set_section_list_address): Cast
 	expressions to unsigned long long type to avoid format warnings.
 

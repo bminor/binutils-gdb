@@ -2739,3 +2739,11 @@ script_phdr_string_to_type(void* closurev, const char* name, size_t namelen)
   yyerror(closurev, _("unknown PHDR type (try integer)"));
   return elfcpp::PT_NULL;
 }
+
+extern "C" void
+script_saw_segment_start_expression(void* closurev)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  Script_sections* ss = closure->script_options()->script_sections();
+  ss->set_saw_segment_start_expression(true);
+}

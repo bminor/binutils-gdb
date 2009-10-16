@@ -191,6 +191,17 @@ class Script_sections
   void
   release_segments();
 
+  // Whether we ever saw a SEGMENT_START expression, the presence of which
+  // changes the behaviour of -Ttext, -Tdata and -Tbss options.
+  bool
+  saw_segment_start_expression() const
+  { return this->saw_segment_start_expression_; }
+
+  // Set the flag which indicates whether we saw a SEGMENT_START expression.
+  void
+  set_saw_segment_start_expression(bool value)
+  { this->saw_segment_start_expression_ = value; }
+
   // Print the contents to the FILE.  This is for debugging.
   void
   print(FILE*) const;
@@ -253,6 +264,8 @@ class Script_sections
   bool saw_data_segment_align_;
   // Whether we have seen DATA_SEGMENT_RELRO_END.
   bool saw_relro_end_;
+  // Whether we have seen SEGMENT_START.
+  bool saw_segment_start_expression_;
 };
 
 } // End namespace gold.
