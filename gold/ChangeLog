@@ -1,3 +1,8 @@
+2009-10-16  Doug Kwan  <dougkwan@google.com>
+
+	* output.cc (Output_segment::set_section_list_address): Cast
+	expressions to unsigned long long type to avoid format warnings.
+
 2009-10-15  Ian Lance Taylor  <iant@google.com>
 
 	* script.cc (Script_options::add_symbol_assignment): Always add a
