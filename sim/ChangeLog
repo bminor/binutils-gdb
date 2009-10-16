@@ -1,3 +1,7 @@
+2009-10-16  Doug Evans  <dje@sebabeach.org>
+
+	* MAINTAINERS: Add myself as m32r maintainer.
+
 2009-10-15  Michael Egaer  <eager@eagercon.com>
 
 	* MAINTAINERS: Add self as MicroBlaze maintainer.
