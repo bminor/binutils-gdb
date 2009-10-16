@@ -1,3 +1,10 @@
+2009-10-16  Jerker Bäck <jerker.back@gmail.com>
+
+	PR 10764
+	* Makefile.am (sysinfo.o, syslex.o): Place source file after all
+	command line switches.
+	* Makefile.in: Regenerate.
+
 2009-10-16  Yann Droneaud  <yann@droneaud.fr>
 
 	PR 10768
