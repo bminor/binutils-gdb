@@ -513,6 +513,9 @@ the 4 8-bit registers: @samp{%sil}, @samp{%dil}, @samp{%bpl}, @samp{%spl}.
 the 8 debug registers: @samp{%db8}--@samp{%db15}.
 
 @item
+the 8 control registers: @samp{%cr8}--@samp{%cr15}.
+
+@item
 the 8 SSE registers: @samp{%xmm8}--@samp{%xmm15}.
 @end itemize
 
@@ -812,8 +815,9 @@ or 64-bit x86-64 code depending on the default configuration,
 it also supports writing code to run in real mode or in 16-bit protected
 mode code segments.  To do this, put a @samp{.code16} or
 @samp{.code16gcc} directive before the assembly language instructions to
-be run in 16-bit mode.  You can switch @code{@value{AS}} back to writing
-normal 32-bit code with the @samp{.code32} directive.
+be run in 16-bit mode.  You can switch @code{@value{AS}} to writing
+32-bit code with the @samp{.code32} directive or 64-bit code with the
+@samp{.code64} directive.
 
 @samp{.code16gcc} provides experimental support for generating 16-bit
 code from gcc, and differs from @samp{.code16} in that @samp{call},

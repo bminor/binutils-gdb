@@ -1,3 +1,10 @@
+2009-10-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/10775
+	* doc/c-i386.texi: Mention the 8 extra control registers for
+	x86-64.
+	Mention .code64 directive.
+
 2009-10-15  Alan Modra  <amodra@bigpond.net.au>
 
 	PR gas/1491
