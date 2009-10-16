@@ -1,3 +1,7 @@
+2009-10-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c: Simplify enums.
+
 2009-10-15  H.J. Lu  <hongjiu.lu@intel.com>
 	    Ineiev <ineiev@gmail.com>
 
