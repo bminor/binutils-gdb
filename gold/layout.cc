@@ -1421,7 +1421,9 @@ Layout::relaxation_loop_body(
       != General_options::OBJECT_FORMAT_ELF)
     load_seg = NULL;
 
-  gold_assert(phdr_seg == NULL || load_seg != NULL);
+  gold_assert(phdr_seg == NULL
+	      || load_seg != NULL
+	      || this->script_options_->saw_sections_clause());
 
   // Lay out the segment headers.
   if (!parameters->options().relocatable())

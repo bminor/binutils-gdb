@@ -1,5 +1,8 @@
 2009-10-15  Ian Lance Taylor  <iant@google.com>
 
+	* layout.cc (Layout::relaxation_loop_body): Don't crash if we see
+	program headers with no load segment if there is a linker script.
+
 	* layout.cc (Layout::set_segment_offsets): Align the file offset
 	to the segment aligment for -N or -n with no load segment.
 	* output.cc (Output_segment::add_output_section): Don't crash if
