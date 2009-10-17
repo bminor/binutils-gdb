@@ -1,3 +1,8 @@
+2009-10-17  Arnold Metselaar  <arnold.metselaar@planet.nl>
+
+	* coff-z80.c (z80coff_vec): Allow sections to be of type
+	SEC_CODE or SEC_DATA
+
 2009-10-16  Alan Modra  <amodra@bigpond.net.au>
 
 	PR binutils/10785

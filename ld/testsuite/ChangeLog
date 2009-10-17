@@ -1,3 +1,7 @@
+2009-10-17  Arnold Metselaar  <arnold.metselaar@planet.nl>
+
+	* ld-scripts/align.exp: Remove xfails for z80-*-coff
+
 2009-10-16  Rafael Avila de Espindola  <espindola@google.com>
 
 	* bootstrap.exp: Detect if plugins are enabled. Skip the static
