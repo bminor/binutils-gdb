@@ -1,3 +1,12 @@
+2009-10-17  Doug Evans  <dje@sebabeach.org>
+
+	* Makefile.am (CGEN_CPUS): Add iq2000, lm32.
+	(FR30_DEPS, FRV_DEPS, IQ2000_DEPS): Move so all cgen *_DEPS are
+	sorted alphabetically.
+	(stamp-fr30, stamp-frv, stamp-iq2000, stamp-xc16x): Move so all cgen
+	stamp-* rules are sorted alphabetically.
+	* Makefile.in: Regenerate.
+
 2009-10-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.h: Use enum instead of nested macros.
