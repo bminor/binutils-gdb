@@ -1,5 +1,8 @@
 2009-10-19  Jerker Bäck  <jerker.back@gmail.com>
 
+	PR binutils/10793
+	* prdbg.c (tg_end_struct_type): Warning fix.
+
 	PR binutils/10792
 	* dlltool.c (dll_name_list_append): Declare variable at start
 	of block.
