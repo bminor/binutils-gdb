@@ -1,3 +1,10 @@
+2009-10-19  Jerker Bäck  <jerker.back@gmail.com>
+
+	PR binutils/10792
+	* dlltool.c (dll_name_list_append): Declare variable at start
+	of block.
+	(dll_name_list_count, dll_name-list_print): Likewise.
+
 2009-10-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* addr2line.c (slurp_symtab): Don't use bfd_read_minisymbols.
