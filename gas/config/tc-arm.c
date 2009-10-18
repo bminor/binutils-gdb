@@ -2489,7 +2489,9 @@ make_mapping_symbol (enum mstate state, valueT value, fragS *frag)
       frag->tc_frag_data.first_map = symbolP;
     }
   if (frag->tc_frag_data.last_map != NULL)
-    know (S_GET_VALUE (frag->tc_frag_data.last_map) < S_GET_VALUE (symbolP));
+    {
+      know (S_GET_VALUE (frag->tc_frag_data.last_map) < S_GET_VALUE (symbolP));
+    }
   frag->tc_frag_data.last_map = symbolP;
 }
 
