@@ -43,12 +43,6 @@
    Each struct record_entry is linked to "record_list" by "prev" and
    "next" pointers.  */
 
-struct record_reg_entry
-{
-  int num;
-  gdb_byte *val;
-};
-
 struct record_mem_entry
 {
   CORE_ADDR addr;
@@ -56,7 +50,22 @@ struct record_mem_entry
   /* Set this flag if target memory for this entry
      can no longer be accessed.  */
   int mem_entry_not_accessible;
-  gdb_byte *val;
+  union
+  {
+    gdb_byte *ptr;
+    gdb_byte buf[sizeof (gdb_byte *)];
+  } u;
+};
+
+struct record_reg_entry
+{
+  unsigned short num;
+  unsigned short len;
+  union 
+  {
+    gdb_byte *ptr;
+    gdb_byte buf[2 * sizeof (gdb_byte *)];
+  } u;
 };
 
 struct record_end_entry
@@ -143,7 +152,9 @@ record_reg_alloc (struct regcache *regcache, int regnum)
   rec = (struct record_entry *) xcalloc (1, sizeof (struct record_entry));
   rec->type = record_reg;
   rec->u.reg.num = regnum;
-  rec->u.reg.val = (gdb_byte *) xmalloc (MAX_REGISTER_SIZE);
+  rec->u.reg.len = register_size (gdbarch, regnum);
+  if (rec->u.reg.len > sizeof (rec->u.reg.u.buf))
+    rec->u.reg.u.ptr = (gdb_byte *) xmalloc (rec->u.reg.len);
 
   return rec;
 }
@@ -154,7 +165,8 @@ static inline void
 record_reg_release (struct record_entry *rec)
 {
   gdb_assert (rec->type == record_reg);
-  xfree (rec->u.reg.val);
+  if (rec->u.reg.len > sizeof (rec->u.reg.u.buf))
+    xfree (rec->u.reg.u.ptr);
   xfree (rec);
 }
 
@@ -169,7 +181,8 @@ record_mem_alloc (CORE_ADDR addr, int len)
   rec->type = record_mem;
   rec->u.mem.addr = addr;
   rec->u.mem.len = len;
-  rec->u.mem.val = (gdb_byte *) xmalloc (len);
+  if (rec->u.mem.len > sizeof (rec->u.mem.u.buf))
+    rec->u.mem.u.ptr = (gdb_byte *) xmalloc (len);
 
   return rec;
 }
@@ -180,7 +193,8 @@ static inline void
 record_mem_release (struct record_entry *rec)
 {
   gdb_assert (rec->type == record_mem);
-  xfree (rec->u.mem.val);
+  if (rec->u.mem.len > sizeof (rec->u.mem.u.buf))
+    xfree (rec->u.mem.u.ptr);
   xfree (rec);
 }
 
@@ -329,7 +343,29 @@ record_arch_list_add (struct record_entry *rec)
     }
 }
 
-/* Record the value of a register REGNUM to record_arch_list.  */
+/* Return the value storage location of a record entry.  */
+static inline gdb_byte *
+record_get_loc (struct record_entry *rec)
+{
+  switch (rec->type) {
+  case record_mem:
+    if (rec->u.mem.len > sizeof (rec->u.mem.u.buf))
+      return rec->u.mem.u.ptr;
+    else
+      return rec->u.mem.u.buf;
+  case record_reg:
+    if (rec->u.reg.len > sizeof (rec->u.reg.u.buf))
+      return rec->u.reg.u.ptr;
+    else
+      return rec->u.reg.u.buf;
+  case record_end:
+  default:
+    gdb_assert (0);
+    return NULL;
+  }
+}
+
+/* Record the value of a register NUM to record_arch_list.  */
 
 int
 record_arch_list_add_reg (struct regcache *regcache, int regnum)
@@ -344,7 +380,7 @@ record_arch_list_add_reg (struct regcache *regcache, int regnum)
 
   rec = record_reg_alloc (regcache, regnum);
 
-  regcache_raw_read (regcache, regnum, rec->u.reg.val);
+  regcache_raw_read (regcache, regnum, record_get_loc (rec));
 
   record_arch_list_add (rec);
 
@@ -370,7 +406,7 @@ record_arch_list_add_mem (CORE_ADDR addr, int len)
 
   rec = record_mem_alloc (addr, len);
 
-  if (target_read_memory (addr, rec->u.mem.val, len))
+  if (target_read_memory (addr, record_get_loc (rec), len))
     {
       if (record_debug)
 	fprintf_unfiltered (gdb_stdlog,
@@ -857,8 +893,9 @@ record_wait (struct target_ops *ops,
 				    record_list->u.reg.num);
 	      regcache_cooked_read (regcache, record_list->u.reg.num, reg);
 	      regcache_cooked_write (regcache, record_list->u.reg.num,
-				     record_list->u.reg.val);
-	      memcpy (record_list->u.reg.val, reg, MAX_REGISTER_SIZE);
+				     record_get_loc (record_list));
+	      memcpy (record_get_loc (record_list), reg, 
+		      record_list->u.reg.len);
 	    }
 	  else if (record_list->type == record_mem)
 	    {
@@ -892,7 +929,7 @@ record_wait (struct target_ops *ops,
 		  else
 		    {
 		      if (target_write_memory (record_list->u.mem.addr,
-					       record_list->u.mem.val,
+					       record_get_loc (record_list),
 		                               record_list->u.mem.len))
 	                {
 			  if (execution_direction != EXEC_REVERSE)
@@ -907,7 +944,7 @@ record_wait (struct target_ops *ops,
 			}
 		      else
 		        {
-			  memcpy (record_list->u.mem.val, mem,
+			  memcpy (record_get_loc (record_list), mem,
 				  record_list->u.mem.len);
 			}
 		    }

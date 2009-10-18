@@ -1,3 +1,18 @@
+2009-10-15  Michael Snyder  <msnyder@vmware.com>
+
+	* record.c (struct record_reg_entry): Replace ptr with union 
+	of ptr and buf.
+	(struct record_mem_entry): Ditto.
+	(record_reg_alloc): Don't alloc ptr if reg will fit into buf.
+	(record_mem_alloc): Ditto.
+	(record_reg_release): Don't free ptr if reg was stored in buf.
+	(record_mem_release): Ditto.
+	(record_get_loc): New function.  Return a pointer to where the
+	value (mem or reg) is to be stored.
+	(record_arch_list_add_reg): Call record_get_loc instead of using ptr.
+	(record_arch_list_add_mem): Ditto.
+	(record_wait): Ditto.
+
 2009-10-16  Michael Eager  <eager@eagercon.com>
 
 	* microblaze-linux-tdep.c:
