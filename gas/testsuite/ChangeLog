@@ -1,3 +1,10 @@
+2009-10-18  Vincent Rivière  <vincent.riviere@freesbee.fr>
+
+	* gas/all/weakref1u.d: Exclude more aout targets.
+	* gas/m68k/br-isaa.d: Likewise.
+	* gas/m68k/br-isab.d: Likewise.
+	* gas/m68k/br-isac.d: Likewise.
+
 2009-10-15  Alan Modra  <amodra@bigpond.net.au>
 
 	PR gas/1491
