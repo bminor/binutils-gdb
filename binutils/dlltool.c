@@ -3192,13 +3192,15 @@ gen_lib_file (int delay)
 static void
 dll_name_list_append (dll_name_list_type * list, bfd_byte * data)
 {
+  dll_name_list_node_type * entry;
+
   /* Error checking.  */
   if (! list || ! list->tail)
     return;
 
   /* Allocate new node.  */
-  dll_name_list_node_type * entry =
-    (dll_name_list_node_type *) xmalloc (sizeof (dll_name_list_node_type));
+  entry = ((dll_name_list_node_type *)
+	   xmalloc (sizeof (dll_name_list_node_type)));
 
   /* Initialize its values.  */
   entry->dllname = xstrdup ((char *) data);
@@ -3214,12 +3216,14 @@ dll_name_list_append (dll_name_list_type * list, bfd_byte * data)
 static int 
 dll_name_list_count (dll_name_list_type * list)
 {
+  dll_name_list_node_type * p;
+  int count = 0;
+
   /* Error checking.  */
   if (! list || ! list->head)
     return 0;
 
-  int count = 0;
-  dll_name_list_node_type * p = list->head;
+  p = list->head;
 
   while (p && p->next)
     {
@@ -3234,11 +3238,13 @@ dll_name_list_count (dll_name_list_type * list)
 static void 
 dll_name_list_print (dll_name_list_type * list)
 {
+  dll_name_list_node_type * p;
+
   /* Error checking.  */
   if (! list || ! list->head)
     return;
 
-  dll_name_list_node_type * p = list->head;
+  p = list->head;
 
   while (p && p->next && p->next->dllname && *(p->next->dllname))
     {
