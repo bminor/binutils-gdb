@@ -1,3 +1,7 @@
+2009-10-19  Don Lee  <don.lee@sunplusct.com>
+
+	* score-tdep.c: Delete dead codes.
+
 2009-10-15  Michael Snyder  <msnyder@vmware.com>
 
 	* record.c (struct record_reg_entry): Replace ptr with union 

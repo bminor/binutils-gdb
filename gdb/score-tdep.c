@@ -56,58 +56,6 @@ struct score_frame_cache
 
 static int target_mach = bfd_mach_score7;
 
-#if 0
-int
-score_target_can_use_watch (int type, int cnt, int othertype)
-{
-  if (strcmp (current_target.to_shortname, "sim") == 0)
-      return soc_gh_can_use_watch (type, cnt);
-  return (*current_target.to_can_use_hw_breakpoint) (type, cnt, othertype);
-}
-
-int
-score_stopped_by_watch (void)
-{
-  if (strcmp (current_target.to_shortname, "sim") == 0)
-      return soc_gh_stopped_by_watch ();
-  return (*current_target.to_stopped_by_watchpoint) ();
-}
-
-int
-score_target_insert_watchpoint (CORE_ADDR addr, int len, int type)
-{
-  if (strcmp (current_target.to_shortname, "sim") == 0)
-      return soc_gh_add_watch (addr, len, type);
-  return (*current_target.to_insert_watchpoint) (addr, len, type); 
-}
-
-int
-score_target_remove_watchpoint (CORE_ADDR addr, int len, int type)
-{
-  if (strcmp (current_target.to_shortname, "sim") == 0)
-      return soc_gh_del_watch (addr, len, type);
-  return (*current_target.to_remove_watchpoint) (addr, len, type); 
-}
-
-int
-score_target_insert_hw_breakpoint (struct gdbarch *gdbarch,
-				   struct bp_target_info * bp_tgt)
-{
-  if (strcmp (current_target.to_shortname, "sim") == 0)
-      return soc_gh_add_hardbp (bp_tgt->placed_address);
-  return (*current_target.to_insert_hw_breakpoint) (gdbarch, bp_tgt);
-}
-
-int
-score_target_remove_hw_breakpoint (struct gdbarch *gdbarch,
-				   struct bp_target_info * bp_tgt)
-{
-  if (strcmp (current_target.to_shortname, "sim") == 0)
-      return soc_gh_del_hardbp (bp_tgt->placed_address);
-  return (*current_target.to_remove_hw_breakpoint) (gdbarch, bp_tgt); 
-}
-#endif
-
 static struct type *
 score_register_type (struct gdbarch *gdbarch, int regnum)
 {
