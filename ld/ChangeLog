@@ -1,3 +1,8 @@
+2009-10-19  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.am: Remove spurious sanitization marker.
+	* Makefile.in: Regenerate.
+
 2009-10-16  Dimitry Gorbachev  <d.g.gorbachev@gmail.com>
 
 	* emultempl/pe.em (OPTION_EXCLUDE_ALL_SYMBOLS): New macro.
