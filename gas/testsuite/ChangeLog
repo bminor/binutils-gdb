@@ -1,3 +1,8 @@
+2009-10-19  Doug Evans  <dje@sebabeach.org>
+
+	* gas/xc16x/shlrol.s: Specify constant shift amount.
+	* gas/xc16x/xc16x.exp (do_xc16x_shlrol): Update expected output.
+
 2009-10-18  Vincent Rivière  <vincent.riviere@freesbee.fr>
 
 	* gas/all/weakref1u.d: Exclude more aout targets.

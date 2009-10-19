@@ -557,15 +557,15 @@ proc do_xc16x_shlrol {} {
     while 1 {
 	expect {
 	    -re " +\[0-9\]+ 0000 4C01\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0002 5C00\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0002 5C40\[^\n\]*\n"   { set x [expr $x+1] }
 	    -re " +\[0-9\]+ 0004 6C01\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0006 7C00\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0006 7C40\[^\n\]*\n"   { set x [expr $x+1] }
 	    -re " +\[0-9\]+ 0008 0C01\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 000a 1C00\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 000a 1C40\[^\n\]*\n"   { set x [expr $x+1] }
 	    -re " +\[0-9\]+ 000c 2C01\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 000e 3C00\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 000e 3C40\[^\n\]*\n"   { set x [expr $x+1] }
 	    -re " +\[0-9\]+ 0010 AC01\[^\n\]*\n"   { set x [expr $x+1] }
-	    -re " +\[0-9\]+ 0012 BC00\[^\n\]*\n"   { set x [expr $x+1] }
+	    -re " +\[0-9\]+ 0012 BC40\[^\n\]*\n"   { set x [expr $x+1] }
 	    timeout 				{ perror "timeout\n; break }
 	    eof					{ break }
 	}
