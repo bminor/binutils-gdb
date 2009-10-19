@@ -86,9 +86,8 @@ set_solib_ops (struct gdbarch *gdbarch, struct target_so_ops *new_ops)
    configuration needs to call set_solib_ops.  */
 struct target_so_ops *current_target_so_ops;
 
-/* local data declarations */
-
-static struct so_list *so_list_head;	/* List of known shared objects */
+/* List of known shared objects */
+#define so_list_head current_program_space->so_list
 
 /* Local function prototypes */
 
@@ -651,6 +650,7 @@ update_solib_list (int from_tty, struct target_ops *target)
       for (i = inferior; i; i = i->next)
 	{
 	  i->from_tty = from_tty;
+	  i->pspace = current_program_space;
 
 	  /* Fill in the rest of the `struct so_list' node.  */
 	  catch_errors (solib_map_sections, i,
@@ -937,11 +937,11 @@ solib_contains_address_p (const struct so_list *const solib,
  */
 
 char *
-solib_name_from_address (CORE_ADDR address)
+solib_name_from_address (struct program_space *pspace, CORE_ADDR address)
 {
-  struct so_list *so = 0;	/* link map state variable */
+  struct so_list *so = NULL;
 
-  for (so = so_list_head; so; so = so->next)
+  for (so = pspace->so_list; so; so = so->next)
     if (solib_contains_address_p (so, address))
       return (so->so_name);
 

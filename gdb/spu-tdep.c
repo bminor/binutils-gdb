@@ -1504,6 +1504,7 @@ static int
 spu_software_single_step (struct frame_info *frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct address_space *aspace = get_frame_address_space (frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR pc, next_pc;
   unsigned int insn;
@@ -1524,7 +1525,8 @@ spu_software_single_step (struct frame_info *frame)
   else
     next_pc = (SPUADDR_ADDR (pc) + 4) & (SPU_LS_SIZE - 1);
 
-  insert_single_step_breakpoint (gdbarch, SPUADDR (SPUADDR_SPU (pc), next_pc));
+  insert_single_step_breakpoint (gdbarch,
+				 aspace, SPUADDR (SPUADDR_SPU (pc), next_pc));
 
   if (is_branch (insn, &offset, &reg))
     {
@@ -1540,7 +1542,7 @@ spu_software_single_step (struct frame_info *frame)
 
       target = target & (SPU_LS_SIZE - 1);
       if (target != next_pc)
-	insert_single_step_breakpoint (gdbarch,
+	insert_single_step_breakpoint (gdbarch, aspace,
 				       SPUADDR (SPUADDR_SPU (pc), target));
     }
 

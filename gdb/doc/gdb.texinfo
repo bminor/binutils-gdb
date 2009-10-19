@@ -1794,9 +1794,9 @@ kill a child process.
 * Attach::                      Debugging an already-running process
 * Kill Process::                Killing the child process
 
-* Inferiors::                   Debugging multiple inferiors
+* Inferiors and Programs::      Debugging multiple inferiors and programs
 * Threads::                     Debugging programs with multiple threads
-* Processes::                   Debugging programs with multiple processes
+* Forks::                       Debugging forks
 * Checkpoint/Restart::          Setting a @emph{bookmark} to return to later
 @end menu
 
@@ -2349,30 +2349,30 @@ next type @code{run}, @value{GDBN} notices that the file has changed, and
 reads the symbol table again (while trying to preserve your current
 breakpoint settings).
 
-@node Inferiors
-@section Debugging Multiple Inferiors
+@node Inferiors and Programs
+@section Debugging Multiple Inferiors and Programs
 
-Some @value{GDBN} targets are able to run multiple processes created
-from a single executable.  This can happen, for instance, with an
-embedded system reporting back several processes via the remote
-protocol.
+@value{GDBN} lets you run and debug multiple programs in a single
+session.  In addition, @value{GDBN} on some systems may let you run
+several programs simultaneously (otherwise you have to exit from one
+before starting another).  In the most general case, you can have
+multiple threads of execution in each of multiple processes, launched
+from multiple executables.
 
 @cindex inferior
 @value{GDBN} represents the state of each program execution with an
 object called an @dfn{inferior}.  An inferior typically corresponds to
 a process, but is more general and applies also to targets that do not
 have processes.  Inferiors may be created before a process runs, and
-may (in future) be retained after a process exits.  Each run of an
-executable creates a new inferior, as does each attachment to an
-existing process.  Inferiors have unique identifiers that are
-different from process ids, and may optionally be named as well.
-Usually each inferior will also have its own distinct address space,
-although some embedded targets may have several inferiors running in
-different parts of a single space.
+may be retained after a process exits.  Inferiors have unique
+identifiers that are different from process ids.  Usually each
+inferior will also have its own distinct address space, although some
+embedded targets may have several inferiors running in different parts
+of a single address space.  Each inferior may in turn have multiple
+threads running in it.
 
-Each inferior may in turn have multiple threads running in it.
-
-To find out what inferiors exist at any moment, use @code{info inferiors}:
+To find out what inferiors exist at any moment, use @w{@code{info
+inferiors}}:
 
 @table @code
 @kindex info inferiors
@@ -2387,6 +2387,10 @@ the inferior number assigned by @value{GDBN}
 
 @item
 the target system's inferior identifier
+
+@item
+the name of the executable the inferior is running.
+
 @end enumerate
 
 @noindent
@@ -2399,9 +2403,9 @@ For example,
 
 @smallexample
 (@value{GDBP}) info inferiors
-  Num  Description
-* 1    process 2307
-  2    process 3401
+  Num  Description       Executable
+  2    process 2307      hello
+* 1    process 3401      goodbye
 @end smallexample
 
 To switch focus between inferiors, use the @code{inferior} command:
@@ -2414,9 +2418,57 @@ Make inferior number @var{infno} the current inferior.  The argument
 in the first field of the @samp{info inferiors} display.
 @end table
 
-To quit debugging one of the inferiors, you can either detach from it
-by using the @w{@code{detach inferior}} command (allowing it to run
-independently), or kill it using the @w{@code{kill inferior}} command:
+
+You can get multiple executables into a debugging session via the
+@code{add-inferior} and @w{@code{clone-inferior}} commands.  On some
+systems @value{GDBN} can add inferiors to the debug session
+automatically by following calls to @code{fork} and @code{exec}.  To
+remove inferiors from the debugging session use the
+@w{@code{remove-inferior}} command.
+
+@table @code
+@kindex add-inferior
+@item add-inferior [ -copies @var{n} ] [ -exec @var{executable} ]
+Adds @var{n} inferiors to be run using @var{executable} as the
+executable.  @var{n} defaults to 1.  If no executable is specified,
+the inferiors begins empty, with no program.  You can still assign or
+change the program assigned to the inferior at any time by using the
+@code{file} command with the executable name as its argument.
+
+@kindex clone-inferior
+@item clone-inferior [ -copies @var{n} ] [ @var{infno} ]
+Adds @var{n} inferiors ready to execute the same program as inferior
+@var{infno}.  @var{n} defaults to 1.  @var{infno} defaults to the
+number of the current inferior.  This is a convenient command when you
+want to run another instance of the inferior you are debugging.
+
+@smallexample
+(@value{GDBP}) info inferiors
+  Num  Description       Executable
+* 1    process 29964     helloworld
+(@value{GDBP}) clone-inferior
+Added inferior 2.
+1 inferiors added.
+(@value{GDBP}) info inferiors
+  Num  Description       Executable
+  2    <null>            helloworld
+* 1    process 29964     helloworld
+@end smallexample
+
+You can now simply switch focus to inferior 2 and run it.
+
+@kindex remove-inferior
+@item remove-inferior @var{infno}
+Removes the inferior @var{infno}.  It is not possible to remove an
+inferior that is running with this command.  For those, use the
+@code{kill} or @code{detach} command first.
+
+@end table
+
+To quit debugging one of the running inferiors that is not the current
+inferior, you can either detach from it by using the @w{@code{detach
+inferior}} command (allowing it to run independently), or kill it
+using the @w{@code{kill inferior}} command:
 
 @table @code
 @kindex detach inferior @var{infno}
@@ -2429,6 +2481,12 @@ Detach from the inferior identified by @value{GDBN} inferior number
 Kill the inferior identified by @value{GDBN} inferior number
 @var{infno}, and remove it from the inferior list.
 @end table
+
+After the successful completion of a command such as @code{detach},
+@code{detach inferior}, @code{kill} or @code{kill inferior}, or after
+a normal process exit, the inferior is still valid and listed with
+@code{info inferiors}, ready to be restarted.
+
 
 To be notified when inferiors are started or exit under @value{GDBN}'s
 control use @w{@code{set print inferior-events}}:
@@ -2448,6 +2506,67 @@ detached.  By default, these messages will not be printed.
 @item show print inferior-events
 Show whether messages will be printed when @value{GDBN} detects that
 inferiors have started, exited or have been detached.
+@end table
+
+Many commands will work the same with multiple programs as with a
+single program: e.g., @code{print myglobal} will simply display the
+value of @code{myglobal} in the current inferior.
+
+
+Occasionaly, when debugging @value{GDBN} itself, it may be useful to
+get more info about the relationship of inferiors, programs, address
+spaces in a debug session.  You can do that with the @w{@code{maint
+info program-spaces}} command.
+
+@table @code
+@kindex maint info program-spaces
+@item maint info program-spaces
+Print a list of all program spaces currently being managed by
+@value{GDBN}.
+
+@value{GDBN} displays for each program space (in this order):
+
+@enumerate
+@item
+the program space number assigned by @value{GDBN}
+
+@item
+the name of the executable loaded into the program space, with e.g.,
+the @code{file} command.
+
+@end enumerate
+
+@noindent
+An asterisk @samp{*} preceding the @value{GDBN} program space number
+indicates the current program space.
+
+In addition, below each program space line, @value{GDBN} prints extra
+information that isn't suitable to display in tabular form.  For
+example, the list of inferiors bound to the program space.
+
+@smallexample
+(@value{GDBP}) maint info program-spaces
+  Id   Executable
+  2    goodbye
+        Bound inferiors: ID 1 (process 21561)
+* 1    hello
+@end smallexample
+
+Here we can see that no inferior is running the program @code{hello},
+while @code{process 21561} is running the program @code{goodbye}.  On
+some targets, it is possible that multiple inferiors are bound to the
+same program space.  The most common example is that of debugging both
+the parent and child processes of a @code{vfork} call.  For example,
+
+@smallexample
+(@value{GDBP}) maint info program-spaces
+  Id   Executable
+* 1    vfork-test
+        Bound inferiors: ID 2 (process 18050), ID 1 (process 18045)
+@end smallexample
+
+Here, both inferior 2 and inferior 1 are running in the same program
+space as a result of inferior 1 having executed a @code{vfork} call.
 @end table
 
 @node Threads
@@ -2729,8 +2848,8 @@ only on some platforms.
 Display current libthread_db search path.
 @end table
 
-@node Processes
-@section Debugging Programs with Multiple Processes
+@node Forks
+@section Debugging Forks
 
 @cindex fork, debugging programs which call
 @cindex multiple processes
@@ -2821,13 +2940,14 @@ If you choose to set @samp{detach-on-fork} mode off, then @value{GDBN}
 will retain control of all forked processes (including nested forks).
 You can list the forked processes under the control of @value{GDBN} by
 using the @w{@code{info inferiors}} command, and switch from one fork
-to another by using the @code{inferior} command (@pxref{Inferiors,
-,Debugging Multiple Inferiors}).
+to another by using the @code{inferior} command (@pxref{Inferiors and
+Programs, ,Debugging Multiple Inferiors and Programs}).
 
 To quit debugging one of the forked processes, you can either detach
 from it by using the @w{@code{detach inferior}} command (allowing it
 to run independently), or kill it using the @w{@code{kill inferior}}
-command.  @xref{Inferiors, ,Debugging Multiple Inferiors}.
+command.  @xref{Inferiors and Programs, ,Debugging Multiple Inferiors
+and Programs}.
 
 If you ask to debug a child process and a @code{vfork} is followed by an
 @code{exec}, @value{GDBN} executes the new target up to the first
@@ -2839,9 +2959,68 @@ On some systems, when a child process is spawned by @code{vfork}, you
 cannot debug the child or parent until an @code{exec} call completes.
 
 If you issue a @code{run} command to @value{GDBN} after an @code{exec}
-call executes, the new target restarts.  To restart the parent process,
-use the @code{file} command with the parent executable name as its
-argument.
+call executes, the new target restarts.  To restart the parent
+process, use the @code{file} command with the parent executable name
+as its argument.  By default, after an @code{exec} call executes,
+@value{GDBN} discards the symbols of the previous executable image.
+You can change this behaviour with the @w{@code{set follow-exec-mode}}
+command.
+
+@table @code
+@kindex set follow-exec-mode
+@item set follow-exec-mode @var{mode}
+
+Set debugger response to a program call of @code{exec}.  An
+@code{exec} call replaces the program image of a process.
+
+@code{follow-exec-mode} can be:
+
+@table @code
+@item new
+@value{GDBN} creates a new inferior and rebinds the process to this
+new inferior.  The program the process was running before the
+@code{exec} call can be restarted afterwards by restarting the
+original inferior.
+
+For example:
+
+@smallexample
+(@value{GDBP}) info inferiors
+(gdb) info inferior
+  Id   Description   Executable
+* 1    <null>        prog1
+(@value{GDBP}) run
+process 12020 is executing new program: prog2
+Program exited normally.
+(@value{GDBP}) info inferiors
+  Id   Description   Executable
+* 2    <null>        prog2
+  1    <null>        prog1
+@end smallexample
+
+@item same
+@value{GDBN} keeps the process bound to the same inferior.  The new
+executable image replaces the previous executable loaded in the
+inferior.  Restarting the inferior after the @code{exec} call, with
+e.g., the @code{run} command, restarts the executable the process was
+running after the @code{exec} call.  This is the default mode.
+
+For example:
+
+@smallexample
+(@value{GDBP}) info inferiors
+  Id   Description   Executable
+* 1    <null>        prog1
+(@value{GDBP}) run
+process 12020 is executing new program: prog2
+Program exited normally.
+(@value{GDBP}) info inferiors
+  Id   Description   Executable
+* 1    <null>        prog2
+@end smallexample
+
+@end table
+@end table
 
 You can use the @code{catch} command to make @value{GDBN} stop whenever
 a @code{fork}, @code{vfork}, or @code{exec} call is made.  @xref{Set

@@ -52,6 +52,9 @@ struct so_list
     /* shared object file name, expanded to something GDB can open */
     char so_name[SO_NAME_MAX_PATH_SIZE];
 
+    /* Program space this shared library belongs to.  */
+    struct program_space *pspace;
+
     /* The following fields of the structure are built from
        information gathered from the shared object file itself, and
        are set when we actually add it to our symbol tables.

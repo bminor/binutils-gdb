@@ -45,6 +45,7 @@
 #include "exceptions.h"
 #include "solib.h"
 #include "filenames.h"
+#include "progspace.h"
 
 
 #ifndef O_LARGEFILE
@@ -208,7 +209,7 @@ core_close (int quitting)
     {
       int pid = ptid_get_pid (inferior_ptid);
       inferior_ptid = null_ptid;	/* Avoid confusion from thread stuff */
-      delete_inferior_silent (pid);
+      exit_inferior_silent (pid);
 
       /* Clear out solib state while the bfd is still open. See
          comments in clear_solib in solib.c. */
@@ -275,8 +276,8 @@ add_to_thread_list (bfd *abfd, asection *asect, void *reg_sect_arg)
       lwpid = core_tid;
     }
 
-  if (!in_inferior_list (pid))
-    add_inferior_silent (pid);
+  if (current_inferior ()->pid == 0)
+    inferior_appeared (current_inferior (), pid);
 
   ptid = ptid_build (pid, lwpid, 0);
 
@@ -302,6 +303,7 @@ core_open (char *filename, int from_tty)
   int scratch_chan;
   int flags;
   int corelow_pid = CORELOW_PID;
+  struct inferior *inf;
 
   target_preopen (from_tty);
   if (!filename)

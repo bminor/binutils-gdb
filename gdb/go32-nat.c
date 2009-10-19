@@ -649,6 +649,7 @@ go32_create_inferior (struct target_ops *ops, char *exec_file,
   char *cmdline;
   char **env_save = environ;
   size_t cmdlen;
+  struct inferior *inf;
 
   /* If no exec file handed to us, get it from the exec-file command -- with
      a good, common error message if none is specified.  */
@@ -714,7 +715,8 @@ go32_create_inferior (struct target_ops *ops, char *exec_file,
 #endif
 
   inferior_ptid = pid_to_ptid (SOME_PID);
-  add_inferior_silent (SOME_PID);
+  inf = current_inferior ();
+  inferior_appeared_silent (inf, SOME_PID);
 
   push_target (&go32_ops);
 

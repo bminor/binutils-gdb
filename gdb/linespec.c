@@ -1584,6 +1584,8 @@ decode_all_digits (char **argptr, struct symtab *default_symtab,
 
   init_sal (&val);
 
+  val.pspace = current_program_space;
+
   /* This is where we need to make sure that we have good defaults.
      We must guarantee that this section of code is never executed
      when we are called with just a function name, since
@@ -1635,6 +1637,7 @@ decode_all_digits (char **argptr, struct symtab *default_symtab,
   if (val.symtab == 0)
     val.symtab = file_symtab;
 
+  val.pspace = SYMTAB_PSPACE (val.symtab);
   val.pc = 0;
   values.sals = (struct symtab_and_line *)
     xmalloc (sizeof (struct symtab_and_line));
@@ -1706,6 +1709,7 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
   val.symtab = file_symtab ? file_symtab : default_symtab;
   val.line = valx;
   val.pc = 0;
+  val.pspace = current_program_space;
 
   values.sals = (struct symtab_and_line *) xmalloc (sizeof val);
   values.sals[0] = val;

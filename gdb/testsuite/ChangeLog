@@ -1,3 +1,25 @@
+2009-10-19  Pedro Alves  <pedro@codesourcery.com>
+	    Stan Shebs  <stan@codesourcery.com>
+
+	* gdb.base/foll-vfork.exp: Adjust to spell out "follow-fork".
+	* gdb.base/foll-exec.exp: Adjust to expect a process id before
+	"Executing new program".
+	* gdb.base/foll-fork.exp: Adjust to spell out "follow-fork".
+	* gdb.base/multi-forks.exp: Ditto.  Adjust to the inferior being
+	left listed after having been killed.
+	* gdb.base/attach.exp: Adjust to spell out "symbol-file".
+	* gdb.base/maint.exp: Adjust test.
+
+	* Makefile.in (ALL_SUBDIRS): Add gdb.multi.
+	* gdb.multi/Makefile.in: New.
+	* gdb.multi/base.exp: New.
+	* gdb.multi/goodbye.c: New.
+	* gdb.multi/hangout.c: New.
+	* gdb.multi/hello.c: New.
+	* gdb.multi/bkpt-multi-exec.c: New.
+	* gdb.multi/bkpt-multi-exec.exp: New.
+	* gdb.multi/crashme.c: New.
+
 2009-10-13  Tristan Gingold  <gingold@adacore.com>
 
 	* gdb.base/sepdebug.exp: Check debug info are found.

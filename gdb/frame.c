@@ -70,6 +70,12 @@ struct frame_info
      moment leave this as speculation.  */
   int level;
 
+  /* The frame's program space.  */
+  struct program_space *pspace;
+
+  /* The frame's address space.  */
+  struct address_space *aspace;
+
   /* The frame's low-level unwinder and corresponding cache.  The
      low-level unwinder is responsible for unwinding register values
      for the previous frame.  The low-level unwind methods are
@@ -1059,10 +1065,12 @@ put_frame_register_bytes (struct frame_info *frame, int regnum,
 /* Create a sentinel frame.  */
 
 static struct frame_info *
-create_sentinel_frame (struct regcache *regcache)
+create_sentinel_frame (struct program_space *pspace, struct regcache *regcache)
 {
   struct frame_info *frame = FRAME_OBSTACK_ZALLOC (struct frame_info);
   frame->level = -1;
+  frame->pspace = pspace;
+  frame->aspace = get_regcache_aspace (regcache);
   /* Explicitly initialize the sentinel frame's cache.  Provide it
      with the underlying regcache.  In the future additional
      information, such as the frame's thread will be added.  */
@@ -1144,7 +1152,7 @@ get_current_frame (void)
   if (current_frame == NULL)
     {
       struct frame_info *sentinel_frame =
-	create_sentinel_frame (get_current_regcache ());
+	create_sentinel_frame (current_program_space, get_current_regcache ());
       if (catch_exceptions (uiout, unwind_to_current_frame, sentinel_frame,
 			    RETURN_MASK_ERROR) != 0)
 	{
@@ -1275,7 +1283,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 
   fi = FRAME_OBSTACK_ZALLOC (struct frame_info);
 
-  fi->next = create_sentinel_frame (get_current_regcache ());
+  fi->next = create_sentinel_frame (current_program_space, get_current_regcache ());
 
   /* Set/update this frame's cached PC value, found in the next frame.
      Do this before looking for this frame's unwinder.  A sniffer is
@@ -1283,6 +1291,10 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
      entitled to rely that the PC doesn't magically change.  */
   fi->next->prev_pc.value = pc;
   fi->next->prev_pc.p = 1;
+
+  /* We currently assume that frame chain's can't cross spaces.  */
+  fi->pspace = fi->next->pspace;
+  fi->aspace = fi->next->aspace;
 
   /* Select/initialize both the unwind function and the frame's type
      based on the PC.  */
@@ -1556,6 +1568,11 @@ get_prev_frame_raw (struct frame_info *this_frame)
      allocation calls.  */
   prev_frame = FRAME_OBSTACK_ZALLOC (struct frame_info);
   prev_frame->level = this_frame->level + 1;
+
+  /* For now, assume we don't have frame chains crossing address
+     spaces.  */
+  prev_frame->pspace = this_frame->pspace;
+  prev_frame->aspace = this_frame->aspace;
 
   /* Don't yet compute ->unwind (and hence ->type).  It is computed
      on-demand in get_frame_type, frame_register_unwind, and
@@ -1937,6 +1954,29 @@ get_frame_type (struct frame_info *frame)
        provides the frame's type.  */
     frame->unwind = frame_unwind_find_by_frame (frame, &frame->prologue_cache);
   return frame->unwind->type;
+}
+
+struct program_space *
+get_frame_program_space (struct frame_info *frame)
+{
+  return frame->pspace;
+}
+
+struct program_space *
+frame_unwind_program_space (struct frame_info *this_frame)
+{
+  gdb_assert (this_frame);
+
+  /* This is really a placeholder to keep the API consistent --- we
+     assume for now that we don't have frame chains crossing
+     spaces.  */
+  return this_frame->pspace;
+}
+
+struct address_space *
+get_frame_address_space (struct frame_info *frame)
+{
+  return frame->aspace;
 }
 
 /* Memory access methods.  */

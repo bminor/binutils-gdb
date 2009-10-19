@@ -64,7 +64,7 @@ proc check_fork_catchpoints {} {
 proc default_fork_parent_follow {} {
    global gdb_prompt
 
-   send_gdb "show follow\n"
+   send_gdb "show follow-fork\n"
    gdb_expect {
       -re "Debugger response to a program call of fork or vfork is \"parent\"..*$gdb_prompt $"\
                       {pass "default show parent follow, no catchpoints"}
@@ -88,12 +88,12 @@ proc default_fork_parent_follow {} {
 proc explicit_fork_parent_follow {} {
    global gdb_prompt
 
-   send_gdb "set follow parent\n"
+   send_gdb "set follow-fork parent\n"
    gdb_expect {
-      -re "$gdb_prompt $" {pass "set follow parent"}
-      timeout         {fail "(timeout) set follow parent"}
+      -re "$gdb_prompt $" {pass "set follow-fork parent"}
+      timeout         {fail "(timeout) set follow-fork parent"}
    }
-   send_gdb "show follow\n"
+   send_gdb "show follow-fork\n"
    gdb_expect {
       -re "Debugger response to a program call of fork or vfork is \"parent\"..*$gdb_prompt $"\
                       {pass "explicit show parent follow, no catchpoints"}
@@ -117,12 +117,12 @@ proc explicit_fork_parent_follow {} {
 proc explicit_fork_child_follow {} {
    global gdb_prompt
 
-   send_gdb "set follow child\n"
+   send_gdb "set follow-fork child\n"
    gdb_expect {
-      -re "$gdb_prompt $" {pass "set follow child"}
-      timeout         {fail "(timeout) set follow child"}
+      -re "$gdb_prompt $" {pass "set follow-fork child"}
+      timeout         {fail "(timeout) set follow-fork child"}
    }
-   send_gdb "show follow\n"
+   send_gdb "show follow-fork\n"
    gdb_expect {
       -re "Debugger response to a program call of fork or vfork is \"child\"..*$gdb_prompt $"\
                       {pass "explicit show child follow, no catchpoints"}
@@ -131,7 +131,7 @@ proc explicit_fork_child_follow {} {
    }
    send_gdb "next 2\n"
    gdb_expect {
-      -re "Attaching after fork to.*$gdb_prompt $"\
+      -re "Attaching after.* fork to.*$gdb_prompt $"\
                       {pass "explicit child follow, no catchpoints"}
       -re "$gdb_prompt $" {fail "explicit child follow, no catchpoints"}
       timeout         {fail "(timeout) explicit child follow, no catchpoints"}
@@ -185,24 +185,24 @@ proc catch_fork_child_follow {} {
      }
    }
 
-   send_gdb "set follow child\n"
+   send_gdb "set follow-fork child\n"
    gdb_expect {
-      -re "$gdb_prompt $" {pass "set follow child"}
-      timeout         {fail "(timeout) set follow child"}
+      -re "$gdb_prompt $" {pass "set follow-fork child"}
+      timeout         {fail "(timeout) set follow-fork child"}
    }
    send_gdb "tbreak ${srcfile}:$bp_after_fork\n"
    gdb_expect {
       -re "Temporary breakpoint.*, line $bp_after_fork.*$gdb_prompt $"\
-                      {pass "set follow child, tbreak"}
-      -re "$gdb_prompt $" {fail "set follow child, tbreak"}
-      timeout         {fail "(timeout) set follow child, tbreak"}
+                      {pass "set follow-fork child, tbreak"}
+      -re "$gdb_prompt $" {fail "set follow-fork child, tbreak"}
+      timeout         {fail "(timeout) set follow-fork child, tbreak"}
    }
    send_gdb "continue\n"
    gdb_expect {
-      -re "Attaching after fork to.* at .*$bp_after_fork.*$gdb_prompt $"\
-                      {pass "set follow child, hit tbreak"}
-      -re "$gdb_prompt $" {fail "set follow child, hit tbreak"}
-      timeout         {fail "(timeout) set follow child, hit tbreak"}
+      -re "Attaching after.* fork to.* at .*$bp_after_fork.*$gdb_prompt $"\
+                      {pass "set follow-fork child, hit tbreak"}
+      -re "$gdb_prompt $" {fail "set follow-fork child, hit tbreak"}
+      timeout         {fail "(timeout) set follow-fork child, hit tbreak"}
    }
    # The parent has been detached; allow time for any output it might
    # generate to arrive, so that output doesn't get confused with
@@ -215,12 +215,12 @@ proc catch_fork_child_follow {} {
          send_gdb "y\n"
          gdb_expect {
             -re "$gdb_prompt $"\
-                    {pass "set follow child, cleanup"}
-            timeout {fail "(timeout) set follow child, cleanup"}
+                    {pass "set follow-fork child, cleanup"}
+            timeout {fail "(timeout) set follow-fork child, cleanup"}
          }
       }
-      -re "$gdb_prompt $" {fail "set follow child, cleanup"}
-      timeout         {fail "(timeout) set follow child, cleanup"}
+      -re "$gdb_prompt $" {fail "set follow-fork child, cleanup"}
+      timeout         {fail "(timeout) set follow-fork child, cleanup"}
    }
 }
 
@@ -244,7 +244,7 @@ proc catch_fork_unpatch_child {} {
        "Breakpoint .*file .*$srcfile, line .*" \
        "unpatch child, breakpoint at exit call"
 
-   gdb_test "set follow child" "" "unpatch child, set follow child"
+   gdb_test "set follow-fork child" "" "unpatch child, set follow-fork child"
 
    set test "unpatch child, unpatched parent breakpoints from child"
    gdb_test_multiple "continue" $test {
@@ -297,24 +297,24 @@ proc tcatch_fork_parent_follow {} {
       -re "$gdb_prompt $" {fail "explicit parent follow, tcatch fork"}
       timeout         {fail "(timeout) explicit parent follow, tcatch fork"}
    }
-   send_gdb "set follow parent\n"
+   send_gdb "set follow-fork parent\n"
    gdb_expect {
-      -re "$gdb_prompt $" {pass "set follow parent"}
-      timeout         {fail "(timeout) set follow parent"}
+      -re "$gdb_prompt $" {pass "set follow-fork parent"}
+      timeout         {fail "(timeout) set follow-fork parent"}
    }
    send_gdb "tbreak ${srcfile}:$bp_after_fork\n"
    gdb_expect {
       -re "Temporary breakpoint.*, line $bp_after_fork.*$gdb_prompt $"\
-                      {pass "set follow parent, tbreak"}
-      -re "$gdb_prompt $" {fail "set follow parent, tbreak"}
-      timeout         {fail "(timeout) set follow child, tbreak"}
+                      {pass "set follow-fork parent, tbreak"}
+      -re "$gdb_prompt $" {fail "set follow-fork parent, tbreak"}
+      timeout         {fail "(timeout) set follow-fork child, tbreak"}
    }
    send_gdb "continue\n"
    gdb_expect {
       -re ".*Detaching after fork from.* at .*$bp_after_fork.*$gdb_prompt $"\
-                      {pass "set follow parent, hit tbreak"}
-      -re "$gdb_prompt $" {fail "set follow parent, hit tbreak"}
-      timeout         {fail "(timeout) set follow parent, hit tbreak"}
+                      {pass "set follow-fork parent, hit tbreak"}
+      -re "$gdb_prompt $" {fail "set follow-fork parent, hit tbreak"}
+      timeout         {fail "(timeout) set follow-fork parent, hit tbreak"}
    }
    # The child has been detached; allow time for any output it might
    # generate to arrive, so that output doesn't get confused with
@@ -327,12 +327,12 @@ proc tcatch_fork_parent_follow {} {
          send_gdb "y\n"
          gdb_expect {
             -re "$gdb_prompt $"\
-                    {pass "set follow parent, cleanup"}
-            timeout {fail "(timeout) set follow parent, cleanup"}
+                    {pass "set follow-fork parent, cleanup"}
+            timeout {fail "(timeout) set follow-fork parent, cleanup"}
          }
       }
-      -re "$gdb_prompt $" {fail "set follow parent, cleanup"}
-      timeout         {fail "(timeout) set follow parent, cleanup"}
+      -re "$gdb_prompt $" {fail "set follow-fork parent, cleanup"}
+      timeout         {fail "(timeout) set follow-fork parent, cleanup"}
    }
 }
 
@@ -349,35 +349,35 @@ A fork or vfork creates a new process.  follow-fork-mode can be:.*
 .*child   - the new process is debugged after a fork.*
 The unfollowed process will continue to run..*
 By default, the debugger will follow the parent process..*$gdb_prompt $"\
-                      { pass "help set follow" }
+                      { pass "help set follow-fork" }
       -re "$gdb_prompt $" { fail "help set follow" }
-      timeout         { fail "(timeout) help set follow" }
+      timeout         { fail "(timeout) help set follow-fork" }
    }
 
    # Verify that we can set follow-fork-mode, using an abbreviation
    # for both the flag and its value.
    #
-   send_gdb "set follow ch\n"
-   send_gdb "show fol\n"
+   send_gdb "set follow-fork ch\n"
+   send_gdb "show follow-fork\n"
    gdb_expect {
      -re "Debugger response to a program call of fork or vfork is \"child\".*$gdb_prompt $"\
-             {pass "set follow, using abbreviations"}
-     timeout {fail "(timeout) set follow, using abbreviations"}
+             {pass "set follow-fork, using abbreviations"}
+     timeout {fail "(timeout) set follow-fork, using abbreviations"}
    }
 
    # Verify that we cannot set follow-fork-mode to nonsense.
    #
-   send_gdb "set follow chork\n"
+   send_gdb "set follow-fork chork\n"
    gdb_expect {
      -re "Undefined item: \"chork\".*$gdb_prompt $"\
-                     {pass "set follow to nonsense is prohibited"}
-     -re "$gdb_prompt $" {fail "set follow to nonsense is prohibited"}
-     timeout         {fail "(timeout) set follow to nonsense is prohibited"}
+                     {pass "set follow-fork to nonsense is prohibited"}
+     -re "$gdb_prompt $" {fail "set follow-fork to nonsense is prohibited"}
+     timeout         {fail "(timeout) set follow-fork to nonsense is prohibited"}
    }
-   send_gdb "set follow parent\n"
+   send_gdb "set follow-fork parent\n"
    gdb_expect {
-     -re "$gdb_prompt $" {pass "set follow to nonsense is prohibited (reset parent)"}
-     timeout         {fail "set follow to nonsense is prohibited (reset parent)"}
+     -re "$gdb_prompt $" {pass "set follow-fork to nonsense is prohibited (reset parent)"}
+     timeout         {fail "set follow-fork to nonsense is prohibited (reset parent)"}
    }
 
    # Check that fork catchpoints are supported, as an indicator for whether

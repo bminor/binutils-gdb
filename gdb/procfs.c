@@ -3705,7 +3705,8 @@ do_attach (ptid_t ptid)
   if ((fail = procfs_debug_inferior (pi)) != 0)
     dead_procinfo (pi, "do_attach: failed in procfs_debug_inferior", NOKILL);
 
-  inf = add_inferior (pi->pid);
+  inf = current_inferior ();
+  inferior_appeared (inf, pi->pid);
   /* Let GDB know that the inferior was attached.  */
   inf->attach_flag = 1;
 

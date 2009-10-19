@@ -199,7 +199,7 @@ The thread's ptid has changed.  The @var{old_ptid} parameter specifies
 the old value, and @var{new_ptid} specifies the new value.
 @end deftypefun
 
-@deftypefun void new_inferior (int @var{pid})
+@deftypefun void inferior_appeared (int @var{pid})
 @value{GDBN} has attached to a new inferior identified by @var{pid}.
 @end deftypefun
 

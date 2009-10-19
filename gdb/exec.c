@@ -32,6 +32,8 @@
 #include "exec.h"
 #include "observer.h"
 #include "arch-utils.h"
+#include "gdbthread.h"
+#include "progspace.h"
 
 #include <fcntl.h>
 #include "readline/readline.h"
@@ -50,8 +52,6 @@ void (*deprecated_file_changed_hook) (char *);
 
 /* Prototypes for local functions */
 
-static void exec_close (int);
-
 static void file_command (char *, int);
 
 static void set_section_command (char *, int);
@@ -66,20 +66,8 @@ void _initialize_exec (void);
 
 struct target_ops exec_ops;
 
-/* The Binary File Descriptor handle for the executable file.  */
-
-bfd *exec_bfd = NULL;
-long exec_bfd_mtime = 0;
-
-/* GDB currently only supports a single symbol/address space for the
-   whole debug session.  When that limitation is lifted, this global
-   goes away.  */
-static struct target_section_table current_target_sections_1;
-
-/* The set of target sections matching the sections mapped into the
-   current inferior's address space.  */
-static struct target_section_table *current_target_sections
-  = &current_target_sections_1;
+/* True if the exec target is pushed on the stack.  */
+static int using_exec_ops;
 
 /* Whether to open exec and core files read-only or read-write.  */
 
@@ -105,8 +93,8 @@ exec_open (char *args, int from_tty)
 /* Close and clear exec_bfd.  If we end up with no target sections to
    read memory from, this unpushes the exec_ops target.  */
 
-static void
-exec_close_1 (void)
+void
+exec_close (void)
 {
   if (exec_bfd)
     {
@@ -127,11 +115,16 @@ exec_close_1 (void)
     }
 }
 
+/* This is the target_close implementation.  Clears all target
+   sections and closes all executable bfds from all program spaces.  */
+
 static void
-exec_close (int quitting)
+exec_close_1 (int quitting)
 {
   int need_symtab_cleanup = 0;
   struct vmap *vp, *nxt;
+
+  using_exec_ops = 0;
 
   for (nxt = vmap; nxt != NULL;)
     {
@@ -163,20 +156,32 @@ exec_close (int quitting)
 
   vmap = NULL;
 
-  /* Delete all target sections.  */
-  resize_section_table
-    (current_target_sections,
-     -resize_section_table (current_target_sections, 0));
+  {
+    struct program_space *ss;
+    struct cleanup *old_chain;
 
-  /* Remove exec file.  */
-  exec_close_1 ();
+    old_chain = save_current_program_space ();
+    ALL_PSPACES (ss)
+    {
+      set_current_program_space (ss);
+
+      /* Delete all target sections.  */
+      resize_section_table
+	(current_target_sections,
+	 -resize_section_table (current_target_sections, 0));
+
+      exec_close ();
+    }
+
+    do_cleanups (old_chain);
+  }
 }
 
 void
 exec_file_clear (int from_tty)
 {
   /* Remove exec file.  */
-  exec_close_1 ();
+  exec_close ();
 
   if (from_tty)
     printf_unfiltered (_("No executable file now.\n"));
@@ -203,7 +208,7 @@ void
 exec_file_attach (char *filename, int from_tty)
 {
   /* Remove any previous exec file.  */
-  exec_close_1 ();
+  exec_close ();
 
   /* Now open and digest the file the user requested, if any.  */
 
@@ -258,7 +263,7 @@ exec_file_attach (char *filename, int from_tty)
 	{
 	  /* Make sure to close exec_bfd, or else "run" might try to use
 	     it.  */
-	  exec_close_1 ();
+	  exec_close ();
 	  error (_("\"%s\": not in executable format: %s"),
 		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
 	}
@@ -273,7 +278,7 @@ exec_file_attach (char *filename, int from_tty)
 	{
 	  /* Make sure to close exec_bfd, or else "run" might try to use
 	     it.  */
-	  exec_close_1 ();
+	  exec_close ();
 	  error (_("\"%s\": can't find the file sections: %s"),
 		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
 	}
@@ -283,7 +288,7 @@ exec_file_attach (char *filename, int from_tty)
 	{
 	  /* Make sure to close exec_bfd, or else "run" might try to use
 	     it.  */
-	  exec_close_1 ();
+	  exec_close ();
 	  error (_("\"%s\": can't find the file sections: %s"),
 		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
 	}
@@ -295,7 +300,8 @@ exec_file_attach (char *filename, int from_tty)
       set_gdbarch_from_file (exec_bfd);
 
       /* Add the executable's sections to the current address spaces'
-	 list of sections.  */
+	 list of sections.  This possibly pushes the exec_ops
+	 target.  */
       add_target_sections (sections, sections_end);
       xfree (sections);
 
@@ -465,8 +471,11 @@ add_target_sections (struct target_section *sections,
 
       /* If these are the first file sections we can provide memory
 	 from, push the file_stratum target.  */
-      if (space == 0)
-	push_target (&exec_ops);
+      if (!using_exec_ops)
+	{
+	  using_exec_ops = 1;
+	  push_target (&exec_ops);
+	}
     }
 }
 
@@ -499,7 +508,16 @@ remove_target_sections (bfd *abfd)
       /* If we don't have any more sections to read memory from,
 	 remove the file_stratum target from the stack.  */
       if (old_count + (dest - src) == 0)
-	unpush_target (&exec_ops);
+	{
+	  struct program_space *pspace;
+
+	  ALL_PSPACES (pspace)
+	    if (pspace->target_sections.sections
+		!= pspace->target_sections.sections_end)
+	      return;
+
+	  unpush_target (&exec_ops);
+	}
     }
 }
 
@@ -817,7 +835,7 @@ init_exec_ops (void)
   exec_ops.to_doc = "Use an executable file as a target.\n\
 Specify the filename of the executable file.";
   exec_ops.to_open = exec_open;
-  exec_ops.to_close = exec_close;
+  exec_ops.to_close = exec_close_1;
   exec_ops.to_attach = find_default_attach;
   exec_ops.to_xfer_partial = exec_xfer_partial;
   exec_ops.to_get_section_table = exec_get_section_table;

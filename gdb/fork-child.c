@@ -138,6 +138,7 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
   int shell = 0;
   static char **argv;
   const char *inferior_io_terminal = get_inferior_io_terminal ();
+  struct inferior *inf;
 
   /* If no exec file handed to us, get it from the exec-file command
      -- with a good, common error message if none is specified.  */
@@ -395,7 +396,9 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
   if (!have_inferiors ())
     init_thread_list ();
 
-  add_inferior (pid);
+  inf = current_inferior ();
+
+  inferior_appeared (inf, pid);
 
   /* Needed for wait_for_inferior stuff below.  */
   inferior_ptid = pid_to_ptid (pid);

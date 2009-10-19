@@ -36,6 +36,7 @@
 #include "tui/tui-stack.h"
 #include "tui/tui-file.h"
 #include "tui/tui-disasm.h"
+#include "progspace.h"
 
 #include "gdb_curses.h"
 
@@ -259,7 +260,8 @@ tui_set_disassem_content (struct gdbarch *gdbarch, CORE_ADDR pc)
 
       /* See whether there is a breakpoint installed.  */
       src->has_break = (!src->is_exec_point
-                       && breakpoint_here_p (pc) != no_breakpoint_here);
+			&& breakpoint_here_p (current_program_space->aspace, pc)
+			!= no_breakpoint_here);
 
       xfree (asm_lines[i].addr_string);
       xfree (asm_lines[i].insn);

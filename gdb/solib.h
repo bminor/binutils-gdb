@@ -25,6 +25,7 @@
 struct so_list;
 struct target_ops;
 struct target_so_ops;
+struct program_space;
 
 /* Called when we free all symtabs, to free the shared library information
    as well. */
@@ -45,7 +46,7 @@ extern void solib_create_inferior_hook (void);
 
 /* If ADDR lies in a shared library, return its name.  */
 
-extern char *solib_name_from_address (CORE_ADDR);
+extern char *solib_name_from_address (struct program_space *, CORE_ADDR);
 
 /* Return 1 if ADDR lies within SOLIB.  */
 

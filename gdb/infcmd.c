@@ -1515,14 +1515,13 @@ finish_forward (struct symbol *function, struct frame_info *frame)
   old_chain = make_cleanup_delete_breakpoint (breakpoint);
 
   tp->proceed_to_finish = 1;    /* We want stop_registers, please...  */
-  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
-
   cargs = xmalloc (sizeof (*cargs));
 
   cargs->breakpoint = breakpoint;
   cargs->function = function;
   add_continuation (tp, finish_command_continuation, cargs,
                     finish_command_continuation_free_arg);
+  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
 
   discard_cleanups (old_chain);
   if (!target_can_async_p ())

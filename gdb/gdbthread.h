@@ -246,6 +246,10 @@ struct thread_info *first_thread_of_process (int pid);
 /* Returns any thread of process PID.  */
 extern struct thread_info *any_thread_of_process (int pid);
 
+/* Returns any non-exited thread of process PID, giving preference for
+   already stopped threads.  */
+extern struct thread_info *any_live_thread_of_process (int pid);
+
 /* Change the ptid of thread OLD_PTID to NEW_PTID.  */
 void thread_change_ptid (ptid_t old_ptid, ptid_t new_ptid);
 

@@ -640,7 +640,8 @@ procfs_attach (struct target_ops *ops, char *args, int from_tty)
       gdb_flush (gdb_stdout);
     }
   inferior_ptid = do_attach (pid_to_ptid (pid));
-  inf = add_inferior (pid);
+  inf = current_inferior ();
+  inferior_appeared (inf, pid);
   inf->attach_flag = 1;
 
   push_target (ops);
@@ -1196,7 +1197,8 @@ procfs_create_inferior (struct target_ops *ops, char *exec_file,
   inferior_ptid = do_attach (pid_to_ptid (pid));
   procfs_find_new_threads (ops);
 
-  inf = add_inferior (pid);
+  inf = current_inferior ();
+  inferior_appeared (inf, pid);
   inf->attach_flag = 0;
 
   flags = _DEBUG_FLAG_KLC;	/* Kill-on-Last-Close flag.  */

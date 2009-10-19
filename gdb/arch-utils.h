@@ -153,4 +153,6 @@ extern struct gdbarch *gdbarch_from_bfd (bfd *abfd);
    routines to determine the architecture to execute a command in.  */
 extern struct gdbarch *get_current_arch (void);
 
+extern int default_has_shared_address_space (struct gdbarch *);
+
 #endif

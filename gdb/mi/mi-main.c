@@ -362,13 +362,18 @@ mi_cmd_thread_info (char *command, char **argv, int argc)
 static int
 print_one_inferior (struct inferior *inferior, void *arg)
 {
-  struct cleanup *back_to = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+  if (inferior->pid != 0)
+    {
+      struct cleanup *back_to
+	= make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 
-  ui_out_field_fmt (uiout, "id", "%d", inferior->pid);
-  ui_out_field_string (uiout, "type", "process");
-  ui_out_field_int (uiout, "pid", inferior->pid);
-  
-  do_cleanups (back_to);
+      ui_out_field_fmt (uiout, "id", "%d", inferior->pid);
+      ui_out_field_string (uiout, "type", "process");
+      ui_out_field_int (uiout, "pid", inferior->pid);
+
+      do_cleanups (back_to);
+    }
+
   return 0;
 }
 

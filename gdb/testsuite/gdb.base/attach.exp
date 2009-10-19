@@ -291,7 +291,7 @@ proc do_attach_tests {} {
     # Explicitly flush out any knowledge of the previous attachment.
 
     set test "before attach3, flush symbols"
-    gdb_test_multiple "symbol" "$test" {
+    gdb_test_multiple "symbol-file" "$test" {
 	-re "Discard symbol table from.*y or n. $" {
 	    gdb_test "y" "No symbol file now." \
 		"$test"

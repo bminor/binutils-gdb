@@ -1183,7 +1183,26 @@ remote_add_inferior (int pid, int attached)
   if (attached == -1)
     attached = remote_query_attached (pid);
 
-  inf = add_inferior (pid);
+  if (gdbarch_has_global_solist (target_gdbarch))
+    {
+      /* If the target shares code across all inferiors, then every
+	 attach adds a new inferior.  */
+      inf = add_inferior (pid);
+
+      /* ... and every inferior is bound to the same program space.
+	 However, each inferior may still have its own address
+	 space.  */
+      inf->aspace = maybe_new_address_space ();
+      inf->pspace = current_program_space;
+    }
+  else
+    {
+      /* In the traditional debugging scenario, there's a 1-1 match
+	 between program/address spaces.  We simply bind the inferior
+	 to the program space's address space.  */
+      inf = current_inferior ();
+      inferior_appeared (inf, pid);
+    }
 
   inf->attach_flag = attached;
 
@@ -2639,6 +2658,10 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
      this before anything involving memory or registers.  */
   target_find_description ();
 
+  /* Next, now that we know something about the target, update the
+     address spaces in the program spaces.  */
+  update_address_spaces ();
+
   /* On OSs where the list of libraries is global to all
      processes, we fetch them early.  */
   if (gdbarch_has_global_solist (target_gdbarch))
@@ -3486,7 +3509,7 @@ extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
     error (_("Attaching to %s failed"),
 	   target_pid_to_str (pid_to_ptid (pid)));
 
-  remote_add_inferior (pid, 1);
+  set_current_inferior (remote_add_inferior (pid, 1));
 
   inferior_ptid = pid_to_ptid (pid);
 
@@ -6779,11 +6802,14 @@ extended_remote_create_inferior_1 (char *exec_file, char *args,
       extended_remote_restart ();
     }
 
-  /* Clean up from the last time we ran, before we mark the target
-     running again.  This will mark breakpoints uninserted, and
-     get_offsets may insert breakpoints.  */
-  init_thread_list ();
-  init_wait_for_inferior ();
+  if (!have_inferiors ())
+    {
+      /* Clean up from the last time we ran, before we mark the target
+	 running again.  This will mark breakpoints uninserted, and
+	 get_offsets may insert breakpoints.  */
+      init_thread_list ();
+      init_wait_for_inferior ();
+    }
 
   /* Now mark the inferior as running before we do anything else.  */
   inferior_ptid = magic_null_ptid;

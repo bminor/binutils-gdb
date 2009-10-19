@@ -23,6 +23,7 @@
 
 struct regcache;
 struct gdbarch;
+struct address_space;
 
 extern struct regcache *get_current_regcache (void);
 extern struct regcache *get_thread_regcache (ptid_t ptid);
@@ -35,6 +36,10 @@ struct regcache *regcache_xmalloc (struct gdbarch *gdbarch);
 /* Return REGCACHE's architecture.  */
 
 extern struct gdbarch *get_regcache_arch (const struct regcache *regcache);
+
+/* Return REGCACHE's address space.  */
+
+extern struct address_space *get_regcache_aspace (const struct regcache *regcache);
 
 /* Transfer a raw register [0..NUM_REGS) between core-gdb and the
    regcache. */

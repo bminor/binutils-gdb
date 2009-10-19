@@ -1218,4 +1218,9 @@ extern ULONGEST align_down (ULONGEST v, int n);
 void *hashtab_obstack_allocate (void *data, size_t size, size_t count);
 void dummy_obstack_deallocate (void *object, void *data);
 
+/* From progspace.c */
+
+extern void initialize_progspace (void);
+extern void initialize_inferiors (void);
+
 #endif /* #ifndef DEFS_H */

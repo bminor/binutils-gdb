@@ -778,20 +778,22 @@ record_wait (struct target_ops *ops,
 	      if (status->kind == TARGET_WAITKIND_STOPPED
 		  && status->value.sig == TARGET_SIGNAL_TRAP)
 		{
+		  struct regcache *regcache;
+
 		  /* Yes -- check if there is a breakpoint.  */
 		  registers_changed ();
-		  tmp_pc = regcache_read_pc (get_current_regcache ());
-		  if (breakpoint_inserted_here_p (tmp_pc))
+		  regcache = get_current_regcache ();
+		  tmp_pc = regcache_read_pc (regcache);
+		  if (breakpoint_inserted_here_p (get_regcache_aspace (regcache),
+						  tmp_pc))
 		    {
 		      /* There is a breakpoint.  GDB will want to stop.  */
-		      CORE_ADDR decr_pc_after_break =
-			gdbarch_decr_pc_after_break
-			(get_regcache_arch (get_current_regcache ()));
+		      struct gdbarch *gdbarch = get_regcache_arch (regcache);
+		      CORE_ADDR decr_pc_after_break
+			= gdbarch_decr_pc_after_break (gdbarch);
 		      if (decr_pc_after_break)
-			{
-			  regcache_write_pc (get_thread_regcache (ret),
-					     tmp_pc + decr_pc_after_break);
-			}
+			regcache_write_pc (regcache,
+					   tmp_pc + decr_pc_after_break);
 		    }
 		  else
 		    {
@@ -799,11 +801,9 @@ record_wait (struct target_ops *ops,
 		         stepping, therefore gdb will not stop.
 			 Therefore we will not return to gdb.
 		         Record the insn and resume.  */
-		      if (!do_record_message (get_current_regcache (),
-					      TARGET_SIGNAL_0))
-			{
-                          break;
-			}
+		      if (!do_record_message (regcache, TARGET_SIGNAL_0))
+			break;
+
 		      record_beneath_to_resume (record_beneath_to_resume_ops,
 						ptid, 1,
 						TARGET_SIGNAL_0);
@@ -833,7 +833,8 @@ record_wait (struct target_ops *ops,
       if (execution_direction == EXEC_FORWARD)
 	{
 	  tmp_pc = regcache_read_pc (regcache);
-	  if (breakpoint_inserted_here_p (tmp_pc))
+	  if (breakpoint_inserted_here_p (get_regcache_aspace (regcache),
+					  tmp_pc))
 	    {
 	      if (record_debug)
 		fprintf_unfiltered (gdb_stdlog,
@@ -981,7 +982,8 @@ record_wait (struct target_ops *ops,
 
 		  /* check breakpoint */
 		  tmp_pc = regcache_read_pc (regcache);
-		  if (breakpoint_inserted_here_p (tmp_pc))
+		  if (breakpoint_inserted_here_p (get_regcache_aspace (regcache),
+						  tmp_pc))
 		    {
 		      if (record_debug)
 			fprintf_unfiltered (gdb_stdlog,

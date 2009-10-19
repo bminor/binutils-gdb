@@ -705,6 +705,7 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
 {
   char *name;
   char **p;
+  struct inferior *inf;
 
   if (mon_ops->magic != MONITOR_OPS_MAGIC)
     error (_("Magic number of monitor_ops struct wrong."));
@@ -822,7 +823,8 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
 
   /* Make run command think we are busy...  */
   inferior_ptid = monitor_ptid;
-  add_inferior_silent (ptid_get_pid (inferior_ptid));
+  inf = current_inferior ();
+  inferior_appeared (inf, ptid_get_pid (inferior_ptid));
   add_thread_silent (inferior_ptid);
 
   /* Give monitor_wait something to read */

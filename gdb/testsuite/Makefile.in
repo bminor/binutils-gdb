@@ -35,7 +35,7 @@ SUBDIRS = @subdirs@
 RPATH_ENVVAR = @RPATH_ENVVAR@
 ALL_SUBDIRS = gdb.ada gdb.arch gdb.asm gdb.base gdb.cp gdb.disasm \
 	gdb.dwarf2 \
-	gdb.fortran gdb.server gdb.java gdb.mi \
+	gdb.fortran gdb.server gdb.java gdb.mi gdb.multi \
 	gdb.objc gdb.opt gdb.pascal gdb.python gdb.threads gdb.trace \
 	gdb.xml \
 	$(SUBDIRS)

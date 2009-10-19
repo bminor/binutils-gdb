@@ -185,6 +185,11 @@ register_size (struct gdbarch *gdbarch, int regnum)
 struct regcache
 {
   struct regcache_descr *descr;
+
+  /* The address space of this register cache (for registers where it
+     makes sense, like PC or SP).  */
+  struct address_space *aspace;
+
   /* The register buffers.  A read-only register cache can hold the
      full [0 .. gdbarch_num_regs + gdbarch_num_pseudo_regs) while a read/write
      register cache can only hold [0 .. gdbarch_num_regs).  */
@@ -219,6 +224,7 @@ regcache_xmalloc (struct gdbarch *gdbarch)
     = XCALLOC (descr->sizeof_raw_registers, gdb_byte);
   regcache->register_valid_p
     = XCALLOC (descr->sizeof_raw_register_valid_p, gdb_byte);
+  regcache->aspace = NULL;
   regcache->readonly_p = 1;
   regcache->ptid = minus_one_ptid;
   return regcache;
@@ -252,6 +258,12 @@ struct gdbarch *
 get_regcache_arch (const struct regcache *regcache)
 {
   return regcache->descr->gdbarch;
+}
+
+struct address_space *
+get_regcache_aspace (const struct regcache *regcache)
+{
+  return regcache->aspace;
 }
 
 /* Return  a pointer to register REGNUM's buffer cache.  */
@@ -340,10 +352,14 @@ regcache_cpy (struct regcache *dst, struct regcache *src)
 {
   int i;
   gdb_byte *buf;
+
   gdb_assert (src != NULL && dst != NULL);
   gdb_assert (src->descr->gdbarch == dst->descr->gdbarch);
   gdb_assert (src != dst);
   gdb_assert (src->readonly_p || dst->readonly_p);
+
+  dst->aspace = src->aspace;
+
   if (!src->readonly_p)
     regcache_save (dst, do_cooked_read, src);
   else if (!dst->readonly_p)
@@ -362,6 +378,8 @@ regcache_cpy_no_passthrough (struct regcache *dst, struct regcache *src)
      move of data into the current regcache.  Doing this would be
      silly - it would mean that valid_p would be completely invalid.  */
   gdb_assert (dst->readonly_p);
+
+  dst->aspace = src->aspace;
   memcpy (dst->registers, src->registers, dst->descr->sizeof_raw_registers);
   memcpy (dst->register_valid_p, src->register_valid_p,
 	  dst->descr->sizeof_raw_register_valid_p);
@@ -438,6 +456,8 @@ get_thread_arch_regcache (ptid_t ptid, struct gdbarch *gdbarch)
   new_regcache = regcache_xmalloc (gdbarch);
   new_regcache->readonly_p = 0;
   new_regcache->ptid = ptid;
+  new_regcache->aspace = target_thread_address_space (ptid);
+  gdb_assert (new_regcache->aspace != NULL);
 
   list = xmalloc (sizeof (struct regcache_list));
   list->regcache = new_regcache;

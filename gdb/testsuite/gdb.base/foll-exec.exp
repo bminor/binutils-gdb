@@ -152,7 +152,7 @@ proc do_exec_tests {} {
    #
    send_gdb "next\n"
    gdb_expect {
-     -re "Executing new program: .*${testfile2}.*${srcfile2}:23.*int  local_j = argc;.*$gdb_prompt $"\
+     -re ".*xecuting new program: .*${testfile2}.*${srcfile2}:23.*int  local_j = argc;.*$gdb_prompt $"\
                      {pass "step through execlp call"}
      -re "$gdb_prompt $" {fail "step through execlp call"}
      timeout         {fail "(timeout) step through execlp call"}
@@ -230,7 +230,7 @@ proc do_exec_tests {} {
    setup_xfail hppa2.0w-hp-hpux* CLLbs16760
    send_gdb "continue\n"
    gdb_expect {
-     -re ".*Executing new program:.*${testfile2}.*Catchpoint .*(exec\'d .*${testfile2}).*in .*$gdb_prompt $"\
+     -re ".*xecuting new program:.*${testfile2}.*Catchpoint .*(exec\'d .*${testfile2}).*in .*$gdb_prompt $"\
                      {pass "hit catch exec"}
      -re "$gdb_prompt $" {fail "hit catch exec"}
      timeout         {fail "(timeout) hit catch exec"}
@@ -299,7 +299,7 @@ proc do_exec_tests {} {
    #
    send_gdb "next 2\n"
    gdb_expect {
-     -re "Executing new program: .*${testfile2}.*${srcfile2}:23.*int  local_j = argc;.*$gdb_prompt $"\
+     -re ".*xecuting new program: .*${testfile2}.*${srcfile2}:23.*int  local_j = argc;.*$gdb_prompt $"\
                      {pass "step through execl call"}
      -re "$gdb_prompt $" {fail "step through execl call"}
      timeout         {fail "(timeout) step through execl call"}
@@ -353,7 +353,7 @@ proc do_exec_tests {} {
    }
    send_gdb "next\n"
    gdb_expect {
-     -re "Executing new program: .*${testfile2}.*${srcfile2}:23.*int  local_j = argc;.*$gdb_prompt $"\
+     -re ".*xecuting new program: .*${testfile2}.*${srcfile2}:23.*int  local_j = argc;.*$gdb_prompt $"\
                      {pass "step through execv call"}
      -re "$gdb_prompt $" {fail "step through execv call"}
      timeout         {fail "(timeout) step through execv call"}
@@ -394,7 +394,7 @@ proc do_exec_tests {} {
    #
    send_gdb "continue\n"
    gdb_expect {
-     -re "Executing new program: .*${testfile2}.*${srcfile2}:23.*int  local_j = argc;.*$gdb_prompt $"\
+     -re ".*xecuting new program: .*${testfile2}.*${srcfile2}:23.*int  local_j = argc;.*$gdb_prompt $"\
                      {pass "continue through exec"}
      -re "$gdb_prompt $" {fail "continue through exec"}
      timeout         {fail "(timeout) continue through exec"}

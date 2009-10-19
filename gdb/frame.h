@@ -406,6 +406,15 @@ extern int frame_relative_level (struct frame_info *fi);
 
 extern enum frame_type get_frame_type (struct frame_info *);
 
+/* Return the frame's program space.  */
+extern struct program_space *get_frame_program_space (struct frame_info *);
+
+/* Unwind THIS frame's program space from the NEXT frame.  */
+extern struct program_space *frame_unwind_program_space (struct frame_info *);
+
+/* Return the frame's address space.  */
+extern struct address_space *get_frame_address_space (struct frame_info *);
+
 /* For frames where we can not unwind further, describe why.  */
 
 enum unwind_stop_reason

@@ -2383,7 +2383,8 @@ mips_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr)
    the sequence.  */
 
 static int
-deal_with_atomic_sequence (struct gdbarch *gdbarch, CORE_ADDR pc)
+deal_with_atomic_sequence (struct gdbarch *gdbarch,
+			   struct address_space *aspace, CORE_ADDR pc)
 {
   CORE_ADDR breaks[2] = {-1, -1};
   CORE_ADDR loc = pc;
@@ -2471,7 +2472,7 @@ deal_with_atomic_sequence (struct gdbarch *gdbarch, CORE_ADDR pc)
 
   /* Effectively inserts the breakpoints.  */
   for (index = 0; index <= last_breakpoint; index++)
-      insert_single_step_breakpoint (gdbarch, breaks[index]);
+    insert_single_step_breakpoint (gdbarch, aspace, breaks[index]);
 
   return 1;
 }
@@ -2485,15 +2486,16 @@ int
 mips_software_single_step (struct frame_info *frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct address_space *aspace = get_frame_address_space (frame);
   CORE_ADDR pc, next_pc;
 
   pc = get_frame_pc (frame);
-  if (deal_with_atomic_sequence (gdbarch, pc))
+  if (deal_with_atomic_sequence (gdbarch, aspace, pc))
     return 1;
 
   next_pc = mips_next_pc (frame, pc);
 
-  insert_single_step_breakpoint (gdbarch, next_pc);
+  insert_single_step_breakpoint (gdbarch, aspace, next_pc);
   return 1;
 }
 
@@ -4677,7 +4679,7 @@ mips_single_step_through_delay (struct gdbarch *gdbarch,
   if (mips_pc_is_mips16 (pc))
     return 0;
 
-  if (!breakpoint_here_p (pc + 4))
+  if (!breakpoint_here_p (get_frame_address_space (frame), pc + 4))
     return 0;
 
   if (!safe_frame_unwind_memory (frame, pc, buf, sizeof buf))

@@ -440,6 +440,24 @@ any_thread_of_process (int pid)
   return NULL;
 }
 
+struct thread_info *
+any_live_thread_of_process (int pid)
+{
+  struct thread_info *tp;
+  struct thread_info *tp_running = NULL;
+
+  for (tp = thread_list; tp; tp = tp->next)
+    if (ptid_get_pid (tp->ptid) == pid)
+      {
+	if (tp->state_ == THREAD_STOPPED)
+	  return tp;
+	else if (tp->state_ == THREAD_RUNNING)
+	  tp_running = tp;
+      }
+
+  return tp_running;
+}
+
 /* Print a list of thread ids currently known, and the total number of
    threads. To be used from within catch_errors. */
 static int
@@ -845,6 +863,19 @@ info_threads_command (char *arg, int from_tty)
 void
 switch_to_thread (ptid_t ptid)
 {
+  /* Switch the program space as well, if we can infer it from the now
+     current thread.  Otherwise, it's up to the caller to select the
+     space it wants.  */
+  if (!ptid_equal (ptid, null_ptid))
+    {
+      struct inferior *inf;
+
+      inf = find_inferior_pid (ptid_get_pid (ptid));
+      gdb_assert (inf != NULL);
+      set_current_program_space (inf->pspace);
+      set_current_inferior (inf);
+    }
+
   if (ptid_equal (ptid, inferior_ptid))
     return;
 
@@ -909,7 +940,7 @@ restore_selected_frame (struct frame_id a_frame_id, int frame_level)
   select_frame (get_current_frame ());
 
   /* Warn the user.  */
-  if (!ui_out_is_mi_like_p (uiout))
+  if (frame_level > 0 && !ui_out_is_mi_like_p (uiout))
     {
       warning (_("\
 Couldn't restore frame #%d in current thread, at reparsed frame #0\n"),
@@ -927,6 +958,7 @@ struct current_thread_cleanup
   struct frame_id selected_frame_id;
   int selected_frame_level;
   int was_stopped;
+  int inf_id;
 };
 
 static void
@@ -945,7 +977,10 @@ do_restore_current_thread_cleanup (void *arg)
       && find_inferior_pid (ptid_get_pid (tp->ptid)) != NULL)
     restore_current_thread (old->inferior_ptid);
   else
-    restore_current_thread (null_ptid);
+    {
+      restore_current_thread (null_ptid);
+      set_current_inferior (find_inferior_id (old->inf_id));
+    }
 
   /* The running state of the originally selected thread may have
      changed, so we have to recheck it here.  */
@@ -979,6 +1014,7 @@ make_cleanup_restore_current_thread (void)
 
   old = xmalloc (sizeof (struct current_thread_cleanup));
   old->inferior_ptid = inferior_ptid;
+  old->inf_id = current_inferior ()->num;
 
   if (!ptid_equal (inferior_ptid, null_ptid))
     {

@@ -273,12 +273,10 @@ IGNORE_FIRST_LINK_MAP_ENTRY (struct so_list *so)
 				ptr_type) == 0;
 }
 
-/* Per-inferior SVR4 specific data.  */
+/* Per pspace SVR4 specific data.  */
 
 struct svr4_info
 {
-  int pid;
-
   CORE_ADDR debug_base;	/* Base of dynamic linker structures */
 
   /* Validity flag for debug_loader_offset.  */
@@ -292,69 +290,40 @@ struct svr4_info
 
   /* Load map address for the main executable.  */
   CORE_ADDR main_lm_addr;
+
+  CORE_ADDR interp_text_sect_low;
+  CORE_ADDR interp_text_sect_high;
+  CORE_ADDR interp_plt_sect_low;
+  CORE_ADDR interp_plt_sect_high;
 };
 
-/* List of known processes using solib-svr4 shared libraries, storing
-   the required bookkeeping for each.  */
-
-typedef struct svr4_info *svr4_info_p;
-DEF_VEC_P(svr4_info_p);
-VEC(svr4_info_p) *svr4_info = NULL;
-
-/* Get svr4 data for inferior PID (target id).  If none is found yet,
-   add it now.  This function always returns a valid object.  */
-
-struct svr4_info *
-get_svr4_info (int pid)
-{
-  int ix;
-  struct svr4_info *it;
-
-  gdb_assert (pid != 0);
-
-  for (ix = 0; VEC_iterate (svr4_info_p, svr4_info, ix, it); ++ix)
-    {
-      if (it->pid == pid)
-	return it;
-    }
-
-  it = XZALLOC (struct svr4_info);
-  it->pid = pid;
-
-  VEC_safe_push (svr4_info_p, svr4_info, it);
-
-  return it;
-}
-
-/* Get rid of any svr4 related bookkeeping for inferior PID (target
-   id).  */
+/* Per-program-space data key.  */
+static const struct program_space_data *solib_svr4_pspace_data;
 
 static void
-remove_svr4_info (int pid)
+svr4_pspace_data_cleanup (struct program_space *pspace, void *arg)
 {
-  int ix;
-  struct svr4_info *it;
+  struct svr4_info *info;
 
-  for (ix = 0; VEC_iterate (svr4_info_p, svr4_info, ix, it); ++ix)
-    {
-      if (it->pid == pid)
-	{
-	  VEC_unordered_remove (svr4_info_p, svr4_info, ix);
-	  return;
-	}
-    }
+  info = program_space_data (pspace, solib_svr4_pspace_data);
+  xfree (info);
 }
 
-/* This is an "inferior_exit" observer.  Inferior PID (target id) is
-   being removed from the inferior list, because it exited, was
-   killed, detached, or we just dropped the connection to the debug
-   interface --- discard any solib-svr4 related bookkeeping for this
-   inferior.  */
+/* Get the current svr4 data.  If none is found yet, add it now.  This
+   function always returns a valid object.  */
 
-static void
-solib_svr4_inferior_exit (int pid)
+static struct svr4_info *
+get_svr4_info (void)
 {
-  remove_svr4_info (pid);
+  struct svr4_info *info;
+
+  info = program_space_data (current_program_space, solib_svr4_pspace_data);
+  if (info != NULL)
+    return info;
+
+  info = XZALLOC (struct svr4_info);
+  set_program_space_data (current_program_space, solib_svr4_pspace_data, info);
+  return info;
 }
 
 /* Local function prototypes */
@@ -931,7 +900,7 @@ open_symbol_file_object (void *from_ttyp)
   int l_name_size = TYPE_LENGTH (ptr_type);
   gdb_byte *l_name_buf = xmalloc (l_name_size);
   struct cleanup *cleanups = make_cleanup (xfree, l_name_buf);
-  struct svr4_info *info = get_svr4_info (PIDGET (inferior_ptid));
+  struct svr4_info *info = get_svr4_info ();
 
   if (symfile_objfile)
     if (!query (_("Attempt to reload symbols from process? ")))
@@ -982,8 +951,7 @@ open_symbol_file_object (void *from_ttyp)
 static struct so_list *
 svr4_default_sos (void)
 {
-  struct inferior *inf = current_inferior ();
-  struct svr4_info *info = get_svr4_info (inf->pid);
+  struct svr4_info *info = get_svr4_info ();
 
   struct so_list *head = NULL;
   struct so_list **link_ptr = &head;
@@ -1038,14 +1006,9 @@ svr4_current_sos (void)
   struct so_list *head = 0;
   struct so_list **link_ptr = &head;
   CORE_ADDR ldsomap = 0;
-  struct inferior *inf;
   struct svr4_info *info;
 
-  if (ptid_equal (inferior_ptid, null_ptid))
-    return NULL;
-
-  inf = current_inferior ();
-  info = get_svr4_info (inf->pid);
+  info = get_svr4_info ();
 
   /* Always locate the debug struct, in case it has moved.  */
   info->debug_base = 0;
@@ -1142,7 +1105,7 @@ CORE_ADDR
 svr4_fetch_objfile_link_map (struct objfile *objfile)
 {
   struct so_list *so;
-  struct svr4_info *info = get_svr4_info (PIDGET (inferior_ptid));
+  struct svr4_info *info = get_svr4_info ();
 
   /* Cause svr4_current_sos() to be run if it hasn't been already.  */
   if (info->main_lm_addr == 0)
@@ -1182,16 +1145,16 @@ match_main (char *soname)
 
 /* Return 1 if PC lies in the dynamic symbol resolution code of the
    SVR4 run time loader.  */
-static CORE_ADDR interp_text_sect_low;
-static CORE_ADDR interp_text_sect_high;
-static CORE_ADDR interp_plt_sect_low;
-static CORE_ADDR interp_plt_sect_high;
 
 int
 svr4_in_dynsym_resolve_code (CORE_ADDR pc)
 {
-  return ((pc >= interp_text_sect_low && pc < interp_text_sect_high)
-	  || (pc >= interp_plt_sect_low && pc < interp_plt_sect_high)
+  struct svr4_info *info = get_svr4_info ();
+
+  return ((pc >= info->interp_text_sect_low
+	   && pc < info->interp_text_sect_high)
+	  || (pc >= info->interp_plt_sect_low
+	      && pc < info->interp_plt_sect_high)
 	  || in_plt_section (pc, NULL));
 }
 
@@ -1265,14 +1228,13 @@ enable_break (struct svr4_info *info)
   asection *interp_sect;
   gdb_byte *interp_name;
   CORE_ADDR sym_addr;
-  struct inferior *inf = current_inferior ();
 
   /* First, remove all the solib event breakpoints.  Their addresses
      may have changed since the last time we ran the program.  */
   remove_solib_event_breakpoints ();
 
-  interp_text_sect_low = interp_text_sect_high = 0;
-  interp_plt_sect_low = interp_plt_sect_high = 0;
+  info->interp_text_sect_low = info->interp_text_sect_high = 0;
+  info->interp_plt_sect_low = info->interp_plt_sect_high = 0;
 
   /* If we already have a shared library list in the target, and
      r_debug contains r_brk, set the breakpoint there - this should
@@ -1308,18 +1270,20 @@ enable_break (struct svr4_info *info)
 	  interp_sect = bfd_get_section_by_name (tmp_bfd, ".text");
 	  if (interp_sect)
 	    {
-	      interp_text_sect_low =
+	      info->interp_text_sect_low =
 		bfd_section_vma (tmp_bfd, interp_sect) + load_addr;
-	      interp_text_sect_high =
-		interp_text_sect_low + bfd_section_size (tmp_bfd, interp_sect);
+	      info->interp_text_sect_high =
+		info->interp_text_sect_low
+		+ bfd_section_size (tmp_bfd, interp_sect);
 	    }
 	  interp_sect = bfd_get_section_by_name (tmp_bfd, ".plt");
 	  if (interp_sect)
 	    {
-	      interp_plt_sect_low =
+	      info->interp_plt_sect_low =
 		bfd_section_vma (tmp_bfd, interp_sect) + load_addr;
-	      interp_plt_sect_high =
-		interp_plt_sect_low + bfd_section_size (tmp_bfd, interp_sect);
+	      info->interp_plt_sect_high =
+		info->interp_plt_sect_low
+		+ bfd_section_size (tmp_bfd, interp_sect);
 	    }
 
 	  create_solib_event_breakpoint (target_gdbarch, sym_addr);
@@ -1412,18 +1376,20 @@ enable_break (struct svr4_info *info)
       interp_sect = bfd_get_section_by_name (tmp_bfd, ".text");
       if (interp_sect)
 	{
-	  interp_text_sect_low =
+	  info->interp_text_sect_low =
 	    bfd_section_vma (tmp_bfd, interp_sect) + load_addr;
-	  interp_text_sect_high =
-	    interp_text_sect_low + bfd_section_size (tmp_bfd, interp_sect);
+	  info->interp_text_sect_high =
+	    info->interp_text_sect_low
+	    + bfd_section_size (tmp_bfd, interp_sect);
 	}
       interp_sect = bfd_get_section_by_name (tmp_bfd, ".plt");
       if (interp_sect)
 	{
-	  interp_plt_sect_low =
+	  info->interp_plt_sect_low =
 	    bfd_section_vma (tmp_bfd, interp_sect) + load_addr;
-	  interp_plt_sect_high =
-	    interp_plt_sect_low + bfd_section_size (tmp_bfd, interp_sect);
+	  info->interp_plt_sect_high =
+	    info->interp_plt_sect_low
+	    + bfd_section_size (tmp_bfd, interp_sect);
 	}
 
       /* Now try to set a breakpoint in the dynamic linker.  */
@@ -1686,7 +1652,7 @@ svr4_solib_create_inferior_hook (void)
   struct thread_info *tp;
   struct svr4_info *info;
 
-  info = get_svr4_info (PIDGET (inferior_ptid));
+  info = get_svr4_info ();
 
   /* Relocate the main executable if necessary.  */
   svr4_relocate_main_executable ();
@@ -1726,7 +1692,14 @@ svr4_solib_create_inferior_hook (void)
 static void
 svr4_clear_solib (void)
 {
-  remove_svr4_info (PIDGET (inferior_ptid));
+  struct svr4_info *info;
+
+  info = get_svr4_info ();
+  info->debug_base = 0;
+  info->debug_loader_offset_p = 0;
+  info->debug_loader_offset = 0;
+  xfree (info->debug_loader_name);
+  info->debug_loader_name = NULL;
 }
 
 static void
@@ -1925,6 +1898,8 @@ void
 _initialize_svr4_solib (void)
 {
   solib_svr4_data = gdbarch_data_register_pre_init (solib_svr4_init);
+  solib_svr4_pspace_data
+    = register_program_space_data_with_cleanup (svr4_pspace_data_cleanup);
 
   svr4_so_ops.relocate_section_addresses = svr4_relocate_section_addresses;
   svr4_so_ops.free_so = svr4_free_so;
@@ -1937,6 +1912,4 @@ _initialize_svr4_solib (void)
   svr4_so_ops.bfd_open = solib_bfd_open;
   svr4_so_ops.lookup_lib_global_symbol = elf_lookup_lib_symbol;
   svr4_so_ops.same = svr4_same;
-
-  observer_attach_inferior_exit (solib_svr4_inferior_exit);
 }

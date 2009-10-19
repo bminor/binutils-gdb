@@ -32,6 +32,7 @@ struct block;
 struct blockvector;
 struct axs_value;
 struct agent_expr;
+struct program_space;
 
 /* Some of the structures in this file are space critical.
    The space-critical structures are:
@@ -823,6 +824,7 @@ struct symtab
 
 #define BLOCKVECTOR(symtab)	(symtab)->blockvector
 #define LINETABLE(symtab)	(symtab)->linetable
+#define SYMTAB_PSPACE(symtab)	(symtab)->objfile->pspace
 
 
 /* Each source file that has not been fully read in is represented by
@@ -1170,6 +1172,9 @@ extern void msymbols_sort (struct objfile *objfile);
 
 struct symtab_and_line
 {
+  /* The program space of this sal.  */
+  struct program_space *pspace;
+
   struct symtab *symtab;
   struct obj_section *section;
   /* Line number.  Line numbers start at 1 and proceed through symtab->nlines.

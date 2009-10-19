@@ -453,6 +453,8 @@ inf_ttrace_follow_fork (struct target_ops *ops, int follow_child)
       inferior_ptid = ptid_build (fpid, flwpid, 0);
       inf = add_inferior (fpid);
       inf->attach_flag = parent_inf->attach_flag;
+      inf->pspace = parent_inf->pspace;
+      inf->aspace = parent_inf->aspace;
       copy_terminal_info (inf, parent_inf);
       detach_breakpoints (pid);
 
@@ -725,7 +727,8 @@ inf_ttrace_attach (struct target_ops *ops, char *args, int from_tty)
   if (ttrace (TT_PROC_ATTACH, pid, 0, TT_KILL_ON_EXIT, TT_VERSION, 0) == -1)
     perror_with_name (("ttrace"));
 
-  inf = add_inferior (pid);
+  inf = current_inferior ();
+  inferior_appeared (inf, pid);
   inf->attach_flag = 1;
 
   /* Set the initial event mask.  */

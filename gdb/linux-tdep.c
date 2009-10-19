@@ -22,8 +22,10 @@
 #include "gdbtypes.h"
 #include "linux-tdep.h"
 #include "observer.h"
-
+#include "auxv.h"
+#include "target.h"
 #include "elf-bfd.h"
+#include "elf/common.h"
 
 /* This function is suitable for architectures that don't
    extend/override the standard siginfo structure.  */
@@ -139,6 +141,21 @@ linux_get_siginfo_type (struct gdbarch *gdbarch)
   return siginfo_type;
 }
 
+int
+linux_has_shared_address_space (void)
+{
+  /* Determine whether we are running on uClinux or normal Linux
+     kernel.  */
+  CORE_ADDR dummy;
+  int target_is_uclinux;
+
+  target_is_uclinux
+    = (target_auxv_search (&current_target, AT_NULL, &dummy) > 0
+       && target_auxv_search (&current_target, AT_PAGESZ, &dummy) == 0);
+
+  return target_is_uclinux;
+}
+
 /* Observer for the executable_changed event, to check whether the new
    exec binary is a PIE (Position Independent Executable) specimen, which
    is currently unsupported.  */
@@ -159,6 +176,9 @@ The current binary is a PIE (Position Independent Executable), which\n\
 GDB does NOT currently support.  Most debugger features will fail if used\n\
 in this session.\n"));
 }
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+extern initialize_file_ftype _initialize_linux_tdep;
 
 void
 _initialize_linux_tdep (void)

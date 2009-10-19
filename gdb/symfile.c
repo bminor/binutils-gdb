@@ -2807,7 +2807,7 @@ clear_symtab_users (void)
 
   clear_displays ();
   breakpoint_re_set ();
-  set_default_breakpoint (0, 0, 0, 0);
+  set_default_breakpoint (0, NULL, 0, 0, 0);
   clear_pc_function_cache ();
   observer_notify_new_objfile (NULL);
 

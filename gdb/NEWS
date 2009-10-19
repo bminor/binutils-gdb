@@ -11,6 +11,40 @@ Xilinx MicroBlaze		microblaze-*-*
 
 Xilinx MicroBlaze		microblaze
 
+* Multi-program debugging.
+
+  GDB now has support for multi-program (a.k.a. multi-executable or
+  multi-exec) debugging.  This allows for debugging multiple inferiors
+  simultaneously each running a different program under the same GDB
+  session.  See "Debugging Multiple Inferiors and Programs" in the
+  manual for more information.  This implied some user visible changes
+  in the multi-inferior support.  For example, "info inferiors" now
+  lists inferiors that are not running yet or that have exited
+  already.  See also "New commands" and "New options" below.
+
+* New commands (for set/show, see "New options" below)
+
+add-inferior [-copies <N>] [-exec <FILENAME>]
+  Add a new inferior.
+
+clone-inferior [-copies <N>] [ID]
+  Make a new inferior ready to execute the same program another
+  inferior has loaded.
+
+remove-inferior ID
+  Remove an inferior.
+
+maint info program-spaces
+  List the program spaces loaded into GDB.
+
+* New options
+
+set follow-exec-mode new|same
+show follow-exec-mode
+  Control whether GDB reuses the same inferior across an exec call or
+  creates a new one.  This is useful to be able to restart the old
+  executable after the inferior having done an exec call.
+
 *** Changes in GDB 7.0
 
 * GDB now has an interface for JIT compilation.  Applications that

@@ -471,7 +471,7 @@ crisv32_single_step_through_delay (struct gdbarch *gdbarch,
     {
       /* In delay slot - check if there's a breakpoint at the preceding
 	 instruction.  */
-      if (breakpoint_here_p (erp & ~0x1))
+      if (breakpoint_here_p (get_frame_address_space (this_frame), erp & ~0x1))
 	ret = 1;
     }
   return ret;
@@ -2132,6 +2132,7 @@ static int
 cris_software_single_step (struct frame_info *frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct address_space *aspace = get_frame_address_space (frame);
   inst_env_type inst_env;
 
   /* Analyse the present instruction environment and insert 
@@ -2149,13 +2150,14 @@ cris_software_single_step (struct frame_info *frame)
          and possibly another one for a branch, jump, etc.  */
       CORE_ADDR next_pc
 	= (CORE_ADDR) inst_env.reg[gdbarch_pc_regnum (gdbarch)];
-      insert_single_step_breakpoint (gdbarch, next_pc);
+      insert_single_step_breakpoint (gdbarch, aspace, next_pc);
       if (inst_env.branch_found 
 	  && (CORE_ADDR) inst_env.branch_break_address != next_pc)
 	{
 	  CORE_ADDR branch_target_address
 		= (CORE_ADDR) inst_env.branch_break_address;
-	  insert_single_step_breakpoint (gdbarch, branch_target_address);
+	  insert_single_step_breakpoint (gdbarch,
+					 aspace, branch_target_address);
 	}
     }
 

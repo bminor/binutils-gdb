@@ -671,6 +671,7 @@ static int
 rs6000_software_single_step (struct frame_info *frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct address_space *aspace = get_frame_address_space (frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int ii, insn;
   CORE_ADDR loc;
@@ -697,7 +698,7 @@ rs6000_software_single_step (struct frame_info *frame)
       /* ignore invalid breakpoint. */
       if (breaks[ii] == -1)
 	continue;
-      insert_single_step_breakpoint (gdbarch, breaks[ii]);
+      insert_single_step_breakpoint (gdbarch, aspace, breaks[ii]);
     }
 
   errno = 0;			/* FIXME, don't ignore errors! */

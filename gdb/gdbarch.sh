@@ -756,6 +756,9 @@ v:int:has_global_solist:::0:0::0
 # visible to all address spaces automatically.  For such cases,
 # this property should be set to true.
 v:int:has_global_breakpoints:::0:0::0
+
+# True if inferiors share an address space (e.g., uClinux).
+m:int:has_shared_address_space:void:::default_has_shared_address_space::0
 EOF
 }
 

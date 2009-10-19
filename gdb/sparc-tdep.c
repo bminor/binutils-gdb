@@ -1312,6 +1312,7 @@ sparc_software_single_step (struct frame_info *frame)
 {
   struct gdbarch *arch = get_frame_arch (frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (arch);
+  struct address_space *aspace = get_frame_address_space (frame);
   CORE_ADDR npc, nnpc;
 
   CORE_ADDR pc, orig_npc;
@@ -1322,10 +1323,10 @@ sparc_software_single_step (struct frame_info *frame)
   /* Analyze the instruction at PC.  */
   nnpc = sparc_analyze_control_transfer (frame, pc, &npc);
   if (npc != 0)
-    insert_single_step_breakpoint (arch, npc);
+    insert_single_step_breakpoint (arch, aspace, npc);
 
   if (nnpc != 0)
-    insert_single_step_breakpoint (arch, nnpc);
+    insert_single_step_breakpoint (arch, aspace, nnpc);
 
   /* Assert that we have set at least one breakpoint, and that
      they're not set at the same spot - unless we're going

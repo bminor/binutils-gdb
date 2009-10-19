@@ -1,3 +1,19 @@
+2009-10-19  Pedro Alves  <pedro@codesourcery.com>
+	    Stan Shebs  <stan@codesourcery.com>
+
+	* observer.texi (new_inferior): Rename to...
+	(inferior_appeared): ... this.
+
+	* gdb.texinfo (Inferiors): Rename node to ...
+	(Inferiors and Programs): ... this.  Mention running multiple
+	programs in the same debug session.
+	<info inferiors>: Mention the new 'Executable' column if "info
+	inferiors".  Update examples.  Document the "add-inferior",
+	"clone-inferior", "remove-inferior" and "maint info
+	program-spaces" commands.
+	(Process): Rename node to...
+	(Forks): ... this.  Document "set|show follow-exec-mode".
+
 2009-10-11  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.texinfo (ReverseStep): Show default as "unsupported".

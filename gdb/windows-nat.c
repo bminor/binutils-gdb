@@ -1585,7 +1585,8 @@ do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
   clear_proceed_status ();
   init_wait_for_inferior ();
 
-  inf = add_inferior (pid);
+  inf = current_inferior ();
+  inferior_appeared (inf, pid);
   inf->attach_flag = attaching;
 
   /* Make the new process the current inferior, so terminal handling

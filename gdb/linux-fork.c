@@ -41,9 +41,6 @@ static int highest_fork_num;
 /* Prevent warning from -Wmissing-prototypes.  */
 extern void _initialize_linux_fork (void);
 
-int detach_fork = 1;		/* Default behavior is to detach
-				   newly forked processes (legacy).  */
-
 /* Fork list data structure:  */
 struct fork_info
 {
@@ -647,14 +644,6 @@ void
 _initialize_linux_fork (void)
 {
   init_fork_list ();
-
-  /* Set/show detach-on-fork: user-settable mode.  */
-
-  add_setshow_boolean_cmd ("detach-on-fork", class_obscure, &detach_fork, _("\
-Set whether gdb will detach the child of a fork."), _("\
-Show whether gdb will detach the child of a fork."), _("\
-Tells gdb whether to detach the child of a fork."),
-			   NULL, NULL, &setlist, &showlist);
 
   /* Checkpoint command: create a fork of the inferior process
      and set it aside for later debugging.  */

@@ -690,6 +690,7 @@ symbol_search_name (const struct general_symbol_info *gsymbol)
 void
 init_sal (struct symtab_and_line *sal)
 {
+  sal->pspace = NULL;
   sal->symtab = 0;
   sal->section = 0;
   sal->line = 0;
@@ -1994,8 +1995,11 @@ find_pc_sect_symtab (CORE_ADDR pc, struct obj_section *section)
   struct symtab *best_s = NULL;
   struct partial_symtab *ps;
   struct objfile *objfile;
+  struct program_space *pspace;
   CORE_ADDR distance = 0;
   struct minimal_symbol *msymbol;
+
+  pspace = current_program_space;
 
   /* If we know that this is not a text address, return failure.  This is
      necessary because we loop based on the block's high and low code
@@ -2151,6 +2155,8 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
      Fudge the pc to make sure we get that.  */
 
   init_sal (&val);		/* initialize to zeroes */
+
+  val.pspace = current_program_space;
 
   /* It's tempting to assume that, if we can't find debugging info for
      any function enclosing PC, that we shouldn't search for line
@@ -2656,6 +2662,11 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
   struct symtab_and_line sal;
   struct block *b, *function_block;
 
+  struct cleanup *old_chain;
+
+  old_chain = save_current_space_and_thread ();
+  switch_to_program_space_and_thread (objfile->pspace);
+
   pc = BLOCK_START (block);
   fixup_symbol_section (sym, objfile);
   if (funfirstline)
@@ -2707,6 +2718,7 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
     }
 
   sal.pc = pc;
+  sal.pspace = objfile->pspace;
 
   /* Check if we are now inside an inlined function.  If we can,
      use the call site of the function instead.  */
@@ -2727,6 +2739,7 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
       sal.symtab = SYMBOL_SYMTAB (BLOCK_FUNCTION (function_block));
     }
 
+  do_cleanups (old_chain);
   return sal;
 }
 
@@ -4560,6 +4573,7 @@ symtab_observer_executable_changed (void)
    initializing it from SYMTAB, LINENO and PC.  */
 static void
 append_expanded_sal (struct symtabs_and_lines *sal,
+		     struct program_space *pspace,
 		     struct symtab *symtab,
 		     int lineno, CORE_ADDR pc)
 {
@@ -4567,6 +4581,7 @@ append_expanded_sal (struct symtabs_and_lines *sal,
 			sizeof (sal->sals[0])
 			* (sal->nelts + 1));
   init_sal (sal->sals + sal->nelts);
+  sal->sals[sal->nelts].pspace = pspace;
   sal->sals[sal->nelts].symtab = symtab;
   sal->sals[sal->nelts].section = NULL;
   sal->sals[sal->nelts].end = 0;
@@ -4586,14 +4601,16 @@ append_exact_match_to_sals (char *filename, int lineno,
 			    struct linetable_entry **best_item,
 			    struct symtab **best_symtab)
 {
+  struct program_space *pspace;
   struct objfile *objfile;
   struct symtab *symtab;
   int exact = 0;
   int j;
   *best_item = 0;
   *best_symtab = 0;
-  
-  ALL_SYMTABS (objfile, symtab)
+
+  ALL_PSPACES (pspace)
+    ALL_PSPACE_SYMTABS (pspace, objfile, symtab)
     {
       if (strcmp (filename, symtab->filename) == 0)
 	{
@@ -4611,7 +4628,8 @@ append_exact_match_to_sals (char *filename, int lineno,
 	      if (item->line == lineno)
 		{
 		  exact = 1;
-		  append_expanded_sal (ret, symtab, lineno, item->pc);
+		  append_expanded_sal (ret, objfile->pspace,
+				       symtab, lineno, item->pc);
 		}
 	      else if (!exact && item->line > lineno
 		       && (*best_item == NULL
@@ -4626,11 +4644,10 @@ append_exact_match_to_sals (char *filename, int lineno,
   return exact;
 }
 
-/* Compute a set of all sals in
-   the entire program that correspond to same file
-   and line as SAL and return those.  If there
-   are several sals that belong to the same block,
-   only one sal for the block is included in results.  */
+/* Compute a set of all sals in all program spaces that correspond to
+   same file and line as SAL and return those.  If there are several
+   sals that belong to the same block, only one sal for the block is
+   included in results.  */
 
 struct symtabs_and_lines
 expand_line_sal (struct symtab_and_line sal)
@@ -4644,10 +4661,12 @@ expand_line_sal (struct symtab_and_line sal)
   int deleted = 0;
   struct block **blocks = NULL;
   int *filter;
+  struct cleanup *old_chain;
 
   ret.nelts = 0;
   ret.sals = NULL;
 
+  /* Only expand sals that represent file.c:line.  */
   if (sal.symtab == NULL || sal.line == 0 || sal.pc != 0)
     {
       ret.sals = xmalloc (sizeof (struct symtab_and_line));
@@ -4657,11 +4676,14 @@ expand_line_sal (struct symtab_and_line sal)
     }
   else
     {
+      struct program_space *pspace;
       struct linetable_entry *best_item = 0;
       struct symtab *best_symtab = 0;
       int exact = 0;
+      char *match_filename;
 
       lineno = sal.line;
+      match_filename = sal.symtab->filename;
 
       /* We need to find all symtabs for a file which name
 	 is described by sal.  We cannot just directly
@@ -4674,17 +4696,23 @@ expand_line_sal (struct symtab_and_line sal)
 	 the right name.  Then, we iterate over symtabs, knowing
 	 that all symtabs we're interested in are loaded.  */
 
-      ALL_PSYMTABS (objfile, psymtab)
+      old_chain = save_current_program_space ();
+      ALL_PSPACES (pspace)
+	ALL_PSPACE_PSYMTABS (pspace, objfile, psymtab)
 	{
-	  if (strcmp (sal.symtab->filename,
-		      psymtab->filename) == 0)
-	    PSYMTAB_TO_SYMTAB (psymtab);
+	  if (strcmp (match_filename, psymtab->filename) == 0)
+	    {
+	      set_current_program_space (pspace);
+
+	      PSYMTAB_TO_SYMTAB (psymtab);
+	    }
 	}
+      do_cleanups (old_chain);
 
       /* Now search the symtab for exact matches and append them.  If
 	 none is found, append the best_item and all its exact
 	 matches.  */
-      exact = append_exact_match_to_sals (sal.symtab->filename, lineno,
+      exact = append_exact_match_to_sals (match_filename, lineno,
 					  &ret, &best_item, &best_symtab);
       if (!exact && best_item)
 	append_exact_match_to_sals (best_symtab->filename, best_item->line,
@@ -4700,13 +4728,21 @@ expand_line_sal (struct symtab_and_line sal)
      blocks -- for each PC found above we see if there are other PCs
      that are in the same block.  If yes, the other PCs are filtered out.  */
 
+  old_chain = save_current_program_space ();
   filter = alloca (ret.nelts * sizeof (int));
   blocks = alloca (ret.nelts * sizeof (struct block *));
   for (i = 0; i < ret.nelts; ++i)
     {
+      struct blockvector *bl;
+      struct block *b;
+
+      set_current_program_space (ret.sals[i].pspace);
+
       filter[i] = 1;
-      blocks[i] = block_for_pc (ret.sals[i].pc);
+      blocks[i] = block_for_pc_sect (ret.sals[i].pc, ret.sals[i].section);
+
     }
+  do_cleanups (old_chain);
 
   for (i = 0; i < ret.nelts; ++i)
     if (blocks[i] != NULL)

@@ -478,9 +478,9 @@ set bp_location6 [gdb_get_line_number "set breakpoint 6 here"]
 
 send_gdb "maint info breakpoints\n"
 gdb_expect {
-    -re "Num\[ \t\]+Type\[ \t\]+Disp\[ \t\]+Enb\[ \t\]+Address\[ \t\]+What\r\n1\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex\[ \t\]+in main at.*break.c:$bp_location6\r\n\[ \t\]+breakpoint already hit 1 time\r\n.*$gdb_prompt $"\
+    -re "Num\[ \t\]+Type\[ \t\]+Disp\[ \t\]+Enb\[ \t\]+Address\[ \t\]+What\r\n1\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex\[ \t\]+in main at.*break.c:$bp_location6 inf 1\r\n\[ \t\]+breakpoint already hit 1 time\r\n.*$gdb_prompt $"\
 		{ pass "maint info breakpoints" }
-	-re "Num\[ \t\]+Type\[ \t\]+Disp\[ \t\]+Enb\[ \t\]+Address\[ \t\]+What\r\n1\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex in main at.*break.c:$bp_location6\r\n\[ \t\]+breakpoint already hit 1 time\r\n-1\[ \t\]+shlib events\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex.*breakpoint already hit.*$gdb_prompt $"\
+	-re "Num\[ \t\]+Type\[ \t\]+Disp\[ \t\]+Enb\[ \t\]+Address\[ \t\]+What\r\n1\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex in main at.*break.c:$bp_location6 sspace 1\r\n\[ \t\]+breakpoint already hit 1 time\r\n-1\[ \t\]+shlib events\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex.*breakpoint already hit.*$gdb_prompt $"\
 		{ pass "maint info breakpoints (with shlib events)" }
 	-re ".*$gdb_prompt $"       { fail "maint info breakpoints" }
 	timeout         { fail "(timeout) maint info breakpoints" }

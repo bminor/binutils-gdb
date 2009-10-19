@@ -56,7 +56,7 @@ static void mi_on_normal_stop (struct bpstats *bs, int print_frame);
 
 static void mi_new_thread (struct thread_info *t);
 static void mi_thread_exit (struct thread_info *t, int silent);
-static void mi_new_inferior (int pid);
+static void mi_inferior_appeared (int pid);
 static void mi_inferior_exit (int pid);
 static void mi_on_resume (ptid_t ptid);
 static void mi_solib_loaded (struct so_list *solib);
@@ -86,7 +86,7 @@ mi_interpreter_init (int top_level)
     {
       observer_attach_new_thread (mi_new_thread);
       observer_attach_thread_exit (mi_thread_exit);
-      observer_attach_new_inferior (mi_new_inferior);
+      observer_attach_inferior_appeared (mi_inferior_appeared);
       observer_attach_inferior_exit (mi_inferior_exit);
       observer_attach_normal_stop (mi_on_normal_stop);
       observer_attach_target_resumed (mi_on_resume);
@@ -308,12 +308,12 @@ mi_thread_exit (struct thread_info *t, int silent)
   gdb_flush (mi->event_channel);
 }
 
-static void
-mi_new_inferior (int pid)
+void
+mi_inferior_appeared (int pid)
 {
   struct mi_interp *mi = top_level_interpreter_data ();
   target_terminal_ours ();
-  fprintf_unfiltered (mi->event_channel, "thread-group-created,id=\"%d\"", 
+  fprintf_unfiltered (mi->event_channel, "thread-group-created,id=\"%d\"",
 		      pid);
   gdb_flush (mi->event_channel);
 }

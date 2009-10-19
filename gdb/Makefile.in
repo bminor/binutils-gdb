@@ -661,6 +661,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	objc-exp.y objc-lang.c \
 	objfiles.c osabi.c observer.c osdata.c \
 	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c printcmd.c \
+	progspace.c \
 	prologue-value.c \
 	regcache.c reggroups.c remote.c remote-fileio.c reverse.c \
 	scm-exp.c scm-lang.c scm-valprint.c \
@@ -834,7 +835,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	prologue-value.o memory-map.o xml-support.o xml-syscall.o \
 	target-descriptions.o target-memory.o xml-tdesc.o xml-builtin.o \
 	inferior.o osdata.o gdb_usleep.o record.o \
-	jit.o
+	jit.o progspace.o
 
 # Definitions for the syscall's XML files and dir
 XML_SYSCALLS_DIR = syscalls/

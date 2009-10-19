@@ -130,10 +130,12 @@ free_symtab (struct symtab *s)
 void
 print_symbol_bcache_statistics (void)
 {
+  struct program_space *pspace;
   struct objfile *objfile;
 
   immediate_quit++;
-  ALL_OBJFILES (objfile)
+  ALL_PSPACES (pspace)
+    ALL_PSPACE_OBJFILES (pspace, objfile)
   {
     printf_filtered (_("Byte cache statistics for '%s':\n"), objfile->name);
     print_bcache_statistics (objfile->psymbol_cache, "partial symbol cache");
@@ -145,13 +147,15 @@ print_symbol_bcache_statistics (void)
 void
 print_objfile_statistics (void)
 {
+  struct program_space *pspace;
   struct objfile *objfile;
   struct symtab *s;
   struct partial_symtab *ps;
   int i, linetables, blockvectors;
 
   immediate_quit++;
-  ALL_OBJFILES (objfile)
+  ALL_PSPACES (pspace)
+    ALL_PSPACE_OBJFILES (pspace, objfile)
   {
     printf_filtered (_("Statistics for '%s':\n"), objfile->name);
     if (OBJSTAT (objfile, n_stabs) > 0)
@@ -886,6 +890,7 @@ maintenance_print_msymbols (char *args, int from_tty)
   struct cleanup *cleanups;
   char *filename = DEV_TTY;
   char *symname = NULL;
+  struct program_space *pspace;
   struct objfile *objfile;
 
   struct stat sym_st, obj_st;
@@ -921,10 +926,11 @@ maintenance_print_msymbols (char *args, int from_tty)
   make_cleanup_ui_file_delete (outfile);
 
   immediate_quit++;
-  ALL_OBJFILES (objfile)
-    if (symname == NULL
-	|| (!stat (objfile->name, &obj_st) && sym_st.st_ino == obj_st.st_ino))
-      dump_msymbols (objfile, outfile);
+  ALL_PSPACES (pspace)
+    ALL_PSPACE_OBJFILES (pspace, objfile)
+      if (symname == NULL
+	  || (!stat (objfile->name, &obj_st) && sym_st.st_ino == obj_st.st_ino))
+	dump_msymbols (objfile, outfile);
   immediate_quit--;
   fprintf_filtered (outfile, "\n\n");
   do_cleanups (cleanups);
@@ -933,13 +939,15 @@ maintenance_print_msymbols (char *args, int from_tty)
 void
 maintenance_print_objfiles (char *ignore, int from_tty)
 {
+  struct program_space *pspace;
   struct objfile *objfile;
 
   dont_repeat ();
 
   immediate_quit++;
-  ALL_OBJFILES (objfile)
-    dump_objfile (objfile);
+  ALL_PSPACES (pspace)
+    ALL_PSPACE_OBJFILES (pspace, objfile)
+      dump_objfile (objfile);
   immediate_quit--;
 }
 
@@ -948,12 +956,14 @@ maintenance_print_objfiles (char *ignore, int from_tty)
 void
 maintenance_info_symtabs (char *regexp, int from_tty)
 {
+  struct program_space *pspace;
   struct objfile *objfile;
 
   if (regexp)
     re_comp (regexp);
 
-  ALL_OBJFILES (objfile)
+  ALL_PSPACES (pspace)
+    ALL_PSPACE_OBJFILES (pspace, objfile)
     {
       struct symtab *symtab;
       
@@ -1005,12 +1015,14 @@ maintenance_info_symtabs (char *regexp, int from_tty)
 void
 maintenance_info_psymtabs (char *regexp, int from_tty)
 {
+  struct program_space *pspace;
   struct objfile *objfile;
 
   if (regexp)
     re_comp (regexp);
 
-  ALL_OBJFILES (objfile)
+  ALL_PSPACES (pspace)
+    ALL_PSPACE_OBJFILES (pspace, objfile)
     {
       struct gdbarch *gdbarch = get_objfile_arch (objfile);
       struct partial_symtab *psymtab;

@@ -135,16 +135,25 @@ struct display
   {
     /* Chain link to next auto-display item.  */
     struct display *next;
+
     /* The expression as the user typed it.  */
     char *exp_string;
+
     /* Expression to be evaluated and displayed.  */
     struct expression *exp;
+
     /* Item number of this auto-display item.  */
     int number;
+
     /* Display format specified.  */
     struct format_data format;
+
+    /* Program space associated with `block'.  */
+    struct program_space *pspace;
+
     /* Innermost block required by this expression when evaluated */
     struct block *block;
+
     /* Status of this display (enabled or disabled) */
     int enabled_p;
   };
@@ -1449,6 +1458,7 @@ display_command (char *exp, int from_tty)
       new->exp_string = xstrdup (exp);
       new->exp = expr;
       new->block = innermost_block;
+      new->pspace = current_program_space;
       new->next = display_chain;
       new->number = ++display_number;
       new->format = fmt;
@@ -1585,7 +1595,12 @@ do_one_display (struct display *d)
     }
 
   if (d->block)
-    within_current_scope = contained_in (get_selected_block (0), d->block);
+    {
+      if (d->pspace == current_program_space)
+	within_current_scope = contained_in (get_selected_block (0), d->block);
+      else
+	within_current_scope = 0;
+    }
   else
     within_current_scope = 1;
   if (!within_current_scope)
@@ -1810,6 +1825,7 @@ display_uses_solib_p (const struct display *d,
   const union exp_element *const elts = exp->elts;
 
   if (d->block != NULL
+      && d->pspace == solib->pspace
       && solib_contains_address_p (solib, d->block->startaddr))
     return 1;
 
@@ -1830,7 +1846,8 @@ display_uses_solib_p (const struct display *d,
 	    SYMBOL_OBJ_SECTION (symbol);
 
 	  if (block != NULL
-	      && solib_contains_address_p (solib, block->startaddr))
+	      && solib_contains_address_p (solib,
+					   block->startaddr))
 	    return 1;
 
 	  if (section && section->objfile == solib->objfile)

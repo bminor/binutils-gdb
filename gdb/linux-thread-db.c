@@ -1226,17 +1226,14 @@ thread_db_wait (struct target_ops *ops,
 
   if (ourstatus->kind == TARGET_WAITKIND_EXECD)
     {
-      /* Breakpoints have already been marked non-inserted by the
-	 layer below.  We're safe in knowing that removing them will
-	 not write the shadows of the old image into the new
-	 image.  */
-      remove_thread_event_breakpoints ();
-
       /* New image, it may or may not end up using thread_db.  Assume
 	 not unless we find otherwise.  */
       delete_thread_db_info (GET_PID (ptid));
       if (!thread_db_list)
  	unpush_target (&thread_db_ops);
+
+      /* Thread event breakpoints are deleted by
+	 update_breakpoints_after_exec.  */
 
       return ptid;
     }
@@ -1274,12 +1271,11 @@ thread_db_mourn_inferior (struct target_ops *ops)
 
   delete_thread_db_info (GET_PID (inferior_ptid));
 
-  /* Delete the old thread event breakpoints.  Mark breakpoints out,
-     so that we don't try to un-insert them.  */
-  mark_breakpoints_out ();
-  remove_thread_event_breakpoints ();
-
   target_beneath->to_mourn_inferior (target_beneath);
+
+  /* Delete the old thread event breakpoints.  Do this after mourning
+     the inferior, so that we don't try to uninsert them.  */
+  remove_thread_event_breakpoints ();
 
   /* Detach thread_db target ops.  */
   if (!thread_db_list)

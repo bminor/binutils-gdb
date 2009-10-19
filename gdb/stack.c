@@ -648,7 +648,8 @@ print_frame_info (struct frame_info *frame, int print_level,
     }
 
   if (print_what != LOCATION)
-    set_default_breakpoint (1, get_frame_pc (frame), sal.symtab, sal.line);
+    set_default_breakpoint (1, sal.pspace,
+			    get_frame_pc (frame), sal.symtab, sal.line);
 
   annotate_frame_end ();
 
@@ -825,7 +826,8 @@ print_frame (struct frame_info *frame, int print_level,
 #ifdef PC_SOLIB
       char *lib = PC_SOLIB (get_frame_pc (frame));
 #else
-      char *lib = solib_name_from_address (get_frame_pc (frame));
+      char *lib = solib_name_from_address (get_frame_program_space (frame),
+					   get_frame_pc (frame));
 #endif
       if (lib)
 	{

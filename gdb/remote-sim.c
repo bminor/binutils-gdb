@@ -471,7 +471,7 @@ gdbsim_create_inferior (struct target_ops *target, char *exec_file, char *args,
   sim_create_inferior (gdbsim_desc, exec_bfd, argv, env);
 
   inferior_ptid = remote_sim_ptid;
-  add_inferior_silent (ptid_get_pid (inferior_ptid));
+  inferior_appeared_silent (current_inferior (), ptid_get_pid (inferior_ptid));
   add_thread_silent (inferior_ptid);
 
   insert_breakpoints ();	/* Needed to get correct instruction in cache */

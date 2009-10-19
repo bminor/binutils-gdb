@@ -176,6 +176,9 @@ enum target_hw_bp_type
 
 struct bp_target_info
 {
+  /* Address space at which the breakpoint was placed.  */
+  struct address_space *placed_address_space;
+
   /* Address at which the breakpoint was placed.  This is normally the
      same as ADDRESS from the bp_location, except when adjustment
      happens in gdbarch_breakpoint_from_pc.  The most common form of
@@ -271,6 +274,14 @@ struct bp_location
   /* Architecture associated with this location's address.  May be
      different from the breakpoint architecture.  */
   struct gdbarch *gdbarch;
+
+  /* The program space associated with this breakpoint location
+     address.  Note that an address space may be represented in more
+     than one program space (e.g. each uClinux program will be given
+     its own program space, but there will only be one address space
+     for all of them), but we must not insert more than one location
+     at the same address in the same address space.  */
+  struct program_space *pspace;
 
   /* Note that zero is a perfectly valid code address on some platforms
      (for example, the mn10200 (OBSOLETE) and mn10300 simulators).  NULL
@@ -409,6 +420,9 @@ struct breakpoint
        equals this.  */
     struct frame_id frame_id;
 
+    /* The program space used to set the breakpoint.  */
+    struct program_space *pspace;
+
     /* String we used to set the breakpoint (malloc'd).  */
     char *addr_string;
     /* Architecture we used to set the breakpoint.  */
@@ -520,7 +534,8 @@ extern void bpstat_clear (bpstat *);
    is part of the bpstat is copied as well.  */
 extern bpstat bpstat_copy (bpstat);
 
-extern bpstat bpstat_stop_status (CORE_ADDR pc, ptid_t ptid);
+extern bpstat bpstat_stop_status (struct address_space *aspace,
+				  CORE_ADDR pc, ptid_t ptid);
 
 /* This bpstat_what stuff tells wait_for_inferior what to do with a
    breakpoint (a challenging task).  */
@@ -707,17 +722,17 @@ enum breakpoint_here
 
 /* Prototypes for breakpoint-related functions.  */
 
-extern enum breakpoint_here breakpoint_here_p (CORE_ADDR);
+extern enum breakpoint_here breakpoint_here_p (struct address_space *, CORE_ADDR);
 
-extern int moribund_breakpoint_here_p (CORE_ADDR);
+extern int moribund_breakpoint_here_p (struct address_space *, CORE_ADDR);
 
-extern int breakpoint_inserted_here_p (CORE_ADDR);
+extern int breakpoint_inserted_here_p (struct address_space *, CORE_ADDR);
 
-extern int regular_breakpoint_inserted_here_p (CORE_ADDR);
+extern int regular_breakpoint_inserted_here_p (struct address_space *, CORE_ADDR);
 
-extern int software_breakpoint_inserted_here_p (CORE_ADDR);
+extern int software_breakpoint_inserted_here_p (struct address_space *, CORE_ADDR);
 
-extern int breakpoint_thread_match (CORE_ADDR, ptid_t);
+extern int breakpoint_thread_match (struct address_space *, CORE_ADDR, ptid_t);
 
 extern void until_break_command (char *, int, int);
 
@@ -735,7 +750,8 @@ extern struct breakpoint *clone_momentary_breakpoint (struct breakpoint *bpkt);
 
 extern void set_ignore_count (int, int, int);
 
-extern void set_default_breakpoint (int, CORE_ADDR, struct symtab *, int);
+extern void set_default_breakpoint (int, struct program_space *,
+				    CORE_ADDR, struct symtab *, int);
 
 extern void breakpoint_init_inferior (enum inf_context);
 
@@ -765,6 +781,8 @@ extern void set_breakpoint (struct gdbarch *gdbarch,
 extern void insert_breakpoints (void);
 
 extern int remove_breakpoints (void);
+
+extern int remove_breakpoints_pid (int pid);
 
 /* This function can be used to physically insert eventpoints from the
    specified traced inferior process, without modifying the breakpoint
@@ -800,6 +818,11 @@ extern void update_breakpoints_after_exec (void);
    It is an error to use this function on the process whose id is
    inferior_ptid.  */
 extern int detach_breakpoints (int);
+
+/* This function is called when program space PSPACE is about to be
+   deleted.  It takes care of updating breakpoints to not reference
+   this PSPACE anymore.  */
+extern void breakpoint_program_space_exit (struct program_space *pspace);
 
 extern void set_longjmp_breakpoint (int thread);
 extern void delete_longjmp_breakpoint (int thread);
@@ -909,13 +932,15 @@ extern int remove_hw_watchpoints (void);
 
 /* Manage a software single step breakpoint (or two).  Insert may be called
    twice before remove is called.  */
-extern void insert_single_step_breakpoint (struct gdbarch *, CORE_ADDR);
+extern void insert_single_step_breakpoint (struct gdbarch *,
+					   struct address_space *, CORE_ADDR);
 extern void remove_single_step_breakpoints (void);
 
 /* Manage manual breakpoints, separate from the normal chain of
    breakpoints.  These functions are used in murky target-specific
    ways.  Please do not add more uses!  */
-extern void *deprecated_insert_raw_breakpoint (struct gdbarch *, CORE_ADDR);
+extern void *deprecated_insert_raw_breakpoint (struct gdbarch *,
+					       struct address_space *, CORE_ADDR);
 extern int deprecated_remove_raw_breakpoint (struct gdbarch *, void *);
 
 /* Check if any hardware watchpoints have triggered, according to the

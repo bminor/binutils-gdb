@@ -757,6 +757,14 @@ get_current_arch (void)
     return target_gdbarch;
 }
 
+int
+default_has_shared_address_space (struct gdbarch *gdbarch)
+{
+  /* Simply say no.  In most unix-like targets each inferior/process
+     has its own address space.  */
+  return 0;
+}
+
 /* */
 
 extern initialize_file_ftype _initialize_gdbarch_utils; /* -Wmissing-prototypes */

@@ -1,3 +1,447 @@
+2009-10-19  Pedro Alves  <pedro@codesourcery.com>
+	    Stan Shebs  <stan@codesourcery.com>
+
+	Add base multi-executable/process support to GDB.
+
+	* Makefile.in (SFILES): Add progspace.c.
+	(COMMON_OBS): Add progspace.o.
+	* progspace.h: New.
+	* progspace.c: New.
+
+	* breakpoint.h (struct bp_target_info) <placed_address_space>: New
+	field.
+	(struct bp_location) <pspace>: New field.
+	(struct breakpoint) <pspace>: New field.
+	(bpstat_stop_status, breakpoint_here_p)
+	(moribund_breakpoint_here_p, breakpoint_inserted_here_p)
+	(regular_breakpoint_inserted_here_p)
+	(software_breakpoint_inserted_here_p, breakpoint_thread_match)
+	(set_default_breakpoint): Adjust prototypes.
+	(remove_breakpoints_pid, breakpoint_program_space_exit): Declare.
+	(insert_single_step_breakpoint, deprecated_insert_raw_breakpoint):
+	Adjust prototypes.
+	* breakpoint.c (executing_startup): Delete.
+	(default_breakpoint_sspace): New.
+	(breakpoint_restore_shadows): Skip if the address space doesn't
+	match.
+	(update_watchpoint): Record the frame's program space in the
+	breakpoint location.
+	(insert_bp_location): Record the address space in target_info.
+	Adjust to pass the symbol space to solib_name_from_address.
+	(breakpoint_program_space_exit): New.
+	(insert_breakpoint_locations): Switch the symbol space and thread
+	when inserting breakpoints.  Don't insert breakpoints in a vfork
+	parent waiting for vfork done if we're not attached to the vfork
+	child.
+	(remove_breakpoints_pid): New.
+	(reattach_breakpoints): Switch to a thread of PID.  Ignore
+	breakpoints of other symbol spaces.
+	(create_internal_breakpoint): Store the symbol space in the sal.
+	(create_longjmp_master_breakpoint): Iterate over all symbol
+	spaces.
+	(update_breakpoints_after_exec): Ignore breakpoints for other
+	symbol spaces.
+	(remove_breakpoint): Rename to ...
+	(remove_breakpoint_1): ... this.  Pass the breakpoints symbol
+	space to solib_name_from_address.
+	(remove_breakpoint): New.
+	(mark_breakpoints_out): Ignore breakpoints from other symbol
+	spaces.
+	(breakpoint_init_inferior): Ditto.
+	(breakpoint_here_p): Add an address space argument and adjust to
+	use breakpoint_address_match.
+	(moribund_breakpoint_here_p): Ditto.
+	(regular_breakpoint_inserted_here_p): Ditto.
+	(breakpoint_inserted_here_p): Ditto.
+	(software_breakpoint_inserted_here_p): Ditto.
+	(breakpoint_thread_match): Ditto.
+	(bpstat_check_location): Ditto.
+	(bpstat_stop_status): Ditto.
+	(print_breakpoint_location): If there's a location to print,
+	switch the current symbol space.
+	(print_one_breakpoint_location): Add `allflag' argument.
+	(print_one_breakpoint): Ditto.	Adjust.
+	(do_captured_breakpoint_query): Adjust.
+	(breakpoint_1): Adjust.
+	(breakpoint_has_pc): Also match the symbol space.
+	(describe_other_breakpoints): Add a symbol space argument and
+	adjust.
+	(set_default_breakpoint): Add a symbol space argument.	Set
+	default_breakpoint_sspace.
+	(breakpoint_address_match): New.
+	(check_duplicates_for): Add an address space argument, and adjust.
+	(set_raw_breakpoint): Record the symbol space in the location and
+	in the breakpoint.
+	(set_longjmp_breakpoint): Skip longjmp master breakpoints from
+	other symbol spaces.
+	(remove_thread_event_breakpoints, remove_solib_event_breakpoints)
+	(disable_breakpoints_in_shlibs): Skip breakpoints from other
+	symbol spaces.
+	(disable_breakpoints_in_unloaded_shlib): Match symbol spaces.
+	(create_catchpoint): Set the symbol space in the sal.
+	(disable_breakpoints_before_startup): Skip breakpoints from other
+	symbol spaces.	Set executing_startup in the current symbol space.
+	(enable_breakpoints_after_startup): Clear executing_startup in the
+	current symbol space.  Skip breakpoints from other symbol spaces.
+	(clone_momentary_breakpoint): Also copy the symbol space.
+	(add_location_to_breakpoint): Set the location's symbol space.
+	(bp_loc_is_permanent): Switch thread and symbol space.
+	(create_breakpoint): Adjust.
+	(expand_line_sal_maybe): Expand comment to mention symbol spaces.
+	Switch thread and symbol space when reading memory.
+	(parse_breakpoint_sals): Set the symbol space in the sal.
+	(break_command_really): Ditto.
+	(skip_prologue_sal): Switch and space.
+	(resolve_sal_pc): Ditto.
+	(watch_command_1): Record the symbol space in the sal.
+	(create_ada_exception_breakpoint): Adjust.
+	(clear_command): Adjust.  Match symbol spaces.
+	(update_global_location_list): Use breakpoint_address_match.
+	(breakpoint_re_set_one): Switch thread and space.
+	(breakpoint_re_set): Save symbol space.
+	(breakpoint_re_set_thread): Also reset the symbol space.
+	(deprecated_insert_raw_breakpoint): Add an address space argument.
+	Adjust.
+	(insert_single_step_breakpoint): Ditto.
+	(single_step_breakpoint_inserted_here_p): Ditto.
+	(clear_syscall_counts): New.
+	(_initialize_breakpoint): Install it as inferior_exit observer.
+
+	* exec.h: Include "progspace.h".
+	(exec_bfd, exec_bfd_mtime): New defines.
+	(exec_close): Declare.
+	* exec.c: Include "gdbthread.h" and "progspace.h".
+	(exec_bfd, exec_bfd_mtime, current_target_sections_1): Delete.
+	(using_exec_ops): New.
+	(exec_close_1): Rename to exec_close, and make public.
+	(exec_close): Rename to exec_close_1, and adjust all callers.  Add
+	description.  Remove target sections and close executables from
+	all program spaces.
+	(exec_file_attach): Add comment.
+	(add_target_sections): Check on `using_exec_ops' to check if the
+	target should be pushed.
+	(remove_target_sections): Only unpush the target if there are no
+	more target sections in any symbol space.
+	* gdbcore.h: Include "exec.h".
+	(exec_bfd, exec_bfd_mtime): Remove declarations.
+
+	* frame.h (get_frame_program_space, get_frame_address_space)
+	(frame_unwind_program_space): Declare.
+	* frame.c (struct frame_info) <pspace, aspace>: New fields.
+	(create_sentinel_frame): Add program space argument.  Set the
+	pspace and aspace fields of the frame object.
+	(get_current_frame, create_new_frame): Adjust.
+	(get_frame_program_space): New.
+	(frame_unwind_program_space): New.
+	(get_frame_address_space): New.
+	* stack.c (print_frame_info): Adjust.
+	(print_frame): Use the frame's program space.
+
+	* gdbthread.h (any_live_thread_of_process): Declare.
+	* thread.c (any_live_thread_of_process): New.
+	(switch_to_thread): Switch the program space as well.
+	(restore_selected_frame): Don't warn if trying to restore frame
+	level 0.
+
+	* inferior.h: Include "progspace.h".
+	(detach_fork): Declare.
+	(struct inferior) <removable, aspace, pspace>
+	<vfork_parent, vfork_child, pending_detach>
+	<waiting_for_vfork_done>: New fields.
+	<terminal_info>: Remove field.
+	<data, num_data>: New fields.
+	(register_inferior_data, register_inferior_data_with_cleanup)
+	(clear_inferior_data, set_inferior_data, inferior_data): Declare.
+	(exit_inferior, exit_inferior_silent, exit_inferior_num_silent)
+	(inferior_appeared): Declare.
+	(find_inferior_pid): Typo.
+	(find_inferior_id, find_inferior_for_program_space): Declare.
+	(set_current_inferior, save_current_inferior, prune_inferiors)
+	(number_of_inferiors): Declare.
+	(inferior_list): Declare.
+	* inferior.c: Include "gdbcore.h" and "symfile.h".
+	(inferior_list): Make public.
+	(delete_inferior_1): Always delete thread silently.
+	(find_inferior_id): Make public.
+	(current_inferior_): New.
+	(current_inferior): Use it.
+	(set_current_inferior): New.
+	(restore_inferior): New.
+	(save_current_inferior): New.
+	(free_inferior): Free the per-inferior data.
+	(add_inferior_silent): Allocate per-inferior data.
+	Call inferior_appeared.
+	(delete_threads_of_inferior): New.
+	(delete_inferior_1): Adjust interface to take an inferior pointer.
+	(delete_inferior): Adjust.
+	(delete_inferior_silent): Adjust.
+	(exit_inferior_1): New.
+	(exit_inferior): New.
+	(exit_inferior_silent): New.
+	(exit_inferior_num_silent): New.
+	(detach_inferior): Adjust.
+	(inferior_appeared): New.
+	(discard_all_inferiors): Adjust.
+	(find_inferior_id): Make public.  Assert pid is not zero.
+	(find_inferior_for_program_space): New.
+	(have_inferiors): Check if we have any inferior with pid not zero.
+	(have_live_inferiors): Go over all pushed targets looking for
+	process_stratum.
+	(prune_inferiors): New.
+	(number_of_inferiors): New.
+	(print_inferior): Add executable column.  Print vfork parent/child
+	relationships.
+	(inferior_command): Adjust to cope with not running inferiors.
+	(remove_inferior_command): New.
+	(add_inferior_command): New.
+	(clone_inferior_command): New.
+	(struct inferior_data): New.
+	(struct inferior_data_registration): New.
+	(struct inferior_data_registry): New.
+	(inferior_data_registry): New.
+	(register_inferior_data_with_cleanup): New.
+	(register_inferior_data): New.
+	(inferior_alloc_data): New.
+	(inferior_free_data): New.
+	(clear_inferior_data): New.
+	(set_inferior_data): New.
+	(inferior_data): New.
+	(initialize_inferiors): New.
+	(_initialize_inferiors): Register "add-inferior",
+	"remove-inferior" and "clone-inferior" commands.
+
+	* objfiles.h: Include "progspace.h".
+	(struct objfile) <pspace>: New field.
+	(symfile_objfile, object_files): Don't declare.
+	(ALL_PSPACE_OBJFILES): New.
+	(ALL_PSPACE_OBJFILES_SAFE): New.
+	(ALL_OBJFILES, ALL_OBJFILES_SAFE): Adjust.
+	(ALL_PSPACE_SYMTABS): New.
+	(ALL_PRIMARY_SYMTABS): Adjust.
+	(ALL_PSPACE_PRIMARY_SYMTABS): New.
+	(ALL_PSYMTABS): Adjust.
+	(ALL_PSPACE_PSYMTABS): New.
+	* objfiles.c (object_files, symfile_objfile): Delete.
+	(struct objfile_sspace_info): New.
+	(objfiles_pspace_data): New.
+	(objfiles_pspace_data_cleanup): New.
+	(get_objfile_pspace_data): New.
+	(objfiles_changed_p): Delete.
+	(allocate_objfile): Set the objfile's program space.  Adjust to
+	reference objfiles_changed_p in pspace data.
+	(free_objfile): Adjust to reference objfiles_changed_p in pspace
+	data.
+	(objfile_relocate): Ditto.
+	(update_section_map): Add pspace argument.  Adjust to iterate over
+	objfiles in the passed in pspace.
+	(find_pc_section): Delete sections and num_sections statics.
+	Adjust to refer to program space's objfiles_changed_p.	Adjust to
+	refer to sections and num_sections store in the objfile's pspace
+	data.
+	(objfiles_changed): Adjust to reference objfiles_changed_p in
+	pspace data.
+	(_initialize_objfiles): New.
+	* linespec.c (decode_all_digits, decode_dollar): Set the sal's
+	program space.
+	* source.c (current_source_pspace): New.
+	(get_current_source_symtab_and_line): Set the sal's program space.
+	(set_current_source_symtab_and_line): Set current_source_pspace.
+	(select_source_symtab): Ditto.	Use ALL_OBJFILES.
+	(forget_cached_source_info): Iterate over all program spaces.
+	* symfile.c (clear_symtab_users): Adjust.
+	* symmisc.c (print_symbol_bcache_statistics): Iterate over all
+	program spaces.
+	(print_objfile_statistics): Ditto.
+	(maintenance_print_msymbols): Ditto.
+	(maintenance_print_objfiles): Ditto.
+	(maintenance_info_symtabs): Ditto.
+	(maintenance_info_psymtabs): Ditto.
+	* symtab.h (SYMTAB_PSPACE): New.
+	(struct symtab_and_line) <pspace>: New field.
+	* symtab.c (init_sal): Clear the sal's program space.
+	(find_pc_sect_symtab): Set the sal's program space.  Switch thread
+	and space.
+	(append_expanded_sal): Add program space argument.  Iterate over
+	all program spaces.
+	(expand_line_sal): Iterate over all program spaces.  Switch
+	program space.
+
+	* target.h (enum target_waitkind) <TARGET_WAITKIND_VFORK_DONE>: New.
+	(struct target_ops) <to_thread_address_space>: New field.
+	(target_thread_address_space): Define.
+	* target.c (target_detach): Only remove breakpoints from the
+	inferior we're detaching.
+	(target_thread_address_space): New.
+
+	* defs.h (initialize_progspace): Declare.
+	* top.c (gdb_init): Call it.
+
+	* solist.h (struct so_list) <sspace>: New field.
+	* solib.h (struct program_space): Forward declare.
+	(solib_name_from_address): Adjust prototype.
+	* solib.c (so_list_head): Replace with a macro referencing the
+	program space.
+	(update_solib_list): Set the so's program space.
+	(solib_name_from_address): Add a program space argument and adjust.
+
+	* solib-svr4.c (struct svr4_info) <pid>: Delete field.
+	<interp_text_sect_low, interp_text_sect_high, interp_plt_sect_low>
+	<interp_plt_sect_high>: New fields.
+	(svr4_info_p, svr4_info): Delete.
+	(solib_svr4_sspace_data): New.
+	(get_svr4_info): Rewrite.
+	(svr4_sspace_data_cleanup): New.
+	(open_symbol_file_object): Adjust.
+	(svr4_default_sos): Adjust.
+	(svr4_fetch_objfile_link_map): Adjust.
+	(interp_text_sect_low, interp_text_sect_high, interp_plt_sect_low)
+	(interp_plt_sect_high): Delete.
+	(svr4_in_dynsym_resolve_code): Adjust.
+	(enable_break): Adjust.
+	(svr4_clear_solib): Revert bit that removed the svr4_info here,
+	and reinstate clearing debug_base, debug_loader_offset_p,
+	debug_loader_offset and debug_loader_name.
+	(_initialize_svr4_solib): Register solib_svr4_pspace_data.  Don't
+	install an inferior_exit observer anymore.
+
+	* printcmd.c (struct display) <pspace>: New field.
+	(display_command): Set the display's sspace.
+	(do_one_display): Match the display's sspace.
+	(display_uses_solib_p): Ditto.
+
+	* linux-fork.c (detach_fork): Moved to infrun.c.
+	(_initialize_linux_fork): Moved "detach-on-fork" command to
+	infrun.c.
+	* infrun.c (detach_fork): Moved from linux-fork.c.
+	(proceed_after_vfork_done): New.
+	(handle_vfork_child_exec_or_exit): New.
+	(follow_exec_mode_replace, follow_exec_mode_keep)
+	(follow_exec_mode_names, follow_exec_mode_string)
+	(show_follow_exec_mode_string): New.
+	(follow_exec): New.  Reinstate the mark_breakpoints_out call.
+	Remove shared libraries before attaching new executable.  If user
+	wants to keep the inferior, keep it.
+	(displaced_step_fixup): Adjust to pass an address space to the
+	breakpoints module.
+	(resume): Ditto.
+	(clear_proceed_status): In all-stop mode, always clear the proceed
+	status of all threads.
+	(prepare_to_proceed): Adjust to pass an address space to the
+	breakpoints module.
+	(proceed): Ditto.
+	(adjust_pc_after_break): Ditto.
+	(handle_inferior_event): When handling a process exit, switch the
+	program space to the inferior's that had exited.  Call
+	handle_vfork_child_exec_or_exit.  Adjust to pass an address space
+	to the breakpoints module.  In non-stop mode, when following a
+	fork and detach-fork is off, also resume the other branch.  Handle
+	TARGET_WAITKIND_VFORK_DONE.  Set the program space in sals.
+	(normal_stop): Prune inferiors.
+	(_initialize_infrun): Install the new "follow-exec-mode" command.
+	"detach-on-fork" moved here.
+
+	* regcache.h (get_regcache_aspace): Declare.
+	* regcache.c (struct regcache) <aspace>: New field.
+	(regcache_xmalloc): Clear the aspace.
+	(get_regcache_aspace): New.
+	(regcache_cpy): Copy the aspace field.
+	(regcache_cpy_no_passthrough): Ditto.
+	(get_thread_regcache): Fetch the thread's address space from the
+	target, and store it in the regcache.
+
+	* infcall.c (call_function_by_hand): Set the sal's pspace.
+
+	* arch-utils.c (default_has_shared_address_space): New.
+	* arch-utils.h (default_has_shared_address_space): Declare.
+
+	* gdbarch.sh (has_shared_address_space): New.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+	* linux-tdep.c: Include auxv.h, target.h, elf/common.h.
+	(linux_has_shared_address_space): New.
+	(_initialize_linux_tdep): Declare.
+
+	* arm-tdep.c (arm_software_single_step): Pass the frame's address
+	space to insert_single_step_breakpoint.
+	* arm-linux-tdep.c (arm_linux_software_single_step): Pass the
+	frame's pspace to breakpoint functions.
+	* cris-tdep.c (crisv32_single_step_through_delay): Ditto.
+	(cris_software_single_step): Ditto.
+	* mips-tdep.c (deal_with_atomic_sequence): Add frame argument.
+	Pass the frame's pspace to breakpoint functions.
+	(mips_software_single_step): Adjust.
+	(mips_single_step_through_delay): Adjust.
+	* rs6000-aix-tdep.c (rs6000_software_single_step): Adjust.
+	* rs6000-tdep.c (ppc_deal_with_atomic_sequence): Adjust.
+	* solib-irix.c (enable_break): Adjust to pass the current frame's
+	address space to breakpoint functions.
+	* sparc-tdep.c (sparc_software_single_step): Ditto.
+	* spu-tdep.c (spu_software_single_step): Ditto.
+	* alpha-tdep.c (alpha_software_single_step): Ditto.
+	* record.c (record_wait): Adjust to pass an address space to the
+	breakpoints module.
+
+	* fork-child.c (fork_inferior): Set the new inferior's program and
+	address spaces.
+	* inf-ptrace.c (inf_ptrace_follow_fork): Copy the parent's program
+	and address spaces.
+	(inf_ptrace_attach): Set the inferior's program and address spaces.
+	* linux-nat.c: Include "solib.h".
+	(linux_child_follow_fork): Manage parent and child's program and
+	address spaces.	 Clone the parent's program space if necessary.
+	Don't wait for the vfork to be done here.  Refuse to resume if
+	following the vfork parent while leaving the child stopped.
+	(resume_callback): Don't resume a vfork parent.
+	(linux_nat_resume): Also check for pending events in the
+	lp->waitstatus field.
+	(linux_handle_extended_wait): Report TARGET_WAITKIND_VFORK_DONE
+	events to the core.
+	(stop_wait_callback): Don't wait for SIGSTOP on vfork parents.
+	(cancel_breakpoint): Adjust.
+	* linux-thread-db.c (thread_db_wait): Don't remove thread event
+	breakpoints here.
+	(thread_db_mourn_inferior): Don't mark breakpoints out here.
+	Remove thread event breakpoints after mourning.
+	* corelow.c: Include progspace.h.
+	(core_open): Set the inferior's program and address spaces.
+	* remote.c (remote_add_inferior): Set the new inferior's program
+	and address spaces.
+	(remote_start_remote): Update address spaces.
+	(extended_remote_create_inferior_1): Don't init the thread list if
+	we already debugging other inferiors.
+	* darwin-nat.c (darwin_attach): Set the new inferior's program and
+	address spaces.
+	* gnu-nat.c (gnu_attach): Ditto.
+	* go32-nat.c (go32_create_inferior): Ditto.
+	* inf-ttrace.c (inf_ttrace_follow_fork, inf_ttrace_attach): Ditto.
+	* monitor.c (monitor_open): Ditto.
+	* nto-procfs.c (procfs_attach, procfs_create_inferior): Ditto.
+	* procfs.c (do_attach): Ditto.
+	* windows-nat.c (do_initial_windows_stuff): Ditto.
+
+	* inflow.c (inferior_process_group)
+	(terminal_init_inferior_with_pgrp, terminal_inferior,
+	(terminal_ours_1, inflow_inferior_exit, copy_terminal_info)
+	(child_terminal_info, new_tty_postfork, set_sigint_trap): Adjust
+	to use per-inferior data instead of inferior->terminal_info.
+	(inflow_inferior_data): New.
+	(inflow_new_inferior): Delete.
+	(inflow_inferior_data_cleanup): New.
+	(get_inflow_inferior_data): New.
+
+	* mi/mi-interp.c (mi_new_inferior): Rename to...
+	(mi_inferior_appeared): ... this.
+	(mi_interpreter_init): Adjust.
+
+	* tui/tui-disasm.c: Include "progspace.h".
+	(tui_set_disassem_content): Pass an address space to
+	breakpoint_here_p.
+
+	* NEWS: Mention multi-program debugging support.  Mention new
+	commands "add-inferior", "clone-inferior", "remove-inferior",
+	"maint info program-spaces", and new option "set
+	follow-exec-mode".
+
 2009-10-19  Don Lee  <don.lee@sunplusct.com>
 
 	* score-tdep.c: Delete dead codes.

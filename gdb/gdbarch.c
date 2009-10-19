@@ -249,6 +249,7 @@ struct gdbarch
   gdbarch_get_syscall_number_ftype *get_syscall_number;
   int has_global_solist;
   int has_global_breakpoints;
+  gdbarch_has_shared_address_space_ftype *has_shared_address_space;
 };
 
 
@@ -389,6 +390,7 @@ struct gdbarch startup_gdbarch =
   0,  /* get_syscall_number */
   0,  /* has_global_solist */
   0,  /* has_global_breakpoints */
+  default_has_shared_address_space,  /* has_shared_address_space */
   /* startup_gdbarch() */
 };
 
@@ -472,6 +474,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->displaced_step_location = NULL;
   gdbarch->target_signal_from_host = default_target_signal_from_host;
   gdbarch->target_signal_to_host = default_target_signal_to_host;
+  gdbarch->has_shared_address_space = default_has_shared_address_space;
   /* gdbarch_alloc() */
 
   return gdbarch;
@@ -649,6 +652,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of get_syscall_number, has predicate */
   /* Skip verify of has_global_solist, invalid_p == 0 */
   /* Skip verify of has_global_breakpoints, invalid_p == 0 */
+  /* Skip verify of has_shared_address_space, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &length);
   make_cleanup (xfree, buf);
   if (length > 0)
@@ -890,6 +894,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: has_global_solist = %s\n",
                       plongest (gdbarch->has_global_solist));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: has_shared_address_space = <%s>\n",
+                      host_address_to_string (gdbarch->has_shared_address_space));
   fprintf_unfiltered (file,
                       "gdbarch_dump: have_nonsteppable_watchpoint = %s\n",
                       plongest (gdbarch->have_nonsteppable_watchpoint));
@@ -3502,6 +3509,23 @@ set_gdbarch_has_global_breakpoints (struct gdbarch *gdbarch,
                                     int has_global_breakpoints)
 {
   gdbarch->has_global_breakpoints = has_global_breakpoints;
+}
+
+int
+gdbarch_has_shared_address_space (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->has_shared_address_space != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_has_shared_address_space called\n");
+  return gdbarch->has_shared_address_space (gdbarch);
+}
+
+void
+set_gdbarch_has_shared_address_space (struct gdbarch *gdbarch,
+                                      gdbarch_has_shared_address_space_ftype has_shared_address_space)
+{
+  gdbarch->has_shared_address_space = has_shared_address_space;
 }
 
 

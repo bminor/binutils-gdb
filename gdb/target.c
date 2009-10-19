@@ -1267,7 +1267,10 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
       return -1;
     }
 
-  inf = find_inferior_pid (ptid_get_pid (inferior_ptid));
+  if (!ptid_equal (inferior_ptid, null_ptid))
+    inf = find_inferior_pid (ptid_get_pid (inferior_ptid));
+  else
+    inf = NULL;
 
   if (inf != NULL
       && (region->attrib.cache
@@ -2046,7 +2049,7 @@ target_detach (char *args, int from_tty)
   else
     /* If we're in breakpoints-always-inserted mode, have to remove
        them before detaching.  */
-    remove_breakpoints ();
+    remove_breakpoints_pid (PIDGET (inferior_ptid));
 
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     {
@@ -2547,6 +2550,27 @@ target_get_osdata (const char *type)
   return target_read_stralloc (t, TARGET_OBJECT_OSDATA, type);
 }
 
+/* Determine the current address space of thread PTID.  */
+
+struct address_space *
+target_thread_address_space (ptid_t ptid)
+{
+  struct inferior *inf;
+
+  /* For now, assume frame chains and inferiors only see one address
+     space.  */
+
+  /* Fall-back to the "main" address space of the inferior.  */
+  inf = find_inferior_pid (ptid_get_pid (ptid));
+
+  if (inf == NULL || inf->aspace == NULL)
+    internal_error (__FILE__, __LINE__, "\
+Can't determine the current address space of thread %s\n",
+		    target_pid_to_str (ptid));
+
+  return inf->aspace;
+}
+
 static int
 default_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 {
@@ -2658,7 +2682,7 @@ generic_mourn_inferior (void)
   if (!ptid_equal (ptid, null_ptid))
     {
       int pid = ptid_get_pid (ptid);
-      delete_inferior (pid);
+      exit_inferior (pid);
     }
 
   breakpoint_init_inferior (inf_exited);
