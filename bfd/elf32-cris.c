@@ -1690,15 +1690,10 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		= -elf_cris_hash_table (info)->dtpmod_refcount;
 	    }
 
-	  /* The thread-based offset to the local symbol is the
-	     relocation.
-	     For the executable, TLS data begins at the thread pointer plus
-	     the negative size of the TLS data.  For a DSO, that's part of
-	     the module TLS offset.  */
+	  /* The relocation is the offset from the start of the module
+	     TLS block to the (local) symbol.  */
 	  relocation -= elf_hash_table (info)->tls_sec == NULL
-	    ? 0 : (elf_hash_table (info)->tls_sec->vma
-		   + (info->shared
-		      ? 0 : elf_hash_table (info)->tls_size));
+	    ? 0 : elf_hash_table (info)->tls_sec->vma;
 	  break;
 
 	case R_CRIS_32_GD:

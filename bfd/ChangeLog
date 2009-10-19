@@ -1,3 +1,9 @@
+2009-10-19  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (cris_elf_relocate_section) <case R_CRIS_32_DTPREL>:
+	Don't subtract the size of the TLS block for non-shared objects
+	from the relocation.
+
 2009-10-16  Tristan Gingold  <gingold@adacore.com>
 
 	* configure.in: Bump version to 2.20.0
