@@ -216,4 +216,5 @@ int main ()
   func4 ();
 
   return 0;
-}
+} /* end of main */
+

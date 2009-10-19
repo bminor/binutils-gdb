@@ -1,3 +1,12 @@
+2009-10-19  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.reverse/consecutive-reverse.c: Add comment at end of main.
+	* gdb.reverse/finish-reverse.c: Ditto.
+	* gdb.reverse/sigall-reverse.c: Ditto.
+	* gdb.reverse/solib-reverse.c: Ditto.
+	* gdb.reverse/step-reverse.c: Ditto.
+	* gdb.reverse/watch-reverse.c: Ditto.
+
 2009-10-19  Pedro Alves  <pedro@codesourcery.com>
 	    Stan Shebs  <stan@codesourcery.com>
 

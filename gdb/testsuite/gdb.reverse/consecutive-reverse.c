@@ -34,4 +34,5 @@ main()
     breakpoint ();
 #endif
   foo ();
-}
+} /* end of main */
+

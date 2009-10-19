@@ -73,6 +73,6 @@ int main () {
      large_struct_by_value (r);  /* step-test.exp: large struct by value */
    }
 
-   exit (0);
+   exit (0); /* end of main */
 }
 

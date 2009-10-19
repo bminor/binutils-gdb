@@ -1409,5 +1409,5 @@ main ()
   gen_63 ();
   gen_TERM ();
 
-  return 0;
+  return 0;	/* end of main */
 }

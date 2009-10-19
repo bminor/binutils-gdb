@@ -39,5 +39,5 @@ int main ()
   sleep (0);			/* sleep three */
 
   return 0;			/* end part one */
-}
+} /* end of main */
 
