@@ -81,7 +81,7 @@ Disassembly of section \.text:
    800a8:	6fae b4ff ffff      	move.d 0xffffffb4,\$r10
 #...
 000800b0 <tlsdsofn>:
-   800b0:	6fae b0ff ffff      	move\.d 0xffffffb0,\$r10
+   800b0:	6fae 0000 0000      	move\.d 0 <x>,\$r10
 #...
 000800b8 <tlsdsofn10>:
    800b8:	6fae 1400 0000      	move\.d 14 <gx\+0x4>,\$r10

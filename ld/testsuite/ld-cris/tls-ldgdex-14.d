@@ -44,7 +44,7 @@ OFFSET   TYPE              VALUE
 Contents of section .interp:
 #...
 Contents of section \.text:
- 801dc 41b20000 5faef8ff 5fbefcff 5fae1400  .*
+ 801dc 41b20000 5fae8000 5fbe8400 5fae1400  .*
  801ec 5fae1c00                             .*
 Contents of section \.tdata:
 #...
