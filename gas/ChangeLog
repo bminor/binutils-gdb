@@ -1,3 +1,8 @@
+2009-10-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* doc/c-i386.texi: Don't mention the 8 extra control registers
+	for x86-64.
+
 2009-10-19  Doug Evans  <dje@sebabeach.org>
 
 	* config/tc-lm32.c (md_begin): Add missing call to bfd_set_arch_mach.

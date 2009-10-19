@@ -513,9 +513,6 @@ the 4 8-bit registers: @samp{%sil}, @samp{%dil}, @samp{%bpl}, @samp{%spl}.
 the 8 debug registers: @samp{%db8}--@samp{%db15}.
 
 @item
-the 8 control registers: @samp{%cr8}--@samp{%cr15}.
-
-@item
 the 8 SSE registers: @samp{%xmm8}--@samp{%xmm15}.
 @end itemize
 
