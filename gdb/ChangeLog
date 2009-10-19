@@ -1,3 +1,7 @@
+2009-10-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* amd64fbsd-nat.c (amd64fbsd_supply_pcb): Add comment.
+
 2009-10-19  Pedro Alves  <pedro@codesourcery.com>
 	    Stan Shebs  <stan@codesourcery.com>
 
