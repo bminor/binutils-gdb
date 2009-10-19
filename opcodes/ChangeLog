@@ -1,3 +1,12 @@
+2009-10-18  Doug Evans  <dje@sebabeach.org>
+
+	* lm32-opinst.c: Regenerate.
+	* m32c-desc.c: Regenerate.
+	* m32r-opinst.c: Regenerate.
+	* openrisc-ibld.c: Regenerate.
+	* xc16x-desc.c: Regenerate.
+	* xc16x-desc.h: Regenerate.
+
 2009-10-17  Doug Evans  <dje@sebabeach.org>
 
 	* Makefile.am (CGEN_CPUS): Add iq2000, lm32.

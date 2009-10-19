@@ -637,6 +637,7 @@ const CGEN_HW_ENTRY xc16x_cgen_hw_table[] =
   { "h-iaddr", HW_H_IADDR, CGEN_ASM_NONE, 0, { 0, { { { (1<<MACH_BASE), 0 } } } } },
   { "h-pc", HW_H_PC, CGEN_ASM_NONE, 0, { 0|A(PC), { { { (1<<MACH_BASE), 0 } } } } },
   { "h-gr", HW_H_GR, CGEN_ASM_KEYWORD, (PTR) & xc16x_cgen_opval_gr_names, { 0|A(CACHE_ADDR)|A(PROFILE), { { { (1<<MACH_BASE), 0 } } } } },
+  { "h-cr", HW_H_CR, CGEN_ASM_KEYWORD, (PTR) & xc16x_cgen_opval_gr_names, { 0|A(CACHE_ADDR)|A(PROFILE), { { { (1<<MACH_BASE), 0 } } } } },
   { "h-ext", HW_H_EXT, CGEN_ASM_KEYWORD, (PTR) & xc16x_cgen_opval_ext_names, { 0|A(CACHE_ADDR)|A(PROFILE), { { { (1<<MACH_BASE), 0 } } } } },
   { "h-psw", HW_H_PSW, CGEN_ASM_KEYWORD, (PTR) & xc16x_cgen_opval_psw_names, { 0|A(CACHE_ADDR)|A(PROFILE), { { { (1<<MACH_BASE), 0 } } } } },
   { "h-grb", HW_H_GRB, CGEN_ASM_KEYWORD, (PTR) & xc16x_cgen_opval_grb_names, { 0|A(CACHE_ADDR)|A(PROFILE), { { { (1<<MACH_BASE), 0 } } } } },

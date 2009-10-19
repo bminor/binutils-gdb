@@ -568,7 +568,7 @@ openrisc_cgen_insert_operand (CGEN_CPU_DESC cd,
     case OPENRISC_OPERAND_ABS_26 :
       {
         long value = fields->f_abs26;
-        value = ((unsigned int) (pc) >> (2));
+        value = ((int) (pc) >> (2));
         errmsg = insert_normal (cd, value, 0|(1<<CGEN_IFLD_SIGNED)|(1<<CGEN_IFLD_ABS_ADDR), 0, 25, 26, 32, total_length, buffer);
       }
       break;
@@ -606,7 +606,7 @@ openrisc_cgen_insert_operand (CGEN_CPU_DESC cd,
     case OPENRISC_OPERAND_UI16NC :
       {
 {
-  FLD (f_i16_2) = ((((unsigned int) (FLD (f_i16nc)) >> (11))) & (31));
+  FLD (f_i16_2) = ((((int) (FLD (f_i16nc)) >> (11))) & (31));
   FLD (f_i16_1) = ((FLD (f_i16nc)) & (2047));
 }
         errmsg = insert_normal (cd, fields->f_i16_1, 0, 0, 10, 11, 32, total_length, buffer);
