@@ -27,6 +27,6 @@ Contents of section .got:
  82120 00000000 00000000 00000000 01000000  .*
  82130 80000000                             .*
 Contents of section .debug_info:
- 0000 fcffffff                             .*
+ 0000 80000000                             .*
 Contents of section .debug_line:
 #pass

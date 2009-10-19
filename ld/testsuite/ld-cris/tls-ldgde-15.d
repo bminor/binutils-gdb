@@ -51,8 +51,8 @@ Disassembly of section \.text:
    80094:	41b2                	moveq 1,\$r11
 #...
 00080098 <tlsdsofn>:
-   80098:	6fae f8ff ffff      	move.d 0xfffffff8,\$r10
-   8009e:	6fbe fcff ffff      	move.d 0xfffffffc,\$r11
+   80098:	6fae 8800 0000      	move.d 88 <x1>,\$r10
+   8009e:	6fbe 8c00 0000      	move.d 8c <x2>,\$r11
 000800a4 <tlsdsofn2>:
    800a4:	6fae 1400 0000      	move.d 14 <tls128\+0x14>,\$r10
 #...

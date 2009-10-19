@@ -102,7 +102,7 @@ Disassembly of section \.text:
 #...
 
 000800cc <tlsdsofn>:
-   800cc:	6fae f4ff ffff      	move\.d 0xfffffff4,\$r10
+   800cc:	6fae 8000 0000      	move\.d 80 <x>,\$r10
 #...
 
 000800d4 <tlsdsofn10>:
