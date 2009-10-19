@@ -193,6 +193,9 @@ md_begin (void)
 
   /* This is a callback from cgen to gas to parse operands.  */
   cgen_set_parse_operand_fn (gas_cgen_cpu_desc, gas_cgen_parse_operand);
+
+  if (! bfd_set_arch_mach (stdoutput, bfd_arch_lm32, bfd_mach_lm32))
+    as_warn (_("could not set architecture and machine"));
 }
 
 /* Turn an integer of n bytes (in val) into a stream of bytes appropriate

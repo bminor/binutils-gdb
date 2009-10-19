@@ -1,5 +1,7 @@
 2009-10-19  Doug Evans  <dje@sebabeach.org>
 
+	* config/tc-lm32.c (md_begin): Add missing call to bfd_set_arch_mach.
+
 	* config/tc-xc16x.c (md_cgen_lookup_reloc): Ensure fix_size is set
 	correctly for all 16 bit relocs.  Return BFD_RELOC_NONE if reloc
 	isn't recognized, not BFD_RELOC_XC16X_SOF.
