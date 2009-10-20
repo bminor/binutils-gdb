@@ -995,7 +995,7 @@ cancel_breakpoint (ptid_t ptid)
   CORE_ADDR pc;
 
   pc = regcache_read_pc (regcache) - gdbarch_decr_pc_after_break (gdbarch);
-  if (breakpoint_inserted_here_p (pc))
+  if (breakpoint_inserted_here_p (get_regcache_aspace (regcache), pc))
     {
       inferior_debug (4, "cancel_breakpoint for thread %x\n",
 		      ptid_get_tid (ptid));

@@ -1,5 +1,10 @@
 2009-10-20  Pedro Alves  <pedro@codesourcery.com>
 
+	* darwin-nat.c (cancel_breakpoint): Pass the regcache's address
+	space to breakpoint_inserted_here_p.
+
+2009-10-20  Pedro Alves  <pedro@codesourcery.com>
+
 	* linux-nat.c (linux_nat_thread_address_space): New.
 	(linux_nat_add_target): Install it.
 	* progspace.c (address_space_num): New.
