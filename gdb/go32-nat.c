@@ -716,7 +716,7 @@ go32_create_inferior (struct target_ops *ops, char *exec_file,
 
   inferior_ptid = pid_to_ptid (SOME_PID);
   inf = current_inferior ();
-  inferior_appeared_silent (inf, SOME_PID);
+  inferior_appeared (inf, SOME_PID);
 
   push_target (&go32_ops);
 

@@ -1,3 +1,9 @@
+2009-10-20  Ken Werner  <ken@linux.vnet.ibm.com>
+
+	* go32-nat.c (go32_create_inferior): Use inferior_appeared, not
+	inferior_appeared_silent.
+	* remote-sim.c (gdbsim_create_inferior): Ditto.
+
 2009-10-20  Pedro Alves  <pedro@codesourcery.com>
 
 	* darwin-nat.c (cancel_breakpoint): Pass the regcache's address
