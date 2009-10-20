@@ -4261,6 +4261,7 @@ infrun: not switching back to stepped thread, it has vanished\n");
 	struct symtab_and_line tmp_sal;
 
 	tmp_sal = find_pc_line (ecs->stop_func_start, 0);
+	tmp_sal.pspace = get_frame_program_space (frame);
 	if (tmp_sal.line != 0)
 	  {
 	    if (execution_direction == EXEC_REVERSE)
@@ -4328,6 +4329,7 @@ infrun: not switching back to stepped thread, it has vanished\n");
 	  struct symtab_and_line sr_sal;
 	  init_sal (&sr_sal);
 	  sr_sal.pc = ecs->stop_func_start;
+	  sr_sal.pspace = get_frame_program_space (frame);
 	  insert_step_resume_breakpoint_at_sal (gdbarch, 
 						sr_sal, null_frame_id);
 	  keep_going (ecs);

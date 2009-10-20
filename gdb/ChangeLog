@@ -1,3 +1,8 @@
+2009-10-20  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
+
+	* infrun.c (handle_inferior_event): Add pspace field to sal
+	for reverse execution cases.
+
 2009-10-20  Ken Werner  <ken@linux.vnet.ibm.com>
 
 	* go32-nat.c (go32_create_inferior): Use inferior_appeared, not
