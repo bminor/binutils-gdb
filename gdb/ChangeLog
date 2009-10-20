@@ -1,3 +1,10 @@
+2009-10-20  Hui Zhu  <teawater@gmail.com>
+	    Michael Snyder  <msnyder@vmware.com>
+
+	* record.c (record_exec_insn): New function.  Emulate one
+	instruction, forward or backward.  Abstracted from record_wait.
+	(record_wait) Call record_exec_insn.
+
 2009-10-20  Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
 
 	* infrun.c (handle_inferior_event): Add pspace field to sal
