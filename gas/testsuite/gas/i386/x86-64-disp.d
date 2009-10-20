@@ -15,7 +15,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	8b 04 25 00 00 00 80 	mov    0xffffffff80000000,%eax
 [ 	]*[a-f0-9]+:	8b 04 25 00 00 00 80 	mov    0xffffffff80000000,%eax
 [ 	]*[a-f0-9]+:	8b 04 25 ff ff ff 7f 	mov    0x7fffffff,%eax
-[ 	]*[a-f0-9]+:	a1 00 00 00 80 00 00 00 00 	mov    0x80000000,%eax
+[ 	]*[a-f0-9]+:	a1 00 00 00 80 00 00 00 00 	movabs 0x80000000,%eax
 [ 	]*[a-f0-9]+:	b8 f0 00 e0 0e       	mov    \$0xee000f0,%eax
 [ 	]*[a-f0-9]+:	89 98 f0 00 e0 0e    	mov    %ebx,0xee000f0\(%rax\)
 [ 	]*[a-f0-9]+:	89 98 f0 00 e0 0e    	mov    %ebx,0xee000f0\(%rax\)
@@ -25,15 +25,15 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	65 89 1c 25 f0 00 e0 0e 	mov    %ebx,%gs:0xee000f0
 [ 	]*[a-f0-9]+:	89 04 25 f0 00 e0 0e 	mov    %eax,0xee000f0
 [ 	]*[a-f0-9]+:	65 89 04 25 f0 00 e0 0e 	mov    %eax,%gs:0xee000f0
-[ 	]*[a-f0-9]+:	a3 f0 00 e0 fe 00 00 00 00 	mov    %eax,0xfee000f0
-[ 	]*[a-f0-9]+:	65 a3 f0 00 e0 fe 00 00 00 00 	mov    %eax,%gs:0xfee000f0
+[ 	]*[a-f0-9]+:	a3 f0 00 e0 fe 00 00 00 00 	movabs %eax,0xfee000f0
+[ 	]*[a-f0-9]+:	65 a3 f0 00 e0 fe 00 00 00 00 	movabs %eax,%gs:0xfee000f0
 [ 	]*[a-f0-9]+:	65 8b 1c 25 f0 00 e0 0e 	mov    %gs:0xee000f0,%ebx
 [ 	]*[a-f0-9]+:	8b 1c 25 f0 00 e0 0e 	mov    0xee000f0,%ebx
 [ 	]*[a-f0-9]+:	8b 1c 25 f0 00 e0 0e 	mov    0xee000f0,%ebx
 [ 	]*[a-f0-9]+:	65 8b 04 25 f0 00 e0 0e 	mov    %gs:0xee000f0,%eax
 [ 	]*[a-f0-9]+:	8b 04 25 f0 00 e0 0e 	mov    0xee000f0,%eax
 [ 	]*[a-f0-9]+:	8b 04 25 f0 00 e0 0e 	mov    0xee000f0,%eax
-[ 	]*[a-f0-9]+:	65 a1 f0 00 e0 fe 00 00 00 00 	mov    %gs:0xfee000f0,%eax
-[ 	]*[a-f0-9]+:	a1 f0 00 e0 fe 00 00 00 00 	mov    0xfee000f0,%eax
-[ 	]*[a-f0-9]+:	a1 f0 00 e0 fe 00 00 00 00 	mov    0xfee000f0,%eax
+[ 	]*[a-f0-9]+:	65 a1 f0 00 e0 fe 00 00 00 00 	movabs %gs:0xfee000f0,%eax
+[ 	]*[a-f0-9]+:	a1 f0 00 e0 fe 00 00 00 00 	movabs 0xfee000f0,%eax
+[ 	]*[a-f0-9]+:	a1 f0 00 e0 fe 00 00 00 00 	movabs 0xfee000f0,%eax
 #pass

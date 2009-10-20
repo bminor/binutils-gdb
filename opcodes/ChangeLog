@@ -1,3 +1,11 @@
+2009-10-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/10775
+	* i386-dis.c: Document LB, LS and LV macros.
+	(dis386): Use mov%LB, mov%LS and mov%LV on mov instruction
+	with the 64-bit displacement or immediate operand.
+	(putop): Handle LB, LS and LV macros.
+
 2009-10-18  Doug Evans  <dje@sebabeach.org>
 
 	* lm32-opinst.c: Regenerate.

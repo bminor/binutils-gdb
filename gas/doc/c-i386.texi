@@ -309,6 +309,9 @@ this by prefixing memory operands (@emph{not} the instruction mnemonics) with
 Intel @samp{mov al, byte ptr @var{foo}} is @samp{movb @var{foo}, %al} in AT&T
 syntax.
 
+In 64-bit code, @samp{movabs} can be used to encode the @samp{mov}
+instruction with the 64-bit displacement or immediate operand.
+
 @cindex return instructions, i386
 @cindex i386 jump, call, return
 @cindex return instructions, x86-64

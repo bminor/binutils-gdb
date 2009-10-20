@@ -1334,9 +1334,12 @@ struct dis386 {
    2 upper case letter macros:
    "XY" => print 'x' or 'y' if no register operands or suffix_always
 	   is true.
-   'XW' => print 's', 'd' depending on the VEX.W bit (for FMA)
-   'LQ' => print 'l' ('d' in Intel mode) or 'q' for memory operand
+   "XW" => print 's', 'd' depending on the VEX.W bit (for FMA)
+   "LQ" => print 'l' ('d' in Intel mode) or 'q' for memory operand
 	   or suffix_always is true
+   "LB" => print "abs" in 64bit mode and behave as 'B' otherwise
+   "LS" => print "abs" in 64bit mode and behave as 'S' otherwise
+   "LV" => print "abs" for 64bit operand and behave as 'S' otherwise
 
    Many of the above letters print nothing in Intel mode.  See "putop"
    for the details.
@@ -1526,10 +1529,10 @@ static const struct dis386 dis386[] = {
   { "sahf",		{ XX } },
   { "lahf",		{ XX } },
   /* a0 */
-  { "movB",		{ AL, Ob } },
-  { "movS",		{ eAX, Ov } },
-  { "movB",		{ Ob, AL } },
-  { "movS",		{ Ov, eAX } },
+  { "mov%LB",		{ AL, Ob } },
+  { "mov%LS",		{ eAX, Ov } },
+  { "mov%LB",		{ Ob, AL } },
+  { "mov%LS",		{ Ov, eAX } },
   { "movs{b|}",		{ Ybr, Xb } },
   { "movs{R|}",		{ Yvr, Xv } },
   { "cmps{b|}",		{ Xb, Yb } },
@@ -1553,14 +1556,14 @@ static const struct dis386 dis386[] = {
   { "movB",		{ RMDH, Ib } },
   { "movB",		{ RMBH, Ib } },
   /* b8 */
-  { "movS",		{ RMeAX, Iv64 } },
-  { "movS",		{ RMeCX, Iv64 } },
-  { "movS",		{ RMeDX, Iv64 } },
-  { "movS",		{ RMeBX, Iv64 } },
-  { "movS",		{ RMeSP, Iv64 } },
-  { "movS",		{ RMeBP, Iv64 } },
-  { "movS",		{ RMeSI, Iv64 } },
-  { "movS",		{ RMeDI, Iv64 } },
+  { "mov%LV",		{ RMeAX, Iv64 } },
+  { "mov%LV",		{ RMeCX, Iv64 } },
+  { "mov%LV",		{ RMeDX, Iv64 } },
+  { "mov%LV",		{ RMeBX, Iv64 } },
+  { "mov%LV",		{ RMeSP, Iv64 } },
+  { "mov%LV",		{ RMeBP, Iv64 } },
+  { "mov%LV",		{ RMeSI, Iv64 } },
+  { "mov%LV",		{ RMeDI, Iv64 } },
   /* c0 */
   { REG_TABLE (REG_C0) },
   { REG_TABLE (REG_C1) },
@@ -10267,10 +10270,34 @@ putop (const char *in_template, int sizeflag)
 	    *obufp++ = 'b';
 	  break;
 	case 'B':
-	  if (intel_syntax)
-	    break;
-	  if (sizeflag & SUFFIX_ALWAYS)
-	    *obufp++ = 'b';
+	  if (l == 0 && len == 1)
+	    {
+case_B:
+	      if (intel_syntax)
+		break;
+	      if (sizeflag & SUFFIX_ALWAYS)
+		*obufp++ = 'b';
+	    }
+	  else
+	    {
+	      if (l != 1
+		  || len != 2
+		  || last[0] != 'L')
+		{
+		  SAVE_LAST (*p);
+		  break;
+		}
+
+	      if (address_mode == mode_64bit
+		  && !(prefixes & PREFIX_ADDR))
+		{
+		  *obufp++ = 'a';
+		  *obufp++ = 'b';
+		  *obufp++ = 's';
+		}
+
+	      goto case_B;
+	    }
 	  break;
 	case 'C':
 	  if (intel_syntax && !alt)
@@ -10506,30 +10533,75 @@ case_Q:
 	    used_prefixes |= (prefixes & PREFIX_DATA);
 	  break;
 	case 'V':
-	  if (intel_syntax)
-	    break;
-	  if (address_mode == mode_64bit && (sizeflag & DFLAG))
+	  if (l == 0 && len == 1)
 	    {
-	      if (sizeflag & SUFFIX_ALWAYS)
-		*obufp++ = 'q';
-	      break;
+	      if (intel_syntax)
+		break;
+	      if (address_mode == mode_64bit && (sizeflag & DFLAG))
+		{
+		  if (sizeflag & SUFFIX_ALWAYS)
+		    *obufp++ = 'q';
+		  break;
+		}
+	    }
+	  else
+	    {
+	      if (l != 1
+		  || len != 2
+		  || last[0] != 'L')
+		{
+		  SAVE_LAST (*p);
+		  break;
+		}
+
+	      if (rex & REX_W)
+		{
+		  *obufp++ = 'a';
+		  *obufp++ = 'b';
+		  *obufp++ = 's';
+		}
 	    }
 	  /* Fall through.  */
+	  goto case_S;
 	case 'S':
-	  if (intel_syntax)
-	    break;
-	  if (sizeflag & SUFFIX_ALWAYS)
+	  if (l == 0 && len == 1)
 	    {
-	      if (rex & REX_W)
-		*obufp++ = 'q';
-	      else
+case_S:
+	      if (intel_syntax)
+		break;
+	      if (sizeflag & SUFFIX_ALWAYS)
 		{
-		  if (sizeflag & DFLAG)
-		    *obufp++ = 'l';
+		  if (rex & REX_W)
+		    *obufp++ = 'q';
 		  else
-		    *obufp++ = 'w';
-		  used_prefixes |= (prefixes & PREFIX_DATA);
+		    {
+		      if (sizeflag & DFLAG)
+			*obufp++ = 'l';
+		      else
+			*obufp++ = 'w';
+		      used_prefixes |= (prefixes & PREFIX_DATA);
+		    }
 		}
+	    }
+	  else
+	    {
+	      if (l != 1
+		  || len != 2
+		  || last[0] != 'L')
+		{
+		  SAVE_LAST (*p);
+		  break;
+		}
+
+	      if (address_mode == mode_64bit
+		  && !(prefixes & PREFIX_ADDR))
+		{
+		  *obufp++ = 'a';
+		  *obufp++ = 'b';
+		  *obufp++ = 's';
+		}
+
+	      goto case_S;
 	    }
 	  break;
 	case 'X':

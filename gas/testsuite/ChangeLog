@@ -1,3 +1,12 @@
+2009-10-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/10775
+	* gas/i386/immed64.d: Updated.
+	* gas/i386/l1om.d: Likewise.
+	* gas/i386/x86-64-disp-intel.d: Likewise.
+	* gas/i386/x86-64-disp.d: Likewise.
+	* gas/i386/x86_64.d: Likewise.
+
 2009-10-19  Doug Evans  <dje@sebabeach.org>
 
 	* gas/xc16x/shlrol.s: Specify constant shift amount.
