@@ -1,3 +1,7 @@
+2009-10-20  Michael Snyder  <msnyder@vmware.com>
+
+	* record.c: Add some top-level comments for general explanation.
+
 2009-10-20  Hui Zhu  <teawater@gmail.com>
 	    Michael Snyder  <msnyder@vmware.com>
 

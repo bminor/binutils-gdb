@@ -27,6 +27,26 @@
 
 #include <signal.h>
 
+/* This module implements "target record", also known as "process
+   record and replay".  This target sits on top of a "normal" target
+   (a target that "has execution"), and provides a record and replay
+   functionality, including reverse debugging.
+
+   Target record has two modes: recording, and replaying.
+
+   In record mode, we intercept the to_resume and to_wait methods.
+   Whenever gdb resumes the target, we run the target in single step
+   mode, and we build up an execution log in which, for each executed
+   instruction, we record all changes in memory and register state.
+   This is invisible to the user, to whom it just looks like an
+   ordinary debugging session (except for performance degredation).
+
+   In replay mode, instead of actually letting the inferior run as a
+   process, we simulate its execution by playing back the recorded
+   execution log.  For each instruction in the log, we simulate the
+   instruction's side effects by duplicating the changes that it would
+   have made on memory and registers.  */
+
 #define DEFAULT_RECORD_INSN_MAX_NUM	200000
 
 #define RECORD_IS_REPLAY \
@@ -80,6 +100,30 @@ enum record_type
   record_mem
 };
 
+/* This is the data structure that makes up the execution log.
+
+   The execution log consists of a single linked list of entries
+   of type "struct record_entry".  It is doubly linked so that it
+   can be traversed in either direction.
+
+   The start of the list is anchored by a struct called
+   "record_first".  The pointer "record_list" either points to the
+   last entry that was added to the list (in record mode), or to the
+   next entry in the list that will be executed (in replay mode).
+
+   Each list element (struct record_entry), in addition to next and
+   prev pointers, consists of a union of three entry types: mem, reg,
+   and end.  A field called "type" determines which entry type is
+   represented by a given list element.
+
+   Each instruction that is added to the execution log is represented
+   by a variable number of list elements ('entries').  The instruction
+   will have one "reg" entry for each register that is changed by 
+   executing the instruction (including the PC in every case).  It 
+   will also have one "mem" entry for each memory change.  Finally,
+   each instruction will have an "end" entry that separates it from
+   the changes associated with the next instruction.  */
+
 struct record_entry
 {
   struct record_entry *prev;
@@ -99,7 +143,22 @@ struct record_entry
 /* This is the debug switch for process record.  */
 int record_debug = 0;
 
-/* These list is for execution log.  */
+/* The following variables are used for managing the linked list that
+   represents the execution log.
+
+   record_first is the anchor that holds down the beginning of the list.
+
+   record_list serves two functions:
+     1) In record mode, it anchors the end of the list.
+     2) In replay mode, it traverses the list and points to
+        the next instruction that must be emulated.
+
+   record_arch_list_head and record_arch_list_tail are used to manage
+   a separate list, which is used to build up the change elements of
+   the currently executing instruction during record mode.  When this
+   instruction has been completely annotated in the "arch list", it 
+   will be appended to the main execution log.  */
+
 static struct record_entry record_first;
 static struct record_entry *record_list = &record_first;
 static struct record_entry *record_arch_list_head = NULL;
@@ -659,6 +718,8 @@ record_exec_insn (struct regcache *regcache, struct gdbarch *gdbarch,
     }
 }
 
+/* "to_open" target method.  Open the process record target.  */
+
 static void
 record_open (char *name, int from_tty)
 {
@@ -743,6 +804,8 @@ record_open (char *name, int from_tty)
   record_list->next = NULL;
 }
 
+/* "to_close" target method.  Close the process record target.  */
+
 static void
 record_close (int quitting)
 {
@@ -754,6 +817,8 @@ record_close (int quitting)
 
 static int record_resume_step = 0;
 static int record_resume_error;
+
+/* "to_resume" target method.  Resume the process record target.  */
 
 static void
 record_resume (struct target_ops *ops, ptid_t ptid, int step,
@@ -778,6 +843,8 @@ record_resume (struct target_ops *ops, ptid_t ptid, int step,
 }
 
 static int record_get_sig = 0;
+
+/* SIGINT signal handler, registered by "to_wait" method.  */
 
 static void
 record_sig_handler (int signo)
@@ -805,8 +872,18 @@ record_wait_cleanups (void *ignore)
     record_list = record_list->prev;
 }
 
-/* In replay mode, this function examines the recorded log and
-   determines where to stop.  */
+/* "to_wait" target method for process record target.
+
+   In record mode, the target is always run in singlestep mode
+   (even when gdb says to continue).  The to_wait method intercepts
+   the stop events and determines which ones are to be passed on to
+   gdb.  Most stop events are just singlestep events that gdb is not
+   to know about, so the to_wait method just records them and keeps
+   singlestepping.
+
+   In replay mode, this function emulates the recorded execution log, 
+   one instruction at a time (forward or backward), and determines 
+   where to stop.  */
 
 static ptid_t
 record_wait (struct target_ops *ops,
@@ -1045,6 +1122,8 @@ replay_out:
   return inferior_ptid;
 }
 
+/* "to_disconnect" method for process record target.  */
+
 static void
 record_disconnect (struct target_ops *target, char *args, int from_tty)
 {
@@ -1055,6 +1134,8 @@ record_disconnect (struct target_ops *target, char *args, int from_tty)
   target_disconnect (args, from_tty);
 }
 
+/* "to_detach" method for process record target.  */
+
 static void
 record_detach (struct target_ops *ops, char *args, int from_tty)
 {
@@ -1064,6 +1145,8 @@ record_detach (struct target_ops *ops, char *args, int from_tty)
   unpush_target (&record_ops);
   target_detach (args, from_tty);
 }
+
+/* "to_mourn_inferior" method for process record target.  */
 
 static void
 record_mourn_inferior (struct target_ops *ops)
@@ -1133,6 +1216,8 @@ record_registers_change (struct regcache *regcache, int regnum)
   else
     record_insn_num++;
 }
+
+/* "to_store_registers" method for process record target.  */
 
 static void
 record_store_registers (struct target_ops *ops, struct regcache *regcache,
@@ -1273,6 +1358,8 @@ record_insert_breakpoint (struct gdbarch *gdbarch,
   return 0;
 }
 
+/* "to_remove_breakpoint" method for process record target.  */
+
 static int
 record_remove_breakpoint (struct gdbarch *gdbarch,
 			  struct bp_target_info *bp_tgt)
@@ -1290,6 +1377,7 @@ record_remove_breakpoint (struct gdbarch *gdbarch,
   return 0;
 }
 
+/* "to_can_execute_reverse" method for process record target.  */
 static int
 record_can_execute_reverse (void)
 {
@@ -1320,6 +1408,8 @@ init_record_ops (void)
   record_ops.to_stratum = record_stratum;
   record_ops.to_magic = OPS_MAGIC;
 }
+
+/* Implement "show record debug" command.  */
 
 static void
 show_record_debug (struct ui_file *file, int from_tty,
@@ -1360,7 +1450,7 @@ cmd_record_delete (char *args, int from_tty)
     printf_unfiltered (_("Process record is not started.\n"));
 }
 
-/* Implement the "stoprecord" command.  */
+/* Implement the "stoprecord" or "record stop" command.  */
 
 static void
 cmd_record_stop (char *args, int from_tty)
