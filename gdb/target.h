@@ -585,6 +585,13 @@ struct target_ops
        The default implementation always returns target_gdbarch.  */
     struct gdbarch *(*to_thread_architecture) (struct target_ops *, ptid_t);
 
+    /* Determine current address space of thread PTID.
+
+       The default implementation always returns the inferior's
+       address space.  */
+    struct address_space *(*to_thread_address_space) (struct target_ops *,
+						      ptid_t);
+
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */

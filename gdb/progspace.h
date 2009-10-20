@@ -254,6 +254,9 @@ extern struct address_space *new_address_space (void);
    share an address space.  */
 extern struct address_space *maybe_new_address_space (void);
 
+/* Returns the integer address space id of ASPACE.  */
+extern int address_space_num (struct address_space *aspace);
+
 /* Update all program spaces matching to address spaces.  The user may
    have created several program spaces, and loaded executables into
    them before connecting to the target interface that will create the

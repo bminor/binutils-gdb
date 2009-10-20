@@ -5311,6 +5311,39 @@ linux_nat_close (int quitting)
     linux_ops->to_close (quitting);
 }
 
+/* When requests are passed down from the linux-nat layer to the
+   single threaded inf-ptrace layer, ptids of (lwpid,0,0) form are
+   used.  The address space pointer is stored in the inferior object,
+   but the common code that is passed such ptid can't tell whether
+   lwpid is a "main" process id or not (it assumes so).  We reverse
+   look up the "main" process id from the lwp here.  */
+
+struct address_space *
+linux_nat_thread_address_space (struct target_ops *t, ptid_t ptid)
+{
+  struct lwp_info *lwp;
+  struct inferior *inf;
+  int pid;
+
+  pid = GET_LWP (ptid);
+  if (GET_LWP (ptid) == 0)
+    {
+      /* An (lwpid,0,0) ptid.  Look up the lwp object to get at the
+	 tgid.  */
+      lwp = find_lwp_pid (ptid);
+      pid = GET_PID (lwp->ptid);
+    }
+  else
+    {
+      /* A (pid,lwpid,0) ptid.  */
+      pid = GET_PID (ptid);
+    }
+
+  inf = find_inferior_pid (pid);
+  gdb_assert (inf != NULL);
+  return inf->aspace;
+}
+
 void
 linux_nat_add_target (struct target_ops *t)
 {
@@ -5333,6 +5366,7 @@ linux_nat_add_target (struct target_ops *t)
   t->to_thread_alive = linux_nat_thread_alive;
   t->to_pid_to_str = linux_nat_pid_to_str;
   t->to_has_thread_control = tc_schedlock;
+  t->to_thread_address_space = linux_nat_thread_address_space;
 
   t->to_can_async_p = linux_nat_can_async_p;
   t->to_is_async_p = linux_nat_is_async_p;

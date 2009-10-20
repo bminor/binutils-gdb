@@ -89,6 +89,12 @@ free_address_space (struct address_space *aspace)
   xfree (aspace);
 }
 
+int
+address_space_num (struct address_space *aspace)
+{
+  return aspace->num;
+}
+
 /* Start counting over from scratch.  */
 
 static void

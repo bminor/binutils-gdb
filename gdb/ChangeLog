@@ -1,3 +1,13 @@
+2009-10-20  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-nat.c (linux_nat_thread_address_space): New.
+	(linux_nat_add_target): Install it.
+	* progspace.c (address_space_num): New.
+	* progspace.h (address_space_num): Declare.
+	* target.c (target_thread_address_space): Really query the target.
+	* target.h (struct target_ops) <to_thread_address_space>: New
+	field.
+
 2009-10-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* amd64fbsd-nat.c (amd64fbsd_supply_pcb): Add comment.

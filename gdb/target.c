@@ -2555,10 +2555,25 @@ target_get_osdata (const char *type)
 struct address_space *
 target_thread_address_space (ptid_t ptid)
 {
+  struct address_space *aspace;
   struct inferior *inf;
+  struct target_ops *t;
 
-  /* For now, assume frame chains and inferiors only see one address
-     space.  */
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_thread_address_space != NULL)
+	{
+	  aspace = t->to_thread_address_space (t, ptid);
+	  gdb_assert (aspace);
+
+	  if (targetdebug)
+	    fprintf_unfiltered (gdb_stdlog,
+				"target_thread_address_space (%s) = %d\n",
+				target_pid_to_str (ptid),
+				address_space_num (aspace));
+	  return aspace;
+	}
+    }
 
   /* Fall-back to the "main" address space of the inferior.  */
   inf = find_inferior_pid (ptid_get_pid (ptid));
