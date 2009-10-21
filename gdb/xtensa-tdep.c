@@ -1046,7 +1046,8 @@ xtensa_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 /* Returns the best guess about which register is a frame pointer
    for the function containing CURRENT_PC.  */
 
-#define XTENSA_ISA_BSZ 32	    /* Instruction buffer size.  */
+#define XTENSA_ISA_BSZ		32		/* Instruction buffer size.  */
+#define XTENSA_ISA_BADPC	((CORE_ADDR)0)	/* Bad PC value.  */
 
 static unsigned int
 xtensa_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR current_pc)
@@ -1083,7 +1084,8 @@ xtensa_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR current_pc)
 	  ba = ia;
 	  bt = (ba + XTENSA_ISA_BSZ) < current_pc
 	    ? ba + XTENSA_ISA_BSZ : current_pc;
-	  read_memory (ba, ibuf, bt - ba);
+	  if (target_read_memory (ba, ibuf, bt - ba) != 0)
+	    RETURN_FP;
 	}
 
       xtensa_insnbuf_from_chars (isa, ins, &ibuf[ia-ba], 0);
@@ -2171,6 +2173,8 @@ call0_analyze_prologue (struct gdbarch *gdbarch,
 	  ba = ia;
 	  bt = (ba + XTENSA_ISA_BSZ) < body_pc ? ba + XTENSA_ISA_BSZ : body_pc;
 	  read_memory (ba, ibuf, bt - ba);
+	  /* If there is a memory reading error read_memory () will report it
+	     and then throw an exception, stopping command execution.  */
 	}
 
       /* Decode format information.  */
@@ -2290,7 +2294,7 @@ done:
 	     (unsigned)ia, fail ? "failed" : "succeeded");
   xtensa_insnbuf_free(isa, slot);
   xtensa_insnbuf_free(isa, ins);
-  return fail ? 0 : ia;
+  return fail ? XTENSA_ISA_BADPC : ia;
 }
 
 /* Initialize frame cache for the current frame in CALL0 ABI.  */
@@ -2315,6 +2319,10 @@ call0_frame_cache (struct frame_info *this_frame,
 					C0_NREGS,
 					&cache->c0.c0_rt[0],
 					&cache->call0);
+
+      if (body_pc == XTENSA_ISA_BADPC)
+	error (_("Xtensa-specific internal error: CALL0 prologue \
+analysis failed in this frame. GDB command execution stopped."));
     }
   
   sp = get_frame_register_unsigned
