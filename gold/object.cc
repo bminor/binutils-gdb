@@ -1711,12 +1711,18 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
 		}
 	      else if (!os->find_starting_output_address(this, shndx, &start))
 		{
-		  // This is a section symbol, but apparently not one
-		  // in a merged section.  Just use the start of the
-		  // output section.  This happens with relocatable
-		  // links when the input object has section symbols
-		  // for arbitrary non-merge sections.
-		  lv.set_output_value(os->address());
+		  // This is a section symbol, but apparently not one in a
+		  // merged section.  First check to see if this is a relaxed
+		  // input section.  If so, use its address.  Otherwise just
+		  // use the start of the output section.  This happens with
+		  // relocatable links when the input object has section
+		  // symbols for arbitrary non-merge sections.
+		  const Output_section_data* posd =
+		    os->find_relaxed_input_section(this, shndx);
+		  if (posd != NULL)
+		    lv.set_output_value(posd->address());
+		  else
+		    lv.set_output_value(os->address());
 		}
 	      else
 		{

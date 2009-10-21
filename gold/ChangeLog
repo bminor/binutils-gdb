@@ -1,3 +1,10 @@
+2009-10-20  Doug Kwan  <dougkwan@google.com>
+
+	* object.cc (Sized_relobj::do_finalize_local_symbols): Handle section
+	symbols of relaxed input sections.
+	* output.h (Output_section::find_relaxed_input_section): Make
+	method public.
+
 2009-10-16  Doug Kwan  <dougkwan@google.com>
 
 	* dynobj.cc (Versions::Versions): Initialize version_script_.

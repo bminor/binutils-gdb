@@ -2585,6 +2585,11 @@ class Output_section : public Output_data
   convert_input_sections_to_relaxed_sections(
       const std::vector<Output_relaxed_input_section*>& sections);
 
+  // Find a relaxed input section to an input section in OBJECT
+  // with index SHNDX.  Return NULL if none is found.
+  const Output_section_data*
+  find_relaxed_input_section(const Relobj* object, unsigned int shndx) const;
+  
   // Print merge statistics to stderr.
   void
   print_merge_stats();
@@ -3208,11 +3213,6 @@ class Output_section : public Output_data
   Output_section_data*
   find_merge_section(const Relobj* object, unsigned int shndx) const;
 
-  // Find a relaxed input section to an input section in OBJECT
-  // with index SHNDX.  Return NULL if none is found.
-  const Output_section_data*
-  find_relaxed_input_section(const Relobj* object, unsigned int shndx) const;
-  
   // Build a relaxation map.
   void
   build_relaxation_map(
