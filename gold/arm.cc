@@ -29,6 +29,7 @@
 #include <limits>
 #include <cstdio>
 #include <string>
+#include <algorithm>
 
 #include "elfcpp.h"
 #include "parameters.h"
@@ -53,6 +54,12 @@ using namespace gold;
 
 template<bool big_endian>
 class Output_data_plt_arm;
+
+template<bool big_endian>
+class Stub_table;
+
+template<bool big_endian>
+class Arm_input_section;
 
 template<bool big_endian>
 class Target_arm;
@@ -641,6 +648,101 @@ class Stub_factory
   
   // Stub templates.  These are initialized in the constructor.
   const Stub_template* stub_templates_[arm_stub_type_last+1];
+};
+
+// A class to hold stubs for the ARM target.
+
+template<bool big_endian>
+class Stub_table : public Output_data
+{
+ public:
+  Stub_table(Arm_input_section<big_endian>* owner)
+    : Output_data(), addralign_(1), owner_(owner), has_been_changed_(false),
+      reloc_stubs_()
+  { }
+
+  ~Stub_table()
+  { }
+
+  // Owner of this stub table.
+  Arm_input_section<big_endian>*
+  owner() const
+  { return this->owner_; }
+
+  // Whether this stub table is empty.
+  bool
+  empty() const
+  { return this->reloc_stubs_.empty(); }
+
+  // Whether this has been changed.
+  bool
+  has_been_changed() const
+  { return this->has_been_changed_; }
+
+  // Set the has-been-changed flag.
+  void
+  set_has_been_changed(bool value)
+  { this->has_been_changed_ = value; }
+
+  // Return the current data size.
+  off_t
+  current_data_size() const
+  { return this->current_data_size_for_child(); }
+
+  // Add a STUB with using KEY.  Caller is reponsible for avoid adding
+  // if already a STUB with the same key has been added. 
+  void
+  add_reloc_stub(Reloc_stub* stub, const Reloc_stub::Key& key);
+
+  // Look up a relocation stub using KEY.  Return NULL if there is none.
+  Reloc_stub*
+  find_reloc_stub(const Reloc_stub::Key& key) const
+  {
+    typename Reloc_stub_map::const_iterator p = this->reloc_stubs_.find(key);
+    return (p != this->reloc_stubs_.end()) ? p->second : NULL;
+  }
+
+  // Relocate stubs in this stub table.
+  void
+  relocate_stubs(const Relocate_info<32, big_endian>*,
+		 Target_arm<big_endian>*, Output_section*,
+		 unsigned char*, Arm_address, section_size_type);
+
+ protected:
+  // Write out section contents.
+  void
+  do_write(Output_file*);
+ 
+  // Return the required alignment.
+  uint64_t
+  do_addralign() const
+  { return this->addralign_; }
+
+  // Finalize data size.
+  void
+  set_final_data_size()
+  { this->set_data_size(this->current_data_size_for_child()); }
+
+  // Reset address and file offset.
+  void
+  do_reset_address_and_file_offset();
+
+ private:
+  // Unordered map of stubs.
+  typedef
+    Unordered_map<Reloc_stub::Key, Reloc_stub*, Reloc_stub::Key::hash,
+		  Reloc_stub::Key::equal_to>
+    Reloc_stub_map;
+
+  // Address alignment
+  uint64_t addralign_;
+  // Owner of this stub table.
+  Arm_input_section<big_endian>* owner_;
+  // This is set to true during relaxiong if the size of the stub table
+  // has been changed.
+  bool has_been_changed_;
+  // The relocation stubs.
+  Reloc_stub_map reloc_stubs_;
 };
 
 // Utilities for manipulating integers of up to 32-bits
@@ -2259,6 +2361,113 @@ Stub_factory::Stub_factory()
 
   DEF_STUBS
 #undef DEF_STUB
+}
+
+// Stub_table methods.
+
+// Add a STUB with using KEY.  Caller is reponsible for avoid adding
+// if already a STUB with the same key has been added. 
+
+template<bool big_endian>
+void
+Stub_table<big_endian>::add_reloc_stub(
+    Reloc_stub* stub,
+    const Reloc_stub::Key& key)
+{
+  const Stub_template* stub_template = stub->stub_template();
+  gold_assert(stub_template->type() == key.stub_type());
+  this->reloc_stubs_[key] = stub;
+  if (this->addralign_ < stub_template->alignment())
+    this->addralign_ = stub_template->alignment();
+  this->has_been_changed_ = true;
+}
+
+template<bool big_endian>
+void
+Stub_table<big_endian>::relocate_stubs(
+    const Relocate_info<32, big_endian>* relinfo,
+    Target_arm<big_endian>* arm_target,
+    Output_section* output_section,
+    unsigned char* view,
+    Arm_address address,
+    section_size_type view_size)
+{
+  // If we are passed a view bigger than the stub table's.  we need to
+  // adjust the view.
+  gold_assert(address == this->address()
+	      && (view_size
+		  == static_cast<section_size_type>(this->data_size())));
+
+  for (typename Reloc_stub_map::const_iterator p = this->reloc_stubs_.begin();
+      p != this->reloc_stubs_.end();
+      ++p)
+    {
+      Reloc_stub* stub = p->second;
+      const Stub_template* stub_template = stub->stub_template();
+      if (stub_template->reloc_count() != 0)
+	{
+	  // Adjust view to cover the stub only.
+	  section_size_type offset = stub->offset();
+	  section_size_type stub_size = stub_template->size();
+	  gold_assert(offset + stub_size <= view_size);
+
+	  arm_target->relocate_stub(stub, relinfo, output_section,
+				    view + offset, address + offset,
+				    stub_size);
+	}
+    }
+}
+
+// Reset address and file offset.
+
+template<bool big_endian>
+void
+Stub_table<big_endian>::do_reset_address_and_file_offset()
+{
+  off_t off = 0;
+  uint64_t max_addralign = 1;
+  for (typename Reloc_stub_map::const_iterator p = this->reloc_stubs_.begin();
+      p != this->reloc_stubs_.end();
+      ++p)
+    {
+      Reloc_stub* stub = p->second;
+      const Stub_template* stub_template = stub->stub_template();
+      uint64_t stub_addralign = stub_template->alignment();
+      max_addralign = std::max(max_addralign, stub_addralign);
+      off = align_address(off, stub_addralign);
+      stub->set_offset(off);
+      stub->reset_destination_address();
+      off += stub_template->size();
+    }
+
+  this->addralign_ = max_addralign;
+  this->set_current_data_size_for_child(off);
+}
+
+// Write out the stubs to file.
+
+template<bool big_endian>
+void
+Stub_table<big_endian>::do_write(Output_file* of)
+{
+  off_t offset = this->offset();
+  const section_size_type oview_size =
+    convert_to_section_size_type(this->data_size());
+  unsigned char* const oview = of->get_output_view(offset, oview_size);
+
+  for (typename Reloc_stub_map::const_iterator p = this->reloc_stubs_.begin();
+      p != this->reloc_stubs_.end();
+      ++p)
+    {
+      Reloc_stub* stub = p->second;
+      Arm_address address = this->address() + stub->offset();
+      gold_assert(address
+		  == align_address(address,
+				   stub->stub_template()->alignment()));
+      stub->write(oview + stub->offset(), stub->stub_template()->size(),
+		  big_endian);
+    } 
+  of->write_output_view(this->offset(), oview_size, oview);
 }
 
 // A class to handle the PLT data.

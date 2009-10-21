@@ -1,5 +1,14 @@
 2009-10-21  Doug Kwan  <dougkwan@google.com>
 
+	* arm.cc (Stub_table, Arm_input_section): New forward class
+	declarations.
+	(Stub_table): New class defintion.
+	(Stub_table::add_reloc_stub, Stub_table::relocate_stubs
+	Stub_table::do_reset_address_and_file_offset, Stub_table::do_write):
+	New method definition.
+
+2009-10-21  Doug Kwan  <dougkwan@google.com>
+
 	* arm.cc: Update copyright comments.
 	(Target_arm): New forward class template declaration.
 	(Arm_address): New type.
