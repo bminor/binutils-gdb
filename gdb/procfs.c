@@ -5666,7 +5666,7 @@ insert_dbx_link_bpt_in_file (int fd, CORE_ADDR ignored)
     {
       /* Insert the breakpoint.  */
       dbx_link_bpt_addr = sym_addr;
-      dbx_link_bpt = deprecated_insert_raw_breakpoint (target_gdbarch,
+      dbx_link_bpt = deprecated_insert_raw_breakpoint (target_gdbarch, NULL,
 						       sym_addr);
       if (dbx_link_bpt == NULL)
         {

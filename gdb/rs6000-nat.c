@@ -590,7 +590,7 @@ exec_one_dummy_insn (struct regcache *regcache)
      assume that this address will never be executed again by the real
      code. */
 
-  bp = deprecated_insert_raw_breakpoint (gdbarch, DUMMY_INSN_ADDR);
+  bp = deprecated_insert_raw_breakpoint (gdbarch, NULL, DUMMY_INSN_ADDR);
 
   /* You might think this could be done with a single ptrace call, and
      you'd be correct for just about every platform I've ever worked

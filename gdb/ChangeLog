@@ -1,3 +1,9 @@
+2009-10-21  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* rs6000-nat.c (exec_one_dummy_insn): Add missing new ASPACE parameter
+	to depreacted_insert_raw_breakpoint function call.
+	* procfs.c (insert_dbx_link_bpt_in_file): Likewise.
+
 2009-10-20  Michael Snyder  <msnyder@vmware.com>
 
 	* record.c: Add some top-level comments for general explanation.
