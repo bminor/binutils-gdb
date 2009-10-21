@@ -1,3 +1,43 @@
+2009-10-21  Andrew Stubbs  <ams@codesourcery.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Remove shnbsd-tdep.h
+	* configure.tgt (sh*-*-linux*): Add corelow.o to gdb_target_obs.
+	* sh-linux-tdep.c: Include sh-tdep.h.
+	(REGSx16): New macro.
+	(gregs_table, fpregs_table): New variables.
+	(sh_linux_init_abi): Set core_gregmap and fpregmap.
+	* sh-tdep.c: Include regset.h.
+	(sh_corefile_supply_regset): New function.
+	(sh_corefile_collect_regset): New function.
+	(sh_corefile_gregset, sh_corefile_fpregset): New variables.
+	(sh_regset_from_core_section): New function.
+	(sh_gdbarch_init): Set up tdep value.
+	Call set_gdbarch_regset_from_core_section.
+	* sh-tdep.h (PC_REGNUM): New enum value.
+	(struct sh_corefile_regs): New type.
+	(sh_corefile_gregset): Export variable.
+	(sh_corefile_supply_regset): New prototype.
+	(sh_corefile_collect_regset): New prototype.
+	* shnbsd-tdep.c: Remove include of regcache.h, gdb_assert.h and
+	shnbsd-tdep.h.
+	(regmap): Use new definition using struct sh_corefile_regs.
+	(shnbsd_supply_gregset, shnbsd_collect_gregset): Delete.
+	(shnbsd_gregset): Delete.
+	(shnbsd_regset_from_core_section): Delete.
+	(shnbsd_supply_reg, shnbsd_fill_reg): Use new regset interface.
+	(shnbsd_init_abi): Set core_gregmap.
+	(shnbsd_supply_reg): Delete.
+	(shnbsd_fill_reg): Delete.
+	(SHNBSD_SIZEOF_GREGS): Move ...
+	* shnbsd-nat.c (SHNBSD_SIZEOF_GREGS): ... to here.
+	Remove include of shnbsd-tdep.h.
+	(shnbsd_fetch_inferior_registers): Replace shnbsd_supply_reg call
+	with sh_corefile_supply_regset.
+	(shnbsd_store_inferior_registers): Replace shnbsd_fill_reg call with
+	sh_corefile_collect_regset.
+	* shnbsd-tdep.h: Delete file.
+
 2009-10-21  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* rs6000-nat.c (exec_one_dummy_insn): Add missing new ASPACE parameter

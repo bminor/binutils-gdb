@@ -28,7 +28,6 @@
 #include <machine/reg.h>
 
 #include "sh-tdep.h"
-#include "shnbsd-tdep.h"
 #include "inf-ptrace.h"
 #include "regcache.h"
 
@@ -39,6 +38,9 @@
 || (regno) == gdbarch_pc_regnum (gdbarch) || (regno) == PR_REGNUM \
 || (regno) == MACH_REGNUM || (regno) == MACL_REGNUM \
 || (regno) == SR_REGNUM)
+
+/* Sizeof `struct reg' in <machine/reg.h>.  */
+#define SHNBSD_SIZEOF_GREGS	(21 * 4)
 
 static void
 shnbsd_fetch_inferior_registers (struct target_ops *ops,
@@ -52,7 +54,9 @@ shnbsd_fetch_inferior_registers (struct target_ops *ops,
 		  (PTRACE_TYPE_ARG3) &inferior_registers, 0) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
-      shnbsd_supply_reg (regcache, (char *) &inferior_registers, regno);
+      sh_corefile_supply_regset (&sh_corefile_gregset, regcache, regno,
+				 (char *) &inferior_registers,
+				 SHNBSD_SIZEOF_GREGS);
 
       if (regno != -1)
 	return;
@@ -71,7 +75,9 @@ shnbsd_store_inferior_registers (struct target_ops *ops,
 		  (PTRACE_TYPE_ARG3) &inferior_registers, 0) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
-      shnbsd_fill_reg (regcache, (char *) &inferior_registers, regno);
+      sh_corefile_collect_regset (&sh_corefile_gregset, regcache, regno,
+				  (char *) &inferior_registers,
+				  SHNBSD_SIZEOF_GREGS);
 
       if (ptrace (PT_SETREGS, PIDGET (inferior_ptid),
 		  (PTRACE_TYPE_ARG3) &inferior_registers, 0) == -1)

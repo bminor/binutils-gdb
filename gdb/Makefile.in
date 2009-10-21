@@ -723,7 +723,7 @@ f-lang.h dwarf2loc.h value.h sparc-tdep.h defs.h target-descriptions.h \
 objfiles.h vec.h disasm.h mips-tdep.h ser-base.h \
 gdb_curses.h bfd-target.h memattr.h inferior.h ax.h dummy-frame.h \
 inflow.h fbsd-nat.h libunwind-frame.h completer.h inf-ttrace.h \
-solib-target.h shnbsd-tdep.h gdb_vfork.h alpha-tdep.h dwarf2expr.h \
+solib-target.h gdb_vfork.h alpha-tdep.h dwarf2expr.h \
 m2-lang.h stack.h charset.h addrmap.h command.h solist.h source.h \
 target.h prologue-value.h cp-abi.h tui/tui-hooks.h tui/tui.h \
 tui/tui-file.h tui/tui-command.h tui/tui-disasm.h tui/tui-wingeneral.h \

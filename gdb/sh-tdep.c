@@ -43,6 +43,7 @@
 #include "doublest.h"
 #include "osabi.h"
 #include "reggroups.h"
+#include "regset.h"
 
 #include "sh-tdep.h"
 
@@ -2738,12 +2739,98 @@ sh_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
     }
   return 0;
 }
+
+
+/* Supply register REGNUM from the buffer specified by REGS and LEN
+   in the register set REGSET to register cache REGCACHE.
+   REGTABLE specifies where each register can be found in REGS.
+   If REGNUM is -1, do this for all registers in REGSET.  */
+
+void
+sh_corefile_supply_regset (const struct regset *regset,
+			   struct regcache *regcache,
+			   int regnum, const void *regs, size_t len)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  const struct sh_corefile_regmap *regmap = (regset == &sh_corefile_gregset
+					     ? tdep->core_gregmap
+					     : tdep->core_fpregmap);
+  int i;
+
+  for (i = 0; regmap[i].regnum != -1; i++)
+    {
+      if ((regnum == -1 || regnum == regmap[i].regnum)
+	  && regmap[i].offset + 4 <= len)
+	regcache_raw_supply (regcache, regmap[i].regnum,
+			     (char *)regs + regmap[i].offset);
+    }
+}
+
+/* Collect register REGNUM in the register set REGSET from register cache
+   REGCACHE into the buffer specified by REGS and LEN.
+   REGTABLE specifies where each register can be found in REGS.
+   If REGNUM is -1, do this for all registers in REGSET.  */
+
+void
+sh_corefile_collect_regset (const struct regset *regset,
+			    const struct regcache *regcache,
+			    int regnum, void *regs, size_t len)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  const struct sh_corefile_regmap *regmap = (regset == &sh_corefile_gregset
+					     ? tdep->core_gregmap
+					     : tdep->core_fpregmap);
+  int i;
+
+  for (i = 0; regmap[i].regnum != -1; i++)
+    {
+      if ((regnum == -1 || regnum == regmap[i].regnum)
+	  && regmap[i].offset + 4 <= len)
+	regcache_raw_collect (regcache, regmap[i].regnum,
+			      (char *)regs + regmap[i].offset);
+    }
+}
+
+/* The following two regsets have the same contents, so it is tempting to
+   unify them, but they are distiguished by their address, so don't.  */
+
+struct regset sh_corefile_gregset =
+{
+  NULL,
+  sh_corefile_supply_regset,
+  sh_corefile_collect_regset
+};
+
+static struct regset sh_corefile_fpregset =
+{
+  NULL,
+  sh_corefile_supply_regset,
+  sh_corefile_collect_regset
+};
+
+static const struct regset *
+sh_regset_from_core_section (struct gdbarch *gdbarch, const char *sect_name,
+			     size_t sect_size)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (tdep->core_gregmap && strcmp (sect_name, ".reg") == 0)
+    return &sh_corefile_gregset;
+
+  if (tdep->core_fpregmap && strcmp (sect_name, ".reg2") == 0)
+    return &sh_corefile_fpregset;
+
+  return NULL;
+}
 
 
 static struct gdbarch *
 sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
+  struct gdbarch_tdep *tdep;
 
   sh_show_regs = sh_generic_show_regs;
   switch (info.bfd_arch_info->mach)
@@ -2803,7 +2890,8 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* None found, create a new architecture from the information
      provided. */
-  gdbarch = gdbarch_alloc (&info, NULL);
+  tdep = XZALLOC (struct gdbarch_tdep);
+  gdbarch = gdbarch_alloc (&info, tdep);
 
   set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_int_bit (gdbarch, 4 * TARGET_CHAR_BIT);
@@ -2846,6 +2934,8 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_in_function_epilogue_p (gdbarch, sh_in_function_epilogue_p);
 
   dwarf2_frame_set_init_reg (gdbarch, sh_dwarf2_frame_init_reg);
+
+  set_gdbarch_regset_from_core_section (gdbarch, sh_regset_from_core_section);
 
   switch (info.bfd_arch_info->mach)
     {

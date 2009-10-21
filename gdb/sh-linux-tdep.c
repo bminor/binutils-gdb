@@ -24,6 +24,50 @@
 #include "symtab.h"
 
 #include "glibc-tdep.h"
+#include "sh-tdep.h"
+
+#define REGSx16(base) \
+  {(base),      0}, \
+  {(base) +  1, 4}, \
+  {(base) +  2, 8}, \
+  {(base) +  3, 12}, \
+  {(base) +  4, 16}, \
+  {(base) +  5, 20}, \
+  {(base) +  6, 24}, \
+  {(base) +  7, 28}, \
+  {(base) +  8, 32}, \
+  {(base) +  9, 36}, \
+  {(base) + 10, 40}, \
+  {(base) + 11, 44}, \
+  {(base) + 12, 48}, \
+  {(base) + 13, 52}, \
+  {(base) + 14, 56}, \
+  {(base) + 15, 60}
+
+/* Describe the contents of the .reg section of the core file.  */
+
+static const struct sh_corefile_regmap gregs_table[] =
+{
+  REGSx16 (R0_REGNUM),
+  {PC_REGNUM,   64},
+  {PR_REGNUM,   68},
+  {SR_REGNUM,   72},
+  {GBR_REGNUM,  76},
+  {MACH_REGNUM, 80},
+  {MACL_REGNUM, 84},
+  {-1 /* Terminator.  */, 0}
+};
+
+/* Describe the contents of the .reg2 section of the core file.  */
+
+static const struct sh_corefile_regmap fpregs_table[] =
+{
+  REGSx16 (FR0_REGNUM),
+  /* REGSx16 xfp_regs omitted.  */
+  {FPSCR_REGNUM, 128},
+  {FPUL_REGNUM,  132},
+  {-1 /* Terminator.  */, 0}
+};
 
 static void
 sh_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -36,6 +80,15 @@ sh_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
                                              svr4_fetch_objfile_link_map);
+
+  /* Core files are supported for 32-bit SH only, at present.  */
+  if (info.bfd_arch_info->mach != bfd_mach_sh5)
+    {
+      struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+      tdep->core_gregmap = (struct sh_corefile_regmap *)gregs_table;
+      tdep->core_fpregmap = (struct sh_corefile_regmap *)fpregs_table;
+    }
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

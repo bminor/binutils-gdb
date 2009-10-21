@@ -420,7 +420,8 @@ score-*-*)
 sh*-*-linux*)
 	# Target: GNU/Linux Super-H
 	gdb_target_obs="sh-tdep.o sh64-tdep.o sh-linux-tdep.o monitor.o \
-			dsrec.o solib.o solib-svr4.o symfile-mem.o glibc-tdep.o"
+			dsrec.o solib.o solib-svr4.o symfile-mem.o \
+			glibc-tdep.o corelow.o"
 	gdb_sim=../sim/sh/libsim.a
 	build_gdbserver=yes
 	;;
