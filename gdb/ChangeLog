@@ -1,3 +1,14 @@
+2009-10-21  Michael Snyder  <msnyder@vmware.com>
+
+	Elaborate "info record".
+	* record.c (struct record_end_entry): New field 'insn_num'.
+	(record_insn_count): New variable.
+	(record_open): Initialize record_insn_count.
+	(info_record_command): Display contents of record log as
+	lowest, current, and highest instruction counts.
+	(show_record_insn_number): Delete.
+	(_initialize_record): Remove add_cmd show_record_insn_number.
+
 2009-10-21  Andrew Stubbs  <ams@codesourcery.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 

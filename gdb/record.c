@@ -91,6 +91,7 @@ struct record_reg_entry
 struct record_end_entry
 {
   enum target_signal sigval;
+  ULONGEST insn_num;
 };
 
 enum record_type
@@ -166,8 +167,13 @@ static struct record_entry *record_arch_list_tail = NULL;
 
 /* 1 ask user. 0 auto delete the last struct record_entry.  */
 static int record_stop_at_limit = 1;
+/* Maximum allowed number of insns in execution log.  */
 static unsigned int record_insn_max_num = DEFAULT_RECORD_INSN_MAX_NUM;
+/* Actual count of insns presently in execution log.  */
 static int record_insn_num = 0;
+/* Count of insns logged so far (may be larger
+   than count of insns presently in execution log).  */
+static ULONGEST record_insn_count;
 
 /* The target_ops of process record.  */
 static struct target_ops record_ops;
@@ -338,7 +344,10 @@ record_list_release_following (struct record_entry *rec)
     {
       rec = tmp->next;
       if (record_entry_release (tmp) == record_end)
-	record_insn_num--;
+	{
+	  record_insn_num--;
+	  record_insn_count--;
+	}
       tmp = rec;
     }
 }
@@ -366,10 +375,7 @@ record_list_release_first (void)
 
       /* tmp is now isolated, and can be deleted.  */
       if (record_entry_release (tmp) == record_end)
-	{
-	  record_insn_num--;
-	  break;	/* End loop at first record_end.  */
-	}
+	break;	/* End loop at first record_end.  */
 
       if (!record_first.next)
 	{
@@ -494,6 +500,7 @@ record_arch_list_add_end (void)
 
   rec = record_end_alloc ();
   rec->u.end.sigval = TARGET_SIGNAL_0;
+  rec->u.end.insn_num = ++record_insn_count;
 
   record_arch_list_add (rec);
 
@@ -800,6 +807,7 @@ record_open (char *name, int from_tty)
 
   /* Reset */
   record_insn_num = 0;
+  record_insn_count = 0;
   record_list = &record_first;
   record_list->next = NULL;
 }
@@ -1458,8 +1466,8 @@ cmd_record_stop (char *args, int from_tty)
   if (current_target.to_stratum == record_stratum)
     {
       unpush_target (&record_ops);
-      printf_unfiltered (_("Process record is stoped and all execution "
-                           "log is deleted.\n"));
+      printf_unfiltered (_("Process record is stopped and all execution "
+                           "logs are deleted.\n"));
     }
   else
     printf_unfiltered (_("Process record is not started.\n"));
@@ -1481,16 +1489,6 @@ set_record_insn_max_num (char *args, int from_tty, struct cmd_list_element *c)
     }
 }
 
-/* Print the current index into the record log (number of insns recorded
-   so far).  */
-
-static void
-show_record_insn_number (char *ignore, int from_tty)
-{
-  printf_unfiltered (_("Record instruction number is %d.\n"),
-		     record_insn_num);
-}
-
 static struct cmd_list_element *record_cmdlist, *set_record_cmdlist,
 			       *show_record_cmdlist, *info_record_cmdlist;
 
@@ -1508,10 +1506,59 @@ show_record_command (char *args, int from_tty)
   cmd_show_list (show_record_cmdlist, from_tty, "");
 }
 
+/* Display some statistics about the execution log.  */
+
 static void
 info_record_command (char *args, int from_tty)
 {
-  cmd_show_list (info_record_cmdlist, from_tty, "");
+  struct record_entry *p;
+
+  if (current_target.to_stratum == record_stratum)
+    {
+      if (RECORD_IS_REPLAY)
+	printf_filtered (_("Replay mode:\n"));
+      else
+	printf_filtered (_("Record mode:\n"));
+
+      /* Find entry for first actual instruction in the log.  */
+      for (p = record_first.next;
+	   p != NULL && p->type != record_end;
+	   p = p->next)
+	;
+
+      /* Do we have a log at all?  */
+      if (p != NULL && p->type == record_end)
+	{
+	  /* Display instruction number for first instruction in the log.  */
+	  printf_filtered (_("Lowest recorded instruction number is %s.\n"),
+			   pulongest (p->u.end.insn_num));
+
+	  /* If in replay mode, display where we are in the log.  */
+	  if (RECORD_IS_REPLAY)
+	    printf_filtered (_("Current instruction number is %s.\n"),
+			     pulongest (record_list->u.end.insn_num));
+
+	  /* Display instruction number for last instruction in the log.  */
+	  printf_filtered (_("Highest recorded instruction number is %s.\n"), 
+			   pulongest (record_insn_count));
+
+	  /* Display log count.  */
+	  printf_filtered (_("Log contains %d instructions.\n"), 
+			   record_insn_num);
+	}
+      else
+	{
+	  printf_filtered (_("No instructions have been logged.\n"));
+	}
+    }
+  else
+    {
+      printf_filtered (_("target record is not active.\n"));
+    }
+
+  /* Display max log size.  */
+  printf_filtered (_("Max logged instructions is %d.\n"),
+		   record_insn_max_num);
 }
 
 void
@@ -1581,7 +1628,4 @@ Set the maximum number of instructions to be stored in the\n\
 record/replay buffer.  Zero means unlimited.  Default is 200000."),
 			    set_record_insn_max_num,
 			    NULL, &set_record_cmdlist, &show_record_cmdlist);
-  add_cmd ("insn-number", class_obscure, show_record_insn_number,
-	   _("Show the current number of instructions in the "
-	     "record/replay buffer."), &info_record_cmdlist);
 }
