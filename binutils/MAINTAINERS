@@ -65,7 +65,6 @@ responsibility among the other maintainers.
   AVR		   Marek Michalkiewicz <marekm@amelek.gda.pl>
   BFIN		   Jie Zhang <jie.zhang@analog.com>
   BFIN		   Bernd Schmidt <bernd.schmidt@analog.com>
-  BUILD SYSTEM	   Ben Elliston <bje@gnu.org>
   BUILD SYSTEM	   Daniel Jacobowitz <dan@debian.org>
   CR16		   M R Swami Reddy <MR.Swami.Reddy@nsc.com>
   CRIS		   Hans-Peter Nilsson <hp@axis.com>
@@ -113,7 +112,6 @@ responsibility among the other maintainers.
   SH		   Kaz Kojima <kkojima@rr.iij4u.or.jp>
   SPARC		   Jakub Jelinek <jakub@redhat.com>
   SPU		   Alan Modra <amodra@bigpond.net.au>
-  TESTSUITES	   Ben Elliston <bje@gnu.org>
   TIC4X            Svein Seldal <svein@dev.seldal.com>
   TIC54X           Timothy Wall <twall@alum.mit.edu>
   VAX		   Matt Thomas <matt@netbsd.org>
