@@ -6525,6 +6525,9 @@ program counter of the selected frame.  A single argument to this
 command is a program counter value; @value{GDBN} dumps the function
 surrounding this value.  Two arguments specify a range of addresses
 (first inclusive, second exclusive) to dump.
+
+If the range of memory being disassembled contains current program counter,
+the instruction at that location is shown with a @code{=>} marker.
 @end table
 
 The following example shows the disassembly of a range of addresses of
@@ -6533,38 +6536,39 @@ HP PA-RISC 2.0 code:
 @smallexample
 (@value{GDBP}) disas 0x32c4 0x32e4
 Dump of assembler code from 0x32c4 to 0x32e4:
-0x32c4 <main+204>:      addil 0,dp
-0x32c8 <main+208>:      ldw 0x22c(sr0,r1),r26
-0x32cc <main+212>:      ldil 0x3000,r31
-0x32d0 <main+216>:      ble 0x3f8(sr4,r31)
-0x32d4 <main+220>:      ldo 0(r31),rp
-0x32d8 <main+224>:      addil -0x800,dp
-0x32dc <main+228>:      ldo 0x588(r1),r26
-0x32e0 <main+232>:      ldil 0x3000,r31
+   0x32c4 <main+204>:      addil 0,dp
+   0x32c8 <main+208>:      ldw 0x22c(sr0,r1),r26
+   0x32cc <main+212>:      ldil 0x3000,r31
+   0x32d0 <main+216>:      ble 0x3f8(sr4,r31)
+   0x32d4 <main+220>:      ldo 0(r31),rp
+   0x32d8 <main+224>:      addil -0x800,dp
+   0x32dc <main+228>:      ldo 0x588(r1),r26
+   0x32e0 <main+232>:      ldil 0x3000,r31
 End of assembler dump.
 @end smallexample
 
-Here is an example showing mixed source+assembly for Intel x86:
+Here is an example showing mixed source+assembly for Intel x86, when the
+program is stopped just after function prologue:
 
 @smallexample
 (@value{GDBP}) disas /m main
 Dump of assembler code for function main:
 5       @{
-0x08048330 <main+0>:    push   %ebp
-0x08048331 <main+1>:    mov    %esp,%ebp
-0x08048333 <main+3>:    sub    $0x8,%esp
-0x08048336 <main+6>:    and    $0xfffffff0,%esp
-0x08048339 <main+9>:    sub    $0x10,%esp
+   0x08048330 <main+0>:    push   %ebp
+   0x08048331 <main+1>:    mov    %esp,%ebp
+   0x08048333 <main+3>:    sub    $0x8,%esp
+   0x08048336 <main+6>:    and    $0xfffffff0,%esp
+   0x08048339 <main+9>:    sub    $0x10,%esp
 
 6         printf ("Hello.\n");
-0x0804833c <main+12>:   movl   $0x8048440,(%esp)
-0x08048343 <main+19>:   call   0x8048284 <puts@@plt>
+=> 0x0804833c <main+12>:   movl   $0x8048440,(%esp)
+   0x08048343 <main+19>:   call   0x8048284 <puts@@plt>
 
 7         return 0;
 8       @}
-0x08048348 <main+24>:   mov    $0x0,%eax
-0x0804834d <main+29>:   leave
-0x0804834e <main+30>:   ret
+   0x08048348 <main+24>:   mov    $0x0,%eax
+   0x0804834d <main+29>:   leave
+   0x0804834e <main+30>:   ret
 
 End of assembler dump.
 @end smallexample
@@ -7243,6 +7247,18 @@ instructions with @samp{x/3i @var{addr}}, you can inspect the next seven
 with just @samp{x/7}.  If you use @key{RET} to repeat the @code{x} command,
 the repeat count @var{n} is used again; the other arguments default as
 for successive uses of @code{x}.
+
+When examining machine instructions, the instruction at current program
+counter is shown with a @code{=>} marker. For example:
+
+@smallexample
+(@value{GDBP}) x/5i $pc-6
+   0x804837f <main+11>: mov    %esp,%ebp
+   0x8048381 <main+13>: push   %ecx
+   0x8048382 <main+14>: sub    $0x4,%esp
+=> 0x8048385 <main+17>: movl   $0x8048460,(%esp)
+   0x804838c <main+24>: call   0x80482d4 <puts@@plt>
+@end smallexample
 
 @cindex @code{$_}, @code{$__}, and value history
 The addresses and contents printed by the @code{x} command are not saved

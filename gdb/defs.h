@@ -608,6 +608,7 @@ extern int build_address_symbolic (CORE_ADDR addr,
 				   int *unmapped);
 
 extern void print_address (struct gdbarch *, CORE_ADDR, struct ui_file *);
+extern const char *pc_prefix (CORE_ADDR);
 
 /* From source.c */
 

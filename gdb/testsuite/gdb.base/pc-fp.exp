@@ -63,7 +63,7 @@ set valueof_fp [get_hexadecimal_valueof "\$fp" "0"]
 # display since that encodes and then decodes the expression parameter
 # (and hence uses the mechanisms we're trying to test).
 
-gdb_test "display/i \$pc" "1: x/i +\\\$pc( +|\r\n)${valueof_pc}.*"
+gdb_test "display/i \$pc" "1: x/i +\\\$pc( +|\r\n)=> ${valueof_pc}.*"
 gdb_test "display/w \$fp" "2: x/xw +\\\$fp +${valueof_fp}.*"
 
 # FIXME: cagney/2002-09-04: Should also check that ``info registers

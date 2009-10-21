@@ -1,3 +1,10 @@
+2009-10-21  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.base/consecutive.exp: Adjust.
+	* gdb.base/display.exp: Likewise.
+	* gdb.base/pc-fp.exp: Likewise.
+	* gdb.base/sigbpt.exp: Likewise.
+	
 2009-10-19  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.reverse/consecutive-reverse.c: Add comment at end of main.

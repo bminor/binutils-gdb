@@ -93,12 +93,12 @@ gdb_test "advance *bowler" "bowler.*" "advance to the bowler"
 set test "stepping to fault"
 set signame "SIGSEGV"
 gdb_test_multiple "stepi" "$test" {
-    -re "Program received signal (SIGBUS|SIGSEGV).*pc(\r\n| *) *(0x\[0-9a-f\]*).*$gdb_prompt $" {
+    -re "Program received signal (SIGBUS|SIGSEGV).*pc(\r\n| *) *=> (0x\[0-9a-f\]*).*$gdb_prompt $" {
 	set signame $expect_out(1,string)
 	set segv_addr $expect_out(3,string)
 	pass "$test"
     }
-    -re " .*pc(\r\n| *)(0x\[0-9a-f\]*).*bowler.*$gdb_prompt $" {
+    -re " .*pc(\r\n| *)=> (0x\[0-9a-f\]*).*bowler.*$gdb_prompt $" {
 	set bowler_addrs [concat $expect_out(2,string) $bowler_addrs]
 	send_gdb "stepi\n"
 	exp_continue
@@ -110,7 +110,7 @@ gdb_test_multiple "stepi" "$test" {
 
 set test "get insn after fault"
 gdb_test_multiple {x/2i $pc} "$test" {
-    -re "(0x\[0-9a-f\]*).*bowler.*(0x\[0-9a-f\]*).*bowler.*$gdb_prompt $" {
+    -re "=> (0x\[0-9a-f\]*).*bowler.*(0x\[0-9a-f\]*).*bowler.*$gdb_prompt $" {
 	set bowler_addrs [concat $expect_out(2,string) $bowler_addrs]
 	pass "$test"
     }
@@ -199,7 +199,7 @@ proc stepi_out { name args } {
 	-re "pc(\r\n| *)[after_segv] .*bowler.*$gdb_prompt $" {
 	    kfail gdb/1702 "$test (skipped fault insn)"
 	}
-	-re "pc(\r\n| *)0x\[a-z0-9\]* .*bowler.*$gdb_prompt $" {
+	-re "pc(\r\n| *)=> 0x\[a-z0-9\]* .*bowler.*$gdb_prompt $" {
 	    kfail gdb/1702 "$test (corrupt pc)"
 	}
     }
@@ -244,12 +244,12 @@ proc cont_out { name args } {
     # inserted at the faulting instruction.  Note that the breakpoint
     # instruction wasn't executed, rather the inferior was SIGTRAPed
     # with the PC at the breakpoint.
-    gdb_test "continue" "Breakpoint.*pc(\r\n| *)[at_segv] .*" \
+    gdb_test "continue" "Breakpoint.*pc(\r\n| *)=> [at_segv] .*" \
 	"${name}; continue to breakpoint at fault"
 
     # Now single step the faulted instrction at that breakpoint.
     gdb_test "stepi" \
-	"Program received signal ${signame}.*pc(\r\n| *)[at_segv] .*" \
+	"Program received signal ${signame}.*pc(\r\n| *)=> [at_segv] .*" \
 	"${name}; stepi fault"    
 
     # Clear any breakpoints

@@ -1,3 +1,11 @@
+2009-10-21  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* defs.h (pc_prefix): New prototype.
+	* disasm.c (dump_insns): Mark current instruction.
+	* printcmd.c (do_examine): Likewise.
+	(pc_prefix): New function.
+	* stack.c (print_frame_info): Disassemble entire current line.
+
 2009-10-21  Michael Snyder  <msnyder@vmware.com>
 
 	Elaborate "info record".

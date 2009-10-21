@@ -113,6 +113,7 @@ dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
 	    num_displayed++;
 	}
       ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+      ui_out_text (uiout, pc_prefix (pc));
       ui_out_field_core_addr (uiout, "address", gdbarch, pc);
 
       if (!build_address_symbolic (pc, 0, &name, &offset, &filename,

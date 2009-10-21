@@ -643,8 +643,7 @@ print_frame_info (struct frame_info *frame, int print_level,
       /* If disassemble-next-line is set to on and there is line debug
          messages, output assembly codes for next line.  */
       if (disassemble_next_line == AUTO_BOOLEAN_TRUE)
-	do_gdb_disassembly (get_frame_arch (frame), -1,
-			    get_frame_pc (frame), sal.end);
+	do_gdb_disassembly (get_frame_arch (frame), -1, sal.pc, sal.end);
     }
 
   if (print_what != LOCATION)

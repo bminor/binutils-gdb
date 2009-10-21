@@ -1,3 +1,8 @@
+2009-10-21  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.texinfo (Machine Code): Mention current pc marker.
+	(Memory): Likewise.
+
 2009-10-19  Pedro Alves  <pedro@codesourcery.com>
 	    Stan Shebs  <stan@codesourcery.com>
 

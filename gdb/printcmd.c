@@ -725,6 +725,26 @@ print_address (struct gdbarch *gdbarch,
   print_address_symbolic (addr, stream, asm_demangle, " ");
 }
 
+/* Return a prefix for instruction address:
+   "=> " for current instruction, else "   ".  */
+
+const char *
+pc_prefix (CORE_ADDR addr)
+{
+  if (has_stack_frames ())
+    {
+      struct frame_info *frame;
+      CORE_ADDR pc;
+
+      frame = get_selected_frame (NULL);
+      pc = get_frame_pc (frame);
+
+      if (pc == addr)
+	return "=> ";
+    }
+  return "   ";
+}
+
 /* Print address ADDR symbolically on STREAM.  Parameter DEMANGLE
    controls whether to print the symbolic name "raw" or demangled.
    Global setting "addressprint" controls whether to print hex address
@@ -817,6 +837,8 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
   while (count > 0)
     {
       QUIT;
+      if (format == 'i')
+	fputs_filtered (pc_prefix (next_address), gdb_stdout);
       print_address (next_gdbarch, next_address, gdb_stdout);
       printf_filtered (":");
       for (i = maxelts;

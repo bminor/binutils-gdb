@@ -91,7 +91,7 @@ gdb_test "break 19"     ".*Breakpoint 4.*" "break 19"
 gdb_test "info disp" ".*There are no auto-display expressions now..*" "inf disp"
 gdb_test "disp i" ".*1: i = 0.*" "display i"
 gdb_test "disp/x j" ".*2: /x j = 0x0.*" "display j"
-gdb_test "disp/i &k" ".*3: x/i &k(\r\n|  )$hex:.*" "display &k"
+gdb_test "disp/i &k" ".*3: x/i &k(\r\n|  )   $hex:.*" "display &k"
 gdb_test "disp/f f" ".*4: /f f = 3.1415*" "display/f f"
 gdb_test "disp/s &sum" ".*5: x/s &sum  $hex.*sum.:.*" "display/s &sum"
 
