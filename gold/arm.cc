@@ -3,6 +3,8 @@
 // Copyright 2009 Free Software Foundation, Inc.
 // Written by Doug Kwan <dougkwan@google.com> based on the i386 code
 // by Ian Lance Taylor <iant@google.com>.
+// This file also contains borrowed and adapted code from
+// bfd/elf32-arm.c.
 
 // This file is part of gold.
 
@@ -52,6 +54,20 @@ using namespace gold;
 template<bool big_endian>
 class Output_data_plt_arm;
 
+template<bool big_endian>
+class Target_arm;
+
+// For convenience.
+typedef elfcpp::Elf_types<32>::Elf_Addr Arm_address;
+
+// Maximum branch offsets for ARM, THUMB and THUMB2.
+const int32_t ARM_MAX_FWD_BRANCH_OFFSET = ((((1 << 23) - 1) << 2) + 8);
+const int32_t ARM_MAX_BWD_BRANCH_OFFSET = ((-((1 << 23) << 2)) + 8);
+const int32_t THM_MAX_FWD_BRANCH_OFFSET = ((1 << 22) -2 + 4);
+const int32_t THM_MAX_BWD_BRANCH_OFFSET = (-(1 << 22) + 4);
+const int32_t THM2_MAX_FWD_BRANCH_OFFSET = (((1 << 24) - 2) + 4);
+const int32_t THM2_MAX_BWD_BRANCH_OFFSET = (-(1 << 24) + 4);
+
 // The arm target class.
 //
 // This is a very simple port of gold for ARM-EABI.  It is intended for
@@ -99,6 +115,533 @@ class Output_data_plt_arm;
 // - Make PLTs more flexible for different architecture features like
 //   Thumb-2 and BE8.
 // There are probably a lot more.
+
+// Instruction template class.  This class is similar to the insn_sequence
+// struct in bfd/elf32-arm.c.
+
+class Insn_template
+{
+ public:
+  // Types of instruction templates.
+  enum Type
+    {
+      THUMB16_TYPE = 1,
+      THUMB32_TYPE,
+      ARM_TYPE,
+      DATA_TYPE
+    };
+
+  // Factory methods to create instrunction templates in different formats.
+
+  static const Insn_template
+  thumb16_insn(uint32_t data)
+  { return Insn_template(data, THUMB16_TYPE, elfcpp::R_ARM_NONE, 0); } 
+
+  // A bit of a hack.  A Thumb conditional branch, in which the proper
+  // condition is inserted when we build the stub.
+  static const Insn_template
+  thumb16_bcond_insn(uint32_t data)
+  { return Insn_template(data, THUMB16_TYPE, elfcpp::R_ARM_NONE, 1); } 
+
+  static const Insn_template
+  thumb32_insn(uint32_t data)
+  { return Insn_template(data, THUMB32_TYPE, elfcpp::R_ARM_NONE, 0); } 
+
+  static const Insn_template
+  thumb32_b_insn(uint32_t data, int reloc_addend)
+  {
+    return Insn_template(data, THUMB32_TYPE, elfcpp::R_ARM_THM_JUMP24,
+			 reloc_addend);
+  } 
+
+  static const Insn_template
+  arm_insn(uint32_t data)
+  { return Insn_template(data, ARM_TYPE, elfcpp::R_ARM_NONE, 0); }
+
+  static const Insn_template
+  arm_rel_insn(unsigned data, int reloc_addend)
+  { return Insn_template(data, ARM_TYPE, elfcpp::R_ARM_JUMP24, reloc_addend); }
+
+  static const Insn_template
+  data_word(unsigned data, unsigned int r_type, int reloc_addend)
+  { return Insn_template(data, DATA_TYPE, r_type, reloc_addend); } 
+
+  // Accessors.  This class is used for read-only objects so no modifiers
+  // are provided.
+
+  uint32_t
+  data() const
+  { return this->data_; }
+
+  // Return the instruction sequence type of this.
+  Type
+  type() const
+  { return this->type_; }
+
+  // Return the ARM relocation type of this.
+  unsigned int
+  r_type() const
+  { return this->r_type_; }
+
+  int32_t
+  reloc_addend() const
+  { return this->reloc_addend_; }
+
+  // Return size of instrunction template in bytes.
+  size_t
+  size() const;
+
+  // Return byte-alignment of instrunction template.
+  unsigned
+  alignment() const;
+
+ private:
+  // We make the constructor private to ensure that only the factory
+  // methods are used.
+  inline
+  Insn_template(unsigned data, Type type, unsigned int r_type, int reloc_addend)
+    : data_(data), type_(type), r_type_(r_type), reloc_addend_(reloc_addend)
+  { }
+
+  // Instruction specific data.  This is used to store information like
+  // some of the instruction bits.
+  uint32_t data_;
+  // Instruction template type.
+  Type type_;
+  // Relocation type if there is a relocation or R_ARM_NONE otherwise.
+  unsigned int r_type_;
+  // Relocation addend.
+  int32_t reloc_addend_;
+};
+
+// Macro for generating code to stub types. One entry per long/short
+// branch stub
+
+#define DEF_STUBS \
+  DEF_STUB(long_branch_any_any) \
+  DEF_STUB(long_branch_v4t_arm_thumb) \
+  DEF_STUB(long_branch_thumb_only) \
+  DEF_STUB(long_branch_v4t_thumb_thumb) \
+  DEF_STUB(long_branch_v4t_thumb_arm) \
+  DEF_STUB(short_branch_v4t_thumb_arm) \
+  DEF_STUB(long_branch_any_arm_pic) \
+  DEF_STUB(long_branch_any_thumb_pic) \
+  DEF_STUB(long_branch_v4t_thumb_thumb_pic) \
+  DEF_STUB(long_branch_v4t_arm_thumb_pic) \
+  DEF_STUB(long_branch_v4t_thumb_arm_pic) \
+  DEF_STUB(long_branch_thumb_only_pic) \
+  DEF_STUB(a8_veneer_b_cond) \
+  DEF_STUB(a8_veneer_b) \
+  DEF_STUB(a8_veneer_bl) \
+  DEF_STUB(a8_veneer_blx)
+
+// Stub types.
+
+#define DEF_STUB(x) arm_stub_##x,
+typedef enum
+  {
+    arm_stub_none,
+    DEF_STUBS
+
+    // First reloc stub type.
+    arm_stub_reloc_first = arm_stub_long_branch_any_any,
+    // Last  reloc stub type.
+    arm_stub_reloc_last = arm_stub_long_branch_thumb_only_pic,
+
+    // First Cortex-A8 stub type.
+    arm_stub_cortex_a8_first = arm_stub_a8_veneer_b_cond,
+    // Last Cortex-A8 stub type.
+    arm_stub_cortex_a8_last = arm_stub_a8_veneer_blx,
+    
+    // Last stub type.
+    arm_stub_type_last = arm_stub_a8_veneer_blx
+  } Stub_type;
+#undef DEF_STUB
+
+// Stub template class.  Templates are meant to be read-only objects.
+// A stub template for a stub type contains all read-only attributes
+// common to all stubs of the same type.
+
+class Stub_template
+{
+ public:
+  Stub_template(Stub_type, const Insn_template*, size_t);
+
+  ~Stub_template()
+  { }
+
+  // Return stub type.
+  Stub_type
+  type() const
+  { return this->type_; }
+
+  // Return an array of instruction templates.
+  const Insn_template*
+  insns() const
+  { return this->insns_; }
+
+  // Return size of template in number of instructions.
+  size_t
+  insn_count() const
+  { return this->insn_count_; }
+
+  // Return size of template in bytes.
+  size_t
+  size() const
+  { return this->size_; }
+
+  // Return alignment of the stub template.
+  unsigned
+  alignment() const
+  { return this->alignment_; }
+  
+  // Return whether entry point is in thumb mode.
+  bool
+  entry_in_thumb_mode() const
+  { return this->entry_in_thumb_mode_; }
+
+  // Return number of relocations in this template.
+  size_t
+  reloc_count() const
+  { return this->relocs_.size(); }
+
+  // Return index of the I-th instruction with relocation.
+  size_t
+  reloc_insn_index(size_t i) const
+  {
+    gold_assert(i < this->relocs_.size());
+    return this->relocs_[i].first;
+  }
+
+  // Return the offset of the I-th instruction with relocation from the
+  // beginning of the stub.
+  section_size_type
+  reloc_offset(size_t i) const
+  {
+    gold_assert(i < this->relocs_.size());
+    return this->relocs_[i].second;
+  }
+
+ private:
+  // This contains information about an instruction template with a relocation
+  // and its offset from start of stub.
+  typedef std::pair<size_t, section_size_type> Reloc;
+
+  // A Stub_template may not be copied.  We want to share templates as much
+  // as possible.
+  Stub_template(const Stub_template&);
+  Stub_template& operator=(const Stub_template&);
+  
+  // Stub type.
+  Stub_type type_;
+  // Points to an array of Insn_templates.
+  const Insn_template* insns_;
+  // Number of Insn_templates in insns_[].
+  size_t insn_count_;
+  // Size of templated instructions in bytes.
+  size_t size_;
+  // Alignment of templated instructions.
+  unsigned alignment_;
+  // Flag to indicate if entry is in thumb mode.
+  bool entry_in_thumb_mode_;
+  // A table of reloc instruction indices and offsets.  We can find these by
+  // looking at the instruction templates but we pre-compute and then stash
+  // them here for speed. 
+  std::vector<Reloc> relocs_;
+};
+
+//
+// A class for code stubs.  This is a base class for different type of
+// stubs used in the ARM target.
+//
+
+class Stub
+{
+ private:
+  static const section_offset_type invalid_offset =
+    static_cast<section_offset_type>(-1);
+
+ public:
+  Stub(const Stub_template* stub_template)
+    : stub_template_(stub_template), offset_(invalid_offset)
+  { }
+
+  virtual
+   ~Stub()
+  { }
+
+  // Return the stub template.
+  const Stub_template*
+  stub_template() const
+  { return this->stub_template_; }
+
+  // Return offset of code stub from beginning of its containing stub table.
+  section_offset_type
+  offset() const
+  {
+    gold_assert(this->offset_ != invalid_offset);
+    return this->offset_;
+  }
+
+  // Set offset of code stub from beginning of its containing stub table.
+  void
+  set_offset(section_offset_type offset)
+  { this->offset_ = offset; }
+  
+  // Return the relocation target address of the i-th relocation in the
+  // stub.  This must be defined in a child class.
+  Arm_address
+  reloc_target(size_t i)
+  { return this->do_reloc_target(i); }
+
+  // Write a stub at output VIEW.  BIG_ENDIAN select how a stub is written.
+  void
+  write(unsigned char* view, section_size_type view_size, bool big_endian)
+  { this->do_write(view, view_size, big_endian); }
+
+ protected:
+  // This must be defined in the child class.
+  virtual Arm_address
+  do_reloc_target(size_t) = 0;
+
+  // This must be defined in the child class.
+  virtual void
+  do_write(unsigned char*, section_size_type, bool) = 0;
+  
+ private:
+  // Its template.
+  const Stub_template* stub_template_;
+  // Offset within the section of containing this stub.
+  section_offset_type offset_;
+};
+
+// Reloc stub class.  These are stubs we use to fix up relocation because
+// of limited branch ranges.
+
+class Reloc_stub : public Stub
+{
+ public:
+  static const unsigned int invalid_index = static_cast<unsigned int>(-1);
+  // We assume we never jump to this address.
+  static const Arm_address invalid_address = static_cast<Arm_address>(-1);
+
+  // Return destination address.
+  Arm_address
+  destination_address() const
+  {
+    gold_assert(this->destination_address_ != this->invalid_address);
+    return this->destination_address_;
+  }
+
+  // Set destination address.
+  void
+  set_destination_address(Arm_address address)
+  {
+    gold_assert(address != this->invalid_address);
+    this->destination_address_ = address;
+  }
+
+  // Reset destination address.
+  void
+  reset_destination_address()
+  { this->destination_address_ = this->invalid_address; }
+
+  // Determine stub type for a branch of a relocation of R_TYPE going
+  // from BRANCH_ADDRESS to BRANCH_TARGET.  If TARGET_IS_THUMB is set,
+  // the branch target is a thumb instruction.  TARGET is used for look
+  // up ARM-specific linker settings.
+  static Stub_type
+  stub_type_for_reloc(unsigned int r_type, Arm_address branch_address,
+		      Arm_address branch_target, bool target_is_thumb);
+
+  // Reloc_stub key.  A key is logically a triplet of a stub type, a symbol
+  // and an addend.  Since we treat global and local symbol differently, we
+  // use a Symbol object for a global symbol and a object-index pair for
+  // a local symbol.
+  class Key
+  {
+   public:
+    // If SYMBOL is not null, this is a global symbol, we ignore RELOBJ and
+    // R_SYM.  Otherwise, this is a local symbol and RELOBJ must non-NULL
+    // and R_SYM must not be invalid_index.
+    Key(Stub_type stub_type, const Symbol* symbol, const Relobj* relobj,
+	unsigned int r_sym, int32_t addend)
+      : stub_type_(stub_type), addend_(addend)
+    {
+      if (symbol != NULL)
+	{
+	  this->r_sym_ = Reloc_stub::invalid_index;
+	  this->u_.symbol = symbol;
+	}
+      else
+	{
+	  gold_assert(relobj != NULL && r_sym != invalid_index);
+	  this->r_sym_ = r_sym;
+	  this->u_.relobj = relobj;
+	}
+    }
+
+    ~Key()
+    { }
+
+    // Accessors: Keys are meant to be read-only object so no modifiers are
+    // provided.
+
+    // Return stub type.
+    Stub_type
+    stub_type() const
+    { return this->stub_type_; }
+
+    // Return the local symbol index or invalid_index.
+    unsigned int
+    r_sym() const
+    { return this->r_sym_; }
+
+    // Return the symbol if there is one.
+    const Symbol*
+    symbol() const
+    { return this->r_sym_ == invalid_index ? this->u_.symbol : NULL; }
+
+    // Return the relobj if there is one.
+    const Relobj*
+    relobj() const
+    { return this->r_sym_ != invalid_index ? this->u_.relobj : NULL; }
+
+    // Whether this equals to another key k.
+    bool
+    eq(const Key& k) const 
+    {
+      return ((this->stub_type_ == k.stub_type_)
+	      && (this->r_sym_ == k.r_sym_)
+	      && ((this->r_sym_ != Reloc_stub::invalid_index)
+		  ? (this->u_.relobj == k.u_.relobj)
+		  : (this->u_.symbol == k.u_.symbol))
+	      && (this->addend_ == k.addend_));
+    }
+
+    // Return a hash value.
+    size_t
+    hash_value() const
+    {
+      return (this->stub_type_
+	      ^ this->r_sym_
+	      ^ gold::string_hash<char>(
+		    (this->r_sym_ != Reloc_stub::invalid_index)
+		    ? this->u_.relobj->name().c_str()
+		    : this->u_.symbol->name())
+	      ^ this->addend_);
+    }
+
+    // Functors for STL associative containers.
+    struct hash
+    {
+      size_t
+      operator()(const Key& k) const
+      { return k.hash_value(); }
+    };
+
+    struct equal_to
+    {
+      bool
+      operator()(const Key& k1, const Key& k2) const
+      { return k1.eq(k2); }
+    };
+
+    // Name of key.  This is mainly for debugging.
+    std::string
+    name() const;
+
+   private:
+    // Stub type.
+    Stub_type stub_type_;
+    // If this is a local symbol, this is the index in the defining object.
+    // Otherwise, it is invalid_index for a global symbol.
+    unsigned int r_sym_;
+    // If r_sym_ is invalid index.  This points to a global symbol.
+    // Otherwise, this points a relobj.  We used the unsized and target
+    // independent Symbol and Relobj classes instead of Arm_symbol and  
+    // Arm_relobj.  This is done to avoid making the stub class a template
+    // as most of the stub machinery is endianity-neutral.  However, it
+    // may require a bit of casting done by users of this class.
+    union
+    {
+      const Symbol* symbol;
+      const Relobj* relobj;
+    } u_;
+    // Addend associated with a reloc.
+    int32_t addend_;
+  };
+
+ protected:
+  // Reloc_stubs are created via a stub factory.  So these are protected.
+  Reloc_stub(const Stub_template* stub_template)
+    : Stub(stub_template), destination_address_(invalid_address)
+  { }
+
+  ~Reloc_stub()
+  { }
+
+  friend class Stub_factory;
+
+ private:
+  // Return the relocation target address of the i-th relocation in the
+  // stub.
+  Arm_address
+  do_reloc_target(size_t i)
+  {
+    // All reloc stub have only one relocation.
+    gold_assert(i == 0);
+    return this->destination_address_;
+  }
+
+  // A template to implement do_write below.
+  template<bool big_endian>
+  void inline
+  do_fixed_endian_write(unsigned char*, section_size_type);
+
+  // Write a stub.
+  void
+  do_write(unsigned char* view, section_size_type view_size, bool big_endian);
+
+  // Address of destination.
+  Arm_address destination_address_;
+};
+
+// Stub factory class.
+
+class Stub_factory
+{
+ public:
+  // Return the unique instance of this class.
+  static const Stub_factory&
+  get_instance()
+  {
+    static Stub_factory singleton;
+    return singleton;
+  }
+
+  // Make a relocation stub.
+  Reloc_stub*
+  make_reloc_stub(Stub_type stub_type) const
+  {
+    gold_assert(stub_type >= arm_stub_reloc_first
+		&& stub_type <= arm_stub_reloc_last);
+    return new Reloc_stub(this->stub_templates_[stub_type]);
+  }
+
+ private:
+  // Constructor and destructor are protected since we only return a single
+  // instance created in Stub_factory::get_instance().
+  
+  Stub_factory();
+
+  // A Stub_factory may not be copied since it is a singleton.
+  Stub_factory(const Stub_factory&);
+  Stub_factory& operator=(Stub_factory&);
+  
+  // Stub templates.  These are initialized in the constructor.
+  const Stub_template* stub_templates_[arm_stub_type_last+1];
+};
 
 // Utilities for manipulating integers of up to 32-bits
 
@@ -169,8 +712,45 @@ class Target_arm : public Sized_target<32, big_endian>
   Target_arm()
     : Sized_target<32, big_endian>(&arm_info),
       got_(NULL), plt_(NULL), got_plt_(NULL), rel_dyn_(NULL),
-      copy_relocs_(elfcpp::R_ARM_COPY), dynbss_(NULL)
+      copy_relocs_(elfcpp::R_ARM_COPY), dynbss_(NULL),
+      may_use_blx_(true), should_force_pic_veneer_(false)
   { }
+
+  // Whether we can use BLX.
+  bool
+  may_use_blx() const
+  { return this->may_use_blx_; }
+
+  // Set use-BLX flag.
+  void
+  set_may_use_blx(bool value)
+  { this->may_use_blx_ = value; }
+  
+  // Whether we force PCI branch veneers.
+  bool
+  should_force_pic_veneer() const
+  { return this->should_force_pic_veneer_; }
+
+  // Set PIC veneer flag.
+  void
+  set_should_force_pic_veneer(bool value)
+  { this->should_force_pic_veneer_ = value; }
+  
+  // Whether we use THUMB-2 instructions.
+  bool
+  using_thumb2() const
+  {
+    // FIXME:  This should not hard-coded.
+    return false;
+  }
+
+  // Whether we use THUMB/THUMB-2 instructions only.
+  bool
+  using_thumb_only() const
+  {
+    // FIXME:  This should not hard-coded.
+    return false;
+  }
 
   // Process the relocations to determine unreferenced sections for 
   // garbage collection.
@@ -272,6 +852,15 @@ class Target_arm : public Sized_target<32, big_endian>
   // Map platform-specific reloc types
   static unsigned int
   get_real_reloc_type (unsigned int r_type);
+
+  // Get the default ARM target.
+  static const Target_arm<big_endian>&
+  default_target()
+  {
+    gold_assert(parameters->target().machine_code() == elfcpp::EM_ARM
+		&& parameters->target().is_big_endian() == big_endian);
+    return static_cast<const Target_arm<big_endian>&>(parameters->target());
+  }
 
  private:
   // The class which scans relocations.
@@ -467,6 +1056,10 @@ class Target_arm : public Sized_target<32, big_endian>
   Copy_relocs<elfcpp::SHT_REL, 32, big_endian> copy_relocs_;
   // Space for variables copied with a COPY reloc.
   Output_data_space* dynbss_;
+  // Whether we can use BLX.
+  bool may_use_blx_;
+  // Whether we force PIC branch veneers.
+  bool should_force_pic_veneer_;
 };
 
 template<bool big_endian>
@@ -1117,6 +1710,555 @@ Target_arm<big_endian>::rel_dyn_section(Layout* layout)
 				      elfcpp::SHF_ALLOC, this->rel_dyn_);
     }
   return this->rel_dyn_;
+}
+
+// Insn_template methods.
+
+// Return byte size of an instruction template.
+
+size_t
+Insn_template::size() const
+{
+  switch (this->type())
+    {
+    case THUMB16_TYPE:
+      return 2;
+    case ARM_TYPE:
+    case THUMB32_TYPE:
+    case DATA_TYPE:
+      return 4;
+    default:
+      gold_unreachable();
+    }
+}
+
+// Return alignment of an instruction template.
+
+unsigned
+Insn_template::alignment() const
+{
+  switch (this->type())
+    {
+    case THUMB16_TYPE:
+    case THUMB32_TYPE:
+      return 2;
+    case ARM_TYPE:
+    case DATA_TYPE:
+      return 4;
+    default:
+      gold_unreachable();
+    }
+}
+
+// Stub_template methods.
+
+Stub_template::Stub_template(
+    Stub_type type, const Insn_template* insns,
+     size_t insn_count)
+  : type_(type), insns_(insns), insn_count_(insn_count), alignment_(1),
+    entry_in_thumb_mode_(false), relocs_()
+{
+  off_t offset = 0;
+
+  // Compute byte size and alignment of stub template.
+  for (size_t i = 0; i < insn_count; i++)
+    {
+      unsigned insn_alignment = insns[i].alignment();
+      size_t insn_size = insns[i].size();
+      gold_assert((offset & (insn_alignment - 1)) == 0);
+      this->alignment_ = std::max(this->alignment_, insn_alignment);
+      switch (insns[i].type())
+	{
+	case Insn_template::THUMB16_TYPE:
+	  if (i == 0)
+	    this->entry_in_thumb_mode_ = true;
+	  break;
+
+	case Insn_template::THUMB32_TYPE:
+          if (insns[i].r_type() != elfcpp::R_ARM_NONE)
+	    this->relocs_.push_back(Reloc(i, offset));
+	  if (i == 0)
+	    this->entry_in_thumb_mode_ = true;
+          break;
+
+	case Insn_template::ARM_TYPE:
+	  // Handle cases where the target is encoded within the
+	  // instruction.
+	  if (insns[i].r_type() == elfcpp::R_ARM_JUMP24)
+	    this->relocs_.push_back(Reloc(i, offset));
+	  break;
+
+	case Insn_template::DATA_TYPE:
+	  // Entry point cannot be data.
+	  gold_assert(i != 0);
+	  this->relocs_.push_back(Reloc(i, offset));
+	  break;
+
+	default:
+	  gold_unreachable();
+	}
+      offset += insn_size; 
+    }
+  this->size_ = offset;
+}
+
+// Reloc_stub::Key methods.
+
+// Dump a Key as a string for debugging.
+
+std::string
+Reloc_stub::Key::name() const
+{
+  if (this->r_sym_ == invalid_index)
+    {
+      // Global symbol key name
+      // <stub-type>:<symbol name>:<addend>.
+      const std::string sym_name = this->u_.symbol->name();
+      // We need to print two hex number and two colons.  So just add 100 bytes
+      // to the symbol name size.
+      size_t len = sym_name.size() + 100;
+      char* buffer = new char[len];
+      int c = snprintf(buffer, len, "%d:%s:%x", this->stub_type_,
+		       sym_name.c_str(), this->addend_);
+      gold_assert(c > 0 && c < static_cast<int>(len));
+      delete[] buffer;
+      return std::string(buffer);
+    }
+  else
+    {
+      // local symbol key name
+      // <stub-type>:<object>:<r_sym>:<addend>.
+      const size_t len = 200;
+      char buffer[len];
+      int c = snprintf(buffer, len, "%d:%p:%u:%x", this->stub_type_,
+		       this->u_.relobj, this->r_sym_, this->addend_);
+      gold_assert(c > 0 && c < static_cast<int>(len));
+      return std::string(buffer);
+    }
+}
+
+// Reloc_stub methods.
+
+// Determine the type of stub needed, if any, for a relocation of R_TYPE at
+// LOCATION to DESTINATION.
+// This code is based on the arm_type_of_stub function in
+// bfd/elf32-arm.c.  We have changed the interface a liitle to keep the Stub
+// class simple.
+
+Stub_type
+Reloc_stub::stub_type_for_reloc(
+   unsigned int r_type,
+   Arm_address location,
+   Arm_address destination,
+   bool target_is_thumb)
+{
+  Stub_type stub_type = arm_stub_none;
+
+  // This is a bit ugly but we want to avoid using a templated class for
+  // big and little endianities.
+  bool may_use_blx;
+  bool should_force_pic_veneer;
+  bool thumb2;
+  bool thumb_only;
+  if (parameters->target().is_big_endian())
+    {
+      const Target_arm<true>& big_endian_target =
+	Target_arm<true>::default_target();
+      may_use_blx = big_endian_target.may_use_blx();
+      should_force_pic_veneer = big_endian_target.should_force_pic_veneer();
+      thumb2 = big_endian_target.using_thumb2();
+      thumb_only = big_endian_target.using_thumb_only();
+    }
+  else
+    {
+      const Target_arm<false>& little_endian_target =
+	Target_arm<false>::default_target();
+      may_use_blx = little_endian_target.may_use_blx();
+      should_force_pic_veneer = little_endian_target.should_force_pic_veneer();
+      thumb2 = little_endian_target.using_thumb2();
+      thumb_only = little_endian_target.using_thumb_only();
+    }
+
+  int64_t branch_offset = (int64_t)destination - location;
+
+  if (r_type == elfcpp::R_ARM_THM_CALL || r_type == elfcpp::R_ARM_THM_JUMP24)
+    {
+      // Handle cases where:
+      // - this call goes too far (different Thumb/Thumb2 max
+      //   distance)
+      // - it's a Thumb->Arm call and blx is not available, or it's a
+      //   Thumb->Arm branch (not bl). A stub is needed in this case.
+      if ((!thumb2
+	    && (branch_offset > THM_MAX_FWD_BRANCH_OFFSET
+		|| (branch_offset < THM_MAX_BWD_BRANCH_OFFSET)))
+	  || (thumb2
+	      && (branch_offset > THM2_MAX_FWD_BRANCH_OFFSET
+		  || (branch_offset < THM2_MAX_BWD_BRANCH_OFFSET)))
+	  || ((!target_is_thumb)
+	      && (((r_type == elfcpp::R_ARM_THM_CALL) && !may_use_blx)
+		  || (r_type == elfcpp::R_ARM_THM_JUMP24))))
+	{
+	  if (target_is_thumb)
+	    {
+	      // Thumb to thumb.
+	      if (!thumb_only)
+		{
+		  stub_type = (parameters->options().shared() | should_force_pic_veneer)
+		    // PIC stubs.
+		    ? ((may_use_blx
+			&& (r_type == elfcpp::R_ARM_THM_CALL))
+		       // V5T and above. Stub starts with ARM code, so
+		       // we must be able to switch mode before
+		       // reaching it, which is only possible for 'bl'
+		       // (ie R_ARM_THM_CALL relocation).
+		       ? arm_stub_long_branch_any_thumb_pic
+		       // On V4T, use Thumb code only.
+		       : arm_stub_long_branch_v4t_thumb_thumb_pic)
+
+		    // non-PIC stubs.
+		    : ((may_use_blx
+			&& (r_type == elfcpp::R_ARM_THM_CALL))
+		       ? arm_stub_long_branch_any_any // V5T and above.
+		       : arm_stub_long_branch_v4t_thumb_thumb);	// V4T.
+		}
+	      else
+		{
+		  stub_type = (parameters->options().shared() | should_force_pic_veneer)
+		    ? arm_stub_long_branch_thumb_only_pic	// PIC stub.
+		    : arm_stub_long_branch_thumb_only;	// non-PIC stub.
+		}
+	    }
+	  else
+	    {
+	      // Thumb to arm.
+	     
+	      // FIXME: We should check that the input section is from an
+	      // object that has interwork enabled.
+
+	      stub_type = (parameters->options().shared()
+			   || should_force_pic_veneer)
+		// PIC stubs.
+		? ((may_use_blx
+		    && (r_type == elfcpp::R_ARM_THM_CALL))
+		   ? arm_stub_long_branch_any_arm_pic	// V5T and above.
+		   : arm_stub_long_branch_v4t_thumb_arm_pic)	// V4T.
+
+		// non-PIC stubs.
+		: ((may_use_blx
+		    && (r_type == elfcpp::R_ARM_THM_CALL))
+		   ? arm_stub_long_branch_any_any	// V5T and above.
+		   : arm_stub_long_branch_v4t_thumb_arm);	// V4T.
+
+	      // Handle v4t short branches.
+	      if ((stub_type == arm_stub_long_branch_v4t_thumb_arm)
+		  && (branch_offset <= THM_MAX_FWD_BRANCH_OFFSET)
+		  && (branch_offset >= THM_MAX_BWD_BRANCH_OFFSET))
+		stub_type = arm_stub_short_branch_v4t_thumb_arm;
+	    }
+	}
+    }
+  else if (r_type == elfcpp::R_ARM_CALL
+	   || r_type == elfcpp::R_ARM_JUMP24
+	   || r_type == elfcpp::R_ARM_PLT32)
+    {
+      if (target_is_thumb)
+	{
+	  // Arm to thumb.
+
+	  // FIXME: We should check that the input section is from an
+	  // object that has interwork enabled.
+
+	  // We have an extra 2-bytes reach because of
+	  // the mode change (bit 24 (H) of BLX encoding).
+	  if (branch_offset > (ARM_MAX_FWD_BRANCH_OFFSET + 2)
+	      || (branch_offset < ARM_MAX_BWD_BRANCH_OFFSET)
+	      || ((r_type == elfcpp::R_ARM_CALL) && !may_use_blx)
+	      || (r_type == elfcpp::R_ARM_JUMP24)
+	      || (r_type == elfcpp::R_ARM_PLT32))
+	    {
+	      stub_type = (parameters->options().shared()
+			   || should_force_pic_veneer)
+		// PIC stubs.
+		? (may_use_blx
+		   ? arm_stub_long_branch_any_thumb_pic// V5T and above.
+		   : arm_stub_long_branch_v4t_arm_thumb_pic)	// V4T stub.
+
+		// non-PIC stubs.
+		: (may_use_blx
+		   ? arm_stub_long_branch_any_any	// V5T and above.
+		   : arm_stub_long_branch_v4t_arm_thumb);	// V4T.
+	    }
+	}
+      else
+	{
+	  // Arm to arm.
+	  if (branch_offset > ARM_MAX_FWD_BRANCH_OFFSET
+	      || (branch_offset < ARM_MAX_BWD_BRANCH_OFFSET))
+	    {
+	      stub_type = (parameters->options().shared()
+			   || should_force_pic_veneer)
+		? arm_stub_long_branch_any_arm_pic	// PIC stubs.
+		: arm_stub_long_branch_any_any;		/// non-PIC.
+	    }
+	}
+    }
+
+  return stub_type;
+}
+
+// Template to implement do_write for a specific target endianity.
+
+template<bool big_endian>
+void inline
+Reloc_stub::do_fixed_endian_write(unsigned char* view,
+				  section_size_type view_size)
+{
+  const Stub_template* stub_template = this->stub_template();
+  const Insn_template* insns = stub_template->insns();
+
+  // FIXME:  We do not handle BE8 encoding yet.
+  unsigned char* pov = view;
+  for (size_t i = 0; i < stub_template->insn_count(); i++)
+    {
+      switch (insns[i].type())
+	{
+	case Insn_template::THUMB16_TYPE:
+	  // Non-zero reloc addends are only used in Cortex-A8 stubs. 
+	  gold_assert(insns[i].reloc_addend() == 0);
+	  elfcpp::Swap<16, big_endian>::writeval(pov, insns[i].data() & 0xffff);
+	  break;
+	case Insn_template::THUMB32_TYPE:
+	  {
+	    uint32_t hi = (insns[i].data() >> 16) & 0xffff;
+	    uint32_t lo = insns[i].data() & 0xffff;
+	    elfcpp::Swap<16, big_endian>::writeval(pov, hi);
+	    elfcpp::Swap<16, big_endian>::writeval(pov + 2, lo);
+	  }
+          break;
+	case Insn_template::ARM_TYPE:
+	case Insn_template::DATA_TYPE:
+	  elfcpp::Swap<32, big_endian>::writeval(pov, insns[i].data());
+	  break;
+	default:
+	  gold_unreachable();
+	}
+      pov += insns[i].size();
+    }
+  gold_assert(static_cast<section_size_type>(pov - view) == view_size);
+} 
+
+// Write a reloc stub to VIEW with endianity specified by BIG_ENDIAN.
+
+void
+Reloc_stub::do_write(unsigned char* view, section_size_type view_size,
+		     bool big_endian)
+{
+  if (big_endian)
+    this->do_fixed_endian_write<true>(view, view_size);
+  else
+    this->do_fixed_endian_write<false>(view, view_size);
+}
+
+// Stub_factory methods.
+
+Stub_factory::Stub_factory()
+{
+  // The instruction template sequences are declared as static
+  // objects and initialized first time the constructor runs.
+ 
+  // Arm/Thumb -> Arm/Thumb long branch stub. On V5T and above, use blx
+  // to reach the stub if necessary.
+  static const Insn_template elf32_arm_stub_long_branch_any_any[] =
+    {
+      Insn_template::arm_insn(0xe51ff004),	// ldr   pc, [pc, #-4]
+      Insn_template::data_word(0, elfcpp::R_ARM_ABS32, 0),
+  						// dcd   R_ARM_ABS32(X)
+    };
+  
+  // V4T Arm -> Thumb long branch stub. Used on V4T where blx is not
+  // available.
+  static const Insn_template elf32_arm_stub_long_branch_v4t_arm_thumb[] =
+    {
+      Insn_template::arm_insn(0xe59fc000),	// ldr   ip, [pc, #0]
+      Insn_template::arm_insn(0xe12fff1c),	// bx    ip
+      Insn_template::data_word(0, elfcpp::R_ARM_ABS32, 0),
+  						// dcd   R_ARM_ABS32(X)
+    };
+  
+  // Thumb -> Thumb long branch stub. Used on M-profile architectures.
+  static const Insn_template elf32_arm_stub_long_branch_thumb_only[] =
+    {
+      Insn_template::thumb16_insn(0xb401),	// push {r0}
+      Insn_template::thumb16_insn(0x4802),	// ldr  r0, [pc, #8]
+      Insn_template::thumb16_insn(0x4684),	// mov  ip, r0
+      Insn_template::thumb16_insn(0xbc01),	// pop  {r0}
+      Insn_template::thumb16_insn(0x4760),	// bx   ip
+      Insn_template::thumb16_insn(0xbf00),	// nop
+      Insn_template::data_word(0, elfcpp::R_ARM_ABS32, 0),
+  						// dcd  R_ARM_ABS32(X)
+    };
+  
+  // V4T Thumb -> Thumb long branch stub. Using the stack is not
+  // allowed.
+  static const Insn_template elf32_arm_stub_long_branch_v4t_thumb_thumb[] =
+    {
+      Insn_template::thumb16_insn(0x4778),	// bx   pc
+      Insn_template::thumb16_insn(0x46c0),	// nop
+      Insn_template::arm_insn(0xe59fc000),	// ldr  ip, [pc, #0]
+      Insn_template::arm_insn(0xe12fff1c),	// bx   ip
+      Insn_template::data_word(0, elfcpp::R_ARM_ABS32, 0),
+  						// dcd  R_ARM_ABS32(X)
+    };
+  
+  // V4T Thumb -> ARM long branch stub. Used on V4T where blx is not
+  // available.
+  static const Insn_template elf32_arm_stub_long_branch_v4t_thumb_arm[] =
+    {
+      Insn_template::thumb16_insn(0x4778),	// bx   pc
+      Insn_template::thumb16_insn(0x46c0),	// nop
+      Insn_template::arm_insn(0xe51ff004),	// ldr   pc, [pc, #-4]
+      Insn_template::data_word(0, elfcpp::R_ARM_ABS32, 0),
+  						// dcd   R_ARM_ABS32(X)
+    };
+  
+  // V4T Thumb -> ARM short branch stub. Shorter variant of the above
+  // one, when the destination is close enough.
+  static const Insn_template elf32_arm_stub_short_branch_v4t_thumb_arm[] =
+    {
+      Insn_template::thumb16_insn(0x4778),		// bx   pc
+      Insn_template::thumb16_insn(0x46c0),		// nop
+      Insn_template::arm_rel_insn(0xea000000, -8),	// b    (X-8)
+    };
+  
+  // ARM/Thumb -> ARM long branch stub, PIC.  On V5T and above, use
+  // blx to reach the stub if necessary.
+  static const Insn_template elf32_arm_stub_long_branch_any_arm_pic[] =
+    {
+      Insn_template::arm_insn(0xe59fc000),	// ldr   r12, [pc]
+      Insn_template::arm_insn(0xe08ff00c),	// add   pc, pc, ip
+      Insn_template::data_word(0, elfcpp::R_ARM_REL32, -4),
+  						// dcd   R_ARM_REL32(X-4)
+    };
+  
+  // ARM/Thumb -> Thumb long branch stub, PIC.  On V5T and above, use
+  // blx to reach the stub if necessary.  We can not add into pc;
+  // it is not guaranteed to mode switch (different in ARMv6 and
+  // ARMv7).
+  static const Insn_template elf32_arm_stub_long_branch_any_thumb_pic[] =
+    {
+      Insn_template::arm_insn(0xe59fc004),	// ldr   r12, [pc, #4]
+      Insn_template::arm_insn(0xe08fc00c),	// add   ip, pc, ip
+      Insn_template::arm_insn(0xe12fff1c),	// bx    ip
+      Insn_template::data_word(0, elfcpp::R_ARM_REL32, 0),
+  						// dcd   R_ARM_REL32(X)
+    };
+  
+  // V4T ARM -> ARM long branch stub, PIC.
+  static const Insn_template elf32_arm_stub_long_branch_v4t_arm_thumb_pic[] =
+    {
+      Insn_template::arm_insn(0xe59fc004),	// ldr   ip, [pc, #4]
+      Insn_template::arm_insn(0xe08fc00c),	// add   ip, pc, ip
+      Insn_template::arm_insn(0xe12fff1c),	// bx    ip
+      Insn_template::data_word(0, elfcpp::R_ARM_REL32, 0),
+  						// dcd   R_ARM_REL32(X)
+    };
+  
+  // V4T Thumb -> ARM long branch stub, PIC.
+  static const Insn_template elf32_arm_stub_long_branch_v4t_thumb_arm_pic[] =
+    {
+      Insn_template::thumb16_insn(0x4778),	// bx   pc
+      Insn_template::thumb16_insn(0x46c0),	// nop
+      Insn_template::arm_insn(0xe59fc000),	// ldr  ip, [pc, #0]
+      Insn_template::arm_insn(0xe08cf00f),	// add  pc, ip, pc
+      Insn_template::data_word(0, elfcpp::R_ARM_REL32, -4),
+  						// dcd  R_ARM_REL32(X)
+    };
+  
+  // Thumb -> Thumb long branch stub, PIC. Used on M-profile
+  // architectures.
+  static const Insn_template elf32_arm_stub_long_branch_thumb_only_pic[] =
+    {
+      Insn_template::thumb16_insn(0xb401),	// push {r0}
+      Insn_template::thumb16_insn(0x4802),	// ldr  r0, [pc, #8]
+      Insn_template::thumb16_insn(0x46fc),	// mov  ip, pc
+      Insn_template::thumb16_insn(0x4484),	// add  ip, r0
+      Insn_template::thumb16_insn(0xbc01),	// pop  {r0}
+      Insn_template::thumb16_insn(0x4760),	// bx   ip
+      Insn_template::data_word(0, elfcpp::R_ARM_REL32, 4),
+  						// dcd  R_ARM_REL32(X)
+    };
+  
+  // V4T Thumb -> Thumb long branch stub, PIC. Using the stack is not
+  // allowed.
+  static const Insn_template elf32_arm_stub_long_branch_v4t_thumb_thumb_pic[] =
+    {
+      Insn_template::thumb16_insn(0x4778),	// bx   pc
+      Insn_template::thumb16_insn(0x46c0),	// nop
+      Insn_template::arm_insn(0xe59fc004),	// ldr  ip, [pc, #4]
+      Insn_template::arm_insn(0xe08fc00c),	// add   ip, pc, ip
+      Insn_template::arm_insn(0xe12fff1c),	// bx   ip
+      Insn_template::data_word(0, elfcpp::R_ARM_REL32, 0),
+  						// dcd  R_ARM_REL32(X)
+    };
+  
+  // Cortex-A8 erratum-workaround stubs.
+  
+  // Stub used for conditional branches (which may be beyond +/-1MB away,
+  // so we can't use a conditional branch to reach this stub).
+  
+  // original code:
+  //
+  // 	b<cond> X
+  // after:
+  //
+  static const Insn_template elf32_arm_stub_a8_veneer_b_cond[] =
+    {
+      Insn_template::thumb16_bcond_insn(0xd001),	//	b<cond>.n true
+      Insn_template::thumb32_b_insn(0xf000b800, -4),	//	b.w after
+      Insn_template::thumb32_b_insn(0xf000b800, -4)	// true:
+  							//	b.w X
+    };
+  
+  // Stub used for b.w and bl.w instructions.
+  
+  static const Insn_template elf32_arm_stub_a8_veneer_b[] =
+    {
+      Insn_template::thumb32_b_insn(0xf000b800, -4)	// b.w dest
+    };
+  
+  static const Insn_template elf32_arm_stub_a8_veneer_bl[] =
+    {
+      Insn_template::thumb32_b_insn(0xf000b800, -4)	// b.w dest
+    };
+  
+  // Stub used for Thumb-2 blx.w instructions.  We modified the original blx.w
+  // instruction (which switches to ARM mode) to point to this stub.  Jump to
+  // the real destination using an ARM-mode branch.
+  const Insn_template elf32_arm_stub_a8_veneer_blx[] =
+    {
+      Insn_template::arm_rel_insn(0xea000000, -8)	// b dest
+    };
+
+  // Fill in the stub template look-up table.  Stub templates are constructed
+  // per instance of Stub_factory for fast look-up without locking
+  // in a thread-enabled environment.
+
+  this->stub_templates_[arm_stub_none] =
+    new Stub_template(arm_stub_none, NULL, 0);
+
+#define DEF_STUB(x)	\
+  do \
+    { \
+      size_t array_size \
+	= sizeof(elf32_arm_stub_##x) / sizeof(elf32_arm_stub_##x[0]); \
+      Stub_type type = arm_stub_##x; \
+      this->stub_templates_[type] = \
+	new Stub_template(type, elf32_arm_stub_##x, array_size); \
+    } \
+  while (0);
+
+  DEF_STUBS
+#undef DEF_STUB
 }
 
 // A class to handle the PLT data.

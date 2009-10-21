@@ -75,7 +75,10 @@ class Input_section_specifier
   // Compute a hash value of this.
   size_t
   hash_value() const
-  { return this->string_hash(this->relobj_->name().c_str()) ^ this->shndx_; }
+  {
+     return (gold::string_hash<char>(this->relobj_->name().c_str())
+	     ^ this->shndx_);
+   }
 
   // Functors for containers.
   struct equal_to
@@ -94,18 +97,6 @@ class Input_section_specifier
   };
 
  private:
-  // For portability, we use our own string hash function instead of assuming
-  // __gnu_cxx::hash or std::tr1::hash is available.  This is the same hash
-  // function used in Stringpool_template::string_hash.
-  static size_t
-  string_hash(const char* s)
-  {
-    size_t h = 5381;
-    while (*s != '\0')
-      h = h * 33 + *s++;
-    return h;
-  }
-
   // An object.
   const Relobj* relobj_;
   // A section index. 

@@ -349,6 +349,43 @@ is_prefix_of(const char* prefix, const char* str)
   return strncmp(prefix, str, strlen(prefix)) == 0;
 }
 
+// We sometimes need to hash strings.  Ideally we should use std::tr1::hash or
+// __gnu_cxx::hash on some systems but there is no guarantee that either
+// one is available.  For portability, we define simple string hash functions.
+
+template<typename Char_type>
+inline size_t
+string_hash(const Char_type* s, size_t length)
+{
+  // This is the hash function used by the dynamic linker for
+  // DT_GNU_HASH entries.  I compared this to a Fowler/Noll/Vo hash
+  // for a C++ program with 385,775 global symbols.  This hash
+  // function was very slightly worse.  However, it is much faster to
+  // compute.  Overall wall clock time was a win.
+  const unsigned char* p = reinterpret_cast<const unsigned char*>(s);
+  size_t h = 5381;
+  for (size_t i = 0; i < length * sizeof(Char_type); ++i)
+    h = h * 33 + *p++;
+  return h;
+}
+
+// Same as above except we expect the string to be zero terminated.
+
+template<typename Char_type>
+inline size_t
+string_hash(const Char_type* s)
+{
+  const unsigned char* p = reinterpret_cast<const unsigned char*>(s);
+  size_t h = 5381;
+  for (size_t i = 0; s[i] != 0; ++i)
+    {
+      for (size_t j = 0; j < sizeof(Char_type); j++)
+	h = h * 33 + *p++;
+    }
+
+  return h;
+}
+
 } // End namespace gold.
 
 #endif // !defined(GOLD_GOLD_H)

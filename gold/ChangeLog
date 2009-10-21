@@ -1,3 +1,40 @@
+2009-10-21  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc: Update copyright comments.
+	(Target_arm): New forward class template declaration.
+	(Arm_address): New type.
+	(ARM_MAX_FWD_BRANCH_OFFSET, ARM_MAX_BWD_BRANCH_OFFSET,
+	THM_MAX_FWD_BRANCH_OFFSET, THM_MAX_BWD_BRANCH_OFFSET,
+	THM2_MAX_FWD_BRANCH_OFFSET, THM2_MAX_BWD_BRANCH_OFFSET): New
+	constants.
+	(Insn_template): Same.
+	(DEF_STUBS): New macro.
+	(Stub_type): New enum type.
+	(Stub_template): New class definition.
+	(Stub): Same.
+	(Reloc_stub): Same.
+	(Stub_factory): Same.
+	(Target_arm::Target_arm): Initialize may_use_blx_ and
+	should_force_pic_veneer_.
+	(Target_arm::may_use_blx, Target_arm::set_may_use_blx,
+	Target_arm::should_force_pic_veneer,
+	Target_arm::set_should_force_pic_veneer, Target_arm::using_thumb2,
+	Target_arm::using_thumb_only, Target_arm:;default_target): New
+	method defintions.
+	(Target_arm::may_use_blx_, Target_arm::should_force_pic_veneer_):
+	New data member declarations.
+	(Insn_template::size, Insn_template::alignment): New method defintions.
+	(Stub_template::Stub_template): New method definition.
+	(Reloc_stub::Key::name, Reloc_stub::stub_type_for_reloc,
+	Reloc_stub::do_fixed_endian_write, Reloc_stub::do_write): Same.
+	(Stub_factory::Stub_factory): New method definition.
+	* gold.h (string_hash): New template.
+	* output.h (Input_section_specifier::hash_value): Use
+	gold::string_hash.
+	(Input_section_specifier::string_hash): Remove.
+	* stringpool.cc (Stringpool_template::string_hash): Use
+	gold::string_hash.
+
 2009-10-20  Doug Kwan  <dougkwan@google.com>
 
 	* object.cc (Sized_relobj::do_finalize_local_symbols): Handle section

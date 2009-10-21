@@ -153,16 +153,7 @@ size_t
 Stringpool_template<Stringpool_char>::string_hash(const Stringpool_char* s,
 						  size_t length)
 {
-  // This is the hash function used by the dynamic linker for
-  // DT_GNU_HASH entries.  I compared this to a Fowler/Noll/Vo hash
-  // for a C++ program with 385,775 global symbols.  This hash
-  // function was very slightly worse.  However, it is much faster to
-  // compute.  Overall wall clock time was a win.
-  const unsigned char* p = reinterpret_cast<const unsigned char*>(s);
-  size_t h = 5381;
-  for (size_t i = 0; i < length * sizeof(Stringpool_char); ++i)
-    h = h * 33 + *p++;
-  return h;
+  return gold::string_hash<Stringpool_char>(s, length);
 }
 
 // Add the string S to the list of canonical strings.  Return a
