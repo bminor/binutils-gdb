@@ -1,3 +1,8 @@
+2009-10-22  Michael Snyder  <msnyder@vmware.com>
+
+	* infrun.c (keep_going): If insert_breakpoints fails, 
+	print the reason.
+
 2009-10-22  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	PR gdb/10819

@@ -4863,6 +4863,7 @@ keep_going (struct execution_control_state *ecs)
 	    }
 	  if (e.reason < 0)
 	    {
+	      exception_print (gdb_stderr, e);
 	      stop_stepping (ecs);
 	      return;
 	    }
