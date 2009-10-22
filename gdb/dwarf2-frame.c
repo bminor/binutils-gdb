@@ -1525,6 +1525,14 @@ find_cie (struct dwarf2_cie_table *cie_table, ULONGEST cie_pointer)
 {
   struct dwarf2_cie **p_cie;
 
+  /* The C standard (ISO/IEC 9899:TC2) requires the BASE argument to
+     bsearch be non-NULL.  */
+  if (cie_table->entries == NULL)
+    {
+      gdb_assert (cie_table->num_entries == 0);
+      return NULL;
+    }
+
   p_cie = bsearch (&cie_pointer, cie_table->entries, cie_table->num_entries,
                    sizeof (cie_table->entries[0]), bsearch_cie_cmp);
   if (p_cie != NULL)
