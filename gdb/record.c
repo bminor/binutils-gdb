@@ -23,10 +23,15 @@
 #include "gdbthread.h"
 #include "event-top.h"
 #include "exceptions.h"
+#include "completer.h"
+#include "arch-utils.h"
 #include "gdbcore.h"
 #include "exec.h"
 #include "record.h"
+#include "elf-bfd.h"
+#include "gcore.h"
 
+#include <byteswap.h>
 #include <signal.h>
 
 /* This module implements "target record", also known as "process
@@ -53,6 +58,8 @@
 
 #define RECORD_IS_REPLAY \
      (record_list->next || execution_direction == EXEC_REVERSE)
+
+#define RECORD_FILE_MAGIC	netorder32(0x20091016)
 
 /* These are the core structs of the process record functionality.
 
@@ -545,10 +552,16 @@ record_check_insn_num (int set_terminal)
 	      if (q)
 		record_stop_at_limit = 0;
 	      else
-		error (_("Process record: inferior program stopped."));
+		error (_("Process record: stopped by user."));
 	    }
 	}
     }
+}
+
+static void
+record_arch_list_cleanups (void *ignore)
+{
+  record_list_release (record_arch_list_tail);
 }
 
 /* Before inferior step (when GDB record the running message, inferior
@@ -556,12 +569,6 @@ record_check_insn_num (int set_terminal)
    record_list.  This function will call gdbarch_process_record to
    record the running message of inferior and set them to
    record_arch_list, and add it to record_list.  */
-
-static void
-record_message_cleanups (void *ignore)
-{
-  record_list_release (record_arch_list_tail);
-}
 
 struct record_message_args {
   struct regcache *regcache;
@@ -574,7 +581,7 @@ record_message (void *args)
   int ret;
   struct record_message_args *myargs = args;
   struct gdbarch *gdbarch = get_regcache_arch (myargs->regcache);
-  struct cleanup *old_cleanups = make_cleanup (record_message_cleanups, 0);
+  struct cleanup *old_cleanups = make_cleanup (record_arch_list_cleanups, 0);
 
   record_arch_list_head = NULL;
   record_arch_list_tail = NULL;
@@ -714,8 +721,8 @@ record_exec_insn (struct regcache *regcache, struct gdbarch *gdbarch,
               {
                 entry->u.mem.mem_entry_not_accessible = 1;
                 if (record_debug)
-                  warning (_("Process record: error reading memory at "
-                             "addr = %s len = %d."),
+                  warning ("Process record: error reading memory at "
+			   "addr = %s len = %d.",
                            paddress (gdbarch, entry->u.mem.addr),
                            entry->u.mem.len);
               }
@@ -727,8 +734,8 @@ record_exec_insn (struct regcache *regcache, struct gdbarch *gdbarch,
                   {
                     entry->u.mem.mem_entry_not_accessible = 1;
                     if (record_debug)
-                      warning (_("Process record: error writing memory at "
-                                 "addr = %s len = %d."),
+                      warning ("Process record: error writing memory at "
+			       "addr = %s len = %d.",
                                paddress (gdbarch, entry->u.mem.addr),
                                entry->u.mem.len);
                   }
@@ -765,6 +772,8 @@ static int (*tmp_to_insert_breakpoint) (struct gdbarch *,
 static int (*tmp_to_remove_breakpoint) (struct gdbarch *,
 					struct bp_target_info *);
 
+static void record_restore (void);
+
 /* Open the process record target.  */
 
 static void
@@ -791,6 +800,7 @@ record_core_open_1 (char *name, int from_tty)
     }
 
   push_target (&record_core_ops);
+  record_restore ();
 }
 
 /* "to_open" target method for 'live' processes.  */
@@ -1438,8 +1448,8 @@ record_xfer_partial (struct target_ops *ops, enum target_object object,
 	  record_list_release (record_arch_list_tail);
 	  if (record_debug)
 	    fprintf_unfiltered (gdb_stdlog,
-				_("Process record: failed to record "
-				  "execution log."));
+				"Process record: failed to record "
+				"execution log.");
 	  return -1;
 	}
       if (record_arch_list_add_end ())
@@ -1447,8 +1457,8 @@ record_xfer_partial (struct target_ops *ops, enum target_object object,
 	  record_list_release (record_arch_list_tail);
 	  if (record_debug)
 	    fprintf_unfiltered (gdb_stdlog,
-				_("Process record: failed to record "
-				  "execution log."));
+				"Process record: failed to record "
+				"execution log.");
 	  return -1;
 	}
       record_list->next = record_arch_list_head;
@@ -1885,9 +1895,513 @@ info_record_command (char *args, int from_tty)
 		   record_insn_max_num);
 }
 
+/* Record log save-file format
+   Version 1 (never released)
+
+   Header:
+     4 bytes: magic number htonl(0x20090829).
+       NOTE: be sure to change whenever this file format changes!
+
+   Records:
+     record_end:
+       1 byte:  record type (record_end, see enum record_type).
+     record_reg:
+       1 byte:  record type (record_reg, see enum record_type).
+       8 bytes: register id (network byte order).
+       MAX_REGISTER_SIZE bytes: register value.
+     record_mem:
+       1 byte:  record type (record_mem, see enum record_type).
+       8 bytes: memory length (network byte order).
+       8 bytes: memory address (network byte order).
+       n bytes: memory value (n == memory length).
+
+   Version 2
+     4 bytes: magic number netorder32(0x20091016).
+       NOTE: be sure to change whenever this file format changes!
+
+   Records:
+     record_end:
+       1 byte:  record type (record_end, see enum record_type).
+       4 bytes: signal
+       4 bytes: instruction count
+     record_reg:
+       1 byte:  record type (record_reg, see enum record_type).
+       4 bytes: register id (network byte order).
+       n bytes: register value (n == actual register size).
+                (eg. 4 bytes for x86 general registers).
+     record_mem:
+       1 byte:  record type (record_mem, see enum record_type).
+       4 bytes: memory length (network byte order).
+       8 bytes: memory address (network byte order).
+       n bytes: memory value (n == memory length).
+
+*/
+
+/* bfdcore_read -- read bytes from a core file section.  */
+
+static inline void
+bfdcore_read (bfd *obfd, asection *osec, void *buf, int len, int *offset)
+{
+  int ret = bfd_get_section_contents (obfd, osec, buf, *offset, len);
+
+  if (ret)
+    *offset += len;
+  else
+    error (_("Failed to read %d bytes from core file %s ('%s').\n"),
+	   len, bfd_get_filename (obfd),
+	   bfd_errmsg (bfd_get_error ()));
+}
+
+static inline uint64_t
+netorder64 (uint64_t fromfile)
+{
+  return (BYTE_ORDER == LITTLE_ENDIAN) 
+    ? bswap_64 (fromfile) 
+    : fromfile;
+}
+
+static inline uint32_t
+netorder32 (uint32_t fromfile)
+{
+  return (BYTE_ORDER == LITTLE_ENDIAN) 
+    ? bswap_32 (fromfile) 
+    : fromfile;
+}
+
+static inline uint16_t
+netorder16 (uint16_t fromfile)
+{
+  return (BYTE_ORDER == LITTLE_ENDIAN) 
+    ? bswap_16 (fromfile) 
+    : fromfile;
+}
+
+/* Restore the execution log from a core_bfd file.  */
+static void
+record_restore (void)
+{
+  uint32_t magic;
+  struct cleanup *old_cleanups;
+  struct record_entry *rec;
+  asection *osec;
+  uint32_t osec_size;
+  int bfd_offset = 0;
+  struct regcache *regcache;
+
+  /* We restore the execution log from the open core bfd,
+     if there is one.  */
+  if (core_bfd == NULL)
+    return;
+
+  /* "record_restore" can only be called when record list is empty.  */
+  gdb_assert (record_first.next == NULL);
+ 
+  if (record_debug)
+    printf_filtered ("Restoring recording from core file.\n");
+
+  /* Now need to find our special note section.  */
+  osec = bfd_get_section_by_name (core_bfd, "null0");
+  osec_size = bfd_section_size (core_bfd, osec);
+  if (record_debug)
+    printf_filtered ("Find precord section %s.\n",
+		     osec ? "succeeded" : "failed");
+  if (!osec)
+    return;
+  if (record_debug)
+    printf_filtered ("%s", bfd_section_name (core_bfd, osec));
+
+  /* Check the magic code.  */
+  bfdcore_read (core_bfd, osec, &magic, sizeof (magic), &bfd_offset);
+  if (magic != RECORD_FILE_MAGIC)
+    error (_("Version mis-match or file format error in core file %s."),
+	   bfd_get_filename (core_bfd));
+  if (record_debug)
+    printf_filtered ("\
+  Reading 4-byte magic cookie RECORD_FILE_MAGIC (0x%08x)\n",
+		     netorder32 (magic));
+
+  /* Restore the entries in recfd into record_arch_list_head and
+     record_arch_list_tail.  */
+  record_arch_list_head = NULL;
+  record_arch_list_tail = NULL;
+  record_insn_num = 0;
+  old_cleanups = make_cleanup (record_arch_list_cleanups, 0);
+  regcache = get_current_regcache ();
+
+  while (1)
+    {
+      int ret;
+      uint8_t tmpu8;
+      uint32_t regnum, len, signal, count;
+      uint64_t addr;
+
+      /* We are finished when offset reaches osec_size.  */
+      if (bfd_offset >= osec_size)
+	break;
+      bfdcore_read (core_bfd, osec, &tmpu8, sizeof (tmpu8), &bfd_offset);
+
+      switch (tmpu8)
+        {
+        case record_reg: /* reg */
+          /* Get register number to regnum.  */
+          bfdcore_read (core_bfd, osec, &regnum,
+			sizeof (regnum), &bfd_offset);
+	  regnum = netorder32 (regnum);
+
+          rec = record_reg_alloc (regcache, regnum);
+
+          /* Get val.  */
+          bfdcore_read (core_bfd, osec, record_get_loc (rec),
+			rec->u.reg.len, &bfd_offset);
+
+          if (record_debug)
+            printf_filtered ("\
+  Reading register %d (1 plus %d plus %d bytes)\n",
+			     rec->u.reg.num,
+			     sizeof (regnum),
+			     rec->u.reg.len);
+          break;
+
+        case record_mem: /* mem */
+          /* Get len.  */
+          bfdcore_read (core_bfd, osec, &len, 
+			sizeof (len), &bfd_offset);
+	  len = netorder32 (len);
+
+          /* Get addr.  */
+          bfdcore_read (core_bfd, osec, &addr,
+			sizeof (addr), &bfd_offset);
+	  addr = netorder64 (addr);
+
+          rec = record_mem_alloc (addr, len);
+
+          /* Get val.  */
+          bfdcore_read (core_bfd, osec, record_get_loc (rec),
+			rec->u.mem.len, &bfd_offset);
+
+          if (record_debug)
+            printf_filtered ("\
+  Reading memory %s (1 plus %d plus %d plus %d bytes)\n",
+			     paddress (get_current_arch (),
+				       rec->u.mem.addr),
+			     sizeof (addr),
+			     sizeof (len),
+			     rec->u.mem.len);
+          break;
+
+        case record_end: /* end */
+          rec = record_end_alloc ();
+          record_insn_num ++;
+
+	  /* Get signal value.  */
+	  bfdcore_read (core_bfd, osec, &signal, 
+			sizeof (signal), &bfd_offset);
+	  signal = netorder32 (signal);
+	  rec->u.end.sigval = signal;
+
+	  /* Get insn count.  */
+	  bfdcore_read (core_bfd, osec, &count, 
+			sizeof (count), &bfd_offset);
+	  count = netorder32 (count);
+	  rec->u.end.insn_num = count;
+	  record_insn_count = count + 1;
+          if (record_debug)
+            printf_filtered ("\
+  Reading record_end (1 + %d + %d bytes), offset == %s\n",
+			     sizeof (signal),
+			     sizeof (count),
+			     paddress (get_current_arch (),
+				       bfd_offset));
+          break;
+
+        default:
+          error (_("Bad entry type in core file %s."),
+		 bfd_get_filename (core_bfd));
+          break;
+        }
+
+      /* Add rec to record arch list.  */
+      record_arch_list_add (rec);
+    }
+
+  discard_cleanups (old_cleanups);
+
+  /* Add record_arch_list_head to the end of record list.  */
+  record_first.next = record_arch_list_head;
+  record_arch_list_head->prev = &record_first;
+  record_arch_list_tail->next = NULL;
+  record_list = &record_first;
+
+  /* Update record_insn_max_num.  */
+  if (record_insn_num > record_insn_max_num)
+    {
+      record_insn_max_num = record_insn_num;
+      warning (_("Auto increase record/replay buffer limit to %d."),
+               record_insn_max_num);
+    }
+
+  /* Succeeded.  */
+  printf_filtered (_("Restored records from core file %s.\n"),
+		   bfd_get_filename (core_bfd));
+
+  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
+}
+
+/* bfdcore_write -- write bytes into a core file section.  */
+
+static inline void
+bfdcore_write (bfd *obfd, asection *osec, void *buf, int len, int *offset)
+{
+  int ret = bfd_set_section_contents (obfd, osec, buf, *offset, len);
+
+  if (ret)
+    *offset += len;
+  else
+    error (_("Failed to write %d bytes to core file %s ('%s').\n"),
+	   len, bfd_get_filename (obfd),
+	   bfd_errmsg (bfd_get_error ()));
+}
+
+/* Restore the execution log from a file.  We use a modified elf
+   corefile format, with an extra section for our data.  */
+
+static void
+cmd_record_restore (char *args, int from_tty)
+{
+  core_file_command (args, from_tty);
+  record_open (args, from_tty);
+}
+
+static void
+record_save_cleanups (void *data)
+{
+  bfd *obfd = data;
+  char *pathname = xstrdup (bfd_get_filename (obfd));
+  bfd_close (obfd);
+  unlink (pathname);
+  xfree (pathname);
+}
+
+/* Save the execution log to a file.  We use a modified elf corefile
+   format, with an extra section for our data.  */
+
+static void
+cmd_record_save (char *args, int from_tty)
+{
+  char *recfilename, recfilename_buffer[40];
+  int recfd;
+  struct record_entry *cur_record_list;
+  uint32_t magic;
+  struct regcache *regcache;
+  struct gdbarch *gdbarch;
+  struct cleanup *old_cleanups;
+  struct cleanup *set_cleanups;
+  bfd *obfd;
+  int save_size = 0;
+  asection *osec = NULL;
+  int bfd_offset = 0;
+
+  if (strcmp (current_target.to_shortname, "record") != 0)
+    error (_("This command can only be used with target 'record'.\n"
+	     "Use 'target record' first.\n"));
+
+  if (args && *args)
+    recfilename = args;
+  else
+    {
+      /* Default recfile name is "gdb_record.PID".  */
+      snprintf (recfilename_buffer, sizeof (recfilename_buffer),
+                "gdb_record.%d", PIDGET (inferior_ptid));
+      recfilename = recfilename_buffer;
+    }
+
+  /* Open the save file.  */
+  if (record_debug)
+    printf_filtered ("Saving execution log to core file '%s'\n", recfilename);
+
+  /* Open the output file.  */
+  obfd = create_gcore_bfd (recfilename);
+  old_cleanups = make_cleanup (record_save_cleanups, obfd);
+
+  /* Save the current record entry to "cur_record_list".  */
+  cur_record_list = record_list;
+
+  /* Get the values of regcache and gdbarch.  */
+  regcache = get_current_regcache ();
+  gdbarch = get_regcache_arch (regcache);
+
+  /* Disable the GDB operation record.  */
+  set_cleanups = record_gdb_operation_disable_set ();
+
+  /* Reverse execute to the begin of record list.  */
+  while (1)
+    {
+      /* Check for beginning and end of log.  */
+      if (record_list == &record_first)
+        break;
+
+      record_exec_insn (regcache, gdbarch, record_list);
+
+      if (record_list->prev)
+        record_list = record_list->prev;
+    }
+
+  /* Compute the size needed for the extra bfd section.  */
+  save_size = 4;	/* magic cookie */
+  for (record_list = record_first.next; record_list;
+       record_list = record_list->next)
+    switch (record_list->type)
+      {
+      case record_end:
+	save_size += 1 + 4 + 4;
+	break;
+      case record_reg:
+	save_size += 1 + 4 + record_list->u.reg.len;
+	break;
+      case record_mem:
+	save_size += 1 + 4 + 8 + record_list->u.mem.len;
+	break;
+      }
+
+  /* Make the new bfd section.  */
+  osec = bfd_make_section_anyway_with_flags (obfd, "precord",
+                                             SEC_HAS_CONTENTS
+                                             | SEC_READONLY);
+  if (osec == NULL)
+    error (_("Failed to create 'precord' section for corefile %s: %s"),
+	   recfilename,
+           bfd_errmsg (bfd_get_error ()));
+  bfd_set_section_size (obfd, osec, save_size);
+  bfd_set_section_vma (obfd, osec, 0);
+  bfd_set_section_alignment (obfd, osec, 0);
+  bfd_section_lma (obfd, osec) = 0;
+
+  /* Save corefile state.  */
+  write_gcore_file (obfd);
+
+  /* Write out the record log.  */
+  /* Write the magic code.  */
+  magic = RECORD_FILE_MAGIC;
+  if (record_debug)
+    printf_filtered ("\
+  Writing 4-byte magic cookie RECORD_FILE_MAGIC (0x%08x)\n",
+		     magic);
+  bfdcore_write (obfd, osec, &magic, sizeof (magic), &bfd_offset);
+
+  /* Save the entries to recfd and forward execute to the end of
+     record list.  */
+  record_list = &record_first;
+  while (1)
+    {
+      /* Save entry.  */
+      if (record_list != &record_first)
+        {
+	  uint8_t type;
+	  uint32_t regnum, len, signal, count;
+          uint64_t addr;
+
+	  type = record_list->type;
+          bfdcore_write (obfd, osec, &type, sizeof (type), &bfd_offset);
+
+          switch (record_list->type)
+            {
+            case record_reg: /* reg */
+              if (record_debug)
+		printf_filtered ("\
+  Writing register %d (1 plus %d plus %d bytes)\n",
+				 record_list->u.reg.num,
+				 sizeof (regnum),
+				 record_list->u.reg.len);
+
+              /* Write regnum.  */
+              regnum = netorder32 (record_list->u.reg.num);
+              bfdcore_write (obfd, osec, &regnum,
+			     sizeof (regnum), &bfd_offset);
+
+              /* Write regval.  */
+              bfdcore_write (obfd, osec, record_get_loc (record_list),
+			     record_list->u.reg.len, &bfd_offset);
+              break;
+
+            case record_mem: /* mem */
+	      if (record_debug)
+		printf_filtered ("\
+  Writing memory %s (1 plus %d plus %d plus %d bytes)\n",
+				 paddress (gdbarch,
+					   record_list->u.mem.addr),
+				 sizeof (addr),
+				 sizeof (len),
+				 record_list->u.mem.len);
+
+	      /* Write memlen.  */
+	      len = netorder32 (record_list->u.mem.len);
+	      bfdcore_write (obfd, osec, &len, sizeof (len), &bfd_offset);
+
+	      /* Write memaddr.  */
+	      addr = netorder64 (record_list->u.mem.addr);
+	      bfdcore_write (obfd, osec, &addr, 
+			     sizeof (addr), &bfd_offset);
+
+	      /* Write memval.  */
+	      bfdcore_write (obfd, osec, record_get_loc (record_list),
+			     record_list->u.mem.len, &bfd_offset);
+              break;
+
+              case record_end:
+                if (record_debug)
+                  printf_filtered ("\
+  Writing record_end (1 + %d + %d bytes)\n", 
+				   sizeof (signal),
+				   sizeof (count));
+		/* Write signal value.  */
+		signal = netorder32 (record_list->u.end.sigval);
+		bfdcore_write (obfd, osec, &signal,
+			       sizeof (signal), &bfd_offset);
+
+		/* Write insn count.  */
+		count = netorder32 (record_list->u.end.insn_num);
+		bfdcore_write (obfd, osec, &count,
+			       sizeof (count), &bfd_offset);
+                break;
+            }
+        }
+
+      /* Execute entry.  */
+      record_exec_insn (regcache, gdbarch, record_list);
+
+      if (record_list->next)
+        record_list = record_list->next;
+      else
+        break;
+    }
+
+  /* Reverse execute to cur_record_list.  */
+  while (1)
+    {
+      /* Check for beginning and end of log.  */
+      if (record_list == cur_record_list)
+        break;
+
+      record_exec_insn (regcache, gdbarch, record_list);
+
+      if (record_list->prev)
+        record_list = record_list->prev;
+    }
+
+  do_cleanups (set_cleanups);
+  bfd_close (obfd);
+  discard_cleanups (old_cleanups);
+
+  /* Succeeded.  */
+  printf_filtered (_("Saved core file %s with execution log.\n"),
+		   recfilename);
+}
+
 void
 _initialize_record (void)
 {
+  struct cmd_list_element *c;
+
   /* Init record_first.  */
   record_first.prev = NULL;
   record_first.next = NULL;
@@ -1906,9 +2420,11 @@ _initialize_record (void)
 			    NULL, show_record_debug, &setdebuglist,
 			    &showdebuglist);
 
-  add_prefix_cmd ("record", class_obscure, cmd_record_start,
-		  _("Abbreviated form of \"target record\" command."),
- 		  &record_cmdlist, "record ", 0, &cmdlist);
+  c = add_prefix_cmd ("record", class_obscure, cmd_record_start,
+		      _("Abbreviated form of \"target record\" command."),
+		      &record_cmdlist, "record ", 0, &cmdlist);
+  set_cmd_completer (c, filename_completer);
+
   add_com_alias ("rec", "record", class_obscure, 1);
   add_prefix_cmd ("record", class_support, set_record_command,
 		  _("Set record options"), &set_record_cmdlist,
@@ -1923,6 +2439,18 @@ _initialize_record (void)
 		  "info record ", 0, &infolist);
   add_alias_cmd ("rec", "record", class_obscure, 1, &infolist);
 
+  c = add_cmd ("save", class_obscure, cmd_record_save,
+	       _("Save the execution log to a file.\n\
+Argument is optional filename.\n\
+Default filename is 'gdb_record.<process_id>'."),
+	       &record_cmdlist);
+  set_cmd_completer (c, filename_completer);
+
+  c = add_cmd ("restore", class_obscure, cmd_record_restore,
+	       _("Restore the execution log from a file.\n\
+Argument is filename.  File must be created with 'record save'."),
+	       &record_cmdlist);
+  set_cmd_completer (c, filename_completer);
 
   add_cmd ("delete", class_obscure, cmd_record_delete,
 	   _("Delete the rest of execution log and start recording it anew."),

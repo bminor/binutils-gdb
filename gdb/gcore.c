@@ -25,10 +25,14 @@
 #include "gdbcore.h"
 #include "objfiles.h"
 #include "symfile.h"
-
+#include "arch-utils.h"
+#include "completer.h"
+#include "gcore.h"
 #include "cli/cli-decode.h"
-
 #include "gdb_assert.h"
+#include <fcntl.h>
+#include "regcache.h"
+#include "regset.h"
 
 /* The largest amount of memory to read from the target at once.  We
    must throttle it to limit the amount of memory used by GDB during
@@ -40,45 +44,30 @@ static enum bfd_architecture default_gcore_arch (void);
 static unsigned long default_gcore_mach (void);
 static int gcore_memory_sections (bfd *);
 
-/* Generate a core file from the inferior process.  */
+/* create_gcore_bfd -- helper for gcore_command (exported).
+   Open a new bfd core file for output, and return the handle.  */
 
-static void
-gcore_command (char *args, int from_tty)
+bfd *
+create_gcore_bfd (char *filename)
 {
-  struct cleanup *old_chain;
-  char *corefilename, corefilename_buffer[40];
-  asection *note_sec = NULL;
-  bfd *obfd;
-  void *note_data = NULL;
-  int note_size = 0;
-
-  /* No use generating a corefile without a target process.  */
-  if (!target_has_execution)
-    noprocess ();
-
-  if (args && *args)
-    corefilename = args;
-  else
-    {
-      /* Default corefile name is "core.PID".  */
-      sprintf (corefilename_buffer, "core.%d", PIDGET (inferior_ptid));
-      corefilename = corefilename_buffer;
-    }
-
-  if (info_verbose)
-    fprintf_filtered (gdb_stdout,
-		      "Opening corefile '%s' for output.\n", corefilename);
-
-  /* Open the output file.  */
-  obfd = bfd_openw (corefilename, default_gcore_target ());
+  bfd *obfd = bfd_openw (filename, default_gcore_target ());
   if (!obfd)
-    error (_("Failed to open '%s' for output."), corefilename);
-
-  /* Need a cleanup that will close the file (FIXME: delete it?).  */
-  old_chain = make_cleanup_bfd_close (obfd);
-
+    error (_("Failed to open '%s' for output."), filename);
   bfd_set_format (obfd, bfd_core);
   bfd_set_arch_mach (obfd, default_gcore_arch (), default_gcore_mach ());
+  return obfd;
+}
+
+/* write_gcore_file -- helper for gcore_command (exported).
+   Compose and write the corefile data to the core file.  */
+
+
+void
+write_gcore_file (bfd *obfd)
+{
+  void *note_data = NULL;
+  int note_size = 0;
+  asection *note_sec = NULL;
 
   /* An external target method must build the notes section.  */
   note_data = target_make_corefile_notes (obfd, &note_size);
@@ -107,8 +96,46 @@ gcore_command (char *args, int from_tty)
   if (note_data != NULL && note_size != 0)
     {
       if (!bfd_set_section_contents (obfd, note_sec, note_data, 0, note_size))
-	warning (_("writing note section (%s)"), bfd_errmsg (bfd_get_error ()));
+	warning (_("writing note section (%s)"), 
+		 bfd_errmsg (bfd_get_error ()));
     }
+}
+
+/* gcore_command -- implements the 'gcore' command.
+   Generate a core file from the inferior process.  */
+
+static void
+gcore_command (char *args, int from_tty)
+{
+  struct cleanup *old_chain;
+  char *corefilename, corefilename_buffer[40];
+  bfd *obfd;
+
+  /* No use generating a corefile without a target process.  */
+  if (!target_has_execution)
+    noprocess ();
+
+  if (args && *args)
+    corefilename = args;
+  else
+    {
+      /* Default corefile name is "core.PID".  */
+      sprintf (corefilename_buffer, "core.%d", PIDGET (inferior_ptid));
+      corefilename = corefilename_buffer;
+    }
+
+  if (info_verbose)
+    fprintf_filtered (gdb_stdout,
+		      "Opening corefile '%s' for output.\n", corefilename);
+
+  /* Open the output file.  */
+  obfd = create_gcore_bfd (corefilename);
+
+  /* Need a cleanup that will close the file (FIXME: delete it?).  */
+  old_chain = make_cleanup_bfd_close (obfd);
+
+  /* Call worker function.  */
+  write_gcore_file (obfd);
 
   /* Succeeded.  */
   fprintf_filtered (gdb_stdout, "Saved corefile %s\n", corefilename);
@@ -212,6 +239,50 @@ derive_stack_segment (bfd_vma *bottom, bfd_vma *top)
   return 1;
 }
 
+/* call_target_sbrk --
+   helper function for derive_heap_segment.  */
+
+static bfd_vma
+call_target_sbrk (int sbrk_arg)
+{
+  struct objfile *sbrk_objf;
+  struct gdbarch *gdbarch;
+  bfd_vma top_of_heap;
+  struct value *target_sbrk_arg;
+  struct value *sbrk_fn, *ret;
+  bfd_vma tmp;
+
+  if (lookup_minimal_symbol ("sbrk", NULL, NULL) != NULL)
+    {
+      sbrk_fn = find_function_in_inferior ("sbrk", &sbrk_objf);
+      if (sbrk_fn == NULL)
+	return (bfd_vma) 0;
+    }
+  else if (lookup_minimal_symbol ("_sbrk", NULL, NULL) != NULL)
+    {
+      sbrk_fn = find_function_in_inferior ("_sbrk", &sbrk_objf);
+      if (sbrk_fn == NULL)
+	return (bfd_vma) 0;
+    }
+  else
+    return (bfd_vma) 0;
+
+  gdbarch = get_objfile_arch (sbrk_objf);
+  target_sbrk_arg = value_from_longest (builtin_type (gdbarch)->builtin_int, 
+					sbrk_arg);
+  gdb_assert (target_sbrk_arg);
+  ret = call_function_by_hand (sbrk_fn, 1, &target_sbrk_arg);
+  if (ret == NULL)
+    return (bfd_vma) 0;
+
+  tmp = value_as_long (ret);
+  if ((LONGEST) tmp <= 0 || (LONGEST) tmp == 0xffffffff)
+    return (bfd_vma) 0;
+
+  top_of_heap = tmp;
+  return top_of_heap;
+}
+
 /* Derive a reasonable heap segment for ABFD by looking at sbrk and
    the static data sections.  Store its limits in *BOTTOM and *TOP.
    Return non-zero if successful.  */
@@ -219,12 +290,10 @@ derive_stack_segment (bfd_vma *bottom, bfd_vma *top)
 static int
 derive_heap_segment (bfd *abfd, bfd_vma *bottom, bfd_vma *top)
 {
-  struct objfile *sbrk_objf;
   struct gdbarch *gdbarch;
   bfd_vma top_of_data_memory = 0;
   bfd_vma top_of_heap = 0;
   bfd_size_type sec_size;
-  struct value *zero, *sbrk;
   bfd_vma sec_vaddr;
   asection *sec;
 
@@ -259,29 +328,9 @@ derive_heap_segment (bfd *abfd, bfd_vma *bottom, bfd_vma *top)
 	}
     }
 
-  /* Now get the top-of-heap by calling sbrk in the inferior.  */
-  if (lookup_minimal_symbol ("sbrk", NULL, NULL) != NULL)
-    {
-      sbrk = find_function_in_inferior ("sbrk", &sbrk_objf);
-      if (sbrk == NULL)
-	return 0;
-    }
-  else if (lookup_minimal_symbol ("_sbrk", NULL, NULL) != NULL)
-    {
-      sbrk = find_function_in_inferior ("_sbrk", &sbrk_objf);
-      if (sbrk == NULL)
-	return 0;
-    }
-  else
+  top_of_heap = call_target_sbrk (0);
+  if (top_of_heap == (bfd_vma) 0)
     return 0;
-
-  gdbarch = get_objfile_arch (sbrk_objf);
-  zero = value_from_longest (builtin_type (gdbarch)->builtin_int, 0);
-  gdb_assert (zero);
-  sbrk = call_function_by_hand (sbrk, 1, &zero);
-  if (sbrk == NULL)
-    return 0;
-  top_of_heap = value_as_long (sbrk);
 
   /* Return results.  */
   if (top_of_heap > top_of_data_memory)
@@ -299,13 +348,15 @@ static void
 make_output_phdrs (bfd *obfd, asection *osec, void *ignored)
 {
   int p_flags = 0;
-  int p_type;
+  int p_type = 0;
 
   /* FIXME: these constants may only be applicable for ELF.  */
   if (strncmp (bfd_section_name (obfd, osec), "load", 4) == 0)
     p_type = PT_LOAD;
-  else
+  else if (strncmp (bfd_section_name (obfd, osec), "note", 4) == 0)
     p_type = PT_NOTE;
+  else
+    p_type = PT_NULL;
 
   p_flags |= PF_R;	/* Segment is readable.  */
   if (!(bfd_get_section_flags (obfd, osec) & SEC_READONLY))

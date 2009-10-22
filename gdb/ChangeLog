@@ -1,3 +1,26 @@
+2009-10-16  Hui Zhu  <teawater@gmail.com>
+	    Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
+
+	* record.c (RECORD_FILE_MAGIC): New constant.
+	(record_arch_list_cleanups): Renamed from record_message_cleanups.
+	(bfdcore_read): New function.
+	(netorder64): New function.
+	(netorder32): New function.
+	(netorder16): New function.
+	(record_restore): New function.  Restore a saved record log.
+	(bfdcore_write): New function.
+	(cmd_record_restore): New function.
+	(cmd_record_save): New function.  Save a record log to a file.
+	(_initialize_record): Set up commands for save and restore.
+
+2009-10-17  Michael Snyder  <msnyder@vmware.com>
+
+	* gcore.h: New file.
+	* gcore.c (create_gcore_bfd): New function.
+	(write_gcore_file): New function.
+	(call_target_sbrk): New function.  Abstracted from gcore_command.
+	(gcore_command): Call call_target_sbrk.
+
 2009-10-22  Hui Zhu  <teawater@gmail.com>
 	    Michael Snyder  <msnyder@vmware.com>
 
