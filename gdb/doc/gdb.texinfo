@@ -5516,9 +5516,25 @@ oldest record to make room for each new one, without asking.
 @item show record stop-at-limit
 Show the current setting of @code{stop-at-limit}.
 
-@kindex info record insn-number
-@item info record insn-number
-Show the current number of recorded instructions.
+@kindex info record
+@item info record
+Show various statistics about the state of process record and its
+in-memory execution log buffer, including:
+
+@itemize @bullet
+@item
+Whether in record mode or replay mode.
+@item
+Lowest recorded instruction number (counting from when the current execution log started recording instructions).
+@item
+Highest recorded instruction number.
+@item
+Current instruction about to be replayed (if in replay mode).
+@item
+Number of instructions contained in the execution log.
+@item
+Maximum number of instructions that may be contained in the execution log.
+@end itemize
 
 @kindex record delete
 @kindex rec del

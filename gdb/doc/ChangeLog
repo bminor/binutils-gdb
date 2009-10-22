@@ -1,3 +1,9 @@
+2009-10-22  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.texinfo (Process Record and Replay): Document new form of
+	info record command.  Also document the new save and restore 
+	commands.
+
 2009-10-21  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* gdb.texinfo (Machine Code): Mention current pc marker.
