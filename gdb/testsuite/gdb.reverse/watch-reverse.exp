@@ -122,6 +122,3 @@ gdb_test "continue" \
 gdb_test "continue" \
     ".*\[Ww\]atchpoint.*ival3.*Old value = 0.*New value = -1.*ival3 = count; ival4 = count;.*" \
     "watchpoint hit in reverse, fifth time"
-
-
-return 0

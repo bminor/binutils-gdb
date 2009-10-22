@@ -228,5 +228,3 @@ gdb_test_multiple "finish" "$test_msg" {
 	pass "$test_msg"
     }
 }
-
-return 0
