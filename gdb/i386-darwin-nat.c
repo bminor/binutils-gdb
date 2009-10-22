@@ -40,6 +40,7 @@
 
 #ifdef BFD64
 #include "amd64-nat.h"
+#include "amd64-tdep.h"
 #include "amd64-darwin-tdep.h"
 #endif
 
@@ -89,7 +90,7 @@ i386_darwin_fetch_inferior_registers (struct target_ops *ops,
 	      printf_unfiltered (_("Error calling thread_get_state for float registers for thread 0x%ulx"), current_thread);
 	      MACH_CHECK_ERROR (ret);
 	    }
-          i387_supply_fxsave (regcache, -1, &fp_regs.ufs.fs64);
+          amd64_supply_fxsave (regcache, -1, &fp_regs.ufs.fs64.__fpu_fcw);
           fetched++;
         }
     }
@@ -194,7 +195,7 @@ i386_darwin_store_inferior_registers (struct target_ops *ops,
           gdb_assert (fp_regs.fsh.flavor == x86_FLOAT_STATE64);
           gdb_assert (fp_regs.fsh.count == x86_FLOAT_STATE64_COUNT);
 
-	  i387_collect_fxsave (regcache, regno, &fp_regs.ufs.fs64.__fpu_fcw);
+	  amd64_collect_fxsave (regcache, regno, &fp_regs.ufs.fs64.__fpu_fcw);
 
 	  ret = thread_set_state (current_thread, x86_FLOAT_STATE,
 				  (thread_state_t) & fp_regs,

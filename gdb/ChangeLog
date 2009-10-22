@@ -1,3 +1,10 @@
+2009-10-22  Tristan Gingold  <gingold@adacore.com>
+
+	* i386-darwin-nat.c (i386_darwin_fetch_inferior_registers): Use
+	amd64_supply_fxsave for amd64.  Fix the offset.
+	(i386_darwin_store_inferior_registers): Use amd64_collect_fxsave
+	for amd64.
+
 2009-10-21  Maxim Grigoriev  <maxim2405@gmail.com>
 
         * xtensa-tdep.c (XTENSA_ISA_BADPC): New.
