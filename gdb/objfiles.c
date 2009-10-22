@@ -1045,6 +1045,14 @@ update_section_map (struct obj_section ***pmap, int *pmap_size)
     if (insert_section_p (objfile->obfd, s->the_bfd_section))
       alloc_size += 1;
 
+  /* This happens on detach/attach (e.g. in gdb.base/attach.exp).  */
+  if (alloc_size == 0)
+    {
+      *pmap = NULL;
+      *pmap_size = 0;
+      return;
+    }
+
   map = xmalloc (alloc_size * sizeof (*map));
 
   i = 0;
@@ -1103,6 +1111,14 @@ find_pc_section (CORE_ADDR pc)
       /* Don't need updates to section map until objfiles are added
          or removed.  */
       objfiles_changed_p = 0;
+    }
+
+  /* The C standard (ISO/IEC 9899:TC2) requires the BASE argument to
+     bsearch be non-NULL.  */
+  if (sections == NULL)
+    {
+      gdb_assert (num_sections == 0);
+      return NULL;
     }
 
   sp = (struct obj_section **) bsearch (&pc, sections, num_sections,

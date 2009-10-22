@@ -1,3 +1,10 @@
+2009-10-22  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	PR gdb/10819
+	* dwarf2-frame.c (find_cie): Don't call bsearch on empty cie_table.
+	* objfiles.c (find_pc_section): Likewise.
+	(update_section_map): Don't allocate empty table.
+	
 2009-10-19  Don Lee  <don.lee@sunplusct.com>
 
 	* score-tdep.c: Delete some simulator dependent codes.
