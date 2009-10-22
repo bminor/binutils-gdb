@@ -1,5 +1,18 @@
 2009-10-22  Michael Snyder  <msnyder@vmware.com>
 
+	* gdb.reverse/break-precsave.exp: New test.
+	* gdb.reverse/consecutive-precsave.exp: Ditto.
+	* gdb.reverse/finish-precsave.exp: Ditto.
+	* gdb.reverse/i386-precsave.exp: Ditto.
+	* gdb.reverse/machinestate-precsave.exp: Ditto.
+	* gdb.reverse/sigall-precsave.exp: Ditto.
+	* gdb.reverse/solilb-precsave.exp: Ditto.
+	* gdb.reverse/step-precsave.exp: Ditto.
+	* gdb.reverse/until-precsave.exp: Ditto.
+	* gdb.reverse/watch-precsave.exp: Ditto.
+
+2009-10-22  Michael Snyder  <msnyder@vmware.com>
+
 	* gdb.reverse/consecutive-reverse.exp: Substitute gdb_test_multiple
 	for gdb_expect.  Adjust one test's expect strings for the new
 	format of disassemble.
