@@ -1,3 +1,11 @@
+2009-10-22  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_input_section): New class definition.
+	(Arm_input_section::init, Arm_input_section:do_write,
+	Arm_input_section::set_final_data_size,
+	Arm_input_section::do_reset_address_and_file_offset): New method
+	definitions.
+
 2009-10-21  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Stub_table, Arm_input_section): New forward class

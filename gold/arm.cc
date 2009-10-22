@@ -745,6 +745,95 @@ class Stub_table : public Output_data
   Reloc_stub_map reloc_stubs_;
 };
 
+// A class to wrap an ordinary input section containing executable code.
+
+template<bool big_endian>
+class Arm_input_section : public Output_relaxed_input_section
+{
+ public:
+  Arm_input_section(Relobj* relobj, unsigned int shndx)
+    : Output_relaxed_input_section(relobj, shndx, 1),
+      original_addralign_(1), original_size_(0), stub_table_(NULL)
+  { }
+
+  ~Arm_input_section()
+  { }
+
+  // Initialize.
+  void
+  init();
+  
+  // Whether this is a stub table owner.
+  bool
+  is_stub_table_owner() const
+  { return this->stub_table_ != NULL && this->stub_table_->owner() == this; }
+
+  // Return the stub table.
+  Stub_table<big_endian>*
+  stub_table() const
+  { return this->stub_table_; }
+
+  // Set the stub_table.
+  void
+  set_stub_table(Stub_table<big_endian>* stub_table)
+  { this->stub_table_ = stub_table; }
+
+ protected:
+  // Write data to output file.
+  void
+  do_write(Output_file*);
+
+  // Return required alignment of this.
+  uint64_t
+  do_addralign() const
+  {
+    if (this->is_stub_table_owner())
+      return std::max(this->stub_table_->addralign(),
+		      this->original_addralign_);
+    else
+      return this->original_addralign_;
+  }
+
+  // Finalize data size.
+  void
+  set_final_data_size();
+
+  // Reset address and file offset.
+  void
+  do_reset_address_and_file_offset();
+
+  // Output offset.
+  bool
+  do_output_offset(const Relobj* object, unsigned int shndx,
+		   section_offset_type offset,
+                   section_offset_type* poutput) const
+  {
+    if ((object == this->relobj())
+	&& (shndx == this->shndx())
+	&& (offset >= 0)
+	&& (convert_types<uint64_t, section_offset_type>(offset)
+	    <= this->original_size_))
+      {
+	*poutput = offset;
+	return true;
+      }
+    else
+      return false;
+  }
+
+ private:
+  // Copying is not allowed.
+  Arm_input_section(const Arm_input_section&);
+  Arm_input_section& operator=(const Arm_input_section&);
+
+  // Address alignment of the original input section.
+  uint64_t original_addralign_;
+  // Section size of the original input section.
+  uint64_t original_size_;
+  // Stub table.
+  Stub_table<big_endian>* stub_table_;
+};
+
 // Utilities for manipulating integers of up to 32-bits
 
 namespace utils
@@ -2468,6 +2557,96 @@ Stub_table<big_endian>::do_write(Output_file* of)
 		  big_endian);
     } 
   of->write_output_view(this->offset(), oview_size, oview);
+}
+
+// Arm_input_section methods.
+
+// Initialize an Arm_input_section.
+
+template<bool big_endian>
+void
+Arm_input_section<big_endian>::init()
+{
+  Relobj* relobj = this->relobj();
+  unsigned int shndx = this->shndx();
+
+  // Cache these to speed up size and alignment queries.  It is too slow
+  // to call section_addraglin and section_size every time.
+  this->original_addralign_ = relobj->section_addralign(shndx);
+  this->original_size_ = relobj->section_size(shndx);
+
+  // We want to make this look like the original input section after
+  // output sections are finalized.
+  Output_section* os = relobj->output_section(shndx);
+  off_t offset = relobj->output_section_offset(shndx);
+  gold_assert(os != NULL && !relobj->is_output_section_offset_invalid(shndx));
+  this->set_address(os->address() + offset);
+  this->set_file_offset(os->offset() + offset);
+
+  this->set_current_data_size(this->original_size_);
+  this->finalize_data_size();
+}
+
+template<bool big_endian>
+void
+Arm_input_section<big_endian>::do_write(Output_file* of)
+{
+  // We have to write out the original section content.
+  section_size_type section_size;
+  const unsigned char* section_contents =
+    this->relobj()->section_contents(this->shndx(), &section_size, false); 
+  of->write(this->offset(), section_contents, section_size); 
+
+  // If this owns a stub table and it is not empty, write it.
+  if (this->is_stub_table_owner() && !this->stub_table_->empty())
+    this->stub_table_->write(of);
+}
+
+// Finalize data size.
+
+template<bool big_endian>
+void
+Arm_input_section<big_endian>::set_final_data_size()
+{
+  // If this owns a stub table, finalize its data size as well.
+  if (this->is_stub_table_owner())
+    {
+      uint64_t address = this->address();
+
+      // The stub table comes after the original section contents.
+      address += this->original_size_;
+      address = align_address(address, this->stub_table_->addralign());
+      off_t offset = this->offset() + (address - this->address());
+      this->stub_table_->set_address_and_file_offset(address, offset);
+      address += this->stub_table_->data_size();
+      gold_assert(address == this->address() + this->current_data_size());
+    }
+
+  this->set_data_size(this->current_data_size());
+}
+
+// Reset address and file offset.
+
+template<bool big_endian>
+void
+Arm_input_section<big_endian>::do_reset_address_and_file_offset()
+{
+  // Size of the original input section contents.
+  off_t off = convert_types<off_t, uint64_t>(this->original_size_);
+
+  // If this is a stub table owner, account for the stub table size.
+  if (this->is_stub_table_owner())
+    {
+      Stub_table<big_endian>* stub_table = this->stub_table_;
+
+      // Reset the stub table's address and file offset.  The
+      // current data size for child will be updated after that.
+      stub_table_->reset_address_and_file_offset();
+      off = align_address(off, stub_table_->addralign());
+      off += stub_table->current_data_size();
+    }
+
+  this->set_current_data_size(off);
 }
 
 // A class to handle the PLT data.
