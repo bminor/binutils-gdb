@@ -5,7 +5,7 @@
 	* objfiles.c (find_pc_section): Likewise.
 	(update_section_map): Don't allocate empty table.
 	
-2009-10-16  Hui Zhu  <teawater@gmail.com>
+2009-10-22  Hui Zhu  <teawater@gmail.com>
 	    Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
 
 	* record.c (RECORD_FILE_MAGIC): New constant.
@@ -20,7 +20,7 @@
 	(cmd_record_save): New function.  Save a record log to a file.
 	(_initialize_record): Set up commands for save and restore.
 
-2009-10-17  Michael Snyder  <msnyder@vmware.com>
+2009-10-22  Michael Snyder  <msnyder@vmware.com>
 
 	* gcore.h: New file.
 	* gcore.c (create_gcore_bfd): New function.
