@@ -1,3 +1,23 @@
+2009-10-22  Hui Zhu  <teawater@gmail.com>
+	    Michael Snyder  <msnyder@vmware.com>
+
+	* record.c (record_core_ops): New ops target vector.
+	(record_core_open_1): New function.  Open core target.
+	(record_open_1): New function.  Open normal process record.
+	(record_open): Call one of the above.
+	(record_close): Allow for both core and normal targets.
+	(record_core_resume): New function.
+	(record_core_kill): New function.
+	(record_core_fetch_registers): New function.
+	(record_core_prepare_to_store): New function.
+	(record_core_store_registers): New function.
+	(record_core_xfer_partial): New function.
+	(record_core_insert_breakpoint): New function.
+	(record_core_remove_breakpoint): New function.
+	(record_core_has_execution): New function.
+	(init_record_core_ops): New function.
+	(_initialize_record): Call init_record_core_ops, add_target.
+
 2009-10-22  Tristan Gingold  <gingold@adacore.com>
 
 	* i386-darwin-nat.c (i386_darwin_fetch_inferior_registers): Use

@@ -23,6 +23,8 @@
 #include "gdbthread.h"
 #include "event-top.h"
 #include "exceptions.h"
+#include "gdbcore.h"
+#include "exec.h"
 #include "record.h"
 
 #include <signal.h>
@@ -144,6 +146,19 @@ struct record_entry
 /* This is the debug switch for process record.  */
 int record_debug = 0;
 
+struct record_core_buf_entry
+{
+  struct record_core_buf_entry *prev;
+  struct target_section *p;
+  bfd_byte *buf;
+};
+
+/* Record buf with core target.  */
+static gdb_byte *record_core_regbuf = NULL;
+static struct target_section *record_core_start;
+static struct target_section *record_core_end;
+static struct record_core_buf_entry *record_core_buf_list = NULL;
+
 /* The following variables are used for managing the linked list that
    represents the execution log.
 
@@ -177,6 +192,7 @@ static ULONGEST record_insn_count;
 
 /* The target_ops of process record.  */
 static struct target_ops record_ops;
+static struct target_ops record_core_ops;
 
 /* The beneath function pointers.  */
 static struct target_ops *record_beneath_to_resume_ops;
@@ -725,10 +741,62 @@ record_exec_insn (struct regcache *regcache, struct gdbarch *gdbarch,
     }
 }
 
-/* "to_open" target method.  Open the process record target.  */
+static struct target_ops *tmp_to_resume_ops;
+static void (*tmp_to_resume) (struct target_ops *, ptid_t, int,
+			      enum target_signal);
+static struct target_ops *tmp_to_wait_ops;
+static ptid_t (*tmp_to_wait) (struct target_ops *, ptid_t,
+			      struct target_waitstatus *,
+			      int);
+static struct target_ops *tmp_to_store_registers_ops;
+static void (*tmp_to_store_registers) (struct target_ops *,
+				       struct regcache *,
+				       int regno);
+static struct target_ops *tmp_to_xfer_partial_ops;
+static LONGEST (*tmp_to_xfer_partial) (struct target_ops *ops,
+				       enum target_object object,
+				       const char *annex,
+				       gdb_byte *readbuf,
+				       const gdb_byte *writebuf,
+				       ULONGEST offset,
+				       LONGEST len);
+static int (*tmp_to_insert_breakpoint) (struct gdbarch *,
+					struct bp_target_info *);
+static int (*tmp_to_remove_breakpoint) (struct gdbarch *,
+					struct bp_target_info *);
+
+/* Open the process record target.  */
 
 static void
-record_open (char *name, int from_tty)
+record_core_open_1 (char *name, int from_tty)
+{
+  struct regcache *regcache = get_current_regcache ();
+  int regnum = gdbarch_num_regs (get_regcache_arch (regcache));
+  int i;
+
+  /* Get record_core_regbuf.  */
+  target_fetch_registers (regcache, -1);
+  record_core_regbuf = xmalloc (MAX_REGISTER_SIZE * regnum);
+  for (i = 0; i < regnum; i ++)
+    regcache_raw_collect (regcache, i,
+			  record_core_regbuf + MAX_REGISTER_SIZE * i);
+
+  /* Get record_core_start and record_core_end.  */
+  if (build_section_table (core_bfd, &record_core_start, &record_core_end))
+    {
+      xfree (record_core_regbuf);
+      record_core_regbuf = NULL;
+      error (_("\"%s\": Can't find sections: %s"),
+	     bfd_get_filename (core_bfd), bfd_errmsg (bfd_get_error ()));
+    }
+
+  push_target (&record_core_ops);
+}
+
+/* "to_open" target method for 'live' processes.  */
+
+static void
+record_open_1 (char *name, int from_tty)
 {
   struct target_ops *t;
 
@@ -749,67 +817,100 @@ record_open (char *name, int from_tty)
     error (_("Process record: the current architecture doesn't support "
 	     "record function."));
 
+  if (!tmp_to_resume)
+    error (_("Could not find 'to_resume' method on the target stack."));
+  if (!tmp_to_wait)
+    error (_("Could not find 'to_wait' method on the target stack."));
+  if (!tmp_to_store_registers)
+    error (_("Could not find 'to_store_registers' method on the target stack."));
+  if (!tmp_to_insert_breakpoint)
+    error (_("Could not find 'to_insert_breakpoint' method on the target stack."));
+  if (!tmp_to_remove_breakpoint)
+    error (_("Could not find 'to_remove_breakpoint' method on the target stack."));
+
+  push_target (&record_ops);
+}
+
+/* "to_open" target method.  Open the process record target.  */
+
+static void
+record_open (char *name, int from_tty)
+{
+  struct target_ops *t;
+
+  if (record_debug)
+    fprintf_unfiltered (gdb_stdlog, "Process record: record_open\n");
+
   /* Check if record target is already running.  */
   if (current_target.to_stratum == record_stratum)
     error (_("Process record target already running.  Use \"record stop\" to "
              "stop record target first."));
 
-  /*Reset the beneath function pointers.  */
-  record_beneath_to_resume = NULL;
-  record_beneath_to_wait = NULL;
-  record_beneath_to_store_registers = NULL;
-  record_beneath_to_xfer_partial = NULL;
-  record_beneath_to_insert_breakpoint = NULL;
-  record_beneath_to_remove_breakpoint = NULL;
+  /* Reset the tmp beneath pointers.  */
+  tmp_to_resume_ops = NULL;
+  tmp_to_resume = NULL;
+  tmp_to_wait_ops = NULL;
+  tmp_to_wait = NULL;
+  tmp_to_store_registers_ops = NULL;
+  tmp_to_store_registers = NULL;
+  tmp_to_xfer_partial_ops = NULL;
+  tmp_to_xfer_partial = NULL;
+  tmp_to_insert_breakpoint = NULL;
+  tmp_to_remove_breakpoint = NULL;
 
   /* Set the beneath function pointers.  */
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     {
-      if (!record_beneath_to_resume)
+      if (!tmp_to_resume)
         {
-	  record_beneath_to_resume = t->to_resume;
-	  record_beneath_to_resume_ops = t;
+	  tmp_to_resume = t->to_resume;
+	  tmp_to_resume_ops = t;
         }
-      if (!record_beneath_to_wait)
+      if (!tmp_to_wait)
         {
-	  record_beneath_to_wait = t->to_wait;
-	  record_beneath_to_wait_ops = t;
+	  tmp_to_wait = t->to_wait;
+	  tmp_to_wait_ops = t;
         }
-      if (!record_beneath_to_store_registers)
+      if (!tmp_to_store_registers)
         {
-	  record_beneath_to_store_registers = t->to_store_registers;
-	  record_beneath_to_store_registers_ops = t;
+	  tmp_to_store_registers = t->to_store_registers;
+	  tmp_to_store_registers_ops = t;
         }
-      if (!record_beneath_to_xfer_partial)
+      if (!tmp_to_xfer_partial)
         {
-	  record_beneath_to_xfer_partial = t->to_xfer_partial;
-	  record_beneath_to_xfer_partial_ops = t;
+	  tmp_to_xfer_partial = t->to_xfer_partial;
+	  tmp_to_xfer_partial_ops = t;
         }
-      if (!record_beneath_to_insert_breakpoint)
-	record_beneath_to_insert_breakpoint = t->to_insert_breakpoint;
-      if (!record_beneath_to_remove_breakpoint)
-	record_beneath_to_remove_breakpoint = t->to_remove_breakpoint;
+      if (!tmp_to_insert_breakpoint)
+	tmp_to_insert_breakpoint = t->to_insert_breakpoint;
+      if (!tmp_to_remove_breakpoint)
+	tmp_to_remove_breakpoint = t->to_remove_breakpoint;
     }
-  if (!record_beneath_to_resume)
-    error (_("Process record can't get to_resume."));
-  if (!record_beneath_to_wait)
-    error (_("Process record can't get to_wait."));
-  if (!record_beneath_to_store_registers)
-    error (_("Process record can't get to_store_registers."));
-  if (!record_beneath_to_xfer_partial)
-    error (_("Process record can't get to_xfer_partial."));
-  if (!record_beneath_to_insert_breakpoint)
-    error (_("Process record can't get to_insert_breakpoint."));
-  if (!record_beneath_to_remove_breakpoint)
-    error (_("Process record can't get to_remove_breakpoint."));
-
-  push_target (&record_ops);
+  if (!tmp_to_xfer_partial)
+    error (_("Could not find 'to_xfer_partial' method on the target stack."));
 
   /* Reset */
   record_insn_num = 0;
   record_insn_count = 0;
   record_list = &record_first;
   record_list->next = NULL;
+
+  /* Set the tmp beneath pointers to beneath pointers.  */
+  record_beneath_to_resume_ops = tmp_to_resume_ops;
+  record_beneath_to_resume = tmp_to_resume;
+  record_beneath_to_wait_ops = tmp_to_wait_ops;
+  record_beneath_to_wait = tmp_to_wait;
+  record_beneath_to_store_registers_ops = tmp_to_store_registers_ops;
+  record_beneath_to_store_registers = tmp_to_store_registers;
+  record_beneath_to_xfer_partial_ops = tmp_to_xfer_partial_ops;
+  record_beneath_to_xfer_partial = tmp_to_xfer_partial;
+  record_beneath_to_insert_breakpoint = tmp_to_insert_breakpoint;
+  record_beneath_to_remove_breakpoint = tmp_to_remove_breakpoint;
+
+  if (current_target.to_stratum == core_stratum)
+    record_core_open_1 (name, from_tty);
+  else
+    record_open_1 (name, from_tty);
 }
 
 /* "to_close" target method.  Close the process record target.  */
@@ -817,10 +918,30 @@ record_open (char *name, int from_tty)
 static void
 record_close (int quitting)
 {
+  struct record_core_buf_entry *entry;
+
   if (record_debug)
     fprintf_unfiltered (gdb_stdlog, "Process record: record_close\n");
 
   record_list_release (record_list);
+
+  /* Release record_core_regbuf.  */
+  if (record_core_regbuf)
+    {
+      xfree (record_core_regbuf);
+      record_core_regbuf = NULL;
+    }
+
+  /* Release record_core_buf_list.  */
+  if (record_core_buf_list)
+    {
+      for (entry = record_core_buf_list->prev; entry; entry = entry->prev)
+	{
+	  xfree (record_core_buf_list);
+	  record_core_buf_list = entry;
+	}
+      record_core_buf_list = NULL;
+    }
 }
 
 static int record_resume_step = 0;
@@ -906,7 +1027,7 @@ record_wait (struct target_ops *ops,
 			"record_resume_step = %d\n",
 			record_resume_step);
 
-  if (!RECORD_IS_REPLAY)
+  if (!RECORD_IS_REPLAY && ops != &record_core_ops)
     {
       if (record_resume_error)
 	{
@@ -1280,7 +1401,7 @@ record_store_registers (struct target_ops *ops, struct regcache *regcache,
                                      regcache, regno);
 }
 
-/* Behavior is conditional on RECORD_IS_REPLAY.
+/* "to_xfer_partial" method.  Behavior is conditional on RECORD_IS_REPLAY.
    In replay mode, we cannot write memory unles we are willing to
    invalidate the record/replay log from this point forward.  */
 
@@ -1386,6 +1507,7 @@ record_remove_breakpoint (struct gdbarch *gdbarch,
 }
 
 /* "to_can_execute_reverse" method for process record target.  */
+
 static int
 record_can_execute_reverse (void)
 {
@@ -1415,6 +1537,208 @@ init_record_ops (void)
   record_ops.to_can_execute_reverse = record_can_execute_reverse;
   record_ops.to_stratum = record_stratum;
   record_ops.to_magic = OPS_MAGIC;
+}
+
+/* "to_resume" method for prec over corefile.  */
+
+static void
+record_core_resume (struct target_ops *ops, ptid_t ptid, int step,
+                    enum target_signal signal)
+{
+  record_resume_step = step;
+}
+
+/* "to_kill" method for prec over corefile.  */
+
+static void
+record_core_kill (struct target_ops *ops)
+{
+  if (record_debug)
+    fprintf_unfiltered (gdb_stdlog, "Process record: record_core_kill\n");
+
+  unpush_target (&record_core_ops);
+}
+
+/* "to_fetch_registers" method for prec over corefile.  */
+
+static void
+record_core_fetch_registers (struct target_ops *ops,
+                             struct regcache *regcache,
+                             int regno)
+{
+  if (regno < 0)
+    {
+      int num = gdbarch_num_regs (get_regcache_arch (regcache));
+      int i;
+
+      for (i = 0; i < num; i ++)
+        regcache_raw_supply (regcache, i,
+                             record_core_regbuf + MAX_REGISTER_SIZE * i);
+    }
+  else
+    regcache_raw_supply (regcache, regno,
+                         record_core_regbuf + MAX_REGISTER_SIZE * regno);
+}
+
+/* "to_prepare_to_store" method for prec over corefile.  */
+
+static void
+record_core_prepare_to_store (struct regcache *regcache)
+{
+}
+
+/* "to_store_registers" method for prec over corefile.  */
+
+static void
+record_core_store_registers (struct target_ops *ops,
+                             struct regcache *regcache,
+                             int regno)
+{
+  if (record_gdb_operation_disable)
+    regcache_raw_collect (regcache, regno,
+                          record_core_regbuf + MAX_REGISTER_SIZE * regno);
+  else
+    error (_("You can't do that without a process to debug."));
+}
+
+/* "to_xfer_partial" method for prec over corefile.  */
+
+static LONGEST
+record_core_xfer_partial (struct target_ops *ops, enum target_object object,
+		          const char *annex, gdb_byte *readbuf,
+		          const gdb_byte *writebuf, ULONGEST offset,
+                          LONGEST len)
+{
+   if (object == TARGET_OBJECT_MEMORY)
+     {
+       if (record_gdb_operation_disable || !writebuf)
+         {
+           struct target_section *p;
+           for (p = record_core_start; p < record_core_end; p++)
+             {
+               if (offset >= p->addr)
+                 {
+                   struct record_core_buf_entry *entry;
+
+                   if (offset >= p->endaddr)
+                     continue;
+
+                   if (offset + len > p->endaddr)
+                     len = p->endaddr - offset;
+
+                   offset -= p->addr;
+
+                   /* Read readbuf or write writebuf p, offset, len.  */
+                   /* Check flags.  */
+                   if (p->the_bfd_section->flags & SEC_CONSTRUCTOR
+                       || (p->the_bfd_section->flags & SEC_HAS_CONTENTS) == 0)
+                     {
+                       if (readbuf)
+                         memset (readbuf, 0, len);
+                       return len;
+                     }
+                   /* Get record_core_buf_entry.  */
+                   for (entry = record_core_buf_list; entry;
+                        entry = entry->prev)
+                     if (entry->p == p)
+                       break;
+                   if (writebuf)
+                     {
+                       if (!entry)
+                         {
+                           /* Add a new entry.  */
+                           entry
+                             = (struct record_core_buf_entry *)
+                                 xmalloc
+                                   (sizeof (struct record_core_buf_entry));
+                           entry->p = p;
+                           if (!bfd_malloc_and_get_section (p->bfd,
+                                                            p->the_bfd_section,
+                                                            &entry->buf))
+                             {
+                               xfree (entry);
+                               return 0;
+                             }
+                           entry->prev = record_core_buf_list;
+                           record_core_buf_list = entry;
+                         }
+
+                        memcpy (entry->buf + offset, writebuf, (size_t) len);
+                     }
+                   else
+                     {
+                       if (!entry)
+                         return record_beneath_to_xfer_partial
+                                  (record_beneath_to_xfer_partial_ops,
+                                   object, annex, readbuf, writebuf,
+                                   offset, len);
+
+                       memcpy (readbuf, entry->buf + offset, (size_t) len);
+                     }
+
+                   return len;
+                 }
+             }
+
+           return -1;
+         }
+       else
+         error (_("You can't do that without a process to debug."));
+     }
+
+  return record_beneath_to_xfer_partial (record_beneath_to_xfer_partial_ops,
+                                         object, annex, readbuf, writebuf,
+                                         offset, len);
+}
+
+/* "to_insert_breakpoint" method for prec over corefile.  */
+
+static int
+record_core_insert_breakpoint (struct gdbarch *gdbarch,
+			       struct bp_target_info *bp_tgt)
+{
+  return 0;
+}
+
+/* "to_remove_breakpoint" method for prec over corefile.  */
+
+static int
+record_core_remove_breakpoint (struct gdbarch *gdbarch,
+			       struct bp_target_info *bp_tgt)
+{
+  return 0;
+}
+
+/* "to_has_execution" method for prec over corefile.  */
+
+int
+record_core_has_execution (struct target_ops *ops)
+{
+  return 1;
+}
+
+static void
+init_record_core_ops (void)
+{
+  record_core_ops.to_shortname = "record_core";
+  record_core_ops.to_longname = "Process record and replay target";
+  record_core_ops.to_doc =
+    "Log program while executing and replay execution from log.";
+  record_core_ops.to_open = record_open;
+  record_core_ops.to_close = record_close;
+  record_core_ops.to_resume = record_core_resume;
+  record_core_ops.to_wait = record_wait;
+  record_core_ops.to_kill = record_core_kill;
+  record_core_ops.to_fetch_registers = record_core_fetch_registers;
+  record_core_ops.to_prepare_to_store = record_core_prepare_to_store;
+  record_core_ops.to_store_registers = record_core_store_registers;
+  record_core_ops.to_xfer_partial = record_core_xfer_partial;
+  record_core_ops.to_insert_breakpoint = record_core_insert_breakpoint;
+  record_core_ops.to_remove_breakpoint = record_core_remove_breakpoint;
+  record_core_ops.to_can_execute_reverse = record_can_execute_reverse;
+  record_core_ops.to_has_execution = record_core_has_execution;
+  record_core_ops.to_stratum = record_stratum;
+  record_core_ops.to_magic = OPS_MAGIC;
 }
 
 /* Implement "show record debug" command.  */
@@ -1571,6 +1895,8 @@ _initialize_record (void)
 
   init_record_ops ();
   add_target (&record_ops);
+  init_record_core_ops ();
+  add_target (&record_core_ops);
 
   add_setshow_zinteger_cmd ("record", no_class, &record_debug,
 			    _("Set debugging of record/replay feature."),
