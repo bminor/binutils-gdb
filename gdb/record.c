@@ -2017,8 +2017,8 @@ record_restore (void)
 	   bfd_get_filename (core_bfd));
   if (record_debug)
     printf_filtered ("\
-  Reading 4-byte magic cookie RECORD_FILE_MAGIC (0x%08x)\n",
-		     netorder32 (magic));
+  Reading 4-byte magic cookie RECORD_FILE_MAGIC (0x%s)\n",
+		     phex_nz (netorder32 (magic), 4));
 
   /* Restore the entries in recfd into record_arch_list_head and
      record_arch_list_tail.  */
@@ -2284,8 +2284,8 @@ cmd_record_save (char *args, int from_tty)
   magic = RECORD_FILE_MAGIC;
   if (record_debug)
     printf_filtered ("\
-  Writing 4-byte magic cookie RECORD_FILE_MAGIC (0x%08x)\n",
-		     magic);
+  Writing 4-byte magic cookie RECORD_FILE_MAGIC (0x%s)\n",
+		     phex_nz (magic, 4));
   bfdcore_write (obfd, osec, &magic, sizeof (magic), &bfd_offset);
 
   /* Save the entries to recfd and forward execute to the end of

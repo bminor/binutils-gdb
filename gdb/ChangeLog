@@ -1,3 +1,7 @@
+2009-10-23  Hui Zhu  <teawater@gmail.com>
+
+	* record.c (record_restore): Use phex_nz.
+
 2009-10-23  Tristan Gingold  <gingold@adacore.com>
 
 	* frame.c (frame_unwind_pc): Fix typo: remove duplicate 0x.
