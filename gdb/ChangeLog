@@ -1,3 +1,9 @@
+2009-10-23  Michael Snyder  <msnyder@vmware.com>
+
+	* record.c (netorder64): Use BFD_ENDIAN_LITTLE not LITTLE_ENDIAN.
+	(netorder32): Ditto.
+	(netorder16): Ditto.
+
 2009-10-23  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* objfiles.c (allocate_objfile): Use xzalloc.
@@ -40,7 +46,7 @@
 	(update_section_map): Don't allocate empty table.
 	
 2009-10-22  Hui Zhu  <teawater@gmail.com>
-	    Michael Snyder  <msnyder@msnyder-server.eng.vmware.com>
+	    Michael Snyder  <msnyder@vmware.com>
 
 	* record.c (RECORD_FILE_MAGIC): New constant.
 	(record_arch_list_cleanups): Renamed from record_message_cleanups.
