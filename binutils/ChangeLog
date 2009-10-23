@@ -1,3 +1,7 @@
+2009-10-23  Thomas Cougnard  <thomas.cougnard@gmail.com>
+
+	* readelf.c (dynamic_info): Correct size of array.
+
 2009-10-21  Ben Elliston  <bje@gnu.org>
 
 	* MAINTAINERS (BUILD SYSTEM, TESTSUITES): Remove myself.
