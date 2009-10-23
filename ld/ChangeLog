@@ -1,3 +1,9 @@
+2009-10-23  Ryan Mansfield  <rmansfield@qnx.com>
+
+	PR ld/10489
+	* emultempl/elf32.em (gld${EMULATION_NAME}_search_needed): Handle
+	drive specifiers for DOS based filesystems in rpath-link strings.
+
 2009-10-19  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.am: Remove spurious sanitization marker.

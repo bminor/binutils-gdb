@@ -58,6 +58,7 @@ fragment <<EOF
 #include <ldgram.h>
 #include "elf/common.h"
 #include "elf-bfd.h"
+#include "filenames.h"
 
 /* Declare functions used by various EXTRA_EM_FILEs.  */
 static void gld${EMULATION_NAME}_before_parse (void);
@@ -472,6 +473,17 @@ gld${EMULATION_NAME}_search_needed (const char *path,
       if (s == NULL)
 	s = path + strlen (path);
 
+#if HAVE_DOS_BASED_FILE_SYSTEM
+      /* Assume a match on the second char is part of drive specifier.  */
+      else if (config.rpath_separator == ':'
+	       && s == path + 1
+	       && ISALPHA (*path))
+	{
+	  s = strchr (s + 1, config.rpath_separator);
+	  if (s == NULL)
+	    s = path + strlen (path);
+	}
+#endif
       filename = (char *) xmalloc (s - path + len + 2);
       if (s == path)
 	sset = filename;
