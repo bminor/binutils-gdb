@@ -329,6 +329,7 @@ static void mcore_elf_gen_out_file (void);
 typedef struct ifunct
 {
   char *         name;   /* Name of function being imported.  */
+  char *     its_name;	 /* Optional import table symbol name.  */
   int            ord;    /* Two-byte ordinal value associated with function.  */
   struct ifunct *next;
 } ifunctype;
@@ -747,6 +748,7 @@ typedef struct export
   const char *name;
   const char *internal_name;
   const char *import_name;
+  const char *its_name;
   int ordinal;
   int constant;
   int noname;		/* Don't put name in image file.  */
@@ -773,7 +775,7 @@ static const char *rvabefore (int);
 static const char *asm_prefix (int, const char *);
 static void process_def_file (const char *);
 static void new_directive (char *);
-static void append_import (const char *, const char *, int);
+static void append_import (const char *, const char *, int, const char *);
 static void run (const char *, char *);
 static void scan_drectve_symbols (bfd *);
 static void scan_filtered_symbols (bfd *, void *, long, unsigned int);
@@ -1021,12 +1023,14 @@ yyerror (const char * err ATTRIBUTE_UNUSED)
 
 void
 def_exports (const char *name, const char *internal_name, int ordinal,
-	     int noname, int constant, int data, int private)
+	     int noname, int constant, int data, int private,
+	     const char *its_name)
 {
   struct export *p = (struct export *) xmalloc (sizeof (*p));
 
   p->name = name;
   p->internal_name = internal_name ? internal_name : name;
+  p->its_name = its_name;
   p->import_name = name;
   p->ordinal = ordinal;
   p->constant = constant;
@@ -1138,7 +1142,8 @@ def_stacksize (int reserve, int commit)
    import_list.  It is used by def_import.  */
 
 static void
-append_import (const char *symbol_name, const char *dll_name, int func_ordinal)
+append_import (const char *symbol_name, const char *dll_name, int func_ordinal,
+	       const char *its_name)
 {
   iheadtype **pq;
   iheadtype *q;
@@ -1152,6 +1157,7 @@ append_import (const char *symbol_name, const char *dll_name, int func_ordinal)
 	  q->functail = q->functail->next;
 	  q->functail->ord  = func_ordinal;
 	  q->functail->name = xstrdup (symbol_name);
+	  q->functail->its_name = (its_name ? xstrdup (its_name) : NULL);
 	  q->functail->next = NULL;
 	  q->nfuncs++;
 	  return;
@@ -1165,6 +1171,7 @@ append_import (const char *symbol_name, const char *dll_name, int func_ordinal)
   q->functail = q->funchead;
   q->next = NULL;
   q->functail->name = xstrdup (symbol_name);
+  q->functail->its_name = (its_name ? xstrdup (its_name) : NULL);
   q->functail->ord  = func_ordinal;
   q->functail->next = NULL;
 
@@ -1203,7 +1210,7 @@ append_import (const char *symbol_name, const char *dll_name, int func_ordinal)
 
 void
 def_import (const char *app_name, const char *module, const char *dllext,
-	    const char *entry, int ord_val)
+	    const char *entry, int ord_val, const char *its_name)
 {
   const char *application_name;
   char *buf;
@@ -1225,7 +1232,7 @@ def_import (const char *app_name, const char *module, const char *dllext,
       module = buf;
     }
 
-  append_import (application_name, module, ord_val);
+  append_import (application_name, module, ord_val, its_name);
 }
 
 void
@@ -1397,7 +1404,7 @@ scan_drectve_symbols (bfd *abfd)
 	  /* FIXME: The 5th arg is for the `constant' field.
 	     What should it be?  Not that it matters since it's not
 	     currently useful.  */
-	  def_exports (c, 0, -1, 0, 0, ! (flags & BSF_FUNCTION), 0);
+	  def_exports (c, 0, -1, 0, 0, ! (flags & BSF_FUNCTION), 0, NULL);
 
 	  if (add_stdcall_alias && strchr (c, '@'))
 	    {
@@ -1406,7 +1413,7 @@ scan_drectve_symbols (bfd *abfd)
 	      char *atsym = strchr (exported_name, '@');
 	      *atsym = '\0';
 	      /* Note: stdcall alias symbols can never be data.  */
-	      def_exports (exported_name, xstrdup (c), -1, 0, 0, 0, 0);
+	      def_exports (exported_name, xstrdup (c), -1, 0, 0, 0, 0, NULL);
 	    }
 	}
       else
@@ -1445,7 +1452,7 @@ scan_filtered_symbols (bfd *abfd, void *minisyms, long symcount,
 	++symbol_name;
 
       def_exports (xstrdup (symbol_name) , 0, -1, 0, 0,
-		   ! (sym->flags & BSF_FUNCTION), 0);
+		   ! (sym->flags & BSF_FUNCTION), 0, NULL);
 
       if (add_stdcall_alias && strchr (symbol_name, '@'))
         {
@@ -1454,7 +1461,7 @@ scan_filtered_symbols (bfd *abfd, void *minisyms, long symcount,
 	  char *atsym = strchr (exported_name, '@');
 	  *atsym = '\0';
 	  /* Note: stdcall alias symbols can never be data.  */
-	  def_exports (exported_name, xstrdup (symbol_name), -1, 0, 0, 0, 0);
+	  def_exports (exported_name, xstrdup (symbol_name), -1, 0, 0, 0, 0, NULL);
 	}
     }
 }
@@ -1669,7 +1676,7 @@ dump_def_info (FILE *f)
   fprintf (f, "\n");
   for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
     {
-      fprintf (f, "%s  %d = %s %s @ %d %s%s%s%s\n",
+      fprintf (f, "%s  %d = %s %s @ %d %s%s%s%s%s%s\n",
 	       ASM_C,
 	       i,
 	       exp->name,
@@ -1678,7 +1685,9 @@ dump_def_info (FILE *f)
 	       exp->noname ? "NONAME " : "",
 	       exp->private ? "PRIVATE " : "",
 	       exp->constant ? "CONSTANT" : "",
-	       exp->data ? "DATA" : "");
+	       exp->data ? "DATA" : "",
+	       exp->its_name ? " ==" : "",
+	       exp->its_name ? exp->its_name : "");
     }
 }
 
@@ -1761,20 +1770,22 @@ gen_def_file (void)
 
       if (strcmp (exp->name, exp->internal_name) == 0)
 	{
-	  fprintf (output_def, "\t%s%s%s @ %d%s%s%s\n",
+	  fprintf (output_def, "\t%s%s%s @ %d%s%s%s%s%s\n",
 		   quote,
 		   exp->name,
 		   quote,
 		   exp->ordinal,
 		   exp->noname ? " NONAME" : "",
 		   exp->private ? "PRIVATE " : "",
-		   exp->data ? " DATA" : "");
+		   exp->data ? " DATA" : "",
+		   exp->its_name ? " ==" : "",
+		   exp->its_name ? exp->its_name : "");
 	}
       else
 	{
 	  char * quote1 = strchr (exp->internal_name, '.') ? "\"" : "";
 	  /* char *alias =  */
-	  fprintf (output_def, "\t%s%s%s = %s%s%s @ %d%s%s%s\n",
+	  fprintf (output_def, "\t%s%s%s = %s%s%s @ %d%s%s%s%s%s\n",
 		   quote,
 		   exp->name,
 		   quote,
@@ -1784,7 +1795,9 @@ gen_def_file (void)
 		   exp->ordinal,
 		   exp->noname ? " NONAME" : "",
 		   exp->private ? "PRIVATE " : "",
-		   exp->data ? " DATA" : "");
+		   exp->data ? " DATA" : "",
+		   exp->its_name ? " ==" : "",
+		   exp->its_name ? exp->its_name : "");
 	}
     }
 
@@ -1888,7 +1901,8 @@ generate_idata_ofile (FILE *filvar)
 	  fprintf (filvar,"funcptr%d_%d:\n", headindex, funcindex);
 	  fprintf (filvar,"\t%s\t%d\n", ASM_SHORT,
 		   ((funcptr->ord) & 0xFFFF));
-	  fprintf (filvar,"\t%s\t\"%s\"\n", ASM_TEXT, funcptr->name);
+	  fprintf (filvar,"\t%s\t\"%s\"\n", ASM_TEXT,
+	    (funcptr->its_name ? funcptr->its_name : funcptr->name));
 	  fprintf (filvar,"\t%s\t0\n", ASM_BYTE);
 	  funcindex++;
 	}
@@ -2023,7 +2037,8 @@ gen_exp_file (void)
 	{
 	  if (!exp->noname || show_allnames)
 	    fprintf (f, "n%d:	%s	\"%s\"\n",
-		     exp->ordinal, ASM_TEXT, xlate (exp->name));
+		     exp->ordinal, ASM_TEXT,
+		     (exp->its_name ? exp->its_name : xlate (exp->name)));
 	  if (exp->forward != 0)
 	    fprintf (f, "f%d:	%s	\"%s\"\n",
 		     exp->forward, ASM_TEXT, exp->internal_name);
@@ -2663,11 +2678,17 @@ make_one_lib_file (export_type *exp, int i, int delay)
 		 why it did that, and it does not match what I see
 		 in programs compiled with the MS tools.  */
 	      int idx = exp->hint;
-	      si->size = strlen (xlate (exp->import_name)) + 3;
+	      if (exp->its_name)
+	        si->size = strlen (exp->its_name) + 3;
+	      else
+	        si->size = strlen (xlate (exp->import_name)) + 3;
 	      si->data = xmalloc (si->size);
 	      si->data[0] = idx & 0xff;
 	      si->data[1] = idx >> 8;
-	      strcpy ((char *) si->data + 2, xlate (exp->import_name));
+	      if (exp->its_name)
+		strcpy ((char *) si->data + 2, exp->its_name);
+	      else
+		strcpy ((char *) si->data + 2, xlate (exp->import_name));
 	    }
 	  break;
 	case IDATA7:
@@ -3118,6 +3139,7 @@ gen_lib_file (int delay)
 	  assert (i < PREFIX_ALIAS_BASE);
 	  alias_exp.name = make_imp_label (ext_prefix_alias, exp->name);
 	  alias_exp.internal_name = exp->internal_name;
+	  alias_exp.its_name = exp->its_name;
 	  alias_exp.import_name = exp->name;
 	  alias_exp.ordinal = exp->ordinal;
 	  alias_exp.constant = exp->constant;
@@ -3626,7 +3648,10 @@ nfunc (const void *a, const void *b)
   export_type *bp = *(export_type **) b;
   const char *an = ap->name;
   const char *bn = bp->name;
-
+  if (ap->its_name)
+    an = ap->its_name;
+  if (bp->its_name)
+    an = bp->its_name;
   if (killat)
     {
       an = (an[0] == '@') ? an + 1 : an;

@@ -1,3 +1,28 @@
+2009-10-23  Kai Tietz  <kai.tietz@onevision.com>
+
+	* deflex.l: Allow '<' and '>' in ID names.
+
+	* defparse.y (EQUAL): New token constant.
+	(opt_import_name): New rule for emptry or '==' ID.
+	(expline): Add opt_import_name as last line element.
+	(impline): Likewise.
+	* dlltool.c (ifunct): New member its_name.
+	(export): Likewise.
+	(append_import): Add its_name argument.
+	(defexports): Likewise.
+	(defimport): Likewise.
+	(scan_drectve_symbols): Adjust calls to def_exports.
+	(dump_def_info): Print new optinal import/export table
+	symbol name.
+	(generate_idata_ofile): Use its_name member.
+	(make_one_lib_file): Likewise.
+	(nfunc): Take its_name in account on sort.
+	* dlltool.h (def_exports): Add its_name as argument.
+	(def_import): Likewise.
+	* doc/binutils.texi: Add new def file syntax extension.
+	* deflex.l (EQUAL): Add rule for '=='.
+	* NEWS: Mention new feature.
+
 2009-10-23  Thomas Cougnard  <thomas.cougnard@gmail.com>
 
 	* readelf.c (dynamic_info): Correct size of array.

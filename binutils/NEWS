@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add to dlltool .def file feature of aliasing PE internal symbol name by
+  '== <ID>' option.
+
 Changes in 2.20:
 
 * Add support for delay importing to dlltool.  Use the --output-delaylib <file>

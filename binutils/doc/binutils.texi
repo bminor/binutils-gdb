@@ -3807,19 +3807,21 @@ The result is going to be named @var{name}@code{.exe}.
 @item @code{LIBRARY} @var{name} @code{[ ,} @var{base} @code{]}
 The result is going to be named @var{name}@code{.dll}.
 
-@item @code{EXPORTS ( ( (} @var{name1} @code{[ = } @var{name2} @code{] ) | ( } @var{name1} @code{=} @var{module-name} @code{.} @var{external-name} @code{) )}
+@item @code{EXPORTS ( ( (} @var{name1} @code{[ = } @var{name2} @code{] ) | ( } @var{name1} @code{=} @var{module-name} @code{.} @var{external-name} @code{) ) [ == } @var{its_name} @code{]}
 @item @code{[} @var{integer} @code{] [ NONAME ] [ CONSTANT ] [ DATA ] [ PRIVATE ] ) *}
 Declares @var{name1} as an exported symbol from the DLL, with optional
 ordinal number @var{integer}, or declares @var{name1} as an alias
-(forward) of the function @var{external-name} in the DLL
+(forward) of the function @var{external-name} in the DLL.
+If @var{its_name} is specified, this name is used as string in export table.
 @var{module-name}.
 
-@item @code{IMPORTS ( (} @var{internal-name} @code{=} @var{module-name} @code{.} @var{integer} @code{) | [} @var{internal-name} @code{= ]} @var{module-name} @code{.} @var{external-name} @code{) ) *}
+@item @code{IMPORTS ( (} @var{internal-name} @code{=} @var{module-name} @code{.} @var{integer} @code{) | [} @var{internal-name} @code{= ]} @var{module-name} @code{.} @var{external-name} @code{) [ == ) @var{its_name} @code{]} *}
 Declares that @var{external-name} or the exported function whose
 ordinal number is @var{integer} is to be imported from the file
 @var{module-name}.  If @var{internal-name} is specified then this is
 the name that the imported function will be referred to in the body of
 the DLL.
+If @var{its_name} is specified, this name is used as string in import table.
 
 @item @code{DESCRIPTION} @var{string}
 Puts @var{string} into the output @file{.exp} file in the
