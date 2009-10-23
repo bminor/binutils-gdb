@@ -571,19 +571,19 @@ rx_decode_opcode (unsigned long pc AU,
 /* MUL									*/
 
 /** 0110 0011 immm rdst			mul	#%1, %0 */
-  ID(mul); DR(rdst); SC(immm); F("O---");
+  ID(mul); DR(rdst); SC(immm); F("----");
 
 /** 0111 01im 0001rdst			mul	#%1, %0 */
-  ID(mul); DR(rdst); SC(IMMex(im)); F("O---");
+  ID(mul); DR(rdst); SC(IMMex(im)); F("----");
 
 /** 0100 11ss rsrc rdst			mul	%1%S1, %0 */
-  ID(mul); SP(ss, rsrc); DR(rdst); F("O---");
+  ID(mul); SP(ss, rsrc); DR(rdst); F("----");
 
 /** 0000 0110 mx00 11ss rsrc rdst	mul	%1%S1, %0 */
-  ID(mul); SPm(ss, rsrc, mx); DR(rdst); F("O---");
+  ID(mul); SPm(ss, rsrc, mx); DR(rdst); F("----");
 
 /** 1111 1111 0011 rdst srca srcb	mul 	%2, %1, %0 */
-  ID(mul); DR(rdst); SR(srcb); S2R(srca); F("O---");
+  ID(mul); DR(rdst); SR(srcb); S2R(srca); F("----");
 
 /*----------------------------------------------------------------------*/
 /* EMUL									*/
@@ -758,10 +758,10 @@ rx_decode_opcode (unsigned long pc AU,
   ID(smovb);
 
 /** 0111 1111 1000 00sz		suntil%s */
-  ID(suntil); BWL(sz); F("OSZC");
+  ID(suntil); BWL(sz); F("--ZC");
 
 /** 0111 1111 1000 01sz		swhile%s */
-  ID(swhile); BWL(sz); F("OSZC");
+  ID(swhile); BWL(sz); F("--ZC");
 
 /** 0111 1111 1000 1111		smovf */
   ID(smovf);

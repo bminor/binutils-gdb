@@ -1,3 +1,8 @@
+2009-10-22  DJ Delorie  <dj@redhat.com>
+
+	* rx-decode.opc (decode_opcode): Fix flags for MUL, SUNTIL, and SWHILE.
+	* rx-decode.c: Regenerated.
+
 2009-10-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/10775
