@@ -1,5 +1,9 @@
 2009-10-23  Tristan Gingold  <gingold@adacore.com>
 
+	* frame.c (frame_unwind_pc): Fix typo: remove duplicate 0x.
+
+2009-10-23  Tristan Gingold  <gingold@adacore.com>
+	
 	* objfiles.c (allocate_objfile): Remove useless test.  Move
 	declaration of last_one to the block that uses it.
 

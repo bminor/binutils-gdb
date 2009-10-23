@@ -639,7 +639,7 @@ frame_unwind_pc (struct frame_info *this_frame)
       this_frame->prev_pc.p = 1;
       if (frame_debug)
 	fprintf_unfiltered (gdb_stdlog,
-			    "{ frame_unwind_caller_pc (this_frame=%d) -> 0x%s }\n",
+			    "{ frame_unwind_caller_pc (this_frame=%d) -> %s }\n",
 			    this_frame->level,
 			    hex_string (this_frame->prev_pc.value));
     }
