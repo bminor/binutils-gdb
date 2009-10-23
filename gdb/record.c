@@ -31,7 +31,6 @@
 #include "elf-bfd.h"
 #include "gcore.h"
 
-#include <byteswap.h>
 #include <signal.h>
 
 /* This module implements "target record", also known as "process
@@ -1956,27 +1955,33 @@ bfdcore_read (bfd *obfd, asection *osec, void *buf, int len, int *offset)
 }
 
 static inline uint64_t
-netorder64 (uint64_t fromfile)
+netorder64 (uint64_t input)
 {
-  return (BYTE_ORDER == BFD_ENDIAN_LITTLE) 
-    ? bswap_64 (fromfile) 
-    : fromfile;
+  uint64_t ret;
+
+  store_unsigned_integer ((gdb_byte *) &ret, sizeof (ret), 
+			  BFD_ENDIAN_BIG, input);
+  return ret;
 }
 
 static inline uint32_t
-netorder32 (uint32_t fromfile)
+netorder32 (uint32_t input)
 {
-  return (BYTE_ORDER == BFD_ENDIAN_LITTLE) 
-    ? bswap_32 (fromfile) 
-    : fromfile;
+  uint32_t ret;
+
+  store_unsigned_integer ((gdb_byte *) &ret, sizeof (ret), 
+			  BFD_ENDIAN_BIG, input);
+  return ret;
 }
 
 static inline uint16_t
-netorder16 (uint16_t fromfile)
+netorder16 (uint16_t input)
 {
-  return (BYTE_ORDER == BFD_ENDIAN_LITTLE) 
-    ? bswap_16 (fromfile) 
-    : fromfile;
+  uint16_t ret;
+
+  store_unsigned_integer ((gdb_byte *) &ret, sizeof (ret), 
+			  BFD_ENDIAN_BIG, input);
+  return ret;
 }
 
 /* Restore the execution log from a core_bfd file.  */
