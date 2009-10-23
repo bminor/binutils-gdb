@@ -1,3 +1,7 @@
+2009-10-23  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* objfiles.c (allocate_objfile): Use xzalloc.
+
 2009-10-23  Hui Zhu  <teawater@gmail.com>
 
 	* record.c (record_restore): Use phex_nz.
@@ -11,6 +15,10 @@
 	* objfiles.c (allocate_objfile): Remove useless test.  Move
 	declaration of last_one to the block that uses it.
 
+2009-10-22  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* record.c (record_restore, cmd_record_save): Fix warnings.
+	
 2009-10-22  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* disasm.h (DISASSEMBLY_OMIT_FNAME) New define.
