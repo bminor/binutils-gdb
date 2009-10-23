@@ -69,7 +69,7 @@ gdb_expect {
     global foo2_addr
     global gdb_prompt
 
-    -re "($hex).*\[\r\n\]+($hex).*$gdb_prompt $" {
+    -re "=> ($hex).*\[\r\n\]+   ($hex).*$gdb_prompt $" {
 	set foo1_addr $expect_out(1,string)
 	set foo2_addr $expect_out(2,string)
 	pass "get breakpoint address for foo"
