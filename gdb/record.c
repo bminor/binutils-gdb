@@ -1955,7 +1955,7 @@ bfdcore_read (bfd *obfd, asection *osec, void *buf, int len, int *offset)
 static inline uint64_t
 netorder64 (uint64_t fromfile)
 {
-  return (BYTE_ORDER == LITTLE_ENDIAN) 
+  return (BYTE_ORDER == BFD_ENDIAN_LITTLE) 
     ? bswap_64 (fromfile) 
     : fromfile;
 }
@@ -1963,7 +1963,7 @@ netorder64 (uint64_t fromfile)
 static inline uint32_t
 netorder32 (uint32_t fromfile)
 {
-  return (BYTE_ORDER == LITTLE_ENDIAN) 
+  return (BYTE_ORDER == BFD_ENDIAN_LITTLE) 
     ? bswap_32 (fromfile) 
     : fromfile;
 }
@@ -1971,7 +1971,7 @@ netorder32 (uint32_t fromfile)
 static inline uint16_t
 netorder16 (uint16_t fromfile)
 {
-  return (BYTE_ORDER == LITTLE_ENDIAN) 
+  return (BYTE_ORDER == BFD_ENDIAN_LITTLE) 
     ? bswap_16 (fromfile) 
     : fromfile;
 }
