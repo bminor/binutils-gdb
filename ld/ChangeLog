@@ -1,5 +1,30 @@
 2009-10-23  Kai Tietz  <kai.tietz@onevision.com>
 
+	* deffile.h (def_file_export): New member its_name.
+	(def_file_import): Likewise.
+	(def_file_add_export): Add argument its_name.
+	(def_file_add_import): Likewise.
+	* deffilep.y (def_exports): Add argument its_name.
+	(def_import): Likewise.
+	(EQUAL): Add new token for '=='.
+	(opt_equalequal_name): New rule.
+	(expline): Add rule opt_equalequal_name.
+	(impline): Likewise.
+	(def_file_free): Free for exports and imports
+	the optional member its_name.
+	(def_lex): Add scan of '==' as EQUAL.
+	* pe-dll.c (pe_export_sort): Sort for its_name too.
+	(process_def_file_and_drectve): Adjust calls to
+	def_file_add_export.
+	(generate_edata): Take its_name in account.
+	(make_one): Likewise.
+	(pe_process_import_defs): Likewise.
+	(pe_dll_generate_def_file): Add print of new '==' option.
+	* ld.texinfo: Extend documentation about .def file syntax.
+	* NEWS: Mention new feature.
+
+2009-10-23  Kai Tietz  <kai.tietz@onevision.com>
+
 	* deffilep.y (def_lex): Allow '<' and '>' characters in identifier
 	strings.
 

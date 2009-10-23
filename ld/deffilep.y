@@ -79,10 +79,10 @@
 #define yycheck	 def_yycheck
 
 static void def_description (const char *);
-static void def_exports (const char *, const char *, int, int);
+static void def_exports (const char *, const char *, int, int, const char *);
 static void def_heapsize (int, int);
 static void def_import (const char *, const char *, const char *, const char *,
-			int);
+			int, const char *);
 static void def_image_name (const char *, int, int);
 static void def_section (const char *, int);
 static void def_section_alt (const char *, const char *);
@@ -109,7 +109,7 @@ static const char *lex_parse_string_end = 0;
 %token NAME LIBRARY DESCRIPTION STACKSIZE_K HEAPSIZE CODE DATAU DATAL
 %token SECTIONS EXPORTS IMPORTS VERSIONK BASE CONSTANTU CONSTANTL
 %token PRIVATEU PRIVATEL ALIGNCOMM
-%token READ WRITE EXECUTE SHARED NONAMEU NONAMEL DIRECTIVE
+%token READ WRITE EXECUTE SHARED NONAMEU NONAMEL DIRECTIVE EQUAL
 %token <id> ID
 %token <digits> DIGITS
 %type  <number> NUMBER
@@ -117,6 +117,7 @@ static const char *lex_parse_string_end = 0;
 %type  <number> opt_base opt_ordinal
 %type  <number> attr attr_list opt_number exp_opt_list exp_opt
 %type  <id> opt_name opt_equal_name dot_name anylang_id opt_id
+%type  <id> opt_equalequal_name
 
 %%
 
@@ -152,8 +153,8 @@ expline:
 		/* The opt_comma is necessary to support both the usual
 		  DEF file syntax as well as .drectve syntax which
 		  mandates <expsym>,<expoptlist>.  */
-		dot_name opt_equal_name opt_ordinal opt_comma exp_opt_list
-			{ def_exports ($1, $2, $3, $5); }
+		dot_name opt_equal_name opt_ordinal opt_comma exp_opt_list opt_comma opt_equalequal_name
+			{ def_exports ($1, $2, $3, $5, $7); }
 	;
 exp_opt_list:
 		/* The opt_comma is necessary to support both the usual
@@ -178,12 +179,18 @@ implist:
 	;
 
 impline:
-               ID '=' ID '.' ID '.' ID     { def_import ($1, $3, $5, $7, -1); }
-       |       ID '=' ID '.' ID '.' NUMBER { def_import ($1, $3, $5,  0, $7); }
-       |       ID '=' ID '.' ID            { def_import ($1, $3,  0, $5, -1); }
-       |       ID '=' ID '.' NUMBER        { def_import ($1, $3,  0,  0, $5); }
-       |       ID '.' ID '.' ID            { def_import ( 0, $1, $3, $5, -1); }
-       |       ID '.' ID                   { def_import ( 0, $1,  0, $3, -1); }
+               ID '=' ID '.' ID '.' ID opt_equalequal_name
+                 { def_import ($1, $3, $5, $7, -1, $8); }
+       |       ID '=' ID '.' ID '.' NUMBER opt_equalequal_name
+				 { def_import ($1, $3, $5,  0, $7, $8); }
+       |       ID '=' ID '.' ID opt_equalequal_name
+                 { def_import ($1, $3,  0, $5, -1, $6); }
+       |       ID '=' ID '.' NUMBER opt_equalequal_name
+                 { def_import ($1, $3,  0,  0, $5, $6); }
+       |       ID '.' ID '.' ID opt_equalequal_name
+                 { def_import( 0, $1, $3, $5, -1, $6); }
+       |       ID '.' ID opt_equalequal_name
+                 { def_import ( 0, $1,  0, $3, -1, $4); }
 ;
 
 seclist:
@@ -224,6 +231,10 @@ opt_name: ID		{ $$ = $1; }
 	    $$ = name;
 	  }
 	|		{ $$ = ""; }
+	;
+
+opt_equalequal_name: EQUAL ID	{ $$ = $2; }
+	|							{ $$ = 0; }
 	;
 
 opt_ordinal: 
@@ -378,6 +389,8 @@ def_file_free (def_file *def)
 	    free (def->exports[i].internal_name);
 	  if (def->exports[i].name)
 	    free (def->exports[i].name);
+	  if (def->exports[i].its_name)
+	    free (def->exports[i].its_name);
 	}
       free (def->exports);
     }
@@ -391,6 +404,8 @@ def_file_free (def_file *def)
 	    free (def->imports[i].internal_name);
 	  if (def->imports[i].name)
 	    free (def->imports[i].name);
+	  if (def->imports[i].its_name)
+	    free (def->imports[i].its_name);
 	}
       free (def->imports);
     }
@@ -503,7 +518,8 @@ def_file_export *
 def_file_add_export (def_file *def,
 		     const char *external_name,
 		     const char *internal_name,
-		     int ordinal)
+		     int ordinal,
+		     const char *its_name)
 {
   def_file_export *e;
   int max_exports = ROUND_UP(def->num_exports, 32);
@@ -525,6 +541,7 @@ def_file_add_export (def_file *def,
     internal_name = external_name;
   e->name = xstrdup (external_name);
   e->internal_name = xstrdup (internal_name);
+  e->its_name = (its_name ? xstrdup (its_name) : NULL);
   e->ordinal = ordinal;
   def->num_exports++;
   return e;
@@ -562,7 +579,8 @@ def_file_add_import (def_file *def,
 		     const char *name,
 		     const char *module,
 		     int ordinal,
-		     const char *internal_name)
+		     const char *internal_name,
+		     const char *its_name)
 {
   def_file_import *i;
   int max_imports = ROUND_UP (def->num_imports, 16);
@@ -588,6 +606,7 @@ def_file_add_import (def_file *def,
     i->internal_name = xstrdup (internal_name);
   else
     i->internal_name = i->name;
+  i->its_name = (its_name ? xstrdup (its_name) : NULL);
   def->num_imports++;
 
   return i;
@@ -805,7 +824,8 @@ static void
 def_exports (const char *external_name,
 	     const char *internal_name,
 	     int ordinal,
-	     int flags)
+	     int flags,
+	     const char *its_name)
 {
   def_file_export *dfe;
 
@@ -815,7 +835,8 @@ def_exports (const char *external_name,
   printf ("def_exports, ext=%s int=%s\n", external_name, internal_name);
 #endif
 
-  dfe = def_file_add_export (def, external_name, internal_name, ordinal);
+  dfe = def_file_add_export (def, external_name, internal_name, ordinal,
+  							 its_name);
   if (flags & 1)
     dfe->flag_noname = 1;
   if (flags & 2)
@@ -831,7 +852,8 @@ def_import (const char *internal_name,
 	    const char *module,
 	    const char *dllext,
 	    const char *name,
-	    int ordinal)
+	    int ordinal,
+	    const char *its_name)
 {
   char *buf = 0;
   const char *ext = dllext ? dllext : "dll";    
@@ -840,7 +862,7 @@ def_import (const char *internal_name,
   sprintf (buf, "%s.%s", module, ext);
   module = buf;
 
-  def_file_add_import (def, name, module, ordinal, internal_name);
+  def_file_add_import (def, name, module, ordinal, internal_name, its_name);
   if (buf)
     free (buf);
 }
@@ -1102,7 +1124,23 @@ def_lex (void)
       return ID;
     }
 
-  if (c == '=' || c == '.' || c == ',')
+  if ( c == '=')
+    {
+      c = def_getc ();
+      if (c == '=')
+        {
+#if TRACE
+          printf ("lex: `==' returns EQUAL\n");
+#endif
+		  return EQUAL;
+        }
+      def_ungetc (c);
+#if TRACE
+      printf ("lex: `=' returns itself\n");
+#endif
+      return '=';
+    }
+  if (c == '.' || c == ',')
     {
 #if TRACE
       printf ("lex: `%c' returns itself\n", c);

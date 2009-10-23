@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Extend .def file syntax by '== <ID>' for imports and exports. This allows
+  to alias the import/export table name written in PE image.
+
 * Add --exlcude-all-symbols option to PE based linkers.  This prevents all
   symbols from automatically being exported.
 

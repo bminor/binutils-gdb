@@ -6672,14 +6672,19 @@ bar
 _bar = bar
 another_foo = abc.dll.afoo
 var1 DATA
+doo = foo == foo2
+eoo DATA == var1
 @end example
 
-This example defines a DLL with a non-default base address and five
+This example defines a DLL with a non-default base address and seven
 symbols in the export table. The third exported symbol @code{_bar} is an
 alias for the second. The fourth symbol, @code{another_foo} is resolved
 by "forwarding" to another module and treating it as an alias for
 @code{afoo} exported from the DLL @samp{abc.dll}. The final symbol
-@code{var1} is declared to be a data object.
+@code{var1} is declared to be a data object. The @samp{doo} symbol in
+export library is an alias of @samp{foo}, which gets the string name
+in export table @samp{foo2}. The @samp{eoo} symbol is an data export
+symbol, which gets in export table the name @samp{var1}.
 
 The optional @code{LIBRARY <name>} command indicates the @emph{internal}
 name of the output DLL. If @samp{<name>} does not include a suffix,
@@ -6704,7 +6709,7 @@ The complete specification of an export symbol is:
 EXPORTS
   ( (  ( <name1> [ = <name2> ] )
      | ( <name1> = <module-name> . <external-name>))
-  [ @@ <integer> ] [NONAME] [DATA] [CONSTANT] [PRIVATE] ) *
+  [ @@ <integer> ] [NONAME] [DATA] [CONSTANT] [PRIVATE] [== <name3>] ) *
 @end example
 
 Declares @samp{<name1>} as an exported symbol from the DLL, or declares
@@ -6712,7 +6717,8 @@ Declares @samp{<name1>} as an exported symbol from the DLL, or declares
 @samp{<name1>} as a "forward" alias for the symbol
 @samp{<external-name>} in the DLL @samp{<module-name>}.
 Optionally, the symbol may be exported by the specified ordinal
-@samp{<integer>} alias.
+@samp{<integer>} alias. The optional @samp{<name3>} is the to be used
+string in import/export table for the symbol.
 
 The optional keywords that follow the declaration indicate:
 
