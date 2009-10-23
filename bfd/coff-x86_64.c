@@ -550,16 +550,16 @@ coff_amd64_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
       bfd_set_error (bfd_error_bad_value);
       return NULL;
     }
-  if (rel->r_type >= R_AMD64_PCRLONG_1 && rel->r_type <= R_AMD64_PCRLONG_5)
-    {
-      rel->r_vaddr += (bfd_vma)(rel->r_type-R_AMD64_PCRLONG);
-      rel->r_type = R_AMD64_PCRLONG;
-    }
   howto = howto_table + rel->r_type;
 
 #if defined(COFF_WITH_PE)
   /* Cancel out code in _bfd_coff_generic_relocate_section.  */
   *addendp = 0;
+  if (rel->r_type >= R_AMD64_PCRLONG_1 && rel->r_type <= R_AMD64_PCRLONG_5)
+    {
+      *addendp -= (bfd_vma)(rel->r_type - R_AMD64_PCRLONG);
+      rel->r_type = R_AMD64_PCRLONG;
+    }
 #endif
 
   if (howto->pc_relative)

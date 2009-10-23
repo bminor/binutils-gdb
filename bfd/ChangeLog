@@ -1,3 +1,8 @@
+2009-10-23  Kai Tietz  <kai.tietz@onevision.com>
+
+	* coff-x86_64.c (coff_amd64_rtype_to_howto): Subtract offset
+	of R_AMD64_PCRLONG_<X> relocations from addend.
+
 2009-10-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* plugin.c: Produce empty object if not BFD_SUPPORTS_PLUGINS.
