@@ -1,3 +1,7 @@
+2009-10-23  Tom Tromey  <tromey@redhat.com>
+
+	* blockframe.c (_initialize_blockframe): Remove declaration.
+
 2009-10-23  Doug Evans  <dje@google.com>
 
 	* record.c (record_core_xfer_partial): Pass correct offset to
