@@ -1629,6 +1629,7 @@ record_core_xfer_partial (struct target_ops *ops, enum target_object object,
                if (offset >= p->addr)
                  {
                    struct record_core_buf_entry *entry;
+		   ULONGEST sec_offset;
 
                    if (offset >= p->endaddr)
                      continue;
@@ -1636,7 +1637,7 @@ record_core_xfer_partial (struct target_ops *ops, enum target_object object,
                    if (offset + len > p->endaddr)
                      len = p->endaddr - offset;
 
-                   offset -= p->addr;
+                   sec_offset = offset - p->addr;
 
                    /* Read readbuf or write writebuf p, offset, len.  */
                    /* Check flags.  */
@@ -1673,7 +1674,8 @@ record_core_xfer_partial (struct target_ops *ops, enum target_object object,
                            record_core_buf_list = entry;
                          }
 
-                        memcpy (entry->buf + offset, writebuf, (size_t) len);
+                        memcpy (entry->buf + sec_offset, writebuf,
+				(size_t) len);
                      }
                    else
                      {
@@ -1683,7 +1685,8 @@ record_core_xfer_partial (struct target_ops *ops, enum target_object object,
                                    object, annex, readbuf, writebuf,
                                    offset, len);
 
-                       memcpy (readbuf, entry->buf + offset, (size_t) len);
+                       memcpy (readbuf, entry->buf + sec_offset,
+			       (size_t) len);
                      }
 
                    return len;

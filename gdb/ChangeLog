@@ -1,3 +1,8 @@
+2009-10-23  Doug Evans  <dje@google.com>
+
+	* record.c (record_core_xfer_partial): Pass correct offset to
+	record_beneath_to_xfer_partial.
+
 2009-10-23  Michael Snyder  <msnyder@vmware.com>
 
 	* record.c (netorder64): Use BFD_ENDIAN_LITTLE not LITTLE_ENDIAN.
