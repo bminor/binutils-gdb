@@ -936,8 +936,7 @@ print_disassembly (struct gdbarch *gdbarch, const char *name,
 }
 
 /* Subroutine of disassemble_command to simplify it.
-   Print a disassembly of the current function.
-   MIXED is non-zero to print source with the assembler.  */
+   Print a disassembly of the current function according to FLAGS.  */
 
 static void
 disassemble_current_function (int flags)
@@ -1018,6 +1017,7 @@ disassemble_command (char *arg, int from_tty)
 
   if (! arg || ! *arg)
     {
+      flags |= DISASSEMBLY_OMIT_FNAME;
       disassemble_current_function (flags);
       return;
     }
@@ -1039,6 +1039,7 @@ disassemble_command (char *arg, int from_tty)
 	low = tui_get_low_disassembly_address (gdbarch, low, pc);
 #endif
       low += gdbarch_deprecated_function_start_offset (gdbarch);
+      flags |= DISASSEMBLY_OMIT_FNAME;
     }
   else
     {

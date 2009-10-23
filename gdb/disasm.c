@@ -122,7 +122,8 @@ dump_insns (struct gdbarch *gdbarch, struct ui_out *uiout,
 	  /* We don't care now about line, filename and
 	     unmapped. But we might in the future. */
 	  ui_out_text (uiout, " <");
-	  ui_out_field_string (uiout, "func-name", name);
+	  if ((flags & DISASSEMBLY_OMIT_FNAME) == 0)
+	    ui_out_field_string (uiout, "func-name", name);
 	  ui_out_text (uiout, "+");
 	  ui_out_field_int (uiout, "offset", offset);
 	  ui_out_text (uiout, ">:\t");
@@ -373,9 +374,8 @@ gdb_disassemble_info (struct gdbarch *gdbarch, struct ui_file *file)
 
 void
 gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
-		char *file_string,
-		int flags,
-		int how_many, CORE_ADDR low, CORE_ADDR high)
+		 char *file_string, int flags, int how_many,
+		 CORE_ADDR low, CORE_ADDR high)
 {
   struct ui_stream *stb = ui_out_stream_new (uiout);
   struct cleanup *cleanups = make_cleanup_ui_out_stream_delete (stb);

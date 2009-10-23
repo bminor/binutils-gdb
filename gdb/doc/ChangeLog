@@ -1,3 +1,8 @@
+2009-10-22  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.texinfo (Machine Code): Mention function name in disasssembly
+	and adjust example.
+	
 2009-10-22  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.texinfo (Process Record and Replay): Document new form of

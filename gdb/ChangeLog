@@ -1,3 +1,11 @@
+2009-10-22  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* disasm.h (DISASSEMBLY_OMIT_FNAME) New define.
+	(gdb_disassembly): Correct parameter name.
+	* disasm.c (dump_insns): Adjust.
+	(gdb_disassembly): Fix indentation.
+	* cli/cli-cmds.c (disassemble_command): Adjust.
+	
 2009-10-22  Michael Snyder  <msnyder@vmware.com>
 
 	* infrun.c (keep_going): If insert_breakpoints fails, 

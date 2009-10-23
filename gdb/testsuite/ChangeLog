@@ -1,3 +1,7 @@
+2009-10-22  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.asm/asm-source.exp: Adjust.
+	
 2009-10-22  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.reverse/break-precsave.exp: New test.

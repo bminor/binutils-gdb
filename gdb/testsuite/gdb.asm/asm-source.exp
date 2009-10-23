@@ -461,7 +461,7 @@ test_dis "x/i &staticvar" "staticvar"
 test_dis "disassem &staticvar &staticvar+1" "staticvar"
 
 # See if we can look at a static function
-gdb_test "disassem foostatic" ".*<foostatic\\+0>:.*End of assembler dump." \
+gdb_test "disassem foostatic" ".*<\\+0>:.*End of assembler dump." \
 	"look at static function"
 
 remote_exec build "rm -f ${subdir}/arch.inc"

@@ -21,14 +21,14 @@
 
 #define DISASSEMBLY_SOURCE	(0x1 << 0)
 #define DISASSEMBLY_RAW_INSN	(0x1 << 1)
+#define DISASSEMBLY_OMIT_FNAME	(0x1 << 2)
 
 struct ui_out;
 struct ui_file;
 
 extern void gdb_disassembly (struct gdbarch *gdbarch, struct ui_out *uiout,
-			     char *file_string,
-			     int mixed_source_and_assembly,
-			     int how_many, CORE_ADDR low, CORE_ADDR high);
+			     char *file_string, int flags, int how_many,
+			     CORE_ADDR low, CORE_ADDR high);
 
 /* Print the instruction at address MEMADDR in debugged memory,
    on STREAM.  Returns the length of the instruction, in bytes,

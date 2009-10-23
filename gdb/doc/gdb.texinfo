@@ -6540,7 +6540,9 @@ The default memory range is the function surrounding the
 program counter of the selected frame.  A single argument to this
 command is a program counter value; @value{GDBN} dumps the function
 surrounding this value.  Two arguments specify a range of addresses
-(first inclusive, second exclusive) to dump.
+(first inclusive, second exclusive) to dump.  In that case, the name of
+the function is also printed (since there could be several functions in
+the given range).
 
 If the range of memory being disassembled contains current program counter,
 the instruction at that location is shown with a @code{=>} marker.
@@ -6570,21 +6572,21 @@ program is stopped just after function prologue:
 (@value{GDBP}) disas /m main
 Dump of assembler code for function main:
 5       @{
-   0x08048330 <main+0>:    push   %ebp
-   0x08048331 <main+1>:    mov    %esp,%ebp
-   0x08048333 <main+3>:    sub    $0x8,%esp
-   0x08048336 <main+6>:    and    $0xfffffff0,%esp
-   0x08048339 <main+9>:    sub    $0x10,%esp
+   0x08048330 <+0>:    push   %ebp
+   0x08048331 <+1>:    mov    %esp,%ebp
+   0x08048333 <+3>:    sub    $0x8,%esp
+   0x08048336 <+6>:    and    $0xfffffff0,%esp
+   0x08048339 <+9>:    sub    $0x10,%esp
 
 6         printf ("Hello.\n");
-=> 0x0804833c <main+12>:   movl   $0x8048440,(%esp)
-   0x08048343 <main+19>:   call   0x8048284 <puts@@plt>
+=> 0x0804833c <+12>:   movl   $0x8048440,(%esp)
+   0x08048343 <+19>:   call   0x8048284 <puts@@plt>
 
 7         return 0;
 8       @}
-   0x08048348 <main+24>:   mov    $0x0,%eax
-   0x0804834d <main+29>:   leave
-   0x0804834e <main+30>:   ret
+   0x08048348 <+24>:   mov    $0x0,%eax
+   0x0804834d <+29>:   leave
+   0x0804834e <+30>:   ret
 
 End of assembler dump.
 @end smallexample
