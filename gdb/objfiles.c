@@ -194,24 +194,16 @@ build_objfile_section_table (struct objfile *objfile)
 struct objfile *
 allocate_objfile (bfd *abfd, int flags)
 {
-  struct objfile *objfile = NULL;
-  struct objfile *last_one = NULL;
+  struct objfile *objfile;
 
-  /* If we don't support mapped symbol files, didn't ask for the file to be
-     mapped, or failed to open the mapped file for some reason, then revert
-     back to an unmapped objfile. */
-
-  if (objfile == NULL)
-    {
-      objfile = (struct objfile *) xmalloc (sizeof (struct objfile));
-      memset (objfile, 0, sizeof (struct objfile));
-      objfile->psymbol_cache = bcache_xmalloc ();
-      objfile->macro_cache = bcache_xmalloc ();
-      /* We could use obstack_specify_allocation here instead, but
-	 gdb_obstack.h specifies the alloc/dealloc functions.  */
-      obstack_init (&objfile->objfile_obstack);
-      terminate_minimal_symbol_table (objfile);
-    }
+  objfile = (struct objfile *) xmalloc (sizeof (struct objfile));
+  memset (objfile, 0, sizeof (struct objfile));
+  objfile->psymbol_cache = bcache_xmalloc ();
+  objfile->macro_cache = bcache_xmalloc ();
+  /* We could use obstack_specify_allocation here instead, but
+     gdb_obstack.h specifies the alloc/dealloc functions.  */
+  obstack_init (&objfile->objfile_obstack);
+  terminate_minimal_symbol_table (objfile);
 
   objfile_alloc_data (objfile);
 
@@ -266,6 +258,8 @@ allocate_objfile (bfd *abfd, int flags)
     object_files = objfile;
   else
     {
+      struct objfile *last_one;
+
       for (last_one = object_files;
 	   last_one->next;
 	   last_one = last_one->next);

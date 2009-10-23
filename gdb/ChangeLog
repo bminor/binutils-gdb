@@ -1,3 +1,8 @@
+2009-10-23  Tristan Gingold  <gingold@adacore.com>
+
+	* objfiles.c (allocate_objfile): Remove useless test.  Move
+	declaration of last_one to the block that uses it.
+
 2009-10-22  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* disasm.h (DISASSEMBLY_OMIT_FNAME) New define.
