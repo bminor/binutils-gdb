@@ -1,3 +1,7 @@
+2009-10-22  Tristan Gingold  <gingold@adacore.com>
+
+	* avr/interp.c (sim_stop): Return 1.
+
 2009-10-16  Doug Evans  <dje@sebabeach.org>
 
 	* MAINTAINERS: Add myself as m32r maintainer.

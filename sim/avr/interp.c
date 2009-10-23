@@ -1760,7 +1760,7 @@ sim_stop (SIM_DESC sd)
 {
   cpu_exception = sim_stopped;
   cpu_signal = TARGET_SIGNAL_INT;
-  return 0;
+  return 1;
 }
 
 void
