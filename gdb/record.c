@@ -2056,9 +2056,9 @@ record_restore (void)
 
           if (record_debug)
             printf_filtered ("\
-  Reading register %d (1 plus %d plus %d bytes)\n",
+  Reading register %d (1 plus %lu plus %d bytes)\n",
 			     rec->u.reg.num,
-			     sizeof (regnum),
+			     (unsigned long) sizeof (regnum),
 			     rec->u.reg.len);
           break;
 
@@ -2081,11 +2081,11 @@ record_restore (void)
 
           if (record_debug)
             printf_filtered ("\
-  Reading memory %s (1 plus %d plus %d plus %d bytes)\n",
+  Reading memory %s (1 plus %lu plus %lu plus %d bytes)\n",
 			     paddress (get_current_arch (),
 				       rec->u.mem.addr),
-			     sizeof (addr),
-			     sizeof (len),
+			     (unsigned long) sizeof (addr),
+			     (unsigned long) sizeof (len),
 			     rec->u.mem.len);
           break;
 
@@ -2107,9 +2107,9 @@ record_restore (void)
 	  record_insn_count = count + 1;
           if (record_debug)
             printf_filtered ("\
-  Reading record_end (1 + %d + %d bytes), offset == %s\n",
-			     sizeof (signal),
-			     sizeof (count),
+  Reading record_end (1 + %lu + %lu bytes), offset == %s\n",
+			     (unsigned long) sizeof (signal),
+			     (unsigned long) sizeof (count),
 			     paddress (get_current_arch (),
 				       bfd_offset));
           break;
@@ -2308,9 +2308,9 @@ cmd_record_save (char *args, int from_tty)
             case record_reg: /* reg */
               if (record_debug)
 		printf_filtered ("\
-  Writing register %d (1 plus %d plus %d bytes)\n",
+  Writing register %d (1 plus %lu plus %d bytes)\n",
 				 record_list->u.reg.num,
-				 sizeof (regnum),
+				 (unsigned long) sizeof (regnum),
 				 record_list->u.reg.len);
 
               /* Write regnum.  */
@@ -2326,11 +2326,11 @@ cmd_record_save (char *args, int from_tty)
             case record_mem: /* mem */
 	      if (record_debug)
 		printf_filtered ("\
-  Writing memory %s (1 plus %d plus %d plus %d bytes)\n",
+  Writing memory %s (1 plus %lu plus %lu plus %d bytes)\n",
 				 paddress (gdbarch,
 					   record_list->u.mem.addr),
-				 sizeof (addr),
-				 sizeof (len),
+				 (unsigned long) sizeof (addr),
+				 (unsigned long) sizeof (len),
 				 record_list->u.mem.len);
 
 	      /* Write memlen.  */
@@ -2350,9 +2350,9 @@ cmd_record_save (char *args, int from_tty)
               case record_end:
                 if (record_debug)
                   printf_filtered ("\
-  Writing record_end (1 + %d + %d bytes)\n", 
-				   sizeof (signal),
-				   sizeof (count));
+  Writing record_end (1 + %lu + %lu bytes)\n", 
+				   (unsigned long) sizeof (signal),
+				   (unsigned long) sizeof (count));
 		/* Write signal value.  */
 		signal = netorder32 (record_list->u.end.sigval);
 		bfdcore_write (obfd, osec, &signal,
