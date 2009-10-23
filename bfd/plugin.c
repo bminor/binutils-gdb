@@ -20,6 +20,10 @@
    MA 02110-1301, USA.  */
 
 #include "config.h"
+#include "bfd.h"
+
+#if BFD_SUPPORTS_PLUGINS
+
 #include <assert.h>
 #include <dlfcn.h>
 #include <stdarg.h>
@@ -492,3 +496,4 @@ const bfd_target plugin_vec =
 
   NULL  			/* backend_data.  */
 };
+#endif /* BFD_SUPPORTS_PLUGIN */
