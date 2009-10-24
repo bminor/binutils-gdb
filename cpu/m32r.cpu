@@ -2089,10 +2089,10 @@
      "sth $src1,@$src2+"
      (+ OP1_2 OP2_3 src1 src2)
      ; This has to be coded carefully to avoid an "earlyclobber" of src2.
-     (sequence ((HI new-src2))
-             (set (mem HI new-src2) src1)
-             (set new-src2 (add src2 (const 2)))
-             (set src2 new-src2))
+     (sequence ((WI new-src2))
+	       (set new-src2 src2)
+	       (set (mem HI new-src2) src1)
+	       (set src2 (add new-src2 (const 2))))
      ((m32rx (unit u-store)
            (unit u-exec (in dr src2) (out dr src2) (cycles 0)))
       (m32r2 (unit u-store)
@@ -2105,10 +2105,10 @@
      "stb $src1,@$src2+"
      (+ OP1_2 OP2_1 src1 src2)
      ; This has to be coded carefully to avoid an "earlyclobber" of src2.
-     (sequence ((QI new-src2))
-             (set (mem QI new-src2) src1)
-             (set new-src2 (add src2 (const 1)))
-             (set src2 new-src2))
+     (sequence ((WI new-src2))
+	       (set new-src2 src2)
+	       (set (mem QI new-src2) src1)
+	       (set src2 (add new-src2 (const 1))))
      ((m32rx (unit u-store)
            (unit u-exec (in dr src2) (out dr src2) (cycles 0)))
       (m32r2 (unit u-store)
@@ -2375,14 +2375,14 @@
      ()
 )
 
-; PSW &= ~((unsigned char) uimm8 | 0x000ff00)
+; PSW &= ((~ uimm8) | 0xff00)
 (dni clrpsw "clrpsw"
      ((PIPE O) SPECIAL_M32R)
      "clrpsw $uimm8"
      (+ OP1_7 (f-r1 2) uimm8)
      (set USI (reg h-cr 0)
               (and USI (reg h-cr 0)
-                     (or USI (inv BI uimm8) (const #xff00))))
+		   (or USI (zext SI (inv QI uimm8)) (const #xff00))))
      ()
 )
 
@@ -2402,7 +2402,7 @@
      (+ OP1_10 (f-bit4 0) uimm3 OP2_6 sr slo16)
      (set QI (mem QI (add sr slo16))
              (or QI (mem QI (add sr slo16))
-                  (sll USI (const 1) (sub (const 7) uimm3))))
+		 (sll QI (const 1) (sub (const 7) uimm3))))
      ()
 )
 
@@ -2413,7 +2413,7 @@
      (+ OP1_10 (f-bit4 0) uimm3  OP2_7 sr slo16)
      (set QI (mem QI (add sr slo16))
              (and QI (mem QI (add sr slo16))
-                   (inv QI (sll USI (const 1) (sub (const 7) uimm3)))))
+                   (inv QI (sll QI (const 1) (sub (const 7) uimm3)))))
      ()
 )
 
@@ -2422,7 +2422,6 @@
      (SPECIAL_M32R (PIPE O))
      "btst $uimm3,$sr"
      (+ OP1_0 (f-bit4 0) uimm3 OP2_15 sr)
-     (set condbit (and QI (srl USI sr (sub (const 7) uimm3)) (const 1)))
+     (set condbit (and QI (srl QI sr (sub (const 7) uimm3)) (const 1)))
      ()
 )
-
