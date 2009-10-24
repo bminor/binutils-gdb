@@ -1,3 +1,11 @@
+2009-10-24  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_output_section, Arm_relobj): Forward class declarations.
+	(Arm_input_section::as_arm_input_section): New method.
+	(Arm_output_section): New class definition.
+	(Arm_output_section::create_stub_group,
+	Arm_output_section::group_sections): New method definitions.
+
 2009-10-22  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_input_section): New class definition.

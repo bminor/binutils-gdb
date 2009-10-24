@@ -62,6 +62,12 @@ template<bool big_endian>
 class Arm_input_section;
 
 template<bool big_endian>
+class Arm_output_section;
+
+template<bool big_endian>
+class Arm_relobj;
+
+template<bool big_endian>
 class Target_arm;
 
 // For convenience.
@@ -778,6 +784,12 @@ class Arm_input_section : public Output_relaxed_input_section
   set_stub_table(Stub_table<big_endian>* stub_table)
   { this->stub_table_ = stub_table; }
 
+  // Downcast a base pointer to an Arm_input_section pointer.  This is
+  // not type-safe but we only use Arm_input_section not the base class.
+  static Arm_input_section<big_endian>*
+  as_arm_input_section(Output_relaxed_input_section* poris)
+  { return static_cast<Arm_input_section<big_endian>*>(poris); }
+
  protected:
   // Write data to output file.
   void
@@ -832,6 +844,44 @@ class Arm_input_section : public Output_relaxed_input_section
   uint64_t original_size_;
   // Stub table.
   Stub_table<big_endian>* stub_table_;
+};
+
+// Arm output section class.  This is defined mainly to add a number of
+// stub generation methods.
+
+template<bool big_endian>
+class Arm_output_section : public Output_section
+{
+ public:
+  Arm_output_section(const char* name, elfcpp::Elf_Word type,
+		     elfcpp::Elf_Xword flags)
+    : Output_section(name, type, flags)
+  { }
+
+  ~Arm_output_section()
+  { }
+  
+  // Group input sections for stub generation.
+  void
+  group_sections(section_size_type, bool, Target_arm<big_endian>*);
+
+  // Downcast a base pointer to an Arm_output_section pointer.  This is
+  // not type-safe but we only use Arm_output_section not the base class.
+  static Arm_output_section<big_endian>*
+  as_arm_output_section(Output_section* os)
+  { return static_cast<Arm_output_section<big_endian>*>(os); }
+
+ private:
+  // For convenience.
+  typedef Output_section::Input_section Input_section;
+  typedef Output_section::Input_section_list Input_section_list;
+
+  // Create a stub group.
+  void create_stub_group(Input_section_list::const_iterator,
+			 Input_section_list::const_iterator,
+			 Input_section_list::const_iterator,
+			 Target_arm<big_endian>*,
+			 std::vector<Output_relaxed_input_section*>*);
 };
 
 // Utilities for manipulating integers of up to 32-bits
@@ -2647,6 +2697,215 @@ Arm_input_section<big_endian>::do_reset_address_and_file_offset()
     }
 
   this->set_current_data_size(off);
+}
+
+// Arm_output_section methods.
+
+// Create a stub group for input sections from BEGIN to END.  OWNER
+// points to the input section to be the owner a new stub table.
+
+template<bool big_endian>
+void
+Arm_output_section<big_endian>::create_stub_group(
+  Input_section_list::const_iterator begin,
+  Input_section_list::const_iterator end,
+  Input_section_list::const_iterator owner,
+  Target_arm<big_endian>* target,
+  std::vector<Output_relaxed_input_section*>* new_relaxed_sections)
+{
+  // Currently we convert ordinary input sections into relaxed sections only
+  // at this point but we may want to support creating relaxed input section
+  // very early.  So we check here to see if owner is already a relaxed
+  // section.
+  
+  Arm_input_section<big_endian>* arm_input_section;
+  if (owner->is_relaxed_input_section())
+    {
+      arm_input_section =
+	Arm_input_section<big_endian>::as_arm_input_section(
+	  owner->relaxed_input_section());
+    }
+  else
+    {
+      gold_assert(owner->is_input_section());
+      // Create a new relaxed input section.
+      arm_input_section =
+	target->new_arm_input_section(owner->relobj(), owner->shndx());
+      new_relaxed_sections->push_back(arm_input_section);
+    }
+
+  // Create a stub table.
+  Stub_table<big_endian>* stub_table =
+    target->new_stub_table(arm_input_section);
+
+  arm_input_section->set_stub_table(stub_table);
+  
+  Input_section_list::const_iterator p = begin;
+  Input_section_list::const_iterator prev_p;
+
+  // Look for input sections or relaxed input sections in [begin ... end].
+  do
+    {
+      if (p->is_input_section() || p->is_relaxed_input_section())
+	{
+	  // The stub table information for input sections live
+	  // in their objects.
+	  Arm_relobj<big_endian>* arm_relobj =
+	    Arm_relobj<big_endian>::as_arm_relobj(p->relobj());
+	  arm_relobj->set_stub_table(p->shndx(), stub_table);
+	}
+      prev_p = p++;
+    }
+  while (prev_p != end);
+}
+
+// Group input sections for stub generation.  GROUP_SIZE is roughly the limit
+// of stub groups.  We grow a stub group by adding input section until the
+// size is just below GROUP_SIZE.  The last input section will be converted
+// into a stub table.  If STUB_ALWAYS_AFTER_BRANCH is false, we also add
+// input section after the stub table, effectively double the group size.
+// 
+// This is similar to the group_sections() function in elf32-arm.c but is
+// implemented differently.
+
+template<bool big_endian>
+void
+Arm_output_section<big_endian>::group_sections(
+    section_size_type group_size,
+    bool stubs_always_after_branch,
+    Target_arm<big_endian>* target)
+{
+  // We only care about sections containing code.
+  if ((this->flags() & elfcpp::SHF_EXECINSTR) == 0)
+    return;
+
+  // States for grouping.
+  typedef enum
+  {
+    // No group is being built.
+    NO_GROUP,
+    // A group is being built but the stub table is not found yet.
+    // We keep group a stub group until the size is just under GROUP_SIZE.
+    // The last input section in the group will be used as the stub table.
+    FINDING_STUB_SECTION,
+    // A group is being built and we have already found a stub table.
+    // We enter this state to grow a stub group by adding input section
+    // after the stub table.  This effectively doubles the group size.
+    HAS_STUB_SECTION
+  } State;
+
+  // Any newly created relaxed sections are stored here.
+  std::vector<Output_relaxed_input_section*> new_relaxed_sections;
+
+  State state = NO_GROUP;
+  section_size_type off = 0;
+  section_size_type group_begin_offset = 0;
+  section_size_type group_end_offset = 0;
+  section_size_type stub_table_end_offset = 0;
+  Input_section_list::const_iterator group_begin =
+    this->input_sections().end();
+  Input_section_list::const_iterator stub_table =
+    this->input_sections().end();
+  Input_section_list::const_iterator group_end = this->input_sections().end();
+  for (Input_section_list::const_iterator p = this->input_sections().begin();
+       p != this->input_sections().end();
+       ++p)
+    {
+      section_size_type section_begin_offset =
+	align_address(off, p->addralign());
+      section_size_type section_end_offset =
+	section_begin_offset + p->data_size(); 
+      
+      // Check to see if we should group the previously seens sections.
+      switch(state)
+	{
+	case NO_GROUP:
+	  break;
+
+	case FINDING_STUB_SECTION:
+	  // Adding this section makes the group larger than GROUP_SIZE.
+	  if (section_end_offset - group_begin_offset >= group_size)
+	    {
+	      if (stubs_always_after_branch)
+		{	
+		  gold_assert(group_end != this->input_sections().end());
+		  this->create_stub_group(group_begin, group_end, group_end,
+					  target, &new_relaxed_sections);
+		  state = NO_GROUP;
+		}
+	      else
+		{
+		  // But wait, there's more!  Input sections up to
+		  // stub_group_size bytes after the stub table can be
+		  // handled by it too.
+		  state = HAS_STUB_SECTION;
+		  stub_table = group_end;
+		  stub_table_end_offset = group_end_offset;
+		}
+	    }
+	    break;
+
+	case HAS_STUB_SECTION:
+	  // Adding this section makes the post stub-section group larger
+	  // than GROUP_SIZE.
+	  if (section_end_offset - stub_table_end_offset >= group_size)
+	   {
+	     gold_assert(group_end != this->input_sections().end());
+	     this->create_stub_group(group_begin, group_end, stub_table,
+				     target, &new_relaxed_sections);
+	     state = NO_GROUP;
+	   }
+	   break;
+
+	  default:
+	    gold_unreachable();
+	}	
+
+      // If we see an input section and currently there is no group, start
+      // a new one.  Skip any empty sections.
+      if ((p->is_input_section() || p->is_relaxed_input_section())
+	  && (p->relobj()->section_size(p->shndx()) != 0))
+	{
+	  if (state == NO_GROUP)
+	    {
+	      state = FINDING_STUB_SECTION;
+	      group_begin = p;
+	      group_begin_offset = section_begin_offset;
+	    }
+
+	  // Keep track of the last input section seen.
+	  group_end = p;
+	  group_end_offset = section_end_offset;
+	}
+
+      off = section_end_offset;
+    }
+
+  // Create a stub group for any ungrouped sections.
+  if (state == FINDING_STUB_SECTION || state == HAS_STUB_SECTION)
+    {
+      gold_assert(group_end != this->input_sections().end());
+      this->create_stub_group(group_begin, group_end,
+			      (state == FINDING_STUB_SECTION
+			       ? group_end
+			       : stub_table),
+			       target, &new_relaxed_sections);
+    }
+
+  // Convert input section into relaxed input section in a batch.
+  if (!new_relaxed_sections.empty())
+    this->convert_input_sections_to_relaxed_sections(new_relaxed_sections);
+
+  // Update the section offsets
+  for (size_t i = 0; i < new_relaxed_sections.size(); ++i)
+    {
+      Arm_relobj<big_endian>* arm_relobj =
+	Arm_relobj<big_endian>::as_arm_relobj(
+	  new_relaxed_sections[i]->relobj());
+      unsigned int shndx = new_relaxed_sections[i]->shndx();
+      // Tell Arm_relobj that this input section is converted.
+      arm_relobj->convert_input_section_to_relaxed_section(shndx);
+    }
 }
 
 // A class to handle the PLT data.
