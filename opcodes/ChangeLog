@@ -1,3 +1,22 @@
+2009-10-23  Doug Evans  <dje@sebabeach.org>
+
+	* cgen-ops.h: Delete, moved to ../include/cgen/basic-ops.h.
+	* cgen-types.h: Delete, moved to ../include/cgen/basic-modes.h.
+	* cgen-bitset.c: Update.
+	* fr30-desc.h: Regenerate.
+	* frv-desc.h: Regenerate.
+	* ip2k-desc.h: Regenerate.
+	* iq2000-desc.h: Regenerate.
+	* lm32-desc.h: Regenerate.
+	* m32c-desc.h: Regenerate.
+	* m32c-opc.h: Regenerate.
+	* m32r-desc.h: Regenerate.
+	* mep-desc.h: Regenerate.
+	* mt-desc.h: Regenerate.
+	* openrisc-desc.h: Regenerate.
+	* xc16x-desc.h: Regenerate.
+	* xstormy16-desc.h: Regenerate.
+
 2009-10-22  DJ Delorie  <dj@redhat.com>
 
 	* rx-decode.opc (decode_opcode): Fix flags for MUL, SUNTIL, and SWHILE.

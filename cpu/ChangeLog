@@ -1,3 +1,8 @@
+2009-10-23  Doug Evans  <dje@sebabeach.org>
+
+	* m32c.opc (opc.h): cgen-types.h -> cgen/basic-modes.h.
+	cgen-ops.h -> cgen/basic-ops.h.
+
 2009-09-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* m32r.cpu (stb-plus): Typo fix.

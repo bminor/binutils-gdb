@@ -25,8 +25,6 @@ This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 #ifndef XSTORMY16_CPU_H
 #define XSTORMY16_CPU_H
 
-#include "opcode/cgen-bitset.h"
-
 #define CGEN_ARCH xstormy16
 
 /* Given symbol S, return xstormy16_cgen_<S>.  */

@@ -25,8 +25,6 @@ This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 #ifndef M32R_CPU_H
 #define M32R_CPU_H
 
-#include "opcode/cgen-bitset.h"
-
 #define CGEN_ARCH m32r
 
 /* Given symbol S, return m32r_cgen_<S>.  */

@@ -1,25 +1,26 @@
-/* Semantics ops support for CGEN-based opcode libraries.
-   Copyright (C) 2005, 2007 Free Software Foundation, Inc.
+/* Basic semantics ops support for CGEN.
+   Copyright 2005, 2007, 2009 Free Software Foundation, Inc.
    Contributed by Red Hat.
 
    This file is part of the GNU opcodes library.
 
-   This program is free software; you can redistribute it and/or modify
+   This library is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3, or (at your option)
    any later version.
 
-   It is distributed in the hope that it will be useful, but WITHOUT
-   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
-   License for more details.
+   It is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License along
-   with this program; if not, write to the Free Software Foundation, Inc.,
-   59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this library; see the file COPYING3.  If not, write to the
+   Free Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
+   02110-1301, USA.  */
 
-#ifndef CGEN_SEM_OPS_H
-#define CGEN_SEM_OPS_H
+#ifndef CGEN_BASIC_OPS_H
+#define CGEN_BASIC_OPS_H
 
 #include <assert.h>
 
@@ -29,8 +30,6 @@
 #else
 #define SEMOPS_INLINE
 #endif
-
-/* TODO: Lazy encoding/decoding of fp values.  */
 
 /* These don't really have a mode.  */
 #define ANDIF(x, y) ((x) && (y))
@@ -298,37 +297,11 @@ extern SI TRUNCDISI (DI);
 
 QI SUBWORDSIQI (SI, int);
 HI SUBWORDSIHI (SI, int);
-SI SUBWORDSFSI (SF);
-SF SUBWORDSISF (SI);
-DI SUBWORDDFDI (DF);
-DF SUBWORDDIDF (DI);
 QI SUBWORDDIQI (DI, int);
 HI SUBWORDDIHI (DI, int);
 SI SUBWORDDISI (DI, int);
-SI SUBWORDDFSI (DF, int);
-SI SUBWORDXFSI (XF, int);
-SI SUBWORDTFSI (TF, int);
-
-UQI SUBWORDSIUQI (SI, int);
-UQI SUBWORDDIUQI (DI, int);
 
 #ifdef SEMOPS_DEFINE_INLINE
-
-SEMOPS_INLINE SF
-SUBWORDSISF (SI in)
-{
-  union { SI in; SF out; } x;
-  x.in = in;
-  return x.out;
-}
-
-SEMOPS_INLINE DF
-SUBWORDDIDF (DI in)
-{
-  union { DI in; DF out; } x;
-  x.in = in;
-  return x.out;
-}
 
 SEMOPS_INLINE QI
 SUBWORDSIQI (SI in, int byte)
@@ -337,11 +310,13 @@ SUBWORDSIQI (SI in, int byte)
   return (UQI) (in >> (8 * (3 - byte))) & 0xFF;
 }
 
-SEMOPS_INLINE UQI
-SUBWORDSIUQI (SI in, int byte)
+SEMOPS_INLINE HI
+SUBWORDSIHI (SI in, int word)
 {
-  assert (byte >= 0 && byte <= 3);
-  return (UQI) (in >> (8 * (3 - byte))) & 0xFF;
+  if (word == 0)
+    return (USI) in >> 16;
+  else
+    return in;
 }
 
 SEMOPS_INLINE QI
@@ -358,38 +333,6 @@ SUBWORDDIHI (DI in, int word)
   return (UHI) (in >> (16 * (3 - word))) & 0xFFFF;
 }
 
-SEMOPS_INLINE HI
-SUBWORDSIHI (SI in, int word)
-{
-  if (word == 0)
-    return (USI) in >> 16;
-  else
-    return in;
-}
-
-SEMOPS_INLINE SI
-SUBWORDSFSI (SF in)
-{
-  union { SF in; SI out; } x;
-  x.in = in;
-  return x.out;
-}
-
-SEMOPS_INLINE DI
-SUBWORDDFDI (DF in)
-{
-  union { DF in; DI out; } x;
-  x.in = in;
-  return x.out;
-}
-
-SEMOPS_INLINE UQI
-SUBWORDDIUQI (DI in, int byte)
-{
-  assert (byte >= 0 && byte <= 7);
-  return (UQI) (in >> (8 * (7 - byte)));
-}
-
 SEMOPS_INLINE SI
 SUBWORDDISI (DI in, int word)
 {
@@ -399,34 +342,6 @@ SUBWORDDISI (DI in, int word)
     return in;
 }
 
-SEMOPS_INLINE SI
-SUBWORDDFSI (DF in, int word)
-{
-  /* Note: typedef UDI DF; */
-  if (word == 0)
-    return (UDI) in >> 32;
-  else
-    return in;
-}
-
-SEMOPS_INLINE SI
-SUBWORDXFSI (XF in, int word)
-{
-  /* Note: typedef struct { SI parts[3]; } XF; */
-  union { XF in; SI out[3]; } x;
-  x.in = in;
-  return x.out[word];
-}
-
-SEMOPS_INLINE SI
-SUBWORDTFSI (TF in, int word)
-{
-  /* Note: typedef struct { SI parts[4]; } TF; */
-  union { TF in; SI out[4]; } x;
-  x.in = in;
-  return x.out[word];
-}
-
 #endif /* SUBWORD,JOIN */
 
-#endif /* CGEN_SEM_OPS_H */
+#endif /* CGEN_BASIC_OPS_H */

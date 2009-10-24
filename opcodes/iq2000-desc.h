@@ -25,8 +25,6 @@ This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 #ifndef IQ2000_CPU_H
 #define IQ2000_CPU_H
 
-#include "opcode/cgen-bitset.h"
-
 #define CGEN_ARCH iq2000
 
 /* Given symbol S, return iq2000_cgen_<S>.  */

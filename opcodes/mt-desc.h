@@ -25,8 +25,6 @@ This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 #ifndef MT_CPU_H
 #define MT_CPU_H
 
-#include "opcode/cgen-bitset.h"
-
 #define CGEN_ARCH mt
 
 /* Given symbol S, return mt_cgen_<S>.  */

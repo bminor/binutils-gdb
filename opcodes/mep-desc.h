@@ -25,8 +25,6 @@ This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 #ifndef MEP_CPU_H
 #define MEP_CPU_H
 
-#include "opcode/cgen-bitset.h"
-
 #define CGEN_ARCH mep
 
 /* Given symbol S, return mep_cgen_<S>.  */

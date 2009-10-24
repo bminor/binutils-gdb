@@ -25,8 +25,6 @@ This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 #ifndef IP2K_CPU_H
 #define IP2K_CPU_H
 
-#include "opcode/cgen-bitset.h"
-
 #define CGEN_ARCH ip2k
 
 /* Given symbol S, return ip2k_cgen_<S>.  */

@@ -25,8 +25,6 @@ This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 #ifndef FR30_CPU_H
 #define FR30_CPU_H
 
-#include "opcode/cgen-bitset.h"
-
 #define CGEN_ARCH fr30
 
 /* Given symbol S, return fr30_cgen_<S>.  */

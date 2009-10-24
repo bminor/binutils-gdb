@@ -25,8 +25,6 @@ This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 #ifndef XC16X_CPU_H
 #define XC16X_CPU_H
 
-#include "opcode/cgen-bitset.h"
-
 #define CGEN_ARCH xc16x
 
 /* Given symbol S, return xc16x_cgen_<S>.  */

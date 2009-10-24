@@ -25,8 +25,6 @@ This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 #ifndef OPENRISC_CPU_H
 #define OPENRISC_CPU_H
 
-#include "opcode/cgen-bitset.h"
-
 #define CGEN_ARCH openrisc
 
 /* Given symbol S, return openrisc_cgen_<S>.  */
