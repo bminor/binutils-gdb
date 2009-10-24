@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2007 Free Software Foundation, Inc.
+Copyright 1996-2009 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -346,44 +346,44 @@ union sem_fields {
     INT f_s6;
     UINT f_operand2;
     unsigned char in_Rd;
-    unsigned char out_h_gr_SI_index_of__DFLT_Rd;
+    unsigned char out_h_gr_SI_index_of__INT_Rd;
   } sfmt_andq;
   struct { /*  */
     INT f_indir_pc__dword;
     UINT f_operand2;
     unsigned char in_Rd;
-    unsigned char out_h_gr_SI_index_of__DFLT_Rd;
+    unsigned char out_h_gr_SI_index_of__INT_Rd;
   } sfmt_addcdr;
   struct { /*  */
     INT f_indir_pc__word;
     UINT f_operand2;
     unsigned char in_Rd;
-    unsigned char out_h_gr_SI_index_of__DFLT_Rd;
+    unsigned char out_h_gr_SI_index_of__INT_Rd;
   } sfmt_addcwr;
   struct { /*  */
     INT f_indir_pc__byte;
     UINT f_operand2;
     unsigned char in_Rd;
-    unsigned char out_h_gr_SI_index_of__DFLT_Rd;
+    unsigned char out_h_gr_SI_index_of__INT_Rd;
   } sfmt_addcbr;
   struct { /*  */
     UINT f_operand1;
     UINT f_operand2;
     unsigned char in_Ps;
-    unsigned char out_h_gr_SI_index_of__DFLT_Rs;
+    unsigned char out_h_gr_SI_index_of__INT_Rs;
   } sfmt_move_spr_rv10;
   struct { /*  */
     UINT f_operand2;
     UINT f_u6;
     unsigned char in_Rd;
-    unsigned char out_h_gr_SI_index_of__DFLT_Rd;
+    unsigned char out_h_gr_SI_index_of__INT_Rd;
   } sfmt_addq;
   struct { /*  */
     UINT f_operand1;
     UINT f_operand2;
     unsigned char in_Rd;
     unsigned char in_Rs;
-    unsigned char out_h_gr_SI_index_of__DFLT_Rd;
+    unsigned char out_h_gr_SI_index_of__INT_Rd;
   } sfmt_add_b_r;
   struct { /*  */
     UINT f_operand1;
@@ -425,7 +425,7 @@ union sem_fields {
     unsigned char in_Rd;
     unsigned char in_Rs;
     unsigned char out_Rs;
-    unsigned char out_h_gr_SI_if__SI_andif__DFLT_prefix_set_not__DFLT_inc_index_of__DFLT_Rs_index_of__DFLT_Rd;
+    unsigned char out_h_gr_SI_if__SI_andif__DFLT_prefix_set_not__UINT_inc_index_of__INT_Rs_index_of__INT_Rd;
   } sfmt_add_m_b_m;
   struct { /*  */
     UINT f_memmode;

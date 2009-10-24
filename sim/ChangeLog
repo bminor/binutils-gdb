@@ -1,3 +1,24 @@
+2009-10-23  Doug Evans  <dje@sebabeach.org>
+
+	* cris/arch.c: Regenerate.
+	* cris/arch.h: Regenerate.
+	* cris/cpuall.h: Regenerate.
+	* cris/cpuv10.c: Regenerate.
+	* cris/cpuv10.h: Regenerate.
+	* cris/cpuv32.c: Regenerate.
+	* cris/cpuv32.h: Regenerate.
+	* cris/cris-desc.c: Regenerate.
+	* cris/cris-desc.h: Regenerate.
+	* cris/cris-opc.h: Regenerate.
+	* cris/decodev10.c: Regenerate.
+	* cris/decodev10.h: Regenerate.
+	* cris/decodev32.c: Regenerate.
+	* cris/decodev32.h: Regenerate.
+	* cris/modelv10.c: Regenerate.
+	* cris/modelv32.c: Regenerate.
+	* cris/semcrisv10f-switch.c: Regenerate.
+	* cris/semcrisv32f-switch.c: Regenerate.
+
 2009-10-22  Tristan Gingold  <gingold@adacore.com>
 
 	* avr/interp.c (sim_stop): Return 1.
