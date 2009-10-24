@@ -1,3 +1,7 @@
+2009-10-24  Doug Evans  <dje@sebabeach.org>
+
+	* sh-desc.h: Regenerate.
+
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* config.in: Regenerate.
