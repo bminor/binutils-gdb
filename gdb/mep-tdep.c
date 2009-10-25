@@ -46,7 +46,7 @@
 #include "elf-bfd.h"
 #include "elf/mep.h"
 #include "prologue-value.h"
-#include "opcode/cgen-bitset.h"
+#include "cgen/bitset.h"
 #include "infcall.h"
 
 #include "gdb_assert.h"
