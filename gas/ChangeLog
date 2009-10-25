@@ -1,3 +1,11 @@
+2009-10-25  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* doc/as.texinfo (Overview): Move -mfix7000/-mno-fix7000 to
+	match the order elsewhere.  Add -mfix-vr4120/-mno-fix-vr4120 and
+	-mfix-vr4130/-mno-fix-vr4130.
+	* doc/c-mips.texi (MIPS Opts): Correct -no-mfix-vr4120 to
+	-mno-fix-vr4120 and -no-mfix-vr4130 to -mno-fix-vr4130.
+
 2009-10-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/10775

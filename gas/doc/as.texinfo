@@ -379,7 +379,6 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mips64}] [@b{-mips64r2}]
    [@b{-construct-floats}] [@b{-no-construct-floats}]
    [@b{-trap}] [@b{-no-break}] [@b{-break}] [@b{-no-trap}]
-   [@b{-mfix7000}] [@b{-mno-fix7000}]
    [@b{-mips16}] [@b{-no-mips16}]
    [@b{-msmartmips}] [@b{-mno-smartmips}]
    [@b{-mips3d}] [@b{-no-mips3d}]
@@ -387,6 +386,9 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mdsp}] [@b{-mno-dsp}]
    [@b{-mdspr2}] [@b{-mno-dspr2}]
    [@b{-mmt}] [@b{-mno-mt}]
+   [@b{-mfix7000}] [@b{-mno-fix7000}]
+   [@b{-mfix-vr4120}] [@b{-mno-fix-vr4120}]
+   [@b{-mfix-vr4130}] [@b{-mno-fix-vr4130}]
    [@b{-mdebug}] [@b{-no-mdebug}]
    [@b{-mpdr}] [@b{-mno-pdr}]
 @end ifset

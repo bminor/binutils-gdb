@@ -173,13 +173,13 @@ Cause nops to be inserted if the read of the destination register
 of an mfhi or mflo instruction occurs in the following two instructions.
 
 @item -mfix-vr4120
-@itemx -no-mfix-vr4120
+@itemx -mno-fix-vr4120
 Insert nops to work around certain VR4120 errata.  This option is
 intended to be used on GCC-generated code: it is not designed to catch
 all problems in hand-written assembler code.
 
 @item -mfix-vr4130
-@itemx -no-mfix-vr4130
+@itemx -mno-fix-vr4130
 Insert nops to work around the VR4130 @samp{mflo}/@samp{mfhi} errata.
 
 @item -mfix-24k
