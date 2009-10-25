@@ -799,7 +799,7 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
 
 template<int size, bool big_endian>
 void
-Sized_relobj<size, big_endian>::relocate_sections(
+Sized_relobj<size, big_endian>::do_relocate_sections(
     const General_options& options,
     const Symbol_table* symtab,
     const Layout* layout,
@@ -1534,6 +1534,50 @@ Sized_relobj<64, true>::do_relocate(const General_options& options,
 				    const Symbol_table* symtab,
 				    const Layout* layout,
 				    Output_file* of);
+#endif
+
+#ifdef HAVE_TARGET_32_LITTLE
+template
+void
+Sized_relobj<32, false>::do_relocate_sections(
+    const General_options& options,
+    const Symbol_table* symtab,
+    const Layout* layout,
+    const unsigned char* pshdrs,
+    Views* pviews);
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+void
+Sized_relobj<32, true>::do_relocate_sections(
+    const General_options& options,
+    const Symbol_table* symtab,
+    const Layout* layout,
+    const unsigned char* pshdrs,
+    Views* pviews);
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+void
+Sized_relobj<64, false>::do_relocate_sections(
+    const General_options& options,
+    const Symbol_table* symtab,
+    const Layout* layout,
+    const unsigned char* pshdrs,
+    Views* pviews);
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+void
+Sized_relobj<64, true>::do_relocate_sections(
+    const General_options& options,
+    const Symbol_table* symtab,
+    const Layout* layout,
+    const unsigned char* pshdrs,
+    Views* pviews);
 #endif
 
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)

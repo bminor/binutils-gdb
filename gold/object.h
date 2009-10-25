@@ -1648,6 +1648,25 @@ class Sized_relobj : public Relobj
   local_values()
   { return &this->local_values_; }
 
+  // Views and sizes when relocating.
+  struct View_size
+  {
+    unsigned char* view;
+    typename elfcpp::Elf_types<size>::Elf_Addr address;
+    off_t offset;
+    section_size_type view_size;
+    bool is_input_output_view;
+    bool is_postprocessing_view;
+  };
+
+  typedef std::vector<View_size> Views;
+
+  // This may be overriden by a child class.
+  virtual void
+  do_relocate_sections(const General_options& options,
+		       const Symbol_table* symtab, const Layout* layout,
+		       const unsigned char* pshdrs, Views* pviews);
+
  private:
   // For convenience.
   typedef Sized_relobj<size, big_endian> This;
@@ -1702,19 +1721,6 @@ class Sized_relobj : public Relobj
                  typename This::Shdr& shdr, unsigned int reloc_shndx,
                  unsigned int reloc_type);
 
-  // Views and sizes when relocating.
-  struct View_size
-  {
-    unsigned char* view;
-    typename elfcpp::Elf_types<size>::Elf_Addr address;
-    off_t offset;
-    section_size_type view_size;
-    bool is_input_output_view;
-    bool is_postprocessing_view;
-  };
-
-  typedef std::vector<View_size> Views;
-
   // Write section data to the output file.  Record the views and
   // sizes in VIEWS for use when relocating.
   void
@@ -1722,8 +1728,10 @@ class Sized_relobj : public Relobj
 
   // Relocate the sections in the output file.
   void
-  relocate_sections(const General_options& options, const Symbol_table*,
-		    const Layout*, const unsigned char* pshdrs, Views*);
+  relocate_sections(const General_options& options, const Symbol_table* symtab,
+		    const Layout* layout, const unsigned char* pshdrs,
+		    Views* pviews)
+  { this->do_relocate_sections(options, symtab, layout, pshdrs, pviews); }
 
   // Scan the input relocations for --emit-relocs.
   void

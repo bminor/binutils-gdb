@@ -1,3 +1,13 @@
+2009-10-25  Doug Kwan  <dougkwan@google.com>
+
+	* object.h (Sized_relobj::View_size, Sized_relobj::Views): Change
+	from private to protected to allow access by child class.
+	(Sized_relobj::do_relocate_sections): New method declaration.
+	(Sized_relobj::relocate_sections): Virtualize.
+	* reloc.cc (Sized_relobj::do_relocate_sections): Rename from 
+	Sized_relobj::relocate_sections.  Instantiate template explicitly
+	for different target sizes and endianity.
+
 2009-10-24  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_output_section, Arm_relobj): Forward class declarations.
