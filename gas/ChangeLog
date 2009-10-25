@@ -1,3 +1,14 @@
+2009-10-25  Arnold Metselaar  <arnold.metselaar@planet.nl>
+
+	* config/tc-z80.c (z80_start_line_hook): Fix parsing of 'equ' or
+	'defl' in cases where the space between the keyword and the
+	expression has been scrubbed away. 
+	Do not check whether a symbol is redefined with 'equ' here;
+	the function equals takes an argument indicating whether
+	redefinitions are allowed. 
+	Only call LISTING_NEWLINE if needed, and then after the call to
+	bump_line_counters. 
+	
 2009-10-25  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* doc/as.texinfo (Overview): Move -mfix7000/-mno-fix7000 to

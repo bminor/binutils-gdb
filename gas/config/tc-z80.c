@@ -253,10 +253,8 @@ z80_start_line_hook (void)
     {
       char c, *rest, *line_start;
       int len;
-      symbolS * symbolP;
 
       line_start = input_line_pointer;
-      LISTING_NEWLINE ();
       if (ignore_input ())
 	return 0;
 
@@ -275,20 +273,17 @@ z80_start_line_hook (void)
 	len = 4;
       else
 	len = 0;
-      if (len && (rest[len] == ' ' || rest[len] == '\t'))
+      if (len && (!ISALPHA(rest[len]) ) )
 	{
 	  /* Handle assignment here.  */
-	  input_line_pointer = rest + len;
 	  if (line_start[-1] == '\n')
-	    bump_line_counters ();
-	  /* Most Z80 assemblers require the first definition of a
-             label to use "EQU" and redefinitions to have "DEFL".  */
-	  if (len == 3 && (symbolP = symbol_find (line_start)) != NULL) 
 	    {
-	      if (S_IS_DEFINED (symbolP) || symbol_equated_p (symbolP))
-		as_bad (_("symbol `%s' is already defined"), line_start);
+	      bump_line_counters ();
+	      LISTING_NEWLINE ();
 	    }
-	  equals (line_start, 1);
+	  input_line_pointer = rest + len - 1;
+	  /* Allow redefining with "DEFL" (len == 4), but not with "EQU".  */
+	  equals (line_start, len == 4);
 	  return 1;
 	}
       else
