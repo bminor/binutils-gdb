@@ -1,3 +1,7 @@
+2009-10-25  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* elf32-vax.c (elf_vax_relocate_section): Fix a typo.
+
 2009-10-23  Kai Tietz  <kai.tietz@onevision.com>
 
 	* coff-x86_64.c (coff_amd64_rtype_to_howto): Subtract offset

@@ -1593,7 +1593,7 @@ elf_vax_relocate_section (bfd *output_bfd,
 	     The first two are reserved.  */
 	  got_offset = (plt_index + 3) * 4;
 
-	  /* We want the relocate to point into the .got.plt instead
+	  /* We want the relocation to point into the .got.plt instead
 	     of the plt itself.  */
 	  relocation = (sgotplt->output_section->vma
 			+ sgotplt->output_offset
