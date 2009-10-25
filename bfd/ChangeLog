@@ -1,5 +1,9 @@
 2009-10-25  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* elf32-vax.c (elf_vax_relocate_section): Correct assertion.
+
+2009-10-25  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* elf32-vax.c (elf_vax_plt_entry): Fix formatting.
 
 2009-10-25  Maciej W. Rozycki  <macro@linux-mips.org>

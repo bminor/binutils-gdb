@@ -1583,7 +1583,7 @@ elf_vax_relocate_section (bfd *output_bfd,
 	  if (sgotplt == NULL)
 	    {
 	      sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
-	      BFD_ASSERT (splt != NULL);
+	      BFD_ASSERT (sgotplt != NULL);
 	    }
 
 	  plt_index = h->plt.offset / PLT_ENTRY_SIZE - 1;
