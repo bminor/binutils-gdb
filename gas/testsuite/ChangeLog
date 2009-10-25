@@ -1,3 +1,10 @@
+2009-10-25  Arnold Metselaar  <arnold.metselaar@planet.nl>
+
+	* gas/z80/equ.d, gas/z80/equ.s: Added test of parsing equ directives.
+	* gas/z80/z80.exp: Run it.
+
+	* gas/z80/redef.d: Expect little endian output only.	
+
 2009-10-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/10775
