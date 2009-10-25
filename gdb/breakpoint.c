@@ -112,8 +112,6 @@ struct breakpoint *set_raw_breakpoint (struct gdbarch *gdbarch,
 					      struct symtab_and_line,
 					      enum bptype);
 
-static void check_duplicates (struct breakpoint *);
-
 static void breakpoint_adjustment_warning (CORE_ADDR, CORE_ADDR, int, int);
 
 static CORE_ADDR adjust_breakpoint_address (struct gdbarch *gdbarch,
@@ -342,14 +340,14 @@ static int overlay_events_enabled;
 	     B ? (TMP=B->next, 1): 0;	\
 	     B = TMP)
 
-/* Similar iterators for the low-level breakpoints.  */
+/* Similar iterator for the low-level breakpoints.  SAFE variant is not
+   provided so update_global_location_list must not be called while executing
+   the block of ALL_BP_LOCATIONS.  */
 
-#define ALL_BP_LOCATIONS(B)  for (B = bp_location_chain; B; B = B->global_next)
-
-#define ALL_BP_LOCATIONS_SAFE(B,TMP)	\
-	for (B = bp_location_chain;	\
-	     B ? (TMP=B->global_next, 1): 0;	\
-	     B = TMP)
+#define ALL_BP_LOCATIONS(B,BP_TMP)					\
+	for (BP_TMP = bp_location;					\
+	     BP_TMP < bp_location + bp_location_count && (B = *BP_TMP);	\
+	     BP_TMP++)
 
 /* Iterator for tracepoints only.  */
 
@@ -361,10 +359,31 @@ static int overlay_events_enabled;
 
 struct breakpoint *breakpoint_chain;
 
-struct bp_location *bp_location_chain;
+/* Array is sorted by bp_location_compare - primarily by the ADDRESS.  */
+
+static struct bp_location **bp_location;
+
+/* Number of elements of BP_LOCATION.  */
+
+static unsigned bp_location_count;
+
+/* Maximum alignment offset between bp_target_info.PLACED_ADDRESS and ADDRESS
+   for the current elements of BP_LOCATION which get a valid result from
+   bp_location_has_shadow.  You can use it for roughly limiting the subrange of
+   BP_LOCATION to scan for shadow bytes for an address you need to read.  */
+
+static CORE_ADDR bp_location_placed_address_before_address_max;
+
+/* Maximum offset plus alignment between
+   bp_target_info.PLACED_ADDRESS + bp_target_info.SHADOW_LEN and ADDRESS for
+   the current elements of BP_LOCATION which get a valid result from
+   bp_location_has_shadow.  You can use it for roughly limiting the subrange of
+   BP_LOCATION to scan for shadow bytes for an address you need to read.  */
+
+static CORE_ADDR bp_location_shadow_len_after_address_max;
 
 /* The locations that no longer correspond to any breakpoint,
-   unlinked from bp_location_chain, but for which a hit
+   unlinked from bp_location array, but for which a hit
    may still be reported by a target.  */
 VEC(bp_location_p) *moribund_locations = NULL;
 
@@ -742,27 +761,90 @@ commands_from_control_command (char *arg, struct command_line *cmd)
       }
   error (_("No breakpoint number %d."), bnum);
 }
-
+
+/* Return non-zero if BL->TARGET_INFO contains valid information.  */
+
+static int
+bp_location_has_shadow (struct bp_location *bl)
+{
+  if (bl->loc_type != bp_loc_software_breakpoint)
+    return 0;
+  if (!bl->inserted)
+    return 0;
+  if (bl->target_info.shadow_len == 0)
+    /* bp isn't valid, or doesn't shadow memory.  */
+    return 0;
+  return 1;
+}
+
 /* Update BUF, which is LEN bytes read from the target address MEMADDR,
-   by replacing any memory breakpoints with their shadowed contents.  */
+   by replacing any memory breakpoints with their shadowed contents.
+
+   The range of shadowed area by each bp_location is:
+     b->address - bp_location_placed_address_before_address_max
+     up to b->address + bp_location_shadow_len_after_address_max
+   The range we were requested to resolve shadows for is:
+     memaddr ... memaddr + len
+   Thus the safe cutoff boundaries for performance optimization are
+     memaddr + len <= b->address - bp_location_placed_address_before_address_max
+   and:
+     b->address + bp_location_shadow_len_after_address_max <= memaddr  */
 
 void
 breakpoint_restore_shadows (gdb_byte *buf, ULONGEST memaddr, LONGEST len)
 {
-  struct bp_location *b;
-  CORE_ADDR bp_addr = 0;
-  int bp_size = 0;
-  int bptoffset = 0;
+  /* Left boundary, right boundary and median element of our binary search.  */
+  unsigned bc_l, bc_r, bc;
 
-  ALL_BP_LOCATIONS (b)
+  /* Find BC_L which is a leftmost element which may affect BUF content.  It is
+     safe to report lower value but a failure to report higher one.  */
+
+  bc_l = 0;
+  bc_r = bp_location_count;
+  while (bc_l + 1 < bc_r)
+    {
+      struct bp_location *b;
+
+      bc = (bc_l + bc_r) / 2;
+      b = bp_location[bc];
+
+      /* Check first B->ADDRESS will not overflow due to the added constant.
+	 Then advance the left boundary only if we are sure the BC element can
+	 in no way affect the BUF content (MEMADDR to MEMADDR + LEN range).
+
+	 Use the BP_LOCATION_SHADOW_LEN_AFTER_ADDRESS_MAX safety offset so that
+	 we cannot miss a breakpoint with its shadow range tail still reaching
+	 MEMADDR.  */
+
+      if (b->address + bp_location_shadow_len_after_address_max >= b->address
+	  && b->address + bp_location_shadow_len_after_address_max <= memaddr)
+	bc_l = bc;
+      else
+	bc_r = bc;
+    }
+
+  /* Now do full processing of the found relevant range of elements.  */
+
+  for (bc = bc_l; bc < bp_location_count; bc++)
   {
+    struct bp_location *b = bp_location[bc];
+    CORE_ADDR bp_addr = 0;
+    int bp_size = 0;
+    int bptoffset = 0;
+
     if (b->owner->type == bp_none)
       warning (_("reading through apparently deleted breakpoint #%d?"),
               b->owner->number);
 
-    if (b->loc_type != bp_loc_software_breakpoint)
-      continue;
-    if (!b->inserted)
+    /* Performance optimization: any futher element can no longer affect BUF
+       content.  */
+
+    if (b->address >= bp_location_placed_address_before_address_max
+        && memaddr + len <= b->address
+			    - bp_location_placed_address_before_address_max)
+      break;
+
+    if (!bp_location_has_shadow (b))
       continue;
     if (!breakpoint_address_match (b->target_info.placed_address_space, 0,
 				   current_program_space->aspace, 0))
@@ -772,9 +854,6 @@ breakpoint_restore_shadows (gdb_byte *buf, ULONGEST memaddr, LONGEST len)
        we need to copy.  */
     bp_addr = b->target_info.placed_address;
     bp_size = b->target_info.shadow_len;
-    if (bp_size == 0)
-      /* bp isn't valid, or doesn't shadow memory.  */
-      continue;
 
     if (bp_addr + bp_size <= memaddr)
       /* The breakpoint is entirely before the chunk of memory we
@@ -924,7 +1003,7 @@ update_watchpoint (struct breakpoint *b, int reparse)
   bpstat bs;
   struct program_space *frame_pspace;
 
-  /* We don't free locations.  They are stored in bp_location_chain and
+  /* We don't free locations.  They are stored in bp_location array and
      update_global_locations will eventually delete them and remove
      breakpoints if needed.  */
   b->loc = NULL;
@@ -1341,7 +1420,7 @@ void
 breakpoint_program_space_exit (struct program_space *pspace)
 {
   struct breakpoint *b, *b_temp;
-  struct bp_location *loc, *loc_temp;
+  struct bp_location *loc, **loc_temp;
 
   /* Remove any breakpoint that was set through this program space.  */
   ALL_BREAKPOINTS_SAFE (b, b_temp)
@@ -1352,7 +1431,7 @@ breakpoint_program_space_exit (struct program_space *pspace)
 
   /* Breakpoints set through other program spaces could have locations
      bound to PSPACE as well.  Remove those.  */
-  ALL_BP_LOCATIONS_SAFE (loc, loc_temp)
+  ALL_BP_LOCATIONS (loc, loc_temp)
     {
       struct bp_location *tmp;
 
@@ -1406,7 +1485,7 @@ static void
 insert_breakpoint_locations (void)
 {
   struct breakpoint *bpt;
-  struct bp_location *b, *temp;
+  struct bp_location *b, **bp_tmp;
   int error = 0;
   int val = 0;
   int disabled_breaks = 0;
@@ -1421,7 +1500,7 @@ insert_breakpoint_locations (void)
 
   save_current_space_and_thread ();
 
-  ALL_BP_LOCATIONS_SAFE (b, temp)
+  ALL_BP_LOCATIONS (b, bp_tmp)
     {
       struct thread_info *tp;
       CORE_ADDR last_addr;
@@ -1527,10 +1606,10 @@ You may have requested too many hardware breakpoints/watchpoints.\n");
 int
 remove_breakpoints (void)
 {
-  struct bp_location *b;
+  struct bp_location *b, **bp_tmp;
   int val = 0;
 
-  ALL_BP_LOCATIONS (b)
+  ALL_BP_LOCATIONS (b, bp_tmp)
   {
     if (b->inserted)
       val |= remove_breakpoint (b, mark_uninserted);
@@ -1543,11 +1622,11 @@ remove_breakpoints (void)
 int
 remove_breakpoints_pid (int pid)
 {
-  struct bp_location *b;
+  struct bp_location *b, **b_tmp;
   int val;
   struct inferior *inf = find_inferior_pid (pid);
 
-  ALL_BP_LOCATIONS (b)
+  ALL_BP_LOCATIONS (b, b_tmp)
   {
     if (b->pspace != inf->pspace)
       continue;
@@ -1565,10 +1644,10 @@ remove_breakpoints_pid (int pid)
 int
 remove_hw_watchpoints (void)
 {
-  struct bp_location *b;
+  struct bp_location *b, **bp_tmp;
   int val = 0;
 
-  ALL_BP_LOCATIONS (b)
+  ALL_BP_LOCATIONS (b, bp_tmp)
   {
     if (b->inserted && b->loc_type == bp_loc_hardware_watchpoint)
       val |= remove_breakpoint (b, mark_uninserted);
@@ -1580,7 +1659,7 @@ int
 reattach_breakpoints (int pid)
 {
   struct cleanup *old_chain;
-  struct bp_location *b;
+  struct bp_location *b, **bp_tmp;
   int val;
   struct ui_file *tmp_error_stream = mem_fileopen ();
   int dummy1 = 0, dummy2 = 0;
@@ -1598,7 +1677,7 @@ reattach_breakpoints (int pid)
 
   make_cleanup_ui_file_delete (tmp_error_stream);
 
-  ALL_BP_LOCATIONS (b)
+  ALL_BP_LOCATIONS (b, bp_tmp)
   {
     if (b->pspace != inf->pspace)
       continue;
@@ -1714,7 +1793,7 @@ update_breakpoints_after_exec (void)
 {
   struct breakpoint *b;
   struct breakpoint *temp;
-  struct bp_location *bploc;
+  struct bp_location *bploc, **bplocp_tmp;
 
   /* We're about to delete breakpoints from GDB's lists.  If the
      INSERTED flag is true, GDB will try to lift the breakpoints by
@@ -1724,7 +1803,7 @@ update_breakpoints_after_exec (void)
      breakpoints out as soon as it detects an exec.  We don't do that
      here instead, because there may be other attempts to delete
      breakpoints after detecting an exec and before reaching here.  */
-  ALL_BP_LOCATIONS (bploc)
+  ALL_BP_LOCATIONS (bploc, bplocp_tmp)
     if (bploc->pspace == current_program_space)
       gdb_assert (!bploc->inserted);
 
@@ -1831,7 +1910,7 @@ update_breakpoints_after_exec (void)
 int
 detach_breakpoints (int pid)
 {
-  struct bp_location *b;
+  struct bp_location *b, **bp_tmp;
   int val = 0;
   struct cleanup *old_chain = save_inferior_ptid ();
   struct inferior *inf = current_inferior ();
@@ -1841,7 +1920,7 @@ detach_breakpoints (int pid)
 
   /* Set inferior_ptid; remove_breakpoint_1 uses this global.  */
   inferior_ptid = pid_to_ptid (pid);
-  ALL_BP_LOCATIONS (b)
+  ALL_BP_LOCATIONS (b, bp_tmp)
   {
     if (b->pspace != inf->pspace)
       continue;
@@ -2006,9 +2085,9 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
 void
 mark_breakpoints_out (void)
 {
-  struct bp_location *bpt;
+  struct bp_location *bpt, **bptp_tmp;
 
-  ALL_BP_LOCATIONS (bpt)
+  ALL_BP_LOCATIONS (bpt, bptp_tmp)
     if (bpt->pspace == current_program_space)
       bpt->inserted = 0;
 }
@@ -2029,7 +2108,7 @@ void
 breakpoint_init_inferior (enum inf_context context)
 {
   struct breakpoint *b, *temp;
-  struct bp_location *bpt;
+  struct bp_location *bpt, **bptp_tmp;
   int ix;
   struct program_space *pspace = current_program_space;
 
@@ -2038,7 +2117,7 @@ breakpoint_init_inferior (enum inf_context context)
   if (gdbarch_has_global_breakpoints (target_gdbarch))
     return;
 
-  ALL_BP_LOCATIONS (bpt)
+  ALL_BP_LOCATIONS (bpt, bptp_tmp)
   {
     if (bpt->pspace == pspace
 	&& bpt->owner->enable_state != bp_permanent)
@@ -2110,10 +2189,10 @@ breakpoint_init_inferior (enum inf_context context)
 enum breakpoint_here
 breakpoint_here_p (struct address_space *aspace, CORE_ADDR pc)
 {
-  const struct bp_location *bpt;
+  struct bp_location *bpt, **bptp_tmp;
   int any_breakpoint_here = 0;
 
-  ALL_BP_LOCATIONS (bpt)
+  ALL_BP_LOCATIONS (bpt, bptp_tmp)
     {
       if (bpt->loc_type != bp_loc_software_breakpoint
 	  && bpt->loc_type != bp_loc_hardware_breakpoint)
@@ -2155,16 +2234,16 @@ moribund_breakpoint_here_p (struct address_space *aspace, CORE_ADDR pc)
 }
 
 /* Returns non-zero if there's a breakpoint inserted at PC, which is
-   inserted using regular breakpoint_chain/bp_location_chain mechanism.
+   inserted using regular breakpoint_chain / bp_location array mechanism.
    This does not check for single-step breakpoints, which are
    inserted and removed using direct target manipulation.  */
 
 int
 regular_breakpoint_inserted_here_p (struct address_space *aspace, CORE_ADDR pc)
 {
-  const struct bp_location *bpt;
+  struct bp_location *bpt, **bptp_tmp;
 
-  ALL_BP_LOCATIONS (bpt)
+  ALL_BP_LOCATIONS (bpt, bptp_tmp)
     {
       if (bpt->loc_type != bp_loc_software_breakpoint
 	  && bpt->loc_type != bp_loc_hardware_breakpoint)
@@ -2206,10 +2285,10 @@ breakpoint_inserted_here_p (struct address_space *aspace, CORE_ADDR pc)
 int
 software_breakpoint_inserted_here_p (struct address_space *aspace, CORE_ADDR pc)
 {
-  const struct bp_location *bpt;
+  struct bp_location *bpt, **bptp_tmp;
   int any_breakpoint_here = 0;
 
-  ALL_BP_LOCATIONS (bpt)
+  ALL_BP_LOCATIONS (bpt, bptp_tmp)
     {
       if (bpt->loc_type != bp_loc_software_breakpoint)
 	continue;
@@ -2241,12 +2320,12 @@ int
 breakpoint_thread_match (struct address_space *aspace, CORE_ADDR pc,
 			 ptid_t ptid)
 {
-  const struct bp_location *bpt;
+  struct bp_location *bpt, **bptp_tmp;
   /* The thread and task IDs associated to PTID, computed lazily.  */
   int thread = -1;
   int task = 0;
   
-  ALL_BP_LOCATIONS (bpt)
+  ALL_BP_LOCATIONS (bpt, bptp_tmp)
     {
       if (bpt->loc_type != bp_loc_software_breakpoint
 	  && bpt->loc_type != bp_loc_hardware_breakpoint)
@@ -3358,16 +3437,16 @@ bpstat_stop_status (struct address_space *aspace,
 		    CORE_ADDR bp_addr, ptid_t ptid)
 {
   struct breakpoint *b = NULL;
-  const struct bp_location *bl;
+  struct bp_location *bl, **blp_tmp;
   struct bp_location *loc;
   /* Root of the chain of bpstat's */
   struct bpstats root_bs[1];
   /* Pointer to the last thing in the chain currently.  */
   bpstat bs = root_bs;
   int ix;
-  int need_remove_insert;
+  int need_remove_insert, update_locations = 0;
 
-  ALL_BP_LOCATIONS (bl)
+  ALL_BP_LOCATIONS (bl, blp_tmp)
   {
     b = bl->owner;
     gdb_assert (b);
@@ -3409,14 +3488,15 @@ bpstat_stop_status (struct address_space *aspace,
   
     if (bs->stop)
       {
-	++(b->hit_count);
+	if (b->enable_state != bp_disabled)
+	  ++(b->hit_count);
 
 	/* We will stop here */
 	if (b->disposition == disp_disable)
 	  {
 	    if (b->enable_state != bp_permanent)
 	      b->enable_state = bp_disabled;
-	    update_global_location_list (0);
+	    update_locations = 1;
 	  }
 	if (b->silent)
 	  bs->print = 0;
@@ -3435,6 +3515,10 @@ bpstat_stop_status (struct address_space *aspace,
     if (bs->stop == 0 || bs->print == 0)
       bs->print_it = print_it_noop;
   }
+
+  /* Delay this call which would break the ALL_BP_LOCATIONS iteration above.  */
+  if (update_locations)
+    update_global_location_list (0);
 
   for (ix = 0; VEC_iterate (bp_location_p, moribund_locations, ix, loc); ++ix)
     {
@@ -4446,9 +4530,8 @@ set_default_breakpoint (int valid, struct program_space *pspace,
    (or use it for any other purpose either).
 
    More specifically, each of the following breakpoint types will always
-   have a zero valued address and we don't want check_duplicates() to mark
-   breakpoints of any of these types to be a duplicate of an actual
-   breakpoint at address zero:
+   have a zero valued address and we don't want to mark breakpoints of any of
+   these types to be a duplicate of an actual breakpoint at address zero:
 
       bp_watchpoint
       bp_hardware_watchpoint
@@ -4480,92 +4563,6 @@ breakpoint_address_match (struct address_space *aspace1, CORE_ADDR addr1,
   return ((gdbarch_has_global_breakpoints (target_gdbarch)
 	   || aspace1 == aspace2)
 	  && addr1 == addr2);
-}
-
-/* Rescan breakpoints at the same address and section as BPT,
-   marking the first one as "first" and any others as "duplicates".
-   This is so that the bpt instruction is only inserted once.
-   If we have a permanent breakpoint at the same place as BPT, make
-   that one the official one, and the rest as duplicates.  */
-
-static void
-check_duplicates_for (struct address_space *aspace,
-		      CORE_ADDR address,
-		      struct obj_section *section)
-{
-  struct bp_location *b;
-  int count = 0;
-  struct bp_location *perm_bp = 0;
-
-  ALL_BP_LOCATIONS (b)
-    if (b->owner->enable_state != bp_disabled
-	&& b->owner->enable_state != bp_call_disabled
-	&& b->owner->enable_state != bp_startup_disabled
-	&& b->enabled
-	&& !b->shlib_disabled
-	&& (!overlay_debugging || b->section == section)
-	&& breakpoint_address_is_meaningful (b->owner)
-	&& breakpoint_address_match (b->pspace->aspace, b->address,
-				     aspace, address))
-    {
-      /* Have we found a permanent breakpoint?  */
-      if (b->owner->enable_state == bp_permanent)
-	{
-	  perm_bp = b;
-	  break;
-	}
-	
-      count++;
-      b->duplicate = count > 1;
-    }
-
-  /* If we found a permanent breakpoint at this address, go over the
-     list again and declare all the other breakpoints there (except
-     other permanent breakpoints) to be the duplicates.  */
-  if (perm_bp)
-    {
-      perm_bp->duplicate = 0;
-
-      /* Permanent breakpoint should always be inserted.  */
-      if (! perm_bp->inserted)
-	internal_error (__FILE__, __LINE__,
-			_("allegedly permanent breakpoint is not "
-			"actually inserted"));
-
-      ALL_BP_LOCATIONS (b)
-	if (b != perm_bp)
-	  {
-	    if (b->owner->enable_state != bp_permanent
-		&& b->owner->enable_state != bp_disabled
-		&& b->owner->enable_state != bp_call_disabled
-		&& b->owner->enable_state != bp_startup_disabled
-		&& b->enabled && !b->shlib_disabled
-		&& breakpoint_address_is_meaningful (b->owner)
-		&& breakpoint_address_match (b->pspace->aspace, b->address,
-					     aspace, address)
-		&& (!overlay_debugging || b->section == section))
-	      {
-		if (b->inserted)
-		  internal_error (__FILE__, __LINE__,
-				  _("another breakpoint was inserted on top of "
-				  "a permanent breakpoint"));
-
-		b->duplicate = 1;
-	      }
-	  }
-    }
-}
-
-static void
-check_duplicates (struct breakpoint *bpt)
-{
-  struct bp_location *bl = bpt->loc;
-
-  if (! breakpoint_address_is_meaningful (bpt))
-    return;
-
-  for (; bl; bl = bl->next)
-    check_duplicates_for (bl->pspace->aspace, bl->address, bl->section);
 }
 
 static void
@@ -4988,9 +4985,9 @@ create_solib_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
 void
 disable_breakpoints_in_shlibs (void)
 {
-  struct bp_location *loc;
+  struct bp_location *loc, **locp_tmp;
 
-  ALL_BP_LOCATIONS (loc)
+  ALL_BP_LOCATIONS (loc, locp_tmp)
   {
     struct breakpoint *b = loc->owner;
     /* We apply the check to all breakpoints, including disabled
@@ -5021,7 +5018,7 @@ disable_breakpoints_in_shlibs (void)
 static void
 disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
 {
-  struct bp_location *loc;
+  struct bp_location *loc, **locp_tmp;
   int disabled_shlib_breaks = 0;
 
   /* SunOS a.out shared libraries are always mapped, so do not
@@ -5032,7 +5029,7 @@ disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
       && bfd_get_flavour (exec_bfd) == bfd_target_aout_flavour)
     return;
 
-  ALL_BP_LOCATIONS (loc)
+  ALL_BP_LOCATIONS (loc, locp_tmp)
   {
     struct breakpoint *b = loc->owner;
     if ((loc->loc_type == bp_loc_hardware_breakpoint
@@ -8079,14 +8076,80 @@ breakpoint_auto_delete (bpstat bs)
   }
 }
 
-/* A cleanup function which destroys a vector.  */
+/* A comparison function for bp_location A and B being interfaced to qsort.
+   Sort elements primarily by their ADDRESS (no matter what does
+   breakpoint_address_is_meaningful say for its OWNER), secondarily by ordering
+   first bp_permanent OWNERed elements and terciarily just ensuring the array
+   is sorted stable way despite qsort being an instable algorithm.  */
+
+static int
+bp_location_compare (struct bp_location *a, struct bp_location *b)
+{
+  int a_perm = a->owner->enable_state == bp_permanent;
+  int b_perm = b->owner->enable_state == bp_permanent;
+
+  if (a->address != b->address)
+    return (a->address > b->address) - (a->address < b->address);
+
+  /* Sort permanent breakpoints first.  */
+  if (a_perm != b_perm)
+    return (a_perm < b_perm) - (a_perm > b_perm);
+
+  /* Make the user-visible order stable across GDB runs.  Locations of the same
+     breakpoint can be sorted in arbitrary order.  */
+
+  if (a->owner->number != b->owner->number)
+    return (a->owner->number > b->owner->number)
+           - (a->owner->number < b->owner->number);
+
+  return (a > b) - (a < b);
+}
+
+/* Interface bp_location_compare as the COMPAR parameter of qsort function.  */
+
+static int
+bp_location_compare_for_qsort (const void *ap, const void *bp)
+{
+  struct bp_location *a = *(void **) ap;
+  struct bp_location *b = *(void **) bp;
+
+  return bp_location_compare (a, b);
+}
+
+/* Set bp_location_placed_address_before_address_max and
+   bp_location_shadow_len_after_address_max according to the current content of
+   the bp_location array.  */
 
 static void
-do_vec_free (void *p)
+bp_location_target_extensions_update (void)
 {
-  VEC(bp_location_p) **vec = p;
-  if (*vec)
-    VEC_free (bp_location_p, *vec);
+  struct bp_location *bl, **blp_tmp;
+
+  bp_location_placed_address_before_address_max = 0;
+  bp_location_shadow_len_after_address_max = 0;
+
+  ALL_BP_LOCATIONS (bl, blp_tmp)
+    {
+      CORE_ADDR start, end, addr;
+
+      if (!bp_location_has_shadow (bl))
+	continue;
+
+      start = bl->target_info.placed_address;
+      end = start + bl->target_info.shadow_len;
+
+      gdb_assert (bl->address >= start);
+      addr = bl->address - start;
+      if (addr > bp_location_placed_address_before_address_max)
+	bp_location_placed_address_before_address_max = addr;
+
+      /* Zero SHADOW_LEN would not pass bp_location_has_shadow.  */
+
+      gdb_assert (bl->address < end);
+      addr = end - bl->address;
+      if (addr > bp_location_shadow_len_after_address_max)
+	bp_location_shadow_len_after_address_max = addr;
+    }
 }
 
 /* If SHOULD_INSERT is false, do not insert any breakpoint locations
@@ -8108,49 +8171,66 @@ static void
 update_global_location_list (int should_insert)
 {
   struct breakpoint *b;
-  struct bp_location **next = &bp_location_chain;
-  struct bp_location *loc;
-  struct bp_location *loc2;
-  VEC(bp_location_p) *old_locations = NULL;
-  int ret;
-  int ix;
+  struct bp_location **locp, *loc;
   struct cleanup *cleanups;
 
-  cleanups = make_cleanup (do_vec_free, &old_locations);
-  /* Store old locations for future reference.  */
-  for (loc = bp_location_chain; loc; loc = loc->global_next)
-    VEC_safe_push (bp_location_p, old_locations, loc);
+  /* The first bp_location being the only one non-DUPLICATE for the current run
+     of the same ADDRESS.  */
+  struct bp_location *loc_first;
 
-  bp_location_chain = NULL;
+  /* Saved former bp_location array which we compare against the newly built
+     bp_location from the current state of ALL_BREAKPOINTS.  */
+  struct bp_location **old_location, **old_locp;
+  unsigned old_location_count;
+
+  old_location = bp_location;
+  old_location_count = bp_location_count;
+  bp_location = NULL;
+  bp_location_count = 0;
+  cleanups = make_cleanup (xfree, old_location);
+
   ALL_BREAKPOINTS (b)
-    {
-      for (loc = b->loc; loc; loc = loc->next)
-	{
-	  *next = loc;
-	  next = &(loc->global_next);
-	  *next = NULL;
-	}
-    }
+    for (loc = b->loc; loc; loc = loc->next)
+      bp_location_count++;
+
+  bp_location = xmalloc (sizeof (*bp_location) * bp_location_count);
+  locp = bp_location;
+  ALL_BREAKPOINTS (b)
+    for (loc = b->loc; loc; loc = loc->next)
+      *locp++ = loc;
+  qsort (bp_location, bp_location_count, sizeof (*bp_location),
+	 bp_location_compare_for_qsort);
+
+  bp_location_target_extensions_update ();
 
   /* Identify bp_location instances that are no longer present in the new
      list, and therefore should be freed.  Note that it's not necessary that
      those locations should be removed from inferior -- if there's another
      location at the same address (previously marked as duplicate),
-     we don't need to remove/insert the location.  */
-  for (ix = 0; VEC_iterate(bp_location_p, old_locations, ix, loc); ++ix)
+     we don't need to remove/insert the location.
+     
+     LOCP is kept in sync with OLD_LOCP, each pointing to the current and
+     former bp_location array state respectively.  */
+
+  locp = bp_location;
+  for (old_locp = old_location; old_locp < old_location + old_location_count;
+       old_locp++)
     {
-      /* Tells if 'loc' is found amoung the new locations.  If not, we
+      struct bp_location *old_loc = *old_locp;
+
+      /* Tells if 'old_loc' is found amoung the new locations.  If not, we
 	 have to free it.  */
-      int found_object = 0;
+      int found_object;
       /* Tells if the location should remain inserted in the target.  */
       int keep_in_target = 0;
       int removed = 0;
-      for (loc2 = bp_location_chain; loc2; loc2 = loc2->global_next)
-	if (loc2 == loc)
-	  {
-	    found_object = 1;
-	    break;
-	  }
+
+      /* Skip LOCP entries which will definitely never be needed.  Stop either
+	 at or being the one matching OLD_LOC.  */
+      while (locp < bp_location + bp_location_count
+	     && bp_location_compare (*locp, old_loc) < 0)
+	locp++;
+      found_object = locp < bp_location + bp_location_count && *locp == old_loc;
 
       /* If this location is no longer present, and inserted, look if there's
 	 maybe a new location at the same address.  If so, mark that one 
@@ -8158,11 +8238,11 @@ update_global_location_list (int should_insert)
 	 don't have a time window where a breakpoint at certain location is not
 	 inserted.  */
 
-      if (loc->inserted)
+      if (old_loc->inserted)
 	{
 	  /* If the location is inserted now, we might have to remove it.  */
 
-	  if (found_object && should_be_inserted (loc))
+	  if (found_object && should_be_inserted (old_loc))
 	    {
 	      /* The location is still present in the location list, and still
 		 should be inserted.  Don't do anything.  */
@@ -8173,41 +8253,49 @@ update_global_location_list (int should_insert)
 	      /* The location is either no longer present, or got disabled.
 		 See if there's another location at the same address, in which 
 		 case we don't need to remove this one from the target.  */
-	      if (breakpoint_address_is_meaningful (loc->owner))
-		for (loc2 = bp_location_chain; loc2; loc2 = loc2->global_next)
-		  {
-		    /* For the sake of should_insert_location.  The
-		       call to check_duplicates will fix up this later.  */
-		    loc2->duplicate = 0;
-		    if (should_be_inserted (loc2)
-			&& loc2 != loc
-			&& breakpoint_address_match (loc2->pspace->aspace,
-						     loc2->address,
-						     loc->pspace->aspace,
-						     loc->address))
-		      {
-			loc2->inserted = 1;
-			loc2->target_info = loc->target_info;
-			keep_in_target = 1;
-			break;
-		      }
-		  }
+
+	      if (breakpoint_address_is_meaningful (old_loc->owner))
+		{
+		  struct bp_location **loc2p;
+
+		  for (loc2p = locp;
+		       loc2p < bp_location + bp_location_count
+		       && breakpoint_address_match ((*loc2p)->pspace->aspace,
+						    (*loc2p)->address,
+						    old_loc->pspace->aspace,
+						    old_loc->address);
+		       loc2p++)
+		    {
+		      struct bp_location *loc2 = *loc2p;
+
+		      /* For the sake of should_be_inserted.
+			 Duplicates check below will fix up this later.  */
+		      loc2->duplicate = 0;
+		      if (loc2 != old_loc && should_be_inserted (loc2))
+			{		  
+			  loc2->inserted = 1;
+			  loc2->target_info = old_loc->target_info;
+			  keep_in_target = 1;
+			  break;
+			}
+		    }
+		}
 	    }
 
 	  if (!keep_in_target)
 	    {
-	      if (remove_breakpoint (loc, mark_uninserted))
+	      if (remove_breakpoint (old_loc, mark_uninserted))
 		{
 		  /* This is just about all we can do.  We could keep this
 		     location on the global list, and try to remove it next
 		     time, but there's no particular reason why we will
 		     succeed next time.  
 		     
-		     Note that at this point, loc->owner is still valid,
+		     Note that at this point, old_loc->owner is still valid,
 		     as delete_breakpoint frees the breakpoint only
 		     after calling us.  */
 		  printf_filtered (_("warning: Error removing breakpoint %d\n"), 
-				   loc->owner->number);
+				   old_loc->owner->number);
 		}
 	      removed = 1;
 	    }
@@ -8229,19 +8317,60 @@ update_global_location_list (int should_insert)
 		 longer need to keep this breakpoint.  This is just a
 		 heuristic, but if it's wrong, we'll report unexpected SIGTRAP,
 		 which is usability issue, but not a correctness problem.  */
-	      loc->events_till_retirement = 3 * (thread_count () + 1);
-	      loc->owner = NULL;
+	      old_loc->events_till_retirement = 3 * (thread_count () + 1);
+	      old_loc->owner = NULL;
 
-	      VEC_safe_push (bp_location_p, moribund_locations, loc);
+	      VEC_safe_push (bp_location_p, moribund_locations, old_loc);
 	    }
 	  else
-	    free_bp_location (loc);
+	    free_bp_location (old_loc);
 	}
     }
 
-  ALL_BREAKPOINTS (b)
+  /* Rescan breakpoints at the same address and section,
+     marking the first one as "first" and any others as "duplicates".
+     This is so that the bpt instruction is only inserted once.
+     If we have a permanent breakpoint at the same place as BPT, make
+     that one the official one, and the rest as duplicates.  Permanent
+     breakpoints are sorted first for the same address.  */
+
+  loc_first = NULL;
+  ALL_BP_LOCATIONS (loc, locp)
     {
-      check_duplicates (b);
+      struct breakpoint *b = loc->owner;
+
+      if (b->enable_state == bp_disabled
+	  || b->enable_state == bp_call_disabled
+	  || b->enable_state == bp_startup_disabled
+	  || !loc->enabled
+	  || loc->shlib_disabled
+	  || !breakpoint_address_is_meaningful (b))
+	continue;
+
+      /* Permanent breakpoint should always be inserted.  */
+      if (b->enable_state == bp_permanent && ! loc->inserted)
+	internal_error (__FILE__, __LINE__,
+			_("allegedly permanent breakpoint is not "
+			"actually inserted"));
+
+      if (loc_first == NULL
+	  || (overlay_debugging && loc->section != loc_first->section)
+	  || !breakpoint_address_match (loc->pspace->aspace, loc->address,
+					loc_first->pspace->aspace,
+					loc_first->address))
+	{
+	  loc_first = loc;
+	  loc->duplicate = 0;
+	  continue;
+	}
+
+      loc->duplicate = 1;
+
+      if (loc_first->owner->enable_state == bp_permanent && loc->inserted
+          && b->enable_state != bp_permanent)
+	internal_error (__FILE__, __LINE__,
+			_("another breakpoint was inserted on top of "
+			"a permanent breakpoint"));
     }
 
   if (breakpoints_always_inserted_mode () && should_insert

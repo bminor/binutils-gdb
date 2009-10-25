@@ -231,10 +231,6 @@ struct bp_location
      the same parent breakpoint.  */
   struct bp_location *next;
 
-  /* Pointer to the next breakpoint location, in a global
-     list of all breakpoint locations.  */
-  struct bp_location *global_next;
- 
   /* Type of this breakpoint location.  */
   enum bp_loc_type loc_type;
 

@@ -1,5 +1,62 @@
 2009-10-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Performance optimize large bp_location count.
+	* breakpoint.c (ALL_BP_LOCATIONS_SAFE): Remove.
+	(ALL_BP_LOCATIONS): New parameter BP_TMP.  Use now bp_location and
+	bp_location_count.
+	(bp_location_chain): Remove variable.
+	(bp_location, bp_location_count)
+	(bp_location_placed_address_before_address_max)
+	(bp_location_shadow_len_after_address_max): New variables.
+	(moribund_locations, update_watchpoint): Update the bp_location
+	variable name.
+	(breakpoint_restore_shadows): Extend the comment.  Move the variable
+	b to local blocks.  Move the variables bp_addr, bp_size and bptoffset
+	to a local block.  New variables bc_l, bc_r and bc.  New binary search
+	for the left range boundary.  New break on reaching the right range
+	boundary.  Move shadow existence conditionals to ...
+	(bp_location_has_shadow): ... a new function.
+	(insert_breakpoint_locations): Replace the temp variable by bp_tmp.
+	Use now ALL_BP_LOCATIONS instead of ALL_BP_LOCATIONS_SAFE.
+	(remove_breakpoints, remove_hw_watchpoints, reattach_breakpoints)
+	(detach_breakpoints): New variable bp_tmp.  Update the ALL_BP_LOCATIONS
+	calling convention.
+	(update_breakpoints_after_exec): New variable bplocp_tmp.  Update the
+	ALL_BP_LOCATIONS calling convention.
+	(breakpoint_here_p, software_breakpoint_inserted_here_p)
+	(breakpoint_thread_match): New variable bptp_tmp.  Drop the const
+	attribute of bpt.  Update the ALL_BP_LOCATIONS calling convention.
+	(regular_breakpoint_inserted_here_p): Likewise.  Update the bp_location
+	variable name.
+	(mark_breakpoints_out, breakpoint_init_inferior): New variable
+	bptp_tmp.  Update the ALL_BP_LOCATIONS calling convention.
+	(bpstat_stop_status): New variables blp_tmp and update_locations.  Drop
+	the const attribute of bl.  Update the ALL_BP_LOCATIONS calling
+	convention.  Protect HIT_COUNT increment by an ENABLE_STATE check.
+	Delay the update_global_location_list call using update_locations.
+	(set_default_breakpoint): Drop the check_duplicates name from comment.
+	(disable_breakpoints_in_shlibs, disable_breakpoints_in_unloaded_shlib):
+	New variable locp_tmp.  Update the ALL_BP_LOCATIONS calling convention.
+	(bp_location_compare, bp_location_compare_for_qsort)
+	(bp_location_target_extensions_update): New functions.
+	(check_duplicates, check_duplicates_for): Remove, moving their code ...
+	(update_global_location_list): ... into this existing function.  Remove
+	variables next, loc2, old_locations, ret and ix.  New variables locp,
+	loc_first, old_location, old_locp and old_location_count.  Stop using
+	global_next, create now the array bp_location, sort it by
+	bp_location_compare_for_qsort and call
+	bp_location_target_extensions_update.  Change quadratic iteration by
+	loc2 into an in-sync scanning by locp and loc2p.  Rename former loc
+	usage as old_loc.
+	(do_vec_free): Remove.
+	(breakpoint_program_space_exit): Update the ALL_BP_LOCATIONS calling
+	convention.
+	(remove_breakpoints_pid): New variable b_tmp.  Update the
+	ALL_BP_LOCATIONS calling convention.
+	* breakpoint.h (struct bp_location <global_next>): Remove.
+
+2009-10-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* mep-tdep.c: Update include for the new location cgen/bitset.h.
 
 2009-10-23  Tom Tromey  <tromey@redhat.com>
