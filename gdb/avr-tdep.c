@@ -1181,7 +1181,8 @@ avr_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int i;
-  unsigned char buf[2];
+  unsigned char buf[3];
+  int call_length = gdbarch_tdep (gdbarch)->call_length;
   CORE_ADDR return_pc = avr_convert_iaddr_to_raw (bp_addr);
   int regnum = AVR_ARGN_REGNUM;
   struct stack_item *si = NULL;
@@ -1219,11 +1220,9 @@ avr_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
             regnum--;
 
           val = extract_unsigned_integer (contents, len, byte_order);
-          for (j=0; j<len; j++)
-            {
-              regcache_cooked_write_unsigned (regcache, regnum--,
-                                              val >> (8*(len-j-1)));
-            }
+          for (j = 0; j < len; j++)
+            regcache_cooked_write_unsigned
+              (regcache, regnum--, val >> (8 * (len - j - 1)));
         }
       /* No registers available, push the args onto the stack. */
       else
@@ -1245,17 +1244,23 @@ avr_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Set the return address.  For the avr, the return address is the BP_ADDR.
      Need to push the return address onto the stack noting that it needs to be
      in big-endian order on the stack.  */
-  buf[0] = (return_pc >> 8) & 0xff;
-  buf[1] = return_pc & 0xff;
+  for (i = 1; i <= call_length; i++)
+    {
+      buf[call_length - i] = return_pc & 0xff;
+      return_pc >>= 8;
+    }
 
-  sp -= 2;
-  write_memory (sp + 1, buf, 2);  /* Add one since pushes are post decr ops. */
+  sp -= call_length;
+  /* Use 'sp + 1' since pushes are post decr ops. */
+  write_memory (sp + 1, buf, call_length);
 
   /* Finally, update the SP register. */
   regcache_cooked_write_unsigned (regcache, AVR_SP_REGNUM,
 				  avr_convert_saddr_to_raw (sp));
 
-  return sp;
+  /* Return SP value for the dummy frame, where the return address hasn't been
+     pushed.  */
+  return sp + call_length;
 }
 
 /* Initialize the gdbarch structure for the AVR's. */

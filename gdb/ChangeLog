@@ -1,3 +1,8 @@
+2009-10-26  Tristan Gingold  <gingold@adacore.com>
+
+	* avr-tdep.c (avr_push_dummy_call): Handle avr6 architecture.
+	Fix the returned value.  Fix style.
+
 2009-10-26  Joel Brobecker  <brobecker@adacore.com>
 
 	* MAINTAINERS (Responsible Maintainers): Add info about the microblaze
