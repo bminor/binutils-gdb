@@ -1409,14 +1409,6 @@ listing_eject (int ignore ATTRIBUTE_UNUSED)
     listing_tail->edict = EDICT_EJECT;
 }
 
-void
-listing_flags (int ignore ATTRIBUTE_UNUSED)
-{
-  while ((*input_line_pointer++) && (*input_line_pointer != '\n'))
-    input_line_pointer++;
-
-}
-
 /* Turn listing on or off.  An argument of 0 means to turn off
    listing.  An argument of 1 means to turn on listing.  An argument
    of 2 means to turn off listing, but as of the next line; that is,
@@ -1557,12 +1549,6 @@ listing_source_file (const char *file)
 #else
 
 /* Dummy functions for when compiled without listing enabled.  */
-
-void
-listing_flags (int ignore)
-{
-  s_ignore (0);
-}
 
 void
 listing_list (int on)

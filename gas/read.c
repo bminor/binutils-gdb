@@ -371,7 +371,7 @@ static const pseudo_typeS potable[] = {
   {"irpc", s_irp, 1},
   {"irepc", s_irp, 1},
   {"lcomm", s_lcomm, 0},
-  {"lflags", listing_flags, 0},	/* Listing flags.  */
+  {"lflags", s_ignore, 0},	/* Listing flags.  */
   {"linefile", s_app_line, 0},
   {"linkonce", s_linkonce, 0},
   {"list", listing_list, 1},	/* Turn listing on.  */
