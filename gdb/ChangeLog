@@ -1,3 +1,33 @@
+2009-10-26  Michael Snyder  <msnyder@vmware.com>
+	    Hui Zhu  <teawater@gmail.com>
+
+	* Makefile.in (SFILES): Add gcore.c.
+	(COMMON_OBS): Add gcore.o.
+	* config/alpha/alpha-linux.mh (NATDEPFILES): Delete gcore.o.
+	* config/alpha/fbsd.mh (NATDEPFILES): Ditto.
+	* config/arm/linux.mh (NATDEPFILES): Ditto.
+	* config/i386/fbsd.mh (NATDEPFILES): Ditto.
+	* config/i386/fbsd64.mh (NATDEPFILES): Ditto.
+	* config/i386/i386sol2.mh (NATDEPFILES): Ditto.
+	* config/i386/linux.mh (NATDEPFILES): Ditto.
+	* config/i386/linux64.mh (NATDEPFILES): Ditto.
+	* config/i386/sol2-64.mh (NATDEPFILES): Ditto.
+	* config/ia64/linux.mh (NATDEPFILES): Ditto.
+	* config/m32r/linux.mh (NATDEPFILES): Ditto.
+	* config/m68k/linux.mh (NATDEPFILES): Ditto.
+	* config/mips/linux.mh (NATDEPFILES): Ditto.
+	* config/pa/linux.mh (NATDEPFILES): Ditto.
+	* config/powerpc/linux.mh (NATDEPFILES): Ditto.
+	* config/powerpc/ppc64-linux.mh (NATDEPFILES): Ditto.
+	* config/s390/s390.mh (NATDEPFILES): Ditto.
+	* config/sparc/fbsd.mh (NATDEPFILES): Ditto.
+	* config/sparc/linux.mh (NATDEPFILES): Ditto.
+	* config/sparc/linux64.mh (NATDEPFILES): Ditto.
+	* config/sparc/sol2.mh (NATDEPFILES): Ditto.
+	* config/xtensa/linux.mh (NATDEPFILES): Ditto.
+	* target.c (dummy_find_memory_regions): Change output.
+	(dummy_make_corefile_notes): Ditto.
+
 2009-10-26  Tristan Gingold  <gingold@adacore.com>
 
 	* avr-tdep.c (avr_push_dummy_call): Handle avr6 architecture.

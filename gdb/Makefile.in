@@ -681,7 +681,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	wrapper.c \
 	xml-tdesc.c xml-support.c \
 	inferior.c gdb_usleep.c \
-	record.c \
+	record.c gcore.c\
 	jit.c \
 	xml-syscall.c \
 
@@ -834,7 +834,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	solib.o solib-null.o \
 	prologue-value.o memory-map.o xml-support.o xml-syscall.o \
 	target-descriptions.o target-memory.o xml-tdesc.o xml-builtin.o \
-	inferior.o osdata.o gdb_usleep.o record.o \
+	inferior.o osdata.o gdb_usleep.o record.o gcore.o \
 	jit.o progspace.o
 
 # Definitions for the syscall's XML files and dir
