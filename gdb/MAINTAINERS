@@ -291,6 +291,10 @@ the native maintainer when resolving ABI issues.
 	mep		--target=mep-elf ,-Werror
 			Kevin Buettner		kevinb@redhat.com
 
+	microblaze	--target=microblaze-xilinx-elf ,-Werror
+			--target=microblaze-linux-gnu ,-Werror
+			Michael Eager		eager@eagercon.com
+
 	mips		--target=mips-elf ,-Werror
 
 	mn10300		--target=mn10300-elf broken

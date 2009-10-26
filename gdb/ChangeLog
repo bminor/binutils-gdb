@@ -1,3 +1,8 @@
+2009-10-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* MAINTAINERS (Responsible Maintainers): Add info about the microblaze
+	targets.  Add Michael Eager as the maintainer for this target.
+
 2009-10-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Performance optimize large bp_location count.
