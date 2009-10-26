@@ -1,3 +1,8 @@
+2009-10-26  Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo: Add mention of RX port and inclusion of RX
+	documentation.
+
 2009-10-25  Arnold Metselaar  <arnold.metselaar@planet.nl>
 
 	* config/tc-z80.c (z80_start_line_hook): Fix parsing of 'equ' or
