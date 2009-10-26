@@ -681,7 +681,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	wrapper.c \
 	xml-tdesc.c xml-support.c \
 	inferior.c gdb_usleep.c \
-	record.c gcore.c\
+	record.c gcore.c \
 	jit.c \
 	xml-syscall.c \
 

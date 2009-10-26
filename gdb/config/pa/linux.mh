@@ -1,6 +1,6 @@
 # Host: Hewlett-Packard PA-RISC machine, running Linux
 NAT_FILE= config/nm-linux.h
-NATDEPFILES= inf-ptrace.o fork-child.o corelow.o gcore.o \
+NATDEPFILES= inf-ptrace.o fork-child.o corelow.o \
 	hppa-linux-nat.o proc-service.o linux-thread-db.o linux-nat.o \
 	linux-fork.o
 

@@ -2,7 +2,7 @@
 
 NAT_FILE= config/nm-linux.h
 
-NATDEPFILES= inf-ptrace.o fork-child.o xtensa-linux-nat.o gcore.o \
+NATDEPFILES= inf-ptrace.o fork-child.o xtensa-linux-nat.o \
 	linux-thread-db.o proc-service.o linux-nat.o linux-fork.o
 
 LOADLIBES = -ldl -rdynamic

@@ -2751,17 +2751,19 @@ dummy_pid_to_str (struct target_ops *ops, ptid_t ptid)
   return normal_pid_to_str (ptid);
 }
 
-/* Error-catcher for target_find_memory_regions */
-static int dummy_find_memory_regions (int (*ignore1) (), void *ignore2)
+/* Error-catcher for target_find_memory_regions.  */
+static int
+dummy_find_memory_regions (int (*ignore1) (), void *ignore2)
 {
-  error (_("No target."));
+  error (_("Command not implemented for this target."));
   return 0;
 }
 
-/* Error-catcher for target_make_corefile_notes */
-static char * dummy_make_corefile_notes (bfd *ignore1, int *ignore2)
+/* Error-catcher for target_make_corefile_notes.  */
+static char *
+dummy_make_corefile_notes (bfd *ignore1, int *ignore2)
 {
-  error (_("No target."));
+  error (_("Command not implemented for this target."));
   return NULL;
 }
 
