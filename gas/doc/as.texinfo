@@ -1191,6 +1191,10 @@ Assemble for a little endian target.
 See the info pages for documentation of the MMIX-specific options.
 @end ifset
 
+@ifset RX
+See the info pages for documentation of the RX-specific options.
+@end ifset
+
 @ifset S390
 The following options are available when @value{AS} is configured for the s390
 processor family.
@@ -2281,6 +2285,9 @@ is considered a comment and is ignored.  The line comment character is
 @end ifset
 @ifset M68HC11
 @samp{#} on the 68HC11 and 68HC12;
+@end ifset
+@ifset RX
+@samp{#} on the RX;
 @end ifset
 @ifset VAX
 @samp{#} on the Vax;
@@ -6817,6 +6824,9 @@ subject, see the hardware manufacturer's manual.
 @ifset PPC
 * PPC-Dependent::               PowerPC Dependent Features
 @end ifset
+@ifset RX
+* RX-Dependent::                RX Dependent Features
+@end ifset
 @ifset S390
 * S/390-Dependent::             IBM S/390 Dependent Features
 @end ifset
@@ -6993,6 +7003,10 @@ family.
 
 @ifset PPC
 @include c-ppc.texi
+@end ifset
+
+@ifset RX
+@include c-rx.texi
 @end ifset
 
 @ifset S390
