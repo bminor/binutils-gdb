@@ -160,6 +160,7 @@ struct thread_db_info
 struct thread_db_info *thread_db_list;
 
 static void thread_db_find_new_threads_1 (ptid_t ptid);
+static void thread_db_find_new_threads_2 (ptid_t ptid, int until_no_new);
 
 /* Add the current inferior to the list of processes using libpthread.
    Return a pointer to the newly allocated object that was added to
@@ -229,8 +230,8 @@ delete_thread_db_info (int pid)
 }
 
 /* Prototypes for local functions.  */
-static void attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
-			   const td_thrinfo_t *ti_p);
+static int attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
+			  const td_thrinfo_t *ti_p);
 static void detach_thread (ptid_t ptid);
 
 
@@ -597,7 +598,7 @@ thread_db_find_new_threads_silently (ptid_t ptid)
 
   TRY_CATCH (except, RETURN_MASK_ERROR)
     {
-      thread_db_find_new_threads_1 (ptid);
+      thread_db_find_new_threads_2 (ptid, 1);
     }
 
   if (except.reason < 0 && info_verbose)
@@ -977,9 +978,9 @@ thread_db_new_objfile (struct objfile *objfile)
 
 /* Attach to a new thread.  This function is called when we receive a
    TD_CREATE event or when we iterate over all threads and find one
-   that wasn't already in our list.  */
+   that wasn't already in our list.  Returns true on success.  */
 
-static void
+static int
 attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
 	       const td_thrinfo_t *ti_p)
 {
@@ -1013,7 +1014,7 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
       if (tp->private != NULL)
 	{
 	  if (!tp->private->dying)
-	    return;
+	    return 0;
 
 	  delete_thread (ptid);
 	  tp = NULL;
@@ -1023,12 +1024,12 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
   check_thread_signals ();
 
   if (ti_p->ti_state == TD_THR_UNKNOWN || ti_p->ti_state == TD_THR_ZOMBIE)
-    return;			/* A zombie thread -- do not attach.  */
+    return 0;			/* A zombie thread -- do not attach.  */
 
   /* Under GNU/Linux, we have to attach to each and every thread.  */
   if (tp == NULL
       && lin_lwp_attach_lwp (BUILD_LWP (ti_p->ti_lid, GET_PID (ptid))) < 0)
-    return;
+    return 0;
 
   /* Construct the thread's private data.  */
   private = xmalloc (sizeof (struct private_thread_info));
@@ -1056,6 +1057,7 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
   if (err != TD_OK)
     error (_("Cannot enable thread event reporting for %s: %s"),
 	   target_pid_to_str (ptid), thread_db_err_str (err));
+  return 1;
 }
 
 static void
@@ -1282,6 +1284,12 @@ thread_db_mourn_inferior (struct target_ops *ops)
     unpush_target (ops);
 }
 
+struct callback_data
+{
+  struct thread_db_info *info;
+  int new_threads;
+};
+
 static int
 find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
 {
@@ -1289,7 +1297,8 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
   td_err_e err;
   ptid_t ptid;
   struct thread_info *tp;
-  struct thread_db_info *info = data;
+  struct callback_data *cb_data = data;
+  struct thread_db_info *info = cb_data->info;
 
   err = info->td_thr_get_info_p (th_p, &ti);
   if (err != TD_OK)
@@ -1332,21 +1341,76 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
   ptid = ptid_build (info->pid, ti.ti_lid, 0);
   tp = find_thread_ptid (ptid);
   if (tp == NULL || tp->private == NULL)
-    attach_thread (ptid, th_p, &ti);
+    {
+      if (attach_thread (ptid, th_p, &ti))
+	cb_data->new_threads += 1;
+      else
+	/* Problem attaching this thread; perhaps it exited before we
+	   could attach it?
+	   This could mean that the thread list inside glibc itself is in
+	   inconsistent state, and libthread_db could go on looping forever
+	   (observed with glibc-2.3.6).  To prevent that, terminate
+	   iteration: thread_db_find_new_threads_2 will retry.  */
+	return 1;
+    }
 
   return 0;
 }
 
+/* Helper for thread_db_find_new_threads_2.
+   Returns number of new threads found.  */
+
+static int
+find_new_threads_once (struct thread_db_info *info, int iteration,
+		       int *errp)
+{
+  volatile struct gdb_exception except;
+  struct callback_data data;
+  int err = TD_ERR;
+
+  data.info = info;
+  data.new_threads = 0;
+
+  TRY_CATCH (except, RETURN_MASK_ERROR)
+    {
+      /* Iterate over all user-space threads to discover new threads.  */
+      err = info->td_ta_thr_iter_p (info->thread_agent,
+				    find_new_threads_callback,
+				    &data,
+				    TD_THR_ANY_STATE,
+				    TD_THR_LOWEST_PRIORITY,
+				    TD_SIGNO_MASK,
+				    TD_THR_ANY_USER_FLAGS);
+    }
+
+  if (info_verbose)
+    {
+      if (except.reason < 0)
+	exception_fprintf (gdb_stderr, except,
+			   "Warning: find_new_threads_once: ");
+
+      printf_filtered (_("Found %d new threads in iteration %d.\n"),
+		       data.new_threads, iteration);
+    }
+
+  if (errp != NULL)
+    *errp = err;
+
+  return data.new_threads;
+}
+
 /* Search for new threads, accessing memory through stopped thread
-   PTID.  */
+   PTID.  If UNTIL_NO_NEW is true, repeat searching until several
+   searches in a row do not discover any new threads.  */
 
 static void
-thread_db_find_new_threads_1 (ptid_t ptid)
+thread_db_find_new_threads_2 (ptid_t ptid, int until_no_new)
 {
   td_err_e err;
   struct lwp_info *lp;
   struct thread_db_info *info;
   int pid = ptid_get_pid (ptid);
+  int i, loop;
 
   /* In linux, we can only read memory through a stopped lwp.  */
   ALL_LWPS (lp, ptid)
@@ -1361,13 +1425,34 @@ thread_db_find_new_threads_1 (ptid_t ptid)
 
   /* Access an lwp we know is stopped.  */
   info->proc_handle.ptid = ptid;
-  /* Iterate over all user-space threads to discover new threads.  */
-  err = info->td_ta_thr_iter_p (info->thread_agent, find_new_threads_callback,
-				info, TD_THR_ANY_STATE, TD_THR_LOWEST_PRIORITY,
-				TD_SIGNO_MASK, TD_THR_ANY_USER_FLAGS);
-  if (err != TD_OK)
-    error (_("Cannot find new threads: %s"), thread_db_err_str (err));
+
+  if (until_no_new)
+    {
+      /* Require 4 successive iterations which do not find any new threads.
+	 The 4 is a heuristic: there is an inherent race here, and I have
+	 seen that 2 iterations in a row are not always sufficient to
+	 "capture" all threads.  */
+      for (i = 0, loop = 0; loop < 4; ++i, ++loop)
+	if (find_new_threads_once (info, i, NULL) != 0)
+	  /* Found some new threads.  Restart the loop from beginning.	*/
+	  loop = -1;
+    }
+  else
+    {
+      int err;
+
+      find_new_threads_once (info, 0, &err);
+      if (err != TD_OK)
+	error (_("Cannot find new threads: %s"), thread_db_err_str (err));
+    }
 }
+
+static void
+thread_db_find_new_threads_1 (ptid_t ptid)
+{
+  thread_db_find_new_threads_2 (ptid, 0);
+}
+
 
 static void
 thread_db_find_new_threads (struct target_ops *ops)

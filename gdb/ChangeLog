@@ -1,3 +1,17 @@
+2009-10-27  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	PR gdb/10757
+	* linux-thread-db.c (attach_thread): Return success/failure
+	indicator.
+	(thread_db_find_new_threads_silently): Retry until no new threads.
+	(struct callback_data): New.
+	(find_new_threads_callback): Count new threads, stop iteration
+	on error.
+	(find_new_threads_once): New function.
+	(thread_db_find_new_threads_2): Rename from
+	thread_db_find_new_threads_1 and adjust.
+	(thread_db_find_new_threads_1): New function.
+	
 2009-10-26  Michael Eager  <eager@eagercon.com>
 
 	* MAINTAINERS: Add self to "modify-after-approval" maintainers.
