@@ -62,6 +62,7 @@
 #include "bfd.h"
 #include "libbfd.h"
 #include "coff/internal.h"
+#include "bfdver.h"
 
 /* NOTE: it's strange to be including an architecture specific header
    in what's supposed to be general (to PE/PEI) code.  However, that's
@@ -666,7 +667,8 @@ _bfd_XXi_swap_aouthdr_out (bfd * abfd, void * in, void * out)
 
   H_PUT_16 (abfd, aouthdr_in->magic, aouthdr_out->standard.magic);
 
-#define LINKER_VERSION 256 /* That is, 2.56 */
+/* e.g. 219510000 is linker version 2.19  */
+#define LINKER_VERSION ((short) (BFD_VERSION / 1000000))
 
   /* This piece of magic sets the "linker version" field to
      LINKER_VERSION.  */
