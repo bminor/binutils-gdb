@@ -19445,6 +19445,13 @@ The type of this @code{gdb.Value}.  The value of this attribute is a
 The following methods are provided:
 
 @table @code
+@defmethod Value cast type
+Return a new instance of @code{gdb.Value} that is the result of
+casting this instance to the type described by @var{type}, which must
+be a @code{gdb.Type} object.  If the cast cannot be performed for some
+reason, this method throws an exception.
+@end defmethod
+
 @defmethod Value dereference
 For pointer data types, this method returns a new @code{gdb.Value} object
 whose contents is the object pointed to by the pointer.  For example, if

@@ -1,3 +1,10 @@
+2009-10-27  Tom Tromey <tromey@redhat.com>
+	    Eli Zaretskii <eliz@gnu.org>
+
+        PR python/10781
+
+	* gdb.texinfo (Values From Inferior): Document cast method.
+
 2009-10-22  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* gdb.texinfo (Machine Code): Mention function name in disasssembly
