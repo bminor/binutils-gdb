@@ -41,7 +41,6 @@ BUILD_LIB_DEPS = @BUILD_LIB_DEPS@
 
 # Header files.
 HFILES = \
-	cgen-ops.h cgen-types.h \
 	fr30-desc.h fr30-opc.h \
 	frv-desc.h frv-opc.h \
 	h8500-opc.h \
