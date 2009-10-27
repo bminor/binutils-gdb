@@ -241,6 +241,9 @@ static void avr_set_arch (int);
 const pseudo_typeS md_pseudo_table[] =
 {
   {"arch", avr_set_arch,	0},
+  {"file", (void (*) (int)) dwarf2_directive_file, 0},
+  {"loc", dwarf2_directive_loc, 0},
+  {"loc_mark_labels", dwarf2_directive_loc_mark_labels, 0},
   { NULL,	NULL,		0}
 };
 

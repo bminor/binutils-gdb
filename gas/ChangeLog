@@ -1,3 +1,9 @@
+2009-10-27  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-avr.c (md_pseudo_table): Add dwarf2 debug pseudo.
+	* config/tc-avr.h (DWARF2_LINE_MIN_INSN_LENGTH): Define.
+	(DWARF2_ADDR_SIZE): Define.
+
 2009-10-27  Alan Modra  <amodra@bigpond.net.au>
 
 	PR gas/10850
