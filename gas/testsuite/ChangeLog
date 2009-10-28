@@ -1,3 +1,7 @@
+2009-10-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/i386/intelpic.d: Correct.
+
 2009-10-25  Arnold Metselaar  <arnold.metselaar@planet.nl>
 
 	* gas/z80/equ.d, gas/z80/equ.s: Added test of parsing equ directives.
