@@ -75,17 +75,17 @@ CGEN_MAINT = ; @true
 # The following line is commented in or out depending upon --enable-cgen-maint.
 @CGEN_MAINT@CGEN_MAINT =
 
-stamp-arch: $(CGEN_READ_SCM) $(CGEN_ARCH_SCM) $(CGEN_CPU_DIR)/lm32.cpu
+stamp-arch: $(CGEN_READ_SCM) $(CGEN_ARCH_SCM) $(CPU_DIR)/lm32.cpu
 	$(MAKE) cgen-arch $(CGEN_FLAGS_TO_PASS) mach=all \
-	  archfile=$(CGEN_CPU_DIR)/lm32.cpu \
+	  archfile=$(CPU_DIR)/lm32.cpu \
 	  FLAGS="with-scache with-profile=fn"
 	touch stamp-arch
 arch.h arch.c cpuall.h: $(CGEN_MAINT) stamp-arch
 
-stamp-cpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CGEN_CPU_DIR)/lm32.cpu
+stamp-cpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CPU_DIR)/lm32.cpu
 	$(MAKE) cgen-cpu-decode $(CGEN_FLAGS_TO_PASS) \
 	  cpu=lm32bf mach=lm32 SUFFIX= \
-	  archfile=$(CGEN_CPU_DIR)/lm32.cpu \
+	  archfile=$(CPU_DIR)/lm32.cpu \
 	  FLAGS="with-scache with-profile=fn" \
 	  EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"
 	touch stamp-cpu
