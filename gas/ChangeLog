@@ -1,3 +1,8 @@
+2009-10-28  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (opcode_lookup): Allow VFP/NEON type suffixes
+	unconditionally.
+
 2009-10-28  Alan Modra  <amodra@bigpond.net.au>
 
 	PR gas/10856

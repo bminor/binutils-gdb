@@ -14955,14 +14955,11 @@ opcode_lookup (char **str)
   const struct asm_opcode *opcode;
   const struct asm_cond *cond;
   char save[2];
-  bfd_boolean neon_supported;
-
-  neon_supported = ARM_CPU_HAS_FEATURE (cpu_variant, fpu_neon_ext_v1);
 
   /* Scan up to the end of the mnemonic, which must end in white space,
-     '.' (in unified mode, or for Neon instructions), or end of string.  */
+     '.' (in unified mode, or for Neon/VFP instructions), or end of string.  */
   for (base = end = *str; *end != '\0'; end++)
-    if (*end == ' ' || ((unified_syntax || neon_supported) && *end == '.'))
+    if (*end == ' ' || *end == '.')
       break;
 
   if (end == base)
