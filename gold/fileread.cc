@@ -57,14 +57,20 @@ namespace gold
 File_read::View::~View()
 {
   gold_assert(!this->is_locked());
-  if (!this->mapped_)
-    delete[] this->data_;
-  else
+  switch (this->data_ownership_)
     {
+    case DATA_ALLOCATED_ARRAY:
+      delete[] this->data_;
+      break;
+    case DATA_MMAPPED:
       if (::munmap(const_cast<unsigned char*>(this->data_), this->size_) != 0)
         gold_warning(_("munmap failed: %s"), strerror(errno));
-
       File_read::current_mapped_bytes -= this->size_;
+      break;
+    case DATA_NOT_OWNED:
+      break;
+    default:
+      gold_unreachable();
     }
 }
 
@@ -105,6 +111,8 @@ File_read::~File_read()
     }
   this->name_.clear();
   this->clear_views(true);
+  if (this->whole_file_view_)
+    delete this->whole_file_view_;
 }
 
 // Open the file.
@@ -132,6 +140,22 @@ File_read::open(const Task* task, const std::string& name)
       gold_debug(DEBUG_FILES, "Attempt to open %s succeeded",
                  this->name_.c_str());
 
+      // Options may not yet be ready e.g. when reading a version
+      // script.  We then default to --no-keep-files-mapped.
+      if (parameters->options_valid()
+	  && parameters->options().keep_files_mapped())
+        {
+          const unsigned char* contents = static_cast<const unsigned char*>(
+              ::mmap(NULL, this->size_, PROT_READ, MAP_PRIVATE,
+                     this->descriptor_, 0));
+          if (contents == MAP_FAILED)
+            gold_fatal(_("%s: mmap failed: %s"), this->filename().c_str(),
+                       strerror(errno));
+          this->whole_file_view_ = new View(0, this->size_, contents, 0, false,
+                                            View::DATA_MMAPPED);
+          this->mapped_bytes_ += this->size_;
+        }
+
       this->token_.add_writer(task);
     }
 
@@ -149,7 +173,8 @@ File_read::open(const Task* task, const std::string& name,
 	      && !this->is_descriptor_opened_
 	      && this->name_.empty());
   this->name_ = name;
-  this->contents_ = contents;
+  this->whole_file_view_ = new View(0, size, contents, 0, false,
+                                    View::DATA_NOT_OWNED);
   this->size_ = size;
   this->token_.add_writer(task);
   return true;
@@ -246,6 +271,12 @@ File_read::find_view(off_t start, section_size_type size,
   if (vshifted != NULL)
     *vshifted = NULL;
 
+  // If we have the whole file mmapped, and the alignment is right,
+  // we can return it.
+  if (this->whole_file_view_)
+    if (byteshift == -1U || byteshift == 0)
+      return this->whole_file_view_;
+
   off_t page = File_read::page_offset(start);
 
   unsigned int bszero = 0;
@@ -281,12 +312,12 @@ void
 File_read::do_read(off_t start, section_size_type size, void* p)
 {
   ssize_t bytes;
-  if (this->contents_ != NULL)
+  if (this->whole_file_view_ != NULL)
     {
       bytes = this->size_ - start;
       if (static_cast<section_size_type>(bytes) >= size)
 	{
-	  memcpy(p, this->contents_ + start, size);
+	  memcpy(p, this->whole_file_view_->data() + start, size);
 	  return;
 	}
     }
@@ -386,12 +417,13 @@ File_read::make_view(off_t start, section_size_type size,
     }
 
   File_read::View* v;
-  if (this->contents_ != NULL || byteshift != 0)
+  if (this->whole_file_view_ != NULL || byteshift != 0)
     {
       unsigned char* p = new unsigned char[psize + byteshift];
       memset(p, 0, byteshift);
       this->do_read(poff, psize, p + byteshift);
-      v = new File_read::View(poff, psize, p, byteshift, cache, false);
+      v = new File_read::View(poff, psize, p, byteshift, cache,
+                              View::DATA_ALLOCATED_ARRAY);
     }
   else
     {
@@ -408,7 +440,8 @@ File_read::make_view(off_t start, section_size_type size,
       this->mapped_bytes_ += psize;
 
       const unsigned char* pbytes = static_cast<const unsigned char*>(p);
-      v = new File_read::View(poff, psize, pbytes, 0, cache, true);
+      v = new File_read::View(poff, psize, pbytes, 0, cache,
+                              View::DATA_MMAPPED);
     }
 
   this->add_view(v);
@@ -463,9 +496,9 @@ File_read::find_or_make_view(off_t offset, off_t start,
       memset(pbytes, 0, byteshift);
       memcpy(pbytes + byteshift, v->data() + v->byteshift(), v->size());
 
-      File_read::View* shifted_view = new File_read::View(v->start(), v->size(),
-							  pbytes, byteshift,
-							  cache, false);
+      File_read::View* shifted_view =
+          new File_read::View(v->start(), v->size(), pbytes, byteshift,
+			      cache, View::DATA_ALLOCATED_ARRAY);
 
       this->add_view(shifted_view);
       return shifted_view;

@@ -65,8 +65,8 @@ class File_read
  public:
   File_read()
     : name_(), descriptor_(-1), is_descriptor_opened_(false), object_count_(0),
-      size_(0), token_(false), views_(), saved_views_(), contents_(NULL),
-      mapped_bytes_(0), released_(true)
+      size_(0), token_(false), views_(), saved_views_(), mapped_bytes_(0),
+      released_(true), whole_file_view_(NULL)
   { }
 
   ~File_read();
@@ -234,10 +234,23 @@ class File_read
   class View
   {
    public:
+    // Specifies how to dispose the data on destruction of the view.
+    enum Data_ownership
+    {
+      // Data owned by File object - nothing done in destructor.
+      DATA_NOT_OWNED,
+      // Data alocated with new[] and owned by this object - should
+      // use delete[].
+      DATA_ALLOCATED_ARRAY,
+      // Data mmapped and owned by this object - should munmap.
+      DATA_MMAPPED
+    };
+
     View(off_t start, section_size_type size, const unsigned char* data,
-	 unsigned int byteshift, bool cache, bool mapped)
+	 unsigned int byteshift, bool cache, Data_ownership data_ownership)
       : start_(start), size_(size), data_(data), lock_count_(0),
-	byteshift_(byteshift), cache_(cache), mapped_(mapped), accessed_(true)
+	byteshift_(byteshift), cache_(cache), data_ownership_(data_ownership),
+	accessed_(true)
     { }
 
     ~View();
@@ -311,7 +324,7 @@ class File_read
     bool cache_;
     // Whether the view is mapped into memory.  If not, data_ points
     // to memory allocated using new[].
-    bool mapped_;
+    Data_ownership data_ownership_;
     // Whether the view has been accessed recently.
     bool accessed_;
   };
@@ -400,14 +413,18 @@ class File_read
   // List of views which were locked but had to be removed from views_
   // because they were not large enough.
   Saved_views saved_views_;
-  // Specified file contents.  Used only for testing purposes.
-  const unsigned char* contents_;
   // Total amount of space mapped into memory.  This is only changed
   // while the file is locked.  When we unlock the file, we transfer
   // the total to total_mapped_bytes, and reset this to zero.
   size_t mapped_bytes_;
   // Whether the file was released.
   bool released_;
+  // A view containing the whole file.  May be NULL if we mmap only
+  // the relevant parts of the file.  Not NULL if:
+  // - Flag --mmap_whole_files is set (default on 64-bit hosts).
+  // - The contents was specified in the constructor.  Used only for
+  //   testing purposes).
+  View* whole_file_view_;
 };
 
 // A view of file data that persists even when the file is unlocked.

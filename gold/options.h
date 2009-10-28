@@ -723,6 +723,12 @@ class General_options
   DEFINE_special(just_symbols, options::TWO_DASHES, '\0',
                  N_("Read only symbol values from FILE"), N_("FILE"));
 
+  DEFINE_bool(keep_files_mapped, options::TWO_DASHES, '\0',
+	      sizeof(void*) >= 8,
+              N_("Map whole files to memory (default on 64-bit hosts)"),
+              N_("Map relevant file parts to memory (default on 32-bit "
+                 "hosts)"));
+
   DEFINE_special(library, options::TWO_DASHES, 'l',
                  N_("Search for library LIBNAME"), N_("LIBNAME"));
 

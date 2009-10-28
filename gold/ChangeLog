@@ -1,3 +1,27 @@
+2009-10-27  Mikolaj Zalewski  <mikolajz@google.com>
+
+	* fileread.cc: (File_read::View::~View): Use the new
+	data_ownership_ filed.
+	(File_read::~File_read): Dispose the new whole_file_view_.
+	(File_read::open): Mmap the whole file if needed.
+	(File_read::open): Use whole_file_view_ instead of contents_.
+	(File_read::find_view): Use whole_file_view_ if applicable.
+	(File_read::do_read): Use whole_file_view_ instead of contents_.
+	(File_read::make_view): Use whole_file_view_ instead of contents_,
+	update File_read::View::View call.
+	(File_read::find_or_make_view): Update File_read::View::View
+	call.
+	* fileread.h: (File_read::File_read): Initialize whole_file_view_,
+	remove contents_
+	(File_read::View::Data_ownership): New enum.
+	(File_read::View::View): Replace bool mapped_ with Data_ownership
+	argument.
+	(File_read::View::mapped_): Remove (replaced by data_ownership_).
+	(File_read::View::data_ownership_): New field.
+	(File_read::contents_): Remove (replaced by whole_file_view_).
+	(File_read::whole_file_view_): New field.
+	* options.h (class General_options): Add --keep-files-mapped.
+
 2009-10-27  Cary Coutant  <ccoutant@google.com>
 
 	* symtab.cc (add_from_pluginobj): Pass correct value for is_ordinary.
