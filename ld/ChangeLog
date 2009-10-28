@@ -1,3 +1,8 @@
+2009-10-28  Kai Tietz  <kai.tietz@onevision.com>
+
+	* emultempl/pep.em (U): Define underscore macro.
+	(init): Use for __ImageBase U macro.
+
 2009-10-23  Kai Tietz  <kai.tietz@onevision.com>
 
 	* deffile.h (def_file_export): New member its_name.

@@ -98,6 +98,7 @@ fragment <<EOF
 #define PE_DEF_SECTION_ALIGNMENT	0x00000400
 #endif
 
+#define U(S) ${INITIAL_SYMBOL_CHAR} S
 
 static struct internal_extra_pe_aouthdr pep;
 static int dll;
@@ -293,7 +294,7 @@ static definfo init[] =
 #define DLLOFF 1
   {&dll, sizeof(dll), 0, "__dll__", 0},
 #define MSIMAGEBASEOFF	2
-  D(ImageBase,"___ImageBase", NT_EXE_IMAGE_BASE),
+  D(ImageBase, U("__ImageBase"), NT_EXE_IMAGE_BASE),
   D(SectionAlignment,"__section_alignment__", PE_DEF_SECTION_ALIGNMENT),
   D(FileAlignment,"__file_alignment__", PE_DEF_FILE_ALIGNMENT),
   D(MajorOperatingSystemVersion,"__major_os_version__", 4),
