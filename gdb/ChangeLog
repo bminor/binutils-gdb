@@ -1,3 +1,7 @@
+2009-10-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (keep_going): Wrap with resume_cleanups.
+
 2009-10-27  Paul Pluzhnikov  <ppluzhnikov@google.com>
 	
 	* MAINTAINERS: Add self to "modify-after-approval" maintainers.

@@ -4812,6 +4812,10 @@ stop_stepping (struct execution_control_state *ecs)
 static void
 keep_going (struct execution_control_state *ecs)
 {
+  /* Make sure normal_stop is called if we get a QUIT handled before
+     reaching resume.  */
+  struct cleanup *old_cleanups = make_cleanup (resume_cleanups, 0);
+
   /* Save the pc before execution, to compare with pc after stop.  */
   ecs->event_thread->prev_pc
     = regcache_read_pc (get_thread_regcache (ecs->ptid));
@@ -4825,6 +4829,8 @@ keep_going (struct execution_control_state *ecs)
       /* We took a signal (which we are supposed to pass through to
 	 the inferior, else we'd not get here) and we haven't yet
 	 gotten our trap.  Simply continue.  */
+
+      discard_cleanups (old_cleanups);
       resume (currently_stepping (ecs->event_thread),
 	      ecs->event_thread->stop_signal);
     }
@@ -4887,6 +4893,7 @@ keep_going (struct execution_control_state *ecs)
 	  && !signal_program[ecs->event_thread->stop_signal])
 	ecs->event_thread->stop_signal = TARGET_SIGNAL_0;
 
+      discard_cleanups (old_cleanups);
       resume (currently_stepping (ecs->event_thread),
 	      ecs->event_thread->stop_signal);
     }
