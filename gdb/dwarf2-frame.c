@@ -2101,7 +2101,8 @@ dwarf2_build_frame_info (struct objfile *objfile)
   if (fde_table.num_entries != 0)
     {
       struct dwarf2_fde_table *fde_table2;
-      int i, j;
+      struct dwarf2_fde *fde_prev = NULL;
+      int i;
 
       /* Prepare FDE table for lookups.  */
       qsort (fde_table.entries, fde_table.num_entries,
@@ -2110,22 +2111,39 @@ dwarf2_build_frame_info (struct objfile *objfile)
       /* Copy fde_table to obstack: it is needed at runtime.  */
       fde_table2 = (struct dwarf2_fde_table *)
           obstack_alloc (&objfile->objfile_obstack, sizeof (*fde_table2));
+      fde_table2->num_entries = 0;
 
       /* Since we'll be doing bsearch, squeeze out identical (except for
          eh_frame_p) fde entries so bsearch result is predictable.  */
-      for (i = 0, j = 0; j < fde_table.num_entries; ++i)
-        {
-          const int k = j;
+      for (i = 0; i < fde_table.num_entries; i++)
+	{
+	  struct dwarf2_fde *fde = fde_table.entries[i];
 
-          obstack_grow (&objfile->objfile_obstack, &fde_table.entries[j],
-                        sizeof (fde_table.entries[0]));
-          while (++j < fde_table.num_entries
-                 && (fde_table.entries[k]->initial_location
-                     == fde_table.entries[j]->initial_location))
-            /* Skip.  */;
-        }
+	  /* Check for leftovers from --gc-sections.  The GNU linker
+	     sets the relevant symbols to zero, but doesn't zero the
+	     FDE *end* ranges because there's no relocation there.
+	     It's (offset, length), not (start, end).  On targets
+	     where address zero is just another valid address this can
+	     be a problem, since the FDEs appear to be non-empty in
+	     the output --- we could pick out the wrong FDE.  To work
+	     around this, when overlaps are detected, we prefer FDEs
+	     that do not start at zero.  */
+	  if (fde->initial_location == 0
+	      && (i + 1) < fde_table.num_entries
+	      && ((fde_table.entries[i + 1])->initial_location
+		  < fde->initial_location + fde->address_range))
+	    continue;
+
+	  if (fde_prev != NULL
+	      && fde_prev->initial_location == fde->initial_location)
+	    continue;
+
+	  obstack_grow (&objfile->objfile_obstack, &fde_table.entries[i],
+			sizeof (fde_table.entries[0]));
+	  ++fde_table2->num_entries;
+	  fde_prev = fde;
+	}
       fde_table2->entries = obstack_finish (&objfile->objfile_obstack);
-      fde_table2->num_entries = i;
       set_objfile_data (objfile, dwarf2_frame_objfile_data, fde_table2);
 
       /* Discard the original fde_table.  */
