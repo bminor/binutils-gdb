@@ -1,3 +1,22 @@
+2009-10-28  Kai Tietz <kai.tietz@onevision.com>
+
+	* dlltool.c (leading_underscore): New local variable.
+	(asm_prefix): Interpret leading_underscore.
+	(xlate): Likewise.
+	(add_excludes): Use leading_underscore for making
+	symbol name.
+	(gen_exp_file): Use leading_underscore for internal
+	_imp_ symbols.
+	(usage): Add display of --no-leading-underscore and
+	--leading-underscore option.
+	(OPTION_NO_LEADING_UNDERSCORE): New.
+	(OPTION_LEADING_UNDERSCORE): New.
+	(long_options): Add --no-leading-underscore and
+	--leading-underscore option.
+	(main): Handle new options.
+	* doc/binutils.text: Add documentation of the options
+	--no-leading-underscore and --leading-underscore.
+
 2009-10-23  Kai Tietz  <kai.tietz@onevision.com>
 
 	* deflex.l: Allow '<' and '>' in ID names.

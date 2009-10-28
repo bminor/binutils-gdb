@@ -394,6 +394,11 @@ static char *dll_name;
 static int add_indirect = 0;
 static int add_underscore = 0;
 static int add_stdcall_underscore = 0;
+/* This variable can hold three different values. The value
+   -1 (default) means that default underscoring should be used,
+   zero means that no underscoring should be done, and one
+   indicates that underscoring should be done.  */
+static int leading_underscore = -1;
 static int dontdeltemps = 0;
 
 /* TRUE if we should export all symbols.  Otherwise, we only export
@@ -936,7 +941,7 @@ asm_prefix (int machine, const char *name)
     case M386:
     case MX86:
       /* Symbol names starting with ? do not have a leading underscore. */
-      if (name && *name == '?')
+      if ((name && *name == '?') || leading_underscore == 0)
         break;
       else
         return "_";
@@ -1488,7 +1493,8 @@ add_excludes (const char *new_excludes)
       if (*exclude_string == '@')
 	sprintf (new_exclude->string, "%s", exclude_string);
       else
-	sprintf (new_exclude->string, "_%s", exclude_string);
+	sprintf (new_exclude->string, "%s%s", (!leading_underscore ? "" : "_"),
+		 exclude_string);
       new_exclude->next = excludes;
       excludes = new_exclude;
 
@@ -2100,10 +2106,11 @@ gen_exp_file (void)
                cygwin releases.  */
 	    if (create_compat_implib)
 	      fprintf (f, "\t%s\t__imp_%s\n", ASM_GLOBAL, exp->name);
-	    fprintf (f, "\t%s\t_imp__%s\n", ASM_GLOBAL, exp->name);
+	    fprintf (f, "\t%s\t_imp_%s%s\n", ASM_GLOBAL,
+	    	     (!leading_underscore ? "" : "_"), exp->name);
 	    if (create_compat_implib)
 	      fprintf (f, "__imp_%s:\n", exp->name);
-	    fprintf (f, "_imp__%s:\n", exp->name);
+	    fprintf (f, "_imp_%s%s:\n", (!leading_underscore ? "" : "_"), exp->name);
 	    fprintf (f, "\t%s\t%s\n", ASM_LONG, exp->name);
 	  }
     }
@@ -2182,10 +2189,10 @@ static const char *
 xlate (const char *name)
 {
   int lead_at = (*name == '@');
+  int is_stdcall = (!lead_at && strchr (name, '@') != NULL);
 
   if (!lead_at && (add_underscore
-		   || (add_stdcall_underscore
-		       && strchr (name, '@'))))
+		   || (add_stdcall_underscore && is_stdcall)))
     {
       char *copy = xmalloc (strlen (name) + 2);
 
@@ -3872,6 +3879,8 @@ usage (FILE *file, int status)
   fprintf (file, _("      --use-nul-prefixed-import-tables Use zero prefixed idata$4 and idata$5.\n"));
   fprintf (file, _("   -U --add-underscore       Add underscores to all symbols in interface library.\n"));
   fprintf (file, _("      --add-stdcall-underscore Add underscores to stdcall symbols in interface library.\n"));
+  fprintf (file, _("      --no-leading-underscore All symbols shouldn't be prefixed by an underscore.\n"));
+  fprintf (file, _("      --leading-underscore   All symbols should be prefixed by an underscore.\n"));
   fprintf (file, _("   -k --kill-at              Kill @<n> from exported names.\n"));
   fprintf (file, _("   -A --add-stdcall-alias    Add aliases without @<n>.\n"));
   fprintf (file, _("   -p --ext-prefix-alias <prefix> Add aliases with <prefix>.\n"));
@@ -3904,6 +3913,8 @@ usage (FILE *file, int status)
 #define OPTION_USE_NUL_PREFIXED_IMPORT_TABLES \
   (OPTION_ADD_STDCALL_UNDERSCORE + 1)
 #define OPTION_IDENTIFY_STRICT		(OPTION_USE_NUL_PREFIXED_IMPORT_TABLES + 1)
+#define OPTION_NO_LEADING_UNDERSCORE	(OPTION_IDENTIFY_STRICT + 1)
+#define OPTION_LEADING_UNDERSCORE	(OPTION_NO_LEADING_UNDERSCORE + 1)
 
 static const struct option long_options[] =
 {
@@ -3924,6 +3935,8 @@ static const struct option long_options[] =
   {"input-def", required_argument, NULL, 'd'},
   {"add-underscore", no_argument, NULL, 'U'},
   {"add-stdcall-underscore", no_argument, NULL, OPTION_ADD_STDCALL_UNDERSCORE},
+  {"no-leading-underscore", no_argument, NULL, OPTION_NO_LEADING_UNDERSCORE},
+  {"leading-underscore", no_argument, NULL, OPTION_LEADING_UNDERSCORE},
   {"kill-at", no_argument, NULL, 'k'},
   {"add-stdcall-alias", no_argument, NULL, 'A'},
   {"ext-prefix-alias", required_argument, NULL, 'p'},
@@ -3994,6 +4007,12 @@ main (int ac, char **av)
 	  break;
 	case OPTION_ADD_STDCALL_UNDERSCORE:
 	  add_stdcall_underscore = 1;
+	  break;
+	case OPTION_NO_LEADING_UNDERSCORE:
+	  leading_underscore = 0;
+	  break;
+	case OPTION_LEADING_UNDERSCORE:
+	  leading_underscore = 1;
 	  break;
 	case OPTION_IDENTIFY_STRICT:
 	  identify_strict = 1;

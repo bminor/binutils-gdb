@@ -3509,6 +3509,7 @@ dlltool [@option{-d}|@option{--input-def} @var{def-file-name}]
         [@option{-n}|@option{--nodelete}] [@option{-t}|@option{--temp-prefix} @var{prefix}]
         [@option{-v}|@option{--verbose}]
         [@option{-h}|@option{--help}] [@option{-V}|@option{--version}]
+        [@option{--no-leading-underscore}] [@option{--leading-underscore}]
         [object-file @dots{}]
 @c man end
 @end smallexample
@@ -3696,6 +3697,11 @@ means!
 @itemx --add-underscore
 Specifies that when @command{dlltool} is creating the exports file it
 should prepend an underscore to the names of @emph{all} exported symbols.
+
+@item --no-leading-underscore
+@item --leading-underscore
+Specifies whether standard symbol should be forced to be prefixed, or
+not.
 
 @item --add-stdcall-underscore
 Specifies that when @command{dlltool} is creating the exports file it
