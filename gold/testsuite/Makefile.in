@@ -329,7 +329,8 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_1 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_2 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_3 \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_4
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_4 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_5
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_23 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_1.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_2.sh \
@@ -345,7 +346,8 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_2.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_3.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_4.a \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_4.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_4.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	unused.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_26 = exclude_libs_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	local_labels_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	discard_locals_test
@@ -525,7 +527,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__EXEEXT_16 = plugin_test_1$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_3$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_4$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_4$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	plugin_test_5$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_17 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exclude_libs_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	local_labels_test$(EXEEXT) \
@@ -784,6 +787,12 @@ plugin_test_4_SOURCES = plugin_test_4.c
 plugin_test_4_OBJECTS = plugin_test_4.$(OBJEXT)
 plugin_test_4_LDADD = $(LDADD)
 plugin_test_4_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+plugin_test_5_SOURCES = plugin_test_5.c
+plugin_test_5_OBJECTS = plugin_test_5.$(OBJEXT)
+plugin_test_5_LDADD = $(LDADD)
+plugin_test_5_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am__protected_1_SOURCES_DIST = protected_main_1.cc protected_main_2.cc \
@@ -1196,13 +1205,13 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	local_labels_test.c many_sections_r_test.c \
 	$(many_sections_test_SOURCES) $(object_unittest_SOURCES) \
 	permission_test.c plugin_test_1.c plugin_test_2.c \
-	plugin_test_3.c plugin_test_4.c $(protected_1_SOURCES) \
-	$(protected_2_SOURCES) $(relro_script_test_SOURCES) \
-	$(relro_test_SOURCES) $(script_test_1_SOURCES) \
-	$(script_test_2_SOURCES) script_test_3.c \
-	$(searched_file_test_SOURCES) $(thin_archive_test_1_SOURCES) \
-	$(thin_archive_test_2_SOURCES) $(tls_pic_test_SOURCES) \
-	$(tls_shared_gd_to_ie_test_SOURCES) \
+	plugin_test_3.c plugin_test_4.c plugin_test_5.c \
+	$(protected_1_SOURCES) $(protected_2_SOURCES) \
+	$(relro_script_test_SOURCES) $(relro_test_SOURCES) \
+	$(script_test_1_SOURCES) $(script_test_2_SOURCES) \
+	script_test_3.c $(searched_file_test_SOURCES) \
+	$(thin_archive_test_1_SOURCES) $(thin_archive_test_2_SOURCES) \
+	$(tls_pic_test_SOURCES) $(tls_shared_gd_to_ie_test_SOURCES) \
 	$(tls_shared_gnu2_gd_to_ie_test_SOURCES) \
 	$(tls_shared_gnu2_test_SOURCES) $(tls_shared_ie_test_SOURCES) \
 	$(tls_shared_nonpic_test_SOURCES) $(tls_shared_test_SOURCES) \
@@ -1254,7 +1263,7 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	many_sections_r_test.c $(am__many_sections_test_SOURCES_DIST) \
 	$(object_unittest_SOURCES) permission_test.c plugin_test_1.c \
 	plugin_test_2.c plugin_test_3.c plugin_test_4.c \
-	$(am__protected_1_SOURCES_DIST) \
+	plugin_test_5.c $(am__protected_1_SOURCES_DIST) \
 	$(am__protected_2_SOURCES_DIST) \
 	$(am__relro_script_test_SOURCES_DIST) \
 	$(am__relro_test_SOURCES_DIST) \
@@ -2036,6 +2045,15 @@ object_unittest$(EXEEXT): $(object_unittest_OBJECTS) $(object_unittest_DEPENDENC
 @PLUGINS_FALSE@plugin_test_4$(EXEEXT): $(plugin_test_4_OBJECTS) $(plugin_test_4_DEPENDENCIES) 
 @PLUGINS_FALSE@	@rm -f plugin_test_4$(EXEEXT)
 @PLUGINS_FALSE@	$(LINK) $(plugin_test_4_OBJECTS) $(plugin_test_4_LDADD) $(LIBS)
+@GCC_FALSE@plugin_test_5$(EXEEXT): $(plugin_test_5_OBJECTS) $(plugin_test_5_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f plugin_test_5$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(plugin_test_5_OBJECTS) $(plugin_test_5_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@plugin_test_5$(EXEEXT): $(plugin_test_5_OBJECTS) $(plugin_test_5_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f plugin_test_5$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(plugin_test_5_OBJECTS) $(plugin_test_5_LDADD) $(LIBS)
+@PLUGINS_FALSE@plugin_test_5$(EXEEXT): $(plugin_test_5_OBJECTS) $(plugin_test_5_DEPENDENCIES) 
+@PLUGINS_FALSE@	@rm -f plugin_test_5$(EXEEXT)
+@PLUGINS_FALSE@	$(LINK) $(plugin_test_5_OBJECTS) $(plugin_test_5_LDADD) $(LIBS)
 protected_1$(EXEEXT): $(protected_1_OBJECTS) $(protected_1_DEPENDENCIES) 
 	@rm -f protected_1$(EXEEXT)
 	$(protected_1_LINK) $(protected_1_OBJECTS) $(protected_1_LDADD) $(LIBS)
@@ -2241,6 +2259,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_4.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_5.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protected_3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protected_main_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protected_main_2.Po@am__quote@
@@ -3049,6 +3068,8 @@ uninstall-am:
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_4.a: two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_AR) cr $@ $^
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test_5: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms unused.syms gcctestdir/ld plugin_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv",--gc-sections two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms unused.syms
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test.so: plugin_test.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(LINK) -Bgcctestdir/ -shared plugin_test.o
@@ -3063,9 +3084,17 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@two_file_test_2.syms: two_file_test_2.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@empty.syms:
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@echo "" >empty.syms
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@echo "Symbol table" >>empty.syms
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@echo "" >$@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@echo "Symbol table" >>$@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@unused.syms: unused.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@echo "     1: 00000000     4 FUNC    GLOBAL DEFAULT    1 UNUSED" >>$@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@unused.o: unused.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(COMPILE) -c -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@unused.c:
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	@cp /dev/null $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exclude_libs_test.syms: exclude_libs_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 @GCC_TRUE@@NATIVE_LINKER_TRUE@libexclude_libs_test_1.a: exclude_libs_test_1.o

@@ -1128,6 +1128,10 @@ plugin_test_4.err: plugin_test_4
 plugin_test_4.a: two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms
 	$(TEST_AR) cr $@ $^
 
+check_PROGRAMS += plugin_test_5
+plugin_test_5: two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms unused.syms gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv",--gc-sections two_file_test_main.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2.syms unused.syms
+
 plugin_test.so: plugin_test.o
 	$(LINK) -Bgcctestdir/ -shared plugin_test.o
 plugin_test.o: plugin_test.c
@@ -1141,9 +1145,19 @@ two_file_test_1b.syms: two_file_test_1b.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 two_file_test_2.syms: two_file_test_2.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+
 empty.syms:
-	@echo "" >empty.syms
-	@echo "Symbol table" >>empty.syms
+	@echo "" >$@
+	@echo "Symbol table" >>$@
+
+MOSTLYCLEANFILES += unused.c
+unused.syms: unused.o
+	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+	@echo "     1: 00000000     4 FUNC    GLOBAL DEFAULT    1 UNUSED" >>$@
+unused.o: unused.c
+	$(COMPILE) -c -o $@ $<
+unused.c:
+	@cp /dev/null $@
 
 endif PLUGINS
 

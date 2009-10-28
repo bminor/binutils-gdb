@@ -1202,6 +1202,7 @@ Symbol_table::add_from_pluginobj(
     elfcpp::Sym<size, big_endian>* sym)
 {
   unsigned int st_shndx = sym->get_st_shndx();
+  bool is_ordinary = st_shndx < elfcpp::SHN_LORESERVE;
 
   Stringpool::Key ver_key = 0;
   bool def = false;
@@ -1245,7 +1246,7 @@ Symbol_table::add_from_pluginobj(
 
   Sized_symbol<size>* res;
   res = this->add_from_object(obj, name, name_key, ver, ver_key,
-		              def, *sym, st_shndx, true, st_shndx);
+		              def, *sym, st_shndx, is_ordinary, st_shndx);
 
   if (local)
     this->force_local(res);
