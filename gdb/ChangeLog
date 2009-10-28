@@ -1,3 +1,10 @@
+2009-10-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Reported by Antti Hatala <ahatala@nvidia.com>.
+
+	* arm-tdep.c (thumb_get_next_pc): Limit check to IT instructions
+	correctly.
+
 2009-10-28  Pedro Alves  <pedro@codesourcery.com>
 
         * dwarf2-frame.c (dwarf2_build_frame_info): Discard --gc-section

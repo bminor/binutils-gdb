@@ -2284,7 +2284,7 @@ thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
   /* On GNU/Linux, where this routine is used, we use an undefined
      instruction as a breakpoint.  Unlike BKPT, IT can disable execution
      of the undefined instruction.  So we might miss the breakpoint!  */
-  if ((inst1 & 0xff00) == 0xbf00 || (it & 0x0f))
+  if (((inst1 & 0xff00) == 0xbf00 && (inst1 & 0x000f) != 0) || (it & 0x0f))
     error (_("Stepping through Thumb-2 IT blocks is not yet supported"));
 
   if (it & 0x0f)
