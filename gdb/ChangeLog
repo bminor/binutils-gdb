@@ -1,10 +1,5 @@
 2009-10-28  Pedro Alves  <pedro@codesourcery.com>
 
-        * dwarf2-frame.c (dwarf2_build_frame_info): Discard --gc-section
-	leftover FDEs.
-
-2009-10-28  Pedro Alves  <pedro@codesourcery.com>
-
 	* infrun.c (keep_going): Wrap with resume_cleanups.
 
 2009-10-27  Paul Pluzhnikov  <ppluzhnikov@google.com>
