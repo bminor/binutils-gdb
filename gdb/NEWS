@@ -37,6 +37,24 @@ remove-inferior ID
 maint info program-spaces
   List the program spaces loaded into GDB.
 
+set remote interrupt-sequence [Ctrl-C | BREAK | BREAK-g]
+show remote interrupt-sequence
+  Allow the user to select one of ^C, a BREAK signal or BREAK-g
+  as the sequence to the remote target in order to interrupt the execution.
+  Ctrl-C is a default.  Some system prefers BREAK which is high level of
+  serial line for some certain time.  Linux kernel prefers BREAK-g, a.k.a
+  Magic SysRq g.  It is BREAK signal and character 'g'.
+
+set remote interrupt-on-connect [on | off]
+show remote interrupt-on-connect
+  When interrupt-on-connect is ON, gdb sends interrupt-sequence to
+  remote target when gdb connects to it.  This is needed when you debug
+  Linux kernel.
+
+set remotebreak [on | off]
+show remotebreak
+Deprecated.  Use "set/show remote interrupt-sequence" instead.
+
 * New options
 
 set follow-exec-mode new|same

@@ -15234,6 +15234,34 @@ extended-remote}.  This should be set to a filename valid on the
 target system.  If it is not set, the target will use a default
 filename (e.g.@: the last program run).
 
+@item set remote interrupt-sequence
+@cindex interrupt remote programs
+@cindex select Ctrl-C, BREAK or BREAK-g
+Allow the user to select one of @samp{Ctrl-C}, a @code{BREAK} or
+@samp{BREAK-g} as the
+sequence to the remote target in order to interrupt the execution.
+@samp{Ctrl-C} is a default.  Some system prefers @code{BREAK} which
+is high level of serial line for some certain time.
+Linux kernel prefers @samp{BREAK-g}, a.k.a Magic SysRq g.
+It is @code{BREAK} signal followed by character @code{g}.
+
+@item show interrupt-sequence
+Show which of @samp{Ctrl-C}, @code{BREAK} or @code{BREAK-g}
+is sent by @value{GDBN} to interrupt the remote program.
+@code{BREAK-g} is BREAK signal followed by @code{g} and
+also known as Magic SysRq g.
+
+@item set remote interrupt-on-connect
+@cindex send interrupt-sequence on start
+Specify whether interrupt-sequence is sent to remote target when
+@value{GDBN} connects to it.  This is mostly needed when you debug
+Linux kernel.  Linux kernel expects @code{BREAK} followed by @code{g}
+which is known as Magic SysRq g in order to connect @value{GDBN}.
+
+@item show interrupt-on-connect
+Show whether interrupt-sequence is sent
+to remote target when @value{GDBN} connects to it.
+
 @kindex set tcp
 @kindex show tcp
 @item set tcp auto-retry on
@@ -30084,9 +30112,9 @@ or -1 if an error occurs.  @var{pathname} is a string.
 @cindex interrupts (remote protocol)
 
 When a program on the remote target is running, @value{GDBN} may
-attempt to interrupt it by sending a @samp{Ctrl-C} or a @code{BREAK},
-control of which is specified via @value{GDBN}'s @samp{remotebreak}
-setting (@pxref{set remotebreak}).
+attempt to interrupt it by sending a @samp{Ctrl-C}, @code{BREAK} or
+a @code{BREAK} followed by @code{g},
+control of which is specified via @value{GDBN}'s @samp{interrupt-sequence}.
 
 The precise meaning of @code{BREAK} is defined by the transport
 mechanism and may, in fact, be undefined.  @value{GDBN} does not
@@ -30102,6 +30130,10 @@ transmitted as part of a packet, it is considered to be packet data
 and does @emph{not} represent an interrupt.  E.g., an @samp{X} packet
 (@pxref{X packet}), used for binary downloads, may include an unescaped
 @code{0x03} as part of its packet.
+
+@code{BREAK} followed by @code{g} is also known as Magic SysRq g.
+When Linux kernel receives this sequence from serial port,
+it stops execution and connects to gdb.
 
 Stubs are not required to recognize these interrupt mechanisms and the
 precise meaning associated with receipt of the interrupt is
