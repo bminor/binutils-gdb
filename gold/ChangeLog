@@ -1,3 +1,13 @@
+2009-10-28  Cary Coutant  <ccoutant@google.com>
+
+	* plugin.h (Plugin::Plugin): Initialize cleanup_done_.
+	(Plugin::cleanup_done_): New member.
+	(Plugin_manager::Plugin_manager): Remove cleanup_done_.
+	(Plugin_manager::cleanup_done_): Remove.
+	(Plugin_manager::add_input_file): Edit error message.
+	* plugin.cc (Plugin::cleanup): Test and set cleanup_done_.
+	(Plugin_manager::cleanup): Remove use of cleanup_done_.
+
 2009-10-27  Mikolaj Zalewski  <mikolajz@google.com>
 
 	* fileread.cc: (File_read::View::~View): Use the new

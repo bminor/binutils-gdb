@@ -238,8 +238,14 @@ Plugin::all_symbols_read()
 inline void
 Plugin::cleanup()
 {
-  if (this->cleanup_handler_ != NULL)
-    (*this->cleanup_handler_)();
+  if (this->cleanup_handler_ != NULL && !this->cleanup_done_)
+    {
+      // Set this flag before calling to prevent a recursive plunge
+      // in the event that a plugin's cleanup handler issues a
+      // fatal error.
+      this->cleanup_done_ = true;
+      (*this->cleanup_handler_)();
+    }
 }
 
 // Plugin_manager methods.
@@ -350,13 +356,10 @@ Plugin_manager::layout_deferred_objects()
 void
 Plugin_manager::cleanup()
 {
-  if (this->cleanup_done_)
-    return;
   for (this->current_ = this->plugins_.begin();
        this->current_ != this->plugins_.end();
        ++this->current_)
     (*this->current_)->cleanup();
-  this->cleanup_done_ = true;
 }
 
 // Make a new Pluginobj object.  This is called when the plugin calls
@@ -423,8 +426,8 @@ Plugin_manager::add_input_file(char *pathname, bool is_lib)
   Task_token* next_blocker = new Task_token(true);
   next_blocker->add_blocker();
   if (this->layout_->incremental_inputs())
-    gold_error(_("Input files added by plug-ins in --incremental mode not "
-		 "supported yet.\n"));
+    gold_error(_("input files added by plug-ins in --incremental mode not "
+		 "supported yet"));
   this->workqueue_->queue_soon(new Read_symbols(this->input_objects_,
                                                 this->symtab_,
                                                 this->layout_,

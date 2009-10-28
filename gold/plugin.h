@@ -54,7 +54,8 @@ class Plugin
       args_(),
       claim_file_handler_(NULL),
       all_symbols_read_handler_(NULL),
-      cleanup_handler_(NULL)      
+      cleanup_handler_(NULL),
+      cleanup_done_(false)
   { }
 
   ~Plugin()
@@ -112,6 +113,8 @@ class Plugin
   ld_plugin_claim_file_handler claim_file_handler_;
   ld_plugin_all_symbols_read_handler all_symbols_read_handler_;
   ld_plugin_cleanup_handler cleanup_handler_;
+  // TRUE if the cleanup handlers have been called.
+  bool cleanup_done_;
 };
 
 // A manager class for plugins.
@@ -121,7 +124,7 @@ class Plugin_manager
  public:
   Plugin_manager(const General_options& options)
     : plugins_(), objects_(), deferred_layout_objects_(), input_file_(NULL),
-      plugin_input_file_(), in_replacement_phase_(false), cleanup_done_(false),
+      plugin_input_file_(), in_replacement_phase_(false),
       options_(options), workqueue_(NULL), task_(NULL), input_objects_(NULL),
       symtab_(NULL), layout_(NULL), dirpath_(NULL), mapfile_(NULL),
       this_blocker_(NULL)
@@ -262,9 +265,6 @@ class Plugin_manager
   // processing replacement files whose symbols should replace the
   // placeholder symbols from the Pluginobj objects.
   bool in_replacement_phase_;
-
-  // TRUE if the cleanup handlers have been called.
-  bool cleanup_done_;
 
   const General_options& options_;
   Workqueue* workqueue_;
