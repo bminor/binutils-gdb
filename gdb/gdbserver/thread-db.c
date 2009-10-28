@@ -297,15 +297,12 @@ find_one_thread (ptid_t ptid)
   return 1;
 }
 
-static void
-maybe_attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
-{
-  td_err_e err;
-  struct lwp_info *lwp;
+/* Attach a thread.  Return true on success.  */
 
-  lwp = find_lwp_pid (pid_to_ptid (ti_p->ti_lid));
-  if (lwp != NULL)
-    return;
+static int
+attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
+{
+  struct lwp_info *lwp;
 
   if (debug_threads)
     fprintf (stderr, "Attaching to thread %ld (LWP %d)\n",
@@ -316,7 +313,7 @@ maybe_attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
     {
       warning ("Could not attach to thread %ld (LWP %d)\n",
 	       ti_p->ti_tid, ti_p->ti_lid);
-      return;
+      return 0;
     }
 
   lwp->thread_known = 1;
@@ -324,12 +321,39 @@ maybe_attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
 
   if (thread_db_use_events)
     {
+      td_err_e err;
       struct thread_db *thread_db = current_process ()->private->thread_db;
+
       err = thread_db->td_thr_event_enable_p (th_p, 1);
       if (err != TD_OK)
 	error ("Cannot enable thread event reporting for %d: %s",
 	       ti_p->ti_lid, thread_db_err_str (err));
     }
+
+  return 1;
+}
+
+/* Attach thread if we haven't seen it yet.
+   Increment *COUNTER if we have attached a new thread.
+   Return false on failure.  */
+
+static int
+maybe_attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p,
+		     int *counter)
+{
+  struct lwp_info *lwp;
+
+  lwp = find_lwp_pid (pid_to_ptid (ti_p->ti_lid));
+  if (lwp != NULL)
+    return 1;
+
+  if (!attach_thread (th_p, ti_p))
+    return 0;
+
+  if (counter != NULL)
+    *counter += 1;
+
+  return 1;
 }
 
 static int
@@ -347,7 +371,12 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
   if (ti.ti_state == TD_THR_UNKNOWN || ti.ti_state == TD_THR_ZOMBIE)
     return 0;
 
-  maybe_attach_thread (th_p, &ti);
+  if (!maybe_attach_thread (th_p, &ti, (int *) data))
+    {
+      /* Terminate iteration early: we might be looking at stale data in
+	 the inferior.  The thread_db_find_new_threads will retry.  */
+      return 1;
+    }
 
   return 0;
 }
@@ -358,6 +387,7 @@ thread_db_find_new_threads (void)
   td_err_e err;
   ptid_t ptid = ((struct inferior_list_entry *) current_inferior)->id;
   struct thread_db *thread_db = current_process ()->private->thread_db;
+  int loop, iteration;
 
   /* This function is only called when we first initialize thread_db.
      First locate the initial thread.  If it is not ready for
@@ -365,11 +395,30 @@ thread_db_find_new_threads (void)
   if (find_one_thread (ptid) == 0)
     return;
 
-  /* Iterate over all user-space threads to discover new threads.  */
-  err = thread_db->td_ta_thr_iter_p (thread_db->thread_agent,
-				     find_new_threads_callback, NULL,
-				     TD_THR_ANY_STATE, TD_THR_LOWEST_PRIORITY,
-				     TD_SIGNO_MASK, TD_THR_ANY_USER_FLAGS);
+  /* Require 4 successive iterations which do not find any new threads.
+     The 4 is a heuristic: there is an inherent race here, and I have
+     seen that 2 iterations in a row are not always sufficient to
+     "capture" all threads.  */
+  for (loop = 0, iteration = 0; loop < 4; ++loop, ++iteration)
+    {
+      int new_thread_count = 0;
+
+      /* Iterate over all user-space threads to discover new threads.  */
+      err = thread_db->td_ta_thr_iter_p (thread_db->thread_agent,
+					 find_new_threads_callback,
+					 &new_thread_count,
+					 TD_THR_ANY_STATE, TD_THR_LOWEST_PRIORITY,
+					 TD_SIGNO_MASK, TD_THR_ANY_USER_FLAGS);
+      if (debug_threads)
+	fprintf (stderr, "Found %d threads in iteration %d.\n",
+		 new_thread_count, iteration);
+
+      if (new_thread_count != 0)
+	{
+	  /* Found new threads.  Restart iteration from beginning.  */
+	  loop = -1;
+	}
+    }
   if (err != TD_OK)
     error ("Cannot find new threads: %s", thread_db_err_str (err));
 }
