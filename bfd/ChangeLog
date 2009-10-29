@@ -1,3 +1,8 @@
+2009-10-29  Johan Kristell  <johankri@axis.com>
+
+	* elf32-cris.c (cris_elf_plt_sym_val): New function.
+	(elf_backend_plt_sym_val): Define.
+
 2009-10-27  Kai Tietz  <kai.tietz@onevision.com>
 
 	* peXXigen.c (bfdver.h): Add include.

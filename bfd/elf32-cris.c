@@ -2704,6 +2704,21 @@ cris_elf_gc_sweep_hook (bfd *abfd,
   return TRUE;
 }
 
+/* The elf_backend_plt_sym_val hook function.  */
+
+static bfd_vma
+cris_elf_plt_sym_val (bfd_vma i, const asection *plt,
+		      const arelent *rel ATTRIBUTE_UNUSED)
+{
+  bfd_size_type plt_entry_size;
+
+  plt_entry_size
+    = (bfd_get_mach (plt->owner) == bfd_mach_cris_v32
+       ? PLT_ENTRY_SIZE_V32 : PLT_ENTRY_SIZE);
+
+  return plt->vma + (i + 1) * plt_entry_size;
+}
+
 /* Make sure we emit a GOT entry if the symbol was supposed to have a PLT
    entry but we found we will not create any.  Called when we find we will
    not have any PLT for this symbol, by for example
@@ -4312,6 +4327,7 @@ elf_cris_got_elt_size (bfd *abfd ATTRIBUTE_UNUSED,
 #define elf_backend_relocate_section		cris_elf_relocate_section
 #define elf_backend_gc_mark_hook		cris_elf_gc_mark_hook
 #define elf_backend_gc_sweep_hook		cris_elf_gc_sweep_hook
+#define elf_backend_plt_sym_val			cris_elf_plt_sym_val
 #define elf_backend_check_relocs                cris_elf_check_relocs
 #define elf_backend_grok_prstatus		cris_elf_grok_prstatus
 #define elf_backend_grok_psinfo			cris_elf_grok_psinfo
