@@ -1,3 +1,8 @@
+2009-10-29  Sebastian Pop  <sebastian.pop@amd.com>
+
+	* config/tc-i386.c (build_modrm_byte): Do not swap REG and
+	NDS operands for FMA4.
+
 2009-10-29  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (neon_tab_entry): Fix VNMLA/VNMLS opcodes.

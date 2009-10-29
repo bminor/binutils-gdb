@@ -1,3 +1,13 @@
+2009-10-29  Sebastian Pop  <sebastian.pop@amd.com>
+
+	* i386-dis.c (OP_VEX_FMA): Removed.
+	(VexFMA): Removed.
+	(Vex128FMA): Removed.
+	(prefix_table): First source operand of FMA4 insns is decoded
+	with Vex not with VexFMA.
+	(OP_EX_VexW): Second source operand is decoded with get_vex_imm8
+	when vex.w is set.  Third source operand is decoded with
+
 2009-10-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (HFILES): Remove cgen-ops.h and cgen-types.h.

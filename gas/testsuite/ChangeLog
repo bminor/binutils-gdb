@@ -1,3 +1,8 @@
+2009-10-29  Sebastian Pop  <sebastian.pop@amd.com>
+
+	* gas/i386/fma4.d: Updated patterns.
+	* gas/i386/x86-64-fma4.d: Same.
+
 2009-10-29  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/vfp-neon-syntax.d: Update expected results.

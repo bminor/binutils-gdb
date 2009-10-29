@@ -4913,14 +4913,6 @@ build_modrm_byte (void)
 	  source = 1;
 	  reg = 0;
 	}
-      /* FMA4 swaps REG and NDS.  */
-      if (i.tm.cpu_flags.bitfield.cpufma4)
-	{
-	  unsigned int tmp;
-	  tmp = reg;
-	  reg = nds;
-	  nds = tmp;
-	}
       gas_assert ((operand_type_equal (&i.tm.operand_types[reg], &regxmm)
 		   || operand_type_equal (&i.tm.operand_types[reg],
 					  &regymm))
