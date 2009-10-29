@@ -30,7 +30,10 @@ static int thread_db_use_events;
 #include "gdb_proc_service.h"
 #include "../gdb_thread_db.h"
 
+#ifndef USE_LIBTHREAD_DB_DIRECTLY
 #include <dlfcn.h>
+#endif
+
 #include <stdint.h>
 #include <limits.h>
 #include <ctype.h>
@@ -44,8 +47,10 @@ struct thread_db
   /* Connection to the libthread_db library.  */
   td_thragent_t *thread_agent;
 
+#ifndef USE_LIBTHREAD_DB_DIRECTLY
   /* Handle of the libthread_db from dlopen.  */
   void *handle;
+#endif
 
   /* Addresses of libthread_db functions.  */
   td_err_e (*td_ta_new_p) (struct ps_prochandle * ps, td_thragent_t **ta);
@@ -484,6 +489,51 @@ thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
     return err;
 }
 
+#ifdef USE_LIBTHREAD_DB_DIRECTLY
+
+static int
+thread_db_load_search (void)
+{
+  td_err_e err;
+  struct thread_db tdb;
+  struct process_info *proc = current_process ();
+
+  if (proc->private->thread_db != NULL)
+    fatal ("unexpected: proc->private->thread_db != NULL");
+
+  tdb.td_ta_new_p = &td_ta_new;
+
+  /* Attempt to open a connection to the thread library.  */
+  err = tdb.td_ta_new_p (&tdb.proc_handle, &tdb.thread_agent);
+  if (err != TD_OK)
+    {
+      if (debug_threads)
+	fprintf (stderr, "td_ta_new(): %s\n", thread_db_err_str (err));
+      return 0;
+    }
+
+  tdb.td_ta_map_lwp2thr_p = &td_ta_map_lwp2thr;
+  tdb.td_thr_get_info_p = &td_thr_get_info;
+  tdb.td_ta_thr_iter_p = &td_ta_thr_iter;
+  tdb.td_symbol_list_p = &td_symbol_list;
+
+  /* This is required only when thread_db_use_events is on.  */
+  tdb.td_thr_event_enable_p = &td_thr_event_enable;
+
+  /* These are not essential.  */
+  tdb.td_ta_event_addr_p = &td_ta_event_addr;
+  tdb.td_ta_set_event_p = &td_ta_set_event;
+  tdb.td_ta_event_getmsg_p = &td_ta_event_getmsg;
+  tdb.td_thr_tls_get_addr_p = &td_thr_tls_get_addr;
+
+  proc->private->thread_db = xmalloc (sizeof (tdb));
+  memcpy (proc->private->thread_db, &tdb, sizeof (tdb));
+
+  return 1;
+}
+
+#else
+
 static int
 try_thread_db_load_1 (void *handle)
 {
@@ -662,6 +712,8 @@ thread_db_load_search (void)
   return rc;
 }
 
+#endif  /* USE_LIBTHREAD_DB_DIRECTLY */
+
 int
 thread_db_init (int use_events)
 {
@@ -705,6 +757,7 @@ thread_db_free (struct process_info *proc)
   struct thread_db *thread_db = proc->private->thread_db;
   if (thread_db)
     {
+#ifndef USE_LIBTHREAD_DB_DIRECTLY
       td_err_e (*td_ta_delete_p) (td_thragent_t *);
 
       td_ta_delete_p = dlsym (thread_db->handle, "td_ta_delete");
@@ -712,6 +765,10 @@ thread_db_free (struct process_info *proc)
 	(*td_ta_delete_p) (thread_db->thread_agent);
 
       dlclose (thread_db->handle);
+#else
+      td_ta_delete (thread_db->thread_agent);
+#endif  /* USE_LIBTHREAD_DB_DIRECTLY  */
+
       free (thread_db);
       proc->private->thread_db = NULL;
     }

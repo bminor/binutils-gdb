@@ -158,6 +158,13 @@ if test "$srv_linux_thread_db" = "yes"; then
   fi
 fi
 
+AC_ARG_WITH(libthread-db,
+AS_HELP_STRING([--with-libthread-db=PATH], [use given libthread_db directly]),
+[srv_libthread_db_path="${withval}"
+  AC_DEFINE(USE_LIBTHREAD_DB_DIRECTLY, 1, [Define if we should use libthread_db directly.])
+  srv_libs="$srv_libthread_db_path"
+])
+
 if test "$srv_xmlfiles" != ""; then
   srv_xmlbuiltin="xml-builtin.o"
   AC_DEFINE(USE_XML, 1, [Define if an XML target description is available.])

@@ -668,6 +668,7 @@ ac_user_opts='
 enable_option_checking
 with_pkgversion
 with_bugurl
+with_libthread_db
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1297,6 +1298,8 @@ Optional Packages:
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-pkgversion=PKG   Use PKG in the version string in place of "GDB"
   --with-bugurl=URL       Direct users to URL to report a bug
+  --with-libthread-db=PATH
+                          use given libthread_db directly
 
 Some influential environment variables:
   CC          C compiler command
@@ -4267,6 +4270,18 @@ $as_echo "#define HAVE_TD_VERSION 1" >>confdefs.h
 
   fi
 fi
+
+
+# Check whether --with-libthread-db was given.
+if test "${with_libthread_db+set}" = set; then :
+  withval=$with_libthread_db; srv_libthread_db_path="${withval}"
+
+$as_echo "#define USE_LIBTHREAD_DB_DIRECTLY 1" >>confdefs.h
+
+  srv_libs="$srv_libthread_db_path"
+
+fi
+
 
 if test "$srv_xmlfiles" != ""; then
   srv_xmlbuiltin="xml-builtin.o"

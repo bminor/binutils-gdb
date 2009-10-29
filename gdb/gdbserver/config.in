@@ -175,6 +175,9 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
+/* Define if we should use libthread_db directly. */
+#undef USE_LIBTHREAD_DB_DIRECTLY
+
 /* Enable extensions on AIX 3, Interix.  */
 #ifndef _ALL_SOURCE
 # undef _ALL_SOURCE
