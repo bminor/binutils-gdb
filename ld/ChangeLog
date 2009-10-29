@@ -1,3 +1,8 @@
+2009-10-29  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* emulparams/vxworks.sh (OTHER_READONLY_SECTIONS): Move into ...
+	(OTHER_READWRITE_SECTIONS): ... here.
+
 2009-10-28  Kai Tietz  <kai.tietz@onevision.com>
 
 	* emultempl/pep.em (U): Define underscore macro.
