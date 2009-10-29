@@ -884,6 +884,102 @@ class Arm_output_section : public Output_section
 			 std::vector<Output_relaxed_input_section*>*);
 };
 
+// Arm_relobj class.
+
+template<bool big_endian>
+class Arm_relobj : public Sized_relobj<32, big_endian>
+{
+ public:
+  static const Arm_address invalid_address = static_cast<Arm_address>(-1);
+
+  Arm_relobj(const std::string& name, Input_file* input_file, off_t offset,
+             const typename elfcpp::Ehdr<32, big_endian>& ehdr)
+    : Sized_relobj<32, big_endian>(name, input_file, offset, ehdr),
+      stub_tables_(), local_symbol_is_thumb_function_()
+  { }
+
+  ~Arm_relobj()
+  { }
+ 
+  // Return the stub table of the SHNDX-th section if there is one.
+  Stub_table<big_endian>*
+  stub_table(unsigned int shndx) const
+  {
+    gold_assert(shndx < this->stub_tables_.size());
+    return this->stub_tables_[shndx];
+  }
+
+  // Set STUB_TABLE to be the stub_table of the SHNDX-th section.
+  void
+  set_stub_table(unsigned int shndx, Stub_table<big_endian>* stub_table)
+  {
+    gold_assert(shndx < this->stub_tables_.size());
+    this->stub_tables_[shndx] = stub_table;
+  }
+
+  // Whether a local symbol is a THUMB function.  R_SYM is the symbol table
+  // index.  This is only valid after do_count_local_symbol is called.
+  bool
+  local_symbol_is_thumb_function(unsigned int r_sym) const
+  {
+    gold_assert(r_sym < this->local_symbol_is_thumb_function_.size());
+    return this->local_symbol_is_thumb_function_[r_sym];
+  }
+  
+  // Scan all relocation sections for stub generation.
+  void
+  scan_sections_for_stubs(Target_arm<big_endian>*, const Symbol_table*,
+			  const Layout*);
+
+  // Convert regular input section with index SHNDX to a relaxed section.
+  void
+  convert_input_section_to_relaxed_section(unsigned shndx)
+  {
+    // The stubs have relocations and we need to process them after writing
+    // out the stubs.  So relocation now must follow section write.
+    this->invalidate_section_offset(shndx);
+    this->set_relocs_must_follow_section_writes();
+  }
+
+  // Downcast a base pointer to an Arm_relobj pointer.  This is
+  // not type-safe but we only use Arm_relobj not the base class.
+  static Arm_relobj<big_endian>*
+  as_arm_relobj(Relobj* relobj)
+  { return static_cast<Arm_relobj<big_endian>*>(relobj); }
+
+ protected:
+  // Post constructor setup.
+  void
+  do_setup()
+  {
+    // Call parent's setup method.
+    Sized_relobj<32, big_endian>::do_setup();
+
+    // Initialize look-up tables.
+    Stub_table_list empty_stub_table_list(this->shnum(), NULL);
+    this->stub_tables_.swap(empty_stub_table_list);
+  }
+
+  // Count the local symbols.
+  void
+  do_count_local_symbols(Stringpool_template<char>*,
+                         Stringpool_template<char>*);
+
+  void
+  do_relocate_sections(const General_options& options,
+		       const Symbol_table* symtab, const Layout* layout,
+		       const unsigned char* pshdrs,
+		       typename Sized_relobj<32, big_endian>::Views* pivews);
+
+ private:
+  // List of stub tables.
+  typedef std::vector<Stub_table<big_endian>*> Stub_table_list;
+  Stub_table_list stub_tables_;
+  // Bit vector to tell if a local symbol is a thumb function or not.
+  // This is only valid after do_count_local_symbol is called.
+  std::vector<bool> local_symbol_is_thumb_function_;
+};
+
 // Utilities for manipulating integers of up to 32-bits
 
 namespace utils
@@ -2905,6 +3001,258 @@ Arm_output_section<big_endian>::group_sections(
       unsigned int shndx = new_relaxed_sections[i]->shndx();
       // Tell Arm_relobj that this input section is converted.
       arm_relobj->convert_input_section_to_relaxed_section(shndx);
+    }
+}
+
+// Arm_relobj methods.
+
+// Scan relocations for stub generation.
+
+template<bool big_endian>
+void
+Arm_relobj<big_endian>::scan_sections_for_stubs(
+    Target_arm<big_endian>* arm_target,
+    const Symbol_table* symtab,
+    const Layout* layout)
+{
+  unsigned int shnum = this->shnum();
+  const unsigned int shdr_size = elfcpp::Elf_sizes<32>::shdr_size;
+
+  // Read the section headers.
+  const unsigned char* pshdrs = this->get_view(this->elf_file()->shoff(),
+					       shnum * shdr_size,
+					       true, true);
+
+  // To speed up processing, we set up hash tables for fast lookup of
+  // input offsets to output addresses.
+  this->initialize_input_to_output_maps();
+
+  const Relobj::Output_sections& out_sections(this->output_sections());
+
+  Relocate_info<32, big_endian> relinfo;
+  relinfo.options = &parameters->options();
+  relinfo.symtab = symtab;
+  relinfo.layout = layout;
+  relinfo.object = this;
+
+  const unsigned char* p = pshdrs + shdr_size;
+  for (unsigned int i = 1; i < shnum; ++i, p += shdr_size)
+    {
+      typename elfcpp::Shdr<32, big_endian> shdr(p);
+
+      unsigned int sh_type = shdr.get_sh_type();
+      if (sh_type != elfcpp::SHT_REL && sh_type != elfcpp::SHT_RELA)
+	continue;
+
+      off_t sh_size = shdr.get_sh_size();
+      if (sh_size == 0)
+	continue;
+
+      unsigned int index = this->adjust_shndx(shdr.get_sh_info());
+      if (index >= this->shnum())
+	{
+	  // Ignore reloc section with bad info.  This error will be
+	  // reported in the final link.
+	  continue;
+	}
+
+      Output_section* os = out_sections[index];
+      if (os == NULL)
+	{
+	  // This relocation section is against a section which we
+	  // discarded.
+	  continue;
+	}
+      Arm_address output_offset = this->get_output_section_offset(index);
+
+      if (this->adjust_shndx(shdr.get_sh_link()) != this->symtab_shndx())
+	{
+	  // Ignore reloc section with unexpected symbol table.  The
+	  // error will be reported in the final link.
+	  continue;
+	}
+
+      const unsigned char* prelocs = this->get_view(shdr.get_sh_offset(),
+						    sh_size, true, false);
+
+      unsigned int reloc_size;
+      if (sh_type == elfcpp::SHT_REL)
+	reloc_size = elfcpp::Elf_sizes<32>::rel_size;
+      else
+	reloc_size = elfcpp::Elf_sizes<32>::rela_size;
+
+      if (reloc_size != shdr.get_sh_entsize())
+	{
+	  // Ignore reloc section with unexpected entsize.  The error
+	  // will be reported in the final link.
+	  continue;
+	}
+
+      size_t reloc_count = sh_size / reloc_size;
+      if (static_cast<off_t>(reloc_count * reloc_size) != sh_size)
+	{
+	  // Ignore reloc section with uneven size.  The error will be
+	  // reported in the final link.
+	  continue;
+	}
+
+      gold_assert(output_offset != invalid_address
+		  || this->relocs_must_follow_section_writes());
+
+      // Get the section contents.  This does work for the case in which
+      // we modify the contents of an input section.  We need to pass the
+      // output view under such circumstances.
+      section_size_type input_view_size = 0;
+      const unsigned char* input_view =
+	this->section_contents(index, &input_view_size, false);
+
+      relinfo.reloc_shndx = i;
+      relinfo.data_shndx = index;
+      arm_target->scan_section_for_stubs(&relinfo, sh_type, prelocs,
+					 reloc_count, os,
+					 output_offset == invalid_address,
+					 input_view,
+					 os->address(),
+					 input_view_size);
+    }
+
+  // After we've done the relocations, we release the hash tables,
+  // since we no longer need them.
+  this->free_input_to_output_maps();
+}
+
+// Count the local symbols.  The ARM backend needs to know if a symbol
+// is a THUMB function or not.  For global symbols, it is easy because
+// the Symbol object keeps the ELF symbol type.  For local symbol it is
+// harder because we cannot access this information.   So we override the
+// do_count_local_symbol in parent and scan local symbols to mark
+// THUMB functions.  This is not the most efficient way but I do not want to
+// slow down other ports by calling a per symbol targer hook inside
+// Sized_relobj<size, big_endian>::do_count_local_symbols. 
+
+template<bool big_endian>
+void
+Arm_relobj<big_endian>::do_count_local_symbols(
+    Stringpool_template<char>* pool,
+    Stringpool_template<char>* dynpool)
+{
+  // We need to fix-up the values of any local symbols whose type are
+  // STT_ARM_TFUNC.
+  
+  // Ask parent to count the local symbols.
+  Sized_relobj<32, big_endian>::do_count_local_symbols(pool, dynpool);
+  const unsigned int loccount = this->local_symbol_count();
+  if (loccount == 0)
+    return;
+
+  // Intialize the thumb function bit-vector.
+  std::vector<bool> empty_vector(loccount, false);
+  this->local_symbol_is_thumb_function_.swap(empty_vector);
+
+  // Read the symbol table section header.
+  const unsigned int symtab_shndx = this->symtab_shndx();
+  elfcpp::Shdr<32, big_endian>
+      symtabshdr(this, this->elf_file()->section_header(symtab_shndx));
+  gold_assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
+
+  // Read the local symbols.
+  const int sym_size =elfcpp::Elf_sizes<32>::sym_size;
+  gold_assert(loccount == symtabshdr.get_sh_info());
+  off_t locsize = loccount * sym_size;
+  const unsigned char* psyms = this->get_view(symtabshdr.get_sh_offset(),
+					      locsize, true, true);
+
+  // Loop over the local symbols and mark any local symbols pointing
+  // to THUMB functions.
+
+  // Skip the first dummy symbol.
+  psyms += sym_size;
+  typename Sized_relobj<32, big_endian>::Local_values* plocal_values =
+    this->local_values();
+  for (unsigned int i = 1; i < loccount; ++i, psyms += sym_size)
+    {
+      elfcpp::Sym<32, big_endian> sym(psyms);
+      elfcpp::STT st_type = sym.get_st_type();
+      Symbol_value<32>& lv((*plocal_values)[i]);
+      Arm_address input_value = lv.input_value();
+
+      if (st_type == elfcpp::STT_ARM_TFUNC
+	  || (st_type == elfcpp::STT_FUNC && ((input_value & 1) != 0)))
+	{
+	  // This is a THUMB function.  Mark this and canonicalize the
+	  // symbol value by setting LSB.
+	  this->local_symbol_is_thumb_function_[i] = true;
+	  if ((input_value & 1) == 0)
+	    lv.set_input_value(input_value | 1);
+	}
+    }
+}
+
+// Relocate sections.
+template<bool big_endian>
+void
+Arm_relobj<big_endian>::do_relocate_sections(
+    const General_options& options,
+    const Symbol_table* symtab,
+    const Layout* layout,
+    const unsigned char* pshdrs,
+    typename Sized_relobj<32, big_endian>::Views* pviews)
+{
+  // Call parent to relocate sections.
+  Sized_relobj<32, big_endian>::do_relocate_sections(options, symtab, layout,
+						     pshdrs, pviews); 
+
+  // We do not generate stubs if doing a relocatable link.
+  if (parameters->options().relocatable())
+    return;
+
+  // Relocate stub tables.
+  unsigned int shnum = this->shnum();
+
+  Target_arm<big_endian>* arm_target =
+    Target_arm<big_endian>::default_target();
+
+  Relocate_info<32, big_endian> relinfo;
+  relinfo.options = &options;
+  relinfo.symtab = symtab;
+  relinfo.layout = layout;
+  relinfo.object = this;
+
+  for (unsigned int i = 1; i < shnum; ++i)
+    {
+      Arm_input_section<big_endian>* arm_input_section =
+	arm_target->find_arm_input_section(this, i);
+
+      if (arm_input_section == NULL
+	  || !arm_input_section->is_stub_table_owner()
+	  || arm_input_section->stub_table()->empty())
+	continue;
+
+      // We cannot discard a section if it owns a stub table.
+      Output_section* os = this->output_section(i);
+      gold_assert(os != NULL);
+
+      relinfo.reloc_shndx = elfcpp::SHN_UNDEF;
+      relinfo.reloc_shdr = NULL;
+      relinfo.data_shndx = i;
+      relinfo.data_shdr = pshdrs + i * elfcpp::Elf_sizes<32>::shdr_size;
+
+      gold_assert((*pviews)[i].view != NULL);
+
+      // We are passed the output section view.  Adjust it to cover the
+      // stub table only.
+      Stub_table<big_endian>* stub_table = arm_input_section->stub_table();
+      gold_assert((stub_table->address() >= (*pviews)[i].address)
+		  && ((stub_table->address() + stub_table->data_size())
+		      <= (*pviews)[i].address + (*pviews)[i].view_size));
+
+      off_t offset = stub_table->address() - (*pviews)[i].address;
+      unsigned char* view = (*pviews)[i].view + offset;
+      Arm_address address = stub_table->address();
+      section_size_type view_size = stub_table->data_size();
+ 
+      stub_table->relocate_stubs(&relinfo, arm_target, os, view, address,
+				 view_size);
     }
 }
 

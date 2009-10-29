@@ -1,3 +1,10 @@
+2009-10-28  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_relobj): New class definition.
+	(Arm_relobj::scan_sections_for_stubs, 
+	Arm_relobj::do_count_local_symbols, Arm_relobj::do_relocate_sections):
+	New method definitions.
+
 2009-10-28  Cary Coutant  <ccoutant@google.com>
 
 	* plugin.h (Plugin::Plugin): Initialize cleanup_done_.
