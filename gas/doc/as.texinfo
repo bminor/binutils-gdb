@@ -5927,11 +5927,6 @@ You may @code{.set} a symbol many times in the same assembly.
 If you @code{.set} a global symbol, the value stored in the object
 file is the last value stored into it.
 
-@ifset HPPA
-The syntax for @code{set} on the HPPA is
-@samp{@var{symbol} .set @var{expression}}.
-@end ifset
-
 @ifset Z80
 On Z80 @code{set} is a real instruction, use
 @samp{@var{symbol} defl @var{expression}} instead.

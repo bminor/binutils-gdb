@@ -1,3 +1,7 @@
+2009-10-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* doc/as.texinfo (Set): Delete incorrect HPPA para.
+
 2009-10-28  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (opcode_lookup): Allow VFP/NEON type suffixes
