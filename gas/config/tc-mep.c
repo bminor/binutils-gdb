@@ -80,8 +80,6 @@ static void mep_noregerr (int);
 const pseudo_typeS md_pseudo_table[] =
 {
   { "word",	cons,	                        4 },
-  { "file",	(void (*) (int)) dwarf2_directive_file,   	0 },
-  { "loc",	dwarf2_directive_loc,   	0 },
   { "vliw", 	mep_switch_to_vliw_mode,	0 },
   { "core", 	mep_switch_to_core_mode,	0 },
   { "vtext", 	mep_s_vtext,             	0 },

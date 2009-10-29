@@ -1,3 +1,11 @@
+2009-10-29  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-mep.c (md_pseudo_table): Remove dwarf2 debug pseudo
+	as they are already defined in obj-elf.c
+	* config/tc-m32c.c (md_pseudo_table): Ditto.
+	* config/tc-spu.c (md_pseudo_table): Ditto.
+	* config/tc-avr.c (md_pseudo_table): Ditto.
+
 2009-10-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* doc/as.texinfo (Set): Delete incorrect HPPA para.
