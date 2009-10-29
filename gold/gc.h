@@ -138,7 +138,6 @@ template<int size, bool big_endian, typename Target_type, int sh_type,
 	 typename Scan>
 inline void
 gc_process_relocs(
-    const General_options& ,
     Symbol_table* symtab,
     Layout*,
     Target_type* ,

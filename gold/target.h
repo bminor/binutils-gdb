@@ -41,7 +41,6 @@
 namespace gold
 {
 
-class General_options;
 class Object;
 class Relobj;
 template<int size, bool big_endian>
@@ -467,34 +466,32 @@ class Sized_target : public Target
   // used to determine unreferenced garbage sections. This procedure is
   // only called during garbage collection.
   virtual void
-  gc_process_relocs(const General_options& options,
-	      Symbol_table* symtab,
-	      Layout* layout,
-	      Sized_relobj<size, big_endian>* object,
-	      unsigned int data_shndx,
-	      unsigned int sh_type,
-	      const unsigned char* prelocs,
-	      size_t reloc_count,
-	      Output_section* output_section,
-	      bool needs_special_offset_handling,
-	      size_t local_symbol_count,
-	      const unsigned char* plocal_symbols) = 0;
+  gc_process_relocs(Symbol_table* symtab,
+		    Layout* layout,
+		    Sized_relobj<size, big_endian>* object,
+		    unsigned int data_shndx,
+		    unsigned int sh_type,
+		    const unsigned char* prelocs,
+		    size_t reloc_count,
+		    Output_section* output_section,
+		    bool needs_special_offset_handling,
+		    size_t local_symbol_count,
+		    const unsigned char* plocal_symbols) = 0;
 
   // Scan the relocs for a section, and record any information
-  // required for the symbol.  OPTIONS is the command line options.
-  // SYMTAB is the symbol table.  OBJECT is the object in which the
-  // section appears.  DATA_SHNDX is the section index that these
-  // relocs apply to.  SH_TYPE is the type of the relocation section,
-  // SHT_REL or SHT_RELA.  PRELOCS points to the relocation data.
-  // RELOC_COUNT is the number of relocs.  LOCAL_SYMBOL_COUNT is the
-  // number of local symbols.  OUTPUT_SECTION is the output section.
+  // required for the symbol.  SYMTAB is the symbol table.  OBJECT is
+  // the object in which the section appears.  DATA_SHNDX is the
+  // section index that these relocs apply to.  SH_TYPE is the type of
+  // the relocation section, SHT_REL or SHT_RELA.  PRELOCS points to
+  // the relocation data.  RELOC_COUNT is the number of relocs.
+  // LOCAL_SYMBOL_COUNT is the number of local symbols.
+  // OUTPUT_SECTION is the output section.
   // NEEDS_SPECIAL_OFFSET_HANDLING is true if offsets to the output
   // sections are not mapped as usual.  PLOCAL_SYMBOLS points to the
   // local symbol data from OBJECT.  GLOBAL_SYMBOLS is the array of
   // pointers to the global symbol table from OBJECT.
   virtual void
-  scan_relocs(const General_options& options,
-	      Symbol_table* symtab,
+  scan_relocs(Symbol_table* symtab,
 	      Layout* layout,
 	      Sized_relobj<size, big_endian>* object,
 	      unsigned int data_shndx,
@@ -533,8 +530,7 @@ class Sized_target : public Target
   // like scan_relocs, with an additional Relocatable_relocs
   // parameter, used to record the disposition of the relocs.
   virtual void
-  scan_relocatable_relocs(const General_options& options,
-			  Symbol_table* symtab,
+  scan_relocatable_relocs(Symbol_table* symtab,
 			  Layout* layout,
 			  Sized_relobj<size, big_endian>* object,
 			  unsigned int data_shndx,

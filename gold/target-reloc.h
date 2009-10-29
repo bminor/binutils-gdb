@@ -1,6 +1,6 @@
 // target-reloc.h -- target specific relocation support  -*- C++ -*-
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -43,7 +43,6 @@ template<int size, bool big_endian, typename Target_type, int sh_type,
 	 typename Scan>
 inline void
 scan_relocs(
-    const General_options& options,
     Symbol_table* symtab,
     Layout* layout,
     Target_type* target,
@@ -104,7 +103,7 @@ scan_relocs(
 	      continue;
 	    }
 
-	  scan.local(options, symtab, layout, target, object, data_shndx,
+	  scan.local(symtab, layout, target, object, data_shndx,
 		     output_section, reloc, r_type, lsym);
 	}
       else
@@ -114,7 +113,7 @@ scan_relocs(
 	  if (gsym->is_forwarder())
 	    gsym = symtab->resolve_forwards(gsym);
 
-	  scan.global(options, symtab, layout, target, object, data_shndx,
+	  scan.global(symtab, layout, target, object, data_shndx,
 		      output_section, reloc, r_type, gsym);
 	}
     }
@@ -384,7 +383,6 @@ template<int size, bool big_endian, int sh_type,
 	 typename Scan_relocatable_reloc>
 void
 scan_relocatable_relocs(
-    const General_options&,
     Symbol_table*,
     Layout*,
     Sized_relobj<size, big_endian>* object,

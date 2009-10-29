@@ -1092,8 +1092,7 @@ class Target_arm : public Sized_target<32, big_endian>
   // Process the relocations to determine unreferenced sections for 
   // garbage collection.
   void
-  gc_process_relocs(const General_options& options,
-		    Symbol_table* symtab,
+  gc_process_relocs(Symbol_table* symtab,
 		    Layout* layout,
 		    Sized_relobj<32, big_endian>* object,
 		    unsigned int data_shndx,
@@ -1107,8 +1106,7 @@ class Target_arm : public Sized_target<32, big_endian>
 
   // Scan the relocations to look for symbol adjustments.
   void
-  scan_relocs(const General_options& options,
-	      Symbol_table* symtab,
+  scan_relocs(Symbol_table* symtab,
 	      Layout* layout,
 	      Sized_relobj<32, big_endian>* object,
 	      unsigned int data_shndx,
@@ -1144,8 +1142,7 @@ class Target_arm : public Sized_target<32, big_endian>
 
   // Scan the relocs during a relocatable link.
   void
-  scan_relocatable_relocs(const General_options& options,
-			  Symbol_table* symtab,
+  scan_relocatable_relocs(Symbol_table* symtab,
 			  Layout* layout,
 			  Sized_relobj<32, big_endian>* object,
 			  unsigned int data_shndx,
@@ -1209,8 +1206,7 @@ class Target_arm : public Sized_target<32, big_endian>
     { }
 
     inline void
-    local(const General_options& options, Symbol_table* symtab,
-	  Layout* layout, Target_arm* target,
+    local(Symbol_table* symtab, Layout* layout, Target_arm* target,
 	  Sized_relobj<32, big_endian>* object,
 	  unsigned int data_shndx,
 	  Output_section* output_section,
@@ -1218,8 +1214,7 @@ class Target_arm : public Sized_target<32, big_endian>
 	  const elfcpp::Sym<32, big_endian>& lsym);
 
     inline void
-    global(const General_options& options, Symbol_table* symtab,
-	   Layout* layout, Target_arm* target,
+    global(Symbol_table* symtab, Layout* layout, Target_arm* target,
 	   Sized_relobj<32, big_endian>* object,
 	   unsigned int data_shndx,
 	   Output_section* output_section,
@@ -3030,7 +3025,6 @@ Arm_relobj<big_endian>::scan_sections_for_stubs(
   const Relobj::Output_sections& out_sections(this->output_sections());
 
   Relocate_info<32, big_endian> relinfo;
-  relinfo.options = &parameters->options();
   relinfo.symtab = symtab;
   relinfo.layout = layout;
   relinfo.object = this;
@@ -3554,8 +3548,7 @@ Target_arm<big_endian>::Scan::check_non_pic(Relobj* object,
 
 template<bool big_endian>
 inline void
-Target_arm<big_endian>::Scan::local(const General_options&,
-				    Symbol_table* symtab,
+Target_arm<big_endian>::Scan::local(Symbol_table* symtab,
 				    Layout* layout,
 				    Target_arm* target,
 				    Sized_relobj<32, big_endian>* object,
@@ -3682,8 +3675,7 @@ Target_arm<big_endian>::Scan::unsupported_reloc_global(
 
 template<bool big_endian>
 inline void
-Target_arm<big_endian>::Scan::global(const General_options&,
-				     Symbol_table* symtab,
+Target_arm<big_endian>::Scan::global(Symbol_table* symtab,
 				     Layout* layout,
 				     Target_arm* target,
 				     Sized_relobj<32, big_endian>* object,
@@ -3887,8 +3879,7 @@ Target_arm<big_endian>::Scan::global(const General_options&,
 
 template<bool big_endian>
 void
-Target_arm<big_endian>::gc_process_relocs(const General_options& options,
-					  Symbol_table* symtab,
+Target_arm<big_endian>::gc_process_relocs(Symbol_table* symtab,
 					  Layout* layout,
 					  Sized_relobj<32, big_endian>* object,
 					  unsigned int data_shndx,
@@ -3904,7 +3895,6 @@ Target_arm<big_endian>::gc_process_relocs(const General_options& options,
   typedef typename Target_arm<big_endian>::Scan Scan;
 
   gold::gc_process_relocs<32, big_endian, Arm, elfcpp::SHT_REL, Scan>(
-    options,
     symtab,
     layout,
     this,
@@ -3922,8 +3912,7 @@ Target_arm<big_endian>::gc_process_relocs(const General_options& options,
 
 template<bool big_endian>
 void
-Target_arm<big_endian>::scan_relocs(const General_options& options,
-				    Symbol_table* symtab,
+Target_arm<big_endian>::scan_relocs(Symbol_table* symtab,
 				    Layout* layout,
 				    Sized_relobj<32, big_endian>* object,
 				    unsigned int data_shndx,
@@ -3944,7 +3933,6 @@ Target_arm<big_endian>::scan_relocs(const General_options& options,
     }
 
   gold::scan_relocs<32, big_endian, Target_arm, elfcpp::SHT_REL, Scan>(
-    options,
     symtab,
     layout,
     this,
@@ -4499,7 +4487,6 @@ Target_arm<big_endian>::Relocatable_size_for_reloc::get_size_for_reloc(
 template<bool big_endian>
 void
 Target_arm<big_endian>::scan_relocatable_relocs(
-    const General_options& options,
     Symbol_table* symtab,
     Layout* layout,
     Sized_relobj<32, big_endian>* object,
@@ -4520,7 +4507,6 @@ Target_arm<big_endian>::scan_relocatable_relocs(
 
   gold::scan_relocatable_relocs<32, big_endian, elfcpp::SHT_REL,
       Scan_relocatable_relocs>(
-    options,
     symtab,
     layout,
     object,

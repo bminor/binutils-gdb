@@ -72,8 +72,7 @@ Read_relocs::run(Workqueue* workqueue)
   if (parameters->options().gc_sections()
       || parameters->options().icf_enabled())
     {
-      workqueue->queue_next(new Gc_process_relocs(this->options_,
-                                                  this->symtab_,
+      workqueue->queue_next(new Gc_process_relocs(this->symtab_,
                                                   this->layout_, 
                                                   this->object_, rd,
                                                   this->symtab_lock_, 
@@ -81,8 +80,8 @@ Read_relocs::run(Workqueue* workqueue)
     }
   else
     {
-      workqueue->queue_next(new Scan_relocs(this->options_, this->symtab_,
-                                            this->layout_, this->object_, rd,
+      workqueue->queue_next(new Scan_relocs(this->symtab_, this->layout_,
+					    this->object_, rd,
                                             this->symtab_lock_, 
                                             this->blocker_));
     }
@@ -120,8 +119,7 @@ Gc_process_relocs::locks(Task_locker* tl)
 void
 Gc_process_relocs::run(Workqueue*)
 {
-  this->object_->gc_process_relocs(this->options_, this->symtab_, this->layout_,
-            	     this->rd_);
+  this->object_->gc_process_relocs(this->symtab_, this->layout_, this->rd_);
   this->object_->release();
 }
 
@@ -166,8 +164,7 @@ Scan_relocs::locks(Task_locker* tl)
 void
 Scan_relocs::run(Workqueue*)
 {
-  this->object_->scan_relocs(this->options_, this->symtab_, this->layout_,
-			     this->rd_);
+  this->object_->scan_relocs(this->symtab_, this->layout_, this->rd_);
   this->object_->release();
   delete this->rd_;
   this->rd_ = NULL;
@@ -216,8 +213,7 @@ Relocate_task::locks(Task_locker* tl)
 void
 Relocate_task::run(Workqueue*)
 {
-  this->object_->relocate(this->options_, this->symtab_, this->layout_,
-			  this->of_);
+  this->object_->relocate(this->symtab_, this->layout_, this->of_);
 
   // This is normally the last thing we will do with an object, so
   // uncache all views.
@@ -360,10 +356,9 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
 
 template<int size, bool big_endian>
 void
-Sized_relobj<size, big_endian>::do_gc_process_relocs(const General_options& options,
-					       Symbol_table* symtab,
-					       Layout* layout,
-					       Read_relocs_data* rd)
+Sized_relobj<size, big_endian>::do_gc_process_relocs(Symbol_table* symtab,
+						     Layout* layout,
+						     Read_relocs_data* rd)
 {  
   Sized_target<size, big_endian>* target =
     parameters->sized_target<size, big_endian>();
@@ -384,7 +379,7 @@ Sized_relobj<size, big_endian>::do_gc_process_relocs(const General_options& opti
 	    // only scan allocated sections.  We may see a non-allocated
 	    // section here if we are emitting relocs.
 	    if (p->is_data_section_allocated)
-              target->gc_process_relocs(options, symtab, layout, this, 
+              target->gc_process_relocs(symtab, layout, this, 
                                         p->data_shndx, p->sh_type, 
                                         p->contents->data(), p->reloc_count, 
                                         p->output_section,
@@ -401,8 +396,7 @@ Sized_relobj<size, big_endian>::do_gc_process_relocs(const General_options& opti
 
 template<int size, bool big_endian>
 void
-Sized_relobj<size, big_endian>::do_scan_relocs(const General_options& options,
-					       Symbol_table* symtab,
+Sized_relobj<size, big_endian>::do_scan_relocs(Symbol_table* symtab,
 					       Layout* layout,
 					       Read_relocs_data* rd)
 {
@@ -434,21 +428,21 @@ Sized_relobj<size, big_endian>::do_scan_relocs(const General_options& options,
 	  // only scan allocated sections.  We may see a non-allocated
 	  // section here if we are emitting relocs.
 	  if (p->is_data_section_allocated)
-	    target->scan_relocs(options, symtab, layout, this, p->data_shndx,
+	    target->scan_relocs(symtab, layout, this, p->data_shndx,
 				p->sh_type, p->contents->data(),
 				p->reloc_count, p->output_section,
 				p->needs_special_offset_handling,
 				this->local_symbol_count_,
 				local_symbols);
 	  if (parameters->options().emit_relocs())
-	    this->emit_relocs_scan(options, symtab, layout, local_symbols, p);
+	    this->emit_relocs_scan(symtab, layout, local_symbols, p);
 	}
       else
 	{
 	  Relocatable_relocs* rr = this->relocatable_relocs(p->reloc_shndx);
 	  gold_assert(rr != NULL);
 	  rr->set_reloc_count(p->reloc_count);
-	  target->scan_relocatable_relocs(options, symtab, layout, this,
+	  target->scan_relocatable_relocs(symtab, layout, this,
 					  p->data_shndx, p->sh_type,
 					  p->contents->data(),
 					  p->reloc_count,
@@ -510,7 +504,6 @@ class Emit_relocs_strategy
 template<int size, bool big_endian>
 void
 Sized_relobj<size, big_endian>::emit_relocs_scan(
-    const General_options& options,
     Symbol_table* symtab,
     Layout* layout,
     const unsigned char* plocal_syms,
@@ -521,14 +514,13 @@ Sized_relobj<size, big_endian>::emit_relocs_scan(
   rr->set_reloc_count(p->reloc_count);
 
   if (p->sh_type == elfcpp::SHT_REL)
-    this->emit_relocs_scan_reltype<elfcpp::SHT_REL>(options, symtab, layout,
+    this->emit_relocs_scan_reltype<elfcpp::SHT_REL>(symtab, layout,
 						    plocal_syms, p, rr);
   else
     {
       gold_assert(p->sh_type == elfcpp::SHT_RELA);
-      this->emit_relocs_scan_reltype<elfcpp::SHT_RELA>(options, symtab,
-						       layout, plocal_syms, p,
-						       rr);
+      this->emit_relocs_scan_reltype<elfcpp::SHT_RELA>(symtab, layout,
+						       plocal_syms, p, rr);
     }
 }
 
@@ -539,7 +531,6 @@ template<int size, bool big_endian>
 template<int sh_type>
 void
 Sized_relobj<size, big_endian>::emit_relocs_scan_reltype(
-    const General_options& options,
     Symbol_table* symtab,
     Layout* layout,
     const unsigned char* plocal_syms,
@@ -548,7 +539,6 @@ Sized_relobj<size, big_endian>::emit_relocs_scan_reltype(
 {
   scan_relocatable_relocs<size, big_endian, sh_type,
 			  Emit_relocs_strategy<sh_type> >(
-    options,
     symtab,
     layout,
     this,
@@ -566,8 +556,7 @@ Sized_relobj<size, big_endian>::emit_relocs_scan_reltype(
 
 template<int size, bool big_endian>
 void
-Sized_relobj<size, big_endian>::do_relocate(const General_options& options,
-					    const Symbol_table* symtab,
+Sized_relobj<size, big_endian>::do_relocate(const Symbol_table* symtab,
 					    const Layout* layout,
 					    Output_file* of)
 {
@@ -593,7 +582,7 @@ Sized_relobj<size, big_endian>::do_relocate(const General_options& options,
 
   // Apply relocations.
 
-  this->relocate_sections(options, symtab, layout, pshdrs, &views);
+  this->relocate_sections(symtab, layout, pshdrs, &views);
 
   // After we've done the relocations, we release the hash tables,
   // since we no longer need them.
@@ -800,7 +789,6 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
 template<int size, bool big_endian>
 void
 Sized_relobj<size, big_endian>::do_relocate_sections(
-    const General_options& options,
     const Symbol_table* symtab,
     const Layout* layout,
     const unsigned char* pshdrs,
@@ -814,7 +802,6 @@ Sized_relobj<size, big_endian>::do_relocate_sections(
   const std::vector<Address>& out_offsets(this->section_offsets_);
 
   Relocate_info<size, big_endian> relinfo;
-  relinfo.options = &options;
   relinfo.symtab = symtab;
   relinfo.layout = layout;
   relinfo.object = this;
@@ -1431,8 +1418,39 @@ Sized_relobj<64, true>::do_read_relocs(Read_relocs_data* rd);
 #ifdef HAVE_TARGET_32_LITTLE
 template
 void
-Sized_relobj<32, false>::do_gc_process_relocs(const General_options& options,
-					Symbol_table* symtab,
+Sized_relobj<32, false>::do_gc_process_relocs(Symbol_table* symtab,
+					      Layout* layout,
+					      Read_relocs_data* rd);
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+void
+Sized_relobj<32, true>::do_gc_process_relocs(Symbol_table* symtab,
+					     Layout* layout,
+					     Read_relocs_data* rd);
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+void
+Sized_relobj<64, false>::do_gc_process_relocs(Symbol_table* symtab,
+					      Layout* layout,
+					      Read_relocs_data* rd);
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+void
+Sized_relobj<64, true>::do_gc_process_relocs(Symbol_table* symtab,
+					     Layout* layout,
+					     Read_relocs_data* rd);
+#endif
+
+#ifdef HAVE_TARGET_32_LITTLE
+template
+void
+Sized_relobj<32, false>::do_scan_relocs(Symbol_table* symtab,
 					Layout* layout,
 					Read_relocs_data* rd);
 #endif
@@ -1440,8 +1458,7 @@ Sized_relobj<32, false>::do_gc_process_relocs(const General_options& options,
 #ifdef HAVE_TARGET_32_BIG
 template
 void
-Sized_relobj<32, true>::do_gc_process_relocs(const General_options& options,
-				       Symbol_table* symtab,
+Sized_relobj<32, true>::do_scan_relocs(Symbol_table* symtab,
 				       Layout* layout,
 				       Read_relocs_data* rd);
 #endif
@@ -1449,8 +1466,7 @@ Sized_relobj<32, true>::do_gc_process_relocs(const General_options& options,
 #ifdef HAVE_TARGET_64_LITTLE
 template
 void
-Sized_relobj<64, false>::do_gc_process_relocs(const General_options& options,
-					Symbol_table* symtab,
+Sized_relobj<64, false>::do_scan_relocs(Symbol_table* symtab,
 					Layout* layout,
 					Read_relocs_data* rd);
 #endif
@@ -1458,8 +1474,7 @@ Sized_relobj<64, false>::do_gc_process_relocs(const General_options& options,
 #ifdef HAVE_TARGET_64_BIG
 template
 void
-Sized_relobj<64, true>::do_gc_process_relocs(const General_options& options,
-				       Symbol_table* symtab,
+Sized_relobj<64, true>::do_scan_relocs(Symbol_table* symtab,
 				       Layout* layout,
 				       Read_relocs_data* rd);
 #endif
@@ -1467,44 +1482,7 @@ Sized_relobj<64, true>::do_gc_process_relocs(const General_options& options,
 #ifdef HAVE_TARGET_32_LITTLE
 template
 void
-Sized_relobj<32, false>::do_scan_relocs(const General_options& options,
-					Symbol_table* symtab,
-					Layout* layout,
-					Read_relocs_data* rd);
-#endif
-
-#ifdef HAVE_TARGET_32_BIG
-template
-void
-Sized_relobj<32, true>::do_scan_relocs(const General_options& options,
-				       Symbol_table* symtab,
-				       Layout* layout,
-				       Read_relocs_data* rd);
-#endif
-
-#ifdef HAVE_TARGET_64_LITTLE
-template
-void
-Sized_relobj<64, false>::do_scan_relocs(const General_options& options,
-					Symbol_table* symtab,
-					Layout* layout,
-					Read_relocs_data* rd);
-#endif
-
-#ifdef HAVE_TARGET_64_BIG
-template
-void
-Sized_relobj<64, true>::do_scan_relocs(const General_options& options,
-				       Symbol_table* symtab,
-				       Layout* layout,
-				       Read_relocs_data* rd);
-#endif
-
-#ifdef HAVE_TARGET_32_LITTLE
-template
-void
-Sized_relobj<32, false>::do_relocate(const General_options& options,
-				     const Symbol_table* symtab,
+Sized_relobj<32, false>::do_relocate(const Symbol_table* symtab,
 				     const Layout* layout,
 				     Output_file* of);
 #endif
@@ -1512,8 +1490,7 @@ Sized_relobj<32, false>::do_relocate(const General_options& options,
 #ifdef HAVE_TARGET_32_BIG
 template
 void
-Sized_relobj<32, true>::do_relocate(const General_options& options,
-				    const Symbol_table* symtab,
+Sized_relobj<32, true>::do_relocate(const Symbol_table* symtab,
 				    const Layout* layout,
 				    Output_file* of);
 #endif
@@ -1521,8 +1498,7 @@ Sized_relobj<32, true>::do_relocate(const General_options& options,
 #ifdef HAVE_TARGET_64_LITTLE
 template
 void
-Sized_relobj<64, false>::do_relocate(const General_options& options,
-				     const Symbol_table* symtab,
+Sized_relobj<64, false>::do_relocate(const Symbol_table* symtab,
 				     const Layout* layout,
 				     Output_file* of);
 #endif
@@ -1530,8 +1506,7 @@ Sized_relobj<64, false>::do_relocate(const General_options& options,
 #ifdef HAVE_TARGET_64_BIG
 template
 void
-Sized_relobj<64, true>::do_relocate(const General_options& options,
-				    const Symbol_table* symtab,
+Sized_relobj<64, true>::do_relocate(const Symbol_table* symtab,
 				    const Layout* layout,
 				    Output_file* of);
 #endif
@@ -1540,7 +1515,6 @@ Sized_relobj<64, true>::do_relocate(const General_options& options,
 template
 void
 Sized_relobj<32, false>::do_relocate_sections(
-    const General_options& options,
     const Symbol_table* symtab,
     const Layout* layout,
     const unsigned char* pshdrs,
@@ -1551,7 +1525,6 @@ Sized_relobj<32, false>::do_relocate_sections(
 template
 void
 Sized_relobj<32, true>::do_relocate_sections(
-    const General_options& options,
     const Symbol_table* symtab,
     const Layout* layout,
     const unsigned char* pshdrs,
@@ -1562,7 +1535,6 @@ Sized_relobj<32, true>::do_relocate_sections(
 template
 void
 Sized_relobj<64, false>::do_relocate_sections(
-    const General_options& options,
     const Symbol_table* symtab,
     const Layout* layout,
     const unsigned char* pshdrs,
@@ -1573,7 +1545,6 @@ Sized_relobj<64, false>::do_relocate_sections(
 template
 void
 Sized_relobj<64, true>::do_relocate_sections(
-    const General_options& options,
     const Symbol_table* symtab,
     const Layout* layout,
     const unsigned char* pshdrs,

@@ -659,15 +659,13 @@ class Relobj : public Object
 
   // Process the relocs, during garbage collection only.
   void
-  gc_process_relocs(const General_options& options, Symbol_table* symtab,
-	            Layout* layout, Read_relocs_data* rd)
-  { return this->do_gc_process_relocs(options, symtab, layout, rd); }
+  gc_process_relocs(Symbol_table* symtab, Layout* layout, Read_relocs_data* rd)
+  { return this->do_gc_process_relocs(symtab, layout, rd); }
 
   // Scan the relocs and adjust the symbol table.
   void
-  scan_relocs(const General_options& options, Symbol_table* symtab,
-	      Layout* layout, Read_relocs_data* rd)
-  { return this->do_scan_relocs(options, symtab, layout, rd); }
+  scan_relocs(Symbol_table* symtab, Layout* layout, Read_relocs_data* rd)
+  { return this->do_scan_relocs(symtab, layout, rd); }
 
   // The number of local symbols in the input symbol table.
   virtual unsigned int
@@ -701,9 +699,8 @@ class Relobj : public Object
 
   // Relocate the input sections and write out the local symbols.
   void
-  relocate(const General_options& options, const Symbol_table* symtab,
-	   const Layout* layout, Output_file* of)
-  { return this->do_relocate(options, symtab, layout, of); }
+  relocate(const Symbol_table* symtab, const Layout* layout, Output_file* of)
+  { return this->do_relocate(symtab, layout, of); }
 
   // Return whether an input section is being included in the link.
   bool
@@ -790,13 +787,11 @@ class Relobj : public Object
 
   // Process the relocs--implemented by child class.
   virtual void
-  do_gc_process_relocs(const General_options&, Symbol_table*, Layout*,
-		 Read_relocs_data*) = 0;
+  do_gc_process_relocs(Symbol_table*, Layout*, Read_relocs_data*) = 0;
 
   // Scan the relocs--implemented by child class.
   virtual void
-  do_scan_relocs(const General_options&, Symbol_table*, Layout*,
-		 Read_relocs_data*) = 0;
+  do_scan_relocs(Symbol_table*, Layout*, Read_relocs_data*) = 0;
 
   // Return the number of local symbols--implemented by child class.
   virtual unsigned int
@@ -824,8 +819,7 @@ class Relobj : public Object
   // Relocate the input sections and write out the local
   // symbols--implemented by child class.
   virtual void
-  do_relocate(const General_options& options, const Symbol_table* symtab,
-	      const Layout*, Output_file* of) = 0;
+  do_relocate(const Symbol_table* symtab, const Layout*, Output_file* of) = 0;
 
   // Get the offset of a section--implemented by child class.
   virtual uint64_t
@@ -1502,13 +1496,11 @@ class Sized_relobj : public Relobj
   // Process the relocs to find list of referenced sections. Used only
   // during garbage collection.
   void
-  do_gc_process_relocs(const General_options&, Symbol_table*, Layout*,
-		       Read_relocs_data*);
+  do_gc_process_relocs(Symbol_table*, Layout*, Read_relocs_data*);
 
   // Scan the relocs and adjust the symbol table.
   void
-  do_scan_relocs(const General_options&, Symbol_table*, Layout*,
-		 Read_relocs_data*);
+  do_scan_relocs(Symbol_table*, Layout*, Read_relocs_data*);
 
   // Count the local symbols.
   void
@@ -1529,8 +1521,7 @@ class Sized_relobj : public Relobj
 
   // Relocate the input sections and write out the local symbols.
   void
-  do_relocate(const General_options& options, const Symbol_table* symtab,
-	      const Layout*, Output_file* of);
+  do_relocate(const Symbol_table* symtab, const Layout*, Output_file* of);
 
   // Get the size of a section.
   uint64_t
@@ -1663,8 +1654,7 @@ class Sized_relobj : public Relobj
 
   // This may be overriden by a child class.
   virtual void
-  do_relocate_sections(const General_options& options,
-		       const Symbol_table* symtab, const Layout* layout,
+  do_relocate_sections(const Symbol_table* symtab, const Layout* layout,
 		       const unsigned char* pshdrs, Views* pviews);
 
  private:
@@ -1728,22 +1718,20 @@ class Sized_relobj : public Relobj
 
   // Relocate the sections in the output file.
   void
-  relocate_sections(const General_options& options, const Symbol_table* symtab,
-		    const Layout* layout, const unsigned char* pshdrs,
-		    Views* pviews)
-  { this->do_relocate_sections(options, symtab, layout, pshdrs, pviews); }
+  relocate_sections(const Symbol_table* symtab, const Layout* layout,
+		    const unsigned char* pshdrs, Views* pviews)
+  { this->do_relocate_sections(symtab, layout, pshdrs, pviews); }
 
   // Scan the input relocations for --emit-relocs.
   void
-  emit_relocs_scan(const General_options&, Symbol_table*, Layout*,
-		   const unsigned char* plocal_syms,
+  emit_relocs_scan(Symbol_table*, Layout*, const unsigned char* plocal_syms,
 		   const Read_relocs_data::Relocs_list::iterator&);
 
   // Scan the input relocations for --emit-relocs, templatized on the
   // type of the relocation section.
   template<int sh_type>
   void
-  emit_relocs_scan_reltype(const General_options&, Symbol_table*, Layout*,
+  emit_relocs_scan_reltype(Symbol_table*, Layout*,
 			   const unsigned char* plocal_syms,
 			   const Read_relocs_data::Relocs_list::iterator&,
 			   Relocatable_relocs*);
@@ -2005,8 +1993,6 @@ class Input_objects
 template<int size, bool big_endian>
 struct Relocate_info
 {
-  // Command line options.
-  const General_options* options;
   // Symbol table.
   const Symbol_table* symtab;
   // Layout.

@@ -67,8 +67,7 @@ class Target_i386 : public Target_freebsd<32, false>
   // Process the relocations to determine unreferenced sections for 
   // garbage collection.
   void
-  gc_process_relocs(const General_options& options,
-                    Symbol_table* symtab,
+  gc_process_relocs(Symbol_table* symtab,
                     Layout* layout,
                     Sized_relobj<32, false>* object,
                     unsigned int data_shndx,
@@ -82,8 +81,7 @@ class Target_i386 : public Target_freebsd<32, false>
 
   // Scan the relocations to look for symbol adjustments.
   void
-  scan_relocs(const General_options& options,
-	      Symbol_table* symtab,
+  scan_relocs(Symbol_table* symtab,
 	      Layout* layout,
 	      Sized_relobj<32, false>* object,
 	      unsigned int data_shndx,
@@ -119,8 +117,7 @@ class Target_i386 : public Target_freebsd<32, false>
 
   // Scan the relocs during a relocatable link.
   void
-  scan_relocatable_relocs(const General_options& options,
-			  Symbol_table* symtab,
+  scan_relocatable_relocs(Symbol_table* symtab,
 			  Layout* layout,
 			  Sized_relobj<32, false>* object,
 			  unsigned int data_shndx,
@@ -190,8 +187,7 @@ class Target_i386 : public Target_freebsd<32, false>
   struct Scan
   {
     inline void
-    local(const General_options& options, Symbol_table* symtab,
-	  Layout* layout, Target_i386* target,
+    local(Symbol_table* symtab, Layout* layout, Target_i386* target,
 	  Sized_relobj<32, false>* object,
 	  unsigned int data_shndx,
 	  Output_section* output_section,
@@ -199,8 +195,7 @@ class Target_i386 : public Target_freebsd<32, false>
 	  const elfcpp::Sym<32, false>& lsym);
 
     inline void
-    global(const General_options& options, Symbol_table* symtab,
-	   Layout* layout, Target_i386* target,
+    global(Symbol_table* symtab, Layout* layout, Target_i386* target,
 	   Sized_relobj<32, false>* object,
 	   unsigned int data_shndx,
 	   Output_section* output_section,
@@ -884,8 +879,7 @@ Target_i386::Scan::unsupported_reloc_local(Sized_relobj<32, false>* object,
 // Scan a relocation for a local symbol.
 
 inline void
-Target_i386::Scan::local(const General_options&,
-			 Symbol_table* symtab,
+Target_i386::Scan::local(Symbol_table* symtab,
 			 Layout* layout,
 			 Target_i386* target,
 			 Sized_relobj<32, false>* object,
@@ -1175,8 +1169,7 @@ Target_i386::Scan::unsupported_reloc_global(Sized_relobj<32, false>* object,
 // Scan a relocation for a global symbol.
 
 inline void
-Target_i386::Scan::global(const General_options&,
-			  Symbol_table* symtab,
+Target_i386::Scan::global(Symbol_table* symtab,
 			  Layout* layout,
 			  Target_i386* target,
 			  Sized_relobj<32, false>* object,
@@ -1492,8 +1485,7 @@ Target_i386::Scan::global(const General_options&,
 // Process relocations for gc.
 
 void
-Target_i386::gc_process_relocs(const General_options& options,
-                               Symbol_table* symtab,
+Target_i386::gc_process_relocs(Symbol_table* symtab,
                                Layout* layout,
                                Sized_relobj<32, false>* object,
                                unsigned int data_shndx,
@@ -1507,7 +1499,6 @@ Target_i386::gc_process_relocs(const General_options& options,
 {
   gold::gc_process_relocs<32, false, Target_i386, elfcpp::SHT_REL,
 		          Target_i386::Scan>(
-    options,
     symtab,
     layout,
     this,
@@ -1524,8 +1515,7 @@ Target_i386::gc_process_relocs(const General_options& options,
 // Scan relocations for a section.
 
 void
-Target_i386::scan_relocs(const General_options& options,
-			 Symbol_table* symtab,
+Target_i386::scan_relocs(Symbol_table* symtab,
 			 Layout* layout,
 			 Sized_relobj<32, false>* object,
 			 unsigned int data_shndx,
@@ -1546,7 +1536,6 @@ Target_i386::scan_relocs(const General_options& options,
 
   gold::scan_relocs<32, false, Target_i386, elfcpp::SHT_REL,
 		    Target_i386::Scan>(
-    options,
     symtab,
     layout,
     this,
@@ -2537,8 +2526,7 @@ Target_i386::Relocatable_size_for_reloc::get_size_for_reloc(
 // Scan the relocs during a relocatable link.
 
 void
-Target_i386::scan_relocatable_relocs(const General_options& options,
-				     Symbol_table* symtab,
+Target_i386::scan_relocatable_relocs(Symbol_table* symtab,
 				     Layout* layout,
 				     Sized_relobj<32, false>* object,
 				     unsigned int data_shndx,
@@ -2558,7 +2546,6 @@ Target_i386::scan_relocatable_relocs(const General_options& options,
 
   gold::scan_relocatable_relocs<32, false, elfcpp::SHT_REL,
       Scan_relocatable_relocs>(
-    options,
     symtab,
     layout,
     object,

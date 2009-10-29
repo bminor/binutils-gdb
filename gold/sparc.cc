@@ -67,8 +67,7 @@ class Target_sparc : public Sized_target<size, big_endian>
   // Process the relocations to determine unreferenced sections for 
   // garbage collection.
   void
-  gc_process_relocs(const General_options& options,
-	            Symbol_table* symtab,
+  gc_process_relocs(Symbol_table* symtab,
 	            Layout* layout,
 	            Sized_relobj<size, big_endian>* object,
 	            unsigned int data_shndx,
@@ -82,8 +81,7 @@ class Target_sparc : public Sized_target<size, big_endian>
 
   // Scan the relocations to look for symbol adjustments.
   void
-  scan_relocs(const General_options& options,
-	      Symbol_table* symtab,
+  scan_relocs(Symbol_table* symtab,
 	      Layout* layout,
 	      Sized_relobj<size, big_endian>* object,
 	      unsigned int data_shndx,
@@ -118,8 +116,7 @@ class Target_sparc : public Sized_target<size, big_endian>
 
   // Scan the relocs during a relocatable link.
   void
-  scan_relocatable_relocs(const General_options& options,
-			  Symbol_table* symtab,
+  scan_relocatable_relocs(Symbol_table* symtab,
 			  Layout* layout,
 			  Sized_relobj<size, big_endian>* object,
 			  unsigned int data_shndx,
@@ -181,8 +178,7 @@ class Target_sparc : public Sized_target<size, big_endian>
     { }
 
     inline void
-    local(const General_options& options, Symbol_table* symtab,
-	  Layout* layout, Target_sparc* target,
+    local(Symbol_table* symtab, Layout* layout, Target_sparc* target,
 	  Sized_relobj<size, big_endian>* object,
 	  unsigned int data_shndx,
 	  Output_section* output_section,
@@ -190,8 +186,7 @@ class Target_sparc : public Sized_target<size, big_endian>
 	  const elfcpp::Sym<size, big_endian>& lsym);
 
     inline void
-    global(const General_options& options, Symbol_table* symtab,
-	   Layout* layout, Target_sparc* target,
+    global(Symbol_table* symtab, Layout* layout, Target_sparc* target,
 	   Sized_relobj<size, big_endian>* object,
 	   unsigned int data_shndx,
 	   Output_section* output_section,
@@ -1600,7 +1595,6 @@ Target_sparc<size, big_endian>::Scan::check_non_pic(Relobj* object, unsigned int
 template<int size, bool big_endian>
 inline void
 Target_sparc<size, big_endian>::Scan::local(
-			const General_options&,
 			Symbol_table* symtab,
 			Layout* layout,
 			Target_sparc<size, big_endian>* target,
@@ -1902,7 +1896,6 @@ Target_sparc<size, big_endian>::Scan::unsupported_reloc_global(
 template<int size, bool big_endian>
 inline void
 Target_sparc<size, big_endian>::Scan::global(
-				const General_options&,
 				Symbol_table* symtab,
 				Layout* layout,
 				Target_sparc<size, big_endian>* target,
@@ -2250,7 +2243,6 @@ Target_sparc<size, big_endian>::Scan::global(
 template<int size, bool big_endian>
 void
 Target_sparc<size, big_endian>::gc_process_relocs(
-			const General_options& options,
 			Symbol_table* symtab,
 			Layout* layout,
 			Sized_relobj<size, big_endian>* object,
@@ -2267,7 +2259,6 @@ Target_sparc<size, big_endian>::gc_process_relocs(
   typedef typename Target_sparc<size, big_endian>::Scan Scan;
 
   gold::gc_process_relocs<size, big_endian, Sparc, elfcpp::SHT_RELA, Scan>(
-    options,
     symtab,
     layout,
     this,
@@ -2286,7 +2277,6 @@ Target_sparc<size, big_endian>::gc_process_relocs(
 template<int size, bool big_endian>
 void
 Target_sparc<size, big_endian>::scan_relocs(
-			const General_options& options,
 			Symbol_table* symtab,
 			Layout* layout,
 			Sized_relobj<size, big_endian>* object,
@@ -2310,7 +2300,6 @@ Target_sparc<size, big_endian>::scan_relocs(
     }
 
   gold::scan_relocs<size, big_endian, Sparc, elfcpp::SHT_RELA, Scan>(
-    options,
     symtab,
     layout,
     this,
@@ -3149,7 +3138,6 @@ Target_sparc<size, big_endian>::Relocatable_size_for_reloc::get_size_for_reloc(
 template<int size, bool big_endian>
 void
 Target_sparc<size, big_endian>::scan_relocatable_relocs(
-			const General_options& options,
 			Symbol_table* symtab,
 			Layout* layout,
 			Sized_relobj<size, big_endian>* object,
@@ -3170,7 +3158,6 @@ Target_sparc<size, big_endian>::scan_relocatable_relocs(
 
   gold::scan_relocatable_relocs<size, big_endian, elfcpp::SHT_RELA,
       Scan_relocatable_relocs>(
-    options,
     symtab,
     layout,
     object,

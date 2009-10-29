@@ -64,10 +64,9 @@ class Read_relocs : public Task
  public:
   // SYMTAB_LOCK is used to lock the symbol table.  BLOCKER should be
   // unblocked when the Scan_relocs task completes.
-  Read_relocs(const General_options& options, Symbol_table* symtab,
-	      Layout* layout, Relobj* object, Task_token* symtab_lock,
-	      Task_token* blocker)
-    : options_(options), symtab_(symtab), layout_(layout), object_(object),
+  Read_relocs(Symbol_table* symtab, Layout* layout, Relobj* object,
+	      Task_token* symtab_lock, Task_token* blocker)
+    : symtab_(symtab), layout_(layout), object_(object),
       symtab_lock_(symtab_lock), blocker_(blocker)
   { }
 
@@ -86,7 +85,6 @@ class Read_relocs : public Task
   get_name() const;
 
  private:
-  const General_options& options_;
   Symbol_table* symtab_;
   Layout* layout_;
   Relobj* object_;
@@ -102,11 +100,11 @@ class Gc_process_relocs : public Task
  public:
   // SYMTAB_LOCK is used to lock the symbol table.  BLOCKER should be
   // unblocked when the task completes.
-  Gc_process_relocs(const General_options& options, Symbol_table* symtab,
-	      Layout* layout, Relobj* object, Read_relocs_data* rd,
-	      Task_token* symtab_lock, Task_token* blocker)
-    : options_(options), symtab_(symtab), layout_(layout), object_(object),
-      rd_(rd), symtab_lock_(symtab_lock), blocker_(blocker)
+  Gc_process_relocs(Symbol_table* symtab, Layout* layout, Relobj* object,
+		    Read_relocs_data* rd, Task_token* symtab_lock,
+		    Task_token* blocker)
+    : symtab_(symtab), layout_(layout), object_(object), rd_(rd),
+      symtab_lock_(symtab_lock), blocker_(blocker)
   { }
 
   // The standard Task methods.
@@ -124,7 +122,6 @@ class Gc_process_relocs : public Task
   get_name() const;
 
  private:
-  const General_options& options_;
   Symbol_table* symtab_;
   Layout* layout_;
   Relobj* object_;
@@ -141,11 +138,11 @@ class Scan_relocs : public Task
  public:
   // SYMTAB_LOCK is used to lock the symbol table.  BLOCKER should be
   // unblocked when the task completes.
-  Scan_relocs(const General_options& options, Symbol_table* symtab,
-	      Layout* layout, Relobj* object, Read_relocs_data* rd,
-	      Task_token* symtab_lock, Task_token* blocker)
-    : options_(options), symtab_(symtab), layout_(layout), object_(object),
-      rd_(rd), symtab_lock_(symtab_lock), blocker_(blocker)
+  Scan_relocs(Symbol_table* symtab, Layout* layout, Relobj* object,
+	      Read_relocs_data* rd, Task_token* symtab_lock,
+	      Task_token* blocker)
+    : symtab_(symtab), layout_(layout), object_(object), rd_(rd),
+      symtab_lock_(symtab_lock), blocker_(blocker)
   { }
 
   // The standard Task methods.
@@ -163,7 +160,6 @@ class Scan_relocs : public Task
   get_name() const;
 
  private:
-  const General_options& options_;
   Symbol_table* symtab_;
   Layout* layout_;
   Relobj* object_;
@@ -177,12 +173,12 @@ class Scan_relocs : public Task
 class Relocate_task : public Task
 {
  public:
-  Relocate_task(const General_options& options, const Symbol_table* symtab,
-		const Layout* layout, Relobj* object, Output_file* of,
+  Relocate_task(const Symbol_table* symtab, const Layout* layout,
+		Relobj* object, Output_file* of,
 		Task_token* input_sections_blocker,
 		Task_token* output_sections_blocker, Task_token* final_blocker)
-    : options_(options), symtab_(symtab), layout_(layout), object_(object),
-      of_(of), input_sections_blocker_(input_sections_blocker),
+    : symtab_(symtab), layout_(layout), object_(object), of_(of),
+      input_sections_blocker_(input_sections_blocker),
       output_sections_blocker_(output_sections_blocker),
       final_blocker_(final_blocker)
   { }
@@ -202,7 +198,6 @@ class Relocate_task : public Task
   get_name() const;
 
  private:
-  const General_options& options_;
   const Symbol_table* symtab_;
   const Layout* layout_;
   Relobj* object_;

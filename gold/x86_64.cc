@@ -74,8 +74,7 @@ class Target_x86_64 : public Target_freebsd<64, false>
 
   // Scan the relocations to look for symbol adjustments.
   void
-  gc_process_relocs(const General_options& options,
-	            Symbol_table* symtab,
+  gc_process_relocs(Symbol_table* symtab,
 	            Layout* layout,
 	            Sized_relobj<64, false>* object,
 	            unsigned int data_shndx,
@@ -89,8 +88,7 @@ class Target_x86_64 : public Target_freebsd<64, false>
 
   // Scan the relocations to look for symbol adjustments.
   void
-  scan_relocs(const General_options& options,
-	      Symbol_table* symtab,
+  scan_relocs(Symbol_table* symtab,
 	      Layout* layout,
 	      Sized_relobj<64, false>* object,
 	      unsigned int data_shndx,
@@ -126,8 +124,7 @@ class Target_x86_64 : public Target_freebsd<64, false>
 
   // Scan the relocs during a relocatable link.
   void
-  scan_relocatable_relocs(const General_options& options,
-			  Symbol_table* symtab,
+  scan_relocatable_relocs(Symbol_table* symtab,
 			  Layout* layout,
 			  Sized_relobj<64, false>* object,
 			  unsigned int data_shndx,
@@ -189,8 +186,7 @@ class Target_x86_64 : public Target_freebsd<64, false>
     { }
 
     inline void
-    local(const General_options& options, Symbol_table* symtab,
-	  Layout* layout, Target_x86_64* target,
+    local(Symbol_table* symtab, Layout* layout, Target_x86_64* target,
 	  Sized_relobj<64, false>* object,
 	  unsigned int data_shndx,
 	  Output_section* output_section,
@@ -198,8 +194,7 @@ class Target_x86_64 : public Target_freebsd<64, false>
 	  const elfcpp::Sym<64, false>& lsym);
 
     inline void
-    global(const General_options& options, Symbol_table* symtab,
-	   Layout* layout, Target_x86_64* target,
+    global(Symbol_table* symtab, Layout* layout, Target_x86_64* target,
 	   Sized_relobj<64, false>* object,
 	   unsigned int data_shndx,
 	   Output_section* output_section,
@@ -1002,8 +997,7 @@ Target_x86_64::Scan::check_non_pic(Relobj* object, unsigned int r_type)
 // Scan a relocation for a local symbol.
 
 inline void
-Target_x86_64::Scan::local(const General_options&,
-                           Symbol_table* symtab,
+Target_x86_64::Scan::local(Symbol_table* symtab,
                            Layout* layout,
                            Target_x86_64* target,
                            Sized_relobj<64, false>* object,
@@ -1283,8 +1277,7 @@ Target_x86_64::Scan::unsupported_reloc_global(Sized_relobj<64, false>* object,
 // Scan a relocation for a global symbol.
 
 inline void
-Target_x86_64::Scan::global(const General_options&,
-                            Symbol_table* symtab,
+Target_x86_64::Scan::global(Symbol_table* symtab,
                             Layout* layout,
                             Target_x86_64* target,
                             Sized_relobj<64, false>* object,
@@ -1576,8 +1569,7 @@ Target_x86_64::Scan::global(const General_options&,
 }
 
 void
-Target_x86_64::gc_process_relocs(const General_options& options,
-                                 Symbol_table* symtab,
+Target_x86_64::gc_process_relocs(Symbol_table* symtab,
                                  Layout* layout,
                                  Sized_relobj<64, false>* object,
                                  unsigned int data_shndx,
@@ -1597,7 +1589,6 @@ Target_x86_64::gc_process_relocs(const General_options& options,
 
    gold::gc_process_relocs<64, false, Target_x86_64, elfcpp::SHT_RELA,
                            Target_x86_64::Scan>(
-    options,
     symtab,
     layout,
     this,
@@ -1614,8 +1605,7 @@ Target_x86_64::gc_process_relocs(const General_options& options,
 // Scan relocations for a section.
 
 void
-Target_x86_64::scan_relocs(const General_options& options,
-                           Symbol_table* symtab,
+Target_x86_64::scan_relocs(Symbol_table* symtab,
                            Layout* layout,
                            Sized_relobj<64, false>* object,
                            unsigned int data_shndx,
@@ -1636,7 +1626,6 @@ Target_x86_64::scan_relocs(const General_options& options,
 
   gold::scan_relocs<64, false, Target_x86_64, elfcpp::SHT_RELA,
       Target_x86_64::Scan>(
-    options,
     symtab,
     layout,
     this,
@@ -2526,8 +2515,7 @@ Target_x86_64::Relocatable_size_for_reloc::get_size_for_reloc(
 // Scan the relocs during a relocatable link.
 
 void
-Target_x86_64::scan_relocatable_relocs(const General_options& options,
-				       Symbol_table* symtab,
+Target_x86_64::scan_relocatable_relocs(Symbol_table* symtab,
 				       Layout* layout,
 				       Sized_relobj<64, false>* object,
 				       unsigned int data_shndx,
@@ -2547,7 +2535,6 @@ Target_x86_64::scan_relocatable_relocs(const General_options& options,
 
   gold::scan_relocatable_relocs<64, false, elfcpp::SHT_RELA,
       Scan_relocatable_relocs>(
-    options,
     symtab,
     layout,
     object,

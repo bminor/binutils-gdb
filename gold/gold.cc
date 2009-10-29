@@ -229,7 +229,7 @@ queue_initial_tasks(const General_options& options,
       || parameters->options().icf_enabled())
     {
       workqueue->queue(new Task_function(new Gc_runner(options,
-                                                       input_objects,
+						       input_objects,
                                                        symtab,
                                                        layout,
                                                        mapfile),
@@ -273,8 +273,8 @@ queue_middle_gc_tasks(const General_options& options,
     {
       // We can read and process the relocations in any order.  
       blocker->add_blocker();
-      workqueue->queue(new Read_relocs(options, symtab, layout, *p,
-				       symtab_lock, blocker));
+      workqueue->queue(new Read_relocs(symtab, layout, *p, symtab_lock,
+				       blocker));
     }
 
   Task_token* this_blocker = new Task_token(true);
@@ -485,8 +485,9 @@ queue_middle_tasks(const General_options& options,
            ++p)
         {
           blocker->add_blocker();
-          workqueue->queue(new Scan_relocs(options, symtab, layout, *p, 
-                           (*p)->get_relocs_data(),symtab_lock, blocker));
+          workqueue->queue(new Scan_relocs(symtab, layout, *p, 
+					   (*p)->get_relocs_data(),
+					   symtab_lock, blocker));
         }
     }
   else
@@ -512,8 +513,8 @@ queue_middle_tasks(const General_options& options,
           // relocations.  That task will in turn queue a task to wait
           // until it can write to the symbol table.
           blocker->add_blocker();
-          workqueue->queue(new Read_relocs(options, symtab, layout, *p,
-                   symtab_lock, blocker));
+          workqueue->queue(new Read_relocs(symtab, layout, *p, symtab_lock,
+					   blocker));
         }
     }
 
@@ -600,7 +601,7 @@ queue_final_tasks(const General_options& options,
       if (input_sections_blocker != NULL)
 	input_sections_blocker->add_blocker();
       final_blocker->add_blocker();
-      workqueue->queue(new Relocate_task(options, symtab, layout, *p, of,
+      workqueue->queue(new Relocate_task(symtab, layout, *p, of,
 					 input_sections_blocker,
 					 output_sections_blocker,
 					 final_blocker));

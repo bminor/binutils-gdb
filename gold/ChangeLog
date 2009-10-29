@@ -1,3 +1,33 @@
+2009-10-28  Ian Lance Taylor  <iant@google.com>
+
+	* object.h (class Relobj): Drop options parameter from
+	gc_process_relocs, scan_relocs, relocate, do_gc_process_relocs,
+	do_scan_relocs, do_relocate.  Change all callers.
+	(class Sized_relobj): Drop options parameters from
+	do_gc_process_relocs, do_scan_relocs, do_relocate,
+	do_relocate_sections, relocate_sections, emit_relocs_scan,
+	emit_relocs_scan_reltype.  Change all callers.
+	(struct Relocate_info): Remove options field and all references to
+	it.
+	* reloc.h (class Read_relocs): Remove options constructor
+	parameter and options_ field.  Change all callers.
+	(class Gc_process_relocs, class Scan_relocs): Likewise.
+	(class Relocate_task): Likewise.
+	* target-reloc.h (scan_relocs): Remove options parameter.  Change
+	all callers.
+	(scan_relocatable_relocs): Likewise.
+	* target.h (class Sized_target): Remove options parameter from
+	gc_process_relocs, scan_relocs, scan_relocatable_relocs.  Change
+	all callers.
+	* gc.h (gc_process_relocs): Remove options parameter.  Change all
+	callers.
+	* arm.cc: Update functions to remove options parameters.
+	* i386.cc: Likewise.
+	* powerpc.cc: Likewise.
+	* sparc.cc: Likewise.
+	* x86_64.cc: Likewise.
+	* testsuite/testfile.cc: Likewise.
+
 2009-10-28  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_relobj): New class definition.
