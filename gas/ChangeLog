@@ -1,3 +1,8 @@
+2009-10-29  Paul Brook  <paul@codesourcery.com>
+
+	* doc/c-arm.texi: Document ARM -mcpu=cortex-a5.
+	* config/arm/tc-arm.c (arm_cpu_option_table): Add cortex-a5.
+
 2009-10-29  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-mep.c (md_pseudo_table): Remove dwarf2 debug pseudo

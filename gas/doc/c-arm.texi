@@ -112,6 +112,7 @@ recognized:
 @code{arm1176jzf-s},
 @code{mpcore},
 @code{mpcorenovfp},
+@code{cortex-a5},
 @code{cortex-a8},
 @code{cortex-a9},
 @code{cortex-r4},
