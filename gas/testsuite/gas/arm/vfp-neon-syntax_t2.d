@@ -53,16 +53,16 @@ Disassembly of section \.text:
 0[0-9a-f]+ <[^>]+> bf04      	itt	eq
 0[0-9a-f]+ <[^>]+> ee20 0ac1 	(vnmuleq\.f32|fnmulseq)	s0, s1, s2
 0[0-9a-f]+ <[^>]+> ee21 0b42 	(vnmuleq\.f64|fnmuldeq)	d0, d1, d2
-0[0-9a-f]+ <[^>]+> ee00 0ac1 	(vmls\.f32|fnmacs)	s0, s1, s2
-0[0-9a-f]+ <[^>]+> ee01 0b42 	(vmls\.f64|fnmacd)	d0, d1, d2
+0[0-9a-f]+ <[^>]+> ee10 0ac1 	(vnmla\.f32|fnmacs)	s0, s1, s2
+0[0-9a-f]+ <[^>]+> ee11 0b42 	(vnmla\.f64|fnmacd)	d0, d1, d2
 0[0-9a-f]+ <[^>]+> bf04      	itt	eq
-0[0-9a-f]+ <[^>]+> ee00 0ac1 	(vmlseq\.f32|fnmacseq)	s0, s1, s2
-0[0-9a-f]+ <[^>]+> ee01 0b42 	(vmlseq\.f64|fnmacdeq)	d0, d1, d2
-0[0-9a-f]+ <[^>]+> ee10 0ac1 	(vnmla\.f32|fnmscs)	s0, s1, s2
-0[0-9a-f]+ <[^>]+> ee11 0b42 	(vnmla\.f64|fnmscd)	d0, d1, d2
+0[0-9a-f]+ <[^>]+> ee10 0ac1 	(vnmlaeq\.f32|fnmacseq)	s0, s1, s2
+0[0-9a-f]+ <[^>]+> ee11 0b42 	(vnmlaeq\.f64|fnmacdeq)	d0, d1, d2
+0[0-9a-f]+ <[^>]+> ee10 0a81 	(vnmls\.f32|fnmscs)	s0, s1, s2
+0[0-9a-f]+ <[^>]+> ee11 0b02 	(vnmls\.f64|fnmscd)	d0, d1, d2
 0[0-9a-f]+ <[^>]+> bf04      	itt	eq
-0[0-9a-f]+ <[^>]+> ee10 0ac1 	(vnmlaeq\.f32|fnmscseq)	s0, s1, s2
-0[0-9a-f]+ <[^>]+> ee11 0b42 	(vnmlaeq\.f64|fnmscdeq)	d0, d1, d2
+0[0-9a-f]+ <[^>]+> ee10 0a81 	(vnmlseq\.f32|fnmscseq)	s0, s1, s2
+0[0-9a-f]+ <[^>]+> ee11 0b02 	(vnmlseq\.f64|fnmscdeq)	d0, d1, d2
 0[0-9a-f]+ <[^>]+> ee20 0a81 	(vmul\.f32|fmuls)	s0, s1, s2
 0[0-9a-f]+ <[^>]+> ee21 0b02 	(vmul\.f64|fmuld)	d0, d1, d2
 0[0-9a-f]+ <[^>]+> bf04      	itt	eq

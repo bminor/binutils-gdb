@@ -11328,8 +11328,8 @@ struct neon_tab_entry
   X(vqmovn,	0x1b20200, N_INV,     N_INV),		\
   X(vqmovun,	0x1b20240, N_INV,     N_INV),		\
   X(vnmul,      0xe200a40, 0xe200b40, N_INV),		\
-  X(vnmla,      0xe000a40, 0xe000b40, N_INV),		\
-  X(vnmls,      0xe100a40, 0xe100b40, N_INV),		\
+  X(vnmla,      0xe100a40, 0xe100b40, N_INV),		\
+  X(vnmls,      0xe100a00, 0xe100b00, N_INV),		\
   X(vcmp,	0xeb40a40, 0xeb40b40, N_INV),		\
   X(vcmpz,	0xeb50a40, 0xeb50b40, N_INV),		\
   X(vcmpe,	0xeb40ac0, 0xeb40bc0, N_INV),		\

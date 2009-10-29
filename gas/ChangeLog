@@ -1,5 +1,9 @@
 2009-10-29  Paul Brook  <paul@codesourcery.com>
 
+	* config/tc-arm.c (neon_tab_entry): Fix VNMLA/VNMLS opcodes.
+
+2009-10-29  Paul Brook  <paul@codesourcery.com>
+
 	* doc/c-arm.texi: Document ARM -mcpu=cortex-a5.
 	* config/arm/tc-arm.c (arm_cpu_option_table): Add cortex-a5.
 
