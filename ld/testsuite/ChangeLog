@@ -1,3 +1,7 @@
+2009-10-28  Johan Kristell  <johankri@axis.com>
+
+	* ld-cris/dso12-pltdis.d: New test.
+
 2009-10-19  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/tls-e-20.d, ld-cris/tls-e-20a.d, ld-cris/tls-e-22.d,
