@@ -1,3 +1,10 @@
+2009-10-29  Sandra Loosemore  <sandra@codesourcery.com>
+
+	PR gdb/10783
+
+	* server.c (handle_search_memory_1): Correct read_addr initialization
+	in loop for searching subsequent chunks.
+
 2009-10-29  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* configure.ac: New --with-libthread-db option.

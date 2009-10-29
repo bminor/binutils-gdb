@@ -2305,7 +2305,7 @@ simple_search_memory (struct target_ops *ops,
       if (search_space_len >= pattern_len)
 	{
 	  unsigned keep_len = search_buf_size - chunk_size;
-	  CORE_ADDR read_addr = start_addr + keep_len;
+	  CORE_ADDR read_addr = start_addr + chunk_size + keep_len;
 	  int nr_to_read;
 
 	  /* Copy the trailing part of the previous iteration to the front

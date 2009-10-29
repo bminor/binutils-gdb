@@ -1,3 +1,10 @@
+2009-10-29  Sandra Loosemore  <sandra@codesourcery.com>
+
+	PR gdb/10783
+
+	* target.c (simple_search_memory): Correct read_addr initialization
+	in loop for searching subsequent chunks.
+
 2009-10-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	Reported by Antti Hatala <ahatala@nvidia.com>.
