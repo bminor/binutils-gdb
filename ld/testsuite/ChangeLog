@@ -1,3 +1,7 @@
+2009-10-30  Mark Mitchell  <mark@codesourcery.com>
+
+	* ld-elfcomm/elfcomm.exp: Compile with -fcommon.
+
 2009-10-28  Johan Kristell  <johankri@axis.com>
 
 	* ld-cris/dso12-pltdis.d: New test.
