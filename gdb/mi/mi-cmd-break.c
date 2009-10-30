@@ -298,7 +298,7 @@ mi_cmd_break_commands (char *command, char **argv, int argc)
   mi_command_line_array_ptr = 1;
   mi_command_line_array_cnt = argc;
 
-  break_command = read_command_lines_1 (mi_read_next_line, 0);
+  break_command = read_command_lines_1 (mi_read_next_line, 1);
   breakpoint_set_commands (b, break_command);
 }
 

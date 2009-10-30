@@ -1306,6 +1306,8 @@ mi_execute_command (char *cmd, int from_tty)
 	  mi_out_rewind (uiout);
 	}
 
+      bpstat_do_actions ();
+
       if (/* The notifications are only output when the top-level
 	     interpreter (specified on the command line) is MI.  */      
 	  ui_out_is_mi_like_p (interp_ui_out (top_level_interpreter ()))

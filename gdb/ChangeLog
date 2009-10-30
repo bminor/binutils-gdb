@@ -1,3 +1,11 @@
+2009-10-30  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Fix breakpoint commands in MI.
+
+	* mi/mi-main.c (mi_execute_command): Run bpstat_do_actions.
+	* mi/mi-cmd-break.c (mi_cmd_break_commands): Pass 1 to
+	read_command_line_1 to actually parse composite commands.
+
 2009-10-29  Sandra Loosemore  <sandra@codesourcery.com>
 
 	PR gdb/10783
