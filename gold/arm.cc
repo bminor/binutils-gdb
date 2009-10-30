@@ -947,6 +947,12 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
   as_arm_relobj(Relobj* relobj)
   { return static_cast<Arm_relobj<big_endian>*>(relobj); }
 
+  // Processor-specific flags in ELF file header.  This is valid only after
+  // reading symbols.
+  elfcpp::Elf_Word
+  processor_specific_flags() const
+  { return this->processor_specific_flags_; }
+
  protected:
   // Post constructor setup.
   void
@@ -971,6 +977,10 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
 		       const unsigned char* pshdrs,
 		       typename Sized_relobj<32, big_endian>::Views* pivews);
 
+  // Read the symbol information.
+  void
+  do_read_symbols(Read_symbols_data* sd);
+
  private:
   // List of stub tables.
   typedef std::vector<Stub_table<big_endian>*> Stub_table_list;
@@ -978,6 +988,45 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
   // Bit vector to tell if a local symbol is a thumb function or not.
   // This is only valid after do_count_local_symbol is called.
   std::vector<bool> local_symbol_is_thumb_function_;
+  // processor-specific flags in ELF file header.
+  elfcpp::Elf_Word processor_specific_flags_;
+};
+
+// Arm_dynobj class.
+
+template<bool big_endian>
+class Arm_dynobj : public Sized_dynobj<32, big_endian>
+{
+ public:
+  Arm_dynobj(const std::string& name, Input_file* input_file, off_t offset,
+	     const elfcpp::Ehdr<32, big_endian>& ehdr)
+    : Sized_dynobj<32, big_endian>(name, input_file, offset, ehdr),
+      processor_specific_flags_(0)
+  { }
+ 
+  ~Arm_dynobj()
+  { }
+
+  // Downcast a base pointer to an Arm_relobj pointer.  This is
+  // not type-safe but we only use Arm_relobj not the base class.
+  static Arm_dynobj<big_endian>*
+  as_arm_dynobj(Dynobj* dynobj)
+  { return static_cast<Arm_dynobj<big_endian>*>(dynobj); }
+
+  // Processor-specific flags in ELF file header.  This is valid only after
+  // reading symbols.
+  elfcpp::Elf_Word
+  processor_specific_flags() const
+  { return this->processor_specific_flags_; }
+
+ protected:
+  // Read the symbol information.
+  void
+  do_read_symbols(Read_symbols_data* sd);
+
+ private:
+  // processor-specific flags in ELF file header.
+  elfcpp::Elf_Word processor_specific_flags_;
 };
 
 // Utilities for manipulating integers of up to 32-bits
@@ -1120,7 +1169,7 @@ class Target_arm : public Sized_target<32, big_endian>
 
   // Finalize the sections.
   void
-  do_finalize_sections(Layout*);
+  do_finalize_sections(Layout*, const Input_objects*);
 
   // Return the value to use for a dynamic symbol which requires special
   // treatment.
@@ -1195,6 +1244,10 @@ class Target_arm : public Sized_target<32, big_endian>
 		&& parameters->target().is_big_endian() == big_endian);
     return static_cast<const Target_arm<big_endian>&>(parameters->target());
   }
+
+ protected:
+  void
+  do_adjust_elf_header(unsigned char* view, int len) const;
 
  private:
   // The class which scans relocations.
@@ -1365,6 +1418,34 @@ class Target_arm : public Sized_target<32, big_endian>
 				  object, shndx, output_section, reloc,
 				  this->rel_dyn_section(layout));
   }
+
+  // Whether two EABI versions are compatible.
+  static bool
+  are_eabi_versions_compatible(elfcpp::Elf_Word v1, elfcpp::Elf_Word v2);
+
+  // Merge processor-specific flags from input object and those in the ELF
+  // header of the output.
+  void
+  merge_processor_specific_flags(const std::string&, elfcpp::Elf_Word);
+
+  Object*
+  do_make_elf_object(const std::string&, Input_file*, off_t,
+		     const elfcpp::Ehdr<32, big_endian>& ehdr);
+
+  Object*
+  do_make_elf_object(const std::string&, Input_file*, off_t,
+		     const elfcpp::Ehdr<32, !big_endian>&)
+  { gold_unreachable(); }
+
+  Object*
+  do_make_elf_object(const std::string&, Input_file*, off_t,
+		      const elfcpp::Ehdr<64, false>&)
+  { gold_unreachable(); }
+
+  Object*
+  do_make_elf_object(const std::string&, Input_file*, off_t,
+		     const elfcpp::Ehdr<64, true>&)
+  { gold_unreachable(); }
 
   // Information about this specific target which we pass to the
   // general Target structure.
@@ -3250,6 +3331,42 @@ Arm_relobj<big_endian>::do_relocate_sections(
     }
 }
 
+// Read the symbol information.
+
+template<bool big_endian>
+void
+Arm_relobj<big_endian>::do_read_symbols(Read_symbols_data* sd)
+{
+  // Call parent class to read symbol information.
+  Sized_relobj<32, big_endian>::do_read_symbols(sd);
+
+  // Read processor-specific flags in ELF file header.
+  const unsigned char* pehdr = this->get_view(elfcpp::file_header_offset,
+					      elfcpp::Elf_sizes<32>::ehdr_size,
+					      true, false);
+  elfcpp::Ehdr<32, big_endian> ehdr(pehdr);
+  this->processor_specific_flags_ = ehdr.get_e_flags();
+}
+
+// Arm_dynobj methods.
+
+// Read the symbol information.
+
+template<bool big_endian>
+void
+Arm_dynobj<big_endian>::do_read_symbols(Read_symbols_data* sd)
+{
+  // Call parent class to read symbol information.
+  Sized_dynobj<32, big_endian>::do_read_symbols(sd);
+
+  // Read processor-specific flags in ELF file header.
+  const unsigned char* pehdr = this->get_view(elfcpp::file_header_offset,
+					      elfcpp::Elf_sizes<32>::ehdr_size,
+					      true, false);
+  elfcpp::Ehdr<32, big_endian> ehdr(pehdr);
+  this->processor_specific_flags_ = ehdr.get_e_flags();
+}
+
 // A class to handle the PLT data.
 
 template<bool big_endian>
@@ -3950,8 +4067,33 @@ Target_arm<big_endian>::scan_relocs(Symbol_table* symtab,
 
 template<bool big_endian>
 void
-Target_arm<big_endian>::do_finalize_sections(Layout* layout)
+Target_arm<big_endian>::do_finalize_sections(
+    Layout* layout,
+    const Input_objects* input_objects)
 {
+  // Merge processor-specific flags.
+  for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
+       p != input_objects->relobj_end();
+       ++p)
+    {
+      Arm_relobj<big_endian>* arm_relobj =
+	Arm_relobj<big_endian>::as_arm_relobj(*p);
+      this->merge_processor_specific_flags(
+	  arm_relobj->name(),
+	  arm_relobj->processor_specific_flags());
+    } 
+
+  for (Input_objects::Dynobj_iterator p = input_objects->dynobj_begin();
+       p != input_objects->dynobj_end();
+       ++p)
+    {
+      Arm_dynobj<big_endian>* arm_dynobj =
+	Arm_dynobj<big_endian>::as_arm_dynobj(*p);
+      this->merge_processor_specific_flags(
+	  arm_dynobj->name(),
+	  arm_dynobj->processor_specific_flags());
+    }
+
   // Fill in some more dynamic tags.
   Output_data_dynamic* const odyn = layout->dynamic_data();
   if (odyn != NULL)
@@ -4585,6 +4727,130 @@ Target_arm<big_endian>::get_real_reloc_type (unsigned int r_type)
 
     default:
       return r_type;
+    }
+}
+
+// Whether if two EABI versions V1 and V2 are compatible.
+
+template<bool big_endian>
+bool
+Target_arm<big_endian>::are_eabi_versions_compatible(
+    elfcpp::Elf_Word v1,
+    elfcpp::Elf_Word v2)
+{
+  // v4 and v5 are the same spec before and after it was released,
+  // so allow mixing them.
+  if ((v1 == elfcpp::EF_ARM_EABI_VER4 && v2 == elfcpp::EF_ARM_EABI_VER5)
+      || (v1 == elfcpp::EF_ARM_EABI_VER5 && v2 == elfcpp::EF_ARM_EABI_VER4))
+    return true;
+
+  return v1 == v2;
+}
+
+// Combine FLAGS from an input object called NAME and the processor-specific
+// flags in the ELF header of the output.  Much of this is adapted from the
+// processor-specific flags merging code in elf32_arm_merge_private_bfd_data
+// in bfd/elf32-arm.c.
+
+template<bool big_endian>
+void
+Target_arm<big_endian>::merge_processor_specific_flags(
+    const std::string& name,
+    elfcpp::Elf_Word flags)
+{
+  if (this->are_processor_specific_flags_set())
+    {
+      elfcpp::Elf_Word out_flags = this->processor_specific_flags();
+
+      // Nothing to merge if flags equal to those in output.
+      if (flags == out_flags)
+	return;
+
+      // Complain about various flag mismatches.
+      elfcpp::Elf_Word version1 = elfcpp::arm_eabi_version(flags);
+      elfcpp::Elf_Word version2 = elfcpp::arm_eabi_version(out_flags);
+      if (!this->are_eabi_versions_compatible(version1, version2))
+	gold_error(_("Source object %s has EABI version %d but output has "
+		     "EABI version %d."),
+		   name.c_str(),
+		   (flags & elfcpp::EF_ARM_EABIMASK) >> 24,
+		   (out_flags & elfcpp::EF_ARM_EABIMASK) >> 24);
+    }
+  else
+    {
+      // If the input is the default architecture and had the default
+      // flags then do not bother setting the flags for the output
+      // architecture, instead allow future merges to do this.  If no
+      // future merges ever set these flags then they will retain their
+      // uninitialised values, which surprise surprise, correspond
+      // to the default values.
+      if (flags == 0)
+	return;
+
+      // This is the first time, just copy the flags.
+      // We only copy the EABI version for now.
+      this->set_processor_specific_flags(flags & elfcpp::EF_ARM_EABIMASK);
+    }
+}
+
+// Adjust ELF file header.
+template<bool big_endian>
+void
+Target_arm<big_endian>::do_adjust_elf_header(
+    unsigned char* view,
+    int len) const
+{
+  gold_assert(len == elfcpp::Elf_sizes<32>::ehdr_size);
+
+  elfcpp::Ehdr<32, big_endian> ehdr(view);
+  unsigned char e_ident[elfcpp::EI_NIDENT];
+  memcpy(e_ident, ehdr.get_e_ident(), elfcpp::EI_NIDENT);
+
+  if (elfcpp::arm_eabi_version(this->processor_specific_flags())
+      == elfcpp::EF_ARM_EABI_UNKNOWN)
+    e_ident[elfcpp::EI_OSABI] = elfcpp::ELFOSABI_ARM;
+  else
+    e_ident[elfcpp::EI_OSABI] = 0;
+  e_ident[elfcpp::EI_ABIVERSION] = 0;
+
+  // FIXME: Do EF_ARM_BE8 adjustment.
+
+  elfcpp::Ehdr_write<32, big_endian> oehdr(view);
+  oehdr.put_e_ident(e_ident);
+}
+
+// do_make_elf_object to override the same function in the base class.
+// We need to use a target-specific sub-class of Sized_relobj<32, big_endian>
+// to store ARM specific information.  Hence we need to have our own
+// ELF object creation.
+
+template<bool big_endian>
+Object*
+Target_arm<big_endian>::do_make_elf_object(
+    const std::string& name,
+    Input_file* input_file,
+    off_t offset, const elfcpp::Ehdr<32, big_endian>& ehdr)
+{
+  int et = ehdr.get_e_type();
+  if (et == elfcpp::ET_REL)
+    {
+      Arm_relobj<big_endian>* obj =
+        new Arm_relobj<big_endian>(name, input_file, offset, ehdr);
+      obj->setup();
+      return obj;
+    }
+  else if (et == elfcpp::ET_DYN)
+    {
+      Sized_dynobj<32, big_endian>* obj =
+        new Arm_dynobj<big_endian>(name, input_file, offset, ehdr);
+      obj->setup();
+      return obj;
+    }
+  else
+    {
+      gold_error(_("%s: unsupported ELF file type %d"),
+                 name.c_str(), et);
+      return NULL;
     }
 }
 

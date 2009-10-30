@@ -102,7 +102,7 @@ class Target_x86_64 : public Target_freebsd<64, false>
 
   // Finalize the sections.
   void
-  do_finalize_sections(Layout*);
+  do_finalize_sections(Layout*, const Input_objects*);
 
   // Return the value to use for a dynamic which requires special
   // treatment.
@@ -1642,7 +1642,7 @@ Target_x86_64::scan_relocs(Symbol_table* symtab,
 // Finalize the sections.
 
 void
-Target_x86_64::do_finalize_sections(Layout* layout)
+Target_x86_64::do_finalize_sections(Layout* layout, const Input_objects*)
 {
   // Fill in some more dynamic tags.
   Output_data_dynamic* const odyn = layout->dynamic_data();

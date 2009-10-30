@@ -1,5 +1,50 @@
 2009-10-30  Doug Kwan  <dougkwan@google.com>
 
+	* arm.cc (Arm_relobj::processor_specific_flags): New method
+	definition.
+	(Arm_relobj::do_read_symbols): New method declaration.
+	(Arm_relobj::processor_specific_flags_): New data member declaration.
+	(Arm_dynobj): New class definition.
+	(Target_arm::do_finalize_sections): Add input_objects parameter.
+	(Target_arm::do_adjust_elf_header): New method declaration.
+	(Target_arm::are_eabi_versions_compatible,
+	(Target_arm::merge_processor_specific_flags): New method declaration.
+	(Target_arm::do_make_elf_object): New overloaded method definitions
+	and declaration.
+	(Arm_relobj::do_read_symbols): New method definition.
+	(Arm_dynobj::do_read_symbols): Ditto.
+	(Target_arm::do_finalize_sections): Add input_objects parameters.
+	Merge processor-specific flags from all input objects.
+	(Target_arm::are_eabi_versions_compatible,
+	Target_arm::merge_processor_specific_flags,
+	Target_arm::do_adjust_elf_header, Target_arm::do_make_elf_object):
+	New method definitions.
+	* i386.cc (Target_i386::do_finalize_sections): Add unnamed
+	Input_objects pointer type parameter.
+	* layout.cc (Layout::finalize): Pass input objects to target's.
+	finalize_sections function.
+	* output.cc (Output_file_header::do_sized_write): Set ELF file
+	header's processor-specific flags.
+	* powerpc.cc (Target_powerpc::do_finalize_sections): Add unnamed
+	Input_objects pointer type parameter.
+	* sparc.cc (Target_sparc::do_finalize_sections): Same.
+	* target.h (Input_objects): New forward class declaration.
+	(Target::processor_specific_flags,
+	Target::are_processor_specific_flags_sect): New method definitions.
+	(Target::finalize_sections): Add input_objects parameter.
+	(Target::Target): Initialize processor_specific_flags_ and
+	are_processor_specific_flags_set_.
+	(Target::do_finalize_sections): Add unnamed Input_objects pointer type
+	parameter.
+	(Target::set_processor_specific_flags): New method definition.
+	(Target::processor_specific_flags_,
+	Target::are_processor_specific_flags_set_): New data member
+	declarations.
+	* x86_64.cc (Target_x86_64::do_finalize_sections): Add unnamed
+	Input_objects pointer type parameter.
+
+2009-10-30  Doug Kwan  <dougkwan@google.com>
+
 	* arm.cc: Use Arm_address instead of elfcpp::Elf_types<32>::Elf_Addr.
 
 2009-10-28  Ian Lance Taylor  <iant@google.com>

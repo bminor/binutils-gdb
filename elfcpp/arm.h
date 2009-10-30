@@ -199,6 +199,29 @@ enum
   // 160 - 255			Unallocated
 };
 
+// e_flags values used for ARM.  We only support flags defined in AAELF.
+
+enum
+{
+  EF_ARM_BE8 = 0x00800000,
+
+  // Mask to extract EABI version, not really a flag value.
+  EF_ARM_EABIMASK = 0xFF000000,
+
+  EF_ARM_EABI_UNKNOWN = 0x00000000,
+  EF_ARM_EABI_VER1 = 0x01000000,
+  EF_ARM_EABI_VER2 = 0x02000000,
+  EF_ARM_EABI_VER3 = 0x03000000,
+  EF_ARM_EABI_VER4 = 0x04000000,
+  EF_ARM_EABI_VER5 = 0x05000000,
+};
+
+// Extract EABI version from flags.
+
+inline Elf_Word
+arm_eabi_version(Elf_Word flags)
+{ return flags & EF_ARM_EABIMASK; }
+
 } // End namespace elfcpp.
 
 #endif // !defined(ELFCPP_ARM_H)

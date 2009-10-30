@@ -459,10 +459,7 @@ Output_file_header::do_sized_write(Output_file* of)
     oehdr.put_e_phoff(this->segment_header_->offset());
 
   oehdr.put_e_shoff(this->section_header_->offset());
-
-  // FIXME: The target needs to set the flags.
-  oehdr.put_e_flags(0);
-
+  oehdr.put_e_flags(this->target_->processor_specific_flags());
   oehdr.put_e_ehsize(elfcpp::Elf_sizes<size>::ehdr_size);
 
   if (this->segment_header_ == NULL)

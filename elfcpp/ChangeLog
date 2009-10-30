@@ -1,3 +1,12 @@
+2009-10-30  Doug Kwan  <dougkwan@google.com>
+
+	* arm.h (EF_ARM_BE8, EF_ARM_EABIMASK, EF_ARM_EABI_UNKNOWN,
+	EF_ARM_EABI_VER1, EF_ARM_EABI_VER2, EF_ARM_EABI_VER3,
+	EF_ARM_EABI_VER4, EF_ARM_EABI_VER5): New enums for processor-specific
+	flags.
+	(arm_eabi_version): New inline function.
+	* elfcpp.h: Add a comment about DT_ENCODING.
+
 2009-10-16  Doug Kwan  <dougkwan@google.com>
 
 	* elfcpp/elfcpp.h (DT_PREINIT_ARRAY): Correct enum value.

@@ -1509,7 +1509,7 @@ off_t
 Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
 		 Target* target, const Task* task)
 {
-  target->finalize_sections(this);
+  target->finalize_sections(this, input_objects);
 
   this->count_local_symbols(task, input_objects);
 

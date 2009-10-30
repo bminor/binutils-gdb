@@ -54,6 +54,7 @@ template<int size>
 class Sized_symbol;
 class Symbol_table;
 class Output_section;
+class Input_objects;
 
 // The abstract class for target specific handling.
 
@@ -78,6 +79,16 @@ class Target
   elfcpp::EM
   machine_code() const
   { return this->pti_->machine_code; }
+
+  // Processor specific flags to store in e_flags field of ELF header.
+  elfcpp::Elf_Word
+  processor_specific_flags() const
+  { return this->processor_specific_flags_; }
+
+  // Whether processor specific flags are set at least once.
+  bool
+  are_processor_specific_flags_set() const
+  { return this->are_processor_specific_flags_set_; }
 
   // Whether this target has a specific make_symbol function.
   bool
@@ -183,8 +194,8 @@ class Target
   // This is called to tell the target to complete any sections it is
   // handling.  After this all sections must have their final size.
   void
-  finalize_sections(Layout* layout)
-  { return this->do_finalize_sections(layout); }
+  finalize_sections(Layout* layout, const Input_objects* input_objects)
+  { return this->do_finalize_sections(layout, input_objects); }
 
   // Return the value to use for a global symbol which needs a special
   // value in the dynamic symbol table.  This will only be called if
@@ -314,7 +325,8 @@ class Target
   };
 
   Target(const Target_info* pti)
-    : pti_(pti)
+    : pti_(pti), processor_specific_flags_(0),
+      are_processor_specific_flags_set_(false)
   { }
 
   // Virtual function which may be implemented by the child class.
@@ -324,7 +336,7 @@ class Target
 
   // Virtual function which may be implemented by the child class.
   virtual void
-  do_finalize_sections(Layout*)
+  do_finalize_sections(Layout*, const Input_objects*)
   { }
 
   // Virtual function which may be implemented by the child class.
@@ -364,6 +376,14 @@ class Target
   // make_elf_object hooks.  There are four versions of these for
   // different address sizes and endianities.
 
+  // Set processor specific flags.
+  void
+  set_processor_specific_flags(elfcpp::Elf_Word flags)
+  {
+    this->processor_specific_flags_ = flags;
+    this->are_processor_specific_flags_set_ = true;
+  }
+  
 #ifdef HAVE_TARGET_32_LITTLE
   // Virtual functions which may be overriden by the child class.
   virtual Object*
@@ -433,6 +453,10 @@ class Target
 
   // The target information.
   const Target_info* pti_;
+  // Processor-specific flags.
+  elfcpp::Elf_Word processor_specific_flags_;
+  // Whether the processor-specific flags are set at least once.
+  bool are_processor_specific_flags_set_;
 };
 
 // The abstract class for a specific size and endianness of target.
