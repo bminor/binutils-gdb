@@ -5961,12 +5961,40 @@ pa_build_unwind_subspace (struct call_info *call_info)
   subsegT save_subseg;
   unsigned int unwind;
   int reloc;
-  char *p;
+  char *name, *p;
+  symbolS *symbolP;
 
   if ((bfd_get_section_flags (stdoutput, now_seg)
        & (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
       != (SEC_ALLOC | SEC_LOAD | SEC_READONLY))
     return;
+
+  /* Replace the start symbol with a local symbol that will be reduced
+     to a section offset.  This avoids problems with weak functions with
+     multiple definitions, etc.  */
+  name = xmalloc (strlen ("L$\001start_")
+		  + strlen (S_GET_NAME (call_info->start_symbol))
+		  + 1);
+  strcpy (name, "L$\001start_");
+  strcat (name, S_GET_NAME (call_info->start_symbol));
+
+  /* If we have a .procend preceded by a .exit, then the symbol will have
+     already been defined.  In that case, we don't want another unwind
+     entry.  */
+  symbolP = symbol_find (name);
+  if (symbolP)
+    {
+      xfree (name);
+      return;
+    }
+  else
+    {
+      symbolP = symbol_new (name, now_seg,
+			    S_GET_VALUE (call_info->start_symbol), frag_now);
+      gas_assert (symbolP);
+      S_CLEAR_EXTERNAL (symbolP);
+      symbol_table_insert (symbolP);
+    }
 
   reloc = R_PARISC_SEGREL32;
   save_seg = now_seg;
@@ -5993,7 +6021,7 @@ pa_build_unwind_subspace (struct call_info *call_info)
   /* Relocation info. for start offset of the function.  */
   md_number_to_chars (p, 0, 4);
   fix_new_hppa (frag_now, p - frag_now->fr_literal, 4,
-		call_info->start_symbol, (offsetT) 0,
+		symbolP, (offsetT) 0,
 		(expressionS *) NULL, 0, reloc,
 		e_fsel, 32, 0, 0);
 

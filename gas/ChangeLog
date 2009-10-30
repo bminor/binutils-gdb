@@ -1,3 +1,8 @@
+2009-10-30  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* config/tc-hppa.c (pa_build_unwind_subspace): Replace start symbol
+	with local symbol.
+
 2009-10-29  Sebastian Pop  <sebastian.pop@amd.com>
 
 	* config/tc-i386.c (build_modrm_byte): Do not swap REG and
