@@ -1136,7 +1136,7 @@ class Target_arm : public Sized_target<32, big_endian>
 		   Output_section* output_section,
 		   bool needs_special_offset_handling,
 		   unsigned char* view,
-		   elfcpp::Elf_types<32>::Elf_Addr view_address,
+		   Arm_address view_address,
 		   section_size_type view_size,
 		   const Reloc_symbol_changes*);
 
@@ -1165,7 +1165,7 @@ class Target_arm : public Sized_target<32, big_endian>
 			   off_t offset_in_output_section,
 			   const Relocatable_relocs*,
 			   unsigned char* view,
-			   elfcpp::Elf_types<32>::Elf_Addr view_address,
+			   Arm_address view_address,
 			   section_size_type view_size,
 			   unsigned char* reloc_view,
 			   section_size_type reloc_view_size);
@@ -1279,7 +1279,7 @@ class Target_arm : public Sized_target<32, big_endian>
 	     const elfcpp::Rel<32, big_endian>&,
 	     unsigned int r_type, const Sized_symbol<32>*,
 	     const Symbol_value<32>*,
-	     unsigned char*, elfcpp::Elf_types<32>::Elf_Addr,
+	     unsigned char*, Arm_address,
 	     section_size_type);
 
     // Return whether we want to pass flag NON_PIC_REF for this
@@ -1534,7 +1534,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
   arm_branch_common(unsigned char *view,
 		    const Sized_relobj<32, big_endian>* object,
 		    const Symbol_value<32>* psymval,
-		    elfcpp::Elf_types<32>::Elf_Addr address,
+		    Arm_address address,
 		    bool has_thumb_bit)
   {
     typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
@@ -1688,7 +1688,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
   rel32(unsigned char *view,
 	const Sized_relobj<32, big_endian>* object,
 	const Symbol_value<32>* psymval,
-	elfcpp::Elf_types<32>::Elf_Addr address,
+	Arm_address address,
 	bool has_thumb_bit)
   {
     typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
@@ -1705,7 +1705,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
   thm_call(unsigned char *view,
 	   const Sized_relobj<32, big_endian>* object,
 	   const Symbol_value<32>* psymval,
-	   elfcpp::Elf_types<32>::Elf_Addr address,
+	   Arm_address address,
 	   bool has_thumb_bit)
   {
     // A thumb call consists of two instructions.
@@ -1740,8 +1740,8 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
   // R_ARM_BASE_PREL: B(S) + A - P
   static inline typename This::Status
   base_prel(unsigned char* view,
-	    elfcpp::Elf_types<32>::Elf_Addr origin,
-	    elfcpp::Elf_types<32>::Elf_Addr address)
+	    Arm_address origin,
+	    Arm_address address)
   {
     Base::rel32(view, origin - address);
     return STATUS_OKAY;
@@ -1750,7 +1750,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
   // R_ARM_BASE_ABS: B(S) + A
   static inline typename This::Status
   base_abs(unsigned char* view,
-	    elfcpp::Elf_types<32>::Elf_Addr origin)
+	    Arm_address origin)
   {
     Base::rel32(view, origin);
     return STATUS_OKAY;
@@ -1769,7 +1769,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
   static inline typename This::Status
   got_prel(unsigned char* view,
 	   typename elfcpp::Swap<32, big_endian>::Valtype got_offset,
-	   elfcpp::Elf_types<32>::Elf_Addr address)
+	   Arm_address address)
   {
     Base::rel32(view, got_offset - address);
     return This::STATUS_OKAY;
@@ -1780,7 +1780,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
   plt32(unsigned char *view,
 	const Sized_relobj<32, big_endian>* object,
 	const Symbol_value<32>* psymval,
-	elfcpp::Elf_types<32>::Elf_Addr address,
+	Arm_address address,
 	bool has_thumb_bit)
   {
     return arm_branch_common<elfcpp::R_ARM_PLT32>(view, object, psymval,
@@ -1792,7 +1792,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
   call(unsigned char *view,
        const Sized_relobj<32, big_endian>* object,
        const Symbol_value<32>* psymval,
-       elfcpp::Elf_types<32>::Elf_Addr address,
+       Arm_address address,
        bool has_thumb_bit)
   {
     return arm_branch_common<elfcpp::R_ARM_CALL>(view, object, psymval,
@@ -1804,7 +1804,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
   jump24(unsigned char *view,
 	 const Sized_relobj<32, big_endian>* object,
 	 const Symbol_value<32>* psymval,
-	 elfcpp::Elf_types<32>::Elf_Addr address,
+	 Arm_address address,
 	 bool has_thumb_bit)
   {
     return arm_branch_common<elfcpp::R_ARM_JUMP24>(view, object, psymval,
@@ -1816,7 +1816,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
   prel31(unsigned char *view,
 	 const Sized_relobj<32, big_endian>* object,
 	 const Symbol_value<32>* psymval,
-	 elfcpp::Elf_types<32>::Elf_Addr address,
+	 Arm_address address,
 	 bool has_thumb_bit)
   {
     typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
@@ -1908,7 +1908,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
   movw_prel_nc(unsigned char *view,
 	       const Sized_relobj<32, big_endian>* object,
 	       const Symbol_value<32>* psymval,
-	       elfcpp::Elf_types<32>::Elf_Addr address,
+	       Arm_address address,
 	       bool has_thumb_bit)
   {
     typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
@@ -1927,7 +1927,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
   movt_prel(unsigned char *view,
 	    const Sized_relobj<32, big_endian>* object,
 	    const Symbol_value<32>* psymval,
-            elfcpp::Elf_types<32>::Elf_Addr address)
+            Arm_address address)
   {
     typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
@@ -1945,7 +1945,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
   thm_movw_prel_nc(unsigned char *view,
 	           const Sized_relobj<32, big_endian>* object,
 	           const Symbol_value<32>* psymval,
-	           elfcpp::Elf_types<32>::Elf_Addr address,
+	           Arm_address address,
 	           bool has_thumb_bit)
   {
     typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
@@ -1967,7 +1967,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
   thm_movt_prel(unsigned char *view,
 	        const Sized_relobj<32, big_endian>* object,
 	        const Symbol_value<32>* psymval,
-	        elfcpp::Elf_types<32>::Elf_Addr address)
+	        Arm_address address)
   {
     typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
     typedef typename elfcpp::Swap<32, big_endian>::Valtype Reltype;
@@ -3405,8 +3405,8 @@ Output_data_plt_arm<big_endian>::do_write(Output_file* of)
 						      got_size);
   unsigned char* pov = oview;
 
-  elfcpp::Elf_types<32>::Elf_Addr plt_address = this->address();
-  elfcpp::Elf_types<32>::Elf_Addr got_address = this->got_plt_->address();
+  Arm_address plt_address = this->address();
+  Arm_address got_address = this->got_plt_->address();
 
   // Write first PLT entry.  All but the last word are constants.
   const size_t num_first_plt_words = (sizeof(first_plt_entry)
@@ -4063,7 +4063,7 @@ Target_arm<big_endian>::Relocate::relocate(
     const Sized_symbol<32>* gsym,
     const Symbol_value<32>* psymval,
     unsigned char* view,
-    elfcpp::Elf_types<32>::Elf_Addr address,
+    Arm_address address,
     section_size_type /* view_size */ )
 {
   typedef Arm_relocate_functions<big_endian> Arm_relocate_functions;
@@ -4239,7 +4239,7 @@ Target_arm<big_endian>::Relocate::relocate(
 
     case elfcpp::R_ARM_GOTOFF32:
       {
-	elfcpp::Elf_types<32>::Elf_Addr got_origin;
+	Arm_address got_origin;
 	got_origin = target->got_plt_section()->address();
 	reloc_status = Arm_relocate_functions::rel32(view, object, psymval,
 						     got_origin, has_thumb_bit);
@@ -4305,7 +4305,7 @@ Target_arm<big_endian>::Relocate::relocate(
       // Get the address origin for GOT PLT, which is allocated right
       // after the GOT section, to calculate an absolute address of
       // the symbol GOT entry (got_origin + got_offset).
-      elfcpp::Elf_types<32>::Elf_Addr got_origin;
+      Arm_address got_origin;
       got_origin = target->got_plt_section()->address();
       reloc_status = Arm_relocate_functions::got_prel(view,
 						      got_origin + got_offset,
@@ -4396,7 +4396,7 @@ Target_arm<big_endian>::relocate_section(
     Output_section* output_section,
     bool needs_special_offset_handling,
     unsigned char* view,
-    elfcpp::Elf_types<32>::Elf_Addr address,
+    Arm_address address,
     section_size_type view_size,
     const Reloc_symbol_changes* reloc_symbol_changes)
 {
@@ -4533,7 +4533,7 @@ Target_arm<big_endian>::relocate_for_relocatable(
     off_t offset_in_output_section,
     const Relocatable_relocs* rr,
     unsigned char* view,
-    elfcpp::Elf_types<32>::Elf_Addr view_address,
+    Arm_address view_address,
     section_size_type view_size,
     unsigned char* reloc_view,
     section_size_type reloc_view_size)
