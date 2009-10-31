@@ -2005,18 +2005,18 @@ record_restore (void)
   gdb_assert (record_first.next == NULL);
  
   if (record_debug)
-    printf_filtered ("Restoring recording from core file.\n");
+    fprintf_unfiltered (gdb_stdlog, "Restoring recording from core file.\n");
 
   /* Now need to find our special note section.  */
   osec = bfd_get_section_by_name (core_bfd, "null0");
   osec_size = bfd_section_size (core_bfd, osec);
   if (record_debug)
-    printf_filtered ("Find precord section %s.\n",
-		     osec ? "succeeded" : "failed");
-  if (!osec)
+    fprintf_unfiltered (gdb_stdlog, "Find precord section %s.\n",
+			osec ? "succeeded" : "failed");
+  if (osec == NULL)
     return;
   if (record_debug)
-    printf_filtered ("%s", bfd_section_name (core_bfd, osec));
+    fprintf_unfiltered (gdb_stdlog, "%s", bfd_section_name (core_bfd, osec));
 
   /* Check the magic code.  */
   bfdcore_read (core_bfd, osec, &magic, sizeof (magic), &bfd_offset);
@@ -2024,9 +2024,9 @@ record_restore (void)
     error (_("Version mis-match or file format error in core file %s."),
 	   bfd_get_filename (core_bfd));
   if (record_debug)
-    printf_filtered ("\
+    fprintf_unfiltered (gdb_stdlog, "\
   Reading 4-byte magic cookie RECORD_FILE_MAGIC (0x%s)\n",
-		     phex_nz (netorder32 (magic), 4));
+			phex_nz (netorder32 (magic), 4));
 
   /* Restore the entries in recfd into record_arch_list_head and
      record_arch_list_tail.  */
@@ -2062,12 +2062,12 @@ record_restore (void)
           bfdcore_read (core_bfd, osec, record_get_loc (rec),
 			rec->u.reg.len, &bfd_offset);
 
-          if (record_debug)
-            printf_filtered ("\
+	  if (record_debug)
+	    fprintf_unfiltered (gdb_stdlog, "\
   Reading register %d (1 plus %lu plus %d bytes)\n",
-			     rec->u.reg.num,
-			     (unsigned long) sizeof (regnum),
-			     rec->u.reg.len);
+				rec->u.reg.num,
+				(unsigned long) sizeof (regnum),
+				rec->u.reg.len);
           break;
 
         case record_mem: /* mem */
@@ -2087,14 +2087,14 @@ record_restore (void)
           bfdcore_read (core_bfd, osec, record_get_loc (rec),
 			rec->u.mem.len, &bfd_offset);
 
-          if (record_debug)
-            printf_filtered ("\
+	  if (record_debug)
+	    fprintf_unfiltered (gdb_stdlog, "\
   Reading memory %s (1 plus %lu plus %lu plus %d bytes)\n",
-			     paddress (get_current_arch (),
-				       rec->u.mem.addr),
-			     (unsigned long) sizeof (addr),
-			     (unsigned long) sizeof (len),
-			     rec->u.mem.len);
+				paddress (get_current_arch (),
+					  rec->u.mem.addr),
+				(unsigned long) sizeof (addr),
+				(unsigned long) sizeof (len),
+				rec->u.mem.len);
           break;
 
         case record_end: /* end */
@@ -2113,13 +2113,13 @@ record_restore (void)
 	  count = netorder32 (count);
 	  rec->u.end.insn_num = count;
 	  record_insn_count = count + 1;
-          if (record_debug)
-            printf_filtered ("\
+	  if (record_debug)
+	    fprintf_unfiltered (gdb_stdlog, "\
   Reading record_end (1 + %lu + %lu bytes), offset == %s\n",
-			     (unsigned long) sizeof (signal),
-			     (unsigned long) sizeof (count),
-			     paddress (get_current_arch (),
-				       bfd_offset));
+				(unsigned long) sizeof (signal),
+				(unsigned long) sizeof (count),
+				paddress (get_current_arch (),
+					  bfd_offset));
           break;
 
         default:
@@ -2225,7 +2225,8 @@ cmd_record_save (char *args, int from_tty)
 
   /* Open the save file.  */
   if (record_debug)
-    printf_filtered ("Saving execution log to core file '%s'\n", recfilename);
+    fprintf_unfiltered (gdb_stdlog, "Saving execution log to core file '%s'\n",
+			recfilename);
 
   /* Open the output file.  */
   obfd = create_gcore_bfd (recfilename);
@@ -2291,9 +2292,9 @@ cmd_record_save (char *args, int from_tty)
   /* Write the magic code.  */
   magic = RECORD_FILE_MAGIC;
   if (record_debug)
-    printf_filtered ("\
+    fprintf_unfiltered (gdb_stdlog, "\
   Writing 4-byte magic cookie RECORD_FILE_MAGIC (0x%s)\n",
-		     phex_nz (magic, 4));
+		      phex_nz (magic, 4));
   bfdcore_write (obfd, osec, &magic, sizeof (magic), &bfd_offset);
 
   /* Save the entries to recfd and forward execute to the end of
@@ -2314,12 +2315,12 @@ cmd_record_save (char *args, int from_tty)
           switch (record_list->type)
             {
             case record_reg: /* reg */
-              if (record_debug)
-		printf_filtered ("\
+	      if (record_debug)
+		fprintf_unfiltered (gdb_stdlog, "\
   Writing register %d (1 plus %lu plus %d bytes)\n",
-				 record_list->u.reg.num,
-				 (unsigned long) sizeof (regnum),
-				 record_list->u.reg.len);
+				    record_list->u.reg.num,
+				    (unsigned long) sizeof (regnum),
+				    record_list->u.reg.len);
 
               /* Write regnum.  */
               regnum = netorder32 (record_list->u.reg.num);
@@ -2333,13 +2334,13 @@ cmd_record_save (char *args, int from_tty)
 
             case record_mem: /* mem */
 	      if (record_debug)
-		printf_filtered ("\
+		fprintf_unfiltered (gdb_stdlog, "\
   Writing memory %s (1 plus %lu plus %lu plus %d bytes)\n",
-				 paddress (gdbarch,
-					   record_list->u.mem.addr),
-				 (unsigned long) sizeof (addr),
-				 (unsigned long) sizeof (len),
-				 record_list->u.mem.len);
+				    paddress (gdbarch,
+					      record_list->u.mem.addr),
+				    (unsigned long) sizeof (addr),
+				    (unsigned long) sizeof (len),
+				    record_list->u.mem.len);
 
 	      /* Write memlen.  */
 	      len = netorder32 (record_list->u.mem.len);
@@ -2356,11 +2357,11 @@ cmd_record_save (char *args, int from_tty)
               break;
 
               case record_end:
-                if (record_debug)
-                  printf_filtered ("\
+		if (record_debug)
+		  fprintf_unfiltered (gdb_stdlog, "\
   Writing record_end (1 + %lu + %lu bytes)\n", 
-				   (unsigned long) sizeof (signal),
-				   (unsigned long) sizeof (count));
+				      (unsigned long) sizeof (signal),
+				      (unsigned long) sizeof (count));
 		/* Write signal value.  */
 		signal = netorder32 (record_list->u.end.sigval);
 		bfdcore_write (obfd, osec, &signal,
