@@ -1,5 +1,12 @@
 2009-10-30  Doug Kwan  <dougkwan@google.com>
 
+	* arm.cc (Stub_addend_reader): New struct template definition
+	and partial specializations.
+	(Stub_addend_reader::operator()): New method definition for a
+	partially specialized template.
+
+2009-10-30  Doug Kwan  <dougkwan@google.com>
+
 	* arm.cc (Arm_relobj::processor_specific_flags): New method
 	definition.
 	(Arm_relobj::do_read_symbols): New method declaration.

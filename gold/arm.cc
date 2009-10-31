@@ -1029,6 +1029,51 @@ class Arm_dynobj : public Sized_dynobj<32, big_endian>
   elfcpp::Elf_Word processor_specific_flags_;
 };
 
+// Functor to read reloc addends during stub generation.
+
+template<int sh_type, bool big_endian>
+struct Stub_addend_reader
+{
+  // Return the addend for a relocation of a particular type.  Depending
+  // on whether this is a REL or RELA relocation, read the addend from a
+  // view or from a Reloc object.
+  elfcpp::Elf_types<32>::Elf_Swxword
+  operator()(
+    unsigned int /* r_type */,
+    const unsigned char* /* view */,
+    const typename Reloc_types<sh_type,
+			       32, big_endian>::Reloc& /* reloc */) const
+  { gold_unreachable(); }
+};
+
+// Specialized Stub_addend_reader for SHT_REL type relocation sections.
+
+template<bool big_endian>
+struct Stub_addend_reader<elfcpp::SHT_REL, big_endian>
+{
+  elfcpp::Elf_types<32>::Elf_Swxword
+  operator()(
+    unsigned int,
+    const unsigned char*,
+    const typename Reloc_types<elfcpp::SHT_REL, 32, big_endian>::Reloc&) const;
+};
+
+// Specialized Stub_addend_reader for RELA type relocation sections.
+// We currently do not handle RELA type relocation sections but it is trivial
+// to implement the addend reader.  This is provided for completeness and to
+// make it easier to add support for RELA relocation sections in the future.
+
+template<bool big_endian>
+struct Stub_addend_reader<elfcpp::SHT_RELA, big_endian>
+{
+  elfcpp::Elf_types<32>::Elf_Swxword
+  operator()(
+    unsigned int,
+    const unsigned char*,
+    const typename Reloc_types<elfcpp::SHT_RELA, 32,
+			       big_endian>::Reloc& reloc) const;
+};
+
 // Utilities for manipulating integers of up to 32-bits
 
 namespace utils
@@ -2989,7 +3034,7 @@ Arm_output_section<big_endian>::group_sections(
 	section_begin_offset + p->data_size(); 
       
       // Check to see if we should group the previously seens sections.
-      switch(state)
+      switch (state)
 	{
 	case NO_GROUP:
 	  break;
@@ -3365,6 +3410,75 @@ Arm_dynobj<big_endian>::do_read_symbols(Read_symbols_data* sd)
 					      true, false);
   elfcpp::Ehdr<32, big_endian> ehdr(pehdr);
   this->processor_specific_flags_ = ehdr.get_e_flags();
+}
+
+// Stub_addend_reader methods.
+
+// Read the addend of a REL relocation of type R_TYPE at VIEW.
+
+template<bool big_endian>
+elfcpp::Elf_types<32>::Elf_Swxword
+Stub_addend_reader<elfcpp::SHT_REL, big_endian>::operator()(
+    unsigned int r_type,
+    const unsigned char* view,
+    const typename Reloc_types<elfcpp::SHT_REL, 32, big_endian>::Reloc&) const
+{
+  switch (r_type)
+    {
+    case elfcpp::R_ARM_CALL:
+    case elfcpp::R_ARM_JUMP24:
+    case elfcpp::R_ARM_PLT32:
+      {
+	typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
+	const Valtype* wv = reinterpret_cast<const Valtype*>(view);
+	Valtype val = elfcpp::Swap<32, big_endian>::readval(wv);
+	return utils::sign_extend<26>(val << 2);
+      }
+
+    case elfcpp::R_ARM_THM_CALL:
+    case elfcpp::R_ARM_THM_JUMP24:
+    case elfcpp::R_ARM_THM_XPC22:
+      {
+	// Fetch the addend.  We use the Thumb-2 encoding (backwards
+	// compatible with Thumb-1) involving the J1 and J2 bits.
+	typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
+	const Valtype* wv = reinterpret_cast<const Valtype*>(view);
+	Valtype upper_insn = elfcpp::Swap<16, big_endian>::readval(wv);
+	Valtype lower_insn = elfcpp::Swap<16, big_endian>::readval(wv + 1);
+
+	uint32_t s = (upper_insn & (1 << 10)) >> 10;
+	uint32_t upper = upper_insn & 0x3ff;
+	uint32_t lower = lower_insn & 0x7ff;
+	uint32_t j1 = (lower_insn & (1 << 13)) >> 13;
+	uint32_t j2 = (lower_insn & (1 << 11)) >> 11;
+	uint32_t i1 = j1 ^ s ? 0 : 1;
+	uint32_t i2 = j2 ^ s ? 0 : 1;
+
+	return utils::sign_extend<25>((s << 24) | (i1 << 23) | (i2 << 22)
+				      | (upper << 12) | (lower << 1));
+      }
+
+    case elfcpp::R_ARM_THM_JUMP19:
+      {
+	typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
+	const Valtype* wv = reinterpret_cast<const Valtype*>(view);
+	Valtype upper_insn = elfcpp::Swap<16, big_endian>::readval(wv);
+	Valtype lower_insn = elfcpp::Swap<16, big_endian>::readval(wv + 1);
+
+	// Reconstruct the top three bits and squish the two 11 bit pieces
+	// together.
+	uint32_t S = (upper_insn & 0x0400) >> 10;
+	uint32_t J1 = (lower_insn & 0x2000) >> 13;
+	uint32_t J2 = (lower_insn & 0x0800) >> 11;
+	uint32_t upper =
+	  (S << 8) | (J2 << 7) | (J1 << 6) | (upper_insn & 0x003f);
+	uint32_t lower = (lower_insn & 0x07ff);
+	return utils::sign_extend<23>((upper << 12) | (lower << 1));
+      }
+
+    default:
+      gold_unreachable();
+    }
 }
 
 // A class to handle the PLT data.
