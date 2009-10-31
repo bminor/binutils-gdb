@@ -1,4 +1,4 @@
-2009-31-10  Sergio Durigan Junior <sergiodj@linux.vnet.ibm.com>
+2009-10-31  Sergio Durigan Junior <sergiodj@linux.vnet.ibm.com>
 
 	* breakpoint.c (catch_syscall_split_args): Remove unecessary warning
 	displayed when the user provided a syscall name and there is no

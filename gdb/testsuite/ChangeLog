@@ -1,4 +1,4 @@
-2009-31-10  Sergio Durigan Junior <sergiodj@linux.vnet.ibm.com>
+2009-10-31  Sergio Durigan Junior <sergiodj@linux.vnet.ibm.com>
 
 	* gdb.base/catch-syscall.exp: Adapt the testcase in order to accept
 	the modified warnings for catch syscall.  Verify if GDB was compiled
