@@ -1,5 +1,9 @@
 2009-10-30  Doug Kwan  <dougkwan@google.com>
 
+	* arm.cc (Stub_addend_reader): Fix bug in previouls check-in.
+
+2009-10-30  Doug Kwan  <dougkwan@google.com>
+
 	* arm.cc (Stub_addend_reader): New struct template definition
 	and partial specializations.
 	(Stub_addend_reader::operator()): New method definition for a

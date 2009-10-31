@@ -1042,8 +1042,7 @@ struct Stub_addend_reader
     unsigned int /* r_type */,
     const unsigned char* /* view */,
     const typename Reloc_types<sh_type,
-			       32, big_endian>::Reloc& /* reloc */) const
-  { gold_unreachable(); }
+			       32, big_endian>::Reloc& /* reloc */) const;
 };
 
 // Specialized Stub_addend_reader for SHT_REL type relocation sections.
@@ -1071,7 +1070,8 @@ struct Stub_addend_reader<elfcpp::SHT_RELA, big_endian>
     unsigned int,
     const unsigned char*,
     const typename Reloc_types<elfcpp::SHT_RELA, 32,
-			       big_endian>::Reloc& reloc) const;
+			       big_endian>::Reloc& reloc) const
+  { return reloc.get_r_addend(); }
 };
 
 // Utilities for manipulating integers of up to 32-bits
