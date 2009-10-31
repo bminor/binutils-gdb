@@ -7804,17 +7804,7 @@ catch_syscall_split_args (char *arg)
       /* Check if the user provided a syscall name or a number.  */
       syscall_number = (int) strtol (cur_name, &endptr, 0);
       if (*endptr == '\0')
-	{
-	  get_syscall_by_number (syscall_number, &s);
-
-	  if (s.name == NULL)
-	    /* We can issue just a warning, but still create the catchpoint.
-	       This is because, even not knowing the syscall name that
-	       this number represents, we can still try to catch the syscall
-	       number.  */
-	    warning (_("The number '%d' does not represent a known syscall."),
-		     syscall_number);
-	}
+	get_syscall_by_number (syscall_number, &s);
       else
 	{
 	  /* We have a name.  Let's check if it's valid and convert it

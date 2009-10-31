@@ -1,3 +1,13 @@
+2009-31-10  Sergio Durigan Junior <sergiodj@linux.vnet.ibm.com>
+
+	* breakpoint.c (catch_syscall_split_args): Remove unecessary warning
+	displayed when the user provided a syscall name and there is no
+	XML support.
+	* xml-syscall.c: Renamed `_sysinfo' to `sysinfo'.
+	(set_xml_syscall_file_name): Remove syscall_warn_user.
+	(xml_init_syscalls_info): Remove warning.
+	(init_sysinfo): Update warnings.
+
 2009-10-30  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Fix breakpoint commands in MI.

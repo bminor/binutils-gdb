@@ -252,6 +252,25 @@ proc test_catch_syscall_restarting_inferior {} {
     check_for_program_end
 }
 
+proc test_catch_syscall_fail_nodatadir {} {
+    global gdb_prompt
+
+    # Sanitizing.
+    delete_breakpoints
+
+    # Testing to see if we receive a warning when calling "catch syscall"
+    # without XML support (without datadir).
+    set thistest "Catch syscall displays a warning when there is no XML support (no datadir set)"
+    gdb_test "catch syscall" "warning: Could not load the syscall XML file.*warning: GDB will not be able to display syscall names nor to verify if.*any provided syscall numbers are valid.*Catchpoint .*(syscall).*" $thistest
+
+    # Since the catchpoint was set, we must check if it's present at
+    # "info breakpoints"
+    check_info_bp_any_syscall
+
+    # Sanitizing.
+    delete_breakpoints
+}
+
 proc do_syscall_tests {} {
     global gdb_prompt srcdir
 
@@ -293,25 +312,6 @@ proc do_syscall_tests {} {
     # Testing the 'catch' syscall command during a restart of
     # the inferior.
     if [runto_main] then { test_catch_syscall_restarting_inferior }
-}
-
-proc test_catch_syscall_fail_noxml {} {
-    global gdb_prompt
-
-    # Sanitizing.
-    delete_breakpoints
-
-    # Testing to see if we receive a warning when calling "catch syscall"
-    # without XML support.
-    set thistest "Catch syscall displays a warning when there is no XML support"
-    gdb_test "catch syscall" "warning: Could not open .*warning: Could not load the syscall XML file .*GDB will not be able to display syscall names.*Catchpoint .*(syscall).*" $thistest
-
-    # Since the catchpoint was set, we must check if it's present at
-    # "info breakpoints"
-    check_info_bp_any_syscall
-
-    # Sanitizing.
-    delete_breakpoints
 }
 
 proc test_catch_syscall_without_args_noxml {} {
@@ -386,11 +386,7 @@ proc do_syscall_tests_without_xml {} {
     # we want GDB to display only numbers, not names.  So, let's
     # begin with the tests.
 
-    # The first test is to see if GDB displays a warning when we
-    # try to catch syscalls without the XML support.
-    test_catch_syscall_fail_noxml
-
-    # Now, let's test if we can catch syscalls without XML support.
+    # Let's test if we can catch syscalls without XML support.
     # We should succeed, but GDB is not supposed to print syscall names.
     if [runto_main] then { test_catch_syscall_without_args_noxml }
 
@@ -426,12 +422,24 @@ proc fill_all_syscalls_numbers {} {
 # Start with a fresh gdb
 
 gdb_exit
+set do_xml_test ![gdb_skip_xml_test]
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
 # Execute the tests, using XML support
-do_syscall_tests
+if $do_xml_test {
+  do_syscall_tests
+
+  # Now, we have to see if GDB displays a warning when we
+  # don't set the data-directory but try to use catch syscall
+  # anyway.  For that, we must restart GDB first.
+  gdb_exit
+  gdb_start
+  gdb_reinitialize_dir $srcdir/$subdir
+  gdb_load ${binfile}
+  test_catch_syscall_fail_nodatadir
+}
 
 # Restart gdb
 

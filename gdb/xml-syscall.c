@@ -1,9 +1,7 @@
 /* Functions that provide the mechanism to parse a syscall XML file
    and get its values.
 
-   Copyright (C) 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1998, 1999, 2000, 2001, 2003, 2004, 2005, 2006, 2007, 2008
-   Free Software Foundation, Inc.
+   Copyright (C) 2009  Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -52,7 +50,7 @@ syscall_warn_user (void)
 void
 set_xml_syscall_file_name (const char *name)
 {
-  syscall_warn_user ();
+  return;
 }
 
 void
@@ -79,7 +77,6 @@ get_syscall_names (void)
   syscall_warn_user ();
   return NULL;
 }
-
 
 #else /* ! HAVE_LIBEXPAT */
 
@@ -114,7 +111,7 @@ struct syscall_parsing_data
 
 /* Structure used to store information about the available syscalls in
    the system.  */
-static const struct syscalls_info *_sysinfo = NULL;
+static const struct syscalls_info *sysinfo = NULL;
 
 /* A flag to tell if we already initialized the structure above.  */
 static int have_initialized_sysinfo = 0;
@@ -275,10 +272,7 @@ xml_init_syscalls_info (const char *filename)
 
   full_file = xml_fetch_content_from_file (filename, gdb_datadir);
   if (full_file == NULL)
-    {
-      warning (_("Could not open \"%s\""), filename);
-      return NULL;
-    }
+    return NULL;
 
   back_to = make_cleanup (xfree, full_file);
 
@@ -300,27 +294,23 @@ init_sysinfo (void)
   /* Did we already try to initialize the structure?  */
   if (have_initialized_sysinfo)
     return;
-/*  if (xml_syscall_file == NULL)
-    internal_error (__FILE__, __LINE__,
-                    _("This architecture has not set the XML syscall file "
-                      "name.  This is a bug and should not happen; please "
-                      "report it.")); */
 
-  _sysinfo = xml_init_syscalls_info (xml_syscall_file);
+  sysinfo = xml_init_syscalls_info (xml_syscall_file);
 
   have_initialized_sysinfo = 1;
 
-  if (_sysinfo == NULL)
+  if (sysinfo == NULL)
     {
       if (xml_syscall_file)
-        /* The initialization failed.  Let's show a warning
-           message to the user (just this time) and leave.  */
-        warning (_("Could not load the syscall XML file `%s'.\n\
-GDB will not be able to display syscall names."), xml_syscall_file);
+	warning (_("\
+Could not load the syscall XML file `%s'."), xml_syscall_file);
       else
-        /* There's no file to open.  Let's warn the user.  */
-        warning (_("There is no XML file to open.\n\
-GDB will not be able to display syscall names."));
+	warning (_("\
+There is no XML file to open."));
+
+      warning (_("\
+GDB will not be able to display syscall names nor to verify if\n\
+any provided syscall numbers are valid."));
     }
 }
 
@@ -408,7 +398,7 @@ get_syscall_by_number (int syscall_number,
   init_sysinfo ();
 
   s->number = syscall_number;
-  s->name = xml_get_syscall_name (_sysinfo, syscall_number);
+  s->name = xml_get_syscall_name (sysinfo, syscall_number);
 }
 
 void
@@ -417,7 +407,7 @@ get_syscall_by_name (const char *syscall_name,
 {
   init_sysinfo ();
 
-  s->number = xml_get_syscall_number (_sysinfo, syscall_name);
+  s->number = xml_get_syscall_number (sysinfo, syscall_name);
   s->name = syscall_name;
 }
 
@@ -426,7 +416,7 @@ get_syscall_names (void)
 {
   init_sysinfo ();
 
-  return xml_list_of_syscalls (_sysinfo);
+  return xml_list_of_syscalls (sysinfo);
 }
 
 #endif /* ! HAVE_LIBEXPAT */
