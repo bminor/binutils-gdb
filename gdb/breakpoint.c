@@ -3457,8 +3457,7 @@ bpstat_stop_status (struct address_space *aspace,
        The watchpoint_check function will work on entire expression,
        not the individual locations.  For read watchopints, the
        watchpoints_triggered function have checked all locations
-       alrea
-     */
+       already.  */
     if (b->type == bp_hardware_watchpoint && bl != b->loc)
       continue;
 

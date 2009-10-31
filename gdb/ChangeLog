@@ -1,3 +1,7 @@
+2009-10-31  Michael Snyder  <msnyder@vmware.com>
+
+	* breakpoint.c (bpstat_stop_status): Fix broken comment.
+
 2009-10-31  Pedro Alves  <pedro@codesourcery.com>
 
 	* record.c (record_restore, cmd_record_save): Debug output goes to
