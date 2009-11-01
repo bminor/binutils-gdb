@@ -1,3 +1,7 @@
+2009-11-01  Michael Snyder  <msnyder@vmware.com>
+
+	* NEWS (New Commands): Mention record save/restore.
+
 2009-10-31  Michael Snyder  <msnyder@vmware.com>
 
 	* breakpoint.c (bpstat_stop_status): Fix broken comment.

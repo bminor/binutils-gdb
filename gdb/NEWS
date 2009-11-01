@@ -24,6 +24,14 @@ Xilinx MicroBlaze		microblaze
 
 * New commands (for set/show, see "New options" below)
 
+record save [<FILENAME>]
+  Save a file (in core file format) containing the process record 
+  execution log for replay debugging at a later time.
+
+record restore <FILENAME>
+  Restore the process record execution log that was saved at an
+  earlier time, for replay debugging.
+
 add-inferior [-copies <N>] [-exec <FILENAME>]
   Add a new inferior.
 
