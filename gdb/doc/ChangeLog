@@ -1,3 +1,9 @@
+2009-11-01  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Stack Manipulation): Make
+	-stack-list-arguments have the same documentation for parameter
+	as -stack-list-locals. Add comas.
+
 2009-10-27  Tom Tromey <tromey@redhat.com>
 	    Eli Zaretskii <eliz@gnu.org>
 

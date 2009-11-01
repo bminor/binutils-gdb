@@ -23420,7 +23420,7 @@ For a stack with frame levels 0 through 11:
 @subsubheading Synopsis
 
 @smallexample
- -stack-list-arguments @var{show-values}
+ -stack-list-arguments @var{print-values}
     [ @var{low-frame} @var{high-frame} ]
 @end smallexample
 
@@ -23433,9 +23433,11 @@ larger than the actual number of frames.  On the other hand,
 @var{high-frame} may be larger than the actual number of frames, in
 which case only existing frames will be returned.
 
-The @var{show-values} argument must have a value of 0 or 1.  A value of
-0 means that only the names of the arguments are listed, a value of 1
-means that both names and values of the arguments are printed.
+If @var{print-values} is 0 or @code{--no-values}, print only the names of
+the variables; if it is 1 or @code{--all-values}, print also their
+values; and if it is 2 or @code{--simple-values}, print the name,
+type and value for simple data types, and the name and type for arrays,
+structures and unions.
 
 Use of this command to obtain arguments in a single frame is
 deprecated in favor of the @samp{-stack-list-variables} command.
@@ -23618,7 +23620,7 @@ Display the local variable names for the selected frame.  If
 @var{print-values} is 0 or @code{--no-values}, print only the names of
 the variables; if it is 1 or @code{--all-values}, print also their
 values; and if it is 2 or @code{--simple-values}, print the name,
-type and value for simple data types and the name and type for arrays,
+type and value for simple data types, and the name and type for arrays,
 structures and unions.  In this last case, a frontend can immediately
 display the value of simple data types and create variable objects for
 other data types when the user wishes to explore their values in
@@ -23660,7 +23662,7 @@ Display the names of local variables and function arguments for the selected fra
 @var{print-values} is 0 or @code{--no-values}, print only the names of
 the variables; if it is 1 or @code{--all-values}, print also their
 values; and if it is 2 or @code{--simple-values}, print the name,
-type and value for simple data types and the name and type for arrays,
+type and value for simple data types, and the name and type for arrays,
 structures and unions.  
 
 @subsubheading Example
