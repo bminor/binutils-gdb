@@ -1,5 +1,9 @@
 2009-11-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* lib/gdb.exp (gdb_expect): Fix timeout typo.
+
+2009-11-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.base/opaque.exp: Remove duplicate tests and xyz from test name.
 
 2009-11-02  Daniel Jacobowitz  <dan@codesourcery.com>

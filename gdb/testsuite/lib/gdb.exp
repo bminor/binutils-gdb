@@ -2027,7 +2027,7 @@ proc gdb_expect { args } {
 
     if [info exists atimeout] {
 	if { ![info exists gtimeout] || $gtimeout < $atimeout } {
-	    set $gtimeout $atimeout;
+	    set gtimeout $atimeout;
 	}
     } else {
 	if ![info exists gtimeout] {
