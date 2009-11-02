@@ -995,6 +995,12 @@ if ![string compare $build_id_debug_filename ""] then {
 
     test_different_dir build-id "${objdir}/${subdir}" $xfail
 
+    # Test also multiple directories can be specified.  Without the build-id
+    # reference GDB would find the separate debug info just at the same
+    # location as the executable file.
+
+    test_different_dir multiple-dirs "/doesnotexist:${objdir}/${subdir}" $xfail
+
     # Spare debug files may confuse testsuite runs in the future.
     remote_exec build "rm -f ${objdir}/${subdir}/${build_id_debug_filename}"
 }

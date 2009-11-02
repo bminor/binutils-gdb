@@ -1,5 +1,16 @@
 2009-11-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* symfile.c (build_id_to_debug_filename): New variable debugdir.  Move
+	variables size, s and data into a new inner block.  Change xmalloc for
+	alloca, use direct BUILDID->SIZE there now.  Loop for the
+	DEBUG_FILE_DIRECTORY components.
+	(find_separate_debug_file): New variable debugdir and debugdir_end.
+	Loop for the DEBUG_FILE_DIRECTORY components.
+	(_initialize_symfile): For "debug-file-directory" use plural and note
+	one can use multiple components now.
+
+2009-11-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* symfile.c (find_separate_debug_file): Initialize dir, debugfile and
 	canon_name to NULL.  Change alloca to xmalloc, newly call xfree for it.
 	New label cleanup_return_debugfile, jump to it from the failure paths.

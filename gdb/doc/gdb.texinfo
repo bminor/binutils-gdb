@@ -14084,13 +14084,14 @@ name @value{GDBN} is currently using.
 @table @code
 
 @kindex set debug-file-directory
-@item set debug-file-directory @var{directory}
-Set the directory which @value{GDBN} searches for separate debugging
-information files to @var{directory}.
+@item set debug-file-directory @var{directories}
+Set the directories which @value{GDBN} searches for separate debugging
+information files to @var{directory}.  Multiple directory components can be set
+concatenating them by a directory separator.
 
 @kindex show debug-file-directory
 @item show debug-file-directory
-Show the directory @value{GDBN} searches for separate debugging
+Show the directories @value{GDBN} searches for separate debugging
 information files.
 
 @end table
@@ -19382,8 +19383,8 @@ readable, @value{GDBN} will evaluate it as a Python script.
 
 If this file does not exist, and if the parameter
 @code{debug-file-directory} is set (@pxref{Separate Debug Files}),
-then @value{GDBN} will use the file named
-@file{@var{debug-file-directory}/@var{real-name}}, where
+then @value{GDBN} will use for its each separated directory component
+@code{component} the file named @file{@code{component}/@var{real-name}}, where
 @var{real-name} is the object file's real name, as described above.
 
 Finally, if this file does not exist, then @value{GDBN} will look for

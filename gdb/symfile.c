@@ -1218,35 +1218,59 @@ build_id_verify (const char *filename, struct build_id *check)
 static char *
 build_id_to_debug_filename (struct build_id *build_id)
 {
-  char *link, *s, *retval = NULL;
-  gdb_byte *data = build_id->data;
-  size_t size = build_id->size;
+  char *link, *debugdir, *retval = NULL;
 
   /* DEBUG_FILE_DIRECTORY/.build-id/ab/cdef */
-  link = xmalloc (strlen (debug_file_directory) + (sizeof "/.build-id/" - 1) + 1
-		  + 2 * size + (sizeof ".debug" - 1) + 1);
-  s = link + sprintf (link, "%s/.build-id/", debug_file_directory);
-  if (size > 0)
-    {
-      size--;
-      s += sprintf (s, "%02x", (unsigned) *data++);
-    }
-  if (size > 0)
-    *s++ = '/';
-  while (size-- > 0)
-    s += sprintf (s, "%02x", (unsigned) *data++);
-  strcpy (s, ".debug");
+  link = alloca (strlen (debug_file_directory) + (sizeof "/.build-id/" - 1) + 1
+		 + 2 * build_id->size + (sizeof ".debug" - 1) + 1);
 
-  /* lrealpath() is expensive even for the usually non-existent files.  */
-  if (access (link, F_OK) == 0)
-    retval = lrealpath (link);
-  xfree (link);
+  /* Keep backward compatibility so that DEBUG_FILE_DIRECTORY being "" will
+     cause "/.build-id/..." lookups.  */
 
-  if (retval != NULL && !build_id_verify (retval, build_id))
+  debugdir = debug_file_directory;
+  do
     {
-      xfree (retval);
-      retval = NULL;
+      char *s, *debugdir_end;
+      gdb_byte *data = build_id->data;
+      size_t size = build_id->size;
+
+      while (*debugdir == DIRNAME_SEPARATOR)
+	debugdir++;
+
+      debugdir_end = strchr (debugdir, DIRNAME_SEPARATOR);
+      if (debugdir_end == NULL)
+	debugdir_end = &debugdir[strlen (debugdir)];
+
+      memcpy (link, debugdir, debugdir_end - debugdir);
+      s = &link[debugdir_end - debugdir];
+      s += sprintf (s, "/.build-id/");
+      if (size > 0)
+	{
+	  size--;
+	  s += sprintf (s, "%02x", (unsigned) *data++);
+	}
+      if (size > 0)
+	*s++ = '/';
+      while (size-- > 0)
+	s += sprintf (s, "%02x", (unsigned) *data++);
+      strcpy (s, ".debug");
+
+      /* lrealpath() is expensive even for the usually non-existent files.  */
+      if (access (link, F_OK) == 0)
+	retval = lrealpath (link);
+
+      if (retval != NULL && !build_id_verify (retval, build_id))
+	{
+	  xfree (retval);
+	  retval = NULL;
+	}
+
+      if (retval != NULL)
+	break;
+
+      debugdir = debugdir_end;
     }
+  while (*debugdir != 0);
 
   return retval;
 }
@@ -1333,7 +1357,7 @@ static char *
 find_separate_debug_file (struct objfile *objfile)
 {
   asection *sect;
-  char *basename, *name_copy;
+  char *basename, *name_copy, *debugdir;
   char *dir = NULL;
   char *debugfile = NULL;
   char *canon_name = NULL;
@@ -1410,29 +1434,51 @@ find_separate_debug_file (struct objfile *objfile)
   if (separate_debug_file_exists (debugfile, crc32, objfile->name))
     goto cleanup_return_debugfile;
 
-  /* Then try in the global debugfile directory.  */
-  strcpy (debugfile, debug_file_directory);
-  strcat (debugfile, "/");
-  strcat (debugfile, dir);
-  strcat (debugfile, basename);
+  /* Then try in the global debugfile directories.
+ 
+     Keep backward compatibility so that DEBUG_FILE_DIRECTORY being "" will
+     cause "/..." lookups.  */
 
-  if (separate_debug_file_exists (debugfile, crc32, objfile->name))
-    goto cleanup_return_debugfile;
-
-  /* If the file is in the sysroot, try using its base path in the
-     global debugfile directory.  */
-  if (canon_name
-      && strncmp (canon_name, gdb_sysroot, strlen (gdb_sysroot)) == 0
-      && IS_DIR_SEPARATOR (canon_name[strlen (gdb_sysroot)]))
+  debugdir = debug_file_directory;
+  do
     {
-      strcpy (debugfile, debug_file_directory);
-      strcat (debugfile, canon_name + strlen (gdb_sysroot));
+      char *debugdir_end;
+
+      while (*debugdir == DIRNAME_SEPARATOR)
+	debugdir++;
+
+      debugdir_end = strchr (debugdir, DIRNAME_SEPARATOR);
+      if (debugdir_end == NULL)
+	debugdir_end = &debugdir[strlen (debugdir)];
+
+      memcpy (debugfile, debugdir, debugdir_end - debugdir);
+      debugfile[debugdir_end - debugdir] = 0;
       strcat (debugfile, "/");
+      strcat (debugfile, dir);
       strcat (debugfile, basename);
 
       if (separate_debug_file_exists (debugfile, crc32, objfile->name))
 	goto cleanup_return_debugfile;
+
+      /* If the file is in the sysroot, try using its base path in the
+	 global debugfile directory.  */
+      if (canon_name
+	  && strncmp (canon_name, gdb_sysroot, strlen (gdb_sysroot)) == 0
+	  && IS_DIR_SEPARATOR (canon_name[strlen (gdb_sysroot)]))
+	{
+	  memcpy (debugfile, debugdir, debugdir_end - debugdir);
+	  debugfile[debugdir_end - debugdir] = 0;
+	  strcat (debugfile, canon_name + strlen (gdb_sysroot));
+	  strcat (debugfile, "/");
+	  strcat (debugfile, basename);
+
+	  if (separate_debug_file_exists (debugfile, crc32, objfile->name))
+	    goto cleanup_return_debugfile;
+	}
+
+      debugdir = debugdir_end;
     }
+  while (*debugdir != 0);
   
   xfree (debugfile);
   debugfile = NULL;
@@ -4173,12 +4219,12 @@ Usage: set extension-language .foo bar"),
 
   add_setshow_optional_filename_cmd ("debug-file-directory", class_support,
 				     &debug_file_directory, _("\
-Set the directory where separate debug symbols are searched for."), _("\
-Show the directory where separate debug symbols are searched for."), _("\
+Set the directories where separate debug symbols are searched for."), _("\
+Show the directories where separate debug symbols are searched for."), _("\
 Separate debug symbols are first searched for in the same\n\
 directory as the binary, then in the `" DEBUG_SUBDIRECTORY "' subdirectory,\n\
 and lastly at the path of the directory of the binary with\n\
-the global debug-file directory prepended."),
+each global debug-file-directory component prepended."),
 				     NULL,
 				     show_debug_file_directory,
 				     &setlist, &showlist);

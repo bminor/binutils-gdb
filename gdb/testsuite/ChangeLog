@@ -1,5 +1,9 @@
 2009-11-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.base/sepdebug.exp: New test_different_dir call for multiple-dirs.
+
+2009-11-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.base/sepdebug.exp (CRC mismatch is reported): New test.
 	* gdb.base/sepdebug2.c: New file.
 

@@ -1,3 +1,8 @@
+2009-11-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (set debug-file-directory, show debug-file-directory)
+	(Auto-loading): Use plural and note one can use multiple components now.
+
 2009-11-01  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Stack Manipulation): Make
