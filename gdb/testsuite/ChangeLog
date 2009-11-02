@@ -1,5 +1,9 @@
 2009-11-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.base/opaque.exp: Remove duplicate tests and xyz from test name.
+
+2009-11-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.cp/ctti.exp: Correct return values for unsigned char functions.
 
 2009-11-02  Jan Kratochvil  <jan.kratochvil@redhat.com>

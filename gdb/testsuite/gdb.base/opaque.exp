@@ -181,7 +181,7 @@ gdb_test "whatis afoo" \
 
 gdb_test "ptype afoo" \
     "type = struct foo \{\[\r\n\]+    int a;\[\r\n\]+    int b;\[\r\n\]+\}" \
-    "ptype on opaque struct instance (dynamically) xyz 1"
+    "ptype on opaque struct instance (dynamically) 1"
 
 
 # Ensure that we know the form of an explicit struct foo.
@@ -220,29 +220,6 @@ gdb_test "whatis foop" \
 # Ensure that we know the form of the thing foop points to.
 
 setup_xfail_on_opaque_pointer
-if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
-gdb_test "ptype foop" \
-    "type = struct foo \{\[\r\n\]+    int a;\[\r\n\]+    int b;\[\r\n\]+\} \[*\]+" \
-    "ptype on opaque struct pointer (dynamically) 2"
-
-gdb_test "whatis afoo" \
-    "type = struct foo" \
-    "whatis on opaque struct instance (dynamically) 1"
-
-
-# Ensure that we know the form of afoo, an instance of a struct foo.
-
-gdb_test "ptype afoo" \
-    "type = struct foo \{\r\n    int a;\r\n    int b;\r\n\}" \
-    "ptype on opaque struct instance (dynamically) 1"
-
-gdb_test "ptype afoo" \
-    "type = struct foo \{\[\r\n\]*.*int a;\[\r\n\]*.*int b;\[\r\n\]*}\[\r\n\]*" \
-    "ptype on opaque struct instance (dynamically) pqr 1"
-
-
-# Ensure that we know the form of an explicit struct foo.
-
 gdb_test "ptype foop" \
     "type = struct foo \{\[\r\n\]+    int a;\[\r\n\]+    int b;\[\r\n\]+\} \[*\]+" \
     "ptype on opaque struct pointer (dynamically) 2"
