@@ -1,3 +1,9 @@
+2009-11-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* symfile.c (find_separate_debug_file): Initialize dir, debugfile and
+	canon_name to NULL.  Change alloca to xmalloc, newly call xfree for it.
+	New label cleanup_return_debugfile, jump to it from the failure paths.
+
 2009-11-02  Andrew Cagney  <cagney@gnu.org>
 
 	* symfile.c (separate_debug_file_exists): When the CRCs mismatch

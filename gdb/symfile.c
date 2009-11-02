@@ -1333,11 +1333,10 @@ static char *
 find_separate_debug_file (struct objfile *objfile)
 {
   asection *sect;
-  char *basename;
-  char *dir;
-  char *debugfile;
-  char *name_copy;
-  char *canon_name;
+  char *basename, *name_copy;
+  char *dir = NULL;
+  char *debugfile = NULL;
+  char *canon_name = NULL;
   bfd_size_type debuglink_size;
   unsigned long crc32;
   int i;
@@ -1366,7 +1365,7 @@ find_separate_debug_file (struct objfile *objfile)
   if (basename == NULL)
     /* There's no separate debug info, hence there's no way we could
        load it => no warning.  */
-    return NULL;
+    goto cleanup_return_debugfile;
 
   dir = xstrdup (objfile->name);
 
@@ -1388,24 +1387,19 @@ find_separate_debug_file (struct objfile *objfile)
   if (canon_name && strlen (canon_name) > i)
     i = strlen (canon_name);
 
-  debugfile = alloca (strlen (debug_file_directory) + 1
-                      + i
-                      + strlen (DEBUG_SUBDIRECTORY)
-                      + strlen ("/")
-                      + strlen (basename)
-                      + 1);
+  debugfile = xmalloc (strlen (debug_file_directory) + 1
+		       + i
+		       + strlen (DEBUG_SUBDIRECTORY)
+		       + strlen ("/")
+		       + strlen (basename)
+		       + 1);
 
   /* First try in the same directory as the original file.  */
   strcpy (debugfile, dir);
   strcat (debugfile, basename);
 
   if (separate_debug_file_exists (debugfile, crc32, objfile->name))
-    {
-      xfree (basename);
-      xfree (dir);
-      xfree (canon_name);
-      return xstrdup (debugfile);
-    }
+    goto cleanup_return_debugfile;
 
   /* Then try in the subdirectory named DEBUG_SUBDIRECTORY.  */
   strcpy (debugfile, dir);
@@ -1414,12 +1408,7 @@ find_separate_debug_file (struct objfile *objfile)
   strcat (debugfile, basename);
 
   if (separate_debug_file_exists (debugfile, crc32, objfile->name))
-    {
-      xfree (basename);
-      xfree (dir);
-      xfree (canon_name);
-      return xstrdup (debugfile);
-    }
+    goto cleanup_return_debugfile;
 
   /* Then try in the global debugfile directory.  */
   strcpy (debugfile, debug_file_directory);
@@ -1428,12 +1417,7 @@ find_separate_debug_file (struct objfile *objfile)
   strcat (debugfile, basename);
 
   if (separate_debug_file_exists (debugfile, crc32, objfile->name))
-    {
-      xfree (basename);
-      xfree (dir);
-      xfree (canon_name);
-      return xstrdup (debugfile);
-    }
+    goto cleanup_return_debugfile;
 
   /* If the file is in the sysroot, try using its base path in the
      global debugfile directory.  */
@@ -1447,20 +1431,17 @@ find_separate_debug_file (struct objfile *objfile)
       strcat (debugfile, basename);
 
       if (separate_debug_file_exists (debugfile, crc32, objfile->name))
-	{
-	  xfree (canon_name);
-	  xfree (basename);
-	  xfree (dir);
-	  return xstrdup (debugfile);
-	}
+	goto cleanup_return_debugfile;
     }
   
-  if (canon_name)
-    xfree (canon_name);
+  xfree (debugfile);
+  debugfile = NULL;
 
+cleanup_return_debugfile:
+  xfree (canon_name);
   xfree (basename);
   xfree (dir);
-  return NULL;
+  return debugfile;
 }
 
 
