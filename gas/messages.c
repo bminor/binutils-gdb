@@ -383,6 +383,8 @@ as_fatal (format, va_alist)
   vfprintf (stderr, format, args);
   (void) putc ('\n', stderr);
   va_end (args);
+  if (out_file_name != NULL)
+    unlink_if_ordinary (out_file_name);
   xexit (EXIT_FAILURE);
 }
 #endif /* not NO_STDARG */

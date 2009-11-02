@@ -1,3 +1,8 @@
+2009-11-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* messages.c (as_fatal): Apply 2001-01-15 change and followup
+	to second copy of function.
+
 2009-10-30  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* config/tc-hppa.c (pa_build_unwind_subspace): Replace start symbol
