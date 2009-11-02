@@ -1,3 +1,22 @@
+2009-11-02  Paul Brook  <paul@codesourcery.com>
+
+	* ld-arm/arm-elf.exp: Add new attr-merge-vfp tests.
+	* ld-arm/attr-merge-vfp-1.d: New test.
+	* ld-arm/attr-merge-vfp-1r.d: New test.
+	* ld-arm/attr-merge-vfp-2.d: New test.
+	* ld-arm/attr-merge-vfp-2r.d: New test.
+	* ld-arm/attr-merge-vfp-3.d: New test.
+	* ld-arm/attr-merge-vfp-3r.d: New test.
+	* ld-arm/attr-merge-vfp-4.d: New test.
+	* ld-arm/attr-merge-vfp-4r.d: New test.
+	* ld-arm/attr-merge-vfp-5.d: New test.
+	* ld-arm/attr-merge-vfp-5r.d: New test.
+	* ld-arm/attr-merge-vfp-2.s: New test.
+	* ld-arm/attr-merge-vfp-3.s: New test.
+	* ld-arm/attr-merge-vfp-3-d16.s: New test.
+	* ld-arm/attr-merge-vfp-4.s: New test.
+	* ld-arm/attr-merge-vfp-4-d16.s: New test.
+
 2009-11-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-scripts/phdrs3.exp (LDFLAGS): Add "--local-store 0:0" for SPU.

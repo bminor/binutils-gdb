@@ -1,3 +1,15 @@
+2009-11-02  Paul Brook  <paul@codesourcery.com>
+
+	* doc/c-arm.texi: Document new -mfpu options.
+	* config/tc-arm.c (fpu_vfp_ext_v3xd, fpu_vfp_fp16, fpu_neon_ext_fma,
+	fpu_vfp_ext_fma): New.
+	(NEON_ENC_TAB): Add vfma, vfms, vfnma and vfnms.
+	(do_vfp_nsyn_fma_fms, do_neon_fmac): New functions.
+	(insns): Move double precision load/store.  Split out double
+	precision VFPv3 instrucitons.  Add VFPv4 instructions.
+	(arm_fpus): Add VFPv3-FP16, VFPv3xD and VFPv4 variants.
+	(aeabi_set_public_attributes): Set VFPv4 variants
+
 2009-11-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* ecoff.c (ecoff_symbol_clone_hook): New function.

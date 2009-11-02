@@ -216,13 +216,16 @@ static const arm_feature_set fpu_vfp_ext_v1xd =
   ARM_FEATURE (0, FPU_VFP_EXT_V1xD);
 static const arm_feature_set fpu_vfp_ext_v1 = ARM_FEATURE (0, FPU_VFP_EXT_V1);
 static const arm_feature_set fpu_vfp_ext_v2 = ARM_FEATURE (0, FPU_VFP_EXT_V2);
+static const arm_feature_set fpu_vfp_ext_v3xd = ARM_FEATURE (0, FPU_VFP_EXT_V3xD);
 static const arm_feature_set fpu_vfp_ext_v3 = ARM_FEATURE (0, FPU_VFP_EXT_V3);
 static const arm_feature_set fpu_vfp_ext_d32 =
   ARM_FEATURE (0, FPU_VFP_EXT_D32);
 static const arm_feature_set fpu_neon_ext_v1 = ARM_FEATURE (0, FPU_NEON_EXT_V1);
 static const arm_feature_set fpu_vfp_v3_or_neon_ext =
   ARM_FEATURE (0, FPU_NEON_EXT_V1 | FPU_VFP_EXT_V3);
-static const arm_feature_set fpu_neon_fp16 = ARM_FEATURE (0, FPU_NEON_FP16);
+static const arm_feature_set fpu_vfp_fp16 = ARM_FEATURE (0, FPU_VFP_EXT_FP16);
+static const arm_feature_set fpu_neon_ext_fma = ARM_FEATURE (0, FPU_NEON_EXT_FMA);
+static const arm_feature_set fpu_vfp_ext_fma = ARM_FEATURE (0, FPU_VFP_EXT_FMA);
 
 static int mfloat_abi_opt = -1;
 /* Record user cpu selection for object attributes.  */
@@ -11293,6 +11296,8 @@ struct neon_tab_entry
      vcge / vcgt with the operands reversed.  */  	\
   X(vclt,	0x0000300, 0x1200e00, 0x1b10200),	\
   X(vcle,	0x0000310, 0x1000e00, 0x1b10180),	\
+  X(vfma,	N_INV, 0x0000c10, N_INV),		\
+  X(vfms,	N_INV, 0x0200c10, N_INV),		\
   X(vmla,	0x0000900, 0x0000d10, 0x0800040),	\
   X(vmls,	0x1000900, 0x0200d10, 0x0800440),	\
   X(vmul,	0x0000910, 0x1000d10, 0x0800840),	\
@@ -11330,6 +11335,8 @@ struct neon_tab_entry
   X(vnmul,      0xe200a40, 0xe200b40, N_INV),		\
   X(vnmla,      0xe100a40, 0xe100b40, N_INV),		\
   X(vnmls,      0xe100a00, 0xe100b00, N_INV),		\
+  X(vfnma,      0xe900a40, 0xe900b40, N_INV),		\
+  X(vfnms,      0xe900a00, 0xe900b00, N_INV),		\
   X(vcmp,	0xeb40a40, 0xeb40b40, N_INV),		\
   X(vcmpz,	0xeb50a40, 0xeb50b40, N_INV),		\
   X(vcmpe,	0xeb40ac0, 0xeb40bc0, N_INV),		\
@@ -12145,6 +12152,27 @@ do_vfp_nsyn_mla_mls (enum neon_shape rs)
         do_vfp_nsyn_opcode ("fmacd");
       else
         do_vfp_nsyn_opcode ("fmscd");
+    }
+}
+
+static void
+do_vfp_nsyn_fma_fms (enum neon_shape rs)
+{
+  int is_fma = (inst.instruction & 0x0fffffff) == N_MNEM_vfma;
+
+  if (rs == NS_FFF)
+    {
+      if (is_fma)
+        do_vfp_nsyn_opcode ("ffmas");
+      else
+        do_vfp_nsyn_opcode ("ffnmas");
+    }
+  else
+    {
+      if (is_fma)
+        do_vfp_nsyn_opcode ("ffmad");
+      else
+        do_vfp_nsyn_opcode ("ffnmad");
     }
 }
 
@@ -13113,6 +13141,18 @@ do_neon_mac_maybe_scalar (void)
 	 affected if we specify unsigned args.  */
       neon_dyadic_misc (NT_untyped, N_IF_32, 0);
     }
+}
+
+static void
+do_neon_fmac (void)
+{
+  if (try_vfp_nsyn (3, do_vfp_nsyn_fma_fms) == SUCCESS)
+    return;
+
+  if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH) == FAIL)
+    return;
+
+  neon_dyadic_misc (NT_untyped, N_IF_32, 0);
 }
 
 static void
@@ -17179,6 +17219,19 @@ static const struct asm_opcode insns[] =
  cCE("fcmpes",	eb40ac0, 2, (RVS, RVS),	      vfp_sp_monadic),
  cCE("fcmpezs",	eb50ac0, 1, (RVS),	      vfp_sp_compare_z),
 
+ /* Double precision load/store are still present on single precision
+    implementations.  */
+ cCE("fldd",	d100b00, 2, (RVD, ADDRGLDC),  vfp_dp_ldst),
+ cCE("fstd",	d000b00, 2, (RVD, ADDRGLDC),  vfp_dp_ldst),
+ cCE("fldmiad",	c900b00, 2, (RRw, VRDLST),    vfp_dp_ldstmia),
+ cCE("fldmfdd",	c900b00, 2, (RRw, VRDLST),    vfp_dp_ldstmia),
+ cCE("fldmdbd",	d300b00, 2, (RRw, VRDLST),    vfp_dp_ldstmdb),
+ cCE("fldmead",	d300b00, 2, (RRw, VRDLST),    vfp_dp_ldstmdb),
+ cCE("fstmiad",	c800b00, 2, (RRw, VRDLST),    vfp_dp_ldstmia),
+ cCE("fstmead",	c800b00, 2, (RRw, VRDLST),    vfp_dp_ldstmia),
+ cCE("fstmdbd",	d200b00, 2, (RRw, VRDLST),    vfp_dp_ldstmdb),
+ cCE("fstmfdd",	d200b00, 2, (RRw, VRDLST),    vfp_dp_ldstmdb),
+
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_vfp_ext_v1 /* VFP V1 (Double precision).  */
 
@@ -17196,18 +17249,6 @@ static const struct asm_opcode insns[] =
  cCE("ftosizd",	ebd0bc0, 2, (RVS, RVD),	      vfp_sp_dp_cvt),
  cCE("ftouid",	ebc0b40, 2, (RVS, RVD),	      vfp_sp_dp_cvt),
  cCE("ftouizd",	ebc0bc0, 2, (RVS, RVD),	      vfp_sp_dp_cvt),
-
-  /* Memory operations.	 */
- cCE("fldd",	d100b00, 2, (RVD, ADDRGLDC),  vfp_dp_ldst),
- cCE("fstd",	d000b00, 2, (RVD, ADDRGLDC),  vfp_dp_ldst),
- cCE("fldmiad",	c900b00, 2, (RRw, VRDLST),    vfp_dp_ldstmia),
- cCE("fldmfdd",	c900b00, 2, (RRw, VRDLST),    vfp_dp_ldstmia),
- cCE("fldmdbd",	d300b00, 2, (RRw, VRDLST),    vfp_dp_ldstmdb),
- cCE("fldmead",	d300b00, 2, (RRw, VRDLST),    vfp_dp_ldstmdb),
- cCE("fstmiad",	c800b00, 2, (RRw, VRDLST),    vfp_dp_ldstmia),
- cCE("fstmead",	c800b00, 2, (RRw, VRDLST),    vfp_dp_ldstmia),
- cCE("fstmdbd",	d200b00, 2, (RRw, VRDLST),    vfp_dp_ldstmdb),
- cCE("fstmfdd",	d200b00, 2, (RRw, VRDLST),    vfp_dp_ldstmdb),
 
   /* Monadic operations.  */
  cCE("fabsd",	eb00bc0, 2, (RVD, RVD),	      vfp_dp_rd_rm),
@@ -17535,28 +17576,51 @@ static const struct asm_opcode insns[] =
  nUF(vst4,      _vst4,    2, (NSTRLST, ADDR),  neon_ldx_stx),
 
 #undef  THUMB_VARIANT
+#define THUMB_VARIANT &fpu_vfp_ext_v3xd
+#undef ARM_VARIANT
+#define ARM_VARIANT &fpu_vfp_ext_v3xd
+ cCE("fconsts",   eb00a00, 2, (RVS, I255),      vfp_sp_const),
+ cCE("fshtos",    eba0a40, 2, (RVS, I16z),      vfp_sp_conv_16),
+ cCE("fsltos",    eba0ac0, 2, (RVS, I32),       vfp_sp_conv_32),
+ cCE("fuhtos",    ebb0a40, 2, (RVS, I16z),      vfp_sp_conv_16),
+ cCE("fultos",    ebb0ac0, 2, (RVS, I32),       vfp_sp_conv_32),
+ cCE("ftoshs",    ebe0a40, 2, (RVS, I16z),      vfp_sp_conv_16),
+ cCE("ftosls",    ebe0ac0, 2, (RVS, I32),       vfp_sp_conv_32),
+ cCE("ftouhs",    ebf0a40, 2, (RVS, I16z),      vfp_sp_conv_16),
+ cCE("ftouls",    ebf0ac0, 2, (RVS, I32),       vfp_sp_conv_32),
+
+#undef THUMB_VARIANT
 #define THUMB_VARIANT  & fpu_vfp_ext_v3
 #undef  ARM_VARIANT
 #define ARM_VARIANT    & fpu_vfp_ext_v3
 
- cCE("fconsts",   eb00a00, 2, (RVS, I255),      vfp_sp_const),
  cCE("fconstd",   eb00b00, 2, (RVD, I255),      vfp_dp_const),
- cCE("fshtos",    eba0a40, 2, (RVS, I16z),      vfp_sp_conv_16),
  cCE("fshtod",    eba0b40, 2, (RVD, I16z),      vfp_dp_conv_16),
- cCE("fsltos",    eba0ac0, 2, (RVS, I32),       vfp_sp_conv_32),
  cCE("fsltod",    eba0bc0, 2, (RVD, I32),       vfp_dp_conv_32),
- cCE("fuhtos",    ebb0a40, 2, (RVS, I16z),      vfp_sp_conv_16),
  cCE("fuhtod",    ebb0b40, 2, (RVD, I16z),      vfp_dp_conv_16),
- cCE("fultos",    ebb0ac0, 2, (RVS, I32),       vfp_sp_conv_32),
  cCE("fultod",    ebb0bc0, 2, (RVD, I32),       vfp_dp_conv_32),
- cCE("ftoshs",    ebe0a40, 2, (RVS, I16z),      vfp_sp_conv_16),
  cCE("ftoshd",    ebe0b40, 2, (RVD, I16z),      vfp_dp_conv_16),
- cCE("ftosls",    ebe0ac0, 2, (RVS, I32),       vfp_sp_conv_32),
  cCE("ftosld",    ebe0bc0, 2, (RVD, I32),       vfp_dp_conv_32),
- cCE("ftouhs",    ebf0a40, 2, (RVS, I16z),      vfp_sp_conv_16),
  cCE("ftouhd",    ebf0b40, 2, (RVD, I16z),      vfp_dp_conv_16),
- cCE("ftouls",    ebf0ac0, 2, (RVS, I32),       vfp_sp_conv_32),
  cCE("ftould",    ebf0bc0, 2, (RVD, I32),       vfp_dp_conv_32),
+
+#undef ARM_VARIANT
+#define ARM_VARIANT &fpu_vfp_ext_fma
+#undef THUMB_VARIANT
+#define THUMB_VARIANT &fpu_vfp_ext_fma
+ /* Mnemonics shared by Neon and VFP.  These are included in the
+    VFP FMA variant; NEON and VFP FMA always includes the NEON
+    FMA instructions.  */
+ nCEF(vfma,     _vfma,    3, (RNSDQ, oRNSDQ, RNSDQ), neon_fmac),
+ nCEF(vfms,     _vfms,    3, (RNSDQ, oRNSDQ, RNSDQ), neon_fmac),
+ /* ffmas/ffmad/ffmss/ffmsd are dummy mnemonics to satisfy gas;
+    the v form should always be used.  */
+ cCE("ffmas",	ea00a00, 3, (RVS, RVS, RVS),  vfp_sp_dyadic),
+ cCE("ffnmas",	ea00a40, 3, (RVS, RVS, RVS),  vfp_sp_dyadic),
+ cCE("ffmad",	ea00b00, 3, (RVD, RVD, RVD),  vfp_dp_rd_rn_rm),
+ cCE("ffnmad",	ea00b40, 3, (RVD, RVD, RVD),  vfp_dp_rd_rn_rm),
+ nCE(vfnma,     _vfnma,   3, (RVSD, RVSD, RVSD), vfp_nsyn_nmul),
+ nCE(vfnms,     _vfnms,   3, (RVSD, RVSD, RVSD), vfp_nsyn_nmul),
 
 #undef THUMB_VARIANT
 #undef  ARM_VARIANT
@@ -21967,7 +22031,11 @@ static const struct arm_option_cpu_value_table arm_fpus[] =
   {"vfpxd",		FPU_ARCH_VFP_V1xD},
   {"vfpv2",		FPU_ARCH_VFP_V2},
   {"vfpv3",		FPU_ARCH_VFP_V3},
+  {"vfpv3-fp16",	FPU_ARCH_VFP_V3_FP16},
   {"vfpv3-d16",		FPU_ARCH_VFP_V3D16},
+  {"vfpv3-d16-fp16",	FPU_ARCH_VFP_V3D16_FP16},
+  {"vfpv3xd",		FPU_ARCH_VFP_V3xD},
+  {"vfpv3xd-fp16",	FPU_ARCH_VFP_V3xD_FP16},
   {"arm1020t",		FPU_ARCH_VFP_V1},
   {"arm1020e",		FPU_ARCH_VFP_V2},
   {"arm1136jfs",	FPU_ARCH_VFP_V2},
@@ -21975,6 +22043,9 @@ static const struct arm_option_cpu_value_table arm_fpus[] =
   {"maverick",		FPU_ARCH_MAVERICK},
   {"neon",              FPU_ARCH_VFP_V3_PLUS_NEON_V1},
   {"neon-fp16",		FPU_ARCH_NEON_FP16},
+  {"vfpv4",		FPU_ARCH_VFP_V4},
+  {"vfpv4-d16",		FPU_ARCH_VFP_V4D16},
+  {"neon-vfpv4",	FPU_ARCH_NEON_VFP_V4},
   {NULL,		ARM_ARCH_NONE}
 };
 
@@ -22453,8 +22524,10 @@ aeabi_set_public_attributes (void)
 	}
       aeabi_set_attribute_string (Tag_CPU_name, p);
     }
+
   /* Tag_CPU_arch.  */
   aeabi_set_attribute_int (Tag_CPU_arch, arch);
+
   /* Tag_CPU_arch_profile.  */
   if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v7a))
     aeabi_set_attribute_int (Tag_CPU_arch_profile, 'A');
@@ -22462,17 +22535,24 @@ aeabi_set_public_attributes (void)
     aeabi_set_attribute_int (Tag_CPU_arch_profile, 'R');
   else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_m))
     aeabi_set_attribute_int (Tag_CPU_arch_profile, 'M');
+
   /* Tag_ARM_ISA_use.  */
   if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v1)
       || arch == 0)
     aeabi_set_attribute_int (Tag_ARM_ISA_use, 1);
+
   /* Tag_THUMB_ISA_use.  */
   if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v4t)
       || arch == 0)
     aeabi_set_attribute_int (Tag_THUMB_ISA_use,
 	ARM_CPU_HAS_FEATURE (flags, arm_arch_t2) ? 2 : 1);
+
   /* Tag_VFP_arch.  */
-  if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_d32))
+  if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_fma))
+    aeabi_set_attribute_int (Tag_VFP_arch,
+			     ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_d32)
+			     ? 5 : 6);
+  else if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_d32))
     aeabi_set_attribute_int (Tag_VFP_arch, 3);
   else if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_v3))
     aeabi_set_attribute_int (Tag_VFP_arch, 4);
@@ -22481,16 +22561,21 @@ aeabi_set_public_attributes (void)
   else if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_v1)
            || ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_v1xd))
     aeabi_set_attribute_int (Tag_VFP_arch, 1);
+
   /* Tag_WMMX_arch.  */
   if (ARM_CPU_HAS_FEATURE (flags, arm_cext_iwmmxt2))
     aeabi_set_attribute_int (Tag_WMMX_arch, 2);
   else if (ARM_CPU_HAS_FEATURE (flags, arm_cext_iwmmxt))
     aeabi_set_attribute_int (Tag_WMMX_arch, 1);
+
   /* Tag_Advanced_SIMD_arch (formerly Tag_NEON_arch).  */
   if (ARM_CPU_HAS_FEATURE (flags, fpu_neon_ext_v1))
-    aeabi_set_attribute_int (Tag_Advanced_SIMD_arch, 1);
+    aeabi_set_attribute_int
+      (Tag_Advanced_SIMD_arch, (ARM_CPU_HAS_FEATURE (flags, fpu_neon_ext_fma)
+				? 2 : 1));
+  
   /* Tag_VFP_HP_extension (formerly Tag_NEON_FP16_arch).  */
-  if (ARM_CPU_HAS_FEATURE (flags, fpu_neon_fp16))
+  if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_fp16))
     aeabi_set_attribute_int (Tag_VFP_HP_extension, 1);
 }
 

@@ -1,3 +1,8 @@
+2009-11-02  Paul Brook  <paul@codesourcery.com>
+
+	* arm-dis.c (coprocessor_opcodes): Update to use new feature flags.
+	Add VFPv4 instructions.
+
 2009-10-29  Sebastian Pop  <sebastian.pop@amd.com>
 
 	* i386-dis.c (OP_VEX_FMA): Removed.

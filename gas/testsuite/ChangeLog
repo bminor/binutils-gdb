@@ -1,3 +1,19 @@
+2009-11-02  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/attr-mfpu-vfpv4.d: New test.
+	* gas/arm/attr-mfpu-vfpv4-d16.d: New test.
+	* gas/arm/neon-fma-cov.d: New test.
+	* gas/arm/neon-fma-cov.s: New test.
+	* gas/arm/vfp-fma-inc.s: New test.
+	* gas/arm/vfp-fma-arm.d: New test.
+	* gas/arm/vfp-fma-arm.s: New test.
+	* gas/arm/vfp-fma-thumb.d: New test.
+	* gas/arm/vfp-fma-thumb.s: New test.
+	* gas/arm/vfma1.d: New test.
+	* gas/arm/vfma1.s: New test.
+	* gas/arm/vfpv3xd.d: New test.
+	* gas/arm/vfpv3xd.s: New test.
+
 2009-10-29  Sebastian Pop  <sebastian.pop@amd.com>
 
 	* gas/i386/fma4.d: Updated patterns.

@@ -1,3 +1,7 @@
+2009-11-02  Paul Brook  <paul@codesourcery.com>
+
+	* readelf.c (arm_attr_tag_VFP_arch): Add VFPv4 and VFPv4-D16.
+
 2009-10-28  Kai Tietz <kai.tietz@onevision.com>
 
 	* dlltool.c (leading_underscore): New local variable.

@@ -1,3 +1,8 @@
+2009-11-02  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Handle VFPv4
+	attributes.
+
 2009-11-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (elf_link_add_object_symbols): Don't force debug

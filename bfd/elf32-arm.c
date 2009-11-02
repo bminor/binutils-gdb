@@ -9730,8 +9730,6 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
   /* Some tags have 0 = don't care, 1 = strong requirement,
      2 = weak requirement.  */
   static const int order_021[3] = {0, 2, 1};
-  /* For use with Tag_VFP_arch.  */
-  static const int order_01243[5] = {0, 1, 2, 4, 3};
   int i;
   bfd_boolean result = TRUE;
 
@@ -9923,12 +9921,50 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	    }
 	  break;
 	case Tag_VFP_arch:
-	  /* Use the "greatest" from the sequence 0, 1, 2, 4, 3, or the
-	     largest value if greater than 4 (for future-proofing).  */
-	  if ((in_attr[i].i > 4 && in_attr[i].i > out_attr[i].i)
-	      || (in_attr[i].i <= 4 && out_attr[i].i <= 4
-		  && order_01243[in_attr[i].i] > order_01243[out_attr[i].i]))
-	    out_attr[i].i = in_attr[i].i;
+	    {
+	      static const struct
+	      {
+		  int ver;
+		  int regs;
+	      } vfp_versions[7] =
+		{
+		  {0, 0},
+		  {1, 16},
+		  {2, 16},
+		  {3, 32},
+		  {3, 16},
+		  {4, 32},
+		  {4, 16}
+		};
+	      int ver;
+	      int regs;
+	      int newval;
+
+	      /* Values greater than 6 aren't defined, so just pick the
+	         biggest */
+	      if (in_attr[i].i > 6 && in_attr[i].i > out_attr[i].i)
+		{
+		  out_attr[i] = in_attr[i];
+		  break;
+		}
+	      /* The output uses the superset of input features
+		 (ISA version) and registers.  */
+	      ver = vfp_versions[in_attr[i].i].ver;
+	      if (ver < vfp_versions[out_attr[i].i].ver)
+		ver = vfp_versions[out_attr[i].i].ver;
+	      regs = vfp_versions[in_attr[i].i].regs;
+	      if (regs < vfp_versions[out_attr[i].i].regs)
+		regs = vfp_versions[out_attr[i].i].regs;
+	      /* This assumes all possible supersets are also a valid
+	         options.  */
+	      for (newval = 6; newval > 0; newval--)
+		{
+		  if (regs == vfp_versions[newval].regs
+		      && ver == vfp_versions[newval].ver)
+		    break;
+		}
+	      out_attr[i].i = newval;
+	    }
 	  break;
 	case Tag_PCS_config:
 	  if (out_attr[i].i == 0)

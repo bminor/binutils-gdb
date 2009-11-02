@@ -8967,7 +8967,7 @@ static const char * arm_attr_tag_ARM_ISA_use[] = {"No", "Yes"};
 static const char * arm_attr_tag_THUMB_ISA_use[] =
   {"No", "Thumb-1", "Thumb-2"};
 static const char * arm_attr_tag_VFP_arch[] =
-  {"No", "VFPv1", "VFPv2", "VFPv3", "VFPv3-D16"};
+  {"No", "VFPv1", "VFPv2", "VFPv3", "VFPv3-D16", "VFPv4", "VFPv4-D16"};
 static const char * arm_attr_tag_WMMX_arch[] = {"No", "WMMXv1", "WMMXv2"};
 static const char * arm_attr_tag_Advanced_SIMD_arch[] = {"No", "NEONv1"};
 static const char * arm_attr_tag_PCS_config[] =

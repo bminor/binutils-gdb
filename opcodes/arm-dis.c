@@ -289,8 +289,8 @@ static const struct opcode32 coprocessor_opcodes[] =
   {FPU_NEON_EXT_V1, 0x0e400b10, 0x0fd00f10, "vmov%c.8\t%16-19,7D[%5,6,21d], %12-15r"},
   {FPU_NEON_EXT_V1, 0x0e500b10, 0x0f500f10, "vmov%c.%23?us8\t%12-15r, %16-19,7D[%5,6,21d]"},
   /* Half-precision conversion instructions.  */
-  {FPU_NEON_FP16,   0x0eb20a40, 0x0fbf0f50, "vcvt%7?tb%c.f32.f16\t%y1, %y0"},
-  {FPU_NEON_FP16,   0x0eb30a40, 0x0fbf0f50, "vcvt%7?tb%c.f16.f32\t%y1, %y0"},
+  {FPU_VFP_EXT_FP16, 0x0eb20a40, 0x0fbf0f50, "vcvt%7?tb%c.f32.f16\t%y1, %y0"},
+  {FPU_VFP_EXT_FP16, 0x0eb30a40, 0x0fbf0f50, "vcvt%7?tb%c.f16.f32\t%y1, %y0"},
 
   /* Floating point coprocessor (VFP) instructions.  */
   {FPU_VFP_EXT_V1xD, 0x0ee00a10, 0x0fff0fff, "vmsr%c\tfpsid, %12-15r"},
@@ -330,14 +330,14 @@ static const struct opcode32 coprocessor_opcodes[] =
   {FPU_VFP_EXT_V1, 0x0eb80b40, 0x0fbf0f50, "vcvt%c.f64.%7?su32\t%z1, %y0"},
   {FPU_VFP_EXT_V1xD, 0x0eb40a40, 0x0fbf0f50, "vcmp%7'e%c.f32\t%y1, %y0"},
   {FPU_VFP_EXT_V1, 0x0eb40b40, 0x0fbf0f50, "vcmp%7'e%c.f64\t%z1, %z0"},
-  {FPU_VFP_EXT_V3, 0x0eba0a40, 0x0fbe0f50, "vcvt%c.f32.%16?us%7?31%7?26\t%y1, %y1, #%5,0-3k"},
+  {FPU_VFP_EXT_V3xD, 0x0eba0a40, 0x0fbe0f50, "vcvt%c.f32.%16?us%7?31%7?26\t%y1, %y1, #%5,0-3k"},
   {FPU_VFP_EXT_V3, 0x0eba0b40, 0x0fbe0f50, "vcvt%c.f64.%16?us%7?31%7?26\t%z1, %z1, #%5,0-3k"},
   {FPU_VFP_EXT_V1xD, 0x0ebc0a40, 0x0fbe0f50, "vcvt%7`r%c.%16?su32.f32\t%y1, %y0"},
   {FPU_VFP_EXT_V1, 0x0ebc0b40, 0x0fbe0f50, "vcvt%7`r%c.%16?su32.f64\t%y1, %z0"},
-  {FPU_VFP_EXT_V3, 0x0ebe0a40, 0x0fbe0f50, "vcvt%c.%16?us%7?31%7?26.f32\t%y1, %y1, #%5,0-3k"},
+  {FPU_VFP_EXT_V3xD, 0x0ebe0a40, 0x0fbe0f50, "vcvt%c.%16?us%7?31%7?26.f32\t%y1, %y1, #%5,0-3k"},
   {FPU_VFP_EXT_V3, 0x0ebe0b40, 0x0fbe0f50, "vcvt%c.%16?us%7?31%7?26.f64\t%z1, %z1, #%5,0-3k"},
   {FPU_VFP_EXT_V1, 0x0c500b10, 0x0fb00ff0, "vmov%c\t%12-15r, %16-19r, %z0"},
-  {FPU_VFP_EXT_V3, 0x0eb00a00, 0x0fb00ff0, "vmov%c.f32\t%y1, #%0-3,16-19d"},
+  {FPU_VFP_EXT_V3xD, 0x0eb00a00, 0x0fb00ff0, "vmov%c.f32\t%y1, #%0-3,16-19d"},
   {FPU_VFP_EXT_V3, 0x0eb00b00, 0x0fb00ff0, "vmov%c.f64\t%z1, #%0-3,16-19d"},
   {FPU_VFP_EXT_V2, 0x0c400a10, 0x0ff00fd0, "vmov%c\t%y4, %12-15r, %16-19r"},
   {FPU_VFP_EXT_V2, 0x0c400b10, 0x0ff00fd0, "vmov%c\t%z0, %12-15r, %16-19r"},
@@ -447,6 +447,16 @@ static const struct opcode32 coprocessor_opcodes[] =
   {ARM_CEXT_MAVERICK, 0x0e200600, 0x0ff00f10, "cfmadda32%c\tmvax%5-7d, mvax%12-15d, mvfx%16-19d, mvfx%0-3d"},
   {ARM_CEXT_MAVERICK, 0x0e300600, 0x0ff00f10, "cfmsuba32%c\tmvax%5-7d, mvax%12-15d, mvfx%16-19d, mvfx%0-3d"},
 
+  /* VFP Fused multiply add instructions.  */
+  {FPU_VFP_EXT_FMA, 0x0ea00a00, 0x0fb00f50, "vfma%c.f32\t%y1, %y2, %y0"},
+  {FPU_VFP_EXT_FMA, 0x0ea00b00, 0x0fb00f50, "vfma%c.f64\t%z1, %z2, %z0"},
+  {FPU_VFP_EXT_FMA, 0x0ea00a40, 0x0fb00f50, "vfms%c.f32\t%y1, %y2, %y0"},
+  {FPU_VFP_EXT_FMA, 0x0ea00b40, 0x0fb00f50, "vfms%c.f64\t%z1, %z2, %z0"},
+  {FPU_VFP_EXT_FMA, 0x0e900a40, 0x0fb00f50, "vfnma%c.f32\t%y1, %y2, %y0"},
+  {FPU_VFP_EXT_FMA, 0x0e900b40, 0x0fb00f50, "vfnma%c.f64\t%z1, %z2, %z0"},
+  {FPU_VFP_EXT_FMA, 0x0e900a00, 0x0fb00f50, "vfnms%c.f32\t%y1, %y2, %y0"},
+  {FPU_VFP_EXT_FMA, 0x0e900b00, 0x0fb00f50, "vfnms%c.f64\t%z1, %z2, %z0"},
+
   /* Generic coprocessor instructions.  */
   { 0, SENTINEL_GENERIC_START, 0, "" },
   {ARM_EXT_V5E, 0x0c400000, 0x0ff00000, "mcrr%c\t%8-11d, %4-7d, %12-15r, %16-19r, cr%0-3d"},
@@ -517,8 +527,12 @@ static const struct opcode32 neon_opcodes[] =
   {FPU_NEON_EXT_V1, 0xf3b00840, 0xffb00c50, "vtbx%c.8\t%12-15,22D, %F, %0-3,5D"},
   
   /* Half-precision conversions.  */
-  {FPU_NEON_FP16,   0xf3b60600, 0xffbf0fd0, "vcvt%c.f16.f32\t%12-15,22D, %0-3,5Q"},
-  {FPU_NEON_FP16,   0xf3b60700, 0xffbf0fd0, "vcvt%c.f32.f16\t%12-15,22Q, %0-3,5D"},
+  {FPU_VFP_EXT_FP16, 0xf3b60600, 0xffbf0fd0, "vcvt%c.f16.f32\t%12-15,22D, %0-3,5Q"},
+  {FPU_VFP_EXT_FP16, 0xf3b60700, 0xffbf0fd0, "vcvt%c.f32.f16\t%12-15,22Q, %0-3,5D"},
+
+  /* NEON fused multiply add instructions.  */
+  {FPU_NEON_EXT_FMA, 0xf2000c10, 0xffa00f10, "vfma%c.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
+  {FPU_NEON_EXT_FMA, 0xf2200c10, 0xffa00f10, "vfms%c.f%20U0\t%12-15,22R, %16-19,7R, %0-3,5R"},
 
   /* Two registers, miscellaneous.  */
   {FPU_NEON_EXT_V1, 0xf2880a10, 0xfebf0fd0, "vmovl%c.%24?us8\t%12-15,22Q, %0-3,5D"},
