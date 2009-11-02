@@ -1,3 +1,8 @@
+2009-11-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elfread.c (elf_symfile_segments): Do not warn about
+	uninitialized sections outside of load segments.
+
 2009-11-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* symfile.c (build_id_to_debug_filename): New variable debugdir.  Move

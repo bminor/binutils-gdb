@@ -114,7 +114,17 @@ elf_symfile_segments (bfd *abfd)
 	    break;
 	  }
 
-      if (bfd_get_section_size (sect) > 0 && j == num_segments)
+      /* We should have found a segment for every non-empty section.
+	 If we haven't, we will not relocate this section by any
+	 offsets we apply to the segments.  As an exception, do not
+	 warn about SHT_NOBITS sections; in normal ELF execution
+	 environments, SHT_NOBITS means zero-initialized and belongs
+	 in a segment, but in no-OS environments some tools (e.g. ARM
+	 RealView) use SHT_NOBITS for uninitialized data.  Since it is
+	 uninitialized, it doesn't need a program header.  Such
+	 binaries are not relocatable.  */
+      if (bfd_get_section_size (sect) > 0 && j == num_segments
+	  && (bfd_get_section_flags (abfd, sect) & SEC_LOAD) != 0)
 	warning (_("Loadable segment \"%s\" outside of ELF segments"),
 		 bfd_section_name (abfd, sect));
     }
