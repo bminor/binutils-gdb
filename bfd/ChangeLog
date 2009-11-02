@@ -1,3 +1,8 @@
+2009-11-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (elf_link_add_object_symbols): Don't force debug
+	symbols local.
+
 2009-10-29  Johan Kristell  <johankri@axis.com>
 
 	* elf32-cris.c (cris_elf_plt_sym_val): New function.

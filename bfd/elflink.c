@@ -4373,7 +4373,6 @@ error_free_dyn:
 	  if (definition && (sec->flags & SEC_DEBUGGING) && !info->relocatable)
 	    {
 	      /* We don't want to make debug symbol dynamic.  */
-	      (*bed->elf_backend_hide_symbol) (info, h, TRUE);
 	      dynsym = FALSE;
 	    }
 
