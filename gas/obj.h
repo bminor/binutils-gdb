@@ -2,7 +2,7 @@
    format backends.
 
    Copyright 1987, 1990, 1991, 1992, 1993, 1995, 1996, 1997, 1999, 2000,
-   2002, 2003, 2004, 2005, 2007 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005, 2007, 2009 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -71,6 +71,7 @@ struct format_ops {
 
   void (*read_begin_hook) (void);
   void (*symbol_new_hook) (symbolS *);
+  void (*symbol_clone_hook) (symbolS *, symbolS *);
 };
 
 extern const struct format_ops elf_format_ops;
