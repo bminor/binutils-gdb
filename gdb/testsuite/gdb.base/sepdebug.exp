@@ -952,6 +952,23 @@ set debugfile "${objdir}/${subdir}/${testfile}.debug"
 test_different_dir debuglink "${objdir}/${subdir}" 0
 
 
+# Test CRC mismatch is reported.
+
+if {[build_executable sepdebug.exp sepdebug2 sepdebug2.c debug] != -1
+    && ![gdb_gnu_strip_debug ${objdir}/${subdir}/sepdebug2]} {
+
+    remote_exec build "cp ${debugfile} ${objdir}/${subdir}/.debug/sepdebug2.debug"
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+
+    set escapedobjdirsubdir [string_to_regexp ${objdir}/${subdir}]
+
+    gdb_test "file ${objdir}/${subdir}/sepdebug2" "warning: the debug information found in \"${escapedobjdirsubdir}/\\.debug/sepdebug2\\.debug\" does not match \"${escapedobjdirsubdir}/sepdebug2\" \\(CRC mismatch\\)\\..*\\(no debugging symbols found\\).*" "CRC mismatch is reported"
+}
+
+
 # NT_GNU_BUILD_ID / .note.gnu.build-id test:
 
 set build_id_debug_filename [build_id_debug_filename_get $binfile]

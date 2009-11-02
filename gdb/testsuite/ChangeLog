@@ -1,3 +1,8 @@
+2009-11-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/sepdebug.exp (CRC mismatch is reported): New test.
+	* gdb.base/sepdebug2.c: New file.
+
 2009-10-31  Sergio Durigan Junior <sergiodj@linux.vnet.ibm.com>
 
 	* gdb.base/catch-syscall.exp: Adapt the testcase in order to accept

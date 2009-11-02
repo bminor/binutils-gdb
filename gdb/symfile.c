@@ -1283,7 +1283,8 @@ get_debug_link_info (struct objfile *objfile, unsigned long *crc32_out)
 }
 
 static int
-separate_debug_file_exists (const char *name, unsigned long crc)
+separate_debug_file_exists (const char *name, unsigned long crc,
+			    const char *parent_name)
 {
   unsigned long file_crc = 0;
   bfd *abfd;
@@ -1303,7 +1304,15 @@ separate_debug_file_exists (const char *name, unsigned long crc)
 
   bfd_close (abfd);
 
-  return crc == file_crc;
+  if (crc != file_crc)
+    {
+      warning (_("the debug information found in \"%s\""
+		 " does not match \"%s\" (CRC mismatch).\n"),
+	       name, parent_name);
+      return 0;
+    }
+
+  return 1;
 }
 
 char *debug_file_directory = NULL;
@@ -1355,6 +1364,8 @@ find_separate_debug_file (struct objfile *objfile)
   basename = get_debug_link_info (objfile, &crc32);
 
   if (basename == NULL)
+    /* There's no separate debug info, hence there's no way we could
+       load it => no warning.  */
     return NULL;
 
   dir = xstrdup (objfile->name);
@@ -1388,7 +1399,7 @@ find_separate_debug_file (struct objfile *objfile)
   strcpy (debugfile, dir);
   strcat (debugfile, basename);
 
-  if (separate_debug_file_exists (debugfile, crc32))
+  if (separate_debug_file_exists (debugfile, crc32, objfile->name))
     {
       xfree (basename);
       xfree (dir);
@@ -1402,7 +1413,7 @@ find_separate_debug_file (struct objfile *objfile)
   strcat (debugfile, "/");
   strcat (debugfile, basename);
 
-  if (separate_debug_file_exists (debugfile, crc32))
+  if (separate_debug_file_exists (debugfile, crc32, objfile->name))
     {
       xfree (basename);
       xfree (dir);
@@ -1416,7 +1427,7 @@ find_separate_debug_file (struct objfile *objfile)
   strcat (debugfile, dir);
   strcat (debugfile, basename);
 
-  if (separate_debug_file_exists (debugfile, crc32))
+  if (separate_debug_file_exists (debugfile, crc32, objfile->name))
     {
       xfree (basename);
       xfree (dir);
@@ -1435,7 +1446,7 @@ find_separate_debug_file (struct objfile *objfile)
       strcat (debugfile, "/");
       strcat (debugfile, basename);
 
-      if (separate_debug_file_exists (debugfile, crc32))
+      if (separate_debug_file_exists (debugfile, crc32, objfile->name))
 	{
 	  xfree (canon_name);
 	  xfree (basename);
