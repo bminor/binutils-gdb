@@ -822,30 +822,43 @@ enable_break (void)
      may have changed since the last time we ran the program.  */
   remove_solib_event_breakpoints ();
 
+  if (symfile_objfile == NULL)
+    {
+      if (solib_frv_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "enable_break: No symbol file found.\n");
+      return 0;
+    }
+
+  if (!symfile_objfile->ei.entry_point_p)
+    {
+      if (solib_frv_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "enable_break: Symbol file has no entry point.\n");
+      return 0;
+    }
+
   /* Check for the presence of a .interp section.  If there is no
      such section, the executable is statically linked.  */
 
   interp_sect = bfd_get_section_by_name (exec_bfd, ".interp");
 
-  if (interp_sect)
-    {
-      enable_break1_done = 1;
-      create_solib_event_breakpoint (target_gdbarch,
-				     symfile_objfile->ei.entry_point);
-
-      if (solib_frv_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "enable_break: solib event breakpoint placed at entry point: %s\n",
-			    hex_string_custom
-			      (symfile_objfile->ei.entry_point, 8));
-    }
-  else
+  if (interp_sect == NULL)
     {
       if (solib_frv_debug)
 	fprintf_unfiltered (gdb_stdlog,
-	                    "enable_break: No .interp section found.\n");
+			    "enable_break: No .interp section found.\n");
+      return 0;
     }
 
+  enable_break1_done = 1;
+  create_solib_event_breakpoint (target_gdbarch,
+				 symfile_objfile->ei.entry_point);
+
+  if (solib_frv_debug)
+    fprintf_unfiltered (gdb_stdlog,
+			"enable_break: solib event breakpoint placed at entry point: %s\n",
+			hex_string_custom (symfile_objfile->ei.entry_point, 8));
   return 1;
 }
 

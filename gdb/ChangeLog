@@ -1,3 +1,22 @@
+2009-11-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Remove INVALID_ENTRY_POINT.
+	* frame.c (inside_entry_func): New variable entry_point.  Return 0 if
+	the entry point is not known.
+	* solib-irix.c (enable_break): Likewise.
+	* objfiles.c (init_entry_point_info): Stop using INVALID_ENTRY_POINT.
+	Initialize EI.ENTRY_POINT_P.
+	(entry_point_address): Rename to ...
+	(entry_point_address_query): ... a new function.  Use EI.ENTRY_POINT_P.
+	(entry_point_address): New function.
+	(objfile_relocate): Use EI.ENTRY_POINT_P.
+	* objfiles.h (struct entry_info): Simplify entry_point comment.  New
+	field entry_point_p.
+	(INVALID_ENTRY_POINT): Remove.
+	(entry_point_address_query): New prototype.
+	* solib-frv.c (enable_break): Check for NULL SYMFILE_OBJFILE and its
+	EI.ENTRY_POINT_P.  Return 0 if ".interp" is not found.
+
 2009-11-01  Michael Snyder  <msnyder@vmware.com>
 
 	* NEWS (New Commands): Mention record save/restore.

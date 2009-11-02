@@ -294,29 +294,34 @@ init_entry_point_info (struct objfile *objfile)
       /* Executable file -- record its entry point so we'll recognize
          the startup file because it contains the entry point.  */
       objfile->ei.entry_point = bfd_get_start_address (objfile->obfd);
+      objfile->ei.entry_point_p = 1;
     }
   else if (bfd_get_file_flags (objfile->obfd) & DYNAMIC
 	   && bfd_get_start_address (objfile->obfd) != 0)
-    /* Some shared libraries may have entry points set and be
-       runnable.  There's no clear way to indicate this, so just check
-       for values other than zero.  */
-    objfile->ei.entry_point = bfd_get_start_address (objfile->obfd);    
+    {
+      /* Some shared libraries may have entry points set and be
+	 runnable.  There's no clear way to indicate this, so just check
+	 for values other than zero.  */
+      objfile->ei.entry_point = bfd_get_start_address (objfile->obfd);    
+      objfile->ei.entry_point_p = 1;
+    }
   else
     {
       /* Examination of non-executable.o files.  Short-circuit this stuff.  */
-      objfile->ei.entry_point = INVALID_ENTRY_POINT;
+      objfile->ei.entry_point_p = 0;
     }
 }
 
-/* Get current entry point address.  */
+/* If there is a valid and known entry point, function fills *ENTRY_P with it
+   and returns non-zero; otherwise it returns zero.  */
 
-CORE_ADDR
-entry_point_address (void)
+int
+entry_point_address_query (CORE_ADDR *entry_p)
 {
   struct gdbarch *gdbarch;
   CORE_ADDR entry_point;
 
-  if (symfile_objfile == NULL)
+  if (symfile_objfile == NULL || !symfile_objfile->ei.entry_point_p)
     return 0;
 
   gdbarch = get_objfile_arch (symfile_objfile);
@@ -332,7 +337,21 @@ entry_point_address (void)
      symbol table.  */
   entry_point = gdbarch_addr_bits_remove (gdbarch, entry_point);
 
-  return entry_point;
+  *entry_p = entry_point;
+  return 1;
+}
+
+/* Get current entry point address.  Call error if it is not known.  */
+
+CORE_ADDR
+entry_point_address (void)
+{
+  CORE_ADDR retval;
+
+  if (!entry_point_address_query (&retval))
+    error (_("Entry point address is not known."));
+
+  return retval;
 }
 
 /* Create the terminating entry of OBJFILE's minimal symbol table.
@@ -702,7 +721,7 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
      to be out of order.  */
   msymbols_sort (objfile);
 
-  if (objfile->ei.entry_point != ~(CORE_ADDR) 0)
+  if (objfile->ei.entry_point_p)
     {
       /* Relocate ei.entry_point with its section offset, use SECT_OFF_TEXT
 	 only as a fallback.  */

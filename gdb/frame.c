@@ -1650,7 +1650,12 @@ inside_main_func (struct frame_info *this_frame)
 static int
 inside_entry_func (struct frame_info *this_frame)
 {
-  return (get_frame_func (this_frame) == entry_point_address ());
+  CORE_ADDR entry_point;
+
+  if (!entry_point_address_query (&entry_point))
+    return 0;
+
+  return get_frame_func (this_frame) == entry_point;
 }
 
 /* Return a structure containing various interesting information about

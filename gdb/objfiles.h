@@ -100,15 +100,11 @@ struct objfile_data;
 
 struct entry_info
   {
-
-    /* The value we should use for this objects entry point.
-       The illegal/unknown value needs to be something other than 0, ~0
-       for instance, which is much less likely than 0. */
-
+    /* The relocated value we should use for this objfile entry point.  */
     CORE_ADDR entry_point;
 
-#define INVALID_ENTRY_POINT (~0)	/* ~0 will not be in any file, we hope.  */
-
+    /* Set to 1 iff ENTRY_POINT contains a valid value.  */
+    unsigned entry_point_p : 1;
   };
 
 /* Sections in an objfile.  The section offsets are stored in the
@@ -446,6 +442,8 @@ extern struct objfile *allocate_objfile (bfd *, int);
 extern struct gdbarch *get_objfile_arch (struct objfile *);
 
 extern void init_entry_point_info (struct objfile *);
+
+extern int entry_point_address_query (CORE_ADDR *entry_p);
 
 extern CORE_ADDR entry_point_address (void);
 

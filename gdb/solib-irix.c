@@ -369,11 +369,13 @@ enable_break (void)
     {
       struct frame_info *frame = get_current_frame ();
       struct address_space *aspace = get_frame_address_space (frame);
+      CORE_ADDR entry_point;
 
-      base_breakpoint
-	= deprecated_insert_raw_breakpoint (target_gdbarch,
-					    aspace,
-					    entry_point_address ());
+      if (!entry_point_address_query (&entry_point))
+	return 0;
+
+      base_breakpoint = deprecated_insert_raw_breakpoint (target_gdbarch,
+							  aspace, entry_point);
 
       if (base_breakpoint != NULL)
 	return 1;
