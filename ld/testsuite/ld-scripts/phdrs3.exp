@@ -30,7 +30,7 @@ set testname "PHDRS headers"
 
 set old_ldflags $LDFLAGS
 if { [istarget spu*-*-*] } {
-    set LDFLAGS "$LDFLAGS --no-overlays"
+    set LDFLAGS "$LDFLAGS --no-overlays --local-store 0:0"
 }
 
 run_dump_test "phdrs3"

@@ -1,3 +1,7 @@
+2009-11-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-scripts/phdrs3.exp (LDFLAGS): Add "--local-store 0:0" for SPU.
+
 2009-10-30  Mark Mitchell  <mark@codesourcery.com>
 
 	* ld-elfcomm/elfcomm.exp: Compile with -fcommon.
@@ -383,7 +387,7 @@
 
 2009-09-08  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 
-        * ld-elf/merge.d: xfail cr16-*-*.
+	* ld-elf/merge.d: xfail cr16-*-*.
 
 2009-09-08  Alan Modra  <amodra@bigpond.net.au>
 
