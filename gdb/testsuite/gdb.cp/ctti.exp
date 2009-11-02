@@ -112,7 +112,7 @@ gdb_test_multiple "print add<float>(2.25,2.25)" "print add<float>(2.25,2.25)" {
 }
 
 gdb_test_multiple "print add<unsigned char>('A','A')" "print add<unsigned char>('A','A')" {
-    -re "\\$\[0-9\]+ = -126 .*\r\n$gdb_prompt $" {
+    -re "\\$\[0-9\]+ = 130 .*\r\n$gdb_prompt $" {
 	pass "print add<unsigned char>('A','A')"
     }
     -re "No symbol \"add<unsigned char>\" in current context.\r\n$gdb_prompt $" {
@@ -142,7 +142,7 @@ gdb_test_multiple "print add2<float>(2.25,2.25)" "print add2<float>(2.25,2.25)" 
 }
 
 gdb_test_multiple "print add2<unsigned char>('A','A')" "print add2<unsigned char>('A','A')" {
-    -re "\\$\[0-9]+ = -126 .*$gdb_prompt $" {
+    -re "\\$\[0-9]+ = 130 .*$gdb_prompt $" {
 	pass "print add2<unsigned char>('A','A')"
     }
     -re "No symbol \"add2<unsigned char>\" in current context.\r\n$gdb_prompt $" {
@@ -172,7 +172,7 @@ gdb_test_multiple "print add3<float>(2.25,2.25)" "print add3<float>(2.25,2.25)" 
 }
 
 gdb_test_multiple "print add3<unsigned char>('A','A')" "print add3<unsigned char>('A','A')" {
-    -re "\\$\[0-9]+ = -126 .*$gdb_prompt $" {
+    -re "\\$\[0-9]+ = 130 .*$gdb_prompt $" {
 	pass "print add3<unsigned char>('A','A')"
     }
     -re "No symbol \"add3<unsigned char>\" in current context.\r\n$gdb_prompt $" {
@@ -202,7 +202,7 @@ gdb_test_multiple "print add4<float>(2.25,2.25)" "print add4<float>(2.25,2.25)" 
 }
 
 gdb_test_multiple "print add4<unsigned char>('A','A')" "print add4<unsigned char>('A','A')" {
-    -re "\\$\[0-9]+ = -126 .*$gdb_prompt $" {
+    -re "\\$\[0-9]+ = 130 .*$gdb_prompt $" {
 	pass "print add4<unsigned char>('A','A')"
     }
     -re "No symbol \"add4<unsigned char>\" in current context.\r\n$gdb_prompt $" {
