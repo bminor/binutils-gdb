@@ -1506,6 +1506,16 @@ ecoff_symbol_new_hook (symbolS *symbolP)
   obj->ecoff_symbol = NULL;
   obj->ecoff_extern_size = 0;
 }
+
+void
+ecoff_symbol_clone_hook (symbolS *newsymP, symbolS *orgsymP)
+{
+  OBJ_SYMFIELD_TYPE *n, *o;
+
+  n = symbol_get_obj (newsymP);
+  o = symbol_get_obj (orgsymP);
+  memcpy (n, o, sizeof *n);
+}
 
 /* Add a page to a varray object.  */
 

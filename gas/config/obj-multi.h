@@ -81,6 +81,11 @@
 	 ? (*this_format->symbol_new_hook) (S)		\
 	 : (void) 0)
 
+#define obj_symbol_clone_hook(N, O)			\
+	(this_format->symbol_clone_hook			\
+	 ? (*this_format->symbol_clone_hook) (N, O)	\
+	 : (void) 0)
+
 #define obj_sec_sym_ok_for_reloc(A)			\
 	(this_format->sec_sym_ok_for_reloc		\
 	 ? (*this_format->sec_sym_ok_for_reloc) (A)	\

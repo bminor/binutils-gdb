@@ -1,5 +1,17 @@
 2009-11-02  Alan Modra  <amodra@bigpond.net.au>
 
+	* ecoff.c (ecoff_symbol_clone_hook): New function.
+	* ecoff.h (ecoff_symbol_clone_hook): Declare.
+	* obj.h (struct format_ops): Add symbol_clone_hook.
+	* config/obj-aout.c (aout_format_ops): Init new field.
+	* config/obj-coff.c (coff_format_ops): Likewise.
+	* config/obj-ecoff.c (ecoff_format_ops): Likewise.
+	* config/obj-elf.c (elf_format_ops): Likewise.
+	* config/obj-ecoff.h (obj_symbol_clone_hook): Define.
+	* config/obj-multi.h (obj_symbol_clone_hook): Define.
+
+2009-11-02  Alan Modra  <amodra@bigpond.net.au>
+
 	* messages.c (as_fatal): Apply 2001-01-15 change and followup
 	to second copy of function.
 

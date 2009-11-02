@@ -314,5 +314,6 @@ const struct format_ops ecoff_format_ops =
   ecoff_pop_insert,
   ecoff_set_ext,
   ecoff_read_begin_hook,
-  ecoff_symbol_new_hook
+  ecoff_symbol_new_hook,
+  ecoff_symbol_clone_hook
 };

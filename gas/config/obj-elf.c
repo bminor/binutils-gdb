@@ -2424,5 +2424,6 @@ const struct format_ops elf_format_ops =
   0,	/* ecoff_set_ext */
 #endif
   elf_obj_read_begin_hook,
-  elf_obj_symbol_new_hook
+  elf_obj_symbol_new_hook,
+  0
 };
