@@ -905,20 +905,18 @@ thread_db_load (void)
 }
 
 static void
-disable_thread_event_reporting (void)
+disable_thread_event_reporting (struct thread_db_info *info)
 {
-  td_thr_events_t events;
-  struct thread_db_info *info;
+  if (info->td_ta_set_event_p != NULL)
+    {
+      td_thr_events_t events;
 
-  info = get_thread_db_info (GET_PID (inferior_ptid));
+      /* Set the process wide mask saying we aren't interested in any
+	 events anymore.  */
+      td_event_emptyset (&events);
+      info->td_ta_set_event_p (info->thread_agent, &events);
+    }
 
-  /* Set the process wide mask saying we aren't interested in any
-     events anymore.  */
-  td_event_emptyset (&events);
-  info->td_ta_set_event_p (info->thread_agent, &events);
-
-  /* Delete thread event breakpoints, if any.  */
-  remove_thread_event_breakpoints ();
   info->td_create_bp_addr = 0;
   info->td_death_bp_addr = 0;
 }
@@ -1088,7 +1086,7 @@ thread_db_detach (struct target_ops *ops, char *args, int from_tty)
 
   if (info)
     {
-      disable_thread_event_reporting ();
+      disable_thread_event_reporting (info);
 
       /* Delete the old thread event breakpoints.  Note that unlike
 	 when mourning, we can remove them here because there's still

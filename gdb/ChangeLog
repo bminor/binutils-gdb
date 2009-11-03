@@ -1,3 +1,7 @@
+2009-11-03  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* linux-thread-db.c (disable_thread_event_reporting): Adjust.
+	
 2009-11-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* MAINTAINERS (Responsible Maintainers): Add Tristan Gingold as
