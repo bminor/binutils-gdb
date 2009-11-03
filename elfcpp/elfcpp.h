@@ -17,7 +17,7 @@
 // combinations without any restriction coming from the use of this
 // file.  (The Library Public License restrictions do apply in other
 // respects; for example, they cover modification of the file, and
-/// distribution when not linked into a combined executable.)
+// distribution when not linked into a combined executable.)
 
 // This program is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -390,7 +390,7 @@ enum SHT
 
   // Link editor is to sort the entries in this section based on the
   // address specified in the associated symbol table entry.
-  SHT_ORDERED = 0x7fffffff,
+  SHT_ORDERED = 0x7fffffff
 };
 
 // The valid bit flags found in the Shdr sh_flags field.
@@ -514,7 +514,7 @@ enum STT
 
   // ARM: a THUMB function.  This is not defined in ARM ELF Specification but
   // used by the GNU tool-chain.
-  STT_ARM_TFUNC = 13,
+  STT_ARM_TFUNC = 13
 };
 
 inline STB
@@ -755,7 +755,7 @@ enum DF_1
   DF_1_INTERPOSE = 0x400,
   DF_1_NODEFLIB = 0x800,
   DF_1_NODUMP = 0x1000,
-  DF_1_CONLFAT = 0x2000,
+  DF_1_CONLFAT = 0x2000
 };
 
 // Version numbers which appear in the vd_version field of a Verdef

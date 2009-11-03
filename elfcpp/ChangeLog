@@ -1,3 +1,7 @@
+2009-11-03  Ian Lance Taylor  <iant@google.com>
+
+	* elfcpp.h: Remove trailing commas from enum definitions.
+
 2009-10-30  Doug Kwan  <dougkwan@google.com>
 
 	* arm.h (EF_ARM_BE8, EF_ARM_EABIMASK, EF_ARM_EABI_UNKNOWN,
