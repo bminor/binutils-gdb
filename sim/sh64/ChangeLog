@@ -1,3 +1,10 @@
+2009-11-03  Doug Evans  <dje@sebabeach.org>
+
+	* Makefile.in (SIM_EXTRA_DEPS): Add sh-desc.h sh-opc.h.
+	(sh-desc.o): New rule.
+	(sh-desc.h,sh-desc.c,sh-opc.h): Replaces rule for desc.h.
+	(all generated file rules): Specify generated file with full path.
+
 2009-10-24  Doug Evans  <dje@sebabeach.org>
 
 	* sh-desc.h: Regenerate.
