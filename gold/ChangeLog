@@ -1,5 +1,11 @@
 2009-11-03  Ian Lance Taylor  <iant@google.com>
 
+	PR 10893
+	* defstd.cc (in_section): Add entries for __rel_iplt_start,
+	__rel_iplt_end, __rela_iplt_start, __rela_iplt_end, and __stack.
+
+2009-11-03  Ian Lance Taylor  <iant@google.com>
+
 	PR 10895
 	* po/Make-in ($(srcdir)/$(PACKAGE).pot): Pass -C and
 	--msgid-bugs-address.
@@ -287,7 +293,7 @@
 2009-10-15  Ian Lance Taylor  <iant@google.com>
 
 	* script.cc (Script_options::add_symbol_assignment): Always add a
-	dot assginment to script_sections_.
+	dot assignment to script_sections_.
 	* script-sections.cc (Script_sections::add_dot_assignment):
 	Initialize if necessary.
 
