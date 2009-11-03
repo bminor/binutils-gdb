@@ -1,3 +1,11 @@
+2009-11-03  Ian Lance Taylor  <iant@google.com>
+
+	PR 10895
+	* po/Make-in ($(srcdir)/$(PACKAGE).pot): Pass -C and
+	--msgid-bugs-address.
+	(install-pdf): New target.
+	(install-data_yes): Look up one directory to find mkinstalldirs.
+
 2009-10-16  Doug Kwan  <dougkwan@google.com>
 
 	* output.cc (Output_segment::set_section_list_address): Cast
