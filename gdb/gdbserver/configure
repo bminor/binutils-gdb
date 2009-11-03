@@ -3973,6 +3973,40 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
+# Check for various supplementary target information (beyond the
+# triplet) which might affect the choices in configure.srv.
+case "${target}" in
+  i[34567]86-*-linux*)
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if building for x86-64" >&5
+$as_echo_n "checking if building for x86-64... " >&6; }
+if test "${gdb_cv_i386_is_x86_64+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  save_CPPFLAGS="$CPPFLAGS"
+                    CPPFLAGS="$CPPFLAGS $CFLAGS"
+                    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#if __x86_64__
+got it
+#endif
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "got it" >/dev/null 2>&1; then :
+  gdb_cv_i386_is_x86_64=yes
+else
+  gdb_cv_i386_is_x86_64=no
+fi
+rm -f conftest*
+
+                    CPPFLAGS="$save_CPPFLAGS"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_i386_is_x86_64" >&5
+$as_echo "$gdb_cv_i386_is_x86_64" >&6; }
+    ;;
+esac
+
 . ${srcdir}/configure.srv
 
 if test "${srv_mingwce}" = "yes"; then

@@ -73,6 +73,25 @@ ACX_BUGURL([http://www.gnu.org/software/gdb/bugs/])
 AC_DEFINE_UNQUOTED([PKGVERSION], ["$PKGVERSION"], [Additional package description])
 AC_DEFINE_UNQUOTED([REPORT_BUGS_TO], ["$REPORT_BUGS_TO"], [Bug reporting address])
 
+# Check for various supplementary target information (beyond the
+# triplet) which might affect the choices in configure.srv.
+case "${target}" in
+changequote(,)dnl
+  i[34567]86-*-linux*)
+changequote([,])dnl
+    AC_CACHE_CHECK([if building for x86-64], [gdb_cv_i386_is_x86_64],
+      	           [save_CPPFLAGS="$CPPFLAGS"
+                    CPPFLAGS="$CPPFLAGS $CFLAGS"
+                    AC_EGREP_CPP([got it], [
+#if __x86_64__
+got it
+#endif
+                 ], [gdb_cv_i386_is_x86_64=yes],
+                    [gdb_cv_i386_is_x86_64=no])
+                    CPPFLAGS="$save_CPPFLAGS"])
+    ;;
+esac
+
 . ${srcdir}/configure.srv
 
 if test "${srv_mingwce}" = "yes"; then
