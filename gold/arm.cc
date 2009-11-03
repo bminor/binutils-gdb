@@ -1143,7 +1143,8 @@ class Target_arm : public Sized_target<32, big_endian>
   Target_arm()
     : Sized_target<32, big_endian>(&arm_info),
       got_(NULL), plt_(NULL), got_plt_(NULL), rel_dyn_(NULL),
-      copy_relocs_(elfcpp::R_ARM_COPY), dynbss_(NULL),
+      copy_relocs_(elfcpp::R_ARM_COPY), dynbss_(NULL), stub_tables_(),
+      stub_factory_(Stub_factory::get_instance()),
       may_use_blx_(true), should_force_pic_veneer_(false)
   { }
 
@@ -1281,6 +1282,28 @@ class Target_arm : public Sized_target<32, big_endian>
   static unsigned int
   get_real_reloc_type (unsigned int r_type);
 
+  //
+  // Methods to support stub-generations.
+  //
+  
+  // Return the stub factory
+  const Stub_factory&
+  stub_factory() const
+  { return this->stub_factory_; }
+
+  // Make a new Arm_input_section object.
+  Arm_input_section<big_endian>*
+  new_arm_input_section(Relobj*, unsigned int);
+
+  // Find the Arm_input_section object corresponding to the SHNDX-th input
+  // section of RELOBJ.
+  Arm_input_section<big_endian>*
+  find_arm_input_section(Relobj* relobj, unsigned int shndx) const;
+
+  // Make a new Stub_table
+  Stub_table<big_endian>*
+  new_stub_table(Arm_input_section<big_endian>*);
+
   // Get the default ARM target.
   static const Target_arm<big_endian>&
   default_target()
@@ -1289,6 +1312,10 @@ class Target_arm : public Sized_target<32, big_endian>
 		&& parameters->target().is_big_endian() == big_endian);
     return static_cast<const Target_arm<big_endian>&>(parameters->target());
   }
+
+  // Whether relocation type uses LSB to distinguish THUMB addresses.
+  static bool
+  reloc_uses_thumb_bit(unsigned int r_type);
 
  protected:
   void
@@ -1502,6 +1529,15 @@ class Target_arm : public Sized_target<32, big_endian>
     GOT_TYPE_STANDARD = 0	// GOT entry for a regular symbol
   };
 
+  typedef typename std::vector<Stub_table<big_endian>*> Stub_table_list;
+
+  // Map input section to Arm_input_section.
+  typedef Unordered_map<Input_section_specifier,
+			Arm_input_section<big_endian>*,
+			Input_section_specifier::hash,
+			Input_section_specifier::equal_to>
+	  Arm_input_section_map;
+    
   // The GOT section.
   Output_data_got<32, big_endian>* got_;
   // The PLT section.
@@ -1514,6 +1550,10 @@ class Target_arm : public Sized_target<32, big_endian>
   Copy_relocs<elfcpp::SHT_REL, 32, big_endian> copy_relocs_;
   // Space for variables copied with a COPY reloc.
   Output_data_space* dynbss_;
+  // Vector of Stub_tables created.
+  Stub_table_list stub_tables_;
+  // Stub factory.
+  const Stub_factory &stub_factory_;
   // Whether we can use BLX.
   bool may_use_blx_;
   // Whether we force PIC branch veneers.
@@ -4966,6 +5006,113 @@ Target_arm<big_endian>::do_make_elf_object(
                  name.c_str(), et);
       return NULL;
     }
+}
+
+// Return whether a relocation type used the LSB to distinguish THUMB
+// addresses.
+template<bool big_endian>
+bool
+Target_arm<big_endian>::reloc_uses_thumb_bit(unsigned int r_type)
+{
+  switch (r_type)
+    {
+    case elfcpp::R_ARM_PC24:
+    case elfcpp::R_ARM_ABS32:
+    case elfcpp::R_ARM_REL32:
+    case elfcpp::R_ARM_SBREL32:
+    case elfcpp::R_ARM_THM_CALL:
+    case elfcpp::R_ARM_GLOB_DAT:
+    case elfcpp::R_ARM_JUMP_SLOT:
+    case elfcpp::R_ARM_GOTOFF32:
+    case elfcpp::R_ARM_PLT32:
+    case elfcpp::R_ARM_CALL:
+    case elfcpp::R_ARM_JUMP24:
+    case elfcpp::R_ARM_THM_JUMP24:
+    case elfcpp::R_ARM_SBREL31:
+    case elfcpp::R_ARM_PREL31:
+    case elfcpp::R_ARM_MOVW_ABS_NC:
+    case elfcpp::R_ARM_MOVW_PREL_NC:
+    case elfcpp::R_ARM_THM_MOVW_ABS_NC:
+    case elfcpp::R_ARM_THM_MOVW_PREL_NC:
+    case elfcpp::R_ARM_THM_JUMP19:
+    case elfcpp::R_ARM_THM_ALU_PREL_11_0:
+    case elfcpp::R_ARM_ALU_PC_G0_NC:
+    case elfcpp::R_ARM_ALU_PC_G0:
+    case elfcpp::R_ARM_ALU_PC_G1_NC:
+    case elfcpp::R_ARM_ALU_PC_G1:
+    case elfcpp::R_ARM_ALU_PC_G2:
+    case elfcpp::R_ARM_ALU_SB_G0_NC:
+    case elfcpp::R_ARM_ALU_SB_G0:
+    case elfcpp::R_ARM_ALU_SB_G1_NC:
+    case elfcpp::R_ARM_ALU_SB_G1:
+    case elfcpp::R_ARM_ALU_SB_G2:
+    case elfcpp::R_ARM_MOVW_BREL_NC:
+    case elfcpp::R_ARM_MOVW_BREL:
+    case elfcpp::R_ARM_THM_MOVW_BREL_NC:
+    case elfcpp::R_ARM_THM_MOVW_BREL:
+      return true;
+    default:
+      return false;
+    }
+}
+
+// Stub-generation methods for Target_arm.
+
+// Make a new Arm_input_section object.
+
+template<bool big_endian>
+Arm_input_section<big_endian>*
+Target_arm<big_endian>::new_arm_input_section(
+    Relobj* relobj,
+    unsigned int shndx)
+{
+  Input_section_specifier iss(relobj, shndx);
+
+  Arm_input_section<big_endian>* arm_input_section =
+    new Arm_input_section<big_endian>(relobj, shndx);
+  arm_input_section->init();
+
+  // Register new Arm_input_section in map for look-up.
+  std::pair<typename Arm_input_section_map::iterator, bool> ins =
+    this->arm_input_section_map_.insert(std::make_pair(iss, arm_input_section));
+
+  // Make sure that it we have not created another Arm_input_section
+  // for this input section already.
+  gold_assert(ins.second);
+
+  return arm_input_section; 
+}
+
+// Find the Arm_input_section object corresponding to the SHNDX-th input
+// section of RELOBJ.
+
+template<bool big_endian>
+Arm_input_section<big_endian>*
+Target_arm<big_endian>::find_arm_input_section(
+    Relobj* relobj,
+    unsigned int shndx) const
+{
+  Input_section_specifier iss(relobj, shndx);
+  typename Arm_input_section_map::const_iterator p =
+    this->arm_input_section_map_.find(iss);
+  return (p != this->arm_input_section_map_.end()) ? p->second : NULL;
+}
+
+// Make a new stub table.
+
+template<bool big_endian>
+Stub_table<big_endian>*
+Target_arm<big_endian>::new_stub_table(Arm_input_section<big_endian>* owner)
+{
+  Stub_table<big_endian>* stub_table =
+    new Stub_table<big_endian>(owner);
+  this->stub_tables_.push_back(stub_table);
+
+  stub_table->set_address(owner->address() + owner->data_size());
+  stub_table->set_file_offset(owner->offset() + owner->data_size());
+  stub_table->finalize_data_size();
+
+  return stub_table;
 }
 
 // The selector for arm object files.
