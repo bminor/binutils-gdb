@@ -73,11 +73,11 @@ Disassembly of section \.text:
 0[0-9a-f]+ <[^>]+> bf04      	itt	eq
 0[0-9a-f]+ <[^>]+> ee00 0a81 	(vmlaeq\.f32|fmacseq)	s0, s1, s2
 0[0-9a-f]+ <[^>]+> ee01 0b02 	(vmlaeq\.f64|fmacdeq)	d0, d1, d2
-0[0-9a-f]+ <[^>]+> ee10 0a81 	(vnmls\.f32|fmscs)	s0, s1, s2
-0[0-9a-f]+ <[^>]+> ee11 0b02 	(vnmls\.f64|fmscd)	d0, d1, d2
+0[0-9a-f]+ <[^>]+> ee00 0ac1 	(vmls\.f32|fmscs)	s0, s1, s2
+0[0-9a-f]+ <[^>]+> ee01 0b42 	(vmls\.f64|fmscd)	d0, d1, d2
 0[0-9a-f]+ <[^>]+> bf04      	itt	eq
-0[0-9a-f]+ <[^>]+> ee10 0a81 	(vnmlseq\.f32|fmscseq)	s0, s1, s2
-0[0-9a-f]+ <[^>]+> ee11 0b02 	(vnmlseq\.f64|fmscdeq)	d0, d1, d2
+0[0-9a-f]+ <[^>]+> ee00 0ac1 	(vmlseq\.f32|fmscseq)	s0, s1, s2
+0[0-9a-f]+ <[^>]+> ee01 0b42 	(vmlseq\.f64|fmscdeq)	d0, d1, d2
 0[0-9a-f]+ <[^>]+> ee30 0a81 	(vadd\.f32|fadds)	s0, s1, s2
 0[0-9a-f]+ <[^>]+> ee31 0b02 	(vadd\.f64|faddd)	d0, d1, d2
 0[0-9a-f]+ <[^>]+> bf04      	itt	eq

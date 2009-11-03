@@ -12144,14 +12144,14 @@ do_vfp_nsyn_mla_mls (enum neon_shape rs)
       if (is_mla)
         do_vfp_nsyn_opcode ("fmacs");
       else
-        do_vfp_nsyn_opcode ("fmscs");
+        do_vfp_nsyn_opcode ("fnmacs");
     }
   else
     {
       if (is_mla)
         do_vfp_nsyn_opcode ("fmacd");
       else
-        do_vfp_nsyn_opcode ("fmscd");
+        do_vfp_nsyn_opcode ("fnmacd");
     }
 }
 

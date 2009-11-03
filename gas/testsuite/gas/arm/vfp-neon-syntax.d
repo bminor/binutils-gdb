@@ -61,10 +61,10 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> ee010b02 	(vmla\.f64|fmacd)	d0, d1, d2
 0[0-9a-f]+ <[^>]+> 0e000a81 	(vmlaeq\.f32|fmacseq)	s0, s1, s2
 0[0-9a-f]+ <[^>]+> 0e010b02 	(vmlaeq\.f64|fmacdeq)	d0, d1, d2
-0[0-9a-f]+ <[^>]+> ee100a81 	(vnmls\.f32|fmscs)	s0, s1, s2
-0[0-9a-f]+ <[^>]+> ee110b02 	(vnmls\.f64|fmscd)	d0, d1, d2
-0[0-9a-f]+ <[^>]+> 0e100a81 	(vnmlseq\.f32|fmscseq)	s0, s1, s2
-0[0-9a-f]+ <[^>]+> 0e110b02 	(vnmlseq\.f64|fmscdeq)	d0, d1, d2
+0[0-9a-f]+ <[^>]+> ee000ac1 	(vmls\.f32|fmscs)	s0, s1, s2
+0[0-9a-f]+ <[^>]+> ee010b42 	(vmls\.f64|fmscd)	d0, d1, d2
+0[0-9a-f]+ <[^>]+> 0e000ac1 	(vmlseq\.f32|fmscseq)	s0, s1, s2
+0[0-9a-f]+ <[^>]+> 0e010b42 	(vmlseq\.f64|fmscdeq)	d0, d1, d2
 0[0-9a-f]+ <[^>]+> ee300a81 	(vadd\.f32|fadds)	s0, s1, s2
 0[0-9a-f]+ <[^>]+> ee310b02 	(vadd\.f64|faddd)	d0, d1, d2
 0[0-9a-f]+ <[^>]+> 0e300a81 	(vaddeq\.f32|faddseq)	s0, s1, s2

@@ -1,3 +1,7 @@
+2009-11-03  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (do_vfp_nsyn_mla_mls): Fix vmls excoding.
+
 2009-11-02  Paul Brook  <paul@codesourcery.com>
 
 	* doc/c-arm.texi: Document new -mfpu options.
