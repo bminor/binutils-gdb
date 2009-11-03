@@ -2692,19 +2692,12 @@ mark_functions_via_relocs (asection *sec,
       Elf_Internal_Sym *sym;
       struct elf_link_hash_entry *h;
       bfd_vma val;
-      bfd_boolean reject, is_call;
+      bfd_boolean nonbranch, is_call;
       struct function_info *caller;
       struct call_info *callee;
 
-      reject = FALSE;
       r_type = ELF32_R_TYPE (irela->r_info);
-      if (r_type != R_SPU_REL16
-	  && r_type != R_SPU_ADDR16)
-	{
-	  reject = TRUE;
-	  if (!(call_tree && spu_hash_table (info)->params->auto_overlay))
-	    continue;
-	}
+      nonbranch = r_type != R_SPU_REL16 && r_type != R_SPU_ADDR16;
 
       r_indx = ELF32_R_SYM (irela->r_info);
       if (!get_sym_h (&h, &sym, &sym_sec, psyms, r_indx, sec->owner))
@@ -2715,7 +2708,7 @@ mark_functions_via_relocs (asection *sec,
 	continue;
 
       is_call = FALSE;
-      if (!reject)
+      if (!nonbranch)
 	{
 	  unsigned char insn[4];
 
@@ -2746,14 +2739,13 @@ mark_functions_via_relocs (asection *sec,
 	    }
 	  else
 	    {
-	      reject = TRUE;
-	      if (!(call_tree && spu_hash_table (info)->params->auto_overlay)
-		  || is_hint (insn))
+	      nonbranch = TRUE;
+	      if (is_hint (insn))
 		continue;
 	    }
 	}
 
-      if (reject)
+      if (nonbranch)
 	{
 	  /* For --auto-overlay, count possible stubs we need for
 	     function pointer references.  */
@@ -2763,8 +2755,20 @@ mark_functions_via_relocs (asection *sec,
 	  else
 	    sym_type = ELF_ST_TYPE (sym->st_info);
 	  if (sym_type == STT_FUNC)
-	    spu_hash_table (info)->non_ovly_stub += 1;
-	  continue;
+	    {
+	      if (call_tree && spu_hash_table (info)->params->auto_overlay)
+		spu_hash_table (info)->non_ovly_stub += 1;
+	      /* If the symbol type is STT_FUNC then this must be a
+		 function pointer initialisation.  */
+	      continue;
+	    }
+	  /* Ignore data references.  */
+	  if ((sym_sec->flags & (SEC_ALLOC | SEC_LOAD | SEC_CODE))
+	      != (SEC_ALLOC | SEC_LOAD | SEC_CODE))
+	    continue;
+	  /* Otherwise we probably have a jump table reloc for
+	     a switch statement or some other reference to a
+	     code label.  */
 	}
 
       if (h)
@@ -2813,7 +2817,7 @@ mark_functions_via_relocs (asection *sec,
       callee->is_pasted = FALSE;
       callee->broken_cycle = FALSE;
       callee->priority = priority;
-      callee->count = 1;
+      callee->count = nonbranch? 0 : 1;
       if (callee->fun->last_caller != sec)
 	{
 	  callee->fun->last_caller = sec;

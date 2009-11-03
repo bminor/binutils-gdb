@@ -1,3 +1,9 @@
+2009-11-03  Alan Modra  <amodra@bigpond.net.au>
+	    Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* elf32-spu.c (mark_functions_via_relocs): Handle non-branch relocs
+	(jump tables or other references to code labels) as well.
+
 2009-11-02  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Handle VFPv4
