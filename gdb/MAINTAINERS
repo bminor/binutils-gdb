@@ -257,6 +257,7 @@ the native maintainer when resolving ABI issues.
 			Richard Earnshaw	rearnsha@arm.com
 
 	avr		--target=avr ,-Werror
+			Tristan Gingold		gingold@adacore.com
 
 	cris		--target=cris-elf ,-Werror ,
 			(sim does not build with -Werror)
