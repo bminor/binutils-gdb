@@ -39,7 +39,7 @@ set binfile ${objdir}/${subdir}/${testfile}
 # some targets have leading underscores on assembly symbols.
 # TODO: detect this automatically
 set additional_flags ""
-if [istarget "i?86-*-cygwin*"] then {
+if { [istarget "*-*-cygwin*"] || [istarget "*-*-mingw*"] } then {
   set additional_flags "additional_flags=-DSYMBOL_PREFIX=\"_\""
 }
 

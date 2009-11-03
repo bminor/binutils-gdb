@@ -1,3 +1,9 @@
+2009-11-03  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.arch/i386-gnu-cfi.exp: Define SYMBOL_PREFIX on *-*-mingw*.
+	* gdb.arch/i386-prologue.exp: Likewise.
+	* gdb.arch/i386-unwind.exp: Likewise.
+
 2009-11-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* lib/gdb.exp (gdb_expect): Fix timeout typo.
