@@ -918,6 +918,10 @@ class General_options
   DEFINE_special(version_script, options::TWO_DASHES, '\0',
                  N_("Read version script"), N_("FILE"));
 
+  DEFINE_bool(warn_common, options::TWO_DASHES, '\0', false,
+	      N_("Warn about duplicate common symbols"),
+	      N_("Do not warn about duplicate common symbols (default)"));
+
   DEFINE_bool(warn_constructors, options::TWO_DASHES, '\0', false,
 	      N_("Ignored"), N_("Ignored"));
 

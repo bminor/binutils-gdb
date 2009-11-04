@@ -1,3 +1,15 @@
+2009-11-03  Ian Lance Taylor  <iant@google.com>
+
+	PR 10860
+	* options.h (class General_options): Add --warn-common.
+	* resolve.cc (Symbol_table::resolve): Handle --warn-common when
+	merging two common symbols.
+	(Symbol_table::should_override): Handle --warn-common when merging
+	a common symbol with a defined symbol.  Use report_resolve_problem
+	for multiple definitions.
+	(Symbol_table::report_resolve_problem): New function.
+	* symtab.h (class Symbol_table): Declare report_resolve_problem.
+
 2009-11-03  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Target_arm::Target_arm): Initialize stub_tables_ and
