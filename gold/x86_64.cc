@@ -467,7 +467,7 @@ Target_x86_64::got_section(Symbol_table* symtab, Layout* layout)
       os = layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
 					   (elfcpp::SHF_ALLOC
 					    | elfcpp::SHF_WRITE),
-					   this->got_);
+					   this->got_, false);
       os->set_is_relro();
 
       // The old GNU linker creates a .got.plt section.  We just
@@ -478,7 +478,7 @@ Target_x86_64::got_section(Symbol_table* symtab, Layout* layout)
       os = layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
 					   (elfcpp::SHF_ALLOC
 					    | elfcpp::SHF_WRITE),
-					   this->got_plt_);
+					   this->got_plt_, false);
       os->set_is_relro();
 
       // The first three entries are reserved.
@@ -506,7 +506,7 @@ Target_x86_64::rela_dyn_section(Layout* layout)
       gold_assert(layout != NULL);
       this->rela_dyn_ = new Reloc_section(parameters->options().combreloc());
       layout->add_output_section_data(".rela.dyn", elfcpp::SHT_RELA,
-				      elfcpp::SHF_ALLOC, this->rela_dyn_);
+				      elfcpp::SHF_ALLOC, this->rela_dyn_, true);
     }
   return this->rela_dyn_;
 }
@@ -606,7 +606,7 @@ Output_data_plt_x86_64::Output_data_plt_x86_64(Layout* layout,
 {
   this->rel_ = new Reloc_section(false);
   layout->add_output_section_data(".rela.plt", elfcpp::SHT_RELA,
-				  elfcpp::SHF_ALLOC, this->rel_);
+				  elfcpp::SHF_ALLOC, this->rel_, true);
 }
 
 void
@@ -802,7 +802,7 @@ Target_x86_64::make_plt_section(Symbol_table* symtab, Layout* layout)
       layout->add_output_section_data(".plt", elfcpp::SHT_PROGBITS,
 				      (elfcpp::SHF_ALLOC
 				       | elfcpp::SHF_EXECINSTR),
-				      this->plt_);
+				      this->plt_, false);
     }
 }
 

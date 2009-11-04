@@ -1,3 +1,21 @@
+2009-11-04  Ian Lance Taylor  <iant@google.com>
+
+	* layout.cc (Layout::get_output_section): Add is_interp and
+	is_dynamic_linker_section parameters.  Change all callers.
+	(Layout::choose_output_section): Likewise.
+	(Layout::make_output_section): Likewise.
+	(Layout::add_output_section_data): Add is_dynamic_linker_section
+	parameter.  Change all callers.
+	* layout.h (class Layout): Update declarations.
+	* output.h (class Output_section): Add is_interp, set_is_interp,
+	is_dynamic_linker_section, set_is_dynamic_linker_section methods.
+	Add is_interp_, is_dynamic_linker_section_ fields.  Change
+	generate_code_fills_at_write_ to a bitfield.
+	* output.cc (Output_section::Output_sections): Initialize new
+	fields.
+	(Output_segment::add_output_section): Add do_sort parameter.
+	Change all callers.
+
 2009-11-03  Ian Lance Taylor  <iant@google.com>
 
 	PR 10860
