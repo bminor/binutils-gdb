@@ -267,7 +267,7 @@ case ${generic_target} in
   m68k-*-sysv4*)			fmt=elf em=svr4 ;;
   m68k-*-rtems*)			fmt=elf ;;
   m68k-*-linux-*)			fmt=elf em=linux ;;
-  m68k-*-uclinux*)			fmt=elf ;;
+  m68k-*-uclinux*)			fmt=elf em=uclinux ;;
   m68k-*-gnu*)				fmt=elf ;;
   m68k-*-netbsdelf*)			fmt=elf em=nbsd ;;
   m68k-*-netbsd*)			fmt=aout em=nbsd bfd_gas=yes ;;

@@ -36,6 +36,14 @@
 # endif
 #endif
 
+#ifndef CFI_DIFF_LSDA_OK
+# define CFI_DIFF_LSDA_OK CFI_DIFF_EXPR_OK
+#endif
+
+#if CFI_DIFF_EXPR_OK == 1 && CFI_DIFF_LSDA_OK == 0
+# error "CFI_DIFF_EXPR_OK should imply CFI_DIFF_LSDA_OK"
+#endif
+
 /* We re-use DWARF2_LINE_MIN_INSN_LENGTH for the code alignment field
    of the CIE.  Default to 1 if not otherwise specified.  */
 #ifndef  DWARF2_LINE_MIN_INSN_LENGTH
@@ -758,7 +766,7 @@ dot_cfi_lsda (int ignored ATTRIBUTE_UNUSED)
 
   if ((encoding & 0xff) != encoding
       || ((encoding & 0x70) != 0
-#if CFI_DIFF_EXPR_OK || defined tc_cfi_emit_pcrel_expr
+#if CFI_DIFF_LSDA_OK || defined tc_cfi_emit_pcrel_expr
 	  && (encoding & 0x70) != DW_EH_PE_pcrel
 #endif
 	  )
@@ -1445,7 +1453,7 @@ output_fde (struct fde_entry *fde, struct cie_entry *cie,
       exp = fde->lsda;
       if ((fde->lsda_encoding & 0x70) == DW_EH_PE_pcrel)
 	{
-#if CFI_DIFF_EXPR_OK
+#if CFI_DIFF_LSDA_OK
 	  exp.X_op = O_subtract;
 	  exp.X_op_symbol = symbol_temp_new_now ();
 	  emit_expr (&exp, augmentation_size);

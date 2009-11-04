@@ -1,3 +1,13 @@
+2009-11-04  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+	* config/tc-m68k.h (CF_DIFF_EXPR_OK): Define to 0 for uClinux.
+	(CFI_DIFF_LSDA_OK): Define.
+	* config/te-uclinux.h: New file.
+	* configure.tgt (m68k-uclinux): Define em.
+	* dw2gencfi.c (CFI_DIFF_LSDA_OK): New macro.
+	(dot_cfi_lsda, output_fde): Use instead of CFI_DIFF_EXPR_OK.
+
 2009-11-03  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (do_vfp_nsyn_mla_mls): Fix vmls excoding.
