@@ -1,3 +1,8 @@
+2009-11-04  Tom Tromey  <tromey@redhat.com>
+
+	* symfile.c (add_psymbol_to_bcache): Don't copy name.  Make
+	'psymbol' non-static.
+
 2009-11-03  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* linux-thread-db.c (disable_thread_event_reporting): Adjust.

@@ -3106,19 +3106,9 @@ add_psymbol_to_bcache (char *name, int namelength, domain_enum domain,
 		       enum language language, struct objfile *objfile,
 		       int *added)
 {
-  char *buf = name;  
-  /* psymbol is static so that there will be no uninitialized gaps in the
-     structure which might contain random data, causing cache misses in
-     bcache. */
-  static struct partial_symbol psymbol;
-  
-  if (name[namelength] != '\0')
-    {
-      buf = alloca (namelength + 1);
-      /* Create local copy of the partial symbol */
-      memcpy (buf, name, namelength);
-      buf[namelength] = '\0';
-    }
+  struct partial_symbol psymbol;
+
+  memset (&psymbol, 0, sizeof (struct partial_symbol));
   /* val and coreaddr are mutually exclusive, one of them *will* be zero */
   if (val != 0)
     {
@@ -3133,7 +3123,7 @@ add_psymbol_to_bcache (char *name, int namelength, domain_enum domain,
   PSYMBOL_DOMAIN (&psymbol) = domain;
   PSYMBOL_CLASS (&psymbol) = class;
 
-  SYMBOL_SET_NAMES (&psymbol, buf, namelength, objfile);
+  SYMBOL_SET_NAMES (&psymbol, name, namelength, objfile);
 
   /* Stash the partial symbol away in the cache */
   return bcache_full (&psymbol, sizeof (struct partial_symbol),
