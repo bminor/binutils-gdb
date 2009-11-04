@@ -1,6 +1,5 @@
 # This shell script emits a C file. -*- C -*-
 # It does some substitutions.
-test -z "${ENTRY}" && ENTRY="_mainCRTStartup"
 if [ -z "$MACHINE" ]; then
   OUTPUT_ARCH=${ARCH}
 else
@@ -102,6 +101,7 @@ fragment <<EOF
 
 static struct internal_extra_pe_aouthdr pep;
 static int dll;
+static int pep_subsystem = ${SUBSYSTEM};
 static flagword real_flags = IMAGE_FILE_LARGE_ADDRESS_AWARE;
 static int support_old_code = 0;
 static lang_assignment_statement_type *image_base_statement = 0;
@@ -127,12 +127,6 @@ gld_${EMULATION_NAME}_before_parse (void)
   config.has_shared = 1;
   link_info.pei386_auto_import = -1;
   link_info.pei386_runtime_pseudo_reloc = 2; /* Use by default version 2.  */
-
-#if (PE_DEF_SUBSYSTEM == 9) || (PE_DEF_SUBSYSTEM == 2)
-  lang_default_entry ("_WinMainCRTStartup");
-#else
-  lang_default_entry ("${ENTRY}");
-#endif
 #endif
 }
 
@@ -403,36 +397,90 @@ set_pep_name (char *name, bfd_vma val)
   abort ();
 }
 
-
 static void
-set_pep_subsystem (void)
+set_entry_point (void)
 {
-  const char *sver;
   const char *entry;
   const char *initial_symbol_char;
-  char *end;
-  int len;
   int i;
-  int subsystem;
-  unsigned long temp_subsystem;
+
   static const struct
     {
-      const char *name;
       const int value;
       const char *entry;
     }
   v[] =
     {
-      { "native",  1, "NtProcessStartup" },
-      { "windows", 2, "WinMainCRTStartup" },
-      { "console", 3, "mainCRTStartup" },
-      { "posix",   7, "__PosixProcessStartup"},
-      { "wince",   9, "_WinMainCRTStartup" },
-      { "xbox",   14, "mainCRTStartup" },
-      { NULL, 0, NULL }
+      { 1, "NtProcessStartup"  },
+      { 2, "WinMainCRTStartup" },
+      { 3, "mainCRTStartup"    },
+      { 7, "__PosixProcessStartup" },
+      { 9, "WinMainCRTStartup" },
+      {14, "mainCRTStartup"    },
+      { 0, NULL          }
     };
+
   /* Entry point name for arbitrary subsystem numbers.  */
   static const char default_entry[] = "mainCRTStartup";
+
+  if (link_info.shared || dll)
+    {
+      entry = "DllMainCRTStartup";
+    }
+  else
+    {
+      for (i = 0; v[i].entry; i++)
+        if (v[i].value == pep_subsystem)
+          break;
+
+      /* If no match, use the default.  */
+      if (v[i].entry != NULL)
+        entry = v[i].entry;
+      else
+        entry = default_entry;
+    }
+
+  initial_symbol_char = ${INITIAL_SYMBOL_CHAR};
+  if (*initial_symbol_char != '\0')
+    {
+      char *alc_entry;
+
+      /* lang_default_entry expects its argument to be permanently
+	 allocated, so we don't free this string.  */
+      alc_entry = xmalloc (strlen (initial_symbol_char)
+			   + strlen (entry)
+			   + 1);
+      strcpy (alc_entry, initial_symbol_char);
+      strcat (alc_entry, entry);
+      entry = alc_entry;
+    }
+
+  lang_default_entry (entry);
+}
+
+static void
+set_pep_subsystem (void)
+{
+  const char *sver;
+  char *end;
+  int len;
+  int i;
+  unsigned long temp_subsystem;
+  static const struct
+    {
+      const char *name;
+      const int value;
+    }
+  v[] =
+    {
+      { "native",  1 },
+      { "windows", 2 },
+      { "console", 3 },
+      { "posix",   7 },
+      { "wince",   9 },
+      { "xbox",   14 },
+      { NULL, 0 }
+    };
 
   /* Check for the presence of a version number.  */
   sver = strchr (optarg, ':');
@@ -459,14 +507,8 @@ set_pep_subsystem (void)
 	if (v[i].value == (int) temp_subsystem)
 	  break;
 
-      /* If no match, use the default.  */
-      if (v[i].name != NULL)
-	entry = v[i].entry;
-      else
-	entry = default_entry;
-
       /* Use this subsystem.  */
-      subsystem = (int) temp_subsystem;
+      pep_subsystem = (int) temp_subsystem;
     }
   else
     {
@@ -482,28 +524,10 @@ set_pep_subsystem (void)
 	  return;
 	}
 
-      entry = v[i].entry;
-      subsystem = v[i].value;
+      pep_subsystem = v[i].value;
     }
 
-  set_pep_name ("__subsystem__", subsystem);
-
-  initial_symbol_char = ${INITIAL_SYMBOL_CHAR};
-  if (*initial_symbol_char != '\0')
-    {
-      char *alc_entry;
-
-      /* lang_default_entry expects its argument to be permanently
-	 allocated, so we don't free this string.  */
-      alc_entry = xmalloc (strlen (initial_symbol_char)
-			   + strlen (entry)
-			   + 1);
-      strcpy (alc_entry, initial_symbol_char);
-      strcat (alc_entry, entry);
-      entry = alc_entry;
-    }
-
-  lang_default_entry (entry);
+  set_pep_name ("__subsystem__", pep_subsystem);
 
   return;
 }
@@ -827,6 +851,8 @@ gld_${EMULATION_NAME}_after_parse (void)
     einfo (_("%P: warning: --export-dynamic is not supported for PE+ "
       "targets, did you mean --export-all-symbols?\n"));
 
+  set_entry_point ();
+  
   after_parse_default ();
 }
 

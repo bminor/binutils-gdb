@@ -1,3 +1,27 @@
+2009-11-04  Kai Tietz  <kai.tietz@onevision.com>
+
+	* emulparams/arm_epoc_pe.sh: Remove ENTRY.
+	* emulparams/arm_wince_pe.sh: Likewise.
+	* emulparams/i386pe.sh: Likewise.
+	* emulparams/i386pe_posix.sh: Likewise.
+	* emulparams/mcorepe.sh: Likewise.
+	* emulparams/mipspe.sh: Likewise.
+	* emulparams/ppcpe.sh: Likewise.
+	* emulparams/armpe.sh: Likewise.
+	* emulparams/i386pep.sh: Likewise.
+	* emulparams/shpe.sh: Likewise.
+	Additionally cleaned up double-defined
+	variables SUBSYSTEM and INITIAL_SYMBOL_CHAR.
+	* emultempl/pe.em: Remove use of ENTRY.
+	(pe_subsystem): New local variable.
+	(gld_XXX_before_parse): Don't set default
+	entry point here.
+	(set_entry_point): New function to set entry
+	point.
+	(set_pe_subsystem): Remove code for entry point.
+	(gld_XXX_after_parse): Use set_entry_point here.
+	* emultempl/pep.em: Likewise.
+
 2009-10-29  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* emulparams/vxworks.sh (OTHER_READONLY_SECTIONS): Move into ...

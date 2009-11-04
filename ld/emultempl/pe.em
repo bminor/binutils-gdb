@@ -1,6 +1,5 @@
 # This shell script emits a C file. -*- C -*-
 # It does some substitutions.
-test -z "${ENTRY}" && ENTRY="_mainCRTStartup"
 if [ -z "$MACHINE" ]; then
   OUTPUT_ARCH=${ARCH}
 else
@@ -122,6 +121,7 @@ fragment <<EOF
 
 static struct internal_extra_pe_aouthdr pe;
 static int dll;
+static int pe_subsystem = ${SUBSYSTEM};
 static flagword real_flags = 0;
 static int support_old_code = 0;
 static char * thumb_entry_symbol = NULL;
@@ -162,16 +162,6 @@ esac
 fragment <<EOF
   link_info.pei386_auto_import = ${default_auto_import};
   link_info.pei386_runtime_pseudo_reloc = 1; /* Use by default version 1.  */
-
-#if (PE_DEF_SUBSYSTEM == 9) || (PE_DEF_SUBSYSTEM == 2)
-#if defined TARGET_IS_mipspe || defined TARGET_IS_armpe || defined TARGET_IS_arm_wince_pe
-  lang_default_entry ("WinMainCRTStartup");
-#else
-  lang_default_entry ("_WinMainCRTStartup");
-#endif
-#else
-  lang_default_entry ("${ENTRY}");
-#endif
 #endif
 }
 
@@ -459,90 +449,53 @@ set_pe_name (char *name, long val)
   abort ();
 }
 
-
 static void
-set_pe_subsystem (void)
+set_entry_point (void)
 {
-  const char *sver;
   const char *entry;
   const char *initial_symbol_char;
-  char *end;
-  int len;
   int i;
-  int subsystem;
-  unsigned long temp_subsystem;
+
   static const struct
     {
-      const char *name;
       const int value;
       const char *entry;
     }
   v[] =
     {
-      { "native",  1, "NtProcessStartup" },
-      { "windows", 2, "WinMainCRTStartup" },
-      { "console", 3, "mainCRTStartup" },
-      { "posix",   7, "__PosixProcessStartup"},
-      { "wince",   9, "WinMainCRTStartup" },
-      { "xbox",   14, "mainCRTStartup" },
-      { NULL, 0, NULL }
+      { 1, "NtProcessStartup"  },
+      { 2, "WinMainCRTStartup" },
+      { 3, "mainCRTStartup"    },
+      { 7, "__PosixProcessStartup"},
+      { 9, "WinMainCRTStartup" },
+      {14, "mainCRTStartup"    },
+      { 0, NULL          }
     };
+
   /* Entry point name for arbitrary subsystem numbers.  */
   static const char default_entry[] = "mainCRTStartup";
 
-  /* Check for the presence of a version number.  */
-  sver = strchr (optarg, ':');
-  if (sver == NULL)
-    len = strlen (optarg);
+  if (link_info.shared || dll)
+    {
+#if defined (TARGET_IS_i386pe)
+      entry = "DllMainCRTStartup@12";
+#else
+      entry = "DllMainCRTStartup";
+#endif
+    }
   else
     {
-      len = sver - optarg;
-      set_pe_name ("__major_subsystem_version__",
-		   strtoul (sver + 1, &end, 0));
-      if (*end == '.')
-	set_pe_name ("__minor_subsystem_version__",
-		     strtoul (end + 1, &end, 0));
-      if (*end != '\0')
-	einfo (_("%P: warning: bad version number in -subsystem option\n"));
-    }
 
-  /* Check for numeric subsystem.  */
-  temp_subsystem = strtoul (optarg, & end, 0);
-  if ((*end == ':' || *end == '\0') && (temp_subsystem < 65536))
-    {
-      /* Search list for a numeric match to use its entry point.  */
-      for (i = 0; v[i].name; i++)
-	if (v[i].value == (int) temp_subsystem)
-	  break;
+      for (i = 0; v[i].entry; i++)
+        if (v[i].value == pe_subsystem)
+          break;
 
       /* If no match, use the default.  */
-      if (v[i].name != NULL)
-	entry = v[i].entry;
+      if (v[i].entry != NULL)
+        entry = v[i].entry;
       else
-	entry = default_entry;
-
-      /* Use this subsystem.  */
-      subsystem = (int) temp_subsystem;
+        entry = default_entry;
     }
-  else
-    {
-      /* Search for subsystem by name.  */
-      for (i = 0; v[i].name; i++)
-	if (strncmp (optarg, v[i].name, len) == 0
-	    && v[i].name[len] == '\0')
-	  break;
-
-      if (v[i].name == NULL)
-	{
-	  einfo (_("%P%F: invalid subsystem type %s\n"), optarg);
-	  return;
-	}
-
-      entry = v[i].entry;
-      subsystem = v[i].value;
-    }
-
-  set_pe_name ("__subsystem__", subsystem);
 
   initial_symbol_char = ${INITIAL_SYMBOL_CHAR};
   if (*initial_symbol_char != '\0')
@@ -560,6 +513,78 @@ set_pe_subsystem (void)
     }
 
   lang_default_entry (entry);
+}
+
+static void
+set_pe_subsystem (void)
+{
+  const char *sver;
+  char *end;
+  int len;
+  int i;
+  unsigned long temp_subsystem;
+  static const struct
+    {
+      const char *name;
+      const int value;
+    }
+  v[] =
+    {
+      { "native",  1},
+      { "windows", 2},
+      { "console", 3},
+      { "posix",   7},
+      { "wince",   9},
+      { "xbox",   14},
+      { NULL, 0 }
+    };
+
+  /* Check for the presence of a version number.  */
+  sver = strchr (optarg, ':');
+  if (sver == NULL)
+    len = strlen (optarg);
+  else
+    {
+      len = sver - optarg;
+      set_pe_name ("__major_subsystem_version__",
+		    strtoul (sver + 1, &end, 0));
+      if (*end == '.')
+	set_pe_name ("__minor_subsystem_version__",
+		      strtoul (end + 1, &end, 0));
+      if (*end != '\0')
+	einfo (_("%P: warning: bad version number in -subsystem option\n"));
+    }
+
+  /* Check for numeric subsystem.  */
+  temp_subsystem = strtoul (optarg, & end, 0);
+  if ((*end == ':' || *end == '\0') && (temp_subsystem < 65536))
+    {
+      /* Search list for a numeric match to use its entry point.  */
+      for (i = 0; v[i].name; i++)
+	if (v[i].value == (int) temp_subsystem)
+	  break;
+
+      /* Use this subsystem.  */
+      pe_subsystem = (int) temp_subsystem;
+    }
+  else
+    {
+      /* Search for subsystem by name.  */
+      for (i = 0; v[i].name; i++)
+	if (strncmp (optarg, v[i].name, len) == 0
+	    && v[i].name[len] == '\0')
+	  break;
+
+      if (v[i].name == NULL)
+	{
+	  einfo (_("%P%F: invalid subsystem type %s\n"), optarg);
+	  return;
+	}
+
+      pe_subsystem = v[i].value;
+    }
+
+  set_pe_name ("__subsystem__", pe_subsystem);
 
   return;
 }
@@ -888,6 +913,8 @@ gld_${EMULATION_NAME}_after_parse (void)
   if (link_info.export_dynamic)
     einfo (_("%P: warning: --export-dynamic is not supported for PE "
       "targets, did you mean --export-all-symbols?\n"));
+
+  set_entry_point ();
 
   after_parse_default ();
 }
