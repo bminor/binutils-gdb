@@ -1,3 +1,11 @@
+2009-11-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/876
+	* gas/i386/i386.exp: Run space1.
+
+	* gas/i386/space1.l: New.
+	* gas/i386/space1.s: Likewise.
+
 2009-11-03  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/vfp-neon-syntax.d: Update expected results.
