@@ -1,5 +1,17 @@
 2009-11-03  Ian Lance Taylor  <iant@google.com>
 
+	PR 10860
+	* options.h (class General_options): Add --warn-common.
+	* resolve.cc (Symbol_table::resolve): Handle --warn-common when
+	merging two common symbols.
+	(Symbol_table::should_override): Handle --warn-common when merging
+	a common symbol with a defined symbol.  Use report_resolve_problem
+	for multiple definitions.
+	(Symbol_table::report_resolve_problem): New function.
+	* symtab.h (class Symbol_table): Declare report_resolve_problem.
+
+2009-11-03  Ian Lance Taylor  <iant@google.com>
+
 	PR 10893
 	* defstd.cc (in_section): Add entries for __rel_iplt_start,
 	__rel_iplt_end, __rela_iplt_start, __rela_iplt_end, and __stack.
