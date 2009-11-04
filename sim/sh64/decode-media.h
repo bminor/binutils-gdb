@@ -2,22 +2,23 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2005 Free Software Foundation, Inc.
+Copyright 1996-2009 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
+   This file is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3, or (at your option)
+   any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   It is distributed in the hope that it will be useful, but WITHOUT
+   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+   License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   You should have received a copy of the GNU General Public License along
+   with this program; if not, write to the Free Software Foundation, Inc.,
+   51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
@@ -105,13 +106,12 @@ typedef enum sh64_media_sfmt_type {
  , SH64_MEDIA_SFMT_LDHIL, SH64_MEDIA_SFMT_LDHIQ, SH64_MEDIA_SFMT_LDLOL, SH64_MEDIA_SFMT_LDLOQ
  , SH64_MEDIA_SFMT_LDXB, SH64_MEDIA_SFMT_LDXL, SH64_MEDIA_SFMT_LDXQ, SH64_MEDIA_SFMT_LDXUB
  , SH64_MEDIA_SFMT_LDXUW, SH64_MEDIA_SFMT_LDXW, SH64_MEDIA_SFMT_MCMV, SH64_MEDIA_SFMT_MOVI
- , SH64_MEDIA_SFMT_MPERMW, SH64_MEDIA_SFMT_NOP, SH64_MEDIA_SFMT_ORI, SH64_MEDIA_SFMT_PTA
- , SH64_MEDIA_SFMT_PTABS, SH64_MEDIA_SFMT_PTREL, SH64_MEDIA_SFMT_PUTCFG, SH64_MEDIA_SFMT_PUTCON
- , SH64_MEDIA_SFMT_SHARI, SH64_MEDIA_SFMT_SHARIL, SH64_MEDIA_SFMT_SHORI, SH64_MEDIA_SFMT_STB
- , SH64_MEDIA_SFMT_STL, SH64_MEDIA_SFMT_STQ, SH64_MEDIA_SFMT_STW, SH64_MEDIA_SFMT_STHIL
- , SH64_MEDIA_SFMT_STHIQ, SH64_MEDIA_SFMT_STLOL, SH64_MEDIA_SFMT_STLOQ, SH64_MEDIA_SFMT_STXB
- , SH64_MEDIA_SFMT_STXL, SH64_MEDIA_SFMT_STXQ, SH64_MEDIA_SFMT_STXW, SH64_MEDIA_SFMT_SWAPQ
- , SH64_MEDIA_SFMT_TRAPA, SH64_MEDIA_SFMT_XORI
+ , SH64_MEDIA_SFMT_NOP, SH64_MEDIA_SFMT_ORI, SH64_MEDIA_SFMT_PTA, SH64_MEDIA_SFMT_PTABS
+ , SH64_MEDIA_SFMT_PTREL, SH64_MEDIA_SFMT_PUTCFG, SH64_MEDIA_SFMT_PUTCON, SH64_MEDIA_SFMT_SHARI
+ , SH64_MEDIA_SFMT_SHORI, SH64_MEDIA_SFMT_STB, SH64_MEDIA_SFMT_STL, SH64_MEDIA_SFMT_STQ
+ , SH64_MEDIA_SFMT_STW, SH64_MEDIA_SFMT_STHIL, SH64_MEDIA_SFMT_STHIQ, SH64_MEDIA_SFMT_STLOL
+ , SH64_MEDIA_SFMT_STLOQ, SH64_MEDIA_SFMT_STXB, SH64_MEDIA_SFMT_STXL, SH64_MEDIA_SFMT_STXQ
+ , SH64_MEDIA_SFMT_STXW, SH64_MEDIA_SFMT_SWAPQ, SH64_MEDIA_SFMT_TRAPA, SH64_MEDIA_SFMT_XORI
 } SH64_MEDIA_SFMT_TYPE;
 
 /* Function unit handlers (user written).  */

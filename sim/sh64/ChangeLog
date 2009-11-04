@@ -1,5 +1,23 @@
 2009-11-03  Doug Evans  <dje@sebabeach.org>
 
+	* arch.c: Regenerate.
+	* arch.h: Regenerate.
+	* cpu.c: Regenerate.
+	* cpu.h: Regenerate.
+	* cpuall.h: Regenerate.
+	* decode-compact.c: Regenerate.
+	* decode-compact.h: Regenerate.
+	* decode-media.c: Regenerate.
+	* decode-media.h: Regenerate.
+	* defs-compact.h: Regenerate.
+	* defs-media.h: Regenerate.
+	* sem-compact-switch.c: Regenerate.
+	* sem-compact.c: Regenerate.
+	* sem-media-switch.c: Regenerate.
+	* sem-media.c: Regenerate.
+	* sh-desc.c: Regenerate.
+	* sh-opc.h: Regenerate.
+
 	* Makefile.in (SIM_EXTRA_DEPS): Add sh-desc.h sh-opc.h.
 	(sh-desc.o): New rule.
 	(sh-desc.h,sh-desc.c,sh-opc.h): Replaces rule for desc.h.

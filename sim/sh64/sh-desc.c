@@ -2,22 +2,23 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2005 Free Software Foundation, Inc.
+Copyright 1996-2009 Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
+   This file is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3, or (at your option)
+   any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   It is distributed in the hope that it will be useful, but WITHOUT
+   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+   License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   You should have received a copy of the GNU General Public License along
+   with this program; if not, write to the Free Software Foundation, Inc.,
+   51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
@@ -788,8 +789,8 @@ const CGEN_HW_ENTRY sh_cgen_hw_table[] =
 
 const CGEN_IFLD sh_cgen_ifld_table[] =
 {
-  { SH_F_NIL, "f-nil", 0, 0, 0, 0, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }  },
-  { SH_F_ANYOF, "f-anyof", 0, 0, 0, 0, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }  },
+  { SH_F_NIL, "f-nil", 0, 0, 0, 0, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } } } }  },
+  { SH_F_ANYOF, "f-anyof", 0, 0, 0, 0, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } } } }  },
   { SH_F_OP4, "f-op4", 0, 32, 0, 4, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }  },
   { SH_F_OP8, "f-op8", 0, 32, 0, 8, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }  },
   { SH_F_OP16, "f-op16", 0, 32, 0, 16, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }  },
@@ -890,7 +891,7 @@ const CGEN_OPERAND sh_cgen_operand_table[] =
 /* pc: program counter */
   { "pc", SH_OPERAND_PC, HW_H_PC, 0, 0,
     { 0, { (const PTR) &sh_cgen_ifld_table[SH_F_NIL] } }, 
-    { 0|A(SEM_ONLY), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }  },
+    { 0|A(SEM_ONLY), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } } } }  },
 /* endian: Endian mode */
   { "endian", SH_OPERAND_ENDIAN, HW_H_ENDIAN, 0, 0,
     { 0, { (const PTR) 0 } }, 

@@ -2,22 +2,23 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2005 Free Software Foundation, Inc.
+Copyright 1996-2009 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
+   This file is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3, or (at your option)
+   any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   It is distributed in the hope that it will be useful, but WITHOUT
+   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+   License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   You should have received a copy of the GNU General Public License along
+   with this program; if not, write to the Free Software Foundation, Inc.,
+   51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
@@ -325,23 +326,14 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 64 : /* fall through */
       case 80 : /* fall through */
       case 96 : /* fall through */
-      case 112 :
-        if ((entire_insn & 0xf00f0000) == 0x0)
-          { itype = SH64_COMPACT_INSN_MOVI20_COMPACT; goto extract_sfmt_movi20_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 112 : itype = SH64_COMPACT_INSN_MOVI20_COMPACT; goto extract_sfmt_movi20_compact;
       case 3 :
         {
           unsigned int val = (((insn >> 7) & (1 << 0)));
           switch (val)
           {
-          case 0 :
-            if ((entire_insn & 0xf0ff) == 0x3)
-              { itype = SH64_COMPACT_INSN_BSRF_COMPACT; goto extract_sfmt_bsrf_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 1 :
-            if ((entire_insn & 0xf0ff) == 0x83)
-              { itype = SH64_COMPACT_INSN_PREF_COMPACT; goto extract_sfmt_pref_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = SH64_COMPACT_INSN_BSRF_COMPACT; goto extract_sfmt_bsrf_compact;
+          case 1 : itype = SH64_COMPACT_INSN_PREF_COMPACT; goto extract_sfmt_pref_compact;
           default : itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -352,10 +344,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 68 : /* fall through */
       case 84 : /* fall through */
       case 100 : /* fall through */
-      case 116 :
-        if ((entire_insn & 0xf00f) == 0x4)
-          { itype = SH64_COMPACT_INSN_MOVB3_COMPACT; goto extract_sfmt_movb3_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 116 : itype = SH64_COMPACT_INSN_MOVB3_COMPACT; goto extract_sfmt_movb3_compact;
       case 5 : /* fall through */
       case 21 : /* fall through */
       case 37 : /* fall through */
@@ -363,10 +352,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 69 : /* fall through */
       case 85 : /* fall through */
       case 101 : /* fall through */
-      case 117 :
-        if ((entire_insn & 0xf00f) == 0x5)
-          { itype = SH64_COMPACT_INSN_MOVW3_COMPACT; goto extract_sfmt_movw3_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 117 : itype = SH64_COMPACT_INSN_MOVW3_COMPACT; goto extract_sfmt_movw3_compact;
       case 6 : /* fall through */
       case 22 : /* fall through */
       case 38 : /* fall through */
@@ -374,10 +360,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 70 : /* fall through */
       case 86 : /* fall through */
       case 102 : /* fall through */
-      case 118 :
-        if ((entire_insn & 0xf00f) == 0x6)
-          { itype = SH64_COMPACT_INSN_MOVL3_COMPACT; goto extract_sfmt_movl3_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 118 : itype = SH64_COMPACT_INSN_MOVL3_COMPACT; goto extract_sfmt_movl3_compact;
       case 7 : /* fall through */
       case 23 : /* fall through */
       case 39 : /* fall through */
@@ -385,10 +368,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 71 : /* fall through */
       case 87 : /* fall through */
       case 103 : /* fall through */
-      case 119 :
-        if ((entire_insn & 0xf00f) == 0x7)
-          { itype = SH64_COMPACT_INSN_MULL_COMPACT; goto extract_sfmt_mull_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 119 : itype = SH64_COMPACT_INSN_MULL_COMPACT; goto extract_sfmt_mull_compact;
       case 8 :
         if ((entire_insn & 0xffff) == 0x8)
           { itype = SH64_COMPACT_INSN_CLRT_COMPACT; goto extract_sfmt_clrt_compact; }
@@ -412,10 +392,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 76 : /* fall through */
       case 92 : /* fall through */
       case 108 : /* fall through */
-      case 124 :
-        if ((entire_insn & 0xf00f) == 0xc)
-          { itype = SH64_COMPACT_INSN_MOVB8_COMPACT; goto extract_sfmt_movb8_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 124 : itype = SH64_COMPACT_INSN_MOVB8_COMPACT; goto extract_sfmt_movb8_compact;
       case 13 : /* fall through */
       case 29 : /* fall through */
       case 45 : /* fall through */
@@ -423,10 +400,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 77 : /* fall through */
       case 93 : /* fall through */
       case 109 : /* fall through */
-      case 125 :
-        if ((entire_insn & 0xf00f) == 0xd)
-          { itype = SH64_COMPACT_INSN_MOVW8_COMPACT; goto extract_sfmt_movw8_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 125 : itype = SH64_COMPACT_INSN_MOVW8_COMPACT; goto extract_sfmt_movw8_compact;
       case 14 : /* fall through */
       case 30 : /* fall through */
       case 46 : /* fall through */
@@ -434,10 +408,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 78 : /* fall through */
       case 94 : /* fall through */
       case 110 : /* fall through */
-      case 126 :
-        if ((entire_insn & 0xf00f) == 0xe)
-          { itype = SH64_COMPACT_INSN_MOVL8_COMPACT; goto extract_sfmt_movl8_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 126 : itype = SH64_COMPACT_INSN_MOVL8_COMPACT; goto extract_sfmt_movl8_compact;
       case 15 : /* fall through */
       case 31 : /* fall through */
       case 47 : /* fall through */
@@ -445,10 +416,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 79 : /* fall through */
       case 95 : /* fall through */
       case 111 : /* fall through */
-      case 127 :
-        if ((entire_insn & 0xf00f) == 0xf)
-          { itype = SH64_COMPACT_INSN_MACL_COMPACT; goto extract_sfmt_macl_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 127 : itype = SH64_COMPACT_INSN_MACL_COMPACT; goto extract_sfmt_macl_compact;
       case 18 :
         if ((entire_insn & 0xf0ff) == 0x12)
           { itype = SH64_COMPACT_INSN_STC_GBR_COMPACT; goto extract_sfmt_stc_gbr_compact; }
@@ -478,14 +446,8 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 7) & (1 << 0)));
           switch (val)
           {
-          case 0 :
-            if ((entire_insn & 0xf0ff) == 0x23)
-              { itype = SH64_COMPACT_INSN_BRAF_COMPACT; goto extract_sfmt_braf_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 1 :
-            if ((entire_insn & 0xf0ff) == 0xa3)
-              { itype = SH64_COMPACT_INSN_OCBP_COMPACT; goto extract_sfmt_movcol_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = SH64_COMPACT_INSN_BRAF_COMPACT; goto extract_sfmt_braf_compact;
+          case 1 : itype = SH64_COMPACT_INSN_OCBP_COMPACT; goto extract_sfmt_movcol_compact;
           default : itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -660,10 +622,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 252 : /* fall through */
       case 253 : /* fall through */
       case 254 : /* fall through */
-      case 255 :
-        if ((entire_insn & 0xf000) == 0x1000)
-          { itype = SH64_COMPACT_INSN_MOVL5_COMPACT; goto extract_sfmt_movl5_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 255 : itype = SH64_COMPACT_INSN_MOVL5_COMPACT; goto extract_sfmt_movl5_compact;
       case 256 : /* fall through */
       case 272 : /* fall through */
       case 288 : /* fall through */
@@ -671,10 +630,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 320 : /* fall through */
       case 336 : /* fall through */
       case 352 : /* fall through */
-      case 368 :
-        if ((entire_insn & 0xf00f) == 0x2000)
-          { itype = SH64_COMPACT_INSN_MOVB1_COMPACT; goto extract_sfmt_movb1_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 368 : itype = SH64_COMPACT_INSN_MOVB1_COMPACT; goto extract_sfmt_movb1_compact;
       case 257 : /* fall through */
       case 273 : /* fall through */
       case 289 : /* fall through */
@@ -682,10 +638,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 321 : /* fall through */
       case 337 : /* fall through */
       case 353 : /* fall through */
-      case 369 :
-        if ((entire_insn & 0xf00f) == 0x2001)
-          { itype = SH64_COMPACT_INSN_MOVW1_COMPACT; goto extract_sfmt_movw1_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 369 : itype = SH64_COMPACT_INSN_MOVW1_COMPACT; goto extract_sfmt_movw1_compact;
       case 258 : /* fall through */
       case 274 : /* fall through */
       case 290 : /* fall through */
@@ -693,10 +646,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 322 : /* fall through */
       case 338 : /* fall through */
       case 354 : /* fall through */
-      case 370 :
-        if ((entire_insn & 0xf00f) == 0x2002)
-          { itype = SH64_COMPACT_INSN_MOVL1_COMPACT; goto extract_sfmt_movl1_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 370 : itype = SH64_COMPACT_INSN_MOVL1_COMPACT; goto extract_sfmt_movl1_compact;
       case 260 : /* fall through */
       case 276 : /* fall through */
       case 292 : /* fall through */
@@ -704,10 +654,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 324 : /* fall through */
       case 340 : /* fall through */
       case 356 : /* fall through */
-      case 372 :
-        if ((entire_insn & 0xf00f) == 0x2004)
-          { itype = SH64_COMPACT_INSN_MOVB2_COMPACT; goto extract_sfmt_movb2_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 372 : itype = SH64_COMPACT_INSN_MOVB2_COMPACT; goto extract_sfmt_movb2_compact;
       case 261 : /* fall through */
       case 277 : /* fall through */
       case 293 : /* fall through */
@@ -715,10 +662,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 325 : /* fall through */
       case 341 : /* fall through */
       case 357 : /* fall through */
-      case 373 :
-        if ((entire_insn & 0xf00f) == 0x2005)
-          { itype = SH64_COMPACT_INSN_MOVW2_COMPACT; goto extract_sfmt_movw2_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 373 : itype = SH64_COMPACT_INSN_MOVW2_COMPACT; goto extract_sfmt_movw2_compact;
       case 262 : /* fall through */
       case 278 : /* fall through */
       case 294 : /* fall through */
@@ -726,10 +670,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 326 : /* fall through */
       case 342 : /* fall through */
       case 358 : /* fall through */
-      case 374 :
-        if ((entire_insn & 0xf00f) == 0x2006)
-          { itype = SH64_COMPACT_INSN_MOVL2_COMPACT; goto extract_sfmt_movl2_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 374 : itype = SH64_COMPACT_INSN_MOVL2_COMPACT; goto extract_sfmt_movl2_compact;
       case 263 : /* fall through */
       case 279 : /* fall through */
       case 295 : /* fall through */
@@ -737,10 +678,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 327 : /* fall through */
       case 343 : /* fall through */
       case 359 : /* fall through */
-      case 375 :
-        if ((entire_insn & 0xf00f) == 0x2007)
-          { itype = SH64_COMPACT_INSN_DIV0S_COMPACT; goto extract_sfmt_div0s_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 375 : itype = SH64_COMPACT_INSN_DIV0S_COMPACT; goto extract_sfmt_div0s_compact;
       case 264 : /* fall through */
       case 280 : /* fall through */
       case 296 : /* fall through */
@@ -748,10 +686,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 328 : /* fall through */
       case 344 : /* fall through */
       case 360 : /* fall through */
-      case 376 :
-        if ((entire_insn & 0xf00f) == 0x2008)
-          { itype = SH64_COMPACT_INSN_TST_COMPACT; goto extract_sfmt_cmpeq_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 376 : itype = SH64_COMPACT_INSN_TST_COMPACT; goto extract_sfmt_cmpeq_compact;
       case 265 : /* fall through */
       case 281 : /* fall through */
       case 297 : /* fall through */
@@ -759,10 +694,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 329 : /* fall through */
       case 345 : /* fall through */
       case 361 : /* fall through */
-      case 377 :
-        if ((entire_insn & 0xf00f) == 0x2009)
-          { itype = SH64_COMPACT_INSN_AND_COMPACT; goto extract_sfmt_and_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 377 : itype = SH64_COMPACT_INSN_AND_COMPACT; goto extract_sfmt_and_compact;
       case 266 : /* fall through */
       case 282 : /* fall through */
       case 298 : /* fall through */
@@ -770,10 +702,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 330 : /* fall through */
       case 346 : /* fall through */
       case 362 : /* fall through */
-      case 378 :
-        if ((entire_insn & 0xf00f) == 0x200a)
-          { itype = SH64_COMPACT_INSN_XOR_COMPACT; goto extract_sfmt_and_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 378 : itype = SH64_COMPACT_INSN_XOR_COMPACT; goto extract_sfmt_and_compact;
       case 267 : /* fall through */
       case 283 : /* fall through */
       case 299 : /* fall through */
@@ -781,10 +710,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 331 : /* fall through */
       case 347 : /* fall through */
       case 363 : /* fall through */
-      case 379 :
-        if ((entire_insn & 0xf00f) == 0x200b)
-          { itype = SH64_COMPACT_INSN_OR_COMPACT; goto extract_sfmt_and_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 379 : itype = SH64_COMPACT_INSN_OR_COMPACT; goto extract_sfmt_and_compact;
       case 268 : /* fall through */
       case 284 : /* fall through */
       case 300 : /* fall through */
@@ -792,10 +718,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 332 : /* fall through */
       case 348 : /* fall through */
       case 364 : /* fall through */
-      case 380 :
-        if ((entire_insn & 0xf00f) == 0x200c)
-          { itype = SH64_COMPACT_INSN_CMPSTR_COMPACT; goto extract_sfmt_cmpeq_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 380 : itype = SH64_COMPACT_INSN_CMPSTR_COMPACT; goto extract_sfmt_cmpeq_compact;
       case 269 : /* fall through */
       case 285 : /* fall through */
       case 301 : /* fall through */
@@ -803,10 +726,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 333 : /* fall through */
       case 349 : /* fall through */
       case 365 : /* fall through */
-      case 381 :
-        if ((entire_insn & 0xf00f) == 0x200d)
-          { itype = SH64_COMPACT_INSN_XTRCT_COMPACT; goto extract_sfmt_add_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 381 : itype = SH64_COMPACT_INSN_XTRCT_COMPACT; goto extract_sfmt_add_compact;
       case 270 : /* fall through */
       case 286 : /* fall through */
       case 302 : /* fall through */
@@ -814,10 +734,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 334 : /* fall through */
       case 350 : /* fall through */
       case 366 : /* fall through */
-      case 382 :
-        if ((entire_insn & 0xf00f) == 0x200e)
-          { itype = SH64_COMPACT_INSN_MULUW_COMPACT; goto extract_sfmt_mull_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 382 : itype = SH64_COMPACT_INSN_MULUW_COMPACT; goto extract_sfmt_mull_compact;
       case 271 : /* fall through */
       case 287 : /* fall through */
       case 303 : /* fall through */
@@ -825,10 +742,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 335 : /* fall through */
       case 351 : /* fall through */
       case 367 : /* fall through */
-      case 383 :
-        if ((entire_insn & 0xf00f) == 0x200f)
-          { itype = SH64_COMPACT_INSN_MULSW_COMPACT; goto extract_sfmt_mull_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 383 : itype = SH64_COMPACT_INSN_MULSW_COMPACT; goto extract_sfmt_mull_compact;
       case 384 : /* fall through */
       case 400 : /* fall through */
       case 416 : /* fall through */
@@ -836,16 +750,13 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 448 : /* fall through */
       case 464 : /* fall through */
       case 480 : /* fall through */
-      case 496 :
-        if ((entire_insn & 0xf00f) == 0x3000)
-          { itype = SH64_COMPACT_INSN_CMPEQ_COMPACT; goto extract_sfmt_cmpeq_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 496 : itype = SH64_COMPACT_INSN_CMPEQ_COMPACT; goto extract_sfmt_cmpeq_compact;
       case 385 : /* fall through */
       case 417 : /* fall through */
       case 449 : /* fall through */
       case 481 :
         {
-          unsigned int val = (((insn >> -3) & (1 << 1)) | ((insn >> -4) & (1 << 0)));
+          unsigned int val = (((entire_insn >> 13) & (1 << 1)) | ((entire_insn >> 12) & (1 << 0)));
           switch (val)
           {
           case 0 :
@@ -874,10 +785,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 450 : /* fall through */
       case 466 : /* fall through */
       case 482 : /* fall through */
-      case 498 :
-        if ((entire_insn & 0xf00f) == 0x3002)
-          { itype = SH64_COMPACT_INSN_CMPHS_COMPACT; goto extract_sfmt_cmpeq_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 498 : itype = SH64_COMPACT_INSN_CMPHS_COMPACT; goto extract_sfmt_cmpeq_compact;
       case 387 : /* fall through */
       case 403 : /* fall through */
       case 419 : /* fall through */
@@ -885,10 +793,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 451 : /* fall through */
       case 467 : /* fall through */
       case 483 : /* fall through */
-      case 499 :
-        if ((entire_insn & 0xf00f) == 0x3003)
-          { itype = SH64_COMPACT_INSN_CMPGE_COMPACT; goto extract_sfmt_cmpeq_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 499 : itype = SH64_COMPACT_INSN_CMPGE_COMPACT; goto extract_sfmt_cmpeq_compact;
       case 388 : /* fall through */
       case 404 : /* fall through */
       case 420 : /* fall through */
@@ -896,10 +801,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 452 : /* fall through */
       case 468 : /* fall through */
       case 484 : /* fall through */
-      case 500 :
-        if ((entire_insn & 0xf00f) == 0x3004)
-          { itype = SH64_COMPACT_INSN_DIV1_COMPACT; goto extract_sfmt_div1_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 500 : itype = SH64_COMPACT_INSN_DIV1_COMPACT; goto extract_sfmt_div1_compact;
       case 389 : /* fall through */
       case 405 : /* fall through */
       case 421 : /* fall through */
@@ -907,10 +809,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 453 : /* fall through */
       case 469 : /* fall through */
       case 485 : /* fall through */
-      case 501 :
-        if ((entire_insn & 0xf00f) == 0x3005)
-          { itype = SH64_COMPACT_INSN_DMULUL_COMPACT; goto extract_sfmt_dmulsl_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 501 : itype = SH64_COMPACT_INSN_DMULUL_COMPACT; goto extract_sfmt_dmulsl_compact;
       case 390 : /* fall through */
       case 406 : /* fall through */
       case 422 : /* fall through */
@@ -918,10 +817,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 454 : /* fall through */
       case 470 : /* fall through */
       case 486 : /* fall through */
-      case 502 :
-        if ((entire_insn & 0xf00f) == 0x3006)
-          { itype = SH64_COMPACT_INSN_CMPHI_COMPACT; goto extract_sfmt_cmpeq_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 502 : itype = SH64_COMPACT_INSN_CMPHI_COMPACT; goto extract_sfmt_cmpeq_compact;
       case 391 : /* fall through */
       case 407 : /* fall through */
       case 423 : /* fall through */
@@ -929,10 +825,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 455 : /* fall through */
       case 471 : /* fall through */
       case 487 : /* fall through */
-      case 503 :
-        if ((entire_insn & 0xf00f) == 0x3007)
-          { itype = SH64_COMPACT_INSN_CMPGT_COMPACT; goto extract_sfmt_cmpeq_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 503 : itype = SH64_COMPACT_INSN_CMPGT_COMPACT; goto extract_sfmt_cmpeq_compact;
       case 392 : /* fall through */
       case 408 : /* fall through */
       case 424 : /* fall through */
@@ -940,10 +833,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 456 : /* fall through */
       case 472 : /* fall through */
       case 488 : /* fall through */
-      case 504 :
-        if ((entire_insn & 0xf00f) == 0x3008)
-          { itype = SH64_COMPACT_INSN_SUB_COMPACT; goto extract_sfmt_add_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 504 : itype = SH64_COMPACT_INSN_SUB_COMPACT; goto extract_sfmt_add_compact;
       case 394 : /* fall through */
       case 410 : /* fall through */
       case 426 : /* fall through */
@@ -951,10 +841,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 458 : /* fall through */
       case 474 : /* fall through */
       case 490 : /* fall through */
-      case 506 :
-        if ((entire_insn & 0xf00f) == 0x300a)
-          { itype = SH64_COMPACT_INSN_SUBC_COMPACT; goto extract_sfmt_addc_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 506 : itype = SH64_COMPACT_INSN_SUBC_COMPACT; goto extract_sfmt_addc_compact;
       case 395 : /* fall through */
       case 411 : /* fall through */
       case 427 : /* fall through */
@@ -962,10 +849,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 459 : /* fall through */
       case 475 : /* fall through */
       case 491 : /* fall through */
-      case 507 :
-        if ((entire_insn & 0xf00f) == 0x300b)
-          { itype = SH64_COMPACT_INSN_SUBV_COMPACT; goto extract_sfmt_addv_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 507 : itype = SH64_COMPACT_INSN_SUBV_COMPACT; goto extract_sfmt_addv_compact;
       case 396 : /* fall through */
       case 412 : /* fall through */
       case 428 : /* fall through */
@@ -973,10 +857,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 460 : /* fall through */
       case 476 : /* fall through */
       case 492 : /* fall through */
-      case 508 :
-        if ((entire_insn & 0xf00f) == 0x300c)
-          { itype = SH64_COMPACT_INSN_ADD_COMPACT; goto extract_sfmt_add_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 508 : itype = SH64_COMPACT_INSN_ADD_COMPACT; goto extract_sfmt_add_compact;
       case 397 : /* fall through */
       case 413 : /* fall through */
       case 429 : /* fall through */
@@ -984,10 +865,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 461 : /* fall through */
       case 477 : /* fall through */
       case 493 : /* fall through */
-      case 509 :
-        if ((entire_insn & 0xf00f) == 0x300d)
-          { itype = SH64_COMPACT_INSN_DMULSL_COMPACT; goto extract_sfmt_dmulsl_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 509 : itype = SH64_COMPACT_INSN_DMULSL_COMPACT; goto extract_sfmt_dmulsl_compact;
       case 398 : /* fall through */
       case 414 : /* fall through */
       case 430 : /* fall through */
@@ -995,10 +873,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 462 : /* fall through */
       case 478 : /* fall through */
       case 494 : /* fall through */
-      case 510 :
-        if ((entire_insn & 0xf00f) == 0x300e)
-          { itype = SH64_COMPACT_INSN_ADDC_COMPACT; goto extract_sfmt_addc_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 510 : itype = SH64_COMPACT_INSN_ADDC_COMPACT; goto extract_sfmt_addc_compact;
       case 399 : /* fall through */
       case 415 : /* fall through */
       case 431 : /* fall through */
@@ -1006,16 +881,13 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 463 : /* fall through */
       case 479 : /* fall through */
       case 495 : /* fall through */
-      case 511 :
-        if ((entire_insn & 0xf00f) == 0x300f)
-          { itype = SH64_COMPACT_INSN_ADDV_COMPACT; goto extract_sfmt_addv_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 511 : itype = SH64_COMPACT_INSN_ADDV_COMPACT; goto extract_sfmt_addv_compact;
       case 401 : /* fall through */
       case 433 : /* fall through */
       case 465 : /* fall through */
       case 497 :
         {
-          unsigned int val = (((insn >> -3) & (1 << 1)) | ((insn >> -4) & (1 << 0)));
+          unsigned int val = (((entire_insn >> 13) & (1 << 1)) | ((entire_insn >> 12) & (1 << 0)));
           switch (val)
           {
           case 0 :
@@ -1038,14 +910,8 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 7) & (1 << 0)));
           switch (val)
           {
-          case 0 :
-            if ((entire_insn & 0xf0ff) == 0x4000)
-              { itype = SH64_COMPACT_INSN_SHLL_COMPACT; goto extract_sfmt_dt_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 1 :
-            if ((entire_insn & 0xf0ff) == 0x4080)
-              { itype = SH64_COMPACT_INSN_MULR_COMPACT; goto extract_sfmt_divu_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = SH64_COMPACT_INSN_SHLL_COMPACT; goto extract_sfmt_dt_compact;
+          case 1 : itype = SH64_COMPACT_INSN_MULR_COMPACT; goto extract_sfmt_divu_compact;
           default : itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1062,14 +928,8 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 7) & (1 << 0)));
           switch (val)
           {
-          case 0 :
-            if ((entire_insn & 0xf0ff) == 0x4004)
-              { itype = SH64_COMPACT_INSN_ROTL_COMPACT; goto extract_sfmt_dt_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 1 :
-            if ((entire_insn & 0xf0ff) == 0x4084)
-              { itype = SH64_COMPACT_INSN_DIVU_COMPACT; goto extract_sfmt_divu_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = SH64_COMPACT_INSN_ROTL_COMPACT; goto extract_sfmt_dt_compact;
+          case 1 : itype = SH64_COMPACT_INSN_DIVU_COMPACT; goto extract_sfmt_divu_compact;
           default : itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1104,10 +964,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 588 : /* fall through */
       case 604 : /* fall through */
       case 620 : /* fall through */
-      case 636 :
-        if ((entire_insn & 0xf00f) == 0x400c)
-          { itype = SH64_COMPACT_INSN_SHAD_COMPACT; goto extract_sfmt_shad_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 636 : itype = SH64_COMPACT_INSN_SHAD_COMPACT; goto extract_sfmt_shad_compact;
       case 525 : /* fall through */
       case 541 : /* fall through */
       case 557 : /* fall through */
@@ -1115,10 +972,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 589 : /* fall through */
       case 605 : /* fall through */
       case 621 : /* fall through */
-      case 637 :
-        if ((entire_insn & 0xf00f) == 0x400d)
-          { itype = SH64_COMPACT_INSN_SHLD_COMPACT; goto extract_sfmt_shad_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 637 : itype = SH64_COMPACT_INSN_SHLD_COMPACT; goto extract_sfmt_shad_compact;
       case 526 :
         if ((entire_insn & 0xf0ff) == 0x400e)
           { itype = SH64_COMPACT_INSN_LDC_SR_COMPACT; goto extract_sfmt_ldc_sr_compact; }
@@ -1130,10 +984,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 591 : /* fall through */
       case 607 : /* fall through */
       case 623 : /* fall through */
-      case 639 :
-        if ((entire_insn & 0xf00f) == 0x400f)
-          { itype = SH64_COMPACT_INSN_MACW_COMPACT; goto extract_sfmt_macw_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 639 : itype = SH64_COMPACT_INSN_MACW_COMPACT; goto extract_sfmt_macw_compact;
       case 528 :
         if ((entire_insn & 0xf0ff) == 0x4010)
           { itype = SH64_COMPACT_INSN_DT_COMPACT; goto extract_sfmt_dt_compact; }
@@ -1223,14 +1074,8 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 7) & (1 << 0)));
           switch (val)
           {
-          case 0 :
-            if ((entire_insn & 0xf0ff) == 0x4029)
-              { itype = SH64_COMPACT_INSN_SHLR16_COMPACT; goto extract_sfmt_movcol_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 1 :
-            if ((entire_insn & 0xf0ff) == 0x40a9)
-              { itype = SH64_COMPACT_INSN_MOVUAL_COMPACT; goto extract_sfmt_movual_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = SH64_COMPACT_INSN_SHLR16_COMPACT; goto extract_sfmt_movcol_compact;
+          case 1 : itype = SH64_COMPACT_INSN_MOVUAL_COMPACT; goto extract_sfmt_movual_compact;
           default : itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -1401,10 +1246,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 764 : /* fall through */
       case 765 : /* fall through */
       case 766 : /* fall through */
-      case 767 :
-        if ((entire_insn & 0xf000) == 0x5000)
-          { itype = SH64_COMPACT_INSN_MOVL11_COMPACT; goto extract_sfmt_movl11_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 767 : itype = SH64_COMPACT_INSN_MOVL11_COMPACT; goto extract_sfmt_movl11_compact;
       case 768 : /* fall through */
       case 784 : /* fall through */
       case 800 : /* fall through */
@@ -1412,10 +1254,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 832 : /* fall through */
       case 848 : /* fall through */
       case 864 : /* fall through */
-      case 880 :
-        if ((entire_insn & 0xf00f) == 0x6000)
-          { itype = SH64_COMPACT_INSN_MOVB6_COMPACT; goto extract_sfmt_movb6_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 880 : itype = SH64_COMPACT_INSN_MOVB6_COMPACT; goto extract_sfmt_movb6_compact;
       case 769 : /* fall through */
       case 785 : /* fall through */
       case 801 : /* fall through */
@@ -1423,10 +1262,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 833 : /* fall through */
       case 849 : /* fall through */
       case 865 : /* fall through */
-      case 881 :
-        if ((entire_insn & 0xf00f) == 0x6001)
-          { itype = SH64_COMPACT_INSN_MOVW6_COMPACT; goto extract_sfmt_movw6_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 881 : itype = SH64_COMPACT_INSN_MOVW6_COMPACT; goto extract_sfmt_movw6_compact;
       case 770 : /* fall through */
       case 786 : /* fall through */
       case 802 : /* fall through */
@@ -1434,10 +1270,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 834 : /* fall through */
       case 850 : /* fall through */
       case 866 : /* fall through */
-      case 882 :
-        if ((entire_insn & 0xf00f) == 0x6002)
-          { itype = SH64_COMPACT_INSN_MOVL6_COMPACT; goto extract_sfmt_movl6_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 882 : itype = SH64_COMPACT_INSN_MOVL6_COMPACT; goto extract_sfmt_movl6_compact;
       case 771 : /* fall through */
       case 787 : /* fall through */
       case 803 : /* fall through */
@@ -1445,10 +1278,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 835 : /* fall through */
       case 851 : /* fall through */
       case 867 : /* fall through */
-      case 883 :
-        if ((entire_insn & 0xf00f) == 0x6003)
-          { itype = SH64_COMPACT_INSN_MOV_COMPACT; goto extract_sfmt_mov_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 883 : itype = SH64_COMPACT_INSN_MOV_COMPACT; goto extract_sfmt_mov_compact;
       case 772 : /* fall through */
       case 788 : /* fall through */
       case 804 : /* fall through */
@@ -1456,10 +1286,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 836 : /* fall through */
       case 852 : /* fall through */
       case 868 : /* fall through */
-      case 884 :
-        if ((entire_insn & 0xf00f) == 0x6004)
-          { itype = SH64_COMPACT_INSN_MOVB7_COMPACT; goto extract_sfmt_movb7_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 884 : itype = SH64_COMPACT_INSN_MOVB7_COMPACT; goto extract_sfmt_movb7_compact;
       case 773 : /* fall through */
       case 789 : /* fall through */
       case 805 : /* fall through */
@@ -1467,10 +1294,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 837 : /* fall through */
       case 853 : /* fall through */
       case 869 : /* fall through */
-      case 885 :
-        if ((entire_insn & 0xf00f) == 0x6005)
-          { itype = SH64_COMPACT_INSN_MOVW7_COMPACT; goto extract_sfmt_movw7_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 885 : itype = SH64_COMPACT_INSN_MOVW7_COMPACT; goto extract_sfmt_movw7_compact;
       case 774 : /* fall through */
       case 790 : /* fall through */
       case 806 : /* fall through */
@@ -1478,10 +1302,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 838 : /* fall through */
       case 854 : /* fall through */
       case 870 : /* fall through */
-      case 886 :
-        if ((entire_insn & 0xf00f) == 0x6006)
-          { itype = SH64_COMPACT_INSN_MOVL7_COMPACT; goto extract_sfmt_movl7_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 886 : itype = SH64_COMPACT_INSN_MOVL7_COMPACT; goto extract_sfmt_movl7_compact;
       case 775 : /* fall through */
       case 791 : /* fall through */
       case 807 : /* fall through */
@@ -1489,10 +1310,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 839 : /* fall through */
       case 855 : /* fall through */
       case 871 : /* fall through */
-      case 887 :
-        if ((entire_insn & 0xf00f) == 0x6007)
-          { itype = SH64_COMPACT_INSN_NOT_COMPACT; goto extract_sfmt_mov_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 887 : itype = SH64_COMPACT_INSN_NOT_COMPACT; goto extract_sfmt_mov_compact;
       case 776 : /* fall through */
       case 792 : /* fall through */
       case 808 : /* fall through */
@@ -1500,10 +1318,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 840 : /* fall through */
       case 856 : /* fall through */
       case 872 : /* fall through */
-      case 888 :
-        if ((entire_insn & 0xf00f) == 0x6008)
-          { itype = SH64_COMPACT_INSN_SWAPB_COMPACT; goto extract_sfmt_extsb_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 888 : itype = SH64_COMPACT_INSN_SWAPB_COMPACT; goto extract_sfmt_extsb_compact;
       case 777 : /* fall through */
       case 793 : /* fall through */
       case 809 : /* fall through */
@@ -1511,10 +1326,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 841 : /* fall through */
       case 857 : /* fall through */
       case 873 : /* fall through */
-      case 889 :
-        if ((entire_insn & 0xf00f) == 0x6009)
-          { itype = SH64_COMPACT_INSN_SWAPW_COMPACT; goto extract_sfmt_extsb_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 889 : itype = SH64_COMPACT_INSN_SWAPW_COMPACT; goto extract_sfmt_extsb_compact;
       case 778 : /* fall through */
       case 794 : /* fall through */
       case 810 : /* fall through */
@@ -1522,10 +1334,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 842 : /* fall through */
       case 858 : /* fall through */
       case 874 : /* fall through */
-      case 890 :
-        if ((entire_insn & 0xf00f) == 0x600a)
-          { itype = SH64_COMPACT_INSN_NEGC_COMPACT; goto extract_sfmt_negc_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 890 : itype = SH64_COMPACT_INSN_NEGC_COMPACT; goto extract_sfmt_negc_compact;
       case 779 : /* fall through */
       case 795 : /* fall through */
       case 811 : /* fall through */
@@ -1533,10 +1342,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 843 : /* fall through */
       case 859 : /* fall through */
       case 875 : /* fall through */
-      case 891 :
-        if ((entire_insn & 0xf00f) == 0x600b)
-          { itype = SH64_COMPACT_INSN_NEG_COMPACT; goto extract_sfmt_extsb_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 891 : itype = SH64_COMPACT_INSN_NEG_COMPACT; goto extract_sfmt_extsb_compact;
       case 780 : /* fall through */
       case 796 : /* fall through */
       case 812 : /* fall through */
@@ -1544,10 +1350,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 844 : /* fall through */
       case 860 : /* fall through */
       case 876 : /* fall through */
-      case 892 :
-        if ((entire_insn & 0xf00f) == 0x600c)
-          { itype = SH64_COMPACT_INSN_EXTUB_COMPACT; goto extract_sfmt_extsb_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 892 : itype = SH64_COMPACT_INSN_EXTUB_COMPACT; goto extract_sfmt_extsb_compact;
       case 781 : /* fall through */
       case 797 : /* fall through */
       case 813 : /* fall through */
@@ -1555,10 +1358,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 845 : /* fall through */
       case 861 : /* fall through */
       case 877 : /* fall through */
-      case 893 :
-        if ((entire_insn & 0xf00f) == 0x600d)
-          { itype = SH64_COMPACT_INSN_EXTUW_COMPACT; goto extract_sfmt_extsb_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 893 : itype = SH64_COMPACT_INSN_EXTUW_COMPACT; goto extract_sfmt_extsb_compact;
       case 782 : /* fall through */
       case 798 : /* fall through */
       case 814 : /* fall through */
@@ -1566,10 +1366,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 846 : /* fall through */
       case 862 : /* fall through */
       case 878 : /* fall through */
-      case 894 :
-        if ((entire_insn & 0xf00f) == 0x600e)
-          { itype = SH64_COMPACT_INSN_EXTSB_COMPACT; goto extract_sfmt_extsb_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 894 : itype = SH64_COMPACT_INSN_EXTSB_COMPACT; goto extract_sfmt_extsb_compact;
       case 783 : /* fall through */
       case 799 : /* fall through */
       case 815 : /* fall through */
@@ -1577,10 +1374,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 847 : /* fall through */
       case 863 : /* fall through */
       case 879 : /* fall through */
-      case 895 :
-        if ((entire_insn & 0xf00f) == 0x600f)
-          { itype = SH64_COMPACT_INSN_EXTSW_COMPACT; goto extract_sfmt_extsb_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 895 : itype = SH64_COMPACT_INSN_EXTSW_COMPACT; goto extract_sfmt_extsb_compact;
       case 896 : /* fall through */
       case 897 : /* fall through */
       case 898 : /* fall through */
@@ -1708,10 +1502,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 1020 : /* fall through */
       case 1021 : /* fall through */
       case 1022 : /* fall through */
-      case 1023 :
-        if ((entire_insn & 0xf000) == 0x7000)
-          { itype = SH64_COMPACT_INSN_ADDI_COMPACT; goto extract_sfmt_addi_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 1023 : itype = SH64_COMPACT_INSN_ADDI_COMPACT; goto extract_sfmt_addi_compact;
       case 1024 : /* fall through */
       case 1025 : /* fall through */
       case 1026 : /* fall through */
@@ -1844,42 +1635,15 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 8) & (15 << 0)));
           switch (val)
           {
-          case 0 :
-            if ((entire_insn & 0xff00) == 0x8000)
-              { itype = SH64_COMPACT_INSN_MOVB5_COMPACT; goto extract_sfmt_movb5_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 1 :
-            if ((entire_insn & 0xff00) == 0x8100)
-              { itype = SH64_COMPACT_INSN_MOVW5_COMPACT; goto extract_sfmt_movw5_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 4 :
-            if ((entire_insn & 0xff00) == 0x8400)
-              { itype = SH64_COMPACT_INSN_MOVB10_COMPACT; goto extract_sfmt_movb10_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 5 :
-            if ((entire_insn & 0xff00) == 0x8500)
-              { itype = SH64_COMPACT_INSN_MOVW11_COMPACT; goto extract_sfmt_movw11_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 8 :
-            if ((entire_insn & 0xff00) == 0x8800)
-              { itype = SH64_COMPACT_INSN_CMPEQI_COMPACT; goto extract_sfmt_cmpeqi_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 9 :
-            if ((entire_insn & 0xff00) == 0x8900)
-              { itype = SH64_COMPACT_INSN_BT_COMPACT; goto extract_sfmt_bf_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 11 :
-            if ((entire_insn & 0xff00) == 0x8b00)
-              { itype = SH64_COMPACT_INSN_BF_COMPACT; goto extract_sfmt_bf_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 13 :
-            if ((entire_insn & 0xff00) == 0x8d00)
-              { itype = SH64_COMPACT_INSN_BTS_COMPACT; goto extract_sfmt_bfs_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 15 :
-            if ((entire_insn & 0xff00) == 0x8f00)
-              { itype = SH64_COMPACT_INSN_BFS_COMPACT; goto extract_sfmt_bfs_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = SH64_COMPACT_INSN_MOVB5_COMPACT; goto extract_sfmt_movb5_compact;
+          case 1 : itype = SH64_COMPACT_INSN_MOVW5_COMPACT; goto extract_sfmt_movw5_compact;
+          case 4 : itype = SH64_COMPACT_INSN_MOVB10_COMPACT; goto extract_sfmt_movb10_compact;
+          case 5 : itype = SH64_COMPACT_INSN_MOVW11_COMPACT; goto extract_sfmt_movw11_compact;
+          case 8 : itype = SH64_COMPACT_INSN_CMPEQI_COMPACT; goto extract_sfmt_cmpeqi_compact;
+          case 9 : itype = SH64_COMPACT_INSN_BT_COMPACT; goto extract_sfmt_bf_compact;
+          case 11 : itype = SH64_COMPACT_INSN_BF_COMPACT; goto extract_sfmt_bf_compact;
+          case 13 : itype = SH64_COMPACT_INSN_BTS_COMPACT; goto extract_sfmt_bfs_compact;
+          case 15 : itype = SH64_COMPACT_INSN_BFS_COMPACT; goto extract_sfmt_bfs_compact;
           default : itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -2010,10 +1774,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 1276 : /* fall through */
       case 1277 : /* fall through */
       case 1278 : /* fall through */
-      case 1279 :
-        if ((entire_insn & 0xf000) == 0x9000)
-          { itype = SH64_COMPACT_INSN_MOVW10_COMPACT; goto extract_sfmt_movw10_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 1279 : itype = SH64_COMPACT_INSN_MOVW10_COMPACT; goto extract_sfmt_movw10_compact;
       case 1280 : /* fall through */
       case 1281 : /* fall through */
       case 1282 : /* fall through */
@@ -2141,10 +1902,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 1404 : /* fall through */
       case 1405 : /* fall through */
       case 1406 : /* fall through */
-      case 1407 :
-        if ((entire_insn & 0xf000) == 0xa000)
-          { itype = SH64_COMPACT_INSN_BRA_COMPACT; goto extract_sfmt_bra_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 1407 : itype = SH64_COMPACT_INSN_BRA_COMPACT; goto extract_sfmt_bra_compact;
       case 1408 : /* fall through */
       case 1409 : /* fall through */
       case 1410 : /* fall through */
@@ -2272,10 +2030,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 1532 : /* fall through */
       case 1533 : /* fall through */
       case 1534 : /* fall through */
-      case 1535 :
-        if ((entire_insn & 0xf000) == 0xb000)
-          { itype = SH64_COMPACT_INSN_BSR_COMPACT; goto extract_sfmt_bsr_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 1535 : itype = SH64_COMPACT_INSN_BSR_COMPACT; goto extract_sfmt_bsr_compact;
       case 1536 : /* fall through */
       case 1537 : /* fall through */
       case 1538 : /* fall through */
@@ -2408,70 +2163,22 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 8) & (15 << 0)));
           switch (val)
           {
-          case 0 :
-            if ((entire_insn & 0xff00) == 0xc000)
-              { itype = SH64_COMPACT_INSN_MOVB4_COMPACT; goto extract_sfmt_movb4_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 1 :
-            if ((entire_insn & 0xff00) == 0xc100)
-              { itype = SH64_COMPACT_INSN_MOVW4_COMPACT; goto extract_sfmt_movw4_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 2 :
-            if ((entire_insn & 0xff00) == 0xc200)
-              { itype = SH64_COMPACT_INSN_MOVL4_COMPACT; goto extract_sfmt_movl4_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 3 :
-            if ((entire_insn & 0xff00) == 0xc300)
-              { itype = SH64_COMPACT_INSN_TRAPA_COMPACT; goto extract_sfmt_trapa_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 4 :
-            if ((entire_insn & 0xff00) == 0xc400)
-              { itype = SH64_COMPACT_INSN_MOVB9_COMPACT; goto extract_sfmt_movb9_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 5 :
-            if ((entire_insn & 0xff00) == 0xc500)
-              { itype = SH64_COMPACT_INSN_MOVW9_COMPACT; goto extract_sfmt_movw9_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 6 :
-            if ((entire_insn & 0xff00) == 0xc600)
-              { itype = SH64_COMPACT_INSN_MOVL9_COMPACT; goto extract_sfmt_movl9_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 7 :
-            if ((entire_insn & 0xff00) == 0xc700)
-              { itype = SH64_COMPACT_INSN_MOVA_COMPACT; goto extract_sfmt_mova_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 8 :
-            if ((entire_insn & 0xff00) == 0xc800)
-              { itype = SH64_COMPACT_INSN_TSTI_COMPACT; goto extract_sfmt_tsti_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 9 :
-            if ((entire_insn & 0xff00) == 0xc900)
-              { itype = SH64_COMPACT_INSN_ANDI_COMPACT; goto extract_sfmt_andi_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 10 :
-            if ((entire_insn & 0xff00) == 0xca00)
-              { itype = SH64_COMPACT_INSN_XORI_COMPACT; goto extract_sfmt_andi_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 11 :
-            if ((entire_insn & 0xff00) == 0xcb00)
-              { itype = SH64_COMPACT_INSN_ORI_COMPACT; goto extract_sfmt_andi_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 12 :
-            if ((entire_insn & 0xff00) == 0xcc00)
-              { itype = SH64_COMPACT_INSN_TSTB_COMPACT; goto extract_sfmt_tstb_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 13 :
-            if ((entire_insn & 0xff00) == 0xcd00)
-              { itype = SH64_COMPACT_INSN_ANDB_COMPACT; goto extract_sfmt_andb_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 14 :
-            if ((entire_insn & 0xff00) == 0xce00)
-              { itype = SH64_COMPACT_INSN_XORB_COMPACT; goto extract_sfmt_andb_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 15 :
-            if ((entire_insn & 0xff00) == 0xcf00)
-              { itype = SH64_COMPACT_INSN_ORB_COMPACT; goto extract_sfmt_andb_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = SH64_COMPACT_INSN_MOVB4_COMPACT; goto extract_sfmt_movb4_compact;
+          case 1 : itype = SH64_COMPACT_INSN_MOVW4_COMPACT; goto extract_sfmt_movw4_compact;
+          case 2 : itype = SH64_COMPACT_INSN_MOVL4_COMPACT; goto extract_sfmt_movl4_compact;
+          case 3 : itype = SH64_COMPACT_INSN_TRAPA_COMPACT; goto extract_sfmt_trapa_compact;
+          case 4 : itype = SH64_COMPACT_INSN_MOVB9_COMPACT; goto extract_sfmt_movb9_compact;
+          case 5 : itype = SH64_COMPACT_INSN_MOVW9_COMPACT; goto extract_sfmt_movw9_compact;
+          case 6 : itype = SH64_COMPACT_INSN_MOVL9_COMPACT; goto extract_sfmt_movl9_compact;
+          case 7 : itype = SH64_COMPACT_INSN_MOVA_COMPACT; goto extract_sfmt_mova_compact;
+          case 8 : itype = SH64_COMPACT_INSN_TSTI_COMPACT; goto extract_sfmt_tsti_compact;
+          case 9 : itype = SH64_COMPACT_INSN_ANDI_COMPACT; goto extract_sfmt_andi_compact;
+          case 10 : itype = SH64_COMPACT_INSN_XORI_COMPACT; goto extract_sfmt_andi_compact;
+          case 11 : itype = SH64_COMPACT_INSN_ORI_COMPACT; goto extract_sfmt_andi_compact;
+          case 12 : itype = SH64_COMPACT_INSN_TSTB_COMPACT; goto extract_sfmt_tstb_compact;
+          case 13 : itype = SH64_COMPACT_INSN_ANDB_COMPACT; goto extract_sfmt_andb_compact;
+          case 14 : itype = SH64_COMPACT_INSN_XORB_COMPACT; goto extract_sfmt_andb_compact;
+          case 15 : itype = SH64_COMPACT_INSN_ORB_COMPACT; goto extract_sfmt_andb_compact;
           default : itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -2602,10 +2309,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 1788 : /* fall through */
       case 1789 : /* fall through */
       case 1790 : /* fall through */
-      case 1791 :
-        if ((entire_insn & 0xf000) == 0xd000)
-          { itype = SH64_COMPACT_INSN_MOVL10_COMPACT; goto extract_sfmt_movl10_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 1791 : itype = SH64_COMPACT_INSN_MOVL10_COMPACT; goto extract_sfmt_movl10_compact;
       case 1792 : /* fall through */
       case 1793 : /* fall through */
       case 1794 : /* fall through */
@@ -2733,10 +2437,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 1916 : /* fall through */
       case 1917 : /* fall through */
       case 1918 : /* fall through */
-      case 1919 :
-        if ((entire_insn & 0xf000) == 0xe000)
-          { itype = SH64_COMPACT_INSN_MOVI_COMPACT; goto extract_sfmt_movi_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 1919 : itype = SH64_COMPACT_INSN_MOVI_COMPACT; goto extract_sfmt_movi_compact;
       case 1920 : /* fall through */
       case 1936 : /* fall through */
       case 1952 : /* fall through */
@@ -2744,10 +2445,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 1984 : /* fall through */
       case 2000 : /* fall through */
       case 2016 : /* fall through */
-      case 2032 :
-        if ((entire_insn & 0xf00f) == 0xf000)
-          { itype = SH64_COMPACT_INSN_FADD_COMPACT; goto extract_sfmt_fadd_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 2032 : itype = SH64_COMPACT_INSN_FADD_COMPACT; goto extract_sfmt_fadd_compact;
       case 1921 : /* fall through */
       case 1937 : /* fall through */
       case 1953 : /* fall through */
@@ -2755,10 +2453,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 1985 : /* fall through */
       case 2001 : /* fall through */
       case 2017 : /* fall through */
-      case 2033 :
-        if ((entire_insn & 0xf00f) == 0xf001)
-          { itype = SH64_COMPACT_INSN_FSUB_COMPACT; goto extract_sfmt_fadd_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 2033 : itype = SH64_COMPACT_INSN_FSUB_COMPACT; goto extract_sfmt_fadd_compact;
       case 1922 : /* fall through */
       case 1938 : /* fall through */
       case 1954 : /* fall through */
@@ -2766,10 +2461,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 1986 : /* fall through */
       case 2002 : /* fall through */
       case 2018 : /* fall through */
-      case 2034 :
-        if ((entire_insn & 0xf00f) == 0xf002)
-          { itype = SH64_COMPACT_INSN_FMUL_COMPACT; goto extract_sfmt_fadd_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 2034 : itype = SH64_COMPACT_INSN_FMUL_COMPACT; goto extract_sfmt_fadd_compact;
       case 1923 : /* fall through */
       case 1939 : /* fall through */
       case 1955 : /* fall through */
@@ -2777,10 +2469,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 1987 : /* fall through */
       case 2003 : /* fall through */
       case 2019 : /* fall through */
-      case 2035 :
-        if ((entire_insn & 0xf00f) == 0xf003)
-          { itype = SH64_COMPACT_INSN_FDIV_COMPACT; goto extract_sfmt_fadd_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 2035 : itype = SH64_COMPACT_INSN_FDIV_COMPACT; goto extract_sfmt_fadd_compact;
       case 1924 : /* fall through */
       case 1940 : /* fall through */
       case 1956 : /* fall through */
@@ -2788,10 +2477,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 1988 : /* fall through */
       case 2004 : /* fall through */
       case 2020 : /* fall through */
-      case 2036 :
-        if ((entire_insn & 0xf00f) == 0xf004)
-          { itype = SH64_COMPACT_INSN_FCMPEQ_COMPACT; goto extract_sfmt_fcmpeq_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 2036 : itype = SH64_COMPACT_INSN_FCMPEQ_COMPACT; goto extract_sfmt_fcmpeq_compact;
       case 1925 : /* fall through */
       case 1941 : /* fall through */
       case 1957 : /* fall through */
@@ -2799,10 +2485,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 1989 : /* fall through */
       case 2005 : /* fall through */
       case 2021 : /* fall through */
-      case 2037 :
-        if ((entire_insn & 0xf00f) == 0xf005)
-          { itype = SH64_COMPACT_INSN_FCMPGT_COMPACT; goto extract_sfmt_fcmpeq_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 2037 : itype = SH64_COMPACT_INSN_FCMPGT_COMPACT; goto extract_sfmt_fcmpeq_compact;
       case 1926 : /* fall through */
       case 1942 : /* fall through */
       case 1958 : /* fall through */
@@ -2810,10 +2493,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 1990 : /* fall through */
       case 2006 : /* fall through */
       case 2022 : /* fall through */
-      case 2038 :
-        if ((entire_insn & 0xf00f) == 0xf006)
-          { itype = SH64_COMPACT_INSN_FMOV4_COMPACT; goto extract_sfmt_fmov4_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 2038 : itype = SH64_COMPACT_INSN_FMOV4_COMPACT; goto extract_sfmt_fmov4_compact;
       case 1927 : /* fall through */
       case 1943 : /* fall through */
       case 1959 : /* fall through */
@@ -2821,10 +2501,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 1991 : /* fall through */
       case 2007 : /* fall through */
       case 2023 : /* fall through */
-      case 2039 :
-        if ((entire_insn & 0xf00f) == 0xf007)
-          { itype = SH64_COMPACT_INSN_FMOV7_COMPACT; goto extract_sfmt_fmov7_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 2039 : itype = SH64_COMPACT_INSN_FMOV7_COMPACT; goto extract_sfmt_fmov7_compact;
       case 1928 : /* fall through */
       case 1944 : /* fall through */
       case 1960 : /* fall through */
@@ -2832,10 +2509,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 1992 : /* fall through */
       case 2008 : /* fall through */
       case 2024 : /* fall through */
-      case 2040 :
-        if ((entire_insn & 0xf00f) == 0xf008)
-          { itype = SH64_COMPACT_INSN_FMOV2_COMPACT; goto extract_sfmt_fmov2_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 2040 : itype = SH64_COMPACT_INSN_FMOV2_COMPACT; goto extract_sfmt_fmov2_compact;
       case 1929 : /* fall through */
       case 1945 : /* fall through */
       case 1961 : /* fall through */
@@ -2843,10 +2517,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 1993 : /* fall through */
       case 2009 : /* fall through */
       case 2025 : /* fall through */
-      case 2041 :
-        if ((entire_insn & 0xf00f) == 0xf009)
-          { itype = SH64_COMPACT_INSN_FMOV3_COMPACT; goto extract_sfmt_fmov3_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 2041 : itype = SH64_COMPACT_INSN_FMOV3_COMPACT; goto extract_sfmt_fmov3_compact;
       case 1930 : /* fall through */
       case 1946 : /* fall through */
       case 1962 : /* fall through */
@@ -2854,10 +2525,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 1994 : /* fall through */
       case 2010 : /* fall through */
       case 2026 : /* fall through */
-      case 2042 :
-        if ((entire_insn & 0xf00f) == 0xf00a)
-          { itype = SH64_COMPACT_INSN_FMOV5_COMPACT; goto extract_sfmt_fmov5_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 2042 : itype = SH64_COMPACT_INSN_FMOV5_COMPACT; goto extract_sfmt_fmov5_compact;
       case 1931 : /* fall through */
       case 1947 : /* fall through */
       case 1963 : /* fall through */
@@ -2865,10 +2533,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 1995 : /* fall through */
       case 2011 : /* fall through */
       case 2027 : /* fall through */
-      case 2043 :
-        if ((entire_insn & 0xf00f) == 0xf00b)
-          { itype = SH64_COMPACT_INSN_FMOV6_COMPACT; goto extract_sfmt_fmov6_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 2043 : itype = SH64_COMPACT_INSN_FMOV6_COMPACT; goto extract_sfmt_fmov6_compact;
       case 1932 : /* fall through */
       case 1948 : /* fall through */
       case 1964 : /* fall through */
@@ -2876,23 +2541,14 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 1996 : /* fall through */
       case 2012 : /* fall through */
       case 2028 : /* fall through */
-      case 2044 :
-        if ((entire_insn & 0xf00f) == 0xf00c)
-          { itype = SH64_COMPACT_INSN_FMOV1_COMPACT; goto extract_sfmt_fmov1_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 2044 : itype = SH64_COMPACT_INSN_FMOV1_COMPACT; goto extract_sfmt_fmov1_compact;
       case 1933 :
         {
           unsigned int val = (((insn >> 7) & (1 << 0)));
           switch (val)
           {
-          case 0 :
-            if ((entire_insn & 0xf0ff) == 0xf00d)
-              { itype = SH64_COMPACT_INSN_FSTS_COMPACT; goto extract_sfmt_fsts_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 1 :
-            if ((entire_insn & 0xf0ff) == 0xf08d)
-              { itype = SH64_COMPACT_INSN_FLDI0_COMPACT; goto extract_sfmt_fldi0_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = SH64_COMPACT_INSN_FSTS_COMPACT; goto extract_sfmt_fsts_compact;
+          case 1 : itype = SH64_COMPACT_INSN_FLDI0_COMPACT; goto extract_sfmt_fldi0_compact;
           default : itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -2903,23 +2559,14 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
       case 1998 : /* fall through */
       case 2014 : /* fall through */
       case 2030 : /* fall through */
-      case 2046 :
-        if ((entire_insn & 0xf00f) == 0xf00e)
-          { itype = SH64_COMPACT_INSN_FMAC_COMPACT; goto extract_sfmt_fmac_compact; }
-        itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+      case 2046 : itype = SH64_COMPACT_INSN_FMAC_COMPACT; goto extract_sfmt_fmac_compact;
       case 1949 :
         {
           unsigned int val = (((insn >> 7) & (1 << 0)));
           switch (val)
           {
-          case 0 :
-            if ((entire_insn & 0xf0ff) == 0xf01d)
-              { itype = SH64_COMPACT_INSN_FLDS_COMPACT; goto extract_sfmt_flds_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 1 :
-            if ((entire_insn & 0xf0ff) == 0xf09d)
-              { itype = SH64_COMPACT_INSN_FLDI1_COMPACT; goto extract_sfmt_fldi0_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = SH64_COMPACT_INSN_FLDS_COMPACT; goto extract_sfmt_flds_compact;
+          case 1 : itype = SH64_COMPACT_INSN_FLDI1_COMPACT; goto extract_sfmt_fldi0_compact;
           default : itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
@@ -2928,10 +2575,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 7) & (1 << 0)));
           switch (val)
           {
-          case 0 :
-            if ((entire_insn & 0xf0ff) == 0xf02d)
-              { itype = SH64_COMPACT_INSN_FLOAT_COMPACT; goto extract_sfmt_float_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = SH64_COMPACT_INSN_FLOAT_COMPACT; goto extract_sfmt_float_compact;
           case 1 :
             if ((entire_insn & 0xf1ff) == 0xf0ad)
               { itype = SH64_COMPACT_INSN_FCNVSD_COMPACT; goto extract_sfmt_fcnvsd_compact; }
@@ -2944,10 +2588,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 7) & (1 << 0)));
           switch (val)
           {
-          case 0 :
-            if ((entire_insn & 0xf0ff) == 0xf03d)
-              { itype = SH64_COMPACT_INSN_FTRC_COMPACT; goto extract_sfmt_ftrc_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = SH64_COMPACT_INSN_FTRC_COMPACT; goto extract_sfmt_ftrc_compact;
           case 1 :
             if ((entire_insn & 0xf1ff) == 0xf0bd)
               { itype = SH64_COMPACT_INSN_FCNVDS_COMPACT; goto extract_sfmt_fcnvds_compact; }
@@ -2968,14 +2609,8 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
           unsigned int val = (((insn >> 7) & (1 << 0)));
           switch (val)
           {
-          case 0 :
-            if ((entire_insn & 0xf0ff) == 0xf06d)
-              { itype = SH64_COMPACT_INSN_FSQRT_COMPACT; goto extract_sfmt_fabs_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
-          case 1 :
-            if ((entire_insn & 0xf0ff) == 0xf0ed)
-              { itype = SH64_COMPACT_INSN_FIPR_COMPACT; goto extract_sfmt_fipr_compact; }
-            itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
+          case 0 : itype = SH64_COMPACT_INSN_FSQRT_COMPACT; goto extract_sfmt_fabs_compact;
+          case 1 : itype = SH64_COMPACT_INSN_FIPR_COMPACT; goto extract_sfmt_fipr_compact;
           default : itype = SH64_COMPACT_INSN_X_INVALID; goto extract_sfmt_empty;
           }
         }
