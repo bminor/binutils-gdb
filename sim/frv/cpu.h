@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2007 Free Software Foundation, Inc.
+Copyright 1996-2009 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -197,7 +197,7 @@ SET_H_FR_INT ((index), ORSI (ANDSI (GET_H_FR_INT ((index)), 0xffff0000), ANDHI (
 #define SET_H_FR_0(index, x) \
 do { \
 {\
-if (GTSI ((x), 255)) {\
+if (GTUSI ((x), 255)) {\
   (x) = 255;\
 }\
 SET_H_FR_INT ((index), ORSI (ANDSI (GET_H_FR_INT ((index)), 0xffffff00), (x)));\
@@ -207,7 +207,7 @@ SET_H_FR_INT ((index), ORSI (ANDSI (GET_H_FR_INT ((index)), 0xffffff00), (x)));\
 #define SET_H_FR_1(index, x) \
 do { \
 {\
-if (GTSI ((x), 255)) {\
+if (GTUSI ((x), 255)) {\
   (x) = 255;\
 }\
 SET_H_FR_INT ((index), ORSI (ANDSI (GET_H_FR_INT ((index)), 0xffff00ff), SLLHI ((x), 8)));\
@@ -217,7 +217,7 @@ SET_H_FR_INT ((index), ORSI (ANDSI (GET_H_FR_INT ((index)), 0xffff00ff), SLLHI (
 #define SET_H_FR_2(index, x) \
 do { \
 {\
-if (GTSI ((x), 255)) {\
+if (GTUSI ((x), 255)) {\
   (x) = 255;\
 }\
 SET_H_FR_INT ((index), ORSI (ANDSI (GET_H_FR_INT ((index)), 0xff00ffff), SLLHI ((x), 16)));\
@@ -227,7 +227,7 @@ SET_H_FR_INT ((index), ORSI (ANDSI (GET_H_FR_INT ((index)), 0xff00ffff), SLLHI (
 #define SET_H_FR_3(index, x) \
 do { \
 {\
-if (GTSI ((x), 255)) {\
+if (GTUSI ((x), 255)) {\
   (x) = 255;\
 }\
 SET_H_FR_INT ((index), ORSI (ANDSI (GET_H_FR_INT ((index)), 16777215), SLLHI ((x), 24)));\
@@ -610,7 +610,7 @@ union sem_fields {
     UINT f_FRk;
     UINT f_u6;
     unsigned char in_FRinti;
-    unsigned char in_h_fr_int_USI_add__DFLT_index_of__DFLT_FRinti_1;
+    unsigned char in_h_fr_int_USI_add__INT_index_of__INT_FRinti_1;
     unsigned char out_FRintk;
   } sfmt_mwcuti;
   struct { /*  */
@@ -618,8 +618,8 @@ union sem_fields {
     UINT f_FRk;
     unsigned char in_FRintk;
     unsigned char out_FRintk;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintk_0;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintk_0;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintk_0;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintk_0;
   } sfmt_mhdsets;
   struct { /*  */
     UINT f_FCCi_2;
@@ -633,17 +633,17 @@ union sem_fields {
     UINT f_FRj;
     UINT f_FRk;
     unsigned char in_FRj;
-    unsigned char in_h_fr_SF_add__DFLT_index_of__DFLT_FRj_1;
+    unsigned char in_h_fr_SF_add__INT_index_of__INT_FRj_1;
     unsigned char out_FRintk;
-    unsigned char out_h_fr_int_USI_add__DFLT_index_of__DFLT_FRintk_1;
+    unsigned char out_h_fr_int_USI_add__INT_index_of__INT_FRintk_1;
   } sfmt_fdstoi;
   struct { /*  */
     UINT f_FRj;
     UINT f_FRk;
     unsigned char in_FRintj;
-    unsigned char in_h_fr_int_USI_add__DFLT_index_of__DFLT_FRintj_1;
+    unsigned char in_h_fr_int_USI_add__INT_index_of__INT_FRintj_1;
     unsigned char out_FRk;
-    unsigned char out_h_fr_SF_add__DFLT_index_of__DFLT_FRk_1;
+    unsigned char out_h_fr_SF_add__INT_index_of__INT_FRk_1;
   } sfmt_fditos;
   struct { /*  */
     UINT f_CRi;
@@ -674,18 +674,18 @@ union sem_fields {
     UINT f_FRi;
     UINT f_FRk;
     unsigned char in_FRintieven;
-    unsigned char in_h_fr_int_USI_add__DFLT_index_of__DFLT_FRintieven_1;
+    unsigned char in_h_fr_int_USI_add__INT_index_of__INT_FRintieven_1;
     unsigned char out_FRintkeven;
-    unsigned char out_h_fr_int_USI_add__DFLT_index_of__DFLT_FRintkeven_1;
+    unsigned char out_h_fr_int_USI_add__INT_index_of__INT_FRintkeven_1;
   } sfmt_mdrotli;
   struct { /*  */
     INT f_s6;
     UINT f_ACC40Si;
     UINT f_FRk;
     unsigned char in_ACC40Si;
-    unsigned char in_h_acc40S_DI_add__DFLT_index_of__DFLT_ACC40Si_1;
+    unsigned char in_h_acc40S_DI_add__INT_index_of__INT_ACC40Si_1;
     unsigned char out_FRintkeven;
-    unsigned char out_h_fr_int_USI_add__DFLT_index_of__DFLT_FRintkeven_1;
+    unsigned char out_h_fr_int_USI_add__INT_index_of__INT_FRintkeven_1;
   } sfmt_mdcutssi;
   struct { /*  */
     UINT f_FRi;
@@ -693,7 +693,7 @@ union sem_fields {
     UINT f_FRk;
     unsigned char in_FRinti;
     unsigned char in_FRintj;
-    unsigned char in_h_fr_int_USI_add__DFLT_index_of__DFLT_FRinti_1;
+    unsigned char in_h_fr_int_USI_add__INT_index_of__INT_FRinti_1;
     unsigned char out_FRintk;
   } sfmt_mwcut;
   struct { /*  */
@@ -799,11 +799,11 @@ union sem_fields {
     INT f_s5;
     UINT f_FRk;
     unsigned char in_FRintk;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintk_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintk_0;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintk_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintk_0;
     unsigned char out_FRintk;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintk_0;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintk_0;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintk_0;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintk_0;
   } sfmt_mhdseth;
   struct { /*  */
     UINT f_CCi;
@@ -864,9 +864,9 @@ union sem_fields {
     UINT f_cond;
     unsigned char in_CCi;
     unsigned char in_FRintk;
-    unsigned char in_h_fr_int_USI_add__DFLT_index_of__DFLT_FRintk_1;
+    unsigned char in_h_fr_int_USI_add__INT_index_of__INT_FRintk_1;
     unsigned char out_GRj;
-    unsigned char out_h_gr_USI_add__DFLT_index_of__DFLT_GRj_1;
+    unsigned char out_h_gr_USI_add__INT_index_of__INT_GRj_1;
   } sfmt_cmovfgd;
   struct { /*  */
     UINT f_CCi;
@@ -875,9 +875,9 @@ union sem_fields {
     UINT f_cond;
     unsigned char in_CCi;
     unsigned char in_GRj;
-    unsigned char in_h_gr_USI_add__DFLT_index_of__DFLT_GRj_1;
+    unsigned char in_h_gr_USI_add__INT_index_of__INT_GRj_1;
     unsigned char out_FRintk;
-    unsigned char out_h_fr_int_USI_add__DFLT_index_of__DFLT_FRintk_1;
+    unsigned char out_h_fr_int_USI_add__INT_index_of__INT_FRintk_1;
   } sfmt_cmovgfd;
   struct { /*  */
     UINT f_GRi;
@@ -908,34 +908,34 @@ union sem_fields {
     UINT f_cond;
     UINT f_u6;
     unsigned char in_CCi;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRinti_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRinti_0;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintk_0;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintk_0;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRinti_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRinti_0;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintk_0;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintk_0;
   } sfmt_cmexpdhw;
   struct { /*  */
     UINT f_ACC40Si;
     UINT f_ACC40Sk;
     unsigned char in_ACC40Si;
-    unsigned char in_h_acc40S_DI_add__DFLT_index_of__DFLT_ACC40Si_1;
-    unsigned char in_h_acc40S_DI_add__DFLT_index_of__DFLT_ACC40Si_2;
-    unsigned char in_h_acc40S_DI_add__DFLT_index_of__DFLT_ACC40Si_3;
+    unsigned char in_h_acc40S_DI_add__INT_index_of__INT_ACC40Si_1;
+    unsigned char in_h_acc40S_DI_add__INT_index_of__INT_ACC40Si_2;
+    unsigned char in_h_acc40S_DI_add__INT_index_of__INT_ACC40Si_3;
     unsigned char out_ACC40Sk;
-    unsigned char out_h_acc40S_DI_add__DFLT_index_of__DFLT_ACC40Sk_1;
-    unsigned char out_h_acc40S_DI_add__DFLT_index_of__DFLT_ACC40Sk_2;
-    unsigned char out_h_acc40S_DI_add__DFLT_index_of__DFLT_ACC40Sk_3;
+    unsigned char out_h_acc40S_DI_add__INT_index_of__INT_ACC40Sk_1;
+    unsigned char out_h_acc40S_DI_add__INT_index_of__INT_ACC40Sk_2;
+    unsigned char out_h_acc40S_DI_add__INT_index_of__INT_ACC40Sk_3;
   } sfmt_mdasaccs;
   struct { /*  */
     UINT f_FRj;
     UINT f_FRk;
     unsigned char in_FRintj;
     unsigned char in_FRintk;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintj_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintj_0;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintj_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintj_0;
     unsigned char out_FRintj;
     unsigned char out_FRintk;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintk_0;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintk_0;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintk_0;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintk_0;
   } sfmt_mabshs;
   struct { /*  */
     UINT f_FRi;
@@ -943,11 +943,11 @@ union sem_fields {
     UINT f_u6;
     unsigned char in_FRinti;
     unsigned char in_FRintk;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRinti_0;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRinti_1;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRinti_0;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRinti_1;
     unsigned char out_FRinti;
     unsigned char out_FRintk;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintk_0;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintk_0;
   } sfmt_mcplhi;
   struct { /*  */
     UINT f_FCCi_2;
@@ -956,10 +956,10 @@ union sem_fields {
     UINT f_FRk;
     unsigned char in_FRi;
     unsigned char in_FRj;
-    unsigned char in_h_fr_SF_add__DFLT_index_of__DFLT_FRi_1;
-    unsigned char in_h_fr_SF_add__DFLT_index_of__DFLT_FRj_1;
+    unsigned char in_h_fr_SF_add__INT_index_of__INT_FRi_1;
+    unsigned char in_h_fr_SF_add__INT_index_of__INT_FRj_1;
     unsigned char out_FCCi_2;
-    unsigned char out_h_fccr_UQI_add__DFLT_index_of__DFLT_FCCi_2_1;
+    unsigned char out_h_fccr_UQI_add__INT_index_of__INT_FCCi_2_1;
   } sfmt_nfdcmps;
   struct { /*  */
     UINT f_CCi;
@@ -1001,25 +1001,25 @@ union sem_fields {
     UINT f_FRk;
     UINT f_GRj;
     unsigned char in_FRintk;
-    unsigned char in_h_fr_int_USI_add__DFLT_index_of__DFLT_FRintk_1;
-    unsigned char in_h_fr_int_USI_add__DFLT_index_of__DFLT_FRintk_2;
-    unsigned char in_h_fr_int_USI_add__DFLT_index_of__DFLT_FRintk_3;
+    unsigned char in_h_fr_int_USI_add__INT_index_of__INT_FRintk_1;
+    unsigned char in_h_fr_int_USI_add__INT_index_of__INT_FRintk_2;
+    unsigned char in_h_fr_int_USI_add__INT_index_of__INT_FRintk_3;
     unsigned char out_GRj;
-    unsigned char out_h_gr_USI_add__DFLT_index_of__DFLT_GRj_1;
-    unsigned char out_h_gr_USI_add__DFLT_index_of__DFLT_GRj_2;
-    unsigned char out_h_gr_USI_add__DFLT_index_of__DFLT_GRj_3;
+    unsigned char out_h_gr_USI_add__INT_index_of__INT_GRj_1;
+    unsigned char out_h_gr_USI_add__INT_index_of__INT_GRj_2;
+    unsigned char out_h_gr_USI_add__INT_index_of__INT_GRj_3;
   } sfmt_movfgq;
   struct { /*  */
     UINT f_FRk;
     UINT f_GRj;
     unsigned char in_GRj;
-    unsigned char in_h_gr_USI_add__DFLT_index_of__DFLT_GRj_1;
-    unsigned char in_h_gr_USI_add__DFLT_index_of__DFLT_GRj_2;
-    unsigned char in_h_gr_USI_add__DFLT_index_of__DFLT_GRj_3;
+    unsigned char in_h_gr_USI_add__INT_index_of__INT_GRj_1;
+    unsigned char in_h_gr_USI_add__INT_index_of__INT_GRj_2;
+    unsigned char in_h_gr_USI_add__INT_index_of__INT_GRj_3;
     unsigned char out_FRintk;
-    unsigned char out_h_fr_int_USI_add__DFLT_index_of__DFLT_FRintk_1;
-    unsigned char out_h_fr_int_USI_add__DFLT_index_of__DFLT_FRintk_2;
-    unsigned char out_h_fr_int_USI_add__DFLT_index_of__DFLT_FRintk_3;
+    unsigned char out_h_fr_int_USI_add__INT_index_of__INT_FRintk_1;
+    unsigned char out_h_fr_int_USI_add__INT_index_of__INT_FRintk_2;
+    unsigned char out_h_fr_int_USI_add__INT_index_of__INT_FRintk_3;
   } sfmt_movgfq;
   struct { /*  */
     UINT f_CCi;
@@ -1135,12 +1135,12 @@ union sem_fields {
     UINT f_FRj;
     unsigned char in_FRinti;
     unsigned char in_FRintj;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRinti_0;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintj_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRinti_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintj_0;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRinti_0;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintj_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRinti_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintj_0;
     unsigned char out_FCCk;
-    unsigned char out_h_fccr_UQI_add__DFLT_index_of__DFLT_FCCk_1;
+    unsigned char out_h_fccr_UQI_add__INT_index_of__INT_FCCk_1;
   } sfmt_mcmpsh;
   struct { /*  */
     UINT f_FRi;
@@ -1148,12 +1148,12 @@ union sem_fields {
     UINT f_u6;
     unsigned char in_FRinti;
     unsigned char in_FRintk;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRinti_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRinti_0;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRinti_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRinti_0;
     unsigned char out_FRinti;
     unsigned char out_FRintk;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintk_0;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintk_0;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintk_0;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintk_0;
   } sfmt_msllhi;
   struct { /*  */
     UINT f_FRi;
@@ -1162,11 +1162,11 @@ union sem_fields {
     unsigned char in_FRi;
     unsigned char in_FRj;
     unsigned char in_FRk;
-    unsigned char in_h_fr_SF_add__DFLT_index_of__DFLT_FRi_1;
-    unsigned char in_h_fr_SF_add__DFLT_index_of__DFLT_FRj_1;
-    unsigned char in_h_fr_SF_add__DFLT_index_of__DFLT_FRk_1;
+    unsigned char in_h_fr_SF_add__INT_index_of__INT_FRi_1;
+    unsigned char in_h_fr_SF_add__INT_index_of__INT_FRj_1;
+    unsigned char in_h_fr_SF_add__INT_index_of__INT_FRk_1;
     unsigned char out_FRk;
-    unsigned char out_h_fr_SF_add__DFLT_index_of__DFLT_FRk_1;
+    unsigned char out_h_fr_SF_add__INT_index_of__INT_FRk_1;
   } sfmt_fdmadds;
   struct { /*  */
     UINT f_FCCi_2;
@@ -1203,9 +1203,9 @@ union sem_fields {
     unsigned char in_CCi;
     unsigned char in_GRi;
     unsigned char in_GRj;
-    unsigned char in_h_iccr_UQI_and__DFLT_index_of__DFLT_CCi_3;
+    unsigned char in_h_iccr_UQI_and__INT_index_of__INT_CCi_3;
     unsigned char out_GRdoublek;
-    unsigned char out_h_iccr_UQI_and__DFLT_index_of__DFLT_CCi_3;
+    unsigned char out_h_iccr_UQI_and__INT_index_of__INT_CCi_3;
   } sfmt_csmulcc;
   struct { /*  */
     UINT f_CCi;
@@ -1216,23 +1216,23 @@ union sem_fields {
     unsigned char in_CCi;
     unsigned char in_GRi;
     unsigned char in_GRj;
-    unsigned char in_h_iccr_UQI_and__DFLT_index_of__DFLT_CCi_3;
+    unsigned char in_h_iccr_UQI_and__INT_index_of__INT_CCi_3;
     unsigned char out_GRk;
-    unsigned char out_h_iccr_UQI_and__DFLT_index_of__DFLT_CCi_3;
+    unsigned char out_h_iccr_UQI_and__INT_index_of__INT_CCi_3;
   } sfmt_caddcc;
   struct { /*  */
     UINT f_FRi;
     UINT f_FRk;
     unsigned char in_FRinti;
     unsigned char in_FRintkeven;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRinti_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRinti_0;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRinti_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRinti_0;
     unsigned char out_FRinti;
     unsigned char out_FRintkeven;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintkeven_0;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintkeven_add__DFLT_0_1;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintkeven_0;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintkeven_add__DFLT_0_1;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintkeven_0;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintkeven_add__INT_0_1;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintkeven_0;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintkeven_add__INT_0_1;
   } sfmt_munpackh;
   struct { /*  */
     UINT f_CCi;
@@ -1243,10 +1243,10 @@ union sem_fields {
     unsigned char in_CCi;
     unsigned char in_FRi;
     unsigned char in_FRj;
-    unsigned char in_h_fr_SF_add__DFLT_index_of__DFLT_FRi_1;
-    unsigned char in_h_fr_SF_add__DFLT_index_of__DFLT_FRj_1;
+    unsigned char in_h_fr_SF_add__INT_index_of__INT_FRi_1;
+    unsigned char in_h_fr_SF_add__INT_index_of__INT_FRj_1;
     unsigned char out_FRk;
-    unsigned char out_h_fr_SF_add__DFLT_index_of__DFLT_FRk_1;
+    unsigned char out_h_fr_SF_add__INT_index_of__INT_FRk_1;
   } sfmt_cfmas;
   struct { /*  */
     UINT f_CCi;
@@ -1256,13 +1256,13 @@ union sem_fields {
     UINT f_u6;
     unsigned char in_CCi;
     unsigned char in_FRintkeven;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRinti_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRinti_0;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRinti_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRinti_0;
     unsigned char out_FRintkeven;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintkeven_0;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintkeven_1;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintkeven_0;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintkeven_1;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintkeven_0;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintkeven_1;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintkeven_0;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintkeven_1;
   } sfmt_cmexpdhd;
   struct { /*  */
     UINT f_CCi;
@@ -1273,12 +1273,12 @@ union sem_fields {
     unsigned char in_CCi;
     unsigned char in_FRinti;
     unsigned char in_FRintj;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRinti_0;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintj_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRinti_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintj_0;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintk_0;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintk_0;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRinti_0;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintj_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRinti_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintj_0;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintk_0;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintk_0;
   } sfmt_cmaddhss;
   struct { /*  */
     UINT f_FRi;
@@ -1286,16 +1286,16 @@ union sem_fields {
     UINT f_u6;
     unsigned char in_FRintieven;
     unsigned char in_FRintkeven;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintieven_0;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintieven_1;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintieven_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintieven_1;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintieven_0;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintieven_1;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintieven_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintieven_1;
     unsigned char out_FRintieven;
     unsigned char out_FRintkeven;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintkeven_0;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintkeven_1;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintkeven_0;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintkeven_1;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintkeven_0;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintkeven_1;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintkeven_0;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintkeven_1;
   } sfmt_mqsllhi;
   struct { /*  */
     UINT f_FRi;
@@ -1303,16 +1303,16 @@ union sem_fields {
     UINT f_FRk;
     unsigned char in_FRi;
     unsigned char in_FRj;
-    unsigned char in_h_fr_SF_add__DFLT_index_of__DFLT_FRi_1;
-    unsigned char in_h_fr_SF_add__DFLT_index_of__DFLT_FRi_2;
-    unsigned char in_h_fr_SF_add__DFLT_index_of__DFLT_FRi_3;
-    unsigned char in_h_fr_SF_add__DFLT_index_of__DFLT_FRj_1;
-    unsigned char in_h_fr_SF_add__DFLT_index_of__DFLT_FRj_2;
-    unsigned char in_h_fr_SF_add__DFLT_index_of__DFLT_FRj_3;
+    unsigned char in_h_fr_SF_add__INT_index_of__INT_FRi_1;
+    unsigned char in_h_fr_SF_add__INT_index_of__INT_FRi_2;
+    unsigned char in_h_fr_SF_add__INT_index_of__INT_FRi_3;
+    unsigned char in_h_fr_SF_add__INT_index_of__INT_FRj_1;
+    unsigned char in_h_fr_SF_add__INT_index_of__INT_FRj_2;
+    unsigned char in_h_fr_SF_add__INT_index_of__INT_FRj_3;
     unsigned char out_FRk;
-    unsigned char out_h_fr_SF_add__DFLT_index_of__DFLT_FRk_1;
-    unsigned char out_h_fr_SF_add__DFLT_index_of__DFLT_FRk_2;
-    unsigned char out_h_fr_SF_add__DFLT_index_of__DFLT_FRk_3;
+    unsigned char out_h_fr_SF_add__INT_index_of__INT_FRk_1;
+    unsigned char out_h_fr_SF_add__INT_index_of__INT_FRk_2;
+    unsigned char out_h_fr_SF_add__INT_index_of__INT_FRk_3;
   } sfmt_fdmas;
   struct { /*  */
     UINT f_ACC40Uk;
@@ -1324,13 +1324,13 @@ union sem_fields {
     unsigned char in_CCi;
     unsigned char in_FRinti;
     unsigned char in_FRintj;
-    unsigned char in_h_acc40U_UDI_add__DFLT_index_of__DFLT_ACC40Uk_1;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRinti_0;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintj_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRinti_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintj_0;
+    unsigned char in_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_1;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRinti_0;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintj_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRinti_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintj_0;
     unsigned char out_ACC40Uk;
-    unsigned char out_h_acc40U_UDI_add__DFLT_index_of__DFLT_ACC40Uk_1;
+    unsigned char out_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_1;
   } sfmt_cmmachu;
   struct { /*  */
     UINT f_ACC40Sk;
@@ -1342,13 +1342,13 @@ union sem_fields {
     unsigned char in_CCi;
     unsigned char in_FRinti;
     unsigned char in_FRintj;
-    unsigned char in_h_acc40S_DI_add__DFLT_index_of__DFLT_ACC40Sk_1;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRinti_0;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintj_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRinti_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintj_0;
+    unsigned char in_h_acc40S_DI_add__INT_index_of__INT_ACC40Sk_1;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRinti_0;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintj_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRinti_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintj_0;
     unsigned char out_ACC40Sk;
-    unsigned char out_h_acc40S_DI_add__DFLT_index_of__DFLT_ACC40Sk_1;
+    unsigned char out_h_acc40S_DI_add__INT_index_of__INT_ACC40Sk_1;
   } sfmt_cmmachs;
   struct { /*  */
     UINT f_CCi;
@@ -1358,16 +1358,16 @@ union sem_fields {
     unsigned char in_CCi;
     unsigned char in_FRintjeven;
     unsigned char in_FRintk;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintjeven_0;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintjeven_1;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintjeven_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintjeven_1;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintjeven_0;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintjeven_1;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintjeven_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintjeven_1;
     unsigned char out_FRintjeven;
     unsigned char out_FRintk;
-    unsigned char out_h_fr_0_UHI_add__DFLT_index_of__DFLT_FRintk_0;
-    unsigned char out_h_fr_1_UHI_add__DFLT_index_of__DFLT_FRintk_0;
-    unsigned char out_h_fr_2_UHI_add__DFLT_index_of__DFLT_FRintk_0;
-    unsigned char out_h_fr_3_UHI_add__DFLT_index_of__DFLT_FRintk_0;
+    unsigned char out_h_fr_0_UHI_add__INT_index_of__INT_FRintk_0;
+    unsigned char out_h_fr_1_UHI_add__INT_index_of__INT_FRintk_0;
+    unsigned char out_h_fr_2_UHI_add__INT_index_of__INT_FRintk_0;
+    unsigned char out_h_fr_3_UHI_add__INT_index_of__INT_FRintk_0;
   } sfmt_cmhtob;
   struct { /*  */
     UINT f_CCi;
@@ -1377,16 +1377,16 @@ union sem_fields {
     unsigned char in_CCi;
     unsigned char in_FRintj;
     unsigned char in_FRintkeven;
-    unsigned char in_h_fr_0_UHI_add__DFLT_index_of__DFLT_FRintj_0;
-    unsigned char in_h_fr_1_UHI_add__DFLT_index_of__DFLT_FRintj_0;
-    unsigned char in_h_fr_2_UHI_add__DFLT_index_of__DFLT_FRintj_0;
-    unsigned char in_h_fr_3_UHI_add__DFLT_index_of__DFLT_FRintj_0;
+    unsigned char in_h_fr_0_UHI_add__INT_index_of__INT_FRintj_0;
+    unsigned char in_h_fr_1_UHI_add__INT_index_of__INT_FRintj_0;
+    unsigned char in_h_fr_2_UHI_add__INT_index_of__INT_FRintj_0;
+    unsigned char in_h_fr_3_UHI_add__INT_index_of__INT_FRintj_0;
     unsigned char out_FRintj;
     unsigned char out_FRintkeven;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintkeven_0;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintkeven_1;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintkeven_0;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintkeven_1;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintkeven_0;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintkeven_1;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintkeven_0;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintkeven_1;
   } sfmt_cmbtoh;
   struct { /*  */
     UINT f_FRi;
@@ -1395,37 +1395,37 @@ union sem_fields {
     unsigned char in_FRintieven;
     unsigned char in_FRintjeven;
     unsigned char in_FRintkeven;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintieven_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintieven_1;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintjeven_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintjeven_1;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintieven_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintieven_1;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintjeven_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintjeven_1;
     unsigned char out_FRintieven;
     unsigned char out_FRintjeven;
     unsigned char out_FRintkeven;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintkeven_0;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintkeven_1;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintkeven_0;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintkeven_1;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintkeven_0;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintkeven_1;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintkeven_0;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintkeven_1;
   } sfmt_mdpackh;
   struct { /*  */
     UINT f_FRi;
     UINT f_FRk;
     unsigned char in_FRintieven;
     unsigned char in_FRintk;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintieven_0;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintieven_1;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintieven_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintieven_1;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintieven_0;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintieven_1;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintieven_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintieven_1;
     unsigned char out_FRintieven;
     unsigned char out_FRintk;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintk_0;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintk_2;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintk_add__DFLT_0_1;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintk_add__DFLT_2_1;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintk_0;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintk_2;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintk_add__DFLT_0_1;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintk_add__DFLT_2_1;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintk_0;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintk_2;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintk_add__INT_0_1;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintk_add__INT_2_1;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintk_0;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintk_2;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintk_add__INT_0_1;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintk_add__INT_2_1;
   } sfmt_mdunpackh;
   struct { /*  */
     UINT f_CCi;
@@ -1435,20 +1435,20 @@ union sem_fields {
     unsigned char in_CCi;
     unsigned char in_FRintj;
     unsigned char in_FRintk;
-    unsigned char in_h_fr_0_UHI_add__DFLT_index_of__DFLT_FRintj_0;
-    unsigned char in_h_fr_1_UHI_add__DFLT_index_of__DFLT_FRintj_0;
-    unsigned char in_h_fr_2_UHI_add__DFLT_index_of__DFLT_FRintj_0;
-    unsigned char in_h_fr_3_UHI_add__DFLT_index_of__DFLT_FRintj_0;
+    unsigned char in_h_fr_0_UHI_add__INT_index_of__INT_FRintj_0;
+    unsigned char in_h_fr_1_UHI_add__INT_index_of__INT_FRintj_0;
+    unsigned char in_h_fr_2_UHI_add__INT_index_of__INT_FRintj_0;
+    unsigned char in_h_fr_3_UHI_add__INT_index_of__INT_FRintj_0;
     unsigned char out_FRintj;
     unsigned char out_FRintk;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintk_0;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintk_1;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintk_2;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintk_3;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintk_0;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintk_1;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintk_2;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintk_3;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintk_0;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintk_1;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintk_2;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintk_3;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintk_0;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintk_1;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintk_2;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintk_3;
   } sfmt_cmbtohe;
   struct { /*  */
     UINT f_CCi;
@@ -1460,19 +1460,19 @@ union sem_fields {
     unsigned char in_FRintieven;
     unsigned char in_FRintjeven;
     unsigned char in_FRintkeven;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintieven_0;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintieven_1;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintjeven_0;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintjeven_1;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintieven_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintieven_1;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintjeven_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintjeven_1;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintieven_0;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintieven_1;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintjeven_0;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintjeven_1;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintieven_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintieven_1;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintjeven_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintjeven_1;
     unsigned char out_FRintkeven;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintkeven_0;
-    unsigned char out_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintkeven_1;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintkeven_0;
-    unsigned char out_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintkeven_1;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintkeven_0;
+    unsigned char out_h_fr_hi_UHI_add__INT_index_of__INT_FRintkeven_1;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintkeven_0;
+    unsigned char out_h_fr_lo_UHI_add__INT_index_of__INT_FRintkeven_1;
   } sfmt_cmqaddhss;
   struct { /*  */
     UINT f_ACC40Uk;
@@ -1484,21 +1484,21 @@ union sem_fields {
     unsigned char in_CCi;
     unsigned char in_FRintieven;
     unsigned char in_FRintjeven;
-    unsigned char in_h_acc40U_UDI_add__DFLT_index_of__DFLT_ACC40Uk_1;
-    unsigned char in_h_acc40U_UDI_add__DFLT_index_of__DFLT_ACC40Uk_2;
-    unsigned char in_h_acc40U_UDI_add__DFLT_index_of__DFLT_ACC40Uk_3;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintieven_0;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintieven_1;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintjeven_0;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintjeven_1;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintieven_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintieven_1;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintjeven_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintjeven_1;
+    unsigned char in_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_1;
+    unsigned char in_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_2;
+    unsigned char in_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_3;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintieven_0;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintieven_1;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintjeven_0;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintjeven_1;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintieven_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintieven_1;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintjeven_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintjeven_1;
     unsigned char out_ACC40Uk;
-    unsigned char out_h_acc40U_UDI_add__DFLT_index_of__DFLT_ACC40Uk_1;
-    unsigned char out_h_acc40U_UDI_add__DFLT_index_of__DFLT_ACC40Uk_2;
-    unsigned char out_h_acc40U_UDI_add__DFLT_index_of__DFLT_ACC40Uk_3;
+    unsigned char out_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_1;
+    unsigned char out_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_2;
+    unsigned char out_h_acc40U_UDI_add__INT_index_of__INT_ACC40Uk_3;
   } sfmt_cmqmachu;
   struct { /*  */
     UINT f_ACC40Sk;
@@ -1510,21 +1510,21 @@ union sem_fields {
     unsigned char in_CCi;
     unsigned char in_FRintieven;
     unsigned char in_FRintjeven;
-    unsigned char in_h_acc40S_DI_add__DFLT_index_of__DFLT_ACC40Sk_1;
-    unsigned char in_h_acc40S_DI_add__DFLT_index_of__DFLT_ACC40Sk_2;
-    unsigned char in_h_acc40S_DI_add__DFLT_index_of__DFLT_ACC40Sk_3;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintieven_0;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintieven_1;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintjeven_0;
-    unsigned char in_h_fr_hi_UHI_add__DFLT_index_of__DFLT_FRintjeven_1;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintieven_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintieven_1;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintjeven_0;
-    unsigned char in_h_fr_lo_UHI_add__DFLT_index_of__DFLT_FRintjeven_1;
+    unsigned char in_h_acc40S_DI_add__INT_index_of__INT_ACC40Sk_1;
+    unsigned char in_h_acc40S_DI_add__INT_index_of__INT_ACC40Sk_2;
+    unsigned char in_h_acc40S_DI_add__INT_index_of__INT_ACC40Sk_3;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintieven_0;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintieven_1;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintjeven_0;
+    unsigned char in_h_fr_hi_UHI_add__INT_index_of__INT_FRintjeven_1;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintieven_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintieven_1;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintjeven_0;
+    unsigned char in_h_fr_lo_UHI_add__INT_index_of__INT_FRintjeven_1;
     unsigned char out_ACC40Sk;
-    unsigned char out_h_acc40S_DI_add__DFLT_index_of__DFLT_ACC40Sk_1;
-    unsigned char out_h_acc40S_DI_add__DFLT_index_of__DFLT_ACC40Sk_2;
-    unsigned char out_h_acc40S_DI_add__DFLT_index_of__DFLT_ACC40Sk_3;
+    unsigned char out_h_acc40S_DI_add__INT_index_of__INT_ACC40Sk_1;
+    unsigned char out_h_acc40S_DI_add__INT_index_of__INT_ACC40Sk_2;
+    unsigned char out_h_acc40S_DI_add__INT_index_of__INT_ACC40Sk_3;
   } sfmt_cmqmachs;
 #if WITH_SCACHE_PBB
   /* Writeback handler.  */

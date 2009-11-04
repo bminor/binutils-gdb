@@ -1,3 +1,15 @@
+2009-11-03  Doug Evans  <dje@sebabeach.org>
+
+	* arch.c: Regenerate.
+	* arch.h: Regenerate.
+	* cpu.c: Regenerate.
+	* cpu.h: Regenerate.
+	* cpuall.h: Regenerate.
+	* decode.c: Regenerate.
+	* decode.h: Regenerate.
+	* model.c: Regenerate.
+	* sem.c: Regenerate.
+
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* config.in: Regenerate.
