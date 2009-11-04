@@ -2,22 +2,23 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+Copyright 1996-2009 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
+   This file is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3, or (at your option)
+   any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   It is distributed in the hope that it will be useful, but WITHOUT
+   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+   License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   You should have received a copy of the GNU General Public License along
+   with this program; if not, write to the Free Software Foundation, Inc.,
+   51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
@@ -70,19 +71,19 @@ typedef enum iq2000bf_insn_type {
  , IQ2000BF_INSN_WBR1U, IQ2000BF_INSN_WBR30, IQ2000BF_INSN_WBR30U, IQ2000BF_INSN_WX
  , IQ2000BF_INSN_WXU, IQ2000BF_INSN_WXR1, IQ2000BF_INSN_WXR1U, IQ2000BF_INSN_WXR30
  , IQ2000BF_INSN_WXR30U, IQ2000BF_INSN_LDW, IQ2000BF_INSN_SDW, IQ2000BF_INSN_J
- , IQ2000BF_INSN_JAL, IQ2000BF_INSN_BMB, IQ2000BF_INSN_MAX
+ , IQ2000BF_INSN_JAL, IQ2000BF_INSN_BMB, IQ2000BF_INSN__MAX
 } IQ2000BF_INSN_TYPE;
 
 /* Enum declaration for semantic formats in cpu family iq2000bf.  */
 typedef enum iq2000bf_sfmt_type {
-  IQ2000BF_SFMT_EMPTY, IQ2000BF_SFMT_ADD, IQ2000BF_SFMT_ADDI, IQ2000BF_SFMT_ADO16
- , IQ2000BF_SFMT_RAM, IQ2000BF_SFMT_SLL, IQ2000BF_SFMT_SLMV, IQ2000BF_SFMT_SLT
- , IQ2000BF_SFMT_SLTI, IQ2000BF_SFMT_BBI, IQ2000BF_SFMT_BBV, IQ2000BF_SFMT_BGEZ
- , IQ2000BF_SFMT_BGEZAL, IQ2000BF_SFMT_JALR, IQ2000BF_SFMT_JR, IQ2000BF_SFMT_LB
- , IQ2000BF_SFMT_LH, IQ2000BF_SFMT_LUI, IQ2000BF_SFMT_LW, IQ2000BF_SFMT_SB
- , IQ2000BF_SFMT_SH, IQ2000BF_SFMT_SW, IQ2000BF_SFMT_BREAK, IQ2000BF_SFMT_SYSCALL
- , IQ2000BF_SFMT_ANDOUI, IQ2000BF_SFMT_MRGB, IQ2000BF_SFMT_BCTXT, IQ2000BF_SFMT_LDW
- , IQ2000BF_SFMT_SDW, IQ2000BF_SFMT_J, IQ2000BF_SFMT_JAL
+  IQ2000BF_SFMT_EMPTY, IQ2000BF_SFMT_ADD, IQ2000BF_SFMT_ADDI, IQ2000BF_SFMT_RAM
+ , IQ2000BF_SFMT_SLL, IQ2000BF_SFMT_SLMV, IQ2000BF_SFMT_SLT, IQ2000BF_SFMT_SLTI
+ , IQ2000BF_SFMT_BBI, IQ2000BF_SFMT_BBV, IQ2000BF_SFMT_BGEZ, IQ2000BF_SFMT_BGEZAL
+ , IQ2000BF_SFMT_JALR, IQ2000BF_SFMT_JR, IQ2000BF_SFMT_LB, IQ2000BF_SFMT_LH
+ , IQ2000BF_SFMT_LUI, IQ2000BF_SFMT_LW, IQ2000BF_SFMT_SB, IQ2000BF_SFMT_SH
+ , IQ2000BF_SFMT_SW, IQ2000BF_SFMT_BREAK, IQ2000BF_SFMT_SYSCALL, IQ2000BF_SFMT_ANDOUI
+ , IQ2000BF_SFMT_MRGB, IQ2000BF_SFMT_BCTXT, IQ2000BF_SFMT_LDW, IQ2000BF_SFMT_SDW
+ , IQ2000BF_SFMT_J, IQ2000BF_SFMT_JAL
 } IQ2000BF_SFMT_TYPE;
 
 /* Function unit handlers (user written).  */

@@ -2,22 +2,23 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+Copyright 1996-2009 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
+   This file is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3, or (at your option)
+   any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   It is distributed in the hope that it will be useful, but WITHOUT
+   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+   License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   You should have received a copy of the GNU General Public License along
+   with this program; if not, write to the Free Software Foundation, Inc.,
+   51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
@@ -2685,7 +2686,7 @@ SEM_FN_NAME (iq2000bf,pkrl) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* pkrlr1: pkrlr1 $rt,$index,$count */
+/* pkrlr1: pkrlr1 $rt,$_index,$count */
 
 static SEM_PC
 SEM_FN_NAME (iq2000bf,pkrlr1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -2702,7 +2703,7 @@ SEM_FN_NAME (iq2000bf,pkrlr1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* pkrlr30: pkrlr30 $rt,$index,$count */
+/* pkrlr30: pkrlr30 $rt,$_index,$count */
 
 static SEM_PC
 SEM_FN_NAME (iq2000bf,pkrlr30) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -2736,7 +2737,7 @@ SEM_FN_NAME (iq2000bf,rb) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* rbr1: rbr1 $rt,$index,$count */
+/* rbr1: rbr1 $rt,$_index,$count */
 
 static SEM_PC
 SEM_FN_NAME (iq2000bf,rbr1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -2753,7 +2754,7 @@ SEM_FN_NAME (iq2000bf,rbr1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* rbr30: rbr30 $rt,$index,$count */
+/* rbr30: rbr30 $rt,$_index,$count */
 
 static SEM_PC
 SEM_FN_NAME (iq2000bf,rbr30) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -2804,7 +2805,7 @@ SEM_FN_NAME (iq2000bf,rx) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* rxr1: rxr1 $rt,$index,$count */
+/* rxr1: rxr1 $rt,$_index,$count */
 
 static SEM_PC
 SEM_FN_NAME (iq2000bf,rxr1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -2821,7 +2822,7 @@ SEM_FN_NAME (iq2000bf,rxr1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* rxr30: rxr30 $rt,$index,$count */
+/* rxr30: rxr30 $rt,$_index,$count */
 
 static SEM_PC
 SEM_FN_NAME (iq2000bf,rxr30) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -3025,7 +3026,7 @@ SEM_FN_NAME (iq2000bf,wbu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* wbr1: wbr1 $rt,$index,$count */
+/* wbr1: wbr1 $rt,$_index,$count */
 
 static SEM_PC
 SEM_FN_NAME (iq2000bf,wbr1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -3042,7 +3043,7 @@ SEM_FN_NAME (iq2000bf,wbr1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* wbr1u: wbr1u $rt,$index,$count */
+/* wbr1u: wbr1u $rt,$_index,$count */
 
 static SEM_PC
 SEM_FN_NAME (iq2000bf,wbr1u) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -3059,7 +3060,7 @@ SEM_FN_NAME (iq2000bf,wbr1u) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* wbr30: wbr30 $rt,$index,$count */
+/* wbr30: wbr30 $rt,$_index,$count */
 
 static SEM_PC
 SEM_FN_NAME (iq2000bf,wbr30) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -3076,7 +3077,7 @@ SEM_FN_NAME (iq2000bf,wbr30) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* wbr30u: wbr30u $rt,$index,$count */
+/* wbr30u: wbr30u $rt,$_index,$count */
 
 static SEM_PC
 SEM_FN_NAME (iq2000bf,wbr30u) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -3127,7 +3128,7 @@ SEM_FN_NAME (iq2000bf,wxu) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* wxr1: wxr1 $rt,$index,$count */
+/* wxr1: wxr1 $rt,$_index,$count */
 
 static SEM_PC
 SEM_FN_NAME (iq2000bf,wxr1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -3144,7 +3145,7 @@ SEM_FN_NAME (iq2000bf,wxr1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* wxr1u: wxr1u $rt,$index,$count */
+/* wxr1u: wxr1u $rt,$_index,$count */
 
 static SEM_PC
 SEM_FN_NAME (iq2000bf,wxr1u) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -3161,7 +3162,7 @@ SEM_FN_NAME (iq2000bf,wxr1u) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* wxr30: wxr30 $rt,$index,$count */
+/* wxr30: wxr30 $rt,$_index,$count */
 
 static SEM_PC
 SEM_FN_NAME (iq2000bf,wxr30) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
@@ -3178,7 +3179,7 @@ SEM_FN_NAME (iq2000bf,wxr30) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 #undef FLD
 }
 
-/* wxr30u: wxr30u $rt,$index,$count */
+/* wxr30u: wxr30u $rt,$_index,$count */
 
 static SEM_PC
 SEM_FN_NAME (iq2000bf,wxr30u) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
