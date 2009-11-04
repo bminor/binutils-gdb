@@ -1,3 +1,13 @@
+2009-11-03  Doug Evans  <dje@sebabeach.org>
+
+	* Makefile.in (mloop.c): Add @true to rule.
+	(mloopx.c, mloop2.c): Ditto.
+	(stamp-*): Add Makefile dependency.
+	(arch.c, arch.h, cpuall.h): Specify full path.
+	(cpu.h, sem.c, sem-switch.c, model.c, decode.c, decode.h): Ditto.
+	(cpux.h, semx-switch.c, modelx.c, decodex.c, decodex.h): Ditto.
+	(cpu2.h, sem2-switch.c, model2.c, decode2.c, decode2.h): Ditto.
+
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* config.in: Regenerate.
