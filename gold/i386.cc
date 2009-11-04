@@ -1569,10 +1569,12 @@ Target_i386::do_finalize_sections(Layout* layout)
   Output_data_dynamic* const odyn = layout->dynamic_data();
   if (odyn != NULL)
     {
-      if (this->got_plt_ != NULL)
+      if (this->got_plt_ != NULL
+	  && this->got_plt_->output_section() != NULL)
 	odyn->add_section_address(elfcpp::DT_PLTGOT, this->got_plt_);
 
-      if (this->plt_ != NULL)
+      if (this->plt_ != NULL
+	  && this->plt_->output_section() != NULL)
 	{
 	  const Output_data* od = this->plt_->rel_plt();
 	  odyn->add_section_size(elfcpp::DT_PLTRELSZ, od);
@@ -1580,7 +1582,8 @@ Target_i386::do_finalize_sections(Layout* layout)
 	  odyn->add_constant(elfcpp::DT_PLTREL, elfcpp::DT_REL);
 	}
 
-      if (this->rel_dyn_ != NULL)
+      if (this->rel_dyn_ != NULL
+	  && this->rel_dyn_->output_section() != NULL)
 	{
 	  const Output_data* od = this->rel_dyn_;
 	  odyn->add_section_address(elfcpp::DT_REL, od);

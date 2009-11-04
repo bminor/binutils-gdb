@@ -2334,7 +2334,8 @@ Target_sparc<size, big_endian>::do_finalize_sections(Layout* layout)
   Output_data_dynamic* const odyn = layout->dynamic_data();
   if (odyn != NULL)
     {
-      if (this->plt_ != NULL)
+      if (this->plt_ != NULL
+	  && this->plt_->output_section() != NULL)
 	{
 	  const Output_data* od = this->plt_->rel_plt();
 	  odyn->add_section_size(elfcpp::DT_PLTRELSZ, od);
@@ -2344,7 +2345,8 @@ Target_sparc<size, big_endian>::do_finalize_sections(Layout* layout)
 	  odyn->add_section_address(elfcpp::DT_PLTGOT, this->plt_);
 	}
 
-      if (this->rela_dyn_ != NULL)
+      if (this->rela_dyn_ != NULL
+	  && this->rela_dyn_->output_section() != NULL)
 	{
 	  const Output_data* od = this->rela_dyn_;
 	  odyn->add_section_address(elfcpp::DT_RELA, od);

@@ -1,5 +1,15 @@
 2009-11-04  Ian Lance Taylor  <iant@google.com>
 
+	PR 10887
+	* arm.cc (Target_arm::do_finalize_sections): Don't add dynamic
+	tags if data is discarded by linker script.
+	* i386.cc (Target_i386::do_finalize_sections): Likewise.
+	* powerpc.cc (Target_powerpc::do_finalize_sections): Likewise.
+	* sparc.cc (Target_sparc::do_finalize_sections): Likewise.
+	* x86_64.cc (Target_x86_64::do_finalize_sections): Likewise.
+
+2009-11-04  Ian Lance Taylor  <iant@google.com>
+
 	* layout.cc (Layout::get_output_section): Add is_interp and
 	is_dynamic_linker_section parameters.  Change all callers.
 	(Layout::choose_output_section): Likewise.
