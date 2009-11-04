@@ -897,7 +897,7 @@ const CGEN_OPERAND mep_cgen_operand_table[] =
 /* pc: program counter */
   { "pc", MEP_OPERAND_PC, HW_H_PC, 0, 0,
     { 0, { (const PTR) &mep_cgen_ifld_table[MEP_F_NIL] } }, 
-    { 0|A(SEM_ONLY), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } }, { { CDATA_LONG, 0 } }, { { 1, 0 } } } }  },
+    { 0|A(SEM_ONLY), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xfc" } }, { { CDATA_LONG, 0 } }, { { 1, 0 } } } }  },
 /* r0: register 0 */
   { "r0", MEP_OPERAND_R0, HW_H_GPR, 0, 0,
     { 0, { (const PTR) 0 } }, 
