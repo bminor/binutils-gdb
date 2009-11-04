@@ -2,22 +2,23 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+Copyright 1996-2009 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
+   This file is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3, or (at your option)
+   any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   It is distributed in the hope that it will be useful, but WITHOUT
+   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+   License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   You should have received a copy of the GNU General Public License along
+   with this program; if not, write to the Free Software Foundation, Inc.,
+   51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
@@ -2753,15 +2754,15 @@ PROFILE_COUNT_FILLNOPS (current_cpu, abuf->addr);
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 {
-  HI tmp_new_src2;
+  SI tmp_new_src2;
+  tmp_new_src2 = * FLD (i_src2);
   {
     HI opval = * FLD (i_src1);
     SETMEMHI (current_cpu, pc, tmp_new_src2, opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-  tmp_new_src2 = ADDSI (* FLD (i_src2), 2);
   {
-    SI opval = tmp_new_src2;
+    SI opval = ADDSI (tmp_new_src2, 2);
     * FLD (i_src2) = opval;
     TRACE_RESULT (current_cpu, abuf, "gr", 'x', opval);
   }
@@ -2781,15 +2782,15 @@ PROFILE_COUNT_FILLNOPS (current_cpu, abuf->addr);
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 {
-  QI tmp_new_src2;
+  SI tmp_new_src2;
+  tmp_new_src2 = * FLD (i_src2);
   {
     QI opval = * FLD (i_src1);
     SETMEMQI (current_cpu, pc, tmp_new_src2, opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-  tmp_new_src2 = ADDSI (* FLD (i_src2), 1);
   {
-    SI opval = tmp_new_src2;
+    SI opval = ADDSI (tmp_new_src2, 1);
     * FLD (i_src2) = opval;
     TRACE_RESULT (current_cpu, abuf, "gr", 'x', opval);
   }
@@ -3195,7 +3196,7 @@ if (ZEXTBISI (NOTBI (CPU (h_cond))))
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    SI opval = ANDSI (GET_H_CR (((UINT) 0)), ORSI (INVBI (FLD (f_uimm8)), 65280));
+    USI opval = ANDSI (GET_H_CR (((UINT) 0)), ORSI (ZEXTQISI (INVQI (FLD (f_uimm8))), 65280));
     SET_H_CR (((UINT) 0), opval);
     TRACE_RESULT (current_cpu, abuf, "cr", 'x', opval);
   }
@@ -3214,7 +3215,7 @@ if (ZEXTBISI (NOTBI (CPU (h_cond))))
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    SI opval = FLD (f_uimm8);
+    USI opval = FLD (f_uimm8);
     SET_H_CR (((UINT) 0), opval);
     TRACE_RESULT (current_cpu, abuf, "cr", 'x', opval);
   }
@@ -3233,7 +3234,7 @@ if (ZEXTBISI (NOTBI (CPU (h_cond))))
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    QI opval = ORQI (GETMEMQI (current_cpu, pc, ADDSI (* FLD (i_sr), FLD (f_simm16))), SLLSI (1, SUBSI (7, FLD (f_uimm3))));
+    QI opval = ORQI (GETMEMQI (current_cpu, pc, ADDSI (* FLD (i_sr), FLD (f_simm16))), SLLQI (1, SUBSI (7, FLD (f_uimm3))));
     SETMEMQI (current_cpu, pc, ADDSI (* FLD (i_sr), FLD (f_simm16)), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
@@ -3252,7 +3253,7 @@ if (ZEXTBISI (NOTBI (CPU (h_cond))))
   vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
   {
-    QI opval = ANDQI (GETMEMQI (current_cpu, pc, ADDSI (* FLD (i_sr), FLD (f_simm16))), INVQI (SLLSI (1, SUBSI (7, FLD (f_uimm3)))));
+    QI opval = ANDQI (GETMEMQI (current_cpu, pc, ADDSI (* FLD (i_sr), FLD (f_simm16))), INVQI (SLLQI (1, SUBSI (7, FLD (f_uimm3)))));
     SETMEMQI (current_cpu, pc, ADDSI (* FLD (i_sr), FLD (f_simm16)), opval);
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
@@ -3271,7 +3272,7 @@ if (ZEXTBISI (NOTBI (CPU (h_cond))))
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    BI opval = ANDQI (SRLSI (* FLD (i_sr), SUBSI (7, FLD (f_uimm3))), 1);
+    BI opval = ANDQI (SRLQI (* FLD (i_sr), SUBSI (7, FLD (f_uimm3))), 1);
     CPU (h_cond) = opval;
     TRACE_RESULT (current_cpu, abuf, "cond", 'x', opval);
   }
@@ -5834,16 +5835,16 @@ CASE (sem, INSN_WRITE_ST_PLUS) : /* st $src1,@+$src2 */
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 {
-  HI tmp_new_src2;
+  SI tmp_new_src2;
+  tmp_new_src2 = * FLD (i_src2);
   {
     HI opval = * FLD (i_src1);
     OPRND (h_memory_HI_new_src2_idx) = tmp_new_src2;
     OPRND (h_memory_HI_new_src2) = opval;
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-  tmp_new_src2 = ADDSI (* FLD (i_src2), 2);
   {
-    SI opval = tmp_new_src2;
+    SI opval = ADDSI (tmp_new_src2, 2);
     OPRND (src2) = opval;
     TRACE_RESULT (current_cpu, abuf, "gr", 'x', opval);
   }
@@ -5883,16 +5884,16 @@ CASE (sem, INSN_WRITE_STH_PLUS) : /* sth $src1,@$src2+ */
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
 {
-  QI tmp_new_src2;
+  SI tmp_new_src2;
+  tmp_new_src2 = * FLD (i_src2);
   {
     QI opval = * FLD (i_src1);
     OPRND (h_memory_QI_new_src2_idx) = tmp_new_src2;
     OPRND (h_memory_QI_new_src2) = opval;
     TRACE_RESULT (current_cpu, abuf, "memory", 'x', opval);
   }
-  tmp_new_src2 = ADDSI (* FLD (i_src2), 1);
   {
-    SI opval = tmp_new_src2;
+    SI opval = ADDSI (tmp_new_src2, 1);
     OPRND (src2) = opval;
     TRACE_RESULT (current_cpu, abuf, "gr", 'x', opval);
   }
@@ -6539,7 +6540,7 @@ CASE (sem, INSN_WRITE_SNC) : /* snc */
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    SI opval = ANDSI (GET_H_CR (((UINT) 0)), ORSI (INVBI (FLD (f_uimm8)), 65280));
+    USI opval = ANDSI (GET_H_CR (((UINT) 0)), ORSI (ZEXTQISI (INVQI (FLD (f_uimm8))), 65280));
     OPRND (h_cr_USI_0) = opval;
     TRACE_RESULT (current_cpu, abuf, "cr", 'x', opval);
   }
@@ -6577,7 +6578,7 @@ CASE (sem, INSN_WRITE_CLRPSW) : /* clrpsw $uimm8 */
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    SI opval = FLD (f_uimm8);
+    USI opval = FLD (f_uimm8);
     OPRND (h_cr_USI_0) = opval;
     TRACE_RESULT (current_cpu, abuf, "cr", 'x', opval);
   }
@@ -6615,7 +6616,7 @@ CASE (sem, INSN_WRITE_SETPSW) : /* setpsw $uimm8 */
   vpc = SEM_NEXT_VPC (sem_arg, pc, 2);
 
   {
-    BI opval = ANDQI (SRLSI (* FLD (i_sr), SUBSI (7, FLD (f_uimm3))), 1);
+    BI opval = ANDQI (SRLQI (* FLD (i_sr), SUBSI (7, FLD (f_uimm3))), 1);
     OPRND (condbit) = opval;
     TRACE_RESULT (current_cpu, abuf, "cond", 'x', opval);
   }

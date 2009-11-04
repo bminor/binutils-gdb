@@ -1,5 +1,28 @@
 2009-11-03  Doug Evans  <dje@sebabeach.org>
 
+	* arch.c: Regenerate.
+	* arch.h: Regenerate.
+	* cpu.c: Regenerate.
+	* cpu.h: Regenerate.
+	* cpu2.c: Regenerate.
+	* cpu2.h: Regenerate.
+	* cpuall.h: Regenerate.
+	* cpux.c: Regenerate.
+	* cpux.h: Regenerate.
+	* decode.c: Regenerate.
+	* decode.h: Regenerate.
+	* decode2.c: Regenerate.
+	* decode2.h: Regenerate.
+	* decodex.c: Regenerate.
+	* decodex.h: Regenerate.
+	* model.c: Regenerate.
+	* model2.c: Regenerate.
+	* modelx.c: Regenerate.
+	* sem-switch.c: Regenerate.
+	* sem.c: Regenerate.
+	* sem2-switch.c: Regenerate.
+	* semx-switch.c: Regenerate.
+
 	* Makefile.in (mloop.c): Add @true to rule.
 	(mloopx.c, mloop2.c): Ditto.
 	(stamp-*): Add Makefile dependency.
