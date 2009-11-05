@@ -1,3 +1,8 @@
+2009-11-05  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* top.c (execute_command): Select a frame before checking the current
+	language.  Only output a message if verbose.
+
 2009-11-05  Tom Tromey  <tromey@redhat.com>
 
 	* symtab.h (SYMBOL_SET_LINKAGE_NAME): Update comment.
