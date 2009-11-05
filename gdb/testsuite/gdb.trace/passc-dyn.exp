@@ -26,39 +26,18 @@ set bug_id 0
 
 gdb_exit
 gdb_start
-if [istarget "m68k-*-elf"] then {
-    load_lib "emc-support.exp";
-    set srcfile gdb_c_test.c
-    set binfile [board_info target d490_binfile];
-    gdb_test "set remotetimeout 6" "" ""
-    set timeout 500
-    gdb_target_monitor $binfile
-    # Give a TSTOP and ignore errors, to make sure any previous trace is off
-    gdb_test "tstop" "" ""
-    gdb_test "tfind none" "" ""
-    send_gdb "compare-sections CS\n"
-    gdb_expect {
-	-re "MIS-MATCHED.*$gdb_prompt $" {
-	    untested passc-dyn.exp
-	    return -1
-	    all tests in this module will fail.";
-	}
-	-re ".*$gdb_prompt $" { }
-    }
-} else {
-    set testfile "actions"
-    set srcfile ${testfile}.c
-    set binfile $objdir/$subdir/passc-dyn
-    if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
-	    executable {debug nowarnings}] != "" } {
-	untested passc-dyn.exp
-	return -1
-    }
-    gdb_load $binfile
-    gdb_test "tstop"       "" ""
-    gdb_test "tfind none"  "" ""
-    runto_main
+set testfile "actions"
+set srcfile ${testfile}.c
+set binfile $objdir/$subdir/passc-dyn
+if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
+	  executable {debug nowarnings}] != "" } {
+    untested passc-dyn.exp
+    return -1
 }
+gdb_load $binfile
+gdb_test "tstop"       "" ""
+gdb_test "tfind none"  "" ""
+runto_main
 gdb_reinitialize_dir $srcdir/$subdir
 
 # We generously give ourselves one "pass" if we successfully 
@@ -117,26 +96,11 @@ gdb_test "passcount 3 $tdp4" "Setting tracepoint $tdp4's passcount to 3" \
 
 gdb_test "tstart" "" ""
 
-if [istarget "m68k-*-elf"] then {
-    gdb_emclaptop_command "85,1,2,3,4,5,6"
-    sleep 5
-    gdb_emclaptop_command "85,7,8,9,A,B,C"
-    sleep 5
-    gdb_emclaptop_command "85,D,E,F,10,11,12"
-    sleep 5
-    # gdb_test "tstop"
-    ##
-    ## Note! Must NOT give the tstop command, because the passcount
-    ##       has already stopped the experiment.  You would not
-    ##       think this would be an error, but in EMC's mind it is...
-    ##
-} else {
-    gdb_test "break end" "" ""
-    gdb_test "continue" \
-	    "Continuing.*Breakpoint $decimal, end.*" \
-	    "run trace experiment"
-    gdb_test "tstop" "" ""
-}
+gdb_test "break end" "" ""
+gdb_test "continue" \
+    "Continuing.*Breakpoint $decimal, end.*" \
+    "run trace experiment"
+gdb_test "tstop" "" ""
 
 gdb_test "tfind none" "" ""
 if [gdb_test "printf \"x \%d x\\n\", \$trace_frame" "x -1 x" ""] {

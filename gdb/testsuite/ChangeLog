@@ -1,3 +1,15 @@
+2009-11-05  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* config/m68k-emc.exp, lib/emc-support.exp,
+	gdb.trace/gdb_c_test.c: Delete.
+	* gdb.trace/actions.exp, gdb.trace/backtrace.exp, gdb.trace/circ.exp,
+	gdb.trace/collection.exp, gdb.trace/deltrace.exp,
+	gdb.trace/infotrace.exp, gdb.trace/limits.exp, gdb.trace/packetlen.exp,
+	gdb.trace/passc-dyn.exp, gdb.trace/passcount.exp, gdb.trace/report.exp,
+	gdb.trace/save-trace.exp, gdb.trace/tfind.exp, gdb.trace/tracecmd.exp,
+	gdb.trace/while-dyn.exp, gdb.trace/while-stepping.exp: Remove special
+	casing for m68k-*-elf.
+
 2009-11-03  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.arch/i386-gnu-cfi.exp: Define SYMBOL_PREFIX on *-*-mingw*.

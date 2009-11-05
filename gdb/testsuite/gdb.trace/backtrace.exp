@@ -27,39 +27,18 @@ set bug_id 0
 gdb_exit
 gdb_start
 
-if [istarget "m68k-*-elf"] then {
-    load_lib "emc-support.exp";
-    set srcfile gdb_c_test.c
-    set binfile [board_info target d490_binfile];
-    gdb_test "set remotetimeout 6" "" ""
-    set timeout 500
-    gdb_target_monitor "$binfile"
-    # Give a TSTOP and ignore errors, to make sure any previous trace is off
-    gdb_test "tstop" "" ""
-    gdb_test "tfind none"  "" ""
-    send_gdb "compare-sections CS\n"
-    gdb_expect {
-	-re "MIS-MATCHED.*$gdb_prompt $" {
-	    untested backtrace.exp
-	    return -1
-	    all tests in this module will fail.";
-	}
-	-re ".*$gdb_prompt $" { }
-    }
-} else {
-    set testfile "actions"
-    set srcfile ${testfile}.c
-    set binfile $objdir/$subdir/backtrace
-    if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
-	    executable {debug nowarnings}] != "" } {
-	untested backtrace.exp
-	return -1
-    }
-    gdb_load $binfile
-    gdb_test "tstop"       "" ""
-    gdb_test "tfind none"  "" ""
-    runto_main
+set testfile "actions"
+set srcfile ${testfile}.c
+set binfile $objdir/$subdir/backtrace
+if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
+	  executable {debug nowarnings}] != "" } {
+    untested backtrace.exp
+    return -1
 }
+gdb_load $binfile
+gdb_test "tstop"       "" ""
+gdb_test "tfind none"  "" ""
+runto_main
 gdb_reinitialize_dir $srcdir/$subdir
 
 # We generously give ourselves one "pass" if we successfully 
@@ -173,15 +152,10 @@ gdb_trace_setactions "8.6: setup TP to collect stack mem cast expr" \
 
 gdb_test "tstart" "" ""
 
-if [istarget "m68k-*-elf"] then {
-    gdb_emclaptop_command "85,$arg1,$arg2,$arg3,$arg4,$arg5,$arg6"
-    sleep 5
-} else {
-    gdb_test "break end" "" ""
-    gdb_test "continue" \
-	    "Continuing.*Breakpoint $decimal, end.*" \
-	    "run trace experiment"
-}
+gdb_test "break end" "" ""
+gdb_test "continue" \
+    "Continuing.*Breakpoint $decimal, end.*" \
+    "run trace experiment"
 
 gdb_test "tstop" "" ""
 
