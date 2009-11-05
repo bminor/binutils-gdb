@@ -1,3 +1,10 @@
+2009-11-05  Nick Clifton  <nickc@redhat.com>
+
+	* elflink.c (elf_link_add_object_symbols): Improve error
+	message generated when a symbol is left unresolved because a
+        --no-add-needed command line option has prevented the
+	inclusion of the DSO defining it.
+
 2009-11-03  Alan Modra  <amodra@bigpond.net.au>
 	    Ulrich Weigand  <uweigand@de.ibm.com>
 

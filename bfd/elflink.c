@@ -3877,6 +3877,7 @@ error_free_dyn:
       bfd_boolean common;
       unsigned int old_alignment;
       bfd *old_bfd;
+      bfd * undef_bfd = NULL;
 
       override = FALSE;
 
@@ -4106,6 +4107,20 @@ error_free_dyn:
 	      memcpy (p, verstr, verlen + 1);
 
 	      name = newname;
+	    }
+
+	  /* If this is a definition of a previously undefined symbol
+	     make a note of the bfd that contained the reference in
+	     case we need to refer to it later on in error messages.  */
+	  if (! bfd_is_und_section (sec))
+	    {
+	      h = elf_link_hash_lookup (elf_hash_table (info), name, FALSE, FALSE, FALSE);
+
+	      if (h != NULL
+		  && (h->root.type == bfd_link_hash_undefined
+		      || h->root.type == bfd_link_hash_undefweak)
+		  && h->root.u.undef.abfd)
+		undef_bfd = h->root.u.undef.abfd;
 	    }
 
 	  if (!_bfd_elf_merge_symbol (abfd, info, name, isym, &sec,
@@ -4447,9 +4462,12 @@ error_free_dyn:
 	      if ((elf_dyn_lib_class (abfd) & DYN_NO_NEEDED) != 0)
 		{
 		  (*_bfd_error_handler)
-		    (_("%B: invalid DSO for symbol `%s' definition"),
+		    (_("%B: undefined reference to symbol '%s'"),
+		     undef_bfd == NULL ? info->output_bfd : undef_bfd, name);
+		  (*_bfd_error_handler)
+		    (_("note: '%s' is defined in DSO %B so try adding it to the linker command line"),
 		     abfd, name);
-		  bfd_set_error (bfd_error_bad_value);
+		  bfd_set_error (bfd_error_invalid_operation);
 		  goto error_free_vers;
 		}
 
