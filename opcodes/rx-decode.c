@@ -295,7 +295,7 @@ rx_decode_opcode (unsigned long pc AU,
                      op[0]);
             }
           SYNTAX("brk");
-#line 957 "rx-decode.opc"
+#line 951 "rx-decode.opc"
           ID(brk);
         
         }
@@ -310,7 +310,7 @@ rx_decode_opcode (unsigned long pc AU,
                      op[0]);
             }
           SYNTAX("dbt");
-#line 960 "rx-decode.opc"
+#line 954 "rx-decode.opc"
           ID(dbt);
         
         }
@@ -4838,9 +4838,34 @@ rx_decode_opcode (unsigned long pc AU,
                            op[0], op[1]);
                   }
                 SYNTAX("int #%1");
-#line 963 "rx-decode.opc"
+#line 957 "rx-decode.opc"
                 ID(int); SC(IMM(1));
               
+              }
+            break;
+          case 0x70:
+              GETBYTE ();
+              switch (op[2] & 0xf0)
+              {
+                case 0x00:
+                    {
+                      /** 0111 0101 0111 0000 0000 immm	mvtipl	#%1 */
+#line 924 "rx-decode.opc"
+                      int immm AU = op[2] & 0x0f;
+                      if (trace)
+                        {
+                          printf ("\033[33m%s\033[0m  %02x %02x %02x\n",
+                                 "/** 0111 0101 0111 0000 0000 immm	mvtipl	#%1 */",
+                                 op[0], op[1], op[2]);
+                          printf ("  immm = 0x%x\n", immm);
+                        }
+                      SYNTAX("mvtipl	#%1");
+#line 924 "rx-decode.opc"
+                      ID(mvtipl); SC(immm);
+                    
+                    }
+                  break;
+                default: UNSUPPORTED(); break;
               }
             break;
           default: UNSUPPORTED(); break;
@@ -5164,7 +5189,7 @@ rx_decode_opcode (unsigned long pc AU,
           case 0xd0:
               {
                 /** 0111 1110 110 crsrc			pushc	%1 */
-#line 927 "rx-decode.opc"
+#line 930 "rx-decode.opc"
                 int crsrc AU = op[1] & 0x1f;
                 if (trace)
                   {
@@ -5174,7 +5199,7 @@ rx_decode_opcode (unsigned long pc AU,
                     printf ("  crsrc = 0x%x\n", crsrc);
                   }
                 SYNTAX("pushc	%1");
-#line 927 "rx-decode.opc"
+#line 930 "rx-decode.opc"
                 ID(mov); OP(0, RX_Operand_Predec, 0, 0); SR(crsrc + 16);
               
               }
@@ -5183,7 +5208,7 @@ rx_decode_opcode (unsigned long pc AU,
           case 0xf0:
               {
                 /** 0111 1110 111 crdst			popc	%0 */
-#line 924 "rx-decode.opc"
+#line 927 "rx-decode.opc"
                 int crdst AU = op[1] & 0x1f;
                 if (trace)
                   {
@@ -5193,7 +5218,7 @@ rx_decode_opcode (unsigned long pc AU,
                     printf ("  crdst = 0x%x\n", crdst);
                   }
                 SYNTAX("popc	%0");
-#line 924 "rx-decode.opc"
+#line 927 "rx-decode.opc"
                 ID(mov); OP(1, RX_Operand_Postinc, 0, 0); DR(crdst + 16);
               
               }
@@ -5512,7 +5537,7 @@ rx_decode_opcode (unsigned long pc AU,
                            op[0], op[1]);
                   }
                 SYNTAX("rtfi");
-#line 951 "rx-decode.opc"
+#line 945 "rx-decode.opc"
                 ID(rtfi);
               
               }
@@ -5527,7 +5552,7 @@ rx_decode_opcode (unsigned long pc AU,
                            op[0], op[1]);
                   }
                 SYNTAX("rte");
-#line 954 "rx-decode.opc"
+#line 948 "rx-decode.opc"
                 ID(rte);
               
               }
@@ -5542,7 +5567,7 @@ rx_decode_opcode (unsigned long pc AU,
                            op[0], op[1]);
                   }
                 SYNTAX("wait");
-#line 966 "rx-decode.opc"
+#line 960 "rx-decode.opc"
                 ID(wait);
               
               /*----------------------------------------------------------------------*/
@@ -8387,13 +8412,13 @@ rx_decode_opcode (unsigned long pc AU,
                   op_semantics_68:
                     {
                       /** 1111 1100 1101 sz sd rdst cond	sc%1%s	%0 */
-#line 972 "rx-decode.opc"
+#line 966 "rx-decode.opc"
                       int sz AU = (op[1] >> 2) & 0x03;
-#line 972 "rx-decode.opc"
+#line 966 "rx-decode.opc"
                       int sd AU = op[1] & 0x03;
-#line 972 "rx-decode.opc"
+#line 966 "rx-decode.opc"
                       int rdst AU = (op[2] >> 4) & 0x0f;
-#line 972 "rx-decode.opc"
+#line 966 "rx-decode.opc"
                       int cond AU = op[2] & 0x0f;
                       if (trace)
                         {
@@ -8406,7 +8431,7 @@ rx_decode_opcode (unsigned long pc AU,
                           printf ("  cond = 0x%x\n", cond);
                         }
                       SYNTAX("sc%1%s	%0");
-#line 972 "rx-decode.opc"
+#line 966 "rx-decode.opc"
                       ID(sccnd); BWL(sz); DD (sd, rdst, sz); Scc(cond);
                     
                     }
@@ -10081,11 +10106,11 @@ rx_decode_opcode (unsigned long pc AU,
                   op_semantics_74:
                     {
                       /** 1111 1101 0110 100c rsrc rdst	mvtc	%1, %0 */
-#line 933 "rx-decode.opc"
+#line 936 "rx-decode.opc"
                       int c AU = op[1] & 0x01;
-#line 933 "rx-decode.opc"
+#line 936 "rx-decode.opc"
                       int rsrc AU = (op[2] >> 4) & 0x0f;
-#line 933 "rx-decode.opc"
+#line 936 "rx-decode.opc"
                       int rdst AU = op[2] & 0x0f;
                       if (trace)
                         {
@@ -10097,7 +10122,7 @@ rx_decode_opcode (unsigned long pc AU,
                           printf ("  rdst = 0x%x\n", rdst);
                         }
                       SYNTAX("mvtc	%1, %0");
-#line 933 "rx-decode.opc"
+#line 936 "rx-decode.opc"
                       ID(mov); SR(rsrc); DR(c*16+rdst + 16);
                     
                     }
@@ -10121,11 +10146,11 @@ rx_decode_opcode (unsigned long pc AU,
                   op_semantics_75:
                     {
                       /** 1111 1101 0110 101s rsrc rdst	mvfc	%1, %0 */
-#line 936 "rx-decode.opc"
+#line 939 "rx-decode.opc"
                       int s AU = op[1] & 0x01;
-#line 936 "rx-decode.opc"
+#line 939 "rx-decode.opc"
                       int rsrc AU = (op[2] >> 4) & 0x0f;
-#line 936 "rx-decode.opc"
+#line 939 "rx-decode.opc"
                       int rdst AU = op[2] & 0x0f;
                       if (trace)
                         {
@@ -10137,8 +10162,11 @@ rx_decode_opcode (unsigned long pc AU,
                           printf ("  rdst = 0x%x\n", rdst);
                         }
                       SYNTAX("mvfc	%1, %0");
-#line 936 "rx-decode.opc"
+#line 939 "rx-decode.opc"
                       ID(mov); SR((s*16+rsrc) + 16); DR(rdst);
+                    
+                    /*----------------------------------------------------------------------*/
+                    /* INTERRUPTS								*/
                     
                     }
                   break;
@@ -10590,9 +10618,9 @@ rx_decode_opcode (unsigned long pc AU,
                   op_semantics_89:
                     {
                       /** 1111 1101 0111 im11 000crdst	mvtc	#%1, %0 */
-#line 930 "rx-decode.opc"
+#line 933 "rx-decode.opc"
                       int im AU = (op[1] >> 2) & 0x03;
-#line 930 "rx-decode.opc"
+#line 933 "rx-decode.opc"
                       int crdst AU = op[2] & 0x1f;
                       if (trace)
                         {
@@ -10603,7 +10631,7 @@ rx_decode_opcode (unsigned long pc AU,
                           printf ("  crdst = 0x%x\n", crdst);
                         }
                       SYNTAX("mvtc	#%1, %0");
-#line 930 "rx-decode.opc"
+#line 933 "rx-decode.opc"
                       ID(mov); SC(IMMex(im)); DR(crdst + 16);
                     
                     }
@@ -14808,7 +14836,7 @@ rx_decode_opcode (unsigned long pc AU,
       break;
     default: UNSUPPORTED(); break;
   }
-#line 975 "rx-decode.opc"
+#line 969 "rx-decode.opc"
 
   return rx->n_bytes;
 }
