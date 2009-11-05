@@ -1,3 +1,18 @@
+2009-11-05  Kai Tietz  <kai.tietz@onevision.com>
+
+	* dllwrap.c (is_leading_underscore): New variable.
+	(cpu_type): New enum type.
+	(which_cpu): New variable.
+	(usage): Add new options --no-leading-underscore
+	and --leading-underscore.
+	(long_options): Likewise.
+	(OPTION_NO_LEADING_UNDERSCORE): New define.
+	(OPTION_LEADING_UNDERSCORE): Likewise.
+	(main): Initialize which_host, pass new options
+	to dlltool, do underscoring dependent on
+	is_leading_underscore, and do '@12' decoration
+	only for x86.
+
 2009-11-02  Paul Brook  <paul@codesourcery.com>
 
 	* readelf.c (arm_attr_tag_VFP_arch): Add VFPv4 and VFPv4-D16.
