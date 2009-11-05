@@ -1,3 +1,9 @@
+2009-11-05  Ian Lance Taylor  <iant@google.com>
+
+	PR 10910
+	* output.cc (Output_segment::add_output_section): Add missing
+	return statement.
+
 2009-11-04  Ian Lance Taylor  <iant@google.com>
 
 	PR 10880

@@ -3050,6 +3050,7 @@ Output_segment::add_output_section(Output_section* os,
   gold_assert((os->flags() & elfcpp::SHF_ALLOC) != 0);
   gold_assert(!this->is_max_align_known_);
   gold_assert(os->is_large_data_section() == this->is_large_data_segment());
+  gold_assert(this->type() == elfcpp::PT_LOAD || !do_sort);
 
   // Update the segment flags.
   this->flags_ |= seg_flags;
@@ -3065,13 +3066,7 @@ Output_segment::add_output_section(Output_section* os,
   // output segment.  The loops below are expected to be fast.
 
   // So that PT_NOTE segments will work correctly, we need to ensure
-  // that all SHT_NOTE sections are adjacent.  This will normally
-  // happen automatically, because all the SHT_NOTE input sections
-  // will wind up in the same output section.  However, it is possible
-  // for multiple SHT_NOTE input sections to have different section
-  // flags, and thus be in different output sections, but for the
-  // different section flags to map into the same segment flags and
-  // thus the same output segment.
+  // that all SHT_NOTE sections are adjacent.
   if (os->type() == elfcpp::SHT_NOTE && !pdl->empty())
     {
       Output_segment::Output_data_list::iterator p = pdl->end();
@@ -3251,6 +3246,7 @@ Output_segment::add_output_section(Output_section* os,
 	  if ((*p)->is_section() && (*p)->output_section()->is_interp())
 	    ++p;
 	  pdl->insert(p, os);
+	  return;
 	}
 
       // If this section is used by the dynamic linker, and it is not
@@ -3558,9 +3554,11 @@ Output_segment::set_section_list_addresses(const Layout* layout, bool reset,
 	    off += (*p)->address() - (addr + (off - startoff));
 	  else
 	    {
+#if 0
 	      if (!layout->script_options()->saw_sections_clause())
 		gold_unreachable();
 	      else
+#endif
 		{
 		  Output_section* os = (*p)->output_section();
 
