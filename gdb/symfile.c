@@ -2765,7 +2765,7 @@ allocate_symtab (char *filename, struct objfile *objfile)
 }
 
 struct partial_symtab *
-allocate_psymtab (char *filename, struct objfile *objfile)
+allocate_psymtab (const char *filename, struct objfile *objfile)
 {
   struct partial_symtab *psymtab;
 
@@ -3079,7 +3079,8 @@ again2:
 
 struct partial_symtab *
 start_psymtab_common (struct objfile *objfile,
-		      struct section_offsets *section_offsets, char *filename,
+		      struct section_offsets *section_offsets,
+		      const char *filename,
 		      CORE_ADDR textlow, struct partial_symbol **global_syms,
 		      struct partial_symbol **static_syms)
 {

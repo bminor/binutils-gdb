@@ -1,3 +1,27 @@
+2009-11-05  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2read.c (struct dwarf2_cu): Remove ranges_offset and
+	has_ranges_offset.
+	(struct partial_die_info): Remove language, has_stmt_list, dirname,
+	and line_offset.
+	(dwarf2_build_include_psymtabs): Take a die_info.  Handle a missing
+	line table.
+	(dwarf2_get_pc_bounds): Take PST argument.  Pass it
+	to dwarf2_ranges_read.  Update all callers.
+	(init_cu_die_reader): Move earlier.
+	(dwarf2_find_base_address): New function.
+	(process_psymtab_comp_unit): Rewrite to use a full DIE for the
+	compilation unit.  Use dwarf2_get_pc_bounds and
+	dwarf2_find_base_address.
+	(load_comp_unit): Rewrite to use a full DIE for the compilation unit.
+	(process_full_comp_unit): Use dwarf2_find_base_address.
+	(read_partial_die): Remove support for attributes only used
+	in the compilation unit DIE.
+	* symfile.c (allocate_psymtab): Make FILENAME const.
+	(start_psymtab_common): Likewise.
+	* symfile.h (allocate_psymtab, start_psymtab_common): Update
+	prototypes.
+
 2009-11-05  Tom Tromey  <tromey@redhat.com>
 
 	* symmisc.c (print_symbol_bcache_statistics): Print filename cache

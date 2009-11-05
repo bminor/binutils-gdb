@@ -266,7 +266,7 @@ extern void free_section_addr_info (struct section_addr_info *);
 
 extern struct partial_symtab *start_psymtab_common (struct objfile *,
 						    struct section_offsets *,
-						    char *, CORE_ADDR,
+						    const char *, CORE_ADDR,
 						    struct partial_symbol **,
 						    struct partial_symbol **);
 
@@ -309,7 +309,8 @@ extern int auto_solib_limit;
 
 extern void set_initial_language (void);
 
-extern struct partial_symtab *allocate_psymtab (char *, struct objfile *);
+extern struct partial_symtab *allocate_psymtab (const char *,
+						struct objfile *);
 
 extern void discard_psymtab (struct partial_symtab *);
 
