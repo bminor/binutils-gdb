@@ -3105,9 +3105,15 @@ add_psymbol_to_bcache (char *name, int namelength, domain_enum domain,
 		       enum language language, struct objfile *objfile,
 		       int *added)
 {
-  struct partial_symbol psymbol;
+  /* psymbol is static so that there will be no uninitialized gaps in the
+     structure which might contain random data, causing cache misses in
+     bcache. */
+  static struct partial_symbol psymbol;
 
-  memset (&psymbol, 0, sizeof (struct partial_symbol));
+  /* However, we must ensure that the entire 'value' field has been
+     zeroed before assigning to it, because an assignment may not
+     write the entire field.  */
+  memset (&psymbol.ginfo.value, 0, sizeof (psymbol.ginfo.value));
   /* val and coreaddr are mutually exclusive, one of them *will* be zero */
   if (val != 0)
     {
