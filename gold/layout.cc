@@ -3130,7 +3130,14 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
        p != input_objects->dynobj_end();
        ++p)
     {
-      // FIXME: Handle --as-needed.
+      if (!(*p)->is_needed()
+	  && (*p)->input_file()->options().as_needed())
+	{
+	  // This dynamic object was linked with --as-needed, but it
+	  // is not needed.
+	  continue;
+	}
+
       odyn->add_string(elfcpp::DT_NEEDED, (*p)->soname());
     }
 
