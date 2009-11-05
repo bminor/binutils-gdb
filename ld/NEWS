@@ -1,5 +1,8 @@
 -*- text -*-
 
+* --add-needed renamed to --copy-dt-needed-entries in order to avoid confusion
+  with --as-needed option.
+
 * Extend .def file syntax by '== <ID>' for imports and exports. This allows
   to alias the import/export table name written in PE image.
 

@@ -93,13 +93,14 @@ bfd_boolean version_printed;
 /* Nonzero means link in every member of an archive.  */
 bfd_boolean whole_archive;
 
-/* Nonzero means create DT_NEEDED entries only if a dynamic library
-   actually satisfies some reference in a regular object.  */
-bfd_boolean as_needed;
+/* True means only create DT_NEEDED entries for dynamic libraries
+   if they actually satisfy some reference in a regular object.  */
+bfd_boolean add_DT_NEEDED_for_regular;
 
-/* Nonzero means never create DT_NEEDED entries for dynamic libraries
-   in DT_NEEDED tags.  */
-bfd_boolean add_needed = TRUE;
+/* True means create DT_NEEDED entries for dynamic libraries that
+   are DT_NEEDED by dynamic libraries specifically mentioned on
+   the command line.  */
+bfd_boolean add_DT_NEEDED_for_dynamic;
 
 /* TRUE if we should demangle symbol names.  */
 bfd_boolean demangling;

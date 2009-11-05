@@ -270,11 +270,11 @@ typedef struct lang_input_statement_struct
 
   /* Whether DT_NEEDED tags should be added for dynamic libraries in
      DT_NEEDED tags from this entry.  */
-  unsigned int add_needed : 1;
+  unsigned int add_DT_NEEDED_for_dynamic : 1;
 
   /* Whether this entry should cause a DT_NEEDED tag only when
      satisfying references from regular files, or always.  */
-  unsigned int as_needed : 1;
+  unsigned int add_DT_NEEDED_for_regular : 1;
 
   /* Whether to include the entire contents of an archive.  */
   unsigned int whole_archive : 1;

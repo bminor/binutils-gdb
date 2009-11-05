@@ -110,7 +110,7 @@ fi
 
 if test x"$LDEMUL_RECOGNIZED_FILE" != xgld"${EMULATION_NAME}"_load_symbols; then
 fragment <<EOF
-/* Handle as_needed DT_NEEDED.  */
+/* Handle the generation of DT_NEEDED tags.  */
 
 static bfd_boolean
 gld${EMULATION_NAME}_load_symbols (lang_input_statement_type *entry)
@@ -120,13 +120,13 @@ gld${EMULATION_NAME}_load_symbols (lang_input_statement_type *entry)
   /* Tell the ELF linker that we don't want the output file to have a
      DT_NEEDED entry for this file, unless it is used to resolve
      references in a regular object.  */
-  if (entry->as_needed)
+  if (entry->add_DT_NEEDED_for_regular)
     link_class = DYN_AS_NEEDED;
 
   /* Tell the ELF linker that we don't want the output file to have a
      DT_NEEDED entry for any dynamic library in DT_NEEDED tags from
      this file at all.  */
-  if (!entry->add_needed)
+  if (!entry->add_DT_NEEDED_for_dynamic)
     link_class |= DYN_NO_ADD_NEEDED;
 
   if (entry->just_syms_flag
@@ -134,7 +134,7 @@ gld${EMULATION_NAME}_load_symbols (lang_input_statement_type *entry)
     einfo (_("%P%F: --just-symbols may not be used on DSO: %B\n"),
 	   entry->the_bfd);
 
-  if (!link_class
+  if (link_class == 0
       || (bfd_get_file_flags (entry->the_bfd) & DYNAMIC) == 0)
     return FALSE;
 

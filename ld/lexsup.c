@@ -125,10 +125,10 @@ enum option_values
   OPTION_SPLIT_BY_RELOC,
   OPTION_SPLIT_BY_FILE ,
   OPTION_WHOLE_ARCHIVE,
-  OPTION_ADD_NEEDED,
-  OPTION_NO_ADD_NEEDED,
-  OPTION_AS_NEEDED,
-  OPTION_NO_AS_NEEDED,
+  OPTION_ADD_DT_NEEDED_FOR_DYNAMIC,
+  OPTION_NO_ADD_DT_NEEDED_FOR_DYNAMIC,
+  OPTION_ADD_DT_NEEDED_FOR_REGULAR,
+  OPTION_NO_ADD_DT_NEEDED_FOR_REGULAR,
   OPTION_WRAP,
   OPTION_FORCE_EXE_SUFFIX,
   OPTION_GC_SECTIONS,
@@ -333,19 +333,22 @@ static const struct ld_option ld_options[] =
      OPTION_NO_ACCEPT_UNKNOWN_INPUT_ARCH},
     '\0', NULL, N_("Reject input files whose architecture is unknown"),
     TWO_DASHES },
-  { {"add-needed", no_argument, NULL, OPTION_ADD_NEEDED},
-    '\0', NULL, N_("Set DT_NEEDED tags for DT_NEEDED entries in\n"
-		   "                                following dynamic libs"),
-    TWO_DASHES },
-  { {"no-add-needed", no_argument, NULL, OPTION_NO_ADD_NEEDED},
-    '\0', NULL, N_("Do not set DT_NEEDED tags for DT_NEEDED entries\n"
-		   "                                in following dynamic libs"),
-    TWO_DASHES },
-  { {"as-needed", no_argument, NULL, OPTION_AS_NEEDED},
+
+  /* The next two options are deprecated because of their similarity to
+     --as-needed and --no-as-needed.  They have been replaced by
+     --resolve-implicit-dynamic-symbols and
+     --no-resolve-implicit-dynamic-symbols.  */
+  { {"add-needed", no_argument, NULL, OPTION_ADD_DT_NEEDED_FOR_DYNAMIC},
+    '\0', NULL, NULL, NO_HELP },
+  { {"no-add-needed", no_argument, NULL, OPTION_NO_ADD_DT_NEEDED_FOR_DYNAMIC},
+    '\0', NULL, NULL, NO_HELP },
+
+  { {"as-needed", no_argument, NULL, OPTION_ADD_DT_NEEDED_FOR_REGULAR},
     '\0', NULL, N_("Only set DT_NEEDED for following dynamic libs if used"),
     TWO_DASHES },
-  { {"no-as-needed", no_argument, NULL, OPTION_NO_AS_NEEDED},
-    '\0', NULL, N_("Always set DT_NEEDED for following dynamic libs"),
+  { {"no-as-needed", no_argument, NULL, OPTION_NO_ADD_DT_NEEDED_FOR_REGULAR},
+    '\0', NULL, N_("Always set DT_NEEDED for dynamic libraries mentioned on\n"
+		   "                                the command line"),
     TWO_DASHES },
   { {"assert", required_argument, NULL, OPTION_ASSERT},
     '\0', N_("KEYWORD"), N_("Ignored for SunOS compatibility"), ONE_DASH },
@@ -373,6 +376,15 @@ static const struct ld_option ld_options[] =
   { {"no-check-sections", no_argument, NULL, OPTION_NO_CHECK_SECTIONS},
     '\0', NULL, N_("Do not check section addresses for overlaps"),
     TWO_DASHES },
+  { {"copy-dt-needed-entries", no_argument, NULL,
+     OPTION_ADD_DT_NEEDED_FOR_DYNAMIC},
+    '\0', NULL, N_("Copy DT_NEEDED links mentioned inside DSOs that follow"),
+    TWO_DASHES },
+  { {"no-copy-dt-needed-entries", no_argument, NULL,
+     OPTION_NO_ADD_DT_NEEDED_FOR_DYNAMIC},
+    '\0', NULL, N_("Do not copy DT_NEEDED links mentioned inside DSOs that follow"),
+    TWO_DASHES },
+
   { {"cref", no_argument, NULL, OPTION_CREF},
     '\0', NULL, N_("Output cross reference table"), TWO_DASHES },
   { {"defsym", required_argument, NULL, OPTION_DEFSYM},
@@ -1379,17 +1391,17 @@ parse_args (unsigned argc, char **argv)
 	case OPTION_WHOLE_ARCHIVE:
 	  whole_archive = TRUE;
 	  break;
-	case OPTION_ADD_NEEDED:
-	  add_needed = TRUE;
+	case OPTION_ADD_DT_NEEDED_FOR_DYNAMIC:
+	  add_DT_NEEDED_for_dynamic = TRUE;
 	  break;
-	case OPTION_NO_ADD_NEEDED:
-	  add_needed = FALSE;
+	case OPTION_NO_ADD_DT_NEEDED_FOR_DYNAMIC:
+	  add_DT_NEEDED_for_dynamic = FALSE;
 	  break;
-	case OPTION_AS_NEEDED:
-	  as_needed = TRUE;
+	case OPTION_ADD_DT_NEEDED_FOR_REGULAR:
+	  add_DT_NEEDED_for_regular = TRUE;
 	  break;
-	case OPTION_NO_AS_NEEDED:
-	  as_needed = FALSE;
+	case OPTION_NO_ADD_DT_NEEDED_FOR_REGULAR:
+	  add_DT_NEEDED_for_regular = FALSE;
 	  break;
 	case OPTION_WRAP:
 	  add_wrap (optarg);

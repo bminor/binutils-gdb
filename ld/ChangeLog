@@ -1,3 +1,18 @@
+2009-11-05  Nick Clifton  <nickc@redhat.com>
+
+	* lexsup.c: Rename --add-needed to --copy-dt-needed-entries.
+	* ldlang.h (struct lang_input_statement_struct): Rename add_needed
+	to add_DT_NEEDED_for_dynamic.  Rename as_needed to
+	add_DT_NEEDED_for_regular.
+	* ldlang.c: Likewise.
+	* ldlang.h: Likewise.
+	* ldlang.c: Use the new variable names.
+	* ldgram.y: Likewise.
+	* emultempl/elf32.em: Likewise.
+	* ld.texinfo: Document the renamed option.  Also mention its
+	affect on the resolution of dynamic symbols.
+	* NEWS: Mention the changed option name.
+
 2009-11-04  Kai Tietz  <kai.tietz@onevision.com>
 
 	* emulparams/arm_epoc_pe.sh: Remove ENTRY.

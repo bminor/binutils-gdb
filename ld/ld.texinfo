@@ -1132,27 +1132,24 @@ restore the old behaviour.
 @item --as-needed
 @itemx --no-as-needed
 This option affects ELF DT_NEEDED tags for dynamic libraries mentioned
-on the command line after the @option{--as-needed} option.  Normally,
+on the command line after the @option{--as-needed} option.  Normally
 the linker will add a DT_NEEDED tag for each dynamic library mentioned
 on the command line, regardless of whether the library is actually
-needed.  @option{--as-needed} causes a DT_NEEDED tag to only be emitted
-for a library that satisfies a symbol reference from regular objects
-which is undefined at the point that the library was linked, or, if
-the library is not found in the DT_NEEDED lists of other libraries
-linked up to that point, a reference from another dynamic library.
+needed or not.  @option{--as-needed} causes a DT_NEEDED tag to only be
+emitted for a library that satisfies an undefined symbol reference
+from a regular object file or, if the library is not found in the
+DT_NEEDED lists of other libraries linked up to that point, an
+undefined symbol reference from another dynamic library.
 @option{--no-as-needed} restores the default behaviour.
 
 @kindex --add-needed
 @kindex --no-add-needed
 @item --add-needed
 @itemx --no-add-needed
-This option affects the treatment of dynamic libraries from ELF
-DT_NEEDED tags in dynamic libraries mentioned on the command line after
-the @option{--no-add-needed} option.  Normally, the linker will add
-a DT_NEEDED tag for each dynamic library from DT_NEEDED tags.
-@option{--no-add-needed} causes DT_NEEDED tags will never be emitted
-for those libraries from DT_NEEDED tags. @option{--add-needed} restores
-the default behaviour.
+These two options have been deprecated because of the similarity of
+their names to the @option{--as-needed} and @option{--no-as-needed}
+options.  They have been replaced by @option{--copy-dt-needed-entries}
+and @option{--no-copy-dt-needed-entries}.
 
 @kindex -assert @var{keyword}
 @item -assert @var{keyword}
@@ -1252,6 +1249,29 @@ restored by using the command line switch @option{--check-sections}.
 Section overlap is not usually checked for relocatable links.  You can
 force checking in that case by using the @option{--check-sections}
 option.
+
+@kindex --copy-dt-needed-entries
+@kindex --no-copy-dt-needed-entries
+@item --copy-dt-needed-entries
+@itemx --no-copy-dt-needed-entries
+This option affects the treatment of dynamic libraries referred to 
+by DT_NEEDED tags @emph{inside} ELF dynamic libraries mentioned on the
+command line.  Normally the linker will add a DT_NEEDED tag to the
+output binary for each library mentioned in a DT_NEEDED tag in an
+input dynamic library.  With @option{--no-copy-dt-needed-entries}
+specified on the command line however any dynamic libraries that
+follow it will have their DT_NEEDED entries ignored.  The default
+behaviour can be restored with @option{--copy-dt-needed-entries}.
+
+This option also has an effect on the resolution of symbols in dynamic
+libraries.  With the default setting dynamic libraries mentioned on
+the command line will be recursively searched, following their
+DT_NEEDED tags to other libraries, in order to resolve symbols
+required by the output binary.  With
+@option{--no-copy-dt-needed-entries} specified however the searching
+of dynamic libraries that follow it will stop with the dynamic
+library itself.  No DT_NEEDED links will be traversed to resolve
+symbols.
 
 @cindex cross reference table
 @kindex --cref
