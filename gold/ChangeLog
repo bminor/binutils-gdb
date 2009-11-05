@@ -1,5 +1,16 @@
 2009-11-04  Ian Lance Taylor  <iant@google.com>
 
+	PR 10880
+	* object.h (class Object): Add is_needed and set_is_needed
+	methods.  Add is_needed_ field.  Make bool fields into bitfields.
+	* symtab.cc (Symbol_table::set_dynsym_indexes): If a symbol is
+	defined in a dynamic object and referenced by a regular object,
+	set is_needed for the dynamic object.
+	* layout.cc (Layout::finish_dynamic_section): Don't add DT_NEEDED
+	if the file is marked with as_needed and it is not needed.
+
+2009-11-04  Ian Lance Taylor  <iant@google.com>
+
 	PR 10887
 	* arm.cc (Target_arm::do_finalize_sections): Don't add dynamic
 	tags if data is discarded by linker script.
