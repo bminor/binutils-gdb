@@ -185,7 +185,8 @@ extern void symbol_init_language_specific (struct general_symbol_info *symbol,
 /* Set just the linkage name of a symbol; do not try to demangle
    it.  Used for constructs which do not have a mangled name,
    e.g. struct tags.  Unlike SYMBOL_SET_NAMES, linkage_name must
-   be terminated and already on the objfile's obstack.  */
+   be terminated and either already on the objfile's obstack or
+   permanently allocated.  */
 #define SYMBOL_SET_LINKAGE_NAME(symbol,linkage_name) \
   (symbol)->ginfo.name = (linkage_name)
 

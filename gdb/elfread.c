@@ -231,8 +231,9 @@ elf_symtab_read (struct objfile *objfile, int type,
   /* If filesym is nonzero, it points to a file symbol, but we haven't
      seen any section info for it yet.  */
   asymbol *filesym = 0;
-  /* Name of filesym, as saved on the objfile_obstack.  */
-  char *filesymname = obsavestring ("", 0, &objfile->objfile_obstack);
+  /* Name of filesym.  This is either a constant string or is saved on
+     the objfile's obstack.  */
+  char *filesymname = "";
   struct dbx_symfile_info *dbx = objfile->deprecated_sym_stab_info;
   int stripped = (bfd_get_symcount (objfile->obfd) == 0);
 

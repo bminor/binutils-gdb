@@ -1,3 +1,16 @@
+2009-11-05  Tom Tromey  <tromey@redhat.com>
+
+	* symtab.h (SYMBOL_SET_LINKAGE_NAME): Update comment.
+	* symfile.c (allocate_symtab): Don't use obsavestring on a
+	constant string.
+	* stabsread.c (define_symbol): Don't use obsavestring on a
+	constant string.
+	* mdebugread.c (parse_type): Don't use obsavestring on a constant
+	string.
+	(new_symtab): Likewise.
+	* elfread.c (elf_symtab_read): Don't use obsavestring on a
+	constant string.
+
 2009-11-04  Tom Tromey  <tromey@redhat.com>
 
 	* symfile.c (add_psymbol_to_bcache): Don't copy name.  Make

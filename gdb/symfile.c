@@ -2750,8 +2750,7 @@ allocate_symtab (char *filename, struct objfile *objfile)
 				   &objfile->objfile_obstack);
   symtab->fullname = NULL;
   symtab->language = deduce_language_from_filename (filename);
-  symtab->debugformat = obsavestring ("unknown", 7,
-				      &objfile->objfile_obstack);
+  symtab->debugformat = "unknown";
 
   /* Hook it to the objfile it comes from */
 
