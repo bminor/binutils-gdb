@@ -3554,11 +3554,9 @@ Output_segment::set_section_list_addresses(const Layout* layout, bool reset,
 	    off += (*p)->address() - (addr + (off - startoff));
 	  else
 	    {
-#if 0
 	      if (!layout->script_options()->saw_sections_clause())
 		gold_unreachable();
 	      else
-#endif
 		{
 		  Output_section* os = (*p)->output_section();
 
