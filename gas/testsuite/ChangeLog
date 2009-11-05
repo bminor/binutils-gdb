@@ -1,3 +1,8 @@
+2009-11-05  Nick Clifton  <nickc@redhat.com>
+
+	* gas/i386/i386.exp (space1): Move test inside check for x86
+	target.
+
 2009-11-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/876

@@ -17,9 +17,6 @@ proc gas_32_check { } {
     return [regexp "targets:.*i386" [lindex $status 1]];
 }
 
-# Common tests
-run_list_test "space1" "-al"
-
 if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]]  then {
 
     global ASFLAGS
@@ -208,10 +205,12 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     set ASFLAGS "$old_ASFLAGS"
 }
 
+# Common tests
 if [expr [istarget "i*86-*-*"] || [istarget "x86_64-*-*"]] then {
     run_dump_test "intel-expr"
     run_dump_test "string-ok"
     run_list_test "string-bad" ""
+    run_list_test "space1" "-al"
 }
 
 if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] then {
