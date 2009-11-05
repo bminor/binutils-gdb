@@ -251,6 +251,7 @@ struct objfile
 
     struct bcache *psymbol_cache;	/* Byte cache for partial syms */
     struct bcache *macro_cache;          /* Byte cache for macros */
+    struct bcache *filename_cache;	 /* Byte cache for file names.  */
 
     /* Hash table for mapping symbol names to demangled names.  Each
        entry in the hash table is actually two consecutive strings,

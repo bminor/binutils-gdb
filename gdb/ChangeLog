@@ -1,5 +1,19 @@
 2009-11-05  Tom Tromey  <tromey@redhat.com>
 
+	* symmisc.c (print_symbol_bcache_statistics): Print filename cache
+	statistics.
+	(print_objfile_statistics): Likewise.
+	* symfile.c (reread_symbols): Initialize filename_cache.
+	(allocate_symtab): Cache the file name.
+	(allocate_psymtab): Likewise.
+	* solib-sunos.c (allocate_rt_common_objfile): Initialize
+	filename_cache.
+	* objfiles.h (struct objfile) <filename_cache>: New field.
+	* objfiles.c (allocate_objfile): Initialize filename_cache.
+	(free_objfile): Free filename_cache.
+
+2009-11-05  Tom Tromey  <tromey@redhat.com>
+
 	* symfile.c (add_psymbol_to_bcache): Make 'psymbol' static again.
 	Zero the 'value' field.
 

@@ -191,6 +191,7 @@ allocate_rt_common_objfile (void)
   memset (objfile, 0, sizeof (struct objfile));
   objfile->psymbol_cache = bcache_xmalloc ();
   objfile->macro_cache = bcache_xmalloc ();
+  objfile->filename_cache = bcache_xmalloc ();
   obstack_init (&objfile->objfile_obstack);
   objfile->name = xstrdup ("rt_common");
 

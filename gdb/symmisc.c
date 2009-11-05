@@ -140,6 +140,7 @@ print_symbol_bcache_statistics (void)
     printf_filtered (_("Byte cache statistics for '%s':\n"), objfile->name);
     print_bcache_statistics (objfile->psymbol_cache, "partial symbol cache");
     print_bcache_statistics (objfile->macro_cache, "preprocessor macro cache");
+    print_bcache_statistics (objfile->filename_cache, "file name cache");
   }
   immediate_quit--;
 }
@@ -204,6 +205,8 @@ print_objfile_statistics (void)
 		     bcache_memory_used (objfile->psymbol_cache));
     printf_filtered (_("  Total memory used for macro cache: %d\n"),
 		     bcache_memory_used (objfile->macro_cache));
+    printf_filtered (_("  Total memory used for file name cache: %d\n"),
+		     bcache_memory_used (objfile->filename_cache));
   }
   immediate_quit--;
 }

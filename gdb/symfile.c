@@ -2402,6 +2402,8 @@ reread_symbols (void)
 	      objfile->psymbol_cache = bcache_xmalloc ();
 	      bcache_xfree (objfile->macro_cache);
 	      objfile->macro_cache = bcache_xmalloc ();
+	      bcache_xfree (objfile->filename_cache);
+	      objfile->filename_cache = bcache_xmalloc ();
 	      if (objfile->demangled_names_hash != NULL)
 		{
 		  htab_delete (objfile->demangled_names_hash);
@@ -2424,6 +2426,7 @@ reread_symbols (void)
 
 	      objfile->psymbol_cache = bcache_xmalloc ();
 	      objfile->macro_cache = bcache_xmalloc ();
+	      objfile->filename_cache = bcache_xmalloc ();
 	      /* obstack_init also initializes the obstack so it is
 	         empty.  We could use obstack_specify_allocation but
 	         gdb_obstack.h specifies the alloc/dealloc
@@ -2746,8 +2749,8 @@ allocate_symtab (char *filename, struct objfile *objfile)
   symtab = (struct symtab *)
     obstack_alloc (&objfile->objfile_obstack, sizeof (struct symtab));
   memset (symtab, 0, sizeof (*symtab));
-  symtab->filename = obsavestring (filename, strlen (filename),
-				   &objfile->objfile_obstack);
+  symtab->filename = (char *) bcache (filename, strlen (filename) + 1,
+				      objfile->filename_cache);
   symtab->fullname = NULL;
   symtab->language = deduce_language_from_filename (filename);
   symtab->debugformat = "unknown";
@@ -2777,8 +2780,8 @@ allocate_psymtab (char *filename, struct objfile *objfile)
 		     sizeof (struct partial_symtab));
 
   memset (psymtab, 0, sizeof (struct partial_symtab));
-  psymtab->filename = obsavestring (filename, strlen (filename),
-				    &objfile->objfile_obstack);
+  psymtab->filename = (char *) bcache (filename, strlen (filename) + 1,
+				       objfile->filename_cache);
   psymtab->symtab = NULL;
 
   /* Prepend it to the psymtab list for the objfile it belongs to.
