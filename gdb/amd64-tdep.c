@@ -1402,7 +1402,10 @@ amd64_init_frame_cache (struct amd64_frame_cache *cache)
   cache->pc = 0;
 
   /* Saved registers.  We initialize these to -1 since zero is a valid
-     offset (that's where %rbp is supposed to be stored).  */
+     offset (that's where %rbp is supposed to be stored).
+     The values start out as being offsets, and are later converted to
+     addresses (at which point -1 is interpreted as an address, still meaning
+     "invalid").  */
   for (i = 0; i < AMD64_NUM_SAVED_REGS; i++)
     cache->saved_regs[i] = -1;
   cache->saved_sp = 0;
