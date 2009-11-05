@@ -920,6 +920,9 @@ rx_decode_opcode (unsigned long pc AU,
 /** 0111 1111 1010 rdst			setpsw	%0 */
   ID(setpsw); DF(rdst);
 
+/** 0111 0101 0111 0000 0000 immm	mvtipl	#%1 */
+  ID(mvtipl); SC(immm);
+
 /** 0111 1110 111 crdst			popc	%0 */
   ID(mov); OP(1, RX_Operand_Postinc, 0, 0); DR(crdst + 16);
 
@@ -934,15 +937,6 @@ rx_decode_opcode (unsigned long pc AU,
 
 /** 1111 1101 0110 101s rsrc rdst	mvfc	%1, %0 */
   ID(mov); SR((s*16+rsrc) + 16); DR(rdst);
-
-/*?* 1111 1101 1111 1010 01cp rsrc	mvtcp	#%2, %1, #%0 */
-  ID(mvtcp); S2C(cp); SR(rsrc); DC (IMM (WSIZE));
-
-/*?* 1111 1101 1111 1011 01cp rdst	mvfcp	#%2, %0, #%1 */
-  ID(mvfcp); S2C(cp); DR(rdst); SC (IMM (WSIZE));
-
-/*?* 1111 1101 1111 1001 01cp 0000	opecp	#%2, #%1 */
-  ID(opecp); S2C(cp); SC (IMM (WSIZE));
 
 /*----------------------------------------------------------------------*/
 /* INTERRUPTS								*/

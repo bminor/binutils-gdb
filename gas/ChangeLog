@@ -1,3 +1,8 @@
+2009-11-04  DJ Delorie  <dj@redhat.com>
+
+	* config/rx-parse.y (MVTIPL): Update bit pattern.
+	(cpen): Remove.
+
 2009-11-04  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Maxim Kuvyrkov  <maxim@codesourcery.com>
 

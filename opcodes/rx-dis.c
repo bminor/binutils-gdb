@@ -63,7 +63,7 @@ static char const * register_names[] =
   "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
   "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
   /* control register */
-  "psw", "pc", "usp", "fpsw", "cpen", "", "", "wr",
+  "psw", "pc", "usp", "fpsw", "", "", "", "wr",
   "bpsw", "bpc", "isp", "fintv", "intb", "", "", "",
   "pbp", "pben", "", "", "", "", "", "",
   "bbpsw", "bbpc", "", "", "", "", "", ""
