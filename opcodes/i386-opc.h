@@ -102,6 +102,8 @@ enum
   CpuFMA,
   /* FMA4 support required */
   CpuFMA4,
+  /* LWP support required */
+  CpuLWP,
   /* MOVBE Instuction support required */
   CpuMovbe,
   /* EPT Instructions required */
@@ -168,6 +170,7 @@ typedef union i386_cpu_flags
       unsigned int cpupclmul:1;
       unsigned int cpufma:1;
       unsigned int cpufma4:1;
+      unsigned int cpulwp:1;
       unsigned int cpumovbe:1;
       unsigned int cpuept:1;
       unsigned int cpurdtscp:1;
@@ -273,6 +276,9 @@ enum
   VexNDS,
   /* insn has VEX NDD. Register destination is encoded in Vex prefix. */
   VexNDD,
+  /* insn has VEX NDD. Register destination is encoded in Vex prefix
+     and one of the operands can access a memory location.  */
+  VexLWP,
   /* insn has VEX W0. */
   VexW0,
   /* insn has VEX W1. */
@@ -283,6 +289,10 @@ enum
   Vex0F38,
   /* insn has VEX 0x0F3A opcode prefix. */
   Vex0F3A,
+  /* insn has XOP 0x09 opcode prefix. */
+  XOP09,
+  /* insn has XOP 0x0A opcode prefix. */
+  XOP0A,
   /* insn has VEX prefix with 3 soures. */
   Vex3Sources,
   /* instruction has VEX 8 bit imm */
@@ -345,11 +355,14 @@ typedef struct i386_opcode_modifier
   unsigned int vex:2;
   unsigned int vexnds:1;
   unsigned int vexndd:1;
+  unsigned int vexlwp:1;
   unsigned int vexw0:1;
   unsigned int vexw1:1;
   unsigned int vex0f:1;
   unsigned int vex0f38:1;
   unsigned int vex0f3a:1;
+  unsigned int xop09:1;
+  unsigned int xop0a:1;
   unsigned int vex3sources:1;
   unsigned int veximmext:1;
   unsigned int sse2avx:1;

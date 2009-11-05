@@ -1,3 +1,37 @@
+2009-11-05  Sebastian Pop  <sebastian.pop@amd.com>
+	    Quentin Neill  <quentin.neill@amd.com>
+
+	* opcodes/i386-dis.c (OP_LWPCB_E): New.
+	(OP_LWP_E): New.
+	(OP_LWP_I): New.
+	(USE_XOP_8F_TABLE): New.
+	(XOP_8F_TABLE): New.
+	(REG_XOP_LWPCB): New.
+	(REG_XOP_LWP): New.
+	(XOP_09): New.
+	(XOP_0A): New.
+	(reg_table): Redirect REG_8F to XOP_8F_TABLE.
+	Add entries for REG_XOP_LWPCB and REG_XOP_LWP.
+	(xop_table): New.
+	(get_valid_dis386): Handle USE_XOP_8F_TABLE.
+	Use the offsets VEX_0F, VEX_0F38, and VEX_0F3A instead of their values
+	to access to the vex_table.
+	(OP_LWPCB_E): New.
+	(OP_LWP_E): New.
+	(OP_LWP_I): New.
+	* opcodes/i386-gen.c (cpu_flag_init): Add CPU_LWP_FLAGS, CpuLWP.
+	(cpu_flags): Add CpuLWP.
+	(opcode_modifiers): Add VexLWP, XOP09, and XOP0A.
+	* opcodes/i386-opc.h (CpuLWP): New.
+	(i386_cpu_flags): Add bit cpulwp.
+	(VexLWP): New.
+	(XOP09): New.
+	(XOP0A): New.
+	(i386_opcode_modifier): Add vexlwp, xop09, and xop0a.
+	* opcodes/i386-opc.tbl (llwpcb): Added.
+	(lwpval): Added.
+	(lwpins): Added.
+
 2009-11-04  DJ Delorie  <dj@redhat.com>
 
 	* rx-decode.opc (rx_decode_opcode) (mvtipl): Add.

@@ -32,6 +32,7 @@ extending the Intel architecture to 64-bits.
 * i386-Jumps::                  Handling of Jump Instructions
 * i386-Float::                  Floating Point
 * i386-SIMD::                   Intel's MMX and AMD's 3DNow! SIMD Operations
+* i386-LWP::                    AMD's Lightweight Profiling Instructions
 * i386-16bit::                  Writing 16-bit Code
 * i386-Arch::                   Specifying an x86 CPU architecture
 * i386-Bugs::                   AT&T Syntax bugs
@@ -140,6 +141,7 @@ accept various extension mnemonics.  For example,
 @code{movbe},
 @code{ept},
 @code{clflush},
+@code{lwp},
 @code{syscall},
 @code{rdtscp},
 @code{3dnow},
@@ -799,6 +801,25 @@ as the floating point stack.
 See Intel and AMD documentation, keeping in mind that the operand order in
 instructions is reversed from the Intel syntax.
 
+@node i386-LWP
+@section AMD's Lightweight Profiling Instructions
+
+@cindex LWP, i386
+@cindex LWP, x86-64
+
+@code{@value{AS}} supports AMD's Lightweight Profiling (LWP)
+instruction set, available on AMD's Family 15h (Orochi) processors.
+
+LWP enables applications to collect and manage performance data, and
+react to performance events.  The collection of performance data
+requires no context switches.  LWP runs in the context of a thread and
+so several counters can be used independently across multiple threads.
+LWP can be used in both 64-bit and legacy 32-bit modes.
+
+For detailed information on the LWP instruction set, see the
+@cite{AMD Lightweight Profiling Specification} available at
+@uref{http://developer.amd.com/cpu/LWP,Lightweight Profiling Specification}.
+
 @node i386-16bit
 @section Writing 16-bit Code
 
@@ -898,7 +919,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.ssse3} @tab @samp{.sse4.1} @tab @samp{.sse4.2} @tab @samp{.sse4}
 @item @samp{.avx} @tab @samp{.vmx} @tab @samp{.smx} @tab @samp{.xsave}
 @item @samp{.aes} @tab @samp{.pclmul} @tab @samp{.fma} @tab @samp{.movbe}
-@item @samp{.ept} @tab @samp{.clflush}
+@item @samp{.ept} @tab @samp{.clflush} @tab @samp{.lwp}
 @item @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.sse4a} @tab @samp{.sse5}
 @item @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme} @tab @samp{.abm}
 @item @samp{.padlock}

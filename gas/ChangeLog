@@ -1,3 +1,12 @@
+2009-11-05  Sebastian Pop  <sebastian.pop@amd.com>
+	    Quentin Neill  <quentin.neill@amd.com>
+
+	* config/tc-i386.c (cpu_arch): Add CPU_LWP_FLAGS.
+	(build_vex_prefix): Handle xop09 and xop0a.
+	(build_modrm_byte): Handle vexlwp.
+	(md_show_usage): Add lwp.
+	* doc/c-i386.texi (i386-LWP): New section.
+
 2009-11-04  DJ Delorie  <dj@redhat.com>
 
 	* config/rx-parse.y (MVTIPL): Update bit pattern.

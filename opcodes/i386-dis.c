@@ -114,6 +114,9 @@ static void REP_Fixup (int, int);
 static void CMPXCHG8B_Fixup (int, int);
 static void XMM_Fixup (int, int);
 static void CRC32_Fixup (int, int);
+static void OP_LWPCB_E (int, int);
+static void OP_LWP_E (int, int);
+static void OP_LWP_I (int, int);
 
 static void MOVBE_Fixup (int, int);
 
@@ -514,6 +517,7 @@ enum
   USE_PREFIX_TABLE,
   USE_X86_64_TABLE,
   USE_3BYTE_TABLE,
+  USE_XOP_8F_TABLE,
   USE_VEX_C4_TABLE,
   USE_VEX_C5_TABLE,
   USE_VEX_LEN_TABLE
@@ -528,6 +532,7 @@ enum
 #define PREFIX_TABLE(I)		DIS386 (USE_PREFIX_TABLE, (I))
 #define X86_64_TABLE(I)		DIS386 (USE_X86_64_TABLE, (I))
 #define THREE_BYTE_TABLE(I)	DIS386 (USE_3BYTE_TABLE, (I))
+#define XOP_8F_TABLE(I)		DIS386 (USE_XOP_8F_TABLE, (I))
 #define VEX_C4_TABLE(I)		DIS386 (USE_VEX_C4_TABLE, (I))
 #define VEX_C5_TABLE(I)		DIS386 (USE_VEX_C5_TABLE, (I))
 #define VEX_LEN_TABLE(I)	DIS386 (USE_VEX_LEN_TABLE, (I))
@@ -565,7 +570,9 @@ enum
   REG_VEX_71,
   REG_VEX_72,
   REG_VEX_73,
-  REG_VEX_AE
+  REG_VEX_AE,
+  REG_XOP_LWPCB,
+  REG_XOP_LWP
 };
 
 enum
@@ -1066,6 +1073,12 @@ enum
   THREE_BYTE_0F38 = 0,
   THREE_BYTE_0F3A,
   THREE_BYTE_0F7A
+};
+
+enum
+{
+  XOP_09 = 0,
+  XOP_0A
 };
 
 enum
@@ -2123,7 +2136,7 @@ static const struct dis386 reg_table[][8] = {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
+    { XOP_8F_TABLE (XOP_09) },
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
   },
@@ -2430,6 +2443,28 @@ static const struct dis386 reg_table[][8] = {
     { "(bad)",	{ XX } },
     { MOD_TABLE (MOD_VEX_AE_REG_2) },
     { MOD_TABLE (MOD_VEX_AE_REG_3) },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+  },
+  /* REG_XOP_LWPCB */
+  {
+    { "llwpcb", { { OP_LWPCB_E, 0 } } },
+    { "slwpcb",	{ { OP_LWPCB_E, 0 } } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+  },
+  /* REG_XOP_LWP */
+  {
+    { "lwpins", { { OP_LWP_E, 0 }, Ed, { OP_LWP_I, 0 } } },
+    { "lwpval",	{ { OP_LWP_E, 0 }, Ed, { OP_LWP_I, 0 } } },
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
@@ -6343,6 +6378,590 @@ static const struct dis386 three_byte_table[][256] = {
   },
 };
 
+static const struct dis386 xop_table[][256] = {
+  /* XOP_09 */
+  {
+    /* 00 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 08 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 10 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { REG_TABLE (REG_XOP_LWPCB) },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 18 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 20 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 28 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 30 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 38 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 40 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 48 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 50 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 58 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 60 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 68 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 70 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 78 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 80 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 88 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 90 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 98 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* a0 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* a8 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* b0 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* b8 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* c0 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* c8 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* d0 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* d8 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* e0 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* e8 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* f0 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* f8 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+  },
+  /* XOP_0A */
+  {
+    /* 00 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 08 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 10 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { REG_TABLE (REG_XOP_LWP) },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 18 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 20 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 28 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 30 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 38 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 40 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 48 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 50 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 58 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 60 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 68 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 70 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 78 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 80 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 88 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 90 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 98 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* a0 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* a8 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* b0 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* b8 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* c0 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* c8 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* d0 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* d8 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* e0 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* e8 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* f0 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* f8 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+  },
+};
 
 static const struct dis386 vex_table[][256] = {
   /* VEX_0F */
@@ -9315,6 +9934,65 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       dp = &vex_len_table[dp->op[1].bytemode][index];
       break;
 
+    case USE_XOP_8F_TABLE:
+      FETCH_DATA (info, codep + 3);
+      /* All bits in the REX prefix are ignored.  */
+      rex_ignored = rex;
+      rex = ~(*codep >> 5) & 0x7;
+
+      /* VEX_TABLE_INDEX is the mmmmm part of the XOP byte 1 "RCB.mmmmm".  */
+      switch ((*codep & 0x1f))
+	{
+	default:
+	  BadOp ();
+	case 0x9:
+	  vex_table_index = XOP_09;
+	  break;
+	case 0xa:
+	  vex_table_index = XOP_0A;
+	  break;
+	}
+      codep++;
+      vex.w = *codep & 0x80;
+      if (vex.w && address_mode == mode_64bit)
+	rex |= REX_W;
+
+      vex.register_specifier = (~(*codep >> 3)) & 0xf;
+      if (address_mode != mode_64bit
+	  && vex.register_specifier > 0x7)
+	BadOp ();
+
+      vex.length = (*codep & 0x4) ? 256 : 128;
+      switch ((*codep & 0x3))
+	{
+	case 0:
+	  vex.prefix = 0;
+	  break;
+	case 1:
+	  vex.prefix = DATA_PREFIX_OPCODE;
+	  break;
+	case 2:
+	  vex.prefix = REPE_PREFIX_OPCODE;
+	  break;
+	case 3:
+	  vex.prefix = REPNE_PREFIX_OPCODE;
+	  break;
+	}
+      need_vex = 1;
+      need_vex_reg = 1;
+      codep++;
+      index = *codep++;
+      dp = &xop_table[vex_table_index][index];
+      /* There is no MODRM byte for VEX [82|77].  */
+      if (index != 0x77 && index != 0x82)
+	{
+	  FETCH_DATA (info, codep + 1);
+	  modrm.mod = (*codep >> 6) & 3;
+	  modrm.reg = (*codep >> 3) & 7;
+	  modrm.rm = *codep & 7;
+	}
+      break;
+
     case USE_VEX_C4_TABLE:
       FETCH_DATA (info, codep + 3);
       /* All bits in the REX prefix are ignored.  */
@@ -9325,13 +10003,13 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	default:
 	  BadOp ();
 	case 0x1:
-	  vex_table_index = 0;
+	  vex_table_index = VEX_0F;
 	  break;
 	case 0x2:
-	  vex_table_index = 1;
+	  vex_table_index = VEX_0F38;
 	  break;
 	case 0x3:
-	  vex_table_index = 2;
+	  vex_table_index = VEX_0F3A;
 	  break;
 	}
       codep++;
@@ -12956,3 +13634,53 @@ MOVBE_Fixup (int bytemode, int sizeflag)
 skip:
   OP_M (bytemode, sizeflag);
 }
+
+static void
+OP_LWPCB_E (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
+{
+  int reg;
+  const char **names;
+
+  /* Skip mod/rm byte.  */
+  MODRM_CHECK;
+  codep++;
+
+  if (vex.w)
+    names = names64;
+  else if (vex.length == 256)
+    names = names32;
+  else
+    names = names16;
+
+  reg = modrm.rm;
+  USED_REX (REX_B);
+  if (rex & REX_B)
+    reg += 8;
+
+  oappend (names[reg]);
+}
+
+static void
+OP_LWP_E (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
+{
+  const char **names;
+
+  if (vex.w)
+    names = names64;
+  else if (vex.length == 256)
+    names = names32;
+  else
+    names = names16;
+
+  oappend (names[vex.register_specifier]);
+}
+
+static void
+OP_LWP_I (int bytemode ATTRIBUTE_UNUSED, int sizeflag)
+{
+  if (vex.w || vex.length == 256)
+    OP_I (q_mode, sizeflag);
+  else
+    OP_I (w_mode, sizeflag);
+}
+

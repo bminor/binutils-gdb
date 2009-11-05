@@ -1,3 +1,13 @@
+2009-11-05  Sebastian Pop  <sebastian.pop@amd.com>
+	    Quentin Neill  <quentin.neill@amd.com>
+
+	* gas/i386/i386.exp: Run x86-64-lwp in 64-bit mode,
+	run lwp in 32-bit mode.
+	* gas/i386/x86-64-lwp.d: New.
+	* gas/i386/x86-64-lwp.s: New.
+	* gas/i386/lwp.d: New.
+	* gas/i386/lwp.s: New.
+
 2009-11-05  Nick Clifton  <nickc@redhat.com>
 
 	* gas/i386/i386.exp (space1): Move test inside check for x86

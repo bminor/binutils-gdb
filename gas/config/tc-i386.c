@@ -641,6 +641,8 @@ static const arch_entry cpu_arch[] =
     CPU_FMA_FLAGS },
   { ".fma4", PROCESSOR_UNKNOWN,
     CPU_FMA4_FLAGS },
+  { ".lwp", PROCESSOR_UNKNOWN,
+    CPU_LWP_FLAGS },
   { ".movbe", PROCESSOR_UNKNOWN,
     CPU_MOVBE_FLAGS },
   { ".ept", PROCESSOR_UNKNOWN,
@@ -2720,17 +2722,27 @@ build_vex_prefix (const insn_template *t)
       /* 3-byte VEX prefix.  */
       unsigned int m, w;
 
+      i.vex.length = 3;
+      i.vex.bytes[0] = 0xc4;
+
       if (i.tm.opcode_modifier.vex0f)
 	m = 0x1;
       else if (i.tm.opcode_modifier.vex0f38)
 	m = 0x2;
       else if (i.tm.opcode_modifier.vex0f3a)
 	m = 0x3;
+      else if (i.tm.opcode_modifier.xop09)
+	{
+	  m = 0x9;
+	  i.vex.bytes[0] = 0x8f;
+	}
+      else if (i.tm.opcode_modifier.xop0a)
+	{
+	  m = 0xa;
+	  i.vex.bytes[0] = 0x8f;
+	}
       else
 	abort ();
-
-      i.vex.length = 3;
-      i.vex.bytes[0] = 0xc4;
 
       /* The high 3 bits of the second VEX byte are 1's compliment
 	 of RXB bits from REX.  */
@@ -4936,7 +4948,8 @@ build_modrm_byte (void)
      a instruction with VEX prefix and 3 sources.  */
   if (i.mem_operands == 0
       && ((i.reg_operands == 2
-	   && !i.tm.opcode_modifier.vexndd)
+	   && !i.tm.opcode_modifier.vexndd
+	   && !i.tm.opcode_modifier.vexlwp)
 	  || (i.reg_operands == 3
 	      && i.tm.opcode_modifier.vexnds)
 	  || (i.reg_operands == 4 && vex_3_sources)))
@@ -5252,11 +5265,22 @@ build_modrm_byte (void)
       else
 	mem = ~0;
 
+      if (i.tm.opcode_modifier.vexlwp)
+	{
+	  i.vex.register_specifier = i.op[2].regs;
+	  if (!i.mem_operands)
+	    {
+	      i.rm.mode = 3;
+	      i.rm.regmem = i.op[1].regs->reg_num;
+	      if ((i.op[1].regs->reg_flags & RegRex) != 0)
+		i.rex |= REX_B;
+	    }
+	}
       /* Fill in i.rm.reg or i.rm.regmem field with register operand
 	 (if any) based on i.tm.extension_opcode.  Again, we must be
 	 careful to make sure that segment/control/debug/test/MMX
 	 registers are coded into the i.rm.reg field.  */
-      if (i.reg_operands)
+      else if (i.reg_operands)
 	{
 	  unsigned int op;
 	  unsigned int vex_reg = ~0;
@@ -5316,6 +5340,7 @@ build_modrm_byte (void)
 		  && !operand_type_equal (&i.tm.operand_types[vex_reg],
 					  &regymm))
 		abort ();
+
 	      i.vex.register_specifier = i.op[vex_reg].regs;
 	    }
 
@@ -8019,7 +8044,7 @@ md_show_usage (stream)
                            ssse3, sse4.1, sse4.2, sse4, nosse, avx, noavx,\n\
                            vmx, smx, xsave, movbe, ept, aes, pclmul, fma,\n\
                            clflush, syscall, rdtscp, 3dnow, 3dnowa, sse4a,\n\
-                           svme, abm, padlock, fma4\n"));
+                           svme, abm, padlock, fma4, lwp\n"));
   fprintf (stream, _("\
   -mtune=CPU              optimize for CPU, CPU is one of:\n\
                            i8086, i186, i286, i386, i486, pentium, pentiumpro,\n\
