@@ -1,3 +1,11 @@
+2009-11-06  Kai Tietz  <kai.tietz@onevision.com>
+
+	* pe.em (DEFAULT_PSEUDO_RELOC_VERSION): New macro.
+	(gld_XXX_before_parse): Set pseudo-relocation default
+	version to DEFAULT_PSEUDO_RELOC_VERSION.
+	(gldXXX_handle_option): Likewise.
+
+
 2009-11-05  Nick Clifton  <nickc@redhat.com>
 
 	* lexsup.c: Rename --add-needed to --copy-dt-needed-entries.

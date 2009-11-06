@@ -99,6 +99,12 @@ fragment <<EOF
 #define DLL_SUPPORT
 #endif
 
+#if defined(TARGET_IS_i386pe)
+#define DEFAULT_PSEUDO_RELOC_VERSION 2
+#else
+#define DEFAULT_PSEUDO_RELOC_VERSION 1
+#endif
+
 #if defined(TARGET_IS_i386pe) || ! defined(DLL_SUPPORT)
 #define	PE_DEF_SUBSYSTEM		3
 #else
@@ -161,7 +167,8 @@ esac
 
 fragment <<EOF
   link_info.pei386_auto_import = ${default_auto_import};
-  link_info.pei386_runtime_pseudo_reloc = 1; /* Use by default version 1.  */
+  /* Use by default version.  */
+  link_info.pei386_runtime_pseudo_reloc = DEFAULT_PSEUDO_RELOC_VERSION;
 #endif
 }
 
@@ -746,7 +753,8 @@ gld${EMULATION_NAME}_handle_option (int optc)
       link_info.pei386_auto_import = 0;
       break;
     case OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC:
-      link_info.pei386_runtime_pseudo_reloc = 1;
+      link_info.pei386_runtime_pseudo_reloc =
+	DEFAULT_PSEUDO_RELOC_VERSION;
       break;
     case OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V1:
       link_info.pei386_runtime_pseudo_reloc = 1;
