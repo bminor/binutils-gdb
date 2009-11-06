@@ -192,7 +192,6 @@ m68k_convert_register_p (struct gdbarch *gdbarch, int regnum, struct type *type)
   if (!gdbarch_tdep (gdbarch)->fpregs_present)
     return 0;
   return (regnum >= M68K_FP0_REGNUM && regnum <= M68K_FP0_REGNUM + 7
-	  && type != m68881_ext_type (gdbarch)
 	  && type != register_type (gdbarch, M68K_FP0_REGNUM));
 }
 

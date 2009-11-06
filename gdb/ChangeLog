@@ -1,5 +1,10 @@
 2009-11-06  Vladimir Prus  <vladimir@codesourcery.com>
 
+	* m68k-tdep.c (m68k_convert_register_p): Correct
+	messup.
+
+2009-11-06  Vladimir Prus  <vladimir@codesourcery.com>
+
 	* m68k-tdep.c (m68k_convert_register_p): Compare with
 	the actual type of fp registers, not one of the possible
 	values.
