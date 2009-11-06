@@ -1,3 +1,12 @@
+2009-11-06  Vladimir Prus  <vladimir@codesourcery.com>
+
+        Prevent program output from mix with "^running".
+
+	gdb/
+	* mi/mi-interp.c (mi_on_resume): Output token
+	and "^running" together, so that nothing else gets
+	in between.
+
 2009-11-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2read.c (struct dwarf2_cu): Remove ranges_offset and
