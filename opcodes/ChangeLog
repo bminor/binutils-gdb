@@ -1,3 +1,12 @@
+2009-11-06  Sebastian Pop  <sebastian.pop@amd.com>
+
+	* i386-dis.c (reg_table): Add XOP_8F_TABLE (XOP_09) to
+	reg_table[REG_8F][1]: for XOP instructions, ModRM.reg first points to
+	B.mm in the RXB.mmmmm byte, and so when B is set, we still should use
+	the xop_table.
+	(get_valid_dis386): Removed unused condition (from cut/n/paste) for
+	XOP instructions.
+
 2009-11-05  Sebastian Pop  <sebastian.pop@amd.com>
 	    Quentin Neill  <quentin.neill@amd.com>
 

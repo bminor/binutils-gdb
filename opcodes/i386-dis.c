@@ -2132,7 +2132,7 @@ static const struct dis386 reg_table[][8] = {
   /* REG_8F */
   {
     { "popU",	{ stackEv } },
-    { "(bad)",	{ XX } },
+    { XOP_8F_TABLE (XOP_09) },
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
@@ -9983,14 +9983,11 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       codep++;
       index = *codep++;
       dp = &xop_table[vex_table_index][index];
-      /* There is no MODRM byte for VEX [82|77].  */
-      if (index != 0x77 && index != 0x82)
-	{
-	  FETCH_DATA (info, codep + 1);
-	  modrm.mod = (*codep >> 6) & 3;
-	  modrm.reg = (*codep >> 3) & 7;
-	  modrm.rm = *codep & 7;
-	}
+
+      FETCH_DATA (info, codep + 1);
+      modrm.mod = (*codep >> 6) & 3;
+      modrm.reg = (*codep >> 3) & 7;
+      modrm.rm = *codep & 7;
       break;
 
     case USE_VEX_C4_TABLE:

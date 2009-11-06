@@ -1,3 +1,9 @@
+2009-11-06  Sebastian Pop  <sebastian.pop@amd.com>
+
+	* gas/i386/x86-64-lwp.s: Updated to also contain patterns
+	with r[8-15] registers.
+	* gas/i386/x86-64-lwp.d: Same.
+
 2009-11-05  Sebastian Pop  <sebastian.pop@amd.com>
 	    Quentin Neill  <quentin.neill@amd.com>
 
