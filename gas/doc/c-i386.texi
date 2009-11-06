@@ -919,9 +919,10 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.ssse3} @tab @samp{.sse4.1} @tab @samp{.sse4.2} @tab @samp{.sse4}
 @item @samp{.avx} @tab @samp{.vmx} @tab @samp{.smx} @tab @samp{.xsave}
 @item @samp{.aes} @tab @samp{.pclmul} @tab @samp{.fma} @tab @samp{.movbe}
-@item @samp{.ept} @tab @samp{.clflush} @tab @samp{.lwp}
+@item @samp{.ept} @tab @samp{.clflush}
 @item @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.sse4a} @tab @samp{.sse5}
 @item @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme} @tab @samp{.abm}
+@item @samp{.lwp}
 @item @samp{.padlock}
 @end multitable
 

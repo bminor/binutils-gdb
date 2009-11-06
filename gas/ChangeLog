@@ -1,3 +1,7 @@
+2009-11-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* doc/c-i386.texi: Move .lwp.
+
 2009-11-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/obj-elf.c (obj_elf_change_section): Remove FIXME from
