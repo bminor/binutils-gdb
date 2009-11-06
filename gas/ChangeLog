@@ -1,3 +1,8 @@
+2009-11-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/obj-elf.c (obj_elf_change_section): Remove FIXME from
+	comment.
+
 2009-11-05  Sebastian Pop  <sebastian.pop@amd.com>
 	    Quentin Neill  <quentin.neill@amd.com>
 
