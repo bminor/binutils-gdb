@@ -100,7 +100,7 @@ bfd_boolean add_DT_NEEDED_for_regular;
 /* True means create DT_NEEDED entries for dynamic libraries that
    are DT_NEEDED by dynamic libraries specifically mentioned on
    the command line.  */
-bfd_boolean add_DT_NEEDED_for_dynamic;
+bfd_boolean add_DT_NEEDED_for_dynamic = TRUE;
 
 /* TRUE if we should demangle symbol names.  */
 bfd_boolean demangling;

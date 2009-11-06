@@ -1,3 +1,8 @@
+2009-11-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/10912
+	* ldmain.c (add_DT_NEEDED_for_dynamic): Default to TRUE.
+
 2009-11-06  Kai Tietz  <kai.tietz@onevision.com>
 
 	* pe.em (DEFAULT_PSEUDO_RELOC_VERSION): New macro.
