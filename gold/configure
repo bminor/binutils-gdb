@@ -6875,6 +6875,40 @@ $as_echo "#define HAVE_TEMPLATE_ATTRIBUTES 1" >>confdefs.h
 
 fi
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for struct stat::st_mtim." >&5
+$as_echo_n "checking for struct stat::st_mtim.... " >&6; }
+if test "${gold_cv_stat_st_mtim+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#include <sys/stat.h>
+long bar() { struct stat s; return (long)(s.st_mtim.tv_sec + s.st_mtim.tv_sec);}
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  gold_cv_stat_st_mtim=yes
+else
+  gold_cv_stat_st_mtim=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gold_cv_stat_st_mtim" >&5
+$as_echo "$gold_cv_stat_st_mtim" >&6; }
+if test "$gold_cv_stat_st_mtim" = "yes"; then
+
+$as_echo "#define HAVE_STAT_ST_MTIM 1" >>confdefs.h
+
+fi
+
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'

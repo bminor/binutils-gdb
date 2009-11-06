@@ -102,6 +102,9 @@
 /* Define to 1 if you have the `readv' function. */
 #undef HAVE_READV
 
+/* Define if struct stat has a field st_mtim with timespec for mtime */
+#undef HAVE_STAT_ST_MTIM
+
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
 

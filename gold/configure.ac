@@ -370,6 +370,18 @@ if test "$gold_cv_template_attribute" = "yes"; then
 	    [Define if attributes work on C++ templates])
 fi
 
+dnl Check if the system has struct stat::st_mtim.
+AC_CACHE_CHECK([for struct stat::st_mtim.],
+[gold_cv_stat_st_mtim],
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#include <sys/stat.h>
+long bar() { struct stat s; return (long)(s.st_mtim.tv_sec + s.st_mtim.tv_sec);}
+]])], [gold_cv_stat_st_mtim=yes], [gold_cv_stat_st_mtim=no])])
+if test "$gold_cv_stat_st_mtim" = "yes"; then
+  AC_DEFINE(HAVE_STAT_ST_MTIM, 1,
+	    [Define if struct stat has a field st_mtim with timespec for mtime])
+fi
+
 AC_LANG_POP(C++)
 
 AM_MAINTAINER_MODE

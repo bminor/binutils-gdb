@@ -823,9 +823,11 @@ File_read::get_mtime()
   if (fstat(this->descriptor_, &file_stat) < 0)
     gold_fatal(_("%s: stat failed: %s"), this->name_.c_str(),
 	       strerror(errno));
-  // TODO: do a configure check if st_mtim is present and get the
-  // nanoseconds part if it is.
+#ifdef HAVE_STAT_ST_MTIM
+  return Timespec(file_stat.st_mtim.tv_sec, file_stat.st_mtim.tv_nsec);
+#else
   return Timespec(file_stat.st_mtime, 0);
+#endif
 }
 
 // Open the file.

@@ -1,3 +1,10 @@
+2009-11-06  Mikolaj Zalewski  <mikolaj@google.com>
+
+	* configure.ac: Check for (struct stat)::st_mtim
+	* fileread.cc (File_read::get_mtime): Use st_mtim if available.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2009-11-05  Ian Lance Taylor  <iant@google.com>
 
 	PR 10910
