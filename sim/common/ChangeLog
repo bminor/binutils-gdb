@@ -1,3 +1,8 @@
+2009-11-05  Doug Evans  <dje@sebabeach.org>
+
+	* cgen-mem.h (DECLARE_GETT): Don't inline.
+	(DECLARE_SETT): Ditto.
+
 2009-10-15  Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* sim-inline.h: Fix spelling error.

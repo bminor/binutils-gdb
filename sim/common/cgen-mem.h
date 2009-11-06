@@ -160,9 +160,9 @@ DECLARE_SETMEM (DF, 8) /* TAGS: SETMEMDF */
    This needn't be very efficient (i.e. can call memcpy) as this is
    only used when interfacing with the outside world (e.g. gdb).  */
 
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
+#if defined (MEMOPS_DEFINE_INLINE)
 #define DECLARE_GETT(mode, size) \
-MEMOPS_INLINE mode \
+mode \
 XCONCAT2 (GETT,mode) (unsigned char *p) \
 { \
   mode tmp; \
@@ -195,9 +195,9 @@ DECLARE_GETT (TF, 16) /* TAGS: GETTTF */
    This needn't be very efficient (i.e. can call memcpy) as this is
    only used when interfacing with the outside world (e.g. gdb).  */
 
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
+#if defined (MEMOPS_DEFINE_INLINE)
 #define DECLARE_SETT(mode, size) \
-MEMOPS_INLINE void \
+void \
 XCONCAT2 (SETT,mode) (unsigned char *buf, mode val) \
 { \
   mode tmp; \
@@ -206,7 +206,7 @@ XCONCAT2 (SETT,mode) (unsigned char *buf, mode val) \
 }
 #else
 #define DECLARE_SETT(mode, size) \
-extern mode XCONCAT2 (GETT,mode) (unsigned char *, mode);
+extern mode XCONCAT2 (SETT,mode) (unsigned char *, mode);
 #endif
 
 DECLARE_SETT (QI, 1)  /* TAGS: SETTQI */
