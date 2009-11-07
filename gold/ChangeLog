@@ -1,3 +1,20 @@
+2009-11-06  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (class Reloc_stub): Correct a comment.
+	(Target_arm::Target_arm): Initialize arm_input_section_map_.
+	(Target_arm::scan_section_for_stubs): New method declaration.
+	(Target_arm::do_make_elf_object, Target_arm::do_make_output_section):
+	Change methods from private to protected.
+	(Target_arm::do_may_relax): New method definition.
+	(Target_arm::do_relax, Target_arm::group_sections,
+	Target_arm::scan_reloc_for_stub,
+	Target_arm::scan_reloc_section_for_stubs): New method declarations.
+	(Target_arm::arm_input_section_map_): New data member declaration.
+	(Target_arm::scan_reloc_for_stub,
+	Target_arm::scan_reloc_section_for_stubs,
+	Target_arm::scan_section_for_stubs, Target_arm::group_sections,
+	Target_arm::do_relax): New method definitions.
+
 2009-11-06  Mikolaj Zalewski  <mikolaj@google.com>
 
 	* configure.ac: Check for (struct stat)::st_mtim
