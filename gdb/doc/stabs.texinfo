@@ -1,5 +1,7 @@
 \input texinfo
 @setfilename stabs.info
+@setchapternewpage odd
+@settitle STABS
 
 @c @finalout
 
@@ -30,8 +32,6 @@ This document describes the stabs debugging symbol tables.
 @insertcopying
 @end ifnottex
 
-@setchapternewpage odd
-@settitle STABS
 @titlepage
 @title The ``stabs'' debug format
 @author Julia Menapace, Jim Kingdon, David MacKenzie

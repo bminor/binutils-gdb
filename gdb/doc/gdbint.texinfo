@@ -1,6 +1,8 @@
 \input texinfo   @c -*- texinfo -*-
 @setfilename gdbint.info
 @include gdb-cfg.texi
+@settitle @value{GDBN} Internals
+@setchapternewpage off
 @dircategory Software development
 @direntry
 * Gdb-Internals: (gdbint).	The GNU debugger's internals.
@@ -27,8 +29,6 @@ This file documents the internals of the GNU debugger @value{GDBN}.
 @insertcopying
 @end ifnottex
 
-@setchapternewpage off
-@settitle @value{GDBN} Internals
 
 @syncodeindex fn cp
 @syncodeindex vr cp
