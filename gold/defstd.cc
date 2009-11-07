@@ -298,7 +298,7 @@ const Define_symbol_in_segment in_segment[] =
     elfcpp::STV_DEFAULT,	// visibility
     0,				// nonvis
     Symbol::SEGMENT_END,	// offset_from_base
-    false			// only_if_ref
+    true			// only_if_ref
   }
 };
 
