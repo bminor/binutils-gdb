@@ -1,5 +1,19 @@
 2009-11-06  Ian Lance Taylor  <iant@google.com>
 
+	Bring over from mainline:
+	2009-10-16  Doug Kwan  <dougkwan@google.com>
+
+	* dynobj.cc (Versions::Versions): Initialize version_script_.
+	Only insert base version symbol definition for a shared object
+	if version script defines any version versions.
+	(Versions::define_base_version): New method definition.
+	(Versions::add_def): Check that base version is not needed.
+	(Versions::add_need): Define base version lazily.
+	* dynobj.h (Versions::define_base_version): New method declaration.
+	(Versions::needs_base_version_): New data member declaration.
+
+2009-11-06  Ian Lance Taylor  <iant@google.com>
+
 	PR 10876
 	* defstd.cc (in_segment): Set only_if_ref true for "end".
 
