@@ -5589,11 +5589,11 @@ slurp_hppa_unwind_table (FILE * file,
 	    {
 	    case 0:
 	      aux->table[i].start.section = sym->st_shndx;
-	      aux->table[i].start.offset += sym->st_value + rp->r_addend;
+	      aux->table[i].start.offset  = sym->st_value + rp->r_addend;
 	      break;
 	    case 1:
 	      aux->table[i].end.section   = sym->st_shndx;
-	      aux->table[i].end.offset   += sym->st_value + rp->r_addend;
+	      aux->table[i].end.offset    = sym->st_value + rp->r_addend;
 	      break;
 	    default:
 	      break;

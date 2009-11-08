@@ -1,3 +1,7 @@
+2009-11-08  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* readelf.c (slurp_hppa_unwind_table): Don't relocate address twice.
+
 2009-11-05  Kai Tietz  <kai.tietz@onevision.com>
 
 	* dllwrap.c (is_leading_underscore): New variable.
