@@ -3033,7 +3033,7 @@ elf_hppa_final_link (bfd *abfd, struct bfd_link_info *info)
 
   /* If we're producing a final executable, sort the contents of the
      unwind section. */
-  if (retval)
+  if (retval && !info->relocatable)
     retval = elf_hppa_sort_unwind (abfd);
 
   return retval;

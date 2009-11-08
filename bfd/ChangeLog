@@ -1,3 +1,9 @@
+2009-11-08  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* elf32-hppa.c (elf32_hppa_final_link): Don't sort unwind information
+	in a relocatable link.
+	* elf64-hppa.c (elf_hppa_final_link): Likewise.
+
 2009-11-05  Nick Clifton  <nickc@redhat.com>
 
 	* elflink.c (elf_link_add_object_symbols): Improve error
