@@ -552,7 +552,7 @@ parse_vma (const char *s, const char *arg)
 
 /* Returns the size of the named file.  If the file does not
    exist, or if it is not a real file, then a suitable non-fatal
-   error message is printed and zero is returned.  */
+   error message is printed and (off_t) -1 is returned.  */
 
 off_t
 get_file_size (const char * file_name)

@@ -1,3 +1,7 @@
+2009-11-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* bucomm.c (get_file_size): Update comment for the error return value.
+
 2009-11-08  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* readelf.c (slurp_hppa_unwind_table): Don't relocate address twice.
