@@ -1,3 +1,7 @@
+2009-11-09  Tom Tromey  <tromey@redhat.com>
+
+	* python/python.c (execute_gdb_command): Copy the argument text.
+
 2009-11-06  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* m68k-tdep.c (m68k_convert_register_p): Correct

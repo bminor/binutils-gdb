@@ -309,7 +309,11 @@ execute_gdb_command (PyObject *self, PyObject *args)
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
-      execute_command (arg, from_tty);
+      /* Copy the argument text in case the command modifies it.  */
+      char *copy = xstrdup (arg);
+      struct cleanup *cleanup = make_cleanup (xfree, copy);
+      execute_command (copy, from_tty);
+      do_cleanups (cleanup);
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 
