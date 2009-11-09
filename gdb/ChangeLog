@@ -1,3 +1,10 @@
+2009-11-09  Sebastien Granjoux  <seb.sfo@free.fr>
+
+	PR mi/9583:
+	* symtab.c (find_line_symtab, append_exact_match_to_sals)
+	(expand_line_sal): Use full filename when setting breakpoints if
+	available
+
 2009-11-09  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf2read.c (read_import_statement): Don't clobber original cu.

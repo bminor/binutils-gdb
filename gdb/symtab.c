@@ -2416,18 +2416,25 @@ find_line_symtab (struct symtab *symtab, int line, int *index, int *exact_match)
 
       ALL_PSYMTABS (objfile, p)
       {
-        if (strcmp (symtab->filename, p->filename) != 0)
+        if (FILENAME_CMP (symtab->filename, p->filename) != 0)
           continue;
         PSYMTAB_TO_SYMTAB (p);
       }
+
+      /* Get symbol full file name if possible.  */
+      symtab_to_fullname (symtab);
 
       ALL_SYMTABS (objfile, s)
       {
 	struct linetable *l;
 	int ind;
 
-	if (strcmp (symtab->filename, s->filename) != 0)
+	if (FILENAME_CMP (symtab->filename, s->filename) != 0)
 	  continue;
+	if (symtab->fullname != NULL
+	    && symtab_to_fullname (s) != NULL
+	    && FILENAME_CMP (symtab->fullname, s->fullname) != 0)
+	  continue;	
 	l = LINETABLE (s);
 	ind = find_line_common (l, line, &exact);
 	if (ind >= 0)
@@ -4591,12 +4598,14 @@ append_expanded_sal (struct symtabs_and_lines *sal,
 }
 
 /* Helper to expand_line_sal below.  Search in the symtabs for any
-   linetable entry that exactly matches FILENAME and LINENO and append
-   them to RET. If there is at least one match, return 1; otherwise,
-   return 0, and return the best choice in BEST_ITEM and BEST_SYMTAB.  */
+   linetable entry that exactly matches FULLNAME and LINENO and append
+   them to RET.  If FULLNAME is NULL or if a symtab has no full name,
+   use FILENAME and LINENO instead.  If there is at least one match,
+   return 1; otherwise, return 0, and return the best choice in BEST_ITEM
+   and BEST_SYMTAB.  */
 
 static int
-append_exact_match_to_sals (char *filename, int lineno,
+append_exact_match_to_sals (char *filename, char *fullname, int lineno,
 			    struct symtabs_and_lines *ret,
 			    struct linetable_entry **best_item,
 			    struct symtab **best_symtab)
@@ -4612,10 +4621,14 @@ append_exact_match_to_sals (char *filename, int lineno,
   ALL_PSPACES (pspace)
     ALL_PSPACE_SYMTABS (pspace, objfile, symtab)
     {
-      if (strcmp (filename, symtab->filename) == 0)
+      if (FILENAME_CMP (filename, symtab->filename) == 0)
 	{
 	  struct linetable *l;
 	  int len;
+	  if (fullname != NULL
+	      && symtab_to_fullname (symtab) != NULL
+    	      && FILENAME_CMP (fullname, symtab->fullname) != 0)
+    	    continue;		  
 	  l = LINETABLE (symtab);
 	  if (!l)
 	    continue;
@@ -4700,7 +4713,7 @@ expand_line_sal (struct symtab_and_line sal)
       ALL_PSPACES (pspace)
 	ALL_PSPACE_PSYMTABS (pspace, objfile, psymtab)
 	{
-	  if (strcmp (match_filename, psymtab->filename) == 0)
+	  if (FILENAME_CMP (match_filename, psymtab->filename) == 0)
 	    {
 	      set_current_program_space (pspace);
 
@@ -4712,10 +4725,13 @@ expand_line_sal (struct symtab_and_line sal)
       /* Now search the symtab for exact matches and append them.  If
 	 none is found, append the best_item and all its exact
 	 matches.  */
-      exact = append_exact_match_to_sals (match_filename, lineno,
+      symtab_to_fullname (sal.symtab);
+      exact = append_exact_match_to_sals (sal.symtab->filename,
+					  sal.symtab->fullname, lineno,
 					  &ret, &best_item, &best_symtab);
       if (!exact && best_item)
-	append_exact_match_to_sals (best_symtab->filename, best_item->line,
+	append_exact_match_to_sals (best_symtab->filename,
+				    best_symtab->fullname, best_item->line,
 				    &ret, &best_item, &best_symtab);
     }
 
