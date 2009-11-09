@@ -1,3 +1,8 @@
+2009-11-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/10911
+	* ld-ifunc/ifunc-4a-x86.d: New.
+
 2009-11-02  Paul Brook  <paul@codesourcery.com>
 
 	* ld-arm/arm-elf.exp: Add new attr-merge-vfp tests.

@@ -1,3 +1,9 @@
+2009-11-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/10911
+	* elflink.c (elf_link_output_extsym): Don't return on
+	STT_GNU_IFUNC symbol when stripping.
+
 2009-11-08  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* elf32-hppa.c (elf32_hppa_final_link): Don't sort unwind information
@@ -8,7 +14,7 @@
 
 	* elflink.c (elf_link_add_object_symbols): Improve error
 	message generated when a symbol is left unresolved because a
-        --no-add-needed command line option has prevented the
+	--no-add-needed command line option has prevented the
 	inclusion of the DSO defining it.
 
 2009-11-03  Alan Modra  <amodra@bigpond.net.au>

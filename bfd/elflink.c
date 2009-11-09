@@ -8639,9 +8639,11 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
     strip = FALSE;
 
   /* If we're stripping it, and it's not a dynamic symbol, there's
-     nothing else to do unless it is a forced local symbol.  */
+     nothing else to do unless it is a forced local symbol or a
+     STT_GNU_IFUNC symbol.  */
   if (strip
       && h->dynindx == -1
+      && h->type != STT_GNU_IFUNC
       && !h->forced_local)
     return TRUE;
 
