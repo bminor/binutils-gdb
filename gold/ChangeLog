@@ -1,5 +1,19 @@
 2009-11-10  Doug Kwan  <dougkwan@google.com>
 
+	* arm.cc (Arm_relobj::do_relocate_sections): Remove options parameter
+	in method declaration.
+	(Target_arm::relocate_stub): New method declaration.
+	(Target_arm::default_target): Change to return a pointer instead of
+	a const reference.
+	(Reloc_stub::stub_type_for_reloc): Adjust for the change in
+	Target_arm::default_target.
+	(Arm_Relobj::do_relocate_sections): Remove options paramater in
+	method definition.
+	(Target_arm::relocate_section): Adjust view.
+	(Target_arm::relocate_stub): New method definition.
+
+2009-11-10  Doug Kwan  <dougkwan@google.com>
+
 	* i386.cc (Target_i386::do_calls_non_split): Add a cast to avoid
 	a format warning.
 	* incremental.cc (open_incremental_binary): Initialized local

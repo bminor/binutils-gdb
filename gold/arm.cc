@@ -972,8 +972,7 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
                          Stringpool_template<char>*);
 
   void
-  do_relocate_sections(const General_options& options,
-		       const Symbol_table* symtab, const Layout* layout,
+  do_relocate_sections(const Symbol_table* symtab, const Layout* layout,
 		       const unsigned char* pshdrs,
 		       typename Sized_relobj<32, big_endian>::Views* pivews);
 
@@ -1315,13 +1314,20 @@ class Target_arm : public Sized_target<32, big_endian>
 			 bool, const unsigned char*, Arm_address,
 			 section_size_type);
 
+  // Relocate a stub. 
+  void
+  relocate_stub(Reloc_stub*, const Relocate_info<32, big_endian>*,
+		Output_section*, unsigned char*, Arm_address,
+		section_size_type);
+ 
   // Get the default ARM target.
-  static const Target_arm<big_endian>&
+  static Target_arm<big_endian>*
   default_target()
   {
     gold_assert(parameters->target().machine_code() == elfcpp::EM_ARM
 		&& parameters->target().is_big_endian() == big_endian);
-    return static_cast<const Target_arm<big_endian>&>(parameters->target());
+    return static_cast<Target_arm<big_endian>*>(
+	     parameters->sized_target<32, big_endian>());
   }
 
   // Whether relocation type uses LSB to distinguish THUMB addresses.
@@ -2388,21 +2394,21 @@ Reloc_stub::stub_type_for_reloc(
   bool thumb_only;
   if (parameters->target().is_big_endian())
     {
-      const Target_arm<true>& big_endian_target =
+      const Target_arm<true>* big_endian_target =
 	Target_arm<true>::default_target();
-      may_use_blx = big_endian_target.may_use_blx();
-      should_force_pic_veneer = big_endian_target.should_force_pic_veneer();
-      thumb2 = big_endian_target.using_thumb2();
-      thumb_only = big_endian_target.using_thumb_only();
+      may_use_blx = big_endian_target->may_use_blx();
+      should_force_pic_veneer = big_endian_target->should_force_pic_veneer();
+      thumb2 = big_endian_target->using_thumb2();
+      thumb_only = big_endian_target->using_thumb_only();
     }
   else
     {
-      const Target_arm<false>& little_endian_target =
+      const Target_arm<false>* little_endian_target =
 	Target_arm<false>::default_target();
-      may_use_blx = little_endian_target.may_use_blx();
-      should_force_pic_veneer = little_endian_target.should_force_pic_veneer();
-      thumb2 = little_endian_target.using_thumb2();
-      thumb_only = little_endian_target.using_thumb_only();
+      may_use_blx = little_endian_target->may_use_blx();
+      should_force_pic_veneer = little_endian_target->should_force_pic_veneer();
+      thumb2 = little_endian_target->using_thumb2();
+      thumb_only = little_endian_target->using_thumb_only();
     }
 
   int64_t branch_offset = (int64_t)destination - location;
@@ -3380,15 +3386,14 @@ Arm_relobj<big_endian>::do_count_local_symbols(
 template<bool big_endian>
 void
 Arm_relobj<big_endian>::do_relocate_sections(
-    const General_options& options,
     const Symbol_table* symtab,
     const Layout* layout,
     const unsigned char* pshdrs,
     typename Sized_relobj<32, big_endian>::Views* pviews)
 {
   // Call parent to relocate sections.
-  Sized_relobj<32, big_endian>::do_relocate_sections(options, symtab, layout,
-						     pshdrs, pviews); 
+  Sized_relobj<32, big_endian>::do_relocate_sections(symtab, layout, pshdrs,
+						     pviews); 
 
   // We do not generate stubs if doing a relocatable link.
   if (parameters->options().relocatable())
@@ -3401,7 +3406,6 @@ Arm_relobj<big_endian>::do_relocate_sections(
     Target_arm<big_endian>::default_target();
 
   Relocate_info<32, big_endian> relinfo;
-  relinfo.options = &options;
   relinfo.symtab = symtab;
   relinfo.layout = layout;
   relinfo.object = this;
@@ -4775,6 +4779,28 @@ Target_arm<big_endian>::relocate_section(
   typedef typename Target_arm<big_endian>::Relocate Arm_relocate;
   gold_assert(sh_type == elfcpp::SHT_REL);
 
+  Arm_input_section<big_endian>* arm_input_section =
+    this->find_arm_input_section(relinfo->object, relinfo->data_shndx);
+
+  // This is an ARM input section and the view covers the whole output
+  // section.
+  if (arm_input_section != NULL)
+    {
+      gold_assert(needs_special_offset_handling);
+      Arm_address section_address = arm_input_section->address();
+      section_size_type section_size = arm_input_section->data_size();
+
+      gold_assert((arm_input_section->address() >= address)
+		  && ((arm_input_section->address()
+		       + arm_input_section->data_size())
+		      <= (address + view_size)));
+
+      off_t offset = section_address - address;
+      view += offset;
+      address += offset;
+      view_size = section_size;
+    }
+
   gold::relocate_section<32, big_endian, Target_arm, elfcpp::SHT_REL,
 			 Arm_relocate>(
     relinfo,
@@ -5612,6 +5638,51 @@ Target_arm<big_endian>::do_relax(
     }
 
   return any_stub_table_changed;
+}
+
+// Relocate a stub.
+
+template<bool big_endian>
+void
+Target_arm<big_endian>::relocate_stub(
+    Reloc_stub* stub,
+    const Relocate_info<32, big_endian>* relinfo,
+    Output_section* output_section,
+    unsigned char* view,
+    Arm_address address,
+    section_size_type view_size)
+{
+  Relocate relocate;
+  const Stub_template* stub_template = stub->stub_template();
+  for (size_t i = 0; i < stub_template->reloc_count(); i++)
+    {
+      size_t reloc_insn_index = stub_template->reloc_insn_index(i);
+      const Insn_template* insn = &stub_template->insns()[reloc_insn_index];
+
+      unsigned int r_type = insn->r_type();
+      section_size_type reloc_offset = stub_template->reloc_offset(i);
+      section_size_type reloc_size = insn->size();
+      gold_assert(reloc_offset + reloc_size <= view_size);
+
+      // This is the address of the stub destination.
+      Arm_address target = stub->reloc_target(i);
+      Symbol_value<32> symval;
+      symval.set_output_value(target);
+
+      // Synthesize a fake reloc just in case.  We don't have a symbol so
+      // we use 0.
+      unsigned char reloc_buffer[elfcpp::Elf_sizes<32>::rel_size];
+      memset(reloc_buffer, 0, sizeof(reloc_buffer));
+      elfcpp::Rel_write<32, big_endian> reloc_write(reloc_buffer);
+      reloc_write.put_r_offset(reloc_offset);
+      reloc_write.put_r_info(elfcpp::elf_r_info<32>(0, r_type));
+      elfcpp::Rel<32, big_endian> rel(reloc_buffer);
+
+      relocate.relocate(relinfo, this, output_section,
+			this->fake_relnum_for_stubs, rel, r_type,
+			NULL, &symval, view + reloc_offset,
+			address + reloc_offset, reloc_size);
+    }
 }
 
 // The selector for arm object files.
