@@ -1,3 +1,8 @@
+009-11-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/10930
+	* testsuite/plugin_test.c: Include "config.h".
+
 2009-11-09  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Target_arm::fake_relnum_for_stubs): New constant.
