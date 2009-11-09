@@ -1,3 +1,7 @@
+2009-11-09  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf2read.c (read_import_statement): Don't clobber original cu.
+
 2009-11-09  Tom Tromey  <tromey@redhat.com>
 
 	* python/python.c (execute_gdb_command): Copy the argument text.

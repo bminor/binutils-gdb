@@ -3372,6 +3372,7 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct attribute *import_attr;
   struct die_info *imported_die;
+  struct dwarf2_cu *imported_cu;
   const char *imported_name;
   const char *imported_name_prefix;
   const char *import_prefix;
@@ -3385,8 +3386,9 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
       return;
     }
 
-  imported_die = follow_die_ref_or_sig (die, import_attr, &cu);
-  imported_name = dwarf2_name (imported_die, cu);
+  imported_cu = cu;
+  imported_die = follow_die_ref_or_sig (die, import_attr, &imported_cu);
+  imported_name = dwarf2_name (imported_die, imported_cu);
   if (imported_name == NULL)
     {
       /* GCC bug: https://bugzilla.redhat.com/show_bug.cgi?id=506524
@@ -3431,7 +3433,7 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
 
   /* Figure out what the scope of the imported die is and prepend it
      to the name of the imported die.  */
-  imported_name_prefix = determine_prefix (imported_die, cu);
+  imported_name_prefix = determine_prefix (imported_die, imported_cu);
 
   if (strlen (imported_name_prefix) > 0)
     {
