@@ -1,3 +1,13 @@
+2009-11-10  Doug Kwan  <dougkwan@google.com>
+
+	* i386.cc (Target_i386::do_calls_non_split): Add a cast to avoid
+	a format warning.
+	* incremental.cc (open_incremental_binary): Initialized local
+	variables to avoid warnings.
+	* object.cc (make_elf_object): Ditto.
+	* x86_64.cc (Target_x86_64::do_calls_non_split): Add a cast to avoid
+	a format warning.
+ 
 009-11-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/10930

@@ -2705,7 +2705,7 @@ Target_x86_64::do_calls_non_split(Relobj* object, unsigned int shndx,
       if (!object->has_no_split_stack())
 	object->error(_("failed to match split-stack sequence at "
 			"section %u offset %0zx"),
-		      shndx, fnoffset);
+		      shndx, static_cast<size_t>(fnoffset));
       return;
     }
 

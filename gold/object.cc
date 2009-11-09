@@ -2310,8 +2310,8 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
     *punconfigured = false;
 
   std::string error;
-  bool big_endian;
-  int size;
+  bool big_endian = false;
+  int size = 0;
   if (!elfcpp::Elf_recognizer::is_valid_header(p, bytes, &size,
                                                &big_endian, &error))
     {
