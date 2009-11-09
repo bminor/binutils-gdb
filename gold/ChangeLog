@@ -1,3 +1,27 @@
+2009-11-09  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Target_arm::fake_relnum_for_stubs): New constant.
+	(arm_symbol_value): Remove.
+	(Arm_relocate_functions::arm_branch_common,
+	Arm_relocate_functions::abs8, Arm_relocate_functions::thm_abs5,
+	Arm_relocate_functions::abs12, Arm_relocate_functions::abs16,
+	Arm_relocate_functions::abs32, Arm_relocate_functions::rel32,
+	Arm_relocate_functions::thm_call, Arm_relocate_functions::plt32,
+	Arm_relocate_functions::call, Arm_relocate_functions::jump24,
+	Arm_relocate_functions::prel31, Arm_relocate_functions::mov_abs_nc,
+	Arm_relocate_functions::movt_abs, Arm_relocate_functions::movw_abs_nc,
+	Arm_relocate_functions::thm_mobw_abs_nc,
+	Arm_relocate_functions::thm_mov_abs,
+	Arm_relocate_functions::movw_prel_nc,
+	Arm_relocate_functions::thm_movt_abs,
+	Arm_relocate_functions::movt_prel,
+	Arm_relocate_functions::thm_movw_prel_nc,
+	Arm_relocate_functions::thm_movt_prel): Adjust callers of the above.
+	(Target_arm::Relocate::relocate): Only decompose address into two
+	parts if relocation type uses the thumb-bit and pass the actual
+	bit instead of a flag indicating that the thumb-bit is used.  Adjust
+	calls to methods in Arm_relocate_functions for this change.
+
 2009-11-08  Ian Lance Taylor  <ian@airs.com>
 
 	PR 10925
