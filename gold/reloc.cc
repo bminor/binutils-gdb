@@ -1551,6 +1551,46 @@ Sized_relobj<64, true>::do_relocate_sections(
     Views* pviews);
 #endif
 
+#ifdef HAVE_TARGET_32_LITTLE
+template
+void
+Sized_relobj<32, false>::initialize_input_to_output_maps();
+
+template
+void
+Sized_relobj<32, false>::free_input_to_output_maps();
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+void
+Sized_relobj<32, true>::initialize_input_to_output_maps();
+
+template
+void
+Sized_relobj<32, true>::free_input_to_output_maps();
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+void
+Sized_relobj<64, false>::initialize_input_to_output_maps();
+
+template
+void
+Sized_relobj<64, false>::free_input_to_output_maps();
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+void
+Sized_relobj<64, true>::initialize_input_to_output_maps();
+
+template
+void
+Sized_relobj<64, true>::free_input_to_output_maps();
+#endif
+
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
 template
 class Merged_symbol_value<32>;
