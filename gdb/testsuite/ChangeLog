@@ -1,3 +1,10 @@
+2009-11-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in (abs_builddir): New.
+	(site.exp): New target `$(abs_builddir)/site.exp'.  New comment.
+	(check-single, $(TEST_TARGETS), check-gdb.base%): Change `site.exp' to
+	`$(abs_builddir)/site.exp'.
+
 2009-11-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* config/m68k-emc.exp, lib/emc-support.exp,

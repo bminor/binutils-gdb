@@ -22,6 +22,7 @@ VPATH = @srcdir@
 srcdir = @srcdir@
 prefix = @prefix@
 exec_prefix = @exec_prefix@
+abs_builddir = @abs_builddir@
 
 target_alias = @target_noncanonical@
 program_transform_name = @program_transform_name@
@@ -102,7 +103,11 @@ install:
 
 uninstall: force
 
-site.exp: ./config.status Makefile
+# Use absolute `site.exp' path everywhere to suppress VPATH lookups for it.
+# Bare `site.exp' is used as a target here if user requests it explicitly.
+# $(RUNTEST) is looking up `site.exp' only in the current directory.
+
+$(abs_builddir)/site.exp site.exp: ./config.status Makefile
 	@echo "Making a new config file..."
 	-@rm -f ./tmp?
 	@touch site.exp
@@ -147,7 +152,7 @@ DO_RUNTEST = \
 	  export TCL_LIBRARY ; fi ; \
 	$(RUNTEST)
 
-check-single: all site.exp
+check-single: all $(abs_builddir)/site.exp
 	$(DO_RUNTEST) $(RUNTESTFLAGS)
 
 # A list of all directories named "gdb.*" which also hold a .exp file.
@@ -170,7 +175,7 @@ check-parallel:
 	$(SHELL) $(srcdir)/dg-extract-results.sh -L \
 	  $(addsuffix /gdb.log,$(TEST_DIRS)) > gdb.log
 
-$(filter-out check-gdb.base%,$(TEST_TARGETS)): check-gdb.%: all site.exp
+$(filter-out check-gdb.base%,$(TEST_TARGETS)): check-gdb.%: all $(abs_builddir)/site.exp
 	@if test ! -d gdb.$*; then mkdir gdb.$*; fi
 	$(DO_RUNTEST) --directory=gdb.$* --outdir=gdb.$* $(RUNTESTFLAGS)
 
@@ -179,7 +184,7 @@ BASE1_FILES = $(patsubst $(srcdir)/%,%,$(wildcard $(srcdir)/gdb.base/[a-m]*.exp)
 BASE2_FILES = $(patsubst $(srcdir)/%,%,$(wildcard $(srcdir)/gdb.base/[n-z]*.exp))
 
 # Handle each half of gdb.base.
-check-gdb.base%: all site.exp
+check-gdb.base%: all $(abs_builddir)/site.exp
 	@if test ! -d gdb.base$*; then mkdir gdb.base$*; fi
 	$(DO_RUNTEST) $(BASE$*_FILES) --outdir gdb.base$* $(RUNTESTFLAGS)
 
