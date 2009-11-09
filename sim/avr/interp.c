@@ -985,7 +985,7 @@ sim_resume (SIM_DESC sd, int step, int signal)
 	    unsigned int sp = read_word (REG_SP);
 	    if (avr_pc22)
 	      {
-		pc = sram[++sp] = pc << 16;
+		pc = sram[++sp] << 16;
 		cycles++;
 	      }
 	    else
