@@ -1,3 +1,9 @@
+2009-11-10  Joseph Myers  <joseph@codesourcery.com>
+
+	* solib-svr4.c (enable_break): Call
+	gdbarch_convert_from_func_ptr_addr on results of looking up
+	fallback symbol names.
+
 2009-11-10  Daniel Gutson  <dgutson@codesourcery.com>
 
 	* procfs.c (procfs_do_thread_registers): Added a call to fetch
