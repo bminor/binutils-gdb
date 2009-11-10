@@ -89,6 +89,10 @@ enum
   AVR_NUM_REGS = 32 + 1 /*SREG*/ + 1 /*SP*/ + 1 /*PC*/,
   AVR_NUM_REG_BYTES = 32 + 1 /*SREG*/ + 2 /*SP*/ + 4 /*PC*/,
 
+  /* Pseudo registers.  */
+  AVR_PSEUDO_PC_REGNUM = 35,
+  AVR_NUM_PSEUDO_REGS = 1,
+
   AVR_PC_REG_INDEX = 35,	/* index into array of registers */
 
   AVR_MAX_PROLOGUE_SIZE = 64,	/* bytes */
@@ -181,6 +185,13 @@ struct gdbarch_tdep
   /* Number of bytes stored to the stack by call instructions.
      2 bytes for avr1-5, 3 bytes for avr6.  */
   int call_length;
+
+  /* Type for void.  */
+  struct type *void_type;
+  /* Type for a function returning void.  */
+  struct type *func_void_type;
+  /* Type for a pointer to a function.  Used for the type of PC.  */
+  struct type *pc_type;
 };
 
 /* Lookup the name of a register given it's number. */
@@ -193,7 +204,8 @@ avr_register_name (struct gdbarch *gdbarch, int regnum)
     "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
     "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23",
     "r24", "r25", "r26", "r27", "r28", "r29", "r30", "r31",
-    "SREG", "SP", "PC"
+    "SREG", "SP", "PC2",
+    "pc"
   };
   if (regnum < 0)
     return NULL;
@@ -210,10 +222,11 @@ avr_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
   if (reg_nr == AVR_PC_REGNUM)
     return builtin_type (gdbarch)->builtin_uint32;
+  if (reg_nr == AVR_PSEUDO_PC_REGNUM)
+    return gdbarch_tdep (gdbarch)->pc_type;
   if (reg_nr == AVR_SP_REGNUM)
     return builtin_type (gdbarch)->builtin_data_ptr;
-  else
-    return builtin_type (gdbarch)->builtin_uint8;
+  return builtin_type (gdbarch)->builtin_uint8;
 }
 
 /* Instruction address checks and convertions. */
@@ -338,7 +351,43 @@ static void
 avr_write_pc (struct regcache *regcache, CORE_ADDR val)
 {
   regcache_cooked_write_unsigned (regcache, AVR_PC_REGNUM,
-				  avr_convert_iaddr_to_raw (val));
+                                  avr_convert_iaddr_to_raw (val));
+}
+
+static void
+avr_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
+                          int regnum, gdb_byte *buf)
+{
+  ULONGEST val;
+
+  switch (regnum)
+    {
+    case AVR_PSEUDO_PC_REGNUM:
+      regcache_raw_read_unsigned (regcache, AVR_PC_REGNUM, &val);
+      val >>= 1;
+      store_unsigned_integer (buf, 4, gdbarch_byte_order (gdbarch), val);
+      break;
+    default:
+      internal_error (__FILE__, __LINE__, _("invalid regnum"));
+    }
+}
+
+static void
+avr_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
+                           int regnum, const gdb_byte *buf)
+{
+  ULONGEST val;
+
+  switch (regnum)
+    {
+    case AVR_PSEUDO_PC_REGNUM:
+      val = extract_unsigned_integer (buf, 4, gdbarch_byte_order (gdbarch));
+      val <<= 1;
+      regcache_raw_write_unsigned (regcache, AVR_PC_REGNUM, val);
+      break;
+    default:
+      internal_error (__FILE__, __LINE__, _("invalid regnum"));
+    }
 }
 
 /* Function: avr_scan_prologue
@@ -1036,9 +1085,9 @@ avr_frame_prev_register (struct frame_info *this_frame,
   struct avr_unwind_cache *info
     = avr_frame_unwind_cache (this_frame, this_prologue_cache);
 
-  if (regnum == AVR_PC_REGNUM)
+  if (regnum == AVR_PC_REGNUM || regnum == AVR_PSEUDO_PC_REGNUM)
     {
-      if (trad_frame_addr_p (info->saved_regs, regnum))
+      if (trad_frame_addr_p (info->saved_regs, AVR_PC_REGNUM))
         {
 	  /* Reading the return PC from the PC register is slightly
 	     abnormal.  register_size(AVR_PC_REGNUM) says it is 4 bytes,
@@ -1058,14 +1107,18 @@ avr_frame_prev_register (struct frame_info *this_frame,
 	  struct gdbarch *gdbarch = get_frame_arch (this_frame);
 	  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-	  read_memory (info->saved_regs[regnum].addr, buf, tdep->call_length);
+	  read_memory (info->saved_regs[AVR_PC_REGNUM].addr,
+                       buf, tdep->call_length);
 
 	  /* Extract the PC read from memory as a big-endian.  */
 	  pc = 0;
 	  for (i = 0; i < tdep->call_length; i++)
 	    pc = (pc << 8) | buf[i];
 
-	  return frame_unwind_got_constant (this_frame, regnum, pc << 1);
+          if (regnum == AVR_PC_REGNUM)
+            pc <<= 1;
+
+	  return frame_unwind_got_constant (this_frame, regnum, pc);
         }
 
       return frame_unwind_got_optimized (this_frame, regnum);
@@ -1327,6 +1380,14 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   
   tdep->call_length = call_length;
 
+  /* Create a type for PC.  We can't use builtin types here, as they may not
+     be defined.  */
+  tdep->void_type = arch_type (gdbarch, TYPE_CODE_VOID, 1, "void");
+  tdep->func_void_type = make_function_type (tdep->void_type, NULL);
+  tdep->pc_type = arch_type (gdbarch, TYPE_CODE_PTR, 4, NULL);
+  TYPE_TARGET_TYPE (tdep->pc_type) = tdep->func_void_type;
+  TYPE_UNSIGNED (tdep->pc_type) = 1;
+
   set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_int_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);
@@ -1352,6 +1413,10 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_register_name (gdbarch, avr_register_name);
   set_gdbarch_register_type (gdbarch, avr_register_type);
+
+  set_gdbarch_num_pseudo_regs (gdbarch, AVR_NUM_PSEUDO_REGS);
+  set_gdbarch_pseudo_register_read (gdbarch, avr_pseudo_register_read);
+  set_gdbarch_pseudo_register_write (gdbarch, avr_pseudo_register_write);
 
   set_gdbarch_return_value (gdbarch, avr_return_value);
   set_gdbarch_print_insn (gdbarch, print_insn_avr);

@@ -1,5 +1,18 @@
 2009-11-10  Tristan Gingold  <gingold@adacore.com>
 
+	* avr-tdep.c: Add AVR_PSEUDO_PC_REGNUM and AVR_NUM_PSEUDO_REGS.
+	(struct gdbarch_tdep): Add void_type, func_void_type and pc_type
+	fields.
+	(avr_register_name): Add "pc" name, renames "PC" to "PC2".
+	(avr_register_type): Handle AVR_PSEUDO_PC_REGNUM.
+	(avr_write_pc): Fix indentation.
+	(avr_pseudo_register_read): New function.
+	(avr_pseudo_register_write): New function.
+	(avr_frame_prev_register): Handle AVR_PSEUDO_PC_REGNUM.
+	(avr_gdbarch_init): Create types for pc.  Register pseudo regs.
+
+2009-11-10  Tristan Gingold  <gingold@adacore.com>
+
 	* avr-tdep.c (avr_integer_to_address): New function.
 	(avr_gdbarch_init): Set integer_to_address.
 
