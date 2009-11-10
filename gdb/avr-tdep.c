@@ -240,6 +240,10 @@ avr_convert_iaddr_to_raw (CORE_ADDR x)
 static CORE_ADDR
 avr_make_saddr (CORE_ADDR x)
 {
+  /* Return 0 for NULL.  */
+  if (x == 0)
+    return 0;
+
   return ((x) | AVR_SMEM_START);
 }
 

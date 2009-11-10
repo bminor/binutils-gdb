@@ -1,5 +1,9 @@
 2009-11-10  Tristan Gingold  <gingold@adacore.com>
 
+	* avr-tdep.c (avr_make_saddr): Return 0 for NULL.
+
+2009-11-10  Tristan Gingold  <gingold@adacore.com>
+
 	* avr-tdep.c (avr_dwarf_reg_to_regnum): New function.
 	(avr_gdbarch_init): Call set_gdbarch_dwarf2_reg_to_regnum.
 
