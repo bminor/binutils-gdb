@@ -6060,8 +6060,18 @@ procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
   gdb_gregset_t gregs;
   gdb_fpregset_t fpregs;
   unsigned long merged_pid;
+  struct cleanup *old_chain;
 
   merged_pid = TIDGET (ptid) << 16 | PIDGET (ptid);
+
+  /* This part is the old method for fetching registers.
+     It should be replaced by the newer one using regsets
+     once it is implemented in this platform:
+     gdbarch_regset_from_core_section() and regset->collect_regset(). */
+
+  old_chain = save_inferior_ptid ();
+  inferior_ptid = ptid;
+  target_fetch_registers (regcache, -1);
 
   fill_gregset (regcache, &gregs, -1);
 #if defined (UNIXWARE)
@@ -6085,6 +6095,9 @@ procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
 					      note_size,
 					      &fpregs,
 					      sizeof (fpregs));
+
+  do_cleanups (old_chain);
+
   return note_data;
 }
 
@@ -6102,13 +6115,11 @@ procfs_corefile_thread_callback (procinfo *pi, procinfo *thread, void *data)
 
   if (pi != NULL)
     {
-      ptid_t saved_ptid = inferior_ptid;
-      inferior_ptid = MERGEPID (pi->pid, thread->tid);
-      args->note_data = procfs_do_thread_registers (args->obfd, inferior_ptid,
+      ptid_t ptid = MERGEPID (pi->pid, thread->tid);
+      args->note_data = procfs_do_thread_registers (args->obfd, ptid,
 						    args->note_data,
 						    args->note_size,
 						    args->stop_signal);
-      inferior_ptid = saved_ptid;
     }
   return 0;
 }

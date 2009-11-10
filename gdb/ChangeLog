@@ -1,3 +1,12 @@
+2009-11-10  Daniel Gutson  <dgutson@codesourcery.com>
+
+	* procfs.c (procfs_do_thread_registers): Added a call to fetch
+	register values before saving them in the core file
+	through the gcore command.
+	(procfs_corefile_thread_callback): Removed the backup of
+	inferior_ptid before calling procfs_do_thread_registers since
+	the function already saves and restores it before returning.
+
 2009-11-10  Michael Snyder  <msnyder@vmware.com>
 
 	* dcache.c: Fix typo, shorten long lines in comment.
