@@ -789,40 +789,39 @@ static CORE_ADDR
 avr_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR func_addr, func_end;
-  CORE_ADDR prologue_end = pc;
+  CORE_ADDR post_prologue_pc;
 
   /* See what the symbol table says */
 
-  if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
-    {
-      struct symtab_and_line sal;
-      struct avr_unwind_cache info = {0};
-      struct trad_frame_saved_reg saved_regs[AVR_NUM_REGS];
+  if (!find_pc_partial_function (pc, NULL, &func_addr, &func_end))
+    return pc;
 
-      info.saved_regs = saved_regs;
+  post_prologue_pc = skip_prologue_using_sal (gdbarch, func_addr);
+  if (post_prologue_pc != 0)
+    return max (pc, post_prologue_pc);
 
-      /* Need to run the prologue scanner to figure out if the function has a
-         prologue and possibly skip over moving arguments passed via registers
-         to other registers.  */
+  {
+    CORE_ADDR prologue_end = pc;
+    struct avr_unwind_cache info = {0};
+    struct trad_frame_saved_reg saved_regs[AVR_NUM_REGS];
 
-      prologue_end = avr_scan_prologue (gdbarch, func_addr, func_end, &info);
-
-      if (info.prologue_type == AVR_PROLOGUE_NONE)
-        return pc;
-      else
-        {
-          sal = find_pc_line (func_addr, 0);
-
-          if (sal.line != 0 && sal.end < func_end)
-            return sal.end;
-        }
-    }
+    info.saved_regs = saved_regs;
+    
+    /* Need to run the prologue scanner to figure out if the function has a
+       prologue and possibly skip over moving arguments passed via registers
+       to other registers.  */
+    
+    prologue_end = avr_scan_prologue (gdbarch, func_addr, func_end, &info);
+    
+    if (info.prologue_type != AVR_PROLOGUE_NONE)
+      return prologue_end;
+  }
 
   /* Either we didn't find the start of this function (nothing we can do),
      or there's no line info, or the line after the prologue is after
      the end of the function (there probably isn't a prologue). */
 
-  return prologue_end;
+  return pc;
 }
 
 /* Not all avr devices support the BREAK insn. Those that don't should treat
