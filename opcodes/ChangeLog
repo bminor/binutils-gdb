@@ -1,3 +1,7 @@
+2009-11-10  Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+	* m68k-dis.c (print_insn_arg): Handle RGPIOBAR, ACR[4-7] and MBAR[01].
+
 2009-11-06  Sebastian Pop  <sebastian.pop@amd.com>
 
 	* i386-dis.c (reg_table): Add XOP_8F_TABLE (XOP_09) to

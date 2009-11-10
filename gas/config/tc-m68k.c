@@ -186,7 +186,7 @@ static const enum m68k_register mcf51_ctrl[] = {
   0
 };
 static const enum m68k_register mcf5206_ctrl[] = {
-  CACR, ACR0, ACR1,  VBR, RAMBAR0, RAMBAR_ALT, MBAR,
+  CACR, ACR0, ACR1, VBR, RAMBAR0, RAMBAR_ALT, MBAR,
   0
 };
 static const enum m68k_register mcf5208_ctrl[] = {
@@ -210,7 +210,7 @@ static const enum m68k_register mcf5221x_ctrl[] = {
   0
 };
 static const enum m68k_register mcf52223_ctrl[] = {
-  VBR, CACR, ACR0, ACR1, FLASHBAR, RAMBAR, RAMBAR1,
+  VBR, FLASHBAR, RAMBAR, RAMBAR1,
   0
 };
 static const enum m68k_register mcf52235_ctrl[] = {
@@ -302,13 +302,22 @@ static const enum m68k_register mcf5407_ctrl[] = {
   MBAR1 /* MBAR */, RAMBAR /* RAMBAR1 */,
   0
 };
-static const enum m68k_register mcf54455_ctrl[] = {
-  CACR, ASID, ACR0, ACR1, ACR2, ACR3, MMUBAR,
-  VBR, PC, RAMBAR1, MBAR,
+static const enum m68k_register mcf54418_ctrl[] = {
+  CACR, ASID, ACR0, ACR1, ACR2, ACR3, ACR4, ACR5, ACR6, ACR7, MMUBAR, RGPIOBAR,
+  VBR, PC, RAMBAR1,
   /* Legacy names */
   TC /* ASID */, BUSCR /* MMUBAR */,
   ITT0 /* ACR0 */, ITT1 /* ACR1 */, DTT0 /* ACR2 */, DTT1 /* ACR3 */,
-  MBAR1 /* MBAR */,  RAMBAR /* RAMBAR1 */,
+  RAMBAR /* RAMBAR1 */,
+  0
+};
+static const enum m68k_register mcf54455_ctrl[] = {
+  CACR, ASID, ACR0, ACR1, ACR2, ACR3, MMUBAR,
+  VBR, PC, RAMBAR1,
+  /* Legacy names */
+  TC /* ASID */, BUSCR /* MMUBAR */,
+  ITT0 /* ACR0 */, ITT1 /* ACR1 */, DTT0 /* ACR2 */, DTT1 /* ACR3 */,
+  RAMBAR /* RAMBAR1 */,
   0
 };
 static const enum m68k_register mcf5475_ctrl[] = {
@@ -692,6 +701,12 @@ static const struct m68k_cpu m68k_cpus[] =
   {mcfisa_a|mcfisa_aa|mcfhwdiv|mcfemac|mcfusp,	mcf5373_ctrl, "537x", 0},
   
   {mcfisa_a|mcfisa_b|mcfhwdiv|mcfmac,		mcf5407_ctrl, "5407",0},
+
+  {mcfisa_a|mcfisa_c|mcfhwdiv|mcfemac|mcfusp,   mcf54418_ctrl, "54410", -1},
+  {mcfisa_a|mcfisa_c|mcfhwdiv|mcfemac|mcfusp,   mcf54418_ctrl, "54415", -1},
+  {mcfisa_a|mcfisa_c|mcfhwdiv|mcfemac|mcfusp,   mcf54418_ctrl, "54416", -1},
+  {mcfisa_a|mcfisa_c|mcfhwdiv|mcfemac|mcfusp,   mcf54418_ctrl, "54417", -1},
+  {mcfisa_a|mcfisa_c|mcfhwdiv|mcfemac|mcfusp,   mcf54418_ctrl, "54418", 0},
 
   {mcfisa_a|mcfisa_c|mcfhwdiv|mcfemac|mcfusp,   mcf54455_ctrl, "54450", -1},
   {mcfisa_a|mcfisa_c|mcfhwdiv|mcfemac|mcfusp,   mcf54455_ctrl, "54451", -1},
@@ -3330,6 +3345,15 @@ m68k_ip (char *instring)
 	    case MMUBAR:
 	      tmpreg = 0x008;
 	      break;
+	    case RGPIOBAR:
+	      tmpreg = 0x009;
+	      break;
+	    case ACR4:
+	    case ACR5:
+	    case ACR6:
+	    case ACR7:
+	      tmpreg = 0x00c + (opP->reg - ACR4);
+	      break;
 
 	    case USP:
 	      tmpreg = 0x800;
@@ -4125,6 +4149,10 @@ static const struct init_entry init_table[] =
   { "acr1", ACR1 },		/* Access Control Unit 1.  */
   { "acr2", ACR2 },		/* Access Control Unit 2.  */
   { "acr3", ACR3 },		/* Access Control Unit 3.  */
+  { "acr4", ACR4 },		/* Access Control Unit 4.  */
+  { "acr5", ACR5 },		/* Access Control Unit 5.  */
+  { "acr6", ACR6 },		/* Access Control Unit 6.  */
+  { "acr7", ACR7 },		/* Access Control Unit 7.  */
 
   { "tc", TC },			/* MMU Translation Control Register.  */
   { "tcr", TC },
@@ -4169,6 +4197,8 @@ static const struct init_entry init_table[] =
   { "rambar",   RAMBAR },  	/* mcf528x registers.  */
 
   { "mbar2",    MBAR2 },  	/* mcf5249 registers.  */
+
+  { "rgpiobar",	RGPIOBAR },	/* mcf54418 registers.  */
 
   { "cac",    CAC },  		/* fido registers.  */
   { "mbb",    MBO },  		/* fido registers (obsolete).  */
