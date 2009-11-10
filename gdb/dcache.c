@@ -41,9 +41,9 @@
    of data, such as when performing a backtrace.
 
    The cache is a splay tree along with a linked list for replacement.
-   Each block caches a LINE_SIZE area of memory.  Wtihin each line we remember
-   the address of the line (which must be a multiple of LINE_SIZE) and the
-   actual data block.
+   Each block caches a LINE_SIZE area of memory.  Within each line we
+   remember the address of the line (which must be a multiple of
+   LINE_SIZE) and the actual data block.
 
    Lines are only allocated as needed, so DCACHE_SIZE really specifies the
    *maximum* number of lines in the cache.

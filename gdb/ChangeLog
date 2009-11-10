@@ -1,3 +1,7 @@
+2009-11-10  Michael Snyder  <msnyder@vmware.com>
+
+	* dcache.c: Fix typo, shorten long lines in comment.
+
 2009-11-10  Tristan Gingold  <gingold@adacore.com>
 
 	* avr-tdep.c: Add AVR_PSEUDO_PC_REGNUM and AVR_NUM_PSEUDO_REGS.
