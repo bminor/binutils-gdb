@@ -318,6 +318,15 @@ avr_pointer_to_address (struct gdbarch *gdbarch,
 }
 
 static CORE_ADDR
+avr_integer_to_address (struct gdbarch *gdbarch,
+			struct type *type, const gdb_byte *buf)
+{
+  ULONGEST addr = unpack_long (type, buf);
+
+  return avr_make_saddr (addr);
+}
+
+static CORE_ADDR
 avr_read_pc (struct regcache *regcache)
 {
   ULONGEST pc;
@@ -1353,6 +1362,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_address_to_pointer (gdbarch, avr_address_to_pointer);
   set_gdbarch_pointer_to_address (gdbarch, avr_pointer_to_address);
+  set_gdbarch_integer_to_address (gdbarch, avr_integer_to_address);
 
   set_gdbarch_skip_prologue (gdbarch, avr_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);

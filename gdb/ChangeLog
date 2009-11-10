@@ -1,5 +1,10 @@
 2009-11-10  Tristan Gingold  <gingold@adacore.com>
 
+	* avr-tdep.c (avr_integer_to_address): New function.
+	(avr_gdbarch_init): Set integer_to_address.
+
+2009-11-10  Tristan Gingold  <gingold@adacore.com>
+
 	* avr-tdep.c (avr_skip_prologue): First try to skip prologue
 	using skip_prologue_using_sal.
 
