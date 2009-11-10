@@ -18,6 +18,8 @@
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
+if { [skip_fortran_tests] } { return -1 }
+
 gdb_exit
 if [mi_gdb_start] {
     continue
@@ -26,8 +28,8 @@ if [mi_gdb_start] {
 set testfile "array"
 set srcfile ${testfile}.f
 set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug f77 quiet}] != "" } {
-    untested "Couldn't compile ${srcfile}"
+if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
+	 executable {debug f77}] != ""} {
     return -1
 }
 

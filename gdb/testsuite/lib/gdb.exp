@@ -1241,6 +1241,24 @@ proc default_gdb_start { } {
     return 0;
 }
 
+# Examine the output of compilation to determine whether compilation
+# failed or not.  If it failed determine whether it is due to missing
+# compiler or due to compiler error.  Report pass, fail or unsupported
+# as appropriate
+
+proc gdb_compile_test {src output} {
+    if { $output == "" } {
+	pass "compilation [file tail $src]"
+    } elseif { [regexp {^[a-zA-Z_0-9]+: Can't find [^ ]+\.$} $output] } {
+	unsupported "compilation [file tail $src]"
+    } elseif { [regexp {.*: command not found[\r|\n]*$} $output] } {
+	unsupported "compilation [file tail $src]"
+    } else {
+	verbose -log "compilation failed: $output" 2
+	fail "compilation [file tail $src]"
+    }
+}
+
 # Return a 1 for configurations for which we don't even want to try to
 # test C++.
 
@@ -1263,6 +1281,18 @@ proc skip_cplus_tests {} {
 # Return a 1 if I don't even want to try to test FORTRAN.
 
 proc skip_fortran_tests {} {
+    return 0
+}
+
+# Return a 1 if I don't even want to try to test ada.
+
+proc skip_ada_tests {} {
+    return 0
+}
+
+# Return a 1 if I don't even want to try to test java.
+
+proc skip_java_tests {} {
     return 0
 }
 
@@ -1836,9 +1866,15 @@ proc gdb_compile {source dest type options} {
 
     regsub "\[\r\n\]*$" "$result" "" result;
     regsub "^\[\r\n\]*" "$result" "" result;
-
-    if { $result != "" && [lsearch $options quiet] == -1} {
-	clone_output "gdb compile failed, $result"
+    
+    if {[lsearch $options quiet] < 0} {
+	# We shall update this on a per language basis, to avoid
+	# changing the entire testsuite in one go.
+	if {[lsearch $options f77] >= 0} {
+	    gdb_compile_test $source $result
+	} elseif { $result != "" } {
+	    clone_output "gdb compile failed, $result"
+	}
     }
     return $result;
 }

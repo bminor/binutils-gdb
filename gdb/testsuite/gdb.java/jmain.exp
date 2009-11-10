@@ -22,12 +22,13 @@ if $tracelevel then {
 
 load_lib "java.exp"
 
+if { [skip_java_tests] } { continue }
+
 set testfile "jmain"
 set srcfile ${srcdir}/$subdir/${testfile}.java
 set binfile ${objdir}/${subdir}/${testfile}
-if  { [compile_java_from_source ${srcfile} ${binfile} "-g"] != "" } {
-    untested "Couldn't compile ${srcfile}"
-    return -1
+if {[compile_java_from_source ${srcfile} ${binfile} "-g"] != ""} {
+    continue
 }
 
 set prms_id 0

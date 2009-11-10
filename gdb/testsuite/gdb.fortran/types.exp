@@ -21,6 +21,8 @@ if $tracelevel then {
 	strace $tracelevel
 }
 
+if { [skip_fortran_tests] } { continue }
+
 set prms_id 0
 set bug_id 0
 

@@ -19,6 +19,8 @@ if $tracelevel then {
 
 load_lib "ada.exp"
 
+if { [skip_ada_tests] } { return -1 }
+
 set testdir "exec_changed"
 file mkdir ${objdir}/${subdir}/${testdir}
 
@@ -27,8 +29,8 @@ set testfile1 "${testdir}/first"
 set srcfile1 ${srcdir}/${subdir}/${testfile1}.adb
 set binfile1 ${objdir}/${subdir}/${testfile1}$EXEEXT
 
-if {[gdb_compile_ada "${srcfile1}" "${binfile1}" executable [list debug ]] != "" } {
-  return -1
+if {[gdb_compile_ada "${srcfile1}" "${binfile1}" executable {debug}] != ""} {
+    return -1
 }
 
 # Build the second test program
@@ -36,8 +38,8 @@ set testfile2 "${testdir}/second"
 set srcfile2 ${srcdir}/${subdir}/${testfile2}.adb
 set binfile2 ${objdir}/${subdir}/${testfile2}$EXEEXT
 
-if {[gdb_compile_ada "${srcfile2}" "${binfile2}" executable [list debug ]] != "" } {
-  return -1
+if {[gdb_compile_ada "${srcfile2}" "${binfile2}" executable {debug}] != ""} {
+    return -1
 }
 
 # Start with a fresh gdb.

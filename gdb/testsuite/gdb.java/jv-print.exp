@@ -17,6 +17,10 @@ if $tracelevel then {
 	strace $tracelevel
 }
 
+load_lib "java.exp"
+
+if { [skip_java_tests] } { continue }
+
 set prms_id 0
 set bug_id 0
 

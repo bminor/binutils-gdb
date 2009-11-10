@@ -1,3 +1,22 @@
+2009-11-10  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* lib/gdb.exp (gdb_compile_test): New.
+	(skip_ada_tests, skip_java_tests): New.
+	(gdb_compile): Use gdb_compile_test for f77.
+	* lib/ada.exp (gdb_compile_ada): Use gdb_compile_test to record result.
+	* lib/java.exp (compile_java_from_source): Remove runtests check,
+	use gdb_compile_test to record result.
+	* gdb.ada/packed_array.exp, gdb.ada/fixed_points.exp,
+	gdb.ada/exec_changed.exp, gdb.ada/start.exp,
+	gdb.ada/watch_arg.exp, gdb.ada/null_record.exp,
+	gdb.ada/array_return.exp, gdb.ada/arrayidx.exp,
+	gdb.mi/mi-var-child-f.exp, gdb.fortran/types.exp,
+	gdb.fortran/array-element.exp, gdb.fortran/subarray.exp,
+	gdb.fortran/derived-type.exp, gdb.fortran/exprs.exp,
+	gdb.java/jmisc.exp, gdb.java/jmisc1.exp, gdb.java/jprint.exp,
+	gdb.java/jv-print.exp, gdb.java/jmain.exp: Add language skip,
+	adjust gdb_compile invocations.
+
 2009-11-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* Makefile.in (abs_builddir): New.

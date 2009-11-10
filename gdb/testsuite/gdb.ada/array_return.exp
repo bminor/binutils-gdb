@@ -19,14 +19,16 @@ if $tracelevel then {
 
 load_lib "ada.exp"
 
+if { [skip_ada_tests] } { return -1 }
+
 set testdir "array_return"
 set testfile "${testdir}/p"
 set srcfile ${srcdir}/${subdir}/${testfile}.adb
 set binfile ${objdir}/${subdir}/${testfile}
 
 file mkdir ${objdir}/${subdir}/${testdir}
-if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug ]] != "" } {
-  return -1
+if {[gdb_compile_ada "${srcfile}" "${binfile}" executable {debug}] != ""} {
+    return -1
 }
 
 gdb_exit

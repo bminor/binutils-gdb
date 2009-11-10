@@ -22,12 +22,14 @@ if $tracelevel then {
 	strace $tracelevel
 }
 
+if { [skip_fortran_tests] } { return -1 }
+
 set testfile "subarray"
 set srcfile ${testfile}.f
 set binfile ${objdir}/${subdir}/${testfile}
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug f77 quiet}] != "" } {
-    untested "Couldn't compile ${srcfile}"
+if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
+	executable {debug f77}] != ""} {
     return -1
 }
 
