@@ -1,3 +1,8 @@
+2009-11-09  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.cp/overload.exp: Add tests for resolving overloaded
+	methods in expression parsing/evaluation.
+
 2009-11-10  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* lib/gdb.exp (default_gdb_version): Use --version instead of
