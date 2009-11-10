@@ -1263,6 +1263,21 @@ avr_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   return sp + call_length;
 }
 
+/* Unfortunately dwarf2 register for SP is 32.  */
+
+static int
+avr_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
+{
+  if (reg >= 0 && reg < 32)
+    return reg;
+  if (reg == 32)
+    return AVR_SP_REGNUM;
+
+  warning (_("Unmapped DWARF Register #%d encountered."), reg);
+
+  return -1;
+}
+
 /* Initialize the gdbarch structure for the AVR's. */
 
 static struct gdbarch *
@@ -1334,6 +1349,8 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_insn (gdbarch, print_insn_avr);
 
   set_gdbarch_push_dummy_call (gdbarch, avr_push_dummy_call);
+
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, avr_dwarf_reg_to_regnum);
 
   set_gdbarch_address_to_pointer (gdbarch, avr_address_to_pointer);
   set_gdbarch_pointer_to_address (gdbarch, avr_pointer_to_address);
