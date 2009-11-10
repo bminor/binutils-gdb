@@ -1,5 +1,17 @@
 2009-11-10  Tristan Gingold  <gingold@adacore.com>
 
+	* avr-tdep.c (avr_extract_return_value): Remove.
+	(avr_return_value): Mostly rewritten.  Fix handling for structures.
+	(avr_push_dummy_call): Handle struct_return.
+
+2009-11-10  Tristan Gingold  <gingold@adacore.com>
+
+	* avr-tdep.c (avr_scan_prologue): Decode instructions used for
+	small stack allocation.
+	Adjust code for prologue that don't write SP.
+
+2009-11-10  Tristan Gingold  <gingold@adacore.com>
+
 	* avr-tdep.c (avr_make_saddr): Return 0 for NULL.
 
 2009-11-10  Tristan Gingold  <gingold@adacore.com>

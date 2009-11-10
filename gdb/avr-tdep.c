@@ -654,6 +654,25 @@ avr_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc_beg, CORE_ADDR pc_end,
      fprintf_unfiltered (gdb_stderr,
                          _("Hit end of prologue while scanning pushes\n"));
 
+  /* Handle static small stack allocation using rcall or push.  */
+
+  while (scan_stage == 1 && vpc < len)
+    {
+      insn = extract_unsigned_integer (&prologue[vpc], 2, byte_order);
+      if (insn == 0xd000)	/* rcall .+0 */
+        {
+          info->size += gdbarch_tdep (gdbarch)->call_length;
+          vpc += 2;
+        }
+      else if (insn == 0x920f)  /* push r0 */
+        {
+          info->size += 1;
+          vpc += 2;
+        }
+      else
+        break;
+    }
+
   /* Second stage of the prologue scanning.
      Scan:
      in r28,__SP_L__
@@ -707,18 +726,21 @@ avr_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc_beg, CORE_ADDR pc_end,
       };
 
       insn = extract_unsigned_integer (&prologue[vpc], 2, byte_order);
-      vpc += 2;
       if ((insn & 0xff30) == 0x9720)	/* sbiw r28,XXX */
-	locals_size = (insn & 0xf) | ((insn & 0xc0) >> 2);
+        {
+          locals_size = (insn & 0xf) | ((insn & 0xc0) >> 2);
+          vpc += 2;
+        }
       else if ((insn & 0xf0f0) == 0x50c0)	/* subi r28,lo8(XX) */
 	{
 	  locals_size = (insn & 0xf) | ((insn & 0xf00) >> 4);
+	  vpc += 2;
 	  insn = extract_unsigned_integer (&prologue[vpc], 2, byte_order);
 	  vpc += 2;
-	  locals_size += ((insn & 0xf) | ((insn & 0xf00) >> 4) << 8);
+	  locals_size += ((insn & 0xf) | ((insn & 0xf00) >> 4)) << 8;
 	}
       else
-	return pc_beg + vpc;
+        return pc_beg + vpc;
 
       /* Scan the last part of the prologue. May not be present for interrupt
          or signal handler functions, which is why we set the prologue type
@@ -815,40 +837,6 @@ avr_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR * pcptr, int *lenptr)
     return avr_break_insn;
 }
 
-/* Given a return value in `regcache' with a type `type', 
-   extract and copy its value into `valbuf'.
-
-   Return values are always passed via registers r25:r24:...  */
-
-static void
-avr_extract_return_value (struct type *type, struct regcache *regcache,
-                          gdb_byte *valbuf)
-{
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  ULONGEST r24, r25;
-  ULONGEST c;
-  int len;
-  if (TYPE_LENGTH (type) == 1)
-    {
-      regcache_cooked_read_unsigned (regcache, 24, &c);
-      store_unsigned_integer (valbuf, 1, byte_order, c);
-    }
-  else
-    {
-      int i;
-      /* The MSB of the return value is always in r25, calculate which
-         register holds the LSB.  */
-      int lsb_reg = 25 - TYPE_LENGTH (type) + 1;
-
-      for (i=0; i< TYPE_LENGTH (type); i++)
-        {
-          regcache_cooked_read (regcache, lsb_reg + i,
-                                (bfd_byte *) valbuf + i);
-        }
-    }
-}
-
 /* Determine, for architecture GDBARCH, how a return value of TYPE
    should be returned.  If it is supposed to be returned in registers,
    and READBUF is non-zero, read the appropriate value from REGCACHE,
@@ -860,30 +848,40 @@ avr_return_value (struct gdbarch *gdbarch, struct type *func_type,
 		  struct type *valtype, struct regcache *regcache,
 		  gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  int struct_return = ((TYPE_CODE (valtype) == TYPE_CODE_STRUCT
-			|| TYPE_CODE (valtype) == TYPE_CODE_UNION
-			|| TYPE_CODE (valtype) == TYPE_CODE_ARRAY)
-		       && !(TYPE_LENGTH (valtype) == 1
-			    || TYPE_LENGTH (valtype) == 2
-			    || TYPE_LENGTH (valtype) == 4
-			    || TYPE_LENGTH (valtype) == 8));
+  int i;
+  /* Single byte are returned in r24.
+     Otherwise, the MSB of the return value is always in r25, calculate which
+     register holds the LSB.  */
+  int lsb_reg;
+
+  if ((TYPE_CODE (valtype) == TYPE_CODE_STRUCT
+       || TYPE_CODE (valtype) == TYPE_CODE_UNION
+       || TYPE_CODE (valtype) == TYPE_CODE_ARRAY)
+      && TYPE_LENGTH (valtype) > 8)
+    return RETURN_VALUE_STRUCT_CONVENTION;
+
+  if (TYPE_LENGTH (valtype) <= 2)
+    lsb_reg = 24;
+  else if (TYPE_LENGTH (valtype) <= 4)
+    lsb_reg = 22;
+  else if (TYPE_LENGTH (valtype) <= 8)
+    lsb_reg = 18;
+  else
+    gdb_assert (0);
 
   if (writebuf != NULL)
     {
-      gdb_assert (!struct_return);
-      error (_("Cannot store return value."));
+      for (i = 0; i < TYPE_LENGTH (valtype); i++)
+        regcache_cooked_write (regcache, lsb_reg + i, writebuf + i);
     }
 
   if (readbuf != NULL)
     {
-      gdb_assert (!struct_return);
-      avr_extract_return_value (valtype, regcache, readbuf);
+      for (i = 0; i < TYPE_LENGTH (valtype); i++)
+        regcache_cooked_read (regcache, lsb_reg + i, readbuf + i);
     }
 
-  if (struct_return)
-    return RETURN_VALUE_STRUCT_CONVENTION;
-  else
-    return RETURN_VALUE_REGISTER_CONVENTION;
+  return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
 
@@ -1191,15 +1189,13 @@ avr_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int regnum = AVR_ARGN_REGNUM;
   struct stack_item *si = NULL;
 
-#if 0
-  /* FIXME: TRoth/2003-06-18: Not sure what to do when returning a struct. */
   if (struct_return)
     {
-      fprintf_unfiltered (gdb_stderr, "struct_return: 0x%lx\n", struct_addr);
-      regcache_cooked_write_unsigned (regcache, argreg--, struct_addr & 0xff);
-      regcache_cooked_write_unsigned (regcache, argreg--, (struct_addr >>8) & 0xff);
+      regcache_cooked_write_unsigned (regcache, regnum--,
+                                      struct_addr & 0xff);
+      regcache_cooked_write_unsigned (regcache, regnum--,
+                                      (struct_addr >> 8) & 0xff);
     }
-#endif
 
   for (i = 0; i < nargs; i++)
     {
