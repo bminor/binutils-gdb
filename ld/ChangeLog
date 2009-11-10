@@ -1,3 +1,9 @@
+2009-11-10  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/10864
+	* ld.texinfo (Entry Point): Mention that the default entry symbol
+	is not 'start' on some targets.
+
 2009-11-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/10912
