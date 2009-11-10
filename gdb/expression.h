@@ -88,6 +88,13 @@ enum exp_opcode
        when X is a pointer instead of an aggregate.  */
     STRUCTOP_MPTR,
 
+    /* TYPE_INSTANCE is used when the user specifies a specific
+       type instantiation for overloaded methods/functions.
+
+       The format is:
+       TYPE_INSTANCE num_types type0 ... typeN num_types TYPE_INSTANCE  */
+    TYPE_INSTANCE,
+
     /* end of C++.  */
 
     /* For Modula-2 integer division DIV */

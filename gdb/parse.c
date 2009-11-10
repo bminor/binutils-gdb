@@ -837,6 +837,11 @@ operator_length_standard (struct expression *expr, int endpos,
       args = 1 + longest_to_int (expr->elts[endpos - 2].longconst);
       break;
 
+    case TYPE_INSTANCE:
+      oplen = 4 + longest_to_int (expr->elts[endpos - 2].longconst);
+      args = 1;
+      break;
+
     case OP_OBJC_MSGCALL:	/* Objective C message (method) call */
       oplen = 4;
       args = 1 + longest_to_int (expr->elts[endpos - 2].longconst);

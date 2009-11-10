@@ -40,6 +40,8 @@
 #include "regcache.h"
 #include "user-regs.h"
 #include "valprint.h"
+#include "gdb_obstack.h"
+#include "objfiles.h"
 #include "python/python.h"
 
 #include "gdb_assert.h"
@@ -651,6 +653,29 @@ ptrmath_type_p (struct type *type)
     }
 }
 
+/* Constructs a fake method with the given parameter types.
+   This function is used by the parser to construct an "expected"
+   type for method overload resolution.  */
+
+static struct type *
+make_params (int num_types, struct type **param_types)
+{
+  struct type *type = XZALLOC (struct type);
+  TYPE_MAIN_TYPE (type) = XZALLOC (struct main_type);
+  TYPE_LENGTH (type) = 1;
+  TYPE_CODE (type) = TYPE_CODE_METHOD;
+  TYPE_VPTR_FIELDNO (type) = -1;
+  TYPE_CHAIN (type) = type;
+  TYPE_NFIELDS (type) = num_types;
+  TYPE_FIELDS (type) = (struct field *)
+    TYPE_ZALLOC (type, sizeof (struct field) * num_types);
+
+  while (num_types-- > 0)
+    TYPE_FIELD_TYPE (type, num_types) = param_types[num_types];
+
+  return type;
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -684,7 +709,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	goto nosideret;
       arg1 = value_aggregate_elt (exp->elts[pc + 1].type,
 				  &exp->elts[pc + 3].string,
-				  0, noside);
+				  expect_type, 0, noside);
       if (arg1 == NULL)
 	error (_("There is no field named %s"), &exp->elts[pc + 3].string);
       return arg1;
@@ -1730,6 +1755,20 @@ evaluate_subexp_standard (struct type *expect_type,
 	  error (_("non-pointer-to-member value used in pointer-to-member construct"));
 	}
 
+    case TYPE_INSTANCE:
+      nargs = longest_to_int (exp->elts[pc + 1].longconst);
+      arg_types = (struct type **) alloca (nargs * sizeof (struct type *));
+      for (ix = 0; ix < nargs; ++ix)
+	arg_types[ix] = exp->elts[pc + 1 + ix + 1].type;
+
+      expect_type = make_params (nargs, arg_types);
+      *(pos) += 3 + nargs;
+      arg1 = evaluate_subexp_standard (expect_type, exp, pos, noside);
+      xfree (TYPE_FIELDS (expect_type));
+      xfree (TYPE_MAIN_TYPE (expect_type));
+      xfree (expect_type);
+      return arg1;
+
     case BINOP_CONCAT:
       arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
       arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
@@ -2612,7 +2651,7 @@ evaluate_subexp_for_address (struct expression *exp, int *pos,
       (*pos) += 5 + BYTES_TO_EXP_ELEM (tem + 1);
       x = value_aggregate_elt (exp->elts[pc + 1].type,
 			       &exp->elts[pc + 3].string,
-			       1, noside);
+			       NULL, 1, noside);
       if (x == NULL)
 	error (_("There is no field named %s"), &exp->elts[pc + 3].string);
       return x;

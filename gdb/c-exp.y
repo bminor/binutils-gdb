@@ -401,6 +401,18 @@ arglist	:	arglist ',' exp   %prec ABOVE_COMMA
 			{ arglist_len++; }
 	;
 
+exp     :       exp '(' nonempty_typelist ')' const_or_volatile
+			{ int i;
+			  write_exp_elt_opcode (TYPE_INSTANCE);
+			  write_exp_elt_longcst ((LONGEST) $<ivec>3[0]);
+			  for (i = 0; i < $<ivec>3[0]; ++i)
+			    write_exp_elt_type ($<tvec>3[i + 1]);
+			  write_exp_elt_longcst((LONGEST) $<ivec>3[0]);
+			  write_exp_elt_opcode (TYPE_INSTANCE);
+			  free ($3);
+			}
+	;
+
 rcurly	:	'}'
 			{ $$ = end_arglist () - 1; }
 	;

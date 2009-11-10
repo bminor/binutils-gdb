@@ -1,3 +1,23 @@
+2009-11-10  Keith Seitz  <keiths@redhat.com>
+
+	* c-exp.y: Add new rule for resolving method overloads.
+	* eval.c (make_params): New function.
+	(free_param_types): New function.
+	(evaluate_subexp_standard): Pass expect_type to value_aggregate_elt.
+	Handle case TYPE_INSTANCE.
+	(evaluate_subexp_for_address): Pass expect_type to value_aggregate_elt.
+	* expression.h (enum exp_opcode): Add TYPE_INSTANCE.
+	(compare_parameters): Add declaration.
+	* parse.c (operator_length_standard): Add TYPE_INSTANCE.
+	* valops.c (value_aggregate_elt): Add new expect_type parameter.
+	Pass expect_type to value_struct_elt_for_reference.
+	(value_struct_elt_for_reference): Add expect_type parameter and use
+	compare_parameters.
+	Check for overload matches with and without artificial parameters.
+	Skip artificial methods.
+	(compare_parameters): New function.
+	* value.h (value_aggregate_elt): Add new expect_type parameter.
+
 2009-11-10  Joseph Myers  <joseph@codesourcery.com>
 
 	* solib-svr4.c (enable_break): Call
