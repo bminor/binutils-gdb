@@ -104,13 +104,7 @@ proc default_gdb_version {} {
     global GDB
     global INTERNAL_GDBFLAGS GDBFLAGS
     global gdb_prompt
-    set fileid [open "gdb_cmd" w];
-    puts $fileid "q";
-    close $fileid;
-    set cmdfile [remote_download host "gdb_cmd"];
-    set output [remote_exec host "$GDB $INTERNAL_GDBFLAGS --command $cmdfile"]
-    remote_file build delete "gdb_cmd";
-    remote_file host delete "$cmdfile";
+    set output [remote_exec host "$GDB $INTERNAL_GDBFLAGS --version"]
     set tmp [lindex $output 1];
     set version ""
     regexp " \[0-9\]\[^ \t\n\r\]+" "$tmp" version

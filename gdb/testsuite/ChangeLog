@@ -1,3 +1,8 @@
+2009-11-10  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* lib/gdb.exp (default_gdb_version): Use --version instead of
+	--command.
+
 2009-11-10  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* lib/gdb.exp (gdb_compile_test): New.
