@@ -1,3 +1,16 @@
+2009-11-10  Keith Seitz  <keiths@redhat.com>
+
+	* c-expy. (operator_stoken): New function.
+	(OPERATOR): New token.
+	(NEW): New token.
+	(DELETE): New token.
+	(operator): New rule.
+	(name): Add operator.
+	(ident_tokens): Add "new", "delete", and "operator".
+	* gdbtypes.c (rank_one_type): Don't complain about
+	void pointer conversion badness if both types are
+	void pointers.
+
 2009-11-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* symfile.c (separate_debug_file_exists): Change parameter parent_name

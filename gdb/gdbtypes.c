@@ -2004,7 +2004,8 @@ rank_one_type (struct type *parm, struct type *arg)
       switch (TYPE_CODE (arg))
 	{
 	case TYPE_CODE_PTR:
-	  if (TYPE_CODE (TYPE_TARGET_TYPE (parm)) == TYPE_CODE_VOID)
+	  if (TYPE_CODE (TYPE_TARGET_TYPE (parm)) == TYPE_CODE_VOID
+	      && TYPE_CODE (TYPE_TARGET_TYPE (arg)) != TYPE_CODE_VOID)
 	    return VOID_PTR_CONVERSION_BADNESS;
 	  else
 	    return rank_one_type (TYPE_TARGET_TYPE (parm), 

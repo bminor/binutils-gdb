@@ -157,6 +157,7 @@ void yyerror (char *);
 %{
 /* YYSTYPE gets defined by %union */
 static int parse_number (char *, int, int, YYSTYPE *);
+static struct stoken operator_stoken (const char *);
 %}
 
 %type <voidval> exp exp1 type_exp start variable qualified_name lcurly
@@ -199,9 +200,12 @@ static int parse_number (char *, int, int, YYSTYPE *);
 
 %token <ssym> NAME_OR_INT 
 
+%token OPERATOR
 %token STRUCT CLASS UNION ENUM SIZEOF UNSIGNED COLONCOLON
 %token TEMPLATE
 %token ERROR
+%token NEW DELETE
+%type <sval> operator
 
 /* Special type cases, put in to allow the parser to distinguish different
    legal basetypes.  */
@@ -1132,10 +1136,130 @@ const_or_volatile_noopt:  	const_and_volatile
 			{ push_type (tp_volatile); }
 	;
 
+operator:	OPERATOR NEW
+			{ $$ = operator_stoken (" new"); }
+	|	OPERATOR DELETE
+			{ $$ = operator_stoken (" delete"); }
+	|	OPERATOR NEW '[' ']'
+			{ $$ = operator_stoken (" new[]"); }
+	|	OPERATOR DELETE '[' ']'
+			{ $$ = operator_stoken (" delete[]"); }
+	|	OPERATOR '+'
+			{ $$ = operator_stoken ("+"); }
+	|	OPERATOR '-'
+			{ $$ = operator_stoken ("-"); }
+	|	OPERATOR '*'
+			{ $$ = operator_stoken ("*"); }
+	|	OPERATOR '/'
+			{ $$ = operator_stoken ("/"); }
+	|	OPERATOR '%'
+			{ $$ = operator_stoken ("%"); }
+	|	OPERATOR '^'
+			{ $$ = operator_stoken ("^"); }
+	|	OPERATOR '&'
+			{ $$ = operator_stoken ("&"); }
+	|	OPERATOR '|'
+			{ $$ = operator_stoken ("|"); }
+	|	OPERATOR '~'
+			{ $$ = operator_stoken ("~"); }
+	|	OPERATOR '!'
+			{ $$ = operator_stoken ("!"); }
+	|	OPERATOR '='
+			{ $$ = operator_stoken ("="); }
+	|	OPERATOR '<'
+			{ $$ = operator_stoken ("<"); }
+	|	OPERATOR '>'
+			{ $$ = operator_stoken (">"); }
+	|	OPERATOR ASSIGN_MODIFY
+			{ const char *op = "unknown";
+			  switch ($2)
+			    {
+			    case BINOP_RSH:
+			      op = ">>=";
+			      break;
+			    case BINOP_LSH:
+			      op = "<<=";
+			      break;
+			    case BINOP_ADD:
+			      op = "+=";
+			      break;
+			    case BINOP_SUB:
+			      op = "-=";
+			      break;
+			    case BINOP_MUL:
+			      op = "*=";
+			      break;
+			    case BINOP_DIV:
+			      op = "/=";
+			      break;
+			    case BINOP_REM:
+			      op = "%=";
+			      break;
+			    case BINOP_BITWISE_IOR:
+			      op = "|=";
+			      break;
+			    case BINOP_BITWISE_AND:
+			      op = "&=";
+			      break;
+			    case BINOP_BITWISE_XOR:
+			      op = "^=";
+			      break;
+			    default:
+			      break;
+			    }
+
+			  $$ = operator_stoken (op);
+			}
+	|	OPERATOR LSH
+			{ $$ = operator_stoken ("<<"); }
+	|	OPERATOR RSH
+			{ $$ = operator_stoken (">>"); }
+	|	OPERATOR EQUAL
+			{ $$ = operator_stoken ("=="); }
+	|	OPERATOR NOTEQUAL
+			{ $$ = operator_stoken ("!="); }
+	|	OPERATOR LEQ
+			{ $$ = operator_stoken ("<="); }
+	|	OPERATOR GEQ
+			{ $$ = operator_stoken (">="); }
+	|	OPERATOR ANDAND
+			{ $$ = operator_stoken ("&&"); }
+	|	OPERATOR OROR
+			{ $$ = operator_stoken ("||"); }
+	|	OPERATOR INCREMENT
+			{ $$ = operator_stoken ("++"); }
+	|	OPERATOR DECREMENT
+			{ $$ = operator_stoken ("--"); }
+	|	OPERATOR ','
+			{ $$ = operator_stoken (","); }
+	|	OPERATOR ARROW_STAR
+			{ $$ = operator_stoken ("->*"); }
+	|	OPERATOR ARROW
+			{ $$ = operator_stoken ("->"); }
+	|	OPERATOR '(' ')'
+			{ $$ = operator_stoken ("()"); }
+	|	OPERATOR '[' ']'
+			{ $$ = operator_stoken ("[]"); }
+	|	OPERATOR ptype
+			{ char *name;
+			  long length;
+			  struct ui_file *buf = mem_fileopen ();
+
+			  c_print_type ($2, NULL, buf, -1, 0);
+			  name = ui_file_xstrdup (buf, &length);
+			  ui_file_delete (buf);
+			  $$ = operator_stoken (name);
+			  free (name);
+			}
+	;
+
+
+
 name	:	NAME { $$ = $1.stoken; }
 	|	BLOCKNAME { $$ = $1.stoken; }
 	|	TYPENAME { $$ = $1.stoken; }
 	|	NAME_OR_INT  { $$ = $1.stoken; }
+	|	operator { $$ = $1; }
 	;
 
 name_not_typename :	NAME
@@ -1150,6 +1274,23 @@ name_not_typename :	NAME
 	;
 
 %%
+
+/* Returns a stoken of the operator name given by OP (which does not
+   include the string "operator").  */ 
+static struct stoken
+operator_stoken (const char *op)
+{
+  static const char *operator_string = "operator";
+  struct stoken st = { NULL, 0 };
+  st.length = strlen (operator_string) + strlen (op);
+  st.ptr = malloc (st.length + 1);
+  strcpy (st.ptr, operator_string);
+  strcat (st.ptr, op);
+
+  /* The toplevel (c_parse) will free the memory allocated here.  */
+  make_cleanup (free, st.ptr);
+  return st;
+};
 
 /* Take care of parsing a number (anything that starts with a digit).
    Set yylval and return the token type; update lexptr.
@@ -1729,6 +1870,9 @@ static const struct token ident_tokens[] =
     {"long", LONG, OP_NULL, 0},
     {"true", TRUEKEYWORD, OP_NULL, 1},
     {"int", INT_KEYWORD, OP_NULL, 0},
+    {"new", NEW, OP_NULL, 1},
+    {"delete", DELETE, OP_NULL, 1},
+    {"operator", OPERATOR, OP_NULL, 1},
 
     {"and", ANDAND, BINOP_END, 1},
     {"and_eq", ASSIGN_MODIFY, BINOP_BITWISE_AND, 1},
