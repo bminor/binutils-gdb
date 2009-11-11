@@ -36,8 +36,9 @@
 #include "block.h"
 #include "objfiles.h"
 
-/* Basic byte-swapping routines.  GDB has needed these for a long time...
-   All extract a target-format integer at ADDR which is LEN bytes long.  */
+/* Basic byte-swapping routines.  All 'extract' functions return a
+   host-format integer from a target-format integer at ADDR which is
+   LEN bytes long.  */
 
 #if TARGET_CHAR_BIT != 8 || HOST_CHAR_BIT != 8
   /* 8 bit characters are a pretty safe assumption these days, so we
@@ -179,6 +180,8 @@ extract_typed_address (const gdb_byte *buf, struct type *type)
   return gdbarch_pointer_to_address (get_type_arch (type), type, buf);
 }
 
+/* All 'store' functions accept a host-format integer and store a
+   target-format integer at ADDR which is LEN bytes long.  */
 
 void
 store_signed_integer (gdb_byte *addr, int len,

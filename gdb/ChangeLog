@@ -1,3 +1,7 @@
+2009-10-28  Michael Snyder  <msnyder@vmware.com>
+
+        * findvar.c (top level): Fix and add comments.
+
 2009-11-10  Keith Seitz  <keiths@redhat.com>
 
 	* c-expy. (operator_stoken): New function.
@@ -64,6 +68,11 @@
 	(procfs_corefile_thread_callback): Removed the backup of
 	inferior_ptid before calling procfs_do_thread_registers since
 	the function already saves and restores it before returning.
+
+2009-11-10  Michael Snyder  <msnyder@vmware.com>
+
+	* dcache.c (dcache_invalidate_line): Remove block from used list
+	when adding it to freed list.
 
 2009-11-10  Michael Snyder  <msnyder@vmware.com>
 
