@@ -1,4 +1,8 @@
-2009-10-28  Michael Snyder  <msnyder@vmware.com>
+2009-11-11  Michael Snyder  <msnyder@vmware.com>
+
+	* s390-nat.c: Update copyright.
+
+2009-11-11  Michael Snyder  <msnyder@vmware.com>
 
         * findvar.c (top level): Fix and add comments.
 
