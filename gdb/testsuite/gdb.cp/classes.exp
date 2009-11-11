@@ -636,6 +636,8 @@ proc do_tests {} {
     gdb_test "print base1::Base1" "<.*Base1.*>" "print ctor of typedef class"
     gdb_test "print base1::~Base1" "<.*~Base1(\\(\\))?>" \
 	"print dtor of typedef class"
+
+    gdb_test "list ByAnyOtherName::times" ".*int Foo::times.*"
 }
 
 do_tests

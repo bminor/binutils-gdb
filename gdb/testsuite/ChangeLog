@@ -1,3 +1,10 @@
+2009-11-11  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.cp/classes.cc (ByAnyOtherName): Add typedef and
+	use it instead of "Foo".
+	* gdb.cp/classes.exp (do_tests): Add a test to access
+	a method through a typedef'd class name.
+
 2009-11-11  Nathan Froyd  <froydnj@codesourcery.com>
 
 	* gdb.base/long_long.exp: Permit leading zeros on floating-point
