@@ -4,7 +4,7 @@
 
 2009-11-10  Keith Seitz  <keiths@redhat.com>
 
-	* c-expy. (operator_stoken): New function.
+	* c-exp.y (operator_stoken): New function.
 	(OPERATOR): New token.
 	(NEW): New token.
 	(DELETE): New token.
