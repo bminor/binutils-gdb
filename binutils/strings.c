@@ -80,21 +80,6 @@ extern int errno;
 /* The BFD section flags that identify an initialized data section.  */
 #define DATA_FLAGS (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS)
 
-#ifdef HAVE_FOPEN64
-typedef off64_t file_off;
-#define file_open(s,m) fopen64(s, m)
-#else
-typedef off_t file_off;
-#define file_open(s,m) fopen(s, m)
-#endif
-#ifdef HAVE_STAT64
-typedef struct stat64 statbuf;
-#define file_stat(f,s) stat64(f, s)
-#else
-typedef struct stat statbuf;
-#define file_stat(f,s) stat(f, s)
-#endif
-
 /* Radix for printing addresses (must be 8, 10 or 16).  */
 static int address_radix;
 
@@ -145,9 +130,9 @@ typedef struct
 static void strings_a_section (bfd *, asection *, void *);
 static bfd_boolean strings_object_file (const char *);
 static bfd_boolean strings_file (char *file);
-static void print_strings (const char *, FILE *, file_off, int, int, char *);
+static void print_strings (const char *, FILE *, file_ptr, int, int, char *);
 static void usage (FILE *, int);
-static long get_char (FILE *, file_off *, int *, char **);
+static long get_char (FILE *, file_ptr *, int *, char **);
 
 int main (int, char **);
 
@@ -414,9 +399,11 @@ strings_object_file (const char *file)
 static bfd_boolean
 strings_file (char *file)
 {
-  statbuf st;
+  struct stat st;
 
-  if (file_stat (file, &st) < 0)
+  /* get_file_size does not support non-S_ISREG files.  */
+
+  if (stat (file, &st) < 0)
     {
       if (errno == ENOENT)
 	non_fatal (_("'%s': No such file"), file);
@@ -434,7 +421,7 @@ strings_file (char *file)
     {
       FILE *stream;
 
-      stream = file_open (file, FOPEN_RB);
+      stream = fopen (file, FOPEN_RB);
       if (stream == NULL)
 	{
 	  fprintf (stderr, "%s: ", program_name);
@@ -442,7 +429,7 @@ strings_file (char *file)
 	  return FALSE;
 	}
 
-      print_strings (file, stream, (file_off) 0, 0, 0, (char *) 0);
+      print_strings (file, stream, (file_ptr) 0, 0, 0, (char *) 0);
 
       if (fclose (stream) == EOF)
 	{
@@ -466,7 +453,7 @@ strings_file (char *file)
    MAGICCOUNT is how many characters are in it.  */
 
 static long
-get_char (FILE *stream, file_off *address, int *magiccount, char **magic)
+get_char (FILE *stream, file_ptr *address, int *magiccount, char **magic)
 {
   int c, i;
   long r = EOF;
@@ -542,14 +529,14 @@ get_char (FILE *stream, file_off *address, int *magiccount, char **magic)
    Those characters come at address ADDRESS and the data in STREAM follow.  */
 
 static void
-print_strings (const char *filename, FILE *stream, file_off address,
+print_strings (const char *filename, FILE *stream, file_ptr address,
 	       int stop_point, int magiccount, char *magic)
 {
   char *buf = (char *) xmalloc (sizeof (char) * (string_min + 1));
 
   while (1)
     {
-      file_off start;
+      file_ptr start;
       int i;
       long c;
 

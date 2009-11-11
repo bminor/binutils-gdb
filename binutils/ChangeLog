@@ -1,5 +1,17 @@
 2009-11-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* configure.in: Stop checking for fopen64 and stat64.
+	* strings.c (file_off, file_open, statbuf, file_stat): Remove.
+	(strings_file): Change file_off to file_ptr, file_open to fopen,
+	statbuf to struct stat and file_stat to stat.
+	(get_char): Change parameter type file_off * to file_ptr *.
+	(print_strings): Change parameter and variable `start' type file_off to
+	file_ptr.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+2009-11-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* configure.in: Call ACX_LARGEFILE.  Stop calling AC_PLUGINS,
 	AC_SYS_LARGEFILE and checking the Solaris largefile exception.
 	* aclocal.m4: Regenerate.
