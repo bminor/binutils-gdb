@@ -1,3 +1,9 @@
+2009-11-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* configure.in: Call ACX_LARGEFILE.  Stop calling AC_SYS_LARGEFILE.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
 2009-09-25  Dimitry Gorbachev  <d.g.gorbachev@gmail.com>
 
 	PR 10656

@@ -16,25 +16,7 @@ AC_PROG_CC
 AC_GNU_SOURCE
 AC_USE_SYSTEM_EXTENSIONS
 
-AC_PLUGINS
-
-case "${target}" in
-changequote(,)dnl
-  sparc-*-solaris*|i[3-7]86-*-solaris*)
-changequote([,])dnl
-    # See comment in bfd/configure.in for the reason for this test.
-    # PR 9992/binutils: We have to duplicate the behaviour of bfd's
-    # configure script so that the utilities in this directory agree
-    # on the size of structures used to describe files.
-    if test "${target}" = "${host}" -a "$enable_largefile" != 'yes'; then
-      if test "$plugins" = "no"; then
-        enable_largefile="no"
-      fi
-    fi
-    ;;
-esac
-
-AC_SYS_LARGEFILE
+ACX_LARGEFILE
 LT_INIT
 
 AC_ARG_ENABLE(targets,

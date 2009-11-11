@@ -1,3 +1,9 @@
+2009-11-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* configure.in: Call ACX_LARGEFILE.  Stop calling AC_SYS_LARGEFILE.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
 2009-11-10  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/10864

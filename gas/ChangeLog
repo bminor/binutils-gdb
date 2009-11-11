@@ -1,3 +1,9 @@
+2009-11-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* configure.in: Call ACX_LARGEFILE.  Stop calling AC_SYS_LARGEFILE.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
 2009-11-10  Maxim Kuvyrkov  <maxim@codesourcery.com>
 
 	* config/m68k-parse.h (enum m68k_register): Add ACR[4-7], RGPIOBAR.

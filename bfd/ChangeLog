@@ -1,3 +1,10 @@
+2009-11-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* configure.in: Call ACX_LARGEFILE.  Stop calling AC_PLUGINS,
+	AC_SYS_LARGEFILE and checking the Solaris largefile exception.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
 2009-11-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/10911
