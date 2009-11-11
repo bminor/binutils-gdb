@@ -1,6 +1,13 @@
 2009-11-11  Michael Snyder  <msnyder@vmware.com>
 
-	* s390-nat.c: Update copyright.
+	* darwin-nat-info.c: Update copyright.
+	* dbxread.c: Ditto.
+	* gdbarch.sh: Ditto.
+	* gdbarch.c: Ditto.
+	* gdbarch.h: Ditto.
+	* inline-frame.c: Ditto.
+	* inline-frame.h: Ditto.
+	* s390-nat.c: Ditto.
 
 2009-11-11  Michael Snyder  <msnyder@vmware.com>
 
