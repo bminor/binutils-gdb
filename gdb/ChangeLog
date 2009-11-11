@@ -1,5 +1,12 @@
 2009-11-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* symfile.c (separate_debug_file_exists): Change parameter parent_name
+	to parent_objfile.  New variables parent_stat and abfd_stat.  Call
+	strcmp and then bfd_stat functions to verify if NAME matches.
+	(find_separate_debug_file): Update the passed parameter at caller.
+
+2009-11-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* objfiles.c (objfile_relocate): Update also the field psymtabs_addrmap.
 
 2009-11-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
