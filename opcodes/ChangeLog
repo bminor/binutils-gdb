@@ -1,5 +1,21 @@
 2009-11-11  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/10924
+	* arm-dis.c (UNPREDICTABLE_INSTRUCTION): New macro.
+	(print_insn_arm): Extend %s format control code to check for
+	unpredictable addressing modes.  Add support for %S format control
+	code which suppresses this check.
+	(W_BIT, I_BIT, U_BIT, P_BIT): New macros.
+	(WRITEBACK_BIT_SET, IMMEDIATE_BIT_SET, NEGATIVE_BIT_SET,
+	PRE_BIT_SET): New macros.
+	(print_insn_coprocessor): Use the new macros instead of magic
+	constants.
+	(print_arm_address): Likewise.
+	(pirnt_insn_arm): Likewise.
+	(print_insn_thumb32): Likewise.
+
+2009-11-11  Nick Clifton  <nickc@redhat.com>
+
 	* po/id.po: Updated Indonesian translation.
 
 2009-11-10  Maxim Kuvyrkov  <maxim@codesourcery.com>
