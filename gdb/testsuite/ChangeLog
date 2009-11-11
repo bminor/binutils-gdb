@@ -1,3 +1,7 @@
+2009-11-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.dwarf2/dw2-ranges.exp: Call runto_main.
+
 2009-11-09  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.cp/overload.exp: Add tests for resolving overloaded

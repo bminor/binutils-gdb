@@ -55,6 +55,12 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
+# Test also objfile->psymtabs_addrmap relocations for -fPIE -pie builds below.
+# On some targets it may possibly fail but the program is being started only
+# for the PIE build so try it anyway.
+
+runto_main
+
 # Correct output:
 # 	Line 39 of "../.././gdb/testsuite/gdb.dwarf2/dw2-ranges.S" starts at address 0x4 and ends at 0x8.
 # Wrong output:

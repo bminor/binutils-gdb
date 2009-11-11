@@ -1,5 +1,9 @@
 2009-11-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* objfiles.c (objfile_relocate): Update also the field psymtabs_addrmap.
+
+2009-11-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* configure.ac: Call ACX_LARGEFILE.
 	* aclocal.m4: Call m4_include for ../config/largefile.m4 and
 	../config/plugins.m4.

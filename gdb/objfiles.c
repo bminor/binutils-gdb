@@ -680,6 +680,10 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
     }
   }
 
+  if (objfile->psymtabs_addrmap)
+    addrmap_relocate (objfile->psymtabs_addrmap,
+		      ANOFFSET (delta, SECT_OFF_TEXT (objfile)));
+
   {
     struct partial_symtab *p;
 
