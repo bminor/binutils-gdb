@@ -1,3 +1,8 @@
+2009-11-11  Pedro Alves  <pedro@codesourcery.com>
+
+	* agentexpr.texi (Tracing On Symmetrix): Delete section.
+	(Using Agent Expressions): Delete cross reference.
+
 2009-11-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbint.texinfo, stabs.texinfo: Move the @setchapternewpage
