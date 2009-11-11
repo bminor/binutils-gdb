@@ -512,7 +512,7 @@ gdb_expect {
 
 send_gdb "print *pF\n"
 gdb_expect {
-    -re ".\[0-9\]* = 1.2\[0-9\]*e\\+10.*$gdb_prompt $" {
+    -re ".\[0-9\]* = 1.2\[0-9\]*e\\+0?10.*$gdb_prompt $" {
         pass "print value of *pF"
       }
     -re ".*$gdb_prompt $" { fail "print value of *pF" }
@@ -529,7 +529,7 @@ gdb_expect {
 
 send_gdb "print *pD\n"
 gdb_expect {
-    -re ".\[0-9\]* = -1.2\[0-9\]*e\\-37.*$gdb_prompt $" {
+    -re ".\[0-9\]* = -1.2\[0-9\]*e\\-0?37.*$gdb_prompt $" {
         pass "print value of *pD"
       }
     -re ".*$gdb_prompt $" { fail "print value of *pD" }

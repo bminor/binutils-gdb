@@ -1,3 +1,10 @@
+2009-11-11  Nathan Froyd  <froydnj@codesourcery.com>
+
+	* gdb.base/long_long.exp: Permit leading zeros on floating-point
+	exponents.
+	* gdb.base/pointers.exp: Likewise.
+	* gdb.cp/ref-types.exp: Likewise.
+
 2009-11-11  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.cp/cplusfuncs.cc (class foo): Add operators

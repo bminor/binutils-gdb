@@ -412,7 +412,7 @@ gdb_expect {
 
 send_gdb "print F\n"
 gdb_expect {
-    -re ".\[0-9\]* = 1.2\[0-9\]*e\\+10.*$gdb_prompt $" {
+    -re ".\[0-9\]* = 1.2\[0-9\]*e\\+0?10.*$gdb_prompt $" {
         pass "print value of F"
       }
     -re ".*$gdb_prompt $" { fail "print value of F" }
@@ -640,7 +640,7 @@ gdb_expect {
 
 send_gdb "print rF\n"
 gdb_expect {
-    -re ".\[0-9\]* = \\(float &\\) @$hex: 1.2\[0-9\]*e\\+10.*$gdb_prompt $" {
+    -re ".\[0-9\]* = \\(float &\\) @$hex: 1.2\[0-9\]*e\\+0?10.*$gdb_prompt $" {
         pass "print value of rF"
       }
     -re ".*$gdb_prompt $" { fail "print value of rF" }
