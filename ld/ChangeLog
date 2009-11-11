@@ -1,3 +1,7 @@
+2009-11-11  Nick Clifton  <nickc@redhat.com>
+
+	* po/id.po: Updated Indonesian translation.
+
 2009-11-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* configure.in: Call ACX_LARGEFILE.  Stop calling AC_SYS_LARGEFILE.
