@@ -46,7 +46,9 @@ public:
   void  operator []     (foo&);
   void  operator ()     (foo&);
   void* operator new    (size_t) throw ();
+  void* operator new[]  (size_t) throw ();
   void  operator delete (void *);
+  void  operator delete[] (void *);
   /**/  operator int    ();
   /**/  operator char*  ();
 
@@ -115,7 +117,9 @@ void  foo::operator ->*    (foo& afoo) { afoo.ifoo = 0; }
 void  foo::operator []     (foo& afoo) { afoo.ifoo = 0; }
 void  foo::operator ()     (foo& afoo) { afoo.ifoo = 0; }
 void* foo::operator new    (size_t ival) throw () { ival = 0; return 0; }
+void* foo::operator new[]    (size_t ival) throw () { ival = 0; return 0; }
 void  foo::operator delete (void *ptr) { ptr = 0; }
+void  foo::operator delete[] (void *ptr) { ptr = 0; }
 /**/  foo::operator int    () { return 0; }
 /**/  foo::operator char*  () { return 0; }
 

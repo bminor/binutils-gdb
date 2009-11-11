@@ -63,7 +63,7 @@ set dm_type_foo_ref 		"foo&"
 set dm_type_int_star		"int*"
 set dm_type_long_star		"long*"
 set dm_type_unsigned_int	"unsigned"
-set dm_type_void		""
+set dm_type_void		"void"
 set dm_type_void_star		"void*"
 
 proc probe_demangler { } {
@@ -78,7 +78,7 @@ proc probe_demangler { } {
     global dm_type_void
     global dm_type_void_star
 
-    send_gdb "print &'foo::operator,(foo&)'\n"
+    send_gdb "print &foo::operator,(foo&)\n"
     gdb_expect {
 	-re ".*foo::operator, \\(.*foo.*&.*\\).*\r\n$gdb_prompt $" {
 	    # v2 demangler
@@ -97,7 +97,7 @@ proc probe_demangler { } {
 	}
     }
 
-    send_gdb "print &'dm_type_char_star'\n"
+    send_gdb "print &dm_type_char_star\n"
     gdb_expect {
 	-re ".*dm_type_char_star\\(char \\*\\).*\r\n$gdb_prompt $" {
 	    # v2 demangler
@@ -117,7 +117,7 @@ proc probe_demangler { } {
 	}
     }
 
-    send_gdb "print &'dm_type_foo_ref'\n"
+    send_gdb "print &dm_type_foo_ref\n"
     gdb_expect {
 	-re ".*dm_type_foo_ref\\(foo &\\).*\r\n$gdb_prompt $" {
 	    # v2 demangler
@@ -136,7 +136,7 @@ proc probe_demangler { } {
 	}
     }
 
-    send_gdb "print &'dm_type_int_star'\n"
+    send_gdb "print &dm_type_int_star\n"
     gdb_expect {
 	-re ".*dm_type_int_star\\(int \\*\\).*\r\n$gdb_prompt $" {
 	    # v2 demangler
@@ -155,7 +155,7 @@ proc probe_demangler { } {
 	}
     }
 
-    send_gdb "print &'dm_type_long_star'\n"
+    send_gdb "print &dm_type_long_star\n"
     gdb_expect {
 	-re ".*dm_type_long_star\\(long \\*\\).*\r\n$gdb_prompt $" {
 	    # v2 demangler
@@ -174,7 +174,7 @@ proc probe_demangler { } {
 	}
     }
 
-    send_gdb "print &'dm_type_unsigned_int'\n"
+    send_gdb "print &dm_type_unsigned_int\n"
     gdb_expect {
 	-re ".*dm_type_unsigned_int\\(unsigned int\\).*\r\n$gdb_prompt $" {
 	    # v2 demangler
@@ -193,7 +193,7 @@ proc probe_demangler { } {
 	}
     }
 
-    send_gdb "print &'dm_type_void'\n"
+    send_gdb "print &dm_type_void\n"
     gdb_expect {
 	-re ".*dm_type_void\\(void\\).*\r\n$gdb_prompt $" {
 	    # v2 demangler
@@ -212,7 +212,7 @@ proc probe_demangler { } {
 	}
     }
 
-    send_gdb "print &'dm_type_void_star'\n"
+    send_gdb "print &dm_type_void_star\n"
     gdb_expect {
 	-re ".*dm_type_void_star\\(void \\*\\).*\r\n$gdb_prompt $" {
 	    # v2 demangler
@@ -241,6 +241,7 @@ proc info_func_regexp { name demangled } {
     global gdb_prompt
 
     send_gdb "info function $name\n"
+    set demangled [regsub {\\\(void\\\)} $demangled {\(\)}]
     gdb_expect {
 	-re ".*File .*:\r\n(class |)$demangled\r\n.*$gdb_prompt $" {
 	    pass "info function for \"$name\""
@@ -277,16 +278,16 @@ proc print_addr_2 { name good } {
 
     set good_pattern [string_to_regexp $good]
 
-    send_gdb "print &'$name'\n"
+    send_gdb "print &$name\n"
     gdb_expect {
 	-re ".* = .* $hex <$good_pattern>\r\n$gdb_prompt $" {
-	    pass "print &'$name'"
+	    pass "print &$name"
 	}
 	-re ".*$gdb_prompt $" {
-	    fail "print &'$name'"
+	    fail "print &$name"
 	}
 	timeout {
-	    fail "print &'$name' (timeout)"
+	    fail "print &$name (timeout)"
 	}
     }
 }
@@ -305,19 +306,19 @@ proc print_addr_2_kfail { name good bad bugid } {
     set good_pattern [string_to_regexp $good]
     set bad_pattern [string_to_regexp $bad]
 
-    send_gdb "print &'$name'\n"
+    send_gdb "print &$name\n"
     gdb_expect {
 	-re ".* = .* $hex <$good_pattern>\r\n$gdb_prompt $" {
-	    pass "print &'$name'"
+	    pass "print &$name"
 	}
 	-re ".* = .* $hex <$bad_pattern>\r\n$gdb_prompt $" {
-	    kfail $bugid "print &'$name'"
+	    kfail $bugid "print &$name"
 	}
 	-re ".*$gdb_prompt $" {
-	    fail "print &'$name'"
+	    fail "print &$name"
 	}
 	timeout {
-	    fail "print &'$name' (timeout)"
+	    fail "print &$name (timeout)"
 	}
     }
 }
@@ -327,7 +328,12 @@ proc print_addr_2_kfail { name good bad bugid } {
 #
 
 proc print_addr { name } {
-    print_addr_2 "$name" "$name"
+    set expected [regsub {\(void\)} $name {()}]
+    if {[string first "::" $name] == -1} {
+	# C function -- must be qutoed
+	set name "'$name'"
+    }
+    print_addr_2 "$name" $expected
 }
 
 #
@@ -460,10 +466,13 @@ proc test_paddr_operator_functions {} {
     print_addr "foo::operator\[\]($dm_type_foo_ref)"
     print_addr "foo::operator()($dm_type_foo_ref)"
 
-    gdb_test "print &'foo::operator new'" \
+    gdb_test "print &foo::operator new" \
 	" = .* $hex <foo::operator new\\(.*\\)(| static)>"
+    gdb_test "print &foo::operator new\[\]" \
+	" = .* $hex <foo::operator new\\\[\\\]\\(.*\\)(| static)>"    
     if { !$hp_aCC_compiler } {
 	print_addr "foo::operator delete($dm_type_void_star)"
+	print_addr "foo::operator delete[]($dm_type_void_star)"
     } else {
 	gdb_test "print &'foo::operator delete($dm_type_void_star) static'" \
 	    " = .*(0x\[0-9a-f\]+|) <foo::operator delete.*>"

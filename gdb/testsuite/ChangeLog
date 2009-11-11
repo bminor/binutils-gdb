@@ -1,3 +1,22 @@
+2009-11-11  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.cp/cplusfuncs.cc (class foo): Add operators
+	new[] and delete[].
+	* gdb.cp/cplusfuncs.exp (dm_type_void): Change to
+	"void".
+	(probe_demangler): Remove all single-quoting of
+	method and variable names.
+	(info_func_regexp): Remove the word "void" from any
+	occurrence of "(void)".
+	(print_addr_2): Remove all single-quoting of
+	method names.
+	(print_addr_2_kfail): Likewise.
+	(print_addr): Single-quote C function names before
+	passing to print_addr_2.
+	(test_paddr_operator_functions): Remove single-quoting
+	for method names.
+	Add tests for operator new[] and operator delete[].
+
 2009-11-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/dw2-ranges.exp: Call runto_main.
