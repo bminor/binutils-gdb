@@ -4758,9 +4758,14 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   if (attr && DW_UNSND (attr) != 0)
     fnp->is_artificial = 1;
 
-  /* Get index in virtual function table if it is a virtual member function.  */
+  /* Get index in virtual function table if it is a virtual member
+     function.  For GCC, this is an offset in the appropriate
+     virtual table, as specified by DW_AT_containing_type.  For
+     everyone else, it is an expression to be evaluated relative
+     to the object address.  */
+
   attr = dwarf2_attr (die, DW_AT_vtable_elem_location, cu);
-  if (attr)
+  if (attr && fnp->fcontext)
     {
       /* Support the .debug_loc offsets */
       if (attr_form_is_block (attr))
@@ -4776,7 +4781,28 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 	  dwarf2_invalid_attrib_class_complaint ("DW_AT_vtable_elem_location",
 						 fieldname);
         }
-   }
+    }
+  else if (attr)
+    {
+      /* We only support trivial expressions here.  This hack will work
+         for v3 classes, which always start with the vtable pointer.  */
+      if (attr_form_is_block (attr) && DW_BLOCK (attr)->size > 0
+	  && DW_BLOCK (attr)->data[0] == DW_OP_deref)
+	{
+	  struct dwarf_block blk;
+	  blk.size = DW_BLOCK (attr)->size - 1;
+	  blk.data = DW_BLOCK (attr)->data + 1;
+          fnp->voffset = decode_locdesc (&blk, cu);
+          if ((fnp->voffset % cu->header.addr_size) != 0)
+            dwarf2_complex_location_expr_complaint ();
+          else
+            fnp->voffset /= cu->header.addr_size;
+	  fnp->voffset += 2;
+	  fnp->fcontext = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (this_type, 0));
+	}
+      else
+	dwarf2_complex_location_expr_complaint ();
+    }
 }
 
 /* Create the vector of member function fields, and attach it to the type.  */
@@ -5038,7 +5064,8 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 
 	  /* Get the type which refers to the base class (possibly this
 	     class itself) which contains the vtable pointer for the current
-	     class from the DW_AT_containing_type attribute.  */
+	     class from the DW_AT_containing_type attribute.  This use of
+	     DW_AT_containing_type is a GNU extension.  */
 
 	  if (dwarf2_attr (die, DW_AT_containing_type, cu) != NULL)
 	    {
