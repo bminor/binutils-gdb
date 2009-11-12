@@ -1,3 +1,7 @@
+2009-11-12  Nick Clifton  <nickc@redhat.com>
+
+	* po/id.po: Updated Indonesian translation.
+
 2009-11-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (build_modrm_byte): Don't set register
