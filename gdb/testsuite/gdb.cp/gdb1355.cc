@@ -31,5 +31,6 @@ struct mystruct s1 =
 
 int main ()
 {
-  return 0;
+  /* Reference s1 so that it is included.  */
+  return s1.m_int - 117;
 }

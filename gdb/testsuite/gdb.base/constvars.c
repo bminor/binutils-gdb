@@ -172,6 +172,10 @@ main (void)
   struct crass { char * const ptr; } crass = { lamprey };
   struct crisp { char * const *ptr; } crisp = { &lamprey };
 
+  /* Reference the structs so that they are not discarded.  */
+  struct crass *creed = &crass;
+  struct crisp *crow = &crisp;
+
   /* misc. references */
   /*
   const char           & radiation = laconic;

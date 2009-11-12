@@ -62,6 +62,13 @@ extern void marker3 ();
 extern void marker4 ();
 #endif
 
+/* We're used by a test that requires malloc, so make sure it is in
+   the executable.  */
+void *need_malloc ()
+{
+  return malloc (1);
+}
+
 /*
  *	This simple classical example of recursion is useful for
  *	testing stack backtraces and such.

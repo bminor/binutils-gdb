@@ -1,4 +1,16 @@
 2009-11-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/break.c (need_malloc): New.
+	* gdb.base/constvars.c (main): Reference crass and crisp.
+	* gdb.base/gdb1821.c (main): Reference bar.
+	* gdb.cp/gdb1355.cc (main): Reference s1.
+	* gdb.cp/hang1.cc (dummy2, dummy3): Declare.
+	(main): Call them.
+	* gdb.cp/hang2.cc (dummy2): Define.
+	* gdb.cp/hang3.cc (dummy3): Define.
+	* gdb.cp/m-data.cc (main): Reference shadow.
+
+2009-11-12  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Nathan Froyd  <froydnj@codesourcery.com>
 
 	* lib/gdb.exp (gdb_compile): Also set rpath for shlib=, on a

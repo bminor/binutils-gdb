@@ -20,4 +20,4 @@
 struct foo { double x__0, y__0, z__1; } bar;
 
 
-int main(void) { return 0; }
+int main(void) { return (int) bar.x__0; }
