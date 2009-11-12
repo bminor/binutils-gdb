@@ -779,7 +779,7 @@ thread_db_free (struct process_info *proc)
 
       dlclose (thread_db->handle);
 #else
-      td_thd_events_t events;
+      td_thr_events_t events;
 
       td_event_fillset (&events);
       td_ta_clear_event (thread_db->thread_agent, &events);

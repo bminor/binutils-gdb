@@ -1,3 +1,7 @@
+2009-11-12  Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+	* thread-db.c (thread_db_free): Fix typo.
+
 2009-11-11  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	PR gdb/10838
