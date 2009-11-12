@@ -5344,19 +5344,23 @@ build_modrm_byte (void)
 	      i.vex.register_specifier = i.op[vex_reg].regs;
 	    }
 
-	  /* If there is an extension opcode to put here, the
-	     register number must be put into the regmem field.  */
-	  if (i.tm.extension_opcode != None)
+	  /* Don't set OP operand twice.  */
+	  if (vex_reg != op)
 	    {
-	      i.rm.regmem = i.op[op].regs->reg_num;
-	      if ((i.op[op].regs->reg_flags & RegRex) != 0)
-		i.rex |= REX_B;
-	    }
-	  else
-	    {
-	      i.rm.reg = i.op[op].regs->reg_num;
-	      if ((i.op[op].regs->reg_flags & RegRex) != 0)
-		i.rex |= REX_R;
+	      /* If there is an extension opcode to put here, the
+		 register number must be put into the regmem field.  */
+	      if (i.tm.extension_opcode != None)
+		{
+		  i.rm.regmem = i.op[op].regs->reg_num;
+		  if ((i.op[op].regs->reg_flags & RegRex) != 0)
+		    i.rex |= REX_B;
+		}
+	      else
+		{
+		  i.rm.reg = i.op[op].regs->reg_num;
+		  if ((i.op[op].regs->reg_flags & RegRex) != 0)
+		    i.rex |= REX_R;
+		}
 	    }
 
 	  /* Now, if no memory operand has set i.rm.mode = 0, 1, 2 we
