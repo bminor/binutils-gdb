@@ -1887,6 +1887,20 @@ process_psymtab_comp_unit (struct objfile *objfile,
 
   cu.list_in_scope = &file_symbols;
 
+  /* If this compilation unit was already read in, free the
+     cached copy in order to read it in again.	This is
+     necessary because we skipped some symbols when we first
+     read in the compilation unit (see load_partial_dies).
+     This problem could be avoided, but the benefit is
+     unclear.  */
+  if (this_cu->cu != NULL)
+    free_one_cached_comp_unit (this_cu->cu);
+
+  /* Note that this is a pointer to our stack frame, being
+     added to a global data structure.	It will be cleaned up
+     in free_stack_comp_unit when we finish with this
+     compilation unit.	*/
+  this_cu->cu = &cu;
   cu.per_cu = this_cu;
 
   /* Read the abbrevs for this compilation unit into a table.  */
@@ -1940,21 +1954,6 @@ process_psymtab_comp_unit (struct objfile *objfile,
 
   /* Store the function that reads in the rest of the symbol table */
   pst->read_symtab = dwarf2_psymtab_to_symtab;
-
-  /* If this compilation unit was already read in, free the
-     cached copy in order to read it in again.	This is
-     necessary because we skipped some symbols when we first
-     read in the compilation unit (see load_partial_dies).
-     This problem could be avoided, but the benefit is
-     unclear.  */
-  if (this_cu->cu != NULL)
-    free_one_cached_comp_unit (this_cu->cu);
-
-  /* Note that this is a pointer to our stack frame, being
-     added to a global data structure.	It will be cleaned up
-     in free_stack_comp_unit when we finish with this
-     compilation unit.	*/
-  this_cu->cu = &cu;
 
   this_cu->psymtab = pst;
 
@@ -2153,6 +2152,11 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu,
 
   /* ??? Missing cleanup for CU?  */
 
+  /* Link this compilation unit into the compilation unit tree.  */
+  this_cu->cu = cu;
+  cu->per_cu = this_cu;
+  cu->type_hash = this_cu->type_hash;
+
   info_ptr = partial_read_comp_unit_head (&cu->header, info_ptr,
 					  dwarf2_per_objfile->info.buffer,
 					  dwarf2_per_objfile->info.size,
@@ -2177,11 +2181,6 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu,
     set_cu_language (DW_UNSND (attr), cu);
   else
     set_cu_language (language_minimal, cu);
-
-  /* Link this compilation unit into the compilation unit tree.  */
-  this_cu->cu = cu;
-  cu->per_cu = this_cu;
-  cu->type_hash = this_cu->type_hash;
 
   /* Check if comp unit has_children.
      If so, read the rest of the partial symbols from this comp unit.

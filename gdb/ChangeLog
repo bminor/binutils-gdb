@@ -1,3 +1,10 @@
+2009-11-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2read.c (process_psymtab_comp_unit): Initialize per_cu backlink
+	at the same time as the forward link.
+	(load_partial_comp_unit): Initialize per_cu links before calling
+	init_cu_die_reader.
+
 2009-11-11  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	PR gdb/10838
