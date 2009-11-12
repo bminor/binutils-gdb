@@ -204,30 +204,27 @@ proc list_and_check_macro {func macro expected} {
     return [check_macro $macro $expected "after `list $func'"]
 }
 
-
-if {[list_and_check_macro main WHERE {macscp1.c {before macscp1_3}}]} {
-    global verbose
-    set macro_support "unknown"
-    send_gdb "info source\n"
-    gdb_test_multiple "info source" "Test macro information"  {
-	-re "Includes preprocessor macro info\..*$gdb_prompt $" {
-	    set macro_support 1
-	    verbose "Source has macro information"
-	}
-	-re "Does not include preprocessor macro info\..*$gdb_prompt $" {
-	    set macro_support 0
-	    verbose "Source has no macro information"
-	}
-	default {
-	    warning "couldn't check macro support (no valid response)."
-	}
+gdb_test "list main" ".*main.*" "list main for support check"
+set macro_support "unknown"
+gdb_test_multiple "info source" "Test macro information"  {
+    -re "Includes preprocessor macro info\..*$gdb_prompt $" {
+	set macro_support 1
+	verbose "Source has macro information"
     }
-    if {$macro_support == 0} {
-	unsupported "Skipping test because debug information does not include macro information."
-	return 0
+    -re "Does not include preprocessor macro info\..*$gdb_prompt $" {
+	set macro_support 0
+	verbose "Source has no macro information"
+    }
+    default {
+	warning "couldn't check macro support (no valid response)."
     }
 }
+if {$macro_support == 0} {
+    unsupported "Skipping test because debug information does not include macro information."
+    return 0
+}
  
+list_and_check_macro main WHERE {macscp1.c {before macscp1_3}}
 list_and_check_macro macscp2_2 WHERE {macscp2.h macscp1.c {before macscp2_2}}
 list_and_check_macro macscp3_2 WHERE {macscp3.h macscp1.c {before macscp3_2}}
 

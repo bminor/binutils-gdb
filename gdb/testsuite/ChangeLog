@@ -1,5 +1,10 @@
 2009-11-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.base/macscp.exp: Avoid the first FAIL if macro information
+	is missing.
+
+2009-11-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.base/break.c (need_malloc): New.
 	* gdb.base/constvars.c (main): Reference crass and crisp.
 	* gdb.base/gdb1821.c (main): Reference bar.
