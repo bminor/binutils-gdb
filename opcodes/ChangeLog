@@ -1,5 +1,11 @@
 2009-11-12  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-opc.tbl: Remove IsLockable from add, adc, and, dec, inc,
+	or, sbb, sub, xor and xchg with register only operands.
+	* i386-tbl.h: Regenerated.
+
+2009-11-12  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-gen.c (opcode_modifiers): Add IsLockable.
 
 	* i386-opc.h (IsLockable): New.
