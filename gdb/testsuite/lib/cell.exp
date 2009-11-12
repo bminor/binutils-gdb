@@ -106,22 +106,27 @@ proc skip_cell_tests {} {
     verbose "$me:  compiling testfile $src" 2
     set compile_flags {debug nowarnings quiet}
 
+    set skip 0
     if { [gdb_compile_cell_spu $src_spu $exe_spu executable $compile_flags] != "" } {
         verbose "$me:  compiling spu binary failed, returning 1" 2
-        return [set skip_cell_tests_saved 1]
+	set skip 1
     }
-    if { [gdb_cell_embedspu $exe_spu $exe_spu-embed.o $compile_flags]  != "" } {
+    if { ! $skip && [gdb_cell_embedspu $exe_spu $exe_spu-embed.o $compile_flags]  != "" } {
         verbose "$me:  embedding spu binary failed, returning 1" 2
-        return [set skip_cell_tests_saved 1]
+	set skip 1
     }
-    if { [gdb_compile_cell_ppu [list $src $exe_spu-embed.o] $exe executable $compile_flags] != "" } {
+    if { ! $skip && [gdb_compile_cell_ppu [list $src $exe_spu-embed.o] $exe executable $compile_flags] != "" } {
         verbose "$me:  compiling ppu binary failed, returning 1" 2
-        return [set skip_cell_tests_saved 1]
+	set skip 1
     }
     file delete $src
     file delete $src_spu
     file delete $exe_spu
     file delete $exe_spu-embed.o
+
+    if { $skip } {
+        return [set skip_cell_tests_saved 1]
+    }
 
     # Compilation succeeded so now run it via gdb.
 

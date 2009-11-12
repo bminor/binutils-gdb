@@ -1,5 +1,10 @@
 2009-11-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* lib/cell.exp (skip_cell_tests): Clean up test files before
+	returning.
+
+2009-11-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* lib/gdb.exp (gdb_test_multiple): Handle "y or [n]", "[y] or n",
 	and the breakpoint menu.  Do not call perror if a prompt is seen.
 	Consume the following GDB prompt.
