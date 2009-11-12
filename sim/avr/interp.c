@@ -1628,16 +1628,20 @@ sim_write (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
 
   if (addr >= 0 && addr < SRAM_VADDR)
     {
-      if (addr & 1)
-	return 0;
-      addr /= 2;
-      while (size > 1 && addr < MAX_AVR_FLASH)
+      while (size > 0 && addr < (MAX_AVR_FLASH << 1))
 	{
-	  flash[addr].op = buffer[0] | (buffer[1] << 8);
-	  flash[addr].code = OP_unknown;
+          word val = flash[addr >> 1].op;
+
+          if (addr & 1)
+            val = (val & 0xff) | (buffer[0] << 8);
+          else
+            val = (val & 0xff00) | buffer[0];
+
+	  flash[addr >> 1].op = val;
+	  flash[addr >> 1].code = OP_unknown;
 	  addr++;
-	  buffer += 2;
-	  size -= 2;
+	  buffer++;
+	  size--;
 	}
       return osize - size;
     }
@@ -1660,16 +1664,16 @@ sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
 
   if (addr >= 0 && addr < SRAM_VADDR)
     {
-      if (addr & 1)
-	return 0;
-      addr /= 2;
-      while (size > 1 && addr < MAX_AVR_FLASH)
+      while (size > 0 && addr < (MAX_AVR_FLASH << 1))
 	{
-	  buffer[0] = flash[addr].op;
-	  buffer[1] = flash[addr].op >> 8;
+          word val = flash[addr >> 1].op;
+
+          if (addr & 1)
+            val >>= 8;
+
+          *buffer++ = val;
 	  addr++;
-	  buffer += 2;
-	  size -= 2;
+	  size--;
 	}
       return osize - size;
     }

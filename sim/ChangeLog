@@ -1,5 +1,10 @@
 2009-11-12  Tristan Gingold  <gingold@adacore.com>
 
+	* avr/interp.c (sim_write): Allow byte access.
+	(sim_read): Ditto.
+
+2009-11-12  Tristan Gingold  <gingold@adacore.com>
+
 	* avr/interp.c (sim_load): Clear memory before loading.
 
 2009-11-09  Tristan Gingold  <gingold@adacore.com>
