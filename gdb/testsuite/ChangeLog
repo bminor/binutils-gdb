@@ -1,5 +1,10 @@
 2009-11-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.base/break1.c (struct some_struct, values): Move earlier.
+	(marker4): Reference values.
+
+2009-11-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.base/macscp.exp: Avoid the first FAIL if macro information
 	is missing.
 
