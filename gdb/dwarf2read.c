@@ -4785,18 +4785,18 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   else if (attr)
     {
       /* We only support trivial expressions here.  This hack will work
-         for v3 classes, which always start with the vtable pointer.  */
+	 for v3 classes, which always start with the vtable pointer.  */
       if (attr_form_is_block (attr) && DW_BLOCK (attr)->size > 0
 	  && DW_BLOCK (attr)->data[0] == DW_OP_deref)
 	{
 	  struct dwarf_block blk;
 	  blk.size = DW_BLOCK (attr)->size - 1;
 	  blk.data = DW_BLOCK (attr)->data + 1;
-          fnp->voffset = decode_locdesc (&blk, cu);
-          if ((fnp->voffset % cu->header.addr_size) != 0)
-            dwarf2_complex_location_expr_complaint ();
-          else
-            fnp->voffset /= cu->header.addr_size;
+	  fnp->voffset = decode_locdesc (&blk, cu);
+	  if ((fnp->voffset % cu->header.addr_size) != 0)
+	    dwarf2_complex_location_expr_complaint ();
+	  else
+	    fnp->voffset /= cu->header.addr_size;
 	  fnp->voffset += 2;
 	  fnp->fcontext = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (this_type, 0));
 	}
