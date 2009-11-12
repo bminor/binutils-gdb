@@ -43,7 +43,9 @@ if {[lsearch -exact [mi_get_features] python] < 0} {
 
 mi_runto main
 
-mi_gdb_test "python execfile ('${srcdir}/${subdir}/${testfile}.py')" ""
+set remote_python_file [remote_download host ${srcdir}/${subdir}/${testfile}.py]
+
+mi_gdb_test "python execfile ('${remote_python_file}')" ""
 
 mi_continue_to_line [gdb_get_line_number {MI breakpoint here} ${testfile}.c] \
   "step to breakpoint"
@@ -232,3 +234,5 @@ mi_continue_to_line \
     "step to second breakpoint"
 
 mi_varobj_update_with_type_change container int 0 "update after type change"
+
+remote_file host delete ${remote_python_file}

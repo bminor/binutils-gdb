@@ -72,8 +72,10 @@ proc run_lang_tests {lang} {
     gdb_test "b [gdb_get_line_number {break to inspect} ${testfile}.c ]" \
 	".*Breakpoint.*"
     gdb_test "continue" ".*Breakpoint.*"
-    
-    gdb_test "python execfile ('${srcdir}/${subdir}/${testfile}.py')" ""
+
+    set remote_python_file [remote_download host ${srcdir}/${subdir}/${testfile}.py]
+
+    gdb_test "python execfile ('${remote_python_file}')" ""
     
     gdb_test "print ss" " = a=< a=<1> b=<$hex>> b=< a=<2> b=<$hex>>"
     gdb_test "print ssa\[1\]" " = a=< a=<5> b=<$hex>> b=< a=<6> b=<$hex>>"
@@ -103,6 +105,8 @@ proc run_lang_tests {lang} {
     gdb_test "print c" " = container $hex \"container\" with 2 elements = {$nl *.0. = 23,$nl *.1. = 72$nl}"
 
     gdb_test "continue" "Program exited normally\."
+
+    remote_file host delete ${remote_python_file}
 }
 
 run_lang_tests "c"

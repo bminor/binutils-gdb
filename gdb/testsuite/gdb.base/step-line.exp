@@ -26,6 +26,7 @@ if $tracelevel then {
 
 set testfile step-line
 set srcfile ${testfile}.c
+set linefile ${testfile}.inp
 set binfile ${objdir}/${subdir}/${testfile}
 
 remote_exec build "rm -f ${binfile}"
@@ -43,6 +44,8 @@ if ![runto_main] then {
    fail "Can't run to main"
    return 0
 }
+
+set remote_linefile [remote_download host ${srcdir}/${subdir}/${linefile}]
 
 gdb_test "break f1" ".*Breakpoint 2 at .* file step-line.c.*" "break f1"
 gdb_test "continue" \
@@ -90,4 +93,7 @@ gdb_test "next" \
 gdb_test "next" \
          ".*RETURN \\(j\\);.*" \
 	 "next over dummy 10"
+
+remote_file host delete ${remote_linefile}
+
 return 0
