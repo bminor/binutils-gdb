@@ -1,3 +1,16 @@
+2009-11-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (LOCKREP_PREFIX): Removed.
+	(REP_PREFIX): New.
+	(LOCK_PREFIX): Likewise.
+	(PREFIX_GROUP): Likewise.
+	(REX_PREFIX): Updated.
+	(MAX_PREFIXES): Likewise.
+	(add_prefix): Updated.  Return enum PREFIX_GROUP.
+	(md_assemble): Check for lock without a lockable instruction.
+	(parse_insn): Updated.
+	(output_insn): Likewise.
+
 2009-11-12  Nick Clifton  <nickc@redhat.com>
 
 	* po/id.po: Updated Indonesian translation.

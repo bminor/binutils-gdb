@@ -240,6 +240,8 @@ enum
   FWait,
   /* quick test for string instructions */
   IsString,
+  /* quick test for lockable instructions */
+  IsLockable,
   /* fake an extra reg operand for clr, imul and special register
      processing for some instructions.  */
   RegKludge,
@@ -340,6 +342,7 @@ typedef struct i386_opcode_modifier
   unsigned int no_ldsuf:1;
   unsigned int fwait:1;
   unsigned int isstring:1;
+  unsigned int islockable:1;
   unsigned int regkludge:1;
   unsigned int firstxmm0:1;
   unsigned int implicit1stxmm0:1;

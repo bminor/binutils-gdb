@@ -126,10 +126,10 @@ popa, 0, 0x61, None, 1, Cpu186|CpuNo64, DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_l
 // xchg commutes:  we allow both operand orders.
 
 // In the 64bit code, xchg rax, rax is reused for new nop instruction.
-xchg, 2, 0x90, None, 1, 0, ShortForm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64, Acc|Word|Dword|Qword }
-xchg, 2, 0x90, None, 1, 0, ShortForm|No_bSuf|No_sSuf|No_ldSuf, { Acc|Word|Dword|Qword, Reg16|Reg32|Reg64 }
-xchg, 2, 0x86, None, 1, 0, W|Modrm|No_sSuf|No_ldSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-xchg, 2, 0x86, None, 1, 0, W|Modrm|No_sSuf|No_ldSuf, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg8|Reg16|Reg32|Reg64 }
+xchg, 2, 0x90, None, 1, 0, ShortForm|No_bSuf|No_sSuf|No_ldSuf|IsLockable, { Reg16|Reg32|Reg64, Acc|Word|Dword|Qword }
+xchg, 2, 0x90, None, 1, 0, ShortForm|No_bSuf|No_sSuf|No_ldSuf|IsLockable, { Acc|Word|Dword|Qword, Reg16|Reg32|Reg64 }
+xchg, 2, 0x86, None, 1, 0, W|Modrm|No_sSuf|No_ldSuf|IsLockable, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+xchg, 2, 0x86, None, 1, 0, W|Modrm|No_sSuf|No_ldSuf|IsLockable, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg8|Reg16|Reg32|Reg64 }
 
 // In/out from ports.
 in, 2, 0xe4, None, 1, 0, W|No_sSuf|No_qSuf|No_ldSuf, { Imm8, Acc|Byte|Word|Dword }
@@ -168,26 +168,26 @@ std, 0, 0xfd, None, 1, 0, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 
 sti, 0, 0xfb, None, 1, 0, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 
 // Arithmetic.
-add, 2, 0x0, None, 1, 0, D|W|Modrm|No_sSuf|No_ldSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-add, 2, 0x83, 0x0, 1, 0, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Imm8S, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-add, 2, 0x4, None, 1, 0, W|No_sSuf|No_ldSuf, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
-add, 2, 0x80, 0x0, 1, 0, W|Modrm|No_sSuf|No_ldSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+add, 2, 0x0, None, 1, 0, D|W|Modrm|No_sSuf|No_ldSuf|IsLockable, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+add, 2, 0x83, 0x0, 1, 0, Modrm|No_bSuf|No_sSuf|No_ldSuf|IsLockable, { Imm8S, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+add, 2, 0x4, None, 1, 0, W|No_sSuf|No_ldSuf|IsLockable, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
+add, 2, 0x80, 0x0, 1, 0, W|Modrm|No_sSuf|No_ldSuf|IsLockable, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 
-inc, 1, 0x40, None, 1, CpuNo64, ShortForm|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg16|Reg32 }
-inc, 1, 0xfe, 0x0, 1, 0, W|Modrm|No_sSuf|No_ldSuf, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+inc, 1, 0x40, None, 1, CpuNo64, ShortForm|No_bSuf|No_sSuf|No_qSuf|No_ldSuf|IsLockable, { Reg16|Reg32 }
+inc, 1, 0xfe, 0x0, 1, 0, W|Modrm|No_sSuf|No_ldSuf|IsLockable, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 
-sub, 2, 0x28, None, 1, 0, D|W|Modrm|No_sSuf|No_ldSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-sub, 2, 0x83, 0x5, 1, 0, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Imm8S, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-sub, 2, 0x2c, None, 1, 0, W|No_sSuf|No_ldSuf, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
-sub, 2, 0x80, 0x5, 1, 0, W|Modrm|No_sSuf|No_ldSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+sub, 2, 0x28, None, 1, 0, D|W|Modrm|No_sSuf|No_ldSuf|IsLockable, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+sub, 2, 0x83, 0x5, 1, 0, Modrm|No_bSuf|No_sSuf|No_ldSuf|IsLockable, { Imm8S, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+sub, 2, 0x2c, None, 1, 0, W|No_sSuf|No_ldSuf|IsLockable, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
+sub, 2, 0x80, 0x5, 1, 0, W|Modrm|No_sSuf|No_ldSuf|IsLockable, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 
-dec, 1, 0x48, None, 1, CpuNo64, ShortForm|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg16|Reg32 }
-dec, 1, 0xfe, 0x1, 1, 0, W|Modrm|No_sSuf|No_ldSuf, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+dec, 1, 0x48, None, 1, CpuNo64, ShortForm|No_bSuf|No_sSuf|No_qSuf|No_ldSuf|IsLockable, { Reg16|Reg32 }
+dec, 1, 0xfe, 0x1, 1, 0, W|Modrm|No_sSuf|No_ldSuf|IsLockable, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 
-sbb, 2, 0x18, None, 1, 0, D|W|Modrm|No_sSuf|No_ldSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-sbb, 2, 0x83, 0x3, 1, 0, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Imm8S, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-sbb, 2, 0x1c, None, 1, 0, W|No_sSuf|No_ldSuf, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
-sbb, 2, 0x80, 0x3, 1, 0, W|Modrm|No_sSuf|No_ldSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+sbb, 2, 0x18, None, 1, 0, D|W|Modrm|No_sSuf|No_ldSuf|IsLockable, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+sbb, 2, 0x83, 0x3, 1, 0, Modrm|No_bSuf|No_sSuf|No_ldSuf|IsLockable, { Imm8S, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+sbb, 2, 0x1c, None, 1, 0, W|No_sSuf|No_ldSuf|IsLockable, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
+sbb, 2, 0x80, 0x3, 1, 0, W|Modrm|No_sSuf|No_ldSuf|IsLockable, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 
 cmp, 2, 0x38, None, 1, 0, D|W|Modrm|No_sSuf|No_ldSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 cmp, 2, 0x83, 0x7, 1, 0, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Imm8S, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
@@ -199,31 +199,31 @@ test, 2, 0x84, None, 1, 0, W|Modrm|No_sSuf|No_ldSuf, { Byte|Word|Dword|Qword|Uns
 test, 2, 0xa8, None, 1, 0, W|No_sSuf|No_ldSuf, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
 test, 2, 0xf6, 0x0, 1, 0, W|Modrm|No_sSuf|No_ldSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 
-and, 2, 0x20, None, 1, 0, D|W|Modrm|No_sSuf|No_ldSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-and, 2, 0x83, 0x4, 1, 0, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Imm8S, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-and, 2, 0x24, None, 1, 0, W|No_sSuf|No_ldSuf, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
-and, 2, 0x80, 0x4, 1, 0, W|Modrm|No_sSuf|No_ldSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+and, 2, 0x20, None, 1, 0, D|W|Modrm|No_sSuf|No_ldSuf|IsLockable, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+and, 2, 0x83, 0x4, 1, 0, Modrm|No_bSuf|No_sSuf|No_ldSuf|IsLockable, { Imm8S, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+and, 2, 0x24, None, 1, 0, W|No_sSuf|No_ldSuf|IsLockable, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
+and, 2, 0x80, 0x4, 1, 0, W|Modrm|No_sSuf|No_ldSuf|IsLockable, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 
-or, 2, 0x8, None, 1, 0, D|W|Modrm|No_sSuf|No_ldSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-or, 2, 0x83, 0x1, 1, 0, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Imm8S, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-or, 2, 0xc, None, 1, 0, W|No_sSuf|No_ldSuf, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
-or, 2, 0x80, 0x1, 1, 0, W|Modrm|No_sSuf|No_ldSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+or, 2, 0x8, None, 1, 0, D|W|Modrm|No_sSuf|No_ldSuf|IsLockable, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+or, 2, 0x83, 0x1, 1, 0, Modrm|No_bSuf|No_sSuf|No_ldSuf|IsLockable, { Imm8S, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+or, 2, 0xc, None, 1, 0, W|No_sSuf|No_ldSuf|IsLockable, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
+or, 2, 0x80, 0x1, 1, 0, W|Modrm|No_sSuf|No_ldSuf|IsLockable, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 
-xor, 2, 0x30, None, 1, 0, D|W|Modrm|No_sSuf|No_ldSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-xor, 2, 0x83, 0x6, 1, 0, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Imm8S, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-xor, 2, 0x34, None, 1, 0, W|No_sSuf|No_ldSuf, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
-xor, 2, 0x80, 0x6, 1, 0, W|Modrm|No_sSuf|No_ldSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+xor, 2, 0x30, None, 1, 0, D|W|Modrm|No_sSuf|No_ldSuf|IsLockable, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+xor, 2, 0x83, 0x6, 1, 0, Modrm|No_bSuf|No_sSuf|No_ldSuf|IsLockable, { Imm8S, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+xor, 2, 0x34, None, 1, 0, W|No_sSuf|No_ldSuf|IsLockable, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
+xor, 2, 0x80, 0x6, 1, 0, W|Modrm|No_sSuf|No_ldSuf|IsLockable, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 
 // clr with 1 operand is really xor with 2 operands.
 clr, 1, 0x30, None, 1, 0, W|Modrm|No_sSuf|No_ldSuf|RegKludge, { Reg8|Reg16|Reg32|Reg64 }
 
-adc, 2, 0x10, None, 1, 0, D|W|Modrm|No_sSuf|No_ldSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-adc, 2, 0x83, 0x2, 1, 0, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Imm8S, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-adc, 2, 0x14, None, 1, 0, W|No_sSuf|No_ldSuf, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
-adc, 2, 0x80, 0x2, 1, 0, W|Modrm|No_sSuf|No_ldSuf, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+adc, 2, 0x10, None, 1, 0, D|W|Modrm|No_sSuf|No_ldSuf|IsLockable, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+adc, 2, 0x83, 0x2, 1, 0, Modrm|No_bSuf|No_sSuf|No_ldSuf|IsLockable, { Imm8S, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+adc, 2, 0x14, None, 1, 0, W|No_sSuf|No_ldSuf|IsLockable, { Imm8|Imm16|Imm32|Imm32S, Acc|Byte|Word|Dword|Qword }
+adc, 2, 0x80, 0x2, 1, 0, W|Modrm|No_sSuf|No_ldSuf|IsLockable, { Imm8|Imm16|Imm32|Imm32S, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 
-neg, 1, 0xf6, 0x3, 1, 0, W|Modrm|No_sSuf|No_ldSuf, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-not, 1, 0xf6, 0x2, 1, 0, W|Modrm|No_sSuf|No_ldSuf, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+neg, 1, 0xf6, 0x3, 1, 0, W|Modrm|No_sSuf|No_ldSuf|IsLockable, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+not, 1, 0xf6, 0x2, 1, 0, W|Modrm|No_sSuf|No_ldSuf|IsLockable, { Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 
 aaa, 0, 0x37, None, 1, CpuNo64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 aas, 0, 0x3f, None, 1, CpuNo64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
@@ -479,12 +479,12 @@ bsf, 2, 0xfbc, None, 2, Cpu386, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Re
 bsr, 2, 0xfbd, None, 2, Cpu386, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg16|Reg32|Reg64 }
 bt, 2, 0xfa3, None, 2, Cpu386, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 bt, 2, 0xfba, 0x4, 2, Cpu386, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Imm8, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-btc, 2, 0xfbb, None, 2, Cpu386, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-btc, 2, 0xfba, 0x7, 2, Cpu386, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Imm8, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-btr, 2, 0xfb3, None, 2, Cpu386, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-btr, 2, 0xfba, 0x6, 2, Cpu386, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Imm8, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-bts, 2, 0xfab, None, 2, Cpu386, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-bts, 2, 0xfba, 0x5, 2, Cpu386, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Imm8, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+btc, 2, 0xfbb, None, 2, Cpu386, Modrm|No_bSuf|No_sSuf|No_ldSuf|IsLockable, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+btc, 2, 0xfba, 0x7, 2, Cpu386, Modrm|No_bSuf|No_sSuf|No_ldSuf|IsLockable, { Imm8, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+btr, 2, 0xfb3, None, 2, Cpu386, Modrm|No_bSuf|No_sSuf|No_ldSuf|IsLockable, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+btr, 2, 0xfba, 0x6, 2, Cpu386, Modrm|No_bSuf|No_sSuf|No_ldSuf|IsLockable, { Imm8, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+bts, 2, 0xfab, None, 2, Cpu386, Modrm|No_bSuf|No_sSuf|No_ldSuf|IsLockable, { Reg16|Reg32|Reg64, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+bts, 2, 0xfba, 0x5, 2, Cpu386, Modrm|No_bSuf|No_sSuf|No_ldSuf|IsLockable, { Imm8, Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 
 // Interrupts & op. sys insns.
 // See gas/config/tc-i386.c for conversion of 'int $3' into the special
@@ -829,8 +829,8 @@ rex.wrxb, 0, 0x4f, None, 1, Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ld
 // 486 extensions.
 
 bswap, 1, 0xfc8, None, 2, Cpu486, ShortForm|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64 }
-xadd, 2, 0xfc0, None, 2, Cpu486, W|Modrm|No_sSuf|No_ldSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-cmpxchg, 2, 0xfb0, None, 2, Cpu486, W|Modrm|No_sSuf|No_ldSuf, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+xadd, 2, 0xfc0, None, 2, Cpu486, W|Modrm|No_sSuf|No_ldSuf|IsLockable, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+cmpxchg, 2, 0xfb0, None, 2, Cpu486, W|Modrm|No_sSuf|No_ldSuf|IsLockable, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 invd, 0, 0xf08, None, 2, Cpu486, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 wbinvd, 0, 0xf09, None, 2, Cpu486, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 invlpg, 1, 0xf01, 0x7, 2, Cpu486, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
@@ -842,7 +842,7 @@ cpuid, 0, 0xfa2, None, 2, Cpu486, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldS
 wrmsr, 0, 0xf30, None, 2, Cpu586, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 rdtsc, 0, 0xf31, None, 2, Cpu586, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 rdmsr, 0, 0xf32, None, 2, Cpu586, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
-cmpxchg8b, 1, 0xfc7, 0x1, 2, Cpu586, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf, { Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+cmpxchg8b, 1, 0xfc7, 0x1, 2, Cpu586, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|IsLockable, { Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 
 // Pentium II/Pentium Pro extensions.
 sysenter, 0, 0xf34, None, 2, Cpu686, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }

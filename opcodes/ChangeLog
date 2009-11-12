@@ -1,3 +1,15 @@
+2009-11-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (opcode_modifiers): Add IsLockable.
+
+	* i386-opc.h (IsLockable): New.
+	(i386_opcode_modifier): Add islockable.
+
+	* i386-opc.tbl: Add IsLockable to add, adc, and, btc, btr,
+	bts, cmpxchg, cmpxch8b, dec, inc, neg, not, or, sbb, sub,
+	xor, xadd and xchg.
+	* i386-tbl.h: Regenerated.
+
 2009-11-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* arm-dis.c (coprocessor_opcodes): Use %A instead of %C.  Remove

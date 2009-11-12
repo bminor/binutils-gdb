@@ -59,14 +59,15 @@
    WAIT_PREFIX must be the first prefix since FWAIT is really is an
    instruction, and so must come before any prefixes.
    The preferred prefix order is SEG_PREFIX, ADDR_PREFIX, DATA_PREFIX,
-   LOCKREP_PREFIX.  */
+   REP_PREFIX, LOCK_PREFIX.  */
 #define WAIT_PREFIX	0
 #define SEG_PREFIX	1
 #define ADDR_PREFIX	2
 #define DATA_PREFIX	3
-#define LOCKREP_PREFIX	4
-#define REX_PREFIX	5       /* must come last.  */
-#define MAX_PREFIXES	6	/* max prefixes per opcode */
+#define REP_PREFIX	4
+#define LOCK_PREFIX	5
+#define REX_PREFIX	6       /* must come last.  */
+#define MAX_PREFIXES	7	/* max prefixes per opcode */
 
 /* we define the syntax here (modulo base,index,scale syntax) */
 #define REGISTER_PREFIX '%'
@@ -1783,13 +1784,26 @@ offset_in_range (offsetT val, int size)
   return val & mask;
 }
 
-/* Returns 0 if attempting to add a prefix where one from the same
-   class already exists, 1 if non rep/repne added, 2 if rep/repne
-   added.  */
-static int
+enum PREFIX_GROUP
+{
+  PREFIX_EXIST = 0,
+  PREFIX_LOCK,
+  PREFIX_REP,
+  PREFIX_OTHER
+};
+
+/* Returns
+   a. PREFIX_EXIST if attempting to add a prefix where one from the
+   same class already exists.
+   b. PREFIX_LOCK if lock prefix is added.
+   c. PREFIX_REP if rep/repne prefix is added.
+   d. PREFIX_OTHER if other prefix is added.
+ */
+
+static enum PREFIX_GROUP
 add_prefix (unsigned int prefix)
 {
-  int ret = 1;
+  enum PREFIX_GROUP ret = PREFIX_OTHER;
   unsigned int q;
 
   if (prefix >= REX_OPCODE && prefix < REX_OPCODE + 16
@@ -1798,7 +1812,7 @@ add_prefix (unsigned int prefix)
       if ((i.prefix[REX_PREFIX] & prefix & REX_W)
 	  || ((i.prefix[REX_PREFIX] & (REX_R | REX_X | REX_B))
 	      && (prefix & (REX_R | REX_X | REX_B))))
-	ret = 0;
+	ret = PREFIX_EXIST;
       q = REX_PREFIX;
     }
   else
@@ -1819,10 +1833,13 @@ add_prefix (unsigned int prefix)
 
 	case REPNE_PREFIX_OPCODE:
 	case REPE_PREFIX_OPCODE:
-	  ret = 2;
-	  /* fall thru */
+	  q = REP_PREFIX;
+	  ret = PREFIX_REP;
+	  break;
+
 	case LOCK_PREFIX_OPCODE:
-	  q = LOCKREP_PREFIX;
+	  q = LOCK_PREFIX;
+	  ret = PREFIX_LOCK;
 	  break;
 
 	case FWAIT_OPCODE:
@@ -1838,7 +1855,7 @@ add_prefix (unsigned int prefix)
 	  break;
 	}
       if (i.prefix[q] != 0)
-	ret = 0;
+	ret = PREFIX_EXIST;
     }
 
   if (ret)
@@ -2915,6 +2932,15 @@ md_assemble (char *line)
     if (!add_prefix (FWAIT_OPCODE))
       return;
 
+  /* Check for lock without a lockable instruction.  */
+  if (i.prefix[LOCK_PREFIX]
+      && (!i.tm.opcode_modifier.islockable
+	  || i.mem_operands == 0))
+    {
+      as_bad (_("expecting lockable instruction after `lock'"));
+      return;
+    }
+
   /* Check string instruction segment overrides.  */
   if (i.tm.opcode_modifier.isstring && i.mem_operands != 0)
     {
@@ -3111,10 +3137,12 @@ parse_insn (char *line, char *mnemonic)
 	  /* Add prefix, checking for repeated prefixes.  */
 	  switch (add_prefix (current_templates->start->base_opcode))
 	    {
-	    case 0:
+	    case PREFIX_EXIST:
 	      return NULL;
-	    case 2:
+	    case PREFIX_REP:
 	      expecting_string_instruction = current_templates->start->name;
+	      break;
+	    default:
 	      break;
 	    }
 	  /* Skip past PREFIX_SEPARATOR and reset token_start.  */
@@ -5636,7 +5664,7 @@ output_insn (void)
 		    {
 check_prefix:
 		      if (prefix != REPE_PREFIX_OPCODE
-			  || (i.prefix[LOCKREP_PREFIX]
+			  || (i.prefix[REP_PREFIX]
 			      != REPE_PREFIX_OPCODE))
 			add_prefix (prefix);
 		    }
