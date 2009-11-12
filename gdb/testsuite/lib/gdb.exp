@@ -763,10 +763,16 @@ proc gdb_test_multiple { command message user_code } {
             fail "$message"
 	    set result -1
 	}
-	 -re "\\(y or n\\) " {
+	-re "\\((y or n|y or \\\[n\\\]|\\\[y\\\] or n)\\) " {
 	    send_gdb "n\n"
-	    perror "Got interactive prompt."
-            fail "$message"
+	    gdb_expect -re "$gdb_prompt $"
+	    fail "$message (got interactive prompt)"
+	    set result -1
+	}
+	-re "\\\[0\\\] cancel\r\n\\\[1\\\] all.*\r\n> $" {
+	    send_gdb "0\n"
+	    gdb_expect -re "$gdb_prompt $"
+	    fail "$message (got breakpoint menu)"
 	    set result -1
 	}
 	 eof {

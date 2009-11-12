@@ -50,15 +50,12 @@ proc test_break { lang } {
 	"" \
 	"setting language $lang"
 
-    send_gdb "break A::method\n"
-    gdb_expect {
+    gdb_test_multiple "break A::method" "breaking in method ($lang)" {
 	-re ".0. cancel.*\[\r\n\]*.1. all.*\[\r\n\]*.2. A::method\\(A\\*\\) at .*\[\r\n\]*.3. A::method\\(int\\) at .*\[\r\n\]*\[\r\n\]*.4. A::method\\(\\) at .*\[\r\n\]*> $" {
 	    gdb_test "0" \
 		"canceled" \
 		"breaking in method ($lang)"
 	}
-	-re ".*$gdb_prompt $" { fail "breaking in method ($lang)" }
-	default { fail "breaking in method ($lang) (timeout)" }
     }
 }
 

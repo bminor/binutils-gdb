@@ -1,5 +1,15 @@
 2009-11-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* lib/gdb.exp (gdb_test_multiple): Handle "y or [n]", "[y] or n",
+	and the breakpoint menu.  Do not call perror if a prompt is seen.
+	Consume the following GDB prompt.
+	* gdb.cp/method2.exp (test_break): Use gdb_test_multiple.
+	* gdb.cp/namespace.exp: Use gdb_test.
+	* gdb.cp/templates.exp: Use gdb_test.
+	(test_template_breakpoints): Use gdb_test_multiple.
+
+2009-11-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.base/break1.c (struct some_struct, values): Move earlier.
 	(marker4): Reference values.
 

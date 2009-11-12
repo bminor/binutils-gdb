@@ -112,8 +112,7 @@ proc test_template_breakpoints {} {
     global srcdir
     global hp_aCC_compiler
 
-    send_gdb "break T5<int>::T5\n"
-    gdb_expect {
+    gdb_test_multiple "break T5<int>::T5" "constructor breakpoint" {
 	-re "0. cancel.*\[\r\n\]*.1. all.*\[\r\n\]*.2. T5<int>::T5\\(int\\) at .*\[\r\n\]*.3. T5<int>::T5\\((T5<int> const|const T5<int>) ?&\\) at .*\[\r\n\]*> $" {
 	    gdb_test "0" \
 		"canceled" \
@@ -135,8 +134,6 @@ proc test_template_breakpoints {} {
 		    "nonsense intended to insure that this test fails" \
 		    "constructor breakpoint (bad menu choices)"
 	}
-	-re ".*$gdb_prompt $" { fail "constructor breakpoint" }
-	default { fail "constructor breakpoint (timeout)" }
     }
     
 # See CLLbs14792
@@ -546,9 +543,5 @@ gdb_expect {
 
 # djb - 06-03-2000
 # Now should work fine
-send_gdb "break Garply<Garply<char> >::garply\n"
-gdb_expect {
-   -re "Breakpoint \[0-9\]* at $hex: file .*templates.cc, line.*\r\n$gdb_prompt $" { pass "break Garply<Garply<char> >::garply" }
-   -re ".*$gdb_prompt $" { fail "break Garply<Garply<char> >::garply" }
-   timeout { fail "break Garply<Garply<char> >::garply (timeout)" }
-}
+gdb_test "break Garply<Garply<char> >::garply" \
+    "Breakpoint \[0-9\]* at $hex: file .*templates.cc, line.*"
