@@ -3103,16 +3103,21 @@ cplus_number_of_children (struct varobj *var)
 static void
 cplus_class_num_children (struct type *type, int children[3])
 {
-  int i;
+  int i, vptr_fieldno;
+  struct type *basetype = NULL;
 
   children[v_public] = 0;
   children[v_private] = 0;
   children[v_protected] = 0;
 
+  vptr_fieldno = get_vptr_fieldno (type, &basetype);
   for (i = TYPE_N_BASECLASSES (type); i < TYPE_NFIELDS (type); i++)
     {
-      /* If we have a virtual table pointer, omit it. */
-      if (TYPE_VPTR_BASETYPE (type) == type && TYPE_VPTR_FIELDNO (type) == i)
+      /* If we have a virtual table pointer, omit it.  Even if virtual
+	 table pointers are not specifically marked in the debug info,
+	 they should be artificial.  */
+      if ((type == basetype && i == vptr_fieldno)
+	  || TYPE_FIELD_ARTIFICIAL (type, i))
 	continue;
 
       if (TYPE_FIELD_PROTECTED (type, i))
@@ -3199,6 +3204,10 @@ cplus_describe_child (struct varobj *parent, int index,
 	     find the indexed field. */
 	  int type_index = TYPE_N_BASECLASSES (type);
 	  enum accessibility acc = public_field;
+	  int vptr_fieldno;
+	  struct type *basetype = NULL;
+
+	  vptr_fieldno = get_vptr_fieldno (type, &basetype);
 	  if (strcmp (parent->name, "private") == 0)
 	    acc = private_field;
 	  else if (strcmp (parent->name, "protected") == 0)
@@ -3206,8 +3215,8 @@ cplus_describe_child (struct varobj *parent, int index,
 
 	  while (index >= 0)
 	    {
-	      if (TYPE_VPTR_BASETYPE (type) == type
-		  && type_index == TYPE_VPTR_FIELDNO (type))
+	      if ((type == basetype && type_index == vptr_fieldno)
+		  || TYPE_FIELD_ARTIFICIAL (type, type_index))
 		; /* ignore vptr */
 	      else if (match_accessibility (type, type_index, acc))
 		    --index;

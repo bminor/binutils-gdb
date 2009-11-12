@@ -775,6 +775,13 @@ struct cplus_struct_type
 	int line;
       }
      *localtype_ptr;
+
+    /* One if this struct is a dynamic class, as defined by the
+       Itanium C++ ABI: if it requires a virtual table pointer,
+       because it or any of its base classes have one or more virtual
+       member functions or virtual base classes.  Minus one if not
+       dynamic.  Zero if not yet computed.  */
+    int is_dynamic : 2;
   };
 
 /* Struct used in computing virtual base list */
@@ -861,6 +868,7 @@ extern void allocate_cplus_struct_type (struct type *);
 #define TYPE_BASECLASS_BITPOS(thistype,index) TYPE_FIELD_BITPOS(thistype,index)
 #define BASETYPE_VIA_PUBLIC(thistype, index) \
   ((!TYPE_FIELD_PRIVATE(thistype, index)) && (!TYPE_FIELD_PROTECTED(thistype, index)))
+#define TYPE_CPLUS_DYNAMIC(thistype) TYPE_CPLUS_SPECIFIC (thistype)->is_dynamic
 
 #define BASETYPE_VIA_VIRTUAL(thistype, index) \
   (TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits == NULL ? 0 \

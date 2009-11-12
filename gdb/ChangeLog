@@ -1,3 +1,22 @@
+2009-11-12  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Paul Brook  <paul@codesourcery.com>
+
+	* c-typeprint.c (c_type_print_base): Skip artificial fields.
+	Use get_vptr_fieldno to skip the vtable pointer.
+	* dwarf2read.c (dwarf2_add_field): Set FIELD_ARTIFICIAL on artificial
+	fields.
+	(dwarf2_add_member_fn): Complain about virtual member functions
+	without DW_AT_vtable_elem_location and force TYPE_CPLUS_DYNAMIC.
+	* gdbtypes.c (get_vptr_fieldno): Update comment.
+	* gdbtypes.h (struct cplus_struct_type): Add is_dynamic.
+	(TYPE_CPLUS_DYNAMIC): New macro.
+	* gnu-v3-abi.c (gnuv3_dynamic_class): New.
+	(gnuv3_get_vtable): Rewrite to use gnuv3_dynamic_class.  Move higher.
+	(gnuv3_rtti_type, gnuv3_get_virtual_fn, gnuv3_baseclass_offset): Use
+	gnuv3_get_vtable.
+	* varobj.c (cplus_class_num_children, cplus_describe_child): Skip
+	artificial fields.  Use get_vptr_fieldno to skip the vtable pointer.
+
 2009-11-12  Paul Brook  <paul@codesourcery.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 

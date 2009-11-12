@@ -1277,7 +1277,8 @@ lookup_struct_elt_type (struct type *type, char *name, int noerr)
    If not found, return -1 and ignore BASETYPEP.
    Callers should be aware that in some cases (for example,
    the type or one of its baseclasses is a stub type and we are
-   debugging a .o file), this function will not be able to find the
+   debugging a .o file, or the compiler uses DWARF-2 and is not GCC),
+   this function will not be able to find the
    virtual function table pointer, and vptr_fieldno will remain -1 and
    vptr_basetype will remain NULL or incomplete.  */
 

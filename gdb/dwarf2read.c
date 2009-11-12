@@ -4484,6 +4484,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
          pointer or virtual base class pointer) to private.  */
       if (dwarf2_attr (die, DW_AT_artificial, cu))
 	{
+	  FIELD_ARTIFICIAL (*fp) = 1;
 	  new_field->accessibility = DW_ACCESS_private;
 	  fip->non_public_fields = 1;
 	}
@@ -4802,6 +4803,18 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 	}
       else
 	dwarf2_complex_location_expr_complaint ();
+    }
+  else
+    {
+      attr = dwarf2_attr (die, DW_AT_virtuality, cu);
+      if (attr && DW_UNSND (attr))
+	{
+	  /* GCC does this, as of 2008-08-25; PR debug/37237.  */
+	  complaint (&symfile_complaints,
+		     _("Member function \"%s\" (offset %d) is virtual but the vtable offset is not specified"),
+		     fieldname, die->offset);
+	  TYPE_CPLUS_DYNAMIC (type) = 1;
+	}
     }
 }
 
