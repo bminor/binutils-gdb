@@ -1,3 +1,9 @@
+2009-11-11  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	PR gdb/10838
+	* linux-thread-db.c (thread_db_info): New member.
+	(disable_thread_event_reporting): Call td_ta_clear_event.
+
 2009-11-11  Keith Seitz  <keiths@redhat.com>
 
 	* linespec.c (lookup_prefix_sym): Lookup the symbol

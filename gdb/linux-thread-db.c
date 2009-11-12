@@ -141,6 +141,8 @@ struct thread_db_info
 				  td_event_e event, td_notify_t *ptr);
   td_err_e (*td_ta_set_event_p) (const td_thragent_t *ta,
 				 td_thr_events_t *event);
+  td_err_e (*td_ta_clear_event_p) (const td_thragent_t *ta,
+				   td_thr_events_t *event);
   td_err_e (*td_ta_event_getmsg_p) (const td_thragent_t *ta,
 				    td_event_msg_t *msg);
 
@@ -701,6 +703,7 @@ try_thread_db_load_1 (struct thread_db_info *info)
   /* These are not essential.  */
   info->td_ta_event_addr_p = dlsym (info->handle, "td_ta_event_addr");
   info->td_ta_set_event_p = dlsym (info->handle, "td_ta_set_event");
+  info->td_ta_clear_event_p = dlsym (info->handle, "td_ta_clear_event");
   info->td_ta_event_getmsg_p = dlsym (info->handle, "td_ta_event_getmsg");
   info->td_thr_event_enable_p = dlsym (info->handle, "td_thr_event_enable");
   info->td_thr_tls_get_addr_p = dlsym (info->handle, "td_thr_tls_get_addr");
@@ -907,14 +910,14 @@ thread_db_load (void)
 static void
 disable_thread_event_reporting (struct thread_db_info *info)
 {
-  if (info->td_ta_set_event_p != NULL)
+  if (info->td_ta_clear_event_p != NULL)
     {
       td_thr_events_t events;
 
       /* Set the process wide mask saying we aren't interested in any
 	 events anymore.  */
-      td_event_emptyset (&events);
-      info->td_ta_set_event_p (info->thread_agent, &events);
+      td_event_fillset (&events);
+      info->td_ta_clear_event_p (info->thread_agent, &events);
     }
 
   info->td_create_bp_addr = 0;
