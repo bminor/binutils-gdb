@@ -1734,6 +1734,7 @@ proc gdb_compile {source dest type options} {
     # "shlib=librarypath" in OPTIONS.
     set new_options ""
     set shlib_found 0
+    set shlib_load 0
     foreach opt $options {
         if [regexp {^shlib=(.*)} $opt dummy_var shlib_name] {
             if [test_compiler_info "xlc-*"] {
@@ -1755,21 +1756,32 @@ proc gdb_compile {source dest type options} {
 		}
             }
 	} elseif { $opt == "shlib_load" } {
-	    if { ([istarget "*-*-mingw*"]
-		  || [istarget *-*-cygwin*]
-		  || [istarget *-*-pe*]
-		  || [istarget arm*-*-symbianelf*]
-		  || [istarget hppa*-*-hpux*])} {
-		# Do not need anything.
-	    } elseif { [istarget *-*-openbsd*] } {
-		lappend new_options "additional_flags=-Wl,-rpath,${outdir}"
-	    } else {
-		lappend new_options "libs=-ldl"
-		lappend new_options "additional_flags=-Wl,-rpath,\\\$ORIGIN"
-	    }
+	    set shlib_load 1
         } else {
             lappend new_options $opt
         }
+    }
+
+    # We typically link to shared libraries using an absolute path, and
+    # that's how they are found at runtime.  If we are going to
+    # dynamically load one by basename, we must specify rpath.  If we
+    # are using a remote host, DejaGNU will link to the shared library
+    # using a relative path, so again we must specify an rpath.
+    if { $shlib_load || ($shlib_found && [is_remote host]) } {
+	if { ([istarget "*-*-mingw*"]
+	      || [istarget *-*-cygwin*]
+	      || [istarget *-*-pe*]
+	      || [istarget arm*-*-symbianelf*]
+	      || [istarget hppa*-*-hpux*])} {
+	    # Do not need anything.
+	} elseif { [istarget *-*-openbsd*] } {
+	    lappend new_options "additional_flags=-Wl,-rpath,${outdir}"
+	} else {
+	    if { $shlib_load } {
+		lappend new_options "libs=-ldl"
+	    }
+	    lappend new_options "additional_flags=-Wl,-rpath,\\\$ORIGIN"
+	}
     }
     set options $new_options
 

@@ -1,3 +1,9 @@
+2009-11-12  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Nathan Froyd  <froydnj@codesourcery.com>
+
+	* lib/gdb.exp (gdb_compile): Also set rpath for shlib=, on a
+	remote host.
+
 2009-11-12  Nathan Froyd  <froydnj@codesourcery.com>
 
 	* gdb.base/step-line.exp: Copy step-line.inp to the remote host.
