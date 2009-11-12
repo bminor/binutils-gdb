@@ -741,7 +741,7 @@ remote_fileio_func_read (char *buf)
 	  static char *remaining_buf = NULL;
 	  static int remaining_length = 0;
 
-	  buffer = (gdb_byte *) xmalloc (32768);
+	  buffer = (gdb_byte *) xmalloc (16384);
 	  if (remaining_buf)
 	    {
 	      remote_fio_no_longjmp = 1;
@@ -763,7 +763,18 @@ remote_fileio_func_read (char *buf)
 	    }
 	  else
 	    {
-	      ret = ui_file_read (gdb_stdtargin, (char *) buffer, 32767);
+	      /* Windows (at least XP and Server 2003) has difficulty
+		 with large reads from consoles.  If a handle is
+		 backed by a real console device, overly large reads
+		 from the handle will fail and set errno == ENOMEM.
+		 On a Windows Server 2003 system where I tested,
+		 reading 26608 bytes from the console was OK, but
+		 anything above 26609 bytes would fail.  The limit has
+		 been observed to vary on different systems.  So, we
+		 limit this read to something smaller than that - by a
+		 safe margin, in case the limit depends on system
+		 resources or version.  */
+	      ret = ui_file_read (gdb_stdtargin, (char *) buffer, 16383);
 	      remote_fio_no_longjmp = 1;
 	      if (ret > 0 && (size_t)ret > length)
 		{

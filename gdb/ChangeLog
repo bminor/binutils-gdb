@@ -1,4 +1,9 @@
 2009-11-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote-fileio.c (remote_fileio_func_read): Limit console
+	reads to 16K.
+
+2009-11-12  Daniel Jacobowitz  <dan@codesourcery.com>
 	    Paul Brook  <paul@codesourcery.com>
 
 	* c-typeprint.c (c_type_print_base): Skip artificial fields.
