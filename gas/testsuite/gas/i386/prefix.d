@@ -10,5 +10,5 @@ Disassembly of section .text:
    5:	9b df e0 [ 	]*fstsw  %ax
    8:	9b df e0 [ 	]*fstsw  %ax
    b:	9b 67 df e0 [ 	]*addr16 fstsw %ax
-   f:	36 67 66 f3 a7 [ 	]*repz addr16 cmpsw %es:\(%di\),%ss:\(%si\)
+   f:	36 67 66 f3 a7 [ 	]*addr16 repz cmpsw %es:\(%di\),%ss:\(%si\)
 #pass

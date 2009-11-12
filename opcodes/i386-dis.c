@@ -1997,6 +1997,7 @@ static const char *data_prefix;
 static const char *addr_prefix;
 static const char *repz_prefix;
 static const char *repnz_prefix;
+static const char **all_prefixes[5];
 static disassemble_info *the_info;
 static struct
   {
@@ -9572,13 +9573,16 @@ static const struct dis386 rm_table[][8] = {
 static void
 ckprefix (void)
 {
-  int newrex;
+  int newrex, i;
   rex = 0;
   rex_original = 0;
   rex_ignored = 0;
   prefixes = 0;
   used_prefixes = 0;
   rex_used = 0;
+  for (i = 0; i < (int) ARRAY_SIZE (all_prefixes); i++)
+    all_prefixes[i] = 0;
+  i = 0;
   while (1)
     {
       FETCH_DATA (the_info, codep + 1);
@@ -9608,12 +9612,27 @@ ckprefix (void)
 	      return;
 	  break;
 	case 0xf3:
+	  if ((prefixes & PREFIX_REPZ) == 0)
+	    {
+	      all_prefixes[i] = &repz_prefix;
+	      i++;
+	    }
 	  prefixes |= PREFIX_REPZ;
 	  break;
 	case 0xf2:
+	  if ((prefixes & PREFIX_REPNZ) == 0)
+	    {
+	      all_prefixes[i] = &repnz_prefix;
+	      i++;
+	    }
 	  prefixes |= PREFIX_REPNZ;
 	  break;
 	case 0xf0:
+	  if ((prefixes & PREFIX_LOCK) == 0)
+	    {
+	      all_prefixes[i] = &lock_prefix;
+	      i++;
+	    }
 	  prefixes |= PREFIX_LOCK;
 	  break;
 	case 0x2e:
@@ -9635,9 +9654,19 @@ ckprefix (void)
 	  prefixes |= PREFIX_GS;
 	  break;
 	case 0x66:
+	  if ((prefixes & PREFIX_DATA) == 0)
+	    {
+	      all_prefixes[i] = &data_prefix;
+	      i++;
+	    }
 	  prefixes |= PREFIX_DATA;
 	  break;
 	case 0x67:
+	  if ((prefixes & PREFIX_ADDR) == 0)
+	    {
+	      all_prefixes[i] = &addr_prefix;
+	      i++;
+	    }
 	  prefixes |= PREFIX_ADDR;
 	  break;
 	case FWAIT_OPCODE:
@@ -10437,16 +10466,9 @@ print_insn (bfd_vma pc, disassemble_info *info)
 
   prefix_obuf[0] = 0;
   prefix_obufp = prefix_obuf;
-  if (lock_prefix)
-    prefix_obufp = stpcpy (prefix_obufp, lock_prefix);
-  if (repz_prefix)
-    prefix_obufp = stpcpy (prefix_obufp, repz_prefix);
-  if (repnz_prefix)
-    prefix_obufp = stpcpy (prefix_obufp, repnz_prefix);
-  if (addr_prefix)
-    prefix_obufp = stpcpy (prefix_obufp, addr_prefix);
-  if (data_prefix)
-    prefix_obufp = stpcpy (prefix_obufp, data_prefix);
+  for (i = 0; i < (int) ARRAY_SIZE (all_prefixes); i++)
+    if (all_prefixes[i] && *all_prefixes[i])
+      prefix_obufp = stpcpy (prefix_obufp, *all_prefixes[i]);
 
   if (prefix_obuf[0] != 0)
     (*info->fprintf_func) (info->stream, "%s", prefix_obuf);

@@ -1,3 +1,10 @@
+2009-11-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (all_prefixes): New.
+	(ckprefix): Set all_prefixes.
+	(print_insn): Print all_prefixes instead of lock_prefix,
+	repz_prefix, repnz_prefix, addr_prefix and data_prefix.
+
 2009-11-11  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/10924
