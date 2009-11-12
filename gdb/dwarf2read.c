@@ -639,9 +639,9 @@ struct field_info
 	int virtuality;
 	struct field field;
       }
-     *fields;
+     *fields, *baseclasses;
 
-    /* Number of fields.  */
+    /* Number of fields (including baseclasses).  */
     int nfields;
 
     /* Number of baseclasses.  */
@@ -4357,8 +4357,17 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
   new_field = (struct nextfield *) xmalloc (sizeof (struct nextfield));
   make_cleanup (xfree, new_field);
   memset (new_field, 0, sizeof (struct nextfield));
-  new_field->next = fip->fields;
-  fip->fields = new_field;
+
+  if (die->tag == DW_TAG_inheritance)
+    {
+      new_field->next = fip->baseclasses;
+      fip->baseclasses = new_field;
+    }
+  else
+    {
+      new_field->next = fip->fields;
+      fip->fields = new_field;
+    }
   fip->nfields++;
 
   /* Handle accessibility and virtuality of field.
@@ -4581,8 +4590,21 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
      up in the same order in the array in which they were added to the list.  */
   while (nfields-- > 0)
     {
-      TYPE_FIELD (type, nfields) = fip->fields->field;
-      switch (fip->fields->accessibility)
+      struct nextfield *fieldp;
+
+      if (fip->fields)
+	{
+	  fieldp = fip->fields;
+	  fip->fields = fieldp->next;
+	}
+      else
+	{
+	  fieldp = fip->baseclasses;
+	  fip->baseclasses = fieldp->next;
+	}
+
+      TYPE_FIELD (type, nfields) = fieldp->field;
+      switch (fieldp->accessibility)
 	{
 	case DW_ACCESS_private:
 	  SET_TYPE_FIELD_PRIVATE (type, nfields);
@@ -4599,13 +4621,13 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
 	  /* Unknown accessibility.  Complain and treat it as public.  */
 	  {
 	    complaint (&symfile_complaints, _("unsupported accessibility %d"),
-		       fip->fields->accessibility);
+		       fieldp->accessibility);
 	  }
 	  break;
 	}
       if (nfields < fip->nbaseclasses)
 	{
-	  switch (fip->fields->virtuality)
+	  switch (fieldp->virtuality)
 	    {
 	    case DW_VIRTUALITY_virtual:
 	    case DW_VIRTUALITY_pure_virtual:
@@ -4613,7 +4635,6 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
 	      break;
 	    }
 	}
-      fip->fields = fip->fields->next;
     }
 }
 

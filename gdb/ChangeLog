@@ -1,3 +1,10 @@
+2009-11-12  Paul Brook  <paul@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2read.c (struct field_info): Add baseclasses.
+	(dwarf2_add_field): Add base classes to a separate list.
+	(dwarf2_attach_fields_to_type): Merge base classes and fields.
+
 2009-11-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2read.c (process_psymtab_comp_unit): Initialize per_cu backlink
