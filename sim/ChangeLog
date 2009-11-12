@@ -1,3 +1,7 @@
+2009-11-12  Tristan Gingold  <gingold@adacore.com>
+
+	* avr/interp.c (sim_load): Clear memory before loading.
+
 2009-11-09  Tristan Gingold  <gingold@adacore.com>
 
 	* avr/interp.c (sim_resume): Fix typo for OP_ret.

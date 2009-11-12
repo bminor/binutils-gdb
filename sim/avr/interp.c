@@ -1793,6 +1793,10 @@ sim_load (SIM_DESC sd, char *prog, bfd *abfd, int from_tty)
 {
   bfd *prog_bfd;
 
+  /* Clear all the memory.  */
+  memset (sram, 0, sizeof (sram));
+  memset (flash, 0, sizeof (flash));
+
   prog_bfd = sim_load_file (sd, myname, callback, prog, abfd,
                             sim_kind == SIM_OPEN_DEBUG,
                             0, sim_write);
