@@ -69,7 +69,6 @@ struct opcode16
    %u			print condition code (unconditional in ARM mode)
    %A			print address for ldc/stc/ldf/stf instruction
    %B			print vstm/vldm register list
-   %C			print vstr/vldr address operand
    %I                   print cirrus signed shift immediate: bits 0..3|4..6
    %F			print the COUNT field of a LFM/SFM instruction.
    %P			print floating point precision in arithmetic insn
@@ -248,8 +247,8 @@ static const struct opcode32 coprocessor_opcodes[] =
   {FPU_FPA_EXT_V1, 0x0ef0f110, 0x0ff8fff0, "cnfe%c\t%16-18f, %0-3f"},
   {FPU_FPA_EXT_V1, 0x0c000100, 0x0e100f00, "stf%c%Q\t%12-14f, %A"},
   {FPU_FPA_EXT_V1, 0x0c100100, 0x0e100f00, "ldf%c%Q\t%12-14f, %A"},
-  {FPU_FPA_EXT_V2, 0x0c000200, 0x0e100f00, "sfm%c\t%12-14f, %F, %A\t; (stc%22'l%c %8-11d, cr%12-15d, %A)"},
-  {FPU_FPA_EXT_V2, 0x0c100200, 0x0e100f00, "lfm%c\t%12-14f, %F, %A\t; (ldc%22'l%c %8-11d, cr%12-15d, %A)"},
+  {FPU_FPA_EXT_V2, 0x0c000200, 0x0e100f00, "sfm%c\t%12-14f, %F, %A"},
+  {FPU_FPA_EXT_V2, 0x0c100200, 0x0e100f00, "lfm%c\t%12-14f, %F, %A"},
 
   /* Register load/store.  */
   {FPU_VFP_EXT_V1xD | FPU_NEON_EXT_V1, 0x0d2d0b00, 0x0fbf0f01, "vpush%c\t%B"},
@@ -258,8 +257,8 @@ static const struct opcode32 coprocessor_opcodes[] =
   {FPU_VFP_EXT_V1xD | FPU_NEON_EXT_V1, 0x0c800b00, 0x0f900f01, "vstmia%c\t%16-19r%21'!, %B"},
   {FPU_VFP_EXT_V1xD | FPU_NEON_EXT_V1, 0x0cbd0b00, 0x0fbf0f01, "vpop%c\t%B"},
   {FPU_VFP_EXT_V1xD | FPU_NEON_EXT_V1, 0x0c900b00, 0x0f900f01, "vldmia%c\t%16-19r%21'!, %B"},
-  {FPU_VFP_EXT_V1xD | FPU_NEON_EXT_V1, 0x0d000b00, 0x0f300f00, "vstr%c\t%12-15,22D, %C"},
-  {FPU_VFP_EXT_V1xD | FPU_NEON_EXT_V1, 0x0d100b00, 0x0f300f00, "vldr%c\t%12-15,22D, %C"},
+  {FPU_VFP_EXT_V1xD | FPU_NEON_EXT_V1, 0x0d000b00, 0x0f300f00, "vstr%c\t%12-15,22D, %A"},
+  {FPU_VFP_EXT_V1xD | FPU_NEON_EXT_V1, 0x0d100b00, 0x0f300f00, "vldr%c\t%12-15,22D, %A"},
   {FPU_VFP_EXT_V1xD, 0x0d2d0a00, 0x0fbf0f00, "vpush%c\t%y3"},
   {FPU_VFP_EXT_V1xD, 0x0d200a00, 0x0fb00f00, "vstmdb%c\t%16-19r!, %y3"},
   {FPU_VFP_EXT_V1xD, 0x0d300a00, 0x0fb00f00, "vldmdb%c\t%16-19r!, %y3"},
@@ -1808,19 +1807,26 @@ print_insn_coprocessor (bfd_vma pc,
 
 		case 'A':
 		  {
-		    int offset = given & 0xff;
+		    int rn = (given >> 16) & 0xf;
+  		    int offset = given & 0xff;
 
 		    func (stream, "[%s", arm_regnames [(given >> 16) & 0xf]);
 
-		    value_in_comment = offset * 4;
-		    if (NEGATIVE_BIT_SET)
-		      value_in_comment = - value_in_comment;
-		    
+		    if (PRE_BIT_SET || WRITEBACK_BIT_SET)
+		      {
+			/* Not unindexed.  The offset is scaled.  */
+			offset = offset * 4;
+			if (NEGATIVE_BIT_SET)
+			  offset = - offset;
+			if (rn != 15)
+			  value_in_comment = offset;
+		      }
+
 		    if (PRE_BIT_SET)
 		      {
 			if (offset)
 			  func (stream, ", #%d]%s",
-				value_in_comment,
+				offset,
 				WRITEBACK_BIT_SET ? "!" : "");
 			else
 			  func (stream, "]");
@@ -1832,13 +1838,19 @@ print_insn_coprocessor (bfd_vma pc,
 			if (WRITEBACK_BIT_SET)
 			  {
 			    if (offset)
-			      func (stream, ", #%d", value_in_comment);
+			      func (stream, ", #%d", offset);
 			  }
 			else
 			  {
 			    func (stream, ", {%d}", offset);
 			    value_in_comment = offset;
 			  }
+		      }
+		    if (rn == 15 && (PRE_BIT_SET || WRITEBACK_BIT_SET))
+		      {
+			func (stream, "\t; ");
+			info->print_address_func (offset + pc
+						  + info->bytes_per_chunk * 2, info);
 		      }
 		  }
 		  break;
@@ -1854,33 +1866,6 @@ print_insn_coprocessor (bfd_vma pc,
 		      func (stream, "{d%d-<overflow reg d%d>}", regno, regno + offset - 1);
 		    else
 		      func (stream, "{d%d-d%d}", regno, regno + offset - 1);
-		  }
-		  break;
-
-		case 'C':
-		  {
-		    int rn = (given >> 16) & 0xf;
-		    int offset = (given & 0xff) * 4;
-
-		    func (stream, "[%s", arm_regnames[rn]);
-
-		    if (offset)
-		      {
-			if (NEGATIVE_BIT_SET)
-			  offset = - offset;
-			func (stream, ", #%d", offset);
-			if (rn != 15)
-			  value_in_comment = offset;
-		      }
-		    func (stream, "]");
-		    if (rn == 15)
-		      {
-			func (stream, "\t; ");
-			/* FIXME: Unsure if info->bytes_per_chunk is the
-			   right thing to use here.  */
-			info->print_address_func (offset + pc
-						  + info->bytes_per_chunk * 2, info);
-		      }
 		  }
 		  break;
 

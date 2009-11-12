@@ -1,3 +1,10 @@
+2009-11-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-dis.c (coprocessor_opcodes): Use %A instead of %C.  Remove
+	generic coprocessor instructions for FPA loads and stores.
+	(print_insn_coprocessor): Remove %C support.  Display address for
+	PC-relative offsets in %A.
+
 2009-11-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (all_prefixes): New.

@@ -1,3 +1,9 @@
+2009-11-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gas/arm/copro.d, gas/arm/fp-save.d, gas/arm/float.d,
+	gas/arm/fpa-mem.d: Update for removed generic coprocessor instructions
+	and expanded PC-relative offsets.
+
 2009-11-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/prefix.d: Swap order of ADDR and REP prefixes.
