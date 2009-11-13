@@ -2821,6 +2821,10 @@ handle_inferior_event (struct execution_control_state *ecs)
 	     dynamically loaded objects (among other things).  */
 	  if (stop_on_solib_events)
 	    {
+	      /* Make sure we print "Stopped due to solib-event" in
+		 normal_stop.  */
+	      stop_print_frame = 1;
+
 	      stop_stepping (ecs);
 	      return;
 	    }

@@ -1,3 +1,8 @@
+2009-11-13  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (handle_inferior_event): Set stop_print_frame on
+	TARGET_WAITKIND_LOADED events, if stopping on solib-events.
+
 2009-11-13  Doug Evans  <dje@google.com>
 
 	* dcache.c (dcache_block): Replace member newer with next,prev.
