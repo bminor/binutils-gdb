@@ -1,3 +1,8 @@
+2009-11-13  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* breakpoint.c (update_watchpoint): Only fiddle with frames for
+	local watchpoints.
+
 2009-11-13  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (handle_inferior_event): Set stop_print_frame on

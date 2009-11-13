@@ -1000,6 +1000,7 @@ update_watchpoint (struct breakpoint *b, int reparse)
   int within_current_scope;
   struct frame_id saved_frame_id;
   struct bp_location *loc;
+  int frame_saved;
   bpstat bs;
   struct program_space *frame_pspace;
 
@@ -1011,12 +1012,7 @@ update_watchpoint (struct breakpoint *b, int reparse)
   if (b->disposition == disp_del_at_next_stop)
     return;
  
-  /* Save the current frame's ID so we can restore it after
-     evaluating the watchpoint expression on its own frame.  */
-  /* FIXME drow/2003-09-09: It would be nice if evaluate_expression
-     took a frame parameter, so that we didn't have to change the
-     selected frame.  */
-  saved_frame_id = get_frame_id (get_selected_frame (NULL));
+  frame_saved = 0;
 
   /* Determine if the watchpoint is within scope.  */
   if (b->exp_valid_block == NULL)
@@ -1024,6 +1020,15 @@ update_watchpoint (struct breakpoint *b, int reparse)
   else
     {
       struct frame_info *fi;
+
+      /* Save the current frame's ID so we can restore it after
+         evaluating the watchpoint expression on its own frame.  */
+      /* FIXME drow/2003-09-09: It would be nice if evaluate_expression
+         took a frame parameter, so that we didn't have to change the
+         selected frame.  */
+      frame_saved = 1;
+      saved_frame_id = get_frame_id (get_selected_frame (NULL));
+
       fi = frame_find_by_id (b->watchpoint_frame);
       within_current_scope = (fi != NULL);
       if (within_current_scope)
@@ -1169,7 +1174,8 @@ in which its expression is valid.\n"),
     }
 
   /* Restore the selected frame.  */
-  select_frame (frame_find_by_id (saved_frame_id));
+  if (frame_saved)
+    select_frame (frame_find_by_id (saved_frame_id));
 }
 
 
