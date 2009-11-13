@@ -1,3 +1,14 @@
+2009-11-13  Kazu Hirata  <kazu@codesourcery.com>
+	    Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+	* remote-fileio.c (remote_fileio_request): Send Ctrl-C if it is
+	pending.
+	* remote-fileio.h: Update the prototype for remote_fileio_request.
+	* remote.c (struct remote_state): Add ctrlc_pending_p.
+	(remote_open_1): Clear ctrlc_pending_p.
+	(remote_stop_as): Set ctrlc_pending_p to 1.
+	(remote_wait_as): Pass ctrlc_pending_p to remote_fileio_request.
+
 2009-11-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* arm-tdep.c (arm_skip_stub): Recognize RealView veneer functions.

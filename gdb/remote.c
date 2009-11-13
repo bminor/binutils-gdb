@@ -297,6 +297,10 @@ struct remote_state
 
   /* True if the stub reports support for conditional tracepoints.  */
   int cond_tracepoints;
+
+  /* Nonzero if the user has pressed Ctrl-C, but the target hasn't
+     responded to that.  */
+  int ctrlc_pending_p;
 };
 
 /* Returns true if the multi-process extensions are in effect.  */
@@ -3394,6 +3398,7 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target, int extended
   rs->extended = extended_p;
   rs->non_stop_aware = 0;
   rs->waiting_for_stop_reply = 0;
+  rs->ctrlc_pending_p = 0;
 
   general_thread = not_sent_ptid;
   continue_thread = not_sent_ptid;
@@ -4122,6 +4127,8 @@ remote_stop_as (ptid_t ptid)
 {
   struct remote_state *rs = get_remote_state ();
 
+  rs->ctrlc_pending_p = 1;
+
   /* If the inferior is stopped already, but the core didn't know
      about it yet, just ignore the request.  The cached wait status
      will be collected in remote_wait.  */
@@ -4848,6 +4855,11 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
   /* We got something.  */
   rs->waiting_for_stop_reply = 0;
 
+  /* Assume that the target has acknowledged Ctrl-C unless we receive
+     an 'F' or 'O' packet.  */
+  if (buf[0] != 'F' && buf[0] != 'O')
+    rs->ctrlc_pending_p = 0;
+
   switch (buf[0])
     {
     case 'E':		/* Error of some sort.	*/
@@ -4858,7 +4870,8 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
       status->value.sig = TARGET_SIGNAL_0;
       break;
     case 'F':		/* File-I/O request.  */
-      remote_fileio_request (buf);
+      remote_fileio_request (buf, rs->ctrlc_pending_p);
+      rs->ctrlc_pending_p = 0;
       break;
     case 'T': case 'S': case 'X': case 'W':
       {

@@ -1416,28 +1416,44 @@ remote_fileio_reset (void)
     }
 }
 
+/* Handle a file I/O request. BUF points to the packet containing the
+   request. CTRLC_PENDING_P should be nonzero if the target has not
+   acknowledged the Ctrl-C sent asynchronously earlier.  */
+
 void
-remote_fileio_request (char *buf)
+remote_fileio_request (char *buf, int ctrlc_pending_p)
 {
   int ex;
 
   remote_fileio_sig_init ();
 
-  remote_fio_ctrl_c_flag = 0;
-  remote_fio_no_longjmp = 0;
-
-  ex = catch_exceptions (uiout, do_remote_fileio_request, (void *)buf,
-			 RETURN_MASK_ALL);
-  switch (ex)
+  if (ctrlc_pending_p)
     {
-      case RETURN_ERROR:
-	remote_fileio_reply (-1, FILEIO_ENOSYS);
-        break;
-      case RETURN_QUIT:
-        remote_fileio_reply (-1, FILEIO_EINTR);
-	break;
-      default:
-        break;
+      /* If the target hasn't responded to the Ctrl-C sent
+	 asynchronously earlier, take this opportunity to send the
+	 Ctrl-C synchronously.  */
+      remote_fio_ctrl_c_flag = 1;
+      remote_fio_no_longjmp = 0;
+      remote_fileio_reply (-1, FILEIO_EINTR);
+    }
+  else
+    {
+      remote_fio_ctrl_c_flag = 0;
+      remote_fio_no_longjmp = 0;
+
+      ex = catch_exceptions (uiout, do_remote_fileio_request, (void *)buf,
+			     RETURN_MASK_ALL);
+      switch (ex)
+	{
+	case RETURN_ERROR:
+	  remote_fileio_reply (-1, FILEIO_ENOSYS);
+	  break;
+	case RETURN_QUIT:
+	  remote_fileio_reply (-1, FILEIO_EINTR);
+	  break;
+	default:
+	  break;
+	}
     }
 
   remote_fileio_sig_exit ();

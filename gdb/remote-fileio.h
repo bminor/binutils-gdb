@@ -26,7 +26,7 @@ struct cmd_list_element;
 
 /* Unified interface to remote fileio, called in remote.c from
    remote_wait () and remote_async_wait () */
-extern void remote_fileio_request (char *buf);
+extern void remote_fileio_request (char *buf, int ctrlc_pending_p);
 
 /* Cleanup any remote fileio state.  */
 extern void remote_fileio_reset (void);
