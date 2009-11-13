@@ -247,7 +247,10 @@ proc do_tests {} {
     gdb_test "set language c++" "" ""
     gdb_test "set width 0" "" ""
 
-    runto_main
+    if ![runto_main] then {
+	perror "couldn't run to breakpoint"
+	return
+    }
     test_ptype_of_classes
 
     gdb_breakpoint test_calls
