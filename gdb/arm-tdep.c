@@ -5155,8 +5155,10 @@ arm_skip_stub (struct frame_info *frame, CORE_ADDR pc)
   /* If PC is in a Thumb call or return stub, return the address of the
      target PC, which is in a register.  The thunk functions are called
      _call_via_xx, where x is the register name.  The possible names
-     are r0-r9, sl, fp, ip, sp, and lr.  */
-  if (strncmp (name, "_call_via_", 10) == 0)
+     are r0-r9, sl, fp, ip, sp, and lr.  ARM RealView has similar
+     functions, named __ARM_call_via_r[0-7].  */
+  if (strncmp (name, "_call_via_", 10) == 0
+      || strncmp (name, "__ARM_call_via_", strlen ("__ARM_call_via_")) == 0)
     {
       /* Use the name suffix to determine which register contains the
          target PC.  */

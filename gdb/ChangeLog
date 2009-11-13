@@ -1,3 +1,7 @@
+2009-11-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-tdep.c (arm_skip_stub): Recognize RealView veneer functions.
+
 2009-11-13  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* breakpoint.c (update_watchpoint): Only fiddle with frames for
