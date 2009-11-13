@@ -1,3 +1,12 @@
+2009-11-13  Doug Evans  <dje@google.com>
+
+	* dcache.c (dcache_hit, dcache_read_line): Tweak comments.
+	(dcache_peek_byte, dcache_init, dcache_xfer_memory): Ditto.
+	* target.c (memory_xfer_partial): Tweak comments.
+	(target_xfer_partial, target_write_memory): Add comment.
+	(target_read_partial): Remove note from 2003-10-21.
+	(target_read, target_write): Add comments.
+
 2009-11-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* inline-frame.c (find_inline_frame_state): Check for changed PC

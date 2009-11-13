@@ -1181,8 +1181,8 @@ target_section_by_addr (struct target_ops *target, CORE_ADDR addr)
   return NULL;
 }
 
-/* Perform a partial memory transfer.  The arguments and return
-   value are just as for target_xfer_partial.  */
+/* Perform a partial memory transfer.
+   For docs see target.h, to_xfer_partial.  */
 
 static LONGEST
 memory_xfer_partial (struct target_ops *ops, enum target_object object,
@@ -1360,6 +1360,8 @@ make_show_memory_breakpoints_cleanup (int show)
 		       (void *) (uintptr_t) current);
 }
 
+/* For docs see target.h, to_xfer_partial.  */
+
 static LONGEST
 target_xfer_partial (struct target_ops *ops,
 		     enum target_object object, const char *annex,
@@ -1473,6 +1475,11 @@ target_read_stack (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
   else
     return EIO;
 }
+
+/* Write LEN bytes from MYADDR to target memory at address MEMADDR.
+   Returns either 0 for success or an errno value if any error occurs.
+   If an error occurs, no guarantee is made about how much data got written.
+   Callers that can deal with partial writes should call target_write.  */
 
 int
 target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
@@ -1637,11 +1644,7 @@ current_xfer_partial (struct target_ops *ops, enum target_object object,
     return -1;
 }
 
-/* Target vector read/write partial wrapper functions.
-
-   NOTE: cagney/2003-10-21: I wonder if having "to_xfer_partial
-   (inbuf, outbuf)", instead of separate read/write methods, make life
-   easier.  */
+/* Target vector read/write partial wrapper functions.  */
 
 static LONGEST
 target_read_partial (struct target_ops *ops,
@@ -1662,6 +1665,9 @@ target_write_partial (struct target_ops *ops,
 }
 
 /* Wrappers to perform the full transfer.  */
+
+/* For docs on target_read see target.h.  */
+
 LONGEST
 target_read (struct target_ops *ops,
 	     enum target_object object,
@@ -1750,7 +1756,6 @@ target_read_until_error (struct target_ops *ops,
   return len;
 }
 
-
 /* An alternative to target_write with progress callbacks.  */
 
 LONGEST
@@ -1785,6 +1790,8 @@ target_write_with_progress (struct target_ops *ops,
     }
   return len;
 }
+
+/* For docs on target_write see target.h.  */
 
 LONGEST
 target_write (struct target_ops *ops,

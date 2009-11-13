@@ -251,7 +251,7 @@ dcache_invalidate_line (DCACHE *dcache, CORE_ADDR addr)
 }
 
 /* If addr is present in the dcache, return the address of the block
-   containing it.  */
+   containing it.  Otherwise return NULL.  */
 
 static struct dcache_block *
 dcache_hit (DCACHE *dcache, CORE_ADDR addr)
@@ -269,7 +269,9 @@ dcache_hit (DCACHE *dcache, CORE_ADDR addr)
   return db;
 }
 
-/* Fill a cache line from target memory.  */
+/* Fill a cache line from target memory.
+   The result is 1 for success, 0 if the (entire) cache line
+   wasn't readable.  */
 
 static int
 dcache_read_line (DCACHE *dcache, struct dcache_block *db)
@@ -356,7 +358,7 @@ dcache_alloc (DCACHE *dcache, CORE_ADDR addr)
   return db;
 }
 
-/* Using the data cache DCACHE return the contents of the byte at
+/* Using the data cache DCACHE, store in *PTR the contents of the byte at
    address ADDR in the remote machine.  
 
    Returns 1 for success, 0 for error.  */
@@ -411,7 +413,7 @@ dcache_splay_tree_compare (splay_tree_key a, splay_tree_key b)
     return -1;
 }
 
-/* Initialize the data cache.  */
+/* Allocate and initialize a data cache.  */
 
 DCACHE *
 dcache_init (void)
@@ -460,7 +462,11 @@ dcache_free (DCACHE *dcache)
    to or from debugger address MYADDR.  Write to inferior if SHOULD_WRITE is
    nonzero. 
 
-   The meaning of the result is the same as for target_write.  */
+   Return the number of bytes actually transfered, or -1 if the
+   transfer is not supported or otherwise fails.  Return of a non-negative
+   value less than LEN indicates that no further transfer is possible.
+   NOTE: This is different than the to_xfer_partial interface, in which
+   positive values less than LEN mean further transfers may be possible.  */
 
 int
 dcache_xfer_memory (struct target_ops *ops, DCACHE *dcache,
