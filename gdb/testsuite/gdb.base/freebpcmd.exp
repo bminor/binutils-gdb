@@ -48,7 +48,6 @@ set bug_id 0
 
 set testfile "freebpcmd"
 set srcfile ${testfile}.c
-set srcfile1 ${testfile}1.c
 set binfile ${objdir}/${subdir}/${testfile}
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
@@ -61,7 +60,7 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-gdb_test "break [gdb_get_line_number "euphonium"]" "" "set breakpoint"
+gdb_test "break ${srcfile}:[gdb_get_line_number "euphonium"]" "" "set breakpoint"
 
 # The goal of all this is to make sure that there's plenty of memory
 # churn, and different amounts of it each time the inferior stops;

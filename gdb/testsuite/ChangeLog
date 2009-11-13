@@ -1,3 +1,8 @@
+2009-11-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/freebpcmd.exp: Delete unused variable.  Specify
+	srcfile when setting a breakpoint.
+
 2009-11-13  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gdb.base/find.c (int8_t, int16_t, int32_t, int64_t): Undefine
