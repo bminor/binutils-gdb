@@ -95,6 +95,11 @@ proc gdb_load_timed {executable class writesize} {
 	}
     }
 
+    # Do not try to load using fixed sizes; we may overflow the remote target.
+    if { $class == "fixed" } {
+	return
+    }
+
     set load_begin_time [clock clicks]
     set result [gdb_load $executable]
     set load_end_time [clock clicks]
@@ -105,8 +110,6 @@ proc gdb_load_timed {executable class writesize} {
     verbose "$test - time [expr ($load_end_time - $load_begin_time) / 1000] ms"
     pass $test
 }
-
-gdb_load_timed $binfile "" {}
 
 # Typically about 400-1 bytes can be downloaded
 gdb_load_timed $binfile "limit" 398

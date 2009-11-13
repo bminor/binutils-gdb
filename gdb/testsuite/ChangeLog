@@ -1,5 +1,10 @@
 2009-11-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.base/remote.exp: Delete the slowest load test.
+	Do not load with fixed packet sizes.
+
+2009-11-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.cp/virtfunc.exp (do_tests): If runto_main fails, give up.
 
 2009-11-13  Daniel Jacobowitz  <dan@codesourcery.com>
