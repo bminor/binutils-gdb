@@ -1,3 +1,8 @@
+2009-11-13  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gdb.base/find.c (int8_t, int16_t, int32_t, int64_t): Undefine
+	macros.
+
 2009-11-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.cp/formatted-ref.exp (test_p_x_ref_addr): Allow the reference

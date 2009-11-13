@@ -22,6 +22,15 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+/* According to C99 <stdint.h> has to provide these identifiers as
+   types, but is also free to define macros shadowing the typedefs.
+   This is the case with some C library implementations.  Undefine
+   them to make sure the types are used and included in debug output.  */
+#undef int8_t
+#undef int16_t
+#undef int32_t
+#undef int64_t
+
 #define CHUNK_SIZE 16000 /* same as findcmd.c's */
 #define BUF_SIZE (2 * CHUNK_SIZE) /* at least two chunks */
 
