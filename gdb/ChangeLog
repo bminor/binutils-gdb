@@ -1,3 +1,9 @@
+2009-11-13  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* elfread.c (elf_symtab_read): Only mark a minimal symbol as
+	special if it actually exists.  Merge the checks for this
+	conditions.
+
 2009-11-13  Kazu Hirata  <kazu@codesourcery.com>
 	    Maxim Kuvyrkov  <maxim@codesourcery.com>
 

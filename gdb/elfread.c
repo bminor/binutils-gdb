@@ -531,10 +531,10 @@ elf_symtab_read (struct objfile *objfile, int type,
 
 	      if (elf_sym)
 		MSYMBOL_SIZE(msym) = elf_sym->internal_elf_sym.st_size;
+	  
+	      msym->filename = filesymname;
+	      gdbarch_elf_make_msymbol_special (gdbarch, sym, msym);
 	    }
-	  if (msym != NULL)
-	    msym->filename = filesymname;
-	  gdbarch_elf_make_msymbol_special (gdbarch, sym, msym);
 
 	  /* For @plt symbols, also record a trampoline to the
 	     destination symbol.  The @plt symbol will be used in
