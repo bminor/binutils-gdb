@@ -71,7 +71,10 @@ gdb_load ${binfile}
 gdb_load_shlibs $lib_sl
 
 set pendfunc1_loc [gdb_get_line_number "y = x + 4" ${libfile}.c]
-gdb_test "run" \
+
+gdb_run_cmd
+
+gdb_test "" \
 ".*Breakpoint.*pendfunc1.*at.*pendshr.c:$pendfunc1_loc.*y = x \\+ 4.*" \
 "run to resolved breakpoint 1 (without symbols)"
 

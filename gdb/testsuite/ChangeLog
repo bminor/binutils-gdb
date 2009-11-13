@@ -1,3 +1,8 @@
+2009-11-13  Nathan Froyd  <froydnj@codesourcery.com>
+
+	* gdb.base/pending.exp: Use gdb_run_cmd to start the program
+	instead of a bare "run".
+
 2009-11-13  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* gdb.python/py-prettyprint.exp: Adjust.
