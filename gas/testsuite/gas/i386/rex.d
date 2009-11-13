@@ -14,6 +14,7 @@ Disassembly of section .text:
 [	 ]*[0-9a-f]+:[	 ]+4a 0f ae 04 05 00 00 00 00[	 ]+(rex.WX? )?fxsaveq?[	 ]+(0x0)?\(,%r8(,1)?\)
 [	 ]*[0-9a-f]+:[	 ]+43 0f ae 04 00[	 ]+fxsavel?[	 ]+\(%r8,%r8(,1)?\)
 [	 ]*[0-9a-f]+:[	 ]+4b 0f ae 04 00[	 ]+(rex.W(XB)? )?fxsaveq?[	 ]+\(%r8,%r8(,1)?\)
+[	 ]*[0-9a-f]+:[	 ]+40 c5 f9 28 00[	 ]+rex vmovapd \(%rax\),%xmm0
 [	 ]*[0-9a-f]+:[	 ]+40[	 ]+rex
 [	 ]*[0-9a-f]+:[	 ]+41[	 ]+rex.B
 [	 ]*[0-9a-f]+:[	 ]+42[	 ]+rex.X

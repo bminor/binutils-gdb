@@ -1,5 +1,9 @@
 2009-11-13  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (print_insn): Check rex_ignored.
+
+2009-11-13  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c (ckprefix): Updated to return 0 if number of
 	prefixes > 14 and record the last position for each prefix.
 	(lock_prefix): Removed.

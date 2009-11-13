@@ -10491,7 +10491,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
     }
 
   /* Check if the REX prefix used.  */
-  if ((rex ^ rex_used) == 0)
+  if (rex_ignored == 0 && (rex ^ rex_used) == 0)
     all_prefixes[last_rex_prefix] = 0;
 
   /* Check if the SEG prefix used.  */
