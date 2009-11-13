@@ -1814,6 +1814,9 @@ mips_insn16_frame_this_id (struct frame_info *this_frame, void **this_cache,
 {
   struct mips_frame_cache *info = mips_insn16_frame_cache (this_frame,
 							   this_cache);
+  /* This marks the outermost frame.  */
+  if (info->base == 0)
+    return;
   (*this_id) = frame_id_build (info->base, get_frame_func (this_frame));
 }
 
@@ -2163,6 +2166,9 @@ mips_insn32_frame_this_id (struct frame_info *this_frame, void **this_cache,
 {
   struct mips_frame_cache *info = mips_insn32_frame_cache (this_frame,
 							   this_cache);
+  /* This marks the outermost frame.  */
+  if (info->base == 0)
+    return;
   (*this_id) = frame_id_build (info->base, get_frame_func (this_frame));
 }
 
