@@ -1,3 +1,8 @@
+2009-11-13  Tristan Gingold  <gingold@adacore.com>
+
+	* avr-tdep.c (avr_push_dummy_call): Fix endianness issue and avoid
+	overlap between returned structure and return address/parameters.
+
 2009-11-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote-fileio.c (remote_fileio_func_read): Limit console

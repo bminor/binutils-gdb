@@ -1252,10 +1252,14 @@ avr_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   if (struct_return)
     {
-      regcache_cooked_write_unsigned (regcache, regnum--,
-                                      struct_addr & 0xff);
-      regcache_cooked_write_unsigned (regcache, regnum--,
-                                      (struct_addr >> 8) & 0xff);
+      regcache_cooked_write_unsigned
+        (regcache, regnum--, (struct_addr >> 8) & 0xff);
+      regcache_cooked_write_unsigned
+        (regcache, regnum--, struct_addr & 0xff);
+      /* SP being post decremented, we need to reserve one byte so that the
+         return address won't overwrite the result (or vice-versa).  */
+      if (sp == struct_addr)
+        sp--;
     }
 
   for (i = 0; i < nargs; i++)
