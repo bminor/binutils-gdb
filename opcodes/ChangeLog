@@ -1,3 +1,50 @@
+2009-11-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (ckprefix): Updated to return 0 if number of
+	prefixes > 14 and record the last position for each prefix.
+	(lock_prefix): Removed.
+	(data_prefix): Likewise.
+	(addr_prefix): Likewise.
+	(repz_prefix): Likewise.
+	(repnz_prefix): Likewise.
+	(last_lock_prefix): New.
+	(last_repz_prefix): Likewise.
+	(last_repnz_prefix): Likewise.
+	(last_data_prefix): Likewise.
+	(last_addr_prefix): Likewise.
+	(last_rex_prefix): Likewise.
+	(last_seg_prefix): Likewise.
+	(MAX_CODE_LENGTH): Likewise.
+	(ADDR16_PREFIX): Likewise.
+	(ADDR32_PREFIX): Likewise.
+	(DATA16_PREFIX): Likewise.
+	(DATA32_PREFIX): Likewise.
+	(REP_PREFIX): Likewise.
+	(seg_prefix): Likewise.
+	(all_prefixes): Change size to MAX_CODE_LENGTH - 1.
+	(prefix_name): Handle ADDR16_PREFIX, ADDR32_PREFIX,
+	DATA16_PREFIX, DATA32_PREFIX and REP_PREFIX.
+	(get_valid_dis386): Updated.
+	(OP_C): Likewise.
+	(OP_Monitor): Likewise.
+	(REP_Fixup): Likewise.
+	(print_insn): Display all prefixes.
+	(putop): Set PREFIX_DATA on used_prefixes only if it is used.
+	(intel_operand_size): Likewise.
+	(OP_E_register): Likewise.
+	(OP_G): Likewise.
+	(OP_REG): Likewise.
+	(OP_IMREG): Likewise.
+	(OP_I): Likewise.
+	(OP_I64): Likewise.
+	(OP_sI): Likewise.
+	(CRC32_Fixup): Likewise.
+	(MOVBE_Fixup): Likewise.
+	(OP_E_memory): Set REFIX_DATA on used_prefixes when it is used
+	in 16bit mode.
+	(OP_J): Set REX_W used if it is used. Set PREFIX_DATA on
+	used_prefixes only if it is used.
+
 2009-11-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.tbl: Remove IsLockable from add, adc, and, dec, inc,

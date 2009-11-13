@@ -32,30 +32,30 @@ Disassembly of section .text:
   37:	f3 48 ab[ 	]+rep stos %rax,%es:\(%rdi\)
   3a:	f3 48 a7[ 	]+repz cmpsq %es:\(%rdi\),%ds:\(%rsi\)
   3d:	f3 48 af[ 	]+repz scas %es:\(%rdi\),%rax
-  40:	67 f3 6c[ 	]+addr32 rep insb \(%dx\),%es:\(%edi\)
-  43:	67 f3 6e[ 	]+addr32 rep outsb %ds:\(%esi\),\(%dx\)
-  46:	67 f3 a4[ 	]+addr32 rep movsb %ds:\(%esi\),%es:\(%edi\)
-  49:	67 f3 ac[ 	]+addr32 rep lods %ds:\(%esi\),%al
-  4c:	67 f3 aa[ 	]+addr32 rep stos %al,%es:\(%edi\)
-  4f:	67 f3 a6[ 	]+addr32 repz cmpsb %es:\(%edi\),%ds:\(%esi\)
-  52:	67 f3 ae[ 	]+addr32 repz scas %es:\(%edi\),%al
-  55:	67 66 f3 6d[ 	]+addr32 rep insw \(%dx\),%es:\(%edi\)
-  59:	67 66 f3 6f[ 	]+addr32 rep outsw %ds:\(%esi\),\(%dx\)
-  5d:	67 66 f3 a5[ 	]+addr32 rep movsw %ds:\(%esi\),%es:\(%edi\)
-  61:	67 66 f3 ad[ 	]+addr32 rep lods %ds:\(%esi\),%ax
-  65:	67 66 f3 ab[ 	]+addr32 rep stos %ax,%es:\(%edi\)
-  69:	67 66 f3 a7[ 	]+addr32 repz cmpsw %es:\(%edi\),%ds:\(%esi\)
-  6d:	67 66 f3 af[ 	]+addr32 repz scas %es:\(%edi\),%ax
-  71:	67 f3 6d[ 	]+addr32 rep insl \(%dx\),%es:\(%edi\)
-  74:	67 f3 6f[ 	]+addr32 rep outsl %ds:\(%esi\),\(%dx\)
-  77:	67 f3 a5[ 	]+addr32 rep movsl %ds:\(%esi\),%es:\(%edi\)
-  7a:	67 f3 ad[ 	]+addr32 rep lods %ds:\(%esi\),%eax
-  7d:	67 f3 ab[ 	]+addr32 rep stos %eax,%es:\(%edi\)
-  80:	67 f3 a7[ 	]+addr32 repz cmpsl %es:\(%edi\),%ds:\(%esi\)
-  83:	67 f3 af[ 	]+addr32 repz scas %es:\(%edi\),%eax
-  86:	67 f3 48 a5[ 	]+addr32 rep movsq %ds:\(%esi\),%es:\(%edi\)
-  8a:	67 f3 48 ad[ 	]+addr32 rep lods %ds:\(%esi\),%rax
-  8e:	67 f3 48 ab[ 	]+addr32 rep stos %rax,%es:\(%edi\)
-  92:	67 f3 48 a7[ 	]+addr32 repz cmpsq %es:\(%edi\),%ds:\(%esi\)
-  96:	67 f3 48 af[ 	]+addr32 repz scas %es:\(%edi\),%rax
+  40:	67 f3 6c[ 	]+rep insb \(%dx\),%es:\(%edi\)
+  43:	67 f3 6e[ 	]+rep outsb %ds:\(%esi\),\(%dx\)
+  46:	67 f3 a4[ 	]+rep movsb %ds:\(%esi\),%es:\(%edi\)
+  49:	67 f3 ac[ 	]+rep lods %ds:\(%esi\),%al
+  4c:	67 f3 aa[ 	]+rep stos %al,%es:\(%edi\)
+  4f:	67 f3 a6[ 	]+repz cmpsb %es:\(%edi\),%ds:\(%esi\)
+  52:	67 f3 ae[ 	]+repz scas %es:\(%edi\),%al
+  55:	67 66 f3 6d[ 	]+rep insw \(%dx\),%es:\(%edi\)
+  59:	67 66 f3 6f[ 	]+rep outsw %ds:\(%esi\),\(%dx\)
+  5d:	67 66 f3 a5[ 	]+rep movsw %ds:\(%esi\),%es:\(%edi\)
+  61:	67 66 f3 ad[ 	]+rep lods %ds:\(%esi\),%ax
+  65:	67 66 f3 ab[ 	]+rep stos %ax,%es:\(%edi\)
+  69:	67 66 f3 a7[ 	]+repz cmpsw %es:\(%edi\),%ds:\(%esi\)
+  6d:	67 66 f3 af[ 	]+repz scas %es:\(%edi\),%ax
+  71:	67 f3 6d[ 	]+rep insl \(%dx\),%es:\(%edi\)
+  74:	67 f3 6f[ 	]+rep outsl %ds:\(%esi\),\(%dx\)
+  77:	67 f3 a5[ 	]+rep movsl %ds:\(%esi\),%es:\(%edi\)
+  7a:	67 f3 ad[ 	]+rep lods %ds:\(%esi\),%eax
+  7d:	67 f3 ab[ 	]+rep stos %eax,%es:\(%edi\)
+  80:	67 f3 a7[ 	]+repz cmpsl %es:\(%edi\),%ds:\(%esi\)
+  83:	67 f3 af[ 	]+repz scas %es:\(%edi\),%eax
+  86:	67 f3 48 a5[ 	]+rep movsq %ds:\(%esi\),%es:\(%edi\)
+  8a:	67 f3 48 ad[ 	]+rep lods %ds:\(%esi\),%rax
+  8e:	67 f3 48 ab[ 	]+rep stos %rax,%es:\(%edi\)
+  92:	67 f3 48 a7[ 	]+repz cmpsq %es:\(%edi\),%ds:\(%esi\)
+  96:	67 f3 48 af[ 	]+repz scas %es:\(%edi\),%rax
 #pass

@@ -1,3 +1,10 @@
+2009-11-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/tlsbin.dd: Updated for prefix processing.
+	* ld-x86-64/tlsgdesc.dd: Likewise.
+	* ld-x86-64/tlsld1.dd: Likewise.
+	* ld-x86-64/tlspic.dd: Likewise.
+
 2009-11-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/10911

@@ -1,3 +1,48 @@
+2009-11-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Run long-1, long-1-intel, x86-64-long-1,
+	and x86-64-long-1-intel.
+
+	* gas/i386/long-1-intel.d: New.
+	* gas/i386/long-1.d: Likewise.
+	* gas/i386/long-1.s: Likewise.
+	* gas/i386/x86-64-long-1-intel.d: Likewise.
+	* gas/i386/x86-64-long-1.d: Likewise.
+	* gas/i386/x86-64-long-1.s: Likewise.
+
+	* gas/i386/jump16.d: Updated for prefix processing.
+	* gas/i386/naked.d: Likewise.
+	* gas/i386/nops-1-core2.d: Likewise.
+	* gas/i386/nops-1-i686.d: Likewise.
+	* gas/i386/nops-3-i686.d: Likewise.
+	* gas/i386/nops-4-i686.d: Likewise.
+	* gas/i386/nops-5-i686.d: Likewise.
+	* gas/i386/nops-5.d: Likewise.
+	* gas/i386/prefix.d: Likewise.
+	* gas/i386/rep.d: Likewise.
+	* gas/i386/string-ok.d: Likewise.
+	* gas/i386/x86-64-addr32-intel.d: Likewise.
+	* gas/i386/x86-64-addr32.d: Likewise.
+	* gas/i386/x86-64-cbw-intel.d: Likewise.
+	* gas/i386/x86-64-cbw.d: Likewise.
+	* gas/i386/x86-64-io-intel.d: Likewise.
+	* gas/i386/x86-64-io-suffix.d: Likewise.
+	* gas/i386/x86-64-io.d: Likewise.
+	* gas/i386/x86-64-lwp.d: Likewise.
+	* gas/i386/x86-64-nops-1-core2.d: Likewise.
+	* gas/i386/x86-64-nops-1-nocona.d: Likewise.
+	* gas/i386/x86-64-nops-1.d: Likewise.
+	* gas/i386/x86-64-nops-2.d: Likewise.
+	* gas/i386/x86-64-nops-3.d: Likewise.
+	* gas/i386/x86-64-nops-4-core2.d: Likewise.
+	* gas/i386/x86-64-nops-4.d: Likewise.
+	* gas/i386/x86-64-nops-5-k8.d: Likewise.
+	* gas/i386/x86-64-nops-5.d: Likewise.
+	* gas/i386/x86-64-rep.d: Likewise.
+	* gas/i386/x86-64-stack-intel.d: Likewise.
+	* gas/i386/x86-64-stack-suffix.d: Likewise.
+	* gas/i386/x86-64-stack.d: Likewise.
+
 2009-11-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run lock-1, lock-1-intel, lockbad-1,

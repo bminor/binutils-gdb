@@ -10,16 +10,16 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	e9 f(e|b) ff             	jmp    (0x3|0 <.text>)	3: (R_386_PC)?(DISP)?16	xxx
 [ 	]*[a-f0-9]+:	ff 26 00 00          	jmp    \*0x0	7: (R_386_)?16	xxx
 [ 	]*[a-f0-9]+:	66 ff e7             	jmpl   \*%edi
-[ 	]*[a-f0-9]+:	67 ff 27             	addr32 jmp \*\(%edi\)
-[ 	]*[a-f0-9]+:	67 ff af 00 00 00 00 	addr32 ljmp \*0x0\(%edi\)	12: (R_386_)?(dir)?32	xxx
+[ 	]*[a-f0-9]+:	67 ff 27             	jmp    \*\(%edi\)
+[ 	]*[a-f0-9]+:	67 ff af 00 00 00 00 	ljmp   \*0x0\(%edi\)	12: (R_386_)?(dir)?32	xxx
 [ 	]*[a-f0-9]+:	ff 2e 00 00          	ljmp   \*0x0	18: (R_386_)?16	xxx
 [ 	]*[a-f0-9]+:	ea 00 00 34 12       	ljmp   \$0x1234,\$0x0	1b: (R_386_)?16	xxx
 [ 	]*[a-f0-9]+:	66 e8 db ff ff ff    	calll  (0x0|0 <.text>)
 [ 	]*[a-f0-9]+:	66 e8 (fc|d5) ff ff ff    	calll  (0x27|0 <.text>)	27: (R_386_PC)?(DISP)?32	xxx
 [ 	]*[a-f0-9]+:	66 ff 16 00 00       	calll  \*0x0	2e: (R_386_)?16	xxx
 [ 	]*[a-f0-9]+:	66 ff d7             	calll  \*%edi
-[ 	]*[a-f0-9]+:	67 66 ff 17          	addr32 calll \*\(%edi\)
-[ 	]*[a-f0-9]+:	67 66 ff 9f 00 00 00 00 	addr32 lcalll \*0x0\(%edi\)	3b: (R_386_)?(dir)?32	xxx
+[ 	]*[a-f0-9]+:	67 66 ff 17          	calll  \*\(%edi\)
+[ 	]*[a-f0-9]+:	67 66 ff 9f 00 00 00 00 	lcalll \*0x0\(%edi\)	3b: (R_386_)?(dir)?32	xxx
 [ 	]*[a-f0-9]+:	66 ff 1e 00 00       	lcalll \*0x0	42: (R_386_)?16	xxx
 [ 	]*[a-f0-9]+:	66 9a 00 00 00 00 34 12 	lcalll \$0x1234,\$0x0	46: (R_386_)?(dir)?32	xxx
 [ 	]*[a-f0-9]+:	eb b2                	jmp    (0x0|0 <.text>)
