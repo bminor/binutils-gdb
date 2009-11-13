@@ -78,13 +78,15 @@ if [target_info exists gdb,no_hardware_watchpoints] {
     gdb_test "set can-use-hw-watchpoints 0" "" ""
 }
 
-gdb_test "break 14" ".*Breakpoint 2.*"           "break  do_loops"
+set bp_location1 [gdb_get_line_number "set breakpoint 1 here"]
+gdb_test "break $bp_location1" ".*Breakpoint 2.*"           "break  do_loops"
 gdb_test "cont"     ".*Breakpoint 2, do_loops.*" "get to do_loops"
 
 # Create stopping points.
 #
 gdb_test "watch sum"    ".*\[Ww\]atchpoint 3: sum.*" "set watch"
-gdb_test "break 19"     ".*Breakpoint 4.*" "break 19"
+set bp_location2 [gdb_get_line_number "set breakpoint 2 here"]
+gdb_test "break $bp_location2"     ".*Breakpoint 4.*" "break loop end"
 
 # Create displays for those points
 #
@@ -161,9 +163,10 @@ gdb_expect {
     }
 }
 
-gdb_test "step"      ".*do_vars.*.*27.*"
-gdb_test "tbreak 37" ".*breakpoint 5 a.*"
-gdb_test "cont"      ".*do_vars.*37.*37.*"
+gdb_test "step"      ".*do_vars.*.*i = 9.*"
+set bp_location3 [gdb_get_line_number "set breakpoint 3 here"]
+gdb_test "tbreak $bp_location3" ".*breakpoint 5 a.*" "tbreak in do_vars"
+gdb_test "cont"      ".*do_vars.*$bp_location3.*$bp_location3.*"
 
 # Beat on printf a bit
 #

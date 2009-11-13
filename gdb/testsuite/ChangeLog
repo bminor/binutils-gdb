@@ -1,3 +1,13 @@
+2009-11-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.cp/formatted-ref.exp (test_p_x_ref_addr): Allow the reference
+	to be in memory.
+	* gdb.base/display.c (force_mem): New.
+	(do_loops): Use it.  Add breakpoint comments.
+	(do_vars): Add a breakpoint comment.
+	* gdb.base/display.exp: Use gdb_get_line_number.  Remove hardcoded
+	line numbers.
+
 2009-11-13  Nathan Froyd  <froydnj@codesourcery.com>
 
 	* gdb.base/pending.exp: Use gdb_run_cmd to start the program

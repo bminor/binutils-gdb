@@ -101,7 +101,12 @@ proc test_p_x_ref_addr { var addr } {
     gdb_test_multiple $test $test {
         -re "\\$\[0-9\]+ = $addr.*$gdb_prompt $" {
 	    pass $test
-	} 
+	}
+	-re "Attempt to take address of value not located in memory.*$gdb_prompt $" {
+	    # The reference might be in a register.  At least we parsed
+	    # correctly...
+	    pass $test
+	}
 	-re "\\$\[0-9\]+ = 0x\[a-f0-9+\]+.*$gdb_prompt $" {
             fail "$test (prints unexpected address)"
         }

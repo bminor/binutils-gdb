@@ -5,20 +5,23 @@
 
 int sum = 0;
 
+/* Call to force a variable onto the stack so we can see its address.  */
+void force_mem (int *arg) { }
+
 int do_loops()
 {
     int i=0;
     int k=0;
     int j=0;
     float f=3.1415;
-    for( i = 0; i < LOOP; i++ ) {
+    for( i = 0; i < LOOP; i++ ) { /* set breakpoint 1 here */
         for( j = 0; j < LOOP; j++ ) {
             for( k = 0; k < LOOP; k++ ) {
-                sum++; f++;
+                sum++; f++; force_mem (&k);
             }
         }
     } 
-    return i;
+    return i; /* set breakpoint 2 here */
 }
 
 int do_vars()
@@ -34,7 +37,7 @@ int do_vars()
     /* Need some code here to set breaks on.
      */
     for( j = 0; j < LOOP; j++ ) {
-        if( p_c[j] == c ) {
+        if( p_c[j] == c ) { /* set breakpoint 3 here */
             j++;
         } 
         else {
