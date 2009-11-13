@@ -1,3 +1,7 @@
+2009-11-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ui-file.c (stdio_file_read): Call gdb_select before read.
+
 2009-11-13  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-tdep.c (mips_insn16_frame_this_id): Mark the outermost
