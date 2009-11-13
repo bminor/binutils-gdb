@@ -1,5 +1,13 @@
 2009-11-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* lib/gdb.exp (current_target_name): New procedure.
+	(gdb_wrapper_target): New variable.
+	(gdb_wrapper_init): Set gdb_wrapper_target.
+	(default_gdb_init): Check gdb_wrapper_target before rebuilding the
+	wrapper.
+
+2009-11-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.base/remote.exp: Delete the slowest load test.
 	Do not load with fixed packet sizes.
 

@@ -1699,12 +1699,24 @@ proc test_compiler_info { {compiler ""} } {
     return [string match $compiler $compiler_info]
 }
 
+proc current_target_name { } {
+    global target_info
+    if [info exists target_info(target,name)] {
+        set answer $target_info(target,name)
+    } else {
+        set answer ""
+    }
+    return $answer
+}
+
 set gdb_wrapper_initialized 0
+set gdb_wrapper_target ""
 
 proc gdb_wrapper_init { args } {
     global gdb_wrapper_initialized;
     global gdb_wrapper_file;
     global gdb_wrapper_flags;
+    global gdb_wrapper_target
 
     if { $gdb_wrapper_initialized == 1 } { return; }
 
@@ -1719,6 +1731,7 @@ proc gdb_wrapper_init { args } {
 	}
     }
     set gdb_wrapper_initialized 1
+    set gdb_wrapper_target [current_target_name]
 }
 
 # Some targets need to always link a special object in.  Save its path here.
@@ -2361,6 +2374,7 @@ proc gdb_continue { function } {
 
 proc default_gdb_init { args } {
     global gdb_wrapper_initialized
+    global gdb_wrapper_target
     global cleanfiles
     
     set cleanfiles {}
@@ -2369,7 +2383,9 @@ proc default_gdb_init { args } {
 
     # Make sure that the wrapper is rebuilt
     # with the appropriate multilib option.
-    set gdb_wrapper_initialized 0
+    if { $gdb_wrapper_target != [current_target_name] } {
+	set gdb_wrapper_initialized 0
+    }
     
     # Unlike most tests, we have a small number of tests that generate
     # a very large amount of output.  We therefore increase the expect
