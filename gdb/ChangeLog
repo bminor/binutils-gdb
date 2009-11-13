@@ -1,3 +1,8 @@
+2009-11-13  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* python/py-prettyprint.c (print_string_repr): Suppress
+	address printing
+	
 2009-11-13  Tristan Gingold  <gingold@adacore.com>
 
 	* avr-tdep.c (avr_push_dummy_call): Fix endianness issue and avoid

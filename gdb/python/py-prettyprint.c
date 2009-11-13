@@ -209,7 +209,12 @@ print_string_repr (PyObject *printer, const char *hint,
       Py_DECREF (py_str);
     }
   else if (replacement)
-    common_val_print (replacement, stream, recurse, options, language);
+    {
+      struct value_print_options opts = *options;
+
+      opts.addressprint = 0;
+      common_val_print (replacement, stream, recurse, &opts, language);
+    }
   else
     gdbpy_print_stack ();
 }

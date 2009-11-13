@@ -1,3 +1,7 @@
+2009-11-13  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.python/py-prettyprint.exp: Adjust.
+	
 2009-11-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* lib/cell.exp (skip_cell_tests): Clean up test files before
