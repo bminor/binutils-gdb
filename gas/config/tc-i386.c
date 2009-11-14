@@ -257,7 +257,7 @@ struct _i386_insn
     vex_prefix vex;
 
     /* Swap operand in encoding.  */
-    unsigned int swap_operand : 1;
+    unsigned int swap_operand;
   };
 
 typedef struct _i386_insn i386_insn;
