@@ -34,6 +34,14 @@ foo:
 	lock xor %ebx, %eax
 	lock xor $0x64, %ebx
 
+	lock add (%ebx), %eax
+	lock adc (%ebx), %eax
+	lock and (%ebx), %eax
+	lock or (%ebx), %eax
+	lock sbb (%ebx), %eax
+	lock sub (%ebx), %eax
+	lock xor (%ebx), %eax
+
 	.intel_syntax noprefix
 	lock mov eax,ebx
 	lock mov eax,DWORD PTR [ebx]
@@ -66,3 +74,11 @@ foo:
 	lock xchg ebx,eax
 	lock xor eax,ebx
 	lock xor ebx,0x64
+
+	lock add eax,DWORD PTR [ebx]
+	lock adc eax,DWORD PTR [ebx]
+	lock and eax,DWORD PTR [ebx]
+	lock or eax,DWORD PTR [ebx]
+	lock sbb eax,DWORD PTR [ebx]
+	lock sub eax,DWORD PTR [ebx]
+	lock xor eax,DWORD PTR [ebx]

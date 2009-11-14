@@ -2,11 +2,11 @@
 
 	.text
 foo:
-	lock add (%rbx), %eax
+	lock add %eax, (%rbx)
 	lock add $0x64, (%rbx)
-	lock adc (%rbx), %eax
+	lock adc %eax, (%rbx)
 	lock adc $0x64, (%rbx)
-	lock and (%rbx), %eax
+	lock and %eax, (%rbx)
 	lock and $0x64, (%rbx)
 	lock btc %eax, (%rbx)
 	lock btc $0x64, (%rbx)
@@ -20,24 +20,24 @@ foo:
 	lock incl (%rbx)
 	lock negl (%rbx)
 	lock notl (%rbx)
-	lock or (%rbx), %eax
+	lock or %eax, (%rbx)
 	lock or $0x64, (%rbx)
-	lock sbb (%rbx), %eax
+	lock sbb %eax, (%rbx)
 	lock sbb $0x64, (%rbx)
-	lock sub (%rbx), %eax
+	lock sub %eax, (%rbx)
 	lock sub $0x64, (%rbx)
 	lock xadd %eax, (%rbx)
 	lock xchg (%rbx), %eax
 	lock xchg %eax, (%rbx)
-	lock xor (%rbx), %eax
+	lock xor %eax, (%rbx)
 	lock xor $0x64, (%rbx)
 
 	.intel_syntax noprefix
-	lock add eax,DWORD PTR [rbx]
+	lock add DWORD PTR [rbx],eax
 	lock add DWORD PTR [rbx],0x64
-	lock adc eax,DWORD PTR [rbx]
+	lock adc DWORD PTR [rbx],eax
 	lock adc DWORD PTR [rbx],0x64
-	lock and eax,DWORD PTR [rbx]
+	lock and DWORD PTR [rbx],eax
 	lock and DWORD PTR [rbx],0x64
 	lock btc DWORD PTR [rbx],eax
 	lock btc DWORD PTR [rbx],0x64
@@ -51,14 +51,14 @@ foo:
 	lock inc DWORD PTR [rbx]
 	lock neg DWORD PTR [rbx]
 	lock not DWORD PTR [rbx]
-	lock or eax,DWORD PTR [rbx]
+	lock or DWORD PTR [rbx],eax
 	lock or DWORD PTR [rbx],0x64
-	lock sbb eax,DWORD PTR [rbx]
+	lock sbb DWORD PTR [rbx],eax
 	lock sbb DWORD PTR [rbx],0x64
-	lock sub eax,DWORD PTR [rbx]
+	lock sub DWORD PTR [rbx],eax
 	lock sub DWORD PTR [rbx],0x64
 	lock xadd DWORD PTR [rbx],eax
 	lock xchg DWORD PTR [rbx],eax
 	lock xchg DWORD PTR [rbx],eax
-	lock xor eax,DWORD PTR [rbx]
+	lock xor DWORD PTR [rbx],eax
 	lock xor DWORD PTR [rbx],0x64

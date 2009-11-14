@@ -29,16 +29,15 @@
 .*:33: Error: .*
 .*:34: Error: .*
 .*:35: Error: .*
+.*:37: Error: .*
 .*:38: Error: .*
 .*:39: Error: .*
+.*:40: Error: .*
 .*:41: Error: .*
 .*:42: Error: .*
 .*:43: Error: .*
-.*:44: Error: .*
-.*:45: Error: .*
 .*:46: Error: .*
 .*:47: Error: .*
-.*:48: Error: .*
 .*:49: Error: .*
 .*:50: Error: .*
 .*:51: Error: .*
@@ -59,6 +58,21 @@
 .*:66: Error: .*
 .*:67: Error: .*
 .*:68: Error: .*
+.*:69: Error: .*
+.*:70: Error: .*
+.*:71: Error: .*
+.*:72: Error: .*
+.*:73: Error: .*
+.*:74: Error: .*
+.*:75: Error: .*
+.*:76: Error: .*
+.*:78: Error: .*
+.*:79: Error: .*
+.*:80: Error: .*
+.*:81: Error: .*
+.*:82: Error: .*
+.*:83: Error: .*
+.*:84: Error: .*
 GAS LISTING .*
 
 
@@ -98,38 +112,54 @@ GAS LISTING .*
 [ 	]*34[ 	]+lock xor %ebx, %eax
 [ 	]*35[ 	]+lock xor \$0x64, %ebx
 [ 	]*36[ 	]+
-[ 	]*37[ 	]+\.intel_syntax noprefix
-[ 	]*38[ 	]+lock mov eax,ebx
-[ 	]*39[ 	]+lock mov eax,DWORD PTR \[ebx\]
-[ 	]*40[ 	]+
-[ 	]*41[ 	]+lock add eax,ebx
-[ 	]*42[ 	]+lock add ebx,0x64
-[ 	]*43[ 	]+lock adc eax,ebx
-[ 	]*44[ 	]+lock adc ebx,0x64
-[ 	]*45[ 	]+lock and eax,ebx
-[ 	]*46[ 	]+lock and ebx,0x64
-[ 	]*47[ 	]+lock btc ebx,eax
-[ 	]*48[ 	]+lock btc ebx,0x64
-[ 	]*49[ 	]+lock btr ebx,eax
-[ 	]*50[ 	]+lock btr ebx,0x64
-[ 	]*51[ 	]+lock bts ebx,eax
-[ 	]*52[ 	]+lock bts ebx,0x64
-[ 	]*53[ 	]+lock cmpxchg ebx,eax
-[ 	]*54[ 	]+lock dec ebx
-[ 	]*55[ 	]+lock inc ebx
-[ 	]*56[ 	]+lock neg ebx
-[ 	]*57[ 	]+lock not ebx
+[ 	]*37[ 	]+lock add \(%ebx\), %eax
+[ 	]*38[ 	]+lock adc \(%ebx\), %eax
+[ 	]*39[ 	]+lock and \(%ebx\), %eax
+[ 	]*40[ 	]+lock or \(%ebx\), %eax
+[ 	]*41[ 	]+lock sbb \(%ebx\), %eax
+[ 	]*42[ 	]+lock sub \(%ebx\), %eax
+[ 	]*43[ 	]+lock xor \(%ebx\), %eax
+[ 	]*44[ 	]+
+[ 	]*45[ 	]+\.intel_syntax noprefix
+[ 	]*46[ 	]+lock mov eax,ebx
+[ 	]*47[ 	]+lock mov eax,DWORD PTR \[ebx\]
+[ 	]*48[ 	]+
+[ 	]*49[ 	]+lock add eax,ebx
+[ 	]*50[ 	]+lock add ebx,0x64
+[ 	]*51[ 	]+lock adc eax,ebx
+[ 	]*52[ 	]+lock adc ebx,0x64
+[ 	]*53[ 	]+lock and eax,ebx
+[ 	]*54[ 	]+lock and ebx,0x64
+[ 	]*55[ 	]+lock btc ebx,eax
+[ 	]*56[ 	]+lock btc ebx,0x64
+[ 	]*57[ 	]+lock btr ebx,eax
 GAS LISTING .*
 
 
-[ 	]*58[ 	]+lock or eax,ebx
-[ 	]*59[ 	]+lock or ebx,0x64
-[ 	]*60[ 	]+lock sbb eax,ebx
-[ 	]*61[ 	]+lock sbb ebx,0x64
-[ 	]*62[ 	]+lock sub eax,ebx
-[ 	]*63[ 	]+lock sub ebx,0x64
-[ 	]*64[ 	]+lock xadd ebx,eax
-[ 	]*65[ 	]+lock xchg ebx,eax
-[ 	]*66[ 	]+lock xchg ebx,eax
-[ 	]*67[ 	]+lock xor eax,ebx
-[ 	]*68[ 	]+lock xor ebx,0x64
+[ 	]*58[ 	]+lock btr ebx,0x64
+[ 	]*59[ 	]+lock bts ebx,eax
+[ 	]*60[ 	]+lock bts ebx,0x64
+[ 	]*61[ 	]+lock cmpxchg ebx,eax
+[ 	]*62[ 	]+lock dec ebx
+[ 	]*63[ 	]+lock inc ebx
+[ 	]*64[ 	]+lock neg ebx
+[ 	]*65[ 	]+lock not ebx
+[ 	]*66[ 	]+lock or eax,ebx
+[ 	]*67[ 	]+lock or ebx,0x64
+[ 	]*68[ 	]+lock sbb eax,ebx
+[ 	]*69[ 	]+lock sbb ebx,0x64
+[ 	]*70[ 	]+lock sub eax,ebx
+[ 	]*71[ 	]+lock sub ebx,0x64
+[ 	]*72[ 	]+lock xadd ebx,eax
+[ 	]*73[ 	]+lock xchg ebx,eax
+[ 	]*74[ 	]+lock xchg ebx,eax
+[ 	]*75[ 	]+lock xor eax,ebx
+[ 	]*76[ 	]+lock xor ebx,0x64
+[ 	]*77[ 	]+
+[ 	]*78[ 	]+lock add eax,DWORD PTR \[ebx\]
+[ 	]*79[ 	]+lock adc eax,DWORD PTR \[ebx\]
+[ 	]*80[ 	]+lock and eax,DWORD PTR \[ebx\]
+[ 	]*81[ 	]+lock or eax,DWORD PTR \[ebx\]
+[ 	]*82[ 	]+lock sbb eax,DWORD PTR \[ebx\]
+[ 	]*83[ 	]+lock sub eax,DWORD PTR \[ebx\]
+[ 	]*84[ 	]+lock xor eax,DWORD PTR \[ebx\]

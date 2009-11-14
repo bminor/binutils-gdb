@@ -2932,10 +2932,13 @@ md_assemble (char *line)
     if (!add_prefix (FWAIT_OPCODE))
       return;
 
-  /* Check for lock without a lockable instruction.  */
+  /* Check for lock without a lockable instruction.  Destination operand
+     must be memory unless it is xchg (0x86).  */
   if (i.prefix[LOCK_PREFIX]
       && (!i.tm.opcode_modifier.islockable
-	  || i.mem_operands == 0))
+	  || i.mem_operands == 0
+	  || (i.tm.base_opcode != 0x86
+	      && !operand_type_check (i.types[i.operands - 1], anymem))))
     {
       as_bad (_("expecting lockable instruction after `lock'"));
       return;
