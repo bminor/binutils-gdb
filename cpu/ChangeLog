@@ -1,3 +1,14 @@
+2009-11-14  Doug Evans  <dje@sebabeach.org>
+
+	Must use VOID expression in VOID context.
+	* xc16x.cpu (mov4): Fix mode of `sequence'.
+	(mov9, mov10): Ditto.
+	(movbsrr, moveb1, jmprel, jmpseg, jmps): Fix mode of `if'.
+	(callr, callseg, calls, trap, rets, reti): Ditto.
+	(jb, jbc, jnb, jnbs): Fix mode of `if'.  Comment out no-op `sll'.
+	(atomic, extr, extp, extp1, extpg1, extpr, extpr1): Fix mode of `cond'.
+	(exts, exts1, extsr, extsr1, prior): Ditto.
+
 2009-10-23  Doug Evans  <dje@sebabeach.org>
 
 	* m32c.opc (opc.h): cgen-types.h -> cgen/basic-modes.h.
