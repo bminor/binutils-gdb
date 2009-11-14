@@ -439,9 +439,11 @@ stamp-openrisc: $(CGENDEPS) $(CPUDIR)/openrisc.cpu $(CPUDIR)/openrisc.opc
 
 $(srcdir)/xc16x-desc.h $(srcdir)/xc16x-desc.c $(srcdir)/xc16x-opc.h $(srcdir)/xc16x-opc.c $(srcdir)/xc16x-ibld.c $(srcdir)/xc16x-asm.c $(srcdir)/xc16x-dis.c: $(XC16X_DEPS)
 	@true
-stamp-xc16x: $(CGENDEPS) $(CPUDIR)/xc16x.cpu $(CPUDIR)/xc16x.opc
+stamp-xc16x: $(CGENDEPS) $(srcdir)/../cpu/xc16x.cpu $(srcdir)/../cpu/xc16x.opc
 	$(MAKE) run-cgen arch=xc16x prefix=xc16x options= \
-		archfile=$(CPUDIR)/xc16x.cpu opcfile=$(CPUDIR)/xc16x.opc extrafiles=
+		archfile=$(srcdir)/../cpu/xc16x.cpu \
+		opcfile=$(srcdir)/../cpu/xc16x.opc \
+		extrafiles=
 
 $(srcdir)/xstormy16-desc.h $(srcdir)/xstormy16-desc.c $(srcdir)/xstormy16-opc.h $(srcdir)/xstormy16-opc.c $(srcdir)/xstormy16-ibld.c $(srcdir)/xstormy16-asm.c $(srcdir)/xstormy16-dis.c: $(XSTORMY16_DEPS)
 	@true

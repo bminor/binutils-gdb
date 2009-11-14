@@ -1,3 +1,9 @@
+2009-11-14  Doug Evans  <dje@sebabeach.org>
+
+	* Makefile.am (stamp-xc16x): Use ../cpu/xc16x.cpu instead of
+	../cgen/cpu.
+	* Makefile.in: Regenerate.
+
 2009-11-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (OP_E_extended): Removed.
