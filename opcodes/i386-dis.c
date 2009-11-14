@@ -53,7 +53,6 @@ static void OP_indirE (int, int);
 static void print_operand_value (char *, int, bfd_vma);
 static void OP_E_register (int, int);
 static void OP_E_memory (int, int);
-static void OP_E_extended (int, int);
 static void print_displacement (char *, bfd_vma);
 static void OP_E (int, int);
 static void OP_G (int, int);
@@ -12080,7 +12079,7 @@ OP_E_memory (int bytemode, int sizeflag)
 }
 
 static void
-OP_E_extended (int bytemode, int sizeflag)
+OP_E (int bytemode, int sizeflag)
 {
   /* Skip mod/rm byte.  */
   MODRM_CHECK;
@@ -12091,13 +12090,6 @@ OP_E_extended (int bytemode, int sizeflag)
   else
     OP_E_memory (bytemode, sizeflag);
 }
-
-static void
-OP_E (int bytemode, int sizeflag)
-{
-  OP_E_extended (bytemode, sizeflag);
-}
-
 
 static void
 OP_G (int bytemode, int sizeflag)
