@@ -21,7 +21,7 @@
 
 /* Frustrating header junk */
 
-#include "config.h"
+#include "build-config.h"
 
 #include <stdio.h>
 #include <ctype.h>

@@ -23,7 +23,7 @@
 #include <stdarg.h>
 #include <ctype.h>
 
-#include "config.h"
+#include "build-config.h"
 #include "misc.h"
 
 #ifdef HAVE_STDLIB_H

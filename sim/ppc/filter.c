@@ -21,7 +21,7 @@
 
 #include <stdio.h>
 
-#include "config.h"
+#include "build-config.h"
 
 #ifdef HAVE_STRING_H
 #include <string.h>
