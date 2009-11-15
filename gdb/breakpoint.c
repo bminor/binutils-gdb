@@ -3816,6 +3816,16 @@ bpstat_should_step (void)
   return 0;
 }
 
+int
+bpstat_causes_stop (bpstat bs)
+{
+  for (; bs != NULL; bs = bs->next)
+    if (bs->stop)
+      return 1;
+
+  return 0;
+}
+
 
 
 static void print_breakpoint_location (struct breakpoint *b,

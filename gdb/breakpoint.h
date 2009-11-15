@@ -629,6 +629,9 @@ extern struct breakpoint *bpstat_find_step_resume_breakpoint (bpstat);
    a watchpoint enabled.  */
 #define bpstat_explains_signal(bs) ((bs) != NULL)
 
+/* Nonzero is this bpstat causes a stop.  */
+extern int bpstat_causes_stop (bpstat);
+
 /* Nonzero if we should step constantly (e.g. watchpoints on machines
    without hardware support).  This isn't related to a specific bpstat,
    just to things like whether watchpoints are set.  */

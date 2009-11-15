@@ -1,5 +1,13 @@
 2009-11-15  Pedro Alves  <pedro@codesourcery.com>
 
+	* infrun.c (handle_inferior_event): When handling a fork or vfork
+	event, check if the bpstat causes a stop, instead of if it
+	explains the signal.
+	* breakpoint.c (bpstat_causes_stop): New.
+	* breakpoint.h (bpstat_causes_stop): Declare.
+
+2009-11-15  Pedro Alves  <pedro@codesourcery.com>
+
 	* breakpoint.c (should_be_inserted): Don't insert breakpoints if
 	the pspace doesn't allow breakpoints.
 	(insert_breakpoint_locations): Remove waiting_for_vfork_done

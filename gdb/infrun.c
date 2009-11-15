@@ -2946,7 +2946,11 @@ handle_inferior_event (struct execution_control_state *ecs)
 	= bpstat_stop_status (get_regcache_aspace (get_current_regcache ()),
 			      stop_pc, ecs->ptid);
 
-      ecs->random_signal = !bpstat_explains_signal (ecs->event_thread->stop_bpstat);
+      /* Note that we're interested in knowing the bpstat actually
+	 causes a stop, not just if it may explain the signal.
+	 Software watchpoints, for example, always appear in the
+	 bpstat.  */
+      ecs->random_signal = !bpstat_causes_stop (ecs->event_thread->stop_bpstat);
 
       /* If no catchpoint triggered for this, then keep going.  */
       if (ecs->random_signal)
