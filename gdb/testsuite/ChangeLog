@@ -1,3 +1,7 @@
+2009-11-15  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/watch-vfork.c, gdb.base/watch-vfork.exp: New files.
+
 2009-11-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* lib/gdb.exp (current_target_name): New procedure.
