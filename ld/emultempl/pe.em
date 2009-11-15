@@ -942,10 +942,13 @@ pe_undef_cdecl_match (struct bfd_link_hash_entry *h, void *inf)
 {
   int sl;
   char *string = inf;
+  const char *hs = h->root.string;
 
   sl = strlen (string);
   if (h->type == bfd_link_hash_defined
-      && strncmp (h->root.string, string, sl) == 0
+      && ((*hs == '@' && *string == '_'
+		   && strncmp (hs + 1, string + 1, sl - 1) == 0)
+		  || strncmp (hs, string, sl) == 0)
       && h->root.string[sl] == '@')
     {
       pe_undef_found_sym = h;
@@ -968,15 +971,20 @@ pe_fixup_stdcalls (void)
       {
 	char* at = strchr (undef->root.string, '@');
 	int lead_at = (*undef->root.string == '@');
-	/* For now, don't try to fixup fastcall symbols.  */
+	if (lead_at)
+	  at = strchr (undef->root.string + 1, '@');
 
-	if (at && !lead_at)
+	if (at || lead_at)
 	  {
 	    /* The symbol is a stdcall symbol, so let's look for a
 	       cdecl symbol with the same name and resolve to that.  */
-	    char *cname = xstrdup (undef->root.string /* + lead_at */);
+	    char *cname = xstrdup (undef->root.string);
+
+	    if (lead_at)
+	      *cname = '_';
 	    at = strchr (cname, '@');
-	    *at = 0;
+	    if (at)
+	      *at = 0;
 	    sym = bfd_link_hash_lookup (link_info.hash, cname, 0, 0, 1);
 
 	    if (sym && sym->type == bfd_link_hash_defined)
@@ -1211,6 +1219,11 @@ gld_${EMULATION_NAME}_after_open (void)
   pe_process_import_defs (link_info.output_bfd, &link_info);
 
   pe_find_data_imports ();
+
+  /* As possibly new symbols are added by imports, we rerun
+     stdcall/fastcall fixup here.  */
+  if (pe_enable_stdcall_fixup) /* -1=warn or 1=disable */
+    pe_fixup_stdcalls ();
 
 #if defined (TARGET_IS_i386pe) \
     || defined (TARGET_IS_armpe) \

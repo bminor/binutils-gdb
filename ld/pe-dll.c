@@ -2761,6 +2761,37 @@ pe_dll_generate_implib (def_file *def, const char *impfilename, struct bfd_link_
     }
 }
 
+static struct bfd_link_hash_entry *found_sym;
+
+static bfd_boolean
+pe_undef_alias_cdecl_match (struct bfd_link_hash_entry *h, void *inf)
+{
+  int sl;
+  char *string = inf;
+  const char *hs = h->root.string;
+
+  sl = strlen (string);
+  if (h->type == bfd_link_hash_undefined
+      && ((*hs == '@' && *string == '_'
+	   && strncmp (hs + 1, string + 1, sl - 1) == 0)
+	  || strncmp (hs, string, sl) == 0)
+      && h->root.string[sl] == '@')
+    {
+      found_sym = h;
+      return FALSE;
+    }
+  return TRUE;
+}
+
+static struct bfd_link_hash_entry *
+pe_find_cdecl_alias_match (char *name)
+{
+  found_sym = 0;
+  bfd_link_hash_traverse (link_info.hash, pe_undef_alias_cdecl_match,
+			  (char *) name);
+  return found_sym;
+}
+
 static void
 add_bfd_to_link (bfd *abfd, const char *name, struct bfd_link_info *link_info)
 {
@@ -2808,6 +2839,9 @@ pe_process_import_defs (bfd *output_bfd, struct bfd_link_info *link_info)
 	    size_t len = strlen (pe_def_file->imports[i].internal_name);
 	    char *name = xmalloc (len + 2 + 6);
 	    bfd_boolean include_jmp_stub = FALSE;
+	    bfd_boolean is_cdecl = FALSE;
+	    if (!lead_at && strchr (pe_def_file->imports[i].internal_name, '@') == NULL)
+	        is_cdecl = TRUE;
 
  	    if (lead_at)
 	      sprintf (name, "%s",
@@ -2835,6 +2869,14 @@ pe_process_import_defs (bfd *output_bfd, struct bfd_link_info *link_info)
 	      }
 	    else
 	      include_jmp_stub = TRUE;
+
+	    if (is_cdecl && !blhe)
+	      {
+		sprintf (name, "%s%s",U (""),
+		         pe_def_file->imports[i].internal_name);
+		blhe = pe_find_cdecl_alias_match (name);
+		include_jmp_stub = TRUE;
+	      }
 
 	    free (name);
 

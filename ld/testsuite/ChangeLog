@@ -1,3 +1,10 @@
+2009-11-15  Kai Tietz  <kai.tietz@onevision.com>
+
+	* ld-pe/direct2_client.c: New file.
+	* ld-pe/direct2_dll.c: Likewise.
+	* ld-pe/direct2_dll.def: Likewise.
+	* ld-pe/pe-run2.exp: Likewise.
+
 2009-11-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-x86-64/tlsbin.dd: Updated for prefix processing.

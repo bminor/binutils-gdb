@@ -1,3 +1,20 @@
+2009-11-15  Kai Tietz  <kai.tietz@onevision.com>
+
+	* pe-dll.c (pe_undef_alias_cdecl_match): New function.
+	(pe_find_cdecl_alias_match): New function.
+	(pe_process_import_defs): Add matching for import symbols
+	declared as cdecl for fastcall/stdcall.
+	* emultempl/pe.em (pe_undef_cdecl_match): Treat fastcall
+	symbols, too.
+	(pe_fixup_stdcalls): Likewise.
+	(gld_XXX_after_open): Redo scanning for imported
+	fastcall/stdcall symbols as cdecl one.
+	* emultempl/pep.em (pep_undef_cdecl_match): Treat fastcall
+	symbols, too.
+	(pep_fixup_stdcalls): Likewise.
+	(gld_XXX_after_open): Redo scanning for imported
+	fastcall/stdcall symbols as cdecl one.
+
 2009-11-11  Nick Clifton  <nickc@redhat.com>
 
 	* po/id.po: Updated Indonesian translation.
