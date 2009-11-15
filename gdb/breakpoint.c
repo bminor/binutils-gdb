@@ -1193,6 +1193,17 @@ should_be_inserted (struct bp_location *bpt)
   if (!bpt->enabled || bpt->shlib_disabled || bpt->duplicate)
     return 0;
 
+  /* This is set for example, when we're attached to the parent of a
+     vfork, and have detached from the child.  The child is running
+     free, and we expect it to do an exec or exit, at which point the
+     OS makes the parent schedulable again (and the target reports
+     that the vfork is done).  Until the child is done with the shared
+     memory region, do not insert breakpoints in the parent, otherwise
+     the child could still trip on the parent's breakpoints.  Since
+     the parent is blocked anyway, it won't miss any breakpoint.  */
+  if (bpt->pspace->breakpoints_not_allowed)
+    return 0;
+
   /* Tracepoints are inserted by the target at a time of its choosing,
      not by us.  */
   if (bpt->owner->type == bp_tracepoint)
@@ -1530,25 +1541,6 @@ insert_breakpoint_locations (void)
 	  && ptid_equal (inferior_ptid, null_ptid))
 	continue;
 
-      if (!ptid_equal (inferior_ptid, null_ptid))
-	{
-	  struct inferior *inf = current_inferior ();
-	  if (inf->waiting_for_vfork_done)
-	    {
-	      /* This is set when we're attached to the parent of the
-		 vfork, and have detached from the child.  The child
-		 is running free, and we expect it to do an exec or
-		 exit, at which point the OS makes the parent
-		 schedulable again (and the target reports that the
-		 vfork is done).  Until the child is done with the
-		 shared memory region, do not insert breakpoints in
-		 parent, otherwise the child could still trip on the
-		 parent's breakpoints.  Since the parent is blocked
-		 anyway, it won't miss any breakpoint.  */
-	      continue;
-	    }
-	}
-
       val = insert_bp_location (b, tmp_error_stream,
 				    &disabled_breaks,
 				    &hw_breakpoint_error);
@@ -1573,7 +1565,7 @@ insert_breakpoint_locations (void)
 	continue;
       
       for (loc = bpt->loc; loc; loc = loc->next)
-	if (!loc->inserted)
+	if (!loc->inserted && should_be_inserted (loc))
 	  {
 	    some_failed = 1;
 	    break;

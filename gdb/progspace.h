@@ -165,6 +165,10 @@ struct program_space
        to set breakpoints point at the wrong addresses.  */
     int executing_startup;
 
+    /* True if no breakpoints should be inserted in this program
+       space.  */
+    int breakpoints_not_allowed;
+
     /* The object file that the main symbol table was loaded from
        (e.g. the argument to the "symbol-file" or "file" command).  */
     struct objfile *symfile_object_file;

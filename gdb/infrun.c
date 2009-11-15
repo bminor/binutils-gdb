@@ -3004,6 +3004,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	context_switch (ecs->ptid);
 
       current_inferior ()->waiting_for_vfork_done = 0;
+      current_inferior ()->pspace->breakpoints_not_allowed = 0;
       /* This also takes care of reinserting breakpoints in the
 	 previously locked inferior.  */
       keep_going (ecs);

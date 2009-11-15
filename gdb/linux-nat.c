@@ -793,6 +793,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	     subsequent child exec or exit is enough to know when does
 	     the child stops using the parent's address space.  */
 	  parent_inf->waiting_for_vfork_done = detach_fork;
+	  parent_inf->pspace->breakpoints_not_allowed = detach_fork;
 
 	  lp = find_lwp_pid (pid_to_ptid (parent_pid));
 	  gdb_assert (linux_supports_tracefork_flag >= 0);

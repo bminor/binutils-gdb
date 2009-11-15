@@ -1,3 +1,15 @@
+2009-11-15  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (should_be_inserted): Don't insert breakpoints if
+	the pspace doesn't allow breakpoints.
+	(insert_breakpoint_locations): Remove waiting_for_vfork_done
+	special case.  Expect watchpoints that shouldn't be inserted, to
+	not be inserted.
+	* progspace.h (struct program_space) <breakpoints_not_allowed>:
+	New field.
+	* infrun.c (handle_inferior_event): Clear it.
+	* linux-nat.c (linux_child_follow_fork): Set it.
+
 2009-11-13  Doug Evans  <dje@google.com>
 
 	* dcache.c (dcache_hit, dcache_read_line): Tweak comments.
