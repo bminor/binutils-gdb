@@ -757,11 +757,12 @@ prim_record_minimal_symbol (const char *name, CORE_ADDR address,
    newly created.  */
 
 struct minimal_symbol *
-prim_record_minimal_symbol_and_info (const char *name, CORE_ADDR address,
-				     enum minimal_symbol_type ms_type,
-				     int section,
-				     asection *bfd_section,
-				     struct objfile *objfile)
+prim_record_minimal_symbol_full (const char *name, int name_len, int copy_name,
+				 CORE_ADDR address,
+				 enum minimal_symbol_type ms_type,
+				 int section,
+				 asection *bfd_section,
+				 struct objfile *objfile)
 {
   struct obj_section *obj_section;
   struct msym_bunch *new;
@@ -780,7 +781,10 @@ prim_record_minimal_symbol_and_info (const char *name, CORE_ADDR address,
   /* It's safe to strip the leading char here once, since the name
      is also stored stripped in the minimal symbol table. */
   if (name[0] == get_symbol_leading_char (objfile->obfd))
-    ++name;
+    {
+      ++name;
+      --name_len;
+    }
 
   if (ms_type == mst_file_text && strncmp (name, "__gnu_compiled", 14) == 0)
     return (NULL);
@@ -795,7 +799,7 @@ prim_record_minimal_symbol_and_info (const char *name, CORE_ADDR address,
   msymbol = &msym_bunch->contents[msym_bunch_index];
   SYMBOL_INIT_LANGUAGE_SPECIFIC (msymbol, language_unknown);
   SYMBOL_LANGUAGE (msymbol) = language_auto;
-  SYMBOL_SET_NAMES (msymbol, (char *)name, strlen (name), objfile);
+  SYMBOL_SET_NAMES (msymbol, name, name_len, copy_name, objfile);
 
   SYMBOL_VALUE_ADDRESS (msymbol) = address;
   SYMBOL_SECTION (msymbol) = section;
@@ -826,6 +830,21 @@ prim_record_minimal_symbol_and_info (const char *name, CORE_ADDR address,
   msym_count++;
   OBJSTAT (objfile, n_minsyms++);
   return msymbol;
+}
+
+/* Record a minimal symbol in the msym bunches.  Returns the symbol
+   newly created.  */
+
+struct minimal_symbol *
+prim_record_minimal_symbol_and_info (const char *name, CORE_ADDR address,
+				     enum minimal_symbol_type ms_type,
+				     int section,
+				     asection *bfd_section,
+				     struct objfile *objfile)
+{
+  return prim_record_minimal_symbol_full (name, strlen (name), 1,
+					  address, ms_type, section,
+					  bfd_section, objfile);
 }
 
 /* Compare two minimal symbols by address and return a signed result based

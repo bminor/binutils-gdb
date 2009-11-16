@@ -713,11 +713,11 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	}
       if (new_name != NULL)
 	{
-	  SYMBOL_SET_NAMES (sym, new_name, strlen (new_name), objfile);
+	  SYMBOL_SET_NAMES (sym, new_name, strlen (new_name), 1, objfile);
 	  xfree (new_name);
 	}
       else
-	SYMBOL_SET_NAMES (sym, string, p - string, objfile);
+	SYMBOL_SET_NAMES (sym, string, p - string, 1, objfile);
     }
   p++;
 

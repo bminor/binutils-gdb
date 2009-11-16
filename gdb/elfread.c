@@ -172,7 +172,8 @@ elf_locate_sections (bfd *ignore_abfd, asection *sectp, void *eip)
 }
 
 static struct minimal_symbol *
-record_minimal_symbol (char *name, CORE_ADDR address,
+record_minimal_symbol (const char *name, int name_len, int copy_name,
+		       CORE_ADDR address,
 		       enum minimal_symbol_type ms_type,
 		       asection *bfd_section, struct objfile *objfile)
 {
@@ -181,8 +182,9 @@ record_minimal_symbol (char *name, CORE_ADDR address,
   if (ms_type == mst_text || ms_type == mst_file_text)
     address = gdbarch_smash_text_address (gdbarch, address);
 
-  return prim_record_minimal_symbol_and_info
-    (name, address, ms_type, bfd_section->index, bfd_section, objfile);
+  return prim_record_minimal_symbol_full (name, name_len, copy_name, address,
+					  ms_type, bfd_section->index,
+					  bfd_section, objfile);
 }
 
 /*
@@ -216,7 +218,8 @@ record_minimal_symbol (char *name, CORE_ADDR address,
 
 static void
 elf_symtab_read (struct objfile *objfile, int type,
-		 long number_of_symbols, asymbol **symbol_table)
+		 long number_of_symbols, asymbol **symbol_table,
+		 int copy_names)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   long storage_needed;
@@ -298,7 +301,8 @@ elf_symtab_read (struct objfile *objfile, int type,
 	  symaddr += ANOFFSET (objfile->section_offsets, sect->index);
 
 	  msym = record_minimal_symbol
-	    ((char *) sym->name, symaddr, mst_solib_trampoline, sect, objfile);
+	    (sym->name, strlen (sym->name), copy_names,
+	     symaddr, mst_solib_trampoline, sect, objfile);
 	  if (msym != NULL)
 	    msym->filename = filesymname;
 	  continue;
@@ -511,7 +515,7 @@ elf_symtab_read (struct objfile *objfile, int type,
 	      continue;	/* Skip this symbol. */
 	    }
 	  msym = record_minimal_symbol
-	    ((char *) sym->name, symaddr,
+	    (sym->name, strlen (sym->name), copy_names, symaddr,
 	     ms_type, sym->section, objfile);
 
 	  if (msym)
@@ -546,15 +550,12 @@ elf_symtab_read (struct objfile *objfile, int type,
 
 	      if (len > 4 && strcmp (sym->name + len - 4, "@plt") == 0)
 		{
-		  char *base_name = xmalloc (len - 4 + 1);
 		  struct minimal_symbol *mtramp;
 
-		  memcpy (base_name, sym->name, len - 4);
-		  base_name[len - 4] = '\0';
-		  mtramp = record_minimal_symbol (base_name, symaddr,
+		  mtramp = record_minimal_symbol (sym->name, len - 4, 1,
+						  symaddr,
 						  mst_solib_trampoline,
 						  sym->section, objfile);
-		  xfree (base_name);
 		  if (mtramp)
 		    {
 		      MSYMBOL_SIZE (mtramp) = MSYMBOL_SIZE (msym);
@@ -639,7 +640,7 @@ elf_symfile_read (struct objfile *objfile, int mainline)
 	error (_("Can't read symbols from %s: %s"), bfd_get_filename (objfile->obfd),
 	       bfd_errmsg (bfd_get_error ()));
 
-      elf_symtab_read (objfile, ST_REGULAR, symcount, symbol_table);
+      elf_symtab_read (objfile, ST_REGULAR, symcount, symbol_table, 0);
     }
 
   /* Add the dynamic symbols.  */
@@ -657,7 +658,7 @@ elf_symfile_read (struct objfile *objfile, int mainline)
 	error (_("Can't read symbols from %s: %s"), bfd_get_filename (objfile->obfd),
 	       bfd_errmsg (bfd_get_error ()));
 
-      elf_symtab_read (objfile, ST_DYNAMIC, dynsymcount, dyn_symbol_table);
+      elf_symtab_read (objfile, ST_DYNAMIC, dynsymcount, dyn_symbol_table, 0);
     }
 
   /* Add synthetic symbols - for instance, names for any PLT entries.  */
@@ -675,7 +676,7 @@ elf_symfile_read (struct objfile *objfile, int mainline)
       for (i = 0; i < synthcount; i++)
 	synth_symbol_table[i] = synthsyms + i;
       make_cleanup (xfree, synth_symbol_table);
-      elf_symtab_read (objfile, ST_SYNTHETIC, synthcount, synth_symbol_table);
+      elf_symtab_read (objfile, ST_SYNTHETIC, synthcount, synth_symbol_table, 1);
     }
 
   /* Install any minimal symbols that have been collected as the current

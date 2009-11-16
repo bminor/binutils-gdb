@@ -3095,7 +3095,7 @@ parse_partial_symbols (struct objfile *objfile)
 			  namestring = gdbarch_static_transform_name
 					 (gdbarch, namestring);
 
-			add_psymbol_to_list (namestring, p - namestring,
+			add_psymbol_to_list (namestring, p - namestring, 1,
 					     VAR_DOMAIN, LOC_STATIC,
 					     &objfile->static_psymbols,
 					     0, sh.value,
@@ -3105,7 +3105,7 @@ parse_partial_symbols (struct objfile *objfile)
 			sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
 			/* The addresses in these entries are reported to be
 			   wrong.  See the code that reads 'G's for symtabs. */
-			add_psymbol_to_list (namestring, p - namestring,
+			add_psymbol_to_list (namestring, p - namestring, 1,
 					     VAR_DOMAIN, LOC_STATIC,
 					     &objfile->global_psymbols,
 					     0, sh.value,
@@ -3123,7 +3123,7 @@ parse_partial_symbols (struct objfile *objfile)
 			    || (p == namestring + 1
 				&& namestring[0] != ' '))
 			  {
-			    add_psymbol_to_list (namestring, p - namestring,
+			    add_psymbol_to_list (namestring, p - namestring, 1,
 						 STRUCT_DOMAIN, LOC_TYPEDEF,
 						 &objfile->static_psymbols,
 						 sh.value, 0,
@@ -3132,6 +3132,7 @@ parse_partial_symbols (struct objfile *objfile)
 			      {
 				/* Also a typedef with the same name.  */
 				add_psymbol_to_list (namestring, p - namestring,
+						     1,
 						     VAR_DOMAIN, LOC_TYPEDEF,
 						     &objfile->static_psymbols,
 						     sh.value, 0,
@@ -3143,7 +3144,7 @@ parse_partial_symbols (struct objfile *objfile)
 		      case 't':
 			if (p != namestring)	/* a name is there, not just :T... */
 			  {
-			    add_psymbol_to_list (namestring, p - namestring,
+			    add_psymbol_to_list (namestring, p - namestring, 1,
 						 VAR_DOMAIN, LOC_TYPEDEF,
 						 &objfile->static_psymbols,
 						 sh.value, 0,
@@ -3205,7 +3206,7 @@ parse_partial_symbols (struct objfile *objfile)
 				  ;
 				/* Note that the value doesn't matter for
 				   enum constants in psymtabs, just in symtabs.  */
-				add_psymbol_to_list (p, q - p,
+				add_psymbol_to_list (p, q - p, 1,
 						     VAR_DOMAIN, LOC_CONST,
 						     &objfile->static_psymbols, 0,
 						     0, psymtab_language, objfile);
@@ -3222,7 +3223,7 @@ parse_partial_symbols (struct objfile *objfile)
 			continue;
 		      case 'c':
 			/* Constant, e.g. from "const" in Pascal.  */
-			add_psymbol_to_list (namestring, p - namestring,
+			add_psymbol_to_list (namestring, p - namestring, 1,
 					     VAR_DOMAIN, LOC_CONST,
 					     &objfile->static_psymbols, sh.value,
 					     0, psymtab_language, objfile);
@@ -3239,7 +3240,7 @@ parse_partial_symbols (struct objfile *objfile)
 			    xfree (name);
 			  }
 			sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
-			add_psymbol_to_list (namestring, p - namestring,
+			add_psymbol_to_list (namestring, p - namestring, 1,
 					     VAR_DOMAIN, LOC_BLOCK,
 					     &objfile->static_psymbols,
 					     0, sh.value,
@@ -3260,7 +3261,7 @@ parse_partial_symbols (struct objfile *objfile)
 			    xfree (name);
 			  }
 			sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
-			add_psymbol_to_list (namestring, p - namestring,
+			add_psymbol_to_list (namestring, p - namestring, 1,
 					     VAR_DOMAIN, LOC_BLOCK,
 					     &objfile->global_psymbols,
 					     0, sh.value,
@@ -3489,12 +3490,12 @@ parse_partial_symbols (struct objfile *objfile)
 		     symbol table, and the MAIN__ symbol via the minimal
 		     symbol table.  */
 		  if (sh.st == stProc)
-		    add_psymbol_to_list (name, strlen (name),
+		    add_psymbol_to_list (name, strlen (name), 1,
 					 VAR_DOMAIN, LOC_BLOCK,
 					 &objfile->global_psymbols,
 				    0, sh.value, psymtab_language, objfile);
 		  else
-		    add_psymbol_to_list (name, strlen (name),
+		    add_psymbol_to_list (name, strlen (name), 1,
 					 VAR_DOMAIN, LOC_BLOCK,
 					 &objfile->static_psymbols,
 				    0, sh.value, psymtab_language, objfile);
@@ -3563,7 +3564,7 @@ parse_partial_symbols (struct objfile *objfile)
 		      && sh.iss != 0
 		      && sh.index != cur_sdx + 2)
 		    {
-		      add_psymbol_to_list (name, strlen (name),
+		      add_psymbol_to_list (name, strlen (name), 1,
 					   STRUCT_DOMAIN, LOC_TYPEDEF,
 					   &objfile->static_psymbols,
 					   0, (CORE_ADDR) 0,
@@ -3604,7 +3605,7 @@ parse_partial_symbols (struct objfile *objfile)
 		  continue;
 		}
 	      /* Use this gdb symbol */
-	      add_psymbol_to_list (name, strlen (name),
+	      add_psymbol_to_list (name, strlen (name), 1,
 				   VAR_DOMAIN, class,
 				   &objfile->static_psymbols,
 				   0, sh.value, psymtab_language, objfile);
@@ -3680,7 +3681,7 @@ parse_partial_symbols (struct objfile *objfile)
 		  break;
 		}
 	      name = debug_info->ssext + psh->iss;
-	      add_psymbol_to_list (name, strlen (name),
+	      add_psymbol_to_list (name, strlen (name), 1,
 				   VAR_DOMAIN, class,
 				   &objfile->global_psymbols,
 				   0, svalue,
@@ -3843,7 +3844,7 @@ handle_psymbol_enumerators (struct objfile *objfile, FDR *fh, int stype,
 
       /* Note that the value doesn't matter for enum constants
          in psymtabs, just in symtabs.  */
-      add_psymbol_to_list (name, strlen (name),
+      add_psymbol_to_list (name, strlen (name), 1,
 			   VAR_DOMAIN, LOC_CONST,
 			   &objfile->static_psymbols, 0,
 			   (CORE_ADDR) 0, psymtab_language, objfile);
@@ -4788,7 +4789,7 @@ new_symbol (char *name)
 
   memset (s, 0, sizeof (*s));
   SYMBOL_LANGUAGE (s) = psymtab_language;
-  SYMBOL_SET_NAMES (s, name, strlen (name), current_objfile);
+  SYMBOL_SET_NAMES (s, name, strlen (name), 1, current_objfile);
   return s;
 }
 

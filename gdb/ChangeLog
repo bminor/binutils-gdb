@@ -1,3 +1,35 @@
+2009-11-16  Tom Tromey  <tromey@redhat.com>
+
+	* xcoffread.c (scan_xcoff_symtab): Update.
+	* symfile.h (add_psymbol_to_list): Update prototype.
+	* symfile.c (add_psymbol_to_bcache): Add copy_name argument.
+	(add_psymbol_to_list): Likewise.
+	* stabsread.c (define_symbol): Update.
+	* mdebugread.c (parse_partial_symbols): Update.
+	(handle_psymbol_enumerators): Update.
+	(new_symbol): Update.
+	* dbxread.c (read_dbx_symtab): Update.
+	* coffread.c (process_coff_symbol): Update.
+	* symtab.h (prim_record_minimal_symbol_full): Declare.
+	(SYMBOL_SET_NAMES): Add copy_name argument.
+	* symtab.c (struct demangled_name_entry): New struct.
+	(hash_demangled_name_entry): New function.
+	(eq_demangled_name_entry): Likewise.
+	(create_demangled_names_hash): Use new functions.
+	(symbol_set_names): Use struct demangled_name_entry.  Add
+	copy_name argument.
+	* minsyms.c (prim_record_minimal_symbol_full): New function.
+	(prim_record_minimal_symbol_and_info): Use it.
+	* elfread.c (record_minimal_symbol): Add name_len and copy_name
+	arguments.  Call prim_record_minimal_symbol_full.
+	(elf_symtab_read): Add copy_names argument.
+	(elf_symfile_read): Update calls to elf_symtab_read.
+	* dwarf2read.c (add_partial_symbol): Don't copy symbol names.
+	(load_partial_dies): Likewise.
+	(new_symbol): Likewise.
+	* cp-namespace.c (check_one_possible_namespace_symbol): Don't save
+	name on the obstack.  Update call to SYMBOL_SET_NAMES.
+
 2009-11-15  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (handle_inferior_event): When handling a fork or vfork

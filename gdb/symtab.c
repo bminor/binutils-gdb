@@ -427,6 +427,30 @@ symbol_init_language_specific (struct general_symbol_info *gsymbol,
 
 /* Functions to initialize a symbol's mangled name.  */
 
+/* Objects of this type are stored in the demangled name hash table.  */
+struct demangled_name_entry
+{
+  char *mangled;
+  char demangled[1];
+};
+
+/* Hash function for the demangled name hash.  */
+static hashval_t
+hash_demangled_name_entry (const void *data)
+{
+  const struct demangled_name_entry *e = data;
+  return htab_hash_string (e->mangled);
+}
+
+/* Equality function for the demangled name hash.  */
+static int
+eq_demangled_name_entry (const void *a, const void *b)
+{
+  const struct demangled_name_entry *da = a;
+  const struct demangled_name_entry *db = b;
+  return strcmp (da->mangled, db->mangled) == 0;
+}
+
 /* Create the hash table used for demangled names.  Each hash entry is
    a pair of strings; one for the mangled name and one for the demangled
    name.  The entry is hashed via just the mangled name.  */
@@ -440,7 +464,7 @@ create_demangled_names_hash (struct objfile *objfile)
      1% in symbol reading.  */
 
   objfile->demangled_names_hash = htab_create_alloc
-    (256, htab_hash_string, (int (*) (const void *, const void *)) streq,
+    (256, hash_demangled_name_entry, eq_demangled_name_entry,
      NULL, xcalloc, xfree);
 }
 
@@ -496,10 +520,15 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
 }
 
 /* Set both the mangled and demangled (if any) names for GSYMBOL based
-   on LINKAGE_NAME and LEN.  The hash table corresponding to OBJFILE
-   is used, and the memory comes from that objfile's objfile_obstack.
-   LINKAGE_NAME is copied, so the pointer can be discarded after
-   calling this function.  */
+   on LINKAGE_NAME and LEN.  Ordinarily, NAME is copied onto the
+   objfile's obstack; but if COPY_NAME is 0 and if NAME is
+   NUL-terminated, then this function assumes that NAME is already
+   correctly saved (either permanently or with a lifetime tied to the
+   objfile), and it will not be copied.
+
+   The hash table corresponding to OBJFILE is used, and the memory
+   comes from that objfile's objfile_obstack.  LINKAGE_NAME is copied,
+   so the pointer can be discarded after calling this function.  */
 
 /* We have to be careful when dealing with Java names: when we run
    into a Java minimal symbol, we don't know it's a Java symbol, so it
@@ -522,9 +551,10 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
 
 void
 symbol_set_names (struct general_symbol_info *gsymbol,
-		  const char *linkage_name, int len, struct objfile *objfile)
+		  const char *linkage_name, int len, int copy_name,
+		  struct objfile *objfile)
 {
-  char **slot;
+  struct demangled_name_entry **slot;
   /* A 0-terminated copy of the linkage name.  */
   const char *linkage_name_copy;
   /* A copy of the linkage name that might have a special Java prefix
@@ -532,9 +562,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
   const char *lookup_name;
   /* The length of lookup_name.  */
   int lookup_len;
-
-  if (objfile->demangled_names_hash == NULL)
-    create_demangled_names_hash (objfile);
+  struct demangled_name_entry entry;
 
   if (gsymbol->language == language_ada)
     {
@@ -546,13 +574,21 @@ symbol_set_names (struct general_symbol_info *gsymbol,
          been observed with Java.  Because we don't store the demangled
          name with the symbol, we don't need to use the same trick
          as Java.  */
-      gsymbol->name = obstack_alloc (&objfile->objfile_obstack, len + 1);
-      memcpy (gsymbol->name, linkage_name, len);
-      gsymbol->name[len] = '\0';
+      if (!copy_name)
+	gsymbol->name = (char *) linkage_name;
+      else
+	{
+	  gsymbol->name = obstack_alloc (&objfile->objfile_obstack, len + 1);
+	  memcpy (gsymbol->name, linkage_name, len);
+	  gsymbol->name[len] = '\0';
+	}
       gsymbol->language_specific.cplus_specific.demangled_name = NULL;
 
       return;
     }
+
+  if (objfile->demangled_names_hash == NULL)
+    create_demangled_names_hash (objfile);
 
   /* The stabs reader generally provides names that are not
      NUL-terminated; most of the other readers don't do this, so we
@@ -589,8 +625,10 @@ symbol_set_names (struct general_symbol_info *gsymbol,
       linkage_name_copy = linkage_name;
     }
 
-  slot = (char **) htab_find_slot (objfile->demangled_names_hash,
-				   lookup_name, INSERT);
+  entry.mangled = (char *) lookup_name;
+  slot = ((struct demangled_name_entry **)
+	  htab_find_slot (objfile->demangled_names_hash,
+			  &entry, INSERT));
 
   /* If this name is not in the hash table, add it.  */
   if (*slot == NULL)
@@ -599,25 +637,49 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 							 linkage_name_copy);
       int demangled_len = demangled_name ? strlen (demangled_name) : 0;
 
-      /* If there is a demangled name, place it right after the mangled name.
-	 Otherwise, just place a second zero byte after the end of the mangled
-	 name.  */
-      *slot = obstack_alloc (&objfile->objfile_obstack,
-			     lookup_len + demangled_len + 2);
-      memcpy (*slot, lookup_name, lookup_len + 1);
+      /* Suppose we have demangled_name==NULL, copy_name==0, and
+	 lookup_name==linkage_name.  In this case, we already have the
+	 mangled name saved, and we don't have a demangled name.  So,
+	 you might think we could save a little space by not recording
+	 this in the hash table at all.
+	 
+	 It turns out that it is actually important to still save such
+	 an entry in the hash table, because storing this name gives
+	 us better backache hit rates for partial symbols.  */
+      if (!copy_name && lookup_name == linkage_name)
+	{
+	  *slot = obstack_alloc (&objfile->objfile_obstack,
+				 offsetof (struct demangled_name_entry,
+					   demangled)
+				 + demangled_len + 1);
+	  (*slot)->mangled = (char *) lookup_name;
+	}
+      else
+	{
+	  /* If we must copy the mangled name, put it directly after
+	     the demangled name so we can have a single
+	     allocation.  */
+	  *slot = obstack_alloc (&objfile->objfile_obstack,
+				 offsetof (struct demangled_name_entry,
+					   demangled)
+				 + lookup_len + demangled_len + 2);
+	  (*slot)->mangled = &((*slot)->demangled[demangled_len + 1]);
+	  strcpy ((*slot)->mangled, lookup_name);
+	}
+
       if (demangled_name != NULL)
 	{
-	  memcpy (*slot + lookup_len + 1, demangled_name, demangled_len + 1);
+	  strcpy ((*slot)->demangled, demangled_name);
 	  xfree (demangled_name);
 	}
       else
-	(*slot)[lookup_len + 1] = '\0';
+	(*slot)->demangled[0] = '\0';
     }
 
-  gsymbol->name = *slot + lookup_len - len;
-  if ((*slot)[lookup_len + 1] != '\0')
+  gsymbol->name = (*slot)->mangled;
+  if ((*slot)->demangled[0] != '\0')
     gsymbol->language_specific.cplus_specific.demangled_name
-      = &(*slot)[lookup_len + 1];
+      = (*slot)->demangled;
   else
     gsymbol->language_specific.cplus_specific.demangled_name = NULL;
 }

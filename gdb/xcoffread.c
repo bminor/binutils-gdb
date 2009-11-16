@@ -2606,7 +2606,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		  namestring = gdbarch_static_transform_name
 				 (gdbarch, namestring);
 
-		add_psymbol_to_list (namestring, p - namestring,
+		add_psymbol_to_list (namestring, p - namestring, 1,
 				     VAR_DOMAIN, LOC_STATIC,
 				     &objfile->static_psymbols,
 				     0, symbol.n_value,
@@ -2617,7 +2617,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		symbol.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
 		/* The addresses in these entries are reported to be
 		   wrong.  See the code that reads 'G's for symtabs. */
-		add_psymbol_to_list (namestring, p - namestring,
+		add_psymbol_to_list (namestring, p - namestring, 1,
 				     VAR_DOMAIN, LOC_STATIC,
 				     &objfile->global_psymbols,
 				     0, symbol.n_value,
@@ -2635,7 +2635,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		    || (p == namestring + 1
 			&& namestring[0] != ' '))
 		  {
-		    add_psymbol_to_list (namestring, p - namestring,
+		    add_psymbol_to_list (namestring, p - namestring, 1,
 					 STRUCT_DOMAIN, LOC_TYPEDEF,
 					 &objfile->static_psymbols,
 					 symbol.n_value, 0,
@@ -2643,7 +2643,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		    if (p[2] == 't')
 		      {
 			/* Also a typedef with the same name.  */
-			add_psymbol_to_list (namestring, p - namestring,
+			add_psymbol_to_list (namestring, p - namestring, 1,
 					     VAR_DOMAIN, LOC_TYPEDEF,
 					     &objfile->static_psymbols,
 					     symbol.n_value, 0,
@@ -2656,7 +2656,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 	      case 't':
 		if (p != namestring)	/* a name is there, not just :T... */
 		  {
-		    add_psymbol_to_list (namestring, p - namestring,
+		    add_psymbol_to_list (namestring, p - namestring, 1,
 					 VAR_DOMAIN, LOC_TYPEDEF,
 					 &objfile->static_psymbols,
 					 symbol.n_value, 0,
@@ -2718,7 +2718,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 			  ;
 			/* Note that the value doesn't matter for
 			   enum constants in psymtabs, just in symtabs.  */
-			add_psymbol_to_list (p, q - p,
+			add_psymbol_to_list (p, q - p, 1,
 					     VAR_DOMAIN, LOC_CONST,
 					     &objfile->static_psymbols, 0,
 					     0, psymtab_language, objfile);
@@ -2736,7 +2736,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 
 	      case 'c':
 		/* Constant, e.g. from "const" in Pascal.  */
-		add_psymbol_to_list (namestring, p - namestring,
+		add_psymbol_to_list (namestring, p - namestring, 1,
 				     VAR_DOMAIN, LOC_CONST,
 				     &objfile->static_psymbols, symbol.n_value,
 				     0, psymtab_language, objfile);
@@ -2753,7 +2753,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		    xfree (name);
 		  }
 		symbol.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
-		add_psymbol_to_list (namestring, p - namestring,
+		add_psymbol_to_list (namestring, p - namestring, 1,
 				     VAR_DOMAIN, LOC_BLOCK,
 				     &objfile->static_psymbols,
 				     0, symbol.n_value,
@@ -2782,7 +2782,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		  continue;
 
 		symbol.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
-		add_psymbol_to_list (namestring, p - namestring,
+		add_psymbol_to_list (namestring, p - namestring, 1,
 				     VAR_DOMAIN, LOC_BLOCK,
 				     &objfile->global_psymbols,
 				     0, symbol.n_value,

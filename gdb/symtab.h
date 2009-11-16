@@ -192,10 +192,10 @@ extern void symbol_init_language_specific (struct general_symbol_info *symbol,
 
 /* Set the linkage and natural names of a symbol, by demangling
    the linkage name.  */
-#define SYMBOL_SET_NAMES(symbol,linkage_name,len,objfile) \
-  symbol_set_names (&(symbol)->ginfo, linkage_name, len, objfile)
+#define SYMBOL_SET_NAMES(symbol,linkage_name,len,copy_name,objfile)	\
+  symbol_set_names (&(symbol)->ginfo, linkage_name, len, copy_name, objfile)
 extern void symbol_set_names (struct general_symbol_info *symbol,
-			      const char *linkage_name, int len,
+			      const char *linkage_name, int len, int copy_name,
 			      struct objfile *objfile);
 
 /* Now come lots of name accessor macros.  Short version as to when to
@@ -1121,6 +1121,11 @@ extern struct type *basic_lookup_transparent_type (const char *);
 extern void prim_record_minimal_symbol (const char *, CORE_ADDR,
 					enum minimal_symbol_type,
 					struct objfile *);
+
+extern struct minimal_symbol *prim_record_minimal_symbol_full
+  (const char *, int, int, CORE_ADDR,
+   enum minimal_symbol_type,
+   int section, asection * bfd_section, struct objfile *);
 
 extern struct minimal_symbol *prim_record_minimal_symbol_and_info
   (const char *, CORE_ADDR,

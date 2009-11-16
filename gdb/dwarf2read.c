@@ -2460,6 +2460,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	  /*prim_record_minimal_symbol (actual_name, pdi->lowpc + baseaddr,
 	     mst_text, objfile); */
 	  psym = add_psymbol_to_list (actual_name, strlen (actual_name),
+				      built_actual_name,
 				      VAR_DOMAIN, LOC_BLOCK,
 				      &objfile->global_psymbols,
 				      0, pdi->lowpc + baseaddr,
@@ -2470,6 +2471,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	  /*prim_record_minimal_symbol (actual_name, pdi->lowpc + baseaddr,
 	     mst_file_text, objfile); */
 	  psym = add_psymbol_to_list (actual_name, strlen (actual_name),
+				      built_actual_name,
 				      VAR_DOMAIN, LOC_BLOCK,
 				      &objfile->static_psymbols,
 				      0, pdi->lowpc + baseaddr,
@@ -2496,6 +2498,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	    addr = decode_locdesc (pdi->locdesc, cu);
 	  if (pdi->locdesc || pdi->has_type)
 	    psym = add_psymbol_to_list (actual_name, strlen (actual_name),
+					built_actual_name,
 					VAR_DOMAIN, LOC_STATIC,
 					&objfile->global_psymbols,
 					0, addr + baseaddr,
@@ -2514,6 +2517,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	  /*prim_record_minimal_symbol (actual_name, addr + baseaddr,
 	     mst_file_data, objfile); */
 	  psym = add_psymbol_to_list (actual_name, strlen (actual_name),
+				      built_actual_name,
 				      VAR_DOMAIN, LOC_STATIC,
 				      &objfile->static_psymbols,
 				      0, addr + baseaddr,
@@ -2524,12 +2528,14 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
     case DW_TAG_base_type:
     case DW_TAG_subrange_type:
       add_psymbol_to_list (actual_name, strlen (actual_name),
+			   built_actual_name,
 			   VAR_DOMAIN, LOC_TYPEDEF,
 			   &objfile->static_psymbols,
 			   0, (CORE_ADDR) 0, cu->language, objfile);
       break;
     case DW_TAG_namespace:
       add_psymbol_to_list (actual_name, strlen (actual_name),
+			   built_actual_name,
 			   VAR_DOMAIN, LOC_TYPEDEF,
 			   &objfile->global_psymbols,
 			   0, (CORE_ADDR) 0, cu->language, objfile);
@@ -2554,6 +2560,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
       /* NOTE: carlton/2003-10-07: See comment in new_symbol about
 	 static vs. global.  */
       add_psymbol_to_list (actual_name, strlen (actual_name),
+			   built_actual_name,
 			   STRUCT_DOMAIN, LOC_TYPEDEF,
 			   (cu->language == language_cplus
 			    || cu->language == language_java)
@@ -2564,6 +2571,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
       break;
     case DW_TAG_enumerator:
       add_psymbol_to_list (actual_name, strlen (actual_name),
+			   built_actual_name,
 			   VAR_DOMAIN, LOC_CONST,
 			   (cu->language == language_cplus
 			    || cu->language == language_java)
@@ -6572,7 +6580,7 @@ load_partial_dies (bfd *abfd, gdb_byte *buffer, gdb_byte *info_ptr,
 	      || part_die->tag == DW_TAG_subrange_type))
 	{
 	  if (building_psymtab && part_die->name != NULL)
-	    add_psymbol_to_list (part_die->name, strlen (part_die->name),
+	    add_psymbol_to_list (part_die->name, strlen (part_die->name), 0,
 				 VAR_DOMAIN, LOC_TYPEDEF,
 				 &cu->objfile->static_psymbols,
 				 0, (CORE_ADDR) 0, cu->language, cu->objfile);
@@ -6593,7 +6601,7 @@ load_partial_dies (bfd *abfd, gdb_byte *buffer, gdb_byte *info_ptr,
 	  if (part_die->name == NULL)
 	    complaint (&symfile_complaints, _("malformed enumerator DIE ignored"));
 	  else if (building_psymtab)
-	    add_psymbol_to_list (part_die->name, strlen (part_die->name),
+	    add_psymbol_to_list (part_die->name, strlen (part_die->name), 0,
 				 VAR_DOMAIN, LOC_CONST,
 				 (cu->language == language_cplus
 				  || cu->language == language_java)
@@ -8325,7 +8333,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 
       /* Cache this symbol's name and the name's demangled form (if any).  */
       SYMBOL_LANGUAGE (sym) = cu->language;
-      SYMBOL_SET_NAMES (sym, name, strlen (name), objfile);
+      SYMBOL_SET_NAMES (sym, name, strlen (name), 0, objfile);
 
       /* Default assumptions.
          Use the passed type or decode it from the die.  */

@@ -194,7 +194,7 @@ extern void extend_psymbol_list (struct psymbol_allocation_list *,
 /* #include "demangle.h" */
 
 extern const
-struct partial_symbol *add_psymbol_to_list (char *, int, domain_enum,
+struct partial_symbol *add_psymbol_to_list (char *, int, int, domain_enum,
 					    enum address_class,
 					    struct psymbol_allocation_list *,
 					    long, CORE_ADDR,
