@@ -1,3 +1,20 @@
+2009-11-15  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Target_arm::may_use_arm_nop): New method definition.
+	(Arm_relocate_functions::arm_branch_common): Change method defintion
+	in class definition to a method declaration and update list of formal
+	parameters.
+	(Arm_relocate_functions::plt32, Arm_relocate_functions::call,
+	Arm_relocation_functions::jump24): Adjust call to
+	Arm_relocate_functions::arm_branch_common.  Update list of formal
+	parameters.
+	(Arm_relocate_functions::xpc25): New method definition.
+	(Arm_relocate_functions::arm_branch_common): Move method defintion
+	out from class definition.  Use stubs for mode-switching and extending
+	branch ranges.
+	(Target_arm::Relocate::relocate): Handle weakly-undefined symbols
+	specially.  Change code to enable use of stubs in ARM branches.
+
 2009-11-10  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_relobj::do_relocate_sections): Remove options parameter

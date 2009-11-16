@@ -1187,6 +1187,14 @@ class Target_arm : public Sized_target<32, big_endian>
     return false;
   }
 
+  // Whether we have an NOP instruction.  If not, use mov r0, r0 instead.
+  bool
+  may_use_arm_nop() const
+  {
+    // FIXME:  This should not hard-coded.
+    return false;
+  }
+
   // Process the relocations to determine unreferenced sections for 
   // garbage collection.
   void
@@ -1735,67 +1743,12 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
     return val;
   }
 
-  // FIXME: This probably only works for Android on ARM v5te. We should
-  // following GNU ld for the general case.
-  template<unsigned r_type>
-  static inline typename This::Status
-  arm_branch_common(unsigned char *view,
-		    const Sized_relobj<32, big_endian>* object,
-		    const Symbol_value<32>* psymval,
-		    Arm_address address,
-		    Arm_address thumb_bit)
-  {
-    typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
-    Valtype* wv = reinterpret_cast<Valtype*>(view);
-    Valtype val = elfcpp::Swap<32, big_endian>::readval(wv);
-     
-    bool insn_is_b = (((val >> 28) & 0xf) <= 0xe)
-		      && ((val & 0x0f000000UL) == 0x0a000000UL);
-    bool insn_is_uncond_bl = (val & 0xff000000UL) == 0xeb000000UL;
-    bool insn_is_cond_bl = (((val >> 28) & 0xf) < 0xe)
-			    && ((val & 0x0f000000UL) == 0x0b000000UL);
-    bool insn_is_blx = (val & 0xfe000000UL) == 0xfa000000UL;
-    bool insn_is_any_branch = (val & 0x0e000000UL) == 0x0a000000UL;
-
-    if (r_type == elfcpp::R_ARM_CALL)
-      {
-	if (!insn_is_uncond_bl && !insn_is_blx)
-	  return This::STATUS_BAD_RELOC;
-      }
-    else if (r_type == elfcpp::R_ARM_JUMP24)
-      {
-	if (!insn_is_b && !insn_is_cond_bl)
-	  return This::STATUS_BAD_RELOC;
-      }
-    else if (r_type == elfcpp::R_ARM_PLT32)
-      {
-	if (!insn_is_any_branch)
-	  return This::STATUS_BAD_RELOC;
-      }
-    else
-      gold_unreachable();
-
-    Valtype addend = utils::sign_extend<26>(val << 2);
-    Valtype x = (psymval->value(object, addend) | thumb_bit) - address;
-
-    // If target has thumb bit set, we need to either turn the BL
-    // into a BLX (for ARMv5 or above) or generate a stub.
-    if (x & 1)
-      {
-	// Turn BL to BLX.
-	if (insn_is_uncond_bl)
-	  val = (val & 0xffffff) | 0xfa000000 | ((x & 2) << 23);
-	else
-	  return This::STATUS_BAD_RELOC;
-      }
-    else
-      gold_assert(!insn_is_blx);
-
-    val = utils::bit_select(val, (x >> 2), 0xffffffUL);
-    elfcpp::Swap<32, big_endian>::writeval(wv, val);
-    return (utils::has_overflow<26>(x)
-	    ? This::STATUS_OVERFLOW : This::STATUS_OKAY);
-  }
+  // Handle ARM long branches.
+  static typename This::Status
+  arm_branch_common(unsigned int, const Relocate_info<32, big_endian>*,
+		    unsigned char *, const Sized_symbol<32>*,
+		    const Arm_relobj<big_endian>*, unsigned int,
+		    const Symbol_value<32>*, Arm_address, Arm_address, bool);
 
  public:
 
@@ -1982,38 +1935,70 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 
   // R_ARM_PLT32: (S + A) | T - P
   static inline typename This::Status
-  plt32(unsigned char *view,
-	const Sized_relobj<32, big_endian>* object,
+  plt32(const Relocate_info<32, big_endian>* relinfo,
+	unsigned char *view,
+	const Sized_symbol<32>* gsym,
+	const Arm_relobj<big_endian>* object,
+	unsigned int r_sym,
 	const Symbol_value<32>* psymval,
 	Arm_address address,
-	Arm_address thumb_bit)
+	Arm_address thumb_bit,
+	bool is_weakly_undefined_without_plt)
   {
-    return arm_branch_common<elfcpp::R_ARM_PLT32>(view, object, psymval,
-						  address, thumb_bit);
+    return arm_branch_common(elfcpp::R_ARM_PLT32, relinfo, view, gsym,
+			     object, r_sym, psymval, address, thumb_bit,
+			     is_weakly_undefined_without_plt);
+  }
+
+  // R_ARM_XPC25: (S + A) | T - P
+  static inline typename This::Status
+  xpc25(const Relocate_info<32, big_endian>* relinfo,
+	unsigned char *view,
+	const Sized_symbol<32>* gsym,
+	const Arm_relobj<big_endian>* object,
+	unsigned int r_sym,
+	const Symbol_value<32>* psymval,
+	Arm_address address,
+	Arm_address thumb_bit,
+	bool is_weakly_undefined_without_plt)
+  {
+    return arm_branch_common(elfcpp::R_ARM_XPC25, relinfo, view, gsym,
+			     object, r_sym, psymval, address, thumb_bit,
+			     is_weakly_undefined_without_plt);
   }
 
   // R_ARM_CALL: (S + A) | T - P
   static inline typename This::Status
-  call(unsigned char *view,
-       const Sized_relobj<32, big_endian>* object,
+  call(const Relocate_info<32, big_endian>* relinfo,
+       unsigned char *view,
+       const Sized_symbol<32>* gsym,
+       const Arm_relobj<big_endian>* object,
+       unsigned int r_sym,
        const Symbol_value<32>* psymval,
        Arm_address address,
-       Arm_address thumb_bit)
+       Arm_address thumb_bit,
+       bool is_weakly_undefined_without_plt)
   {
-    return arm_branch_common<elfcpp::R_ARM_CALL>(view, object, psymval,
-						 address, thumb_bit);
+    return arm_branch_common(elfcpp::R_ARM_CALL, relinfo, view, gsym,
+			     object, r_sym, psymval, address, thumb_bit,
+			     is_weakly_undefined_without_plt);
   }
 
   // R_ARM_JUMP24: (S + A) | T - P
   static inline typename This::Status
-  jump24(unsigned char *view,
-	 const Sized_relobj<32, big_endian>* object,
+  jump24(const Relocate_info<32, big_endian>* relinfo,
+	 unsigned char *view,
+	 const Sized_symbol<32>* gsym,
+	 const Arm_relobj<big_endian>* object,
+	 unsigned int r_sym,
 	 const Symbol_value<32>* psymval,
 	 Arm_address address,
-	 Arm_address thumb_bit)
+	 Arm_address thumb_bit,
+	 bool is_weakly_undefined_without_plt)
   {
-    return arm_branch_common<elfcpp::R_ARM_JUMP24>(view, object, psymval,
-						   address, thumb_bit);
+    return arm_branch_common(elfcpp::R_ARM_JUMP24, relinfo, view, gsym,
+			     object, r_sym, psymval, address, thumb_bit,
+			     is_weakly_undefined_without_plt);
   }
 
   // R_ARM_PREL: (S + A) | T - P
@@ -2183,6 +2168,129 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
     return This::STATUS_OKAY;
   }
 };
+
+// Relocate ARM long branches.  This handles relocation types
+// R_ARM_CALL, R_ARM_JUMP24, R_ARM_PLT32 and R_ARM_XPC25.
+// If IS_WEAK_UNDEFINED_WITH_PLT is true.  The target symbol is weakly
+// undefined and we do not use PLT in this relocation.  In such a case,
+// the branch is converted into an NOP.
+
+template<bool big_endian>
+typename Arm_relocate_functions<big_endian>::Status
+Arm_relocate_functions<big_endian>::arm_branch_common(
+    unsigned int r_type,
+    const Relocate_info<32, big_endian>* relinfo,
+    unsigned char *view,
+    const Sized_symbol<32>* gsym,
+    const Arm_relobj<big_endian>* object,
+    unsigned int r_sym,
+    const Symbol_value<32>* psymval,
+    Arm_address address,
+    Arm_address thumb_bit,
+    bool is_weakly_undefined_without_plt)
+{
+  typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
+  Valtype* wv = reinterpret_cast<Valtype*>(view);
+  Valtype val = elfcpp::Swap<32, big_endian>::readval(wv);
+     
+  bool insn_is_b = (((val >> 28) & 0xf) <= 0xe)
+	            && ((val & 0x0f000000UL) == 0x0a000000UL);
+  bool insn_is_uncond_bl = (val & 0xff000000UL) == 0xeb000000UL;
+  bool insn_is_cond_bl = (((val >> 28) & 0xf) < 0xe)
+			  && ((val & 0x0f000000UL) == 0x0b000000UL);
+  bool insn_is_blx = (val & 0xfe000000UL) == 0xfa000000UL;
+  bool insn_is_any_branch = (val & 0x0e000000UL) == 0x0a000000UL;
+
+  // Check that the instruction is valid.
+  if (r_type == elfcpp::R_ARM_CALL)
+    {
+      if (!insn_is_uncond_bl && !insn_is_blx)
+	return This::STATUS_BAD_RELOC;
+    }
+  else if (r_type == elfcpp::R_ARM_JUMP24)
+    {
+      if (!insn_is_b && !insn_is_cond_bl)
+	return This::STATUS_BAD_RELOC;
+    }
+  else if (r_type == elfcpp::R_ARM_PLT32)
+    {
+      if (!insn_is_any_branch)
+	return This::STATUS_BAD_RELOC;
+    }
+  else if (r_type == elfcpp::R_ARM_XPC25)
+    {
+      // FIXME: AAELF document IH0044C does not say much about it other
+      // than it being obsolete.
+      if (!insn_is_any_branch)
+	return This::STATUS_BAD_RELOC;
+    }
+  else
+    gold_unreachable();
+
+  // A branch to an undefined weak symbol is turned into a jump to
+  // the next instruction unless a PLT entry will be created.
+  // Do the same for local undefined symbols.
+  // The jump to the next instruction is optimized as a NOP depending
+  // on the architecture.
+  const Target_arm<big_endian>* arm_target =
+    Target_arm<big_endian>::default_target();
+  if (is_weakly_undefined_without_plt)
+    {
+      Valtype cond = val & 0xf0000000U;
+      if (arm_target->may_use_arm_nop())
+	val = cond | 0x0320f000;
+      else
+	val = cond | 0x01a00000;	// Using pre-UAL nop: mov r0, r0.
+      elfcpp::Swap<32, big_endian>::writeval(wv, val);
+      return This::STATUS_OKAY;
+    }
+ 
+  Valtype addend = utils::sign_extend<26>(val << 2);
+  Valtype branch_target = psymval->value(object, addend);
+  int32_t branch_offset = branch_target - address;
+
+  // We need a stub if the branch offset is too large or if we need
+  // to switch mode.
+  bool may_use_blx = arm_target->may_use_blx();
+  Reloc_stub* stub = NULL;
+  if ((branch_offset > ARM_MAX_FWD_BRANCH_OFFSET)
+      || (branch_offset < ARM_MAX_BWD_BRANCH_OFFSET)
+      || ((thumb_bit != 0) && !(may_use_blx && r_type == elfcpp::R_ARM_CALL)))
+    {
+      Stub_type stub_type =
+	Reloc_stub::stub_type_for_reloc(r_type, address, branch_target,
+					(thumb_bit != 0));
+      if (stub_type != arm_stub_none)
+	{
+	  Stub_table<big_endian>* stub_table =
+	    object->stub_table(relinfo->data_shndx);
+	  gold_assert(stub_table != NULL);
+
+	  Reloc_stub::Key stub_key(stub_type, gsym, object, r_sym, addend);
+	  stub = stub_table->find_reloc_stub(stub_key);
+	  gold_assert(stub != NULL);
+	  thumb_bit = stub->stub_template()->entry_in_thumb_mode() ? 1 : 0;
+	  branch_target = stub_table->address() + stub->offset() + addend;
+	  branch_offset = branch_target - address;
+	  gold_assert((branch_offset <= ARM_MAX_FWD_BRANCH_OFFSET)
+		      && (branch_offset >= ARM_MAX_BWD_BRANCH_OFFSET));
+	}
+    }
+
+  // At this point, if we still need to switch mode, the instruction
+  // must either be a BLX or a BL that can be converted to a BLX.
+  if (thumb_bit != 0)
+    {
+      // Turn BL to BLX.
+      gold_assert(may_use_blx && r_type == elfcpp::R_ARM_CALL);
+      val = (val & 0xffffff) | 0xfa000000 | ((branch_offset & 2) << 23);
+    }
+
+  val = utils::bit_select(val, (branch_offset >> 2), 0xffffffUL);
+  elfcpp::Swap<32, big_endian>::writeval(wv, val);
+  return (utils::has_overflow<26>(branch_offset)
+	  ? This::STATUS_OVERFLOW : This::STATUS_OKAY);
+}
 
 // Get the GOT section, creating it if necessary.
 
@@ -4409,6 +4517,7 @@ Target_arm<big_endian>::Relocate::relocate(
   // is 1.  Otherwise it is 0.
   Arm_address thumb_bit = 0;
   Symbol_value<32> symval;
+  bool is_weakly_undefined_without_plt = false;
   if (relnum != Target_arm<big_endian>::fake_relnum_for_stubs)
     {
       if (gsym != NULL)
@@ -4421,6 +4530,13 @@ Target_arm<big_endian>::Relocate::relocate(
 	      symval.set_output_value(target->plt_section()->address()
 				      + gsym->plt_offset());
 	      psymval = &symval;
+	    }
+	  else if (gsym->is_weak_undefined())
+	    {
+	      // This is a weakly undefined symbol and we do not use PLT
+	      // for this relocation.  A branch targeting this symbol will
+	      // be converted into an NOP.
+	      is_weakly_undefined_without_plt = true;
 	    }
 	  else
 	    {
@@ -4493,6 +4609,10 @@ Target_arm<big_endian>::Relocate::relocate(
     default:
       break;
     }
+
+  // To look up relocation stubs, we need to pass the symbol table index of
+  // a local symbol.
+  unsigned int r_sym = elfcpp::elf_r_sym<32>(rel.get_r_info());
 
   typename Arm_relocate_functions::Status reloc_status =
 	Arm_relocate_functions::STATUS_OKAY;
@@ -4613,6 +4733,13 @@ Target_arm<big_endian>::Relocate::relocate(
 						      address, thumb_bit);
       break;
 
+    case elfcpp::R_ARM_XPC25:
+      reloc_status =
+	Arm_relocate_functions::xpc25(relinfo, view, gsym, object, r_sym,
+				      psymval, address, thumb_bit,
+				      is_weakly_undefined_without_plt);
+      break;
+
     case elfcpp::R_ARM_GOTOFF32:
       {
 	Arm_address got_origin;
@@ -4695,18 +4822,24 @@ Target_arm<big_endian>::Relocate::relocate(
 		  || (gsym->is_defined()
 		      && !gsym->is_from_dynobj()
 		      && !gsym->is_preemptible()));
-      reloc_status = Arm_relocate_functions::plt32(view, object, psymval,
-						   address, thumb_bit);
+      reloc_status =
+	Arm_relocate_functions::plt32(relinfo, view, gsym, object, r_sym,
+				      psymval, address, thumb_bit,
+				      is_weakly_undefined_without_plt);
       break;
 
     case elfcpp::R_ARM_CALL:
-      reloc_status = Arm_relocate_functions::call(view, object, psymval,
-						  address, thumb_bit);
+      reloc_status =
+	Arm_relocate_functions::call(relinfo, view, gsym, object, r_sym,
+				     psymval, address, thumb_bit,
+				     is_weakly_undefined_without_plt);
       break;
 
     case elfcpp::R_ARM_JUMP24:
-      reloc_status = Arm_relocate_functions::jump24(view, object, psymval,
-						    address, thumb_bit);
+      reloc_status =
+	Arm_relocate_functions::jump24(relinfo, view, gsym, object, r_sym,
+				       psymval, address, thumb_bit,
+				       is_weakly_undefined_without_plt);
       break;
 
     case elfcpp::R_ARM_PREL31:
