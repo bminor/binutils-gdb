@@ -1,3 +1,9 @@
+2009-11-16  Kai Tietz  <kai.tietz@onevision.com>
+
+	* windmc.c (set_endianess): Use bfd_get_target_info.
+	* windres.c (set_endianess): Likewise.
+	(find_arch_match): Removed.
+
 2009-11-11  Nick Clifton  <nickc@redhat.com>
 
 	* po/id.po: Updated Indonesian translation.

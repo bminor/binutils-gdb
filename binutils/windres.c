@@ -1057,71 +1057,18 @@ main (int argc, char **argv)
   return 0;
 }
 
-static int
-find_arch_match(const char *tname,const char **arch)
-{
-  while (*arch != NULL)
-    {
-      const char *in_a = strstr (*arch, tname);
-      char end_ch = (in_a ? in_a[strlen(tname)] : 0);
-
-      if (in_a && (in_a == *arch || in_a[-1] == ':')
-	  && end_ch == 0)
-        {
-	  def_target_arch = *arch;
-	  return 1;
-        }
-      arch++;
-    }
-  return 0;
-}
-
 static void
 set_endianess (bfd *abfd, const char *target)
 {
   const bfd_target *target_vec;
 
   def_target_arch = NULL;
-  target_vec = bfd_find_target (target, abfd);
+  target_vec = bfd_get_target_info (target, abfd, &target_is_bigendian, NULL,
+                                   &def_target_arch);
   if (! target_vec)
     fatal ("Can't detect target endianess and architecture.");
-  target_is_bigendian = ((target_vec->byteorder == BFD_ENDIAN_BIG) ? 1 : 0);
-
-  {
-    const char *  tname = target_vec->name;
-    const char ** arches = bfd_arch_list();
-
-    if (arches && tname)
-      {
-	char *hyp = strchr (tname, '-');
-
-	if (hyp != NULL)
-	  {
-	    tname = ++hyp;
-
-	    /* Make sure we dectect architecture names
-	       for triplets like "pe-arm-wince-little".  */
-	    if (!find_arch_match (tname, arches))
-	      {
-		char *new_tname = (char *) alloca (strlen (hyp) + 1);
-		strcpy (new_tname, hyp);
-		while ((hyp = strrchr (new_tname, '-')) != NULL)
-		  {
-		    *hyp = 0;
-		    if (find_arch_match (new_tname, arches))
-		      break;
-		  }
-	      }
-	  }
-	else
-	  find_arch_match (tname, arches);
-      }
-
-    free (arches);
-
-    if (! def_target_arch)
-      fatal ("Can't detect architecture.");
-  }
+  if (! def_target_arch)
+    fatal ("Can't detect architecture.");
 }
 
 bfd *
