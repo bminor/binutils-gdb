@@ -1,3 +1,9 @@
+2009-11-16  Kai Tietz  <kai.tietz@onevision.com>
+
+	* targets.c (bfd_get_target_info): New function.
+	(_bfd_find_arch_match): New function.
+	* bfd-in2.h: Regenerated.
+
 2009-11-12  Nick Clifton  <nickc@redhat.com>
 
 	* po/ru.po: Updates Russian translation.
