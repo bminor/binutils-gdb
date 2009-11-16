@@ -1,3 +1,19 @@
+2009-11-13  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+
+        Backport from mainline.
+        2009-07-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+        * arm-tdep.c (arm_push_dummy_call): Set the low bit of LR for
+        a Thumb entry point.
+	(thumb_get_next_pc): Handle Thumb-2 and ARM v6 instructions.
+	Refuse to single step into IT blocks.
+
+        2009-10-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+        Reported by Antti Hatala <ahatala@nvidia.com>
+        * arm-tdep.c (thumb_get_next_pc): Limit check to IT instructions
+        correctly.
+
 2009-10-22  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	PR gdb/10819
