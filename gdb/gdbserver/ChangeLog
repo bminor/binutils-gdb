@@ -1,3 +1,15 @@
+2009-11-16  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-low.c (linux_remove_process): Add `detaching' parameter.
+	Pass it to thread_db_free.
+	(linux_kill, linux_detach, linux_wait_1): Adjust to pass the
+	proper `detaching' argument to linux_remove_process.
+	* linux-low.h (thread_db_free): Add `detaching' parameter.
+	* thread-db.c (thread_db_init): Pass false as `detaching' argument
+	to thread_db_free.
+	(thread_db_free): Add `detaching' parameter.  Only
+	call td_ta_clear_event if detaching from process.
+
 2009-11-12  Maxim Kuvyrkov  <maxim@codesourcery.com>
 
 	* thread-db.c (thread_db_free): Fix typo.

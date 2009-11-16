@@ -259,12 +259,12 @@ linux_add_process (int pid, int attached)
    also freeing all private data.  */
 
 static void
-linux_remove_process (struct process_info *process)
+linux_remove_process (struct process_info *process, int detaching)
 {
   struct process_info_private *priv = process->private;
 
 #ifdef USE_THREAD_DB
-  thread_db_free (process);
+  thread_db_free (process, detaching);
 #endif
 
   free (priv->arch_private);
@@ -663,7 +663,7 @@ linux_kill (int pid)
     } while (lwpid > 0 && WIFSTOPPED (wstat));
 
   delete_lwp (lwp);
-  linux_remove_process (process);
+  linux_remove_process (process, 0);
   return 0;
 }
 
@@ -752,7 +752,7 @@ linux_detach (int pid)
 
   delete_all_breakpoints ();
   find_inferior (&all_threads, linux_detach_one_lwp, &pid);
-  linux_remove_process (process);
+  linux_remove_process (process, 1);
   return 0;
 }
 
@@ -1378,7 +1378,7 @@ retry:
 	  struct process_info *process = find_process_pid (pid);
 
 	  delete_lwp (lwp);
-	  linux_remove_process (process);
+	  linux_remove_process (process, 0);
 
 	  current_inferior = NULL;
 

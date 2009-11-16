@@ -737,7 +737,7 @@ thread_db_init (int use_events)
       if (use_events && thread_db_enable_reporting () == 0)
 	{
 	  /* Keep trying; maybe event reporting will work later.  */
-	  thread_db_free (proc);
+	  thread_db_free (proc, 0);
 	  return 0;
 	}
       thread_db_find_new_threads ();
@@ -752,38 +752,38 @@ thread_db_init (int use_events)
 /* Disconnect from libthread_db and free resources.  */
 
 void
-thread_db_free (struct process_info *proc)
+thread_db_free (struct process_info *proc, int detaching)
 {
   struct thread_db *thread_db = proc->private->thread_db;
   if (thread_db)
     {
-#ifndef USE_LIBTHREAD_DB_DIRECTLY
       td_err_e (*td_ta_delete_p) (td_thragent_t *);
       td_err_e (*td_ta_clear_event_p) (const td_thragent_t *ta,
 				       td_thr_events_t *event);
 
+#ifndef USE_LIBTHREAD_DB_DIRECTLY
       td_ta_clear_event_p = dlsym (thread_db->handle, "td_ta_clear_event");
-      if (td_ta_clear_event_p != NULL)
+      td_ta_delete_p = dlsym (thread_db->handle, "td_ta_delete");
+#else
+      td_ta_delete_p = &td_ta_delete;
+      td_ta_clear_event_p = &td_ta_clear_event;
+#endif
+
+      if (detaching && td_ta_clear_event_p != NULL)
 	{
 	  td_thr_events_t events;
 
-	  /* Set the process wide mask saying we aren't interested in any
-	     events anymore.  */
+	  /* Set the process wide mask saying we aren't interested
+	     in any events anymore.  */
 	  td_event_fillset (&events);
 	  (*td_ta_clear_event_p) (thread_db->thread_agent, &events);
 	}
 
-      td_ta_delete_p = dlsym (thread_db->handle, "td_ta_delete");
       if (td_ta_delete_p != NULL)
 	(*td_ta_delete_p) (thread_db->thread_agent);
 
+#ifndef USE_LIBTHREAD_DB_DIRECTLY
       dlclose (thread_db->handle);
-#else
-      td_thr_events_t events;
-
-      td_event_fillset (&events);
-      td_ta_clear_event (thread_db->thread_agent, &events);
-      td_ta_delete (thread_db->thread_agent);
 #endif  /* USE_LIBTHREAD_DB_DIRECTLY  */
 
       free (thread_db);
