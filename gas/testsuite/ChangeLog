@@ -1,3 +1,8 @@
+2009-11-16  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
+
+	* gas/arm/vfp1xD.s: Add vmrs and vmsr instructions.
+	* gas/arm/vfp1xD.d: Update expected disassembly.
+
 2009-11-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/lock-1-intel.d: Updated.

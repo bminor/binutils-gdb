@@ -1,3 +1,10 @@
+2009-11-16  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
+
+	* config/tc-arm.c (parse_operands): Encode APSR_nzcv as r15.
+	(do_vmrs): New function.
+	(do_vmsr): New function.
+	(insns): Add vmrs and vmsr.
+
 2009-11-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (md_assemble): Check destination operand

@@ -6303,6 +6303,8 @@ parse_operands (char *str, const unsigned char *pattern)
               if (found != 15)
                 goto failure;
               inst.operands[i].isvec = 1;
+	      /* APSR_nzcv is encoded in instructions as if it were the REG_PC.  */
+	      inst.operands[i].reg = REG_PC;
             }
           else
             goto failure;
@@ -7612,6 +7614,49 @@ do_vfp_nsyn_msr (void)
     return FAIL;
 
   return SUCCESS;
+}
+
+static void
+do_vmrs (void)
+{
+  unsigned Rt = inst.operands[0].reg;
+  
+  if (thumb_mode && inst.operands[0].reg == REG_SP)
+    {
+      inst.error = BAD_SP;
+      return;
+    }
+
+  /* APSR_ sets isvec. All other refs to PC are illegal.  */
+  if (!inst.operands[0].isvec && inst.operands[0].reg == REG_PC)
+    {
+      inst.error = BAD_PC;
+      return;
+    }
+
+  if (inst.operands[1].reg != 1)
+    first_error (_("operand 1 must be FPSCR"));
+
+  inst.instruction |= (Rt << 12);
+}
+
+static void
+do_vmsr (void)
+{
+  unsigned Rt = inst.operands[1].reg;
+  
+  if (thumb_mode)
+    reject_bad_reg (Rt);
+  else if (Rt == REG_PC)
+    {
+      inst.error = BAD_PC;
+      return;
+    }
+
+  if (inst.operands[0].reg != 1)
+    first_error (_("operand 0 must be FPSCR"));
+
+  inst.instruction |= (Rt << 12);
 }
 
 static void
@@ -17168,6 +17213,8 @@ static const struct asm_opcode insns[] =
  cCE("fmrs",	e100a10, 2, (RR, RVS),	      vfp_reg_from_sp),
  cCE("fmsr",	e000a10, 2, (RVS, RR),	      vfp_sp_from_reg),
  cCE("fmstat",	ef1fa10, 0, (),		      noargs),
+ cCE("vmrs",	ef10a10, 2, (APSR_RR, RVC),   vmrs),
+ cCE("vmsr",	ee10a10, 2, (RVC, RR),        vmsr),
  cCE("fsitos",	eb80ac0, 2, (RVS, RVS),	      vfp_sp_monadic),
  cCE("fuitos",	eb80a40, 2, (RVS, RVS),	      vfp_sp_monadic),
  cCE("ftosis",	ebd0a40, 2, (RVS, RVS),	      vfp_sp_monadic),
