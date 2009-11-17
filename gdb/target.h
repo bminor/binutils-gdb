@@ -1144,7 +1144,7 @@ extern char *normal_pid_to_str (ptid_t ptid);
 /* Hardware watchpoint interfaces.  */
 
 /* Returns non-zero if we were stopped by a hardware watchpoint (memory read or
-   write).  */
+   write).  Only the INFERIOR_PTID task is being queried.  */
 
 #define target_stopped_by_watchpoint \
    (*current_target.to_stopped_by_watchpoint)
@@ -1192,8 +1192,11 @@ extern char *normal_pid_to_str (ptid_t ptid);
 #define target_remove_hw_breakpoint(gdbarch, bp_tgt) \
      (*current_target.to_remove_hw_breakpoint) (gdbarch, bp_tgt)
 
-#define target_stopped_data_address(target, x) \
-    (*target.to_stopped_data_address) (target, x)
+/* Return non-zero if target knows the data address which triggered this
+   target_stopped_by_watchpoint, in such case place it to *ADDR_P.  Only the
+   INFERIOR_PTID task is being queried.  */
+#define target_stopped_data_address(target, addr_p) \
+    (*target.to_stopped_data_address) (target, addr_p)
 
 #define target_watchpoint_addr_within_range(target, addr, start, length) \
   (*target.to_watchpoint_addr_within_range) (target, addr, start, length)

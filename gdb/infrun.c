@@ -3135,6 +3135,9 @@ targets should add new threads to the thread list themselves in non-stop mode.")
     {
       struct regcache *regcache = get_thread_regcache (ecs->ptid);
       struct gdbarch *gdbarch = get_regcache_arch (regcache);
+      struct cleanup *old_chain = save_inferior_ptid ();
+
+      inferior_ptid = ecs->ptid;
 
       fprintf_unfiltered (gdb_stdlog, "infrun: stop_pc = %s\n",
                           paddress (gdbarch, stop_pc));
@@ -3151,6 +3154,8 @@ targets should add new threads to the thread list themselves in non-stop mode.")
             fprintf_unfiltered (gdb_stdlog,
                                 "infrun: (no data address available)\n");
 	}
+
+      do_cleanups (old_chain);
     }
 
   if (stepping_past_singlestep_breakpoint)

@@ -1,3 +1,11 @@
+2009-11-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix wrong debug output with `set debug infrun 1'.
+	* gdb/infrun.c (handle_inferior_event <debug_infrun>): New variable
+	old_chain.  Temporarily switch INFERIOR_PTID.
+	* target.h (target_stopped_by_watchpoint): Extend the comment.
+	(target_stopped_data_address): New comment.
+
 2009-11-16  Tom Tromey  <tromey@redhat.com>
 
 	* xcoffread.c (scan_xcoff_symtab): Update.
