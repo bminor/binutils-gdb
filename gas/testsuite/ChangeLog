@@ -1,3 +1,11 @@
+2009-11-17  Nick Clifton  <nickc@redhat.com>
+
+	* gas/rx/macros.inc (creg): Remove cpen.
+	* gas/rx/mvfc.d: Remove expected uses of cpen register.
+	* gas/rx/mvtc.d: Likewise.
+	* gas/rx/popc.d: Likewise.
+	* gas/rx/pushc.d: Likewise.
+
 2009-11-16  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
 
 	* gas/arm/vfp1xD.s: Add vmrs and vmsr instructions.
