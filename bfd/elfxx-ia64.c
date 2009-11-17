@@ -764,8 +764,9 @@ static void
 elfNN_ia64_update_short_info (asection *sec, bfd_vma offset,
 			      struct elfNN_ia64_link_hash_table *ia64_info)
 {
-  /* Skip SHF_IA_64_SHORT sections.  */
-  if (sec->flags & SEC_SMALL_DATA)
+  /* Skip ABS and SHF_IA_64_SHORT sections.  */
+  if (sec == bfd_abs_section_ptr
+      || (sec->flags & SEC_SMALL_DATA) != 0)
     return;
 
   if (!ia64_info->min_short_sec)

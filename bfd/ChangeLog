@@ -1,6 +1,12 @@
 2009-11-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/10955
+	* elfxx-ia64.c (elfNN_ia64_update_short_info): Also skip ABS
+	sections.
+
+2009-11-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/10955
 	* elfxx-ia64.c (elfNN_ia64_link_hash_table): Update comments.
 	(elfNN_ia64_update_short_info): Remove "->output_section" from
 	ia64_info->max_short_sec and ia64_info->min_short_sec.
