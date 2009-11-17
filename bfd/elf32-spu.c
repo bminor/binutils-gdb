@@ -331,16 +331,7 @@ struct spu_link_hash_table
 
   /* How much memory we have.  */
   unsigned int local_store;
-  /* Local store --auto-overlay should reserve for non-overlay
-     functions and data.  */
-  unsigned int overlay_fixed;
-  /* Local store --auto-overlay should reserve for stack and heap.  */
-  unsigned int reserved;
-  /* If reserved is not specified, stack analysis will calculate a value
-     for the stack.  This parameter adjusts that value to allow for
-     negative sp access (the ABI says 2000 bytes below sp are valid,
-     and the overlay manager uses some of this area).  */
-  int extra_stack_space;
+
   /* Count of overlay stubs needed in non-overlay area.  */
   unsigned int non_ovly_stub;
 
@@ -4163,6 +4154,7 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
   bfd **bfd_arr;
   struct elf_segment_map *m;
   unsigned int fixed_size, lo, hi;
+  unsigned int reserved;
   struct spu_link_hash_table *htab;
   unsigned int base, i, count, bfd_count;
   unsigned int region, ovlynum;
@@ -4198,7 +4190,8 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
     goto err_exit;
 
   htab = spu_hash_table (info);
-  if (htab->reserved == 0)
+  reserved = htab->params->auto_overlay_reserved;
+  if (reserved == 0)
     {
       struct _sum_stack_param sum_stack_param;
 
@@ -4206,11 +4199,12 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
       sum_stack_param.overall_stack = 0;
       if (!for_each_node (sum_stack, info, &sum_stack_param, TRUE))
 	goto err_exit;
-      htab->reserved = sum_stack_param.overall_stack + htab->extra_stack_space;
+      reserved = (sum_stack_param.overall_stack
+		  + htab->params->extra_stack_space);
     }
 
   /* No need for overlays if everything already fits.  */
-  if (fixed_size + htab->reserved <= htab->local_store
+  if (fixed_size + reserved <= htab->local_store
       && htab->params->ovly_flavour != ovly_soft_icache)
     {
       htab->params->auto_overlay = 0;
@@ -4323,7 +4317,7 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
     }
   free (bfd_arr);
 
-  fixed_size += htab->reserved;
+  fixed_size += reserved;
   fixed_size += htab->non_ovly_stub * ovl_stub_size (htab->params);
   if (fixed_size + mos_param.max_overlay_size <= htab->local_store)
     {
@@ -4362,13 +4356,13 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
 			    (bfd_vma) mos_param.max_overlay_size);
 
   /* Now see if we should put some functions in the non-overlay area.  */
-  else if (fixed_size < htab->overlay_fixed)
+  else if (fixed_size < htab->params->auto_overlay_fixed)
     {
       unsigned int max_fixed, lib_size;
 
       max_fixed = htab->local_store - mos_param.max_overlay_size;
-      if (max_fixed > htab->overlay_fixed)
-	max_fixed = htab->overlay_fixed;
+      if (max_fixed > htab->params->auto_overlay_fixed)
+	max_fixed = htab->params->auto_overlay_fixed;
       lib_size = max_fixed - fixed_size;
       lib_size = auto_ovl_lib_functions (info, lib_size);
       if (lib_size == (unsigned int) -1)

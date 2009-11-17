@@ -1,3 +1,10 @@
+2009-11-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* elf32-spu.c (struct spu_link_hash_table): Remove overlay_fixed,
+	reserved, and extra_stack_space members.
+	(spu_elf_auto_overlay): Use auto_overlay_fixed, auto_overlay_reserved,
+	and extra_stack_space members of htab->params instead.
+
 2009-11-17  Tristan Gingold  <gingold@adacore.com>
 
 	* targets.c: Include alloca-conf.h
