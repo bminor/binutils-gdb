@@ -965,8 +965,9 @@ set_namestring (struct objfile *objfile, const struct internal_nlist *nlist)
 {
   char *namestring;
 
-  if (((unsigned) nlist->n_strx + file_string_table_offset)
-      >= DBX_STRINGTAB_SIZE (objfile))
+  if (nlist->n_strx + file_string_table_offset
+      >= DBX_STRINGTAB_SIZE (objfile)
+      || nlist->n_strx + file_string_table_offset < nlist->n_strx)
     {
       complaint (&symfile_complaints, _("bad string table offset in symbol %d"),
 		 symnum);

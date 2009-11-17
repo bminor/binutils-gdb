@@ -1,3 +1,8 @@
+2009-11-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dbxread.c (set_namestring): Remove cast to unsigned.  Check N_STRX
+	overflow.
+
 2009-11-17  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* features/m68k-core.xml: New file.
