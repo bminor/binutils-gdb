@@ -25,6 +25,7 @@
 #include "bfd.h"
 #include "libbfd.h"
 #include "fnmatch.h"
+#include "alloca-conf.h"
 
 /*
    It's okay to see some:

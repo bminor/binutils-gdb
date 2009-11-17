@@ -1,3 +1,7 @@
+2009-11-17  Tristan Gingold  <gingold@adacore.com>
+
+	* targets.c: Include alloca-conf.h
+
 2009-11-16  Kai Tietz  <kai.tietz@onevision.com>
 
 	* targets.c (bfd_get_target_info): New function.
