@@ -1,3 +1,8 @@
+2009-11-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* m68k-tdep.c (m68k_register_name): Check fpregs_present.
+	(m68k_gdbarch_init): Remove a duplicate of set_gdbarch_fp0_regnum.
+
 2009-11-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix wrong debug output with `set debug infrun 1'.
