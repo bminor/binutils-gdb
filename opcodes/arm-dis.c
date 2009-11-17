@@ -3932,6 +3932,10 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		      func (stream, "%c", c[(1 << width) - (int) val]);
 		      c += 1 << width;
 		      break;
+		      
+		    case 'x':
+		      func (stream, "0x%lx", val & 0xffffffffUL);
+		      break;
 
 		    default:
 		      abort ();

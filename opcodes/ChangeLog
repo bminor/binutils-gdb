@@ -1,3 +1,7 @@
+2009-11-17  Edward Nevill <edward.nevill@arm.com>
+
+	* arm-dis.c (print_insn_thumb32): Handle undefined instruction.
+
 2009-11-14  Doug Evans  <dje@sebabeach.org>
 
 	* Makefile.am (stamp-xc16x): Use ../cpu/xc16x.cpu instead of
