@@ -40,11 +40,11 @@ Disassembly of section .text:
 0+80 <[^>]+> e3009000 	movw	r9, #0
 0+84 <[^>]+> e3000999 	movw	r0, #2457	; 0x999
 0+88 <[^>]+> e3090000 	movw	r0, #36864	; 0x9000
-0+8c <[^>]+> e0f900b0 	ldrht	r0, \[r9\]
-0+90 <[^>]+> e0f900f0 	ldrsht	r0, \[r9\]
-0+94 <[^>]+> e0f900d0 	ldrsbt	r0, \[r9\]
-0+98 <[^>]+> e0e900b0 	strht	r0, \[r9\]
-0+9c <[^>]+> 10f900b0 	ldrhtne	r0, \[r9\]
+0+8c <[^>]+> e0f900b0 	ldrht	r0, \[r9\], #0
+0+90 <[^>]+> e0f900f0 	ldrsht	r0, \[r9\], #0
+0+94 <[^>]+> e0f900d0 	ldrsbt	r0, \[r9\], #0
+0+98 <[^>]+> e0e900b0 	strht	r0, \[r9\], #0
+0+9c <[^>]+> 10f900b0 	ldrhtne	r0, \[r9\], #0
 0+a0 <[^>]+> e0b090b9 	ldrht	r9, \[r0\], r9
 0+a4 <[^>]+> e03090b9 	ldrht	r9, \[r0\], -r9
 0+a8 <[^>]+> e0f099b9 	ldrht	r9, \[r0\], #153.*

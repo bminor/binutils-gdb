@@ -1,6 +1,8 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: VFMA decoding
 #as: -mcpu=arm7m
+# This test is only valid on ELF based ports.
+#not-target: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd *-*-riscix*
 
 # Test VFMA instruction disassembly
 

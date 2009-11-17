@@ -56,7 +56,7 @@ struct opcode32
 struct opcode16
 {
   unsigned long arch;		/* Architecture defining this insn.  */
-  unsigned short value, mask;	/* Recognise insn if (op&mask)==value.  */
+  unsigned short value, mask;	/* Recognise insn if (op & mask) == value.  */
   const char *assembler;	/* How to disassemble this insn.  */
 };
 
@@ -112,7 +112,7 @@ enum opcode_sentinel_enum
   SENTINEL_GENERIC_START
 } opcode_sentinels;
 
-#define UNDEFINED_INSTRUCTION      "undefined instruction %0-31x"
+#define UNDEFINED_INSTRUCTION      "\t\t; <UNDEFINED> instruction: %0-31x"
 #define UNPREDICTABLE_INSTRUCTION  "\t; <UNPREDICTABLE>"
 
 /* Common coprocessor opcodes shared between Arm and Thumb-2.  */
@@ -825,7 +825,10 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V6T2, 0x07c00010, 0x0fe00070, "bfi%c\t%12-15r, %0-3r, %E"},
   {ARM_EXT_V6T2, 0x00600090, 0x0ff000f0, "mls%c\t%16-19r, %0-3r, %8-11r, %12-15r"},
   {ARM_EXT_V6T2, 0x006000b0, 0x0f7000f0, "strht%c\t%12-15r, %S"},
+  
+  {ARM_EXT_V6T2, 0x00300090, 0x0f3000f0, UNDEFINED_INSTRUCTION },
   {ARM_EXT_V6T2, 0x00300090, 0x0f300090, "ldr%6's%5?hbt%c\t%12-15r, %S"},
+  
   {ARM_EXT_V6T2, 0x03000000, 0x0ff00000, "movw%c\t%12-15r, %V"},
   {ARM_EXT_V6T2, 0x03400000, 0x0ff00000, "movt%c\t%12-15r, %V"},
   {ARM_EXT_V6T2, 0x06ff0f30, 0x0fff0ff0, "rbit%c\t%12-15r, %0-3r"},
@@ -1022,7 +1025,10 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V1, 0x06400000, 0x0e500010, "strb%c\t%12-15r, %a"},
   {ARM_EXT_V1, 0x004000b0, 0x0e5000f0, "strh%c\t%12-15r, %s"},
   {ARM_EXT_V1, 0x000000b0, 0x0e500ff0, "strh%c\t%12-15r, %s"},
+
+  {ARM_EXT_V1, 0x00500090, 0x0e5000f0, UNDEFINED_INSTRUCTION},
   {ARM_EXT_V1, 0x00500090, 0x0e500090, "ldr%6's%5?hb%c\t%12-15r, %s"},
+  {ARM_EXT_V1, 0x00100090, 0x0e500ff0, UNDEFINED_INSTRUCTION},
   {ARM_EXT_V1, 0x00100090, 0x0e500f90, "ldr%6's%5?hb%c\t%12-15r, %s"},
 
   {ARM_EXT_V1, 0x02000000, 0x0fe00000, "and%20's%c\t%12-15r, %16-19r, %o"},
@@ -1069,6 +1075,7 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V1, 0x01200010, 0x0fe00090, "teq%p%c\t%16-19r, %o"},
 
   {ARM_EXT_V1, 0x03400000, 0x0fe00000, "cmp%p%c\t%16-19r, %o"},
+  {ARM_EXT_V3, 0x01400000, 0x0ff00010, "mrs%c\t%12-15r, %22?SCPSR"},
   {ARM_EXT_V1, 0x01400000, 0x0fe00010, "cmp%p%c\t%16-19r, %o"},
   {ARM_EXT_V1, 0x01400010, 0x0fe00090, "cmp%p%c\t%16-19r, %o"},
 
@@ -1693,7 +1700,7 @@ arm_decode_shift (long given, fprintf_ftype func, void *stream,
 	    func (stream, ", #%d", amount);
 	}
       else if ((given & 0x80) == 0x80)
-	func (stream, ", <illegal shifter operand>");
+	func (stream, "\t; <illegal shifter operand>");
       else if (print_shift)
 	func (stream, ", %s %s", arm_shift[(given & 0x60) >> 5],
 	      arm_regnames[(given & 0xf00) >> 8]);
@@ -2862,8 +2869,16 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			  if (NEGATIVE_BIT_SET)
 			    offset = - offset;
 
-			  func (stream, "[pc, #%d]\t; ", offset);
-			  info->print_address_func (offset + pc + 8, info);
+			  if (PRE_BIT_SET)
+			    {
+			      func (stream, "[pc, #%d]\t; ", offset);
+			      info->print_address_func (offset + pc + 8, info);
+			    }
+			  else
+			    {
+			      func (stream, "[pc], #%d", offset);
+			      func (stream, UNPREDICTABLE_INSTRUCTION);
+			    }
 			}
 		      else
 			{
@@ -2880,8 +2895,8 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
                               /* Pre-indexed.  */
 			      if (IMMEDIATE_BIT_SET)
 				{
-				  if (offset)
-				    func (stream, ", #%d", offset);
+				  /* PR 10924: Offset must be printed, even if it is zero.  */
+				  func (stream, ", #%d", offset);
 				  value_in_comment = offset;
 				}
 			      else /* Register.  */
@@ -2896,11 +2911,8 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			    {
 			      if (IMMEDIATE_BIT_SET)
 				{
-				  if (offset)
-				    func (stream, "], #%d", offset);
-				  else
-				    func (stream, "]");
-
+				  /* PR 10924: Offset must be printed, even if it is zero.  */
+				  func (stream, "], #%d", offset);
 				  value_in_comment = offset;
 				}
 			      else /* Register.  */
@@ -2966,7 +2978,13 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 
 		    case 'p':
 		      if ((given & 0x0000f000) == 0x0000f000)
-			func (stream, "p");
+			{
+			  /* The p-variants of tst/cmp/cmn/teq are the pre-V6
+			     mechanism for setting PSR flag bits.  They are
+			     obsolete in V6 onwards.  */
+			  if (((((arm_feature_set *) info->private_data)->core) & ARM_EXT_V6) == 0)
+			    func (stream, "p");
+			}
 		      break;
 
 		    case 't':

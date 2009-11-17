@@ -1,3 +1,15 @@
+2009-11-17  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/10924
+	* arm-dis.c (arm_opcodes): Add patterns to match undefined LDRB
+	instruction variants.  Add pattern for MRS variant that was being
+	confused with CMP.
+	(arm_decode_shift): Place error message in a comment.
+	(print_insn_arm): Note that writing back to the PC is
+	unpredictable.
+	Only print 'p' variants of cmp/cmn/teq/tst instructions if
+	decoding for pre-V6 architectures.
+
 2009-11-17  Edward Nevill <edward.nevill@arm.com>
 
 	* arm-dis.c (print_insn_thumb32): Handle undefined instruction.
