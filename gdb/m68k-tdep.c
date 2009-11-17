@@ -1163,6 +1163,13 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
     }
 
+  if (best_arch != NULL)
+    {
+      if (tdesc_data != NULL)
+	tdesc_data_cleanup (tdesc_data);
+      return best_arch->gdbarch;
+    }
+
   tdep = xzalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
   tdep->fpregs_present = has_fp;
