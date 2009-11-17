@@ -1,6 +1,16 @@
 2009-11-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/10955
+	* elfxx-ia64.c (elfNN_ia64_link_hash_table): Update comments.
+	(elfNN_ia64_update_short_info): Remove "->output_section" from
+	ia64_info->max_short_sec and ia64_info->min_short_sec.
+	(elfNN_ia64_choose_gp): Likewise.
+	(elfNN_ia64_relax_section): Pass tsec->output_section to
+	elfNN_ia64_update_short_info.
+
+2009-11-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/10955
 	* elfxx-ia64.c (elfNN_ia64_link_hash_table): Add max_short_sec,
 	max_short_offset, min_short_sec and min_short_offset.
 	(elfNN_ia64_update_short_info): New.
