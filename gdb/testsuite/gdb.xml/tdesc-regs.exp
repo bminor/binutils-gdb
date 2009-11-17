@@ -32,6 +32,9 @@ switch -glob -- [istarget] {
     "xscale-*-*" {
         set core-regs {arm-core.xml}
     }
+    "*m68k-*-*" {
+        set core-regs {m68k-core.xml}
+    }
     "mips*-*-*" {
 	set core-regs {mips-cpu.xml mips-cp0.xml mips-fpu.xml}
     }

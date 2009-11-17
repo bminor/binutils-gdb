@@ -1,5 +1,9 @@
 2009-11-17  Nathan Sidwell  <nathan@codesourcery.com>
 
+	* features/m68k-core.xml: New file.
+
+2009-11-17  Nathan Sidwell  <nathan@codesourcery.com>
+
 	* regformats/reg-cf.dat: New file.
 
 2009-11-17  Daniel Jacobowitz  <dan@codesourcery.com>

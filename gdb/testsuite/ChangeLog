@@ -1,3 +1,7 @@
+2009-11-17  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gdb.xml/tdesc-regs.exp: Use for m68k.
+
 2009-11-15  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.base/watch-vfork.c, gdb.base/watch-vfork.exp: New files.
