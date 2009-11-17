@@ -11361,7 +11361,7 @@ fi
 done
 
 
-ALL_LINGUAS="fr tr sv es id da pt_BR de vi rw ga ms fi nl"
+ALL_LINGUAS="fr tr sv es id da pt_BR de vi rw ga ms fi nl bg"
 # If we haven't got the data from the intl directory,
 # assume NLS is disabled.
 USE_NLS=no
