@@ -1,5 +1,16 @@
+2009-11-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/10955
+	* elfxx-ia64.c (elfNN_ia64_link_hash_table): Add max_short_sec,
+	max_short_offset, min_short_sec and min_short_offset.
+	(elfNN_ia64_update_short_info): New.
+	(elfNN_ia64_relax_section): Update max_short_sec,
+	max_short_offset, min_short_sec and min_short_offset.
+	(elfNN_ia64_choose_gp): Use min_short_sec/max_short_sec if
+	they are set.
+
 2009-11-17  Paul Brook  <paul@codesourcery.com>
-	Daniel Jacobowitz  <dan@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf32-arm.c (using_thumb_only, arch_has_arm_nop,
 	arch_has_thumb2_nop): Handle TAG_CPU_ARCH_V7E_M.

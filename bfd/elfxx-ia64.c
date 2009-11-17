@@ -172,6 +172,14 @@ struct elfNN_ia64_link_hash_table
   unsigned reltext : 1;		/* are there relocs against readonly sections? */
   unsigned self_dtpmod_done : 1;/* has self DTPMOD entry been finished? */
   bfd_vma self_dtpmod_offset;	/* .got offset to self DTPMOD entry */
+  /* There are maybe R_IA64_GPREL22 relocations, including those
+     optimized from R_IA64_LTOFF22X, against non-SHF_IA_64_SHORT
+     sections.  We need to record those sections so that we can choose
+     a proper GP to cover all R_IA64_GPREL22 relocations.  */
+  asection *max_short_sec;	/* maximum short section */
+  bfd_vma max_short_offset;	/* maximum short offset */
+  asection *min_short_sec;	/* minimum short section */
+  bfd_vma min_short_offset;	/* minimum short offset */
 
   htab_t loc_hash_table;
   void *loc_hash_memory;
@@ -752,6 +760,41 @@ elfNN_ia64_relax_brl (bfd_byte *contents, bfd_vma off)
 
 /* These functions do relaxation for IA-64 ELF.  */
 
+static void
+elfNN_ia64_update_short_info (asection *sec, bfd_vma offset,
+			      struct elfNN_ia64_link_hash_table *ia64_info)
+{
+  /* Skip SHF_IA_64_SHORT sections.  */
+  if (sec->flags & SEC_SMALL_DATA)
+    return;
+
+  if (!ia64_info->min_short_sec)
+    {
+      ia64_info->max_short_sec = sec;
+      ia64_info->max_short_offset = offset;
+      ia64_info->min_short_sec = sec;
+      ia64_info->min_short_offset = offset;
+    }
+  else if (sec == ia64_info->max_short_sec
+	   && offset > ia64_info->max_short_offset)
+    ia64_info->max_short_offset = offset;
+  else if (sec == ia64_info->min_short_sec
+	   && offset < ia64_info->min_short_offset)
+    ia64_info->min_short_offset = offset;
+  else if (sec->output_section->vma
+	   > ia64_info->max_short_sec->output_section->vma)
+    {
+      ia64_info->max_short_sec = sec;
+      ia64_info->max_short_offset = offset;
+    }
+  else if (sec->output_section->vma
+	   < ia64_info->min_short_sec->output_section->vma)
+    {
+      ia64_info->min_short_sec = sec;
+      ia64_info->min_short_offset = offset;
+    }
+}
+
 static bfd_boolean
 elfNN_ia64_relax_section (bfd *abfd, asection *sec,
 			  struct bfd_link_info *link_info,
@@ -854,6 +897,9 @@ elfNN_ia64_relax_section (bfd *abfd, asection *sec,
 	    }
 	  is_branch = TRUE;
 	  break;
+
+	case R_IA64_GPREL22:
+	  /* Update max_short_sec/min_short_sec.  */
 
 	case R_IA64_LTOFF22X:
 	case R_IA64_LDXMOV:
@@ -1171,7 +1217,11 @@ elfNN_ia64_relax_section (bfd *abfd, asection *sec,
 	      ||(bfd_signed_vma) (symaddr - gp) < -0x200000)
 	    continue;
 
-	  if (r_type == R_IA64_LTOFF22X)
+	  if (r_type == R_IA64_GPREL22)
+	    elfNN_ia64_update_short_info (tsec,
+					  tsec->output_offset + toff,
+					  ia64_info);
+	  else if (r_type == R_IA64_LTOFF22X)
 	    {
 	      irel->r_info = ELFNN_R_INFO (ELFNN_R_SYM (irel->r_info),
 					   R_IA64_GPREL22);
@@ -1181,6 +1231,10 @@ elfNN_ia64_relax_section (bfd *abfd, asection *sec,
 		  dyn_i->want_gotx = 0;
 		  changed_got |= !dyn_i->want_got;
 		}
+
+	      elfNN_ia64_update_short_info (tsec,
+					    tsec->output_offset + toff,
+					    ia64_info);
 	    }
 	  else
 	    {
@@ -4256,6 +4310,20 @@ elfNN_ia64_choose_gp (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
+  if (ia64_info->min_short_sec)
+    {
+      if (min_short_vma 
+	  > (ia64_info->min_short_sec->output_section->vma
+	     + ia64_info->min_short_offset))
+	min_short_vma = (ia64_info->min_short_sec->output_section->vma
+			 + ia64_info->min_short_offset);
+      if (max_short_vma
+	  < (ia64_info->max_short_sec->output_section->vma
+	     + ia64_info->max_short_offset))
+	max_short_vma = (ia64_info->max_short_sec->output_section->vma
+			 + ia64_info->max_short_offset);
+    }
+
   /* See if the user wants to force a value.  */
   gp = elf_link_hash_lookup (elf_hash_table (info), "__gp", FALSE,
 			     FALSE, FALSE);
@@ -4273,17 +4341,30 @@ elfNN_ia64_choose_gp (bfd *abfd, struct bfd_link_info *info)
     {
       /* Pick a sensible value.  */
 
-      asection *got_sec = ia64_info->root.sgot;
+      if (ia64_info->min_short_sec)
+	{
+	  bfd_vma short_range = max_short_vma - min_short_vma;
 
-      /* Start with just the address of the .got.  */
-      if (got_sec)
-	gp_val = got_sec->output_section->vma;
-      else if (max_short_vma != 0)
-	gp_val = min_short_vma;
-      else if (max_vma - min_vma < 0x200000)
-	gp_val = min_vma;
+	  /* If min_short_sec is set, pick one in the middle bewteen
+	     min_short_vma and max_short_vma.  */
+	  if (short_range >= 0x400000)
+	    goto overflow;
+	  gp_val = min_short_vma + short_range / 2;
+	}
       else
-	gp_val = max_vma - 0x200000 + 8;
+	{
+	  asection *got_sec = ia64_info->root.sgot;
+
+	  /* Start with just the address of the .got.  */
+	  if (got_sec)
+	    gp_val = got_sec->output_section->vma;
+	  else if (max_short_vma != 0)
+	    gp_val = min_short_vma;
+	  else if (max_vma - min_vma < 0x200000)
+	    gp_val = min_vma;
+	  else
+	    gp_val = max_vma - 0x200000 + 8;
+	}
 
       /* If it is possible to address the entire image, but we
 	 don't with the choice above, adjust.  */
@@ -4310,6 +4391,7 @@ elfNN_ia64_choose_gp (bfd *abfd, struct bfd_link_info *info)
     {
       if (max_short_vma - min_short_vma >= 0x400000)
 	{
+overflow:
 	  (*_bfd_error_handler)
 	    (_("%s: short data segment overflowed (0x%lx >= 0x400000)"),
 	     bfd_get_filename (abfd),
