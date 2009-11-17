@@ -1,3 +1,10 @@
+2009-11-17  Paul Brook  <paul@codesourcery.com>
+	Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf32-arm.c (using_thumb_only, arch_has_arm_nop,
+	arch_has_thumb2_nop): Handle TAG_CPU_ARCH_V7E_M.
+	(tag_cpu_arch_combine): Ditto. Correct MAX_TAG_CPU_ARCH test.
+
 2009-11-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* elf32-spu.c (struct spu_link_hash_table): Remove overlay_fixed,

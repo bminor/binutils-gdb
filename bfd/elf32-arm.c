@@ -2971,7 +2971,7 @@ using_thumb_only (struct elf32_arm_link_hash_table *globals)
 				       Tag_CPU_arch);
   int profile;
 
-  if (arch != TAG_CPU_ARCH_V7)
+  if (arch != TAG_CPU_ARCH_V7 && arch != TAG_CPU_ARCH_V7E_M)
     return FALSE;
 
   profile = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
@@ -2999,7 +2999,8 @@ arch_has_arm_nop (struct elf32_arm_link_hash_table *globals)
 					     Tag_CPU_arch);
   return arch == TAG_CPU_ARCH_V6T2
 	 || arch == TAG_CPU_ARCH_V6K
-	 || arch == TAG_CPU_ARCH_V7;
+	 || arch == TAG_CPU_ARCH_V7
+	 || arch == TAG_CPU_ARCH_V7E_M;
 }
 
 static bfd_boolean
@@ -3007,7 +3008,8 @@ arch_has_thumb2_nop (struct elf32_arm_link_hash_table *globals)
 {
   const int arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
 					     Tag_CPU_arch);
-  return arch == TAG_CPU_ARCH_V6T2 || arch == TAG_CPU_ARCH_V7;
+  return (arch == TAG_CPU_ARCH_V6T2 || arch == TAG_CPU_ARCH_V7
+	  || arch == TAG_CPU_ARCH_V7E_M);
 }
 
 static bfd_boolean
@@ -9637,6 +9639,23 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V6S_M),  /* V6_M.  */
       T(V6S_M)   /* V6S_M.  */
     };
+  const int v7e_m[] =
+    {
+      -1,        /* PRE_V4.  */
+      -1,        /* V4.  */
+      T(V7E_M),  /* V4T.  */
+      T(V7E_M),  /* V5T.  */
+      T(V7E_M),  /* V5TE.  */
+      T(V7E_M),  /* V5TEJ.  */
+      T(V7E_M),  /* V6.  */
+      T(V7E_M),  /* V6KZ.  */
+      T(V7E_M),  /* V6T2.  */
+      T(V7E_M),  /* V6K.  */
+      T(V7E_M),  /* V7.  */
+      T(V7E_M),  /* V6_M.  */
+      T(V7E_M),  /* V6S_M.  */
+      T(V7E_M)   /* V7E_M.  */
+    };
   const int v4t_plus_v6_m[] =
     {
       -1,		/* PRE_V4.  */
@@ -9652,6 +9671,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V7),		/* V7.  */
       T(V6_M),		/* V6_M.  */
       T(V6S_M),		/* V6S_M.  */
+      T(V7E_M),		/* V7E_M.  */
       T(V4T_PLUS_V6_M)	/* V4T plus V6_M.  */
     };
   const int *comb[] =
@@ -9661,13 +9681,14 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       v7,
       v6_m,
       v6s_m,
+      v7e_m,
       /* Pseudo-architecture.  */
       v4t_plus_v6_m
     };
 
   /* Check we've not got a higher architecture than we know about.  */
 
-  if (oldtag >= MAX_TAG_CPU_ARCH || newtag >= MAX_TAG_CPU_ARCH)
+  if (oldtag > MAX_TAG_CPU_ARCH || newtag > MAX_TAG_CPU_ARCH)
     {
       _bfd_error_handler (_("error: %B: Unknown CPU architecture"), ibfd);
       return -1;

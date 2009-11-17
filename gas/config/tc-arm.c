@@ -188,12 +188,14 @@ static const arm_feature_set arm_ext_v6k = ARM_FEATURE (ARM_EXT_V6K, 0);
 static const arm_feature_set arm_ext_v6z = ARM_FEATURE (ARM_EXT_V6Z, 0);
 static const arm_feature_set arm_ext_v6t2 = ARM_FEATURE (ARM_EXT_V6T2, 0);
 static const arm_feature_set arm_ext_v6_notm = ARM_FEATURE (ARM_EXT_V6_NOTM, 0);
+static const arm_feature_set arm_ext_v6_dsp = ARM_FEATURE (ARM_EXT_V6_DSP, 0);
 static const arm_feature_set arm_ext_barrier = ARM_FEATURE (ARM_EXT_BARRIER, 0);
 static const arm_feature_set arm_ext_msr = ARM_FEATURE (ARM_EXT_THUMB_MSR, 0);
 static const arm_feature_set arm_ext_div = ARM_FEATURE (ARM_EXT_DIV, 0);
 static const arm_feature_set arm_ext_v7 = ARM_FEATURE (ARM_EXT_V7, 0);
 static const arm_feature_set arm_ext_v7a = ARM_FEATURE (ARM_EXT_V7A, 0);
 static const arm_feature_set arm_ext_v7r = ARM_FEATURE (ARM_EXT_V7R, 0);
+static const arm_feature_set arm_ext_v7m = ARM_FEATURE (ARM_EXT_V7M, 0);
 static const arm_feature_set arm_ext_m =
   ARM_FEATURE (ARM_EXT_V6M | ARM_EXT_V7M, 0);
 
@@ -16468,6 +16470,8 @@ static const struct asm_opcode insns[] =
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & arm_ext_v5exp /*  ARM Architecture 5TExP.  */
+#undef THUMB_VARIANT
+#define THUMB_VARIANT &arm_ext_v5exp
 
  TCE("smlabb",	1000080, fb100000, 4, (RRnpc, RRnpc, RRnpc, RRnpc),   smla, t_mla),
  TCE("smlatb",	10000a0, fb100020, 4, (RRnpc, RRnpc, RRnpc, RRnpc),   smla, t_mla),
@@ -16497,6 +16501,8 @@ static const struct asm_opcode insns[] =
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & arm_ext_v5e /*  ARM Architecture 5TE.  */
+#undef THUMB_VARIANT
+#define THUMB_VARIANT &arm_ext_v6t2
 
  TUF("pld",	450f000, f810f000, 1, (ADDR),		     pld,  t_pld),
  TC3("ldrd",	00000d0, e8500000, 3, (RRnpc, oRRnpc, ADDRGLDRS), ldrd, t_ldstd),
@@ -16537,10 +16543,25 @@ static const struct asm_opcode insns[] =
  TCE("ssat",	6a00010, f3000000, 4, (RRnpc, I32, RRnpc, oSHllar),ssat,   t_ssat),
  TCE("usat",	6e00010, f3800000, 4, (RRnpc, I31, RRnpc, oSHllar),usat,   t_usat),
 
-/*  ARM V6 not included in V7M (eg. integer SIMD).  */
+/*  ARM V6 not included in V7M.  */
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_v6_notm
+ TUF("rfeia",	8900a00, e990c000, 1, (RRw),			   rfe, rfe),
+  UF(rfeib,	9900a00,           1, (RRw),			   rfe),
+  UF(rfeda,	8100a00,           1, (RRw),			   rfe),
+ TUF("rfedb",	9100a00, e810c000, 1, (RRw),			   rfe, rfe),
+ TUF("rfefd",	8900a00, e990c000, 1, (RRw),			   rfe, rfe),
+  UF(rfefa,	9900a00,           1, (RRw),			   rfe),
+  UF(rfeea,	8100a00,           1, (RRw),			   rfe),
+ TUF("rfeed",	9100a00, e810c000, 1, (RRw),			   rfe, rfe),
+ TUF("srsia",	8c00500, e980c000, 2, (oRRw, I31w),		   srs,  srs),
+  UF(srsib,	9c00500,           2, (oRRw, I31w),		   srs),
+  UF(srsda,	8400500,	   2, (oRRw, I31w),		   srs),
+ TUF("srsdb",	9400500, e800c000, 2, (oRRw, I31w),		   srs,  srs),
 
+/*  ARM V6 not included in V7M (eg. integer SIMD).  */
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT  & arm_ext_v6_dsp
  TUF("cps",	1020000, f3af8100, 1, (I31b),			  imm0, t_cps),
  TCE("pkhbt",	6800010, eac00000, 4, (RRnpc, RRnpc, RRnpc, oSHll),   pkhbt, t_pkhbt),
  TCE("pkhtb",	6800050, eac00020, 4, (RRnpc, RRnpc, RRnpc, oSHar),   pkhtb, t_pkhtb),
@@ -16604,14 +16625,6 @@ static const struct asm_opcode insns[] =
  /* Old name for USAX.  */
  TCE("usubaddx",	6500f50, fae0f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("usub8",	6500ff0, fac0f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TUF("rfeia",	8900a00, e990c000, 1, (RRw),			   rfe, rfe),
-  UF(rfeib,	9900a00,           1, (RRw),			   rfe),
-  UF(rfeda,	8100a00,           1, (RRw),			   rfe),
- TUF("rfedb",	9100a00, e810c000, 1, (RRw),			   rfe, rfe),
- TUF("rfefd",	8900a00, e990c000, 1, (RRw),			   rfe, rfe),
-  UF(rfefa,	9900a00,           1, (RRw),			   rfe),
-  UF(rfeea,	8100a00,           1, (RRw),			   rfe),
- TUF("rfeed",	9100a00, e810c000, 1, (RRw),			   rfe, rfe),
  TCE("sxtah",	6b00070, fa00f080, 4, (RRnpc, RRnpc, RRnpc, oROR), sxtah, t_sxtah),
  TCE("sxtab16",	6800070, fa20f080, 4, (RRnpc, RRnpc, RRnpc, oROR), sxtah, t_sxtah),
  TCE("sxtab",	6a00070, fa40f080, 4, (RRnpc, RRnpc, RRnpc, oROR), sxtah, t_sxtah),
@@ -16639,10 +16652,6 @@ static const struct asm_opcode insns[] =
  TCE("smuadx",	700f030, fb20f010, 3, (RRnpc, RRnpc, RRnpc),	   smul, t_simd),
  TCE("smusd",	700f050, fb40f000, 3, (RRnpc, RRnpc, RRnpc),	   smul, t_simd),
  TCE("smusdx",	700f070, fb40f010, 3, (RRnpc, RRnpc, RRnpc),	   smul, t_simd),
- TUF("srsia",	8c00500, e980c000, 2, (oRRw, I31w),		   srs,  srs),
-  UF(srsib,	9c00500,           2, (oRRw, I31w),		   srs),
-  UF(srsda,	8400500,	   2, (oRRw, I31w),		   srs),
- TUF("srsdb",	9400500, e800c000, 2, (oRRw, I31w),		   srs,  srs),
  TCE("ssat16",	6a00f30, f3200000, 3, (RRnpc, I16, RRnpc),	   ssat16, t_ssat16),
  TCE("umaal",	0400090, fbe00060, 4, (RRnpc, RRnpc, RRnpc, RRnpc),smlal,  t_mlal),
  TCE("usad8",	780f010, fb70f000, 3, (RRnpc, RRnpc, RRnpc),	   smul,   t_simd),
@@ -22034,6 +22043,7 @@ static const struct arm_arch_option_table arm_archs[] =
   {"armv7-a",		ARM_ARCH_V7A,	 FPU_ARCH_VFP},
   {"armv7-r",		ARM_ARCH_V7R,	 FPU_ARCH_VFP},
   {"armv7-m",		ARM_ARCH_V7M,	 FPU_ARCH_VFP},
+  {"armv7e-m",		ARM_ARCH_V7EM,	 FPU_ARCH_VFP},
   {"xscale",		ARM_ARCH_XSCALE, FPU_ARCH_VFP},
   {"iwmmxt",		ARM_ARCH_IWMMXT, FPU_ARCH_VFP},
   {"iwmmxt2",		ARM_ARCH_IWMMXT2,FPU_ARCH_VFP},
@@ -22554,6 +22564,20 @@ aeabi_set_public_attributes (void)
 	  ARM_CLEAR_FEATURE (tmp, tmp, p->flags);
 	}
     }
+
+  /* The table lookup above finds the last architecture to contribute
+     a new feature.  Unfortunately, Tag13 is a subset of the union of
+     v6T2 and v7-M, so it is never seen as contributing a new feature.
+     We can not search for the last entry which is entirely used,
+     because if no CPU is specified we build up only those flags
+     actually used.  Perhaps we should separate out the specified
+     and implicit cases.  Avoid taking this path for -march=all by
+     checking for contradictory v7-A / v7-M features.  */
+  if (arch == 10
+      && !ARM_CPU_HAS_FEATURE (flags, arm_ext_v7a)
+      && ARM_CPU_HAS_FEATURE (flags, arm_ext_v7m)
+      && ARM_CPU_HAS_FEATURE (flags, arm_ext_v6_dsp))
+    arch = 13;
 
   /* Tag_CPU_name.  */
   if (selected_cpu_name[0])

@@ -1,3 +1,8 @@
+2009-11-17  Paul Brook  <paul@codesourcery.com>
+	Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* readelf.c (arm_attr_tag_CPU_arch): Add v7E-M.
+
 2009-11-16  Kai Tietz  <kai.tietz@onevision.com>
 
 	* windmc.c (set_endianess): Use bfd_get_target_info.

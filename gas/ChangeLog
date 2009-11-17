@@ -1,3 +1,14 @@
+2009-11-17  Paul Brook  <paul@codesourcery.com>
+	Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* doc/c-arm.texi: Document .arch armv7e-m.
+	* config/tc-arm.c (arm_ext_v6_dsp, arm_ext_v7m): New.
+	(insns): Put Thumb versions of v5TExP instructions into
+	arm_ext_v5exp also.  Move some Thumb variants from
+	arm_ext_v6_notm to arm_ext_v6_dsp.
+	(arm_archs): Add armv7e-m architecture.
+	(aeabi_set_public_attributes): Handle -march=armv7e-m.
+
 2009-11-16  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
 
 	* config/tc-arm.c (parse_operands): Encode APSR_nzcv as r15.

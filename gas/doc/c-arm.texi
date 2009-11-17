@@ -168,6 +168,7 @@ names are recognized:
 @code{armv7-a},
 @code{armv7-r},
 @code{armv7-m},
+@code{armv7e-m},
 @code{iwmmxt}
 and
 @code{xscale}.
