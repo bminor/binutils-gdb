@@ -1,3 +1,13 @@
+2009-11-17  Nathan Sidwell  <nathan@codesourcery.com>
+2009-11-17  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* Makefile.in (reg-cf.o, reg-cf.c): New targets.
+	* configure.ac: Check for __mcoldfire__ and set
+	gdb_cv_m68k_is_coldfire.
+	* configure.srv: Use gdb_cv_m68k_is_coldfire to select between
+	reg-cf.o and reg-m68k.o.
+	* configure: Regenerated.
+
 2009-11-16  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-low.c (linux_remove_process): Add `detaching' parameter.

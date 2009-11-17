@@ -98,13 +98,21 @@ case "${target}" in
 			srv_linux_usrregs=yes
  			srv_linux_thread_db=yes
 			;;
-  m68*-*-linux*)	srv_regobj=reg-m68k.o
+  m68*-*-linux*)	if test "$gdb_cv_m68k_is_coldfire" = yes; then
+                          srv_regobj=reg-cf.o
+                        else
+                          src_regobj=reg-m68k.o
+                        fi
 			srv_tgtobj="linux-low.o linux-m68k-low.o"
 			srv_linux_usrregs=yes
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
 			;;
-  m68*-*-uclinux*)	srv_regobj=reg-m68k.o
+  m68*-*-uclinux*)	if test "$gdb_cv_m68k_is_coldfire" = yes; then
+                          srv_regobj=reg-cf.o
+                        else
+                          src_regobj=reg-m68k.o
+                        fi
 			srv_tgtobj="linux-low.o linux-m68k-low.o"
 			srv_linux_usrregs=yes
 			srv_linux_regsets=yes

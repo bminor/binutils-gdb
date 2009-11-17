@@ -1,3 +1,7 @@
+2009-11-17  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* regformats/reg-cf.dat: New file.
+
 2009-11-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* m68k-tdep.c (m68k_register_name): Check fpregs_present.

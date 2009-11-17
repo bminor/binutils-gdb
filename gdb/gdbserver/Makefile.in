@@ -359,6 +359,9 @@ reg-m32r.c : $(srcdir)/../regformats/reg-m32r.dat $(regdat_sh)
 reg-m68k.o : reg-m68k.c $(regdef_h)
 reg-m68k.c : $(srcdir)/../regformats/reg-m68k.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-m68k.dat reg-m68k.c
+reg-cf.o : reg-cf.c $(regdef_h)
+reg-cf.c : $(srcdir)/../regformats/reg-cf.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-cf.dat reg-cf.c
 mips-linux.o : mips-linux.c $(regdef_h)
 mips-linux.c : $(srcdir)/../regformats/mips-linux.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/mips-linux.dat mips-linux.c

@@ -90,6 +90,18 @@ got it
                     [gdb_cv_i386_is_x86_64=no])
                     CPPFLAGS="$save_CPPFLAGS"])
     ;;
+  m68k-*-*)
+    AC_CACHE_CHECK([if building for Coldfire], [gdb_cv_m68k_is_coldfire],
+      	           [save_CPPFLAGS="$CPPFLAGS"
+                    CPPFLAGS="$CPPFLAGS $CFLAGS"
+                    AC_EGREP_CPP([got it], [
+#ifdef __mcoldfire__
+got it
+#endif
+                 ], [gdb_cv_m68k_is_coldfire=yes],
+                    [gdb_cv_m68k_is_coldfire=no])
+                    CPPFLAGS="$save_CPPFLAGS"])
+    ;;
 esac
 
 . ${srcdir}/configure.srv
