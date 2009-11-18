@@ -2732,8 +2732,15 @@ md_assemble (char *str)
 		  break;
 
 		case BFD_RELOC_PPC_TLS:
-		  insn = ppc_insert_operand (insn, operand, ppc_obj64 ? 13 : 2,
-					     ppc_cpu, (char *) NULL, 0);
+		  if (!_bfd_elf_ppc_at_tls_transform (opcode->opcode, 0))
+		    as_bad (_("@tls may not be used with \"%s\" operands"),
+			    opcode->name);
+		  else if (operand->shift != 11)
+		    as_bad (_("@tls may only be used in last operand"));
+		  else
+		    insn = ppc_insert_operand (insn, operand,
+					       ppc_obj64 ? 13 : 2,
+					       ppc_cpu, (char *) NULL, 0);
 		  break;
 
 		  /* We'll only use the 32 (or 64) bit form of these relocations

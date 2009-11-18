@@ -6613,6 +6613,46 @@ is_static_defined (struct elf_link_hash_entry *h)
 	  && h->root.u.def.section->output_section != NULL);
 }
 
+/* If INSN is an opcode that may be used with an @tls operand, return
+   the transformed insn for TLS optimisation, otherwise return 0.  If
+   REG is non-zero only match an insn with RB or RA equal to REG.  */
+
+unsigned int
+_bfd_elf_ppc_at_tls_transform (unsigned int insn, unsigned int reg)
+{
+  unsigned int rtra;
+
+  if ((insn & (0x3f << 26)) != 31 << 26)
+    return 0;
+
+  if (reg == 0 || ((insn >> 11) & 0x1f) == reg)
+    rtra = insn & ((1 << 26) - (1 << 16));
+  else if (((insn >> 16) & 0x1f) == reg)
+    rtra = (insn & (0x1f << 21)) | ((insn & (0x1f << 11)) << 5);
+  else
+    return 0;
+
+  if ((insn & (0x3ff << 1)) == 266 << 1)
+    /* add -> addi.  */
+    insn = 14 << 26;
+  else if ((insn & (0x1f << 1)) == 23 << 1
+	   && ((insn & (0x1f << 6)) < 14 << 6
+	       || ((insn & (0x1f << 6)) >= 16 << 6
+		   && (insn & (0x1f << 6)) < 24 << 6)))
+    /* load and store indexed -> dform.  */
+    insn = (32 | ((insn >> 6) & 0x1f)) << 26;
+  else if ((insn & (((0x1a << 5) | 0x1f) << 1)) == 21 << 1)
+    /* ldx, ldux, stdx, stdux -> ld, ldu, std, stdu.  */
+    insn = ((58 | ((insn >> 6) & 4)) << 26) | ((insn >> 6) & 1);
+  else if ((insn & (((0x1f << 5) | 0x1f) << 1)) == 341 << 1)
+    /* lwax -> lwa.  */
+    insn = (58 << 26) | 2;
+  else
+    return 0;
+  insn |= rtra;
+  return insn;
+}
+
 /* The RELOCATE_SECTION function is called by the ELF backend linker
    to handle the relocations for a section.
 
@@ -6813,37 +6853,12 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  if ((tls_mask & TLS_TLS) != 0
 	      && (tls_mask & TLS_TPREL) == 0)
 	    {
-	      bfd_vma insn, rtra;
+	      bfd_vma insn;
+
 	      insn = bfd_get_32 (output_bfd, contents + rel->r_offset);
-	      if ((insn & ((31 << 26) | (31 << 11)))
-		  == ((31 << 26) | (2 << 11)))
-		rtra = insn & ((1 << 26) - (1 << 16));
-	      else if ((insn & ((31 << 26) | (31 << 16)))
-		       == ((31 << 26) | (2 << 16)))
-		rtra = (insn & (31 << 21)) | ((insn & (31 << 11)) << 5);
-	      else
+	      insn = _bfd_elf_ppc_at_tls_transform (insn, 2);
+	      if (insn == 0)
 		abort ();
-	      if ((insn & ((1 << 11) - (1 << 1))) == 266 << 1)
-		/* add -> addi.  */
-		insn = 14 << 26;
-	      else if ((insn & (31 << 1)) == 23 << 1
-		       && ((insn & (31 << 6)) < 14 << 6
-			   || ((insn & (31 << 6)) >= 16 << 6
-			       && (insn & (31 << 6)) < 24 << 6)))
-		/* load and store indexed -> dform.  */
-		insn = (32 | ((insn >> 6) & 31)) << 26;
-	      else if ((insn & (31 << 1)) == 21 << 1
-		       && (insn & (0x1a << 6)) == 0)
-		/* ldx, ldux, stdx, stdux -> ld, ldu, std, stdu.  */
-		insn = (((58 | ((insn >> 6) & 4)) << 26)
-			| ((insn >> 6) & 1));
-	      else if ((insn & (31 << 1)) == 21 << 1
-		       && (insn & ((1 << 11) - (1 << 1))) == 341 << 1)
-		/* lwax -> lwa.  */
-		insn = (58 << 26) | 2;
-	      else
-		abort ();
-	      insn |= rtra;
 	      bfd_put_32 (output_bfd, insn, contents + rel->r_offset);
 	      r_type = R_PPC_TPREL16_LO;
 	      rel->r_info = ELF32_R_INFO (r_symndx, r_type);

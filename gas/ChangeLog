@@ -1,3 +1,8 @@
+2009-11-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (md_assemble): Report error on invalid @tls operands
+	and opcode.
+
 2009-11-17  Sebastian Pop  <sebastian.pop@amd.com>
 	    Quentin Neill  <quentin.neill@amd.com>
 
