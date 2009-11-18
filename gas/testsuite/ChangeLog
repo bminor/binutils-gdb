@@ -1,3 +1,11 @@
+2009-11-18  Sebastian Pop  <sebastian.pop@amd.com>
+
+	* gas/i386/cvt16.d: Removed.
+	* gas/i386/cvt16.s: Removed.
+	* gas/i386/x86-64-cvt16.d: Removed.
+	* gas/i386/x86-64-cvt16.s: Removed.
+	* gas/i386/i386.exp: Remove cvt16 and x86-64-cvt16 tests.
+
 2009-11-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/rex.d: Remove suffix on fxsave.

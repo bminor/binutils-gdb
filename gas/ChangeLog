@@ -1,3 +1,9 @@
+2009-11-18  Sebastian Pop  <sebastian.pop@amd.com>
+
+	* config/tc-i386.c (cpu_arch): Remove cvt16.
+	(md_show_usage): Same.
+	* doc/c-i386.texi: Same.
+
 2009-11-18  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (arm_fpus): Add fpv4-sp-d16.

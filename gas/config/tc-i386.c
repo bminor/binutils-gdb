@@ -644,8 +644,6 @@ static const arch_entry cpu_arch[] =
     CPU_FMA4_FLAGS },
   { ".xop", PROCESSOR_UNKNOWN,
     CPU_XOP_FLAGS },
-  { ".cvt16", PROCESSOR_UNKNOWN,
-    CPU_CVT16_FLAGS },
   { ".lwp", PROCESSOR_UNKNOWN,
     CPU_LWP_FLAGS },
   { ".movbe", PROCESSOR_UNKNOWN,
@@ -8127,7 +8125,7 @@ md_show_usage (stream)
                            ssse3, sse4.1, sse4.2, sse4, nosse, avx, noavx,\n\
                            vmx, smx, xsave, movbe, ept, aes, pclmul, fma,\n\
                            clflush, syscall, rdtscp, 3dnow, 3dnowa, sse4a,\n\
-                           svme, abm, padlock, fma4, xop, cvt16, lwp\n"));
+                           svme, abm, padlock, fma4, xop, lwp\n"));
   fprintf (stream, _("\
   -mtune=CPU              optimize for CPU, CPU is one of:\n\
                            i8086, i186, i286, i386, i486, pentium, pentiumpro,\n\

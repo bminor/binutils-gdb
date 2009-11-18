@@ -2548,13 +2548,6 @@ vfnmsubsd, 4, 0x667f, None, 1, CpuFMA4, Modrm|Vex|Vex0F3A|VexNDS|VexW0|Vex3Sourc
 vfnmsubss, 4, 0x667e, None, 1, CpuFMA4, Modrm|Vex|Vex0F3A|VexNDS|VexW1|Vex3Sources|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VexImmExt, {Dword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM, RegXMM, RegXMM }
 vfnmsubss, 4, 0x667e, None, 1, CpuFMA4, Modrm|Vex|Vex0F3A|VexNDS|VexW0|Vex3Sources|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VexImmExt, {RegXMM, Dword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM, RegXMM }
 
-// CVT16 instructions
-
-vcvtph2ps,  3, 0xa0, None, 1, CpuCVT16, Modrm|XOP08|VexW0|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Vex,   { Imm8, Qword|RegXMM|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, RegXMM }
-vcvtph2ps,  3, 0xa0, None, 1, CpuCVT16, Modrm|XOP08|VexW0|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Vex=2, { Imm8, Xmmword|RegXMM|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, RegYMM }
-vcvtps2ph,  3, 0xa1, None, 1, CpuCVT16, Modrm|XOP08|VexW0|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Vex,   { Imm8, RegXMM, Qword|RegXMM|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex }
-vcvtps2ph,  3, 0xa1, None, 1, CpuCVT16, Modrm|XOP08|VexW0|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Vex=2, { Imm8, RegYMM, Xmmword|RegXMM|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex }
-
 // XOP instructions
 
 vfrczpd,    2, 0x81, None, 1, CpuXOP, Modrm|XOP09|VexW0|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Vex,   { Xmmword|RegXMM|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, RegXMM }

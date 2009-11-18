@@ -1293,8 +1293,6 @@ enum
   VEX_LEN_3A7E_P_2,
   VEX_LEN_3A7F_P_2,
   VEX_LEN_3ADF_P_2,
-  VEX_LEN_XOP_08_A0,
-  VEX_LEN_XOP_08_A1,
   VEX_LEN_XOP_09_80,
   VEX_LEN_XOP_09_81
 };
@@ -6573,8 +6571,8 @@ static const struct dis386 xop_table[][256] = {
     { "vpmacsdd", 	{ XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
     { "vpmacsdqh", 	{ XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
     /* a0 */
-    { VEX_LEN_TABLE (VEX_LEN_XOP_08_A0) },
-    { VEX_LEN_TABLE (VEX_LEN_XOP_08_A1) },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
     { "vpcmov", 	{ XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
     { "vpperm", 	{ XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
     { "(bad)",		{ XX } },
@@ -9352,16 +9350,6 @@ static const struct dis386 vex_len_table[][2] = {
   {
     { "vaeskeygenassist", { XM, EXx, Ib } },
     { "(bad)",		{ XX } },
-  },
-  /* VEX_LEN_XOP_08_A0 */
-  {
-    { "vcvtph2ps", { XM, EXq, Ib } },
-    { "vcvtph2ps", { XM, EXxmm, Ib } },
-  },
-  /* VEX_LEN_XOP_08_A1 */
-  {
-    { "vcvtps2ph", { EXq, XM, Ib } },
-    { "vcvtps2ph", { EXxmm, XM, Ib } },
   },
   /* VEX_LEN_XOP_09_80 */
   {

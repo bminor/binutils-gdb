@@ -104,8 +104,6 @@ enum
   CpuFMA4,
   /* XOP support required */
   CpuXOP,
-  /* CVT16 support required */
-  CpuCVT16,
   /* LWP support required */
   CpuLWP,
   /* MOVBE Instuction support required */
@@ -175,7 +173,6 @@ typedef union i386_cpu_flags
       unsigned int cpufma:1;
       unsigned int cpufma4:1;
       unsigned int cpuxop:1;
-      unsigned int cpucvt16:1;
       unsigned int cpulwp:1;
       unsigned int cpumovbe:1;
       unsigned int cpuept:1;

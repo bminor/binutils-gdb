@@ -1,3 +1,18 @@
+2009-11-18  Sebastian Pop  <sebastian.pop@amd.com>
+
+	* i386-dis.c (VEX_LEN_XOP_08_A0): Removed.
+	(VEX_LEN_XOP_08_A1): Removed.
+	(xop_table): Remove entries for VEX_LEN_XOP_08_A0 and
+	VEX_LEN_XOP_08_A1.
+	(vex_len_table): Same.
+	* i386-gen.c (CPU_CVT16_FLAGS): Removed.
+	(cpu_flags): Remove field for CpuCVT16.
+	* i386-opc.h (CpuCVT16): Removed.
+	(i386_cpu_flags): Remove bitfield cpucvt16.
+	(i386-opc.tbl): Remove CVT16 instructions.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Regenerated.
+
 2009-11-17  Sebastian Pop  <sebastian.pop@amd.com>
 	    Quentin Neill  <quentin.neill@amd.com>
 
