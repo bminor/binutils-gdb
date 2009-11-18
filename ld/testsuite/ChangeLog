@@ -1,3 +1,13 @@
+2009-11-18  Nick Clifton  <nickc@redhat.com>
+
+	* ld-elf/extract-symbol-1sec.d: Expect to fail for the RX target.
+	* ld-scripts/overlay-size.d: Likewise.
+	* ld-scripts/rgn-at1.d: Likewise.
+	* ld-scripts/rgn-at2.d: Likewise.
+	* ld-scripts/rgn-at3.d: Likewise.
+	* ld-scripts/rgn-at4.d: Likewise.
+	* ld-scripts/rgn-over8-ok.d: Likewise.
+
 2009-11-15  Kai Tietz  <kai.tietz@onevision.com>
 
 	* ld-pe/direct2_client.c: New file.
