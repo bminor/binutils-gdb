@@ -429,6 +429,7 @@ macho_oso_symfile (struct objfile *main_objfile)
 	      const char *member_name = member_bfd->filename;
               int member_len = strlen (member_name);
 
+              /* If this member is referenced, add it as a symfile.  */
               for (ix2 = ix; ix2 < last_ix; ix2++)
                 {
                   oso2 = VEC_index (oso_el, vec, ix2);
@@ -447,7 +448,9 @@ macho_oso_symfile (struct objfile *main_objfile)
               prev = member_bfd;
 	      member_bfd = bfd_openr_next_archived_file
 		(archive_bfd, member_bfd);
-              if (ix2 < last_ix)
+
+              /* Free previous member if not referenced by an oso.  */
+              if (ix2 >= last_ix)
                 bfd_close (prev);
 	    }
           for (ix2 = ix; ix2 < last_ix; ix2++)
