@@ -1,3 +1,16 @@
+2009-11-17  Sebastian Pop  <sebastian.pop@amd.com>
+	    Quentin Neill  <quentin.neill@amd.com>
+
+	* gas/i386/i386.exp: Run xop and cvt16 in 32-bit mode.
+	Run x86-64-xop and x86-64-cvt16 in 64-bit mode.
+	* gas/i386/lwp.d: Update name of the testcase.
+	* gas/i386/x86-64-xop.d: New.
+	* gas/i386/x86-64-xop.s: New.
+	* gas/i386/xop.d: New.
+	* gas/i386/xop.s: New.
+	* gas/i386/cvt16.d: New.
+	* gas/i386/cvt16.s: New.
+
 2009-11-17  Paul Brook  <paul@codesourcery.com>
 	Daniel Jacobowitz  <dan@codesourcery.com>
 
@@ -20,7 +33,7 @@
 	* gas/arm/arm7t.d: Likewise.
 	* gas/arm/inst.d: Likewise.
 	* gas/arm/xscale.d: Likewise.
-	
+
 2009-11-17  Nick Clifton  <nickc@redhat.com>
 
 	* gas/rx/macros.inc (creg): Remove cpen.

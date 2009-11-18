@@ -1,3 +1,13 @@
+2009-11-17  Sebastian Pop  <sebastian.pop@amd.com>
+	    Quentin Neill  <quentin.neill@amd.com>
+
+	* config/tc-i386.c (cpu_arch): Added .xop and .cvt16.
+	(build_vex_prefix): Handle xop08.
+	(md_assemble): Don't special case the constant 3 for insns using MODRM.
+	(build_modrm_byte): Handle vex2sources.
+	(md_show_usage): Add xop and cvt16.
+	* doc/c-i386.texi: Document fma4, xop, and cvt16.
+
 2009-11-17  Paul Brook  <paul@codesourcery.com>
 	Daniel Jacobowitz  <dan@codesourcery.com>
 

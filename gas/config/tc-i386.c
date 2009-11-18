@@ -642,6 +642,10 @@ static const arch_entry cpu_arch[] =
     CPU_FMA_FLAGS },
   { ".fma4", PROCESSOR_UNKNOWN,
     CPU_FMA4_FLAGS },
+  { ".xop", PROCESSOR_UNKNOWN,
+    CPU_XOP_FLAGS },
+  { ".cvt16", PROCESSOR_UNKNOWN,
+    CPU_CVT16_FLAGS },
   { ".lwp", PROCESSOR_UNKNOWN,
     CPU_LWP_FLAGS },
   { ".movbe", PROCESSOR_UNKNOWN,
@@ -2748,6 +2752,11 @@ build_vex_prefix (const insn_template *t)
 	m = 0x2;
       else if (i.tm.opcode_modifier.vex0f3a)
 	m = 0x3;
+      else if (i.tm.opcode_modifier.xop08)
+	{
+	  m = 0x8;
+	  i.vex.bytes[0] = 0x8f;
+	}
       else if (i.tm.opcode_modifier.xop09)
 	{
 	  m = 0x9;
@@ -2997,8 +3006,12 @@ md_assemble (char *line)
   if (i.tm.opcode_modifier.vex)
     build_vex_prefix (t);
 
-  /* Handle conversion of 'int $3' --> special int3 insn.  */
-  if (i.tm.base_opcode == INT_OPCODE && i.op[0].imms->X_add_number == 3)
+  /* Handle conversion of 'int $3' --> special int3 insn.  XOP or FMA4
+     instructions may define INT_OPCODE as well, so avoid this corner
+     case for those instructions that use MODRM.  */
+  if (i.tm.base_opcode == INT_OPCODE
+      && i.op[0].imms->X_add_number == 3
+      && !i.tm.opcode_modifier.modrm)
     {
       i.tm.base_opcode = INT3_OPCODE;
       i.imm_operands = 0;
@@ -4908,11 +4921,12 @@ build_modrm_byte (void)
 {
   const seg_entry *default_seg = 0;
   unsigned int source, dest;
-  int vex_3_sources;
+  int vex_3_sources, vex_2_sources;
 
   /* The first operand of instructions with VEX prefix and 3 sources
      must be VEX_Imm4.  */
   vex_3_sources = i.tm.opcode_modifier.vex3sources;
+  vex_2_sources = i.tm.opcode_modifier.vex2sources;
   if (vex_3_sources)
     {
       unsigned int nds, reg;
@@ -5296,7 +5310,41 @@ build_modrm_byte (void)
       else
 	mem = ~0;
 
-      if (i.tm.opcode_modifier.vexlwp)
+      if (vex_2_sources)
+	{
+	  if (operand_type_check (i.types[0], imm))
+	    i.vex.register_specifier = NULL;
+	  else
+	    {
+	      /* VEX.vvvv encodes one of the sources when the first
+		 operand is not an immediate.  */
+	      if (i.tm.opcode_modifier.vexw0)
+		i.vex.register_specifier = i.op[0].regs;
+	      else
+		i.vex.register_specifier = i.op[1].regs;
+	    }
+
+	  /* Destination is a XMM register encoded in the ModRM.reg
+	     and VEX.R bit.  */
+	  i.rm.reg = i.op[2].regs->reg_num;
+	  if ((i.op[2].regs->reg_flags & RegRex) != 0)
+	    i.rex |= REX_R;
+
+	  /* ModRM.rm and VEX.B encodes the other source.  */
+	  if (!i.mem_operands)
+	    {
+	      i.rm.mode = 3;
+
+	      if (i.tm.opcode_modifier.vexw0)
+		i.rm.regmem = i.op[1].regs->reg_num;
+	      else
+		i.rm.regmem = i.op[0].regs->reg_num;
+
+	      if ((i.op[1].regs->reg_flags & RegRex) != 0)
+		i.rex |= REX_B;
+	    }
+	}
+      else if (i.tm.opcode_modifier.vexlwp)
 	{
 	  i.vex.register_specifier = i.op[2].regs;
 	  if (!i.mem_operands)
@@ -8079,7 +8127,7 @@ md_show_usage (stream)
                            ssse3, sse4.1, sse4.2, sse4, nosse, avx, noavx,\n\
                            vmx, smx, xsave, movbe, ept, aes, pclmul, fma,\n\
                            clflush, syscall, rdtscp, 3dnow, 3dnowa, sse4a,\n\
-                           svme, abm, padlock, fma4, lwp\n"));
+                           svme, abm, padlock, fma4, xop, cvt16, lwp\n"));
   fprintf (stream, _("\
   -mtune=CPU              optimize for CPU, CPU is one of:\n\
                            i8086, i186, i286, i386, i486, pentium, pentiumpro,\n\

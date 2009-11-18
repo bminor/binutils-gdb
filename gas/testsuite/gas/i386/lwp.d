@@ -1,5 +1,5 @@
 #objdump: -dw
-#name: x86-64 LWP
+#name: i386 LWP
 
 .*: +file format .*
 

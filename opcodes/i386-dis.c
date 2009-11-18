@@ -113,6 +113,8 @@ static void CRC32_Fixup (int, int);
 static void OP_LWPCB_E (int, int);
 static void OP_LWP_E (int, int);
 static void OP_LWP_I (int, int);
+static void OP_Vex_2src_1 (int, int);
+static void OP_Vex_2src_2 (int, int);
 
 static void MOVBE_Fixup (int, int);
 
@@ -356,6 +358,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define OPSUF { OP_3DNowSuffix, 0 }
 #define CMP { CMP_Fixup, 0 }
 #define XMM0 { XMM_Fixup, 0 }
+#define Vex_2src_1 { OP_Vex_2src_1, 0 }
+#define Vex_2src_2 { OP_Vex_2src_2, 0 }
 
 #define Vex { OP_VEX, vex_mode }
 #define Vex128 { OP_VEX, vex128_mode }
@@ -1073,7 +1077,8 @@ enum
 
 enum
 {
-  XOP_09 = 0,
+  XOP_08 = 0,
+  XOP_09,
   XOP_0A
 };
 
@@ -1287,7 +1292,11 @@ enum
   VEX_LEN_3A7B_P_2,
   VEX_LEN_3A7E_P_2,
   VEX_LEN_3A7F_P_2,
-  VEX_LEN_3ADF_P_2
+  VEX_LEN_3ADF_P_2,
+  VEX_LEN_XOP_08_A0,
+  VEX_LEN_XOP_08_A1,
+  VEX_LEN_XOP_09_80,
+  VEX_LEN_XOP_09_81
 };
 
 typedef void (*op_rtn) (int bytemode, int sizeflag);
@@ -6381,6 +6390,297 @@ static const struct dis386 three_byte_table[][256] = {
 };
 
 static const struct dis386 xop_table[][256] = {
+  /* XOP_08 */
+  {
+    /* 00 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 08 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 10 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 18 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 20 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 28 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 30 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 38 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 40 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 48 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 50 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 58 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 60 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 68 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 70 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 78 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* 80 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "vpmacssww", 	{ XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    { "vpmacsswd", 	{ XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    { "vpmacssdql", 	{ XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    /* 88 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "vpmacssdd", 	{ XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    { "vpmacssdqh", 	{ XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    /* 90 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "vpmacsww", 	{ XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    { "vpmacswd", 	{ XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    { "vpmacsdql", 	{ XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    /* 98 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "vpmacsdd", 	{ XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    { "vpmacsdqh", 	{ XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    /* a0 */
+    { VEX_LEN_TABLE (VEX_LEN_XOP_08_A0) },
+    { VEX_LEN_TABLE (VEX_LEN_XOP_08_A1) },
+    { "vpcmov", 	{ XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    { "vpperm", 	{ XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "vpmadcsswd", 	{ XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    { "(bad)",		{ XX } },
+    /* a8 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* b0 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "vpmadcswd", 	{ XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    { "(bad)",		{ XX } },
+    /* b8 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* c0 */
+    { "vprotb", 	{ XM, Vex_2src_1, Ib } },
+    { "vprotw", 	{ XM, Vex_2src_1, Ib } },
+    { "vprotd", 	{ XM, Vex_2src_1, Ib } },
+    { "vprotq", 	{ XM, Vex_2src_1, Ib } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* c8 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "vpcomb", 	{ XM, Vex128, EXx, Ib } },
+    { "vpcomw", 	{ XM, Vex128, EXx, Ib } },
+    { "vpcomd", 	{ XM, Vex128, EXx, Ib } },
+    { "vpcomq", 	{ XM, Vex128, EXx, Ib } },
+    /* d0 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* d8 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* e0 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* e8 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "vpcomub",	{ XM, Vex128, EXx, Ib } },
+    { "vpcomuw",	{ XM, Vex128, EXx, Ib } },
+    { "vpcomud",	{ XM, Vex128, EXx, Ib } },
+    { "vpcomuq",	{ XM, Vex128, EXx, Ib } },
+    /* f0 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    /* f8 */
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+  },
   /* XOP_09 */
   {
     /* 00 */
@@ -6528,10 +6828,10 @@ static const struct dis386 xop_table[][256] = {
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     /* 80 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
+    { VEX_LEN_TABLE (VEX_LEN_XOP_09_80) },
+    { VEX_LEN_TABLE (VEX_LEN_XOP_09_81) },
+    { "vfrczss", 	{ XM, EXd } },
+    { "vfrczsd", 	{ XM, EXq } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
@@ -6546,19 +6846,19 @@ static const struct dis386 xop_table[][256] = {
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     /* 90 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
+    { "vprotb",		{ XM, Vex_2src_1, Vex_2src_2 } },
+    { "vprotw",		{ XM, Vex_2src_1, Vex_2src_2 } },
+    { "vprotd",		{ XM, Vex_2src_1, Vex_2src_2 } },
+    { "vprotq",		{ XM, Vex_2src_1, Vex_2src_2 } },
+    { "vpshlb",		{ XM, Vex_2src_1, Vex_2src_2 } },
+    { "vpshlw",		{ XM, Vex_2src_1, Vex_2src_2 } },
+    { "vpshld",		{ XM, Vex_2src_1, Vex_2src_2 } },
+    { "vpshlq",		{ XM, Vex_2src_1, Vex_2src_2 } },
     /* 98 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
+    { "vpshab",		{ XM, Vex_2src_1, Vex_2src_2 } },
+    { "vpshaw",		{ XM, Vex_2src_1, Vex_2src_2 } },
+    { "vpshad",		{ XM, Vex_2src_1, Vex_2src_2 } },
+    { "vpshaq",		{ XM, Vex_2src_1, Vex_2src_2 } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
@@ -6601,45 +6901,45 @@ static const struct dis386 xop_table[][256] = {
     { "(bad)",		{ XX } },
     /* c0 */
     { "(bad)",		{ XX } },
+    { "vphaddbw",	{ XM, EXxmm } },
+    { "vphaddbd",	{ XM, EXxmm } },
+    { "vphaddbq",	{ XM, EXxmm } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
+    { "vphaddwd",	{ XM, EXxmm } },
+    { "vphaddwq",	{ XM, EXxmm } },
     /* c8 */
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
+    { "vphadddq",	{ XM, EXxmm } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     /* d0 */
     { "(bad)",		{ XX } },
+    { "vphaddubw",	{ XM, EXxmm } },
+    { "vphaddubd",	{ XM, EXxmm } },
+    { "vphaddubq",	{ XM, EXxmm } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
+    { "vphadduwd",	{ XM, EXxmm } },
+    { "vphadduwq",	{ XM, EXxmm } },
     /* d8 */
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
+    { "vphaddudq",	{ XM, EXxmm } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     /* e0 */
     { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
+    { "vphsubbw",	{ XM, EXxmm } },
+    { "vphsubwd",	{ XM, EXxmm } },
+    { "vphsubdq",	{ XM, EXxmm } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
@@ -9053,6 +9353,26 @@ static const struct dis386 vex_len_table[][2] = {
     { "vaeskeygenassist", { XM, EXx, Ib } },
     { "(bad)",		{ XX } },
   },
+  /* VEX_LEN_XOP_08_A0 */
+  {
+    { "vcvtph2ps", { XM, EXq, Ib } },
+    { "vcvtph2ps", { XM, EXxmm, Ib } },
+  },
+  /* VEX_LEN_XOP_08_A1 */
+  {
+    { "vcvtps2ph", { EXq, XM, Ib } },
+    { "vcvtps2ph", { EXxmm, XM, Ib } },
+  },
+  /* VEX_LEN_XOP_09_80 */
+  {
+    { "vfrczps", { XM, EXxmm } },
+    { "vfrczps", { XM, EXymmq } },
+  },
+  /* VEX_LEN_XOP_09_81 */
+  {
+    { "vfrczpd", { XM, EXxmm } },
+    { "vfrczpd", { XM, EXymmq } },
+  },
 };
 
 static const struct dis386 mod_table[][2] = {
@@ -10015,6 +10335,9 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	{
 	default:
 	  BadOp ();
+	case 0x8:
+	  vex_table_index = XOP_08;
+	  break;
 	case 0x9:
 	  vex_table_index = XOP_09;
 	  break;
@@ -13480,6 +13803,58 @@ OP_EX_VexReg (int bytemode, int sizeflag, int reg)
       abort ();
     }
   oappend (scratchbuf + intel_syntax);
+}
+
+static void
+OP_Vex_2src (int bytemode, int sizeflag)
+{
+  if (modrm.mod == 3)
+    {
+      USED_REX (REX_B);
+      sprintf (scratchbuf, "%%xmm%d", rex & REX_B ? modrm.rm + 8 : modrm.rm);
+      oappend (scratchbuf + intel_syntax);
+    }
+  else
+    {
+      if (intel_syntax
+	  && (bytemode == v_mode || bytemode == v_swap_mode))
+	{
+	  bytemode = (prefixes & PREFIX_DATA) ? x_mode : q_mode;
+	  used_prefixes |= (prefixes & PREFIX_DATA);
+	}
+      OP_E (bytemode, sizeflag);
+    }
+}
+
+static void
+OP_Vex_2src_1 (int bytemode, int sizeflag)
+{
+  if (modrm.mod == 3)
+    {
+      /* Skip mod/rm byte.   */
+      MODRM_CHECK;
+      codep++;
+    }
+
+  if (vex.w)
+    {
+      sprintf (scratchbuf, "%%xmm%d", vex.register_specifier);
+      oappend (scratchbuf + intel_syntax);
+    }
+  else
+    OP_Vex_2src (bytemode, sizeflag);
+}
+
+static void
+OP_Vex_2src_2 (int bytemode, int sizeflag)
+{
+  if (vex.w)
+    OP_Vex_2src (bytemode, sizeflag);
+  else
+    {
+      sprintf (scratchbuf, "%%xmm%d", vex.register_specifier);
+      oappend (scratchbuf + intel_syntax);
+    }
 }
 
 static void

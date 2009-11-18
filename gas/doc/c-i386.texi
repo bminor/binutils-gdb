@@ -142,6 +142,9 @@ accept various extension mnemonics.  For example,
 @code{ept},
 @code{clflush},
 @code{lwp},
+@code{fma4},
+@code{xop},
+@code{cvt16},
 @code{syscall},
 @code{rdtscp},
 @code{3dnow},
@@ -922,7 +925,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.ept} @tab @samp{.clflush}
 @item @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.sse4a} @tab @samp{.sse5}
 @item @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme} @tab @samp{.abm}
-@item @samp{.lwp}
+@item @samp{.lwp} @tab @samp{.fma4} @tab @samp{.xop} @tab @samp{.cvt16}
 @item @samp{.padlock}
 @end multitable
 

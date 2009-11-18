@@ -102,6 +102,10 @@ enum
   CpuFMA,
   /* FMA4 support required */
   CpuFMA4,
+  /* XOP support required */
+  CpuXOP,
+  /* CVT16 support required */
+  CpuCVT16,
   /* LWP support required */
   CpuLWP,
   /* MOVBE Instuction support required */
@@ -170,6 +174,8 @@ typedef union i386_cpu_flags
       unsigned int cpupclmul:1;
       unsigned int cpufma:1;
       unsigned int cpufma4:1;
+      unsigned int cpuxop:1;
+      unsigned int cpucvt16:1;
       unsigned int cpulwp:1;
       unsigned int cpumovbe:1;
       unsigned int cpuept:1;
@@ -291,11 +297,15 @@ enum
   Vex0F38,
   /* insn has VEX 0x0F3A opcode prefix. */
   Vex0F3A,
+  /* insn has XOP 0x08 opcode prefix. */
+  XOP08,
   /* insn has XOP 0x09 opcode prefix. */
   XOP09,
   /* insn has XOP 0x0A opcode prefix. */
   XOP0A,
-  /* insn has VEX prefix with 3 soures. */
+  /* insn has VEX prefix with 2 sources. */
+  Vex2Sources,
+  /* insn has VEX prefix with 3 sources. */
   Vex3Sources,
   /* instruction has VEX 8 bit imm */
   VexImmExt,
@@ -364,8 +374,10 @@ typedef struct i386_opcode_modifier
   unsigned int vex0f:1;
   unsigned int vex0f38:1;
   unsigned int vex0f3a:1;
+  unsigned int xop08:1;
   unsigned int xop09:1;
   unsigned int xop0a:1;
+  unsigned int vex2sources:1;
   unsigned int vex3sources:1;
   unsigned int veximmext:1;
   unsigned int sse2avx:1;

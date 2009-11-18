@@ -1,3 +1,33 @@
+2009-11-17  Sebastian Pop  <sebastian.pop@amd.com>
+	    Quentin Neill  <quentin.neill@amd.com>
+
+	* i386-dis.c (OP_Vex_2src_1): New.
+	(OP_Vex_2src_2): New.
+	(Vex_2src_1): New.
+	(Vex_2src_2): New.
+	(XOP_08): Added.
+	(VEX_LEN_XOP_08_A0): Added.
+	(VEX_LEN_XOP_08_A1): Added.
+	(VEX_LEN_XOP_09_80): Added.
+	(VEX_LEN_XOP_09_81): Added.
+	(xop_table): Added an entry for XOP_08.  Handle xop instructions.
+	(vex_len_table): Added entries for VEX_LEN_XOP_08_A0,
+	VEX_LEN_XOP_08_A1, VEX_LEN_XOP_09_80, VEX_LEN_XOP_09_81.
+	(get_valid_dis386): Handle XOP_08.
+	(OP_Vex_2src): New.
+	* i386-gen.c (cpu_flag_init): Add CPU_XOP_FLAGS and CPU_CVT16_FLAGS.
+	(cpu_flags): Add CpuXOP and CpuCVT16.
+	(opcode_modifiers): Add XOP08, Vex2Sources.
+	* i386-opc.h (CpuXOP): Added.
+	(CpuCVT16): Added.
+	(i386_cpu_flags): Add cpuxop and cpucvt16.
+	(XOP08): Added.
+	(Vex2Sources): Added.
+	(i386_opcode_modifier): Add xop08, vex2sources.
+	* i386-opc.tbl: Add entries for XOP and CVT16 instructions.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Regenerated.
+
 2009-11-17  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/10924
