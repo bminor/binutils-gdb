@@ -1,3 +1,7 @@
+2009-11-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/rex.d: Remove suffix on fxsave.
+
 2009-11-17  Sebastian Pop  <sebastian.pop@amd.com>
 	    Quentin Neill  <quentin.neill@amd.com>
 
@@ -12,7 +16,7 @@
 	* gas/i386/cvt16.s: New.
 
 2009-11-17  Paul Brook  <paul@codesourcery.com>
-	Daniel Jacobowitz  <dan@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gas/arm/attr-march-armv7em.d: New test.
 	* gas/arm/arch7em-bad.d: New test.
