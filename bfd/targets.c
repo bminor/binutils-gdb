@@ -25,7 +25,6 @@
 #include "bfd.h"
 #include "libbfd.h"
 #include "fnmatch.h"
-#include "alloca-conf.h"
 
 /*
    It's okay to see some:
@@ -1523,7 +1522,8 @@ bfd_get_target_info (const char *target_name, bfd *abfd,
 		 for triplets like "pe-arm-wince-little".  */
 	      if (!_bfd_find_arch_match (tname, arches, def_target_arch))
 		{
-		  char *new_tname = (char *) alloca (strlen (hyp) + 1);
+		  char new_tname[50];
+
 		  strcpy (new_tname, hyp);
 		  while ((hyp = strrchr (new_tname, '-')) != NULL)
 		    {

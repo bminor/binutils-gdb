@@ -1,3 +1,8 @@
+2009-11-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* targets.c: Don't include alloca-conf.h.
+	(bfd_get_target_info): Don't use alloca.
+
 2009-11-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/10955
