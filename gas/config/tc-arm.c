@@ -22102,6 +22102,7 @@ static const struct arm_option_cpu_value_table arm_fpus[] =
   {"neon-fp16",		FPU_ARCH_NEON_FP16},
   {"vfpv4",		FPU_ARCH_VFP_V4},
   {"vfpv4-d16",		FPU_ARCH_VFP_V4D16},
+  {"fpv4-sp-d16",	FPU_ARCH_VFP_V4_SP_D16},
   {"neon-vfpv4",	FPU_ARCH_NEON_VFP_V4},
   {NULL,		ARM_ARCH_NONE}
 };
@@ -22625,7 +22626,7 @@ aeabi_set_public_attributes (void)
 			     ? 5 : 6);
   else if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_d32))
     aeabi_set_attribute_int (Tag_VFP_arch, 3);
-  else if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_v3))
+  else if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_v3xd))
     aeabi_set_attribute_int (Tag_VFP_arch, 4);
   else if (ARM_CPU_HAS_FEATURE (flags, fpu_vfp_ext_v2))
     aeabi_set_attribute_int (Tag_VFP_arch, 2);

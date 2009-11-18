@@ -1,3 +1,8 @@
+2009-11-18  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (arm_fpus): Add fpv4-sp-d16.
+	(aeabi_set_public_attributes): Correctly mark VFPv3xD.
+
 2009-11-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (md_assemble): Report error on invalid @tls operands
