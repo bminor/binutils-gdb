@@ -879,30 +879,35 @@ static enum misc_command_type
 process_next_line (char *p, struct command_line **command, int parse_commands)
 {
   char *p1;
+  char *p2;
   int not_handled = 0;
 
   /* Not sure what to do here.  */
   if (p == NULL)
     return end_command;
 
-  if (parse_commands)
-    {
-      /* Strip leading whitespace.  */
-      while (*p == ' ' || *p == '\t')
-	p++;
-    }
-
   /* Strip trailing whitespace.  */
   p1 = p + strlen (p);
   while (p1 != p && (p1[-1] == ' ' || p1[-1] == '\t'))
     p1--;
 
-  /* Is this the end of a simple, while, or if control structure?  */
-  if (p1 - p == 3 && !strncmp (p, "end", 3))
-    return end_command;
+  p2 = p;
+  /* Strip leading whitespace.  */
+  while (*p2 == ' ' || *p2 == '\t')
+    p2++;
 
+  /* 'end' is always recognized, regardless of parse_commands value. 
+     We also permit whitespace before end and after.  */
+  if (p1 - p2 == 3 && !strncmp (p2, "end", 3))
+    return end_command;
+  
   if (parse_commands)
     {
+      /* If commands are parsed, we skip initial spaces. Otherwise,
+	 which is the case for Python commands and documentation
+	 (see the 'document' command), spaces are preserved.  */
+      p = p2;
+
       /* Blanks and comments don't really do anything, but we need to
 	 distinguish them from else, end and other commands which can be
 	 executed.  */

@@ -1,3 +1,9 @@
+2009-11-18  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* cli/cli-script.c (process_next_line): Recognize 'end'
+	even when the line has leading space and we're not parsing
+	commands.
+
 2009-11-18  Tom Tromey  <tromey@redhat.com>
 
 	* symtab.c (symbol_set_names): Correctly set 'name' on symbol when
