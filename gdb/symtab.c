@@ -676,7 +676,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	(*slot)->demangled[0] = '\0';
     }
 
-  gsymbol->name = (*slot)->mangled;
+  gsymbol->name = (*slot)->mangled + lookup_len - len;
   if ((*slot)->demangled[0] != '\0')
     gsymbol->language_specific.cplus_specific.demangled_name
       = (*slot)->demangled;

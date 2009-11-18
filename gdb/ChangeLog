@@ -1,3 +1,8 @@
+2009-11-18  Tom Tromey  <tromey@redhat.com>
+
+	* symtab.c (symbol_set_names): Correctly set 'name' on symbol when
+	lookup name differs.
+
 2009-11-18  Tristan Gingold  <gingold@adacore.com>
 
 	* machoread.c (macho_oso_symfile): Fix typo.  Add comments.
