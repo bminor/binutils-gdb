@@ -1,5 +1,9 @@
 2009-11-19  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (discrete_type_p): TYPE_CODE_BOOL is also a discrete type.
+
+2009-11-19  Joel Brobecker  <brobecker@adacore.com>
+
 	* completer.c (complete_line_internal): Make sure the command
 	completer is not NULL before calling it.
 

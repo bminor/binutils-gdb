@@ -3585,6 +3585,7 @@ discrete_type_p (struct type *type)
         case TYPE_CODE_INT:
         case TYPE_CODE_RANGE:
         case TYPE_CODE_ENUM:
+        case TYPE_CODE_BOOL:
           return 1;
         default:
           return 0;
