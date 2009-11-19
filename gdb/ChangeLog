@@ -1,3 +1,10 @@
+2009-11-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_remove_Xbn_suffix): New function.
+	(find_old_style_renaming_symbol): Add handling for function suffixes
+	present in the name of various procedures.
+	Do not overwrite the function symbol's name.
+
 2009-11-19  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (breakpoint_address_bits): Visit all locations'

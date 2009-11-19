@@ -870,6 +870,26 @@ ada_remove_po_subprogram_suffix (const char *encoded, int *len)
     *len = *len - 1;
 }
 
+/* Remove trailing X[bn]* suffixes (indicating names in package bodies).  */
+
+static void
+ada_remove_Xbn_suffix (const char *encoded, int *len)
+{
+  int i = *len - 1;
+
+  while (i > 0 && (encoded[i] == 'b' || encoded[i] == 'n'))
+    i--;
+
+  if (encoded[i] != 'X')
+    return;
+
+  if (i == 0)
+    return;
+
+  if (isalnum (encoded[i-1]))
+    *len = i;
+}
+
 /* If ENCODED follows the GNAT entity encoding conventions, then return
    the decoded form of ENCODED.  Otherwise, return "<%s>" where "%s" is
    replaced by ENCODED.
@@ -6511,12 +6531,14 @@ find_old_style_renaming_symbol (const char *name, struct block *block)
          the XR type name, we need to make sure that this suffix is
          not included.  So do not include any suffix in the function
          name length below.  */
-      const int function_name_len = ada_name_prefix_len (function_name);
+      int function_name_len = ada_name_prefix_len (function_name);
       const int rename_len = function_name_len + 2      /*  "__" */
         + strlen (name) + 6 /* "___XR\0" */ ;
 
       /* Strip the suffix if necessary.  */
-      function_name[function_name_len] = '\0';
+      ada_remove_trailing_digits (function_name, &function_name_len);
+      ada_remove_po_subprogram_suffix (function_name, &function_name_len);
+      ada_remove_Xbn_suffix (function_name, &function_name_len);
 
       /* Library-level functions are a special case, as GNAT adds
          a ``_ada_'' prefix to the function name to avoid namespace
@@ -6524,11 +6546,15 @@ find_old_style_renaming_symbol (const char *name, struct block *block)
          have this prefix, so we need to skip this prefix if present.  */
       if (function_name_len > 5 /* "_ada_" */
           && strstr (function_name, "_ada_") == function_name)
-        function_name = function_name + 5;
+        {
+	  function_name += 5;
+	  function_name_len -= 5;
+        }
 
       rename = (char *) alloca (rename_len * sizeof (char));
-      xsnprintf (rename, rename_len * sizeof (char), "%s__%s___XR", 
-		 function_name, name);
+      strncpy (rename, function_name, function_name_len);
+      xsnprintf (rename + function_name_len, rename_len - function_name_len,
+		 "__%s___XR", name);
     }
   else
     {
