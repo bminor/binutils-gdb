@@ -1,3 +1,8 @@
+2009-11-19  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (breakpoint_address_bits): Visit all locations'
+	gdbarchs, not the breakpoint's gdbarch.
+
 2009-11-18  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* cli/cli-script.c (process_next_line): Recognize 'end'

@@ -4268,7 +4268,7 @@ breakpoint_address_bits (struct breakpoint *b)
 
   for (loc = b->loc; loc; loc = loc->next)
     {
-      int addr_bit = gdbarch_addr_bit (b->gdbarch);
+      int addr_bit = gdbarch_addr_bit (loc->gdbarch);
       if (addr_bit > print_address_bits)
 	print_address_bits = addr_bit;
     }
