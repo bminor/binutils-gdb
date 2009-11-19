@@ -1,3 +1,9 @@
+2009-11-19  Matthias Klose  <doko@ubuntu.com>
+
+	PR ld/9863
+	* emulparams/armelf_linux.sh (DATA_START_SYMBOLS): Use PROVIDE
+	with __data_start.
+
 2009-11-19  Ben Elliston  <bje@au.ibm.com>
 
 	* ldlex.l: Enable nounput flex option.
