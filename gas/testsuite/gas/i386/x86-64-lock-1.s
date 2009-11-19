@@ -16,6 +16,7 @@ foo:
 	lock bts $0x64, (%rbx)
 	lock cmpxchg %eax,(%rbx)
 	lock cmpxchg8b (%rbx)
+	lock cmpxchg16b (%rbx)
 	lock decl (%rbx)
 	lock incl (%rbx)
 	lock negl (%rbx)
@@ -47,6 +48,7 @@ foo:
 	lock bts DWORD PTR [rbx],0x64
 	lock cmpxchg DWORD PTR [rbx],eax
 	lock cmpxchg8b QWORD PTR [rbx]
+	lock cmpxchg16b OWORD PTR [rbx]
 	lock dec DWORD PTR [rbx]
 	lock inc DWORD PTR [rbx]
 	lock neg DWORD PTR [rbx]

@@ -22,6 +22,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	f0 0f ba 2b 64       	lock bts DWORD PTR \[rbx\],0x64
 [ 	]*[a-f0-9]+:	f0 0f b1 03          	lock cmpxchg DWORD PTR \[rbx\],eax
 [ 	]*[a-f0-9]+:	f0 0f c7 0b          	lock cmpxchg8b QWORD PTR \[rbx\]
+[ 	]*[a-f0-9]+:	f0 48 0f c7 0b       	lock cmpxchg16b OWORD PTR \[rbx\]
 [ 	]*[a-f0-9]+:	f0 ff 0b             	lock dec DWORD PTR \[rbx\]
 [ 	]*[a-f0-9]+:	f0 ff 03             	lock inc DWORD PTR \[rbx\]
 [ 	]*[a-f0-9]+:	f0 f7 1b             	lock neg DWORD PTR \[rbx\]
@@ -51,6 +52,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	f0 0f ba 2b 64       	lock bts DWORD PTR \[rbx\],0x64
 [ 	]*[a-f0-9]+:	f0 0f b1 03          	lock cmpxchg DWORD PTR \[rbx\],eax
 [ 	]*[a-f0-9]+:	f0 0f c7 0b          	lock cmpxchg8b QWORD PTR \[rbx\]
+[ 	]*[a-f0-9]+:	f0 48 0f c7 0b       	lock cmpxchg16b OWORD PTR \[rbx\]
 [ 	]*[a-f0-9]+:	f0 ff 0b             	lock dec DWORD PTR \[rbx\]
 [ 	]*[a-f0-9]+:	f0 ff 03             	lock inc DWORD PTR \[rbx\]
 [ 	]*[a-f0-9]+:	f0 f7 1b             	lock neg DWORD PTR \[rbx\]

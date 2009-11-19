@@ -1,3 +1,8 @@
+2009-11-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.tbl: Add IsLockable to cmpxch16b.
+	* i386-tbl.h: Regenerated.
+
 2009-11-19  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/10924
