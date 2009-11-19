@@ -352,7 +352,7 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
   int bitsize;
   int n_indices;
 
-  if (ada_is_packed_array_type (type))
+  if (ada_is_constrained_packed_array_type (type))
     type = ada_coerce_to_simple_array_type (type);
 
   bitsize = 0;
@@ -770,7 +770,7 @@ ada_print_type (struct type *type0, char *varstring, struct ui_file *stream,
 
   if (ada_is_aligner_type (type))
     ada_print_type (ada_aligned_type (type), "", stream, show, level);
-  else if (ada_is_packed_array_type (type))
+  else if (ada_is_constrained_packed_array_type (type))
     {
       if (TYPE_CODE (type) == TYPE_CODE_PTR)
         {

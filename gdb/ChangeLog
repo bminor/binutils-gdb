@@ -1,3 +1,23 @@
+2009-11-19  Jerome Guitton  <guitton@adacore.com>
+
+	* ada-lang.c (packed_array_type): Rename to...
+	(constrained_packed_array_type): ...and update comment.
+	(decode_packed_array, decode_constrained_packed_array): Ditto.
+	(decode_packed_array_type, decode_constrained_packed_array_type):
+	Ditto.
+	(ada_is_constrained_packed_array_type): New function.
+	(ada_is_unconstrained_packed_array_type): New function.
+	(decode_packed_array_bitsize): New function, extracted from
+	decode_packed_array_type.
+	(ada_type_of_array): Add support for unconstrained packed arrays.
+	(ada_coerce_to_simple_array_ptr, ada_coerce_to_simple_array)
+	(ada_array_bound_from_type, ada_array_bound, ada_array_length)
+	(ada_prefer_type, to_fixed_array_type, ada_evaluate_subexp): Resync.
+	* ada-lang.h (ada_is_packed_array_type,
+	ada_is_constrained_packed_array_type): Renaming.
+	* ada-valprint.c (ada_val_print_1): Resync.
+	* ada-typeprint.c (print_array_type, ada_print_type): Resync.
+
 2009-11-19  Joel Brobecker  <brobecker@adacore.com>
 
 	Wrong function used to perform address addition/subtraction.

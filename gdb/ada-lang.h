@@ -243,7 +243,7 @@ extern struct type *ada_parent_type (struct type *);
 
 extern int ada_is_ignored_field (struct type *, int);
 
-extern int ada_is_packed_array_type (struct type *);
+extern int ada_is_constrained_packed_array_type (struct type *);
 
 extern struct value *ada_value_primitive_packed_val (struct value *,
 						     const gdb_byte *,
