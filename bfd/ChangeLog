@@ -1,3 +1,11 @@
+2009-11-19  Tristan Gingold  <gingold@adacore.com>
+
+	* coff-rs6000.c (rs6000coff_vec): Use generic routines instead of
+	hard-coded casts.
+	(pmac_xcoff_vec): Ditto.
+	* coff64-rs6000.c (rs6000coff64_vec): Ditto.
+	(aix5coff64_vec): Ditto.
+
 2009-11-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* bfd-in.h (_bfd_elf_ppc_at_tls_transform): Declare.
