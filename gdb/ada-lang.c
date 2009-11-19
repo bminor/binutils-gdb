@@ -2977,10 +2977,9 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
 
 /* Return non-zero if formal type FTYPE matches actual type ATYPE.  If
    MAY_DEREF is non-zero, the formal may be a pointer and the actual
-   a non-pointer.   A type of 'void' (which is never a valid expression type)
-   by convention matches anything. */
+   a non-pointer.  */
 /* The term "match" here is rather loose.  The match is heuristic and
-   liberal.  FIXME: TOO liberal, in fact.  */
+   liberal.  */
 
 static int
 ada_type_match (struct type *ftype, struct type *atype, int may_deref)
@@ -2993,14 +2992,10 @@ ada_type_match (struct type *ftype, struct type *atype, int may_deref)
   if (TYPE_CODE (atype) == TYPE_CODE_REF)
     atype = TYPE_TARGET_TYPE (atype);
 
-  if (TYPE_CODE (ftype) == TYPE_CODE_VOID
-      || TYPE_CODE (atype) == TYPE_CODE_VOID)
-    return 1;
-
   switch (TYPE_CODE (ftype))
     {
     default:
-      return 1;
+      return TYPE_CODE (ftype) == TYPE_CODE (atype);
     case TYPE_CODE_PTR:
       if (TYPE_CODE (atype) == TYPE_CODE_PTR)
         return ada_type_match (TYPE_TARGET_TYPE (ftype),

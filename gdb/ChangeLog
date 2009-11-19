@@ -1,5 +1,12 @@
 2009-11-19  Joel Brobecker  <brobecker@adacore.com>
 
+	Wrong function used to perform address addition/subtraction.
+	* ada-lang.c (ada_type_match): Stop making TYPE_CODE_VOID
+	a wildcard matching any type.  For types that we don't already
+	handle specifically, make sure that both types have the same code.
+
+2009-11-19  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_decode): Add handling of "TB" suffixes for
 	task bodies.  
 
