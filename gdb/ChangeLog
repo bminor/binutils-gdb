@@ -1,3 +1,8 @@
+2009-11-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* completer.c (complete_line_internal): Make sure the command
+	completer is not NULL before calling it.
+
 2009-11-19  Jerome Guitton  <guitton@adacore.com>
 
 	* ada-lang.c (packed_array_type): Rename to...
