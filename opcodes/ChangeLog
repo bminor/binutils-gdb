@@ -1,3 +1,9 @@
+2009-11-19  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/10924
+	* arm-dis.c (print_insn_arm): Do not print an offset of zero when
+	decoding Immediaate Offset addressing.
+
 2009-11-18  Sebastian Pop  <sebastian.pop@amd.com>
 
 	PR binutils/10973

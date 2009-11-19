@@ -2871,7 +2871,10 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 
 			  if (PRE_BIT_SET)
 			    {
-			      func (stream, "[pc, #%d]\t; ", offset);
+			      if (offset)
+				func (stream, "[pc, #%d]\t; ", offset);
+			      else
+				func (stream, "[pc]\t; ");				
 			      info->print_address_func (offset + pc + 8, info);
 			    }
 			  else
@@ -2892,14 +2895,20 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 
 			  if (PRE_BIT_SET)
 			    {
-                              /* Pre-indexed.  */
 			      if (IMMEDIATE_BIT_SET)
 				{
-				  /* PR 10924: Offset must be printed, even if it is zero.  */
-				  func (stream, ", #%d", offset);
+				  if (WRITEBACK_BIT_SET)
+				    /* Immediate Pre-indexed.  */
+				    /* PR 10924: Offset must be printed, even if it is zero.  */
+				    func (stream, ", #%d", offset);
+				  else if (offset)
+				    /* Immediate Offset: printing zero offset is optional.  */
+				    func (stream, ", #%d", offset);
+
 				  value_in_comment = offset;
 				}
-			      else /* Register.  */
+			      else
+				/* Register Offset or Register Pre-Indexed.  */
 				func (stream, ", %s%s",
 				      NEGATIVE_BIT_SET ? "-" : "",
 				      arm_regnames[given & 0xf]);
@@ -2907,19 +2916,24 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			      func (stream, "]%s",
 				    WRITEBACK_BIT_SET ? "!" : "");
 			    }
-			  else /* Post-indexed.  */
+			  else
 			    {
 			      if (IMMEDIATE_BIT_SET)
 				{
+				  /* Immediate Post-indexed.  */
 				  /* PR 10924: Offset must be printed, even if it is zero.  */
 				  func (stream, "], #%d", offset);
 				  value_in_comment = offset;
 				}
-			      else /* Register.  */
+			      else
+				/* Register Post-indexed.  */
 				func (stream, "], %s%s",
 				      NEGATIVE_BIT_SET ? "-" : "",
 				      arm_regnames[given & 0xf]);
 
+			      /* Writeback is automatically implied by post- addressing.
+				 Setting the W bit is unnecessary and ARM specify it as
+				 being unpredictable.  */
 			      if (WRITEBACK_BIT_SET && ! allow_unpredictable)
 				func (stream, UNPREDICTABLE_INSTRUCTION);
 			    }

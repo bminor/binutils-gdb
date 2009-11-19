@@ -12,7 +12,7 @@ Disassembly of section .text:
 0+04 <[^>]+> 012fff11 ?	bxeq	r1
 .*: R_ARM_V4BX.*
 0+08 <[^>]+> e15f30b8 ?	ldrh	r3, \[pc, #-8\]	; 0+08 <[^>]+>
-0+0c <[^>]+> e1d540f0 ?	ldrsh	r4, \[r5, #0\]
+0+0c <[^>]+> e1d540f0 ?	ldrsh	r4, \[r5\]
 0+10 <[^>]+> e19140d3 ?	ldrsb	r4, \[r1, r3\]
 0+14 <[^>]+> e1b410f4 ?	ldrsh	r1, \[r4, r4\]!
 0+18 <[^>]+> 011510d3 ?	ldrsbeq	r1, \[r5, -r3\]
@@ -22,7 +22,7 @@ Disassembly of section .text:
 0+28 <[^>]+> e1541ffa ?	ldrsh	r1, \[r4, #-250\].*
 0+2c <[^>]+> e1d51fd0 ?	ldrsb	r1, \[r5, #240\].*
 0+30 <[^>]+> e1cf23b0 ?	strh	r2, \[pc, #48\]	; 0+68 <[^>]+>
-0+34 <[^>]+> 11c330b0 ?	strhne	r3, \[r3, #0\]
+0+34 <[^>]+> 11c330b0 ?	strhne	r3, \[r3\]
 0+38 <[^>]+> e328f002 ?	msr	CPSR_f, #2
 0+3c <[^>]+> e121f003 ?	msr	CPSR_c, r3
 0+40 <[^>]+> e122f004 ?	msr	CPSR_x, r4

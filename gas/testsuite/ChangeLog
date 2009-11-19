@@ -1,3 +1,15 @@
+2009-11-19  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/10924
+	* gas/arm/arch4t-eabi.d: Restore previous expected dissambly of
+	instructions using Immediate Offset addressing with an offset of
+	zero.
+	* gas/arm/arch4t.d: Likewise.
+	* gas/arm/arm7t.d: Likewise.
+	* gas/arm/xscale.d: Likewise.
+	* gas/arm/wince-inst.d: Remove 'p' suffix from cmp, cmn, teq and
+	tst instructions.
+
 2009-11-18  Sebastian Pop  <sebastian.pop@amd.com>
 
 	* gas/i386/x86-64-xop.d: Update patterns.
