@@ -1,5 +1,9 @@
 2009-11-18  Sebastian Pop  <sebastian.pop@amd.com>
 
+	* gas/i386/x86-64-xop.d: Update patterns.
+
+2009-11-18  Sebastian Pop  <sebastian.pop@amd.com>
+
 	* gas/i386/cvt16.d: Removed.
 	* gas/i386/cvt16.s: Removed.
 	* gas/i386/x86-64-cvt16.d: Removed.

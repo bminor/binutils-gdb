@@ -1,5 +1,13 @@
 2009-11-18  Sebastian Pop  <sebastian.pop@amd.com>
 
+	PR binutils/10973
+	* i386-dis.c (get_vex_imm8): Do not increment codep.
+	Avoid incrementing bytes_before_imm when OP_E_memory
+	has already forwarded the codep pointer.
+	(OP_EX_VexW): Increment codep to skip mod/rm byte.
+
+2009-11-18  Sebastian Pop  <sebastian.pop@amd.com>
+
 	* i386-dis.c (VEX_LEN_XOP_08_A0): Removed.
 	(VEX_LEN_XOP_08_A1): Removed.
 	(xop_table): Remove entries for VEX_LEN_XOP_08_A0 and

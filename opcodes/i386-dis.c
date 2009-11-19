@@ -13695,10 +13695,6 @@ get_vex_imm8 (int sizeflag)
 {
   int bytes_before_imm = 0;
 
-  /* Skip mod/rm byte.   */
-  MODRM_CHECK;
-  codep++;
-
   if (modrm.mod != 3)
     {
       /* There are SIB/displacement bytes.  */
@@ -13712,7 +13708,8 @@ get_vex_imm8 (int sizeflag)
 	    {
 	      FETCH_DATA (the_info, codep + 1);
 	      base = *codep & 7;
-	      bytes_before_imm++;
+	      /* Don't increase bytes_before_imm as this has already
+		 been done in OP_E_memory.  */
 	    }
 
 	  switch (modrm.mod)
@@ -13728,8 +13725,8 @@ get_vex_imm8 (int sizeflag)
 	      bytes_before_imm += 4;
 	      break;
 	    case 1:
-	      /* 1 byte displacement.  */
-	      bytes_before_imm++;
+	      /* 1 byte displacement: codep has already been
+		 incremented by 1 in OP_E_memory.  */
 	      break;
 	    }
 	}
@@ -13747,8 +13744,8 @@ get_vex_imm8 (int sizeflag)
 	      bytes_before_imm += 2;
 	      break;
 	    case 1:
-	      /* 1 byte displacement.  */
-	      bytes_before_imm++;
+	      /* 1 byte displacement: codep has already been
+		 incremented by 1 in OP_E_memory.  */
 	      break;
 	    }
 	}
@@ -13853,6 +13850,11 @@ OP_EX_VexW (int bytemode, int sizeflag)
   if (!vex_w_done)
     {
       vex_w_done = 1;
+
+      /* Skip mod/rm byte.  */
+      MODRM_CHECK;
+      codep++;
+
       if (vex.w)
 	reg = get_vex_imm8 (sizeflag) >> 4;
     }
