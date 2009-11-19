@@ -1,3 +1,7 @@
+2009-11-19  Ben Elliston  <bje@au.ibm.com>
+
+	* ldlex.l: Enable nounput flex option.
+
 2009-11-15  Kai Tietz  <kai.tietz@onevision.com>
 
 	* pe-dll.c (pe_undef_alias_cdecl_match): New function.

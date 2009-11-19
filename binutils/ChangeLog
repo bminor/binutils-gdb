@@ -1,5 +1,10 @@
+2009-11-19  Ben Elliston  <bje@au.ibm.com>
+
+	* arlex.l: Enable noinput, nounput flex options.
+	* syslex.l: Likewise.
+
 2009-11-17  Paul Brook  <paul@codesourcery.com>
-	Daniel Jacobowitz  <dan@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* readelf.c (arm_attr_tag_CPU_arch): Add v7E-M.
 

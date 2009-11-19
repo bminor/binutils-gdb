@@ -1,3 +1,5 @@
+%option noinput nounput
+
 %{
 /* arlex.l - Strange script language lexer */
 
