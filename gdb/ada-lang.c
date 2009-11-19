@@ -946,6 +946,13 @@ ada_decode (const char *encoded)
   if (len0 > 3 && strncmp (encoded + len0 - 3, "TKB", 3) == 0)
     len0 -= 3;
 
+  /* Remove any trailing TB suffix.  The TB suffix is slightly different
+     from the TKB suffix because it is used for non-anonymous task
+     bodies.  */
+
+  if (len0 > 2 && strncmp (encoded + len0 - 2, "TB", 2) == 0)
+    len0 -= 2;
+
   /* Remove trailing "B" suffixes.  */
   /* FIXME: brobecker/2006-04-19: Not sure what this are used for...  */
 

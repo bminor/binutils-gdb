@@ -1,5 +1,10 @@
 2009-11-19  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_decode): Add handling of "TB" suffixes for
+	task bodies.  
+
+2009-11-19  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_remove_Xbn_suffix): New function.
 	(find_old_style_renaming_symbol): Add handling for function suffixes
 	present in the name of various procedures.
