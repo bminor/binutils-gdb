@@ -1,3 +1,8 @@
+2009-11-19  Jan Beulich  <jbeulich@novell.com>
+
+	* read.c (pseudo_set): Also call copy_symbol_attributes() for
+	undefined target symbol.
+
 2009-11-18  Sebastian Pop  <sebastian.pop@amd.com>
 
 	* config/tc-i386.c (cpu_arch): Remove cvt16.

@@ -3750,6 +3750,7 @@ pseudo_set (symbolS *symbolP)
 	}
       S_SET_SEGMENT (symbolP, undefined_section);
       symbol_set_value_expression (symbolP, &exp);
+      copy_symbol_attributes (symbolP, exp.X_add_symbol);
       set_zero_frag (symbolP);
       break;
 
