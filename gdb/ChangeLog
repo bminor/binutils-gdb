@@ -1,5 +1,12 @@
 2009-11-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* breakpoint.c (bp_location_compare): Change parameter a to ap and b to
+	bp.  New variables a and b.
+	(bp_location_compare_for_qsort): Remove.
+	(update_global_location_list): Use now bp_location_compare.
+
+2009-11-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix repeated rwatch output.
 	* amd64-linux-nat.c (amd64_linux_dr_set, amd64_linux_dr_set_control)
 	(amd64_linux_dr_set_addr, amd64_linux_dr_reset_addr)

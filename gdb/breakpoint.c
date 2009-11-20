@@ -8112,15 +8112,17 @@ breakpoint_auto_delete (bpstat bs)
   }
 }
 
-/* A comparison function for bp_location A and B being interfaced to qsort.
+/* A comparison function for bp_location AP and BP being interfaced to qsort.
    Sort elements primarily by their ADDRESS (no matter what does
    breakpoint_address_is_meaningful say for its OWNER), secondarily by ordering
    first bp_permanent OWNERed elements and terciarily just ensuring the array
    is sorted stable way despite qsort being an instable algorithm.  */
 
 static int
-bp_location_compare (struct bp_location *a, struct bp_location *b)
+bp_location_compare (const void *ap, const void *bp)
 {
+  struct bp_location *a = *(void **) ap;
+  struct bp_location *b = *(void **) bp;
   int a_perm = a->owner->enable_state == bp_permanent;
   int b_perm = b->owner->enable_state == bp_permanent;
 
@@ -8139,17 +8141,6 @@ bp_location_compare (struct bp_location *a, struct bp_location *b)
            - (a->owner->number < b->owner->number);
 
   return (a > b) - (a < b);
-}
-
-/* Interface bp_location_compare as the COMPAR parameter of qsort function.  */
-
-static int
-bp_location_compare_for_qsort (const void *ap, const void *bp)
-{
-  struct bp_location *a = *(void **) ap;
-  struct bp_location *b = *(void **) bp;
-
-  return bp_location_compare (a, b);
 }
 
 /* Set bp_location_placed_address_before_address_max and
@@ -8235,7 +8226,7 @@ update_global_location_list (int should_insert)
     for (loc = b->loc; loc; loc = loc->next)
       *locp++ = loc;
   qsort (bp_location, bp_location_count, sizeof (*bp_location),
-	 bp_location_compare_for_qsort);
+	 bp_location_compare);
 
   bp_location_target_extensions_update ();
 
