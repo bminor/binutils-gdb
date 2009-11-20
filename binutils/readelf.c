@@ -139,6 +139,7 @@
 #include "elf/v850.h"
 #include "elf/vax.h"
 #include "elf/x86-64.h"
+#include "elf/xc16x.h"
 #include "elf/xstormy16.h"
 #include "elf/xtensa.h"
 
@@ -1221,6 +1222,11 @@ dump_relocations (FILE * file,
 	case EM_RX:
 	  rtype = elf_rx_reloc_type (type);
 	  break;
+
+	case EM_XC16X:
+	case EM_C166:
+	  rtype = elf_xc16x_reloc_type (type);
+	  break;
 	}
 
       if (rtype == NULL)
@@ -1887,6 +1893,7 @@ get_machine_name (unsigned e_machine)
     case EM_BLACKFIN:		return "Analog Devices Blackfin";
     case EM_NIOS32:		return "Altera Nios";
     case EM_ALTERA_NIOS2:	return "Altera Nios II";
+    case EM_C166:
     case EM_XC16X:		return "Infineon Technologies xc16x";
     case EM_CYGNUS_MEP:         return "Toshiba MeP Media Engine";
     case EM_CR16:
@@ -8094,12 +8101,14 @@ is_32bit_abs_reloc (unsigned int reloc_type)
     case EM_X86_64:
     case EM_L1OM:
       return reloc_type == 10; /* R_X86_64_32.  */
+    case EM_XC16X:
+    case EM_C166:
+      return reloc_type == 3; /* R_XC16C_ABS_32.  */
     case EM_XSTORMY16:
       return reloc_type == 1; /* R_XSTROMY16_32.  */
     case EM_XTENSA_OLD:
     case EM_XTENSA:
       return reloc_type == 1; /* R_XTENSA_32.  */
-
     default:
       error (_("Missing knowledge of 32-bit reloc types used in DWARF sections of machine number %d\n"),
 	     elf_header.e_machine);
@@ -8267,6 +8276,9 @@ is_16bit_abs_reloc (unsigned int reloc_type)
     case EM_ALTERA_NIOS2:
     case EM_NIOS32:
       return reloc_type == 9; /* R_NIOS_16.  */
+    case EM_XC16X:
+    case EM_C166:
+      return reloc_type == 2; /* R_XC16C_ABS_16.  */
     default:
       return FALSE;
     }
@@ -8300,6 +8312,8 @@ is_none_reloc (unsigned int reloc_type)
     case EM_L1OM:    /* R_X86_64_NONE.  */
     case EM_MN10300: /* R_MN10300_NONE.  */
     case EM_M32R:    /* R_M32R_NONE.  */
+    case EM_XC16X:
+    case EM_C166:    /* R_XC16X_NONE.  */
       return reloc_type == 0;
     case EM_XTENSA_OLD:
     case EM_XTENSA:
