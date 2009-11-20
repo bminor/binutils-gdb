@@ -586,6 +586,8 @@ i386_linux_store_inferior_registers (struct target_ops *ops,
 
 static unsigned long i386_linux_dr[DR_CONTROL + 1];
 
+/* Get debug register REGNUM value from only the one LWP of PTID.  */
+
 static unsigned long
 i386_linux_dr_get (ptid_t ptid, int regnum)
 {
@@ -614,6 +616,8 @@ i386_linux_dr_get (ptid_t ptid, int regnum)
   return value;
 }
 
+/* Set debug register REGNUM to VALUE in only the one LWP of PTID.  */
+
 static void
 i386_linux_dr_set (ptid_t ptid, int regnum, unsigned long value)
 {
@@ -630,6 +634,8 @@ i386_linux_dr_set (ptid_t ptid, int regnum, unsigned long value)
     perror_with_name (_("Couldn't write debug register"));
 }
 
+/* Set DR_CONTROL to ADDR in all LWPs of LWP_LIST.  */
+
 static void
 i386_linux_dr_set_control (unsigned long control)
 {
@@ -640,6 +646,8 @@ i386_linux_dr_set_control (unsigned long control)
   ALL_LWPS (lp, ptid)
     i386_linux_dr_set (ptid, DR_CONTROL, control);
 }
+
+/* Set address REGNUM (zero based) to ADDR in all LWPs of LWP_LIST.  */
 
 static void
 i386_linux_dr_set_addr (int regnum, CORE_ADDR addr)
@@ -654,16 +662,38 @@ i386_linux_dr_set_addr (int regnum, CORE_ADDR addr)
     i386_linux_dr_set (ptid, DR_FIRSTADDR + regnum, addr);
 }
 
+/* Set address REGNUM (zero based) to zero in all LWPs of LWP_LIST.  */
+
 static void
 i386_linux_dr_reset_addr (int regnum)
 {
   i386_linux_dr_set_addr (regnum, 0);
 }
 
+/* Get DR_STATUS from only the one LWP of INFERIOR_PTID.  */
+
 static unsigned long
 i386_linux_dr_get_status (void)
 {
   return i386_linux_dr_get (inferior_ptid, DR_STATUS);
+}
+
+/* Unset MASK bits in DR_STATUS in all LWPs of LWP_LIST.  */
+
+static void
+i386_linux_dr_unset_status (unsigned long mask)
+{
+  struct lwp_info *lp;
+  ptid_t ptid;
+
+  ALL_LWPS (lp, ptid)
+    {
+      unsigned long value;
+      
+      value = i386_linux_dr_get (ptid, DR_STATUS);
+      value &= ~mask;
+      i386_linux_dr_set (ptid, DR_STATUS, value);
+    }
 }
 
 static void
@@ -837,6 +867,7 @@ _initialize_i386_linux_nat (void)
   i386_dr_low.set_addr = i386_linux_dr_set_addr;
   i386_dr_low.reset_addr = i386_linux_dr_reset_addr;
   i386_dr_low.get_status = i386_linux_dr_get_status;
+  i386_dr_low.unset_status = i386_linux_dr_unset_status;
   i386_set_debug_register_length (4);
 
   /* Override the default ptrace resume method.  */

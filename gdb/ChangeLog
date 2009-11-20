@@ -1,4 +1,24 @@
 2009-11-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix repeated rwatch output.
+	* amd64-linux-nat.c (amd64_linux_dr_set, amd64_linux_dr_set_control)
+	(amd64_linux_dr_set_addr, amd64_linux_dr_reset_addr)
+	(amd64_linux_dr_get_status): New comments.
+	(amd64_linux_dr_unset_status): New function.
+	(_initialize_amd64_linux_nat): Install it.
+	* i386-linux-nat.c (i386_linux_dr_get, i386_linux_dr_set)
+	(i386_linux_dr_set_control, i386_linux_dr_set_addr)
+	(i386_linux_dr_reset_addr, i386_linux_dr_get_status): New comments.
+	(i386_linux_dr_unset_status): New function.
+	(_initialize_i386_linux_nat): Install it.
+	* i386-nat.c (I386_DR_WATCH_MASK): New macro.
+	(I386_DR_WATCH_HIT): Use I386_DR_WATCH_MASK.
+	(i386_insert_aligned_watchpoint): Call i386_dr_low.unset_status.
+	* i386-nat.h (struct i386_dr_low_type): Extend comments for
+	set_control, set_addr, reset_addr and get_status.  New unset_status.
+	* breakpoint.c (update_watchpoint): Extend the comment.
+
+2009-11-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves  <pedro@codesourcery.com>
 
 	Fix reordered watchpoints triggered in other threads during all-stop.

@@ -993,7 +993,46 @@ fetch_watchpoint_value (struct expression *exp, struct value **valp,
    - Update the list of values that must be watched in B->loc.
 
    If the watchpoint disposition is disp_del_at_next_stop, then do nothing.
-   If this is local watchpoint that is out of scope, delete it.  */
+   If this is local watchpoint that is out of scope, delete it.
+
+   Even with `set breakpoint always-inserted on' the watchpoints are removed
+   + inserted on each stop here.  Normal breakpoints must never be removed
+   because they might be missed by a running thread when debugging in non-stop
+   mode.  On the other hand, hardware watchpoints (is_hardware_watchpoint;
+   processed here) are specific to each LWP since they are stored in each LWP's
+   hardware debug registers.  Therefore, such LWP must be stopped first in
+   order to be able to modify its hardware watchpoints.
+
+   Hardware watchpoints must be reset exactly once after being presented to the
+   user.  It cannot be done sooner, because it would reset the data used to
+   present the watchpoint hit to the user.  And it must not be done later
+   because it could display the same single watchpoint hit during multiple GDB
+   stops.  Note that the latter is relevant only to the hardware watchpoint
+   types bp_read_watchpoint and bp_access_watchpoint.  False hit by
+   bp_hardware_watchpoint is not user-visible - its hit is suppressed if the
+   memory content has not changed.
+
+   The following constraints influence the location where we can reset hardware
+   watchpoints:
+
+   * target_stopped_by_watchpoint and target_stopped_data_address are called
+     several times when GDB stops.
+
+   [linux]
+   * Multiple hardware watchpoints can be hit at the same time, causing GDB to
+     stop.  GDB only presents one hardware watchpoint hit at a time as the
+     reason for stopping, and all the other hits are presented later, one after
+     the other, each time the user requests the execution to be resumed.
+     Execution is not resumed for the threads still having pending hit event
+     stored in LWP_INFO->STATUS.  While the watchpoint is already removed from
+     the inferior on the first stop the thread hit event is kept being reported
+     from its cached value by linux_nat_stopped_data_address until the real
+     thread resume happens after the watchpoint gets presented and thus its
+     LWP_INFO->STATUS gets reset.
+
+   Therefore the hardware watchpoint hit can get safely reset on the watchpoint
+   removal from inferior.  */
+
 static void
 update_watchpoint (struct breakpoint *b, int reparse)
 {

@@ -137,8 +137,11 @@ struct i386_dr_low_type i386_dr_low;
 #define I386_DR_GET_RW_LEN(i) \
   ((dr_control_mirror >> (DR_CONTROL_SHIFT + DR_CONTROL_SIZE * (i))) & 0x0f)
 
+/* Mask that this I'th watchpoint has triggered.  */
+#define I386_DR_WATCH_MASK(i)	(1 << (i))
+
 /* Did the watchpoint whose address is in the I'th register break?  */
-#define I386_DR_WATCH_HIT(i)	(dr_status_mirror & (1 << (i)))
+#define I386_DR_WATCH_HIT(i)	(dr_status_mirror & I386_DR_WATCH_MASK (i))
 
 /* A macro to loop over all debug registers.  */
 #define ALL_DEBUG_REGISTERS(i)	for (i = 0; i < DR_NADDR; i++)
@@ -357,6 +360,10 @@ i386_insert_aligned_watchpoint (CORE_ADDR addr, unsigned len_rw_bits)
   /* Finally, actually pass the info to the inferior.  */
   i386_dr_low.set_addr (i, addr);
   i386_dr_low.set_control (dr_control_mirror);
+
+  /* Only a sanity check for leftover bits (set possibly only by inferior).  */
+  if (i386_dr_low.unset_status)
+    i386_dr_low.unset_status (I386_DR_WATCH_MASK (i));
 
   return 0;
 }
