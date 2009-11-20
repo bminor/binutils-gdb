@@ -1,3 +1,12 @@
+2009-11-20  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (handle_inferior_event): Hardware hatchpoint traps are
+	never random signals.
+	* breakpoint.c (update_global_location_list): Always delete
+	immediately delete hardware watchpoint locations and other
+	locations whose target address isn't meaningful.  Update comment
+	explaining the hazard of moribund locations.
+
 2009-11-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (discrete_type_p): TYPE_CODE_BOOL is also a discrete type.

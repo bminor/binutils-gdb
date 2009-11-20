@@ -3593,6 +3593,21 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 	 function.  */
       stop_print_frame = 1;
 
+      /* This is where we handle "moribund" watchpoints.  Unlike
+	 software breakpoints traps, hardware watchpoint traps are
+	 always distinguishable from random traps.  If no high-level
+	 watchpoint is associated with the reported stop data address
+	 anymore, then the bpstat does not explain the signal ---
+	 simply make sure to ignore it if `stopped_by_watchpoint' is
+	 set.  */
+
+      if (debug_infrun
+	  && ecs->event_thread->stop_signal == TARGET_SIGNAL_TRAP
+	  && !bpstat_explains_signal (ecs->event_thread->stop_bpstat)
+	  && stopped_by_watchpoint)
+	fprintf_unfiltered (gdb_stdlog, "\
+infrun: no user watchpoint explains watchpoint SIGTRAP, ignoring\n");
+
       /* NOTE: cagney/2003-03-29: These two checks for a random signal
          at one stage in the past included checks for an inferior
          function call's call dummy's return breakpoint.  The original
@@ -3616,6 +3631,7 @@ targets should add new threads to the thread list themselves in non-stop mode.")
       if (ecs->event_thread->stop_signal == TARGET_SIGNAL_TRAP)
 	ecs->random_signal
 	  = !(bpstat_explains_signal (ecs->event_thread->stop_bpstat)
+	      || stopped_by_watchpoint
 	      || ecs->event_thread->trap_expected
 	      || (ecs->event_thread->step_range_end
 		  && ecs->event_thread->step_resume_breakpoint == NULL));
