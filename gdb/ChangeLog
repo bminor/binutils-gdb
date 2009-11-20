@@ -1,3 +1,24 @@
+2009-11-20  Michael Snyder  <msnyder@vmware.com>
+
+        * target.h (struct target_ops): New methods to_get_bookmark
+        and to_goto_bookmark.
+        (target_get_bookmark): New macro.
+        (target_goto_bookmark): New macro.
+        * target.c (dummy_get_bookmark): New function, default implementation.
+        (dummy_goto_bookmark): New function, default implementation.
+        (update_current_target): Inherit new methods.
+        * record.c (record_get_bookmark): New function.
+        (record_goto_bookmark): New function.
+        (init_record_ops): Set to_get_bookmark and to_goto_bookmark methods.
+        * reverse.c (struct bookmark): New type.
+        (save_bookmark_command): New function (command).
+        (delete_bookmark_command): New function (command).
+        (goto_bookmark_command): New function (command).
+        (bookmarks_info): New function (command).
+        (_initialize_reverse): Add new bookmark commands.
+	* command.h (enum command_class): Add class_bookmark.
+	* NEWS: Mention bookmark commands.
+
 2009-11-20  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (update_global_location_list): Fix duplicate

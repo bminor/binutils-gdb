@@ -674,6 +674,8 @@ update_current_target (void)
       INHERIT (to_async_mask, t);
       INHERIT (to_find_memory_regions, t);
       INHERIT (to_make_corefile_notes, t);
+      INHERIT (to_get_bookmark, t);
+      INHERIT (to_goto_bookmark, t);
       /* Do not inherit to_get_thread_local_address.  */
       INHERIT (to_can_execute_reverse, t);
       INHERIT (to_thread_architecture, t);
@@ -2774,6 +2776,21 @@ dummy_make_corefile_notes (bfd *ignore1, int *ignore2)
   return NULL;
 }
 
+/* Error-catcher for target_get_bookmark.  */
+static gdb_byte *
+dummy_get_bookmark (char *ignore1, int ignore2)
+{
+  tcomplain ();
+  return NULL;
+}
+
+/* Error-catcher for target_goto_bookmark.  */
+static void
+dummy_goto_bookmark (gdb_byte *ignore, int from_tty)
+{
+  tcomplain ();
+}
+
 /* Set up the handful of non-empty slots needed by the dummy target
    vector.  */
 
@@ -2794,6 +2811,8 @@ init_dummy_target (void)
   dummy_target.to_stratum = dummy_stratum;
   dummy_target.to_find_memory_regions = dummy_find_memory_regions;
   dummy_target.to_make_corefile_notes = dummy_make_corefile_notes;
+  dummy_target.to_get_bookmark = dummy_get_bookmark;
+  dummy_target.to_goto_bookmark = dummy_goto_bookmark;
   dummy_target.to_xfer_partial = default_xfer_partial;
   dummy_target.to_has_all_memory = (int (*) (struct target_ops *)) return_zero;
   dummy_target.to_has_memory = (int (*) (struct target_ops *)) return_zero;

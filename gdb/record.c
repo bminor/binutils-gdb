@@ -1523,6 +1523,57 @@ record_can_execute_reverse (void)
   return 1;
 }
 
+/* "to_get_bookmark" method for process record and prec over core.  */
+
+static gdb_byte *
+record_get_bookmark (char *args, int from_tty)
+{
+  gdb_byte *ret = NULL;
+
+  /* Return stringified form of instruction count.  */
+  if (record_list && record_list->type == record_end)
+    ret = xstrdup (pulongest (record_list->u.end.insn_num));
+
+  if (record_debug)
+    {
+      if (ret)
+	fprintf_unfiltered (gdb_stdlog,
+			    "record_get_bookmark returns %s\n", ret);
+      else
+	fprintf_unfiltered (gdb_stdlog,
+			    "record_get_bookmark returns NULL\n");
+    }
+  return ret;
+}
+
+/* The implementation of the command "record goto".  */
+static void cmd_record_goto (char *, int);
+
+/* "to_goto_bookmark" method for process record and prec over core.  */
+
+static void
+record_goto_bookmark (gdb_byte *bookmark, int from_tty)
+{
+  if (record_debug)
+    fprintf_unfiltered (gdb_stdlog,
+			"record_goto_bookmark receives %s\n", bookmark);
+
+  if (bookmark[0] == '\'' || bookmark[0] == '\"')
+    {
+      if (bookmark[strlen (bookmark) - 1] != bookmark[0])
+	error (_("Unbalanced quotes: %s"), bookmark);
+
+      /* Strip trailing quote.  */
+      bookmark[strlen (bookmark) - 1] = '\0';
+      /* Strip leading quote.  */
+      bookmark++;
+      /* Pass along to cmd_record_goto.  */
+    }
+
+  cmd_record_goto ((char *) bookmark, from_tty);
+  return;
+}
+
 static void
 init_record_ops (void)
 {
@@ -1545,6 +1596,9 @@ init_record_ops (void)
   record_ops.to_remove_breakpoint = record_remove_breakpoint;
   record_ops.to_can_execute_reverse = record_can_execute_reverse;
   record_ops.to_stratum = record_stratum;
+  /* Add bookmark target methods.  */
+  record_ops.to_get_bookmark = record_get_bookmark;
+  record_ops.to_goto_bookmark = record_goto_bookmark;
   record_ops.to_magic = OPS_MAGIC;
 }
 
@@ -1750,6 +1804,9 @@ init_record_core_ops (void)
   record_core_ops.to_can_execute_reverse = record_can_execute_reverse;
   record_core_ops.to_has_execution = record_core_has_execution;
   record_core_ops.to_stratum = record_stratum;
+  /* Add bookmark target methods.  */
+  record_core_ops.to_get_bookmark = record_get_bookmark;
+  record_core_ops.to_goto_bookmark = record_goto_bookmark;
   record_core_ops.to_magic = OPS_MAGIC;
 }
 
@@ -2406,6 +2463,101 @@ cmd_record_save (char *args, int from_tty)
 		   recfilename);
 }
 
+/* record_goto_insn -- rewind the record log (forward or backward,
+   depending on DIR) to the given entry, changing the program state
+   correspondingly.  */
+
+static void
+record_goto_insn (struct record_entry *entry,
+		  enum exec_direction_kind dir)
+{
+  struct cleanup *set_cleanups = record_gdb_operation_disable_set ();
+  struct regcache *regcache = get_current_regcache ();
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+
+  /* Assume everything is valid: we will hit the entry,
+     and we will not hit the end of the recording.  */
+
+  if (dir == EXEC_FORWARD)
+    record_list = record_list->next;
+
+  do
+    {
+      record_exec_insn (regcache, gdbarch, record_list);
+      if (dir == EXEC_REVERSE)
+	record_list = record_list->prev;
+      else
+	record_list = record_list->next;
+    } while (record_list != entry);
+  do_cleanups (set_cleanups);
+}
+
+/* "record goto" command.  Argument is an instruction number,
+   as given by "info record".
+
+   Rewinds the recording (forward or backward) to the given instruction.  */
+
+static void
+cmd_record_goto (char *arg, int from_tty)
+{
+  struct record_entry *p = NULL;
+  ULONGEST target_insn = 0;
+
+  if (arg == NULL || *arg == '\0')
+    error (_("Command requires an argument (insn number to go to)."));
+
+  if (strncmp (arg, "start", strlen ("start")) == 0
+      || strncmp (arg, "begin", strlen ("begin")) == 0)
+    {
+      /* Special case.  Find first insn.  */
+      for (p = &record_first; p != NULL; p = p->next)
+	if (p->type == record_end)
+	  break;
+      if (p)
+	target_insn = p->u.end.insn_num;
+    }
+  else if (strncmp (arg, "end", strlen ("end")) == 0)
+    {
+      /* Special case.  Find last insn.  */
+      for (p = record_list; p->next != NULL; p = p->next)
+	;
+      for (; p!= NULL; p = p->prev)
+	if (p->type == record_end)
+	  break;
+      if (p)
+	target_insn = p->u.end.insn_num;
+    }
+  else
+    {
+      /* General case.  Find designated insn.  */
+      target_insn = parse_and_eval_long (arg);
+
+      for (p = &record_first; p != NULL; p = p->next)
+	if (p->type == record_end && p->u.end.insn_num == target_insn)
+	  break;
+    }
+
+  if (p == NULL)
+    error (_("Target insn '%s' not found."), arg);
+  else if (p == record_list)
+    error (_("Already at insn '%s'."), arg);
+  else if (p->u.end.insn_num > record_list->u.end.insn_num)
+    {
+      printf_filtered (_("Go forward to insn number %s\n"),
+		       pulongest (target_insn));
+      record_goto_insn (p, EXEC_FORWARD);
+    }
+  else
+    {
+      printf_filtered (_("Go backward to insn number %s\n"),
+		       pulongest (target_insn));
+      record_goto_insn (p, EXEC_REVERSE);
+    }
+  registers_changed ();
+  reinit_frame_cache ();
+  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
+}
+
 void
 _initialize_record (void)
 {
@@ -2491,4 +2643,9 @@ Set the maximum number of instructions to be stored in the\n\
 record/replay buffer.  Zero means unlimited.  Default is 200000."),
 			    set_record_insn_max_num,
 			    NULL, &set_record_cmdlist, &show_record_cmdlist);
+
+  add_cmd ("goto", class_obscure, cmd_record_goto, _("\
+Restore the program to its state at instruction number N.\n\
+Argument is instruction number, as shown by 'info record'."),
+	   &record_cmdlist);
 }

@@ -459,13 +459,18 @@ struct target_ops
     void (*to_async) (void (*) (enum inferior_event_type, void *), void *);
     int (*to_async_mask) (int);
     int (*to_supports_non_stop) (void);
+    /* find_memory_regions support method for gcore */
     int (*to_find_memory_regions) (int (*) (CORE_ADDR,
 					    unsigned long,
 					    int, int, int,
 					    void *),
 				   void *);
+    /* make_corefile_notes support method for gcore */
     char * (*to_make_corefile_notes) (bfd *, int *);
-
+    /* get_bookmark support method for bookmarks */
+    gdb_byte * (*to_get_bookmark) (char *, int);
+    /* goto_bookmark support method for bookmarks */
+    void (*to_goto_bookmark) (gdb_byte *, int);
     /* Return the thread-local address at OFFSET in the
        thread-local storage for the thread PTID and the shared library
        or executable file given by OBJFILE.  If that block of
@@ -1140,6 +1145,13 @@ extern char *normal_pid_to_str (ptid_t ptid);
 
 #define target_make_corefile_notes(BFD, SIZE_P) \
      (current_target.to_make_corefile_notes) (BFD, SIZE_P)
+
+/* Bookmark interfaces.  */
+#define target_get_bookmark(ARGS, FROM_TTY) \
+     (current_target.to_get_bookmark) (ARGS, FROM_TTY)
+
+#define target_goto_bookmark(ARG, FROM_TTY) \
+     (current_target.to_goto_bookmark) (ARG, FROM_TTY)
 
 /* Hardware watchpoint interfaces.  */
 

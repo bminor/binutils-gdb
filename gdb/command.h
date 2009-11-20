@@ -32,8 +32,8 @@ enum command_class
   /* Classes of commands */
   no_class = -1, class_run = 0, class_vars, class_stack,
   class_files, class_support, class_info, class_breakpoint, class_trace,
-  class_alias, class_obscure, class_user, class_maintenance,
-  class_pseudo, class_tui, class_xdb
+  class_alias, class_bookmark, class_obscure, class_maintenance,
+  class_pseudo, class_tui, class_user, class_xdb
 };
 
 /* FIXME: cagney/2002-03-17: Once cmd_type() has been removed, ``enum

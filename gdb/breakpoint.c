@@ -10142,6 +10142,8 @@ is prefixed with \"server \".\n\n\
 Convenience variable \"$bpnum\" contains the number of the last\n\
 breakpoint set."));
 
+  add_info_alias ("b", "breakpoints", 1);
+
   if (xdb_commands)
     add_com ("lb", class_breakpoint, breakpoints_info, _("\
 Status of user-settable breakpoints, or breakpoint number NUMBER.\n\
