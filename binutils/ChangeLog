@@ -1,3 +1,9 @@
+2009-11-20  Ben Elliston  <bje@au.ibm.com>
+
+	* Makefile.am (syslex.o): Use $(NO_WERROR) not -Wno-error.
+	(sysinfo.o): Likewise.
+	* Makefile.in: Regenerate.
+
 2009-11-19  Ben Elliston  <bje@au.ibm.com>
 
 	* arlex.l: Enable noinput, nounput flex options.
