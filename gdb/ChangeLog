@@ -1,5 +1,10 @@
 2009-11-20  Pedro Alves  <pedro@codesourcery.com>
 
+	* breakpoint.c (update_global_location_list): Fix duplicate
+	locations detection.
+
+2009-11-20  Pedro Alves  <pedro@codesourcery.com>
+
 	* infrun.c (handle_inferior_event): Hardware hatchpoint traps are
 	never random signals.
 	* breakpoint.c (update_global_location_list): Always delete

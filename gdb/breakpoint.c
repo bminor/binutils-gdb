@@ -8214,10 +8214,11 @@ update_global_location_list (int should_insert)
        old_locp++)
     {
       struct bp_location *old_loc = *old_locp;
+      struct bp_location **loc2p;
 
       /* Tells if 'old_loc' is found amoung the new locations.  If not, we
 	 have to free it.  */
-      int found_object;
+      int found_object = 0;
       /* Tells if the location should remain inserted in the target.  */
       int keep_in_target = 0;
       int removed = 0;
@@ -8225,9 +8226,20 @@ update_global_location_list (int should_insert)
       /* Skip LOCP entries which will definitely never be needed.  Stop either
 	 at or being the one matching OLD_LOC.  */
       while (locp < bp_location + bp_location_count
-	     && bp_location_compare (*locp, old_loc) < 0)
+	     && (*locp)->address < old_loc->address)
 	locp++;
-      found_object = locp < bp_location + bp_location_count && *locp == old_loc;
+
+      for (loc2p = locp;
+	   (loc2p < bp_location + bp_location_count
+	    && (*loc2p)->address == old_loc->address);
+	   loc2p++)
+	{
+	  if (*loc2p == old_loc)
+	    {
+	      found_object = 1;
+	      break;
+	    }
+	}
 
       /* If this location is no longer present, and inserted, look if there's
 	 maybe a new location at the same address.  If so, mark that one 
@@ -8253,27 +8265,28 @@ update_global_location_list (int should_insert)
 
 	      if (breakpoint_address_is_meaningful (old_loc->owner))
 		{
-		  struct bp_location **loc2p;
-
 		  for (loc2p = locp;
-		       loc2p < bp_location + bp_location_count
-		       && breakpoint_address_match ((*loc2p)->pspace->aspace,
-						    (*loc2p)->address,
-						    old_loc->pspace->aspace,
-						    old_loc->address);
+		       (loc2p < bp_location + bp_location_count
+			&& (*loc2p)->address == old_loc->address);
 		       loc2p++)
 		    {
 		      struct bp_location *loc2 = *loc2p;
 
-		      /* For the sake of should_be_inserted.
-			 Duplicates check below will fix up this later.  */
-		      loc2->duplicate = 0;
-		      if (loc2 != old_loc && should_be_inserted (loc2))
-			{		  
-			  loc2->inserted = 1;
-			  loc2->target_info = old_loc->target_info;
-			  keep_in_target = 1;
-			  break;
+		      if (breakpoint_address_match (loc2->pspace->aspace,
+						    loc2->address,
+						    old_loc->pspace->aspace,
+						    old_loc->address))
+			{
+			  /* For the sake of should_be_inserted.
+			     Duplicates check below will fix up this later.  */
+			  loc2->duplicate = 0;
+			  if (loc2 != old_loc && should_be_inserted (loc2))
+			    {
+			      loc2->inserted = 1;
+			      loc2->target_info = old_loc->target_info;
+			      keep_in_target = 1;
+			      break;
+			    }
 			}
 		    }
 		}
