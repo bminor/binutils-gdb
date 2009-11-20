@@ -1882,6 +1882,7 @@ resume_callback (struct lwp_info *lp, void *data)
       lp->stopped = 0;
       lp->step = 0;
       memset (&lp->siginfo, 0, sizeof (lp->siginfo));
+      lp->stopped_by_watchpoint = 0;
     }
   else if (lp->stopped && debug_linux_nat)
     fprintf_unfiltered (gdb_stdlog, "RC: Not resuming sibling %s (has pending)\n",
@@ -2019,6 +2020,7 @@ linux_nat_resume (struct target_ops *ops,
 
   linux_ops->to_resume (linux_ops, ptid, step, signo);
   memset (&lp->siginfo, 0, sizeof (lp->siginfo));
+  lp->stopped_by_watchpoint = 0;
 
   if (debug_linux_nat)
     fprintf_unfiltered (gdb_stdlog,
@@ -2570,6 +2572,74 @@ maybe_clear_ignore_sigint (struct lwp_info *lp)
     }
 }
 
+/* Fetch the possible triggered data watchpoint info and store it in
+   LP.
+
+   On some archs, like x86, that use debug registers to set
+   watchpoints, it's possible that the way to know which watched
+   address trapped, is to check the register that is used to select
+   which address to watch.  Problem is, between setting the watchpoint
+   and reading back which data address trapped, the user may change
+   the set of watchpoints, and, as a consequence, GDB changes the
+   debug registers in the inferior.  To avoid reading back a stale
+   stopped-data-address when that happens, we cache in LP the fact
+   that a watchpoint trapped, and the corresponding data address, as
+   soon as we see LP stop with a SIGTRAP.  If GDB changes the debug
+   registers meanwhile, we have the cached data we can rely on.  */
+
+static void
+save_sigtrap (struct lwp_info *lp)
+{
+  struct cleanup *old_chain;
+
+  if (linux_ops->to_stopped_by_watchpoint == NULL)
+    {
+      lp->stopped_by_watchpoint = 0;
+      return;
+    }
+
+  old_chain = save_inferior_ptid ();
+  inferior_ptid = lp->ptid;
+
+  lp->stopped_by_watchpoint = linux_ops->to_stopped_by_watchpoint ();
+
+  if (lp->stopped_by_watchpoint)
+    {
+      if (linux_ops->to_stopped_data_address != NULL)
+	lp->stopped_data_address_p =
+	  linux_ops->to_stopped_data_address (&current_target,
+					      &lp->stopped_data_address);
+      else
+	lp->stopped_data_address_p = 0;
+    }
+
+  do_cleanups (old_chain);
+}
+
+/* See save_sigtrap.  */
+
+static int
+linux_nat_stopped_by_watchpoint (void)
+{
+  struct lwp_info *lp = find_lwp_pid (inferior_ptid);
+
+  gdb_assert (lp != NULL);
+
+  return lp->stopped_by_watchpoint;
+}
+
+static int
+linux_nat_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
+{
+  struct lwp_info *lp = find_lwp_pid (inferior_ptid);
+
+  gdb_assert (lp != NULL);
+
+  *addr_p = lp->stopped_data_address;
+
+  return lp->stopped_data_address_p;
+}
+
 /* Wait until LP is stopped.  */
 
 static int
@@ -2627,6 +2697,8 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 
 	      /* Save the trap's siginfo in case we need it later.  */
 	      save_siginfo (lp);
+
+	      save_sigtrap (lp);
 
 	      /* Now resume this LWP and get the SIGSTOP event. */
 	      errno = 0;
@@ -3027,9 +3099,13 @@ linux_nat_filter_event (int lwpid, int status, int options)
 	return NULL;
     }
 
-  /* Save the trap's siginfo in case we need it later.  */
   if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP)
-    save_siginfo (lp);
+    {
+      /* Save the trap's siginfo in case we need it later.  */
+      save_siginfo (lp);
+
+      save_sigtrap (lp);
+    }
 
   /* Check if the thread has exited.  */
   if ((WIFEXITED (status) || WIFSIGNALED (status))
@@ -5368,6 +5444,8 @@ linux_nat_add_target (struct target_ops *t)
   t->to_pid_to_str = linux_nat_pid_to_str;
   t->to_has_thread_control = tc_schedlock;
   t->to_thread_address_space = linux_nat_thread_address_space;
+  t->to_stopped_by_watchpoint = linux_nat_stopped_by_watchpoint;
+  t->to_stopped_data_address = linux_nat_stopped_data_address;
 
   t->to_can_async_p = linux_nat_can_async_p;
   t->to_is_async_p = linux_nat_is_async_p;

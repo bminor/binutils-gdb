@@ -1,3 +1,8 @@
+2009-11-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/watchthreads-reorder.exp,
+	gdb.base/watchthreads-reorder.c: New.
+
 2009-11-17  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* gdb.xml/tdesc-regs.exp: Use for m68k.

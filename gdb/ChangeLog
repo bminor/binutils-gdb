@@ -1,3 +1,18 @@
+2009-11-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	Fix reordered watchpoints triggered in other threads during all-stop.
+
+	* linux-nat.c (resume_callback, linux_nat_resume): Clear
+	stopped_by_watchpoint.
+	(save_sigtrap, linux_nat_stopped_by_watchpoint)
+	(linux_nat_stopped_data_address): New.
+	(stop_wait_callback, linux_nat_filter_event): Call save_sigtrap.
+	(linux_nat_add_target): Install linux_nat_stopped_by_watchpoint
+	and linux_nat_stopped_data_address.
+	* linux-nat.h (struct lwp_info): New fields stopped_by_watchpoint,
+	stopped_data_address_p and stopped_data_address.
+
 2009-11-20  Michael Snyder  <msnyder@vmware.com>
 
         * target.h (struct target_ops): New methods to_get_bookmark

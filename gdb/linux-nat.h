@@ -62,6 +62,18 @@ struct lwp_info
      be the address of a hardware watchpoint.  */
   struct siginfo siginfo;
 
+  /* STOPPED_BY_WATCHPOINT is non-zero if this LWP stopped with a data
+     watchpoint trap.  */
+  int stopped_by_watchpoint;
+
+  /* On architectures where it is possible to know the data address of
+     a triggered watchpoint, STOPPED_DATA_ADDRESS_P is non-zero, and
+     STOPPED_DATA_ADDRESS contains such data address.  Otherwise,
+     STOPPED_DATA_ADDRESS_P is false, and STOPPED_DATA_ADDRESS is
+     undefined.  Only valid if STOPPED_BY_WATCHPOINT is true.  */
+  int stopped_data_address_p;
+  CORE_ADDR stopped_data_address;
+
   /* Non-zero if we expect a duplicated SIGINT.  */
   int ignore_sigint;
 
