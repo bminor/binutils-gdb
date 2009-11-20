@@ -1,3 +1,13 @@
+2009-11-20  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* emulparams/armelf.sh (OTHER_READONLY_SECTIONS)
+	<__exidx_start, __exidx_end>: Use PROVIDE_HIDDEN.
+	* emulparams/armelf_linux_eabi.sh (OTHER_READONLY_SECTIONS)
+	<__exidx_start, __exidx_end>: Likewise.
+	* emulparams/armsymbian.sh (OTHER_READONLY_SECTIONS)
+	<.ARM.exidx$$Base, __exidx_start, __exidx_end, .ARM.exidx$$Limit>:
+	Likewise.
+
 2009-11-19  Matthias Klose  <doko@ubuntu.com>
 
 	PR ld/9863

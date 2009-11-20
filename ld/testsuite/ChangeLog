@@ -1,3 +1,19 @@
+2009-11-20  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* ld-arm/arm-dyn.ld: Adapt to main linker script changes.
+	* ld-arm/arm-lib.ld: Likewise.
+	* ld-arm/armthumb-lib.sym: : Adjust expected results.
+	* ld-arm/farcall-mixed-app-v5.d: Likewise.
+	* ld-arm/farcall-mixed-app.d: Likewise.
+	* ld-arm/farcall-mixed-app.sym: Likewise.
+	* ld-arm/farcall-mixed-lib.d: Likewise.
+	* ld-arm/mixed-app-v5.d: Likewise.
+	* ld-arm/mixed-app.d: Likewise.
+	* ld-arm/mixed-app.sym: Likewise.
+	* ld-arm/mixed-lib.sym: Likewise.
+	* ld-arm/preempt-app.sym: Likewise.
+	* ld-arm/tls-app.d: Likewise.
+
 2009-11-18  Nick Clifton  <nickc@redhat.com>
 
 	* ld-elf/extract-symbol-1sec.d: Expect to fail for the RX target.
