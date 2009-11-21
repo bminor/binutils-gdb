@@ -1,5 +1,23 @@
 2009-11-21  Pedro Alves  <pedro@codesourcery.com>
 
+	* breakpoint.c (update_watchpoint): Skip creating locations and
+	reading the selected frame if there's no execution.
+	(bpstat_stop_status): Use is_hardware_watchpoint.  If not
+	stopping, update watchpoints and the global location list, instead
+	of removing and inserting all breakpoints.
+	(breakpoint_address_is_meaningful): Hardware watchpoints also have
+	a meaningful target address.
+	(watchpoint_locations_match): New.
+	(breakpoint_locations_match): New.
+	(watch_command_1): Create the watchpoint breakpoint without any
+	location initially.  Use update_watchpoint to create the
+	watchpoint locations.
+	(update_global_location_list): Use breakpoint_locations_match, so
+	watchpoint locations are handled too.  Also detect duplicate
+	watchpoint locations.
+
+2009-11-21  Pedro Alves  <pedro@codesourcery.com>
+
 	* breakpoint.h (struct breakpoint) <watchpoint_thread>: New field.
 	* breakpoint.c (watchpoint_in_thread_scope): New.
 	(update_watchpoint): Skip if the local watchpoint's thread doesn't
