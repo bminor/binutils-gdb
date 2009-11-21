@@ -241,7 +241,7 @@ proc info_func_regexp { name demangled } {
     global gdb_prompt
 
     send_gdb "info function $name\n"
-    set demangled [regsub {\\\(void\\\)} $demangled {\(\)}]
+    regsub {\\\(void\\\)} $demangled {\(\)} demangled
     gdb_expect {
 	-re ".*File .*:\r\n(class |)$demangled\r\n.*$gdb_prompt $" {
 	    pass "info function for \"$name\""
@@ -328,7 +328,7 @@ proc print_addr_2_kfail { name good bad bugid } {
 #
 
 proc print_addr { name } {
-    set expected [regsub {\(void\)} $name {()}]
+    regsub {\(void\)} $name {()} expected
     if {[string first "::" $name] == -1} {
 	# C function -- must be qutoed
 	set name "'$name'"

@@ -1,3 +1,8 @@
+2009-11-21  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.cp/cplusfuncs.exp (info_func_regexp, print_addr): Don't
+	assume new `regsub' syntax available.
+
 2009-11-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/watchpoint-hw-hit-once.exp,
