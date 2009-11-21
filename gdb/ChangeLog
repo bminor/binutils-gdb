@@ -1,3 +1,12 @@
+2009-11-21  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.h (struct breakpoint) <watchpoint_thread>: New field.
+	* breakpoint.c (watchpoint_in_thread_scope): New.
+	(update_watchpoint): Skip if the local watchpoint's thread doesn't
+	match the current thread, or if the current thread is running.
+	(watchpoint_check): Ditto.
+	(watch_command_1): Set the watchpoint's watchpoint_thread field.
+
 2009-11-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* breakpoint.c (bp_location_compare): Change parameter a to ap and b to

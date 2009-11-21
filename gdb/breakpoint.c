@@ -985,6 +985,24 @@ fetch_watchpoint_value (struct expression *exp, struct value **valp,
     }
 }
 
+/* Assuming that B is a watchpoint: returns true if the current thread
+   and its running state are safe to evaluate or update watchpoint B.
+   Watchpoints on local expressions need to be evaluated in the
+   context of the thread that was current when the watchpoint was
+   created, and, that thread needs to be stopped to be able to select
+   the correct frame context.  Watchpoints on global expressions can
+   be evaluated on any thread, and in any state.  It is presently left
+   to the target allowing memory accesses when threads are
+   running.  */
+
+static int
+watchpoint_in_thread_scope (struct breakpoint *b)
+{
+  return (ptid_equal (b->watchpoint_thread, null_ptid)
+	  || (ptid_equal (inferior_ptid, b->watchpoint_thread)
+	      && !is_executing (inferior_ptid)));
+}
+
 /* Assuming that B is a watchpoint:
    - Reparse watchpoint expression, if REPARSE is non-zero
    - Evaluate expression and store the result in B->val
@@ -1042,6 +1060,12 @@ update_watchpoint (struct breakpoint *b, int reparse)
   int frame_saved;
   bpstat bs;
   struct program_space *frame_pspace;
+
+  /* If this is a local watchpoint, we only want to check if the
+     watchpoint frame is in scope if the current thread is the thread
+     that was used to create the watchpoint.  */
+  if (!watchpoint_in_thread_scope (b))
+    return;
 
   /* We don't free locations.  They are stored in bp_location array and
      update_global_locations will eventually delete them and remove
@@ -3123,6 +3147,12 @@ watchpoint_check (void *p)
   int within_current_scope;
 
   b = bs->breakpoint_at->owner;
+
+  /* If this is a local watchpoint, we only want to check if the
+     watchpoint frame is in scope if the current thread is the thread
+     that was used to create the watchpoint.  */
+  if (!watchpoint_in_thread_scope (b))
+    return WP_VALUE_NOT_CHANGED;
 
   if (b->exp_valid_block == NULL)
     within_current_scope = 1;
@@ -7190,9 +7220,15 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
     b->cond_string = 0;
 
   if (frame)
-    b->watchpoint_frame = get_frame_id (frame);
+    {
+      b->watchpoint_frame = get_frame_id (frame);
+      b->watchpoint_thread = inferior_ptid;
+    }
   else
-    b->watchpoint_frame = null_frame_id;
+    {
+      b->watchpoint_frame = null_frame_id;
+      b->watchpoint_thread = null_ptid;
+    }
 
   if (scope_breakpoint != NULL)
     {

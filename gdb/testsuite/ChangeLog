@@ -1,5 +1,10 @@
 2009-11-21  Pedro Alves  <pedro@codesourcery.com>
 
+	* gdb.threads/local-watch-wrong-thread.c,
+	gdb.threads/local-watch-wrong-thread.exp: New files.
+
+2009-11-21  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdb.cp/cplusfuncs.exp (info_func_regexp, print_addr): Don't
 	assume new `regsub' syntax available.
 

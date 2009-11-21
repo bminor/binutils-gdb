@@ -457,6 +457,11 @@ struct breakpoint
        should be evaluated on the outermost frame.  */
     struct frame_id watchpoint_frame;
 
+    /* Holds the thread which identifies the frame this watchpoint
+       should be considered in scope for, or `null_ptid' if the
+       watchpoint should be evaluated in all threads.  */
+    ptid_t watchpoint_thread;
+
     /* For hardware watchpoints, the triggered status according to the
        hardware.  */
     enum watchpoint_triggered watchpoint_triggered;
