@@ -1097,6 +1097,7 @@ record_wait (struct target_ops *ops,
 		  && status->value.sig == TARGET_SIGNAL_TRAP)
 		{
 		  struct regcache *regcache;
+		  struct address_space *aspace;
 
 		  /* Yes -- this is likely our single-step finishing,
 		     but check if there's any reason the core would be
@@ -1105,22 +1106,25 @@ record_wait (struct target_ops *ops,
 		  registers_changed ();
 		  regcache = get_current_regcache ();
 		  tmp_pc = regcache_read_pc (regcache);
+		  aspace = get_regcache_aspace (regcache);
 
 		  if (target_stopped_by_watchpoint ())
 		    {
 		      /* Always interested in watchpoints.  */
 		    }
-		  else if (breakpoint_inserted_here_p (get_regcache_aspace (regcache),
-						       tmp_pc))
+		  else if (breakpoint_inserted_here_p (aspace, tmp_pc))
 		    {
 		      /* There is a breakpoint here.  Let the core
 			 handle it.  */
-		      struct gdbarch *gdbarch = get_regcache_arch (regcache);
-		      CORE_ADDR decr_pc_after_break
-			= gdbarch_decr_pc_after_break (gdbarch);
-		      if (decr_pc_after_break)
-			regcache_write_pc (regcache,
-					   tmp_pc + decr_pc_after_break);
+		      if (software_breakpoint_inserted_here_p (aspace, tmp_pc))
+			{
+			  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+			  CORE_ADDR decr_pc_after_break
+			    = gdbarch_decr_pc_after_break (gdbarch);
+			  if (decr_pc_after_break)
+			    regcache_write_pc (regcache,
+					       tmp_pc + decr_pc_after_break);
+			}
 		    }
 		  else
 		    {
@@ -1147,6 +1151,7 @@ record_wait (struct target_ops *ops,
     {
       struct regcache *regcache = get_current_regcache ();
       struct gdbarch *gdbarch = get_regcache_arch (regcache);
+      struct address_space *aspace = get_regcache_aspace (regcache);
       int continue_flag = 1;
       int first_record_end = 1;
       struct cleanup *old_cleanups = make_cleanup (record_wait_cleanups, 0);
@@ -1159,18 +1164,20 @@ record_wait (struct target_ops *ops,
       if (execution_direction == EXEC_FORWARD)
 	{
 	  tmp_pc = regcache_read_pc (regcache);
-	  if (breakpoint_inserted_here_p (get_regcache_aspace (regcache),
-					  tmp_pc))
+	  if (breakpoint_inserted_here_p (aspace, tmp_pc))
 	    {
+	      int decr_pc_after_break = gdbarch_decr_pc_after_break (gdbarch);
+
 	      if (record_debug)
 		fprintf_unfiltered (gdb_stdlog,
 				    "Process record: break at %s.\n",
 				    paddress (gdbarch, tmp_pc));
-	      if (gdbarch_decr_pc_after_break (gdbarch)
-		  && !record_resume_step)
+
+	      if (decr_pc_after_break
+		  && !record_resume_step
+		  && software_breakpoint_inserted_here_p (aspace, tmp_pc))
 		regcache_write_pc (regcache,
-				   tmp_pc +
-				   gdbarch_decr_pc_after_break (gdbarch));
+				   tmp_pc + decr_pc_after_break);
 	      goto replay_out;
 	    }
 	}
@@ -1240,28 +1247,31 @@ record_wait (struct target_ops *ops,
 
 		  /* check breakpoint */
 		  tmp_pc = regcache_read_pc (regcache);
-		  if (breakpoint_inserted_here_p (get_regcache_aspace (regcache),
-						  tmp_pc))
+		  if (breakpoint_inserted_here_p (aspace, tmp_pc))
 		    {
+		      int decr_pc_after_break
+			= gdbarch_decr_pc_after_break (gdbarch);
+
 		      if (record_debug)
 			fprintf_unfiltered (gdb_stdlog,
 					    "Process record: break "
 					    "at %s.\n",
 					    paddress (gdbarch, tmp_pc));
-		      if (gdbarch_decr_pc_after_break (gdbarch)
+		      if (decr_pc_after_break
 			  && execution_direction == EXEC_FORWARD
-			  && !record_resume_step)
+			  && !record_resume_step
+			  && software_breakpoint_inserted_here_p (aspace,
+								  tmp_pc))
 			regcache_write_pc (regcache,
-					   tmp_pc +
-					   gdbarch_decr_pc_after_break (gdbarch));
+					   tmp_pc + decr_pc_after_break);
 		      continue_flag = 0;
 		    }
 
 		  if (record_hw_watchpoint)
 		    {
 		      if (record_debug)
-			fprintf_unfiltered (gdb_stdlog,
-					    "Process record: hit hw watchpoint.\n");
+			fprintf_unfiltered (gdb_stdlog, "\
+Process record: hit hw watchpoint.\n");
 		      continue_flag = 0;
 		    }
 		  /* Check target signal */

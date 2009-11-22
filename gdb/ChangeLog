@@ -1,4 +1,11 @@
 2009-11-22  Pedro Alves  <pedro@codesourcery.com>
+
+        Make hardware breakpoints work for process repord.
+
+	* record.c (record_wait): Only adjust PC on software breakpoints
+	hits.
+
+2009-11-22  Pedro Alves  <pedro@codesourcery.com>
 	    Michael Snyder  <msnyder@vmware.com>
 
         Make hardware watchpoints work for process record.
