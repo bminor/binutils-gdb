@@ -258,6 +258,10 @@ proc test_catch_syscall_fail_nodatadir {} {
     # Sanitizing.
     delete_breakpoints
 
+    # Make sure GDB doesn't load the syscalls xml from the system data
+    # directory.
+    gdb_test "set data-directory /the/path/to/nowhere" ""
+
     # Testing to see if we receive a warning when calling "catch syscall"
     # without XML support (without datadir).
     set thistest "Catch syscall displays a warning when there is no XML support (no datadir set)"
@@ -382,9 +386,9 @@ proc test_catch_syscall_with_wrong_args_noxml {} {
 proc do_syscall_tests_without_xml {} {
     global gdb_prompt srcdir
 
-    # In this case, we don't need to set GDB's datadir because
-    # we want GDB to display only numbers, not names.  So, let's
-    # begin with the tests.
+    # Make sure GDB doesn't load the syscalls xml from the system data
+    # directory.
+    gdb_test "set data-directory /the/path/to/nowhere" ""
 
     # Let's test if we can catch syscalls without XML support.
     # We should succeed, but GDB is not supposed to print syscall names.

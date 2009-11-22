@@ -1,3 +1,9 @@
+2009-11-22  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/catch-syscall.exp (test_catch_syscall_fail_nodatadir)
+	(do_syscall_tests_without_xml): Set data-directory to
+	/the/path/to/nowhere.
+
 2009-11-21  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.threads/local-watch-wrong-thread.c,
