@@ -736,6 +736,12 @@ extern int regular_breakpoint_inserted_here_p (struct address_space *, CORE_ADDR
 
 extern int software_breakpoint_inserted_here_p (struct address_space *, CORE_ADDR);
 
+/* Returns true if there's a hardware watchpoint or access watchpoint
+   inserted in the range defined by ADDR and LEN.  */
+extern int hardware_watchpoint_inserted_in_range (struct address_space *,
+						  CORE_ADDR addr,
+						  ULONGEST len);
+
 extern int breakpoint_thread_match (struct address_space *, CORE_ADDR, ptid_t);
 
 extern void until_break_command (char *, int, int);

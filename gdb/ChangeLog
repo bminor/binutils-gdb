@@ -1,3 +1,27 @@
+2009-11-22  Pedro Alves  <pedro@codesourcery.com>
+	    Michael Snyder  <msnyder@vmware.com>
+
+        Make hardware watchpoints work for process record.
+
+        * breakpoint.c (hardware_watchpoint_inserted_in_range): New.
+	* breakpoint.h (hardware_watchpoint_inserted_in_range): Declare.
+	* record.c (record_beneath_to_stopped_by_watchpoint)
+	(record_beneath_to_stopped_data_address, record_hw_watchpoint):
+	New globals.
+	(record_exec_insn): Check for watchpoint hits.
+	(tmp_to_stopped_by_watchpoint, tmp_to_stopped_data_address): New
+	globals.
+	(record_open): Set tmp_to_stopped_by_watchpoint,
+	tmp_to_stopped_data_address,
+	record_beneath_to_stopped_by_watchpoint and
+	record_beneath_to_stopped_data_address.
+	(record_wait): Report watchpoint hits to the core.  Update and
+	extend comments.
+	(record_stopped_by_watchpoint): New.
+	(record_stopped_data_address): New.
+	(init_record_ops): Install them.
+	(init_record_core_ops): Ditto.
+
 2009-11-21  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (update_watchpoint): Skip creating locations and

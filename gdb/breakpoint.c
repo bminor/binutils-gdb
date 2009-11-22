@@ -2380,6 +2380,38 @@ software_breakpoint_inserted_here_p (struct address_space *aspace, CORE_ADDR pc)
   return 0;
 }
 
+int
+hardware_watchpoint_inserted_in_range (struct address_space *aspace,
+				       CORE_ADDR addr, ULONGEST len)
+{
+  struct breakpoint *bpt;
+
+  ALL_BREAKPOINTS (bpt)
+    {
+      struct bp_location *loc;
+
+      if (bpt->type != bp_hardware_watchpoint
+	  && bpt->type != bp_access_watchpoint)
+	continue;
+
+      if (!breakpoint_enabled (bpt))
+	continue;
+
+      for (loc = bpt->loc; loc; loc = loc->next)
+	if (loc->pspace->aspace == aspace && loc->inserted)
+	  {
+	    CORE_ADDR l, h;
+
+	    /* Check for intersection.  */
+	    l = max (loc->address, addr);
+	    h = min (loc->address + loc->length, addr + len);
+	    if (l < h)
+	      return 1;
+	  }
+    }
+  return 0;
+}
+
 /* breakpoint_thread_match (PC, PTID) returns true if the breakpoint at
    PC is valid for process/thread PTID.  */
 
