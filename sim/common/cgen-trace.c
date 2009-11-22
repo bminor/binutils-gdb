@@ -192,7 +192,7 @@ trace_extract (SIM_CPU *cpu, IADDR pc, char *name, ...)
   va_start (args, name);
 
   trace_printf (CPU_STATE (cpu), cpu, "Extract: 0x%.*lx: %s ",
-		SIZE_PC, pc, name);
+		SIZE_PC, (unsigned long) pc, name);
 
   do {
     int type,ival;
