@@ -1,3 +1,8 @@
+2009-11-23  Tom Tromey  <tromey@redhat.com>
+
+	PR python/10782:
+	* gdb.texinfo (Types In Python): Document Type.pointer.
+
 2009-11-23  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* gdb.texinfo (Machine Code): Adjust.

@@ -19640,6 +19640,11 @@ Return a new @code{gdb.Type} object which represents a reference to this
 type.
 @end defmethod
 
+@defmethod Type pointer
+Return a new @code{gdb.Type} object which represents a pointer to this
+type.
+@end defmethod
+
 @defmethod Type strip_typedefs
 Return a new @code{gdb.Type} that represents the real type,
 after removing all layers of typedefs.
