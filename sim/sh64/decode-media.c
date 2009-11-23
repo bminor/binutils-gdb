@@ -1587,7 +1587,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_disp10 = EXTRACT_MSB0_INT (insn, 32, 12, 10);
+    f_disp10 = EXTRACT_MSB0_SINT (insn, 32, 12, 10);
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -1675,7 +1675,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_tra;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_imm6 = EXTRACT_MSB0_INT (insn, 32, 16, 6);
+    f_imm6 = EXTRACT_MSB0_SINT (insn, 32, 16, 6);
     f_tra = EXTRACT_MSB0_UINT (insn, 32, 25, 3);
 
   /* Record the fields for the semantic handler.  */
@@ -2127,7 +2127,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_disp10x8 = ((EXTRACT_MSB0_INT (insn, 32, 12, 10)) << (3));
+    f_disp10x8 = ((EXTRACT_MSB0_SINT (insn, 32, 12, 10)) << (3));
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -2158,7 +2158,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_disp10x8 = ((EXTRACT_MSB0_INT (insn, 32, 12, 10)) << (3));
+    f_disp10x8 = ((EXTRACT_MSB0_SINT (insn, 32, 12, 10)) << (3));
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -2190,7 +2190,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_disp10x4 = ((EXTRACT_MSB0_INT (insn, 32, 12, 10)) << (2));
+    f_disp10x4 = ((EXTRACT_MSB0_SINT (insn, 32, 12, 10)) << (2));
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -2499,7 +2499,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_disp10x8 = ((EXTRACT_MSB0_INT (insn, 32, 12, 10)) << (3));
+    f_disp10x8 = ((EXTRACT_MSB0_SINT (insn, 32, 12, 10)) << (3));
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -2530,7 +2530,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_disp10x4 = ((EXTRACT_MSB0_INT (insn, 32, 12, 10)) << (2));
+    f_disp10x4 = ((EXTRACT_MSB0_SINT (insn, 32, 12, 10)) << (2));
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -2660,7 +2660,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_disp6 = EXTRACT_MSB0_INT (insn, 32, 16, 6);
+    f_disp6 = EXTRACT_MSB0_SINT (insn, 32, 16, 6);
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -2746,7 +2746,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_disp10 = EXTRACT_MSB0_INT (insn, 32, 12, 10);
+    f_disp10 = EXTRACT_MSB0_SINT (insn, 32, 12, 10);
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -2777,7 +2777,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_disp10x4 = ((EXTRACT_MSB0_INT (insn, 32, 12, 10)) << (2));
+    f_disp10x4 = ((EXTRACT_MSB0_SINT (insn, 32, 12, 10)) << (2));
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -2808,7 +2808,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_disp10x8 = ((EXTRACT_MSB0_INT (insn, 32, 12, 10)) << (3));
+    f_disp10x8 = ((EXTRACT_MSB0_SINT (insn, 32, 12, 10)) << (3));
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -2839,7 +2839,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_disp10x2 = ((EXTRACT_MSB0_INT (insn, 32, 12, 10)) << (1));
+    f_disp10x2 = ((EXTRACT_MSB0_SINT (insn, 32, 12, 10)) << (1));
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -2870,7 +2870,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_disp6 = EXTRACT_MSB0_INT (insn, 32, 16, 6);
+    f_disp6 = EXTRACT_MSB0_SINT (insn, 32, 16, 6);
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -2901,7 +2901,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_disp6 = EXTRACT_MSB0_INT (insn, 32, 16, 6);
+    f_disp6 = EXTRACT_MSB0_SINT (insn, 32, 16, 6);
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -2932,7 +2932,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_disp6 = EXTRACT_MSB0_INT (insn, 32, 16, 6);
+    f_disp6 = EXTRACT_MSB0_SINT (insn, 32, 16, 6);
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -2963,7 +2963,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_disp6 = EXTRACT_MSB0_INT (insn, 32, 16, 6);
+    f_disp6 = EXTRACT_MSB0_SINT (insn, 32, 16, 6);
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -3217,7 +3217,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     INT f_imm16;
     UINT f_dest;
 
-    f_imm16 = EXTRACT_MSB0_INT (insn, 32, 6, 16);
+    f_imm16 = EXTRACT_MSB0_SINT (insn, 32, 6, 16);
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -3259,7 +3259,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_imm10 = EXTRACT_MSB0_INT (insn, 32, 12, 10);
+    f_imm10 = EXTRACT_MSB0_SINT (insn, 32, 12, 10);
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -3288,7 +3288,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     DI f_disp16;
     UINT f_tra;
 
-    f_disp16 = ((((EXTRACT_MSB0_INT (insn, 32, 6, 16)) << (2))) + (pc));
+    f_disp16 = ((((EXTRACT_MSB0_SINT (insn, 32, 6, 16)) << (2))) + (pc));
     f_tra = EXTRACT_MSB0_UINT (insn, 32, 25, 3);
 
   /* Record the fields for the semantic handler.  */
@@ -3373,7 +3373,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_disp6 = EXTRACT_MSB0_INT (insn, 32, 16, 6);
+    f_disp6 = EXTRACT_MSB0_SINT (insn, 32, 16, 6);
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -3490,7 +3490,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_disp10 = EXTRACT_MSB0_INT (insn, 32, 12, 10);
+    f_disp10 = EXTRACT_MSB0_SINT (insn, 32, 12, 10);
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -3521,7 +3521,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_disp10x4 = ((EXTRACT_MSB0_INT (insn, 32, 12, 10)) << (2));
+    f_disp10x4 = ((EXTRACT_MSB0_SINT (insn, 32, 12, 10)) << (2));
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -3552,7 +3552,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_disp10x8 = ((EXTRACT_MSB0_INT (insn, 32, 12, 10)) << (3));
+    f_disp10x8 = ((EXTRACT_MSB0_SINT (insn, 32, 12, 10)) << (3));
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -3583,7 +3583,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_disp10x2 = ((EXTRACT_MSB0_INT (insn, 32, 12, 10)) << (1));
+    f_disp10x2 = ((EXTRACT_MSB0_SINT (insn, 32, 12, 10)) << (1));
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -3614,7 +3614,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_disp6 = EXTRACT_MSB0_INT (insn, 32, 16, 6);
+    f_disp6 = EXTRACT_MSB0_SINT (insn, 32, 16, 6);
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -3645,7 +3645,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_disp6 = EXTRACT_MSB0_INT (insn, 32, 16, 6);
+    f_disp6 = EXTRACT_MSB0_SINT (insn, 32, 16, 6);
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -3676,7 +3676,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_disp6 = EXTRACT_MSB0_INT (insn, 32, 16, 6);
+    f_disp6 = EXTRACT_MSB0_SINT (insn, 32, 16, 6);
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -3707,7 +3707,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_disp6 = EXTRACT_MSB0_INT (insn, 32, 16, 6);
+    f_disp6 = EXTRACT_MSB0_SINT (insn, 32, 16, 6);
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */
@@ -3923,7 +3923,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_dest;
 
     f_left = EXTRACT_MSB0_UINT (insn, 32, 6, 6);
-    f_imm6 = EXTRACT_MSB0_INT (insn, 32, 16, 6);
+    f_imm6 = EXTRACT_MSB0_SINT (insn, 32, 16, 6);
     f_dest = EXTRACT_MSB0_UINT (insn, 32, 22, 6);
 
   /* Record the fields for the semantic handler.  */

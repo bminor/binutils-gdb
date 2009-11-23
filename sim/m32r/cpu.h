@@ -331,7 +331,7 @@ struct scache {
   f_r1 = EXTRACT_MSB0_UINT (insn, 32, 4, 4); \
   f_op2 = EXTRACT_MSB0_UINT (insn, 32, 8, 4); \
   f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4); \
-  f_simm16 = EXTRACT_MSB0_INT (insn, 32, 16, 16); \
+  f_simm16 = EXTRACT_MSB0_SINT (insn, 32, 16, 16); \
 
 #define EXTRACT_IFMT_AND3_VARS \
   UINT f_op1; \
@@ -372,7 +372,7 @@ struct scache {
   length = 2; \
   f_op1 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
   f_r1 = EXTRACT_MSB0_UINT (insn, 16, 4, 4); \
-  f_simm8 = EXTRACT_MSB0_INT (insn, 16, 8, 8); \
+  f_simm8 = EXTRACT_MSB0_SINT (insn, 16, 8, 8); \
 
 #define EXTRACT_IFMT_ADDV3_VARS \
   UINT f_op1; \
@@ -387,7 +387,7 @@ struct scache {
   f_r1 = EXTRACT_MSB0_UINT (insn, 32, 4, 4); \
   f_op2 = EXTRACT_MSB0_UINT (insn, 32, 8, 4); \
   f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4); \
-  f_simm16 = EXTRACT_MSB0_INT (insn, 32, 16, 16); \
+  f_simm16 = EXTRACT_MSB0_SINT (insn, 32, 16, 16); \
 
 #define EXTRACT_IFMT_BC8_VARS \
   UINT f_op1; \
@@ -398,7 +398,7 @@ struct scache {
   length = 2; \
   f_op1 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
   f_r1 = EXTRACT_MSB0_UINT (insn, 16, 4, 4); \
-  f_disp8 = ((((EXTRACT_MSB0_INT (insn, 16, 8, 8)) << (2))) + (((pc) & (-4)))); \
+  f_disp8 = ((((EXTRACT_MSB0_SINT (insn, 16, 8, 8)) << (2))) + (((pc) & (-4)))); \
 
 #define EXTRACT_IFMT_BC24_VARS \
   UINT f_op1; \
@@ -409,7 +409,7 @@ struct scache {
   length = 4; \
   f_op1 = EXTRACT_MSB0_UINT (insn, 32, 0, 4); \
   f_r1 = EXTRACT_MSB0_UINT (insn, 32, 4, 4); \
-  f_disp24 = ((((EXTRACT_MSB0_INT (insn, 32, 8, 24)) << (2))) + (pc)); \
+  f_disp24 = ((((EXTRACT_MSB0_SINT (insn, 32, 8, 24)) << (2))) + (pc)); \
 
 #define EXTRACT_IFMT_BEQ_VARS \
   UINT f_op1; \
@@ -424,7 +424,7 @@ struct scache {
   f_r1 = EXTRACT_MSB0_UINT (insn, 32, 4, 4); \
   f_op2 = EXTRACT_MSB0_UINT (insn, 32, 8, 4); \
   f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4); \
-  f_disp16 = ((((EXTRACT_MSB0_INT (insn, 32, 16, 16)) << (2))) + (pc)); \
+  f_disp16 = ((((EXTRACT_MSB0_SINT (insn, 32, 16, 16)) << (2))) + (pc)); \
 
 #define EXTRACT_IFMT_BEQZ_VARS \
   UINT f_op1; \
@@ -439,7 +439,7 @@ struct scache {
   f_r1 = EXTRACT_MSB0_UINT (insn, 32, 4, 4); \
   f_op2 = EXTRACT_MSB0_UINT (insn, 32, 8, 4); \
   f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4); \
-  f_disp16 = ((((EXTRACT_MSB0_INT (insn, 32, 16, 16)) << (2))) + (pc)); \
+  f_disp16 = ((((EXTRACT_MSB0_SINT (insn, 32, 16, 16)) << (2))) + (pc)); \
 
 #define EXTRACT_IFMT_CMP_VARS \
   UINT f_op1; \
@@ -467,7 +467,7 @@ struct scache {
   f_r1 = EXTRACT_MSB0_UINT (insn, 32, 4, 4); \
   f_op2 = EXTRACT_MSB0_UINT (insn, 32, 8, 4); \
   f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4); \
-  f_simm16 = EXTRACT_MSB0_INT (insn, 32, 16, 16); \
+  f_simm16 = EXTRACT_MSB0_SINT (insn, 32, 16, 16); \
 
 #define EXTRACT_IFMT_DIV_VARS \
   UINT f_op1; \
@@ -482,7 +482,7 @@ struct scache {
   f_r1 = EXTRACT_MSB0_UINT (insn, 32, 4, 4); \
   f_op2 = EXTRACT_MSB0_UINT (insn, 32, 8, 4); \
   f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4); \
-  f_simm16 = EXTRACT_MSB0_INT (insn, 32, 16, 16); \
+  f_simm16 = EXTRACT_MSB0_SINT (insn, 32, 16, 16); \
 
 #define EXTRACT_IFMT_JL_VARS \
   UINT f_op1; \
@@ -521,7 +521,7 @@ struct scache {
   f_r1 = EXTRACT_MSB0_UINT (insn, 32, 4, 4); \
   f_op2 = EXTRACT_MSB0_UINT (insn, 32, 8, 4); \
   f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4); \
-  f_simm16 = EXTRACT_MSB0_INT (insn, 32, 16, 16); \
+  f_simm16 = EXTRACT_MSB0_SINT (insn, 32, 16, 16); \
 
 #define EXTRACT_IFMT_MVFACHI_VARS \
   UINT f_op1; \
@@ -629,7 +629,7 @@ struct scache {
   f_r1 = EXTRACT_MSB0_UINT (insn, 32, 4, 4); \
   f_op2 = EXTRACT_MSB0_UINT (insn, 32, 8, 4); \
   f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4); \
-  f_simm16 = EXTRACT_MSB0_INT (insn, 32, 16, 16); \
+  f_simm16 = EXTRACT_MSB0_SINT (insn, 32, 16, 16); \
 
 #define EXTRACT_IFMT_TRAP_VARS \
   UINT f_op1; \
@@ -670,7 +670,7 @@ struct scache {
   f_uimm3 = EXTRACT_MSB0_UINT (insn, 32, 5, 3); \
   f_op2 = EXTRACT_MSB0_UINT (insn, 32, 8, 4); \
   f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4); \
-  f_simm16 = EXTRACT_MSB0_INT (insn, 32, 16, 16); \
+  f_simm16 = EXTRACT_MSB0_SINT (insn, 32, 16, 16); \
 
 #define EXTRACT_IFMT_BTST_VARS \
   UINT f_op1; \

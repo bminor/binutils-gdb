@@ -709,7 +709,7 @@ struct scache {
   f_operand2 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
   f_mode = EXTRACT_LSB0_UINT (insn, 16, 11, 2); \
   f_opcode = EXTRACT_LSB0_UINT (insn, 16, 9, 4); \
-  f_s6 = EXTRACT_LSB0_INT (insn, 16, 5, 6); \
+  f_s6 = EXTRACT_LSB0_SINT (insn, 16, 5, 6); \
 
 #define EXTRACT_IFMT_MOVECBR_VARS \
   UINT f_operand2; \
@@ -1082,7 +1082,7 @@ struct scache {
   f_operand2 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
   f_mode = EXTRACT_LSB0_UINT (insn, 16, 11, 2); \
   f_opcode_hi = EXTRACT_LSB0_UINT (insn, 16, 9, 2); \
-  f_disp9_hi = EXTRACT_LSB0_INT (insn, 16, 0, 1); \
+  f_disp9_hi = EXTRACT_LSB0_SINT (insn, 16, 0, 1); \
   f_disp9_lo = EXTRACT_LSB0_UINT (insn, 16, 7, 7); \
 {\
   SI tmp_abslo;\
@@ -1105,7 +1105,7 @@ struct scache {
   f_operand2 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
   f_mode = EXTRACT_LSB0_UINT (insn, 16, 11, 2); \
   f_opcode_hi = EXTRACT_LSB0_UINT (insn, 16, 9, 2); \
-  f_disp9_hi = EXTRACT_LSB0_INT (insn, 16, 0, 1); \
+  f_disp9_hi = EXTRACT_LSB0_SINT (insn, 16, 0, 1); \
   f_disp9_lo = EXTRACT_LSB0_UINT (insn, 16, 7, 7); \
 {\
   SI tmp_abslo;\
@@ -1251,7 +1251,7 @@ struct scache {
   f_operand2 = EXTRACT_LSB0_UINT (insn, 16, 15, 4); \
   f_mode = EXTRACT_LSB0_UINT (insn, 16, 11, 2); \
   f_opcode_hi = EXTRACT_LSB0_UINT (insn, 16, 9, 2); \
-  f_s8 = EXTRACT_LSB0_INT (insn, 16, 7, 8); \
+  f_s8 = EXTRACT_LSB0_SINT (insn, 16, 7, 8); \
 
 #define EXTRACT_IFMT_FIDXI_VARS \
   UINT f_operand2; \

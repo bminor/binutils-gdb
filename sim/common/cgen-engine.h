@@ -51,14 +51,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* Instruction field support macros.  */
 
-#define EXTRACT_MSB0_INT(val, total, start, length) \
+#define EXTRACT_MSB0_SINT(val, total, start, length) \
 (((INT) (val) << ((sizeof (INT) * 8) - (total) + (start))) \
  >> ((sizeof (INT) * 8) - (length)))
 #define EXTRACT_MSB0_UINT(val, total, start, length) \
 (((UINT) (val) << ((sizeof (UINT) * 8) - (total) + (start))) \
  >> ((sizeof (UINT) * 8) - (length)))
 
-#define EXTRACT_LSB0_INT(val, total, start, length) \
+#define EXTRACT_LSB0_SINT(val, total, start, length) \
 (((INT) (val) << ((sizeof (INT) * 8) - (start) - 1)) \
  >> ((sizeof (INT) * 8) - (length)))
 #define EXTRACT_LSB0_UINT(val, total, start, length) \

@@ -1985,7 +1985,7 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
     INT f_s6;
 
     f_operand2 = EXTRACT_LSB0_UINT (insn, 16, 15, 4);
-    f_s6 = EXTRACT_LSB0_INT (insn, 16, 5, 6);
+    f_s6 = EXTRACT_LSB0_SINT (insn, 16, 5, 6);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_s6) = f_s6;
@@ -2492,7 +2492,7 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
     INT f_s6;
 
     f_operand2 = EXTRACT_LSB0_UINT (insn, 16, 15, 4);
-    f_s6 = EXTRACT_LSB0_INT (insn, 16, 5, 6);
+    f_s6 = EXTRACT_LSB0_SINT (insn, 16, 5, 6);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_operand2) = f_operand2;
@@ -4110,7 +4110,7 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
     INT f_s6;
 
     f_operand2 = EXTRACT_LSB0_UINT (insn, 16, 15, 4);
-    f_s6 = EXTRACT_LSB0_INT (insn, 16, 5, 6);
+    f_s6 = EXTRACT_LSB0_SINT (insn, 16, 5, 6);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_operand2) = f_operand2;
@@ -4432,7 +4432,7 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_operand2 = EXTRACT_LSB0_UINT (insn, 16, 15, 4);
     f_disp9_lo = EXTRACT_LSB0_UINT (insn, 16, 7, 7);
-    f_disp9_hi = EXTRACT_LSB0_INT (insn, 16, 0, 1);
+    f_disp9_hi = EXTRACT_LSB0_SINT (insn, 16, 0, 1);
 {
   SI tmp_abslo;
   SI tmp_absval;
@@ -4466,7 +4466,7 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
     INT f_disp9;
 
     f_disp9_lo = EXTRACT_LSB0_UINT (insn, 16, 7, 7);
-    f_disp9_hi = EXTRACT_LSB0_INT (insn, 16, 0, 1);
+    f_disp9_hi = EXTRACT_LSB0_SINT (insn, 16, 0, 1);
 {
   SI tmp_abslo;
   SI tmp_absval;
@@ -4836,7 +4836,7 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
     INT f_s8;
 
     f_operand2 = EXTRACT_LSB0_UINT (insn, 16, 15, 4);
-    f_s8 = EXTRACT_LSB0_INT (insn, 16, 7, 8);
+    f_s8 = EXTRACT_LSB0_SINT (insn, 16, 7, 8);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_operand2) = f_operand2;

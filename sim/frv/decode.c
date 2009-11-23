@@ -3864,7 +3864,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_GRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_GRi) = f_GRi;
@@ -3895,7 +3895,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_GRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_GRi) = f_GRi;
@@ -3926,7 +3926,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_GRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_GRi) = f_GRi;
@@ -3959,7 +3959,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     f_GRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
     f_ICCi_1 = EXTRACT_LSB0_UINT (insn, 32, 11, 2);
-    f_s10 = EXTRACT_LSB0_INT (insn, 32, 9, 10);
+    f_s10 = EXTRACT_LSB0_SINT (insn, 32, 9, 10);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_GRi) = f_GRi;
@@ -3995,7 +3995,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     f_GRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
     f_ICCi_1 = EXTRACT_LSB0_UINT (insn, 32, 11, 2);
-    f_s10 = EXTRACT_LSB0_INT (insn, 32, 9, 10);
+    f_s10 = EXTRACT_LSB0_SINT (insn, 32, 9, 10);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_GRi) = f_GRi;
@@ -4031,7 +4031,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     f_GRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
     f_ICCi_1 = EXTRACT_LSB0_UINT (insn, 32, 11, 2);
-    f_s10 = EXTRACT_LSB0_INT (insn, 32, 9, 10);
+    f_s10 = EXTRACT_LSB0_SINT (insn, 32, 9, 10);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_GRi) = f_GRi;
@@ -4067,7 +4067,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     f_GRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
     f_ICCi_1 = EXTRACT_LSB0_UINT (insn, 32, 11, 2);
-    f_s10 = EXTRACT_LSB0_INT (insn, 32, 9, 10);
+    f_s10 = EXTRACT_LSB0_SINT (insn, 32, 9, 10);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_GRi) = f_GRi;
@@ -4184,7 +4184,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     INT f_s16;
 
     f_GRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
-    f_s16 = EXTRACT_LSB0_INT (insn, 32, 15, 16);
+    f_s16 = EXTRACT_LSB0_SINT (insn, 32, 15, 16);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_s16) = f_s16;
@@ -5178,7 +5178,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_GRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_GRi) = f_GRi;
@@ -5209,7 +5209,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_FRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_GRi) = f_GRi;
@@ -5240,7 +5240,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_GRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_GRi) = f_GRi;
@@ -5271,7 +5271,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_FRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_GRi) = f_GRi;
@@ -5302,7 +5302,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_GRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_GRi) = f_GRi;
@@ -5333,7 +5333,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_FRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_GRi) = f_GRi;
@@ -5364,7 +5364,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_GRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_GRi) = f_GRi;
@@ -5395,7 +5395,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_FRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_GRi) = f_GRi;
@@ -5426,7 +5426,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_GRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_GRi) = f_GRi;
@@ -5456,7 +5456,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_FRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_GRi) = f_GRi;
@@ -5486,7 +5486,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_FRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_GRi) = f_GRi;
@@ -6647,7 +6647,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_GRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_GRi) = f_GRi;
@@ -6678,7 +6678,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_FRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_FRk) = f_FRk;
@@ -6709,7 +6709,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_GRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_GRk) = f_GRk;
@@ -6740,7 +6740,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_FRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_FRk) = f_FRk;
@@ -6804,7 +6804,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_GRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_GRi) = f_GRi;
@@ -7270,7 +7270,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     SI f_label16;
 
     f_hint = EXTRACT_LSB0_UINT (insn, 32, 17, 2);
-    f_label16 = ((((EXTRACT_LSB0_INT (insn, 32, 15, 16)) << (2))) + (pc));
+    f_label16 = ((((EXTRACT_LSB0_SINT (insn, 32, 15, 16)) << (2))) + (pc));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_hint) = f_hint;
@@ -7296,7 +7296,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     SI f_label16;
 
     f_hint = EXTRACT_LSB0_UINT (insn, 32, 17, 2);
-    f_label16 = ((((EXTRACT_LSB0_INT (insn, 32, 15, 16)) << (2))) + (pc));
+    f_label16 = ((((EXTRACT_LSB0_SINT (insn, 32, 15, 16)) << (2))) + (pc));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_hint) = f_hint;
@@ -7318,7 +7318,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_ICCi_2 = EXTRACT_LSB0_UINT (insn, 32, 26, 2);
     f_hint = EXTRACT_LSB0_UINT (insn, 32, 17, 2);
-    f_label16 = ((((EXTRACT_LSB0_INT (insn, 32, 15, 16)) << (2))) + (pc));
+    f_label16 = ((((EXTRACT_LSB0_SINT (insn, 32, 15, 16)) << (2))) + (pc));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_ICCi_2) = f_ICCi_2;
@@ -7348,7 +7348,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_FCCi_2 = EXTRACT_LSB0_UINT (insn, 32, 26, 2);
     f_hint = EXTRACT_LSB0_UINT (insn, 32, 17, 2);
-    f_label16 = ((((EXTRACT_LSB0_INT (insn, 32, 15, 16)) << (2))) + (pc));
+    f_label16 = ((((EXTRACT_LSB0_SINT (insn, 32, 15, 16)) << (2))) + (pc));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_FCCi_2) = f_FCCi_2;
@@ -7663,7 +7663,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_LI = EXTRACT_LSB0_UINT (insn, 32, 25, 1);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_GRi) = f_GRi;
@@ -7691,7 +7691,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     UINT f_labelL18;
     INT f_label24;
 
-    f_labelH6 = EXTRACT_LSB0_INT (insn, 32, 30, 6);
+    f_labelH6 = EXTRACT_LSB0_SINT (insn, 32, 30, 6);
     f_labelL18 = EXTRACT_LSB0_UINT (insn, 32, 17, 18);
 {
   f_label24 = ((((((((f_labelH6) << (18))) | (f_labelL18))) << (2))) + (pc));
@@ -7863,7 +7863,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     INT f_d12;
 
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_GRi) = f_GRi;
@@ -7897,7 +7897,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_ICCi_2 = EXTRACT_LSB0_UINT (insn, 32, 26, 2);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_GRi) = f_GRi;
@@ -7933,7 +7933,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_FCCi_2 = EXTRACT_LSB0_UINT (insn, 32, 26, 2);
     f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_d12 = EXTRACT_LSB0_INT (insn, 32, 11, 12);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_FCCi_2) = f_FCCi_2;
@@ -9571,7 +9571,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     INT f_u12;
 
     f_FRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
-    f_u12_h = EXTRACT_LSB0_INT (insn, 32, 17, 6);
+    f_u12_h = EXTRACT_LSB0_SINT (insn, 32, 17, 6);
     f_u12_l = EXTRACT_LSB0_UINT (insn, 32, 5, 6);
 {
   f_u12 = ((((f_u12_h) << (6))) | (f_u12_l));
@@ -9604,7 +9604,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     INT f_u12;
 
     f_FRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
-    f_u12_h = EXTRACT_LSB0_INT (insn, 32, 17, 6);
+    f_u12_h = EXTRACT_LSB0_SINT (insn, 32, 17, 6);
     f_u12_l = EXTRACT_LSB0_UINT (insn, 32, 5, 6);
 {
   f_u12 = ((((f_u12_h) << (6))) | (f_u12_l));
@@ -9637,7 +9637,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     INT f_u12;
 
     f_FRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
-    f_u12_h = EXTRACT_LSB0_INT (insn, 32, 17, 6);
+    f_u12_h = EXTRACT_LSB0_SINT (insn, 32, 17, 6);
     f_u12_l = EXTRACT_LSB0_UINT (insn, 32, 5, 6);
 {
   f_u12 = ((((f_u12_h) << (6))) | (f_u12_l));
@@ -9671,7 +9671,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     INT f_s5;
 
     f_FRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
-    f_s5 = EXTRACT_LSB0_INT (insn, 32, 4, 5);
+    f_s5 = EXTRACT_LSB0_SINT (insn, 32, 4, 5);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_FRk) = f_FRk;
@@ -9699,7 +9699,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     INT f_s5;
 
     f_FRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
-    f_s5 = EXTRACT_LSB0_INT (insn, 32, 4, 5);
+    f_s5 = EXTRACT_LSB0_SINT (insn, 32, 4, 5);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_FRk) = f_FRk;
@@ -9727,7 +9727,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     INT f_s5;
 
     f_FRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
-    f_s5 = EXTRACT_LSB0_INT (insn, 32, 4, 5);
+    f_s5 = EXTRACT_LSB0_SINT (insn, 32, 4, 5);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_FRk) = f_FRk;
@@ -10023,7 +10023,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_FRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_ACC40Si = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_s6 = EXTRACT_LSB0_INT (insn, 32, 5, 6);
+    f_s6 = EXTRACT_LSB0_SINT (insn, 32, 5, 6);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_ACC40Si) = f_ACC40Si;
@@ -10054,7 +10054,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_FRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_ACC40Si = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_s6 = EXTRACT_LSB0_INT (insn, 32, 5, 6);
+    f_s6 = EXTRACT_LSB0_SINT (insn, 32, 5, 6);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_ACC40Si) = f_ACC40Si;
@@ -10124,7 +10124,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_FRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
     f_FRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
-    f_s6 = EXTRACT_LSB0_INT (insn, 32, 5, 6);
+    f_s6 = EXTRACT_LSB0_SINT (insn, 32, 5, 6);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_FRi) = f_FRi;

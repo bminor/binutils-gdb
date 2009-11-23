@@ -207,7 +207,7 @@ struct scache {
 #define EXTRACT_IFMT_BF_COMPACT_CODE \
   length = 2; \
   f_op8 = EXTRACT_MSB0_UINT (insn, 16, 0, 8); \
-  f_disp8 = ((((EXTRACT_MSB0_INT (insn, 16, 8, 8)) << (1))) + (((pc) + (4)))); \
+  f_disp8 = ((((EXTRACT_MSB0_SINT (insn, 16, 8, 8)) << (1))) + (((pc) + (4)))); \
 
 #define EXTRACT_IFMT_BRA_COMPACT_VARS \
   UINT f_op4; \
@@ -216,7 +216,7 @@ struct scache {
 #define EXTRACT_IFMT_BRA_COMPACT_CODE \
   length = 2; \
   f_op4 = EXTRACT_MSB0_UINT (insn, 16, 0, 4); \
-  f_disp12 = ((((EXTRACT_MSB0_INT (insn, 16, 4, 12)) << (1))) + (((pc) + (4)))); \
+  f_disp12 = ((((EXTRACT_MSB0_SINT (insn, 16, 4, 12)) << (1))) + (((pc) + (4)))); \
 
 #define EXTRACT_IFMT_BRAF_COMPACT_VARS \
   UINT f_op4; \
@@ -366,7 +366,7 @@ struct scache {
   f_rm = EXTRACT_MSB0_UINT (insn, 32, 8, 4); \
   f_sub4 = EXTRACT_MSB0_UINT (insn, 32, 12, 4); \
   f_16_4 = EXTRACT_MSB0_UINT (insn, 32, 16, 4); \
-  f_imm12x8 = ((EXTRACT_MSB0_INT (insn, 32, 20, 12)) << (3)); \
+  f_imm12x8 = ((EXTRACT_MSB0_SINT (insn, 32, 20, 12)) << (3)); \
 
 #define EXTRACT_IFMT_FMOV9_COMPACT_VARS \
   UINT f_op4; \
@@ -385,7 +385,7 @@ struct scache {
   f_11_1 = EXTRACT_MSB0_UINT (insn, 32, 11, 1); \
   f_sub4 = EXTRACT_MSB0_UINT (insn, 32, 12, 4); \
   f_16_4 = EXTRACT_MSB0_UINT (insn, 32, 16, 4); \
-  f_imm12x8 = ((EXTRACT_MSB0_INT (insn, 32, 20, 12)) << (3)); \
+  f_imm12x8 = ((EXTRACT_MSB0_SINT (insn, 32, 20, 12)) << (3)); \
 
 #define EXTRACT_IFMT_FTRV_COMPACT_VARS \
   UINT f_op4; \
@@ -410,7 +410,7 @@ struct scache {
   length = 4; \
   f_op4 = EXTRACT_MSB0_UINT (insn, 32, 0, 4); \
   f_rn = EXTRACT_MSB0_UINT (insn, 32, 4, 4); \
-  f_imm20_hi = EXTRACT_MSB0_INT (insn, 32, 8, 4); \
+  f_imm20_hi = EXTRACT_MSB0_SINT (insn, 32, 8, 4); \
   f_imm20_lo = EXTRACT_MSB0_UINT (insn, 32, 16, 16); \
   f_imm20 = ((((f_imm20_hi) << (16))) | (f_imm20_lo));\
   f_sub4 = EXTRACT_MSB0_UINT (insn, 32, 12, 4); \
@@ -474,7 +474,7 @@ struct scache {
   f_rm = EXTRACT_MSB0_UINT (insn, 32, 8, 4); \
   f_sub4 = EXTRACT_MSB0_UINT (insn, 32, 12, 4); \
   f_16_4 = EXTRACT_MSB0_UINT (insn, 32, 16, 4); \
-  f_imm12x4 = ((EXTRACT_MSB0_INT (insn, 32, 20, 12)) << (2)); \
+  f_imm12x4 = ((EXTRACT_MSB0_SINT (insn, 32, 20, 12)) << (2)); \
 
 #define EXTRACT_IFMT_MOVW4_COMPACT_VARS \
   UINT f_op8; \

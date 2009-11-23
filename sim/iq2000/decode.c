@@ -1070,7 +1070,7 @@ iq2000bf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_rs = EXTRACT_LSB0_UINT (insn, 32, 25, 5);
     f_rt = EXTRACT_LSB0_UINT (insn, 32, 20, 5);
-    f_offset = ((((EXTRACT_LSB0_INT (insn, 32, 15, 16)) << (2))) + (((pc) + (4))));
+    f_offset = ((((EXTRACT_LSB0_SINT (insn, 32, 15, 16)) << (2))) + (((pc) + (4))));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_rt) = f_rt;
@@ -1099,7 +1099,7 @@ iq2000bf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_rs = EXTRACT_LSB0_UINT (insn, 32, 25, 5);
     f_rt = EXTRACT_LSB0_UINT (insn, 32, 20, 5);
-    f_offset = ((((EXTRACT_LSB0_INT (insn, 32, 15, 16)) << (2))) + (((pc) + (4))));
+    f_offset = ((((EXTRACT_LSB0_SINT (insn, 32, 15, 16)) << (2))) + (((pc) + (4))));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_rs) = f_rs;
@@ -1126,7 +1126,7 @@ iq2000bf_decode (SIM_CPU *current_cpu, IADDR pc,
     SI f_offset;
 
     f_rs = EXTRACT_LSB0_UINT (insn, 32, 25, 5);
-    f_offset = ((((EXTRACT_LSB0_INT (insn, 32, 15, 16)) << (2))) + (((pc) + (4))));
+    f_offset = ((((EXTRACT_LSB0_SINT (insn, 32, 15, 16)) << (2))) + (((pc) + (4))));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_rs) = f_rs;
@@ -1152,7 +1152,7 @@ iq2000bf_decode (SIM_CPU *current_cpu, IADDR pc,
     SI f_offset;
 
     f_rs = EXTRACT_LSB0_UINT (insn, 32, 25, 5);
-    f_offset = ((((EXTRACT_LSB0_INT (insn, 32, 15, 16)) << (2))) + (((pc) + (4))));
+    f_offset = ((((EXTRACT_LSB0_SINT (insn, 32, 15, 16)) << (2))) + (((pc) + (4))));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_rs) = f_rs;

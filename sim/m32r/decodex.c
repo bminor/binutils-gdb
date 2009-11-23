@@ -755,7 +755,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_r1 = EXTRACT_MSB0_UINT (insn, 32, 4, 4);
     f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4);
-    f_simm16 = EXTRACT_MSB0_INT (insn, 32, 16, 16);
+    f_simm16 = EXTRACT_MSB0_SINT (insn, 32, 16, 16);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_simm16) = f_simm16;
@@ -852,7 +852,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
     INT f_simm8;
 
     f_r1 = EXTRACT_MSB0_UINT (insn, 16, 4, 4);
-    f_simm8 = EXTRACT_MSB0_INT (insn, 16, 8, 8);
+    f_simm8 = EXTRACT_MSB0_SINT (insn, 16, 8, 8);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_r1) = f_r1;
@@ -914,7 +914,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_r1 = EXTRACT_MSB0_UINT (insn, 32, 4, 4);
     f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4);
-    f_simm16 = EXTRACT_MSB0_INT (insn, 32, 16, 16);
+    f_simm16 = EXTRACT_MSB0_SINT (insn, 32, 16, 16);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_simm16) = f_simm16;
@@ -974,7 +974,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
 #define FLD(f) abuf->fields.sfmt_bl8.f
     SI f_disp8;
 
-    f_disp8 = ((((EXTRACT_MSB0_INT (insn, 16, 8, 8)) << (2))) + (((pc) & (-4))));
+    f_disp8 = ((((EXTRACT_MSB0_SINT (insn, 16, 8, 8)) << (2))) + (((pc) & (-4))));
 
   /* Record the fields for the semantic handler.  */
   FLD (i_disp8) = f_disp8;
@@ -997,7 +997,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
 #define FLD(f) abuf->fields.sfmt_bl24.f
     SI f_disp24;
 
-    f_disp24 = ((((EXTRACT_MSB0_INT (insn, 32, 8, 24)) << (2))) + (pc));
+    f_disp24 = ((((EXTRACT_MSB0_SINT (insn, 32, 8, 24)) << (2))) + (pc));
 
   /* Record the fields for the semantic handler.  */
   FLD (i_disp24) = f_disp24;
@@ -1024,7 +1024,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_r1 = EXTRACT_MSB0_UINT (insn, 32, 4, 4);
     f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4);
-    f_disp16 = ((((EXTRACT_MSB0_INT (insn, 32, 16, 16)) << (2))) + (pc));
+    f_disp16 = ((((EXTRACT_MSB0_SINT (insn, 32, 16, 16)) << (2))) + (pc));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_r1) = f_r1;
@@ -1055,7 +1055,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
     SI f_disp16;
 
     f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4);
-    f_disp16 = ((((EXTRACT_MSB0_INT (insn, 32, 16, 16)) << (2))) + (pc));
+    f_disp16 = ((((EXTRACT_MSB0_SINT (insn, 32, 16, 16)) << (2))) + (pc));
 
   /* Record the fields for the semantic handler.  */
   FLD (f_r2) = f_r2;
@@ -1081,7 +1081,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
 #define FLD(f) abuf->fields.sfmt_bl8.f
     SI f_disp8;
 
-    f_disp8 = ((((EXTRACT_MSB0_INT (insn, 16, 8, 8)) << (2))) + (((pc) & (-4))));
+    f_disp8 = ((((EXTRACT_MSB0_SINT (insn, 16, 8, 8)) << (2))) + (((pc) & (-4))));
 
   /* Record the fields for the semantic handler.  */
   FLD (i_disp8) = f_disp8;
@@ -1105,7 +1105,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
 #define FLD(f) abuf->fields.sfmt_bl24.f
     SI f_disp24;
 
-    f_disp24 = ((((EXTRACT_MSB0_INT (insn, 32, 8, 24)) << (2))) + (pc));
+    f_disp24 = ((((EXTRACT_MSB0_SINT (insn, 32, 8, 24)) << (2))) + (pc));
 
   /* Record the fields for the semantic handler.  */
   FLD (i_disp24) = f_disp24;
@@ -1129,7 +1129,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
 #define FLD(f) abuf->fields.sfmt_bl8.f
     SI f_disp8;
 
-    f_disp8 = ((((EXTRACT_MSB0_INT (insn, 16, 8, 8)) << (2))) + (((pc) & (-4))));
+    f_disp8 = ((((EXTRACT_MSB0_SINT (insn, 16, 8, 8)) << (2))) + (((pc) & (-4))));
 
   /* Record the fields for the semantic handler.  */
   FLD (i_disp8) = f_disp8;
@@ -1153,7 +1153,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
 #define FLD(f) abuf->fields.sfmt_bl24.f
     SI f_disp24;
 
-    f_disp24 = ((((EXTRACT_MSB0_INT (insn, 32, 8, 24)) << (2))) + (pc));
+    f_disp24 = ((((EXTRACT_MSB0_SINT (insn, 32, 8, 24)) << (2))) + (pc));
 
   /* Record the fields for the semantic handler.  */
   FLD (i_disp24) = f_disp24;
@@ -1177,7 +1177,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
 #define FLD(f) abuf->fields.sfmt_bl8.f
     SI f_disp8;
 
-    f_disp8 = ((((EXTRACT_MSB0_INT (insn, 16, 8, 8)) << (2))) + (((pc) & (-4))));
+    f_disp8 = ((((EXTRACT_MSB0_SINT (insn, 16, 8, 8)) << (2))) + (((pc) & (-4))));
 
   /* Record the fields for the semantic handler.  */
   FLD (i_disp8) = f_disp8;
@@ -1200,7 +1200,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
 #define FLD(f) abuf->fields.sfmt_bl24.f
     SI f_disp24;
 
-    f_disp24 = ((((EXTRACT_MSB0_INT (insn, 32, 8, 24)) << (2))) + (pc));
+    f_disp24 = ((((EXTRACT_MSB0_SINT (insn, 32, 8, 24)) << (2))) + (pc));
 
   /* Record the fields for the semantic handler.  */
   FLD (i_disp24) = f_disp24;
@@ -1255,7 +1255,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
     INT f_simm16;
 
     f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4);
-    f_simm16 = EXTRACT_MSB0_INT (insn, 32, 16, 16);
+    f_simm16 = EXTRACT_MSB0_SINT (insn, 32, 16, 16);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_simm16) = f_simm16;
@@ -1447,7 +1447,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_r1 = EXTRACT_MSB0_UINT (insn, 32, 4, 4);
     f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4);
-    f_simm16 = EXTRACT_MSB0_INT (insn, 32, 16, 16);
+    f_simm16 = EXTRACT_MSB0_SINT (insn, 32, 16, 16);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_simm16) = f_simm16;
@@ -1510,7 +1510,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_r1 = EXTRACT_MSB0_UINT (insn, 32, 4, 4);
     f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4);
-    f_simm16 = EXTRACT_MSB0_INT (insn, 32, 16, 16);
+    f_simm16 = EXTRACT_MSB0_SINT (insn, 32, 16, 16);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_simm16) = f_simm16;
@@ -1573,7 +1573,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_r1 = EXTRACT_MSB0_UINT (insn, 32, 4, 4);
     f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4);
-    f_simm16 = EXTRACT_MSB0_INT (insn, 32, 16, 16);
+    f_simm16 = EXTRACT_MSB0_SINT (insn, 32, 16, 16);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_simm16) = f_simm16;
@@ -1663,7 +1663,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
     INT f_simm8;
 
     f_r1 = EXTRACT_MSB0_UINT (insn, 16, 4, 4);
-    f_simm8 = EXTRACT_MSB0_INT (insn, 16, 8, 8);
+    f_simm8 = EXTRACT_MSB0_SINT (insn, 16, 8, 8);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_simm8) = f_simm8;
@@ -1691,7 +1691,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
     INT f_simm16;
 
     f_r1 = EXTRACT_MSB0_UINT (insn, 32, 4, 4);
-    f_simm16 = EXTRACT_MSB0_INT (insn, 32, 16, 16);
+    f_simm16 = EXTRACT_MSB0_SINT (insn, 32, 16, 16);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_simm16) = f_simm16;
@@ -2042,7 +2042,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_r1 = EXTRACT_MSB0_UINT (insn, 32, 4, 4);
     f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4);
-    f_simm16 = EXTRACT_MSB0_INT (insn, 32, 16, 16);
+    f_simm16 = EXTRACT_MSB0_SINT (insn, 32, 16, 16);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_simm16) = f_simm16;
@@ -2134,7 +2134,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_r1 = EXTRACT_MSB0_UINT (insn, 32, 4, 4);
     f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4);
-    f_simm16 = EXTRACT_MSB0_INT (insn, 32, 16, 16);
+    f_simm16 = EXTRACT_MSB0_SINT (insn, 32, 16, 16);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_simm16) = f_simm16;
@@ -2197,7 +2197,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_r1 = EXTRACT_MSB0_UINT (insn, 32, 4, 4);
     f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4);
-    f_simm16 = EXTRACT_MSB0_INT (insn, 32, 16, 16);
+    f_simm16 = EXTRACT_MSB0_SINT (insn, 32, 16, 16);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_simm16) = f_simm16;
@@ -2260,7 +2260,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_r1 = EXTRACT_MSB0_UINT (insn, 32, 4, 4);
     f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4);
-    f_simm16 = EXTRACT_MSB0_INT (insn, 32, 16, 16);
+    f_simm16 = EXTRACT_MSB0_SINT (insn, 32, 16, 16);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_simm16) = f_simm16;
@@ -2649,7 +2649,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
 
     f_uimm3 = EXTRACT_MSB0_UINT (insn, 32, 5, 3);
     f_r2 = EXTRACT_MSB0_UINT (insn, 32, 12, 4);
-    f_simm16 = EXTRACT_MSB0_INT (insn, 32, 16, 16);
+    f_simm16 = EXTRACT_MSB0_SINT (insn, 32, 16, 16);
 
   /* Record the fields for the semantic handler.  */
   FLD (f_simm16) = f_simm16;

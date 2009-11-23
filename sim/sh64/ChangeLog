@@ -6,6 +6,8 @@
 	* decode-compact.h: Regenerate.
 	* decode-media.c: Regenerate.
 	* decode-media.h: Regenerate.
+	* defs-compact.h: Regenerate.
+	* defs-media.h: Regenerate.
 
 2009-11-03  Doug Evans  <dje@sebabeach.org>
 
