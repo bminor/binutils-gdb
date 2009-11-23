@@ -12596,3 +12596,15 @@ _bfd_elf_make_dynamic_reloc_section (asection *         sec,
 
   return reloc_sec;
 }
+
+/* Copy the ELF symbol type associated with a linker hash entry.  */
+void
+_bfd_elf_copy_link_hash_symbol_type (bfd *abfd ATTRIBUTE_UNUSED,
+    struct bfd_link_hash_entry * hdest,
+    struct bfd_link_hash_entry * hsrc)
+{
+  struct elf_link_hash_entry *ehdest = (struct elf_link_hash_entry *)hdest;
+  struct elf_link_hash_entry *ehsrc = (struct elf_link_hash_entry *)hsrc;
+
+  ehdest->type = ehsrc->type;
+}

@@ -54,6 +54,8 @@
 #define nlm_bfd_link_hash_table_free            _bfd_generic_link_hash_table_free
 #define nlm_bfd_link_add_symbols                _bfd_generic_link_add_symbols
 #define nlm_bfd_link_just_syms                  _bfd_generic_link_just_syms
+#define nlm_bfd_copy_link_hash_symbol_type \
+  _bfd_generic_copy_link_hash_symbol_type
 #define nlm_bfd_final_link                      _bfd_generic_final_link
 #define nlm_bfd_link_split_section              _bfd_generic_link_split_section
 

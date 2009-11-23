@@ -1,3 +1,43 @@
+2009-11-23  Paul Brook  <paul@codesourcery.com>
+
+	* libbfd-in.h (_bfd_generic_copy_link_hash_symbol_type): Add
+	prototype.
+	* elf-bfd.h (_bfd_elf_copy_link_hash_symbol_type): Add prototype.
+	* linker.c (_bfd_generic_copy_link_hash_symbol_type): New function.
+	* elflink.c (_bfd_elf_copy_link_hash_symbol_type): New function.
+	* targets.c (BFD_JUMP_TABLE_LINK, struct bfd_target): Add
+	_copy_link_hash_symbol_type.
+	* bfd/coff64-rs6000.c (rs6000coff64_vec, aix5coff64_vec): Add
+	_bfd_generic_copy_link_hash_symbol_type.
+	* bfd/coff-rs6000.c (rs6000coff_vec, pmac_xcoff_vec): Add
+	_bfd_generic_copy_link_hash_symbol_type.
+	* aout-adobe.c (aout_32_bfd_copy_link_hash_symbol_type): Define.
+	* aout-target.h (MY_bfd_copy_link_hash_symbol_type): Define.
+	* aout-tic30.c (MY_bfd_copy_link_hash_symbol_type): Define.
+	* binary.c (binary_bfd_copy_link_hash_symbol_type): Define.
+	* bout.c (b_out_bfd_copy_link_hash_symbol_type): Define.
+	* coffcode.h (coff_bfd_copy_link_hash_symbol_type): Define.
+	* elfxx-target.h (bfd_elfNN_bfd_copy_link_hash_symbol_type): Define.
+	* i386msdos.c (msdos_bfd_copy_link_hash_symbol_type): Define.
+	* i386os9k.c (os9k_bfd_copy_link_hash_symbol_type): Define.
+	* ieee.c (ieee_bfd_copy_link_hash_symbol_type): Define.
+	* ihex.c (ihex_bfd_copy_link_hash_symbol_type): Define.
+	* libecoff.h (_bfd_ecoff_bfd_copy_link_hash_symbol_type): Define.
+	* mach-o.c (bfd_mach_o_bfd_copy_link_hash_symbol_type): Define.
+	* mmo.c (mmo_bfd_copy_link_hash_symbol_type): Define.
+	* nlm-target.h (nlm_bfd_copy_link_hash_symbol_type): Define.
+	* oasys.c (oasys_bfd_copy_link_hash_symbol_type): Define.
+	* pef.c (bfd_pef_bfd_copy_link_hash_symbol_type): Define.
+	* ppcboot.c (ppcboot_bfd_copy_link_hash_symbol_type): Define.
+	* som.c (som_bfd_copy_link_hash_symbol_type): Define.
+	* srec.c (srec_bfd_copy_link_hash_symbol_type): Define.
+	* tekhex.c (tekhex_bfd_copy_link_hash_symbol_type): Define.
+	* versados.c (versados_bfd_copy_link_hash_symbol_type): Define.
+	* vms.c (vms_bfd_copy_link_hash_symbol_type): Define.
+	* xsym.c (bfd_sym_bfd_copy_link_hash_symbol_type): Define.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2009-11-19  Tristan Gingold  <gingold@adacore.com>
 
 	* coff-rs6000.c (rs6000coff_vec): Use generic routines instead of

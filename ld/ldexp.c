@@ -815,6 +815,20 @@ exp_fold_tree_1 (etree_type *tree)
 	      h->u.def.section = expld.result.section;
 	      if (tree->type.node_class == etree_provide)
 		tree->type.node_class = etree_provided;
+
+	      /* Copy the symbol type if this is a simple assignment of
+	         one symbol to annother.  */
+	      if (tree->assign.src->type.node_class == etree_name)
+		{
+		  struct bfd_link_hash_entry *hsrc;
+
+		  hsrc = bfd_link_hash_lookup (link_info.hash,
+					       tree->assign.src->name.name,
+					       FALSE, FALSE, TRUE);
+		  if (hsrc)
+		    bfd_copy_link_hash_symbol_type (link_info.output_bfd, h,
+						    hsrc);
+		}
 	    }
 	}
       break;

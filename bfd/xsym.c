@@ -51,6 +51,8 @@
 #define bfd_sym_bfd_link_hash_table_free            _bfd_generic_link_hash_table_free
 #define bfd_sym_bfd_link_add_symbols                _bfd_generic_link_add_symbols
 #define bfd_sym_bfd_link_just_syms                  _bfd_generic_link_just_syms
+#define bfd_sym_bfd_copy_link_hash_symbol_type \
+  _bfd_generic_copy_link_hash_symbol_type
 #define bfd_sym_bfd_final_link                      _bfd_generic_final_link
 #define bfd_sym_bfd_link_split_section              _bfd_generic_link_split_section
 #define bfd_sym_get_section_contents_in_window      _bfd_generic_get_section_contents_in_window

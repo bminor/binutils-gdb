@@ -227,6 +227,9 @@ set armelftests {
     {"jump19" "-static -T arm.ld" "" {jump19.s}
      {{objdump -dr jump19.d}}
      "jump19"}
+    {"script-type" "-static -T script-type.ld" "" {script-type.s}
+     {{readelf -s script-type.sym}}
+     "script-type"}
     {"callweak" "-static -T arm.ld" "" {callweak.s}
      {{objdump -dr callweak.d}}
      "callweak"}

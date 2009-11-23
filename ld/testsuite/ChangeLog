@@ -1,3 +1,9 @@
+2009-11-23  Paul Brook  <paul@codesourcery.com>
+
+	* ld-arm/script-type.sym: New test.
+	* ld-arm/script-type.s: New test.
+	* ld-arm/script-type.s: New test.
+
 2009-11-20  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* ld-arm/arm-dyn.ld: Adapt to main linker script changes.

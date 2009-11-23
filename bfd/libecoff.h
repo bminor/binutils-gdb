@@ -315,6 +315,8 @@ extern struct bfd_link_hash_table *_bfd_ecoff_bfd_link_hash_table_create
 extern bfd_boolean _bfd_ecoff_bfd_link_add_symbols
   (bfd *, struct bfd_link_info *);
 #define _bfd_ecoff_bfd_link_just_syms _bfd_generic_link_just_syms
+#define _bfd_ecoff_bfd_copy_link_hash_symbol_type \
+  _bfd_generic_copy_link_hash_symbol_type
 extern bfd_boolean _bfd_ecoff_bfd_final_link
   (bfd *, struct bfd_link_info *);
 

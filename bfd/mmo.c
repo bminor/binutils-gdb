@@ -3199,6 +3199,8 @@ mmo_write_object_contents (bfd *abfd)
 #define mmo_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 #define mmo_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define mmo_bfd_link_just_syms _bfd_generic_link_just_syms
+#define mmo_bfd_copy_link_hash_symbol_type \
+  _bfd_generic_copy_link_hash_symbol_type
 #define mmo_bfd_final_link _bfd_generic_final_link
 #define mmo_bfd_link_split_section _bfd_generic_link_split_section
 

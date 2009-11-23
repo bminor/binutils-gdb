@@ -410,6 +410,9 @@ extern bfd_boolean _bfd_generic_set_section_contents
   ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) bfd_false)
 #define _bfd_nolink_bfd_link_just_syms \
   ((void (*) (asection *, struct bfd_link_info *)) bfd_void)
+#define _bfd_nolink_bfd_copy_link_hash_symbol_type \
+  ((void (*) (bfd *, struct bfd_link_hash_entry *, \
+	      struct bfd_link_hash_entry *)) bfd_void)
 #define _bfd_nolink_bfd_final_link \
   ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) bfd_false)
 #define _bfd_nolink_bfd_link_split_section \
@@ -523,6 +526,10 @@ extern bfd_boolean _bfd_generic_link_add_one_symbol
 /* Generic routine to mark section as supplying symbols only.  */
 extern void _bfd_generic_link_just_syms
   (asection *, struct bfd_link_info *);
+
+/* Generic routine that does nothing.  */
+extern void _bfd_generic_copy_link_hash_symbol_type
+  (bfd *, struct bfd_link_hash_entry *, struct bfd_link_hash_entry *);
 
 /* Generic link routine.  */
 extern bfd_boolean _bfd_generic_final_link

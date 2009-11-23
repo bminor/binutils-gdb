@@ -980,6 +980,10 @@ tic30_aout_set_arch_mach (bfd *abfd,
 #ifndef MY_bfd_link_just_syms
 #define MY_bfd_link_just_syms _bfd_generic_link_just_syms
 #endif
+#ifndef MY_bfd_copy_link_hash_symbol_type
+#define MY_bfd_copy_link_hash_symbol_type \
+  _bfd_generic_copy_link_hash_symbol_type
+#endif
 #ifndef MY_bfd_link_split_section
 #define MY_bfd_link_split_section  _bfd_generic_link_split_section
 #endif

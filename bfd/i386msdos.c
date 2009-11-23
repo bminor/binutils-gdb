@@ -153,6 +153,8 @@ msdos_set_section_contents (bfd *abfd,
 #define msdos_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 #define msdos_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define msdos_bfd_link_just_syms _bfd_generic_link_just_syms
+#define msdos_bfd_copy_link_hash_symbol_type \
+  _bfd_generic_copy_link_hash_symbol_type
 #define msdos_bfd_final_link _bfd_generic_final_link
 #define msdos_bfd_link_split_section _bfd_generic_link_split_section
 #define msdos_set_arch_mach _bfd_generic_set_arch_mach

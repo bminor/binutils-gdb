@@ -5328,6 +5328,8 @@ dummy_reloc16_extra_cases (bfd *abfd ATTRIBUTE_UNUSED,
 #endif /* ! defined (coff_relocate_section) */
 
 #define coff_bfd_link_just_syms      _bfd_generic_link_just_syms
+#define coff_bfd_copy_link_hash_symbol_type \
+  _bfd_generic_copy_link_hash_symbol_type
 #define coff_bfd_link_split_section  _bfd_generic_link_split_section
 
 #ifndef coff_start_final_link

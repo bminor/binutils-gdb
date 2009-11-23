@@ -436,6 +436,7 @@ BFD_JUMP_TABLE macros.
 .  NAME##_bfd_link_hash_table_free, \
 .  NAME##_bfd_link_add_symbols, \
 .  NAME##_bfd_link_just_syms, \
+.  NAME##_bfd_copy_link_hash_symbol_type, \
 .  NAME##_bfd_final_link, \
 .  NAME##_bfd_link_split_section, \
 .  NAME##_bfd_gc_sections, \
@@ -466,6 +467,12 @@ BFD_JUMP_TABLE macros.
 .
 .  {* Indicate that we are only retrieving symbol values from this section.  *}
 .  void        (*_bfd_link_just_syms) (asection *, struct bfd_link_info *);
+.
+.  {* Copy the symbol type of a linker hash table entry.  *}
+.#define bfd_copy_link_hash_symbol_type(b, t, f) \
+.  BFD_SEND (b, _bfd_copy_link_hash_symbol_type, (b, t, f))
+.  void (*_bfd_copy_link_hash_symbol_type)
+.    (bfd *, struct bfd_link_hash_entry *, struct bfd_link_hash_entry *);
 .
 .  {* Do a link based on the link_order structures attached to each
 .     section of the BFD.  *}
