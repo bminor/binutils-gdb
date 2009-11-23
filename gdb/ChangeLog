@@ -1,3 +1,7 @@
+2009-11-23  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* dwarf2read.c [HAVE_MMAP] (MAP_FAILED): Define if missing.
+
 2009-11-23  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (find_partial_die): Don't reassign to 'back_to'.
