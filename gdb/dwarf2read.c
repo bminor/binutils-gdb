@@ -6914,7 +6914,7 @@ find_partial_die (unsigned int offset, struct dwarf2_cu *cu)
       if (per_cu->cu->dwarf2_abbrevs == NULL)
 	{
 	  dwarf2_read_abbrevs (per_cu->cu->objfile->obfd, per_cu->cu);
-	  back_to = make_cleanup (dwarf2_free_abbrev_table, per_cu->cu);
+	  make_cleanup (dwarf2_free_abbrev_table, per_cu->cu);
 	}
       info_ptr = (dwarf2_per_objfile->info.buffer
 		  + per_cu->cu->header.offset

@@ -1,3 +1,7 @@
+2009-11-23  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (find_partial_die): Don't reassign to 'back_to'.
+
 2009-11-23  Michael Snyder  <msnyder@vmware.com>
 
 	* NEWS: Mention hw watchpoint fix for process record.
