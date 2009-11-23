@@ -77,6 +77,10 @@ show follow-exec-mode
   creates a new one.  This is useful to be able to restart the old
   executable after the inferior having done an exec call.
 
+* Bug fixes
+
+Process record now works correctly with hardware watchpoints.
+
 *** Changes in GDB 7.0
 
 * GDB now has an interface for JIT compilation.  Applications that

@@ -1,3 +1,7 @@
+2009-11-23  Michael Snyder  <msnyder@vmware.com>
+
+	* NEWS: Mention hw watchpoint fix for process record.
+
 2009-11-23  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* cli/cli-cmds.c (disassemble_command): Split on comma.
