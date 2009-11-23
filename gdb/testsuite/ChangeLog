@@ -1,3 +1,8 @@
+2009-11-23  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.asm/asm-source.exp: Adjust.
+	* gdb.base/help.exp: Adjust.
+	
 2009-11-22  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.base/catch-syscall.exp (test_catch_syscall_fail_nodatadir)

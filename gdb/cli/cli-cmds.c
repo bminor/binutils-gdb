@@ -983,7 +983,6 @@ disassemble_command (char *arg, int from_tty)
   CORE_ADDR low, high;
   char *name;
   CORE_ADDR pc, pc_masked;
-  char *space_index;
   int flags;
 
   name = NULL;
@@ -1022,13 +1021,12 @@ disassemble_command (char *arg, int from_tty)
       return;
     }
 
-  /* FIXME: 'twould be nice to allow spaces in the expression for the first
-     arg.  Allow comma separater too?  */
-
-  if (!(space_index = (char *) strchr (arg, ' ')))
+  pc = value_as_address (parse_to_comma_and_eval (&arg));
+  if (arg[0] == ',')
+    ++arg;
+  if (arg[0] == '\0')
     {
       /* One argument.  */
-      pc = parse_and_eval_address (arg);
       if (find_pc_partial_function (pc, &name, &low, &high) == 0)
 	error (_("No function contains specified address."));
 #if defined(TUI)
@@ -1044,9 +1042,8 @@ disassemble_command (char *arg, int from_tty)
   else
     {
       /* Two arguments.  */
-      *space_index = '\0';
-      low = parse_and_eval_address (arg);
-      high = parse_and_eval_address (space_index + 1);
+      low = pc;
+      high = parse_and_eval_address (arg);
     }
 
   print_disassembly (gdbarch, name, low, high, flags);
@@ -1461,7 +1458,7 @@ Default is the function surrounding the pc of the selected frame.\n\
 With a /m modifier, source lines are included (if available).\n\
 With a /r modifier, raw instructions in hex are included.\n\
 With a single argument, the function surrounding that address is dumped.\n\
-Two arguments are taken as a range of memory to dump."));
+Two arguments (separated by a comma) are taken as a range of memory to dump."));
   set_cmd_completer (c, location_completer);
   if (xdb_commands)
     add_com_alias ("va", "disassemble", class_xdb, 0);

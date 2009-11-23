@@ -1,3 +1,7 @@
+2009-11-23  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.texinfo (Machine Code): Adjust.
+	
 2009-11-11  Pedro Alves  <pedro@codesourcery.com>
 
 	* agentexpr.texi (Tracing On Symmetrix): Delete section.

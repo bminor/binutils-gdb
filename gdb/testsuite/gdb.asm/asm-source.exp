@@ -453,12 +453,12 @@ proc test_dis { command var } {
 # See if we can look at a global variable, three ways
 gdb_test "print globalvar" ".* = 11" "look at global variable"
 test_dis "x/i &globalvar" "globalvar"
-test_dis "disassem &globalvar &globalvar+1" "globalvar"
+test_dis "disassem &globalvar, &globalvar+1" "globalvar"
 
 # See if we can look at a static variable, three ways
 gdb_test "print staticvar" ".* = 5" "look at static variable"
 test_dis "x/i &staticvar" "staticvar"
-test_dis "disassem &staticvar &staticvar+1" "staticvar"
+test_dis "disassem &staticvar, &staticvar+1" "staticvar"
 
 # See if we can look at a static function
 gdb_test "disassem foostatic" ".*<\\+0>:.*End of assembler dump." \

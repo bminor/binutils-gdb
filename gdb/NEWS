@@ -22,6 +22,12 @@ Xilinx MicroBlaze		microblaze
   lists inferiors that are not running yet or that have exited
   already.  See also "New commands" and "New options" below.
 
+* Changed commands
+
+disassemble
+  The disassemble command, when invoked with two arguments, now requires
+  the arguments to be comma-separated.
+
 * New commands (for set/show, see "New options" below)
 
 record save [<FILENAME>]

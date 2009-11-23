@@ -1,3 +1,9 @@
+2009-11-23  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* cli/cli-cmds.c (disassemble_command): Split on comma.
+	(init_cli_cmds): Update help.
+	* NEWS: Mention incompatible change to 'disassemble'.
+	
 2009-11-22  Pedro Alves  <pedro@codesourcery.com>
 
         Make hardware breakpoints work for process repord.

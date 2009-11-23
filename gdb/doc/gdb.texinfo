@@ -6539,10 +6539,14 @@ in symbolic form by specifying the @code{/r}.
 The default memory range is the function surrounding the
 program counter of the selected frame.  A single argument to this
 command is a program counter value; @value{GDBN} dumps the function
-surrounding this value.  Two arguments specify a range of addresses
-(first inclusive, second exclusive) to dump.  In that case, the name of
-the function is also printed (since there could be several functions in
-the given range).
+surrounding this value.  When two arguments are given, they should
+be separated by a comma, possibly surrounded by whitespace.  The
+arguments specify a range of addresses (first inclusive, second exclusive)
+to dump.  In that case, the name of the function is also printed (since
+there could be several functions in the given range).
+
+The argument(s) can be any expression yielding a numeric value, such as
+@samp{0x32c4}, @samp{&main+10} or @samp{$pc - 8}.
 
 If the range of memory being disassembled contains current program counter,
 the instruction at that location is shown with a @code{=>} marker.
@@ -6552,7 +6556,7 @@ The following example shows the disassembly of a range of addresses of
 HP PA-RISC 2.0 code:
 
 @smallexample
-(@value{GDBP}) disas 0x32c4 0x32e4
+(@value{GDBP}) disas 0x32c4, 0x32e4
 Dump of assembler code from 0x32c4 to 0x32e4:
    0x32c4 <main+204>:      addil 0,dp
    0x32c8 <main+208>:      ldw 0x22c(sr0,r1),r26
