@@ -1,3 +1,13 @@
+2009-11-22  Doug Evans  <dje@sebabeach.org>
+
+	* cris/cpuall.h: Regenerate.
+	* cris/cpuv10.h: Regenerate.
+	* cris/cpuv32.h: Regenerate.
+	* cris/decodev10.c: Regenerate.
+	* cris/decodev10.h: Regenerate.
+	* cris/decodev32.c: Regenerate.
+	* cris/decodev32.h: Regenerate.
+
 2009-11-12  Tristan Gingold  <gingold@adacore.com>
 
 	* avr/interp.c (sim_write): Allow byte access.

@@ -1,3 +1,16 @@
+2009-11-22  Doug Evans  <dje@sebabeach.org>
+
+	* cpu.h: Regenerate.
+	* cpu2.h: Regenerate.
+	* cpux.h: Regenerate.
+	* cpuall.h: Regenerate.
+	* decode.c: Regenerate.
+	* decode.h: Regenerate.
+	* decode2.c: Regenerate.
+	* decode2.h: Regenerate.
+	* decodex.c: Regenerate.
+	* decodex.h: Regenerate.
+
 2009-11-03  Doug Evans  <dje@sebabeach.org>
 
 	* arch.c: Regenerate.

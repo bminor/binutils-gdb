@@ -29,7 +29,6 @@ This file is part of the GNU simulators.
 
 #ifdef WANT_CPU_FRVBF
 #include "eng.h"
-#include "cgen-engine.h"
 #include "cpu.h"
 #include "decode.h"
 #endif

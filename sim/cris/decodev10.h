@@ -26,7 +26,7 @@ This file is part of the GNU simulators.
 #define CRISV10F_DECODE_H
 
 extern const IDESC *crisv10f_decode (SIM_CPU *, IADDR,
-                                  CGEN_INSN_INT,
+                                  CGEN_INSN_WORD,
                                   ARGBUF *);
 extern void crisv10f_init_idesc_table (SIM_CPU *);
 extern void crisv10f_sem_init_idesc_table (SIM_CPU *);

@@ -26,7 +26,7 @@ This file is part of the GNU simulators.
 #define IQ2000BF_DECODE_H
 
 extern const IDESC *iq2000bf_decode (SIM_CPU *, IADDR,
-                                  CGEN_INSN_INT, CGEN_INSN_INT,
+                                  CGEN_INSN_WORD, CGEN_INSN_WORD,
                                   ARGBUF *);
 extern void iq2000bf_init_idesc_table (SIM_CPU *);
 extern void iq2000bf_sem_init_idesc_table (SIM_CPU *);

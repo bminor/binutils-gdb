@@ -29,14 +29,12 @@ This file is part of the GNU simulators.
 
 #ifdef WANT_CPU_IQ2000BF
 #include "eng.h"
-#include "cgen-engine.h"
 #include "cpu.h"
 #include "decode.h"
 #endif
 
 #ifdef WANT_CPU_IQ10BF
 #include "eng.h"
-#include "cgen-engine.h"
 #include "cpu.h"
 #include "decode.h"
 #endif

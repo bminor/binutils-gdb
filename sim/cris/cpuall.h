@@ -29,35 +29,30 @@ This file is part of the GNU simulators.
 
 #ifdef WANT_CPU_CRISV0F
 #include "engv0.h"
-#include "cgen-engine.h"
 #include "cpuv0.h"
 #include "decodev0.h"
 #endif
 
 #ifdef WANT_CPU_CRISV3F
 #include "engv3.h"
-#include "cgen-engine.h"
 #include "cpuv3.h"
 #include "decodev3.h"
 #endif
 
 #ifdef WANT_CPU_CRISV8F
 #include "engv8.h"
-#include "cgen-engine.h"
 #include "cpuv8.h"
 #include "decodev8.h"
 #endif
 
 #ifdef WANT_CPU_CRISV10F
 #include "engv10.h"
-#include "cgen-engine.h"
 #include "cpuv10.h"
 #include "decodev10.h"
 #endif
 
 #ifdef WANT_CPU_CRISV32F
 #include "engv32.h"
-#include "cgen-engine.h"
 #include "cpuv32.h"
 #include "decodev32.h"
 #endif

@@ -29,21 +29,18 @@ This file is part of the GNU simulators.
 
 #ifdef WANT_CPU_M32RBF
 #include "eng.h"
-#include "cgen-engine.h"
 #include "cpu.h"
 #include "decode.h"
 #endif
 
 #ifdef WANT_CPU_M32RXF
 #include "engx.h"
-#include "cgen-engine.h"
 #include "cpux.h"
 #include "decodex.h"
 #endif
 
 #ifdef WANT_CPU_M32R2F
 #include "eng2.h"
-#include "cgen-engine.h"
 #include "cpu2.h"
 #include "decode2.h"
 #endif

@@ -29,7 +29,6 @@ This file is part of the GNU simulators.
 
 #ifdef WANT_CPU_SH64
 #include "eng.h"
-#include "cgen-engine.h"
 #include "cpu.h"
 #include "decode.h"
 #endif

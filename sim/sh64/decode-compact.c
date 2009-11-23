@@ -306,14 +306,14 @@ sh64_compact_init_idesc_table (SIM_CPU *cpu)
 
 const IDESC *
 sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
-              CGEN_INSN_INT base_insn, CGEN_INSN_INT entire_insn,
+              CGEN_INSN_WORD base_insn, CGEN_INSN_WORD entire_insn,
               ARGBUF *abuf)
 {
   /* Result of decoder.  */
   SH64_COMPACT_INSN_TYPE itype;
 
   {
-    CGEN_INSN_INT insn = base_insn;
+    CGEN_INSN_WORD insn = base_insn;
 
     {
       unsigned int val = (((insn >> 5) & (15 << 7)) | ((insn >> 0) & (127 << 0)));
@@ -2658,7 +2658,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_add_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -2687,7 +2687,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_addi_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_addi_compact.f
     UINT f_rn;
     UINT f_imm8;
@@ -2715,7 +2715,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_addc_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -2744,7 +2744,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_addv_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -2773,7 +2773,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_and_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -2802,7 +2802,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_andi_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_addi_compact.f
     UINT f_imm8;
 
@@ -2827,7 +2827,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_andb_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_addi_compact.f
     UINT f_imm8;
 
@@ -2851,7 +2851,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_bf_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_bf_compact.f
     SI f_disp8;
 
@@ -2874,7 +2874,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_bfs_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_bf_compact.f
     SI f_disp8;
 
@@ -2897,7 +2897,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_bra_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_bra_compact.f
     SI f_disp12;
 
@@ -2920,7 +2920,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_braf_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -2963,7 +2963,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_bsr_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_bra_compact.f
     SI f_disp12;
 
@@ -2986,7 +2986,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_bsrf_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -3049,7 +3049,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_cmpeq_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -3077,7 +3077,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_cmpeqi_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_addi_compact.f
     UINT f_imm8;
 
@@ -3101,7 +3101,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_cmppl_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -3125,7 +3125,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_div0s_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -3166,7 +3166,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_div1_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -3195,7 +3195,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_divu_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -3221,7 +3221,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_dmulsl_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -3249,7 +3249,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_dt_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -3274,7 +3274,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_extsb_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -3302,7 +3302,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fabs_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -3327,7 +3327,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fadd_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -3356,7 +3356,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fcmpeq_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -3384,7 +3384,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fcnvds_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_fmov8_compact.f
     SI f_dn;
 
@@ -3409,7 +3409,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fcnvsd_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_fmov8_compact.f
     SI f_dn;
 
@@ -3434,7 +3434,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fipr_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_fipr_compact.f
     SI f_vn;
     SI f_vm;
@@ -3454,7 +3454,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_flds_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -3479,7 +3479,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fldi0_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -3503,7 +3503,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_float_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -3528,7 +3528,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fmac_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -3558,7 +3558,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fmov1_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -3586,7 +3586,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fmov2_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -3614,7 +3614,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fmov3_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -3643,7 +3643,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fmov4_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -3672,7 +3672,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fmov5_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -3700,7 +3700,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fmov6_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -3729,7 +3729,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fmov7_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -3758,7 +3758,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fmov8_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_fmov8_compact.f
     SI f_dn;
     UINT f_rm;
@@ -3789,7 +3789,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fmov9_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_fmov9_compact.f
     UINT f_rn;
     SI f_dm;
@@ -3846,7 +3846,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fsts_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -3871,7 +3871,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ftrc_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -3896,7 +3896,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ftrv_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_fipr_compact.f
     SI f_vn;
 
@@ -3913,7 +3913,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldc_gbr_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -3937,7 +3937,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldc_vbr_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -3961,7 +3961,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldc_sr_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -3985,7 +3985,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldcl_gbr_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -4010,7 +4010,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldcl_vbr_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -4035,7 +4035,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_lds_fpscr_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -4059,7 +4059,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldsl_fpscr_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -4084,7 +4084,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_lds_fpul_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -4109,7 +4109,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldsl_fpul_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -4135,7 +4135,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_lds_mach_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -4159,7 +4159,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldsl_mach_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -4184,7 +4184,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_lds_macl_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -4208,7 +4208,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldsl_macl_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -4233,7 +4233,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_lds_pr_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -4257,7 +4257,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldsl_pr_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -4282,7 +4282,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_macl_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -4312,7 +4312,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_macw_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -4342,7 +4342,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_mov_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -4370,7 +4370,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movi_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_addi_compact.f
     UINT f_rn;
     UINT f_imm8;
@@ -4397,7 +4397,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movi20_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movi20_compact.f
     UINT f_rn;
     INT f_imm20_hi;
@@ -4428,7 +4428,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movb1_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -4456,7 +4456,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movb2_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -4485,7 +4485,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movb3_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -4514,7 +4514,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movb4_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_addi_compact.f
     UINT f_imm8;
 
@@ -4538,7 +4538,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movb5_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movb5_compact.f
     UINT f_rm;
     UINT f_imm4;
@@ -4566,7 +4566,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movb6_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -4594,7 +4594,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movb7_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -4623,7 +4623,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movb8_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -4652,7 +4652,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movb9_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_addi_compact.f
     UINT f_imm8;
 
@@ -4676,7 +4676,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movb10_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movb5_compact.f
     UINT f_rm;
     UINT f_imm4;
@@ -4704,7 +4704,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movl1_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -4732,7 +4732,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movl2_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -4761,7 +4761,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movl3_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -4790,7 +4790,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movl4_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl10_compact.f
     SI f_imm8x4;
 
@@ -4814,7 +4814,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movl5_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl5_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -4845,7 +4845,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movl6_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -4873,7 +4873,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movl7_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -4903,7 +4903,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movl8_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -4932,7 +4932,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movl9_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl10_compact.f
     SI f_imm8x4;
 
@@ -4956,7 +4956,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movl10_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl10_compact.f
     UINT f_rn;
     SI f_imm8x4;
@@ -4983,7 +4983,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movl11_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl5_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -5014,7 +5014,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movl12_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -5045,7 +5045,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movl13_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -5076,7 +5076,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movw1_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -5104,7 +5104,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movw2_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -5133,7 +5133,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movw3_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -5162,7 +5162,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movw4_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     SI f_imm8x2;
 
@@ -5186,7 +5186,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movw5_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw5_compact.f
     UINT f_rm;
     SI f_imm4x2;
@@ -5214,7 +5214,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movw6_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -5242,7 +5242,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movw7_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -5271,7 +5271,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movw8_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -5300,7 +5300,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movw9_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     SI f_imm8x2;
 
@@ -5324,7 +5324,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movw10_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
     SI f_imm8x2;
@@ -5351,7 +5351,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movw11_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw5_compact.f
     UINT f_rm;
     SI f_imm4x2;
@@ -5379,7 +5379,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_mova_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl10_compact.f
     SI f_imm8x4;
 
@@ -5403,7 +5403,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movcal_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -5428,7 +5428,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movcol_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -5453,7 +5453,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movt_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -5477,7 +5477,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movual_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -5502,7 +5502,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movual2_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -5528,7 +5528,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_mull_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -5556,7 +5556,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_negc_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -5597,7 +5597,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_pref_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -5621,7 +5621,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_rotcl_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -5665,7 +5665,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_shad_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movl12_compact.f
     UINT f_rn;
     UINT f_rm;
@@ -5694,7 +5694,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_stc_gbr_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -5718,7 +5718,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_stc_vbr_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -5742,7 +5742,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_stcl_gbr_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -5767,7 +5767,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_stcl_vbr_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -5792,7 +5792,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_sts_fpscr_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -5816,7 +5816,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_stsl_fpscr_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -5841,7 +5841,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_sts_fpul_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -5866,7 +5866,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_stsl_fpul_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -5892,7 +5892,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_sts_mach_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -5916,7 +5916,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_stsl_mach_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -5941,7 +5941,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_sts_macl_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -5965,7 +5965,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_stsl_macl_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -5990,7 +5990,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_sts_pr_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -6014,7 +6014,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_stsl_pr_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -6039,7 +6039,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_tasb_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movw10_compact.f
     UINT f_rn;
 
@@ -6063,7 +6063,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_trapa_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_addi_compact.f
     UINT f_imm8;
 
@@ -6086,7 +6086,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_tsti_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_addi_compact.f
     UINT f_imm8;
 
@@ -6110,7 +6110,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_tstb_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_addi_compact.f
     UINT f_imm8;
 

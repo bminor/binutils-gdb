@@ -1,5 +1,10 @@
 2009-11-22  Doug Evans  <dje@sebabeach.org>
 
+	* cgen-engine.h (EXTRACT_MSB0_LGSINT, EXTRACT_MSB0_LGUINT): Define.
+	(EXTRACT_LSB0_LGSINT, EXTRACT_LSB0_LGUINT): Define.
+	(EXTRACT_FN, SEMANTIC_FN): Use CGEN_INSN_WORD in prototype
+	instead of CGEN_INSN_INT.
+
 	* cgen-trace.h (trace_extract): Add cast to fix warning.
 
 2009-11-05  Doug Evans  <dje@sebabeach.org>

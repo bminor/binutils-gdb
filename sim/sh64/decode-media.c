@@ -320,14 +320,14 @@ sh64_media_init_idesc_table (SIM_CPU *cpu)
 
 const IDESC *
 sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
-              CGEN_INSN_INT base_insn, CGEN_INSN_INT entire_insn,
+              CGEN_INSN_WORD base_insn, CGEN_INSN_WORD entire_insn,
               ARGBUF *abuf)
 {
   /* Result of decoder.  */
   SH64_MEDIA_INSN_TYPE itype;
 
   {
-    CGEN_INSN_INT insn = base_insn;
+    CGEN_INSN_WORD insn = base_insn;
 
     {
       unsigned int val = (((insn >> 22) & (63 << 4)) | ((insn >> 16) & (15 << 0)));
@@ -1548,7 +1548,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_add:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -1580,7 +1580,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_addi:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_addi.f
     UINT f_left;
     INT f_disp10;
@@ -1611,7 +1611,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_alloco:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_xori.f
     UINT f_left;
 
@@ -1636,7 +1636,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_beq:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_beq.f
     UINT f_left;
     UINT f_right;
@@ -1668,7 +1668,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_beqi:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_beqi.f
     UINT f_left;
     INT f_imm6;
@@ -1699,7 +1699,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_blink:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_blink.f
     UINT f_trb;
     UINT f_dest;
@@ -1746,7 +1746,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_byterev:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_xori.f
     UINT f_left;
     UINT f_dest;
@@ -1774,7 +1774,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_cmveq:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -1806,7 +1806,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fabsd:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_fabsd.f
     UINT f_left;
     UINT f_right;
@@ -1838,7 +1838,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fabss:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_fabsd.f
     UINT f_left;
     UINT f_right;
@@ -1870,7 +1870,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_faddd:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -1902,7 +1902,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fadds:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -1934,7 +1934,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fcmpeqd:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -1966,7 +1966,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fcmpeqs:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -1998,7 +1998,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fcnvds:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_fabsd.f
     UINT f_left;
     UINT f_right;
@@ -2030,7 +2030,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fcnvsd:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_fabsd.f
     UINT f_left;
     UINT f_right;
@@ -2062,7 +2062,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fgetscr:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_shori.f
     UINT f_dest;
 
@@ -2086,7 +2086,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fiprs:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -2120,7 +2120,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fldd:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_fldd.f
     UINT f_left;
     SI f_disp10x8;
@@ -2151,7 +2151,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fldp:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_fldd.f
     UINT f_left;
     SI f_disp10x8;
@@ -2183,7 +2183,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_flds:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_flds.f
     UINT f_left;
     SI f_disp10x4;
@@ -2214,7 +2214,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fldxd:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -2246,7 +2246,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fldxp:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -2279,7 +2279,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fldxs:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -2311,7 +2311,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fmacs:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -2344,7 +2344,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fmovdq:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_fabsd.f
     UINT f_left;
     UINT f_right;
@@ -2376,7 +2376,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fmovls:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_xori.f
     UINT f_left;
     UINT f_dest;
@@ -2404,7 +2404,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fmovqd:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_xori.f
     UINT f_left;
     UINT f_dest;
@@ -2432,7 +2432,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fmovsl:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_fabsd.f
     UINT f_left;
     UINT f_right;
@@ -2464,7 +2464,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fputscr:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_fabsd.f
     UINT f_left;
     UINT f_right;
@@ -2492,7 +2492,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fstd:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_fldd.f
     UINT f_left;
     SI f_disp10x8;
@@ -2523,7 +2523,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fsts:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_flds.f
     UINT f_left;
     SI f_disp10x4;
@@ -2554,7 +2554,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fstxd:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -2586,7 +2586,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fstxs:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -2618,7 +2618,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ftrvs:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -2653,7 +2653,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_getcfg:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_getcfg.f
     UINT f_left;
     INT f_disp6;
@@ -2684,7 +2684,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_getcon:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_xori.f
     UINT f_left;
     UINT f_dest;
@@ -2711,7 +2711,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_gettr:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_blink.f
     UINT f_trb;
     UINT f_dest;
@@ -2739,7 +2739,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldb:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_addi.f
     UINT f_left;
     INT f_disp10;
@@ -2770,7 +2770,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldl:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_flds.f
     UINT f_left;
     SI f_disp10x4;
@@ -2801,7 +2801,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldq:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_fldd.f
     UINT f_left;
     SI f_disp10x8;
@@ -2832,7 +2832,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_lduw:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_lduw.f
     UINT f_left;
     SI f_disp10x2;
@@ -2863,7 +2863,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldhil:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_getcfg.f
     UINT f_left;
     INT f_disp6;
@@ -2894,7 +2894,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldhiq:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_getcfg.f
     UINT f_left;
     INT f_disp6;
@@ -2925,7 +2925,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldlol:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_getcfg.f
     UINT f_left;
     INT f_disp6;
@@ -2956,7 +2956,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldloq:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_getcfg.f
     UINT f_left;
     INT f_disp6;
@@ -2987,7 +2987,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldxb:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -3019,7 +3019,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldxl:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -3051,7 +3051,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldxq:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -3083,7 +3083,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldxub:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -3115,7 +3115,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldxuw:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -3147,7 +3147,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ldxw:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -3179,7 +3179,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_mcmv:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -3212,7 +3212,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_movi:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_movi.f
     INT f_imm16;
     UINT f_dest;
@@ -3252,7 +3252,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ori:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_ori.f
     UINT f_left;
     INT f_imm10;
@@ -3283,7 +3283,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_pta:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_pta.f
     DI f_disp16;
     UINT f_tra;
@@ -3310,7 +3310,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ptabs:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_beq.f
     UINT f_right;
     UINT f_tra;
@@ -3338,7 +3338,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_ptrel:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_beq.f
     UINT f_right;
     UINT f_tra;
@@ -3366,7 +3366,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_putcfg:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_getcfg.f
     UINT f_left;
     INT f_disp6;
@@ -3397,7 +3397,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_putcon:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_xori.f
     UINT f_left;
     UINT f_dest;
@@ -3424,7 +3424,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_shari:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_shari.f
     UINT f_left;
     UINT f_uimm6;
@@ -3455,7 +3455,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_shori:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_shori.f
     UINT f_uimm16;
     UINT f_dest;
@@ -3483,7 +3483,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_stb:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_addi.f
     UINT f_left;
     INT f_disp10;
@@ -3514,7 +3514,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_stl:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_flds.f
     UINT f_left;
     SI f_disp10x4;
@@ -3545,7 +3545,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_stq:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_fldd.f
     UINT f_left;
     SI f_disp10x8;
@@ -3576,7 +3576,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_stw:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_lduw.f
     UINT f_left;
     SI f_disp10x2;
@@ -3607,7 +3607,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_sthil:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_getcfg.f
     UINT f_left;
     INT f_disp6;
@@ -3638,7 +3638,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_sthiq:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_getcfg.f
     UINT f_left;
     INT f_disp6;
@@ -3669,7 +3669,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_stlol:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_getcfg.f
     UINT f_left;
     INT f_disp6;
@@ -3700,7 +3700,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_stloq:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_getcfg.f
     UINT f_left;
     INT f_disp6;
@@ -3731,7 +3731,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_stxb:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -3763,7 +3763,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_stxl:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -3795,7 +3795,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_stxq:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -3827,7 +3827,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_stxw:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -3859,7 +3859,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_swapq:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_add.f
     UINT f_left;
     UINT f_right;
@@ -3892,7 +3892,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_trapa:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_xori.f
     UINT f_left;
 
@@ -3916,7 +3916,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_xori:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-    CGEN_INSN_INT insn = entire_insn;
+    CGEN_INSN_WORD insn = entire_insn;
 #define FLD(f) abuf->fields.sfmt_xori.f
     UINT f_left;
     INT f_imm6;

@@ -32,6 +32,12 @@ This file is part of the GNU simulators.
 /* Maximum number of instructions that can be executed in parallel.  */
 #define MAX_PARALLEL_INSNS 1
 
+/* The size of an "int" needed to hold an instruction word.
+   This is usually 32 bits, but some architectures needs 64 bits.  */
+typedef CGEN_INSN_INT CGEN_INSN_WORD;
+
+#include "cgen-engine.h"
+
 /* CPU state information.  */
 typedef struct {
   /* Hardware elements.  */
