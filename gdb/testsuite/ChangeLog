@@ -1,3 +1,8 @@
+2009-11-23  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.reverse/watch-reverse.exp: Extend test for hw watchpoints.
+	* gdb.reverse-watch-precsave.exp: Ditto.
+
 2009-11-23  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* gdb.asm/asm-source.exp: Adjust.

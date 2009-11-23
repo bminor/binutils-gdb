@@ -38,8 +38,8 @@ if [target_info exists gdb,use_precord] {
     # FIXME: command ought to acknowledge, so we can test if it succeeded.
 }
 
-# Only software watchpoints can be used in reverse
-gdb_test "set can-use-hw-watchpoints 0" "" ""
+# Test software watchpoints
+gdb_test "set can-use-hw-watchpoints 0" "" "disable hw watchpoints"
 
 gdb_test "break marker1" \
     "Breakpoint $decimal at $hex: file .*$srcfile, line $decimal.*" \
@@ -122,3 +122,81 @@ gdb_test "continue" \
 gdb_test "continue" \
     ".*\[Ww\]atchpoint.*ival3.*Old value = 0.*New value = -1.*ival3 = count; ival4 = count;.*" \
     "watchpoint hit in reverse, fifth time"
+
+gdb_test "set can-use-hw-watchpoints 1" "" "enable hw watchpoints"
+
+###
+###
+###
+
+# FIXME 'set exec-dir' command should give some output so we can test.
+gdb_test "set exec-direction forward" "" "set forward"
+
+# Continue until first change, from -1 to 0
+
+gdb_test "continue" \
+    ".*\[Ww\]atchpoint.*ival3.*Old value = -1.*New value = 0.*ival3 = count; ival4 = count;.*" \
+    "watchpoint hit, forward replay, first time"
+
+# Continue until the next change, from 0 to 1.
+gdb_test "continue" \
+    ".*\[Ww\]atchpoint.*ival3.*Old value = 0.*New value = 1.*ival3 = count; ival4 = count;.*" \
+    "watchpoint hit, forward replay, second time"
+
+# Continue until the next change, from 1 to 2.
+gdb_test "continue" \
+    ".*\[Ww\]atchpoint.*ival3.*Old value = 1.*New value = 2.*ival3 = count; ival4 = count;.*" \
+    "watchpoint hit, forward replay, third time"
+
+# Continue until the next change, from 2 to 3.
+gdb_test "continue" \
+    ".*\[Ww\]atchpoint.*ival3.*Old value = 2.*New value = 3.*ival3 = count; ival4 = count;.*" \
+    "watchpoint hit, forward replay, fourth time"
+
+# Continue until the next change, from 3 to 4.
+# Note that this one is outside the loop.
+
+gdb_test "continue" \
+    ".*\[Ww\]atchpoint.*ival3.*Old value = 3.*New value = 4.*ival3 = count; ival4 = count;.*" \
+    "watchpoint hit, forward replay, fifth time"
+
+# Continue until we hit the finishing marker function.
+# Make sure we hit no more watchpoints.
+
+gdb_test "continue" "marker2 .*" "replay forward to marker2"
+
+###
+###
+###
+
+# FIXME 'set exec-dir' command should give some output so we can test.
+gdb_test "set exec-direction reverse" "" "set reverse"
+
+# Reverse until the previous change, from 4 to 3
+# Note that this one is outside the loop
+
+gdb_test "continue" \
+    ".*\[Ww\]atchpoint.*ival3.*Old value = 4.*New value = 3.*ival3 = count; ival4 = count;.*" \
+    "watchpoint hit in reverse, HW, first time"
+
+# Reverse until the previous change, from 3 to 2.
+gdb_test "continue" \
+    ".*\[Ww\]atchpoint.*ival3.*Old value = 3.*New value = 2.*ival3 = count; ival4 = count;.*" \
+    "watchpoint hit in reverse, HW, second time"
+
+# Reverse until the previous change, from 2 to 1.
+gdb_test "continue" \
+    ".*\[Ww\]atchpoint.*ival3.*Old value = 2.*New value = 1.*ival3 = count; ival4 = count;.*" \
+    "watchpoint hit in reverse, HW, third time"
+
+# Reverse until the previous change, from 1 to 0.
+gdb_test "continue" \
+    ".*\[Ww\]atchpoint.*ival3.*Old value = 1.*New value = 0.*ival3 = count; ival4 = count;.*" \
+    "watchpoint hit in reverse, HW, fourth time"
+
+# Reverse until first change, from 0 to -1
+
+gdb_test "continue" \
+    ".*\[Ww\]atchpoint.*ival3.*Old value = 0.*New value = -1.*ival3 = count; ival4 = count;.*" \
+    "watchpoint hit in reverse, HW, fifth time"
+
