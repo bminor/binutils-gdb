@@ -1,3 +1,9 @@
+2009-11-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* acinclude.m4: Add include of ../config/zlib.m4.
+	* configure.in: AM_ZLIB to check for zlib support.
+	* configure: Regenerate.
+
 2009-11-23  Paul Brook  <paul@codesourcery.com>
 
 	* libbfd-in.h (_bfd_generic_copy_link_hash_symbol_type): Add

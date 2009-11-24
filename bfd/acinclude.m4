@@ -1,3 +1,5 @@
+sinclude([../config/zlib.m4])
+
 dnl See whether we need to use fopen-bin.h rather than fopen-same.h.
 AC_DEFUN([BFD_BINARY_FOPEN],
 [AC_REQUIRE([AC_CANONICAL_TARGET])
