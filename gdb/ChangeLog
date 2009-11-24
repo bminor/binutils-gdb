@@ -1,5 +1,11 @@
 2009-11-24  Joel Brobecker  <brobecker@adacore.com>
 
+	* acinclude.m4: Include ../config/zlib.m4.
+	* configure.ac: Use AM_ZLIB to check for zlib support.
+	* configure: Regenerate.
+
+2009-11-24  Joel Brobecker  <brobecker@adacore.com>
+
 	* breakpoint.c (expand_line_sal_maybe): Adjust adjust the SAL
 	past the function prologue in the case where we were given only
 	one SAL.
