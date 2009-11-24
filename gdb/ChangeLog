@@ -1,3 +1,8 @@
+2009-11-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* record.c (init_record_ops, init_record_core_ops): Actually
+	install record_stopped_data_address.
+
 2009-11-23  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* dwarf2read.c [HAVE_MMAP] (MAP_FAILED): Define if missing.

@@ -1668,6 +1668,7 @@ init_record_ops (void)
   record_ops.to_insert_breakpoint = record_insert_breakpoint;
   record_ops.to_remove_breakpoint = record_remove_breakpoint;
   record_ops.to_stopped_by_watchpoint = record_stopped_by_watchpoint;
+  record_ops.to_stopped_data_address = record_stopped_data_address;
   record_ops.to_can_execute_reverse = record_can_execute_reverse;
   record_ops.to_stratum = record_stratum;
   /* Add bookmark target methods.  */
@@ -1876,6 +1877,7 @@ init_record_core_ops (void)
   record_core_ops.to_insert_breakpoint = record_core_insert_breakpoint;
   record_core_ops.to_remove_breakpoint = record_core_remove_breakpoint;
   record_core_ops.to_stopped_by_watchpoint = record_stopped_by_watchpoint;
+  record_core_ops.to_stopped_data_address = record_stopped_data_address;
   record_core_ops.to_can_execute_reverse = record_can_execute_reverse;
   record_core_ops.to_has_execution = record_core_has_execution;
   record_core_ops.to_stratum = record_stratum;
