@@ -114,6 +114,9 @@ if test "${enable_sim}" != no; then
 	   AC_CONFIG_SUBDIRS(moxie)
 	   testsuite=yes
 	   ;;
+       rx-*-*)
+           AC_CONFIG_SUBDIRS(rx)
+	   ;;
        sh64*-*-*)
            AC_CONFIG_SUBDIRS(sh64)
 	   testsuite=yes
