@@ -854,8 +854,11 @@ struct evax_private_udata_struct
 #if VMS_DEBUG				 
 extern void _bfd_vms_debug (int, char *, ...) ATTRIBUTE_PRINTF_2;
 extern void _bfd_hexdump   (int, unsigned char *, int, int);
-					 
-#define vms_debug _bfd_vms_debug	 
+
+#define vms_debug _bfd_vms_debug
+#define vms_debug2(X) _bfd_vms_debug X
+#else
+#define vms_debug2(X)
 #endif					 
 					 
 extern struct bfd_hash_entry * _bfd_vms_hash_newfunc (struct bfd_hash_entry *, struct bfd_hash_table *, const char *);

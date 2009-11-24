@@ -234,6 +234,7 @@ _bfd_vms_write_hdr (bfd *abfd, int objtype)
       _bfd_vms_output_long (abfd, MAX_OUTREC_SIZE);
     }
 
+  /* Create module name from filename.  */
   if (bfd_get_filename (abfd) != 0)
     {
       /* Strip path and suffix information.  */
@@ -256,9 +257,9 @@ _bfd_vms_write_hdr (bfd *abfd, int objtype)
       if (fptr != NULL)
 	fout = fptr + 1;
 
-      /* Strip .obj suffix.  */
+      /* Strip suffix.  */
       fptr = strrchr (fout, '.');
-      if (fptr != 0 && strcasecmp (fptr, ".OBJ") == 0)
+      if (fptr != 0)
 	*fptr = 0;
 
       /* Convert to upper case and truncate at 31 characters.
