@@ -6340,13 +6340,14 @@ expand_line_sal_maybe (struct symtab_and_line sal)
 
   if (expanded.nelts == 1)
     {
-      /* We had one sal, we got one sal.  Without futher
-	 processing, just return the original sal.  */
+      /* We had one sal, we got one sal.  Return that sal, adjusting it
+         past the function prologue if necessary.  */
       xfree (expanded.sals);
       expanded.nelts = 1;
       expanded.sals = xmalloc (sizeof (struct symtab_and_line));
       sal.pc = original_pc;
       expanded.sals[0] = sal;
+      skip_prologue_sal (&expanded.sals[0]);
       do_cleanups (old_chain);
       return expanded;      
     }

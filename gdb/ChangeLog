@@ -1,3 +1,9 @@
+2009-11-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* breakpoint.c (expand_line_sal_maybe): Adjust adjust the SAL
+	past the function prologue in the case where we were given only
+	one SAL.
+
 2009-11-24  Pedro Alves  <pedro@codesourcery.com>
 
 	* record.c (init_record_ops, init_record_core_ops): Actually
