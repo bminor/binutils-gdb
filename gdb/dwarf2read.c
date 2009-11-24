@@ -58,6 +58,9 @@
 #endif
 #ifdef HAVE_MMAP
 #include <sys/mman.h>
+#ifndef MAP_FAILED
+#define MAP_FAILED ((void *) -1)
+#endif
 #endif
 
 #if 0

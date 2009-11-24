@@ -1,3 +1,7 @@
+2009-11-23  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* dwarf2read.c [HAVE_MMAP] (MAP_FAILED): Define if missing.
+
 2009-11-13  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
 
         Backport from mainline.
