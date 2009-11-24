@@ -2,6 +2,12 @@
 
 	* incremental.cc (Incremental_inputs_header,
 	Incremental_inputs_header_write, Incremental_inputs_entry,
+	Incremental_inputs_entry_write): Add a typedef with the data type.
+
+2009-11-24  Rafael Avila de Espindola  <espindola@google.com>
+
+	* incremental.cc (Incremental_inputs_header,
+	Incremental_inputs_header_write, Incremental_inputs_entry,
 	Incremental_inputs_entry_write): Update comment about which
 	type has the filed descriptions.
 
