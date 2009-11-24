@@ -56,7 +56,7 @@ AC_CHECK_LIB(nsl, gethostbyname)
 
 # BFD conditionally uses zlib, so we must link it in if libbfd does, by
 # using the same condition.
-AC_SEARCH_LIBS(zlibVersion, z, [AC_CHECK_HEADERS(zlib.h)])
+AM_ZLIB
 
 . ${srcdir}/../../bfd/configure.host
 

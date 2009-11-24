@@ -20,6 +20,7 @@
 
 # Include global overrides and fixes for Autoconf.
 m4_include(../../config/override.m4)
+sinclude([../../config/zlib.m4])
 
 AC_DEFUN([SIM_AC_COMMON],
 [

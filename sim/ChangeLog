@@ -1,3 +1,16 @@
+2009-11-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* common/aclocal.m4: Add include of ../../config/zlib.m4.
+	* common/common.m4: Use AM_ZLIB to check for zlib support.
+	* ppc/configure.ac: Likewise.
+	* arm/configure, avr/configure, common/configure, cr16/configure,
+	cris/configure, d10v/configure, erc32/configure, frv/configure,
+	h8300/configure, iq2000/configure, lm32/configure, m32c/configure,
+	m32r/configure, m68hc11/configure, mcore/configure,
+	microblaze/configure, mips/configure, mn10300/configure,
+	moxie/configure, ppc/configure, sh/configure, sh64/configure,
+	v850/configure: Regenerate.
+
 2009-11-24  DJ Delorie  <dj@redhat.com>
 
 	* rx: New directory.
