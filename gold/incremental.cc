@@ -85,7 +85,7 @@ struct Incremental_inputs_entry_data
 // Accessors.
 
 // Reader class for .gnu_incremental_inputs header. See
-// internal::Incremental_input_header for fields descriptions.
+// internal::Incremental_inputs_header_data for fields descriptions.
 
 template<int size, bool big_endian>
 class Incremental_inputs_header
@@ -118,7 +118,7 @@ class Incremental_inputs_header
 };
 
 // Writer class for .gnu_incremental_inputs header. See
-// internal::Incremental_input_header for fields descriptions.
+// internal::Incremental_inputs_header_data for fields descriptions.
 
 template<int size, bool big_endian>
 class Incremental_inputs_header_write
@@ -151,7 +151,7 @@ class Incremental_inputs_header_write
 };
 
 // Reader class for an .gnu_incremental_inputs entry. See
-// internal::Incremental_input_entry for fields descriptions.
+// internal::Incremental_inputs_entry_data for fields descriptions.
 template<int size, bool big_endian>
 class Incremental_inputs_entry
 {
@@ -191,7 +191,7 @@ class Incremental_inputs_entry
 };
 
 // Writer class for an .gnu_incremental_inputs entry. See
-// internal::Incremental_input_entry for fields descriptions.
+// internal::Incremental_inputs_entry_data for fields descriptions.
 template<int size, bool big_endian>
 class Incremental_inputs_entry_write
 {
