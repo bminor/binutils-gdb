@@ -1142,7 +1142,14 @@ class Target_arm : public Sized_target<32, big_endian>
   // When were are relocating a stub, we pass this as the relocation number.
   static const size_t fake_relnum_for_stubs = static_cast<size_t>(-1);
 
-  Target_arm();
+  Target_arm()
+    : Sized_target<32, big_endian>(&arm_info),
+      got_(NULL), plt_(NULL), got_plt_(NULL), rel_dyn_(NULL),
+      copy_relocs_(elfcpp::R_ARM_COPY), dynbss_(NULL), stub_tables_(),
+      stub_factory_(Stub_factory::get_instance()),
+      may_use_blx_(true), should_force_pic_veneer_(false),
+      arm_input_section_map_()
+  { }
 
   // Whether we can use BLX.
   bool
@@ -1291,8 +1298,8 @@ class Target_arm : public Sized_target<32, big_endian>
   }
 
   // Map platform-specific reloc types
-  unsigned int
-  get_real_reloc_type (unsigned int r_type) const;
+  static unsigned int
+  get_real_reloc_type (unsigned int r_type);
 
   //
   // Methods to support stub-generations.
@@ -1624,11 +1631,6 @@ class Target_arm : public Sized_target<32, big_endian>
   Stub_table_list stub_tables_;
   // Stub factory.
   const Stub_factory &stub_factory_;
-  // Whether R_ARM_TARGET1 maps to R_ARM_REL32 or R_ARM_ABS32.
-  bool target1_is_rel_;
-  // What R_ARM_TARGET2 maps to.  It should be one of R_ARM_REL32, R_ARM_ABS32
-  // and R_ARM_GOT_PREL.
-  unsigned int target2_reloc_;
   // Whether we can use BLX.
   bool may_use_blx_;
   // Whether we force PIC branch veneers.
@@ -2306,51 +2308,6 @@ Arm_relocate_functions<big_endian>::arm_branch_common(
   elfcpp::Swap<32, big_endian>::writeval(wv, val);
   return (utils::has_overflow<26>(branch_offset)
 	  ? This::STATUS_OVERFLOW : This::STATUS_OKAY);
-}
-
-template<bool big_endian>
-Target_arm<big_endian>::Target_arm()
-  : Sized_target<32, big_endian>(&arm_info),
-    got_(NULL), plt_(NULL), got_plt_(NULL), rel_dyn_(NULL),
-    copy_relocs_(elfcpp::R_ARM_COPY), dynbss_(NULL), stub_tables_(),
-    stub_factory_(Stub_factory::get_instance()), target1_is_rel_(false),
-    may_use_blx_(true), should_force_pic_veneer_(false),
-    arm_input_section_map_()
-{
-  // FIXME: This is not strictly compatible with ld, which allows both
-  // --target1-abs and --target-rel to be given.
-  if (parameters->options().user_set_target1_abs()
-      && parameters->options().user_set_target1_rel())
-    {
-      gold_error(_("Cannot use both --target1-abs and --target1-rel."));
-    }
-  else if (parameters->options().user_set_target1_rel())
-    this->target1_is_rel_ = true;
-  else if (parameters->options().user_set_target1_abs())
-    this->target1_is_rel_ = false;
-
-  if (parameters->options().user_set_target2())
-    {
-      if (strcmp(parameters->options().target2(), "rel") == 0)
-	this->target2_reloc_ = elfcpp::R_ARM_REL32;
-      else if (strcmp(parameters->options().target2(), "abs") == 0)
-	this->target2_reloc_ = elfcpp::R_ARM_ABS32;
-      else if (strcmp(parameters->options().target2(), "got-rel") == 0)
-	this->target2_reloc_ = elfcpp::R_ARM_GOT_PREL;
-      else
-	gold_unreachable();
-    }
-  else
-    {
-      // Default values for R_ARM_TARGET2:
-      //  
-      // R_ARM_REL32 (arm*-*-elf, arm*-*-eabi)
-      // R_ARM_ABS32 (arm*-*-symbianelf)
-      // R_ARM_GOT_PREL (arm*-*-linux, arm*-*-*bsd)
-
-      // This is the default value for EABI.
-      this->target2_reloc_ = elfcpp::R_ARM_REL32;
-    }
 }
 
 // Relocate THUMB long branches.  This handles relocation types
@@ -4209,7 +4166,7 @@ Target_arm<big_endian>::Scan::local(Symbol_table* symtab,
 				    unsigned int r_type,
 				    const elfcpp::Sym<32, big_endian>&)
 {
-  r_type = target->get_real_reloc_type(r_type);
+  r_type = get_real_reloc_type(r_type);
   switch (r_type)
     {
     case elfcpp::R_ARM_NONE:
@@ -4336,7 +4293,7 @@ Target_arm<big_endian>::Scan::global(Symbol_table* symtab,
 				     unsigned int r_type,
 				     Symbol* gsym)
 {
-  r_type = target->get_real_reloc_type(r_type);
+  r_type = get_real_reloc_type(r_type);
   switch (r_type)
     {
     case elfcpp::R_ARM_NONE:
@@ -4748,7 +4705,7 @@ Target_arm<big_endian>::Relocate::relocate(
 {
   typedef Arm_relocate_functions<big_endian> Arm_relocate_functions;
 
-  r_type = target->get_real_reloc_type(r_type);
+  r_type = get_real_reloc_type(r_type);
 
   const Arm_relobj<big_endian>* object =
     Arm_relobj<big_endian>::as_arm_relobj(relinfo->object);
@@ -5213,9 +5170,7 @@ Target_arm<big_endian>::Relocatable_size_for_reloc::get_size_for_reloc(
     unsigned int r_type,
     Relobj* object)
 {
-  const Target_arm<big_endian>* arm_target =
-    Target_arm<big_endian>::default_target();
-  r_type = arm_target->get_real_reloc_type(r_type);
+  r_type = get_real_reloc_type(r_type);
   switch (r_type)
     {
     case elfcpp::R_ARM_NONE:
@@ -5360,15 +5315,17 @@ Target_arm<big_endian>::do_dynsym_value(const Symbol* gsym) const
 //
 template<bool big_endian>
 unsigned int
-Target_arm<big_endian>::get_real_reloc_type (unsigned int r_type) const
+Target_arm<big_endian>::get_real_reloc_type (unsigned int r_type)
 {
   switch (r_type)
     {
     case elfcpp::R_ARM_TARGET1:
-      return this->target1_is_rel_? elfcpp::R_ARM_REL32 : elfcpp::R_ARM_ABS32;
+      // This is either R_ARM_ABS32 or R_ARM_REL32;
+      return elfcpp::R_ARM_ABS32;
 
     case elfcpp::R_ARM_TARGET2:
-      return this->target2_reloc_;
+      // This can be any reloc type but ususally is R_ARM_GOT_PREL
+      return elfcpp::R_ARM_GOT_PREL;
 
     default:
       return r_type;

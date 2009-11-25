@@ -1,4 +1,26 @@
 2009-11-25  Doug Kwan  <dougkwan@google.com>
+	
+	Revert:
+
+	2009-11-25  Doug Kwan  <dougkwan@google.com>
+
+		* arm.cc (Target_arm::Target_arm): Move method definition
+		outside of class definition.  Add code to handle
+		--target1-rel, --target1-abs and --target2= options.
+		(Target_arm::get_reloc_reloc_type): Change method to be
+		non-static and const.
+		(Target_arm::target1_is_rel_, Target_arm::target2_reloc_):
+		New data member declaration.
+		(Target_arm::Scan::local, Target_arm::Scan::global,
+		Target_arm::Relocate::relocate,
+		Target_arm::Relocatable_size_for_reloc::get_size_for_reloc):
+		Adjust call to Target_arm::get_real_reloc_type.
+		(Target_arm::get_real_reloc_type): Use command line options
+		to determine real types of R_ARM_TARGET1 and R_ARM_TARGET2.
+		* options.h (--target1-rel, --target1-abs, --target2): New
+		ARM-only options.
+
+2009-11-25  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Target_arm::Target_arm): Move method definition outside of
 	class definition.  Add code to handle --target1-rel, --target1-abs
