@@ -1,3 +1,11 @@
+2009-11-17  Quentin Neill  <quentin.neill@amd.com>
+	    Sebastian Pop  <sebastian.pop@amd.com>
+
+	* i386-dis.c (get_vex_imm8): Increase bytes_before_imm when
+	decoding the second source operand from the immediate byte.
+	(OP_EX_VexW): Pass an extra integer to identify the second
+	and third source arguments.
+
 2009-11-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.tbl: Add IsLockable to cmpxch16b.

@@ -61,4 +61,7 @@ _start:
 	vfnmaddss %xmm4,(%rcx),%xmm2,%xmm7
 	vfnmsubss %xmm4,%xmm6,%xmm2,%xmm7
 	vfnmsubss (%rcx),%xmm6,%xmm2,%xmm7
+	vfmaddpd (%r13,%rcx),%xmm11,%xmm3,%xmm4
+	vfmaddpd 0xbe(%r9,%rax,8),%xmm9,%xmm1,%xmm7
+	vfmsubpd (%r13,%rcx),%xmm11,%xmm3,%xmm4
 

@@ -63,4 +63,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 e3 69 7a 39 40    	vfnmaddss %xmm4,\(%rcx\),%xmm2,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 e9 7e fc 60    	vfnmsubss %xmm4,%xmm6,%xmm2,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 e9 7e 39 60    	vfnmsubss \(%rcx\),%xmm6,%xmm2,%xmm7
+[ 	]*[a-f0-9]+:	c4 c3 e1 69 64 0d 00 b0[ 	]+vfmaddpd 0x0\(%r13,%rcx,1\),%xmm11,%xmm3,%xmm4
+[ 	]*[a-f0-9]+:	c4 c3 f1 69 bc c1 be 00 00 00 90[ 	]+vfmaddpd 0xbe\(%r9,%rax,8\),%xmm9,%xmm1,%xmm7
+[ 	]*[a-f0-9]+:	c4 c3 e1 6d 64 0d 00 b0[ 	]+vfmsubpd 0x0\(%r13,%rcx,1\),%xmm11,%xmm3,%xmm4
 #pass
