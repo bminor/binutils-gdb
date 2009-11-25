@@ -34,7 +34,7 @@ AM_YFLAGS = -d
 am__skiplex =
 am__skipyacc =
 
-noinst_PROGRAMS = ld-new
+noinst_PROGRAMS = ld-new incremental-dump
 noinst_LIBRARIES = libgold.a
 
 CCFILES = \
@@ -150,6 +150,10 @@ ld_new_DEPENDENCIES = $(deps_var)
 ld_new_LDADD = $(ldadd_var)
 
 EXTRA_ld_new_SOURCES = $(TARGETSOURCES)
+
+incremental_dump_SOURCES = incremental-dump.cc
+incremental_dump_DEPENDENCIES = $(TARGETOBJS) libgold.a $(LIBIBERTY)
+incremental_dump_LDADD = $(TARGETOBJS) libgold.a $(LIBIBERTY)
 
 # Use an explicit dependency for the bison generated header file.
 expression.$(OBJEXT): yyscript.h

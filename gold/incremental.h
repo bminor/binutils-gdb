@@ -52,6 +52,45 @@ enum Incremental_input_type
   INCREMENTAL_INPUT_SCRIPT = 4
 };
 
+// Header of the .gnu_incremental_input section.
+struct Incremental_inputs_header_data
+{
+  // Incremental linker version.
+  elfcpp::Elf_Word version;
+
+  // Numer of input files in the link.
+  elfcpp::Elf_Word input_file_count;
+
+  // Offset of command line options in .gnu_incremental_strtab.
+  elfcpp::Elf_Word command_line_offset;
+
+  // Padding.
+  elfcpp::Elf_Word reserved;
+};
+
+// Data stored in .gnu_incremental_input after the header for each of the
+// Incremental_input_header_data::input_file_count input entries.
+struct Incremental_inputs_entry_data
+{
+  // Offset of file name in .gnu_incremental_strtab section.
+  elfcpp::Elf_Word filename_offset;
+
+  // Offset of data in .gnu_incremental_input.
+  elfcpp::Elf_Word data_offset;
+
+  // Timestamp (in seconds).
+  elfcpp::Elf_Xword timestamp_sec;
+
+  // Nano-second part of timestamp (if supported).
+  elfcpp::Elf_Word timestamp_nsec;
+
+  // Type of the input entry.
+  elfcpp::Elf_Half input_type;
+
+  // Padding.
+  elfcpp::Elf_Half reserved;
+};
+
 // An object representing the ELF file we edit during an incremental build.
 // Similar to Object or Dynobj, but operates on Output_file and contains
 // method specific to file edition (TBD). This is the abstract parent class

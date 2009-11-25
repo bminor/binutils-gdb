@@ -38,7 +38,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-noinst_PROGRAMS = ld-new$(EXEEXT)
+noinst_PROGRAMS = ld-new$(EXEEXT) incremental-dump$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@check_PROGRAMS = ld1$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ld2$(EXEEXT) ld1-r$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ld2-r$(EXEEXT)
@@ -94,10 +94,12 @@ am_libgold_a_OBJECTS = $(am__objects_1) $(am__objects_2) \
 	$(am__objects_3)
 libgold_a_OBJECTS = $(am_libgold_a_OBJECTS)
 PROGRAMS = $(noinst_PROGRAMS)
+am_incremental_dump_OBJECTS = incremental-dump.$(OBJEXT)
+incremental_dump_OBJECTS = $(am_incremental_dump_OBJECTS)
+am__DEPENDENCIES_1 =
 am__objects_4 = main.$(OBJEXT)
 am_ld_new_OBJECTS = $(am__objects_4)
 ld_new_OBJECTS = $(am_ld_new_OBJECTS)
-am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) libgold.a $(LIBIBERTY) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
@@ -137,13 +139,13 @@ CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 @MAINTAINER_MODE_FALSE@am__skipyacc = test -f $@ ||
 YACCCOMPILE = $(YACC) $(YFLAGS) $(AM_YFLAGS)
 YLWRAP = $(top_srcdir)/../ylwrap
-SOURCES = $(libgold_a_SOURCES) $(ld_new_SOURCES) \
-	$(EXTRA_ld_new_SOURCES) $(ld1_SOURCES) $(ld1_r_SOURCES) \
-	$(ld2_SOURCES) $(ld2_r_SOURCES)
-DIST_SOURCES = $(libgold_a_SOURCES) $(ld_new_SOURCES) \
-	$(EXTRA_ld_new_SOURCES) $(am__ld1_SOURCES_DIST) \
-	$(am__ld1_r_SOURCES_DIST) $(am__ld2_SOURCES_DIST) \
-	$(am__ld2_r_SOURCES_DIST)
+SOURCES = $(libgold_a_SOURCES) $(incremental_dump_SOURCES) \
+	$(ld_new_SOURCES) $(EXTRA_ld_new_SOURCES) $(ld1_SOURCES) \
+	$(ld1_r_SOURCES) $(ld2_SOURCES) $(ld2_r_SOURCES)
+DIST_SOURCES = $(libgold_a_SOURCES) $(incremental_dump_SOURCES) \
+	$(ld_new_SOURCES) $(EXTRA_ld_new_SOURCES) \
+	$(am__ld1_SOURCES_DIST) $(am__ld1_r_SOURCES_DIST) \
+	$(am__ld2_SOURCES_DIST) $(am__ld2_r_SOURCES_DIST)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -458,6 +460,9 @@ ld_new_SOURCES = $(sources_var)
 ld_new_DEPENDENCIES = $(deps_var)
 ld_new_LDADD = $(ldadd_var)
 EXTRA_ld_new_SOURCES = $(TARGETSOURCES)
+incremental_dump_SOURCES = incremental-dump.cc
+incremental_dump_DEPENDENCIES = $(TARGETOBJS) libgold.a $(LIBIBERTY)
+incremental_dump_LDADD = $(TARGETOBJS) libgold.a $(LIBIBERTY)
 POTFILES = $(CCFILES) $(HFILES) $(TARGETSOURCES)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ld1_SOURCES = $(sources_var)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ld1_DEPENDENCIES = $(deps_var) gcctestdir1/ld
@@ -552,6 +557,9 @@ clean-checkPROGRAMS:
 
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+incremental-dump$(EXEEXT): $(incremental_dump_OBJECTS) $(incremental_dump_DEPENDENCIES) 
+	@rm -f incremental-dump$(EXEEXT)
+	$(CXXLINK) $(incremental_dump_OBJECTS) $(incremental_dump_LDADD) $(LIBS)
 ld-new$(EXEEXT): $(ld_new_OBJECTS) $(ld_new_DEPENDENCIES) 
 	@rm -f ld-new$(EXEEXT)
 	$(CXXLINK) $(ld_new_OBJECTS) $(ld_new_LDADD) $(LIBS)
@@ -599,6 +607,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gold.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/i386.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/icf.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/incremental-dump.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/incremental.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/layout.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
