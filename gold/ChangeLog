@@ -1,3 +1,19 @@
+2009-11-25  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Target_arm::may_use_thumb2_nop): New method definition.
+	(Arm_relocate_functions::thumb_branch_common): New metod declaration.
+	(Arm_relocate_functions::abs12, Arm_relocate_functions::abs16): Fix
+	formatting.
+	(Arm_relocate_functions::thm_call): Replace body with a call to
+	Arm_relocate_functions::thumb_branch_common.
+	(Arm_relocate_functions::thm_jump24,
+	Arm_relocate_functions::thm_xpc22): New method definitions.
+	(Arm_relocate_functions::thumb_branch_common): New method definition.
+	(Reloc_stub::stbu_type_for_reloc): Fix incorrect uses of bit-wise-or
+	operator.
+	(Target_arm::Relocate::relocate): Adjust call to thm_call.
+	Add code to handle R_ARM_THM_XPC22 and R_ARM_THM_JUMP24.
+
 2009-11-24  Rafael Avila de Espindola  <espindola@google.com>
 
 	* Makefile.am: Build incremental-dump
