@@ -6636,7 +6636,7 @@ find_condition_and_thread (char *tok, CORE_ADDR pc,
 	  if (tok == tmptok)
 	    error (_("Junk after task keyword."));
 	  if (!valid_task_id (*task))
-	    error (_("Unknown task %d\n"), *task);
+	    error (_("Unknown task %d."), *task);
 	}
       else
 	error (_("Junk at end of arguments."));

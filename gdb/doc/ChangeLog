@@ -1,3 +1,10 @@
+2009-11-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR gdb/8704
+
+	* gdb.texinfo (Thread-Specific Breakpoints): Thread specifiers
+	are allowed after the breakpoint condition.
+
 2009-11-23  Tom Tromey  <tromey@redhat.com>
 
 	PR python/10782:

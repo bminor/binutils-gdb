@@ -207,10 +207,10 @@ gdb_expect {
 setup_xfail hppa2.0w-*-* 11512CLLbs
 send_gdb "continue\n"
 gdb_expect {
-    -re "Continuing\\..*Breakpoint \[0-9\]+, marker2 \\(a=43\\) at .*$srcfile1:($bp_location8|$bp_location9).*($bp_location8|$bp_location9)\[\t \]+.*" {
+    -re "Continuing\\..*Breakpoint \[0-9\]+, marker2 \\(a=43\\) at .*$srcfile1:($bp_location8|$bp_location9).*($bp_location8|$bp_location9)\[\t \]+.*$gdb_prompt $" {
 	pass "run until breakpoint at marker2"
     }
-    -re "Continuing\\..*Breakpoint \[0-9\]+, $hex in marker2 \\(a=43\\) at .*$srcfile1:($bp_location8|$bp_location9).*($bp_location8|$bp_location9)\[\t \]+.*" {
+    -re "Continuing\\..*Breakpoint \[0-9\]+, $hex in marker2 \\(a=43\\) at .*$srcfile1:($bp_location8|$bp_location9).*($bp_location8|$bp_location9)\[\t \]+.*$gdb_prompt $" {
 	xfail "run until breakpoint at marker2"
     }
     -re "$gdb_prompt $" {
@@ -220,3 +220,30 @@ gdb_expect {
 	fail "(timeout) run until breakpoint at marker2"
     }
 }
+
+# Test combinations of conditional and thread-specific breakpoints.
+gdb_test "break main if (1==1) thread 999" \
+    "Unknown thread 999\\."
+gdb_test "break main thread 999 if (1==1)" \
+    "Unknown thread 999\\."
+
+# Verify that both if and thread can be distinguished from a breakpoint
+# address expression.
+gdb_test "break *main if (1==1) thread 999" \
+    "Unknown thread 999\\."
+gdb_test "break *main thread 999 if (1==1)" \
+    "Unknown thread 999\\."
+
+# Similarly for task.
+gdb_test "break *main if (1==1) task 999" \
+    "Unknown task 999\\."
+gdb_test "break *main task 999 if (1==1)" \
+    "Unknown task 999\\."
+
+# GDB accepts abbreviations for "thread" and "task".
+gdb_test "break *main if (1==1) t 999" \
+    "Unknown thread 999\\."
+gdb_test "break *main if (1==1) th 999" \
+    "Unknown thread 999\\."
+gdb_test "break *main if (1==1) ta 999" \
+    "Unknown task 999\\."

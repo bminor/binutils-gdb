@@ -5214,8 +5214,8 @@ breakpoint, the breakpoint applies to @emph{all} threads of your
 program.
 
 You can use the @code{thread} qualifier on conditional breakpoints as
-well; in this case, place @samp{thread @var{threadno}} before the
-breakpoint condition, like this:
+well; in this case, place @samp{thread @var{threadno}} before or
+after the breakpoint condition, like this:
 
 @smallexample
 (@value{GDBP}) break frik.c:13 thread 28 if bartab > lim

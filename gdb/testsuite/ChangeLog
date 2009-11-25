@@ -1,3 +1,10 @@
+2009-11-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR gdb/8704
+
+	* gdb.base/condbreak.exp: Test combinations of "break *EXP",
+	"if", and "thread".  Correct matching in the previous test.
+
 2009-11-25  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.cp/extern-c.cc, gdb.cp/extern-c.exp: New test.

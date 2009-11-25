@@ -1,3 +1,11 @@
+2009-11-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR gdb/8704
+
+	* breakpoint.c (find_condition_and_thread): Correct task error message.
+	* c-exp.y (yylex): Stop before "thread N", "task N", or abbreviations
+	of those.
+
 2009-11-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* acinclude.m4: Include ../config/zlib.m4.
