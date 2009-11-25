@@ -884,6 +884,17 @@ class General_options
   DEFINE_string(sysroot, options::TWO_DASHES, '\0', "",
                 N_("Set target system root directory"), N_("DIR"));
 
+  DEFINE_bool(target1_rel, options::TWO_DASHES, '\0', false,
+	      N_("(ARM only) Force R_ARM_TARGET1 type to R_ARM_REL32"),
+	      NULL);
+  DEFINE_bool(target1_abs, options::TWO_DASHES, '\0', false,
+	      N_("(ARM only) Force R_ARM_TARGET1 type to R_ARM_ABS32"),
+	      NULL);
+  DEFINE_enum(target2, options::TWO_DASHES, '\0', "default",
+	      N_("(ARM only) Set R_ARM_TARGET2 relocation type"),
+	      N_("[default, rel, abs, got-rel"),
+	      {"default", "rel", "abs", "got-rel"});
+
   DEFINE_bool(trace, options::TWO_DASHES, 't', false,
               N_("Print the name of each input file"), NULL);
 
