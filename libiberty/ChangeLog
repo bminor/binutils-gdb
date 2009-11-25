@@ -1,6 +1,6 @@
 2009-11-26  Ben Elliston  <bje@au.ibm.com>
 
-	* configure.ac (AC_CHECK_FUNCS): Sort into alphabetical order.
+	* configure.ac (AC_CHECK_FUNCS): Sort into alphabetic order.
 	* configure: Regenerate.
 
 2009-11-25  Ben Elliston  <bje@au.ibm.com>
