@@ -140,6 +140,8 @@ SECTIONS
     *(.debug\$T)
     *(.debug\$F)
     *(.drectve)
+    ${RELOCATING+ *(.note.GNU-stack)}
+    ${RELOCATING+ *(.gnu.lto_*)}
   }
 
   .idata ${RELOCATING+BLOCK(__section_alignment__)} :

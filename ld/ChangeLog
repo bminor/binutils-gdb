@@ -1,3 +1,10 @@
+2009-11-25  Kai Tietz  <kai.tietz@onevision.com>
+
+	* scripttempl/pe.sc: (.note.GNU-stack): Mark as discardable.
+	(.gnu.lto_*): Likewise.
+	* scripttempl/pep.sc: (.note.GNU-stack): Mark as discardable.
+	(.gnu.lto_*): Likewise.
+
 2009-11-23  Paul Brook  <paul@codesourcery.com>
 
 	* ldexp.c: Copy symbol type for simple assignments.
