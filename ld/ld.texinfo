@@ -1563,7 +1563,9 @@ This option is ignored for SVR4 compatibility.
 @kindex --relax
 @cindex synthesizing linker
 @cindex relaxing addressing modes
+@cindex --no-relax
 @item --relax
+@itemx --no-relax
 An option with machine dependent effects.
 @ifset GENERIC
 This option is only supported on a few targets.
@@ -1584,22 +1586,26 @@ This option is only supported on a few targets.
 @xref{PowerPC ELF32,,@command{ld} and PowerPC 32-bit ELF Support}.
 @end ifset
 
-On some platforms, the @samp{--relax} option performs global
-optimizations that become possible when the linker resolves addressing
-in the program, such as relaxing address modes and synthesizing new
-instructions in the output object file.
+On some platforms the @samp{--relax} option performs target specific,
+global optimizations that become possible when the linker resolves
+addressing in the program, such as relaxing address modes,
+synthesizing new instructions, selecting shorter version of current
+instructions, and combinig constant values.
 
 On some platforms these link time global optimizations may make symbolic
 debugging of the resulting executable impossible.
 @ifset GENERIC
-This is known to be
-the case for the Matsushita MN10200 and MN10300 family of processors.
+This is known to be the case for the Matsushita MN10200 and MN10300
+family of processors.
 @end ifset
 
 @ifset GENERIC
 On platforms where this is not supported, @samp{--relax} is accepted,
 but ignored.
 @end ifset
+
+On platforms where @samp{--relax} is accepted the option
+@samp{--no-relax} can be used to disable the feature.
 
 @cindex retaining specified symbols
 @cindex stripping all but some symbols
@@ -7146,12 +7152,6 @@ control the linker:
 
 @cindex Xtensa options
 @table @option
-@kindex --no-relax
-@item --no-relax
-Since the Xtensa version of @code{ld} enables the @option{--relax} option
-by default, the @option{--no-relax} option is provided to disable
-relaxation.
-
 @item --size-opt
 When optimizing indirect calls to direct calls, optimize for code size
 more than performance.  With this option, the linker will not insert

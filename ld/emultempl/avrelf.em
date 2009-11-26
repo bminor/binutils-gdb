@@ -146,7 +146,7 @@ avr_elf_create_output_section_statements (void)
 static void
 avr_elf_after_allocation (void)
 {
-  if (!avr_no_stubs && !command_line.relax)
+  if (!avr_no_stubs && ! RELAXATION_ENABLED)
     {
       /* If relaxing, elf32_avr_size_stubs will be called from
 	 elf32_avr_relax_section.  */

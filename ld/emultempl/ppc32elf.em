@@ -121,7 +121,7 @@ ppc_before_allocation (void)
 
   /* Turn on relaxation if executable sections have addresses that
      might make branches overflow.  */
-  if (!command_line.relax)
+  if (RELAXATION_DISABLED_BY_DEFAULT)
     {
       bfd_vma low = (bfd_vma) -1;
       bfd_vma high = 0;
@@ -148,7 +148,7 @@ ppc_before_allocation (void)
 	    high = o->vma + o->rawsize - 1;
 	}
       if (high > low && high - low > (1 << 25) - 1)
-	command_line.relax = TRUE;
+	ENABLE_RELAXATION;
     }
 }
 

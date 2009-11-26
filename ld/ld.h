@@ -146,7 +146,29 @@ typedef struct {
 
   /* 1 => do not assign addresses to common symbols.  */
   bfd_boolean inhibit_common_definition;
-  bfd_boolean relax;
+
+  /* Enable or disable target specific optimizations.
+
+     Not all targets have optimizations to enable.
+
+     Normally these optimizations are disabled by default but some targets
+     prefer to enable them by default.  So this field is a tri-state variable.
+     The values are:
+     
+     zero: Enable the optimizations (either from --relax being specified on
+       the command line or the backend's before_allocation emulation function.
+       
+     positive: The user has requested that these optimizations be disabled.
+       (Via the --no-relax command line option).
+
+     negative: The optimizations are disabled.  (Set when initializing the
+       args_type structure in ldmain.c:main.  */
+  signed int disable_target_specific_optimizations;
+#define RELAXATION_DISABLED_BY_DEFAULT (command_line.disable_target_specific_optimizations < 0)
+#define RELAXATION_DISABLED_BY_USER    (command_line.disable_target_specific_optimizations > 0)
+#define RELAXATION_ENABLED (command_line.disable_target_specific_optimizations == 0)
+#define DISABLE_RELAXATION do { command_line.disable_target_specific_optimizations = 1; } while (0)
+#define ENABLE_RELAXATION  do { command_line.disable_target_specific_optimizations = 0; } while (0)
 
   /* If TRUE, build MIPS embedded PIC relocation tables in the output
      file.  */

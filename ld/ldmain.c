@@ -253,6 +253,7 @@ main (int argc, char **argv)
   command_line.warn_mismatch = TRUE;
   command_line.warn_search_mismatch = TRUE;
   command_line.check_section_addresses = -1;
+  command_line.disable_target_specific_optimizations = -1;
 
   /* We initialize DEMANGLING based on the environment variable
      COLLECT_NO_DEMANGLE.  The gcc collect2 program will demangle the
@@ -906,10 +907,10 @@ multiple_definition (struct bfd_link_info *info ATTRIBUTE_UNUSED,
   if (obfd != NULL)
     einfo (_("%D: first defined here\n"), obfd, osec, oval);
 
-  if (command_line.relax)
+  if (RELAXATION_ENABLED)
     {
       einfo (_("%P: Disabling relaxation: it will not work with multiple definitions\n"));
-      command_line.relax = 0;
+      command_line.disable_target_specific_optimizations = -1;
     }
 
   return TRUE;

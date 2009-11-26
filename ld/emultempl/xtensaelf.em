@@ -42,9 +42,6 @@ static void xtensa_strip_inconsistent_linkonce_sections
   (lang_statement_list_type *);
 
 
-/* Flag for the emulation-specific "--no-relax" option.  */
-static bfd_boolean disable_relaxation = FALSE;
-
 /* This number is irrelevant until we turn on use_literal_pages */
 static bfd_vma xtensa_page_power = 12; /* 4K pages.  */
 
@@ -527,16 +524,16 @@ elf_xtensa_before_allocation (void)
      specified.  This is done here instead of in the before_parse hook
      because there is a check in main() to prohibit use of --relax and
      -r together and that combination should be allowed for Xtensa.  */
-
-  if (!disable_relaxation)
-    command_line.relax = TRUE;
+  if (RELAXATION_DISABLED_BY_DEFAULT)
+    ENABLE_RELAXATION;
 
   xtensa_strip_inconsistent_linkonce_sections (stat_ptr);
 
   gld${EMULATION_NAME}_before_allocation ();
 
   xtensa_wild_group_interleave (stat_ptr->head);
-  if (command_line.relax)
+
+  if (RELAXATION_ENABLED)
     xtensa_colocate_output_literals (stat_ptr->head);
 
   /* TBD: We need to force the page alignments to here and only do
@@ -1983,8 +1980,7 @@ EOF
 #
 PARSE_AND_LIST_PROLOGUE='
 #define OPTION_OPT_SIZEOPT              (300)
-#define OPTION_NO_RELAX			(OPTION_OPT_SIZEOPT + 1)
-#define OPTION_LITERAL_MOVEMENT		(OPTION_NO_RELAX + 1)
+#define OPTION_LITERAL_MOVEMENT		(OPTION_OPT_SIZEOPT + 1)
 #define OPTION_NO_LITERAL_MOVEMENT	(OPTION_LITERAL_MOVEMENT + 1)
 extern int elf32xtensa_size_opt;
 extern int elf32xtensa_no_literal_movement;
@@ -1992,7 +1988,6 @@ extern int elf32xtensa_no_literal_movement;
 
 PARSE_AND_LIST_LONGOPTS='
   { "size-opt", no_argument, NULL, OPTION_OPT_SIZEOPT},
-  { "no-relax", no_argument, NULL, OPTION_NO_RELAX},
   { "literal-movement", no_argument, NULL, OPTION_LITERAL_MOVEMENT},
   { "no-literal-movement", no_argument, NULL, OPTION_NO_LITERAL_MOVEMENT},
 '
@@ -2001,16 +1996,11 @@ PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("\
   --size-opt                  When relaxing longcalls, prefer size\n\
                                 optimization over branch target alignment\n"));
-  fprintf (file, _("\
-  --no-relax                  Do not relax branches or coalesce literals\n"));
 '
 
 PARSE_AND_LIST_ARGS_CASES='
     case OPTION_OPT_SIZEOPT:
       elf32xtensa_size_opt = 1;
-      break;
-    case OPTION_NO_RELAX:
-      disable_relaxation = TRUE;
       break;
     case OPTION_LITERAL_MOVEMENT:
       elf32xtensa_no_literal_movement = 0;

@@ -1,3 +1,48 @@
+2009-11-26  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/10956
+	* ld.h (struct args_type): Rename 'relax' field to
+	'disable_target_specific_optimizations' and turn it into a
+	tri-state variable.
+	(RELAXATION_DISABLED_BY_DEFAULT): New macro.
+	(RELAXATION_DISABLED_BY_USER): New macro.
+	(RELAXATION_ENABLED): New macro.
+	(DISABLE_RELAXATION): New macro.
+	(ENABLE_RELAXATION): New macro.
+	* lexsup (enum option_values): Add OPTION_NO_RELAX.
+	(struct ld_options): Add --no-relax.
+	(parse_args): Handle OPTION_NO_RELAX.  Use DISABLE_RELAXATION and
+	ENABLE_RELAXATION macros.
+	* ldlang.c (lang_relax_sections): Use RELAXATION_ENABLED macro.
+	(lang_process): Likewise.
+	* ldmain.c (main): Initialise
+	disable_target_specific_optimizations field.
+	(multiple_definition): Use RELAXATION_ENABLED macro.
+	* ld.texinfo: Document new command line option.
+	* emultempl/alphaelf.em: Remove --no-relax option.
+	(before_allocation): Test RELAXATION_DISABLED_BY_USER macro.
+	Use ENABLE_RELAXATION macro.
+	* emultempl/avrelf.em: (after_allocation): Test RELAXATION_ENABLED
+	macro.
+	* emultempl/cr16elf.em: Remove --no-relax option.
+	(before_allocation): Test RELAXATION_DISABLED_BY_USER macro.
+	Use ENABLE_RELAXATION macro.
+	* emultempl/crxelf.em: Remove --no-relax option.
+	(before_allocation): Test RELAXATION_DISABLED_BY_USER macro.
+	Use ENABLE_RELAXATION macro.
+	* emultempl/mmix-elfnmmo.em: (before_allocation): Use
+	ENABLE_RELAXATION macro.
+	* emultempl/needrelax.em: (before_allocation): Use
+	ENABLE_RELAXATION macro.
+	* emultempl/ppc32elf.em: (before_allocation): Test
+	RELAXATION_DISABLED_BY_DEFAULT macro. Use
+	ENABLE_RELAXATION macro.
+	* emultempl/sh64elf.em: (before_allocation): Test
+	RELAXATION_ENABLED macro. Use DISABLE_RELAXATION macro.
+	* emultempl/xtensaelf.em: Remove --no-relax option.
+	(before_allocation): Test RELAXATION_ENABLED macro.
+	Use ENABLE_RELAXATION macro.
+	
 2009-11-25  Kai Tietz  <kai.tietz@onevision.com>
 
 	* scripttempl/pe.sc: (.note.GNU-stack): Mark as discardable.

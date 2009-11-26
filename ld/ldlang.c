@@ -6212,7 +6212,7 @@ lang_find_relro_sections (void)
 void
 lang_relax_sections (bfd_boolean need_layout)
 {
-  if (command_line.relax)
+  if (RELAXATION_ENABLED)
     {
       /* We may need more than one relaxation pass.  */
       int i = link_info.relax_pass;
@@ -6364,7 +6364,7 @@ lang_process (void)
     lang_find_relro_sections ();
 
   /* Size up the sections.  */
-  lang_size_sections (NULL, !command_line.relax);
+  lang_size_sections (NULL, ! RELAXATION_ENABLED);
 
   /* See if anything special should be done now we know how big
      everything is.  This is where relaxation is done.  */
