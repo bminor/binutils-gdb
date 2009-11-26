@@ -1438,10 +1438,6 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 
  gotevent:
 
-  ptid = debug_event_ptid (&current_event);
-  current_inferior =
-    (struct thread_info *) find_inferior_id (&all_threads, ptid);
-
   switch (current_event.dwDebugEventCode)
     {
     case CREATE_THREAD_DEBUG_EVENT:
@@ -1463,7 +1459,9 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 		(unsigned) current_event.dwThreadId));
       child_delete_thread (current_event.dwProcessId,
 			   current_event.dwThreadId);
-      break;
+
+      current_inferior = (struct thread_info *) all_threads.head;
+      return 1;
 
     case CREATE_PROCESS_DEBUG_EVENT:
       OUTMSG2 (("gdbserver: kernel event CREATE_PROCESS_DEBUG_EVENT "
@@ -1558,6 +1556,7 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
       break;
     }
 
+  ptid = debug_event_ptid (&current_event);
   current_inferior =
     (struct thread_info *) find_inferior_id (&all_threads, ptid);
   return 1;
