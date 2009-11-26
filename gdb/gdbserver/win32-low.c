@@ -38,14 +38,17 @@
 #include <sys/cygwin.h>
 #endif
 
-#define LOG 0
+#define OUTMSG(X) do { printf X; fflush (stderr); } while (0)
 
-#define OUTMSG(X) do { printf X; fflush (stdout); } while (0)
-#if LOG
-#define OUTMSG2(X) do { printf X; fflush (stdout); } while (0)
-#else
-#define OUTMSG2(X) do ; while (0)
-#endif
+#define OUTMSG2(X) \
+  do						\
+    {						\
+      if (debug_threads)			\
+	{					\
+	  printf X;				\
+	  fflush (stderr);			\
+	}					\
+    } while (0)
 
 #ifndef _T
 #define _T(x) TEXT (x)
@@ -1586,7 +1589,7 @@ win32_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 	case TARGET_WAITKIND_STOPPED:
 	case TARGET_WAITKIND_LOADED:
 	  OUTMSG2 (("Child Stopped with signal = %d \n",
-		    our_status.value.sig));
+		    ourstatus->value.sig));
 
 	  child_fetch_inferior_registers (-1);
 

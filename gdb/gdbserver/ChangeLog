@@ -1,5 +1,13 @@
 2009-11-26  Pedro Alves  <pedro@codesourcery.com>
 
+	* win32-low.c (LOG): Delete.
+	(OUTMSG): Output to stderr.
+	(OUTMSG2): Conditionalize on `debug_threads' variable, instead of
+	on compile time LOG macro.
+	(win32_wait): Fix debug output.
+
+2009-11-26  Pedro Alves  <pedro@codesourcery.com>
+
 	* win32-low.c (win32_add_one_solib): If the dll name is
 	"ntdll.dll", prepend the system directory to the dll path.
 
