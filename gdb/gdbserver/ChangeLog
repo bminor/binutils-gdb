@@ -1,3 +1,8 @@
+2009-11-26  Pedro Alves  <pedro@codesourcery.com>
+
+	* win32-low.c (win32_add_one_solib): If the dll name is
+	"ntdll.dll", prepend the system directory to the dll path.
+
 2009-11-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* m68k-tdep.c (m68k_gdbarch_init): Reuse previous initialization.

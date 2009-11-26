@@ -906,6 +906,14 @@ win32_add_one_solib (const char *name, CORE_ADDR load_addr)
 #endif
     }
 
+#ifndef _WIN32_WCE
+  if (strcasecmp (buf, "ntdll.dll") == 0)
+    {
+      GetSystemDirectoryA (buf, sizeof (buf));
+      strcat (buf, "\\ntdll.dll");
+    }
+#endif
+
 #ifdef __CYGWIN__
   cygwin_conv_to_posix_path (buf, buf2);
 #else
