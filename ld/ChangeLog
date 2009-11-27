@@ -1,3 +1,8 @@
+2009-11-27  Tristan Gingold  <gingold@adacore.com>
+
+	* pe-dll.c (pe_implied_import_dll): Return early if there is no
+	export entries.
+
 2009-11-26  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/10956
