@@ -8480,15 +8480,15 @@ ada_value_cast (struct type *type, struct value *arg2, enum noside noside)
 
     Arrays are a little simpler to handle than records, because the same
     amount of memory is allocated for each element of the array, even if
-    the amount of space actually used by each element changes from element
+    the amount of space actually used by each element differs from element
     to element.  Consider for instance the following array of type Rec:
 
        type Rec_Array is array (1 .. 2) of Rec;
 
-    The actual amount of memory occupied by each element might change
-    from element to element, depending on the their discriminant value.
+    The actual amount of memory occupied by each element might be different
+    from element to element, depending on the value of their discriminant.
     But the amount of space reserved for each element in the array remains
-    constant regardless.  So we simply need to compute that size using
+    fixed regardless.  So we simply need to compute that size using
     the debugging information available, from which we can then determine
     the array size (we multiply the number of elements of the array by
     the size of each element).
@@ -8512,7 +8512,7 @@ ada_value_cast (struct type *type, struct value *arg2, enum noside noside)
     that we also use the adjective "aligner" in our code to designate
     these wrapper types.
 
-    In some cases, the size of allocated for each element is statically
+    In some cases, the size allocated for each element is statically
     known.  In that case, the PAD type already has the correct size,
     and the array element should remain unfixed.
 

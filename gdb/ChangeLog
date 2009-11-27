@@ -1,3 +1,7 @@
+2009-11-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c: Apply some corrections to the previous comment addition.
+
 2009-11-26  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c: Update the comment explaining how to evaluate
