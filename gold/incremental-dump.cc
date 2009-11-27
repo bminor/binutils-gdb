@@ -148,7 +148,8 @@ main(int argc, char** argv)
           return 1;
         }
       printf("  %s\n", objname);
-      printf("    Timestamp sec = %ld\n", input->timestamp_sec);
+      printf("    Timestamp sec = %llu\n",
+             static_cast<unsigned long long>(input->timestamp_sec));
       printf("    Timestamp nsec = %d\n", input->timestamp_nsec);
       printf("    Type = ");
       // TODO: print the data at input->data_offset once we have it.
