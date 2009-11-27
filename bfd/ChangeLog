@@ -1,3 +1,7 @@
+2009-11-26  Per Øyvind Karlsen <peroyvind@mandriva.org>
+
+	* plugin.c (bfd_plugin_bfd_copy_link_hash_symbol_type): Define.
+
 2009-11-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* acinclude.m4: Add include of ../config/zlib.m4.
@@ -13,9 +17,9 @@
 	* elflink.c (_bfd_elf_copy_link_hash_symbol_type): New function.
 	* targets.c (BFD_JUMP_TABLE_LINK, struct bfd_target): Add
 	_copy_link_hash_symbol_type.
-	* bfd/coff64-rs6000.c (rs6000coff64_vec, aix5coff64_vec): Add
+	* coff64-rs6000.c (rs6000coff64_vec, aix5coff64_vec): Add
 	_bfd_generic_copy_link_hash_symbol_type.
-	* bfd/coff-rs6000.c (rs6000coff_vec, pmac_xcoff_vec): Add
+	* coff-rs6000.c (rs6000coff_vec, pmac_xcoff_vec): Add
 	_bfd_generic_copy_link_hash_symbol_type.
 	* aout-adobe.c (aout_32_bfd_copy_link_hash_symbol_type): Define.
 	* aout-target.h (MY_bfd_copy_link_hash_symbol_type): Define.
