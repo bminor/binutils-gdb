@@ -8389,6 +8389,9 @@ ada_value_cast (struct type *type, struct value *arg2, enum noside noside)
 /*  Evaluating Ada expressions, and printing their result.
     ------------------------------------------------------
 
+    1. Introduction:
+    ----------------
+
     We usually evaluate an Ada expression in order to print its value.
     We also evaluate an expression in order to print its type, which
     happens during the EVAL_AVOID_SIDE_EFFECTS phase of the evaluation,
@@ -8416,6 +8419,9 @@ ada_value_cast (struct type *type, struct value *arg2, enum noside noside)
     situation might be duplicated or not.  One day, when the code is
     cleaned up, this guide might become redundant with the comments
     inserted in the code, and we might want to remove it.
+
+    2. ``Fixing'' an Entity, the Simple Case:
+    -----------------------------------------
 
     When evaluating Ada expressions, the tricky issue is that they may
     reference entities whose type contents and size are not statically
@@ -8458,34 +8464,60 @@ ada_value_cast (struct type *type, struct value *arg2, enum noside noside)
     such as an array of variant records, for instance.  There are
     two possible cases: Arrays, and records.
 
-    Arrays are a little simpler to handle, because the same amount of
-    memory is allocated for each element of the array, even if the amount
-    of space used by each element changes from element to element.
-    Consider for instance the following array of type Rec:
+    3. ``Fixing'' Arrays:
+    ---------------------
+
+    The type structure in GDB describes an array in terms of its bounds,
+    and the type of its elements.  By design, all elements in the array
+    have the same type and we cannot represent an array of variant elements
+    using the current type structure in GDB.  When fixing an array,
+    we cannot fix the array element, as we would potentially need one
+    fixed type per element of the array.  As a result, the best we can do
+    when fixing an array is to produce an array whose bounds and size
+    are correct (allowing us to read it from memory), but without having
+    touched its element type.  Fixing each element will be done later,
+    when (if) necessary.
+
+    Arrays are a little simpler to handle than records, because the same
+    amount of memory is allocated for each element of the array, even if
+    the amount of space actually used by each element changes from element
+    to element.  Consider for instance the following array of type Rec:
 
        type Rec_Array is array (1 .. 2) of Rec;
 
-    The type structure in GDB describes an array in terms of its
-    bounds, and the type of its elements.  By design, all elements
-    in the array have the same type.  So we cannot use a fixed type
-    for the array elements in this case, since the fixed type depends
-    on the actual value of each element.
+    The actual amount of memory occupied by each element might change
+    from element to element, depending on the their discriminant value.
+    But the amount of space reserved for each element in the array remains
+    constant regardless.  So we simply need to compute that size using
+    the debugging information available, from which we can then determine
+    the array size (we multiply the number of elements of the array by
+    the size of each element).
 
-    Fortunately, what happens in practice is that each element of
-    the array has the same size, which is the maximum size that
-    might be needed in order to hold an object of the element type.
-    And the compiler shows it in the debugging information by wrapping
-    the array element inside a private PAD type.  This type should not
-    be shown to the user, and must be "unwrap"'ed before printing. Note
+    The simplest case is when we have an array of a constrained element
+    type. For instance, consider the following type declarations:
+
+        type Bounded_String (Max_Size : Integer) is
+           Length : Integer;
+           Buffer : String (1 .. Max_Size);
+        end record;
+        type Bounded_String_Array is array (1 ..2) of Bounded_String (80);
+
+    In this case, the compiler describes the array as an array of
+    variable-size elements (identified by its XVS suffix) for which
+    the size can be read in the parallel XVZ variable.
+
+    In the case of an array of an unconstrained element type, the compiler
+    wraps the array element inside a private PAD type.  This type should not
+    be shown to the user, and must be "unwrap"'ed before printing.  Note
     that we also use the adjective "aligner" in our code to designate
     these wrapper types.
 
-    These wrapper types should have a constant size, which is the size
-    of each element of the array.  In the case when the size is statically
-    known, the PAD type will already have the right size, and the array
-    element type should remain unfixed.  But there are cases when
-    this size is not statically known.  For instance, assuming that
-    "Five" is an integer variable:
+    In some cases, the size of allocated for each element is statically
+    known.  In that case, the PAD type already has the correct size,
+    and the array element should remain unfixed.
+
+    But there are cases when this size is not statically known.
+    For instance, assuming that "Five" is an integer variable:
 
         type Dynamic is array (1 .. Five) of Integer;
         type Wrapper (Has_Length : Boolean := False) is record
@@ -8508,7 +8540,10 @@ ada_value_cast (struct type *type, struct value *arg2, enum noside noside)
     In that case, a copy of the PAD type with the correct size should
     be used for the fixed array.
 
-    However, things are slightly different in the case of dynamic
+    3. ``Fixing'' record type objects:
+    ----------------------------------
+
+    Things are slightly different from arrays in the case of dynamic
     record types.  In this case, in order to compute the associated
     fixed type, we need to determine the size and offset of each of
     its components.  This, in turn, requires us to compute the fixed
@@ -8524,7 +8559,7 @@ ada_value_cast (struct type *type, struct value *arg2, enum noside noside)
 
     In that case, the position of field "Length" depends on the size
     of field Str, which itself depends on the value of the Max_Size
-    discriminant. In order to fix the type of variable My_String,
+    discriminant.  In order to fix the type of variable My_String,
     we need to fix the type of field Str.  Therefore, fixing a variant
     record requires us to fix each of its components.
 
@@ -8552,21 +8587,21 @@ ada_value_cast (struct type *type, struct value *arg2, enum noside noside)
 
     The debugger computes the position of each field based on an algorithm
     that uses, among other things, the actual position and size of the field
-    preceding it.  Let's now imagine that the user is trying to print the
-    value of My_Container.  If the type fixing was recursive, we would
+    preceding it.  Let's now imagine that the user is trying to print
+    the value of My_Container.  If the type fixing was recursive, we would
     end up computing the offset of field After based on the size of the
     fixed version of field First.  And since in our example First has
     only one actual field, the size of the fixed type is actually smaller
     than the amount of space allocated to that field, and thus we would
     compute the wrong offset of field After.
 
-    Unfortunately, we need to watch out for dynamic components of variant
-    records (identified by the ___XVL suffix in the component name).
-    Even if the target type is a PAD type, the size of that type might
-    not be statically known.  So the PAD type needs to be unwrapped and
-    the resulting type needs to be fixed.  Otherwise, we might end up
-    with the wrong size for our component.  This can be observed with
-    the following type declarations:
+    To make things more complicated, we need to watch out for dynamic
+    components of variant records (identified by the ___XVL suffix in
+    the component name).  Even if the target type is a PAD type, the size
+    of that type might not be statically known.  So the PAD type needs
+    to be unwrapped and the resulting type needs to be fixed.  Otherwise,
+    we might end up with the wrong size for our component.  This can be
+    observed with the following type declarations:
 
         type Octal is new Integer range 0 .. 7;
         type Octal_Array is array (Positive range <>) of Octal;
@@ -8580,7 +8615,10 @@ ada_value_cast (struct type *type, struct value *arg2, enum noside noside)
     In that case, Buffer is a PAD type whose size is unset and needs
     to be computed by fixing the unwrapped type.
 
-    Lastly, when should the sub-elements of a type that remained unfixed
+    4. When to ``Fix'' un-``Fixed'' sub-elements of an entity:
+    ----------------------------------------------------------
+
+    Lastly, when should the sub-elements of an entity that remained unfixed
     thus far, be actually fixed?
 
     The answer is: Only when referencing that element.  For instance

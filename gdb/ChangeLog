@@ -1,3 +1,8 @@
+2009-11-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c: Update the comment explaining how to evaluate
+	Ada expressions.
+
 2009-11-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	PR gdb/8704
