@@ -1,3 +1,8 @@
+2009-11-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* s390-nat.c (s390_can_use_hw_breakpoint): Only support breakpoints
+	of type bp_hardware_watchpoint.
+
 2009-11-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c: Apply some corrections to the previous comment addition.

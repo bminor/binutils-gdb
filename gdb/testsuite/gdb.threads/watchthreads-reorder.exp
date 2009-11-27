@@ -26,7 +26,7 @@
 # different/new watchpoint, just based on the watchpoint/debug register number.
 
 if {(![istarget "i?86-*-*"] && ![istarget "x86_64-*-*"]
-     && ![istarget "ia64-*-*"] && ![istarget "s390*-*-*"])
+     && ![istarget "ia64-*-*"])
     || [target_info exists gdb,no_hardware_watchpoints]
     || ![istarget *-*-linux*]} {
     return 0

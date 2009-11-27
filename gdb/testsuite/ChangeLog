@@ -1,3 +1,9 @@
+2009-11-27  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.base/hbreak.exp: Disable for s390*-*-* targets.
+	* gdb.base/watchpoint-hw-hit-once.exp: Likewise.
+	* gdb.threads/watchthreads-reorder.exp: Likewise.
+
 2009-11-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	PR gdb/8704

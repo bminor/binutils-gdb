@@ -380,7 +380,7 @@ s390_remove_watchpoint (CORE_ADDR addr, int len, int type)
 static int
 s390_can_use_hw_breakpoint (int type, int cnt, int othertype)
 {
-  return 1;
+  return type == bp_hardware_watchpoint;
 }
 
 static int
