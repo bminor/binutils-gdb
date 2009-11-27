@@ -1,3 +1,11 @@
+2009-11-26  Per Øyvind Karlsen <peroyvind@mandriva.org>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (incremental_dump_DEPENDENCIES): Add $(THREADSLIB)
+	$(LIBDL).
+	(incremental_dump_LDADD): Likewise.
+	* Makefile.in: Regenerated.
+
 2009-11-25  Doug Kwan  <dougkwan@google.com>
 	
 	Revert:
