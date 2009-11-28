@@ -481,8 +481,10 @@ void
 target_terminal_inferior (void)
 {
   /* A background resume (``run&'') should leave GDB in control of the
-     terminal.  */
-  if (target_is_async_p () && !sync_execution)
+     terminal. Use target_can_async_p, not target_is_async_p, since at
+     this point the target is not async yet.  However, if sync_execution
+     is not set, we know it will become async prior to resume.  */
+  if (target_can_async_p () && !sync_execution)
     return;
 
   /* If GDB is resuming the inferior in the foreground, install
