@@ -1,5 +1,9 @@
 2009-11-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.base/bigcore.exp (extract_heap): Set $lim limit to 200.
+
+2009-11-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.base/foll-fork.exp (unpatch child, breakpoint at exit call):
 	Force $srcfile file.
 	* gdb.base/foll-fork.c (callee): Comment out the printf call.
