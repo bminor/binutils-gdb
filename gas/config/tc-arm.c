@@ -4972,13 +4972,13 @@ parse_address_main (char **str, int i, int group_relocations,
     {
       if (skip_past_char (&p, '=') == FAIL)
 	{
-	  /* bare address - translate to PC-relative offset */
+	  /* Bare address - translate to PC-relative offset.  */
 	  inst.reloc.pc_rel = 1;
 	  inst.operands[i].reg = REG_PC;
 	  inst.operands[i].isreg = 1;
 	  inst.operands[i].preind = 1;
 	}
-      /* else a load-constant pseudo op, no special treatment needed here */
+      /* Otherwise a load-constant pseudo op, no special treatment needed here.  */
 
       if (my_get_expression (&inst.reloc.exp, &p, GE_NO_PREFIX))
 	return PARSE_OPERAND_FAIL;
@@ -18335,7 +18335,8 @@ relax_adr (fragS *fragp, asection *sec, long stretch)
   offsetT val;
 
   /* Assume worst case for symbols not known to be in the same section.  */
-  if (!S_IS_DEFINED (fragp->fr_symbol)
+  if (fragp->fr_symbol == NULL
+      || !S_IS_DEFINED (fragp->fr_symbol)
       || sec != S_GET_SEGMENT (fragp->fr_symbol))
     return 4;
 

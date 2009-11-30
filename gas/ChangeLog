@@ -1,3 +1,8 @@
+2009-11-30  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/11032
+	* config/tc-arm.c (relax_adr): Cope with a frag with no symbol.
+
 2009-11-19  Jan Beulich  <jbeulich@novell.com>
 
 	* read.c (pseudo_set): Also call copy_symbol_attributes() for
