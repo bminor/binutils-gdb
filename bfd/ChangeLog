@@ -1,3 +1,7 @@
+2009-11-30  Joseph Myers  <joseph@codesourcery.com>
+
+	* configure: Regenerate.
+
 2009-11-26  Per Øyvind Karlsen <peroyvind@mandriva.org>
 
 	* plugin.c (bfd_plugin_bfd_copy_link_hash_symbol_type): Define.

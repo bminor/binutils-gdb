@@ -1,3 +1,7 @@
+2009-11-30  Joseph Myers  <joseph@codesourcery.com>
+
+	* configure: Regenerate.
+
 2009-11-20  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c: Include xc16x.h.

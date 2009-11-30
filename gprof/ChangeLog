@@ -1,3 +1,7 @@
+2009-11-30  Joseph Myers  <joseph@codesourcery.com>
+
+	* configure: Regenerate.
+
 2009-11-17  Nick Clifton  <nickc@redhat.com>
 
 	* po/bg.po: New Bulgarian translation.
