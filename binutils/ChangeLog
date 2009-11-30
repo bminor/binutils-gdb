@@ -198,7 +198,7 @@
 	SHN_AFTER section link values in x86 binaries.
 	(process_section_headers): Likewise.
 
-2009-09-25  Dimitry Gorbachev  <d.g.gorbachev@gmail.com>
+2009-09-25  Dmitry Gorbachev  <d.g.gorbachev@gmail.com>
 
 	PR 10656
 	* readelf.c: Remove duplicate declaration of variable do_wide.

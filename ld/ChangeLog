@@ -220,7 +220,7 @@
 	* Makefile.am: Remove spurious sanitization marker.
 	* Makefile.in: Regenerate.
 
-2009-10-16  Dimitry Gorbachev  <d.g.gorbachev@gmail.com>
+2009-10-16  Dmitry Gorbachev  <d.g.gorbachev@gmail.com>
 
 	* emultempl/pe.em (OPTION_EXCLUDE_ALL_SYMBOLS): New macro.
 	(gld${EMULATION_NAME}_add_options): Add new --exclude-all-symbols option

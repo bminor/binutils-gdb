@@ -14,7 +14,7 @@
 	* aclocal.m4: Regenerate.
 	* configure: Regenerate.
 
-2009-09-25  Dimitry Gorbachev  <d.g.gorbachev@gmail.com>
+2009-09-25  Dmitry Gorbachev  <d.g.gorbachev@gmail.com>
 
 	PR 10656
 	* hist.h: Move declaration of histograms and num_histograms
