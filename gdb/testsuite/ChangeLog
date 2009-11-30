@@ -1,3 +1,9 @@
+2009-11-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/foll-fork.exp (unpatch child, breakpoint at exit call):
+	Force $srcfile file.
+	* gdb.base/foll-fork.c (callee): Comment out the printf call.
+
 2009-11-27  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.base/hbreak.exp: Disable for s390*-*-* targets.

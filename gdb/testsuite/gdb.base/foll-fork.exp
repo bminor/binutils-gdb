@@ -240,7 +240,8 @@ proc catch_fork_unpatch_child {} {
    # Delete all breakpoints and catchpoints.
    delete_breakpoints
 
-   gdb_test "break $bp_exit" \
+   # Force $srcfile as the current GDB source can be in glibc sourcetree.
+   gdb_test "break $srcfile:$bp_exit" \
        "Breakpoint .*file .*$srcfile, line .*" \
        "unpatch child, breakpoint at exit call"
 

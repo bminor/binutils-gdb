@@ -9,7 +9,8 @@ void callee (i)
   int  i;
 #endif
 {
-  printf("callee: %d\n", i);
+  /* Any output corrupts GDB CLI expect strings.
+     printf("callee: %d\n", i);  */
 }
 
 #ifdef PROTOTYPES
