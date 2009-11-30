@@ -1,3 +1,8 @@
+2009-11-30  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/11006
+	* lexsup.c (parse_args): Allow nested --start-group, --end-group.
+
 2009-11-27  Tristan Gingold  <gingold@adacore.com>
 
 	* pe-dll.c (pe_implied_import_dll): Return early if there is no

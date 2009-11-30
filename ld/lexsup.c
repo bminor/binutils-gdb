@@ -1459,18 +1459,15 @@ parse_args (unsigned argc, char **argv)
 	  command_line.accept_unknown_input_arch = FALSE;
 	  break;
 	case '(':
-	  if (ingroup)
-	    einfo (_("%P%F: may not nest groups (--help for usage)\n"));
-
 	  lang_enter_group ();
-	  ingroup = 1;
+	  ingroup++;
 	  break;
 	case ')':
 	  if (! ingroup)
 	    einfo (_("%P%F: group ended before it began (--help for usage)\n"));
 
 	  lang_leave_group ();
-	  ingroup = 0;
+	  ingroup--;
 	  break;
 
 	case OPTION_INIT:
@@ -1501,8 +1498,11 @@ parse_args (unsigned argc, char **argv)
 	}
     }
 
-  if (ingroup)
-    lang_leave_group ();
+  while (ingroup)
+    {
+      lang_leave_group ();
+      ingroup--;
+    }
 
   if (default_dirlist != NULL)
     {
