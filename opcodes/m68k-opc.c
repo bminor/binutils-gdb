@@ -2026,7 +2026,7 @@ const struct m68k_opcode m68k_opcodes[] =
 {"sbcd", 2,	one(0100400),		one(0170770), "DsDd", m68000up },
 {"sbcd", 2,	one(0100410),		one(0170770), "-s-d", m68000up },
   
-{"stldsr", 6,   two(0x40e7, 0x46fc),    two(0xffff, 0xffff), "#w", mcfisa_c },
+{"stldsr", 6,   two(0x40e7, 0x46fc),    two(0xffff, 0xffff), "#w", mcfisa_aa | mcfisa_c },
   
   /* Traps have to come before conditional sets, as they have a more
      specific opcode.  */

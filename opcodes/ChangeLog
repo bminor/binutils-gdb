@@ -1,3 +1,9 @@
+2009-11-30  Massimo Ruo Roch  <massimo.ruoroch@polito.it>
+
+	PR gas/11030
+	* m68k-opc.c (m68k_opcodes): Allow the STLDSR instruction on the
+	Coldfire ISA A+.
+
 2009-11-17  Quentin Neill  <quentin.neill@amd.com>
 	    Sebastian Pop  <sebastian.pop@amd.com>
 
