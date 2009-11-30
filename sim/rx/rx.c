@@ -1385,9 +1385,9 @@ decode_opcode ()
 	    {
 	      regs.r[3] --;
 	      umb = mem_get_si (get_reg (1));
+	      regs.r[1] += 4;
 	      if (umb != uma)
 		break;
-	      regs.r[1] += 4;
 	    }
 	  break;
 	case RX_Word:
@@ -1396,9 +1396,9 @@ decode_opcode ()
 	    {
 	      regs.r[3] --;
 	      umb = mem_get_hi (get_reg (1));
+	      regs.r[1] += 2;
 	      if (umb != uma)
 		break;
-	      regs.r[1] += 2;
 	    }
 	  break;
 	case RX_Byte:
@@ -1407,9 +1407,9 @@ decode_opcode ()
 	    {
 	      regs.r[3] --;
 	      umb = mem_get_qi (regs.r[1]);
+	      regs.r[1] += 1;
 	      if (umb != uma)
 		break;
-	      regs.r[1] += 1;
 	    }
 	  break;
 	default:

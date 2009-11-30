@@ -1,3 +1,7 @@
+2009-11-30  DJ Delorie  <dj@redhat.com>
+
+	* rx/rx.c (decode_opcode): fix SWHILE logic.
+
 2009-10-27  DJ Delorie  <dj@redhat.com>
 	    Kevin Buettner <kevinb@redhat.com>
 
