@@ -1,3 +1,8 @@
+2009-12-01  Joseph Myers  <joseph@codesourcery.com>
+
+	* readelf.c (get_machine_name, get_osabi_name): Handle more
+	allocated values.
+
 2009-11-30  Joseph Myers  <joseph@codesourcery.com>
 
 	* configure: Regenerate.
