@@ -5356,7 +5356,7 @@ the first line of a function, @code{reverse-next} will take you back
 to the caller of that function, @emph{before} the function was called,
 just as the normal @code{next} command would take you from the last 
 line of a function back to its return to its caller
-@footnote{Unles the code is too heavily optimized.}.
+@footnote{Unless the code is too heavily optimized.}.
 
 @kindex reverse-nexti
 @kindex rni @r{(@code{reverse-nexti})}
