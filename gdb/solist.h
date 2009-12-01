@@ -126,6 +126,14 @@ struct target_so_ops
        Falls back to using strcmp on so_original_name field when set
        to NULL.  */
     int (*same) (struct so_list *gdb, struct so_list *inferior);
+
+    /* Return whether a region of memory must be kept in a core file
+       for shared libraries loaded before "gcore" is used to be
+       handled correctly when the core file is loaded.  This only
+       applies when the section would otherwise not be kept in the
+       core file (in particular, for readonly sections).  */
+    int (*keep_data_in_core) (CORE_ADDR vaddr,
+			      unsigned long size);
   };
 
 /* Free the memory associated with a (so_list *).  */

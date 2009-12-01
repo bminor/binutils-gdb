@@ -1,3 +1,15 @@
+2009-12-01  Joseph Myers  <joseph@codesourcery.com>
+
+	* gcore.c: Include solib.h.
+	(gcore_create_callback): Call solib_keep_data_in_core when
+	considering not saving memory in core file.
+	* solib-svr4.c (svr4_keep_data_in_core): New.
+	(_initialize_svr4_solib): Initialize
+	svr4_so_ops.keep_data_in_core.
+	* solib.c (solib_keep_data_in_core): New.
+	* solib.h (solib_keep_data_in_core): Declare.
+	* solist.h (struct target_so_ops): Add keep_data_in_core.
+
 2009-11-30  Joseph Myers  <joseph@codesourcery.com>
 
 	* configure: Regenerate.

@@ -24,6 +24,7 @@
 #include "inferior.h"
 #include "gdbcore.h"
 #include "objfiles.h"
+#include "solib.h"
 #include "symfile.h"
 #include "arch-utils.h"
 #include "completer.h"
@@ -389,7 +390,7 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size,
       return 0;
     }
 
-  if (write == 0)
+  if (write == 0 && !solib_keep_data_in_core (vaddr, size))
     {
       /* See if this region of memory lies inside a known file on disk.
 	 If so, we can avoid copying its contents by clearing SEC_LOAD.  */

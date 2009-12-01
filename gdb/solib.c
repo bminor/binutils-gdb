@@ -948,6 +948,23 @@ solib_name_from_address (struct program_space *pspace, CORE_ADDR address)
   return (0);
 }
 
+/* Return whether the data starting at VADDR, size SIZE, must be kept
+   in a core file for shared libraries loaded before "gcore" is used
+   to be handled correctly when the core file is loaded.  This only
+   applies when the section would otherwise not be kept in the core
+   file (in particular, for readonly sections).  */
+
+int
+solib_keep_data_in_core (CORE_ADDR vaddr, unsigned long size)
+{
+  struct target_so_ops *ops = solib_ops (target_gdbarch);
+
+  if (ops->keep_data_in_core)
+    return ops->keep_data_in_core (vaddr, size);
+  else
+    return 0;
+}
+
 /* Called by free_all_symtabs */
 
 void

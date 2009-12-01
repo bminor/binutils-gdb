@@ -52,6 +52,14 @@ extern char *solib_name_from_address (struct program_space *, CORE_ADDR);
 
 extern int solib_contains_address_p (const struct so_list *, CORE_ADDR);
 
+/* Return whether the data starting at VADDR, size SIZE, must be kept
+   in a core file for shared libraries loaded before "gcore" is used
+   to be handled correctly when the core file is loaded.  This only
+   applies when the section would otherwise not be kept in the core
+   file (in particular, for readonly sections).  */
+
+extern int solib_keep_data_in_core (CORE_ADDR vaddr, unsigned long size);
+
 /* Return 1 if PC lies in the dynamic symbol resolution code of the
    run time loader.  */
 
