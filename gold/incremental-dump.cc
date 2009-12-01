@@ -94,7 +94,7 @@ main(int argc, char** argv)
 
   if (incremental_header->version != 1)
     {
-      fprintf(stderr, "%s: %s: unknown incremestal version %d\n", argv[0],
+      fprintf(stderr, "%s: %s: unknown incremental version %d\n", argv[0],
               filename, incremental_header->version);
       return 1;
     }
@@ -156,7 +156,7 @@ main(int argc, char** argv)
       switch (input->input_type)
       {
       case INCREMENTAL_INPUT_OBJECT:
-        printf("Abject\n");
+        printf("Object\n");
         break;
       case INCREMENTAL_INPUT_ARCHIVE:
         printf("Archive\n");

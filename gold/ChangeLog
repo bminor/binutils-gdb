@@ -1,3 +1,7 @@
+2009-12-01  Rafael Avila de Espindola  <espindola@google.com>
+
+       * incremental-dump.cc (main): Fix typos.
+
 2009-11-27  Rafael Avila de Espindola  <espindola@google.com>
 
 	PR gold/11025
