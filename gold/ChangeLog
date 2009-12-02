@@ -1,3 +1,10 @@
+2009-12-02  Rafael Avila de Espindola  <espindola@google.com>
+
+	* testsuite/Makefile.am: Add the incremental_test.sh test.
+	* testsuite/incremental_test.sh: New.
+	* testsuite/incremental_test_1.c: New.
+	* testsuite/incremental_test_2.c: New.
+
 2009-12-01  Rafael Avila de Espindola  <espindola@google.com>
 
        * incremental-dump.cc (main): Fix typos.

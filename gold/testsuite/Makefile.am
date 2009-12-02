@@ -105,6 +105,17 @@ flagstest_debug.o: constructor_test.cc
 flagstest_ndebug.o: constructor_test.cc
 	$(CXXCOMPILE) -O0 -c -o $@ $<
 
+check_SCRIPTS += incremental_test.sh
+check_DATA += incremental_test.stdout
+MOSTLYCLEANFILES += incremental_test
+incremental_test_1.o: incremental_test_1.c
+	$(COMPILE) -O0 -c -ffunction-sections -g -o $@ $<
+incremental_test_2.o: incremental_test_2.c
+	$(COMPILE) -O0 -c -ffunction-sections -g -o $@ $<
+incremental_test: incremental_test_1.o incremental_test_2.o gcctestdir/ld
+	$(LINK) -Bgcctestdir/ -Wl,-incremental incremental_test_1.o incremental_test_2.o -Wl,-debug 2> incremental_test.cmdline
+incremental_test.stdout: incremental_test ../incremental-dump
+	../incremental-dump incremental_test > $@
 
 check_SCRIPTS += gc_comdat_test.sh
 check_DATA += gc_comdat_test.stdout
