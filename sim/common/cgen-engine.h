@@ -184,18 +184,6 @@ do { \
 /* Return pointer to ARGBUF given ptr to SCACHE.  */
 #define SEM_ARGBUF(sem_arg) (& (sem_arg) -> argbuf)
 
-/* There are several styles of engines, all generally supported by the
-   same code:
-
-   WITH_SCACHE && WITH_SCACHE_PBB - pseudo-basic-block scaching
-   WITH_SCACHE && !WITH_SCACHE_PBB - scaching on an insn by insn basis
-   !WITH_SCACHE - simple engine: fetch an insn, execute an insn
-
-   ??? The !WITH_SCACHE case can also be broken up into two flavours:
-   extract the fields of the insn into an ARGBUF struct, or defer the
-   extraction to the semantic handler.  The WITH_SCACHE case always
-   extracts the fields into an ARGBUF struct.  */
-
 #if WITH_SCACHE
 
 #define CIA_ADDR(cia) (cia)

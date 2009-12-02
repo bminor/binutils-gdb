@@ -1,3 +1,7 @@
+2009-12-02  Doug Evans  <dje@sebabeach.org>
+
+	* cgen-engine.h: Remove duplicated comment.
+
 2009-11-23  Doug Evans  <dje@sebabeach.org>
 
 	* cgen-engine.h (EXTRACT_MSB0_SINT): Renamed from EXTRACT_MSB0_INT.
