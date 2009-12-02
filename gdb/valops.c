@@ -861,8 +861,8 @@ value_assign (struct value *toval, struct value *fromval)
 	  }
 
 	write_memory (changed_addr, dest_buffer, changed_len);
-	if (deprecated_memory_changed_hook)
-	  deprecated_memory_changed_hook (changed_addr, changed_len);
+	observer_notify_memory_changed (changed_addr, changed_len,
+					dest_buffer);
       }
       break;
 

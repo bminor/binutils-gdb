@@ -2289,9 +2289,8 @@ ada_value_assign (struct value *toval, struct value *fromval)
         move_bits (buffer, value_bitpos (toval),
 		   value_contents (fromval), 0, bits, 0);
       write_memory (to_addr, buffer, len);
-      if (deprecated_memory_changed_hook)
-	deprecated_memory_changed_hook (to_addr, len);
-      
+      observer_notify_memory_changed (to_addr, len, buffer);
+
       val = value_copy (toval);
       memcpy (value_contents_raw (val), value_contents (fromval),
               TYPE_LENGTH (type));

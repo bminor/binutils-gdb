@@ -1,3 +1,11 @@
+2009-12-02  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* ada-lang.c (ada_value_assign): Use observer_notify_memory_changed.
+	* valops.c (value_assign): Likewise.
+	* defs.h (deprecated_memory_changed_hook): Remove.
+	* top.c (deprecated_memory_changed_hook): Likewise.
+	* interps.c (clear_interpreter_hooks): Adjust.	
+	
 2009-12-02  Tristan Gingold  <gingold@adacore.com>
 
 	* symfile.h (dwarf2_build_psymtabs): Remove mainline parameter in

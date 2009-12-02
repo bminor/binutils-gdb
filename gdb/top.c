@@ -259,9 +259,6 @@ void (*deprecated_interactive_hook) (void);
    that several registers have changed (see value_assign). */
 void (*deprecated_register_changed_hook) (int regno);
 
-/* Tell the GUI someone changed LEN bytes of memory at ADDR */
-void (*deprecated_memory_changed_hook) (CORE_ADDR addr, int len);
-
 /* Called when going to wait for the target.  Usually allows the GUI to run
    while waiting for target events.  */
 

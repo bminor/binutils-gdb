@@ -1,3 +1,7 @@
+2009-12-02  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* observer.texi: New memory_changed observer.
+
 2009-12-01  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Reverse Execution): Fix typo.

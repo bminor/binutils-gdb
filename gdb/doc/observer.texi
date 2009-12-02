@@ -208,6 +208,11 @@ Either @value{GDBN} detached from the inferior, or the inferior
 exited.  The argument @var{pid} identifies the inferior.
 @end deftypefun
 
+@deftypefun void memory_changed (CORE_ADDR @var{addr}, int @var{len}, const bfd_byte *@var{data})
+Bytes from @var{data} to @var{data} + @var{len} have been written
+to the current inferior at @var{addr}.
+@end deftypefun
+
  @deftypefun void test_notification (int @var{somearg})
 This observer is used for internal testing.  Do not use.  
 See testsuite/gdb.gdb/observer.exp.

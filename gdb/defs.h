@@ -1108,7 +1108,6 @@ extern void (*deprecated_readline_begin_hook) (char *, ...)
 extern char *(*deprecated_readline_hook) (char *);
 extern void (*deprecated_readline_end_hook) (void);
 extern void (*deprecated_register_changed_hook) (int regno);
-extern void (*deprecated_memory_changed_hook) (CORE_ADDR addr, int len);
 extern void (*deprecated_context_hook) (int);
 extern ptid_t (*deprecated_target_wait_hook) (ptid_t ptid,
 					      struct target_waitstatus *status,
