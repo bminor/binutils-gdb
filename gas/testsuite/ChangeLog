@@ -1,3 +1,10 @@
+2009-12-02  Nick Clifton  <nickc@redhat.com>
+	    Richard Earnshaw  <rearnsha@arm.com>
+
+	PR gas/11013
+	* gas/arm/arch7em.d: Update expected disassembly.
+	* gas/arm/thumb32.d: Likewise.
+	
 2009-11-17  Quentin Neill  <quentin.neill@amd.com>
 	    Sebastian Pop  <sebastian.pop@amd.com>
 

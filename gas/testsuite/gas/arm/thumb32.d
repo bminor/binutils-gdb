@@ -695,14 +695,14 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> bd02      	pop	\{r1, pc\}
 0[0-9a-f]+ <[^>]+> e92d 1f00 	stmdb	sp!, \{r8, r9, sl, fp, ip\}
 0[0-9a-f]+ <[^>]+> e8bd 1f00 	ldmia\.w	sp!, \{r8, r9, sl, fp, ip\}
-0[0-9a-f]+ <[^>]+> fa82 f183 	qadd	r1, r2, r3
+0[0-9a-f]+ <[^>]+> fa83 f182 	qadd	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fa92 f113 	qadd16	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fa82 f113 	qadd8	r1, r2, r3
 0[0-9a-f]+ <[^>]+> faa2 f113 	qaddsubx	r1, r2, r3
 0[0-9a-f]+ <[^>]+> faa2 f113 	qaddsubx	r1, r2, r3
-0[0-9a-f]+ <[^>]+> fa82 f193 	qdadd	r1, r2, r3
-0[0-9a-f]+ <[^>]+> fa82 f1b3 	qdsub	r1, r2, r3
-0[0-9a-f]+ <[^>]+> fa82 f1a3 	qsub	r1, r2, r3
+0[0-9a-f]+ <[^>]+> fa83 f192 	qdadd	r1, r2, r3
+0[0-9a-f]+ <[^>]+> fa83 f1b2 	qdsub	r1, r2, r3
+0[0-9a-f]+ <[^>]+> fa83 f1a2 	qsub	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fad2 f113 	qsub16	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fac2 f113 	qsub8	r1, r2, r3
 0[0-9a-f]+ <[^>]+> fae2 f113 	qsubaddx	r1, r2, r3

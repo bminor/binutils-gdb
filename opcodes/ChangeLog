@@ -1,3 +1,10 @@
+2009-12-02  Nick Clifton  <nickc@redhat.com>
+	    Richard Earnshaw  <rearnsha@arm.com>
+
+	PR gas/11013
+	* arm-dis.c (thumb32_opc): Adjust disassembly of QADD, QDADD, QSUB
+	and QDSUB.
+
 2009-11-30  Massimo Ruo Roch  <massimo.ruoroch@polito.it>
 
 	PR gas/11030
