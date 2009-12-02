@@ -1,5 +1,11 @@
 2009-12-02  Rafael Avila de Espindola  <espindola@google.com>
 
+	* incremental-dump.cc (main): Check that the offeset of a script is 0.
+	* incremental.cc (Incremental_inputs::sized_create_inputs_section_data):
+	Write 0 for the data_offset of scripts.
+
+2009-12-02  Rafael Avila de Espindola  <espindola@google.com>
+
 	* testsuite/Makefile.am: Add the incremental_test.sh test.
 	* testsuite/incremental_test.sh: New.
 	* testsuite/incremental_test_1.c: New.

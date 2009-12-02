@@ -650,6 +650,22 @@ Incremental_inputs::sized_create_inputs_section_data()
       int filename_offset =
           this->strtab_->get_offset_from_key(it->second.filename_key);
       entry.put_filename_offset(filename_offset);
+      switch (it->second.type)
+        {
+        case INCREMENTAL_INPUT_SCRIPT:
+          entry.put_data_offset(0);
+          break;
+        case INCREMENTAL_INPUT_ARCHIVE:
+        case INCREMENTAL_INPUT_OBJECT:
+        case INCREMENTAL_INPUT_SHARED_LIBRARY:
+          // TODO: add per input data.  Currently we store
+          // an out-of-bounds offset for future version of gold to reject
+          // such an incremental_inputs section.
+          entry.put_data_offset(0xffffffff);
+          break;
+        default:
+          gold_unreachable();
+        }
       // TODO: add per input data and timestamp.  Currently we store
       // an out-of-bounds offset for future version of gold to reject
       // such an incremental_inputs section.

@@ -166,6 +166,12 @@ main(int argc, char** argv)
         break;
       case INCREMENTAL_INPUT_SCRIPT:
         printf("Linker script\n");
+        if (input->data_offset != 0)
+          {
+            fprintf(stderr,"%s: %s: %u is a script but offset is not zero",
+                    argv[0], filename, i);
+            return 1;
+          }
         break;
       case INCREMENTAL_INPUT_INVALID:
       default:
