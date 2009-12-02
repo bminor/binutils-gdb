@@ -380,7 +380,7 @@ void free_symfile_segment_data (struct symfile_segment_data *data);
 
 extern int dwarf2_has_info (struct objfile *);
 
-extern void dwarf2_build_psymtabs (struct objfile *, int);
+extern void dwarf2_build_psymtabs (struct objfile *);
 extern void dwarf2_build_frame_info (struct objfile *);
 
 void dwarf2_free_objfile (struct objfile *);

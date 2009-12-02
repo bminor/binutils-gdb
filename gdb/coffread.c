@@ -641,7 +641,7 @@ coff_symfile_read (struct objfile *objfile, int mainline)
   if (dwarf2_has_info (objfile))
     {
       /* DWARF2 sections.  */
-      dwarf2_build_psymtabs (objfile, mainline);
+      dwarf2_build_psymtabs (objfile);
     }
 
   dwarf2_build_frame_info (objfile);

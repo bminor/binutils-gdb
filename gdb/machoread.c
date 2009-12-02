@@ -649,10 +649,15 @@ macho_symfile_read (struct objfile *objfile, int mainline)
 	}
     }
 
+  /* If we are reinitializing, or if we have never loaded syms yet,
+     set table to empty.  */
+  if (mainline)
+    init_psymbol_list (objfile, 0);
+
   if (dwarf2_has_info (objfile))
     {
       /* DWARF 2 sections */
-      dwarf2_build_psymtabs (objfile, mainline);
+      dwarf2_build_psymtabs (objfile);
     }
 
   /* Do not try to read .eh_frame/.debug_frame as they are not relocated

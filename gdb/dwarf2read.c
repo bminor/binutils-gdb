@@ -1448,7 +1448,7 @@ dwarf2_get_section_info (struct objfile *objfile, const char *section_name,
 /* Build a partial symbol table.  */
 
 void
-dwarf2_build_psymtabs (struct objfile *objfile, int mainline)
+dwarf2_build_psymtabs (struct objfile *objfile)
 {
   dwarf2_read_section (objfile, &dwarf2_per_objfile->info);
   dwarf2_read_section (objfile, &dwarf2_per_objfile->abbrev);
@@ -1461,9 +1461,7 @@ dwarf2_build_psymtabs (struct objfile *objfile, int mainline)
   dwarf2_read_section (objfile, &dwarf2_per_objfile->eh_frame);
   dwarf2_read_section (objfile, &dwarf2_per_objfile->frame);
 
-  if (mainline
-      || (objfile->global_psymbols.size == 0
-	  && objfile->static_psymbols.size == 0))
+  if (objfile->global_psymbols.size == 0 && objfile->static_psymbols.size == 0)
     {
       init_psymbol_list (objfile, 1024);
     }

@@ -743,7 +743,7 @@ elf_symfile_read (struct objfile *objfile, int mainline)
   if (dwarf2_has_info (objfile))
     {
       /* DWARF 2 sections */
-      dwarf2_build_psymtabs (objfile, mainline);
+      dwarf2_build_psymtabs (objfile);
     }
 
   /* FIXME: kettenis/20030504: This still needs to be integrated with

@@ -1,5 +1,16 @@
 2009-12-02  Tristan Gingold  <gingold@adacore.com>
 
+	* symfile.h (dwarf2_build_psymtabs): Remove mainline parameter in
+	prototype.
+	* dwarf2read.c (dwarf2_build_psymtabs): Remove mainline paramter in
+	definition, simplify code assuming it is always 0.
+	* coffread.c (coff_symfile_read): Adjust call.
+	* elfread.c (elf_symfile_read): Ditto.
+	* machoread.c (macho_symfile_read): Explicitely calls
+	init_psymbol_list if mainline is set.
+
+2009-12-02  Tristan Gingold  <gingold@adacore.com>
+
 	* dwarf2read.c (dwarf2_build_psymtabs_easy): Remove mainline parameter.
 	(dwarf2_build_psymtabs_hard): Ditto.
 	(dwarf2_build_psymtabs): Ajust calls.
