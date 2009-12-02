@@ -1,5 +1,10 @@
 2009-12-02  Rafael Avila de Espindola  <espindola@google.com>
 
+	* incremental.cc (Incremental_inputs_entry): Remove unused argument
+	from the get_* methods.
+
+2009-12-02  Rafael Avila de Espindola  <espindola@google.com>
+
 	* incremental-dump.cc (main): Check that the offeset of a script is 0.
 	* incremental.cc (Incremental_inputs::sized_create_inputs_section_data):
 	Write 0 for the data_offset of scripts.

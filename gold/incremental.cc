@@ -129,27 +129,27 @@ class Incremental_inputs_entry
   static const int data_size = sizeof(Data_type);
 
   elfcpp::Elf_Word
-  get_filename_offset(elfcpp::Elf_Word v)
+  get_filename_offset()
   { return Convert<32, big_endian>::convert_host(this->p_->filename_offset); }
 
   elfcpp::Elf_Word
-  get_data_offset(elfcpp::Elf_Word v)
+  get_data_offset()
   { return Convert<32, big_endian>::convert_host(this->p_->data_offset); }
 
   elfcpp::Elf_Xword
-  get_timestamp_sec(elfcpp::Elf_Xword v)
+  get_timestamp_sec()
   { return Convert<64, big_endian>::convert_host(this->p_->timestamp_sec); }
 
   elfcpp::Elf_Word
-  get_timestamp_nsec(elfcpp::Elf_Word v)
+  get_timestamp_nsec()
   { return Convert<32, big_endian>::convert_host(this->p_->timestamp_nsec); }
 
   elfcpp::Elf_Word
-  get_input_type(elfcpp::Elf_Word v)
+  get_input_type()
   { return Convert<32, big_endian>::convert_host(this->p_->input_type); }
 
   elfcpp::Elf_Word
-  get_reserved(elfcpp::Elf_Word v)
+  get_reserved()
   { return Convert<32, big_endian>::convert_host(this->p_->reserved); }
 
  private:
