@@ -1,6 +1,6 @@
 /* BFD back-end for Intel 386 COFF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008
+   2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -44,13 +44,13 @@
 #include "libcoff.h"
 
 static bfd_reloc_status_type coff_i386_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+  (bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **);
 static reloc_howto_type *coff_i386_rtype_to_howto
-  PARAMS ((bfd *, asection *, struct internal_reloc *,
-	   struct coff_link_hash_entry *, struct internal_syment *,
-	   bfd_vma *));
+  (bfd *, asection *, struct internal_reloc *,
+   struct coff_link_hash_entry *, struct internal_syment *,
+   bfd_vma *);
 static reloc_howto_type *coff_i386_reloc_type_lookup
-  PARAMS ((bfd *, bfd_reloc_code_real_type));
+  (bfd *, bfd_reloc_code_real_type);
 
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (2)
 /* The page size is a guess based on ELF.  */

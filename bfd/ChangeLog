@@ -1,3 +1,8 @@
+2009-12-02  Jerker Bäck  <jerker.back@gmail.com>
+
+	PR binutils/11017
+	* coff-i386.h (COFF_PAGE_SIZE): Definition moved to coff/i386.h
+
 2009-11-30  Joseph Myers  <joseph@codesourcery.com>
 
 	* configure: Regenerate.

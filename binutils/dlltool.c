@@ -241,9 +241,6 @@
 
 #define show_allnames 0
 
-#define PAGE_SIZE ((bfd_vma) 4096)
-#define PAGE_MASK ((bfd_vma) (-4096))
-
 #include "sysdep.h"
 #include "bfd.h"
 #include "libiberty.h"
@@ -263,11 +260,22 @@
 #include "coff/arm.h"
 #include "coff/internal.h"
 #endif
-#ifdef DLLTOOL_MX86_64
+#ifdef DLLTOOL_DEFAULT_MX86_64
 #include "coff/x86_64.h"
 #endif
+#ifdef DLLTOOL_DEFAULT_I386
+#include "coff/i386.h"
+#endif
 
-/* get current BFD error message */
+#ifndef COFF_PAGE_SIZE
+#define COFF_PAGE_SIZE ((bfd_vma) 4096)
+#endif
+
+#ifndef PAGE_MASK
+#define PAGE_MASK ((bfd_vma) (- COFF_PAGE_SIZE))
+#endif
+
+/* Get current BFD error message.  */
 #define bfd_get_errmsg() (bfd_errmsg (bfd_get_error ()))
 
 /* Forward references.  */
@@ -2119,7 +2127,7 @@ gen_exp_file (void)
   if (base_file)
     {
       bfd_vma addr;
-      bfd_vma need[PAGE_SIZE];
+      bfd_vma need[COFF_PAGE_SIZE];
       bfd_vma page_addr;
       bfd_size_type numbytes;
       int num_entries;

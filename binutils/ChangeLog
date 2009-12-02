@@ -1,3 +1,10 @@
+2009-12-02  Jerker Bäck  <jerker.back@gmail.com>
+
+	PR binutils/11017
+	* dlltool.c (PAGE_SIZE): Delete.
+	(PAGE_MASK): Provide default definition based on COFF_PAGE_SIZE.
+	Check for DLLTOOL_DEFAULT_MX86_64 and DLLTOOL_DEFAULT_I386.
+
 2009-12-01  Joseph Myers  <joseph@codesourcery.com>
 
 	* readelf.c (get_machine_name, get_osabi_name): Handle more
