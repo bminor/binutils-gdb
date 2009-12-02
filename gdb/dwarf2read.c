@@ -769,7 +769,7 @@ dwarf2_invalid_attrib_class_complaint (const char *arg1, const char *arg2)
 static void dwarf2_locate_sections (bfd *, asection *, void *);
 
 #if 0
-static void dwarf2_build_psymtabs_easy (struct objfile *, int);
+static void dwarf2_build_psymtabs_easy (struct objfile *);
 #endif
 
 static void dwarf2_create_include_psymtab (char *, struct partial_symtab *,
@@ -779,7 +779,7 @@ static void dwarf2_build_include_psymtabs (struct dwarf2_cu *,
                                            struct die_info *,
                                            struct partial_symtab *);
 
-static void dwarf2_build_psymtabs_hard (struct objfile *, int);
+static void dwarf2_build_psymtabs_hard (struct objfile *);
 
 static void scan_partial_symbols (struct partial_die_info *,
 				  CORE_ADDR *, CORE_ADDR *,
@@ -1474,14 +1474,14 @@ dwarf2_build_psymtabs (struct objfile *objfile, int mainline)
       /* Things are significantly easier if we have .debug_aranges and
          .debug_pubnames sections */
 
-      dwarf2_build_psymtabs_easy (objfile, mainline);
+      dwarf2_build_psymtabs_easy (objfile);
     }
   else
 #endif
     /* only test this case for now */
     {
       /* In this case we have to work a bit harder */
-      dwarf2_build_psymtabs_hard (objfile, mainline);
+      dwarf2_build_psymtabs_hard (objfile);
     }
 }
 
@@ -1490,7 +1490,7 @@ dwarf2_build_psymtabs (struct objfile *objfile, int mainline)
    .debug_pubnames and .debug_aranges sections.  */
 
 static void
-dwarf2_build_psymtabs_easy (struct objfile *objfile, int mainline)
+dwarf2_build_psymtabs_easy (struct objfile *objfile)
 {
   bfd *abfd = objfile->obfd;
   char *aranges_buffer, *pubnames_buffer;
@@ -2075,7 +2075,7 @@ build_type_psymtabs (struct objfile *objfile)
    .debug_info and .debug_abbrev sections.  */
 
 static void
-dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
+dwarf2_build_psymtabs_hard (struct objfile *objfile)
 {
   /* Instead of reading this into a big buffer, we should probably use
      mmap()  on architectures that support it. (FIXME) */

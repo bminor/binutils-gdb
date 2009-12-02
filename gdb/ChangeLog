@@ -1,4 +1,21 @@
-2009-12-01  Tristan Gingold  <gingold@adacore.com>
+2009-12-02  Tristan Gingold  <gingold@adacore.com>
+
+	* dwarf2read.c (dwarf2_build_psymtabs_easy): Remove mainline parameter.
+	(dwarf2_build_psymtabs_hard): Ditto.
+	(dwarf2_build_psymtabs): Ajust calls.
+	* stabsread.h (elfstab_build_psymtabs): Remove mainline parameter on
+	the prototype.
+	(coffstab_build_psymtabs): Ditto.
+	(stabsect_build_psymtabs): Ditto.
+	* dbxread.c (coffstab_build_psymtabs): Remove mainline parameter on
+	the definition.
+	(elfstab_build_psymtabs): Ditto.
+	(stabsect_build_psymtabs): Ditto.
+	* coffread.c (coff_symfile_read): Adjust call.
+	* elfread.c (elf_symfile_read): Ditto.
+	* somread.c (som_symfile_read): Ditto.
+
+2009-12-02  Tristan Gingold  <gingold@adacore.com>
 
 	* charset.c (_initialize_charset): Set a default value to
 	auto_host_charset_name if empty.

@@ -634,7 +634,6 @@ coff_symfile_read (struct objfile *objfile, int mainline)
       stabstrsize = bfd_section_size (abfd, info->stabstrsect);
 
       coffstab_build_psymtabs (objfile,
-			       mainline,
 			       info->textaddr, info->textsize,
 			       info->stabsects,
 			       info->stabstrsect->filepos, stabstrsize);

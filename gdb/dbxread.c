@@ -3320,8 +3320,6 @@ no enclosing block"));
    OBJFILE is the object file we are reading symbols from.
    ADDR is the address relative to which the symbols are (e.g.
    the base address of the text segment).
-   MAINLINE is true if we are reading the main symbol
-   table (as opposed to a shared lib or dynamically loaded file).
    TEXTADDR is the address of the text section.
    TEXTSIZE is the size of the text section.
    STABSECTS is the list of .stab sections in OBJFILE.
@@ -3332,7 +3330,7 @@ no enclosing block"));
    adjusted for coff details. */
 
 void
-coffstab_build_psymtabs (struct objfile *objfile, int mainline,
+coffstab_build_psymtabs (struct objfile *objfile,
 			 CORE_ADDR textaddr, unsigned int textsize,
 			 struct stab_section_list *stabsects,
 			 file_ptr stabstroffset, unsigned int stabstrsize)
@@ -3415,8 +3413,6 @@ coffstab_build_psymtabs (struct objfile *objfile, int mainline,
    OBJFILE is the object file we are reading symbols from.
    ADDR is the address relative to which the symbols are (e.g.
    the base address of the text segment).
-   MAINLINE is true if we are reading the main symbol
-   table (as opposed to a shared lib or dynamically loaded file).
    STABSECT is the BFD section information for the .stab section.
    STABSTROFFSET and STABSTRSIZE define the location in OBJFILE where the
    .stabstr section exists.
@@ -3425,8 +3421,7 @@ coffstab_build_psymtabs (struct objfile *objfile, int mainline,
    adjusted for elf details. */
 
 void
-elfstab_build_psymtabs (struct objfile *objfile, int mainline,
-			asection *stabsect,
+elfstab_build_psymtabs (struct objfile *objfile, asection *stabsect,
 			file_ptr stabstroffset, unsigned int stabstrsize)
 {
   int val;
@@ -3501,15 +3496,13 @@ elfstab_build_psymtabs (struct objfile *objfile, int mainline,
    OBJFILE is the object file we are reading symbols from.
    ADDR is the address relative to which the symbols are (e.g. the base address
    of the text segment).
-   MAINLINE is true if we are reading the main symbol table (as opposed to a
-   shared lib or dynamically loaded file).
    STAB_NAME is the name of the section that contains the stabs.
    STABSTR_NAME is the name of the section that contains the stab strings.
 
    This routine is mostly copied from dbx_symfile_init and dbx_symfile_read. */
 
 void
-stabsect_build_psymtabs (struct objfile *objfile, int mainline, char *stab_name,
+stabsect_build_psymtabs (struct objfile *objfile, char *stab_name,
 			 char *stabstr_name, char *text_name)
 {
   int val;

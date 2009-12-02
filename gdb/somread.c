@@ -340,7 +340,7 @@ som_symfile_read (struct objfile *objfile, int mainline)
 
   /* Now read information from the stabs debug sections.
      This is emitted by gcc.  */
-  stabsect_build_psymtabs (objfile, mainline,
+  stabsect_build_psymtabs (objfile,
 			   "$GDB_SYMBOLS$", "$GDB_STRINGS$", "$TEXT$");
 }
 

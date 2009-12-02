@@ -736,7 +736,6 @@ elf_symfile_read (struct objfile *objfile, int mainline)
       /* FIXME should probably warn about a stab section without a stabstr.  */
       if (str_sect)
 	elfstab_build_psymtabs (objfile,
-				mainline,
 				ei.stabsect,
 				str_sect->filepos,
 				bfd_section_size (abfd, str_sect));
