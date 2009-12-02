@@ -1,3 +1,8 @@
+2009-12-01  Tristan Gingold  <gingold@adacore.com>
+
+	* charset.c (_initialize_charset): Set a default value to
+	auto_host_charset_name if empty.
+
 2009-12-01  Joseph Myers  <joseph@codesourcery.com>
 
 	* gcore.c: Include solib.h.

@@ -818,8 +818,9 @@ _initialize_charset (void)
 #ifdef HAVE_LANGINFO_CODESET
   auto_host_charset_name = nl_langinfo (CODESET);
   /* Solaris will return `646' here -- but the Solaris iconv then
-     does not accept this.  */
-  if (!strcmp (auto_host_charset_name, "646"))
+     does not accept this.  Darwin (and maybe FreeBSD) may return "" here,
+     which GNU libiconv doesn't like (infinite loop).  */
+  if (!strcmp (auto_host_charset_name, "646") || !*auto_host_charset_name)
     auto_host_charset_name = "ASCII";
   target_charset_name = auto_host_charset_name;
 
