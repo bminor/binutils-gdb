@@ -1,3 +1,7 @@
+2009-12-03  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Basic Python): Document gdb.parse_and_eval.
+
 2009-12-02  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* observer.texi: New memory_changed observer.

@@ -1,3 +1,8 @@
+2009-12-03  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.python/py-value.exp (test_parse_and_eval): New
+	function.
+
 2009-12-03  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
        PR gdb/11022

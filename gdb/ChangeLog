@@ -1,3 +1,8 @@
+2009-12-03  Tom Tromey  <tromey@redhat.com>
+
+	* python/python.c (gdbpy_parse_and_eval): New function.
+	(GdbMethods): Add "parse_and_eval".
+
 2009-12-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* linux-thread-db.c (find_new_threads_once): Change errp and err types

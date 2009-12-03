@@ -361,6 +361,17 @@ proc test_subscript_regression {lang} {
  gdb_test "python print marray\[1\]\[2\]" "o." "Test multiple subscript"
 }
 
+# A few tests of gdb.parse_and_eval.
+proc test_parse_and_eval {} {
+  gdb_test "python print gdb.parse_and_eval ('23')" "23" \
+    "parse_and_eval constant test"
+  gdb_test "python print gdb.parse_and_eval ('5 + 7')" "12" \
+    "parse_and_eval simple expression test"
+  gdb_test "python print type(gdb.parse_and_eval ('5 + 7'))" \
+    ".type 'gdb.Value'."\
+    "parse_and_eval type test"
+}
+
 # Start with a fresh gdb.
 
 gdb_exit
@@ -381,6 +392,7 @@ test_value_numeric_ops
 test_value_boolean
 test_value_compare
 test_objfiles
+test_parse_and_eval
 
 # The following tests require execution.
 
