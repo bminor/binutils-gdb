@@ -194,8 +194,9 @@ class Target
   // This is called to tell the target to complete any sections it is
   // handling.  After this all sections must have their final size.
   void
-  finalize_sections(Layout* layout, const Input_objects* input_objects)
-  { return this->do_finalize_sections(layout, input_objects); }
+  finalize_sections(Layout* layout, const Input_objects* input_objects,
+		    Symbol_table* symtab)
+  { return this->do_finalize_sections(layout, input_objects, symtab); }
 
   // Return the value to use for a global symbol which needs a special
   // value in the dynamic symbol table.  This will only be called if
@@ -336,7 +337,7 @@ class Target
 
   // Virtual function which may be implemented by the child class.
   virtual void
-  do_finalize_sections(Layout*, const Input_objects*)
+  do_finalize_sections(Layout*, const Input_objects*, Symbol_table*)
   { }
 
   // Virtual function which may be implemented by the child class.

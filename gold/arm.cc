@@ -123,7 +123,6 @@ const int32_t THM2_MAX_BWD_BRANCH_OFFSET = (-(1 << 24) + 4);
 // TODOs:
 // - Generate various branch stubs.
 // - Support interworking.
-// - Define section symbols __exidx_start and __exidx_stop.
 // - Support more relocation types as needed. 
 // - Make PLTs more flexible for different architecture features like
 //   Thumb-2 and BE8.
@@ -1234,7 +1233,7 @@ class Target_arm : public Sized_target<32, big_endian>
 
   // Finalize the sections.
   void
-  do_finalize_sections(Layout*, const Input_objects*);
+  do_finalize_sections(Layout*, const Input_objects*, Symbol_table*);
 
   // Return the value to use for a dynamic symbol which requires special
   // treatment.
@@ -4560,7 +4559,8 @@ template<bool big_endian>
 void
 Target_arm<big_endian>::do_finalize_sections(
     Layout* layout,
-    const Input_objects* input_objects)
+    const Input_objects* input_objects,
+    Symbol_table* symtab)
 {
   // Merge processor-specific flags.
   for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
@@ -4625,16 +4625,25 @@ Target_arm<big_endian>::do_finalize_sections(
   if (this->copy_relocs_.any_saved_relocs())
     this->copy_relocs_.emit(this->rel_dyn_section(layout));
 
-  // For the ARM target, we need to add a PT_ARM_EXIDX segment for
-  // the .ARM.exidx section.
-  if (!layout->script_options()->saw_phdrs_clause()
+  // Handle the .ARM.exidx section.
+  Output_section* exidx_section = layout->find_output_section(".ARM.exidx");
+  if (exidx_section != NULL
+      && exidx_section->type() == elfcpp::SHT_ARM_EXIDX
       && !parameters->options().relocatable())
     {
-      Output_section* exidx_section =
-	layout->find_output_section(".ARM.exidx");
+      // Create __exidx_start and __exdix_end symbols.
+      symtab->define_in_output_data("__exidx_start", NULL, exidx_section,
+				    0, 0, elfcpp::STT_OBJECT,
+				    elfcpp::STB_LOCAL, elfcpp::STV_HIDDEN, 0,
+				    false, false);
+      symtab->define_in_output_data("__exidx_end", NULL, exidx_section,
+				    0, 0, elfcpp::STT_OBJECT,
+				    elfcpp::STB_LOCAL, elfcpp::STV_HIDDEN, 0,
+				    true, false);
 
-      if (exidx_section != NULL
-	  && exidx_section->type() == elfcpp::SHT_ARM_EXIDX)
+      // For the ARM target, we need to add a PT_ARM_EXIDX segment for
+      // the .ARM.exidx section.
+      if (!layout->script_options()->saw_phdrs_clause())
 	{
 	  gold_assert(layout->find_output_segment(elfcpp::PT_ARM_EXIDX, 0, 0)
 		      == NULL);

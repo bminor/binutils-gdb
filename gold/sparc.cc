@@ -94,7 +94,7 @@ class Target_sparc : public Sized_target<size, big_endian>
 	      const unsigned char* plocal_symbols);
   // Finalize the sections.
   void
-  do_finalize_sections(Layout*, const Input_objects*);
+  do_finalize_sections(Layout*, const Input_objects*, Symbol_table*);
 
   // Return the value to use for a dynamic which requires special
   // treatment.
@@ -2319,7 +2319,8 @@ template<int size, bool big_endian>
 void
 Target_sparc<size, big_endian>::do_finalize_sections(
     Layout* layout,
-    const Input_objects*)
+    const Input_objects*,
+    Symbol_table*)
 {
   // Fill in some more dynamic tags.
   Output_data_dynamic* const odyn = layout->dynamic_data();

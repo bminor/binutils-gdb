@@ -1,3 +1,20 @@
+2009-12-03  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc: Remove comment about missing .ARM.exidx section symbols.
+	(Target_arm::do_finalize_sections): Add parameter for symbol table
+	pointer.  Add __exidx_start and __exidx_end symbols as appropriate.
+	* i386.cc (Target_i386::do_finalize_sections): Add an additional
+	parameter for symbol table pointer.
+	* layout.cc (Layout::finalize): Call Target::finalize_sections with
+	an additional parameter for a pointer to symbol table.
+	* powerpc.cc (Target_powerpc::do_finalize_sections): Add an additional
+	parameter for a symbol table pointer.
+	* sparc.cc (Target_sparc::do_finalize_sections): Ditto.
+	* target.h (Target::finalize_sections, Target::do_finalize_sections):
+	Ditto.
+	* x86_64.cc (Target_x86_64::do_finalize_sections): Add an additional
+	parameter for a symbol table pointer.
+
 2009-12-03  Rafael Avila de Espindola  <espindola@google.com>
 
 	* incremental.cc (Incremental_inputs_header)
