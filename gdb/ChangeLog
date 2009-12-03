@@ -1,3 +1,9 @@
+2009-12-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linux-thread-db.c (find_new_threads_once): Change errp and err types
+	to td_err_e.
+	(thread_db_find_new_threads_2): Change err type to td_err_e.
+
 2009-12-03  Paul Pluzhnikov  <ppluzhnikov@google.com>
 	
 	PR gdb/11022

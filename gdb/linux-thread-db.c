@@ -1363,11 +1363,11 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
 
 static int
 find_new_threads_once (struct thread_db_info *info, int iteration,
-		       int *errp)
+		       td_err_e *errp)
 {
   volatile struct gdb_exception except;
   struct callback_data data;
-  int err = TD_ERR;
+  td_err_e err = TD_ERR;
 
   data.info = info;
   data.new_threads = 0;
@@ -1440,7 +1440,7 @@ thread_db_find_new_threads_2 (ptid_t ptid, int until_no_new)
     }
   else
     {
-      int err;
+      td_err_e err;
 
       find_new_threads_once (info, 0, &err);
       if (err != TD_OK)
