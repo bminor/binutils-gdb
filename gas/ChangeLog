@@ -1,3 +1,11 @@
+2009-12-03  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/11011
+	Import this patch from the mainline:
+	2009-10-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* as.h (know): Don't define as empty.
+
 2009-10-28  Alan Modra  <amodra@bigpond.net.au>
 
 	PR gas/10856
