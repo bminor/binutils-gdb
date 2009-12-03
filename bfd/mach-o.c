@@ -1480,8 +1480,13 @@ bfd_mach_o_make_bfd_section (bfd *abfd, bfd_mach_o_section *section,
   if (sname == NULL)
     return NULL;
 
-  if (section->flags & BFD_MACH_O_S_ATTR_DEBUG)
-    flags = SEC_HAS_CONTENTS | SEC_DEBUGGING;
+  if ((section->flags & BFD_MACH_O_S_ATTR_DEBUG)
+      || !strcmp (section->segname, "__DWARF"))
+    {
+      /* Force flags for dwarf sections.  This looks weird but dsym files
+         have no flags for them and this is important for gdb.  */
+      flags = SEC_HAS_CONTENTS | SEC_DEBUGGING;
+    }
   else
     {
       flags = SEC_ALLOC;

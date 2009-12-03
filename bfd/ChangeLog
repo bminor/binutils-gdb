@@ -1,3 +1,8 @@
+2009-12-03  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_make_bfd_section): Force debug flags for
+	all sections of the __DWARF segment.
+
 2009-12-03  Alan Modra  <amodra@bigpond.net.au>
 
 	PR ld/11047
