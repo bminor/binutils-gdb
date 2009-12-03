@@ -1,3 +1,11 @@
+2009-12-03  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/11047
+	* elf32-ppc.c (ppc_elf_relocate_section): Delete __tls_get_addr
+	symbol reference from relocs belonging to calls that are
+	optimized away.
+	* elf64-ppc.c (ppc64_elf_relocate_section): Likewise.
+
 2009-12-02  Jerker Bäck  <jerker.back@gmail.com>
 
 	PR binutils/11017

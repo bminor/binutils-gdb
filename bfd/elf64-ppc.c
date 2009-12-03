@@ -11102,8 +11102,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  insn1 |= 58 << 26;	/* ld */
 		  insn2 = 0x7c636a14;	/* add 3,3,13 */
 		  if (offset != (bfd_vma) -1)
-		    rel[1].r_info = ELF64_R_INFO (ELF64_R_SYM (rel[1].r_info),
-						  R_PPC64_NONE);
+		    rel[1].r_info = ELF64_R_INFO (STN_UNDEF, R_PPC64_NONE);
 		  if ((tls_mask & TLS_EXPLICIT) == 0)
 		    r_type = (((r_type - (R_PPC64_GOT_TLSGD16 & 3)) & 3)
 			      + R_PPC64_GOT_TPREL16_DS);
@@ -11202,8 +11201,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      rel->r_info = ELF64_R_INFO (r_symndx, r_type);
 	      /* Zap the reloc on the _tls_get_addr call too.  */
 	      BFD_ASSERT (offset == rel[1].r_offset);
-	      rel[1].r_info = ELF64_R_INFO (ELF64_R_SYM (rel[1].r_info),
-					    R_PPC64_NONE);
+	      rel[1].r_info = ELF64_R_INFO (STN_UNDEF, R_PPC64_NONE);
 	      insn3 = bfd_get_32 (output_bfd,
 				  contents + offset + 4);
 	      if (insn3 == NOP
@@ -11248,8 +11246,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      rel->r_offset = offset + d_offset;
 	      /* Zap the reloc on the _tls_get_addr call too.  */
 	      BFD_ASSERT (offset == rel[1].r_offset);
-	      rel[1].r_info = ELF64_R_INFO (ELF64_R_SYM (rel[1].r_info),
-					    R_PPC64_NONE);
+	      rel[1].r_info = ELF64_R_INFO (STN_UNDEF, R_PPC64_NONE);
 	      insn2 = 0x38630000;	/* addi 3,3,0 */
 	      insn3 = bfd_get_32 (output_bfd,
 				  contents + offset + 4);

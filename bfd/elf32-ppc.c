@@ -6929,9 +6929,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  insn1 |= 32 << 26;	/* lwz */
 		  if (offset != (bfd_vma) -1)
 		    {
-		      rel[1].r_info
-			= ELF32_R_INFO (ELF32_R_SYM (rel[1].r_info),
-					R_PPC_NONE);
+		      rel[1].r_info = ELF32_R_INFO (STN_UNDEF, R_PPC_NONE);
 		      insn2 = 0x7c631214;	/* add 3,3,2 */
 		      bfd_put_32 (output_bfd, insn2, contents + offset);
 		    }
@@ -7005,8 +7003,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      bfd_put_32 (output_bfd, insn2, contents + offset);
 	      /* Zap the reloc on the _tls_get_addr call too.  */
 	      BFD_ASSERT (offset == rel[1].r_offset);
-	      rel[1].r_info = ELF32_R_INFO (ELF32_R_SYM (rel[1].r_info),
-					    R_PPC_NONE);
+	      rel[1].r_info = ELF32_R_INFO (STN_UNDEF, R_PPC_NONE);
 	    }
 	  break;
 
@@ -7035,8 +7032,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			  contents + rel->r_offset - d_offset);
 	      /* Zap the reloc on the _tls_get_addr call too.  */
 	      BFD_ASSERT (rel->r_offset - d_offset == rel[1].r_offset);
-	      rel[1].r_info = ELF32_R_INFO (ELF32_R_SYM (rel[1].r_info),
-					    R_PPC_NONE);
+	      rel[1].r_info = ELF32_R_INFO (STN_UNDEF, R_PPC_NONE);
 	      rel--;
 	      continue;
 	    }
