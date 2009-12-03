@@ -1,3 +1,7 @@
+2009-12-03  Richard Ward  <richard.j.ward1@googlemail.com>
+
+	* gdb.texinfo (Types In Python): Describe "is_base_class".
+
 2009-12-03  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Basic Python): Document gdb.parse_and_eval.

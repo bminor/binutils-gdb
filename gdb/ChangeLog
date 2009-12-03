@@ -1,3 +1,7 @@
+2009-12-03  Richard Ward  <richard.j.ward1@googlemail.com>
+
+	* python/py-type.c (convert_field): New attribute "is_base_class".
+
 2009-12-03  Tom Tromey  <tromey@redhat.com>
 
 	* python/python.c (gdbpy_parse_and_eval): New function.

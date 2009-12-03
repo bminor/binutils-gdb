@@ -1,3 +1,11 @@
+2009-12-03  Phil Muldoon <pmuldoon@redhat.com>
+
+	PR python/10805
+
+	* gdb.python/py-type.exp: New file.
+	* gdb.python/py-type.c: New file.
+	* Makefile.in: Add py-type.
+
 2009-12-03  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.python/py-value.exp (test_parse_and_eval): New

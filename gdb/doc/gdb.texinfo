@@ -19621,6 +19621,12 @@ This is @code{True} if the field is artificial, usually meaning that
 it was provided by the compiler and not the user.  This attribute is
 always provided, and is @code{False} if the field is not artificial.
 
+@item is_base_class
+This is @code{True} if the field represents a base class of a C@t{++}
+structure.  This attribute is always provided, and is @code{False}
+if the field is not a base class of the type that is the argument of
+@code{fields}, or if that type was not a C@t{++} class.
+
 @item bitsize
 If the field is packed, or is a bitfield, then this will have a
 non-zero value, which is the size of the field in bits.  Otherwise,
