@@ -3653,6 +3653,11 @@ class Output_file
   filesize()
   { return this->file_size_; }
 
+  // Return the name of this file.
+  const char*
+  filename()
+  { return this->name_; }
+
   // We currently always use mmap which makes the view handling quite
   // simple.  In the future we may support other approaches.
 

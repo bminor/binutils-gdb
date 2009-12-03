@@ -333,6 +333,11 @@ make_sized_incremental_binary(Output_file* file,
       return NULL;
     }
 
+  if (!parameters->target_valid())
+    set_parameters_target(target);
+  else if (target != &parameters->target())
+    gold_error(_("%s: incompatible target"), file->filename());
+
   return new Sized_incremental_binary<size, big_endian>(file, ehdr, target);
 }
 

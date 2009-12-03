@@ -1,5 +1,11 @@
 2009-12-02  Rafael Avila de Espindola  <espindola@google.com>
 
+	* incremental.cc (make_sized_incremental_binary): Set the target.
+	Error if it is incompatible.
+	* output.h (Output_file): Add filename method.
+
+2009-12-02  Rafael Avila de Espindola  <espindola@google.com>
+
 	* incremental.cc (Incremental_inputs_entry): Remove unused argument
 	from the get_* methods.
 
