@@ -9490,6 +9490,35 @@ show_breakpoint_cmd (char *args, int from_tty)
 {
 }
 
+/* Invalidate last known value of any hardware watchpoint if
+   the memory which that value represents has been written to by
+   GDB itself.  */
+
+static void
+invalidate_bp_value_on_memory_change (CORE_ADDR addr, int len,
+				      const bfd_byte *data)
+{
+  struct breakpoint *bp;
+
+  ALL_BREAKPOINTS (bp)
+    if (bp->enable_state == bp_enabled
+	&& bp->type == bp_hardware_watchpoint
+	&& bp->val_valid && bp->val)
+      {
+	struct bp_location *loc;
+
+	for (loc = bp->loc; loc != NULL; loc = loc->next)
+	  if (loc->loc_type == bp_loc_hardware_watchpoint
+	      && loc->address + loc->length > addr
+	      && addr + len > loc->address)
+	    {
+	      value_free (bp->val);
+	      bp->val = NULL;
+	      bp->val_valid = 0;
+	    }
+      }
+}
+
 /* Use default_breakpoint_'s, or nothing if they aren't valid.  */
 
 struct symtabs_and_lines
@@ -10077,6 +10106,7 @@ _initialize_breakpoint (void)
 
   observer_attach_solib_unloaded (disable_breakpoints_in_unloaded_shlib);
   observer_attach_inferior_exit (clear_syscall_counts);
+  observer_attach_memory_changed (invalidate_bp_value_on_memory_change);
 
   breakpoint_chain = 0;
   /* Don't bother to call set_breakpoint_count.  $bpnum isn't useful

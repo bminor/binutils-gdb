@@ -1,3 +1,11 @@
+2009-12-03  Paul Pluzhnikov  <ppluzhnikov@google.com>
+	
+	PR gdb/11022
+
+	* breakpoint.c (invalidate_bp_value_on_memory_change):
+	New function.
+	(_initialize_breakpoint): Add it as memory change observer.
+
 2009-12-03  Tristan Gingold  <gingold@adacore.com>
 
 	* machoread.c (macho_sym_fns): Set sym_segment routine.
