@@ -1,3 +1,14 @@
+2009-12-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix spurious false FAILs.
+	* gdb.base/structs.c (chartest): New.
+	(main): Fill-in chartest.
+	* gdb.base/structs.exp (anychar_re, first): New.
+	(start_structs_test): Import global anychar_re and first.
+	New gdb_test call "set print elements 300; ${testfile}"
+	(start_structs_test <$first>): New block.
+	(any): Import global anychar_re.  New variable ac.  Use ${ac}.
+
 2009-11-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/bigcore.exp (extract_heap): Set $lim limit to 200.
