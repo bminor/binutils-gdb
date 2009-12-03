@@ -1,3 +1,8 @@
+2009-12-03  David Daney  <ddaney@caviumnetworks.com>
+	    Adam Nemet  <adambnemet@gmail.com>
+
+	* readelf.c (get_machine_flags): Handle E_MIPS_MACH_OCTEON2 case.
+
 2009-12-03  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/11045
