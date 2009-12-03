@@ -1,3 +1,12 @@
+2009-12-03  Rafael Avila de Espindola  <espindola@google.com>
+
+	* incremental.cc (Incremental_inputs_header)
+	(Incremental_inputs_header_write, Incremental_inputs_entry)
+	(Incremental_inputs_entry_write): Move ...
+	* incremental.h (Incremental_inputs_header)
+	(Incremental_inputs_header_write, Incremental_inputs_entry)
+	(Incremental_inputs_entry_write): here.
+
 2009-12-02  Rafael Avila de Espindola  <espindola@google.com>
 
 	* incremental.cc (make_sized_incremental_binary): Set the target.

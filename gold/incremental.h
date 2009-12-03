@@ -68,6 +68,80 @@ struct Incremental_inputs_header_data
   elfcpp::Elf_Word reserved;
 };
 
+// Reader class for .gnu_incremental_inputs header. See
+// Incremental_inputs_header_data for fields descriptions.
+
+template<int size, bool big_endian>
+class Incremental_inputs_header
+{
+ private:
+  typedef Incremental_inputs_header_data Data_type;
+  typedef elfcpp::Convert<32, big_endian> Convert32;
+
+ public:
+  Incremental_inputs_header(const unsigned char *p)
+    : p_(reinterpret_cast<const Data_type*>(p))
+  { }
+
+  static const int data_size = sizeof(Data_type);
+
+  elfcpp::Elf_Word
+  get_version() const
+  { return Convert32::convert_host(this->p_->version); }
+
+  elfcpp::Elf_Word
+  get_input_file_count() const
+  { return Convert32::convert_host(this->p_->input_file_count); }
+
+  elfcpp::Elf_Word
+  get_command_line_offset() const
+  { return Convert32::convert_host(this->p_->command_line_offset); }
+
+  elfcpp::Elf_Word
+  get_reserved() const
+  { return Convert32::convert_host(this->p_->reserved); }
+
+ private:
+  const Data_type* p_;
+};
+
+// Writer class for .gnu_incremental_inputs header. See
+// Incremental_inputs_header_data for fields descriptions.
+
+template<int size, bool big_endian>
+class Incremental_inputs_header_write
+{
+ private:
+  typedef Incremental_inputs_header_data Data_type;
+  typedef elfcpp::Convert<32, big_endian> Convert32;
+
+ public:
+  Incremental_inputs_header_write(unsigned char *p)
+    : p_(reinterpret_cast<Data_type*>(p))
+  { }
+
+  static const int data_size = sizeof(Data_type);
+
+  void
+  put_version(elfcpp::Elf_Word v)
+  { this->p_->version = Convert32::convert_host(v); }
+
+  void
+  put_input_file_count(elfcpp::Elf_Word v)
+  { this->p_->input_file_count = Convert32::convert_host(v); }
+
+  void
+  put_command_line_offset(elfcpp::Elf_Word v)
+  { this->p_->command_line_offset = Convert32::convert_host(v); }
+
+  void
+  put_reserved(elfcpp::Elf_Word v)
+  { this->p_->reserved = Convert32::convert_host(v); }
+
+ private:
+  Data_type* p_;
+};
+
 // Data stored in .gnu_incremental_input after the header for each of the
 // Incremental_input_header_data::input_file_count input entries.
 struct Incremental_inputs_entry_data
@@ -89,6 +163,96 @@ struct Incremental_inputs_entry_data
 
   // Padding.
   elfcpp::Elf_Half reserved;
+};
+
+// Reader class for an .gnu_incremental_inputs entry. See
+// Incremental_inputs_entry_data for fields descriptions.
+template<int size, bool big_endian>
+class Incremental_inputs_entry
+{
+ private:
+  typedef Incremental_inputs_entry_data Data_type;
+  typedef elfcpp::Convert<32, big_endian> Convert32;
+  typedef elfcpp::Convert<64, big_endian> Convert64;
+
+ public:
+  Incremental_inputs_entry(const unsigned char *p)
+    : p_(reinterpret_cast<const Data_type*>(p))
+  { }
+
+  static const int data_size = sizeof(Data_type);
+
+  elfcpp::Elf_Word
+  get_filename_offset()
+  { return Convert32::convert_host(this->p_->filename_offset); }
+
+  elfcpp::Elf_Word
+  get_data_offset()
+  { return Convert32::convert_host(this->p_->data_offset); }
+
+  elfcpp::Elf_Xword
+  get_timestamp_sec()
+  { return Convert64::convert_host(this->p_->timestamp_sec); }
+
+  elfcpp::Elf_Word
+  get_timestamp_nsec()
+  { return Convert32::convert_host(this->p_->timestamp_nsec); }
+
+  elfcpp::Elf_Word
+  get_input_type()
+  { return Convert32::convert_host(this->p_->input_type); }
+
+  elfcpp::Elf_Word
+  get_reserved()
+  { return Convert32::convert_host(this->p_->reserved); }
+
+ private:
+  const Data_type* p_;
+};
+
+// Writer class for an .gnu_incremental_inputs entry. See
+// Incremental_inputs_entry_data for fields descriptions.
+template<int size, bool big_endian>
+class Incremental_inputs_entry_write
+{
+ private:
+  typedef Incremental_inputs_entry_data Data_type;
+  typedef elfcpp::Convert<32, big_endian> Convert32;
+  typedef elfcpp::Convert<64, big_endian> Convert64;
+
+ public:
+  Incremental_inputs_entry_write(unsigned char *p)
+    : p_(reinterpret_cast<Data_type*>(p))
+  { }
+
+  static const int data_size = sizeof(Data_type);
+
+  void
+  put_filename_offset(elfcpp::Elf_Word v)
+  { this->p_->filename_offset = Convert32::convert_host(v); }
+
+  void
+  put_data_offset(elfcpp::Elf_Word v)
+  { this->p_->data_offset = Convert32::convert_host(v); }
+
+  void
+  put_timestamp_sec(elfcpp::Elf_Xword v)
+  { this->p_->timestamp_sec = Convert64::convert_host(v); }
+
+  void
+  put_timestamp_nsec(elfcpp::Elf_Word v)
+  { this->p_->timestamp_nsec = Convert32::convert_host(v); }
+
+  void
+  put_input_type(elfcpp::Elf_Word v)
+  { this->p_->input_type = Convert32::convert_host(v); }
+
+  void
+  put_reserved(elfcpp::Elf_Word v)
+  { this->p_->reserved = Convert32::convert_host(v); }
+
+ private:
+  Data_type* p_;
 };
 
 // An object representing the ELF file we edit during an incremental build.
