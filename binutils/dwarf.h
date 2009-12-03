@@ -105,6 +105,7 @@ extern int do_debug_info;
 extern int do_debug_abbrevs;
 extern int do_debug_lines;
 extern int do_debug_pubnames;
+extern int do_debug_pubtypes;
 extern int do_debug_aranges;
 extern int do_debug_ranges;
 extern int do_debug_frames;

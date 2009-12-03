@@ -1,3 +1,18 @@
+2009-12-03  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/11045
+	* dwarf.c (do_debug_pubtypes): New variable.
+	(dwarf_select_sections_by_names): Handle .debug_pubtypes.
+	(dwarf_select_sections_by_letters): Add 't' for .debug_pubtype.
+	(dwarf_select_sections_all): Set do_debug_pubtypes.
+	(debug_displays): Add support for .debug_pubtypes.
+	* dwarf.h (do_debug_pubtypes): Export.
+	* objdump.c (usage): Add -wt or --dwarf=pubtypes.
+	* readelf.c (usage): Likewise.
+	(process_section_headers): Enable debug display if
+	do_debug_pubtypes is set.
+	* doc/binutils.texi: Document -wt/--dwarf=pubtypes option.
+
 2009-12-02  Jerker Bäck  <jerker.back@gmail.com>
 
 	PR binutils/11017

@@ -45,6 +45,7 @@ int do_debug_info;
 int do_debug_abbrevs;
 int do_debug_lines;
 int do_debug_pubnames;
+int do_debug_pubtypes;
 int do_debug_aranges;
 int do_debug_ranges;
 int do_debug_frames;
@@ -4848,7 +4849,7 @@ dwarf_select_sections_by_names (const char *names)
   {
     const char * option;
     int *        variable;
-    int val;
+    int          val;
   }
   debug_dump_long_opts;
 
@@ -4867,6 +4868,7 @@ dwarf_select_sections_by_names (const char *names)
       { "loc",  & do_debug_loc, 1 },
       { "macro", & do_debug_macinfo, 1 },
       { "pubnames", & do_debug_pubnames, 1 },
+      { "pubtypes", & do_debug_pubnames, 1 },
       /* This entry is for compatability
 	 with earlier versions of readelf.  */
       { "ranges", & do_debug_aranges, 1 },
@@ -4941,6 +4943,10 @@ dwarf_select_sections_by_letters (const char *letters)
 	do_debug_pubnames = 1;
 	break;
 	
+      case 't':
+	do_debug_pubtypes = 1;
+	break;
+	
       case 'r':
 	do_debug_aranges = 1;
 	break;
@@ -4980,6 +4986,7 @@ dwarf_select_sections_all (void)
   do_debug_abbrevs = 1;
   do_debug_lines = FLAG_DEBUG_LINES_RAW;
   do_debug_pubnames = 1;
+  do_debug_pubtypes = 1;
   do_debug_aranges = 1;
   do_debug_ranges = 1;
   do_debug_frames = 1;
@@ -5002,6 +5009,8 @@ struct dwarf_section_display debug_displays[] =
     display_debug_lines,		&do_debug_lines,	1 },
   { { ".debug_pubnames",	".zdebug_pubnames",	NULL,	NULL,	0,	0 },
     display_debug_pubnames,		&do_debug_pubnames,	0 },
+  { { ".debug_pubtypes",	".zdebug_pubtypes",	NULL,	NULL,	0,	0 },
+    display_debug_pubnames,		&do_debug_pubtypes,	0 },
   { { ".eh_frame",		"",			NULL,	NULL,	0,	0 },
     display_debug_frames,		&do_debug_frames,	1 },
   { { ".debug_macinfo",		".zdebug_macinfo",	NULL,	NULL,	0,	0 },
@@ -5011,7 +5020,7 @@ struct dwarf_section_display debug_displays[] =
   { { ".debug_loc",		".zdebug_loc",		NULL,	NULL,	0,	0 },
     display_debug_loc,			&do_debug_loc,		1 },
   { { ".debug_pubtypes",	".zdebug_pubtypes",	NULL,	NULL,	0,	0 },
-    display_debug_pubnames,		&do_debug_pubnames,	0 },
+    display_debug_pubnames,		&do_debug_pubtypes,	0 },
   { { ".debug_ranges",		".zdebug_ranges",	NULL,	NULL,	0,	0 },
     display_debug_ranges,		&do_debug_ranges,	1 },
   { { ".debug_static_func",	".zdebug_static_func",	NULL,	NULL,	0,	0 },

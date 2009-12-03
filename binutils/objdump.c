@@ -200,9 +200,9 @@ usage (FILE *stream, int status)
   -g, --debugging          Display debug information in object file\n\
   -e, --debugging-tags     Display debug information using ctags style\n\
   -G, --stabs              Display (in raw form) any STABS info in the file\n\
-  -W[lLiaprmfFsoR] or\n\
+  -W[lLiaprmfFsoRt] or\n\
   --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,\n\
-          =frames-interp,=str,=loc,=Ranges]\n\
+          =frames-interp,=str,=loc,=Ranges,=pubtypes]\n\
                            Display DWARF info in the file\n\
   -t, --syms               Display the contents of the symbol table(s)\n\
   -T, --dynamic-syms       Display the contents of the dynamic symbol table\n\
