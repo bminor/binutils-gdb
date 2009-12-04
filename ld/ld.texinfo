@@ -780,8 +780,9 @@ scripts.
 @kindex --nmagic
 @item -n
 @itemx --nmagic
-Turn off page alignment of sections, and mark the output as
-@code{NMAGIC} if possible.
+Turn off page alignment of sections, and disable linking against shared
+libraries.  If the output format supports Unix style magic numbers,
+mark the output as @code{NMAGIC}.
 
 @kindex -N
 @kindex --omagic
