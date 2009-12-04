@@ -1,5 +1,10 @@
 2009-12-04  Rafael Avila de Espindola  <espindola@google.com>
 
+	* incremental.cc (Incremental_inputs::sized_create_inputs_section_data):
+	Don't set the data_offset twice.
+
+2009-12-04  Rafael Avila de Espindola  <espindola@google.com>
+
 	* testsuite/Makefile.in: Regenerate.
 
 2009-12-03  Doug Kwan  <dougkwan@google.com>

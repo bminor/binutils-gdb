@@ -509,10 +509,6 @@ Incremental_inputs::sized_create_inputs_section_data()
         default:
           gold_unreachable();
         }
-      // TODO: add per input data and timestamp.  Currently we store
-      // an out-of-bounds offset for future version of gold to reject
-      // such an incremental_inputs section.
-      entry.put_data_offset(0xffffffff);
       entry.put_timestamp_sec(it->second.mtime.seconds);
       entry.put_timestamp_nsec(it->second.mtime.nanoseconds);
       entry.put_input_type(it->second.type);
