@@ -1,3 +1,8 @@
+2009-12-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* valops.c (value_struct_elt_for_reference): Do not rely on
+	field order.
+
 2009-12-03  Richard Ward  <richard.j.ward1@googlemail.com>
 
 	* python/py-type.c (convert_field): New attribute "is_base_class".

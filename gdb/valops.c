@@ -2700,29 +2700,31 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 		}
 
 	      if (j == len)
-		error (_("no member function matches that type instantiation"));	    }
+		error (_("no member function matches that type instantiation"));
+	    }
 	  else
 	    {
 	      int ii;
-	      /* Skip artificial methods.  This is necessary if, for example,
-		 the user wants to "print subclass::subclass" with only
-		 one user-defined constructor.  There is no ambiguity in this
-		 case.  */
+
+	      j = -1;
 	      for (ii = 0; ii < TYPE_FN_FIELDLIST_LENGTH (t, i);
 		   ++ii)
 		{
+		  /* Skip artificial methods.  This is necessary if,
+		     for example, the user wants to "print
+		     subclass::subclass" with only one user-defined
+		     constructor.  There is no ambiguity in this
+		     case.  */
 		  if (TYPE_FN_FIELD_ARTIFICIAL (f, ii))
-		    --len;
+		    continue;
+
+		  /* Desired method is ambiguous if more than one
+		     method is defined.  */
+		  if (j != -1)
+		    error (_("non-unique member `%s' requires type instantiation"), name);
+
+		  j = ii;
 		}
-
-	      /* Desired method is ambiguous if more than one method is
-		 defined.  */
-	      if (len > 1)
-		error (_("non-unique member `%s' requires type instantiation"), name);
-
-	      /* This assumes, of course, that all artificial methods appear
-		 BEFORE any concrete methods.  */
-	      j = TYPE_FN_FIELDLIST_LENGTH (t, i) - 1;
 	    }
 
 	  if (TYPE_FN_FIELD_STATIC_P (f, j))
