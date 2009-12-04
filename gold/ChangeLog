@@ -1,3 +1,7 @@
+2009-12-04  Rafael Avila de Espindola  <espindola@google.com>
+
+	* testsuite/Makefile.in: Regenerate.
+
 2009-12-03  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc: Remove comment about missing .ARM.exidx section symbols.

@@ -55,8 +55,9 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 
 # Test --dynamic-list, --dynamic-list-data, --dynamic-list-cpp-new,
 # and --dynamic-list-cpp-typeinfo
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_1 = gc_comdat_test.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_tls_test.sh icf_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_1 = incremental_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_comdat_test.sh gc_tls_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_keep_unique_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.sh weak_plt.sh \
@@ -78,7 +79,8 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 
 # We also want to make sure we do something reasonable when there's no
 # debug info available.  For the best test, we use .so's.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_2 = gc_comdat_test.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_2 = incremental_test.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_comdat_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_tls_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_keep_unique_test.stdout \
@@ -99,9 +101,9 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_7.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_8.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list.stdout
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_3 = gc_comdat_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_tls_test icf_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_keep_unique_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_3 = incremental_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_comdat_test gc_tls_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test icf_keep_unique_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.dbg \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/weak_undef_lib.so
@@ -2654,6 +2656,14 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g -c -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_ndebug.o: constructor_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@incremental_test_1.o: incremental_test_1.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -O0 -c -ffunction-sections -g -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@incremental_test_2.o: incremental_test_2.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -O0 -c -ffunction-sections -g -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@incremental_test: incremental_test_1.o incremental_test_2.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -Wl,-incremental incremental_test_1.o incremental_test_2.o -Wl,-debug 2> incremental_test.cmdline
+@GCC_TRUE@@NATIVE_LINKER_TRUE@incremental_test.stdout: incremental_test ../incremental-dump
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	../incremental-dump incremental_test > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@gc_comdat_test_1.o: gc_comdat_test_1.cc 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@gc_comdat_test_2.o: gc_comdat_test_2.cc 
