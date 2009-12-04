@@ -110,6 +110,7 @@ static void REP_Fixup (int, int);
 static void CMPXCHG8B_Fixup (int, int);
 static void XMM_Fixup (int, int);
 static void CRC32_Fixup (int, int);
+static void FXSAVE_Fixup (int, int);
 static void OP_LWPCB_E (int, int);
 static void OP_LWP_E (int, int);
 static void OP_LWP_I (int, int);
@@ -358,6 +359,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define OPSUF { OP_3DNowSuffix, 0 }
 #define CMP { CMP_Fixup, 0 }
 #define XMM0 { XMM_Fixup, 0 }
+#define FXSAVE { FXSAVE_Fixup, 0 }
 #define Vex_2src_1 { OP_Vex_2src_1, 0 }
 #define Vex_2src_2 { OP_Vex_2src_2, 0 }
 
@@ -9541,12 +9543,12 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0FAE_REG_0 */
-    { "fxsave",		{ M } },
+    { "fxsave",		{ FXSAVE } },
     { "(bad)",		{ XX } },
   },
   {
     /* MOD_0FAE_REG_1 */
-    { "fxrstor",	{ M } },
+    { "fxrstor",	{ FXSAVE } },
     { "(bad)",		{ XX } },
   },
   {
@@ -13639,6 +13641,22 @@ skip:
     }
   else
     OP_E (bytemode, sizeflag);
+}
+
+static void
+FXSAVE_Fixup (int bytemode, int sizeflag)
+{
+  /* Add proper suffix to "fxsave" and "fxrstor".  */
+  USED_REX (REX_W);
+  if (rex & REX_W)
+    {
+      char *p = mnemonicendp;
+      *p++ = '6';
+      *p++ = '4';
+      *p = '\0';
+      mnemonicendp = p;
+    }
+  OP_M (bytemode, sizeflag);
 }
 
 /* Display the destination register operand for instructions with

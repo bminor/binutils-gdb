@@ -848,7 +848,9 @@ cmpxchg8b, 1, 0xfc7, 0x1, 2, Cpu586, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ld
 sysenter, 0, 0xf34, None, 2, Cpu686, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 sysexit, 0, 0xf35, None, 2, Cpu686, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 fxsave, 1, 0xfae, 0x0, 2, Cpu686, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf, { Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+fxsave64, 1, 0xfae, 0x0, 2, Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|Rex64, { Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 fxrstor, 1, 0xfae, 0x1, 2, Cpu686, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf, { Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+fxrstor64, 1, 0xfae, 0x1, 2, Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|Rex64, { Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 rdpmc, 0, 0xf33, None, 2, Cpu686, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 // official undefined instr.
 ud2, 0, 0xf0b, None, 2, Cpu686, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
