@@ -124,42 +124,10 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_21_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_relocatable_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_pie_test
-@GCC_FALSE@constructor_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-@NATIVE_LINKER_FALSE@constructor_test_DEPENDENCIES = libgoldtest.a \
-@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
-@GCC_FALSE@constructor_static_test_DEPENDENCIES = libgoldtest.a \
-@GCC_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1)
-@NATIVE_LINKER_FALSE@constructor_static_test_DEPENDENCIES =  \
-@NATIVE_LINKER_FALSE@	libgoldtest.a ../libgold.a \
-@NATIVE_LINKER_FALSE@	../../libiberty/libiberty.a \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
-@GCC_FALSE@two_file_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-@NATIVE_LINKER_FALSE@two_file_test_DEPENDENCIES = libgoldtest.a \
-@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
-@GCC_FALSE@two_file_static_test_DEPENDENCIES = libgoldtest.a \
-@GCC_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1)
-@NATIVE_LINKER_FALSE@two_file_static_test_DEPENDENCIES =  \
-@NATIVE_LINKER_FALSE@	libgoldtest.a ../libgold.a \
-@NATIVE_LINKER_FALSE@	../../libiberty/libiberty.a \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@constructor_test_DEPENDENCIES =
+@NATIVE_LINKER_FALSE@constructor_test_DEPENDENCIES =
+@GCC_FALSE@two_file_test_DEPENDENCIES =
+@NATIVE_LINKER_FALSE@two_file_test_DEPENDENCIES =
 
 # The nonpic tests will fail on platforms which can not put non-PIC
 # code into shared libraries, so we just don't run them in that case.
@@ -180,40 +148,12 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_separate_shared_12_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_separate_shared_21_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_test weak_undef_test
-@GCC_FALSE@common_test_1_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-@NATIVE_LINKER_FALSE@common_test_1_DEPENDENCIES = libgoldtest.a \
-@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
-@GCC_FALSE@exception_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-@NATIVE_LINKER_FALSE@exception_test_DEPENDENCIES = libgoldtest.a \
-@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
-@GCC_FALSE@exception_static_test_DEPENDENCIES = libgoldtest.a \
-@GCC_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1)
-@NATIVE_LINKER_FALSE@exception_static_test_DEPENDENCIES =  \
-@NATIVE_LINKER_FALSE@	libgoldtest.a ../libgold.a \
-@NATIVE_LINKER_FALSE@	../../libiberty/libiberty.a \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
-@GCC_FALSE@weak_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-@NATIVE_LINKER_FALSE@weak_test_DEPENDENCIES = libgoldtest.a \
-@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@common_test_1_DEPENDENCIES =
+@NATIVE_LINKER_FALSE@common_test_1_DEPENDENCIES =
+@GCC_FALSE@exception_test_DEPENDENCIES =
+@NATIVE_LINKER_FALSE@exception_test_DEPENDENCIES =
+@GCC_FALSE@weak_test_DEPENDENCIES =
+@NATIVE_LINKER_FALSE@weak_test_DEPENDENCIES =
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_7 = weak_undef_nonpic_test
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_8 = alt/weak_undef_lib_nonpic.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_9 = weak_alias_test weak_plt \
@@ -230,15 +170,8 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_14 = tls_shared_nonpic_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_15 = many_sections_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_r_test
-@GCC_FALSE@many_sections_test_DEPENDENCIES = libgoldtest.a \
-@GCC_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1)
-@NATIVE_LINKER_FALSE@many_sections_test_DEPENDENCIES = libgoldtest.a \
-@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@many_sections_test_DEPENDENCIES =
+@NATIVE_LINKER_FALSE@many_sections_test_DEPENDENCIES =
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_16 = many_sections_define.h \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_check.h
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_17 = many_sections_define.h \
@@ -258,20 +191,9 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/thin_archive_test_4.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/libthin2.a alt/libthin4.a
 @CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_18 = initpri1
-@CONSTRUCTOR_PRIORITY_FALSE@initpri1_DEPENDENCIES = libgoldtest.a \
-@CONSTRUCTOR_PRIORITY_FALSE@	../libgold.a \
-@CONSTRUCTOR_PRIORITY_FALSE@	../../libiberty/libiberty.a \
-@CONSTRUCTOR_PRIORITY_FALSE@	$(am__DEPENDENCIES_1) \
-@CONSTRUCTOR_PRIORITY_FALSE@	$(am__DEPENDENCIES_1) \
-@CONSTRUCTOR_PRIORITY_FALSE@	$(am__DEPENDENCIES_1)
-@GCC_FALSE@initpri1_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-@NATIVE_LINKER_FALSE@initpri1_DEPENDENCIES = libgoldtest.a \
-@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
+@CONSTRUCTOR_PRIORITY_FALSE@initpri1_DEPENDENCIES =
+@GCC_FALSE@initpri1_DEPENDENCIES =
+@NATIVE_LINKER_FALSE@initpri1_DEPENDENCIES =
 
 # Test -o when emitting to a special file (such as something in /dev).
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_19 = flagstest_o_specialfile
@@ -293,38 +215,14 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	binary_test script_test_3 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_test_1 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_test_2
-@GCC_FALSE@script_test_1_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-@NATIVE_LINKER_FALSE@script_test_1_DEPENDENCIES = libgoldtest.a \
-@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
-@GCC_FALSE@script_test_2_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-@NATIVE_LINKER_FALSE@script_test_2_DEPENDENCIES = libgoldtest.a \
-@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
-@GCC_FALSE@justsyms_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-@NATIVE_LINKER_FALSE@justsyms_DEPENDENCIES = libgoldtest.a \
-@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
-@GCC_FALSE@binary_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-@NATIVE_LINKER_FALSE@binary_test_DEPENDENCIES = libgoldtest.a \
-@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@script_test_1_DEPENDENCIES =
+@NATIVE_LINKER_FALSE@script_test_1_DEPENDENCIES =
+@GCC_FALSE@script_test_2_DEPENDENCIES =
+@NATIVE_LINKER_FALSE@script_test_2_DEPENDENCIES =
+@GCC_FALSE@justsyms_DEPENDENCIES =
+@NATIVE_LINKER_FALSE@justsyms_DEPENDENCIES =
+@GCC_FALSE@binary_test_DEPENDENCIES =
+@NATIVE_LINKER_FALSE@binary_test_DEPENDENCIES =
 @GCC_FALSE@thin_archive_test_2_DEPENDENCIES =
 @NATIVE_LINKER_FALSE@thin_archive_test_2_DEPENDENCIES =
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__append_22 =  \
@@ -386,19 +284,9 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	libno_version_test.so \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	no_version_test.stdout
 @GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@am__append_30 = large
-@GCC_FALSE@large_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-@MCMODEL_MEDIUM_FALSE@large_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@MCMODEL_MEDIUM_FALSE@	../../libiberty/libiberty.a \
-@MCMODEL_MEDIUM_FALSE@	$(am__DEPENDENCIES_1) \
-@MCMODEL_MEDIUM_FALSE@	$(am__DEPENDENCIES_1) \
-@MCMODEL_MEDIUM_FALSE@	$(am__DEPENDENCIES_1)
-@NATIVE_LINKER_FALSE@large_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@NATIVE_LINKER_FALSE@	../../libiberty/libiberty.a \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@large_DEPENDENCIES =
+@MCMODEL_MEDIUM_FALSE@large_DEPENDENCIES =
+@NATIVE_LINKER_FALSE@large_DEPENDENCIES =
 
 # Test that if the output file already exists and is empty,
 # it will get execute permission.
@@ -574,7 +462,6 @@ am__binary_test_SOURCES_DIST = binary_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_binary_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	binary_test.$(OBJEXT)
 binary_test_OBJECTS = $(am_binary_test_OBJECTS)
-binary_test_LDADD = $(LDADD)
 binary_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(binary_test_LDFLAGS) $(LDFLAGS) -o $@
 am_binary_unittest_OBJECTS = binary_unittest.$(OBJEXT)
@@ -587,7 +474,6 @@ am__common_test_1_SOURCES_DIST = common_test_1.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_common_test_1_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	common_test_1.$(OBJEXT)
 common_test_1_OBJECTS = $(am_common_test_1_OBJECTS)
-common_test_1_LDADD = $(LDADD)
 common_test_1_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(common_test_1_LDFLAGS) $(LDFLAGS) -o $@
 am__constructor_static_test_SOURCES_DIST = constructor_test.cc
@@ -597,14 +483,12 @@ am__constructor_static_test_SOURCES_DIST = constructor_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(am__objects_1)
 constructor_static_test_OBJECTS =  \
 	$(am_constructor_static_test_OBJECTS)
-constructor_static_test_LDADD = $(LDADD)
 constructor_static_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(constructor_static_test_LDFLAGS) $(LDFLAGS) -o $@
 am__constructor_test_SOURCES_DIST = constructor_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_constructor_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	constructor_test.$(OBJEXT)
 constructor_test_OBJECTS = $(am_constructor_test_OBJECTS)
-constructor_test_LDADD = $(LDADD)
 constructor_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(constructor_test_LDFLAGS) $(LDFLAGS) -o $@
 am__copy_test_SOURCES_DIST = copy_test.cc
@@ -675,7 +559,6 @@ am__exception_static_test_SOURCES_DIST = exception_test_main.cc \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_exception_static_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(am__objects_2)
 exception_static_test_OBJECTS = $(am_exception_static_test_OBJECTS)
-exception_static_test_LDADD = $(LDADD)
 exception_static_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(exception_static_test_LDFLAGS) $(LDFLAGS) -o $@
 am__exception_test_SOURCES_DIST = exception_test_main.cc \
@@ -685,7 +568,6 @@ am__exception_test_SOURCES_DIST = exception_test_main.cc \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test_1.$(OBJEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test_2.$(OBJEXT)
 exception_test_OBJECTS = $(am_exception_test_OBJECTS)
-exception_test_LDADD = $(LDADD)
 exception_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(exception_test_LDFLAGS) $(LDFLAGS) -o $@
 am__exclude_libs_test_SOURCES_DIST = exclude_libs_test.c
@@ -720,20 +602,17 @@ flagstest_o_specialfile_and_compress_debug_sections_DEPENDENCIES =  \
 am__initpri1_SOURCES_DIST = initpri1.c
 @CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am_initpri1_OBJECTS = initpri1.$(OBJEXT)
 initpri1_OBJECTS = $(am_initpri1_OBJECTS)
-initpri1_LDADD = $(LDADD)
 initpri1_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(initpri1_LDFLAGS) \
 	$(LDFLAGS) -o $@
 am__justsyms_SOURCES_DIST = justsyms_1.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_justsyms_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms_1.$(OBJEXT)
 justsyms_OBJECTS = $(am_justsyms_OBJECTS)
-justsyms_LDADD = $(LDADD)
 justsyms_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(justsyms_LDFLAGS) $(LDFLAGS) -o $@
 am__large_SOURCES_DIST = large.c
 @GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@am_large_OBJECTS = large-large.$(OBJEXT)
 large_OBJECTS = $(am_large_OBJECTS)
-large_LDADD = $(LDADD)
 large_LINK = $(CCLD) $(large_CFLAGS) $(CFLAGS) $(large_LDFLAGS) \
 	$(LDFLAGS) -o $@
 local_labels_test_SOURCES = local_labels_test.c
@@ -752,7 +631,6 @@ am__many_sections_test_SOURCES_DIST = many_sections_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_many_sections_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_test.$(OBJEXT)
 many_sections_test_OBJECTS = $(am_many_sections_test_OBJECTS)
-many_sections_test_LDADD = $(LDADD)
 many_sections_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(many_sections_test_LDFLAGS) $(LDFLAGS) -o $@
 am_object_unittest_OBJECTS = object_unittest.$(OBJEXT)
@@ -829,7 +707,6 @@ am__script_test_1_SOURCES_DIST = script_test_1.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_script_test_1_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1.$(OBJEXT)
 script_test_1_OBJECTS = $(am_script_test_1_OBJECTS)
-script_test_1_LDADD = $(LDADD)
 script_test_1_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(script_test_1_LDFLAGS) $(LDFLAGS) -o $@
 am__script_test_2_SOURCES_DIST = script_test_2.cc script_test_2a.cc \
@@ -839,7 +716,6 @@ am__script_test_2_SOURCES_DIST = script_test_2.cc script_test_2a.cc \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2a.$(OBJEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2b.$(OBJEXT)
 script_test_2_OBJECTS = $(am_script_test_2_OBJECTS)
-script_test_2_LDADD = $(LDADD)
 script_test_2_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(script_test_2_LDFLAGS) $(LDFLAGS) -o $@
 script_test_3_SOURCES = script_test_3.c
@@ -1088,7 +964,6 @@ am__two_file_static_test_SOURCES_DIST = two_file_test_1.cc \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_two_file_static_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(am__objects_5)
 two_file_static_test_OBJECTS = $(am_two_file_static_test_OBJECTS)
-two_file_static_test_LDADD = $(LDADD)
 two_file_static_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(two_file_static_test_LDFLAGS) $(LDFLAGS) -o $@
 two_file_strip_test_SOURCES = two_file_strip_test.c
@@ -1106,7 +981,6 @@ am__two_file_test_SOURCES_DIST = two_file_test_1.cc \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_2.$(OBJEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_main.$(OBJEXT)
 two_file_test_OBJECTS = $(am_two_file_test_OBJECTS)
-two_file_test_LDADD = $(LDADD)
 two_file_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(two_file_test_LDFLAGS) $(LDFLAGS) -o $@
 am__ver_test_SOURCES_DIST = ver_test_main.cc
@@ -1161,7 +1035,6 @@ am__weak_test_SOURCES_DIST = weak_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_weak_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_test.$(OBJEXT)
 weak_test_OBJECTS = $(am_weak_test_OBJECTS)
-weak_test_LDADD = $(LDADD)
 weak_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(weak_test_LDFLAGS) $(LDFLAGS) -o $@
 am__weak_undef_nonpic_test_SOURCES_DIST = weak_undef_test.cc
@@ -1505,9 +1378,11 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_test_SOURCES = constructor_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_test_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_test_LDFLAGS = -Bgcctestdir/
+@GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_test_LDADD = 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_static_test_SOURCES = $(constructor_test_SOURCES)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_static_test_DEPENDENCIES = $(constructor_test_DEPENDENCIES)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_static_test_LDFLAGS = $(constructor_test_LDFLAGS) -static
+@GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_static_test_LDADD = $(constructor_test_LDADD)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_test_SOURCES = \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_1.cc \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_1b.cc \
@@ -1517,9 +1392,11 @@ binary_unittest_SOURCES = binary_unittest.cc
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_test_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_test_LDFLAGS = -Bgcctestdir/
+@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_test_LDADD = 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_static_test_SOURCES = $(two_file_test_SOURCES)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_static_test_DEPENDENCIES = $(two_file_test_DEPENDENCIES)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_static_test_LDFLAGS = $(two_file_test_LDFLAGS) -static
+@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_static_test_LDADD = $(two_file_test_LDADD)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_pic_test_SOURCES = two_file_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_pic_test_DEPENDENCIES = \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld two_file_test_1_pic.o two_file_test_1b_pic.o two_file_test_2_pic.o
@@ -1627,6 +1504,7 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_1_SOURCES = common_test_1.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_1_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_1_LDFLAGS = -Bgcctestdir/
+@GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_1_LDADD = 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_test_SOURCES = \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test_main.cc \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test_1.cc \
@@ -1635,9 +1513,11 @@ binary_unittest_SOURCES = binary_unittest.cc
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_test_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_test_LDFLAGS = -Bgcctestdir/
+@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_test_LDADD = 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_static_test_SOURCES = $(exception_test_SOURCES)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_static_test_DEPENDENCIES = $(exception_test_DEPENDENCIES)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_static_test_LDFLAGS = $(exception_test_LDFLAGS) -static
+@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_static_test_LDADD = $(exception_test_LDADD)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_shared_1_test_SOURCES = exception_test_2.cc exception_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_shared_1_test_DEPENDENCIES = gcctestdir/ld exception_shared_1.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_shared_1_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
@@ -1669,6 +1549,7 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_test_SOURCES = weak_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_test_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_test_LDFLAGS = -Bgcctestdir/
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_test_LDADD = 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_SOURCES = weak_undef_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_DEPENDENCIES = gcctestdir/ld weak_undef_lib.so alt/weak_undef_lib.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,alt
@@ -1746,9 +1627,11 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@many_sections_test_SOURCES = many_sections_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@many_sections_test_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@many_sections_test_LDFLAGS = -Bgcctestdir/ -rdynamic
+@GCC_TRUE@@NATIVE_LINKER_TRUE@many_sections_test_LDADD = 
 @CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@initpri1_SOURCES = initpri1.c
 @CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@initpri1_DEPENDENCIES = gcctestdir/ld
 @CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@initpri1_LDFLAGS = -Bgcctestdir/
+@CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@initpri1_LDADD = 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_SOURCES = ver_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_DEPENDENCIES = gcctestdir/ld ver_test_1.so ver_test_2.so ver_test_4.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
@@ -1794,15 +1677,19 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_SOURCES = script_test_1.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_DEPENDENCIES = gcctestdir/ld script_test_1.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -T $(srcdir)/script_test_1.t
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_LDADD = 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_2_SOURCES = script_test_2.cc script_test_2a.cc script_test_2b.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_2_DEPENDENCIES = gcctestdir/ld script_test_2.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_2_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -T $(srcdir)/script_test_2.t
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_2_LDADD = 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_SOURCES = justsyms_1.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_DEPENDENCIES = gcctestdir/ld justsyms_2r.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_LDFLAGS = -Bgcctestdir/ -Wl,-R,justsyms_2r.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_LDADD = 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@binary_test_SOURCES = binary_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@binary_test_DEPENDENCIES = gcctestdir/ld binary.txt
 @GCC_TRUE@@NATIVE_LINKER_TRUE@binary_test_LDFLAGS = -Bgcctestdir/ -Wl,--format,binary,binary.txt,--format,elf
+@GCC_TRUE@@NATIVE_LINKER_TRUE@binary_test_LDADD = 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@thin_archive_test_1_SOURCES = thin_archive_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@thin_archive_test_1_DEPENDENCIES = gcctestdir/ld libthin1.a alt/libthin2.a
 @GCC_TRUE@@NATIVE_LINKER_TRUE@thin_archive_test_1_LDFLAGS = -Bgcctestdir/ -Lalt
@@ -1828,6 +1715,7 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@large_CFLAGS = -mcmodel=medium
 @GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@large_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@large_LDFLAGS = -Bgcctestdir/
+@GCC_TRUE@@MCMODEL_MEDIUM_TRUE@@NATIVE_LINKER_TRUE@large_LDADD = 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@searched_file_test_SOURCES = searched_file_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@searched_file_test_DEPENDENCIES = alt/searched_file_test_lib.a
 @GCC_TRUE@@NATIVE_LINKER_TRUE@searched_file_test_LDFLAGS = -Bgcctestdir/ -Lalt

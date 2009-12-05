@@ -1,5 +1,21 @@
+2009-12-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/Makefile.am (constructor_test_LDADD): New. Empty.
+	(two_file_test_LDADD): Likewise.
+	(common_test_1_LDADD): Likewise.
+	(exception_test_LDADD) Likewise.
+	(weak_test_LDADD): Likewise.
+	(many_sections_test_LDADD): Likewise.
+	(initpri1_LDADD): Likewise.
+	(script_test_1_LDADD): Likewise.
+	(script_test_2_LDADD): Likewise.
+	(justsyms_LDADD): Likewise.
+	(binary_test_LDADD): Likewise.
+	(large_LDADD): Likewise.
+	* testsuite/Makefile.in: Regenerated.
+
 2009-12-04  H.J. Lu  <hongjiu.lu@intel.com>
- 
+
 	* resolve.cc (symbol_to_bits): Treat STB_GNU_UNIQUE as STB_GLOBAL.
 	(Symbol_table::override_with_special): Likewise.
 	(Symbol_table::add_from_object): Likewise.
