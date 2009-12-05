@@ -178,6 +178,7 @@ symbol_to_bits(elfcpp::STB binding, bool is_dynamic,
   switch (binding)
     {
     case elfcpp::STB_GLOBAL:
+    case elfcpp::STB_GNU_UNIQUE:
       bits = global_flag;
       break;
 
@@ -883,6 +884,7 @@ Symbol_table::override_with_special(Sized_symbol<size>* tosym,
       || ((tosym->visibility() == elfcpp::STV_HIDDEN
 	   || tosym->visibility() == elfcpp::STV_INTERNAL)
 	  && (tosym->binding() == elfcpp::STB_GLOBAL
+	      || tosym->binding() == elfcpp::STB_GNU_UNIQUE
 	      || tosym->binding() == elfcpp::STB_WEAK)
 	  && !parameters->options().relocatable()))
     this->force_local(tosym);

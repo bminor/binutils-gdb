@@ -1010,6 +1010,7 @@ Symbol_table::add_from_object(Object* object,
   if ((ret->visibility() == elfcpp::STV_HIDDEN
        || ret->visibility() == elfcpp::STV_INTERNAL)
       && (ret->binding() == elfcpp::STB_GLOBAL
+	  || ret->binding() == elfcpp::STB_GNU_UNIQUE
 	  || ret->binding() == elfcpp::STB_WEAK)
       && !parameters->options().relocatable())
     this->force_local(ret);

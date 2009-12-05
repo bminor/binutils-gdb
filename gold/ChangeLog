@@ -1,3 +1,9 @@
+2009-12-04  H.J. Lu  <hongjiu.lu@intel.com>
+ 
+	* resolve.cc (symbol_to_bits): Treat STB_GNU_UNIQUE as STB_GLOBAL.
+	(Symbol_table::override_with_special): Likewise.
+	(Symbol_table::add_from_object): Likewise.
+
 2009-12-04  Rafael Avila de Espindola  <espindola@google.com>
 
 	* incremental.cc (Incremental_inputs::sized_create_inputs_section_data):
