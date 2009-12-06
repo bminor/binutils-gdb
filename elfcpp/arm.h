@@ -222,6 +222,29 @@ inline Elf_Word
 arm_eabi_version(Elf_Word flags)
 { return flags & EF_ARM_EABIMASK; }
 
+// Values for the Tag_CPU_arch EABI attribute.
+enum
+{
+  TAG_CPU_ARCH_PRE_V4,
+  TAG_CPU_ARCH_V4,
+  TAG_CPU_ARCH_V4T,
+  TAG_CPU_ARCH_V5T,
+  TAG_CPU_ARCH_V5TE,
+  TAG_CPU_ARCH_V5TEJ,
+  TAG_CPU_ARCH_V6,
+  TAG_CPU_ARCH_V6KZ,
+  TAG_CPU_ARCH_V6T2,
+  TAG_CPU_ARCH_V6K,
+  TAG_CPU_ARCH_V7,
+  TAG_CPU_ARCH_V6_M,
+  TAG_CPU_ARCH_V6S_M,
+  TAG_CPU_ARCH_V7E_M,
+  MAX_TAG_CPU_ARCH = TAG_CPU_ARCH_V7E_M,
+  // Pseudo-architecture to allow objects to be compatible with the subset of
+  // armv4t and armv6-m.  This value should never be stored in object files.
+  TAG_CPU_ARCH_V4T_PLUS_V6_M = (MAX_TAG_CPU_ARCH + 1)
+};
+
 } // End namespace elfcpp.
 
 #endif // !defined(ELFCPP_ARM_H)

@@ -1665,7 +1665,9 @@ const Target::Target_info Target_arm<big_endian>::arm_info =
   elfcpp::SHN_UNDEF,	// small_common_shndx
   elfcpp::SHN_UNDEF,	// large_common_shndx
   0,			// small_common_section_flags
-  0			// large_common_section_flags
+  0,			// large_common_section_flags
+  ".ARM.attributes",	// attributes_section
+  "aeabi"		// attributes_vendor
 };
 
 // Arm relocate functions class

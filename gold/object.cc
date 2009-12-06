@@ -1138,6 +1138,12 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 		omit[i] = true;
 	    }
 
+	  // Skip attributes section.
+	  if (parameters->target().is_attributes_section(name))
+	    {
+	      omit[i] = true;
+	    }
+
           bool discard = omit[i];
           if (!discard)
             {

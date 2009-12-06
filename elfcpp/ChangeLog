@@ -1,3 +1,7 @@
+2009-12-05  Doug Kwan  <dougkwan@google.com>
+
+	* arm.h: Define enums for Tag_CPU_arch EABI attribute.
+
 2009-11-24  Rafael Avila de Espindola  <espindola@google.com>
 
 	* elfcpp_file.h: Include elfcpp.h.

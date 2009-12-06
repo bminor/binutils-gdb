@@ -1,5 +1,25 @@
 2009-12-05  Doug Kwan  <dougkwan@google.com>
 
+	* arm.cc (Target_arm::arm_info): Initialize new fields
+	attributes_section and attributes_vendor.
+	* i386.cc (Target_i386::i386_info): Same.
+	* object.cc (Sized_relobj::do_layout): Skip attribute section.
+	* gold/powerpc.cc (Target_powerpc::powerpc_info): Initialize new
+	fields attributes_section and attributes_vendor.
+ 	* sparc.cc (Target_sparc::sparc_info): Same.
+	* target.h (Target::attributes_section, Target::attributes_vendor,
+	Target::is_attributes_section, Target::attribute_arg_type,
+	Target::attributes_order): New method definitions.
+	(Target::Target_info::attributes_section,
+	Target::Target_info::attributes_vendor): New fields.
+	(Target::do_attribute_arg_type, Target::do_attributes_order): New
+	virtual method definitions.
+	* x86_64.cc (Target_x86_64::x86_64_info): Initialize new fields
+	attributes_section and attributes_vendor.
+	* testsuite/testfile.cc (Target_test::test_target_info): Same.
+
+2009-12-05  Doug Kwan  <dougkwan@google.com>
+
 	* arm.cc: Update comments about interworking and stub generation.
 	(Target_arm::Relocate::reloc_is_non_pic): Update list of relocations
 	considered as non-PIC.

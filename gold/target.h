@@ -282,6 +282,39 @@ class Target
     return this->do_relax(pass, input_objects, symtab, layout);
   } 
 
+  // Return the target-specific name of attributes section.  This is
+  // NULL if a target does not use attributes section or if it uses
+  // the default section name ".gnu.attributes".
+  const char*
+  attributes_section() const
+  { return this->pti_->attributes_section; }
+
+  // Return the vendor name of vendor attributes.
+  const char*
+  attributes_vendor() const
+  { return this->pti_->attributes_vendor; }
+
+  // Whether a section called NAME is an attribute section.
+  bool
+  is_attributes_section(const char* name) const
+  {
+    return ((this->pti_->attributes_section != NULL
+	     && strcmp(name, this->pti_->attributes_section) == 0)
+	    || strcmp(name, ".gnu.attributes") == 0); 
+  }
+
+  // Return a bit mask of argument types for attribute with TAG.
+  int
+  attribute_arg_type(int tag) const
+  { return this->do_attribute_arg_type(tag); }
+
+  // Return the attribute tag of the position NUM in the list of fixed
+  // attributes.  Normally there is no reordering and
+  // attributes_order(NUM) == NUM.
+  int
+  attributes_order(int num) const
+  { return this->do_attributes_order(num); }
+
  protected:
   // This struct holds the constant information for a child class.  We
   // use a struct to avoid the overhead of virtual function calls for
@@ -323,6 +356,10 @@ class Target
     elfcpp::Elf_Xword small_common_section_flags;
     // Section flags for large common section.
     elfcpp::Elf_Xword large_common_section_flags;
+    // Name of attributes section if it is not ".gnu.attributes".
+    const char* attributes_section;
+    // Vendor name of vendor attributes.
+    const char* attributes_vendor;
   };
 
   Target(const Target_info* pti)
@@ -439,6 +476,17 @@ class Target
   void
   set_view_to_nop(unsigned char* view, section_size_type view_size,
 		  section_offset_type offset, size_t len) const;
+
+  // This must be overriden by the child class if it has target-specific
+  // attributes subsection in the attribute section. 
+  virtual int
+  do_attribute_arg_type(int) const
+  { gold_unreachable(); }
+
+  // This may be overridden by the child class.
+  virtual int
+  do_attributes_order(int num) const
+  { return num; }
 
  private:
   // The implementations of the four do_make_elf_object virtual functions are
