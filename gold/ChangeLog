@@ -1,3 +1,17 @@
+2009-12-05  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc: Update comments about interworking and stub generation.
+	(Target_arm::Relocate::reloc_is_non_pic): Update list of relocations
+	considered as non-PIC.
+	(Arm_relocate_functions::base_abs): Fix formatting.
+	(Arm_relocate_functions::got_prel): Fix comment.  Change interface
+	of function to use GOT entry address instead of offset.
+	(Target_arm::Scan::global): Issue an error if a symbol would need a
+	PLT does not get one because it is untyped.  Remove code to create
+	dynamic symbols for relative branches.
+	(Target_arm::Relocate::relocate: Use 0 instead of false since function
+	takes unsigned integer instead of boolean.
+
 2009-12-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/Makefile.am (constructor_test_LDADD): New. Empty.
