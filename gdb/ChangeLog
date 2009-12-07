@@ -1,3 +1,8 @@
+2009-12-07  Kevin Buettner  <kevinb@redhat.com>
+
+	* configure.tgt: Add rx-*-elf target.
+	* rx-tdep.c: New target.
+
 2009-12-07  Tristan Gingold  <gingold@adacore.com>
 
 	* symfile.h (struct sym_fns): Adjust comment on sym_read.

@@ -408,6 +408,12 @@ s390*-*-*)
 	build_gdbserver=yes
 	;;
 
+rx-*-elf)
+	# Target: Renesas RX
+	gdb_target_obs="rx-tdep.o"
+	gdb_sim=../sim/rx/libsim.a
+	;;
+
 score-*-*)
 	# Target: S+core embedded system
 	gdb_target_obs="score-tdep.o corelow.o"
