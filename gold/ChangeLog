@@ -1,3 +1,9 @@
+2009-12-07  Rafael Avila de Espindola  <espindola@google.com>
+
+	PR gold/11055
+	* incremental-dump.cc (dump_incremental_inputs): New.
+	(main): Use dump_incremental_inputs.
+
 2009-12-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/10893

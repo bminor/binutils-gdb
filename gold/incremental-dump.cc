@@ -42,6 +42,124 @@ namespace gold
 
 using namespace gold;
 
+template<int size, bool big_endian>
+static void
+dump_incremental_inputs(const char* argv0,
+                        const char* filename, Incremental_binary* inc)
+{
+  bool t;
+  unsigned int strtab_shndx;
+  Incremental_binary::Location location;
+
+  t = inc->find_incremental_inputs_section(&location, &strtab_shndx);
+  if (!t)
+    {
+      fprintf(stderr, "%s: %s: no .gnu_incremental_inputs section\n", argv0,
+              filename);
+      exit (1);
+    }
+
+  Incremental_binary::View inputs_view(inc->view(location));
+  const unsigned char* p = inputs_view.data();
+
+  Incremental_inputs_header<size, big_endian> incremental_header(p);
+
+  const unsigned char* incremental_inputs_base =
+    (p + sizeof(Incremental_inputs_header_data));
+
+  if (incremental_header.get_version() != 1)
+    {
+      fprintf(stderr, "%s: %s: unknown incremental version %d\n", argv0,
+              filename, incremental_header.get_version());
+      exit(1);
+    }
+
+  elfcpp::Elf_file<size, big_endian, Incremental_binary> elf_file(inc);
+
+  if (elf_file.section_type(strtab_shndx) != elfcpp::SHT_STRTAB)
+    {
+      fprintf(stderr,
+              "%s: %s: invalid string table section %u (type %d != %d)\n",
+              argv0, filename, strtab_shndx,
+              elf_file.section_type(strtab_shndx), elfcpp::SHT_STRTAB);
+      exit(1);
+    }
+
+  Incremental_binary::Location
+    strtab_location(elf_file.section_contents(strtab_shndx));
+
+  Incremental_binary::View strtab_view(inc->view(strtab_location));
+  p = strtab_view.data();
+
+  elfcpp::Elf_strtab strtab(strtab_view.data(), strtab_location.data_size);
+  const char* command_line;
+  elfcpp::Elf_Word command_line_offset =
+    incremental_header.get_command_line_offset();
+  t = strtab.get_c_string(command_line_offset, &command_line);
+
+  if (!t)
+    {
+      fprintf(stderr,
+              "%s: %s: failed to get link command line: %zu out of range\n",
+              argv0, filename,
+              static_cast<size_t>(command_line_offset));
+      exit(1);
+    }
+
+  printf("Link command line: %s\n", command_line);
+
+  printf("Input files:\n");
+  for (unsigned i = 0; i < incremental_header.get_input_file_count(); ++i)
+    {
+      const unsigned char* input_p = incremental_inputs_base +
+        i * sizeof(Incremental_inputs_entry_data);
+      Incremental_inputs_entry<size, big_endian> input(input_p);
+      const char* objname;
+
+      t = strtab.get_c_string(input.get_filename_offset(), &objname);
+      if (!t)
+        {
+          fprintf(stderr,"%s: %s: failed to get file name for object %u:"
+                  " %zu out of range\n", argv0, filename, i,
+                  static_cast<size_t>(input.get_filename_offset()));
+          exit(1);
+        }
+      printf("  %s\n", objname);
+      printf("    Timestamp sec = %llu\n",
+             static_cast<unsigned long long>(input.get_timestamp_sec()));
+      printf("    Timestamp nsec = %d\n", input.get_timestamp_nsec());
+      printf("    Type = ");
+      // TODO: print the data at input->data_offset once we have it.
+      elfcpp::Elf_Word input_type = input.get_input_type();
+      switch (input_type)
+      {
+      case INCREMENTAL_INPUT_OBJECT:
+        printf("Object\n");
+        break;
+      case INCREMENTAL_INPUT_ARCHIVE:
+        printf("Archive\n");
+        break;
+      case INCREMENTAL_INPUT_SHARED_LIBRARY:
+        printf("Shared library\n");
+        break;
+      case INCREMENTAL_INPUT_SCRIPT:
+        printf("Linker script\n");
+        if (input.get_data_offset() != 0)
+          {
+            fprintf(stderr,"%s: %s: %u is a script but offset is not zero",
+                    argv0, filename, i);
+            exit(1);
+          }
+        break;
+      case INCREMENTAL_INPUT_INVALID:
+      default:
+        fprintf(stderr, "%s: invalid file type for object %u: %d\n",
+                argv0, i, input_type);
+        exit(1);
+      }
+    }
+}
+
 int
 main(int argc, char** argv)
 {
@@ -71,114 +189,30 @@ main(int argc, char** argv)
       return 1;
     }
 
-  unsigned int strtab_shndx;
-  Incremental_binary::Location location;
-
-  t = inc->find_incremental_inputs_section(&location, &strtab_shndx);
-  if (!t)
+  switch (parameters->size_and_endianness())
     {
-      fprintf(stderr, "%s: %s: no .gnu_incremental_inputs section\n", argv[0],
-              filename);
-      return 1;
-    }
-
-  Incremental_binary::View inputs_view(inc->view(location));
-  const unsigned char *p = inputs_view.data();
-
-  const Incremental_inputs_header_data* incremental_header =
-    reinterpret_cast<const Incremental_inputs_header_data*> (p);
-
-  const Incremental_inputs_entry_data* incremental_inputs =
-    reinterpret_cast<const Incremental_inputs_entry_data*>
-    (p + sizeof(Incremental_inputs_header_data));
-
-  if (incremental_header->version != 1)
-    {
-      fprintf(stderr, "%s: %s: unknown incremental version %d\n", argv[0],
-              filename, incremental_header->version);
-      return 1;
-    }
-
-  elfcpp::Elf_file<64, false, Incremental_binary> elf_file(inc);
-
-  if (elf_file.section_type(strtab_shndx) != elfcpp::SHT_STRTAB)
-    {
-      fprintf(stderr,
-              "%s: %s: invalid string table section %u (type %d != %d)\n",
-              argv[0], filename, strtab_shndx,
-              elf_file.section_type(strtab_shndx), elfcpp::SHT_STRTAB);
-      return 1;
-    }
-
-  Incremental_binary::Location
-    strtab_location(elf_file.section_contents(strtab_shndx));
-
-  Incremental_binary::View strtab_view(inc->view(strtab_location));
-  p = strtab_view.data();
-
-  elfcpp::Elf_strtab strtab(strtab_view.data(), strtab_location.data_size);
-  const char* command_line;
-  t = strtab.get_c_string(incremental_header->command_line_offset,
-                          &command_line);
-
-  if (!t)
-    {
-      fprintf(stderr,
-              "%s: %s: failed to get link command line: %zu out of range\n",
-              argv[0], filename,
-              static_cast<size_t>(incremental_header->command_line_offset));
-      return 1;
-    }
-
-  printf("Link command line: %s\n", command_line);
-
-  printf("Input files:\n");
-  for (unsigned i = 0; i < incremental_header->input_file_count; ++i)
-    {
-      const Incremental_inputs_entry_data* input =
-        &incremental_inputs[i];
-      const char *objname;
-
-      t = strtab.get_c_string(input->filename_offset, &objname);
-      if (!t)
-        {
-          fprintf(stderr,"%s: %s: failed to get file name for object %u:"
-                  " %zu out of range\n", argv[0], filename, i,
-                  static_cast<size_t>(input->filename_offset));
-          return 1;
-        }
-      printf("  %s\n", objname);
-      printf("    Timestamp sec = %llu\n",
-             static_cast<unsigned long long>(input->timestamp_sec));
-      printf("    Timestamp nsec = %d\n", input->timestamp_nsec);
-      printf("    Type = ");
-      // TODO: print the data at input->data_offset once we have it.
-      switch (input->input_type)
-      {
-      case INCREMENTAL_INPUT_OBJECT:
-        printf("Object\n");
-        break;
-      case INCREMENTAL_INPUT_ARCHIVE:
-        printf("Archive\n");
-        break;
-      case INCREMENTAL_INPUT_SHARED_LIBRARY:
-        printf("Shared library\n");
-        break;
-      case INCREMENTAL_INPUT_SCRIPT:
-        printf("Linker script\n");
-        if (input->data_offset != 0)
-          {
-            fprintf(stderr,"%s: %s: %u is a script but offset is not zero",
-                    argv[0], filename, i);
-            return 1;
-          }
-        break;
-      case INCREMENTAL_INPUT_INVALID:
-      default:
-        fprintf(stderr, "%s: invalid file type for object %u: %d\n",
-                argv[0], i, input->input_type);
-        return 1;
-      }
+#ifdef HAVE_TARGET_32_LITTLE
+    case Parameters::TARGET_32_LITTLE:
+      dump_incremental_inputs<32, false>(argv[0], filename, inc);
+      break;
+#endif
+#ifdef HAVE_TARGET_32_BIG
+    case Parameters::TARGET_32_BIG:
+      dump_incremental_inputs<32, true>(argv[0], filename, inc);
+      break;
+#endif
+#ifdef HAVE_TARGET_64_LITTLE
+    case Parameters::TARGET_64_LITTLE:
+      dump_incremental_inputs<64, false>(argv[0], filename, inc);
+      break;
+#endif
+#ifdef HAVE_TARGET_64_BIG
+    case Parameters::TARGET_64_BIG:
+      dump_incremental_inputs<64, true>(argv[0], filename, inc);
+      break;
+#endif
+    default:
+      gold_unreachable();
     }
 
   return 0;
