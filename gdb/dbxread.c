@@ -556,10 +556,8 @@ dbx_symfile_read (struct objfile *objfile, int mainline)
   if (val < 0)
     perror_with_name (objfile->name);
 
-  /* If we are reinitializing, or if we have never loaded syms yet, init */
-  if (mainline
-      || (objfile->global_psymbols.size == 0
-	  &&  objfile->static_psymbols.size == 0))
+  /* Size the symbol table.  */
+  if (objfile->global_psymbols.size == 0 && objfile->static_psymbols.size == 0)
     init_psymbol_list (objfile, DBX_SYMCOUNT (objfile));
 
   symbol_size = DBX_SYMBOL_SIZE (objfile);

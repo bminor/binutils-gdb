@@ -691,15 +691,6 @@ elf_symfile_read (struct objfile *objfile, int mainline)
   /* Now process debugging information, which is contained in
      special ELF sections. */
 
-  /* If we are reinitializing, or if we have never loaded syms yet,
-     set table to empty.  MAINLINE is cleared so that *_read_psymtab
-     functions do not all also re-initialize the psymbol table. */
-  if (mainline)
-    {
-      init_psymbol_list (objfile, 0);
-      mainline = 0;
-    }
-
   /* We first have to find them... */
   bfd_map_over_sections (abfd, elf_locate_sections, (void *) & ei);
 

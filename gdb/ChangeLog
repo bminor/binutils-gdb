@@ -1,3 +1,12 @@
+2009-12-07  Tristan Gingold  <gingold@adacore.com>
+
+	* dbxread.c (dbx_symfile_read): No need to test mainline to call
+	init_psymbol_list.
+	* xcoffread.c (xcoff_initial_scan): Ditto;
+	* coffread.c (coff_symfile_read): Remove call to init_psymbol_list.
+	* elfread.c (elf_symfile_read): Ditto.
+	* machoread.c (macho_symfile_read): Ditto.
+
 2009-12-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* valops.c (value_struct_elt_for_reference): Do not rely on
