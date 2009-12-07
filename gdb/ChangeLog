@@ -1,5 +1,18 @@
 2009-12-07  Tristan Gingold  <gingold@adacore.com>
 
+	* symfile.h (struct sym_fns): Adjust comment on sym_read.
+	* symfile.c (syms_from_objfile): Pass all symfile flags to sym_read.
+	* dbxread.c (dbx_symfile_read): Rename mainline to symfile_flags,
+	adjust header comment.
+	* elfread.c (elf_symfile_read): Ditto.
+	* somread.c (som_symfile_read): Ditto.
+	* xcoffread.c (xcoff_initial_scan): Ditto.
+	* coffread.c (coff_symfile_read): Rename mainline to symfile_flags.
+	* machoread.c (macho_symfile_read): Ditto.
+	* mipsread.c (mipscoff_symfile_read): Ditto.
+
+2009-12-07  Tristan Gingold  <gingold@adacore.com>
+
 	* dbxread.c (dbx_symfile_read): No need to test mainline to call
 	init_psymbol_list.
 	* xcoffread.c (xcoff_initial_scan): Ditto;

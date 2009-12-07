@@ -574,7 +574,7 @@ macho_check_dsym (struct objfile *objfile)
 }
 
 static void
-macho_symfile_read (struct objfile *objfile, int mainline)
+macho_symfile_read (struct objfile *objfile, int symfile_flags)
 {
   bfd *abfd = objfile->obfd;
   struct cleanup *back_to;

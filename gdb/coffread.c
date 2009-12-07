@@ -501,7 +501,7 @@ static bfd *symfile_bfd;
 /* Read a symbol file, after initialization by coff_symfile_init.  */
 
 static void
-coff_symfile_read (struct objfile *objfile, int mainline)
+coff_symfile_read (struct objfile *objfile, int symfile_flags)
 {
   struct coff_symfile_info *info;
   struct dbx_symfile_info *dbxinfo;

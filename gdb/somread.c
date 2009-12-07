@@ -292,9 +292,6 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
    SECTION_OFFSETS is a set of offsets to apply to relocate the symbols
    in each section.  This is ignored, as it isn't needed for SOM.
 
-   MAINLINE is true if we are reading the main symbol
-   table (as opposed to a shared lib or dynamically loaded file).
-
    This function only does the minimum work necessary for letting the
    user "name" things symbolically; it does not read the entire symtab.
    Instead, it reads the external and static symbols and puts them in partial
@@ -315,7 +312,7 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
    capability even for files compiled without -g.  */
 
 static void
-som_symfile_read (struct objfile *objfile, int mainline)
+som_symfile_read (struct objfile *objfile, int symfile_flags)
 {
   bfd *abfd = objfile->obfd;
   struct cleanup *back_to;

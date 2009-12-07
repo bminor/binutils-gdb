@@ -2868,11 +2868,10 @@ xcoff_get_toc_offset (struct objfile *objfile)
 
    SECTION_OFFSETS contains offsets relative to which the symbols in the
    various sections are (depending where the sections were actually loaded).
-   MAINLINE is true if we are reading the main symbol
-   table (as opposed to a shared lib or dynamically loaded file).  */
+*/
 
 static void
-xcoff_initial_scan (struct objfile *objfile, int mainline)
+xcoff_initial_scan (struct objfile *objfile, int symfile_flags)
 {
   bfd *abfd;
   int val;

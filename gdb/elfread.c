@@ -576,9 +576,6 @@ elf_symtab_read (struct objfile *objfile, int type,
    in each section.  We simplify it down to a single offset for all
    symbols.  FIXME.
 
-   MAINLINE is true if we are reading the main symbol
-   table (as opposed to a shared lib or dynamically loaded file).
-
    This function only does the minimum work necessary for letting the
    user "name" things symbolically; it does not read the entire symtab.
    Instead, it reads the external and static symbols and puts them in partial
@@ -600,7 +597,7 @@ elf_symtab_read (struct objfile *objfile, int type,
    capability even for files compiled without -g.  */
 
 static void
-elf_symfile_read (struct objfile *objfile, int mainline)
+elf_symfile_read (struct objfile *objfile, int symfile_flags)
 {
   bfd *abfd = objfile->obfd;
   struct elfinfo ei;

@@ -132,11 +132,10 @@ struct sym_fns
 
   void (*sym_init) (struct objfile *);
 
-  /* sym_read (objfile, mainline) Reads a symbol file into a psymtab
+  /* sym_read (objfile, symfile_flags) Reads a symbol file into a psymtab
      (or possibly a symtab).  OBJFILE is the objfile struct for the
-     file we are reading.  MAINLINE is 1 if this is the main symbol
-     table being read, and 0 if a secondary symbol file (e.g. shared
-     library or dynamically loaded file) is being read.  */
+     file we are reading.  SYMFILE_FLAGS are the flags passed to
+     symbol_file_add & co.  */
 
   void (*sym_read) (struct objfile *, int);
 

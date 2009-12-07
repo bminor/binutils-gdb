@@ -886,7 +886,7 @@ syms_from_objfile (struct objfile *objfile,
       init_objfile_sect_indices (objfile);
     }
 
-  (*objfile->sf->sym_read) (objfile, mainline);
+  (*objfile->sf->sym_read) (objfile, add_flags);
 
   /* Discard cleanups as symbol reading was successful.  */
 

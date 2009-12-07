@@ -520,13 +520,10 @@ record_minimal_symbol (char *name, CORE_ADDR address, int type,
 /* Scan and build partial symbols for a symbol file.
    We have been initialized by a call to dbx_symfile_init, which 
    put all the relevant info into a "struct dbx_symfile_info",
-   hung off the objfile structure.
-
-   MAINLINE is true if we are reading the main symbol
-   table (as opposed to a shared lib or dynamically loaded file).  */
+   hung off the objfile structure.  */
 
 static void
-dbx_symfile_read (struct objfile *objfile, int mainline)
+dbx_symfile_read (struct objfile *objfile, int symfile_flags)
 {
   bfd *sym_bfd;
   int val;
