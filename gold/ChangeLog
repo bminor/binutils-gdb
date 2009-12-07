@@ -1,3 +1,16 @@
+2009-12-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/10893
+	* i386.cc (Target_i386::Scan::globa): Use is_func instead of
+	checking elfcpp::STT_FUNC.
+	(Target_i386::Relocate::relocate): Likewise.
+	* x86_64.cc (Target_x86_64::Scan::global): Likewise.
+
+	* symtab.cc (Symbol_table::sized_write_symbol): Turn IFUNC
+	symbols from shared libraries into normal FUNC symbols.
+
+	* symtab.h (Symbol): Add is_func and use it.
+
 2009-12-05  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Target_arm::arm_info): Initialize new fields
@@ -6,7 +19,7 @@
 	* object.cc (Sized_relobj::do_layout): Skip attribute section.
 	* gold/powerpc.cc (Target_powerpc::powerpc_info): Initialize new
 	fields attributes_section and attributes_vendor.
- 	* sparc.cc (Target_sparc::sparc_info): Same.
+	* sparc.cc (Target_sparc::sparc_info): Same.
 	* target.h (Target::attributes_section, Target::attributes_vendor,
 	Target::is_attributes_section, Target::attribute_arg_type,
 	Target::attributes_order): New method definitions.

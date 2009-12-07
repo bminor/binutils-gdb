@@ -205,6 +205,14 @@ class Symbol
   type() const
   { return this->type_; }
 
+  // Return true for function symbol.
+  bool
+  is_func() const
+  {
+    return (this->type_ == elfcpp::STT_FUNC
+	    || this->type_ == elfcpp::STT_GNU_IFUNC);
+  }
+
   // Return the symbol visibility.
   elfcpp::STV
   visibility() const
@@ -543,7 +551,7 @@ class Symbol
 
     return (!parameters->doing_static_link()
 	    && !parameters->options().pie()
-            && this->type() == elfcpp::STT_FUNC
+            && this->is_func()
             && (this->is_from_dynobj()
                 || this->is_undefined()
                 || this->is_preemptible()));
@@ -734,7 +742,7 @@ class Symbol
     return (!parameters->options().shared()
 	    && parameters->options().copyreloc()
 	    && this->is_from_dynobj()
-	    && this->type() != elfcpp::STT_FUNC);
+	    && !this->is_func());
   }
 
  protected:

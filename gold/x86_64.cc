@@ -1352,7 +1352,7 @@ Target_x86_64::Scan::global(Symbol_table* symtab,
           target->make_plt_entry(symtab, layout, gsym);
         // Make a dynamic relocation if necessary.
         int flags = Symbol::NON_PIC_REF;
-        if (gsym->type() == elfcpp::STT_FUNC)
+        if (gsym->is_func())
           flags |= Symbol::FUNCTION_CALL;
         if (gsym->needs_dynamic_reloc(flags))
           {
