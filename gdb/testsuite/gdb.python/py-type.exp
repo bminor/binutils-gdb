@@ -102,6 +102,29 @@ proc test_base_class {} {
   gdb_test "python print fields\[1\].is_base_class" "False" "Check base class"
 }
 
+proc test_range {} {
+
+  # Test a valid range request.
+  gdb_py_test_silent_cmd "print ar" "print value" 1
+  gdb_py_test_silent_cmd "python ar = gdb.history (0)" "get value from history" 1
+  gdb_test "python print len(ar.type.range())" "2" "Check correct tuple length"
+  gdb_test "python print ar.type.range()\[0\]" "0" "Check low range"
+  gdb_test "python print ar.type.range()\[1\]" "1" "Check high range"
+
+  # Test a range request on a ranged type.
+  gdb_py_test_silent_cmd "print ar" "print value" 1
+  gdb_py_test_silent_cmd "python ar = gdb.history (0)" "get value from  history" 1
+  gdb_py_test_silent_cmd "python fields = ar.type.fields()" "get fields" 1
+  gdb_test "python print fields\[0\].type.range()\[0\]" "0" "Check range type low bound"
+  gdb_test "python print fields\[0\].type.range()\[1\]" "1" "Check range type high bound"
+
+  # Test where a range does not exist.
+  gdb_py_test_silent_cmd "print st" "print value" 1
+  gdb_py_test_silent_cmd "python st = gdb.history (0)" "get value from history" 1
+  gdb_test "python print st.type.range()" "RuntimeError: This type does not have a range.*" "Check range for non ranged type."
+}
+
+
 # Perform C Tests.
 build_inferior "c"
 restart_gdb "break to inspect struct and array."
@@ -112,3 +135,4 @@ build_inferior "c++"
 restart_gdb "break to inspect struct and array."
 test_fields "c++"
 test_base_class
+test_range

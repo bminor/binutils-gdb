@@ -1,3 +1,7 @@
+2009-12-08  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.texinfo (Types In Python): Describe range function.
+
 2009-12-03  Richard Ward  <richard.j.ward1@googlemail.com>
 
 	* gdb.texinfo (Types In Python): Describe "is_base_class".

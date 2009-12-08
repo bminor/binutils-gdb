@@ -19654,6 +19654,13 @@ variant of this type.  That is, the result is neither @code{const} nor
 @code{volatile}.
 @end defmethod
 
+@defmethod Type range
+Return a Python @code{Tuple} object that contains two elements: the
+low bound of the argument type and the high bound of that type.  If
+the type does not have a range, @value{GDBN} will raise a
+@code{RuntimeError} exception.
+@end defmethod
+
 @defmethod Type reference
 Return a new @code{gdb.Type} object which represents a reference to this
 type.

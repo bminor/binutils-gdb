@@ -1,3 +1,9 @@
+2009-12-08  Phil Muldoon  <pmuldoon@redhat.com>
+
+	PR python/10804
+
+	* python/py-type.c (typy_range): New Function.
+
 2009-12-07  Doug Evans  <dje@google.com>
 
 	* charset.c: Include environ.h.
