@@ -2237,8 +2237,7 @@ resolve_expression (expressionS *expressionP)
 	op = O_constant;
       else if (seg_left == reg_section && final_val == 0)
 	op = O_register;
-      else if (seg_left == undefined_section
-	       && add_symbol != orig_add_symbol)
+      else if (!symbol_same_p (add_symbol, orig_add_symbol))
 	final_val += left;
       expressionP->X_add_symbol = add_symbol;
     }
