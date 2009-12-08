@@ -4127,6 +4127,22 @@ print_segment_map (const struct elf_segment_map *m)
   putc ('\n',stderr);
 }
 
+static bfd_boolean
+write_zeros (bfd *abfd, file_ptr pos, bfd_size_type len)
+{
+  void *buf;
+  bfd_boolean ret;
+
+  if (bfd_seek (abfd, pos, SEEK_SET) != 0)
+    return FALSE;
+  buf = bfd_zmalloc (len);
+  if (buf == NULL)
+    return FALSE;
+  ret = bfd_bwrite (buf, len, abfd) == len;
+  free (buf);
+  return ret;
+}
+
 /* Assign file positions to the sections based on the mapping from
    sections to segments.  This function also sets up some fields in
    the file header.  */
@@ -4448,6 +4464,15 @@ assign_file_positions_for_load_sections (bfd *abfd,
 
 	      if (this_hdr->sh_type != SHT_NOBITS)
 		{
+		  if (p->p_filesz + adjust < p->p_memsz)
+		    {
+		      /* We have a PROGBITS section following NOBITS ones.
+		         Allocate file space for the NOBITS section(s) and
+			 zero it.  */
+		      adjust = p->p_memsz - p->p_filesz;
+		      if (!write_zeros (abfd, off, adjust))
+			return FALSE;
+		    }
 		  off += adjust;
 		  p->p_filesz += adjust;
 		}

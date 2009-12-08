@@ -1,3 +1,9 @@
+2009-12-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (write_zeros): New function.
+	(assign_file_positions_for_load_sections): Allocate file space for
+	NOBITS sections that are followed by PROGBITS sections in a segment.
+
 2009-12-03  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.c (bfd_mach_o_make_bfd_section): Force debug flags for
