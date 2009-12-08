@@ -2,6 +2,7 @@
 
 	* configure.tgt: Add rx-*-elf target.
 	* rx-tdep.c: New target.
+	* NEWS: Announce Renesas RX support.
 
 2009-12-07  Tristan Gingold  <gingold@adacore.com>
 

@@ -6,10 +6,12 @@
 * New targets
 
 Xilinx MicroBlaze		microblaze-*-*
+Renesas RX			rx-*-elf
 
 * New Simulators
 
 Xilinx MicroBlaze		microblaze
+Renesas RX			rx
 
 * Multi-program debugging.
 
