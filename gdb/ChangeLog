@@ -1,3 +1,10 @@
+2009-12-07  Doug Evans  <dje@google.com>
+
+	* charset.c: Include environ.h.
+	(ignore_line_p): New function.
+	(find_charset_names): Handle older versions of iconv that print
+	human-readable output even if stdout is not a tty.
+
 2009-12-07  Kevin Buettner  <kevinb@redhat.com>
 
 	* configure.tgt: Add rx-*-elf target.

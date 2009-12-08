@@ -25,6 +25,7 @@
 #include "gdb_wait.h"
 #include "charset-list.h"
 #include "vec.h"
+#include "environ.h"
 
 #include <stddef.h>
 #include "gdb_string.h"
@@ -705,6 +706,35 @@ find_charset_names (void)
 
 #else
 
+/* Return non-zero if LINE (output from iconv) should be ignored.
+   Older iconv programs (e.g. 2.2.2) include the human readable
+   introduction even when stdout is not a tty.  Newer versions omit
+   the intro if stdout is not a tty.  */
+
+static int
+ignore_line_p (const char *line)
+{
+  /* This table is used to filter the output.  If this text appears
+     anywhere in the line, it is ignored (strstr is used).  */
+  static const char * const ignore_lines[] =
+    {
+      "The following",
+      "not necessarily",
+      "the FROM and TO",
+      "listed with several",
+      NULL
+    };
+  int i;
+
+  for (i = 0; ignore_lines[i] != NULL; ++i)
+    {
+      if (strstr (line, ignore_lines[i]) != NULL)
+	return 1;
+    }
+
+  return 0;
+}
+
 static void
 find_charset_names (void)
 {
@@ -712,6 +742,15 @@ find_charset_names (void)
   char *args[3];
   int err, status;
   int fail = 1;
+  struct gdb_environ *iconv_env;
+
+  /* Older iconvs, e.g. 2.2.2, don't omit the intro text if stdout is not
+     a tty.  We need to recognize it and ignore it.  This text is subject
+     to translation, so force LANGUAGE=C.  */
+  iconv_env = make_environ ();
+  init_environ (iconv_env);
+  set_in_environ (iconv_env, "LANGUAGE", "C");
+  set_in_environ (iconv_env, "LC_ALL", "C");
 
   child = pex_init (0, "iconv", NULL);
 
@@ -719,14 +758,16 @@ find_charset_names (void)
   args[1] = "-l";
   args[2] = NULL;
   /* Note that we simply ignore errors here.  */
-  if (!pex_run (child, PEX_SEARCH | PEX_STDERR_TO_STDOUT, "iconv",
-		args, NULL, NULL, &err))
+  if (!pex_run_in_environment (child, PEX_SEARCH | PEX_STDERR_TO_STDOUT,
+			       "iconv", args, environ_vector (iconv_env),
+			       NULL, NULL, &err))
     {
       FILE *in = pex_read_output (child, 0);
 
       /* POSIX says that iconv -l uses an unspecified format.  We
 	 parse the glibc and libiconv formats; feel free to add others
 	 as needed.  */
+
       while (!feof (in))
 	{
 	  /* The size of buf is chosen arbitrarily.  */
@@ -740,6 +781,9 @@ find_charset_names (void)
 	  len = strlen (r);
 	  if (len <= 3)
 	    continue;
+	  if (ignore_line_p (r))
+	    continue;
+
 	  /* Strip off the newline.  */
 	  --len;
 	  /* Strip off one or two '/'s.  glibc will print lines like
@@ -751,15 +795,21 @@ find_charset_names (void)
 	  buf[len] = '\0';
 
 	  /* libiconv will print multiple entries per line, separated
-	     by spaces.  */
+	     by spaces.  Older iconvs will print multiple entries per line,
+	     indented by two spaces, and separated by ", "
+	     (i.e. the human readable form).  */
 	  start = buf;
 	  while (1)
 	    {
 	      int keep_going;
 	      char *p;
 
-	      /* Find the next space, or end-of-line.  */
-	      for (p = start; *p && *p != ' '; ++p)
+	      /* Skip leading blanks.  */
+	      for (p = start; *p && *p == ' '; ++p)
+		;
+	      start = p;
+	      /* Find the next space, comma, or end-of-line.  */
+	      for ( ; *p && *p != ' ' && *p != ','; ++p)
 		;
 	      /* Ignore an empty result.  */
 	      if (p == start)
@@ -782,6 +832,7 @@ find_charset_names (void)
     }
 
   pex_free (child);
+  free_environ (iconv_env);
 
   if (fail)
     {
