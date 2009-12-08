@@ -4868,7 +4868,7 @@ dwarf_select_sections_by_names (const char *names)
       { "loc",  & do_debug_loc, 1 },
       { "macro", & do_debug_macinfo, 1 },
       { "pubnames", & do_debug_pubnames, 1 },
-      { "pubtypes", & do_debug_pubnames, 1 },
+      { "pubtypes", & do_debug_pubtypes, 1 },
       /* This entry is for compatability
 	 with earlier versions of readelf.  */
       { "ranges", & do_debug_aranges, 1 },
@@ -5009,8 +5009,6 @@ struct dwarf_section_display debug_displays[] =
     display_debug_lines,		&do_debug_lines,	1 },
   { { ".debug_pubnames",	".zdebug_pubnames",	NULL,	NULL,	0,	0 },
     display_debug_pubnames,		&do_debug_pubnames,	0 },
-  { { ".debug_pubtypes",	".zdebug_pubtypes",	NULL,	NULL,	0,	0 },
-    display_debug_pubnames,		&do_debug_pubtypes,	0 },
   { { ".eh_frame",		"",			NULL,	NULL,	0,	0 },
     display_debug_frames,		&do_debug_frames,	1 },
   { { ".debug_macinfo",		".zdebug_macinfo",	NULL,	NULL,	0,	0 },

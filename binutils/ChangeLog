@@ -1,3 +1,8 @@
+2009-12-08  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf.c (dwarf_select_sections_by_names): Handle pubtypes correctly.
+	(debug_displays): Remove duplicate entry for debug_pubtypes.
+
 2009-12-03  David Daney  <ddaney@caviumnetworks.com>
 	    Adam Nemet  <adambnemet@gmail.com>
 
