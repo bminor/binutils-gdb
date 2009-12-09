@@ -263,7 +263,7 @@ two_file_shared_2_test_LDADD = two_file_shared_2.so
 
 two_file_shared_1_pic_2_test_SOURCES = two_file_test_main.cc
 two_file_shared_1_pic_2_test_DEPENDENCIES = \
-	gcctestdir/ld two_file_shared_1.so two_file_test_1_pic.o two_file_test_1b_pic.o
+	gcctestdir/ld two_file_shared_2.so two_file_test_1_pic.o two_file_test_1b_pic.o
 two_file_shared_1_pic_2_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 two_file_shared_1_pic_2_test_LDADD = two_file_test_1_pic.o two_file_test_1b_pic.o two_file_shared_2.so
 

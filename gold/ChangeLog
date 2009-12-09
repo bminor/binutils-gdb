@@ -1,3 +1,9 @@
+2009-12-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/Makefile.am (two_file_shared_1_pic_2_test_DEPENDENCIES):
+	Replace two_file_shared_1.so with two_file_shared_2.so.
+	* testsuite/Makefile.in: Regenerated.
+
 2009-12-08  Doug Kwan  <dougkwan@google.com>
 
 	* Makefile.am (CCFILES): Add attributes.cc and int_encoding.cc.
