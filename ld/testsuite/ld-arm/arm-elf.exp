@@ -422,6 +422,9 @@ set armeabitests {
      {{objdump -fdw farcall-mixed-lib.d}}
      "farcall-mixed-lib.so"}
 
+    {"Long branch with mixed text and data" "-T arm.ld" "" {farcall-data.s}
+     {{objdump -dr farcall-data.d}}
+     "farcall-data"}
 }
 
 run_ld_link_tests $armeabitests

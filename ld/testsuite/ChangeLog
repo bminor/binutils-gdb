@@ -1,3 +1,10 @@
+2009-12-09  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-arm/arm-elf.exp (armeabitests): Add farcall-data.
+	* ld-arm/farcall-data.d, ld-arm/farcall-data.s: New.
+	* lib/ld-lib.exp (run_ld_link_tests, run_cc_link_tests): Correct
+	regular expression for archives.
+
 2009-11-23  Paul Brook  <paul@codesourcery.com>
 
 	* ld-arm/script-type.sym: New test.

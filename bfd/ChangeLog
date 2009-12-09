@@ -1,3 +1,8 @@
+2009-12-09  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_next_input_section): Skip sections without
+	SEC_CODE.
+
 2009-12-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (write_zeros): New function.

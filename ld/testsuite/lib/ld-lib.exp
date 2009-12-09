@@ -1227,7 +1227,7 @@ proc run_ld_link_tests { ldtests } {
 	    continue
 	}
 
-	if { [regexp ".*a$" $binfile] } {
+	if { [regexp ".*\\.a$" $binfile] } {
 	    if { ![ar_simple_create $ar $ld_options $binfile "$objfiles"] } {
 		fail $testname
 		set failed 1
@@ -1538,7 +1538,7 @@ proc run_cc_link_tests { ldtests } {
 	    set cc_cmd $CC
 	}
 
-	if { [regexp ".*a$" $binfile] } {
+	if { [regexp ".*\\.a$" $binfile] } {
 	    if { ![ar_simple_create $ar $ldflags $binfile "$objfiles"] } {
 		fail $testname
 		set failed 1
