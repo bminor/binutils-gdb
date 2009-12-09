@@ -282,7 +282,8 @@ typy_range (PyObject *self, PyObject *args)
   struct type *type = ((type_object *) self)->type;
   PyObject *result;
   PyObject *low_bound = NULL, *high_bound = NULL;
-  LONGEST low, high;
+  /* Initialize these to appease GCC warnings.  */
+  LONGEST low = 0, high = 0;
 
   if (TYPE_CODE (type) != TYPE_CODE_ARRAY
       && TYPE_CODE (type) != TYPE_CODE_STRING
