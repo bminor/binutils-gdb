@@ -637,6 +637,21 @@ coff_symfile_read (struct objfile *objfile, int symfile_flags)
 
   dwarf2_build_frame_info (objfile);
 
+  /* Try to add separate debug file if no symbols table found.   */
+  if (!objfile_has_partial_symbols (objfile))
+    {
+      char *debugfile;
+
+      debugfile = find_separate_debug_file_by_debuglink (objfile);
+
+      if (debugfile)
+	{
+	  bfd *abfd = symfile_bfd_open (debugfile);
+	  symbol_file_add_separate (abfd, symfile_flags, objfile);
+	  xfree (debugfile);
+	}
+    }
+
   do_cleanups (back_to);
 }
 

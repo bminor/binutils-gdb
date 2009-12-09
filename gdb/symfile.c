@@ -97,8 +97,6 @@ static void symbol_file_add_main_1 (char *args, int from_tty, int flags);
 
 static void add_symbol_file_command (char *, int);
 
-static void reread_separate_symbols (struct objfile *objfile);
-
 static void cashier_psymtab (struct partial_symtab *);
 
 bfd *symfile_bfd_open (char *);
@@ -139,8 +137,6 @@ static int simple_overlay_update_1 (struct obj_section *);
 static void add_filename_language (char *ext, enum language lang);
 
 static void info_ext_lang_command (char *args, int from_tty);
-
-static char *find_separate_debug_file (struct objfile *objfile);
 
 static void init_filename_language_table (void);
 
@@ -947,8 +943,6 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd,
 {
   struct objfile *objfile;
   struct partial_symtab *psymtab;
-  char *debugfile = NULL;
-  struct section_addr_info *orig_addrs = NULL;
   struct cleanup *my_cleanups;
   const char *name = bfd_get_filename (abfd);
   const int from_tty = add_flags & SYMFILE_VERBOSE;
@@ -966,12 +960,6 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd,
 
   objfile = allocate_objfile (abfd, flags);
   discard_cleanups (my_cleanups);
-
-  if (addrs)
-    {
-      orig_addrs = copy_section_addr_info (addrs);
-      make_cleanup_free_section_addr_info (orig_addrs);
-    }
 
   /* We either created a new mapped symbol table, mapped an existing
      symbol table file which has not had initial symbol reading
@@ -1012,33 +1000,6 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd,
 	}
     }
 
-  /* If the file has its own symbol tables it has no separate debug info.
-     `.dynsym'/`.symtab' go to MSYMBOLS, `.debug_info' goes to SYMTABS/PSYMTABS.
-     `.gnu_debuglink' may no longer be present with `.note.gnu.build-id'.  */
-  if (objfile->psymtabs == NULL)
-    debugfile = find_separate_debug_file (objfile);
-  if (debugfile)
-    {
-      if (addrs != NULL)
-	{
-	  objfile->separate_debug_objfile
-            = symbol_file_add (debugfile, add_flags, orig_addrs, flags);
-	}
-      else
-	{
-	  objfile->separate_debug_objfile
-            = symbol_file_add (debugfile, add_flags, NULL, flags);
-	}
-      objfile->separate_debug_objfile->separate_debug_objfile_backlink
-        = objfile;
-
-      /* Put the separate debug object before the normal one, this is so that
-         usage of the ALL_OBJFILES_SAFE macro will stay safe. */
-      put_objfile_before (objfile->separate_debug_objfile, objfile);
-
-      xfree (debugfile);
-    }
-
   if ((from_tty || info_verbose)
       && !objfile_has_symbols (objfile))
     {
@@ -1076,6 +1037,28 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd,
   return (objfile);
 }
 
+/* Add BFD as a separate debug file for OBJFILE.  */
+
+void
+symbol_file_add_separate (bfd *bfd, int symfile_flags, struct objfile *objfile)
+{
+  /* Currently only one separate debug objfile is supported.  */
+  gdb_assert (objfile && objfile->separate_debug_objfile == NULL);
+
+  objfile->separate_debug_objfile =
+    symbol_file_add_with_addrs_or_offsets
+    (bfd, symfile_flags,
+     0, /* No addr table.  */
+     objfile->section_offsets, objfile->num_sections,
+     objfile->flags & (OBJF_REORDERED | OBJF_SHARED | OBJF_READNOW
+		       | OBJF_USERLOADED));
+  objfile->separate_debug_objfile->separate_debug_objfile_backlink
+    = objfile;
+
+  /* Put the separate debug object before the normal one, this is so that
+     usage of the ALL_OBJFILES_SAFE macro will stay safe. */
+  put_objfile_before (objfile->separate_debug_objfile, objfile);
+}
 
 /* Process the symbol file ABFD, as either the main file or as a
    dynamically loaded file.
@@ -1383,8 +1366,8 @@ The directory where separate debug symbols are searched for is \"%s\".\n"),
 #define DEBUG_SUBDIRECTORY ".debug"
 #endif
 
-static char *
-find_separate_debug_file (struct objfile *objfile)
+char *
+find_separate_debug_file_by_buildid (struct objfile *objfile)
 {
   asection *sect;
   char *basename, *name_copy, *debugdir;
@@ -1413,6 +1396,20 @@ find_separate_debug_file (struct objfile *objfile)
       else if (build_id_name != NULL)
         return build_id_name;
     }
+  return NULL;
+}
+
+char *
+find_separate_debug_file_by_debuglink (struct objfile *objfile)
+{
+  asection *sect;
+  char *basename, *name_copy, *debugdir;
+  char *dir = NULL;
+  char *debugfile = NULL;
+  char *canon_name = NULL;
+  bfd_size_type debuglink_size;
+  unsigned long crc32;
+  int i;
 
   basename = get_debug_link_info (objfile, &crc32);
 
@@ -2320,204 +2317,216 @@ reread_symbols (void)
 
   for (objfile = object_files; objfile; objfile = objfile->next)
     {
-      if (objfile->obfd)
-	{
+      /* solib-sunos.c creates one objfile with obfd.  */
+      if (objfile->obfd == NULL)
+	continue;
+
+      /* Separate debug objfiles are handled in the main objfile.  */
+      if (objfile->separate_debug_objfile_backlink)
+	continue;
+
 #ifdef DEPRECATED_IBM6000_TARGET
-	  /* If this object is from a shared library, then you should
-	     stat on the library name, not member name. */
+      /* If this object is from a shared library, then you should
+	 stat on the library name, not member name. */
 
-	  if (objfile->obfd->my_archive)
-	    res = stat (objfile->obfd->my_archive->filename, &new_statbuf);
-	  else
+      if (objfile->obfd->my_archive)
+	res = stat (objfile->obfd->my_archive->filename, &new_statbuf);
+      else
 #endif
-	    res = stat (objfile->name, &new_statbuf);
-	  if (res != 0)
+	res = stat (objfile->name, &new_statbuf);
+      if (res != 0)
+	{
+	  /* FIXME, should use print_sys_errmsg but it's not filtered. */
+	  printf_unfiltered (_("`%s' has disappeared; keeping its symbols.\n"),
+			     objfile->name);
+	  continue;
+	}
+      new_modtime = new_statbuf.st_mtime;
+      if (new_modtime != objfile->mtime)
+	{
+	  struct cleanup *old_cleanups;
+	  struct section_offsets *offsets;
+	  int num_offsets;
+	  char *obfd_filename;
+
+	  printf_unfiltered (_("`%s' has changed; re-reading symbols.\n"),
+			     objfile->name);
+
+	  /* There are various functions like symbol_file_add,
+	     symfile_bfd_open, syms_from_objfile, etc., which might
+	     appear to do what we want.  But they have various other
+	     effects which we *don't* want.  So we just do stuff
+	     ourselves.  We don't worry about mapped files (for one thing,
+	     any mapped file will be out of date).  */
+
+	  /* If we get an error, blow away this objfile (not sure if
+	     that is the correct response for things like shared
+	     libraries).  */
+	  old_cleanups = make_cleanup_free_objfile (objfile);
+	  /* We need to do this whenever any symbols go away.  */
+	  make_cleanup (clear_symtab_users_cleanup, 0 /*ignore*/);
+
+	  if (exec_bfd != NULL && strcmp (bfd_get_filename (objfile->obfd),
+					  bfd_get_filename (exec_bfd)) == 0)
 	    {
-	      /* FIXME, should use print_sys_errmsg but it's not filtered. */
-	      printf_unfiltered (_("`%s' has disappeared; keeping its symbols.\n"),
-			       objfile->name);
-	      continue;
+	      /* Reload EXEC_BFD without asking anything.  */
+
+	      exec_file_attach (bfd_get_filename (objfile->obfd), 0);
 	    }
-	  new_modtime = new_statbuf.st_mtime;
-	  if (new_modtime != objfile->mtime)
+
+	  /* Clean up any state BFD has sitting around.  We don't need
+	     to close the descriptor but BFD lacks a way of closing the
+	     BFD without closing the descriptor.  */
+	  obfd_filename = bfd_get_filename (objfile->obfd);
+	  if (!bfd_close (objfile->obfd))
+	    error (_("Can't close BFD for %s: %s"), objfile->name,
+		   bfd_errmsg (bfd_get_error ()));
+	  if (remote_filename_p (obfd_filename))
+	    objfile->obfd = remote_bfd_open (obfd_filename, gnutarget);
+	  else
+	    objfile->obfd = bfd_openr (obfd_filename, gnutarget);
+	  if (objfile->obfd == NULL)
+	    error (_("Can't open %s to read symbols."), objfile->name);
+	  else
+	    objfile->obfd = gdb_bfd_ref (objfile->obfd);
+	  /* bfd_openr sets cacheable to true, which is what we want.  */
+	  if (!bfd_check_format (objfile->obfd, bfd_object))
+	    error (_("Can't read symbols from %s: %s."), objfile->name,
+		   bfd_errmsg (bfd_get_error ()));
+
+	  /* Save the offsets, we will nuke them with the rest of the
+	     objfile_obstack.  */
+	  num_offsets = objfile->num_sections;
+	  offsets = ((struct section_offsets *)
+		     alloca (SIZEOF_N_SECTION_OFFSETS (num_offsets)));
+	  memcpy (offsets, objfile->section_offsets,
+		  SIZEOF_N_SECTION_OFFSETS (num_offsets));
+
+	  /* Remove any references to this objfile in the global
+	     value lists.  */
+	  preserve_values (objfile);
+
+	  /* Nuke all the state that we will re-read.  Much of the following
+	     code which sets things to NULL really is necessary to tell
+	     other parts of GDB that there is nothing currently there.
+
+	     Try to keep the freeing order compatible with free_objfile.  */
+
+	  if (objfile->sf != NULL)
 	    {
-	      struct cleanup *old_cleanups;
-	      struct section_offsets *offsets;
-	      int num_offsets;
-	      char *obfd_filename;
-
-	      printf_unfiltered (_("`%s' has changed; re-reading symbols.\n"),
-			       objfile->name);
-
-	      /* There are various functions like symbol_file_add,
-	         symfile_bfd_open, syms_from_objfile, etc., which might
-	         appear to do what we want.  But they have various other
-	         effects which we *don't* want.  So we just do stuff
-	         ourselves.  We don't worry about mapped files (for one thing,
-	         any mapped file will be out of date).  */
-
-	      /* If we get an error, blow away this objfile (not sure if
-	         that is the correct response for things like shared
-	         libraries).  */
-	      old_cleanups = make_cleanup_free_objfile (objfile);
-	      /* We need to do this whenever any symbols go away.  */
-	      make_cleanup (clear_symtab_users_cleanup, 0 /*ignore*/);
-
-	      if (exec_bfd != NULL && strcmp (bfd_get_filename (objfile->obfd),
-					      bfd_get_filename (exec_bfd)) == 0)
-		{
-		  /* Reload EXEC_BFD without asking anything.  */
-
-		  exec_file_attach (bfd_get_filename (objfile->obfd), 0);
-		}
-
-	      /* Clean up any state BFD has sitting around.  We don't need
-	         to close the descriptor but BFD lacks a way of closing the
-	         BFD without closing the descriptor.  */
-	      obfd_filename = bfd_get_filename (objfile->obfd);
-	      if (!bfd_close (objfile->obfd))
-		error (_("Can't close BFD for %s: %s"), objfile->name,
-		       bfd_errmsg (bfd_get_error ()));
-	      if (remote_filename_p (obfd_filename))
-		objfile->obfd = remote_bfd_open (obfd_filename, gnutarget);
-	      else
-		objfile->obfd = bfd_openr (obfd_filename, gnutarget);
-	      if (objfile->obfd == NULL)
-		error (_("Can't open %s to read symbols."), objfile->name);
-	      else
-		objfile->obfd = gdb_bfd_ref (objfile->obfd);
-	      /* bfd_openr sets cacheable to true, which is what we want.  */
-	      if (!bfd_check_format (objfile->obfd, bfd_object))
-		error (_("Can't read symbols from %s: %s."), objfile->name,
-		       bfd_errmsg (bfd_get_error ()));
-
-	      /* Save the offsets, we will nuke them with the rest of the
-	         objfile_obstack.  */
-	      num_offsets = objfile->num_sections;
-	      offsets = ((struct section_offsets *)
-			 alloca (SIZEOF_N_SECTION_OFFSETS (num_offsets)));
-	      memcpy (offsets, objfile->section_offsets,
-		      SIZEOF_N_SECTION_OFFSETS (num_offsets));
-
-	      /* Remove any references to this objfile in the global
-		 value lists.  */
-	      preserve_values (objfile);
-
-	      /* Nuke all the state that we will re-read.  Much of the following
-	         code which sets things to NULL really is necessary to tell
-	         other parts of GDB that there is nothing currently there.
-		 
-		 Try to keep the freeing order compatible with free_objfile.  */
-
-	      if (objfile->sf != NULL)
-		{
-		  (*objfile->sf->sym_finish) (objfile);
-		}
-
-	      clear_objfile_data (objfile);
-
-	      /* FIXME: Do we have to free a whole linked list, or is this
-	         enough?  */
-	      if (objfile->global_psymbols.list)
-		xfree (objfile->global_psymbols.list);
-	      memset (&objfile->global_psymbols, 0,
-		      sizeof (objfile->global_psymbols));
-	      if (objfile->static_psymbols.list)
-		xfree (objfile->static_psymbols.list);
-	      memset (&objfile->static_psymbols, 0,
-		      sizeof (objfile->static_psymbols));
-
-	      /* Free the obstacks for non-reusable objfiles */
-	      bcache_xfree (objfile->psymbol_cache);
-	      objfile->psymbol_cache = bcache_xmalloc ();
-	      bcache_xfree (objfile->macro_cache);
-	      objfile->macro_cache = bcache_xmalloc ();
-	      bcache_xfree (objfile->filename_cache);
-	      objfile->filename_cache = bcache_xmalloc ();
-	      if (objfile->demangled_names_hash != NULL)
-		{
-		  htab_delete (objfile->demangled_names_hash);
-		  objfile->demangled_names_hash = NULL;
-		}
-	      obstack_free (&objfile->objfile_obstack, 0);
-	      objfile->sections = NULL;
-	      objfile->symtabs = NULL;
-	      objfile->psymtabs = NULL;
-	      objfile->psymtabs_addrmap = NULL;
-	      objfile->free_psymtabs = NULL;
-	      objfile->cp_namespace_symtab = NULL;
-	      objfile->msymbols = NULL;
-	      objfile->deprecated_sym_private = NULL;
-	      objfile->minimal_symbol_count = 0;
-	      memset (&objfile->msymbol_hash, 0,
-		      sizeof (objfile->msymbol_hash));
-	      memset (&objfile->msymbol_demangled_hash, 0,
-		      sizeof (objfile->msymbol_demangled_hash));
-
-	      objfile->psymbol_cache = bcache_xmalloc ();
-	      objfile->macro_cache = bcache_xmalloc ();
-	      objfile->filename_cache = bcache_xmalloc ();
-	      /* obstack_init also initializes the obstack so it is
-	         empty.  We could use obstack_specify_allocation but
-	         gdb_obstack.h specifies the alloc/dealloc
-	         functions.  */
-	      obstack_init (&objfile->objfile_obstack);
-	      if (build_objfile_section_table (objfile))
-		{
-		  error (_("Can't find the file sections in `%s': %s"),
-			 objfile->name, bfd_errmsg (bfd_get_error ()));
-		}
-              terminate_minimal_symbol_table (objfile);
-
-	      /* We use the same section offsets as from last time.  I'm not
-	         sure whether that is always correct for shared libraries.  */
-	      objfile->section_offsets = (struct section_offsets *)
-		obstack_alloc (&objfile->objfile_obstack,
-			       SIZEOF_N_SECTION_OFFSETS (num_offsets));
-	      memcpy (objfile->section_offsets, offsets,
-		      SIZEOF_N_SECTION_OFFSETS (num_offsets));
-	      objfile->num_sections = num_offsets;
-
-	      /* What the hell is sym_new_init for, anyway?  The concept of
-	         distinguishing between the main file and additional files
-	         in this way seems rather dubious.  */
-	      if (objfile == symfile_objfile)
-		{
-		  (*objfile->sf->sym_new_init) (objfile);
-		}
-
-	      (*objfile->sf->sym_init) (objfile);
-	      clear_complaints (&symfile_complaints, 1, 1);
-	      /* The "mainline" parameter is a hideous hack; I think leaving it
-	         zero is OK since dbxread.c also does what it needs to do if
-	         objfile->global_psymbols.size is 0.  */
-	      (*objfile->sf->sym_read) (objfile, 0);
-	      if (!objfile_has_symbols (objfile))
-		{
-		  wrap_here ("");
-		  printf_unfiltered (_("(no debugging symbols found)\n"));
-		  wrap_here ("");
-		}
-
-	      /* We're done reading the symbol file; finish off complaints.  */
-	      clear_complaints (&symfile_complaints, 0, 1);
-
-	      /* Getting new symbols may change our opinion about what is
-	         frameless.  */
-
-	      reinit_frame_cache ();
-
-	      /* Discard cleanups as symbol reading was successful.  */
-	      discard_cleanups (old_cleanups);
-
-	      /* If the mtime has changed between the time we set new_modtime
-	         and now, we *want* this to be out of date, so don't call stat
-	         again now.  */
-	      objfile->mtime = new_modtime;
-	      reread_one = 1;
-              reread_separate_symbols (objfile);
-	      init_entry_point_info (objfile);
+	      (*objfile->sf->sym_finish) (objfile);
 	    }
+
+	  clear_objfile_data (objfile);
+
+	  /* Free the separate debug objfile if there is one.  It will be
+	     automatically recreated by sym_read.  */
+	  if (objfile->separate_debug_objfile)
+	    {
+	      /* Note: no need to clear separate_debug_objfile field as it is
+		 done by free_objfile.  */
+	      free_objfile (objfile->separate_debug_objfile);
+	    }
+
+	  /* FIXME: Do we have to free a whole linked list, or is this
+	     enough?  */
+	  if (objfile->global_psymbols.list)
+	    xfree (objfile->global_psymbols.list);
+	  memset (&objfile->global_psymbols, 0,
+		  sizeof (objfile->global_psymbols));
+	  if (objfile->static_psymbols.list)
+	    xfree (objfile->static_psymbols.list);
+	  memset (&objfile->static_psymbols, 0,
+		  sizeof (objfile->static_psymbols));
+
+	  /* Free the obstacks for non-reusable objfiles */
+	  bcache_xfree (objfile->psymbol_cache);
+	  objfile->psymbol_cache = bcache_xmalloc ();
+	  bcache_xfree (objfile->macro_cache);
+	  objfile->macro_cache = bcache_xmalloc ();
+	  bcache_xfree (objfile->filename_cache);
+	  objfile->filename_cache = bcache_xmalloc ();
+	  if (objfile->demangled_names_hash != NULL)
+	    {
+	      htab_delete (objfile->demangled_names_hash);
+	      objfile->demangled_names_hash = NULL;
+	    }
+	  obstack_free (&objfile->objfile_obstack, 0);
+	  objfile->sections = NULL;
+	  objfile->symtabs = NULL;
+	  objfile->psymtabs = NULL;
+	  objfile->psymtabs_addrmap = NULL;
+	  objfile->free_psymtabs = NULL;
+	  objfile->cp_namespace_symtab = NULL;
+	  objfile->msymbols = NULL;
+	  objfile->deprecated_sym_private = NULL;
+	  objfile->minimal_symbol_count = 0;
+	  memset (&objfile->msymbol_hash, 0,
+		  sizeof (objfile->msymbol_hash));
+	  memset (&objfile->msymbol_demangled_hash, 0,
+		  sizeof (objfile->msymbol_demangled_hash));
+
+	  objfile->psymbol_cache = bcache_xmalloc ();
+	  objfile->macro_cache = bcache_xmalloc ();
+	  objfile->filename_cache = bcache_xmalloc ();
+	  /* obstack_init also initializes the obstack so it is
+	     empty.  We could use obstack_specify_allocation but
+	     gdb_obstack.h specifies the alloc/dealloc
+	     functions.  */
+	  obstack_init (&objfile->objfile_obstack);
+	  if (build_objfile_section_table (objfile))
+	    {
+	      error (_("Can't find the file sections in `%s': %s"),
+		     objfile->name, bfd_errmsg (bfd_get_error ()));
+	    }
+	  terminate_minimal_symbol_table (objfile);
+
+	  /* We use the same section offsets as from last time.  I'm not
+	     sure whether that is always correct for shared libraries.  */
+	  objfile->section_offsets = (struct section_offsets *)
+	    obstack_alloc (&objfile->objfile_obstack,
+			   SIZEOF_N_SECTION_OFFSETS (num_offsets));
+	  memcpy (objfile->section_offsets, offsets,
+		  SIZEOF_N_SECTION_OFFSETS (num_offsets));
+	  objfile->num_sections = num_offsets;
+
+	  /* What the hell is sym_new_init for, anyway?  The concept of
+	     distinguishing between the main file and additional files
+	     in this way seems rather dubious.  */
+	  if (objfile == symfile_objfile)
+	    {
+	      (*objfile->sf->sym_new_init) (objfile);
+	    }
+
+	  (*objfile->sf->sym_init) (objfile);
+	  clear_complaints (&symfile_complaints, 1, 1);
+	  /* Do not set flags as this is safe and we don't want to be
+             verbose.  */
+	  (*objfile->sf->sym_read) (objfile, 0);
+	  if (!objfile_has_symbols (objfile))
+	    {
+	      wrap_here ("");
+	      printf_unfiltered (_("(no debugging symbols found)\n"));
+	      wrap_here ("");
+	    }
+
+	  /* We're done reading the symbol file; finish off complaints.  */
+	  clear_complaints (&symfile_complaints, 0, 1);
+
+	  /* Getting new symbols may change our opinion about what is
+	     frameless.  */
+
+	  reinit_frame_cache ();
+
+	  /* Discard cleanups as symbol reading was successful.  */
+	  discard_cleanups (old_cleanups);
+
+	  /* If the mtime has changed between the time we set new_modtime
+	     and now, we *want* this to be out of date, so don't call stat
+	     again now.  */
+	  objfile->mtime = new_modtime;
+	  reread_one = 1;
+	  init_entry_point_info (objfile);
 	}
     }
 
@@ -2532,73 +2541,6 @@ reread_symbols (void)
       observer_notify_executable_changed ();
     }
 }
-
-
-/* Handle separate debug info for OBJFILE, which has just been
-   re-read:
-   - If we had separate debug info before, but now we don't, get rid
-     of the separated objfile.
-   - If we didn't have separated debug info before, but now we do,
-     read in the new separated debug info file.
-   - If the debug link points to a different file, toss the old one
-     and read the new one.
-   This function does *not* handle the case where objfile is still
-   using the same separate debug info file, but that file's timestamp
-   has changed.  That case should be handled by the loop in
-   reread_symbols already.  */
-static void
-reread_separate_symbols (struct objfile *objfile)
-{
-  char *debug_file;
-  unsigned long crc32;
-
-  /* Does the updated objfile's debug info live in a
-     separate file?  */
-  debug_file = find_separate_debug_file (objfile);
-
-  if (objfile->separate_debug_objfile)
-    {
-      /* There are two cases where we need to get rid of
-         the old separated debug info objfile:
-         - if the new primary objfile doesn't have
-         separated debug info, or
-         - if the new primary objfile has separate debug
-         info, but it's under a different filename.
-
-         If the old and new objfiles both have separate
-         debug info, under the same filename, then we're
-         okay --- if the separated file's contents have
-         changed, we will have caught that when we
-         visited it in this function's outermost
-         loop.  */
-      if (! debug_file
-          || strcmp (debug_file, objfile->separate_debug_objfile->name) != 0)
-        free_objfile (objfile->separate_debug_objfile);
-    }
-
-  /* If the new objfile has separate debug info, and we
-     haven't loaded it already, do so now.  */
-  if (debug_file
-      && ! objfile->separate_debug_objfile)
-    {
-      /* Use the same section offset table as objfile itself.
-         Preserve the flags from objfile that make sense.  */
-      objfile->separate_debug_objfile
-        = (symbol_file_add_with_addrs_or_offsets
-           (symfile_bfd_open (debug_file),
-            info_verbose ? SYMFILE_VERBOSE : 0,
-            0, /* No addr table.  */
-            objfile->section_offsets, objfile->num_sections,
-            objfile->flags & (OBJF_REORDERED | OBJF_SHARED | OBJF_READNOW
-                              | OBJF_USERLOADED)));
-      objfile->separate_debug_objfile->separate_debug_objfile_backlink
-        = objfile;
-    }
-  if (debug_file)
-    xfree (debug_file);
-}
-
-
 
 
 

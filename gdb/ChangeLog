@@ -1,3 +1,20 @@
+2009-12-09  Tristan Gingold  <gingold@adacore.com>
+
+	* symfile.h (symbol_file_add_separate): New prototype.
+	(find_separate_debug_file_by_buildid): Ditto.
+	(find_separate_debug_file_by_debuglink): Ditto.
+	* symfile.c (reread_separate_symbols): Remove.
+	(find_separate_debug_file): Split into ...
+	(find_separate_debug_file_by_buildid): ... this and ...
+	(find_separate_debug_file_by_debuglink): ... this.
+	(symbol_file_add_with_addrs_or_offsets): Do not save orig_addrs.
+	Remove separate debug file handling.
+	(symbol_file_add_separate): New function.
+	(reread_symbols): Do not considere separate debug files, but free
+	them while handling their parent.  Reindent.
+	* coffread.c (coff_symfile_read): Handle separate object file.
+	* elfread.c (elf_symfile_read): Ditto.
+
 2009-12-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* acinclude.m4: Update comment.

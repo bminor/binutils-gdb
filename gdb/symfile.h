@@ -238,6 +238,13 @@ extern struct objfile *symbol_file_add_from_bfd (bfd *, int,
                                                  struct section_addr_info *,
                                                  int);
 
+extern void symbol_file_add_separate (bfd *bfd, int symfile_flags,
+				      struct objfile *objfile);
+
+extern char *find_separate_debug_file_by_buildid (struct objfile *objfile);
+
+extern char *find_separate_debug_file_by_debuglink (struct objfile *objfile);
+
 /* Create a new section_addr_info, with room for NUM_SECTIONS.  */
 
 extern struct section_addr_info *alloc_section_addr_info (size_t

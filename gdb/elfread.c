@@ -737,6 +737,26 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
   /* FIXME: kettenis/20030504: This still needs to be integrated with
      dwarf2read.c in a better way.  */
   dwarf2_build_frame_info (objfile);
+
+  /* If the file has its own symbol tables it has no separate debug info.
+     `.dynsym'/`.symtab' go to MSYMBOLS, `.debug_info' goes to SYMTABS/PSYMTABS.
+     `.gnu_debuglink' may no longer be present with `.note.gnu.build-id'.  */
+  if (!objfile_has_partial_symbols (objfile))
+    {
+      char *debugfile;
+
+      debugfile = find_separate_debug_file_by_buildid (objfile);
+
+      if (debugfile == NULL)
+	debugfile = find_separate_debug_file_by_debuglink (objfile);
+
+      if (debugfile)
+	{
+	  bfd *abfd = symfile_bfd_open (debugfile);
+	  symbol_file_add_separate (abfd, symfile_flags, objfile);
+	  xfree (debugfile);
+	}
+    }
 }
 
 /* This cleans up the objfile's deprecated_sym_stab_info pointer, and
