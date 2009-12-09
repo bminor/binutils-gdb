@@ -1,3 +1,10 @@
+2009-12-09  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/11012
+	* emulparams/elf64ppc.sh (OTHER_GOT_RELOC_SECTIONS): Move .rela.opd ..
+	(INITIAL_RELOC_SECTIONS): .. to here.  New define.
+	* scripttempl/elf.sc: Expand INITIAL_RELOC_SECTIONS.
+
 2009-12-04  Jie Zhang  <jie.zhang@analog.com>
 
 	* ld.texinfo: Make it clear that --nmagic disables linking
