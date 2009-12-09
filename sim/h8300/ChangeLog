@@ -1,3 +1,9 @@
+2009-12-09  Yoshinori Sato <ysato@users.sourceforge.jp>
+	* compile.c(fetch_1): Fix pre-dec, pre-inc, post-dec and post-inc.
+	Index registers not masked memory areas.
+	Only simply increment or decrement.
+	* compile.c(store_1): Ditto.
+
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* config.in: Regenerate.
