@@ -641,11 +641,11 @@ macho_symfile_read (struct objfile *objfile, int symfile_flags)
 	  VEC_free (oso_el, oso_vector);
 	  oso_vector = NULL;
 
-	  /* Now recurse: read dwarf from dsym.  */
-	  symbol_file_add_from_bfd (dsym_bfd, 0, NULL, 0);
+	  /* Add the dsym file as a separate file.  */
+          symbol_file_add_separate (dsym_bfd, symfile_flags, objfile);
       
 	  /* Don't try to read dwarf2 from main file or shared libraries.  */
-	  return;
+          return;
 	}
     }
 

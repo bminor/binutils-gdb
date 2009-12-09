@@ -1,3 +1,8 @@
+2009-12-03  Tristan Gingold  <gingold@adacore.com>
+
+	* machoread.c (macho_symfile_read): Use symbol_file_add_separate
+	to add dsym files.
+
 2009-12-09  Tristan Gingold  <gingold@adacore.com>
 
 	* symfile.h (symbol_file_add_separate): New prototype.
