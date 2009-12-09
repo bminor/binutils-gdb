@@ -1,3 +1,14 @@
+2009-12-09  Tristan Gingold  <gingold@adacore.com>
+
+	* addr2line.c (translate_addresses): Display addresses
+	if option -a is used.
+	(with_addresses): New variable.
+	(long_options): Add option '-a'.
+	(usage): Add usage for option '-a'.
+	(main): Handle option '-a'.
+	* doc/binutils.texi (addr2line): Document option '-a'.
+	* NEWS: Mention new feature.
+
 2009-12-08  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf.c (dwarf_select_sections_by_names): Handle pubtypes correctly.

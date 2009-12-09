@@ -2906,7 +2906,8 @@ c++filt @var{option} @var{symbol}
 
 @smallexample
 @c man begin SYNOPSIS addr2line
-addr2line [@option{-b} @var{bfdname}|@option{--target=}@var{bfdname}]
+addr2line [@option{-a}|@option{--addresses}]
+          [@option{-b} @var{bfdname}|@option{--target=}@var{bfdname}]
           [@option{-C}|@option{--demangle}[=@var{style}]]
           [@option{-e} @var{filename}|@option{--exe=}@var{filename}]
           [@option{-f}|@option{--functions}] [@option{-s}|@option{--basename}]
@@ -2943,7 +2944,8 @@ The format of the output is @samp{FILENAME:LINENO}.  The file name and
 line number for each address is printed on a separate line.  If the
 @command{-f} option is used, then each @samp{FILENAME:LINENO} line is
 preceded by a @samp{FUNCTIONNAME} line which is the name of the function
-containing the address.
+containing the address.  If the @command{-a} option is used, then the
+address read is first printed.
 
 If the file name or function name can not be determined,
 @command{addr2line} will print two question marks in their place.  If the
@@ -2957,6 +2959,12 @@ The long and short forms of options, shown here as alternatives, are
 equivalent.
 
 @table @env
+@item -a
+@itemx --addresses
+Display address before function names or file and line number
+information.  The address is printed with a @samp{0x} prefix to easily
+identify it.
+
 @item -b @var{bfdname}
 @itemx --target=@var{bfdname}
 @cindex object code format
