@@ -8316,7 +8316,7 @@ if test "${with_libiconv_prefix+set}" = set; then :
 fi
 
 
-  BUILD_LIBICONV_LIBDIR="-L../libiconv/lib/.libs -L../libiconv/lib/_libs"
+  BUILD_LIBICONV_LIBDIRS="../libiconv/lib/.libs ../libiconv/lib/_libs"
   BUILD_LIBICONV_INCLUDE="-I../libiconv/include"
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for iconv" >&5
@@ -8332,11 +8332,12 @@ else
     # If libiconv is part of the build tree, then try using it over
     # any system iconv.
     if test -d ../libiconv; then
-      am_save_LIBS="$LIBS"
-      am_save_CPPFLAGS="$CPPFLAGS"
-      LIBS="$LIBS $BUILD_LIBICONV_LIBDIR -liconv"
-      CPPFLAGS="$CPPFLAGS $BUILD_LIBICONV_INCLUDE"
-      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+      for lib_dir in $BUILD_LIBICONV_LIBDIRS; do
+        am_save_LIBS="$LIBS"
+        am_save_CPPFLAGS="$CPPFLAGS"
+        LIBS="$LIBS $lib_dir/libiconv.a"
+        CPPFLAGS="$CPPFLAGS $BUILD_LIBICONV_INCLUDE"
+        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <stdlib.h>
 #include <iconv.h>
@@ -8344,21 +8345,26 @@ int
 main ()
 {
 iconv_t cd = iconv_open("","");
-         iconv(cd,NULL,NULL,NULL,NULL);
-         iconv_close(cd);
+           iconv(cd,NULL,NULL,NULL,NULL);
+           iconv_close(cd);
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
   am_cv_use_build_libiconv=yes
-        am_cv_lib_iconv=yes
-        am_cv_func_iconv=yes
+          am_cv_lib_iconv=yes
+          am_cv_func_iconv=yes
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-      LIBS="$am_save_LIBS"
-      CPPFLAGS="$am_save_CPPFLAGS"
+        LIBS="$am_save_LIBS"
+        CPPFLAGS="$am_save_CPPFLAGS"
+        if test "$am_cv_use_build_libiconv" = "yes"; then
+          BUILD_LIBICONV_LIBDIR=$lib_dir
+          break
+        fi
+      done
     fi
 
     # Next, try to find iconv in libc.
@@ -8432,7 +8438,8 @@ $as_echo "$am_cv_func_iconv" >&6; }
     LIBICONV_INCLUDE=
   fi
   if test "$am_cv_use_build_libiconv" = yes; then
-    LIBICONV_LIBDIR="$BUILD_LIBICONV_LIBDIR"
+    LIBICONV="$BUILD_LIBICONV_LIBDIR/libiconv.a"
+    LIBICONV_LIBDIR=""
     LIBICONV_INCLUDE="$BUILD_LIBICONV_INCLUDE"
   fi
   CPPFLAGS="$CPPFLAGS $LIBICONV_INCLUDE"

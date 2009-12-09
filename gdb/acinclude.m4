@@ -184,7 +184,7 @@ AC_DEFUN([AM_ICONV],
     done
    ])
 
-  BUILD_LIBICONV_LIBDIR="-L../libiconv/lib/.libs -L../libiconv/lib/_libs"
+  BUILD_LIBICONV_LIBDIRS="../libiconv/lib/.libs ../libiconv/lib/_libs"
   BUILD_LIBICONV_INCLUDE="-I../libiconv/include"
 
   AC_CACHE_CHECK(for iconv, am_cv_func_iconv, [
@@ -195,20 +195,26 @@ AC_DEFUN([AM_ICONV],
     # If libiconv is part of the build tree, then try using it over
     # any system iconv.
     if test -d ../libiconv; then
-      am_save_LIBS="$LIBS"
-      am_save_CPPFLAGS="$CPPFLAGS"
-      LIBS="$LIBS $BUILD_LIBICONV_LIBDIR -liconv"
-      CPPFLAGS="$CPPFLAGS $BUILD_LIBICONV_INCLUDE"
-      AC_TRY_LINK([#include <stdlib.h>
+      for lib_dir in $BUILD_LIBICONV_LIBDIRS; do
+        am_save_LIBS="$LIBS"
+        am_save_CPPFLAGS="$CPPFLAGS"
+        LIBS="$LIBS $lib_dir/libiconv.a"
+        CPPFLAGS="$CPPFLAGS $BUILD_LIBICONV_INCLUDE"
+        AC_TRY_LINK([#include <stdlib.h>
 #include <iconv.h>],
-        [iconv_t cd = iconv_open("","");
-         iconv(cd,NULL,NULL,NULL,NULL);
-         iconv_close(cd);],
-	am_cv_use_build_libiconv=yes
-        am_cv_lib_iconv=yes
-        am_cv_func_iconv=yes)
-      LIBS="$am_save_LIBS"
-      CPPFLAGS="$am_save_CPPFLAGS"
+          [iconv_t cd = iconv_open("","");
+           iconv(cd,NULL,NULL,NULL,NULL);
+           iconv_close(cd);],
+          am_cv_use_build_libiconv=yes
+          am_cv_lib_iconv=yes
+          am_cv_func_iconv=yes)
+        LIBS="$am_save_LIBS"
+        CPPFLAGS="$am_save_CPPFLAGS"
+        if test "$am_cv_use_build_libiconv" = "yes"; then
+          BUILD_LIBICONV_LIBDIR=$lib_dir
+          break
+        fi
+      done
     fi
 
     # Next, try to find iconv in libc.
@@ -253,7 +259,8 @@ AC_DEFUN([AM_ICONV],
     LIBICONV_INCLUDE=
   fi
   if test "$am_cv_use_build_libiconv" = yes; then
-    LIBICONV_LIBDIR="$BUILD_LIBICONV_LIBDIR"
+    LIBICONV="$BUILD_LIBICONV_LIBDIR/libiconv.a"
+    LIBICONV_LIBDIR=""
     LIBICONV_INCLUDE="$BUILD_LIBICONV_INCLUDE"
   fi
   CPPFLAGS="$CPPFLAGS $LIBICONV_INCLUDE"
