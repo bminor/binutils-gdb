@@ -2931,11 +2931,17 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 				      NEGATIVE_BIT_SET ? "-" : "",
 				      arm_regnames[given & 0xf]);
 
-			      /* Writeback is automatically implied by post- addressing.
-				 Setting the W bit is unnecessary and ARM specify it as
-				 being unpredictable.  */
-			      if (WRITEBACK_BIT_SET && ! allow_unpredictable)
-				func (stream, UNPREDICTABLE_INSTRUCTION);
+			      if (! allow_unpredictable)
+				{
+				  /* Writeback is automatically implied by post- addressing.
+				     Setting the W bit is unnecessary and ARM specify it as
+				     being unpredictable.  */
+				  if (WRITEBACK_BIT_SET
+				      /* Specifying the PC register as the post-indexed
+					 registers is also unpredictable.  */
+				      || ((given & 0xf) == 0xf))
+				    func (stream, UNPREDICTABLE_INSTRUCTION);
+				}
 			    }
 			}
 		      break;
