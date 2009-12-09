@@ -73,16 +73,17 @@ AR = ar
 ARFLAGS = cru
 libgold_a_AR = $(AR) $(ARFLAGS)
 libgold_a_DEPENDENCIES = $(LIBOBJS)
-am__objects_1 = archive.$(OBJEXT) binary.$(OBJEXT) common.$(OBJEXT) \
-	compressed_output.$(OBJEXT) copy-relocs.$(OBJEXT) \
-	cref.$(OBJEXT) defstd.$(OBJEXT) descriptors.$(OBJEXT) \
-	dirsearch.$(OBJEXT) dynobj.$(OBJEXT) dwarf_reader.$(OBJEXT) \
-	ehframe.$(OBJEXT) errors.$(OBJEXT) expression.$(OBJEXT) \
-	fileread.$(OBJEXT) gc.$(OBJEXT) gold.$(OBJEXT) \
-	gold-threads.$(OBJEXT) icf.$(OBJEXT) incremental.$(OBJEXT) \
-	layout.$(OBJEXT) mapfile.$(OBJEXT) merge.$(OBJEXT) \
-	object.$(OBJEXT) options.$(OBJEXT) output.$(OBJEXT) \
-	parameters.$(OBJEXT) plugin.$(OBJEXT) readsyms.$(OBJEXT) \
+am__objects_1 = archive.$(OBJEXT) attributes.$(OBJEXT) \
+	binary.$(OBJEXT) common.$(OBJEXT) compressed_output.$(OBJEXT) \
+	copy-relocs.$(OBJEXT) cref.$(OBJEXT) defstd.$(OBJEXT) \
+	descriptors.$(OBJEXT) dirsearch.$(OBJEXT) dynobj.$(OBJEXT) \
+	dwarf_reader.$(OBJEXT) ehframe.$(OBJEXT) errors.$(OBJEXT) \
+	expression.$(OBJEXT) fileread.$(OBJEXT) gc.$(OBJEXT) \
+	gold.$(OBJEXT) gold-threads.$(OBJEXT) icf.$(OBJEXT) \
+	incremental.$(OBJEXT) int_encoding.$(OBJEXT) layout.$(OBJEXT) \
+	mapfile.$(OBJEXT) merge.$(OBJEXT) object.$(OBJEXT) \
+	options.$(OBJEXT) output.$(OBJEXT) parameters.$(OBJEXT) \
+	plugin.$(OBJEXT) readsyms.$(OBJEXT) \
 	reduced_debug_output.$(OBJEXT) reloc.$(OBJEXT) \
 	resolve.$(OBJEXT) script-sections.$(OBJEXT) script.$(OBJEXT) \
 	stringpool.$(OBJEXT) symtab.$(OBJEXT) target.$(OBJEXT) \
@@ -352,6 +353,7 @@ am__skipyacc =
 noinst_LIBRARIES = libgold.a
 CCFILES = \
 	archive.cc \
+	attributes.cc \
 	binary.cc \
 	common.cc \
 	compressed_output.cc \
@@ -371,6 +373,7 @@ CCFILES = \
 	gold-threads.cc \
 	icf.cc \
 	incremental.cc \
+	int_encoding.cc \
 	layout.cc \
 	mapfile.cc \
 	merge.cc \
@@ -395,6 +398,7 @@ CCFILES = \
 
 HFILES = \
 	archive.h \
+	attributes.h \
 	binary.h \
 	common.h \
 	compressed_output.h \
@@ -413,6 +417,7 @@ HFILES = \
 	gold.h \
 	gold-threads.h \
 	icf.h \
+	int_encoding.h \
 	layout.h \
 	mapfile.h \
 	merge.h \
@@ -592,6 +597,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/pread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/archive.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arm.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/attributes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binary.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compressed_output.Po@am__quote@
@@ -613,6 +619,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/icf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/incremental-dump.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/incremental.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/int_encoding.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/layout.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mapfile.Po@am__quote@

@@ -31,76 +31,9 @@
 #include "parameters.h"
 #include "reloc.h"
 #include "dwarf_reader.h"
+#include "int_encoding.h"
 
 namespace gold {
-
-// Read an unsigned LEB128 number.  Each byte contains 7 bits of
-// information, plus one bit saying whether the number continues or
-// not.
-
-uint64_t
-read_unsigned_LEB_128(const unsigned char* buffer, size_t* len)
-{
-  uint64_t result = 0;
-  size_t num_read = 0;
-  unsigned int shift = 0;
-  unsigned char byte;
-
-  do
-    {
-      if (num_read >= 64 / 7) 
-        {
-          gold_warning(_("Unusually large LEB128 decoded, "
-			 "debug information may be corrupted"));
-          break;
-        }
-      byte = *buffer++;
-      num_read++;
-      result |= (static_cast<uint64_t>(byte & 0x7f)) << shift;
-      shift += 7;
-    }
-  while (byte & 0x80);
-
-  *len = num_read;
-
-  return result;
-}
-
-// Read a signed LEB128 number.  These are like regular LEB128
-// numbers, except the last byte may have a sign bit set.
-
-int64_t
-read_signed_LEB_128(const unsigned char* buffer, size_t* len)
-{
-  int64_t result = 0;
-  int shift = 0;
-  size_t num_read = 0;
-  unsigned char byte;
-
-  do
-    {
-      if (num_read >= 64 / 7) 
-        {
-          gold_warning(_("Unusually large LEB128 decoded, "
-			 "debug information may be corrupted"));
-          break;
-        }
-      byte = *buffer++;
-      num_read++;
-      result |= (static_cast<uint64_t>(byte & 0x7f) << shift);
-      shift += 7;
-    }
-  while (byte & 0x80);
-
-  if ((shift < 8 * static_cast<int>(sizeof(result))) && (byte & 0x40))
-    result |= -((static_cast<int64_t>(1)) << shift);
-  *len = num_read;
-  return result;
-}
-
-// This is the format of a DWARF2/3 line state machine that we process
-// opcodes using.  There is no need for anything outside the lineinfo
-// processor to know how this works.
 
 struct LineStateMachine
 {

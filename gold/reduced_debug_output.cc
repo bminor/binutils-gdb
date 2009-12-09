@@ -27,70 +27,12 @@
 #include "dwarf.h"
 #include "dwarf_reader.h"
 #include "reduced_debug_output.h"
+#include "int_encoding.h"
 
 #include <vector>
 
 namespace gold
 {
-
-void
-write_unsigned_LEB_128(std::vector<unsigned char>* buffer, uint64_t value)
-{
-  do
-    {
-      unsigned char current_byte = value & 0x7f;
-      value >>= 7;
-      if (value != 0)
-        {
-          current_byte |= 0x80;
-        }
-      buffer->push_back(current_byte);
-    }
-  while (value != 0);
-}
-
-size_t
-get_length_as_unsigned_LEB_128(uint64_t value)
-{
-  size_t length = 0;
-  do
-    {
-      unsigned char current_byte = value & 0x7f;
-      value >>= 7;
-      if (value != 0)
-        {
-          current_byte |= 0x80;
-        }
-      length++;
-    }
-  while (value != 0);
-  return length;
-}
-
-template <int valsize>
-void insert_into_vector(std::vector<unsigned char>* destination,
-                        typename elfcpp::Valtype_base<valsize>::Valtype value)
-{
-  unsigned char buffer[valsize / 8];
-  if (parameters->target().is_big_endian())
-    elfcpp::Swap_unaligned<valsize, true>::writeval(buffer, value);
-  else
-    elfcpp::Swap_unaligned<valsize, false>::writeval(buffer, value);
-  destination->insert(destination->end(), buffer, buffer + valsize / 8);
-}
-
-template <int valsize>
-typename elfcpp::Valtype_base<valsize>::Valtype
-read_from_pointer(unsigned char** source)
-{
-  typename elfcpp::Valtype_base<valsize>::Valtype return_value;
-  if (parameters->target().is_big_endian())
-    return_value = elfcpp::Swap_unaligned<valsize, true>::readval(*source);
-  else
-    return_value = elfcpp::Swap_unaligned<valsize, false>::readval(*source);
-  *source += valsize / 8;
-  return return_value;
-}
 
 // Given a pointer to the beginning of a die and the beginning of the associated
 // abbreviation fills in die_end with the end of the information entry.  If

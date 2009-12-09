@@ -39,6 +39,7 @@ noinst_LIBRARIES = libgold.a
 
 CCFILES = \
 	archive.cc \
+	attributes.cc \
 	binary.cc \
 	common.cc \
 	compressed_output.cc \
@@ -58,6 +59,7 @@ CCFILES = \
 	gold-threads.cc \
 	icf.cc \
 	incremental.cc \
+	int_encoding.cc \
 	layout.cc \
 	mapfile.cc \
 	merge.cc \
@@ -82,6 +84,7 @@ CCFILES = \
 
 HFILES = \
 	archive.h \
+	attributes.h \
 	binary.h \
 	common.h \
 	compressed_output.h \
@@ -100,6 +103,7 @@ HFILES = \
 	gold.h \
 	gold-threads.h \
 	icf.h \
+	int_encoding.h \
 	layout.h \
 	mapfile.h \
 	merge.h \

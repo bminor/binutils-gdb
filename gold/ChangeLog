@@ -1,3 +1,22 @@
+2009-12-08  Doug Kwan  <dougkwan@google.com>
+
+	* Makefile.am (CCFILES): Add attributes.cc and int_encoding.cc.
+	(HFILES): Add attributes.h and int_encoding.h.
+	* Makefile.in: Regenerate.
+	* dwarf_reader.cc (read_unsigned_LEB_128, read_signed_LEB_128): Move
+	function definitions to int_encoding.cc
+	* dwarf_reader.h (read_unsigned_LEB_128, read_signed_LEB_128): Move
+	prototypes to int_encoding.h
+	* reduced_debug_output.cc (int_encoding.h): New include.
+	(write_unsigned_LEB_128, get_length_as_unsigned_LEB_128): Move
+	function definitions to int_encoding.cc
+	(insert_into_vector, read_from_pointer): Move template definitions to
+	int_encoding.h
+	* attributes.cc: New file.
+	* attributes.h: New file.
+	* int_encoding.cc: New file.
+	* int_encoding.h: New file.
+
 2009-12-07  Rafael Avila de Espindola  <espindola@google.com>
 
 	PR gold/11055
