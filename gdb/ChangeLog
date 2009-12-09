@@ -1,5 +1,9 @@
 2009-12-09  Joel Brobecker  <brobecker@adacore.com>
 
+	* acinclude.m4: Update comment.
+
+2009-12-09  Joel Brobecker  <brobecker@adacore.com>
+
 	* acinclude.m4: Link against in-tree libiconv by adding
 	libiconv.a to the LIBS instead of using -liconv.
 	* configure: Regenerate.

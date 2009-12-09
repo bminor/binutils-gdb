@@ -169,7 +169,8 @@ case "x$am_cv_prog_cc_stdc" in
 esac
 ])
 
-dnl From Bruno Haible.
+dnl Originally from Bruno Haible, but with some modifications
+dnl for the GDB project.
 
 AC_DEFUN([AM_ICONV],
 [
