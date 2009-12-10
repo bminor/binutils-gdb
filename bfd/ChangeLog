@@ -1,3 +1,8 @@
+2009-12-10  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Correct handling
+	of undefined symbols.
+
 2009-12-09  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_next_input_section): Skip sections without

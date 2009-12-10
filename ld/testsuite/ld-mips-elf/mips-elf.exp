@@ -520,3 +520,5 @@ if { $linux_gnu } {
 	 "got-vers-1.so"}
     }
 }
+
+run_dump_test "undefined"

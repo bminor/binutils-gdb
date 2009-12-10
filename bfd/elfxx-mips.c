@@ -4973,15 +4973,17 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	     http://techpubs.sgi.com/library/manuals/4000/007-4658-001/pdf/007-4658-001.pdf  */
 	  symbol = 0;
 	}
+      else if ((*info->callbacks->undefined_symbol)
+	       (info, h->root.root.root.string, input_bfd,
+		input_section, relocation->r_offset,
+		(info->unresolved_syms_in_objects == RM_GENERATE_ERROR)
+		 || ELF_ST_VISIBILITY (h->root.other)))
+	{
+	  return bfd_reloc_undefined;
+	}
       else
 	{
-	  if (! ((*info->callbacks->undefined_symbol)
-		 (info, h->root.root.root.string, input_bfd,
-		  input_section, relocation->r_offset,
-		  (info->unresolved_syms_in_objects == RM_GENERATE_ERROR)
-		   || ELF_ST_VISIBILITY (h->root.other))))
-	    return bfd_reloc_undefined;
-	  symbol = 0;
+	  return bfd_reloc_notsupported;
 	}
 
       target_is_16_bit_code_p = ELF_ST_IS_MIPS16 (h->root.other);
