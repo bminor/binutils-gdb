@@ -245,6 +245,82 @@ enum
   TAG_CPU_ARCH_V4T_PLUS_V6_M = (MAX_TAG_CPU_ARCH + 1)
 };
 
+// EABI object attributes.
+enum
+{
+  // 0-3 are generic.
+  Tag_CPU_raw_name = 4,
+  Tag_CPU_name = 5,
+  Tag_CPU_arch = 6,
+  Tag_CPU_arch_profile = 7,
+  Tag_ARM_ISA_use = 8,
+  Tag_THUMB_ISA_use = 9,
+  Tag_VFP_arch = 10,
+  Tag_WMMX_arch = 11,
+  Tag_Advanced_SIMD_arch = 12,
+  Tag_PCS_config = 13,
+  Tag_ABI_PCS_R9_use = 14,
+  Tag_ABI_PCS_RW_data = 15,
+  Tag_ABI_PCS_RO_data = 16,
+  Tag_ABI_PCS_GOT_use = 17,
+  Tag_ABI_PCS_wchar_t = 18,
+  Tag_ABI_FP_rounding = 19,
+  Tag_ABI_FP_denormal = 20,
+  Tag_ABI_FP_exceptions = 21,
+  Tag_ABI_FP_user_exceptions = 22,
+  Tag_ABI_FP_number_model = 23,
+  Tag_ABI_align8_needed = 24,
+  Tag_ABI_align8_preserved = 25,
+  Tag_ABI_enum_size = 26,
+  Tag_ABI_HardFP_use = 27,
+  Tag_ABI_VFP_args = 28,
+  Tag_ABI_WMMX_args = 29,
+  Tag_ABI_optimization_goals = 30,
+  Tag_ABI_FP_optimization_goals = 31,
+  // 32 is generic (Tag_compatibility).
+  Tag_undefined33 = 33,
+  Tag_CPU_unaligned_access = 34,
+  Tag_undefined35 = 35,
+  Tag_VFP_HP_extension = 36,
+  Tag_undefined37 = 37,
+  Tag_ABI_FP_16bit_format = 38,
+  Tag_undefined39 = 39,
+  Tag_nodefaults = 64,
+  Tag_also_compatible_with = 65,
+  Tag_T2EE_use = 66,
+  Tag_conformance = 67,
+  Tag_Virtualization_use = 68,
+  Tag_undefined69 = 69,
+  Tag_MPextension_use = 70
+};
+
+// Values for Tag_ABI_PCS_R9_use.
+enum
+{
+  AEABI_R9_V6 = 0,
+  AEABI_R9_SB = 1,
+  AEABI_R9_TLS = 2,
+  AEABI_R9_unused = 3
+};
+
+// Values for Tag_ABI_PCS_RW_data.
+enum
+{
+  AEABI_PCS_RW_data_absolute = 0,
+  AEABI_PCS_RW_data_PCrel = 1,
+  AEABI_PCS_RW_data_SBrel = 2,
+  AEABI_PCS_RW_data_unused = 3
+};
+
+// Values for Tag_ABI_enum_size.
+enum
+{
+  AEABI_enum_unused = 0,
+  AEABI_enum_short = 1,
+  AEABI_enum_wide = 2,
+  AEABI_enum_forced_wide = 3
+};
+
 } // End namespace elfcpp.
 
 #endif // !defined(ELFCPP_ARM_H)

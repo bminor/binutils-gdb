@@ -46,6 +46,7 @@
 #include "tls.h"
 #include "defstd.h"
 #include "gc.h"
+#include "attributes.h"
 
 namespace
 {
@@ -892,11 +893,12 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
   Arm_relobj(const std::string& name, Input_file* input_file, off_t offset,
              const typename elfcpp::Ehdr<32, big_endian>& ehdr)
     : Sized_relobj<32, big_endian>(name, input_file, offset, ehdr),
-      stub_tables_(), local_symbol_is_thumb_function_()
+      stub_tables_(), local_symbol_is_thumb_function_(),
+      attributes_section_data_(NULL)
   { }
 
   ~Arm_relobj()
-  { }
+  { delete this->attributes_section_data_; }
  
   // Return the stub table of the SHNDX-th section if there is one.
   Stub_table<big_endian>*
@@ -950,6 +952,12 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
   processor_specific_flags() const
   { return this->processor_specific_flags_; }
 
+  // Attribute section data  This is the contents of the .ARM.attribute section
+  // if there is one.
+  const Attributes_section_data*
+  attributes_section_data() const
+  { return this->attributes_section_data_; }
+
  protected:
   // Post constructor setup.
   void
@@ -986,6 +994,8 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
   std::vector<bool> local_symbol_is_thumb_function_;
   // processor-specific flags in ELF file header.
   elfcpp::Elf_Word processor_specific_flags_;
+  // Object attributes if there is an .ARM.attributes section or NULL.
+  Attributes_section_data* attributes_section_data_;
 };
 
 // Arm_dynobj class.
@@ -997,11 +1007,11 @@ class Arm_dynobj : public Sized_dynobj<32, big_endian>
   Arm_dynobj(const std::string& name, Input_file* input_file, off_t offset,
 	     const elfcpp::Ehdr<32, big_endian>& ehdr)
     : Sized_dynobj<32, big_endian>(name, input_file, offset, ehdr),
-      processor_specific_flags_(0)
+      processor_specific_flags_(0), attributes_section_data_(NULL)
   { }
  
   ~Arm_dynobj()
-  { }
+  { delete this->attributes_section_data_; }
 
   // Downcast a base pointer to an Arm_relobj pointer.  This is
   // not type-safe but we only use Arm_relobj not the base class.
@@ -1015,6 +1025,11 @@ class Arm_dynobj : public Sized_dynobj<32, big_endian>
   processor_specific_flags() const
   { return this->processor_specific_flags_; }
 
+  // Attributes section data.
+  const Attributes_section_data*
+  attributes_section_data() const
+  { return this->attributes_section_data_; }
+
  protected:
   // Read the symbol information.
   void
@@ -1023,6 +1038,8 @@ class Arm_dynobj : public Sized_dynobj<32, big_endian>
  private:
   // processor-specific flags in ELF file header.
   elfcpp::Elf_Word processor_specific_flags_;
+  // Object attributes if there is an .ARM.attributes section or NULL.
+  Attributes_section_data* attributes_section_data_;
 };
 
 // Functor to read reloc addends during stub generation.
@@ -1143,9 +1160,9 @@ class Target_arm : public Sized_target<32, big_endian>
     : Sized_target<32, big_endian>(&arm_info),
       got_(NULL), plt_(NULL), got_plt_(NULL), rel_dyn_(NULL),
       copy_relocs_(elfcpp::R_ARM_COPY), dynbss_(NULL), stub_tables_(),
-      stub_factory_(Stub_factory::get_instance()),
-      may_use_blx_(true), should_force_pic_veneer_(false),
-      arm_input_section_map_()
+      stub_factory_(Stub_factory::get_instance()), may_use_blx_(false),
+      should_force_pic_veneer_(false), arm_input_section_map_(),
+      attributes_section_data_(NULL)
   { }
 
   // Whether we can use BLX.
@@ -1172,32 +1189,48 @@ class Target_arm : public Sized_target<32, big_endian>
   bool
   using_thumb2() const
   {
-    // FIXME:  This should not hard-coded.
-    return false;
+    Object_attribute* attr =
+      this->get_aeabi_object_attribute(elfcpp::Tag_CPU_arch);
+    int arch = attr->int_value();
+    return arch == elfcpp::TAG_CPU_ARCH_V6T2 || arch >= elfcpp::TAG_CPU_ARCH_V7;
   }
 
   // Whether we use THUMB/THUMB-2 instructions only.
   bool
   using_thumb_only() const
   {
-    // FIXME:  This should not hard-coded.
-    return false;
+    Object_attribute* attr =
+      this->get_aeabi_object_attribute(elfcpp::Tag_CPU_arch);
+    if (attr->int_value() != elfcpp::TAG_CPU_ARCH_V7
+	&& attr->int_value() != elfcpp::TAG_CPU_ARCH_V7E_M)
+      return false;
+    attr = this->get_aeabi_object_attribute(elfcpp::Tag_CPU_arch_profile);
+    return attr->int_value() == 'M';
   }
 
   // Whether we have an NOP instruction.  If not, use mov r0, r0 instead.
   bool
   may_use_arm_nop() const
   {
-    // FIXME:  This should not hard-coded.
-    return false;
+    Object_attribute* attr =
+      this->get_aeabi_object_attribute(elfcpp::Tag_CPU_arch);
+    int arch = attr->int_value();
+    return (arch == elfcpp::TAG_CPU_ARCH_V6T2
+	    || arch == elfcpp::TAG_CPU_ARCH_V6K
+	    || arch == elfcpp::TAG_CPU_ARCH_V7
+	    || arch == elfcpp::TAG_CPU_ARCH_V7E_M);
   }
 
   // Whether we have THUMB-2 NOP.W instruction.
   bool
   may_use_thumb2_nop() const
   {
-    // FIXME:  This should not hard-coded.
-    return false;
+    Object_attribute* attr =
+      this->get_aeabi_object_attribute(elfcpp::Tag_CPU_arch);
+    int arch = attr->int_value();
+    return (arch == elfcpp::TAG_CPU_ARCH_V6T2
+	    || arch == elfcpp::TAG_CPU_ARCH_V7
+	    || arch == elfcpp::TAG_CPU_ARCH_V7E_M);
   }
   
   // Process the relocations to determine unreferenced sections for 
@@ -1385,6 +1418,15 @@ class Target_arm : public Sized_target<32, big_endian>
 
   bool
   do_relax(int, const Input_objects*, Symbol_table*, Layout*);
+
+  // Determine whether an object attribute tag takes an integer, a
+  // string or both.
+  int
+  do_attribute_arg_type(int tag) const;
+
+  // Reorder tags during output.
+  int
+  do_attributes_order(int num) const;
 
  private:
   // The class which scans relocations.
@@ -1576,6 +1618,41 @@ class Target_arm : public Sized_target<32, big_endian>
   void
   merge_processor_specific_flags(const std::string&, elfcpp::Elf_Word);
 
+  // Get the secondary compatible architecture.
+  static int
+  get_secondary_compatible_arch(const Attributes_section_data*);
+
+  // Set the secondary compatible architecture.
+  static void
+  set_secondary_compatible_arch(Attributes_section_data*, int);
+
+  static int
+  tag_cpu_arch_combine(const char*, int, int*, int, int);
+
+  // Helper to print AEABI enum tag value.
+  static std::string
+  aeabi_enum_name(unsigned int);
+
+  // Return string value for TAG_CPU_name.
+  static std::string
+  tag_cpu_name_value(unsigned int);
+
+  // Merge object attributes from input object and those in the output.
+  void
+  merge_object_attributes(const char*, const Attributes_section_data*);
+
+  // Helper to get an AEABI object attribute
+  Object_attribute*
+  get_aeabi_object_attribute(int tag) const
+  {
+    Attributes_section_data* pasd = this->attributes_section_data_;
+    gold_assert(pasd != NULL);
+    Object_attribute* attr =
+      pasd->get_attribute(Object_attribute::OBJ_ATTR_PROC, tag);
+    gold_assert(attr != NULL);
+    return attr;
+  }
+
   //
   // Methods to support stub-generations.
   //
@@ -1645,6 +1722,8 @@ class Target_arm : public Sized_target<32, big_endian>
   bool should_force_pic_veneer_;
   // Map for locating Arm_input_sections.
   Arm_input_section_map arm_input_section_map_;
+  // Attributes section data in output.
+  Attributes_section_data* attributes_section_data_;
 };
 
 template<bool big_endian>
@@ -3763,6 +3842,37 @@ Arm_relobj<big_endian>::do_relocate_sections(
     }
 }
 
+// Helper functions for both Arm_relobj and Arm_dynobj to read ARM
+// ABI information.
+
+template<bool big_endian>
+Attributes_section_data*
+read_arm_attributes_section(
+    Object* object,
+    Read_symbols_data *sd)
+{
+  // Read the attributes section if there is one.
+  // We read from the end because gas seems to put it near the end of
+  // the section headers.
+  const size_t shdr_size = elfcpp::Elf_sizes<32>::shdr_size;
+  const unsigned char *ps =
+    sd->section_headers->data() + shdr_size * (object->shnum() - 1);
+  for (unsigned int i = object->shnum(); i > 0; --i, ps -= shdr_size)
+    {
+      elfcpp::Shdr<32, big_endian> shdr(ps);
+      if (shdr.get_sh_type() == elfcpp::SHT_ARM_ATTRIBUTES)
+	{
+	  section_offset_type section_offset = shdr.get_sh_offset();
+	  section_size_type section_size =
+	    convert_to_section_size_type(shdr.get_sh_size());
+	  File_view* view = object->get_lasting_view(section_offset,
+						     section_size, true, false);
+	  return new Attributes_section_data(view->data(), section_size);
+	}
+    }
+  return NULL;
+}
+
 // Read the symbol information.
 
 template<bool big_endian>
@@ -3778,6 +3888,8 @@ Arm_relobj<big_endian>::do_read_symbols(Read_symbols_data* sd)
 					      true, false);
   elfcpp::Ehdr<32, big_endian> ehdr(pehdr);
   this->processor_specific_flags_ = ehdr.get_e_flags();
+  this->attributes_section_data_ =
+    read_arm_attributes_section<big_endian>(this, sd); 
 }
 
 // Arm_dynobj methods.
@@ -3797,6 +3909,8 @@ Arm_dynobj<big_endian>::do_read_symbols(Read_symbols_data* sd)
 					      true, false);
   elfcpp::Ehdr<32, big_endian> ehdr(pehdr);
   this->processor_specific_flags_ = ehdr.get_e_flags();
+  this->attributes_section_data_ =
+    read_arm_attributes_section<big_endian>(this, sd); 
 }
 
 // Stub_addend_reader methods.
@@ -4576,6 +4690,9 @@ Target_arm<big_endian>::do_finalize_sections(
       this->merge_processor_specific_flags(
 	  arm_relobj->name(),
 	  arm_relobj->processor_specific_flags());
+      this->merge_object_attributes(arm_relobj->name().c_str(),
+				    arm_relobj->attributes_section_data());
+
     } 
 
   for (Input_objects::Dynobj_iterator p = input_objects->dynobj_begin();
@@ -4587,8 +4704,16 @@ Target_arm<big_endian>::do_finalize_sections(
       this->merge_processor_specific_flags(
 	  arm_dynobj->name(),
 	  arm_dynobj->processor_specific_flags());
+      this->merge_object_attributes(arm_dynobj->name().c_str(),
+				    arm_dynobj->attributes_section_data());
     }
 
+  // Check BLX use.
+  Object_attribute* attr =
+    this->get_aeabi_object_attribute(elfcpp::Tag_CPU_arch);
+  if (attr->int_value() > elfcpp::TAG_CPU_ARCH_V4)
+    this->set_may_use_blx(true);
+ 
   // Fill in some more dynamic tags.
   Output_data_dynamic* const odyn = layout->dynamic_data();
   if (odyn != NULL)
@@ -4638,11 +4763,11 @@ Target_arm<big_endian>::do_finalize_sections(
       // Create __exidx_start and __exdix_end symbols.
       symtab->define_in_output_data("__exidx_start", NULL, exidx_section,
 				    0, 0, elfcpp::STT_OBJECT,
-				    elfcpp::STB_LOCAL, elfcpp::STV_HIDDEN, 0,
+				    elfcpp::STB_GLOBAL, elfcpp::STV_HIDDEN, 0,
 				    false, false);
       symtab->define_in_output_data("__exidx_end", NULL, exidx_section,
 				    0, 0, elfcpp::STT_OBJECT,
-				    elfcpp::STB_LOCAL, elfcpp::STV_HIDDEN, 0,
+				    elfcpp::STB_GLOBAL, elfcpp::STV_HIDDEN, 0,
 				    true, false);
 
       // For the ARM target, we need to add a PT_ARM_EXIDX segment for
@@ -4657,6 +4782,13 @@ Target_arm<big_endian>::do_finalize_sections(
 					    false);
 	}
     }
+
+  // Create an .ARM.attributes section if there is not one already.
+  Output_attributes_section_data* attributes_section =
+    new Output_attributes_section_data(*this->attributes_section_data_);
+  layout->add_output_section_data(".ARM.attributes",
+				  elfcpp::SHT_ARM_ATTRIBUTES, 0,
+				  attributes_section, false);
 }
 
 // Return whether a direct absolute static relocation needs to be applied.
@@ -5469,6 +5601,774 @@ Target_arm<big_endian>::do_make_elf_object(
     }
 }
 
+// Read the architecture from the Tag_also_compatible_with attribute, if any.
+// Returns -1 if no architecture could be read.
+// This is adapted from get_secondary_compatible_arch() in bfd/elf32-arm.c.
+
+template<bool big_endian>
+int
+Target_arm<big_endian>::get_secondary_compatible_arch(
+    const Attributes_section_data* pasd)
+{
+  const Object_attribute *known_attributes =
+    pasd->known_attributes(Object_attribute::OBJ_ATTR_PROC);
+
+  // Note: the tag and its argument below are uleb128 values, though
+  // currently-defined values fit in one byte for each.
+  const std::string& sv =
+    known_attributes[elfcpp::Tag_also_compatible_with].string_value();
+  if (sv.size() == 2
+      && sv.data()[0] == elfcpp::Tag_CPU_arch
+      && (sv.data()[1] & 128) != 128)
+   return sv.data()[1];
+
+  // This tag is "safely ignorable", so don't complain if it looks funny.
+  return -1;
+}
+
+// Set, or unset, the architecture of the Tag_also_compatible_with attribute.
+// The tag is removed if ARCH is -1.
+// This is adapted from set_secondary_compatible_arch() in bfd/elf32-arm.c.
+
+template<bool big_endian>
+void
+Target_arm<big_endian>::set_secondary_compatible_arch(
+    Attributes_section_data* pasd,
+    int arch)
+{
+  Object_attribute *known_attributes =
+    pasd->known_attributes(Object_attribute::OBJ_ATTR_PROC);
+
+  if (arch == -1)
+    {
+      known_attributes[elfcpp::Tag_also_compatible_with].set_string_value("");
+      return;
+    }
+
+  // Note: the tag and its argument below are uleb128 values, though
+  // currently-defined values fit in one byte for each.
+  char sv[3];
+  sv[0] = elfcpp::Tag_CPU_arch;
+  gold_assert(arch != 0);
+  sv[1] = arch;
+  sv[2] = '\0';
+
+  known_attributes[elfcpp::Tag_also_compatible_with].set_string_value(sv);
+}
+
+// Combine two values for Tag_CPU_arch, taking secondary compatibility tags
+// into account.
+// This is adapted from tag_cpu_arch_combine() in bfd/elf32-arm.c.
+
+template<bool big_endian>
+int
+Target_arm<big_endian>::tag_cpu_arch_combine(
+    const char* name,
+    int oldtag,
+    int* secondary_compat_out,
+    int newtag,
+    int secondary_compat)
+{
+#define T(X) elfcpp::TAG_CPU_ARCH_##X
+  static const int v6t2[] =
+    {
+      T(V6T2),   // PRE_V4.
+      T(V6T2),   // V4.
+      T(V6T2),   // V4T.
+      T(V6T2),   // V5T.
+      T(V6T2),   // V5TE.
+      T(V6T2),   // V5TEJ.
+      T(V6T2),   // V6.
+      T(V7),     // V6KZ.
+      T(V6T2)    // V6T2.
+    };
+  static const int v6k[] =
+    {
+      T(V6K),    // PRE_V4.
+      T(V6K),    // V4.
+      T(V6K),    // V4T.
+      T(V6K),    // V5T.
+      T(V6K),    // V5TE.
+      T(V6K),    // V5TEJ.
+      T(V6K),    // V6.
+      T(V6KZ),   // V6KZ.
+      T(V7),     // V6T2.
+      T(V6K)     // V6K.
+    };
+  static const int v7[] =
+    {
+      T(V7),     // PRE_V4.
+      T(V7),     // V4.
+      T(V7),     // V4T.
+      T(V7),     // V5T.
+      T(V7),     // V5TE.
+      T(V7),     // V5TEJ.
+      T(V7),     // V6.
+      T(V7),     // V6KZ.
+      T(V7),     // V6T2.
+      T(V7),     // V6K.
+      T(V7)      // V7.
+    };
+  static const int v6_m[] =
+    {
+      -1,        // PRE_V4.
+      -1,        // V4.
+      T(V6K),    // V4T.
+      T(V6K),    // V5T.
+      T(V6K),    // V5TE.
+      T(V6K),    // V5TEJ.
+      T(V6K),    // V6.
+      T(V6KZ),   // V6KZ.
+      T(V7),     // V6T2.
+      T(V6K),    // V6K.
+      T(V7),     // V7.
+      T(V6_M)    // V6_M.
+    };
+  static const int v6s_m[] =
+    {
+      -1,        // PRE_V4.
+      -1,        // V4.
+      T(V6K),    // V4T.
+      T(V6K),    // V5T.
+      T(V6K),    // V5TE.
+      T(V6K),    // V5TEJ.
+      T(V6K),    // V6.
+      T(V6KZ),   // V6KZ.
+      T(V7),     // V6T2.
+      T(V6K),    // V6K.
+      T(V7),     // V7.
+      T(V6S_M),  // V6_M.
+      T(V6S_M)   // V6S_M.
+    };
+  static const int v7e_m[] =
+    {
+      -1,	// PRE_V4.
+      -1,	// V4.
+      T(V7E_M),	// V4T.
+      T(V7E_M),	// V5T.
+      T(V7E_M),	// V5TE.
+      T(V7E_M),	// V5TEJ.
+      T(V7E_M),	// V6.
+      T(V7E_M),	// V6KZ.
+      T(V7E_M),	// V6T2.
+      T(V7E_M),	// V6K.
+      T(V7E_M),	// V7.
+      T(V7E_M),	// V6_M.
+      T(V7E_M),	// V6S_M.
+      T(V7E_M)	// V7E_M.
+    };
+  static const int v4t_plus_v6_m[] =
+    {
+      -1,		// PRE_V4.
+      -1,		// V4.
+      T(V4T),		// V4T.
+      T(V5T),		// V5T.
+      T(V5TE),		// V5TE.
+      T(V5TEJ),		// V5TEJ.
+      T(V6),		// V6.
+      T(V6KZ),		// V6KZ.
+      T(V6T2),		// V6T2.
+      T(V6K),		// V6K.
+      T(V7),		// V7.
+      T(V6_M),		// V6_M.
+      T(V6S_M),		// V6S_M.
+      T(V7E_M),		// V7E_M.
+      T(V4T_PLUS_V6_M)	// V4T plus V6_M.
+    };
+  static const int *comb[] =
+    {
+      v6t2,
+      v6k,
+      v7,
+      v6_m,
+      v6s_m,
+      v7e_m,
+      // Pseudo-architecture.
+      v4t_plus_v6_m
+    };
+
+  // Check we've not got a higher architecture than we know about.
+
+  if (oldtag >= elfcpp::MAX_TAG_CPU_ARCH || newtag >= elfcpp::MAX_TAG_CPU_ARCH)
+    {
+      gold_error(_("%s: unknown CPU architecture"), name);
+      return -1;
+    }
+
+  // Override old tag if we have a Tag_also_compatible_with on the output.
+
+  if ((oldtag == T(V6_M) && *secondary_compat_out == T(V4T))
+      || (oldtag == T(V4T) && *secondary_compat_out == T(V6_M)))
+    oldtag = T(V4T_PLUS_V6_M);
+
+  // And override the new tag if we have a Tag_also_compatible_with on the
+  // input.
+
+  if ((newtag == T(V6_M) && secondary_compat == T(V4T))
+      || (newtag == T(V4T) && secondary_compat == T(V6_M)))
+    newtag = T(V4T_PLUS_V6_M);
+
+  // Architectures before V6KZ add features monotonically.
+  int tagh = std::max(oldtag, newtag);
+  if (tagh <= elfcpp::TAG_CPU_ARCH_V6KZ)
+    return tagh;
+
+  int tagl = std::min(oldtag, newtag);
+  int result = comb[tagh - T(V6T2)][tagl];
+
+  // Use Tag_CPU_arch == V4T and Tag_also_compatible_with (Tag_CPU_arch V6_M)
+  // as the canonical version.
+  if (result == T(V4T_PLUS_V6_M))
+    {
+      result = T(V4T);
+      *secondary_compat_out = T(V6_M);
+    }
+  else
+    *secondary_compat_out = -1;
+
+  if (result == -1)
+    {
+      gold_error(_("%s: conflicting CPU architectures %d/%d"),
+		 name, oldtag, newtag);
+      return -1;
+    }
+
+  return result;
+#undef T
+}
+
+// Helper to print AEABI enum tag value.
+
+template<bool big_endian>
+std::string
+Target_arm<big_endian>::aeabi_enum_name(unsigned int value)
+{
+  static const char *aeabi_enum_names[] =
+    { "", "variable-size", "32-bit", "" };
+  const size_t aeabi_enum_names_size =
+    sizeof(aeabi_enum_names) / sizeof(aeabi_enum_names[0]);
+
+  if (value < aeabi_enum_names_size)
+    return std::string(aeabi_enum_names[value]);
+  else
+    {
+      char buffer[100];
+      sprintf(buffer, "<unknown value %u>", value);
+      return std::string(buffer);
+    }
+}
+
+// Return the string value to store in TAG_CPU_name.
+
+template<bool big_endian>
+std::string
+Target_arm<big_endian>::tag_cpu_name_value(unsigned int value)
+{
+  static const char *name_table[] = {
+    // These aren't real CPU names, but we can't guess
+    // that from the architecture version alone.
+   "Pre v4",
+   "ARM v4",
+   "ARM v4T",
+   "ARM v5T",
+   "ARM v5TE",
+   "ARM v5TEJ",
+   "ARM v6",
+   "ARM v6KZ",
+   "ARM v6T2",
+   "ARM v6K",
+   "ARM v7",
+   "ARM v6-M",
+   "ARM v6S-M",
+   "ARM v7E-M"
+ };
+ const size_t name_table_size = sizeof(name_table) / sizeof(name_table[0]);
+
+  if (value < name_table_size)
+    return std::string(name_table[value]);
+  else
+    {
+      char buffer[100];
+      sprintf(buffer, "<unknown CPU value %u>", value);
+      return std::string(buffer);
+    } 
+}
+
+// Merge object attributes from input file called NAME with those of the
+// output.  The input object attributes are in the object pointed by PASD.
+
+template<bool big_endian>
+void
+Target_arm<big_endian>::merge_object_attributes(
+    const char* name,
+    const Attributes_section_data* pasd)
+{
+  // Return if there is no attributes section data.
+  if (pasd == NULL)
+    return;
+
+  // If output has no object attributes, just copy.
+  if (this->attributes_section_data_ == NULL)
+    {
+      this->attributes_section_data_ = new Attributes_section_data(*pasd);
+      return;
+    }
+
+  const int vendor = Object_attribute::OBJ_ATTR_PROC;
+  const Object_attribute* in_attr = pasd->known_attributes(vendor);
+  Object_attribute* out_attr =
+    this->attributes_section_data_->known_attributes(vendor);
+
+  // This needs to happen before Tag_ABI_FP_number_model is merged.  */
+  if (in_attr[elfcpp::Tag_ABI_VFP_args].int_value()
+      != out_attr[elfcpp::Tag_ABI_VFP_args].int_value())
+    {
+      // Ignore mismatches if the object doesn't use floating point.  */
+      if (out_attr[elfcpp::Tag_ABI_FP_number_model].int_value() == 0)
+	out_attr[elfcpp::Tag_ABI_VFP_args].set_int_value(
+	    in_attr[elfcpp::Tag_ABI_VFP_args].int_value());
+      else if (in_attr[elfcpp::Tag_ABI_FP_number_model].int_value() != 0)
+        gold_error(_("%s uses VFP register arguments, output does not"),
+		   name);
+    }
+
+  for (int i = 4; i < Vendor_object_attributes::NUM_KNOWN_ATTRIBUTES; ++i)
+    {
+      // Merge this attribute with existing attributes.
+      switch (i)
+	{
+	case elfcpp::Tag_CPU_raw_name:
+	case elfcpp::Tag_CPU_name:
+	  // These are merged after Tag_CPU_arch.
+	  break;
+
+	case elfcpp::Tag_ABI_optimization_goals:
+	case elfcpp::Tag_ABI_FP_optimization_goals:
+	  // Use the first value seen.
+	  break;
+
+	case elfcpp::Tag_CPU_arch:
+	  {
+	    unsigned int saved_out_attr = out_attr->int_value();
+	    // Merge Tag_CPU_arch and Tag_also_compatible_with.
+	    int secondary_compat =
+	      this->get_secondary_compatible_arch(pasd);
+	    int secondary_compat_out =
+	      this->get_secondary_compatible_arch(
+		  this->attributes_section_data_);
+	    out_attr[i].set_int_value(
+		tag_cpu_arch_combine(name, out_attr[i].int_value(),
+				     &secondary_compat_out,
+				     in_attr[i].int_value(),
+				     secondary_compat));
+	    this->set_secondary_compatible_arch(this->attributes_section_data_,
+						secondary_compat_out);
+
+	    // Merge Tag_CPU_name and Tag_CPU_raw_name.
+	    if (out_attr[i].int_value() == saved_out_attr)
+	      ; // Leave the names alone.
+	    else if (out_attr[i].int_value() == in_attr[i].int_value())
+	      {
+		// The output architecture has been changed to match the
+		// input architecture.  Use the input names.
+		out_attr[elfcpp::Tag_CPU_name].set_string_value(
+		    in_attr[elfcpp::Tag_CPU_name].string_value());
+		out_attr[elfcpp::Tag_CPU_raw_name].set_string_value(
+		    in_attr[elfcpp::Tag_CPU_raw_name].string_value());
+	      }
+	    else
+	      {
+		out_attr[elfcpp::Tag_CPU_name].set_string_value("");
+		out_attr[elfcpp::Tag_CPU_raw_name].set_string_value("");
+	      }
+
+	    // If we still don't have a value for Tag_CPU_name,
+	    // make one up now.  Tag_CPU_raw_name remains blank.
+	    if (out_attr[elfcpp::Tag_CPU_name].string_value() == "")
+	      {
+		const std::string cpu_name =
+		  this->tag_cpu_name_value(out_attr[i].int_value());
+		// FIXME:  If we see an unknown CPU, this will be set
+		// to "<unknown CPU n>", where n is the attribute value.
+		// This is different from BFD, which leaves the name alone.
+		out_attr[elfcpp::Tag_CPU_name].set_string_value(cpu_name);
+	      }
+	  }
+	  break;
+
+	case elfcpp::Tag_ARM_ISA_use:
+	case elfcpp::Tag_THUMB_ISA_use:
+	case elfcpp::Tag_WMMX_arch:
+	case elfcpp::Tag_Advanced_SIMD_arch:
+	  // ??? Do Advanced_SIMD (NEON) and WMMX conflict?
+	case elfcpp::Tag_ABI_FP_rounding:
+	case elfcpp::Tag_ABI_FP_exceptions:
+	case elfcpp::Tag_ABI_FP_user_exceptions:
+	case elfcpp::Tag_ABI_FP_number_model:
+	case elfcpp::Tag_VFP_HP_extension:
+	case elfcpp::Tag_CPU_unaligned_access:
+	case elfcpp::Tag_T2EE_use:
+	case elfcpp::Tag_Virtualization_use:
+	case elfcpp::Tag_MPextension_use:
+	  // Use the largest value specified.
+	  if (in_attr[i].int_value() > out_attr[i].int_value())
+	    out_attr[i].set_int_value(in_attr[i].int_value());
+	  break;
+
+	case elfcpp::Tag_ABI_align8_preserved:
+	case elfcpp::Tag_ABI_PCS_RO_data:
+	  // Use the smallest value specified.
+	  if (in_attr[i].int_value() < out_attr[i].int_value())
+	    out_attr[i].set_int_value(in_attr[i].int_value());
+	  break;
+
+	case elfcpp::Tag_ABI_align8_needed:
+	  if ((in_attr[i].int_value() > 0 || out_attr[i].int_value() > 0)
+	      && (in_attr[elfcpp::Tag_ABI_align8_preserved].int_value() == 0
+		  || (out_attr[elfcpp::Tag_ABI_align8_preserved].int_value()
+		      == 0)))
+	    {
+	      // This error message should be enabled once all non-conformant
+	      // binaries in the toolchain have had the attributes set
+	      // properly.
+	      // gold_error(_("output 8-byte data alignment conflicts with %s"),
+	      // 	    name);
+	    }
+	  // Fall through.
+	case elfcpp::Tag_ABI_FP_denormal:
+	case elfcpp::Tag_ABI_PCS_GOT_use:
+	  {
+	    // These tags have 0 = don't care, 1 = strong requirement,
+	    // 2 = weak requirement.
+	    static const int order_021[3] = {0, 2, 1};
+
+	    // Use the "greatest" from the sequence 0, 2, 1, or the largest
+	    // value if greater than 2 (for future-proofing).
+	    if ((in_attr[i].int_value() > 2
+		 && in_attr[i].int_value() > out_attr[i].int_value())
+		|| (in_attr[i].int_value() <= 2
+		    && out_attr[i].int_value() <= 2
+		    && (order_021[in_attr[i].int_value()]
+			> order_021[out_attr[i].int_value()])))
+	      out_attr[i].set_int_value(in_attr[i].int_value());
+	  }
+	  break;
+
+	case elfcpp::Tag_CPU_arch_profile:
+	  if (out_attr[i].int_value() != in_attr[i].int_value())
+	    {
+	      // 0 will merge with anything.
+	      // 'A' and 'S' merge to 'A'.
+	      // 'R' and 'S' merge to 'R'.
+	      // 'M' and 'A|R|S' is an error.
+	      if (out_attr[i].int_value() == 0
+		  || (out_attr[i].int_value() == 'S'
+		      && (in_attr[i].int_value() == 'A'
+			  || in_attr[i].int_value() == 'R')))
+		out_attr[i].set_int_value(in_attr[i].int_value());
+	      else if (in_attr[i].int_value() == 0
+		       || (in_attr[i].int_value() == 'S'
+			   && (out_attr[i].int_value() == 'A'
+			       || out_attr[i].int_value() == 'R')))
+		; // Do nothing.
+	      else
+		{
+		  gold_error
+		    (_("conflicting architecture profiles %c/%c"),
+		     in_attr[i].int_value() ? in_attr[i].int_value() : '0',
+		     out_attr[i].int_value() ? out_attr[i].int_value() : '0');
+		}
+	    }
+	  break;
+	case elfcpp::Tag_VFP_arch:
+	    {
+	      static const struct
+	      {
+		  int ver;
+		  int regs;
+	      } vfp_versions[7] =
+		{
+		  {0, 0},
+		  {1, 16},
+		  {2, 16},
+		  {3, 32},
+		  {3, 16},
+		  {4, 32},
+		  {4, 16}
+		};
+
+	      // Values greater than 6 aren't defined, so just pick the
+	      // biggest.
+	      if (in_attr[i].int_value() > 6
+		  && in_attr[i].int_value() > out_attr[i].int_value())
+		{
+		  *out_attr = *in_attr;
+		  break;
+		}
+	      // The output uses the superset of input features
+	      // (ISA version) and registers.
+	      int ver = std::max(vfp_versions[in_attr[i].int_value()].ver,
+				 vfp_versions[out_attr[i].int_value()].ver);
+	      int regs = std::max(vfp_versions[in_attr[i].int_value()].regs,
+				  vfp_versions[out_attr[i].int_value()].regs);
+	      // This assumes all possible supersets are also a valid
+	      // options.
+	      int newval;
+	      for (newval = 6; newval > 0; newval--)
+		{
+		  if (regs == vfp_versions[newval].regs
+		      && ver == vfp_versions[newval].ver)
+		    break;
+		}
+	      out_attr[i].set_int_value(newval);
+	    }
+	  break;
+	case elfcpp::Tag_PCS_config:
+	  if (out_attr[i].int_value() == 0)
+	    out_attr[i].set_int_value(in_attr[i].int_value());
+	  else if (in_attr[i].int_value() != 0 && out_attr[i].int_value() != 0)
+	    {
+	      // It's sometimes ok to mix different configs, so this is only
+	      // a warning.
+	      gold_warning(_("%s: conflicting platform configuration"), name);
+	    }
+	  break;
+	case elfcpp::Tag_ABI_PCS_R9_use:
+	  if (in_attr[i].int_value() != out_attr[i].int_value()
+	      && out_attr[i].int_value() != elfcpp::AEABI_R9_unused
+	      && in_attr[i].int_value() != elfcpp::AEABI_R9_unused)
+	    {
+	      gold_error(_("%s: conflicting use of R9"), name);
+	    }
+	  if (out_attr[i].int_value() == elfcpp::AEABI_R9_unused)
+	    out_attr[i].set_int_value(in_attr[i].int_value());
+	  break;
+	case elfcpp::Tag_ABI_PCS_RW_data:
+	  if (in_attr[i].int_value() == elfcpp::AEABI_PCS_RW_data_SBrel
+	      && (in_attr[elfcpp::Tag_ABI_PCS_R9_use].int_value()
+		  != elfcpp::AEABI_R9_SB)
+	      && (out_attr[elfcpp::Tag_ABI_PCS_R9_use].int_value()
+		  != elfcpp::AEABI_R9_unused))
+	    {
+	      gold_error(_("%s: SB relative addressing conflicts with use "
+			   "of R9"),
+			 name);
+	    }
+	  // Use the smallest value specified.
+	  if (in_attr[i].int_value() < out_attr[i].int_value())
+	    out_attr[i].set_int_value(in_attr[i].int_value());
+	  break;
+	case elfcpp::Tag_ABI_PCS_wchar_t:
+	  // FIXME: Make it possible to turn off this warning.
+	  if (out_attr[i].int_value()
+	      && in_attr[i].int_value()
+	      && out_attr[i].int_value() != in_attr[i].int_value())
+	    {
+	      gold_warning(_("%s uses %u-byte wchar_t yet the output is to "
+			     "use %u-byte wchar_t; use of wchar_t values "
+			     "across objects may fail"),
+			   name, in_attr[i].int_value(),
+			   out_attr[i].int_value());
+	    }
+	  else if (in_attr[i].int_value() && !out_attr[i].int_value())
+	    out_attr[i].set_int_value(in_attr[i].int_value());
+	  break;
+	case elfcpp::Tag_ABI_enum_size:
+	  if (in_attr[i].int_value() != elfcpp::AEABI_enum_unused)
+	    {
+	      if (out_attr[i].int_value() == elfcpp::AEABI_enum_unused
+		  || out_attr[i].int_value() == elfcpp::AEABI_enum_forced_wide)
+		{
+		  // The existing object is compatible with anything.
+		  // Use whatever requirements the new object has.
+		  out_attr[i].set_int_value(in_attr[i].int_value());
+		}
+	      // FIXME: Make it possible to turn off this warning.
+	      else if (in_attr[i].int_value() != elfcpp::AEABI_enum_forced_wide
+		       && out_attr[i].int_value() != in_attr[i].int_value())
+		{
+		  unsigned int in_value = in_attr[i].int_value();
+		  unsigned int out_value = out_attr[i].int_value();
+		  gold_warning(_("%s uses %s enums yet the output is to use "
+				 "%s enums; use of enum values across objects "
+				 "may fail"),
+			       name,
+			       this->aeabi_enum_name(in_value).c_str(),
+			       this->aeabi_enum_name(out_value).c_str());
+		}
+	    }
+	  break;
+	case elfcpp::Tag_ABI_VFP_args:
+	  // Aready done.
+	  break;
+	case elfcpp::Tag_ABI_WMMX_args:
+	  if (in_attr[i].int_value() != out_attr[i].int_value())
+	    {
+	      gold_error(_("%s uses iWMMXt register arguments, output does "
+			   "not"),
+			 name);
+	    }
+	  break;
+	case Object_attribute::Tag_compatibility:
+	  // Merged in target-independent code.
+	  break;
+	case elfcpp::Tag_ABI_HardFP_use:
+	  // 1 (SP) and 2 (DP) conflict, so combine to 3 (SP & DP).
+	  if ((in_attr[i].int_value() == 1 && out_attr[i].int_value() == 2)
+	      || (in_attr[i].int_value() == 2 && out_attr[i].int_value() == 1))
+	    out_attr[i].set_int_value(3);
+	  else if (in_attr[i].int_value() > out_attr[i].int_value())
+	    out_attr[i].set_int_value(in_attr[i].int_value());
+	  break;
+	case elfcpp::Tag_ABI_FP_16bit_format:
+	  if (in_attr[i].int_value() != 0 && out_attr[i].int_value() != 0)
+	    {
+	      if (in_attr[i].int_value() != out_attr[i].int_value())
+		gold_error(_("fp16 format mismatch between %s and output"),
+			   name);
+	    }
+	  if (in_attr[i].int_value() != 0)
+	    out_attr[i].set_int_value(in_attr[i].int_value());
+	  break;
+
+	case elfcpp::Tag_nodefaults:
+	  // This tag is set if it exists, but the value is unused (and is
+	  // typically zero).  We don't actually need to do anything here -
+	  // the merge happens automatically when the type flags are merged
+	  // below.
+	  break;
+	case elfcpp::Tag_also_compatible_with:
+	  // Already done in Tag_CPU_arch.
+	  break;
+	case elfcpp::Tag_conformance:
+	  // Keep the attribute if it matches.  Throw it away otherwise.
+	  // No attribute means no claim to conform.
+	  if (in_attr[i].string_value() != out_attr[i].string_value())
+	    out_attr[i].set_string_value("");
+	  break;
+
+	default:
+	  {
+	    const char* err_object = NULL;
+
+	    // The "known_obj_attributes" table does contain some undefined
+	    // attributes.  Ensure that there are unused.
+	    if (out_attr[i].int_value() != 0
+		|| out_attr[i].string_value() != "")
+	      err_object = "output";
+	    else if (in_attr[i].int_value() != 0
+		     || in_attr[i].string_value() != "")
+	      err_object = name;
+
+	    if (err_object != NULL)
+	      {
+		// Attribute numbers >=64 (mod 128) can be safely ignored.
+		if ((i & 127) < 64)
+		  gold_error(_("%s: unknown mandatory EABI object attribute "
+			       "%d"),
+			     err_object, i);
+		else
+		  gold_warning(_("%s: unknown EABI object attribute %d"),
+			       err_object, i);
+	      }
+
+	    // Only pass on attributes that match in both inputs.
+	    if (!in_attr[i].matches(out_attr[i]))
+	      {
+		out_attr[i].set_int_value(0);
+		out_attr[i].set_string_value("");
+	      }
+	  }
+	}
+
+      // If out_attr was copied from in_attr then it won't have a type yet.
+      if (in_attr[i].type() && !out_attr[i].type())
+	out_attr[i].set_type(in_attr[i].type());
+    }
+
+  // Merge Tag_compatibility attributes and any common GNU ones.
+  this->attributes_section_data_->merge(name, pasd);
+
+  // Check for any attributes not known on ARM.
+  typedef Vendor_object_attributes::Other_attributes Other_attributes;
+  const Other_attributes* in_other_attributes = pasd->other_attributes(vendor);
+  Other_attributes::const_iterator in_iter = in_other_attributes->begin();
+  Other_attributes* out_other_attributes =
+    this->attributes_section_data_->other_attributes(vendor);
+  Other_attributes::iterator out_iter = out_other_attributes->begin();
+
+  while (in_iter != in_other_attributes->end()
+	 || out_iter != out_other_attributes->end())
+    {
+      const char* err_object = NULL;
+      int err_tag = 0;
+
+      // The tags for each list are in numerical order.
+      // If the tags are equal, then merge.
+      if (out_iter != out_other_attributes->end()
+	  && (in_iter == in_other_attributes->end()
+	      || in_iter->first > out_iter->first))
+	{
+	  // This attribute only exists in output.  We can't merge, and we
+	  // don't know what the tag means, so delete it.
+	  err_object = "output";
+	  err_tag = out_iter->first;
+	  int saved_tag = out_iter->first;
+	  delete out_iter->second;
+	  out_other_attributes->erase(out_iter); 
+	  out_iter = out_other_attributes->upper_bound(saved_tag);
+	}
+      else if (in_iter != in_other_attributes->end()
+	       && (out_iter != out_other_attributes->end()
+		   || in_iter->first < out_iter->first))
+	{
+	  // This attribute only exists in input. We can't merge, and we
+	  // don't know what the tag means, so ignore it.
+	  err_object = name;
+	  err_tag = in_iter->first;
+	  ++in_iter;
+	}
+      else // The tags are equal.
+	{
+	  // As present, all attributes in the list are unknown, and
+	  // therefore can't be merged meaningfully.
+	  err_object = "output";
+	  err_tag = out_iter->first;
+
+	  //  Only pass on attributes that match in both inputs.
+	  if (!in_iter->second->matches(*(out_iter->second)))
+	    {
+	      // No match.  Delete the attribute.
+	      int saved_tag = out_iter->first;
+	      delete out_iter->second;
+	      out_other_attributes->erase(out_iter);
+	      out_iter = out_other_attributes->upper_bound(saved_tag);
+	    }
+	  else
+	    {
+	      // Matched.  Keep the attribute and move to the next.
+	      ++out_iter;
+	      ++in_iter;
+	    }
+	}
+
+      if (err_object)
+	{
+	  // Attribute numbers >=64 (mod 128) can be safely ignored.  */
+	  if ((err_tag & 127) < 64)
+	    {
+	      gold_error(_("%s: unknown mandatory EABI object attribute %d"),
+			 err_object, err_tag);
+	    }
+	  else
+	    {
+	      gold_warning(_("%s: unknown EABI object attribute %d"),
+			   err_object, err_tag);
+	    }
+	}
+    }
+}
+
 // Return whether a relocation type used the LSB to distinguish THUMB
 // addresses.
 template<bool big_endian>
@@ -6044,7 +6944,53 @@ Target_arm<big_endian>::relocate_stub(
     }
 }
 
-// The selector for arm object files.
+// Determine whether an object attribute tag takes an integer, a
+// string or both.
+
+template<bool big_endian>
+int
+Target_arm<big_endian>::do_attribute_arg_type(int tag) const
+{
+  if (tag == Object_attribute::Tag_compatibility)
+    return (Object_attribute::ATTR_TYPE_FLAG_INT_VAL
+	    | Object_attribute::ATTR_TYPE_FLAG_STR_VAL);
+  else if (tag == elfcpp::Tag_nodefaults)
+    return (Object_attribute::ATTR_TYPE_FLAG_INT_VAL
+	    | Object_attribute::ATTR_TYPE_FLAG_NO_DEFAULT);
+  else if (tag == elfcpp::Tag_CPU_raw_name || tag == elfcpp::Tag_CPU_name)
+    return Object_attribute::ATTR_TYPE_FLAG_STR_VAL;
+  else if (tag < 32)
+    return Object_attribute::ATTR_TYPE_FLAG_INT_VAL;
+  else
+    return ((tag & 1) != 0
+	    ? Object_attribute::ATTR_TYPE_FLAG_STR_VAL
+	    : Object_attribute::ATTR_TYPE_FLAG_INT_VAL);
+}
+
+// Reorder attributes.
+//
+// The ABI defines that Tag_conformance should be emitted first, and that
+// Tag_nodefaults should be second (if either is defined).  This sets those
+// two positions, and bumps up the position of all the remaining tags to
+// compensate.
+
+template<bool big_endian>
+int
+Target_arm<big_endian>::do_attributes_order(int num) const
+{
+  // Reorder the known object attributes in output.  We want to move
+  // Tag_conformance to position 4 and Tag_conformance to position 5
+  // and shift eveything between 4 .. Tag_conformance - 1 to make room.
+  if (num == 4)
+    return elfcpp::Tag_conformance;
+  if (num == 5)
+    return elfcpp::Tag_nodefaults;
+  if ((num - 2) < elfcpp::Tag_nodefaults)
+    return num - 2;
+  if ((num - 1) < elfcpp::Tag_conformance)
+    return num - 1;
+  return num;
+}
 
 template<bool big_endian>
 class Target_selector_arm : public Target_selector

@@ -1,3 +1,7 @@
+2009-12-10  Doug Kwan  <dougkwan@google.com>
+
+	* arm.h: New enums for EABI object attribute tags and values.
+
 2009-12-05  Doug Kwan  <dougkwan@google.com>
 
 	* arm.h: Define enums for Tag_CPU_arch EABI attribute.

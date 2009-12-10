@@ -1,3 +1,43 @@
+2009-12-10  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (attributes.h): New include.
+	(Arm_relobj::Arm_relobj): Initialize attributes_section_data_.
+	(Arm_relobj::~Arm_relobj): Delete object pointed by
+	attributes_section_data_.
+	(Arm_relobj::attributes_section_data): New method definition.
+	(Arm_relobj::attributes_section_data_): New data member declaration.
+	(Arm_dynobj::Arm_dynobj): Initialize attributes_section_data_.
+	(Arm_dynobj::~Arm_dynobj): Delete object pointed by
+	attributes_section_data_.
+	(Arm_dynobj::attributes_section_data): New method definition.
+	(Arm_dynobj::attributes_section_data_): New data member declaration.
+	(Target_arm::Target_arm): Initialize attributes_section_data_.  Change
+	initialization value of may_use_blx_ to false.
+   	(Target_arm::using_thumb2, Target_arm::using_thumb_only,
+	Target_arm::may_use_arm_nop, Target_arm::may_use_thumb2_nop): Use
+	object attributes to compute results instead of hard-coding.
+	(Target_arm::do_attribute_arg_type, Target_arm::do_attributes_order,
+	Target_arm::get_secondary_compatible_arch,
+	Target_arm::set_secondary_compatible_arch
+	Target_arm::tag_cpu_arch_combine, Target_arm::aeabi_enum_name,
+	Target_arm::tag_cpu_name_value, Target_arm::merge_object_attributes):
+	New method declarations.
+	(Target_arm::get_aeabi_object_attribute): New method definition.
+	(Target_arm::attributes_section_data_): New data member declaration.
+	(read_arm_attributes_section): New template definition.
+	(Arm_relobj::do_read_symbols): Read attributes section if it exists.
+	(Arm_dynobj::do_read_symbols): Ditto.
+	(Target_arm::do_finalize_sections): Merge attributes sections from
+	input.  Check for BLX use after attributes section merging.
+	Fix __exidx_start and __exidx_end visibility.  Create an
+	.ARM.attributes section if necessary.
+	(Target_arm::get_secondary_compatible_arch,
+	Target_arm::set_secondary_compatible_arch,
+	Target_arm::tag_cpu_arch_combine, Target_arm::aeabi_enum_name,
+	Target_arm::tag_cpu_name_value, Target_arm::merge_object_attributes,
+	Target_arm::do_attribute_arg_type, Target_arm::do_attributes_order): 
+	New method definitions.
+
 2009-12-09  Ian Lance Taylor  <iant@google.com>
 
 	* plugin.cc (Plugin::load): Don't cast from void* to a function
