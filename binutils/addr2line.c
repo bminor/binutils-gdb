@@ -42,6 +42,7 @@ static bfd_boolean unwind_inlines;	/* -i, unwind inlined functions. */
 static bfd_boolean with_addresses;	/* -a, show addresses.  */
 static bfd_boolean with_functions;	/* -f, show function names.  */
 static bfd_boolean do_demangle;		/* -C, demangle names.  */
+static bfd_boolean pretty_print;	/* -p, print on one line.  */
 static bfd_boolean base_names;		/* -s, strip directory names.  */
 
 static int naddr;		/* Number of addresses to process.  */
@@ -57,6 +58,7 @@ static struct option long_options[] =
   {"exe", required_argument, NULL, 'e'},
   {"functions", no_argument, NULL, 'f'},
   {"inlines", no_argument, NULL, 'i'},
+  {"pretty-print", no_argument, NULL, 'p'},
   {"section", required_argument, NULL, 'j'},
   {"target", required_argument, NULL, 'b'},
   {"help", no_argument, NULL, 'H'},
@@ -85,6 +87,7 @@ usage (FILE *stream, int status)
   -e --exe=<executable>  Set the input file name (default is a.out)\n\
   -i --inlines           Unwind inlined functions\n\
   -j --section=<name>    Read section-relative offsets instead of addresses\n\
+  -p --pretty-print      Make the output easier to read for humans\n\
   -s --basenames         Strip directory names\n\
   -f --functions         Show function names\n\
   -C --demangle[=style]  Demangle function names\n\
@@ -216,7 +219,11 @@ translate_addresses (bfd *abfd, asection *section)
         {
           printf ("0x");
           bfd_printf_vma (abfd, pc);
-          printf ("\n");
+
+          if (pretty_print)
+            printf (": ");
+          else
+            printf ("\n");
         }
 
       found = FALSE;
@@ -233,44 +240,52 @@ translate_addresses (bfd *abfd, asection *section)
 	}
       else
 	{
-	  do {
-	    if (with_functions)
-	      {
-		const char *name;
-		char *alloc = NULL;
+	  while (1)
+            {
+              if (with_functions)
+                {
+                  const char *name;
+                  char *alloc = NULL;
 
-		name = functionname;
-		if (name == NULL || *name == '\0')
-		  name = "??";
-		else if (do_demangle)
-		  {
-		    alloc = bfd_demangle (abfd, name, DMGL_ANSI | DMGL_PARAMS);
-		    if (alloc != NULL)
-		      name = alloc;
-		  }
+                  name = functionname;
+                  if (name == NULL || *name == '\0')
+                    name = "??";
+                  else if (do_demangle)
+                    {
+                      alloc = bfd_demangle (abfd, name, DMGL_ANSI | DMGL_PARAMS);
+                      if (alloc != NULL)
+                        name = alloc;
+                    }
 
-		printf ("%s\n", name);
+                  printf ("%s", name);
+                  if (pretty_print)
+                    printf (_(" at "));
+                  else
+                    printf ("\n");
 
-		if (alloc != NULL)
-		  free (alloc);
-	      }
+                  if (alloc != NULL)
+                    free (alloc);
+                }
 
-	    if (base_names && filename != NULL)
-	      {
-		char *h;
+              if (base_names && filename != NULL)
+                {
+                  char *h;
 
-		h = strrchr (filename, '/');
-		if (h != NULL)
-		  filename = h + 1;
-	      }
+                  h = strrchr (filename, '/');
+                  if (h != NULL)
+                    filename = h + 1;
+                }
 
-	    printf ("%s:%u\n", filename ? filename : "??", line);
-	    if (!unwind_inlines)
-	      found = FALSE;
-	    else
-	      found = bfd_find_inliner_info (abfd, &filename, &functionname, &line);
-	  } while (found);
-
+              printf ("%s:%u\n", filename ? filename : "??", line);
+              if (!unwind_inlines)
+                found = FALSE;
+              else
+                found = bfd_find_inliner_info (abfd, &filename, &functionname, &line);
+              if (! found)
+                break;
+              if (pretty_print)
+                printf (_(" (inlined by) "));
+            }
 	}
 
       /* fflush() is essential for using this command as a server
@@ -364,7 +379,7 @@ main (int argc, char **argv)
   file_name = NULL;
   section_name = NULL;
   target = NULL;
-  while ((c = getopt_long (argc, argv, "ab:Ce:sfHhij:Vv", long_options, (int *) 0))
+  while ((c = getopt_long (argc, argv, "ab:Ce:sfHhij:pVv", long_options, (int *) 0))
 	 != EOF)
     {
       switch (c)
@@ -400,6 +415,9 @@ main (int argc, char **argv)
 	case 'f':
 	  with_functions = TRUE;
 	  break;
+        case 'p':
+          pretty_print = TRUE;
+          break;
 	case 'v':
 	case 'V':
 	  print_version ("addr2line");

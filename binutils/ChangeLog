@@ -1,3 +1,13 @@
+2009-12-10  Tristan Gingold  <gingold@adacore.com>
+
+	* addr2line.c (pretty_print): New variable.
+	(long_options): Add an entry for -p/--pretty-print.
+	(usage): Document -p/--pretty-print.
+	(translate_addresses): Handle pretty_print.  Reindent.
+	(main): Handle option -p.
+	* doc/binutils.texi (addr2line): Document -p/--pretty-print.
+	* NEWS: Mention new feature.
+
 2009-12-09  Tristan Gingold  <gingold@adacore.com>
 
 	* addr2line.c (translate_addresses): Display addresses

@@ -2912,6 +2912,7 @@ addr2line [@option{-a}|@option{--addresses}]
           [@option{-e} @var{filename}|@option{--exe=}@var{filename}]
           [@option{-f}|@option{--functions}] [@option{-s}|@option{--basename}]
           [@option{-i}|@option{--inlines}]
+          [@option{-p}|@option{--pretty-print}]
           [@option{-j}|@option{--section=}@var{name}]
           [@option{-H}|@option{--help}] [@option{-V}|@option{--version}]
           [addr addr @dots{}]
@@ -3006,6 +3007,12 @@ will also be printed.
 @item -j
 @itemx --section
 Read offsets relative to the specified section instead of absolute addresses.
+
+@item -p
+@itemx --pretty-print
+Make the output more human friendly: each location are printed on one line.
+If option @option{-i} is specified, lines for all enclosing scopes are
+prefixed with @samp{(inlined by)}.
 @end table
 
 @c man end
