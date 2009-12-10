@@ -1,5 +1,10 @@
 2009-12-09  Ian Lance Taylor  <iant@google.com>
 
+	* plugin.cc (Plugin::load): Don't cast from void* to a function
+	pointer.
+
+2009-12-09  Ian Lance Taylor  <iant@google.com>
+
 	* dynobj.cc (Sized_dynobj::do_read_symbols): Clear version
 	information fields.
 

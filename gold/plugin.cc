@@ -109,14 +109,16 @@ Plugin::load()
     }
 
   // Find the plugin's onload entry point.
-  ld_plugin_onload onload = reinterpret_cast<ld_plugin_onload>
-    (dlsym(this->handle_, "onload"));
-  if (onload == NULL)
+  void* ptr = dlsym(this->handle_, "onload");
+  if (ptr == NULL)
     {
       gold_error(_("%s: could not find onload entry point"),
                  this->filename_.c_str());
       return;
     }
+  ld_plugin_onload onload;
+  gold_assert(sizeof(onload) == sizeof(ptr));
+  memcpy(&onload, &ptr, sizeof(ptr));
 
   // Get the linker's version number.
   const char* ver = get_version_string();
