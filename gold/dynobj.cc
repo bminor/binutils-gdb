@@ -323,6 +323,14 @@ Sized_dynobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
   sd->external_symbols_offset = 0;
   sd->symbol_names = NULL;
   sd->symbol_names_size = 0;
+  sd->versym = NULL;
+  sd->versym_size = 0;
+  sd->verdef = NULL;
+  sd->verdef_size = 0;
+  sd->verdef_info = 0;
+  sd->verneed = NULL;
+  sd->verneed_size = 0;
+  sd->verneed_info = 0;
 
   if (this->dynsym_shndx_ != -1U)
     {
