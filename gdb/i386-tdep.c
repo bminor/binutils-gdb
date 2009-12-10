@@ -3196,6 +3196,74 @@ i386_record_push (struct i386_record_s *irp, int size)
   return 0;
 }
 
+
+/* Defines contents to record.  */
+#define I386_SAVE_FPU_REGS              0xfffd
+#define I386_SAVE_FPU_ENV               0xfffe
+#define I386_SAVE_FPU_ENV_REG_STACK     0xffff
+
+/* Record the value of floating point registers which will be changed by the
+   current instruction to "record_arch_list".  Return -1 if something is wrong.
+*/
+
+static int i386_record_floats (struct gdbarch *gdbarch,
+                               struct i386_record_s *ir,
+                               uint32_t iregnum)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int i;
+
+  /* Oza: Because of floating point insn push/pop of fpu stack is going to
+     happen.  Currently we store st0-st7 registers, but we need not store all
+     registers all the time, in future we use ftag register and record only
+     those who are not marked as an empty.  */
+
+  if (I386_SAVE_FPU_REGS == iregnum)
+    {
+      for (i = I387_ST0_REGNUM (tdep); i <= I387_ST0_REGNUM (tdep) + 7; i++)
+        {
+          if (record_arch_list_add_reg (ir->regcache, i))
+            return -1;
+        }
+    }
+  else if (I386_SAVE_FPU_ENV == iregnum)
+    {
+      for (i = I387_FCTRL_REGNUM (tdep); i <= I387_FOP_REGNUM (tdep); i++)
+	      {
+	      if (record_arch_list_add_reg (ir->regcache, i))
+	        return -1;
+	      }
+    }
+  else if (I386_SAVE_FPU_ENV_REG_STACK == iregnum)
+    {
+      for (i = I387_ST0_REGNUM (tdep); i <= I387_FOP_REGNUM (tdep); i++)
+      {
+        if (record_arch_list_add_reg (ir->regcache, i))
+          return -1;
+      }
+    }
+  else if ((iregnum >= I387_ST0_REGNUM (tdep)) &&
+           (iregnum <= I387_FOP_REGNUM (tdep)))
+    {
+      if (record_arch_list_add_reg (ir->regcache,iregnum))
+        return -1;
+    }
+  else
+    {
+      /* Parameter error.  */
+      return -1;
+    }
+  if(I386_SAVE_FPU_ENV != iregnum)
+    {
+    for (i = I387_FCTRL_REGNUM (tdep); i <= I387_FOP_REGNUM (tdep); i++)
+      {
+      if (record_arch_list_add_reg (ir->regcache, i))
+        return -1;
+      }
+    }
+  return 0;
+}
+
 /* Parse the current instruction and record the values of the registers and
    memory that will be changed in current instruction to "record_arch_list".
    Return -1 if something wrong. */
@@ -3214,6 +3282,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   ULONGEST tmpulongest;
   uint32_t opcode;
   struct i386_record_s ir;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int rex = 0;
   uint8_t rex_w = -1;
   uint8_t rex_r = 0;
@@ -4262,8 +4331,7 @@ reswitch:
 	}
       break;
 
-      /* floats */
-      /* It just record the memory change of instrcution. */
+    /* Floats.  */
     case 0xd8:
     case 0xd9:
     case 0xda:
@@ -4277,45 +4345,56 @@ reswitch:
       ir.reg |= ((opcode & 7) << 3);
       if (ir.mod != 3)
 	{
-	  /* memory */
+	  /* Memory. */
 	  uint64_t tmpu64;
 
 	  if (i386_record_lea_modrm_addr (&ir, &tmpu64))
 	    return -1;
 	  switch (ir.reg)
 	    {
-	    case 0x00:
-	    case 0x01:
 	    case 0x02:
+            case 0x12:
+            case 0x22:
+            case 0x32:
+	      /* For fcom, ficom nothing to do.  */
+              break;
 	    case 0x03:
+            case 0x13:
+            case 0x23:
+            case 0x33:
+	      /* For fcomp, ficomp pop FPU stack, store all.  */
+              if (i386_record_floats (gdbarch, &ir, I386_SAVE_FPU_REGS))
+                return -1;
+              break;
+            case 0x00:
+            case 0x01:
 	    case 0x04:
 	    case 0x05:
 	    case 0x06:
 	    case 0x07:
 	    case 0x10:
 	    case 0x11:
-	    case 0x12:
-	    case 0x13:
 	    case 0x14:
 	    case 0x15:
 	    case 0x16:
 	    case 0x17:
 	    case 0x20:
 	    case 0x21:
-	    case 0x22:
-	    case 0x23:
 	    case 0x24:
 	    case 0x25:
 	    case 0x26:
 	    case 0x27:
 	    case 0x30:
 	    case 0x31:
-	    case 0x32:
-	    case 0x33:
 	    case 0x34:
 	    case 0x35:
 	    case 0x36:
 	    case 0x37:
+              /* For fadd, fmul, fsub, fsubr, fdiv, fdivr, fiadd, fimul,
+                 fisub, fisubr, fidiv, fidivr, modR/M.reg is an extension
+                 of code,  always affects st(0) register.  */
+              if (i386_record_floats (gdbarch, &ir, I387_ST0_REGNUM (tdep)))
+                return -1;
 	      break;
 	    case 0x08:
 	    case 0x0a:
@@ -4324,6 +4403,7 @@ reswitch:
 	    case 0x19:
 	    case 0x1a:
 	    case 0x1b:
+            case 0x1d:
 	    case 0x28:
 	    case 0x29:
 	    case 0x2a:
@@ -4332,9 +4412,14 @@ reswitch:
 	    case 0x39:
 	    case 0x3a:
 	    case 0x3b:
+            case 0x3c:
+            case 0x3d:
 	      switch (ir.reg & 7)
 		{
 		case 0:
+		  /* Handling fld, fild.  */
+		  if (i386_record_floats (gdbarch, &ir, I386_SAVE_FPU_REGS))
+		    return -1;
 		  break;
 		case 1:
 		  switch (ir.reg >> 4)
@@ -4348,6 +4433,7 @@ reswitch:
 			return -1;
 		      break;
 		    case 3:
+		      break;
 		    default:
 		      if (record_arch_list_add_mem (tmpu64, 2))
 			return -1;
@@ -4358,15 +4444,49 @@ reswitch:
 		  switch (ir.reg >> 4)
 		    {
 		    case 0:
+		      if (record_arch_list_add_mem (tmpu64, 4))
+			return -1;
+		      if (3 == (ir.reg & 7))
+			{
+			  /* For fstp m32fp.  */
+			  if (i386_record_floats (gdbarch, &ir,
+						  I386_SAVE_FPU_REGS))
+			    return -1;
+			}
+		      break;
 		    case 1:
 		      if (record_arch_list_add_mem (tmpu64, 4))
 			return -1;
+		      if ((3 == (ir.reg & 7))
+			  || (5 == (ir.reg & 7))
+			  || (7 == (ir.reg & 7)))
+			{
+			  /* For fstp insn.  */
+			  if (i386_record_floats (gdbarch, &ir,
+						  I386_SAVE_FPU_REGS))
+			    return -1;
+			}
 		      break;
 		    case 2:
 		      if (record_arch_list_add_mem (tmpu64, 8))
 			return -1;
+		      if (3 == (ir.reg & 7))
+			{
+			  /* For fstp m64fp.  */
+			  if (i386_record_floats (gdbarch, &ir,
+						  I386_SAVE_FPU_REGS))
+			    return -1;
+			}
 		      break;
 		    case 3:
+		      if ((3 <= (ir.reg & 7)) && (6 <= (ir.reg & 7)))
+			{
+			  /* For fistp, fbld, fild, fbstp.  */
+			  if (i386_record_floats (gdbarch, &ir,
+						  I386_SAVE_FPU_REGS))
+			    return -1;
+			}
+		      /* Fall through */
 		    default:
 		      if (record_arch_list_add_mem (tmpu64, 2))
 			return -1;
@@ -4376,11 +4496,21 @@ reswitch:
 		}
 	      break;
 	    case 0x0c:
+              /* Insn fldenv.  */
+              if (i386_record_floats (gdbarch, &ir,
+                                      I386_SAVE_FPU_ENV_REG_STACK))
+                return -1;
+              break;
 	    case 0x0d:
-	    case 0x1d:
+              /* Insn fldcw.  */
+              if (i386_record_floats (gdbarch, &ir, I387_FCTRL_REGNUM (tdep)))
+                return -1;
+              break;
 	    case 0x2c:
-	    case 0x3c:
-	    case 0x3d:
+              /* Insn frstor.  */
+              if (i386_record_floats (gdbarch, &ir,
+                                      I386_SAVE_FPU_ENV_REG_STACK))
+                return -1;
 	      break;
 	    case 0x0e:
 	      if (ir.dflag)
@@ -4398,6 +4528,9 @@ reswitch:
 	    case 0x2f:
 	      if (record_arch_list_add_mem (tmpu64, 2))
 		return -1;
+              /* Insn fstp, fbstp.  */
+              if (i386_record_floats (gdbarch, &ir, I386_SAVE_FPU_REGS))
+                return -1;
 	      break;
 	    case 0x1f:
 	    case 0x3e:
@@ -4419,9 +4552,16 @@ reswitch:
 		}
 	      if (record_arch_list_add_mem (tmpu64, 80))
 		return -1;
+	      /* Insn fsave.  */
+	      if (i386_record_floats (gdbarch, &ir,
+				      I386_SAVE_FPU_ENV_REG_STACK))
+		return -1;
 	      break;
 	    case 0x3f:
 	      if (record_arch_list_add_mem (tmpu64, 8))
+		return -1;
+	      /* Insn fistp.  */
+	      if (i386_record_floats (gdbarch, &ir, I386_SAVE_FPU_REGS))
 		return -1;
 	      break;
 	    default:
@@ -4431,8 +4571,211 @@ reswitch:
 	      break;
 	    }
 	}
+      /* Opcode is an extension of modR/M byte.  */
+      else
+        {
+	  switch (opcode)
+	    {
+	    case 0xd8:
+	      if (i386_record_floats (gdbarch, &ir, I387_ST0_REGNUM (tdep)))
+		return -1;
+	      break;
+	    case 0xd9:
+	      if (0x0c == (ir.modrm >> 4))
+		{
+		  if ((ir.modrm & 0x0f) <= 7)
+		    {
+		      if (i386_record_floats (gdbarch, &ir,
+					      I386_SAVE_FPU_REGS))
+			return -1;
+		    }
+                  else
+		    {
+		      if (i386_record_floats (gdbarch, &ir,
+					      I387_ST0_REGNUM (tdep)))
+			return -1;
+		      /* If only st(0) is changing, then we have already
+			 recorded.  */
+		      if ((ir.modrm & 0x0f) - 0x08)
+			{
+			  if (i386_record_floats (gdbarch, &ir,
+						  I387_ST0_REGNUM (tdep) +
+						  ((ir.modrm & 0x0f) - 0x08)))
+			    return -1;
+			}
+		    }
+		}
+              else
+                {
+		  switch (ir.modrm)
+		    {
+		    case 0xe0:
+		    case 0xe1:
+		    case 0xf0:
+		    case 0xf5:
+		    case 0xf8:
+		    case 0xfa:
+		    case 0xfc:
+		    case 0xfe:
+		    case 0xff:
+		      if (i386_record_floats (gdbarch, &ir,
+					      I387_ST0_REGNUM (tdep)))
+			return -1;
+		      break;
+		    case 0xf1:
+		    case 0xf2:
+		    case 0xf3:
+		    case 0xf4:
+		    case 0xf6:
+		    case 0xf7:
+		    case 0xe8:
+		    case 0xe9:
+		    case 0xea:
+		    case 0xeb:
+		    case 0xec:
+		    case 0xed:
+		    case 0xee:
+		    case 0xf9:
+		    case 0xfb:
+		      if (i386_record_floats (gdbarch, &ir,
+					      I386_SAVE_FPU_REGS))
+			return -1;
+		      break;
+		    case 0xfd:
+		      if (i386_record_floats (gdbarch, &ir,
+					      I387_ST0_REGNUM (tdep)))
+			return -1;
+		      if (i386_record_floats (gdbarch, &ir,
+					      I387_ST0_REGNUM (tdep) + 1))
+			return -1;
+		      break;
+		    }
+		}
+              break;
+            case 0xda:
+              if (0xe9 == ir.modrm)
+                {
+		  if (i386_record_floats (gdbarch, &ir, I386_SAVE_FPU_REGS))
+		    return -1;
+                }
+              else if ((0x0c == ir.modrm >> 4) || (0x0d == ir.modrm >> 4))
+                {
+		  if (i386_record_floats (gdbarch, &ir,
+					  I387_ST0_REGNUM (tdep)))
+		    return -1;
+		  if (((ir.modrm & 0x0f) > 0) && ((ir.modrm & 0x0f) <= 7))
+		    {
+		      if (i386_record_floats (gdbarch, &ir,
+					      I387_ST0_REGNUM (tdep) +
+					      (ir.modrm & 0x0f)))
+			return -1;
+		    }
+		  else if ((ir.modrm & 0x0f) - 0x08)
+		    {
+		      if (i386_record_floats (gdbarch, &ir,
+					      I387_ST0_REGNUM (tdep) +
+					      ((ir.modrm & 0x0f) - 0x08)))
+			return -1;
+		    }
+                }
+              break;
+            case 0xdb:
+              if (0xe3 == ir.modrm)
+                {
+		  if (i386_record_floats (gdbarch, &ir, I386_SAVE_FPU_ENV))
+		    return -1;
+                }
+              else if ((0x0c == ir.modrm >> 4) || (0x0d == ir.modrm >> 4))
+                {
+		  if (i386_record_floats (gdbarch, &ir,
+					  I387_ST0_REGNUM (tdep)))
+		    return -1;
+		  if (((ir.modrm & 0x0f) > 0) && ((ir.modrm & 0x0f) <= 7))
+		    {
+		      if (i386_record_floats (gdbarch, &ir,
+					      I387_ST0_REGNUM (tdep) +
+					      (ir.modrm & 0x0f)))
+			return -1;
+		    }
+		  else if ((ir.modrm & 0x0f) - 0x08)
+		    {
+		      if (i386_record_floats (gdbarch, &ir,
+					      I387_ST0_REGNUM (tdep) +
+					      ((ir.modrm & 0x0f) - 0x08)))
+			return -1;
+		    }
+                }
+              break;
+            case 0xdc:
+              if ((0x0c == ir.modrm >> 4)
+		  || (0x0d == ir.modrm >> 4)
+		  || (0x0f == ir.modrm >> 4))
+                {
+		  if ((ir.modrm & 0x0f) <= 7)
+		    {
+		      if (i386_record_floats (gdbarch, &ir,
+					      I387_ST0_REGNUM (tdep) +
+					      (ir.modrm & 0x0f)))
+			return -1;
+		    }
+		  else
+		    {
+		      if (i386_record_floats (gdbarch, &ir,
+					      I387_ST0_REGNUM (tdep) +
+					      ((ir.modrm & 0x0f) - 0x08)))
+			return -1;
+		    }
+                }
+	      break;
+            case 0xdd:
+              if (0x0c == ir.modrm >> 4)
+                {
+                  if (i386_record_floats (gdbarch, &ir,
+                                          I387_FTAG_REGNUM (tdep)))
+                    return -1;
+                }
+              else if ((0x0d == ir.modrm >> 4) || (0x0e == ir.modrm >> 4))
+                {
+                  if ((ir.modrm & 0x0f) <= 7)
+                    {
+		      if (i386_record_floats (gdbarch, &ir,
+					      I387_ST0_REGNUM (tdep) +
+					      (ir.modrm & 0x0f)))
+			return -1;
+                    }
+                  else
+                    {
+                      if (i386_record_floats (gdbarch, &ir,
+					      I386_SAVE_FPU_REGS))
+                        return -1;
+                    }
+                }
+              break;
+            case 0xde:
+              if ((0x0c == ir.modrm >> 4)
+		  || (0x0e == ir.modrm >> 4)
+		  || (0x0f == ir.modrm >> 4)
+		  || (0xd9 == ir.modrm))
+                {
+		  if (i386_record_floats (gdbarch, &ir, I386_SAVE_FPU_REGS))
+		    return -1;
+                }
+              break;
+            case 0xdf:
+              if (0xe0 == ir.modrm)
+                {
+		  if (record_arch_list_add_reg (ir.regcache, I386_EAX_REGNUM))
+		    return -1;
+                }
+              else if ((0x0f == ir.modrm >> 4) || (0x0e == ir.modrm >> 4))
+                {
+		  if (i386_record_floats (gdbarch, &ir, I386_SAVE_FPU_REGS))
+		    return -1;
+                }
+              break;
+	    }
+	}
       break;
-
       /* string ops */
       /* movsS */
     case 0xa4:
@@ -4836,12 +5179,18 @@ reswitch:
       break;
 
       /* fwait */
-      /* XXX */
     case 0x9b:
-      printf_unfiltered (_("Process record doesn't support instruction "
-			   "fwait.\n"));
-      ir.addr -= 1;
-      goto no_support;
+      if (target_read_memory (ir.addr, &tmpu8, 1))
+        {
+          if (record_debug)
+            printf_unfiltered (_("Process record: error reading memory at "
+				 "addr 0x%s len = 1.\n"),
+			       paddress (gdbarch, ir.addr));
+          return -1;
+        }
+      opcode = (uint32_t) tmpu8;
+      ir.addr++;
+      goto reswitch;
       break;
 
       /* int3 */

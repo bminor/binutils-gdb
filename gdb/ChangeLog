@@ -1,3 +1,11 @@
+2009-12-10  Oza Pawandeep <paawan1982@yahoo.com>
+
+	* i386-tdep.c:  Support for floating point recording.
+	Records and Replay the i386 floating point registers,
+	of i387 FPU.
+	(i386_record_floats): New function.
+	(i386_process_record): Implement FP insns.
+
 2009-12-03  Tristan Gingold  <gingold@adacore.com>
 
 	* machoread.c (macho_symfile_read): Use symbol_file_add_separate
