@@ -1,3 +1,11 @@
+2009-12-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (arch_entry): Add len and skip.
+	(cpu_arch): Use STRING_COMMA_LEN.
+	(MESSAGE_TEMPLATE): New.
+	(show_arch): Likewise.
+	(md_show_usage): Use show_arch.
+
 2009-12-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/11037

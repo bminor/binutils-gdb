@@ -128,8 +128,10 @@ sib_byte;
 typedef struct
 {
   const char *name;		/* arch name */
+  unsigned int len;		/* arch string length */
   enum processor_type type;	/* arch type */
   i386_cpu_flags flags;		/* cpu feature flags */
+  unsigned int skip;		/* show_arch should skip this. */
 }
 arch_entry;
 
@@ -536,140 +538,140 @@ const relax_typeS md_relax_table[] =
 
 static const arch_entry cpu_arch[] =
 {
-  { "generic32", PROCESSOR_GENERIC32,
-    CPU_GENERIC32_FLAGS },
-  { "generic64", PROCESSOR_GENERIC64,
-    CPU_GENERIC64_FLAGS },
-  { "i8086", PROCESSOR_UNKNOWN,
-    CPU_NONE_FLAGS },
-  { "i186", PROCESSOR_UNKNOWN,
-    CPU_I186_FLAGS },
-  { "i286", PROCESSOR_UNKNOWN,
-    CPU_I286_FLAGS },
-  { "i386", PROCESSOR_I386,
-    CPU_I386_FLAGS },
-  { "i486", PROCESSOR_I486,
-    CPU_I486_FLAGS },
-  { "i586", PROCESSOR_PENTIUM,
-    CPU_I586_FLAGS },
-  { "i686", PROCESSOR_PENTIUMPRO,
-    CPU_I686_FLAGS },
-  { "pentium", PROCESSOR_PENTIUM,
-    CPU_I586_FLAGS },
-  { "pentiumpro", PROCESSOR_PENTIUMPRO,
-    CPU_I686_FLAGS },
-  { "pentiumii", PROCESSOR_PENTIUMPRO,
-    CPU_P2_FLAGS },
-  { "pentiumiii",PROCESSOR_PENTIUMPRO,
-    CPU_P3_FLAGS },
-  { "pentium4", PROCESSOR_PENTIUM4,
-    CPU_P4_FLAGS },
-  { "prescott", PROCESSOR_NOCONA,
-    CPU_CORE_FLAGS },
-  { "nocona", PROCESSOR_NOCONA,
-    CPU_NOCONA_FLAGS },
-  { "yonah", PROCESSOR_CORE,
-    CPU_CORE_FLAGS },
-  { "core", PROCESSOR_CORE,
-    CPU_CORE_FLAGS },
-  { "merom", PROCESSOR_CORE2,
-    CPU_CORE2_FLAGS },
-  { "core2", PROCESSOR_CORE2,
-    CPU_CORE2_FLAGS },
-  { "corei7", PROCESSOR_COREI7,
-    CPU_COREI7_FLAGS },
-  { "l1om", PROCESSOR_L1OM,
-    CPU_L1OM_FLAGS },
-  { "k6", PROCESSOR_K6,
-    CPU_K6_FLAGS },
-  { "k6_2", PROCESSOR_K6,
-    CPU_K6_2_FLAGS },
-  { "athlon", PROCESSOR_ATHLON,
-    CPU_ATHLON_FLAGS },
-  { "sledgehammer", PROCESSOR_K8,
-    CPU_K8_FLAGS },
-  { "opteron", PROCESSOR_K8,
-    CPU_K8_FLAGS },
-  { "k8", PROCESSOR_K8,
-    CPU_K8_FLAGS },
-  { "amdfam10", PROCESSOR_AMDFAM10,
-    CPU_AMDFAM10_FLAGS },
-  { ".8087", PROCESSOR_UNKNOWN,
-    CPU_8087_FLAGS },
-  { ".287", PROCESSOR_UNKNOWN,
-    CPU_287_FLAGS },
-  { ".387", PROCESSOR_UNKNOWN,
-    CPU_387_FLAGS },
-  { ".no87", PROCESSOR_UNKNOWN,
-    CPU_ANY87_FLAGS },
-  { ".mmx", PROCESSOR_UNKNOWN,
-    CPU_MMX_FLAGS },
-  { ".nommx", PROCESSOR_UNKNOWN,
-    CPU_3DNOWA_FLAGS },
-  { ".sse", PROCESSOR_UNKNOWN,
-    CPU_SSE_FLAGS },
-  { ".sse2", PROCESSOR_UNKNOWN,
-    CPU_SSE2_FLAGS },
-  { ".sse3", PROCESSOR_UNKNOWN,
-    CPU_SSE3_FLAGS },
-  { ".ssse3", PROCESSOR_UNKNOWN,
-    CPU_SSSE3_FLAGS },
-  { ".sse4.1", PROCESSOR_UNKNOWN,
-    CPU_SSE4_1_FLAGS },
-  { ".sse4.2", PROCESSOR_UNKNOWN,
-    CPU_SSE4_2_FLAGS },
-  { ".sse4", PROCESSOR_UNKNOWN,
-    CPU_SSE4_2_FLAGS },
-  { ".nosse", PROCESSOR_UNKNOWN,
-    CPU_ANY_SSE_FLAGS },
-  { ".avx", PROCESSOR_UNKNOWN,
-    CPU_AVX_FLAGS },
-  { ".noavx", PROCESSOR_UNKNOWN,
-    CPU_ANY_AVX_FLAGS },
-  { ".vmx", PROCESSOR_UNKNOWN,
-    CPU_VMX_FLAGS },
-  { ".smx", PROCESSOR_UNKNOWN,
-    CPU_SMX_FLAGS },
-  { ".xsave", PROCESSOR_UNKNOWN,
-    CPU_XSAVE_FLAGS },
-  { ".aes", PROCESSOR_UNKNOWN,
-    CPU_AES_FLAGS },
-  { ".pclmul", PROCESSOR_UNKNOWN,
-    CPU_PCLMUL_FLAGS },
-  { ".clmul", PROCESSOR_UNKNOWN,
-    CPU_PCLMUL_FLAGS },
-  { ".fma", PROCESSOR_UNKNOWN,
-    CPU_FMA_FLAGS },
-  { ".fma4", PROCESSOR_UNKNOWN,
-    CPU_FMA4_FLAGS },
-  { ".xop", PROCESSOR_UNKNOWN,
-    CPU_XOP_FLAGS },
-  { ".lwp", PROCESSOR_UNKNOWN,
-    CPU_LWP_FLAGS },
-  { ".movbe", PROCESSOR_UNKNOWN,
-    CPU_MOVBE_FLAGS },
-  { ".ept", PROCESSOR_UNKNOWN,
-    CPU_EPT_FLAGS },
-  { ".clflush", PROCESSOR_UNKNOWN,
-    CPU_CLFLUSH_FLAGS },
-  { ".syscall", PROCESSOR_UNKNOWN,
-    CPU_SYSCALL_FLAGS },
-  { ".rdtscp", PROCESSOR_UNKNOWN,
-    CPU_RDTSCP_FLAGS },
-  { ".3dnow", PROCESSOR_UNKNOWN,
-    CPU_3DNOW_FLAGS },
-  { ".3dnowa", PROCESSOR_UNKNOWN,
-    CPU_3DNOWA_FLAGS },
-  { ".padlock", PROCESSOR_UNKNOWN,
-    CPU_PADLOCK_FLAGS },
-  { ".pacifica", PROCESSOR_UNKNOWN,
-    CPU_SVME_FLAGS },
-  { ".svme", PROCESSOR_UNKNOWN,
-    CPU_SVME_FLAGS },
-  { ".sse4a", PROCESSOR_UNKNOWN,
-    CPU_SSE4A_FLAGS },
-  { ".abm", PROCESSOR_UNKNOWN,
-    CPU_ABM_FLAGS },
+  { STRING_COMMA_LEN ("generic32"), PROCESSOR_GENERIC32,
+    CPU_GENERIC32_FLAGS, 0 },
+  { STRING_COMMA_LEN ("generic64"), PROCESSOR_GENERIC64,
+    CPU_GENERIC64_FLAGS, 0 },
+  { STRING_COMMA_LEN ("i8086"), PROCESSOR_UNKNOWN,
+    CPU_NONE_FLAGS, 0 },
+  { STRING_COMMA_LEN ("i186"), PROCESSOR_UNKNOWN,
+    CPU_I186_FLAGS, 0 },
+  { STRING_COMMA_LEN ("i286"), PROCESSOR_UNKNOWN,
+    CPU_I286_FLAGS, 0 },
+  { STRING_COMMA_LEN ("i386"), PROCESSOR_I386,
+    CPU_I386_FLAGS, 0 },
+  { STRING_COMMA_LEN ("i486"), PROCESSOR_I486,
+    CPU_I486_FLAGS, 0 },
+  { STRING_COMMA_LEN ("i586"), PROCESSOR_PENTIUM,
+    CPU_I586_FLAGS, 0 },
+  { STRING_COMMA_LEN ("i686"), PROCESSOR_PENTIUMPRO,
+    CPU_I686_FLAGS, 0 },
+  { STRING_COMMA_LEN ("pentium"), PROCESSOR_PENTIUM,
+    CPU_I586_FLAGS, 0 },
+  { STRING_COMMA_LEN ("pentiumpro"), PROCESSOR_PENTIUMPRO,
+    CPU_I686_FLAGS, 0 },
+  { STRING_COMMA_LEN ("pentiumii"), PROCESSOR_PENTIUMPRO,
+    CPU_P2_FLAGS, 0 },
+  { STRING_COMMA_LEN ("pentiumiii"),PROCESSOR_PENTIUMPRO,
+    CPU_P3_FLAGS, 0 },
+  { STRING_COMMA_LEN ("pentium4"), PROCESSOR_PENTIUM4,
+    CPU_P4_FLAGS, 0 },
+  { STRING_COMMA_LEN ("prescott"), PROCESSOR_NOCONA,
+    CPU_CORE_FLAGS, 0 },
+  { STRING_COMMA_LEN ("nocona"), PROCESSOR_NOCONA,
+    CPU_NOCONA_FLAGS, 0 },
+  { STRING_COMMA_LEN ("yonah"), PROCESSOR_CORE,
+    CPU_CORE_FLAGS, 1 },
+  { STRING_COMMA_LEN ("core"), PROCESSOR_CORE,
+    CPU_CORE_FLAGS, 0 },
+  { STRING_COMMA_LEN ("merom"), PROCESSOR_CORE2,
+    CPU_CORE2_FLAGS, 1 },
+  { STRING_COMMA_LEN ("core2"), PROCESSOR_CORE2,
+    CPU_CORE2_FLAGS, 0 },
+  { STRING_COMMA_LEN ("corei7"), PROCESSOR_COREI7,
+    CPU_COREI7_FLAGS, 0 },
+  { STRING_COMMA_LEN ("l1om"), PROCESSOR_L1OM,
+    CPU_L1OM_FLAGS, 0 },
+  { STRING_COMMA_LEN ("k6"), PROCESSOR_K6,
+    CPU_K6_FLAGS, 0 },
+  { STRING_COMMA_LEN ("k6_2"), PROCESSOR_K6,
+    CPU_K6_2_FLAGS, 0 },
+  { STRING_COMMA_LEN ("athlon"), PROCESSOR_ATHLON,
+    CPU_ATHLON_FLAGS, 0 },
+  { STRING_COMMA_LEN ("sledgehammer"), PROCESSOR_K8,
+    CPU_K8_FLAGS, 1 },
+  { STRING_COMMA_LEN ("opteron"), PROCESSOR_K8,
+    CPU_K8_FLAGS, 0 },
+  { STRING_COMMA_LEN ("k8"), PROCESSOR_K8,
+    CPU_K8_FLAGS, 0 },
+  { STRING_COMMA_LEN ("amdfam10"), PROCESSOR_AMDFAM10,
+    CPU_AMDFAM10_FLAGS, 0 },
+  { STRING_COMMA_LEN (".8087"), PROCESSOR_UNKNOWN,
+    CPU_8087_FLAGS, 0 },
+  { STRING_COMMA_LEN (".287"), PROCESSOR_UNKNOWN,
+    CPU_287_FLAGS, 0 },
+  { STRING_COMMA_LEN (".387"), PROCESSOR_UNKNOWN,
+    CPU_387_FLAGS, 0 },
+  { STRING_COMMA_LEN (".no87"), PROCESSOR_UNKNOWN,
+    CPU_ANY87_FLAGS, 0 },
+  { STRING_COMMA_LEN (".mmx"), PROCESSOR_UNKNOWN,
+    CPU_MMX_FLAGS, 0 },
+  { STRING_COMMA_LEN (".nommx"), PROCESSOR_UNKNOWN,
+    CPU_3DNOWA_FLAGS, 0 },
+  { STRING_COMMA_LEN (".sse"), PROCESSOR_UNKNOWN,
+    CPU_SSE_FLAGS, 0 },
+  { STRING_COMMA_LEN (".sse2"), PROCESSOR_UNKNOWN,
+    CPU_SSE2_FLAGS, 0 },
+  { STRING_COMMA_LEN (".sse3"), PROCESSOR_UNKNOWN,
+    CPU_SSE3_FLAGS, 0 },
+  { STRING_COMMA_LEN (".ssse3"), PROCESSOR_UNKNOWN,
+    CPU_SSSE3_FLAGS, 0 },
+  { STRING_COMMA_LEN (".sse4.1"), PROCESSOR_UNKNOWN,
+    CPU_SSE4_1_FLAGS, 0 },
+  { STRING_COMMA_LEN (".sse4.2"), PROCESSOR_UNKNOWN,
+    CPU_SSE4_2_FLAGS, 0 },
+  { STRING_COMMA_LEN (".sse4"), PROCESSOR_UNKNOWN,
+    CPU_SSE4_2_FLAGS, 0 },
+  { STRING_COMMA_LEN (".nosse"), PROCESSOR_UNKNOWN,
+    CPU_ANY_SSE_FLAGS, 0 },
+  { STRING_COMMA_LEN (".avx"), PROCESSOR_UNKNOWN,
+    CPU_AVX_FLAGS, 0 },
+  { STRING_COMMA_LEN (".noavx"), PROCESSOR_UNKNOWN,
+    CPU_ANY_AVX_FLAGS, 0 },
+  { STRING_COMMA_LEN (".vmx"), PROCESSOR_UNKNOWN,
+    CPU_VMX_FLAGS, 0 },
+  { STRING_COMMA_LEN (".smx"), PROCESSOR_UNKNOWN,
+    CPU_SMX_FLAGS, 0 },
+  { STRING_COMMA_LEN (".xsave"), PROCESSOR_UNKNOWN,
+    CPU_XSAVE_FLAGS, 0 },
+  { STRING_COMMA_LEN (".aes"), PROCESSOR_UNKNOWN,
+    CPU_AES_FLAGS, 0 },
+  { STRING_COMMA_LEN (".pclmul"), PROCESSOR_UNKNOWN,
+    CPU_PCLMUL_FLAGS, 0 },
+  { STRING_COMMA_LEN (".clmul"), PROCESSOR_UNKNOWN,
+    CPU_PCLMUL_FLAGS, 1 },
+  { STRING_COMMA_LEN (".fma"), PROCESSOR_UNKNOWN,
+    CPU_FMA_FLAGS, 0 },
+  { STRING_COMMA_LEN (".fma4"), PROCESSOR_UNKNOWN,
+    CPU_FMA4_FLAGS, 0 },
+  { STRING_COMMA_LEN (".xop"), PROCESSOR_UNKNOWN,
+    CPU_XOP_FLAGS, 0 },
+  { STRING_COMMA_LEN (".lwp"), PROCESSOR_UNKNOWN,
+    CPU_LWP_FLAGS, 0 },
+  { STRING_COMMA_LEN (".movbe"), PROCESSOR_UNKNOWN,
+    CPU_MOVBE_FLAGS, 0 },
+  { STRING_COMMA_LEN (".ept"), PROCESSOR_UNKNOWN,
+    CPU_EPT_FLAGS, 0 },
+  { STRING_COMMA_LEN (".clflush"), PROCESSOR_UNKNOWN,
+    CPU_CLFLUSH_FLAGS, 0 },
+  { STRING_COMMA_LEN (".syscall"), PROCESSOR_UNKNOWN,
+    CPU_SYSCALL_FLAGS, 0 },
+  { STRING_COMMA_LEN (".rdtscp"), PROCESSOR_UNKNOWN,
+    CPU_RDTSCP_FLAGS, 0 },
+  { STRING_COMMA_LEN (".3dnow"), PROCESSOR_UNKNOWN,
+    CPU_3DNOW_FLAGS, 0 },
+  { STRING_COMMA_LEN (".3dnowa"), PROCESSOR_UNKNOWN,
+    CPU_3DNOWA_FLAGS, 0 },
+  { STRING_COMMA_LEN (".padlock"), PROCESSOR_UNKNOWN,
+    CPU_PADLOCK_FLAGS, 0 },
+  { STRING_COMMA_LEN (".pacifica"), PROCESSOR_UNKNOWN,
+    CPU_SVME_FLAGS, 1 },
+  { STRING_COMMA_LEN (".svme"), PROCESSOR_UNKNOWN,
+    CPU_SVME_FLAGS, 0 },
+  { STRING_COMMA_LEN (".sse4a"), PROCESSOR_UNKNOWN,
+    CPU_SSE4A_FLAGS, 0 },
+  { STRING_COMMA_LEN (".abm"), PROCESSOR_UNKNOWN,
+    CPU_ABM_FLAGS, 0 },
 };
 
 #ifdef I386COFF
@@ -8084,9 +8086,82 @@ md_parse_option (int c, char *arg)
   return 1;
 }
 
+#define MESSAGE_TEMPLATE \
+"                                                                                "
+
+static void
+show_arch (FILE *stream, int ext)
+{
+  static char message[] = MESSAGE_TEMPLATE;
+  char *start = message + 27;
+  char *p;
+  int size = sizeof (MESSAGE_TEMPLATE);
+  int left;
+  const char *name;
+  int len;
+  unsigned int j;
+
+  p = start;
+  left = size - (start - message);
+  for (j = 0; j < ARRAY_SIZE (cpu_arch); j++)
+    {
+      /* Should it be skipped?  */
+      if (cpu_arch [j].skip)
+	continue;
+
+      name = cpu_arch [j].name;
+      len = cpu_arch [j].len;
+      if (*name == '.')
+	{
+	  /* It is an extension.  Skip if we aren't asked to show it.  */
+	  if (ext)
+	    {
+	      name++;
+	      len--;
+	    }
+	  else
+	    continue;
+	}
+      else if (ext)
+	{
+	  /* It is an processor.  Skip if we show only extension.  */
+	  continue;
+	}
+
+      /* Reserve 2 spaces for ", " or ",\0" */
+      left -= len + 2;
+
+      /* Check if there is any room.  */
+      if (left >= 0)
+	{
+	  if (p != start)
+	    {
+	      *p++ = ',';
+	      *p++ = ' ';
+	    }
+	  p = mempcpy (p, name, len);
+	}
+      else
+	{
+	  /* Output the current message now and start a new one.  */
+	  *p++ = ',';
+	  *p = '\0';
+	  fprintf (stream, "%s\n", message);
+	  p = start;
+	  left = size - (start - message) - len - 2;
+	  
+	  gas_assert (left >= 0);
+
+	  p = mempcpy (p, name, len);
+	}
+    }
+
+  *p = '\0';
+  fprintf (stream, "%s\n", message);
+}
+
 void
-md_show_usage (stream)
-     FILE *stream;
+md_show_usage (FILE *stream)
 {
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   fprintf (stream, _("\
@@ -8115,23 +8190,14 @@ md_show_usage (stream)
 #endif
   fprintf (stream, _("\
   -march=CPU[,+EXTENSION...]\n\
-                          generate code for CPU and EXTENSION, CPU is one of:\n\
-                           i8086, i186, i286, i386, i486, pentium, pentiumpro,\n\
-                           pentiumii, pentiumiii, pentium4, prescott, nocona,\n\
-                           core, core2, corei7, l1om, k6, k6_2, athlon, k8,\n\
-                           amdfam10, generic32, generic64\n\
-                          EXTENSION is combination of:\n\
-                           8087, 287, 387, no87, mmx, nommx, sse, sse2, sse3,\n\
-                           ssse3, sse4.1, sse4.2, sse4, nosse, avx, noavx,\n\
-                           vmx, smx, xsave, movbe, ept, aes, pclmul, fma,\n\
-                           clflush, syscall, rdtscp, 3dnow, 3dnowa, sse4a,\n\
-                           svme, abm, padlock, fma4, xop, lwp\n"));
+                          generate code for CPU and EXTENSION, CPU is one of:\n"));
+  show_arch (stream, 0);
   fprintf (stream, _("\
-  -mtune=CPU              optimize for CPU, CPU is one of:\n\
-                           i8086, i186, i286, i386, i486, pentium, pentiumpro,\n\
-                           pentiumii, pentiumiii, pentium4, prescott, nocona,\n\
-                           core, core2, corei7, l1om, k6, k6_2, athlon, k8,\n\
-                           amdfam10, generic32, generic64\n"));
+                          EXTENSION is combination of:\n"));
+  show_arch (stream, 1);
+  fprintf (stream, _("\
+  -mtune=CPU              optimize for CPU, CPU is one of:\n"));
+  show_arch (stream, 0);
   fprintf (stream, _("\
   -msse2avx               encode SSE instructions with VEX prefix\n"));
   fprintf (stream, _("\
