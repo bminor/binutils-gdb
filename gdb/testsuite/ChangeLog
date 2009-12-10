@@ -1,3 +1,10 @@
+2009-12-10  Oza Pawandeep (paawan1982@yahoo.com
+
+	* gdb.reverse/i387-env-reverse.c: New file.
+	* gdb.reverse/i387-env-reverse.exp: New file.
+	* gdb.reverse/i387-stack-reverse.c: New file.
+	* gdb.reverse/i387-stack-reverse.exp: New file.
+
 2009-12-08  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.python/py-type.exp (test_range): New test.
