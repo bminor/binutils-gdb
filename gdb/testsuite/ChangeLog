@@ -1,3 +1,10 @@
+2009-12-10  Chris Moller  <moller@mollerware.com>
+
+	PR gdb/9399
+	* gdb.cp/virtfunc2.exp: New tests
+	* gdb.cp/virtfunc2.cc: New tests
+	* gdb.cp/Makefile.in: Added tests to EXECUTABLES
+
 2009-12-10  Oza Pawandeep (paawan1982@yahoo.com
 
 	* gdb.reverse/i387-env-reverse.c: New file.

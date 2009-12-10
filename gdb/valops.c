@@ -232,6 +232,11 @@ value_cast_structs (struct type *type, struct value *v2)
 	       || TYPE_CODE (t2) == TYPE_CODE_UNION)
 	      && !!"Precondition is that value is of STRUCT or UNION kind");
 
+  if (TYPE_NAME (t1) != NULL
+      && TYPE_NAME (t2) != NULL
+      && !strcmp (TYPE_NAME (t1), TYPE_NAME (t2)))
+    return NULL;
+
   /* Upcasting: look in the type of the source to see if it contains the
      type of the target as a superclass.  If so, we'll need to
      offset the pointer rather than just change its type.  */

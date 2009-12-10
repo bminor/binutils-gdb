@@ -1,3 +1,9 @@
+2009-12-10  Chris Moller  <cmoller@redhat.com>
+
+	PR gdb/9399
+	* valops.c (value_cast_structs): Added test to return NULL if no
+        casting needed.
+
 2009-12-10  Oza Pawandeep <paawan1982@yahoo.com>
 
 	* i386-tdep.c:  Support for floating point recording.
