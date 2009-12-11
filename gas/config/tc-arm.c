@@ -18577,9 +18577,7 @@ arm_handle_align (fragS * fragP)
   if (bytes > MAX_MEM_FOR_RS_ALIGN_CODE)
     bytes &= MAX_MEM_FOR_RS_ALIGN_CODE;
 
-#ifdef OBJ_ELF
   gas_assert ((fragP->tc_frag_data.thumb_mode & MODE_RECORDED) != 0);
-#endif
 
   if (fragP->tc_frag_data.thumb_mode & (~ MODE_RECORDED))
     {
@@ -18685,7 +18683,7 @@ void
 arm_init_frag (fragS * fragP, int max_chars ATTRIBUTE_UNUSED)
 {
   /* Record whether this frag is in an ARM or a THUMB area.  */
-  fragP->tc_frag_data.thumb_mode = thumb_mode;
+  fragP->tc_frag_data.thumb_mode = thumb_mode | MODE_RECORDED;
 }
 
 #else /* OBJ_ELF is defined.  */

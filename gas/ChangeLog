@@ -1,3 +1,9 @@
+2009-12-11  Andrew Jenner  <andrew@codesourcery.com>
+
+	* config/tc-arm.c (arm_init_frag): Set thumb MODE_RECORDED flag for
+	non-elf.
+	(arm_handle_align): Re-enable assert for non-elf.
+
 2009-12-11  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.in: Regenerate.
