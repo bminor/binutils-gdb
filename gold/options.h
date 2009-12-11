@@ -227,9 +227,9 @@ struct Struct_special : public Struct_var
       parse(parse_function)
   { }
 
-  void parse_to_value(const char* option, const char* arg,
+  void parse_to_value(const char* opt, const char* arg,
                       Command_line* cmdline, General_options* options)
-  { (options->*(this->parse))(option, arg, cmdline); }
+  { (options->*(this->parse))(opt, arg, cmdline); }
 
   One_option option;
   Parse_function parse;
@@ -517,8 +517,8 @@ class Search_directory
   { }
 
   // This is the usual constructor.
-  Search_directory(const char* name, bool put_in_sysroot)
-    : name_(name), put_in_sysroot_(put_in_sysroot), is_in_sysroot_(false)
+  Search_directory(const char* cname, bool put_in_sysroot)
+    : name_(cname), put_in_sysroot_(put_in_sysroot), is_in_sysroot_(false)
   {
     if (this->name_.empty())
       this->name_ = ".";
@@ -1298,24 +1298,24 @@ class Input_file_argument
       just_symbols_(false), options_()
   { }
 
-  Input_file_argument(const char* name, Input_file_type type,
-                      const char* extra_search_path,
-                      bool just_symbols,
-                      const Position_dependent_options& options)
-    : name_(name), type_(type), extra_search_path_(extra_search_path),
-      just_symbols_(just_symbols), options_(options)
+  Input_file_argument(const char* aname, Input_file_type type,
+                      const char* aextra_search_path,
+                      bool ajust_symbols,
+                      const Position_dependent_options& aoptions)
+    : name_(aname), type_(type), extra_search_path_(aextra_search_path),
+      just_symbols_(ajust_symbols), options_(aoptions)
   { }
 
   // You can also pass in a General_options instance instead of a
   // Position_dependent_options.  In that case, we extract the
   // position-independent vars from the General_options and only store
   // those.
-  Input_file_argument(const char* name, Input_file_type type,
-                      const char* extra_search_path,
-                      bool just_symbols,
-                      const General_options& options)
-    : name_(name), type_(type), extra_search_path_(extra_search_path),
-      just_symbols_(just_symbols), options_(options)
+  Input_file_argument(const char* aname, Input_file_type type,
+                      const char* aextra_search_path,
+                      bool ajust_symbols,
+                      const General_options& aoptions)
+    : name_(aname), type_(type), extra_search_path_(aextra_search_path),
+      just_symbols_(ajust_symbols), options_(aoptions)
   { }
 
   const char*
@@ -1374,13 +1374,13 @@ class Input_argument
 {
  public:
   // Create a file or library argument.
-  explicit Input_argument(Input_file_argument file)
-    : is_file_(true), file_(file), group_(NULL)
+  explicit Input_argument(Input_file_argument afile)
+    : is_file_(true), file_(afile), group_(NULL)
   { }
 
   // Create a group argument.
-  explicit Input_argument(Input_file_group* group)
-    : is_file_(false), group_(group)
+  explicit Input_argument(Input_file_group* agroup)
+    : is_file_(false), group_(agroup)
   { }
 
   // Return whether this is a file.

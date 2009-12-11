@@ -11440,7 +11440,7 @@ esac
 fi
 
 
-GCC_WARN_CFLAGS="-W -Wall -Wstrict-prototypes -Wmissing-prototypes"
+GCC_WARN_CFLAGS="-W -Wall -Wstrict-prototypes -Wmissing-prototypes -Wshadow"
 
 # Check whether --enable-werror was given.
 if test "${enable_werror+set}" = set; then :

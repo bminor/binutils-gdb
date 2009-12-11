@@ -1650,7 +1650,7 @@ score_elf_local_got_index (bfd *abfd, bfd *ibfd, struct bfd_link_info *info,
 static bfd_vma
 score_elf_global_got_index (bfd *abfd, struct elf_link_hash_entry *h)
 {
-  bfd_vma index;
+  bfd_vma got_index;
   asection *sgot;
   struct score_got_info *g;
   long global_got_dynindx = 0;
@@ -1664,17 +1664,19 @@ score_elf_global_got_index (bfd *abfd, struct elf_link_hash_entry *h)
      indices into the GOT.  That makes it easy to calculate the GOT
      offset.  */
   BFD_ASSERT (h->dynindx >= global_got_dynindx);
-  index = ((h->dynindx - global_got_dynindx + g->local_gotno) * SCORE_ELF_GOT_SIZE (abfd));
-  BFD_ASSERT (index < sgot->size);
+  got_index = ((h->dynindx - global_got_dynindx + g->local_gotno) * SCORE_ELF_GOT_SIZE (abfd));
+  BFD_ASSERT (got_index < sgot->size);
 
-  return index;
+  return got_index;
 }
 
 /* Returns the offset for the entry at the INDEXth position in the GOT.  */
 
 static bfd_vma
-score_elf_got_offset_from_index (bfd *dynobj, bfd *output_bfd,
-                                 bfd *input_bfd ATTRIBUTE_UNUSED, bfd_vma index)
+score_elf_got_offset_from_index (bfd *dynobj,
+				 bfd *output_bfd,
+                                 bfd *input_bfd ATTRIBUTE_UNUSED,
+				 bfd_vma got_index)
 {
   asection *sgot;
   bfd_vma gp;
@@ -1683,7 +1685,7 @@ score_elf_got_offset_from_index (bfd *dynobj, bfd *output_bfd,
   g = score_elf_got_info (dynobj, &sgot);
   gp = _bfd_get_gp_value (output_bfd);
 
-  return sgot->output_section->vma + sgot->output_offset + index - gp;
+  return sgot->output_section->vma + sgot->output_offset + got_index - gp;
 }
 
 /* Follow indirect and warning hash entries so that each got entry
@@ -2512,7 +2514,6 @@ s7_bfd_score_elf_relocate_section (bfd *output_bfd,
 
               if (r_type == R_SCORE_GOT15)
                 {
-                  const Elf_Internal_Rela *relend;
                   const Elf_Internal_Rela *lo16_rel;
                   const struct elf_backend_data *bed;
                   bfd_vma lo_addend = 0, lo_value = 0;

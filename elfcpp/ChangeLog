@@ -1,3 +1,7 @@
+2009-12-11  Nick Clifton  <nickc@redhat.com>
+
+	* elfcpp_file.h: Fix shadowed variable warnings.
+
 2009-12-10  Doug Kwan  <dougkwan@google.com>
 
 	* arm.h: New enums for EABI object attribute tags and values.

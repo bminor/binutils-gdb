@@ -1826,6 +1826,7 @@ expression_maybe_register (xtensa_opcode opc, int opnd, expressionS *tok)
     {
       bfd_reloc_code_real_type reloc;
       segT t = expression (tok);
+
       if (t == absolute_section
 	  && xtensa_operand_is_PCrelative (isa, opc, opnd) == 1)
 	{
@@ -3235,15 +3236,16 @@ xg_immeds_fit (const TInsn *insn)
   gas_assert (insn->insn_type == ITYPE_INSN);
   for (i = 0; i < n; ++i)
     {
-      const expressionS *expr = &insn->tok[i];
+      const expressionS *exp = &insn->tok[i];
+
       if (xtensa_operand_is_register (isa, insn->opcode, i) == 1)
 	continue;
 
-      switch (expr->X_op)
+      switch (exp->X_op)
 	{
 	case O_register:
 	case O_constant:
-	  if (xg_check_operand (expr->X_add_number, insn->opcode, i))
+	  if (xg_check_operand (exp->X_add_number, insn->opcode, i))
 	    return FALSE;
 	  break;
 
@@ -3279,15 +3281,16 @@ xg_symbolic_immeds_fit (const TInsn *insn,
 
   for (i = 0; i < n; ++i)
     {
-      const expressionS *expr = &insn->tok[i];
+      const expressionS *exp = &insn->tok[i];
+
       if (xtensa_operand_is_register (isa, insn->opcode, i) == 1)
 	continue;
 
-      switch (expr->X_op)
+      switch (exp->X_op)
 	{
 	case O_register:
 	case O_constant:
-	  if (xg_check_operand (expr->X_add_number, insn->opcode, i))
+	  if (xg_check_operand (exp->X_add_number, insn->opcode, i))
 	    return FALSE;
 	  break;
 
@@ -3307,8 +3310,8 @@ xg_symbolic_immeds_fit (const TInsn *insn,
 
 	  /* If it is a weak symbol or a symbol in a different section,
 	     it cannot be known to fit at assembly time.  */
-	  if (S_IS_WEAK (expr->X_add_symbol)
-	      || S_GET_SEGMENT (expr->X_add_symbol) != pc_seg)
+	  if (S_IS_WEAK (exp->X_add_symbol)
+	      || S_GET_SEGMENT (exp->X_add_symbol) != pc_seg)
 	    {
 	      /* For a direct call with --no-longcalls, be optimistic and
 		 assume it will be in range.  If the symbol is weak and
@@ -3318,16 +3321,16 @@ xg_symbolic_immeds_fit (const TInsn *insn,
 		 symbols even if longcalls is not enabled.  */
 	      if (is_direct_call_opcode (insn->opcode)
 		  && ! pc_frag->tc_frag_data.use_longcalls
-		  && (! S_IS_WEAK (expr->X_add_symbol)
-		      || S_IS_DEFINED (expr->X_add_symbol)))
+		  && (! S_IS_WEAK (exp->X_add_symbol)
+		      || S_IS_DEFINED (exp->X_add_symbol)))
 		return TRUE;
 
 	      return FALSE;
 	    }
 
-	  symbolP = expr->X_add_symbol;
+	  symbolP = exp->X_add_symbol;
 	  sym_frag = symbol_get_frag (symbolP);
-	  target = S_GET_VALUE (symbolP) + expr->X_add_number;
+	  target = S_GET_VALUE (symbolP) + exp->X_add_number;
 	  pc = pc_frag->fr_address + pc_offset;
 
 	  /* If frag has yet to be reached on this pass, assume it
@@ -3568,11 +3571,11 @@ xg_expand_to_stack (IStack *istack, TInsn *insn, int lateral_steps)
 	      /* Check to see if it fits.  */
 	      for (i = stack_size; i < istack->ninsn; i++)
 		{
-		  TInsn *insn = &istack->insn[i];
+		  TInsn *tinsn = &istack->insn[i];
 
-		  if (insn->insn_type == ITYPE_INSN
-		      && !tinsn_has_symbolic_operands (insn)
-		      && !xg_immeds_fit (insn))
+		  if (tinsn->insn_type == ITYPE_INSN
+		      && !tinsn_has_symbolic_operands (tinsn)
+		      && !xg_immeds_fit (tinsn))
 		    {
 		      istack->ninsn = stack_size;
 		      return FALSE;
@@ -4192,7 +4195,7 @@ xg_add_opcode_fix (TInsn *tinsn,
 		   int opnum,
 		   xtensa_format fmt,
 		   int slot,
-		   expressionS *expr,
+		   expressionS *exp,
 		   fragS *fragP,
 		   offsetT offset)
 {
@@ -4212,15 +4215,15 @@ xg_add_opcode_fix (TInsn *tinsn,
     }
   else if (opcode == xtensa_const16_opcode)
     {
-      if (expr->X_op == O_lo16)
+      if (exp->X_op == O_lo16)
 	{
 	  reloc = encode_reloc (slot);
-	  expr->X_op = O_symbol;
+	  exp->X_op = O_symbol;
 	}
-      else if (expr->X_op == O_hi16)
+      else if (exp->X_op == O_hi16)
 	{
 	  reloc = encode_alt_reloc (slot);
-	  expr->X_op = O_symbol;
+	  exp->X_op = O_symbol;
 	}
     }
 
@@ -4234,7 +4237,7 @@ xg_add_opcode_fix (TInsn *tinsn,
   /* Handle erroneous "@h" and "@l" expressions here before they propagate
      into the symbol table where the generic portions of the assembler
      won't know what to do with them.  */
-  if (expr->X_op == O_lo16 || expr->X_op == O_hi16)
+  if (exp->X_op == O_lo16 || exp->X_op == O_hi16)
     {
       as_bad (_("invalid expression for operand %i of '%s'"),
 	      opnum + 1, xtensa_opcode_name (xtensa_default_isa, opcode));
@@ -4259,11 +4262,11 @@ xg_add_opcode_fix (TInsn *tinsn,
     }
 
   fmt_length = xtensa_format_length (xtensa_default_isa, fmt);
-  the_fix = fix_new_exp (fragP, offset, fmt_length, expr,
+  the_fix = fix_new_exp (fragP, offset, fmt_length, exp,
 			 howto->pc_relative, reloc);
   the_fix->fx_no_overflow = 1;
-  the_fix->tc_fix_data.X_add_symbol = expr->X_add_symbol;
-  the_fix->tc_fix_data.X_add_number = expr->X_add_number;
+  the_fix->tc_fix_data.X_add_symbol = exp->X_add_symbol;
+  the_fix->tc_fix_data.X_add_number = exp->X_add_number;
   the_fix->tc_fix_data.slot = slot;
 
   return TRUE;
@@ -7349,12 +7352,12 @@ static offsetT unrelaxed_frag_max_size (fragS *);
 static bfd_boolean
 is_narrow_branch_guaranteed_in_range (fragS *fragP, TInsn *tinsn)
 {
-  const expressionS *expr = &tinsn->tok[1];
-  symbolS *symbolP = expr->X_add_symbol;
-  offsetT max_distance = expr->X_add_number;
+  const expressionS *exp = &tinsn->tok[1];
+  symbolS *symbolP = exp->X_add_symbol;
+  offsetT max_distance = exp->X_add_number;
   fragS *target_frag;
 
-  if (expr->X_op != O_symbol)
+  if (exp->X_op != O_symbol)
     return FALSE;
 
   target_frag = symbol_get_frag (symbolP);
@@ -7441,12 +7444,12 @@ xtensa_mark_difference_of_two_symbols (void)
   for (expr_sym = expr_symbols; expr_sym; 
        expr_sym = symbol_get_tc (expr_sym)->next_expr_symbol)
     {
-      expressionS *expr = symbol_get_value_expression (expr_sym);
+      expressionS *exp = symbol_get_value_expression (expr_sym);
 
-      if (expr->X_op == O_subtract)
+      if (exp->X_op == O_subtract)
 	{
-	  symbolS *left = expr->X_add_symbol;
-	  symbolS *right = expr->X_op_symbol;
+	  symbolS *left = exp->X_add_symbol;
+	  symbolS *right = exp->X_op_symbol;
 	  
 	  /* Difference of two symbols not in the same section
 	     are handled with relocations in the linker.  */
@@ -8083,7 +8086,7 @@ xtensa_sanity_check (void)
 static bfd_boolean
 is_empty_loop (const TInsn *insn, fragS *fragP)
 {
-  const expressionS *expr;
+  const expressionS *exp;
   symbolS *symbolP;
   fragS *next_fragP;
 
@@ -8096,12 +8099,12 @@ is_empty_loop (const TInsn *insn, fragS *fragP)
   if (insn->ntok <= LOOP_IMMED_OPN)
     return FALSE;
 
-  expr = &insn->tok[LOOP_IMMED_OPN];
+  exp = &insn->tok[LOOP_IMMED_OPN];
 
-  if (expr->X_op != O_symbol)
+  if (exp->X_op != O_symbol)
     return FALSE;
 
-  symbolP = expr->X_add_symbol;
+  symbolP = exp->X_add_symbol;
   if (!symbolP)
     return FALSE;
 
@@ -8130,7 +8133,7 @@ is_empty_loop (const TInsn *insn, fragS *fragP)
 static bfd_boolean
 is_local_forward_loop (const TInsn *insn, fragS *fragP)
 {
-  const expressionS *expr;
+  const expressionS *exp;
   symbolS *symbolP;
   fragS *next_fragP;
 
@@ -8143,12 +8146,12 @@ is_local_forward_loop (const TInsn *insn, fragS *fragP)
   if (insn->ntok <= LOOP_IMMED_OPN)
     return FALSE;
 
-  expr = &insn->tok[LOOP_IMMED_OPN];
+  exp = &insn->tok[LOOP_IMMED_OPN];
 
-  if (expr->X_op != O_symbol)
+  if (exp->X_op != O_symbol)
     return FALSE;
 
-  symbolP = expr->X_add_symbol;
+  symbolP = exp->X_add_symbol;
   if (!symbolP)
     return FALSE;
 
@@ -10167,9 +10170,9 @@ xtensa_move_literals (void)
   for (lit = literal_syms; lit; lit = lit->next)
     {
       symbolS *lit_sym = lit->sym;
-      segT dest_seg = symbol_get_frag (lit_sym)->tc_frag_data.lit_seg;
-      if (dest_seg)
-	S_SET_SEGMENT (lit_sym, dest_seg);
+      segT dseg = symbol_get_frag (lit_sym)->tc_frag_data.lit_seg;
+      if (dseg)
+	S_SET_SEGMENT (lit_sym, dseg);
     }
 }
 
@@ -11401,20 +11404,20 @@ tinsn_to_slotbuf (xtensa_format fmt,
 
   for (i = 0; i < noperands; i++)
     {
-      expressionS *expr = &tinsn->tok[i];
+      expressionS *exp = &tinsn->tok[i];
       int rc;
       unsigned line;
       char *file_name;
       uint32 opnd_value;
 
-      switch (expr->X_op)
+      switch (exp->X_op)
 	{
 	case O_register:
 	  if (xtensa_operand_is_visible (isa, opcode, i) == 0)
 	    break;
 	  /* The register number has already been checked in
 	     expression_maybe_register, so we don't need to check here.  */
-	  opnd_value = expr->X_add_number;
+	  opnd_value = exp->X_add_number;
 	  (void) xtensa_operand_encode (isa, opcode, i, &opnd_value);
 	  rc = xtensa_operand_set_field (isa, opcode, i, fmt, slot, slotbuf,
 					 opnd_value);
@@ -11429,7 +11432,7 @@ tinsn_to_slotbuf (xtensa_format fmt,
 	  /* It is a constant and we called this function
 	     then we have to try to fit it.  */
 	  xtensa_insnbuf_set_operand (slotbuf, fmt, slot, opcode, i,
-				      expr->X_add_number, file_name, line);
+				      exp->X_add_number, file_name, line);
 	  break;
 
 	default:
@@ -11783,8 +11786,8 @@ vinsn_to_insnbuf (vliw_insn *vinsn,
 
 	  for (i = 0; i < noperands; i++)
 	    {
-	      expressionS* expr = &tinsn->tok[i];
-	      switch (expr->X_op)
+	      expressionS* exp = &tinsn->tok[i];
+	      switch (exp->X_op)
 		{
 		case O_symbol:
 		case O_lo16:
@@ -11799,15 +11802,15 @@ vinsn_to_insnbuf (vliw_insn *vinsn,
 			  || tinsn->is_specific_opcode
 			  || !xg_is_relaxable_insn (tinsn, 0))
 			{
-			  xg_add_opcode_fix (tinsn, i, fmt, slot, expr, fragP,
+			  xg_add_opcode_fix (tinsn, i, fmt, slot, exp, fragP,
 					     frag_offset - fragP->fr_literal);
 			}
 		      else
 			{
-			  if (expr->X_op != O_symbol)
+			  if (exp->X_op != O_symbol)
 			    as_bad (_("invalid operand"));
-			  tinsn->symbol = expr->X_add_symbol;
-			  tinsn->offset = expr->X_add_number;
+			  tinsn->symbol = exp->X_add_symbol;
+			  tinsn->offset = exp->X_add_number;
 			}
 		    }
 		  else

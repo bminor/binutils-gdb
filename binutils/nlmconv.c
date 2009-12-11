@@ -2039,7 +2039,7 @@ powerpc_mangle_relocs (bfd *outbfd, asection *insec,
    file.  */
 
 static char *
-link_inputs (struct string_list *inputs, char *ld, char * map_file)
+link_inputs (struct string_list *inputs, char *ld, char * mfile)
 {
   size_t c;
   struct string_list *q;
@@ -2088,12 +2088,12 @@ link_inputs (struct string_list *inputs, char *ld, char * map_file)
   argv[3] = unlink_on_exit;
   /* If we have been given the name of a mapfile and that
      name is not 'stderr' then pass it on to the linker.  */
-  if (map_file
-      && * map_file
-      && strcmp (map_file, "stderr") == 0)
+  if (mfile
+      && * mfile
+      && strcmp (mfile, "stderr") == 0)
     {
       argv[4] = (char *) "-Map";
-      argv[5] = map_file;
+      argv[5] = mfile;
       i = 6;
     }
   else

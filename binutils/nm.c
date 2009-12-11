@@ -343,11 +343,11 @@ get_symbol_type (unsigned int type)
     }
 }
 
-/* Print symbol name NAME, read from ABFD, with printf format FORMAT,
+/* Print symbol name NAME, read from ABFD, with printf format FORM,
    demangling it if requested.  */
 
 static void
-print_symname (const char *format, const char *name, bfd *abfd)
+print_symname (const char *form, const char *name, bfd *abfd)
 {
   if (do_demangle && *name)
     {
@@ -355,13 +355,13 @@ print_symname (const char *format, const char *name, bfd *abfd)
 
       if (res != NULL)
 	{
-	  printf (format, res);
+	  printf (form, res);
 	  free (res);
 	  return;
 	}
     }
 
-  printf (format, name);
+  printf (form, name);
 }
 
 static void
@@ -397,7 +397,7 @@ print_symdef_entry (bfd *abfd)
    Return the number of symbols to be printed.  */
 
 static long
-filter_symbols (bfd *abfd, bfd_boolean dynamic, void *minisyms,
+filter_symbols (bfd *abfd, bfd_boolean is_dynamic, void *minisyms,
 		long symcount, unsigned int size)
 {
   bfd_byte *from, *fromend, *to;
@@ -418,7 +418,7 @@ filter_symbols (bfd *abfd, bfd_boolean dynamic, void *minisyms,
 
       PROGRESS (1);
 
-      sym = bfd_minisymbol_to_symbol (abfd, dynamic, (const void *) from, store);
+      sym = bfd_minisymbol_to_symbol (abfd, is_dynamic, (const void *) from, store);
       if (sym == NULL)
 	bfd_fatal (bfd_get_filename (abfd));
 
@@ -659,7 +659,7 @@ size_forward2 (const void *P_x, const void *P_y)
    size.  */
 
 static long
-sort_symbols_by_size (bfd *abfd, bfd_boolean dynamic, void *minisyms,
+sort_symbols_by_size (bfd *abfd, bfd_boolean is_dynamic, void *minisyms,
 		      long symcount, unsigned int size,
 		      struct size_sym **symsizesp)
 {
@@ -686,7 +686,7 @@ sort_symbols_by_size (bfd *abfd, bfd_boolean dynamic, void *minisyms,
 
   if (from < fromend)
     {
-      sym = bfd_minisymbol_to_symbol (abfd, dynamic, (const void *) from,
+      sym = bfd_minisymbol_to_symbol (abfd, is_dynamic, (const void *) from,
 				      store_sym);
       if (sym == NULL)
 	bfd_fatal (bfd_get_filename (abfd));
@@ -702,7 +702,7 @@ sort_symbols_by_size (bfd *abfd, bfd_boolean dynamic, void *minisyms,
       if (from + size < fromend)
 	{
 	  next = bfd_minisymbol_to_symbol (abfd,
-					   dynamic,
+					   is_dynamic,
 					   (const void *) (from + size),
 					   store_next);
 	  if (next == NULL)
@@ -861,7 +861,7 @@ print_symbol (bfd *abfd, asymbol *sym, bfd_vma ssize, bfd *archive_bfd)
 
 	  if (relocs == NULL)
 	    {
-	      struct get_relocs_info info;
+	      struct get_relocs_info rinfo;
 
 	      seccount = bfd_count_sections (abfd);
 
@@ -869,11 +869,11 @@ print_symbol (bfd *abfd, asymbol *sym, bfd_vma ssize, bfd *archive_bfd)
 	      relocs = (arelent ***) xmalloc (seccount * sizeof *relocs);
 	      relcount = (long *) xmalloc (seccount * sizeof *relcount);
 
-	      info.secs = secs;
-	      info.relocs = relocs;
-	      info.relcount = relcount;
-	      info.syms = syms;
-	      bfd_map_over_sections (abfd, get_relocs, (void *) &info);
+	      rinfo.secs = secs;
+	      rinfo.relocs = relocs;
+	      rinfo.relcount = relcount;
+	      rinfo.syms = syms;
+	      bfd_map_over_sections (abfd, get_relocs, (void *) &rinfo);
 	      lineno_cache_rel_bfd = abfd;
 	    }
 
@@ -923,7 +923,7 @@ print_symbol (bfd *abfd, asymbol *sym, bfd_vma ssize, bfd *archive_bfd)
 /* Print the symbols when sorting by size.  */
 
 static void
-print_size_symbols (bfd *abfd, bfd_boolean dynamic,
+print_size_symbols (bfd *abfd, bfd_boolean is_dynamic,
 		    struct size_sym *symsizes, long symcount,
 		    bfd *archive_bfd)
 {
@@ -941,7 +941,7 @@ print_size_symbols (bfd *abfd, bfd_boolean dynamic,
       asymbol *sym;
       bfd_vma ssize;
 
-      sym = bfd_minisymbol_to_symbol (abfd, dynamic, from->minisym, store);
+      sym = bfd_minisymbol_to_symbol (abfd, is_dynamic, from->minisym, store);
       if (sym == NULL)
 	bfd_fatal (bfd_get_filename (abfd));
 
@@ -960,7 +960,7 @@ print_size_symbols (bfd *abfd, bfd_boolean dynamic,
    containing ABFD.  */
 
 static void
-print_symbols (bfd *abfd, bfd_boolean dynamic, void *minisyms, long symcount,
+print_symbols (bfd *abfd, bfd_boolean is_dynamic, void *minisyms, long symcount,
 	       unsigned int size, bfd *archive_bfd)
 {
   asymbol *store;
@@ -976,7 +976,7 @@ print_symbols (bfd *abfd, bfd_boolean dynamic, void *minisyms, long symcount,
     {
       asymbol *sym;
 
-      sym = bfd_minisymbol_to_symbol (abfd, dynamic, from, store);
+      sym = bfd_minisymbol_to_symbol (abfd, is_dynamic, from, store);
       if (sym == NULL)
 	bfd_fatal (bfd_get_filename (abfd));
 

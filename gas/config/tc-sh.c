@@ -2320,7 +2320,7 @@ insert_loop_bounds (char *output, sh_operand_info *operand)
 static unsigned int
 build_Mytes (sh_opcode_info *opcode, sh_operand_info *operand)
 {
-  int index;
+  int indx;
   char nbuf[8];
   char *output;
   unsigned int size = 2;
@@ -2345,12 +2345,12 @@ build_Mytes (sh_opcode_info *opcode, sh_operand_info *operand)
   else
     output = frag_more (2);
 
-  for (index = 0; index < max_index; index++)
+  for (indx = 0; indx < max_index; indx++)
     {
-      sh_nibble_type i = opcode->nibbles[index];
+      sh_nibble_type i = opcode->nibbles[indx];
       if (i < 16)
 	{
-	  nbuf[index] = i;
+	  nbuf[indx] = i;
 	}
       else
 	{
@@ -2358,32 +2358,32 @@ build_Mytes (sh_opcode_info *opcode, sh_operand_info *operand)
 	    {
 	    case REG_N:
 	    case REG_N_D:
-	      nbuf[index] = reg_n;
+	      nbuf[indx] = reg_n;
 	      break;
 	    case REG_M:
-	      nbuf[index] = reg_m;
+	      nbuf[indx] = reg_m;
 	      break;
 	    case SDT_REG_N:
 	      if (reg_n < 2 || reg_n > 5)
 		as_bad (_("Invalid register: 'r%d'"), reg_n);
-	      nbuf[index] = (reg_n & 3) | 4;
+	      nbuf[indx] = (reg_n & 3) | 4;
 	      break;
 	    case REG_NM:
-	      nbuf[index] = reg_n | (reg_m >> 2);
+	      nbuf[indx] = reg_n | (reg_m >> 2);
 	      break;
 	    case REG_B:
-	      nbuf[index] = reg_b | 0x08;
+	      nbuf[indx] = reg_b | 0x08;
 	      break;
 	    case REG_N_B01:
-	      nbuf[index] = reg_n | 0x01;
+	      nbuf[indx] = reg_n | 0x01;
 	      break;
 	    case IMM0_3s:
-	      nbuf[index] |= 0x08;
+	      nbuf[indx] |= 0x08;
 	    case IMM0_3c:
 	      insert (output + low_byte, BFD_RELOC_SH_IMM3, 0, operand);
 	      break;
 	    case IMM0_3Us:
-	      nbuf[index] |= 0x80;
+	      nbuf[indx] |= 0x80;
 	    case IMM0_3Uc:
 	      insert (output + low_byte, BFD_RELOC_SH_IMM3U, 0, operand);
 	      break;
@@ -2465,7 +2465,7 @@ build_Mytes (sh_opcode_info *opcode, sh_operand_info *operand)
 	      break;
 	    case REPEAT:
 	      output = insert_loop_bounds (output, operand);
-	      nbuf[index] = opcode->nibbles[3];
+	      nbuf[indx] = opcode->nibbles[3];
 	      operand += 2;
 	      break;
 	    default:

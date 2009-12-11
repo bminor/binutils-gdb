@@ -354,15 +354,15 @@ _bfd_find_nested_archive (bfd *arch_bfd, const char *filename)
 static char *
 get_extended_arelt_filename (bfd *arch, const char *name, file_ptr *originp)
 {
-  unsigned long index = 0;
+  unsigned long table_index = 0;
   const char *endp;
 
   /* Should extract string so that I can guarantee not to overflow into
      the next region, but I'm too lazy.  */
   errno = 0;
   /* Skip first char, which is '/' in SVR4 or ' ' in some other variants.  */
-  index = strtol (name + 1, (char **) &endp, 10);
-  if (errno != 0 || index >= bfd_ardata (arch)->extended_names_size)
+  table_index = strtol (name + 1, (char **) &endp, 10);
+  if (errno != 0 || table_index >= bfd_ardata (arch)->extended_names_size)
     {
       bfd_set_error (bfd_error_malformed_archive);
       return NULL;
@@ -383,7 +383,7 @@ get_extended_arelt_filename (bfd *arch, const char *name, file_ptr *originp)
   else
     *originp = 0;
 
-  return bfd_ardata (arch)->extended_names + index;
+  return bfd_ardata (arch)->extended_names + table_index;
 }
 
 /* This functions reads an arch header and returns an areltdata pointer, or
@@ -656,14 +656,14 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
 }
 
 /* Return the BFD which is referenced by the symbol in ABFD indexed by
-   INDEX.  INDEX should have been returned by bfd_get_next_mapent.  */
+   SYM_INDEX.  SYM_INDEX should have been returned by bfd_get_next_mapent.  */
 
 bfd *
-_bfd_generic_get_elt_at_index (bfd *abfd, symindex index)
+_bfd_generic_get_elt_at_index (bfd *abfd, symindex sym_index)
 {
   carsym *entry;
 
-  entry = bfd_ardata (abfd)->symdefs + index;
+  entry = bfd_ardata (abfd)->symdefs + sym_index;
   return _bfd_get_elt_at_filepos (abfd, entry->file_offset);
 }
 

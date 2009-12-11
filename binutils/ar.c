@@ -1168,14 +1168,14 @@ move_members (bfd *arch, char **files_to_move)
 	    {
 	      /* Move this file to the end of the list - first cut from
 		 where it is.  */
-	      bfd *link;
+	      bfd *link_bfd;
 	      *current_ptr_ptr = current_ptr->archive_next;
 
 	      /* Now glue to end */
 	      after_bfd = get_pos_bfd (&arch->archive_next, pos_end, NULL);
-	      link = *after_bfd;
+	      link_bfd = *after_bfd;
 	      *after_bfd = current_ptr;
-	      current_ptr->archive_next = link;
+	      current_ptr->archive_next = link_bfd;
 
 	      if (verbose)
 		printf ("m - %s\n", *files_to_move);

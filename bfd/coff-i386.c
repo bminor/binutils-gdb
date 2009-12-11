@@ -532,16 +532,16 @@ coff_i386_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
 	osect_vma = h->root.u.def.section->output_section->vma;
       else
 	{
-	  asection *sec;
+	  asection *s;
 	  int i;
 
 	  /* Sigh, the only way to get the section to offset against
 	     is to find it the hard way.  */
 
-	  for (sec = abfd->sections, i = 1; i < sym->n_scnum; i++)
-	    sec = sec->next;
+	  for (s = abfd->sections, i = 1; i < sym->n_scnum; i++)
+	    s = s->next;
 
-	  osect_vma = sec->output_section->vma;
+	  osect_vma = s->output_section->vma;
 	}
 
       *addendp -= osect_vma;

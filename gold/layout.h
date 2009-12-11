@@ -151,10 +151,10 @@ class Kept_section
 
   // Set the object.
   void
-  set_object(Relobj* object)
+  set_object(Relobj* obj)
   {
     gold_assert(this->object_ == NULL);
-    this->object_ = object;
+    this->object_ = obj;
   }
 
   // The section index.
@@ -164,10 +164,10 @@ class Kept_section
 
   // Set the section index.
   void
-  set_shndx(unsigned int shndx)
+  set_shndx(unsigned int sec_shndx)
   {
     gold_assert(this->shndx_ == 0);
-    this->shndx_ = shndx;
+    this->shndx_ = sec_shndx;
   }
 
   // Whether this is a comdat group.
@@ -198,11 +198,11 @@ class Kept_section
 
   // Add a section to the group list.
   void
-  add_comdat_section(const std::string& name, unsigned int shndx,
+  add_comdat_section(const std::string& name, unsigned int sec_shndx,
 		     uint64_t size)
   {
     gold_assert(this->is_comdat_);
-    Comdat_section_info sinfo(shndx, size);
+    Comdat_section_info sinfo(sec_shndx, size);
     this->u_.group_sections->insert(std::make_pair(name, sinfo));
   }
 

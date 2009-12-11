@@ -1716,7 +1716,6 @@ cfi_finish (void)
       for (fde = all_fde_data; fde ; fde = fde->next)
 	{
 	  struct cfi_insn_data *first;
-	  struct cie_entry *cie;
 
 	  if (fde->end_address == NULL)
 	    {

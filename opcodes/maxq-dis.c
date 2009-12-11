@@ -1,6 +1,6 @@
 /* Instruction printing code for the MAXQ
 
-   Copyright 2004, 2005, 2007 Free Software Foundation, Inc.
+   Copyright 2004, 2005, 2007, 2009 Free Software Foundation, Inc.
 
    Written by Vineet Sharma(vineets@noida.hcltech.com) Inderpreet
    S.(inderpreetb@noida.hcltech.com)
@@ -151,21 +151,21 @@ static char *
 get_reg_name (unsigned char reg_code, type1 arg_pos)
 {
   unsigned char module;
-  unsigned char index;
+  unsigned char r_index;
   int ix = 0;
   reg_entry const *reg_x;
   mem_access_syntax const *syntax;
   mem_access *mem_acc;
 
   module = 0;
-  index = 0;
+  r_index = 0;
   module = (reg_code & MASK_LOW_BYTE);
-  index = (reg_code & MASK_HIGH_BYTE);
-  index = index >> 4;
+  r_index = (reg_code & MASK_HIGH_BYTE);
+  r_index = r_index >> 4;
 
   /* Search the system register table.  */
   for (reg_x = &system_reg_table[0]; reg_x->reg_name != NULL; ++reg_x)
-    if ((reg_x->Mod_name == module) && (reg_x->Mod_index == index))
+    if ((reg_x->Mod_name == module) && (reg_x->Mod_index == r_index))
       return reg_x->reg_name;
 
   /* Serch pheripheral table.  */
@@ -173,7 +173,7 @@ get_reg_name (unsigned char reg_code, type1 arg_pos)
     {
       reg_x = &new_reg_table[ix];
 
-      if ((reg_x->Mod_name == module) && (reg_x->Mod_index == index))
+      if ((reg_x->Mod_name == module) && (reg_x->Mod_index == r_index))
 	return reg_x->reg_name;
     }
 
@@ -195,7 +195,7 @@ get_reg_name (unsigned char reg_code, type1 arg_pos)
     }
 
   memset (unres_reg_name, 0, 20);
-  sprintf (unres_reg_name, "%01x%01xh", index, module);
+  sprintf (unres_reg_name, "%01x%01xh", r_index, module);
 
   return unres_reg_name;
 }

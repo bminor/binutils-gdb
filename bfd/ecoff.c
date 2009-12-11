@@ -2677,7 +2677,7 @@ _bfd_ecoff_write_object_contents (bfd *abfd)
 	      else
 		{
 		  const char *name;
-		  unsigned int i;
+		  unsigned int j;
 		  static struct
 		  {
 		    const char * name;
@@ -2704,14 +2704,14 @@ _bfd_ecoff_write_object_contents (bfd *abfd)
 
 		  name = bfd_get_section_name (abfd, bfd_get_section (sym));
 
-		  for (i = 0; i < ARRAY_SIZE (section_symndx); i++)
-		    if (streq (name, section_symndx[i].name))
+		  for (j = 0; j < ARRAY_SIZE (section_symndx); j++)
+		    if (streq (name, section_symndx[j].name))
 		      {
-			in.r_symndx = section_symndx[i].r_symndx;
+			in.r_symndx = section_symndx[j].r_symndx;
 			break;
 		      }
 
-		  if (i == ARRAY_SIZE (section_symndx))
+		  if (j == ARRAY_SIZE (section_symndx))
 		    abort ();
 		  in.r_extern = 0;
 		}

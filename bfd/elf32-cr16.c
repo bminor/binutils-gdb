@@ -889,16 +889,11 @@ cr16_elf_final_link_relocate (reloc_howto_type *howto,
   unsigned short r_type = howto->type;
   bfd_byte *hit_data = contents + offset;
   bfd_vma reloc_bits, check, Rvalue1;
-
   bfd *      dynobj;
   bfd_vma *  local_got_offsets;
-  asection * sgot;
 
   dynobj = elf_hash_table (info)->dynobj;
   local_got_offsets = elf_local_got_offsets (input_bfd);
-
-  sgot   = NULL;
-
 
   switch (r_type)
     {

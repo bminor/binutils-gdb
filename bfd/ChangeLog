@@ -1,3 +1,66 @@
+2009-12-11  Nick Clifton  <nickc@redhat.com>
+
+	* warning.m4 (GCC_WARN_CFLAGS): Add -Wshadow.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+	* aout-arm.c: Fix shadowed variable warnings.
+	* aout-tic30.c: Likewise.
+	* aoutx.h: Likewise.
+	* archive.c: Likewise.
+	* coff-alpha.c: Likewise.
+	* coff-i386.c: Likewise.
+	* coff-x86_64.c: Likewise.
+	* coffgen.c: Likewise.
+	* dwarf2.c: Likewise.
+	* ecoff.c: Likewise.
+	* elf-eh-frame.c: Likewise.
+	* elf-m10300.c: Likewise.
+	* elf.c: Likewise.
+	* elf32-arm.c: Likewise.
+	* elf32-avr.c: Likewise.
+	* elf32-bfin.c: Likewise.
+	* elf32-cr16.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-ip2k.c: Likewise.
+	* elf32-lm32.c: Likewise.
+	* elf32-m68hc1x.c: Likewise.
+	* elf32-microblaze.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-rx.c: Likewise.
+	* elf32-score.c: Likewise.
+	* elf32-score7.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-spu.c: Likewise.
+	* elf32-v850.c: Likewise.
+	* elf32-xtensa.c: Likewise.
+	* elf64-hppa.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elflink.c: Likewise.
+	* elfxx-ia64.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* elfxx-sparc.c: Likewise.
+	* hash.c: Likewise.
+	* ieee.c: Likewise.
+	* libbfd.c: Likewise.
+	* mach-o.c: Likewise.
+	* merge.c: Likewise.
+	* nlm32-sparc.c: Likewise.
+	* oasys.c: Likewise.
+	* opncls.c: Likewise.
+	* pdp11.c: Likewise.
+	* peXXigen.c: Likewise.
+	* pef.c: Likewise.
+	* versados.c: Likewise.
+	* vms-gsd.c: Likewise.
+	* vms-hdr.c: Likewise.
+	* vms-tir.c: Likewise.
+	* vms.c: Likewise.
+	* xcofflink.c: Likewise.
+	* xsym.c: Likewise.
+	* xtensa-isa.c: Likewise.
+
 2009-12-10  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* elfxx-mips.c (mips_elf_calculate_relocation): Correct handling

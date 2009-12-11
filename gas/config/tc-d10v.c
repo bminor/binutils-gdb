@@ -1201,7 +1201,9 @@ find_opcode (struct d10v_opcode *opcode, expressionS myops[])
 	  for (i = 0; opcode->operands[i + 1]; i++)
 	    {
 	      int bits = d10v_operands[next_opcode->operands[opnum]].bits;
-	      int flags = d10v_operands[next_opcode->operands[opnum]].flags;
+
+	      flags = d10v_operands[next_opcode->operands[opnum]].flags;
+
 	      if (flags & OPERAND_ADDR)
 		bits += 2;
 

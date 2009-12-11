@@ -1,6 +1,6 @@
 // merge.h -- handle section merging for gold  -*- C++ -*-
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -215,8 +215,8 @@ class Merge_map
 class Output_merge_base : public Output_section_data
 {
  public:
-  Output_merge_base(uint64_t entsize, uint64_t addralign)
-    : Output_section_data(addralign), merge_map_(), entsize_(entsize)
+  Output_merge_base(uint64_t ent_size, uint64_t addr_align)
+    : Output_section_data(addr_align), merge_map_(), entsize_(ent_size)
   { }
 
   // Return the entry size.
@@ -241,15 +241,15 @@ class Output_merge_base : public Output_section_data
   bool
   do_is_merge_section_for(const Relobj*, unsigned int shndx) const;
 
-  // Add a mapping from an OFFSET in input section SHNDX in object
-  // OBJECT to an OUTPUT_OFFSET in the output section.  OUTPUT_OFFSET
+  // Add a mapping from an IN_OFFSET in input section SHNDX in object
+  // OBJECT to an OUT_OFFSET in the output section.  OUT_OFFSET
   // is the offset from the start of the merged data in the output
   // section.
   void
-  add_mapping(Relobj* object, unsigned int shndx, section_offset_type offset,
-	      section_size_type length, section_offset_type output_offset)
+  add_mapping(Relobj* object, unsigned int shndx, section_offset_type in_offset,
+	      section_size_type length, section_offset_type out_offset)
   {
-    this->merge_map_.add_mapping(object, shndx, offset, length, output_offset);
+    this->merge_map_.add_mapping(object, shndx, in_offset, length, out_offset);
   }
 
   // This may be overriden by the child class.
@@ -271,8 +271,8 @@ class Output_merge_base : public Output_section_data
 class Output_merge_data : public Output_merge_base
 {
  public:
-  Output_merge_data(uint64_t entsize, uint64_t addralign)
-    : Output_merge_base(entsize, addralign), p_(NULL), len_(0), alc_(0),
+  Output_merge_data(uint64_t ent_size, uint64_t addr_align)
+    : Output_merge_base(ent_size, addr_align), p_(NULL), len_(0), alc_(0),
       input_count_(0),
       hashtable_(128, Merge_data_hash(this), Merge_data_eq(this))
   { }
@@ -386,11 +386,11 @@ template<typename Char_type>
 class Output_merge_string : public Output_merge_base
 {
  public:
-  Output_merge_string(uint64_t addralign)
-    : Output_merge_base(sizeof(Char_type), addralign), stringpool_(),
+  Output_merge_string(uint64_t addr_align)
+    : Output_merge_base(sizeof(Char_type), addr_align), stringpool_(),
       merged_strings_(), input_count_(0)
   {
-    gold_assert(addralign <= sizeof(Char_type));
+    gold_assert(addr_align <= sizeof(Char_type));
     this->stringpool_.set_no_zero_null();
   }
 

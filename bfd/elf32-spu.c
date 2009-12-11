@@ -4401,7 +4401,7 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
 	  struct call_info *call, *pasty;
 	  struct _spu_elf_section_data *sec_data;
 	  struct spu_elf_stack_info *sinfo;
-	  int k;
+	  unsigned int k;
 
 	  /* See whether we can add this section to the current
 	     overlay without overflowing our overlay buffer.  */
@@ -4421,7 +4421,7 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
 	    {
 	      /* Pasted sections must stay together, so add their
 		 sizes too.  */
-	      struct call_info *pasty = find_pasted_call (sec);
+	      pasty = find_pasted_call (sec);
 	      while (pasty != NULL)
 		{
 		  struct function_info *call_fun = pasty->fun;
@@ -4448,7 +4448,7 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
 	  pasty = NULL;
 	  sec_data = spu_elf_section_data (sec);
 	  sinfo = sec_data->u.i.stack_info;
-	  for (k = 0; k < sinfo->num_fun; ++k)
+	  for (k = 0; k < (unsigned) sinfo->num_fun; ++k)
 	    for (call = sinfo->fun[k].call_list; call; call = call->next)
 	      if (call->is_pasted)
 		{
@@ -4478,7 +4478,6 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
 	  num_stubs = 0;
 	  for (call = dummy_caller.call_list; call; call = call->next)
 	    {
-	      unsigned int k;
 	      unsigned int stub_delta = 1;
 
 	      if (htab->params->ovly_flavour == ovly_soft_icache)
@@ -5253,7 +5252,7 @@ spu_elf_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
       if ((*p)->p_type == PT_LOAD && (*p)->count == 1
 	  && spu_elf_section_data ((*p)->sections[0])->u.o.ovl_index != 0)
 	{
-	  struct elf_segment_map *m = *p;
+	  m = *p;
 	  *p = m->next;
 	  *p_overlay = m;
 	  p_overlay = &m->next;

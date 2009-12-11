@@ -1104,7 +1104,7 @@ warning_callback (struct bfd_link_info *info ATTRIBUTE_UNUSED,
     einfo ("%B: %s%s\n", abfd, _("warning: "), warning);
   else
     {
-      struct warning_callback_info info;
+      struct warning_callback_info cinfo;
 
       /* Look through the relocs to see if we can find a plausible
 	 address.  */
@@ -1112,13 +1112,13 @@ warning_callback (struct bfd_link_info *info ATTRIBUTE_UNUSED,
       if (!bfd_generic_link_read_symbols (abfd))
 	einfo (_("%B%F: could not read symbols: %E\n"), abfd);
 
-      info.found = FALSE;
-      info.warning = warning;
-      info.symbol = symbol;
-      info.asymbols = bfd_get_outsymbols (abfd);
-      bfd_map_over_sections (abfd, warning_find_reloc, &info);
+      cinfo.found = FALSE;
+      cinfo.warning = warning;
+      cinfo.symbol = symbol;
+      cinfo.asymbols = bfd_get_outsymbols (abfd);
+      bfd_map_over_sections (abfd, warning_find_reloc, &cinfo);
 
-      if (! info.found)
+      if (! cinfo.found)
 	einfo ("%B: %s%s\n", abfd, _("warning: "), warning);
     }
 

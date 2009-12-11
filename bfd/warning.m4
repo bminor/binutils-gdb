@@ -1,7 +1,7 @@
 dnl Common configure.in fragment
 
 AC_DEFUN([AM_BINUTILS_WARNINGS],[
-GCC_WARN_CFLAGS="-W -Wall -Wstrict-prototypes -Wmissing-prototypes"
+GCC_WARN_CFLAGS="-W -Wall -Wstrict-prototypes -Wmissing-prototypes -Wshadow"
 
 AC_ARG_ENABLE(werror,
   [  --enable-werror         treat compile warnings as errors],

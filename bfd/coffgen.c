@@ -307,20 +307,20 @@ coff_object_p (bfd *abfd)
 /* Get the BFD section from a COFF symbol section number.  */
 
 asection *
-coff_section_from_bfd_index (bfd *abfd, int index)
+coff_section_from_bfd_index (bfd *abfd, int section_index)
 {
   struct bfd_section *answer = abfd->sections;
 
-  if (index == N_ABS)
+  if (section_index == N_ABS)
     return bfd_abs_section_ptr;
-  if (index == N_UNDEF)
+  if (section_index == N_UNDEF)
     return bfd_und_section_ptr;
-  if (index == N_DEBUG)
+  if (section_index == N_DEBUG)
     return bfd_abs_section_ptr;
 
   while (answer)
     {
-      if (answer->target_index == index)
+      if (answer->target_index == section_index)
 	return answer;
       answer = answer->next;
     }

@@ -196,8 +196,6 @@ print_insn_s390 (bfd_vma memaddr, struct disassemble_info *info)
 	  separator = 0;
 	  for (opindex = opcode->operands; *opindex != 0; opindex++)
 	    {
-	      unsigned int value;
-
 	      operand = s390_operands + *opindex;
 	      value = s390_extract_operand (buffer, operand);
 

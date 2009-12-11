@@ -1,3 +1,30 @@
+2009-12-11  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+	* ar.c: Fix shadowed variable warnings.
+	* bucomm.c: Likewise.
+	* coffgrok.c: Likewise.
+	* configure: Likewise.
+	* dlltool.c: Likewise.
+	* dllwrap.c: Likewise.
+	* dwarf.c: Likewise.
+	* ieee.c: Likewise.
+	* nlmconv.c: Likewise.
+	* nm.c: Likewise.
+	* objcopy.c: Likewise.
+	* objdump.c: Likewise.
+	* prdbg.c: Likewise.
+	* readelf.c: Likewise.
+	* resbin.c: Likewise.
+	* resrc.c: Likewise.
+	* resres.c: Likewise.
+	* srconv.c: Likewise.
+	* stabs.c: Likewise.
+	* sysdump.c: Likewise.
+	* sysinfo.y: Likewise.
+	* wrstabs.c: Likewise.
+
 2009-12-10  Tristan Gingold  <gingold@adacore.com>
 
 	* addr2line.c (pretty_print): New variable.

@@ -2272,13 +2272,11 @@ alpha_ecoff_openr_next_archived_file (archive, last_file)
 /* Open the archive file given an index into the armap.  */
 
 static bfd *
-alpha_ecoff_get_elt_at_index (abfd, index)
-     bfd *abfd;
-     symindex index;
+alpha_ecoff_get_elt_at_index (bfd *abfd, symindex sym_index)
 {
   carsym *entry;
 
-  entry = bfd_ardata (abfd)->symdefs + index;
+  entry = bfd_ardata (abfd)->symdefs + sym_index;
   return alpha_ecoff_get_elt_at_filepos (abfd, entry->file_offset);
 }
 

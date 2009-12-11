@@ -1446,15 +1446,15 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 		  {
 		    while (*s == '#')
 		      {
-			int mask;
+			int jmask;
 
 			if (! parse_keyword_arg (sparc_encode_membar, &s,
-						 &mask))
+						 &jmask))
 			  {
 			    error_message = _(": invalid membar mask name");
 			    goto error;
 			  }
-			kmask |= mask;
+			kmask |= jmask;
 			while (*s == ' ')
 			  ++s;
 			if (*s == '|' || *s == '+')
@@ -2890,36 +2890,36 @@ get_expression (char *str)
 /* Subroutine of md_assemble to output one insn.  */
 
 static void
-output_insn (const struct sparc_opcode *insn, struct sparc_it *the_insn)
+output_insn (const struct sparc_opcode *insn, struct sparc_it *theinsn)
 {
   char *toP = frag_more (4);
 
   /* Put out the opcode.  */
   if (INSN_BIG_ENDIAN)
-    number_to_chars_bigendian (toP, (valueT) the_insn->opcode, 4);
+    number_to_chars_bigendian (toP, (valueT) theinsn->opcode, 4);
   else
-    number_to_chars_littleendian (toP, (valueT) the_insn->opcode, 4);
+    number_to_chars_littleendian (toP, (valueT) theinsn->opcode, 4);
 
   /* Put out the symbol-dependent stuff.  */
-  if (the_insn->reloc != BFD_RELOC_NONE)
+  if (theinsn->reloc != BFD_RELOC_NONE)
     {
       fixS *fixP =  fix_new_exp (frag_now,	/* Which frag.  */
 				 (toP - frag_now->fr_literal),	/* Where.  */
 				 4,		/* Size.  */
-				 &the_insn->exp,
-				 the_insn->pcrel,
-				 the_insn->reloc);
+				 &theinsn->exp,
+				 theinsn->pcrel,
+				 theinsn->reloc);
       /* Turn off overflow checking in fixup_segment.  We'll do our
 	 own overflow checking in md_apply_fix.  This is necessary because
 	 the insn size is 4 and fixup_segment will signal an overflow for
 	 large 8 byte quantities.  */
       fixP->fx_no_overflow = 1;
-      if (the_insn->reloc == BFD_RELOC_SPARC_OLO10)
-	fixP->tc_fix_data = the_insn->exp2.X_add_number;
+      if (theinsn->reloc == BFD_RELOC_SPARC_OLO10)
+	fixP->tc_fix_data = theinsn->exp2.X_add_number;
     }
 
   last_insn = insn;
-  last_opcode = the_insn->opcode;
+  last_opcode = theinsn->opcode;
 
 #ifdef OBJ_ELF
   dwarf2_emit_insn (4);
@@ -3869,7 +3869,6 @@ s_common (int ignore ATTRIBUTE_UNUSED)
 	{
 	  segT old_sec;
 	  int old_subsec;
-	  char *p;
 	  int align;
 
 	  old_sec = now_seg;

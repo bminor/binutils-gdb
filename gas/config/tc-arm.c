@@ -1052,10 +1052,10 @@ md_atof (int type, char * litP, int * sizeP)
 /* We handle all bad expressions here, so that we can report the faulty
    instruction in the error message.  */
 void
-md_operand (expressionS * expr)
+md_operand (expressionS * exp)
 {
   if (in_my_get_expression)
-    expr->X_op = O_illegal;
+    exp->X_op = O_illegal;
 }
 
 /* Immediate values.  */
@@ -1583,23 +1583,23 @@ parse_reg_list (char ** strp)
 	}
       else
 	{
-	  expressionS expr;
+	  expressionS exp;
 
-	  if (my_get_expression (&expr, &str, GE_NO_PREFIX))
+	  if (my_get_expression (&exp, &str, GE_NO_PREFIX))
 	    return FAIL;
 
-	  if (expr.X_op == O_constant)
+	  if (exp.X_op == O_constant)
 	    {
-	      if (expr.X_add_number
-		  != (expr.X_add_number & 0x0000ffff))
+	      if (exp.X_add_number
+		  != (exp.X_add_number & 0x0000ffff))
 		{
 		  inst.error = _("invalid register mask");
 		  return FAIL;
 		}
 
-	      if ((range & expr.X_add_number) != 0)
+	      if ((range & exp.X_add_number) != 0)
 		{
-		  int regno = range & expr.X_add_number;
+		  int regno = range & exp.X_add_number;
 
 		  regno &= -regno;
 		  regno = (1 << regno) - 1;
@@ -1608,7 +1608,7 @@ parse_reg_list (char ** strp)
 		     regno);
 		}
 
-	      range |= expr.X_add_number;
+	      range |= exp.X_add_number;
 	    }
 	  else
 	    {
@@ -1618,7 +1618,7 @@ parse_reg_list (char ** strp)
 		  return FAIL;
 		}
 
-	      memcpy (&inst.reloc.exp, &expr, sizeof (expressionS));
+	      memcpy (&inst.reloc.exp, &exp, sizeof (expressionS));
 	      inst.reloc.type = BFD_RELOC_ARM_MULTI;
 	      inst.reloc.pc_rel = 0;
 	    }
@@ -4711,7 +4711,7 @@ static int
 parse_shifter_operand (char **str, int i)
 {
   int value;
-  expressionS expr;
+  expressionS exp;
 
   if ((value = arm_reg_parse (str, REG_TYPE_RN)) != FAIL)
     {
@@ -4735,16 +4735,16 @@ parse_shifter_operand (char **str, int i)
   if (skip_past_comma (str) == SUCCESS)
     {
       /* #x, y -- ie explicit rotation by Y.  */
-      if (my_get_expression (&expr, str, GE_NO_PREFIX))
+      if (my_get_expression (&exp, str, GE_NO_PREFIX))
 	return FAIL;
 
-      if (expr.X_op != O_constant || inst.reloc.exp.X_op != O_constant)
+      if (exp.X_op != O_constant || inst.reloc.exp.X_op != O_constant)
 	{
 	  inst.error = _("constant expression expected");
 	  return FAIL;
 	}
 
-      value = expr.X_add_number;
+      value = exp.X_add_number;
       if (value < 0 || value > 30 || value % 2 != 0)
 	{
 	  inst.error = _("invalid rotation");
@@ -14163,11 +14163,12 @@ do_neon_mov (void)
     case NS_SR:  /* case 4.  */
       {
         unsigned bcdebits = 0;
-        struct neon_type_el et = neon_check_type (2, NS_NULL,
-          N_8 | N_16 | N_32 | N_KEY, N_EQK);
-        int logsize = neon_logbits (et.size);
+        int logsize;
         unsigned dn = NEON_SCALAR_REG (inst.operands[0].reg);
         unsigned x = NEON_SCALAR_INDEX (inst.operands[0].reg);
+
+        et = neon_check_type (2, NS_NULL, N_8 | N_16 | N_32 | N_KEY, N_EQK);
+        logsize = neon_logbits (et.size);
 
         constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v1),
                     _(BAD_FPU));
@@ -14210,12 +14211,14 @@ do_neon_mov (void)
 
     case NS_RS:  /* case 6.  */
       {
-        struct neon_type_el et = neon_check_type (2, NS_NULL,
-          N_EQK, N_S8 | N_S16 | N_U8 | N_U16 | N_32 | N_KEY);
-        unsigned logsize = neon_logbits (et.size);
+        unsigned logsize;
         unsigned dn = NEON_SCALAR_REG (inst.operands[1].reg);
         unsigned x = NEON_SCALAR_INDEX (inst.operands[1].reg);
         unsigned abcdebits = 0;
+
+	et = neon_check_type (2, NS_NULL,
+			      N_EQK, N_S8 | N_S16 | N_U8 | N_U16 | N_32 | N_KEY);
+        logsize = neon_logbits (et.size);
 
         constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v1),
                     _(BAD_FPU));
@@ -19126,12 +19129,12 @@ tc_arm_regname_to_dw2regnum (char *regname)
 void
 tc_pe_dwarf2_emit_offset (symbolS *symbol, unsigned int size)
 {
-  expressionS expr;
+  expressionS exp;
 
-  expr.X_op = O_secrel;
-  expr.X_add_symbol = symbol;
-  expr.X_add_number = 0;
-  emit_expr (&expr, size);
+  exp.X_op = O_secrel;
+  exp.X_add_symbol = symbol;
+  exp.X_add_number = 0;
+  emit_expr (&exp, size);
 }
 #endif
 
@@ -22602,18 +22605,18 @@ aeabi_set_public_attributes (void)
   /* Tag_CPU_name.  */
   if (selected_cpu_name[0])
     {
-      char *p;
+      char *q;
 
-      p = selected_cpu_name;
-      if (strncmp (p, "armv", 4) == 0)
+      q = selected_cpu_name;
+      if (strncmp (q, "armv", 4) == 0)
 	{
 	  int i;
 
-	  p += 4;
-	  for (i = 0; p[i]; i++)
-	    p[i] = TOUPPER (p[i]);
+	  q += 4;
+	  for (i = 0; q[i]; i++)
+	    q[i] = TOUPPER (q[i]);
 	}
-      aeabi_set_attribute_string (Tag_CPU_name, p);
+      aeabi_set_attribute_string (Tag_CPU_name, q);
     }
 
   /* Tag_CPU_arch.  */

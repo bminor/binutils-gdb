@@ -1,6 +1,6 @@
 // compressed_output.cc -- manage compressed output sections for gold
 
-// Copyright 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -137,14 +137,14 @@ Output_compressed_section::set_final_data_size()
 void
 Output_compressed_section::do_write(Output_file* of)
 {
-  off_t offset = this->offset();
-  off_t data_size = this->data_size();
-  unsigned char* view = of->get_output_view(offset, data_size);
+  off_t off = this->offset();
+  off_t datasize = this->data_size();
+  unsigned char* view = of->get_output_view(off, datasize);
   if (this->data_ == NULL)
-    memcpy(view, this->postprocessing_buffer(), data_size);
+    memcpy(view, this->postprocessing_buffer(), datasize);
   else
-    memcpy(view, this->data_, data_size);
-  of->write_output_view(offset, data_size, view);
+    memcpy(view, this->data_, datasize);
+  of->write_output_view(off, datasize, view);
 }
 
 } // End namespace gold.

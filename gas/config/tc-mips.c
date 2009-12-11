@@ -2612,10 +2612,10 @@ insns_between (const struct mips_cl_insn *insn1,
 
 /* Return the number of nops that would be needed to work around the
    VR4130 mflo/mfhi errata if instruction INSN immediately followed
-   the MAX_VR4130_NOPS instructions described by HISTORY.  */
+   the MAX_VR4130_NOPS instructions described by HIST.  */
 
 static int
-nops_for_vr4130 (const struct mips_cl_insn *history,
+nops_for_vr4130 (const struct mips_cl_insn *hist,
 		 const struct mips_cl_insn *insn)
 {
   int i, j, reg;
@@ -2630,13 +2630,13 @@ nops_for_vr4130 (const struct mips_cl_insn *history,
 
   /* Search for the first MFLO or MFHI.  */
   for (i = 0; i < MAX_VR4130_NOPS; i++)
-    if (MF_HILO_INSN (history[i].insn_mo->pinfo))
+    if (MF_HILO_INSN (hist[i].insn_mo->pinfo))
       {
 	/* Extract the destination register.  */
 	if (mips_opts.mips16)
-	  reg = mips16_to_32_reg_map[MIPS16_EXTRACT_OPERAND (RX, history[i])];
+	  reg = mips16_to_32_reg_map[MIPS16_EXTRACT_OPERAND (RX, hist[i])];
 	else
-	  reg = EXTRACT_OPERAND (RD, history[i]);
+	  reg = EXTRACT_OPERAND (RD, hist[i]);
 
 	/* No nops are needed if INSN reads that register.  */
 	if (insn != NULL && insn_uses_reg (insn, reg, MIPS_GR_REG))
@@ -2644,7 +2644,7 @@ nops_for_vr4130 (const struct mips_cl_insn *history,
 
 	/* ...or if any of the intervening instructions do.  */
 	for (j = 0; j < i; j++)
-	  if (insn_uses_reg (&history[j], reg, MIPS_GR_REG))
+	  if (insn_uses_reg (&hist[j], reg, MIPS_GR_REG))
 	    return 0;
 
 	return MAX_VR4130_NOPS - i;
@@ -2653,12 +2653,12 @@ nops_for_vr4130 (const struct mips_cl_insn *history,
 }
 
 /* Return the number of nops that would be needed if instruction INSN
-   immediately followed the MAX_NOPS instructions given by HISTORY,
-   where HISTORY[0] is the most recent instruction.  If INSN is null,
+   immediately followed the MAX_NOPS instructions given by HIST,
+   where HIST[0] is the most recent instruction.  If INSN is null,
    return the worse-case number of nops for any instruction.  */
 
 static int
-nops_for_insn (const struct mips_cl_insn *history,
+nops_for_insn (const struct mips_cl_insn *hist,
 	       const struct mips_cl_insn *insn)
 {
   int i, nops, tmp_nops;
@@ -2666,14 +2666,14 @@ nops_for_insn (const struct mips_cl_insn *history,
   nops = 0;
   for (i = 0; i < MAX_DELAY_NOPS; i++)
     {
-      tmp_nops = insns_between (history + i, insn) - i;
+      tmp_nops = insns_between (hist + i, insn) - i;
       if (tmp_nops > nops)
 	nops = tmp_nops;
     }
 
   if (mips_fix_vr4130)
     {
-      tmp_nops = nops_for_vr4130 (history, insn);
+      tmp_nops = nops_for_vr4130 (hist, insn);
       if (tmp_nops > nops)
 	nops = tmp_nops;
     }
@@ -2682,20 +2682,20 @@ nops_for_insn (const struct mips_cl_insn *history,
 }
 
 /* The variable arguments provide NUM_INSNS extra instructions that
-   might be added to HISTORY.  Return the largest number of nops that
+   might be added to HIST.  Return the largest number of nops that
    would be needed after the extended sequence.  */
 
 static int
-nops_for_sequence (int num_insns, const struct mips_cl_insn *history, ...)
+nops_for_sequence (int num_insns, const struct mips_cl_insn *hist, ...)
 {
   va_list args;
   struct mips_cl_insn buffer[MAX_NOPS];
   struct mips_cl_insn *cursor;
   int nops;
 
-  va_start (args, history);
+  va_start (args, hist);
   cursor = buffer + num_insns;
-  memcpy (cursor, history, (MAX_NOPS - num_insns) * sizeof (*cursor));
+  memcpy (cursor, hist, (MAX_NOPS - num_insns) * sizeof (*cursor));
   while (cursor > buffer)
     *--cursor = *va_arg (args, const struct mips_cl_insn *);
 
@@ -2708,23 +2708,23 @@ nops_for_sequence (int num_insns, const struct mips_cl_insn *history, ...)
    worst-case delay for the branch target.  */
 
 static int
-nops_for_insn_or_target (const struct mips_cl_insn *history,
+nops_for_insn_or_target (const struct mips_cl_insn *hist,
 			 const struct mips_cl_insn *insn)
 {
   int nops, tmp_nops;
 
-  nops = nops_for_insn (history, insn);
+  nops = nops_for_insn (hist, insn);
   if (insn->insn_mo->pinfo & (INSN_UNCOND_BRANCH_DELAY
 			      | INSN_COND_BRANCH_DELAY
 			      | INSN_COND_BRANCH_LIKELY))
     {
-      tmp_nops = nops_for_sequence (2, history, insn, NOP_INSN);
+      tmp_nops = nops_for_sequence (2, hist, insn, NOP_INSN);
       if (tmp_nops > nops)
 	nops = tmp_nops;
     }
   else if (mips_opts.mips16 && (insn->insn_mo->pinfo & MIPS16_INSN_BRANCH))
     {
-      tmp_nops = nops_for_sequence (1, history, insn);
+      tmp_nops = nops_for_sequence (1, hist, insn);
       if (tmp_nops > nops)
 	nops = tmp_nops;
     }
@@ -5754,8 +5754,6 @@ macro (struct mips_cl_insn *ip)
 		}
 	      else if (IS_SEXT_32BIT_NUM (expr1.X_add_number + 0x8000))
 		{
-		  int dreg;
-
 		  /* If we are going to add in a base register, and the
 		     target register and the base register are the same,
 		     then we are using AT as a temporary register.  Since
@@ -5895,8 +5893,6 @@ macro (struct mips_cl_insn *ip)
 	    }
 	  else
 	    {
-	      int dreg;
-
 	      /* If we are going to add in a base register, and the
 		 target register and the base register are the same,
 		 then we are using AT as a temporary register.  Since
@@ -6034,8 +6030,6 @@ macro (struct mips_cl_insn *ip)
 	    }
 	  else if (IS_SEXT_32BIT_NUM (expr1.X_add_number + 0x8000))
 	    {
-	      int dreg;
-
 	      /* If we are going to add in a base register, and the
 		 target register and the base register are the same,
 		 then we are using AT as a temporary register.  Since
@@ -7550,7 +7544,8 @@ macro2 (struct mips_cl_insn *ip)
     case M_DROL_I:
       {
 	unsigned int rot;
-	char *l, *r;
+	char *l;
+	char *rr;
 
 	if (imm_expr.X_op != O_constant)
 	  as_bad (_("Improper rotate count"));
@@ -7570,11 +7565,11 @@ macro2 (struct mips_cl_insn *ip)
 	    break;
 	  }
 	l = (rot < 0x20) ? "dsll" : "dsll32";
-	r = ((0x40 - rot) < 0x20) ? "dsrl" : "dsrl32";
+	rr = ((0x40 - rot) < 0x20) ? "dsrl" : "dsrl32";
 	rot &= 0x1f;
 	used_at = 1;
 	macro_build (NULL, l, "d,w,<", AT, sreg, rot);
-	macro_build (NULL, r, "d,w,<", dreg, sreg, (0x20 - rot) & 0x1f);
+	macro_build (NULL, rr, "d,w,<", dreg, sreg, (0x20 - rot) & 0x1f);
 	macro_build (NULL, "or", "d,v,t", dreg, dreg, AT);
       }
       break;
@@ -7632,7 +7627,8 @@ macro2 (struct mips_cl_insn *ip)
     case M_DROR_I:
       {
 	unsigned int rot;
-	char *l, *r;
+	char *l;
+	char *rr;
 
 	if (imm_expr.X_op != O_constant)
 	  as_bad (_("Improper rotate count"));
@@ -7650,11 +7646,11 @@ macro2 (struct mips_cl_insn *ip)
 	    macro_build (NULL, "dsrl", "d,w,<", dreg, sreg, 0);
 	    break;
 	  }
-	r = (rot < 0x20) ? "dsrl" : "dsrl32";
+	rr = (rot < 0x20) ? "dsrl" : "dsrl32";
 	l = ((0x40 - rot) < 0x20) ? "dsll" : "dsll32";
 	rot &= 0x1f;
 	used_at = 1;
-	macro_build (NULL, r, "d,w,<", AT, sreg, rot);
+	macro_build (NULL, rr, "d,w,<", AT, sreg, rot);
 	macro_build (NULL, l, "d,w,<", dreg, sreg, (0x20 - rot) & 0x1f);
 	macro_build (NULL, "or", "d,v,t", dreg, dreg, AT);
       }
@@ -10601,7 +10597,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 	      {
 		int opcode = 0;
 		int framesz = 0, seen_framesz = 0;
-		int args = 0, statics = 0, sregs = 0;
+		int nargs = 0, statics = 0, sregs = 0;
 
 		while (*s != '\0')
 		  {
@@ -10656,7 +10652,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 			  {
 			    if (!seen_framesz)
 				/* args $a0-$a3 */
-				args |= 1 << (reg1 - 4);
+				nargs |= 1 << (reg1 - 4);
 			    else
 				/* statics $a0-$a3 */
 				statics |= 1 << (reg1 - 4);
@@ -10682,9 +10678,9 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 		  }
 
 		/* Encode args/statics combination.  */
-		if (args & statics)
+		if (nargs & statics)
 		  as_bad (_("arg/static registers overlap"));
-		else if (args == 0xf)
+		else if (nargs == 0xf)
 		  /* All $a0-$a3 are args.  */
 		  opcode |= MIPS16_ALL_ARGS << 16;
 		else if (statics == 0xf)
@@ -10695,12 +10691,12 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 		    int narg = 0, nstat = 0;
 
 		    /* Count arg registers.  */
-		    while (args & 0x1)
+		    while (nargs & 0x1)
 		      {
-			args >>= 1;
+			nargs >>= 1;
 			narg++;
 		      }
-		    if (args != 0)
+		    if (nargs != 0)
 		      as_bad (_("invalid arg register list"));
 
 		    /* Count static registers.  */

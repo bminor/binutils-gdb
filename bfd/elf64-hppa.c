@@ -2740,15 +2740,16 @@ elf64_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym,
 }
 
 /* Support HP specific sections for core files.  */
+
 static bfd_boolean
-elf64_hppa_section_from_phdr (bfd *abfd, Elf_Internal_Phdr *hdr, int index,
+elf64_hppa_section_from_phdr (bfd *abfd, Elf_Internal_Phdr *hdr, int sec_index,
 			      const char *typename)
 {
   if (hdr->p_type == PT_HP_CORE_KERNEL)
     {
       asection *sect;
 
-      if (!_bfd_elf_make_section_from_phdr (abfd, hdr, index, typename))
+      if (!_bfd_elf_make_section_from_phdr (abfd, hdr, sec_index, typename))
 	return FALSE;
 
       sect = bfd_make_section_anyway (abfd, ".kernel");
@@ -2771,7 +2772,7 @@ elf64_hppa_section_from_phdr (bfd *abfd, Elf_Internal_Phdr *hdr, int index,
 
       elf_tdata (abfd)->core_signal = sig;
 
-      if (!_bfd_elf_make_section_from_phdr (abfd, hdr, index, typename))
+      if (!_bfd_elf_make_section_from_phdr (abfd, hdr, sec_index, typename))
 	return FALSE;
 
       /* GDB uses the ".reg" section to read register contents.  */
@@ -2784,7 +2785,7 @@ elf64_hppa_section_from_phdr (bfd *abfd, Elf_Internal_Phdr *hdr, int index,
       || hdr->p_type == PT_HP_CORE_MMF)
     hdr->p_type = PT_LOAD;
 
-  return _bfd_elf_make_section_from_phdr (abfd, hdr, index, typename);
+  return _bfd_elf_make_section_from_phdr (abfd, hdr, sec_index, typename);
 }
 
 /* Hook called by the linker routine which adds symbols from an object
@@ -2800,9 +2801,9 @@ elf_hppa_add_symbol_hook (bfd *abfd,
 			  asection **secp,
 			  bfd_vma *valp)
 {
-  unsigned int index = sym->st_shndx;
+  unsigned int sec_index = sym->st_shndx;
 
-  switch (index)
+  switch (sec_index)
     {
     case SHN_PARISC_ANSI_COMMON:
       *secp = bfd_make_section_old_way (abfd, ".PARISC.ansi.common");

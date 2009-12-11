@@ -1043,9 +1043,9 @@ print_source (file_info_type *  current_file,
       while (current_file->linenum < list->hll_line
 	     && !current_file->at_end)
 	{
-	  cached_line * cache = cached_lines + next_free_line;
 	  char *p;
 
+	  cache = cached_lines + next_free_line;
 	  cache->file = current_file;
 	  cache->line = current_file->linenum;
 	  cache->buffer[0] = 0;

@@ -205,12 +205,12 @@ get_opflags (operand_type op)
 static reg
 get_register (char *reg_name)
 {
-  const reg_entry *reg;
+  const reg_entry *rreg;
 
-  reg = (const reg_entry *) hash_find (reg_hash, reg_name);
+  rreg = (const reg_entry *) hash_find (reg_hash, reg_name);
 
-  if (reg != NULL)
-    return reg->value.reg_val;
+  if (rreg != NULL)
+    return rreg->value.reg_val;
   else
     return nullregister;
 }
@@ -220,12 +220,12 @@ get_register (char *reg_name)
 static copreg
 get_copregister (char *copreg_name)
 {
-  const reg_entry *copreg;
+  const reg_entry *coreg;
 
-  copreg = (const reg_entry *) hash_find (copreg_hash, copreg_name);
+  coreg = (const reg_entry *) hash_find (copreg_hash, copreg_name);
 
-  if (copreg != NULL)
-    return copreg->value.copreg_val;
+  if (coreg != NULL)
+    return coreg->value.copreg_val;
   else
     return nullcopregister;
 }
@@ -1106,7 +1106,7 @@ get_cinv_parameters (char * operand)
 static int
 getreg_image (reg r)
 {
-  const reg_entry *reg;
+  const reg_entry *rreg;
   char *reg_name;
   int is_procreg = 0; /* Nonzero means argument should be processor reg.  */
 
@@ -1116,10 +1116,10 @@ getreg_image (reg r)
 
   /* Check whether the register is in registers table.  */
   if (r < MAX_REG)
-    reg = &crx_regtab[r];
+    rreg = &crx_regtab[r];
   /* Check whether the register is in coprocessor registers table.  */
   else if (r < MAX_COPREG)
-    reg = &crx_copregtab[r-MAX_REG];
+    rreg = &crx_copregtab[r-MAX_REG];
   /* Register not found.  */
   else
     {
@@ -1127,7 +1127,7 @@ getreg_image (reg r)
       return 0;
     }
 
-  reg_name = reg->name;
+  reg_name = rreg->name;
 
 /* Issue a error message when register is illegal.  */
 #define IMAGE_ERR \
@@ -1135,29 +1135,29 @@ getreg_image (reg r)
 	    reg_name, ins_parse);			     \
   break;
 
-  switch (reg->type)
+  switch (rreg->type)
   {
     case CRX_U_REGTYPE:
       if (is_procreg || (instruction->flags & USER_REG))
-	return reg->image;
+	return rreg->image;
       else
 	IMAGE_ERR;
 
     case CRX_CFG_REGTYPE:
       if (is_procreg)
-	return reg->image;
+	return rreg->image;
       else
 	IMAGE_ERR;
 
     case CRX_R_REGTYPE:
       if (! is_procreg)
-	return reg->image;
+	return rreg->image;
       else
 	IMAGE_ERR;
 
     case CRX_C_REGTYPE:
     case CRX_CS_REGTYPE:
-      return reg->image;
+      return rreg->image;
       break;
 
     default:

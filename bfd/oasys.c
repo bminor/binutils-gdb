@@ -786,7 +786,7 @@ oasys_write_syms (bfd *abfd)
 {
   unsigned int count;
   asymbol **generic = bfd_get_outsymbols (abfd);
-  unsigned int index = 0;
+  unsigned int sym_index = 0;
 
   for (count = 0; count < bfd_get_symcount (abfd); count++)
     {
@@ -799,8 +799,8 @@ oasys_write_syms (bfd *abfd)
       if (bfd_is_com_section (g->section))
 	{
 	  symbol.relb = RELOCATION_TYPE_COM;
-	  H_PUT_16 (abfd, index, symbol.refno);
-	  index++;
+	  H_PUT_16 (abfd, sym_index, symbol.refno);
+	  sym_index++;
 	}
       else if (bfd_is_abs_section (g->section))
 	{
@@ -810,9 +810,9 @@ oasys_write_syms (bfd *abfd)
       else if (bfd_is_und_section (g->section))
 	{
 	  symbol.relb = RELOCATION_TYPE_UND;
-	  H_PUT_16 (abfd, index, symbol.refno);
-	  /* Overload the value field with the output index number */
-	  index++;
+	  H_PUT_16 (abfd, sym_index, symbol.refno);
+	  /* Overload the value field with the output sym_index number */
+	  sym_index++;
 	}
       else if (g->flags & BSF_DEBUGGING)
 	/* Throw it away.  */
@@ -859,7 +859,7 @@ oasys_write_syms (bfd *abfd)
 					      name[0]) + l))
 	    return FALSE;
 	}
-      g->value = index - 1;
+      g->value = sym_index - 1;
     }
 
   return TRUE;

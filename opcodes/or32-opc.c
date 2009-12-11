@@ -345,7 +345,7 @@ const unsigned int or32_num_opcodes = ((sizeof(or32_opcodes)) / (sizeof(struct o
 /* Calculates instruction length in bytes. Always 4 for OR32.  */
 
 int
-insn_len (int insn_index ATTRIBUTE_UNUSED)
+insn_len (int i_index ATTRIBUTE_UNUSED)
 {
   return 4;
 }
@@ -409,10 +409,10 @@ insn_index (char *insn)
 }
 
 const char *
-insn_name (int index)
+insn_name (int op_index)
 {
-  if (index >= 0 && index < (int) or32_num_opcodes)
-    return or32_opcodes[index].name;
+  if (op_index >= 0 && op_index < (int) or32_num_opcodes)
+    return or32_opcodes[op_index].name;
   else
     return "???";
 }
@@ -985,12 +985,12 @@ or32_print_immediate (char param_ch, char *encoding, unsigned long insn)
 int
 disassemble_insn (unsigned long insn)
 {
-  int index;
-  index = insn_decode (insn);
+  int op_index;
+  op_index = insn_decode (insn);
 
-  if (index >= 0)
+  if (op_index >= 0)
     {
-      struct or32_opcode const *opcode = &or32_opcodes[index];
+      struct or32_opcode const *opcode = &or32_opcodes[op_index];
       char *s;
 
       sprintf (disassembled, "%s ", opcode->name);

@@ -154,7 +154,7 @@ operatorT i386_operator (const char *name, unsigned int operands, char *pc)
     }
 
   for (j = 0; i386_operators[j].name; ++j)
-    if (strcasecmp(i386_operators[j].name, name) == 0)
+    if (strcasecmp (i386_operators[j].name, name) == 0)
       {
 	if (i386_operators[j].operands
 	    && i386_operators[j].operands != operands)
@@ -163,16 +163,16 @@ operatorT i386_operator (const char *name, unsigned int operands, char *pc)
       }
 
   for (j = 0; i386_types[j].name; ++j)
-    if (strcasecmp(i386_types[j].name, name) == 0)
+    if (strcasecmp (i386_types[j].name, name) == 0)
       break;
   if (i386_types[j].name && *pc == ' ')
     {
-      char *name = ++input_line_pointer;
+      char *pname = ++input_line_pointer;
       char c = get_symbol_end ();
 
-      if (strcasecmp (name, "ptr") == 0)
+      if (strcasecmp (pname, "ptr") == 0)
 	{
-	  name[-1] = *pc;
+	  pname[-1] = *pc;
 	  *pc = c;
 	  if (intel_syntax > 0 || operands != 1)
 	    return O_illegal;
@@ -180,7 +180,7 @@ operatorT i386_operator (const char *name, unsigned int operands, char *pc)
 	}
 
       *input_line_pointer = c;
-      input_line_pointer = name - 1;
+      input_line_pointer = pname - 1;
     }
 
   return O_absent;
@@ -188,13 +188,13 @@ operatorT i386_operator (const char *name, unsigned int operands, char *pc)
 
 static int i386_intel_parse_name (const char *name, expressionS *e)
 {
-  unsigned int i;
+  unsigned int j;
 
-  for (i = 0; i386_types[i].name; ++i)
-    if (strcasecmp(i386_types[i].name, name) == 0)
+  for (j = 0; i386_types[j].name; ++j)
+    if (strcasecmp(i386_types[j].name, name) == 0)
       {
 	e->X_op = O_constant;
-	e->X_add_number = i386_types[i].sz[flag_code];
+	e->X_add_number = i386_types[j].sz[flag_code];
 	e->X_add_symbol = NULL;
 	e->X_op_symbol = NULL;
 	return 1;
@@ -203,12 +203,12 @@ static int i386_intel_parse_name (const char *name, expressionS *e)
   return 0;
 }
 
-static INLINE int i386_intel_check (const reg_entry *reg,
+static INLINE int i386_intel_check (const reg_entry *rreg,
 				    const reg_entry *base,
-				    const reg_entry *index)
+				    const reg_entry *iindex)
 {
-  if ((this_operand >= 0 && reg != i.op[this_operand].regs)
-      || base != intel_state.base || index != intel_state.index)
+  if ((this_operand >= 0 && rreg != i.op[this_operand].regs)
+      || base != intel_state.base || iindex != intel_state.index)
     {
       as_bad (_("invalid use of register"));
       return 0;
@@ -249,9 +249,9 @@ static INLINE int i386_intel_simplify_symbol(symbolS *sym)
 
 static int i386_intel_simplify (expressionS *e)
 {
-  const reg_entry *reg = this_operand >= 0 ? i.op[this_operand].regs : NULL;
+  const reg_entry *the_reg = this_operand >= 0 ? i.op[this_operand].regs : NULL;
   const reg_entry *base = intel_state.base;
-  const reg_entry *index = intel_state.index;
+  const reg_entry *state_index = intel_state.index;
   int ret;
 
   if (!intel_syntax)
@@ -263,7 +263,7 @@ static int i386_intel_simplify (expressionS *e)
       if (e->X_add_symbol)
 	{
 	  if (!i386_intel_simplify_symbol (e->X_add_symbol)
-	      || !i386_intel_check(reg, intel_state.base, intel_state.index))
+	      || !i386_intel_check(the_reg, intel_state.base, intel_state.index))
 	    return 0;;
 	}
       if (!intel_state.in_offset)
@@ -284,7 +284,7 @@ static int i386_intel_simplify (expressionS *e)
       ++intel_state.in_offset;
       ret = i386_intel_simplify_symbol (e->X_add_symbol);
       --intel_state.in_offset;
-      if (!ret || !i386_intel_check(reg, base, index))
+      if (!ret || !i386_intel_check(the_reg, base, state_index))
 	return 0;
       i386_intel_fold (e, e->X_add_symbol);
       return ret;
@@ -321,7 +321,7 @@ static int i386_intel_simplify (expressionS *e)
 	  return 0;
 	}
       if (!i386_intel_simplify_symbol (e->X_op_symbol)
-	  || !i386_intel_check(reg, intel_state.base, intel_state.index))
+	  || !i386_intel_check(the_reg, intel_state.base, intel_state.index))
 	return 0;
       if (!intel_state.in_offset)
 	intel_state.seg = e->X_add_symbol;
@@ -425,13 +425,13 @@ static int i386_intel_simplify (expressionS *e)
       if (e->X_op == O_add || e->X_op == O_subtract)
 	{
 	  base = intel_state.base;
-	  index = intel_state.index;
+	  state_index = intel_state.index;
 	}
-      if (!i386_intel_check (reg, base, index)
+      if (!i386_intel_check (the_reg, base, state_index)
 	  || (e->X_op_symbol && !i386_intel_simplify_symbol (e->X_op_symbol))
-	  || !i386_intel_check (reg,
+	  || !i386_intel_check (the_reg,
 				e->X_op != O_add ? base : intel_state.base,
-				e->X_op != O_add ? index : intel_state.index))
+				e->X_op != O_add ? state_index : intel_state.index))
 	return 0;
       break;
     }

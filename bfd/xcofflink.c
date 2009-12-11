@@ -687,12 +687,12 @@ bfd_boolean
 bfd_xcoff_split_import_path (bfd *abfd, const char *filename,
 			     const char **imppath, const char **impfile)
 {
-  const char *basename;
+  const char *base;
   size_t length;
   char *path;
 
-  basename = lbasename (filename);
-  length = basename - filename;
+  base = lbasename (filename);
+  length = base - filename;
   if (length == 0)
     /* The filename has no directory component, so use an empty path.  */
     *imppath = "";
@@ -711,7 +711,7 @@ bfd_xcoff_split_import_path (bfd *abfd, const char *filename,
       path[length - 1] = 0;
       *imppath = path;
     }
-  *impfile = basename;
+  *impfile = base;
   return TRUE;
 }
 

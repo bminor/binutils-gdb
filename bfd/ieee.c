@@ -228,7 +228,7 @@ ieee_write_expression (bfd *abfd,
 		       bfd_vma value,
 		       asymbol *symbol,
 		       bfd_boolean pcrel,
-		       unsigned int index)
+		       unsigned int sindex)
 {
   unsigned int term_count = 0;
 
@@ -297,7 +297,7 @@ ieee_write_expression (bfd *abfd,
       /* Subtract the pc from here by asking for PC of this section.  */
       if (! ieee_write_byte (abfd, ieee_variable_P_enum)
 	  || ! ieee_write_byte (abfd,
-				(bfd_byte) (index + IEEE_SECTION_NUMBER_BASE))
+				(bfd_byte) (sindex + IEEE_SECTION_NUMBER_BASE))
 	  || ! ieee_write_byte (abfd, ieee_function_minus_enum))
 	return FALSE;
     }
@@ -1045,9 +1045,9 @@ ieee_canonicalize_symtab (bfd *abfd, asymbol **location)
 }
 
 static asection *
-get_section_entry (bfd *abfd, ieee_data_type *ieee, unsigned int index)
+get_section_entry (bfd *abfd, ieee_data_type *ieee, unsigned int sindex)
 {
-  if (index >= ieee->section_table_size)
+  if (sindex >= ieee->section_table_size)
     {
       unsigned int c, i;
       asection **n;
@@ -1056,7 +1056,7 @@ get_section_entry (bfd *abfd, ieee_data_type *ieee, unsigned int index)
       c = ieee->section_table_size;
       if (c == 0)
 	c = 20;
-      while (c <= index)
+      while (c <= sindex)
 	c *= 2;
 
       amt = c;
@@ -1072,20 +1072,20 @@ get_section_entry (bfd *abfd, ieee_data_type *ieee, unsigned int index)
       ieee->section_table_size = c;
     }
 
-  if (ieee->section_table[index] == (asection *) NULL)
+  if (ieee->section_table[sindex] == (asection *) NULL)
     {
       char *tmp = bfd_alloc (abfd, (bfd_size_type) 11);
       asection *section;
 
       if (!tmp)
 	return NULL;
-      sprintf (tmp, " fsec%4d", index);
+      sprintf (tmp, " fsec%4d", sindex);
       section = bfd_make_section (abfd, tmp);
-      ieee->section_table[index] = section;
-      section->target_index = index;
-      ieee->section_table[index] = section;
+      ieee->section_table[sindex] = section;
+      section->target_index = sindex;
+      ieee->section_table[sindex] = section;
     }
-  return ieee->section_table[index];
+  return ieee->section_table[sindex];
 }
 
 static void

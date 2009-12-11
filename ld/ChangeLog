@@ -1,3 +1,13 @@
+2009-12-11  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* deffilep.y: Fix shadowed variable warnings.
+	* ldlang.c: Likewise.
+	* ldmain.c: Likewise.
+	* pe-dll.c: Likewise.
+	* emultempl/elf32.em: Likewise.
+
 2009-12-09  Alan Modra  <amodra@bigpond.net.au>
 
 	PR ld/11012

@@ -3306,7 +3306,6 @@ s7_do_ldst_insn (char *str)
 
           if (s7_inst.reloc.exp.X_op == O_constant)
             {
-              int value;
               unsigned int data_type;
 
               if (pre_inc == 1)
@@ -6194,11 +6193,11 @@ s7_assemble (char *str)
    instruction in the error message.  */
 
 static void
-s7_operand (expressionS * expr)
+s7_operand (expressionS * exp)
 {
   if (s7_in_my_get_expression)
     {
-      expr->X_op = O_illegal;
+      exp->X_op = O_illegal;
       if (s7_inst.error == NULL)
         {
           s7_inst.error = _("bad expression");

@@ -1447,7 +1447,7 @@ static bfd_boolean
 elfNN_ia64_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr,
 			  asection *sec)
 {
-  register const char *name;
+  const char *name;
 
   name = bfd_get_section_name (abfd, sec);
 
@@ -2135,7 +2135,7 @@ sort_dyn_sym_info (struct elfNN_ia64_dyn_sym_info *info,
 		   unsigned int count)
 {
   bfd_vma curr, prev, got_offset;
-  unsigned int i, kept, dup, diff, dest, src, len;
+  unsigned int i, kept, dupes, diff, dest, src, len;
 
   qsort (info, count, sizeof (*info), addend_compare);
 
@@ -2200,35 +2200,35 @@ sort_dyn_sym_info (struct elfNN_ia64_dyn_sym_info *info,
 	  /* Find the next duplicate.  SRC will be kept.  */
 	  prev = info [src].addend;
 	  got_offset = info [src].got_offset;
-	  for (dup = src + 1; dup < count; dup++)
+	  for (dupes = src + 1; dupes < count; dupes ++)
 	    {
-	      curr = info [dup].addend;
+	      curr = info [dupes].addend;
 	      if (curr == prev)
 		{
 		  /* Make sure that got_offset is valid.  */
 		  if (got_offset == (bfd_vma) -1)
-		    got_offset = info [dup].got_offset;
+		    got_offset = info [dupes].got_offset;
 
 		  /* For duplicates, make sure that the kept one has
 		     a valid got_offset.  */
 		  if (got_offset != (bfd_vma) -1)
-		    info [dup - 1].got_offset = got_offset;
+		    info [dupes - 1].got_offset = got_offset;
 		  break;
 		}
-	      got_offset = info [dup].got_offset;
+	      got_offset = info [dupes].got_offset;
 	      prev = curr;
 	    }
 
 	  /* How much to move.  */
-	  len = dup - src;
-	  i = dup + 1;
+	  len = dupes - src;
+	  i = dupes + 1;
 
-	  if (len == 1 && dup < count)
+	  if (len == 1 && dupes < count)
 	    {
 	      /* If we only move 1 element, we combine it with the next
 		 one.  There must be at least a duplicate.  Find the
 		 next different one.  */
-	      for (diff = dup + 1, src++; diff < count; diff++, src++)
+	      for (diff = dupes + 1, src++; diff < count; diff++, src++)
 		{
 		  if (info [diff].addend != curr)
 		    break;
@@ -2249,18 +2249,18 @@ sort_dyn_sym_info (struct elfNN_ia64_dyn_sym_info *info,
 		     offset.  */
 		  prev = info [diff].addend;
 		  got_offset = info [diff].got_offset;
-		  for (dup = diff + 1; dup < count; dup++)
+		  for (dupes = diff + 1; dupes < count; dupes ++)
 		    {
-		      curr = info [dup].addend;
+		      curr = info [dupes].addend;
 		      if (curr == prev)
 			{
 			  /* For duplicates, make sure that GOT_OFFSET
 			     is valid.  */
 			  if (got_offset == (bfd_vma) -1)
-			    got_offset = info [dup].got_offset;
+			    got_offset = info [dupes].got_offset;
 			  break;
 			}
-		      got_offset = info [dup].got_offset;
+		      got_offset = info [dupes].got_offset;
 		      prev = curr;
 		      diff++;
 		    }
@@ -5241,18 +5241,18 @@ elfNN_ia64_finish_dynamic_symbol (bfd *output_bfd,
       Elf_Internal_Rela outrel;
       bfd_byte *loc;
       asection *plt_sec;
-      bfd_vma plt_addr, pltoff_addr, gp_val, index;
+      bfd_vma plt_addr, pltoff_addr, gp_val, plt_index;
 
       gp_val = _bfd_get_gp_value (output_bfd);
 
       /* Initialize the minimal PLT entry.  */
 
-      index = (dyn_i->plt_offset - PLT_HEADER_SIZE) / PLT_MIN_ENTRY_SIZE;
+      plt_index = (dyn_i->plt_offset - PLT_HEADER_SIZE) / PLT_MIN_ENTRY_SIZE;
       plt_sec = ia64_info->root.splt;
       loc = plt_sec->contents + dyn_i->plt_offset;
 
       memcpy (loc, plt_min_entry, PLT_MIN_ENTRY_SIZE);
-      elfNN_ia64_install_value (loc, index, R_IA64_IMM22);
+      elfNN_ia64_install_value (loc, plt_index, R_IA64_IMM22);
       elfNN_ia64_install_value (loc+2, -dyn_i->plt_offset, R_IA64_PCREL21B);
 
       plt_addr = (plt_sec->output_section->vma
@@ -5297,7 +5297,7 @@ elfNN_ia64_finish_dynamic_symbol (bfd *output_bfd,
 	 PLT relocations.  */
 
       loc = ia64_info->rel_pltoff_sec->contents;
-      loc += ((ia64_info->rel_pltoff_sec->reloc_count + index)
+      loc += ((ia64_info->rel_pltoff_sec->reloc_count + plt_index)
 	      * sizeof (ElfNN_External_Rela));
       bfd_elfNN_swap_reloca_out (output_bfd, &outrel, loc);
     }

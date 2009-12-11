@@ -900,6 +900,7 @@ i370_dc (int unused ATTRIBUTE_UNUSED)
   int nbytes=0;
   expressionS exp;
   char type=0;
+  char * clse;
 
   if (is_it_end_of_statement ())
     {
@@ -929,24 +930,20 @@ i370_dc (int unused ATTRIBUTE_UNUSED)
   /* Get rid of pesky quotes.  */
   if ('\'' == *input_line_pointer)
     {
-      char * close;
-
       ++input_line_pointer;
-      close = strchr (input_line_pointer, '\'');
-      if (close)
-	*close= ' ';
+      clse = strchr (input_line_pointer, '\'');
+      if (clse)
+	*clse= ' ';
       else
 	as_bad (_("missing end-quote"));
     }
 
   if ('\"' == *input_line_pointer)
     {
-      char * close;
-
       ++input_line_pointer;
-      close = strchr (input_line_pointer, '\"');
-      if (close)
-	*close= ' ';
+      clse = strchr (input_line_pointer, '\"');
+      if (clse)
+	*clse= ' ';
       else
 	as_bad (_("missing end-quote"));
     }
@@ -1523,21 +1520,23 @@ i370_addr_cons (expressionS *exp)
       /* Get rid of pesky quotes.  */
       if ('\'' == *input_line_pointer)
 	{
-	  char * close;
+	  char * clse;
+
 	  ++input_line_pointer;
-	  close = strchr (input_line_pointer, '\'');
-	  if (close)
-	    *close= ' ';
+	  clse = strchr (input_line_pointer, '\'');
+	  if (clse)
+	    *clse= ' ';
 	  else
 	    as_bad (_("missing end-quote"));
 	}
       if ('\"' == *input_line_pointer)
 	{
-	  char * close;
+	  char * clse;
+
 	  ++input_line_pointer;
-	  close = strchr (input_line_pointer, '\"');
-	  if (close)
-	    *close= ' ';
+	  clse = strchr (input_line_pointer, '\"');
+	  if (clse)
+	    *clse= ' ';
 	  else
 	    as_bad (_("missing end-quote"));
 	}

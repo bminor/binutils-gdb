@@ -1,3 +1,49 @@
+2009-12-11  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* dw2gencfi.c: Fix shadowed variable warnings.
+	* dwarf2dbg.c: Likewise.
+	* expr.c: Likewise.
+	* hash.c: Likewise.
+	* listing.c: Likewise.
+	* macro.c: Likewise.
+	* read.c: Likewise.
+	* stabs.c: Likewise.
+	* symbols.c: Likewise.
+	* write.c: Likewise.
+	* config/bfin-parse.y: Likewise.
+	* config/obj-coff.c: Likewise.
+	* config/tc-arm.c: Likewise.
+	* config/tc-bfin.c: Likewise.
+	* config/tc-cr16.c: Likewise.
+	* config/tc-crx.c: Likewise.
+	* config/tc-d10v.c: Likewise.
+	* config/tc-d30v.c: Likewise.
+	* config/tc-frv.c: Likewise.
+	* config/tc-i370.c: Likewise.
+	* config/tc-i386-intel.c: Likewise.
+	* config/tc-i386.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-m32r.c: Likewise.
+	* config/tc-m68hc11.c: Likewise.
+	* config/tc-mips.c: Likewise.
+	* config/tc-mn10200.c: Likewise.
+	* config/tc-mn10300.c: Likewise.
+	* config/tc-ns32k.c: Likewise.
+	* config/tc-ppc.c: Likewise.
+	* config/tc-score.c: Likewise.
+	* config/tc-score7.c: Likewise.
+	* config/tc-sh.c: Likewise.
+	* config/tc-sh64.c: Likewise.
+	* config/tc-sparc.c: Likewise.
+	* config/tc-tic30.c: Likewise.
+	* config/tc-tic4x.c: Likewise.
+	* config/tc-tic54x.c: Likewise.
+	* config/tc-xtensa.c: Likewise.
+	* config/tc-z8k.c: Likewise.
+
 2009-12-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (arch_entry): Add len and skip.

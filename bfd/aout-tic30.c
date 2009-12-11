@@ -296,7 +296,7 @@ tic30_aout_reloc_howto (bfd *abfd,
 {
   unsigned int r_length;
   unsigned int r_pcrel_done;
-  int index;
+  int howto_index;
 
   *r_pcrel = 0;
   if (bfd_header_big_endian (abfd))
@@ -313,8 +313,8 @@ tic30_aout_reloc_howto (bfd *abfd,
       r_pcrel_done = (0 != (relocs->r_type[0] & RELOC_STD_BITS_PCREL_LITTLE));
       r_length = ((relocs->r_type[0] & RELOC_STD_BITS_LENGTH_LITTLE) >> RELOC_STD_BITS_LENGTH_SH_LITTLE);
     }
-  index = r_length + 4 * r_pcrel_done;
-  return tic30_aout_howto_table + index;
+  howto_index = r_length + 4 * r_pcrel_done;
+  return tic30_aout_howto_table + howto_index;
 }
 
 /* These macros will get 24-bit values from the bfd definition.

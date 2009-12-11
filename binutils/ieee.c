@@ -2616,7 +2616,7 @@ ieee_read_cxx_class (struct ieee_info *info, const bfd_byte **pp,
 	case 'b':
 	  {
 	    bfd_vma flags, cinline;
-	    const char *basename, *fieldname;
+	    const char *base, *fieldname;
 	    unsigned long baselen, fieldlen;
 	    char *basecopy;
 	    debug_type basetype;
@@ -2628,7 +2628,7 @@ ieee_read_cxx_class (struct ieee_info *info, const bfd_byte **pp,
 	    /* This represents a base or friend class.  */
 
 	    if (! ieee_require_asn (info, pp, &flags)
-		|| ! ieee_require_atn65 (info, pp, &basename, &baselen)
+		|| ! ieee_require_atn65 (info, pp, &base, &baselen)
 		|| ! ieee_require_asn (info, pp, &cinline)
 		|| ! ieee_require_atn65 (info, pp, &fieldname, &fieldlen))
 	      return FALSE;
@@ -2650,7 +2650,7 @@ ieee_read_cxx_class (struct ieee_info *info, const bfd_byte **pp,
 		return FALSE;
 	      }
 
-	    basecopy = savestring (basename, baselen);
+	    basecopy = savestring (base, baselen);
 	    basetype = debug_find_tagged_type (dhandle, basecopy,
 					       DEBUG_KIND_ILLEGAL);
 	    free (basecopy);
@@ -3113,7 +3113,7 @@ ieee_read_cxx_class (struct ieee_info *info, const bfd_byte **pp,
 
 	case 'z':
 	  {
-	    const char *vname, *basename;
+	    const char *vname, *base;
 	    unsigned long vnamelen, baselen;
 	    bfd_vma vsize, control;
 
@@ -3121,7 +3121,7 @@ ieee_read_cxx_class (struct ieee_info *info, const bfd_byte **pp,
 
 	    if (! ieee_require_atn65 (info, pp, &vname, &vnamelen)
 		|| ! ieee_require_asn (info, pp, &vsize)
-		|| ! ieee_require_atn65 (info, pp, &basename, &baselen)
+		|| ! ieee_require_atn65 (info, pp, &base, &baselen)
 		|| ! ieee_require_asn (info, pp, &control))
 	      return FALSE;
 	    count -= 4;
@@ -3138,7 +3138,7 @@ ieee_read_cxx_class (struct ieee_info *info, const bfd_byte **pp,
 	      {
 		char *basecopy;
 
-		basecopy = savestring (basename, baselen);
+		basecopy = savestring (base, baselen);
 		vptrbase = debug_find_tagged_type (dhandle, basecopy,
 						   DEBUG_KIND_ILLEGAL);
 		free (basecopy);
@@ -5980,8 +5980,6 @@ ieee_struct_field (void *p, const char *name, bfd_vma bitpos, bfd_vma bitsize,
 
       if (referencep)
 	{
-	  unsigned int nindx;
-
 	  /* We need to output a record recording that this field is
              really of reference type.  We put this on the refs field
              of classdef, so that it can be appended to the C++

@@ -188,7 +188,7 @@ static unsigned long local_symbol_conversion_count;
 /* Create a local symbol and insert it into the local hash table.  */
 
 static struct local_symbol *
-local_symbol_make (const char *name, segT section, valueT value, fragS *frag)
+local_symbol_make (const char *name, segT section, valueT val, fragS *frag)
 {
   char *name_copy;
   struct local_symbol *ret;
@@ -202,7 +202,7 @@ local_symbol_make (const char *name, segT section, valueT value, fragS *frag)
   ret->lsy_name = name_copy;
   ret->lsy_section = section;
   local_symbol_set_frag (ret, frag);
-  ret->lsy_value = value;
+  ret->lsy_value = val;
 
   hash_jam (local_hash, name_copy, (void *) ret);
 
@@ -1484,21 +1484,21 @@ snapshot_symbol (symbolS **symbolPP, valueT *valueP, segT *segP, fragS **fragPP)
     }
   else
     {
-      expressionS expr = symbolP->sy_value;
+      expressionS exp = symbolP->sy_value;
 
-      if (!symbolP->sy_resolved && expr.X_op != O_illegal)
+      if (!symbolP->sy_resolved && exp.X_op != O_illegal)
 	{
 	  int resolved;
 
 	  if (symbolP->sy_resolving)
 	    return 0;
 	  symbolP->sy_resolving = 1;
-	  resolved = resolve_expression (&expr);
+	  resolved = resolve_expression (&exp);
 	  symbolP->sy_resolving = 0;
 	  if (!resolved)
 	    return 0;
 
-	  switch (expr.X_op)
+	  switch (exp.X_op)
 	    {
 	    case O_constant:
 	    case O_register:
@@ -1507,7 +1507,7 @@ snapshot_symbol (symbolS **symbolPP, valueT *valueP, segT *segP, fragS **fragPP)
 	      /* Fall thru.  */
 	    case O_symbol:
 	    case O_symbol_rva:
-	      symbolP = expr.X_add_symbol;
+	      symbolP = exp.X_add_symbol;
 	      break;
 	    default:
 	      return 0;
@@ -1515,12 +1515,12 @@ snapshot_symbol (symbolS **symbolPP, valueT *valueP, segT *segP, fragS **fragPP)
 	}
 
       *symbolPP = symbolP;
-      *valueP = expr.X_add_number;
+      *valueP = exp.X_add_number;
       *segP = symbolP->bsym->section;
       *fragPP = symbolP->sy_frag;
 
       if (*segP == expr_section)
-	switch (expr.X_op)
+	switch (exp.X_op)
 	  {
 	  case O_constant: *segP = absolute_section; break;
 	  case O_register: *segP = reg_section; break;
@@ -1862,17 +1862,17 @@ decode_local_label_name (char *s)
   int instance_number;
   char *type;
   const char *message_format;
-  int index = 0;
+  int lindex = 0;
 
 #ifdef LOCAL_LABEL_PREFIX
-  if (s[index] == LOCAL_LABEL_PREFIX)
-    ++index;
+  if (s[lindex] == LOCAL_LABEL_PREFIX)
+    ++lindex;
 #endif
 
-  if (s[index] != 'L')
+  if (s[lindex] != 'L')
     return s;
 
-  for (label_number = 0, p = s + index + 1; ISDIGIT (*p); ++p)
+  for (label_number = 0, p = s + lindex + 1; ISDIGIT (*p); ++p)
     label_number = (10 * label_number) + *p - '0';
 
   if (*p == DOLLAR_LABEL_CHAR)

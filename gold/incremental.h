@@ -432,8 +432,8 @@ class Incremental_inputs
 
   // Record the input arguments obtained from parsing the command line.
   void
-  report_inputs(const Input_arguments& inputs)
-  { this->inputs_ = &inputs; }
+  report_inputs(const Input_arguments& ins)
+  { this->inputs_ = &ins; }
 
   // Record that the input argument INPUT is an archive ARCHIVE.
   void

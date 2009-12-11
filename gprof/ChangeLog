@@ -1,3 +1,12 @@
+2009-12-11  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.in: Regenerate.
+	* cg_arcs.c: Fix shadowed variable warnings.
+	* cg_dfn.c: Likewise.
+	* cg_print.c: Likewise.
+	* configure: Likewise.
+	* hist.c: Likewise.
+
 2009-11-30  Joseph Myers  <joseph@codesourcery.com>
 
 	* configure: Regenerate.

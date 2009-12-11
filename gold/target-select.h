@@ -1,6 +1,6 @@
 // target-select.h -- select a target for an object file  -*- C++ -*-
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -57,8 +57,8 @@ class Target_selector
   // If we can handle this target, return a pointer to a target
   // structure.  The size and endianness are known.
   Target*
-  recognize(int machine, int osabi, int abiversion)
-  { return this->do_recognize(machine, osabi, abiversion); }
+  recognize(int mach, int osabi, int abiversion)
+  { return this->do_recognize(mach, osabi, abiversion); }
 
   // If NAME matches the target, return a pointer to a target
   // structure.

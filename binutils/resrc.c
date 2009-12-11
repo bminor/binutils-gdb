@@ -1926,7 +1926,7 @@ indent (FILE *e, int c)
    without the need to store it somewhere externally.  */
 
 void
-write_rc_file (const char *filename, const rc_res_directory *resources)
+write_rc_file (const char *filename, const rc_res_directory *res_dir)
 {
   FILE *e;
   rc_uint_type language;
@@ -1941,7 +1941,7 @@ write_rc_file (const char *filename, const rc_res_directory *resources)
     }
 
   language = (rc_uint_type) ((bfd_signed_vma) -1);
-  write_rc_directory (e, resources, (const rc_res_id *) NULL,
+  write_rc_directory (e, res_dir, (const rc_res_id *) NULL,
 		      (const rc_res_id *) NULL, &language, 1);
 }
 

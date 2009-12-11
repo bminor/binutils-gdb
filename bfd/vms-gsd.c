@@ -729,7 +729,8 @@ _bfd_vms_slurp_gsd (bfd * abfd, int objtype)
 	    if (symbol->flags & BSF_FUNCTION)
 	      {
 		asymbol *en_sym;
-		char *name = bfd_alloc (abfd, strlen (symbol->name) + 5);
+
+		name = bfd_alloc (abfd, strlen (symbol->name) + 5);
 
 		en_sym = bfd_make_empty_symbol (abfd);
 		if (en_sym == 0)

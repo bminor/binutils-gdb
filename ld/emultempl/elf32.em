@@ -342,14 +342,14 @@ gld${EMULATION_NAME}_try_needed (struct dt_needed *needed,
 
   if (! force)
     {
-      struct bfd_link_needed_list *needed;
+      struct bfd_link_needed_list *needs;
 
-      if (! bfd_elf_get_bfd_needed_list (abfd, &needed))
+      if (! bfd_elf_get_bfd_needed_list (abfd, &needs))
 	einfo ("%F%P:%B: bfd_elf_get_bfd_needed_list failed: %E\n", abfd);
 
-      if (needed != NULL)
+      if (needs != NULL)
 	{
-	  global_vercheck_needed = needed;
+	  global_vercheck_needed = needs;
 	  global_vercheck_failed = FALSE;
 	  lang_for_each_input_file (gld${EMULATION_NAME}_vercheck);
 	  if (global_vercheck_failed)
@@ -374,7 +374,7 @@ case ${target} in
 	  {
 	    struct bfd_link_needed_list *l;
 
-	    for (l = needed; l != NULL; l = l->next)
+	    for (l = needs; l != NULL; l = l->next)
 	      if (CONST_STRNEQ (l->name, "libc.so"))
 		break;
 	    if (l == NULL)
@@ -884,9 +884,9 @@ fragment <<EOF
 
 static bfd_size_type
 gld${EMULATION_NAME}_id_note_section_size (bfd *abfd,
-					   struct bfd_link_info *link_info)
+					   struct bfd_link_info *linfo)
 {
-  const char *style = link_info->emit_note_gnu_build_id;
+  const char *style = linfo->emit_note_gnu_build_id;
   bfd_size_type size;
 
   abfd = abfd;
@@ -1414,23 +1414,23 @@ fragment <<EOF
 
 /* used by before_allocation and handle_option. */
 static void 
-gld${EMULATION_NAME}_append_to_separated_string (char **to, char *optarg)
+gld${EMULATION_NAME}_append_to_separated_string (char **to, char *op_arg)
 {
   if (*to == NULL)
-    *to = xstrdup (optarg);
+    *to = xstrdup (op_arg);
   else
     {
       size_t to_len = strlen (*to);
-      size_t optarg_len = strlen (optarg);
+      size_t op_arg_len = strlen (op_arg);
       char *buf;
       char *cp = *to;
 
       /* First see whether OPTARG is already in the path.  */
       do
 	{
-	  if (strncmp (optarg, cp, optarg_len) == 0
-	      && (cp[optarg_len] == 0
-		  || cp[optarg_len] == config.rpath_separator))
+	  if (strncmp (op_arg, cp, op_arg_len) == 0
+	      && (cp[op_arg_len] == 0
+		  || cp[op_arg_len] == config.rpath_separator))
 	    /* We found it.  */
 	    break;
 
@@ -1443,9 +1443,9 @@ gld${EMULATION_NAME}_append_to_separated_string (char **to, char *optarg)
 
       if (cp == NULL)
 	{
-	  buf = xmalloc (to_len + optarg_len + 2);
+	  buf = xmalloc (to_len + op_arg_len + 2);
 	  sprintf (buf, "%s%c%s", *to,
-		   config.rpath_separator, optarg);
+		   config.rpath_separator, op_arg);
 	  free (*to);
 	  *to = buf;
 	}

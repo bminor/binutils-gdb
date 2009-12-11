@@ -1973,7 +1973,6 @@ print_insn_coprocessor (bfd_vma pc,
 		case '5': case '6': case '7': case '8': case '9':
 		  {
 		    int width;
-		    unsigned long value;
 
 		    c = arm_decode_bitfield (c, given, &value, &width);
 
@@ -2142,7 +2141,6 @@ print_insn_coprocessor (bfd_vma pc,
 
 		  case 'Z':
 		    {
-		      int value;
 		      /* given (20, 23) | given (0, 3) */
 		      value = ((given >> 16) & 0xf0) | (given & 0xf);
 		      func (stream, "%d", value);
@@ -2537,7 +2535,7 @@ print_insn_neon (struct disassemble_info *info, long given, bfd_boolean thumb)
 			func (stream, "}, [%s", arm_regnames[rn]);
 			if (align)
 			  {
-                            int align = (8 * (type + 1)) << size;
+                            align = (8 * (type + 1)) << size;
                             if (type == 3)
                               align = (size > 1) ? align >> 1 : align;
 			    if (type == 2 || (type == 0 && !size))
@@ -3171,10 +3169,10 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			{
 			  long msb = (given & 0x001f0000) >> 16;
 			  long lsb = (given & 0x00000f80) >> 7;
-			  long width = msb - lsb + 1;
+			  long w = msb - lsb + 1;
 
-			  if (width > 0)
-			    func (stream, "#%lu, #%lu", lsb, width);
+			  if (w > 0)
+			    func (stream, "#%lu, #%lu", lsb, w);
 			  else
 			    func (stream, "(invalid: %lu:%lu)", lsb, msb);
 			}

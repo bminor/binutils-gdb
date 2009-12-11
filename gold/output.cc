@@ -354,13 +354,13 @@ Output_segment_headers::do_size() const
 Output_file_header::Output_file_header(const Target* target,
 				       const Symbol_table* symtab,
 				       const Output_segment_headers* osh,
-				       const char* entry)
+				       const char* aentry)
   : target_(target),
     symtab_(symtab),
     segment_header_(osh),
     section_header_(NULL),
     shstrtab_(NULL),
-    entry_(entry)
+    entry_(aentry)
 {
   this->set_data_size(this->do_size());
 }
@@ -509,11 +509,11 @@ Output_file_header::entry()
                                      && !parameters->options().shared());
 
   // FIXME: Need to support target specific entry symbol.
-  const char* entry = this->entry_;
-  if (entry == NULL)
-    entry = "_start";
+  const char* entry_sym = this->entry_;
+  if (entry_sym == NULL)
+    entry_sym = "_start";
 
-  Symbol* sym = this->symtab_->lookup(entry);
+  Symbol* sym = this->symtab_->lookup(entry_sym);
 
   typename Sized_symbol<size>::Value_type v;
   if (sym != NULL)
@@ -521,7 +521,7 @@ Output_file_header::entry()
       Sized_symbol<size>* ssym;
       ssym = this->symtab_->get_sized_symbol<size>(sym);
       if (!ssym->is_defined() && should_issue_warning)
-	gold_warning("entry symbol '%s' exists but is not defined", entry);
+	gold_warning("entry symbol '%s' exists but is not defined", entry_sym);
       v = ssym->value();
     }
   else
@@ -529,11 +529,11 @@ Output_file_header::entry()
       // We couldn't find the entry symbol.  See if we can parse it as
       // a number.  This supports, e.g., -e 0x1000.
       char* endptr;
-      v = strtoull(entry, &endptr, 0);
+      v = strtoull(entry_sym, &endptr, 0);
       if (*endptr != '\0')
 	{
 	  if (should_issue_warning)
-	    gold_warning("cannot find entry symbol '%s'", entry);
+	    gold_warning("cannot find entry symbol '%s'", entry_sym);
 	  v = 0;
 	}
     }
@@ -596,12 +596,12 @@ Output_section_data::do_out_shndx() const
 // of the output section.
 
 void
-Output_section_data::set_addralign(uint64_t addralign)
+Output_section_data::set_addralign(uint64_t addr_align)
 {
-  this->addralign_ = addralign;
+  this->addralign_ = addr_align;
   if (this->output_section_ != NULL
-      && this->output_section_->addralign() < addralign)
-    this->output_section_->set_addralign(addralign);
+      && this->output_section_->addralign() < addr_align)
+    this->output_section_->set_addralign(addr_align);
 }
 
 // Output_data_strtab methods.
@@ -633,9 +633,9 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     unsigned int type,
     Output_data* od,
     Address address,
-    bool is_relative)
+    bool is_rel)
   : address_(address), local_sym_index_(GSYM_CODE), type_(type),
-    is_relative_(is_relative), is_section_symbol_(false), shndx_(INVALID_CODE)
+    is_relative_(is_rel), is_section_symbol_(false), shndx_(INVALID_CODE)
 {
   // this->type_ is a bitfield; make sure TYPE fits.
   gold_assert(this->type_ == type);
@@ -652,9 +652,9 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     Sized_relobj<size, big_endian>* relobj,
     unsigned int shndx,
     Address address,
-    bool is_relative)
+    bool is_rel)
   : address_(address), local_sym_index_(GSYM_CODE), type_(type),
-    is_relative_(is_relative), is_section_symbol_(false), shndx_(shndx)
+    is_relative_(is_rel), is_section_symbol_(false), shndx_(shndx)
 {
   gold_assert(shndx != INVALID_CODE);
   // this->type_ is a bitfield; make sure TYPE fits.
@@ -674,10 +674,10 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     unsigned int type,
     Output_data* od,
     Address address,
-    bool is_relative,
+    bool is_rel,
     bool is_section_symbol)
   : address_(address), local_sym_index_(local_sym_index), type_(type),
-    is_relative_(is_relative), is_section_symbol_(is_section_symbol),
+    is_relative_(is_rel), is_section_symbol_(is_section_symbol),
     shndx_(INVALID_CODE)
 {
   gold_assert(local_sym_index != GSYM_CODE
@@ -697,10 +697,10 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     unsigned int type,
     unsigned int shndx,
     Address address,
-    bool is_relative,
+    bool is_rel,
     bool is_section_symbol)
   : address_(address), local_sym_index_(local_sym_index), type_(type),
-    is_relative_(is_relative), is_section_symbol_(is_section_symbol),
+    is_relative_(is_rel), is_section_symbol_(is_section_symbol),
     shndx_(shndx)
 {
   gold_assert(local_sym_index != GSYM_CODE
@@ -1222,9 +1222,9 @@ Output_data_got<size, big_endian>::add_global_with_rel(
 
   this->entries_.push_back(Got_entry());
   this->set_got_size();
-  unsigned int got_offset = this->last_got_offset();
-  gsym->set_got_offset(got_type, got_offset);
-  rel_dyn->add_global(gsym, r_type, this, got_offset);
+  unsigned int g_offset = this->last_got_offset();
+  gsym->set_got_offset(got_type, g_offset);
+  rel_dyn->add_global(gsym, r_type, this, g_offset);
 }
 
 template<int size, bool big_endian>
@@ -1240,9 +1240,9 @@ Output_data_got<size, big_endian>::add_global_with_rela(
 
   this->entries_.push_back(Got_entry());
   this->set_got_size();
-  unsigned int got_offset = this->last_got_offset();
-  gsym->set_got_offset(got_type, got_offset);
-  rela_dyn->add_global(gsym, r_type, this, got_offset, 0);
+  unsigned int g_offset = this->last_got_offset();
+  gsym->set_got_offset(got_type, g_offset);
+  rela_dyn->add_global(gsym, r_type, this, g_offset, 0);
 }
 
 // Add a pair of entries for a global symbol to the GOT, and add
@@ -1261,15 +1261,15 @@ Output_data_got<size, big_endian>::add_global_pair_with_rel(
     return;
 
   this->entries_.push_back(Got_entry());
-  unsigned int got_offset = this->last_got_offset();
-  gsym->set_got_offset(got_type, got_offset);
-  rel_dyn->add_global(gsym, r_type_1, this, got_offset);
+  unsigned int g_offset = this->last_got_offset();
+  gsym->set_got_offset(got_type, g_offset);
+  rel_dyn->add_global(gsym, r_type_1, this, g_offset);
 
   this->entries_.push_back(Got_entry());
   if (r_type_2 != 0)
     {
-      got_offset = this->last_got_offset();
-      rel_dyn->add_global(gsym, r_type_2, this, got_offset);
+      g_offset = this->last_got_offset();
+      rel_dyn->add_global(gsym, r_type_2, this, g_offset);
     }
 
   this->set_got_size();
@@ -1288,15 +1288,15 @@ Output_data_got<size, big_endian>::add_global_pair_with_rela(
     return;
 
   this->entries_.push_back(Got_entry());
-  unsigned int got_offset = this->last_got_offset();
-  gsym->set_got_offset(got_type, got_offset);
-  rela_dyn->add_global(gsym, r_type_1, this, got_offset, 0);
+  unsigned int g_offset = this->last_got_offset();
+  gsym->set_got_offset(got_type, g_offset);
+  rela_dyn->add_global(gsym, r_type_1, this, g_offset, 0);
 
   this->entries_.push_back(Got_entry());
   if (r_type_2 != 0)
     {
-      got_offset = this->last_got_offset();
-      rela_dyn->add_global(gsym, r_type_2, this, got_offset, 0);
+      g_offset = this->last_got_offset();
+      rela_dyn->add_global(gsym, r_type_2, this, g_offset, 0);
     }
 
   this->set_got_size();
@@ -1338,9 +1338,9 @@ Output_data_got<size, big_endian>::add_local_with_rel(
 
   this->entries_.push_back(Got_entry());
   this->set_got_size();
-  unsigned int got_offset = this->last_got_offset();
-  object->set_local_got_offset(symndx, got_type, got_offset);
-  rel_dyn->add_local(object, symndx, r_type, this, got_offset);
+  unsigned int g_offset = this->last_got_offset();
+  object->set_local_got_offset(symndx, got_type, g_offset);
+  rel_dyn->add_local(object, symndx, r_type, this, g_offset);
 }
 
 template<int size, bool big_endian>
@@ -1357,9 +1357,9 @@ Output_data_got<size, big_endian>::add_local_with_rela(
 
   this->entries_.push_back(Got_entry());
   this->set_got_size();
-  unsigned int got_offset = this->last_got_offset();
-  object->set_local_got_offset(symndx, got_type, got_offset);
-  rela_dyn->add_local(object, symndx, r_type, this, got_offset, 0);
+  unsigned int g_offset = this->last_got_offset();
+  object->set_local_got_offset(symndx, got_type, g_offset);
+  rela_dyn->add_local(object, symndx, r_type, this, g_offset, 0);
 }
 
 // Add a pair of entries for a local symbol to the GOT, and add
@@ -1380,16 +1380,16 @@ Output_data_got<size, big_endian>::add_local_pair_with_rel(
     return;
 
   this->entries_.push_back(Got_entry());
-  unsigned int got_offset = this->last_got_offset();
-  object->set_local_got_offset(symndx, got_type, got_offset);
+  unsigned int g_offset = this->last_got_offset();
+  object->set_local_got_offset(symndx, got_type, g_offset);
   Output_section* os = object->output_section(shndx);
-  rel_dyn->add_output_section(os, r_type_1, this, got_offset);
+  rel_dyn->add_output_section(os, r_type_1, this, g_offset);
 
   this->entries_.push_back(Got_entry(object, symndx));
   if (r_type_2 != 0)
     {
-      got_offset = this->last_got_offset();
-      rel_dyn->add_output_section(os, r_type_2, this, got_offset);
+      g_offset = this->last_got_offset();
+      rel_dyn->add_output_section(os, r_type_2, this, g_offset);
     }
 
   this->set_got_size();
@@ -1410,16 +1410,16 @@ Output_data_got<size, big_endian>::add_local_pair_with_rela(
     return;
 
   this->entries_.push_back(Got_entry());
-  unsigned int got_offset = this->last_got_offset();
-  object->set_local_got_offset(symndx, got_type, got_offset);
+  unsigned int g_offset = this->last_got_offset();
+  object->set_local_got_offset(symndx, got_type, g_offset);
   Output_section* os = object->output_section(shndx);
-  rela_dyn->add_output_section(os, r_type_1, this, got_offset, 0);
+  rela_dyn->add_output_section(os, r_type_1, this, g_offset, 0);
 
   this->entries_.push_back(Got_entry(object, symndx));
   if (r_type_2 != 0)
     {
-      got_offset = this->last_got_offset();
-      rela_dyn->add_output_section(os, r_type_2, this, got_offset, 0);
+      g_offset = this->last_got_offset();
+      rela_dyn->add_output_section(os, r_type_2, this, g_offset, 0);
     }
 
   this->set_got_size();
@@ -1571,9 +1571,9 @@ Output_data_dynamic::sized_write(Output_file* of)
 {
   const int dyn_size = elfcpp::Elf_sizes<size>::dyn_size;
 
-  const off_t offset = this->offset();
+  const off_t off = this->offset();
   const off_t oview_size = this->data_size();
-  unsigned char* const oview = of->get_output_view(offset, oview_size);
+  unsigned char* const oview = of->get_output_view(off, oview_size);
 
   unsigned char* pov = oview;
   for (typename Dynamic_entries::const_iterator p = this->entries_.begin();
@@ -1586,7 +1586,7 @@ Output_data_dynamic::sized_write(Output_file* of)
 
   gold_assert(pov - oview == oview_size);
 
-  of->write_output_view(offset, oview_size, oview);
+  of->write_output_view(off, oview_size, oview);
 
   // We no longer need the dynamic entries.
   this->entries_.clear();
@@ -1597,9 +1597,9 @@ Output_data_dynamic::sized_write(Output_file* of)
 void
 Output_symtab_xindex::do_write(Output_file* of)
 {
-  const off_t offset = this->offset();
+  const off_t off = this->offset();
   const off_t oview_size = this->data_size();
-  unsigned char* const oview = of->get_output_view(offset, oview_size);
+  unsigned char* const oview = of->get_output_view(off, oview_size);
 
   memset(oview, 0, oview_size);
 
@@ -1608,7 +1608,7 @@ Output_symtab_xindex::do_write(Output_file* of)
   else
     this->endian_do_write<false>(oview);
 
-  of->write_output_view(offset, oview_size, oview);
+  of->write_output_view(off, oview_size, oview);
 
   // We no longer need the data.
   this->entries_.clear();
@@ -1682,17 +1682,17 @@ Output_section::Input_section::finalize_data_size()
 inline bool
 Output_section::Input_section::output_offset(
     const Relobj* object,
-    unsigned int shndx,
-    section_offset_type offset,
+    unsigned int sec_shndx,
+    section_offset_type off,
     section_offset_type *poutput) const
 {
   if (!this->is_input_section())
-    return this->u2_.posd->output_offset(object, shndx, offset, poutput);
+    return this->u2_.posd->output_offset(object, sec_shndx, off, poutput);
   else
     {
-      if (this->shndx_ != shndx || this->u2_.object != object)
+      if (this->shndx_ != sec_shndx || this->u2_.object != object)
 	return false;
-      *poutput = offset;
+      *poutput = off;
       return true;
     }
 }
@@ -1702,11 +1702,11 @@ Output_section::Input_section::output_offset(
 
 inline bool
 Output_section::Input_section::is_merge_section_for(const Relobj* object,
-						    unsigned int shndx) const
+						    unsigned int sec_shndx) const
 {
   if (this->is_input_section())
     return false;
-  return this->u2_.posd->is_merge_section_for(object, shndx);
+  return this->u2_.posd->is_merge_section_for(object, sec_shndx);
 }
 
 // Write out the data.  We don't have to do anything for an input
@@ -1761,9 +1761,9 @@ Output_section::Input_section::print_to_mapfile(Mapfile* mapfile) const
 
 // Construct an Output_section.  NAME will point into a Stringpool.
 
-Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
-			       elfcpp::Elf_Xword flags)
-  : name_(name),
+Output_section::Output_section(const char* aname, elfcpp::Elf_Word atype,
+			       elfcpp::Elf_Xword aflags)
+  : name_(aname),
     addralign_(0),
     entsize_(0),
     load_address_(0),
@@ -1772,8 +1772,8 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
     info_section_(NULL),
     info_symndx_(NULL),
     info_(0),
-    type_(type),
-    flags_(flags),
+    type_(atype),
+    flags_(aflags),
     out_shndx_(-1U),
     symtab_index_(0),
     dynsym_index_(0),
@@ -1810,7 +1810,7 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
   // An unallocated section has no address.  Forcing this means that
   // we don't need special treatment for symbols defined in debug
   // sections.
-  if ((flags & elfcpp::SHF_ALLOC) == 0)
+  if ((aflags & elfcpp::SHF_ALLOC) == 0)
     this->set_address(0);
 }
 
@@ -1845,34 +1845,34 @@ Output_section::set_entsize(uint64_t v)
 template<int size, bool big_endian>
 off_t
 Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
-				  unsigned int shndx,
+				  unsigned int sec_shndx,
 				  const char* secname,
 				  const elfcpp::Shdr<size, big_endian>& shdr,
 				  unsigned int reloc_shndx,
 				  bool have_sections_script)
 {
-  elfcpp::Elf_Xword addralign = shdr.get_sh_addralign();
-  if ((addralign & (addralign - 1)) != 0)
+  elfcpp::Elf_Xword addr_align = shdr.get_sh_addralign();
+  if ((addr_align & (addr_align - 1)) != 0)
     {
       object->error(_("invalid alignment %lu for section \"%s\""),
-		    static_cast<unsigned long>(addralign), secname);
-      addralign = 1;
+		    static_cast<unsigned long>(addr_align), secname);
+      addr_align = 1;
     }
 
-  if (addralign > this->addralign_)
-    this->addralign_ = addralign;
+  if (addr_align > this->addralign_)
+    this->addralign_ = addr_align;
 
   typename elfcpp::Elf_types<size>::Elf_WXword sh_flags = shdr.get_sh_flags();
   this->update_flags_for_input_section(sh_flags);
 
-  uint64_t entsize = shdr.get_sh_entsize();
+  uint64_t ent_size = shdr.get_sh_entsize();
 
   // .debug_str is a mergeable string section, but is not always so
   // marked by compilers.  Mark manually here so we can optimize.
   if (strcmp(secname, ".debug_str") == 0)
     {
       sh_flags |= (elfcpp::SHF_MERGE | elfcpp::SHF_STRINGS);
-      entsize = 1;
+      ent_size = 1;
     }
 
   // If this is a SHF_MERGE section, we pass all the input sections to
@@ -1883,8 +1883,8 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
       && reloc_shndx == 0
       && shdr.get_sh_size() > 0)
     {
-      if (this->add_merge_input_section(object, shndx, sh_flags,
-					entsize, addralign))
+      if (this->add_merge_input_section(object, sec_shndx, sh_flags,
+					ent_size, addr_align))
 	{
 	  // Tell the relocation routines that they need to call the
 	  // output_offset method to determine the final address.
@@ -1894,7 +1894,7 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
 
   off_t offset_in_section = this->current_data_size_for_child();
   off_t aligned_offset_in_section = align_address(offset_in_section,
-                                                  addralign);
+                                                  addr_align);
 
   // Determine if we want to delay code-fill generation until the output
   // section is written.  When the target is relaxing, we want to delay fill
@@ -1942,9 +1942,9 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
       || this->must_sort_attached_input_sections()
       || parameters->options().user_set_Map()
       || parameters->target().may_relax())
-    this->input_sections_.push_back(Input_section(object, shndx,
+    this->input_sections_.push_back(Input_section(object, sec_shndx,
 						  shdr.get_sh_size(),
-						  addralign));
+						  addr_align));
 
   return aligned_offset_in_section;
 }
@@ -2002,9 +2002,9 @@ Output_section::add_output_section_data(Input_section* inp)
 
   this->input_sections_.push_back(*inp);
 
-  uint64_t addralign = inp->addralign();
-  if (addralign > this->addralign_)
-    this->addralign_ = addralign;
+  uint64_t addr_align = inp->addralign();
+  if (addr_align > this->addralign_)
+    this->addralign_ = addr_align;
 
   inp->set_output_section(this);
 }
@@ -2013,43 +2013,43 @@ Output_section::add_output_section_data(Input_section* inp)
 
 void
 Output_section::add_output_merge_section(Output_section_data* posd,
-					 bool is_string, uint64_t entsize)
+					 bool is_string, uint64_t ent_size)
 {
-  Input_section inp(posd, is_string, entsize);
+  Input_section inp(posd, is_string, ent_size);
   this->add_output_section_data(&inp);
 }
 
 // Add an input section to a SHF_MERGE section.
 
 bool
-Output_section::add_merge_input_section(Relobj* object, unsigned int shndx,
-					uint64_t flags, uint64_t entsize,
-					uint64_t addralign)
+Output_section::add_merge_input_section(Relobj* object, unsigned int sec_shndx,
+					uint64_t aflags, uint64_t ent_size,
+					uint64_t addr_align)
 {
-  bool is_string = (flags & elfcpp::SHF_STRINGS) != 0;
+  bool is_string = (aflags & elfcpp::SHF_STRINGS) != 0;
 
   // We only merge strings if the alignment is not more than the
   // character size.  This could be handled, but it's unusual.
-  if (is_string && addralign > entsize)
+  if (is_string && addr_align > ent_size)
     return false;
 
   // We cannot restore merged input section states.
   gold_assert(this->checkpoint_ == NULL);
 
   // Look up merge sections by required properties.
-  Merge_section_properties msp(is_string, entsize, addralign);
+  Merge_section_properties msp(is_string, ent_size, addr_align);
   Merge_section_by_properties_map::const_iterator p =
     this->merge_section_by_properties_map_.find(msp);
   if (p != this->merge_section_by_properties_map_.end())
     {
       Output_merge_base* merge_section = p->second;
-      merge_section->add_input_section(object, shndx);
+      merge_section->add_input_section(object, sec_shndx);
       gold_assert(merge_section->is_string() == is_string
-		  && merge_section->entsize() == entsize
-		  && merge_section->addralign() == addralign);
+		  && merge_section->entsize() == ent_size
+		  && merge_section->addralign() == addr_align);
 
       // Link input section to found merge section.
-      Input_section_specifier iss(object, shndx);
+      Input_section_specifier iss(object, sec_shndx);
       this->merge_section_map_[iss] = merge_section;
       return true;
     }
@@ -2058,19 +2058,19 @@ Output_section::add_merge_input_section(Relobj* object, unsigned int shndx,
   // Output_merge_string_data.
   Output_merge_base* pomb;
   if (!is_string)
-    pomb = new Output_merge_data(entsize, addralign);
+    pomb = new Output_merge_data(ent_size, addr_align);
   else
     {
-      switch (entsize)
+      switch (ent_size)
 	{
         case 1:
-	  pomb = new Output_merge_string<char>(addralign);
+	  pomb = new Output_merge_string<char>(addr_align);
 	  break;
         case 2:
-	  pomb = new Output_merge_string<uint16_t>(addralign);
+	  pomb = new Output_merge_string<uint16_t>(addr_align);
 	  break;
         case 4:
-	  pomb = new Output_merge_string<uint32_t>(addralign);
+	  pomb = new Output_merge_string<uint32_t>(addr_align);
 	  break;
         default:
 	  return false;
@@ -2079,30 +2079,30 @@ Output_section::add_merge_input_section(Relobj* object, unsigned int shndx,
 
   // Add new merge section to this output section and link merge section
   // properties to new merge section in map.
-  this->add_output_merge_section(pomb, is_string, entsize);
+  this->add_output_merge_section(pomb, is_string, ent_size);
   this->merge_section_by_properties_map_[msp] = pomb;
 
   // Add input section to new merge section and link input section to new
   // merge section in map.
-  pomb->add_input_section(object, shndx);
-  Input_section_specifier iss(object, shndx);
+  pomb->add_input_section(object, sec_shndx);
+  Input_section_specifier iss(object, sec_shndx);
   this->merge_section_map_[iss] = pomb;
 
   return true;
 }
 
 // Build a relaxation map to speed up relaxation of existing input sections.
-// Look up to the first LIMIT elements in INPUT_SECTIONS.
+// Look up to the first LIMIT elements in INPUTSECTIONS.
 
 void
 Output_section::build_relaxation_map(
-  const Input_section_list& input_sections,
+  const Input_section_list& inputsections,
   size_t limit,
   Relaxation_map* relaxation_map) const
 {
   for (size_t i = 0; i < limit; ++i)
     {
-      const Input_section& is(input_sections[i]);
+      const Input_section& is(inputsections[i]);
       if (is.is_input_section() || is.is_relaxed_input_section())
 	{
 	  Input_section_specifier iss(is.relobj(), is.shndx());
@@ -2113,13 +2113,13 @@ Output_section::build_relaxation_map(
 
 // Convert regular input sections in INPUT_SECTIONS into relaxed input
 // sections in RELAXED_SECTIONS.  MAP is a prebuilt map from input section
-// specifier to indices of INPUT_SECTIONS.
+// specifier to indices of INPUTSECTIONS.
 
 void
 Output_section::convert_input_sections_in_list_to_relaxed_sections(
   const std::vector<Output_relaxed_input_section*>& relaxed_sections,
   const Relaxation_map& map,
-  Input_section_list* input_sections)
+  Input_section_list* inputsections)
 {
   for (size_t i = 0; i < relaxed_sections.size(); ++i)
     {
@@ -2127,8 +2127,8 @@ Output_section::convert_input_sections_in_list_to_relaxed_sections(
       Input_section_specifier iss(poris->relobj(), poris->shndx());
       Relaxation_map::const_iterator p = map.find(iss);
       gold_assert(p != map.end());
-      gold_assert((*input_sections)[p->second].is_input_section());
-      (*input_sections)[p->second] = Input_section(poris);
+      gold_assert((*inputsections)[p->second].is_input_section());
+      (*inputsections)[p->second] = Input_section(poris);
     }
 }
   
@@ -2186,35 +2186,35 @@ Output_section::convert_input_sections_to_relaxed_sections(
 // Update the output section flags based on input section flags.
 
 void
-Output_section::update_flags_for_input_section(elfcpp::Elf_Xword flags)
+Output_section::update_flags_for_input_section(elfcpp::Elf_Xword aflags)
 {
   // If we created the section with SHF_ALLOC clear, we set the
   // address.  If we are now setting the SHF_ALLOC flag, we need to
   // undo that.
   if ((this->flags_ & elfcpp::SHF_ALLOC) == 0
-      && (flags & elfcpp::SHF_ALLOC) != 0)
+      && (aflags & elfcpp::SHF_ALLOC) != 0)
     this->mark_address_invalid();
 
-  this->flags_ |= (flags
+  this->flags_ |= (aflags
 		   & (elfcpp::SHF_WRITE
 		      | elfcpp::SHF_ALLOC
 		      | elfcpp::SHF_EXECINSTR));
 }
 
-// Find the merge section into which an input section with index SHNDX in
+// Find the merge section into which an input section with index SEC_SHNDX in
 // OBJECT has been added.  Return NULL if none found.
 
 Output_section_data*
 Output_section::find_merge_section(const Relobj* object,
-				   unsigned int shndx) const
+				   unsigned int sec_shndx) const
 {
-  Input_section_specifier iss(object, shndx);
+  Input_section_specifier iss(object, sec_shndx);
   Output_section_data_by_input_section_map::const_iterator p =
     this->merge_section_map_.find(iss);
   if (p != this->merge_section_map_.end())
     {
       Output_section_data* posd = p->second;
-      gold_assert(posd->is_merge_section_for(object, shndx));
+      gold_assert(posd->is_merge_section_for(object, sec_shndx));
       return posd;
     }
   else
@@ -2222,11 +2222,11 @@ Output_section::find_merge_section(const Relobj* object,
 }
 
 // Find an relaxed input section corresponding to an input section
-// in OBJECT with index SHNDX.
+// in OBJECT with index SEC_SHNDX.
 
 const Output_section_data*
 Output_section::find_relaxed_input_section(const Relobj* object,
-					   unsigned int shndx) const
+					   unsigned int sec_shndx) const
 {
   // Be careful that the map may not be valid due to input section export
   // to scripts or a check-point restore.
@@ -2246,7 +2246,7 @@ Output_section::find_relaxed_input_section(const Relobj* object,
       this->is_relaxed_input_section_map_valid_ = true;
     }
 
-  Input_section_specifier iss(object, shndx);
+  Input_section_specifier iss(object, sec_shndx);
   Output_section_data_by_input_section_map::const_iterator p =
     this->relaxed_input_section_map_.find(iss);
   if (p != this->relaxed_input_section_map_.end())
@@ -2255,27 +2255,27 @@ Output_section::find_relaxed_input_section(const Relobj* object,
     return NULL;
 }
 
-// Given an address OFFSET relative to the start of input section
-// SHNDX in OBJECT, return whether this address is being included in
-// the final link.  This should only be called if SHNDX in OBJECT has
+// Given an address OFF relative to the start of input section
+// SEC_SHNDX in OBJECT, return whether this address is being included in
+// the final link.  This should only be called if SEC_SHNDX in OBJECT has
 // a special mapping.
 
 bool
 Output_section::is_input_address_mapped(const Relobj* object,
-					unsigned int shndx,
-					off_t offset) const
+					unsigned int sec_shndx,
+					off_t off) const
 {
   // Look at the Output_section_data_maps first.
-  const Output_section_data* posd = this->find_merge_section(object, shndx);
+  const Output_section_data* posd = this->find_merge_section(object, sec_shndx);
   if (posd == NULL)
-    posd = this->find_relaxed_input_section(object, shndx);
+    posd = this->find_relaxed_input_section(object, sec_shndx);
 
   if (posd != NULL)
     {
-      section_offset_type output_offset;
-      bool found = posd->output_offset(object, shndx, offset, &output_offset);
+      section_offset_type outputoffset;
+      bool found = posd->output_offset(object, sec_shndx, off, &outputoffset);
       gold_assert(found);   
-      return output_offset != -1;
+      return outputoffset != -1;
     }
 
   // Fall back to the slow look-up.
@@ -2283,9 +2283,9 @@ Output_section::is_input_address_mapped(const Relobj* object,
        p != this->input_sections_.end();
        ++p)
     {
-      section_offset_type output_offset;
-      if (p->output_offset(object, shndx, offset, &output_offset))
-	return output_offset != -1;
+      section_offset_type outputoffset;
+      if (p->output_offset(object, sec_shndx, off, &outputoffset))
+	return outputoffset != -1;
     }
 
   // By default we assume that the address is mapped.  This should
@@ -2294,29 +2294,29 @@ Output_section::is_input_address_mapped(const Relobj* object,
   return true;
 }
 
-// Given an address OFFSET relative to the start of input section
-// SHNDX in object OBJECT, return the output offset relative to the
+// Given an address OFF relative to the start of input section
+// SEC_SHNDX in object OBJECT, return the output offset relative to the
 // start of the input section in the output section.  This should only
-// be called if SHNDX in OBJECT has a special mapping.
+// be called if SEC_SHNDX in OBJECT has a special mapping.
 
 section_offset_type
-Output_section::output_offset(const Relobj* object, unsigned int shndx,
-			      section_offset_type offset) const
+Output_section::output_offset(const Relobj* object, unsigned int sec_shndx,
+			      section_offset_type off) const
 {
   // This can only be called meaningfully when we know the data size
   // of this.
   gold_assert(this->is_data_size_valid());
 
   // Look at the Output_section_data_maps first.
-  const Output_section_data* posd = this->find_merge_section(object, shndx);
+  const Output_section_data* posd = this->find_merge_section(object, sec_shndx);
   if (posd == NULL) 
-    posd = this->find_relaxed_input_section(object, shndx);
+    posd = this->find_relaxed_input_section(object, sec_shndx);
   if (posd != NULL)
     {
-      section_offset_type output_offset;
-      bool found = posd->output_offset(object, shndx, offset, &output_offset);
+      section_offset_type outputoffset;
+      bool found = posd->output_offset(object, sec_shndx, off, &outputoffset);
       gold_assert(found);   
-      return output_offset;
+      return outputoffset;
     }
 
   // Fall back to the slow look-up.
@@ -2324,32 +2324,32 @@ Output_section::output_offset(const Relobj* object, unsigned int shndx,
        p != this->input_sections_.end();
        ++p)
     {
-      section_offset_type output_offset;
-      if (p->output_offset(object, shndx, offset, &output_offset))
-	return output_offset;
+      section_offset_type outputoffset;
+      if (p->output_offset(object, sec_shndx, off, &outputoffset))
+	return outputoffset;
     }
   gold_unreachable();
 }
 
-// Return the output virtual address of OFFSET relative to the start
-// of input section SHNDX in object OBJECT.
+// Return the output virtual address of OFF relative to the start
+// of input section SEC_SHNDX in object OBJECT.
 
 uint64_t
-Output_section::output_address(const Relobj* object, unsigned int shndx,
-			       off_t offset) const
+Output_section::output_address(const Relobj* object, unsigned int sec_shndx,
+			       off_t off) const
 {
   uint64_t addr = this->address() + this->first_input_offset_;
 
   // Look at the Output_section_data_maps first.
-  const Output_section_data* posd = this->find_merge_section(object, shndx);
+  const Output_section_data* posd = this->find_merge_section(object, sec_shndx);
   if (posd == NULL) 
-    posd = this->find_relaxed_input_section(object, shndx);
+    posd = this->find_relaxed_input_section(object, sec_shndx);
   if (posd != NULL && posd->is_address_valid())
     {
-      section_offset_type output_offset;
-      bool found = posd->output_offset(object, shndx, offset, &output_offset);
+      section_offset_type outputoffset;
+      bool found = posd->output_offset(object, sec_shndx, off, &outputoffset);
       gold_assert(found);
-      return posd->address() + output_offset;
+      return posd->address() + outputoffset;
     }
 
   // Fall back to the slow look-up.
@@ -2358,12 +2358,12 @@ Output_section::output_address(const Relobj* object, unsigned int shndx,
        ++p)
     {
       addr = align_address(addr, p->addralign());
-      section_offset_type output_offset;
-      if (p->output_offset(object, shndx, offset, &output_offset))
+      section_offset_type outputoffset;
+      if (p->output_offset(object, sec_shndx, off, &outputoffset))
 	{
-	  if (output_offset == -1)
+	  if (outputoffset == -1)
 	    return -1ULL;
-	  return addr + output_offset;
+	  return addr + outputoffset;
 	}
       addr += p->data_size();
     }
@@ -2377,11 +2377,11 @@ Output_section::output_address(const Relobj* object, unsigned int shndx,
 }
 
 // Find the output address of the start of the merged section for
-// input section SHNDX in object OBJECT.
+// input section SEC_SHNDX in object OBJECT.
 
 bool
 Output_section::find_starting_output_address(const Relobj* object,
-					     unsigned int shndx,
+					     unsigned int sec_shndx,
 					     uint64_t* paddr) const
 {
   // FIXME: This becomes a bottle-neck if we have many relaxed sections.
@@ -2398,7 +2398,7 @@ Output_section::find_starting_output_address(const Relobj* object,
       // method to get the output offset of input offset 0.
       // Unfortunately we don't know for sure that input offset 0 is
       // mapped at all.
-      if (p->is_merge_section_for(object, shndx))
+      if (p->is_merge_section_for(object, sec_shndx))
 	{
 	  *paddr = addr;
 	  return true;
@@ -2426,7 +2426,7 @@ Output_section::set_final_data_size()
   if (this->must_sort_attached_input_sections())
     this->sort_attached_input_sections();
 
-  uint64_t address = this->address();
+  uint64_t addr = this->address();
   off_t startoff = this->offset();
   off_t off = startoff + this->first_input_offset_;
   for (Input_section_list::iterator p = this->input_sections_.begin();
@@ -2434,7 +2434,7 @@ Output_section::set_final_data_size()
        ++p)
     {
       off = align_address(off, p->addralign());
-      p->set_address_and_file_offset(address + (off - startoff), off,
+      p->set_address_and_file_offset(addr + (off - startoff), off,
 				     startoff);
       off += p->data_size();
     }
@@ -2498,11 +2498,11 @@ class Output_section::Input_section_sort_entry
       section_name_()
   { }
 
-  Input_section_sort_entry(const Input_section& input_section,
-			   unsigned int index)
-    : input_section_(input_section), index_(index),
-      section_has_name_(input_section.is_input_section()
-			|| input_section.is_relaxed_input_section())
+  Input_section_sort_entry(const Input_section& inputsection,
+			   unsigned int indx)
+    : input_section_(inputsection), index_(indx),
+      section_has_name_(inputsection.is_input_section()
+			|| inputsection.is_relaxed_input_section())
   {
     if (this->section_has_name_)
       {
@@ -2510,14 +2510,14 @@ class Output_section::Input_section_sort_entry
 	// so it is OK to lock.  Unfortunately we have no way to pass
 	// in a Task token.
 	const Task* dummy_task = reinterpret_cast<const Task*>(-1);
-	Object* obj = (input_section.is_input_section()
-		       ? input_section.relobj()
-		       : input_section.relaxed_input_section()->relobj());
+	Object* obj = (inputsection.is_input_section()
+		       ? inputsection.relobj()
+		       : inputsection.relaxed_input_section()->relobj());
 	Task_lock_obj<Object> tl(dummy_task, obj);
 
 	// This is a slow operation, which should be cached in
 	// Layout::layout if this becomes a speed problem.
-	this->section_name_ = obj->section_name(input_section.shndx());
+	this->section_name_ = obj->section_name(inputsection.shndx());
       }
   }
 
@@ -2568,12 +2568,12 @@ class Output_section::Input_section_sort_entry
   // file name this way is a dreadful hack, but the GNU linker does it
   // in order to better support gcc, and we need to be compatible.
   bool
-  match_file_name(const char* match_file_name) const
+  match_file_name(const char* match_filename) const
   {
     const std::string& file_name(this->input_section_.relobj()->name());
     const char* base_name = lbasename(file_name.c_str());
-    size_t match_len = strlen(match_file_name);
-    if (strncmp(base_name, match_file_name, match_len) != 0)
+    size_t match_len = strlen(match_filename);
+    if (strncmp(base_name, match_filename, match_len) != 0)
       return false;
     size_t base_len = strlen(base_name);
     if (base_len != match_len + 2 && base_len != match_len + 3)
@@ -2706,10 +2706,10 @@ Output_section::write_header(const Layout* layout,
   oshdr->put_sh_name(secnamepool->get_offset(this->name_));
   oshdr->put_sh_type(this->type_);
 
-  elfcpp::Elf_Xword flags = this->flags_;
+  elfcpp::Elf_Xword xflags = this->flags_;
   if (this->info_section_ != NULL && this->info_uses_section_index_)
-    flags |= elfcpp::SHF_INFO_LINK;
-  oshdr->put_sh_flags(flags);
+    xflags |= elfcpp::SHF_INFO_LINK;
+  oshdr->put_sh_flags(xflags);
 
   oshdr->put_sh_addr(this->address());
   oshdr->put_sh_offset(this->offset());
@@ -2723,19 +2723,19 @@ Output_section::write_header(const Layout* layout,
   else
     oshdr->put_sh_link(this->link_);
 
-  elfcpp::Elf_Word info;
+  elfcpp::Elf_Word inf;
   if (this->info_section_ != NULL)
     {
       if (this->info_uses_section_index_)
-	info = this->info_section_->out_shndx();
+	inf = this->info_section_->out_shndx();
       else
-	info = this->info_section_->symtab_index();
+	inf = this->info_section_->symtab_index();
     }
   else if (this->info_symndx_ != NULL)
-    info = this->info_symndx_->symtab_index();
+    inf = this->info_symndx_->symtab_index();
   else
-    info = this->info_;
-  oshdr->put_sh_info(info);
+    inf = this->info_;
+  oshdr->put_sh_info(inf);
 
   oshdr->put_sh_addralign(this->addralign_);
   oshdr->put_sh_entsize(this->entsize_);
@@ -2862,9 +2862,9 @@ Output_section::write_to_postprocessing_buffer()
 
 uint64_t
 Output_section::get_input_sections(
-    uint64_t address,
+    uint64_t addr,
     const std::string& fill,
-    std::list<Simple_input_section>* input_sections)
+    std::list<Simple_input_section>* inputsections)
 {
   if (this->checkpoint_ != NULL
       && !this->checkpoint_->input_sections_saved())
@@ -2873,9 +2873,9 @@ Output_section::get_input_sections(
   // Invalidate the relaxed input section map.
   this->is_relaxed_input_section_map_valid_ = false;
 
-  uint64_t orig_address = address;
+  uint64_t orig_address = addr;
 
-  address = align_address(address, this->addralign());
+  addr = align_address(addr, this->addralign());
 
   Input_section_list remaining;
   for (Input_section_list::iterator p = this->input_sections_.begin();
@@ -2883,18 +2883,18 @@ Output_section::get_input_sections(
        ++p)
     {
       if (p->is_input_section())
-	input_sections->push_back(Simple_input_section(p->relobj(),
+	inputsections->push_back(Simple_input_section(p->relobj(),
 						       p->shndx()));
       else if (p->is_relaxed_input_section())
-	input_sections->push_back(
+	inputsections->push_back(
 	    Simple_input_section(p->relaxed_input_section()));
       else
 	{
-	  uint64_t aligned_address = align_address(address, p->addralign());
-	  if (aligned_address != address && !fill.empty())
+	  uint64_t aligned_address = align_address(addr, p->addralign());
+	  if (aligned_address != addr && !fill.empty())
 	    {
 	      section_size_type length =
-		convert_to_section_size_type(aligned_address - address);
+		convert_to_section_size_type(aligned_address - addr);
 	      std::string this_fill;
 	      this_fill.reserve(length);
 	      while (this_fill.length() + fill.length() <= length)
@@ -2905,44 +2905,44 @@ Output_section::get_input_sections(
 	      Output_section_data* posd = new Output_data_const(this_fill, 0);
 	      remaining.push_back(Input_section(posd));
 	    }
-	  address = aligned_address;
+	  addr = aligned_address;
 
 	  remaining.push_back(*p);
 
 	  p->finalize_data_size();
-	  address += p->data_size();
+	  addr += p->data_size();
 	}
     }
 
   this->input_sections_.swap(remaining);
   this->first_input_offset_ = 0;
 
-  uint64_t data_size = address - orig_address;
-  this->set_current_data_size_for_child(data_size);
-  return data_size;
+  uint64_t datasize = addr - orig_address;
+  this->set_current_data_size_for_child(datasize);
+  return datasize;
 }
 
 // Add an input section from a script.
 
 void
 Output_section::add_input_section_for_script(const Simple_input_section& sis,
-					     off_t data_size,
-					     uint64_t addralign)
+					     off_t datasize,
+					     uint64_t addr_align)
 {
-  if (addralign > this->addralign_)
-    this->addralign_ = addralign;
+  if (addr_align > this->addralign_)
+    this->addralign_ = addr_align;
 
   off_t offset_in_section = this->current_data_size_for_child();
   off_t aligned_offset_in_section = align_address(offset_in_section,
-						  addralign);
+						  addr_align);
 
   this->set_current_data_size_for_child(aligned_offset_in_section
-					+ data_size);
+					+ datasize);
 
   Input_section is =
     (sis.is_relaxed_input_section()
      ? Input_section(sis.relaxed_input_section())
-     : Input_section(sis.relobj(), sis.shndx(), data_size, addralign));
+     : Input_section(sis.relobj(), sis.shndx(), datasize, addr_align));
   this->input_sections_.push_back(is);
 }
 
@@ -3022,7 +3022,7 @@ Output_section::print_merge_stats()
 
 // Output segment methods.
 
-Output_segment::Output_segment(elfcpp::Elf_Word type, elfcpp::Elf_Word flags)
+Output_segment::Output_segment(elfcpp::Elf_Word atype, elfcpp::Elf_Word aflags)
   : output_data_(),
     output_bss_(),
     vaddr_(0),
@@ -3032,8 +3032,8 @@ Output_segment::Output_segment(elfcpp::Elf_Word type, elfcpp::Elf_Word flags)
     min_p_align_(0),
     offset_(0),
     filesz_(0),
-    type_(type),
-    flags_(flags),
+    type_(atype),
+    flags_(aflags),
     is_max_align_known_(false),
     are_addresses_set_(false),
     is_large_data_segment_(false)
@@ -3332,15 +3332,15 @@ Output_segment::maximum_alignment()
 {
   if (!this->is_max_align_known_)
     {
-      uint64_t addralign;
+      uint64_t addr_align;
 
-      addralign = Output_segment::maximum_alignment_list(&this->output_data_);
-      if (addralign > this->max_align_)
-	this->max_align_ = addralign;
+      addr_align = Output_segment::maximum_alignment_list(&this->output_data_);
+      if (addr_align > this->max_align_)
+	this->max_align_ = addr_align;
 
-      addralign = Output_segment::maximum_alignment_list(&this->output_bss_);
-      if (addralign > this->max_align_)
-	this->max_align_ = addralign;
+      addr_align = Output_segment::maximum_alignment_list(&this->output_bss_);
+      if (addr_align > this->max_align_)
+	this->max_align_ = addr_align;
 
       // If -z relro is in effect, and the first section in this
       // segment is a relro section, then the segment must be aligned
@@ -3350,9 +3350,9 @@ Output_segment::maximum_alignment()
 	  && parameters->options().relro()
 	  && this->is_first_section_relro())
 	{
-	  addralign = parameters->target().common_pagesize();
-	  if (addralign > this->max_align_)
-	    this->max_align_ = addralign;
+	  addr_align = parameters->target().common_pagesize();
+	  if (addr_align > this->max_align_)
+	    this->max_align_ = addr_align;
 	}
 
       this->is_max_align_known_ = true;
@@ -3371,9 +3371,9 @@ Output_segment::maximum_alignment_list(const Output_data_list* pdl)
        p != pdl->end();
        ++p)
     {
-      uint64_t addralign = (*p)->addralign();
-      if (addralign > ret)
-	ret = addralign;
+      uint64_t addr_align = (*p)->addralign();
+      if (addr_align > ret)
+	ret = addr_align;
     }
   return ret;
 }
@@ -4138,7 +4138,7 @@ template
 off_t
 Output_section::add_input_section<32, false>(
     Sized_relobj<32, false>* object,
-    unsigned int shndx,
+    unsigned int sec_shndx,
     const char* secname,
     const elfcpp::Shdr<32, false>& shdr,
     unsigned int reloc_shndx,
@@ -4150,7 +4150,7 @@ template
 off_t
 Output_section::add_input_section<32, true>(
     Sized_relobj<32, true>* object,
-    unsigned int shndx,
+    unsigned int sec_shndx,
     const char* secname,
     const elfcpp::Shdr<32, true>& shdr,
     unsigned int reloc_shndx,
@@ -4162,7 +4162,7 @@ template
 off_t
 Output_section::add_input_section<64, false>(
     Sized_relobj<64, false>* object,
-    unsigned int shndx,
+    unsigned int sec_shndx,
     const char* secname,
     const elfcpp::Shdr<64, false>& shdr,
     unsigned int reloc_shndx,
@@ -4174,7 +4174,7 @@ template
 off_t
 Output_section::add_input_section<64, true>(
     Sized_relobj<64, true>* object,
-    unsigned int shndx,
+    unsigned int sec_shndx,
     const char* secname,
     const elfcpp::Shdr<64, true>& shdr,
     unsigned int reloc_shndx,

@@ -1232,7 +1232,6 @@ print_insn_arg (const char *d,
     case '2':
     case '3':
       {
-	int val;
 	char *name = 0;
 
 	FETCH_ARG (5, val);

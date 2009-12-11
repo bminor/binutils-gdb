@@ -2547,7 +2547,7 @@ slot_index (unsigned long slot_addr,
 	    fragS *first_frag,
 	    int before_relax)
 {
-  unsigned long index = 0;
+  unsigned long s_index = 0;
 
   /* First time we are called, the initial address and frag are invalid.  */
   if (first_addr == 0)
@@ -2565,7 +2565,7 @@ slot_index (unsigned long slot_addr,
 	  /* We can get the final addresses only during and after
 	     relaxation.  */
 	  if (first_frag->fr_next && first_frag->fr_next->fr_address)
-	    index += 3 * ((first_frag->fr_next->fr_address
+	    s_index += 3 * ((first_frag->fr_next->fr_address
 			   - first_frag->fr_address
 			     - first_frag->fr_fix) >> 4);
 	}
@@ -2586,7 +2586,7 @@ slot_index (unsigned long slot_addr,
 	  case rs_align_test:
 	    /* Take alignment into account.  Assume the worst case
 	       before relaxation.  */
-	    index += 3 * ((1 << first_frag->fr_offset) >> 4);
+	    s_index += 3 * ((1 << first_frag->fr_offset) >> 4);
 	    break;
 
 	  case rs_org:
@@ -2596,14 +2596,14 @@ slot_index (unsigned long slot_addr,
 		break;
 	      }
 	  case rs_fill:
-	    index += 3 * (first_frag->fr_offset >> 4);
+	    s_index += 3 * (first_frag->fr_offset >> 4);
 	    break;
 	  }
 
       /* Add in the full size of the frag converted to instruction slots.  */
-      index += 3 * (first_frag->fr_fix >> 4);
+      s_index += 3 * (first_frag->fr_fix >> 4);
       /* Subtract away the initial part before first_addr.  */
-      index -= (3 * ((first_addr >> 4) - (start_addr >> 4))
+      s_index -= (3 * ((first_addr >> 4) - (start_addr >> 4))
 		+ ((first_addr & 0x3) - (start_addr & 0x3)));
 
       /* Move to the beginning of the next frag.  */
@@ -2619,9 +2619,9 @@ slot_index (unsigned long slot_addr,
     }
 
   /* Add in the used part of the last frag.  */
-  index += (3 * ((slot_addr >> 4) - (first_addr >> 4))
+  s_index += (3 * ((slot_addr >> 4) - (first_addr >> 4))
 	    + ((slot_addr & 0x3) - (first_addr & 0x3)));
-  return index;
+  return s_index;
 }
 
 /* Optimize unwind record directives.  */
@@ -4646,7 +4646,7 @@ dot_ln (int dummy ATTRIBUTE_UNUSED)
 }
 
 static void
-cross_section (int ref, void (*cons) (int), int ua)
+cross_section (int ref, void (*builder) (int), int ua)
 {
   char *start, *end;
   int saved_auto_align;
@@ -4691,15 +4691,15 @@ cross_section (int ref, void (*cons) (int), int ua)
   end = input_line_pointer + 1;		/* skip comma */
   input_line_pointer = start;
   md.keep_pending_output = 1;
-  section_count = bfd_count_sections(stdoutput);
+  section_count = bfd_count_sections (stdoutput);
   obj_elf_section (0);
-  if (section_count != bfd_count_sections(stdoutput))
+  if (section_count != bfd_count_sections (stdoutput))
     as_warn (_("Creating sections with .xdataN/.xrealN/.xstringZ is deprecated."));
   input_line_pointer = end;
   saved_auto_align = md.auto_align;
   if (ua)
     md.auto_align = 0;
-  (*cons) (ref);
+  (*builder) (ref);
   if (ua)
     md.auto_align = saved_auto_align;
   obj_elf_previous (0);
@@ -5305,9 +5305,9 @@ operand_width (enum ia64_opnd opnd)
 }
 
 static enum operand_match_result
-operand_match (const struct ia64_opcode *idesc, int index, expressionS *e)
+operand_match (const struct ia64_opcode *idesc, int res_index, expressionS *e)
 {
-  enum ia64_opnd opnd = idesc->operands[index];
+  enum ia64_opnd opnd = idesc->operands[res_index];
   int bits, relocatable = 0;
   struct insn_fix *fix;
   bfd_signed_vma val;
@@ -5477,7 +5477,7 @@ operand_match (const struct ia64_opcode *idesc, int index, expressionS *e)
     case IA64_OPND_CNT2a:
     case IA64_OPND_LEN4:
     case IA64_OPND_LEN6:
-      bits = operand_width (idesc->operands[index]);
+      bits = operand_width (idesc->operands[res_index]);
       if (e->X_op == O_constant)
 	{
 	  if ((bfd_vma) (e->X_add_number - 1) < ((bfd_vma) 1 << bits))
@@ -5551,7 +5551,7 @@ operand_match (const struct ia64_opcode *idesc, int index, expressionS *e)
 		e->X_op = O_symbol;
 	    }
 
-	  fix->opnd = idesc->operands[index];
+	  fix->opnd = idesc->operands[res_index];
 	  fix->expr = *e;
 	  fix->is_pcrel = 0;
 	  ++CURR_SLOT.num_fixups;
@@ -5586,7 +5586,7 @@ operand_match (const struct ia64_opcode *idesc, int index, expressionS *e)
     case IA64_OPND_MBTYPE4:
     case IA64_OPND_MHTYPE8:
     case IA64_OPND_POS6:
-      bits = operand_width (idesc->operands[index]);
+      bits = operand_width (idesc->operands[res_index]);
       if (e->X_op == O_constant)
 	{
 	  if ((bfd_vma) e->X_add_number < ((bfd_vma) 1 << bits))
@@ -5597,7 +5597,7 @@ operand_match (const struct ia64_opcode *idesc, int index, expressionS *e)
       break;
 
     case IA64_OPND_IMMU9:
-      bits = operand_width (idesc->operands[index]);
+      bits = operand_width (idesc->operands[res_index]);
       if (e->X_op == O_constant)
 	{
 	  if ((bfd_vma) e->X_add_number < ((bfd_vma) 1 << bits))
@@ -5673,14 +5673,14 @@ operand_match (const struct ia64_opcode *idesc, int index, expressionS *e)
     case IA64_OPND_IMM8M1U8:
     case IA64_OPND_IMM9a:
     case IA64_OPND_IMM9b:
-      bits = operand_width (idesc->operands[index]);
+      bits = operand_width (idesc->operands[res_index]);
       if (relocatable && (e->X_op == O_symbol
 			  || e->X_op == O_subtract
 			  || e->X_op == O_pseudo_fixup))
 	{
 	  fix = CURR_SLOT.fixup + CURR_SLOT.num_fixups;
 
-	  if (idesc->operands[index] == IA64_OPND_IMM14)
+	  if (idesc->operands[res_index] == IA64_OPND_IMM14)
 	    fix->code = BFD_RELOC_IA64_IMM14;
 	  else
 	    fix->code = BFD_RELOC_IA64_IMM22;
@@ -5692,7 +5692,7 @@ operand_match (const struct ia64_opcode *idesc, int index, expressionS *e)
 		e->X_op = O_symbol;
 	    }
 
-	  fix->opnd = idesc->operands[index];
+	  fix->opnd = idesc->operands[res_index];
 	  fix->expr = *e;
 	  fix->is_pcrel = 0;
 	  ++CURR_SLOT.num_fixups;
@@ -5798,7 +5798,7 @@ operand_match (const struct ia64_opcode *idesc, int index, expressionS *e)
 	    abort ();
 
 	  fix->code = ia64_gen_real_reloc_type (e->X_op_symbol, fix->code);
-	  fix->opnd = idesc->operands[index];
+	  fix->opnd = idesc->operands[res_index];
 	  fix->expr = *e;
 	  fix->is_pcrel = 1;
 	  ++CURR_SLOT.num_fixups;
@@ -5817,7 +5817,7 @@ operand_match (const struct ia64_opcode *idesc, int index, expressionS *e)
 	     create a dummy reloc.  This will not live past md_apply_fix.  */
 	  fix->code = BFD_RELOC_UNUSED;
 	  fix->code = ia64_gen_real_reloc_type (e->X_op_symbol, fix->code);
-	  fix->opnd = idesc->operands[index];
+	  fix->opnd = idesc->operands[res_index];
 	  fix->expr = *e;
 	  fix->is_pcrel = 1;
 	  ++CURR_SLOT.num_fixups;
@@ -5831,7 +5831,7 @@ operand_match (const struct ia64_opcode *idesc, int index, expressionS *e)
     case IA64_OPND_LDXMOV:
       fix = CURR_SLOT.fixup + CURR_SLOT.num_fixups;
       fix->code = BFD_RELOC_IA64_LDXMOV;
-      fix->opnd = idesc->operands[index];
+      fix->opnd = idesc->operands[res_index];
       fix->expr = *e;
       fix->is_pcrel = 0;
       ++CURR_SLOT.num_fixups;
@@ -8361,9 +8361,9 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 	      || (!rsrc_write && idesc->operands[1] == IA64_OPND_PMD_R3))
 
 	    {
-	      int index = ((idesc->operands[1] == IA64_OPND_R3 && !rsrc_write)
-			   ? 1 : !rsrc_write);
-	      int regno = CURR_SLOT.opnd[index].X_add_number - REG_GR;
+	      int reg_index = ((idesc->operands[1] == IA64_OPND_R3 && !rsrc_write)
+			       ? 1 : !rsrc_write);
+	      int regno = CURR_SLOT.opnd[reg_index].X_add_number - REG_GR;
 	      if (regno >= 0 && regno < NELEMS (gr_values)
 		  && KNOWN (regno))
 		{
@@ -8901,11 +8901,11 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 		      if (idesc->operands[0] == IA64_OPND_CR3
 			  || idesc->operands[1] == IA64_OPND_CR3)
 			{
-			  int index =
+			  int reg_index =
 			    ((idesc->operands[0] == IA64_OPND_CR3)
 			     ? 0 : 1);
 			  int regno =
-			    CURR_SLOT.opnd[index].X_add_number - REG_CR;
+			    CURR_SLOT.opnd[reg_index].X_add_number - REG_CR;
 
 			  switch (regno)
 			    {
@@ -8939,15 +8939,15 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 		      if (idesc->operands[0] == IA64_OPND_AR3
 			  || idesc->operands[1] == IA64_OPND_AR3)
 			{
-			  int index =
+			  int reg_index =
 			    ((idesc->operands[0] == IA64_OPND_AR3)
 			     ? 0 : 1);
 			  int regno =
-			    CURR_SLOT.opnd[index].X_add_number - REG_AR;
+			    CURR_SLOT.opnd[reg_index].X_add_number - REG_AR;
 
 			  if (regno == AR_ITC
 			      || regno == AR_RUC
-			      || (index == 0
+			      || (reg_index == 0
 				  && (regno == AR_RSC
 				      || (regno >= AR_K0
 					  && regno <= AR_K7))))
@@ -10799,13 +10799,13 @@ ia64_pcrel_from_section (fixS *fix, segT sec)
 void
 ia64_dwarf2_emit_offset (symbolS *symbol, unsigned int size)
 {
-  expressionS expr;
+  expressionS exp;
 
-  expr.X_op = O_pseudo_fixup;
-  expr.X_op_symbol = pseudo_func[FUNC_SEC_RELATIVE].u.sym;
-  expr.X_add_number = 0;
-  expr.X_add_symbol = symbol;
-  emit_expr (&expr, size);
+  exp.X_op = O_pseudo_fixup;
+  exp.X_op_symbol = pseudo_func[FUNC_SEC_RELATIVE].u.sym;
+  exp.X_add_number = 0;
+  exp.X_add_symbol = symbol;
+  emit_expr (&exp, size);
 }
 
 /* This is called whenever some data item (not an instruction) needs a
@@ -11403,13 +11403,13 @@ ia64_handle_align (fragS *fragp)
 {
   int bytes;
   char *p;
-  const unsigned char *nop;
+  const unsigned char *nop_type;
 
   if (fragp->fr_type != rs_align_code)
     return;
 
   /* Check if this frag has to end with a stop bit.  */
-  nop = fragp->tc_frag_data ? le_nop_stop : le_nop;
+  nop_type = fragp->tc_frag_data ? le_nop_stop : le_nop;
 
   bytes = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
   p = fragp->fr_literal + fragp->fr_fix;
@@ -11446,7 +11446,7 @@ ia64_handle_align (fragS *fragp)
     }
 
   /* Instruction bundles are always little-endian.  */
-  memcpy (p, nop, 16);
+  memcpy (p, nop_type, 16);
   fragp->fr_var = 16;
 }
 

@@ -2023,20 +2023,20 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
     {
       char *string = input_line_pointer;
       int e = get_symbol_end ();
-      unsigned int i;
+      unsigned int j;
       i386_cpu_flags flags;
 
-      for (i = 0; i < ARRAY_SIZE (cpu_arch); i++)
+      for (j = 0; j < ARRAY_SIZE (cpu_arch); j++)
 	{
-	  if (strcmp (string, cpu_arch[i].name) == 0)
+	  if (strcmp (string, cpu_arch[j].name) == 0)
 	    {
-	      check_cpu_arch_compatible (string, cpu_arch[i].flags);
+	      check_cpu_arch_compatible (string, cpu_arch[j].flags);
 
 	      if (*string != '.')
 		{
-		  cpu_arch_name = cpu_arch[i].name;
+		  cpu_arch_name = cpu_arch[j].name;
 		  cpu_sub_arch_name = NULL;
-		  cpu_arch_flags = cpu_arch[i].flags;
+		  cpu_arch_flags = cpu_arch[j].flags;
 		  if (flag_code == CODE_64BIT)
 		    {
 		      cpu_arch_flags.bitfield.cpu64 = 1;
@@ -2047,8 +2047,8 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 		      cpu_arch_flags.bitfield.cpu64 = 0;
 		      cpu_arch_flags.bitfield.cpuno64 = 1;
 		    }
-		  cpu_arch_isa = cpu_arch[i].type;
-		  cpu_arch_isa_flags = cpu_arch[i].flags;
+		  cpu_arch_isa = cpu_arch[j].type;
+		  cpu_arch_isa_flags = cpu_arch[j].flags;
 		  if (!cpu_arch_tune_set)
 		    {
 		      cpu_arch_tune = cpu_arch_isa;
@@ -2059,22 +2059,22 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 
 	      if (strncmp (string + 1, "no", 2))
 		flags = cpu_flags_or (cpu_arch_flags,
-				      cpu_arch[i].flags);
+				      cpu_arch[j].flags);
 	      else
 		flags = cpu_flags_and_not (cpu_arch_flags,
-					   cpu_arch[i].flags);
+					   cpu_arch[j].flags);
 	      if (!cpu_flags_equal (&flags, &cpu_arch_flags))
 		{
 		  if (cpu_sub_arch_name)
 		    {
 		      char *name = cpu_sub_arch_name;
 		      cpu_sub_arch_name = concat (name,
-						  cpu_arch[i].name,
+						  cpu_arch[j].name,
 						  (const char *) NULL);
 		      free (name);
 		    }
 		  else
-		    cpu_sub_arch_name = xstrdup (cpu_arch[i].name);
+		    cpu_sub_arch_name = xstrdup (cpu_arch[j].name);
 		  cpu_arch_flags = flags;
 		}
 	      *input_line_pointer = e;
@@ -2082,7 +2082,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 	      return;
 	    }
 	}
-      if (i >= ARRAY_SIZE (cpu_arch))
+      if (j >= ARRAY_SIZE (cpu_arch))
 	as_bad (_("no such architecture: `%s'"), string);
 
       *input_line_pointer = e;
@@ -2454,7 +2454,7 @@ reloc (unsigned int size,
 {
   if (other != NO_RELOC)
     {
-      reloc_howto_type *reloc;
+      reloc_howto_type *rel;
 
       if (size == 8)
 	switch (other)
@@ -2485,18 +2485,18 @@ reloc (unsigned int size,
       if (size == 4 && flag_code != CODE_64BIT)
 	sign = -1;
 
-      reloc = bfd_reloc_type_lookup (stdoutput, other);
-      if (!reloc)
+      rel = bfd_reloc_type_lookup (stdoutput, other);
+      if (!rel)
 	as_bad (_("unknown relocation (%u)"), other);
-      else if (size != bfd_get_reloc_size (reloc))
+      else if (size != bfd_get_reloc_size (rel))
 	as_bad (_("%u-byte relocation cannot be applied to %u-byte field"),
-		bfd_get_reloc_size (reloc),
+		bfd_get_reloc_size (rel),
 		size);
-      else if (pcrel && !reloc->pc_relative)
+      else if (pcrel && !rel->pc_relative)
 	as_bad (_("non-pc-relative relocation for pc-relative field"));
-      else if ((reloc->complain_on_overflow == complain_overflow_signed
+      else if ((rel->complain_on_overflow == complain_overflow_signed
 		&& !sign)
-	       || (reloc->complain_on_overflow == complain_overflow_unsigned
+	       || (rel->complain_on_overflow == complain_overflow_unsigned
 		   && sign > 0))
 	as_bad (_("relocated field and relocation type differ in signedness"));
       else
@@ -3639,28 +3639,28 @@ optimize_disp (void)
       {
 	if (i.op[op].disps->X_op == O_constant)
 	  {
-	    offsetT disp = i.op[op].disps->X_add_number;
+	    offsetT op_disp = i.op[op].disps->X_add_number;
 
 	    if (i.types[op].bitfield.disp16
-		&& (disp & ~(offsetT) 0xffff) == 0)
+		&& (op_disp & ~(offsetT) 0xffff) == 0)
 	      {
 		/* If this operand is at most 16 bits, convert
 		   to a signed 16 bit number and don't use 64bit
 		   displacement.  */
-		disp = (((disp & 0xffff) ^ 0x8000) - 0x8000);
+		op_disp = (((op_disp & 0xffff) ^ 0x8000) - 0x8000);
 		i.types[op].bitfield.disp64 = 0;
 	      }
 	    if (i.types[op].bitfield.disp32
-		&& (disp & ~(((offsetT) 2 << 31) - 1)) == 0)
+		&& (op_disp & ~(((offsetT) 2 << 31) - 1)) == 0)
 	      {
 		/* If this operand is at most 32 bits, convert
 		   to a signed 32 bit number and don't use 64bit
 		   displacement.  */
-		disp &= (((offsetT) 2 << 31) - 1);
-		disp = (disp ^ ((offsetT) 1 << 31)) - ((addressT) 1 << 31);
+		op_disp &= (((offsetT) 2 << 31) - 1);
+		op_disp = (op_disp ^ ((offsetT) 1 << 31)) - ((addressT) 1 << 31);
 		i.types[op].bitfield.disp64 = 0;
 	      }
-	    if (!disp && i.types[op].bitfield.baseindex)
+	    if (!op_disp && i.types[op].bitfield.baseindex)
 	      {
 		i.types[op].bitfield.disp8 = 0;
 		i.types[op].bitfield.disp16 = 0;
@@ -3672,19 +3672,19 @@ optimize_disp (void)
 	      }
 	    else if (flag_code == CODE_64BIT)
 	      {
-		if (fits_in_signed_long (disp))
+		if (fits_in_signed_long (op_disp))
 		  {
 		    i.types[op].bitfield.disp64 = 0;
 		    i.types[op].bitfield.disp32s = 1;
 		  }
 		if (i.prefix[ADDR_PREFIX]
-		    && fits_in_unsigned_long (disp))
+		    && fits_in_unsigned_long (op_disp))
 		  i.types[op].bitfield.disp32 = 1;
 	      }
 	    if ((i.types[op].bitfield.disp32
 		 || i.types[op].bitfield.disp32s
 		 || i.types[op].bitfield.disp16)
-		&& fits_in_signed_byte (disp))
+		&& fits_in_signed_byte (op_disp))
 	      i.types[op].bitfield.disp8 = 1;
 	  }
 	else if (i.reloc[op] == BFD_RELOC_386_TLS_DESC_CALL
@@ -4683,13 +4683,14 @@ finalize_imm (void)
 static int
 bad_implicit_operand (int xmm)
 {
-  const char *reg = xmm ? "xmm0" : "ymm0";
+  const char *ireg = xmm ? "xmm0" : "ymm0";
+
   if (intel_syntax)
     as_bad (_("the last operand of `%s' must be `%s%s'"),
-	    i.tm.name, register_prefix, reg);
+	    i.tm.name, register_prefix, ireg);
   else
     as_bad (_("the first operand of `%s' must be `%s%s'"),
-	    i.tm.name, register_prefix, reg);
+	    i.tm.name, register_prefix, ireg);
   return 0;
 }
 
@@ -4705,13 +4706,13 @@ process_operands (void)
       && (i.tm.opcode_modifier.vexnds
 	  || i.tm.opcode_modifier.vexndd))
     {
-      unsigned int dup = i.operands;
-      unsigned int dest = dup - 1;
+      unsigned int dupl = i.operands;
+      unsigned int dest = dupl - 1;
       unsigned int j;
 
       /* The destination must be an xmm register.  */
       gas_assert (i.reg_operands
-		  && MAX_OPERANDS > dup
+		  && MAX_OPERANDS > dupl
 		  && operand_type_equal (&i.types[dest], &regxmm));
 
       if (i.tm.opcode_modifier.firstxmm0)
@@ -4742,7 +4743,7 @@ process_operands (void)
 	}
       else if (i.tm.opcode_modifier.implicit1stxmm0)
 	{
-	  gas_assert ((MAX_OPERANDS - 1) > dup
+	  gas_assert ((MAX_OPERANDS - 1) > dupl
 		      && i.tm.opcode_modifier.vex3sources);
 
 	  /* Add the implicit xmm0 for instructions with VEX prefix
@@ -4762,11 +4763,11 @@ process_operands (void)
 	  i.reg_operands += 2;
 	  i.tm.operands += 2;
 
-	  dup++;
+	  dupl++;
 	  dest++;
-	  i.op[dup] = i.op[dest];
-	  i.types[dup] = i.types[dest];
-	  i.tm.operand_types[dup] = i.tm.operand_types[dest];
+	  i.op[dupl] = i.op[dest];
+	  i.types[dupl] = i.types[dest];
+	  i.tm.operand_types[dupl] = i.tm.operand_types[dest];
 	}
       else
 	{
@@ -4775,9 +4776,9 @@ duplicate:
 	  i.reg_operands++;
 	  i.tm.operands++;
 
-	  i.op[dup] = i.op[dest];
-	  i.types[dup] = i.types[dest];
-	  i.tm.operand_types[dup] = i.tm.operand_types[dest];
+	  i.op[dupl] = i.op[dest];
+	  i.types[dupl] = i.types[dest];
+	  i.tm.operand_types[dupl] = i.tm.operand_types[dest];
 	}
 
        if (i.tm.opcode_modifier.immext)
@@ -4929,7 +4930,7 @@ build_modrm_byte (void)
   vex_2_sources = i.tm.opcode_modifier.vex2sources;
   if (vex_3_sources)
     {
-      unsigned int nds, reg;
+      unsigned int nds, reg_slot;
       expressionS *exp;
 
       if (i.tm.opcode_modifier.veximmext
@@ -4939,7 +4940,7 @@ build_modrm_byte (void)
 	  gas_assert (dest == 3);
 	}
       else
-      dest = i.operands - 1;
+	dest = i.operands - 1;
       nds = dest - 1;
 
       /* This instruction must have 4 register operands
@@ -4963,23 +4964,23 @@ build_modrm_byte (void)
       if (i.tm.opcode_modifier.vexw1)
 	{
 	  source = 0;
-	  reg = 1;
+	  reg_slot = 1;
 	}
       else
 	{
 	  source = 1;
-	  reg = 0;
+	  reg_slot = 0;
 	}
-      gas_assert ((operand_type_equal (&i.tm.operand_types[reg], &regxmm)
-		   || operand_type_equal (&i.tm.operand_types[reg],
+      gas_assert ((operand_type_equal (&i.tm.operand_types[reg_slot], &regxmm)
+		   || operand_type_equal (&i.tm.operand_types[reg_slot],
 					  &regymm))
 		  && (operand_type_equal (&i.tm.operand_types[nds], &regxmm)
 		      || operand_type_equal (&i.tm.operand_types[nds],
 					     &regymm)));
       exp->X_op = O_constant;
       exp->X_add_number
-	= ((i.op[reg].regs->reg_num
-	    + ((i.op[reg].regs->reg_flags & RegRex) ? 8 : 0)) << 4);
+	= ((i.op[reg_slot].regs->reg_num
+	    + ((i.op[reg_slot].regs->reg_flags & RegRex) ? 8 : 0)) << 4);
       i.vex.register_specifier = i.op[nds].regs;
     }
   else
@@ -6110,7 +6111,7 @@ x86_cons_fix_new (fragS *frag, unsigned int off, unsigned int len,
    is non-null set it to the length of the string we removed from the
    input line.  Otherwise return NULL.  */
 static char *
-lex_got (enum bfd_reloc_code_real *reloc,
+lex_got (enum bfd_reloc_code_real *rel,
 	 int *adjust,
 	 i386_operand_type *types)
 {
@@ -6199,7 +6200,7 @@ lex_got (enum bfd_reloc_code_real *reloc,
 	      int first, second;
 	      char *tmpbuf, *past_reloc;
 
-	      *reloc = gotrel[j].rel[object_64bit];
+	      *rel = gotrel[j].rel[object_64bit];
 	      if (adjust)
 		*adjust = len;
 
@@ -7877,7 +7878,7 @@ size_t md_longopts_size = sizeof (md_longopts);
 int
 md_parse_option (int c, char *arg)
 {
-  unsigned int i;
+  unsigned int j;
   char *arch, *next;
 
   switch (c)
@@ -7963,16 +7964,16 @@ md_parse_option (int c, char *arg)
 	  next = strchr (arch, '+');
 	  if (next)
 	    *next++ = '\0';
-	  for (i = 0; i < ARRAY_SIZE (cpu_arch); i++)
+	  for (j = 0; j < ARRAY_SIZE (cpu_arch); j++)
 	    {
-	      if (strcmp (arch, cpu_arch [i].name) == 0)
+	      if (strcmp (arch, cpu_arch [j].name) == 0)
 		{
 		  /* Processor.  */
-		  cpu_arch_name = cpu_arch[i].name;
+		  cpu_arch_name = cpu_arch[j].name;
 		  cpu_sub_arch_name = NULL;
-		  cpu_arch_flags = cpu_arch[i].flags;
-		  cpu_arch_isa = cpu_arch[i].type;
-		  cpu_arch_isa_flags = cpu_arch[i].flags;
+		  cpu_arch_flags = cpu_arch[j].flags;
+		  cpu_arch_isa = cpu_arch[j].type;
+		  cpu_arch_isa_flags = cpu_arch[j].flags;
 		  if (!cpu_arch_tune_set)
 		    {
 		      cpu_arch_tune = cpu_arch_isa;
@@ -7980,37 +7981,37 @@ md_parse_option (int c, char *arg)
 		    }
 		  break;
 		}
-	      else if (*cpu_arch [i].name == '.'
-		       && strcmp (arch, cpu_arch [i].name + 1) == 0)
+	      else if (*cpu_arch [j].name == '.'
+		       && strcmp (arch, cpu_arch [j].name + 1) == 0)
 		{
 		  /* ISA entension.  */
 		  i386_cpu_flags flags;
 
 		  if (strncmp (arch, "no", 2))
 		    flags = cpu_flags_or (cpu_arch_flags,
-					  cpu_arch[i].flags);
+					  cpu_arch[j].flags);
 		  else
 		    flags = cpu_flags_and_not (cpu_arch_flags,
-					       cpu_arch[i].flags);
+					       cpu_arch[j].flags);
 		  if (!cpu_flags_equal (&flags, &cpu_arch_flags))
 		    {
 		      if (cpu_sub_arch_name)
 			{
 			  char *name = cpu_sub_arch_name;
 			  cpu_sub_arch_name = concat (name,
-						      cpu_arch[i].name,
+						      cpu_arch[j].name,
 						      (const char *) NULL);
 			  free (name);
 			}
 		      else
-			cpu_sub_arch_name = xstrdup (cpu_arch[i].name);
+			cpu_sub_arch_name = xstrdup (cpu_arch[j].name);
 		      cpu_arch_flags = flags;
 		    }
 		  break;
 		}
 	    }
 
-	  if (i >= ARRAY_SIZE (cpu_arch))
+	  if (j >= ARRAY_SIZE (cpu_arch))
 	    as_fatal (_("Invalid -march= option: `%s'"), arg);
 
 	  arch = next;
@@ -8021,17 +8022,17 @@ md_parse_option (int c, char *arg)
     case OPTION_MTUNE:
       if (*arg == '.')
 	as_fatal (_("Invalid -mtune= option: `%s'"), arg);
-      for (i = 0; i < ARRAY_SIZE (cpu_arch); i++)
+      for (j = 0; j < ARRAY_SIZE (cpu_arch); j++)
 	{
-	  if (strcmp (arg, cpu_arch [i].name) == 0)
+	  if (strcmp (arg, cpu_arch [j].name) == 0)
 	    {
 	      cpu_arch_tune_set = 1;
-	      cpu_arch_tune = cpu_arch [i].type;
-	      cpu_arch_tune_flags = cpu_arch[i].flags;
+	      cpu_arch_tune = cpu_arch [j].type;
+	      cpu_arch_tune_flags = cpu_arch[j].flags;
 	      break;
 	    }
 	}
-      if (i >= ARRAY_SIZE (cpu_arch))
+      if (j >= ARRAY_SIZE (cpu_arch))
 	as_fatal (_("Invalid -mtune= option: `%s'"), arg);
       break;
 
@@ -8713,12 +8714,12 @@ i386_solaris_fix_up_eh_frame (segT sec)
 void
 tc_pe_dwarf2_emit_offset (symbolS *symbol, unsigned int size)
 {
-  expressionS expr;
+  expressionS exp;
 
-  expr.X_op = O_secrel;
-  expr.X_add_symbol = symbol;
-  expr.X_add_number = 0;
-  emit_expr (&expr, size);
+  exp.X_op = O_secrel;
+  exp.X_add_symbol = symbol;
+  exp.X_add_number = 0;
+  emit_expr (&exp, size);
 }
 #endif
 

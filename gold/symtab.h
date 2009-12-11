@@ -220,8 +220,8 @@ class Symbol
 
   // Set the visibility.
   void
-  set_visibility(elfcpp::STV visibility)
-  { this->visibility_ = visibility; }
+  set_visibility(elfcpp::STV vis)
+  { this->visibility_ = vis; }
 
   // Override symbol visibility.
   void
@@ -368,15 +368,15 @@ class Symbol
   unsigned int
   got_offset(unsigned int got_type) const
   {
-    unsigned int got_offset = this->got_offsets_.get_offset(got_type);
-    gold_assert(got_offset != -1U);
-    return got_offset;
+    unsigned int got_off = this->got_offsets_.get_offset(got_type);
+    gold_assert(got_off != -1U);
+    return got_off;
   }
 
   // Set the GOT offset of this symbol.
   void
-  set_got_offset(unsigned int got_type, unsigned int got_offset)
-  { this->got_offsets_.set_offset(got_type, got_offset); }
+  set_got_offset(unsigned int got_type, unsigned int got_off)
+  { this->got_offsets_.set_offset(got_type, got_off); }
 
   // Return whether this symbol has an entry in the PLT section.
   bool
@@ -393,10 +393,10 @@ class Symbol
 
   // Set the PLT offset of this symbol.
   void
-  set_plt_offset(unsigned int plt_offset)
+  set_plt_offset(unsigned int plt_off)
   {
     this->has_plt_offset_ = true;
-    this->plt_offset_ = plt_offset;
+    this->plt_offset_ = plt_off;
   }
 
   // Return whether this dynamic symbol needs a special value in the
@@ -432,10 +432,10 @@ class Symbol
     bool is_ordinary;
     if (this->source_ != FROM_OBJECT)
       return this->source_ != IS_UNDEFINED;
-    unsigned int shndx = this->shndx(&is_ordinary);
+    unsigned int sec_shndx = this->shndx(&is_ordinary);
     return (is_ordinary
-	    ? shndx != elfcpp::SHN_UNDEF
-	    : !Symbol::is_common_shndx(shndx));
+	    ? sec_shndx != elfcpp::SHN_UNDEF
+	    : !Symbol::is_common_shndx(sec_shndx));
   }
 
   // Return true if this symbol is from a dynamic object.
@@ -481,8 +481,8 @@ class Symbol
     if (this->source_ != FROM_OBJECT)
       return false;
     bool is_ordinary;
-    unsigned int shndx = this->shndx(&is_ordinary);
-    return !is_ordinary && Symbol::is_common_shndx(shndx);
+    unsigned int sec_shndx = this->shndx(&is_ordinary);
+    return !is_ordinary && Symbol::is_common_shndx(sec_shndx);
   }
 
   // Return whether this symbol can be seen outside this object.
@@ -1004,14 +1004,14 @@ class Sized_symbol : public Symbol
 
   // Set the symbol size.  This is used when resolving common symbols.
   void
-  set_symsize(Size_type symsize)
-  { this->symsize_ = symsize; }
+  set_symsize(Size_type symsz)
+  { this->symsize_ = symsz; }
 
   // Set the symbol value.  This is called when we store the final
   // values of the symbols into the symbol table.
   void
-  set_value(Value_type value)
-  { this->value_ = value; }
+  set_value(Value_type val)
+  { this->value_ = val; }
 
   // Allocate a common symbol by giving it a location in the output
   // file.
@@ -1184,8 +1184,8 @@ class Symbol_table
   ~Symbol_table();
 
   void
-  set_icf(Icf* icf)
-  { this->icf_ = icf;}
+  set_icf(Icf* _icf)
+  { this->icf_ = _icf;}
 
   Icf*
   icf() const
@@ -1196,8 +1196,8 @@ class Symbol_table
   is_section_folded(Object* obj, unsigned int shndx) const;
 
   void
-  set_gc(Garbage_collection* gc)
-  { this->gc_ = gc; }
+  set_gc(Garbage_collection* garbage)
+  { this->gc_ = garbage; }
 
   Garbage_collection*
   gc() const

@@ -3961,7 +3961,7 @@ ppc_elf_check_relocs (bfd *abfd,
 		      || !h->def_regular)))
 	    {
 	      struct ppc_elf_dyn_relocs *p;
-	      struct ppc_elf_dyn_relocs **head;
+	      struct ppc_elf_dyn_relocs **rel_head;
 
 #ifdef DEBUG
 	      fprintf (stderr,
@@ -3986,7 +3986,7 @@ ppc_elf_check_relocs (bfd *abfd,
 		 relocations we need for this symbol.  */
 	      if (h != NULL)
 		{
-		  head = &ppc_elf_hash_entry (h)->dyn_relocs;
+		  rel_head = &ppc_elf_hash_entry (h)->dyn_relocs;
 		}
 	      else
 		{
@@ -4007,17 +4007,17 @@ ppc_elf_check_relocs (bfd *abfd,
 		    s = sec;
 
 		  vpp = &elf_section_data (s)->local_dynrel;
-		  head = (struct ppc_elf_dyn_relocs **) vpp;
+		  rel_head = (struct ppc_elf_dyn_relocs **) vpp;
 		}
 
-	      p = *head;
+	      p = *rel_head;
 	      if (p == NULL || p->sec != sec)
 		{
 		  p = bfd_alloc (htab->elf.dynobj, sizeof *p);
 		  if (p == NULL)
 		    return FALSE;
-		  p->next = *head;
-		  *head = p;
+		  p->next = *rel_head;
+		  *rel_head = p;
 		  p->sec = sec;
 		  p->count = 0;
 		  p->pc_count = 0;
@@ -5619,6 +5619,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       local_plt = (struct plt_entry **) end_local_got;
       end_local_plt = local_plt + locsymcount;
       lgot_masks = (char *) end_local_plt;
+
       for (; local_got < end_local_got; ++local_got, ++lgot_masks)
 	if (*local_got > 0)
 	  {
@@ -5662,7 +5663,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  for (ent = *local_plt; ent != NULL; ent = ent->next)
 	    if (ent->plt.refcount > 0)
 	      {
-		asection *s = htab->iplt;
+		s = htab->iplt;
 
 		if (!doneone)
 		  {
@@ -6018,7 +6019,7 @@ ppc_elf_relax_section (bfd *abfd,
   for (irel = internal_relocs; irel < irelend; irel++)
     {
       unsigned long r_type = ELF32_R_TYPE (irel->r_info);
-      bfd_vma reladdr, toff, roff;
+      bfd_vma toff, roff;
       asection *tsec;
       struct one_fixup *f;
       size_t insn_offset = 0;
@@ -6202,7 +6203,6 @@ ppc_elf_relax_section (bfd *abfd,
 	continue;
 
       roff = irel->r_offset;
-      reladdr = isec->output_section->vma + isec->output_offset + roff;
 
       /* If the branch is in range, no need to do anything.  */
       if (tsec != bfd_und_section_ptr
@@ -6698,7 +6698,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
   Elf_Internal_Rela outrel;
-  bfd_byte *loc;
   asection *got2, *sreloc = NULL;
   bfd_vma *local_got_offsets;
   bfd_boolean ret = TRUE;
@@ -6742,7 +6741,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
       reloc_howto_type *howto;
       unsigned long r_symndx;
       bfd_vma relocation;
-      bfd_vma branch_bit, insn, from;
+      bfd_vma branch_bit, from;
       bfd_boolean unresolved_reloc;
       bfd_boolean warned;
       unsigned int tls_type, tls_mask, tls_gd;
@@ -6840,6 +6839,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      && (tls_mask & TLS_TPREL) == 0)
 	    {
 	      bfd_vma insn;
+
 	      insn = bfd_get_32 (output_bfd, contents + rel->r_offset - d_offset);
 	      insn &= 31 << 21;
 	      insn |= 0x3c020000;	/* addis 0,2,0 */
@@ -7055,20 +7055,24 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  /* Branch not taken prediction relocations.  */
 	case R_PPC_ADDR14_BRNTAKEN:
 	case R_PPC_REL14_BRNTAKEN:
-	  insn = bfd_get_32 (output_bfd, contents + rel->r_offset);
-	  insn &= ~BRANCH_PREDICT_BIT;
-	  insn |= branch_bit;
+	  {
+	    bfd_vma insn;
 
-	  from = (rel->r_offset
-		  + input_section->output_offset
-		  + input_section->output_section->vma);
+	    insn = bfd_get_32 (output_bfd, contents + rel->r_offset);
+	    insn &= ~BRANCH_PREDICT_BIT;
+	    insn |= branch_bit;
 
-	  /* Invert 'y' bit if not the default.  */
-	  if ((bfd_signed_vma) (relocation + rel->r_addend - from) < 0)
-	    insn ^= BRANCH_PREDICT_BIT;
+	    from = (rel->r_offset
+		    + input_section->output_offset
+		    + input_section->output_section->vma);
 
-	  bfd_put_32 (output_bfd, insn, contents + rel->r_offset);
-	  break;
+	    /* Invert 'y' bit if not the default.  */
+	    if ((bfd_signed_vma) (relocation + rel->r_addend - from) < 0)
+	      insn ^= BRANCH_PREDICT_BIT;
+
+	    bfd_put_32 (output_bfd, insn, contents + rel->r_offset);
+	    break;
+	  }
 	}
 
       ifunc = NULL;
@@ -7299,6 +7303,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			    || h->root.type != bfd_link_hash_undefweak))
 		      {
 			asection *rsec = htab->relgot;
+			bfd_byte * loc;
 
 			outrel.r_offset = (htab->got->output_section->vma
 					   + htab->got->output_offset
@@ -7530,7 +7535,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  && !h->def_regular))
 	    {
 	      int skip;
-
+	      bfd_byte * loc;
 #ifdef DEBUG
 	      fprintf (stderr, "ppc_elf_relocate_section needs to "
 		       "create relocation for %s\n",
@@ -7920,7 +7925,9 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      }
 
 	    if (r_type == R_PPC_EMB_SDA21)
-	      {			/* fill in register field */
+	      {
+		bfd_vma insn;  /* Fill in register field.  */
+
 		insn = bfd_get_32 (output_bfd, contents + rel->r_offset);
 		insn = (insn & ~RA_REGISTER_MASK) | (reg << RA_REGISTER_SHIFT);
 		bfd_put_32 (output_bfd, insn, contents + rel->r_offset);

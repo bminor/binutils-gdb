@@ -2089,9 +2089,9 @@ get_plt_index (const struct elf_sh_plt_info *info, bfd_vma offset)
 /* Do the inverse operation.  */
 
 static bfd_vma
-get_plt_offset (const struct elf_sh_plt_info *info, bfd_vma index)
+get_plt_offset (const struct elf_sh_plt_info *info, bfd_vma plt_index)
 {
-  return info->plt0_entry_size + (index * info->symbol_entry_size);
+  return info->plt0_entry_size + (plt_index * info->symbol_entry_size);
 }
 
 /* The sh linker needs to keep track of the number of relocs that it
@@ -2316,7 +2316,7 @@ sh_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 {
   struct elf_sh_link_hash_table *htab;
   flagword flags, pltflags;
-  register asection *s;
+  asection *s;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   int ptralign = 0;
 
@@ -4043,7 +4043,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		}
 	      else
 		{
-		  int index;
+		  int target;
 
 		  /* IE->LE transition:
 		     mov.l 1f,r0; stc gbr,rN; mov.l @(r0,r12),rM;
@@ -4065,12 +4065,12 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		    }
 
 		  BFD_ASSERT ((insn & 0xff00) == 0xd000);
-		  index = insn & 0x00ff;
+		  target = insn & 0x00ff;
 		  insn = bfd_get_16 (input_bfd, contents + offset + 2);
 		  BFD_ASSERT ((insn & 0xf0ff) == 0x0012);
 		  insn = bfd_get_16 (input_bfd, contents + offset + 4);
 		  BFD_ASSERT ((insn & 0xf0ff) == 0x00ce);
-		  insn = 0xd000 | (insn & 0x0f00) | index;
+		  insn = 0xd000 | (insn & 0x0f00) | target;
 		  bfd_put_16 (output_bfd, insn, contents + offset + 0);
 		  bfd_put_16 (output_bfd, 0x0009, contents + offset + 4);
 		}

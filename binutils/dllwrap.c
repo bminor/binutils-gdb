@@ -1,5 +1,5 @@
 /* dllwrap.c -- wrapper for DLLTOOL and GCC to generate PE style DLLs
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2009
    Free Software Foundation, Inc.
    Contributed by Mumit Khan (khan@xraylith.wisc.edu).
 
@@ -182,20 +182,20 @@ warn VPARAMS ((const char *format, ...))
    appropriate.  */
 
 static char *
-look_for_prog (const char *prog_name, const char *prefix, int end_prefix)
+look_for_prog (const char *progname, const char *prefix, int end_prefix)
 {
   struct stat s;
   char *cmd;
 
   cmd = xmalloc (strlen (prefix)
-		 + strlen (prog_name)
+		 + strlen (progname)
 #ifdef HAVE_EXECUTABLE_SUFFIX
 		 + strlen (EXECUTABLE_SUFFIX)
 #endif
 		 + 10);
   strcpy (cmd, prefix);
 
-  sprintf (cmd + end_prefix, "%s", prog_name);
+  sprintf (cmd + end_prefix, "%s", progname);
 
   if (strchr (cmd, '/') != NULL)
     {
@@ -973,7 +973,6 @@ Creating one, but that may not be what you want"));
 
   if (! def_file_seen)
     {
-      int i;
       dyn_string_t step_pre1;
 
       step_pre1 = dyn_string_new (1024);

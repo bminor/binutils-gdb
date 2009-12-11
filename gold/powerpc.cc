@@ -890,10 +890,10 @@ template<int size, bool big_endian>
 void
 Output_data_plt_powerpc<size, big_endian>::do_write(Output_file* of)
 {
-  const off_t offset = this->offset();
+  const off_t off = this->offset();
   const section_size_type oview_size =
     convert_to_section_size_type(this->data_size());
-  unsigned char* const oview = of->get_output_view(offset, oview_size);
+  unsigned char* const oview = of->get_output_view(off, oview_size);
   unsigned char* pov = oview;
 
   memset(pov, 0, base_plt_entry_size * 4);
@@ -924,7 +924,7 @@ Output_data_plt_powerpc<size, big_endian>::do_write(Output_file* of)
 
   gold_assert(static_cast<section_size_type>(pov - oview) == oview_size);
 
-  of->write_output_view(offset, oview_size, oview);
+  of->write_output_view(off, oview_size, oview);
 }
 
 // Create a PLT entry for a global symbol.
@@ -1458,9 +1458,9 @@ Target_powerpc<size, big_endian>::gc_process_relocs(
 			const unsigned char* plocal_symbols)
 {
   typedef Target_powerpc<size, big_endian> Powerpc;
-  typedef typename Target_powerpc<size, big_endian>::Scan Scan;
+  typedef typename Target_powerpc<size, big_endian>::Scan scan;
 
-  gold::gc_process_relocs<size, big_endian, Powerpc, elfcpp::SHT_RELA, Scan>(
+  gold::gc_process_relocs<size, big_endian, Powerpc, elfcpp::SHT_RELA, scan>(
     symtab,
     layout,
     this,
@@ -1492,7 +1492,7 @@ Target_powerpc<size, big_endian>::scan_relocs(
 			const unsigned char* plocal_symbols)
 {
   typedef Target_powerpc<size, big_endian> Powerpc;
-  typedef typename Target_powerpc<size, big_endian>::Scan Scan;
+  typedef typename Target_powerpc<size, big_endian>::Scan scan;
   static Output_data_space* sdata;
 
   if (sh_type == elfcpp::SHT_REL)
@@ -1520,7 +1520,7 @@ Target_powerpc<size, big_endian>::scan_relocs(
 				  false, false);
   }
 
-  gold::scan_relocs<size, big_endian, Powerpc, elfcpp::SHT_RELA, Scan>(
+  gold::scan_relocs<size, big_endian, Powerpc, elfcpp::SHT_RELA, scan>(
     symtab,
     layout,
     this,
@@ -1992,17 +1992,17 @@ public:
 		       (big_endian ? "elf32-powerpc" : "elf32-powerpcle")))
   { }
 
-  Target* do_recognize(int machine, int, int)
+  Target* do_recognize(int amachine, int, int)
   {
     switch (size)
       {
       case 64:
-	if (machine != elfcpp::EM_PPC64)
+	if (amachine != elfcpp::EM_PPC64)
 	  return NULL;
 	break;
 
       case 32:
-	if (machine != elfcpp::EM_PPC)
+	if (amachine != elfcpp::EM_PPC)
 	  return NULL;
 	break;
 

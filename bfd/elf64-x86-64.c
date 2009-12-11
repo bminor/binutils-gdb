@@ -1504,7 +1504,6 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		     easily.  Oh well.  */
 		  asection *s;
 		  void **vpp;
-		  Elf_Internal_Sym *isym;
 
 		  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
 						abfd, r_symndx);
@@ -4226,11 +4225,11 @@ elf64_x86_64_add_symbol_hook (bfd *abfd,
 
 static bfd_boolean
 elf64_x86_64_elf_section_from_bfd_section (bfd *abfd ATTRIBUTE_UNUSED,
-					   asection *sec, int *index)
+					   asection *sec, int *index_return)
 {
   if (sec == &_bfd_elf_large_com_section)
     {
-      *index = SHN_X86_64_LCOMMON;
+      *index_return = SHN_X86_64_LCOMMON;
       return TRUE;
     }
   return FALSE;

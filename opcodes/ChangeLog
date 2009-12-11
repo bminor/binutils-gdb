@@ -1,3 +1,34 @@
+2009-12-11  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* arm-dis.c: Fix shadowed variable warnings.
+	* cgen-opc.c: Likewise.
+	* cr16-dis.c: Likewise.
+	* crx-dis.c: Likewise.
+	* d30v-dis.c: Likewise.
+	* fr30-dis.c: Likewise.
+	* frv-opc.c: Likewise.
+	* h8500-dis.c: Likewise.
+	* i386-dis.c: Likewise.
+	* i960-dis.c: Likewise.
+	* ia64-gen.c: Likewise.
+	* ia64-opc.c: Likewise.
+	* m32c-asm.c: Likewise.
+	* m32c-dis.c: Likewise.
+	* m68k-dis.c: Likewise.
+	* maxq-dis.c: Likewise.
+	* mcore-dis.c: Likewise.
+	* mep-asm.c: Likewise.
+	* microblaze-dis.c: Likewise.
+	* mmix-dis.c: Likewise.
+	* ns32k-dis.c: Likewise.
+	* or32-opc.c: Likewise.
+	* s390-dis.c: Likewise.
+	* sh64-dis.c: Likewise.
+	* spu-dis.c: Likewise.
+	* tic30-dis.c: Likewise.
+
 2009-12-09  Nick Clifton  <nickc@redhat.com>
 
 	PR 10924

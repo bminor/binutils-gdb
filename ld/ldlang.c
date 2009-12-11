@@ -305,7 +305,7 @@ typedef struct
 } section_iterator_callback_data;
 
 static bfd_boolean
-section_iterator_callback (bfd *bfd ATTRIBUTE_UNUSED, asection *s, void *data)
+section_iterator_callback (bfd *abfd ATTRIBUTE_UNUSED, asection *s, void *data)
 {
   section_iterator_callback_data *d = (section_iterator_callback_data *) data;
 
@@ -2204,9 +2204,6 @@ lang_add_section (lang_statement_list_type *ptr,
     {
       bfd_boolean first;
       lang_input_section_type *new_section;
-      flagword flags;
-
-      flags = section->flags;
 
       /* We don't copy the SEC_NEVER_LOAD flag from an input section
 	 to an output section, because we want to be able to include a
@@ -2214,7 +2211,6 @@ lang_add_section (lang_statement_list_type *ptr,
 	 section (I don't know why we want to do this, but we do).
 	 build_link_order in ldwrite.c handles this case by turning
 	 the embedded SEC_NEVER_LOAD section into a fill.  */
-
       flags &= ~ SEC_NEVER_LOAD;
 
       switch (output->sectype)
@@ -4618,12 +4614,12 @@ static void
 os_region_check (lang_output_section_statement_type *os,
 		 lang_memory_region_type *region,
 		 etree_type *tree,
-		 bfd_vma base)
+		 bfd_vma rbase)
 {
   if ((region->current < region->origin
        || (region->current - region->origin > region->length))
       && ((region->current != region->origin + region->length)
-	  || base == 0))
+	  || rbase == 0))
     {
       if (tree != NULL)
 	{

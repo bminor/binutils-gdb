@@ -1130,10 +1130,8 @@ lm32_elf_relocate_section (bfd *output_bfd,
 
       if (r != bfd_reloc_ok)
         {
-          const char *name;
           const char *msg = NULL;
           arelent bfd_reloc;
-          reloc_howto_type *howto;
 
           lm32_info_to_howto_rela (input_bfd, &bfd_reloc, rel);
           howto = bfd_reloc.howto;

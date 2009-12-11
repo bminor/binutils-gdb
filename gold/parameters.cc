@@ -1,6 +1,6 @@
 // parameters.cc -- general parameters for a link using gold
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -31,50 +31,50 @@ namespace gold
 {
 
 void
-Parameters::set_errors(Errors* errors)
+Parameters::set_errors(Errors* errs)
 {
   gold_assert(this->errors_ == NULL);
-  this->errors_ = errors;
+  this->errors_ = errs;
 }
 
 void
-Parameters::set_options(const General_options* options)
+Parameters::set_options(const General_options* opts)
 {
   gold_assert(!this->options_valid());
-  this->options_ = options;
+  this->options_ = opts;
   // For speed, we convert the options() debug var from a string to an
   // enum (from debug.h).
   this->debug_ = debug_string_to_enum(this->options().debug());
   // If --verbose is set, it acts as "--debug=files".
-  if (options->verbose())
+  if (opts->verbose())
     this->debug_ |= DEBUG_FILES;
 }
 
 void
-Parameters::set_doing_static_link(bool doing_static_link)
+Parameters::set_doing_static_link(bool doing_staticlink)
 {
   gold_assert(!this->doing_static_link_valid_);
-  this->doing_static_link_ = doing_static_link;
+  this->doing_static_link_ = doing_staticlink;
   this->doing_static_link_valid_ = true;
 }
 
 void
-Parameters::set_target(Target* target)
+Parameters::set_target(Target* targ)
 {
   if (!this->target_valid())
-    this->target_ = target;
+    this->target_ = targ;
   else
-    gold_assert(target == this->target_);
+    gold_assert(targ == this->target_);
 }
 
 // Return whether TARGET is compatible with the target we are using.
 
 bool
-Parameters::is_compatible_target(const Target* target) const
+Parameters::is_compatible_target(const Target* targ) const
 {
   if (this->target_ == NULL)
     return true;
-  return target == this->target_;
+  return targ == this->target_;
 }
 
 Parameters::Target_size_endianness

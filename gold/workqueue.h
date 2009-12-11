@@ -150,8 +150,8 @@ class Task_function : public Task
   // RUNNER and BLOCKER should be allocated using new, and will be
   // deleted after the task runs.
   Task_function(Task_function_runner* runner, Task_token* blocker,
-		const char* name)
-    : runner_(runner), blocker_(blocker), name_(name)
+		const char* tname)
+    : runner_(runner), blocker_(blocker), name_(tname)
   { }
 
   ~Task_function()

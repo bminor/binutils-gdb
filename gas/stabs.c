@@ -1,6 +1,6 @@
 /* Generic stabs parsing for gas.
    Copyright 1989, 1990, 1991, 1993, 1995, 1996, 1997, 1998, 2000, 2001
-   2002, 2003, 2004, 2005, 2007 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005, 2007, 2009  Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -517,7 +517,7 @@ generate_asm_file (int type, char *file)
   char sym[30];
   char *buf;
   char *tmp = file;
-  char *endp = file + strlen (file);
+  char *file_endp = file + strlen (file);
   char *bufp;
 
   if (last_file != NULL
@@ -540,7 +540,7 @@ generate_asm_file (int type, char *file)
 
   *bufp++ = '"';
 
-  while (tmp < endp)
+  while (tmp < file_endp)
     {
       char *bslash = strchr (tmp, '\\');
       size_t len = (bslash) ? (size_t) (bslash - tmp + 1) : strlen (tmp);

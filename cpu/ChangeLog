@@ -1,3 +1,8 @@
+2009-12-11  Nick Clifton  <nickc@redhat.com>
+
+	* frv.opc: Fix shadowed variable warnings.
+	* m32c.opc: Fix shadowed variable warnings.
+
 2009-11-14  Doug Evans  <dje@sebabeach.org>
 
 	Must use VOID expression in VOID context.

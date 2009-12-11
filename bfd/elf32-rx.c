@@ -303,7 +303,7 @@ rx_info_to_howto_rela (bfd *               abfd ATTRIBUTE_UNUSED,
 
 static bfd_vma
 get_symbol_value (const char *            name,
-		  bfd_reloc_status_type * stat,
+		  bfd_reloc_status_type * status,
 		  struct bfd_link_info *  info,
 		  bfd *                   input_bfd,
 		  asection *              input_section,
@@ -317,7 +317,7 @@ get_symbol_value (const char *            name,
   if (h == NULL
       || (h->type != bfd_link_hash_defined
 	  && h->type != bfd_link_hash_defweak))
-    * stat = info->callbacks->undefined_symbol
+    * status = info->callbacks->undefined_symbol
       (info, name, input_bfd, input_section, offset, TRUE);
   else
     value = (h->u.def.value
@@ -328,7 +328,7 @@ get_symbol_value (const char *            name,
 }
 
 static bfd_vma
-get_gp (bfd_reloc_status_type * stat,
+get_gp (bfd_reloc_status_type * status,
 	struct bfd_link_info *  info,
 	bfd *                   abfd,
 	asection *              sec,
@@ -339,14 +339,14 @@ get_gp (bfd_reloc_status_type * stat,
 
   if (!cached)
     {
-      cached_value = get_symbol_value ("__gp", stat, info, abfd, sec, offset);
+      cached_value = get_symbol_value ("__gp", status, info, abfd, sec, offset);
       cached = TRUE;
     }
   return cached_value;
 }
 
 static bfd_vma
-get_romstart (bfd_reloc_status_type * stat,
+get_romstart (bfd_reloc_status_type * status,
 	      struct bfd_link_info *  info,
 	      bfd *                   abfd,
 	      asection *              sec,
@@ -357,14 +357,14 @@ get_romstart (bfd_reloc_status_type * stat,
 
   if (!cached)
     {
-      cached_value = get_symbol_value ("_start", stat, info, abfd, sec, offset);
+      cached_value = get_symbol_value ("_start", status, info, abfd, sec, offset);
       cached = TRUE;
     }
   return cached_value;
 }
 
 static bfd_vma
-get_ramstart (bfd_reloc_status_type * stat,
+get_ramstart (bfd_reloc_status_type * status,
 	      struct bfd_link_info *  info,
 	      bfd *                   abfd,
 	      asection *              sec,
@@ -375,7 +375,7 @@ get_ramstart (bfd_reloc_status_type * stat,
 
   if (!cached)
     {
-      cached_value = get_symbol_value ("__datastart", stat, info, abfd, sec, offset);
+      cached_value = get_symbol_value ("__datastart", status, info, abfd, sec, offset);
       cached = TRUE;
     }
   return cached_value;
@@ -2062,9 +2062,9 @@ elf32_rx_relax_section (bfd *                  abfd,
 	  else if (code == 1 && symval/scale <= 31
 		   /* Decodable bits.  */
 		   && (insn[0] & 0xcc) == 0xcc
-		   /* width */
+		   /* Width.  */
 		   && (insn[0] & 0x30) != 3
-		   /* register MSBs */
+		   /* Register MSBs.  */
 		   && (insn[1] & 0x88)  == 0x00)
 	    {
 	      int newrel = 0;

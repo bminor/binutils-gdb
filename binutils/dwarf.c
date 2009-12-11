@@ -438,23 +438,23 @@ static abbrev_entry *last_abbrev = NULL;
 static void
 free_abbrevs (void)
 {
-  abbrev_entry *abbrev;
+  abbrev_entry *abbrv;
 
-  for (abbrev = first_abbrev; abbrev;)
+  for (abbrv = first_abbrev; abbrv;)
     {
-      abbrev_entry *next = abbrev->next;
+      abbrev_entry *next_abbrev = abbrv->next;
       abbrev_attr *attr;
 
-      for (attr = abbrev->first_attr; attr;)
+      for (attr = abbrv->first_attr; attr;)
 	{
-	  abbrev_attr *next = attr->next;
+	  abbrev_attr *next_attr = attr->next;
 
 	  free (attr);
-	  attr = next;
+	  attr = next_attr;
 	}
 
-      free (abbrev);
-      abbrev = next;
+      free (abbrv);
+      abbrv = next_abbrev;
     }
 
   last_abbrev = first_abbrev = NULL;
@@ -1355,19 +1355,19 @@ read_and_display_attr_value (unsigned long attribute,
     	  if (form == DW_FORM_data4 || form == DW_FORM_data8)
 	    {
 	      /* Process location list.  */
-	      unsigned int max = debug_info_p->max_loc_offsets;
+	      unsigned int lmax = debug_info_p->max_loc_offsets;
 	      unsigned int num = debug_info_p->num_loc_offsets;
 
-	      if (max == 0 || num >= max)
+	      if (lmax == 0 || num >= lmax)
 		{
-		  max += 1024;
+		  lmax += 1024;
 		  debug_info_p->loc_offsets = (long unsigned int *)
                       xcrealloc (debug_info_p->loc_offsets,
-				 max, sizeof (*debug_info_p->loc_offsets));
+				 lmax, sizeof (*debug_info_p->loc_offsets));
 		  debug_info_p->have_frame_base = (int *)
                       xcrealloc (debug_info_p->have_frame_base,
-				 max, sizeof (*debug_info_p->have_frame_base));
-		  debug_info_p->max_loc_offsets = max;
+				 lmax, sizeof (*debug_info_p->have_frame_base));
+		  debug_info_p->max_loc_offsets = lmax;
 		}
 	      debug_info_p->loc_offsets [num] = uvalue;
 	      debug_info_p->have_frame_base [num] = have_frame_base;
@@ -1384,16 +1384,16 @@ read_and_display_attr_value (unsigned long attribute,
 	  if (form == DW_FORM_data4 || form == DW_FORM_data8)
 	    {
 	      /* Process range list.  */
-	      unsigned int max = debug_info_p->max_range_lists;
+	      unsigned int lmax = debug_info_p->max_range_lists;
 	      unsigned int num = debug_info_p->num_range_lists;
 
-	      if (max == 0 || num >= max)
+	      if (lmax == 0 || num >= lmax)
 		{
-		  max += 1024;
+		  lmax += 1024;
 		  debug_info_p->range_lists = (long unsigned int *)
                       xcrealloc (debug_info_p->range_lists,
-				 max, sizeof (*debug_info_p->range_lists));
-		  debug_info_p->max_range_lists = max;
+				 lmax, sizeof (*debug_info_p->range_lists));
+		  debug_info_p->max_range_lists = lmax;
 		}
 	      debug_info_p->range_lists [num] = uvalue;
 	      debug_info_p->num_range_lists++;
@@ -2226,7 +2226,7 @@ display_debug_lines_raw (struct dwarf_section *section,
 
   while (data < end)
     {
-      DWARF2_Internal_LineInfo info;
+      DWARF2_Internal_LineInfo linfo;
       unsigned char *standard_opcodes;
       unsigned char *end_of_sequence;
       unsigned char *hdrptr;
@@ -2239,13 +2239,13 @@ display_debug_lines_raw (struct dwarf_section *section,
       hdroff = hdrptr - start;
 
       /* Check the length of the block.  */
-      info.li_length = byte_get (hdrptr, 4);
+      linfo.li_length = byte_get (hdrptr, 4);
       hdrptr += 4;
 
-      if (info.li_length == 0xffffffff)
+      if (linfo.li_length == 0xffffffff)
 	{
 	  /* This section is 64-bit DWARF 3.  */
-	  info.li_length = byte_get (hdrptr, 8);
+	  linfo.li_length = byte_get (hdrptr, 8);
 	  hdrptr += 8;
 	  offset_size = 8;
 	  initial_length_size = 12;
@@ -2256,7 +2256,7 @@ display_debug_lines_raw (struct dwarf_section *section,
 	  initial_length_size = 4;
 	}
 
-      if (info.li_length + initial_length_size > section->size)
+      if (linfo.li_length + initial_length_size > section->size)
 	{
 	  warn
 	    (_("The information in section %s appears to be corrupt - the section is too small\n"),
@@ -2265,55 +2265,55 @@ display_debug_lines_raw (struct dwarf_section *section,
 	}
 
       /* Check its version number.  */
-      info.li_version = byte_get (hdrptr, 2);
+      linfo.li_version = byte_get (hdrptr, 2);
       hdrptr += 2;
-      if (info.li_version != 2 && info.li_version != 3)
+      if (linfo.li_version != 2 && linfo.li_version != 3)
 	{
 	  warn (_("Only DWARF version 2 and 3 line info is currently supported.\n"));
 	  return 0;
 	}
 
-      info.li_prologue_length = byte_get (hdrptr, offset_size);
+      linfo.li_prologue_length = byte_get (hdrptr, offset_size);
       hdrptr += offset_size;
-      info.li_min_insn_length = byte_get (hdrptr, 1);
+      linfo.li_min_insn_length = byte_get (hdrptr, 1);
       hdrptr++;
-      info.li_default_is_stmt = byte_get (hdrptr, 1);
+      linfo.li_default_is_stmt = byte_get (hdrptr, 1);
       hdrptr++;
-      info.li_line_base = byte_get (hdrptr, 1);
+      linfo.li_line_base = byte_get (hdrptr, 1);
       hdrptr++;
-      info.li_line_range = byte_get (hdrptr, 1);
+      linfo.li_line_range = byte_get (hdrptr, 1);
       hdrptr++;
-      info.li_opcode_base = byte_get (hdrptr, 1);
+      linfo.li_opcode_base = byte_get (hdrptr, 1);
       hdrptr++;
 
       /* Sign extend the line base field.  */
-      info.li_line_base <<= 24;
-      info.li_line_base >>= 24;
+      linfo.li_line_base <<= 24;
+      linfo.li_line_base >>= 24;
 
       printf (_("  Offset:                      0x%lx\n"), hdroff);
-      printf (_("  Length:                      %ld\n"), info.li_length);
-      printf (_("  DWARF Version:               %d\n"), info.li_version);
-      printf (_("  Prologue Length:             %d\n"), info.li_prologue_length);
-      printf (_("  Minimum Instruction Length:  %d\n"), info.li_min_insn_length);
-      printf (_("  Initial value of 'is_stmt':  %d\n"), info.li_default_is_stmt);
-      printf (_("  Line Base:                   %d\n"), info.li_line_base);
-      printf (_("  Line Range:                  %d\n"), info.li_line_range);
-      printf (_("  Opcode Base:                 %d\n"), info.li_opcode_base);
+      printf (_("  Length:                      %ld\n"), linfo.li_length);
+      printf (_("  DWARF Version:               %d\n"), linfo.li_version);
+      printf (_("  Prologue Length:             %d\n"), linfo.li_prologue_length);
+      printf (_("  Minimum Instruction Length:  %d\n"), linfo.li_min_insn_length);
+      printf (_("  Initial value of 'is_stmt':  %d\n"), linfo.li_default_is_stmt);
+      printf (_("  Line Base:                   %d\n"), linfo.li_line_base);
+      printf (_("  Line Range:                  %d\n"), linfo.li_line_range);
+      printf (_("  Opcode Base:                 %d\n"), linfo.li_opcode_base);
 
-      end_of_sequence = data + info.li_length + initial_length_size;
+      end_of_sequence = data + linfo.li_length + initial_length_size;
 
-      reset_state_machine (info.li_default_is_stmt);
+      reset_state_machine (linfo.li_default_is_stmt);
 
       /* Display the contents of the Opcodes table.  */
       standard_opcodes = hdrptr;
 
       printf (_("\n Opcodes:\n"));
 
-      for (i = 1; i < info.li_opcode_base; i++)
+      for (i = 1; i < linfo.li_opcode_base; i++)
 	printf (_("  Opcode %d has %d args\n"), i, standard_opcodes[i - 1]);
 
       /* Display the contents of the Directory table.  */
-      data = standard_opcodes + info.li_opcode_base - 1;
+      data = standard_opcodes + linfo.li_opcode_base - 1;
 
       if (*data == 0)
 	printf (_("\n The Directory Table is empty.\n"));
@@ -2375,14 +2375,14 @@ display_debug_lines_raw (struct dwarf_section *section,
 
 	  op_code = *data++;
 
-	  if (op_code >= info.li_opcode_base)
+	  if (op_code >= linfo.li_opcode_base)
 	    {
-	      op_code -= info.li_opcode_base;
-	      uladv = (op_code / info.li_line_range) * info.li_min_insn_length;
+	      op_code -= linfo.li_opcode_base;
+	      uladv = (op_code / linfo.li_line_range) * linfo.li_min_insn_length;
 	      state_machine_regs.address += uladv;
 	      printf (_("  Special opcode %d: advance Address by %lu to 0x%lx"),
 		      op_code, uladv, state_machine_regs.address);
-	      adv = (op_code % info.li_line_range) + info.li_line_base;
+	      adv = (op_code % linfo.li_line_range) + linfo.li_line_base;
 	      state_machine_regs.line += adv;
 	      printf (_(" and Line by %d to %d\n"),
 		      adv, state_machine_regs.line);
@@ -2390,7 +2390,7 @@ display_debug_lines_raw (struct dwarf_section *section,
 	  else switch (op_code)
 	    {
 	    case DW_LNS_extended_op:
-	      data += process_extended_line_op (data, info.li_default_is_stmt);
+	      data += process_extended_line_op (data, linfo.li_default_is_stmt);
 	      break;
 
 	    case DW_LNS_copy:
@@ -2399,7 +2399,7 @@ display_debug_lines_raw (struct dwarf_section *section,
 
 	    case DW_LNS_advance_pc:
 	      uladv = read_leb128 (data, & bytes_read, 0);
-	      uladv *= info.li_min_insn_length;
+	      uladv *= linfo.li_min_insn_length;
 	      data += bytes_read;
 	      state_machine_regs.address += uladv;
 	      printf (_("  Advance PC by %lu to 0x%lx\n"), uladv,
@@ -2442,8 +2442,8 @@ display_debug_lines_raw (struct dwarf_section *section,
 	      break;
 
 	    case DW_LNS_const_add_pc:
-	      uladv = (((255 - info.li_opcode_base) / info.li_line_range)
-		      * info.li_min_insn_length);
+	      uladv = (((255 - linfo.li_opcode_base) / linfo.li_line_range)
+		      * linfo.li_min_insn_length);
 	      state_machine_regs.address += uladv;
 	      printf (_("  Advance PC by constant %lu to 0x%lx\n"), uladv,
 		      state_machine_regs.address);
@@ -2511,7 +2511,7 @@ display_debug_lines_decoded (struct dwarf_section *section,
   while (data < end)
     {
       /* This loop amounts to one iteration per compilation unit.  */
-      DWARF2_Internal_LineInfo info;
+      DWARF2_Internal_LineInfo linfo;
       unsigned char *standard_opcodes;
       unsigned char *end_of_sequence;
       unsigned char *hdrptr;
@@ -2528,13 +2528,13 @@ display_debug_lines_decoded (struct dwarf_section *section,
         (section 6.2.4 in the Dwarf3 doc).  */
 
       /* Get the length of this CU's line number information block.  */
-      info.li_length = byte_get (hdrptr, 4);
+      linfo.li_length = byte_get (hdrptr, 4);
       hdrptr += 4;
 
-      if (info.li_length == 0xffffffff)
+      if (linfo.li_length == 0xffffffff)
         {
           /* This section is 64-bit DWARF 3.  */
-          info.li_length = byte_get (hdrptr, 8);
+          linfo.li_length = byte_get (hdrptr, 8);
           hdrptr += 8;
           offset_size = 8;
           initial_length_size = 12;
@@ -2545,7 +2545,7 @@ display_debug_lines_decoded (struct dwarf_section *section,
           initial_length_size = 4;
         }
 
-      if (info.li_length + initial_length_size > section->size)
+      if (linfo.li_length + initial_length_size > section->size)
         {
           warn (_("The line info appears to be corrupt - "
                   "the section is too small\n"));
@@ -2553,47 +2553,46 @@ display_debug_lines_decoded (struct dwarf_section *section,
         }
 
       /* Get this CU's Line Number Block version number.  */
-      info.li_version = byte_get (hdrptr, 2);
+      linfo.li_version = byte_get (hdrptr, 2);
       hdrptr += 2;
-      if (info.li_version != 2 && info.li_version != 3)
+      if (linfo.li_version != 2 && linfo.li_version != 3)
         {
           warn (_("Only DWARF version 2 and 3 line info is currently "
                 "supported.\n"));
           return 0;
         }
 
-      info.li_prologue_length = byte_get (hdrptr, offset_size);
+      linfo.li_prologue_length = byte_get (hdrptr, offset_size);
       hdrptr += offset_size;
-      info.li_min_insn_length = byte_get (hdrptr, 1);
+      linfo.li_min_insn_length = byte_get (hdrptr, 1);
       hdrptr++;
-      info.li_default_is_stmt = byte_get (hdrptr, 1);
+      linfo.li_default_is_stmt = byte_get (hdrptr, 1);
       hdrptr++;
-      info.li_line_base = byte_get (hdrptr, 1);
+      linfo.li_line_base = byte_get (hdrptr, 1);
       hdrptr++;
-      info.li_line_range = byte_get (hdrptr, 1);
+      linfo.li_line_range = byte_get (hdrptr, 1);
       hdrptr++;
-      info.li_opcode_base = byte_get (hdrptr, 1);
+      linfo.li_opcode_base = byte_get (hdrptr, 1);
       hdrptr++;
 
       /* Sign extend the line base field.  */
-      info.li_line_base <<= 24;
-      info.li_line_base >>= 24;
+      linfo.li_line_base <<= 24;
+      linfo.li_line_base >>= 24;
 
       /* Find the end of this CU's Line Number Information Block.  */
-      end_of_sequence = data + info.li_length + initial_length_size;
+      end_of_sequence = data + linfo.li_length + initial_length_size;
 
-      reset_state_machine (info.li_default_is_stmt);
+      reset_state_machine (linfo.li_default_is_stmt);
 
       /* Save a pointer to the contents of the Opcodes table.  */
       standard_opcodes = hdrptr;
 
       /* Traverse the Directory table just to count entries.  */
-      data = standard_opcodes + info.li_opcode_base - 1;
+      data = standard_opcodes + linfo.li_opcode_base - 1;
       if (*data != 0)
         {
           unsigned int n_directories = 0;
           unsigned char *ptr_directory_table = data;
-          int i;
 
 	  while (*data != 0)
 	    {
@@ -2621,7 +2620,6 @@ display_debug_lines_decoded (struct dwarf_section *section,
         {
           unsigned int n_files = 0;
           unsigned char *ptr_file_name_table = data;
-          int i;
 
           while (*data != 0)
             {
@@ -2700,13 +2698,13 @@ display_debug_lines_decoded (struct dwarf_section *section,
           op_code = *data++;
           prev_line = state_machine_regs.line;
 
-          if (op_code >= info.li_opcode_base)
+          if (op_code >= linfo.li_opcode_base)
 	    {
-	      op_code -= info.li_opcode_base;
-              uladv = (op_code / info.li_line_range) * info.li_min_insn_length;
+	      op_code -= linfo.li_opcode_base;
+              uladv = (op_code / linfo.li_line_range) * linfo.li_min_insn_length;
               state_machine_regs.address += uladv;
 
-              adv = (op_code % info.li_line_range) + info.li_line_base;
+              adv = (op_code % linfo.li_line_range) + linfo.li_line_base;
               state_machine_regs.line += adv;
               is_special_opcode = 1;
             }
@@ -2715,7 +2713,6 @@ display_debug_lines_decoded (struct dwarf_section *section,
             case DW_LNS_extended_op:
               {
                 unsigned int ext_op_code_len;
-                unsigned int bytes_read;
                 unsigned char ext_op_code;
                 unsigned char *op_code_data = data;
 
@@ -2733,7 +2730,7 @@ display_debug_lines_decoded (struct dwarf_section *section,
                 switch (ext_op_code)
                   {
                   case DW_LNE_end_sequence:
-                    reset_state_machine (info.li_default_is_stmt);
+                    reset_state_machine (linfo.li_default_is_stmt);
                     break;
                   case DW_LNE_set_address:
                     state_machine_regs.address =
@@ -2766,7 +2763,7 @@ display_debug_lines_decoded (struct dwarf_section *section,
 
             case DW_LNS_advance_pc:
               uladv = read_leb128 (data, & bytes_read, 0);
-              uladv *= info.li_min_insn_length;
+              uladv *= linfo.li_min_insn_length;
               data += bytes_read;
               state_machine_regs.address += uladv;
               break;
@@ -2813,8 +2810,8 @@ display_debug_lines_decoded (struct dwarf_section *section,
               break;
 
             case DW_LNS_const_add_pc:
-              uladv = (((255 - info.li_opcode_base) / info.li_line_range)
-                       * info.li_min_insn_length);
+              uladv = (((255 - linfo.li_opcode_base) / linfo.li_line_range)
+                       * linfo.li_min_insn_length);
               state_machine_regs.address += uladv;
               break;
 
@@ -2949,7 +2946,7 @@ static int
 display_debug_pubnames (struct dwarf_section *section,
 			void *file ATTRIBUTE_UNUSED)
 {
-  DWARF2_Internal_PubNames pubnames;
+  DWARF2_Internal_PubNames names;
   unsigned char *start = section->start;
   unsigned char *end = start + section->size;
 
@@ -2967,11 +2964,11 @@ display_debug_pubnames (struct dwarf_section *section,
 
       data = start;
 
-      pubnames.pn_length = byte_get (data, 4);
+      names.pn_length = byte_get (data, 4);
       data += 4;
-      if (pubnames.pn_length == 0xffffffff)
+      if (names.pn_length == 0xffffffff)
 	{
-	  pubnames.pn_length = byte_get (data, 8);
+	  names.pn_length = byte_get (data, 8);
 	  data += 8;
 	  offset_size = 8;
 	  initial_length_size = 12;
@@ -2982,24 +2979,24 @@ display_debug_pubnames (struct dwarf_section *section,
 	  initial_length_size = 4;
 	}
 
-      pubnames.pn_version = byte_get (data, 2);
+      names.pn_version = byte_get (data, 2);
       data += 2;
 
-      pubnames.pn_offset = byte_get (data, offset_size);
+      names.pn_offset = byte_get (data, offset_size);
       data += offset_size;
 
       if (num_debug_info_entries != DEBUG_INFO_UNAVAILABLE
 	  && num_debug_info_entries > 0
-	  && find_debug_info_for_offset (pubnames.pn_offset) == NULL)
+	  && find_debug_info_for_offset (names.pn_offset) == NULL)
 	warn (_(".debug_info offset of 0x%lx in %s section does not point to a CU header.\n"),
-	      pubnames.pn_offset, section->name);
+	      names.pn_offset, section->name);
 
-      pubnames.pn_size = byte_get (data, offset_size);
+      names.pn_size = byte_get (data, offset_size);
       data += offset_size;
 
-      start += pubnames.pn_length + initial_length_size;
+      start += names.pn_length + initial_length_size;
 
-      if (pubnames.pn_version != 2 && pubnames.pn_version != 3)
+      if (names.pn_version != 2 && names.pn_version != 3)
 	{
 	  static int warned = 0;
 
@@ -3013,13 +3010,13 @@ display_debug_pubnames (struct dwarf_section *section,
 	}
 
       printf (_("  Length:                              %ld\n"),
-	      pubnames.pn_length);
+	      names.pn_length);
       printf (_("  Version:                             %d\n"),
-	      pubnames.pn_version);
+	      names.pn_version);
       printf (_("  Offset into .debug_info section:     0x%lx\n"),
-	      pubnames.pn_offset);
+	      names.pn_offset);
       printf (_("  Size of area in .debug_info section: %ld\n"),
-	      pubnames.pn_size);
+	      names.pn_size);
 
       printf (_("\n    Offset\tName\n"));
 
@@ -3464,7 +3461,7 @@ display_debug_aranges (struct dwarf_section *section,
     {
       unsigned char *hdrptr;
       DWARF2_Internal_ARange arange;
-      unsigned char *ranges;
+      unsigned char *addr_ranges;
       dwarf_vma length;
       dwarf_vma address;
       unsigned char address_size;
@@ -3536,24 +3533,24 @@ display_debug_aranges (struct dwarf_section *section,
       else
 	printf (_("\n    Address    Length\n"));
 
-      ranges = hdrptr;
+      addr_ranges = hdrptr;
 
       /* Must pad to an alignment boundary that is twice the address size.  */
       excess = (hdrptr - start) % (2 * address_size);
       if (excess)
-	ranges += (2 * address_size) - excess;
+	addr_ranges += (2 * address_size) - excess;
 
       start += arange.ar_length + initial_length_size;
 
-      while (ranges + 2 * address_size <= start)
+      while (addr_ranges + 2 * address_size <= start)
 	{
-	  address = byte_get (ranges, address_size);
+	  address = byte_get (addr_ranges, address_size);
 
-	  ranges += address_size;
+	  addr_ranges += address_size;
 
-	  length  = byte_get (ranges, address_size);
+	  length  = byte_get (addr_ranges, address_size);
 
-	  ranges += address_size;
+	  addr_ranges += address_size;
 
 	  printf ("    ");
 	  print_dwarf_vma (address, address_size);
@@ -3880,11 +3877,11 @@ frame_display_row (Frame_Chunk *fc, int *need_col_headers, int *max_regs)
 
   if (*need_col_headers)
     {
-      static const char *loc = "   LOC";
+      static const char *sloc = "   LOC";
 
       *need_col_headers = 0;
 
-      printf ("%-*s CFA      ", eh_addr_size * 2, loc);
+      printf ("%-*s CFA      ", eh_addr_size * 2, sloc);
 
       for (r = 0; r < *max_regs; r++)
 	if (fc->col_type[r] != DW_CFA_unreferenced)
@@ -4218,7 +4215,7 @@ display_debug_frames (struct dwarf_section *section,
 	  while (start < block_end)
 	    {
 	      unsigned op, opa;
-	      unsigned long reg, tmp;
+	      unsigned long reg, temp;
 
 	      op = *start++;
 	      opa = op & 0x3f;
@@ -4289,14 +4286,14 @@ display_debug_frames (struct dwarf_section *section,
 		  LEB ();
 		  break;
 		case DW_CFA_def_cfa_expression:
-		  tmp = LEB ();
-		  start += tmp;
+		  temp = LEB ();
+		  start += temp;
 		  break;
 		case DW_CFA_expression:
 		case DW_CFA_val_expression:
 		  reg = LEB ();
-		  tmp = LEB ();
-		  start += tmp;
+		  temp = LEB ();
+		  start += temp;
 		  if (frame_need_space (fc, reg) >= 0)
 		    fc->col_type[reg] = DW_CFA_undefined;
 		  break;
@@ -4918,10 +4915,10 @@ dwarf_select_sections_by_names (const char *names)
 void
 dwarf_select_sections_by_letters (const char *letters)
 {
-  unsigned int index = 0;
+  unsigned int lindex = 0;
 
-  while (letters[index])
-    switch (letters[index++])
+  while (letters[lindex])
+    switch (letters[lindex++])
       {
       case 'i':
 	do_debug_info = 1;

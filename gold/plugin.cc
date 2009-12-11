@@ -318,7 +318,7 @@ Plugin_manager::claim_file(Input_file* input_file, off_t offset,
 void
 Plugin_manager::all_symbols_read(Workqueue* workqueue, Task* task,
                                  Input_objects* input_objects,
-	                         Symbol_table* symtab, Layout* layout,
+	                         Symbol_table* symtab, Layout* alayout,
 	                         Dirsearch* dirpath, Mapfile* mapfile,
 	                         Task_token** last_blocker)
 {
@@ -327,7 +327,7 @@ Plugin_manager::all_symbols_read(Workqueue* workqueue, Task* task,
   this->task_ = task;
   this->input_objects_ = input_objects;
   this->symtab_ = symtab;
-  this->layout_ = layout;
+  this->layout_ = alayout;
   this->dirpath_ = dirpath;
   this->mapfile_ = mapfile;
   this->this_blocker_ = NULL;
@@ -446,10 +446,10 @@ Plugin_manager::add_input_file(char *pathname, bool is_lib)
 
 // Class Pluginobj.
 
-Pluginobj::Pluginobj(const std::string& name, Input_file* input_file,
-                     off_t offset, off_t filesize)
-  : Object(name, input_file, false, offset),
-    nsyms_(0), syms_(NULL), symbols_(), filesize_(filesize), comdat_map_()
+Pluginobj::Pluginobj(const std::string& aname, Input_file* ainput_file,
+                     off_t aoffset, off_t afilesize)
+  : Object(aname, ainput_file, false, aoffset),
+    nsyms_(0), syms_(NULL), symbols_(), filesize_(afilesize), comdat_map_()
 {
 }
 
@@ -521,7 +521,7 @@ Pluginobj::get_symbol_resolution_info(int nsyms, ld_plugin_symbol* syms) const
 // should be kept.
 
 bool
-Pluginobj::include_comdat_group(std::string comdat_key, Layout* layout)
+Pluginobj::include_comdat_group(std::string comdat_key, Layout* alayout)
 {
   std::pair<Comdat_map::iterator, bool> ins =
     this->comdat_map_.insert(std::make_pair(comdat_key, false));
@@ -529,9 +529,9 @@ Pluginobj::include_comdat_group(std::string comdat_key, Layout* layout)
   // If this is the first time we've seen this comdat key, ask the
   // layout object whether it should be included.
   if (ins.second)
-    ins.first->second = layout->find_or_add_kept_section(comdat_key,
-							 NULL, 0, true,
-							 true, NULL);
+    ins.first->second = alayout->find_or_add_kept_section(comdat_key,
+							  NULL, 0, true,
+							  true, NULL);
 
   return ins.first->second;
 }
@@ -540,11 +540,11 @@ Pluginobj::include_comdat_group(std::string comdat_key, Layout* layout)
 
 template<int size, bool big_endian>
 Sized_pluginobj<size, big_endian>::Sized_pluginobj(
-    const std::string& name,
-    Input_file* input_file,
-    off_t offset,
-    off_t filesize)
-  : Pluginobj(name, input_file, offset, filesize)
+    const std::string& aname,
+    Input_file* ainput_file,
+    off_t aoffset,
+    off_t afilesize)
+  : Pluginobj(aname, ainput_file, aoffset, afilesize)
 {
 }
 
@@ -573,7 +573,7 @@ template<int size, bool big_endian>
 void
 Sized_pluginobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
                                                   Read_symbols_data*,
-                                                  Layout* layout)
+                                                  Layout* alayout)
 {
   const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
   unsigned char symbuf[sym_size];
@@ -587,14 +587,14 @@ Sized_pluginobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
   for (int i = 0; i < this->nsyms_; ++i)
     {
       const struct ld_plugin_symbol *isym = &this->syms_[i];
-      const char* name = isym->name;
+      const char* aname = isym->name;
       const char* ver = isym->version;
       elfcpp::Elf_Half shndx;
       elfcpp::STB bind;
       elfcpp::STV vis;
 
-      if (name != NULL && name[0] == '\0')
-        name = NULL;
+      if (aname != NULL && aname[0] == '\0')
+        aname = NULL;
       if (ver != NULL && ver[0] == '\0')
         ver = NULL;
 
@@ -647,7 +647,7 @@ Sized_pluginobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
 
       if (isym->comdat_key != NULL
           && isym->comdat_key[0] != '\0'
-          && !this->include_comdat_group(isym->comdat_key, layout))
+          && !this->include_comdat_group(isym->comdat_key, alayout))
         shndx = elfcpp::SHN_UNDEF;
 
       osym.put_st_name(0);
@@ -658,7 +658,7 @@ Sized_pluginobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
       osym.put_st_shndx(shndx);
 
       this->symbols_[i] =
-        symtab->add_from_pluginobj<size, big_endian>(this, name, ver, &sym);
+        symtab->add_from_pluginobj<size, big_endian>(this, aname, ver, &sym);
     }
 }
 

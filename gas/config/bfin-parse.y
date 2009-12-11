@@ -193,10 +193,10 @@ yyerror (char *msg)
 }
 
 static int
-in_range_p (Expr_Node *expr, int from, int to, unsigned int mask)
+in_range_p (Expr_Node *exp, int from, int to, unsigned int mask)
 {
-  int val = EXPR_VALUE (expr);
-  if (expr->type != Expr_Node_Constant)
+  int val = EXPR_VALUE (exp);
+  if (exp->type != Expr_Node_Constant)
     return 0;
   if (val < from || val > to)
     return 0;
@@ -4411,13 +4411,13 @@ mkexpr (int x, SYMBOL_T s)
 }
 
 static int
-value_match (Expr_Node *expr, int sz, int sign, int mul, int issigned)
+value_match (Expr_Node *exp, int sz, int sign, int mul, int issigned)
 {
   int umax = (1 << sz) - 1;
   int min = -1 << (sz - 1);
   int max = (1 << (sz - 1)) - 1;
 	
-  int v = (EXPR_VALUE (expr)) & 0xffffffff;
+  int v = (EXPR_VALUE (exp)) & 0xffffffff;
 
   if ((v % mul) != 0)
     {

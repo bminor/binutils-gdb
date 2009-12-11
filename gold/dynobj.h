@@ -330,10 +330,10 @@ class Version_base
 
   // Set the version index.
   void
-  set_index(unsigned int index)
+  set_index(unsigned int vindex)
   {
     gold_assert(this->index_ == -1U);
-    this->index_ = index;
+    this->index_ = vindex;
   }
 
   // Clear the weak flag in a version definition.
@@ -354,10 +354,10 @@ class Version_base
 class Verdef : public Version_base
 {
  public:
-  Verdef(const char* name, const std::vector<std::string>& deps,
-         bool is_base, bool is_weak, bool is_symbol_created)
-    : name_(name), deps_(deps), is_base_(is_base), is_weak_(is_weak),
-      is_symbol_created_(is_symbol_created)
+  Verdef(const char* vname, const std::vector<std::string>& deps,
+         bool is_base, bool vis_weak, bool vis_symbol_created)
+    : name_(vname), deps_(deps), is_base_(is_base), is_weak_(vis_weak),
+      is_symbol_created_(vis_symbol_created)
   { }
 
   // Return the version name.
@@ -373,8 +373,8 @@ class Verdef : public Version_base
   // Add a dependency to this version.  The NAME should be
   // canonicalized in the dynamic Stringpool.
   void
-  add_dependency(const char* name)
-  { this->deps_.push_back(name); }
+  add_dependency(const char* dname)
+  { this->deps_.push_back(dname); }
 
   // Return whether this definition is weak.
   bool
@@ -424,8 +424,8 @@ class Verdef : public Version_base
 class Verneed_version : public Version_base
 {
  public:
-  Verneed_version(const char* version)
-    : version_(version)
+  Verneed_version(const char* ver)
+    : version_(ver)
   { }
 
   // Return the version name.
@@ -450,8 +450,8 @@ class Verneed_version : public Version_base
 class Verneed
 {
  public:
-  Verneed(const char* filename)
-    : filename_(filename), need_versions_()
+  Verneed(const char* fname)
+    : filename_(fname), need_versions_()
   { }
 
   ~Verneed();

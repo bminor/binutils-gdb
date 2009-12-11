@@ -2188,7 +2188,7 @@ v850_elf_relax_delete_bytes (bfd *abfd,
   Elf32_External_Sym *extsyms;
   Elf32_External_Sym *esym;
   Elf32_External_Sym *esymend;
-  int index;
+  int sym_index;
   unsigned int sec_shndx;
   bfd_byte *contents;
   Elf_Internal_Rela *irel;
@@ -2336,12 +2336,12 @@ v850_elf_relax_delete_bytes (bfd *abfd,
   esym = extsyms + symtab_hdr->sh_info;
   esymend = extsyms + (symtab_hdr->sh_size / sizeof (Elf32_External_Sym));
 
-  for (index = 0; esym < esymend; esym ++, index ++)
+  for (sym_index = 0; esym < esymend; esym ++, sym_index ++)
     {
       Elf_Internal_Sym isym;
 
       bfd_elf32_swap_symbol_in (abfd, esym, shndx, & isym);
-      sym_hash = elf_sym_hashes (abfd) [index];
+      sym_hash = elf_sym_hashes (abfd) [sym_index];
 
       if (isym.st_shndx == sec_shndx
 	  && ((sym_hash)->root.type == bfd_link_hash_defined

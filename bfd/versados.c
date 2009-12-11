@@ -399,9 +399,9 @@ process_otr (bfd *abfd, struct ext_otr *otr, int pass)
 
 	      for (j = 0; j < esdids; j++)
 		{
-		  int esdid = *srcp++;
+		  int id = *srcp++;
 
-		  if (esdid)
+		  if (id)
 		    {
 		      int rn = EDATA (abfd, otr->esdid - 1).relocs++;
 
@@ -416,7 +416,7 @@ process_otr (bfd *abfd, struct ext_otr *otr, int pass)
 			  EDATA (abfd, otr->esdid - 1).section->relocation + rn;
 			  n->address = dst_idx;
 
-			  n->sym_ptr_ptr = (asymbol **) (size_t) esdid;
+			  n->sym_ptr_ptr = (asymbol **) (size_t) id;
 			  n->addend = 0;
 			  n->howto = versados_howto_table + ((j & 1) * 2) + (sizeinwords - 1);
 			}

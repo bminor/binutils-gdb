@@ -93,15 +93,15 @@ Eh_frame_hdr::Eh_frame_hdr(Output_section* eh_frame_section,
 void
 Eh_frame_hdr::set_final_data_size()
 {
-  unsigned int data_size = eh_frame_hdr_size + 4;
+  unsigned int datasize = eh_frame_hdr_size + 4;
   if (!this->any_unrecognized_eh_frame_sections_)
     {
       unsigned int fde_count = this->eh_frame_data_->fde_count();
       if (fde_count != 0)
-	data_size += 4 + 8 * fde_count;
+	datasize += 4 + 8 * fde_count;
       this->fde_offsets_.reserve(fde_count);
     }
-  this->set_data_size(data_size);
+  this->set_data_size(datasize);
 }
 
 // Write the data to the flie.
@@ -332,11 +332,11 @@ Fde::write(unsigned char* oview, section_offset_type offset,
 {
   gold_assert((offset & (addralign - 1)) == 0);
 
-  size_t length = this->contents_.length();
+  size_t len = this->contents_.length();
 
   // We add 8 when getting the aligned length to account for the
   // length word and the CIE offset.
-  size_t aligned_full_length = align_address(length + 8, addralign);
+  size_t aligned_full_length = align_address(len + 8, addralign);
 
   // Write the length of the FDE as a 32-bit word.  The length word
   // does not include the four bytes of the length word itself, but it
@@ -353,10 +353,10 @@ Fde::write(unsigned char* oview, section_offset_type offset,
   // Copy the rest of the FDE.  Note that this is run before
   // relocation processing is done on this section, so the relocations
   // will later be applied to the FDE data.
-  memcpy(oview + offset + 8, this->contents_.data(), length);
+  memcpy(oview + offset + 8, this->contents_.data(), len);
 
-  if (aligned_full_length > length + 8)
-    memset(oview + offset + length + 8, 0, aligned_full_length - (length + 8));
+  if (aligned_full_length > len + 8)
+    memset(oview + offset + len + 8, 0, aligned_full_length - (len + 8));
 
   // Tell the exception frame header about this FDE.
   if (eh_frame_hdr != NULL)
@@ -934,16 +934,16 @@ Eh_frame::read_fde(Sized_relobj<size, big_endian>* object,
 		   const unsigned char* symbols,
 		   section_size_type symbols_size,
 		   const unsigned char* pcontents,
-		   unsigned int offset,
+		   unsigned int fde_offset,
 		   const unsigned char* pfde,
 		   const unsigned char *pfdeend,
 		   Track_relocs<size, big_endian>* relocs,
 		   Offsets_to_cie* cies)
 {
-  // OFFSET is the distance between the 4 bytes before PFDE to the
+  // FDE_OFFSET is the distance between the 4 bytes before PFDE to the
   // start of the CIE.  The offset we recorded for the CIE is 8 bytes
   // after the start of the CIE--after the length and the zero tag.
-  unsigned int cie_offset = (pfde - 4 - pcontents) - offset + 8;
+  unsigned int cie_offset = (pfde - 4 - pcontents) - fde_offset + 8;
   Offsets_to_cie::const_iterator pcie = cies->find(cie_offset);
   if (pcie == cies->end())
     return false;
@@ -1026,38 +1026,38 @@ Eh_frame::set_final_data_size()
       return;
     }
 
-  section_offset_type output_offset = 0;
+  section_offset_type out_offset = 0;
 
   for (Unmergeable_cie_offsets::iterator p =
 	 this->unmergeable_cie_offsets_.begin();
        p != this->unmergeable_cie_offsets_.end();
        ++p)
-    output_offset = (*p)->set_output_offset(output_offset,
-					    this->addralign(),
-					    &this->merge_map_);
+    out_offset = (*p)->set_output_offset(out_offset,
+					 this->addralign(),
+					 &this->merge_map_);
 
   for (Cie_offsets::iterator p = this->cie_offsets_.begin();
        p != this->cie_offsets_.end();
        ++p)
-    output_offset = (*p)->set_output_offset(output_offset,
-					    this->addralign(),
-					    &this->merge_map_);
+    out_offset = (*p)->set_output_offset(out_offset,
+					 this->addralign(),
+					 &this->merge_map_);
 
   this->mappings_are_done_ = true;
-  this->final_data_size_ = output_offset;
+  this->final_data_size_ = out_offset;
 
-  gold_assert((output_offset & (this->addralign() - 1)) == 0);
-  this->set_data_size(output_offset);
+  gold_assert((out_offset & (this->addralign() - 1)) == 0);
+  this->set_data_size(out_offset);
 }
 
 // Return an output offset for an input offset.
 
 bool
 Eh_frame::do_output_offset(const Relobj* object, unsigned int shndx,
-			   section_offset_type offset,
+			   section_offset_type foffset,
 			   section_offset_type* poutput) const
 {
-  return this->merge_map_.get_output_offset(object, shndx, offset, poutput);
+  return this->merge_map_.get_output_offset(object, shndx, foffset, poutput);
 }
 
 // Return whether this is the merge section for an input section.
@@ -1074,9 +1074,9 @@ Eh_frame::do_is_merge_section_for(const Relobj* object,
 void
 Eh_frame::do_write(Output_file* of)
 {
-  const off_t offset = this->offset();
+  const off_t foffset = this->offset();
   const off_t oview_size = this->data_size();
-  unsigned char* const oview = of->get_output_view(offset, oview_size);
+  unsigned char* const oview = of->get_output_view(foffset, oview_size);
 
   switch (parameters->size_and_endianness())
     {
@@ -1104,7 +1104,7 @@ Eh_frame::do_write(Output_file* of)
       gold_unreachable();
     }
 
-  of->write_output_view(offset, oview_size, oview);
+  of->write_output_view(foffset, oview_size, oview);
 }
 
 // Write the data to the output file--template version.
@@ -1113,18 +1113,18 @@ template<int size, bool big_endian>
 void
 Eh_frame::do_sized_write(unsigned char* oview)
 {
-  unsigned int addralign = this->addralign();
+  unsigned int addr_align = this->addralign();
   section_offset_type o = 0;
   for (Unmergeable_cie_offsets::iterator p =
 	 this->unmergeable_cie_offsets_.begin();
        p != this->unmergeable_cie_offsets_.end();
        ++p)
-    o = (*p)->write<size, big_endian>(oview, o, addralign,
+    o = (*p)->write<size, big_endian>(oview, o, addr_align,
                                       this->eh_frame_hdr_);
   for (Cie_offsets::iterator p = this->cie_offsets_.begin();
        p != this->cie_offsets_.end();
        ++p)
-    o = (*p)->write<size, big_endian>(oview, o, addralign,
+    o = (*p)->write<size, big_endian>(oview, o, addr_align,
                                       this->eh_frame_hdr_);
 }
 

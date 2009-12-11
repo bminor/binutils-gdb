@@ -3277,26 +3277,26 @@ static debug_type *
 stab_find_slot (struct stab_handle *info, const int *typenums)
 {
   int filenum;
-  int index;
+  int tindex;
   struct stab_types **ps;
 
   filenum = typenums[0];
-  index = typenums[1];
+  tindex = typenums[1];
 
   if (filenum < 0 || (unsigned int) filenum >= info->files)
     {
       fprintf (stderr, _("Type file number %d out of range\n"), filenum);
       return NULL;
     }
-  if (index < 0)
+  if (tindex < 0)
     {
-      fprintf (stderr, _("Type index number %d out of range\n"), index);
+      fprintf (stderr, _("Type index number %d out of range\n"), tindex);
       return NULL;
     }
 
   ps = info->file_types + filenum;
 
-  while (index >= STAB_TYPES_SLOTS)
+  while (tindex >= STAB_TYPES_SLOTS)
     {
       if (*ps == NULL)
 	{
@@ -3304,7 +3304,7 @@ stab_find_slot (struct stab_handle *info, const int *typenums)
 	  memset (*ps, 0, sizeof **ps);
 	}
       ps = &(*ps)->next;
-      index -= STAB_TYPES_SLOTS;
+      tindex -= STAB_TYPES_SLOTS;
     }
   if (*ps == NULL)
     {
@@ -3312,7 +3312,7 @@ stab_find_slot (struct stab_handle *info, const int *typenums)
       memset (*ps, 0, sizeof **ps);
     }
 
-  return (*ps)->types + index;
+  return (*ps)->types + tindex;
 }
 
 /* Find a type given a type number.  If the type has not been

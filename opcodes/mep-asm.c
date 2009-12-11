@@ -633,7 +633,7 @@ expand_macro (arg *args, int narg, macro *mac)
   char *result = 0, *rescanned_result = 0;
   char *e = mac->expansion;
   char *mark = e;
-  int arg = 0;
+  int mac_arg = 0;
 
   /*  printf("expanding macro %s with %d args\n", mac->name, narg + 1); */
   while (*e)
@@ -644,9 +644,9 @@ expand_macro (arg *args, int narg, macro *mac)
 	  ((*(e + 1) - '1') <= narg))
 	{
 	  result = str_append (result, mark, e - mark);
-	  arg = (*(e + 1) - '1');
-	  /* printf("replacing `%d with %s\n", arg+1, args[arg].start); */
-	  result = str_append (result, args[arg].start, args[arg].len);
+	  mac_arg = (*(e + 1) - '1');
+	  /* printf("replacing `%d with %s\n", mac_arg+1, args[mac_arg].start); */
+	  result = str_append (result, args[mac_arg].start, args[mac_arg].len);
 	  ++e;
 	  mark = e+1;
 	}
@@ -678,8 +678,7 @@ expand_string (const char *in, int first_only)
   arg args[MAXARGS];
   int state = IN_TEXT;
   const char *mark = in;
-  macro *macro = 0;
-
+  macro *pmacro = NULL;
   char *expansion = 0;
   char *result = 0;
 
@@ -690,18 +689,18 @@ expand_string (const char *in, int first_only)
 	case IN_TEXT:
 	  if (*in == '%' && *(in + 1) && (!first_only || num_expansions == 0)) 
 	    {	      
-	      macro = lookup_macro (in + 1);
-	      if (macro)
+	      pmacro = lookup_macro (in + 1);
+	      if (pmacro)
 		{
 		  /* printf("entering state %d at '%s'...\n", state, in); */
 		  result = str_append (result, mark, in - mark);
 		  mark = in;
-		  in += 1 + strlen (macro->name);
+		  in += 1 + strlen (pmacro->name);
 		  while (*in == ' ') ++in;
 		  if (*in != '(')
 		    {
 		      state = IN_TEXT;		      
-		      macro = 0;
+		      pmacro = NULL;
 		    }
 		  else
 		    {
@@ -727,10 +726,10 @@ expand_string (const char *in, int first_only)
 		case ')':
 		  state = IN_TEXT;
 		  /* printf("entering state %d at '%s'...\n", state, in); */
-		  if (macro)
+		  if (pmacro)
 		    {
 		      expansion = 0;
-		      expansion = expand_macro (args, narg, macro);
+		      expansion = expand_macro (args, narg, pmacro);
 		      num_expansions++;
 		      if (expansion)
 			{
@@ -742,7 +741,7 @@ expand_string (const char *in, int first_only)
 		    {
 		      result = str_append (result, mark, in - mark);
 		    }
-		  macro = 0;
+		  pmacro = NULL;
 		  mark = in + 1;
 		  break;
 		case '(':

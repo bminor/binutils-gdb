@@ -533,15 +533,15 @@ _bfd_sparc_elf_mkobject (bfd *abfd)
 }
 
 static void
-sparc_put_word_32 (bfd *bfd, bfd_vma val, void *ptr)
+sparc_put_word_32 (bfd *abfd, bfd_vma val, void *ptr)
 {
-  bfd_put_32 (bfd, val, ptr);
+  bfd_put_32 (abfd, val, ptr);
 }
 
 static void
-sparc_put_word_64 (bfd *bfd, bfd_vma val, void *ptr)
+sparc_put_word_64 (bfd *abfd, bfd_vma val, void *ptr)
 {
-  bfd_put_64 (bfd, val, ptr);
+  bfd_put_64 (abfd, val, ptr);
 }
 
 static void
@@ -557,10 +557,10 @@ sparc_elf_append_rela (bfd *abfd, asection *s, Elf_Internal_Rela *rel)
 
 static bfd_vma
 sparc_elf_r_info_64 (Elf_Internal_Rela *in_rel ATTRIBUTE_UNUSED,
-		     bfd_vma index ATTRIBUTE_UNUSED,
+		     bfd_vma rel_index ATTRIBUTE_UNUSED,
 		     bfd_vma type ATTRIBUTE_UNUSED)
 {
-  return ELF64_R_INFO (index,
+  return ELF64_R_INFO (rel_index,
 		       (in_rel ?
 			ELF64_R_TYPE_INFO (ELF64_R_TYPE_DATA (in_rel->r_info),
 					   type) : type));
@@ -568,9 +568,9 @@ sparc_elf_r_info_64 (Elf_Internal_Rela *in_rel ATTRIBUTE_UNUSED,
 
 static bfd_vma
 sparc_elf_r_info_32 (Elf_Internal_Rela *in_rel ATTRIBUTE_UNUSED,
-		     bfd_vma index, bfd_vma type)
+		     bfd_vma rel_index, bfd_vma type)
 {
-  return ELF32_R_INFO (index, type);
+  return ELF32_R_INFO (rel_index, type);
 }
 
 static bfd_vma
@@ -634,7 +634,7 @@ sparc64_plt_entry_build (bfd *output_bfd, asection *splt, bfd_vma offset,
 {
   unsigned char *entry = splt->contents + offset;
   const unsigned int nop = SPARC_NOP;
-  int index;
+  int plt_index;
 
   if (offset < (PLT64_LARGE_THRESHOLD * PLT64_ENTRY_SIZE))
     {
@@ -642,9 +642,9 @@ sparc64_plt_entry_build (bfd *output_bfd, asection *splt, bfd_vma offset,
 
       *r_offset = offset;
 
-      index = (offset / PLT64_ENTRY_SIZE);
+      plt_index = (offset / PLT64_ENTRY_SIZE);
 
-      sethi = 0x03000000 | (index * PLT64_ENTRY_SIZE);
+      sethi = 0x03000000 | (plt_index * PLT64_ENTRY_SIZE);
       ba = 0x30680000
 	| (((splt->contents + PLT64_ENTRY_SIZE) - (entry + 4)) / 4 & 0x7ffff);
 
@@ -691,7 +691,7 @@ sparc64_plt_entry_build (bfd *output_bfd, asection *splt, bfd_vma offset,
 
       ofs = offset % block_size;
 
-      index = (PLT64_LARGE_THRESHOLD +
+      plt_index = (PLT64_LARGE_THRESHOLD +
 	       (block * 160) +
 	       (ofs / insn_chunk_size));
 
@@ -721,7 +721,7 @@ sparc64_plt_entry_build (bfd *output_bfd, asection *splt, bfd_vma offset,
       bfd_put_64 (output_bfd, (bfd_vma) (splt->contents - (entry + 4)), ptr);
     }
 
-  return index - 4;
+  return plt_index - 4;
 }
 
 /* The format of the first PLT entry in a VxWorks executable.  */

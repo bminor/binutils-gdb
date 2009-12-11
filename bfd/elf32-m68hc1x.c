@@ -379,7 +379,6 @@ elf32_m68hc11_size_stubs (bfd *output_bfd, bfd *stub_bfd,
        input_bfd = input_bfd->link_next, bfd_indx++)
     {
       Elf_Internal_Shdr *symtab_hdr;
-      Elf_Internal_Sym *local_syms;
       struct elf_link_hash_entry ** sym_hashes;
 
       sym_hashes = elf_sym_hashes (input_bfd);

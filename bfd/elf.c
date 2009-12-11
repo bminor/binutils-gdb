@@ -734,18 +734,18 @@ _bfd_elf_setup_sections (bfd *abfd)
 	    }
 	  else
 	    {
-	      asection *link = NULL;
+	      asection *linksec = NULL;
 
 	      if (elfsec < elf_numsections (abfd))
 		{
 		  this_hdr = elf_elfsections (abfd)[elfsec];
-		  link = this_hdr->bfd_section;
+		  linksec = this_hdr->bfd_section;
 		}
 
 	      /* PR 1991, 2008:
 		 Some strip/objcopy may leave an incorrect value in
 		 sh_link.  We don't want to proceed.  */
-	      if (link == NULL)
+	      if (linksec == NULL)
 		{
 		  (*_bfd_error_handler)
 		    (_("%B: sh_link [%d] in section `%A' is incorrect"),
@@ -753,7 +753,7 @@ _bfd_elf_setup_sections (bfd *abfd)
 		  result = FALSE;
 		}
 
-	      elf_linked_to_section (s) = link;
+	      elf_linked_to_section (s) = linksec;
 	    }
 	}
     }
@@ -1961,11 +1961,11 @@ bfd_sym_from_r_symndx (struct sym_cache *cache,
    section.  */
 
 asection *
-bfd_section_from_elf_index (bfd *abfd, unsigned int index)
+bfd_section_from_elf_index (bfd *abfd, unsigned int sec_index)
 {
-  if (index >= elf_numsections (abfd))
+  if (sec_index >= elf_numsections (abfd))
     return NULL;
-  return elf_elfsections (abfd)[index]->bfd_section;
+  return elf_elfsections (abfd)[sec_index]->bfd_section;
 }
 
 static const struct bfd_elf_special_section special_sections_b[] =
@@ -2266,7 +2266,7 @@ _bfd_elf_new_section_hook (bfd *abfd, asection *sec)
 bfd_boolean
 _bfd_elf_make_section_from_phdr (bfd *abfd,
 				 Elf_Internal_Phdr *hdr,
-				 int index,
+				 int hdr_index,
 				 const char *type_name)
 {
   asection *newsect;
@@ -2281,7 +2281,7 @@ _bfd_elf_make_section_from_phdr (bfd *abfd,
 
   if (hdr->p_filesz > 0)
     {
-      sprintf (namebuf, "%s%d%s", type_name, index, split ? "a" : "");
+      sprintf (namebuf, "%s%d%s", type_name, hdr_index, split ? "a" : "");
       len = strlen (namebuf) + 1;
       name = (char *) bfd_alloc (abfd, len);
       if (!name)
@@ -2317,7 +2317,7 @@ _bfd_elf_make_section_from_phdr (bfd *abfd,
     {
       bfd_vma align;
 
-      sprintf (namebuf, "%s%d%s", type_name, index, split ? "b" : "");
+      sprintf (namebuf, "%s%d%s", type_name, hdr_index, split ? "b" : "");
       len = strlen (namebuf) + 1;
       name = (char *) bfd_alloc (abfd, len);
       if (!name)
@@ -2356,51 +2356,51 @@ _bfd_elf_make_section_from_phdr (bfd *abfd,
 }
 
 bfd_boolean
-bfd_section_from_phdr (bfd *abfd, Elf_Internal_Phdr *hdr, int index)
+bfd_section_from_phdr (bfd *abfd, Elf_Internal_Phdr *hdr, int hdr_index)
 {
   const struct elf_backend_data *bed;
 
   switch (hdr->p_type)
     {
     case PT_NULL:
-      return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "null");
+      return _bfd_elf_make_section_from_phdr (abfd, hdr, hdr_index, "null");
 
     case PT_LOAD:
-      return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "load");
+      return _bfd_elf_make_section_from_phdr (abfd, hdr, hdr_index, "load");
 
     case PT_DYNAMIC:
-      return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "dynamic");
+      return _bfd_elf_make_section_from_phdr (abfd, hdr, hdr_index, "dynamic");
 
     case PT_INTERP:
-      return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "interp");
+      return _bfd_elf_make_section_from_phdr (abfd, hdr, hdr_index, "interp");
 
     case PT_NOTE:
-      if (! _bfd_elf_make_section_from_phdr (abfd, hdr, index, "note"))
+      if (! _bfd_elf_make_section_from_phdr (abfd, hdr, hdr_index, "note"))
 	return FALSE;
       if (! elf_read_notes (abfd, hdr->p_offset, hdr->p_filesz))
 	return FALSE;
       return TRUE;
 
     case PT_SHLIB:
-      return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "shlib");
+      return _bfd_elf_make_section_from_phdr (abfd, hdr, hdr_index, "shlib");
 
     case PT_PHDR:
-      return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "phdr");
+      return _bfd_elf_make_section_from_phdr (abfd, hdr, hdr_index, "phdr");
 
     case PT_GNU_EH_FRAME:
-      return _bfd_elf_make_section_from_phdr (abfd, hdr, index,
+      return _bfd_elf_make_section_from_phdr (abfd, hdr, hdr_index,
 					      "eh_frame_hdr");
 
     case PT_GNU_STACK:
-      return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "stack");
+      return _bfd_elf_make_section_from_phdr (abfd, hdr, hdr_index, "stack");
 
     case PT_GNU_RELRO:
-      return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "relro");
+      return _bfd_elf_make_section_from_phdr (abfd, hdr, hdr_index, "relro");
 
     default:
       /* Check for any processor-specific program segment types.  */
       bed = get_elf_backend_data (abfd);
-      return bed->elf_backend_section_from_phdr (abfd, hdr, index, "proc");
+      return bed->elf_backend_section_from_phdr (abfd, hdr, hdr_index, "proc");
     }
 }
 
@@ -2894,9 +2894,10 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 
   for (sec = abfd->sections; sec; sec = sec->next)
     {
-      struct bfd_elf_section_data *d = elf_section_data (sec);
       asection *s;
       const char *name;
+
+      d = elf_section_data (sec);
 
       i_shdrp[d->this_idx] = &d->this_hdr;
       if (d->rel_idx != 0)
@@ -3860,7 +3861,8 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	      && CONST_STRNEQ (s->name, ".note"))
 	    {
 	      asection *s2;
-	      unsigned count = 1;
+
+	      count = 1;
 	      amt = sizeof (struct elf_segment_map);
 	      if (s->alignment_power == 2)
 		for (s2 = s; s2->next != NULL; s2 = s2->next)
@@ -3903,8 +3905,6 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
       /* If there are any SHF_TLS output sections, add PT_TLS segment.  */
       if (tls_count > 0)
 	{
-	  int i;
-
 	  amt = sizeof (struct elf_segment_map);
 	  amt += (tls_count - 1) * sizeof (asection *);
 	  m = (struct elf_segment_map *) bfd_zalloc (abfd, amt);
@@ -3916,7 +3916,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	  /* Mandated PF_R.  */
 	  m->p_flags = PF_R;
 	  m->p_flags_valid = 1;
-	  for (i = 0; i < tls_count; ++i)
+	  for (i = 0; i < (unsigned int) tls_count; ++i)
 	    {
 	      BFD_ASSERT (first_tls->flags & SEC_THREAD_LOCAL);
 	      m->sections[i] = first_tls;
@@ -5042,34 +5042,34 @@ unsigned int
 _bfd_elf_section_from_bfd_section (bfd *abfd, struct bfd_section *asect)
 {
   const struct elf_backend_data *bed;
-  unsigned int index;
+  unsigned int sec_index;
 
   if (elf_section_data (asect) != NULL
       && elf_section_data (asect)->this_idx != 0)
     return elf_section_data (asect)->this_idx;
 
   if (bfd_is_abs_section (asect))
-    index = SHN_ABS;
+    sec_index = SHN_ABS;
   else if (bfd_is_com_section (asect))
-    index = SHN_COMMON;
+    sec_index = SHN_COMMON;
   else if (bfd_is_und_section (asect))
-    index = SHN_UNDEF;
+    sec_index = SHN_UNDEF;
   else
-    index = SHN_BAD;
+    sec_index = SHN_BAD;
 
   bed = get_elf_backend_data (abfd);
   if (bed->elf_backend_section_from_bfd_section)
     {
-      int retval = index;
+      int retval = sec_index;
 
       if ((*bed->elf_backend_section_from_bfd_section) (abfd, asect, &retval))
 	return retval;
     }
 
-  if (index == SHN_BAD)
+  if (sec_index == SHN_BAD)
     bfd_set_error (bfd_error_nonrepresentable_section);
 
-  return index;
+  return sec_index;
 }
 
 /* Given a BFD symbol, return the index in the ELF symbol table, or -1
@@ -9011,7 +9011,7 @@ _bfd_elf_get_synthetic_symtab (bfd *abfd,
       if (p->addend != 0)
 	{
 	  char buf[30], *a;
-	  int len;
+	  
 	  memcpy (names, "+0x", sizeof ("+0x") - 1);
 	  names += sizeof ("+0x") - 1;
 	  bfd_sprintf_vma (abfd, buf, p->addend);

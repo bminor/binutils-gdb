@@ -1134,6 +1134,7 @@ Expr_Node_Gen_Reloc_R (Expr_Node * head)
 
 #define INIT(t)  t c_code = init_##t
 #define ASSIGN(x) c_code.opcode |= ((x & c_code.mask_##x)<<c_code.bits_##x)
+#define ASSIGNF(x,f) c_code.opcode |= ((x & c_code.mask_##f)<<c_code.bits_##f)
 #define ASSIGN_R(x) c_code.opcode |= (((x ? (x->regno & CODE_MASK) : 0) & c_code.mask_##x)<<c_code.bits_##x)
 
 #define HI(x) ((x >> 16) & 0xffff)
@@ -1302,13 +1303,13 @@ bfin_gen_calla (Expr_Node * addr, int S)
 {
   int val;
   int high_val;
-  int reloc = 0;
+  int rel = 0;
   INIT (CALLa);
 
   switch(S){
-   case 0 : reloc = BFD_RELOC_BFIN_24_PCREL_JUMP_L; break;
-   case 1 : reloc = BFD_RELOC_24_PCREL; break;
-   case 2 : reloc = BFD_RELOC_BFIN_PLTPC; break;
+   case 0 : rel = BFD_RELOC_BFIN_24_PCREL_JUMP_L; break;
+   case 1 : rel = BFD_RELOC_24_PCREL; break;
+   case 2 : rel = BFD_RELOC_BFIN_PLTPC; break;
    default : break;
   }
 
@@ -1318,7 +1319,7 @@ bfin_gen_calla (Expr_Node * addr, int S)
   high_val = val >> 16;
 
   return conscode (gencode (HI (c_code.opcode) | (high_val & 0xff)),
-                     Expr_Node_Gen_Reloc (addr, reloc));
+                     Expr_Node_Gen_Reloc (addr, rel));
   }
 
 INSTR_T
@@ -1336,7 +1337,7 @@ bfin_gen_linkage (int R, int framesize)
 /* Load and Store.  */
 
 INSTR_T
-bfin_gen_ldimmhalf (REG_T reg, int H, int S, int Z, Expr_Node * phword, int reloc)
+bfin_gen_ldimmhalf (REG_T reg, int H, int S, int Z, Expr_Node * phword, int rel)
 {
   int grp, hword;
   unsigned val = EXPR_VALUE (phword);
@@ -1349,11 +1350,11 @@ bfin_gen_ldimmhalf (REG_T reg, int H, int S, int Z, Expr_Node * phword, int relo
   ASSIGN_R (reg);
   grp = (GROUP (reg));
   ASSIGN (grp);
-  if (reloc == 2)
+  if (rel == 2)
     {
       return conscode (gencode (HI (c_code.opcode)), Expr_Node_Gen_Reloc (phword, BFD_RELOC_BFIN_16_IMM));
     }
-  else if (reloc == 1)
+  else if (rel == 1)
     {
       return conscode (gencode (HI (c_code.opcode)), Expr_Node_Gen_Reloc (phword, IS_H (*reg) ? BFD_RELOC_BFIN_16_HIGH : BFD_RELOC_BFIN_16_LOW));
     }
@@ -1450,12 +1451,11 @@ bfin_gen_ldst (REG_T ptr, REG_T reg, int aop, int sz, int Z, int W)
 }
 
 INSTR_T
-bfin_gen_ldstii (REG_T ptr, REG_T reg, Expr_Node * poffset, int W, int op)
+bfin_gen_ldstii (REG_T ptr, REG_T reg, Expr_Node * poffset, int W, int opc)
 {
   int offset;
   int value = 0;
   INIT (LDSTii);
-
 
   if (!IS_PREG (*ptr))
     {
@@ -1463,7 +1463,7 @@ bfin_gen_ldstii (REG_T ptr, REG_T reg, Expr_Node * poffset, int W, int op)
       return 0;
     }
 
-  switch (op)
+  switch (opc)
     {
     case 1:
     case 2:
@@ -1481,7 +1481,7 @@ bfin_gen_ldstii (REG_T ptr, REG_T reg, Expr_Node * poffset, int W, int op)
   offset = value;
   ASSIGN (offset);
   ASSIGN (W);
-  ASSIGN (op);
+  ASSIGNF (opc, op);
 
   return GEN_OPCODE16 ();
 }
@@ -1580,48 +1580,48 @@ bfin_gen_alu2op (REG_T dst, REG_T src, int opc)
 }
 
 INSTR_T
-bfin_gen_compi2opd (REG_T dst, int src, int op)
+bfin_gen_compi2opd (REG_T dst, int src, int opc)
 {
   INIT (COMPI2opD);
 
   ASSIGN_R (dst);
   ASSIGN (src);
-  ASSIGN (op);
+  ASSIGNF (opc, op);
 
   return GEN_OPCODE16 ();
 }
 
 INSTR_T
-bfin_gen_compi2opp (REG_T dst, int src, int op)
+bfin_gen_compi2opp (REG_T dst, int src, int opc)
 {
   INIT (COMPI2opP);
 
   ASSIGN_R (dst);
   ASSIGN (src);
-  ASSIGN (op);
+  ASSIGNF (opc, op);
 
   return GEN_OPCODE16 ();
 }
 
 INSTR_T
-bfin_gen_dagmodik (REG_T i, int op)
+bfin_gen_dagmodik (REG_T i, int opc)
 {
   INIT (DagMODik);
 
   ASSIGN_R (i);
-  ASSIGN (op);
+  ASSIGNF (opc, op);
 
   return GEN_OPCODE16 ();
 }
 
 INSTR_T
-bfin_gen_dagmodim (REG_T i, REG_T m, int op, int br)
+bfin_gen_dagmodim (REG_T i, REG_T m, int opc, int br)
 {
   INIT (DagMODim);
 
   ASSIGN_R (i);
   ASSIGN_R (m);
-  ASSIGN (op);
+  ASSIGNF (opc, op);
   ASSIGN (br);
 
   return GEN_OPCODE16 ();
@@ -1684,12 +1684,12 @@ bfin_gen_ccmv (REG_T src, REG_T dst, int T)
 }
 
 INSTR_T
-bfin_gen_cc2stat (int cbit, int op, int D)
+bfin_gen_cc2stat (int cbit, int opc, int D)
 {
   INIT (CC2stat);
 
   ASSIGN (cbit);
-  ASSIGN (op);
+  ASSIGNF (opc, op);
   ASSIGN (D);
 
   return GEN_OPCODE16 ();
@@ -1713,11 +1713,11 @@ bfin_gen_regmv (REG_T src, REG_T dst)
 }
 
 INSTR_T
-bfin_gen_cc2dreg (int op, REG_T reg)
+bfin_gen_cc2dreg (int opc, REG_T reg)
 {
   INIT (CC2dreg);
 
-  ASSIGN (op);
+  ASSIGNF (opc, op);
   ASSIGN_R (reg);
 
   return GEN_OPCODE16 ();
@@ -1735,13 +1735,13 @@ bfin_gen_progctrl (int prgfunc, int poprnd)
 }
 
 INSTR_T
-bfin_gen_cactrl (REG_T reg, int a, int op)
+bfin_gen_cactrl (REG_T reg, int a, int opc)
 {
   INIT (CaCTRL);
 
   ASSIGN_R (reg);
   ASSIGN (a);
-  ASSIGN (op);
+  ASSIGNF (opc, op);
 
   return GEN_OPCODE16 ();
 }
@@ -1841,14 +1841,14 @@ bfin_gen_multi_instr (INSTR_T dsp32, INSTR_T dsp16_grp1, INSTR_T dsp16_grp2)
 }
 
 INSTR_T
-bfin_gen_loop (Expr_Node *expr, REG_T reg, int rop, REG_T preg)
+bfin_gen_loop (Expr_Node *exp, REG_T reg, int rop, REG_T preg)
 {
   const char *loopsym;
   char *lbeginsym, *lendsym;
   Expr_Node_Value lbeginval, lendval;
   Expr_Node *lbegin, *lend;
 
-  loopsym = expr->value.s_value;
+  loopsym = exp->value.s_value;
   lbeginsym = (char *) xmalloc (strlen (loopsym) + strlen ("__BEGIN") + 5);
   lendsym = (char *) xmalloc (strlen (loopsym) + strlen ("__END") + 5);
 
@@ -1875,14 +1875,14 @@ bfin_gen_loop (Expr_Node *expr, REG_T reg, int rop, REG_T preg)
 }
 
 void
-bfin_loop_beginend (Expr_Node *expr, int begin)
+bfin_loop_beginend (Expr_Node *exp, int begin)
 {
   const char *loopsym;
   char *label_name;
-  symbolS *line_label;
+  symbolS *linelabel;
   const char *suffix = begin ? "__BEGIN" : "__END";
 
-  loopsym = expr->value.s_value;
+  loopsym = exp->value.s_value;
   label_name = (char *) xmalloc (strlen (loopsym) + strlen (suffix) + 5);
 
   label_name[0] = 0;
@@ -1891,12 +1891,12 @@ bfin_loop_beginend (Expr_Node *expr, int begin)
   strcat (label_name, loopsym);
   strcat (label_name, suffix);
 
-  line_label = colon (label_name);
+  linelabel = colon (label_name);
 
   /* LOOP_END follows the last instruction in the loop.
      Adjust label address.  */
   if (!begin)
-    ((struct local_symbol *) line_label)->lsy_value -= last_insn_size;
+    ((struct local_symbol *) linelabel)->lsy_value -= last_insn_size;
 }
 
 bfd_boolean
@@ -2018,9 +2018,9 @@ decode_dagMODim_0 (int iw0)
      | 1 | 0 | 0 | 1 | 1 | 1 | 1 | 0 |.br| 1 | 1 |.op|.m.....|.i.....|
      +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+  */
   int i  = ((iw0 >> DagMODim_i_bits) & DagMODim_i_mask);
-  int op  = ((iw0 >> DagMODim_op_bits) & DagMODim_op_mask);
+  int opc  = ((iw0 >> DagMODim_op_bits) & DagMODim_op_mask);
 
-  if (op == 0 || op == 1)
+  if (opc == 0 || opc == 1)
     return IREG_MASK (i);
   else
     return 0;
@@ -2199,18 +2199,18 @@ decode_LDSTii_0 (int iw0)
      | 1 | 0 | 1 |.W.|.op....|.offset........|.ptr.......|.reg.......|
      +---+---+---+---|---+---+---+---|---+---+---+---|---+---+---+---+  */
   int reg = ((iw0 >> LDSTii_reg_bit) & LDSTii_reg_mask);
-  int op = ((iw0 >> LDSTii_op_bit) & LDSTii_op_mask);
+  int opc = ((iw0 >> LDSTii_op_bit) & LDSTii_op_mask);
   int W = ((iw0 >> LDSTii_W_bit) & LDSTii_W_mask);
 
-  if (W == 0 && op != 3)
+  if (W == 0 && opc != 3)
     return DREG_MASK (reg);
-  else if (W == 0 && op == 3)
+  else if (W == 0 && opc == 3)
    return 0;
-  else if (W == 1 && op == 0)
+  else if (W == 1 && opc == 0)
     return 0;
-  else if (W == 1 && op == 1)
+  else if (W == 1 && opc == 1)
     return 0;
-  else if (W == 1 && op == 3)
+  else if (W == 1 && opc == 3)
     return 0;
 
   abort ();

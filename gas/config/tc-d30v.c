@@ -1133,7 +1133,7 @@ find_format (struct d30v_opcode *opcode,
 	     int fsize,
 	     int cmp_hack)
 {
-  int numops, match, index, i = 0, j, k;
+  int numops, match, opcode_index, i = 0, j, k;
   struct d30v_format *fm;
 
   if (opcode == NULL)
@@ -1142,17 +1142,17 @@ find_format (struct d30v_opcode *opcode,
   /* Get all the operands and save them as expressions.  */
   numops = get_operands (myops, cmp_hack);
 
-  while ((index = opcode->format[i++]) != 0)
+  while ((opcode_index = opcode->format[i++]) != 0)
     {
-      if (fsize == FORCE_SHORT && index >= LONG)
+      if (fsize == FORCE_SHORT && opcode_index >= LONG)
 	continue;
 
-      if (fsize == FORCE_LONG && index < LONG)
+      if (fsize == FORCE_LONG && opcode_index < LONG)
 	continue;
 
-      fm = (struct d30v_format *) &d30v_format_table[index];
-      k = index;
-      while (fm->form == index)
+      fm = (struct d30v_format *) &d30v_format_table[opcode_index];
+      k = opcode_index;
+      while (fm->form == opcode_index)
 	{
 	  match = 1;
 	  /* Now check the operands for compatibility.  */
@@ -1346,13 +1346,14 @@ do_assemble (char *str,
   if (!strncmp (name, "cmp", 3))
     {
       int p, i;
-      char **str = (char **) d30v_cc_names;
+      char **d30v_str = (char **) d30v_cc_names;
+
       if (name[3] == 'u')
 	p = 4;
       else
 	p = 3;
 
-      for (i = 1; *str && strncmp (*str, &name[p], 2); i++, str++)
+      for (i = 1; *d30v_str && strncmp (*d30v_str, &name[p], 2); i++, d30v_str++)
 	;
 
       /* cmpu only supports some condition codes.  */
@@ -1365,7 +1366,7 @@ do_assemble (char *str,
 	    }
 	}
 
-      if (!*str)
+      if (!*d30v_str)
 	{
 	  name[p + 2] = 0;
 	  as_bad (_("unknown condition code: %s"), &name[p]);

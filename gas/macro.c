@@ -75,14 +75,14 @@ static int macro_number;
 
 void
 macro_init (int alternate, int mri, int strip_at,
-	    int (*expr) (const char *, int, sb *, int *))
+	    int (*exp) (const char *, int, sb *, int *))
 {
   macro_hash = hash_new ();
   macro_defined = 0;
   macro_alternate = alternate;
   macro_mri = mri;
   macro_strip_at = strip_at;
-  macro_expr = expr;
+  macro_expr = exp;
 }
 
 /* Switch in and out of alternate mode on the fly.  */
@@ -1204,7 +1204,7 @@ check_macro (const char *line, sb *expand,
 	     const char **error, macro_entry **info)
 {
   const char *s;
-  char *copy, *cs;
+  char *copy, *cls;
   macro_entry *macro;
   sb line_sb;
 
@@ -1221,8 +1221,8 @@ check_macro (const char *line, sb *expand,
   copy = (char *) alloca (s - line + 1);
   memcpy (copy, line, s - line);
   copy[s - line] = '\0';
-  for (cs = copy; *cs != '\0'; cs++)
-    *cs = TOLOWER (*cs);
+  for (cls = copy; *cls != '\0'; cls ++)
+    *cls = TOLOWER (*cls);
 
   macro = (macro_entry *) hash_find (macro_hash, copy);
 

@@ -1784,7 +1784,7 @@ _bfd_XX_print_ce_compressed_pdata (bfd * abfd, void * vfile)
   bfd_size_type i;
   bfd_size_type start, stop;
   int onaline = PDATA_ROW_SIZE;
-  struct sym_cache sym_cache = {0, 0} ;
+  struct sym_cache cache = {0, 0} ;
 
   if (section == NULL
       || coff_section_data (abfd, section) == NULL
@@ -1870,7 +1870,7 @@ _bfd_XX_print_ce_compressed_pdata (bfd * abfd, void * vfile)
 		  fprintf (file, "%08x", (unsigned int) eh_data);
 		  if (eh != 0)
 		    {
-		      const char *s = my_symbol_for_address (abfd, eh, &sym_cache);
+		      const char *s = my_symbol_for_address (abfd, eh, &cache);
 
 		      if (s)
 			fprintf (file, " (%s) ", s);
@@ -1890,7 +1890,7 @@ _bfd_XX_print_ce_compressed_pdata (bfd * abfd, void * vfile)
 
   free (data);
 
-  cleanup_syms (& sym_cache);
+  cleanup_syms (& cache);
 
   return TRUE;
 #undef PDATA_ROW_SIZE

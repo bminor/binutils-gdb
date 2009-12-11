@@ -603,7 +603,7 @@ vms_new_section_hook (bfd * abfd, asection *section)
 
   if (section_count > PRIV (section_count))
     {
-      bfd_size_type amt = section_count;
+      amt = section_count;
       amt *= sizeof (asection *);
       PRIV (sections) = bfd_realloc_or_free (PRIV (sections), amt);
       if (PRIV (sections) == NULL)

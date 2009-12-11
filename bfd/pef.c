@@ -730,14 +730,11 @@ bfd_pef_parse_function_stubs (bfd *abfd,
 			      asymbol **csym)
 {
   const char *const sprefix = "__stub_";
-
   size_t codepos = 0;
   unsigned long count = 0;
-
   bfd_pef_loader_header header;
   bfd_pef_imported_library *libraries = NULL;
   bfd_pef_imported_symbol *imports = NULL;
-
   unsigned long i;
   int ret;
 
@@ -783,8 +780,7 @@ bfd_pef_parse_function_stubs (bfd *abfd,
       asymbol sym;
       const char *symname;
       char *name;
-      unsigned long index;
-      int ret;
+      unsigned long sym_index;
 
       if (csym && (csym[count] == NULL))
 	break;
@@ -802,14 +798,14 @@ bfd_pef_parse_function_stubs (bfd *abfd,
       if ((codepos + 4) > codelen)
 	break;
 
-      ret = bfd_pef_parse_function_stub (abfd, codebuf + codepos, 24, &index);
+      ret = bfd_pef_parse_function_stub (abfd, codebuf + codepos, 24, &sym_index);
       if (ret < 0)
 	{
 	  codepos += 24;
 	  continue;
 	}
 
-      if (index >= header.total_imported_symbol_count)
+      if (sym_index >= header.total_imported_symbol_count)
 	{
 	  codepos += 24;
 	  continue;
@@ -819,12 +815,12 @@ bfd_pef_parse_function_stubs (bfd *abfd,
 	size_t max, namelen;
 	const char *s;
 
-	if (loaderlen < (header.loader_strings_offset + imports[index].name))
+	if (loaderlen < (header.loader_strings_offset + imports[sym_index].name))
 	  goto error;
 
-	max = loaderlen - (header.loader_strings_offset + imports[index].name);
+	max = loaderlen - (header.loader_strings_offset + imports[sym_index].name);
 	symname = (char *) loaderbuf;
-	symname += header.loader_strings_offset + imports[index].name;
+	symname += header.loader_strings_offset + imports[sym_index].name;
 	namelen = 0;
 	for (s = symname; s < (symname + max); s++)
 	  {

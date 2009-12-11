@@ -1787,22 +1787,24 @@ write_object_file (void)
 	  if (symbol_equated_reloc_p (symp)
 	      || S_IS_WEAKREFR (symp))
 	    {
-	      const char *name = S_GET_NAME (symp);
+	      const char *sname = S_GET_NAME (symp);
+
 	      if (S_IS_COMMON (symp)
-		  && !TC_FAKE_LABEL (name)
+		  && !TC_FAKE_LABEL (sname)
 		  && !S_IS_WEAKREFR (symp)
 		  && (!S_IS_EXTERNAL (symp) || S_IS_LOCAL (symp)))
 		{
 		  expressionS *e = symbol_get_value_expression (symp);
+
 		  as_bad (_("Local symbol `%s' can't be equated to common symbol `%s'"),
-			  name, S_GET_NAME (e->X_add_symbol));
+			  sname, S_GET_NAME (e->X_add_symbol));
 		}
 	      if (S_GET_SEGMENT (symp) == reg_section)
 		{
 		  /* Report error only if we know the symbol name.  */
 		  if (S_GET_NAME (symp) != reg_section->name)
 		    as_bad (_("can't make global register symbol `%s'"),
-			    name);
+			    sname);
 		}
 	      symbol_remove (symp, &symbol_rootP, &symbol_lastP);
 	      continue;

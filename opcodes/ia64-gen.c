@@ -2697,7 +2697,7 @@ static void
 print_main_table (void)
 {
   struct main_entry *ptr = maintable;
-  int index = 0;
+  int tindex = 0;
 
   printf ("static const struct ia64_main_table\nmain_table[] = {\n");
   while (ptr != NULL)
@@ -2718,7 +2718,7 @@ print_main_table (void)
 	      ptr->opcode->flags,
 	      ptr->completers->num);
 
-      ptr->main_index = index++;
+      ptr->main_index = tindex++;
 
       ptr = ptr->next;
     }

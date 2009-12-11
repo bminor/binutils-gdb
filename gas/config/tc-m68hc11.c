@@ -1612,7 +1612,7 @@ build_jump_insn (struct m68hc11_opcode *opcode, operand operands[],
     }
   else
     {
-      char *opcode;
+      char *op;
 
       frag = frag_now;
       where = frag_now_fix ();
@@ -1623,8 +1623,8 @@ build_jump_insn (struct m68hc11_opcode *opcode, operand operands[],
       /* Branch offset must fit in 8-bits, don't do some relax.  */
       if (jmp_mode == 0 && flag_fixed_branches)
 	{
-	  opcode = m68hc11_new_insn (1);
-	  number_to_chars_bigendian (opcode, code, 1);
+	  op = m68hc11_new_insn (1);
+	  number_to_chars_bigendian (op, code, 1);
 	  fixup8 (&operands[0].exp, M6811_OP_JUMP_REL, M6811_OP_JUMP_REL);
 	}
 
@@ -1632,31 +1632,31 @@ build_jump_insn (struct m68hc11_opcode *opcode, operand operands[],
       else if (code == M6811_BSR || code == M6811_BRA || code == M6812_BSR)
 	{
           /* Allocate worst case storage.  */
-	  opcode = m68hc11_new_insn (3);
-	  number_to_chars_bigendian (opcode, code, 1);
-	  number_to_chars_bigendian (opcode + 1, 0, 1);
+	  op = m68hc11_new_insn (3);
+	  number_to_chars_bigendian (op, code, 1);
+	  number_to_chars_bigendian (op + 1, 0, 1);
 	  frag_variant (rs_machine_dependent, 1, 1,
                         ENCODE_RELAX (STATE_PC_RELATIVE, STATE_UNDF),
                         operands[0].exp.X_add_symbol, (offsetT) n,
-                        opcode);
+                        op);
 	}
       else if (current_architecture & cpu6812)
 	{
-	  opcode = m68hc11_new_insn (2);
-	  number_to_chars_bigendian (opcode, code, 1);
-	  number_to_chars_bigendian (opcode + 1, 0, 1);
+	  op = m68hc11_new_insn (2);
+	  number_to_chars_bigendian (op, code, 1);
+	  number_to_chars_bigendian (op + 1, 0, 1);
 	  frag_var (rs_machine_dependent, 2, 2,
 		    ENCODE_RELAX (STATE_CONDITIONAL_BRANCH_6812, STATE_UNDF),
-		    operands[0].exp.X_add_symbol, (offsetT) n, opcode);
+		    operands[0].exp.X_add_symbol, (offsetT) n, op);
 	}
       else
 	{
-	  opcode = m68hc11_new_insn (2);
-	  number_to_chars_bigendian (opcode, code, 1);
-	  number_to_chars_bigendian (opcode + 1, 0, 1);
+	  op = m68hc11_new_insn (2);
+	  number_to_chars_bigendian (op, code, 1);
+	  number_to_chars_bigendian (op + 1, 0, 1);
 	  frag_var (rs_machine_dependent, 3, 3,
 		    ENCODE_RELAX (STATE_CONDITIONAL_BRANCH, STATE_UNDF),
-		    operands[0].exp.X_add_symbol, (offsetT) n, opcode);
+		    operands[0].exp.X_add_symbol, (offsetT) n, op);
 	}
     }
 }

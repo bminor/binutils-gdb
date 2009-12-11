@@ -261,9 +261,9 @@ class Symbol_assignment
 class Script_assertion
 {
  public:
-  Script_assertion(Expression* check, const char* message,
+  Script_assertion(Expression* echeck, const char* message,
 		   size_t messagelen)
-    : check_(check), message_(message, messagelen)
+    : check_(echeck), message_(message, messagelen)
   { }
 
   // Check the assertion.
@@ -390,8 +390,8 @@ class Script_options
 class Script_info
 {
  public:
-  Script_info(Input_arguments* inputs)
-    : inputs_(inputs)
+  Script_info(Input_arguments* arg_inputs)
+    : inputs_(arg_inputs)
   { }
 
   // Returns the input files included because of this script.

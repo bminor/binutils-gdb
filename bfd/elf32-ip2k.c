@@ -1,5 +1,5 @@
 /* Ubicom IP2xxx specific support for 32-bit ELF
-   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2009
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -347,7 +347,7 @@ ip2k_is_switch_table_128 (bfd *abfd ATTRIBUTE_UNUSED,
 			  bfd_byte *contents)
 {
   bfd_byte code[4];
-  int index = 0;
+  int table_index = 0;
   
   /* Check current page-jmp.  */
   if (addr + 4 > sec->size)
@@ -369,13 +369,13 @@ ip2k_is_switch_table_128 (bfd *abfd ATTRIBUTE_UNUSED,
       ip2k_get_mem (abfd, contents + addr - 4, 4, code);
       if ((IS_ADD_W_WREG_OPCODE (code + 0))
 	  && (IS_ADD_PCL_W_OPCODE (code + 2)))
-	return index;
+	return table_index;
 
       if ((! IS_PAGE_OPCODE (code + 0))
 	  || (! IS_JMP_OPCODE (code + 2)))
 	return -1;
 
-      index++;
+      table_index++;
       addr -= 4;
     }
 }
@@ -427,7 +427,7 @@ ip2k_is_switch_table_256 (bfd *abfd ATTRIBUTE_UNUSED,
 			  bfd_byte *contents)
 {
   bfd_byte code[16];
-  int index = 0;
+  int table_index = 0;
   
   /* Check current page-jmp.  */
   if (addr + 4 > sec->size)
@@ -454,7 +454,7 @@ ip2k_is_switch_table_256 (bfd *abfd ATTRIBUTE_UNUSED,
 	  && (IS_INC_1SP_OPCODE (code + 10))
 	  && (IS_PAGE_OPCODE (code + 12))
 	  && (IS_JMP_OPCODE (code + 14)))
-	return index;
+	return table_index;
 
       if ((IS_ADD_W_WREG_OPCODE (code + 2))
 	  && (IS_SNC_OPCODE (code + 4))
@@ -463,13 +463,13 @@ ip2k_is_switch_table_256 (bfd *abfd ATTRIBUTE_UNUSED,
 	  && (IS_SNC_OPCODE (code + 10))
 	  && (IS_INC_1SP_OPCODE (code + 12))
 	  && (IS_JMP_OPCODE (code + 14)))
-	return index;
+	return table_index;
       
       if ((! IS_PAGE_OPCODE (code + 0))
 	  || (! IS_JMP_OPCODE (code + 2)))
 	return -1;
 
-      index++;
+      table_index++;
       addr -= 4;
     }
 }

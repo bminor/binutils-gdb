@@ -2295,28 +2295,28 @@ static void
 add_section_rename (const char * old_name, const char * new_name,
 		    flagword flags)
 {
-  section_rename * rename;
+  section_rename * srename;
 
   /* Check for conflicts first.  */
-  for (rename = section_rename_list; rename != NULL; rename = rename->next)
-    if (strcmp (rename->old_name, old_name) == 0)
+  for (srename = section_rename_list; srename != NULL; srename = srename->next)
+    if (strcmp (srename->old_name, old_name) == 0)
       {
 	/* Silently ignore duplicate definitions.  */
-	if (strcmp (rename->new_name, new_name) == 0
-	    && rename->flags == flags)
+	if (strcmp (srename->new_name, new_name) == 0
+	    && srename->flags == flags)
 	  return;
 
 	fatal (_("Multiple renames of section %s"), old_name);
       }
 
-  rename = (section_rename *) xmalloc (sizeof (* rename));
+  srename = (section_rename *) xmalloc (sizeof (* srename));
 
-  rename->old_name = old_name;
-  rename->new_name = new_name;
-  rename->flags    = flags;
-  rename->next     = section_rename_list;
+  srename->old_name = old_name;
+  srename->new_name = new_name;
+  srename->flags    = flags;
+  srename->next     = section_rename_list;
 
-  section_rename_list = rename;
+  section_rename_list = srename;
 }
 
 /* Check the section rename list for a new name of the input section
@@ -2328,18 +2328,18 @@ find_section_rename (bfd * ibfd ATTRIBUTE_UNUSED, sec_ptr isection,
 		     flagword * returned_flags)
 {
   const char * old_name = bfd_section_name (ibfd, isection);
-  section_rename * rename;
+  section_rename * srename;
 
   /* Default to using the flags of the input section.  */
   * returned_flags = bfd_get_section_flags (ibfd, isection);
 
-  for (rename = section_rename_list; rename != NULL; rename = rename->next)
-    if (strcmp (rename->old_name, old_name) == 0)
+  for (srename = section_rename_list; srename != NULL; srename = srename->next)
+    if (strcmp (srename->old_name, old_name) == 0)
       {
-	if (rename->flags != (flagword) -1)
-	  * returned_flags = rename->flags;
+	if (srename->flags != (flagword) -1)
+	  * returned_flags = srename->flags;
 
-	return rename->new_name;
+	return srename->new_name;
       }
 
   return old_name;

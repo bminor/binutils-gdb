@@ -10204,7 +10204,7 @@ with the -M switch (multiple options should be separated by commas):\n"));
 static const struct dis386 *
 get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 {
-  int index, vex_table_index;
+  int vindex, vex_table_index;
 
   if (dp->name != NULL)
     return dp;
@@ -10216,8 +10216,8 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       break;
 
     case USE_MOD_TABLE:
-      index = modrm.mod == 0x3 ? 1 : 0;
-      dp = &mod_table[dp->op[1].bytemode][index];
+      vindex = modrm.mod == 0x3 ? 1 : 0;
+      dp = &mod_table[dp->op[1].bytemode][vindex];
       break;
 
     case USE_RM_TABLE:
@@ -10231,16 +10231,16 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	  switch (vex.prefix)
 	    {
 	    case 0:
-	      index = 0;
+	      vindex = 0;
 	      break;
 	    case REPE_PREFIX_OPCODE:
-	      index = 1;
+	      vindex = 1;
 	      break;
 	    case DATA_PREFIX_OPCODE:
-	      index = 2;
+	      vindex = 2;
 	      break;
 	    case REPNE_PREFIX_OPCODE:
-	      index = 3;
+	      vindex = 3;
 	      break;
 	    default:
 	      abort ();
@@ -10249,11 +10249,11 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	}
       else 
 	{
-	  index = 0;
+	  vindex = 0;
 	  used_prefixes |= (prefixes & PREFIX_REPZ);
 	  if (prefixes & PREFIX_REPZ)
 	    {
-	      index = 1;
+	      vindex = 1;
 	      all_prefixes[last_repz_prefix] = 0;
 	    }
 	  else
@@ -10263,7 +10263,7 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	      used_prefixes |= (prefixes & PREFIX_REPNZ);
 	      if (prefixes & PREFIX_REPNZ)
 		{
-		  index = 3;
+		  vindex = 3;
 		  all_prefixes[last_repnz_prefix] = 0;
 		}
 	      else
@@ -10271,24 +10271,24 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 		  used_prefixes |= (prefixes & PREFIX_DATA);
 		  if (prefixes & PREFIX_DATA)
 		    {
-		      index = 2;
+		      vindex = 2;
 		      all_prefixes[last_data_prefix] = 0;
 		    }
 		}
 	    }
 	}
-      dp = &prefix_table[dp->op[1].bytemode][index];
+      dp = &prefix_table[dp->op[1].bytemode][vindex];
       break;
 
     case USE_X86_64_TABLE:
-      index = address_mode == mode_64bit ? 1 : 0;
-      dp = &x86_64_table[dp->op[1].bytemode][index];
+      vindex = address_mode == mode_64bit ? 1 : 0;
+      dp = &x86_64_table[dp->op[1].bytemode][vindex];
       break;
 
     case USE_3BYTE_TABLE:
       FETCH_DATA (info, codep + 2);
-      index = *codep++;
-      dp = &three_byte_table[dp->op[1].bytemode][index];
+      vindex = *codep++;
+      dp = &three_byte_table[dp->op[1].bytemode][vindex];
       modrm.mod = (*codep >> 6) & 3;
       modrm.reg = (*codep >> 3) & 7;
       modrm.rm = *codep & 7;
@@ -10301,17 +10301,17 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       switch (vex.length)
 	{
 	case 128:
-	  index = 0;
+	  vindex = 0;
 	  break;
 	case 256:
-	  index = 1;
+	  vindex = 1;
 	  break;
 	default:
 	  abort ();
 	  break;
 	}
 
-      dp = &vex_len_table[dp->op[1].bytemode][index];
+      dp = &vex_len_table[dp->op[1].bytemode][vindex];
       break;
 
     case USE_XOP_8F_TABLE:
@@ -10364,8 +10364,8 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       need_vex = 1;
       need_vex_reg = 1;
       codep++;
-      index = *codep++;
-      dp = &xop_table[vex_table_index][index];
+      vindex = *codep++;
+      dp = &xop_table[vex_table_index][vindex];
 
       FETCH_DATA (info, codep + 1);
       modrm.mod = (*codep >> 6) & 3;
@@ -10421,10 +10421,10 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       need_vex = 1;
       need_vex_reg = 1;
       codep++;
-      index = *codep++;
-      dp = &vex_table[vex_table_index][index];
+      vindex = *codep++;
+      dp = &vex_table[vex_table_index][vindex];
       /* There is no MODRM byte for VEX [82|77].  */
-      if (index != 0x77 && index != 0x82)
+      if (vindex != 0x77 && vindex != 0x82)
 	{
 	  FETCH_DATA (info, codep + 1);
 	  modrm.mod = (*codep >> 6) & 3;
@@ -10463,10 +10463,10 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       need_vex = 1;
       need_vex_reg = 1;
       codep++;
-      index = *codep++;
-      dp = &vex_table[dp->op[1].bytemode][index];
+      vindex = *codep++;
+      dp = &vex_table[dp->op[1].bytemode][vindex];
       /* There is no MODRM byte for VEX [82|77].  */
-      if (index != 0x77 && index != 0x82)
+      if (vindex != 0x77 && vindex != 0x82)
 	{
 	  FETCH_DATA (info, codep + 1);
 	  modrm.mod = (*codep >> 6) & 3;
@@ -12158,7 +12158,7 @@ OP_E_memory (int bytemode, int sizeflag)
       int haveindex;
       int needindex;
       int base, rbase;
-      int index = 0;
+      int vindex = 0;
       int scale = 0;
 
       havesib = 0;
@@ -12170,13 +12170,13 @@ OP_E_memory (int bytemode, int sizeflag)
 	{
 	  havesib = 1;
 	  FETCH_DATA (the_info, codep + 1);
-	  index = (*codep >> 3) & 7;
+	  vindex = (*codep >> 3) & 7;
 	  scale = (*codep >> 6) & 3;
 	  base = *codep & 7;
 	  USED_REX (REX_X);
 	  if (rex & REX_X)
-	    index += 8;
-	  haveindex = index != 4;
+	    vindex += 8;
+	  haveindex = vindex != 4;
 	  codep++;
 	}
       rbase = base + add;
@@ -12260,7 +12260,7 @@ OP_E_memory (int bytemode, int sizeflag)
 		  if (haveindex)
 		    oappend (address_mode == mode_64bit 
 			     && (sizeflag & AFLAG)
-			     ? names64[index] : names32[index]);
+			     ? names64[vindex] : names32[vindex]);
 		  else
 		    oappend (address_mode == mode_64bit 
 			     && (sizeflag & AFLAG)

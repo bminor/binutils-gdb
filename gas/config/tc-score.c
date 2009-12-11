@@ -58,7 +58,7 @@ static void s_score_lcomm (int bytes_p);
 static void s3_md_number_to_chars (char *buf, valueT val, int n);
 static valueT s3_md_chars_to_number (char *buf, int n);
 static void s3_assemble (char *str);
-static void s3_operand (expressionS * expr);
+static void s3_operand (expressionS *);
 static void s3_begin (void);
 static void s3_number_to_chars (char *buf, valueT val, int n);
 static char *s3_atof (int type, char *litP, int *sizeP);
@@ -3138,7 +3138,6 @@ s3_do_ldst_insn (char *str)
 
           if (s3_inst.reloc.exp.X_op == O_constant)
             {
-              int value;
               unsigned int data_type;
 
               if (pre_inc == 1)
@@ -6510,11 +6509,11 @@ s3_assemble (char *str)
 }
 
 static void
-s3_operand (expressionS * expr)
+s3_operand (expressionS * exp)
 {
   if (s3_in_my_get_expression)
     {
-      expr->X_op = O_illegal;
+      exp->X_op = O_illegal;
       if (s3_inst.error == NULL)
         {
           s3_inst.error = _("bad expression");
@@ -7522,12 +7521,12 @@ md_assemble (char *str)
 /* We handle all bad expressions here, so that we can report the faulty
    instruction in the error message.  */
 void
-md_operand (expressionS * expr)
+md_operand (expressionS * exp)
 {
   if (score3)
-    s3_operand (expr);
+    s3_operand (exp);
   else
-    s7_operand (expr);
+    s7_operand (exp);
 }
 
 /* Turn an integer of n bytes (in val) into a stream of bytes appropriate

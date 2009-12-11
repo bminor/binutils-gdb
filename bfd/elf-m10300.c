@@ -1274,8 +1274,6 @@ mn10300_elf_final_link_relocate (reloc_howto_type *howto,
 	  && ELF_ST_VISIBILITY (h->other) != STV_HIDDEN
 	  && h->plt.offset != (bfd_vma) -1)
 	{
-	  asection * splt;
-
 	  splt = bfd_get_section_by_name (dynobj, ".plt");
 
 	  value = (splt->output_section->vma
@@ -1297,8 +1295,6 @@ mn10300_elf_final_link_relocate (reloc_howto_type *howto,
 	  && ELF_ST_VISIBILITY (h->other) != STV_HIDDEN
 	  && h->plt.offset != (bfd_vma) -1)
 	{
-	  asection * splt;
-
 	  splt = bfd_get_section_by_name (dynobj, ".plt");
 
 	  value = (splt->output_section->vma
@@ -1321,8 +1317,6 @@ mn10300_elf_final_link_relocate (reloc_howto_type *howto,
     case R_MN10300_GOT24:
     case R_MN10300_GOT16:
       {
-	asection * sgot;
-
 	sgot = bfd_get_section_by_name (dynobj, ".got");
 
 	  if (h != NULL)

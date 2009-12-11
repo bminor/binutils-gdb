@@ -177,7 +177,8 @@ struct mips_got_info
 
 /* Map an input bfd to a got in a multi-got link.  */
 
-struct mips_elf_bfd2got_hash {
+struct mips_elf_bfd2got_hash
+{
   bfd *bfd;
   struct mips_got_info *g;
 };
@@ -3064,7 +3065,7 @@ mips_elf_global_got_index (bfd *abfd, bfd *ibfd, struct elf_link_hash_entry *h,
 			   int r_type, struct bfd_link_info *info)
 {
   struct mips_elf_link_hash_table *htab;
-  bfd_vma index;
+  bfd_vma got_index;
   struct mips_got_info *g, *gg;
   long global_got_dynindx = 0;
 
@@ -3122,8 +3123,8 @@ mips_elf_global_got_index (bfd *abfd, bfd *ibfd, struct elf_link_hash_entry *h,
 		 + h->root.u.def.section->output_offset
 		 + h->root.u.def.section->output_section->vma);
 
-      index = mips_tls_got_index (abfd, hm->tls_got_offset, &hm->tls_type,
-				  r_type, info, hm, value);
+      got_index = mips_tls_got_index (abfd, hm->tls_got_offset, &hm->tls_type,
+				      r_type, info, hm, value);
     }
   else
     {
@@ -3132,12 +3133,12 @@ mips_elf_global_got_index (bfd *abfd, bfd *ibfd, struct elf_link_hash_entry *h,
 	 indices into the GOT.  That makes it easy to calculate the GOT
 	 offset.  */
       BFD_ASSERT (h->dynindx >= global_got_dynindx);
-      index = ((h->dynindx - global_got_dynindx + g->local_gotno)
-	       * MIPS_ELF_GOT_SIZE (abfd));
+      got_index = ((h->dynindx - global_got_dynindx + g->local_gotno)
+		   * MIPS_ELF_GOT_SIZE (abfd));
     }
-  BFD_ASSERT (index < htab->sgot->size);
+  BFD_ASSERT (got_index < htab->sgot->size);
 
-  return index;
+  return got_index;
 }
 
 /* Find a GOT page entry that points to within 32KB of VALUE.  These
@@ -3150,7 +3151,7 @@ static bfd_vma
 mips_elf_got_page (bfd *abfd, bfd *ibfd, struct bfd_link_info *info,
 		   bfd_vma value, bfd_vma *offsetp)
 {
-  bfd_vma page, index;
+  bfd_vma page, got_index;
   struct mips_got_entry *entry;
 
   page = (value + 0x8000) & ~(bfd_vma) 0xffff;
@@ -3160,12 +3161,12 @@ mips_elf_got_page (bfd *abfd, bfd *ibfd, struct bfd_link_info *info,
   if (!entry)
     return MINUS_ONE;
 
-  index = entry->gotidx;
+  got_index = entry->gotidx;
 
   if (offsetp)
     *offsetp = value - entry->d.address;
 
-  return index;
+  return got_index;
 }
 
 /* Find a local GOT entry for an R_MIPS*_GOT16 relocation against VALUE.
@@ -3201,7 +3202,7 @@ mips_elf_got16_entry (bfd *abfd, bfd *ibfd, struct bfd_link_info *info,
 
 static bfd_vma
 mips_elf_got_offset_from_index (struct bfd_link_info *info, bfd *output_bfd,
-				bfd *input_bfd, bfd_vma index)
+				bfd *input_bfd, bfd_vma got_index)
 {
   struct mips_elf_link_hash_table *htab;
   asection *sgot;
@@ -3212,7 +3213,7 @@ mips_elf_got_offset_from_index (struct bfd_link_info *info, bfd *output_bfd,
   gp = _bfd_get_gp_value (output_bfd)
     + mips_elf_adjust_gp (output_bfd, htab->got_info, input_bfd);
 
-  return sgot->output_section->vma + sgot->output_offset + index - gp;
+  return sgot->output_section->vma + sgot->output_offset + got_index - gp;
 }
 
 /* Create and return a local GOT entry for VALUE, which was calculated
@@ -3309,7 +3310,7 @@ mips_elf_create_local_got_entry (bfd *abfd, struct bfd_link_info *info,
     {
       Elf_Internal_Rela outrel;
       asection *s;
-      bfd_byte *loc;
+      bfd_byte *rloc;
       bfd_vma got_address;
 
       s = mips_elf_rel_dyn_section (info, FALSE);
@@ -3317,11 +3318,11 @@ mips_elf_create_local_got_entry (bfd *abfd, struct bfd_link_info *info,
 		     + htab->sgot->output_offset
 		     + entry.gotidx);
 
-      loc = s->contents + (s->reloc_count++ * sizeof (Elf32_External_Rela));
+      rloc = s->contents + (s->reloc_count++ * sizeof (Elf32_External_Rela));
       outrel.r_offset = got_address;
       outrel.r_info = ELF32_R_INFO (STN_UNDEF, R_MIPS_32);
       outrel.r_addend = value;
-      bfd_elf32_swap_reloca_out (abfd, &outrel, loc);
+      bfd_elf32_swap_reloca_out (abfd, &outrel, rloc);
     }
 
   return *loc;
@@ -8975,8 +8976,6 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  if (!mips_elf_add_lo16_rel_addend (input_bfd, rel, relend,
 						     contents, &addend))
 		    {
-		      const char *name;
-
 		      if (h)
 			name = h->root.root.string;
 		      else
@@ -9122,9 +9121,8 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  && (howto->type == R_MIPS_GPREL16
 		      || howto->type == R_MIPS_LITERAL))
 		{
-		  const char *msg =
-		    _("small-data section exceeds 64KB;"
-		      " lower small-data size limit (see option -G)");
+		  msg = _("small-data section exceeds 64KB;"
+			  " lower small-data size limit (see option -G)");
 
 		  htab->small_data_overflow_reported = TRUE;
 		  (*info->callbacks->einfo) ("%P: %s\n", msg);
@@ -10226,22 +10224,22 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 
       for (g = gg->next; g->next != gg; g = g->next)
 	{
-	  bfd_vma index = g->next->local_gotno + g->next->global_gotno
+	  bfd_vma got_index = g->next->local_gotno + g->next->global_gotno
 	    + g->next->tls_gotno;
 
 	  MIPS_ELF_PUT_WORD (output_bfd, 0, sgot->contents
-			     + index++ * MIPS_ELF_GOT_SIZE (output_bfd));
+			     + got_index++ * MIPS_ELF_GOT_SIZE (output_bfd));
 	  MIPS_ELF_PUT_WORD (output_bfd, MIPS_ELF_GNU_GOT1_MASK (output_bfd),
 			     sgot->contents
-			     + index++ * MIPS_ELF_GOT_SIZE (output_bfd));
+			     + got_index++ * MIPS_ELF_GOT_SIZE (output_bfd));
 
 	  if (! info->shared)
 	    continue;
 
-	  while (index < g->assigned_gotno)
+	  while (got_index < g->assigned_gotno)
 	    {
 	      rel[0].r_offset = rel[1].r_offset = rel[2].r_offset
-		= index++ * MIPS_ELF_GOT_SIZE (output_bfd);
+		= got_index++ * MIPS_ELF_GOT_SIZE (output_bfd);
 	      if (!(mips_elf_create_dynamic_relocation
 		    (output_bfd, info, rel, NULL,
 		     bfd_abs_section_ptr,

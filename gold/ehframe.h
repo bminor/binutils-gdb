@@ -1,6 +1,6 @@
 // ehframe.h -- handle exception frame sections for gold  -*- C++ -*-
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -169,9 +169,9 @@ class Fde
 {
  public:
   Fde(Relobj* object, unsigned int shndx, section_offset_type input_offset,
-      const unsigned char* contents, size_t length)
+      const unsigned char* contents, size_t len)
     : object_(object), shndx_(shndx), input_offset_(input_offset),
-      contents_(reinterpret_cast<const char*>(contents), length)
+      contents_(reinterpret_cast<const char*>(contents), len)
   { }
 
   // Return the length of this FDE.  Add 4 for the length and 4 for

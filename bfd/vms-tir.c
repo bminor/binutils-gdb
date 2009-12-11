@@ -2318,7 +2318,7 @@ static void etir_output_check (bfd *abfd, asection *section, bfd_vma vaddr,
 /* Start ETIR record for section #index at virtual addr offset.  */
 
 static void
-start_etir_record (bfd * abfd, int index, uquad offset, bfd_boolean justoffset)
+start_etir_record (bfd * abfd, int sec_index, uquad offset, bfd_boolean justoffset)
 {
   if (!justoffset)
     {
@@ -2329,7 +2329,7 @@ start_etir_record (bfd * abfd, int index, uquad offset, bfd_boolean justoffset)
 
   /* Push start offset.  */
   _bfd_vms_output_begin (abfd, ETIR_S_C_STA_PQ, -1);
-  _bfd_vms_output_long (abfd, (unsigned long) index);
+  _bfd_vms_output_long (abfd, (unsigned long) sec_index);
   _bfd_vms_output_quad (abfd, (uquad) offset);
   _bfd_vms_output_flush (abfd);
 
@@ -2346,11 +2346,11 @@ end_etir_record (bfd * abfd)
 }
 
 /* Output a STO_IMM command for SSIZE bytes of data from CPR at virtual
-   address VADDR in section specified by INDEX and NAME.  */
+   address VADDR in section specified by SEC_INDEX and NAME.  */
 
 static void
 sto_imm (bfd *abfd, bfd_size_type ssize, unsigned char *cptr, bfd_vma vaddr,
-	 int index, const char *name)
+	 int sec_index, const char *name)
 {
   bfd_size_type size;
 
@@ -2372,7 +2372,7 @@ sto_imm (bfd *abfd, bfd_size_type ssize, unsigned char *cptr, bfd_vma vaddr,
 	  if (name [0] && name[1] == 'v' && !strcmp (name, ".vmsdebug"))
 	    start_another_etbt_record (abfd);
 	  else
-	    start_etir_record (abfd, index, vaddr, FALSE);
+	    start_etir_record (abfd, sec_index, vaddr, FALSE);
 
 	  size = _bfd_vms_output_check (abfd, 0);	/* get max size */
 	  if (size > ssize)			/* more than what's left ? */

@@ -5693,7 +5693,7 @@ static enum bfd_arm_vfp11_pipe
 bfd_arm_vfp11_insn_decode (unsigned int insn, unsigned int *destmask, int *regs,
                            int *numregs)
 {
-  enum bfd_arm_vfp11_pipe pipe = VFP11_BAD;
+  enum bfd_arm_vfp11_pipe vpipe = VFP11_BAD;
   bfd_boolean is_double = ((insn & 0xf00) == 0xb00) ? 1 : 0;
 
   if ((insn & 0x0f000e10) == 0x0e000a00)  /* A data-processing insn.  */
@@ -5712,7 +5712,7 @@ bfd_arm_vfp11_insn_decode (unsigned int insn, unsigned int *destmask, int *regs,
         case 1: /* fnmac[sd].  */
         case 2: /* fmsc[sd].  */
         case 3: /* fnmsc[sd].  */
-          pipe = VFP11_FMAC;
+          vpipe = VFP11_FMAC;
           bfd_arm_vfp11_write_mask (destmask, fd);
           regs[0] = fd;
           regs[1] = bfd_arm_vfp11_regno (insn, is_double, 16, 7);  /* Fn.  */
@@ -5724,11 +5724,11 @@ bfd_arm_vfp11_insn_decode (unsigned int insn, unsigned int *destmask, int *regs,
         case 5: /* fnmul[sd].  */
         case 6: /* fadd[sd].  */
         case 7: /* fsub[sd].  */
-          pipe = VFP11_FMAC;
+          vpipe = VFP11_FMAC;
           goto vfp_binop;
 
         case 8: /* fdiv[sd].  */
-          pipe = VFP11_DS;
+          vpipe = VFP11_DS;
           vfp_binop:
           bfd_arm_vfp11_write_mask (destmask, fd);
           regs[0] = bfd_arm_vfp11_regno (insn, is_double, 16, 7);   /* Fn.  */
@@ -5758,14 +5758,14 @@ bfd_arm_vfp11_insn_decode (unsigned int insn, unsigned int *destmask, int *regs,
               case 27: /* ftosiz[sd].  */
                 /* These instructions will not bounce due to underflow.  */
                 *numregs = 0;
-                pipe = VFP11_FMAC;
+                vpipe = VFP11_FMAC;
                 break;
 
               case 3: /* fsqrt[sd].  */
                 /* fsqrt cannot underflow, but it can (perhaps) overwrite
                    registers to cause the erratum in previous instructions.  */
                 bfd_arm_vfp11_write_mask (destmask, fd);
-                pipe = VFP11_DS;
+                vpipe = VFP11_DS;
                 break;
 
               case 15: /* fcvt{ds,sd}.  */
@@ -5780,7 +5780,7 @@ bfd_arm_vfp11_insn_decode (unsigned int insn, unsigned int *destmask, int *regs,
 
                   *numregs = rnum;
 
-                  pipe = VFP11_FMAC;
+                  vpipe = VFP11_FMAC;
                 }
                 break;
 
@@ -5810,7 +5810,7 @@ bfd_arm_vfp11_insn_decode (unsigned int insn, unsigned int *destmask, int *regs,
             }
 	}
 
-      pipe = VFP11_LS;
+      vpipe = VFP11_LS;
     }
   else if ((insn & 0x0e100e00) == 0x0c100a00)  /* A load insn.  */
     {
@@ -5845,7 +5845,7 @@ bfd_arm_vfp11_insn_decode (unsigned int insn, unsigned int *destmask, int *regs,
           return VFP11_BAD;
         }
 
-      pipe = VFP11_LS;
+      vpipe = VFP11_LS;
     }
   /* Single-register transfer. Note L==0.  */
   else if ((insn & 0x0f100e10) == 0x0e000a10)
@@ -5867,10 +5867,10 @@ bfd_arm_vfp11_insn_decode (unsigned int insn, unsigned int *destmask, int *regs,
           break;
         }
 
-      pipe = VFP11_LS;
+      vpipe = VFP11_LS;
     }
 
-  return pipe;
+  return vpipe;
 }
 
 
@@ -5990,17 +5990,17 @@ bfd_elf32_arm_vfp11_erratum_scan (bfd *abfd, struct bfd_link_info *link_info)
                   | (contents[i + 1] << 8)
                   | contents[i];
               unsigned int writemask = 0;
-              enum bfd_arm_vfp11_pipe pipe;
+              enum bfd_arm_vfp11_pipe vpipe;
 
               switch (state)
                 {
                 case 0:
-                  pipe = bfd_arm_vfp11_insn_decode (insn, &writemask, regs,
+                  vpipe = bfd_arm_vfp11_insn_decode (insn, &writemask, regs,
                                                     &numregs);
                   /* I'm assuming the VFP11 erratum can trigger with denorm
                      operands on either the FMAC or the DS pipeline. This might
                      lead to slightly overenthusiastic veneer insertion.  */
-                  if (pipe == VFP11_FMAC || pipe == VFP11_DS)
+                  if (vpipe == VFP11_FMAC || vpipe == VFP11_DS)
                     {
                       state = use_vector ? 1 : 2;
                       first_fmac = i;
@@ -6011,10 +6011,10 @@ bfd_elf32_arm_vfp11_erratum_scan (bfd *abfd, struct bfd_link_info *link_info)
                 case 1:
                   {
                     int other_regs[3], other_numregs;
-                    pipe = bfd_arm_vfp11_insn_decode (insn, &writemask,
+                    vpipe = bfd_arm_vfp11_insn_decode (insn, &writemask,
 						      other_regs,
                                                       &other_numregs);
-                    if (pipe != VFP11_BAD
+                    if (vpipe != VFP11_BAD
                         && bfd_arm_vfp11_antidependency (writemask, regs,
 							 numregs))
                       state = 3;
@@ -6026,10 +6026,10 @@ bfd_elf32_arm_vfp11_erratum_scan (bfd *abfd, struct bfd_link_info *link_info)
                 case 2:
                   {
                     int other_regs[3], other_numregs;
-                    pipe = bfd_arm_vfp11_insn_decode (insn, &writemask,
+                    vpipe = bfd_arm_vfp11_insn_decode (insn, &writemask,
 						      other_regs,
                                                       &other_numregs);
-                    if (pipe != VFP11_BAD
+                    if (vpipe != VFP11_BAD
                         && bfd_arm_vfp11_antidependency (writemask, regs,
 							 numregs))
                       state = 3;
@@ -9044,9 +9044,9 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
   return TRUE;
 }
 
-/* Add a new unwind edit to the list described by HEAD, TAIL.  If INDEX is zero,
+/* Add a new unwind edit to the list described by HEAD, TAIL.  If TINDEX is zero,
    adds the edit to the start of the list.  (The list must be built in order of
-   ascending INDEX: the function's callers are primarily responsible for
+   ascending TINDEX: the function's callers are primarily responsible for
    maintaining that condition).  */
 
 static void
@@ -9054,16 +9054,16 @@ add_unwind_table_edit (arm_unwind_table_edit **head,
 		       arm_unwind_table_edit **tail,
 		       arm_unwind_edit_type type,
 		       asection *linked_section,
-		       unsigned int index)
+		       unsigned int tindex)
 {
   arm_unwind_table_edit *new_edit = (arm_unwind_table_edit *)
       xmalloc (sizeof (arm_unwind_table_edit));
   
   new_edit->type = type;
   new_edit->linked_section = linked_section;
-  new_edit->index = index;
+  new_edit->index = tindex;
   
-  if (index > 0)
+  if (tindex > 0)
     {
       new_edit->next = NULL;
 
@@ -9173,8 +9173,7 @@ elf32_arm_fix_exidx_coverage (asection **text_section_order,
 
   /* Walk all text sections in order of increasing VMA.  Eilminate duplicate
      index table entries (EXIDX_CANTUNWIND and inlined unwind opcodes),
-     and add EXIDX_CANTUNWIND entries for sections with no unwind table data.
-   */
+     and add EXIDX_CANTUNWIND entries for sections with no unwind table data.  */
 
   for (i = 0; i < num_text_sections; i++)
     {
@@ -13166,7 +13165,7 @@ make_branch_to_a8_stub (struct bfd_hash_entry *gen_entry,
   bfd_vma veneered_insn_loc, veneer_entry_loc;
   bfd_signed_vma branch_offset;
   bfd *abfd;
-  unsigned int index;
+  unsigned int target;
 
   stub_entry = (struct elf32_arm_stub_hash_entry *) gen_entry;
   data = (struct a8_branch_to_stub_data *) in_arg;
@@ -13191,7 +13190,7 @@ make_branch_to_a8_stub (struct bfd_hash_entry *gen_entry,
   branch_offset = veneer_entry_loc - veneered_insn_loc - 4;
 
   abfd = stub_entry->target_section->owner;
-  index = stub_entry->target_value;
+  target = stub_entry->target_value;
 
   /* We attempt to avoid this condition by setting stubs_always_after_branch
      in elf32_arm_size_stubs if we've enabled the Cortex-A8 erratum workaround.
@@ -13252,8 +13251,8 @@ make_branch_to_a8_stub (struct bfd_hash_entry *gen_entry,
       return FALSE;
     }
 
-  bfd_put_16 (abfd, (branch_insn >> 16) & 0xffff, &contents[index]);
-  bfd_put_16 (abfd, branch_insn & 0xffff, &contents[index + 2]);
+  bfd_put_16 (abfd, (branch_insn >> 16) & 0xffff, &contents[target]);
+  bfd_put_16 (abfd, branch_insn & 0xffff, &contents[target + 2]);
 
   return TRUE;
 }
@@ -13295,7 +13294,7 @@ elf32_arm_write_section (bfd *output_bfd,
       for (errnode = arm_data->erratumlist; errnode != 0;
            errnode = errnode->next)
         {
-          bfd_vma index = errnode->vma - offset;
+          bfd_vma target = errnode->vma - offset;
 
           switch (errnode->type)
             {
@@ -13308,7 +13307,7 @@ elf32_arm_write_section (bfd *output_bfd,
                                   | 0x0a000000;
 
 		/* The instruction is before the label.  */
-		index -= 4;
+		target -= 4;
 
 		/* Above offset included in -4 below.  */
 		branch_to_veneer = errnode->u.b.veneer->vma
@@ -13320,10 +13319,10 @@ elf32_arm_write_section (bfd *output_bfd,
 					   "range"), output_bfd);
 
                 insn |= (branch_to_veneer >> 2) & 0xffffff;
-                contents[endianflip ^ index] = insn & 0xff;
-                contents[endianflip ^ (index + 1)] = (insn >> 8) & 0xff;
-                contents[endianflip ^ (index + 2)] = (insn >> 16) & 0xff;
-                contents[endianflip ^ (index + 3)] = (insn >> 24) & 0xff;
+                contents[endianflip ^ target] = insn & 0xff;
+                contents[endianflip ^ (target + 1)] = (insn >> 8) & 0xff;
+                contents[endianflip ^ (target + 2)] = (insn >> 16) & 0xff;
+                contents[endianflip ^ (target + 3)] = (insn >> 24) & 0xff;
               }
               break;
 
@@ -13343,17 +13342,17 @@ elf32_arm_write_section (bfd *output_bfd,
 
                 /* Original instruction.  */
                 insn = errnode->u.v.branch->u.b.vfp_insn;
-                contents[endianflip ^ index] = insn & 0xff;
-                contents[endianflip ^ (index + 1)] = (insn >> 8) & 0xff;
-                contents[endianflip ^ (index + 2)] = (insn >> 16) & 0xff;
-                contents[endianflip ^ (index + 3)] = (insn >> 24) & 0xff;
+                contents[endianflip ^ target] = insn & 0xff;
+                contents[endianflip ^ (target + 1)] = (insn >> 8) & 0xff;
+                contents[endianflip ^ (target + 2)] = (insn >> 16) & 0xff;
+                contents[endianflip ^ (target + 3)] = (insn >> 24) & 0xff;
 
                 /* Branch back to insn after original insn.  */
                 insn = 0xea000000 | ((branch_from_veneer >> 2) & 0xffffff);
-                contents[endianflip ^ (index + 4)] = insn & 0xff;
-                contents[endianflip ^ (index + 5)] = (insn >> 8) & 0xff;
-                contents[endianflip ^ (index + 6)] = (insn >> 16) & 0xff;
-                contents[endianflip ^ (index + 7)] = (insn >> 24) & 0xff;
+                contents[endianflip ^ (target + 4)] = insn & 0xff;
+                contents[endianflip ^ (target + 5)] = (insn >> 8) & 0xff;
+                contents[endianflip ^ (target + 6)] = (insn >> 16) & 0xff;
+                contents[endianflip ^ (target + 7)] = (insn >> 24) & 0xff;
               }
               break;
 

@@ -192,12 +192,12 @@ class Object
   // (e.g., libfoo.a(bar.o) if this is in an archive.  INPUT_FILE is
   // used to read the file.  OFFSET is the offset within the input
   // file--0 for a .o or .so file, something else for a .a file.
-  Object(const std::string& name, Input_file* input_file, bool is_dynamic,
-	 off_t offset = 0)
-    : name_(name), input_file_(input_file), offset_(offset), shnum_(-1U),
-      is_dynamic_(is_dynamic), is_needed_(false), uses_split_stack_(false),
+  Object(const std::string& oname, Input_file* oinput_file, bool ois_dynamic,
+	 off_t ooffset = 0)
+    : name_(oname), input_file_(oinput_file), offset_(ooffset), shnum_(-1U),
+      is_dynamic_(ois_dynamic), is_needed_(false), uses_split_stack_(false),
       has_no_split_stack_(false), no_export_(false), xindex_(NULL)
-  { input_file->file().add_object(); }
+  { oinput_file->file().add_object(); }
 
   virtual ~Object()
   { this->input_file_->file().remove_object(); }
@@ -372,13 +372,13 @@ class Object
   // Pass sections which should be included in the link to the Layout
   // object, and record where the sections go in the output file.
   void
-  layout(Symbol_table* symtab, Layout* layout, Read_symbols_data* sd)
-  { this->do_layout(symtab, layout, sd); }
+  layout(Symbol_table* symtab, Layout* olayout, Read_symbols_data* sd)
+  { this->do_layout(symtab, olayout, sd); }
 
   // Add symbol information to the global symbol table.
   void
-  add_symbols(Symbol_table* symtab, Read_symbols_data* sd, Layout *layout)
-  { this->do_add_symbols(symtab, sd, layout); }
+  add_symbols(Symbol_table* symtab, Read_symbols_data* sd, Layout *olayout)
+  { this->do_add_symbols(symtab, sd, olayout); }
 
   // Functions and types for the elfcpp::Elf_file interface.  This
   // permit us to use Object as the File template parameter for
@@ -555,8 +555,8 @@ class Object
 
   // Set the number of sections.
   void
-  set_shnum(int shnum)
-  { this->shnum_ = shnum; }
+  set_shnum(int sec_shnum)
+  { this->shnum_ = sec_shnum; }
 
   // Functions used by both Sized_relobj and Sized_dynobj.
 
@@ -625,8 +625,8 @@ class Object
 class Relobj : public Object
 {
  public:
-  Relobj(const std::string& name, Input_file* input_file, off_t offset = 0)
-    : Object(name, input_file, false, offset),
+  Relobj(const std::string& rname, Input_file* rinput_file, off_t roffset = 0)
+    : Object(rname, rinput_file, false, roffset),
       output_sections_(),
       map_to_relocatable_relocs_(NULL),
       object_merge_map_(NULL),
@@ -676,13 +676,13 @@ class Relobj : public Object
 
   // Process the relocs, during garbage collection only.
   void
-  gc_process_relocs(Symbol_table* symtab, Layout* layout, Read_relocs_data* rd)
-  { return this->do_gc_process_relocs(symtab, layout, rd); }
+  gc_process_relocs(Symbol_table* symtab, Layout* olayout, Read_relocs_data* rd)
+  { return this->do_gc_process_relocs(symtab, olayout, rd); }
 
   // Scan the relocs and adjust the symbol table.
   void
-  scan_relocs(Symbol_table* symtab, Layout* layout, Read_relocs_data* rd)
-  { return this->do_scan_relocs(symtab, layout, rd); }
+  scan_relocs(Symbol_table* symtab, Layout* olayout, Read_relocs_data* rd)
+  { return this->do_scan_relocs(symtab, olayout, rd); }
 
   // The number of local symbols in the input symbol table.
   virtual unsigned int
@@ -716,8 +716,8 @@ class Relobj : public Object
 
   // Relocate the input sections and write out the local symbols.
   void
-  relocate(const Symbol_table* symtab, const Layout* layout, Output_file* of)
-  { return this->do_relocate(symtab, layout, of); }
+  relocate(const Symbol_table* symtab, const Layout* olayout, Output_file* of)
+  { return this->do_relocate(symtab, olayout, of); }
 
   // Return whether an input section is being included in the link.
   bool
@@ -789,8 +789,8 @@ class Relobj : public Object
   // Layout sections whose layout was deferred while waiting for
   // input files from a plugin.
   void
-  layout_deferred_sections(Layout* layout)
-  { this->do_layout_deferred_sections(layout); }
+  layout_deferred_sections(Layout* olayout)
+  { this->do_layout_deferred_sections(olayout); }
 
  protected:
   // The output section to be used for each input section, indexed by
@@ -1018,8 +1018,8 @@ class Symbol_value
 
   // Set the value of this symbol in the output symbol table.
   void
-  set_output_value(Value value)
-  { this->u_.value = value; }
+  set_output_value(Value val)
+  { this->u_.value = val; }
 
   // For a section symbol in a merged section, we need more
   // information.
@@ -1058,8 +1058,8 @@ class Symbol_value
   // called by count_local_symbols, to communicate the value to
   // finalize_local_symbols.
   void
-  set_input_value(Value value)
-  { this->u_.value = value; }
+  set_input_value(Value val)
+  { this->u_.value = val; }
 
   // Return the input value.  This is only called by
   // finalize_local_symbols and (in special cases) relocate_section.
@@ -1735,9 +1735,9 @@ class Sized_relobj : public Relobj
 
   // Relocate the sections in the output file.
   void
-  relocate_sections(const Symbol_table* symtab, const Layout* layout,
+  relocate_sections(const Symbol_table* symtab, const Layout* olayout,
 		    const unsigned char* pshdrs, Views* pviews)
-  { this->do_relocate_sections(symtab, layout, pshdrs, pviews); }
+  { this->do_relocate_sections(symtab, olayout, pshdrs, pviews); }
 
   // Scan the input relocations for --emit-relocs.
   void

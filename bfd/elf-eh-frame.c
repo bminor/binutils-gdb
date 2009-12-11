@@ -1629,7 +1629,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	  if (ent->set_loc)
 	    {
 	      /* Adjust DW_CFA_set_loc.  */
-	      unsigned int cnt, width;
+	      unsigned int cnt;
 	      bfd_vma new_offset;
 
 	      width = get_DW_EH_PE_width (ent->fde_encoding, ptr_size);
@@ -1639,7 +1639,6 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 
 	      for (cnt = 1; cnt <= ent->set_loc[0]; cnt++)
 		{
-		  bfd_vma value;
 		  buf = start + ent->set_loc[cnt];
 
 		  value = read_value (abfd, buf, width,

@@ -1,3 +1,54 @@
+2009-12-11  Nick Clifton  <nickc@redhat.com>
+
+	* archive.cc: Fix shadowed variable warnings.
+	* arm.cc: Likewise.
+	* compressed_output.cc: Likewise.
+	* compressed_output.h: Likewise.
+	* configure: Likewise.
+	* dwarf_reader.cc: Likewise.
+	* dynobj.cc: Likewise.
+	* dynobj.h: Likewise.
+	* ehframe.cc: Likewise.
+	* ehframe.h: Likewise.
+	* errors.cc: Likewise.
+	* expression.cc: Likewise.
+	* fileread.cc: Likewise.
+	* fileread.h: Likewise.
+	* freebsd.h: Likewise.
+	* i386.cc: Likewise.
+	* icf.cc: Likewise.
+	* incremental.h: Likewise.
+	* layout.cc: Likewise.
+	* layout.h: Likewise.
+	* mapfile.cc: Likewise.
+	* merge.cc: Likewise.
+	* merge.h: Likewise.
+	* object.cc: Likewise.
+	* object.h: Likewise.
+	* options.h: Likewise.
+	* output.cc: Likewise.
+	* output.h: Likewise.
+	* parameters.cc: Likewise.
+	* plugin.cc: Likewise.
+	* powerpc.cc: Likewise.
+	* reduced_debug_output.cc: Likewise.
+	* reduced_debug_output.h: Likewise.
+	* reloc.cc: Likewise.
+	* reloc.h: Likewise.
+	* resolve.cc: Likewise.
+	* script-sections.cc: Likewise.
+	* script.cc: Likewise.
+	* script.h: Likewise.
+	* sparc.cc: Likewise.
+	* symtab.cc: Likewise.
+	* symtab.h: Likewise.
+	* target-select.cc: Likewise.
+	* target-select.h: Likewise.
+	* token.h: Likewise.
+	* workqueue.cc: Likewise.
+	* workqueue.h: Likewise.
+	* x86_64.cc: Likewise.
+
 2009-12-10  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (attributes.h): New include.

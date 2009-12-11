@@ -729,13 +729,13 @@ slurp_rela_relocs (FILE * file,
 		 little-endian symbol index followed by four
 		 individual byte fields.  Reorder INFO
 		 accordingly.  */
-	      bfd_vma info = relas[i].r_info;
-	      info = (((info & 0xffffffff) << 32)
-		      | ((info >> 56) & 0xff)
-		      | ((info >> 40) & 0xff00)
-		      | ((info >> 24) & 0xff0000)
-		      | ((info >> 8) & 0xff000000));
-	      relas[i].r_info = info;
+	      bfd_vma inf = relas[i].r_info;
+	      inf = (((inf & 0xffffffff) << 32)
+		      | ((inf >> 56) & 0xff)
+		      | ((inf >> 40) & 0xff00)
+		      | ((inf >> 24) & 0xff0000)
+		      | ((inf >> 8) & 0xff000000));
+	      relas[i].r_info = inf;
 	    }
 #endif /* BFD64 */
 	}
@@ -825,13 +825,13 @@ slurp_rel_relocs (FILE * file,
 		 little-endian symbol index followed by four
 		 individual byte fields.  Reorder INFO
 		 accordingly.  */
-	      bfd_vma info = rels[i].r_info;
-	      info = (((info & 0xffffffff) << 32)
-		      | ((info >> 56) & 0xff)
-		      | ((info >> 40) & 0xff00)
-		      | ((info >> 24) & 0xff0000)
-		      | ((info >> 8) & 0xff000000));
-	      rels[i].r_info = info;
+	      bfd_vma inf = rels[i].r_info;
+	      inf = (((inf & 0xffffffff) << 32)
+		     | ((inf >> 56) & 0xff)
+		     | ((inf >> 40) & 0xff00)
+		     | ((inf >> 24) & 0xff0000)
+		     | ((inf >> 8) & 0xff000000));
+	      rels[i].r_info = inf;
 	    }
 #endif /* BFD64 */
 	}
@@ -942,21 +942,21 @@ dump_relocations (FILE * file,
     {
       const char * rtype;
       bfd_vma offset;
-      bfd_vma info;
+      bfd_vma inf;
       bfd_vma symtab_index;
       bfd_vma type;
 
       offset = rels[i].r_offset;
-      info   = rels[i].r_info;
+      inf    = rels[i].r_info;
 
-      type = get_reloc_type (info);
-      symtab_index = get_reloc_symindex  (info);
+      type = get_reloc_type (inf);
+      symtab_index = get_reloc_symindex  (inf);
 
       if (is_32bit_elf)
 	{
 	  printf ("%8.8lx  %8.8lx ",
 		  (unsigned long) offset & 0xffffffff,
-		  (unsigned long) info & 0xffffffff);
+		  (unsigned long) inf & 0xffffffff);
 	}
       else
 	{
@@ -964,18 +964,18 @@ dump_relocations (FILE * file,
 	  printf (do_wide
 		  ? "%16.16lx  %16.16lx "
 		  : "%12.12lx  %12.12lx ",
-		  offset, info);
+		  offset, inf);
 #elif BFD_HOST_64BIT_LONG_LONG
 #ifndef __MSVCRT__
 	  printf (do_wide
 		  ? "%16.16llx  %16.16llx "
 		  : "%12.12llx  %12.12llx ",
-		  offset, info);
+		  offset, inf);
 #else
 	  printf (do_wide
 		  ? "%16.16I64x  %16.16I64x "
 		  : "%12.12I64x  %12.12I64x ",
-		  offset, info);
+		  offset, inf);
 #endif
 #else
 	  printf (do_wide
@@ -983,8 +983,8 @@ dump_relocations (FILE * file,
 		  : "%4.4lx%8.8lx  %4.4lx%8.8lx ",
 		  _bfd_int64_high (offset),
 		  _bfd_int64_low (offset),
-		  _bfd_int64_high (info),
-		  _bfd_int64_low (info));
+		  _bfd_int64_high (inf),
+		  _bfd_int64_low (inf));
 #endif
 	}
 
@@ -1355,12 +1355,12 @@ dump_relocations (FILE * file,
 
 	      if (is_rela)
 		{
-		  long offset = (long) (bfd_signed_vma) rels[i].r_addend;
+		  long off = (long) (bfd_signed_vma) rels[i].r_addend;
 
-		  if (offset < 0)
-		    printf (" - %lx", - offset);
+		  if (off < 0)
+		    printf (" - %lx", - off);
 		  else
-		    printf (" + %lx", offset);
+		    printf (" + %lx", off);
 		}
 	    }
 	}
@@ -1374,15 +1374,15 @@ dump_relocations (FILE * file,
       if (elf_header.e_machine == EM_SPARCV9
 	  && rtype != NULL
 	  && streq (rtype, "R_SPARC_OLO10"))
-	printf (" + %lx", (unsigned long) ELF64_R_TYPE_DATA (info));
+	printf (" + %lx", (unsigned long) ELF64_R_TYPE_DATA (inf));
 
       putchar ('\n');
 
 #ifdef BFD64
       if (! is_32bit_elf && elf_header.e_machine == EM_MIPS)
 	{
-	  bfd_vma type2 = ELF64_MIPS_R_TYPE2 (info);
-	  bfd_vma type3 = ELF64_MIPS_R_TYPE3 (info);
+	  bfd_vma type2 = ELF64_MIPS_R_TYPE2 (inf);
+	  bfd_vma type3 = ELF64_MIPS_R_TYPE3 (inf);
 	  const char * rtype2 = elf_mips_reloc_type (type2);
 	  const char * rtype3 = elf_mips_reloc_type (type3);
 
@@ -3368,7 +3368,7 @@ process_file_header (void)
 
 
 static int
-get_32bit_program_headers (FILE * file, Elf_Internal_Phdr * program_headers)
+get_32bit_program_headers (FILE * file, Elf_Internal_Phdr * pheaders)
 {
   Elf32_External_Phdr * phdrs;
   Elf32_External_Phdr * external;
@@ -3382,7 +3382,7 @@ get_32bit_program_headers (FILE * file, Elf_Internal_Phdr * program_headers)
   if (!phdrs)
     return 0;
 
-  for (i = 0, internal = program_headers, external = phdrs;
+  for (i = 0, internal = pheaders, external = phdrs;
        i < elf_header.e_phnum;
        i++, internal++, external++)
     {
@@ -3402,7 +3402,7 @@ get_32bit_program_headers (FILE * file, Elf_Internal_Phdr * program_headers)
 }
 
 static int
-get_64bit_program_headers (FILE * file, Elf_Internal_Phdr * program_headers)
+get_64bit_program_headers (FILE * file, Elf_Internal_Phdr * pheaders)
 {
   Elf64_External_Phdr * phdrs;
   Elf64_External_Phdr * external;
@@ -3416,7 +3416,7 @@ get_64bit_program_headers (FILE * file, Elf_Internal_Phdr * program_headers)
   if (!phdrs)
     return 0;
 
-  for (i = 0, internal = program_headers, external = phdrs;
+  for (i = 0, internal = pheaders, external = phdrs;
        i < elf_header.e_phnum;
        i++, internal++, external++)
     {
@@ -3959,7 +3959,8 @@ get_elf_section_flags (bfd_vma sh_flags)
   static char buff[1024];
   char * p = buff;
   int field_size = is_32bit_elf ? 8 : 16;
-  int index, size = sizeof (buff) - (field_size + 4 + 1);
+  int sindex;
+  int size = sizeof (buff) - (field_size + 4 + 1);
   bfd_vma os_flags = 0;
   bfd_vma proc_flags = 0;
   bfd_vma unknown_flags = 0;
@@ -4013,36 +4014,36 @@ get_elf_section_flags (bfd_vma sh_flags)
 	{
 	  switch (flag)
 	    {
-	    case SHF_WRITE:		index = 0; break;
-	    case SHF_ALLOC:		index = 1; break;
-	    case SHF_EXECINSTR:		index = 2; break;
-	    case SHF_MERGE:		index = 3; break;
-	    case SHF_STRINGS:		index = 4; break;
-	    case SHF_INFO_LINK:		index = 5; break;
-	    case SHF_LINK_ORDER:	index = 6; break;
-	    case SHF_OS_NONCONFORMING:	index = 7; break;
-	    case SHF_GROUP:		index = 8; break;
-	    case SHF_TLS:		index = 9; break;
+	    case SHF_WRITE:		sindex = 0; break;
+	    case SHF_ALLOC:		sindex = 1; break;
+	    case SHF_EXECINSTR:		sindex = 2; break;
+	    case SHF_MERGE:		sindex = 3; break;
+	    case SHF_STRINGS:		sindex = 4; break;
+	    case SHF_INFO_LINK:		sindex = 5; break;
+	    case SHF_LINK_ORDER:	sindex = 6; break;
+	    case SHF_OS_NONCONFORMING:	sindex = 7; break;
+	    case SHF_GROUP:		sindex = 8; break;
+	    case SHF_TLS:		sindex = 9; break;
 
 	    default:
-	      index = -1;
+	      sindex = -1;
 	      switch (elf_header.e_machine)
 		{
 		case EM_IA_64:
 		  if (flag == SHF_IA_64_SHORT)
-		    index = 10;
+		    sindex = 10;
 		  else if (flag == SHF_IA_64_NORECOV)
-		    index = 11;
+		    sindex = 11;
 #ifdef BFD64
 		  else if (elf_header.e_ident[EI_OSABI] == ELFOSABI_OPENVMS)
 		    switch (flag)
 		      {
-		      case SHF_IA_64_VMS_GLOBAL:      index = 12; break;
-		      case SHF_IA_64_VMS_OVERLAID:    index = 13; break;
-		      case SHF_IA_64_VMS_SHARED:      index = 14; break;
-		      case SHF_IA_64_VMS_VECTOR:      index = 15; break;
-		      case SHF_IA_64_VMS_ALLOC_64BIT: index = 16; break;
-		      case SHF_IA_64_VMS_PROTECTED:   index = 17; break;
+		      case SHF_IA_64_VMS_GLOBAL:      sindex = 12; break;
+		      case SHF_IA_64_VMS_OVERLAID:    sindex = 13; break;
+		      case SHF_IA_64_VMS_SHARED:      sindex = 14; break;
+		      case SHF_IA_64_VMS_VECTOR:      sindex = 15; break;
+		      case SHF_IA_64_VMS_ALLOC_64BIT: sindex = 16; break;
+		      case SHF_IA_64_VMS_PROTECTED:   sindex = 17; break;
 		      default:                        break;
 		      }
 #endif
@@ -4056,16 +4057,16 @@ get_elf_section_flags (bfd_vma sh_flags)
 		case EM_SPARCV9:
 		case EM_SPARC:
 		  if (flag == SHF_EXCLUDE)
-		    index = 18;
+		    sindex = 18;
 		  else if (flag == SHF_ORDERED)
-		    index = 19;
+		    sindex = 19;
 		  break;
 		default:
 		  break;
 		}
 	    }
 
-	  if (index != -1)
+	  if (sindex != -1)
 	    {
 	      if (p != buff + field_size + 4)
 		{
@@ -4076,8 +4077,8 @@ get_elf_section_flags (bfd_vma sh_flags)
 		  *p++ = ' ';
 		}
 
-	      size -= flags [index].len;
-	      p = stpcpy (p, flags [index].str);
+	      size -= flags [sindex].len;
+	      p = stpcpy (p, flags [sindex].str);
 	    }
 	  else if (flag & SHF_MASKOS)
 	    os_flags |= flag;
@@ -5804,8 +5805,8 @@ dynamic_section_mips_val (Elf_Internal_Dyn * entry)
 	char timebuf[20];
 	struct tm * tmp;
 
-	time_t time = entry->d_un.d_val;
-	tmp = gmtime (&time);
+	time_t atime = entry->d_un.d_val;
+	tmp = gmtime (&atime);
 	snprintf (timebuf, sizeof (timebuf), "%04u-%02u-%02uT%02u:%02u:%02u",
 		  tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,
 		  tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
@@ -6559,9 +6560,9 @@ process_dynamic_section (FILE * file)
 	  if (do_dynamic)
 	    {
 	      struct tm * tmp;
-	      time_t time = entry->d_un.d_val;
+	      time_t atime = entry->d_un.d_val;
 
-	      tmp = gmtime (&time);
+	      tmp = gmtime (&atime);
 	      printf ("%04u-%02u-%02uT%02u:%02u:%02u\n",
 		      tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,
 		      tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
@@ -7722,9 +7723,9 @@ process_symbol_table (FILE * file)
 			      Elf_Internal_Verdef ivd;
 			      Elf_Internal_Verdaux ivda;
 			      Elf_External_Verdaux evda;
-			      unsigned long offset;
+			      unsigned long off;
 
-			      offset = offset_from_vma
+			      off = offset_from_vma
 				(file,
 				 version_info[DT_VERSIONTAGIDX (DT_VERDEF)],
 				 sizeof (Elf_External_Verdef));
@@ -7733,22 +7734,22 @@ process_symbol_table (FILE * file)
 				{
 				  Elf_External_Verdef evd;
 
-				  get_data (&evd, file, offset, sizeof (evd),
+				  get_data (&evd, file, off, sizeof (evd),
 					    1, _("version def"));
 
 				  ivd.vd_ndx = BYTE_GET (evd.vd_ndx);
 				  ivd.vd_aux = BYTE_GET (evd.vd_aux);
 				  ivd.vd_next = BYTE_GET (evd.vd_next);
 
-				  offset += ivd.vd_next;
+				  off += ivd.vd_next;
 				}
 			      while (ivd.vd_ndx != (vers_data & VERSYM_VERSION)
 				     && ivd.vd_next != 0);
 
-			      offset -= ivd.vd_next;
-			      offset += ivd.vd_aux;
+			      off -= ivd.vd_next;
+			      off += ivd.vd_aux;
 
-			      get_data (&evda, file, offset, sizeof (evda),
+			      get_data (&evda, file, off, sizeof (evda),
 					1, _("version def aux"));
 
 			      ivda.vda_name = BYTE_GET (evda.vda_name);
@@ -8445,7 +8446,7 @@ apply_relocations (void * file,
 	  bfd_vma         addend;
 	  unsigned int    reloc_type;
 	  unsigned int    reloc_size;
-	  unsigned char * loc;
+	  unsigned char * rloc;
 
 	  reloc_type = get_reloc_type (rp->r_info);
 
@@ -8470,8 +8471,8 @@ apply_relocations (void * file,
 	      continue;
 	    }
 
-	  loc = start + rp->r_offset;
-	  if ((loc + reloc_size) > end)
+	  rloc = start + rp->r_offset;
+	  if ((rloc + reloc_size) > end)
 	    {
 	      warn (_("skipping invalid relocation offset 0x%lx in section %s\n"),
 		    (unsigned long) rp->r_offset,
@@ -8514,7 +8515,7 @@ apply_relocations (void * file,
 	      || ((elf_header.e_machine == EM_PJ
 		   || elf_header.e_machine == EM_PJ_OLD)
 		  && reloc_type == 1))
-	    addend += byte_get (loc, reloc_size);
+	    addend += byte_get (rloc, reloc_size);
 
 	  if (is_32bit_pcrel_reloc (reloc_type)
 	      || is_64bit_pcrel_reloc (reloc_type))
@@ -8522,11 +8523,11 @@ apply_relocations (void * file,
 	      /* On HPPA, all pc-relative relocations are biased by 8.  */
 	      if (elf_header.e_machine == EM_PARISC)
 		addend -= 8;
-	      byte_put (loc, (addend + sym->st_value) - rp->r_offset,
+	      byte_put (rloc, (addend + sym->st_value) - rp->r_offset,
 		        reloc_size);
 	    }
 	  else
-	    byte_put (loc, addend + sym->st_value, reloc_size);
+	    byte_put (rloc, addend + sym->st_value, reloc_size);
 	}
 
       free (symtab);
@@ -9585,10 +9586,10 @@ process_attributes (FILE * file,
 		    do_numlist:
 		      for (;;)
 			{
-			  unsigned int i;
+			  unsigned int j;
 
-			  val = read_uleb128 (p, &i);
-			  p += i;
+			  val = read_uleb128 (p, &j);
+			  p += j;
 			  if (val == 0)
 			    break;
 			  printf (" %d", val);
@@ -9787,17 +9788,17 @@ process_mips_specific (FILE * file)
 	  for (cnt = 0; cnt < liblistno; ++cnt)
 	    {
 	      Elf32_Lib liblist;
-	      time_t time;
+	      time_t atime;
 	      char timebuf[20];
 	      struct tm * tmp;
 
 	      liblist.l_name = BYTE_GET (elib[cnt].l_name);
-	      time = BYTE_GET (elib[cnt].l_time_stamp);
+	      atime = BYTE_GET (elib[cnt].l_time_stamp);
 	      liblist.l_checksum = BYTE_GET (elib[cnt].l_checksum);
 	      liblist.l_version = BYTE_GET (elib[cnt].l_version);
 	      liblist.l_flags = BYTE_GET (elib[cnt].l_flags);
 
-	      tmp = gmtime (&time);
+	      tmp = gmtime (&atime);
 	      snprintf (timebuf, sizeof (timebuf),
 			"%04u-%02u-%02uT%02u:%02u:%02u",
 			tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,
@@ -10120,12 +10121,12 @@ process_mips_specific (FILE * file)
 
   if (pltgot != 0 && local_gotno != 0)
     {
-      bfd_vma entry, local_end, global_end;
+      bfd_vma ent, local_end, global_end;
       size_t i, offset;
       unsigned char * data;
       int addr_size;
 
-      entry = pltgot;
+      ent = pltgot;
       addr_size = (is_32bit_elf ? 4 : 8);
       local_end = pltgot + local_gotno * addr_size;
       global_end = local_end + (symtabno - gotsym) * addr_size;
@@ -10142,26 +10143,26 @@ process_mips_specific (FILE * file)
       printf (_("  %*s %10s %*s Purpose\n"),
 	      addr_size * 2, "Address", "Access",
 	      addr_size * 2, "Initial");
-      entry = print_mips_got_entry (data, pltgot, entry);
+      ent = print_mips_got_entry (data, pltgot, ent);
       printf (" Lazy resolver\n");
       if (data
-	  && (byte_get (data + entry - pltgot, addr_size)
+	  && (byte_get (data + ent - pltgot, addr_size)
 	      >> (addr_size * 8 - 1)) != 0)
 	{
-	  entry = print_mips_got_entry (data, pltgot, entry);
+	  ent = print_mips_got_entry (data, pltgot, ent);
 	  printf (" Module pointer (GNU extension)\n");
 	}
       printf ("\n");
 
-      if (entry < local_end)
+      if (ent < local_end)
 	{
 	  printf (_(" Local entries:\n"));
 	  printf (_("  %*s %10s %*s\n"),
 		  addr_size * 2, "Address", "Access",
 		  addr_size * 2, "Initial");
-	  while (entry < local_end)
+	  while (ent < local_end)
 	    {
-	      entry = print_mips_got_entry (data, pltgot, entry);
+	      ent = print_mips_got_entry (data, pltgot, ent);
 	      printf ("\n");
 	    }
 	  printf ("\n");
@@ -10182,7 +10183,7 @@ process_mips_specific (FILE * file)
 	      Elf_Internal_Sym * psym;
 
 	      psym = dynamic_symbols + i;
-	      entry = print_mips_got_entry (data, pltgot, entry);
+	      ent = print_mips_got_entry (data, pltgot, ent);
 	      printf (" ");
 	      print_vma (psym->st_value, LONG_HEX);
 	      printf (" %-7s %3s ",
@@ -10203,7 +10204,7 @@ process_mips_specific (FILE * file)
 
   if (mips_pltgot != 0 && jmprel != 0 && pltrel != 0 && pltrelsz != 0)
     {
-      bfd_vma entry, end;
+      bfd_vma ent, end;
       size_t offset, rel_offset;
       unsigned long count, i;
       unsigned char * data;
@@ -10222,7 +10223,7 @@ process_mips_specific (FILE * file)
 	    return 0;
 	}
 
-      entry = mips_pltgot;
+      ent = mips_pltgot;
       addr_size = (is_32bit_elf ? 4 : 8);
       end = mips_pltgot + (2 + count) * addr_size;
 
@@ -10233,9 +10234,9 @@ process_mips_specific (FILE * file)
       printf (_(" Reserved entries:\n"));
       printf (_("  %*s %*s Purpose\n"),
 	      addr_size * 2, "Address", addr_size * 2, "Initial");
-      entry = print_mips_pltgot_entry (data, mips_pltgot, entry);
+      ent = print_mips_pltgot_entry (data, mips_pltgot, ent);
       printf (" PLT lazy resolver\n");
-      entry = print_mips_pltgot_entry (data, mips_pltgot, entry);
+      ent = print_mips_pltgot_entry (data, mips_pltgot, ent);
       printf (" Module pointer\n");
       printf ("\n");
 
@@ -10250,7 +10251,7 @@ process_mips_specific (FILE * file)
 	  Elf_Internal_Sym * psym;
 
 	  psym = dynamic_symbols + get_reloc_symindex (rels[i].r_info);
-	  entry = print_mips_pltgot_entry (data, mips_pltgot, entry);
+	  ent = print_mips_pltgot_entry (data, mips_pltgot, ent);
 	  printf (" ");
 	  print_vma (psym->st_value, LONG_HEX);
 	  printf (" %-7s %3s ",
@@ -10326,17 +10327,17 @@ process_gnu_liblist (FILE * file)
 	       ++cnt)
 	    {
 	      Elf32_Lib liblist;
-	      time_t time;
+	      time_t atime;
 	      char timebuf[20];
 	      struct tm * tmp;
 
 	      liblist.l_name = BYTE_GET (elib[cnt].l_name);
-	      time = BYTE_GET (elib[cnt].l_time_stamp);
+	      atime = BYTE_GET (elib[cnt].l_time_stamp);
 	      liblist.l_checksum = BYTE_GET (elib[cnt].l_checksum);
 	      liblist.l_version = BYTE_GET (elib[cnt].l_version);
 	      liblist.l_flags = BYTE_GET (elib[cnt].l_flags);
 
-	      tmp = gmtime (&time);
+	      tmp = gmtime (&atime);
 	      snprintf (timebuf, sizeof (timebuf),
 			"%04u-%02u-%02uT%02u:%02u:%02u",
 			tmp->tm_year + 1900, tmp->tm_mon + 1, tmp->tm_mday,

@@ -795,7 +795,7 @@ check_insn_major_constraints (FRV_VLIW *vliw,
 int
 frv_vliw_add_insn (FRV_VLIW *vliw, const CGEN_INSN *insn)
 {
-  int index;
+  int slot_index;
   CGEN_ATTR_VALUE_ENUM_TYPE major;
   CGEN_ATTR_VALUE_ENUM_TYPE unit;
   VLIW_COMBO *new_vliw;
@@ -803,8 +803,8 @@ frv_vliw_add_insn (FRV_VLIW *vliw, const CGEN_INSN *insn)
   if (vliw->constraint_violation || CGEN_INSN_INVALID_P (insn))
     return 1;
 
-  index = vliw->next_slot;
-  if (index >= FRV_VLIW_SIZE)
+  slot_index = vliw->next_slot;
+  if (slot_index >= FRV_VLIW_SIZE)
     return 1;
 
   unit = CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_UNIT);
@@ -831,7 +831,7 @@ frv_vliw_add_insn (FRV_VLIW *vliw, const CGEN_INSN *insn)
       break;
     }
 
-  if (index <= 0)
+  if (slot_index <= 0)
     {
       /* Any insn can be added to slot 0.  */
       while (! match_unit (vliw, unit, (*vliw->current_vliw)[0]))
@@ -851,8 +851,8 @@ frv_vliw_add_insn (FRV_VLIW *vliw, const CGEN_INSN *insn)
       if (new_vliw && check_insn_major_constraints (vliw, major, insn))
 	{
 	  vliw->current_vliw = new_vliw;
-	  vliw->major[index] = major;
-	  vliw->insn[index] = insn;
+	  vliw->major[slot_index] = major;
+	  vliw->insn[slot_index] = insn;
 	  vliw->next_slot++;
 	  return 0;
 	}

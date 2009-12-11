@@ -210,7 +210,7 @@ print_regset (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
   };
   disassemble_info *info = dis_info;
   int mask;
-  int index = 0;
+  int reg_index = 0;
   char* comma = "";
 
   if (push)
@@ -224,7 +224,7 @@ print_regset (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       comma = ",";
     }
 
-  for (index = 1; index <= 7; ++index)
+  for (reg_index = 1; reg_index <= 7; ++reg_index)
     {
       if (push)
         mask >>= 1;
@@ -234,7 +234,7 @@ print_regset (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
       if (value & mask)
         {
           (*info->fprintf_func) (info->stream, "%s%s", comma,
-				 m16c_register_names [index]);
+				 m16c_register_names [reg_index]);
           comma = ",";
         }
     }

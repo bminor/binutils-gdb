@@ -83,15 +83,15 @@ const char Archive::armagt[sarmag] =
 
 const char Archive::arfmag[2] = { '`', '\n' };
 
-Archive::Archive(const std::string& name, Input_file* input_file,
-                 bool is_thin_archive, Dirsearch* dirpath, Task* task)
-  : name_(name), input_file_(input_file), armap_(), armap_names_(),
+Archive::Archive(const std::string& aname, Input_file* ainput_file,
+                 bool is_a_thin_archive, Dirsearch* dirpath, Task* task)
+  : name_(aname), input_file_(ainput_file), armap_(), armap_names_(),
     extended_names_(), armap_checked_(), seen_offsets_(), members_(),
-    is_thin_archive_(is_thin_archive), included_member_(false),
+    is_thin_archive_(is_a_thin_archive), included_member_(false),
     nested_archives_(), dirpath_(dirpath), task_(task), num_members_(0)
 {
   this->no_export_ =
-    parameters->options().check_excluded_libs(input_file->found_name());
+    parameters->options().check_excluded_libs(ainput_file->found_name());
 }
 
 // Set up the archive: read the symbol map and the extended name
@@ -247,9 +247,9 @@ Archive::interpret_header(const Archive_header* hdr, off_t off,
   *ps = '\0';
 
   errno = 0;
-  char* end;
-  off_t member_size = strtol(size_string, &end, 10);
-  if (*end != '\0'
+  char* hend;
+  off_t member_size = strtol(size_string, &hend, 10);
+  if (*hend != '\0'
       || member_size < 0
       || (member_size == LONG_MAX && errno == ERANGE))
     {
@@ -285,11 +285,11 @@ Archive::interpret_header(const Archive_header* hdr, off_t off,
   else
     {
       errno = 0;
-      long x = strtol(hdr->ar_name + 1, &end, 10);
+      long x = strtol(hdr->ar_name + 1, &hend, 10);
       long y = 0;
-      if (*end == ':')
-        y = strtol(end + 1, &end, 10);
-      if (*end != ' '
+      if (*hend == ':')
+        y = strtol(hend + 1, &hend, 10);
+      if (*hend != ' '
 	  || x < 0
 	  || (x == LONG_MAX && errno == ERANGE)
 	  || static_cast<size_t>(x) >= this->extended_names_.size())
@@ -299,16 +299,16 @@ Archive::interpret_header(const Archive_header* hdr, off_t off,
 	  return this->input_file_->file().filesize() - off;
 	}
 
-      const char* name = this->extended_names_.data() + x;
-      const char* name_end = strchr(name, '\n');
-      if (static_cast<size_t>(name_end - name) > this->extended_names_.size()
+      const char* name_start = this->extended_names_.data() + x;
+      const char* name_end = strchr(name_start, '\n');
+      if (static_cast<size_t>(name_end - name_start) > this->extended_names_.size()
 	  || name_end[-1] != '/')
 	{
 	  gold_error(_("%s: bad extended name entry at header %zu"),
 		     this->name().c_str(), static_cast<size_t>(off));
 	  return this->input_file_->file().filesize() - off;
 	}
-      pname->assign(name, name_end - 1 - name);
+      pname->assign(name_start, name_end - 1 - name_start);
       if (nested_off != NULL)
         *nested_off = y;
     }
@@ -452,14 +452,14 @@ Archive::end()
 // to the name of the archive member.  Return TRUE on success.
 
 bool
-Archive::get_file_and_offset(off_t off, Input_file** input_file, off_t* memoff,
+Archive::get_file_and_offset(off_t off, Input_file** in_file, off_t* memoff,
                              off_t* memsize, std::string* member_name)
 {
   off_t nested_off;
 
   *memsize = this->read_header(off, false, member_name, &nested_off);
 
-  *input_file = this->input_file_;
+  *in_file = this->input_file_;
   *memoff = off + static_cast<off_t>(sizeof(Archive_header));
 
   if (!this->is_thin_archive_)
@@ -492,18 +492,18 @@ Archive::get_file_and_offset(off_t off, Input_file** input_file, off_t* memoff,
             new Input_file_argument(member_name->c_str(),
                                     Input_file_argument::INPUT_FILE_TYPE_FILE,
                                     "", false, parameters->options());
-          *input_file = new Input_file(input_file_arg);
+          *in_file = new Input_file(input_file_arg);
 	  int dummy = 0;
-          if (!(*input_file)->open(*this->dirpath_, this->task_, &dummy))
+          if (!(*in_file)->open(*this->dirpath_, this->task_, &dummy))
             return false;
-          arch = new Archive(*member_name, *input_file, false, this->dirpath_,
+          arch = new Archive(*member_name, *in_file, false, this->dirpath_,
                              this->task_);
           arch->setup();
           std::pair<Nested_archive_table::iterator, bool> ins =
             this->nested_archives_.insert(std::make_pair(*member_name, arch));
           gold_assert(ins.second);
         }
-      return arch->get_file_and_offset(nested_off, input_file, memoff,
+      return arch->get_file_and_offset(nested_off, in_file, memoff,
 				       memsize, member_name);
     }
 
@@ -513,13 +513,13 @@ Archive::get_file_and_offset(off_t off, Input_file** input_file, off_t* memoff,
       new Input_file_argument(member_name->c_str(),
                               Input_file_argument::INPUT_FILE_TYPE_FILE,
                               "", false, this->input_file_->options());
-  *input_file = new Input_file(input_file_arg);
+  *in_file = new Input_file(input_file_arg);
   int dummy = 0;
-  if (!(*input_file)->open(*this->dirpath_, this->task_, &dummy))
+  if (!(*in_file)->open(*this->dirpath_, this->task_, &dummy))
     return false;
 
   *memoff = 0;
-  *memsize = (*input_file)->file().filesize();
+  *memsize = (*in_file)->file().filesize();
   return true;
 }
 
@@ -532,17 +532,17 @@ Archive::get_elf_object_for_member(off_t off, bool* punconfigured)
 {
   *punconfigured = false;
 
-  Input_file* input_file;
+  Input_file* in_file;
   off_t memoff;
   off_t memsize;
   std::string member_name;
-  if (!this->get_file_and_offset(off, &input_file, &memoff, &memsize,
+  if (!this->get_file_and_offset(off, &in_file, &memoff, &memsize,
 				 &member_name))
     return NULL;
 
   if (parameters->options().has_plugins())
     {
-      Object* obj = parameters->options().plugins()->claim_file(input_file,
+      Object* obj = parameters->options().plugins()->claim_file(in_file,
                                                                 memoff,
                                                                 memsize);
       if (obj != NULL)
@@ -555,7 +555,7 @@ Archive::get_elf_object_for_member(off_t off, bool* punconfigured)
 
   const unsigned char* ehdr;
   int read_size;
-  if (!is_elf_object(input_file, memoff, &ehdr, &read_size))
+  if (!is_elf_object(in_file, memoff, &ehdr, &read_size))
     {
       gold_error(_("%s: member at %zu is not an ELF object"),
 		 this->name().c_str(), static_cast<size_t>(off));
@@ -564,7 +564,7 @@ Archive::get_elf_object_for_member(off_t off, bool* punconfigured)
 
   Object *obj = make_elf_object((std::string(this->input_file_->filename())
 				 + "(" + member_name + ")"),
-				input_file, memoff, ehdr, read_size,
+				in_file, memoff, ehdr, read_size,
 				punconfigured);
   if (obj == NULL)
     return NULL;

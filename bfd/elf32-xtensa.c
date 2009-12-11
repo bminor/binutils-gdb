@@ -1943,9 +1943,8 @@ elf_xtensa_do_reloc (reloc_howto_type *howto,
       if (!is_weak_undef)
 	{
 	  /* Check for windowed CALL across a 1GB boundary.  */
-	  xtensa_opcode opcode =
-	    get_expanded_call_opcode (contents + address,
-				      input_size - address, 0);
+	  opcode = get_expanded_call_opcode (contents + address,
+					     input_size - address, 0);
 	  if (is_windowed_call_opcode (opcode))
 	    {
 	      if ((self_address >> CALL_SEGMENT_BITS)
@@ -2665,7 +2664,7 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 
 	  if (r_type == R_XTENSA_ASM_SIMPLIFY)
 	    {
-	      char *error_message = NULL;
+	      error_message = NULL;
 	      /* Convert ASM_SIMPLIFY into the simpler relocation
 		 so that they never escape a relaxing link.  */
 	      r = contract_asm_expansion (contents, input_size, rel,
@@ -3166,18 +3165,18 @@ elf_xtensa_combine_prop_entries (bfd *output_bfd,
 
   for (n = 0; n < num; n++)
     {
-      bfd_boolean remove = FALSE;
+      bfd_boolean remove_entry = FALSE;
 
       if (table[n].size == 0)
-	remove = TRUE;
-      else if (n > 0 &&
-	       (table[n-1].address + table[n-1].size == table[n].address))
+	remove_entry = TRUE;
+      else if (n > 0
+	       && (table[n-1].address + table[n-1].size == table[n].address))
 	{
 	  table[n-1].size += table[n].size;
-	  remove = TRUE;
+	  remove_entry = TRUE;
 	}
 
-      if (remove)
+      if (remove_entry)
 	{
 	  for (m = n; m < num - 1; m++)
 	    {

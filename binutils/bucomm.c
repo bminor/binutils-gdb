@@ -70,12 +70,12 @@ bfd_nonfatal (const char *string)
    PROGRAM:file: bfd-error-message
    PROGRAM:file[section]: bfd-error-message
    PROGRAM:file: printf-message: bfd-error-message
-   PROGRAM:file[section]: printf-message: bfd-error-message
-*/
+   PROGRAM:file[section]: printf-message: bfd-error-message.  */
 
 void
 bfd_nonfatal_message (const char *filename,
-		      const bfd *bfd, const asection *section,
+		      const bfd *abfd,
+		      const asection *section,
 		      const char *format, ...)
 {
   const char *errmsg = bfd_errmsg (bfd_get_error ());
@@ -85,12 +85,12 @@ bfd_nonfatal_message (const char *filename,
   va_start (args, format);
   fprintf (stderr, "%s", program_name);
   
-  if (bfd)
+  if (abfd)
     {
       if (!filename)
-	filename = bfd_get_archive_filename (bfd);
+	filename = bfd_get_archive_filename (abfd);
       if (section)
-	section_name = bfd_get_section_name (bfd, section);
+	section_name = bfd_get_section_name (abfd, section);
     }
   if (section_name)
     fprintf (stderr, ":%s[%s]", filename, section_name);

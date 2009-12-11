@@ -523,19 +523,12 @@ static const struct bfd_iovec opncls_iovec = {
 
 bfd *
 bfd_openr_iovec (const char *filename, const char *target,
-		 void *(*open) (struct bfd *nbfd,
-				void *open_closure),
+		 void *(*_open) (struct bfd *, void *),
 		 void *open_closure,
-		 file_ptr (*pread) (struct bfd *abfd,
-				    void *stream,
-				    void *buf,
-				    file_ptr nbytes,
-				    file_ptr offset),
-		 int (*close) (struct bfd *nbfd,
-			       void *stream),
-		 int (*stat) (struct bfd *abfd,
-			      void *stream,
-			      struct stat *sb))
+		 file_ptr (*_pread) (struct bfd *, void *, void *, file_ptr,
+				    file_ptr),
+		 int (*_close) (struct bfd *, void *),
+		 int (*_stat) (struct bfd *, void *, struct stat *))
 {
   bfd *nbfd;
   const bfd_target *target_vec;
@@ -557,7 +550,7 @@ bfd_openr_iovec (const char *filename, const char *target,
   nbfd->direction = read_direction;
 
   /* `open (...)' would get expanded by an the open(2) syscall macro.  */
-  stream = (*open) (nbfd, open_closure);
+  stream = (*_open) (nbfd, open_closure);
   if (stream == NULL)
     {
       _bfd_delete_bfd (nbfd);
@@ -566,9 +559,9 @@ bfd_openr_iovec (const char *filename, const char *target,
 
   vec = (struct opncls *) bfd_zalloc (nbfd, sizeof (struct opncls));
   vec->stream = stream;
-  vec->pread = pread;
-  vec->close = close;
-  vec->stat = stat;
+  vec->pread = _pread;
+  vec->close = _close;
+  vec->stat = _stat;
 
   nbfd->iovec = &opncls_iovec;
   nbfd->iostream = vec;
@@ -1234,7 +1227,7 @@ DESCRIPTION
 static char *
 find_separate_debug_file (bfd *abfd, const char *debug_file_directory)
 {
-  char *basename;
+  char *base;
   char *dir;
   char *debugfile;
   char *canon_dir;
@@ -1253,13 +1246,13 @@ find_separate_debug_file (bfd *abfd, const char *debug_file_directory)
       return NULL;
     }
 
-  basename = get_debug_link_info (abfd, & crc32);
-  if (basename == NULL)
+  base = get_debug_link_info (abfd, & crc32);
+  if (base == NULL)
     return NULL;
 
-  if (basename[0] == '\0')
+  if (base[0] == '\0')
     {
-      free (basename);
+      free (base);
       bfd_set_error (bfd_error_no_debug_section);
       return NULL;
     }
@@ -1271,7 +1264,7 @@ find_separate_debug_file (bfd *abfd, const char *debug_file_directory)
   dir = (char *) bfd_malloc (dirlen + 1);
   if (dir == NULL)
     {
-      free (basename);
+      free (base);
       return NULL;
     }
   memcpy (dir, abfd->filename, dirlen);
@@ -1289,11 +1282,11 @@ find_separate_debug_file (bfd *abfd, const char *debug_file_directory)
       bfd_malloc (strlen (debug_file_directory) + 1
                   + (canon_dirlen > dirlen ? canon_dirlen : dirlen)
                   + strlen (".debug/")
-                  + strlen (basename)
+                  + strlen (base)
                   + 1);
   if (debugfile == NULL)
     {
-      free (basename);
+      free (base);
       free (dir);
       free (canon_dir);
       return NULL;
@@ -1301,11 +1294,11 @@ find_separate_debug_file (bfd *abfd, const char *debug_file_directory)
 
   /* First try in the same directory as the original file:  */
   strcpy (debugfile, dir);
-  strcat (debugfile, basename);
+  strcat (debugfile, base);
 
   if (separate_debug_file_exists (debugfile, crc32))
     {
-      free (basename);
+      free (base);
       free (dir);
       free (canon_dir);
       return debugfile;
@@ -1314,11 +1307,11 @@ find_separate_debug_file (bfd *abfd, const char *debug_file_directory)
   /* Then try in a subdirectory called .debug.  */
   strcpy (debugfile, dir);
   strcat (debugfile, ".debug/");
-  strcat (debugfile, basename);
+  strcat (debugfile, base);
 
   if (separate_debug_file_exists (debugfile, crc32))
     {
-      free (basename);
+      free (base);
       free (dir);
       free (canon_dir);
       return debugfile;
@@ -1332,18 +1325,18 @@ find_separate_debug_file (bfd *abfd, const char *debug_file_directory)
       && canon_dir[0] != '/')
     strcat (debugfile, "/");
   strcat (debugfile, canon_dir);
-  strcat (debugfile, basename);
+  strcat (debugfile, base);
 
   if (separate_debug_file_exists (debugfile, crc32))
     {
-      free (basename);
+      free (base);
       free (dir);
       free (canon_dir);
       return debugfile;
     }
 
   free (debugfile);
-  free (basename);
+  free (base);
   free (dir);
   free (canon_dir);
   return NULL;

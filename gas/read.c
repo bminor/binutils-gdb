@@ -589,9 +589,9 @@ try_macro (char term, const char *line)
 void
 read_a_source_file (char *name)
 {
-  register char c;
-  register char *s;		/* String of symbol, '\0' appended.  */
-  register int temp;
+  char c;
+  char *s;		/* String of symbol, '\0' appended.  */
+  int temp;
   pseudo_typeS *pop;
 
 #ifdef WARN_COMMENTS
@@ -680,7 +680,6 @@ read_a_source_file (char *name)
 		  if (is_name_beginner (*input_line_pointer))
 		    {
 		      char *line_start = input_line_pointer;
-		      char c;
 		      int mri_line_macro;
 
 		      HANDLE_CONDITIONAL_ASSEMBLY ();
@@ -3198,12 +3197,12 @@ s_space (int mult)
 	}
       else if (mri_common_symbol != NULL)
 	{
-	  valueT val;
+	  valueT mri_val;
 
-	  val = S_GET_VALUE (mri_common_symbol);
-	  if ((val & 1) != 0)
+	  mri_val = S_GET_VALUE (mri_common_symbol);
+	  if ((mri_val & 1) != 0)
 	    {
-	      S_SET_VALUE (mri_common_symbol, val + 1);
+	      S_SET_VALUE (mri_common_symbol, mri_val + 1);
 	      if (line_label != NULL)
 		{
 		  expressionS *symexp;

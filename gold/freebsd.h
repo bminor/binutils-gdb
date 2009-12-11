@@ -87,11 +87,11 @@ Target_freebsd<size, big_endian>::do_adjust_elf_header(unsigned char* view,
 class Target_selector_freebsd : public Target_selector
 {
  public:
-  Target_selector_freebsd(int machine, int size, bool is_big_endian,
-			  const char* bfd_name,
+  Target_selector_freebsd(int amachine, int size, bool is_big_end,
+			  const char* bfdname,
 			  const char* freebsd_bfd_name)
-    : Target_selector(machine, size, is_big_endian, NULL),
-      bfd_name_(bfd_name), freebsd_bfd_name_(freebsd_bfd_name)
+    : Target_selector(amachine, size, is_big_end, NULL),
+      bfd_name_(bfdname), freebsd_bfd_name_(freebsd_bfd_name)
   { }
 
  protected:

@@ -357,183 +357,185 @@ def_file_parse (const char *filename, def_file *add_to)
 }
 
 void
-def_file_free (def_file *def)
+def_file_free (def_file *fdef)
 {
   int i;
 
-  if (!def)
+  if (!fdef)
     return;
-  if (def->name)
-    free (def->name);
-  if (def->description)
-    free (def->description);
+  if (fdef->name)
+    free (fdef->name);
+  if (fdef->description)
+    free (fdef->description);
 
-  if (def->section_defs)
+  if (fdef->section_defs)
     {
-      for (i = 0; i < def->num_section_defs; i++)
+      for (i = 0; i < fdef->num_section_defs; i++)
 	{
-	  if (def->section_defs[i].name)
-	    free (def->section_defs[i].name);
-	  if (def->section_defs[i].class)
-	    free (def->section_defs[i].class);
+	  if (fdef->section_defs[i].name)
+	    free (fdef->section_defs[i].name);
+	  if (fdef->section_defs[i].class)
+	    free (fdef->section_defs[i].class);
 	}
-      free (def->section_defs);
+      free (fdef->section_defs);
     }
 
-  if (def->exports)
+  if (fdef->exports)
     {
       for (i = 0; i < def->num_exports; i++)
 	{
-	  if (def->exports[i].internal_name
-	      && def->exports[i].internal_name != def->exports[i].name)
-	    free (def->exports[i].internal_name);
-	  if (def->exports[i].name)
-	    free (def->exports[i].name);
-	  if (def->exports[i].its_name)
-	    free (def->exports[i].its_name);
+	  if (fdef->exports[i].internal_name
+	      && fdef->exports[i].internal_name != fdef->exports[i].name)
+	    free (fdef->exports[i].internal_name);
+	  if (fdef->exports[i].name)
+	    free (fdef->exports[i].name);
+	  if (fdef->exports[i].its_name)
+	    free (fdef->exports[i].its_name);
 	}
-      free (def->exports);
+      free (fdef->exports);
     }
 
-  if (def->imports)
+  if (fdef->imports)
     {
-      for (i = 0; i < def->num_imports; i++)
+      for (i = 0; i < fdef->num_imports; i++)
 	{
-	  if (def->imports[i].internal_name
-	      && def->imports[i].internal_name != def->imports[i].name)
-	    free (def->imports[i].internal_name);
-	  if (def->imports[i].name)
-	    free (def->imports[i].name);
-	  if (def->imports[i].its_name)
-	    free (def->imports[i].its_name);
+	  if (fdef->imports[i].internal_name
+	      && fdef->imports[i].internal_name != fdef->imports[i].name)
+	    free (fdef->imports[i].internal_name);
+	  if (fdef->imports[i].name)
+	    free (fdef->imports[i].name);
+	  if (fdef->imports[i].its_name)
+	    free (fdef->imports[i].its_name);
 	}
-      free (def->imports);
+      free (fdef->imports);
     }
 
-  while (def->modules)
+  while (fdef->modules)
     {
-      def_file_module *m = def->modules;
-      def->modules = def->modules->next;
+      def_file_module *m = fdef->modules;
+
+      fdef->modules = fdef->modules->next;
       free (m);
     }
 
-  while (def->aligncomms)
+  while (fdef->aligncomms)
     {
-      def_file_aligncomm *c = def->aligncomms;
-      def->aligncomms = def->aligncomms->next;
+      def_file_aligncomm *c = fdef->aligncomms;
+
+      fdef->aligncomms = fdef->aligncomms->next;
       free (c->symbol_name);
       free (c);
     }
 
-  free (def);
+  free (fdef);
 }
 
 #ifdef DEF_FILE_PRINT
 void
-def_file_print (FILE *file, def_file *def)
+def_file_print (FILE *file, def_file *fdef)
 {
   int i;
 
-  fprintf (file, ">>>> def_file at 0x%08x\n", def);
-  if (def->name)
-    fprintf (file, "  name: %s\n", def->name ? def->name : "(unspecified)");
-  if (def->is_dll != -1)
-    fprintf (file, "  is dll: %s\n", def->is_dll ? "yes" : "no");
-  if (def->base_address != (bfd_vma) -1)
-    fprintf (file, "  base address: 0x%08x\n", def->base_address);
-  if (def->description)
-    fprintf (file, "  description: `%s'\n", def->description);
-  if (def->stack_reserve != -1)
-    fprintf (file, "  stack reserve: 0x%08x\n", def->stack_reserve);
-  if (def->stack_commit != -1)
-    fprintf (file, "  stack commit: 0x%08x\n", def->stack_commit);
-  if (def->heap_reserve != -1)
-    fprintf (file, "  heap reserve: 0x%08x\n", def->heap_reserve);
-  if (def->heap_commit != -1)
-    fprintf (file, "  heap commit: 0x%08x\n", def->heap_commit);
+  fprintf (file, ">>>> def_file at 0x%08x\n", fdef);
+  if (fdef->name)
+    fprintf (file, "  name: %s\n", fdef->name ? fdef->name : "(unspecified)");
+  if (fdef->is_dll != -1)
+    fprintf (file, "  is dll: %s\n", fdef->is_dll ? "yes" : "no");
+  if (fdef->base_address != (bfd_vma) -1)
+    fprintf (file, "  base address: 0x%08x\n", fdef->base_address);
+  if (fdef->description)
+    fprintf (file, "  description: `%s'\n", fdef->description);
+  if (fdef->stack_reserve != -1)
+    fprintf (file, "  stack reserve: 0x%08x\n", fdef->stack_reserve);
+  if (fdef->stack_commit != -1)
+    fprintf (file, "  stack commit: 0x%08x\n", fdef->stack_commit);
+  if (fdef->heap_reserve != -1)
+    fprintf (file, "  heap reserve: 0x%08x\n", fdef->heap_reserve);
+  if (fdef->heap_commit != -1)
+    fprintf (file, "  heap commit: 0x%08x\n", fdef->heap_commit);
 
-  if (def->num_section_defs > 0)
+  if (fdef->num_section_defs > 0)
     {
       fprintf (file, "  section defs:\n");
 
-      for (i = 0; i < def->num_section_defs; i++)
+      for (i = 0; i < fdef->num_section_defs; i++)
 	{
 	  fprintf (file, "    name: `%s', class: `%s', flags:",
-		   def->section_defs[i].name, def->section_defs[i].class);
-	  if (def->section_defs[i].flag_read)
+		   fdef->section_defs[i].name, fdef->section_defs[i].class);
+	  if (fdef->section_defs[i].flag_read)
 	    fprintf (file, " R");
-	  if (def->section_defs[i].flag_write)
+	  if (fdef->section_defs[i].flag_write)
 	    fprintf (file, " W");
-	  if (def->section_defs[i].flag_execute)
+	  if (fdef->section_defs[i].flag_execute)
 	    fprintf (file, " X");
-	  if (def->section_defs[i].flag_shared)
+	  if (fdef->section_defs[i].flag_shared)
 	    fprintf (file, " S");
 	  fprintf (file, "\n");
 	}
     }
 
-  if (def->num_exports > 0)
+  if (fdef->num_exports > 0)
     {
       fprintf (file, "  exports:\n");
 
-      for (i = 0; i < def->num_exports; i++)
+      for (i = 0; i < fdef->num_exports; i++)
 	{
 	  fprintf (file, "    name: `%s', int: `%s', ordinal: %d, flags:",
-		   def->exports[i].name, def->exports[i].internal_name,
-		   def->exports[i].ordinal);
-	  if (def->exports[i].flag_private)
+		   fdef->exports[i].name, fdef->exports[i].internal_name,
+		   fdef->exports[i].ordinal);
+	  if (fdef->exports[i].flag_private)
 	    fprintf (file, " P");
-	  if (def->exports[i].flag_constant)
+	  if (fdef->exports[i].flag_constant)
 	    fprintf (file, " C");
-	  if (def->exports[i].flag_noname)
+	  if (fdef->exports[i].flag_noname)
 	    fprintf (file, " N");
-	  if (def->exports[i].flag_data)
+	  if (fdef->exports[i].flag_data)
 	    fprintf (file, " D");
 	  fprintf (file, "\n");
 	}
     }
 
-  if (def->num_imports > 0)
+  if (fdef->num_imports > 0)
     {
       fprintf (file, "  imports:\n");
 
-      for (i = 0; i < def->num_imports; i++)
+      for (i = 0; i < fdef->num_imports; i++)
 	{
 	  fprintf (file, "    int: %s, from: `%s', name: `%s', ordinal: %d\n",
-		   def->imports[i].internal_name,
-		   def->imports[i].module,
-		   def->imports[i].name,
-		   def->imports[i].ordinal);
+		   fdef->imports[i].internal_name,
+		   fdef->imports[i].module,
+		   fdef->imports[i].name,
+		   fdef->imports[i].ordinal);
 	}
     }
 
-  if (def->version_major != -1)
-    fprintf (file, "  version: %d.%d\n", def->version_major, def->version_minor);
+  if (fdef->version_major != -1)
+    fprintf (file, "  version: %d.%d\n", fdef->version_major, fdef->version_minor);
 
   fprintf (file, "<<<< def_file at 0x%08x\n", def);
 }
 #endif
 
 def_file_export *
-def_file_add_export (def_file *def,
+def_file_add_export (def_file *fdef,
 		     const char *external_name,
 		     const char *internal_name,
 		     int ordinal,
 		     const char *its_name)
 {
   def_file_export *e;
-  int max_exports = ROUND_UP(def->num_exports, 32);
+  int max_exports = ROUND_UP(fdef->num_exports, 32);
 
-  if (def->num_exports >= max_exports)
+  if (fdef->num_exports >= max_exports)
     {
-      max_exports = ROUND_UP(def->num_exports + 1, 32);
-      if (def->exports)
-	def->exports = xrealloc (def->exports,
+      max_exports = ROUND_UP(fdef->num_exports + 1, 32);
+      if (fdef->exports)
+	fdef->exports = xrealloc (fdef->exports,
 				 max_exports * sizeof (def_file_export));
       else
-	def->exports = xmalloc (max_exports * sizeof (def_file_export));
+	fdef->exports = xmalloc (max_exports * sizeof (def_file_export));
     }
-  e = def->exports + def->num_exports;
+  e = fdef->exports + fdef->num_exports;
   memset (e, 0, sizeof (def_file_export));
   if (internal_name && !external_name)
     external_name = internal_name;
@@ -543,16 +545,16 @@ def_file_add_export (def_file *def,
   e->internal_name = xstrdup (internal_name);
   e->its_name = (its_name ? xstrdup (its_name) : NULL);
   e->ordinal = ordinal;
-  def->num_exports++;
+  fdef->num_exports++;
   return e;
 }
 
 def_file_module *
-def_get_module (def_file *def, const char *name)
+def_get_module (def_file *fdef, const char *name)
 {
   def_file_module *s;
 
-  for (s = def->modules; s; s = s->next)
+  for (s = fdef->modules; s; s = s->next)
     if (strcmp (s->name, name) == 0)
       return s;
 
@@ -560,22 +562,22 @@ def_get_module (def_file *def, const char *name)
 }
 
 static def_file_module *
-def_stash_module (def_file *def, const char *name)
+def_stash_module (def_file *fdef, const char *name)
 {
   def_file_module *s;
 
-  if ((s = def_get_module (def, name)) != NULL)
+  if ((s = def_get_module (fdef, name)) != NULL)
       return s;
   s = xmalloc (sizeof (def_file_module) + strlen (name));
   s->next = def->modules;
-  def->modules = s;
+  fdef->modules = s;
   s->user_data = 0;
   strcpy (s->name, name);
   return s;
 }
 
 def_file_import *
-def_file_add_import (def_file *def,
+def_file_add_import (def_file *fdef,
 		     const char *name,
 		     const char *module,
 		     int ordinal,
@@ -583,19 +585,19 @@ def_file_add_import (def_file *def,
 		     const char *its_name)
 {
   def_file_import *i;
-  int max_imports = ROUND_UP (def->num_imports, 16);
+  int max_imports = ROUND_UP (fdef->num_imports, 16);
 
-  if (def->num_imports >= max_imports)
+  if (fdef->num_imports >= max_imports)
     {
-      max_imports = ROUND_UP (def->num_imports+1, 16);
+      max_imports = ROUND_UP (fdef->num_imports+1, 16);
 
-      if (def->imports)
-	def->imports = xrealloc (def->imports,
+      if (fdef->imports)
+	fdef->imports = xrealloc (fdef->imports,
 				 max_imports * sizeof (def_file_import));
       else
-	def->imports = xmalloc (max_imports * sizeof (def_file_import));
+	fdef->imports = xmalloc (max_imports * sizeof (def_file_import));
     }
-  i = def->imports + def->num_imports;
+  i = fdef->imports + fdef->num_imports;
   memset (i, 0, sizeof (def_file_import));
   if (name)
     i->name = xstrdup (name);
@@ -607,7 +609,7 @@ def_file_add_import (def_file *def,
   else
     i->internal_name = i->name;
   i->its_name = (its_name ? xstrdup (its_name) : NULL);
-  def->num_imports++;
+  fdef->num_imports++;
 
   return i;
 }
@@ -660,7 +662,7 @@ def_file_add_directive (def_file *my_def, const char *param, int len)
 
       for (i = 0; diropts[i].param; i++)
 	{
-	  int len = strlen (diropts[i].param);
+	  len = strlen (diropts[i].param);
 
 	  if (tend - param >= len
 	      && strncmp (param, diropts[i].param, len) == 0
@@ -704,6 +706,7 @@ def_image_name (const char *name, int base, int is_dll)
   if (*name)
     {
       const char* image_name = lbasename (name);
+
       if (image_name != name)
 	einfo ("%s:%d: Warning: path components stripped from %s, '%s'\n",
 	       def_filename, linenumber, is_dll ? "LIBRARY" : "NAME",

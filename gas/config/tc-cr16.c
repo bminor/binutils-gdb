@@ -317,12 +317,12 @@ get_cc (char *cc_name)
 static reg
 get_register (char *reg_name)
 {
-  const reg_entry *reg;
+  const reg_entry *rreg;
 
-  reg = (const reg_entry *) hash_find (reg_hash, reg_name);
+  rreg = (const reg_entry *) hash_find (reg_hash, reg_name);
 
-  if (reg != NULL)
-    return reg->value.reg_val;
+  if (rreg != NULL)
+    return rreg->value.reg_val;
 
   return nullregister;
 }
@@ -331,7 +331,7 @@ get_register (char *reg_name)
 static reg
 get_register_pair (char *reg_name)
 {
-  const reg_entry *reg;
+  const reg_entry *rreg;
   char tmp_rp[16]="\0";
 
   /* Add '(' and ')' to the reg pair, if its not present.  */
@@ -340,13 +340,13 @@ get_register_pair (char *reg_name)
       tmp_rp[0] = '(';
       strcat (tmp_rp, reg_name);
       strcat (tmp_rp,")");
-      reg = (const reg_entry *) hash_find (regp_hash, tmp_rp);
+      rreg = (const reg_entry *) hash_find (regp_hash, tmp_rp);
     }
   else
-    reg = (const reg_entry *) hash_find (regp_hash, reg_name);
+    rreg = (const reg_entry *) hash_find (regp_hash, reg_name);
 
-  if (reg != NULL)
-    return reg->value.reg_val;
+  if (rreg != NULL)
+    return rreg->value.reg_val;
 
   return nullregister;
 } 
@@ -356,13 +356,13 @@ get_register_pair (char *reg_name)
 static reg
 get_index_register (char *reg_name)
 {
-  const reg_entry *reg;
+  const reg_entry *rreg;
 
-  reg = (const reg_entry *) hash_find (reg_hash, reg_name);
+  rreg = (const reg_entry *) hash_find (reg_hash, reg_name);
 
-  if ((reg != NULL)
-      && ((reg->value.reg_val == 12) || (reg->value.reg_val == 13)))
-    return reg->value.reg_val;
+  if ((rreg != NULL)
+      && ((rreg->value.reg_val == 12) || (rreg->value.reg_val == 13)))
+    return rreg->value.reg_val;
 
   return nullregister;
 }
@@ -371,17 +371,17 @@ get_index_register (char *reg_name)
 static reg
 get_index_register_pair (char *reg_name)
 {
-  const reg_entry *reg;
+  const reg_entry *rreg;
 
-  reg = (const reg_entry *) hash_find (regp_hash, reg_name);
+  rreg = (const reg_entry *) hash_find (regp_hash, reg_name);
 
-  if (reg != NULL)
+  if (rreg != NULL)
     {
-      if ((reg->value.reg_val != 1) || (reg->value.reg_val != 7)
-          || (reg->value.reg_val != 9) || (reg->value.reg_val > 10))
-        return reg->value.reg_val;
+      if ((rreg->value.reg_val != 1) || (rreg->value.reg_val != 7)
+          || (rreg->value.reg_val != 9) || (rreg->value.reg_val > 10))
+        return rreg->value.reg_val;
 
-      as_bad (_("Unknown register pair - index relative mode: `%d'"), reg->value.reg_val);
+      as_bad (_("Unknown register pair - index relative mode: `%d'"), rreg->value.reg_val);
     }
 
   return nullregister;
@@ -392,12 +392,12 @@ get_index_register_pair (char *reg_name)
 static preg
 get_pregister (char *preg_name)
 {
-  const reg_entry *preg;
+  const reg_entry *prreg;
 
-  preg = (const reg_entry *) hash_find (preg_hash, preg_name);
+  prreg = (const reg_entry *) hash_find (preg_hash, preg_name);
 
-  if (preg != NULL)
-    return preg->value.preg_val;
+  if (prreg != NULL)
+    return prreg->value.preg_val;
 
   return nullpregister;
 }
@@ -407,12 +407,12 @@ get_pregister (char *preg_name)
 static preg
 get_pregisterp (char *preg_name)
 {
-  const reg_entry *preg;
+  const reg_entry *prreg;
 
-  preg = (const reg_entry *) hash_find (pregp_hash, preg_name);
+  prreg = (const reg_entry *) hash_find (pregp_hash, preg_name);
 
-  if (preg != NULL)
-    return preg->value.preg_val;
+  if (prreg != NULL)
+    return prreg->value.preg_val;
 
   return nullpregister;
 }
@@ -797,20 +797,20 @@ initialise_reg_hash_table (struct hash_control ** hash_table,
                            const reg_entry * register_table,
                            const unsigned int num_entries)
 {
-  const reg_entry * reg;
+  const reg_entry * rreg;
   const char *hashret;
 
   if ((* hash_table = hash_new ()) == NULL)
     as_fatal (_("Virtual memory exhausted"));
 
-  for (reg = register_table;
-       reg < (register_table + num_entries);
-       reg++)
+  for (rreg = register_table;
+       rreg < (register_table + num_entries);
+       rreg++)
     {
-      hashret = hash_insert (* hash_table, reg->name, (char *) reg);
+      hashret = hash_insert (* hash_table, rreg->name, (char *) rreg);
       if (hashret)
         as_fatal (_("Internal Error:  Can't hash %s: %s"),
-                  reg->name, hashret);
+                  rreg->name, hashret);
     }
 }
 
@@ -1105,20 +1105,20 @@ process_label_constant (char *str, ins * cr16_ins)
 static int
 getreg_image (reg r)
 {
-  const reg_entry *reg;
+  const reg_entry *rreg;
   char *reg_name;
   int is_procreg = 0; /* Nonzero means argument should be processor reg.  */
 
   /* Check whether the register is in registers table.  */
   if (r < MAX_REG)
-    reg = cr16_regtab + r;
+    rreg = cr16_regtab + r;
   else /* Register not found.  */
     {
       as_bad (_("Unknown register: `%d'"), r);
       return 0;
     }
 
-  reg_name = reg->name;
+  reg_name = rreg->name;
 
 /* Issue a error message when register is illegal.  */
 #define IMAGE_ERR \
@@ -1126,16 +1126,16 @@ getreg_image (reg r)
             reg_name, ins_parse);                            \
   break;
 
-  switch (reg->type)
+  switch (rreg->type)
     {
     case CR16_R_REGTYPE:
       if (! is_procreg)
-        return reg->image;
+        return rreg->image;
       else
         IMAGE_ERR;
 
     case CR16_P_REGTYPE:
-      return reg->image;
+      return rreg->image;
       break;
 
     default:
@@ -1579,12 +1579,12 @@ check_cinv_options (char * operand)
 static int
 getregp_image (reg r)
 {
-  const reg_entry *reg;
+  const reg_entry *rreg;
   char *reg_name;
 
   /* Check whether the register is in registers table.  */
   if (r < MAX_REG)
-    reg = cr16_regptab + r;
+    rreg = cr16_regptab + r;
   /* Register not found.  */
   else
     {
@@ -1592,7 +1592,7 @@ getregp_image (reg r)
       return 0;
     }
 
-  reg_name = reg->name;
+  reg_name = rreg->name;
 
 /* Issue a error message when register  pair is illegal.  */
 #define RPAIR_IMAGE_ERR \
@@ -1600,10 +1600,10 @@ getregp_image (reg r)
             reg_name, ins_parse);                                 \
   break;
 
-  switch (reg->type)
+  switch (rreg->type)
     {
     case CR16_RP_REGTYPE:
-      return reg->image;
+      return rreg->image;
     default:
       RPAIR_IMAGE_ERR;
     }
@@ -1618,12 +1618,12 @@ getregp_image (reg r)
 static int
 getidxregp_image (reg r)
 {
-  const reg_entry *reg;
+  const reg_entry *rreg;
   char *reg_name;
 
   /* Check whether the register is in registers table.  */
   if (r < MAX_REG)
-    reg = cr16_regptab + r;
+    rreg = cr16_regptab + r;
   /* Register not found.  */
   else
     {
@@ -1631,16 +1631,16 @@ getidxregp_image (reg r)
       return 0;
     }
 
-  reg_name = reg->name;
+  reg_name = rreg->name;
 
 /* Issue a error message when register  pair is illegal.  */
 #define IDX_RPAIR_IMAGE_ERR \
   as_bad (_("Illegal index register pair (`%s') in Instruction: `%s'"), \
             reg_name, ins_parse);                                       \
 
-  if (reg->type == CR16_RP_REGTYPE)
+  if (rreg->type == CR16_RP_REGTYPE)
     {
-      switch (reg->image)
+      switch (rreg->image)
         {
         case 0:  return 0; break;
         case 2:  return 1; break;
@@ -1665,12 +1665,12 @@ getidxregp_image (reg r)
 static int
 getprocreg_image (reg r)
 {
-  const reg_entry *reg;
+  const reg_entry *rreg;
   char *reg_name;
 
   /* Check whether the register is in registers table.  */
   if (r < MAX_PREG)
-    reg = &cr16_pregtab[r - MAX_REG];
+    rreg = &cr16_pregtab[r - MAX_REG];
   /* Register not found.  */
   else
     {
@@ -1678,7 +1678,7 @@ getprocreg_image (reg r)
       return 0;
     }
 
-  reg_name = reg->name;
+  reg_name = rreg->name;
 
 /* Issue a error message when register  pair is illegal.  */
 #define PROCREG_IMAGE_ERR \
@@ -1686,10 +1686,10 @@ getprocreg_image (reg r)
             reg_name, ins_parse);                                      \
   break;
 
-  switch (reg->type)
+  switch (rreg->type)
     {
     case CR16_P_REGTYPE:
-      return reg->image;
+      return rreg->image;
     default:
       PROCREG_IMAGE_ERR;
     }
@@ -1703,7 +1703,7 @@ getprocreg_image (reg r)
 static int
 getprocregp_image (reg r)
 {
-  const reg_entry *reg;
+  const reg_entry *rreg;
   char *reg_name;
   int pregptab_disp = 0;
 
@@ -1725,7 +1725,7 @@ getprocregp_image (reg r)
           pregptab_disp = 5;  break;
         default: break;
         }
-      reg = &cr16_pregptab[r - pregptab_disp];
+      rreg = &cr16_pregptab[r - pregptab_disp];
     }
   /* Register not found.  */
   else
@@ -1734,7 +1734,7 @@ getprocregp_image (reg r)
       return 0;
     }
 
-  reg_name = reg->name;
+  reg_name = rreg->name;
 
 /* Issue a error message when register  pair is illegal.  */
 #define PROCREGP_IMAGE_ERR \
@@ -1742,10 +1742,10 @@ getprocregp_image (reg r)
             reg_name, ins_parse);                                              \
   break;
 
-  switch (reg->type)
+  switch (rreg->type)
     {
     case CR16_P_REGTYPE:
-      return reg->image;
+      return rreg->image;
     default:
       PROCREGP_IMAGE_ERR;
     }

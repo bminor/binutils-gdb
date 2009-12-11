@@ -1171,8 +1171,8 @@ Output_section_element_input::match_name(const char* file_name,
 class Input_section_info
 {
  public:
-  Input_section_info(const Output_section::Simple_input_section& input_section)
-    : input_section_(input_section), section_name_(),
+  Input_section_info(const Output_section::Simple_input_section& inputsection)
+    : input_section_(inputsection), section_name_(),
       size_(0), addralign_(1)
   { }
 
@@ -1198,8 +1198,8 @@ class Input_section_info
 
   // Set the section name.
   void
-  set_section_name(const std::string name)
-  { this->section_name_ = name; }
+  set_section_name(const std::string aname)
+  { this->section_name_ = aname; }
 
   // Return the section size.
   uint64_t
@@ -1208,8 +1208,8 @@ class Input_section_info
 
   // Set the section size.
   void
-  set_size(uint64_t size)
-  { this->size_ = size; }
+  set_size(uint64_t sec_size)
+  { this->size_ = sec_size; }
 
   // Return the address alignment.
   uint64_t
@@ -1218,8 +1218,8 @@ class Input_section_info
 
   // Set the address alignment.
   void
-  set_addralign(uint64_t addralign)
-  { this->addralign_ = addralign; }
+  set_addralign(uint64_t addr_align)
+  { this->addralign_ = addr_align; }
 
  private:
   // Input section, can be a relaxed section.
@@ -1388,12 +1388,12 @@ Output_section_element_input::set_section_addresses(
 			 Input_section_sorter(this->filename_sort_,
 					      isp.sort));
 
-      for (std::vector<Input_section_info>::const_iterator p =
+      for (std::vector<Input_section_info>::const_iterator q =
 	     matching_sections[i].begin();
-	   p != matching_sections[i].end();
-	   ++p)
+	   q != matching_sections[i].end();
+	   ++q)
 	{
-	  uint64_t this_subalign = p->addralign();
+	  uint64_t this_subalign = q->addralign();
 	  if (this_subalign < subalign)
 	    this_subalign = subalign;
 
@@ -1409,11 +1409,11 @@ Output_section_element_input::set_section_addresses(
 	      layout->new_output_section_data_from_script(posd);
 	    }
 
-	  output_section->add_input_section_for_script(p->input_section(),
-						       p->size(),
+	  output_section->add_input_section_for_script(q->input_section(),
+						       q->size(),
 						       this_subalign);
 
-	  dot = address + p->size();
+	  dot = address + q->size();
 	}
     }
 
@@ -2127,7 +2127,7 @@ bool
 Output_section_definition::get_output_section_info(const char* name,
                                                    uint64_t* address,
                                                    uint64_t* load_address,
-                                                   uint64_t* addralign,
+                                                   uint64_t* addr_align,
                                                    uint64_t* size) const
 {
   if (this->name_ != name)
@@ -2140,14 +2140,14 @@ Output_section_definition::get_output_section_info(const char* name,
         *load_address = this->output_section_->load_address();
       else
         *load_address = *address;
-      *addralign = this->output_section_->addralign();
+      *addr_align = this->output_section_->addralign();
       *size = this->output_section_->current_data_size();
     }
   else
     {
       *address = this->evaluated_address_;
       *load_address = this->evaluated_load_address_;
-      *addralign = this->evaluated_addralign_;
+      *addr_align = this->evaluated_addralign_;
       *size = 0;
     }
 
@@ -2297,7 +2297,7 @@ Orphan_output_section::set_section_addresses(Symbol_table*, Layout*,
        p != input_sections.end();
        ++p)
     {
-      uint64_t addralign;
+      uint64_t addr_align;
       uint64_t size;
 
       // We know what are single-threaded, so it is OK to lock the
@@ -2305,7 +2305,7 @@ Orphan_output_section::set_section_addresses(Symbol_table*, Layout*,
       {
 	const Task* task = reinterpret_cast<const Task*>(-1);
 	Task_lock_obj<Object> tl(task, p->relobj());
-	addralign = p->relobj()->section_addralign(p->shndx());
+	addr_align = p->relobj()->section_addralign(p->shndx());
 	if (p->is_relaxed_input_section())
 	  // We use current data size because relxed section sizes may not
 	  // have finalized yet.
@@ -2314,8 +2314,8 @@ Orphan_output_section::set_section_addresses(Symbol_table*, Layout*,
 	  size = p->relobj()->section_size(p->shndx());
       }
 
-      address = align_address(address, addralign);
-      this->os_->add_input_section_for_script(*p, size, addralign);
+      address = align_address(address, addr_align);
+      this->os_->add_input_section_for_script(*p, size, addr_align);
       address += size;
     }
 
@@ -2351,13 +2351,13 @@ Orphan_output_section::allocate_to_segment(String_list**, bool* orphan)
 class Phdrs_element
 {
  public:
-  Phdrs_element(const char* name, size_t namelen, unsigned int type,
-		bool includes_filehdr, bool includes_phdrs,
+  Phdrs_element(const char* aname, size_t namelen, unsigned int atype,
+		bool include_filehdr, bool include_phdrs,
 		bool is_flags_valid, unsigned int flags,
-		Expression* load_address)
-    : name_(name, namelen), type_(type), includes_filehdr_(includes_filehdr),
-      includes_phdrs_(includes_phdrs), is_flags_valid_(is_flags_valid),
-      flags_(flags), load_address_(load_address), load_address_value_(0),
+		Expression* aload_address)
+    : name_(aname, namelen), type_(atype), includes_filehdr_(include_filehdr),
+      includes_phdrs_(include_phdrs), is_flags_valid_(is_flags_valid),
+      flags_(flags), load_address_(aload_address), load_address_value_(0),
       segment_(NULL)
   { }
 
@@ -2388,10 +2388,10 @@ class Phdrs_element
 
   // Evaluate the load address expression if there is one.
   void
-  eval_load_address(Symbol_table* symtab, Layout* layout)
+  eval_load_address(Symbol_table* symtab, Layout* alayout)
   {
     if (this->load_address_ != NULL)
-      this->load_address_value_ = this->load_address_->eval(symtab, layout,
+      this->load_address_value_ = this->load_address_->eval(symtab, alayout,
 							    true);
   }
 
@@ -3496,7 +3496,7 @@ Script_sections::put_headers_in_phdrs(Output_data* file_header,
 bool
 Script_sections::get_output_section_info(const char* name, uint64_t* address,
                                          uint64_t* load_address,
-                                         uint64_t* addralign,
+                                         uint64_t* addr_align,
                                          uint64_t* size) const
 {
   if (!this->saw_sections_clause_)
@@ -3504,7 +3504,7 @@ Script_sections::get_output_section_info(const char* name, uint64_t* address,
   for (Sections_elements::const_iterator p = this->sections_elements_->begin();
        p != this->sections_elements_->end();
        ++p)
-    if ((*p)->get_output_section_info(name, address, load_address, addralign,
+    if ((*p)->get_output_section_info(name, address, load_address, addr_align,
                                       size))
       return true;
   return false;

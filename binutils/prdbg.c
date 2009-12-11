@@ -1947,13 +1947,13 @@ translate_addresses (bfd *abfd, char *addr_hex, FILE *f, asymbol **syms)
 /* Start a new compilation unit.  */
 
 static bfd_boolean
-tg_start_compilation_unit (void * p, const char *filename ATTRIBUTE_UNUSED)
+tg_start_compilation_unit (void * p, const char *fname ATTRIBUTE_UNUSED)
 {
   struct pr_handle *info = (struct pr_handle *) p;
 
   free (info->filename);
   /* Should it be relative? best way to do it here?.  */
-  info->filename = strdup (filename);
+  info->filename = strdup (fname);
 
   return TRUE;
 }
@@ -1961,13 +1961,13 @@ tg_start_compilation_unit (void * p, const char *filename ATTRIBUTE_UNUSED)
 /* Start a source file within a compilation unit.  */
 
 static bfd_boolean
-tg_start_source (void *p, const char *filename)
+tg_start_source (void *p, const char *fname)
 {
   struct pr_handle *info = (struct pr_handle *) p;
 
   free (info->filename);
   /* Should it be relative? best way to do it here?.  */
-  info->filename = strdup (filename);
+  info->filename = strdup (fname);
 
   return TRUE;
 }
@@ -2744,7 +2744,7 @@ tg_start_block (void *p, bfd_vma addr)
 /* Write out line number information.  */
 
 static bfd_boolean
-tg_lineno (void *p ATTRIBUTE_UNUSED, const char *filename ATTRIBUTE_UNUSED,
+tg_lineno (void *p ATTRIBUTE_UNUSED, const char *fname ATTRIBUTE_UNUSED,
 	   unsigned long lineno ATTRIBUTE_UNUSED,
 	   bfd_vma addr ATTRIBUTE_UNUSED)
 {

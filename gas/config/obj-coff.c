@@ -621,14 +621,11 @@ obj_coff_def (int what ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
-unsigned int dim_index;
-
 static void
 obj_coff_endef (int ignore ATTRIBUTE_UNUSED)
 {
   symbolS *symbolP = NULL;
 
-  dim_index = 0;
   if (def_symbol_in_progress == NULL)
     {
       as_warn (_(".endef pseudo-op used outside of .def/.endef: ignored."));
@@ -861,7 +858,7 @@ obj_coff_endef (int ignore ATTRIBUTE_UNUSED)
 static void
 obj_coff_dim (int ignore ATTRIBUTE_UNUSED)
 {
-  int dim_index;
+  int d_index;
 
   if (def_symbol_in_progress == NULL)
     {
@@ -872,10 +869,10 @@ obj_coff_dim (int ignore ATTRIBUTE_UNUSED)
 
   S_SET_NUMBER_AUXILIARY (def_symbol_in_progress, 1);
 
-  for (dim_index = 0; dim_index < DIMNUM; dim_index++)
+  for (d_index = 0; d_index < DIMNUM; d_index++)
     {
       SKIP_WHITESPACES ();
-      SA_SET_SYM_DIMEN (def_symbol_in_progress, dim_index,
+      SA_SET_SYM_DIMEN (def_symbol_in_progress, d_index,
 			get_absolute_expression ());
 
       switch (*input_line_pointer)
@@ -889,7 +886,7 @@ obj_coff_dim (int ignore ATTRIBUTE_UNUSED)
 	  /* Fall through.  */
 	case '\n':
 	case ';':
-	  dim_index = DIMNUM;
+	  d_index = DIMNUM;
 	  break;
 	}
     }

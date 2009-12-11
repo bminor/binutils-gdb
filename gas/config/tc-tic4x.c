@@ -1248,7 +1248,7 @@ tic4x_inst_make (char *name, unsigned long opcode, char *args)
 {
   static tic4x_inst_t *insts = NULL;
   static char *names = NULL;
-  static int index = 0;
+  static int iindex = 0;
 
   if (insts == NULL)
     {
@@ -1258,18 +1258,18 @@ tic4x_inst_make (char *name, unsigned long opcode, char *args)
       insts = (tic4x_inst_t *)
 	xmalloc (sizeof (tic4x_inst_t) * 1024);
     }
-  insts[index].name = names;
-  insts[index].opcode = opcode;
-  insts[index].opmask = 0xffffffff;
-  insts[index].args = args;
-  index++;
+  insts[iindex].name = names;
+  insts[iindex].opcode = opcode;
+  insts[iindex].opmask = 0xffffffff;
+  insts[iindex].args = args;
+  iindex++;
 
   do
     *names++ = *name++;
   while (*name);
   *names++ = '\0';
 
-  return &insts[index - 1];
+  return &insts[iindex - 1];
 }
 
 /* Add instruction template, creating dynamic templates as required.  */
@@ -1672,12 +1672,12 @@ tic4x_operand_parse (char *s, tic4x_operand_t *operand)
 }
 
 static int 
-tic4x_operands_match (tic4x_inst_t *inst, tic4x_insn_t *insn, int check)
+tic4x_operands_match (tic4x_inst_t *inst, tic4x_insn_t *tinsn, int check)
 {
   const char *args = inst->args;
   unsigned long opcode = inst->opcode;
-  int num_operands = insn->num_operands;
-  tic4x_operand_t *operand = insn->operands;
+  int num_operands = tinsn->num_operands;
+  tic4x_operand_t *operand = tinsn->operands;
   expressionS *exp = &operand->expr;
   int ret = 1;
   int reg;
@@ -1688,13 +1688,13 @@ tic4x_operands_match (tic4x_inst_t *inst, tic4x_insn_t *insn, int check)
      If an operand matches, we modify insn or opcode appropriately,
      and do a "continue".  If an operand fails to match, we "break".  */
 
-  insn->nchars = 4;		/* Instructions always 4 bytes.  */
-  insn->reloc = NO_RELOC;
-  insn->pcrel = 0;
+  tinsn->nchars = 4;		/* Instructions always 4 bytes.  */
+  tinsn->reloc = NO_RELOC;
+  tinsn->pcrel = 0;
 
   if (*args == '\0')
     {
-      insn->opcode = opcode;
+      tinsn->opcode = opcode;
       return num_operands == 0;
     }
 
@@ -1706,7 +1706,7 @@ tic4x_operands_match (tic4x_inst_t *inst, tic4x_insn_t *insn, int check)
 	case '\0':		/* End of args.  */
 	  if (num_operands == 1)
 	    {
-	      insn->opcode = opcode;
+	      tinsn->opcode = opcode;
 	      return ret;
 	    }
 	  break;		/* Too many operands.  */
@@ -1735,8 +1735,8 @@ tic4x_operands_match (tic4x_inst_t *inst, tic4x_insn_t *insn, int check)
 	    }
 	  else if (exp->X_op == O_symbol)
 	    {
-	      insn->reloc = BFD_RELOC_HI16;
-	      insn->exp = *exp;
+	      tinsn->reloc = BFD_RELOC_HI16;
+	      tinsn->exp = *exp;
 	      continue;
 	    }
 	  break;		/* Not direct (dp) addressing.  */
@@ -1752,8 +1752,8 @@ tic4x_operands_match (tic4x_inst_t *inst, tic4x_insn_t *insn, int check)
 	    }
 	  else if (exp->X_op == O_symbol)
 	    {
-	      insn->reloc = BFD_RELOC_LO16;
-	      insn->exp = *exp;
+	      tinsn->reloc = BFD_RELOC_LO16;
+	      tinsn->exp = *exp;
 	      continue;
 	    }
 	  break;		/* Not direct addressing.  */
@@ -1794,15 +1794,15 @@ tic4x_operands_match (tic4x_inst_t *inst, tic4x_insn_t *insn, int check)
 	    }
 	  if (IS_CPU_TIC4X (tic4x_cpu))
 	    {
-	      insn->reloc = BFD_RELOC_24_PCREL;
-	      insn->pcrel = 1;
+	      tinsn->reloc = BFD_RELOC_24_PCREL;
+	      tinsn->pcrel = 1;
 	    }
 	  else
 	    {
-	      insn->reloc = BFD_RELOC_24;
-	      insn->pcrel = 0;
+	      tinsn->reloc = BFD_RELOC_24;
+	      tinsn->pcrel = 0;
 	    }
-	  insn->exp = *exp;
+	  tinsn->exp = *exp;
 	  continue;
 
 	case 'C':
@@ -2048,9 +2048,9 @@ tic4x_operands_match (tic4x_inst_t *inst, tic4x_insn_t *insn, int check)
 		  continue;
 		}
 	    }
-	  insn->reloc = BFD_RELOC_16_PCREL;
-	  insn->pcrel = 1;
-	  insn->exp = *exp;
+	  tinsn->reloc = BFD_RELOC_16_PCREL;
+	  tinsn->pcrel = 1;
+	  tinsn->exp = *exp;
 	  continue;
 
 	case 'Q':
@@ -2127,21 +2127,21 @@ tic4x_operands_match (tic4x_inst_t *inst, tic4x_insn_t *insn, int check)
 	    {
 	      if (operand->mode == M_HI)
 		{
-		  insn->reloc = BFD_RELOC_HI16;
+		  tinsn->reloc = BFD_RELOC_HI16;
 		}
 	      else
 		{
-		  insn->reloc = BFD_RELOC_LO16;
+		  tinsn->reloc = BFD_RELOC_LO16;
 		}
-	      insn->exp = *exp;
+	      tinsn->exp = *exp;
 	      continue;
 	    }
 	  /* Handle cases like ldi foo - $, ar0  where foo
 	     is a forward reference.  Perhaps we should check
 	     for X_op == O_symbol and disallow things like
 	     ldi foo, ar0.  */
-	  insn->reloc = BFD_RELOC_16;
-	  insn->exp = *exp;
+	  tinsn->reloc = BFD_RELOC_16;
+	  tinsn->exp = *exp;
 	  continue;
 
 	case 'T':		/* 5-bit immediate value for tic4x stik.  */
@@ -2189,15 +2189,15 @@ tic4x_operands_match (tic4x_inst_t *inst, tic4x_insn_t *insn, int check)
 	  else if (exp->X_op == O_symbol)
 	    {
 	      if (operand->mode == M_HI)
-		insn->reloc = BFD_RELOC_HI16;
+		tinsn->reloc = BFD_RELOC_HI16;
 	      else
-		insn->reloc = BFD_RELOC_LO16;
+		tinsn->reloc = BFD_RELOC_LO16;
 
-	      insn->exp = *exp;
+	      tinsn->exp = *exp;
 	      continue;
 	    }
-	  insn->reloc = BFD_RELOC_16;
-	  insn->exp = *exp;
+	  tinsn->reloc = BFD_RELOC_16;
+	  tinsn->exp = *exp;
 	  continue;
 
 	case 'V':		/* Trap numbers (immediate field).  */
@@ -2254,8 +2254,8 @@ tic4x_operands_match (tic4x_inst_t *inst, tic4x_insn_t *insn, int check)
 		  continue;
 		}
 	    }
-	  insn->reloc = BFD_RELOC_16;
-	  insn->exp = *exp;
+	  tinsn->reloc = BFD_RELOC_16;
+	  tinsn->exp = *exp;
 	  continue;
 
 	case 'X':		/* Expansion register for tic4x.  */
@@ -2309,7 +2309,7 @@ tic4x_operands_match (tic4x_inst_t *inst, tic4x_insn_t *insn, int check)
 	  continue;
 
 	case '|':		/* treat as `,' if have ldi_ldi form.  */
-	  if (insn->parallel)
+	  if (tinsn->parallel)
 	    {
 	      if (--num_operands < 0)
 		break;		/* Too few operands.  */
@@ -2343,57 +2343,57 @@ tic4x_operands_match (tic4x_inst_t *inst, tic4x_insn_t *insn, int check)
 }
 
 static void
-tic4x_insn_check (tic4x_insn_t *insn)
+tic4x_insn_check (tic4x_insn_t *tinsn)
 {
   
-  if (!strcmp(insn->name, "lda"))
+  if (!strcmp (tinsn->name, "lda"))
     {
-      if (insn->num_operands < 2 || insn->num_operands > 2)
+      if (tinsn->num_operands < 2 || tinsn->num_operands > 2)
         as_fatal ("Illegal internal LDA insn definition");
 
-      if ( insn->operands[0].mode == M_REGISTER
-           && insn->operands[1].mode == M_REGISTER
-           && insn->operands[0].expr.X_add_number == insn->operands[1].expr.X_add_number )
+      if (tinsn->operands[0].mode == M_REGISTER
+	  && tinsn->operands[1].mode == M_REGISTER
+	  && tinsn->operands[0].expr.X_add_number == tinsn->operands[1].expr.X_add_number )
         as_bad (_("Source and destination register should not be equal"));
     }
-  else if( !strcmp(insn->name, "ldi_ldi")
-           || !strcmp(insn->name, "ldi1_ldi2")
-           || !strcmp(insn->name, "ldi2_ldi1")
-           || !strcmp(insn->name, "ldf_ldf")
-           || !strcmp(insn->name, "ldf1_ldf2")
-           || !strcmp(insn->name, "ldf2_ldf1") )
+  else if (!strcmp (tinsn->name, "ldi_ldi")
+           || !strcmp (tinsn->name, "ldi1_ldi2")
+           || !strcmp (tinsn->name, "ldi2_ldi1")
+           || !strcmp (tinsn->name, "ldf_ldf")
+           || !strcmp (tinsn->name, "ldf1_ldf2")
+           || !strcmp (tinsn->name, "ldf2_ldf1") )
     {
-      if ( insn->num_operands < 4 && insn->num_operands > 5 )
-        as_fatal ("Illegal internal %s insn definition", insn->name);
+      if (tinsn->num_operands < 4 && tinsn->num_operands > 5 )
+        as_fatal ("Illegal internal %s insn definition", tinsn->name);
       
-      if ( insn->operands[1].mode == M_REGISTER
-           && insn->operands[insn->num_operands-1].mode == M_REGISTER
-           && insn->operands[1].expr.X_add_number == insn->operands[insn->num_operands-1].expr.X_add_number )
+      if (tinsn->operands[1].mode == M_REGISTER
+	  && tinsn->operands[tinsn->num_operands-1].mode == M_REGISTER
+	  && tinsn->operands[1].expr.X_add_number == tinsn->operands[tinsn->num_operands-1].expr.X_add_number )
         as_warn (_("Equal parallell destination registers, one result will be discarded"));
     }
 }
 
 static void 
-tic4x_insn_output (tic4x_insn_t *insn)
+tic4x_insn_output (tic4x_insn_t *tinsn)
 {
   char *dst;
 
   /* Grab another fragment for opcode.  */
-  dst = frag_more (insn->nchars);
+  dst = frag_more (tinsn->nchars);
 
   /* Put out opcode word as a series of bytes in little endian order.  */
-  md_number_to_chars (dst, insn->opcode, insn->nchars);
+  md_number_to_chars (dst, tinsn->opcode, tinsn->nchars);
 
   /* Put out the symbol-dependent stuff.  */
-  if (insn->reloc != NO_RELOC)
+  if (tinsn->reloc != NO_RELOC)
     {
       /* Where is the offset into the fragment for this instruction.  */
       fix_new_exp (frag_now,
 		   dst - frag_now->fr_literal,	/* where */
-		   insn->nchars,	/* size */
-		   &insn->exp,
-		   insn->pcrel,
-		   insn->reloc);
+		   tinsn->nchars,	/* size */
+		   &tinsn->exp,
+		   tinsn->pcrel,
+		   tinsn->reloc);
     }
 }
 

@@ -877,7 +877,7 @@ static const struct pd_reg cr_names[] =
    expression.  */
 
 int
-ppc_parse_name (const char *name, expressionS *expr)
+ppc_parse_name (const char *name, expressionS *exp)
 {
   int val;
 
@@ -891,8 +891,8 @@ ppc_parse_name (const char *name, expressionS *expr)
   if (val < 0)
     return 0;
 
-  expr->X_op = O_constant;
-  expr->X_add_number = val;
+  exp->X_op = O_constant;
+  exp->X_add_number = val;
 
   return 1;
 }
@@ -1624,7 +1624,7 @@ static unsigned long
 ppc_insert_operand (unsigned long insn,
 		    const struct powerpc_operand *operand,
 		    offsetT val,
-		    ppc_cpu_t ppc_cpu,
+		    ppc_cpu_t cpu,
 		    char *file,
 		    unsigned int line)
 {
@@ -1683,7 +1683,7 @@ ppc_insert_operand (unsigned long insn,
       const char *errmsg;
 
       errmsg = NULL;
-      insn = (*operand->insert) (insn, (long) val, ppc_cpu, &errmsg);
+      insn = (*operand->insert) (insn, (long) val, cpu, &errmsg);
       if (errmsg != (const char *) NULL)
 	as_bad_where (file, line, "%s", errmsg);
     }
@@ -2381,7 +2381,6 @@ md_assemble (char *str)
 	{
 	  unsigned int opcount;
 	  unsigned int num_operands_expected;
-	  unsigned int i;
 
 	  /* There is an optional operand.  Count the number of
 	     commas in the input line.  */
@@ -3779,16 +3778,16 @@ ppc_function (int ignore ATTRIBUTE_UNUSED)
 
   if (*input_line_pointer == ',')
     {
-      expressionS ignore;
+      expressionS exp;
 
       /* Ignore the third argument.  */
       ++input_line_pointer;
-      expression (&ignore);
+      expression (& exp);
       if (*input_line_pointer == ',')
 	{
 	  /* Ignore the fourth argument.  */
 	  ++input_line_pointer;
-	  expression (&ignore);
+	  expression (& exp);
 	  if (*input_line_pointer == ',')
 	    {
 	      /* The fifth argument is the function size.  */
