@@ -432,7 +432,7 @@ captured_main (void *data)
       {"statistics", no_argument, 0, OPT_STATISTICS},
       {"write", no_argument, &write_files, 1},
       {"args", no_argument, &set_args, 1},
-     {"l", required_argument, 0, 'l'},
+      {"l", required_argument, 0, 'l'},
       {"return-child-result", no_argument, &return_child_result, 1},
       {0, no_argument, 0, 0}
     };

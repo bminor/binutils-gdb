@@ -1,3 +1,7 @@
+2009-12-11  Michael Snyder  <msnyder@vmware.com>
+
+	* main.c (captured_main): Indentation.
+
 2009-12-10  Michael Snyder  <msnyder@vmware.com>
 
 	* i386-tdep.c (i386_record_lea_modrm_addr): Indent goto label.
