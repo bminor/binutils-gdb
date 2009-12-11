@@ -3144,7 +3144,7 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
       *addr &= 0xffff;
     }
 
-no_rm:
+ no_rm:
   return 0;
 }
 
@@ -3315,39 +3315,39 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	  return -1;
 	}
       ir.addr++;
-      switch (tmpu8)
+      switch (tmpu8)	/* Instruction prefixes */
 	{
-	case 0xf3:
+	case REPE_PREFIX_OPCODE:
 	  prefixes |= PREFIX_REPZ;
 	  break;
-	case 0xf2:
+	case REPNE_PREFIX_OPCODE:
 	  prefixes |= PREFIX_REPNZ;
 	  break;
-	case 0xf0:
+	case LOCK_PREFIX_OPCODE:
 	  prefixes |= PREFIX_LOCK;
 	  break;
-	case 0x2e:
+	case CS_PREFIX_OPCODE:
 	  ir.override = X86_RECORD_CS_REGNUM;
 	  break;
-	case 0x36:
+	case SS_PREFIX_OPCODE:
 	  ir.override = X86_RECORD_SS_REGNUM;
 	  break;
-	case 0x3e:
+	case DS_PREFIX_OPCODE:
 	  ir.override = X86_RECORD_DS_REGNUM;
 	  break;
-	case 0x26:
+	case ES_PREFIX_OPCODE:
 	  ir.override = X86_RECORD_ES_REGNUM;
 	  break;
-	case 0x64:
+	case FS_PREFIX_OPCODE:
 	  ir.override = X86_RECORD_FS_REGNUM;
 	  break;
-	case 0x65:
+	case GS_PREFIX_OPCODE:
 	  ir.override = X86_RECORD_GS_REGNUM;
 	  break;
-	case 0x66:
+	case DATA_PREFIX_OPCODE:
 	  prefixes |= PREFIX_DATA;
 	  break;
-	case 0x67:
+	case ADDR_PREFIX_OPCODE:
 	  prefixes |= PREFIX_ADDR;
 	  break;
         case 0x40:	/* i386 inc %eax */
@@ -3383,7 +3383,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	  break;
 	}
     }
-out_prefixes:
+ out_prefixes:
   if (ir.regmap[X86_RECORD_R8_REGNUM] && rex_w == 1)
     {
       ir.dflag = 2;
@@ -3400,7 +3400,7 @@ out_prefixes:
 
   /* now check op code */
   opcode = (uint32_t) tmpu8;
-reswitch:
+ reswitch:
   switch (opcode)
     {
     case 0x0f:
@@ -5717,7 +5717,7 @@ reswitch:
 
   return 0;
 
-no_support:
+ no_support:
   printf_unfiltered (_("Process record doesn't support instruction 0x%02x "
 		       "at address %s.\n"),
 		     (unsigned int) (opcode), paddress (gdbarch, ir.addr));

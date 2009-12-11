@@ -1,3 +1,9 @@
+2009-12-10  Michael Snyder  <msnyder@vmware.com>
+
+	* i386-tdep.c (i386_record_lea_modrm_addr): Indent goto label.
+	(i386_process_record): Indent goto label.  Use prefix opcode
+	constants from include/opcode/i386.h in switch statement.
+
 2009-12-10  Chris Moller  <cmoller@redhat.com>
 
 	PR gdb/9399
