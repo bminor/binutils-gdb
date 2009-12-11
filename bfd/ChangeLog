@@ -1,3 +1,10 @@
+2009-12-11  Tristan Gingold  <gingold@adacore.com>
+
+	* som.c (bfd_som_set_subsection_attributes) 
+	(bfd_section_from_som_symbol, som_reloc_queue_fix): Fix shadowed
+	variable warnings.
+	* cache.c (close_one): Likewise.
+
 2009-12-11  Nick Clifton  <nickc@redhat.com>
 
 	* warning.m4 (GCC_WARN_CFLAGS): Add -Wshadow.
