@@ -10,6 +10,8 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 e3 ed 69 39 60    	vfmaddpd \(%ecx\),%ymm6,%ymm2,%ymm7
 [ 	]*[a-f0-9]+:	c4 e3 ed 68 fc 60    	vfmaddps %ymm4,%ymm6,%ymm2,%ymm7
 [ 	]*[a-f0-9]+:	c4 e3 ed 68 39 60    	vfmaddps \(%ecx\),%ymm6,%ymm2,%ymm7
+[ 	]*[a-f0-9]+:	c4 e3 59 68 6c da 01 30 	vfmaddps %xmm3,0x1\(%edx,%ebx,8\),%xmm4,%xmm5
+[ 	]*[a-f0-9]+:	c4 e3 49 68 8c 81 80 00 00 00 70 	vfmaddps %xmm7,0x80\(%ecx,%eax,4\),%xmm6,%xmm1
 [ 	]*[a-f0-9]+:	c4 e3 ed 5d fc 60    	vfmaddsubpd %ymm4,%ymm6,%ymm2,%ymm7
 [ 	]*[a-f0-9]+:	c4 e3 ed 5d 39 60    	vfmaddsubpd \(%ecx\),%ymm6,%ymm2,%ymm7
 [ 	]*[a-f0-9]+:	c4 e3 ed 5c fc 60    	vfmaddsubps %ymm4,%ymm6,%ymm2,%ymm7

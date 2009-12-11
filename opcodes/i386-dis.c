@@ -13717,67 +13717,76 @@ get_vex_imm8 (int sizeflag, int opnum)
     {
       /* There are SIB/displacement bytes.  */
       if ((sizeflag & AFLAG) || address_mode == mode_64bit)
-	{
+        {
 	  /* 32/64 bit address mode */
-	  int base = modrm.rm;
+          int base = modrm.rm;
 
 	  /* Check SIB byte.  */
-	  if (base == 4)
-	    {
-	      FETCH_DATA (the_info, codep + 1);
-	      base = *codep & 7;
-	      /* When decoding the third source, don't increase
-		 bytes_before_imm as this has already been incremented
-		 by one in OP_E_memory while decoding the second
-		 source operand.  */
+          if (base == 4)
+            {
+              FETCH_DATA (the_info, codep + 1);
+              base = *codep & 7;
+              /* When decoding the third source, don't increase
+                 bytes_before_imm as this has already been incremented
+                 by one in OP_E_memory while decoding the second
+                 source operand.  */
               if (opnum == 0)
                 bytes_before_imm++;
-	    }
-	  switch (modrm.mod)
-	    {
-	    case 0:
-	      /* When modrm.rm == 5 or modrm.rm == 4 and base in
-		 SIB == 5, there is a 4 byte displacement.  */
-	      if (base != 5)
-		/* No displacement. */
-		break;
-	    case 2:
-	      /* 4 byte displacement.  */
-	      bytes_before_imm += 4;
-	      break;
-	    case 1:
-	      /* 1 byte displacement: when decoding the third source,
-		 don't increase bytes_before_imm as this has already
-		 been incremented by one in OP_E_memory while decoding
-		 the second source operand.  */
-              if (opnum == 0)
-                bytes_before_imm++;
+            }
 
-	      break;
-	    }
-	}
+          /* Don't increase bytes_before_imm when decoding the third source,
+             it has already been incremented by OP_E_memory while decoding
+             the second source operand.  */
+          if (opnum == 0)
+            {
+              switch (modrm.mod)
+                {
+                  case 0:
+                    /* When modrm.rm == 5 or modrm.rm == 4 and base in
+                       SIB == 5, there is a 4 byte displacement.  */
+                    if (base != 5)
+                      /* No displacement. */
+                      break;
+                  case 2:
+                    /* 4 byte displacement.  */
+                    bytes_before_imm += 4;
+                    break;
+                  case 1:
+                    /* 1 byte displacement.  */
+                    bytes_before_imm++;
+                    break;
+                }
+            }
+        }
       else
-	{ /* 16 bit address mode */
-	  switch (modrm.mod)
-	    {
-	    case 0:
-	      /* When modrm.rm == 6, there is a 2 byte displacement.  */
-	      if (modrm.rm != 6)
-		/* No displacement. */
-		break;
-	    case 2:
-	      /* 2 byte displacement.  */
-	      bytes_before_imm += 2;
-	      break;
-	    case 1:
-	      /* 1 byte displacement: when decoding the third source,
-		 don't increase bytes_before_imm as this has already
-		 been incremented by one in OP_E_memory while decoding
-		 the second source operand.  */
-              if (opnum == 0)
-                bytes_before_imm++;
+	{
+	  /* 16 bit address mode */
+          /* Don't increase bytes_before_imm when decoding the third source,
+             it has already been incremented by OP_E_memory while decoding
+             the second source operand.  */
+          if (opnum == 0)
+            {
+	      switch (modrm.mod)
+		{
+		case 0:
+		  /* When modrm.rm == 6, there is a 2 byte displacement.  */
+		  if (modrm.rm != 6)
+		    /* No displacement. */
+		    break;
+		case 2:
+		  /* 2 byte displacement.  */
+		  bytes_before_imm += 2;
+		  break;
+		case 1:
+		  /* 1 byte displacement: when decoding the third source,
+		     don't increase bytes_before_imm as this has already
+		     been incremented by one in OP_E_memory while decoding
+		     the second source operand.  */
+		  if (opnum == 0)
+		    bytes_before_imm++;
 
-	      break;
+		  break;
+		}
 	    }
 	}
     }

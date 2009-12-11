@@ -1,3 +1,10 @@
+2009-12-11  Quentin Neill  <quentin.neill@amd.com>
+
+	* gas/i386/fma4.d: Add test cases.
+	* gas/i386/fma4.s: Add test cases.
+	* gas/i386/x86-64-fma4.d: Add test cases.
+	* gas/i386/x86-64-fma4.s: Add test cases.
+
 2009-12-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/11037

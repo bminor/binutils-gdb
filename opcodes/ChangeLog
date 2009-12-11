@@ -1,3 +1,9 @@
+2009-12-11  Quentin Neill  <quentin.neill@amd.com>
+
+	* i386-dis.c (get_vex_imm8): Extend logic to apply in all cases,
+	to avoid fetching ahead for the immediate bytes when OP_E_memory
+	has already been called.  Fix indentation.
+
 2009-12-11  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.in: Regenerate.
