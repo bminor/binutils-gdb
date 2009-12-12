@@ -10763,6 +10763,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
 
    need_vex = 0;
    need_vex_reg = 0;
+   vex.w = 0;
    vex_w_done = 0;
 
   if (dp->name == NULL && dp->op[0].bytemode == FLOATCODE)

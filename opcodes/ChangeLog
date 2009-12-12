@@ -1,3 +1,7 @@
+2009-12-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (print_insn): Set vex.w to 0.
+
 2009-12-11  Quentin Neill  <quentin.neill@amd.com>
 
 	* i386-dis.c (get_vex_imm8): Extend logic to apply in all cases,
