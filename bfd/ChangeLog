@@ -1,3 +1,8 @@
+2009-12-12  Nick Clifton  <nickc@redhat.com>
+
+	* coff-arm.c (coff_arm_rtype_to_howto): Fix shadowed variable
+	warning.
+
 2009-12-11  Tristan Gingold  <gingold@adacore.com>
 
 	* som.c (bfd_som_set_subsection_attributes) 

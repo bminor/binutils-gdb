@@ -549,7 +549,6 @@ coff_arm_rtype_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 	osect_vma = h->root.u.def.section->output_section->vma;
       else
 	{
-	  asection *sec;
 	  int i;
 
 	  /* Sigh, the only way to get the section to offset against
