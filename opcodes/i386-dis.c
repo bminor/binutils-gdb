@@ -10444,6 +10444,8 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	  && vex.register_specifier > 0x7)
 	BadOp ();
 
+      vex.w = 0;
+
       vex.length = (*codep & 0x4) ? 256 : 128;
       switch ((*codep & 0x3))
 	{
@@ -10763,7 +10765,6 @@ print_insn (bfd_vma pc, disassemble_info *info)
 
    need_vex = 0;
    need_vex_reg = 0;
-   vex.w = 0;
    vex_w_done = 0;
 
   if (dp->name == NULL && dp->op[0].bytemode == FLOATCODE)

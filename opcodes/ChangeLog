@@ -1,5 +1,11 @@
 2009-12-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (get_valid_dis386): Set vex.w to 0 for VEX C5
+	prefix.
+	(print_insn): Don't set vex.w here.
+
+2009-12-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c (print_insn): Set vex.w to 0.
 
 2009-12-11  Quentin Neill  <quentin.neill@amd.com>
