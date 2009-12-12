@@ -4784,11 +4784,10 @@ Target_arm<big_endian>::do_finalize_sections(
     }
 
   // Create an .ARM.attributes section if there is not one already.
-  Output_attributes_section_data* attributes_section =
+  Output_attributes_section_data* as =
     new Output_attributes_section_data(*this->attributes_section_data_);
-  layout->add_output_section_data(".ARM.attributes",
-				  elfcpp::SHT_ARM_ATTRIBUTES, 0,
-				  attributes_section, false);
+  alayout->add_output_section_data(".ARM.attributes",
+				   elfcpp::SHT_ARM_ATTRIBUTES, 0, as, false);
 }
 
 // Return whether a direct absolute static relocation needs to be applied.

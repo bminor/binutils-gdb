@@ -1,3 +1,14 @@
+2009-12-11  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Target_arm::do_finalize_sections): Fix build breakage
+	due to -Wshadow.
+	* attributes.cc (Object_attribute::size): Ditto.
+	(Attributes_section_data::size): Ditto.
+	(Attributes_section_data::Attributes_section_data): Ditto.
+	(Output_attributes_section_data::do_write): Ditto.
+	* attributes.h (Object_attribute::set_type): Ditto.
+	* testsuite/tls_test_main.cc (safe_lock, safe_unlock): Ditto.
+
 2009-12-11  Nick Clifton  <nickc@redhat.com>
 
 	* archive.cc: Fix shadowed variable warnings.

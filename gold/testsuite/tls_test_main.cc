@@ -33,16 +33,16 @@
 #define safe_lock(muptr)			\
   do						\
     {						\
-      int err = pthread_mutex_lock(muptr);	\
-      assert(err == 0);				\
+      int pthread_err = pthread_mutex_lock(muptr);	\
+      assert(pthread_err == 0);				\
     }						\
   while (0)
 
 #define safe_unlock(muptr)			\
   do						\
     {						\
-      int err = pthread_mutex_unlock(muptr);	\
-      assert(err == 0);				\
+      int pthread_err = pthread_mutex_unlock(muptr);	\
+      assert(pthread_err == 0);				\
     }						\
   while (0)
 
