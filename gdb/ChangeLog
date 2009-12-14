@@ -1,3 +1,16 @@
+2009-12-14  Tristan Gingold  <gingold@adacore.com>
+
+	* symfile.h (find_separate_debug_file_by_buildid): Remove prototype.
+	(bfd_open_maybe_remote): New prototype.
+	* symfile.c (bfd_open_maybe_remote): New function.
+	(separate_debug_file_exists, reread_symbols): Use it.
+	(struct build_id, build_id_bfd_get, build_id_verify)
+	(build_id_to_debug_filename)
+	(find_separate_debug_file_by_buildid): Move these ...
+	* elfread.c (struct build_id)
+	(build_id_bfd_get, build_id_verify, build_id_to_debug_filename)
+	(find_separate_debug_file_by_buildid): ... here.
+
 2009-12-13  Paul N. Hilfinger  <hilfinger@adacore.com>
 
 	* dwarf2read.c (struct attribute): Increase sizes of unsnd and snd 

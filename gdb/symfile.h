@@ -241,8 +241,6 @@ extern struct objfile *symbol_file_add_from_bfd (bfd *, int,
 extern void symbol_file_add_separate (bfd *bfd, int symfile_flags,
 				      struct objfile *objfile);
 
-extern char *find_separate_debug_file_by_buildid (struct objfile *objfile);
-
 extern char *find_separate_debug_file_by_debuglink (struct objfile *objfile);
 
 /* Create a new section_addr_info, with room for NUM_SECTIONS.  */
@@ -323,6 +321,8 @@ extern void discard_psymtab (struct partial_symtab *);
 extern void find_lowest_section (bfd *, asection *, void *);
 
 extern bfd *symfile_bfd_open (char *);
+
+extern bfd *bfd_open_maybe_remote (const char *);
 
 extern int get_section_index (struct objfile *, char *);
 

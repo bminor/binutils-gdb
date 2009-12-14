@@ -1137,127 +1137,6 @@ symbol_file_clear (int from_tty)
     printf_unfiltered (_("No symbol file now.\n"));
 }
 
-struct build_id
-  {
-    size_t size;
-    gdb_byte data[1];
-  };
-
-/* Locate NT_GNU_BUILD_ID from ABFD and return its content.  */
-
-static struct build_id *
-build_id_bfd_get (bfd *abfd)
-{
-  struct build_id *retval;
-
-  if (!bfd_check_format (abfd, bfd_object)
-      || bfd_get_flavour (abfd) != bfd_target_elf_flavour
-      || elf_tdata (abfd)->build_id == NULL)
-    return NULL;
-
-  retval = xmalloc (sizeof *retval - 1 + elf_tdata (abfd)->build_id_size);
-  retval->size = elf_tdata (abfd)->build_id_size;
-  memcpy (retval->data, elf_tdata (abfd)->build_id, retval->size);
-
-  return retval;
-}
-
-/* Return if FILENAME has NT_GNU_BUILD_ID matching the CHECK value.  */
-
-static int
-build_id_verify (const char *filename, struct build_id *check)
-{
-  bfd *abfd;
-  struct build_id *found = NULL;
-  int retval = 0;
-
-  /* We expect to be silent on the non-existing files.  */
-  if (remote_filename_p (filename))
-    abfd = remote_bfd_open (filename, gnutarget);
-  else
-    abfd = bfd_openr (filename, gnutarget);
-  if (abfd == NULL)
-    return 0;
-
-  found = build_id_bfd_get (abfd);
-
-  if (found == NULL)
-    warning (_("File \"%s\" has no build-id, file skipped"), filename);
-  else if (found->size != check->size
-           || memcmp (found->data, check->data, found->size) != 0)
-    warning (_("File \"%s\" has a different build-id, file skipped"), filename);
-  else
-    retval = 1;
-
-  if (!bfd_close (abfd))
-    warning (_("cannot close \"%s\": %s"), filename,
-	     bfd_errmsg (bfd_get_error ()));
-
-  xfree (found);
-
-  return retval;
-}
-
-static char *
-build_id_to_debug_filename (struct build_id *build_id)
-{
-  char *link, *debugdir, *retval = NULL;
-
-  /* DEBUG_FILE_DIRECTORY/.build-id/ab/cdef */
-  link = alloca (strlen (debug_file_directory) + (sizeof "/.build-id/" - 1) + 1
-		 + 2 * build_id->size + (sizeof ".debug" - 1) + 1);
-
-  /* Keep backward compatibility so that DEBUG_FILE_DIRECTORY being "" will
-     cause "/.build-id/..." lookups.  */
-
-  debugdir = debug_file_directory;
-  do
-    {
-      char *s, *debugdir_end;
-      gdb_byte *data = build_id->data;
-      size_t size = build_id->size;
-
-      while (*debugdir == DIRNAME_SEPARATOR)
-	debugdir++;
-
-      debugdir_end = strchr (debugdir, DIRNAME_SEPARATOR);
-      if (debugdir_end == NULL)
-	debugdir_end = &debugdir[strlen (debugdir)];
-
-      memcpy (link, debugdir, debugdir_end - debugdir);
-      s = &link[debugdir_end - debugdir];
-      s += sprintf (s, "/.build-id/");
-      if (size > 0)
-	{
-	  size--;
-	  s += sprintf (s, "%02x", (unsigned) *data++);
-	}
-      if (size > 0)
-	*s++ = '/';
-      while (size-- > 0)
-	s += sprintf (s, "%02x", (unsigned) *data++);
-      strcpy (s, ".debug");
-
-      /* lrealpath() is expensive even for the usually non-existent files.  */
-      if (access (link, F_OK) == 0)
-	retval = lrealpath (link);
-
-      if (retval != NULL && !build_id_verify (retval, build_id))
-	{
-	  xfree (retval);
-	  retval = NULL;
-	}
-
-      if (retval != NULL)
-	break;
-
-      debugdir = debugdir_end;
-    }
-  while (*debugdir != 0);
-
-  return retval;
-}
-
 static char *
 get_debug_link_info (struct objfile *objfile, unsigned long *crc32_out)
 {
@@ -1308,10 +1187,7 @@ separate_debug_file_exists (const char *name, unsigned long crc,
   if (strcmp (name, parent_objfile->name) == 0)
     return 0;
 
-  if (remote_filename_p (name))
-    abfd = remote_bfd_open (name, gnutarget);
-  else
-    abfd = bfd_openr (name, gnutarget);
+  abfd = bfd_open_maybe_remote (name);
 
   if (!abfd)
     return 0;
@@ -1365,39 +1241,6 @@ The directory where separate debug symbols are searched for is \"%s\".\n"),
 #if ! defined (DEBUG_SUBDIRECTORY)
 #define DEBUG_SUBDIRECTORY ".debug"
 #endif
-
-char *
-find_separate_debug_file_by_buildid (struct objfile *objfile)
-{
-  asection *sect;
-  char *basename, *name_copy, *debugdir;
-  char *dir = NULL;
-  char *debugfile = NULL;
-  char *canon_name = NULL;
-  bfd_size_type debuglink_size;
-  unsigned long crc32;
-  int i;
-  struct build_id *build_id;
-
-  build_id = build_id_bfd_get (objfile->obfd);
-  if (build_id != NULL)
-    {
-      char *build_id_name;
-
-      build_id_name = build_id_to_debug_filename (build_id);
-      xfree (build_id);
-      /* Prevent looping on a stripped .debug file.  */
-      if (build_id_name != NULL && strcmp (build_id_name, objfile->name) == 0)
-        {
-	  warning (_("\"%s\": separate debug info file has no debug info"),
-		   build_id_name);
-	  xfree (build_id_name);
-	}
-      else if (build_id_name != NULL)
-        return build_id_name;
-    }
-  return NULL;
-}
 
 char *
 find_separate_debug_file_by_debuglink (struct objfile *objfile)
@@ -1604,6 +1447,19 @@ set_initial_language (void)
       expected_language = current_language; /* Don't warn the user.  */
     }
 }
+
+/* If NAME is a remote name open the file using remote protocol, otherwise
+   open it normally.  */
+
+bfd *
+bfd_open_maybe_remote (const char *name)
+{
+  if (remote_filename_p (name))
+    return remote_bfd_open (name, gnutarget);
+  else
+    return bfd_openr (name, gnutarget);
+}
+
 
 /* Open the file specified by NAME and hand it off to BFD for
    preliminary analysis.  Return a newly initialized bfd *, which
@@ -2381,10 +2237,7 @@ reread_symbols (void)
 	  if (!bfd_close (objfile->obfd))
 	    error (_("Can't close BFD for %s: %s"), objfile->name,
 		   bfd_errmsg (bfd_get_error ()));
-	  if (remote_filename_p (obfd_filename))
-	    objfile->obfd = remote_bfd_open (obfd_filename, gnutarget);
-	  else
-	    objfile->obfd = bfd_openr (obfd_filename, gnutarget);
+	  objfile->obfd = bfd_open_maybe_remote (obfd_filename);
 	  if (objfile->obfd == NULL)
 	    error (_("Can't open %s to read symbols."), objfile->name);
 	  else
