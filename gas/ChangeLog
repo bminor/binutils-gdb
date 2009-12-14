@@ -1,6 +1,6 @@
 2009-12-14  Yoshinori Sato  <ysato@users.sourceforge.jp>
 
-	PR gas/11089
+	PR gas/11086
 	* config/tc-rx.c (rx_equ): Rename 'expr' to 'expression' in order
 	to avoid shadowing a global symbol of the same name.
 
