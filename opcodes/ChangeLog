@@ -1,3 +1,10 @@
+2009-12-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (MOD_VEX_51): Renamed to ...
+	(MOD_VEX_50): This.
+	(vex_table): Updated.
+	(mod_table): Likewise.
+
 2009-12-14  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/10924

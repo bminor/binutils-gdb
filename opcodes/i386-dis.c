@@ -639,7 +639,7 @@ enum
   MOD_VEX_16_PREFIX_0,
   MOD_VEX_17,
   MOD_VEX_2B,
-  MOD_VEX_51,
+  MOD_VEX_50,
   MOD_VEX_71_REG_2,
   MOD_VEX_71_REG_4,
   MOD_VEX_71_REG_6,
@@ -7359,7 +7359,7 @@ static const struct dis386 vex_table[][256] = {
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     /* 50 */
-    { MOD_TABLE (MOD_VEX_51) },
+    { MOD_TABLE (MOD_VEX_50) },
     { PREFIX_TABLE (PREFIX_VEX_51) },
     { PREFIX_TABLE (PREFIX_VEX_52) },
     { PREFIX_TABLE (PREFIX_VEX_53) },
@@ -9667,7 +9667,7 @@ static const struct dis386 mod_table[][2] = {
     { "(bad)",		{ XX } },
   },
   {
-    /* MOD_VEX_51 */
+    /* MOD_VEX_50 */
     { "(bad)",		{ XX } },
     { "vmovmskpX",	{ Gdq, XS } },
   },
