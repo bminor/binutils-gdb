@@ -1,3 +1,7 @@
+2009-12-14  Ian Lance Taylor  <iant@google.com>
+
+	* elfcpp_file.h: Revert last patch.
+
 2009-12-11  Nick Clifton  <nickc@redhat.com>
 
 	* elfcpp_file.h: Fix shadowed variable warnings.

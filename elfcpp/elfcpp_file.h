@@ -449,10 +449,10 @@ template<int size, bool big_endian, typename File>
 unsigned int
 Elf_file<size, big_endian, File>::find_section_by_type(unsigned int type)
 {
-  unsigned int tshnum = this->shnum();
+  unsigned int shnum = this->shnum();
   typename File::View v(this->file_->view(this->shoff_,
-					  This::shdr_size * tshnum));
-  for (unsigned int i = 0; i < tshnum; i++)
+					  This::shdr_size * shnum));
+  for (unsigned int i = 0; i < shnum; i++)
     {
       Ef_shdr shdr(v.data() + This::shdr_size * i);
       if (shdr.get_sh_type() == type)
@@ -494,8 +494,8 @@ Elf_file<size, big_endian, File>::section_name(unsigned int shndx)
   off_t shstr_off;
   typename Elf_types<size>::Elf_WXword shstr_size;
   {
-    const unsigned int fshstrndx = this->shstrndx_;
-    typename File::View v(file->view(this->section_header_offset(fshstrndx),
+    const unsigned int shstrndx = this->shstrndx_;
+    typename File::View v(file->view(this->section_header_offset(shstrndx),
 				     This::shdr_size));
     Ef_shdr shstr_shdr(v.data());
     shstr_off = shstr_shdr.get_sh_offset();
