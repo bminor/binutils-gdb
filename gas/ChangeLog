@@ -1,3 +1,8 @@
+2009-12-14  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-microblaze.c (md_assemble): Rename 'imm' to 'immed' in
+	order to avoid shadowing global variable of the same name.
+
 2009-12-11  Andrew Jenner  <andrew@codesourcery.com>
 
 	* config/tc-arm.c (arm_init_frag): Set thumb MODE_RECORDED flag for
