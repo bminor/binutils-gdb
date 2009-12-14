@@ -160,9 +160,9 @@ Layout_task_runner::run(Workqueue* workqueue, const Task* task)
 
 // Layout methods.
 
-Layout::Layout(int number_of_input_files, Script_options* script_opts)
+Layout::Layout(int number_of_input_files, Script_options* script_options)
   : number_of_input_files_(number_of_input_files),
-    script_options_(script_opts),
+    script_options_(script_options),
     namepool_(),
     sympool_(),
     dynpool_(),
@@ -2831,7 +2831,7 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
   // inconvenient to check.
   if (this->allocated_output_section_count() >= elfcpp::SHN_LORESERVE)
     {
-      Output_section* dyn_sym_xindex =
+      Output_section* dynsym_xindex =
 	this->choose_output_section(NULL, ".dynsym_shndx",
 				    elfcpp::SHT_SYMTAB_SHNDX,
 				    elfcpp::SHF_ALLOC,
@@ -2839,13 +2839,13 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 
       this->dynsym_xindex_ = new Output_symtab_xindex(index);
 
-      dyn_sym_xindex->add_output_section_data(this->dynsym_xindex_);
+      dynsym_xindex->add_output_section_data(this->dynsym_xindex_);
 
-      dyn_sym_xindex->set_link_section(dynsym);
-      dyn_sym_xindex->set_addralign(4);
-      dyn_sym_xindex->set_entsize(4);
+      dynsym_xindex->set_link_section(dynsym);
+      dynsym_xindex->set_addralign(4);
+      dynsym_xindex->set_entsize(4);
 
-      dyn_sym_xindex->set_after_input_sections();
+      dynsym_xindex->set_after_input_sections();
 
       // This tells the driver code to wait until the symbol table has
       // written out before writing out the postprocessing sections,
@@ -3489,13 +3489,13 @@ Layout::find_or_add_kept_section(const std::string& name,
 // Store the allocated sections into the section list.
 
 void
-Layout::get_allocated_sections(Section_list* sec_list) const
+Layout::get_allocated_sections(Section_list* section_list) const
 {
   for (Section_list::const_iterator p = this->section_list_.begin();
        p != this->section_list_.end();
        ++p)
     if (((*p)->flags() & elfcpp::SHF_ALLOC) != 0)
-      sec_list->push_back(*p);
+      section_list->push_back(*p);
 }
 
 // Create an output segment.
@@ -3538,35 +3538,35 @@ Layout::write_data(const Symbol_table* symtab, Output_file* of) const
 {
   if (!parameters->options().strip_all())
     {
-      const Output_section* sym_tab_section = this->symtab_section_;
+      const Output_section* symtab_section = this->symtab_section_;
       for (Section_list::const_iterator p = this->section_list_.begin();
 	   p != this->section_list_.end();
 	   ++p)
 	{
 	  if ((*p)->needs_symtab_index())
 	    {
-	      gold_assert(sym_tab_section != NULL);
+	      gold_assert(symtab_section != NULL);
 	      unsigned int index = (*p)->symtab_index();
 	      gold_assert(index > 0 && index != -1U);
-	      off_t off = (sym_tab_section->offset()
-			   + index * sym_tab_section->entsize());
+	      off_t off = (symtab_section->offset()
+			   + index * symtab_section->entsize());
 	      symtab->write_section_symbol(*p, this->symtab_xindex_, of, off);
 	    }
 	}
     }
 
-  const Output_section* dyn_sym_section = this->dynsym_section_;
+  const Output_section* dynsym_section = this->dynsym_section_;
   for (Section_list::const_iterator p = this->section_list_.begin();
        p != this->section_list_.end();
        ++p)
     {
       if ((*p)->needs_dynsym_index())
 	{
-	  gold_assert(dyn_sym_section != NULL);
+	  gold_assert(dynsym_section != NULL);
 	  unsigned int index = (*p)->dynsym_index();
 	  gold_assert(index > 0 && index != -1U);
-	  off_t off = (dyn_sym_section->offset()
-		       + index * dyn_sym_section->entsize());
+	  off_t off = (dynsym_section->offset()
+		       + index * dynsym_section->entsize());
 	  symtab->write_section_symbol(*p, this->dynsym_xindex_, of, off);
 	}
     }

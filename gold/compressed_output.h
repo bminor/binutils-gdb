@@ -1,6 +1,6 @@
 // compressed_output.h -- compressed output sections for gold  -*- C++ -*-
 
-// Copyright 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2007, 2008 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -45,9 +45,9 @@ class Output_compressed_section : public Output_section
 {
  public:
   Output_compressed_section(const General_options* options,
-			    const char* cname, elfcpp::Elf_Word cflags,
-			    elfcpp::Elf_Xword ctype)
-    : Output_section(cname, cflags, ctype),
+			    const char* name, elfcpp::Elf_Word flags,
+			    elfcpp::Elf_Xword type)
+    : Output_section(name, flags, type),
       options_(options)
   { this->set_requires_postprocessing(); }
 

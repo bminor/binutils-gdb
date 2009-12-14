@@ -103,8 +103,8 @@ class Object_attribute
 
   // Set attribute type.
   void
-  set_type(int at)
-  { this->type_ = at; }
+  set_type(int type)
+  { this->type_ = type; }
 
   // Return integer value.
   unsigned int

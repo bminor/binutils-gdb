@@ -259,10 +259,10 @@ class Relocatable_relocs
 
   // Record what to do for the next reloc.
   void
-  set_next_reloc_strategy(Reloc_strategy astrategy)
+  set_next_reloc_strategy(Reloc_strategy strategy)
   {
-    this->reloc_strategies_.push_back(static_cast<unsigned char>(astrategy));
-    if (astrategy != RELOC_DISCARD)
+    this->reloc_strategies_.push_back(static_cast<unsigned char>(strategy));
+    if (strategy != RELOC_DISCARD)
       ++this->output_reloc_count_;
   }
 

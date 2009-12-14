@@ -217,7 +217,7 @@ Mapfile::print_input_section_symbols(
 	  && is_ordinary
 	  && sym->is_defined())
 	{
-	  for (size_t j = 0; j < Mapfile::section_name_map_length; ++j)
+	  for (size_t i = 0; i < Mapfile::section_name_map_length; ++i)
 	    putc(' ', this->map_file_);
 	  const Sized_symbol<size>* ssym =
 	    static_cast<const Sized_symbol<size>*>(sym);

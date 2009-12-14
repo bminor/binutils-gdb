@@ -45,12 +45,12 @@ Object_attribute::size(int tag) const
   if (this->is_default_attribute())
     return 0;
 
-  size_t uleb128_size = get_length_as_unsigned_LEB_128(tag);
+  size_t size = get_length_as_unsigned_LEB_128(tag);
   if (Object_attribute::attribute_type_has_int_value(this->type_))
-    uleb128_size += get_length_as_unsigned_LEB_128(this->int_value_);
+    size += get_length_as_unsigned_LEB_128(this->int_value_);
   if (Object_attribute::attribute_type_has_string_value(this->type_))
-    uleb128_size += this->string_value_.size() + 1;
-  return uleb128_size;
+    size += this->string_value_.size() + 1;
+  return size;
 }
 
 // Whether this has the default value (0/"").
@@ -266,11 +266,11 @@ Attributes_section_data::size() const
 }
 
 // Construct an Attributes_section_data object by parsing section contents
-// specified by VIEW and VIEW_SIZE.
+// specified by VIEW and SIZE.
 
 Attributes_section_data::Attributes_section_data(
     const unsigned char* view,
-    section_size_type view_size)
+    section_size_type size)
 {
   for (int vendor = OBJ_ATTR_FIRST; vendor <= OBJ_ATTR_LAST; ++vendor)
     this->vendor_object_attributes_[vendor] =
@@ -280,16 +280,16 @@ Attributes_section_data::Attributes_section_data(
   p = view;
   if (*(p++) == 'A')
     {
-      view_size--;
-      while (view_size > 0)
+      size--;
+      while (size > 0)
 	{
 	  // Size of vendor attributes section.
 	  section_size_type section_size =
 	    convert_to_section_size_type(read_from_pointer<32>(&p));
 
-	  if (section_size > view_size)
-	    section_size = view_size;
-	  view_size -= section_size;
+	  if (section_size > size)
+	    section_size = size;
+	  size -= section_size;
 
 	  const char* section_name = reinterpret_cast<const char*>(p);
 	  section_size_type section_name_size = strlen(section_name) + 1;
@@ -443,9 +443,10 @@ Attributes_section_data::write(std::vector<unsigned char>* buffer) const
 void
 Output_attributes_section_data::do_write(Output_file* of)
 {
+  off_t offset = this->offset();
   const section_size_type oview_size =
     convert_to_section_size_type(this->data_size());
-  unsigned char* const oview = of->get_output_view(this->offset(), oview_size);
+  unsigned char* const oview = of->get_output_view(offset, oview_size);
 
   std::vector<unsigned char> buffer;
   this->attributes_section_data_.write(&buffer);

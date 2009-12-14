@@ -78,28 +78,28 @@ class Token
   { }
 
   // A general token with no value.
-  Token(Classification aclassification, int linenum, int char_pos)
-    : classification_(aclassification), value_(NULL), value_length_(0),
-      opcode_(0), lineno_(linenum), charpos_(char_pos)
+  Token(Classification classification, int lineno, int charpos)
+    : classification_(classification), value_(NULL), value_length_(0),
+      opcode_(0), lineno_(lineno), charpos_(charpos)
   {
-    gold_assert(aclassification == TOKEN_INVALID
-		|| aclassification == TOKEN_EOF);
+    gold_assert(classification == TOKEN_INVALID
+		|| classification == TOKEN_EOF);
   }
 
   // A general token with a value.
-  Token(Classification aclassification, const char* value, size_t length,
-	int linenum, int char_pos)
-    : classification_(aclassification), value_(value), value_length_(length),
-      opcode_(0), lineno_(linenum), charpos_(char_pos)
+  Token(Classification classification, const char* value, size_t length,
+	int lineno, int charpos)
+    : classification_(classification), value_(value), value_length_(length),
+      opcode_(0), lineno_(lineno), charpos_(charpos)
   {
-    gold_assert(aclassification != TOKEN_INVALID
-		&& aclassification != TOKEN_EOF);
+    gold_assert(classification != TOKEN_INVALID
+		&& classification != TOKEN_EOF);
   }
 
   // A token representing an operator.
-  Token(int opcode, int linenum, int char_pos)
+  Token(int opcode, int lineno, int charpos)
     : classification_(TOKEN_OPERATOR), value_(NULL), value_length_(0),
-      opcode_(opcode), lineno_(linenum), charpos_(char_pos)
+      opcode_(opcode), lineno_(lineno), charpos_(charpos)
   { }
 
   // Return whether the token is invalid.
@@ -213,8 +213,8 @@ class Lex
 
   // Set the lexing mode.
   void
-  set_mode(Mode mde)
-  { this->mode_ = mde; }
+  set_mode(Mode mode)
+  { this->mode_ = mode; }
 
  private:
   Lex(const Lex&);
@@ -1160,19 +1160,19 @@ Script_options::set_section_addresses(Symbol_table* symtab, Layout* layout)
 class Parser_closure
 {
  public:
-  Parser_closure(const char* afilename,
+  Parser_closure(const char* filename,
 		 const Position_dependent_options& posdep_options,
-		 bool in_a_group, bool is_in_a_sysroot,
-                 Command_line* acommand_line,
-		 Script_options* script_opts,
+		 bool in_group, bool is_in_sysroot,
+                 Command_line* command_line,
+		 Script_options* script_options,
 		 Lex* lex,
-		 bool skip_on_a_incompatible_target)
-    : filename_(afilename), posdep_options_(posdep_options),
-      in_group_(in_a_group), is_in_sysroot_(is_in_a_sysroot),
-      skip_on_incompatible_target_(skip_on_a_incompatible_target),
+		 bool skip_on_incompatible_target)
+    : filename_(filename), posdep_options_(posdep_options),
+      in_group_(in_group), is_in_sysroot_(is_in_sysroot),
+      skip_on_incompatible_target_(skip_on_incompatible_target),
       found_incompatible_target_(false),
-      command_line_(acommand_line), script_options_(script_opts),
-      version_script_info_(script_opts->version_script_info()),
+      command_line_(command_line), script_options_(script_options),
+      version_script_info_(script_options->version_script_info()),
       lex_(lex), lineno_(0), charpos_(0), lex_mode_stack_(), inputs_(NULL)
   {
     // We start out processing C symbols in the default lex mode.
@@ -1814,10 +1814,10 @@ Lazy_demangler::get()
 // For example, pattern="std::map*" and language="C++".
 // pattern and language should be from the stringpool
 struct Version_expression {
-  Version_expression(const std::string& apattern,
-                     const std::string& alanguage,
-                     bool is_exact_match)
-      : pattern(apattern), language(alanguage), exact_match(is_exact_match) {}
+  Version_expression(const std::string& pattern,
+                     const std::string& language,
+                     bool exact_match)
+      : pattern(pattern), language(language), exact_match(exact_match) {}
 
   std::string pattern;
   std::string language;

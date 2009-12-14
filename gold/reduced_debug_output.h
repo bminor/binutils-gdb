@@ -1,6 +1,6 @@
 // reduced_debug_output.h -- reduce debugging information  -*- C++ -*-
 
-// Copyright 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2008 Free Software Foundation, Inc.
 // Written by Caleb Howe <cshowe@google.com>.
 
 // This file is part of gold.
@@ -42,9 +42,9 @@ namespace gold
 class Output_reduced_debug_abbrev_section : public Output_section
 {
  public:
-  Output_reduced_debug_abbrev_section(const char* aname, elfcpp::Elf_Word aflags,
-			              elfcpp::Elf_Xword atype)
-    : Output_section(aname, aflags, atype), sized_(false),
+  Output_reduced_debug_abbrev_section(const char* name, elfcpp::Elf_Word flags,
+			              elfcpp::Elf_Xword type)
+    : Output_section(name, flags, type), sized_(false),
       abbrev_count_(0), failed_(false)
   { this->set_requires_postprocessing(); }
 
@@ -88,9 +88,9 @@ class Output_reduced_debug_abbrev_section : public Output_section
 class Output_reduced_debug_info_section : public Output_section
 {
  public:
-  Output_reduced_debug_info_section(const char* aname, elfcpp::Elf_Word aflags,
-			            elfcpp::Elf_Xword atype)
-    : Output_section(aname, aflags, atype), failed_(false)
+  Output_reduced_debug_info_section(const char* name, elfcpp::Elf_Word flags,
+			            elfcpp::Elf_Xword type)
+    : Output_section(name, flags, type), failed_(false)
   { this->set_requires_postprocessing(); }
 
   void

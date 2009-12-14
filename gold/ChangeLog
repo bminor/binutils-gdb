@@ -1,3 +1,10 @@
+2009-12-14  Ian Lance Taylor  <iant@google.com>
+
+	Revert -Wshadow changes, all changes from:
+	2009-12-11  Doug Kwan  <dougkwan@google.com>
+	2009-12-11  Nick Clifton  <nickc@redhat.com>
+	* configure.ac: Remove -Wshadow when setting WARN_CXXFLAGS.
+
 2009-12-11  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Target_arm::do_finalize_sections): Fix build breakage

@@ -246,10 +246,10 @@ class File_read
       DATA_MMAPPED
     };
 
-    View(off_t vstart, section_size_type vsize, const unsigned char* vdata,
-	 unsigned int vbyteshift, bool cache, Data_ownership data_ownership)
-      : start_(vstart), size_(vsize), data_(vdata), lock_count_(0),
-	byteshift_(vbyteshift), cache_(cache), data_ownership_(data_ownership),
+    View(off_t start, section_size_type size, const unsigned char* data,
+	 unsigned int byteshift, bool cache, Data_ownership data_ownership)
+      : start_(start), size_(size), data_(data), lock_count_(0),
+	byteshift_(byteshift), cache_(cache), data_ownership_(data_ownership),
 	accessed_(true)
     { }
 
@@ -450,8 +450,8 @@ class File_view
   friend class File_read;
 
   // Callers have to get these via File_read::get_lasting_view.
-  File_view(File_read& file, File_read::View* view, const unsigned char* vdata)
-    : file_(file), view_(view), data_(vdata)
+  File_view(File_read& file, File_read::View* view, const unsigned char* data)
+    : file_(file), view_(view), data_(data)
   { }
 
   File_read& file_;

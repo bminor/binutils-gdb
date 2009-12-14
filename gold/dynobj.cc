@@ -39,8 +39,8 @@ namespace gold
 // Sets up the default soname_ to use, in the (rare) cases we never
 // see a DT_SONAME entry.
 
-Dynobj::Dynobj(const std::string& aname, Input_file* ainput_file, off_t aoffset)
-  : Object(aname, ainput_file, true, aoffset),
+Dynobj::Dynobj(const std::string& name, Input_file* input_file, off_t offset)
+  : Object(name, input_file, true, offset),
     needed_(),
     unknown_needed_(UNKNOWN_NEEDED_UNSET)
 {
@@ -67,11 +67,11 @@ Dynobj::Dynobj(const std::string& aname, Input_file* ainput_file, off_t aoffset)
 
 template<int size, bool big_endian>
 Sized_dynobj<size, big_endian>::Sized_dynobj(
-    const std::string& aname,
-    Input_file* ainput_file,
-    off_t aoffset,
+    const std::string& name,
+    Input_file* input_file,
+    off_t offset,
     const elfcpp::Ehdr<size, big_endian>& ehdr)
-  : Dynobj(aname, ainput_file, aoffset),
+  : Dynobj(name, input_file, offset),
     elf_file_(this, ehdr),
     dynsym_shndx_(-1U),
     symbols_(NULL),
@@ -85,8 +85,8 @@ template<int size, bool big_endian>
 void
 Sized_dynobj<size, big_endian>::setup()
 {
-  const unsigned int sec_shnum = this->elf_file_.shnum();
-  this->set_shnum(sec_shnum);
+  const unsigned int shnum = this->elf_file_.shnum();
+  this->set_shnum(shnum);
 }
 
 // Find the SHT_DYNSYM section and the various version sections, and
@@ -108,9 +108,9 @@ Sized_dynobj<size, big_endian>::find_dynsym_sections(
 
   unsigned int xindex_shndx = 0;
   unsigned int xindex_link = 0;
-  const unsigned int sec_shnum = this->shnum();
+  const unsigned int shnum = this->shnum();
   const unsigned char* p = pshdrs;
-  for (unsigned int i = 0; i < sec_shnum; ++i, p += This::shdr_size)
+  for (unsigned int i = 0; i < shnum; ++i, p += This::shdr_size)
     {
       typename This::Shdr shdr(p);
 
@@ -180,13 +180,13 @@ Sized_dynobj<size, big_endian>::read_dynsym_section(
     unsigned int shndx,
     elfcpp::SHT type,
     unsigned int link,
-    File_view** aview,
+    File_view** view,
     section_size_type* view_size,
     unsigned int* view_info)
 {
   if (shndx == -1U)
     {
-      *aview = NULL;
+      *view = NULL;
       *view_size = 0;
       *view_info = 0;
       return;
@@ -200,8 +200,8 @@ Sized_dynobj<size, big_endian>::read_dynsym_section(
     this->error(_("unexpected link in section %u header: %u != %u"),
 	        shndx, this->adjust_shndx(shdr.get_sh_link()), link);
 
-  *aview = this->get_lasting_view(shdr.get_sh_offset(), shdr.get_sh_size(),
-				  true, false);
+  *view = this->get_lasting_view(shdr.get_sh_offset(), shdr.get_sh_size(),
+				 true, false);
   *view_size = convert_to_section_size_type(shdr.get_sh_size());
   *view_info = shdr.get_sh_info();
 }
@@ -424,8 +424,8 @@ Sized_dynobj<size, big_endian>::do_layout(Symbol_table* symtab,
 					  Layout*,
 					  Read_symbols_data* sd)
 {
-  const unsigned int sec_shnum = this->shnum();
-  if (sec_shnum == 0)
+  const unsigned int shnum = this->shnum();
+  if (shnum == 0)
     return;
 
   // Get the section headers.
@@ -437,7 +437,7 @@ Sized_dynobj<size, big_endian>::do_layout(Symbol_table* symtab,
 
   // Skip the first, dummy, section.
   pshdrs += This::shdr_size;
-  for (unsigned int i = 1; i < sec_shnum; ++i, pshdrs += This::shdr_size)
+  for (unsigned int i = 1; i < shnum; ++i, pshdrs += This::shdr_size)
     {
       typename This::Shdr shdr(pshdrs);
 
@@ -448,10 +448,10 @@ Sized_dynobj<size, big_endian>::do_layout(Symbol_table* symtab,
 	  return;
 	}
 
-      const char* aname = pnames + shdr.get_sh_name();
+      const char* name = pnames + shdr.get_sh_name();
 
-      this->handle_gnu_warning_section(aname, i, symtab);
-      this->handle_split_stack_section(aname);
+      this->handle_gnu_warning_section(name, i, symtab);
+      this->handle_split_stack_section(name);
     }
 
   delete sd->section_headers;
@@ -468,13 +468,13 @@ void
 Sized_dynobj<size, big_endian>::set_version_map(
     Version_map* version_map,
     unsigned int ndx,
-    const char* aname) const
+    const char* name) const
 {
   if (ndx >= version_map->size())
     version_map->resize(ndx + 1);
   if ((*version_map)[ndx] != NULL)
     this->error(_("duplicate definition for version %u"), ndx);
-  (*version_map)[ndx] = aname;
+  (*version_map)[ndx] = name;
 }
 
 // Add mappings for the version definitions to VERSION_MAP.
@@ -670,10 +670,10 @@ Sized_dynobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
       return;
     }
 
-  const int symsize = This::sym_size;
-  const size_t symcount = sd->symbols_size / symsize;
+  const int sym_size = This::sym_size;
+  const size_t symcount = sd->symbols_size / sym_size;
   gold_assert(sd->external_symbols_offset == 0);
-  if (symcount * symsize != sd->symbols_size)
+  if (symcount * sym_size != sd->symbols_size)
     {
       this->error(_("size of dynamic symbols is not multiple of symbol size"));
       return;
@@ -1217,9 +1217,9 @@ Verdef::write(const Stringpool* dynpool, bool is_last, unsigned char* pb) const
        p != this->deps_.end();
        ++p, ++i)
     {
-      elfcpp::Verdaux_write<size, big_endian> avda(pb);
-      avda.set_vda_name(dynpool->get_offset(*p));
-      avda.set_vda_next(i + 1 >= this->deps_.size() ? 0 : verdaux_size);
+      elfcpp::Verdaux_write<size, big_endian> vda(pb);
+      vda.set_vda_name(dynpool->get_offset(*p));
+      vda.set_vda_next(i + 1 >= this->deps_.size() ? 0 : verdaux_size);
       pb += verdaux_size;
     }
 
@@ -1305,10 +1305,10 @@ Verneed::write(const Stringpool* dynpool, bool is_last,
 
 // Versions methods.
 
-Versions::Versions(const Version_script_info& vscript,
+Versions::Versions(const Version_script_info& version_script,
                    Stringpool* dynpool)
   : defs_(), needs_(), version_table_(),
-    is_finalized_(false), version_script_(vscript),
+    is_finalized_(false), version_script_(version_script),
     needs_base_version_(parameters->options().shared())
 {
   if (!this->version_script_.empty())
@@ -1620,18 +1620,18 @@ Versions::symbol_section_contents(const Symbol_table* symtab,
        p != syms.end();
        ++p)
     {
-      unsigned int vindex;
+      unsigned int version_index;
       const char* version = (*p)->version();
       if (version == NULL)
-	vindex = elfcpp::VER_NDX_GLOBAL;
+	version_index = elfcpp::VER_NDX_GLOBAL;
       else        
-	vindex = this->version_index(symtab, dynpool, *p);
+	version_index = this->version_index(symtab, dynpool, *p);
       // If the symbol was defined as foo@V1 instead of foo@@V1, add
       // the hidden bit.
       if ((*p)->version() != NULL && !(*p)->is_default())
-        vindex |= elfcpp::VERSYM_HIDDEN;
+        version_index |= elfcpp::VERSYM_HIDDEN;
       elfcpp::Swap<16, big_endian>::writeval(pbuf + (*p)->dynsym_index() * 2,
-                                             vindex);
+                                             version_index);
     }
 
   *pp = pbuf;

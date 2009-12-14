@@ -557,7 +557,7 @@ Icf::find_identical_sections(const Input_objects* input_objects,
                              Symbol_table* symtab)
 {
   unsigned int section_num = 0;
-  std::vector<unsigned int> num_tracked_rels;
+  std::vector<unsigned int> num_tracked_relocs;
   std::vector<bool> is_secn_or_group_unique;
   std::vector<std::string> section_contents;
 
@@ -585,7 +585,7 @@ Icf::find_identical_sections(const Input_objects* input_objects,
           this->id_section_.push_back(Section_id(*p, i));
           this->section_id_[Section_id(*p, i)] = section_num;
           this->kept_section_id_.push_back(section_num);
-          num_tracked_rels.push_back(0);
+          num_tracked_relocs.push_back(0);
           is_secn_or_group_unique.push_back(false);
           section_contents.push_back("");
           section_num++;
@@ -605,7 +605,7 @@ Icf::find_identical_sections(const Input_objects* input_objects,
     {
       num_iterations++;
       converged = match_sections(num_iterations, symtab,
-                                 &num_tracked_rels, &this->kept_section_id_,
+                                 &num_tracked_relocs, &this->kept_section_id_,
                                  this->id_section_, &is_secn_or_group_unique,
                                  &section_contents);
     }

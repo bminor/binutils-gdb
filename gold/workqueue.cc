@@ -1,6 +1,6 @@
 // workqueue.cc -- the workqueue for gold
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -148,7 +148,7 @@ Workqueue::~Workqueue()
 // waiting for a Token.
 
 void
-Workqueue::add_to_queue(Task_list* que, Task* t, bool front)
+Workqueue::add_to_queue(Task_list* queue, Task* t, bool front)
 {
   Hold_lock hl(this->lock_);
 
@@ -164,9 +164,9 @@ Workqueue::add_to_queue(Task_list* que, Task* t, bool front)
   else
     {
       if (front)
-	que->push_front(t);
+	queue->push_front(t);
       else
-	que->push_back(t);
+	queue->push_back(t);
       // Tell any waiting thread that there is work to do.
       this->condvar_.signal();
     }
@@ -441,11 +441,11 @@ Workqueue::release_locks(Task* t, Task_locker* tl)
 	    {
 	      // The token has been unblocked.  Every waiting Task may
 	      // now be runnable.
-	      Task* tok;
-	      while ((tok = token->remove_first_waiting()) != NULL)
+	      Task* t;
+	      while ((t = token->remove_first_waiting()) != NULL)
 		{
 		  --this->waiting_;
-		  this->return_or_queue(tok, true, &ret);
+		  this->return_or_queue(t, true, &ret);
 		}
 	    }
 	}
@@ -458,11 +458,11 @@ Workqueue::release_locks(Task* t, Task_locker* tl)
 	  // move all the Tasks to the runnable queue, to avoid a
 	  // potential deadlock if the locking status changes before
 	  // we run the next thread.
-	  Task* tok;
-	  while ((tok = token->remove_first_waiting()) != NULL)
+	  Task* t;
+	  while ((t = token->remove_first_waiting()) != NULL)
 	    {
 	      --this->waiting_;
-	      if (this->return_or_queue(tok, false, &ret))
+	      if (this->return_or_queue(t, false, &ret))
 		break;
 	    }
 	}

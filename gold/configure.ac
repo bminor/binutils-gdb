@@ -312,7 +312,7 @@ AC_SUBST(RANDOM_SEED_CFLAGS)
 
 AM_BINUTILS_WARNINGS
 
-WARN_CXXFLAGS=`echo ${WARN_CFLAGS} | sed -e 's/-Wstrict-prototypes//' -e 's/-Wmissing-prototypes//'`
+WARN_CXXFLAGS=`echo ${WARN_CFLAGS} | sed -e 's/-Wstrict-prototypes//' -e 's/-Wmissing-prototypes//' -e 's/-Wshadow//'`
 AC_SUBST(WARN_CXXFLAGS)
 
 dnl Force support for large files by default.  This may need to be

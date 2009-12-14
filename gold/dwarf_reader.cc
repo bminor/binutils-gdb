@@ -294,7 +294,7 @@ Sized_dwarf_line_info<size, big_endian>::process_one_opcode(
     case elfcpp::DW_LNS_advance_pc:
       {
         const uint64_t advance_address
-	  = read_unsigned_LEB_128(start, &templen);
+            = read_unsigned_LEB_128(start, &templen);
         oplen += templen;
         lsm->address += header_.min_insn_length * advance_address;
       }
@@ -353,7 +353,7 @@ Sized_dwarf_line_info<size, big_endian>::process_one_opcode(
     case elfcpp::DW_LNS_extended_op:
       {
         const uint64_t extended_op_len
-	  = read_unsigned_LEB_128(start, &templen);
+            = read_unsigned_LEB_128(start, &templen);
         start += templen;
         oplen += templen + extended_op_len;
 
@@ -375,7 +375,7 @@ Sized_dwarf_line_info<size, big_endian>::process_one_opcode(
             {
               lsm->address = elfcpp::Swap_unaligned<size, big_endian>::readval(start);
               typename Reloc_map::const_iterator it
-		= reloc_map_.find(start - this->buffer_);
+                  = reloc_map_.find(start - this->buffer_);
               if (it != reloc_map_.end())
                 {
                   // value + addend.
@@ -420,16 +420,17 @@ Sized_dwarf_line_info<size, big_endian>::process_one_opcode(
 
     default:
       {
-        // Ignore unknown opcode  silently.
+        // Ignore unknown opcode  silently
         for (int i = 0; i < header_.std_opcode_lengths[opcode]; i++)
           {
+            size_t templen;
             read_unsigned_LEB_128(start, &templen);
             start += templen;
             oplen += templen;
           }
       }
       break;
-    }
+  }
   *len = oplen;
   return false;
 }

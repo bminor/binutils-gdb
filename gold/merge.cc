@@ -289,10 +289,10 @@ Merge_map::is_merge_section_for(const Relobj* object, unsigned int shndx) const
 bool
 Output_merge_base::do_output_offset(const Relobj* object,
 				    unsigned int shndx,
-				    section_offset_type off,
+				    section_offset_type offset,
 				    section_offset_type* poutput) const
 {
-  return this->merge_map_.get_output_offset(object, shndx, off, poutput);
+  return this->merge_map_.get_output_offset(object, shndx, offset, poutput);
 }
 
 // Return whether this is the merge section for SHNDX in OBJECT.
@@ -354,10 +354,10 @@ Output_merge_data::Merge_data_eq::operator()(Merge_data_key k1,
 void
 Output_merge_data::add_constant(const unsigned char* p)
 {
-  section_size_type ent_size = convert_to_section_size_type(this->entsize());
-  section_size_type addr_align =
+  section_size_type entsize = convert_to_section_size_type(this->entsize());
+  section_size_type addralign =
     convert_to_section_size_type(this->addralign());
-  section_size_type addsize = std::max(ent_size, addr_align);
+  section_size_type addsize = std::max(entsize, addralign);
   if (this->len_ + addsize > this->alc_)
     {
       if (this->alc_ == 0)
@@ -369,9 +369,9 @@ Output_merge_data::add_constant(const unsigned char* p)
 	gold_nomem();
     }
 
-  memcpy(this->p_ + this->len_, p, ent_size);
-  if (addsize > ent_size)
-    memset(this->p_ + this->len_ + ent_size, 0, addsize - ent_size);
+  memcpy(this->p_ + this->len_, p, entsize);
+  if (addsize > entsize)
+    memset(this->p_ + this->len_ + entsize, 0, addsize - entsize);
   this->len_ += addsize;
 }
 
@@ -386,14 +386,14 @@ Output_merge_data::do_add_input_section(Relobj* object, unsigned int shndx)
   section_size_type len;
   const unsigned char* p = object->section_contents(shndx, &len, false);
 
-  section_size_type ent_size = convert_to_section_size_type(this->entsize());
+  section_size_type entsize = convert_to_section_size_type(this->entsize());
 
-  if (len % ent_size != 0)
+  if (len % entsize != 0)
     return false;
 
-  this->input_count_ += len / ent_size;
+  this->input_count_ += len / entsize;
 
-  for (section_size_type i = 0; i < len; i += ent_size, p += ent_size)
+  for (section_size_type i = 0; i < len; i += entsize, p += entsize)
     {
       // Add the constant to the section contents.  If we find that it
       // is already in the hash table, we will remove it again.
@@ -406,12 +406,12 @@ Output_merge_data::do_add_input_section(Relobj* object, unsigned int shndx)
       if (!ins.second)
 	{
 	  // Key was already present.  Remove the copy we just added.
-	  this->len_ -= ent_size;
+	  this->len_ -= entsize;
 	  k = *ins.first;
 	}
 
       // Record the offset of this constant in the output section.
-      this->add_mapping(object, shndx, i, ent_size, k);
+      this->add_mapping(object, shndx, i, entsize, k);
     }
 
   return true;
@@ -531,9 +531,9 @@ Output_merge_string<Char_type>::finalize_merged_data()
        p != this->merged_strings_.end();
        ++p)
     {
-      section_offset_type soffset =
+      section_offset_type offset =
 	this->stringpool_.get_offset_from_key(p->stringpool_key);
-      this->add_mapping(p->object, p->shndx, p->offset, p->length, soffset);
+      this->add_mapping(p->object, p->shndx, p->offset, p->length, offset);
     }
 
   // Save some memory.  This also ensures that this function will work

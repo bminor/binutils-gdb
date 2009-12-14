@@ -91,8 +91,8 @@ class Task_list
 class Task_token
 {
  public:
-  Task_token(bool tis_blocker)
-    : is_blocker_(tis_blocker), blockers_(0), writer_(NULL), waiting_()
+  Task_token(bool is_blocker)
+    : is_blocker_(is_blocker), blockers_(0), writer_(NULL), waiting_()
   { }
 
   ~Task_token()

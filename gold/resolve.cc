@@ -37,9 +37,9 @@ namespace gold
 // VERSION.  Update the VERSION_ field accordingly.
 
 inline void
-Symbol::override_version(const char* aversion)
+Symbol::override_version(const char* version)
 {
-  if (aversion == NULL)
+  if (version == NULL)
     {
       // This is the case where this symbol is NAME/VERSION, and the
       // version was not marked as hidden.  That makes it the default
@@ -49,7 +49,7 @@ Symbol::override_version(const char* aversion)
       // override NAME/VERSION as well.  They are already the same
       // Symbol structure.  Setting the VERSION_ field to NULL ensures
       // that it will be output with the correct, empty, version.
-      this->version_ = aversion;
+      this->version_ = version;
     }
   else
     {
@@ -58,8 +58,8 @@ Symbol::override_version(const char* aversion)
       // overriding NAME.  If VERSION_ONE and VERSION_TWO are
       // different, then this can only happen when VERSION_ONE is NULL
       // and VERSION_TWO is not hidden.
-      gold_assert(this->version_ == aversion || this->version_ == NULL);
-      this->version_ = aversion;
+      gold_assert(this->version_ == version || this->version_ == NULL);
+      this->version_ = version;
     }
 }
 
@@ -67,19 +67,19 @@ Symbol::override_version(const char* aversion)
 // is VISIBILITY.  Updated the VISIBILITY_ field accordingly.
 
 inline void
-Symbol::override_visibility(elfcpp::STV avisibility)
+Symbol::override_visibility(elfcpp::STV visibility)
 {
   // The rule for combining visibility is that we always choose the
   // most constrained visibility.  In order of increasing constraint,
   // visibility goes PROTECTED, HIDDEN, INTERNAL.  This is the reverse
   // of the numeric values, so the effect is that we always want the
   // smallest non-zero value.
-  if (avisibility != elfcpp::STV_DEFAULT)
+  if (visibility != elfcpp::STV_DEFAULT)
     {
       if (this->visibility_ == elfcpp::STV_DEFAULT)
-	this->visibility_ = avisibility;
-      else if (this->visibility_ > avisibility)
-	this->visibility_ = avisibility;
+	this->visibility_ = visibility;
+      else if (this->visibility_ > visibility)
+	this->visibility_ = visibility;
     }
 }
 
@@ -89,18 +89,18 @@ template<int size, bool big_endian>
 void
 Symbol::override_base(const elfcpp::Sym<size, big_endian>& sym,
 		      unsigned int st_shndx, bool is_ordinary,
-		      Object* aobject, const char* aversion)
+		      Object* object, const char* version)
 {
   gold_assert(this->source_ == FROM_OBJECT);
-  this->u_.from_object.object = aobject;
-  this->override_version(aversion);
+  this->u_.from_object.object = object;
+  this->override_version(version);
   this->u_.from_object.shndx = st_shndx;
   this->is_ordinary_shndx_ = is_ordinary;
   this->type_ = sym.get_st_type();
   this->binding_ = sym.get_st_bind();
   this->override_visibility(sym.get_st_visibility());
   this->nonvis_ = sym.get_st_nonvis();
-  if (aobject->is_dynamic())
+  if (object->is_dynamic())
     this->in_dyn_ = true;
   else
     this->in_reg_ = true;
@@ -113,9 +113,9 @@ template<bool big_endian>
 void
 Sized_symbol<size>::override(const elfcpp::Sym<size, big_endian>& sym,
 			     unsigned st_shndx, bool is_ordinary,
-			     Object* aobject, const char* aversion)
+			     Object* object, const char* version)
 {
-  this->override_base(sym, st_shndx, is_ordinary, aobject, aversion);
+  this->override_base(sym, st_shndx, is_ordinary, object, version);
   this->value_ = sym.get_st_value();
   this->symsize_ = sym.get_st_size();
 }
@@ -128,9 +128,9 @@ void
 Symbol_table::override(Sized_symbol<size>* tosym,
 		       const elfcpp::Sym<size, big_endian>& fromsym,
 		       unsigned int st_shndx, bool is_ordinary,
-		       Object* aobject, const char* aversion)
+		       Object* object, const char* version)
 {
-  tosym->override(fromsym, st_shndx, is_ordinary, aobject, aversion);
+  tosym->override(fromsym, st_shndx, is_ordinary, object, version);
   if (tosym->has_alias())
     {
       Symbol* sym = this->weak_aliases_[tosym];
@@ -138,7 +138,7 @@ Symbol_table::override(Sized_symbol<size>* tosym,
       Sized_symbol<size>* ssym = this->get_sized_symbol<size>(sym);
       do
 	{
-	  ssym->override(fromsym, st_shndx, is_ordinary, aobject, aversion);
+	  ssym->override(fromsym, st_shndx, is_ordinary, object, version);
 	  sym = this->weak_aliases_[ssym];
 	  gold_assert(sym != NULL);
 	  ssym = this->get_sized_symbol<size>(sym);

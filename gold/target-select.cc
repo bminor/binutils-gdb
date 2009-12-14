@@ -1,6 +1,6 @@
 // target-select.cc -- select a target for an object file
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -43,10 +43,10 @@ namespace gold
 // list.  This runs at global constructor time, so we want it to be
 // fast.
 
-Target_selector::Target_selector(int amachine, int size, bool is_big_end,
-				 const char* bfdname)
-  : machine_(amachine), size_(size), is_big_endian_(is_big_end),
-    bfd_name_(bfdname), instantiated_target_(NULL), lock_(NULL),
+Target_selector::Target_selector(int machine, int size, bool is_big_endian,
+				 const char* bfd_name)
+  : machine_(machine), size_(size), is_big_endian_(is_big_endian),
+    bfd_name_(bfd_name), instantiated_target_(NULL), lock_(NULL),
     initialize_lock_(&this->lock_)
     
 {

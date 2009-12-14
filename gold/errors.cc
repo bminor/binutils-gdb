@@ -1,6 +1,6 @@
 // errors.cc -- handle errors for gold
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -38,8 +38,8 @@ namespace gold
 
 const int Errors::max_undefined_error_report;
 
-Errors::Errors(const char* prog_name)
-  : program_name_(prog_name), lock_(NULL), initialize_lock_(&this->lock_),
+Errors::Errors(const char* program_name)
+  : program_name_(program_name), lock_(NULL), initialize_lock_(&this->lock_),
     error_count_(0), warning_count_(0), undefined_symbols_()
 {
 }

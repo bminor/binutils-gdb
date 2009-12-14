@@ -702,10 +702,10 @@ unsigned char Output_data_plt_x86_64::tlsdesc_plt_entry[plt_entry_size] =
 void
 Output_data_plt_x86_64::do_write(Output_file* of)
 {
-  const off_t off = this->offset();
+  const off_t offset = this->offset();
   const section_size_type oview_size =
     convert_to_section_size_type(this->data_size());
-  unsigned char* const oview = of->get_output_view(off, oview_size);
+  unsigned char* const oview = of->get_output_view(offset, oview_size);
 
   const off_t got_file_offset = this->got_plt_->offset();
   const section_size_type got_size =
@@ -785,7 +785,7 @@ Output_data_plt_x86_64::do_write(Output_file* of)
   gold_assert(static_cast<section_size_type>(pov - oview) == oview_size);
   gold_assert(static_cast<section_size_type>(got_pov - got_view) == got_size);
 
-  of->write_output_view(off, oview_size, oview);
+  of->write_output_view(offset, oview_size, oview);
   of->write_output_view(got_file_offset, got_size, got_view);
 }
 

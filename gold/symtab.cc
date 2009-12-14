@@ -50,20 +50,20 @@ namespace gold
 // and source_.
 
 void
-Symbol::init_fields(const char* aname, const char* aversion,
-		    elfcpp::STT atype, elfcpp::STB abinding,
-		    elfcpp::STV avisibility, unsigned char non_vis)
+Symbol::init_fields(const char* name, const char* version,
+		    elfcpp::STT type, elfcpp::STB binding,
+		    elfcpp::STV visibility, unsigned char nonvis)
 {
-  this->name_ = aname;
-  this->version_ = aversion;
+  this->name_ = name;
+  this->version_ = version;
   this->symtab_index_ = 0;
   this->dynsym_index_ = 0;
   this->got_offsets_.init();
   this->plt_offset_ = 0;
-  this->type_ = atype;
-  this->binding_ = abinding;
-  this->visibility_ = avisibility;
-  this->nonvis_ = non_vis;
+  this->type_ = type;
+  this->binding_ = binding;
+  this->visibility_ = visibility;
+  this->nonvis_ = nonvis;
   this->is_target_special_ = false;
   this->is_def_ = false;
   this->is_forwarder_ = false;
@@ -83,16 +83,16 @@ Symbol::init_fields(const char* aname, const char* aversion,
 // if the --demangle flag was set.
 
 static std::string
-demangle(const char* aname)
+demangle(const char* name)
 {
   if (!parameters->options().do_demangle())
-    return aname;
+    return name;
 
   // cplus_demangle allocates memory for the result it returns,
   // and returns NULL if the name is already demangled.
-  char* demangled_name = cplus_demangle(aname, DMGL_ANSI | DMGL_PARAMS);
+  char* demangled_name = cplus_demangle(name, DMGL_ANSI | DMGL_PARAMS);
   if (demangled_name == NULL)
-    return aname;
+    return name;
 
   std::string retval(demangled_name);
   free(demangled_name);
@@ -109,33 +109,33 @@ Symbol::demangled_name() const
 
 template<int size, bool big_endian>
 void
-Symbol::init_base_object(const char* aname, const char* aversion, Object* aobject,
+Symbol::init_base_object(const char* name, const char* version, Object* object,
 			 const elfcpp::Sym<size, big_endian>& sym,
 			 unsigned int st_shndx, bool is_ordinary)
 {
-  this->init_fields(aname, aversion, sym.get_st_type(), sym.get_st_bind(),
+  this->init_fields(name, version, sym.get_st_type(), sym.get_st_bind(),
 		    sym.get_st_visibility(), sym.get_st_nonvis());
-  this->u_.from_object.object = aobject;
+  this->u_.from_object.object = object;
   this->u_.from_object.shndx = st_shndx;
   this->is_ordinary_shndx_ = is_ordinary;
   this->source_ = FROM_OBJECT;
-  this->in_reg_ = !aobject->is_dynamic();
-  this->in_dyn_ = aobject->is_dynamic();
-  this->in_real_elf_ = aobject->pluginobj() == NULL;
+  this->in_reg_ = !object->is_dynamic();
+  this->in_dyn_ = object->is_dynamic();
+  this->in_real_elf_ = object->pluginobj() == NULL;
 }
 
 // Initialize the fields in the base class Symbol for a symbol defined
 // in an Output_data.
 
 void
-Symbol::init_base_output_data(const char* aname, const char* aversion,
-			      Output_data* od, elfcpp::STT atype,
-			      elfcpp::STB abinding, elfcpp::STV avisibility,
-			      unsigned char non_vis, bool offset_is_from_the_end)
+Symbol::init_base_output_data(const char* name, const char* version,
+			      Output_data* od, elfcpp::STT type,
+			      elfcpp::STB binding, elfcpp::STV visibility,
+			      unsigned char nonvis, bool offset_is_from_end)
 {
-  this->init_fields(aname, aversion, atype, abinding, avisibility, non_vis);
+  this->init_fields(name, version, type, binding, visibility, nonvis);
   this->u_.in_output_data.output_data = od;
-  this->u_.in_output_data.offset_is_from_end = offset_is_from_the_end;
+  this->u_.in_output_data.offset_is_from_end = offset_is_from_end;
   this->source_ = IN_OUTPUT_DATA;
   this->in_reg_ = true;
   this->in_real_elf_ = true;
@@ -145,15 +145,15 @@ Symbol::init_base_output_data(const char* aname, const char* aversion,
 // in an Output_segment.
 
 void
-Symbol::init_base_output_segment(const char* aname, const char* aversion,
-				 Output_segment* os, elfcpp::STT atype,
-				 elfcpp::STB abinding, elfcpp::STV avisibility,
-				 unsigned char non_vis,
-				 Segment_offset_base offsetbase)
+Symbol::init_base_output_segment(const char* name, const char* version,
+				 Output_segment* os, elfcpp::STT type,
+				 elfcpp::STB binding, elfcpp::STV visibility,
+				 unsigned char nonvis,
+				 Segment_offset_base offset_base)
 {
-  this->init_fields(aname, aversion, atype, abinding, avisibility, non_vis);
+  this->init_fields(name, version, type, binding, visibility, nonvis);
   this->u_.in_output_segment.output_segment = os;
-  this->u_.in_output_segment.offset_base = offsetbase;
+  this->u_.in_output_segment.offset_base = offset_base;
   this->source_ = IN_OUTPUT_SEGMENT;
   this->in_reg_ = true;
   this->in_real_elf_ = true;
@@ -163,11 +163,11 @@ Symbol::init_base_output_segment(const char* aname, const char* aversion,
 // as a constant.
 
 void
-Symbol::init_base_constant(const char* aname, const char* aversion,
-			   elfcpp::STT atype, elfcpp::STB abinding,
-			   elfcpp::STV avisibility, unsigned char non_vis)
+Symbol::init_base_constant(const char* name, const char* version,
+			   elfcpp::STT type, elfcpp::STB binding,
+			   elfcpp::STV visibility, unsigned char nonvis)
 {
-  this->init_fields(aname, aversion, atype, abinding, avisibility, non_vis);
+  this->init_fields(name, version, type, binding, visibility, nonvis);
   this->source_ = IS_CONSTANT;
   this->in_reg_ = true;
   this->in_real_elf_ = true;
@@ -177,11 +177,11 @@ Symbol::init_base_constant(const char* aname, const char* aversion,
 // symbol.
 
 void
-Symbol::init_base_undefined(const char* aname, const char* aversion,
-			    elfcpp::STT atype, elfcpp::STB abinding,
-			    elfcpp::STV avisibility, unsigned char non_vis)
+Symbol::init_base_undefined(const char* name, const char* version,
+			    elfcpp::STT type, elfcpp::STB binding,
+			    elfcpp::STV visibility, unsigned char nonvis)
 {
-  this->init_fields(aname, aversion, atype, abinding, avisibility, non_vis);
+  this->init_fields(name, version, type, binding, visibility, nonvis);
   this->dynsym_index_ = -1U;
   this->source_ = IS_UNDEFINED;
   this->in_reg_ = true;
@@ -204,12 +204,12 @@ Symbol::allocate_base_common(Output_data* od)
 template<int size>
 template<bool big_endian>
 void
-Sized_symbol<size>::init_object(const char* aname, const char* aversion,
-				Object* aobject,
+Sized_symbol<size>::init_object(const char* name, const char* version,
+				Object* object,
 				const elfcpp::Sym<size, big_endian>& sym,
 				unsigned int st_shndx, bool is_ordinary)
 {
-  this->init_base_object(aname, aversion, aobject, sym, st_shndx, is_ordinary);
+  this->init_base_object(name, version, object, sym, st_shndx, is_ordinary);
   this->value_ = sym.get_st_value();
   this->symsize_ = sym.get_st_size();
 }
@@ -219,18 +219,18 @@ Sized_symbol<size>::init_object(const char* aname, const char* aversion,
 
 template<int size>
 void
-Sized_symbol<size>::init_output_data(const char* aname, const char* aversion,
-				     Output_data* od, Value_type avalue,
-				     Size_type sym_size, elfcpp::STT atype,
-				     elfcpp::STB abinding,
-				     elfcpp::STV avisibility,
-				     unsigned char non_vis,
-				     bool offset_is_from_the_end)
+Sized_symbol<size>::init_output_data(const char* name, const char* version,
+				     Output_data* od, Value_type value,
+				     Size_type symsize, elfcpp::STT type,
+				     elfcpp::STB binding,
+				     elfcpp::STV visibility,
+				     unsigned char nonvis,
+				     bool offset_is_from_end)
 {
-  this->init_base_output_data(aname, aversion, od, atype, abinding, avisibility,
-			      non_vis, offset_is_from_the_end);
-  this->value_ = avalue;
-  this->symsize_ = sym_size;
+  this->init_base_output_data(name, version, od, type, binding, visibility,
+			      nonvis, offset_is_from_end);
+  this->value_ = value;
+  this->symsize_ = symsize;
 }
 
 // Initialize the fields in Sized_symbol for a symbol defined in an
@@ -238,18 +238,18 @@ Sized_symbol<size>::init_output_data(const char* aname, const char* aversion,
 
 template<int size>
 void
-Sized_symbol<size>::init_output_segment(const char* aname, const char* aversion,
-					Output_segment* os, Value_type avalue,
-					Size_type sym_size, elfcpp::STT atype,
-					elfcpp::STB abinding,
-					elfcpp::STV avisibility,
-					unsigned char non_vis,
-					Segment_offset_base offsetbase)
+Sized_symbol<size>::init_output_segment(const char* name, const char* version,
+					Output_segment* os, Value_type value,
+					Size_type symsize, elfcpp::STT type,
+					elfcpp::STB binding,
+					elfcpp::STV visibility,
+					unsigned char nonvis,
+					Segment_offset_base offset_base)
 {
-  this->init_base_output_segment(aname, aversion, os, atype, abinding, avisibility,
-				 non_vis, offsetbase);
-  this->value_ = avalue;
-  this->symsize_ = sym_size;
+  this->init_base_output_segment(name, version, os, type, binding, visibility,
+				 nonvis, offset_base);
+  this->value_ = value;
+  this->symsize_ = symsize;
 }
 
 // Initialize the fields in Sized_symbol for a symbol defined as a
@@ -257,25 +257,25 @@ Sized_symbol<size>::init_output_segment(const char* aname, const char* aversion,
 
 template<int size>
 void
-Sized_symbol<size>::init_constant(const char* aname, const char* aversion,
-				  Value_type avalue, Size_type sym_size,
-				  elfcpp::STT atype, elfcpp::STB abinding,
-				  elfcpp::STV avisibility, unsigned char non_vis)
+Sized_symbol<size>::init_constant(const char* name, const char* version,
+				  Value_type value, Size_type symsize,
+				  elfcpp::STT type, elfcpp::STB binding,
+				  elfcpp::STV visibility, unsigned char nonvis)
 {
-  this->init_base_constant(aname, aversion, atype, abinding, avisibility, non_vis);
-  this->value_ = avalue;
-  this->symsize_ = sym_size;
+  this->init_base_constant(name, version, type, binding, visibility, nonvis);
+  this->value_ = value;
+  this->symsize_ = symsize;
 }
 
 // Initialize the fields in Sized_symbol for an undefined symbol.
 
 template<int size>
 void
-Sized_symbol<size>::init_undefined(const char* aname, const char* aversion,
-				   elfcpp::STT atype, elfcpp::STB abinding,
-				   elfcpp::STV avisibility, unsigned char non_vis)
+Sized_symbol<size>::init_undefined(const char* name, const char* version,
+				   elfcpp::STT type, elfcpp::STB binding,
+				   elfcpp::STV visibility, unsigned char nonvis)
 {
-  this->init_base_undefined(aname, aversion, atype, abinding, avisibility, non_vis);
+  this->init_base_undefined(name, version, type, binding, visibility, nonvis);
   this->value_ = 0;
   this->symsize_ = 0;
 }
@@ -283,21 +283,21 @@ Sized_symbol<size>::init_undefined(const char* aname, const char* aversion,
 // Return true if SHNDX represents a common symbol.
 
 bool
-Symbol::is_common_shndx(unsigned int sec_shndx)
+Symbol::is_common_shndx(unsigned int shndx)
 {
-  return (sec_shndx == elfcpp::SHN_COMMON
-	  || sec_shndx == parameters->target().small_common_shndx()
-	  || sec_shndx == parameters->target().large_common_shndx());
+  return (shndx == elfcpp::SHN_COMMON
+	  || shndx == parameters->target().small_common_shndx()
+	  || shndx == parameters->target().large_common_shndx());
 }
 
 // Allocate a common symbol.
 
 template<int size>
 void
-Sized_symbol<size>::allocate_common(Output_data* od, Value_type avalue)
+Sized_symbol<size>::allocate_common(Output_data* od, Value_type value)
 {
   this->allocate_base_common(od);
-  this->value_ = avalue;
+  this->value_ = value;
 }
 
 // The ""'s around str ensure str is a string literal, so sizeof works.
@@ -323,9 +323,9 @@ Symbol::should_add_dynsym_entry() const
     {
       Relobj* relobj = static_cast<Relobj*>(this->object());
       bool is_ordinary;
-      unsigned int sec_shndx = this->shndx(&is_ordinary);
-      if (is_ordinary && sec_shndx != elfcpp::SHN_UNDEF
-          && !relobj->is_section_included(sec_shndx))
+      unsigned int shndx = this->shndx(&is_ordinary);
+      if (is_ordinary && shndx != elfcpp::SHN_UNDEF
+          && !relobj->is_section_included(shndx))
         return false;
     }
 
@@ -351,28 +351,28 @@ Symbol::should_add_dynsym_entry() const
     {
       // TODO(csilvers): We could probably figure out if we're an operator
       //                 new/delete or typeinfo without the need to demangle.
-      char* ademangled_name = cplus_demangle(this->name(),
-					     DMGL_ANSI | DMGL_PARAMS);
-      if (ademangled_name == NULL)
+      char* demangled_name = cplus_demangle(this->name(),
+                                            DMGL_ANSI | DMGL_PARAMS);
+      if (demangled_name == NULL)
         {
           // Not a C++ symbol, so it can't satisfy these flags
         }
       else if (parameters->options().dynamic_list_cpp_new()
-               && (strprefix(ademangled_name, "operator new")
-                   || strprefix(ademangled_name, "operator delete")))
+               && (strprefix(demangled_name, "operator new")
+                   || strprefix(demangled_name, "operator delete")))
         {
-          free(ademangled_name);
+          free(demangled_name);
           return true;
         }
       else if (parameters->options().dynamic_list_cpp_typeinfo()
-               && (strprefix(ademangled_name, "typeinfo name for")
-                   || strprefix(ademangled_name, "typeinfo for")))
+               && (strprefix(demangled_name, "typeinfo name for")
+                   || strprefix(demangled_name, "typeinfo for")))
         {
-          free(ademangled_name);
+          free(demangled_name);
           return true;
         }
       else
-        free(ademangled_name);
+        free(demangled_name);
     }
 
   // If exporting all symbols or building a shared library,
@@ -434,13 +434,13 @@ Symbol::output_section() const
     {
     case FROM_OBJECT:
       {
-	unsigned int sec_shndx = this->u_.from_object.shndx;
-	if (sec_shndx != elfcpp::SHN_UNDEF && this->is_ordinary_shndx_)
+	unsigned int shndx = this->u_.from_object.shndx;
+	if (shndx != elfcpp::SHN_UNDEF && this->is_ordinary_shndx_)
 	  {
 	    gold_assert(!this->u_.from_object.object->is_dynamic());
 	    gold_assert(this->u_.from_object.object->pluginobj() == NULL);
 	    Relobj* relobj = static_cast<Relobj*>(this->u_.from_object.object);
-	    return relobj->output_section(sec_shndx);
+	    return relobj->output_section(shndx);
 	  }
 	return NULL;
       }
@@ -486,11 +486,11 @@ Symbol::set_output_section(Output_section* os)
 // Class Symbol_table.
 
 Symbol_table::Symbol_table(unsigned int count,
-                           const Version_script_info& aversion_script)
+                           const Version_script_info& version_script)
   : saw_undefined_(0), offset_(0), table_(count), namepool_(),
     forwarders_(), commons_(), tls_commons_(), small_commons_(),
     large_commons_(), forced_locals_(), warnings_(),
-    version_script_(aversion_script), gc_(NULL), icf_(NULL)
+    version_script_(version_script), gc_(NULL), icf_(NULL)
 {
   namepool_.reserve(count);
 }
@@ -518,10 +518,10 @@ Symbol_table::Symbol_table_eq::operator()(const Symbol_table_key& k1,
 }
 
 bool
-Symbol_table::is_section_folded(Object* obj, unsigned int sec_shndx) const
+Symbol_table::is_section_folded(Object* obj, unsigned int shndx) const
 {
   return (parameters->options().icf_enabled()
-          && this->icf_->is_section_folded(obj, sec_shndx));
+          && this->icf_->is_section_folded(obj, shndx));
 }
 
 // For symbols that have been listed with -u option, add them to the
@@ -535,19 +535,19 @@ Symbol_table::gc_mark_undef_symbols()
        p != parameters->options().undefined_end();
        ++p)
     {
-      const char* aname = p->c_str();
-      Symbol* sym = this->lookup(aname);
+      const char* name = p->c_str();
+      Symbol* sym = this->lookup(name);
       gold_assert (sym != NULL);
       if (sym->source() == Symbol::FROM_OBJECT 
           && !sym->object()->is_dynamic())
         {
           Relobj* obj = static_cast<Relobj*>(sym->object());
           bool is_ordinary;
-          unsigned int sec_shndx = sym->shndx(&is_ordinary);
+          unsigned int shndx = sym->shndx(&is_ordinary);
           if (is_ordinary)
             {
               gold_assert(this->gc_ != NULL);
-              this->gc_->worklist().push(Section_id(obj, sec_shndx));
+              this->gc_->worklist().push(Section_id(obj, shndx));
             }
         }
     }
@@ -562,11 +562,11 @@ Symbol_table::gc_mark_symbol_for_shlib(Symbol* sym)
       //Add the object and section to the work list.
       Relobj* obj = static_cast<Relobj*>(sym->object());
       bool is_ordinary;
-      unsigned int sec_shndx = sym->shndx(&is_ordinary);
-      if (is_ordinary && sec_shndx != elfcpp::SHN_UNDEF)
+      unsigned int shndx = sym->shndx(&is_ordinary);
+      if (is_ordinary && shndx != elfcpp::SHN_UNDEF)
         {
           gold_assert(this->gc_!= NULL);
-          this->gc_->worklist().push(Section_id(obj, sec_shndx));
+          this->gc_->worklist().push(Section_id(obj, shndx));
         }
     }
 }
@@ -581,11 +581,11 @@ Symbol_table::gc_mark_dyn_syms(Symbol* sym)
     {
       Relobj *obj = static_cast<Relobj*>(sym->object()); 
       bool is_ordinary;
-      unsigned int sec_shndx = sym->shndx(&is_ordinary);
-      if (is_ordinary && sec_shndx != elfcpp::SHN_UNDEF)
+      unsigned int shndx = sym->shndx(&is_ordinary);
+      if (is_ordinary && shndx != elfcpp::SHN_UNDEF)
         {
           gold_assert(this->gc_ != NULL);
-          this->gc_->worklist().push(Section_id(obj, sec_shndx));
+          this->gc_->worklist().push(Section_id(obj, shndx));
         }
     }
 }
@@ -616,18 +616,18 @@ Symbol_table::resolve_forwards(const Symbol* from) const
 // Look up a symbol by name.
 
 Symbol*
-Symbol_table::lookup(const char* aname, const char* aversion) const
+Symbol_table::lookup(const char* name, const char* version) const
 {
   Stringpool::Key name_key;
-  aname = this->namepool_.find(aname, &name_key);
-  if (aname == NULL)
+  name = this->namepool_.find(name, &name_key);
+  if (name == NULL)
     return NULL;
 
   Stringpool::Key version_key = 0;
-  if (aversion != NULL)
+  if (version != NULL)
     {
-      aversion = this->namepool_.find(aversion, &version_key);
-      if (aversion == NULL)
+      version = this->namepool_.find(version, &version_key);
+      if (version == NULL)
 	return NULL;
     }
 
@@ -656,8 +656,8 @@ Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from)
   esym.put_st_info(from->binding(), from->type());
   esym.put_st_other(from->visibility(), from->nonvis());
   bool is_ordinary;
-  unsigned int sec_shndx = from->shndx(&is_ordinary);
-  this->resolve(to, esym.sym(), sec_shndx, is_ordinary, sec_shndx, from->object(),
+  unsigned int shndx = from->shndx(&is_ordinary);
+  this->resolve(to, esym.sym(), shndx, is_ordinary, shndx, from->object(),
 		from->version());
   if (from->in_reg())
     to->set_in_reg();
@@ -689,25 +689,25 @@ Symbol_table::force_local(Symbol* sym)
 // option was used.
 
 const char*
-Symbol_table::wrap_symbol(const char* aname, Stringpool::Key* name_key)
+Symbol_table::wrap_symbol(const char* name, Stringpool::Key* name_key)
 {
   // For some targets, we need to ignore a specific character when
   // wrapping, and add it back later.
   char prefix = '\0';
-  if (aname[0] == parameters->target().wrap_char())
+  if (name[0] == parameters->target().wrap_char())
     {
-      prefix = aname[0];
-      ++aname;
+      prefix = name[0];
+      ++name;
     }
 
-  if (parameters->options().is_wrap(aname))
+  if (parameters->options().is_wrap(name))
     {
       // Turn NAME into __wrap_NAME.
       std::string s;
       if (prefix != '\0')
 	s += prefix;
       s += "__wrap_";
-      s += aname;
+      s += name;
 
       // This will give us both the old and new name in NAMEPOOL_, but
       // that is OK.  Only the versions we need will wind up in the
@@ -717,18 +717,18 @@ Symbol_table::wrap_symbol(const char* aname, Stringpool::Key* name_key)
 
   const char* const real_prefix = "__real_";
   const size_t real_prefix_length = strlen(real_prefix);
-  if (strncmp(aname, real_prefix, real_prefix_length) == 0
-      && parameters->options().is_wrap(aname + real_prefix_length))
+  if (strncmp(name, real_prefix, real_prefix_length) == 0
+      && parameters->options().is_wrap(name + real_prefix_length))
     {
       // Turn __real_NAME into NAME.
       std::string s;
       if (prefix != '\0')
 	s += prefix;
-      s += aname + real_prefix_length;
+      s += name + real_prefix_length;
       return this->namepool_.add(s.c_str(), true, name_key);
     }
 
-  return aname;
+  return name;
 }
 
 // This is called when we see a symbol NAME/VERSION, and the symbol
@@ -839,10 +839,10 @@ Symbol_table::define_default_version(Sized_symbol<size>* sym,
 
 template<int size, bool big_endian>
 Sized_symbol<size>*
-Symbol_table::add_from_object(Object* aobject,
-			      const char *aname,
+Symbol_table::add_from_object(Object* object,
+			      const char *name,
 			      Stringpool::Key name_key,
-			      const char *aversion,
+			      const char *version,
 			      Stringpool::Key version_key,
 			      bool def,
 			      const elfcpp::Sym<size, big_endian>& sym,
@@ -851,12 +851,12 @@ Symbol_table::add_from_object(Object* aobject,
 			      unsigned int orig_st_shndx)
 {
   // Print a message if this symbol is being traced.
-  if (parameters->options().is_trace_symbol(aname))
+  if (parameters->options().is_trace_symbol(name))
     {
       if (orig_st_shndx == elfcpp::SHN_UNDEF)
-        gold_info(_("%s: reference to %s"), aobject->name().c_str(), aname);
+        gold_info(_("%s: reference to %s"), object->name().c_str(), name);
       else
-        gold_info(_("%s: definition of %s"), aobject->name().c_str(), aname);
+        gold_info(_("%s: definition of %s"), object->name().c_str(), name);
     }
 
   // For an undefined symbol, we may need to adjust the name using
@@ -864,17 +864,17 @@ Symbol_table::add_from_object(Object* aobject,
   if (orig_st_shndx == elfcpp::SHN_UNDEF
       && parameters->options().any_wrap())
     {
-      const char* wrap_name = this->wrap_symbol(aname, &name_key);
-      if (wrap_name != aname)
+      const char* wrap_name = this->wrap_symbol(name, &name_key);
+      if (wrap_name != name)
 	{
 	  // If we see a reference to malloc with version GLIBC_2.0,
 	  // and we turn it into a reference to __wrap_malloc, then we
 	  // discard the version number.  Otherwise the user would be
 	  // required to specify the correct version for
 	  // __wrap_malloc.
-	  aversion = NULL;
+	  version = NULL;
 	  version_key = 0;
-	  aname = wrap_name;
+	  name = wrap_name;
 	}
     }
 
@@ -910,8 +910,8 @@ Symbol_table::add_from_object(Object* aobject,
       was_undefined = ret->is_undefined();
       was_common = ret->is_common();
 
-      this->resolve(ret, sym, st_shndx, is_ordinary, orig_st_shndx, aobject,
-		    aversion);
+      this->resolve(ret, sym, st_shndx, is_ordinary, orig_st_shndx, object,
+		    version);
       if (parameters->options().gc_sections())
         this->gc_mark_dyn_syms(ret);
 
@@ -933,8 +933,8 @@ Symbol_table::add_from_object(Object* aobject,
 	  was_undefined = ret->is_undefined();
 	  was_common = ret->is_common();
 
-	  this->resolve(ret, sym, st_shndx, is_ordinary, orig_st_shndx, aobject,
-			aversion);
+	  this->resolve(ret, sym, st_shndx, is_ordinary, orig_st_shndx, object,
+			version);
           if (parameters->options().gc_sections())
             this->gc_mark_dyn_syms(ret);
 	  ins.first->second = ret;
@@ -968,7 +968,7 @@ Symbol_table::add_from_object(Object* aobject,
 		}
 	    }
 
-	  ret->init_object(aname, aversion, aobject, sym, st_shndx, is_ordinary);
+	  ret->init_object(name, version, object, sym, st_shndx, is_ordinary);
 
 	  ins.first->second = ret;
 	  if (def)
@@ -1055,7 +1055,7 @@ Symbol_table::add_from_relobj(
 	  continue;
 	}
 
-      const char* aname = sym_names + st_name;
+      const char* name = sym_names + st_name;
 
       bool is_ordinary;
       unsigned int st_shndx = relobj->adjust_sym_shndx(i + symndx_offset,
@@ -1078,7 +1078,7 @@ Symbol_table::add_from_relobj(
       // In an object file, an '@' in the name separates the symbol
       // name from the version name.  If there are two '@' characters,
       // this is the default version.
-      const char* ver = strchr(aname, '@');
+      const char* ver = strchr(name, '@');
       Stringpool::Key ver_key = 0;
       int namelen = 0;
       // DEF: is the version default?  LOCAL: is the symbol forced local?
@@ -1088,7 +1088,7 @@ Symbol_table::add_from_relobj(
       if (ver != NULL)
         {
           // The symbol name is of the form foo@VERSION or foo@@VERSION
-          namelen = ver - aname;
+          namelen = ver - name;
           ++ver;
 	  if (*ver == '@')
 	    {
@@ -1102,27 +1102,27 @@ Symbol_table::add_from_relobj(
       // about a common symbol?
       else
 	{
-	  namelen = strlen(aname);
+	  namelen = strlen(name);
 	  if (!this->version_script_.empty()
 	      && st_shndx != elfcpp::SHN_UNDEF)
 	    {
 	      // The symbol name did not have a version, but the
 	      // version script may assign a version anyway.
-	      std::string aversion;
-	      if (this->version_script_.get_symbol_version(aname, &aversion))
+	      std::string version;
+	      if (this->version_script_.get_symbol_version(name, &version))
 		{
 		  // The version can be empty if the version script is
 		  // only used to force some symbols to be local.
-		  if (!aversion.empty())
+		  if (!version.empty())
 		    {
-		      ver = this->namepool_.add_with_length(aversion.c_str(),
-							    aversion.length(),
+		      ver = this->namepool_.add_with_length(version.c_str(),
+							    version.length(),
 							    true,
 							    &ver_key);
 		      def = true;
 		    }
 		}
-	      else if (this->version_script_.symbol_is_local(aname))
+	      else if (this->version_script_.symbol_is_local(name))
 		local = true;
 	    }
 	}
@@ -1171,11 +1171,11 @@ Symbol_table::add_from_relobj(
         }
 
       Stringpool::Key name_key;
-      aname = this->namepool_.add_with_length(aname, namelen, true,
+      name = this->namepool_.add_with_length(name, namelen, true,
 					     &name_key);
 
       Sized_symbol<size>* res;
-      res = this->add_from_object(relobj, aname, name_key, ver, ver_key,
+      res = this->add_from_object(relobj, name, name_key, ver, ver_key,
 				  def, *psym, st_shndx, is_ordinary,
 				  orig_st_shndx);
       
@@ -1198,7 +1198,7 @@ template<int size, bool big_endian>
 Symbol*
 Symbol_table::add_from_pluginobj(
     Sized_pluginobj<size, big_endian>* obj,
-    const char* aname,
+    const char* name,
     const char* ver,
     elfcpp::Sym<size, big_endian>* sym)
 {
@@ -1223,30 +1223,30 @@ Symbol_table::add_from_pluginobj(
         {
           // The symbol name did not have a version, but the
           // version script may assign a version anyway.
-          std::string aversion;
-          if (this->version_script_.get_symbol_version(aname, &aversion))
+          std::string version;
+          if (this->version_script_.get_symbol_version(name, &version))
             {
               // The version can be empty if the version script is
               // only used to force some symbols to be local.
-              if (!aversion.empty())
+              if (!version.empty())
                 {
-                  ver = this->namepool_.add_with_length(aversion.c_str(),
-                                                        aversion.length(),
+                  ver = this->namepool_.add_with_length(version.c_str(),
+                                                        version.length(),
                                                         true,
                                                         &ver_key);
                   def = true;
                 }
             }
-          else if (this->version_script_.symbol_is_local(aname))
+          else if (this->version_script_.symbol_is_local(name))
             local = true;
         }
     }
 
   Stringpool::Key name_key;
-  aname = this->namepool_.add(aname, true, &name_key);
+  name = this->namepool_.add(name, true, &name_key);
 
   Sized_symbol<size>* res;
-  res = this->add_from_object(obj, aname, name_key, ver, ver_key,
+  res = this->add_from_object(obj, name, name_key, ver, ver_key,
 		              def, *sym, st_shndx, is_ordinary, st_shndx);
 
   if (local)
@@ -1337,7 +1337,7 @@ Symbol_table::add_from_dynobj(
 	  continue;
 	}
 
-      const char* aname = sym_names + st_name;
+      const char* name = sym_names + st_name;
 
       bool is_ordinary;
       unsigned int st_shndx = dynobj->adjust_sym_shndx(i, psym->get_st_shndx(),
@@ -1351,8 +1351,8 @@ Symbol_table::add_from_dynobj(
       if (versym == NULL)
 	{
 	  Stringpool::Key name_key;
-	  aname = this->namepool_.add(aname, true, &name_key);
-	  res = this->add_from_object(dynobj, aname, name_key, NULL, 0,
+	  name = this->namepool_.add(name, true, &name_key);
+	  res = this->add_from_object(dynobj, name, name_key, NULL, 0,
 				      false, *psym, st_shndx, is_ordinary,
 				      st_shndx);
 	}
@@ -1381,13 +1381,13 @@ Symbol_table::add_from_dynobj(
 
 	  // At this point we are definitely going to add this symbol.
 	  Stringpool::Key name_key;
-	  aname = this->namepool_.add(aname, true, &name_key);
+	  name = this->namepool_.add(name, true, &name_key);
 
 	  if (v == static_cast<unsigned int>(elfcpp::VER_NDX_LOCAL)
 	      || v == static_cast<unsigned int>(elfcpp::VER_NDX_GLOBAL))
 	    {
 	      // This symbol does not have a version.
-	      res = this->add_from_object(dynobj, aname, name_key, NULL, 0,
+	      res = this->add_from_object(dynobj, name, name_key, NULL, 0,
 					  false, *psym, st_shndx, is_ordinary,
 					  st_shndx);
 	    }
@@ -1400,8 +1400,8 @@ Symbol_table::add_from_dynobj(
 		  continue;
 		}
 
-	      const char* aversion = (*version_map)[v];
-	      if (aversion == NULL)
+	      const char* version = (*version_map)[v];
+	      if (version == NULL)
 		{
 		  dynobj->error(_("versym for symbol %zu has no name: %u"),
 				i, v);
@@ -1409,7 +1409,7 @@ Symbol_table::add_from_dynobj(
 		}
 
 	      Stringpool::Key version_key;
-	      aversion = this->namepool_.add(aversion, true, &version_key);
+	      version = this->namepool_.add(version, true, &version_key);
 
 	      // If this is an absolute symbol, and the version name
 	      // and symbol name are the same, then this is the
@@ -1419,14 +1419,14 @@ Symbol_table::add_from_dynobj(
 	      if (st_shndx == elfcpp::SHN_ABS
 		  && !is_ordinary
 		  && name_key == version_key)
-		res = this->add_from_object(dynobj, aname, name_key, NULL, 0,
+		res = this->add_from_object(dynobj, name, name_key, NULL, 0,
 					    false, *psym, st_shndx, is_ordinary,
 					    st_shndx);
 	      else
 		{
 		  const bool def = (!hidden
 				    && st_shndx != elfcpp::SHN_UNDEF);
-		  res = this->add_from_object(dynobj, aname, name_key, aversion,
+		  res = this->add_from_object(dynobj, name, name_key, version,
 					      version_key, def, *psym, st_shndx,
 					      is_ordinary, st_shndx);
 		}
@@ -1684,25 +1684,25 @@ Symbol_table::define_special_symbol(const char** pname, const char** pversion,
 // Define a symbol based on an Output_data.
 
 Symbol*
-Symbol_table::define_in_output_data(const char* aname,
-				    const char* aversion,
+Symbol_table::define_in_output_data(const char* name,
+				    const char* version,
 				    Output_data* od,
-				    uint64_t avalue,
-				    uint64_t sym_size,
+				    uint64_t value,
+				    uint64_t symsize,
 				    elfcpp::STT type,
 				    elfcpp::STB binding,
 				    elfcpp::STV visibility,
 				    unsigned char nonvis,
-				    bool offset_is_from_the_end,
+				    bool offset_is_from_end,
 				    bool only_if_ref)
 {
   if (parameters->target().get_size() == 32)
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
-      return this->do_define_in_output_data<32>(aname, aversion, od,
-                                                avalue, sym_size, type, binding,
+      return this->do_define_in_output_data<32>(name, version, od,
+                                                value, symsize, type, binding,
                                                 visibility, nonvis,
-                                                offset_is_from_the_end,
+                                                offset_is_from_end,
                                                 only_if_ref);
 #else
       gold_unreachable();
@@ -1711,10 +1711,10 @@ Symbol_table::define_in_output_data(const char* aname,
   else if (parameters->target().get_size() == 64)
     {
 #if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
-      return this->do_define_in_output_data<64>(aname, aversion, od,
-                                                avalue, sym_size, type, binding,
+      return this->do_define_in_output_data<64>(name, version, od,
+                                                value, symsize, type, binding,
                                                 visibility, nonvis,
-                                                offset_is_from_the_end,
+                                                offset_is_from_end,
                                                 only_if_ref);
 #else
       gold_unreachable();
@@ -1729,16 +1729,16 @@ Symbol_table::define_in_output_data(const char* aname,
 template<int size>
 Sized_symbol<size>*
 Symbol_table::do_define_in_output_data(
-    const char* aname,
-    const char* aversion,
+    const char* name,
+    const char* version,
     Output_data* od,
-    typename elfcpp::Elf_types<size>::Elf_Addr avalue,
-    typename elfcpp::Elf_types<size>::Elf_WXword sym_size,
+    typename elfcpp::Elf_types<size>::Elf_Addr value,
+    typename elfcpp::Elf_types<size>::Elf_WXword symsize,
     elfcpp::STT type,
     elfcpp::STB binding,
     elfcpp::STV visibility,
     unsigned char nonvis,
-    bool offset_is_from_the_end,
+    bool offset_is_from_end,
     bool only_if_ref)
 {
   Sized_symbol<size>* sym;
@@ -1748,7 +1748,7 @@ Symbol_table::do_define_in_output_data(
   if (parameters->target().is_big_endian())
     {
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
-      sym = this->define_special_symbol<size, true>(&aname, &aversion,
+      sym = this->define_special_symbol<size, true>(&name, &version,
 						    only_if_ref, &oldsym,
 						    &resolve_oldsym);
 #else
@@ -1758,7 +1758,7 @@ Symbol_table::do_define_in_output_data(
   else
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
-      sym = this->define_special_symbol<size, false>(&aname, &aversion,
+      sym = this->define_special_symbol<size, false>(&name, &version,
 						     only_if_ref, &oldsym,
 						     &resolve_oldsym);
 #else
@@ -1769,15 +1769,15 @@ Symbol_table::do_define_in_output_data(
   if (sym == NULL)
     return NULL;
 
-  sym->init_output_data(aname, aversion, od, avalue, sym_size, type, binding,
-			visibility, nonvis, offset_is_from_the_end);
+  sym->init_output_data(name, version, od, value, symsize, type, binding,
+			visibility, nonvis, offset_is_from_end);
 
   if (oldsym == NULL)
     {
       if (binding == elfcpp::STB_LOCAL
-	  || this->version_script_.symbol_is_local(aname))
+	  || this->version_script_.symbol_is_local(name))
 	this->force_local(sym);
-      else if (aversion != NULL)
+      else if (version != NULL)
 	sym->set_is_default();
       return sym;
     }
@@ -1797,24 +1797,24 @@ Symbol_table::do_define_in_output_data(
 // Define a symbol based on an Output_segment.
 
 Symbol*
-Symbol_table::define_in_output_segment(const char* aname,
-				       const char* aversion, Output_segment* os,
-				       uint64_t avalue,
-				       uint64_t sym_size,
+Symbol_table::define_in_output_segment(const char* name,
+				       const char* version, Output_segment* os,
+				       uint64_t value,
+				       uint64_t symsize,
 				       elfcpp::STT type,
 				       elfcpp::STB binding,
 				       elfcpp::STV visibility,
 				       unsigned char nonvis,
-				       Symbol::Segment_offset_base offsetbase,
+				       Symbol::Segment_offset_base offset_base,
 				       bool only_if_ref)
 {
   if (parameters->target().get_size() == 32)
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
-      return this->do_define_in_output_segment<32>(aname, aversion, os,
-                                                   avalue, sym_size, type,
+      return this->do_define_in_output_segment<32>(name, version, os,
+                                                   value, symsize, type,
                                                    binding, visibility, nonvis,
-                                                   offsetbase, only_if_ref);
+                                                   offset_base, only_if_ref);
 #else
       gold_unreachable();
 #endif
@@ -1822,10 +1822,10 @@ Symbol_table::define_in_output_segment(const char* aname,
   else if (parameters->target().get_size() == 64)
     {
 #if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
-      return this->do_define_in_output_segment<64>(aname, aversion, os,
-                                                   avalue, sym_size, type,
+      return this->do_define_in_output_segment<64>(name, version, os,
+                                                   value, symsize, type,
                                                    binding, visibility, nonvis,
-                                                   offsetbase, only_if_ref);
+                                                   offset_base, only_if_ref);
 #else
       gold_unreachable();
 #endif
@@ -1839,16 +1839,16 @@ Symbol_table::define_in_output_segment(const char* aname,
 template<int size>
 Sized_symbol<size>*
 Symbol_table::do_define_in_output_segment(
-    const char* aname,
-    const char* aversion,
+    const char* name,
+    const char* version,
     Output_segment* os,
-    typename elfcpp::Elf_types<size>::Elf_Addr avalue,
-    typename elfcpp::Elf_types<size>::Elf_WXword sym_size,
+    typename elfcpp::Elf_types<size>::Elf_Addr value,
+    typename elfcpp::Elf_types<size>::Elf_WXword symsize,
     elfcpp::STT type,
     elfcpp::STB binding,
     elfcpp::STV visibility,
     unsigned char nonvis,
-    Symbol::Segment_offset_base offsetbase,
+    Symbol::Segment_offset_base offset_base,
     bool only_if_ref)
 {
   Sized_symbol<size>* sym;
@@ -1858,7 +1858,7 @@ Symbol_table::do_define_in_output_segment(
   if (parameters->target().is_big_endian())
     {
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
-      sym = this->define_special_symbol<size, true>(&aname, &aversion,
+      sym = this->define_special_symbol<size, true>(&name, &version,
 						    only_if_ref, &oldsym,
 						    &resolve_oldsym);
 #else
@@ -1868,7 +1868,7 @@ Symbol_table::do_define_in_output_segment(
   else
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
-      sym = this->define_special_symbol<size, false>(&aname, &aversion,
+      sym = this->define_special_symbol<size, false>(&name, &version,
 						     only_if_ref, &oldsym,
 						     &resolve_oldsym);
 #else
@@ -1879,15 +1879,15 @@ Symbol_table::do_define_in_output_segment(
   if (sym == NULL)
     return NULL;
 
-  sym->init_output_segment(aname, aversion, os, avalue, sym_size, type, binding,
-			   visibility, nonvis, offsetbase);
+  sym->init_output_segment(name, version, os, value, symsize, type, binding,
+			   visibility, nonvis, offset_base);
 
   if (oldsym == NULL)
     {
       if (binding == elfcpp::STB_LOCAL
-	  || this->version_script_.symbol_is_local(aname))
+	  || this->version_script_.symbol_is_local(name))
 	this->force_local(sym);
-      else if (aversion != NULL)
+      else if (version != NULL)
 	sym->set_is_default();
       return sym;
     }
@@ -1908,10 +1908,10 @@ Symbol_table::do_define_in_output_segment(
 // definition error if this symbol is already defined.
 
 Symbol*
-Symbol_table::define_as_constant(const char* aname,
-				 const char* aversion,
-				 uint64_t avalue,
-				 uint64_t sym_size,
+Symbol_table::define_as_constant(const char* name,
+				 const char* version,
+				 uint64_t value,
+				 uint64_t symsize,
 				 elfcpp::STT type,
 				 elfcpp::STB binding,
 				 elfcpp::STV visibility,
@@ -1922,8 +1922,8 @@ Symbol_table::define_as_constant(const char* aname,
   if (parameters->target().get_size() == 32)
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
-      return this->do_define_as_constant<32>(aname, aversion, avalue,
-                                             sym_size, type, binding,
+      return this->do_define_as_constant<32>(name, version, value,
+                                             symsize, type, binding,
                                              visibility, nonvis, only_if_ref,
                                              force_override);
 #else
@@ -1933,8 +1933,8 @@ Symbol_table::define_as_constant(const char* aname,
   else if (parameters->target().get_size() == 64)
     {
 #if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
-      return this->do_define_as_constant<64>(aname, aversion, avalue,
-                                             sym_size, type, binding,
+      return this->do_define_as_constant<64>(name, version, value,
+                                             symsize, type, binding,
                                              visibility, nonvis, only_if_ref,
                                              force_override);
 #else
@@ -1950,10 +1950,10 @@ Symbol_table::define_as_constant(const char* aname,
 template<int size>
 Sized_symbol<size>*
 Symbol_table::do_define_as_constant(
-    const char* aname,
-    const char* aversion,
-    typename elfcpp::Elf_types<size>::Elf_Addr avalue,
-    typename elfcpp::Elf_types<size>::Elf_WXword sym_size,
+    const char* name,
+    const char* version,
+    typename elfcpp::Elf_types<size>::Elf_Addr value,
+    typename elfcpp::Elf_types<size>::Elf_WXword symsize,
     elfcpp::STT type,
     elfcpp::STB binding,
     elfcpp::STV visibility,
@@ -1968,7 +1968,7 @@ Symbol_table::do_define_as_constant(
   if (parameters->target().is_big_endian())
     {
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
-      sym = this->define_special_symbol<size, true>(&aname, &aversion,
+      sym = this->define_special_symbol<size, true>(&name, &version,
 						    only_if_ref, &oldsym,
 						    &resolve_oldsym);
 #else
@@ -1978,7 +1978,7 @@ Symbol_table::do_define_as_constant(
   else
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
-      sym = this->define_special_symbol<size, false>(&aname, &aversion,
+      sym = this->define_special_symbol<size, false>(&name, &version,
 						     only_if_ref, &oldsym,
 						     &resolve_oldsym);
 #else
@@ -1989,21 +1989,21 @@ Symbol_table::do_define_as_constant(
   if (sym == NULL)
     return NULL;
 
-  sym->init_constant(aname, aversion, avalue, sym_size, type, binding, visibility,
+  sym->init_constant(name, version, value, symsize, type, binding, visibility,
 		     nonvis);
 
   if (oldsym == NULL)
     {
       // Version symbols are absolute symbols with name == version.
       // We don't want to force them to be local.
-      if ((aversion == NULL
-	   || aname != aversion
-	   || avalue != 0)
+      if ((version == NULL
+	   || name != version
+	   || value != 0)
 	  && (binding == elfcpp::STB_LOCAL
-	      || this->version_script_.symbol_is_local(aname)))
+	      || this->version_script_.symbol_is_local(name)))
 	this->force_local(sym);
-      else if (aversion != NULL
-	       && (aname != aversion || avalue != 0))
+      else if (version != NULL
+	       && (name != version || value != 0))
 	sym->set_is_default();
       return sym;
     }
@@ -2079,13 +2079,13 @@ void
 Symbol_table::define_with_copy_reloc(
     Sized_symbol<size>* csym,
     Output_data* posd,
-    typename elfcpp::Elf_types<size>::Elf_Addr avalue)
+    typename elfcpp::Elf_types<size>::Elf_Addr value)
 {
   gold_assert(csym->is_from_dynobj());
   gold_assert(!csym->is_copied_from_dynobj());
-  Object* aobject = csym->object();
-  gold_assert(aobject->is_dynamic());
-  Dynobj* dynobj = static_cast<Dynobj*>(aobject);
+  Object* object = csym->object();
+  gold_assert(object->is_dynamic());
+  Dynobj* dynobj = static_cast<Dynobj*>(object);
 
   // Our copied variable has to override any variable in a shared
   // library.
@@ -2094,7 +2094,7 @@ Symbol_table::define_with_copy_reloc(
     binding = elfcpp::STB_GLOBAL;
 
   this->define_in_output_data(csym->name(), csym->version(),
-			      posd, avalue, csym->symsize(),
+			      posd, value, csym->symsize(),
 			      csym->type(), binding,
 			      csym->visibility(), csym->nonvis(),
 			      false, false);
@@ -2172,12 +2172,12 @@ Symbol_table::do_add_undefined_symbols_from_command_line()
        p != parameters->options().undefined_end();
        ++p)
     {
-      const char* aname = p->c_str();
+      const char* name = p->c_str();
 
-      if (this->lookup(aname) != NULL)
+      if (this->lookup(name) != NULL)
 	continue;
 
-      const char* aversion = NULL;
+      const char* version = NULL;
 
       Sized_symbol<size>* sym;
       Sized_symbol<size>* oldsym;
@@ -2185,7 +2185,7 @@ Symbol_table::do_add_undefined_symbols_from_command_line()
       if (parameters->target().is_big_endian())
 	{
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
-	  sym = this->define_special_symbol<size, true>(&aname, &aversion,
+	  sym = this->define_special_symbol<size, true>(&name, &version,
 							false, &oldsym,
 							&resolve_oldsym);
 #else
@@ -2195,7 +2195,7 @@ Symbol_table::do_add_undefined_symbols_from_command_line()
       else
 	{
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
-	  sym = this->define_special_symbol<size, false>(&aname, &aversion,
+	  sym = this->define_special_symbol<size, false>(&name, &version,
 							 false, &oldsym,
 							 &resolve_oldsym);
 #else
@@ -2205,7 +2205,7 @@ Symbol_table::do_add_undefined_symbols_from_command_line()
 
       gold_assert(oldsym == NULL);
 
-      sym->init_undefined(aname, aversion, elfcpp::STT_NOTYPE, elfcpp::STB_GLOBAL,
+      sym->init_undefined(name, version, elfcpp::STT_NOTYPE, elfcpp::STB_GLOBAL,
 			  elfcpp::STV_DEFAULT, 0);
       ++this->saw_undefined_;
     }
@@ -2375,18 +2375,18 @@ Symbol_table::compute_final_value(
     Compute_final_value_status* pstatus) const
 {
   typedef typename Sized_symbol<size>::Value_type Value_type;
-  Value_type avalue;
+  Value_type value;
 
   switch (sym->source())
     {
     case Symbol::FROM_OBJECT:
       {
 	bool is_ordinary;
-	unsigned int sec_shndx = sym->shndx(&is_ordinary);
+	unsigned int shndx = sym->shndx(&is_ordinary);
 
 	if (!is_ordinary
-	    && sec_shndx != elfcpp::SHN_ABS
-	    && !Symbol::is_common_shndx(sec_shndx))
+	    && shndx != elfcpp::SHN_ABS
+	    && !Symbol::is_common_shndx(shndx))
 	  {
 	    *pstatus = CFVS_UNSUPPORTED_SYMBOL_SECTION;
 	    return 0;
@@ -2395,32 +2395,32 @@ Symbol_table::compute_final_value(
 	Object* symobj = sym->object();
 	if (symobj->is_dynamic())
 	  {
-	    avalue = 0;
-	    sec_shndx = elfcpp::SHN_UNDEF;
+	    value = 0;
+	    shndx = elfcpp::SHN_UNDEF;
 	  }
 	else if (symobj->pluginobj() != NULL)
 	  {
-	    avalue = 0;
-	    sec_shndx = elfcpp::SHN_UNDEF;
+	    value = 0;
+	    shndx = elfcpp::SHN_UNDEF;
 	  }
-	else if (sec_shndx == elfcpp::SHN_UNDEF)
-	  avalue = 0;
+	else if (shndx == elfcpp::SHN_UNDEF)
+	  value = 0;
 	else if (!is_ordinary
-		 && (sec_shndx == elfcpp::SHN_ABS
-		     || Symbol::is_common_shndx(sec_shndx)))
-	  avalue = sym->value();
+		 && (shndx == elfcpp::SHN_ABS
+		     || Symbol::is_common_shndx(shndx)))
+	  value = sym->value();
 	else
 	  {
 	    Relobj* relobj = static_cast<Relobj*>(symobj);
-	    Output_section* os = relobj->output_section(sec_shndx);
-            uint64_t secoff64 = relobj->output_section_offset(sec_shndx);
+	    Output_section* os = relobj->output_section(shndx);
+            uint64_t secoff64 = relobj->output_section_offset(shndx);
 
-            if (this->is_section_folded(relobj, sec_shndx))
+            if (this->is_section_folded(relobj, shndx))
               {
                 gold_assert(os == NULL);
                 // Get the os of the section it is folded onto.
                 Section_id folded = this->icf_->get_folded_section(relobj,
-                                                                   sec_shndx);
+                                                                   shndx);
                 gold_assert(folded.first != NULL);
                 Relobj* folded_obj = reinterpret_cast<Relobj*>(folded.first);
                 os = folded_obj->output_section(folded.second);  
@@ -2442,16 +2442,16 @@ Symbol_table::compute_final_value(
               {
                 // The section needs special handling (e.g., a merge section).
 
-	        avalue = os->output_address(relobj, sec_shndx, sym->value());
+	        value = os->output_address(relobj, shndx, sym->value());
 	      }
             else
               {
                 Value_type secoff =
                   convert_types<Value_type, uint64_t>(secoff64);
 	        if (sym->type() == elfcpp::STT_TLS)
-	          avalue = sym->value() + os->tls_offset() + secoff;
+	          value = sym->value() + os->tls_offset() + secoff;
 	        else
-	          avalue = sym->value() + os->address() + secoff;
+	          value = sym->value() + os->address() + secoff;
 	      }
 	  }
       }
@@ -2460,35 +2460,35 @@ Symbol_table::compute_final_value(
     case Symbol::IN_OUTPUT_DATA:
       {
 	Output_data* od = sym->output_data();
-	avalue = sym->value();
+	value = sym->value();
 	if (sym->type() != elfcpp::STT_TLS)
-	  avalue += od->address();
+	  value += od->address();
 	else
 	  {
 	    Output_section* os = od->output_section();
 	    gold_assert(os != NULL);
-	    avalue += os->tls_offset() + (od->address() - os->address());
+	    value += os->tls_offset() + (od->address() - os->address());
 	  }
 	if (sym->offset_is_from_end())
-	  avalue += od->data_size();
+	  value += od->data_size();
       }
       break;
 
     case Symbol::IN_OUTPUT_SEGMENT:
       {
 	Output_segment* os = sym->output_segment();
-	avalue = sym->value();
+	value = sym->value();
         if (sym->type() != elfcpp::STT_TLS)
-	  avalue += os->vaddr();
+	  value += os->vaddr();
 	switch (sym->offset_base())
 	  {
 	  case Symbol::SEGMENT_START:
 	    break;
 	  case Symbol::SEGMENT_END:
-	    avalue += os->memsz();
+	    value += os->memsz();
 	    break;
 	  case Symbol::SEGMENT_BSS:
-	    avalue += os->filesz();
+	    value += os->filesz();
 	    break;
 	  default:
 	    gold_unreachable();
@@ -2497,11 +2497,11 @@ Symbol_table::compute_final_value(
       break;
 
     case Symbol::IS_CONSTANT:
-      avalue = sym->value();
+      value = sym->value();
       break;
 
     case Symbol::IS_UNDEFINED:
-      avalue = 0;
+      value = 0;
       break;
 
     default:
@@ -2509,7 +2509,7 @@ Symbol_table::compute_final_value(
     }
 
   *pstatus = CFVS_OK;
-  return avalue;
+  return value;
 }
 
 // Finalize the symbol SYM.  This returns true if the symbol should be
@@ -2538,7 +2538,7 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
 
   // Compute final symbol value.
   Compute_final_value_status status;
-  Value_type avalue = this->compute_final_value(sym, &status);
+  Value_type value = this->compute_final_value(sym, &status);
 
   switch (status)
     {
@@ -2547,9 +2547,9 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
     case CFVS_UNSUPPORTED_SYMBOL_SECTION:
       {
 	bool is_ordinary;
-	unsigned int sec_shndx = sym->shndx(&is_ordinary);
+	unsigned int shndx = sym->shndx(&is_ordinary);
 	gold_error(_("%s: unsupported symbol section 0x%x"),
-		   sym->demangled_name().c_str(), sec_shndx);
+		   sym->demangled_name().c_str(), shndx);
       }
       break;
     case CFVS_NO_OUTPUT_SECTION:
@@ -2559,7 +2559,7 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
       gold_unreachable();
     }
 
-  sym->set_value(avalue);
+  sym->set_value(value);
 
   if (parameters->options().strip_all()
       || !parameters->options().should_retain_symbol(sym->name()))
@@ -2666,7 +2666,7 @@ Symbol_table::sized_write_globals(const Stringpool* sympool,
 	  continue;
 	}
 
-      unsigned int sec_shndx;
+      unsigned int shndx;
       typename elfcpp::Elf_types<size>::Elf_Addr sym_value = sym->value();
       typename elfcpp::Elf_types<size>::Elf_Addr dynsym_value = sym_value;
       switch (sym->source())
@@ -2682,7 +2682,7 @@ Symbol_table::sized_write_globals(const Stringpool* sympool,
 	      {
 		gold_error(_("%s: unsupported symbol section 0x%x"),
 			   sym->demangled_name().c_str(), in_shndx);
-		sec_shndx = in_shndx;
+		shndx = in_shndx;
 	      }
 	    else
 	      {
@@ -2691,15 +2691,15 @@ Symbol_table::sized_write_globals(const Stringpool* sympool,
 		  {
 		    if (sym->needs_dynsym_value())
 		      dynsym_value = target.dynsym_value(sym);
-		    sec_shndx = elfcpp::SHN_UNDEF;
+		    shndx = elfcpp::SHN_UNDEF;
 		  }
 		else if (symobj->pluginobj() != NULL)
-		  sec_shndx = elfcpp::SHN_UNDEF;
+		  shndx = elfcpp::SHN_UNDEF;
 		else if (in_shndx == elfcpp::SHN_UNDEF
 			 || (!is_ordinary
 			     && (in_shndx == elfcpp::SHN_ABS
 				 || Symbol::is_common_shndx(in_shndx))))
-		  sec_shndx = in_shndx;
+		  shndx = in_shndx;
 		else
 		  {
 		    Relobj* relobj = static_cast<Relobj*>(symobj);
@@ -2718,15 +2718,15 @@ Symbol_table::sized_write_globals(const Stringpool* sympool,
                         gold_assert(os != NULL);
                       }
 		    gold_assert(os != NULL);
-		    sec_shndx = os->out_shndx();
+		    shndx = os->out_shndx();
 
-		    if (sec_shndx >= elfcpp::SHN_LORESERVE)
+		    if (shndx >= elfcpp::SHN_LORESERVE)
 		      {
 			if (sym_index != -1U)
-			  symtab_xindex->add(sym_index, sec_shndx);
+			  symtab_xindex->add(sym_index, shndx);
 			if (dynsym_index != -1U)
-			  dynsym_xindex->add(dynsym_index, sec_shndx);
-			sec_shndx = elfcpp::SHN_XINDEX;
+			  dynsym_xindex->add(dynsym_index, shndx);
+			shndx = elfcpp::SHN_XINDEX;
 		      }
 
 		    // In object files symbol values are section
@@ -2739,27 +2739,27 @@ Symbol_table::sized_write_globals(const Stringpool* sympool,
 	  break;
 
 	case Symbol::IN_OUTPUT_DATA:
-	  sec_shndx = sym->output_data()->out_shndx();
-	  if (sec_shndx >= elfcpp::SHN_LORESERVE)
+	  shndx = sym->output_data()->out_shndx();
+	  if (shndx >= elfcpp::SHN_LORESERVE)
 	    {
 	      if (sym_index != -1U)
-		symtab_xindex->add(sym_index, sec_shndx);
+		symtab_xindex->add(sym_index, shndx);
 	      if (dynsym_index != -1U)
-		dynsym_xindex->add(dynsym_index, sec_shndx);
-	      sec_shndx = elfcpp::SHN_XINDEX;
+		dynsym_xindex->add(dynsym_index, shndx);
+	      shndx = elfcpp::SHN_XINDEX;
 	    }
 	  break;
 
 	case Symbol::IN_OUTPUT_SEGMENT:
-	  sec_shndx = elfcpp::SHN_ABS;
+	  shndx = elfcpp::SHN_ABS;
 	  break;
 
 	case Symbol::IS_CONSTANT:
-	  sec_shndx = elfcpp::SHN_ABS;
+	  shndx = elfcpp::SHN_ABS;
 	  break;
 
 	case Symbol::IS_UNDEFINED:
-	  sec_shndx = elfcpp::SHN_UNDEF;
+	  shndx = elfcpp::SHN_UNDEF;
 	  break;
 
 	default:
@@ -2771,7 +2771,7 @@ Symbol_table::sized_write_globals(const Stringpool* sympool,
 	  sym_index -= first_global_index;
 	  gold_assert(sym_index < output_count);
 	  unsigned char* ps = psyms + (sym_index * sym_size);
-	  this->sized_write_symbol<size, big_endian>(sym, sym_value, sec_shndx,
+	  this->sized_write_symbol<size, big_endian>(sym, sym_value, shndx,
 						     sympool, ps);
 	}
 
@@ -2780,7 +2780,7 @@ Symbol_table::sized_write_globals(const Stringpool* sympool,
 	  dynsym_index -= first_dynamic_global_index;
 	  gold_assert(dynsym_index < dynamic_count);
 	  unsigned char* pd = dynamic_view + (dynsym_index * sym_size);
-	  this->sized_write_symbol<size, big_endian>(sym, dynsym_value, sec_shndx,
+	  this->sized_write_symbol<size, big_endian>(sym, dynsym_value, shndx,
 						     dynpool, pd);
 	}
     }
@@ -2797,16 +2797,16 @@ template<int size, bool big_endian>
 void
 Symbol_table::sized_write_symbol(
     Sized_symbol<size>* sym,
-    typename elfcpp::Elf_types<size>::Elf_Addr avalue,
-    unsigned int sec_shndx,
+    typename elfcpp::Elf_types<size>::Elf_Addr value,
+    unsigned int shndx,
     const Stringpool* pool,
     unsigned char* p) const
 {
   elfcpp::Sym_write<size, big_endian> osym(p);
   osym.put_st_name(pool->get_offset(sym->name()));
-  osym.put_st_value(avalue);
+  osym.put_st_value(value);
   // Use a symbol size of zero for undefined symbols from shared libraries.
-  if (sec_shndx == elfcpp::SHN_UNDEF && sym->is_from_dynobj())
+  if (shndx == elfcpp::SHN_UNDEF && sym->is_from_dynobj())
     osym.put_st_size(0);
   else
     osym.put_st_size(sym->symsize());
@@ -2821,7 +2821,7 @@ Symbol_table::sized_write_symbol(
   else
     osym.put_st_info(elfcpp::elf_st_info(sym->binding(), type));
   osym.put_st_other(elfcpp::elf_st_other(sym->visibility(), sym->nonvis()));
-  osym.put_st_shndx(sec_shndx);
+  osym.put_st_shndx(shndx);
 }
 
 // Check for unresolved symbols in shared libraries.  This is
@@ -2920,13 +2920,13 @@ Symbol_table::sized_write_section_symbol(const Output_section* os,
 				       elfcpp::STT_SECTION));
   osym.put_st_other(elfcpp::elf_st_other(elfcpp::STV_DEFAULT, 0));
 
-  unsigned int sec_shndx = os->out_shndx();
-  if (sec_shndx >= elfcpp::SHN_LORESERVE)
+  unsigned int shndx = os->out_shndx();
+  if (shndx >= elfcpp::SHN_LORESERVE)
     {
-      symtab_xindex->add(os->symtab_index(), sec_shndx);
-      sec_shndx = elfcpp::SHN_XINDEX;
+      symtab_xindex->add(os->symtab_index(), shndx);
+      shndx = elfcpp::SHN_XINDEX;
     }
-  osym.put_st_shndx(sec_shndx);
+  osym.put_st_shndx(shndx);
 
   of->write_output_view(offset, sym_size, pov);
 }
@@ -3029,11 +3029,11 @@ Symbol_table::detect_odr_violations(const Task* task,
 // Add a new warning.
 
 void
-Warnings::add_warning(Symbol_table* symtab, const char* aname, Object* obj,
+Warnings::add_warning(Symbol_table* symtab, const char* name, Object* obj,
 		      const std::string& warning)
 {
-  aname = symtab->canonicalize_name(aname);
-  this->warnings_[aname].set(obj, warning);
+  name = symtab->canonicalize_name(name);
+  this->warnings_[name].set(obj, warning);
 }
 
 // Look through the warnings and mark the symbols for which we should
@@ -3253,7 +3253,7 @@ void
 Symbol_table::define_with_copy_reloc<32>(
     Sized_symbol<32>* sym,
     Output_data* posd,
-    elfcpp::Elf_types<32>::Elf_Addr avalue);
+    elfcpp::Elf_types<32>::Elf_Addr value);
 #endif
 
 #if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
@@ -3262,7 +3262,7 @@ void
 Symbol_table::define_with_copy_reloc<64>(
     Sized_symbol<64>* sym,
     Output_data* posd,
-    elfcpp::Elf_types<64>::Elf_Addr avalue);
+    elfcpp::Elf_types<64>::Elf_Addr value);
 #endif
 
 #ifdef HAVE_TARGET_32_LITTLE

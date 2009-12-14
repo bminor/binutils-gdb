@@ -401,13 +401,13 @@ private:
   rela(unsigned char* view,
        unsigned int right_shift,
        typename elfcpp::Elf_types<valsize>::Elf_Addr dst_mask,
-       typename elfcpp::Swap<size, big_endian>::Valtype avalue,
+       typename elfcpp::Swap<size, big_endian>::Valtype value,
        typename elfcpp::Swap<size, big_endian>::Valtype addend)
   {
     typedef typename elfcpp::Swap<valsize, big_endian>::Valtype Valtype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
     Valtype val = elfcpp::Swap<valsize, big_endian>::readval(wv);
-    Valtype reloc = ((avalue + addend) >> right_shift);
+    Valtype reloc = ((value + addend) >> right_shift);
 
     val &= ~dst_mask;
     reloc &= dst_mask;
@@ -589,10 +589,10 @@ public:
   // R_SPARC_HI22: (Symbol + Addend) >> 10
   static inline void
   hi22(unsigned char* view,
-       typename elfcpp::Elf_types<size>::Elf_Addr avalue,
+       typename elfcpp::Elf_types<size>::Elf_Addr value,
        typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
-    This_insn::template rela<32>(view, 10, 0x003fffff, avalue, addend);
+    This_insn::template rela<32>(view, 10, 0x003fffff, value, addend);
   }
 
   // R_SPARC_HI22: (Symbol + Addend) >> 10
@@ -620,10 +620,10 @@ public:
   // R_SPARC_LO10: (Symbol + Addend) & 0x3ff
   static inline void
   lo10(unsigned char* view,
-       typename elfcpp::Elf_types<size>::Elf_Addr avalue,
+       typename elfcpp::Elf_types<size>::Elf_Addr value,
        typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
-    This_insn::template rela<32>(view, 0, 0x000003ff, avalue, addend);
+    This_insn::template rela<32>(view, 0, 0x000003ff, value, addend);
   }
 
   // R_SPARC_LO10: (Symbol + Addend) & 0x3ff
@@ -682,10 +682,10 @@ public:
   // R_SPARC_13: (Symbol + Addend)
   static inline void
   rela32_13(unsigned char* view,
-	    typename elfcpp::Elf_types<size>::Elf_Addr avalue,
+	    typename elfcpp::Elf_types<size>::Elf_Addr value,
 	    typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
-    This_insn::template rela<32>(view, 0, 0x00001fff, avalue, addend);
+    This_insn::template rela<32>(view, 0, 0x00001fff, value, addend);
   }
 
   // R_SPARC_13: (Symbol + Addend)
@@ -904,22 +904,22 @@ public:
   // R_SPARC_TLS_LDO_HIX22: @dtpoff(Symbol + Addend) >> 10
   static inline void
   ldo_hix22(unsigned char* view,
-	    typename elfcpp::Elf_types<size>::Elf_Addr avalue,
+	    typename elfcpp::Elf_types<size>::Elf_Addr value,
 	    typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
-    This_insn::hi22(view, avalue, addend);
+    This_insn::hi22(view, value, addend);
   }
 
   // R_SPARC_TLS_LDO_LOX10: @dtpoff(Symbol + Addend) & 0x3ff
   static inline void
   ldo_lox10(unsigned char* view,
-	    typename elfcpp::Elf_types<size>::Elf_Addr avalue,
+	    typename elfcpp::Elf_types<size>::Elf_Addr value,
 	    typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
     typedef typename elfcpp::Swap<32, true>::Valtype Valtype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
     Valtype val = elfcpp::Swap<32, true>::readval(wv);
-    Valtype reloc = (avalue + addend);
+    Valtype reloc = (value + addend);
 
     val &= ~0x1fff;
     reloc &= 0x3ff;
@@ -930,13 +930,13 @@ public:
   // R_SPARC_TLS_LE_HIX22: (@tpoff(Symbol + Addend) ^ 0xffffffffffffffff) >> 10
   static inline void
   hix22(unsigned char* view,
-	typename elfcpp::Elf_types<size>::Elf_Addr avalue,
+	typename elfcpp::Elf_types<size>::Elf_Addr value,
 	typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
     typedef typename elfcpp::Swap<32, true>::Valtype Valtype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
     Valtype val = elfcpp::Swap<32, true>::readval(wv);
-    Valtype reloc = (avalue + addend);
+    Valtype reloc = (value + addend);
 
     val &= ~0x3fffff;
 
@@ -974,13 +974,13 @@ public:
   // R_SPARC_TLS_LE_LOX10: (@tpoff(Symbol + Addend) & 0x3ff) | 0x1c00
   static inline void
   lox10(unsigned char* view,
-	typename elfcpp::Elf_types<size>::Elf_Addr avalue,
+	typename elfcpp::Elf_types<size>::Elf_Addr value,
 	typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
     typedef typename elfcpp::Swap<32, true>::Valtype Valtype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
     Valtype val = elfcpp::Swap<32, true>::readval(wv);
-    Valtype reloc = (avalue + addend);
+    Valtype reloc = (value + addend);
 
     val &= ~0x1fff;
     reloc &= 0x3ff;
@@ -1220,10 +1220,10 @@ template<int size, bool big_endian>
 void
 Output_data_plt_sparc<size, big_endian>::do_write(Output_file* of)
 {
-  const off_t off = this->offset();
+  const off_t offset = this->offset();
   const section_size_type oview_size =
     convert_to_section_size_type(this->data_size());
-  unsigned char* const oview = of->get_output_view(off, oview_size);
+  unsigned char* const oview = of->get_output_view(offset, oview_size);
   unsigned char* pov = oview;
 
   memset(pov, 0, base_plt_entry_size * 4);
@@ -1347,7 +1347,7 @@ Output_data_plt_sparc<size, big_endian>::do_write(Output_file* of)
 
   gold_assert(static_cast<section_size_type>(pov - oview) == oview_size);
 
-  of->write_output_view(off, oview_size, oview);
+  of->write_output_view(offset, oview_size, oview);
 }
 
 // Create a PLT entry for a global symbol.
@@ -2260,9 +2260,9 @@ Target_sparc<size, big_endian>::gc_process_relocs(
 			const unsigned char* plocal_symbols)
 {
   typedef Target_sparc<size, big_endian> Sparc;
-  typedef typename Target_sparc<size, big_endian>::Scan scan;
+  typedef typename Target_sparc<size, big_endian>::Scan Scan;
 
-  gold::gc_process_relocs<size, big_endian, Sparc, elfcpp::SHT_RELA, scan>(
+  gold::gc_process_relocs<size, big_endian, Sparc, elfcpp::SHT_RELA, Scan>(
     symtab,
     layout,
     this,
@@ -2294,7 +2294,7 @@ Target_sparc<size, big_endian>::scan_relocs(
 			const unsigned char* plocal_symbols)
 {
   typedef Target_sparc<size, big_endian> Sparc;
-  typedef typename Target_sparc<size, big_endian>::Scan scan;
+  typedef typename Target_sparc<size, big_endian>::Scan Scan;
 
   if (sh_type == elfcpp::SHT_REL)
     {
@@ -2303,7 +2303,7 @@ Target_sparc<size, big_endian>::scan_relocs(
       return;
     }
 
-  gold::scan_relocs<size, big_endian, Sparc, elfcpp::SHT_RELA, scan>(
+  gold::scan_relocs<size, big_endian, Sparc, elfcpp::SHT_RELA, Scan>(
     symtab,
     layout,
     this,
@@ -2415,11 +2415,11 @@ Target_sparc<size, big_endian>::Relocate::relocate(
 			      || r_type == elfcpp::R_SPARC_WDISP19
 			      || r_type == elfcpp::R_SPARC_WDISP16))
     {
-      elfcpp::Elf_Xword avalue;
+      elfcpp::Elf_Xword value;
 
-      avalue = target->plt_section()->address() + gsym->plt_offset();
+      value = target->plt_section()->address() + gsym->plt_offset();
 
-      symval.set_output_value(avalue);
+      symval.set_output_value(value);
 
       psymval = &symval;
     }
@@ -2740,7 +2740,7 @@ Target_sparc<size, big_endian>::Relocate::relocate_tls(
   typedef typename elfcpp::Swap<32, true>::Valtype Insntype;
 
   const elfcpp::Elf_Xword addend = rela.get_r_addend();
-  typename elfcpp::Elf_types<size>::Elf_Addr avalue = psymval->value(object, 0);
+  typename elfcpp::Elf_types<size>::Elf_Addr value = psymval->value(object, 0);
 
   const bool is_final =
     (gsym == NULL
@@ -2760,18 +2760,18 @@ Target_sparc<size, big_endian>::Relocate::relocate_tls(
 	  Insntype* wv = reinterpret_cast<Insntype*>(view);
 	  Insntype val;
 
-	  avalue -= tls_segment->memsz();
+	  value -= tls_segment->memsz();
 
 	  switch (r_type)
 	    {
 	    case elfcpp::R_SPARC_TLS_GD_HI22:
 	      // TLS_GD_HI22 --> TLS_LE_HIX22
-	      Reloc::hix22(view, avalue, addend);
+	      Reloc::hix22(view, value, addend);
 	      break;
 
 	    case elfcpp::R_SPARC_TLS_GD_LO10:
 	      // TLS_GD_LO10 --> TLS_LE_LOX10
-	      Reloc::lox10(view, avalue, addend);
+	      Reloc::lox10(view, value, addend);
 	      break;
 
 	    case elfcpp::R_SPARC_TLS_GD_ADD:
@@ -2795,13 +2795,13 @@ Target_sparc<size, big_endian>::Relocate::relocate_tls(
           if (gsym != NULL)
             {
               gold_assert(gsym->has_got_offset(got_type));
-              avalue = gsym->got_offset(got_type);
+              value = gsym->got_offset(got_type);
             }
           else
             {
               unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
               gold_assert(object->local_has_got_offset(r_sym, got_type));
-              avalue = object->local_got_offset(r_sym, got_type);
+              value = object->local_got_offset(r_sym, got_type);
             }
           if (optimized_type == tls::TLSOPT_TO_IE)
 	    {
@@ -2812,12 +2812,12 @@ Target_sparc<size, big_endian>::Relocate::relocate_tls(
 		{
 		case elfcpp::R_SPARC_TLS_GD_HI22:
 		  // TLS_GD_HI22 --> TLS_IE_HI22
-		  Reloc::hi22(view, avalue, addend);
+		  Reloc::hi22(view, value, addend);
 		  break;
 
 		case elfcpp::R_SPARC_TLS_GD_LO10:
 		  // TLS_GD_LO10 --> TLS_IE_LO10
-		  Reloc::lo10(view, avalue, addend);
+		  Reloc::lo10(view, value, addend);
 		  break;
 
 		case elfcpp::R_SPARC_TLS_GD_ADD:
@@ -2867,24 +2867,24 @@ Target_sparc<size, big_endian>::Relocate::relocate_tls(
 	      switch (r_type)
 		{
 		case elfcpp::R_SPARC_TLS_GD_HI22:
-		  Reloc::hi22(view, avalue, addend);
+		  Reloc::hi22(view, value, addend);
 		  break;
 		case elfcpp::R_SPARC_TLS_GD_LO10:
-		  Reloc::lo10(view, avalue, addend);
+		  Reloc::lo10(view, value, addend);
 		  break;
 		case elfcpp::R_SPARC_TLS_GD_ADD:
 		  break;
 		case elfcpp::R_SPARC_TLS_GD_CALL:
 		  {
 		    Symbol_value<size> symval;
-		    elfcpp::Elf_Xword xvalue;
+		    elfcpp::Elf_Xword value;
 		    Symbol* tsym;
 
 		    tsym = target->tls_get_addr_sym_;
 		    gold_assert(tsym);
-		    xvalue = (target->plt_section()->address() +
-			      tsym->plt_offset());
-		    symval.set_output_value(xvalue);
+		    value = (target->plt_section()->address() +
+			     tsym->plt_offset());
+		    symval.set_output_value(value);
 		    Reloc::wdisp30(view, object, &symval, addend, address);
 		  }
 		  break;
@@ -2939,14 +2939,14 @@ Target_sparc<size, big_endian>::Relocate::relocate_tls(
 	    case elfcpp::R_SPARC_TLS_LDM_CALL:
 	      {
 		Symbol_value<size> symval;
-		elfcpp::Elf_Xword xvalue;
+		elfcpp::Elf_Xword value;
 		Symbol* tsym;
 
 		tsym = target->tls_get_addr_sym_;
 		gold_assert(tsym);
-		xvalue = (target->plt_section()->address() +
-			  tsym->plt_offset());
-		symval.set_output_value(xvalue);
+		value = (target->plt_section()->address() +
+			 tsym->plt_offset());
+		symval.set_output_value(value);
 		Reloc::wdisp30(view, object, &symval, addend, address);
 	      }
 	      break;
@@ -2964,20 +2964,20 @@ Target_sparc<size, big_endian>::Relocate::relocate_tls(
     case elfcpp::R_SPARC_TLS_LDO_HIX22:
       if (optimized_type == tls::TLSOPT_TO_LE)
 	{
-	  avalue -= tls_segment->memsz();
-	  Reloc::hix22(view, avalue, addend);
+	  value -= tls_segment->memsz();
+	  Reloc::hix22(view, value, addend);
 	}
       else
-	Reloc::ldo_hix22(view, avalue, addend);
+	Reloc::ldo_hix22(view, value, addend);
       break;
     case elfcpp::R_SPARC_TLS_LDO_LOX10:
       if (optimized_type == tls::TLSOPT_TO_LE)
 	{
-	  avalue -= tls_segment->memsz();
-	  Reloc::lox10(view, avalue, addend);
+	  value -= tls_segment->memsz();
+	  Reloc::lox10(view, value, addend);
 	}
       else
-	Reloc::ldo_lox10(view, avalue, addend);
+	Reloc::ldo_lox10(view, value, addend);
       break;
     case elfcpp::R_SPARC_TLS_LDO_ADD:
       if (optimized_type == tls::TLSOPT_TO_LE)
@@ -3018,16 +3018,16 @@ Target_sparc<size, big_endian>::Relocate::relocate_tls(
     case elfcpp::R_SPARC_TLS_IE_LO10:
       if (optimized_type == tls::TLSOPT_TO_LE)
 	{
-	  avalue -= tls_segment->memsz();
+	  value -= tls_segment->memsz();
 	  switch (r_type)
 	    {
 	    case elfcpp::R_SPARC_TLS_IE_HI22:
 	      // IE_HI22 --> LE_HIX22
-	      Reloc::hix22(view, avalue, addend);
+	      Reloc::hix22(view, value, addend);
 	      break;
 	    case elfcpp::R_SPARC_TLS_IE_LO10:
 	      // IE_LO10 --> LE_LOX10
-	      Reloc::lox10(view, avalue, addend);
+	      Reloc::lox10(view, value, addend);
 	      break;
 	    }
 	  break;
@@ -3039,23 +3039,23 @@ Target_sparc<size, big_endian>::Relocate::relocate_tls(
 	  if (gsym != NULL)
 	    {
 	      gold_assert(gsym->has_got_offset(GOT_TYPE_TLS_OFFSET));
-	      avalue = gsym->got_offset(GOT_TYPE_TLS_OFFSET);
+	      value = gsym->got_offset(GOT_TYPE_TLS_OFFSET);
 	    }
 	  else
 	    {
 	      unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
 	      gold_assert(object->local_has_got_offset(r_sym,
 						       GOT_TYPE_TLS_OFFSET));
-	      avalue = object->local_got_offset(r_sym,
-						GOT_TYPE_TLS_OFFSET);
+	      value = object->local_got_offset(r_sym,
+					       GOT_TYPE_TLS_OFFSET);
 	    }
 	  switch (r_type)
 	    {
 	    case elfcpp::R_SPARC_TLS_IE_HI22:
-	      Reloc::hi22(view, avalue, addend);
+	      Reloc::hi22(view, value, addend);
 	      break;
 	    case elfcpp::R_SPARC_TLS_IE_LO10:
-	      Reloc::lo10(view, avalue, addend);
+	      Reloc::lo10(view, value, addend);
 	      break;
 	    }
 	  break;
@@ -3076,8 +3076,8 @@ Target_sparc<size, big_endian>::Relocate::relocate_tls(
       // have been created for this location, so do not apply it now.
       if (!parameters->options().shared())
 	{
-	  avalue -= tls_segment->memsz();
-	  Reloc::hix22(view, avalue, addend);
+	  value -= tls_segment->memsz();
+	  Reloc::hix22(view, value, addend);
 	}
       break;
 
@@ -3086,8 +3086,8 @@ Target_sparc<size, big_endian>::Relocate::relocate_tls(
       // have been created for this location, so do not apply it now.
       if (!parameters->options().shared())
 	{
-	  avalue -= tls_segment->memsz();
-	  Reloc::lox10(view, avalue, addend);
+	  value -= tls_segment->memsz();
+	  Reloc::lox10(view, value, addend);
 	}
       break;
     }
@@ -3238,18 +3238,18 @@ public:
 		      (size == 64 ? "elf64-sparc" : "elf32-sparc"))
   { }
 
-  Target* do_recognize(int amachine, int, int)
+  Target* do_recognize(int machine, int, int)
   {
     switch (size)
       {
       case 64:
-	if (amachine != elfcpp::EM_SPARCV9)
+	if (machine != elfcpp::EM_SPARCV9)
 	  return NULL;
 	break;
 
       case 32:
-	if (amachine != elfcpp::EM_SPARC
-	    && amachine != elfcpp::EM_SPARC32PLUS)
+	if (machine != elfcpp::EM_SPARC
+	    && machine != elfcpp::EM_SPARC32PLUS)
 	  return NULL;
 	break;
 

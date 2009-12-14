@@ -239,21 +239,21 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
 {
   rd->relocs.clear();
 
-  unsigned int sec_shnum = this->shnum();
-  if (sec_shnum == 0)
+  unsigned int shnum = this->shnum();
+  if (shnum == 0)
     return;
 
-  rd->relocs.reserve(sec_shnum / 2);
+  rd->relocs.reserve(shnum / 2);
 
   const Output_sections& out_sections(this->output_sections());
   const std::vector<Address>& out_offsets(this->section_offsets_);
 
   const unsigned char *pshdrs = this->get_view(this->elf_file_.shoff(),
-					       sec_shnum * This::shdr_size,
+					       shnum * This::shdr_size,
 					       true, true);
   // Skip the first, dummy, section.
   const unsigned char *ps = pshdrs + This::shdr_size;
-  for (unsigned int i = 1; i < sec_shnum; ++i, ps += This::shdr_size)
+  for (unsigned int i = 1; i < shnum; ++i, ps += This::shdr_size)
     {
       typename This::Shdr shdr(ps);
 
@@ -262,7 +262,7 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
 	continue;
 
       unsigned int shndx = this->adjust_shndx(shdr.get_sh_info());
-      if (shndx >= sec_shnum)
+      if (shndx >= shnum)
 	{
 	  this->error(_("relocation section %u has bad info %u"),
 		      i, shndx);
@@ -341,10 +341,10 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
       typename This::Shdr symtabshdr(pshdrs
 				     + this->symtab_shndx_ * This::shdr_size);
       gold_assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
-      const int symsize = This::sym_size;
+      const int sym_size = This::sym_size;
       const unsigned int loccount = this->local_symbol_count_;
       gold_assert(loccount == symtabshdr.get_sh_info());
-      off_t locsize = loccount * symsize;
+      off_t locsize = loccount * sym_size;
       rd->local_symbols = this->get_lasting_view(symtabshdr.get_sh_offset(),
 						 locsize, true, true);
     }
@@ -357,7 +357,7 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
 template<int size, bool big_endian>
 void
 Sized_relobj<size, big_endian>::do_gc_process_relocs(Symbol_table* symtab,
-						     Layout* alayout,
+						     Layout* layout,
 						     Read_relocs_data* rd)
 {  
   Sized_target<size, big_endian>* target =
@@ -379,7 +379,7 @@ Sized_relobj<size, big_endian>::do_gc_process_relocs(Symbol_table* symtab,
 	    // only scan allocated sections.  We may see a non-allocated
 	    // section here if we are emitting relocs.
 	    if (p->is_data_section_allocated)
-              target->gc_process_relocs(symtab, alayout, this, 
+              target->gc_process_relocs(symtab, layout, this, 
                                         p->data_shndx, p->sh_type, 
                                         p->contents->data(), p->reloc_count, 
                                         p->output_section,
@@ -397,7 +397,7 @@ Sized_relobj<size, big_endian>::do_gc_process_relocs(Symbol_table* symtab,
 template<int size, bool big_endian>
 void
 Sized_relobj<size, big_endian>::do_scan_relocs(Symbol_table* symtab,
-					       Layout* alayout,
+					       Layout* layout,
 					       Read_relocs_data* rd)
 {
   Sized_target<size, big_endian>* target =
@@ -428,21 +428,21 @@ Sized_relobj<size, big_endian>::do_scan_relocs(Symbol_table* symtab,
 	  // only scan allocated sections.  We may see a non-allocated
 	  // section here if we are emitting relocs.
 	  if (p->is_data_section_allocated)
-	    target->scan_relocs(symtab, alayout, this, p->data_shndx,
+	    target->scan_relocs(symtab, layout, this, p->data_shndx,
 				p->sh_type, p->contents->data(),
 				p->reloc_count, p->output_section,
 				p->needs_special_offset_handling,
 				this->local_symbol_count_,
 				local_symbols);
 	  if (parameters->options().emit_relocs())
-	    this->emit_relocs_scan(symtab, alayout, local_symbols, p);
+	    this->emit_relocs_scan(symtab, layout, local_symbols, p);
 	}
       else
 	{
 	  Relocatable_relocs* rr = this->relocatable_relocs(p->reloc_shndx);
 	  gold_assert(rr != NULL);
 	  rr->set_reloc_count(p->reloc_count);
-	  target->scan_relocatable_relocs(symtab, alayout, this,
+	  target->scan_relocatable_relocs(symtab, layout, this,
 					  p->data_shndx, p->sh_type,
 					  p->contents->data(),
 					  p->reloc_count,
@@ -505,7 +505,7 @@ template<int size, bool big_endian>
 void
 Sized_relobj<size, big_endian>::emit_relocs_scan(
     Symbol_table* symtab,
-    Layout* alayout,
+    Layout* layout,
     const unsigned char* plocal_syms,
     const Read_relocs_data::Relocs_list::iterator& p)
 {
@@ -514,12 +514,12 @@ Sized_relobj<size, big_endian>::emit_relocs_scan(
   rr->set_reloc_count(p->reloc_count);
 
   if (p->sh_type == elfcpp::SHT_REL)
-    this->emit_relocs_scan_reltype<elfcpp::SHT_REL>(symtab, alayout,
+    this->emit_relocs_scan_reltype<elfcpp::SHT_REL>(symtab, layout,
 						    plocal_syms, p, rr);
   else
     {
       gold_assert(p->sh_type == elfcpp::SHT_RELA);
-      this->emit_relocs_scan_reltype<elfcpp::SHT_RELA>(symtab, alayout,
+      this->emit_relocs_scan_reltype<elfcpp::SHT_RELA>(symtab, layout,
 						       plocal_syms, p, rr);
     }
 }
@@ -532,7 +532,7 @@ template<int sh_type>
 void
 Sized_relobj<size, big_endian>::emit_relocs_scan_reltype(
     Symbol_table* symtab,
-    Layout* alayout,
+    Layout* layout,
     const unsigned char* plocal_syms,
     const Read_relocs_data::Relocs_list::iterator& p,
     Relocatable_relocs* rr)
@@ -540,7 +540,7 @@ Sized_relobj<size, big_endian>::emit_relocs_scan_reltype(
   scan_relocatable_relocs<size, big_endian, sh_type,
 			  Emit_relocs_strategy<sh_type> >(
     symtab,
-    alayout,
+    layout,
     this,
     p->data_shndx,
     p->contents->data(),
@@ -557,18 +557,18 @@ Sized_relobj<size, big_endian>::emit_relocs_scan_reltype(
 template<int size, bool big_endian>
 void
 Sized_relobj<size, big_endian>::do_relocate(const Symbol_table* symtab,
-					    const Layout* alayout,
+					    const Layout* layout,
 					    Output_file* of)
 {
-  unsigned int sec_shnum = this->shnum();
+  unsigned int shnum = this->shnum();
 
   // Read the section headers.
   const unsigned char* pshdrs = this->get_view(this->elf_file_.shoff(),
-					       sec_shnum * This::shdr_size,
+					       shnum * This::shdr_size,
 					       true, true);
 
   Views views;
-  views.resize(sec_shnum);
+  views.resize(shnum);
 
   // Make two passes over the sections.  The first one copies the
   // section data to the output file.  The second one applies
@@ -582,14 +582,14 @@ Sized_relobj<size, big_endian>::do_relocate(const Symbol_table* symtab,
 
   // Apply relocations.
 
-  this->relocate_sections(symtab, alayout, pshdrs, &views);
+  this->relocate_sections(symtab, layout, pshdrs, &views);
 
   // After we've done the relocations, we release the hash tables,
   // since we no longer need them.
   this->free_input_to_output_maps();
 
   // Write out the accumulated views.
-  for (unsigned int i = 1; i < sec_shnum; ++i)
+  for (unsigned int i = 1; i < shnum; ++i)
     {
       if (views[i].view != NULL)
 	{
@@ -607,8 +607,8 @@ Sized_relobj<size, big_endian>::do_relocate(const Symbol_table* symtab,
     }
 
   // Write out the local symbols.
-  this->write_local_symbols(of, alayout->sympool(), alayout->dynpool(),
-			    alayout->symtab_xindex(), alayout->dynsym_xindex());
+  this->write_local_symbols(of, layout->sympool(), layout->dynpool(),
+			    layout->symtab_xindex(), layout->dynsym_xindex());
 
   // We should no longer need the local symbol values.
   this->clear_local_symbols();
@@ -633,7 +633,7 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
 					       Output_file* of,
 					       Views* pviews)
 {
-  unsigned int sec_shnum = this->shnum();
+  unsigned int shnum = this->shnum();
   const Output_sections& out_sections(this->output_sections());
   const std::vector<Address>& out_offsets(this->section_offsets_);
 
@@ -641,7 +641,7 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
   bool is_sorted = true;
 
   const unsigned char* p = pshdrs + This::shdr_size;
-  for (unsigned int i = 1; i < sec_shnum; ++i, p += This::shdr_size)
+  for (unsigned int i = 1; i < shnum; ++i, p += This::shdr_size)
     {
       View_size* pvs = &(*pviews)[i];
 
@@ -702,16 +702,16 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
       // buffer, and the output section is responsible for writing the
       // final data to the output file.
 
-      off_t out_section_offset;
+      off_t output_section_offset;
       Address output_section_size;
       if (!os->requires_postprocessing())
 	{
-	  out_section_offset = os->offset();
+	  output_section_offset = os->offset();
 	  output_section_size = convert_types<Address, off_t>(os->data_size());
 	}
       else
 	{
-	  out_section_offset = 0;
+	  output_section_offset = 0;
 	  output_section_size =
               convert_types<Address, off_t>(os->postprocessing_buffer_size());
 	}
@@ -720,12 +720,12 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
       section_size_type view_size;
       if (output_offset != invalid_address)
 	{
-	  view_start = out_section_offset + output_offset;
+	  view_start = output_section_offset + output_offset;
 	  view_size = convert_to_section_size_type(shdr.get_sh_size());
 	}
       else
 	{
-	  view_start = out_section_offset;
+	  view_start = output_section_offset;
 	  view_size = convert_to_section_size_type(output_section_size);
 	}
 
@@ -735,36 +735,36 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
       gold_assert(output_offset == invalid_address
 		  || output_offset + view_size <= output_section_size);
 
-      unsigned char* aview;
+      unsigned char* view;
       if (os->requires_postprocessing())
 	{
 	  unsigned char* buffer = os->postprocessing_buffer();
-	  aview = buffer + view_start;
+	  view = buffer + view_start;
 	  if (output_offset != invalid_address)
 	    {
 	      off_t sh_offset = shdr.get_sh_offset();
 	      if (!rm.empty() && rm.back().file_offset > sh_offset)
 		is_sorted = false;
 	      rm.push_back(File_read::Read_multiple_entry(sh_offset,
-							  view_size, aview));
+							  view_size, view));
 	    }
 	}
       else
 	{
 	  if (output_offset == invalid_address)
-	    aview = of->get_input_output_view(view_start, view_size);
+	    view = of->get_input_output_view(view_start, view_size);
 	  else
 	    {
-	      aview = of->get_output_view(view_start, view_size);
+	      view = of->get_output_view(view_start, view_size);
 	      off_t sh_offset = shdr.get_sh_offset();
 	      if (!rm.empty() && rm.back().file_offset > sh_offset)
 		is_sorted = false;
 	      rm.push_back(File_read::Read_multiple_entry(sh_offset,
-							  view_size, aview));
+							  view_size, view));
 	    }
 	}
 
-      pvs->view = aview;
+      pvs->view = view;
       pvs->address = os->address();
       if (output_offset != invalid_address)
 	pvs->address += output_offset;
@@ -790,11 +790,11 @@ template<int size, bool big_endian>
 void
 Sized_relobj<size, big_endian>::do_relocate_sections(
     const Symbol_table* symtab,
-    const Layout* alayout,
+    const Layout* layout,
     const unsigned char* pshdrs,
     Views* pviews)
 {
-  unsigned int sec_shnum = this->shnum();
+  unsigned int shnum = this->shnum();
   Sized_target<size, big_endian>* target =
     parameters->sized_target<size, big_endian>();
 
@@ -803,11 +803,11 @@ Sized_relobj<size, big_endian>::do_relocate_sections(
 
   Relocate_info<size, big_endian> relinfo;
   relinfo.symtab = symtab;
-  relinfo.layout = alayout;
+  relinfo.layout = layout;
   relinfo.object = this;
 
   const unsigned char* p = pshdrs + This::shdr_size;
-  for (unsigned int i = 1; i < sec_shnum; ++i, p += This::shdr_size)
+  for (unsigned int i = 1; i < shnum; ++i, p += This::shdr_size)
     {
       typename This::Shdr shdr(p);
 
@@ -880,7 +880,7 @@ Sized_relobj<size, big_endian>::do_relocate_sections(
       relinfo.reloc_shdr = p;
       relinfo.data_shndx = index;
       relinfo.data_shdr = pshdrs + index * This::shdr_size;
-      unsigned char* aview = (*pviews)[index].view;
+      unsigned char* view = (*pviews)[index].view;
       Address address = (*pviews)[index].address;
       section_size_type view_size = (*pviews)[index].view_size;
 
@@ -890,7 +890,7 @@ Sized_relobj<size, big_endian>::do_relocate_sections(
 	  typename This::Shdr data_shdr(pshdrs + index * This::shdr_size);
 	  if ((data_shdr.get_sh_flags() & elfcpp::SHF_EXECINSTR) != 0)
 	    this->split_stack_adjust(symtab, pshdrs, sh_type, index,
-				     prelocs, reloc_count, aview, view_size,
+				     prelocs, reloc_count, view, view_size,
 				     &reloc_map);
 	}
 
@@ -898,10 +898,10 @@ Sized_relobj<size, big_endian>::do_relocate_sections(
 	{
 	  target->relocate_section(&relinfo, sh_type, prelocs, reloc_count, os,
 				   output_offset == invalid_address,
-				   aview, address, view_size, reloc_map);
+				   view, address, view_size, reloc_map);
 	  if (parameters->options().emit_relocs())
 	    this->emit_relocs(&relinfo, i, sh_type, prelocs, reloc_count,
-			      os, output_offset, aview, address, view_size,
+			      os, output_offset, view, address, view_size,
 			      (*pviews)[i].view, (*pviews)[i].view_size);
 	}
       else
@@ -909,7 +909,7 @@ Sized_relobj<size, big_endian>::do_relocate_sections(
 	  Relocatable_relocs* rr = this->relocatable_relocs(i);
 	  target->relocate_for_relocatable(&relinfo, sh_type, prelocs,
 					   reloc_count, os, output_offset, rr,
-					   aview, address, view_size,
+					   view, address, view_size,
 					   (*pviews)[i].view,
 					   (*pviews)[i].view_size);
 	}
@@ -926,9 +926,9 @@ Sized_relobj<size, big_endian>::emit_relocs(
     unsigned int sh_type,
     const unsigned char* prelocs,
     size_t reloc_count,
-    Output_section* aoutput_section,
+    Output_section* output_section,
     typename elfcpp::Elf_types<size>::Elf_Addr offset_in_output_section,
-    unsigned char* aview,
+    unsigned char* view,
     typename elfcpp::Elf_types<size>::Elf_Addr address,
     section_size_type view_size,
     unsigned char* reloc_view,
@@ -936,17 +936,17 @@ Sized_relobj<size, big_endian>::emit_relocs(
 {
   if (sh_type == elfcpp::SHT_REL)
     this->emit_relocs_reltype<elfcpp::SHT_REL>(relinfo, i, prelocs,
-					       reloc_count, aoutput_section,
+					       reloc_count, output_section,
 					       offset_in_output_section,
-					       aview, address, view_size,
+					       view, address, view_size,
 					       reloc_view, reloc_view_size);
   else
     {
       gold_assert(sh_type == elfcpp::SHT_RELA);
       this->emit_relocs_reltype<elfcpp::SHT_RELA>(relinfo, i, prelocs,
-						  reloc_count, aoutput_section,
+						  reloc_count, output_section,
 						  offset_in_output_section,
-						  aview, address, view_size,
+						  view, address, view_size,
 						  reloc_view, reloc_view_size);
     }
 }
@@ -962,9 +962,9 @@ Sized_relobj<size, big_endian>::emit_relocs_reltype(
     unsigned int i,
     const unsigned char* prelocs,
     size_t reloc_count,
-    Output_section* aoutput_section,
+    Output_section* output_section,
     typename elfcpp::Elf_types<size>::Elf_Addr offset_in_output_section,
-    unsigned char* aview,
+    unsigned char* view,
     typename elfcpp::Elf_types<size>::Elf_Addr address,
     section_size_type view_size,
     unsigned char* reloc_view,
@@ -975,10 +975,10 @@ Sized_relobj<size, big_endian>::emit_relocs_reltype(
     relinfo,
     prelocs,
     reloc_count,
-    aoutput_section,
+    output_section,
     offset_in_output_section,
     rr,
-    aview,
+    view,
     address,
     view_size,
     reloc_view,
@@ -1029,21 +1029,21 @@ Sized_relobj<size, big_endian>::split_stack_adjust(
     unsigned int shndx,
     const unsigned char* prelocs,
     size_t reloc_count,
-    unsigned char* aview,
+    unsigned char* view,
     section_size_type view_size,
     Reloc_symbol_changes** reloc_map)
 {
   if (sh_type == elfcpp::SHT_REL)
     this->split_stack_adjust_reltype<elfcpp::SHT_REL>(symtab, pshdrs, shndx,
 						      prelocs, reloc_count,
-						      aview, view_size,
+						      view, view_size,
 						      reloc_map);
   else
     {
       gold_assert(sh_type == elfcpp::SHT_RELA);
       this->split_stack_adjust_reltype<elfcpp::SHT_RELA>(symtab, pshdrs, shndx,
 							 prelocs, reloc_count,
-							 aview, view_size,
+							 view, view_size,
 							 reloc_map);
     }
 }
@@ -1060,7 +1060,7 @@ Sized_relobj<size, big_endian>::split_stack_adjust_reltype(
     unsigned int shndx,
     const unsigned char* prelocs,
     size_t reloc_count,
-    unsigned char* aview,
+    unsigned char* view,
     section_size_type view_size,
     Reloc_symbol_changes** reloc_map)
 {
@@ -1097,9 +1097,9 @@ Sized_relobj<size, big_endian>::split_stack_adjust_reltype(
 	  && gsym->source() == Symbol::FROM_OBJECT
 	  && !gsym->object()->uses_split_stack())
 	{
-	  section_offset_type off =
+	  section_offset_type offset =
 	    convert_to_section_size_type(reloc.get_r_offset());
-	  non_split_refs.push_back(off);
+	  non_split_refs.push_back(offset);
 	}
     }
 
@@ -1152,7 +1152,7 @@ Sized_relobj<size, big_endian>::split_stack_adjust_reltype(
       std::string from;
       std::string to;
       parameters->target().calls_non_split(this, shndx, p->first, p->second,
-					   aview, view_size, &from, &to);
+					   view, view_size, &from, &to);
       if (!from.empty())
 	{
 	  gold_assert(!to.empty());
@@ -1171,10 +1171,10 @@ Sized_relobj<size, big_endian>::split_stack_adjust_reltype(
 	      if (r_sym < local_count)
 		continue;
 
-	      section_offset_type off =
+	      section_offset_type offset =
 		convert_to_section_size_type(reloc.get_r_offset());
-	      if (off < p->first
-		  || (off
+	      if (offset < p->first
+		  || (offset
 		      >= (p->first
 			  + static_cast<section_offset_type>(p->second))))
 		continue;
@@ -1216,8 +1216,8 @@ Sized_relobj<size, big_endian>::find_functions(
   // We need to read the symbols to find the functions.  If we wanted
   // to, we could cache reading the symbols across all sections in the
   // object.
-  const unsigned int sym_tab_shndx = this->symtab_shndx_;
-  typename This::Shdr symtabshdr(pshdrs + sym_tab_shndx * This::shdr_size);
+  const unsigned int symtab_shndx = this->symtab_shndx_;
+  typename This::Shdr symtabshdr(pshdrs + symtab_shndx * This::shdr_size);
   gold_assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
 
   typename elfcpp::Elf_types<size>::Elf_WXword sh_size =
@@ -1225,9 +1225,9 @@ Sized_relobj<size, big_endian>::find_functions(
   const unsigned char* psyms = this->get_view(symtabshdr.get_sh_offset(),
 					      sh_size, true, true);
 
-  const int symsize = This::sym_size;
-  const unsigned int symcount = sh_size / symsize;
-  for (unsigned int i = 0; i < symcount; ++i, psyms += symsize)
+  const int sym_size = This::sym_size;
+  const unsigned int symcount = sh_size / sym_size;
+  for (unsigned int i = 0; i < symcount; ++i, psyms += sym_size)
     {
       typename elfcpp::Sym<size, big_endian> isym(psyms);
 
@@ -1419,7 +1419,7 @@ Sized_relobj<64, true>::do_read_relocs(Read_relocs_data* rd);
 template
 void
 Sized_relobj<32, false>::do_gc_process_relocs(Symbol_table* symtab,
-					      Layout* alayout,
+					      Layout* layout,
 					      Read_relocs_data* rd);
 #endif
 
@@ -1427,7 +1427,7 @@ Sized_relobj<32, false>::do_gc_process_relocs(Symbol_table* symtab,
 template
 void
 Sized_relobj<32, true>::do_gc_process_relocs(Symbol_table* symtab,
-					     Layout* alayout,
+					     Layout* layout,
 					     Read_relocs_data* rd);
 #endif
 
@@ -1435,7 +1435,7 @@ Sized_relobj<32, true>::do_gc_process_relocs(Symbol_table* symtab,
 template
 void
 Sized_relobj<64, false>::do_gc_process_relocs(Symbol_table* symtab,
-					      Layout* alayout,
+					      Layout* layout,
 					      Read_relocs_data* rd);
 #endif
 
@@ -1443,7 +1443,7 @@ Sized_relobj<64, false>::do_gc_process_relocs(Symbol_table* symtab,
 template
 void
 Sized_relobj<64, true>::do_gc_process_relocs(Symbol_table* symtab,
-					     Layout* alayout,
+					     Layout* layout,
 					     Read_relocs_data* rd);
 #endif
 
@@ -1451,7 +1451,7 @@ Sized_relobj<64, true>::do_gc_process_relocs(Symbol_table* symtab,
 template
 void
 Sized_relobj<32, false>::do_scan_relocs(Symbol_table* symtab,
-					Layout* alayout,
+					Layout* layout,
 					Read_relocs_data* rd);
 #endif
 
@@ -1459,7 +1459,7 @@ Sized_relobj<32, false>::do_scan_relocs(Symbol_table* symtab,
 template
 void
 Sized_relobj<32, true>::do_scan_relocs(Symbol_table* symtab,
-				       Layout* alayout,
+				       Layout* layout,
 				       Read_relocs_data* rd);
 #endif
 
@@ -1467,7 +1467,7 @@ Sized_relobj<32, true>::do_scan_relocs(Symbol_table* symtab,
 template
 void
 Sized_relobj<64, false>::do_scan_relocs(Symbol_table* symtab,
-					Layout* alayout,
+					Layout* layout,
 					Read_relocs_data* rd);
 #endif
 
@@ -1475,7 +1475,7 @@ Sized_relobj<64, false>::do_scan_relocs(Symbol_table* symtab,
 template
 void
 Sized_relobj<64, true>::do_scan_relocs(Symbol_table* symtab,
-				       Layout* alayout,
+				       Layout* layout,
 				       Read_relocs_data* rd);
 #endif
 
@@ -1483,7 +1483,7 @@ Sized_relobj<64, true>::do_scan_relocs(Symbol_table* symtab,
 template
 void
 Sized_relobj<32, false>::do_relocate(const Symbol_table* symtab,
-				     const Layout* alayout,
+				     const Layout* layout,
 				     Output_file* of);
 #endif
 
@@ -1491,7 +1491,7 @@ Sized_relobj<32, false>::do_relocate(const Symbol_table* symtab,
 template
 void
 Sized_relobj<32, true>::do_relocate(const Symbol_table* symtab,
-				    const Layout* alayout,
+				    const Layout* layout,
 				    Output_file* of);
 #endif
 
@@ -1499,7 +1499,7 @@ Sized_relobj<32, true>::do_relocate(const Symbol_table* symtab,
 template
 void
 Sized_relobj<64, false>::do_relocate(const Symbol_table* symtab,
-				     const Layout* alayout,
+				     const Layout* layout,
 				     Output_file* of);
 #endif
 
@@ -1507,7 +1507,7 @@ Sized_relobj<64, false>::do_relocate(const Symbol_table* symtab,
 template
 void
 Sized_relobj<64, true>::do_relocate(const Symbol_table* symtab,
-				    const Layout* alayout,
+				    const Layout* layout,
 				    Output_file* of);
 #endif
 
@@ -1516,7 +1516,7 @@ template
 void
 Sized_relobj<32, false>::do_relocate_sections(
     const Symbol_table* symtab,
-    const Layout* alayout,
+    const Layout* layout,
     const unsigned char* pshdrs,
     Views* pviews);
 #endif
@@ -1526,7 +1526,7 @@ template
 void
 Sized_relobj<32, true>::do_relocate_sections(
     const Symbol_table* symtab,
-    const Layout* alayout,
+    const Layout* layout,
     const unsigned char* pshdrs,
     Views* pviews);
 #endif
@@ -1536,7 +1536,7 @@ template
 void
 Sized_relobj<64, false>::do_relocate_sections(
     const Symbol_table* symtab,
-    const Layout* alayout,
+    const Layout* layout,
     const unsigned char* pshdrs,
     Views* pviews);
 #endif

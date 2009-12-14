@@ -1,6 +1,6 @@
 // reduced_debug_output.cc -- output reduced debugging information to save space
 
-// Copyright 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2008 Free Software Foundation, Inc.
 // Written by Caleb Howe <cshowe@google.com>.
 
 // This file is part of gold.
@@ -213,15 +213,15 @@ Output_reduced_debug_abbrev_section::set_final_data_size()
 void
 Output_reduced_debug_abbrev_section::do_write(Output_file* of)
 {
-  off_t off = this->offset();
-  off_t datasize = this->data_size();
-  unsigned char* view = of->get_output_view(off, datasize);
+  off_t offset = this->offset();
+  off_t data_size = this->data_size();
+  unsigned char* view = of->get_output_view(offset, data_size);
   if (this->failed_)
     memcpy(view, this->postprocessing_buffer(),
            this->postprocessing_buffer_size());
   else
-    memcpy(view, &this->data_.front(), datasize);
-  of->write_output_view(off, datasize, view);
+    memcpy(view, &this->data_.front(), data_size);
+  of->write_output_view(offset, data_size, view);
 }
 
 // Locates the abbreviation with abbreviation_number abbrev_number in the
@@ -353,15 +353,15 @@ void Output_reduced_debug_info_section::set_final_data_size()
 
 void Output_reduced_debug_info_section::do_write(Output_file* of)
 {
-  off_t off = this->offset();
-  off_t datasize = this->data_size();
-  unsigned char* view = of->get_output_view(off, datasize);
+  off_t offset = this->offset();
+  off_t data_size = this->data_size();
+  unsigned char* view = of->get_output_view(offset, data_size);
   if (this->failed_)
     memcpy(view, this->postprocessing_buffer(),
            this->postprocessing_buffer_size());
   else
-    memcpy(view, &this->data_.front(), datasize);
-  of->write_output_view(off, datasize, view);
+    memcpy(view, &this->data_.front(), data_size);
+  of->write_output_view(offset, data_size, view);
 }
 
 } // End namespace gold.

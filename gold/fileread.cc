@@ -754,14 +754,14 @@ File_view::~File_view()
 
 // Create a file for testing.
 
-Input_file::Input_file(const Task* task, const char* iname,
+Input_file::Input_file(const Task* task, const char* name,
 		       const unsigned char* contents, off_t size)
   : file_()
 {
   this->input_argument_ =
-    new Input_file_argument(iname, Input_file_argument::INPUT_FILE_TYPE_FILE,
+    new Input_file_argument(name, Input_file_argument::INPUT_FILE_TYPE_FILE,
                             "", false, Position_dependent_options());
-  bool ok = this->file_.open(task, iname, contents, size);
+  bool ok = this->file_.open(task, name, contents, size);
   gold_assert(ok);
 }
 
@@ -843,7 +843,7 @@ File_read::get_mtime()
 bool
 Input_file::open(const Dirsearch& dirpath, const Task* task, int *pindex)
 {
-  std::string iname;
+  std::string name;
 
   // Case 1: name is an absolute file, just try to open it
   // Case 2: name is relative but is_lib is false, is_searched_file is false,
@@ -853,8 +853,8 @@ Input_file::open(const Dirsearch& dirpath, const Task* task, int *pindex)
 	  && !this->input_argument_->is_searched_file()
 	  && this->input_argument_->extra_search_path() == NULL))
     {
-      iname = this->input_argument_->name();
-      this->found_name_ = iname;
+      name = this->input_argument_->name();
+      this->found_name_ = name;
     }
   // Case 3: is_lib is true or is_searched_file is true
   else if (this->input_argument_->is_lib()
@@ -878,15 +878,15 @@ Input_file::open(const Dirsearch& dirpath, const Task* task, int *pindex)
 	}
       else
 	n1 = this->input_argument_->name();
-      iname = dirpath.find(n1, n2, &this->is_in_sysroot_, pindex);
-      if (iname.empty())
+      name = dirpath.find(n1, n2, &this->is_in_sysroot_, pindex);
+      if (name.empty())
 	{
 	  gold_error(_("cannot find %s%s"),
 	             this->input_argument_->is_lib() ? "-l" : "",
 		     this->input_argument_->name());
 	  return false;
 	}
-      if (n2.empty() || iname[iname.length() - 1] == 'o')
+      if (n2.empty() || name[name.length() - 1] == 'o')
 	this->found_name_ = n1;
       else
 	this->found_name_ = n2;
@@ -897,20 +897,20 @@ Input_file::open(const Dirsearch& dirpath, const Task* task, int *pindex)
       gold_assert(this->input_argument_->extra_search_path() != NULL);
 
       // First, check extra_search_path.
-      iname = this->input_argument_->extra_search_path();
-      if (!IS_DIR_SEPARATOR (iname[iname.length() - 1]))
-        iname += '/';
-      iname += this->input_argument_->name();
+      name = this->input_argument_->extra_search_path();
+      if (!IS_DIR_SEPARATOR (name[name.length() - 1]))
+        name += '/';
+      name += this->input_argument_->name();
       struct stat dummy_stat;
-      if (*pindex > 0 || ::stat(iname.c_str(), &dummy_stat) < 0)
+      if (*pindex > 0 || ::stat(name.c_str(), &dummy_stat) < 0)
         {
           // extra_search_path failed, so check the normal search-path.
 	  int index = *pindex;
 	  if (index > 0)
 	    --index;
-          iname = dirpath.find(this->input_argument_->name(), "",
-			       &this->is_in_sysroot_, &index);
-          if (iname.empty())
+          name = dirpath.find(this->input_argument_->name(), "",
+			      &this->is_in_sysroot_, &index);
+          if (name.empty())
             {
               gold_error(_("cannot find %s"),
 			 this->input_argument_->name());
@@ -927,17 +927,17 @@ Input_file::open(const Dirsearch& dirpath, const Task* task, int *pindex)
     this->input_argument_->options().format_enum();
   bool ok;
   if (format == General_options::OBJECT_FORMAT_ELF)
-    ok = this->file_.open(task, iname);
+    ok = this->file_.open(task, name);
   else
     {
       gold_assert(format == General_options::OBJECT_FORMAT_BINARY);
-      ok = this->open_binary(task, iname);
+      ok = this->open_binary(task, name);
     }
 
   if (!ok)
     {
       gold_error(_("cannot open %s: %s"),
-		 iname.c_str(), strerror(errno));
+		 name.c_str(), strerror(errno));
       return false;
     }
 
@@ -947,7 +947,7 @@ Input_file::open(const Dirsearch& dirpath, const Task* task, int *pindex)
 // Open a file for --format binary.
 
 bool
-Input_file::open_binary(const Task* task, const std::string& iname)
+Input_file::open_binary(const Task* task, const std::string& name)
 {
   // In order to open a binary file, we need machine code, size, and
   // endianness.  We may not have a valid target at this point, in
@@ -958,10 +958,10 @@ Input_file::open_binary(const Task* task, const std::string& iname)
   Binary_to_elf binary_to_elf(target.machine_code(),
 			      target.get_size(),
 			      target.is_big_endian(),
-			      iname);
+			      name);
   if (!binary_to_elf.convert(task))
     return false;
-  return this->file_.open(task, iname, binary_to_elf.converted_data_leak(),
+  return this->file_.open(task, name, binary_to_elf.converted_data_leak(),
 			  binary_to_elf.converted_size());
 }
 

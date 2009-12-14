@@ -1,6 +1,6 @@
 // expression.cc -- expressions in linker scripts for gold
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -739,10 +739,10 @@ class Align_expression : public Binary_expression
 	&& parameters->options().relocatable())
       gold_warning(_("aligning to section relative value"));
 
-    uint64_t val = this->left_value(eei, eei->result_section_pointer);
+    uint64_t value = this->left_value(eei, eei->result_section_pointer);
     if (align <= 1)
-      return val;
-    return ((val + align - 1) / align) * align;
+      return value;
+    return ((value + align - 1) / align) * align;
   }
 
   void
@@ -768,10 +768,10 @@ class Assert_expression : public Unary_expression
   uint64_t
   value(const Expression_eval_info* eei)
   {
-    uint64_t val = this->arg_value(eei, eei->result_section_pointer);
-    if (!val && eei->check_assertions)
+    uint64_t value = this->arg_value(eei, eei->result_section_pointer);
+    if (!value && eei->check_assertions)
       gold_error("%s", this->message_.c_str());
-    return val;
+    return value;
   }
 
   void
