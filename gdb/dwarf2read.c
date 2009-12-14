@@ -549,8 +549,8 @@ struct attribute
       {
 	char *str;
 	struct dwarf_block *blk;
-	unsigned long unsnd;
-	long int snd;
+	ULONGEST unsnd;
+	LONGEST snd;
 	CORE_ADDR addr;
 	struct signatured_type *signatured_type;
       }
@@ -1065,7 +1065,7 @@ static int is_ref_attr (struct attribute *);
 
 static unsigned int dwarf2_get_ref_die_offset (struct attribute *);
 
-static int dwarf2_get_attr_constant_value (struct attribute *, int);
+static LONGEST dwarf2_get_attr_constant_value (struct attribute *, int);
 
 static struct die_info *follow_die_ref_or_sig (struct die_info *,
 					       struct attribute *,
@@ -6041,9 +6041,10 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   struct type *base_type;
   struct type *range_type;
   struct attribute *attr;
-  int low = 0;
-  int high = -1;
+  LONGEST low = 0;
+  LONGEST high = -1;
   char *name;
+  LONGEST negative_mask;
   
   base_type = die_type (die, cu);
   if (TYPE_CODE (base_type) == TYPE_CODE_VOID)
@@ -6089,6 +6090,13 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
       else
         high = dwarf2_get_attr_constant_value (attr, 1);
     }
+
+  negative_mask = 
+    (LONGEST) -1 << (TYPE_LENGTH (base_type) * TARGET_CHAR_BIT - 1);
+  if (!TYPE_UNSIGNED (base_type) && (low & negative_mask))
+    low |= negative_mask;
+  if (!TYPE_UNSIGNED (base_type) && (high & negative_mask))
+    high |= negative_mask;
 
   range_type = create_range_type (NULL, base_type, low, high);
 
@@ -7127,8 +7135,8 @@ read_attribute_value (struct attribute *attr, unsigned form,
     {
       complaint
         (&symfile_complaints,
-         _("Suspicious DW_AT_byte_size value treated as zero instead of 0x%lx"),
-         DW_UNSND (attr));
+         _("Suspicious DW_AT_byte_size value treated as zero instead of %s"),
+         hex_string (DW_UNSND (attr)));
       DW_UNSND (attr) = 0;
     }
 
@@ -10107,7 +10115,8 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	case DW_FORM_data8:
 	case DW_FORM_udata:
 	case DW_FORM_sdata:
-	  fprintf_unfiltered (f, "constant: %ld", DW_UNSND (&die->attrs[i]));
+	  fprintf_unfiltered (f, "constant: %s",
+			      pulongest (DW_UNSND (&die->attrs[i])));
 	  break;
 	case DW_FORM_sig8:
 	  if (DW_SIGNATURED_TYPE (&die->attrs[i]) != NULL)
@@ -10230,10 +10239,10 @@ dwarf2_get_ref_die_offset (struct attribute *attr)
   return 0;
 }
 
-/* Return the constant value held by the given attribute.  Return -1
-   if the value held by the attribute is not constant.  */
+/* Return the constant value held by ATTR.  Return DEFAULT_VALUE if
+ * the value held by the attribute is not constant.  */
 
-static int
+static LONGEST
 dwarf2_get_attr_constant_value (struct attribute *attr, int default_value)
 {
   if (attr->form == DW_FORM_sdata)

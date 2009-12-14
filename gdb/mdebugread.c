@@ -1743,13 +1743,11 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
   /* Deal with range types */
   if (t->bt == btRange)
     {
-      TYPE_NFIELDS (tp) = 2;
-      TYPE_FIELDS (tp) = ((struct field *)
-			  TYPE_ALLOC (tp, 2 * sizeof (struct field)));
-      TYPE_FIELD_NAME (tp, 0) = "Low";
+      TYPE_NFIELDS (tp) = 0;
+      TYPE_RANGE_DATA (tp) = ((struct range_bounds *)
+			  TYPE_ZALLOC (tp, sizeof (struct range_bounds)));
       TYPE_LOW_BOUND (tp) = AUX_GET_DNLOW (bigend, ax);
       ax++;
-      TYPE_FIELD_NAME (tp, 1) = "High";
       TYPE_HIGH_BOUND (tp) = AUX_GET_DNHIGH (bigend, ax);
       ax++;
     }

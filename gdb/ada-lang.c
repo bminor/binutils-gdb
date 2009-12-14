@@ -597,8 +597,8 @@ min_of_type (struct type *t)
 }
 
 /* The largest value in the domain of TYPE, a discrete type, as an integer.  */
-static LONGEST
-discrete_type_high_bound (struct type *type)
+LONGEST
+ada_discrete_type_high_bound (struct type *type)
 {
   switch (TYPE_CODE (type))
     {
@@ -612,13 +612,13 @@ discrete_type_high_bound (struct type *type)
     case TYPE_CODE_INT:
       return max_of_type (type);
     default:
-      error (_("Unexpected type in discrete_type_high_bound."));
+      error (_("Unexpected type in ada_discrete_type_high_bound."));
     }
 }
 
 /* The largest value in the domain of TYPE, a discrete type, as an integer.  */
-static LONGEST
-discrete_type_low_bound (struct type *type)
+LONGEST
+ada_discrete_type_low_bound (struct type *type)
 {
   switch (TYPE_CODE (type))
     {
@@ -632,7 +632,7 @@ discrete_type_low_bound (struct type *type)
     case TYPE_CODE_INT:
       return min_of_type (type);
     default:
-      error (_("Unexpected type in discrete_type_low_bound."));
+      error (_("Unexpected type in ada_discrete_type_low_bound."));
     }
 }
 
@@ -2399,7 +2399,7 @@ ada_value_slice_from_ptr (struct value *array_ptr, struct type *type,
                           int low, int high)
 {
   CORE_ADDR base = value_as_address (array_ptr)
-    + ((low - TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type)))
+    + ((low - ada_discrete_type_low_bound (TYPE_INDEX_TYPE (type)))
        * TYPE_LENGTH (TYPE_TARGET_TYPE (type)));
   struct type *index_type =
     create_range_type (NULL, TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (type)),
@@ -2542,7 +2542,6 @@ static LONGEST
 ada_array_bound_from_type (struct type * arr_type, int n, int which)
 {
   struct type *type, *elt_type, *index_type_desc, *index_type;
-  LONGEST retval;
   int i;
 
   gdb_assert (which == 0 || which == 1);
@@ -2569,22 +2568,10 @@ ada_array_bound_from_type (struct type * arr_type, int n, int which)
   else
     index_type = TYPE_INDEX_TYPE (elt_type);
 
-  switch (TYPE_CODE (index_type))
-    {
-    case TYPE_CODE_RANGE:
-      retval = which == 0 ? TYPE_LOW_BOUND (index_type)
-			  : TYPE_HIGH_BOUND (index_type);
-      break;
-    case TYPE_CODE_ENUM:
-      retval = which == 0 ? TYPE_FIELD_BITPOS (index_type, 0)
-			  : TYPE_FIELD_BITPOS (index_type,
-					       TYPE_NFIELDS (index_type) - 1);
-      break;
-    default:
-      internal_error (__FILE__, __LINE__, _("invalid type code of index type"));
-    }
-
-  return retval;
+  return
+    (LONGEST) (which == 0
+               ? ada_discrete_type_low_bound (index_type)
+               : ada_discrete_type_high_bound (index_type));
 }
 
 /* Given that arr is an array value, returns the lower bound of the
@@ -9262,10 +9249,10 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
                 error (_("unexpected attribute encountered"));
               case OP_ATR_FIRST:
 		return value_from_longest 
-		  (range_type, discrete_type_low_bound (range_type));
+		  (range_type, ada_discrete_type_low_bound (range_type));
               case OP_ATR_LAST:
                 return value_from_longest
-		  (range_type, discrete_type_high_bound (range_type));
+		  (range_type, ada_discrete_type_high_bound (range_type));
               case OP_ATR_LENGTH:
                 error (_("the 'length attribute applies only to array types"));
               }
@@ -9839,14 +9826,14 @@ to_fixed_range_type (char *name, struct value *dval, struct type *orig_type)
   subtype_info = strstr (name, "___XD");
   if (subtype_info == NULL)
     {
-      LONGEST L = discrete_type_low_bound (raw_type);
-      LONGEST U = discrete_type_high_bound (raw_type);
+      LONGEST L = ada_discrete_type_low_bound (raw_type);
+      LONGEST U = ada_discrete_type_high_bound (raw_type);
       if (L < INT_MIN || U > INT_MAX)
 	return raw_type;
       else
 	return create_range_type (alloc_type_copy (orig_type), raw_type,
-				  discrete_type_low_bound (raw_type),
-				  discrete_type_high_bound (raw_type));
+				  ada_discrete_type_low_bound (raw_type),
+				  ada_discrete_type_high_bound (raw_type));
     }
   else
     {
@@ -9972,20 +9959,7 @@ ada_modulus_from_name (struct type *type, ULONGEST *modulus)
 ULONGEST
 ada_modulus (struct type *type)
 {
-  ULONGEST modulus;
-
-  /* Normally, the modulus of a modular type is equal to the value of
-     its upper bound + 1.  However, the upper bound is currently stored
-     as an int, which is not always big enough to hold the actual bound
-     value.  To workaround this, try to take advantage of the encoding
-     that GNAT uses with with discrete types.  To avoid some unnecessary
-     parsing, we do this only when the size of TYPE is greater than
-     the size of the field holding the bound.  */
-  if (TYPE_LENGTH (type) > sizeof (TYPE_HIGH_BOUND (type))
-      && ada_modulus_from_name (type, &modulus))
-    return modulus;
-
-  return (ULONGEST) (unsigned int) TYPE_HIGH_BOUND (type) + 1;
+  return (ULONGEST) TYPE_HIGH_BOUND (type) + 1;
 }
 
 

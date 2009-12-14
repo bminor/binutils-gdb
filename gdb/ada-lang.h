@@ -199,6 +199,10 @@ extern int ada_is_array_descriptor_type (struct type *);
 
 extern int ada_is_bogus_array_descriptor (struct type *);
 
+extern LONGEST ada_discrete_type_low_bound (struct type *);
+
+extern LONGEST ada_discrete_type_high_bound (struct type *);
+
 extern char *ada_decode_symbol (const struct general_symbol_info*);
 
 extern const char *ada_decode (const char*);

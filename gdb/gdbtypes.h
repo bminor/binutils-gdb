@@ -447,61 +447,87 @@ struct main_type
      because we can allocate the space for a type before
      we know what to put in it.  */
 
-  struct field
+  union 
   {
-    union field_location
+    struct field
     {
-      /* Position of this field, counting in bits from start of
-	 containing structure.
-	 For gdbarch_bits_big_endian=1 targets, it is the bit offset to the MSB.
-	 For gdbarch_bits_big_endian=0 targets, it is the bit offset to the LSB.
-	 For a range bound or enum value, this is the value itself. */
+      union field_location
+      {
+	/* Position of this field, counting in bits from start of
+	   containing structure.
+	   For gdbarch_bits_big_endian=1 targets, it is the bit offset to the MSB.
+	   For gdbarch_bits_big_endian=0 targets, it is the bit offset to the LSB.
+	   For a range bound or enum value, this is the value itself. */
 
-      int bitpos;
+	int bitpos;
 
-      /* For a static field, if TYPE_FIELD_STATIC_HAS_ADDR then physaddr
-	 is the location (in the target) of the static field.
-	 Otherwise, physname is the mangled label of the static field. */
+	/* For a static field, if TYPE_FIELD_STATIC_HAS_ADDR then physaddr
+	   is the location (in the target) of the static field.
+	   Otherwise, physname is the mangled label of the static field. */
 
-      CORE_ADDR physaddr;
-      char *physname;
+	CORE_ADDR physaddr;
+	char *physname;
 
-      /* The field location can be computed by evaluating the following DWARF
-	 block.  This can be used in Fortran variable-length arrays, for
-	 instance.  */
+	/* The field location can be computed by evaluating the following DWARF
+	   block.  This can be used in Fortran variable-length arrays, for
+	   instance.  */
 
-      struct dwarf2_locexpr_baton *dwarf_block;
-    }
-    loc;
+	struct dwarf2_locexpr_baton *dwarf_block;
+      }
+      loc;
 
-    /* For a function or member type, this is 1 if the argument is marked
-       artificial.  Artificial arguments should not be shown to the
-       user.  For TYPE_CODE_RANGE it is set if the specific bound is not
-       defined.  */
-    unsigned int artificial : 1;
+      /* For a function or member type, this is 1 if the argument is marked
+	 artificial.  Artificial arguments should not be shown to the
+	 user.  For TYPE_CODE_RANGE it is set if the specific bound is not
+	 defined.  */
+      unsigned int artificial : 1;
 
-    /* Discriminant for union field_location.  */
-    ENUM_BITFIELD(field_loc_kind) loc_kind : 2;
+      /* Discriminant for union field_location.  */
+      ENUM_BITFIELD(field_loc_kind) loc_kind : 2;
 
-    /* Size of this field, in bits, or zero if not packed.
-       For an unpacked field, the field's type's length
-       says how many bytes the field occupies.  */
+      /* Size of this field, in bits, or zero if not packed.
+	 If non-zero in an array type, indicates the element size in
+	 bits (used only in Ada at the moment).
+	 For an unpacked field, the field's type's length
+	 says how many bytes the field occupies.  */
 
-    unsigned int bitsize : 29;
+      unsigned int bitsize : 29;
 
-    /* In a struct or union type, type of this field.
-       In a function or member type, type of this argument.
-       In an array type, the domain-type of the array.  */
+      /* In a struct or union type, type of this field.
+	 In a function or member type, type of this argument.
+	 In an array type, the domain-type of the array.  */
 
-    struct type *type;
+      struct type *type;
 
-    /* Name of field, value or argument.
-       NULL for range bounds, array domains, and member function
-       arguments.  */
+      /* Name of field, value or argument.
+	 NULL for range bounds, array domains, and member function
+	 arguments.  */
 
-    char *name;
+      char *name;
+    } *fields;
 
-  } *fields;
+    /* Union member used for range types. */
+
+    struct range_bounds
+    {
+      /* Low bound of range. */
+
+      LONGEST low;
+
+      /* High bound of range. */
+
+      LONGEST high;
+
+      /* Flags indicating whether the values of low and high are
+         valid.  When true, the respective range value is
+         undefined.  Currently used only for FORTRAN arrays.  */
+           
+      char low_undefined;
+      char high_undefined;
+
+    } *bounds;
+
+  } flds_bnds;
 
   /* For types with virtual functions (TYPE_CODE_STRUCT), VPTR_BASETYPE
      is the base class which defined the virtual function table pointer.  
@@ -828,19 +854,24 @@ extern void allocate_cplus_struct_type (struct type *);
    type, you need to do TYPE_CODE (check_type (this_type)). */
 #define TYPE_CODE(thistype) TYPE_MAIN_TYPE(thistype)->code
 #define TYPE_NFIELDS(thistype) TYPE_MAIN_TYPE(thistype)->nfields
-#define TYPE_FIELDS(thistype) TYPE_MAIN_TYPE(thistype)->fields
+#define TYPE_FIELDS(thistype) TYPE_MAIN_TYPE(thistype)->flds_bnds.fields
 #define TYPE_TEMPLATE_ARGS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->template_args
 
 #define TYPE_INDEX_TYPE(type) TYPE_FIELD_TYPE (type, 0)
-#define TYPE_LOW_BOUND(range_type) TYPE_FIELD_BITPOS (range_type, 0)
-#define TYPE_HIGH_BOUND(range_type) TYPE_FIELD_BITPOS (range_type, 1)
+#define TYPE_RANGE_DATA(thistype) TYPE_MAIN_TYPE(thistype)->flds_bnds.bounds
+#define TYPE_LOW_BOUND(range_type) TYPE_RANGE_DATA(range_type)->low
+#define TYPE_HIGH_BOUND(range_type) TYPE_RANGE_DATA(range_type)->high
+#define TYPE_LOW_BOUND_UNDEFINED(range_type) \
+   TYPE_RANGE_DATA(range_type)->low_undefined
+#define TYPE_HIGH_BOUND_UNDEFINED(range_type) \
+   TYPE_RANGE_DATA(range_type)->high_undefined
 
 /* Moto-specific stuff for FORTRAN arrays */
 
 #define TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED(arraytype) \
-   (TYPE_FIELD_ARTIFICIAL(TYPE_INDEX_TYPE((arraytype)),1))
+   TYPE_HIGH_BOUND_UNDEFINED(TYPE_INDEX_TYPE(arraytype))
 #define TYPE_ARRAY_LOWER_BOUND_IS_UNDEFINED(arraytype) \
-   (TYPE_FIELD_ARTIFICIAL(TYPE_INDEX_TYPE((arraytype)),0))
+   TYPE_LOW_BOUND_UNDEFINED(TYPE_INDEX_TYPE(arraytype))
 
 #define TYPE_ARRAY_UPPER_BOUND_VALUE(arraytype) \
    (TYPE_HIGH_BOUND(TYPE_INDEX_TYPE((arraytype))))
@@ -862,9 +893,9 @@ extern void allocate_cplus_struct_type (struct type *);
 #define TYPE_CPLUS_SPECIFIC(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.cplus_stuff
 #define TYPE_FLOATFORMAT(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.floatformat
 #define TYPE_CALLING_CONVENTION(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.calling_convention
-#define TYPE_BASECLASS(thistype,index) TYPE_MAIN_TYPE(thistype)->fields[index].type
+#define TYPE_BASECLASS(thistype,index) TYPE_FIELD_TYPE(thistype, index)
 #define TYPE_N_BASECLASSES(thistype) TYPE_CPLUS_SPECIFIC(thistype)->n_baseclasses
-#define TYPE_BASECLASS_NAME(thistype,index) TYPE_MAIN_TYPE(thistype)->fields[index].name
+#define TYPE_BASECLASS_NAME(thistype,index) TYPE_FIELD_NAME(thistype, index)
 #define TYPE_BASECLASS_BITPOS(thistype,index) TYPE_FIELD_BITPOS(thistype,index)
 #define BASETYPE_VIA_PUBLIC(thistype, index) \
   ((!TYPE_FIELD_PRIVATE(thistype, index)) && (!TYPE_FIELD_PROTECTED(thistype, index)))
@@ -896,7 +927,7 @@ extern void allocate_cplus_struct_type (struct type *);
 #define FIELD_ARTIFICIAL(thisfld) ((thisfld).artificial)
 #define FIELD_BITSIZE(thisfld) ((thisfld).bitsize)
 
-#define TYPE_FIELD(thistype, n) TYPE_MAIN_TYPE(thistype)->fields[n]
+#define TYPE_FIELD(thistype, n) TYPE_MAIN_TYPE(thistype)->flds_bnds.fields[n]
 #define TYPE_FIELD_TYPE(thistype, n) FIELD_TYPE(TYPE_FIELD(thistype, n))
 #define TYPE_FIELD_NAME(thistype, n) FIELD_NAME(TYPE_FIELD(thistype, n))
 #define TYPE_FIELD_LOC_KIND(thistype, n) FIELD_LOC_KIND (TYPE_FIELD (thistype, n))
@@ -1227,8 +1258,8 @@ extern struct type *make_function_type (struct type *, struct type **);
 
 extern struct type *lookup_function_type (struct type *);
 
-extern struct type *create_range_type (struct type *, struct type *, int,
-				       int);
+extern struct type *create_range_type (struct type *, struct type *, LONGEST,
+				       LONGEST);
 
 extern struct type *create_array_type (struct type *, struct type *,
 				       struct type *);

@@ -1,3 +1,54 @@
+2009-12-13  Paul N. Hilfinger  <hilfinger@adacore.com>
+
+	* dwarf2read.c (struct attribute): Increase sizes of unsnd and snd 
+	fields to allow larger integer sizes.
+	(read_subrange_type): Increase size of bound values.
+	Add logic to determine signedness based on base-type size, signedness.
+	(read_attribute_value): Change format for bad byte size in message.
+	(read_8_bytes): Increase size of result type.
+	(dump_die_shallow): Change format for value.
+	(dwarf2_get_attr_constant_value): Increase size of return type.
+	Correct comment.
+	* gdbtypes.c (create_range_type): Change API to increase size of 
+	bounds. struct field -> union field.
+	Always take signedness from base type.
+	(check_typedef): Use new API for TYPE_LOW_BOUND, TYPE_HIGH_BOUND.
+	(recursive_dump_type, copy_type_recursive): Adjust to new 
+	representation of range types.
+	* gdbtypes.h (fields_or_bounds): New union containing struct field and
+	new struct range_bounds, used for range types.
+	(TYPE_RANGE_DATA): New macro to access range_bounds member.
+	(TYPE_LOW_BOUND, TYPE_HIGH_BOUND): Represent with new TYPE_RANGE_DATA.
+	(TYPE_LOW_BOUND_UNDEFINED, TYPE_HIGH_BOUND_UNDEFINED): New macros,
+	taking over the job of TYPE_FIELD_ARTIFICIAL for range bounds.
+	(SET_TYPE_LOW_BOUND, SET_TYPE_HIGH_BOUND, SET_TYPE_LOW_BOUND_DEFINED)
+	(SET_TYPE_HIGH_BOUND_DEFINED): New macros.
+	(TYPE_FIELDS, TYPE_BASECLASS, TYPE_BASECLASS_NAME, TYPE_FIELD)
+	(TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED)
+	(TYPE_ARRAY_LOWER_BOUND_IS_UNDEFINED, TYPE_ARRAY_UPPER_BOUND_VALUE)
+	(TYPE_ARRAY_LOWER_BOUND_VALUE):	Adjust to new representation.
+	(create_range_type): Adjust API.
+	* ada-lang.c (ada_modulus): Use new extended bound values.
+	(discrete_type_low_bound): Rename to...
+	(ada_discrete_type_low_bound): ... and make external.
+	(discrete_type_high_bound): Rename to...
+	(ada_discrete_type_high_bound): ... and make external.
+	(ada_value_slice_from_ptr, ada_array_bound_from_type)
+	(ada_evaluate_subexp, to_fixed_range_type): 
+	Use ada_discrete_type_low_bound, ada_discrete_type_high_bound.
+	* ada-typeprint.c (print_range): Use ada_discrete_type_low_bound,
+	ada_discrete_type_high_bound.  Don't look at field count, which 
+	is no longer meaningful.  Print bounds whenever argument is a range
+	or enumeration.
+	* ada-lang.h (ada_discrete_type_low_bound,ada_discrete_type_high_bound):
+	Declare.
+	* varobj.c (c_describe_child): Adjust to render larger values.
+	* mdebugread.c (parse_type): Use proper abstractions for range types:
+	TYPE_RANGE_DATA, SET_TYPE_LOW_BOUND_DEFINED,
+	SET_TYPE_HIGH_BOUND_DEFINED.
+	* p-typeprint.c (pascal_type_print_varspec_prefix): Use larger format
+	for bounds.
+	
 2009-12-11  Michael Snyder  <msnyder@vmware.com>
 
 	* main.c (captured_main): Indentation.
