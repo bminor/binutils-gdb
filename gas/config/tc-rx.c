@@ -895,7 +895,7 @@ rx_frag_init (fragS * fragP)
    <symbol_name> .equ <expression>   */
 
 static void
-rx_equ (char * name, char * expr)
+rx_equ (char * name, char * expression)
 {
   char   saved_name_end_char;
   char * name_end;
@@ -912,7 +912,7 @@ rx_equ (char * name, char * expr)
   * name_end = 0;
 
   saved_ilp = input_line_pointer;
-  input_line_pointer = expr;
+  input_line_pointer = expression;
 
   equals (name, 1);
 

@@ -1,7 +1,13 @@
+2009-12-14  Yoshinori Sato  <ysato@users.sourceforge.jp>
+
+	PR gas/11089
+	* config/tc-rx.c (rx_equ): Rename 'expr' to 'expression' in order
+	to avoid shadowing a global symbol of the same name.
+
 2009-12-14  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-microblaze.c (md_assemble): Rename 'imm' to 'immed' in
-	order to avoid shadowing global variable of the same name.
+	order to avoid shadowing a global symbol of the same name.
 
 2009-12-11  Andrew Jenner  <andrew@codesourcery.com>
 
