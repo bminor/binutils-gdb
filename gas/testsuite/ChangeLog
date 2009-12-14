@@ -1,3 +1,10 @@
+2009-12-14  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/10924
+	* gas/arm/unpredictable.s: New test case - checks the disassembly
+	of instructions with unpredictable behaviour.
+	* gas/arm/unpredictable.d: New file - expected disassembly.
+
 2009-12-11  Quentin Neill  <quentin.neill@amd.com>
 
 	* gas/i386/fma4.d: Add test cases.

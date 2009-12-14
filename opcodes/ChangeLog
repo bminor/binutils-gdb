@@ -1,3 +1,10 @@
+2009-12-14  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/10924
+	* arm-dis.c (arm_opcodes): Specify %R in cases where using r15
+	results in unpredictable behaviour.
+	(print_insn_arm): Handle %R.
+
 2009-12-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (get_valid_dis386): Set vex.w to 0 for VEX C5

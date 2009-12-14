@@ -789,6 +789,7 @@ static const struct opcode32 neon_opcodes[] =
    %P			print address for pli instruction.
 
    %<bitfield>r		print as an ARM register
+   %<bitfield>R		as %<bitfield>r but r15 is UNPREDICTABLE
    %<bitfield>d		print the bitfield in decimal
    %<bitfield>W         print the bitfield plus one in decimal 
    %<bitfield>x		print the bitfield in hex
@@ -807,11 +808,11 @@ static const struct opcode32 arm_opcodes[] =
   /* ARM instructions.  */
   {ARM_EXT_V1, 0xe1a00000, 0xffffffff, "nop\t\t\t; (mov r0, r0)"},
   {ARM_EXT_V4T | ARM_EXT_V5, 0x012FFF10, 0x0ffffff0, "bx%c\t%0-3r"},
-  {ARM_EXT_V2, 0x00000090, 0x0fe000f0, "mul%20's%c\t%16-19r, %0-3r, %8-11r"},
-  {ARM_EXT_V2, 0x00200090, 0x0fe000f0, "mla%20's%c\t%16-19r, %0-3r, %8-11r, %12-15r"},
-  {ARM_EXT_V2S, 0x01000090, 0x0fb00ff0, "swp%22'b%c\t%12-15r, %0-3r, [%16-19r]"},
-  {ARM_EXT_V3M, 0x00800090, 0x0fa000f0, "%22?sumull%20's%c\t%12-15r, %16-19r, %0-3r, %8-11r"},
-  {ARM_EXT_V3M, 0x00a00090, 0x0fa000f0, "%22?sumlal%20's%c\t%12-15r, %16-19r, %0-3r, %8-11r"},
+  {ARM_EXT_V2, 0x00000090, 0x0fe000f0, "mul%20's%c\t%16-19R, %0-3R, %8-11R"},
+  {ARM_EXT_V2, 0x00200090, 0x0fe000f0, "mla%20's%c\t%16-19R, %0-3R, %8-11R, %12-15R"},
+  {ARM_EXT_V2S, 0x01000090, 0x0fb00ff0, "swp%22'b%c\t%12-15R, %0-3R, [%16-19R]"},
+  {ARM_EXT_V3M, 0x00800090, 0x0fa000f0, "%22?sumull%20's%c\t%12-15R, %16-19R, %0-3R, %8-11R"},
+  {ARM_EXT_V3M, 0x00a00090, 0x0fa000f0, "%22?sumlal%20's%c\t%12-15R, %16-19R, %0-3R, %8-11R"},
 
   /* V7 instructions.  */
   {ARM_EXT_V7, 0xf450f000, 0xfd70f000, "pli\t%P"},
@@ -984,7 +985,7 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V5, 0xe1200070, 0xfff000f0, "bkpt\t0x%16-19X%12-15X%8-11X%0-3X"},
   {ARM_EXT_V5, 0xfa000000, 0xfe000000, "blx\t%B"},
   {ARM_EXT_V5, 0x012fff30, 0x0ffffff0, "blx%c\t%0-3r"},
-  {ARM_EXT_V5, 0x016f0f10, 0x0fff0ff0, "clz%c\t%12-15r, %0-3r"},
+  {ARM_EXT_V5, 0x016f0f10, 0x0fff0ff0, "clz%c\t%12-15R, %0-3R"},
 
   /* V5E "El Segundo" Instructions.  */    
   {ARM_EXT_V5E, 0x000000d0, 0x0e1000f0, "ldrd%c\t%12-15r, %s"},
@@ -1018,18 +1019,23 @@ static const struct opcode32 arm_opcodes[] =
 
   /* ARM Instructions.  */
   {ARM_EXT_V1, 0x052d0004, 0x0fff0fff, "push%c\t{%12-15r}\t\t; (str%c %12-15r, %a)"},
-  {ARM_EXT_V1, 0x04000000, 0x0e100000, "str%22'b%t%c\t%12-15r, %a"},
-  {ARM_EXT_V1, 0x06000000, 0x0e100ff0, "str%22'b%t%c\t%12-15r, %a"},
-  {ARM_EXT_V1, 0x04000000, 0x0c100010, "str%22'b%t%c\t%12-15r, %a"},
-  {ARM_EXT_V1, 0x04400000, 0x0e500000, "strb%c\t%12-15r, %a"},
-  {ARM_EXT_V1, 0x06400000, 0x0e500010, "strb%c\t%12-15r, %a"},
-  {ARM_EXT_V1, 0x004000b0, 0x0e5000f0, "strh%c\t%12-15r, %s"},
-  {ARM_EXT_V1, 0x000000b0, 0x0e500ff0, "strh%c\t%12-15r, %s"},
+  
+  {ARM_EXT_V1, 0x04400000, 0x0e500000, "strb%t%c\t%12-15R, %a"},
+  {ARM_EXT_V1, 0x04000000, 0x0e500000, "str%t%c\t%12-15r, %a"},
+  {ARM_EXT_V1, 0x06400000, 0x0e500ff0, "strb%t%c\t%12-15R, %a"},
+  {ARM_EXT_V1, 0x06000000, 0x0e500ff0, "str%t%c\t%12-15r, %a"},
+  {ARM_EXT_V1, 0x04400000, 0x0c500010, "strb%t%c\t%12-15R, %a"},
+  {ARM_EXT_V1, 0x04000000, 0x0c500010, "str%t%c\t%12-15r, %a"},
+  
+  {ARM_EXT_V1, 0x04400000, 0x0e500000, "strb%c\t%12-15R, %a"},
+  {ARM_EXT_V1, 0x06400000, 0x0e500010, "strb%c\t%12-15R, %a"},
+  {ARM_EXT_V1, 0x004000b0, 0x0e5000f0, "strh%c\t%12-15R, %s"},
+  {ARM_EXT_V1, 0x000000b0, 0x0e500ff0, "strh%c\t%12-15R, %s"},
 
   {ARM_EXT_V1, 0x00500090, 0x0e5000f0, UNDEFINED_INSTRUCTION},
-  {ARM_EXT_V1, 0x00500090, 0x0e500090, "ldr%6's%5?hb%c\t%12-15r, %s"},
+  {ARM_EXT_V1, 0x00500090, 0x0e500090, "ldr%6's%5?hb%c\t%12-15R, %s"},
   {ARM_EXT_V1, 0x00100090, 0x0e500ff0, UNDEFINED_INSTRUCTION},
-  {ARM_EXT_V1, 0x00100090, 0x0e500f90, "ldr%6's%5?hb%c\t%12-15r, %s"},
+  {ARM_EXT_V1, 0x00100090, 0x0e500f90, "ldr%6's%5?hb%c\t%12-15R, %s"},
 
   {ARM_EXT_V1, 0x02000000, 0x0fe00000, "and%20's%c\t%12-15r, %16-19r, %o"},
   {ARM_EXT_V1, 0x00000000, 0x0fe00010, "and%20's%c\t%12-15r, %16-19r, %o"},
@@ -1064,7 +1070,7 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V1, 0x00e00010, 0x0fe00090, "rsc%20's%c\t%12-15r, %16-19r, %o"},
 
   {ARM_EXT_V3, 0x0120f000, 0x0db0f000, "msr%c\t%22?SCPSR%C, %o"},
-  {ARM_EXT_V3, 0x010f0000, 0x0fbf0fff, "mrs%c\t%12-15r, %22?SCPSR"},
+  {ARM_EXT_V3, 0x010f0000, 0x0fbf0fff, "mrs%c\t%12-15R, %22?SCPSR"},
 
   {ARM_EXT_V1, 0x03000000, 0x0fe00000, "tst%p%c\t%16-19r, %o"},
   {ARM_EXT_V1, 0x01000000, 0x0fe00010, "tst%p%c\t%16-19r, %o"},
@@ -1105,13 +1111,18 @@ static const struct opcode32 arm_opcodes[] =
 
   {ARM_EXT_V1, 0x06000010, 0x0e000010, UNDEFINED_INSTRUCTION},
   {ARM_EXT_V1, 0x049d0004, 0x0fff0fff, "pop%c\t{%12-15r}\t\t; (ldr%c %12-15r, %a)"},
-  {ARM_EXT_V1, 0x04100000, 0x0c100000, "ldr%22'b%t%c\t%12-15r, %a"},
+  
+  {ARM_EXT_V1, 0x04500000, 0x0c500000, "ldrb%t%c\t%12-15R, %a"},
+
+  {ARM_EXT_V1, 0x04300000, 0x0d700000, "ldrt%c\t%12-15R, %a"},
+  {ARM_EXT_V1, 0x04100000, 0x0c500000, "ldr%c\t%12-15r, %a"},
+  
   {ARM_EXT_V1, 0x092d0000, 0x0fff0000, "push%c\t%m"},
-  {ARM_EXT_V1, 0x08800000, 0x0ff00000, "stm%c\t%16-19r%21'!, %m%22'^"},
-  {ARM_EXT_V1, 0x08000000, 0x0e100000, "stm%23?id%24?ba%c\t%16-19r%21'!, %m%22'^"},
+  {ARM_EXT_V1, 0x08800000, 0x0ff00000, "stm%c\t%16-19R%21'!, %m%22'^"},
+  {ARM_EXT_V1, 0x08000000, 0x0e100000, "stm%23?id%24?ba%c\t%16-19R%21'!, %m%22'^"},
   {ARM_EXT_V1, 0x08bd0000, 0x0fff0000, "pop%c\t%m"},
-  {ARM_EXT_V1, 0x08900000, 0x0f900000, "ldm%c\t%16-19r%21'!, %m%22'^"},
-  {ARM_EXT_V1, 0x08100000, 0x0e100000, "ldm%23?id%24?ba%c\t%16-19r%21'!, %m%22'^"},
+  {ARM_EXT_V1, 0x08900000, 0x0f900000, "ldm%c\t%16-19R%21'!, %m%22'^"},
+  {ARM_EXT_V1, 0x08100000, 0x0e100000, "ldm%23?id%24?ba%c\t%16-19R%21'!, %m%22'^"},
   {ARM_EXT_V1, 0x0a000000, 0x0e000000, "b%24'l%c\t%b"},
   {ARM_EXT_V1, 0x0f000000, 0x0f000000, "svc%c\t%0-23x"},
 
@@ -2831,6 +2842,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 	  || (insn->mask & 0xF0000000) == 0xF0000000
 	  || (insn->mask == 0 && insn->value == 0))
 	{
+	  bfd_boolean is_unpredictable = FALSE;
 	  signed long value_in_comment = 0;
 	  const char *c;
 
@@ -2878,7 +2890,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			  else
 			    {
 			      func (stream, "[pc], #%d", offset);
-			      func (stream, UNPREDICTABLE_INSTRUCTION);
+			      is_unpredictable = TRUE;
 			    }
 			}
 		      else
@@ -2937,8 +2949,8 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 				  if (WRITEBACK_BIT_SET
 				      /* Specifying the PC register as the post-indexed
 					 registers is also unpredictable.  */
-				      || ((given & 0xf) == 0xf))
-				    func (stream, UNPREDICTABLE_INSTRUCTION);
+				      || (! IMMEDIATE_BIT_SET && ((given & 0xf) == 0xf)))
+				    is_unpredictable = TRUE;
 				}
 			    }
 			}
@@ -2972,6 +2984,8 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			      func (stream, "%s", arm_regnames[reg]);
 			    }
 			func (stream, "}");
+			if (! started)
+			  is_unpredictable = TRUE;
 		      }
 		      break;
 
@@ -3105,6 +3119,10 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			
 			switch (*c)
 			  {
+			  case 'R':
+			    if (value == 15)
+			      is_unpredictable = TRUE;
+			    /* Fall through.  */
 			  case 'r':
 			    func (stream, "%s", arm_regnames[value]);
 			    break;
@@ -3202,6 +3220,9 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 
 	  if (value_in_comment > 32 || value_in_comment < -16)
 	    func (stream, "\t; 0x%lx", (value_in_comment & 0xffffffffUL));
+
+	  if (is_unpredictable)
+	    func (stream, UNPREDICTABLE_INSTRUCTION);
 	  return;
 	}
     }
