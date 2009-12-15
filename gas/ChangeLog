@@ -1,3 +1,7 @@
+2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (build_vex_prefix): Use VEX256.
+
 2009-12-14  Yoshinori Sato  <ysato@users.sourceforge.jp>
 
 	PR gas/11086

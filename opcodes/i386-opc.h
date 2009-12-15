@@ -274,6 +274,8 @@ enum
 	1: 128bit VEX prefix.
 	2: 256bit VEX prefix.
    */
+#define VEX128	1
+#define VEX256	2
   Vex,
   /* insn has VEX NDS. Register-only source is encoded in Vex prefix.
      We use VexNDS on insns with VEX DDS since the register-only source
