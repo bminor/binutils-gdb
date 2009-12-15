@@ -626,6 +626,7 @@ macho_symfile_read (struct objfile *objfile, int symfile_flags)
 	{
 	  int ix;
 	  oso_el *oso;
+          struct bfd_section *asect, *dsect;
 
 	  if (mach_o_debug_level > 0)
 	    printf_unfiltered (_("dsym file found\n"));
@@ -638,6 +639,17 @@ macho_symfile_read (struct objfile *objfile, int symfile_flags)
 	    }
 	  VEC_free (oso_el, oso_vector);
 	  oso_vector = NULL;
+
+          /* Set dsym section size.  */
+          for (asect = objfile->obfd->sections, dsect = dsym_bfd->sections;
+               asect && dsect;
+               asect = asect->next, dsect = dsect->next)
+            {
+              if (strcmp (asect->name, dsect->name) != 0)
+                break;
+              bfd_set_section_size (dsym_bfd, dsect,
+                                    bfd_get_section_size (asect));
+            }
 
 	  /* Add the dsym file as a separate file.  */
           symbol_file_add_separate (dsym_bfd, symfile_flags, objfile);
