@@ -2694,10 +2694,14 @@ Layout::create_shstrtab()
   Output_section* os = this->make_output_section(name, elfcpp::SHT_STRTAB, 0,
 						 false, false);
 
-  // We can't write out this section until we've set all the section
-  // names, and we don't set the names of compressed output sections
-  // until relocations are complete.
-  os->set_after_input_sections();
+  if (strcmp(parameters->options().compress_debug_sections(), "none") != 0)
+    {
+      // We can't write out this section until we've set all the
+      // section names, and we don't set the names of compressed
+      // output sections until relocations are complete.  FIXME: With
+      // the current names we use, this is unnecessary.
+      os->set_after_input_sections();
+    }
 
   Output_section_data* posd = new Output_data_strtab(&this->namepool_);
   os->add_output_section_data(posd);

@@ -1,5 +1,10 @@
 2009-12-15  Ian Lance Taylor  <iant@google.com>
 
+	* layout.cc (Layout::create_shstrtab): Only write out after input
+	sections if we are compressing debug sections.
+
+2009-12-15  Ian Lance Taylor  <iant@google.com>
+
 	* archive.cc (Archive::add_symbols): Only look up a symbol without
 	a version if there is, in fact, a version.
 
