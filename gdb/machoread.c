@@ -69,7 +69,9 @@ typedef struct oso_el
   int num_sections;
 
   /* Each seaction of the object file is represented by a symbol and its
-     offset.  */
+     offset.  If the offset is 0, we assume that the symbol is at offset 0
+     in the OSO object file and a symbol lookup in the main file is
+     required to get the offset.  */
   asymbol **symbols;
   bfd_vma *offsets;
 }
@@ -124,14 +126,17 @@ macho_symtab_read (struct objfile *objfile,
 	{
 	  bfd_vma addr;
 
+          /* Debugging symbols are used to collect OSO file names as well
+             as section offsets.  */
+
 	  switch (mach_o_sym->n_type)
 	    {
 	    case N_SO:
-	      if ((sym->name == NULL || sym->name[0] == 0)
-		  && oso_file != NULL)
+              /* An empty SO entry terminates a chunk for an OSO file.  */
+	      if ((sym->name == NULL || sym->name[0] == 0) && oso_file != NULL)
 		{
 		  macho_add_oso (oso_file, nbr_sections,
-				 first_symbol, first_offset);
+                                 first_symbol, first_offset);
 		  first_symbol = NULL;
 		  first_offset = NULL;
 		  oso_file = NULL;
@@ -149,6 +154,7 @@ macho_symtab_read (struct objfile *objfile,
 	      if (addr != 0
 		  && first_symbol[sym->section->index] == NULL)
 		{
+                  /* These STAB entries can directly relocate a section.  */
 		  first_symbol[sym->section->index] = sym;
 		  first_offset[sym->section->index] = addr + offset;
 		}
@@ -156,9 +162,15 @@ macho_symtab_read (struct objfile *objfile,
 	    case N_GSYM:
 	      gdb_assert (oso_file != NULL);
 	      if (first_symbol[sym->section->index] == NULL)
-		first_symbol[sym->section->index] = sym;
+                {
+                  /* This STAB entry needs a symbol look-up to relocate
+                     the section.  */
+                  first_symbol[sym->section->index] = sym;
+                  first_offset[sym->section->index] = 0;
+                }
 	      break;
 	    case N_OSO:
+              /* New OSO file.  */
 	      gdb_assert (oso_file == NULL);
 	      first_symbol = (asymbol **)xmalloc (nbr_sections
 						  * sizeof (asymbol *));
@@ -233,6 +245,7 @@ macho_symtab_read (struct objfile *objfile,
 	  if (oso_file != NULL
 	      && first_symbol[sym->section->index] == NULL)
 	    {
+              /* Standard symbols can directly relocate sections.  */
 	      first_symbol[sym->section->index] = sym;
 	      first_offset[sym->section->index] = symaddr;
 	    }
@@ -243,6 +256,7 @@ macho_symtab_read (struct objfile *objfile,
 	}
     }
 
+  /* Just in case there is no trailing SO entry.  */
   if (oso_file != NULL)
     macho_add_oso (oso_file, nbr_sections, first_symbol, first_offset);
 }

@@ -1,3 +1,8 @@
+2009-12-15  Tristan Gingold  <gingold@adacore.com>
+
+        * machoread.c (macho_symtab_read): Add comments.  Always set
+        first_offset.
+
 2009-12-14  Tristan Gingold  <gingold@adacore.com>
 
 	* symfile.h (find_separate_debug_file_by_buildid): Remove prototype.
