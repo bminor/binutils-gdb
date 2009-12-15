@@ -90,38 +90,43 @@ struct mach_o_section_name_xlat
 {
   const char *bfd_name;
   const char *mach_o_name;
+  flagword flags;
 };
 
 static const struct mach_o_section_name_xlat dwarf_section_names_xlat[] =
   {
-    { ".debug_frame", "__debug_frame" },
-    { ".debug_info", "__debug_info" },
-    { ".debug_abbrev", "__debug_abbrev" },
-    { ".debug_aranges", "__debug_aranges" },
-    { ".debug_macinfo", "__debug_macinfo" },
-    { ".debug_line", "__debug_line" },
-    { ".debug_loc", "__debug_loc" },
-    { ".debug_pubnames", "__debug_pubnames" },
-    { ".debug_pubtypes", "__debug_pubtypes" },
-    { ".debug_str", "__debug_str" },
-    { ".debug_ranges", "__debug_ranges" },
-    { NULL, NULL}
+    { ".debug_frame",    "__debug_frame",    SEC_DEBUGGING },
+    { ".debug_info",     "__debug_info",     SEC_DEBUGGING },
+    { ".debug_abbrev",   "__debug_abbrev",   SEC_DEBUGGING },
+    { ".debug_aranges",  "__debug_aranges",  SEC_DEBUGGING },
+    { ".debug_macinfo",  "__debug_macinfo",  SEC_DEBUGGING },
+    { ".debug_line",     "__debug_line",     SEC_DEBUGGING },
+    { ".debug_loc",      "__debug_loc",      SEC_DEBUGGING },
+    { ".debug_pubnames", "__debug_pubnames", SEC_DEBUGGING },
+    { ".debug_pubtypes", "__debug_pubtypes", SEC_DEBUGGING },
+    { ".debug_str",      "__debug_str",      SEC_DEBUGGING },
+    { ".debug_ranges",   "__debug_ranges",   SEC_DEBUGGING },
+    { NULL, NULL, 0}
   };
 
 static const struct mach_o_section_name_xlat text_section_names_xlat[] =
   {
-    { ".text", "__text" },
-    { ".const", "__const" },
-    { ".cstring", "__cstring" },
-    { ".eh_frame", "__eh_frame" },
-    { NULL, NULL}
+    { ".text",     "__text",      SEC_CODE | SEC_LOAD },
+    { ".const",    "__const",     SEC_READONLY | SEC_DATA | SEC_LOAD },
+    { ".cstring",  "__cstring",   SEC_READONLY | SEC_DATA | SEC_LOAD },
+    { ".eh_frame", "__eh_frame",  SEC_READONLY | SEC_LOAD },
+    { NULL, NULL, 0}
   };
 
 static const struct mach_o_section_name_xlat data_section_names_xlat[] =
   {
-    { ".data", "__data" },
-    { ".bss", "__bss" },
-    { NULL, NULL}
+    { ".data",                "__data",          SEC_DATA | SEC_LOAD },
+    { ".const_data",          "__const",         SEC_DATA | SEC_LOAD },
+    { ".dyld",                "__dyld",          SEC_DATA | SEC_LOAD },
+    { ".lazy_symbol_ptr",     "__la_symbol_ptr", SEC_DATA | SEC_LOAD },
+    { ".non_lazy_symbol_ptr", "__nl_symbol_ptr", SEC_DATA | SEC_LOAD },
+    { ".bss",                 "__bss",           SEC_NO_FLAGS },
+    { NULL, NULL, 0}
   };
 
 struct mach_o_segment_name_xlat
@@ -141,13 +146,17 @@ static const struct mach_o_segment_name_xlat segsec_names_xlat[] =
 
 /* Mach-O to bfd names.  */
 
-static char *
-bfd_mach_o_convert_section_name_to_bfd (bfd *abfd, bfd_mach_o_section *section)
+static void
+bfd_mach_o_convert_section_name_to_bfd (bfd *abfd, bfd_mach_o_section *section,
+                                        char **name, flagword *flags)
 {
   const struct mach_o_segment_name_xlat *seg;
   char *res;
   unsigned int len;
   const char *pfx = "";
+
+  *name = NULL;
+  *flags = SEC_NO_FLAGS;
 
   for (seg = segsec_names_xlat; seg->segname; seg++)
     {
@@ -163,9 +172,11 @@ bfd_mach_o_convert_section_name_to_bfd (bfd *abfd, bfd_mach_o_section *section)
                   res = bfd_alloc (abfd, len + 1);
 
                   if (res == NULL)
-                    return NULL;
+                    return;
                   strcpy (res, sec->bfd_name);
-                  return res;
+                  *name = res;
+                  *flags = sec->flags;
+                  return;
                 }
             }
         }
@@ -186,9 +197,9 @@ bfd_mach_o_convert_section_name_to_bfd (bfd *abfd, bfd_mach_o_section *section)
 
   res = bfd_alloc (abfd, len);
   if (res == NULL)
-    return NULL;
+    return;
   snprintf (res, len, "%s%s.%s", pfx, section->segname, section->sectname);
-  return res;
+  *name = res;
 }
 
 /* Convert a bfd section name to a Mach-O segment + section name.  */
@@ -1474,32 +1485,39 @@ bfd_mach_o_make_bfd_section (bfd *abfd, bfd_mach_o_section *section,
   char *sname;
   flagword flags;
 
-  sname = bfd_mach_o_convert_section_name_to_bfd (abfd, section);
+  bfd_mach_o_convert_section_name_to_bfd (abfd, section, &sname, &flags);
   if (sname == NULL)
     return NULL;
 
-  if ((section->flags & BFD_MACH_O_S_ATTR_DEBUG)
-      || !strcmp (section->segname, "__DWARF"))
+  if (flags == SEC_NO_FLAGS)
     {
-      /* Force flags for dwarf sections.  This looks weird but dsym files
-         have no flags for them and this is important for gdb.  */
-      flags = SEC_HAS_CONTENTS | SEC_DEBUGGING;
+      /* Try to guess flags.  */
+      if (section->flags & BFD_MACH_O_S_ATTR_DEBUG)
+        flags = SEC_DEBUGGING;
+      else
+        {
+          flags = SEC_ALLOC;
+          if ((section->flags & BFD_MACH_O_SECTION_TYPE_MASK)
+              != BFD_MACH_O_S_ZEROFILL)
+            {
+              flags |= SEC_LOAD;
+              if (prot & BFD_MACH_O_PROT_EXECUTE)
+                flags |= SEC_CODE;
+              if (prot & BFD_MACH_O_PROT_WRITE)
+                flags |= SEC_DATA;
+              else if (prot & BFD_MACH_O_PROT_READ)
+                flags |= SEC_READONLY;
+            }
+        }
     }
   else
     {
-      flags = SEC_ALLOC;
-      if ((section->flags & BFD_MACH_O_SECTION_TYPE_MASK)
-	  != BFD_MACH_O_S_ZEROFILL)
-	{
-	  flags |= SEC_HAS_CONTENTS | SEC_LOAD;
-	  if (prot & BFD_MACH_O_PROT_EXECUTE)
-	    flags |= SEC_CODE;
-	  if (prot & BFD_MACH_O_PROT_WRITE)
-	    flags |= SEC_DATA;
-	  else if (prot & BFD_MACH_O_PROT_READ)
-	    flags |= SEC_READONLY;
-	}
+      if ((flags & SEC_DEBUGGING) == 0)
+        flags |= SEC_ALLOC;
     }
+
+  if (section->offset != 0)
+    flags |= SEC_HAS_CONTENTS;
   if (section->nreloc != 0)
     flags |= SEC_RELOC;
 

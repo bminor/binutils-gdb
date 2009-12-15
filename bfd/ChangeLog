@@ -1,3 +1,14 @@
+2009-12-15  Tristan Gingold  <gingold@adacore.com>
+
+        * mach-o.c (struct mach_o_section_name_xlat): Add flags field.
+        (dwarf_section_names_xlat): Add section flags.
+        (text_section_names_xlat): Ditto.
+        (data_section_names_xlat): Ditto.
+        (bfd_mach_o_convert_section_name_to_bfd): Now return name and section
+        flags by reference.
+        (bfd_mach_o_make_bfd_section): Use section flags when know, otherwise
+        try to guess.
+
 2009-12-14  Doug Kwan  <dougkwan@google.com>
 
 	* opncls.c (bfd_opnr_iovec): Rename parameters to avoid shawdowed
