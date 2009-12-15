@@ -1,5 +1,21 @@
 2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (USE_VEX_W_TABLE): New.
+	(VEX_W_TABLE): Likewise.
+	(VEX_W_XXX): Likewise.
+	(vex_w_table): Likewise.
+	(prefix_table): Use VEX_W_XXX.
+	(vex_table): Likewise.
+	(vex_len_table): Likewise.
+	(mod_table): Likewise.
+	(get_valid_dis386): Handle USE_VEX_W_TABLE.
+
+	* i386-opc.tbl: Add VexW0 to AVX instructions where the VEX.W bit
+	isn't used.
+	* i386-tbl.h: Regenerated.
+
+2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-opc.h (VEX128): New.
 	(VEX256): Likewise.
 
