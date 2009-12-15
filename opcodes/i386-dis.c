@@ -9353,15 +9353,17 @@ static const struct dis386 vex_len_table[][2] = {
     { "vaeskeygenassist", { XM, EXx, Ib } },
     { "(bad)",		{ XX } },
   },
+
   /* VEX_LEN_XOP_09_80 */
   {
-    { "vfrczps", { XM, EXxmm } },
-    { "vfrczps", { XM, EXymmq } },
+    { "vfrczps",	{ XM, EXxmm } },
+    { "vfrczps",	{ XM, EXymmq } },
   },
+
   /* VEX_LEN_XOP_09_81 */
   {
-    { "vfrczpd", { XM, EXxmm } },
-    { "vfrczpd", { XM, EXymmq } },
+    { "vfrczpd",	{ XM, EXxmm } },
+    { "vfrczpd",	{ XM, EXymmq } },
   },
 };
 
