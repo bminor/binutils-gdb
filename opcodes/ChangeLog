@@ -1,5 +1,11 @@
 2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (VEX_W_382X_P_2_M_0): New.
+	(vex_w_table): Add VEX_W_382X_P_2_M_0.
+	(mod_table): Use VEX_W_382X_P_2_M_0.
+
+2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c (vex_w_table): Reformat.
 
 2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>

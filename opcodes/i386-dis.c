@@ -1500,6 +1500,10 @@ enum
   VEX_W_3829_P_2,
   VEX_W_382A_P_2_M_0,
   VEX_W_382B_P_2,
+  VEX_W_382C_P_2_M_0,
+  VEX_W_382D_P_2_M_0,
+  VEX_W_382E_P_2_M_0,
+  VEX_W_382F_P_2_M_0,
   VEX_W_3830_P_2,
   VEX_W_3831_P_2,
   VEX_W_3832_P_2,
@@ -10608,6 +10612,26 @@ static const struct dis386 vex_w_table[][2] = {
     { "(bad)",		{ XX } },
   },
   {
+    /* VEX_W_382C_P_2_M_0 */
+    { "vmaskmovps",	{ XM, Vex, Mx } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* VEX_W_382D_P_2_M_0 */
+    { "vmaskmovpd",	{ XM, Vex, Mx } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* VEX_W_382E_P_2_M_0 */
+    { "vmaskmovps",	{ Mx, Vex, XM } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* VEX_W_382F_P_2_M_0 */
+    { "vmaskmovpd",	{ Mx, Vex, XM } },
+    { "(bad)",		{ XX } },
+  },
+  {
     /* VEX_W_3830_P_2 */
     { "vpmovzxbw",	{ XM, EXq } },
     { "(bad)",		{ XX } },
@@ -11267,22 +11291,22 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_VEX_382C_PREFIX_2 */
-    { "vmaskmovps",	{ XM, Vex, Mx } },
+    { VEX_W_TABLE (VEX_W_382C_P_2_M_0) },
     { "(bad)",		{ XX } },
   },
   {
     /* MOD_VEX_382D_PREFIX_2 */
-    { "vmaskmovpd",	{ XM, Vex, Mx } },
+    { VEX_W_TABLE (VEX_W_382D_P_2_M_0) },
     { "(bad)",		{ XX } },
   },
   {
     /* MOD_VEX_382E_PREFIX_2 */
-    { "vmaskmovps",	{ Mx, Vex, XM } },
+    { VEX_W_TABLE (VEX_W_382E_P_2_M_0) },
     { "(bad)",		{ XX } },
   },
   {
     /* MOD_VEX_382F_PREFIX_2 */
-    { "vmaskmovpd",	{ Mx, Vex, XM } },
+    { VEX_W_TABLE (VEX_W_382F_P_2_M_0) },
     { "(bad)",		{ XX } },
   },
 };
