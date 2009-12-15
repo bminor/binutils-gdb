@@ -1,3 +1,9 @@
+2009-12-14  Doug Kwan  <dougkwan@google.com>
+
+	* opncls.c (bfd_opnr_iovec): Rename parameters to avoid shawdowed
+	variable warnings.
+	* bfd-in2.h: Regnenerate.
+
 2009-12-12  Nick Clifton  <nickc@redhat.com>
 
 	* coff-arm.c (coff_arm_rtype_to_howto): Fix shadowed variable
