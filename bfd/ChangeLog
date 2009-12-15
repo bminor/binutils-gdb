@@ -1,5 +1,11 @@
 2009-12-15  Tristan Gingold  <gingold@adacore.com>
 
+        * mach-o.h (bfd_mach_o_uuid_command): Remove section field.
+        * mach-o.c (bfd_mach_o_scan_read_uuid): Do not create a section
+        from this command.
+
+2009-12-15  Tristan Gingold  <gingold@adacore.com>
+
         * mach-o.c (struct mach_o_section_name_xlat): Add flags field.
         (dwarf_section_names_xlat): Add section flags.
         (text_section_names_xlat): Ditto.

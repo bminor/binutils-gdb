@@ -2298,32 +2298,12 @@ static int
 bfd_mach_o_read_uuid (bfd *abfd, bfd_mach_o_load_command *command)
 {
   bfd_mach_o_uuid_command *cmd = &command->command.uuid;
-  asection *bfdsec;
-  char *sname;
-  static const char prefix[] = "LC_UUID";
 
   BFD_ASSERT (command->type == BFD_MACH_O_LC_UUID);
 
   if (bfd_seek (abfd, command->offset + 8, SEEK_SET) != 0
       || bfd_bread ((void *) cmd->uuid, 16, abfd) != 16)
     return -1;
-
-  sname = bfd_alloc (abfd, strlen (prefix) + 1);
-  if (sname == NULL)
-    return -1;
-  strcpy (sname, prefix);
-
-  bfdsec = bfd_make_section_anyway_with_flags (abfd, sname, SEC_HAS_CONTENTS);
-  if (bfdsec == NULL)
-    return -1;
-
-  bfdsec->vma = 0;
-  bfdsec->lma = 0;
-  bfdsec->size = command->len - 8;
-  bfdsec->filepos = command->offset + 8;
-  bfdsec->alignment_power = 0;
-
-  cmd->section = bfdsec;
 
   return 0;
 }

@@ -751,7 +751,6 @@ bfd_mach_o_prebound_dylib_command;
 typedef struct bfd_mach_o_uuid_command
 {
   unsigned char uuid[16];
-  asection *section;
 }
 bfd_mach_o_uuid_command;
 
