@@ -1,5 +1,10 @@
 2009-12-15  Tristan Gingold  <gingold@adacore.com>
 
+        * machoread.c (macho_check_dsym): Read uuid directly from load command
+        instead of from a fake section.
+
+2009-12-15  Tristan Gingold  <gingold@adacore.com>
+
         * machoread.c (macho_symtab_read): Add comments.  Always set
         first_offset.
 

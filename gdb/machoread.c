@@ -519,9 +519,8 @@ macho_check_dsym (struct objfile *objfile)
   size_t base_len = strlen (base_name);
   char *dsym_filename = alloca (name_len + dsym_len + base_len + 1);
   bfd *dsym_bfd;
-  asection *sect;
-  bfd_byte main_uuid[16];
-  bfd_byte dsym_uuid[16];
+  bfd_mach_o_load_command *main_uuid;
+  bfd_mach_o_load_command *dsym_uuid;
 
   strcpy (dsym_filename, objfile->name);
   strcpy (dsym_filename + name_len, DSYM_SUFFIX);
@@ -530,19 +529,12 @@ macho_check_dsym (struct objfile *objfile)
   if (access (dsym_filename, R_OK) != 0)
     return NULL;
 
-  sect = bfd_get_section_by_name (objfile->obfd, "LC_UUID");
-  if (sect == NULL)
+  if (bfd_mach_o_lookup_command (objfile->obfd,
+                                 BFD_MACH_O_LC_UUID, &main_uuid) == 0)
     {
       warning (_("can't find UUID in %s"), objfile->name);
       return NULL;
     }
-  if (!bfd_get_section_contents (objfile->obfd, sect, main_uuid,
-				 0, sizeof (main_uuid)))
-    {
-      warning (_("can't read UUID in %s"), objfile->name);
-      return NULL;
-    }
-
   dsym_filename = xstrdup (dsym_filename);
   dsym_bfd = bfd_openr (dsym_filename, gnutarget);
   if (dsym_bfd == NULL)
@@ -560,23 +552,16 @@ macho_check_dsym (struct objfile *objfile)
       return NULL;
     }
 
-  sect = bfd_get_section_by_name (dsym_bfd, "LC_UUID");
-  if (sect == NULL)
+  if (bfd_mach_o_lookup_command (dsym_bfd,
+                                 BFD_MACH_O_LC_UUID, &dsym_uuid) == 0)
     {
       warning (_("can't find UUID in %s"), dsym_filename);
       bfd_close (dsym_bfd);
       xfree (dsym_filename);
       return NULL;
     }
-  if (!bfd_get_section_contents (dsym_bfd, sect, dsym_uuid,
-				 0, sizeof (dsym_uuid)))
-    {
-      warning (_("can't read UUID in %s"), dsym_filename);
-      bfd_close (dsym_bfd);
-      xfree (dsym_filename);
-      return NULL;
-    }
-  if (memcmp (dsym_uuid, main_uuid, sizeof (main_uuid)))
+  if (memcmp (dsym_uuid->command.uuid.uuid, main_uuid->command.uuid.uuid,
+              sizeof (main_uuid->command.uuid.uuid)))
     {
       warning (_("dsym file UUID doesn't match the one in %s"), objfile->name);
       bfd_close (dsym_bfd);
@@ -584,7 +569,6 @@ macho_check_dsym (struct objfile *objfile)
       return NULL;
     }
   return dsym_bfd;
-
 }
 
 static void
