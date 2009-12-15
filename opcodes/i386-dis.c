@@ -1485,6 +1485,7 @@ enum
   VEX_W_380E_P_2,
   VEX_W_380F_P_2,
   VEX_W_3817_P_2,
+  VEX_W_3818_P_2_M_0,
   VEX_W_3819_P_2_M_0,
   VEX_W_381A_P_2_M_0,
   VEX_W_381C_P_2,
@@ -10537,6 +10538,11 @@ static const struct dis386 vex_w_table[][2] = {
     { "(bad)",		{ XX } },
   },
   {
+    /* VEX_W_3818_P_2_M_0 */
+    { "vbroadcastss",	{ XM, Md } },
+    { "(bad)",		{ XX } },
+  },
+  {
     /* VEX_W_3819_P_2_M_0 */
     { "vbroadcastsd",	{ XM, Mq } },
     { "(bad)",		{ XX } },
@@ -11271,7 +11277,7 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_VEX_3818_PREFIX_2 */
-    { "vbroadcastss",	{ XM, Md } },
+    { VEX_W_TABLE (VEX_W_3818_P_2_M_0) },
     { "(bad)",		{ XX } },
   },
   {
