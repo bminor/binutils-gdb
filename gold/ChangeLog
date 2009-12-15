@@ -1,3 +1,8 @@
+2009-12-15  Ian Lance Taylor  <iant@google.com>
+
+	* archive.cc (Archive::add_symbols): Only look up a symbol without
+	a version if there is, in fact, a version.
+
 2009-12-14  Ian Lance Taylor  <iant@google.com>
 
 	Revert -Wshadow changes, all changes from:

@@ -688,6 +688,7 @@ Archive::add_symbols(Symbol_table* symtab, Layout* layout,
 
 	  Symbol* sym = symtab->lookup(sym_name, ver);
 	  if (def
+	      && ver != NULL
 	      && (sym == NULL
 		  || !sym->is_undefined()
 		  || sym->binding() == elfcpp::STB_WEAK))
