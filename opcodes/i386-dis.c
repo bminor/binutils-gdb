@@ -10323,12 +10323,12 @@ static const struct dis386 vex_w_table[][2] = {
   },
   {
     /* VEX_W_E6_P_2  */
-    { "vcvttpd2dq%XY", { XMM, EXx } },
+    { "vcvttpd2dq%XY",	{ XMM, EXx } },
     { "(bad)",		{ XX } },
   },
   {
     /* VEX_W_E6_P_3  */
-    { "vcvtpd2dq%XY", { XMM, EXx } },
+    { "vcvtpd2dq%XY",	{ XMM, EXx } },
     { "(bad)",		{ XX } },
   },
   {
