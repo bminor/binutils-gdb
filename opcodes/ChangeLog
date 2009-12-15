@@ -1,5 +1,9 @@
 2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (vex_w_table): Reformat.
+
+2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c (USE_VEX_W_TABLE): New.
 	(VEX_W_TABLE): Likewise.
 	(VEX_W_XXX): Likewise.

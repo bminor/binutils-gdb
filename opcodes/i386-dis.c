@@ -10029,12 +10029,12 @@ static const struct dis386 vex_w_table[][2] = {
   },
   {
     /* VEX_W_6F_P_1  */
-    { "vmovdqu", { XM, EXx } },
+    { "vmovdqu",	{ XM, EXx } },
     { "(bad)",		{ XX } },
   },
   {
     /* VEX_W_6F_P_2  */
-    { "vmovdqa", { XM, EXx } },
+    { "vmovdqa",	{ XM, EXx } },
     { "(bad)",		{ XX } },
   },
   {
@@ -10314,7 +10314,7 @@ static const struct dis386 vex_w_table[][2] = {
   },
   {
     /* VEX_W_E6_P_1  */
-    { "vcvtdq2pd", { XM, EXxmmq } },
+    { "vcvtdq2pd",	{ XM, EXxmmq } },
     { "(bad)",		{ XX } },
   },
   {
