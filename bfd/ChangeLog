@@ -1,19 +1,26 @@
+2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* opncls.c (bfd_opnr_iovec): Replace _XXX with XXX_P in
+	parameters.
+
+	* tekhex.c (pass_over): Replace eof with is_eof.
+
 2009-12-15  Tristan Gingold  <gingold@adacore.com>
 
-        * mach-o.h (bfd_mach_o_uuid_command): Remove section field.
-        * mach-o.c (bfd_mach_o_scan_read_uuid): Do not create a section
-        from this command.
+	* mach-o.h (bfd_mach_o_uuid_command): Remove section field.
+	* mach-o.c (bfd_mach_o_scan_read_uuid): Do not create a section
+	from this command.
 
 2009-12-15  Tristan Gingold  <gingold@adacore.com>
 
-        * mach-o.c (struct mach_o_section_name_xlat): Add flags field.
-        (dwarf_section_names_xlat): Add section flags.
-        (text_section_names_xlat): Ditto.
-        (data_section_names_xlat): Ditto.
-        (bfd_mach_o_convert_section_name_to_bfd): Now return name and section
-        flags by reference.
-        (bfd_mach_o_make_bfd_section): Use section flags when know, otherwise
-        try to guess.
+	* mach-o.c (struct mach_o_section_name_xlat): Add flags field.
+	(dwarf_section_names_xlat): Add section flags.
+	(text_section_names_xlat): Ditto.
+	(data_section_names_xlat): Ditto.
+	(bfd_mach_o_convert_section_name_to_bfd): Now return name and section
+	flags by reference.
+	(bfd_mach_o_make_bfd_section): Use section flags when know, otherwise
+	try to guess.
 
 2009-12-14  Doug Kwan  <dougkwan@google.com>
 

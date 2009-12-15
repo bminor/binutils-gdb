@@ -523,12 +523,12 @@ static const struct bfd_iovec opncls_iovec = {
 
 bfd *
 bfd_openr_iovec (const char *filename, const char *target,
-		 void *(*_open) (struct bfd *, void *),
+		 void *(*open_p) (struct bfd *, void *),
 		 void *open_closure,
-		 file_ptr (*_pread) (struct bfd *, void *, void *, file_ptr,
-				    file_ptr),
-		 int (*_close) (struct bfd *, void *),
-		 int (*_stat) (struct bfd *, void *, struct stat *))
+		 file_ptr (*pread_p) (struct bfd *, void *, void *,
+				      file_ptr, file_ptr),
+		 int (*close_p) (struct bfd *, void *),
+		 int (*stat_p) (struct bfd *, void *, struct stat *))
 {
   bfd *nbfd;
   const bfd_target *target_vec;
@@ -549,8 +549,8 @@ bfd_openr_iovec (const char *filename, const char *target,
   nbfd->filename = filename;
   nbfd->direction = read_direction;
 
-  /* `open (...)' would get expanded by an the open(2) syscall macro.  */
-  stream = (*_open) (nbfd, open_closure);
+  /* `open_p (...)' would get expanded by an the open(2) syscall macro.  */
+  stream = (*open_p) (nbfd, open_closure);
   if (stream == NULL)
     {
       _bfd_delete_bfd (nbfd);
@@ -559,9 +559,9 @@ bfd_openr_iovec (const char *filename, const char *target,
 
   vec = (struct opncls *) bfd_zalloc (nbfd, sizeof (struct opncls));
   vec->stream = stream;
-  vec->pread = _pread;
-  vec->close = _close;
-  vec->stat = _stat;
+  vec->pread = pread_p;
+  vec->close = close_p;
+  vec->stat = stat_p;
 
   nbfd->iovec = &opncls_iovec;
   nbfd->iostream = vec;
