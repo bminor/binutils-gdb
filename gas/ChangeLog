@@ -1,5 +1,12 @@
 2009-12-16  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (process_suffix): Set i.suffix to 0 in
+	Intel syntax if size is ignored and b/l/w suffixes are
+	illegal.
+	(check_byte_reg): Remove byteokintel check.
+
+2009-12-16  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (build_vex_prefix): Replace vex0f, vex0f38,
 	vex0f3a, xop08, xop09 and xop0a with vexopcode.
 

@@ -252,8 +252,6 @@ enum
   FirstXmm0,
   /* An implicit xmm0 as the first operand */
   Implicit1stXmm0,
-  /* BYTE is OK in Intel syntax. */
-  ByteOkIntel,
   /* Convert to DWORD */
   ToDword,
   /* Convert to QWORD */
@@ -366,7 +364,6 @@ typedef struct i386_opcode_modifier
   unsigned int regkludge:1;
   unsigned int firstxmm0:1;
   unsigned int implicit1stxmm0:1;
-  unsigned int byteokintel:1;
   unsigned int todword:1;
   unsigned int toqword:1;
   unsigned int addrprefixop0:1;

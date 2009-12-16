@@ -1,5 +1,15 @@
 2009-12-16  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-gen.c (opcode_modifiers): Remove ByteOkIntel.
+
+	* i386-opc.h (ByteOkIntel): Removed.
+	(i386_opcode_modifier): Remove byteokintel.
+
+	* i386-opc.tbl: Remove ByteOkIntel.
+	* i386-tbl.h: Regenerated.
+
+2009-12-16  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-gen.c (opcode_modifiers): Remove Vex0F, Vex0F38,
 	Vex0F3A, XOP08, XOP09 and XOP0A.  Add VexOpcode.
 

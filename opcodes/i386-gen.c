@@ -344,7 +344,6 @@ static bitfield opcode_modifiers[] =
   BITFIELD (RegKludge),
   BITFIELD (FirstXmm0),
   BITFIELD (Implicit1stXmm0),
-  BITFIELD (ByteOkIntel),
   BITFIELD (ToDword),
   BITFIELD (ToQword),
   BITFIELD (AddrPrefixOp0),

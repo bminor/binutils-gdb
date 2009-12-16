@@ -4178,12 +4178,20 @@ process_suffix (void)
 	}
       else if (i.suffix == BYTE_MNEM_SUFFIX)
 	{
-	  if (!check_byte_reg ())
+	  if (intel_syntax
+	      && i.tm.opcode_modifier.ignoresize
+	      && i.tm.opcode_modifier.no_bsuf)
+	    i.suffix = 0;
+	  else if (!check_byte_reg ())
 	    return 0;
 	}
       else if (i.suffix == LONG_MNEM_SUFFIX)
 	{
-	  if (!check_long_reg ())
+	  if (intel_syntax
+	      && i.tm.opcode_modifier.ignoresize
+	      && i.tm.opcode_modifier.no_lsuf)
+	    i.suffix = 0;
+	  else if (!check_long_reg ())
 	    return 0;
 	}
       else if (i.suffix == QWORD_MNEM_SUFFIX)
@@ -4197,7 +4205,11 @@ process_suffix (void)
 	}
       else if (i.suffix == WORD_MNEM_SUFFIX)
 	{
-	  if (!check_word_reg ())
+	  if (intel_syntax
+	      && i.tm.opcode_modifier.ignoresize
+	      && i.tm.opcode_modifier.no_wsuf)
+	    i.suffix = 0;
+	  else if (!check_word_reg ())
 	    return 0;
 	}
       else if (i.suffix == XMMWORD_MNEM_SUFFIX
@@ -4373,10 +4385,6 @@ check_byte_reg (void)
 	 32 bit version of an eight bit register, we will just use the
 	 low portion, and that's OK too.  */
       if (i.types[op].bitfield.reg8)
-	continue;
-
-      /* Don't generate this warning if not needed.  */
-      if (intel_syntax && i.tm.opcode_modifier.byteokintel)
 	continue;
 
       /* crc32 doesn't generate this warning.  */
