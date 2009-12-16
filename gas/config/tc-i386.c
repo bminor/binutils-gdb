@@ -4722,7 +4722,7 @@ process_operands (void)
 	  if (i.op[0].regs->reg_num != 0)
 	    return bad_implicit_operand (1);
 
-	  if (i.tm.opcode_modifier.vex3sources)
+	  if (i.tm.opcode_modifier.vexsources == VEX3SOURCES)
 	    {
 	      /* Keep xmm0 for instructions with VEX prefix and 3
 		 sources.  */
@@ -4744,7 +4744,8 @@ process_operands (void)
       else if (i.tm.opcode_modifier.implicit1stxmm0)
 	{
 	  gas_assert ((MAX_OPERANDS - 1) > dupl
-		      && i.tm.opcode_modifier.vex3sources);
+		      && (i.tm.opcode_modifier.vexsources
+			  == VEX3SOURCES));
 
 	  /* Add the implicit xmm0 for instructions with VEX prefix
 	     and 3 sources.  */
@@ -4922,12 +4923,11 @@ build_modrm_byte (void)
 {
   const seg_entry *default_seg = 0;
   unsigned int source, dest;
-  int vex_3_sources, vex_2_sources;
+  int vex_3_sources;
 
   /* The first operand of instructions with VEX prefix and 3 sources
      must be VEX_Imm4.  */
-  vex_3_sources = i.tm.opcode_modifier.vex3sources;
-  vex_2_sources = i.tm.opcode_modifier.vex2sources;
+  vex_3_sources = i.tm.opcode_modifier.vexsources == VEX3SOURCES;
   if (vex_3_sources)
     {
       unsigned int nds, reg_slot;
@@ -5311,7 +5311,7 @@ build_modrm_byte (void)
       else
 	mem = ~0;
 
-      if (vex_2_sources)
+      if (i.tm.opcode_modifier.vexsources == VEX2SOURCES)
 	{
 	  if (operand_type_check (i.types[0], imm))
 	    i.vex.register_specifier = NULL;

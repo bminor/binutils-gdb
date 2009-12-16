@@ -306,10 +306,14 @@ enum
   XOP09,
   /* insn has XOP 0x0A opcode prefix. */
   XOP0A,
-  /* insn has VEX prefix with 2 sources. */
-  Vex2Sources,
-  /* insn has VEX prefix with 3 sources. */
-  Vex3Sources,
+  /* number of VEX source operands:
+     0: < 2 source operands.
+     1: 2 source operands.
+     2: 3 source operands.
+   */
+#define VEX2SOURCES	1
+#define VEX3SOURCES	2
+  VexSources,
   /* instruction has VEX 8 bit imm */
   VexImmExt,
   /* SSE to AVX support required */
@@ -379,8 +383,7 @@ typedef struct i386_opcode_modifier
   unsigned int xop08:1;
   unsigned int xop09:1;
   unsigned int xop0a:1;
-  unsigned int vex2sources:1;
-  unsigned int vex3sources:1;
+  unsigned int vexsources:2;
   unsigned int veximmext:1;
   unsigned int sse2avx:1;
   unsigned int noavx:1;

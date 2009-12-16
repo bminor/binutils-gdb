@@ -1,5 +1,22 @@
 2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-gen.c (opcode_modifiers): Remove Vex3Sources and
+	Vex2Sources.  Add VexSources.
+
+	* i386-opc.h ()Vex2Sources: Removed.
+	(Vex3Sources): Likewise.
+	(VEX2SOURCES): New.
+	(VEX3SOURCES): Likewise.
+	(VexSources): Likewise.
+	(i386_opcode_modifier): Remove vex2sources and vex3sources.
+	Add vexsources.
+
+	* i386-opc.tbl: Replace Vex2Sources with VexSources=1 and
+	Vex3Sourceswith VexSources=2.
+	* i386-tbl.h: Regenerated.
+
+2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-gen.c (opcode_modifiers): Remove VexW0 and VexW1.  Add
 	VexW.
 
@@ -12,8 +29,7 @@
 
 	* i386-opc.tbl: Replace VexW0 with VexW=1 and VexW1 with
 	Vex=2.
-	* i386-init.h: Regenerated.
-	* i386-tbl.h: Likewise.
+	* i386-tbl.h: Regenerated.
 
 2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>
 
