@@ -5879,6 +5879,11 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
      the default value DW_CC_normal.  */
   attr = dwarf2_attr (die, DW_AT_calling_convention, cu);
   TYPE_CALLING_CONVENTION (ftype) = attr ? DW_UNSND (attr) : DW_CC_normal;
+
+  /* We need to add the subroutine type to the die immediately so
+     we don't infinitely recurse when dealing with parameters
+     declared as the same subroutine type. */
+  set_die_type (die, ftype, cu);
   
   if (die->child != NULL)
     {
@@ -5926,7 +5931,7 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
 	}
     }
 
-  return set_die_type (die, ftype, cu);
+  return ftype;
 }
 
 static struct type *

@@ -1,3 +1,9 @@
+2009-12-15  Gaius Mulley  <gaius@glam.ac.uk>
+
+	* dwarf2read.c (read_subroutine_type): Add the subroutine
+	type to the die immediately to allow a parameter type to be
+	the same subroutine type.
+
 2009-12-15  Tristan Gingold  <gingold@adacore.com>
 
 	* machoread.c (macho_symfile_read): Set section size of dsym bfd
