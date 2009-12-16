@@ -1,3 +1,22 @@
+2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from trunk:
+	2009-12-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/11037
+	* gas/i386/intelpic.s: Add testcases.
+	* gas/i386/intelpic.d: Updated.
+
+	2009-10-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/i386/intelpic.d: Correct.
+
+	2009-10-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/10704
+	* gas/i386/intelpic.s: Add 2 new tests.
+	* gas/i386/intelpic.d: Updated.
+
 2009-10-02  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* gas/ppc/476.s: New test.

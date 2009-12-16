@@ -1,3 +1,15 @@
+2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from trunk:
+	2009-12-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/11037
+	* expr.c (resolve_expression): Call symbol_same_p to check
+	if 2 symbols are the same.
+
+	* symbols.c (symbol_same_p): New.
+	* symbols.h (symbol_same_p): Likewise.
+
 2009-12-03  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/11011
