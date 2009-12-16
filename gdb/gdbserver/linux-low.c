@@ -2357,7 +2357,7 @@ linux_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 #ifdef HAVE_PREAD64
       if (pread64 (fd, myaddr, len, memaddr) != len)
 #else
-      if (lseek (fd, memaddr, SEEK_SET) == -1 || read (fd, memaddr, len) != len)
+      if (lseek (fd, memaddr, SEEK_SET) == -1 || read (fd, myaddr, len) != len)
 #endif
 	{
 	  close (fd);

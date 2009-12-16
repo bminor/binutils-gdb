@@ -1,3 +1,7 @@
+2009-12-16  Doug Evans  <dje@google.com>
+
+	* linux-low.c (linux_read_memory): Fix argument to read.
+
 2009-11-26  Pedro Alves  <pedro@codesourcery.com>
 
 	* win32-low.c (get_child_debug_event): On EXIT_THREAD_DEBUG_EVENT
