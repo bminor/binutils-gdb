@@ -149,6 +149,10 @@ extern void *realloc ();
 extern char *strstr ();
 #endif
 
+#if !HAVE_DECL_MEMPCPY
+void *mempcpy(void *, const void *, size_t);
+#endif
+
 #if !HAVE_DECL_VSNPRINTF
 extern int vsnprintf(char *, size_t, const char *, va_list);
 #endif

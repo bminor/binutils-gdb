@@ -13820,6 +13820,17 @@ $as_echo "#define NEED_DECLARATION_STRSTR 1" >>confdefs.h
 fi
 
 
+ac_fn_c_check_decl "$LINENO" "mempcpy" "ac_cv_have_decl_mempcpy" "$ac_includes_default"
+if test "x$ac_cv_have_decl_mempcpy" = x""yes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_MEMPCPY $ac_have_decl
+_ACEOF
+
 ac_fn_c_check_decl "$LINENO" "vsnprintf" "ac_cv_have_decl_vsnprintf" "$ac_includes_default"
 if test "x$ac_cv_have_decl_vsnprintf" = x""yes; then :
   ac_have_decl=1
