@@ -5311,7 +5311,7 @@ build_modrm_byte (void)
       else
 	mem = ~0;
 
-      if (i.tm.opcode_modifier.vexsources == VEX2SOURCES)
+      if (i.tm.opcode_modifier.vexsources == XOP2SOURCES)
 	{
 	  if (operand_type_check (i.types[0], imm))
 	    i.vex.register_specifier = NULL;

@@ -307,11 +307,11 @@ enum
   /* insn has XOP 0x0A opcode prefix. */
   XOP0A,
   /* number of VEX source operands:
-     0: < 2 source operands.
-     1: 2 source operands.
+     0: <= 2 source operands.
+     1: 2 XOP source operands.
      2: 3 source operands.
    */
-#define VEX2SOURCES	1
+#define XOP2SOURCES	1
 #define VEX3SOURCES	2
   VexSources,
   /* instruction has VEX 8 bit imm */

@@ -1,5 +1,10 @@
 2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (build_modrm_byte): Check XOP2SOURCES
+	instead VEX2SOURCES.
+
+2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (process_operands): Check vexsources 
 	instead of vex3sources.
 	(build_modrm_byte): Check vexsources instead of vex2sources

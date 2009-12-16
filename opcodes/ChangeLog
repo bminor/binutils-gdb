@@ -1,5 +1,10 @@
 2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-opc.h (VEX2SOURCES): Renamed to ...
+	(XOP2SOURCES): This.
+
+2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-gen.c (opcode_modifiers): Remove Vex3Sources and
 	Vex2Sources.  Add VexSources.
 
