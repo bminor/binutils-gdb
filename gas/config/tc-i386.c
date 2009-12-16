@@ -2675,7 +2675,7 @@ build_vex_prefix (const insn_template *t)
      operand.  */
   if (!i.swap_operand
       && i.operands == i.reg_operands
-      && i.tm.opcode_modifier.vex0f
+      && i.tm.opcode_modifier.vexopcode == VEX0F
       && i.tm.opcode_modifier.s
       && i.rex == REX_B)
     {
@@ -2722,7 +2722,7 @@ build_vex_prefix (const insn_template *t)
     }
 
   /* Use 2-byte VEX prefix if possible.  */
-  if (i.tm.opcode_modifier.vex0f
+  if (i.tm.opcode_modifier.vexopcode == VEX0F
       && (i.rex & (REX_W | REX_X | REX_B)) == 0)
     {
       /* 2-byte VEX prefix.  */
@@ -2746,29 +2746,32 @@ build_vex_prefix (const insn_template *t)
       i.vex.length = 3;
       i.vex.bytes[0] = 0xc4;
 
-      if (i.tm.opcode_modifier.vex0f)
-	m = 0x1;
-      else if (i.tm.opcode_modifier.vex0f38)
-	m = 0x2;
-      else if (i.tm.opcode_modifier.vex0f3a)
-	m = 0x3;
-      else if (i.tm.opcode_modifier.xop08)
+      switch (i.tm.opcode_modifier.vexopcode)
 	{
+	case VEX0F:
+	  m = 0x1;
+	  break;
+	case VEX0F38:
+	  m = 0x2;
+	  break;
+	case VEX0F3A:
+	  m = 0x3;
+	  break;
+	case XOP08:
 	  m = 0x8;
 	  i.vex.bytes[0] = 0x8f;
-	}
-      else if (i.tm.opcode_modifier.xop09)
-	{
+	  break;
+	case XOP09:
 	  m = 0x9;
 	  i.vex.bytes[0] = 0x8f;
-	}
-      else if (i.tm.opcode_modifier.xop0a)
-	{
+	  break;
+	case XOP0A:
 	  m = 0xa;
 	  i.vex.bytes[0] = 0x8f;
+	  break;
+	default:
+	  abort ();
 	}
-      else
-	abort ();
 
       /* The high 3 bits of the second VEX byte are 1's compliment
 	 of RXB bits from REX.  */

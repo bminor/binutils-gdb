@@ -294,18 +294,21 @@ enum
 #define VEXW0	1
 #define VEXW1	2
   VexW,
-  /* insn has VEX 0x0F opcode prefix. */
-  Vex0F,
-  /* insn has VEX 0x0F38 opcode prefix. */
-  Vex0F38,
-  /* insn has VEX 0x0F3A opcode prefix. */
-  Vex0F3A,
-  /* insn has XOP 0x08 opcode prefix. */
-  XOP08,
-  /* insn has XOP 0x09 opcode prefix. */
-  XOP09,
-  /* insn has XOP 0x0A opcode prefix. */
-  XOP0A,
+  /* VEX opcode prefix:
+     0: VEX 0x0F opcode prefix.
+     1: VEX 0x0F38 opcode prefix.
+     2: VEX 0x0F3A opcode prefix
+     3: XOP 0x08 opcode prefix.
+     4: XOP 0x09 opcode prefix
+     5: XOP 0x0A opcode prefix.
+   */
+#define VEX0F		0
+#define VEX0F38		1
+#define VEX0F3A		2
+#define XOP08		3
+#define XOP09		4
+#define XOP0A		5
+  VexOpcode,
   /* number of VEX source operands:
      0: <= 2 source operands.
      1: 2 XOP source operands.
@@ -377,12 +380,7 @@ typedef struct i386_opcode_modifier
   unsigned int vexndd:1;
   unsigned int vexlwp:1;
   unsigned int vexw:2;
-  unsigned int vex0f:1;
-  unsigned int vex0f38:1;
-  unsigned int vex0f3a:1;
-  unsigned int xop08:1;
-  unsigned int xop09:1;
-  unsigned int xop0a:1;
+  unsigned int vexopcode:3;
   unsigned int vexsources:2;
   unsigned int veximmext:1;
   unsigned int sse2avx:1;

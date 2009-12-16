@@ -1,3 +1,26 @@
+2009-12-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (opcode_modifiers): Remove Vex0F, Vex0F38,
+	Vex0F3A, XOP08, XOP09 and XOP0A.  Add VexOpcode.
+
+	* i386-opc.h (Vex0F): Removed.
+	(Vex0F38): Likewise.
+	(Vex0F3A): Likewise.
+	(VexOpcode): New.
+	(VEX0F): Likewise.
+	(VEX0F38): Likewise.
+	(VEX0F3A): Likewise.
+	(XOP08): Defined as a macro.
+	(XOP09): Likewise.
+	(XOP0A): Likewise.
+	(i386_opcode_modifier): Remove vex0f, vex0f38, vex0f3a, xop08,
+	xop09 and xop0a.  Add vexopcode.
+
+	* i386-opc.tbl: Replace Vex0F with VexOpcode=0, Vex0F38 with
+	VexOpcode=1, Vex0F3A with VexOpcode=2, XOP08 with VexOpcode=3,
+	XOP09 with VexOpcode=4 and XOP0A with VexOpcode=5.
+	* i386-tbl.h: Regenerated.
+
 2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.h (VEX2SOURCES): Renamed to ...
