@@ -1,5 +1,22 @@
 2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-gen.c (opcode_modifiers): Remove VexW0 and VexW1.  Add
+	VexW.
+
+	* i386-opc.h (VexW0): Removed.
+	(VexW1): Likewise.
+	(VEXW0): New.
+	(VEXW1): Likewise.
+	(VexW): Likewise.
+	(i386_opcode_modifier): Remove vexw0 and vexw1.  Add vexw.
+
+	* i386-opc.tbl: Replace VexW0 with VexW=1 and VexW1 with
+	Vex=2.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
+2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c (VEX_W_3818_P_2_M_0): New.
 	(vex_w_table): Add VEX_W_3818_P_2_M_0.
 	(mod_table): Use VEX_W_3818_P_2_M_0.

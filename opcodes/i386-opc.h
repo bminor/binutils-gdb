@@ -286,10 +286,14 @@ enum
   /* insn has VEX NDD. Register destination is encoded in Vex prefix
      and one of the operands can access a memory location.  */
   VexLWP,
-  /* insn has VEX W0. */
-  VexW0,
-  /* insn has VEX W1. */
-  VexW1,
+  /* How the VEX.W bit is used:
+     0: Set by the REX.W bit.
+     1: VEX.W0.  Should always be 0.
+     2: VEX.W1.  Should always be 1.
+   */
+#define VEXW0	1
+#define VEXW1	2
+  VexW,
   /* insn has VEX 0x0F opcode prefix. */
   Vex0F,
   /* insn has VEX 0x0F38 opcode prefix. */
@@ -368,8 +372,7 @@ typedef struct i386_opcode_modifier
   unsigned int vexnds:1;
   unsigned int vexndd:1;
   unsigned int vexlwp:1;
-  unsigned int vexw0:1;
-  unsigned int vexw1:1;
+  unsigned int vexw:2;
   unsigned int vex0f:1;
   unsigned int vex0f38:1;
   unsigned int vex0f3a:1;

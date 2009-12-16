@@ -2776,12 +2776,12 @@ build_vex_prefix (const insn_template *t)
 
       /* Check the REX.W bit.  */
       w = (i.rex & REX_W) ? 1 : 0;
-      if (i.tm.opcode_modifier.vexw0 || i.tm.opcode_modifier.vexw1)
+      if (i.tm.opcode_modifier.vexw)
 	{
 	  if (w)
 	    abort ();
 
-	  if (i.tm.opcode_modifier.vexw1)
+	  if (i.tm.opcode_modifier.vexw == VEXW1)
 	    w = 1;
 	}
 
@@ -4961,7 +4961,7 @@ build_modrm_byte (void)
       i.operands++;
       /* If VexW1 is set, the first operand is the source and
 	 the second operand is encoded in the immediate operand.  */
-      if (i.tm.opcode_modifier.vexw1)
+      if (i.tm.opcode_modifier.vexw == VEXW1)
 	{
 	  source = 0;
 	  reg_slot = 1;
@@ -5319,7 +5319,7 @@ build_modrm_byte (void)
 	    {
 	      /* VEX.vvvv encodes one of the sources when the first
 		 operand is not an immediate.  */
-	      if (i.tm.opcode_modifier.vexw0)
+	      if (i.tm.opcode_modifier.vexw == VEXW0)
 		i.vex.register_specifier = i.op[0].regs;
 	      else
 		i.vex.register_specifier = i.op[1].regs;
@@ -5336,7 +5336,7 @@ build_modrm_byte (void)
 	    {
 	      i.rm.mode = 3;
 
-	      if (i.tm.opcode_modifier.vexw0)
+	      if (i.tm.opcode_modifier.vexw == VEXW0)
 		i.rm.regmem = i.op[1].regs->reg_num;
 	      else
 		i.rm.regmem = i.op[0].regs->reg_num;
