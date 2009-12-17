@@ -1,3 +1,10 @@
+2009-12-17  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* deffilep.y (def_file_free): Add missing shadow parameter renaming.
+	(def_file_print): Likewise.
+	(def_stash_module): Likewise.
+	(def_file_add_import): Likewise.
+
 2009-12-11  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.in: Regenerate.

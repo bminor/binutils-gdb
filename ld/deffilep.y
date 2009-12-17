@@ -382,7 +382,7 @@ def_file_free (def_file *fdef)
 
   if (fdef->exports)
     {
-      for (i = 0; i < def->num_exports; i++)
+      for (i = 0; i < fdef->num_exports; i++)
 	{
 	  if (fdef->exports[i].internal_name
 	      && fdef->exports[i].internal_name != fdef->exports[i].name)
@@ -512,7 +512,7 @@ def_file_print (FILE *file, def_file *fdef)
   if (fdef->version_major != -1)
     fprintf (file, "  version: %d.%d\n", fdef->version_major, fdef->version_minor);
 
-  fprintf (file, "<<<< def_file at 0x%08x\n", def);
+  fprintf (file, "<<<< def_file at 0x%08x\n", fdef);
 }
 #endif
 
@@ -569,7 +569,7 @@ def_stash_module (def_file *fdef, const char *name)
   if ((s = def_get_module (fdef, name)) != NULL)
       return s;
   s = xmalloc (sizeof (def_file_module) + strlen (name));
-  s->next = def->modules;
+  s->next = fdef->modules;
   fdef->modules = s;
   s->user_data = 0;
   strcpy (s->name, name);
@@ -602,7 +602,7 @@ def_file_add_import (def_file *fdef,
   if (name)
     i->name = xstrdup (name);
   if (module)
-    i->module = def_stash_module (def, module);
+    i->module = def_stash_module (fdef, module);
   i->ordinal = ordinal;
   if (internal_name)
     i->internal_name = xstrdup (internal_name);
