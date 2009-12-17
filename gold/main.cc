@@ -46,6 +46,7 @@
 #include "gc.h"
 #include "icf.h"
 #include "incremental.h"
+#include "timer.h"
 
 using namespace gold;
 
@@ -161,9 +162,9 @@ main(int argc, char** argv)
   Command_line command_line;
   command_line.process(argc - 1, const_cast<const char**>(argv + 1));
 
-  long start_time = 0;
+  Timer timer;
   if (command_line.options().stats())
-    start_time = get_run_time();
+    timer.start();
 
   // Store some options in the globally accessible parameters.
   set_parameters_options(&command_line.options());
@@ -247,9 +248,15 @@ main(int argc, char** argv)
 
   if (command_line.options().stats())
     {
-      long run_time = get_run_time() - start_time;
-      fprintf(stderr, _("%s: total run time: %ld.%06ld seconds\n"),
-	      program_name, run_time / 1000000, run_time % 1000000);
+      Timer::TimeStats elapsed = timer.get_elapsed_time();
+      fprintf(stderr,
+             _("%s: total run time: " \
+               "(user: %ld.%06ld sys: %ld.%06ld wall: %ld.%06ld)\n"),
+              program_name,
+              elapsed.user / 1000, (elapsed.user % 1000) * 1000,
+              elapsed.sys / 1000, (elapsed.user % 1000) * 1000,
+              elapsed.wall / 1000, (elapsed.wall % 1000) * 1000);
+
 #ifdef HAVE_MALLINFO
       struct mallinfo m = mallinfo();
       fprintf(stderr, _("%s: total space allocated by malloc: %d bytes\n"),

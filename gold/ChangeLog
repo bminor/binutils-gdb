@@ -1,3 +1,19 @@
+2009-12-17  Rafael Avila de Espindola  <espindola@google.com>
+
+	* Makefile.am (CCFILES): Add timer.cc.
+	(HFILES): Add timer.h.
+	* configure.ac: Check for sysconf and times.
+	* main.cc: include timer.h.
+	(main): Use Timer instead of get_run_time.
+	* timer.cc: New.
+	* timer.h: New.
+	* workqueue.cc: include timer.h.
+	(Workqueue::find_and_run_task):
+	Report user, sys and wall time.
+	* Makefile.in: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2009-12-16  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_relobj::scan_sections_for_stubs): Exclude ICF-eliminated

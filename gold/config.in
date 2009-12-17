@@ -117,6 +117,9 @@
 /* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
 
+/* Define to 1 if you have the `sysconf' function. */
+#undef HAVE_SYSCONF
+
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
 
@@ -137,6 +140,9 @@
 
 /* Define if attributes work on C++ templates */
 #undef HAVE_TEMPLATE_ATTRIBUTES
+
+/* Define to 1 if you have the `times' function. */
+#undef HAVE_TIMES
 
 /* Define to 1 if you have the <tr1/unordered_map> header file. */
 #undef HAVE_TR1_UNORDERED_MAP

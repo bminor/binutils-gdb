@@ -78,6 +78,7 @@ CCFILES = \
 	symtab.cc \
 	target.cc \
 	target-select.cc \
+	timer.cc \
 	version.cc \
 	workqueue.cc \
 	workqueue-threads.cc
@@ -124,6 +125,7 @@ HFILES = \
 	target.h \
 	target-reloc.h \
 	target-select.h \
+	timer.h \
 	tls.h \
 	token.h \
 	workqueue.h \
