@@ -1361,10 +1361,29 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 		  if (sym->flags == BSF_WEAK)
 		    {
 		      struct bfd_link_hash_entry *blhe
-			= bfd_link_hash_lookup (info->hash, sym->name,
+			= bfd_wrapped_link_hash_lookup (abfd, info, sym->name,
 						FALSE, FALSE, FALSE);
-		      if (!blhe || blhe->type != bfd_link_hash_defined)
-			continue;		      
+		      if (blhe && blhe->type == bfd_link_hash_undefweak)
+			{
+			  /* Check aux sym and see if it is defined or not. */
+			  struct coff_link_hash_entry *h, *h2;
+			  h = (struct coff_link_hash_entry *)blhe;
+			  if (h->symbol_class != C_NT_WEAK || h->numaux != 1)
+			    continue;
+			  h2 = h->auxbfd->tdata.coff_obj_data->sym_hashes
+						[h->aux->x_sym.x_tagndx.l];
+			  /* We don't want a base reloc if the aux sym is not
+			     found, undefined, or if it is the constant ABS
+			     zero default value.  (We broaden that slightly by
+			     not testing the value, just the section; there's
+			     no reason we'd want a reference to any absolute
+			     address to get relocated during rebasing).  */
+			  if (!h2 || h2->root.type == bfd_link_hash_undefined
+				|| h2->root.u.def.section == &bfd_abs_section)
+			    continue;
+			}
+		      else if (!blhe || blhe->type != bfd_link_hash_defined)
+			continue;
 		    }
 
 		  sym_vma = (relocs[i]->addend
