@@ -1,3 +1,9 @@
+2009-12-17  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/11088
+	* elf64-ppc.c (ppc64_elf_gc_sweep_hook): Don't abort if symbol
+	hiding has nulled out plt.plist.
+
 2009-12-03  Alan Modra  <amodra@bigpond.net.au>
 
 	PR ld/11047
