@@ -3323,6 +3323,8 @@ update_plt_info (bfd *abfd, struct plt_entry **plist,
 {
   struct plt_entry *ent;
 
+  if (addend < 32768)
+    sec = NULL;
   for (ent = *plist; ent != NULL; ent = ent->next)
     if (ent->sec == sec && ent->addend == addend)
       break;
@@ -3508,8 +3510,7 @@ ppc_elf_check_relocs (bfd *abfd,
 		      if (info->shared)
 			addend = rel->r_addend;
 		    }
-		  if (!update_plt_info (abfd, ifunc,
-					addend < 32768 ? NULL : got2, addend))
+		  if (!update_plt_info (abfd, ifunc, got2, addend))
 		    return FALSE;
 		}
 	    }
@@ -3748,8 +3749,7 @@ ppc_elf_check_relocs (bfd *abfd,
 		    addend = rel->r_addend;
 		}
 	      h->needs_plt = 1;
-	      if (!update_plt_info (abfd, &h->plt.plist,
-				    addend < 32768 ? NULL : got2, addend))
+	      if (!update_plt_info (abfd, &h->plt.plist, got2, addend))
 		return FALSE;
 	    }
 	  break;
@@ -3780,10 +3780,9 @@ ppc_elf_check_relocs (bfd *abfd,
 	case R_PPC_EMB_MRKREF:
 	case R_PPC_NONE:
 	case R_PPC_max:
-	case R_PPC_RELAX32:
-	case R_PPC_RELAX32PC:
-	case R_PPC_RELAX32_PLT:
-	case R_PPC_RELAX32PC_PLT:
+	case R_PPC_RELAX:
+	case R_PPC_RELAX_PLT:
+	case R_PPC_RELAX_PLTREL24:
 	  break;
 
 	  /* These should only appear in dynamic objects.  */
@@ -4486,7 +4485,7 @@ ppc_elf_gc_sweep_hook (bfd *abfd,
 		  struct plt_entry *ent;
 
 		  ent = find_plt_ent (&h->plt.plist, NULL, 0);
-		  if (ent->plt.refcount > 0)
+		  if (ent != NULL && ent->plt.refcount > 0)
 		    ent->plt.refcount -= 1;
 		}
 	    }
@@ -4534,7 +4533,7 @@ ppc_elf_gc_sweep_hook (bfd *abfd,
 	      if (r_type == R_PPC_PLTREL24 && info->shared)
 		addend = rel->r_addend;
 	      ent = find_plt_ent (&h->plt.plist, got2, addend);
-	      if (ent->plt.refcount > 0)
+	      if (ent != NULL && ent->plt.refcount > 0)
 		ent->plt.refcount -= 1;
 	    }
 	  break;
@@ -4582,9 +4581,10 @@ ppc_elf_tls_setup (bfd *obfd,
 		       && tga->root.type == bfd_link_hash_undefweak)))
 	    {
 	      struct plt_entry *ent;
-	      ent = find_plt_ent (&tga->plt.plist, NULL, 0);
-	      if (ent != NULL
-		  && ent->plt.refcount > 0)
+	      for (ent = tga->plt.plist; ent != NULL; ent = ent->next)
+		if (ent->plt.refcount > 0)
+		  break;
+	      if (ent != NULL)
 		{
 		  tga->root.type = bfd_link_hash_indirect;
 		  tga->root.u.i.link = &opt->root;
@@ -4669,6 +4669,7 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
       {
 	Elf_Internal_Sym *locsyms = NULL;
 	Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (ibfd);
+	asection *got2 = bfd_get_section_by_name (ibfd, ".got2");
 
 	for (sec = ibfd->sections; sec != NULL; sec = sec->next)
 	  if (sec->has_tls_reloc && !bfd_is_abs_section (sec->output_section))
@@ -4762,6 +4763,13 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 		      else
 			continue;
 
+		    case R_PPC_TLSGD:
+		    case R_PPC_TLSLD:
+		      expecting_tls_get_addr = 2;
+		      tls_set = 0;
+		      tls_clear = 0;
+		      break;
+
 		    default:
 		      continue;
 		    }
@@ -4769,7 +4777,8 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 		  if (pass == 0)
 		    {
 		      if (!expecting_tls_get_addr
-			  || !sec->has_tls_get_addr_call)
+			  || (expecting_tls_get_addr == 1
+			      && !sec->has_tls_get_addr_call))
 			continue;
 
 		      if (rel + 1 < relend
@@ -4783,6 +4792,23 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 			 the entire section.  */
 		      sec->has_tls_reloc = 0;
 		      break;
+		    }
+
+		  if (expecting_tls_get_addr)
+		    {
+		      struct plt_entry *ent;
+		      bfd_vma addend = 0;
+
+		      if (info->shared
+			  && ELF32_R_TYPE (rel[1].r_info) == R_PPC_PLTREL24)
+			addend = rel[1].r_addend;
+		      ent = find_plt_ent (&htab->tls_get_addr->plt.plist,
+					  got2, addend);
+		      if (ent != NULL && ent->plt.refcount > 0)
+			ent->plt.refcount -= 1;
+
+		      if (expecting_tls_get_addr == 2)
+			continue;
 		    }
 
 		  if (h != NULL)
@@ -4827,16 +4853,6 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 		      /* We managed to get rid of a got entry.  */
 		      if (*got_count > 0)
 			*got_count -= 1;
-		    }
-
-		  if (expecting_tls_get_addr)
-		    {
-		      struct plt_entry *ent;
-
-		      ent = find_plt_ent (&htab->tls_get_addr->plt.plist,
-					  NULL, 0);
-		      if (ent != NULL && ent->plt.refcount > 0)
-			ent->plt.refcount -= 1;
 		    }
 
 		  *tls_mask |= tls_set;
@@ -6239,28 +6255,28 @@ ppc_elf_relax_section (bfd *abfd,
 	    {
 	      size = 4 * ARRAY_SIZE (shared_stub_entry);
 	      insn_offset = 12;
-	      stub_rtype = R_PPC_RELAX32PC;
 	    }
 	  else
 	    {
 	      size = 4 * ARRAY_SIZE (stub_entry);
 	      insn_offset = 0;
-	      stub_rtype = R_PPC_RELAX32;
 	    }
-
-	  if (R_PPC_RELAX32_PLT - R_PPC_RELAX32
-	      != R_PPC_RELAX32PC_PLT - R_PPC_RELAX32PC)
-	    abort ();
+	  stub_rtype = R_PPC_RELAX;
 	  if (tsec == htab->plt
 	      || tsec == htab->glink)
-	    stub_rtype += R_PPC_RELAX32_PLT - R_PPC_RELAX32;
+	    {
+	      stub_rtype = R_PPC_RELAX_PLT;
+	      if (r_type == R_PPC_PLTREL24)
+		stub_rtype = R_PPC_RELAX_PLTREL24;
+	    }
 
 	  /* Hijack the old relocation.  Since we need two
 	     relocations for this use a "composite" reloc.  */
 	  irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
 				       stub_rtype);
 	  irel->r_offset = trampoff + insn_offset;
-	  if (r_type == R_PPC_PLTREL24)
+	  if (r_type == R_PPC_PLTREL24
+	      && stub_rtype != R_PPC_RELAX_PLTREL24)
 	    irel->r_addend = 0;
 
 	  /* Record the fixup so we don't do it again this section.  */
@@ -6430,7 +6446,7 @@ ppc_elf_relax_section (bfd *abfd,
     {
       /* Convert the internal relax relocs to external form.  */
       for (irel = internal_relocs; irel < irelend; irel++)
-	if (ELF32_R_TYPE (irel->r_info) == R_PPC_RELAX32)
+	if (ELF32_R_TYPE (irel->r_info) == R_PPC_RELAX)
 	  {
 	    unsigned long r_symndx = ELF32_R_SYM (irel->r_info);
 
@@ -7649,12 +7665,20 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	    }
 	  break;
 
-	case R_PPC_RELAX32PC_PLT:
-	case R_PPC_RELAX32_PLT:
+	case R_PPC_RELAX_PLT:
+	case R_PPC_RELAX_PLTREL24:
 	  if (h != NULL)
 	    {
-	      struct plt_entry *ent = find_plt_ent (&h->plt.plist, got2,
-						    info->shared ? addend : 0);
+	      struct plt_entry *ent;
+	      bfd_vma got2_addend = 0;
+
+	      if (r_type == R_PPC_RELAX_PLTREL24)
+		{
+		  if (info->shared)
+		    got2_addend = addend;
+		  addend = 0;
+		}
+	      ent = find_plt_ent (&h->plt.plist, got2, got2_addend);
 	      if (htab->plt_type == PLT_NEW)
 		relocation = (htab->glink->output_section->vma
 			      + htab->glink->output_offset
@@ -7664,18 +7688,14 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			      + htab->plt->output_offset
 			      + ent->plt.offset);
 	    }
-	  if (r_type == R_PPC_RELAX32_PLT)
-	    goto relax32;
 	  /* Fall thru */
 
-	case R_PPC_RELAX32PC:
-	  relocation -= (input_section->output_section->vma
-			 + input_section->output_offset
-			 + rel->r_offset - 4);
-	  /* Fall thru */
+	case R_PPC_RELAX:
+	  if (info->shared)
+	    relocation -= (input_section->output_section->vma
+			   + input_section->output_offset
+			   + rel->r_offset - 4);
 
-	case R_PPC_RELAX32:
-	relax32:
 	  {
 	    unsigned long t0;
 	    unsigned long t1;
