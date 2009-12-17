@@ -7506,6 +7506,7 @@ do_ldstt (void)
 static void
 do_ldstv4 (void)
 {
+  constraint (inst.operands[0].reg == REG_PC, BAD_PC);
   inst.instruction |= inst.operands[0].reg << 12;
   if (!inst.operands[1].isreg)
     if (move_or_literal_pool (0, /*thumb_p=*/FALSE, /*mode_3=*/TRUE))
@@ -7671,6 +7672,7 @@ do_mrs (void)
   constraint ((inst.operands[1].imm & (PSR_c|PSR_x|PSR_s|PSR_f))
 	      != (PSR_c|PSR_f),
 	      _("'CPSR' or 'SPSR' expected"));
+  constraint (inst.operands[0].reg == REG_PC, BAD_PC);
   inst.instruction |= inst.operands[0].reg << 12;
   inst.instruction |= (inst.operands[1].imm & SPSR_BIT);
 }
@@ -7699,6 +7701,8 @@ do_msr (void)
 static void
 do_mul (void)
 {
+  constraint (inst.operands[2].reg == REG_PC, BAD_PC);
+
   if (!inst.operands[2].present)
     inst.operands[2].reg = inst.operands[0].reg;
   inst.instruction |= inst.operands[0].reg << 16;

@@ -1,3 +1,9 @@
+2009-12-17  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/10924
+	* gas/arm/unpredictable.s: Add more unpredictable instructions.
+	* gas/arm/unpredictable.d: Add expected disassemblies.
+
 2009-12-14  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/10924

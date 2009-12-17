@@ -64,5 +64,13 @@ Disassembly of section .text:
 0+0e4 <[^>]+> [^<]+<UNPREDICTABLE>
 0+0e8 <[^>]+> [^<]+<UNPREDICTABLE>
 0+0ec <[^>]+> [^<]+<UNPREDICTABLE>
+0+0f0 <[^>]+> [^<]+<UNPREDICTABLE>
+0+0f4 <[^>]+> [^<]+<UNPREDICTABLE>
+0+0f8 <[^>]+> [^<]+<UNPREDICTABLE>
+0+0fc <[^>]+> [^<]+<UNPREDICTABLE>
+0+100 <[^>]+> [^<]+<UNPREDICTABLE>
+0+104 <[^>]+> [^<]+<UNPREDICTABLE>
+0+108 <[^>]+> [^<]+<UNPREDICTABLE>
+0+10c <[^>]+> [^<]+<UNPREDICTABLE>
+0+110 <[^>]+> e1a00000[ 	]+nop[ 	]+; \(mov r0, r0\)
 #pass
-

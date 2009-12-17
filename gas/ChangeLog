@@ -1,3 +1,11 @@
+2009-12-17  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/10924
+	* config/tc-arm.c (do_ldstv4): Do not allow r15 as the destination
+	register.
+	(do_mrs): Likewise.
+	(do_mul): Likewise.
+	
 2009-12-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (process_suffix): Set i.suffix to 0 in
