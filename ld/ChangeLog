@@ -1,3 +1,9 @@
+2009-12-17  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* pe-dll.c (generate_reloc): Take account of wrapper options when
+	testing if a weak symbol is defined or not, and when it is not,
+	consider whether the default value requires a base reloc anyway.
+
 2009-12-09  Alan Modra  <amodra@bigpond.net.au>
 
 	PR ld/11012
