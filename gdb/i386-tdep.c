@@ -3417,8 +3417,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       goto reswitch;
       break;
 
-      /* arith & logic */
-    case 0x00:
+    case 0x00:    /* arith & logic */
     case 0x01:
     case 0x02:
     case 0x03:
@@ -3475,8 +3474,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 
 	  switch ((opcode >> 1) & 3)
 	    {
-	      /* OP Ev, Gv */
-	    case 0:
+	    case 0:    /* OP Ev, Gv */
 	      if (i386_record_modrm (&ir))
 		return -1;
 	      if (ir.mod != 3)
@@ -3492,8 +3490,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 		  I386_RECORD_ARCH_LIST_ADD_REG (ir.rm);
 		}
 	      break;
-	      /* OP Gv, Ev */
-	    case 1:
+	    case 1:    /* OP Gv, Ev */
 	      if (i386_record_modrm (&ir))
 		return -1;
               ir.reg |= rex_r;
@@ -3501,8 +3498,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 		ir.reg &= 0x3;
 	      I386_RECORD_ARCH_LIST_ADD_REG (ir.reg);
 	      break;
-	      /* OP A, Iv */
-	    case 2:
+	    case 2:    /* OP A, Iv */
 	      I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_REAX_REGNUM);
 	      break;
 	    }
@@ -3510,8 +3506,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* GRP1 */
-    case 0x80:
+    case 0x80:    /* GRP1 */
     case 0x81:
     case 0x82:
     case 0x83:
@@ -3540,8 +3535,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* inv */
-    case 0x40:
+    case 0x40:      /* inc */
     case 0x41:
     case 0x42:
     case 0x43:
@@ -3549,8 +3543,8 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
     case 0x45:
     case 0x46:
     case 0x47:
-      /* dec */
-    case 0x48:
+
+    case 0x48:      /* dec */
     case 0x49:
     case 0x4a:
     case 0x4b:
@@ -3558,12 +3552,12 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
     case 0x4d:
     case 0x4e:
     case 0x4f:
+
       I386_RECORD_ARCH_LIST_ADD_REG (opcode & 7);
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* GRP3 */
-    case 0xf6:
+    case 0xf6:    /* GRP3 */
     case 0xf7:
       if ((opcode & 1) == 0)
 	ir.ot = OT_BYTE;
@@ -3577,14 +3571,11 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 
       switch (ir.reg)
 	{
-	  /* test */
-	case 0:
+	case 0:    /* test */
 	  I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
 	  break;
-	  /* not */
-	case 2:
-	  /* neg */
-	case 3:
+	case 2:    /* not */
+	case 3:    /* neg */
 	  if (ir.mod != 3)
 	    {
 	      if (i386_record_lea_modrm (&ir))
@@ -3597,18 +3588,13 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 		ir.rm &= 0x3;
 	      I386_RECORD_ARCH_LIST_ADD_REG (ir.rm);
 	    }
-	  /* neg */
-	  if (ir.reg == 3)
+	  if (ir.reg == 3)  /* neg */
 	    I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
 	  break;
-	  /* mul */
-	case 4:
-	  /* imul */
-	case 5:
-	  /* div */
-	case 6:
-	  /* idiv */
-	case 7:
+	case 4:    /* mul  */
+	case 5:    /* imul */
+	case 6:    /* div  */
+	case 7:    /* idiv */
 	  I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_REAX_REGNUM);
 	  if (ir.ot != OT_BYTE)
 	    I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_REDX_REGNUM);
@@ -3622,10 +3608,8 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	}
       break;
 
-      /* GRP4 */
-    case 0xfe:
-      /* GRP5 */
-    case 0xff:
+    case 0xfe:    /* GRP4 */
+    case 0xff:    /* GRP5 */
       if (i386_record_modrm (&ir))
 	return -1;
       if (ir.reg >= 2 && opcode == 0xfe)
@@ -3636,10 +3620,8 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	}
       switch (ir.reg)
 	{
-	  /* inc */
-	case 0:
-	  /* dec */
-	case 1:
+	case 0:    /* inc */
+	case 1:    /* dec */
           if ((opcode & 1) == 0)
 	    ir.ot = OT_BYTE;
           else
@@ -3658,29 +3640,24 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	    }
 	  I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
 	  break;
-	  /* call */
-	case 2:
+	case 2:    /* call */
           if (ir.regmap[X86_RECORD_R8_REGNUM] && ir.dflag)
             ir.dflag = 2;
 	  if (i386_record_push (&ir, 1 << (ir.dflag + 1)))
 	    return -1;
 	  I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
 	  break;
-	  /* lcall */
-	case 3:
+	case 3:    /* lcall */
 	  I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_CS_REGNUM);
 	  if (i386_record_push (&ir, 1 << (ir.dflag + 1)))
 	    return -1;
 	  I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
 	  break;
-	  /* jmp */
-	case 4:
-	  /* ljmp */
-	case 5:
+	case 4:    /* jmp  */
+	case 5:    /* ljmp */
 	  I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
 	  break;
-	  /* push */
-	case 6:
+	case 6:    /* push */
           if (ir.regmap[X86_RECORD_R8_REGNUM] && ir.dflag)
             ir.dflag = 2;
 	  if (i386_record_push (&ir, 1 << (ir.dflag + 1)))
@@ -3694,27 +3671,23 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	}
       break;
 
-      /* test */
-    case 0x84:
+    case 0x84:    /* test */
     case 0x85:
     case 0xa8:
     case 0xa9:
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* CWDE/CBW */
-    case 0x98:
+    case 0x98:    /* CWDE/CBW */
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_REAX_REGNUM);
       break;
 
-      /* CDQ/CWD */
-    case 0x99:
+    case 0x99:    /* CDQ/CWD */
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_REAX_REGNUM);
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_REDX_REGNUM);
       break;
 
-      /* imul */
-    case 0x0faf:
+    case 0x0faf:  /* imul */
     case 0x69:
     case 0x6b:
       ir.ot = ir.dflag + OT_WORD;
@@ -3731,8 +3704,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* xadd */
-    case 0x0fc0:
+    case 0x0fc0:  /* xadd */
     case 0x0fc1:
       if ((opcode & 1) == 0)
 	ir.ot = OT_BYTE;
@@ -3761,8 +3733,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* cmpxchg */
-    case 0x0fb0:
+    case 0x0fb0:  /* cmpxchg */
     case 0x0fb1:
       if ((opcode & 1) == 0)
 	ir.ot = OT_BYTE;
@@ -3787,8 +3758,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* cmpxchg8b */
-    case 0x0fc7:
+    case 0x0fc7:    /* cmpxchg8b */
       if (i386_record_modrm (&ir))
 	return -1;
       if (ir.mod == 3)
@@ -3804,8 +3774,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* push */
-    case 0x50:
+    case 0x50:    /* push */
     case 0x51:
     case 0x52:
     case 0x53:
@@ -3821,14 +3790,10 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	return -1;
       break;
 
-      /* push es */
-    case 0x06:
-      /* push cs */
-    case 0x0e:
-      /* push ss */
-    case 0x16:
-      /* push ds */
-    case 0x1e:
+    case 0x06:    /* push es */
+    case 0x0e:    /* push cs */
+    case 0x16:    /* push ss */
+    case 0x1e:    /* push ds */
       if (ir.regmap[X86_RECORD_R8_REGNUM])
         {
 	  ir.addr -= 1;
@@ -3838,10 +3803,8 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	return -1;
       break;
 
-      /* push fs */
-    case 0x0fa0:
-      /* push gs */
-    case 0x0fa8:
+    case 0x0fa0:    /* push fs */
+    case 0x0fa8:    /* push gs */
       if (ir.regmap[X86_RECORD_R8_REGNUM])
         {
 	  ir.addr -= 2;
@@ -3851,8 +3814,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	return -1;
       break;
 
-      /* pusha */
-    case 0x60:
+    case 0x60:    /* pusha */
       if (ir.regmap[X86_RECORD_R8_REGNUM])
         {
 	  ir.addr -= 1;
@@ -3862,8 +3824,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	return -1;
       break;
 
-      /* pop */
-    case 0x58:
+    case 0x58:    /* pop */
     case 0x59:
     case 0x5a:
     case 0x5b:
@@ -3875,8 +3836,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG ((opcode & 0x7) | ir.rex_b);
       break;
 
-      /* popa */
-    case 0x61:
+    case 0x61:    /* popa */
       if (ir.regmap[X86_RECORD_R8_REGNUM])
         {
 	  ir.addr -= 1;
@@ -3887,8 +3847,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	I386_RECORD_ARCH_LIST_ADD_REG (tmpu8);
       break;
 
-      /* pop */
-    case 0x8f:
+    case 0x8f:    /* pop */
       if (ir.regmap[X86_RECORD_R8_REGNUM])
 	ir.ot = ir.dflag ? OT_QUAD : OT_WORD;
       else
@@ -3906,8 +3865,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_RESP_REGNUM);
       break;
 
-      /* enter */
-    case 0xc8:
+    case 0xc8:    /* enter */
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_REBP_REGNUM);
       if (ir.regmap[X86_RECORD_R8_REGNUM] && ir.dflag)
         ir.dflag = 2;
@@ -3915,14 +3873,12 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	return -1;
       break;
 
-      /* leave */
-    case 0xc9:
+    case 0xc9:    /* leave */
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_RESP_REGNUM);
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_REBP_REGNUM);
       break;
 
-      /* pop es */
-    case 0x07:
+    case 0x07:    /* pop es */
       if (ir.regmap[X86_RECORD_R8_REGNUM])
         {
 	  ir.addr -= 1;
@@ -3933,8 +3889,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* pop ss */
-    case 0x17:
+    case 0x17:    /* pop ss */
       if (ir.regmap[X86_RECORD_R8_REGNUM])
         {
 	  ir.addr -= 1;
@@ -3945,8 +3900,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* pop ds */
-    case 0x1f:
+    case 0x1f:    /* pop ds */
       if (ir.regmap[X86_RECORD_R8_REGNUM])
         {
 	  ir.addr -= 1;
@@ -3957,22 +3911,19 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* pop fs */
-    case 0x0fa1:
+    case 0x0fa1:    /* pop fs */
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_RESP_REGNUM);
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_FS_REGNUM);
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* pop gs */
-    case 0x0fa9:
+    case 0x0fa9:    /* pop gs */
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_RESP_REGNUM);
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_GS_REGNUM);
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* mov */
-    case 0x88:
+    case 0x88:    /* mov */
     case 0x89:
     case 0xc6:
     case 0xc7:
@@ -4001,8 +3952,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	}
       break;
 
-      /* mov */
-    case 0x8a:
+    case 0x8a:    /* mov */
     case 0x8b:
       if ((opcode & 1) == 0)
 	ir.ot = OT_BYTE;
@@ -4016,8 +3966,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG (ir.reg);
       break;
 
-      /* mov seg */
-    case 0x8c:
+    case 0x8c:    /* mov seg */
       if (i386_record_modrm (&ir))
 	return -1;
       if (ir.reg > 5)
@@ -4037,8 +3986,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	}
       break;
 
-      /* mov seg */
-    case 0x8e:
+    case 0x8e:    /* mov seg */
       if (i386_record_modrm (&ir))
 	return -1;
       switch (ir.reg)
@@ -4068,21 +4016,16 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* movzbS */
-    case 0x0fb6:
-      /* movzwS */
-    case 0x0fb7:
-      /* movsbS */
-    case 0x0fbe:
-      /* movswS */
-    case 0x0fbf:
+    case 0x0fb6:    /* movzbS */
+    case 0x0fb7:    /* movzwS */
+    case 0x0fbe:    /* movsbS */
+    case 0x0fbf:    /* movswS */
       if (i386_record_modrm (&ir))
 	return -1;
       I386_RECORD_ARCH_LIST_ADD_REG (ir.reg | rex_r);
       break;
 
-      /* lea */
-    case 0x8d:
+    case 0x8d:      /* lea */
       if (i386_record_modrm (&ir))
 	return -1;
       if (ir.mod == 3)
@@ -4098,16 +4041,14 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG (ir.reg);
       break;
 
-      /* mov EAX */
-    case 0xa0:
+    case 0xa0:    /* mov EAX */
     case 0xa1:
-      /* xlat */
-    case 0xd7:
+
+    case 0xd7:    /* xlat */
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_REAX_REGNUM);
       break;
 
-      /* mov EAX */
-    case 0xa2:
+    case 0xa2:    /* mov EAX */
     case 0xa3:
       if (ir.override >= 0)
         {
@@ -4166,8 +4107,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
         }
       break;
 
-      /* mov R, Ib */
-    case 0xb0:
+    case 0xb0:    /* mov R, Ib */
     case 0xb1:
     case 0xb2:
     case 0xb3:
@@ -4180,8 +4120,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 					: ((opcode & 0x7) & 0x3));
       break;
 
-      /* mov R, Iv */
-    case 0xb8:
+    case 0xb8:    /* mov R, Iv */
     case 0xb9:
     case 0xba:
     case 0xbb:
@@ -4192,8 +4131,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG ((opcode & 0x7) | ir.rex_b);
       break;
 
-      /* xchg R, EAX */
-    case 0x91:
+    case 0x91:    /* xchg R, EAX */
     case 0x92:
     case 0x93:
     case 0x94:
@@ -4204,8 +4142,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG (opcode & 0x7);
       break;
 
-      /* xchg Ev, Gv */
-    case 0x86:
+    case 0x86:    /* xchg Ev, Gv */
     case 0x87:
       if ((opcode & 1) == 0)
 	ir.ot = OT_BYTE;
@@ -4231,21 +4168,16 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG (ir.reg);
       break;
 
-      /* les Gv */
-    case 0xc4:
-      /* lds Gv */
-    case 0xc5:
+    case 0xc4:    /* les Gv */
+    case 0xc5:    /* lds Gv */
       if (ir.regmap[X86_RECORD_R8_REGNUM])
         {
 	  ir.addr -= 1;
 	  goto no_support;
 	}
-      /* lss Gv */
-    case 0x0fb2:
-      /* lfs Gv */
-    case 0x0fb4:
-      /* lgs Gv */
-    case 0x0fb5:
+    case 0x0fb2:    /* lss Gv */
+    case 0x0fb4:    /* lfs Gv */
+    case 0x0fb5:    /* lgs Gv */
       if (i386_record_modrm (&ir))
 	return -1;
       if (ir.mod == 3)
@@ -4259,24 +4191,19 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	}
       switch (opcode)
 	{
-	  /* les Gv */
-	case 0xc4:
+	case 0xc4:    /* les Gv */
 	  tmpu8 = X86_RECORD_ES_REGNUM;
 	  break;
-	  /* lds Gv */
-	case 0xc5:
+	case 0xc5:    /* lds Gv */
 	  tmpu8 = X86_RECORD_DS_REGNUM;
 	  break;
-	  /* lss Gv */
-	case 0x0fb2:
+	case 0x0fb2:  /* lss Gv */
 	  tmpu8 = X86_RECORD_SS_REGNUM;
 	  break;
-	  /* lfs Gv */
-	case 0x0fb4:
+	case 0x0fb4:  /* lfs Gv */
 	  tmpu8 = X86_RECORD_FS_REGNUM;
 	  break;
-	  /* lgs Gv */
-	case 0x0fb5:
+	case 0x0fb5:  /* lgs Gv */
 	  tmpu8 = X86_RECORD_GS_REGNUM;
 	  break;
 	}
@@ -4285,8 +4212,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* shifts */
-    case 0xc0:
+    case 0xc0:    /* shifts */
     case 0xc1:
     case 0xd0:
     case 0xd1:
@@ -4331,8 +4257,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	}
       break;
 
-    /* Floats.  */
-    case 0xd8:
+    case 0xd8:    /* Floats.  */
     case 0xd9:
     case 0xda:
     case 0xdb:
@@ -4777,14 +4702,11 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	}
       break;
       /* string ops */
-      /* movsS */
-    case 0xa4:
+    case 0xa4:    /* movsS */
     case 0xa5:
-      /* stosS */
-    case 0xaa:
+    case 0xaa:    /* stosS */
     case 0xab:
-      /* insS */
-    case 0x6c:
+    case 0x6c:    /* insS */
     case 0x6d:
       regcache_raw_read_unsigned (ir.regcache,
                                   ir.regmap[X86_RECORD_RECX_REGNUM],
@@ -4831,8 +4753,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	}
       break;
 
-      /* cmpsS */
-    case 0xa6:
+    case 0xa6:    /* cmpsS */
     case 0xa7:
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_REDI_REGNUM);
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_RESI_REGNUM);
@@ -4841,8 +4762,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* lodsS */
-    case 0xac:
+    case 0xac:    /* lodsS */
     case 0xad:
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_REAX_REGNUM);
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_RESI_REGNUM);
@@ -4851,8 +4771,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* scasS */
-    case 0xae:
+    case 0xae:    /* scasS */
     case 0xaf:
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_REDI_REGNUM);
       if (prefixes & (PREFIX_REPZ | PREFIX_REPNZ))
@@ -4860,8 +4779,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* outsS */
-    case 0x6e:
+    case 0x6e:    /* outsS */
     case 0x6f:
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_RESI_REGNUM);
       if (prefixes & (PREFIX_REPZ | PREFIX_REPNZ))
@@ -4869,8 +4787,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* port I/O */
-    case 0xe4:
+    case 0xe4:    /* port I/O */
     case 0xe5:
     case 0xec:
     case 0xed:
@@ -4885,35 +4802,28 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       break;
 
       /* control */
-      /* ret im */
-    case 0xc2:
-      /* ret */
-    case 0xc3:
+    case 0xc2:    /* ret im */
+    case 0xc3:    /* ret */
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_RESP_REGNUM);
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* lret im */
-    case 0xca:
-      /* lret */
-    case 0xcb:
-      /* iret */
-    case 0xcf:
+    case 0xca:    /* lret im */
+    case 0xcb:    /* lret */
+    case 0xcf:    /* iret */
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_CS_REGNUM);
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_RESP_REGNUM);
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* call im */
-    case 0xe8:
+    case 0xe8:    /* call im */
       if (ir.regmap[X86_RECORD_R8_REGNUM] && ir.dflag)
         ir.dflag = 2;
       if (i386_record_push (&ir, 1 << (ir.dflag + 1)))
         return -1;
       break;
 
-      /* lcall im */
-    case 0x9a:
+    case 0x9a:    /* lcall im */
       if (ir.regmap[X86_RECORD_R8_REGNUM])
         {
           ir.addr -= 1;
@@ -4924,14 +4834,10 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
         return -1;
       break;
 
-      /* jmp im */
-    case 0xe9:
-      /* ljmp im */
-    case 0xea:
-      /* jmp Jb */
-    case 0xeb:
-      /* jcc Jb */
-    case 0x70:
+    case 0xe9:    /* jmp im */
+    case 0xea:    /* ljmp im */
+    case 0xeb:    /* jmp Jb */
+    case 0x70:    /* jcc Jb */
     case 0x71:
     case 0x72:
     case 0x73:
@@ -4947,8 +4853,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
     case 0x7d:
     case 0x7e:
     case 0x7f:
-      /* jcc Jv */
-    case 0x0f80:
+    case 0x0f80:  /* jcc Jv */
     case 0x0f81:
     case 0x0f82:
     case 0x0f83:
@@ -4966,8 +4871,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
     case 0x0f8f:
       break;
 
-      /* setcc Gv */
-    case 0x0f90:
+    case 0x0f90:  /* setcc Gv */
     case 0x0f91:
     case 0x0f92:
     case 0x0f93:
@@ -4997,8 +4901,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	}
       break;
 
-      /* cmov Gv, Ev */
-    case 0x0f40:
+    case 0x0f40:    /* cmov Gv, Ev */
     case 0x0f41:
     case 0x0f42:
     case 0x0f43:
@@ -5023,8 +4926,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       break;
 
       /* flags */
-      /* pushf */
-    case 0x9c:
+    case 0x9c:    /* pushf */
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       if (ir.regmap[X86_RECORD_R8_REGNUM] && ir.dflag)
         ir.dflag = 2;
@@ -5032,34 +4934,26 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
         return -1;
       break;
 
-      /* popf */
-    case 0x9d:
+    case 0x9d:    /* popf */
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_RESP_REGNUM);
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* sahf */
-    case 0x9e:
+    case 0x9e:    /* sahf */
       if (ir.regmap[X86_RECORD_R8_REGNUM])
         {
           ir.addr -= 1;
           goto no_support;
         }
-      /* cmc */
-    case 0xf5:
-      /* clc */
-    case 0xf8:
-      /* stc */
-    case 0xf9:
-      /* cld */
-    case 0xfc:
-      /* std */
-    case 0xfd:
+    case 0xf5:    /* cmc */
+    case 0xf8:    /* clc */
+    case 0xf9:    /* stc */
+    case 0xfc:    /* cld */
+    case 0xfd:    /* std */
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* lahf */
-    case 0x9f:
+    case 0x9f:    /* lahf */
       if (ir.regmap[X86_RECORD_R8_REGNUM])
         {
           ir.addr -= 1;
@@ -5070,8 +4964,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       break;
 
       /* bit operations */
-      /* bt/bts/btr/btc Gv, im */
-    case 0x0fba:
+    case 0x0fba:    /* bt/bts/btr/btc Gv, im */
       ir.ot = ir.dflag + OT_WORD;
       if (i386_record_modrm (&ir))
 	return -1;
@@ -5094,17 +4987,13 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* bt Gv, Ev */
-    case 0x0fa3:
+    case 0x0fa3:    /* bt Gv, Ev */
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* bts */
-    case 0x0fab:
-      /* btr */
-    case 0x0fb3:
-      /* btc */
-    case 0x0fbb:
+    case 0x0fab:    /* bts */
+    case 0x0fb3:    /* btr */
+    case 0x0fbb:    /* btc */
       ir.ot = ir.dflag + OT_WORD;
       if (i386_record_modrm (&ir))
         return -1;
@@ -5138,27 +5027,19 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* bsf */
-    case 0x0fbc:
-      /* bsr */
-    case 0x0fbd:
+    case 0x0fbc:    /* bsf */
+    case 0x0fbd:    /* bsr */
       I386_RECORD_ARCH_LIST_ADD_REG (ir.reg | rex_r);
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
       /* bcd */
-      /* daa */
-    case 0x27:
-      /* das */
-    case 0x2f:
-      /* aaa */
-    case 0x37:
-      /* aas */
-    case 0x3f:
-      /* aam */
-    case 0xd4:
-      /* aad */
-    case 0xd5:
+    case 0x27:    /* daa */
+    case 0x2f:    /* das */
+    case 0x37:    /* aaa */
+    case 0x3f:    /* aas */
+    case 0xd4:    /* aam */
+    case 0xd5:    /* aad */
       if (ir.regmap[X86_RECORD_R8_REGNUM])
         {
           ir.addr -= 1;
@@ -5169,8 +5050,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       break;
 
       /* misc */
-      /* nop */
-    case 0x90:
+    case 0x90:    /* nop */
       if (prefixes & PREFIX_LOCK)
 	{
 	  ir.addr -= 1;
@@ -5178,8 +5058,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	}
       break;
 
-      /* fwait */
-    case 0x9b:
+    case 0x9b:    /* fwait */
       if (target_read_memory (ir.addr, &tmpu8, 1))
         {
           if (record_debug)
@@ -5193,18 +5072,16 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       goto reswitch;
       break;
 
-      /* int3 */
       /* XXX */
-    case 0xcc:
+    case 0xcc:    /* int3 */
       printf_unfiltered (_("Process record doesn't support instruction "
 			   "int3.\n"));
       ir.addr -= 1;
       goto no_support;
       break;
 
-      /* int */
       /* XXX */
-    case 0xcd:
+    case 0xcd:    /* int */
       {
 	int ret;
 	if (target_read_memory (ir.addr, &tmpu8, 1))
@@ -5231,31 +5108,26 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       }
       break;
 
-      /* into */
       /* XXX */
-    case 0xce:
+    case 0xce:    /* into */
       printf_unfiltered (_("Process record doesn't support "
 			   "instruction into.\n"));
       ir.addr -= 1;
       goto no_support;
       break;
 
-      /* cli */
-    case 0xfa:
-      /* sti */
-    case 0xfb:
+    case 0xfa:    /* cli */
+    case 0xfb:    /* sti */
       break;
 
-      /* bound */
-    case 0x62:
+    case 0x62:    /* bound */
       printf_unfiltered (_("Process record doesn't support "
 			   "instruction bound.\n"));
       ir.addr -= 1;
       goto no_support;
       break;
 
-      /* bswap reg */
-    case 0x0fc8:
+    case 0x0fc8:    /* bswap reg */
     case 0x0fc9:
     case 0x0fca:
     case 0x0fcb:
@@ -5266,8 +5138,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG ((opcode & 7) | ir.rex_b);
       break;
 
-      /* salc */
-    case 0xd6:
+    case 0xd6:    /* salc */
       if (ir.regmap[X86_RECORD_R8_REGNUM])
         {
           ir.addr -= 1;
@@ -5277,44 +5148,36 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* loopnz */
-    case 0xe0:
-      /* loopz */
-    case 0xe1:
-      /* loop */
-    case 0xe2:
-      /* jecxz */
-    case 0xe3:
+    case 0xe0:    /* loopnz */
+    case 0xe1:    /* loopz */
+    case 0xe2:    /* loop */
+    case 0xe3:    /* jecxz */
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_RECX_REGNUM);
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* wrmsr */
-    case 0x0f30:
+    case 0x0f30:    /* wrmsr */
       printf_unfiltered (_("Process record doesn't support "
 			   "instruction wrmsr.\n"));
       ir.addr -= 2;
       goto no_support;
       break;
 
-      /* rdmsr */
-    case 0x0f32:
+    case 0x0f32:    /* rdmsr */
       printf_unfiltered (_("Process record doesn't support "
 			   "instruction rdmsr.\n"));
       ir.addr -= 2;
       goto no_support;
       break;
 
-      /* rdtsc */
-    case 0x0f31:
+    case 0x0f31:    /* rdtsc */
       printf_unfiltered (_("Process record doesn't support "
 			   "instruction rdtsc.\n"));
       ir.addr -= 2;
       goto no_support;
       break;
 
-      /* sysenter */
-    case 0x0f34:
+    case 0x0f34:    /* sysenter */
       {
 	int ret;
         if (ir.regmap[X86_RECORD_R8_REGNUM])
@@ -5335,16 +5198,14 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       }
       break;
 
-      /* sysexit */
-    case 0x0f35:
+    case 0x0f35:    /* sysexit */
       printf_unfiltered (_("Process record doesn't support "
 			   "instruction sysexit.\n"));
       ir.addr -= 2;
       goto no_support;
       break;
 
-      /* syscall */
-    case 0x0f05:
+    case 0x0f05:    /* syscall */
       {
 	int ret;
 	if (gdbarch_tdep (gdbarch)->i386_syscall_record == NULL)
@@ -5360,24 +5221,21 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       }
       break;
 
-      /* sysret */
-    case 0x0f07:
+    case 0x0f07:    /* sysret */
       printf_unfiltered (_("Process record doesn't support "
                            "instruction sysret.\n"));
       ir.addr -= 2;
       goto no_support;
       break;
 
-      /* cpuid */
-    case 0x0fa2:
+    case 0x0fa2:    /* cpuid */
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_REAX_REGNUM);
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_RECX_REGNUM);
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_REDX_REGNUM);
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_REBX_REGNUM);
       break;
 
-      /* hlt */
-    case 0xf4:
+    case 0xf4:    /* hlt */
       printf_unfiltered (_("Process record doesn't support "
 			   "instruction hlt.\n"));
       ir.addr -= 1;
@@ -5389,10 +5247,8 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	return -1;
       switch (ir.reg)
 	{
-	  /* sldt */
-	case 0:
-	  /* str */
-	case 1:
+	case 0:  /* sldt */
+	case 1:  /* str  */
 	  if (ir.mod == 3)
             I386_RECORD_ARCH_LIST_ADD_REG (ir.rm | ir.rex_b);
 	  else
@@ -5402,15 +5258,11 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 		return -1;
 	    }
 	  break;
-	  /* lldt */
-	case 2:
-	  /* ltr */
-	case 3:
+	case 2:  /* lldt */
+	case 3:  /* ltr */
 	  break;
-	  /* verr */
-	case 4:
-	  /* verw */
-	case 5:
+	case 4:  /* verr */
+	case 5:  /* verw */
           I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
 	  break;
 	default:
@@ -5426,8 +5278,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	return -1;
       switch (ir.reg)
 	{
-	  /* sgdt */
-	case 0:
+	case 0:  /* sgdt */
 	  {
 	    uint64_t tmpu64;
 
@@ -5471,11 +5322,9 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	    {
 	      switch (ir.rm)
 		{
-		  /* monitor */
-		case 0:
+		case 0:  /* monitor */
 		  break;
-		  /* mwait */
-		case 1:
+		case 1:  /* mwait */
 		  I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
 		  break;
 		default:
@@ -5519,8 +5368,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 		}
 	    }
 	  break;
-	  /* lgdt */
-	case 2:
+	case 2:  /* lgdt */
 	  if (ir.mod == 3)
 	    {
 	      /* xgetbv */
@@ -5534,8 +5382,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	      else if (ir.rm == 1)
 		break;
 	    }
-	  /* lidt */
-	case 3:
+	case 3:  /* lidt */
 	  if (ir.mod == 3)
 	    {
 	      ir.addr -= 3;
@@ -5543,8 +5390,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	      goto no_support;
 	    }
 	  break;
-	  /* smsw */
-	case 4:
+	case 4:  /* smsw */
 	  if (ir.mod == 3)
 	    {
 	      if (record_arch_list_add_reg (ir.regcache, ir.rm | ir.rex_b))
@@ -5558,12 +5404,10 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	    }
 	  I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
 	  break;
-	  /* lmsw */
-	case 6:
+	case 6:  /* lmsw */
 	  I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
 	  break;
-	  /* invlpg */
-	case 7:
+	case 7:  /* invlpg */
 	  if (ir.mod == 3)
 	    {
 	      if (ir.rm == 0 && ir.regmap[X86_RECORD_R8_REGNUM])
@@ -5586,14 +5430,11 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	}
       break;
 
-      /* invd */
-    case 0x0f08:
-      /* wbinvd */
-    case 0x0f09:
+    case 0x0f08:    /* invd */
+    case 0x0f09:    /* wbinvd */
       break;
 
-      /* arpl */
-    case 0x63:
+    case 0x63:    /* arpl */
       if (i386_record_modrm (&ir))
 	return -1;
       if (ir.mod == 3 || ir.regmap[X86_RECORD_R8_REGNUM])
@@ -5611,10 +5452,8 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
         I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
-      /* lar */
-    case 0x0f02:
-      /* lsl */
-    case 0x0f03:
+    case 0x0f02:    /* lar */
+    case 0x0f03:    /* lsl */
       if (i386_record_modrm (&ir))
 	return -1;
       I386_RECORD_ARCH_LIST_ADD_REG (ir.reg | rex_r);
@@ -5632,7 +5471,6 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	}
       break;
 
-      /* nop (multi byte) */
     case 0x0f19:
     case 0x0f1a:
     case 0x0f1b:
@@ -5640,12 +5478,11 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
     case 0x0f1d:
     case 0x0f1e:
     case 0x0f1f:
+      /* nop (multi byte) */
       break;
 
-      /* mov reg, crN */
-    case 0x0f20:
-      /* mov crN, reg */
-    case 0x0f22:
+    case 0x0f20:    /* mov reg, crN */
+    case 0x0f22:    /* mov crN, reg */
       if (i386_record_modrm (&ir))
 	return -1;
       if ((ir.modrm & 0xc0) != 0xc0)
@@ -5674,10 +5511,8 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	}
       break;
 
-      /* mov reg, drN */
-    case 0x0f21:
-      /* mov drN, reg */
-    case 0x0f23:
+    case 0x0f21:    /* mov reg, drN */
+    case 0x0f23:    /* mov drN, reg */
       if (i386_record_modrm (&ir))
 	return -1;
       if ((ir.modrm & 0xc0) != 0xc0 || ir.reg == 4
@@ -5693,8 +5528,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	I386_RECORD_ARCH_LIST_ADD_REG (ir.rm | ir.rex_b);
       break;
 
-      /* clts */
-    case 0x0f06:
+    case 0x0f06:    /* clts */
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
