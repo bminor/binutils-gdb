@@ -1,3 +1,9 @@
+2009-12-17  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/11088
+	* elf64-ppc.c (ppc64_elf_gc_sweep_hook): Don't abort if symbol
+	hiding has nulled out plt.plist.
+
 2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* opncls.c (bfd_opnr_iovec): Replace _XXX with XXX_P in
@@ -35,7 +41,7 @@
 
 2009-12-11  Tristan Gingold  <gingold@adacore.com>
 
-	* som.c (bfd_som_set_subsection_attributes) 
+	* som.c (bfd_som_set_subsection_attributes)
 	(bfd_section_from_som_symbol, som_reloc_queue_fix): Fix shadowed
 	variable warnings.
 	* cache.c (close_one): Likewise.
