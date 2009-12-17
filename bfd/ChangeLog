@@ -1,6 +1,24 @@
 2009-12-17  Alan Modra  <amodra@bigpond.net.au>
 
 	PR ld/11088
+	* elf32-ppc.c (update_plt_info): Clear sec here when addend is
+	less than 32768..
+	(ppc_elf_check_relocs): ..rather than doing so here.  Ignore new
+	relax relocs.
+	(ppc_elf_gc_sweep_hook): Don't segfault when symbol hiding has
+	removed plt_entry records.
+	(ppc_elf_tls_setup): Handle PIE calls to __tls_get_addr correctly.
+	(ppc_elf_tls_optimize): Likewise.  Also dec __tls_get_addr refcount
+	when optimizing code using new tlsgd and tlsld marker relocs.
+	(ppc_elf_relax_section): Differentiate relaxed PLTREL24 relocs
+	from ADDR24 relocs using plt or glink.  Don't clear the addend
+	for R_PPC_RELAX_PLTREL24.
+	(ppc_elf_relocate_section): Correctly handle addends on relaxed
+	PLTREL24 relocs.
+
+2009-12-17  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/11088
 	* elf64-ppc.c (ppc64_elf_gc_sweep_hook): Don't abort if symbol
 	hiding has nulled out plt.plist.
 
