@@ -1,3 +1,21 @@
+2009-12-16  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_relobj::scan_sections_for_stubs): Exclude ICF-eliminated
+	sections.
+	* object.cc (Sized_relobj::do_finalize_local_symbols): Handle
+	relaxed input sections.
+	* output.cc (Output_section::find_relaxed_input_section): Change
+	return type to Output_relaxed_input_section pointer.  Adjust code
+	for new type of relaxed_input_section_map_.
+	* output.h (Output_section::find_relaxed_input_section): Change
+	return type to Output_relaxed_input_section pointer.
+	(Output_section::Output_relaxed_input_section_by_input_section_map):
+	New type.
+	(Output_section::relaxed_input_section_map_): Change type to
+	Output_section::Output_relaxed_input_section_by_input_section_map.
+	* symtab.cc (Symbol_table::compute_final_value): Handle relaxed
+	input section.
+
 2009-12-15  Ian Lance Taylor  <iant@google.com>
 
 	* layout.cc (Layout::create_shstrtab): Only write out after input

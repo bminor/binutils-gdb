@@ -2413,7 +2413,6 @@ Symbol_table::compute_final_value(
 	  {
 	    Relobj* relobj = static_cast<Relobj*>(symobj);
 	    Output_section* os = relobj->output_section(shndx);
-            uint64_t secoff64 = relobj->output_section_offset(shndx);
 
             if (this->is_section_folded(relobj, shndx))
               {
@@ -2423,11 +2422,17 @@ Symbol_table::compute_final_value(
                                                                    shndx);
                 gold_assert(folded.first != NULL);
                 Relobj* folded_obj = reinterpret_cast<Relobj*>(folded.first);
-                os = folded_obj->output_section(folded.second);  
+		unsigned folded_shndx = folded.second;
+
+                os = folded_obj->output_section(folded_shndx);  
                 gold_assert(os != NULL);
-                secoff64 = folded_obj->output_section_offset(folded.second);
+
+		// Replace (relobj, shndx) with canonical ICF input section.
+		shndx = folded_shndx;
+		relobj = folded_obj;
               }
 
+            uint64_t secoff64 = relobj->output_section_offset(shndx);
  	    if (os == NULL)
 	      {
                 bool static_or_reloc = (parameters->doing_static_link() ||

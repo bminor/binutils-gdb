@@ -2599,7 +2599,7 @@ class Output_section : public Output_data
 
   // Find a relaxed input section to an input section in OBJECT
   // with index SHNDX.  Return NULL if none is found.
-  const Output_section_data*
+  const Output_relaxed_input_section*
   find_relaxed_input_section(const Relobj* object, unsigned int shndx) const;
   
   // Print merge statistics to stderr.
@@ -3190,6 +3190,12 @@ class Output_section : public Output_data
 			Input_section_specifier::equal_to>
     Output_section_data_by_input_section_map;
 
+  // Map that link Input_section_specifier to Output_relaxed_input_section.
+  typedef Unordered_map<Input_section_specifier, Output_relaxed_input_section*,
+			Input_section_specifier::hash,
+			Input_section_specifier::equal_to>
+    Output_relaxed_input_section_by_input_section_map;
+
   // Map used during relaxation of existing sections.  This map
   // an input section specifier to an input section list index.
   // We assume that Input_section_list is a vector.
@@ -3358,7 +3364,8 @@ class Output_section : public Output_data
   // Map from input sections to relaxed input sections.  This is mutable
   // because it is updated lazily.  We may need to update it in a
   // const qualified method.
-  mutable Output_section_data_by_input_section_map relaxed_input_section_map_;
+  mutable Output_relaxed_input_section_by_input_section_map
+    relaxed_input_section_map_;
   // Whether relaxed_input_section_map_ is valid.
   mutable bool is_relaxed_input_section_map_valid_;
 };

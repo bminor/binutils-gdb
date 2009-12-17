@@ -3645,10 +3645,12 @@ Arm_relobj<big_endian>::scan_sections_for_stubs(
 	}
 
       Output_section* os = out_sections[index];
-      if (os == NULL)
+      if (os == NULL
+	  || symtab->is_section_folded(this, index))
 	{
 	  // This relocation section is against a section which we
-	  // discarded.
+	  // discarded or if the section is folded into another
+	  // section due to ICF.
 	  continue;
 	}
       Arm_address output_offset = this->get_output_section_offset(index);

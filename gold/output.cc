@@ -2224,7 +2224,7 @@ Output_section::find_merge_section(const Relobj* object,
 // Find an relaxed input section corresponding to an input section
 // in OBJECT with index SHNDX.
 
-const Output_section_data*
+const Output_relaxed_input_section*
 Output_section::find_relaxed_input_section(const Relobj* object,
 					   unsigned int shndx) const
 {
@@ -2247,7 +2247,7 @@ Output_section::find_relaxed_input_section(const Relobj* object,
     }
 
   Input_section_specifier iss(object, shndx);
-  Output_section_data_by_input_section_map::const_iterator p =
+  Output_relaxed_input_section_by_input_section_map::const_iterator p =
     this->relaxed_input_section_map_.find(iss);
   if (p != this->relaxed_input_section_map_.end())
     return p->second;

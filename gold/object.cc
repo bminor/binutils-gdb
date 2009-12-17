@@ -1683,7 +1683,15 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
               os = folded_obj->output_section(folded.second);
               gold_assert(os != NULL);
               secoffset = folded_obj->get_output_section_offset(folded.second);
-              gold_assert(secoffset != invalid_address);
+
+	      // This could be a relaxed input section.
+              if (secoffset == invalid_address)
+		{
+		  const Output_relaxed_input_section* relaxed_section =
+		    os->find_relaxed_input_section(folded_obj, folded.second);
+		  gold_assert(relaxed_section != NULL);
+		  secoffset = relaxed_section->address() - os->address();
+		}
             }
 
 	  if (os == NULL)
