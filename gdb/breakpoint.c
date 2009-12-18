@@ -3306,6 +3306,11 @@ bpstat_check_location (const struct bp_location *bl,
 {
   struct breakpoint *b = bl->owner;
 
+  /* By definition, the inferior does not report stops at
+     tracepoints.  */
+  if (b->type == bp_tracepoint)
+    return 0;
+
   if (b->type != bp_watchpoint
       && b->type != bp_hardware_watchpoint
       && b->type != bp_read_watchpoint
