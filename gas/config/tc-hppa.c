@@ -7369,7 +7369,7 @@ pa_subspace (int create_new)
 {
   char *name, *ss_name, c;
   char loadable, code_only, comdat, common, dup_common, zero, sort;
-  int i, access, space_index, alignment, quadrant, applicable, flags;
+  int i, access_ctr, space_index, alignment, quadrant, applicable, flags;
   sd_chain_struct *space;
   ssd_chain_struct *ssd;
   asection *section;
@@ -7392,7 +7392,7 @@ pa_subspace (int create_new)
 
       /* Load default values.  */
       sort = 0;
-      access = 0x7f;
+      access_ctr = 0x7f;
       loadable = 1;
       comdat = 0;
       common = 0;
@@ -7437,7 +7437,7 @@ pa_subspace (int create_new)
 		  space_index = pa_def_subspaces[i].space_index;
 		  alignment = pa_def_subspaces[i].alignment;
 		  quadrant = pa_def_subspaces[i].quadrant;
-		  access = pa_def_subspaces[i].access;
+		  access_ctr = pa_def_subspaces[i].access;
 		  sort = pa_def_subspaces[i].sort;
 		  break;
 		}
@@ -7475,7 +7475,7 @@ pa_subspace (int create_new)
 		{
 		  *input_line_pointer = c;
 		  input_line_pointer++;
-		  access = get_absolute_expression ();
+		  access_ctr = get_absolute_expression ();
 		}
 	      else if ((strncasecmp (name, "sort", 4) == 0))
 		{
@@ -7583,14 +7583,14 @@ pa_subspace (int create_new)
 
 	current_subspace = update_subspace (space, ss_name, loadable,
 					    code_only, comdat, common,
-					    dup_common, sort, zero, access,
+					    dup_common, sort, zero, access_ctr,
 					    space_index, alignment, quadrant,
 					    section);
       else
 	current_subspace = create_new_subspace (space, ss_name, loadable,
 						code_only, comdat, common,
 						dup_common, zero, sort,
-						access, space_index,
+						access_ctr, space_index,
 						alignment, quadrant, section);
 
       demand_empty_rest_of_line ();
@@ -7821,7 +7821,7 @@ create_new_subspace (sd_chain_struct *space,
 		     int dup_common,
 		     int is_zero ATTRIBUTE_UNUSED,
 		     int sort,
-		     int access,
+		     int access_ctr,
 		     int space_index ATTRIBUTE_UNUSED,
 		     int alignment ATTRIBUTE_UNUSED,
 		     int quadrant,
@@ -7876,7 +7876,7 @@ create_new_subspace (sd_chain_struct *space,
     }
 
 #ifdef obj_set_subsection_attributes
-  obj_set_subsection_attributes (seg, space->sd_seg, access, sort,
+  obj_set_subsection_attributes (seg, space->sd_seg, access_ctr, sort,
 				 quadrant, comdat, common, dup_common);
 #endif
 
@@ -7896,7 +7896,7 @@ update_subspace (sd_chain_struct *space,
 		 int dup_common,
 		 int sort,
 		 int zero ATTRIBUTE_UNUSED,
-		 int access,
+		 int access_ctr,
 		 int space_index ATTRIBUTE_UNUSED,
 		 int alignment ATTRIBUTE_UNUSED,
 		 int quadrant,
@@ -7907,7 +7907,7 @@ update_subspace (sd_chain_struct *space,
   chain_entry = is_defined_subspace (name);
 
 #ifdef obj_set_subsection_attributes
-  obj_set_subsection_attributes (section, space->sd_seg, access, sort,
+  obj_set_subsection_attributes (section, space->sd_seg, access_ctr, sort,
 				 quadrant, comdat, common, dup_common);
 #endif
 

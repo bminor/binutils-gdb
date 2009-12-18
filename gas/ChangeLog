@@ -1,3 +1,7 @@
+2009-12-18  Steve Ellcey  <sje@cup.hp.com>
+
+	* config/tc-hppa.c: Change access to access_ctr.
+
 2009-12-17  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/10924
