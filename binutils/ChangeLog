@@ -1,3 +1,7 @@
+2009-12-18  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* readelf.c (get_note_type): Handle NT_S390_HIGH_GPRS notes.
+
 2009-12-11  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.in: Regenerate.

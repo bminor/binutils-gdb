@@ -7638,6 +7638,12 @@ elfcore_grok_ppc_vsx (bfd *abfd, Elf_Internal_Note *note)
   return elfcore_make_note_pseudosection (abfd, ".reg-ppc-vsx", note);
 }
 
+static bfd_boolean
+elfcore_grok_s390_high_gprs (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-s390-high-gprs", note);
+}
+
 #if defined (HAVE_PRPSINFO_T)
 typedef prpsinfo_t   elfcore_psinfo_t;
 #if defined (HAVE_PRPSINFO32_T)		/* Sparc64 cross Sparc32 */
@@ -7996,6 +8002,13 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
       if (note->namesz == 6
           && strcmp (note->namedata, "LINUX") == 0)
         return elfcore_grok_ppc_vsx (abfd, note);
+      else
+        return TRUE;
+
+    case NT_S390_HIGH_GPRS:
+      if (note->namesz == 6
+          && strcmp (note->namedata, "LINUX") == 0)
+        return elfcore_grok_s390_high_gprs (abfd, note);
       else
         return TRUE;
 
@@ -8641,6 +8654,19 @@ elfcore_write_ppc_vsx (bfd *abfd,
                              note_name, NT_PPC_VSX, ppc_vsx, size);
 }
 
+static char *
+elfcore_write_s390_high_gprs (bfd *abfd,
+			      char *buf,
+			      int *bufsiz,
+			      const void *s390_high_gprs,
+			      int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+                             note_name, NT_S390_HIGH_GPRS,
+			     s390_high_gprs, size);
+}
+
 char *
 elfcore_write_register_note (bfd *abfd,
 			     char *buf,
@@ -8657,6 +8683,8 @@ elfcore_write_register_note (bfd *abfd,
     return elfcore_write_ppc_vmx (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-ppc-vsx") == 0)
     return elfcore_write_ppc_vsx (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-s390-high-gprs") == 0)
+    return elfcore_write_s390_high_gprs (abfd, buf, bufsiz, data, size);
   return NULL;
 }
 

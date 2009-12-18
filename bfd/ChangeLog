@@ -1,3 +1,10 @@
+2009-12-18  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* elf.c (elfcore_grok_s390_high_gprs): New function.
+	(elfcore_grok_note): Handle NT_S390_HIGH_GPRS notes.
+	(elfcore_write_s390_high_gprs): New function.
+	(elfcore_write_register_note): Call it.
+
 2009-12-17  Alan Modra  <amodra@bigpond.net.au>
 
 	PR ld/11088
