@@ -1,5 +1,7 @@
 2009-12-18  Doug Evans  <dje@google.com>
 
+	* event-loop.c: Include unistd.h if it exists.
+
 	* linux-low.c (my_waitpid): Move definition away from being in
 	between linux_tracefork_child/linux_test_for_tracefork.
 

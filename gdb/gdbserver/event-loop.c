@@ -34,6 +34,10 @@
 #include <errno.h>
 #endif
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 typedef struct gdb_event gdb_event;
 typedef void (event_handler_func) (int);
 
