@@ -841,4 +841,6 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "mips32-sync"
 
     if $has_newabi { run_dump_test "cfi-n64-1" }
+
+    run_dump_test_arches "aent"		[mips_arch_list_matching mips1]
 }

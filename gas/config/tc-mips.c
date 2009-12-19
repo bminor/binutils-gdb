@@ -15047,14 +15047,14 @@ s_mips_ent (int aent)
 
       cur_proc_ptr->func_sym = symbolP;
 
-      symbol_get_bfdsym (symbolP)->flags |= BSF_FUNCTION;
-
       ++numprocs;
 
       if (debug_type == DEBUG_STABS)
         stabs_generate_asm_func (S_GET_NAME (symbolP),
 				 S_GET_NAME (symbolP));
     }
+
+  symbol_get_bfdsym (symbolP)->flags |= BSF_FUNCTION;
 
   demand_empty_rest_of_line ();
 }

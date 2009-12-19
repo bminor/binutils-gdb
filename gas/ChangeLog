@@ -1,3 +1,8 @@
+2009-12-19  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c (s_mips_ent): Also set BSF_FUNCTION for
+	".aent".
+
 2009-12-18  Steve Ellcey  <sje@cup.hp.com>
 
 	* config/tc-hppa.c: Change access to access_ctr.
