@@ -4713,9 +4713,7 @@ process_operands (void)
      unnecessary segment overrides.  */
   const seg_entry *default_seg = 0;
 
-  if (i.tm.opcode_modifier.sse2avx
-      && (i.tm.opcode_modifier.vexnds
-	  || i.tm.opcode_modifier.vexndd))
+  if (i.tm.opcode_modifier.sse2avx && i.tm.opcode_modifier.vexvvvv)
     {
       unsigned int dupl = i.operands;
       unsigned int dest = dupl - 1;
@@ -4959,7 +4957,7 @@ build_modrm_byte (void)
 	 It must have VexNDS and VexImmExt.  */
       gas_assert ((i.reg_operands == 4
 		      || (i.reg_operands == 3 && i.mem_operands == 1))
-		  && i.tm.opcode_modifier.vexnds
+		  && i.tm.opcode_modifier.vexvvvv == VEXXDS
 		  && i.tm.opcode_modifier.veximmext
 	    && (operand_type_equal (&i.tm.operand_types[dest], &regxmm)
 		|| operand_type_equal (&i.tm.operand_types[dest], &regymm)));
@@ -5005,10 +5003,9 @@ build_modrm_byte (void)
      a instruction with VEX prefix and 3 sources.  */
   if (i.mem_operands == 0
       && ((i.reg_operands == 2
-	   && !i.tm.opcode_modifier.vexndd
-	   && !i.tm.opcode_modifier.vexlwp)
+	   && i.tm.opcode_modifier.vexvvvv <= VEXXDS)
 	  || (i.reg_operands == 3
-	      && i.tm.opcode_modifier.vexnds)
+	      && i.tm.opcode_modifier.vexvvvv == VEXXDS)
 	  || (i.reg_operands == 4 && vex_3_sources)))
     {
       switch (i.operands)
@@ -5023,7 +5020,7 @@ build_modrm_byte (void)
 	     is an instruction with VexNDS. */
 	  gas_assert (i.imm_operands == 1
 		      || (i.imm_operands == 0
-			  && (i.tm.opcode_modifier.vexnds
+			  && (i.tm.opcode_modifier.vexvvvv == VEXXDS
 			      || i.types[0].bitfield.shiftcount)));
 	  if (operand_type_check (i.types[0], imm)
 	      || i.types[0].bitfield.shiftcount)
@@ -5042,11 +5039,11 @@ build_modrm_byte (void)
 	  gas_assert ((i.imm_operands == 2
 		       && i.types[0].bitfield.imm8
 		       && i.types[1].bitfield.imm8)
-		      || (i.tm.opcode_modifier.vexnds
+		      || (i.tm.opcode_modifier.vexvvvv == VEXXDS
 			  && i.imm_operands == 1
 			  && (i.types[0].bitfield.imm8
 			      || i.types[i.operands - 1].bitfield.imm8)));
-	  if (i.tm.opcode_modifier.vexnds)
+	  if (i.tm.opcode_modifier.vexvvvv == VEXXDS)
 	    {
 	      if (i.types[0].bitfield.imm8)
 		source = 1;
@@ -5066,7 +5063,7 @@ build_modrm_byte (void)
 	{
 	  dest = source + 1;
 
-	  if (i.tm.opcode_modifier.vexnds)
+	  if (i.tm.opcode_modifier.vexvvvv == VEXXDS)
 	    {
 	      /* For instructions with VexNDS, the register-only
 		 source operand must be XMM or YMM register. It is
@@ -5356,7 +5353,7 @@ build_modrm_byte (void)
 		i.rex |= REX_B;
 	    }
 	}
-      else if (i.tm.opcode_modifier.vexlwp)
+      else if (i.tm.opcode_modifier.vexvvvv == VEXLWP)
 	{
 	  i.vex.register_specifier = i.op[2].regs;
 	  if (!i.mem_operands)
@@ -5393,7 +5390,7 @@ build_modrm_byte (void)
 
 	  if (vex_3_sources)
 	    op = dest;
-	  else if (i.tm.opcode_modifier.vexnds)
+	  else if (i.tm.opcode_modifier.vexvvvv == VEXXDS)
 	    {
 	      /* For instructions with VexNDS, the register-only
 		 source operand is encoded in VEX prefix. */
@@ -5410,7 +5407,7 @@ build_modrm_byte (void)
 		  gas_assert (vex_reg < i.operands);
 		}
 	    }
-	  else if (i.tm.opcode_modifier.vexndd)
+	  else if (i.tm.opcode_modifier.vexvvvv == VEXNDD)
 	    {
 	      /* For instructions with VexNDD, there should be
 		 no memory operand and the register destination

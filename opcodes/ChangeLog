@@ -1,3 +1,22 @@
+2009-12-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (opcode_modifiers): Remove VexNDS, VexNDD and
+	VexLWP.  Add VexVVVV.
+
+	* i386-opc.h (VexNDS): Removed.
+	(VexNDD): Likewise.
+	(VexLWP): Likewise.
+	(VEXXDS): New.
+	(VEXNDD): Likewise.
+	(VEXLWP): Likewise.
+	(VexVVVV): Likewise.
+	(i386_opcode_modifier): Remove vexnds, vexndd and vexlwp.
+	Add vexvvvv.
+
+	* i386-opc.tbl: Replace VexNDS with VexVVVV=1, VexNDD with
+	VexVVVV=2 and VexLWP with VexVVVV=3.
+	* i386-tbl.h: Regenerated.
+
 2009-12-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (operand_types): Move Imm1 before Imm8.
