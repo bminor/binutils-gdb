@@ -1,3 +1,9 @@
+2009-12-18  Doug Evans  <dje@google.com>
+
+	* gdb_proc_service.h (psaddr_t): Fix type.
+	* thread-db.c (thread_db_info.td_thr_tls_get_addr_p): Fix
+	signature to match glibc.
+
 2009-12-16  Doug Evans  <dje@google.com>
 
 	* linux-low.c (linux_read_memory): Fix argument to read.

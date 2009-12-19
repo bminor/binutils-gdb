@@ -153,8 +153,8 @@ struct thread_db_info
 				     int event);
 
   td_err_e (*td_thr_tls_get_addr_p) (const td_thrhandle_t *th,
-				     void *map_address,
-				     size_t offset, void **address);
+				     psaddr_t map_address,
+				     size_t offset, psaddr_t *address);
 };
 
 /* List of known processes using thread_db, and the required
@@ -1530,7 +1530,7 @@ thread_db_get_thread_local_address (struct target_ops *ops,
   if (thread_info != NULL && thread_info->private != NULL)
     {
       td_err_e err;
-      void *address;
+      psaddr_t address;
       struct thread_db_info *info;
 
       info = get_thread_db_info (GET_PID (ptid));
@@ -1544,8 +1544,11 @@ thread_db_get_thread_local_address (struct target_ops *ops,
       gdb_assert (lm != 0);
 
       /* Finally, get the address of the variable.  */
+      /* Note the cast through uintptr_t: this interface only works if
+	 a target address fits in a psaddr_t, which is a host pointer.
+	 So a 32-bit debugger can not access 64-bit TLS through this.  */
       err = info->td_thr_tls_get_addr_p (&thread_info->private->th,
-					 (void *)(size_t) lm,
+					 (psaddr_t)(uintptr_t) lm,
 					 offset, &address);
 
 #ifdef THREAD_DB_HAS_TD_NOTALLOC

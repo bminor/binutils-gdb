@@ -47,7 +47,7 @@ typedef unsigned int lwpid_t;
 #endif
 
 #ifndef HAVE_PSADDR_T
-typedef unsigned long psaddr_t;
+typedef void *psaddr_t;
 #endif
 
 #ifndef HAVE_PRGREGSET_T
