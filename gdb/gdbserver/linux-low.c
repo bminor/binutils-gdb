@@ -272,6 +272,81 @@ linux_remove_process (struct process_info *process, int detaching)
   remove_process (process);
 }
 
+/* Wrapper function for waitpid which handles EINTR, and emulates
+   __WALL for systems where that is not available.  */
+
+static int
+my_waitpid (int pid, int *status, int flags)
+{
+  int ret, out_errno;
+
+  if (debug_threads)
+    fprintf (stderr, "my_waitpid (%d, 0x%x)\n", pid, flags);
+
+  if (flags & __WALL)
+    {
+      sigset_t block_mask, org_mask, wake_mask;
+      int wnohang;
+
+      wnohang = (flags & WNOHANG) != 0;
+      flags &= ~(__WALL | __WCLONE);
+      flags |= WNOHANG;
+
+      /* Block all signals while here.  This avoids knowing about
+	 LinuxThread's signals.  */
+      sigfillset (&block_mask);
+      sigprocmask (SIG_BLOCK, &block_mask, &org_mask);
+
+      /* ... except during the sigsuspend below.  */
+      sigemptyset (&wake_mask);
+
+      while (1)
+	{
+	  /* Since all signals are blocked, there's no need to check
+	     for EINTR here.  */
+	  ret = waitpid (pid, status, flags);
+	  out_errno = errno;
+
+	  if (ret == -1 && out_errno != ECHILD)
+	    break;
+	  else if (ret > 0)
+	    break;
+
+	  if (flags & __WCLONE)
+	    {
+	      /* We've tried both flavors now.  If WNOHANG is set,
+		 there's nothing else to do, just bail out.  */
+	      if (wnohang)
+		break;
+
+	      if (debug_threads)
+		fprintf (stderr, "blocking\n");
+
+	      /* Block waiting for signals.  */
+	      sigsuspend (&wake_mask);
+	    }
+
+	  flags ^= __WCLONE;
+	}
+
+      sigprocmask (SIG_SETMASK, &org_mask, NULL);
+    }
+  else
+    {
+      do
+	ret = waitpid (pid, status, flags);
+      while (ret == -1 && errno == EINTR);
+      out_errno = errno;
+    }
+
+  if (debug_threads)
+    fprintf (stderr, "my_waitpid (%d, 0x%x): status(%x), %d\n",
+	     pid, flags, status ? *status : -1, ret);
+
+  errno = out_errno;
+  return ret;
+}
+
 /* Handle a GNU/Linux extended wait response.  If we see a clone
    event, we need to add the new LWP to our list (and not report the
    trap to higher layers).  */
@@ -2473,81 +2548,6 @@ linux_tracefork_child (void *arg)
 	 CLONE_VM | SIGCHLD, NULL);
 #endif
   _exit (0);
-}
-
-/* Wrapper function for waitpid which handles EINTR, and emulates
-   __WALL for systems where that is not available.  */
-
-static int
-my_waitpid (int pid, int *status, int flags)
-{
-  int ret, out_errno;
-
-  if (debug_threads)
-    fprintf (stderr, "my_waitpid (%d, 0x%x)\n", pid, flags);
-
-  if (flags & __WALL)
-    {
-      sigset_t block_mask, org_mask, wake_mask;
-      int wnohang;
-
-      wnohang = (flags & WNOHANG) != 0;
-      flags &= ~(__WALL | __WCLONE);
-      flags |= WNOHANG;
-
-      /* Block all signals while here.  This avoids knowing about
-	 LinuxThread's signals.  */
-      sigfillset (&block_mask);
-      sigprocmask (SIG_BLOCK, &block_mask, &org_mask);
-
-      /* ... except during the sigsuspend below.  */
-      sigemptyset (&wake_mask);
-
-      while (1)
-	{
-	  /* Since all signals are blocked, there's no need to check
-	     for EINTR here.  */
-	  ret = waitpid (pid, status, flags);
-	  out_errno = errno;
-
-	  if (ret == -1 && out_errno != ECHILD)
-	    break;
-	  else if (ret > 0)
-	    break;
-
-	  if (flags & __WCLONE)
-	    {
-	      /* We've tried both flavors now.  If WNOHANG is set,
-		 there's nothing else to do, just bail out.  */
-	      if (wnohang)
-		break;
-
-	      if (debug_threads)
-		fprintf (stderr, "blocking\n");
-
-	      /* Block waiting for signals.  */
-	      sigsuspend (&wake_mask);
-	    }
-
-	  flags ^= __WCLONE;
-	}
-
-      sigprocmask (SIG_SETMASK, &org_mask, NULL);
-    }
-  else
-    {
-      do
-	ret = waitpid (pid, status, flags);
-      while (ret == -1 && errno == EINTR);
-      out_errno = errno;
-    }
-
-  if (debug_threads)
-    fprintf (stderr, "my_waitpid (%d, 0x%x): status(%x), %d\n",
-	     pid, flags, status ? *status : -1, ret);
-
-  errno = out_errno;
-  return ret;
 }
 
 /* Determine if PTRACE_O_TRACEFORK can be used to follow fork events.  Make

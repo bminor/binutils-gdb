@@ -1,5 +1,8 @@
 2009-12-18  Doug Evans  <dje@google.com>
 
+	* linux-low.c (my_waitpid): Move definition away from being in
+	between linux_tracefork_child/linux_test_for_tracefork.
+
 	* gdb_proc_service.h (psaddr_t): Fix type.
 	* thread-db.c (thread_db_info.td_thr_tls_get_addr_p): Fix
 	signature to match glibc.
