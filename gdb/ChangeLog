@@ -1,3 +1,12 @@
+2009-12-19  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* arm-linux-tdep.c (ARM_OABI_SYSCALL_RESTART_SYSCALL): New macro.
+	(ARM_LDR_PC_SP_12): Likewise.
+	(arm_linux_restart_syscall_init): New function.
+	(arm_linux_restart_syscall_tramp_frame): New variable.
+	(arm_linux_init_abi): Install the
+	arm_linux_restart_syscall_tramp_frame unwinder.
+
 2009-12-18  Doug Evans  <dje@google.com>
 
 	* gdb_proc_service.h (psaddr_t): Fix type.

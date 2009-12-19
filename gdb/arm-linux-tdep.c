@@ -216,6 +216,11 @@ static const char arm_linux_thumb_le_breakpoint[] = {0x01, 0xde};
 #define ARM_SET_R7_RT_SIGRETURN		0xe3a070ad
 #define ARM_EABI_SYSCALL		0xef000000
 
+/* OABI syscall restart trampoline, used for EABI executables too
+   whenever OABI support has been enabled in the kernel.  */
+#define ARM_OABI_SYSCALL_RESTART_SYSCALL 0xef900000
+#define ARM_LDR_PC_SP_12		0xe49df00c
+
 static void
 arm_linux_sigtramp_cache (struct frame_info *this_frame,
 			  struct trad_frame_cache *this_cache,
@@ -325,6 +330,21 @@ arm_linux_rt_sigreturn_init (const struct tramp_frame *self,
 			      + ARM_SIGCONTEXT_R0);
 }
 
+static void
+arm_linux_restart_syscall_init (const struct tramp_frame *self,
+				struct frame_info *this_frame,
+				struct trad_frame_cache *this_cache,
+				CORE_ADDR func)
+{
+  CORE_ADDR sp = get_frame_register_unsigned (this_frame, ARM_SP_REGNUM);
+
+  trad_frame_set_reg_addr (this_cache, ARM_PC_REGNUM, sp);
+  trad_frame_set_reg_value (this_cache, ARM_SP_REGNUM, sp + 12);
+
+  /* Save a frame ID.  */
+  trad_frame_set_id (this_cache, frame_id_build (sp, func));
+}
+
 static struct tramp_frame arm_linux_sigreturn_tramp_frame = {
   SIGTRAMP_FRAME,
   4,
@@ -365,6 +385,17 @@ static struct tramp_frame arm_eabi_linux_rt_sigreturn_tramp_frame = {
     { TRAMP_SENTINEL_INSN }
   },
   arm_linux_rt_sigreturn_init
+};
+
+static struct tramp_frame arm_linux_restart_syscall_tramp_frame = {
+  NORMAL_FRAME,
+  4,
+  {
+    { ARM_OABI_SYSCALL_RESTART_SYSCALL, -1 },
+    { ARM_LDR_PC_SP_12, -1 },
+    { TRAMP_SENTINEL_INSN }
+  },
+  arm_linux_restart_syscall_init
 };
 
 /* Core file and register set support.  */
@@ -860,6 +891,8 @@ arm_linux_init_abi (struct gdbarch_info info,
 				&arm_eabi_linux_sigreturn_tramp_frame);
   tramp_frame_prepend_unwinder (gdbarch,
 				&arm_eabi_linux_rt_sigreturn_tramp_frame);
+  tramp_frame_prepend_unwinder (gdbarch,
+				&arm_linux_restart_syscall_tramp_frame);
 
   /* Core file support.  */
   set_gdbarch_regset_from_core_section (gdbarch,
