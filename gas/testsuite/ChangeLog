@@ -1,3 +1,7 @@
+2009-12-19  Doug Evans  <dje@sebabeach.org>
+
+	* gas/xc16x/xc16x.exp (*): Add missing " in timeout cases.
+
 2009-12-19  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/mips/eret-2.s: Add an instruction to fill a branch delay
