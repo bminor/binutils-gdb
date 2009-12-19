@@ -1,5 +1,11 @@
 2009-12-19  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* gas/mips/eret-2.s: Add an instruction to fill a branch delay
+	slot.
+	* gas/mips/eret-2.d: Adjust accordingly.
+
+2009-12-19  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* gas/mips/aent.d: New test.
 	* gas/mips/aent.s: Source for the new test.
 	* gas/mips/mips.exp: Run it.
