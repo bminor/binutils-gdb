@@ -1,3 +1,11 @@
+2009-12-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* Makefile.in gdb.ada/gnat_ada.gpr, gdb.base/gcore-buffer-overflow.c,
+	gdb.base/gcore-buffer-overflow.exp, gdb.base/source-error.gdb,
+	gdb.base/watch_thread_num.c, gdb.java/jprint.java,
+	gdb.mi/mi-async.exp, gdb.modula2/unbounded-array.exp,
+	gdb.modula2/unbounded1.c: Update copyright header.
+
 2009-12-10  Chris Moller  <moller@mollerware.com>
 
 	PR gdb/9399
