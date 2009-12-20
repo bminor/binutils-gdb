@@ -1,3 +1,8 @@
+2009-12-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* darwin-nat-info.c, solib-spu.c, spu-multiarch.c,
+	regformats/regdat.sh, features/Makefile: Update copyright header.
+
 2009-12-19  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* arm-linux-tdep.c (ARM_OABI_SYSCALL_RESTART_SYSCALL): New macro.
