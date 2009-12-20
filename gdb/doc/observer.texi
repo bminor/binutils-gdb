@@ -11,7 +11,7 @@
 @c header file during the GDB build process.  Permission is granted
 @c to redistribute and/or modify those lines under the terms of the
 @c GNU General Public License as published by the Free Software
-@c Foundation; either version 2 of the License, or (at your option)
+@c Foundation; either version 3 of the License, or (at your option)
 @c any later version.
 
 @node GDB Observers

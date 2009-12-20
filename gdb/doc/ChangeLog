@@ -1,3 +1,8 @@
+2009-12-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* Makefile.in: Update copyright header.
+	* observer.texi: Fix the copyright header of the generated files.
+
 2009-12-08  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.texinfo (Types In Python): Describe range function.
