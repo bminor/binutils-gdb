@@ -1928,7 +1928,7 @@ amd64_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct amd64_frame_cache *cache;
-  gdb_byte buf[4];
+  gdb_byte buf[8];
 
   if (*this_cache)
     return *this_cache;
