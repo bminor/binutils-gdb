@@ -577,6 +577,8 @@ proc set_frozen {varobjs flag} {
 mi_prepare_inline_tests $srcfile
 mi_run_inline_test frozen
 
+mi_run_inline_test bitfield
+
 # Since the inline test framework does not really work with
 # function calls, first to inline tests and then do the reminder
 # manually.
