@@ -1572,25 +1572,29 @@ linux_wait (ptid_t ptid,
   return event_ptid;
 }
 
-/* Send a signal to an LWP.  For LinuxThreads, kill is enough; however, if
-   thread groups are in use, we need to use tkill.  */
+/* Send a signal to an LWP.  */
 
 static int
 kill_lwp (unsigned long lwpid, int signo)
 {
-  static int tkill_failed;
+  /* Use tkill, if possible, in case we are using nptl threads.  If tkill
+     fails, then we are not using nptl threads and we should be using kill.  */
 
-  errno = 0;
+#ifdef __NR_tkill
+  {
+    static int tkill_failed;
 
-#ifdef SYS_tkill
-  if (!tkill_failed)
-    {
-      int ret = syscall (SYS_tkill, lwpid, signo);
-      if (errno != ENOSYS)
-	return ret;
-      errno = 0;
-      tkill_failed = 1;
-    }
+    if (!tkill_failed)
+      {
+	int ret;
+
+	errno = 0;
+	ret = syscall (__NR_tkill, lwpid, signo);
+	if (errno != ENOSYS)
+	  return ret;
+	tkill_failed = 1;
+      }
+  }
 #endif
 
   return kill (lwpid, signo);

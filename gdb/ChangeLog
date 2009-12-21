@@ -1,3 +1,10 @@
+2009-12-21  Doug Evans  <dje@google.com>
+
+	* linux-nat.c (kill_lwp): Minor cleanup, move definition of
+	tkill_failed into ifdef HAVE_TKILL_SYSCALL.  Move setting of errno
+	there too.  Delete unnecessary resetting of errno after syscall.
+	Minor comment changes to match gdbserver/linux-low.c:kill_lwp.
+
 2009-12-21  Alan Modra  <amodra@gmail.com>
 
 	* MAINTAINERS: Update my email address.

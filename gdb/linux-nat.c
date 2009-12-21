@@ -2034,27 +2034,29 @@ linux_nat_resume (struct target_ops *ops,
     target_async (inferior_event_handler, 0);
 }
 
-/* Issue kill to specified lwp.  */
-
-static int tkill_failed;
+/* Send a signal to an LWP.  */
 
 static int
 kill_lwp (int lwpid, int signo)
 {
-  errno = 0;
-
-/* Use tkill, if possible, in case we are using nptl threads.  If tkill
-   fails, then we are not using nptl threads and we should be using kill.  */
+  /* Use tkill, if possible, in case we are using nptl threads.  If tkill
+     fails, then we are not using nptl threads and we should be using kill.  */
 
 #ifdef HAVE_TKILL_SYSCALL
-  if (!tkill_failed)
-    {
-      int ret = syscall (__NR_tkill, lwpid, signo);
-      if (errno != ENOSYS)
-	return ret;
-      errno = 0;
-      tkill_failed = 1;
-    }
+  {
+    static int tkill_failed;
+
+    if (!tkill_failed)
+      {
+	int ret;
+
+	errno = 0;
+	ret = syscall (__NR_tkill, lwpid, signo);
+	if (errno != ENOSYS)
+	  return ret;
+	tkill_failed = 1;
+      }
+  }
 #endif
 
   return kill (lwpid, signo);

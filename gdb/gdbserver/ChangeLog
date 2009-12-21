@@ -1,5 +1,11 @@
 2009-12-21  Doug Evans  <dje@google.com>
 
+	* linux-low.c (kill_lwp): Use __NR_tkill instead of SYS_tkill.
+	Move definition of tkill_failed to ifdef __NR_tkill to avoid gcc
+	warning ifndef __NR_tkill.  Move setting of errno there too.
+	Delete unnecessary resetting of errno after syscall.
+	Minor comment changes to match gdb/linux-nat.c:kill_lwp.
+
 	* configure.ac: Check for dladdr.
 	* config.in: Regenerate.
 	* configure: Regenerate.
