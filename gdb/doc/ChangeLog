@@ -1,5 +1,9 @@
 2009-12-20  Joel Brobecker  <brobecker@adacore.com>
 
+	* gpl.texi: Update to version 3 of the GPL.
+
+2009-12-20  Joel Brobecker  <brobecker@adacore.com>
+
 	* Makefile.in: Update copyright header.
 	* observer.texi: Fix the copyright header of the generated files.
 
