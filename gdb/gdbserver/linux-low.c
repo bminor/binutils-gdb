@@ -134,7 +134,6 @@ static void stop_all_lwps (void);
 static int linux_wait_for_event (ptid_t ptid, int *wstat, int options);
 static int check_removed_breakpoint (struct lwp_info *event_child);
 static void *add_lwp (ptid_t ptid);
-static int my_waitpid (int pid, int *status, int flags);
 static int linux_stopped_by_watchpoint (void);
 static void mark_lwp_dead (struct lwp_info *lwp, int wstat);
 

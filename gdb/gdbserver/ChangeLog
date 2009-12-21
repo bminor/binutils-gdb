@@ -1,3 +1,7 @@
+2009-12-21  Doug Evans  <dje@google.com>
+
+	* linux-low.c (my_waitpid): Delete unnecessary prototype.
+
 2009-12-18  Doug Evans  <dje@google.com>
 
 	* event-loop.c: Include unistd.h if it exists.
