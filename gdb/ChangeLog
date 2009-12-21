@@ -1,3 +1,7 @@
+2009-12-20  Michael Snyder  <msnyder@vmware.com>
+
+	* amd64-tdep.c (amd64_epilogue_frame_cache): Fix buf size.
+
 2009-11-23  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* dwarf2read.c [HAVE_MMAP] (MAP_FAILED): Define if missing.
