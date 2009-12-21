@@ -676,7 +676,7 @@ complete_line_internal (const char *text, char *line_buffer, int point,
 			   p--)
 			;
 		    }
-		  if (reason != handle_brkchars)
+		  if (reason != handle_brkchars && c->completer != NULL)
 		    list = (*c->completer) (c, p, word);
 		}
 	    }
@@ -747,7 +747,7 @@ complete_line_internal (const char *text, char *line_buffer, int point,
 		       p--)
 		    ;
 		}
-	      if (reason != handle_brkchars)
+	      if (reason != handle_brkchars && c->completer != NULL)
 		list = (*c->completer) (c, p, word);
 	    }
 	}

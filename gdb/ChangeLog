@@ -1,3 +1,8 @@
+2009-12-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* completer.c (complete_line_internal): Make sure the command
+	completer is not NULL before calling it.
+
 2009-12-20  Michael Snyder  <msnyder@vmware.com>
 
 	* amd64-tdep.c (amd64_epilogue_frame_cache): Fix buf size.
