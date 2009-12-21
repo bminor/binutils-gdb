@@ -1,3 +1,15 @@
+2009-12-21  Doug Evans  <dje@google.com>
+
+	* dcache.c (dcache_block): Replace member newer with next,prev.
+	(dcache_struct): Delete member newest.
+	(block_func): New typedef.
+	(append_block, remove_block, for_each_block): New functions.
+	(invalidate_block, free_block): New functions.
+	(dcache_invalidate): Update
+	(dcache_invalidate_line, dcache_alloc): Update to use new list
+	accessors.
+	(dcache_free): Ditto.  Fix memory leak.
+
 2009-12-21  Joel Brobecker  <brobecker@adacore.com>
 
 	* completer.c (complete_line_internal): Make sure the command
