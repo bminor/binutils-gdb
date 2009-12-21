@@ -1,3 +1,8 @@
+2009-12-21  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Clarify that
+	-gdb-exit behaviour.
+
 2009-12-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* gpl.texi: Update to version 3 of the GPL.

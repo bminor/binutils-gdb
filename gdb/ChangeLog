@@ -1,5 +1,9 @@
 2009-12-21  Vladimir Prus  <vladimir@codesourcery.com>
 
+	* mi/mi-main.c (mi_cmd_gdb_exit): Flush raw_stdout.
+
+2009-12-21  Vladimir Prus  <vladimir@codesourcery.com>
+
 	PR gdb/10884
 
 	* value.c (value_primitive_field): Call check_typedef

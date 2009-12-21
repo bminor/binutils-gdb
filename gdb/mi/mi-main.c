@@ -111,6 +111,7 @@ mi_cmd_gdb_exit (char *command, char **argv, int argc)
     fputs_unfiltered (current_token, raw_stdout);
   fputs_unfiltered ("^exit\n", raw_stdout);
   mi_out_put (uiout, raw_stdout);
+  gdb_flush (raw_stdout);
   /* FIXME: The function called is not yet a formal libgdb function.  */
   quit_force (NULL, FROM_TTY);
 }

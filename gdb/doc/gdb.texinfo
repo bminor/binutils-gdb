@@ -21955,6 +21955,13 @@ Quitting @value{GDBN} just prints the result class @samp{^exit}.
 <- ^exit
 @end smallexample
 
+Please note that @samp{^exit} is printed immediately, but it might
+take some time for @value{GDBN} to actually exit.  During that time, @value{GDBN}
+performs necessary cleanups, including killing programs being debugged
+or disconnecting from debug hardware, so the frontend should wait till
+@value{GDBN} exits and should only forcibly kill @value{GDBN} if it
+fails to exit in reasonable time.
+
 @subheading A Bad Command
 
 Here's what happens if you pass a non-existent command:
