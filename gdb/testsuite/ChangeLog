@@ -1,3 +1,7 @@
+2009-12-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/bigcore.exp (extract_heap): Set $lim limit to 200.
+
 2009-09-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/breakpoint-shadow.exp: Move the ia64 part into ...

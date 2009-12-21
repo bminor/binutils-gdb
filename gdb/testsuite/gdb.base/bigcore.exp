@@ -96,7 +96,7 @@ proc extract_heap { dir } {
 	}
 	-re " = \\(struct list \\*\\) (0x\[0-9a-f\]*).*$gdb_prompt $" {
 	    set heap [concat $heap $expect_out(1,string)]
-	    if { $lim >= 50 } {
+	    if { $lim >= 200 } {
 		pass "$test (stop at $lim)"
 	    } else {
 		incr lim
