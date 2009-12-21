@@ -1,5 +1,5 @@
 dnl Autoconf configure script for GDB server.
-dnl Copyright (C) 2000, 2002, 2003, 2004, 2005, 2006, 2007, 2008
+dnl Copyright (C) 2000, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
 dnl Free Software Foundation, Inc.
 dnl
 dnl This file is part of GDB.
@@ -44,6 +44,15 @@ AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h string.h dnl
 		 netinet/tcp.h arpa/inet.h sys/wait.h)
 AC_CHECK_FUNCS(pread pwrite pread64)
 AC_REPLACE_FUNCS(memmem)
+
+dnl dladdr is glibc-specific.  It is used by thread-db.c but only for
+dnl debugging messages.  It lives in -ldl which is handled below so we don't
+dnl use AC_CHECK_LIB (or AC_SEARCH_LIBS) here.  Instead we just temporarily
+dnl augment LIBS.
+old_LIBS="$LIBS"
+LIBS="$LIBS -ldl"
+AC_CHECK_FUNCS(dladdr)
+LIBS="$old_LIBS"
 
 have_errno=no
 AC_MSG_CHECKING(for errno)

@@ -3816,6 +3816,21 @@ done
 
 
 
+old_LIBS="$LIBS"
+LIBS="$LIBS -ldl"
+for ac_func in dladdr
+do :
+  ac_fn_c_check_func "$LINENO" "dladdr" "ac_cv_func_dladdr"
+if test "x$ac_cv_func_dladdr" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_DLADDR 1
+_ACEOF
+
+fi
+done
+
+LIBS="$old_LIBS"
+
 have_errno=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for errno" >&5
 $as_echo_n "checking for errno... " >&6; }

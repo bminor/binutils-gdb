@@ -1,5 +1,11 @@
 2009-12-21  Doug Evans  <dje@google.com>
 
+	* configure.ac: Check for dladdr.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* thread-db.c (dladdr_to_soname): Only define ifdef HAVE_DLADDR.
+	(try_thread_db_load): Update.
+
 	* linux-low.c (my_waitpid): Delete unnecessary prototype.
 
 2009-12-18  Doug Evans  <dje@google.com>

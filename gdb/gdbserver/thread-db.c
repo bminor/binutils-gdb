@@ -596,6 +596,8 @@ try_thread_db_load_1 (void *handle)
   return 1;
 }
 
+#ifdef HAVE_DLADDR
+
 /* Lookup a library in which given symbol resides.
    Note: this is looking in the GDBSERVER process, not in the inferior.
    Returns library name, or NULL.  */
@@ -609,6 +611,8 @@ dladdr_to_soname (const void *addr)
     return info.dli_fname;
   return NULL;
 }
+
+#endif
 
 static int
 try_thread_db_load (const char *library)
@@ -626,6 +630,7 @@ try_thread_db_load (const char *library)
       return 0;
     }
 
+#ifdef HAVE_DLADDR
   if (debug_threads && strchr (library, '/') == NULL)
     {
       void *td_init;
@@ -640,6 +645,7 @@ try_thread_db_load (const char *library)
 		     library, libpath);
 	}
     }
+#endif
 
   if (try_thread_db_load_1 (handle))
     return 1;
