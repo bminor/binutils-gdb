@@ -1,3 +1,7 @@
+2009-12-21  Alan Modra  <amodra@gmail.com>
+
+	* MAINTAINERS: Update my email address.
+
 2009-12-21  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* mi/mi-main.c (mi_cmd_gdb_exit): Flush raw_stdout.
