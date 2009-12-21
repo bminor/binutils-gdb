@@ -1,3 +1,7 @@
+2009-12-21  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c: Delete my email address.
+
 2009-12-18  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* elf.c (elfcore_grok_s390_high_gprs): New function.

@@ -3,7 +3,7 @@
    2009 Free Software Foundation, Inc.
    Written by Linus Nordberg, Swox AB <info@swox.com>,
    based on elf32-ppc.c by Ian Lance Taylor.
-   Largely rewritten by Alan Modra <amodra@bigpond.net.au>
+   Largely rewritten by Alan Modra.
 
    This file is part of BFD, the Binary File Descriptor library.
 
