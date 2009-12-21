@@ -4,7 +4,7 @@
 
 	* gdb.mi/var-cmd.c (do_bitfield_tests): New
 	(main): Call do_bitfield_tests.
-	* gdb.mi/mi-cmd-var.exp: Run the 'bitfield' testcase.
+	* gdb.mi/mi-var-cmd.exp: Run the 'bitfield' testcase.
 
 2009-12-20  Joel Brobecker  <brobecker@adacore.com>
 
