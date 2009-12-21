@@ -1,5 +1,11 @@
 2009-12-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.base/foll-fork.exp (unpatch child, breakpoint at exit call):
+	Force $srcfile file.
+	* gdb.base/foll-fork.c (callee): Comment out the printf call.
+
+2009-12-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix spurious false FAILs.
 	* gdb.base/structs.c (chartest): New.
 	(main): Fill-in chartest.
