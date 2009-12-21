@@ -1,3 +1,7 @@
+2009-12-21  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c: Delete my email address.
+
 2009-12-17  Alan Modra  <amodra@bigpond.net.au>
 
 	PR ld/11088
