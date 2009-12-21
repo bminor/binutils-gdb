@@ -38,7 +38,7 @@ repository without obtaining approval first:
   Jeff Law <law@redhat.com>
   Jim Wilson <wilson@tuliptree.org>
   DJ Delorie <dj@redhat.com>
-  Alan Modra <amodra@bigpond.net.au>
+  Alan Modra <amodra@gmail.com>
   Michael Meissner <gnu@the-meissners.org>
   Daniel Jacobowitz <dan@debian.org>
   Richard Sandiford <rdsandiford@googlemail.com>
@@ -76,7 +76,7 @@ responsibility among the other maintainers.
   FRV		   Alexandre Oliva <aoliva@redhat.com>
   H8300		   Prafulla Thakare <prafulla.thakare@kpitcummins.com>
   HPPA		   Dave Anglin <dave.anglin@nrc.ca>
-  HPPA elf32	   Alan Modra <amodra@bigpond.net.au>
+  HPPA elf32	   Alan Modra <amodra@gmail.com>
   HPPA elf64	   Jeff Law <law@redhat.com> [Basic maintainance only]
   IA-64		   Jim Wilson <wilson@tuliptree.org>
   IQ2000	   Stan Cox <scox@redhat.com>
@@ -102,7 +102,7 @@ responsibility among the other maintainers.
   MSP430	   Dmitry Diky <diwil@spec.ru>
   NetBSD support   Matt Thomas <matt@netbsd.org>
   PPC		   Geoff Keating <geoffk@geoffk.org>
-  PPC		   Alan Modra <amodra@bigpond.net.au>
+  PPC		   Alan Modra <amodra@gmail.com>
   PPC vector ext   Aldy Hernandez <aldyh@redhat.com>
   RX               DJ Delorie <dj@redhat.com>
   RX               Nick Clifton <nickc@redhat.com>
@@ -111,7 +111,7 @@ responsibility among the other maintainers.
   SH		   Alexandre Oliva <aoliva@redhat.com>
   SH		   Kaz Kojima <kkojima@rr.iij4u.or.jp>
   SPARC		   Jakub Jelinek <jakub@redhat.com>
-  SPU		   Alan Modra <amodra@bigpond.net.au>
+  SPU		   Alan Modra <amodra@gmail.com>
   TIC4X            Svein Seldal <svein@dev.seldal.com>
   TIC54X           Timothy Wall <twall@alum.mit.edu>
   VAX		   Matt Thomas <matt@netbsd.org>
