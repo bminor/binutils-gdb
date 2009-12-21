@@ -468,6 +468,40 @@ void do_at_tests ()
   /*: END: floating :*/
 }
 
+/* Some header appear to define uint already, so apply some
+   uglification.  Note that without uglification, the compile
+   does not fail, rather, we don't test what we want because
+   something else calls check_typedef on 'uint' already.  */
+typedef unsigned int uint_for_mi_testing;
+
+struct Data {
+  int alloc;
+  uint_for_mi_testing sharable : 4;
+};
+
+/* Accessing a value of a bitfield whose type is a typed used to
+   result in division by zero.  See:
+
+         http://sourceware.org/bugzilla/show_bug.cgi?id=10884
+
+   This tests for this bug.  */
+
+void do_bitfield_tests ()
+{
+  /*: BEGIN: bitfield :*/
+  struct Data d = {0, 3};
+  /*:
+    mi_create_varobj V d "create varobj for Data"
+    mi_list_varobj_children "V" {
+        {"V.alloc" "alloc" "0" "int"}
+        {"V.sharable" "sharable" "0" "unsigned int"}
+    } "list children of Data"
+    mi_check_varobj_value V.sharable 3 "access bitfield"
+    :*/
+  return;
+  /*: END: bitfield :*/  
+}
+
 int
 main (int argc, char *argv [])
 {
@@ -477,6 +511,7 @@ main (int argc, char *argv [])
   do_special_tests ();
   do_frozen_tests ();
   do_at_tests ();
+  do_bitfield_tests ();
   exit (0);
 }
 

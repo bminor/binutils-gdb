@@ -1873,6 +1873,7 @@ value_primitive_field (struct value *arg1, int offset,
 
   CHECK_TYPEDEF (arg_type);
   type = TYPE_FIELD_TYPE (arg_type, fieldno);
+  type = check_typedef (type);
 
   /* Handle packed fields */
 
