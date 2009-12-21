@@ -1,3 +1,7 @@
+2009-12-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* gpl.texi: Update to version 3 of the GPL.
+
 2009-10-04  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.texinfo (Remote Protocol): Don't mention vCont;T.
