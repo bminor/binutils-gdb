@@ -36,6 +36,9 @@ set testfile "structs"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 
+# Regex matching any value of `char' type like: a = 65 'A'
+set anychar_re {-?[0-9]{1,3} '(.|\\([0-7]{3}|[a-z]|\\|'))'}
+
 # Create and source the file that provides information about the
 # compiler used to compile the test case.
 
@@ -48,6 +51,7 @@ if [get_compiler_info ${binfile}] {
 # the last TYPES field).  Run the compmiled program up to "main".
 # Also updates the global "testfile" to reflect the most recent build.
 
+set first 1
 proc start_structs_test { types } {
     global testfile
     global srcfile
@@ -56,6 +60,8 @@ proc start_structs_test { types } {
     global subdir
     global srcdir
     global gdb_prompt
+    global anychar_re
+    global first
 
     # Create the additional flags
     set flags "debug"
@@ -91,6 +97,8 @@ proc start_structs_test { types } {
 	    "set print address off; ${testfile}"
     gdb_test "set width 0" "" \
 	    "set width 0; ${testfile}"
+    gdb_test "set print elements 300" "" \
+	    "set print elements 300; ${testfile}"
 
     # Advance to main
     if { ![runto_main] } then {
@@ -99,6 +107,16 @@ proc start_structs_test { types } {
 
     # Get the debug format
     get_debug_format
+
+    # Limit the slow $anychar_re{256} matching for better performance.
+    if $first {
+	set first 0
+
+	# Verify $anychar_re can match all the values of `char' type.
+	gdb_breakpoint [gdb_get_line_number "chartest-done"]
+	gdb_continue_to_breakpoint "chartest-done" ".*chartest-done.*"
+	gdb_test "p chartest" "= {({c = ${anychar_re}}, ){255}{c = ${anychar_re}}}"
+    }
 
     # check that at the struct containing all the relevant types is correct
     set foo_t "type = struct struct[llength ${types}] \{"
@@ -161,26 +179,28 @@ proc zed { n } {
 }
 
 proc any { n } {
-    return [lindex {
-	"{}"
-	"{a = \[^,\}\]*}"
-	"{a = \[^,\}\]*, b = \[^,\}\]*}"
-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*}"
-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*}"
-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*}"
-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*}"
-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*}"
-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*}"
-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*}"
-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*, j = \[^,\}\]*}"
-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*, j = \[^,\}\]*, k = \[^,\}\]*}"
-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*, j = \[^,\}\]*, k = \[^,\}\]*, l = \[^,\}\]*}"
-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*, j = \[^,\}\]*, k = \[^,\}\]*, l = \[^,\}\]*, m = \[^,\}\]*}"
-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*, j = \[^,\}\]*, k = \[^,\}\]*, l = \[^,\}\]*, m = \[^,\}\]*, n = \[^,\}\]*}"
-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*, j = \[^,\}\]*, k = \[^,\}\]*, l = \[^,\}\]*, m = \[^,\}\]*, n = \[^,\}\]*, o = \[^,\}\]*}"
-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*, j = \[^,\}\]*, k = \[^,\}\]*, l = \[^,\}\]*, m = \[^,\}\]*, n = \[^,\}\]*, o = \[^,\}\]*, p = \[^,\}\]*}"
-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*, j = \[^,\}\]*, k = \[^,\}\]*, l = \[^,\}\]*, m = \[^,\}\]*, n = \[^,\}\]*, o = \[^,\}\]*, p = \[^,\}\]*, q = \[^,\}\]*}"
-    } $n]
+    global anychar_re
+    set ac $anychar_re
+    return [lindex [list \
+	"{}" \
+	"{a = ${ac}}" \
+	"{a = ${ac}, b = ${ac}}" \
+	"{a = ${ac}, b = ${ac}, c = ${ac}}" \
+	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}}" \
+	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}}" \
+	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}, f = ${ac}}" \
+	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}, f = ${ac}, g = ${ac}}" \
+	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}, f = ${ac}, g = ${ac}, h = ${ac}}" \
+	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}, f = ${ac}, g = ${ac}, h = ${ac}, i = ${ac}}" \
+	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}, f = ${ac}, g = ${ac}, h = ${ac}, i = ${ac}, j = ${ac}}" \
+	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}, f = ${ac}, g = ${ac}, h = ${ac}, i = ${ac}, j = ${ac}, k = ${ac}}" \
+	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}, f = ${ac}, g = ${ac}, h = ${ac}, i = ${ac}, j = ${ac}, k = ${ac}, l = ${ac}}" \
+	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}, f = ${ac}, g = ${ac}, h = ${ac}, i = ${ac}, j = ${ac}, k = ${ac}, l = ${ac}, m = ${ac}}" \
+	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}, f = ${ac}, g = ${ac}, h = ${ac}, i = ${ac}, j = ${ac}, k = ${ac}, l = ${ac}, m = ${ac}, n = ${ac}}" \
+	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}, f = ${ac}, g = ${ac}, h = ${ac}, i = ${ac}, j = ${ac}, k = ${ac}, l = ${ac}, m = ${ac}, n = ${ac}, o = ${ac}}" \
+	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}, f = ${ac}, g = ${ac}, h = ${ac}, i = ${ac}, j = ${ac}, k = ${ac}, l = ${ac}, m = ${ac}, n = ${ac}, o = ${ac}, p = ${ac}}" \
+	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}, f = ${ac}, g = ${ac}, h = ${ac}, i = ${ac}, j = ${ac}, k = ${ac}, l = ${ac}, m = ${ac}, n = ${ac}, o = ${ac}, p = ${ac}, q = ${ac}}" \
+    ] $n]
 }
 
 # Given N (0..25), return the corresponding alphabetic letter in lower

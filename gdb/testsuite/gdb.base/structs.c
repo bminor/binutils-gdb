@@ -396,6 +396,8 @@ zed ()
   L18.r = 'Z';
 }
 
+static struct { char c; } chartest[256];
+
 int main()
 {
 #ifdef usestubs
@@ -403,6 +405,10 @@ int main()
   breakpoint();
 #endif
   int i;
+
+  for (i = 0; i < 256; i++)
+    chartest[i].c = i;
+  chartest[0].c = 0;  /* chartest-done */
 
   Fun1(foo1);	
   Fun2(foo2);	
