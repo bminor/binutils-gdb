@@ -1,3 +1,7 @@
+2009-12-22  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.0.1 released.
+
 2009-12-22  Hui Zhu  <teawater@gmail.com>
 
 	* record.c (record_message): Change argument.
