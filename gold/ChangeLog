@@ -1,3 +1,8 @@
+2009-12-21  Sriraman Tallam  <tmsriram@google.com>
+
+	* options.cc (General_options::parse_version): Make -v continue and do
+	the link like GNU ld does.
+
 2009-12-17  Rafael Avila de Espindola  <espindola@google.com>
 
 	* Makefile.am (CCFILES): Add timer.cc.

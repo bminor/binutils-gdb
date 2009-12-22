@@ -288,8 +288,10 @@ General_options::parse_help(const char*, const char*, Command_line*)
 void
 General_options::parse_version(const char* opt, const char*, Command_line*)
 {
-  gold::print_version(opt[0] == '-' && opt[1] == 'v');
-  ::exit(EXIT_SUCCESS);
+  bool print_short = (opt[0] == '-' && opt[1] == 'v');
+  gold::print_version(print_short);
+  if (!print_short)
+    ::exit(EXIT_SUCCESS);
 }
 
 void
