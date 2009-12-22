@@ -1,5 +1,9 @@
 2009-12-22  Joel Brobecker  <brobecker@adacore.com>
 
+	GDB 7.0.1 released.
+
+2009-12-22  Joel Brobecker  <brobecker@adacore.com>
+
 	* README: Update GDB version number to 7.0.1.
 	* version.in: Likewise.
 
