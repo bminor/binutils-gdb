@@ -27,10 +27,6 @@
 
 #include "gdb_proc_service.h"
 
-/* NOTE: gdb_proc_service.h may include linux/elf.h.
-   We need Elf32_Phdr.  If we don't get linux/elf.h we could include
-   elf.h like linux-ppc-low.c does.  */
-
 /* Defined in auto-generated file reg-i386-linux.c.  */
 void init_registers_i386_linux (void);
 /* Defined in auto-generated file reg-x86-64-linux.c.  */
