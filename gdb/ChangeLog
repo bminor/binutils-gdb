@@ -1,3 +1,16 @@
+2009-12-22  Hui Zhu  <teawater@gmail.com>
+
+	* record.c (record_message): Change argument.
+	(record_message_wrapper): New function.
+	(do_record_message): Change it name to
+	"record_message_wrapper_safe".
+	Let it call "record_message_wrapper".
+	(record_resume_error): Deleted.
+	(record_resume): Call "record_message".
+	(record_wait): Deleted record_resume_error.
+	Call "record_message_wrapper_safe".
+	Set status when do_record_message need stop the inferior.
+
 2009-12-21  Doug Evans  <dje@google.com>
 
 	* linux-nat.c (kill_lwp): Minor cleanup, move definition of

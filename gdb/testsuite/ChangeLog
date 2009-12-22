@@ -1,3 +1,7 @@
+2009-12-22  Hui Zhu  <teawater@gmail.com>
+
+	* gdb.reverse/sigall-reverse.exp: Adjust.
+
 2009-12-21  Vladimir Prus  <vladimir@codesourcery.com>
 
 	PR gdb/10884

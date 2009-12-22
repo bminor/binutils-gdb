@@ -572,17 +572,11 @@ record_arch_list_cleanups (void *ignore)
    record the running message of inferior and set them to
    record_arch_list, and add it to record_list.  */
 
-struct record_message_args {
-  struct regcache *regcache;
-  enum target_signal signal;
-};
-
 static int
-record_message (void *args)
+record_message (struct regcache *regcache, enum target_signal signal)
 {
   int ret;
-  struct record_message_args *myargs = args;
-  struct gdbarch *gdbarch = get_regcache_arch (myargs->regcache);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct cleanup *old_cleanups = make_cleanup (record_arch_list_cleanups, 0);
 
   record_arch_list_head = NULL;
@@ -616,18 +610,18 @@ record_message (void *args)
   if (record_list != &record_first)    /* FIXME better way to check */
     {
       gdb_assert (record_list->type == record_end);
-      record_list->u.end.sigval = myargs->signal;
+      record_list->u.end.sigval = signal;
     }
 
-  if (myargs->signal == TARGET_SIGNAL_0
+  if (signal == TARGET_SIGNAL_0
       || !gdbarch_process_record_signal_p (gdbarch))
     ret = gdbarch_process_record (gdbarch,
-				  myargs->regcache,
-				  regcache_read_pc (myargs->regcache));
+				  regcache,
+				  regcache_read_pc (regcache));
   else
     ret = gdbarch_process_record_signal (gdbarch,
-					 myargs->regcache,
-					 myargs->signal);
+					 regcache,
+					 signal);
 
   if (ret > 0)
     error (_("Process record: inferior program stopped."));
@@ -648,15 +642,29 @@ record_message (void *args)
   return 1;
 }
 
+struct record_message_args {
+  struct regcache *regcache;
+  enum target_signal signal;
+};
+
 static int
-do_record_message (struct regcache *regcache,
-		   enum target_signal signal)
+record_message_wrapper (void *args)
+{
+  struct record_message_args *record_args = args;
+
+  return record_message (record_args->regcache, record_args->signal);
+}
+
+static int
+record_message_wrapper_safe (struct regcache *regcache,
+                             enum target_signal signal)
 {
   struct record_message_args args;
 
   args.regcache = regcache;
   args.signal = signal;
-  return catch_errors (record_message, &args, NULL, RETURN_MASK_ALL);
+
+  return catch_errors (record_message_wrapper, &args, NULL, RETURN_MASK_ALL);
 }
 
 /* Set to 1 if record_store_registers and record_xfer_partial
@@ -983,7 +991,6 @@ record_close (int quitting)
 }
 
 static int record_resume_step = 0;
-static int record_resume_error;
 
 /* "to_resume" target method.  Resume the process record target.  */
 
@@ -995,15 +1002,7 @@ record_resume (struct target_ops *ops, ptid_t ptid, int step,
 
   if (!RECORD_IS_REPLAY)
     {
-      if (do_record_message (get_current_regcache (), signal))
-        {
-          record_resume_error = 0;
-        }
-      else
-        {
-          record_resume_error = 1;
-          return;
-        }
+      record_message (get_current_regcache (), signal);
       record_beneath_to_resume (record_beneath_to_resume_ops, ptid, 1,
                                 signal);
     }
@@ -1067,14 +1066,6 @@ record_wait (struct target_ops *ops,
 
   if (!RECORD_IS_REPLAY && ops != &record_core_ops)
     {
-      if (record_resume_error)
-	{
-	  /* If record_resume get error, return directly.  */
-	  status->kind = TARGET_WAITKIND_STOPPED;
-	  status->value.sig = TARGET_SIGNAL_ABRT;
-	  return inferior_ptid;
-	}
-
       if (record_resume_step)
 	{
 	  /* This is a single step.  */
@@ -1130,8 +1121,13 @@ record_wait (struct target_ops *ops,
 		    {
 		      /* This must be a single-step trap.  Record the
 		         insn and issue another step.  */
-		      if (!do_record_message (regcache, TARGET_SIGNAL_0))
-			break;
+		      if (!record_message_wrapper_safe (regcache,
+                                                        TARGET_SIGNAL_0))
+  			{
+                           status->kind = TARGET_WAITKIND_STOPPED;
+                           status->value.sig = TARGET_SIGNAL_0;
+                           break;
+  			}
 
 		      record_beneath_to_resume (record_beneath_to_resume_ops,
 						ptid, 1,
