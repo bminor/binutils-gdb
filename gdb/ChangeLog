@@ -1,3 +1,7 @@
+2009-12-23  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (SFILES): Add exceptions.c.
+
 2009-12-22  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 7.0.1 released.

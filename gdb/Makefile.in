@@ -644,7 +644,8 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	cp-name-parser.y \
 	dbxread.c demangle.c dictionary.c disasm.c doublest.c dummy-frame.c \
 	dwarf2expr.c dwarf2loc.c dwarf2read.c dwarf2-frame.c \
-	elfread.c environ.c eval.c event-loop.c event-top.c expprint.c \
+	elfread.c environ.c eval.c event-loop.c event-top.c \
+	exceptions.c expprint.c \
 	f-exp.y f-lang.c f-typeprint.c f-valprint.c findcmd.c findvar.c \
 	frame.c frame-base.c frame-unwind.c \
 	gdbarch.c arch-utils.c gdbtypes.c gnu-v2-abi.c gnu-v3-abi.c \
