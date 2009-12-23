@@ -39,8 +39,8 @@ extern unsigned long trace_running_p;
 
 /* A hook used to notify the UI of tracepoint operations.  */
 
-void (*deprecated_trace_find_hook) (char *arg, int from_tty);
-void (*deprecated_trace_start_stop_hook) (int start, int from_tty);
+extern void (*deprecated_trace_find_hook) (char *arg, int from_tty);
+extern void (*deprecated_trace_start_stop_hook) (int start, int from_tty);
 
 int get_traceframe_number (void);
 void free_actions (struct breakpoint *);

@@ -1,3 +1,11 @@
+2009-12-23  Dmitry Gorbachev  <d.g.gorbachev@gmail.com>
+
+	PR gdb/11110
+	* tracepoint.h (deprecated_trace_find_hook)
+	(deprecated_trace_start_stop_hook): Declare extern.
+	* tracepoint.c (deprecated_trace_find_hook)
+	(deprecated_trace_start_stop_hook): Define.
+
 2009-12-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* breakpoint.c (bpstat_stop_status): Iterate using ALL_BREAKPOINTS and
