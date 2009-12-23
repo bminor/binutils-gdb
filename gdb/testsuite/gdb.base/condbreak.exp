@@ -68,8 +68,12 @@ set bp_location1  [gdb_get_line_number "set breakpoint 1 here"]
 set bp_location6  [gdb_get_line_number "set breakpoint 6 here"]
 set bp_location8  [gdb_get_line_number "set breakpoint 8 here" $srcfile1]
 set bp_location9  [gdb_get_line_number "set breakpoint 9 here" $srcfile1]
+set bp_location13 [gdb_get_line_number "set breakpoint 13 here" $srcfile1]
+set bp_location14 [gdb_get_line_number "set breakpoint 14 here" $srcfile1]
 set bp_location15 [gdb_get_line_number "set breakpoint 15 here" $srcfile1]
 set bp_location16 [gdb_get_line_number "set breakpoint 16 here" $srcfile1]
+set bp_location17 [gdb_get_line_number "set breakpoint 17 here" $srcfile1]
+set bp_location18 [gdb_get_line_number "set breakpoint 18 here" $srcfile1]
 
 #
 # test break at function
@@ -110,15 +114,29 @@ gdb_test "break marker2 if (a==43)" \
     "Breakpoint.*at.* file .*$srcfile1, line.*"
 
 #
+# Check break involving inferior function call.
+# Ensure there is at least one additional breakpoint with higher VMA.
+#
+gdb_test "break marker3 if (multi_line_if_conditional(1,1,1)==0)" \
+    "Breakpoint.*at.* file .*$srcfile1, line.*"
+gdb_test "break marker4" \
+    "Breakpoint.*at.* file .*$srcfile1, line.*"
+
+#
 # check to see what breakpoints are set
 #
 
 if {$hp_aCC_compiler} {
     set marker1_proto "\\(void\\)"
     set marker2_proto "\\(int\\)"
+    # Not checked.
+    set marker3_proto "\\(char \\*, char \\*\\)"
+    set marker4_proto "\\(long\\)"
 } else {
     set marker1_proto ""
     set marker2_proto ""
+    set marker3_proto ""
+    set marker4_proto ""
 }
 
 gdb_test "info break" \
@@ -129,7 +147,10 @@ gdb_test "info break" \
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$bp_location1.*
 \[\t \]+stop only if \\(1==1\\).*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in marker2$marker2_proto at .*$srcfile1:($bp_location8|$bp_location9).*
-\[\t \]+stop only if \\(a==43\\).*" \
+\[\t \]+stop only if \\(a==43\\).*
+\[0-9\]+\[\t \]+breakpoint     keep y.* in marker3$marker3_proto at .*$srcfile1:($bp_location17|$bp_location18).*
+\[\t \]+stop only if \\(multi_line_if_conditional\\(1,1,1\\)==0\\).*
+\[0-9\]+\[\t \]+breakpoint     keep y.* in marker4$marker4_proto at .*$srcfile1:($bp_location13|$bp_location14).*" \
     "breakpoint info"
 
 
@@ -247,3 +268,23 @@ gdb_test "break *main if (1==1) th 999" \
     "Unknown thread 999\\."
 gdb_test "break *main if (1==1) ta 999" \
     "Unknown task 999\\."
+
+set test "run until breakpoint at marker3"
+gdb_test_multiple "continue" $test {
+    -re "Continuing\\..*Breakpoint \[0-9\]+, marker3 \\(a=$hex \"stack\", b=$hex \"trace\"\\) at .*$srcfile1:($bp_location17|$bp_location18).*($bp_location17|$bp_location18)\[\t \]+.*$gdb_prompt $" {
+	pass $test
+    }
+    -re "Continuing\\..*Breakpoint \[0-9\]+, $hex in marker3 \\(a=$hex \"stack\", b=$hex \"trace\"\\) at .*$srcfile1:($bp_location17|$bp_location18).*($bp_location17|$bp_location18)\[\t \]+.*$gdb_prompt $" {
+	xfail $test
+    }
+}
+
+set test "run until breakpoint at marker4"
+gdb_test_multiple "continue" $test {
+    -re "Continuing\\..*Breakpoint \[0-9\]+, marker4 \\(d=177601976\\) at .*$srcfile1:($bp_location13|$bp_location14).*($bp_location13|$bp_location14)\[\t \]+.*$gdb_prompt $" {
+	pass $test
+    }
+    -re "Continuing\\..*Breakpoint \[0-9\]+, $hex in marker4 \\(d=177601976\\) at .*$srcfile1:($bp_location13|$bp_location14).*($bp_location13|$bp_location14)\[\t \]+.*$gdb_prompt $" {
+	xfail $test
+    }
+}

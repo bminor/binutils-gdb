@@ -3554,82 +3554,84 @@ bpstat_stop_status (struct address_space *aspace,
   /* Pointer to the last thing in the chain currently.  */
   bpstat bs = root_bs;
   int ix;
-  int need_remove_insert, update_locations = 0;
+  int need_remove_insert;
 
-  ALL_BP_LOCATIONS (bl, blp_tmp)
-  {
-    b = bl->owner;
-    gdb_assert (b);
-    if (!breakpoint_enabled (b) && b->enable_state != bp_permanent)
-      continue;
-    if (bl->shlib_disabled)
-      continue;
+  /* ALL_BP_LOCATIONS iteration would break across
+     update_global_location_list possibly executed by
+     bpstat_check_breakpoint_conditions's inferior call.  */
 
-    /* For hardware watchpoints, we look only at the first location.
-       The watchpoint_check function will work on entire expression,
-       not the individual locations.  For read watchopints, the
-       watchpoints_triggered function have checked all locations
-       already.  */
-    if (b->type == bp_hardware_watchpoint && bl != b->loc)
-      continue;
+  ALL_BREAKPOINTS (b)
+    {
+      if (!breakpoint_enabled (b) && b->enable_state != bp_permanent)
+	continue;
 
-    if (!bpstat_check_location (bl, aspace, bp_addr))
-      continue;
+      for (bl = b->loc; bl != NULL; bl = bl->next)
+	{
+	  /* For hardware watchpoints, we look only at the first location.
+	     The watchpoint_check function will work on entire expression,
+	     not the individual locations.  For read watchopints, the
+	     watchpoints_triggered function have checked all locations
+	     already.  */
+	  if (b->type == bp_hardware_watchpoint && bl != b->loc)
+	    break;
 
-    /* Come here if it's a watchpoint, or if the break address matches */
+	  if (bl->shlib_disabled)
+	    continue;
 
-    bs = bpstat_alloc (bl, bs);	/* Alloc a bpstat to explain stop */
+	  if (!bpstat_check_location (bl, aspace, bp_addr))
+	    continue;
 
-    /* Assume we stop.  Should we find watchpoint that is not actually
-       triggered, or if condition of breakpoint is false, we'll reset
-       'stop' to 0.  */
-    bs->stop = 1;
-    bs->print = 1;
+	  /* Come here if it's a watchpoint, or if the break address matches */
 
-    bpstat_check_watchpoint (bs);
-    if (!bs->stop)
-      continue;
+	  bs = bpstat_alloc (bl, bs);	/* Alloc a bpstat to explain stop */
 
-    if (b->type == bp_thread_event || b->type == bp_overlay_event
-	|| b->type == bp_longjmp_master)
-      /* We do not stop for these.  */
-      bs->stop = 0;
-    else
-      bpstat_check_breakpoint_conditions (bs, ptid);
-  
-    if (bs->stop)
-      {
-	if (b->enable_state != bp_disabled)
-	  ++(b->hit_count);
+	  /* Assume we stop.  Should we find watchpoint that is not actually
+	     triggered, or if condition of breakpoint is false, we'll reset
+	     'stop' to 0.  */
+	  bs->stop = 1;
+	  bs->print = 1;
 
-	/* We will stop here */
-	if (b->disposition == disp_disable)
-	  {
-	    if (b->enable_state != bp_permanent)
-	      b->enable_state = bp_disabled;
-	    update_locations = 1;
-	  }
-	if (b->silent)
-	  bs->print = 0;
-	bs->commands = b->commands;
-	if (bs->commands
-	    && (strcmp ("silent", bs->commands->line) == 0
-		|| (xdb_commands && strcmp ("Q", bs->commands->line) == 0)))
-	  {
-	    bs->commands = bs->commands->next;
-	    bs->print = 0;
-	  }
-	bs->commands = copy_command_lines (bs->commands);
-      }
+	  bpstat_check_watchpoint (bs);
+	  if (!bs->stop)
+	    continue;
 
-    /* Print nothing for this entry if we dont stop or if we dont print.  */
-    if (bs->stop == 0 || bs->print == 0)
-      bs->print_it = print_it_noop;
-  }
+	  if (b->type == bp_thread_event || b->type == bp_overlay_event
+	      || b->type == bp_longjmp_master)
+	    /* We do not stop for these.  */
+	    bs->stop = 0;
+	  else
+	    bpstat_check_breakpoint_conditions (bs, ptid);
+	
+	  if (bs->stop)
+	    {
+	      ++(b->hit_count);
 
-  /* Delay this call which would break the ALL_BP_LOCATIONS iteration above.  */
-  if (update_locations)
-    update_global_location_list (0);
+	      /* We will stop here */
+	      if (b->disposition == disp_disable)
+		{
+		  if (b->enable_state != bp_permanent)
+		    b->enable_state = bp_disabled;
+		  update_global_location_list (0);
+		}
+	      if (b->silent)
+		bs->print = 0;
+	      bs->commands = b->commands;
+	      if (bs->commands
+		  && (strcmp ("silent", bs->commands->line) == 0
+		      || (xdb_commands && strcmp ("Q",
+						  bs->commands->line) == 0)))
+		{
+		  bs->commands = bs->commands->next;
+		  bs->print = 0;
+		}
+	      bs->commands = copy_command_lines (bs->commands);
+	    }
+
+	  /* Print nothing for this entry if we dont stop or dont print.  */
+	  if (bs->stop == 0 || bs->print == 0)
+	    bs->print_it = print_it_noop;
+	}
+    }
 
   for (ix = 0; VEC_iterate (bp_location_p, moribund_locations, ix, loc); ++ix)
     {

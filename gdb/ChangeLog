@@ -1,5 +1,13 @@
 2009-12-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* breakpoint.c (bpstat_stop_status): Iterate using ALL_BREAKPOINTS and
+	the B->LOC list.  Remove gdb_assert on B.  Change bp_hardware_watchpoint
+	continue to break.  Remove variable update_locations.  Remove HIT_COUNT
+	increment protection by an ENABLE_STATE check.  Inline the delayed
+	update_global_location_list call.
+
+2009-12-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* breakpoint.c (bpstat_stop_status): Check BL->SHLIB_DISABLED.
 	(print_breakpoint_location): New comment.  Check LOC->SHLIB_DISABLED.
 	Check LOC validity before printing it.  Use LOC instead of B->LOC.

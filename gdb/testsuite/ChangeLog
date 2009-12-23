@@ -1,4 +1,14 @@
 2009-12-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.base/condbreak.exp: Put breakpoint on marker3 and marker4.
+	(bp_location13, bp_location14, bp_location17, bp_location18)
+	(marker3_proto, marker4_proto): New variables.
+	(breakpoint info): Update output.
+	(run until breakpoint at marker3, run until breakpoint at marker4): New
+	tests.
+
+2009-12-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/unload.c (main): Change the UNLOADSHR parameter to 1.
 	Replace the printf call of Y by provided "y-set-1" label.  New block
