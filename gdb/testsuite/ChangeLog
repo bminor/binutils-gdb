@@ -1,3 +1,22 @@
+2009-12-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/unload.c (main): Change the UNLOADSHR parameter to 1.
+	Replace the printf call of Y by provided "y-set-1" label.  New block
+	for the second shared library.
+	* gdb.base/unload.exp: Compile also the second library, call
+	gdb_load_shlibs also for it.  Use now gdb_breakpoint.
+	(single pending breakpoint info): Rename to ...
+	(pending breakpoint info before run): ... this extended test.
+	(libfile2, libname2, libsrcfile2, libsrc2)
+	(lib_sl2): New variables.
+	(exec_opts): Set also SHLIB_NAME2.
+	(pending breakpoint info on first run at shrfunc1)
+	(pending breakpoint info on second run at shrfunc1)
+	(pending breakpoint info on second run at shrfunc2)
+	(print y from libfile, print y from libfile2): New tests.
+	* gdb.base/unloadshr.c (shrfunc1): Change the returned value.
+	* gdb.base/unloadshr2.c: New.
+
 2009-12-22  Hui Zhu  <teawater@gmail.com>
 
 	* gdb.reverse/sigall-reverse.exp: Adjust.

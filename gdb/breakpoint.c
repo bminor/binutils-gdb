@@ -3562,6 +3562,8 @@ bpstat_stop_status (struct address_space *aspace,
     gdb_assert (b);
     if (!breakpoint_enabled (b) && b->enable_state != bp_permanent)
       continue;
+    if (bl->shlib_disabled)
+      continue;
 
     /* For hardware watchpoints, we look only at the first location.
        The watchpoint_check function will work on entire expression,
@@ -3935,6 +3937,8 @@ bpstat_causes_stop (bpstat bs)
 
 
 
+/* Print the LOC location out of the list of B->LOC locations.  */
+
 static void print_breakpoint_location (struct breakpoint *b,
 				       struct bp_location *loc,
 				       char *wrap_indent,
@@ -3942,10 +3946,13 @@ static void print_breakpoint_location (struct breakpoint *b,
 {
   struct cleanup *old_chain = save_current_program_space ();
 
+  if (loc != NULL && loc->shlib_disabled)
+    loc = NULL;
+
   if (loc != NULL)
     set_current_program_space (loc->pspace);
 
-  if (b->source_file)
+  if (b->source_file && loc)
     {
       struct symbol *sym 
 	= find_pc_sect_function (loc->address, loc->section);
@@ -3971,15 +3978,13 @@ static void print_breakpoint_location (struct breakpoint *b,
       
       ui_out_field_int (uiout, "line", b->line_number);
     }
-  else if (!b->loc)
-    {
-      ui_out_field_string (uiout, "pending", b->addr_string);
-    }
-  else
+  else if (loc)
     {
       print_address_symbolic (loc->address, stb->stream, demangle, "");
       ui_out_field_stream (uiout, "at", stb);
     }
+  else
+    ui_out_field_string (uiout, "pending", b->addr_string);
 
   do_cleanups (old_chain);
 }

@@ -1,3 +1,10 @@
+2009-12-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* breakpoint.c (bpstat_stop_status): Check BL->SHLIB_DISABLED.
+	(print_breakpoint_location): New comment.  Check LOC->SHLIB_DISABLED.
+	Check LOC validity before printing it.  Use LOC instead of B->LOC.
+	Swap the if conditionals order.
+
 2009-12-23  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (SFILES): Add exceptions.c.

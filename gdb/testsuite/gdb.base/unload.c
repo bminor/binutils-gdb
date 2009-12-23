@@ -48,7 +48,7 @@ int main()
       exit (1);
     }
 
-  unloadshr = (int (*)(int))dlsym (handle, "shrfunc1");
+  unloadshr = (int (*) (int)) dlsym (handle, "shrfunc1");
 
   if (!unloadshr)
     {
@@ -60,11 +60,37 @@ int main()
       exit (1);
     }
 
-  y = (*unloadshr)(3);
-
-  printf ("y is %d\n", y);
+  y = (*unloadshr) (1);
 
   dlclose (handle);
+  handle = NULL;	/* y-set-1 */
+
+  /* The second library should share the same memory address.  */
+
+  handle = dlopen (SHLIB_NAME2, RTLD_LAZY);
+  
+  if (!handle)
+    {
+      fprintf (stderr, dlerror ());
+      exit (1);
+    }
+
+  unloadshr = (int (*)(int)) dlsym (handle, "shrfunc2");
+
+  if (!unloadshr)
+    {
+#ifdef __WIN32__
+      fprintf (stderr, "error %d occurred", GetLastError ());
+#else
+      fprintf (stderr, "%s", dlerror ());
+#endif
+      exit (1);
+    }
+
+  y = (*unloadshr) (2);
+
+  dlclose (handle);
+  handle = NULL;	/* y-set-2 */
 
   return 0;
 }
