@@ -676,7 +676,7 @@ decode_opcode ()
     case RXO_btst:
       ma = GS ();
       mb = GS2 ();
-      if (opcode.op[0].type == RX_Operand_Register)
+      if (opcode.op[1].type == RX_Operand_Register)
 	mb &= 0x1f;
       else
 	mb &= 0x07;

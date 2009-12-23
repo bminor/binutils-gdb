@@ -1,3 +1,7 @@
+2009-12-22  Yoshinori Sato  <ysato@users.sourceforge.jp>
+
+	* rx/rx.c (decode_opcode): btst bit address mask fix.
+
 2009-11-30  DJ Delorie  <dj@redhat.com>
 
 	* rx/rx.c (decode_opcode): fix SWHILE logic.
