@@ -19383,6 +19383,31 @@ arm_optimize_expr (expressionS *l, operatorT op, expressionS *r)
   return FALSE;
 }
 
+/* Encode Thumb2 unconditional branches and calls. The encoding
+   for the 2 are identical for the immediate values.  */
+
+static void
+encode_thumb2_b_bl_offset (char * buf, offsetT value)
+{
+#define T2I1I2MASK  ((1 << 13) | (1 << 11))
+  offsetT newval;
+  offsetT newval2;
+  addressT S, I1, I2, lo, hi;
+
+  S = (value >> 24) & 0x01;
+  I1 = (value >> 23) & 0x01;
+  I2 = (value >> 22) & 0x01;
+  hi = (value >> 12) & 0x3ff;
+  lo = (value >> 1) & 0x7ff; 
+  newval   = md_chars_to_number (buf, THUMB_SIZE);
+  newval2  = md_chars_to_number (buf + THUMB_SIZE, THUMB_SIZE);
+  newval  |= (S << 10) | hi;
+  newval2 &=  ~T2I1I2MASK;
+  newval2 |= (((I1 ^ S) << 13) | ((I2 ^ S) << 11) | lo) ^ T2I1I2MASK;
+  md_number_to_chars (buf, newval, THUMB_SIZE);
+  md_number_to_chars (buf + THUMB_SIZE, newval2, THUMB_SIZE);
+}
+
 void
 md_apply_fix (fixS *	fixP,
 	       valueT * valP,
@@ -20075,16 +20100,30 @@ md_apply_fix (fixS *	fixP,
 	 fixP->fx_r_type = BFD_RELOC_THUMB_PCREL_BRANCH23;
 #endif
 
-      if ((value & ~0x3fffff) && ((value & ~0x3fffff) != ~0x3fffff))
-	as_bad_where (fixP->fx_file, fixP->fx_line,
-		      _("branch out of range"));
-
       if (fixP->fx_r_type == BFD_RELOC_THUMB_PCREL_BLX)
 	/* For a BLX instruction, make sure that the relocation is rounded up
 	   to a word boundary.  This follows the semantics of the instruction
 	   which specifies that bit 1 of the target address will come from bit
 	   1 of the base address.  */
 	value = (value + 1) & ~ 1;
+
+       if ((value & ~0x3fffff) && ((value & ~0x3fffff) != ~0x3fffff))
+	 {
+	   if (!(ARM_CPU_HAS_FEATURE (cpu_variant, arm_arch_t2)))
+	     {
+	       as_bad_where (fixP->fx_file, fixP->fx_line,
+			     _("branch out of range"));
+	     }
+	   else  if ((value & ~0x1ffffff)
+		     && ((value & ~0x1ffffff) != ~0x1ffffff))
+	       {
+		 as_bad_where (fixP->fx_file, fixP->fx_line,
+			     _("Thumb2 branch out of range"));
+	       }
+	 }
+
+       if (fixP->fx_done || !seg->use_rela_p)
+	 encode_thumb2_b_bl_offset (buf, value);
 
       if (fixP->fx_done || !seg->use_rela_p)
 	{
@@ -20106,24 +20145,7 @@ md_apply_fix (fixS *	fixP,
 
       if (fixP->fx_done || !seg->use_rela_p)
 	{
-	  offsetT newval2;
-	  addressT S, I1, I2, lo, hi;
-
-	  S  = (value & 0x01000000) >> 24;
-	  I1 = (value & 0x00800000) >> 23;
-	  I2 = (value & 0x00400000) >> 22;
-	  hi = (value & 0x003ff000) >> 12;
-	  lo = (value & 0x00000ffe) >> 1;
-
-	  I1 = !(I1 ^ S);
-	  I2 = !(I2 ^ S);
-
-	  newval   = md_chars_to_number (buf, THUMB_SIZE);
-	  newval2  = md_chars_to_number (buf + THUMB_SIZE, THUMB_SIZE);
-	  newval  |= (S << 10) | hi;
-	  newval2 |= (I1 << 13) | (I2 << 11) | lo;
-	  md_number_to_chars (buf, newval, THUMB_SIZE);
-	  md_number_to_chars (buf + THUMB_SIZE, newval2, THUMB_SIZE);
+	  encode_thumb2_b_bl_offset (buf, value);
 	}
       break;
 

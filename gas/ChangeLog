@@ -1,3 +1,15 @@
+2009-12-24  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+
+        Backport from trunk:
+	2009-12-21  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+	            Richard Earnshaw  <richard.earnshaw@arm.com>
+
+        * config/tc-arm.c (encode_thumb2_b_bl_offset): New. Refactored
+        from md_apply_fix.
+        (md_apply_fix): Fixup range checks for Thumb2 version
+        of unconditional calls. Call encode_thumb2_b_bl_offset for
+        unconditional branches / function calls.
+
 2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from trunk:
