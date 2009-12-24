@@ -729,7 +729,8 @@ static void
 collect_symbol (struct collection_list *collect, 
 		struct symbol *sym,
 		struct gdbarch *gdbarch,
-		long frame_regno, long frame_offset)
+		long frame_regno, long frame_offset,
+		CORE_ADDR scope)
 {
   unsigned long len;
   unsigned int reg;
@@ -821,6 +822,50 @@ collect_symbol (struct collection_list *collect,
       printf_filtered ("%s has been optimized out of existence.\n",
 		       SYMBOL_PRINT_NAME (sym));
       break;
+
+    case LOC_COMPUTED:
+      {
+	struct agent_expr *aexpr;
+	struct cleanup *old_chain1 = NULL;
+	struct agent_reqs areqs;
+
+	aexpr = gen_trace_for_var (scope, sym);
+
+	old_chain1 = make_cleanup_free_agent_expr (aexpr);
+
+	ax_reqs (aexpr, &areqs);
+	if (areqs.flaw != agent_flaw_none)
+	  error (_("malformed expression"));
+	
+	if (areqs.min_height < 0)
+	  error (_("gdb: Internal error: expression has min height < 0"));
+	if (areqs.max_height > 20)
+	  error (_("expression too complicated, try simplifying"));
+
+	discard_cleanups (old_chain1);
+	add_aexpr (collect, aexpr);
+
+	/* take care of the registers */
+	if (areqs.reg_mask_len > 0)
+	  {
+	    int ndx1, ndx2;
+
+	    for (ndx1 = 0; ndx1 < areqs.reg_mask_len; ndx1++)
+	      {
+		QUIT;	/* allow user to bail out with ^C */
+		if (areqs.reg_mask[ndx1] != 0)
+		  {
+		    /* assume chars have 8 bits */
+		    for (ndx2 = 0; ndx2 < 8; ndx2++)
+		      if (areqs.reg_mask[ndx1] & (1 << ndx2))
+			/* it's used -- record it */
+			add_register (collect, 
+				      ndx1 * 8 + ndx2);
+		  }
+	      }
+	  }
+      }
+      break;
     }
 }
 
@@ -847,7 +892,7 @@ add_local_symbols (struct collection_list *collect,
 	    {
 	      count++;
 	      collect_symbol (collect, sym, gdbarch,
-			      frame_regno, frame_offset);
+			      frame_regno, frame_offset, pc);
 	    }
 	}
       if (BLOCK_FUNCTION (block))
@@ -1126,7 +1171,8 @@ encode_actions (struct breakpoint *t, char ***tdp_actions,
 				      exp->elts[2].symbol,
 				      t->gdbarch,
 				      frame_reg,
-				      frame_offset);
+				      frame_offset,
+				      t->loc->address);
 		      break;
 
 		    default:	/* full-fledged expression */

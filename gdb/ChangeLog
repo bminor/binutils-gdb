@@ -1,3 +1,15 @@
+2009-12-23  Stan Shebs  <stan@codesourcery.com>
+
+	* ax-gdb.h (gen_trace_for_var): Declare.
+	* ax-gdb.c (gen_trace_for_var): New function.
+	* dwarf2loc.c (dwarf_expr_frame_base_1): New function, split from...
+	(dwarf_expr_frame_base): ...here.
+	(dwarf2_tracepoint_var_ref): Add computed location case.
+	* tracepoint.c (collect_symbol): Add scope arg and LOC_COMPUTED
+	case.
+	(add_local_symbols): Update call to collect_symbol.
+	(encode_actions): Ditto.
+
 2009-12-23  Dmitry Gorbachev  <d.g.gorbachev@gmail.com>
 
 	PR gdb/11110

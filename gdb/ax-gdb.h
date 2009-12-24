@@ -99,6 +99,8 @@ struct axs_value
    function to discover which registers the expression uses.  */
 extern struct agent_expr *gen_trace_for_expr (CORE_ADDR, struct expression *);
 
+extern struct agent_expr *gen_trace_for_var (CORE_ADDR, struct symbol *);
+
 extern struct agent_expr *gen_eval_for_expr (CORE_ADDR, struct expression *);
 
 #endif /* AX_GDB_H */

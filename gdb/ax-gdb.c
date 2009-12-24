@@ -1768,6 +1768,35 @@ gen_expr (struct expression *exp, union exp_element **pc,
 }
 
 
+/* Given a single variable and a scope, generate bytecodes to trace
+   its value.  This is for use in situations where we have only a
+   variable's name, and no parsed expression; for instance, when the
+   name comes from a list of local variables of a function.  */
+
+struct agent_expr *
+gen_trace_for_var (CORE_ADDR scope, struct symbol *var)
+{
+  struct cleanup *old_chain = 0;
+  struct agent_expr *ax = new_agent_expr (scope);
+  struct axs_value value;
+
+  old_chain = make_cleanup_free_agent_expr (ax);
+
+  trace_kludge = 1;
+  gen_var_ref (NULL, ax, &value, var);
+
+  /* Make sure we record the final object, and get rid of it.  */
+  gen_traced_pop (ax, &value);
+
+  /* Oh, and terminate.  */
+  ax_simple (ax, aop_end);
+
+  /* We have successfully built the agent expr, so cancel the cleanup
+     request.  If we add more cleanups that we always want done, this
+     will have to get more complicated.  */
+  discard_cleanups (old_chain);
+  return ax;
+}
 
 /* Generating bytecode from GDB expressions: driver */
 
