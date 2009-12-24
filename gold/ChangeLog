@@ -2,6 +2,8 @@
 
 	* i386.cc (Target_i386::do_calls_non_split): Recognize
 	-fsplit-stack prologue for a function with a static chain.
+	* x86_64.cc (Target_x86_64::do_calls_non_split): Recognize
+	-fsplit-stack prologue when using %r11.
 
 2009-12-21  Sriraman Tallam  <tmsriram@google.com>
 

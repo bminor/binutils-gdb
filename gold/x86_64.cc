@@ -2692,7 +2692,11 @@ Target_x86_64::do_calls_non_split(Relobj* object, unsigned int shndx,
       this->set_view_to_nop(view, view_size, fnoffset + 1, 8);
     }
   // lea NN(%rsp),%r10
-  else if (this->match_view(view, view_size, fnoffset, "\x4c\x8d\x94\x24", 4)
+  // lea NN(%rsp),%r11
+  else if ((this->match_view(view, view_size, fnoffset,
+			     "\x4c\x8d\x94\x24", 4)
+	    || this->match_view(view, view_size, fnoffset,
+				"\x4c\x8d\x9c\x24", 4))
 	   && fnsize > 8)
     {
       // This is loading an offset from the stack pointer for a
