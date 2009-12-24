@@ -1,5 +1,7 @@
 2009-12-23  Stan Shebs  <stan@codesourcery.com>
 
+	* ax-gdb.c (gen_expr): Handle OP_THIS.
+
 	* ax-gdb.h (gen_trace_for_var): Declare.
 	* ax-gdb.c (gen_trace_for_var): New function.
 	* dwarf2loc.c (dwarf_expr_frame_base_1): New function, split from...

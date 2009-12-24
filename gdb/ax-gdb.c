@@ -35,6 +35,7 @@
 #include "regcache.h"
 #include "user-regs.h"
 #include "language.h"
+#include "dictionary.h"
 
 /* To make sense of this file, you should read doc/agentexpr.texi.
    Then look at the types and enums in ax-gdb.h.  For the code itself,
@@ -1756,6 +1757,38 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	     shouldn't mention it, and we shouldn't be here.  */
 	  internal_error (__FILE__, __LINE__,
 			  _("gen_expr: unhandled struct case"));
+      }
+      break;
+
+    case OP_THIS:
+      {
+	char *name;
+	struct frame_info *frame;
+	struct symbol *func, *sym;
+	struct block *b;
+
+	name = current_language->la_name_of_this;
+	if (!name)
+	  error (_("no `this' in current language"));
+
+	frame = get_selected_frame (_("no frame selected"));
+
+	func = get_frame_function (frame);
+	if (!func)
+	  error (_("no `%s' in nameless context"), name);
+
+	b = SYMBOL_BLOCK_VALUE (func);
+	if (dict_empty (BLOCK_DICT (b)))
+	  error (_("no args, no `%s' in block"), name);
+
+	/* Calling lookup_block_symbol is necessary to get the LOC_REGISTER
+	   symbol instead of the LOC_ARG one (if both exist).  */
+	sym = lookup_block_symbol (b, name, NULL, VAR_DOMAIN);
+	if (!sym)
+	  error (_("no `%s' found"), name);
+
+	gen_var_ref (exp->gdbarch, ax, value, sym);
+	(*pc) += 2;
       }
       break;
 
