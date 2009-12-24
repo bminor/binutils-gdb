@@ -23,8 +23,6 @@ if ![runto_main] {
     return -1
 }
 
-gdb_breakpoint [gdb_get_line_number "exit-line"]
-
 gdb_breakpoint [gdb_get_line_number "func-line"]
 gdb_continue_to_breakpoint "func" ".*func-line.*"
 
@@ -52,7 +50,3 @@ gdb_test "bt" \
 	 "bt from A"
 
 gdb_continue_to_breakpoint "next caller func" ".*func-line.*"
-
-# Verify GDB really could not catch any other breakpoint location.
-
-gdb_continue_to_breakpoint "uncaught return" ".*exit-line.*"

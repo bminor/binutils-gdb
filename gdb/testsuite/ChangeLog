@@ -1,3 +1,10 @@
+2009-12-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix compatibility with G++-4.5.
+	* gdb.cp/expand-sals.cc (main): Remove the "exit-line" comment.
+	* gdb.cp/expand-sals.exp: Remove breakpoint on "exit-line".
+	(uncaught return): Remove.
+
 2009-12-23  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Phil Muldoon  <pmuldoon@redhat.com>
 

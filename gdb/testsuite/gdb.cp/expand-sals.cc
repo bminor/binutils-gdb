@@ -49,5 +49,5 @@ main (void)
   A a;
   B b;
 
-  return 0;	/* exit-line */
+  return 0;
 }
