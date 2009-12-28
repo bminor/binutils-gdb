@@ -1,5 +1,10 @@
 2009-12-28  Daniel Gutson  <dgutson@codesourcery.com>
 
+	* elf32-arm.c (elf32_arm_final_link_relocate): limits
+	fixed.
+
+2009-12-28  Daniel Gutson  <dgutson@codesourcery.com>
+
 	* elf-attrs.c (_bfd_elf_merge_object_attributes): Error
 	message rephrased.
 

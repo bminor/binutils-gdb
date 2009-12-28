@@ -1,0 +1,6 @@
+
+[^:]*:     file format elf32-(little|big)arm
+
+Contents of section .text:
+ 8000 80ff0080 ffff                        ......          
+#...

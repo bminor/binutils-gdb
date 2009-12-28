@@ -7212,7 +7212,11 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 
     case R_ARM_ABS8:
       value += addend;
-      if ((long) value > 0x7f || (long) value < -0x80)
+
+      /* There is no way to tell whether the user intended to use a signed or
+	 unsigned addend.  When checking for overflow we accept either,
+	 as specified by the AAELF.  */
+      if ((long) value > 0xff || (long) value < -0x80)
 	return bfd_reloc_overflow;
 
       bfd_put_8 (input_bfd, value, hit_data);
@@ -7221,7 +7225,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
     case R_ARM_ABS16:
       value += addend;
 
-      if ((long) value > 0x7fff || (long) value < -0x8000)
+      /* See comment for R_ARM_ABS8.  */
+      if ((long) value > 0xffff || (long) value < -0x8000)
 	return bfd_reloc_overflow;
 
       bfd_put_16 (input_bfd, value, hit_data);

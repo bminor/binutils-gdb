@@ -58,7 +58,7 @@ if { ![is_elf_format] || ![istarget "arm*-*-*"] } {
     return
 }
 
-# List contains test-items with 3 items followed by 2 lists:
+# List contains test-items with 3 items followed by 2 lists and one more item:
 # 0:name 1:ld options 2:assembler options
 # 3:filenames of assembler files 4: action and options. 5: name of output file
 
@@ -236,6 +236,9 @@ set armelftests {
     {"callweak-2" "-static -T arm.ld" "" {callweak-2.s}
      {{objdump -dr callweak-2.d}}
      "callweak-2"}
+    {"Relocation boundaries" "-defsym x=0 -defsym y=0 -defsym _start=0" "" {reloc-boundaries.s}
+     {{objdump -s reloc-boundaries.d}}
+     "reloc-boundaries"}
 }
 
 run_ld_link_tests $armelftests

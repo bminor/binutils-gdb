@@ -1,5 +1,11 @@
 2009-12-28  Daniel Gutson  <dgutson@codesourcery.com>
 
+	* ld-arm/arm-elf.exp (armelftests): New test case added.
+	* ld-arm/reloc-boundaries.s: New file.
+	* ld-arm/reloc-boundaries.d: New file.
+
+2009-12-28  Daniel Gutson  <dgutson@codesourcery.com>
+
 	* ld-arm/arm-elf.exp: Run missing test
 	from a previous commit (callweak-2).
 
