@@ -233,6 +233,9 @@ set armelftests {
     {"callweak" "-static -T arm.ld" "" {callweak.s}
      {{objdump -dr callweak.d}}
      "callweak"}
+    {"callweak-2" "-static -T arm.ld" "" {callweak-2.s}
+     {{objdump -dr callweak-2.d}}
+     "callweak-2"}
 }
 
 run_ld_link_tests $armelftests
