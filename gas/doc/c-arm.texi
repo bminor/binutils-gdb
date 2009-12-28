@@ -339,6 +339,7 @@ features.  The default is to warn.
 * ARM-Chars::                Special Characters
 * ARM-Regs::                 Register Names
 * ARM-Relocations::	     Relocations
+* ARM-Neon-Alignment::	     NEON Alignment Specifiers
 @end menu
 
 @node ARM-Instruction-Set
@@ -405,6 +406,21 @@ Either @samp{#} or @samp{$} can be used to indicate immediate operands.
 @cindex ARM register names
 @cindex register names, ARM
 *TODO* Explain about ARM register naming, and the predefined names.
+
+@node ARM-Neon-Alignment
+@subsection NEON Alignment Specifiers
+
+@cindex alignment for NEON instructions
+Some NEON load/store instructions allow an optional address
+alignment qualifier.
+The ARM documentation specifies that this is indicated by
+@samp{@@ @var{align}}. However GAS already interprets
+the @samp{@@} character as a "line comment" start,
+so @samp{: @var{align}} is used instead.  For example:
+
+@smallexample
+        vld1.8 @{q0@}, [r0, :128]
+@end smallexample
 
 @node ARM Floating Point
 @section Floating Point
