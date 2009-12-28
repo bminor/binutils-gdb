@@ -258,13 +258,9 @@ linux_add_process (int pid, int attached)
    also freeing all private data.  */
 
 static void
-linux_remove_process (struct process_info *process, int detaching)
+linux_remove_process (struct process_info *process)
 {
   struct process_info_private *priv = process->private;
-
-#ifdef USE_THREAD_DB
-  thread_db_free (process, detaching);
-#endif
 
   free (priv->arch_private);
   free (priv);
@@ -736,8 +732,11 @@ linux_kill (int pid)
       lwpid = linux_wait_for_event (lwp->head.id, &wstat, __WALL);
     } while (lwpid > 0 && WIFSTOPPED (wstat));
 
+#ifdef USE_THREAD_DB
+  thread_db_free (process, 0);
+#endif
   delete_lwp (lwp);
-  linux_remove_process (process, 0);
+  linux_remove_process (process);
   return 0;
 }
 
@@ -821,12 +820,16 @@ linux_detach (int pid)
   if (process == NULL)
     return -1;
 
+#ifdef USE_THREAD_DB
+  thread_db_free (process, 1);
+#endif
+
   current_inferior =
     (struct thread_info *) find_inferior (&all_threads, any_thread_of, &pid);
 
   delete_all_breakpoints ();
   find_inferior (&all_threads, linux_detach_one_lwp, &pid);
-  linux_remove_process (process, 1);
+  linux_remove_process (process);
   return 0;
 }
 
@@ -1451,8 +1454,11 @@ retry:
 	  int pid = pid_of (lwp);
 	  struct process_info *process = find_process_pid (pid);
 
+#ifdef USE_THREAD_DB
+	  thread_db_free (process, 0);
+#endif
 	  delete_lwp (lwp);
-	  linux_remove_process (process, 0);
+	  linux_remove_process (process);
 
 	  current_inferior = NULL;
 

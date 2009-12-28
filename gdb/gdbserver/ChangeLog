@@ -1,3 +1,14 @@
+2009-12-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-low.c (linux_remove_process): Remove `detaching'
+	parameter.  Don't release/detach from thread_db here.
+	(linux_kill): Release/detach from thread_db here, ...
+	(linux_detach): ... and here, before actually detaching.
+	(linux_wait_1): ... and here, when a process exits.
+	* thread-db.c (any_thread_of): New.
+	(thread_db_free): Switch the current inferior to a thread of the
+	passed in process.
+
 2009-12-21  Doug Evans  <dje@google.com>
 
 	* linux-x86-low.c: Delete outdated comment about Elf32_Phdr.

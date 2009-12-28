@@ -755,6 +755,17 @@ thread_db_init (int use_events)
   return 0;
 }
 
+static int
+any_thread_of (struct inferior_list_entry *entry, void *args)
+{
+  int *pid_p = args;
+
+  if (ptid_get_pid (entry->id) == *pid_p)
+    return 1;
+
+  return 0;
+}
+
 /* Disconnect from libthread_db and free resources.  */
 
 void
@@ -763,6 +774,8 @@ thread_db_free (struct process_info *proc, int detaching)
   struct thread_db *thread_db = proc->private->thread_db;
   if (thread_db)
     {
+      struct thread_info *saved_inferior;
+      int pid;
       td_err_e (*td_ta_delete_p) (td_thragent_t *);
       td_err_e (*td_ta_clear_event_p) (const td_thragent_t *ta,
 				       td_thr_events_t *event);
@@ -774,6 +787,12 @@ thread_db_free (struct process_info *proc, int detaching)
       td_ta_delete_p = &td_ta_delete;
       td_ta_clear_event_p = &td_ta_clear_event;
 #endif
+
+      pid = pid_of (proc);
+      saved_inferior = current_inferior;
+      current_inferior =
+	(struct thread_info *) find_inferior (&all_threads,
+					      any_thread_of, &pid);
 
       if (detaching && td_ta_clear_event_p != NULL)
 	{
@@ -794,6 +813,7 @@ thread_db_free (struct process_info *proc, int detaching)
 
       free (thread_db);
       proc->private->thread_db = NULL;
+      current_inferior = saved_inferior;
     }
 }
 
