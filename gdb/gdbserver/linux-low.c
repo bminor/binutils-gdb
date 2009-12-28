@@ -19,9 +19,6 @@
 
 #include "server.h"
 #include "linux-low.h"
-#include "ansidecl.h" /* For ATTRIBUTE_PACKED, must be bug in external.h.  */
-#include "elf/common.h"
-#include "elf/external.h"
 
 #include <sys/wait.h>
 #include <stdio.h>
@@ -42,6 +39,13 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/vfs.h>
+#ifndef ELFMAG0
+/* Don't include <linux/elf.h> here.  If it got included by gdb_proc_service.h
+   then ELFMAG0 will have been defined.  If it didn't get included by
+   gdb_proc_service.h then including it will likely introduce a duplicate
+   definition of elf_fpregset_t.  */
+#include <elf.h>
+#endif
 
 #ifndef SPUFS_MAGIC
 #define SPUFS_MAGIC 0x23c9b64e
@@ -191,7 +195,7 @@ linux_child_pid_to_exec_file (int pid)
 /* Return non-zero if HEADER is a 64-bit ELF file.  */
 
 static int
-elf_64_header_p (const Elf64_External_Ehdr *header)
+elf_64_header_p (const Elf64_Ehdr *header)
 {
   return (header->e_ident[EI_MAG0] == ELFMAG0
           && header->e_ident[EI_MAG1] == ELFMAG1
@@ -207,7 +211,7 @@ elf_64_header_p (const Elf64_External_Ehdr *header)
 int
 elf_64_file_p (const char *file)
 {
-  Elf64_External_Ehdr header;
+  Elf64_Ehdr header;
   int fd;
 
   fd = open (file, O_RDONLY);
