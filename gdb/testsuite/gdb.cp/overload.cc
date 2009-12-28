@@ -102,6 +102,10 @@ int main ()
        breakpoint();
     #endif
 
+    overloadNamespace (1);
+    overloadNamespace (dummyInstance);
+    XXX::overloadNamespace ('a');
+
     // Verify that intToChar should work:
     intToChar(1);
 

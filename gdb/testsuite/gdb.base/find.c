@@ -67,5 +67,11 @@ main ()
 
   stop_here ();
 
+  /* Reference variables.  */
+  x = int8_search_buf[0];
+  x = int16_search_buf[0];
+  x = int32_search_buf[0];
+  x = int64_search_buf[0];
+
   return 0;
 }

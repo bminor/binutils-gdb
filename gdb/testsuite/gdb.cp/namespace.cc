@@ -168,6 +168,8 @@ namespace C
   }
 }
 
+extern int ensureOtherRefs ();
+
 int main ()
 {
   using AAA::inA;
@@ -195,4 +197,7 @@ int main ()
   marker1();
   
   C::D::marker2 ();
+
+  C::ensureRefs ();
+  ensureOtherRefs ();
 }

@@ -269,10 +269,13 @@ func_type v_func_type;
 
 /***********/
 
+extern char charfoo ();
+
 typedef int foo;
 
 foo intfoo (afoo)
 {
+  charfoo (afoo);
   return (afoo * 2);
 }
 

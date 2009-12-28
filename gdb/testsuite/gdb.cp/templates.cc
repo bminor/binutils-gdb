@@ -782,8 +782,10 @@ int main()
 
   intBazOne ibo;
   z = ibo.baz (2, 21);
+
+  t5i.value();
+
   return 0;
-    
 }
 
 

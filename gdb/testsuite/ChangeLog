@@ -1,3 +1,25 @@
+2009-12-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/find.c (main): Reference search buffers.
+	* gdb.base/included.c (main): Reference integer.
+	* gdb.base/ptype.c (charfoo): Declare.
+	(intfoo): Call charfoo.
+	* gdb.base/scope0.c (useitp): New function.
+	(usestatics): Use useitp.
+	(useit): Add a type for val.
+	* gdb.base/scope1.c (useit1): Take a pointer argument.
+	(usestatics1): Update calls to useit1.
+	* gdb.cp/call-c.cc: Declare foo.
+	(main): Call foo.
+	* gdb.cp/m-static.cc (main): Reference test4.elsewhere.
+	* gdb.cp/namespace.cc (ensureOtherRefs): Declare.
+	(main): Call C::ensureRefs and ensureOtherRefs.
+	* gdb.cp/namespace1.cc (C::ensureOtherRefs): Also reference int
+	variables.
+	(ensureOtherRefs): New function.
+	* gdb.cp/overload.cc (main): Call all overloadNamespace variants.
+	* gdb.cp/templates.cc (main): Call t5i.value.
+
 2009-12-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix compatibility with G++-4.5.

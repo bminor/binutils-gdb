@@ -30,6 +30,10 @@ struct Foo {
 
 typedef Foo *FooHandle;
 
+extern "C" {
+  int foo(int);
+}
+
 int main()
 {
     Foo f;
@@ -37,5 +41,6 @@ int main()
     Foo* &rf = pf;
     FooHandle handle = pf;
     rf->func(); /* set breakpoint here */
+    foo(0);
     return func(0);
 }

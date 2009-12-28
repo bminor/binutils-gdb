@@ -11,6 +11,7 @@ extern void foo();
 int autovars (int bcd, int abc);
 int localscopes (int x);
 int useit (int val);
+int useitp (const int *val);
 void init0();
 void marker1 ();
 void marker2 ();
@@ -30,12 +31,13 @@ int main ()
 }
 
 /* On some systems, such as AIX, unreferenced variables are deleted
-   from the executable.  */
+   from the executable.  On other compilers, such as ARM RealView,
+   const variables without their address taken are deleted.  */
 void usestatics ()
 {
-  useit (filelocal);
-  useit (filelocal_bss);
-  useit (filelocal_ro);
+  useitp (&filelocal);
+  useitp (&filelocal_bss);
+  useitp (&filelocal_ro);
 }
 
 void init0 ()
@@ -68,13 +70,27 @@ int
 useit (int val)
 #else
 int
-useit (val)
+useit (val) int val;
 #endif
 {
     static int usedval;
 
     usedval = val;
     return val + sum_upto (0);
+}
+
+#ifdef PROTOTYPES
+int
+useitp (const int *val)
+#else
+int
+useitp (val) const int *val;
+#endif
+{
+    static int usedval;
+
+    usedval = *val;
+    return *val + sum_upto (0);
 }
 
 #ifdef PROTOTYPES
