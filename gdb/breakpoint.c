@@ -3982,7 +3982,8 @@ static void print_breakpoint_location (struct breakpoint *b,
     }
   else if (loc)
     {
-      print_address_symbolic (loc->address, stb->stream, demangle, "");
+      print_address_symbolic (loc->gdbarch, loc->address, stb->stream,
+			      demangle, "");
       ui_out_field_stream (uiout, "at", stb);
     }
   else

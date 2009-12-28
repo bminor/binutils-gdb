@@ -562,7 +562,8 @@ set_next_address (struct gdbarch *gdbarch, CORE_ADDR addr)
    settings of the demangle and asm_demangle variables.  */
 
 void
-print_address_symbolic (CORE_ADDR addr, struct ui_file *stream,
+print_address_symbolic (struct gdbarch *gdbarch, CORE_ADDR addr,
+			struct ui_file *stream,
 			int do_demangle, char *leadin)
 {
   char *name = NULL;
@@ -575,7 +576,7 @@ print_address_symbolic (CORE_ADDR addr, struct ui_file *stream,
   struct cleanup *cleanup_chain = make_cleanup (free_current_contents, &name);
   make_cleanup (free_current_contents, &filename);
 
-  if (build_address_symbolic (addr, do_demangle, &name, &offset,
+  if (build_address_symbolic (gdbarch, addr, do_demangle, &name, &offset,
 			      &filename, &line, &unmapped))
     {
       do_cleanups (cleanup_chain);
@@ -615,7 +616,8 @@ print_address_symbolic (CORE_ADDR addr, struct ui_file *stream,
    success, when all the info in the OUT paramters is valid. Return 1
    otherwise. */
 int
-build_address_symbolic (CORE_ADDR addr,  /* IN */
+build_address_symbolic (struct gdbarch *gdbarch,
+			CORE_ADDR addr,  /* IN */
 			int do_demangle, /* IN */
 			char **name,     /* OUT */
 			int *offset,     /* OUT */
@@ -658,6 +660,13 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
 
   if (symbol)
     {
+      /* If this is a function (i.e. a code address), strip out any
+	 non-address bits.  For instance, display a pointer to the
+	 first instruction of a Thumb function as <function>; the
+	 second instruction will be <function+2>, even though the
+	 pointer is <function+3>.  This matches the ISA behavior.  */
+      addr = gdbarch_addr_bits_remove (gdbarch, addr);
+
       name_location = BLOCK_START (SYMBOL_BLOCK_VALUE (symbol));
       if (do_demangle || asm_demangle)
 	name_temp = SYMBOL_PRINT_NAME (symbol);
@@ -722,7 +731,7 @@ print_address (struct gdbarch *gdbarch,
 	       CORE_ADDR addr, struct ui_file *stream)
 {
   fputs_filtered (paddress (gdbarch, addr), stream);
-  print_address_symbolic (addr, stream, asm_demangle, " ");
+  print_address_symbolic (gdbarch, addr, stream, asm_demangle, " ");
 }
 
 /* Return a prefix for instruction address:
@@ -763,11 +772,11 @@ print_address_demangle (struct gdbarch *gdbarch, CORE_ADDR addr,
   else if (opts.addressprint)
     {
       fputs_filtered (paddress (gdbarch, addr), stream);
-      print_address_symbolic (addr, stream, do_demangle, " ");
+      print_address_symbolic (gdbarch, addr, stream, do_demangle, " ");
     }
   else
     {
-      print_address_symbolic (addr, stream, do_demangle, "");
+      print_address_symbolic (gdbarch, addr, stream, do_demangle, "");
     }
 }
 

@@ -1,3 +1,12 @@
+2009-12-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* defs.h (print_address_symbolic, build_address_symbolic): Update
+	prototypes.
+	* printcmd.c (print_address_symbolic): Take a gdbarch argument.
+	Pass it to build_address_symbolic.  All callers updated.
+	(build_address_symbolic): Take a gdbarch argument.  Use
+	gdbarch_addr_bits_remove for functions.  All callers updated.
+
 2009-12-28  Pedro Alves  <pedro@codesourcery.com>
 
 	* ax-gdb.c (gen_expr) <OP_THIS>: Lookup `this' in the context of
