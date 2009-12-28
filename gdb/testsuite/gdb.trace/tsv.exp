@@ -1,0 +1,107 @@
+#   Copyright 2009 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+load_lib "trace-support.exp";
+
+if $tracelevel then {
+    strace $tracelevel
+}
+
+set prms_id 0
+set bug_id 0
+
+gdb_exit
+gdb_start
+set testfile "actions"
+set srcfile ${testfile}.c
+set binfile $objdir/$subdir/tsv
+if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
+	  executable {debug nowarnings}] != "" } {
+    untested tracecmd.exp
+    return -1
+}
+gdb_reinitialize_dir $srcdir/$subdir
+
+# If testing on a remote host, download the source file.
+# remote_download host $srcdir/$subdir/$srcfile
+
+gdb_file_cmd $binfile
+
+gdb_test "tvariable \$tvar1" \
+  "Trace state variable \\\$tvar1 created, with initial value 0." \
+  "Create a trace state variable"
+
+gdb_test "tvariable \$tvar2 = 45" \
+  "Trace state variable \\\$tvar2 created, with initial value 45." \
+  "Create a trace state variable with initial value"
+
+gdb_test "tvariable \$tvar2 = -92" \
+  "Trace state variable \\\$tvar2 now has initial value -92." \
+  "Change initial value of a trace state variable"
+
+gdb_test "tvariable \$tvar3 = 2 + 3" \
+  "Trace state variable \\\$tvar3 created, with initial value 5." \
+  "Create a trace state variable with expression"
+
+gdb_test "tvariable \$tvar3 = 1234567000000" \
+  "Trace state variable \\\$tvar3 now has initial value 1234567000000." \
+  "Init trace state variable to a 64-bit value"
+
+gdb_test "tvariable main" \
+  "Syntax must be \\\$NAME \\\[ = EXPR \\\]" \
+  "tvariable syntax error, bad name"
+
+gdb_test "tvariable \$tvar1 - 93" \
+  "Syntax must be \\\$NAME \\\[ = EXPR \\\]" \
+  "tvariable syntax error, not an assignment"
+
+gdb_test "info tvariables" \
+    "Name\[\t \]+Initial\[\t \]+Current.*
+\\\$tvar1\[\t \]+0\[\t \]+<undefined>.*
+\\\$tvar2\[\t \]+-92\[\t \]+<undefined>.*
+\\\$tvar3\[\t \]+1234567000000\[\t \]+.*<undefined>.*" \
+  "List tvariables"
+
+gdb_test "delete tvariable \$tvar2" \
+  "" \
+  "delete trace state variable"
+
+gdb_test "info tvariables" \
+    "Name\[\t \]+Initial\[\t \]+Current.*
+\\\$tvar1\[\t \]+0\[\t \]+<undefined>.*
+\\\$tvar3\[\t \]+1234567000000\[\t \]+.*<undefined>.*" \
+  "List tvariables after deletion"
+
+send_gdb "delete tvariable\n"
+gdb_expect 30 {
+    -re "Delete all trace state variables.*y or n.*$" {
+	send_gdb "y\n"
+	gdb_expect 30 {
+	    -re "$gdb_prompt $" {
+		pass "Delete all trace state variables"
+	    }
+	    timeout { fail "Delete all trace state variables (timeout)" }
+	}
+    }
+    -re "$gdb_prompt $" { # This happens if there were no variables
+    }
+    timeout { perror "Delete all trace state variables (timeout)" ; return }
+}
+
+gdb_test "info tvariables" \
+  "No trace state variables.*" \
+  "List tvariables after deleting all"
+
+

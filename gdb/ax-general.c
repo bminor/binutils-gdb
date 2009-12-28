@@ -272,6 +272,22 @@ ax_reg (struct agent_expr *x, int reg)
   x->buf[x->len + 2] = (reg) & 0xff;
   x->len += 3;
 }
+
+/* Assemble code to operate on a trace state variable.  */
+
+void
+ax_tsv (struct agent_expr *x, enum agent_op op, int num)
+{
+  /* Make sure the tsv number is in range.  */
+  if (num < 0 || num > 0xffff)
+    internal_error (__FILE__, __LINE__, _("ax-general.c (ax_tsv): variable number is %d, out of range"), num);
+
+  grow_expr (x, 3);
+  x->buf[x->len] = op;
+  x->buf[x->len + 1] = (num >> 8) & 0xff;
+  x->buf[x->len + 2] = (num) & 0xff;
+  x->len += 3;
+}
 
 
 
@@ -324,9 +340,9 @@ struct aop_map aop_map[] =
   {"pop", 0, 0, 1, 0},		/* 0x29 */
   {"zero_ext", 1, 0, 1, 1},	/* 0x2a */
   {"swap", 0, 0, 2, 2},		/* 0x2b */
-  {0, 0, 0, 0, 0},		/* 0x2c */
-  {0, 0, 0, 0, 0},		/* 0x2d */
-  {0, 0, 0, 0, 0},		/* 0x2e */
+  {"getv", 2, 0, 0, 1},		/* 0x2c */
+  {"setv", 2, 0, 0, 1},		/* 0x2d */
+  {"tracev", 2, 0, 0, 1},	/* 0x2e */
   {0, 0, 0, 0, 0},		/* 0x2f */
   {"trace16", 2, 0, 1, 1},	/* 0x30 */
 };

@@ -131,6 +131,9 @@ enum agent_op
     aop_pop = 0x29,
     aop_zero_ext = 0x2a,
     aop_swap = 0x2b,
+    aop_getv = 0x2c,
+    aop_setv = 0x2d,
+    aop_tracev = 0x2e,
     aop_trace16 = 0x30,
     aop_last
   };
@@ -182,6 +185,9 @@ extern void ax_const_d (struct agent_expr *EXPR, LONGEST d);
 /* Assemble code to push the value of register number REG on the
    stack.  */
 extern void ax_reg (struct agent_expr *EXPR, int REG);
+
+/* Assemble code to operate on a trace state variable.  */
+extern void ax_tsv (struct agent_expr *expr, enum agent_op op, int num);
 
 
 /* Functions for printing out expressions, and otherwise debugging

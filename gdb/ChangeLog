@@ -1,3 +1,29 @@
+2009-12-28  Stan Shebs  <stan@codesourcery.com>
+
+	Add trace state variables.
+	* ax.h (enum agent_op): Add getv, setv, and tracev.
+	(ax_tsv): Declare.
+	* ax-gdb.c: Include tracepoint.h.
+	(gen_expr): Handle BINOP_ASSIGN, BINOP_ASSIGN_MODIFY, and
+	OP_INTERNALVAR.
+	(gen_expr_binop_rest): New function, split from gen_expr.
+	* ax-general.c (ax_tsv): New function.
+	(aop_map): Add new bytecodes.
+	* tracepoint.h (struct trace_state_variable): New struct.
+	(tsv_s): New typedef.
+	(find_trace_state_variable): Declare.
+	* tracepoint.c (tvariables): New global.
+	(next_tsv_number): New global.
+	(create_trace_state_variable): New function.
+	(find_trace_state_variable): New function.
+	(delete_trace_state_variable): New function.
+	(trace_variable_command): New function.
+	(delete_trace_variable_command): New function.
+	(tvariables_info): New function.
+	(trace_start_command): Download tsvs with initial values.
+	(_initialize_tracepoint): Add new commands.
+	* NEWS: Mention the addition of trace state variables.
+
 2009-12-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* NEWS: Document "info variables" change.

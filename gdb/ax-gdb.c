@@ -36,6 +36,7 @@
 #include "user-regs.h"
 #include "language.h"
 #include "dictionary.h"
+#include "tracepoint.h"
 
 /* To make sense of this file, you should read doc/agentexpr.texi.
    Then look at the types and enums in ax-gdb.h.  For the code itself,
@@ -139,6 +140,12 @@ static void gen_sizeof (struct expression *exp, union exp_element **pc,
 			struct type *size_type);
 static void gen_expr (struct expression *exp, union exp_element **pc,
 		      struct agent_expr *ax, struct axs_value *value);
+static void gen_expr_binop_rest (struct expression *exp,
+				 enum exp_opcode op, union exp_element **pc,
+				 struct agent_expr *ax,
+				 struct axs_value *value,
+				 struct axs_value *value1,
+				 struct axs_value *value2);
 
 static void agent_command (char *exp, int from_tty);
 
@@ -1441,7 +1448,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
 {
   /* Used to hold the descriptions of operand expressions.  */
   struct axs_value value1, value2;
-  enum exp_opcode op = (*pc)[0].opcode;
+  enum exp_opcode op = (*pc)[0].opcode, op2;
 
   /* If we're looking at a constant expression, just push its value.  */
   {
@@ -1478,119 +1485,63 @@ gen_expr (struct expression *exp, union exp_element **pc,
       (*pc)++;
       gen_expr (exp, pc, ax, &value1);
       gen_usual_unary (exp, ax, &value1);
-      gen_expr (exp, pc, ax, &value2);
-      gen_usual_unary (exp, ax, &value2);
-      gen_usual_arithmetic (exp, ax, &value1, &value2);
-      switch (op)
+      gen_expr_binop_rest (exp, op, pc, ax, value, &value1, &value2);
+      break;
+
+    case BINOP_ASSIGN:
+      (*pc)++;
+      if ((*pc)[0].opcode == OP_INTERNALVAR)
 	{
-	case BINOP_ADD:
-	  if (TYPE_CODE (value1.type) == TYPE_CODE_INT
-	      && TYPE_CODE (value2.type) == TYPE_CODE_PTR)
+	  char *name = internalvar_name ((*pc)[1].internalvar);
+	  struct trace_state_variable *tsv;
+	  (*pc) += 3;
+	  gen_expr (exp, pc, ax, value);
+	  tsv = find_trace_state_variable (name);
+	  if (tsv)
 	    {
-	      /* Swap the values and proceed normally.  */
-	      ax_simple (ax, aop_swap);
-	      gen_ptradd (ax, value, &value2, &value1);
+	      ax_tsv (ax, aop_setv, tsv->number);
+	      if (trace_kludge)
+		ax_tsv (ax, aop_tracev, tsv->number);
 	    }
-	  else if (TYPE_CODE (value1.type) == TYPE_CODE_PTR
-		   && TYPE_CODE (value2.type) == TYPE_CODE_INT)
-	    gen_ptradd (ax, value, &value1, &value2);
 	  else
-	    gen_binop (ax, value, &value1, &value2,
-		       aop_add, aop_add, 1, "addition");
-	  break;
-	case BINOP_SUB:
-	  if (TYPE_CODE (value1.type) == TYPE_CODE_PTR
-	      && TYPE_CODE (value2.type) == TYPE_CODE_INT)
-	    gen_ptrsub (ax,value, &value1, &value2);
-	  else if (TYPE_CODE (value1.type) == TYPE_CODE_PTR
-		   && TYPE_CODE (value2.type) == TYPE_CODE_PTR)
-	    /* FIXME --- result type should be ptrdiff_t */
-	    gen_ptrdiff (ax, value, &value1, &value2,
-		         builtin_type (exp->gdbarch)->builtin_long);
-	  else
-	    gen_binop (ax, value, &value1, &value2,
-		       aop_sub, aop_sub, 1, "subtraction");
-	  break;
-	case BINOP_MUL:
-	  gen_binop (ax, value, &value1, &value2,
-		     aop_mul, aop_mul, 1, "multiplication");
-	  break;
-	case BINOP_DIV:
-	  gen_binop (ax, value, &value1, &value2,
-		     aop_div_signed, aop_div_unsigned, 1, "division");
-	  break;
-	case BINOP_REM:
-	  gen_binop (ax, value, &value1, &value2,
-		     aop_rem_signed, aop_rem_unsigned, 1, "remainder");
-	  break;
-	case BINOP_SUBSCRIPT:
-	  gen_ptradd (ax, value, &value1, &value2);
-	  if (TYPE_CODE (value->type) != TYPE_CODE_PTR)
-	    error (_("Invalid combination of types in array subscripting."));
-	  gen_deref (ax, value);
-	  break;
-	case BINOP_BITWISE_AND:
-	  gen_binop (ax, value, &value1, &value2,
-		     aop_bit_and, aop_bit_and, 0, "bitwise and");
-	  break;
-
-	case BINOP_BITWISE_IOR:
-	  gen_binop (ax, value, &value1, &value2,
-		     aop_bit_or, aop_bit_or, 0, "bitwise or");
-	  break;
-
-	case BINOP_BITWISE_XOR:
-	  gen_binop (ax, value, &value1, &value2,
-		     aop_bit_xor, aop_bit_xor, 0, "bitwise exclusive-or");
-	  break;
-
-	case BINOP_EQUAL:
-	  gen_binop (ax, value, &value1, &value2,
-		     aop_equal, aop_equal, 0, "equal");
-	  break;
-
-	case BINOP_NOTEQUAL:
-	  gen_binop (ax, value, &value1, &value2,
-		     aop_equal, aop_equal, 0, "equal");
-	  gen_logical_not (ax, value,
-			   language_bool_type (exp->language_defn,
-					       exp->gdbarch));
-	  break;
-
-	case BINOP_LESS:
-	  gen_binop (ax, value, &value1, &value2,
-		     aop_less_signed, aop_less_unsigned, 0, "less than");
-	  break;
-
-	case BINOP_GTR:
-	  ax_simple (ax, aop_swap);
-	  gen_binop (ax, value, &value1, &value2,
-		     aop_less_signed, aop_less_unsigned, 0, "less than");
-	  break;
-
-	case BINOP_LEQ:
-	  ax_simple (ax, aop_swap);
-	  gen_binop (ax, value, &value1, &value2,
-		     aop_less_signed, aop_less_unsigned, 0, "less than");
-	  gen_logical_not (ax, value,
-			   language_bool_type (exp->language_defn,
-					       exp->gdbarch));
-	  break;
-
-	case BINOP_GEQ:
-	  gen_binop (ax, value, &value1, &value2,
-		     aop_less_signed, aop_less_unsigned, 0, "less than");
-	  gen_logical_not (ax, value,
-			   language_bool_type (exp->language_defn,
-					       exp->gdbarch));
-	  break;
-
-	default:
-	  /* We should only list operators in the outer case statement
-	     that we actually handle in the inner case statement.  */
-	  internal_error (__FILE__, __LINE__,
-			  _("gen_expr: op case sets don't match"));
+	    error (_("$%s is not a trace state variable, may not assign to it"), name);
 	}
+      else
+	error (_("May only assign to trace state variables"));
+      break;
+
+    case BINOP_ASSIGN_MODIFY:
+      (*pc)++;
+      op2 = (*pc)[0].opcode;
+      (*pc)++;
+      (*pc)++;
+      if ((*pc)[0].opcode == OP_INTERNALVAR)
+	{
+	  char *name = internalvar_name ((*pc)[1].internalvar);
+	  struct trace_state_variable *tsv;
+	  (*pc) += 3;
+	  tsv = find_trace_state_variable (name);
+	  if (tsv)
+	    {
+	      /* The tsv will be the left half of the binary operation.  */
+	      ax_tsv (ax, aop_getv, tsv->number);
+	      if (trace_kludge)
+		ax_tsv (ax, aop_tracev, tsv->number);
+	      /* Trace state variables are always 64-bit integers.  */
+	      value1.kind = axs_rvalue;
+	      value1.type = builtin_type (exp->gdbarch)->builtin_long_long;
+	      /* Now do right half of expression.  */
+	      gen_expr_binop_rest (exp, op2, pc, ax, value, &value1, &value2);
+	      /* We have a result of the binary op, set the tsv.  */
+	      ax_tsv (ax, aop_setv, tsv->number);
+	      if (trace_kludge)
+		ax_tsv (ax, aop_tracev, tsv->number);
+	    }
+	  else
+	    error (_("$%s is not a trace state variable, may not assign to it"), name);
+	}
+      else
+	error (_("May only assign to trace state variables"));
       break;
 
       /* Note that we need to be a little subtle about generating code
@@ -1644,7 +1595,24 @@ gen_expr (struct expression *exp, union exp_element **pc,
       break;
 
     case OP_INTERNALVAR:
-      error (_("GDB agent expressions cannot use convenience variables."));
+      {
+	const char *name = internalvar_name ((*pc)[1].internalvar);
+	struct trace_state_variable *tsv;
+	(*pc) += 3;
+	tsv = find_trace_state_variable (name);
+	if (tsv)
+	  {
+	    ax_tsv (ax, aop_getv, tsv->number);
+	    if (trace_kludge)
+	      ax_tsv (ax, aop_tracev, tsv->number);
+	    /* Trace state variables are always 64-bit integers.  */
+	    value->kind = axs_rvalue;
+	    value->type = builtin_type (exp->gdbarch)->builtin_long_long;
+	  }
+	else
+	  error (_("$%s is not a trace state variable; GDB agent expressions cannot use convenience variables."), name);
+      }
+      break;
 
       /* Weirdo operator: see comments for gen_repeat for details.  */
     case BINOP_REPEAT:
@@ -1786,6 +1754,131 @@ gen_expr (struct expression *exp, union exp_element **pc,
 
     default:
       error (_("Unsupported operator in expression."));
+    }
+}
+
+/* This handles the middle-to-right-side of code generation for binary
+   expressions, which is shared between regular binary operations and
+   assign-modify (+= and friends) expressions.  */
+
+static void
+gen_expr_binop_rest (struct expression *exp,
+		     enum exp_opcode op, union exp_element **pc,
+		     struct agent_expr *ax, struct axs_value *value,
+		     struct axs_value *value1, struct axs_value *value2)
+{
+  gen_expr (exp, pc, ax, value2);
+  gen_usual_unary (exp, ax, value2);
+  gen_usual_arithmetic (exp, ax, value1, value2);
+  switch (op)
+    {
+    case BINOP_ADD:
+      if (TYPE_CODE (value1->type) == TYPE_CODE_INT
+	  && TYPE_CODE (value2->type) == TYPE_CODE_PTR)
+	{
+	  /* Swap the values and proceed normally.  */
+	  ax_simple (ax, aop_swap);
+	  gen_ptradd (ax, value, value2, value1);
+	}
+      else if (TYPE_CODE (value1->type) == TYPE_CODE_PTR
+	       && TYPE_CODE (value2->type) == TYPE_CODE_INT)
+	gen_ptradd (ax, value, value1, value2);
+      else
+	gen_binop (ax, value, value1, value2,
+		   aop_add, aop_add, 1, "addition");
+      break;
+    case BINOP_SUB:
+      if (TYPE_CODE (value1->type) == TYPE_CODE_PTR
+	  && TYPE_CODE (value2->type) == TYPE_CODE_INT)
+	gen_ptrsub (ax,value, value1, value2);
+      else if (TYPE_CODE (value1->type) == TYPE_CODE_PTR
+	       && TYPE_CODE (value2->type) == TYPE_CODE_PTR)
+	/* FIXME --- result type should be ptrdiff_t */
+	gen_ptrdiff (ax, value, value1, value2,
+		     builtin_type (exp->gdbarch)->builtin_long);
+      else
+	gen_binop (ax, value, value1, value2,
+		   aop_sub, aop_sub, 1, "subtraction");
+      break;
+    case BINOP_MUL:
+      gen_binop (ax, value, value1, value2,
+		 aop_mul, aop_mul, 1, "multiplication");
+      break;
+    case BINOP_DIV:
+      gen_binop (ax, value, value1, value2,
+		 aop_div_signed, aop_div_unsigned, 1, "division");
+      break;
+    case BINOP_REM:
+      gen_binop (ax, value, value1, value2,
+		 aop_rem_signed, aop_rem_unsigned, 1, "remainder");
+      break;
+    case BINOP_SUBSCRIPT:
+      gen_ptradd (ax, value, value1, value2);
+      if (TYPE_CODE (value->type) != TYPE_CODE_PTR)
+	error (_("Invalid combination of types in array subscripting."));
+      gen_deref (ax, value);
+      break;
+    case BINOP_BITWISE_AND:
+      gen_binop (ax, value, value1, value2,
+		 aop_bit_and, aop_bit_and, 0, "bitwise and");
+      break;
+
+    case BINOP_BITWISE_IOR:
+      gen_binop (ax, value, value1, value2,
+		 aop_bit_or, aop_bit_or, 0, "bitwise or");
+      break;
+      
+    case BINOP_BITWISE_XOR:
+      gen_binop (ax, value, value1, value2,
+		 aop_bit_xor, aop_bit_xor, 0, "bitwise exclusive-or");
+      break;
+
+    case BINOP_EQUAL:
+      gen_binop (ax, value, value1, value2,
+		 aop_equal, aop_equal, 0, "equal");
+      break;
+
+    case BINOP_NOTEQUAL:
+      gen_binop (ax, value, value1, value2,
+		 aop_equal, aop_equal, 0, "equal");
+      gen_logical_not (ax, value,
+		       language_bool_type (exp->language_defn,
+					   exp->gdbarch));
+      break;
+
+    case BINOP_LESS:
+      gen_binop (ax, value, value1, value2,
+		 aop_less_signed, aop_less_unsigned, 0, "less than");
+      break;
+
+    case BINOP_GTR:
+      ax_simple (ax, aop_swap);
+      gen_binop (ax, value, value1, value2,
+		 aop_less_signed, aop_less_unsigned, 0, "less than");
+      break;
+
+    case BINOP_LEQ:
+      ax_simple (ax, aop_swap);
+      gen_binop (ax, value, value1, value2,
+		 aop_less_signed, aop_less_unsigned, 0, "less than");
+      gen_logical_not (ax, value,
+		       language_bool_type (exp->language_defn,
+					   exp->gdbarch));
+      break;
+
+    case BINOP_GEQ:
+      gen_binop (ax, value, value1, value2,
+		 aop_less_signed, aop_less_unsigned, 0, "less than");
+      gen_logical_not (ax, value,
+		       language_bool_type (exp->language_defn,
+					   exp->gdbarch));
+      break;
+
+    default:
+      /* We should only list operators in the outer case statement
+	 that we actually handle in the inner case statement.  */
+      internal_error (__FILE__, __LINE__,
+		      _("gen_expr: op case sets don't match"));
     }
 }
 

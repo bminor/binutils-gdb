@@ -440,6 +440,24 @@ alignment within the bytecode stream; thus, on machines where fetching a
 16-bit on an unaligned address raises an exception, you should fetch the
 register number one byte at a time.
 
+@item @code{getv} (0x2c) @var{n}: @result{} @var{v}
+Push the value of trace state variable number @var{n}, without sign
+extension.
+
+The variable number @var{n} is encoded as a 16-bit unsigned integer
+immediately following the @code{getv} bytecode.  It is always stored most
+significant byte first, regardless of the target's normal endianness.
+The variable number is not guaranteed to fall at any particular
+alignment within the bytecode stream; thus, on machines where fetching a
+16-bit on an unaligned address raises an exception, you should fetch the
+register number one byte at a time.
+
+@item @code{setv} (0x2d) @var{n}: @result{} @var{v}
+Set trace state variable number @var{n} to the value found on the top
+of the stack.  The stack is unchanged, so that the value is readily
+available if the assignment is part of a larger expression.  The
+handling of @var{n} is as described for @code{getv}.
+
 @item @code{trace} (0x0c): @var{addr} @var{size} @result{}
 Record the contents of the @var{size} bytes at @var{addr} in a trace
 buffer, for later retrieval by GDB.
@@ -456,6 +474,10 @@ trace}, but we provide it anyway to save space in bytecode strings.
 Identical to trace_quick, except that @var{size} is a 16-bit big-endian
 unsigned integer, not a single byte.  This should probably have been
 named @code{trace_quick16}, for consistency.
+
+@item @code{tracev} (0x2e) @var{n}: @result{} @var{a}
+Record the value of trace state variable number @var{n} in the trace
+buffer.  The handling of @var{n} is as described for @code{getv}.
 
 @item @code{end} (0x27): @result{}
 Stop executing bytecode; the result should be the top element of the

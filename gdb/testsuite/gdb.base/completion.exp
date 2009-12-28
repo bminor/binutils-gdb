@@ -211,7 +211,7 @@ gdb_expect  {
         -re "^info t foo\\\x07$"\
             { send_gdb "\n"
               gdb_expect {
-                      -re "Ambiguous info command \"t foo\": target, tasks, terminal, threads, tp, tracepoints, types\\..*$gdb_prompt $"\
+                      -re "Ambiguous info command \"t foo\": target, tasks, terminal, threads, tp, tracepoints, tvariables, types\\..*$gdb_prompt $"\
                                         { pass "complete 'info t foo'"}
                       -re ".*$gdb_prompt $" { fail "complete 'info t foo'"}
                       timeout           {fail "(timeout) complete 'info t foo'"}
@@ -227,7 +227,7 @@ gdb_expect  {
         -re "^info t\\\x07$"\
             { send_gdb "\n"
               gdb_expect {
-                      -re "Ambiguous info command \"t\": target, tasks, terminal, threads, tp, tracepoints, types\\..
+                      -re "Ambiguous info command \"t\": target, tasks, terminal, threads, tp, tracepoints, tvariables, types\\..
 *$gdb_prompt $"\
                                         { pass "complete 'info t'"}
                       -re ".*$gdb_prompt $" { fail "complete 'info t'"}
@@ -245,7 +245,7 @@ gdb_expect  {
         -re "^info t \\\x07$"\
             { send_gdb "\n"
               gdb_expect {
-                      -re "Ambiguous info command \"t \": target, tasks, terminal, threads, tp, tracepoints, types\\..
+                      -re "Ambiguous info command \"t \": target, tasks, terminal, threads, tp, tracepoints, tvariables, types\\..
 *$gdb_prompt $"\
                                         { pass "complete 'info t '"}
                       -re ".*$gdb_prompt $" { fail "complete 'info t '"}

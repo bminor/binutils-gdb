@@ -9331,6 +9331,7 @@ conditions and actions.
 * Enable and Disable Tracepoints::
 * Tracepoint Passcounts::
 * Tracepoint Conditions::
+* Trace State Variables::
 * Tracepoint Actions::
 * Listing Tracepoints::
 * Starting and Stopping Trace Experiments::
@@ -9496,6 +9497,59 @@ search through.
 @smallexample
 (@value{GDBP}) @kbd{trace normal_operation if errcode > 0}
 @end smallexample
+
+@node Trace State Variables
+@subsection Trace State Variables
+@cindex trace state variables
+
+A @dfn{trace state variable} is a special type of variable that is
+created and managed by target-side code.  The syntax is the same as
+that for GDB's convenience variables (a string prefixed with ``$''),
+but they are stored on the target.  They must be created explicitly,
+using a @code{tvariable} command.  They are always 64-bit signed
+integers.
+
+Trace state variables are remembered by @value{GDBN}, and downloaded
+to the target along with tracepoint information when the trace
+experiment starts.  There are no intrinsic limits on the number of
+trace state variables, beyond memory limitations of the target.
+
+@cindex convenience variables, and trace state variables
+Although trace state variables are managed by the target, you can use
+them in print commands and expressions as if they were convenience
+variables; @value{GDBN} will get the current value from the target
+while the trace experiment is running.  Trace state variables share
+the same namespace as other ``$'' variables, which means that you
+cannot have trace state variables with names like @code{$23} or
+@code{$pc}, nor can you have a trace state variable and a convenience
+variable with the same name.
+
+@table @code
+
+@item tvariable $@var{name} [ = @var{expression} ]
+@kindex tvariable
+The @code{tvariable} command creates a new trace state variable named
+@code{$@var{name}}, and optionally gives it an initial value of
+@var{expression}.  @var{expression} is evaluated when this command is
+entered; the result will be converted to an integer if possible,
+otherwise @value{GDBN} will report an error. A subsequent
+@code{tvariable} command specifying the same name does not create a
+variable, but instead assigns the supplied initial value to the
+existing variable of that name, overwriting any previous initial
+value. The default initial value is 0.
+
+@item info tvariables
+@kindex info tvariables
+List all the trace state variables along with their initial values.
+Their current values may also be displayed, if the trace experiment is
+currently running.
+
+@item delete tvariable @r{[} $@var{name} @dots{} @r{]}
+@kindex delete tvariable
+Delete the given trace state variables, or all of them if no arguments
+are specified.
+
+@end table
 
 @node Tracepoint Actions
 @subsection Tracepoint Action Lists
@@ -9929,7 +9983,8 @@ use @code{output} instead.
 
 Here's a simple example of using these convenience variables for
 stepping through all the trace snapshots and printing some of their
-data.
+data.  Note that these are not the same as trace state variables,
+which are managed by the target.
 
 @smallexample
 (@value{GDBP}) @b{tfind start}
@@ -29978,6 +30033,16 @@ The packet was understood and carried out.
 The packet was not recognized.
 @end table
 
+@item QTDV:@var{n}:@var{value}
+@cindex define trace state variable, remote request
+@cindex @samp{QTDV} packet
+Create a new trace state variable, number @var{n}, with an initial
+value of @var{value}, which is a 64-bit signed integer.  Both @var{n}
+and @var{value} are encoded as hexadecimal values. @value{GDBN} has
+the option of not using this packet for initial values of zero; the
+target should simply create the trace state variables as they are
+mentioned in expressions.
+
 @item QTFrame:@var{n}
 Select the @var{n}'th tracepoint frame from the buffer, and use the
 register and memory contents recorded there to answer subsequent
@@ -30051,8 +30116,28 @@ There is no trace experiment running.
 There is a trace experiment running.
 @end table
 
+@item qTV:@var{var}
+@cindex trace state variable value, remote request
+@cindex @samp{qTV} packet
+Ask the stub for the value of the trace state variable number @var{var}.
+
+Replies:
+@table @samp
+@item V@var{value}
+The value of the variable is @var{value}.  This will be the current
+value of the variable if the user is examining a running target, or a
+saved value if the variable was collected in the trace frame that the
+user is looking at.  Note that multiple requests may result in
+different reply values, such as when requesting values while the
+program is running.
+
+@item U
+The value of the variable is unknown.  This would occur, for example,
+if the user is examining a trace frame in which the requested variable
+was not collected.
 @end table
 
+@end table
 
 @node Host I/O Packets
 @section Host I/O Packets

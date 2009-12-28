@@ -34,6 +34,7 @@
 #include "tracepoint.h"
 #include "remote.h"
 extern int remote_supports_cond_tracepoints (void);
+extern char *unpack_varlen_hex (char *buff, ULONGEST *result);
 #include "linespec.h"
 #include "regcache.h"
 #include "completer.h"
@@ -111,6 +112,19 @@ extern void output_command (char *, int);
 
 /* ======= Important global variables: ======= */
 
+/* The list of all trace state variables.  We don't retain pointers to
+   any of these for any reason - API is by name or number only - so it
+   works to have a vector of objects.  */
+
+typedef struct trace_state_variable tsv_s;
+DEF_VEC_O(tsv_s);
+
+static VEC(tsv_s) *tvariables;
+
+/* The next integer to assign to a variable.  */
+
+static int next_tsv_number = 1;
+
 /* Number of last traceframe collected.  */
 static int traceframe_number;
 
@@ -125,6 +139,9 @@ static struct symtab_and_line traceframe_sal;
 
 /* Tracing command lists */
 static struct cmd_list_element *tfindlist;
+
+static char *target_buf;
+static long target_buf_size;
 
 /* ======= Important command functions: ======= */
 static void trace_actions_command (char *, int);
@@ -272,6 +289,205 @@ set_traceframe_context (struct frame_info *trace_frame)
   else
     set_internalvar_string (lookup_internalvar ("trace_file"),
 			    traceframe_sal.symtab->filename);
+}
+
+/* Create a new trace state variable with the given name.  */
+
+struct trace_state_variable *
+create_trace_state_variable (const char *name)
+{
+  struct trace_state_variable tsv;
+
+  memset (&tsv, 0, sizeof (tsv));
+  tsv.name = name;
+  tsv.number = next_tsv_number++;
+  return VEC_safe_push (tsv_s, tvariables, &tsv);
+}
+
+/* Look for a trace state variable of the given name.  */
+
+struct trace_state_variable *
+find_trace_state_variable (const char *name)
+{
+  struct trace_state_variable *tsv;
+  int ix;
+
+  for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
+    if (strcmp (name, tsv->name) == 0)
+      return tsv;
+
+  return NULL;
+}
+
+void
+delete_trace_state_variable (const char *name)
+{
+  struct trace_state_variable *tsv;
+  int ix;
+
+  for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
+    if (strcmp (name, tsv->name) == 0)
+      {
+	VEC_unordered_remove (tsv_s, tvariables, ix);
+	return;
+      }
+
+  warning (_("No trace variable named \"$%s\", not deleting"), name);
+}
+
+/* The 'tvariable' command collects a name and optional expression to
+   evaluate into an initial value.  */
+
+void
+trace_variable_command (char *args, int from_tty)
+{
+  struct expression *expr;
+  struct cleanup *old_chain;
+  struct internalvar *intvar = NULL;
+  LONGEST initval = 0;
+  struct trace_state_variable *tsv;
+
+  if (!args || !*args)
+    error_no_arg (_("trace state variable name"));
+
+  /* All the possible valid arguments are expressions.  */
+  expr = parse_expression (args);
+  old_chain = make_cleanup (free_current_contents, &expr);
+
+  if (expr->nelts == 0)
+    error (_("No expression?"));
+
+  /* Only allow two syntaxes; "$name" and "$name=value".  */
+  if (expr->elts[0].opcode == OP_INTERNALVAR)
+    {
+      intvar = expr->elts[1].internalvar;
+    }
+  else if (expr->elts[0].opcode == BINOP_ASSIGN
+	   && expr->elts[1].opcode == OP_INTERNALVAR)
+    {
+      intvar = expr->elts[2].internalvar;
+      initval = value_as_long (evaluate_subexpression_type (expr, 4));
+    }
+  else
+    error (_("Syntax must be $NAME [ = EXPR ]"));
+
+  if (!intvar)
+    error (_("No name given"));
+
+  if (strlen (internalvar_name (intvar)) <= 0)
+    error (_("Must supply a non-empty variable name"));
+
+  /* If the variable already exists, just change its initial value.  */
+  tsv = find_trace_state_variable (internalvar_name (intvar));
+  if (tsv)
+    {
+      tsv->initial_value = initval;
+      printf_filtered (_("Trace state variable $%s now has initial value %s.\n"),
+		       tsv->name, plongest (tsv->initial_value));
+      return;
+    }
+
+  /* Create a new variable.  */
+  tsv = create_trace_state_variable (internalvar_name (intvar));
+  tsv->initial_value = initval;
+
+  printf_filtered (_("Trace state variable $%s created, with initial value %s.\n"),
+		   tsv->name, plongest (tsv->initial_value));
+
+  do_cleanups (old_chain);
+}
+
+void
+delete_trace_variable_command (char *args, int from_tty)
+{
+  int i, ix;
+  char **argv;
+  struct cleanup *back_to;
+  struct trace_state_variable *tsv;
+
+  if (args == NULL)
+    {
+      if (query (_("Delete all trace state variables? ")))
+	VEC_free (tsv_s, tvariables);
+      dont_repeat ();
+      return;
+    }
+
+  argv = gdb_buildargv (args);
+  back_to = make_cleanup_freeargv (argv);
+
+  for (i = 0; argv[i] != NULL; i++)
+    {
+      if (*argv[i] == '$')
+	delete_trace_state_variable (argv[i] + 1);
+      else
+	warning (_("Name \"%s\" not prefixed with '$', ignoring"), argv[i]);
+    }
+
+  do_cleanups (back_to);
+
+  dont_repeat ();
+}
+
+/* List all the trace state variables.  */
+
+static void
+tvariables_info (char *args, int from_tty)
+{
+  struct trace_state_variable *tsv;
+  int ix;
+  char *reply;
+  ULONGEST tval;
+
+  if (target_is_remote ())
+    {
+      char buf[20];
+
+      for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
+	{
+	  /* We don't know anything about the value until we get a
+	     valid packet.  */
+	  tsv->value_known = 0;
+	  sprintf (buf, "qTV:%x", tsv->number);
+	  putpkt (buf);
+	  reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
+	  if (reply && *reply)
+	    {
+	      if (*reply == 'V')
+		{
+		  unpack_varlen_hex (reply + 1, &tval);
+		  tsv->value = (LONGEST) tval;
+		  tsv->value_known = 1;
+		}
+	      /* FIXME say anything about oddball replies? */
+	    }
+	}
+    }
+
+  if (VEC_length (tsv_s, tvariables) == 0)
+    {
+      printf_filtered (_("No trace state variables.\n"));
+      return;
+    }
+
+  printf_filtered (_("Name\t\t  Initial\tCurrent\n"));
+
+  for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
+    {
+      printf_filtered ("$%s", tsv->name);
+      print_spaces_filtered (17 - strlen (tsv->name), gdb_stdout);
+      printf_filtered ("%s ", plongest (tsv->initial_value));
+      print_spaces_filtered (11 - strlen (plongest (tsv->initial_value)), gdb_stdout);
+      if (tsv->value_known)
+	printf_filtered ("  %s", plongest (tsv->value));
+      else if (trace_running_p || traceframe_number >= 0)
+	/* The value is/was defined, but we don't have it.  */
+	printf_filtered (_("  <unknown>"));
+      else
+	/* It is not meaningful to ask about the value.  */
+	printf_filtered (_("  <undefined>"));
+      printf_filtered ("\n");
+    }
 }
 
 /* ACTIONS functions: */
@@ -1254,9 +1470,6 @@ add_aexpr (struct collection_list *collect, struct agent_expr *aexpr)
   collect->next_aexpr_elt++;
 }
 
-static char *target_buf;
-static long target_buf_size;
-
 /* Set "transparent" memory ranges
 
    Allow trace mechanism to treat text-like sections
@@ -1312,9 +1525,11 @@ void download_tracepoint (struct breakpoint *t);
 static void
 trace_start_command (char *args, int from_tty)
 {
+  char buf[2048];
   VEC(breakpoint_p) *tp_vec = NULL;
   int ix;
   struct breakpoint *t;
+  struct trace_state_variable *tsv;
 
   dont_repeat ();	/* Like "run", dangerous to repeat accidentally.  */
 
@@ -1331,6 +1546,19 @@ trace_start_command (char *args, int from_tty)
 	  download_tracepoint (t);
 	}
       VEC_free (breakpoint_p, tp_vec);
+
+      /* Init any trace state variables that start with nonzero values.  */
+
+      for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
+	{
+	  if (tsv->initial_value != 0)
+	    {
+	      sprintf (buf, "QTDV:%x:%s",
+		       tsv->number, phex ((ULONGEST) tsv->initial_value, 8));
+	      putpkt (buf);
+	      remote_get_noisy_reply (&target_buf, &target_buf_size);
+	    }
+	}
 
       /* Tell target to treat text-like sections as transparent.  */
       remote_set_transparent_ranges ();
@@ -2234,6 +2462,23 @@ _initialize_tracepoint (void)
 
   add_com ("tdump", class_trace, trace_dump_command,
 	   _("Print everything collected at the current tracepoint."));
+
+  c = add_com ("tvariable", class_trace, trace_variable_command,_("\
+Define a trace state variable.\n\
+Argument is a $-prefixed name, optionally followed\n\
+by '=' and an expression that sets the initial value\n\
+at the start of tracing."));
+  set_cmd_completer (c, expression_completer);
+
+  add_cmd ("tvariable", class_trace, delete_trace_variable_command, _("\
+Delete one or more trace state variables.\n\
+Arguments are the names of the variables to delete.\n\
+If no arguments are supplied, delete all variables."), &deletelist);
+  /* FIXME add a trace variable completer */
+
+  add_info ("tvariables", tvariables_info, _("\
+Status of trace state variables and their values.\n\
+"));
 
   add_prefix_cmd ("tfind", class_trace, trace_find_command, _("\
 Select a trace frame;\n\

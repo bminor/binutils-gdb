@@ -35,6 +35,34 @@ enum actionline_type
     STEPPING = 2
   };
 
+/* A trace state variable is a value managed by a target being
+   traced. A trace state variable (or tsv for short) can be accessed
+   and assigned to by tracepoint actions and conditionals, but is not
+   part of the program being traced, and it doesn't have to be
+   collected. Effectively the variables are scratch space for
+   tracepoints.  */
+
+struct trace_state_variable
+  {
+    /* The variable's name.  The user has to prefix with a dollar sign,
+       but we don't store that internally.  */
+    const char *name;
+
+    /* An id number assigned by GDB, and transmitted to targets.  */
+    int number;
+
+    /* The initial value of a variable is a 64-bit signed integer.  */
+    LONGEST initial_value;
+
+    /* 1 if the value is known, else 0.  The value is known during a
+       trace run, or in tfind mode if the variable was collected into
+       the current trace frame.  */
+    int value_known;
+
+    /* The value of a variable is a 64-bit signed integer.  */
+    LONGEST value;
+  };
+
 extern unsigned long trace_running_p;
 
 /* A hook used to notify the UI of tracepoint operations.  */
@@ -48,5 +76,7 @@ enum actionline_type validate_actionline (char **, struct breakpoint *);
 
 extern void end_actions_pseudocommand (char *args, int from_tty);
 extern void while_stepping_pseudocommand (char *args, int from_tty);
+
+extern struct trace_state_variable *find_trace_state_variable (const char *name);
 
 #endif	/* TRACEPOINT_H */

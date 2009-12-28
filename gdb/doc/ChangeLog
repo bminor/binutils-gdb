@@ -1,3 +1,10 @@
+2009-12-28  Stan Shebs  <stan@codesourcery.com>
+
+	* gdb.texinfo (Trace State Variables): New section.
+	(Tracepoint Packets): Describe trace state variable packets.
+	* agentexpr.texi (Bytecode Descriptions): Describe trace state
+	variable bytecodes.
+
 2009-12-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (Symbols): "info variables" prints definitions, not
