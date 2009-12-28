@@ -1,3 +1,8 @@
+2009-12-28  Daniel Gutson  <dgutson@codesourcery.com>
+
+	* elf-attrs.c (_bfd_elf_merge_object_attributes): Error
+	message rephrased.
+
 2009-12-21  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c: Delete my email address.

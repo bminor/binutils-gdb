@@ -564,7 +564,8 @@ _bfd_elf_merge_object_attributes (bfd *ibfd, bfd *obfd)
       if (in_attr->i > 0 && strcmp (in_attr->s, "gnu") != 0)
 	{
 	  _bfd_error_handler
-		(_("error: %B: Must be processed by '%s' toolchain"),
+		(_("error: %B: Object has vendor-specific contents that "
+		   "must be processed by the '%s' toolchain"),
 		 ibfd, in_attr->s);
 	  return FALSE;
 	}
