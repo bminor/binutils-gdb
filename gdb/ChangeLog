@@ -1,5 +1,12 @@
 2009-12-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* NEWS: Document "info variables" change.
+	* dwarf2read.c (new_symbol): Add file-scope external unresolved
+	symbols to global_symbols.
+	* symtab.c (search_symbols): Skip LOC_UNRESOLVED symbols.
+
+2009-12-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* defs.h (print_address_symbolic, build_address_symbolic): Update
 	prototypes.
 	* printcmd.c (print_address_symbolic): Take a gdbarch argument.

@@ -30,6 +30,10 @@ disassemble
   The disassemble command, when invoked with two arguments, now requires
   the arguments to be comma-separated.
 
+info variables
+  The info variables command now displays variable definitions.  Files
+  which only declare a variable are not shown.
+
 * New commands (for set/show, see "New options" below)
 
 record save [<FILENAME>]

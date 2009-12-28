@@ -3296,7 +3296,9 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
 		&& ((regexp == NULL
 		     || re_exec (SYMBOL_NATURAL_NAME (*psym)) != 0)
 		    && ((kind == VARIABLES_DOMAIN && SYMBOL_CLASS (*psym) != LOC_TYPEDEF
-			 && SYMBOL_CLASS (*psym) != LOC_BLOCK)
+			 && SYMBOL_CLASS (*psym) != LOC_UNRESOLVED
+			 && SYMBOL_CLASS (*psym) != LOC_BLOCK
+			 && SYMBOL_CLASS (*psym) != LOC_CONST)
 			|| (kind == FUNCTIONS_DOMAIN && SYMBOL_CLASS (*psym) == LOC_BLOCK)
 			|| (kind == TYPES_DOMAIN && SYMBOL_CLASS (*psym) == LOC_TYPEDEF))))
 	      {
@@ -3372,6 +3374,7 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
 		  && ((regexp == NULL
 		       || re_exec (SYMBOL_NATURAL_NAME (sym)) != 0)
 		      && ((kind == VARIABLES_DOMAIN && SYMBOL_CLASS (sym) != LOC_TYPEDEF
+			   && SYMBOL_CLASS (sym) != LOC_UNRESOLVED
 			   && SYMBOL_CLASS (sym) != LOC_BLOCK
 			   && SYMBOL_CLASS (sym) != LOC_CONST)
 			  || (kind == FUNCTIONS_DOMAIN && SYMBOL_CLASS (sym) == LOC_BLOCK)

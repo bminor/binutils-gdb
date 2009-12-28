@@ -8463,8 +8463,15 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	      if (attr2 && (DW_UNSND (attr2) != 0)
 		  && dwarf2_attr (die, DW_AT_type, cu) != NULL)
 		{
+		  struct pending **list_to_add;
+
+		  /* A variable with DW_AT_external is never static, but it
+		     may be block-scoped.  */
+		  list_to_add = (cu->list_in_scope == &file_symbols
+				 ? &global_symbols : cu->list_in_scope);
+
 		  SYMBOL_CLASS (sym) = LOC_UNRESOLVED;
-		  add_symbol_to_list (sym, cu->list_in_scope);
+		  add_symbol_to_list (sym, list_to_add);
 		}
 	      else if (!die_is_declaration (die, cu))
 		{

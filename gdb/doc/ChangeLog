@@ -1,3 +1,8 @@
+2009-12-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (Symbols): "info variables" prints definitions, not
+	declarations.
+
 2009-12-21  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Miscellaneous Commands): Clarify that

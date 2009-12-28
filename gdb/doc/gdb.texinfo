@@ -12924,7 +12924,7 @@ that conflict with the regular expression language (e.g.@:
 
 @kindex info variables
 @item info variables
-Print the names and data types of all variables that are declared
+Print the names and data types of all variables that are defined
 outside of functions (i.e.@: excluding local variables).
 
 @item info variables @var{regexp}
