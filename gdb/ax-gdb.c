@@ -1762,30 +1762,19 @@ gen_expr (struct expression *exp, union exp_element **pc,
 
     case OP_THIS:
       {
-	char *name;
-	struct frame_info *frame;
+	char *this_name;
 	struct symbol *func, *sym;
 	struct block *b;
 
-	name = current_language->la_name_of_this;
-	if (!name)
-	  error (_("no `this' in current language"));
-
-	frame = get_selected_frame (_("no frame selected"));
-
-	func = get_frame_function (frame);
-	if (!func)
-	  error (_("no `%s' in nameless context"), name);
-
+	func = block_linkage_function (block_for_pc (ax->scope));
+	this_name = language_def (SYMBOL_LANGUAGE (func))->la_name_of_this;
 	b = SYMBOL_BLOCK_VALUE (func);
-	if (dict_empty (BLOCK_DICT (b)))
-	  error (_("no args, no `%s' in block"), name);
 
 	/* Calling lookup_block_symbol is necessary to get the LOC_REGISTER
 	   symbol instead of the LOC_ARG one (if both exist).  */
-	sym = lookup_block_symbol (b, name, NULL, VAR_DOMAIN);
+	sym = lookup_block_symbol (b, this_name, NULL, VAR_DOMAIN);
 	if (!sym)
-	  error (_("no `%s' found"), name);
+	  error (_("no `%s' found"), this_name);
 
 	gen_var_ref (exp->gdbarch, ax, value, sym);
 	(*pc) += 2;

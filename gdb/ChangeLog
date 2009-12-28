@@ -1,3 +1,8 @@
+2009-12-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* ax-gdb.c (gen_expr) <OP_THIS>: Lookup `this' in the context of
+	the tracepoint, not of the selected frame and language.
+
 2009-12-23  Stan Shebs  <stan@codesourcery.com>
 
 	* ax-gdb.c (gen_expr): Handle OP_THIS.
