@@ -1,6 +1,7 @@
 2009-12-28  Ian Lance Taylor  <iant@google.com>
 
 	* gold.cc (queue_middle_tasks): Fix formatting.
+	* object.cc (Relobj::is_section_name_included): Likewise.
 
 2009-12-23  Ian Lance Taylor  <iant@google.com>
 
