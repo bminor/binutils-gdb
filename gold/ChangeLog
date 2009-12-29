@@ -1,5 +1,29 @@
 2009-12-28  Ian Lance Taylor  <iant@google.com>
 
+	* symtab.h (class Symbol_table): Add enum Defined.
+	* resolve.cc (Symbol_table::should_override): Add defined
+	parameter.  Change all callers.  Test whether object is NULL
+	before calling a method on it.
+	(Symbol_table::report_resolve_problem): Add defined parameter.
+	Change all callers.
+	(Symbol_table::should_override_with_special): Likewise.
+	* symtab.cc (Symbol_table::define_in_output_data): Add defined
+	parameter.  Change all callers.
+	(Symbol_table::do_define_in_output_data): Likewise.
+	(Symbol_table::define_in_output_segment): Likewise.
+	(Symbol_table::do_define_in_output_segment): Likewise.
+	(Symbol_table::define_as_constant): Likewise.
+	(Symbol_table::do_define_as_constant): Likewise.
+	* script.h (class Symbol_assignment): Add is_defsym parameter to
+	constructor; change all callers.
+	* script.cc (Script_options::add_symbol_assignment): Add is_defsym
+	parameter.  Change all callers.  Add is_defsym_ field.
+	(class Parser_closure): Add parsing_defsym parameter to
+	constructor; change all callers.  Add parsing_defsym accessor
+	function.  Add parsing_defsym_ field.
+
+2009-12-28  Ian Lance Taylor  <iant@google.com>
+
 	* gold.cc (queue_middle_tasks): Fix formatting.
 	* object.cc (Relobj::is_section_name_included): Likewise.
 

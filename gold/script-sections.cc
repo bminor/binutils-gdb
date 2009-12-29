@@ -406,7 +406,7 @@ class Sections_element_assignment : public Sections_element
  public:
   Sections_element_assignment(const char* name, size_t namelen,
 			      Expression* val, bool provide, bool hidden)
-    : assignment_(name, namelen, val, provide, hidden)
+    : assignment_(name, namelen, false, val, provide, hidden)
   { }
 
   // Add the symbol to the symbol table.
@@ -593,7 +593,7 @@ class Output_section_element_assignment : public Output_section_element
   Output_section_element_assignment(const char* name, size_t namelen,
 				    Expression* val, bool provide,
 				    bool hidden)
-    : assignment_(name, namelen, val, provide, hidden)
+    : assignment_(name, namelen, false, val, provide, hidden)
   { }
 
   // Add the symbol to the symbol table.

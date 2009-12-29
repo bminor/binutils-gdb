@@ -1526,7 +1526,9 @@ Versions::finalize(Symbol_table* symtab, unsigned int dynsym_index,
       if (!(*p)->is_symbol_created())
 	{
 	  Symbol* vsym = symtab->define_as_constant((*p)->name(),
-						    (*p)->name(), 0, 0,
+						    (*p)->name(),
+						    Symbol_table::PREDEFINED,
+						    0, 0,
 						    elfcpp::STT_OBJECT,
 						    elfcpp::STB_GLOBAL,
 						    elfcpp::STV_DEFAULT, 0,

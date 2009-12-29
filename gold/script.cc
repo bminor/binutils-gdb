@@ -874,6 +874,9 @@ Symbol_assignment::add_to_table(Symbol_table* symtab)
   elfcpp::STV vis = this->hidden_ ? elfcpp::STV_HIDDEN : elfcpp::STV_DEFAULT;
   this->sym_ = symtab->define_as_constant(this->name_.c_str(),
 					  NULL, // version
+					  (this->is_defsym_
+					   ? Symbol_table::DEFSYM
+					   : Symbol_table::SCRIPT),
 					  0, // value
 					  0, // size
 					  elfcpp::STT_NOTYPE,
@@ -1051,18 +1054,21 @@ Script_options::Script_options()
 
 void
 Script_options::add_symbol_assignment(const char* name, size_t length,
-				      Expression* value, bool provide,
-				      bool hidden)
+				      bool is_defsym, Expression* value,
+				      bool provide, bool hidden)
 {
   if (length != 1 || name[0] != '.')
     {
       if (this->script_sections_.in_sections_clause())
-	this->script_sections_.add_symbol_assignment(name, length, value,
-						     provide, hidden);
+	{
+	  gold_assert(!is_defsym);
+	  this->script_sections_.add_symbol_assignment(name, length, value,
+						       provide, hidden);
+	}
       else
 	{
-	  Symbol_assignment* p = new Symbol_assignment(name, length, value,
-						       provide, hidden);
+	  Symbol_assignment* p = new Symbol_assignment(name, length, is_defsym,
+						       value, provide, hidden);
 	  this->symbol_assignments_.push_back(p);
 	}
     }
@@ -1162,13 +1168,14 @@ class Parser_closure
  public:
   Parser_closure(const char* filename,
 		 const Position_dependent_options& posdep_options,
-		 bool in_group, bool is_in_sysroot,
+		 bool parsing_defsym, bool in_group, bool is_in_sysroot,
                  Command_line* command_line,
 		 Script_options* script_options,
 		 Lex* lex,
 		 bool skip_on_incompatible_target)
     : filename_(filename), posdep_options_(posdep_options),
-      in_group_(in_group), is_in_sysroot_(is_in_sysroot),
+      parsing_defsym_(parsing_defsym), in_group_(in_group),
+      is_in_sysroot_(is_in_sysroot),
       skip_on_incompatible_target_(skip_on_incompatible_target),
       found_incompatible_target_(false),
       command_line_(command_line), script_options_(script_options),
@@ -1190,6 +1197,11 @@ class Parser_closure
   Position_dependent_options&
   position_dependent_options()
   { return this->posdep_options_; }
+
+  // Whether we are parsing a --defsym.
+  bool
+  parsing_defsym() const
+  { return this->parsing_defsym_; }
 
   // Return whether this script is being run in a group.
   bool
@@ -1322,6 +1334,8 @@ class Parser_closure
   const char* filename_;
   // The position dependent options.
   Position_dependent_options posdep_options_;
+  // True if we are parsing a --defsym.
+  bool parsing_defsym_;
   // Whether we are currently in a --start-group/--end-group.
   bool in_group_;
   // Whether the script was found in a sysrooted directory.
@@ -1374,6 +1388,7 @@ read_input_script(Workqueue* workqueue, Symbol_table* symtab, Layout* layout,
 
   Parser_closure closure(input_file->filename().c_str(),
 			 input_argument->file().options(),
+			 false,
 			 input_group != NULL,
 			 input_file->is_in_sysroot(),
                          NULL,
@@ -1469,6 +1484,7 @@ read_script_file(const char* filename, Command_line* cmdline,
 
   Parser_closure closure(filename,
 			 cmdline->position_dependent_options(),
+			 first_token == Lex::DYNAMIC_LIST,
 			 false,
 			 input_file.is_in_sysroot(),
                          cmdline,
@@ -1532,8 +1548,8 @@ Script_options::define_symbol(const char* definition)
   // Dummy value.
   Position_dependent_options posdep_options;
 
-  Parser_closure closure("command line", posdep_options, false, false, NULL,
-			 this, &lex, false);
+  Parser_closure closure("command line", posdep_options, true,
+			 false, false, NULL, this, &lex, false);
 
   if (yyparse(&closure) != 0)
     return false;
@@ -2266,8 +2282,9 @@ script_set_symbol(void* closurev, const char* name, size_t length,
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
   const bool provide = providei != 0;
   const bool hidden = hiddeni != 0;
-  closure->script_options()->add_symbol_assignment(name, length, value,
-						   provide, hidden);
+  closure->script_options()->add_symbol_assignment(name, length,
+						   closure->parsing_defsym(),
+						   value, provide, hidden);
   closure->clear_skip_on_incompatible_target();
 }
 

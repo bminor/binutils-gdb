@@ -1161,7 +1161,8 @@ Layout::create_initial_dynamic_sections(Symbol_table* symtab)
 						       false, false, true);
   this->dynamic_section_->set_is_relro();
 
-  symtab->define_in_output_data("_DYNAMIC", NULL, this->dynamic_section_, 0, 0,
+  symtab->define_in_output_data("_DYNAMIC", NULL, Symbol_table::PREDEFINED,
+				this->dynamic_section_, 0, 0,
 				elfcpp::STT_OBJECT, elfcpp::STB_LOCAL,
 				elfcpp::STV_HIDDEN, 0, false, false);
 
@@ -1195,6 +1196,7 @@ Layout::define_section_symbols(Symbol_table* symtab)
 
 	  symtab->define_in_output_data(start_name.c_str(),
 					NULL, // version
+					Symbol_table::PREDEFINED,
 					*p,
 					0, // value
 					0, // symsize
@@ -1207,6 +1209,7 @@ Layout::define_section_symbols(Symbol_table* symtab)
 
 	  symtab->define_in_output_data(stop_name.c_str(),
 					NULL, // version
+					Symbol_table::PREDEFINED,
 					*p,
 					0, // value
 					0, // symsize

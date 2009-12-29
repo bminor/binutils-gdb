@@ -200,10 +200,10 @@ class Version_script_info
 class Symbol_assignment
 {
  public:
-  Symbol_assignment(const char* name, size_t namelen, Expression* val,
-		    bool provide, bool hidden)
-    : name_(name, namelen), val_(val), provide_(provide), hidden_(hidden),
-      sym_(NULL)
+  Symbol_assignment(const char* name, size_t namelen, bool is_defsym,
+		    Expression* val, bool provide, bool hidden)
+    : name_(name, namelen), val_(val), is_defsym_(is_defsym),
+      provide_(provide), hidden_(hidden), sym_(NULL)
   { }
 
   // Add the symbol to the symbol table.
@@ -246,6 +246,9 @@ class Symbol_assignment
   std::string name_;
   // Expression to assign to symbol.
   Expression* val_;
+  // True if this symbol is defined by a --defsym, false if it is
+  // defined in a linker script.
+  bool is_defsym_;
   // Whether the assignment should be provided (only set if there is
   // an undefined reference to the symbol.
   bool provide_;
@@ -298,8 +301,8 @@ class Script_options
 
   // Add a symbol to be defined.
   void
-  add_symbol_assignment(const char* name, size_t length, Expression* value,
-			bool provide, bool hidden);
+  add_symbol_assignment(const char* name, size_t length, bool is_defsym,
+			Expression* value, bool provide, bool hidden);
 
   // Add an assertion.
   void

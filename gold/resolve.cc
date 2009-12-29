@@ -304,7 +304,7 @@ Symbol_table::resolve(Sized_symbol<size>* to,
 
   bool adjust_common_sizes;
   typename Sized_symbol<size>::Size_type tosize = to->symsize();
-  if (Symbol_table::should_override(to, frombits, object,
+  if (Symbol_table::should_override(to, frombits, OBJECT, object,
 				    &adjust_common_sizes))
     {
       this->override(to, sym, st_shndx, is_ordinary, object, version);
@@ -326,16 +326,16 @@ Symbol_table::resolve(Sized_symbol<size>* to,
 	Symbol_table::report_resolve_problem(false,
 					     _("common of '%s' overriding "
 					       "smaller common"),
-					     to, object);
+					     to, OBJECT, object);
       else if (tosize < sym.get_st_size())
 	Symbol_table::report_resolve_problem(false,
 					     _("common of '%s' overidden by "
 					       "larger common"),
-					     to, object);
+					     to, OBJECT, object);
       else
 	Symbol_table::report_resolve_problem(false,
 					     _("multiple common of '%s'"),
-					     to, object);
+					     to, OBJECT, object);
     }
 
   // A new weak undefined reference, merging with an old weak
@@ -378,7 +378,8 @@ Symbol_table::resolve(Sized_symbol<size>* to,
 
 bool
 Symbol_table::should_override(const Symbol* to, unsigned int frombits,
-                              Object* object, bool* adjust_common_sizes)
+                              Defined defined, Object* object,
+			      bool* adjust_common_sizes)
 {
   *adjust_common_sizes = false;
 
@@ -436,12 +437,12 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
       // --just-symbols, then don't warn.  This is for compatibility
       // with the GNU linker.  FIXME: This is a hack.
       if ((to->source() == Symbol::FROM_OBJECT && to->object()->just_symbols())
-          || object->just_symbols())
+          || (object != NULL && object->just_symbols()))
         return false;
 
       Symbol_table::report_resolve_problem(true,
 					   _("multiple definition of '%s'"),
-					   to, object);
+					   to, defined, object);
       return false;
 
     case WEAK_DEF * 16 + DEF:
@@ -481,7 +482,7 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
 	Symbol_table::report_resolve_problem(false,
 					     _("definition of '%s' overriding "
 					       "common"),
-					     to, object);
+					     to, defined, object);
       return true;
 
     case DEF * 16 + WEAK_DEF:
@@ -516,7 +517,7 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
 	Symbol_table::report_resolve_problem(false,
 					     _("definition of '%s' overriding "
 					       "dynamic common definition"),
-					     to, object);
+					     to, defined, object);
       return true;
 
     case DEF * 16 + DYN_DEF:
@@ -636,7 +637,7 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
 	Symbol_table::report_resolve_problem(false,
 					     _("common '%s' overridden by "
 					       "previous definition"),
-					     to, object);
+					     to, defined, object);
       return false;
 
     case WEAK_DEF * 16 + COMMON:
@@ -745,7 +746,8 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
 // Issue an error or warning due to symbol resolution.  IS_ERROR
 // indicates an error rather than a warning.  MSG is the error
 // message; it is expected to have a %s for the symbol name.  TO is
-// the existing symbol.  OBJECT is where the new symbol was found.
+// the existing symbol.  DEFINED/OBJECT is where the new symbol was
+// found.
 
 // FIXME: We should have better location information here.  When the
 // symbol is defined, we should be able to pull the location from the
@@ -753,7 +755,8 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
 
 void
 Symbol_table::report_resolve_problem(bool is_error, const char* msg,
-				     const Symbol* to, Object* object)
+				     const Symbol* to, Defined defined,
+				     Object* object)
 {
   std::string demangled(to->demangled_name());
   size_t len = strlen(msg) + demangled.length() + 10;
@@ -761,10 +764,27 @@ Symbol_table::report_resolve_problem(bool is_error, const char* msg,
   snprintf(buf, len, msg, demangled.c_str());
 
   const char* objname;
-  if (object != NULL)
-    objname = object->name().c_str();
-  else
-    objname = _("command line");
+  switch (defined)
+    {
+    case OBJECT:
+      objname = object->name().c_str();
+      break;
+    case COPY:
+      objname = _("COPY reloc");
+      break;
+    case DEFSYM:
+    case UNDEFINED:
+      objname = _("command line");
+      break;
+    case SCRIPT:
+      objname = _("linker script");
+      break;
+    case PREDEFINED:
+      objname = _("linker defined");
+      break;
+    default:
+      gold_unreachable();
+    }
 
   if (is_error)
     gold_error("%s: %s", objname, buf);
@@ -785,11 +805,11 @@ Symbol_table::report_resolve_problem(bool is_error, const char* msg,
 // defining special symbols.
 
 bool
-Symbol_table::should_override_with_special(const Symbol* to)
+Symbol_table::should_override_with_special(const Symbol* to, Defined defined)
 {
   bool adjust_common_sizes;
   unsigned int frombits = global_flag | regular_flag | def_flag;
-  bool ret = Symbol_table::should_override(to, frombits, NULL,
+  bool ret = Symbol_table::should_override(to, frombits, defined, NULL,
 					   &adjust_common_sizes);
   gold_assert(!adjust_common_sizes);
   return ret;

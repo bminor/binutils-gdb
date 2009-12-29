@@ -1176,6 +1176,23 @@ class Warnings
 class Symbol_table
 {
  public:
+  // The different places where a symbol definition can come from.
+  enum Defined
+  {
+    // Defined in an object file--the normal case.
+    OBJECT,
+    // Defined for a COPY reloc.
+    COPY,
+    // Defined on the command line using --defsym.
+    DEFSYM,
+    // Defined (so to speak) on the command line using -u.
+    UNDEFINED,
+    // Defined in a linker script.
+    SCRIPT,
+    // Predefined by the linker.
+    PREDEFINED,
+  };
+
   // COUNT is an estimate of how many symbosl will be inserted in the
   // symbol table.  It's ok to put 0 if you don't know; a correct
   // guess will just save some CPU by reducing hashtable resizes.
@@ -1257,7 +1274,7 @@ class Symbol_table
   // Define a special symbol based on an Output_data.  It is a
   // multiple definition error if this symbol is already defined.
   Symbol*
-  define_in_output_data(const char* name, const char* version,
+  define_in_output_data(const char* name, const char* version, Defined,
 			Output_data*, uint64_t value, uint64_t symsize,
 			elfcpp::STT type, elfcpp::STB binding,
 			elfcpp::STV visibility, unsigned char nonvis,
@@ -1266,7 +1283,7 @@ class Symbol_table
   // Define a special symbol based on an Output_segment.  It is a
   // multiple definition error if this symbol is already defined.
   Symbol*
-  define_in_output_segment(const char* name, const char* version,
+  define_in_output_segment(const char* name, const char* version, Defined,
 			   Output_segment*, uint64_t value, uint64_t symsize,
 			   elfcpp::STT type, elfcpp::STB binding,
 			   elfcpp::STV visibility, unsigned char nonvis,
@@ -1275,7 +1292,7 @@ class Symbol_table
   // Define a special symbol with a constant value.  It is a multiple
   // definition error if this symbol is already defined.
   Symbol*
-  define_as_constant(const char* name, const char* version,
+  define_as_constant(const char* name, const char* version, Defined,
 		     uint64_t value, uint64_t symsize, elfcpp::STT type,
 		     elfcpp::STB binding, elfcpp::STV visibility,
 		     unsigned char nonvis, bool only_if_ref,
@@ -1494,12 +1511,12 @@ class Symbol_table
   // Whether we should override a symbol, based on flags in
   // resolve.cc.
   static bool
-  should_override(const Symbol*, unsigned int, Object*, bool*);
+  should_override(const Symbol*, unsigned int, Defined, Object*, bool*);
 
   // Report a problem in symbol resolution.
   static void
   report_resolve_problem(bool is_error, const char* msg, const Symbol* to,
-			 Object* object);
+			 Defined, Object* object);
 
   // Override a symbol.
   template<int size, bool big_endian>
@@ -1512,7 +1529,7 @@ class Symbol_table
   // Whether we should override a symbol with a special symbol which
   // is automatically defined by the linker.
   static bool
-  should_override_with_special(const Symbol*);
+  should_override_with_special(const Symbol*, Defined);
 
   // Override a symbol with a special symbol.
   template<int size>
@@ -1535,7 +1552,8 @@ class Symbol_table
   // Define a symbol in an Output_data, sized version.
   template<int size>
   Sized_symbol<size>*
-  do_define_in_output_data(const char* name, const char* version, Output_data*,
+  do_define_in_output_data(const char* name, const char* version, Defined,
+			   Output_data*,
 			   typename elfcpp::Elf_types<size>::Elf_Addr value,
 			   typename elfcpp::Elf_types<size>::Elf_WXword ssize,
 			   elfcpp::STT type, elfcpp::STB binding,
@@ -1546,7 +1564,7 @@ class Symbol_table
   template<int size>
   Sized_symbol<size>*
   do_define_in_output_segment(
-    const char* name, const char* version, Output_segment* os,
+    const char* name, const char* version, Defined, Output_segment* os,
     typename elfcpp::Elf_types<size>::Elf_Addr value,
     typename elfcpp::Elf_types<size>::Elf_WXword ssize,
     elfcpp::STT type, elfcpp::STB binding,
@@ -1557,7 +1575,7 @@ class Symbol_table
   template<int size>
   Sized_symbol<size>*
   do_define_as_constant(
-    const char* name, const char* version,
+    const char* name, const char* version, Defined,
     typename elfcpp::Elf_types<size>::Elf_Addr value,
     typename elfcpp::Elf_types<size>::Elf_WXword ssize,
     elfcpp::STT type, elfcpp::STB binding,

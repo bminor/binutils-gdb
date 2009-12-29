@@ -2611,6 +2611,7 @@ Target_arm<big_endian>::got_section(Symbol_table* symtab, Layout* layout)
 
       // Define _GLOBAL_OFFSET_TABLE_ at the start of the PLT.
       symtab->define_in_output_data("_GLOBAL_OFFSET_TABLE_", NULL,
+				    Symbol_table::PREDEFINED,
 				    this->got_plt_,
 				    0, 0, elfcpp::STT_OBJECT,
 				    elfcpp::STB_LOCAL,
@@ -4763,12 +4764,14 @@ Target_arm<big_endian>::do_finalize_sections(
       && !parameters->options().relocatable())
     {
       // Create __exidx_start and __exdix_end symbols.
-      symtab->define_in_output_data("__exidx_start", NULL, exidx_section,
-				    0, 0, elfcpp::STT_OBJECT,
+      symtab->define_in_output_data("__exidx_start", NULL,
+				    Symbol_table::PREDEFINED,
+				    exidx_section, 0, 0, elfcpp::STT_OBJECT,
 				    elfcpp::STB_GLOBAL, elfcpp::STV_HIDDEN, 0,
 				    false, false);
-      symtab->define_in_output_data("__exidx_end", NULL, exidx_section,
-				    0, 0, elfcpp::STT_OBJECT,
+      symtab->define_in_output_data("__exidx_end", NULL,
+				    Symbol_table::PREDEFINED,
+				    exidx_section, 0, 0, elfcpp::STT_OBJECT,
 				    elfcpp::STB_GLOBAL, elfcpp::STV_HIDDEN, 0,
 				    true, false);
 
