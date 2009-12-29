@@ -314,7 +314,7 @@ queue_middle_tasks(const General_options& options,
         start_sym = symtab->lookup(parameters->options().entry());
       else
         start_sym = symtab->lookup("_start");
-      if (start_sym !=NULL)
+      if (start_sym != NULL)
         {
           bool is_ordinary;
           unsigned int shndx = start_sym->shndx(&is_ordinary);
