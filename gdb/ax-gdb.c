@@ -1447,8 +1447,9 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	  struct agent_expr *ax, struct axs_value *value)
 {
   /* Used to hold the descriptions of operand expressions.  */
-  struct axs_value value1, value2;
+  struct axs_value value1, value2, value3;
   enum exp_opcode op = (*pc)[0].opcode, op2;
+  int if1, go1, if2, go2, end;
 
   /* If we're looking at a constant expression, just push its value.  */
   {
@@ -1486,6 +1487,71 @@ gen_expr (struct expression *exp, union exp_element **pc,
       gen_expr (exp, pc, ax, &value1);
       gen_usual_unary (exp, ax, &value1);
       gen_expr_binop_rest (exp, op, pc, ax, value, &value1, &value2);
+      break;
+
+    case BINOP_LOGICAL_AND:
+      (*pc)++;
+      /* Generate the obvious sequence of tests and jumps.  */
+      gen_expr (exp, pc, ax, &value1);
+      gen_usual_unary (exp, ax, &value1);
+      if1 = ax_goto (ax, aop_if_goto);
+      go1 = ax_goto (ax, aop_goto);
+      ax_label (ax, if1, ax->len);
+      gen_expr (exp, pc, ax, &value2);
+      gen_usual_unary (exp, ax, &value2);
+      if2 = ax_goto (ax, aop_if_goto);
+      go2 = ax_goto (ax, aop_goto);
+      ax_label (ax, if2, ax->len);
+      ax_const_l (ax, 1);
+      end = ax_goto (ax, aop_goto);
+      ax_label (ax, go1, ax->len);
+      ax_label (ax, go2, ax->len);
+      ax_const_l (ax, 0);
+      ax_label (ax, end, ax->len);
+      value->kind = axs_rvalue;
+      value->type = language_bool_type (exp->language_defn, exp->gdbarch);
+      break;
+
+    case BINOP_LOGICAL_OR:
+      (*pc)++;
+      /* Generate the obvious sequence of tests and jumps.  */
+      gen_expr (exp, pc, ax, &value1);
+      gen_usual_unary (exp, ax, &value1);
+      if1 = ax_goto (ax, aop_if_goto);
+      gen_expr (exp, pc, ax, &value2);
+      gen_usual_unary (exp, ax, &value2);
+      if2 = ax_goto (ax, aop_if_goto);
+      ax_const_l (ax, 0);
+      end = ax_goto (ax, aop_goto);
+      ax_label (ax, if1, ax->len);
+      ax_label (ax, if2, ax->len);
+      ax_const_l (ax, 1);
+      ax_label (ax, end, ax->len);
+      value->kind = axs_rvalue;
+      value->type = language_bool_type (exp->language_defn, exp->gdbarch);
+      break;
+
+    case TERNOP_COND:
+      (*pc)++;
+      gen_expr (exp, pc, ax, &value1);
+      gen_usual_unary (exp, ax, &value1);
+      /* For (A ? B : C), it's easiest to generate subexpression
+	 bytecodes in order, but if_goto jumps on true, so we invert
+	 the sense of A.  Then we can do B by dropping through, and
+	 jump to do C.  */
+      gen_logical_not (ax, &value1,
+		       language_bool_type (exp->language_defn, exp->gdbarch));
+      if1 = ax_goto (ax, aop_if_goto);
+      gen_expr (exp, pc, ax, &value2);
+      gen_usual_unary (exp, ax, &value2);
+      end = ax_goto (ax, aop_goto);
+      ax_label (ax, if1, ax->len);
+      gen_expr (exp, pc, ax, &value3);
+      gen_usual_unary (exp, ax, &value3);
+      ax_label (ax, end, ax->len);
+      /* This is arbitary - what if B and C are incompatible types? */
+      value->type = value2.type;
+      value->kind = value2.kind;
       break;
 
     case BINOP_ASSIGN:

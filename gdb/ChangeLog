@@ -1,3 +1,8 @@
+2009-12-29  Stan Shebs  <stan@codesourcery.com>
+
+	* ax-gdb.c (gen_expr): Handle logical and, logical or, and
+	conditional expressions.
+
 2009-12-28  Stan Shebs  <stan@codesourcery.com>
 
 	Add trace state variables.
