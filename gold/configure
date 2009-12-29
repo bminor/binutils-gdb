@@ -6045,7 +6045,32 @@ else
 fi
 
 
- if test "$target_cpu" = "x86_64"; then
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for gcc >= 4.1" >&5
+$as_echo_n "checking for gcc >= 4.1... " >&6; }
+if test "${gold_cv_prog_gcc41+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#if !defined __GNUC__
+error
+#elif __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 1)
+error
+#endif
+
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gold_cv_prog_gcc41=yes
+else
+  gold_cv_prog_gcc41=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gold_cv_prog_gcc41" >&5
+$as_echo "$gold_cv_prog_gcc41" >&6; }
+
+ if test "$target_cpu" = "x86_64" -a "$gold_cv_prog_gcc41" = "yes"; then
   MCMODEL_MEDIUM_TRUE=
   MCMODEL_MEDIUM_FALSE='#'
 else

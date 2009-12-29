@@ -1,3 +1,9 @@
+2009-12-29  Ian Lance Taylor  <iant@google.com>
+
+	* configure.ac: Set the MCMODEL_MEDIUM conditional to false if
+	using a version of gcc before 4.1.
+	* configure: Rebuild.
+
 2009-12-28  Chris Demetriou  <cgd@google.com>
 
 	* attributes.cc (Output_attributes_section_data::do_write): Use

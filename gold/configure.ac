@@ -227,8 +227,20 @@ AM_CONDITIONAL(FN_PTRS_IN_SO_WITHOUT_PIC, [
     *) true;;
   esac])
 
+dnl Test for gcc 4.1 or later.  Full support for -mcmodel=medium is
+dnl only available in gcc 4.1.
+AC_CACHE_CHECK([for gcc >= 4.1], [gold_cv_prog_gcc41],
+[AC_COMPILE_IFELSE([
+#if !defined __GNUC__
+error
+#elif __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 1)
+error
+#endif
+], [gold_cv_prog_gcc41=yes], [gold_cv_prog_gcc41=no])])
+
 dnl Whether we can test -mcmodel=medium.
-AM_CONDITIONAL(MCMODEL_MEDIUM, [test "$target_cpu" = "x86_64"])
+AM_CONDITIONAL(MCMODEL_MEDIUM,
+[test "$target_cpu" = "x86_64" -a "$gold_cv_prog_gcc41" = "yes"])
 
 dnl Test for __thread support.
 AC_CACHE_CHECK([for thread support], [gold_cv_c_thread],
