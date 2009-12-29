@@ -1,3 +1,8 @@
+2009-12-28  Chris Demetriou  <cgd@google.com>
+
+	* attributes.cc (Output_attributes_section_data::do_write): Use
+	std::vector::front rather than std::vector::data.
+
 2009-12-28  Ian Lance Taylor  <iant@google.com>
 
 	* symtab.h (class Symbol_table): Add enum Defined.
