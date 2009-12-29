@@ -1,3 +1,8 @@
+2009-12-29   Rafael Espindola  <espindola@google.com>
+
+	* main.cc (main): Fix the sys time reporting.
+	* workqueue.cc (Workqueue::find_and_run_task): Fix the sys time reporting.
+
 2009-12-29  Sriraman Tallam  <tmsriram@google.com>
 
 	* options.cc (General_options::parse_version): Allow -v to exit

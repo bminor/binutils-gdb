@@ -254,7 +254,7 @@ main(int argc, char** argv)
                "(user: %ld.%06ld sys: %ld.%06ld wall: %ld.%06ld)\n"),
               program_name,
               elapsed.user / 1000, (elapsed.user % 1000) * 1000,
-              elapsed.sys / 1000, (elapsed.user % 1000) * 1000,
+              elapsed.sys / 1000, (elapsed.sys % 1000) * 1000,
               elapsed.wall / 1000, (elapsed.wall % 1000) * 1000);
 
 #ifdef HAVE_MALLINFO

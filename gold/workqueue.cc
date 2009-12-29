@@ -327,7 +327,7 @@ Workqueue::find_and_run_task(int thread_number)
                      "(user: %ld.%06ld sys: %ld.%06ld wall: %ld.%06ld)",
                      thread_number,  t->name().c_str(),
                      elapsed.user / 1000, (elapsed.user % 1000) * 1000,
-                     elapsed.sys / 1000, (elapsed.user % 1000) * 1000,
+                     elapsed.sys / 1000, (elapsed.sys % 1000) * 1000,
                      elapsed.wall / 1000, (elapsed.wall % 1000) * 1000);
         }
 
