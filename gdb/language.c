@@ -696,6 +696,7 @@ float_type (struct type *type)
   CHECK_TYPEDEF (type);
   return TYPE_CODE (type) == TYPE_CODE_FLT;
 }
+#endif
 
 /* Returns non-zero if the value is a pointer type */
 int
@@ -705,6 +706,7 @@ pointer_type (struct type *type)
     TYPE_CODE (type) == TYPE_CODE_REF;
 }
 
+#if 0
 /* Returns non-zero if the value is a structured type */
 int
 structured_type (struct type *type)

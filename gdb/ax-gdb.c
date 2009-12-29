@@ -22,6 +22,7 @@
 #include "symtab.h"
 #include "symfile.h"
 #include "gdbtypes.h"
+#include "language.h"
 #include "value.h"
 #include "expression.h"
 #include "command.h"
@@ -401,6 +402,7 @@ gen_fetch (struct agent_expr *ax, struct type *type)
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_PTR:
+    case TYPE_CODE_REF:
     case TYPE_CODE_ENUM:
     case TYPE_CODE_INT:
     case TYPE_CODE_CHAR:
@@ -901,6 +903,7 @@ gen_cast (struct agent_expr *ax, struct axs_value *value, struct type *type)
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_PTR:
+    case TYPE_CODE_REF:
       /* It's implementation-defined, and I'll bet this is what GCC
          does.  */
       break;
@@ -961,7 +964,7 @@ static void
 gen_ptradd (struct agent_expr *ax, struct axs_value *value,
 	    struct axs_value *value1, struct axs_value *value2)
 {
-  gdb_assert (TYPE_CODE (value1->type) == TYPE_CODE_PTR);
+  gdb_assert (pointer_type (value1->type));
   gdb_assert (TYPE_CODE (value2->type) == TYPE_CODE_INT);
 
   gen_scale (ax, aop_mul, value1->type);
@@ -977,7 +980,7 @@ static void
 gen_ptrsub (struct agent_expr *ax, struct axs_value *value,
 	    struct axs_value *value1, struct axs_value *value2)
 {
-  gdb_assert (TYPE_CODE (value1->type) == TYPE_CODE_PTR);
+  gdb_assert (pointer_type (value1->type));
   gdb_assert (TYPE_CODE (value2->type) == TYPE_CODE_INT);
 
   gen_scale (ax, aop_mul, value1->type);
@@ -994,8 +997,8 @@ gen_ptrdiff (struct agent_expr *ax, struct axs_value *value,
 	     struct axs_value *value1, struct axs_value *value2,
 	     struct type *result_type)
 {
-  gdb_assert (TYPE_CODE (value1->type) == TYPE_CODE_PTR);
-  gdb_assert (TYPE_CODE (value2->type) == TYPE_CODE_PTR);
+  gdb_assert (pointer_type (value1->type));
+  gdb_assert (pointer_type (value2->type));
 
   if (TYPE_LENGTH (TYPE_TARGET_TYPE (value1->type))
       != TYPE_LENGTH (TYPE_TARGET_TYPE (value2->type)))
@@ -1068,7 +1071,7 @@ gen_deref (struct agent_expr *ax, struct axs_value *value)
 {
   /* The caller should check the type, because several operators use
      this, and we don't know what error message to generate.  */
-  if (TYPE_CODE (value->type) != TYPE_CODE_PTR)
+  if (!pointer_type (value->type))
     internal_error (__FILE__, __LINE__,
 		    _("gen_deref: expected a pointer"));
 
@@ -1327,7 +1330,7 @@ gen_struct_ref (struct expression *exp, struct agent_expr *ax,
   /* Follow pointers until we reach a non-pointer.  These aren't the C
      semantics, but they're what the normal GDB evaluator does, so we
      should at least be consistent.  */
-  while (TYPE_CODE (value->type) == TYPE_CODE_PTR)
+  while (pointer_type (value->type))
     {
       require_rvalue (ax, value);
       gen_deref (ax, value);
@@ -1753,7 +1756,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
       (*pc)++;
       gen_expr (exp, pc, ax, value);
       gen_usual_unary (exp, ax, value);
-      if (TYPE_CODE (value->type) != TYPE_CODE_PTR)
+      if (!pointer_type (value->type))
 	error (_("Argument of unary `*' is not a pointer."));
       gen_deref (ax, value);
       break;
@@ -1840,13 +1843,13 @@ gen_expr_binop_rest (struct expression *exp,
     {
     case BINOP_ADD:
       if (TYPE_CODE (value1->type) == TYPE_CODE_INT
-	  && TYPE_CODE (value2->type) == TYPE_CODE_PTR)
+	  && pointer_type (value2->type))
 	{
 	  /* Swap the values and proceed normally.  */
 	  ax_simple (ax, aop_swap);
 	  gen_ptradd (ax, value, value2, value1);
 	}
-      else if (TYPE_CODE (value1->type) == TYPE_CODE_PTR
+      else if (pointer_type (value1->type)
 	       && TYPE_CODE (value2->type) == TYPE_CODE_INT)
 	gen_ptradd (ax, value, value1, value2);
       else
@@ -1854,11 +1857,11 @@ gen_expr_binop_rest (struct expression *exp,
 		   aop_add, aop_add, 1, "addition");
       break;
     case BINOP_SUB:
-      if (TYPE_CODE (value1->type) == TYPE_CODE_PTR
+      if (pointer_type (value1->type)
 	  && TYPE_CODE (value2->type) == TYPE_CODE_INT)
 	gen_ptrsub (ax,value, value1, value2);
-      else if (TYPE_CODE (value1->type) == TYPE_CODE_PTR
-	       && TYPE_CODE (value2->type) == TYPE_CODE_PTR)
+      else if (pointer_type (value1->type)
+	       && pointer_type (value2->type))
 	/* FIXME --- result type should be ptrdiff_t */
 	gen_ptrdiff (ax, value, value1, value2,
 		     builtin_type (exp->gdbarch)->builtin_long);
@@ -1880,7 +1883,7 @@ gen_expr_binop_rest (struct expression *exp,
       break;
     case BINOP_SUBSCRIPT:
       gen_ptradd (ax, value, value1, value2);
-      if (TYPE_CODE (value->type) != TYPE_CODE_PTR)
+      if (!pointer_type (value->type))
 	error (_("Invalid combination of types in array subscripting."));
       gen_deref (ax, value);
       break;

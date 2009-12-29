@@ -1,5 +1,11 @@
 2009-12-29  Stan Shebs  <stan@codesourcery.com>
 
+	* language.c (pointer_type): Un-comment out.
+	* ax-gdb.c: Include language.h, use pointer_type throughout
+	instead of testing TYPE_CODE_PTR.
+	(gen_fetch): Include TYPE_CODE_REF.
+	(gen_cast): Ditto.
+
 	* ax-gdb.c (gen_expr): Handle logical and, logical or, and
 	conditional expressions.
 
