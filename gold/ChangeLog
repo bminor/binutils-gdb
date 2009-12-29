@@ -1,3 +1,8 @@
+2009-12-29  Sriraman Tallam  <tmsriram@google.com>
+
+	* options.cc (General_options::parse_version): Allow -v to exit
+	without an error if there is nothing to link.
+
 2009-12-29  Ian Lance Taylor  <iant@google.com>
 
 	* configure.ac: Set the MCMODEL_MEDIUM conditional to false if

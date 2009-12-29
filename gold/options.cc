@@ -290,6 +290,7 @@ General_options::parse_version(const char* opt, const char*, Command_line*)
 {
   bool print_short = (opt[0] == '-' && opt[1] == 'v');
   gold::print_version(print_short);
+  this->printed_version_ = true;
   if (!print_short)
     ::exit(EXIT_SUCCESS);
 }
