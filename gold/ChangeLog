@@ -1,5 +1,17 @@
 2009-12-29  Ian Lance Taylor  <iant@google.com>
 
+	PR 10450
+	* i386.cc (class Target_i386): Initialize global_offset_table_ in
+	constructor.  Add global_offset_table_ field.
+	(Target_i386::got_section): Set global_offset_table_.
+	(Target_i386::do_finalize_sections): Set global_offset_table_
+	size.
+	* x86_64.cc (class Target_x86_64): Initialize global_offset_table_
+	in constructor.  Add global_offset_table_ field.
+	(Target_x86_64::got_section): Set global_offset_table_.
+	(Target_x86_64::do_finalize_sections): Set global_offset_table_
+	size.
+
 	* layout.cc (Layout::Layout): Initialize increase_relro_.
 	(Layout::get_output_section): Add is_relro, is_last_relro, and
 	is_first_non_relro parameters.  Change all callers.

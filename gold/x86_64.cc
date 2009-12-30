@@ -63,8 +63,8 @@ class Target_x86_64 : public Target_freebsd<64, false>
 
   Target_x86_64()
     : Target_freebsd<64, false>(&x86_64_info),
-      got_(NULL), plt_(NULL), got_plt_(NULL), rela_dyn_(NULL),
-      copy_relocs_(elfcpp::R_X86_64_COPY), dynbss_(NULL),
+      got_(NULL), plt_(NULL), got_plt_(NULL), global_offset_table_(NULL),
+      rela_dyn_(NULL), copy_relocs_(elfcpp::R_X86_64_COPY), dynbss_(NULL),
       got_mod_index_offset_(-1U), tls_base_symbol_defined_(false)
   { }
 
@@ -410,6 +410,8 @@ class Target_x86_64 : public Target_freebsd<64, false>
   Output_data_plt_x86_64* plt_;
   // The GOT PLT section.
   Output_data_space* got_plt_;
+  // The _GLOBAL_OFFSET_TABLE_ symbol.
+  Symbol* global_offset_table_;
   // The dynamic reloc section.
   Reloc_section* rela_dyn_;
   // Relocs saved to avoid a COPY reloc.
@@ -486,13 +488,14 @@ Target_x86_64::got_section(Symbol_table* symtab, Layout* layout)
       layout->increase_relro(3 * 8);
 
       // Define _GLOBAL_OFFSET_TABLE_ at the start of the PLT.
-      symtab->define_in_output_data("_GLOBAL_OFFSET_TABLE_", NULL,
-				    Symbol_table::PREDEFINED,
-				    this->got_plt_,
-				    0, 0, elfcpp::STT_OBJECT,
-				    elfcpp::STB_LOCAL,
-				    elfcpp::STV_HIDDEN, 0,
-				    false, false);
+      this->global_offset_table_ =
+	symtab->define_in_output_data("_GLOBAL_OFFSET_TABLE_", NULL,
+				      Symbol_table::PREDEFINED,
+				      this->got_plt_,
+				      0, 0, elfcpp::STT_OBJECT,
+				      elfcpp::STB_LOCAL,
+				      elfcpp::STV_HIDDEN, 0,
+				      false, false);
     }
 
   return this->got_;
@@ -1650,7 +1653,7 @@ void
 Target_x86_64::do_finalize_sections(
     Layout* layout,
     const Input_objects*,
-    Symbol_table*)
+    Symbol_table* symtab)
 {
   // Fill in some more dynamic tags.
   Output_data_dynamic* const odyn = layout->dynamic_data();
@@ -1701,6 +1704,15 @@ Target_x86_64::do_finalize_sections(
   // relocs.
   if (this->copy_relocs_.any_saved_relocs())
     this->copy_relocs_.emit(this->rela_dyn_section(layout));
+
+  // Set the size of the _GLOBAL_OFFSET_TABLE_ symbol to the size of
+  // the .got.plt section.
+  Symbol* sym = this->global_offset_table_;
+  if (sym != NULL)
+    {
+      uint64_t data_size = this->got_plt_->current_data_size();
+      symtab->get_sized_symbol<64>(sym)->set_symsize(data_size);
+    }
 }
 
 // Perform a relocation.
