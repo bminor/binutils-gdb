@@ -654,6 +654,8 @@ class General_options
               N_("Try to detect violations of the One Definition Rule"),
               NULL);
 
+  DEFINE_bool(discard_all, options::TWO_DASHES, 'x', false,
+	      N_("Delete all local symbols"), NULL);
   DEFINE_bool(discard_locals, options::TWO_DASHES, 'X', false,
               N_("Delete all temporary local symbols"), NULL);
 

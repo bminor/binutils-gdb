@@ -1,5 +1,13 @@
 2009-12-30  Ian Lance Taylor  <iant@google.com>
 
+	PR 10670
+	* options.h (class General_options): Add -x/--discard-all.
+	* object.cc (Sized_relobj::do_count_local_symbols): Handle
+	--discard-all.  If the local symbol needs a dynamic entry, check
+	that before handling --discard-locals.
+
+2009-12-30  Ian Lance Taylor  <iant@google.com>
+
 	PR 10450
 	* output.cc (Output_segment::Output_segment): If PT_TLS, set the
 	flags to PF_R.

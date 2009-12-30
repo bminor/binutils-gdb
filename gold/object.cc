@@ -1527,6 +1527,7 @@ Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
   unsigned int dyncount = 0;
   // Skip the first, dummy, symbol.
   psyms += sym_size;
+  bool discard_all = parameters->options().discard_all();
   bool discard_locals = parameters->options().discard_locals();
   for (unsigned int i = 1; i < loccount; ++i, psyms += sym_size)
     {
@@ -1550,7 +1551,7 @@ Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
       // Decide whether this symbol should go into the output file.
 
       if ((shndx < shnum && out_sections[shndx] == NULL)
-	  || (shndx == this->discarded_eh_frame_shndx_))
+	  || shndx == this->discarded_eh_frame_shndx_)
         {
 	  lv.set_no_output_symtab_entry();
           gold_assert(!lv.needs_output_dynsym_entry());
@@ -1573,6 +1574,21 @@ Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
 	  continue;
 	}
 
+      const char* name = pnames + sym.get_st_name();
+
+      // If needed, add the symbol to the dynamic symbol table string pool.
+      if (lv.needs_output_dynsym_entry())
+        {
+          dynpool->add(name, true, NULL);
+          ++dyncount;
+        }
+
+      if (discard_all)
+	{
+	  lv.set_no_output_symtab_entry();
+	  continue;
+	}
+
       // If --discard-locals option is used, discard all temporary local
       // symbols.  These symbols start with system-specific local label
       // prefixes, typically .L for ELF system.  We want to be compatible
@@ -1585,7 +1601,6 @@ Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
       //   - the symbol has a name.
       //
       // We do not discard a symbol if it needs a dynamic symbol entry.
-      const char* name = pnames + sym.get_st_name();
       if (discard_locals
 	  && sym.get_st_type() != elfcpp::STT_FILE
 	  && !lv.needs_output_dynsym_entry()
@@ -1606,13 +1621,6 @@ Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
       // Add the symbol to the symbol table string pool.
       pool->add(name, true, NULL);
       ++count;
-
-      // If needed, add the symbol to the dynamic symbol table string pool.
-      if (lv.needs_output_dynsym_entry())
-        {
-          dynpool->add(name, true, NULL);
-          ++dyncount;
-        }
     }
 
   this->output_local_symbol_count_ = count;
