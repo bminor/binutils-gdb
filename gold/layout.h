@@ -708,6 +708,10 @@ class Layout
   void
   finish_dynamic_section(const Input_objects*, const Symbol_table*);
 
+  // Set the size of the _DYNAMIC symbol.
+  void
+  set_dynamic_symbol_size(const Symbol_table*);
+
   // Create the .interp section and PT_INTERP segment.
   void
   create_interp(const Target* target);
@@ -947,6 +951,8 @@ class Layout
   Output_symtab_xindex* dynsym_xindex_;
   // The SHT_DYNAMIC output section if there is one.
   Output_section* dynamic_section_;
+  // The _DYNAMIC symbol if there is one.
+  Symbol* dynamic_symbol_;
   // The dynamic data which goes into dynamic_section_.
   Output_data_dynamic* dynamic_data_;
   // The exception frame output section if there is one.

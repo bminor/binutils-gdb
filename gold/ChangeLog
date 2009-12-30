@@ -1,6 +1,14 @@
 2009-12-29  Ian Lance Taylor  <iant@google.com>
 
 	PR 10450
+	* layout.cc (Layout::Layout): Initialize dynamic_symbol_ field.
+	(Layout::create_initial_dynamic_sections): Set dynamic_symbol_.
+	(Layout::finalize): Call set_dynamic_symbol_size.
+	(Layout::set_dynamic_symbol_size): New function.
+	* layout.h (class Layout): Add dynamic_symbol_ field.  Declare
+	set_dynamic_symbol_size.
+
+	PR 10450
 	* output.h (class Output_section): Add is_entsize_zero_ field.
 	* output.cc (Output_section::Output_section): Initialize
 	is_entsize_zero_.

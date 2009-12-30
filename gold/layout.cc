@@ -180,6 +180,7 @@ Layout::Layout(int number_of_input_files, Script_options* script_options)
     dynsym_section_(NULL),
     dynsym_xindex_(NULL),
     dynamic_section_(NULL),
+    dynamic_symbol_(NULL),
     dynamic_data_(NULL),
     eh_frame_section_(NULL),
     eh_frame_data_(NULL),
@@ -1161,10 +1162,11 @@ Layout::create_initial_dynamic_sections(Symbol_table* symtab)
 						       false, false, true);
   this->dynamic_section_->set_is_relro();
 
-  symtab->define_in_output_data("_DYNAMIC", NULL, Symbol_table::PREDEFINED,
-				this->dynamic_section_, 0, 0,
-				elfcpp::STT_OBJECT, elfcpp::STB_LOCAL,
-				elfcpp::STV_HIDDEN, 0, false, false);
+  this->dynamic_symbol_ =
+    symtab->define_in_output_data("_DYNAMIC", NULL, Symbol_table::PREDEFINED,
+				  this->dynamic_section_, 0, 0,
+				  elfcpp::STT_OBJECT, elfcpp::STB_LOCAL,
+				  elfcpp::STV_HIDDEN, 0, false, false);
 
   this->dynamic_data_ =  new Output_data_dynamic(&this->dynpool_);
 
@@ -1580,6 +1582,10 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
       // dynamic string table is complete.
       this->create_version_sections(&versions, symtab, local_dynamic_count,
 				    dynamic_symbols, dynstr);
+
+      // Set the size of the _DYNAMIC symbol.  We can't do this until
+      // after we call create_version_sections.
+      this->set_dynamic_symbol_size(symtab);
     }
   
   if (this->incremental_inputs_)
@@ -3301,6 +3307,24 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
     flags |= elfcpp::DF_1_NOW;
   if (flags)
     odyn->add_constant(elfcpp::DT_FLAGS_1, flags);
+}
+
+// Set the size of the _DYNAMIC symbol table to be the size of the
+// dynamic data.
+
+void
+Layout::set_dynamic_symbol_size(const Symbol_table* symtab)
+{
+  Output_data_dynamic* const odyn = this->dynamic_data_;
+  odyn->finalize_data_size();
+  off_t data_size = odyn->data_size();
+  const int size = parameters->target().get_size();
+  if (size == 32)
+    symtab->get_sized_symbol<32>(this->dynamic_symbol_)->set_symsize(data_size);
+  else if (size == 64)
+    symtab->get_sized_symbol<64>(this->dynamic_symbol_)->set_symsize(data_size);
+  else
+    gold_unreachable();
 }
 
 // The mapping of input section name prefixes to output section names.
