@@ -128,11 +128,31 @@ class Expression
 class Version_script_info
 {
  public:
+  // The languages which can be specified in a versionn script.
+  enum Language
+  {
+    LANGUAGE_C,		// No demangling.
+    LANGUAGE_CXX,	// C++ demangling.
+    LANGUAGE_JAVA,	// Java demangling.
+    LANGUAGE_COUNT
+  };
+
+  Version_script_info();
+
   ~Version_script_info();
 
   // Clear everything.
   void
   clear();
+
+  // Finalize the version control information.
+  void
+  finalize();
+
+  // Return whether the information is finalized.
+  bool
+  is_finalized() const
+  { return this->is_finalized_; }
 
   // Return whether any version were defined in the version script.
   bool
@@ -152,8 +172,6 @@ class Version_script_info
   { return this->get_symbol_version_helper(symbol, false, NULL); }
 
   // Return the names of versions defined in the version script.
-  // Strings are allocated out of the stringpool given in the
-  // constructor.
   std::vector<std::string>
   get_versions() const;
 
@@ -174,6 +192,10 @@ class Version_script_info
   struct Version_tree*
   allocate_version_tree();
 
+  // Build the lookup tables after all data have been read.
+  void
+  build_lookup_tables();
+
   // Print contents to the FILE.  This is for debugging.
   void
   print(FILE*) const;
@@ -182,13 +204,58 @@ class Version_script_info
   void
   print_expression_list(FILE* f, const Version_expression_list*) const;
 
-  bool get_symbol_version_helper(const char* symbol,
-				 bool check_global,
-				 std::string* pversion) const;
+  bool
+  get_symbol_version_helper(const char* symbol,
+			    bool check_global,
+			    std::string* pversion) const;
 
-  std::vector<struct Version_dependency_list*> dependency_lists_;
-  std::vector<struct Version_expression_list*> expression_lists_;
-  std::vector<struct Version_tree*> version_trees_;
+  // Fast lookup information for a glob pattern.
+  struct Glob
+  {
+    Glob()
+      : pattern(NULL), version(NULL)
+    { }
+
+    Glob(const char* p, const Version_tree* v)
+      : pattern(p), version(v)
+    { }
+
+    // A pointer to the glob pattern.  The pattern itself lives in a
+    // Version_expression structure.
+    const char* pattern;
+    // The Version_tree we use if this pattern matches.
+    const Version_tree* version;
+  };
+
+  // Fast lookup information for a given language.
+
+  typedef Unordered_map<std::string, const Version_tree*> Exact;
+
+  struct Lookup
+  {
+    // A hash table of all exact match strings mapping to a
+    // Version_tree.
+    Exact exact;
+    // A vector of glob patterns mapping to Version_trees.
+    std::vector<Glob> globs;
+  };
+
+  void
+  build_expression_list_lookup(const Version_expression_list*,
+			       const Version_tree*, Lookup**);
+
+  // All the version dependencies we allocate.
+  std::vector<Version_dependency_list*> dependency_lists_;
+  // All the version expressions we allocate.
+  std::vector<Version_expression_list*> expression_lists_;
+  // The list of versions.
+  std::vector<Version_tree*> version_trees_;
+  // Lookup information for global symbols, by language.
+  Lookup* globals_[LANGUAGE_COUNT];
+  // Lookup information for local symbols, by language.
+  Lookup* locals_[LANGUAGE_COUNT];
+  // Whether this has been finalized.
+  bool is_finalized_;
 };
 
 // This class manages assignments to symbols.  These can appear in

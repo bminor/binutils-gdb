@@ -1209,4 +1209,15 @@ Command_line::process(int argc, const char** argv)
   this->options_.finalize();
 }
 
+// Finalize the version script options and return them.
+
+const Version_script_info&
+Command_line::version_script()
+{
+  this->options_.finalize_dynamic_list();
+  Version_script_info* vsi = this->script_options_.version_script_info();
+  vsi->finalize();
+  return *vsi;
+}
+
 } // End namespace gold.

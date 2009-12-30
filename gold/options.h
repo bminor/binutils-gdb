@@ -1118,6 +1118,11 @@ class General_options
   in_dynamic_list(const char* symbol) const
   { return this->dynamic_list_.version_script_info()->symbol_is_local(symbol); }
 
+  // Finalize the dynamic list.
+  void
+  finalize_dynamic_list()
+  { this->dynamic_list_.version_script_info()->finalize(); }
+
   // The disposition given by the --incremental-changed,
   // --incremental-unchanged or --incremental-unknown option.  The
   // value may change as we proceed parsing the command line flags.
@@ -1552,10 +1557,9 @@ class Command_line
   script_options()
   { return this->script_options_; }
 
-  // Get the version-script options: a convenience routine.
+  // Finalize the version-script options and return them.
   const Version_script_info&
-  version_script() const
-  { return *this->script_options_.version_script_info(); }
+  version_script();
 
   // Get the input files.
   Input_arguments&

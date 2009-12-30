@@ -1,5 +1,41 @@
 2009-12-30  Ian Lance Taylor  <iant@google.com>
 
+	PR 10861
+	* script.h (class Version_script_info): Define Language enum.
+	Update declarations.  Define Glob, Exact, and Lookup types.  Add
+	new fields globals_, locals_, and is_finalized_.
+	* script.cc: Various formatting fixes.
+	(class Parser_closure): Change language_stack_ from a vector of
+	std::string to one of Version_script_info::Language.  Adjust all
+	uses accordingly.
+	(class Lazy_demangler): Remove.
+	(struct Version_expression): Change language from std::string to
+	Version_script_info::Language.
+	(Version_script_info::Version_script_info): New function.
+	(Version_script_info::~Version_script_info): Don't call clear.
+	(Version_script_info::finalize): New function.
+	(Version_script_info::build_lookup_tables): New function.
+	(Version_script_info::build_expression_list_lookup): New
+	function.
+	(Version_script_info::get_symbol_version_helper): Rewrite to use
+	lookup tables.
+	(Version_script_info::print_expression_list): Adjust to use
+	Version_script_info::Language.
+	(script_push_lex_into_version_mode): Check that the version script
+	has not been finalized.
+	(version_script_push_lang): Change language string to
+	Version_script_info::Language.
+	* options.cc (Command_line::version_script): New function.
+	* options.h (class General_options): Add finalize_dynamic_list
+	function.  Change version_script from declaration to definition.
+	* testsuite/ver_test_4.script: Remove duplicate def of t2_2.
+	* testsuite/version_script.map: Remove duplicate def of foo.
+	* testsuite/Makefile.am (ver_matching_def.so): Depend upon
+	version_script.map.
+	* testsuite/Makefile.in: Rebuild.
+
+2009-12-30  Ian Lance Taylor  <iant@google.com>
+
 	PR 10843
 	* target-reloc.h (relocate_for_relocatable): When copying a reloc,
 	if the input symbol index is 0, make the output symbol index 0.
