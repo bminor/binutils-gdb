@@ -1,6 +1,11 @@
 2009-12-29  Ian Lance Taylor  <iant@google.com>
 
 	PR 10450
+	* symtab.h (Symbol::needs_dynsym_entry): A symbol in both a
+	regular and a dynamic object only needs a dynamic symbol table
+	entry if it is externally visible.
+
+	PR 10450
 	* i386.cc (class Target_i386): Initialize global_offset_table_ in
 	constructor.  Add global_offset_table_ field.
 	(Target_i386::got_section): Set global_offset_table_.

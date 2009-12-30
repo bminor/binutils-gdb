@@ -261,7 +261,9 @@ class Symbol
   needs_dynsym_entry() const
   {
     return (this->needs_dynsym_entry_
-            || (this->in_reg() && this->in_dyn()));
+            || (this->in_reg()
+		&& this->in_dyn()
+		&& this->is_externally_visible()));
   }
 
   // Mark this symbol as needing an entry in the dynamic symbol table.
