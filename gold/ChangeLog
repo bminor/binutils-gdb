@@ -1,6 +1,10 @@
 2009-12-29  Ian Lance Taylor  <iant@google.com>
 
 	PR 10450
+	* layout.cc (Layout::create_dynamic_symtab): Only set entsize of
+	.gnu.hash table for a 32-bit target.
+
+	PR 10450
 	* symtab.h (Symbol::needs_dynsym_entry): A symbol in both a
 	regular and a dynamic object only needs a dynamic symbol table
 	entry if it is externally visible.

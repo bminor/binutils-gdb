@@ -2978,7 +2978,12 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
       hashsec->add_output_section_data(hashdata);
 
       hashsec->set_link_section(dynsym);
-      hashsec->set_entsize(4);
+
+      // For a 64-bit target, the entries in .gnu.hash do not have a
+      // uniform size, so we only set the entry size for a 32-bit
+      // target.
+      if (parameters->target().get_size() == 32)
+	hashsec->set_entsize(4);
 
       odyn->add_section_address(elfcpp::DT_GNU_HASH, hashsec);
     }
