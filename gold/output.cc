@@ -3063,6 +3063,10 @@ Output_segment::Output_segment(elfcpp::Elf_Word type, elfcpp::Elf_Word flags)
     are_addresses_set_(false),
     is_large_data_segment_(false)
 {
+  // The ELF ABI specifies that a PT_TLS segment always has PF_R as
+  // the flags.
+  if (type == elfcpp::PT_TLS)
+    this->flags_ = elfcpp::PF_R;
 }
 
 // Add an Output_section to an Output_segment.
@@ -3077,8 +3081,11 @@ Output_segment::add_output_section(Output_section* os,
   gold_assert(os->is_large_data_section() == this->is_large_data_segment());
   gold_assert(this->type() == elfcpp::PT_LOAD || !do_sort);
 
-  // Update the segment flags.
-  this->flags_ |= seg_flags;
+  // Update the segment flags.  The ELF ABI specifies that a PT_TLS
+  // segment should always have PF_R as the flags, regardless of the
+  // associated sections.
+  if (this->type() != elfcpp::PT_TLS)
+    this->flags_ |= seg_flags;
 
   Output_segment::Output_data_list* pdl;
   if (os->type() == elfcpp::SHT_NOBITS)

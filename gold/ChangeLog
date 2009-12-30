@@ -1,6 +1,12 @@
 2009-12-30  Ian Lance Taylor  <iant@google.com>
 
 	PR 10450
+	* output.cc (Output_segment::Output_segment): If PT_TLS, set the
+	flags to PF_R.
+	(Output_segment::add_output_section): Don't change the flags if
+	the type is PT_TLS.
+
+	PR 10450
 	* dynobj.cc (Dynobj::create_gnu_hash_table): Add symbols to the
 	GNU hash table if they need a dynamic value.  Otherwise, don't add
 	them if they are defined in a dynamic object or are forced local.
