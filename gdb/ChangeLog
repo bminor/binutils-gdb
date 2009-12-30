@@ -1,3 +1,10 @@
+2009-12-30  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* valarith.c (value_equal_contents): New function.
+	* value.h (value_equal_contents): Declare.
+	* breakpoint.c (watchpoint_check): Use value_equal_contents
+	instead of value_equal.
+
 2009-12-30  Stan Shebs  <stan@codesourcery.com>
 
 	Add default-collect variable.

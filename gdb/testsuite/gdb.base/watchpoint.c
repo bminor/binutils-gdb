@@ -30,7 +30,7 @@ int ival2 = -1;
 int ival3 = -1;
 int ival4 = -1;
 int ival5 = -1;
-char buf[10];
+char buf[30] = "testtesttesttesttesttesttestte";
 struct foo
 {
   int val;
@@ -95,6 +95,7 @@ func3 ()
   x = 1;				/* second x assignment */
   y = 1;
   y = 2;
+  buf[26] = 3;
 }
 
 int

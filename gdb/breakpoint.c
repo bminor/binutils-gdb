@@ -3174,7 +3174,7 @@ watchpoints_triggered (struct target_waitstatus *ws)
 #define BP_TEMPFLAG 1
 #define BP_HARDWAREFLAG 2
 
-/* Check watchpoint condition.  */
+/* Evaluate watchpoint condition expression and check if its value changed.  */
 
 static int
 watchpoint_check (void *p)
@@ -3245,8 +3245,12 @@ watchpoint_check (void *p)
       struct value *new_val;
 
       fetch_watchpoint_value (b->exp, &new_val, NULL, NULL);
+
+      /* We use value_equal_contents instead of value_equal because the latter
+	 coerces an array to a pointer, thus comparing just the address of the
+	 array instead of its contents.  This is not what we want.  */
       if ((b->val != NULL) != (new_val != NULL)
-	  || (b->val != NULL && !value_equal (b->val, new_val)))
+	  || (b->val != NULL && !value_equal_contents (b->val, new_val)))
 	{
 	  if (new_val != NULL)
 	    {

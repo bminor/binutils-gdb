@@ -1,3 +1,11 @@
+2009-12-30  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.base/watchpoint.exp (test_watchpoint_in_big_blob): New function.
+	(top level): Call test_watchpoint_in_big_blob.
+	* gdb.base/watchpoint.c (buf): Change size to value too big for hardware
+	watchpoints.
+	(func3): Write to buf.
+
 2009-12-29  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.trace/actions.exp: Test default-collect.

@@ -678,6 +678,13 @@ proc test_inaccessible_watchpoint {} {
     }
 }
     
+proc test_watchpoint_in_big_blob {} {
+    global gdb_prompt
+
+    gdb_test "watch buf" ".*atchpoint \[0-9\]+: buf"
+    gdb_test "cont" "Continuing.*atchpoint \[0-9\]+: buf\r\n\r\nOld value = .*testte\".*" "watchpoint on buf hit"
+}
+
 # Start with a fresh gdb.
 
 gdb_exit
@@ -842,6 +849,8 @@ if [initialize] then {
     }
 
     test_watchpoint_and_breakpoint
+
+    test_watchpoint_in_big_blob
 }
 
 # Restore old timeout

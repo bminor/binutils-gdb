@@ -563,6 +563,8 @@ extern struct internalvar *lookup_internalvar (const char *name);
 
 extern int value_equal (struct value *arg1, struct value *arg2);
 
+extern int value_equal_contents (struct value *arg1, struct value *arg2);
+
 extern int value_less (struct value *arg1, struct value *arg2);
 
 extern int value_logical_not (struct value *arg1);

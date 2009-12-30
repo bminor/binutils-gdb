@@ -1397,6 +1397,24 @@ value_equal (struct value *arg1, struct value *arg2)
     }
 }
 
+/* Compare values based on their raw contents.  Useful for arrays since
+   value_equal coerces them to pointers, thus comparing just the address
+   of the array instead of its contents.  */
+
+int
+value_equal_contents (struct value *arg1, struct value *arg2)
+{
+  struct type *type1, *type2;
+
+  type1 = check_typedef (value_type (arg1));
+  type2 = check_typedef (value_type (arg2));
+
+  return (TYPE_CODE (type1) == TYPE_CODE (type2)
+	  && TYPE_LENGTH (type1) == TYPE_LENGTH (type2)
+	  && memcmp (value_contents (arg1), value_contents (arg2),
+		     TYPE_LENGTH (type1)) == 0);
+}
+
 /* Simulate the C operator < by returning 1
    iff ARG1's contents are less than ARG2's.  */
 
