@@ -959,9 +959,10 @@ Dynobj::create_gnu_hash_table(const std::vector<Symbol*>& dynsyms,
     {
       Symbol* sym = dynsyms[i];
 
-      // FIXME: Should put on unhashed_dynsyms if the symbol is
-      // hidden.
-      if (sym->is_undefined())
+      if (!sym->needs_dynsym_value()
+	  && (sym->is_undefined()
+	      || sym->is_from_dynobj()
+	      || sym->is_forced_local()))
 	unhashed_dynsyms.push_back(sym);
       else
 	{
