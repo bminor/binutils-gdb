@@ -1,7 +1,21 @@
+2009-12-29  Ian Lance Taylor  <iant@google.com>
+
+	PR 10450
+	* output.h (class Output_section): Add is_entsize_zero_ field.
+	* output.cc (Output_section::Output_section): Initialize
+	is_entsize_zero_.
+	(Output_section::set_entsize): If two different entsizes are
+	requested, force it to zero.
+	(Output_section::add_input_section): Set flags for .debug_str
+	before updating section flags.  Set entsize.
+	(Output_section::update_flags_for_input_section): Set SHF_MERGE
+	and SHF_STRING if all input sections have those flags.
+
 2009-12-29   Rafael Espindola  <espindola@google.com>
 
 	* main.cc (main): Fix the sys time reporting.
-	* workqueue.cc (Workqueue::find_and_run_task): Fix the sys time reporting.
+	* workqueue.cc (Workqueue::find_and_run_task): Fix the sys time
+	reporting.
 
 2009-12-29  Sriraman Tallam  <tmsriram@google.com>
 

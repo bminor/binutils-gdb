@@ -1800,6 +1800,7 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
     is_interp_(false),
     is_dynamic_linker_section_(false),
     generate_code_fills_at_write_(false),
+    is_entsize_zero_(false),
     tls_offset_(0),
     checkpoint_(NULL),
     merge_section_map_(),
@@ -1824,10 +1825,15 @@ Output_section::~Output_section()
 void
 Output_section::set_entsize(uint64_t v)
 {
-  if (this->entsize_ == 0)
+  if (this->is_entsize_zero_)
+    ;
+  else if (this->entsize_ == 0)
     this->entsize_ = v;
-  else
-    gold_assert(this->entsize_ == v);
+  else if (this->entsize_ != v)
+    {
+      this->entsize_ = 0;
+      this->is_entsize_zero_ = 1;
+    }
 }
 
 // Add the input section SHNDX, with header SHDR, named SECNAME, in
@@ -1863,8 +1869,6 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
     this->addralign_ = addralign;
 
   typename elfcpp::Elf_types<size>::Elf_WXword sh_flags = shdr.get_sh_flags();
-  this->update_flags_for_input_section(sh_flags);
-
   uint64_t entsize = shdr.get_sh_entsize();
 
   // .debug_str is a mergeable string section, but is not always so
@@ -1874,6 +1878,9 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
       sh_flags |= (elfcpp::SHF_MERGE | elfcpp::SHF_STRINGS);
       entsize = 1;
     }
+
+  this->update_flags_for_input_section(sh_flags);
+  this->set_entsize(entsize);
 
   // If this is a SHF_MERGE section, we pass all the input sections to
   // a Output_data_merge.  We don't try to handle relocations for such
@@ -2199,6 +2206,22 @@ Output_section::update_flags_for_input_section(elfcpp::Elf_Xword flags)
 		   & (elfcpp::SHF_WRITE
 		      | elfcpp::SHF_ALLOC
 		      | elfcpp::SHF_EXECINSTR));
+
+  if ((flags & elfcpp::SHF_MERGE) == 0)
+    this->flags_ &=~ elfcpp::SHF_MERGE;
+  else
+    {
+      if (this->current_data_size_for_child() == 0)
+	this->flags_ |= elfcpp::SHF_MERGE;
+    }
+
+  if ((flags & elfcpp::SHF_STRINGS) == 0)
+    this->flags_ &=~ elfcpp::SHF_STRINGS;
+  else
+    {
+      if (this->current_data_size_for_child() == 0)
+	this->flags_ |= elfcpp::SHF_STRINGS;
+    }
 }
 
 // Find the merge section into which an input section with index SHNDX in

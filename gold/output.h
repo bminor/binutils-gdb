@@ -3352,6 +3352,8 @@ class Output_section : public Output_data
   bool is_dynamic_linker_section_ : 1;
   // Whether code-fills are generated at write.
   bool generate_code_fills_at_write_ : 1;
+  // Whether the entry size field should be zero.
+  bool is_entsize_zero_ : 1;
   // For SHT_TLS sections, the offset of this section relative to the base
   // of the TLS segment.
   uint64_t tls_offset_;
