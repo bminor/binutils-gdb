@@ -1152,6 +1152,13 @@ update_watchpoint (struct breakpoint *b, int reparse)
 	  {
 	    int i, mem_cnt, other_type_used;
 
+	    /* We need to determine how many resources are already used
+	       for all other hardware watchpoints to see if we still have
+	       enough resources to also fit this watchpoint in as well.
+	       To avoid the hw_watchpoint_used_count call below from counting
+	       this watchpoint, make sure that it is marked as a software
+	       watchpoint.  */
+	    b->type = bp_watchpoint;
 	    i = hw_watchpoint_used_count (bp_hardware_watchpoint,
 					  &other_type_used);
 	    mem_cnt = can_use_hardware_watchpoint (val_chain);

@@ -1,3 +1,9 @@
+20090-12-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	     Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* breakpoint.c (update_watchpoint): Change b->type to
+	bp_watchpoint before calling hw_watchpoint_used_count.
+
 2009-12-30  Joel Brobecker  <brobecker@adacore.com>
 
 	* breakpoint.c (watchpoint_check): Expand the function description.
