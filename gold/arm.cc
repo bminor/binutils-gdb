@@ -2592,8 +2592,8 @@ Target_arm<big_endian>::got_section(Symbol_table* symtab, Layout* layout)
       os = layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
 					   (elfcpp::SHF_ALLOC
 					    | elfcpp::SHF_WRITE),
-					   this->got_, false);
-      os->set_is_relro();
+					   this->got_, false, true, true,
+					   false);
 
       // The old GNU linker creates a .got.plt section.  We just
       // create another set of data in the .got section.  Note that we
@@ -2603,8 +2603,8 @@ Target_arm<big_endian>::got_section(Symbol_table* symtab, Layout* layout)
       os = layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
 					   (elfcpp::SHF_ALLOC
 					    | elfcpp::SHF_WRITE),
-					   this->got_plt_, false);
-      os->set_is_relro();
+					   this->got_plt_, false, false,
+					   false, true);
 
       // The first three entries are reserved.
       this->got_plt_->set_current_data_size(3 * 4);
@@ -2632,7 +2632,8 @@ Target_arm<big_endian>::rel_dyn_section(Layout* layout)
       gold_assert(layout != NULL);
       this->rel_dyn_ = new Reloc_section(parameters->options().combreloc());
       layout->add_output_section_data(".rel.dyn", elfcpp::SHT_REL,
-				      elfcpp::SHF_ALLOC, this->rel_dyn_, true);
+				      elfcpp::SHF_ALLOC, this->rel_dyn_, true,
+				      false, false, false);
     }
   return this->rel_dyn_;
 }
@@ -4052,7 +4053,8 @@ Output_data_plt_arm<big_endian>::Output_data_plt_arm(Layout* layout,
 {
   this->rel_ = new Reloc_section(false);
   layout->add_output_section_data(".rel.plt", elfcpp::SHT_REL,
-				  elfcpp::SHF_ALLOC, this->rel_, true);
+				  elfcpp::SHF_ALLOC, this->rel_, true, false,
+				  false, false);
 }
 
 template<bool big_endian>
@@ -4214,7 +4216,7 @@ Target_arm<big_endian>::make_plt_entry(Symbol_table* symtab, Layout* layout,
       layout->add_output_section_data(".plt", elfcpp::SHT_PROGBITS,
 				      (elfcpp::SHF_ALLOC
 				       | elfcpp::SHF_EXECINSTR),
-				      this->plt_, false);
+				      this->plt_, false, false, false, false);
     }
   this->plt_->add_entry(gsym);
 }
@@ -4793,7 +4795,8 @@ Target_arm<big_endian>::do_finalize_sections(
     new Output_attributes_section_data(*this->attributes_section_data_);
   layout->add_output_section_data(".ARM.attributes",
 				  elfcpp::SHT_ARM_ATTRIBUTES, 0,
-				  attributes_section, false);
+				  attributes_section, false, false, false,
+				  false);
 }
 
 // Return whether a direct absolute static relocation needs to be applied.

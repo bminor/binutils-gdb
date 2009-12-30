@@ -1,5 +1,35 @@
 2009-12-29  Ian Lance Taylor  <iant@google.com>
 
+	* layout.cc (Layout::Layout): Initialize increase_relro_.
+	(Layout::get_output_section): Add is_relro, is_last_relro, and
+	is_first_non_relro parameters.  Change all callers.
+	(Layout::choose_output_section): Likewise.
+	(Layout::add_output_section_data): Likewise.
+	(Layout::make_output_section): Likewise.
+	(Layout::set_segment_offsets): Clear increase_relro when using a
+	linker script.
+	* layout.h (class Layout): Add increase_relro method.  Add
+	increase_relro_ field.  Update declarations.
+	* output.cc (Output_section::Output_section): Initialize
+	is_last_relro_ and is_first_non_relro_.
+	(Output_segment::add_output_section): Group relro sections is
+	do_sort is true.  Handle is_last_relro and is_first_non_relro.
+	(Output_segment::maximum_alignment): Remove relro handling.
+	(Output_segment::set_section_addresses): Add increase_relro
+	parameter.  Change all callers.  Add initial alignment to align
+	relro sections on separate page.  Remove old relro handling.
+	(Output_segment::set_section_list_addresses): Remove in_relro
+	parameter.  Change all callers.
+	(Output_segment::set_offset): Add increase parameter.  Change all
+	callers.  Remove old relro handling.
+	* output.h (class Output_section): Add new methods: is_last_relro,
+	set_is_last_relro, is_first_non_relro, set_is_first_non_relro.
+	Add is_last_relro_ and is_first_non_relro_ fields.
+	* i386.cc (Target_i386::got_section): Don't call set_is_relro.
+	Create separate .got.plt section.  Call increase_relro.
+	* x86_64.cc (Target_x86_64::got_section): Likewise.
+	* testsuite/relro_script_test.t: Add .got.plt.
+
 	PR 10450
 	* layout.cc (Layout::Layout): Initialize dynamic_symbol_ field.
 	(Layout::create_initial_dynamic_sections): Set dynamic_symbol_.

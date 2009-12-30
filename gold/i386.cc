@@ -461,22 +461,21 @@ Target_i386::got_section(Symbol_table* symtab, Layout* layout)
       os = layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
 					   (elfcpp::SHF_ALLOC
 					    | elfcpp::SHF_WRITE),
-					   this->got_, false);
-      os->set_is_relro();
+					   this->got_, false, true, true,
+					   false);
 
-      // The old GNU linker creates a .got.plt section.  We just
-      // create another set of data in the .got section.  Note that we
-      // always create a PLT if we create a GOT, although the PLT
-      // might be empty.
       this->got_plt_ = new Output_data_space(4, "** GOT PLT");
-      os = layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
+      os = layout->add_output_section_data(".got.plt", elfcpp::SHT_PROGBITS,
 					   (elfcpp::SHF_ALLOC
 					    | elfcpp::SHF_WRITE),
-					   this->got_plt_, false);
-      os->set_is_relro();
+					   this->got_plt_, false, false, false,
+					   true);
 
       // The first three entries are reserved.
       this->got_plt_->set_current_data_size(3 * 4);
+
+      // Those bytes can go into the relro segment.
+      layout->increase_relro(3 * 4);
 
       // Define _GLOBAL_OFFSET_TABLE_ at the start of the PLT.
       symtab->define_in_output_data("_GLOBAL_OFFSET_TABLE_", NULL,
@@ -501,7 +500,8 @@ Target_i386::rel_dyn_section(Layout* layout)
       gold_assert(layout != NULL);
       this->rel_dyn_ = new Reloc_section(parameters->options().combreloc());
       layout->add_output_section_data(".rel.dyn", elfcpp::SHT_REL,
-				      elfcpp::SHF_ALLOC, this->rel_dyn_, true);
+				      elfcpp::SHF_ALLOC, this->rel_dyn_, true,
+				      false, false, false);
     }
   return this->rel_dyn_;
 }
@@ -576,7 +576,8 @@ Output_data_plt_i386::Output_data_plt_i386(Layout* layout,
 {
   this->rel_ = new Reloc_section(false);
   layout->add_output_section_data(".rel.plt", elfcpp::SHT_REL,
-				  elfcpp::SHF_ALLOC, this->rel_, true);
+				  elfcpp::SHF_ALLOC, this->rel_, true,
+				  false, false, false);
 }
 
 void
@@ -761,7 +762,7 @@ Target_i386::make_plt_entry(Symbol_table* symtab, Layout* layout, Symbol* gsym)
       layout->add_output_section_data(".plt", elfcpp::SHT_PROGBITS,
 				      (elfcpp::SHF_ALLOC
 				       | elfcpp::SHF_EXECINSTR),
-				      this->plt_, false);
+				      this->plt_, false, false, false, false);
     }
 
   this->plt_->add_entry(gsym);

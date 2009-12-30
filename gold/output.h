@@ -2351,6 +2351,35 @@ class Output_section : public Output_data
   set_is_relro_local()
   { this->is_relro_local_ = true; }
 
+  // True if this must be the last relro section.
+  bool
+  is_last_relro() const
+  { return this->is_last_relro_; }
+
+  // Record that this must be the last relro section.
+  void
+  set_is_last_relro()
+  {
+    gold_assert(this->is_relro_);
+    this->is_last_relro_ = true;
+  }
+
+  // True if this must be the first section following the relro sections.
+  bool
+  is_first_non_relro() const
+  {
+    gold_assert(!this->is_relro_);
+    return this->is_first_non_relro_;
+  }
+
+  // Record that this must be the first non-relro section.
+  void
+  set_is_first_non_relro()
+  {
+    gold_assert(!this->is_relro_);
+    this->is_first_non_relro_ = true;
+  }
+
   // True if this is a small section: a section which holds small
   // variables.
   bool
@@ -3341,6 +3370,10 @@ class Output_section : public Output_data
   bool is_relro_ : 1;
   // True if this section holds relro local data.
   bool is_relro_local_ : 1;
+  // True if this must be the last relro section.
+  bool is_last_relro_ : 1;
+  // True if this must be the first section after the relro sections.
+  bool is_first_non_relro_ : 1;
   // True if this is a small section.
   bool is_small_section_ : 1;
   // True if this is a large section.
@@ -3497,7 +3530,8 @@ class Output_segment
   // address of the immediately following segment.  Update *POFF and
   // *PSHNDX.  This should only be called for a PT_LOAD segment.
   uint64_t
-  set_section_addresses(const Layout*, bool reset, uint64_t addr, off_t* poff,
+  set_section_addresses(const Layout*, bool reset, uint64_t addr,
+			unsigned int increase_relro, off_t* poff,
 			unsigned int* pshndx);
 
   // Set the minimum alignment of this segment.  This may be adjusted
@@ -3509,7 +3543,7 @@ class Output_segment
   // Set the offset of this segment based on the section.  This should
   // only be called for a non-PT_LOAD segment.
   void
-  set_offset();
+  set_offset(unsigned int increase);
 
   // Set the TLS offsets of the sections contained in the PT_TLS segment.
   void
@@ -3555,7 +3589,7 @@ class Output_segment
   uint64_t
   set_section_list_addresses(const Layout*, bool reset, Output_data_list*,
                              uint64_t addr, off_t* poff, unsigned int* pshndx,
-                             bool* in_tls, bool* in_relro);
+                             bool* in_tls);
 
   // Return the number of Output_sections in an Output_data_list.
   unsigned int
