@@ -1,3 +1,7 @@
+2009-12-29  Stan Shebs  <stan@codesourcery.com>
+
+	* gdb.texinfo (Tracepoint Actions): Describe default-collect.
+	
 2009-12-28  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.texinfo (Trace State Variables): New section.

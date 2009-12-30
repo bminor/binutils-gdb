@@ -203,3 +203,12 @@ gdb_test "help while-stepping" \
 gdb_test "help end" "Ends a list of commands or actions.*" \
 			"5.8d: help end"
 
+# 5.9 default-collect
+
+gdb_test "set default-collect gdb_char_test, gdb_long_test - 100" \
+    "" \
+    "5.9a: set default-collect"
+
+gdb_test "show default-collect" \
+    "The list of expressions to collect by default is \"gdb_char_test, gdb_long_test - 100\"..*" \
+    "5.9b: show default-collect"

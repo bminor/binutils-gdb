@@ -1,3 +1,7 @@
+2009-12-29  Stan Shebs  <stan@codesourcery.com>
+
+	* gdb.trace/actions.exp: Test default-collect.
+	
 2009-12-28  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.trace/tsv.exp: New file.

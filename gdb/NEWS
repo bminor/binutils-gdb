@@ -105,6 +105,12 @@ show follow-exec-mode
   creates a new one.  This is useful to be able to restart the old
   executable after the inferior having done an exec call.
 
+set default-collect EXPR, ...
+show default-collect
+   Define a list of expressions to be collected at each tracepoint.
+   This is a useful way to ensure essential items are not overlooked,
+   such as registers or a critical global variable.
+
 * New remote packets
 
 QTDV

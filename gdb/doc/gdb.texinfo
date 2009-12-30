@@ -9643,6 +9643,22 @@ its own @code{end} command):
 @noindent
 You may abbreviate @code{while-stepping} as @code{ws} or
 @code{stepping}.
+
+@item set default-collect @var{expr1}, @var{expr2}, @dots{}
+@kindex set default-collect
+@cindex default collection action
+This variable is a list of expressions to collect at each tracepoint
+hit.  It is effectively an additional @code{collect} action prepended
+to every tracepoint action list.  The expressions are parsed
+individually for each tracepoint, so for instance a variable named
+@code{xyz} may be interpreted as a global for one tracepoint, and a
+local for another, as appropriate to the tracepoint's location.
+
+@item show default-collect
+@kindex show default-collect
+Show the list of expressions that are collected by default at each
+tracepoint hit.
+
 @end table
 
 @node Listing Tracepoints

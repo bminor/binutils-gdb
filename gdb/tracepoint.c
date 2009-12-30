@@ -140,9 +140,12 @@ static struct symtab_and_line traceframe_sal;
 /* Tracing command lists */
 static struct cmd_list_element *tfindlist;
 
+/* List of expressions to collect by default at each tracepoint hit.  */
+static char *default_collect = "";
+
 static char *target_buf;
 static long target_buf_size;
-
+  
 /* ======= Important command functions: ======= */
 static void trace_actions_command (char *, int);
 static void trace_start_command (char *, int);
@@ -1285,7 +1288,8 @@ encode_actions (struct breakpoint *t, char ***tdp_actions,
   struct agent_expr *aexpr;
   int frame_reg;
   LONGEST frame_offset;
-
+  char *default_collect_line = NULL;
+  struct action_line *default_collect_action = NULL;
 
   clear_collection_list (&tracepoint_list);
   clear_collection_list (&stepping_list);
@@ -1297,7 +1301,32 @@ encode_actions (struct breakpoint *t, char ***tdp_actions,
   gdbarch_virtual_frame_pointer (t->gdbarch,
 				 t->loc->address, &frame_reg, &frame_offset);
 
-  for (action = t->actions; action; action = action->next)
+  action = t->actions;
+
+  /* If there are default expressions to collect, make up a collect
+     action and prepend to the action list to encode.  Note that since
+     validation is per-tracepoint (local var "xyz" might be valid for
+     one tracepoint and not another, etc), we make up the action on
+     the fly, and don't cache it.  */
+  if (*default_collect)
+    {
+      char *line;
+      enum actionline_type linetype;
+
+      default_collect_line = xmalloc (12 + strlen (default_collect));
+      sprintf (default_collect_line, "collect %s", default_collect);
+      line = default_collect_line;
+      linetype = validate_actionline (&line, t);
+      if (linetype != BADLINE)
+	{
+	  default_collect_action = xmalloc (sizeof (struct action_line));
+	  default_collect_action->next = t->actions;
+	  default_collect_action->action = line;
+	  action = default_collect_action;
+	}
+    }
+
+  for (; action; action = action->next)
     {
       QUIT;			/* allow user to bail out with ^C */
       action_exp = action->action;
@@ -1454,6 +1483,9 @@ encode_actions (struct breakpoint *t, char ***tdp_actions,
 					    tdp_buff);
   *stepping_actions = stringify_collection_list (&stepping_list, 
 						 step_buff);
+
+  xfree (default_collect_line);
+  xfree (default_collect_action);
 }
 
 static void
@@ -1616,14 +1648,14 @@ download_tracepoint (struct breakpoint *t)
 	warning (_("Target does not support conditional tracepoints, ignoring tp %d cond"), t->number);
     }
 
-  if (t->actions)
+  if (t->actions || *default_collect)
     strcat (buf, "-");
   putpkt (buf);
   remote_get_noisy_reply (&target_buf, &target_buf_size);
   if (strcmp (target_buf, "OK"))
     error (_("Target does not support tracepoints."));
 
-  if (!t->actions)
+  if (!t->actions && !*default_collect)
     return;
 
   encode_actions (t, &tdp_actions, &stepping_actions);
@@ -2567,6 +2599,14 @@ Specify the actions to be taken at a tracepoint.\n\
 Tracepoint actions may include collecting of specified data, \n\
 single-stepping, or enabling/disabling other tracepoints, \n\
 depending on target's capabilities."));
+
+  default_collect = xstrdup ("");
+  add_setshow_string_cmd ("default-collect", class_trace,
+			  &default_collect, _("\
+Set the list of expressions to collect by default"), _("\
+Show the list of expressions to collect by default"), NULL,
+			  NULL, NULL,
+			  &setlist, &showlist);
 
   target_buf_size = 2048;
   target_buf = xmalloc (target_buf_size);
