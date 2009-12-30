@@ -3174,7 +3174,10 @@ watchpoints_triggered (struct target_waitstatus *ws)
 #define BP_TEMPFLAG 1
 #define BP_HARDWAREFLAG 2
 
-/* Evaluate watchpoint condition expression and check if its value changed.  */
+/* Evaluate watchpoint condition expression and check if its value changed.
+
+   P should be a pointer to struct bpstat, but is defined as a void *
+   in order for this function to be usable with catch_errors.  */
 
 static int
 watchpoint_check (void *p)

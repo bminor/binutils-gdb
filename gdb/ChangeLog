@@ -1,3 +1,7 @@
+2009-12-30  Joel Brobecker  <brobecker@adacore.com>
+
+	* breakpoint.c (watchpoint_check): Expand the function description.
+
 2009-12-30  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* valarith.c (value_equal_contents): New function.
