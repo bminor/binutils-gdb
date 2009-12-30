@@ -503,8 +503,13 @@ relocate_for_relocatable(
 	  switch (strategy)
 	    {
 	    case Relocatable_relocs::RELOC_COPY:
-	      new_symndx = object->symtab_index(r_sym);
-	      gold_assert(new_symndx != -1U);
+	      if (r_sym == 0)
+		new_symndx = 0;
+	      else
+		{
+		  new_symndx = object->symtab_index(r_sym);
+		  gold_assert(new_symndx != -1U);
+		}
 	      break;
 
 	    case Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_RELA:

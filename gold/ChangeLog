@@ -1,5 +1,11 @@
 2009-12-30  Ian Lance Taylor  <iant@google.com>
 
+	PR 10843
+	* target-reloc.h (relocate_for_relocatable): When copying a reloc,
+	if the input symbol index is 0, make the output symbol index 0.
+
+2009-12-30  Ian Lance Taylor  <iant@google.com>
+
 	PR 10670
 	* options.h (class General_options): Add -x/--discard-all.
 	* object.cc (Sized_relobj::do_count_local_symbols): Handle
