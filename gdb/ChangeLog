@@ -1,3 +1,7 @@
+2009-12-30  Stan Shebs  <stan@codesourcery.com>
+
+	* tracepoint.c (trace_status_command): Add some status output.
+
 20090-12-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	     Thiago Jung Bauermann  <bauerman@br.ibm.com>
 

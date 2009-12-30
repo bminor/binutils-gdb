@@ -1736,6 +1736,18 @@ trace_status_command (char *args, int from_tty)
 
       /* exported for use by the GUI */
       trace_running_p = (target_buf[1] == '1');
+
+      if (trace_running_p)
+	printf_filtered (_("Trace is running on the target.\n"));
+      else
+	printf_filtered (_("Trace is not running on the target.\n"));
+
+      if (traceframe_number >= 0)
+	printf_filtered (_("Looking at trace frame %d, tracepoint %d.\n"),
+			 traceframe_number, tracepoint_number);
+      else
+	printf_filtered (_("Not looking at any trace frame.\n"));
+
     }
   else
     error (_("Trace can only be run on remote targets."));
