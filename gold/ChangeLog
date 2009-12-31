@@ -1,5 +1,18 @@
 2009-12-30  Ian Lance Taylor  <iant@google.com>
 
+	PR 10931
+	* options.h (class General_options): Add --sort-common option.
+	* symtab.h (class Symbol_table): Define Sort_commons_order enum.
+	* common.cc (Sort_common): Add sort_order parameter to
+	constructor.  Add sort_order_ field.
+	(Sort_commons::operator): Check sort_order_.
+	(Symbol_table::allocate_commons): Determine the sort order.
+	(Symbol_table::do_allocate_commons): Add sort_order parameter.
+	Change all callers.
+	(Symbol_table::do_allocate_commons_list): Likewise.
+
+2009-12-30  Ian Lance Taylor  <iant@google.com>
+
 	PR 10916
 	* symtab.cc (Symbol_table::add_from_relobj): When not exporting
 	symbols from this object, don't change the visibility of an

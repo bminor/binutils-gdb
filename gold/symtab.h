@@ -1195,6 +1195,14 @@ class Symbol_table
     PREDEFINED,
   };
 
+  // The order in which we sort common symbols.
+  enum Sort_commons_order
+  {
+    SORT_COMMONS_BY_SIZE_DESCENDING,
+    SORT_COMMONS_BY_ALIGNMENT_DESCENDING,
+    SORT_COMMONS_BY_ALIGNMENT_ASCENDING
+  };
+
   // COUNT is an estimate of how many symbosl will be inserted in the
   // symbol table.  It's ok to put 0 if you don't know; a correct
   // guess will just save some CPU by reducing hashtable resizes.
@@ -1603,13 +1611,13 @@ class Symbol_table
   // Allocate the common symbols, sized version.
   template<int size>
   void
-  do_allocate_commons(Layout*, Mapfile*);
+  do_allocate_commons(Layout*, Mapfile*, Sort_commons_order);
 
   // Allocate the common symbols from one list.
   template<int size>
   void
   do_allocate_commons_list(Layout*, Commons_section_type, Commons_type*,
-			   Mapfile*);
+			   Mapfile*, Sort_commons_order);
 
   // Implement detect_odr_violations.
   template<int size, bool big_endian>

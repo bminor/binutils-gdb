@@ -819,6 +819,10 @@ class General_options
                  N_("Add DIR to link time shared library search path"),
                  N_("DIR"));
 
+  DEFINE_optional_string(sort_common, options::TWO_DASHES, '\0', NULL,
+			 N_("Sort common symbols by alignment"),
+			 N_("[={ascending,descending}]"));
+
   DEFINE_bool(strip_all, options::TWO_DASHES, 's', false,
               N_("Strip all symbols"), NULL);
   DEFINE_bool(strip_debug, options::TWO_DASHES, 'S', false,
