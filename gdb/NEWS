@@ -97,6 +97,10 @@ info tvariables
 delete tvariable $NAME ...
   Delete one or more trace state variables.
 
+teval EXPR, ...
+  Evaluate the given expressions without collecting anything into the
+  trace buffer. (Valid in tracepoint actions only.)
+
 * New options
 
 set follow-exec-mode new|same

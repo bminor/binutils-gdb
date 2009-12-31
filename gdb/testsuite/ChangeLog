@@ -1,3 +1,7 @@
+2009-12-31  Stan Shebs  <stan@codesourcery.com>
+
+	* gdb.trace/actions.exp: Test teval action.
+	
 2009-12-30  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.base/watchpoint.exp (test_watchpoint_in_big_blob): New function.

@@ -525,6 +525,12 @@ collect_pseudocommand (char *args, int from_tty)
   error (_("This command can only be used in a tracepoint actions list."));
 }
 
+static void
+teval_pseudocommand (char *args, int from_tty)
+{
+  error (_("This command can only be used in a tracepoint actions list."));
+}
+
 /* Enter a list of actions for a tracepoint.  */
 static void
 trace_actions_command (char *args, int from_tty)
@@ -754,6 +760,34 @@ validate_actionline (char **line, struct breakpoint *t)
 	    error (_("gdb: Internal error: expression has min height < 0"));
 
 	  if (areqs.max_height > 20)
+	    error (_("expression too complicated, try simplifying"));
+
+	  do_cleanups (old_chain);
+	}
+      while (p && *p++ == ',');
+      return GENERIC;
+    }
+  else if (cmd_cfunc_eq (c, teval_pseudocommand))
+    {
+      struct agent_expr *aexpr;
+
+      do
+	{			/* repeat over a comma-separated list */
+	  QUIT;			/* allow user to bail out with ^C */
+	  while (isspace ((int) *p))
+	    p++;
+
+	  /* Only expressions are allowed for this action.  */
+	  exp = parse_exp_1 (&p, block_for_pc (t->loc->address), 1);
+	  old_chain = make_cleanup (free_current_contents, &exp);
+
+	  /* We have something to evaluate, make sure that the expr to
+	     bytecode translator can handle it and that it's not too
+	     long.  */
+	  aexpr = gen_eval_for_expr (t->loc->address, exp);
+	  make_cleanup_free_agent_expr (aexpr);
+
+	  if (aexpr->len > MAX_AGENT_EXPR_LEN)
 	    error (_("expression too complicated, try simplifying"));
 
 	  do_cleanups (old_chain);
@@ -1459,6 +1493,46 @@ encode_actions (struct breakpoint *t, char ***tdp_actions,
 			}
 		      break;
 		    }		/* switch */
+		  do_cleanups (old_chain);
+		}		/* do */
+	    }
+	  while (action_exp && *action_exp++ == ',');
+	}			/* if */
+      else if (cmd_cfunc_eq (cmd, teval_pseudocommand))
+	{
+	  do
+	    {			/* repeat over a comma-separated list */
+	      QUIT;		/* allow user to bail out with ^C */
+	      while (isspace ((int) *action_exp))
+		action_exp++;
+
+		{
+		  unsigned long addr, len;
+		  struct cleanup *old_chain = NULL;
+		  struct cleanup *old_chain1 = NULL;
+		  struct agent_reqs areqs;
+
+		  exp = parse_exp_1 (&action_exp, 
+				     block_for_pc (t->loc->address), 1);
+		  old_chain = make_cleanup (free_current_contents, &exp);
+
+		  aexpr = gen_eval_for_expr (t->loc->address, exp);
+		  old_chain1 = make_cleanup_free_agent_expr (aexpr);
+
+		  ax_reqs (aexpr, &areqs);
+		  if (areqs.flaw != agent_flaw_none)
+		    error (_("malformed expression"));
+
+		  if (areqs.min_height < 0)
+		    error (_("gdb: Internal error: expression has min height < 0"));
+		  if (areqs.max_height > 20)
+		    error (_("expression too complicated, try simplifying"));
+
+		  discard_cleanups (old_chain1);
+		  /* Even though we're not officially collecting, add
+		     to the collect list anyway.  */
+		  add_aexpr (collect, aexpr);
+
 		  do_cleanups (old_chain);
 		}		/* do */
 	    }
@@ -2622,6 +2696,12 @@ Also accepts the following special arguments:\n\
     $regs   -- all registers.\n\
     $args   -- all function arguments.\n\
     $locals -- all variables local to the block/function scope.\n\
+Note: this command can only be used in a tracepoint \"actions\" list."));
+
+  add_com ("teval", class_trace, teval_pseudocommand, _("\
+Specify one or more expressions to be evaluated at a tracepoint.\n\
+Accepts a comma-separated list of (one or more) expressions.\n\
+The result of each evaluation will be discarded.\n\
 Note: this command can only be used in a tracepoint \"actions\" list."));
 
   add_com ("actions", class_trace, trace_actions_command, _("\

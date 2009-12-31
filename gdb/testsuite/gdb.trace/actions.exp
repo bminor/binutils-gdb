@@ -212,3 +212,31 @@ gdb_test "set default-collect gdb_char_test, gdb_long_test - 100" \
 gdb_test "show default-collect" \
     "The list of expressions to collect by default is \"gdb_char_test, gdb_long_test - 100\"..*" \
     "5.9b: show default-collect"
+
+# 5.10 teval
+
+gdb_test "tvariable \$tsv" \
+  "Trace state variable \\\$tsv created, with initial value 0." \
+  "Create a trace state variable"
+
+gdb_trace_setactions "5.10a: set teval action for first tracepoint" \
+	"$trcpt1" \
+	"teval gdb_char_test" "^$"
+
+gdb_trace_setactions "5.10a: set teval action for second tracepoint" \
+	"$trcpt2" \
+	"teval \$tsv += 1" "^$"
+
+gdb_test "info tracepoints" \
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_c_test at .*$srcfile:\[0-9\]+.
+\[\t \]+A\[\t \]+teval gdb_char_test.
+\[\t \]+A\[\t \]+end.
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_asm_test at .*$srcfile:\[0-9\]+.
+\[\t \]+A\[\t \]+teval \\\$tsv \\\+= 1.
+\[\t \]+A\[\t \]+end.
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_recursion_test at .*$srcfile:\[0-9\]+.
+\[\t \]+A\[\t \]+collect gdb_long_test.
+\[\t \]+A\[\t \]+end." \
+		"5.10a: verify teval actions set for two tracepoints"
+

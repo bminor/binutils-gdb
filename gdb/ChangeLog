@@ -1,5 +1,12 @@
 2009-12-31  Stan Shebs  <stan@codesourcery.com>
 
+	Add new tracepoint action teval.
+	* tracepoint.c (teval_pseudocommand): New function.
+	(validate_actionline): Add teval action case.
+	(encode_actions): Ditto.
+	(_initialize_tracepoint): Define teval pseudocommand.
+	* NEWS: Mention teval.
+
 	* tracepoint.c (trace_find_command): Error out if trace running.
 	(trace_find_pc_command): Ditto.
 	(trace_find_tracepoint_command): Ditto.

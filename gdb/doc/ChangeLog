@@ -1,3 +1,7 @@
+2009-12-31  Stan Shebs  <stan@codesourcery.com>
+
+	* gdb.texinfo (Tracepoint Actions): Describe teval.
+	
 2009-12-29  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.texinfo (Tracepoint Actions): Describe default-collect.

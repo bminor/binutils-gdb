@@ -9626,6 +9626,15 @@ arguments separated by commas: the effect is the same.
 The command @code{info scope} (@pxref{Symbols, info scope}) is
 particularly useful for figuring out what data to collect.
 
+@kindex teval @r{(tracepoints)}
+@item teval @var{expr1}, @var{expr2}, @dots{}
+Evaluate the given expressions when the tracepoint is hit.  This
+command accepts a comma-separated list of expressions.  The results
+are discarded, so this is mainly useful for assigning values to trace
+state variables (@pxref{Trace State Variables}) without adding those
+values to the trace buffer, as would be the case if the @code{collect}
+action were used.
+
 @kindex while-stepping @r{(tracepoints)}
 @item while-stepping @var{n}
 Perform @var{n} single-step traces after the tracepoint, collecting
