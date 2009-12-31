@@ -1,5 +1,17 @@
 2009-12-30  Ian Lance Taylor  <iant@google.com>
 
+	PR 10979
+	* script.cc (read_input_script): If we see a new SECTIONS clause,
+	and we have added an input section, give an error.
+	* layout.h (class Layout): Add have_added_input_section function.
+	Add have_added_input_section_ field.
+	* layout.cc (Layout::Layout): Initialize
+	have_added_input_section_.
+	(Layout::layout): Set have_added_input_section_.
+	(Layout::layout_eh_frame): Likewise.
+
+2009-12-30  Ian Lance Taylor  <iant@google.com>
+
 	PR 10931
 	* options.h (class General_options): Add --sort-common option.
 	* symtab.h (class Symbol_table): Define Sort_commons_order enum.

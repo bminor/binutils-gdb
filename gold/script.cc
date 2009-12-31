@@ -1398,6 +1398,9 @@ read_input_script(Workqueue* workqueue, Symbol_table* symtab, Layout* layout,
 			 &lex,
 			 input_file->will_search_for());
 
+  bool old_saw_sections_clause =
+    layout->script_options()->saw_sections_clause();
+
   if (yyparse(&closure) != 0)
     {
       if (closure.found_incompatible_target())
@@ -1410,6 +1413,12 @@ read_input_script(Workqueue* workqueue, Symbol_table* symtab, Layout* layout,
 	}
       return false;
     }
+
+  if (!old_saw_sections_clause
+      && layout->script_options()->saw_sections_clause()
+      && layout->have_added_input_section())
+    gold_error(_("%s: SECTIONS seen after other input files; try -T/--script"),
+	       input_file->filename().c_str());
 
   if (!closure.saw_inputs())
     return true;

@@ -192,6 +192,7 @@ Layout::Layout(int number_of_input_files, Script_options* script_options)
     debug_info_(NULL),
     group_signatures_(),
     output_file_size_(-1),
+    have_added_input_section_(false),
     sections_are_attached_(false),
     input_requires_executable_stack_(false),
     input_with_gnu_stack_note_(false),
@@ -610,6 +611,7 @@ Layout::layout(Sized_relobj<size, big_endian>* object, unsigned int shndx,
 
   *off = os->add_input_section(object, shndx, name, shdr, reloc_shndx,
 			       this->script_options_->saw_sections_clause());
+  this->have_added_input_section_ = true;
 
   return os;
 }
@@ -818,6 +820,7 @@ Layout::layout_eh_frame(Sized_relobj<size, big_endian>* object,
       bool saw_sections_clause = this->script_options_->saw_sections_clause();
       *off = os->add_input_section(object, shndx, name, shdr, reloc_shndx,
 				   saw_sections_clause);
+      this->have_added_input_section_ = true;
     }
 
   return os;

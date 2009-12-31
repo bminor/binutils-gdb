@@ -433,6 +433,11 @@ class Layout
   is_linkonce(const char* name)
   { return strncmp(name, ".gnu.linkonce", sizeof(".gnu.linkonce") - 1) == 0; }
 
+  // Whether we have added an input section.
+  bool
+  have_added_input_section() const
+  { return this->have_added_input_section_; }
+
   // Return true if a section is a debugging section.
   static inline bool
   is_debug_info_section(const char* name)
@@ -990,6 +995,8 @@ class Layout
   Group_signatures group_signatures_;
   // The size of the output file.
   off_t output_file_size_;
+  // Whether we have added an input section to an output section.
+  bool have_added_input_section_;
   // Whether we have attached the sections to the segments.
   bool sections_are_attached_;
   // Whether we have seen an object file marked to require an
