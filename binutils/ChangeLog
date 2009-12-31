@@ -1,3 +1,9 @@
+2009-12-31  Eirik Byrkjeflot Anonsen  <eirik@opera.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (add_redefine_syms_file): Avoid symbol buffer
+	overrun.
+
 2009-10-23  Thomas Cougnard  <thomas.cougnard@gmail.com>
 
 	* readelf.c (dynamic_info): Correct size of array.
