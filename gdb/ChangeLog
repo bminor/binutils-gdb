@@ -1,3 +1,12 @@
+2009-12-31  Stan Shebs  <stan@codesourcery.com>
+
+	* tracepoint.c (trace_find_command): Error out if trace running.
+	(trace_find_pc_command): Ditto.
+	(trace_find_tracepoint_command): Ditto.
+	(trace_find_line_command): Ditto.
+	(trace_find_range_command): Ditto.
+	(trace_find_outside_command): Ditto.
+
 2009-12-31  Joel Brobecker  <brobecker@adacore.com>
 
 	Internal error while loading core on alpha-tru64.

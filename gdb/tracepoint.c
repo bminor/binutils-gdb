@@ -1875,6 +1875,9 @@ trace_find_command (char *args, int from_tty)
 
   if (target_is_remote ())
     {
+      if (trace_running_p)
+	error ("May not look at trace frames while trace is running.");
+
       if (deprecated_trace_find_hook)
 	deprecated_trace_find_hook (args, from_tty);
 
@@ -1937,6 +1940,9 @@ trace_find_pc_command (char *args, int from_tty)
 
   if (target_is_remote ())
     {
+      if (trace_running_p)
+	error ("May not look at trace frames while trace is running.");
+
       if (args == 0 || *args == 0)
 	pc = regcache_read_pc (get_current_regcache ());
       else
@@ -1958,6 +1964,9 @@ trace_find_tracepoint_command (char *args, int from_tty)
 
   if (target_is_remote ())
     {
+      if (trace_running_p)
+	error ("May not look at trace frames while trace is running.");
+
       if (args == 0 || *args == 0)
 	{
 	  if (tracepoint_number == -1)
@@ -1994,6 +2003,9 @@ trace_find_line_command (char *args, int from_tty)
 
   if (target_is_remote ())
     {
+      if (trace_running_p)
+	error ("May not look at trace frames while trace is running.");
+
       if (args == 0 || *args == 0)
 	{
 	  sal = find_pc_line (get_frame_pc (get_current_frame ()), 0);
@@ -2089,6 +2101,9 @@ trace_find_range_command (char *args, int from_tty)
 
   if (target_is_remote ())
     {
+      if (trace_running_p)
+	error ("May not look at trace frames while trace is running.");
+
       if (args == 0 || *args == 0)
 	{ /* XXX FIXME: what should default behavior be?  */
 	  printf_filtered ("Usage: tfind range <startaddr>,<endaddr>\n");
@@ -2128,6 +2143,9 @@ trace_find_outside_command (char *args, int from_tty)
 
   if (target_is_remote ())
     {
+      if (trace_running_p)
+	error ("May not look at trace frames while trace is running.");
+
       if (args == 0 || *args == 0)
 	{ /* XXX FIXME: what should default behavior be? */
 	  printf_filtered ("Usage: tfind outside <startaddr>,<endaddr>\n");
