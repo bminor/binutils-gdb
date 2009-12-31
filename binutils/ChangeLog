@@ -1,3 +1,9 @@
+2009-12-31  Eirik Byrkjeflot Anonsen  <eirik@opera.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (add_redefine_syms_file): Avoid symbol buffer
+	overrun.
+
 2009-12-21  Alan Modra  <amodra@gmail.com>
 
 	* MAINTAINERS: Update my email address.
