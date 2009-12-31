@@ -302,8 +302,6 @@ core_open (char *filename, int from_tty)
   bfd *temp_bfd;
   int scratch_chan;
   int flags;
-  int corelow_pid = CORELOW_PID;
-  struct inferior *inf;
 
   target_preopen (from_tty);
   if (!filename)
@@ -423,7 +421,7 @@ core_open (char *filename, int from_tty)
       struct thread_info *thread = first_thread_of_process (-1);
       if (thread == NULL)
 	{
-	  add_inferior_silent (CORELOW_PID);
+	  inferior_appeared (current_inferior (), CORELOW_PID);
 	  inferior_ptid = pid_to_ptid (CORELOW_PID);
 	  add_thread_silent (inferior_ptid);
 	}
