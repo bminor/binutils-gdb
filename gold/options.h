@@ -803,8 +803,8 @@ class General_options
   DEFINE_bool(relax, options::TWO_DASHES, '\0', false,
 	      N_("Relax branches on certain targets"), NULL);
 
-  DEFINE_string(retain_symbols_file, options::EXACTLY_ONE_DASH, '\0', NULL,
-                N_("keep only symbols listed in this file"), N_("[file]"));
+  DEFINE_string(retain_symbols_file, options::TWO_DASHES, '\0', NULL,
+                N_("keep only symbols listed in this file"), N_("FILE"));
 
   // -R really means -rpath, but can mean --just-symbols for
   // compatibility with GNU ld.  -rpath is always -rpath, so we list

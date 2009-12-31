@@ -1,5 +1,11 @@
 2009-12-30  Ian Lance Taylor  <iant@google.com>
 
+	PR 10980
+	* options.h (class General_options): Permit two dashes with
+	--retain-symbols-file.
+
+2009-12-30  Ian Lance Taylor  <iant@google.com>
+
 	PR 10979
 	* layout.cc (Layout::relaxation_loop_body): If -Ttext was used,
 	don't put the file header and segment headers in the text
