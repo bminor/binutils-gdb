@@ -1151,7 +1151,8 @@ Symbol_table::add_from_relobj(
 	}
 
       // Fix up visibility if object has no-export set.
-      if (relobj->no_export())
+      if (relobj->no_export()
+	  && (orig_st_shndx != elfcpp::SHN_UNDEF || !is_ordinary))
         {
 	  // We may have copied symbol already above.
 	  if (psym != &sym2)

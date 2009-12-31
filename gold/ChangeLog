@@ -1,5 +1,13 @@
 2009-12-30  Ian Lance Taylor  <iant@google.com>
 
+	PR 10916
+	* symtab.cc (Symbol_table::add_from_relobj): When not exporting
+	symbols from this object, don't change the visibility of an
+	undefined symbol.
+	* testsuite/exclude_libs_test_1.c (lib1_ref): New function.
+
+2009-12-30  Ian Lance Taylor  <iant@google.com>
+
 	PR 10861
 	* script.h (class Version_script_info): Define Language enum.
 	Update declarations.  Define Glob, Exact, and Lookup types.  Add
