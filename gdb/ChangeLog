@@ -8,7 +8,7 @@
 
 	* tracepoint.c (trace_status_command): Add some status output.
 
-20090-12-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+2009-12-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	     Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* breakpoint.c (update_watchpoint): Change b->type to
