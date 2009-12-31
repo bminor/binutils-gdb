@@ -478,10 +478,10 @@ class Symbol
   bool
   is_common() const
   {
-    if (this->type_ == elfcpp::STT_COMMON)
-      return true;
     if (this->source_ != FROM_OBJECT)
       return false;
+    if (this->type_ == elfcpp::STT_COMMON)
+      return true;
     bool is_ordinary;
     unsigned int shndx = this->shndx(&is_ordinary);
     return !is_ordinary && Symbol::is_common_shndx(shndx);

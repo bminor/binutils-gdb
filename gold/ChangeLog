@@ -1,6 +1,22 @@
 2009-12-30  Ian Lance Taylor  <iant@google.com>
 
 	PR 10979
+	* common.cc (Sort_commons::operator()): Stabilize sort when both
+	entries are NULL.
+	(Symbol_table::do_allocate_commons_list): When allocating common
+	symbols, skip a symbol which is no longer common.
+	* symtab.h (Symbol::is_common): Test whether the symbol comes from
+	an object before checking its type.
+	* testsuite/common_test_2.c: New file.
+	* testsuite/common_test_3.c: New file.
+	* testsuite/Makefile.am (check_PROGRAMS): Add common_test_2.
+	(common_test_2_SOURCES, common_test_2_DEPENDENCIES): Define.
+	(common_test_2_LDFLAGS, common_test_2_LDADD): Define.
+	(common_test_2_pic.o, common_test_2.so): New targets.
+	(common_test_3_pic.o, common_test_3.so): New targets.
+	* testsuite/Makefile.in: Rebuild.
+
+	PR 10979
 	* script.cc (read_input_script): If we see a new SECTIONS clause,
 	and we have added an input section, give an error.
 	* layout.h (class Layout): Add have_added_input_section function.

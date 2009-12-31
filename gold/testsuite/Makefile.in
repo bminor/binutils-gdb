@@ -140,7 +140,8 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_2_shared_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_6 = two_file_strip_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_same_shared_strip_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	common_test_1 exception_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	common_test_1 common_test_2 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_static_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_shared_1_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_shared_2_test \
@@ -366,6 +367,7 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_strip_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_same_shared_strip_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	common_test_1$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	common_test_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_static_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_shared_1_test$(EXEEXT) \
@@ -476,6 +478,12 @@ am__common_test_1_SOURCES_DIST = common_test_1.c
 common_test_1_OBJECTS = $(am_common_test_1_OBJECTS)
 common_test_1_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(common_test_1_LDFLAGS) $(LDFLAGS) -o $@
+am__common_test_2_SOURCES_DIST = common_test_1.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_common_test_2_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	common_test_1.$(OBJEXT)
+common_test_2_OBJECTS = $(am_common_test_2_OBJECTS)
+common_test_2_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(common_test_2_LDFLAGS) $(LDFLAGS) -o $@
 am__constructor_static_test_SOURCES_DIST = constructor_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__objects_1 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	constructor_test.$(OBJEXT)
@@ -1064,9 +1072,9 @@ CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	basic_static_pic_test.c basic_static_test.c basic_test.c \
 	$(binary_test_SOURCES) $(binary_unittest_SOURCES) \
-	$(common_test_1_SOURCES) $(constructor_static_test_SOURCES) \
-	$(constructor_test_SOURCES) $(copy_test_SOURCES) \
-	$(discard_locals_test_SOURCES) \
+	$(common_test_1_SOURCES) $(common_test_2_SOURCES) \
+	$(constructor_static_test_SOURCES) $(constructor_test_SOURCES) \
+	$(copy_test_SOURCES) $(discard_locals_test_SOURCES) \
 	$(exception_same_shared_test_SOURCES) \
 	$(exception_separate_shared_12_test_SOURCES) \
 	$(exception_separate_shared_21_test_SOURCES) \
@@ -1119,6 +1127,7 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	basic_pie_test.c basic_static_pic_test.c basic_static_test.c \
 	basic_test.c $(am__binary_test_SOURCES_DIST) \
 	$(binary_unittest_SOURCES) $(am__common_test_1_SOURCES_DIST) \
+	$(am__common_test_2_SOURCES_DIST) \
 	$(am__constructor_static_test_SOURCES_DIST) \
 	$(am__constructor_test_SOURCES_DIST) \
 	$(am__copy_test_SOURCES_DIST) \
@@ -1505,6 +1514,10 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_1_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_1_LDFLAGS = -Bgcctestdir/
 @GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_1_LDADD = 
+@GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_2_SOURCES = common_test_1.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_2_DEPENDENCIES = common_test_2.so common_test_3.so gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_2_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_2_LDADD = common_test_2.so common_test_3.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_test_SOURCES = \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test_main.cc \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test_1.cc \
@@ -1806,6 +1819,9 @@ binary_unittest$(EXEEXT): $(binary_unittest_OBJECTS) $(binary_unittest_DEPENDENC
 common_test_1$(EXEEXT): $(common_test_1_OBJECTS) $(common_test_1_DEPENDENCIES) 
 	@rm -f common_test_1$(EXEEXT)
 	$(common_test_1_LINK) $(common_test_1_OBJECTS) $(common_test_1_LDADD) $(LIBS)
+common_test_2$(EXEEXT): $(common_test_2_OBJECTS) $(common_test_2_DEPENDENCIES) 
+	@rm -f common_test_2$(EXEEXT)
+	$(common_test_2_LINK) $(common_test_2_OBJECTS) $(common_test_2_LDADD) $(LIBS)
 constructor_static_test$(EXEEXT): $(constructor_static_test_OBJECTS) $(constructor_static_test_DEPENDENCIES) 
 	@rm -f constructor_static_test$(EXEEXT)
 	$(constructor_static_test_LINK) $(constructor_static_test_OBJECTS) $(constructor_static_test_LDADD) $(LIBS)
@@ -2642,6 +2658,14 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_STRIP) -o two_file_strip_test two_file_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_strip.so: two_file_shared.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_STRIP) -S -o two_file_shared_strip.so two_file_shared.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_2_pic.o: common_test_2.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_2.so: common_test_2_pic.o common_test_3.so gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -shared common_test_2_pic.o common_test_3.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_3_pic.o: common_test_3.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_3.so: common_test_3_pic.o ver_test_2.script gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ -shared common_test_3_pic.o -Wl,--version-script,$(srcdir)/ver_test_2.script
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_test_1_pic.o: exception_test_1.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_test_2_pic.o: exception_test_2.cc
