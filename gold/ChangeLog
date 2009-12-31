@@ -1,6 +1,11 @@
 2009-12-30  Ian Lance Taylor  <iant@google.com>
 
 	PR 10979
+	* layout.cc (Layout::relaxation_loop_body): If -Ttext was used,
+	don't put the file header and segment headers in the text
+	segment.
+
+	PR 10979
 	* common.cc (Sort_commons::operator()): Stabilize sort when both
 	entries are NULL.
 	(Symbol_table::do_allocate_commons_list): When allocating common

@@ -1482,6 +1482,12 @@ Layout::relaxation_loop_body(
       != General_options::OBJECT_FORMAT_ELF)
     load_seg = NULL;
 
+  // If the user set the address of the text segment, that may not be
+  // compatible with putting the segment headers and file headers into
+  // that segment.
+  if (parameters->options().user_set_Ttext())
+    load_seg = NULL;
+
   gold_assert(phdr_seg == NULL
 	      || load_seg != NULL
 	      || this->script_options_->saw_sections_clause());
