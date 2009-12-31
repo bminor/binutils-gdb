@@ -1,3 +1,16 @@
+2009-12-31  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf2.c (struct line_sequence): New struct.
+	(struct line_info_table): Add num_sequences, remove last_line,
+	add sequences.
+	(add_line_info): Add new sequences as necessary.
+	(compare_sequences): New function.
+	(sort_line_sequences): New function.
+	(decode_line_info): Initialize new fields in line table.
+	Call sort_line_sequences.
+	(lookup_address_in_line_info_table): Binary search for proper
+	sequence.
+
 2009-12-28  Daniel Gutson  <dgutson@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_final_link_relocate): limits
