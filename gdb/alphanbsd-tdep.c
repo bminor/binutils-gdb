@@ -1,6 +1,6 @@
 /* Target-dependent code for NetBSD/alpha.
 
-   Copyright (C) 2002, 2003, 2004, 2006, 2007, 2008, 2009
+   Copyright (C) 2002, 2003, 2004, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
 
    Contributed by Wasabi Systems, Inc.

@@ -1,6 +1,6 @@
 /* Machine-independent support for SVR4 /proc (process file system)
 
-   Copyright (C) 1999, 2000, 2004, 2007, 2008, 2009
+   Copyright (C) 1999, 2000, 2004, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
 
    Written by Michael Snyder at Cygnus Solutions.

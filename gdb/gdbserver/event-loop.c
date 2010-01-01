@@ -1,5 +1,5 @@
 /* Event loop machinery for the remote server for GDB.
-   Copyright (C) 1999, 2000, 2001, 2002, 2005, 2006, 2007, 2008
+   Copyright (C) 1999, 2000, 2001, 2002, 2005, 2006, 2007, 2008, 2010
    Free Software Foundation, Inc.
 
    This file is part of GDB.

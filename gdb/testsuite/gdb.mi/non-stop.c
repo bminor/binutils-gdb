@@ -1,5 +1,5 @@
 /* Test program for non-stop debugging.
-   Copyright 1996, 2002, 2003, 2004, 2007, 2008, 2009
+   Copyright 1996, 2002, 2003, 2004, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
 
    This file is part of GDB.

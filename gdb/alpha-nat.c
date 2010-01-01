@@ -1,6 +1,6 @@
 /* Low level Alpha interface, for GDB when running native.
    Copyright (C) 1993, 1995, 1996, 1998, 1999, 2000, 2001, 2003, 2007, 2008,
-   2009 Free Software Foundation, Inc.
+   2009, 2010 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

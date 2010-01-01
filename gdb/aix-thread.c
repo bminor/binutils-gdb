@@ -1,6 +1,6 @@
 /* Low level interface for debugging AIX 4.3+ pthreads.
 
-   Copyright (C) 1999, 2000, 2002, 2007, 2008, 2009
+   Copyright (C) 1999, 2000, 2002, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
    Written by Nick Duffek <nsd@redhat.com>.
 

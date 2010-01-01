@@ -7,7 +7,7 @@
 
 /* Header file for GDB-specific command-line stuff.
    Copyright (C) 1986, 1989, 1990, 1991, 1992, 1993, 1994, 1998, 1999, 2000,
-   2002, 2007, 2008, 2009 Free Software Foundation, Inc.
+   2002, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by

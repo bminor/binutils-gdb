@@ -1,6 +1,7 @@
 # Test `info auxv' and related functionality.
 
-# Copyright 1992,1993,1994,1995,1996,1997,1998,1999,2000,2004,2007,2008,2009
+# Copyright
+#	1992,1993,1994,1995,1996,1997,1998,1999,2000,2004,2007,2008,2009,2010
 #	Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify

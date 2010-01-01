@@ -1,6 +1,6 @@
 /* Shared library support for RS/6000 (xcoff) object files, for GDB.
-   Copyright (C) 1991, 1992, 1995, 1996, 1999, 2000, 2001, 2007, 2008, 2009
-   Free Software Foundation, Inc.
+   Copyright (C) 1991, 1992, 1995, 1996, 1999, 2000, 2001, 2007, 2008, 2009,
+   2010 Free Software Foundation, Inc.
    Contributed by IBM Corporation.
 
    This file is part of GDB.

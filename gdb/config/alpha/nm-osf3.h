@@ -1,5 +1,5 @@
 /* Native definitions for alpha running OSF/1-3.x and higher, using procfs.
-   Copyright 1995, 2007, 2008, 2009 Free Software Foundation, Inc.
+   Copyright 1995, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

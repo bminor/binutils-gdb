@@ -1,5 +1,5 @@
 /* Remote debugging interface to dBUG ROM monitor for GDB, the GNU debugger.
-   Copyright (C) 1996, 1998, 1999, 2000, 2001, 2007, 2008, 2009
+   Copyright (C) 1996, 1998, 1999, 2000, 2001, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
 
    Written by Stan Shebs of Cygnus Support.

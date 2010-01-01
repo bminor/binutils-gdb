@@ -1,5 +1,5 @@
 /* i387-specific utility functions, for the remote server for GDB.
-   Copyright (C) 2000, 2001, 2002, 2005, 2007, 2008, 2009
+   Copyright (C) 2000, 2001, 2002, 2005, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
 
    This file is part of GDB.

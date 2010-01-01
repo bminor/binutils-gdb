@@ -1,6 +1,6 @@
 /* Helper file for i386 platform.  Runtime check for MMX/SSE/SSE2 support.
 
-   Copyright 2004, 2007, 2008, 2009 Free Software Foundation, Inc.
+   Copyright 2004, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
