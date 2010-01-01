@@ -395,7 +395,7 @@ static void
 gdbreplay_version (void)
 {
   printf ("GNU gdbreplay %s%s\n"
-	  "Copyright (C) 2009 Free Software Foundation, Inc.\n"
+	  "Copyright (C) 2010 Free Software Foundation, Inc.\n"
 	  "gdbreplay is free software, covered by the GNU General Public License.\n"
 	  "This gdbreplay was configured as \"%s\"\n",
 	  PKGVERSION, version, host_name);

@@ -1,3 +1,8 @@
+2010-01-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* server.c (gdbserver_version): Update copyright year to 2010.
+	* gdbreplay.c (gdbreplay_version): Likewise.
+
 2009-12-28  Doug Evans  <dje@google.com>
 
 	* linux-low.c: Delete inclusion of ansidecl.h, elf/common.h,
