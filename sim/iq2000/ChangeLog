@@ -1,3 +1,7 @@
+2010-01-01  Doug Evans  <dje@sebabeach.org>
+
+	* mloop.in: Fix copyright update snafu.
+
 2009-11-22  Doug Evans  <dje@sebabeach.org>
 
 	* cpu.h: Regenerate.

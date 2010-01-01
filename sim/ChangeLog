@@ -1,3 +1,7 @@
+2010-01-01  Doug Evans  <dje@sebabeach.org>
+
+	* cris/mloop.in: Fix copyright update snafu.
+
 2009-11-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* common/aclocal.m4: Add include of ../../config/zlib.m4.
