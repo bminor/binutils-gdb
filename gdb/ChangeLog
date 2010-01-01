@@ -1,3 +1,10 @@
+2010-01-01  Joel Brobecker  <brobecker@adacore.com>
+
+	Fix break *FUN'address task NUM.
+	* ada-lex.l (task): New rule.
+	* ada-lang.c (valid_task_id): Make sure the Ada task list has
+	been built before using it.
+
 2009-12-31  Stan Shebs  <stan@codesourcery.com>
 
 	Add new tracepoint action teval.

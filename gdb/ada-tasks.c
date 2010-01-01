@@ -198,6 +198,7 @@ get_task_number_from_id (CORE_ADDR task_id)
 int
 valid_task_id (int task_num)
 {
+  ada_build_task_list (0);
   return (task_num > 0
           && task_num <= VEC_length (ada_task_info_s, task_list));
 }

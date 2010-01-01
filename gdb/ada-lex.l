@@ -160,6 +160,13 @@ if		{
 		  return 0;
 		}
 
+task		{
+		  while (*lexptr != 't' && *lexptr != 'T')
+		    lexptr--;
+		  yyrestart(NULL);
+		  return 0;
+		}
+
 	/* ADA KEYWORDS */
 
 abs		{ return ABS; }
