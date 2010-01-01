@@ -107,6 +107,7 @@
 @V@/gdb/ChangeLog-2006 @V@/gdb/ChangeLog.006
 @V@/gdb/ChangeLog-2007 @V@/gdb/ChangeLog.007
 @V@/gdb/ChangeLog-2008 @V@/gdb/ChangeLog.008
+@V@/gdb/ChangeLog-2002 @V@/gdb/ChangeLog.009
 @V@/gdb/ChangeLog-3.x @V@/gdb/ChangeLog.3-x
 @V@/gdb/ada-exp.tab.c @V@/gdb/ada-exp_tab.c
 @V@/gdb/amd64-windows-nat.c @V@/gdb/a64w-nat.c
