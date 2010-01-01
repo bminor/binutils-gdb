@@ -6752,15 +6752,44 @@ Update the copyright year in the startup message
 
 Update the copyright year in:
 @itemize @bullet
-@item file @file{top.c}, function @code{print_gdb_version}
-@item file @file{gdbserver/server.c}, function @code{gdbserver_version}
-@item file @file{gdbserver/gdbreplay.c}, function @code{gdbreplay_version}
+  @item
+  file @file{top.c}, function @code{print_gdb_version}
+  @item
+  file @file{gdbserver/server.c}, function @code{gdbserver_version}
+  @item
+  file @file{gdbserver/gdbreplay.c}, function @code{gdbreplay_version}
 @end itemize
 
 @item
-Add the new year in the copyright notices of all source and documentation
-files.  This can be done semi-automatically by running the @code{copyright.sh}
-script.  This script requires Emacs 22 or later to be installed.
+Run the @file{copyright.sh} script to add the new year in the copyright
+notices of most source files.  This script requires Emacs 22 or later to
+be installed.
+
+@item
+The new year also needs to be added manually in all other files that
+are not already taken care of by the @file{copyright.sh} script:
+@itemize @bullet
+  @item
+  @file{*.s}
+  @item
+  @file{*.f}
+  @item
+  @file{*.f90}
+  @item
+  @file{*.igen}
+  @item
+  @file{*.ac}
+  @item
+  @file{*.texi}
+  @item
+  @file{*.texinfo}
+  @item
+  @file{*.tex}
+  @item
+  @file{*.defs}
+  @item
+  @file{*.1}
+@end itemize
 
 @end itemize
 

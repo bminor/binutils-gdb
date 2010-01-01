@@ -1,5 +1,11 @@
 2010-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	Update the "Start of New Year Procedure".
+	* gdbint.texinfo: Add the list of files that need to be updated
+	manually.  Minor reformatting.
+
+2010-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* refcard.tex: Update copyright year in header and text.
 
 2010-01-01  Joel Brobecker  <brobecker@adacore.com>
