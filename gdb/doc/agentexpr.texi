@@ -7,7 +7,7 @@
 
 @c This file is part of the GDB manual.
 @c
-@c Copyright (C) 2003, 2004, 2005, 2006, 2009
+@c Copyright (C) 2003, 2004, 2005, 2006, 2009, 2010
 @c               Free Software Foundation, Inc.
 @c
 @c See the file gdb.texinfo for copying conditions.
