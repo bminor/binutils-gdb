@@ -1,5 +1,12 @@
 2010-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.fortran/array-element.f, gdb.fortran/complex.f,
+	gdb.fortran/derived-type.f90, gdb.fortran/module.f90,
+	gdb.fortran/subarray.f, gdb.mi/array.f: Update year in copyright
+	notice.
+
+2010-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.arch/gdb1291.s, gdb.arch/gdb1431.s: Update year in copyright
 	notice.
 

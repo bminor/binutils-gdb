@@ -1,5 +1,9 @@
 2009-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	Update the copyright hearder to add year 2010 for most GDB files.
+
+2009-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	Fix build failure in inf-ptrace.c.
 	* inf-ptrace.c (inf_ptrace_follow_fork): Fix typo.
 
