@@ -1,5 +1,5 @@
 /* Simulator option handling.
-   Copyright (C) 1996, 1997, 2004, 2007, 2008, 2009
+   Copyright (C) 1996, 1997, 2004, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 

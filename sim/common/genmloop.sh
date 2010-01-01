@@ -1,5 +1,5 @@
 # Generate the main loop of the simulator.
-# Copyright (C) 1996, 1997, 1998, 1999, 2000, 2007, 2008, 2009
+# Copyright (C) 1996, 1997, 1998, 1999, 2000, 2007, 2008, 2009, 2010
 # Free Software Foundation, Inc.
 # Contributed by Cygnus Support.
 #

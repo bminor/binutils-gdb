@@ -1,5 +1,5 @@
 /* Simulator for the moxie processor
-   Copyright (C) 2008, 2009 Free Software Foundation, Inc.
+   Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
    Contributed by Anthony Green
 
 This file is part of GDB, the GNU debugger.

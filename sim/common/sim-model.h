@@ -1,5 +1,5 @@
 /* Architecture, machine, and model support.
-   Copyright (C) 1997, 1998, 1999, 2007, 2008, 2009
+   Copyright (C) 1997, 1998, 1999, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 

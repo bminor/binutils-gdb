@@ -1,5 +1,5 @@
 /* Main simulator entry points specific to the SH5.
-   Copyright (C) 2000, 2008, 2009 Free Software Foundation, Inc.
+   Copyright (C) 2000, 2008, 2009, 2010 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions.
 
 This file is part of the GNU simulators.

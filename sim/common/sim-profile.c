@@ -1,5 +1,5 @@
 /* Default profiling support.
-   Copyright (C) 1996, 1997, 1998, 2000, 2001, 2007, 2008, 2009
+   Copyright (C) 1996, 1997, 1998, 2000, 2001, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 

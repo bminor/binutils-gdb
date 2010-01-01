@@ -1,12 +1,12 @@
 /* System includes and definitions used by the Xilinx MicroBlaze simulator.
-   Copyright (C) 1999 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2010 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions.
 
 This file is part of GDB, the GNU debugger.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
+the Free Software Foundation; either version 3, or (at your option)
 any later version.
 
 This program is distributed in the hope that it will be useful,
