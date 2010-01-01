@@ -1,3 +1,8 @@
+2010-01-01  Joel Brobecker  <brobecker@adacore.com>
+
+	Fix -Wshadow warnings (seen on ppc-aix)
+	* xcofflink.c: Replace finfo by flinfo throughout.
+
 2009-12-31  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf2.c (struct line_sequence): New struct.
