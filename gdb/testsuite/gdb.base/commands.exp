@@ -577,6 +577,19 @@ proc stray_arg0_test { } {
 	"stray_arg0_test #4"
 }
 
+# Test that GDB is able to source a file with an indented comment.
+proc source_file_with_indented_comment {} {
+    set fd [open "file1" w]
+    puts $fd \
+{define my_fun
+    #indented comment
+end
+echo Done!\n}
+    close $fd
+
+    gdb_test "source file1" "Done!" "source file with indented comment"
+}
+
 # Test that GDB can handle arguments when sourcing files recursively.
 # If the arguments are overwritten with ####### then the test has failed.
 proc recursive_source_test {} {
@@ -761,6 +774,7 @@ deprecated_command_test
 bp_deleted_in_command_test
 temporary_breakpoint_commands
 stray_arg0_test
+source_file_with_indented_comment
 recursive_source_test
 if_commands_test
 redefine_hook_test
