@@ -160,7 +160,9 @@ if		{
 		  return 0;
 		}
 
-task		{
+(task|thread)	{
+                  /* This keyword signals the end of the expression and
+                     will be processed separately.  */
 		  while (*lexptr != 't' && *lexptr != 'T')
 		    lexptr--;
 		  yyrestart(NULL);
