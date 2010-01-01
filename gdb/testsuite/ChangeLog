@@ -1,3 +1,8 @@
+2010-01-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.arch/gdb1291.s, gdb.arch/gdb1431.s: Update year in copyright
+	notice.
+
 2010-01-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* lib/mi-support.exp (mi_expect_stop <stopped at wrong place>): Insert
