@@ -1,3 +1,8 @@
+2009-01-01  Joel Brobecker  <brobecker@adacore.com>
+
+	Fix build failure in inf-ptrace.c.
+	* inf-ptrace.c (inf_ptrace_follow_fork): Fix typo.
+
 2010-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* top.c (print_gdb_version): Update copyright year.

@@ -67,8 +67,8 @@ inf_ptrace_follow_fork (struct target_ops *ops, int follow_child)
       child_inf = add_inferior (fpid);
       child_inf->attach_flag = parent_inf->attach_flag;
       copy_terminal_info (child_inf, parent_inf);
-      inf->pspace = parent_inf->pspace;
-      inf->pspace = parent_inf->aspace;
+      child_inf->pspace = parent_inf->pspace;
+      child_inf->aspace = parent_inf->aspace;
 
       /* Before detaching from the parent, remove all breakpoints from
 	 it.  */
