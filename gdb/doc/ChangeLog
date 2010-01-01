@@ -1,5 +1,9 @@
 2010-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* refcard.tex: Update copyright year in header and text.
+
+2010-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* agentexpr.texi: Add 2010 to the list of copyright years.
 	* annotate.texinfo: Likewise.
 	* gdb.texinfo: Likewise.
