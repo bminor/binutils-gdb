@@ -1,5 +1,10 @@
 2010-01-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* cli/cli-script.c (process_next_line): Rename p1 as p_end and p2 as
+	p_start.  Change != comparisons to > and < comparisons.
+
+2010-01-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* cli/cli-script.c (process_next_line): Check P2 overrun.
 
 2009-01-01  Joel Brobecker  <brobecker@adacore.com>

@@ -878,8 +878,8 @@ read_next_line ()
 static enum misc_command_type
 process_next_line (char *p, struct command_line **command, int parse_commands)
 {
-  char *p1;
-  char *p2;
+  char *p_end;
+  char *p_start;
   int not_handled = 0;
 
   /* Not sure what to do here.  */
@@ -887,18 +887,18 @@ process_next_line (char *p, struct command_line **command, int parse_commands)
     return end_command;
 
   /* Strip trailing whitespace.  */
-  p1 = p + strlen (p);
-  while (p1 != p && (p1[-1] == ' ' || p1[-1] == '\t'))
-    p1--;
+  p_end = p + strlen (p);
+  while (p_end > p && (p_end[-1] == ' ' || p_end[-1] == '\t'))
+    p_end--;
 
-  p2 = p;
+  p_start = p;
   /* Strip leading whitespace.  */
-  while (p2 != p1 && (*p2 == ' ' || *p2 == '\t'))
-    p2++;
+  while (p_start < p_end && (*p_start == ' ' || *p_start == '\t'))
+    p_start++;
 
   /* 'end' is always recognized, regardless of parse_commands value. 
      We also permit whitespace before end and after.  */
-  if (p1 - p2 == 3 && !strncmp (p2, "end", 3))
+  if (p_end - p_start == 3 && !strncmp (p_start, "end", 3))
     return end_command;
   
   if (parse_commands)
@@ -906,51 +906,51 @@ process_next_line (char *p, struct command_line **command, int parse_commands)
       /* If commands are parsed, we skip initial spaces. Otherwise,
 	 which is the case for Python commands and documentation
 	 (see the 'document' command), spaces are preserved.  */
-      p = p2;
+      p = p_start;
 
       /* Blanks and comments don't really do anything, but we need to
 	 distinguish them from else, end and other commands which can be
 	 executed.  */
-      if (p1 == p || p[0] == '#')
+      if (p_end == p || p[0] == '#')
 	return nop_command;
 
       /* Is the else clause of an if control structure?  */
-      if (p1 - p == 4 && !strncmp (p, "else", 4))
+      if (p_end - p == 4 && !strncmp (p, "else", 4))
 	return else_command;
 
       /* Check for while, if, break, continue, etc and build a new command
 	 line structure for them.  */
-      if (p1 - p > 5 && !strncmp (p, "while", 5))
+      if (p_end - p > 5 && !strncmp (p, "while", 5))
 	{
 	  char *first_arg;
 	  first_arg = p + 5;
-	  while (first_arg < p1 && isspace (*first_arg))
+	  while (first_arg < p_end && isspace (*first_arg))
 	    first_arg++;
 	  *command = build_command_line (while_control, first_arg);
 	}
-      else if (p1 - p > 2 && !strncmp (p, "if", 2))
+      else if (p_end - p > 2 && !strncmp (p, "if", 2))
 	{
 	  char *first_arg;
 	  first_arg = p + 2;
-	  while (first_arg < p1 && isspace (*first_arg))
+	  while (first_arg < p_end && isspace (*first_arg))
 	    first_arg++;
 	  *command = build_command_line (if_control, first_arg);
 	}
-      else if (p1 - p >= 8 && !strncmp (p, "commands", 8))
+      else if (p_end - p >= 8 && !strncmp (p, "commands", 8))
 	{
 	  char *first_arg;
 	  first_arg = p + 8;
-	  while (first_arg < p1 && isspace (*first_arg))
+	  while (first_arg < p_end && isspace (*first_arg))
 	    first_arg++;
 	  *command = build_command_line (commands_control, first_arg);
 	}
-      else if (p1 - p == 6 && !strncmp (p, "python", 6))
+      else if (p_end - p == 6 && !strncmp (p, "python", 6))
 	{
 	  /* Note that we ignore the inline "python command" form
 	     here.  */
 	  *command = build_command_line (python_control, "");
 	}
-      else if (p1 - p == 10 && !strncmp (p, "loop_break", 10))
+      else if (p_end - p == 10 && !strncmp (p, "loop_break", 10))
 	{
 	  *command = (struct command_line *)
 	    xmalloc (sizeof (struct command_line));
@@ -960,7 +960,7 @@ process_next_line (char *p, struct command_line **command, int parse_commands)
 	  (*command)->body_count = 0;
 	  (*command)->body_list = NULL;
 	}
-      else if (p1 - p == 13 && !strncmp (p, "loop_continue", 13))
+      else if (p_end - p == 13 && !strncmp (p, "loop_continue", 13))
 	{
 	  *command = (struct command_line *)
 	    xmalloc (sizeof (struct command_line));
@@ -980,7 +980,7 @@ process_next_line (char *p, struct command_line **command, int parse_commands)
       *command = (struct command_line *)
 	xmalloc (sizeof (struct command_line));
       (*command)->next = NULL;
-      (*command)->line = savestring (p, p1 - p);
+      (*command)->line = savestring (p, p_end - p);
       (*command)->control_type = simple_control;
       (*command)->body_count = 0;
       (*command)->body_list = NULL;
