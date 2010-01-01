@@ -1,5 +1,9 @@
 2010-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* top.c (print_gdb_version): Update copyright year.
+
+2010-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	Fix break *FUN'address thread NUM.
 	* ada-lex.l (task): Expand rule to also match the thread keyword.
 
