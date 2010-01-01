@@ -893,7 +893,7 @@ process_next_line (char *p, struct command_line **command, int parse_commands)
 
   p2 = p;
   /* Strip leading whitespace.  */
-  while (*p2 == ' ' || *p2 == '\t')
+  while (p2 != p1 && (*p2 == ' ' || *p2 == '\t'))
     p2++;
 
   /* 'end' is always recognized, regardless of parse_commands value. 

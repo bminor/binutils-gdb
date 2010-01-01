@@ -1,3 +1,7 @@
+2010-01-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* cli/cli-script.c (process_next_line): Check P2 overrun.
+
 2009-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	Update the copyright hearder to add year 2010 for most GDB files.
