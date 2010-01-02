@@ -1,3 +1,29 @@
+2010-01-02  Doug Evans  <dje@sebabeach.org>
+
+	* cgen-asm.in: Update copyright year.
+	* cgen-dis.in: Update copyright year.
+	* cgen-ibld.in: Update copyright year.
+	* fr30-asm.c, * fr30-desc.c, * fr30-desc.h, * fr30-dis.c,
+	* fr30-ibld.c, * fr30-opc.c, * fr30-opc.h, * frv-asm.c, * frv-desc.c,
+	* frv-desc.h, * frv-dis.c, * frv-ibld.c, * frv-opc.c, * frv-opc.h,
+	* ip2k-asm.c, * ip2k-desc.c, * ip2k-desc.h, * ip2k-dis.c,
+	* ip2k-ibld.c, * ip2k-opc.c, * ip2k-opc.h, * iq2000-asm.c,
+	* iq2000-desc.c, * iq2000-desc.h, * iq2000-dis.c, * iq2000-ibld.c,
+	* iq2000-opc.c, * iq2000-opc.h, * lm32-asm.c, * lm32-desc.c,
+	* lm32-desc.h, * lm32-dis.c, * lm32-ibld.c, * lm32-opc.c, * lm32-opc.h,
+	* lm32-opinst.c, * m32c-asm.c, * m32c-desc.c, * m32c-desc.h,
+	* m32c-dis.c, * m32c-ibld.c, * m32c-opc.c, * m32c-opc.h, * m32r-asm.c,
+	* m32r-desc.c, * m32r-desc.h, * m32r-dis.c, * m32r-ibld.c,
+	* m32r-opc.c, * m32r-opc.h, * m32r-opinst.c, * mep-asm.c, * mep-desc.c,
+	* mep-desc.h, * mep-dis.c, * mep-ibld.c, * mep-opc.c, * mep-opc.h,
+	* mt-asm.c, * mt-desc.c, * mt-desc.h, * mt-dis.c, * mt-ibld.c,
+	* mt-opc.c, * mt-opc.h, * openrisc-asm.c, * openrisc-desc.c,
+	* openrisc-desc.h, * openrisc-dis.c, * openrisc-ibld.c,
+	* openrisc-opc.c, * openrisc-opc.h, * xc16x-asm.c, * xc16x-desc.c,
+	* xc16x-desc.h, * xc16x-dis.c, * xc16x-ibld.c, * xc16x-opc.c,
+	* xc16x-opc.h, * xstormy16-asm.c, * xstormy16-desc.c,
+	* xstormy16-desc.h, * xstormy16-dis.c, * xstormy16-ibld.c,
+	* xstormy16-opc.c, * xstormy16-opc.h: Regenerate.
 
 For older changes see ChangeLog-2009
 
