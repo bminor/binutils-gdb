@@ -1,3 +1,12 @@
+2010-01-02  Doug Evans  <dje@sebabeach.org>
+
+	* cris/arch.c, * cris/arch.h, * cris/cpuall.h, * cris/cpuv10.c,
+	* cris/cpuv10.h, * cris/cpuv32.c, * cris/cpuv32.h, * cris/cris-desc.c,
+	* cris/cris-desc.h, * cris/cris-opc.h, * cris/decodev10.c,
+	* cris/decodev10.h, * cris/decodev32.c, * cris/decodev32.h,
+	* cris/modelv10.c, * cris/modelv32.c, * cris/semcrisv10f-switch.c,
+	* cris/semcrisv32f-switch.c: Regenerate, update copyright year.
+
 2010-01-01  Doug Evans  <dje@sebabeach.org>
 
 	* cris/mloop.in: Fix copyright year update snafu.

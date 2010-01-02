@@ -1,3 +1,11 @@
+2010-01-02  Doug Evans  <dje@sebabeach.org>
+
+	* arch.c, * arch.h, * cpu.c, * cpu.h, * cpu2.c, * cpu2.h, * cpuall.h,
+	* cpux.c, * cpux.h, * decode.c, * decode.h, * decode2.c, * decode2.h,
+	* decodex.c, * decodex.h, * model.c, * model2.c, * modelx.c,
+	* sem-switch.c, * sem.c, * sem2-switch.c, * semx-switch.c: Regenerate,
+	update copyright year.
+
 2009-11-22  Doug Evans  <dje@sebabeach.org>
 
 	* cpu.h: Regenerate.

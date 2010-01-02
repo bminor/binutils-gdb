@@ -1,3 +1,11 @@
+2010-01-02  Doug Evans  <dje@sebabeach.org>
+
+	* arch.c, * arch.h, * cpu.c, * cpu.h, * cpuall.h, * decode-compact.c,
+	* decode-compact.h, * decode-media.c, * decode-media.h,
+	* defs-compact.h, * defs-media.h, * sem-compact-switch.c,
+	* sem-compact.c, * sem-media-switch.c, * sem-media.c, * sh-desc.c,
+	* sh-desc.h, * sh-opc.h: Regenerate, update copyright year.
+
 2009-11-22  Doug Evans  <dje@sebabeach.org>
 
 	* cpu.h: Regenerate.
