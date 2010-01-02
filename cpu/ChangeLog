@@ -1,3 +1,7 @@
+2010-01-02  Doug Evans  <dje@sebabeach.org>
+
+	* m32c.opc (parse_signed16): Fix typo.
+
 2009-12-11  Nick Clifton  <nickc@redhat.com>
 
 	* frv.opc: Fix shadowed variable warnings.

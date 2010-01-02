@@ -1,6 +1,6 @@
 /* m32c opcode support.  -*- C -*-
 
-   Copyright 2005, 2007, 2009 Free Software Foundation, Inc.
+   Copyright 2005, 2007, 2009, 2010 Free Software Foundation, Inc.
 
    Contributed by Red Hat Inc; developed under contract from Renesas
 
@@ -367,7 +367,7 @@ parse_signed16 (CGEN_CPU_DESC cd, const char **strp,
 
       if (errmsg == NULL
   	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-	value &= 0xffff;
+	val &= 0xffff;
 
       value = val;
       *valuep = value;
