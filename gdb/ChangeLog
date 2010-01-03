@@ -1,3 +1,11 @@
+2010-01-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbtypes.c (check_typedef): New comment on type length.
+	* value.c (allocate_value_lazy): Remove the unused atype variable.  New
+	comment on type length.
+	(value_primitive_field): Keep the original TYPE value, new comment.
+
 2010-01-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* cli/cli-script.c (process_next_line): Rename p1 as p_end and p2 as

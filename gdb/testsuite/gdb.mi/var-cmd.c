@@ -494,7 +494,7 @@ void do_bitfield_tests ()
     mi_create_varobj V d "create varobj for Data"
     mi_list_varobj_children "V" {
         {"V.alloc" "alloc" "0" "int"}
-        {"V.sharable" "sharable" "0" "unsigned int"}
+        {"V.sharable" "sharable" "0" "uint_for_mi_testing"}
     } "list children of Data"
     mi_check_varobj_value V.sharable 3 "access bitfield"
     :*/
