@@ -1,3 +1,11 @@
+2010-01-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbtypes.c (check_typedef): New comment on type length.
+	* value.c (allocate_value_lazy): Remove the unused atype variable.  New
+	comment on type length.
+	(value_primitive_field): Keep the original TYPE value, new comment.
+
 2009-12-22  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set version to 7.0.1.20091222-cvs.

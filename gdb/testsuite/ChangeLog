@@ -1,3 +1,8 @@
+2010-01-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.mi/var-cmd.c (do_bitfield_tests): Change "V.sharable" type to
+	"uint_for_mi_testing".
+
 2009-12-21  Vladimir Prus  <vladimir@codesourcery.com>
 
 	PR gdb/10884

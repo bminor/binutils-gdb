@@ -1342,12 +1342,17 @@ stub_noname_complaint (void)
    symbols which contain a full definition for the type.
 
    This used to be coded as a macro, but I don't think it is called 
-   often enough to merit such treatment.  */
+   often enough to merit such treatment.
 
-/* Find the real type of TYPE.  This function returns the real type,
+   Find the real type of TYPE.  This function returns the real type,
    after removing all layers of typedefs and completing opaque or stub
    types.  Completion changes the TYPE argument, but stripping of
-   typedefs does not.  */
+   typedefs does not.
+
+   If TYPE is a TYPE_CODE_TYPEDEF, its length is (also) set to the length of
+   the target type instead of zero.  However, in the case of TYPE_CODE_TYPEDEF
+   check_typedef can still return different type than the original TYPE
+   pointer.  */
 
 struct type *
 check_typedef (struct type *type)
