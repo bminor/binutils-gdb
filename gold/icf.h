@@ -1,6 +1,6 @@
 // icf.h --  Identical Code Folding
 
-// Copyright 2009 Free Software Foundation, Inc.
+// Copyright 2009, 2010 Free Software Foundation, Inc.
 // Written by Sriraman Tallam <tmsriram@google.com>.
 
 // This file is part of gold.
@@ -138,6 +138,17 @@ class Icf
   Symbol_list symbol_reloc_list_;
   Addend_list addend_reloc_list_;
 };
+
+// This function returns true if this section corresponds to a function that
+// should be considered by icf as a possible candidate for folding.  Some
+// earlier gcc versions, like 4.0.3, put constructors and destructors in
+// .gnu.linkonce.t sections and hence should be included too.
+inline bool
+is_section_foldable_candidate(const char* section_name)
+{
+  return (is_prefix_of(".text", section_name)
+          || is_prefix_of(".gnu.linkonce.t", section_name));
+}
 
 } // End of namespace gold.
 

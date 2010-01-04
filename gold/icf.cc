@@ -1,6 +1,6 @@
 // icf.cc -- Identical Code Folding.
 //
-// Copyright 2009 Free Software Foundation, Inc.
+// Copyright 2009, 2010 Free Software Foundation, Inc.
 // Written by Sriraman Tallam <tmsriram@google.com>.
 
 // This file is part of gold.
@@ -23,7 +23,7 @@
 // Identical Code Folding Algorithm
 // ----------------------------------
 // Detecting identical functions is done here and the basic algorithm
-// is as follows.  A checksum is computed on each .text section using
+// is as follows.  A checksum is computed on each foldable section using
 // its contents and relocations.  If the symbol name corresponding to
 // a relocation is known it is used to compute the checksum.  If the
 // symbol name is not known the stringified name of the object and the
@@ -34,8 +34,8 @@
 // checking the contents when two sections have the same checksum.
 //
 // However, two functions A and B with identical text but with
-// relocations pointing to different .text sections can be identical if
-// the corresponding .text sections to which their relocations point to
+// relocations pointing to different foldable sections can be identical if
+// the corresponding foldable sections to which their relocations point to
 // turn out to be identical.  Hence, this checksumming process must be
 // done repeatedly until convergence is obtained.  Here is an example for
 // the following case :
@@ -102,7 +102,7 @@
 // behaviour.
 //
 //
-// How to run  : --icf
+// How to run  : --icf=[safe|all|none]
 // Optional parameters : --icf-iterations <num> --print-icf-sections
 //
 // Performance : Less than 20 % link-time overhead on industry strength
@@ -570,17 +570,20 @@ Icf::find_identical_sections(const Input_objects* input_objects,
       for (unsigned int i = 0;i < (*p)->shnum(); ++i)
         {
 	  const char* section_name = (*p)->section_name(i).c_str();
-          // Only looking to fold functions, so just look at .text sections.
-          if (!is_prefix_of(".text.", section_name))
+          if (!is_section_foldable_candidate(section_name))
             continue;
           if (!(*p)->is_section_included(i))
             continue;
           if (parameters->options().gc_sections()
               && symtab->gc()->is_section_garbage(*p, i))
               continue;
-	  // With --icf=safe, check if mangled name is a ctor or a dtor.
+	  // With --icf=safe, check if the mangled function name is a ctor
+	  // or a dtor.  The mangled function name can be obtained from the
+	  // section name by stripping the section prefix.
+	  const char* mangled_func_name = strrchr(section_name, '.');
+	  gold_assert(mangled_func_name != NULL);
 	  if (parameters->options().icf_safe_folding()
-	      && !is_function_ctor_or_dtor(section_name + 6))
+	      && !is_function_ctor_or_dtor(mangled_func_name + 1))
 	    continue;
           this->id_section_.push_back(Section_id(*p, i));
           this->section_id_[Section_id(*p, i)] = section_num;

@@ -1,6 +1,6 @@
 // gc.h -- garbage collection of unused sections
 
-// Copyright 2009 Free Software Foundation, Inc.
+// Copyright 2009, 2010 Free Software Foundation, Inc.
 // Written by Sriraman Tallam <tmsriram@google.com>.
 
 // This file is part of gold.
@@ -163,7 +163,7 @@ gc_process_relocs(
   bool is_icf_tracked = false;
 
   if (parameters->options().icf_enabled()
-      && is_prefix_of(".text.", (src_obj)->section_name(src_indx).c_str()))
+      && is_section_foldable_candidate(src_obj->section_name(src_indx).c_str()))
     {
       is_icf_tracked = true;
       Section_id src_id(src_obj, src_indx);
