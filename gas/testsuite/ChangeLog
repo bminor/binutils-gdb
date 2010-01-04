@@ -1,3 +1,9 @@
+2010-01-04  Daniel Gutson  <dgutson@codesourcery.com>
+
+	* gas/arm/neon-addressing-bad.d: New test case.
+	* gas/arm/neon-addressing-bad.s: New file.
+	* gas/arm/neon-addressing-bad.l: New file.
+
 2010-01-03  Daniel Gutson  <dgutson@codesourcery.com>
 
 	* gas/arm/neon-suffix-bad.d: New test case.

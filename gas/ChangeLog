@@ -1,3 +1,8 @@
+2010-01-04  Daniel Gutson  <dgutson@codesourcery.com>
+
+	* config/tc-arm.c (do_neon_ldx_stx): Added
+	validation for vector load/store insns.
+
 2010-01-04  Edmar Wienskoski  <edmar@freescale.com>
 
 	* config/tc-ppc.c (md_show_usage): Document -me500mc64.

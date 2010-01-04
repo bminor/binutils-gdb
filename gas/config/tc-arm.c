@@ -14810,6 +14810,9 @@ do_neon_ld_dup (void)
 static void
 do_neon_ldx_stx (void)
 {
+  if (inst.operands[1].isreg)
+    constraint (inst.operands[1].reg == REG_PC, BAD_PC);
+
   switch (NEON_LANE (inst.operands[0].imm))
     {
     case NEON_INTERLEAVE_LANES:
