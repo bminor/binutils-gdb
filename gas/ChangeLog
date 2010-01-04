@@ -1,5 +1,14 @@
 2010-01-04  Daniel Gutson  <dgutson@codesourcery.com>
 
+	* config/tc-arm.c (do_neon_logic): Accept imm value
+	in the third operand too.
+	(operand_parse_code): OP_RNDQ_IMVNb renamed to
+	OP_RNDQ_Ibig.
+	(parse_operands): OP_NILO case removed, applied renaming.
+	(insns): Neon shape changed for some logic instructions.
+
+2010-01-04  Daniel Gutson  <dgutson@codesourcery.com>
+
 	* config/tc-arm.c (do_neon_ldx_stx): Added
 	validation for vector load/store insns.
 

@@ -5768,7 +5768,6 @@ enum operand_parse_code
   OP_NRDLST,    /* Neon double-precision register list (d0-d31, qN aliases) */
   OP_NSTRLST,   /* Neon element/structure list */
 
-  OP_NILO,      /* Neon immediate/logic operands 2 or 2+3. (VBIC, VORR...)  */
   OP_RNDQ_I0,   /* Neon D or Q reg, or immediate zero.  */
   OP_RVSD_I0,	/* VFP S or D reg, or immediate zero.  */
   OP_RR_RNSC,   /* ARM reg or Neon scalar.  */
@@ -5776,7 +5775,7 @@ enum operand_parse_code
   OP_RNDQ_RNSC, /* Neon D or Q reg, or Neon scalar.  */
   OP_RND_RNSC,  /* Neon D reg, or Neon scalar.  */
   OP_VMOV,      /* Neon VMOV operands.  */
-  OP_RNDQ_IMVNb,/* Neon D or Q reg, or immediate good for VMVN.  */
+  OP_RNDQ_Ibig,	/* Neon D or Q reg, or big immediate for logic and VMVN.  */
   OP_RNDQ_I63b, /* Neon D or Q reg, or immediate for shift.  */
   OP_RIWR_I32z, /* iWMMXt wR register, or immediate 0 .. 32 for iWMMXt2.  */
 
@@ -6008,36 +6007,6 @@ parse_operands (char *str, const unsigned char *pattern)
            scalars are accepted here, so deal with those in later code.  */
         case OP_RNSC:  po_scalar_or_goto (8, failure);    break;
 
-        /* WARNING: We can expand to two operands here. This has the potential
-           to totally confuse the backtracking mechanism! It will be OK at
-           least as long as we don't try to use optional args as well,
-           though.  */
-        case OP_NILO:
-          {
-            po_reg_or_goto (REG_TYPE_NDQ, try_imm);
-	    inst.operands[i].present = 1;
-            i++;
-            skip_past_comma (&str);
-            po_reg_or_goto (REG_TYPE_NDQ, one_reg_only);
-            break;
-            one_reg_only:
-            /* Optional register operand was omitted. Unfortunately, it's in
-               operands[i-1] and we need it to be in inst.operands[i]. Fix that
-               here (this is a bit grotty).  */
-            inst.operands[i] = inst.operands[i-1];
-            inst.operands[i-1].present = 0;
-            break;
-            try_imm:
-	    /* There's a possibility of getting a 64-bit immediate here, so
-	       we need special handling.  */
-	    if (parse_big_immediate (&str, i) == FAIL)
-	      {
-		inst.error = _("immediate value is out of range");
-		goto failure;
-	      }
-          }
-          break;
-
         case OP_RNDQ_I0:
           {
             po_reg_or_goto (REG_TYPE_NDQ, try_imm0);
@@ -6093,11 +6062,11 @@ parse_operands (char *str, const unsigned char *pattern)
           po_misc_or_fail (parse_neon_mov (&str, &i) == FAIL);
           break;
 
-        case OP_RNDQ_IMVNb:
+        case OP_RNDQ_Ibig:
           {
-            po_reg_or_goto (REG_TYPE_NDQ, try_mvnimm);
+            po_reg_or_goto (REG_TYPE_NDQ, try_immbig);
             break;
-            try_mvnimm:
+            try_immbig:
             /* There's a possibility of getting a 64-bit immediate here, so
                we need special handling.  */
             if (parse_big_immediate (&str, i) == FAIL)
@@ -12910,7 +12879,12 @@ do_neon_logic (void)
     }
   else
     {
-      enum neon_shape rs = neon_select_shape (NS_DI, NS_QI, NS_NULL);
+      const int three_ops_form = (inst.operands[2].present
+				  && !inst.operands[2].isreg);
+      const int immoperand = (three_ops_form ? 2 : 1);
+      enum neon_shape rs = (three_ops_form
+			    ? neon_select_shape (NS_DDI, NS_QQI, NS_NULL)
+			    : neon_select_shape (NS_DI, NS_QI, NS_NULL));
       struct neon_type_el et = neon_check_type (2, rs,
         N_I8 | N_I16 | N_I32 | N_I64 | N_F32 | N_KEY, N_EQK);
       enum neon_opc opcode = (enum neon_opc) inst.instruction & 0x0fffffff;
@@ -12920,15 +12894,19 @@ do_neon_logic (void)
       if (et.type == NT_invtype)
         return;
 
+      if (three_ops_form)
+	constraint (inst.operands[0].reg != inst.operands[1].reg,
+		    _("first and second operands shall be the same register"));
+
       NEON_ENCODE (IMMED, inst);
 
-      immbits = inst.operands[1].imm;
+      immbits = inst.operands[immoperand].imm;
       if (et.size == 64)
 	{
 	  /* .i64 is a pseudo-op, so the immediate must be a repeating
 	     pattern.  */
-	  if (immbits != (inst.operands[1].regisimm ?
-			  inst.operands[1].reg : 0))
+	  if (immbits != (inst.operands[immoperand].regisimm ?
+			  inst.operands[immoperand].reg : 0))
 	    {
 	      /* Set immbits to an invalid constant.  */
 	      immbits = 0xdeadbeef;
@@ -17479,16 +17457,16 @@ static const struct asm_opcode insns[] =
  nUF(vqshl,     _vqshl,   3, (RNDQ, oRNDQ, RNDQ_I63b), neon_qshl_imm),
  nUF(vqshlq,    _vqshl,   3, (RNQ,  oRNQ,  RNDQ_I63b), neon_qshl_imm),
   /* Logic ops, types optional & ignored.  */
- nUF(vand,      _vand,    2, (RNDQ, NILO),        neon_logic),
- nUF(vandq,     _vand,    2, (RNQ,  NILO),        neon_logic),
- nUF(vbic,      _vbic,    2, (RNDQ, NILO),        neon_logic),
- nUF(vbicq,     _vbic,    2, (RNQ,  NILO),        neon_logic),
- nUF(vorr,      _vorr,    2, (RNDQ, NILO),        neon_logic),
- nUF(vorrq,     _vorr,    2, (RNQ,  NILO),        neon_logic),
- nUF(vorn,      _vorn,    2, (RNDQ, NILO),        neon_logic),
- nUF(vornq,     _vorn,    2, (RNQ,  NILO),        neon_logic),
- nUF(veor,      _veor,    3, (RNDQ, oRNDQ, RNDQ), neon_logic),
- nUF(veorq,     _veor,    3, (RNQ,  oRNQ,  RNQ),  neon_logic),
+ nUF(vand,      _vand,    3, (RNDQ, oRNDQ, RNDQ_Ibig), neon_logic),
+ nUF(vandq,     _vand,    3, (RNQ,  oRNQ,  RNDQ_Ibig), neon_logic),
+ nUF(vbic,      _vbic,    3, (RNDQ, oRNDQ, RNDQ_Ibig), neon_logic),
+ nUF(vbicq,     _vbic,    3, (RNQ,  oRNQ,  RNDQ_Ibig), neon_logic),
+ nUF(vorr,      _vorr,    3, (RNDQ, oRNDQ, RNDQ_Ibig), neon_logic),
+ nUF(vorrq,     _vorr,    3, (RNQ,  oRNQ,  RNDQ_Ibig), neon_logic),
+ nUF(vorn,      _vorn,    3, (RNDQ, oRNDQ, RNDQ_Ibig), neon_logic),
+ nUF(vornq,     _vorn,    3, (RNQ,  oRNQ,  RNDQ_Ibig), neon_logic),
+ nUF(veor,      _veor,    3, (RNDQ, oRNDQ, RNDQ),      neon_logic),
+ nUF(veorq,     _veor,    3, (RNQ,  oRNQ,  RNQ),       neon_logic),
   /* Bitfield ops, untyped.  */
  NUF(vbsl,      1100110, 3, (RNDQ, RNDQ, RNDQ), neon_bitfield),
  NUF(vbslq,     1100110, 3, (RNQ,  RNQ,  RNQ),  neon_bitfield),
@@ -17587,8 +17565,8 @@ static const struct asm_opcode insns[] =
   /* CVT with optional immediate for fixed-point variant.  */
  nUF(vcvtq,     _vcvt,    3, (RNQ, RNQ, oI32b), neon_cvt),
 
- nUF(vmvn,      _vmvn,    2, (RNDQ, RNDQ_IMVNb), neon_mvn),
- nUF(vmvnq,     _vmvn,    2, (RNQ,  RNDQ_IMVNb), neon_mvn),
+ nUF(vmvn,      _vmvn,    2, (RNDQ, RNDQ_Ibig), neon_mvn),
+ nUF(vmvnq,     _vmvn,    2, (RNQ,  RNDQ_Ibig), neon_mvn),
 
   /* Data processing, three registers of different lengths.  */
   /* Dyadic, long insns. Types S8 S16 S32 U8 U16 U32.  */
