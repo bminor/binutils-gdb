@@ -1,3 +1,11 @@
+2010-01-04  Joel Brobecker  <brobecker@adacore.com>
+
+	Fix -Wshadow warnings in dwarf2.c (seen on alpha-tru64).
+	* dwarf2.c (concat_filename): Rename dirname with dir_name
+	to void shadowing the dirname function.
+	Rename subdirname with subdir_name to stay consistent with
+	the new dir_name variable name.
+
 2010-01-04  Edmar Wienskoski  <edmar@freescale.com>
 
 	* archures.c: Add bfd_mach_ppc_e500mc64.

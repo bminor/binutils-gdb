@@ -1109,40 +1109,40 @@ concat_filename (struct line_info_table *table, unsigned int file)
 
   if (!IS_ABSOLUTE_PATH (filename))
     {
-      char *dirname = NULL;
-      char *subdirname = NULL;
+      char *dir_name = NULL;
+      char *subdir_name = NULL;
       char *name;
       size_t len;
 
       if (table->files[file - 1].dir)
-	subdirname = table->dirs[table->files[file - 1].dir - 1];
+	subdir_name = table->dirs[table->files[file - 1].dir - 1];
 
-      if (!subdirname || !IS_ABSOLUTE_PATH (subdirname))
-	dirname = table->comp_dir;
+      if (!subdir_name || !IS_ABSOLUTE_PATH (subdir_name))
+	dir_name = table->comp_dir;
 
-      if (!dirname)
+      if (!dir_name)
 	{
-	  dirname = subdirname;
-	  subdirname = NULL;
+	  dir_name = subdir_name;
+	  subdir_name = NULL;
 	}
 
-      if (!dirname)
+      if (!dir_name)
 	return strdup (filename);
 
-      len = strlen (dirname) + strlen (filename) + 2;
+      len = strlen (dir_name) + strlen (filename) + 2;
 
-      if (subdirname)
+      if (subdir_name)
 	{
-	  len += strlen (subdirname) + 1;
+	  len += strlen (subdir_name) + 1;
 	  name = (char *) bfd_malloc (len);
 	  if (name)
-	    sprintf (name, "%s/%s/%s", dirname, subdirname, filename);
+	    sprintf (name, "%s/%s/%s", dir_name, subdir_name, filename);
 	}
       else
 	{
 	  name = (char *) bfd_malloc (len);
 	  if (name)
-	    sprintf (name, "%s/%s", dirname, filename);
+	    sprintf (name, "%s/%s", dir_name, filename);
 	}
 
       return name;
