@@ -49,6 +49,7 @@
 #include "solib.h"
 #include "parser-defs.h"
 #include "charset.h"
+#include "arch-utils.h"
 
 #ifdef TUI
 #include "tui/tui.h"		/* For tui_active et.al.   */
@@ -1605,6 +1606,20 @@ do_one_display (struct display *d)
 
   if (d->enabled_p == 0)
     return;
+
+  /* The expression carries the architecture that was used at parse time.
+     This is a problem if the expression depends on architecture features
+     (e.g. register numbers), and the current architecture is now different.
+     For example, a display statement like "display/i $pc" is expected to
+     display the PC register of the current architecture, not the arch at
+     the time the display command was given.  Therefore, we re-parse the
+     expression if the current architecture has changed.  */
+  if (d->exp != NULL && d->exp->gdbarch != get_current_arch ())
+    {
+      xfree (d->exp);
+      d->exp = NULL;
+      d->block = NULL;
+    }
 
   if (d->exp == NULL)
     {

@@ -1,3 +1,8 @@
+2010-01-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* printcmd.c: Include "arch-utils.h".
+	(do_one_display): Re-parse expression if current architecture changed.
+
 2010-01-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 
