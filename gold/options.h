@@ -588,6 +588,10 @@ class General_options
               N_("Only set DT_NEEDED for dynamic libs if used"),
               N_("Always DT_NEEDED for dynamic libs"));
 
+  DEFINE_enum(assert, options::ONE_DASH, '\0', NULL,
+	      N_("Ignored"), N_("[ignored]"),
+	      {"definitions", "nodefinitions", "nosymbolic", "pure-text"});
+
   // This should really be an "enum", but it's too easy for folks to
   // forget to update the list as they add new targets.  So we just
   // accept any string.  We'll fail later (when the string is parsed),
@@ -692,8 +696,14 @@ class General_options
   DEFINE_string(fini, options::ONE_DASH, '\0', "_fini",
                 N_("Call SYMBOL at unload-time"), N_("SYMBOL"));
 
+  DEFINE_bool(g, options::EXACTLY_ONE_DASH, '\0', false,
+	      N_("Ignored"), NULL);
+
   DEFINE_string(soname, options::ONE_DASH, 'h', NULL,
                 N_("Set shared library name"), N_("FILENAME"));
+
+  DEFINE_bool(i, options::EXACTLY_ONE_DASH, '\0', false,
+	      N_("Ignored"), NULL);
 
   DEFINE_double(hash_bucket_empty_fraction, options::TWO_DASHES, '\0', 0.0,
 		N_("Min fraction of empty buckets in dynamic hash"),
@@ -845,7 +855,7 @@ class General_options
               N_("Use less memory and more disk I/O "
                  "(included only for compatibility with GNU ld)"), NULL);
 
-  DEFINE_bool(shared, options::ONE_DASH, '\0', false,
+  DEFINE_bool(shared, options::ONE_DASH, 'G', false,
               N_("Generate shared library"), NULL);
 
   DEFINE_bool(Bshareable, options::ONE_DASH, '\0', false,

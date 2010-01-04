@@ -1,3 +1,9 @@
+2010-01-04  Ian Lance Taylor  <iant@google.com>
+
+	PR 10980
+	* options.h (class General_options): Add -G as a short version of
+	--shared.  Add no-op options -assert, -g, and -i.
+
 2010-01-04  Sriraman Tallam  <tmsriram@google.com>
 
 	* gc.h (gc_process_relocs): Call is_section_foldable_candidate to
