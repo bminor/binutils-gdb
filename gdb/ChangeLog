@@ -1,5 +1,17 @@
 2010-01-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* regset.h (struct core_regset_section): Add HUMAN_NAME.
+	* i386-linux-tdep.c (i386_linux_regset_sections): Fill in HUMAN_NAME.
+	* ppc-linux-tdep.c (ppc_linux_vsx_regset_sections): Likewise.
+	(ppc_linux_vmx_regset_sections): Likewise.
+	(ppc_linux_fp_regset_sections): Likewise.
+
+	* corelow.c (get_core_register_section): Constify arguments.
+	(get_core_registers): Use gdbarch_core_regset_sections instead
+	of hard-coded platform-specific register section names.
+
+2010-01-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* dwarf2loc.c (read_pieced_value): If a piece occupies part of
 	a register, assume the least-signficant part is used.
 	(write_pieced_value): Likewise.

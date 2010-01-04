@@ -29,6 +29,7 @@ struct core_regset_section
 {
   const char *sect_name;
   int size;
+  const char *human_name;
 };
 
 /* Data structure describing a register set.  */

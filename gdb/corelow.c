@@ -508,9 +508,9 @@ deprecated_core_resize_section_table (int num_added)
 
 static void
 get_core_register_section (struct regcache *regcache,
-			   char *name,
+			   const char *name,
 			   int which,
-			   char *human_name,
+			   const char *human_name,
 			   int required)
 {
   static char *section_name = NULL;
@@ -591,6 +591,7 @@ static void
 get_core_registers (struct target_ops *ops,
 		    struct regcache *regcache, int regno)
 {
+  struct core_regset_section *sect_list;
   int i;
 
   if (!(core_gdbarch && gdbarch_regset_from_core_section_p (core_gdbarch))
@@ -601,16 +602,30 @@ get_core_registers (struct target_ops *ops,
       return;
     }
 
-  get_core_register_section (regcache,
-			     ".reg", 0, "general-purpose", 1);
-  get_core_register_section (regcache,
-			     ".reg2", 2, "floating-point", 0);
-  get_core_register_section (regcache,
-			     ".reg-xfp", 3, "extended floating-point", 0);
-  get_core_register_section (regcache,
-  			     ".reg-ppc-vmx", 3, "ppc Altivec", 0);
-  get_core_register_section (regcache,
-			     ".reg-ppc-vsx", 4, "POWER7 VSX", 0);
+  sect_list = gdbarch_core_regset_sections (get_regcache_arch (regcache));
+  if (sect_list)
+    while (sect_list->sect_name != NULL)
+      {
+        if (strcmp (sect_list->sect_name, ".reg") == 0)
+	  get_core_register_section (regcache, sect_list->sect_name,
+				     0, sect_list->human_name, 1);
+        else if (strcmp (sect_list->sect_name, ".reg2") == 0)
+	  get_core_register_section (regcache, sect_list->sect_name,
+				     2, sect_list->human_name, 0);
+	else
+	  get_core_register_section (regcache, sect_list->sect_name,
+				     3, sect_list->human_name, 0);
+
+	sect_list++;
+      }
+
+  else
+    {
+      get_core_register_section (regcache,
+				 ".reg", 0, "general-purpose", 1);
+      get_core_register_section (regcache,
+				 ".reg2", 2, "floating-point", 0);
+    }
 
   /* Supply dummy value for all registers not found in the core.  */
   for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)

@@ -49,9 +49,9 @@
 /* Supported register note sections.  */
 static struct core_regset_section i386_linux_regset_sections[] =
 {
-  { ".reg", 144 },
-  { ".reg2", 108 },
-  { ".reg-xfp", 512 },
+  { ".reg", 144, "general-purpose" },
+  { ".reg2", 108, "floating-point" },
+  { ".reg-xfp", 512, "extended floating-point" },
   { NULL, 0 }
 };
 
