@@ -98,7 +98,7 @@
 2010-01-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* dwarf2loc.c (read_pieced_value): If a piece occupies part of
-	a register, assume the least-signficant part is used.
+	a register, assume the least-significant part is used.
 	(write_pieced_value): Likewise.
 
 2010-01-04  Ulrich Weigand  <uweigand@de.ibm.com>
