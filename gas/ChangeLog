@@ -1,3 +1,7 @@
+2010-01-04  Edmar Wienskoski  <edmar@freescale.com>
+
+	* config/tc-ppc.c (md_show_usage): Document -me500mc64.
+
 2010-01-03  Daniel Gutson  <dgutson@codesourcery.com>
 
 	* config/tc-arm.c (struct arm_it): New flag 'is_neon'.
@@ -36,7 +40,7 @@
 	(do_neon_cvt): Likewise.
 	(do_neon_mvn): Likewise.
 	(do_neon_dup): Likewise.
-	(md_assemble): Call check_neon_suffixes (). 
+	(md_assemble): Call check_neon_suffixes ().
 
 For older changes see ChangeLog-2009
 

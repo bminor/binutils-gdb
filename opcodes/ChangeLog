@@ -1,3 +1,7 @@
+2010-01-04  Edmar Wienskoski  <edmar@freescale.com>
+
+	* ppc-dis.c (ppc_opts): Add entry for "e500mc64".
+
 2010-01-02  Doug Evans  <dje@sebabeach.org>
 
 	* cgen-asm.in: Update copyright year.

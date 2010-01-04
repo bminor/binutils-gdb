@@ -1,6 +1,6 @@
 /* tc-ppc.c -- Assemble for the PowerPC or POWER (RS/6000)
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -1209,7 +1209,8 @@ PowerPC options:\n\
 -mvsx			generate code for Vector-Scalar (VSX) instructions\n\
 -me300			generate code for PowerPC e300 family\n\
 -me500, -me500x2	generate code for Motorola e500 core complex\n\
--me500mc,               generate code for Freescale e500mc core complex\n\
+-me500mc,		generate code for Freescale e500mc core complex\n\
+-me500mc64,		generate code for Freescale e500mc64 core complex\n\
 -mspe			generate code for Motorola SPE instructions\n\
 -mregnames		Allow symbolic names for registers\n\
 -mno-regnames		Do not allow symbolic names for registers\n"));

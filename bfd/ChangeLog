@@ -1,3 +1,10 @@
+2010-01-04  Edmar Wienskoski  <edmar@freescale.com>
+
+	* archures.c: Add bfd_mach_ppc_e500mc64.
+	* bfd-in2.h: Regenerate.
+	* cpu-powerpc.c (bfd_powerpc_archs): Add entry for
+	bfd_mach_ppc_e500mc64.
+
 2010-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	Fix -Wshadow warnings (seen on ppc-aix)
