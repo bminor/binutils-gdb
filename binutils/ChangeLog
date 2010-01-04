@@ -1,5 +1,12 @@
 2010-01-04  Nick Clifton  <nickc@redhat.com>
 
+	PR 11128
+	* readelf.c (dump_section_as_strings): Use two separate
+	invocations of printf() in order to work around bugs in
+	the Solaris 8 implementation.
+
+2010-01-04  Nick Clifton  <nickc@redhat.com>
+
 	* po/ru/po: Updated Russian translation.
 
 For older changes see ChangeLog-2009
