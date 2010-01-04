@@ -275,11 +275,17 @@ read_pieced_value (struct value *v)
 	case DWARF_VALUE_REGISTER:
 	  {
 	    struct gdbarch *arch = get_frame_arch (frame);
-	    bfd_byte regval[MAX_REGISTER_SIZE];
 	    int gdb_regnum = gdbarch_dwarf2_reg_to_regnum (arch,
 							   p->v.expr.value);
-	    get_frame_register (frame, gdb_regnum, regval);
-	    memcpy (contents + offset, regval, p->size);
+	    int reg_offset = 0;
+
+	    if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG
+		&& p->size < register_size (arch, gdb_regnum))
+	      /* Big-endian, and we want less than full size.  */
+	      reg_offset = register_size (arch, gdb_regnum) - p->size;
+
+	    get_frame_register_bytes (frame, gdb_regnum, reg_offset, p->size,
+				      contents + offset);
 	  }
 	  break;
 
@@ -346,7 +352,15 @@ write_pieced_value (struct value *to, struct value *from)
 	  {
 	    struct gdbarch *arch = get_frame_arch (frame);
 	    int gdb_regnum = gdbarch_dwarf2_reg_to_regnum (arch, p->v.expr.value);
-	    put_frame_register (frame, gdb_regnum, contents + offset);
+	    int reg_offset = 0;
+
+	    if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG
+		&& p->size < register_size (arch, gdb_regnum))
+	      /* Big-endian, and we want less than full size.  */
+	      reg_offset = register_size (arch, gdb_regnum) - p->size;
+
+	    put_frame_register_bytes (frame, gdb_regnum, reg_offset, p->size,
+				      contents + offset);
 	  }
 	  break;
 	case DWARF_VALUE_MEMORY:
