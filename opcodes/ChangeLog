@@ -1,3 +1,8 @@
+2010-01-04  Nick Clifton  <nickc@redhat.com>
+
+	PR 11123
+	* arm-dis.c (print_insn_coprocessor): Initialise value.
+
 2010-01-04  Edmar Wienskoski  <edmar@freescale.com>
 
 	* ppc-dis.c (ppc_opts): Add entry for "e500mc64".

@@ -1749,7 +1749,7 @@ print_insn_coprocessor (bfd_vma pc,
   void *stream = info->stream;
   fprintf_ftype func = info->fprintf_func;
   unsigned long mask;
-  unsigned long value;
+  unsigned long value = 0;
   unsigned long allowed_arches = ((arm_feature_set *) info->private_data)->coproc;
   int cond;
 
