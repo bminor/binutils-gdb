@@ -1,3 +1,42 @@
+2010-01-03  Daniel Gutson  <dgutson@codesourcery.com>
+
+	* config/tc-arm.c (struct arm_it): New flag 'is_neon'.
+	(NEON_ENC_*): Macros renamed to _NEON_ENC_*.
+	(NEON_ENCODE): New macro.
+	(check_neon_suffixes): New macro.
+	(do_vfp_cond_or_thumb): Set the 'is_neon' flag.
+	(do_vfp_nsyn_opcode): Likewise.
+	(do_vfp_nsyn_nmul): Use the new 'NEON_ENCODE' macro.
+	(do_vfp_nsyn_cmp): Likewise.
+	(do_neon_shl_imm): Likewise.
+	(do_neon_qshl_imm): Likewise.
+	(neon_dyadic_misc): Likewise.
+	(do_neon_mac_maybe_scalar): Likewise.
+	(do_neon_qdmulh): Likewise.
+	(do_neon_qmovn): Likewise.
+	(do_neon_qmovun): Likewise.
+	(do_neon_movn): Likewise.
+	(neon_mac_reg_scalar_long): Likewise.
+	(do_neon_vmull): Likewise.
+	(do_neon_trn): Likewise.
+	(do_neon_ldx_stx): Likewise.
+	(neon_dp_fixup): Changed signature and set the flag.
+	(neon_three_same): Call the above with new signature.
+	(neon_two_same): Likewise.
+	(neon_imm_shift): Likewise.
+	(neon_mul_mac): Likewise.
+	(do_neon_abs_neg): Likewise.
+	(neon_mixed_length): Likewise.
+	(do_neon_ext): Likewise.
+	(do_neon_mov): Likewise.
+	(do_neon_tbl_tbx): Likewise.
+	(do_neon_logic): Likewise, and use the new 'NEON_ENCODE' macro.
+	(neon_compare): Likewise.
+	(do_neon_shll): Likewise.
+	(do_neon_cvt): Likewise.
+	(do_neon_mvn): Likewise.
+	(do_neon_dup): Likewise.
+	(md_assemble): Call check_neon_suffixes (). 
 
 For older changes see ChangeLog-2009
 
