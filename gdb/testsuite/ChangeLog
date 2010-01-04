@@ -1,3 +1,7 @@
+2010-01-04  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.xml/tdesc-regs.exp: Support s390*-*-* targets.
+
 2010-01-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.mi/var-cmd.c (do_bitfield_tests): Change "V.sharable" type to

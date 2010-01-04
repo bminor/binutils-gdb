@@ -176,8 +176,18 @@ case "${target}" in
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
 			;;
-  s390*-*-linux*)	srv_regobj="reg-s390.o reg-s390x.o"
+  s390*-*-linux*)	srv_regobj="s390-linux32.o"
+			srv_regobj="${srv_regobj} s390-linux64.o"
+			srv_regobj="${srv_regobj} s390x-linux64.o"
 			srv_tgtobj="linux-low.o linux-s390-low.o"
+			srv_xmlfiles="s390-linux32.xml"
+			srv_xmlfiles="${srv_xmlfiles} s390-linux64.xml"
+			srv_xmlfiles="${srv_xmlfiles} s390x-linux64.xml"
+			srv_xmlfiles="${srv_xmlfiles} s390-core32.xml"
+			srv_xmlfiles="${srv_xmlfiles} s390-core64.xml"
+			srv_xmlfiles="${srv_xmlfiles} s390x-core64.xml"
+			srv_xmlfiles="${srv_xmlfiles} s390-acr.xml"
+			srv_xmlfiles="${srv_xmlfiles} s390-fpr.xml"
 			srv_linux_usrregs=yes
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes

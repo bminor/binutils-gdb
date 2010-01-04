@@ -215,6 +215,7 @@ clean:
 	rm -f powerpc-isa205-32l.c powerpc-isa205-64l.c
 	rm -f powerpc-isa205-altivec32l.c powerpc-isa205-vsx32l.c powerpc-isa205-altivec64l.c
 	rm -f powerpc-isa205-vsx64l.c
+	rm -f s390-linux32.c s390-linux64.c s390x-linux64.c
 	rm -f xml-builtin.c stamp-xml
 
 maintainer-clean realclean distclean: clean
@@ -413,12 +414,15 @@ powerpc-isa205-altivec64l.c : $(srcdir)/../regformats/rs6000/powerpc-isa205-alti
 powerpc-isa205-vsx64l.o : powerpc-isa205-vsx64l.c $(regdef_h)
 powerpc-isa205-vsx64l.c : $(srcdir)/../regformats/rs6000/powerpc-isa205-vsx64l.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-isa205-vsx64l.dat powerpc-isa205-vsx64l.c
-reg-s390.o : reg-s390.c $(regdef_h)
-reg-s390.c : $(srcdir)/../regformats/reg-s390.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-s390.dat reg-s390.c
-reg-s390x.o : reg-s390x.c $(regdef_h)
-reg-s390x.c : $(srcdir)/../regformats/reg-s390x.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-s390x.dat reg-s390x.c
+s390-linux32.o : s390-linux32.c $(regdef_h)
+s390-linux32.c : $(srcdir)/../regformats/s390-linux32.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-linux32.dat s390-linux32.c
+s390-linux64.o : s390-linux64.c $(regdef_h)
+s390-linux64.c : $(srcdir)/../regformats/s390-linux64.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390-linux64.dat s390-linux64.c
+s390x-linux64.o : s390x-linux64.c $(regdef_h)
+s390x-linux64.c : $(srcdir)/../regformats/s390x-linux64.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/s390x-linux64.dat s390x-linux64.c
 reg-sh.o : reg-sh.c $(regdef_h)
 reg-sh.c : $(srcdir)/../regformats/reg-sh.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-sh.dat reg-sh.c

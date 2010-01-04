@@ -1,3 +1,30 @@
+2010-01-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* Makefile.in (clean): Remove new generated files.
+	(reg-s390.o, reg-s390.c): Remove rules.
+	(reg-s390x.o, reg-s390x.c): Likewise.
+	(s390-linux32.o, s390-linux32.c): Add rules.
+	(s390-linux64.o, s390-linux64.c): Likewise.
+	(s390x-linux64.o, s390x-linux64.c): Likewise.
+	* configure.srv (s390*-*-linux*): Update srv_regobj and srv_xmlfiles.
+	* linux-s390-low.c: Include <elf.h>.
+	(HWCAP_S390_HIGH_GPRS): Define if undefined.
+	(init_registers_s390): Remove prototype.
+	(init_registers_s390x): Likewise.
+	(init_registers_s390_linux32): Add prototype.
+	(init_registers_s390_linux64): Likewise.
+	(init_registers_s390x_linux64): Likewise.
+	(s390_num_regs_3264): New define.
+	(s390_regmap_3264): New global variable.
+	(s390_cannot_fetch_register): Remove obsolete check.
+	(s390_cannot_store_register): Likewise.
+	(s390_collect_ptrace_register): Handle upper/lower register halves.
+	(s390_supply_ptrace_register): Likewise.
+	(s390_fill_gregset): Update to register number changes.
+	(s390_get_hwcap): New routine.
+	(s390_arch_setup): Detect 32-bit process running on 64-bit system.
+	Install appropriate regmap and register set.
+
 2010-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* server.c (gdbserver_version): Update copyright year to 2010.

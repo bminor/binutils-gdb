@@ -24,12 +24,18 @@
 #include "linux-low.h"
 
 #include <asm/ptrace.h>
+#include <elf.h>
 
-/* Defined in auto-generated file reg-s390.c.  */
-void init_registers_s390 (void);
-/* Defined in auto-generated file reg-s390x.c.  */
-void init_registers_s390x (void);
+#ifndef HWCAP_S390_HIGH_GPRS
+#define HWCAP_S390_HIGH_GPRS 512
+#endif
 
+/* Defined in auto-generated file s390-linux32.c.  */
+void init_registers_s390_linux32 (void);
+/* Defined in auto-generated file s390-linux64.c.  */
+void init_registers_s390_linux64 (void);
+/* Defined in auto-generated file s390x-linux64.c.  */
+void init_registers_s390x_linux64 (void);
 
 #define s390_num_regs 51
 
@@ -61,21 +67,41 @@ static int s390_regmap[] = {
 #endif
 };
 
+#ifdef __s390x__
+#define s390_num_regs_3264 67
+
+static int s390_regmap_3264[] = {
+  PT_PSWMASK, PT_PSWADDR,
+
+  PT_GPR0, PT_GPR0, PT_GPR1, PT_GPR1, PT_GPR2, PT_GPR2, PT_GPR3, PT_GPR3,
+  PT_GPR4, PT_GPR4, PT_GPR5, PT_GPR5, PT_GPR6, PT_GPR6, PT_GPR7, PT_GPR7,
+  PT_GPR8, PT_GPR8, PT_GPR9, PT_GPR9, PT_GPR10, PT_GPR10, PT_GPR11, PT_GPR11,
+  PT_GPR12, PT_GPR12, PT_GPR13, PT_GPR13, PT_GPR14, PT_GPR14, PT_GPR15, PT_GPR15,
+
+  PT_ACR0, PT_ACR1, PT_ACR2, PT_ACR3,
+  PT_ACR4, PT_ACR5, PT_ACR6, PT_ACR7,
+  PT_ACR8, PT_ACR9, PT_ACR10, PT_ACR11,
+  PT_ACR12, PT_ACR13, PT_ACR14, PT_ACR15,
+
+  PT_FPC,
+
+  PT_FPR0, PT_FPR1, PT_FPR2, PT_FPR3,
+  PT_FPR4, PT_FPR5, PT_FPR6, PT_FPR7,
+  PT_FPR8, PT_FPR9, PT_FPR10, PT_FPR11,
+  PT_FPR12, PT_FPR13, PT_FPR14, PT_FPR15,
+};
+#endif
+
+
 static int
 s390_cannot_fetch_register (int regno)
 {
-  if (s390_regmap[regno] == -1)
-    return 1;
-
   return 0;
 }
 
 static int
 s390_cannot_store_register (int regno)
 {
-  if (s390_regmap[regno] == -1)
-    return 1;
-
   return 0;
 }
 
@@ -85,17 +111,25 @@ s390_collect_ptrace_register (int regno, char *buf)
   int size = register_size (regno);
   if (size < sizeof (long))
     {
+      int regaddr = the_low_target.regmap[regno];
+
       memset (buf, 0, sizeof (long));
 
-      if (regno == find_regno ("pswa")
-	  || (regno >= find_regno ("r0") && regno <= find_regno ("r15")))
+      if ((regno ^ 1) < the_low_target.num_regs
+	  && the_low_target.regmap[regno ^ 1] == regaddr)
+	{
+	  collect_register (regno & ~1, buf);
+	  collect_register ((regno & ~1) + 1, buf + sizeof (long) - size);
+	}
+      else if (regaddr == PT_PSWADDR
+	       || (regaddr >= PT_GPR0 && regaddr <= PT_GPR15))
 	collect_register (regno, buf + sizeof (long) - size);
       else
 	collect_register (regno, buf);
 
       /* When debugging a 32-bit inferior on a 64-bit host, make sure
 	 the 31-bit addressing mode bit is set in the PSW mask.  */
-      if (regno == find_regno ("pswm"))
+      if (regaddr == PT_PSWMASK)
 	buf[size] |= 0x80;
     }
   else
@@ -108,8 +142,16 @@ s390_supply_ptrace_register (int regno, const char *buf)
   int size = register_size (regno);
   if (size < sizeof (long))
     {
-      if (regno == find_regno ("pswa")
-	  || (regno >= find_regno ("r0") && regno <= find_regno ("r15")))
+      int regaddr = the_low_target.regmap[regno];
+
+      if ((regno ^ 1) < the_low_target.num_regs
+	  && the_low_target.regmap[regno ^ 1] == regaddr)
+	{
+	  supply_register (regno & ~1, buf);
+	  supply_register ((regno & ~1) + 1, buf + sizeof (long) - size);
+	}
+      else if (regaddr == PT_PSWADDR
+	       || (regaddr >= PT_GPR0 && regaddr <= PT_GPR15))
 	supply_register (regno, buf + sizeof (long) - size);
       else
 	supply_register (regno, buf);
@@ -125,8 +167,15 @@ static void s390_fill_gregset (void *buf)
 {
   int i;
 
-  for (i = 0; i < 34; i++)
-    s390_collect_ptrace_register (i, (char *) buf + s390_regmap[i]);
+  for (i = 0; i < the_low_target.num_regs; i++)
+    {
+      if (the_low_target.regmap[i] < PT_PSWMASK
+	  || the_low_target.regmap[i] > PT_ACR15)
+	continue;
+
+      s390_collect_ptrace_register (i, (char *) buf
+				       + the_low_target.regmap[i]);
+    }
 }
 
 struct regset_info target_regsets[] = {
@@ -176,12 +225,43 @@ s390_set_pc (CORE_ADDR newpc)
     }
 }
 
+#ifdef __s390x__
+static unsigned long
+s390_get_hwcap (void)
+{
+  int wordsize = register_size (0);
+  unsigned char *data = alloca (2 * wordsize);
+  int offset = 0;
+
+  while ((*the_target->read_auxv) (offset, data, 2 * wordsize) == 2 * wordsize)
+    {
+      if (wordsize == 4)
+        {
+          unsigned int *data_p = (unsigned int *)data;
+          if (data_p[0] == AT_HWCAP)
+	    return data_p[1];
+        }
+      else
+        {
+          unsigned long *data_p = (unsigned long *)data;
+          if (data_p[0] == AT_HWCAP)
+	    return data_p[1];
+        }
+
+      offset += 2 * wordsize;
+    }
+
+  return 0;
+}
+#endif
 
 static void
 s390_arch_setup (void)
 {
   /* Assume 31-bit inferior process.  */
-  init_registers_s390 ();
+  init_registers_s390_linux32 ();
+  the_low_target.num_regs = s390_num_regs;
+  the_low_target.regmap = s390_regmap;
 
   /* On a 64-bit host, check the low bit of the (31-bit) PSWM
      -- if this is one, we actually have a 64-bit inferior.  */
@@ -190,7 +270,16 @@ s390_arch_setup (void)
     unsigned int pswm;
     collect_register_by_name ("pswm", &pswm);
     if (pswm & 1)
-      init_registers_s390x ();
+      init_registers_s390x_linux64 ();
+
+    /* For a 31-bit inferior, check whether the kernel supports
+       using the full 64-bit GPRs.  */
+    else if (s390_get_hwcap () & HWCAP_S390_HIGH_GPRS)
+      {
+        init_registers_s390_linux64 ();
+	the_low_target.num_regs = s390_num_regs_3264;
+	the_low_target.regmap = s390_regmap_3264;
+      }
   }
 #endif
 }

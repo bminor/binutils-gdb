@@ -34,7 +34,8 @@ WHICH = arm-with-iwmmxt arm-with-vfpv2 arm-with-vfpv3 arm-with-neon \
 	mips-linux mips64-linux \
 	rs6000/powerpc-32l rs6000/powerpc-altivec32l rs6000/powerpc-e500l \
 	rs6000/powerpc-64l rs6000/powerpc-altivec64l rs6000/powerpc-vsx32l \
-	rs6000/powerpc-vsx64l rs6000/powerpc-cell32l rs6000/powerpc-cell64l
+	rs6000/powerpc-vsx64l rs6000/powerpc-cell32l rs6000/powerpc-cell64l \
+	s390-linux32 s390-linux64 s390x-linux64
 
 # Record which registers should be sent to GDB by default after stop.
 arm-expedite = r11,sp,pc
@@ -43,6 +44,9 @@ mips64-expedite = r29,pc
 powerpc-expedite = r1,pc
 rs6000/powerpc-cell32l-expedite = r1,pc,r0,orig_r3,r4
 rs6000/powerpc-cell64l-expedite = r1,pc,r0,orig_r3,r4
+s390-linux32-expedite = r14,r15,pswa
+s390-linux64-expedite = r14l,r15l,pswa
+s390x-linux64-expedite = r14,r15,pswa
 
 
 XSLTPROC = xsltproc

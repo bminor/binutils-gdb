@@ -1,5 +1,90 @@
 2010-01-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
+        * features/Makefile (WHICH): Add s390-linux32, s390-linux64,
+	and s390x-linux64.
+	(s390-linux32-expedite): Define.
+	(s390-linux64-expedite): Define.
+	(s390x-linux64-expedite): Define.
+	* features/s390-acr.xml: New file.
+	* features/s390-fpr.xml: New file.
+	* features/s390-core32.xml: New file.
+	* features/s390-core64.xml: New file.
+	* features/s390x-core64.xml: New file.
+	* features/s390-linux32.xml: New file.
+	* features/s390-linux64.xml: New file.
+	* features/s390x-linux64.xml: New file.
+	* features/s390-linux32.c: New generated file.
+	* features/s390-linux64.c: New generated file.
+	* features/s390x-linux64.c: New generated file.
+
+	* regformats/s390-linux32.dat: New generated file.
+	* regformats/s390-linux64.dat: New generated file.
+	* regformats/s390x-linux64.dat: New generated file.
+	* regformats/reg-s390.dat: Remove.
+	* regformats/reg-s390x.dat: Remove.
+
+	* s390-nat.c: Include "auxv.h" and <elf.h>.
+	(HWCAP_S390_HIGH_GPRS): Define if undefined.
+	(s390_target_wordsize): New function.
+	(s390_auxv_parse): Likewise.
+	(s390_get_hwcap): Likewise.
+	(s390_read_description): Likewise.
+	(_initialize_s390_nat): Install s390_auxv_parse and
+	s390_read_description.
+
+	* s390-tdep.c: Include "features/s390-linux32.c",
+	"features/s390-linux64.c", and "features/s390x-linux64.c".
+	(struct gdbarch_tdep): Add gpr_full_regnum, pc_regnum, and cc_regnum.
+	(s390_register_call_saved): New function.
+	(s390_register_name): Remove.
+	(s390_register_type): Remove.
+	(s390_dwarf_regmap): Add lower half GPR pseudo DWARF CFI regnums.
+	(s390_dwarf_reg_to_regnum): Remap GPR regnums to full GPRs.
+	(s390_adjust_frame_regnum): Remap GPR regnums to lower halves for CFI.
+	(s390_pseudo_register_name): New function.
+	(s390_pseudo_register_type): New function.
+	(s390_pseudo_register_read): Handle both 32-bit and 64-bit cases.
+	Handle full GPR pesudos and varying pseudo register numbers.
+	(s390_pseudo_register_write): Likewise
+	(s390x_pseudo_register_read): Remove.
+	(s390x_pseudo_register_write): Likewise.
+	(s390_register_group): Remove.
+	(s390_pseudo_register_group): New function.
+	(s390_regmap_gregset): Add GPR upper halves.
+	(s390x_regmap_gregset): Likewise.
+	(s390_regmap_fpregset): Likewise.
+	(s390_regmap_upper): New global variable.
+	(s390_upper_regset): New global variable.
+	(s390_upper_regset_sections): New global variable.
+	(s390_regset_from_core_section): Handle GPR upper halves.
+	(s390_core_read_description): New function.
+	(s390_prologue_frame_unwind_cache): Set up ABI call-saved/clobbered
+	register information.  Handle varying pseudo register numbers.
+	(s390_backchain_frame_unwind_cache): Likewise.
+	(s390_frame_prev_register): Unwind full GPRs to show lower halves.
+	(s390_stub_frame_unwind_cache): Handle varying pseudo register numbers.
+	(s390_sigtramp_frame_unwind_cache): Unwind PSWM and PSWA as well as
+	PC and CC pseudos.  Unwind upper halves and full GPRs as appropriate.
+	Handle varying pseudo register numbers.
+	(s390_unwind_pc): Handle varying pseudo register numbers.
+	(s390_dwarf2_prev_register): New function.
+	(s390_dwarf2_frame_init_reg): Set up ABI call-saved/clobbered
+	register information.  Handle varying pseudo register numbers.
+	Install s390_dwarf2_prev_register to unwind full GPRs.
+	(s390_gdbarch_init): Handle target descriptions.  Assign varying
+	pseudo register numbers.  Install s390_adjust_frame_regnum.
+	(_initialize_s390_tdep): Initialize target descriptions.
+
+	* s390-tdep.h (S390_R0_UPPER_REGNUM .. S390_R15_UPPER_REGNUM): Define.
+	(S390_NUM_REGS): Redefine to include upper half registers.
+	(S390_PC_REGNUM, S390_CC_REGNUM): Remove.
+	(S390_NUM_PSEUDO_REGS, S390_NUM_TOTAL_REGS): Likewise.
+	(tdesc_s390_linux32): Add declaration.
+	(tdesc_s390_linux64): Likewise.
+	(tdesc_s390x_linux64): Likewise.
+
+2010-01-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* regset.h (struct core_regset_section): Add HUMAN_NAME.
 	* i386-linux-tdep.c (i386_linux_regset_sections): Fill in HUMAN_NAME.
 	* ppc-linux-tdep.c (ppc_linux_vsx_regset_sections): Likewise.

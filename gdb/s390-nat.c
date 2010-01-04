@@ -25,6 +25,7 @@
 #include "inferior.h"
 #include "target.h"
 #include "linux-nat.h"
+#include "auxv.h"
 
 #include "s390-tdep.h"
 
@@ -33,6 +34,11 @@
 #include <asm/types.h>
 #include <sys/procfs.h>
 #include <sys/ucontext.h>
+#include <elf.h>
+
+#ifndef HWCAP_S390_HIGH_GPRS
+#define HWCAP_S390_HIGH_GPRS 512
+#endif
 
 
 /* Map registers to gregset/ptrace offsets.
@@ -389,6 +395,83 @@ s390_region_ok_for_hw_watchpoint (CORE_ADDR addr, int cnt)
   return 1;
 }
 
+static int
+s390_target_wordsize (void)
+{
+  int wordsize = 4;
+
+  /* Check for 64-bit inferior process.  This is the case when the host is
+     64-bit, and in addition bit 32 of the PSW mask is set.  */
+#ifdef __s390x__
+  long pswm;
+
+  errno = 0;
+  pswm = (long) ptrace (PTRACE_PEEKUSER, s390_inferior_tid (), PT_PSWMASK, 0);
+  if (errno == 0 && (pswm & 0x100000000ul) != 0)
+    wordsize = 8;
+#endif
+
+  return wordsize;
+}
+
+static int
+s390_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
+		 gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
+{
+  int sizeof_auxv_field = s390_target_wordsize ();
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  gdb_byte *ptr = *readptr;
+
+  if (endptr == ptr)
+    return 0;
+
+  if (endptr - ptr < sizeof_auxv_field * 2)
+    return -1;
+
+  *typep = extract_unsigned_integer (ptr, sizeof_auxv_field, byte_order);
+  ptr += sizeof_auxv_field;
+  *valp = extract_unsigned_integer (ptr, sizeof_auxv_field, byte_order);
+  ptr += sizeof_auxv_field;
+
+  *readptr = ptr;
+  return 1;
+}
+
+#ifdef __s390x__
+static unsigned long
+s390_get_hwcap (void)
+{
+  CORE_ADDR field;
+
+  if (target_auxv_search (&current_target, AT_HWCAP, &field))
+    return (unsigned long) field;
+
+  return 0;
+}
+#endif
+
+static const struct target_desc *
+s390_read_description (struct target_ops *ops)
+{
+#ifdef __s390x__
+  /* If GDB itself is compiled as 64-bit, we are running on a machine in
+     z/Architecture mode.  If the target is running in 64-bit addressing
+     mode, report s390x architecture.  If the target is running in 31-bit
+     addressing mode, but the kernel supports using 64-bit registers in
+     that mode, report s390 architecture with 64-bit GPRs.  */
+
+  if (s390_target_wordsize () == 8)
+    return tdesc_s390x_linux64;
+
+  if (s390_get_hwcap () & HWCAP_S390_HIGH_GPRS)
+    return tdesc_s390_linux64;
+#endif
+
+  /* If GDB itself is compiled as 31-bit, or if we're running a 31-bit inferior
+     on a 64-bit kernel that does not support using 64-bit registers in 31-bit
+     mode, report s390 architecture with 32-bit GPRs.  */
+  return tdesc_s390_linux32;
+}
 
 void _initialize_s390_nat (void);
 
@@ -411,6 +494,10 @@ _initialize_s390_nat (void)
   t->to_stopped_by_watchpoint = s390_stopped_by_watchpoint;
   t->to_insert_watchpoint = s390_insert_watchpoint;
   t->to_remove_watchpoint = s390_remove_watchpoint;
+
+  /* Detect target architecture.  */
+  t->to_read_description = s390_read_description;
+  t->to_auxv_parse = s390_auxv_parse;
 
   /* Register the target.  */
   linux_nat_add_target (t);
