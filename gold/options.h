@@ -584,6 +584,10 @@ class General_options
 	      N_("Not supported"),
 	      N_("Do not copy DT_NEEDED tags from shared libraries"));
 
+  DEFINE_bool(allow_multiple_definition, options::TWO_DASHES, '\0', false,
+	      N_("Allow multiple definitions of symbols"),
+	      N_("Do not allow multiple definitions"));
+
   DEFINE_bool(allow_shlib_undefined, options::TWO_DASHES, '\0', false,
               N_("Allow unresolved references in shared libraries"),
               N_("Do not allow unresolved references in shared libraries"));
@@ -998,6 +1002,11 @@ class General_options
 	      NULL);
   DEFINE_uint64(max_page_size, options::DASH_Z, '\0', 0,
                 N_("Set maximum page size to SIZE"), N_("SIZE"));
+  DEFINE_bool(muldefs, options::DASH_Z, '\0', false,
+	      N_("Allow multiple definitions of symbols"),
+	      NULL);
+  // copyreloc is here in the list because there is only -z
+  // nocopyreloc, not -z copyreloc.
   DEFINE_bool(copyreloc, options::DASH_Z, '\0', true,
 	      NULL,
 	      N_("Do not create copy relocs"));

@@ -1,6 +1,13 @@
 2010-01-04  Ian Lance Taylor  <iant@google.com>
 
 	PR 10980
+	* options.h (class General_options): Add
+	--allow-multiple-definition and -z muldefs.
+	* resolve.cc (Symbol_table::should_override): Don't warn about a
+	multiple symbol definition if --allow-multiple-definition or -z
+	muldefs.
+
+	PR 10980
 	* options.h (class General_options): Add --add-needed and
 	--copy-dt-needed-entries.  Tweak --as-needed help entry.
 	* object.cc (Input_objects::check_dynamic_dependencies): Give an

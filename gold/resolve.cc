@@ -440,9 +440,11 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
           || (object != NULL && object->just_symbols()))
         return false;
 
-      Symbol_table::report_resolve_problem(true,
-					   _("multiple definition of '%s'"),
-					   to, defined, object);
+      if (!parameters->options().allow_multiple_definition()
+	  && !parameters->options().muldefs())
+	Symbol_table::report_resolve_problem(true,
+					     _("multiple definition of '%s'"),
+					     to, defined, object);
       return false;
 
     case WEAK_DEF * 16 + DEF:
