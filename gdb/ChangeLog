@@ -1,3 +1,7 @@
+2010-01-05  Michael Snyder  <msnyder@vmware.com>
+
+	* infrun.c (handle_inferior_event): Fix typo in comment.
+
 2010-01-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* symfile.c (syms_from_objfile): Remove the !MAINLINE conditional.

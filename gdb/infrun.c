@@ -4176,7 +4176,7 @@ infrun: not switching back to stepped thread, it has vanished\n");
      "outermost" function.  This could be fixed by marking
      outermost frames as !stack_p,code_p,special_p.  Then the
      initial outermost frame, before sp was valid, would
-     have code_addr == &_start.  See the commend in frame_id_eq
+     have code_addr == &_start.  See the comment in frame_id_eq
      for more.  */
   if (!frame_id_eq (get_stack_frame_id (frame),
 		    ecs->event_thread->step_stack_frame_id)
