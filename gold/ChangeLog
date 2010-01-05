@@ -1,3 +1,14 @@
+2010-01-05  Ian Lance Taylor  <iant@google.com>
+
+	* symtab.cc (Symbol_table::add_from_object): Rename def parameter
+	to is_default_version.  Rename insdef to insdefault.
+	(Symbol_table::add_from_relobj): Rename def to is_default_version
+	and local to is_forced_local.
+	(Symbol_table::add_from_pluginobj): Likewise.
+	(Symbol_table::add_from_dynobj): Likewise.
+	(Symbol_table::define_special_symbol): Rename insdef to
+	insdefault.
+
 2010-01-04  Ian Lance Taylor  <iant@google.com>
 
 	PR 10980

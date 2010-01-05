@@ -1,6 +1,6 @@
 // symtab.cc -- the gold symbol table
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -813,13 +813,13 @@ Symbol_table::define_default_version(Sized_symbol<size>* sym,
 // section index; IS_ORDINARY is whether this is a normal section
 // rather than a special code.
 
-// If DEF is true, then this is the definition of a default version of
-// a symbol.  That means that any lookup of NAME/NULL and any lookup
-// of NAME/VERSION should always return the same symbol.  This is
-// obvious for references, but in particular we want to do this for
-// definitions: overriding NAME/NULL should also override
-// NAME/VERSION.  If we don't do that, it would be very hard to
-// override functions in a shared library which uses versioning.
+// If IS_DEFAULT_VERSION is true, then this is the definition of a
+// default version of a symbol.  That means that any lookup of
+// NAME/NULL and any lookup of NAME/VERSION should always return the
+// same symbol.  This is obvious for references, but in particular we
+// want to do this for definitions: overriding NAME/NULL should also
+// override NAME/VERSION.  If we don't do that, it would be very hard
+// to override functions in a shared library which uses versioning.
 
 // We implement this by simply making both entries in the hash table
 // point to the same Symbol structure.  That is easy enough if this is
@@ -844,7 +844,7 @@ Symbol_table::add_from_object(Object* object,
 			      Stringpool::Key name_key,
 			      const char *version,
 			      Stringpool::Key version_key,
-			      bool def,
+			      bool is_default_version,
 			      const elfcpp::Sym<size, big_endian>& sym,
 			      unsigned int st_shndx,
 			      bool is_ordinary,
@@ -883,14 +883,14 @@ Symbol_table::add_from_object(Object* object,
     this->table_.insert(std::make_pair(std::make_pair(name_key, version_key),
 				       snull));
 
-  std::pair<typename Symbol_table_type::iterator, bool> insdef =
+  std::pair<typename Symbol_table_type::iterator, bool> insdefault =
     std::make_pair(this->table_.end(), false);
-  if (def)
+  if (is_default_version)
     {
       const Stringpool::Key vnull_key = 0;
-      insdef = this->table_.insert(std::make_pair(std::make_pair(name_key,
-								 vnull_key),
-						  snull));
+      insdefault = this->table_.insert(std::make_pair(std::make_pair(name_key,
+								     vnull_key),
+						      snull));
     }
 
   // ins.first: an iterator, which is a pointer to a pair.
@@ -915,20 +915,20 @@ Symbol_table::add_from_object(Object* object,
       if (parameters->options().gc_sections())
         this->gc_mark_dyn_syms(ret);
 
-      if (def)
-	this->define_default_version<size, big_endian>(ret, insdef.second,
-						       insdef.first);
+      if (is_default_version)
+	this->define_default_version<size, big_endian>(ret, insdefault.second,
+						       insdefault.first);
     }
   else
     {
       // This is the first time we have seen NAME/VERSION.
       gold_assert(ins.first->second == NULL);
 
-      if (def && !insdef.second)
+      if (is_default_version && !insdefault.second)
 	{
 	  // We already have an entry for NAME/NULL.  If we override
 	  // it, then change it to NAME/VERSION.
-	  ret = this->get_sized_symbol<size>(insdef.first->second);
+	  ret = this->get_sized_symbol<size>(insdefault.first->second);
 
 	  was_undefined = ret->is_undefined();
 	  was_common = ret->is_common();
@@ -955,12 +955,12 @@ Symbol_table::add_from_object(Object* object,
 		{
 		  // This means that we don't want a symbol table
 		  // entry after all.
-		  if (!def)
+		  if (!is_default_version)
 		    this->table_.erase(ins.first);
 		  else
 		    {
-		      this->table_.erase(insdef.first);
-		      // Inserting insdef invalidated ins.
+		      this->table_.erase(insdefault.first);
+		      // Inserting INSDEFAULT invalidated INS.
 		      this->table_.erase(std::make_pair(name_key,
 							version_key));
 		    }
@@ -971,16 +971,16 @@ Symbol_table::add_from_object(Object* object,
 	  ret->init_object(name, version, object, sym, st_shndx, is_ordinary);
 
 	  ins.first->second = ret;
-	  if (def)
+	  if (is_default_version)
 	    {
 	      // This is the first time we have seen NAME/NULL.  Point
 	      // it at the new entry for NAME/VERSION.
-	      gold_assert(insdef.second);
-	      insdef.first->second = ret;
+	      gold_assert(insdefault.second);
+	      insdefault.first->second = ret;
 	    }
 	}
 
-      if (def)
+      if (is_default_version)
 	ret->set_is_default();
     }
 
@@ -1081,9 +1081,10 @@ Symbol_table::add_from_relobj(
       const char* ver = strchr(name, '@');
       Stringpool::Key ver_key = 0;
       int namelen = 0;
-      // DEF: is the version default?  LOCAL: is the symbol forced local?
-      bool def = false;
-      bool local = false;
+      // IS_DEFAULT_VERSION: is the version default?
+      // IS_FORCED_LOCAL: is the symbol forced local?
+      bool is_default_version = false;
+      bool is_forced_local = false;
 
       if (ver != NULL)
         {
@@ -1092,7 +1093,7 @@ Symbol_table::add_from_relobj(
           ++ver;
 	  if (*ver == '@')
 	    {
-	      def = true;
+	      is_default_version = true;
 	      ++ver;
 	    }
 	  ver = this->namepool_.add(ver, true, &ver_key);
@@ -1119,11 +1120,11 @@ Symbol_table::add_from_relobj(
 							    version.length(),
 							    true,
 							    &ver_key);
-		      def = true;
+		      is_default_version = true;
 		    }
 		}
 	      else if (this->version_script_.symbol_is_local(name))
-		local = true;
+		is_forced_local = true;
 	    }
 	}
 
@@ -1177,8 +1178,8 @@ Symbol_table::add_from_relobj(
 
       Sized_symbol<size>* res;
       res = this->add_from_object(relobj, name, name_key, ver, ver_key,
-				  def, *psym, st_shndx, is_ordinary,
-				  orig_st_shndx);
+				  is_default_version, *psym, st_shndx,
+				  is_ordinary, orig_st_shndx);
       
       // If building a shared library using garbage collection, do not 
       // treat externally visible symbols as garbage.
@@ -1186,7 +1187,7 @@ Symbol_table::add_from_relobj(
           && parameters->options().shared())
         this->gc_mark_symbol_for_shlib(res);
 
-      if (local)
+      if (is_forced_local)
 	this->force_local(res);
 
       (*sympointers)[i] = res;
@@ -1207,8 +1208,8 @@ Symbol_table::add_from_pluginobj(
   bool is_ordinary = st_shndx < elfcpp::SHN_LORESERVE;
 
   Stringpool::Key ver_key = 0;
-  bool def = false;
-  bool local = false;
+  bool is_default_version = false;
+  bool is_forced_local = false;
 
   if (ver != NULL)
     {
@@ -1235,11 +1236,11 @@ Symbol_table::add_from_pluginobj(
                                                         version.length(),
                                                         true,
                                                         &ver_key);
-                  def = true;
+                  is_default_version = true;
                 }
             }
           else if (this->version_script_.symbol_is_local(name))
-            local = true;
+            is_forced_local = true;
         }
     }
 
@@ -1248,9 +1249,10 @@ Symbol_table::add_from_pluginobj(
 
   Sized_symbol<size>* res;
   res = this->add_from_object(obj, name, name_key, ver, ver_key,
-		              def, *sym, st_shndx, is_ordinary, st_shndx);
+		              is_default_version, *sym, st_shndx,
+			      is_ordinary, st_shndx);
 
-  if (local)
+  if (is_forced_local)
     this->force_local(res);
 
   return res;
@@ -1425,10 +1427,11 @@ Symbol_table::add_from_dynobj(
 					    st_shndx);
 	      else
 		{
-		  const bool def = (!hidden
-				    && st_shndx != elfcpp::SHN_UNDEF);
+		  const bool is_default_version =
+		    !hidden && st_shndx != elfcpp::SHN_UNDEF;
 		  res = this->add_from_object(dynobj, name, name_key, version,
-					      version_key, def, *psym, st_shndx,
+					      version_key, is_default_version,
+					      *psym, st_shndx,
 					      is_ordinary, st_shndx);
 		}
 	    }
@@ -1604,14 +1607,15 @@ Symbol_table::define_special_symbol(const char** pname, const char** pversion,
 							  version_key),
 					   snull));
 
-      std::pair<typename Symbol_table_type::iterator, bool> insdef =
+      std::pair<typename Symbol_table_type::iterator, bool> insdefault =
 	std::make_pair(this->table_.end(), false);
       if (is_default_version)
 	{
 	  const Stringpool::Key vnull = 0;
-	  insdef = this->table_.insert(std::make_pair(std::make_pair(name_key,
-								     vnull),
-						      snull));
+	  insdefault =
+	    this->table_.insert(std::make_pair(std::make_pair(name_key,
+							      vnull),
+					       snull));
 	}
 
       if (!ins.second)
@@ -1625,8 +1629,8 @@ Symbol_table::define_special_symbol(const char** pname, const char** pversion,
 	      Sized_symbol<size>* soldsym =
 		this->get_sized_symbol<size>(oldsym);
 	      this->define_default_version<size, big_endian>(soldsym,
-							     insdef.second,
-							     insdef.first);
+							     insdefault.second,
+							     insdefault.first);
 	    }
 	}
       else
@@ -1637,11 +1641,11 @@ Symbol_table::define_special_symbol(const char** pname, const char** pversion,
 	  add_to_table = true;
 	  add_loc = ins.first;
 
-	  if (is_default_version && !insdef.second)
+	  if (is_default_version && !insdefault.second)
 	    {
 	      // We are adding NAME/VERSION, and it is the default
 	      // version.  We already have an entry for NAME/NULL.
-	      oldsym = insdef.first->second;
+	      oldsym = insdefault.first->second;
 	      *resolve_oldsym = true;
 	    }
 	  else
@@ -1651,7 +1655,7 @@ Symbol_table::define_special_symbol(const char** pname, const char** pversion,
 	      if (is_default_version)
 		{
 		  add_def_to_table = true;
-		  add_def_loc = insdef.first;
+		  add_def_loc = insdefault.first;
 		}
 	    }
 	}
