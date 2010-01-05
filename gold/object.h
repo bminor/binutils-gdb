@@ -1,6 +1,6 @@
 // object.h -- support for an object file for linking in gold  -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -188,6 +188,8 @@ class Xindex
 class Object
 {
  public:
+  typedef std::vector<Symbol*> Symbols;
+
   // NAME is the name of the object as we would report it to the user
   // (e.g., libfoo.a(bar.o) if this is in an archive.  INPUT_FILE is
   // used to read the file.  OFFSET is the offset within the input
@@ -466,6 +468,11 @@ class Object
 			   size_t* used) const
   { this->do_get_global_symbol_counts(symtab, defined, used); }
 
+  // Get the symbols defined in this object.
+  const Symbols*
+  get_global_symbols() const
+  { return this->do_get_global_symbols(); }
+
   // Return whether this object was found in a system directory.
   bool
   is_in_system_directory() const
@@ -552,6 +559,9 @@ class Object
   // Implement get_global_symbol_counts--implemented by child class.
   virtual void
   do_get_global_symbol_counts(const Symbol_table*, size_t*, size_t*) const = 0;
+
+  virtual const Symbols*
+  do_get_global_symbols() const = 0;
 
   // Set the number of sections.
   void
@@ -1596,6 +1606,11 @@ class Sized_relobj : public Relobj
   void
   do_get_global_symbol_counts(const Symbol_table*, size_t*, size_t*) const;
 
+  // Get the global symbols.
+  const Symbols*
+  do_get_global_symbols() const
+  { return &this->symbols_; }
+
   // Get the offset of a section.
   uint64_t
   do_output_section_offset(unsigned int shndx) const
@@ -1959,6 +1974,10 @@ class Input_objects
   // Print symbol counts.
   void
   print_symbol_counts(const Symbol_table*) const;
+
+  // Print a cross reference table.
+  void
+  print_cref(const Symbol_table*, FILE*) const;
 
   // Iterate over all regular objects.
 

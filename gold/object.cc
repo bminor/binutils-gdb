@@ -1,6 +1,6 @@
 // object.cc -- support for an object file for linking in gold
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -2146,7 +2146,8 @@ Input_objects::add_object(Object* obj)
     }
 
   // Add this object to the cross-referencer if requested.
-  if (parameters->options().user_set_print_symbol_counts())
+  if (parameters->options().user_set_print_symbol_counts()
+      || parameters->options().cref())
     {
       if (this->cref_ == NULL)
 	this->cref_ = new Cref();
@@ -2206,7 +2207,8 @@ Input_objects::check_dynamic_dependencies() const
 void
 Input_objects::archive_start(Archive* archive)
 {
-  if (parameters->options().user_set_print_symbol_counts())
+  if (parameters->options().user_set_print_symbol_counts()
+      || parameters->options().cref())
     {
       if (this->cref_ == NULL)
 	this->cref_ = new Cref();
@@ -2219,7 +2221,8 @@ Input_objects::archive_start(Archive* archive)
 void
 Input_objects::archive_stop(Archive* archive)
 {
-  if (parameters->options().user_set_print_symbol_counts())
+  if (parameters->options().user_set_print_symbol_counts()
+      || parameters->options().cref())
     this->cref_->add_archive_stop(archive);
 }
 
@@ -2231,6 +2234,15 @@ Input_objects::print_symbol_counts(const Symbol_table* symtab) const
   if (parameters->options().user_set_print_symbol_counts()
       && this->cref_ != NULL)
     this->cref_->print_symbol_counts(symtab);
+}
+
+// Print a cross reference table.
+
+void
+Input_objects::print_cref(const Symbol_table* symtab, FILE* f) const
+{
+  if (parameters->options().cref() && this->cref_ != NULL)
+    this->cref_->print_cref(symtab, f);
 }
 
 // Relocate_info methods.

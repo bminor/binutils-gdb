@@ -1,5 +1,36 @@
 2010-01-05  Ian Lance Taylor  <iant@google.com>
 
+	PR 10980
+	* options.h (class General_options): Add --cref.
+	* main.cc (main): Print cref table if --cref.  Don't close mapfile
+	until after printing cref table.
+	* cref.cc: Include "symtab.h".
+	(class Cref_inputs): Define Cref_table_compare and Cref_table.
+	(Cref_table_compare::operator()): New function.
+	(Cref_inputs::gather_cref): New function.
+	(filecol): New static const.
+	(Cref_inputs::print_cref): New function.
+	(Cref::print_cref): New function.
+	* cref.h: Include <cstdio>.
+	(class Cref): Update declarations.
+	* mapfile.h (Mapfile::file): New function.
+	* object.h (class Object): Define Symbols.  Declare virtual
+	do_get_global_symbols.
+	(Object::get_global_symbols): New function.
+	* object.cc (Input_objects::add_object): Pass object to cref_ if
+	--cref.
+	(Input_objects::archive_start): Likewise.
+	(Input_objects::archive_stop): Likewise.
+	(Input_objects::print_cref): New function.
+	* dynobj.h (Sized_dynobj::do_get_global_symbols): New function.
+	* dynobj.cc (big_endian>::do_add_symbols): Create symbols_ if
+	--cref.
+	* plugin.cc (Sized_pluginobj::do_get_global_symbols): New
+	function.
+	* plugin.h (class Sized_pluginobj): Update declarations.
+
+2010-01-05  Ian Lance Taylor  <iant@google.com>
+
 	* symtab.cc (Symbol_table::add_from_object): Rename def parameter
 	to is_default_version.  Rename insdef to insdefault.
 	(Symbol_table::add_from_relobj): Rename def to is_default_version

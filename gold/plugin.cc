@@ -1,6 +1,6 @@
 // plugin.cc -- plugin manager for gold      -*- C++ -*-
 
-// Copyright 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Cary Coutant <ccoutant@google.com>.
 
 // This file is part of gold.
@@ -780,6 +780,15 @@ template<int size, bool big_endian>
 void
 Sized_pluginobj<size, big_endian>::do_get_global_symbol_counts(const Symbol_table*,
                                                    size_t*, size_t*) const
+{
+  gold_unreachable();
+}
+
+// Get symbols.  Not used for plugin objects.
+
+template<int size, bool big_endian>
+const Object::Symbols*
+Sized_pluginobj<size, big_endian>::do_get_global_symbols() const
 {
   gold_unreachable();
 }

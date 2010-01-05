@@ -1,6 +1,6 @@
 // dynobj.h -- dynamic object support for gold   -*- C++ -*-
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -235,6 +235,11 @@ class Sized_dynobj : public Dynobj
   // Get symbol counts.
   void
   do_get_global_symbol_counts(const Symbol_table*, size_t*, size_t*) const;
+
+  // Get the global symbols.
+  const Symbols*
+  do_get_global_symbols() const
+  { return this->symbols_; }
 
  private:
   // For convenience.

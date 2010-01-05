@@ -1,6 +1,6 @@
 // main.cc -- gold main function.
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -270,12 +270,17 @@ main(int argc, char** argv)
       layout.print_stats();
     }
 
-  if (mapfile != NULL)
-    mapfile->close();
-
   // Issue defined symbol report.
   if (command_line.options().user_set_print_symbol_counts())
     input_objects.print_symbol_counts(&symtab);
+
+  // Output cross reference table.
+  if (command_line.options().cref())
+    input_objects.print_cref(&symtab,
+			     mapfile == NULL ? stdout : mapfile->file());
+
+  if (mapfile != NULL)
+    mapfile->close();
 
   if (parameters->options().fatal_warnings()
       && errors.warning_count() > 0

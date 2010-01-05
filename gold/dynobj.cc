@@ -1,6 +1,6 @@
 // dynobj.cc -- dynamic object support for gold
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -682,9 +682,10 @@ Sized_dynobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
   Version_map version_map;
   this->make_version_map(sd, &version_map);
 
-  // If printing symbol counts, we want to track symbols.
-  
-  if (parameters->options().user_set_print_symbol_counts())
+  // If printing symbol counts or a cross reference table, we want to
+  // track symbols.
+  if (parameters->options().user_set_print_symbol_counts()
+      || parameters->options().cref())
     {
       this->symbols_ = new Symbols();
       this->symbols_->resize(symcount);
