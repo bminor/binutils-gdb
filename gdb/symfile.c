@@ -799,7 +799,7 @@ syms_from_objfile (struct objfile *objfile,
 
      We no longer warn if the lowest section is not a text segment (as
      happens for the PA64 port.  */
-  if (!mainline && addrs && addrs->other[0].name)
+  if (addrs && addrs->other[0].name)
     {
       asection *lower_sect;
       asection *sect;

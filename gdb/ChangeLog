@@ -1,3 +1,7 @@
+2010-01-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* symfile.c (syms_from_objfile): Remove the !MAINLINE conditional.
+
 2010-01-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
         * features/Makefile (WHICH): Add s390-linux32, s390-linux64,
