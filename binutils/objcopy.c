@@ -1481,7 +1481,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	non_fatal (_("Unable to recognise the format of the input file `%s'"),
 		   bfd_get_archive_filename (ibfd));
       else
-	non_fatal (_("Warning: Output file cannot represent architecture `%s'"),
+	non_fatal (_("Output file cannot represent architecture `%s'"),
 		   bfd_printable_arch_mach (bfd_get_arch (ibfd),
 					    bfd_get_mach (ibfd)));
       return FALSE;

@@ -1,3 +1,9 @@
+2010-01-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/11130
+	* objcopy.c (copy_object): Remove "Warning: " from error
+	message.
+
 2010-01-04  Nick Clifton  <nickc@redhat.com>
 
 	PR 11128
