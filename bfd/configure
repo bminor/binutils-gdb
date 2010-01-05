@@ -13950,6 +13950,8 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -13985,6 +13987,8 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -14020,6 +14024,8 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -14055,6 +14061,8 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -14090,6 +14098,8 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -14125,6 +14135,8 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -14160,6 +14172,8 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -14195,6 +14209,8 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -14230,6 +14246,8 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -14265,6 +14283,8 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -14300,6 +14320,8 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -14335,6 +14357,8 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -14370,6 +14394,8 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -14405,6 +14431,8 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -14440,6 +14468,8 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()
@@ -14466,6 +14496,43 @@ $as_echo "#define HAVE_LWPSTATUS_T_PR_REG 1" >>confdefs.h
  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_procfs_type_member_lwpstatus_t_pr_reg" >&5
 $as_echo "$bfd_cv_have_sys_procfs_type_member_lwpstatus_t_pr_reg" >&6; }
 
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for lwpstatus_t.pr_fpreg in sys/procfs.h" >&5
+$as_echo_n "checking for lwpstatus_t.pr_fpreg in sys/procfs.h... " >&6; }
+ if test "${bfd_cv_have_sys_procfs_type_member_lwpstatus_t_pr_fpreg+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
+#include <sys/procfs.h>
+int
+main ()
+{
+lwpstatus_t avar; void* aref = (void*) &avar.pr_fpreg
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  bfd_cv_have_sys_procfs_type_member_lwpstatus_t_pr_fpreg=yes
+else
+  bfd_cv_have_sys_procfs_type_member_lwpstatus_t_pr_fpreg=no
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+
+ if test $bfd_cv_have_sys_procfs_type_member_lwpstatus_t_pr_fpreg = yes; then
+
+$as_echo "#define HAVE_LWPSTATUS_T_PR_FPREG 1" >>confdefs.h
+
+ fi
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_cv_have_sys_procfs_type_member_lwpstatus_t_pr_fpreg" >&5
+$as_echo "$bfd_cv_have_sys_procfs_type_member_lwpstatus_t_pr_fpreg" >&6; }
+
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for win32_pstatus_t in sys/procfs.h" >&5
 $as_echo_n "checking for win32_pstatus_t in sys/procfs.h... " >&6; }
  if test "${bfd_cv_have_sys_procfs_type_win32_pstatus_t+set}" = set; then :
@@ -14475,6 +14542,8 @@ else
 /* end confdefs.h.  */
 
 #define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>
 int
 main ()

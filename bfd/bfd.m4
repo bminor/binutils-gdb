@@ -8,6 +8,8 @@ AC_DEFUN([BFD_HAVE_SYS_PROCFS_TYPE],
  AC_CACHE_VAL(bfd_cv_have_sys_procfs_type_$1,
    [AC_TRY_COMPILE([
 #define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>],
       [$1 avar],
       bfd_cv_have_sys_procfs_type_$1=yes,
@@ -27,6 +29,8 @@ AC_DEFUN([BFD_HAVE_SYS_PROCFS_TYPE_MEMBER],
  AC_CACHE_VAL(bfd_cv_have_sys_procfs_type_member_$1_$2,
    [AC_TRY_COMPILE([
 #define _SYSCALL32
+/* Needed for new procfs interface on sparc-solaris.  */
+#define _STRUCTURED_PROC 1
 #include <sys/procfs.h>],
       [$1 avar; void* aref = (void*) &avar.$2],
       bfd_cv_have_sys_procfs_type_member_$1_$2=yes,

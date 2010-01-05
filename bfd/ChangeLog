@@ -1,3 +1,13 @@
+2010-01-04  Daniel Gutson  <dgutson@codesourcery.com>
+
+	* bfd.m4 (BFD_HAVE_SYS_PROCFS_TYPE): Define _STRUCTURE_PROC
+	before including procfs.h.
+	(BFD_HAVE_SYS_PROCFS_TYPE_MEMBER): Likewise.
+	* configure.in: Added autoconf probe for the pr_fpreg member.
+	* configure: Regenerated.
+	* config.in: Regenerated.
+	* elf.c: Define _STRUCTURE_PROC before including procfs.h.
+
 2010-01-04  Joel Brobecker  <brobecker@adacore.com>
 
 	Fix -Wshadow warnings in dwarf2.c (seen on alpha-tru64).

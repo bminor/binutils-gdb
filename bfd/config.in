@@ -114,6 +114,9 @@
 /* Define if <sys/procfs.h> has lwpstatus_t.pr_context. */
 #undef HAVE_LWPSTATUS_T_PR_CONTEXT
 
+/* Define if <sys/procfs.h> has lwpstatus_t.pr_fpreg. */
+#undef HAVE_LWPSTATUS_T_PR_FPREG
+
 /* Define if <sys/procfs.h> has lwpstatus_t.pr_reg. */
 #undef HAVE_LWPSTATUS_T_PR_REG
 
