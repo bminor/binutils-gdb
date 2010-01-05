@@ -1,3 +1,15 @@
+2010-01-05  Alan Modra  <amodra@gmail.com>
+
+	PR 11129
+	2009-11-20  Ben Elliston  <bje@au.ibm.com>
+	* Makefile.am (syslex.o): Use $(NO_WERROR) not -Wno-error.
+	(sysinfo.o): Likewise.
+	PR 10764
+	2009-10-16  Jerker Bäck <jerker.back@gmail.com>
+	* Makefile.am (sysinfo.o, syslex.o): Place source file after all
+	command line switches.
+	* Makefile.in: Regenerate.
+
 2009-12-31  Eirik Byrkjeflot Anonsen  <eirik@opera.com>
 	    Nick Clifton  <nickc@redhat.com>
 
