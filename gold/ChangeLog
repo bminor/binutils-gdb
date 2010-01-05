@@ -1,6 +1,13 @@
 2010-01-04  Ian Lance Taylor  <iant@google.com>
 
 	PR 10980
+	* options.h (class General_options): Add --add-needed and
+	--copy-dt-needed-entries.  Tweak --as-needed help entry.
+	* object.cc (Input_objects::check_dynamic_dependencies): Give an
+	error if --copy-dt-needed-entries aka --add-needed is used and
+	would cause a change in behaviour.
+
+	PR 10980
 	* options.h (class General_options): Add -G as a short version of
 	--shared.  Add no-op options -assert, -g, and -i.
 
