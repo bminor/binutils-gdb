@@ -1,5 +1,10 @@
 2010-01-05  Ian Lance Taylor  <iant@google.com>
 
+	* options.h (class General_options): Use DEFINE_bool_alias for
+	allow_multiple_definition.
+	* resolve.cc (Symbol_table::should_override): Don't test
+	allow_multiple_definition.
+
 	PR 10980
 	* options.h (class General_options): Add --cref.
 	* main.cc (main): Print cref table if --cref.  Don't close mapfile

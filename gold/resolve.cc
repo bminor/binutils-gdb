@@ -1,6 +1,6 @@
 // resolve.cc -- symbol resolution for gold
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -440,8 +440,7 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
           || (object != NULL && object->just_symbols()))
         return false;
 
-      if (!parameters->options().allow_multiple_definition()
-	  && !parameters->options().muldefs())
+      if (!parameters->options().muldefs())
 	Symbol_table::report_resolve_problem(true,
 					     _("multiple definition of '%s'"),
 					     to, defined, object);

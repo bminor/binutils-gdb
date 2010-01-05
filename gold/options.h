@@ -584,9 +584,9 @@ class General_options
 	      N_("Not supported"),
 	      N_("Do not copy DT_NEEDED tags from shared libraries"));
 
-  DEFINE_bool(allow_multiple_definition, options::TWO_DASHES, '\0', false,
-	      N_("Allow multiple definitions of symbols"),
-	      N_("Do not allow multiple definitions"));
+  DEFINE_bool_alias(allow_multiple_definition, muldefs, options::TWO_DASHES,
+		    '\0', N_("Allow multiple definitions of symbols"),
+		    N_("Do not allow multiple definitions"), false);
 
   DEFINE_bool(allow_shlib_undefined, options::TWO_DASHES, '\0', false,
               N_("Allow unresolved references in shared libraries"),
