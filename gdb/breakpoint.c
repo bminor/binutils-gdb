@@ -9847,6 +9847,27 @@ ftrace_command (char *arg, int from_tty)
   set_tracepoint_count (breakpoint_count);
 }
 
+extern void create_tracepoint_from_upload (int num, enum bptype type,
+					   ULONGEST addr);
+
+void
+create_tracepoint_from_upload (int num, enum bptype type, ULONGEST addr)
+{
+  char buf[100];
+  struct breakpoint *tp;
+
+  sprintf (buf, "*0x%s", paddress (get_current_arch (), addr));
+  if (type == bp_fast_tracepoint)
+    ftrace_command (buf, 0);
+  else
+    trace_command (buf, 0);
+
+  /* Record that this tracepoint is numbered differently on host and
+     target.  */
+  tp = get_tracepoint (tracepoint_count);
+  tp->number_on_target = num;
+}
+
 /* Print information on tracepoint number TPNUM_EXP, or all if
    omitted.  */
 
@@ -9992,6 +10013,22 @@ get_tracepoint (int num)
 
   ALL_TRACEPOINTS (t)
     if (t->number == num)
+      return t;
+
+  return NULL;
+}
+
+/* Find the tracepoint with the given target-side number (which may be
+   different from the tracepoint number after disconnecting and
+   reconnecting).  */
+
+struct breakpoint *
+get_tracepoint_by_number_on_target (int num)
+{
+  struct breakpoint *t;
+
+  ALL_TRACEPOINTS (t)
+    if (t->number_on_target == num)
       return t;
 
   return NULL;

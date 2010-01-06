@@ -1,3 +1,35 @@
+2010-01-06  Stan Shebs  <stan@codesourcery.com>
+
+	Support disconnected tracing.
+	* infcmd.c (detach_command): Ask whether to stop tracing.
+	* cli/cli-cmds.c (quit_command): Ditto.
+	* breakpoint.h (struct breakpoint): New field number_on_target.
+	* breakpoint.c (create_tracepoint_from_upload): New function.
+	(get_tracepoint_by_number_on_target): New function.
+	* remote.c (struct remote): New field disconnected_tracing.
+	(remote_disconnected_tracing_feature): New function.
+	(remote_protocol_features): Add DisconnectedTracing.
+	(struct uploaded_tp): New struct.
+	(uploaded_tps): New global.
+	(get_uploaded_tp): New function.
+	(find_matching_tracepoint): New function.
+	(remote_get_tracing_state): New function.
+	(remote_start_remote): Call it.
+	* tracepoint.c (disconnected_tracing): New global.
+	(trace_start_command): Initialize number_on_target.
+	(stop_tracing): New function, split out from...
+	(trace_stop_command): Call stop_tracing.
+	(get_trace_status): New function, split out from...
+	(trace_status_command): Call get_trace_status, add info on
+	disconnection behavior.
+	(disconnect_or_stop_tracing): New function.
+	(finish_tfind_command): Translate from number on target.
+	(trace_find_tracepoint_command): Translate to number on target.
+	(send_disconnected_tracing_value): New function.
+	(set_disconnected_tracing): New function.
+	(_initialize_tracepoint): Add disconnected-tracing variable.
+	* NEWS: Mention disconnected tracing.
+
 2010-01-06  Tristan Gingold  <gingold@adacore.com>
 
 	* symtab.c (lookup_global_symbol_from_objfile): Rename objfile

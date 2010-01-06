@@ -55,6 +55,8 @@
 #include "valprint.h"
 #include "inline-frame.h"
 
+extern void disconnect_or_stop_tracing (int from_tty);
+
 /* Functions exported for general use, in inferior.h: */
 
 void all_registers_info (char *, int);
@@ -2504,6 +2506,8 @@ detach_command (char *args, int from_tty)
 
   if (ptid_equal (inferior_ptid, null_ptid))
     error (_("The program is not being run."));
+
+  disconnect_or_stop_tracing (from_tty);
 
   target_detach (args, from_tty);
 

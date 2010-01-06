@@ -24,7 +24,11 @@ Renesas RX			rx
   lists inferiors that are not running yet or that have exited
   already.  See also "New commands" and "New options" below.
 
-* Trace state variables
+* New tracing features
+
+  GDB's tracepoint facility now includes several new features:
+
+  ** Trace state variables
 
   GDB tracepoints now include support for trace state variables, which
   are variables managed by the target agent during a tracing
@@ -37,7 +41,7 @@ Renesas RX			rx
   command to create, and "info tvariables" to view; see "Trace State
   Variables" in the manual for more detail.
 
-* Fast tracepoints
+  ** Fast tracepoints
 
   GDB now includes an option for defining fast tracepoints, which
   targets may implement more efficiently, such as by installing a jump
@@ -48,6 +52,14 @@ Renesas RX			rx
   instruction to be replaced is shorter than the jump.  To request a
   fast tracepoint, use the "ftrace" command, with syntax identical to
   the regular trace command.
+
+  ** Disconnected tracing
+
+  It is now possible to detach GDB from the target while it is running
+  a trace experiment, then reconnect later to see how the experiment
+  is going.  In addition, a new variable disconnected-tracing lets you
+  tell the target agent whether to continue running a trace if the
+  connection is lost unexpectedly.
 
 * Changed commands
 
@@ -130,6 +142,12 @@ show default-collect
    This is a useful way to ensure essential items are not overlooked,
    such as registers or a critical global variable.
 
+set disconnected-tracing
+show disconnected-tracing
+   If set to 1, the target is instructed to continue tracing if it
+   loses its connection to GDB.  If 0, the target is to stop tracing
+   upon disconnection.
+
 * New remote packets
 
 QTDV
@@ -137,6 +155,12 @@ QTDV
 
 qTV
    Get the current value of a trace state variable.
+
+QTDisconnected
+   Set desired tracing behavior upon disconnection.
+
+qTfP, qTsP
+   Get data about the tracepoints currently in use.
 
 * Bug fixes
 

@@ -37,6 +37,7 @@
 #include "objfiles.h"
 #include "source.h"
 #include "disasm.h"
+extern void disconnect_or_stop_tracing (int from_tty);
 
 #include "ui-out.h"
 
@@ -317,6 +318,9 @@ quit_command (char *args, int from_tty)
 {
   if (!quit_confirm ())
     error (_("Not confirmed."));
+
+  disconnect_or_stop_tracing (from_tty);
+
   quit_force (args, from_tty);
 }
 

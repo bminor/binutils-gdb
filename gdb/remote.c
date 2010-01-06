@@ -202,6 +202,9 @@ static void show_remote_protocol_packet_cmd (struct ui_file *file,
 static char *write_ptid (char *buf, const char *endbuf, ptid_t ptid);
 static ptid_t read_ptid (char *buf, char **obuf);
 
+struct remote_state;
+static void remote_get_tracing_state (struct remote_state *);
+
 static void remote_query_supported (void);
 
 static void remote_check_symbols (struct objfile *objfile);
@@ -300,6 +303,10 @@ struct remote_state
 
   /* True if the stub reports support for fast tracepoints.  */
   int fast_tracepoints;
+
+  /* True if the stub can continue running a trace while GDB is
+     disconnected.  */
+  int disconnected_tracing;
 
   /* Nonzero if the user has pressed Ctrl-C, but the target hasn't
      responded to that.  */
@@ -2922,6 +2929,13 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
 	remote_check_symbols (symfile_objfile);
     }
 
+  /* Possibly the target has been engaged in a trace run started
+     previously; find out where things are at.  */
+  if (rs->disconnected_tracing)
+    {
+      remote_get_tracing_state (rs);
+    }
+
   /* If breakpoints are global, insert them now.  */
   if (gdbarch_has_global_breakpoints (target_gdbarch)
       && breakpoints_always_inserted_mode ())
@@ -3149,6 +3163,15 @@ remote_fast_tracepoint_feature (const struct protocol_feature *feature,
   rs->fast_tracepoints = (support == PACKET_ENABLE);
 }
 
+static void
+remote_disconnected_tracing_feature (const struct protocol_feature *feature,
+				     enum packet_support support,
+				     const char *value)
+{
+  struct remote_state *rs = get_remote_state ();
+  rs->disconnected_tracing = (support == PACKET_ENABLE);
+}
+
 static struct protocol_feature remote_protocol_features[] = {
   { "PacketSize", PACKET_DISABLE, remote_packet_size, -1 },
   { "qXfer:auxv:read", PACKET_DISABLE, remote_supported_packet,
@@ -3179,6 +3202,8 @@ static struct protocol_feature remote_protocol_features[] = {
     PACKET_ConditionalTracepoints },
   { "FastTracepoints", PACKET_DISABLE, remote_fast_tracepoint_feature,
     PACKET_FastTracepoints },
+  { "DisconnectedTracing", PACKET_DISABLE, remote_disconnected_tracing_feature,
+    -1 },
   { "ReverseContinue", PACKET_DISABLE, remote_supported_packet,
     PACKET_bc },
   { "ReverseStep", PACKET_DISABLE, remote_supported_packet,
@@ -9128,6 +9153,184 @@ remote_new_objfile (struct objfile *objfile)
 {
   if (remote_desc != 0)		/* Have a remote connection.  */
     remote_check_symbols (objfile);
+}
+
+/* Struct to collect random info about tracepoints on the target.  */
+
+struct uploaded_tp {
+  int number;
+  enum bptype type;
+  ULONGEST addr;
+  int enabled;
+  int step;
+  int pass;
+  int orig_size;
+  char *cond;
+  int cond_len;
+  struct uploaded_tp *next;
+};
+
+struct uploaded_tp *uploaded_tps;
+
+struct uploaded_tp *
+get_uploaded_tp (int num)
+{
+  struct uploaded_tp *utp;
+
+  for (utp = uploaded_tps; utp; utp = utp->next)
+    if (utp->number == num)
+      return utp;
+  utp = (struct uploaded_tp *) xmalloc (sizeof (struct uploaded_tp));
+  utp->number = num;
+  utp->next = uploaded_tps;
+  uploaded_tps = utp;
+  return utp;
+}
+
+/* Look for an existing tracepoint that seems similar enough to the
+   uploaded one.  Enablement isn't checked, because the user can
+   toggle that freely, and may have done so in anticipation of the
+   next trace run.  */
+
+struct breakpoint *
+find_matching_tracepoint (struct uploaded_tp *utp)
+{
+  VEC(breakpoint_p) *tp_vec = all_tracepoints ();
+  int ix;
+  struct breakpoint *t;
+
+  for (ix = 0; VEC_iterate (breakpoint_p, tp_vec, ix, t); ix++)
+    {
+      if (t->type == utp->type
+	  && (t->loc && t->loc->address == utp->addr)
+	  && t->step_count == utp->step
+	  && t->pass_count == utp->pass
+	  /* FIXME also test conditionals and actions */
+	  )
+	return t;
+    }
+  return NULL;
+}
+
+/* Find out everything we can about the trace run that was already
+   happening on the target.  This includes both running/stopped, and
+   the tracepoints that were in use.  */
+
+static void
+remote_get_tracing_state (struct remote_state *rs)
+{
+  char *p;
+  ULONGEST num, addr, step, pass, orig_size, xlen;
+  int enabled, i;
+  enum bptype type;
+  char *cond;
+  struct uploaded_tp *utp;
+  struct breakpoint *t;
+  extern void get_trace_status ();
+  extern unsigned long trace_running_p;
+
+  get_trace_status ();
+  if (trace_running_p)
+    printf_filtered (_("Trace is running on the target.\n"));
+
+  putpkt ("qTfP");
+  getpkt (&rs->buf, &rs->buf_size, 0);
+  p = rs->buf;
+  while (*p != '\0')
+    {
+      if (*p == 'T')
+	{
+	  p++;
+	  p = unpack_varlen_hex (p, &num);
+	  p++;
+	  p = unpack_varlen_hex (p, &addr);
+	  p++;
+	  enabled = (*p++ == 'E');
+	  p++;
+	  p = unpack_varlen_hex (p, &step);
+	  p++;
+	  p = unpack_varlen_hex (p, &pass);
+	  p++;
+	  type = bp_tracepoint;
+	  cond = NULL;
+	  while (*p)
+	    {
+	      if (*p == 'F')
+		{
+		  type = bp_fast_tracepoint;
+		  p++;
+		  p = unpack_varlen_hex (p, &orig_size);
+		}
+	      else if (*p == 'X')
+		{
+		  p++;
+		  p = unpack_varlen_hex (p, &xlen);
+		  p++;  /* skip the comma */
+		  cond = (char *) xmalloc (xlen);
+		  hex2bin (p, cond, xlen);
+		  p += 2 * xlen;
+		}
+	      else
+		/* Silently skip over anything else.  */
+		p++;
+	    }
+	  utp = get_uploaded_tp (num);
+	  utp->type = type;
+	  utp->addr = addr;
+	  utp->enabled = enabled;
+	  utp->step = step;
+	  utp->pass = pass;
+	  utp->cond = cond;
+	  utp->cond_len = xlen;
+	}
+      else if (*p == 'A')
+	{
+	  p++;
+	  p = unpack_varlen_hex (p, &num);
+	  p++;
+	  p = unpack_varlen_hex (p, &addr);
+	  p++;
+	  utp = get_uploaded_tp (num);
+	  /* FIXME save the action */
+	}
+      else if (*p == 'S')
+	{
+	  p++;
+	  p = unpack_varlen_hex (p, &num);
+	  p++;
+	  p = unpack_varlen_hex (p, &addr);
+	  p++;
+	  utp = get_uploaded_tp (num);
+	  /* FIXME save the action */
+	}
+      else if (*p == 'l')
+	{
+	  /* No more tracepoint info, get out of the loop.  */
+	  break;
+	}
+      putpkt ("qTsP");
+      getpkt (&rs->buf, &rs->buf_size, 0);
+      p = rs->buf;
+    }
+  /* Got all the tracepoint info, now look for matches among what we
+     already have in GDB.  */
+  for (utp = uploaded_tps; utp; utp = utp->next)
+    {
+      t = find_matching_tracepoint (utp);
+      if (t)
+	{
+	  printf_filtered (_("Assuming tracepoint %d is same as target's tracepoint %d.\n"),
+			   t->number, utp->number);
+	  t->number_on_target = utp->number;
+	}
+      else
+	{
+	  extern void create_tracepoint_from_upload (int num, ULONGEST addr);
+	  create_tracepoint_from_upload (utp->number, utp->addr);
+	}
+    }
+  /* FIXME free all the space */
+  uploaded_tps = NULL;
 }
 
 void

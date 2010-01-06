@@ -61,6 +61,8 @@ extern char *unpack_varlen_hex (char *buff, ULONGEST *result);
 #include <unistd.h>
 #endif
 
+extern void stop_tracing ();
+
 /* Maximum length of an agent aexpression.
    This accounts for the fact that packets are limited to 400 bytes
    (which includes everything -- including the checksum), and assumes
@@ -144,6 +146,8 @@ static struct cmd_list_element *tfindlist;
 /* List of expressions to collect by default at each tracepoint hit.  */
 static char *default_collect = "";
 
+static int disconnected_tracing;
+
 static char *target_buf;
 static long target_buf_size;
   
@@ -171,6 +175,8 @@ static void add_register (struct collection_list *collection,
 static struct cleanup *make_cleanup_free_actions (struct breakpoint *t);
 static void free_actions_list (char **actions_list);
 static void free_actions_list_cleanup_wrapper (void *);
+
+extern void send_disconnected_tracing_value (int value);
 
 extern void _initialize_tracepoint (void);
 
@@ -1627,7 +1633,7 @@ remote_set_transparent_ranges (void)
    to the target.  If no errors, 
    Tell target to start a new trace experiment.  */
 
-void download_tracepoint (struct breakpoint *t);
+int download_tracepoint (struct breakpoint *t);
 
 static void
 trace_start_command (char *args, int from_tty)
@@ -1637,6 +1643,7 @@ trace_start_command (char *args, int from_tty)
   int ix;
   struct breakpoint *t;
   struct trace_state_variable *tsv;
+  int any_downloaded = 0;
 
   dont_repeat ();	/* Like "run", dangerous to repeat accidentally.  */
 
@@ -1650,9 +1657,18 @@ trace_start_command (char *args, int from_tty)
       tp_vec = all_tracepoints ();
       for (ix = 0; VEC_iterate (breakpoint_p, tp_vec, ix, t); ix++)
 	{
-	  download_tracepoint (t);
+	  t->number_on_target = 0;
+	  if (download_tracepoint (t))
+	    {
+	      t->number_on_target = t->number;
+	      any_downloaded = 1;
+	    }
 	}
       VEC_free (breakpoint_p, tp_vec);
+
+      /* No point in tracing without any tracepoints... */
+      if (!any_downloaded)
+	error ("No tracepoints downloaded, not starting trace");
 
       /* Init any trace state variables that start with nonzero values.  */
 
@@ -1686,9 +1702,10 @@ trace_start_command (char *args, int from_tty)
     error (_("Trace can only be run on remote targets."));
 }
 
-/* Send the definition of a single tracepoint to the target.  */
+/* Send the definition of a single tracepoint to the target.  Return 1
+   if successful, 0 if not.  */
 
-void
+int
 download_tracepoint (struct breakpoint *t)
 {
   CORE_ADDR tpaddr;
@@ -1759,7 +1776,7 @@ download_tracepoint (struct breakpoint *t)
     error (_("Target does not support tracepoints."));
 
   if (!t->actions && !*default_collect)
-    return;
+    return 1;
 
   encode_actions (t, &tdp_actions, &stepping_actions);
   old_chain = make_cleanup (free_actions_list_cleanup_wrapper,
@@ -1802,6 +1819,7 @@ download_tracepoint (struct breakpoint *t)
 	}
     }
   do_cleanups (old_chain);
+  return 1;
 }
 
 /* tstop command */
@@ -1810,11 +1828,7 @@ trace_stop_command (char *args, int from_tty)
 {
   if (target_is_remote ())
     {
-      putpkt ("QTStop");
-      remote_get_noisy_reply (&target_buf, &target_buf_size);
-      if (strcmp (target_buf, "OK"))
-	error (_("Bogus reply from target: %s"), target_buf);
-      trace_running_p = 0;
+      stop_tracing ();
       if (deprecated_trace_start_stop_hook)
 	deprecated_trace_start_stop_hook (0, from_tty);
     }
@@ -1822,7 +1836,31 @@ trace_stop_command (char *args, int from_tty)
     error (_("Trace can only be run on remote targets."));
 }
 
+void
+stop_tracing ()
+{
+  putpkt ("QTStop");
+  remote_get_noisy_reply (&target_buf, &target_buf_size);
+  if (strcmp (target_buf, "OK"))
+    error (_("Bogus reply from target: %s"), target_buf);
+  trace_running_p = 0;
+}
+
 unsigned long trace_running_p;
+
+void
+get_trace_status ()
+{
+  putpkt ("qTStatus");
+  remote_get_noisy_reply (&target_buf, &target_buf_size);
+
+  if (target_buf[0] != 'T' ||
+      (target_buf[1] != '0' && target_buf[1] != '1'))
+    error (_("Bogus trace status reply from target: %s"), target_buf);
+
+  /* exported for use by the GUI */
+  trace_running_p = (target_buf[1] == '1');
+}
 
 /* tstatus command */
 static void
@@ -1830,18 +1868,16 @@ trace_status_command (char *args, int from_tty)
 {
   if (target_is_remote ())
     {
-      putpkt ("qTStatus");
-      remote_get_noisy_reply (&target_buf, &target_buf_size);
-
-      if (target_buf[0] != 'T' ||
-	  (target_buf[1] != '0' && target_buf[1] != '1'))
-	error (_("Bogus reply from target: %s"), target_buf);
-
-      /* exported for use by the GUI */
-      trace_running_p = (target_buf[1] == '1');
+      get_trace_status ();
 
       if (trace_running_p)
-	printf_filtered (_("Trace is running on the target.\n"));
+	{
+	  printf_filtered (_("Trace is running on the target.\n"));
+	  if (disconnected_tracing)
+	    printf_filtered (_("Trace will continue if GDB disconnects.\n"));
+	  else
+	    printf_filtered (_("Trace will stop if GDB disconnects.\n"));
+	}
       else
 	printf_filtered (_("Trace is not running on the target.\n"));
 
@@ -1856,6 +1892,24 @@ trace_status_command (char *args, int from_tty)
     error (_("Trace can only be run on remote targets."));
 }
 
+void
+disconnect_or_stop_tracing (int from_tty)
+{
+  if (trace_running_p && from_tty)
+    {
+      int cont = query (_("Trace is running.  Continue tracing after detach? "));
+      /* Note that we send the query result without affecting the
+	 user's setting of disconnected_tracing, so that the answer is
+	 a one-time-only.  */
+      send_disconnected_tracing_value (cont);
+
+      /* Also ensure that we do the equivalent of a tstop command if
+	 tracing is not to continue after the detach.  */
+      if (!cont)
+	stop_tracing ();
+    }
+}
+
 /* Worker function for the various flavors of the tfind command.  */
 static void
 finish_tfind_command (char **msg,
@@ -1865,6 +1919,7 @@ finish_tfind_command (char **msg,
   int target_frameno = -1, target_tracept = -1;
   struct frame_id old_frame_id;
   char *reply;
+  struct breakpoint *tp;
 
   old_frame_id = get_frame_id (get_current_frame ());
 
@@ -1926,10 +1981,12 @@ finish_tfind_command (char **msg,
 	error (_("Bogus reply from target: %s"), reply);
       }
 
+  tp = get_tracepoint_by_number_on_target (target_tracept);
+
   reinit_frame_cache ();
   registers_changed ();
   set_traceframe_num (target_frameno);
-  set_tracepoint_num (target_tracept);
+  set_tracepoint_num (tp ? tp->number : target_tracept);
   if (target_frameno == -1)
     set_traceframe_context (NULL);
   else
@@ -2064,6 +2121,7 @@ static void
 trace_find_tracepoint_command (char *args, int from_tty)
 {
   int tdp;
+  struct breakpoint *tp;
 
   if (target_is_remote ())
     {
@@ -2079,6 +2137,13 @@ trace_find_tracepoint_command (char *args, int from_tty)
 	}
       else
 	tdp = parse_and_eval_long (args);
+
+      /* If we have the tracepoint on hand, use the number that the
+	 target knows about (which may be different if we disconnected
+	 and reconnected).  */
+      tp = get_tracepoint (tdp);
+      if (tp)
+	tdp = tp->number_on_target;
 
       sprintf (target_buf, "QTFrame:tdp:%x", tdp);
       finish_tfind_command (&target_buf, &target_buf_size, from_tty);
@@ -2550,6 +2615,32 @@ trace_dump_command (char *args, int from_tty)
   discard_cleanups (old_cleanups);
 }
 
+/* Tell the target what to do with an ongoing tracing run if GDB
+   disconnects for some reason.  */
+
+void
+send_disconnected_tracing_value (int value)
+{
+  char buf[30];
+
+  /* No need to do anything special if target not active.  */
+  if (!target_is_remote ())
+    return;
+
+  sprintf (buf, "QTDisconnected:%x", value);
+  putpkt (buf);
+  remote_get_noisy_reply (&target_buf, &target_buf_size);
+  if (strcmp (target_buf, "OK"))
+    error (_("Target does not support this command."));
+}
+
+static void
+set_disconnected_tracing (char *args, int from_tty,
+			  struct cmd_list_element *c)
+{
+  send_disconnected_tracing_value (disconnected_tracing);
+}
+
 /* Convert the memory pointed to by mem into hex, placing result in buf.
  * Return a pointer to the last char put in buf (null)
  * "stolen" from sparc-stub.c
@@ -2580,7 +2671,6 @@ get_traceframe_number (void)
 {
   return traceframe_number;
 }
-
 
 /* module initialization */
 void
@@ -2746,6 +2836,18 @@ Set the list of expressions to collect by default"), _("\
 Show the list of expressions to collect by default"), NULL,
 			  NULL, NULL,
 			  &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("disconnected-tracing", no_class,
+			   &disconnected_tracing, _("\
+Set whether tracing continues after GDB disconnects."), _("\
+Show whether tracing continues after GDB disconnects."), _("\
+Use this to continue a tracing run even if GDB disconnects\n\
+or detaches from the target.  You can reconnect later and look at\n\
+trace data collected in the meantime."),
+			   set_disconnected_tracing,
+			   NULL,
+			   &setlist,
+			   &showlist);
 
   target_buf_size = 2048;
   target_buf = xmalloc (target_buf_size);

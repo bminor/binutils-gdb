@@ -9781,6 +9781,47 @@ Enter actions for tracepoint #1, one per line.
 (@value{GDBP}) @b{tstop}
 @end smallexample
 
+@cindex disconnected tracing
+You can choose to continue running the trace experiment even if
+@value{GDBN} disconnects from the target, voluntarily or
+involuntarily.  For commands such as @code{detach}, the debugger will
+ask what you want to do with the trace.  But for unexpected
+terminations (@value{GDBN} crash, network outage), it would be
+unfortunate to lose hard-won trace data, so the variable
+@code{disconnected-tracing} lets you decide whether the trace should
+continue running without @value{GDBN}.
+
+@table @code
+@item set disconnected-tracing on
+@itemx set disconnected-tracing off
+@kindex set disconnected-tracing
+Choose whether a tracing run should continue to run if @value{GDBN}
+has disconnected from the target.  Note that @code{detach} or
+@code{quit} will ask you directly what to do about a running trace no
+matter what this variable's setting, so the variable is mainly useful
+for handling unexpected situations, such as loss of the network.
+
+@item show disconnected-tracing
+@kindex show disconnected-tracing
+Show the current choice for disconnected tracing.
+
+@end table
+
+When you reconnect to the target, the trace experiment may or may not
+still be running; it might have filled the trace buffer in the
+meantime, or stopped for one of the other reasons.  If it is running,
+it will continue after reconnection.
+
+Upon reconnection, the target will upload information about the
+tracepoints in effect.  @value{GDBN} will then compare that
+information to the set of tracepoints currently defined, and attempt
+to match them up, allowing for the possibility that the numbers may
+have changed due to creation and deletion in the meantime.  If one of
+the target's tracepoints does not match any in @value{GDBN}, the
+debugger will create a new tracepoint, so that you have a number with
+which to specify that tracepoint.  This matching-up process is
+necessarily heuristic, and it may result in useless tracepoints being
+created; you may simply delete them if they are of no use.
 
 @node Analyze Collected Data
 @section Using the Collected Data
@@ -29721,7 +29762,10 @@ encoded).  @value{GDBN} will continue to supply the values of symbols
 (if available), until the target ceases to request them.
 @end table
 
-@item QTDP
+@item QTDisconnected
+@itemx QTDP
+@itemx QTDV
+@itemx QTfP
 @itemx QTFrame
 @xref{Tracepoint Packets}.
 
@@ -29750,11 +29794,13 @@ the command by a @samp{,}, not a @samp{:}, contrary to the naming
 conventions above.  Please don't use this packet as a model for new
 packets.)
 
-@item QTStart    
+@item QTsP
+@itemx QTStart    
 @itemx QTStop     
 @itemx QTinit     
 @itemx QTro       
 @itemx qTStatus   
+@itemx qTV
 @xref{Tracepoint Packets}.
 
 @item qXfer:@var{object}:read:@var{annex}:@var{offset},@var{length}
@@ -30152,6 +30198,12 @@ containing program code.  Since these areas never change, they should
 still have the same contents they did when the tracepoint was hit, so
 there's no reason for the stub to refuse to provide their contents.
 
+@item QTDisconnected:@var{value}
+Set the choice to what to do with the tracing run when @value{GDBN}
+disconnects from the target.  A @var{value} of 1 directs the target to
+continue the tracing run, while 0 tells the target to stop tracing if
+@value{GDBN} is no longer in the picture.
+
 @item qTStatus
 Ask the stub if there is a trace experiment running right now.
 
@@ -30183,6 +30235,14 @@ The value of the variable is unknown.  This would occur, for example,
 if the user is examining a trace frame in which the requested variable
 was not collected.
 @end table
+
+@item qTfP
+@itemx qTsP
+These packets request data about tracepoints that are being used by
+the target.  @value{GDBN} sends @code{qTfP} to get the first piece
+of data, and multiple @code{qTsP} to get additional pieces.  Replies
+to these packets generally take the form of the @code{QTDP} packets
+that define tracepoints. (FIXME add detailed syntax)
 
 @end table
 

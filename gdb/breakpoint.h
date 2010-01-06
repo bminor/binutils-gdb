@@ -513,6 +513,9 @@ struct breakpoint
 
     /* Chain of action lines to execute when this tracepoint is hit.  */
     struct action_line *actions;
+
+    /* The number of the tracepoint on the target.  */
+    int number_on_target;
   };
 
 typedef struct breakpoint *breakpoint_p;
@@ -984,6 +987,8 @@ extern void make_breakpoint_silent (struct breakpoint *);
 
 /* Return a tracepoint with the given number if found.  */
 extern struct breakpoint *get_tracepoint (int num);
+
+extern struct breakpoint *get_tracepoint_by_number_on_target (int num);
 
 /* Find a tracepoint by parsing a number in the supplied string.  */
 extern struct breakpoint *get_tracepoint_by_number (char **arg, int multi_p,
