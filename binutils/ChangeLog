@@ -1,3 +1,22 @@
+2010-01-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/11131
+	* Makefile.am (ELFEDIT_PROG): New.
+	(bin_PROGRAMS): Add $(ELFEDIT_PROG).
+	(CFILES): Add elfedit.c.
+	(elfedit_DEPENDENCIES): New.
+	(elfedit_SOURCES): Likewise.
+	(elfedit_LDADD): Likewise.
+	* Makefile.in: Regenerated.
+
+	* elfedit.c: New.
+
+	* doc/binutils.texi: Document elfedit.
+
+	* doc/Makefile.am (man_MANS): Add elfedit.1.
+	(elfedit.1): New.
+	* doc/Makefile.in: Regenerated.
+
 2010-01-06  Tristan Gingold  <gingold@adacore.com>
 
 	* nm.c (usage): Remove extra blanks.

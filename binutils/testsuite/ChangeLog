@@ -1,3 +1,14 @@
+2010-01-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/11131
+	* binutils-all/elfedit-1.d: New.
+	* binutils-all/elfedit.exp: Likewise.
+
+	* config/default.exp (ELFEDIT): New. Set if it doesn't exist.
+	(ELFEDITFLAGS): Likewise.
+
+	* lib/utils-lib.exp (run_dump_test): Support elfedit.
+
 2009-10-28  Kai Tietz <kai.tietz@onevision.com>
 
 	* binutils-all/dlltool.exp: Add tests for --no-leading-underscore

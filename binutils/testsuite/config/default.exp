@@ -61,6 +61,12 @@ if ![info exists READELF] then {
 if ![info exists READELFFLAGS] then {
     set READELFFLAGS ""
 }
+if ![info exists ELFEDIT] then {
+    set ELFEDIT [findfile $base_dir/elfedit]
+}
+if ![info exists ELFEDITFLAGS] then {
+    set ELFEDITFLAGS ""
+}
 if ![info exists WINDRES] then {
     set WINDRES [findfile $base_dir/windres]
 }

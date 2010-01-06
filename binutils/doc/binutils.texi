@@ -44,6 +44,7 @@ section entitled ``GNU Free Documentation License''.
 * size: (binutils)size.           List section sizes and total size.
 * strings: (binutils)strings.     List printable strings from files.
 * strip: (binutils)strip.         Discard symbols.
+* elfedit: (binutils)elfedit.     Update the ELF header of ELF files.
 * windmc: (binutils)windmc.	  Generator for Windows message resources.
 * windres: (binutils)windres.	  Manipulate Windows resources.
 @end direntry
@@ -111,6 +112,9 @@ List printable strings from files
 @item strip
 Discard symbols
 
+@item elfedit
+Update the ELF header of ELF files.
+
 @item c++filt
 Demangle encoded C++ symbols (on MS-DOS, this program is named
 @code{cxxfilt})
@@ -146,6 +150,7 @@ in the section entitled ``GNU Free Documentation License''.
 * size::                        List section sizes and total size
 * strings::                     List printable strings from files
 * strip::                       Discard symbols
+* elfedit::                     Update the ELF header of ELF files
 * c++filt::			Filter to demangle encoded C++ symbols
 * cxxfilt: c++filt.             MS-DOS name for c++filt
 * addr2line::			Convert addresses to file and line
@@ -2717,7 +2722,7 @@ the Info entries for @file{binutils}.
 @c man end
 @end ignore
 
-@node c++filt, addr2line, strip, Top
+@node c++filt, addr2line, elfedit, Top
 @chapter c++filt
 
 @kindex c++filt
@@ -4087,6 +4092,70 @@ Display the command line options understood by @command{readelf}.
 @ignore
 @c man begin SEEALSO readelf
 objdump(1), and the Info entries for @file{binutils}.
+@c man end
+@end ignore
+
+@node elfedit
+@chapter elfedit
+
+@cindex Update ELF header
+@kindex elfedit
+
+@c man title elfedit Update the ELF header of ELF files.
+
+@smallexample
+@c man begin SYNOPSIS elfedit
+elfedit [@option{--input-mach=}@var{machine}]
+        @option{--output-machine=}@var{machine}
+        [@option{-v}|@option{--version}]
+        [@option{-h}|@option{--help}]
+        @var{elffile}@dots{}
+@c man end
+@end smallexample
+
+@c man begin DESCRIPTION elfedit
+
+@command{elfedit} updates the ELF header of ELF files.  The
+options control how and which fields in the ELF header should be
+updated.
+
+@var{elffile}@dots{} are the ELF files to be updated.  32-bit and
+64-bit ELF files are supported, as are archives containing ELF files.
+@c man end
+
+@c man begin OPTIONS elfedit
+
+The long and short forms of options, shown here as alternatives, are
+equivalent. The @option{--output-mach} option must be given.
+
+@table @env
+
+@itemx --input-mach=@var{machine}
+Only the input files with ELF machine type, @var{machine}, will be
+updated. If @option{--input-mach} isn't specified, any ELF file
+will be updated.
+
+The supported ELF machine types are, @var{L1OM} and @var{x86-64}.
+
+@itemx --output-mach=@var{machine}
+Change the ELF machine type in the ELF header to @var{machine}.  The
+supported ELF machine types are the same as @option{--input-mach}.
+
+@item -v
+@itemx --version
+Display the version number of @command{elfedit}.
+
+@item -h
+@itemx --help
+Display the command line options understood by @command{elfedit}.
+
+@end table
+
+@c man end
+
+@ignore
+@c man begin SEEALSO elfedit
+readelf(1), and the Info entries for @file{binutils}.
 @c man end
 @end ignore
 

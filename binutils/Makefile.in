@@ -39,8 +39,8 @@ bin_PROGRAMS = $(am__EXEEXT_6) $(am__EXEEXT_7) $(am__EXEEXT_8) \
 	$(am__EXEEXT_9) $(am__EXEEXT_10) $(am__EXEEXT_11) \
 	@BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ \
 	@BUILD_WINDMC@ $(am__EXEEXT_12) $(am__EXEEXT_13) \
-	@BUILD_DLLWRAP@ @BUILD_INSTALL_MISC@ $(am__empty)
-noinst_PROGRAMS = $(am__EXEEXT_17) @BUILD_MISC@
+	$(am__EXEEXT_14) @BUILD_DLLWRAP@ @BUILD_INSTALL_MISC@
+noinst_PROGRAMS = $(am__EXEEXT_18) @BUILD_MISC@
 EXTRA_PROGRAMS = $(am__EXEEXT_1) srconv$(EXEEXT) sysdump$(EXEEXT) \
 	coffdump$(EXEEXT) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 	$(am__EXEEXT_4) $(am__EXEEXT_5)
@@ -93,11 +93,12 @@ am__EXEEXT_10 = ranlib$(EXEEXT)
 am__EXEEXT_11 = objcopy$(EXEEXT)
 am__EXEEXT_12 = addr2line$(EXEEXT)
 am__EXEEXT_13 = readelf$(EXEEXT)
+am__EXEEXT_14 = elfedit$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)"
-am__EXEEXT_14 = nm-new$(EXEEXT)
-am__EXEEXT_15 = strip-new$(EXEEXT)
-am__EXEEXT_16 = cxxfilt$(EXEEXT)
-am__EXEEXT_17 = $(am__EXEEXT_14) $(am__EXEEXT_15) $(am__EXEEXT_16)
+am__EXEEXT_15 = nm-new$(EXEEXT)
+am__EXEEXT_16 = strip-new$(EXEEXT)
+am__EXEEXT_17 = cxxfilt$(EXEEXT)
+am__EXEEXT_18 = $(am__EXEEXT_15) $(am__EXEEXT_16) $(am__EXEEXT_17)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am__objects_1 = bucomm.$(OBJEXT) version.$(OBJEXT) filemode.$(OBJEXT)
 am_addr2line_OBJECTS = addr2line.$(OBJEXT) $(am__objects_1)
@@ -161,6 +162,8 @@ strip_new_LDADD = $(LDADD)
 am_sysdump_OBJECTS = sysdump.$(OBJEXT) $(am__objects_1)
 sysdump_OBJECTS = $(am_sysdump_OBJECTS)
 sysdump_LDADD = $(LDADD)
+am_elfedit_OBJECTS = elfedit.$(OBJEXT) version.$(OBJEXT)
+elfedit_OBJECTS = $(am_elfedit_OBJECTS)
 am_windmc_OBJECTS = windmc.$(OBJEXT) mcparse.$(OBJEXT) mclex.$(OBJEXT) \
 	winduni.$(OBJEXT) $(am__objects_1)
 windmc_OBJECTS = $(am_windmc_OBJECTS)
@@ -197,7 +200,7 @@ SOURCES = $(addr2line_SOURCES) $(ar_SOURCES) $(EXTRA_ar_SOURCES) \
 	$(objcopy_SOURCES) $(objdump_SOURCES) $(ranlib_SOURCES) \
 	$(readelf_SOURCES) $(size_SOURCES) $(srconv_SOURCES) \
 	$(strings_SOURCES) $(strip_new_SOURCES) $(sysdump_SOURCES) \
-	$(windmc_SOURCES) $(windres_SOURCES)
+	$(elfedit_SOURCES) $(windmc_SOURCES) $(windres_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -392,6 +395,7 @@ OBJCOPY_PROG = objcopy
 STRIP_PROG = strip-new
 STRINGS_PROG = strings
 READELF_PROG = readelf
+ELFEDIT_PROG = elfedit
 
 # These should all be the same program too.
 SIZE_PROG = size
@@ -440,7 +444,7 @@ CFILES = \
 	rclex.c rdcoff.c rddbg.c readelf.c rename.c \
 	resbin.c rescoff.c resrc.c resres.c \
 	size.c srconv.c stabs.c strings.c sysdump.c \
-	unwind-ia64.c version.c \
+	unwind-ia64.c elfedit.c version.c \
 	windres.c winduni.c wrstabs.c \
 	windmc.c mclex.c
 
@@ -496,6 +500,7 @@ windres_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
 windmc_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
 addr2line_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY) $(BFDLIB)
 readelf_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY)
+elfedit_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY)
 dllwrap_DEPENDENCIES = $(LIBINTL_DEP) $(LIBIBERTY)
 LDADD = $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
 size_SOURCES = size.c $(BULIBS)
@@ -503,6 +508,8 @@ objcopy_SOURCES = objcopy.c not-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 strings_SOURCES = strings.c $(BULIBS)
 readelf_SOURCES = readelf.c version.c unwind-ia64.c dwarf.c
 readelf_LDADD = $(LIBINTL) $(LIBIBERTY)
+elfedit_SOURCES = elfedit.c version.c
+elfedit_LDADD = $(LIBINTL) $(LIBIBERTY)
 strip_new_SOURCES = objcopy.c is-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 nm_new_SOURCES = nm.c $(BULIBS)
 objdump_SOURCES = objdump.c dwarf.c prdbg.c $(DEBUG_SRCS) $(BULIBS)
@@ -718,6 +725,9 @@ strip-new$(EXEEXT): $(strip_new_OBJECTS) $(strip_new_DEPENDENCIES)
 sysdump$(EXEEXT): $(sysdump_OBJECTS) $(sysdump_DEPENDENCIES) 
 	@rm -f sysdump$(EXEEXT)
 	$(LINK) $(sysdump_OBJECTS) $(sysdump_LDADD) $(LIBS)
+elfedit$(EXEEXT): $(elfedit_OBJECTS) $(elfedit_DEPENDENCIES) 
+	@rm -f elfedit$(EXEEXT)
+	$(LINK) $(elfedit_OBJECTS) $(elfedit_LDADD) $(LIBS)
 mcparse.h: mcparse.c
 	@if test ! -f $@; then \
 	  rm -f mcparse.c; \
@@ -793,6 +803,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/strings.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sysdump.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unwind-ia64.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elfedit.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/version.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/windmc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/windres.Po@am__quote@

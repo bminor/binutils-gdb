@@ -27,6 +27,7 @@ man_MANS = \
 	size.1 \
 	strings.1 \
 	strip.1 \
+	elfedit.1 \
 	windres.1 \
 	windmc.1 \
 	$(DEMANGLER_NAME).1
@@ -123,6 +124,13 @@ strip.1:	$(binutils_TEXI) $(binutils_TEXINFOS)
 	-($(POD2MAN) strip.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
 		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
 	rm -f strip.pod
+
+elfedit.1:	$(binutils_TEXI) $(binutils_TEXINFOS)
+	touch $@
+	-$(TEXI2POD) $(MANCONF) -Delfedit < $(binutils_TEXI) > elfedit.pod
+	-($(POD2MAN) elfedit.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
+		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
+	rm -f elfedit.pod
 
 windres.1:	$(binutils_TEXI) $(binutils_TEXINFOS)
 	touch $@

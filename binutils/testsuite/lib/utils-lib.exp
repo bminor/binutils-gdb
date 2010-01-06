@@ -281,6 +281,7 @@ proc run_dump_test { name {extra_options {}} } {
     global subdir srcdir
     global OBJDUMP NM OBJCOPY READELF STRIP
     global OBJDUMPFLAGS NMFLAGS OBJCOPYFLAGS READELFFLAGS STRIPFLAGS
+    global ELFEDIT ELFEDITFLAGS
     global host_triplet
     global env
     global copyfile
@@ -309,6 +310,7 @@ proc run_dump_test { name {extra_options {}} } {
     set opts(size) {}
     set opts(strings) {}
     set opts(name) {}
+    set opts(elfedit) {}
     set opts(PROG) {}
     set opts(DUMPPROG) {}
     set opts(source) {}
@@ -372,6 +374,7 @@ proc run_dump_test { name {extra_options {}} } {
 	    set destopt "-o"
 	}
 	strings	{ set program strings }
+	elfedit { set program elfedit }
 	default	{
 	    perror "unrecognized program option $opts(PROG) in $file.d"
 	    unresolved $testname
