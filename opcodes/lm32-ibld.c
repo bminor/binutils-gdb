@@ -33,6 +33,7 @@
 #include "symcat.h"
 #include "lm32-desc.h"
 #include "lm32-opc.h"
+#include "cgen/basic-modes.h"
 #include "opintl.h"
 #include "safe-ctype.h"
 
@@ -568,14 +569,14 @@ lm32_cgen_insert_operand (CGEN_CPU_DESC cd,
     case LM32_OPERAND_BRANCH :
       {
         long value = fields->f_branch;
-        value = ((int) (((value) - (pc))) >> (2));
+        value = ((SI) (((value) - (pc))) >> (2));
         errmsg = insert_normal (cd, value, 0|(1<<CGEN_IFLD_SIGNED)|(1<<CGEN_IFLD_PCREL_ADDR), 0, 15, 16, 32, total_length, buffer);
       }
       break;
     case LM32_OPERAND_CALL :
       {
         long value = fields->f_call;
-        value = ((int) (((value) - (pc))) >> (2));
+        value = ((SI) (((value) - (pc))) >> (2));
         errmsg = insert_normal (cd, value, 0|(1<<CGEN_IFLD_SIGNED)|(1<<CGEN_IFLD_PCREL_ADDR), 0, 25, 26, 32, total_length, buffer);
       }
       break;
@@ -671,7 +672,7 @@ lm32_cgen_extract_operand (CGEN_CPU_DESC cd,
       {
         long value;
         length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED)|(1<<CGEN_IFLD_PCREL_ADDR), 0, 15, 16, 32, total_length, pc, & value);
-        value = ((pc) + (((int) (((value) << (16))) >> (14))));
+        value = ((pc) + (((SI) (((value) << (16))) >> (14))));
         fields->f_branch = value;
       }
       break;
@@ -679,7 +680,7 @@ lm32_cgen_extract_operand (CGEN_CPU_DESC cd,
       {
         long value;
         length = extract_normal (cd, ex_info, insn_value, 0|(1<<CGEN_IFLD_SIGNED)|(1<<CGEN_IFLD_PCREL_ADDR), 0, 25, 26, 32, total_length, pc, & value);
-        value = ((pc) + (((int) (((value) << (6))) >> (4))));
+        value = ((pc) + (((SI) (((value) << (6))) >> (4))));
         fields->f_call = value;
       }
       break;

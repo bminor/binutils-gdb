@@ -1,3 +1,11 @@
+2010-01-05  Doug Evans  <dje@sebabeach.org>
+
+	* cgen-ibld.in: #include "cgen/basic-modes.h".
+	* fr30-ibld.c, * frv-ibld.c, * ip2k-ibld.c, * iq2000-ibld.c,
+	* lm32-ibld.c, * m32c-ibld.c, * m32r-ibld.c, * mep-ibld.c,
+	* mt-ibld.c, * openrisc-ibld.c, * xc16x-ibld.c,
+	* xstormy16-ibld.c: Regenerate.
+
 2010-01-04  Nick Clifton  <nickc@redhat.com>
 
 	PR 11123

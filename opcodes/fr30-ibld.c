@@ -33,6 +33,7 @@
 #include "symcat.h"
 #include "fr30-desc.h"
 #include "fr30-opc.h"
+#include "cgen/basic-modes.h"
 #include "opintl.h"
 #include "safe-ctype.h"
 
@@ -604,7 +605,7 @@ fr30_cgen_insert_operand (CGEN_CPU_DESC cd,
     case FR30_OPERAND_DIR10 :
       {
         long value = fields->f_dir10;
-        value = ((unsigned int) (value) >> (2));
+        value = ((USI) (value) >> (2));
         errmsg = insert_normal (cd, value, 0, 0, 8, 8, 16, total_length, buffer);
       }
       break;
@@ -614,14 +615,14 @@ fr30_cgen_insert_operand (CGEN_CPU_DESC cd,
     case FR30_OPERAND_DIR9 :
       {
         long value = fields->f_dir9;
-        value = ((unsigned int) (value) >> (1));
+        value = ((USI) (value) >> (1));
         errmsg = insert_normal (cd, value, 0, 0, 8, 8, 16, total_length, buffer);
       }
       break;
     case FR30_OPERAND_DISP10 :
       {
         long value = fields->f_disp10;
-        value = ((int) (value) >> (2));
+        value = ((SI) (value) >> (2));
         errmsg = insert_normal (cd, value, 0|(1<<CGEN_IFLD_SIGNED), 0, 4, 8, 16, total_length, buffer);
       }
       break;
@@ -631,14 +632,14 @@ fr30_cgen_insert_operand (CGEN_CPU_DESC cd,
     case FR30_OPERAND_DISP9 :
       {
         long value = fields->f_disp9;
-        value = ((int) (value) >> (1));
+        value = ((SI) (value) >> (1));
         errmsg = insert_normal (cd, value, 0|(1<<CGEN_IFLD_SIGNED), 0, 4, 8, 16, total_length, buffer);
       }
       break;
     case FR30_OPERAND_I20 :
       {
 {
-  FLD (f_i20_4) = ((unsigned int) (FLD (f_i20)) >> (16));
+  FLD (f_i20_4) = ((UINT) (FLD (f_i20)) >> (16));
   FLD (f_i20_16) = ((FLD (f_i20)) & (65535));
 }
         errmsg = insert_normal (cd, fields->f_i20_4, 0, 0, 8, 4, 16, total_length, buffer);
@@ -658,14 +659,14 @@ fr30_cgen_insert_operand (CGEN_CPU_DESC cd,
     case FR30_OPERAND_LABEL12 :
       {
         long value = fields->f_rel12;
-        value = ((int) (((value) - (((pc) + (2))))) >> (1));
+        value = ((SI) (((value) - (((pc) + (2))))) >> (1));
         errmsg = insert_normal (cd, value, 0|(1<<CGEN_IFLD_SIGNED)|(1<<CGEN_IFLD_PCREL_ADDR), 0, 5, 11, 16, total_length, buffer);
       }
       break;
     case FR30_OPERAND_LABEL9 :
       {
         long value = fields->f_rel9;
-        value = ((int) (((value) - (((pc) + (2))))) >> (1));
+        value = ((SI) (((value) - (((pc) + (2))))) >> (1));
         errmsg = insert_normal (cd, value, 0|(1<<CGEN_IFLD_SIGNED)|(1<<CGEN_IFLD_PCREL_ADDR), 0, 8, 8, 16, total_length, buffer);
       }
       break;
@@ -693,14 +694,14 @@ fr30_cgen_insert_operand (CGEN_CPU_DESC cd,
     case FR30_OPERAND_S10 :
       {
         long value = fields->f_s10;
-        value = ((int) (value) >> (2));
+        value = ((SI) (value) >> (2));
         errmsg = insert_normal (cd, value, 0|(1<<CGEN_IFLD_SIGNED), 0, 8, 8, 16, total_length, buffer);
       }
       break;
     case FR30_OPERAND_U10 :
       {
         long value = fields->f_u10;
-        value = ((unsigned int) (value) >> (2));
+        value = ((USI) (value) >> (2));
         errmsg = insert_normal (cd, value, 0, 0, 8, 8, 16, total_length, buffer);
       }
       break;
@@ -716,7 +717,7 @@ fr30_cgen_insert_operand (CGEN_CPU_DESC cd,
     case FR30_OPERAND_UDISP6 :
       {
         long value = fields->f_udisp6;
-        value = ((unsigned int) (value) >> (2));
+        value = ((USI) (value) >> (2));
         errmsg = insert_normal (cd, value, 0, 0, 8, 4, 16, total_length, buffer);
       }
       break;

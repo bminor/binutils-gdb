@@ -33,6 +33,7 @@
 #include "symcat.h"
 #include "xc16x-desc.h"
 #include "xc16x-opc.h"
+#include "cgen/basic-modes.h"
 #include "opintl.h"
 #include "safe-ctype.h"
 

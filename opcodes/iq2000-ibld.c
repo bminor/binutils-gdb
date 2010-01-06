@@ -33,6 +33,7 @@
 #include "symcat.h"
 #include "iq2000-desc.h"
 #include "iq2000-opc.h"
+#include "cgen/basic-modes.h"
 #include "opintl.h"
 #include "safe-ctype.h"
 
@@ -613,14 +614,14 @@ iq2000_cgen_insert_operand (CGEN_CPU_DESC cd,
     case IQ2000_OPERAND_JMPTARG :
       {
         long value = fields->f_jtarg;
-        value = ((unsigned int) (((value) & (262143))) >> (2));
+        value = ((USI) (((value) & (262143))) >> (2));
         errmsg = insert_normal (cd, value, 0|(1<<CGEN_IFLD_ABS_ADDR), 0, 15, 16, 32, total_length, buffer);
       }
       break;
     case IQ2000_OPERAND_JMPTARGQ10 :
       {
         long value = fields->f_jtargq10;
-        value = ((unsigned int) (((value) & (8388607))) >> (2));
+        value = ((USI) (((value) & (8388607))) >> (2));
         errmsg = insert_normal (cd, value, 0|(1<<CGEN_IFLD_ABS_ADDR), 0, 20, 21, 32, total_length, buffer);
       }
       break;
@@ -645,7 +646,7 @@ iq2000_cgen_insert_operand (CGEN_CPU_DESC cd,
     case IQ2000_OPERAND_OFFSET :
       {
         long value = fields->f_offset;
-        value = ((int) (((value) - (pc))) >> (2));
+        value = ((SI) (((value) - (pc))) >> (2));
         errmsg = insert_normal (cd, value, 0|(1<<CGEN_IFLD_SIGNED)|(1<<CGEN_IFLD_PCREL_ADDR), 0, 15, 16, 32, total_length, buffer);
       }
       break;

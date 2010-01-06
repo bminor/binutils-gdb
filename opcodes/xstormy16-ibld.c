@@ -33,6 +33,7 @@
 #include "symcat.h"
 #include "xstormy16-desc.h"
 #include "xstormy16-opc.h"
+#include "cgen/basic-modes.h"
 #include "opintl.h"
 #include "safe-ctype.h"
 
@@ -587,7 +588,7 @@ xstormy16_cgen_insert_operand (CGEN_CPU_DESC cd,
       {
 {
   FLD (f_abs24_1) = ((FLD (f_abs24)) & (255));
-  FLD (f_abs24_2) = ((unsigned int) (FLD (f_abs24)) >> (8));
+  FLD (f_abs24_2) = ((UINT) (FLD (f_abs24)) >> (8));
 }
         errmsg = insert_normal (cd, fields->f_abs24_1, 0, 0, 8, 8, 32, total_length, buffer);
         if (errmsg)
@@ -647,7 +648,7 @@ xstormy16_cgen_insert_operand (CGEN_CPU_DESC cd,
     case XSTORMY16_OPERAND_REL12A :
       {
         long value = fields->f_rel12a;
-        value = ((int) (((value) - (((pc) + (2))))) >> (1));
+        value = ((SI) (((value) - (((pc) + (2))))) >> (1));
         errmsg = insert_normal (cd, value, 0|(1<<CGEN_IFLD_SIGNED)|(1<<CGEN_IFLD_PCREL_ADDR), 0, 4, 11, 32, total_length, buffer);
       }
       break;

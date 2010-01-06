@@ -33,6 +33,7 @@
 #include "symcat.h"
 #include "ip2k-desc.h"
 #include "ip2k-opc.h"
+#include "cgen/basic-modes.h"
 #include "opintl.h"
 #include "safe-ctype.h"
 

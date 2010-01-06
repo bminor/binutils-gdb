@@ -33,6 +33,7 @@
 #include "symcat.h"
 #include "@prefix@-desc.h"
 #include "@prefix@-opc.h"
+#include "cgen/basic-modes.h"
 #include "opintl.h"
 #include "safe-ctype.h"
 

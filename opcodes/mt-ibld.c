@@ -33,6 +33,7 @@
 #include "symcat.h"
 #include "mt-desc.h"
 #include "mt-opc.h"
+#include "cgen/basic-modes.h"
 #include "opintl.h"
 #include "safe-ctype.h"
 
@@ -681,7 +682,7 @@ mt_cgen_insert_operand (CGEN_CPU_DESC cd,
     case MT_OPERAND_LOOPSIZE :
       {
         long value = fields->f_loopo;
-        value = ((unsigned int) (value) >> (2));
+        value = ((USI) (value) >> (2));
         errmsg = insert_normal (cd, value, 0, 0, 7, 8, 32, total_length, buffer);
       }
       break;
