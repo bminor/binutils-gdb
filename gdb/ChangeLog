@@ -1,3 +1,7 @@
+2010-01-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb-gdb.py: New file.
+
 2010-01-05  Michael Snyder  <msnyder@vmware.com>
 
 	* infrun.c (handle_inferior_event): Fix typo in comment.
