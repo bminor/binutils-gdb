@@ -13666,11 +13666,21 @@ do_vfp_nsyn_cvtz (void)
 }
 
 static void
-do_neon_cvt (void)
+do_neon_cvt_1 (bfd_boolean round_to_zero ATTRIBUTE_UNUSED)
 {
   enum neon_shape rs = neon_select_shape (NS_DDI, NS_QQI, NS_FFI, NS_DD, NS_QQ,
     NS_FD, NS_DF, NS_FF, NS_QD, NS_DQ, NS_NULL);
   int flavour = neon_cvt_flavour (rs);
+
+  /* PR11109: Handle round-to-zero for VCVT conversions.  */
+  if (round_to_zero
+      && ARM_CPU_HAS_FEATURE (cpu_variant, fpu_arch_vfp_v2)
+      && (flavour == 0 || flavour == 1 || flavour == 8 || flavour == 9)
+      && (rs == NS_FD || rs == NS_FF))
+    {
+      do_vfp_nsyn_cvtz ();
+      return;
+    }
 
   /* VFP rather than Neon conversions.  */
   if (flavour >= 6)
@@ -13769,6 +13779,18 @@ do_neon_cvt (void)
       /* Some VFP conversions go here (s32 <-> f32, u32 <-> f32).  */
       do_vfp_nsyn_cvt (rs, flavour);
     }
+}
+
+static void
+do_neon_cvtr (void)
+{
+  do_neon_cvt_1 (FALSE);
+}
+
+static void
+do_neon_cvt (void)
+{
+  do_neon_cvt_1 (TRUE);
 }
 
 static void
@@ -17416,7 +17438,8 @@ static const struct asm_opcode insns[] =
  NCE(vldr,      d100b00, 2, (RVSD, ADDRGLDC), neon_ldr_str),
  NCE(vstr,      d000b00, 2, (RVSD, ADDRGLDC), neon_ldr_str),
 
- nCEF(vcvt,     _vcvt,    3, (RNSDQ, RNSDQ, oI32b), neon_cvt),
+ nCEF(vcvt,     _vcvt,   3, (RNSDQ, RNSDQ, oI32b), neon_cvt),
+ nCEF(vcvtr,    _vcvt,   2, (RNSDQ, RNSDQ), neon_cvtr),
  nCEF(vcvtb,	_vcvt,	 2, (RVS, RVS), neon_cvtb),
  nCEF(vcvtt,	_vcvt,	 2, (RVS, RVS), neon_cvtt),
 

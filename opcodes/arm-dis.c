@@ -4355,7 +4355,8 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
   long		given;
   int           status;
   int           is_thumb = FALSE;
-  int           is_data = FALSE;
+  int           is_data = (bfd_asymbol_flavour (*info->symtab)
+			   == bfd_target_elf_flavour) ? TRUE : FALSE;
   int           little_code;
   unsigned int	size = 4;
   void	 	(*printer) (bfd_vma, struct disassemble_info *, long);
@@ -4415,7 +4416,7 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
       bfd_vma addr;
       int n;
       int last_sym = -1;
-      enum map_type type = MAP_ARM;
+      enum map_type type = MAP_DATA;
 
       if (pc <= last_mapping_addr)
 	last_mapping_sym = -1;
@@ -4478,7 +4479,9 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
 	  for (n = last_sym + 1; n < info->symtab_size; n++)
 	    {
 	      addr = bfd_asymbol_value (info->symtab[n]);
-	      if (addr > pc)
+	      if (addr > pc
+		  && (info->section == NULL
+		      || info->section == info->symtab[n]->section))
 		{
 		  if (addr - pc < size)
 		    size = addr - pc;
