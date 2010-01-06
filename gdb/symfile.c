@@ -1042,22 +1042,16 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd,
 void
 symbol_file_add_separate (bfd *bfd, int symfile_flags, struct objfile *objfile)
 {
-  /* Currently only one separate debug objfile is supported.  */
-  gdb_assert (objfile && objfile->separate_debug_objfile == NULL);
+  struct objfile *new_objfile;
 
-  objfile->separate_debug_objfile =
-    symbol_file_add_with_addrs_or_offsets
+  new_objfile = symbol_file_add_with_addrs_or_offsets
     (bfd, symfile_flags,
      0, /* No addr table.  */
      objfile->section_offsets, objfile->num_sections,
      objfile->flags & (OBJF_REORDERED | OBJF_SHARED | OBJF_READNOW
 		       | OBJF_USERLOADED));
-  objfile->separate_debug_objfile->separate_debug_objfile_backlink
-    = objfile;
 
-  /* Put the separate debug object before the normal one, this is so that
-     usage of the ALL_OBJFILES_SAFE macro will stay safe. */
-  put_objfile_before (objfile->separate_debug_objfile, objfile);
+  add_separate_debug_objfile (new_objfile, objfile);
 }
 
 /* Process the symbol file ABFD, as either the main file or as a
@@ -2272,14 +2266,9 @@ reread_symbols (void)
 
 	  clear_objfile_data (objfile);
 
-	  /* Free the separate debug objfile if there is one.  It will be
+	  /* Free the separate debug objfiles.  It will be
 	     automatically recreated by sym_read.  */
-	  if (objfile->separate_debug_objfile)
-	    {
-	      /* Note: no need to clear separate_debug_objfile field as it is
-		 done by free_objfile.  */
-	      free_objfile (objfile->separate_debug_objfile);
-	    }
+          free_objfile_separate_debug (objfile);
 
 	  /* FIXME: Do we have to free a whole linked list, or is this
 	     enough?  */

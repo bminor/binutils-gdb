@@ -363,15 +363,25 @@ struct objfile
     struct obj_section
      *sections, *sections_end;
 
-    /* Link to objfile that contains the debug symbols for this one.
-       One is loaded if this file has an debug link to an existing
-       debug file with the right checksum */
+    /* GDB allows to have debug symbols in separate object files.  This is
+       used by .gnu_debuglink, ELF build id note and Mach-O OSO.
+       Although this is a tree structure, GDB only support one level
+       (ie a separate debug for a separate debug is not supported).  Note that
+       separate debug object are in the main chain and therefore will be
+       visited by ALL_OBJFILES & co iterators.  Separate debug objfile always
+       has a non-nul separate_debug_objfile_backlink.  */
+
+    /* Link to the first separate debug object, if any.  */
     struct objfile *separate_debug_objfile;
 
     /* If this is a separate debug object, this is used as a link to the
        actual executable objfile. */
     struct objfile *separate_debug_objfile_backlink;
-    
+
+    /* If this is a separate debug object, this is a link to the next one
+       for the same executable objfile.  */
+    struct objfile *separate_debug_objfile_link;
+
     /* Place to stash various statistics about this objfile */
       OBJSTATS;
 
@@ -452,13 +462,20 @@ extern int build_objfile_section_table (struct objfile *);
 
 extern void terminate_minimal_symbol_table (struct objfile *objfile);
 
+extern struct objfile *objfile_separate_debug_iterate (const struct objfile *,
+                                                       const struct objfile *);
+
 extern void put_objfile_before (struct objfile *, struct objfile *);
 
 extern void objfile_to_front (struct objfile *);
 
+extern void add_separate_debug_objfile (struct objfile *, struct objfile *);
+
 extern void unlink_objfile (struct objfile *);
 
 extern void free_objfile (struct objfile *);
+
+extern void free_objfile_separate_debug (struct objfile *);
 
 extern struct cleanup *make_cleanup_free_objfile (struct objfile *);
 

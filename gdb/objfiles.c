@@ -378,6 +378,42 @@ terminate_minimal_symbol_table (struct objfile *objfile)
   }
 }
 
+/* Iterator on PARENT and every separate debug objfile of PARENT.
+   The usage pattern is:
+     for (objfile = parent;
+          objfile;
+          objfile = objfile_separate_debug_iterate (parent, objfile))
+       ...
+*/
+
+struct objfile *
+objfile_separate_debug_iterate (const struct objfile *parent,
+                                const struct objfile *objfile)
+{
+  struct objfile *res;
+
+  res = objfile->separate_debug_objfile;
+  if (res)
+    return res;
+
+  res = objfile->separate_debug_objfile_link;
+  if (res)
+    return res;
+
+  /* Common case where there is no separate debug objfile.  */
+  if (objfile == parent)
+    return NULL;
+
+  for (res = objfile->separate_debug_objfile_backlink;
+       res != parent;
+       res = res->separate_debug_objfile_backlink)
+    {
+      gdb_assert (res != NULL);
+      if (res->separate_debug_objfile_link)
+        return res->separate_debug_objfile_link;
+    }
+  return NULL;
+}
 
 /* Put one object file before a specified on in the global list.
    This can be used to make sure an object file is destroyed before
@@ -455,6 +491,41 @@ unlink_objfile (struct objfile *objfile)
 		  _("unlink_objfile: objfile already unlinked"));
 }
 
+/* Add OBJFILE as a separate debug objfile of PARENT.  */
+
+void
+add_separate_debug_objfile (struct objfile *objfile, struct objfile *parent)
+{
+  gdb_assert (objfile && parent);
+
+  /* Must not be already in a list.  */
+  gdb_assert (objfile->separate_debug_objfile_backlink == NULL);
+  gdb_assert (objfile->separate_debug_objfile_link == NULL);
+
+  objfile->separate_debug_objfile_backlink = parent;
+  objfile->separate_debug_objfile_link = parent->separate_debug_objfile;
+  parent->separate_debug_objfile = objfile;
+
+  /* Put the separate debug object before the normal one, this is so that
+     usage of the ALL_OBJFILES_SAFE macro will stay safe. */
+  put_objfile_before (objfile, parent);
+}
+
+/* Free all separate debug objfile of OBJFILE, but don't free OBJFILE
+   itself.  */
+
+void
+free_objfile_separate_debug (struct objfile *objfile)
+{
+  struct objfile *child;
+
+  for (child = objfile->separate_debug_objfile; child;)
+    {
+      struct objfile *next_child = child->separate_debug_objfile_link;
+      free_objfile (child);
+      child = next_child;
+    }
+}
 
 /* Destroy an objfile and all the symtabs and psymtabs under it.  Note
    that as much as possible is allocated on the objfile_obstack 
@@ -475,16 +546,38 @@ unlink_objfile (struct objfile *objfile)
 void
 free_objfile (struct objfile *objfile)
 {
-  if (objfile->separate_debug_objfile)
-    {
-      free_objfile (objfile->separate_debug_objfile);
-    }
-  
+  /* Free all separate debug objfiles.  */
+  free_objfile_separate_debug (objfile);
+
   if (objfile->separate_debug_objfile_backlink)
     {
       /* We freed the separate debug file, make sure the base objfile
 	 doesn't reference it.  */
-      objfile->separate_debug_objfile_backlink->separate_debug_objfile = NULL;
+      struct objfile *child;
+
+      child = objfile->separate_debug_objfile_backlink->separate_debug_objfile;
+
+      if (child == objfile)
+        {
+          /* OBJFILE is the first child.  */
+          objfile->separate_debug_objfile_backlink->separate_debug_objfile =
+            objfile->separate_debug_objfile_link;
+        }
+      else
+        {
+          /* Find OBJFILE in the list.  */
+          while (1)
+            {
+              if (child->separate_debug_objfile_link == objfile)
+                {
+                  child->separate_debug_objfile_link =
+                    objfile->separate_debug_objfile_link;
+                  break;
+                }
+              child = child->separate_debug_objfile_link;
+              gdb_assert (child);
+            }
+        }
     }
   
   /* Remove any references to this objfile in the global value
@@ -778,25 +871,16 @@ objfile_has_full_symbols (struct objfile *objfile)
 }
 
 /* Return non-zero if OBJFILE has full or partial symbols, either directly
-   or throught its separate debug file.  */
+   or through a separate debug file.  */
 
 int
 objfile_has_symbols (struct objfile *objfile)
 {
-  struct objfile *separate_objfile;
+  struct objfile *o;
 
-  if (objfile_has_partial_symbols (objfile)
-      || objfile_has_full_symbols (objfile))
-    return 1;
-
-  separate_objfile = objfile->separate_debug_objfile;
-  if (separate_objfile == NULL)
-    return 0;
-
-  if (objfile_has_partial_symbols (separate_objfile)
-      || objfile_has_full_symbols (separate_objfile))
-    return 1;
-
+  for (o = objfile; o; o = objfile_separate_debug_iterate (objfile, o))
+    if (objfile_has_partial_symbols (o) || objfile_has_full_symbols (o))
+      return 1;
   return 0;
 }
 

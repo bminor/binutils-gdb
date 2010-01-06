@@ -1,3 +1,30 @@
+2010-01-06  Tristan Gingold  <gingold@adacore.com>
+
+	* symtab.c (lookup_global_symbol_from_objfile): Rename objfile
+	parameter to main_objfile.  Iterate on all separate debug objfiles.
+	* symfile.h (symbol_file_add_separate)
+	(find_separate_debug_file_by_debuglink): Remove parameter names.
+	* symfile.c (symbol_file_add_separate): Use add_separate_objfile.
+	(reread_symbols): Use free_objfile_separate_debug.
+	* objfiles.h (struct objfile): Add separate_debug_objfile_link.
+	Adjust comment.
+	(objfile_separate_debug_iterate, add_separate_debug_objfile)
+	(free_objfile_separate_debug): New prototypes.
+	* objfiles.c (objfile_separate_debug_iterate): New function.
+	(add_separate_debug_objfile, free_objfile_separate_debug): New
+	functions.
+	(free_objfile): Use free_objfile_separate_debug.  Adjust for
+	multiple separate debug objfile.
+	(objfile_has_symbols): Adjust comment.  Iterate on all separate
+	debug objfiles.
+	* minsyms.c (lookup_minimal_symbol): Adjust for multiple separate
+	debug objfile.
+	(lookup_minimal_symbol_text): Ditto.
+	(lookup_minimal_symbol_by_pc_name): Ditto.
+	(lookup_minimal_symbol_solib_trampoline): Ditto.
+	(lookup_minimal_symbol_by_pc_section_1): Iterate on all separate
+	debug objfiles.
+
 2010-01-05  Stan Shebs  <stan@codesourcery.com>
 
 	Add fast tracepoints.
