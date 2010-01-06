@@ -1,6 +1,6 @@
 /* nm.c -- Describe symbol table of a rel file.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009
+   2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -246,7 +246,7 @@ usage (FILE *stream, int status)
       --plugin NAME      Load the specified plugin\n"));
 #endif
   fprintf (stream, _("\
-  -S, --print-size       Print size of defined symbols\n		\
+  -S, --print-size       Print size of defined symbols\n\
   -s, --print-armap      Include index for symbols from archive members\n\
       --size-sort        Sort symbols by size\n\
       --special-syms     Include special symbols in the output\n\
