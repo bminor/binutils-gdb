@@ -1,3 +1,8 @@
+2010-01-05  Doug Evans  <dje@sebabeach.org>
+
+	* cpu.h: Regenerate.
+	* decode.c: Regenerate.
+
 2010-01-02  Doug Evans  <dje@sebabeach.org>
 
 	* arch.c, * arch.h, * cpu.c, * cpu.h, * cpuall.h, * decode.c,
