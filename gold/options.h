@@ -39,6 +39,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <list>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -845,6 +846,9 @@ class General_options
                  N_("Add DIR to link time shared library search path"),
                  N_("DIR"));
 
+  DEFINE_special(section_start, options::TWO_DASHES, '\0',
+		 N_("Set address of section"), N_("SECTION=ADDRESS"));
+
   DEFINE_optional_string(sort_common, options::TWO_DASHES, '\0', NULL,
 			 N_("Sort common symbols by alignment"),
 			 N_("[={ascending,descending}]"));
@@ -1174,6 +1178,12 @@ class General_options
   bool
   check_excluded_libs (const std::string &s) const;
 
+  // If an explicit start address was given for section SECNAME with
+  // the --section-start option, return true and set *PADDR to the
+  // address.  Otherwise return false.
+  bool
+  section_start(const char* secname, uint64_t* paddr) const;
+
  private:
   // Don't copy this structure.
   General_options(const General_options&);
@@ -1261,6 +1271,8 @@ class General_options
   Unordered_set<std::string> excluded_libs_;
   // List of symbol-names to keep, via -retain-symbol-info.
   Unordered_set<std::string> symbols_to_retain_;
+  // Map from section name to address from --section-start.
+  std::map<std::string, uint64_t> section_starts_;
 };
 
 // The position-dependent options.  We use this to store the state of

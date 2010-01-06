@@ -1,3 +1,22 @@
+2010-01-06  Ian Lance Taylor  <iant@google.com>
+
+	PR 10980
+	* options.cc (General_options::parse_section_start): New function.
+	(General_options::section_start): New function.
+	(General_options::General_options): Initialize all members.
+	* options.h: Include <map>
+	(class General_options): Add --section-start.  Add section_starts_
+	member.
+	* layout.cc (Layout::attach_allocated_section_to_segment): If
+	--section-start was used, set the address of the segment.  Remove
+	local sort_sections.
+	(Layout::relaxation_loop_body): If the address of the load segment
+	has been set by --section-start, don't use it.
+	* output.h (Output_segment::update_flags_for_output_section): New
+	function.
+	* output.cc (Output_segment::add_output_section): Call
+	update_flags_for_output_section.
+
 2010-01-05  Ian Lance Taylor  <iant@google.com>
 
 	PR 10980

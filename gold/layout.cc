@@ -1025,7 +1025,9 @@ Layout::attach_allocated_section_to_segment(Output_section* os)
 
   elfcpp::Elf_Word seg_flags = Layout::section_flags_to_segment(flags);
 
-  bool sort_sections = !this->script_options_->saw_sections_clause();
+  // Check for --section-start.
+  uint64_t addr;
+  bool is_address_set = parameters->options().section_start(os->name(), &addr);
 
   // In general the only thing we really care about for PT_LOAD
   // segments is whether or not they are writable, so that is how we
@@ -1054,7 +1056,18 @@ Layout::attach_allocated_section_to_segment(Output_section* os)
       if (os->is_large_data_section() && !(*p)->is_large_data_segment())
 	continue;
 
-      (*p)->add_output_section(os, seg_flags, sort_sections);
+      if (is_address_set)
+	{
+	  if ((*p)->are_addresses_set())
+	    continue;
+
+	  (*p)->add_initial_output_data(os);
+	  (*p)->update_flags_for_output_section(seg_flags);
+	  (*p)->set_addresses(addr, addr);
+	  break;
+	}
+
+      (*p)->add_output_section(os, seg_flags, true);
       break;
     }
 
@@ -1064,7 +1077,9 @@ Layout::attach_allocated_section_to_segment(Output_section* os)
                                                        seg_flags);
       if (os->is_large_data_section())
 	oseg->set_is_large_data_segment();
-      oseg->add_output_section(os, seg_flags, sort_sections);
+      oseg->add_output_section(os, seg_flags, true);
+      if (is_address_set)
+	oseg->set_addresses(addr, addr);
     }
 
   // If we see a loadable SHT_NOTE section, we create a PT_NOTE
@@ -1491,6 +1506,14 @@ Layout::relaxation_loop_body(
   gold_assert(phdr_seg == NULL
 	      || load_seg != NULL
 	      || this->script_options_->saw_sections_clause());
+
+  // If the address of the load segment we found has been set by
+  // --section-start rather than by a script, then we don't want to
+  // use it for the file and segment headers.
+  if (load_seg != NULL
+      && load_seg->are_addresses_set()
+      && !this->script_options_->saw_sections_clause())
+    load_seg = NULL;
 
   // Lay out the segment headers.
   if (!parameters->options().relocatable())

@@ -3081,11 +3081,7 @@ Output_segment::add_output_section(Output_section* os,
   gold_assert(os->is_large_data_section() == this->is_large_data_segment());
   gold_assert(this->type() == elfcpp::PT_LOAD || !do_sort);
 
-  // Update the segment flags.  The ELF ABI specifies that a PT_TLS
-  // segment should always have PF_R as the flags, regardless of the
-  // associated sections.
-  if (this->type() != elfcpp::PT_TLS)
-    this->flags_ |= seg_flags;
+  this->update_flags_for_output_section(seg_flags);
 
   Output_segment::Output_data_list* pdl;
   if (os->type() == elfcpp::SHT_NOBITS)
@@ -3363,8 +3359,8 @@ Output_segment::remove_output_section(Output_section* os)
   gold_unreachable();
 }
 
-// Add an Output_data (which is not an Output_section) to the start of
-// a segment.
+// Add an Output_data (which need not be an Output_section) to the
+// start of a segment.
 
 void
 Output_segment::add_initial_output_data(Output_data* od)

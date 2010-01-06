@@ -3483,8 +3483,8 @@ class Output_segment
   void
   remove_output_section(Output_section* os);
 
-  // Add an Output_data (which is not an Output_section) to the start
-  // of this segment.
+  // Add an Output_data (which need not be an Output_section) to the
+  // start of this segment.
   void
   add_initial_output_data(Output_data*);
 
@@ -3514,6 +3514,17 @@ class Output_segment
     this->vaddr_ = vaddr;
     this->paddr_ = paddr;
     this->are_addresses_set_ = true;
+  }
+
+  // Update the flags for the flags of an output section added to this
+  // segment.
+  void
+  update_flags_for_output_section(elfcpp::Elf_Xword flags)
+  {
+    // The ELF ABI specifies that a PT_TLS segment should always have
+    // PF_R as the flags.
+    if (this->type() != elfcpp::PT_TLS)
+      this->flags_ |= flags;
   }
 
   // Set the segment flags.  This is only used if we have a PHDRS
