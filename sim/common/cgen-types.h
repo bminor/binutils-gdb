@@ -80,7 +80,6 @@ typedef unsigned64 UDI;
 #define GETHIDI(di) ((SI) ((UDI) (di) >> 32))
 #define SETLODI(di, val) ((di) = (((di) & 0xffffffff00000000LL) | (val)))
 #define SETHIDI(di, val) ((di) = (((di) & 0xffffffffLL) | (((DI) (val)) << 32)))
-#define SETDI(di, hi, lo) ((di) = MAKEDI (hi, lo))
 #define MAKEDI(hi, lo) ((((DI) (SI) (hi)) << 32) | ((UDI) (USI) (lo)))
 #else
 /* DI mode support if "long long" doesn't exist.
@@ -94,7 +93,6 @@ typedef DI UDI;
 #define GETHIDI(di) ((di).hi)
 #define SETLODI(di, val) ((di).lo = (val))
 #define SETHIDI(di, val) ((di).hi = (val))
-#define SETDI(di, hi, lo) ((di) = MAKEDI (hi, lo))
 extern DI make_struct_di (SI, SI);
 #define MAKEDI(hi, lo) (make_struct_di ((hi), (lo)))
 #endif
