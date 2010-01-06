@@ -1,3 +1,9 @@
+2010-01-06  Quentin Neill  <quentin.neill@amd.com>
+
+	* gas/i386/i386.exp: Add new amdfam15 test cases.
+	* gas/i386/nops-1-amdfam15.d: New.
+	* gas/i386/x86-64-nops-1-amdfam15.d: New.
+
 2010-01-06  Daniel Gutson  <dgutson@codesourcery.com>
 
 	* gas/arm/dis-data.d: New test case.

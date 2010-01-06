@@ -1,3 +1,10 @@
+2010-01-06  Quentin Neill  <quentin.neill@amd.com>
+
+	* config/tc-i386.c (cpu_arch): Add amdfam15.
+	(i386_align_code): Add PROCESSOR_AMDFAM15 cases.
+	* config/tc-i386.h (processor_type): Add PROCESSOR_AMDFAM15.
+	* doc/c-i386.texi: Add amdfam15.
+
 2010-01-04  Daniel Gutson  <dgutson@codesourcery.com>
 
 	* config/tc-arm.c (do_neon_logic): Accept imm value
