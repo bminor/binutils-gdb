@@ -43,6 +43,7 @@
 #include "target.h"
 #include "value.h"
 #include "dis-asm.h"
+#include "disasm.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -5567,6 +5568,49 @@ static const int i386_record_regmap[] =
   I386_DS_REGNUM, I386_ES_REGNUM, I386_FS_REGNUM, I386_GS_REGNUM
 };
 
+/* Check that the given address appears suitable for a fast
+   tracepoint, which on x86 means that we need an instruction of at
+   least 5 bytes, so that we can overwrite it with a 4-byte-offset
+   jump and not have to worry about program jumps to an address in the
+   middle of the tracepoint jump.  Returns 1 if OK, and writes a size
+   of instruction to replace, and 0 if not, plus an explanatory
+   string.  */
+
+static int
+i386_fast_tracepoint_valid_at (struct gdbarch *gdbarch,
+			       CORE_ADDR addr, int *isize, char **msg)
+{
+  int len, jumplen;
+  static struct ui_file *gdb_null = NULL;
+
+  /* This is based on the target agent using a 4-byte relative jump.
+     Alternate future possibilities include 8-byte offset for x86-84,
+     or 3-byte jumps if the program has trampoline space close by.  */
+  jumplen = 5;
+
+  /* Dummy file descriptor for the disassembler.  */
+  if (!gdb_null)
+    gdb_null = ui_file_new ();
+
+  /* Check for fit.  */
+  len = gdb_print_insn (gdbarch, addr, gdb_null, NULL);
+  if (len < jumplen)
+    {
+      /* Return a bit of target-specific detail to add to the caller's
+	 generic failure message.  */
+      if (msg)
+	*msg = xstrprintf (_("; instruction is only %d bytes long, need at least %d bytes for the jump"),
+			   len, jumplen);
+      return 0;
+    }
+
+  if (isize)
+    *isize = len;
+  if (msg)
+    *msg = NULL;
+  return 1;
+}
+
 
 static struct gdbarch *
 i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
@@ -5768,6 +5812,9 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_skip_permanent_breakpoint (gdbarch,
 					 i386_skip_permanent_breakpoint);
+
+  set_gdbarch_fast_tracepoint_valid_at (gdbarch,
+					i386_fast_tracepoint_valid_at);
 
   return gdbarch;
 }

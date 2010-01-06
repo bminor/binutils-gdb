@@ -155,4 +155,8 @@ extern struct gdbarch *get_current_arch (void);
 
 extern int default_has_shared_address_space (struct gdbarch *);
 
+extern int default_fast_tracepoint_valid_at (struct gdbarch *gdbarch,
+					     CORE_ADDR addr,
+					     int *isize, char **msg);
+
 #endif

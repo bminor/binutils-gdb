@@ -250,6 +250,7 @@ struct gdbarch
   int has_global_solist;
   int has_global_breakpoints;
   gdbarch_has_shared_address_space_ftype *has_shared_address_space;
+  gdbarch_fast_tracepoint_valid_at_ftype *fast_tracepoint_valid_at;
 };
 
 
@@ -391,6 +392,7 @@ struct gdbarch startup_gdbarch =
   0,  /* has_global_solist */
   0,  /* has_global_breakpoints */
   default_has_shared_address_space,  /* has_shared_address_space */
+  default_fast_tracepoint_valid_at,  /* fast_tracepoint_valid_at */
   /* startup_gdbarch() */
 };
 
@@ -475,6 +477,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->target_signal_from_host = default_target_signal_from_host;
   gdbarch->target_signal_to_host = default_target_signal_to_host;
   gdbarch->has_shared_address_space = default_has_shared_address_space;
+  gdbarch->fast_tracepoint_valid_at = default_fast_tracepoint_valid_at;
   /* gdbarch_alloc() */
 
   return gdbarch;
@@ -653,6 +656,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of has_global_solist, invalid_p == 0 */
   /* Skip verify of has_global_breakpoints, invalid_p == 0 */
   /* Skip verify of has_shared_address_space, invalid_p == 0 */
+  /* Skip verify of fast_tracepoint_valid_at, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &length);
   make_cleanup (xfree, buf);
   if (length > 0)
@@ -825,6 +829,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: elf_make_msymbol_special = <%s>\n",
                       host_address_to_string (gdbarch->elf_make_msymbol_special));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: fast_tracepoint_valid_at = <%s>\n",
+                      host_address_to_string (gdbarch->fast_tracepoint_valid_at));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_fetch_pointer_argument_p() = %d\n",
                       gdbarch_fetch_pointer_argument_p (gdbarch));
@@ -3526,6 +3533,23 @@ set_gdbarch_has_shared_address_space (struct gdbarch *gdbarch,
                                       gdbarch_has_shared_address_space_ftype has_shared_address_space)
 {
   gdbarch->has_shared_address_space = has_shared_address_space;
+}
+
+int
+gdbarch_fast_tracepoint_valid_at (struct gdbarch *gdbarch, CORE_ADDR addr, int *isize, char **msg)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->fast_tracepoint_valid_at != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_fast_tracepoint_valid_at called\n");
+  return gdbarch->fast_tracepoint_valid_at (gdbarch, addr, isize, msg);
+}
+
+void
+set_gdbarch_fast_tracepoint_valid_at (struct gdbarch *gdbarch,
+                                      gdbarch_fast_tracepoint_valid_at_ftype fast_tracepoint_valid_at)
+{
+  gdbarch->fast_tracepoint_valid_at = fast_tracepoint_valid_at;
 }
 
 

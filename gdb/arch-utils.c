@@ -765,6 +765,17 @@ default_has_shared_address_space (struct gdbarch *gdbarch)
   return 0;
 }
 
+int
+default_fast_tracepoint_valid_at (struct gdbarch *gdbarch,
+				  CORE_ADDR addr, int *isize, char **msg)
+{
+  /* We don't know if maybe the target has some way to do fast
+     tracepoints that doesn't need gdbarch, so always say yes.  */
+  if (msg)
+    *msg = NULL;
+  return 1;
+}
+
 /* */
 
 extern initialize_file_ftype _initialize_gdbarch_utils; /* -Wmissing-prototypes */

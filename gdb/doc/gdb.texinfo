@@ -9323,6 +9323,11 @@ expressions and ignore counts on tracepoints have no effect, and
 tracepoints cannot run @value{GDBN} commands when they are
 hit.  Tracepoints may not be thread-specific either.
 
+@cindex fast tracepoints
+Some targets may support @dfn{fast tracepoints}, which are inserted in
+a different way (such as with a jump instead of a trap), that is
+faster but possibly restricted in where they may be installed.
+
 This section describes commands to set tracepoints and associated
 conditions and actions.
 
@@ -9377,6 +9382,20 @@ Set a tracepoint with condition @var{cond}; evaluate the expression
 if the value is nonzero---that is, if @var{cond} evaluates as true.
 @xref{Tracepoint Conditions, ,Tracepoint Conditions}, for more
 information on tracepoint conditions.
+
+@item ftrace @var{location} [ if @var{cond} ]
+@cindex set fast tracepoint
+@kindex ftrace
+The @code{ftrace} command sets a fast tracepoint.  For targets that
+support them, fast tracepoints will use a more efficient but possibly
+less general technique to trigger data collection, such as a jump
+instruction instead of a trap, or some sort of hardware support.  It
+may not be possible to create a fast tracepoint at the desired
+location, in which case the command will exit with an explanatory
+message.
+
+@value{GDBN} handles arguments to @code{ftrace} exactly as for
+@code{trace}.
 
 @vindex $tpnum
 @cindex last tracepoint number
@@ -29975,16 +29994,19 @@ tracepoints (@pxref{Tracepoints}).
 
 @table @samp
 
-@item QTDP:@var{n}:@var{addr}:@var{ena}:@var{step}:@var{pass}[:X@var{len},@var{bytes}]@r{[}-@r{]}
+@item QTDP:@var{n}:@var{addr}:@var{ena}:@var{step}:@var{pass}[:F@var{flen}][:X@var{len},@var{bytes}]@r{[}-@r{]}
 Create a new tracepoint, number @var{n}, at @var{addr}.  If @var{ena}
 is @samp{E}, then the tracepoint is enabled; if it is @samp{D}, then
 the tracepoint is disabled.  @var{step} is the tracepoint's step
-count, and @var{pass} is its pass count.  If an @samp{X} is present,
-it introduces a tracepoint condition, which consists of a hexadecimal
-length, followed by a comma and hex-encoded bytes, in a manner similar
-to action encodings as described below.  If the trailing @samp{-} is
-present, further @samp{QTDP} packets will follow to specify this
-tracepoint's actions.
+count, and @var{pass} is its pass count.  If an @samp{F} is present,
+then the tracepoint is to be a fast tracepoint, and the @var{flen} is
+the number of bytes that the target should copy elsewhere to make room
+for the tracepoint.  If an @samp{X} is present, it introduces a
+tracepoint condition, which consists of a hexadecimal length, followed
+by a comma and hex-encoded bytes, in a manner similar to action
+encodings as described below.  If the trailing @samp{-} is present,
+further @samp{QTDP} packets will follow to specify this tracepoint's
+actions.
 
 Replies:
 @table @samp

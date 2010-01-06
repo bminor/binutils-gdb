@@ -164,4 +164,16 @@ gdb_test "info trace" "in gdb_recursion_test.*$srcfile:$testline1.*trace only if
 # 1.14 help trace
 gdb_test "help trace" "Set a tracepoint at .*" "1.14: help trace"
 
+# 1.15 ftrace
 
+gdb_delete_tracepoints
+
+send_gdb "ftrace gdb_recursion_test\n"
+# Acceptance vs rejection of a location are target-specific, so allow both.
+gdb_expect {
+    -re "Fast tracepoint $decimal at $hex: file.*$srcfile, line $testline1.*$gdb_prompt $"
+    { pass "Set a fast tracepoint" }
+    -re ".*May not have a fast tracepoint at $hex.*$gdb_prompt $"
+    { pass "Declined to set a fast tracepoint" }
+    timeout { fail "Timeout while setting fast tracepoint" }
+}

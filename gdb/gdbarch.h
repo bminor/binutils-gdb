@@ -909,6 +909,12 @@ typedef int (gdbarch_has_shared_address_space_ftype) (struct gdbarch *gdbarch);
 extern int gdbarch_has_shared_address_space (struct gdbarch *gdbarch);
 extern void set_gdbarch_has_shared_address_space (struct gdbarch *gdbarch, gdbarch_has_shared_address_space_ftype *has_shared_address_space);
 
+/* True if a fast tracepoint can be set at an address. */
+
+typedef int (gdbarch_fast_tracepoint_valid_at_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr, int *isize, char **msg);
+extern int gdbarch_fast_tracepoint_valid_at (struct gdbarch *gdbarch, CORE_ADDR addr, int *isize, char **msg);
+extern void set_gdbarch_fast_tracepoint_valid_at (struct gdbarch *gdbarch, gdbarch_fast_tracepoint_valid_at_ftype *fast_tracepoint_valid_at);
+
 /* Definition for an unknown syscall, used basically in error-cases.  */
 #define UNKNOWN_SYSCALL (-1)
 

@@ -353,7 +353,7 @@ static int overlay_events_enabled;
 
 #define ALL_TRACEPOINTS(B)  \
   for (B = breakpoint_chain; B; B = B->next)  \
-    if ((B)->type == bp_tracepoint)
+    if (tracepoint_type (B))
 
 /* Chains of all breakpoints defined.  */
 
@@ -422,6 +422,14 @@ clear_breakpoint_hit_counts (void)
     b->hit_count = 0;
 }
 
+/* Encapsulate tests for different types of tracepoints.  */
+
+static int
+tracepoint_type (const struct breakpoint *b)
+{
+  return (b->type == bp_tracepoint || b->type == bp_fast_tracepoint);
+}
+  
 /* Default address, symtab and line to put a breakpoint at
    for "break" command with no arg.
    if default_breakpoint_valid is zero, the other three are
@@ -1282,7 +1290,7 @@ should_be_inserted (struct bp_location *bpt)
 
   /* Tracepoints are inserted by the target at a time of its choosing,
      not by us.  */
-  if (bpt->owner->type == bp_tracepoint)
+  if (tracepoint_type (bpt->owner))
     return 0;
 
   return 1;
@@ -2977,6 +2985,7 @@ print_it_typical (bpstat bs)
     case bp_watchpoint_scope:
     case bp_call_dummy:
     case bp_tracepoint:
+    case bp_fast_tracepoint:
     case bp_jit_event:
     default:
       result = PRINT_UNKNOWN;
@@ -3322,7 +3331,7 @@ bpstat_check_location (const struct bp_location *bl,
 
   /* By definition, the inferior does not report stops at
      tracepoints.  */
-  if (b->type == bp_tracepoint)
+  if (tracepoint_type (b))
     return 0;
 
   if (b->type != bp_watchpoint
@@ -3914,11 +3923,12 @@ bpstat_what (bpstat bs)
 	  retval.call_dummy = 1;
 	  break;
 	case bp_tracepoint:
+	case bp_fast_tracepoint:
 	  /* Tracepoint hits should not be reported back to GDB, and
 	     if one got through somehow, it should have been filtered
 	     out already.  */
 	  internal_error (__FILE__, __LINE__,
-			  _("bpstat_what: bp_tracepoint encountered"));
+			  _("bpstat_what: tracepoint encountered"));
 	  break;
 	}
       current_action = table[(int) bs_class][(int) current_action];
@@ -4044,6 +4054,7 @@ print_one_breakpoint_location (struct breakpoint *b,
     {bp_longjmp_master, "longjmp master"},
     {bp_catchpoint, "catchpoint"},
     {bp_tracepoint, "tracepoint"},
+    {bp_fast_tracepoint, "fast tracepoint"},
     {bp_jit_event, "jit events"},
   };
   
@@ -4173,6 +4184,7 @@ print_one_breakpoint_location (struct breakpoint *b,
       case bp_overlay_event:
       case bp_longjmp_master:
       case bp_tracepoint:
+      case bp_fast_tracepoint:
       case bp_jit_event:
 	if (opts.addressprint)
 	  {
@@ -4258,7 +4270,7 @@ print_one_breakpoint_location (struct breakpoint *b,
          because the condition is an internal implementation detail
          that we do not want to expose to the user.  */
       annotate_field (7);
-      if (b->type == bp_tracepoint)
+      if (tracepoint_type (b))
 	ui_out_text (uiout, "\ttrace only if ");
       else
 	ui_out_text (uiout, "\tstop only if ");
@@ -4451,7 +4463,7 @@ user_settable_breakpoint (const struct breakpoint *b)
   return (b->type == bp_breakpoint
 	  || b->type == bp_catchpoint
 	  || b->type == bp_hardware_breakpoint
-	  || b->type == bp_tracepoint
+	  || tracepoint_type (b)
 	  || b->type == bp_watchpoint
 	  || b->type == bp_read_watchpoint
 	  || b->type == bp_access_watchpoint
@@ -4804,6 +4816,7 @@ allocate_bp_location (struct breakpoint *bpt)
     {
     case bp_breakpoint:
     case bp_tracepoint:
+    case bp_fast_tracepoint:
     case bp_until:
     case bp_finish:
     case bp_longjmp:
@@ -4900,7 +4913,7 @@ set_breakpoint_location_function (struct bp_location *loc)
 {
   if (loc->owner->type == bp_breakpoint
       || loc->owner->type == bp_hardware_breakpoint
-      || loc->owner->type == bp_tracepoint)
+      || tracepoint_type (loc->owner))
     {
       find_pc_partial_function (loc->address, &(loc->function_name), 
 				NULL, NULL);
@@ -5159,7 +5172,7 @@ disable_breakpoints_in_shlibs (void)
        to insert those breakpoints and fail.  */
     if (((b->type == bp_breakpoint)
 	 || (b->type == bp_hardware_breakpoint)
-	 || (b->type == bp_tracepoint))
+	 || (tracepoint_type (b)))
 	&& loc->pspace == current_program_space
 	&& !loc->shlib_disabled
 #ifdef PC_SOLIB
@@ -6091,6 +6104,16 @@ mention (struct breakpoint *b)
 	printf_filtered (_(" %d"), b->number);
 	say_where = 1;
 	break;
+      case bp_fast_tracepoint:
+	if (ui_out_is_mi_like_p (uiout))
+	  {
+	    say_where = 0;
+	    break;
+	  }
+	printf_filtered (_("Fast tracepoint"));
+	printf_filtered (_(" %d"), b->number);
+	say_where = 1;
+	break;
 
       case bp_until:
       case bp_finish:
@@ -6593,6 +6616,38 @@ breakpoint_sals_to_pc (struct symtabs_and_lines *sals,
     resolve_sal_pc (&sals->sals[i]);
 }
 
+/* Fast tracepoints may have restrictions on valid locations.  For
+   instance, a fast tracepoint using a jump instead of a trap will
+   likely have to overwrite more bytes than a trap would, and so can
+   only be placed where the instruction is longer than the jump, or a
+   multi-instruction sequence does not have a jump into the middle of
+   it, etc.  */
+
+static void
+check_fast_tracepoint_sals (struct gdbarch *gdbarch,
+			    struct symtabs_and_lines *sals)
+{
+  int i, rslt;
+  struct symtab_and_line *sal;
+  char *msg;
+  struct cleanup *old_chain;
+
+  for (i = 0; i < sals->nelts; i++)
+    {
+      sal = &sals->sals[i];
+
+      rslt = gdbarch_fast_tracepoint_valid_at (gdbarch, sal->pc,
+					       NULL, &msg);
+      old_chain = make_cleanup (xfree, msg);
+
+      if (!rslt)
+	error (_("May not have a fast tracepoint at 0x%s%s"),
+	       paddress (gdbarch, sal->pc), (msg ? msg : ""));
+
+      do_cleanups (old_chain);
+    }
+}
+
 static void
 do_captured_parse_breakpoint (struct ui_out *ui, void *data)
 {
@@ -6794,8 +6849,12 @@ break_command_really (struct gdbarch *gdbarch,
     breakpoint_sals_to_pc (&sals, addr_start);
 
   type_wanted = (traceflag
-		 ? bp_tracepoint
+		 ? (hardwareflag ? bp_fast_tracepoint : bp_tracepoint)
 		 : (hardwareflag ? bp_hardware_breakpoint : bp_breakpoint));
+
+  /* Fast tracepoints may have additional restrictions on location.  */
+  if (type_wanted == bp_fast_tracepoint)
+    check_fast_tracepoint_sals (gdbarch, &sals);
 
   /* Verify that condition can be parsed, before setting any
      breakpoints.  Allocate a separate condition expression for each
@@ -8970,6 +9029,7 @@ breakpoint_re_set_one (void *bint)
     case bp_breakpoint:
     case bp_hardware_breakpoint:
     case bp_tracepoint:
+    case bp_fast_tracepoint:
       /* Do not attempt to re-set breakpoints disabled during startup.  */
       if (b->enable_state == bp_startup_disabled)
 	return 0;
@@ -9369,6 +9429,7 @@ disable_command (char *args, int from_tty)
 	continue;
       case bp_breakpoint:
       case bp_tracepoint:
+      case bp_fast_tracepoint:
       case bp_catchpoint:
       case bp_hardware_breakpoint:
       case bp_watchpoint:
@@ -9462,6 +9523,7 @@ enable_command (char *args, int from_tty)
 	continue;
       case bp_breakpoint:
       case bp_tracepoint:
+      case bp_fast_tracepoint:
       case bp_catchpoint:
       case bp_hardware_breakpoint:
       case bp_watchpoint:
@@ -9769,6 +9831,22 @@ trace_command (char *arg, int from_tty)
   set_tracepoint_count (breakpoint_count);
 }
 
+void
+ftrace_command (char *arg, int from_tty)
+{
+  break_command_really (get_current_arch (),
+			arg, 
+			NULL, 0, 1 /* parse arg */,
+			0 /* tempflag */, 1 /* hardwareflag */,
+			1 /* traceflag */,
+			0 /* Ignore count */,
+			pending_break_support, 
+			NULL,
+			from_tty,
+			1 /* enabled */);
+  set_tracepoint_count (breakpoint_count);
+}
+
 /* Print information on tracepoint number TPNUM_EXP, or all if
    omitted.  */
 
@@ -9846,7 +9924,7 @@ delete_trace_command (char *arg, int from_tty)
 	{
 	  ALL_BREAKPOINTS_SAFE (b, temp)
 	  {
-	    if (b->type == bp_tracepoint
+	    if (tracepoint_type (b)
 		&& b->number >= 0)
 	      delete_breakpoint (b);
 	  }
@@ -10500,6 +10578,13 @@ Do \"help tracepoints\" for info on other tracepoint commands."));
   add_com_alias ("tr", "trace", class_alias, 1);
   add_com_alias ("tra", "trace", class_alias, 1);
   add_com_alias ("trac", "trace", class_alias, 1);
+
+  c = add_com ("ftrace", class_breakpoint, ftrace_command, _("\
+Set a fast tracepoint at specified line or function.\n\
+\n"
+BREAK_ARGS_HELP ("ftrace") "\n\
+Do \"help tracepoints\" for info on other tracepoint commands."));
+  set_cmd_completer (c, location_completer);
 
   add_info ("tracepoints", tracepoints_info, _("\
 Status of tracepoints, or tracepoint number NUMBER.\n\

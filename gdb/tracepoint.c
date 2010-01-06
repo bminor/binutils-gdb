@@ -34,6 +34,7 @@
 #include "tracepoint.h"
 #include "remote.h"
 extern int remote_supports_cond_tracepoints (void);
+extern int remote_supports_fast_tracepoints (void);
 extern char *unpack_varlen_hex (char *buff, ULONGEST *result);
 #include "linespec.h"
 #include "regcache.h"
@@ -1690,6 +1691,7 @@ trace_start_command (char *args, int from_tty)
 void
 download_tracepoint (struct breakpoint *t)
 {
+  CORE_ADDR tpaddr;
   char tmp[40];
   char buf[2048];
   char **tdp_actions;
@@ -1699,11 +1701,38 @@ download_tracepoint (struct breakpoint *t)
   struct agent_expr *aexpr;
   struct cleanup *aexpr_chain = NULL;
 
-  sprintf_vma (tmp, (t->loc ? t->loc->address : 0));
+  tpaddr = t->loc->address;
+  sprintf_vma (tmp, (t->loc ? tpaddr : 0));
   sprintf (buf, "QTDP:%x:%s:%c:%lx:%x", t->number, 
 	   tmp, /* address */
 	   (t->enable_state == bp_enabled ? 'E' : 'D'),
 	   t->step_count, t->pass_count);
+  /* Fast tracepoints are mostly handled by the target, but we can
+     tell the target how big of an instruction block should be moved
+     around.  */
+  if (t->type == bp_fast_tracepoint)
+    {
+      /* Only test for support at download time; we may not know
+	 target capabilities at definition time.  */
+      if (remote_supports_fast_tracepoints ())
+	{
+	  int isize;
+
+	  if (gdbarch_fast_tracepoint_valid_at (get_current_arch (),
+						tpaddr, &isize, NULL))
+	    sprintf (buf + strlen (buf), ":F%x", isize);
+	  else
+	    /* If it passed validation at definition but fails now,
+	       something is very wrong.  */
+	    internal_error (__FILE__, __LINE__,
+			    "Fast tracepoint not valid during download");
+	}
+      else
+	/* Fast tracepoints are functionally identical to regular
+	   tracepoints, so don't take lack of support as a reason to
+	   give up on the trace run.  */
+	warning (_("Target does not support fast tracepoints, downloading %d as regular tracepoint"), t->number);
+    }
   /* If the tracepoint has a conditional, make it into an agent
      expression and append to the definition.  */
   if (t->loc->cond)

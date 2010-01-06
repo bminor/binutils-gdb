@@ -759,6 +759,9 @@ v:int:has_global_breakpoints:::0:0::0
 
 # True if inferiors share an address space (e.g., uClinux).
 m:int:has_shared_address_space:void:::default_has_shared_address_space::0
+
+# True if a fast tracepoint can be set at an address.
+m:int:fast_tracepoint_valid_at:CORE_ADDR addr, int *isize, char **msg:addr, isize, msg::default_fast_tracepoint_valid_at::0
 EOF
 }
 

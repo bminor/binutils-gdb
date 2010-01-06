@@ -121,6 +121,7 @@ enum bptype
     bp_catchpoint,
 
     bp_tracepoint,
+    bp_fast_tracepoint,
 
     /* Event for JIT compiled code generation or deletion.  */
     bp_jit_event,

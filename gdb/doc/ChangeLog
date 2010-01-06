@@ -1,3 +1,10 @@
+2010-01-05  Stan Shebs  <stan@codesourcery.com>
+
+	* gdb.texinfo (Create and Delete Tracepoints): Describe fast
+	tracepoints.
+	(Tracepoint Packets): Describe remote protocol for fast
+	tracepoints.
+
 2010-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	Update the "Start of New Year Procedure".

@@ -1,3 +1,43 @@
+2010-01-05  Stan Shebs  <stan@codesourcery.com>
+
+	Add fast tracepoints.
+	* arch-utils.h (default_fast_tracepoint_valid_at): Declare.
+	* arch-utils.c (default_fast_tracepoint_valid_at): New function.
+	* breakpoint.h (enum bptype): Add bp_fast_tracepoint.
+	* breakpoint.c (tracepoint_type): New function.
+	(ALL_TRACEPOINTS): Use it.
+	(should_be_inserted): Ditto.
+	(bpstat_check_location): Ditto.
+	(print_one_breakpoint_location): Ditto.
+	(user_settable_breakpoint): Ditto.
+	(set_breakpoint_location_function): Ditto.
+	(disable_breakpoints_in_shlibs): Ditto.
+	(delete_trace_command): Ditto.
+	(print_it_typical): Add bp_fast_tracepoint case.
+	(bpstat_what): Ditto.
+	(print_one_breakpoint_location): Ditto.
+	(allocate_bp_location): Ditto.
+	(mention): Ditto.
+	(breakpoint_re_set_one): Ditto.
+	(disable_command): Ditto.
+	(enable_command): Ditto.
+	(check_fast_tracepoint_sals): New function.
+	(break_command_really): Call it.
+	(ftrace_command): New function.
+	(_initialize_breakpoint): Add ftrace command.
+	* gdbarch.sh (fast_tracepoint_valid_at): New.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* i386-tdep.c (i386_fast_tracepoint_valid_at): New function.
+	(i386_gdbarch_init): Use it.
+	* remote.c (struct remote_state): New field fast_tracepoints.
+	(PACKET_FastTracepoints): New packet config type.
+	(remote_fast_tracepoint_feature): New function.
+	(remote_protocol_features): Add FastTracepoints.
+	(remote_supports_fast_tracepoints): New function.
+	(_initialize_remote): Add FastTracepoints.
+	* tracepoint.c (download_tracepoint): Add fast tracepoint option.
+	* NEWS: Mention fast tracepoints.
+
 2010-01-06  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb-gdb.py: New file.
