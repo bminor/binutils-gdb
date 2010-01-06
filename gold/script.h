@@ -1,6 +1,6 @@
 // script.h -- handle linker scripts for gold   -*- C++ -*-
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -196,6 +196,11 @@ class Version_script_info
   void
   build_lookup_tables();
 
+  // Give an error if there are any unmatched names in the version
+  // script.
+  void
+  check_unmatched_names(const Symbol_table*) const;
+
   // Print contents to the FILE.  This is for debugging.
   void
   print(FILE*) const;
@@ -208,6 +213,9 @@ class Version_script_info
   get_symbol_version_helper(const char* symbol,
 			    bool check_global,
 			    std::string* pversion) const;
+
+  void
+  matched_symbol(const Version_tree*, const char*) const;
 
   // Fast lookup information for a glob pattern.
   struct Glob

@@ -1,6 +1,6 @@
 // script.cc -- handle linker scripts for gold.
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -1793,22 +1793,24 @@ Keyword_to_parsecode::keyword_to_parsecode(const char* keyword,
 
 // A single version expression.
 // For example, pattern="std::map*" and language="C++".
-// PATTERN should be from the stringpool.
-struct
-Version_expression
+struct Version_expression
 {
   Version_expression(const std::string& a_pattern,
 		     Version_script_info::Language a_language,
                      bool a_exact_match)
-    : pattern(a_pattern), language(a_language), exact_match(a_exact_match)
+    : pattern(a_pattern), language(a_language), exact_match(a_exact_match),
+      was_matched_by_symbol(false)
   { }
 
   std::string pattern;
   Version_script_info::Language language;
   // If false, we use glob() to match pattern.  If true, we use strcmp().
   bool exact_match;
+  // True if --no-undefined-version is in effect and we found this
+  // version in get_symbol_version.  We use mutable because this
+  // struct is generally not modifiable after it has been created.
+  mutable bool was_matched_by_symbol;
 };
-
 
 // A list of expressions.
 struct Version_expression_list
@@ -1965,6 +1967,27 @@ Version_script_info::build_expression_list_lookup(
     }
 }
 
+// Record that we have matched a name found in the version script.
+
+void
+Version_script_info::matched_symbol(const Version_tree* version_tree,
+				    const char* name) const
+{
+  const struct Version_expression_list* global = version_tree->global;
+  for (size_t i = 0; i < global->expressions.size(); ++i)
+    {
+      const Version_expression& expression(global->expressions[i]);
+      if (expression.pattern == name
+	  && (expression.exact_match
+	      || strpbrk(expression.pattern.c_str(), "?*[") == NULL))
+	{
+	  expression.was_matched_by_symbol = true;
+	  return;
+	}
+    }
+  gold_unreachable();
+}
+
 // Look up SYMBOL_NAME in the list of versions.  If CHECK_GLOBAL is
 // true look at the globally visible symbols, otherwise look at the
 // symbols listed as "local:".  Return true if the symbol is found,
@@ -2015,8 +2038,19 @@ Version_script_info::get_symbol_version_helper(const char* symbol_name,
 	{
 	  if (pversion != NULL)
 	    *pversion = pe->second->tag;
+
+	  // If we are using --no-undefined-version, and this is a
+	  // global symbol, we have to record that we have found this
+	  // symbol, so that we don't warn about it.  We have to do
+	  // this now, because otherwise we have no way to get from a
+	  // non-C language back to the demangled name that we
+	  // matched.
+	  if (check_global && !parameters->options().undefined_version())
+	    this->matched_symbol(pe->second, name_to_match);
+
 	  if (allocated != NULL)
 	    free (allocated);
+
 	  return true;
 	}
 
@@ -2041,6 +2075,50 @@ Version_script_info::get_symbol_version_helper(const char* symbol_name,
     }
 
   return false;
+}
+
+// Give an error if any exact symbol names (not wildcards) appear in a
+// version script, but there is no such symbol.
+
+void
+Version_script_info::check_unmatched_names(const Symbol_table* symtab) const
+{
+  for (size_t i = 0; i < this->version_trees_.size(); ++i)
+    {
+      const Version_tree* vt = this->version_trees_[i];
+      if (vt->global == NULL)
+	continue;
+      for (size_t j = 0; j < vt->global->expressions.size(); ++j)
+	{
+	  const Version_expression& expression(vt->global->expressions[j]);
+
+	  // Ignore cases where we used the version because we saw a
+	  // symbol that we looked up.  Note that
+	  // WAS_MATCHED_BY_SYMBOL will be true even if the symbol was
+	  // not a definition.  That's OK as in that case we most
+	  // likely gave an undefined symbol error anyhow.
+	  if (expression.was_matched_by_symbol)
+	    continue;
+
+	  // Just ignore names which are in languages other than C.
+	  // We have no way to look them up in the symbol table.
+	  if (expression.language != LANGUAGE_C)
+	    continue;
+
+	  // Ignore wildcard patterns.
+	  if (!expression.exact_match
+	      && strpbrk(expression.pattern.c_str(), "?*[") != NULL)
+	    continue;
+
+	  if (symtab->lookup(expression.pattern.c_str(),
+			     vt->tag.c_str()) == NULL)
+	    {
+	      gold_error(_("version script assignment of %s to symbol %s "
+			   "failed: symbol not defined"),
+			 vt->tag.c_str(), expression.pattern.c_str());
+	    }
+	}
+    }
 }
 
 struct Version_dependency_list*

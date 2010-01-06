@@ -1,5 +1,16 @@
 2010-01-05  Ian Lance Taylor  <iant@google.com>
 
+	PR 10980
+	* options.h (class General_options): Add --undefined-version.
+	* script.cc (struct Version_expression): Add was_matched_by_symbol
+	field.
+	(Version_script_info::matched_symbol): New function.
+	(Version_script_info::get_symbol_version_helper): Call
+	matched_symbol.
+	(Version_script_info::check_unmatched_names): New function.
+	* script.h (class Version_script_info): Update declarations.
+	* gold.cc (queue_middle_tasks): Handle --no-undefined-version.
+
 	* options.h (class General_options): Use DEFINE_bool_alias for
 	allow_multiple_definition.
 	* resolve.cc (Symbol_table::should_override): Don't test

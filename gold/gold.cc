@@ -1,6 +1,6 @@
 // gold.cc -- main linker functions
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -442,6 +442,13 @@ queue_middle_tasks(const General_options& options,
   // See if any of the input definitions violate the One Definition Rule.
   // TODO: if this is too slow, do this as a task, rather than inline.
   symtab->detect_odr_violations(task, options.output_file_name());
+
+  // Do the --no-undefined-version check.
+  if (!parameters->options().undefined_version())
+    {
+      Script_options* so = layout->script_options();
+      so->version_script_info()->check_unmatched_names(symtab);
+    }
 
   // Create any automatic note sections.
   layout->create_notes();
