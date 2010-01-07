@@ -1,6 +1,6 @@
 // gold.h -- general definitions for gold   -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -347,6 +347,21 @@ inline bool
 is_prefix_of(const char* prefix, const char* str)
 {
   return strncmp(prefix, str, strlen(prefix)) == 0;
+}
+
+const char* const cident_section_start_prefix = "__start_";
+const char* const cident_section_stop_prefix = "__stop_";
+
+// Returns true if the name is a valid C identifier
+inline bool
+is_cident(const char* name)
+{
+  return (name[strspn(name,
+	 	      ("0123456789"
+		       "ABCDEFGHIJKLMNOPWRSTUVWXYZ"
+		       "abcdefghijklmnopqrstuvwxyz"
+		       "_"))]
+	  == '\0');
 }
 
 // We sometimes need to hash strings.  Ideally we should use std::tr1::hash or

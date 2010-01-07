@@ -1,6 +1,6 @@
 // layout.cc -- lay out output file sections for gold
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -1232,16 +1232,13 @@ Layout::define_section_symbols(Symbol_table* symtab)
        ++p)
     {
       const char* const name = (*p)->name();
-      if (name[strspn(name,
-		      ("0123456789"
-		       "ABCDEFGHIJKLMNOPWRSTUVWXYZ"
-		       "abcdefghijklmnopqrstuvwxyz"
-		       "_"))]
-	  == '\0')
+      if (is_cident(name))
 	{
 	  const std::string name_string(name);
-	  const std::string start_name("__start_" + name_string);
-	  const std::string stop_name("__stop_" + name_string);
+	  const std::string start_name(cident_section_start_prefix
+                                       + name_string);
+	  const std::string stop_name(cident_section_stop_prefix
+                                      + name_string);
 
 	  symtab->define_in_output_data(start_name.c_str(),
 					NULL, // version

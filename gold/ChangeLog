@@ -1,3 +1,23 @@
+2010-01-06  Sriraman Tallam  <tmsriram@google.com>
+
+	* gc.h (Garbage_collection::Cident_section_map): New typedef.
+	(Garbage_collection::cident_sections): New function.
+	(Garbage_collection::add_cident_section): New function.
+	(Garbage_collection::cident_sections_): New member.
+	(gc_process_relocs): Add references to sections whose names are C
+	identifiers.
+	* gold.h (cident_section_start_prefix): New constant.
+	(cident_section_stop_prefix): New constant.
+	(is_cident): New function.
+	* layout.cc (Layout::define_section_symbols): Replace string constants
+	with the newly defined constants.
+	* object.cc (Sized_relobj::do_layout): Track sections whose names are
+	C identifiers.
+	* testsuite/Makefile.am: Add gc_orphan_section_test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/gc_orphan_section_test.cc: New file.
+	* testsuite/gc_orphan_section_test.sh: New file.
+
 2010-01-06  Ian Lance Taylor  <iant@google.com>
 
 	PR 10980

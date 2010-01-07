@@ -1180,6 +1180,14 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
             {
               symtab->gc()->worklist().push(Section_id(this, i)); 
             }
+          // If the section name XXX can be represented as a C identifier
+          // it cannot be discarded if there are references to
+          // __start_XXX and __stop_XXX symbols.  These need to be
+          // specially handled.
+          if (is_cident(name))
+            {
+              symtab->gc()->add_cident_section(name, Section_id(this, i));
+            }
         }
 
       // When doing a relocatable link we are going to copy input

@@ -57,6 +57,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 # and --dynamic-list-cpp-typeinfo
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_1 = incremental_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_comdat_test.sh gc_tls_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_orphan_section_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_keep_unique_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_test.sh \
@@ -82,6 +83,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_2 = incremental_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_comdat_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_tls_test.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_orphan_section_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_keep_unique_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_test.stdout \
@@ -103,7 +105,8 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list.stdout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_3 = incremental_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_comdat_test gc_tls_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_test icf_keep_unique_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_orphan_section_test icf_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_keep_unique_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_safe_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.dbg \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/weak_undef_lib.so
@@ -2582,6 +2585,12 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--gc-sections gc_tls_test.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@gc_tls_test.stdout: gc_tls_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) -C gc_tls_test > gc_tls_test.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@gc_orphan_section_test.o: gc_orphan_section_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -g -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@gc_orphan_section_test:gc_orphan_section_test.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--gc-sections gc_orphan_section_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@gc_orphan_section_test.stdout: gc_orphan_section_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) gc_orphan_section_test > gc_orphan_section_test.stdout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_test.o: icf_test.cc 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_test: icf_test.o gcctestdir/ld
