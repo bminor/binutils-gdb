@@ -31,6 +31,7 @@ struct target_ops;
 struct bp_target_info;
 struct regcache;
 struct target_section_table;
+struct trace_state_variable;
 
 /* This include file defines the interface between the main part
    of the debugger, and the part which is target-specific, or
@@ -257,6 +258,18 @@ enum target_object
   TARGET_OBJECT_SIGNAL_INFO,
   /* Possible future objects: TARGET_OBJECT_FILE, ... */
 };
+
+/* Enumeration of the kinds of traceframe searches that a target may
+   be able to perform.  */
+
+enum trace_find_type
+  {
+    tfind_number,
+    tfind_pc,
+    tfind_tp,
+    tfind_range,
+    tfind_outside,
+  };
 
 /* Request that OPS transfer up to LEN 8-bit bytes of the target's
    OBJECT.  The OFFSET, for a seekable object, specifies the
@@ -596,6 +609,47 @@ struct target_ops
        address space.  */
     struct address_space *(*to_thread_address_space) (struct target_ops *,
 						      ptid_t);
+
+    /* Tracepoint-related operations.  */
+
+    /* Prepare the target for a tracing run.  */
+    void (*to_trace_init) (void);
+
+    /* Send full details of a tracepoint to the target.  */
+    void (*to_download_tracepoint) (struct breakpoint *t);
+
+    /* Send full details of a trace state variable to the target.  */
+    void (*to_download_trace_state_variable) (struct trace_state_variable *tsv);
+
+    /* Inform the target info of memory regions that are readonly
+       (such as text sections), and so it should return data from
+       those rather than look in the trace buffer.  */
+    void (*to_trace_set_readonly_regions) (void);
+
+    /* Start a trace run.  */
+    void (*to_trace_start) (void);
+
+    /* Get the current status of a tracing run.  */
+    int (*to_get_trace_status) (int *stop_reason);
+
+    /* Stop a trace run.  */
+    void (*to_trace_stop) (void);
+
+   /* Ask the target to find a trace frame of the given type TYPE,
+      using NUM, ADDR1, and ADDR2 as search parameters.  Returns the
+      number of the trace frame, and also the tracepoint number at
+      TPP.  */
+    int (*to_trace_find) (enum trace_find_type type, int num,
+			  ULONGEST addr1, ULONGEST addr2, int *tpp);
+
+    /* Get the value of the trace state variable number TSV, returning
+       1 if the value is known and writing the value itself into the
+       location pointed to by VAL, else returning 0.  */
+    int (*to_get_trace_state_variable_value) (int tsv, LONGEST *val);
+
+    /* Set the target's tracing behavior in response to unexpected
+       disconnection - set VAL to 1 to keep tracing, 0 to stop.  */
+    void (*to_set_disconnected_tracing) (int val);
 
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
@@ -1237,6 +1291,38 @@ extern int target_search_memory (CORE_ADDR start_addr,
                                  const gdb_byte *pattern,
                                  ULONGEST pattern_len,
                                  CORE_ADDR *found_addrp);
+
+/* Tracepoint-related operations.  */
+
+#define target_trace_init() \
+  (*current_target.to_trace_init) ()
+
+#define target_download_tracepoint(t) \
+  (*current_target.to_download_tracepoint) (t)
+
+#define target_download_trace_state_variable(tsv) \
+  (*current_target.to_download_trace_state_variable) (tsv)
+
+#define target_trace_start() \
+  (*current_target.to_trace_start) ()
+
+#define target_trace_set_readonly_regions() \
+  (*current_target.to_trace_set_readonly_regions) ()
+
+#define target_get_trace_status(stop_reason) \
+  (*current_target.to_get_trace_status) (stop_reason)
+
+#define target_trace_stop() \
+  (*current_target.to_trace_stop) ()
+
+#define target_trace_find(type,num,addr1,addr2,tpp) \
+  (*current_target.to_trace_find) ((type), (num), (addr1), (addr2), (tpp))
+
+#define target_get_trace_state_variable_value(tsv,val) \
+  (*current_target.to_get_trace_state_variable_value) ((tsv), (val))
+
+#define target_set_disconnected_tracing(val) \
+  (*current_target.to_set_disconnected_tracing) (val)
 
 /* Command logging facility.  */
 

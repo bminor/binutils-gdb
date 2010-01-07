@@ -1,5 +1,62 @@
 2010-01-07  Stan Shebs  <stan@codesourcery.com>
 
+	Make tracepoint operations go through target vector.
+	* target.h (enum trace_find_type): New enum.
+	(struct target_ops): New fields to_trace_init,
+	to_download_tracepoint, to_download_trace_state_variable,
+	to_trace_set_readonly_regions, to_trace_start, to_get_trace_status,
+	to_trace_stop, to_trace_find, to_get_trace_state_variable_value,
+	to_set_disconnected_tracing.
+	(target_trace_init): New macro.
+	(target_download_tracepoint): New macro.
+	(target_download_trace_state_variable): New macro.
+	(target_trace_start): New macro.
+	(target_trace_set_readonly_regions): New macro.
+	(target_get_trace_status): New macro.
+	(target_trace_stop): New macro.
+	(target_trace_find): New macro.
+	(target_get_trace_state_variable_value): New macro.
+	(target_set_disconnected_tracing): New macro.
+	* target.c (update_current_target): Inherit and set defaults for
+	tracepoint operations.
+	* tracepoint.c (default_collect): Make globally visible.
+	(target_is_remote): Remove, along with all calls.
+	(tvariables_info): Call target_get_trace_state_variable_value.
+	(remote_set_transparent_ranges): Remove.
+	(trace_start_command): Call target_trace_init,
+	target_download_tracepoint, etc.
+	(download_tracepoint): Remove.
+	(trace_stop_command): Simplify.
+	(stop_tracing): Call target_trace_stop.
+	(get_trace_status): Call target_get_trace_status.
+	(trace_status_command): Add case for targets that cannot trace.
+	(finish_tfind_command): Change to take numerical arguments, call
+	target_trace_find.
+	(trace_find_command): Update call to finish_tfind_command.
+	(trace_find_pc_command): Ditto.
+	(trace_find_tracepoint_command): Ditto.
+	(trace_find_line_command): Ditto.
+	(trace_find_range_command): Ditto.
+	(trace_find_outside_command): Ditto.
+	(set_disconnected_tracing_value): Call
+	target_set_disconnected_tracing.
+	* remote.c: Add protocol encoding bits from tracepoint.c.
+	(trace_error): Move from tracepoint.c.
+	(remote_get_noisy_reply): Ditto.
+	(free_actions_list_cleanup_wrapper): Ditto.
+	(free_actions_list): Ditto.
+	(remote_trace_init): New function.
+	(remote_download_tracepoint): New function.
+	(remote_download_trace_state_variable): New function.
+	(remote_trace_set_readonly_regions): New function.
+	(remote_trace_start): New function.
+	(remote_get_trace_status): New function.
+	(remote_trace_stop): New function.
+	(remote_trace_find): New function.
+	(remote_download_trace_state_variable): New function.
+	(remote_set_disconnected_tracing): New function.
+	(init_remote_ops): Add tracepoint operations.
+
 	* tracepoint.c (trace_dump_command): Don't decr_pc_after_break.
 
 2010-01-07  Tristan Gingold  <gingold@adacore.com>

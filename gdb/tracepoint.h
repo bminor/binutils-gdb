@@ -65,6 +65,8 @@ struct trace_state_variable
 
 extern unsigned long trace_running_p;
 
+extern char *default_collect;
+
 /* A hook used to notify the UI of tracepoint operations.  */
 
 extern void (*deprecated_trace_find_hook) (char *arg, int from_tty);
