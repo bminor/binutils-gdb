@@ -132,6 +132,9 @@ Copy_relocs<sh_type, size, big_endian>::emit_copy_reloc(
   while ((value & (addralign - 1)) != 0)
     addralign >>= 1;
 
+  // Mark the dynamic object as needed for the --as-needed option.
+  sym->object()->set_is_needed();
+
   if (this->dynbss_ == NULL)
     {
       this->dynbss_ = new Output_data_space(addralign, "** dynbss");

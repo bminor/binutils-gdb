@@ -1,3 +1,9 @@
+2010-01-07  Ian Lance Taylor  <iant@google.com>
+
+	PR 11042
+	* copy-relocs.cc (Copy_relocs::emit_copy_reloc): Mark the dynamic
+	object as needed.
+
 2010-01-07  Dmitry Gorbachev  <d.g.gorbachev@gmail.com>
 	    Ian Lance Taylor  <iant@google.com>
 
