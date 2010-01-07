@@ -1,3 +1,11 @@
+2010-01-07  Doug Evans  <dje@sebabeach.org>
+
+	* cgen-ibld.in (insert_normal, extract_normal): Minor cleanup.
+	* fr30-ibld.c, * frv-ibld.c, * ip2k-ibld.c, * iq2000-ibld.c,
+	* lm32-ibld.c, * m32c-ibld.c, * m32r-ibld.c, * mep-ibld.c,
+	* mt-ibld.c, * openrisc-ibld.c, * xc16x-ibld.c,
+	* xstormy16-ibld.c: Regenerate.
+
 2010-01-06  Quentin Neill  <quentin.neill@amd.com>
 
 	* i386-gen.c (cpu_flag_init): Add new CPU_AMDFAM15_FLAGS.

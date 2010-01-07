@@ -138,7 +138,7 @@ insert_normal (CGEN_CPU_DESC cd,
   if (length == 0)
     return NULL;
 
-  if (word_length > 32)
+  if (word_length > 8 * sizeof (CGEN_INSN_INT))
     abort ();
 
   /* For architectures with insns smaller than the base-insn-bitsize,
@@ -442,7 +442,7 @@ extract_normal (CGEN_CPU_DESC cd,
       return 1;
     }
 
-  if (word_length > 32)
+  if (word_length > 8 * sizeof (CGEN_INSN_INT))
     abort ();
 
   /* For architectures with insns smaller than the insn-base-bitsize,
@@ -469,7 +469,7 @@ extract_normal (CGEN_CPU_DESC cd,
     {
       unsigned char *bufp = ex_info->insn_bytes + word_offset / 8;
 
-      if (word_length > 32)
+      if (word_length > 8 * sizeof (CGEN_INSN_INT))
 	abort ();
 
       if (fill_cache (cd, ex_info, word_offset / 8, word_length / 8, pc) == 0)
