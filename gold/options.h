@@ -972,6 +972,14 @@ class General_options
 	      N_("Warn if text segment is not shareable"),
 	      N_("Do not warn if text segment is not shareable (default)"));
 
+  DEFINE_bool(warn_unresolved_symbols, options::TWO_DASHES, '\0', false,
+	      N_("Report unresolved symbols as warnings"),
+	      NULL);
+  DEFINE_bool_alias(error_unresolved_symbols, warn_unresolved_symbols,
+		    options::TWO_DASHES, '\0',
+		    N_("Report unresolved symbols as errors"),
+		    NULL, true);
+
   DEFINE_bool(whole_archive, options::TWO_DASHES, '\0', false,
               N_("Include all archive contents"),
               N_("Include only needed archive contents"));

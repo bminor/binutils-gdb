@@ -1,6 +1,6 @@
 // errors.cc -- handle errors for gold
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -156,21 +156,33 @@ Errors::undefined_symbol(const Symbol* sym, const std::string& location)
 {
   bool initialized = this->initialize_lock();
   gold_assert(initialized);
+
+  const char* zmsg;
   {
     Hold_lock h(*this->lock_);
     if (++this->undefined_symbols_[sym] >= max_undefined_error_report)
       return;
-    ++this->error_count_;
+    if (parameters->options().warn_unresolved_symbols())
+      {
+	++this->warning_count_;
+	zmsg = _("warning");
+      }
+    else
+      {
+	++this->error_count_;
+	zmsg = _("error");
+      }
   }
+
   const char* const version = sym->version();
   if (version == NULL)
-    fprintf(stderr, _("%s: %s: error: undefined reference to '%s'\n"),
-	    this->program_name_, location.c_str(),
+    fprintf(stderr, _("%s: %s: %s: undefined reference to '%s'\n"),
+	    this->program_name_, location.c_str(), zmsg,
 	    sym->demangled_name().c_str());
   else
     fprintf(stderr,
-            _("%s: %s: error: undefined reference to '%s', version '%s'\n"),
-	    this->program_name_, location.c_str(),
+            _("%s: %s: %s: undefined reference to '%s', version '%s'\n"),
+	    this->program_name_, location.c_str(), zmsg,
 	    sym->demangled_name().c_str(), version);
 }
 

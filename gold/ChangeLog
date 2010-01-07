@@ -1,5 +1,11 @@
 2010-01-07  Ian Lance Taylor  <iant@google.com>
 
+	PR 10980
+	* options.h (class General_options): Add --warn-unresolved-symbols
+	and --error-unresolved-symbols.
+	* errors.cc (Errors::undefined_symbol): Implement
+	--warn-unresolved-symbols.
+
 	* options.h (class General_options): Add -z text and -z textoff.
 	* layout.cc (Layout::finish_dynamic_section): Implement -z text.
 
