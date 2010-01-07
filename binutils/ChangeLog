@@ -1,5 +1,9 @@
 2010-01-07  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* readelf.c (usage): Fix indent for --symbols.
+
+2010-01-07  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* doc/binutils.texi: Replace -histogram with --histogram.
 
 2010-01-06  H.J. Lu  <hongjiu.lu@intel.com>
