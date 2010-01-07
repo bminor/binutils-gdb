@@ -206,6 +206,10 @@ class Output_data
   output_section()
   { return this->do_output_section(); }
 
+  const Output_section*
+  output_section() const
+  { return this->do_output_section(); }
+
   // Return the output section index, if there is an output section.
   unsigned int
   out_shndx() const
@@ -356,6 +360,10 @@ class Output_data
   // Return the output section, if there is one.
   virtual Output_section*
   do_output_section()
+  { return NULL; }
+
+  virtual const Output_section*
+  do_output_section() const
   { return NULL; }
 
   // Return the output section index, if there is an output section.
@@ -744,6 +752,10 @@ class Output_section_data : public Output_data
   // Return the output section.
   Output_section*
   do_output_section()
+  { return this->output_section_; }
+
+  const Output_section*
+  do_output_section() const
   { return this->output_section_; }
 
   // Return the section index of the output section.
@@ -2639,6 +2651,10 @@ class Output_section : public Output_data
   // Return the output section--i.e., the object itself.
   Output_section*
   do_output_section()
+  { return this; }
+
+  const Output_section*
+  do_output_section() const
   { return this; }
 
   // Return the section index in the output file.

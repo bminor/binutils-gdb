@@ -1655,48 +1655,27 @@ Target_x86_64::do_finalize_sections(
     const Input_objects*,
     Symbol_table* symtab)
 {
+  const Reloc_section* rel_plt = (this->plt_ == NULL
+				  ? NULL
+				  : this->plt_->rel_plt());
+  layout->add_target_dynamic_tags(false, this->got_plt_, rel_plt,
+				  this->rela_dyn_, true);
+				  
   // Fill in some more dynamic tags.
   Output_data_dynamic* const odyn = layout->dynamic_data();
   if (odyn != NULL)
     {
-      if (this->got_plt_ != NULL
-	  && this->got_plt_->output_section() != NULL)
-	odyn->add_section_address(elfcpp::DT_PLTGOT, this->got_plt_);
-
       if (this->plt_ != NULL
-	  && this->plt_->output_section() != NULL)
+	  && this->plt_->output_section() != NULL
+	  && this->plt_->has_tlsdesc_entry())
 	{
-	  const Output_data* od = this->plt_->rel_plt();
-	  odyn->add_section_size(elfcpp::DT_PLTRELSZ, od);
-	  odyn->add_section_address(elfcpp::DT_JMPREL, od);
-	  odyn->add_constant(elfcpp::DT_PLTREL, elfcpp::DT_RELA);
-	  if (this->plt_->has_tlsdesc_entry())
-	    {
-              unsigned int plt_offset = this->plt_->get_tlsdesc_plt_offset();
-              unsigned int got_offset = this->plt_->get_tlsdesc_got_offset();
-              this->got_->finalize_data_size();
-              odyn->add_section_plus_offset(elfcpp::DT_TLSDESC_PLT,
-                                            this->plt_, plt_offset);
-              odyn->add_section_plus_offset(elfcpp::DT_TLSDESC_GOT,
-                                            this->got_, got_offset);
-	    }
-	}
-
-      if (this->rela_dyn_ != NULL
-	  && this->rela_dyn_->output_section() != NULL)
-	{
-	  const Output_data* od = this->rela_dyn_;
-	  odyn->add_section_address(elfcpp::DT_RELA, od);
-	  odyn->add_section_size(elfcpp::DT_RELASZ, od);
-	  odyn->add_constant(elfcpp::DT_RELAENT,
-			     elfcpp::Elf_sizes<64>::rela_size);
-	}
-
-      if (!parameters->options().shared())
-	{
-	  // The value of the DT_DEBUG tag is filled in by the dynamic
-	  // linker at run time, and used by the debugger.
-	  odyn->add_constant(elfcpp::DT_DEBUG, 0);
+	  unsigned int plt_offset = this->plt_->get_tlsdesc_plt_offset();
+	  unsigned int got_offset = this->plt_->get_tlsdesc_got_offset();
+	  this->got_->finalize_data_size();
+	  odyn->add_section_plus_offset(elfcpp::DT_TLSDESC_PLT,
+					this->plt_, plt_offset);
+	  odyn->add_section_plus_offset(elfcpp::DT_TLSDESC_GOT,
+					this->got_, got_offset);
 	}
     }
 

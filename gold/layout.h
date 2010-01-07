@@ -556,6 +556,13 @@ class Layout
   incremental_inputs()
   { return this->incremental_inputs_; }
 
+  // For the target-specific code to add dynamic tags which are common
+  // to most targets.
+  void
+  add_target_dynamic_tags(bool use_rel, const Output_data* plt_got,
+			  const Output_data* plt_rel,
+			  const Output_data* dyn_rel, bool add_debug);
+
   // Compute and write out the build ID if needed.
   void
   write_build_id(Output_file*) const;

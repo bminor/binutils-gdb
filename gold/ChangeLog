@@ -1,5 +1,21 @@
 2010-01-07  Ian Lance Taylor  <iant@google.com>
 
+	* output.h (class Output_data): Add const version of
+	output_section and do_output_section.
+	(class Output_section_data): Add const version of
+	do_output_section.
+	(class Output_section): Likewise.
+	* layout.cc (Layout::add_target_dynamic_tags): New function.
+	* layout.h (class Layout): Update declarations.
+	* arm.cc (Target_arm::do_finalize_sections): Use
+	add_target_dynamic_tags.
+	* i386.cc (Target_i386::do_finalize_sections): Likewise.
+	* powerpc.cc (Target_powerpc::do_finalize_sections): Likewise.
+	* sparc.cc (Target_sparc::do_finalize_sections): Likewise.
+	* x86_64.cc (Target_x86_64::do_finalize_sections): Likewise.
+
+2010-01-07  Ian Lance Taylor  <iant@google.com>
+
 	PR 11042
 	* copy-relocs.cc (Copy_relocs::emit_copy_reloc): Mark the dynamic
 	object as needed.

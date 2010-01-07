@@ -1565,40 +1565,11 @@ Target_i386::do_finalize_sections(
     const Input_objects*,
     Symbol_table* symtab)
 {
-  // Fill in some more dynamic tags.
-  Output_data_dynamic* const odyn = layout->dynamic_data();
-  if (odyn != NULL)
-    {
-      if (this->got_plt_ != NULL
-	  && this->got_plt_->output_section() != NULL)
-	odyn->add_section_address(elfcpp::DT_PLTGOT, this->got_plt_);
-
-      if (this->plt_ != NULL
-	  && this->plt_->output_section() != NULL)
-	{
-	  const Output_data* od = this->plt_->rel_plt();
-	  odyn->add_section_size(elfcpp::DT_PLTRELSZ, od);
-	  odyn->add_section_address(elfcpp::DT_JMPREL, od);
-	  odyn->add_constant(elfcpp::DT_PLTREL, elfcpp::DT_REL);
-	}
-
-      if (this->rel_dyn_ != NULL
-	  && this->rel_dyn_->output_section() != NULL)
-	{
-	  const Output_data* od = this->rel_dyn_;
-	  odyn->add_section_address(elfcpp::DT_REL, od);
-	  odyn->add_section_size(elfcpp::DT_RELSZ, od);
-	  odyn->add_constant(elfcpp::DT_RELENT,
-			     elfcpp::Elf_sizes<32>::rel_size);
-	}
-
-      if (!parameters->options().shared())
-	{
-	  // The value of the DT_DEBUG tag is filled in by the dynamic
-	  // linker at run time, and used by the debugger.
-	  odyn->add_constant(elfcpp::DT_DEBUG, 0);
-	}
-    }
+  const Reloc_section* rel_plt = (this->plt_ == NULL
+				  ? NULL
+				  : this->plt_->rel_plt());
+  layout->add_target_dynamic_tags(true, this->got_plt_, rel_plt,
+				  this->rel_dyn_, true);
 
   // Emit any relocs we saved in an attempt to avoid generating COPY
   // relocs.
