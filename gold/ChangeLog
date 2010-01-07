@@ -1,3 +1,8 @@
+2010-01-06  Ian Lance Taylor  <iant@google.com>
+
+	PR 10980
+	* options.h (class General_options): Add --warn-multiple-gp.
+
 2010-01-06  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
 
 	* Makefile.am (incremental_dump_DEPENDENCIES): Remove
