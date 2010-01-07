@@ -1049,7 +1049,7 @@ Output_data_reloc_base<sh_type, dynamic, size, big_endian>::do_write(
   const off_t oview_size = this->data_size();
   unsigned char* const oview = of->get_output_view(off, oview_size);
 
-  if (this->sort_relocs_)
+  if (this->sort_relocs())
     {
       gold_assert(dynamic);
       std::sort(this->relocs_.begin(), this->relocs_.end(),

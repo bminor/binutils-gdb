@@ -3226,7 +3226,8 @@ Layout::create_interp(const Target* target)
 void
 Layout::add_target_dynamic_tags(bool use_rel, const Output_data* plt_got,
 				const Output_data* plt_rel,
-				const Output_data* dyn_rel, bool add_debug)
+				const Output_data_reloc_generic* dyn_rel,
+				bool add_debug)
 {
   Output_data_dynamic* odyn = this->dynamic_data_;
   if (odyn == NULL)
@@ -3273,6 +3274,16 @@ Layout::add_target_dynamic_tags(bool use_rel, const Output_data* plt_got,
 	    gold_unreachable();
 	}
       odyn->add_constant(rel_tag, rel_size);
+
+      if (parameters->options().combreloc())
+	{
+	  size_t c = dyn_rel->relative_reloc_count();
+	  if (c > 0)
+	    odyn->add_constant((use_rel
+				? elfcpp::DT_RELCOUNT
+				: elfcpp::DT_RELACOUNT),
+			       c);
+	}
     }
 
   if (add_debug && !parameters->options().shared())

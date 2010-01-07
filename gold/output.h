@@ -1237,6 +1237,11 @@ class Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
     : rel_(os, type, relobj, shndx, address), addend_(addend)
   { }
 
+  // Return TRUE if this is a RELATIVE relocation.
+  bool
+  is_relative() const
+  { return this->rel_.is_relative(); }
+
   // Write the reloc entry to an output view.
   void
   write(unsigned char* pov) const;
@@ -1263,6 +1268,43 @@ class Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
   Addend addend_;
 };
 
+// Output_data_reloc_generic is a non-template base class for
+// Output_data_reloc_base.  This gives the generic code a way to hold
+// a pointer to a reloc section.
+
+class Output_data_reloc_generic : public Output_section_data_build
+{
+ public:
+  Output_data_reloc_generic(int size, bool sort_relocs)
+    : Output_section_data_build(Output_data::default_alignment_for_size(size)),
+      relative_reloc_count_(0), sort_relocs_(sort_relocs)
+  { }
+
+  // Return the number of relative relocs in this section.
+  size_t
+  relative_reloc_count() const
+  { return this->relative_reloc_count_; }
+
+  // Whether we should sort the relocs.
+  bool
+  sort_relocs() const
+  { return this->sort_relocs_; }
+
+ protected:
+  // Note that we've added another relative reloc.
+  void
+  bump_relative_reloc_count()
+  { ++this->relative_reloc_count_; }
+
+ private:
+  // The number of relative relocs added to this section.  This is to
+  // support DT_RELCOUNT.
+  size_t relative_reloc_count_;
+  // Whether to sort the relocations when writing them out, to make
+  // the dynamic linker more efficient.
+  bool sort_relocs_;
+};
+
 // Output_data_reloc is used to manage a section containing relocs.
 // SH_TYPE is either elfcpp::SHT_REL or elfcpp::SHT_RELA.  DYNAMIC
 // indicates whether this is a dynamic relocation or a normal
@@ -1271,7 +1313,7 @@ class Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
 // the reloc type.
 
 template<int sh_type, bool dynamic, int size, bool big_endian>
-class Output_data_reloc_base : public Output_section_data_build
+class Output_data_reloc_base : public Output_data_reloc_generic
 {
  public:
   typedef Output_reloc<sh_type, dynamic, size, big_endian> Output_reloc_type;
@@ -1281,8 +1323,7 @@ class Output_data_reloc_base : public Output_section_data_build
 
   // Construct the section.
   Output_data_reloc_base(bool sort_relocs)
-    : Output_section_data_build(Output_data::default_alignment_for_size(size)),
-      sort_relocs_(sort_relocs)
+    : Output_data_reloc_generic(size, sort_relocs)
   { }
 
  protected:
@@ -1311,6 +1352,8 @@ class Output_data_reloc_base : public Output_section_data_build
     this->relocs_.push_back(reloc);
     this->set_current_data_size(this->relocs_.size() * reloc_size);
     od->add_dynamic_reloc();
+    if (reloc.is_relative())
+      this->bump_relative_reloc_count();
   }
 
  private:
@@ -1326,9 +1369,6 @@ class Output_data_reloc_base : public Output_section_data_build
 
   // The relocations in this section.
   Relocs relocs_;
-  // Whether to sort the relocations when writing them out, to make
-  // the dynamic linker more efficient.
-  bool sort_relocs_;
 };
 
 // The class which callers actually create.

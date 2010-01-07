@@ -1,5 +1,22 @@
 2010-01-07  Ian Lance Taylor  <iant@google.com>
 
+	PR 11061
+	* output.h (class Output_reloc) [SHT_RELA]: Add is_relative
+	function.
+	(class Output_data_reloc_generic): Define.
+	(class Output_data_reloc_base): Change base class to
+	Output_data_reloc_generic.  Change add() method to call
+	bump_relative_reloc_count for a relative reloc.  Remove
+	sort_relocs_ field.
+	* output.cc (Output_data_reloc_base::do_write): Change sort_reloc_
+	to sort_relocs().
+	* layout.cc (Layout::add_target_dynamic_tags): Change dyn_rel to
+	Output_data_reloc_generic*.  Add DT_RELCOUNT/DT_RELACOUNT tag if
+	appropriate.
+	* layout.h (class Layout): Update declaration.
+
+2010-01-07  Ian Lance Taylor  <iant@google.com>
+
 	* output.h (class Output_data): Add const version of
 	output_section and do_output_section.
 	(class Output_section_data): Add const version of
