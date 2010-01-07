@@ -1052,6 +1052,12 @@ class General_options
   DEFINE_bool(relro, options::DASH_Z, '\0', false,
 	      N_("Where possible mark variables read-only after relocation"),
 	      N_("Don't mark variables read-only after relocation"));
+  DEFINE_bool(text, options::DASH_Z, '\0', false,
+	      N_("Do not permit relocations in read-only segments"),
+	      NULL);
+  DEFINE_bool_alias(textoff, text, options::DASH_Z, '\0',
+		    N_("Permit relocations in read-only segments (default)"),
+		    NULL, true);
 
  public:
   typedef options::Dir_list Dir_list;

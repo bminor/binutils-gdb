@@ -3353,8 +3353,10 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
       odyn->add_constant(elfcpp::DT_TEXTREL, 0);
       flags |= elfcpp::DF_TEXTREL;
 
-      if (parameters->options().warn_shared_textrel()
-	  && parameters->options().shared())
+      if (parameters->options().text())
+	gold_error(_("read-only segment has dynamic relocations"));
+      else if (parameters->options().warn_shared_textrel()
+	       && parameters->options().shared())
 	gold_warning(_("shared library text segment is not shareable"));
     }
   if (parameters->options().shared() && this->has_static_tls())
