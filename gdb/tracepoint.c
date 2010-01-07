@@ -2541,8 +2541,7 @@ trace_dump_command (char *args, int from_tty)
   regcache = get_current_regcache ();
   gdbarch = get_regcache_arch (regcache);
 
-  stepping_frame = (t->loc->address != (regcache_read_pc (regcache)
-				   - gdbarch_decr_pc_after_break (gdbarch)));
+  stepping_frame = (t->loc->address != (regcache_read_pc (regcache)));
 
   for (action = t->actions; action; action = action->next)
     {
