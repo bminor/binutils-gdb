@@ -137,22 +137,27 @@ class Insn_template
   enum Type
     {
       THUMB16_TYPE = 1,
+      // THUMB16_SPECIAL_TYPE is used by sub-classes of Stub for instruction 
+      // templates with class-specific semantics.  Currently this is used
+      // only by the Cortex_a8_stub class for handling condition codes in
+      // conditional branches.
+      THUMB16_SPECIAL_TYPE,
       THUMB32_TYPE,
       ARM_TYPE,
       DATA_TYPE
     };
 
-  // Factory methods to create instrunction templates in different formats.
+  // Factory methods to create instruction templates in different formats.
 
   static const Insn_template
   thumb16_insn(uint32_t data)
   { return Insn_template(data, THUMB16_TYPE, elfcpp::R_ARM_NONE, 0); } 
 
-  // A bit of a hack.  A Thumb conditional branch, in which the proper
-  // condition is inserted when we build the stub.
+  // A Thumb conditional branch, in which the proper condition is inserted
+  // when we build the stub.
   static const Insn_template
   thumb16_bcond_insn(uint32_t data)
-  { return Insn_template(data, THUMB16_TYPE, elfcpp::R_ARM_NONE, 1); } 
+  { return Insn_template(data, THUMB16_SPECIAL_TYPE, elfcpp::R_ARM_NONE, 1); } 
 
   static const Insn_template
   thumb32_insn(uint32_t data)
@@ -198,11 +203,11 @@ class Insn_template
   reloc_addend() const
   { return this->reloc_addend_; }
 
-  // Return size of instrunction template in bytes.
+  // Return size of instruction template in bytes.
   size_t
   size() const;
 
-  // Return byte-alignment of instrunction template.
+  // Return byte-alignment of instruction template.
   unsigned
   alignment() const;
 
@@ -410,16 +415,39 @@ class Stub
   write(unsigned char* view, section_size_type view_size, bool big_endian)
   { this->do_write(view, view_size, big_endian); }
 
+  // Return the instruction for THUMB16_SPECIAL_TYPE instruction template
+  // for the i-th instruction.
+  uint16_t
+  thumb16_special(size_t i)
+  { return this->do_thumb16_special(i); }
+
  protected:
   // This must be defined in the child class.
   virtual Arm_address
   do_reloc_target(size_t) = 0;
 
-  // This must be defined in the child class.
+  // This may be overridden in the child class.
   virtual void
-  do_write(unsigned char*, section_size_type, bool) = 0;
+  do_write(unsigned char* view, section_size_type view_size, bool big_endian)
+  {
+    if (big_endian)
+      this->do_fixed_endian_write<true>(view, view_size);
+    else
+      this->do_fixed_endian_write<false>(view, view_size);
+  }
   
+  // This must be overridden if a child class uses the THUMB16_SPECIAL_TYPE
+  // instruction template.
+  virtual uint16_t
+  do_thumb16_special(size_t)
+  { gold_unreachable(); }
+
  private:
+  // A template to implement do_write.
+  template<bool big_endian>
+  void inline
+  do_fixed_endian_write(unsigned char*, section_size_type);
+
   // Its template.
   const Stub_template* stub_template_;
   // Offset within the section of containing this stub.
@@ -594,7 +622,6 @@ class Reloc_stub : public Stub
 
   friend class Stub_factory;
 
- private:
   // Return the relocation target address of the i-th relocation in the
   // stub.
   Arm_address
@@ -605,17 +632,115 @@ class Reloc_stub : public Stub
     return this->destination_address_;
   }
 
-  // A template to implement do_write below.
-  template<bool big_endian>
-  void inline
-  do_fixed_endian_write(unsigned char*, section_size_type);
-
-  // Write a stub.
-  void
-  do_write(unsigned char* view, section_size_type view_size, bool big_endian);
-
+ private:
   // Address of destination.
   Arm_address destination_address_;
+};
+
+// Cortex-A8 stub class.  We need a Cortex-A8 stub to redirect any 32-bit
+// THUMB branch that meets the following conditions:
+// 
+// 1. The branch straddles across a page boundary. i.e. lower 12-bit of
+//    branch address is 0xffe.
+// 2. The branch target address is in the same page as the first word of the
+//    branch.
+// 3. The branch follows a 32-bit instruction which is not a branch.
+//
+// To do the fix up, we need to store the address of the branch instruction
+// and its target at least.  We also need to store the original branch
+// instruction bits for the condition code in a conditional branch.  The
+// condition code is used in a special instruction template.  We also want
+// to identify input sections needing Cortex-A8 workaround quickly.  We store
+// extra information about object and section index of the code section
+// containing a branch being fixed up.  The information is used to mark
+// the code section when we finalize the Cortex-A8 stubs.
+//
+
+class Cortex_a8_stub : public Stub
+{
+ public:
+  ~Cortex_a8_stub()
+  { }
+
+  // Return the object of the code section containing the branch being fixed
+  // up.
+  Relobj*
+  relobj() const
+  { return this->relobj_; }
+
+  // Return the section index of the code section containing the branch being
+  // fixed up.
+  unsigned int
+  shndx() const
+  { return this->shndx_; }
+
+  // Return the source address of stub.  This is the address of the original
+  // branch instruction.  LSB is 1 always set to indicate that it is a THUMB
+  // instruction.
+  Arm_address
+  source_address() const
+  { return this->source_address_; }
+
+  // Return the destination address of the stub.  This is the branch taken
+  // address of the original branch instruction.  LSB is 1 if it is a THUMB
+  // instruction address.
+  Arm_address
+  destination_address() const
+  { return this->destination_address_; }
+
+  // Return the instruction being fixed up.
+  uint32_t
+  original_insn() const
+  { return this->original_insn_; }
+
+ protected:
+  // Cortex_a8_stubs are created via a stub factory.  So these are protected.
+  Cortex_a8_stub(const Stub_template* stub_template, Relobj* relobj,
+		 unsigned int shndx, Arm_address source_address,
+		 Arm_address destination_address, uint32_t original_insn)
+    : Stub(stub_template), relobj_(relobj), shndx_(shndx),
+      source_address_(source_address | 1U),
+      destination_address_(destination_address),
+      original_insn_(original_insn)
+  { }
+
+  friend class Stub_factory;
+
+  // Return the relocation target address of the i-th relocation in the
+  // stub.
+  Arm_address
+  do_reloc_target(size_t i)
+  {
+    if (this->stub_template()->type() == arm_stub_a8_veneer_b_cond)
+      {
+        // The conditional branch veneer has two relocations.
+        gold_assert(i < 2);
+	return i == 0 ? this->source_address_ + 4 : this->destination_address_;
+      }
+    else
+      {
+        // All other Cortex-A8 stubs have only one relocation.
+        gold_assert(i == 0);
+        return this->destination_address_;
+      }
+  }
+
+  // Return an instruction for the THUMB16_SPECIAL_TYPE instruction template.
+  uint16_t
+  do_thumb16_special(size_t);
+
+ private:
+  // Object of the code section containing the branch being fixed up.
+  Relobj* relobj_;
+  // Section index of the code section containing the branch begin fixed up.
+  unsigned int shndx_;
+  // Source address of original branch.
+  Arm_address source_address_;
+  // Destination address of the original branch.
+  Arm_address destination_address_;
+  // Original branch instruction.  This is needed for copying the condition
+  // code from a condition branch to its stub.
+  uint32_t original_insn_;
 };
 
 // Stub factory class.
@@ -638,6 +763,18 @@ class Stub_factory
     gold_assert(stub_type >= arm_stub_reloc_first
 		&& stub_type <= arm_stub_reloc_last);
     return new Reloc_stub(this->stub_templates_[stub_type]);
+  }
+
+  // Make a Cortex-A8 stub.
+  Cortex_a8_stub*
+  make_cortex_a8_stub(Stub_type stub_type, Relobj* relobj, unsigned int shndx,
+		      Arm_address source, Arm_address destination,
+		      uint32_t original_insn) const
+  {
+    gold_assert(stub_type >= arm_stub_cortex_a8_first
+		&& stub_type <= arm_stub_cortex_a8_last);
+    return new Cortex_a8_stub(this->stub_templates_[stub_type], relobj, shndx,
+			      source, destination, original_insn);
   }
 
  private:
@@ -2728,6 +2865,51 @@ Stub_template::Stub_template(
   this->size_ = offset;
 }
 
+// Stub methods.
+
+// Template to implement do_write for a specific target endianity.
+
+template<bool big_endian>
+void inline
+Stub::do_fixed_endian_write(unsigned char* view, section_size_type view_size)
+{
+  const Stub_template* stub_template = this->stub_template();
+  const Insn_template* insns = stub_template->insns();
+
+  // FIXME:  We do not handle BE8 encoding yet.
+  unsigned char* pov = view;
+  for (size_t i = 0; i < stub_template->insn_count(); i++)
+    {
+      switch (insns[i].type())
+	{
+	case Insn_template::THUMB16_TYPE:
+	  elfcpp::Swap<16, big_endian>::writeval(pov, insns[i].data() & 0xffff);
+	  break;
+	case Insn_template::THUMB16_SPECIAL_TYPE:
+	  elfcpp::Swap<16, big_endian>::writeval(
+	      pov,
+	      this->thumb16_special(i));
+	  break;
+	case Insn_template::THUMB32_TYPE:
+	  {
+	    uint32_t hi = (insns[i].data() >> 16) & 0xffff;
+	    uint32_t lo = insns[i].data() & 0xffff;
+	    elfcpp::Swap<16, big_endian>::writeval(pov, hi);
+	    elfcpp::Swap<16, big_endian>::writeval(pov + 2, lo);
+	  }
+          break;
+	case Insn_template::ARM_TYPE:
+	case Insn_template::DATA_TYPE:
+	  elfcpp::Swap<32, big_endian>::writeval(pov, insns[i].data());
+	  break;
+	default:
+	  gold_unreachable();
+	}
+      pov += insns[i].size();
+    }
+  gold_assert(static_cast<section_size_type>(pov - view) == view_size);
+} 
+
 // Reloc_stub::Key methods.
 
 // Dump a Key as a string for debugging.
@@ -2934,57 +3116,23 @@ Reloc_stub::stub_type_for_reloc(
   return stub_type;
 }
 
-// Template to implement do_write for a specific target endianity.
+// Cortex_a8_stub methods.
 
-template<bool big_endian>
-void inline
-Reloc_stub::do_fixed_endian_write(unsigned char* view,
-				  section_size_type view_size)
+// Return the instruction for a THUMB16_SPECIAL_TYPE instruction template.
+// I is the position of the instruction template in the stub template.
+
+uint16_t
+Cortex_a8_stub::do_thumb16_special(size_t i)
 {
-  const Stub_template* stub_template = this->stub_template();
-  const Insn_template* insns = stub_template->insns();
-
-  // FIXME:  We do not handle BE8 encoding yet.
-  unsigned char* pov = view;
-  for (size_t i = 0; i < stub_template->insn_count(); i++)
-    {
-      switch (insns[i].type())
-	{
-	case Insn_template::THUMB16_TYPE:
-	  // Non-zero reloc addends are only used in Cortex-A8 stubs. 
-	  gold_assert(insns[i].reloc_addend() == 0);
-	  elfcpp::Swap<16, big_endian>::writeval(pov, insns[i].data() & 0xffff);
-	  break;
-	case Insn_template::THUMB32_TYPE:
-	  {
-	    uint32_t hi = (insns[i].data() >> 16) & 0xffff;
-	    uint32_t lo = insns[i].data() & 0xffff;
-	    elfcpp::Swap<16, big_endian>::writeval(pov, hi);
-	    elfcpp::Swap<16, big_endian>::writeval(pov + 2, lo);
-	  }
-          break;
-	case Insn_template::ARM_TYPE:
-	case Insn_template::DATA_TYPE:
-	  elfcpp::Swap<32, big_endian>::writeval(pov, insns[i].data());
-	  break;
-	default:
-	  gold_unreachable();
-	}
-      pov += insns[i].size();
-    }
-  gold_assert(static_cast<section_size_type>(pov - view) == view_size);
-} 
-
-// Write a reloc stub to VIEW with endianity specified by BIG_ENDIAN.
-
-void
-Reloc_stub::do_write(unsigned char* view, section_size_type view_size,
-		     bool big_endian)
-{
-  if (big_endian)
-    this->do_fixed_endian_write<true>(view, view_size);
-  else
-    this->do_fixed_endian_write<false>(view, view_size);
+  // The only use of this is to copy condition code from a conditional
+  // branch being worked around to the corresponding conditional branch in
+  // to the stub.
+  gold_assert(this->stub_template()->type() == arm_stub_a8_veneer_b_cond
+	      && i == 0);
+  uint16_t data = this->stub_template()->insns()[i].data();
+  gold_assert((data & 0xff00U) == 0xd000U);
+  data |= ((this->original_insn_ >> 22) & 0xf) << 8;
+  return data;
 }
 
 // Stub_factory methods.
@@ -3162,7 +3310,7 @@ Stub_factory::Stub_factory()
   // Stub used for Thumb-2 blx.w instructions.  We modified the original blx.w
   // instruction (which switches to ARM mode) to point to this stub.  Jump to
   // the real destination using an ARM-mode branch.
-  const Insn_template elf32_arm_stub_a8_veneer_blx[] =
+  static const Insn_template elf32_arm_stub_a8_veneer_blx[] =
     {
       Insn_template::arm_rel_insn(0xea000000, -8)	// b dest
     };
