@@ -1,5 +1,5 @@
 # Expect script for ld-gc tests
-#   Copyright 2008, 2009
+#   Copyright 2008, 2009, 2010
 #   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
@@ -90,3 +90,4 @@ test_gc "Check --gc-section/-r/-e" "gcrel" $ld "-r --gc-sections -e main"
 test_gc "Check --gc-section/-r/-u" "gcrel" $ld "-r --gc-sections -u used_func"
 
 run_dump_test "noent"
+run_dump_test "abi-note"

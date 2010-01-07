@@ -1,6 +1,6 @@
 /* ELF linking support for BFD.
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007, 2008, 2009
+   2005, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -11527,9 +11527,10 @@ elf_gc_sweep (bfd *abfd, struct bfd_link_info *info)
 	      o->gc_mark = first->gc_mark;
 	    }
 	  else if ((o->flags & (SEC_DEBUGGING | SEC_LINKER_CREATED)) != 0
-		   || (o->flags & (SEC_ALLOC | SEC_LOAD | SEC_RELOC)) == 0)
+		   || (o->flags & (SEC_ALLOC | SEC_LOAD | SEC_RELOC)) == 0
+		   || elf_section_data (o)->this_hdr.sh_type == SHT_NOTE)
 	    {
-	      /* Keep debug and special sections.  */
+	      /* Keep debug, special and SHT_NOTE sections.  */
 	      o->gc_mark = 1;
 	    }
 

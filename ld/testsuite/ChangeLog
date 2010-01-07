@@ -1,3 +1,10 @@
+2010-01-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/11143
+	* ld-gc/gc.exp: Run abi-note.
+
+	* ld-gc/abi-note.d: New.
+	* ld-gc/abi-note.s: Likewise.
 
 For older changes see ChangeLog-2009
 

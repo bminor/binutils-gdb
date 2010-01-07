@@ -1,3 +1,8 @@
+2010-01-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/11143
+	* elflink.c (elf_gc_sweep): Keep SHT_NOTE section.
+
 2010-01-04  Daniel Gutson  <dgutson@codesourcery.com>
 
 	* bfd.m4 (BFD_HAVE_SYS_PROCFS_TYPE): Define _STRUCTURE_PROC
