@@ -1,3 +1,10 @@
+2010-01-07  Dmitry Gorbachev  <d.g.gorbachev@gmail.com>
+	    Ian Lance Taylor  <iant@google.com>
+
+	PR 11019
+	* object.cc: Instantiate Xindex::initialize_symtab_xindex and
+	Xindex::read_symtab_xindex.
+
 2010-01-07  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Insn_template::Type): New enum value THUMB16_SPECIAL_TYPE.

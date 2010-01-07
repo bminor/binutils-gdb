@@ -2524,4 +2524,48 @@ template
 struct Relocate_info<64, true>;
 #endif
 
+#ifdef HAVE_TARGET_32_LITTLE
+template
+void
+Xindex::initialize_symtab_xindex<32, false>(Object*, unsigned int);
+
+template
+void
+Xindex::read_symtab_xindex<32, false>(Object*, unsigned int,
+				      const unsigned char*);
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+void
+Xindex::initialize_symtab_xindex<32, true>(Object*, unsigned int);
+
+template
+void
+Xindex::read_symtab_xindex<32, true>(Object*, unsigned int,
+				     const unsigned char*);
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+void
+Xindex::initialize_symtab_xindex<64, false>(Object*, unsigned int);
+
+template
+void
+Xindex::read_symtab_xindex<64, false>(Object*, unsigned int,
+				      const unsigned char*);
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+void
+Xindex::initialize_symtab_xindex<64, true>(Object*, unsigned int);
+
+template
+void
+Xindex::read_symtab_xindex<64, true>(Object*, unsigned int,
+				     const unsigned char*);
+#endif
+
 } // End namespace gold.
