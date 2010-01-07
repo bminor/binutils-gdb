@@ -384,6 +384,29 @@ build_section_addr_info_from_section_table (const struct target_section *start,
   return sap;
 }
 
+/* Create a section_addr_info from section offsets in OBJFILE.  */
+
+static struct section_addr_info *
+build_section_addr_info_from_objfile (const struct objfile *objfile)
+{
+  struct section_addr_info *sap;
+  int i;
+  struct bfd_section *sec;
+
+  sap = alloc_section_addr_info (objfile->num_sections);
+  for (i = 0, sec = objfile->obfd->sections;
+       i < objfile->num_sections;
+       i++, sec = sec->next)
+    {
+      gdb_assert (sec != NULL);
+      sap->other[i].addr = (bfd_get_section_vma (objfile->obfd, sec)
+                            + objfile->section_offsets->offsets[i]);
+      sap->other[i].name = xstrdup (bfd_get_section_name (objfile->obfd, sec));
+      sap->other[i].sectindex = sec->index;
+    }
+  return sap;
+}
+
 
 /* Free all memory allocated by build_section_addr_info_from_section_table. */
 
@@ -1043,13 +1066,22 @@ void
 symbol_file_add_separate (bfd *bfd, int symfile_flags, struct objfile *objfile)
 {
   struct objfile *new_objfile;
+  struct section_addr_info *sap;
+  struct cleanup *my_cleanup;
+
+  /* Create section_addr_info.  We can't directly use offsets from OBJFILE
+     because sections of BFD may not match sections of OBJFILE and because
+     vma may have been modified by tools such as prelink.  */
+  sap = build_section_addr_info_from_objfile (objfile);
+  my_cleanup = make_cleanup_free_section_addr_info (sap);
 
   new_objfile = symbol_file_add_with_addrs_or_offsets
     (bfd, symfile_flags,
-     0, /* No addr table.  */
-     objfile->section_offsets, objfile->num_sections,
+     sap, NULL, 0,
      objfile->flags & (OBJF_REORDERED | OBJF_SHARED | OBJF_READNOW
 		       | OBJF_USERLOADED));
+
+  do_cleanups (my_cleanup);
 
   add_separate_debug_objfile (new_objfile, objfile);
 }
