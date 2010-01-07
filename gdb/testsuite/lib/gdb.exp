@@ -2730,6 +2730,7 @@ proc gdb_skip_bogus_test { msg } {
 
 # Return true if a test should be skipped due to lack of XML support
 # in the host GDB.
+# NOTE: This must be called while gdb is *not* running.
 
 proc gdb_skip_xml_test { } {
     global gdb_prompt

@@ -1,3 +1,7 @@
+2010-01-07  Doug Evans  <dje@google.com>
+
+	* lib/gdb.exp (gdb_skip_xml_test): Add comment.
+
 2010-01-07  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/source.exp: Use correct line number.
