@@ -1,6 +1,11 @@
 2010-01-06  Ian Lance Taylor  <iant@google.com>
 
 	PR 10980
+	* options.h (class General_options): Add --warn-shared-textrel.
+	* layout.cc (Layout::finish_dynamic_section): Implement
+	--warn-shared-textrel.
+
+	PR 10980
 	* options.h (class General_options): Add --warn-multiple-gp.
 
 2010-01-06  Viktor Kutuzov  <vkutuzov@accesssoftek.com>

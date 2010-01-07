@@ -968,6 +968,10 @@ class General_options
 	      N_("Warn when skipping an incompatible library"),
 	      N_("Don't warn when skipping an incompatible library"));
 
+  DEFINE_bool(warn_shared_textrel, options::TWO_DASHES, '\0', false,
+	      N_("Warn if text segment is not shareable"),
+	      N_("Do not warn if text segment is not shareable (default)"));
+
   DEFINE_bool(whole_archive, options::TWO_DASHES, '\0', false,
               N_("Include all archive contents"),
               N_("Include only needed archive contents"));
