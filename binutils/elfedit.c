@@ -253,8 +253,7 @@ update_elf_header (const char *file_name, FILE *file)
   /* Skip if class doesn't match. */
   if (input_elf_class == -1)
     input_elf_class = elf_header.e_ident[EI_CLASS];
-  else
-  if (elf_header.e_ident[EI_CLASS] != input_elf_class)
+  else if (elf_header.e_ident[EI_CLASS] != input_elf_class)
     {
       non_fatal
 	(_("%s: Unmatched EI_CLASS: %d is not %d\n"),
