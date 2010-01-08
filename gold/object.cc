@@ -1390,7 +1390,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 						   reloc_type[i],
 						   &offset);
       out_sections[i] = os;
-      if (offset == -1)
+      if (os == NULL || offset == -1)
 	{
 	  // An object can contain at most one section holding exception
 	  // frame information.
@@ -1404,7 +1404,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
       // If this section requires special handling, and if there are
       // relocs that apply to it, then we must do the special handling
       // before we apply the relocs.
-      if (offset == -1 && reloc_shndx[i] != 0)
+      if (os != NULL && offset == -1 && reloc_shndx[i] != 0)
 	this->set_relocs_must_follow_section_writes();
     }
 

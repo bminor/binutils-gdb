@@ -1,5 +1,10 @@
 2010-01-08  Ian Lance Taylor  <iant@google.com>
 
+	* object.cc (Sized_relobj::do_layout): Don't get confused if
+	layout_eh_frame returns NULL.
+
+2010-01-08  Ian Lance Taylor  <iant@google.com>
+
 	PR 11084
 	* dynobj.cc (Sized_dynobj::find_dynsym_sections): If there is no
 	dynamic symbol table, use the normal symbol table.
