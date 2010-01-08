@@ -310,15 +310,6 @@ print_fixed_point_type (struct type *type, struct ui_file *stream)
     }
 }
 
-/* Print representation of special VAX floating-point type TYPE on STREAM.  */
-
-static void
-print_vax_floating_point_type (struct type *type, struct ui_file *stream)
-{
-  fprintf_filtered (stream, "<float format %c>",
-		    ada_vax_float_type_suffix (type));
-}
-
 /* Print simple (constrained) array type TYPE on STREAM.  LEVEL is the
    recursion (indentation) level, in case the element type itself has
    nested structure, and SHOW is the number of levels of internal
@@ -786,8 +777,6 @@ ada_print_type (struct type *type0, char *varstring, struct ui_file *stream,
       case TYPE_CODE_INT:
 	if (ada_is_fixed_point_type (type))
 	  print_fixed_point_type (type, stream);
-	else if (ada_is_vax_floating_type (type))
-	  print_vax_floating_point_type (type, stream);
 	else
 	  {
 	    char *name = ada_type_name (type);
@@ -804,8 +793,6 @@ ada_print_type (struct type *type0, char *varstring, struct ui_file *stream,
       case TYPE_CODE_RANGE:
 	if (ada_is_fixed_point_type (type))
 	  print_fixed_point_type (type, stream);
-	else if (ada_is_vax_floating_type (type))
-	  print_vax_floating_point_type (type, stream);
 	else if (ada_is_modular_type (type))
 	  fprintf_filtered (stream, "mod %s", 
 			    int_string (ada_modulus (type), 10, 0, 0, 1));

@@ -9656,52 +9656,6 @@ ada_float_to_fixed (struct type *type, DOUBLEST x)
   return (LONGEST) (x / scaling_factor (type) + 0.5);
 }
 
-
-                                /* VAX floating formats */
-
-/* Non-zero iff TYPE represents one of the special VAX floating-point
-   types.  */
-
-int
-ada_is_vax_floating_type (struct type *type)
-{
-  int name_len =
-    (ada_type_name (type) == NULL) ? 0 : strlen (ada_type_name (type));
-  return
-    name_len > 6
-    && (TYPE_CODE (type) == TYPE_CODE_INT
-        || TYPE_CODE (type) == TYPE_CODE_RANGE)
-    && strncmp (ada_type_name (type) + name_len - 6, "___XF", 5) == 0;
-}
-
-/* The type of special VAX floating-point type this is, assuming
-   ada_is_vax_floating_point.  */
-
-int
-ada_vax_float_type_suffix (struct type *type)
-{
-  return ada_type_name (type)[strlen (ada_type_name (type)) - 1];
-}
-
-/* A value representing the special debugging function that outputs
-   VAX floating-point values of the type represented by TYPE.  Assumes
-   ada_is_vax_floating_type (TYPE).  */
-
-struct value *
-ada_vax_float_print_function (struct type *type)
-{
-  switch (ada_vax_float_type_suffix (type))
-    {
-    case 'F':
-      return get_var_value ("DEBUG_STRING_F", 0);
-    case 'D':
-      return get_var_value ("DEBUG_STRING_D", 0);
-    case 'G':
-      return get_var_value ("DEBUG_STRING_G", 0);
-    default:
-      error (_("invalid VAX floating-point type"));
-    }
-}
 
 
                                 /* Range types */

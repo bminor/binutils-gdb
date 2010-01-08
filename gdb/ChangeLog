@@ -1,4 +1,15 @@
-2010-01-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+2009-01-08  Joel Brobecker  <brobecker@adacore.com>
+
+	Get rid of support for VAX Floats.
+	* ada-lang.h (ada_is_vax_floating_type, ada_vax_float_type_suffix)
+	(ada_vax_float_print_function): Delete.
+	* ada-lang.c (ada_is_vax_floating_type, ada_vax_float_type_suffix)
+	(ada_vax_float_print_function): Delete.
+	* ada-typeprint.c (print_vax_floating_point_type): Delete.
+	(ada_print_type): Remove support for VAX floats.
+	* ada-valprint.c (ada_val_print_1): Remove support for VAX floats.
+
+2010-01-08  jan kratochvil  <jan.kratochvil@redhat.com>
 
 	* stabsread.c (read_args): Handle zero arguments.
 

@@ -305,12 +305,6 @@ extern DOUBLEST ada_fixed_to_float (struct type *, LONGEST);
 
 extern LONGEST ada_float_to_fixed (struct type *, DOUBLEST);
 
-extern int ada_is_vax_floating_type (struct type *);
-
-extern int ada_vax_float_type_suffix (struct type *);
-
-extern struct value *ada_vax_float_print_function (struct type *);
-
 extern struct type *ada_system_address_type (void);
 
 extern int ada_which_variant_applies (struct type *, struct type *,
