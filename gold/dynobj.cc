@@ -106,6 +106,7 @@ Sized_dynobj<size, big_endian>::find_dynsym_sections(
   *pverneed_shndx = -1U;
   *pdynamic_shndx = -1U;
 
+  unsigned int symtab_shndx = 0;
   unsigned int xindex_shndx = 0;
   unsigned int xindex_link = 0;
   const unsigned int shnum = this->shnum();
@@ -127,6 +128,9 @@ Sized_dynobj<size, big_endian>::find_dynsym_sections(
 	      this->set_xindex(xindex);
 	    }
 	  pi = NULL;
+	  break;
+	case elfcpp::SHT_SYMTAB:
+	  symtab_shndx = i;
 	  break;
 	case elfcpp::SHT_GNU_versym:
 	  pi = pversym_shndx;
@@ -165,6 +169,25 @@ Sized_dynobj<size, big_endian>::find_dynsym_sections(
 		    shdr.get_sh_type(), *pi, i);
 
       *pi = i;
+    }
+
+  // If there is no dynamic symbol table, use the normal symbol table.
+  // On some SVR4 systems, a shared library is stored in an archive.
+  // The version stored in the archive only has a normal symbol table.
+  // It has an SONAME entry which points to another copy in the file
+  // system which has a dynamic symbol table as usual.  This is way of
+  // addressing the issues which glibc addresses using GROUP with
+  // libc_nonshared.a.
+  if (this->dynsym_shndx_ == -1U && symtab_shndx != 0)
+    {
+      this->dynsym_shndx_ = symtab_shndx;
+      if (xindex_shndx > 0 && xindex_link == symtab_shndx)
+	{
+	  Xindex* xindex = new Xindex(this->elf_file_.large_shndx_offset());
+	  xindex->read_symtab_xindex<size, big_endian>(this, xindex_shndx,
+						       pshdrs);
+	  this->set_xindex(xindex);
+	}
     }
 }
 
@@ -337,7 +360,6 @@ Sized_dynobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
       // Get the dynamic symbols.
       typename This::Shdr dynsymshdr(pshdrs
 				     + this->dynsym_shndx_ * This::shdr_size);
-      gold_assert(dynsymshdr.get_sh_type() == elfcpp::SHT_DYNSYM);
 
       sd->symbols = this->get_lasting_view(dynsymshdr.get_sh_offset(),
 					   dynsymshdr.get_sh_size(), true,

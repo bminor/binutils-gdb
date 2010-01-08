@@ -1,5 +1,13 @@
 2010-01-08  Ian Lance Taylor  <iant@google.com>
 
+	PR 11084
+	* dynobj.cc (Sized_dynobj::find_dynsym_sections): If there is no
+	dynamic symbol table, use the normal symbol table.
+	(Sized_dynobj::do_read_symbols): Remove assertion about type of
+	symbol table.
+
+2010-01-08  Ian Lance Taylor  <iant@google.com>
+
 	PR 11072
 	* layout.cc (Layout::include_section): Remove .gnu_debuglink
 	sections.
