@@ -1,6 +1,6 @@
 /* BFD back-end for archive files (libraries).
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
    Written by Cygnus Support.  Mostly Gumby Henkel-Wallace's fault.
 
@@ -1701,22 +1701,6 @@ bfd_ar_hdr_from_filesystem (bfd *abfd, const char *filename, bfd *member)
   ared->arch_header = (char *) hdr;
 
   return ared;
-}
-
-/* This is magic required by the "ar" program.  Since it's
-   undocumented, it's undocumented.  You may think that it would take
-   a strong stomach to write this, and it does, but it takes even a
-   stronger stomach to try to code around such a thing!  */
-
-struct ar_hdr *bfd_special_undocumented_glue (bfd *, const char *);
-
-struct ar_hdr *
-bfd_special_undocumented_glue (bfd *abfd, const char *filename)
-{
-  struct areltdata *ar_elt = bfd_ar_hdr_from_filesystem (abfd, filename, 0);
-  if (ar_elt == NULL)
-    return NULL;
-  return (struct ar_hdr *) ar_elt->arch_header;
 }
 
 /* Analogous to stat call.  */
