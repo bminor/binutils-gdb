@@ -1,4 +1,4 @@
-2010-01-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+2010-01-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.stabs/weird.def (args93): New.
 
