@@ -1,3 +1,7 @@
+2010-01-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldver.c (ldversion): Change to "Copyright 2010".
+
 2010-01-08  Alan Modra  <amodra@gmail.com>
 
 	PR 11107

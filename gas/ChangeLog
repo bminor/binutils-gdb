@@ -1,3 +1,7 @@
+2010-01-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* version.c (parse_args): Change to "Copyright 2010".
+
 2010-01-06  Quentin Neill  <quentin.neill@amd.com>
 
 	* config/tc-i386.c (cpu_arch): Add amdfam15.

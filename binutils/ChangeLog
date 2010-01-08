@@ -1,5 +1,9 @@
 2010-01-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* version.c (print_version): Change to "Copyright 2010".
+
+2010-01-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elfedit.c (input_elf_type): New.
 	(output_elf_type): Likewise.
 	(elf_type): Likewise.
