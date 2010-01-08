@@ -91,3 +91,4 @@ test_gc "Check --gc-section/-r/-u" "gcrel" $ld "-r --gc-sections -u used_func"
 
 run_dump_test "noent"
 run_dump_test "abi-note"
+run_dump_test "start"

@@ -11331,6 +11331,8 @@ _bfd_elf_gc_mark_hook (asection *sec,
 		       struct elf_link_hash_entry *h,
 		       Elf_Internal_Sym *sym)
 {
+  const char *sec_name;
+
   if (h != NULL)
     {
       switch (h->root.type)
@@ -11341,6 +11343,33 @@ _bfd_elf_gc_mark_hook (asection *sec,
 
 	case bfd_link_hash_common:
 	  return h->root.u.c.p->section;
+
+	case bfd_link_hash_undefined:
+	case bfd_link_hash_undefweak:
+	  /* To work around a glibc bug, keep all XXX input sections
+	     when there is an as yet undefined reference to __start_XXX
+	     or __stop_XXX symbols.  The linker will later define such
+	     symbols for orphan input sections that have a name
+	     representable as a C identifier.  */
+	  if (strncmp (h->root.root.string, "__start_", 8) == 0)
+	    sec_name = h->root.root.string + 8;
+	  else if (strncmp (h->root.root.string, "__stop_", 7) == 0)
+	    sec_name = h->root.root.string + 7;
+	  else
+	    sec_name = NULL;
+
+	  if (sec_name && *sec_name != '\0')
+	    {
+	      bfd *i;
+	      
+	      for (i = info->input_bfds; i; i = i->link_next)
+		{
+		  sec = bfd_get_section_by_name (i, sec_name);
+		  if (sec)
+		    sec->flags |= SEC_KEEP;
+		}
+	    }
+	  break;
 
 	default:
 	  break;

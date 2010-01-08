@@ -1,5 +1,13 @@
 2010-01-07  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/11133
+	* ld-gc/gc.exp: Run start.
+
+	* ld-gc/start.d: New.
+	* ld-gc/start.s: Likewise.
+
+2010-01-07  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/11143
 	* ld-gc/gc.exp: Run abi-note.
 
