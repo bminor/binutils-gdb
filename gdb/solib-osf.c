@@ -306,7 +306,7 @@ osf_clear_solib (void)
    Also, what if child has exit()ed?  Must exit loop somehow.  */
 
 static void
-osf_solib_create_inferior_hook (void)
+osf_solib_create_inferior_hook (int from_tty)
 {
   struct inferior *inf;
   struct thread_info *tp;

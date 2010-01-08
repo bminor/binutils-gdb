@@ -1,3 +1,40 @@
+2010-01-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Add from_tty to solib_create_inferior_hook.
+	* infcmd.c (post_create_inferior): Move solib_add after
+	solib_create_inferior_hook.  Pass from_tty to
+	solib_create_inferior_hook.  Call solib_add and SOLIB_ADD with
+	0 from_tty and comment why.
+	* infrun.c (follow_exec): Pass from_tty solib_create_inferior_hook as 0.
+	* linux-nat.c (linux_child_follow_fork): Likewise.
+	* nto-procfs.c (procfs_post_attach, procfs_create_inferior): Likewise.
+	* solib-darwin.c (darwin_solib_create_inferior_hook): New parameter
+	from_tty.
+	* solib-frv.c (frv_solib_create_inferior_hook): Likewise.
+	* solib-irix.c (irix_solib_create_inferior_hook): Likewise.
+	* solib-null.c (null_solib_create_inferior_hook): Likewise.
+	* solib-osf.c (osf_solib_create_inferior_hook): Likewise.
+	* solib-pa64.c (pa64_solib_create_inferior_hook): Likewise.
+	* solib-som.c (som_solib_create_inferior_hook): Likewise.
+	* solib-spu.c (spu_solib_create_inferior_hook): New parameter from_tty.
+	Pass it to svr4_so_ops.solib_create_inferior_hook.
+	* solib-sunos.c (sunos_solib_create_inferior_hook): New parameter
+	from_tty.
+	* solib-svr4.c (enable_break): New parameter from_tty.  Pass it to
+	solib_add.
+	(svr4_solib_create_inferior_hook): New parameter from_tty.  Pass it to
+	enable_break.
+	* solib-target.c (solib_target_solib_create_inferior_hook): New
+	parameter from_tty.
+	* solib.c (solib_create_inferior_hook): New parameter from_tty.  Pass
+	it to ops->solib_create_inferior_hook.
+	(reload_shared_libraries): Pass from_tty to solib_create_inferior_hook.
+	Move solib_add after solib_create_inferior_hook, call it now with
+	from_tty as 0.  New comment there.
+	* solib.h (solib_create_inferior_hook): New parameter from_tty.
+	* solist.h (struct target_so_ops <solib_create_inferior_hook>):
+	Likewise.
+
 2010-01-08  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Fix multiexec race.
@@ -22,7 +59,7 @@
 	(ada_print_type): Remove support for VAX floats.
 	* ada-valprint.c (ada_val_print_1): Remove support for VAX floats.
 
-2010-01-08  jan kratochvil  <jan.kratochvil@redhat.com>
+2010-01-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* stabsread.c (read_args): Handle zero arguments.
 

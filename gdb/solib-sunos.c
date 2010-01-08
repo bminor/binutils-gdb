@@ -741,7 +741,7 @@ sunos_special_symbol_handling (void)
  */
 
 static void
-sunos_solib_create_inferior_hook (void)
+sunos_solib_create_inferior_hook (int from_tty)
 {
   struct thread_info *tp;
   struct inferior *inf;

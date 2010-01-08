@@ -90,7 +90,7 @@ struct target_so_ops
     void (*clear_solib) (void);
 
     /* Target dependent code to run after child process fork.  */
-    void (*solib_create_inferior_hook) (void);
+    void (*solib_create_inferior_hook) (int from_tty);
 
     /* Do additional symbol handling, lookup, etc. after symbols
        for a shared object have been loaded.  */

@@ -392,7 +392,7 @@ enable_break (void)
 
    SYNOPSIS
 
-   void solib_create_inferior_hook ()
+   void solib_create_inferior_hook (int from_tty)
 
    DESCRIPTION
 
@@ -437,7 +437,7 @@ enable_break (void)
  */
 
 static void
-irix_solib_create_inferior_hook (void)
+irix_solib_create_inferior_hook (int from_tty)
 {
   struct inferior *inf;
   struct thread_info *tp;

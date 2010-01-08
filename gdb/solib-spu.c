@@ -371,7 +371,7 @@ spu_enable_break (struct objfile *objfile)
 
 /* Create inferior hook.  */
 static void
-spu_solib_create_inferior_hook (void)
+spu_solib_create_inferior_hook (int from_tty)
 {
   /* Remove all previously installed solib breakpoints.  Both the SVR4
      code and us will re-install all required breakpoints.  */
@@ -402,7 +402,7 @@ spu_solib_create_inferior_hook (void)
     }
 
   /* Call SVR4 hook -- this will re-insert the SVR4 solib breakpoints.  */
-  svr4_so_ops.solib_create_inferior_hook ();
+  svr4_so_ops.solib_create_inferior_hook (from_tty);
 
   /* If the inferior is statically linked against libspe, we need to install
      our own solib breakpoint right now.  Otherwise, it will be installed by

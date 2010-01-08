@@ -329,7 +329,7 @@ bfd_lookup_symbol (bfd *abfd, char *symname)
    with shared libraries mapped shareable.  */
 
 static void
-pa64_solib_create_inferior_hook (void)
+pa64_solib_create_inferior_hook (int from_tty)
 {
   struct minimal_symbol *msymbol;
   unsigned int dld_flags, status;

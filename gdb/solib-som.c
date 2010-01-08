@@ -183,7 +183,7 @@ struct {
    means running until the "_start" is called.  */
 
 static void
-som_solib_create_inferior_hook (void)
+som_solib_create_inferior_hook (int from_tty)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
   struct minimal_symbol *msymbol;

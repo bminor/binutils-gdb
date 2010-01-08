@@ -769,7 +769,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 		 breakpoint.  If a "cloned-VM" event was propagated
 		 better throughout the core, this wouldn't be
 		 required.  */
-	      solib_create_inferior_hook ();
+	      solib_create_inferior_hook (0);
 	    }
 
 	  /* Let the thread_db layer learn about this new process.  */
@@ -952,7 +952,7 @@ Attaching after process %d fork to child process %d.\n"),
 	     shared libraries, and install the solib event breakpoint.
 	     If a "cloned-VM" event was propagated better throughout
 	     the core, this wouldn't be required.  */
-	  solib_create_inferior_hook ();
+	  solib_create_inferior_hook (0);
 	}
 
       /* Let the thread_db layer learn about this new process.  */

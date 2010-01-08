@@ -295,7 +295,7 @@ darwin_special_symbol_handling (void)
 /* Shared library startup support.  See documentation in solib-svr4.c  */
 
 static void
-darwin_solib_create_inferior_hook (void)
+darwin_solib_create_inferior_hook (int from_tty)
 {
   struct minimal_symbol *msymbol;
   char **bkpt_namep;

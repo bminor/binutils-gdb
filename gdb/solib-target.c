@@ -306,7 +306,7 @@ solib_target_special_symbol_handling (void)
 }
 
 static void
-solib_target_solib_create_inferior_hook (void)
+solib_target_solib_create_inferior_hook (int from_tty)
 {
   /* Nothing needed.  */
 }

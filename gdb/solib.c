@@ -1015,7 +1015,7 @@ clear_solib (void)
 
    SYNOPSIS
 
-   void solib_create_inferior_hook ()
+   void solib_create_inferior_hook (int from_tty)
 
    DESCRIPTION
 
@@ -1025,10 +1025,10 @@ clear_solib (void)
    SOLIB_CREATE_INFERIOR_HOOK.  */
 
 void
-solib_create_inferior_hook (void)
+solib_create_inferior_hook (int from_tty)
 {
   struct target_so_ops *ops = solib_ops (target_gdbarch);
-  ops->solib_create_inferior_hook();
+  ops->solib_create_inferior_hook (from_tty);
 }
 
 /* GLOBAL FUNCTION
@@ -1104,7 +1104,6 @@ reload_shared_libraries (char *ignored, int from_tty,
 			 struct cmd_list_element *e)
 {
   no_shared_libraries (NULL, from_tty);
-  solib_add (NULL, from_tty, NULL, auto_solib_add);
   /* Creating inferior hooks here has two purposes. First, if we reload 
      shared libraries then the address of solib breakpoint we've computed
      previously might be no longer valid.  For example, if we forgot to set
@@ -1119,9 +1118,19 @@ reload_shared_libraries (char *ignored, int from_tty,
 #ifdef SOLIB_CREATE_INFERIOR_HOOK
       SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
 #else
-      solib_create_inferior_hook ();
+      solib_create_inferior_hook (from_tty);
 #endif
     }
+
+  /* Sometimes the platform-specific hook loads initial shared
+     libraries, and sometimes it doesn't.  If it doesn't FROM_TTY will be
+     incorrectly 0 but such solib targets should be fixed anyway.  If we
+     made all the inferior hook methods consistent, this call could be
+     removed.  Call it only after the solib target has been initialized by
+     solib_create_inferior_hook.  */
+
+  solib_add (NULL, 0, NULL, auto_solib_add);
+
   /* We have unloaded and then reloaded debug info for all shared libraries.
      However, frames may still reference them, for example a frame's 
      unwinder might still point of DWARF FDE structures that are now freed.

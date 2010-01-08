@@ -1265,7 +1265,7 @@ exec_entry_point (struct bfd *abfd, struct target_ops *targ)
  */
 
 static int
-enable_break (struct svr4_info *info)
+enable_break (struct svr4_info *info, int from_tty)
 {
   struct minimal_symbol *msymbol;
   char **bkpt_namep;
@@ -1285,7 +1285,7 @@ enable_break (struct svr4_info *info)
      mean r_brk has already been relocated.  Assume the dynamic linker
      is the object containing r_brk.  */
 
-  solib_add (NULL, 0, &current_target, auto_solib_add);
+  solib_add (NULL, from_tty, &current_target, auto_solib_add);
   sym_addr = 0;
   if (info->debug_base && solib_svr4_r_map (info) != 0)
     sym_addr = solib_svr4_r_brk (info);
@@ -1412,7 +1412,7 @@ enable_break (struct svr4_info *info)
 	  info->debug_loader_name = xstrdup (interp_name);
 	  info->debug_loader_offset_p = 1;
 	  info->debug_loader_offset = load_addr;
-	  solib_add (NULL, 0, &current_target, auto_solib_add);
+	  solib_add (NULL, from_tty, &current_target, auto_solib_add);
 	}
 
       /* Record the relocated start and end address of the dynamic linker
@@ -1651,7 +1651,7 @@ svr4_relocate_main_executable (void)
 
    SYNOPSIS
 
-   void svr4_solib_create_inferior_hook ()
+   void svr4_solib_create_inferior_hook (int from_tty)
 
    DESCRIPTION
 
@@ -1696,7 +1696,7 @@ svr4_relocate_main_executable (void)
  */
 
 static void
-svr4_solib_create_inferior_hook (void)
+svr4_solib_create_inferior_hook (int from_tty)
 {
   struct inferior *inf;
   struct thread_info *tp;
@@ -1710,7 +1710,7 @@ svr4_solib_create_inferior_hook (void)
   if (!svr4_have_link_map_offsets ())
     return;
 
-  if (!enable_break (info))
+  if (!enable_break (info, from_tty))
     return;
 
 #if defined(_SCO_DS)

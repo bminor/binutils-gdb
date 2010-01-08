@@ -654,7 +654,7 @@ static void
 procfs_post_attach (pid_t pid)
 {
   if (exec_bfd)
-    solib_create_inferior_hook ();
+    solib_create_inferior_hook (0);
 }
 
 static ptid_t
@@ -1215,7 +1215,7 @@ procfs_create_inferior (struct target_ops *ops, char *exec_file,
 
   if (exec_bfd != NULL
       || (symfile_objfile != NULL && symfile_objfile->obfd != NULL))
-    solib_create_inferior_hook ();
+    solib_create_inferior_hook (0);
 }
 
 static void

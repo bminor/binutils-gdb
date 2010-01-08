@@ -42,7 +42,7 @@ extern int solib_read_symbols (struct so_list *, int);
    addresses to which they are linked, and sufficient information to
    read in their symbols at a later time.  */
 
-extern void solib_create_inferior_hook (void);
+extern void solib_create_inferior_hook (int from_tty);
 
 /* If ADDR lies in a shared library, return its name.  */
 

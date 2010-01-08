@@ -397,22 +397,6 @@ post_create_inferior (struct target_ops *target, int from_tty)
   /* Now that we know the register layout, retrieve current PC.  */
   stop_pc = regcache_read_pc (get_current_regcache ());
 
-  /* If the solist is global across processes, there's no need to
-     refetch it here.  */
-  if (exec_bfd && !gdbarch_has_global_solist (target_gdbarch))
-    {
-      /* Sometimes the platform-specific hook loads initial shared
-	 libraries, and sometimes it doesn't.  Try to do so first, so
-	 that we can add them with the correct value for FROM_TTY.
-	 If we made all the inferior hook methods consistent,
-	 this call could be removed.  */
-#ifdef SOLIB_ADD
-      SOLIB_ADD (NULL, from_tty, target, auto_solib_add);
-#else
-      solib_add (NULL, from_tty, target, auto_solib_add);
-#endif
-    }
-
   if (exec_bfd)
     {
       /* Create the hooks to handle shared library load and unload
@@ -420,7 +404,25 @@ post_create_inferior (struct target_ops *target, int from_tty)
 #ifdef SOLIB_CREATE_INFERIOR_HOOK
       SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
 #else
-      solib_create_inferior_hook ();
+      solib_create_inferior_hook (from_tty);
+#endif
+    }
+
+  /* If the solist is global across processes, there's no need to
+     refetch it here.  */
+  if (exec_bfd && !gdbarch_has_global_solist (target_gdbarch))
+    {
+      /* Sometimes the platform-specific hook loads initial shared
+	 libraries, and sometimes it doesn't.  If it doesn't FROM_TTY will be
+	 incorrectly 0 but such solib targets should be fixed anyway.  If we
+	 made all the inferior hook methods consistent, this call could be
+	 removed.  Call it only after the solib target has been initialized by
+	 solib_create_inferior_hook.  */
+
+#ifdef SOLIB_ADD
+      SOLIB_ADD (NULL, 0, target, auto_solib_add);
+#else
+      solib_add (NULL, 0, target, auto_solib_add);
 #endif
     }
 

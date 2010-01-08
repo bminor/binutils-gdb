@@ -984,7 +984,7 @@ frv_relocate_main_executable (void)
  */
 
 static void
-frv_solib_create_inferior_hook (void)
+frv_solib_create_inferior_hook (int from_tty)
 {
   /* Relocate main executable.  */
   frv_relocate_main_executable ();

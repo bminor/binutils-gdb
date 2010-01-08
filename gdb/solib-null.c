@@ -32,7 +32,7 @@ null_special_symbol_handling (void)
 }
 
 static void
-null_solib_create_inferior_hook (void)
+null_solib_create_inferior_hook (int from_tty)
 {
 }
 
