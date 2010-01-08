@@ -1,5 +1,9 @@
 2010-01-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* doc/binutils.texi: Fix a typo.
+
+2010-01-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elfedit.c (update_elf_header): Don't change input_elf_class
 	nor input_elf_machine if they are -1.
 

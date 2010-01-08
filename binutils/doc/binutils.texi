@@ -4107,7 +4107,7 @@ objdump(1), and the Info entries for @file{binutils}.
 @smallexample
 @c man begin SYNOPSIS elfedit
 elfedit [@option{--input-mach=}@var{machine}]
-        @option{--output-machine=}@var{machine}
+        @option{--output-mach=}@var{machine}
         [@option{-v}|@option{--version}]
         [@option{-h}|@option{--help}]
         @var{elffile}@dots{}
