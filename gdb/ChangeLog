@@ -1,3 +1,9 @@
+2010-01-08  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Fix multiexec race.
+	* infrun.c (handle_inferior_event): Use get_thread_regcache
+	with events ptid, not get_current_regcache.
+
 2009-01-08  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB crash with empty executable name (MinGW).
