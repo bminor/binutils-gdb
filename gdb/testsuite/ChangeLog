@@ -1,3 +1,7 @@
+2010-01-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.cp/gdb2495.exp: Skip if gdb,nosignals.
+
 2010-01-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* lib/gdb.exp (gdb_start_cmd): Move comment outside of gdb_expect

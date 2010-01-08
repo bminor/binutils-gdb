@@ -35,6 +35,11 @@ if $tracelevel then {
 
 if { [skip_cplus_tests] } { continue }
 
+if [target_info exists gdb,nosignals] {
+    verbose "Skipping gdb2495.exp because of nosignals."
+    continue
+}
+
 # On SPU this test fails because the executable exceeds local storage size.
 if { [istarget "spu*-*-*"] } {
         return 0
