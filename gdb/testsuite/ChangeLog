@@ -1,3 +1,9 @@
+2010-01-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Workaround PR binutils/10802.
+	* lib/gdb.exp (gdb_gnu_strip_debug): Preserve the file attributes
+	(twice).
+
 2010-01-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.cp/gdb2495.exp: Skip if gdb,nosignals.

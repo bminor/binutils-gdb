@@ -2845,6 +2845,11 @@ proc gdb_gnu_strip_debug { dest args } {
       return 1
     }
 
+    # Workaround PR binutils/10802:
+    # Preserve the 'x' bit also for PIEs (Position Independent Executables).
+    set perm [file attributes ${dest} -permissions]
+    file attributes ${stripped_file} -permissions $perm
+
     # Get rid of everything but the debug info, and store result in debug_file
     # This will be in the .debug subdirectory, see above.
     set result [catch "exec $strip_to_file_program --only-keep-debug ${dest} -o ${debug_file}" output]
@@ -2881,7 +2886,12 @@ proc gdb_gnu_strip_debug { dest args } {
       return 1
     }
 
-   return 0
+    # Workaround PR binutils/10802:
+    # Preserve the 'x' bit also for PIEs (Position Independent Executables).
+    set perm [file attributes ${stripped_file} -permissions]
+    file attributes ${dest} -permissions $perm
+
+    return 0
 }
 
 # Test the output of GDB_COMMAND matches the pattern obtained
