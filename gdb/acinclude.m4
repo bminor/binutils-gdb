@@ -192,6 +192,7 @@ AC_DEFUN([AM_ICONV],
     am_cv_func_iconv="no, consider installing GNU libiconv"
     am_cv_lib_iconv=no
     am_cv_use_build_libiconv=no
+    am_cv_build_libiconv_path=
 
     # If libiconv is part of the build tree, then try using it over
     # any system iconv.
@@ -207,12 +208,12 @@ AC_DEFUN([AM_ICONV],
            iconv(cd,NULL,NULL,NULL,NULL);
            iconv_close(cd);],
           am_cv_use_build_libiconv=yes
+          am_cv_build_libiconv_path=$lib_dir/libiconv.a
           am_cv_lib_iconv=yes
           am_cv_func_iconv=yes)
         LIBS="$am_save_LIBS"
         CPPFLAGS="$am_save_CPPFLAGS"
         if test "$am_cv_use_build_libiconv" = "yes"; then
-          BUILD_LIBICONV_LIBDIR=$lib_dir
           break
         fi
       done
@@ -260,7 +261,7 @@ AC_DEFUN([AM_ICONV],
     LIBICONV_INCLUDE=
   fi
   if test "$am_cv_use_build_libiconv" = yes; then
-    LIBICONV="$BUILD_LIBICONV_LIBDIR/libiconv.a"
+    LIBICONV="$am_cv_build_libiconv_path"
     LIBICONV_LIBDIR=""
     LIBICONV_INCLUDE="$BUILD_LIBICONV_INCLUDE"
   fi

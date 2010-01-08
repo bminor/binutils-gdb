@@ -1,3 +1,10 @@
+2009-01-08  Joel Brobecker  <brobecker@adacore.com>
+
+	Cannot find in-tree libiconv.a after reconfigure.
+	* acinclude.m4 (AM_ICONV): If we find an in-tree libiconv.a
+	that we can use, then cache the path to this archive.
+	* configure: Regenerate.
+
 2010-01-07  Stan Shebs  <stan@codesourcery.com>
 
 	Make tracepoint operations go through target vector.
