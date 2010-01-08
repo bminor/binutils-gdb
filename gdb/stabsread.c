@@ -4111,7 +4111,17 @@ read_args (char **pp, int end, struct objfile *objfile, int *nargsp,
     }
   (*pp)++;			/* get past `end' (the ':' character) */
 
-  if (TYPE_CODE (types[n - 1]) != TYPE_CODE_VOID)
+  if (n == 0)
+    {
+      /* We should read at least the THIS parameter here.  Some broken stabs
+	 output contained `(0,41),(0,42)=@s8;-16;,(0,43),(0,1);' where should
+	 have been present ";-16,(0,43)" reference instead.  This way the
+	 excessive ";" marker prematurely stops the parameters parsing.  */
+
+      complaint (&symfile_complaints, _("Invalid (empty) method arguments"));
+      *varargsp = 0;
+    }
+  else if (TYPE_CODE (types[n - 1]) != TYPE_CODE_VOID)
     *varargsp = 1;
   else
     {

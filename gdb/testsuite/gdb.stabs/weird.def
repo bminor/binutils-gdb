@@ -880,3 +880,7 @@ var3:
 .stabs "sym92:\ !#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~",N_LSYM,0,0,0
 .stabs "type92:t92=\ !#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~",N_LSYM,0,0,0
 .stabs "attr92:G392=@\ !#$%&'()*+,-./0123456789:<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~;1",N_GSYM,0,0, 0
+
+# See read_args "Invalid (empty) method arguments" error; there is an
+# unexpected semi-colon after =@s8;-16 that used to cause a GDB crash.
+.stabs "args93:G93=#(0,93),(0,93)=@s8;-16;,(0,93),(0,93);",N_GSYM,0,0,0

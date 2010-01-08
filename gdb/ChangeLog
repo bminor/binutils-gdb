@@ -1,3 +1,7 @@
+2010-01-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* stabsread.c (read_args): Handle zero arguments.
+
 2009-01-08  Joel Brobecker  <brobecker@adacore.com>
 
 	Cannot find in-tree libiconv.a after reconfigure.
