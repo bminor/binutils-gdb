@@ -8492,10 +8492,14 @@ elf_link_check_versioned_symbol (struct bfd_link_info *info,
 
 	  _bfd_elf_swap_versym_in (input, ever, &iver);
 
-	  if ((iver.vs_vers & VERSYM_HIDDEN) == 0)
+	  if ((iver.vs_vers & VERSYM_HIDDEN) == 0
+	      && !(h->def_regular
+		   && h->forced_local))
 	    {
 	      /* If we have a non-hidden versioned sym, then it should
-		 have provided a definition for the undefined sym.  */
+		 have provided a definition for the undefined sym unless
+		 it is defined in a non-shared object and forced local.
+	       */
 	      abort ();
 	    }
 

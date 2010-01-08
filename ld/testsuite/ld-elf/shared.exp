@@ -148,6 +148,12 @@ set build_tests {
   {"Build libpr9679.so"
    "-shared" "-fPIC -O0"
    {pr9679-1.c pr9679-2.c} {{readelf {-s} pr9679.rd}} "libpr9679.so"}
+  {"Build libpr11138-1.so"
+   "-shared -Wl,--version-script=pr11138-1.map" "-fPIC"
+   {pr11138-1.c} {} "libpr11138-1.so"}
+  {"Build libpr11138-2.o"
+   "-r -nostdlib" ""
+   {pr11138-2.c} {} "libpr11138-2.o"}
 }
 
 set run_tests {
@@ -266,6 +272,12 @@ set run_tests {
     {"Run with comm1.o libfunc1.so"
      "tmpdir/comm1.o tmpdir/libfunc1.so" ""
      {dummy.c} "comm1" "pass.out"}
+    {"Run with pr11138-2.c libpr11138-1.so"
+     "--version-script=pr11138-2.map tmpdir/pr11138-2.o tmpdir/libpr11138-1.so" ""
+     {dummy.c} "pr11138a" "pr11138.out"}
+    {"Run with libpr11138-1.so pr11138-2.c"
+     "--version-script=pr11138-2.map tmpdir/libpr11138-1.so tmpdir/pr11138-2.o" ""
+     {dummy.c} "pr11138b" "pr11138.out"}
 }
 
 run_cc_link_tests $build_tests
