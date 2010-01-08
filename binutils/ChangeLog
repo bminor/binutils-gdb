@@ -1,3 +1,7 @@
+2010-01-08  Tristan Gingold  <gingold@adacore.com>
+
+	* ar.c: Remove bfd_special_undocumented_glue prototype.
+
 2010-01-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfedit.c (update_elf_header): Reformat.
@@ -32,7 +36,6 @@
 2010-01-06  Tristan Gingold  <gingold@adacore.com>
 
 	* nm.c (usage): Remove extra blanks.
-	Update copyright.
 
 2010-01-04  H.J. Lu  <hongjiu.lu@intel.com>
 
