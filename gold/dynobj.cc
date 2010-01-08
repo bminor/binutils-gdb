@@ -131,6 +131,7 @@ Sized_dynobj<size, big_endian>::find_dynsym_sections(
 	  break;
 	case elfcpp::SHT_SYMTAB:
 	  symtab_shndx = i;
+	  pi = NULL;
 	  break;
 	case elfcpp::SHT_GNU_versym:
 	  pi = pversym_shndx;

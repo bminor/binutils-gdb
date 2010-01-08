@@ -1,5 +1,10 @@
 2010-01-08  Ian Lance Taylor  <iant@google.com>
 
+	* dynobj.cc (big_endian>::find_dynsym_sections): Set pi to NULL in
+	the SHT_SYMTAB case.
+
+2010-01-08  Ian Lance Taylor  <iant@google.com>
+
 	* object.cc (Sized_relobj::do_layout): Don't get confused if
 	layout_eh_frame returns NULL.
 
