@@ -1,3 +1,9 @@
+2010-01-08  Ian Lance Taylor  <iant@google.com>
+
+	PR 11072
+	* layout.cc (Layout::include_section): Remove .gnu_debuglink
+	sections.
+
 2010-01-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* version.cc (print_version): Change to "Copyright 2010".

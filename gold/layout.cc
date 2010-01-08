@@ -352,6 +352,11 @@ Layout::include_section(Sized_relobj<size, big_endian>*, const char* name,
           if (is_prefix_of(".gnu.lto_", name))
             return false;
         }
+      // The GNU linker strips .gnu_debuglink sections, so we do too.
+      // This is a feature used to keep debugging information in
+      // separate files.
+      if (strcmp(name, ".gnu_debuglink") == 0)
+	return false;
       return true;
 
     default:
