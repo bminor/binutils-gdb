@@ -707,6 +707,20 @@ openp (const char *path, int opts, const char *string,
 
   /* The open syscall MODE parameter is not specified.  */
   gdb_assert ((mode & O_CREAT) == 0);
+  gdb_assert (string != NULL);
+
+  /* A file with an empty name cannot possibly exist.  Report a failure
+     without further checking.
+
+     This is an optimization which also defends us against buggy
+     implementations of the "stat" function.  For instance, we have
+     noticed that a MinGW debugger built on Windows XP 32bits crashes
+     when the debugger is started with an empty argument.  */
+  if (string[0] == '\0')
+    {
+      errno = ENOENT;
+      return -1;
+    }
 
   if (!path)
     path = ".";

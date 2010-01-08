@@ -1,5 +1,12 @@
 2009-01-08  Joel Brobecker  <brobecker@adacore.com>
 
+	GDB crash with empty executable name (MinGW).
+	* source.c (openp): Add assert that parameter string is not NULL.
+	if parameter string is an empty string, then return with a failure
+	immediately.
+
+2009-01-08  Joel Brobecker  <brobecker@adacore.com>
+
 	Get rid of support for VAX Floats.
 	* ada-lang.h (ada_is_vax_floating_type, ada_vax_float_type_suffix)
 	(ada_vax_float_print_function): Delete.
