@@ -1,5 +1,5 @@
 /* BFD back-end for National Semiconductor's CR16 ELF
-   Copyright 2007, 2008, 2009 Free Software Foundation, Inc.
+   Copyright 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
    Written by M R Swami Reddy.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -2287,26 +2287,12 @@ elf32_cr16_relax_section (bfd *abfd, asection *sec,
 
 static asection *
 elf32_cr16_gc_mark_hook (asection *sec,
-                         struct bfd_link_info *info ATTRIBUTE_UNUSED,
-                         Elf_Internal_Rela *rel ATTRIBUTE_UNUSED,
+                         struct bfd_link_info *info,
+                         Elf_Internal_Rela *rel,
                          struct elf_link_hash_entry *h,
                          Elf_Internal_Sym *sym)
 {
-  if (h == NULL)
-    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
-
-  switch (h->root.type)
-    {
-      case bfd_link_hash_defined:
-      case bfd_link_hash_defweak:
-        return h->root.u.def.section;
-
-      case bfd_link_hash_common:
-        return h->root.u.c.p->section;
-
-      default:
-        return NULL;
-    }
+  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
 /* Update the got entry reference counts for the section being removed.  */

@@ -1,6 +1,6 @@
 /* PowerPC64-specific support for 64-bit ELF.
    Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
-   2009 Free Software Foundation, Inc.
+   2009, 2010 Free Software Foundation, Inc.
    Written by Linus Nordberg, Swox AB <info@swox.com>,
    based on elf32-ppc.c by Ian Lance Taylor.
    Largely rewritten by Alan Modra.
@@ -5624,7 +5624,7 @@ ppc64_elf_gc_mark_dynamic_ref (struct elf_link_hash_entry *h, void *inf)
 
 static asection *
 ppc64_elf_gc_mark_hook (asection *sec,
-			struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			struct bfd_link_info *info,
 			Elf_Internal_Rela *rel,
 			struct elf_link_hash_entry *h,
 			Elf_Internal_Sym *sym)
@@ -5683,7 +5683,7 @@ ppc64_elf_gc_mark_hook (asection *sec,
 	      break;
 
 	    default:
-	      break;
+	      return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 	    }
 	}
     }

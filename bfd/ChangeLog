@@ -1,3 +1,10 @@
+2010-01-08  Alan Modra  <amodra@gmail.com>
+
+	PR ld/11133
+	* elf32-cr16.c (elf32_cr16_gc_mark_hook): Call _bfd_elf_gc_mark_hook.
+	* elf32-microblaze.c (microblaze_elf_gc_mark_hook): Likewise.
+	* elf64-ppc.c (ppc64_elf_gc_mark_hook): Likewise.
+
 2010-01-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/11138
