@@ -1,3 +1,7 @@
+2010-01-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* version.cc (print_version): Change to "Copyright 2010".
+
 2010-01-08  Ian Lance Taylor  <iant@google.com>
 
 	PR 10287
