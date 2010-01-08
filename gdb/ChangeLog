@@ -1,5 +1,17 @@
 2010-01-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Move some symfile code into subroutines.
+	* symfile.h (relative_addr_info_to_section_offsets)
+	(addr_info_make_relative): New prototypes.
+	* symfile.c (default_symfile_offsets): Move a part to ...
+	(relative_addr_info_to_section_offsets): ... this new function.
+	(default_symfile_offsets): Call it.
+	(syms_from_objfile <!mainline && addrs && addrs->other[0].name>): Move
+	this part to ...
+	(addr_info_make_relative): ... this new function.
+
+2010-01-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Add from_tty to solib_create_inferior_hook.
 	* infcmd.c (post_create_inferior): Move solib_add after
 	solib_create_inferior_hook.  Pass from_tty to

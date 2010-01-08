@@ -174,6 +174,13 @@ struct sym_fns
 
 };
 
+extern void relative_addr_info_to_section_offsets
+  (struct section_offsets *section_offsets, int num_sections,
+   struct section_addr_info *addrs);
+
+extern void addr_info_make_relative (struct section_addr_info *addrs,
+				     bfd *abfd);
+
 /* The default version of sym_fns.sym_offsets for readers that don't
    do anything special.  */
 

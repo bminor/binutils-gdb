@@ -555,6 +555,95 @@ place_section (bfd *abfd, asection *sect, void *obj)
   arg->lowest = start_addr + bfd_get_section_size (sect);
 }
 
+/* Store struct section_addr_info as prepared (made relative and with SECTINDEX
+   filled-in) by addr_info_make_relative into SECTION_OFFSETS of NUM_SECTIONS
+   entries.  */
+
+void
+relative_addr_info_to_section_offsets (struct section_offsets *section_offsets,
+				       int num_sections,
+				       struct section_addr_info *addrs)
+{
+  int i;
+
+  memset (section_offsets, 0, SIZEOF_N_SECTION_OFFSETS (num_sections));
+
+  /* Now calculate offsets for section that were specified by the caller. */
+  for (i = 0; i < addrs->num_sections && addrs->other[i].name; i++)
+    {
+      struct other_sections *osp;
+
+      osp = &addrs->other[i];
+      if (osp->addr == 0)
+  	continue;
+
+      /* Record all sections in offsets */
+      /* The section_offsets in the objfile are here filled in using
+         the BFD index. */
+      section_offsets->offsets[osp->sectindex] = osp->addr;
+    }
+}
+
+/* Relativize absolute addresses in ADDRS into offsets based on ABFD.  Fill-in
+   also SECTINDEXes there.  */
+
+void
+addr_info_make_relative (struct section_addr_info *addrs, bfd *abfd)
+{
+  asection *lower_sect;
+  asection *sect;
+  CORE_ADDR lower_offset;
+  int i;
+
+  /* Find lowest loadable section to be used as starting point for
+     continguous sections. FIXME!! won't work without call to find
+     .text first, but this assumes text is lowest section. */
+  lower_sect = bfd_get_section_by_name (abfd, ".text");
+  if (lower_sect == NULL)
+    bfd_map_over_sections (abfd, find_lowest_section, &lower_sect);
+  if (lower_sect == NULL)
+    {
+      warning (_("no loadable sections found in added symbol-file %s"),
+	       bfd_get_filename (abfd));
+      lower_offset = 0;
+    }
+  else
+    lower_offset = bfd_section_vma (bfd_get_filename (abfd), lower_sect);
+
+  /* Calculate offsets for the loadable sections.
+     FIXME! Sections must be in order of increasing loadable section
+     so that contiguous sections can use the lower-offset!!!
+
+     Adjust offsets if the segments are not contiguous.
+     If the section is contiguous, its offset should be set to
+     the offset of the highest loadable section lower than it
+     (the loadable section directly below it in memory).
+     this_offset = lower_offset = lower_addr - lower_orig_addr */
+
+  for (i = 0; i < addrs->num_sections && addrs->other[i].name; i++)
+    {
+      if (addrs->other[i].addr != 0)
+	{
+	  sect = bfd_get_section_by_name (abfd, addrs->other[i].name);
+	  if (sect)
+	    {
+	      addrs->other[i].addr -= bfd_section_vma (abfd, sect);
+	      lower_offset = addrs->other[i].addr;
+	      /* This is the index used by BFD. */
+	      addrs->other[i].sectindex = sect->index;
+	    }
+	  else
+	    {
+	      warning (_("section %s not found in %s"), addrs->other[i].name,
+		       bfd_get_filename (abfd));
+	      addrs->other[i].addr = 0;
+	    }
+	}
+      else
+	addrs->other[i].addr = lower_offset;
+    }
+}
+
 /* Parse the user's idea of an offset for dynamic linking, into our idea
    of how to represent it for fast symbol reading.  This is the default
    version of the sym_fns.sym_offsets function for symbol readers that
@@ -565,30 +654,12 @@ void
 default_symfile_offsets (struct objfile *objfile,
 			 struct section_addr_info *addrs)
 {
-  int i;
-
   objfile->num_sections = bfd_count_sections (objfile->obfd);
   objfile->section_offsets = (struct section_offsets *)
     obstack_alloc (&objfile->objfile_obstack,
 		   SIZEOF_N_SECTION_OFFSETS (objfile->num_sections));
-  memset (objfile->section_offsets, 0,
-	  SIZEOF_N_SECTION_OFFSETS (objfile->num_sections));
-
-  /* Now calculate offsets for section that were specified by the
-     caller. */
-  for (i = 0; i < addrs->num_sections && addrs->other[i].name; i++)
-    {
-      struct other_sections *osp ;
-
-      osp = &addrs->other[i] ;
-      if (osp->addr == 0)
-  	continue;
-
-      /* Record all sections in offsets */
-      /* The section_offsets in the objfile are here filled in using
-         the BFD index. */
-      (objfile->section_offsets)->offsets[osp->sectindex] = osp->addr;
-    }
+  relative_addr_info_to_section_offsets (objfile->section_offsets,
+					 objfile->num_sections, addrs);
 
   /* For relocatable files, all loadable sections will start at zero.
      The zero is meaningless, so try to pick arbitrary addresses such
@@ -823,64 +894,7 @@ syms_from_objfile (struct objfile *objfile,
      We no longer warn if the lowest section is not a text segment (as
      happens for the PA64 port.  */
   if (addrs && addrs->other[0].name)
-    {
-      asection *lower_sect;
-      asection *sect;
-      CORE_ADDR lower_offset;
-      int i;
-
-      /* Find lowest loadable section to be used as starting point for
-         continguous sections. FIXME!! won't work without call to find
-	 .text first, but this assumes text is lowest section. */
-      lower_sect = bfd_get_section_by_name (objfile->obfd, ".text");
-      if (lower_sect == NULL)
-	bfd_map_over_sections (objfile->obfd, find_lowest_section,
-			       &lower_sect);
-      if (lower_sect == NULL)
-	{
-	  warning (_("no loadable sections found in added symbol-file %s"),
-		   objfile->name);
-	  lower_offset = 0;
-	}
-      else
-	lower_offset = bfd_section_vma (objfile->obfd, lower_sect);
-
-      /* Calculate offsets for the loadable sections.
- 	 FIXME! Sections must be in order of increasing loadable section
- 	 so that contiguous sections can use the lower-offset!!!
-
-         Adjust offsets if the segments are not contiguous.
-         If the section is contiguous, its offset should be set to
- 	 the offset of the highest loadable section lower than it
- 	 (the loadable section directly below it in memory).
- 	 this_offset = lower_offset = lower_addr - lower_orig_addr */
-
-        for (i = 0; i < addrs->num_sections && addrs->other[i].name; i++)
-          {
-            if (addrs->other[i].addr != 0)
-              {
-                sect = bfd_get_section_by_name (objfile->obfd,
-                                                addrs->other[i].name);
-                if (sect)
-                  {
-                    addrs->other[i].addr
-                      -= bfd_section_vma (objfile->obfd, sect);
-                    lower_offset = addrs->other[i].addr;
-                    /* This is the index used by BFD. */
-                    addrs->other[i].sectindex = sect->index ;
-                  }
-                else
-                  {
-                    warning (_("section %s not found in %s"),
-                             addrs->other[i].name,
-                             objfile->name);
-                    addrs->other[i].addr = 0;
-                  }
-              }
-            else
-              addrs->other[i].addr = lower_offset;
-          }
-    }
+    addr_info_make_relative (addrs, objfile->obfd);
 
   /* Initialize symbol reading routines for this objfile, allow complaints to
      appear for this new file, and record how verbose to be, then do the
