@@ -1,3 +1,8 @@
+2010-01-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfedit.c (update_elf_header): Don't change input_elf_class
+	nor input_elf_machine if they are -1.
+
 2010-01-08  Tristan Gingold  <gingold@adacore.com>
 
 	* ar.c: Remove bfd_special_undocumented_glue prototype.

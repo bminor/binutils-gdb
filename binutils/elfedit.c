@@ -228,7 +228,7 @@ byte_put_big_endian (unsigned char * field, bfd_vma value, int size)
 static int
 update_elf_header (const char *file_name, FILE *file)
 {
-  int status;
+  int class, machine, status;
 
   if (elf_header.e_ident[EI_MAG0] != ELFMAG0
       || elf_header.e_ident[EI_MAG1] != ELFMAG1
@@ -250,35 +250,34 @@ update_elf_header (const char *file_name, FILE *file)
       return 0;
     }
 
-  /* Skip if class doesn't match. */
-  if (input_elf_class == -1)
-    input_elf_class = elf_header.e_ident[EI_CLASS];
-  else if (elf_header.e_ident[EI_CLASS] != input_elf_class)
-    {
-      non_fatal
-	(_("%s: Unmatched EI_CLASS: %d is not %d\n"),
-	 file_name, elf_header.e_ident[EI_CLASS],
-	 input_elf_class);
-      return 0;
-    }
-
   /* Return if e_machine is the same as output_elf_machine.  */
   if (output_elf_machine == elf_header.e_machine)
     return 1;
 
+  class = elf_header.e_ident[EI_CLASS];
+
+  /* Skip if class doesn't match. */
+  if (input_elf_class != -1 && class != input_elf_class)
+    {
+      non_fatal
+	(_("%s: Unmatched EI_CLASS: %d is not %d\n"),
+	 file_name, class, input_elf_class);
+      return 0;
+    }
+
+  machine = elf_header.e_machine;
+
   /* Skip if e_machine doesn't match. */
-  if (input_elf_machine == -1)
-    input_elf_machine = elf_header.e_machine;
-  else if (elf_header.e_machine != input_elf_machine)
+  if (input_elf_machine != -1 && machine != input_elf_machine)
     {
       non_fatal
 	(_("%s: Unmatched e_machine: %d is not %d\n"),
-	 file_name, elf_header.e_machine, input_elf_machine);
+	 file_name, machine, input_elf_machine);
       return 0;
     }
 
   /* Update e_machine.  */
-  switch (input_elf_class)
+  switch (class)
     {
     default:
       /* We should never get here.  */
