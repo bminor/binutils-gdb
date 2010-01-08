@@ -368,7 +368,7 @@ class Target_i386 : public Target_freebsd<32, false>
 		      Sized_relobj<32, false>* object);
 
   // Get the PLT section.
-  const Output_data_plt_i386*
+  Output_data_plt_i386*
   plt_section() const
   {
     gold_assert(this->plt_ != NULL);
@@ -378,6 +378,10 @@ class Target_i386 : public Target_freebsd<32, false>
   // Get the dynamic reloc section, creating it if necessary.
   Reloc_section*
   rel_dyn_section(Layout*);
+
+  // Get the section to use for TLS_DESC relocations.
+  Reloc_section*
+  rel_tls_desc_section(Layout*) const;
 
   // Add a potential copy relocation.
   void
@@ -527,6 +531,10 @@ class Output_data_plt_i386 : public Output_section_data
   rel_plt() const
   { return this->rel_; }
 
+  // Return where the TLS_DESC relocations should go.
+  Reloc_section*
+  rel_tls_desc(Layout*);
+
  protected:
   void
   do_adjust_output_section(Output_section* os);
@@ -563,6 +571,9 @@ class Output_data_plt_i386 : public Output_section_data
 
   // The reloc section.
   Reloc_section* rel_;
+  // The TLS_DESC relocations, if necessary.  These must follow the
+  // regular PLT relocs.
+  Reloc_section* tls_desc_rel_;
   // The .got.plt section.
   Output_data_space* got_plt_;
   // The number of PLT entries.
@@ -575,7 +586,7 @@ class Output_data_plt_i386 : public Output_section_data
 
 Output_data_plt_i386::Output_data_plt_i386(Layout* layout,
 					   Output_data_space* got_plt)
-  : Output_section_data(4), got_plt_(got_plt), count_(0)
+  : Output_section_data(4), tls_desc_rel_(NULL), got_plt_(got_plt), count_(0)
 {
   this->rel_ = new Reloc_section(false);
   layout->add_output_section_data(".rel.plt", elfcpp::SHT_REL,
@@ -619,6 +630,24 @@ Output_data_plt_i386::add_entry(Symbol* gsym)
   // Note that we don't need to save the symbol.  The contents of the
   // PLT are independent of which symbols are used.  The symbols only
   // appear in the relocations.
+}
+
+// Return where the TLS_DESC relocations should go, creating it if
+// necessary. These follow the JUMP_SLOT relocations.
+
+Output_data_plt_i386::Reloc_section*
+Output_data_plt_i386::rel_tls_desc(Layout* layout)
+{
+  if (this->tls_desc_rel_ == NULL)
+    {
+      this->tls_desc_rel_ = new Reloc_section(false);
+      layout->add_output_section_data(".rel.plt", elfcpp::SHT_REL,
+				      elfcpp::SHF_ALLOC, this->tls_desc_rel_,
+				      true, false, false, false);
+      gold_assert(this->tls_desc_rel_->output_section() ==
+		  this->rel_->output_section());
+    }
+  return this->tls_desc_rel_;
 }
 
 // The first entry in the PLT for an executable.
@@ -769,6 +798,14 @@ Target_i386::make_plt_entry(Symbol_table* symtab, Layout* layout, Symbol* gsym)
     }
 
   this->plt_->add_entry(gsym);
+}
+
+// Get the section to use for TLS_DESC relocations.
+
+Target_i386::Reloc_section*
+Target_i386::rel_tls_desc_section(Layout* layout) const
+{
+  return this->plt_section()->rel_tls_desc(layout);
 }
 
 // Define the _TLS_MODULE_BASE_ symbol in the TLS segment.
@@ -1055,17 +1092,20 @@ Target_i386::Scan::local(Symbol_table* symtab,
                 Output_data_got<32, false>* got
                     = target->got_section(symtab, layout);
                 unsigned int r_sym = elfcpp::elf_r_sym<32>(reloc.get_r_info());
-		unsigned int shndx = lsym.get_st_shndx();
-		bool is_ordinary;
-		shndx = object->adjust_sym_shndx(r_sym, shndx, &is_ordinary);
-		if (!is_ordinary)
-		  object->error(_("local symbol %u has bad shndx %u"),
-			      r_sym, shndx);
-                else
-		  got->add_local_pair_with_rel(object, r_sym, shndx,
-					       GOT_TYPE_TLS_DESC,
-					       target->rel_dyn_section(layout),
-					       elfcpp::R_386_TLS_DESC, 0);
+		if (!object->local_has_got_offset(r_sym, GOT_TYPE_TLS_DESC))
+		  {
+		    unsigned int got_offset = got->add_constant(0);
+		    // The local symbol value is stored in the second
+		    // GOT entry.
+		    got->add_local(object, r_sym, GOT_TYPE_TLS_DESC);
+		    // That set the GOT offset of the local symbol to
+		    // point to the second entry, but we want it to
+		    // point to the first.
+		    object->set_local_got_offset(r_sym, GOT_TYPE_TLS_DESC,
+						 got_offset);
+		    Reloc_section* rt = target->rel_tls_desc_section(layout);
+		    rt->add_absolute(elfcpp::R_386_TLS_DESC, got, got_offset);
+		  }
               }
             else if (optimized_type != tls::TLSOPT_TO_LE)
               unsupported_reloc_local(object, r_type);
@@ -1386,8 +1426,8 @@ Target_i386::Scan::global(Symbol_table* symtab,
                 // Create a double GOT entry with an R_386_TLS_DESC reloc.
                 Output_data_got<32, false>* got
                     = target->got_section(symtab, layout);
-                got->add_global_pair_with_rel(gsym, GOT_TYPE_TLS_DESC,
-                                             target->rel_dyn_section(layout),
+		Reloc_section* rt = target->rel_tls_desc_section(layout);
+                got->add_global_pair_with_rel(gsym, GOT_TYPE_TLS_DESC, rt,
                                              elfcpp::R_386_TLS_DESC, 0);
               }
             else if (optimized_type == tls::TLSOPT_TO_IE)

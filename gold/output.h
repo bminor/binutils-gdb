@@ -1057,7 +1057,30 @@ class Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
                Sized_relobj<size, big_endian>* relobj,
 	       unsigned int shndx, Address address);
 
-  // Return TRUE if this is a RELATIVE relocation.
+  // An absolute relocation with no symbol.
+
+  Output_reloc(unsigned int type, Output_data* od, Address address);
+
+  Output_reloc(unsigned int type, Sized_relobj<size, big_endian>* relobj,
+	       unsigned int shndx, Address address);
+
+  // A target specific relocation.  The target will be called to get
+  // the symbol index, passing ARG.  The type and offset will be set
+  // as for other relocation types.
+
+  Output_reloc(unsigned int type, void* arg, Output_data* od,
+	       Address address);
+
+  Output_reloc(unsigned int type, void* arg,
+	       Sized_relobj<size, big_endian>* relobj,
+	       unsigned int shndx, Address address);
+
+  // Return the reloc type.
+  unsigned int
+  type() const
+  { return this->type_; }
+
+  // Return whether this is a RELATIVE relocation.
   bool
   is_relative() const
   { return this->is_relative_; }
@@ -1069,7 +1092,22 @@ class Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
     return (this->local_sym_index_ != GSYM_CODE
             && this->local_sym_index_ != SECTION_CODE
             && this->local_sym_index_ != INVALID_CODE
+	    && this->local_sym_index_ != TARGET_CODE
             && this->is_section_symbol_);
+  }
+
+  // Return whether this is a target specific relocation.
+  bool
+  is_target_specific() const
+  { return this->local_sym_index_ == TARGET_CODE; }
+
+  // Return the argument to pass to the target for a target specific
+  // relocation.
+  void*
+  target_arg() const
+  {
+    gold_assert(this->local_sym_index_ == TARGET_CODE);
+    return this->u1_.arg;
   }
 
   // For a local section symbol, return the offset of the input
@@ -1124,8 +1162,10 @@ class Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
     GSYM_CODE = -1U,
     // Output section.
     SECTION_CODE = -2U,
+    // Target specific.
+    TARGET_CODE = -3U,
     // Invalid uninitialized entry.
-    INVALID_CODE = -3U
+    INVALID_CODE = -4U
   };
 
   union
@@ -1143,6 +1183,9 @@ class Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
     // For a relocation against an output section
     // (this->local_sym_index_ == SECTION_CODE), the output section.
     Output_section* os;
+    // For a target specific relocation, an argument to pass to the
+    // target.
+    void* arg;
   } u1_;
   union
   {
@@ -1157,11 +1200,12 @@ class Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
   // The address offset within the input section or the Output_data.
   Address address_;
   // This is GSYM_CODE for a global symbol, or SECTION_CODE for a
-  // relocation against an output section, or INVALID_CODE for an
-  // uninitialized value.  Otherwise, for a local symbol
-  // (this->is_section_symbol_ is false), the local symbol index.  For
-  // a local section symbol (this->is_section_symbol_ is true), the
-  // section index in the input file.
+  // relocation against an output section, or TARGET_CODE for a target
+  // specific relocation, or INVALID_CODE for an uninitialized value.
+  // Otherwise, for a local symbol (this->is_section_symbol_ is
+  // false), the local symbol index.  For a local section symbol
+  // (this->is_section_symbol_ is true), the section index in the
+  // input file.
   unsigned int local_sym_index_;
   // The reloc type--a processor specific code.
   unsigned int type_ : 30;
@@ -1237,7 +1281,34 @@ class Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
     : rel_(os, type, relobj, shndx, address), addend_(addend)
   { }
 
-  // Return TRUE if this is a RELATIVE relocation.
+  // An absolute relocation with no symbol.
+
+  Output_reloc(unsigned int type, Output_data* od, Address address,
+	       Addend addend)
+    : rel_(type, od, address), addend_(addend)
+  { }
+
+  Output_reloc(unsigned int type, Sized_relobj<size, big_endian>* relobj,
+	       unsigned int shndx, Address address, Addend addend)
+    : rel_(type, relobj, shndx, address), addend_(addend)
+  { }
+
+  // A target specific relocation.  The target will be called to get
+  // the symbol index and the addend, passing ARG.  The type and
+  // offset will be set as for other relocation types.
+
+  Output_reloc(unsigned int type, void* arg, Output_data* od,
+	       Address address, Addend addend)
+    : rel_(type, arg, od, address), addend_(addend)
+  { }
+
+  Output_reloc(unsigned int type, void* arg,
+	       Sized_relobj<size, big_endian>* relobj,
+	       unsigned int shndx, Address address, Addend addend)
+    : rel_(type, arg, relobj, shndx, address), addend_(addend)
+  { }
+
+  // Return whether this is a RELATIVE relocation.
   bool
   is_relative() const
   { return this->rel_.is_relative(); }
@@ -1519,6 +1590,32 @@ class Output_data_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
 		     Sized_relobj<size, big_endian>* relobj,
                      unsigned int shndx, Address address)
   { this->add(od, Output_reloc_type(os, type, relobj, shndx, address)); }
+
+  // Add an absolute relocation.
+
+  void
+  add_absolute(unsigned int type, Output_data* od, Address address)
+  { this->add(od, Output_reloc_type(type, od, address)); }
+
+  void
+  add_absolute(unsigned int type, Output_data* od,
+	       Sized_relobj<size, big_endian>* relobj,
+	       unsigned int shndx, Address address)
+  { this->add(od, Output_reloc_type(type, relobj, shndx, address)); }
+
+  // Add a target specific relocation.  A target which calls this must
+  // define the reloc_symbol_index and reloc_addend virtual functions.
+
+  void
+  add_target_specific(unsigned int type, void* arg, Output_data* od,
+		      Address address)
+  { this->add(od, Output_reloc_type(type, arg, od, address)); }
+
+  void
+  add_target_specific(unsigned int type, void* arg, Output_data* od,
+		      Sized_relobj<size, big_endian>* relobj,
+		      unsigned int shndx, Address address)
+  { this->add(od, Output_reloc_type(type, arg, relobj, shndx, address)); }
 };
 
 // The SHT_RELA version of Output_data_reloc.
@@ -1651,6 +1748,36 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
 		     unsigned int shndx, Address address, Addend addend)
   { this->add(os, Output_reloc_type(os, type, relobj, shndx, address,
                                     addend)); }
+
+  // Add an absolute relocation.
+
+  void
+  add_absolute(unsigned int type, Output_data* od, Address address,
+	       Addend addend)
+  { this->add(od, Output_reloc_type(type, od, address, addend)); }
+
+  void
+  add_absolute(unsigned int type, Output_data* od,
+	       Sized_relobj<size, big_endian>* relobj,
+	       unsigned int shndx, Address address, Addend addend)
+  { this->add(od, Output_reloc_type(type, relobj, shndx, address, addend)); }
+
+  // Add a target specific relocation.  A target which calls this must
+  // define the reloc_symbol_index and reloc_addend virtual functions.
+
+  void
+  add_target_specific(unsigned int type, void* arg, Output_data* od,
+		      Address address, Addend addend)
+  { this->add(od, Output_reloc_type(type, arg, od, address, addend)); }
+
+  void
+  add_target_specific(unsigned int type, void* arg, Output_data* od,
+		      Sized_relobj<size, big_endian>* relobj,
+		      unsigned int shndx, Address address, Addend addend)
+  {
+    this->add(od, Output_reloc_type(type, arg, relobj, shndx, address,
+				    addend));
+  }
 };
 
 // Output_relocatable_relocs represents a relocation section in a

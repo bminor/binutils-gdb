@@ -756,6 +756,72 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     os->set_needs_symtab_index();
 }
 
+// An absolute relocation.
+
+template<bool dynamic, int size, bool big_endian>
+Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
+    unsigned int type,
+    Output_data* od,
+    Address address)
+  : address_(address), local_sym_index_(0), type_(type),
+    is_relative_(false), is_section_symbol_(false), shndx_(INVALID_CODE)
+{
+  // this->type_ is a bitfield; make sure TYPE fits.
+  gold_assert(this->type_ == type);
+  this->u1_.relobj = NULL;
+  this->u2_.od = od;
+}
+
+template<bool dynamic, int size, bool big_endian>
+Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
+    unsigned int type,
+    Sized_relobj<size, big_endian>* relobj,
+    unsigned int shndx,
+    Address address)
+  : address_(address), local_sym_index_(0), type_(type),
+    is_relative_(false), is_section_symbol_(false), shndx_(shndx)
+{
+  gold_assert(shndx != INVALID_CODE);
+  // this->type_ is a bitfield; make sure TYPE fits.
+  gold_assert(this->type_ == type);
+  this->u1_.relobj = NULL;
+  this->u2_.relobj = relobj;
+}
+
+// A target specific relocation.
+
+template<bool dynamic, int size, bool big_endian>
+Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
+    unsigned int type,
+    void* arg,
+    Output_data* od,
+    Address address)
+  : address_(address), local_sym_index_(TARGET_CODE), type_(type),
+    is_relative_(false), is_section_symbol_(false), shndx_(INVALID_CODE)
+{
+  // this->type_ is a bitfield; make sure TYPE fits.
+  gold_assert(this->type_ == type);
+  this->u1_.arg = arg;
+  this->u2_.od = od;
+}
+
+template<bool dynamic, int size, bool big_endian>
+Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
+    unsigned int type,
+    void* arg,
+    Sized_relobj<size, big_endian>* relobj,
+    unsigned int shndx,
+    Address address)
+  : address_(address), local_sym_index_(TARGET_CODE), type_(type),
+    is_relative_(false), is_section_symbol_(false), shndx_(shndx)
+{
+  gold_assert(shndx != INVALID_CODE);
+  // this->type_ is a bitfield; make sure TYPE fits.
+  gold_assert(this->type_ == type);
+  this->u1_.arg = arg;
+  this->u2_.relobj = relobj;
+}
+
 // Record that we need a dynamic symbol index for this relocation.
 
 template<bool dynamic, int size, bool big_endian>
@@ -776,6 +842,10 @@ set_needs_dynsym_index()
 
     case SECTION_CODE:
       this->u1_.os->set_needs_dynsym_index();
+      break;
+
+    case TARGET_CODE:
+      // The target must take care of this if necessary.
       break;
 
     case 0:
@@ -822,6 +892,11 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::get_symbol_index()
 	index = this->u1_.os->symtab_index();
       break;
 
+    case TARGET_CODE:
+      index = parameters->target().reloc_symbol_index(this->u1_.arg,
+						      this->type_);
+      break;
+
     case 0:
       // Relocations without symbols use a symbol index of 0.
       index = 0;
@@ -863,7 +938,9 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::
 {
   gold_assert(this->local_sym_index_ != GSYM_CODE
               && this->local_sym_index_ != SECTION_CODE
+	      && this->local_sym_index_ != TARGET_CODE
               && this->local_sym_index_ != INVALID_CODE
+	      && this->local_sym_index_ != 0
               && this->is_section_symbol_);
   const unsigned int lsi = this->local_sym_index_;
   Output_section* os = this->u1_.relobj->output_section(lsi);
@@ -942,7 +1019,9 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::symbol_value(
       return sym->value() + addend;
     }
   gold_assert(this->local_sym_index_ != SECTION_CODE
+	      && this->local_sym_index_ != TARGET_CODE
               && this->local_sym_index_ != INVALID_CODE
+	      && this->local_sym_index_ != 0
               && !this->is_section_symbol_);
   const unsigned int lsi = this->local_sym_index_;
   const Symbol_value<size>* symval = this->u1_.relobj->local_symbol(lsi);
@@ -1010,7 +1089,10 @@ Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>::write(
   elfcpp::Rela_write<size, big_endian> orel(pov);
   this->rel_.write_rel(&orel);
   Addend addend = this->addend_;
-  if (this->rel_.is_relative())
+  if (this->rel_.is_target_specific())
+    addend = parameters->target().reloc_addend(this->rel_.target_arg(),
+					       this->rel_.type(), addend);
+  else if (this->rel_.is_relative())
     addend = this->rel_.symbol_value(addend);
   else if (this->rel_.is_local_section_symbol())
     addend = this->rel_.local_section_offset(addend);

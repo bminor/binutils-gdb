@@ -1,3 +1,60 @@
+2010-01-08  Ian Lance Taylor  <iant@google.com>
+
+	PR 10287
+	PR 11063
+	* i386.cc (class Target_i386): Change return type of plt_section
+	to be non-const.
+	(class Output_data_plt_i386): Add tls_desc_rel_ field.
+	(Output_data_plt_i386::Output_data_plt_i386): Initialize
+	tls_desc_rel_ field.
+	(Output_data_plt_i386::rel_tls_desc): New function.
+	(Target_i386::rel_tls_desc_section): New function.
+	(Target_i386::Scan::local): Rewrite R_386_TLS_GOTDESC handling.
+	(Target_i386::Scan::global): For R_386_TLS_GOTDESC put
+	R_386_TLS_DESC reloc in rel_tls_desc_section.
+	* x86_64.cc (class Target_x86_64): Add tlsdesc_reloc_info_ field.
+	Define struct Tlsdesc_info.
+	(Target_x86_64::Target_x86_64): Initialize tlsdesc_reloc_info_.
+	(Target_x86_64::do_reloc_symbol_index): New function.
+	(Target_x86_64::add_tlsdesc_info): New function.
+	(class Output_data_plt_x86_64): Add tlsdesc_rel_ field.
+	(Output_data_plt_x86_64::Output_data_plt_x86_64): Initialize
+	tlsdesc_rel_ field.
+	(Output_data_plt_x86_64::rela_plt): Rename from rel_plt.  Change
+	all callers.
+	(Output_data_plt_x86_64::rela_tlsdesc): New function.
+	(Target_x86_64::rela_tlsdesc_section): New function.
+	(Target_x86_64::Scan::local): Rewrite R_X86_64_GOTPC32_TLSDESC
+	handling.
+	(Target_x86_64::Scan::global): For R_X86_64_GOTPC32_TLSDESC put
+	(Target_x86_64::do_reloc_addend): New function.
+	R_X86_64_TLSDESC reloc in rela_tlsdesc_section.
+	* output.h (class Output_reloc) [SHT_REL]: Add new constructor
+	declarations.  Define TARGET_CODE.  Add arg field to u1_ union.
+	(Output_reloc::type): New function.
+	(Output_reloc::is_local_section_symbol): Check for TARGET_CODE.
+	(Output_reloc::is_target_specific): New function.
+	(Output_reloc::target_arg): New function.
+	(class Output_reloc) [SHT_RELA]: Add four new constructors for
+	absolute relocs and target specific relocs.
+	(class Output_data_reloc) [SHT_REL]: Add add_absolute and
+	add_target_specific.
+	(class Output_data_reloc) [SHT_RELA]: Likewise.
+	* output.cc (Output_reloc::Output_reloc): Add four new versions
+	for absolute relocs and target specific relocs.
+	(Output_reloc::set_needs_dynsym_index): Add TARGET_CODE case.
+	(Output_reloc::get_symbol_index): Likewise.
+	(Output_reloc::local_section_offset): Check that local_sym_index_
+	is not TARGET_CODE or 0.
+	(Output_reloc::symbol_value): Likewise.
+	(Output_reloc::write) [SHT_RELA]: Call target for target specific
+	reloc.
+	* target.h (class Target): Add reloc_symbol_index and reloc_addend
+	functions.  Add do_reloc_symbol_index and do_reloc_addend virtual
+	functions.
+	* layout.cc (add_target_dynamic_tags): Use output section for
+	DT_PLTRELSZ and DT_JMPREL.
+
 2010-01-07  Ian Lance Taylor  <iant@google.com>
 
 	PR 11061
