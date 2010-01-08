@@ -55,6 +55,8 @@ static Elf32_External_Ehdr ehdr32;
 static Elf64_External_Ehdr ehdr64;
 static int input_elf_machine = -1;
 static int output_elf_machine = -1;
+static int input_elf_type = -1;
+static int output_elf_type = -1;
 static int input_elf_class = -1;
 
 #define streq(a,b)	  (strcmp ((a), (b)) == 0)
@@ -228,7 +230,7 @@ byte_put_big_endian (unsigned char * field, bfd_vma value, int size)
 static int
 update_elf_header (const char *file_name, FILE *file)
 {
-  int class, machine, status;
+  int class, machine, type, status;
 
   if (elf_header.e_ident[EI_MAG0] != ELFMAG0
       || elf_header.e_ident[EI_MAG1] != ELFMAG1
@@ -276,7 +278,18 @@ update_elf_header (const char *file_name, FILE *file)
       return 0;
     }
 
-  /* Update e_machine.  */
+  type = elf_header.e_type;
+
+  /* Skip if e_type doesn't match. */
+  if (input_elf_type != -1 && type != input_elf_type)
+    {
+      non_fatal
+	(_("%s: Unmatched e_type: %d is not %d\n"),
+	 file_name, type, input_elf_type);
+      return 0;
+    }
+
+  /* Update e_machine and e_type.  */
   switch (class)
     {
     default:
@@ -284,11 +297,17 @@ update_elf_header (const char *file_name, FILE *file)
       abort ();
       break;
     case ELFCLASS32:
-      BYTE_PUT (ehdr32.e_machine, output_elf_machine);
+      if (output_elf_machine != -1)
+	BYTE_PUT (ehdr32.e_machine, output_elf_machine);
+      if (output_elf_type != -1)
+	BYTE_PUT (ehdr32.e_type, output_elf_type);
       status = fwrite (&ehdr32, sizeof (ehdr32), 1, file) == 1;
       break;
     case ELFCLASS64:
-      BYTE_PUT (ehdr64.e_machine, output_elf_machine);
+      if (output_elf_machine != -1)
+	BYTE_PUT (ehdr64.e_machine, output_elf_machine);
+      if (output_elf_type != -1)
+	BYTE_PUT (ehdr64.e_type, output_elf_type);
       status = fwrite (&ehdr64, sizeof (ehdr64), 1, file) == 1;
       break;
     }
@@ -1015,16 +1034,39 @@ elf_class (int mach)
     }
 }
 
+/* Return ET_XXX for a type string, TYPE.  */
+
+static int
+elf_type (const char *type)
+{
+  if (strcasecmp (type, "rel") == 0)
+    return ET_REL;
+  if (strcasecmp (type, "exec") == 0)
+    return ET_EXEC;
+  if (strcasecmp (type, "dyn") == 0)
+    return ET_DYN;
+  if (strcasecmp (type, "none") == 0)
+    return ET_NONE;
+
+  non_fatal (_("Unknown type: %s\n"), type);
+
+  return -1;
+}
+
 enum command_line_switch
   {
     OPTION_INPUT_MACH = 150,
-    OPTION_OUTPUT_MACH
+    OPTION_OUTPUT_MACH,
+    OPTION_INPUT_TYPE,
+    OPTION_OUTPUT_TYPE
   };
 
 static struct option options[] =
 {
   {"input-mach",	required_argument, 0, OPTION_INPUT_MACH},
   {"output-mach",	required_argument, 0, OPTION_OUTPUT_MACH},
+  {"input-type",	required_argument, 0, OPTION_INPUT_TYPE},
+  {"output-type",	required_argument, 0, OPTION_OUTPUT_TYPE},
   {"version",		no_argument, 0, 'v'},
   {"help",		no_argument, 0, 'h'},
   {0,			no_argument, 0, 0}
@@ -1033,13 +1075,15 @@ static struct option options[] =
 static void
 usage (FILE *stream, int exit_status)
 {
-  fprintf (stream, _("Usage: %s [option(s)] --output-mach <machine> elffile(s)\n"),
+  fprintf (stream, _("Usage: %s [option(s)] {--output-mach <machine>|--output-type <type>} elffile(s)\n"),
 	   program_name);
   fprintf (stream, _(" Update the ELF header of ELF files\n"));
   fprintf (stream, _(" The options are:\n"));
   fprintf (stream, _("\
   --input-mach <machine>      Set input machine type to <machine>\n\
   --output-mach <machine>     Set output machine type to <machine>\n\
+  --input-type <type>         Set input file type to <type>\n\
+  --output-type <type>        Set output file type to <type>\n\
   -h --help                   Display this information\n\
   -v --version                Display the version number of %s\n\
 "),
@@ -1085,6 +1129,18 @@ main (int argc, char ** argv)
 	    return 1;
 	  break;
 
+	case OPTION_INPUT_TYPE:
+	  input_elf_type = elf_type (optarg);
+	  if (input_elf_type < 0)
+	    return 1;
+	  break;
+
+	case OPTION_OUTPUT_TYPE:
+	  output_elf_type = elf_type (optarg);
+	  if (output_elf_type < 0)
+	    return 1;
+	  break;
+
 	case 'h':
 	  usage (stdout, 0);
 
@@ -1097,7 +1153,9 @@ main (int argc, char ** argv)
 	}
     }
 
-  if (optind == argc || output_elf_machine == -1)
+  if (optind == argc
+      || (output_elf_machine == -1
+	  && output_elf_type == -1))
     usage (stderr, 1);
 
   status = 0;

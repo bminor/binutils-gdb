@@ -4107,7 +4107,9 @@ objdump(1), and the Info entries for @file{binutils}.
 @smallexample
 @c man begin SYNOPSIS elfedit
 elfedit [@option{--input-mach=}@var{machine}]
+        [@option{--input-type=}@var{type}]
         @option{--output-mach=}@var{machine}
+        @option{--output-type=}@var{type}
         [@option{-v}|@option{--version}]
         [@option{-h}|@option{--help}]
         @var{elffile}@dots{}
@@ -4116,9 +4118,9 @@ elfedit [@option{--input-mach=}@var{machine}]
 
 @c man begin DESCRIPTION elfedit
 
-@command{elfedit} updates the ELF header of ELF files.  The
-options control how and which fields in the ELF header should be
-updated.
+@command{elfedit} updates the ELF header of ELF files which have
+the matching ELF machine and file types.  The options control how and
+which fields in the ELF header should be updated.
 
 @var{elffile}@dots{} are the ELF files to be updated.  32-bit and
 64-bit ELF files are supported, as are archives containing ELF files.
@@ -4127,20 +4129,31 @@ updated.
 @c man begin OPTIONS elfedit
 
 The long and short forms of options, shown here as alternatives, are
-equivalent. The @option{--output-mach} option must be given.
+equivalent. At least one of the @option{--output-mach} and
+@option{--output-type} options must be given.
 
 @table @env
 
 @itemx --input-mach=@var{machine}
-Only the input files with ELF machine type, @var{machine}, will be
-updated. If @option{--input-mach} isn't specified, any ELF file
-will be updated.
+Set the matching input ELF machine type to @var{machine}.  If
+@option{--input-mach} isn't specified, it will match any ELF
+machine types.
 
 The supported ELF machine types are, @var{L1OM} and @var{x86-64}.
 
 @itemx --output-mach=@var{machine}
 Change the ELF machine type in the ELF header to @var{machine}.  The
 supported ELF machine types are the same as @option{--input-mach}.
+
+@itemx --input-type=@var{type}
+Set the matching input ELF file type to @var{type}.  If
+@option{--input-type} isn't specified, it will match any ELF file types.
+
+The supported ELF file types are, @var{rel}, @var{exec} and @var{dyn}.
+
+@itemx --output-type=@var{type}
+Change the ELF file type in the ELF header to @var{type}.  The
+supported ELF types are the same as @option{--input-type}.
 
 @item -v
 @itemx --version

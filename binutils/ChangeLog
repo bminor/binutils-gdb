@@ -1,5 +1,21 @@
 2010-01-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elfedit.c (input_elf_type): New.
+	(output_elf_type): Likewise.
+	(elf_type): Likewise.
+	(update_elf_header): Support updating ELF file type.
+	(command_line_switch): Add OPTION_INPUT_TYPE and
+	OPTION_OUTPUT_TYPE.
+	(options): Likewise.
+	(usage): Add --input-type and --output-type.
+	(main): Handle OPTION_INPUT_TYPE and OPTION_OUTPUT_TYPE.  Check
+	one of --output-mach and --output-type must be specified.
+
+	* doc/binutils.texi: Document --input-type and --output-type
+	for elfedit.
+
+2010-01-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* doc/binutils.texi: Fix a typo.
 
 2010-01-08  H.J. Lu  <hongjiu.lu@intel.com>
