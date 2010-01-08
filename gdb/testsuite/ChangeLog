@@ -1,3 +1,8 @@
+2010-01-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* lib/gdb.exp (gdb_start_cmd): Move comment outside of gdb_expect
+	call, to avoid interruption.
+
 2010-01-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.stabs/weird.def (args93): New.
