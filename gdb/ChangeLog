@@ -70,7 +70,7 @@
 	Fix build failure of solaris-hosted cross debuggers.
 	* ada-valprint.c, parse.c: Include defs.h before including ctype.h.
 
-2010-01-09  Joel Brobecker  <brobecker@adacore.com>
+2010-01-09  Daniel Gutson  <dgutson@codesourcery.com>
 
 	Fix build failure on sparc-solaris.
 	* procfs.c: (procfs_do_thread_registers) Use elfcore_write_lwpstatus.
