@@ -798,8 +798,8 @@ class Stub_table : public Output_data
 {
  public:
   Stub_table(Arm_input_section<big_endian>* owner)
-    : Output_data(), addralign_(1), owner_(owner), has_been_changed_(false),
-      reloc_stubs_()
+    : Output_data(), owner_(owner), reloc_stubs_(), cortex_a8_stubs_(),
+      prev_data_size_(0), prev_addralign_(1)
   { }
 
   ~Stub_table()
@@ -813,17 +813,7 @@ class Stub_table : public Output_data
   // Whether this stub table is empty.
   bool
   empty() const
-  { return this->reloc_stubs_.empty(); }
-
-  // Whether this has been changed.
-  bool
-  has_been_changed() const
-  { return this->has_been_changed_; }
-
-  // Set the has-been-changed flag.
-  void
-  set_has_been_changed(bool value)
-  { this->has_been_changed_ = value; }
+  { return this->reloc_stubs_.empty() && this->cortex_a8_stubs_.empty(); }
 
   // Return the current data size.
   off_t
@@ -833,7 +823,26 @@ class Stub_table : public Output_data
   // Add a STUB with using KEY.  Caller is reponsible for avoid adding
   // if already a STUB with the same key has been added. 
   void
-  add_reloc_stub(Reloc_stub* stub, const Reloc_stub::Key& key);
+  add_reloc_stub(Reloc_stub* stub, const Reloc_stub::Key& key)
+  {
+    const Stub_template* stub_template = stub->stub_template();
+    gold_assert(stub_template->type() == key.stub_type());
+    this->reloc_stubs_[key] = stub;
+  }
+
+  // Add a Cortex-A8 STUB that fixes up a THUMB branch at ADDRESS.
+  // Caller is reponsible for avoid adding if already a STUB with the same
+  // address has been added. 
+  void
+  add_cortex_a8_stub(Arm_address address, Cortex_a8_stub* stub)
+  {
+    std::pair<Arm_address, Cortex_a8_stub*> value(address, stub);
+    this->cortex_a8_stubs_.insert(value);
+  }
+
+  // Remove all Cortex-A8 stubs.
+  void
+  remove_all_cortex_a8_stubs();
 
   // Look up a relocation stub using KEY.  Return NULL if there is none.
   Reloc_stub*
@@ -849,6 +858,23 @@ class Stub_table : public Output_data
 		 Target_arm<big_endian>*, Output_section*,
 		 unsigned char*, Arm_address, section_size_type);
 
+  // Update data size and alignment at the end of a relaxation pass.  Return
+  // true if either data size or alignment is different from that of the
+  // previous relaxation pass.
+  bool
+  update_data_size_and_addralign();
+
+  // Finalize stubs.  Set the offsets of all stubs and mark input sections
+  // needing the Cortex-A8 workaround.
+  void
+  finalize_stubs();
+  
+  // Apply Cortex-A8 workaround to an address range.
+  void
+  apply_cortex_a8_workaround_to_address_range(Target_arm<big_endian>*,
+					      unsigned char*, Arm_address,
+					      section_size_type);
+
  protected:
   // Write out section contents.
   void
@@ -857,33 +883,45 @@ class Stub_table : public Output_data
   // Return the required alignment.
   uint64_t
   do_addralign() const
-  { return this->addralign_; }
-
-  // Finalize data size.
-  void
-  set_final_data_size()
-  { this->set_data_size(this->current_data_size_for_child()); }
+  { return this->prev_addralign_; }
 
   // Reset address and file offset.
   void
-  do_reset_address_and_file_offset();
+  do_reset_address_and_file_offset()
+  { this->set_current_data_size_for_child(this->prev_data_size_); }
 
+  // Set final data size.
+  void
+  set_final_data_size()
+  { this->set_data_size(this->current_data_size()); }
+  
  private:
-  // Unordered map of stubs.
+  // Relocate one stub.
+  void
+  relocate_stub(Stub*, const Relocate_info<32, big_endian>*,
+		Target_arm<big_endian>*, Output_section*,
+		unsigned char*, Arm_address, section_size_type);
+
+  // Unordered map of relocation stubs.
   typedef
     Unordered_map<Reloc_stub::Key, Reloc_stub*, Reloc_stub::Key::hash,
 		  Reloc_stub::Key::equal_to>
     Reloc_stub_map;
 
-  // Address alignment
-  uint64_t addralign_;
+  // List of Cortex-A8 stubs ordered by addresses of branches being
+  // fixed up in output.
+  typedef std::map<Arm_address, Cortex_a8_stub*> Cortex_a8_stub_list;
+
   // Owner of this stub table.
   Arm_input_section<big_endian>* owner_;
-  // This is set to true during relaxiong if the size of the stub table
-  // has been changed.
-  bool has_been_changed_;
   // The relocation stubs.
   Reloc_stub_map reloc_stubs_;
+  // The cortex_a8_stubs.
+  Cortex_a8_stub_list cortex_a8_stubs_;
+  // data size of this in the previous pass.
+  off_t prev_data_size_;
+  // address alignment of this in the previous pass.
+  uint64_t prev_addralign_;
 };
 
 // A class to wrap an ordinary input section containing executable code.
@@ -1031,7 +1069,7 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
              const typename elfcpp::Ehdr<32, big_endian>& ehdr)
     : Sized_relobj<32, big_endian>(name, input_file, offset, ehdr),
       stub_tables_(), local_symbol_is_thumb_function_(),
-      attributes_section_data_(NULL)
+      attributes_section_data_(NULL), section_has_cortex_a8_workaround_(NULL)
   { }
 
   ~Arm_relobj()
@@ -1095,6 +1133,24 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
   attributes_section_data() const
   { return this->attributes_section_data_; }
 
+  // Whether a section contains any Cortex-A8 workaround.
+  bool
+  section_has_cortex_a8_workaround(unsigned int shndx) const
+  { 
+    return (this->section_has_cortex_a8_workaround_ != NULL
+	    && (*this->section_has_cortex_a8_workaround_)[shndx]);
+  }
+  
+  // Mark a section that has Cortex-A8 workaround.
+  void
+  mark_section_for_cortex_a8_workaround(unsigned int shndx)
+  {
+    if (this->section_has_cortex_a8_workaround_ == NULL)
+      this->section_has_cortex_a8_workaround_ =
+	new std::vector<bool>(this->shnum(), false);
+    (*this->section_has_cortex_a8_workaround_)[shndx] = true;
+  }
+
  protected:
   // Post constructor setup.
   void
@@ -1133,6 +1189,8 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
   elfcpp::Elf_Word processor_specific_flags_;
   // Object attributes if there is an .ARM.attributes section or NULL.
   Attributes_section_data* attributes_section_data_;
+  // Bitmap to indicate sections with Cortex-A8 workaround or NULL.
+  std::vector<bool>* section_has_cortex_a8_workaround_;
 };
 
 // Arm_dynobj class.
@@ -1499,7 +1557,7 @@ class Target_arm : public Sized_target<32, big_endian>
 
   // Relocate a stub. 
   void
-  relocate_stub(Reloc_stub*, const Relocate_info<32, big_endian>*,
+  relocate_stub(Stub*, const Relocate_info<32, big_endian>*,
 		Output_section*, unsigned char*, Arm_address,
 		section_size_type);
  
@@ -2785,6 +2843,7 @@ Insn_template::size() const
   switch (this->type())
     {
     case THUMB16_TYPE:
+    case THUMB16_SPECIAL_TYPE:
       return 2;
     case ARM_TYPE:
     case THUMB32_TYPE:
@@ -2803,6 +2862,7 @@ Insn_template::alignment() const
   switch (this->type())
     {
     case THUMB16_TYPE:
+    case THUMB16_SPECIAL_TYPE:
     case THUMB32_TYPE:
       return 2;
     case ARM_TYPE:
@@ -3339,22 +3399,46 @@ Stub_factory::Stub_factory()
 
 // Stub_table methods.
 
-// Add a STUB with using KEY.  Caller is reponsible for avoid adding
-// if already a STUB with the same key has been added. 
+// Removel all Cortex-A8 stub.
 
 template<bool big_endian>
 void
-Stub_table<big_endian>::add_reloc_stub(
-    Reloc_stub* stub,
-    const Reloc_stub::Key& key)
+Stub_table<big_endian>::remove_all_cortex_a8_stubs()
+{
+  for (Cortex_a8_stub_list::iterator p = this->cortex_a8_stubs_.begin();
+       p != this->cortex_a8_stubs_.end();
+       ++p)
+    delete p->second;
+  this->cortex_a8_stubs_.clear();
+}
+
+// Relocate one stub.  This is a helper for Stub_table::relocate_stubs().
+
+template<bool big_endian>
+void
+Stub_table<big_endian>::relocate_stub(
+    Stub* stub,
+    const Relocate_info<32, big_endian>* relinfo,
+    Target_arm<big_endian>* arm_target,
+    Output_section* output_section,
+    unsigned char* view,
+    Arm_address address,
+    section_size_type view_size)
 {
   const Stub_template* stub_template = stub->stub_template();
-  gold_assert(stub_template->type() == key.stub_type());
-  this->reloc_stubs_[key] = stub;
-  if (this->addralign_ < stub_template->alignment())
-    this->addralign_ = stub_template->alignment();
-  this->has_been_changed_ = true;
+  if (stub_template->reloc_count() != 0)
+    {
+      // Adjust view to cover the stub only.
+      section_size_type offset = stub->offset();
+      section_size_type stub_size = stub_template->size();
+      gold_assert(offset + stub_size <= view_size);
+
+      arm_target->relocate_stub(stub, relinfo, output_section, view + offset,
+				address + offset, stub_size);
+    }
 }
+
+// Relocate all stubs in this stub table.
 
 template<bool big_endian>
 void
@@ -3372,50 +3456,19 @@ Stub_table<big_endian>::relocate_stubs(
 	      && (view_size
 		  == static_cast<section_size_type>(this->data_size())));
 
+  // Relocate all relocation stubs.
   for (typename Reloc_stub_map::const_iterator p = this->reloc_stubs_.begin();
       p != this->reloc_stubs_.end();
       ++p)
-    {
-      Reloc_stub* stub = p->second;
-      const Stub_template* stub_template = stub->stub_template();
-      if (stub_template->reloc_count() != 0)
-	{
-	  // Adjust view to cover the stub only.
-	  section_size_type offset = stub->offset();
-	  section_size_type stub_size = stub_template->size();
-	  gold_assert(offset + stub_size <= view_size);
+    this->relocate_stub(p->second, relinfo, arm_target, output_section, view,
+			address, view_size);
 
-	  arm_target->relocate_stub(stub, relinfo, output_section,
-				    view + offset, address + offset,
-				    stub_size);
-	}
-    }
-}
-
-// Reset address and file offset.
-
-template<bool big_endian>
-void
-Stub_table<big_endian>::do_reset_address_and_file_offset()
-{
-  off_t off = 0;
-  uint64_t max_addralign = 1;
-  for (typename Reloc_stub_map::const_iterator p = this->reloc_stubs_.begin();
-      p != this->reloc_stubs_.end();
-      ++p)
-    {
-      Reloc_stub* stub = p->second;
-      const Stub_template* stub_template = stub->stub_template();
-      uint64_t stub_addralign = stub_template->alignment();
-      max_addralign = std::max(max_addralign, stub_addralign);
-      off = align_address(off, stub_addralign);
-      stub->set_offset(off);
-      stub->reset_destination_address();
-      off += stub_template->size();
-    }
-
-  this->addralign_ = max_addralign;
-  this->set_current_data_size_for_child(off);
+  // Relocate all Cortex-A8 stubs.
+  for (Cortex_a8_stub_list::iterator p = this->cortex_a8_stubs_.begin();
+       p != this->cortex_a8_stubs_.end();
+       ++p)
+    this->relocate_stub(p->second, relinfo, arm_target, output_section, view,
+			address, view_size);
 }
 
 // Write out the stubs to file.
@@ -3429,6 +3482,7 @@ Stub_table<big_endian>::do_write(Output_file* of)
     convert_to_section_size_type(this->data_size());
   unsigned char* const oview = of->get_output_view(offset, oview_size);
 
+  // Write relocation stubs.
   for (typename Reloc_stub_map::const_iterator p = this->reloc_stubs_.begin();
       p != this->reloc_stubs_.end();
       ++p)
@@ -3440,8 +3494,145 @@ Stub_table<big_endian>::do_write(Output_file* of)
 				   stub->stub_template()->alignment()));
       stub->write(oview + stub->offset(), stub->stub_template()->size(),
 		  big_endian);
-    } 
+    }
+
+  // Write Cortex-A8 stubs.
+  for (Cortex_a8_stub_list::const_iterator p = this->cortex_a8_stubs_.begin();
+       p != this->cortex_a8_stubs_.end();
+       ++p)
+    {
+      Cortex_a8_stub* stub = p->second;
+      Arm_address address = this->address() + stub->offset();
+      gold_assert(address
+		  == align_address(address,
+				   stub->stub_template()->alignment()));
+      stub->write(oview + stub->offset(), stub->stub_template()->size(),
+		  big_endian);
+    }
+
   of->write_output_view(this->offset(), oview_size, oview);
+}
+
+// Update the data size and address alignment of the stub table at the end
+// of a relaxation pass.   Return true if either the data size or the
+// alignment changed in this relaxation pass.
+
+template<bool big_endian>
+bool
+Stub_table<big_endian>::update_data_size_and_addralign()
+{
+  off_t size = 0;
+  unsigned addralign = 1;
+
+  // Go over all stubs in table to compute data size and address alignment.
+  
+  for (typename Reloc_stub_map::const_iterator p = this->reloc_stubs_.begin();
+      p != this->reloc_stubs_.end();
+      ++p)
+    {
+      const Stub_template* stub_template = p->second->stub_template();
+      addralign = std::max(addralign, stub_template->alignment());
+      size = (align_address(size, stub_template->alignment())
+	      + stub_template->size());
+    }
+
+  for (Cortex_a8_stub_list::const_iterator p = this->cortex_a8_stubs_.begin();
+       p != this->cortex_a8_stubs_.end();
+       ++p)
+    {
+      const Stub_template* stub_template = p->second->stub_template();
+      addralign = std::max(addralign, stub_template->alignment());
+      size = (align_address(size, stub_template->alignment())
+	      + stub_template->size());
+    }
+
+  // Check if either data size or alignment changed in this pass.
+  // Update prev_data_size_ and prev_addralign_.  These will be used
+  // as the current data size and address alignment for the next pass.
+  bool changed = size != this->prev_data_size_;
+  this->prev_data_size_ = size; 
+
+  if (addralign != this->prev_addralign_)
+    changed = true;
+  this->prev_addralign_ = addralign;
+
+  return changed;
+}
+
+// Finalize the stubs.  This sets the offsets of the stubs within the stub
+// table.  It also marks all input sections needing Cortex-A8 workaround.
+
+template<bool big_endian>
+void
+Stub_table<big_endian>::finalize_stubs()
+{
+  off_t off = 0;
+  for (typename Reloc_stub_map::const_iterator p = this->reloc_stubs_.begin();
+      p != this->reloc_stubs_.end();
+      ++p)
+    {
+      Reloc_stub* stub = p->second;
+      const Stub_template* stub_template = stub->stub_template();
+      uint64_t stub_addralign = stub_template->alignment();
+      off = align_address(off, stub_addralign);
+      stub->set_offset(off);
+      off += stub_template->size();
+    }
+
+  for (Cortex_a8_stub_list::const_iterator p = this->cortex_a8_stubs_.begin();
+       p != this->cortex_a8_stubs_.end();
+       ++p)
+    {
+      Cortex_a8_stub* stub = p->second;
+      const Stub_template* stub_template = stub->stub_template();
+      uint64_t stub_addralign = stub_template->alignment();
+      off = align_address(off, stub_addralign);
+      stub->set_offset(off);
+      off += stub_template->size();
+
+      // Mark input section so that we can determine later if a code section
+      // needs the Cortex-A8 workaround quickly.
+      Arm_relobj<big_endian>* arm_relobj =
+	Arm_relobj<big_endian>::as_arm_relobj(stub->relobj());
+      arm_relobj->mark_section_for_cortex_a8_workaround(stub->shndx());
+    }
+
+  gold_assert(off <= this->prev_data_size_);
+}
+
+// Apply Cortex-A8 workaround to an address range between VIEW_ADDRESS
+// and VIEW_ADDRESS + VIEW_SIZE - 1.  VIEW points to the mapped address
+// of the address range seen by the linker.
+
+template<bool big_endian>
+void
+Stub_table<big_endian>::apply_cortex_a8_workaround_to_address_range(
+    Target_arm<big_endian>* arm_target,
+    unsigned char* view,
+    Arm_address view_address,
+    section_size_type view_size)
+{
+  // Cortex-A8 stubs are sorted by addresses of branches being fixed up.
+  for (Cortex_a8_stub_list::const_iterator p =
+	 this->cortex_a8_stubs_.lower_bound(view_address);
+       ((p != this->cortex_a8_stubs_.end())
+	&& (p->first < (view_address + view_size)));
+       ++p)
+    {
+      // We do not store the THUMB bit in the LSB of either the branch address
+      // or the stub offset.  There is no need to strip the LSB.
+      Arm_address branch_address = p->first;
+      const Cortex_a8_stub* stub = p->second;
+      Arm_address stub_address = this->address() + stub->offset();
+
+      // Offset of the branch instruction relative to this view.
+      section_size_type offset =
+	convert_to_section_size_type(branch_address - view_address);
+      gold_assert((offset + 4) <= view_size);
+
+      arm_target->apply_cortex_a8_workaround(stub, stub_address,
+					     view + offset, branch_address);
+    }
 }
 
 // Arm_input_section methods.
@@ -6998,12 +7189,7 @@ Target_arm<big_endian>::do_relax(
       group_sections(layout, stub_group_size, stubs_always_after_branch);
     }
 
-  // clear changed flags for all stub_tables
   typedef typename Stub_table_list::iterator Stub_table_iterator;
-  for (Stub_table_iterator sp = this->stub_tables_.begin();
-       sp != this->stub_tables_.end();
-       ++sp)
-    (*sp)->set_has_been_changed(false);
 
   // scan relocs for stubs
   for (Input_objects::Relobj_iterator op = input_objects->relobj_begin();
@@ -7015,14 +7201,24 @@ Target_arm<big_endian>::do_relax(
       arm_relobj->scan_sections_for_stubs(this, symtab, layout);
     }
 
+  // Check all stub tables to see if any of them have their data sizes
+  // or addresses alignments changed.  These are the only things that
+  // matter.
   bool any_stub_table_changed = false;
   for (Stub_table_iterator sp = this->stub_tables_.begin();
        (sp != this->stub_tables_.end()) && !any_stub_table_changed;
        ++sp)
     {
-      if ((*sp)->has_been_changed())
+      if ((*sp)->update_data_size_and_addralign())
 	any_stub_table_changed = true;
     }
+
+  // Finalize the stubs in the last relaxation pass.
+  if (!any_stub_table_changed)
+    for (Stub_table_iterator sp = this->stub_tables_.begin();
+	 (sp != this->stub_tables_.end()) && !any_stub_table_changed;
+	 ++sp)
+      (*sp)->finalize_stubs();
 
   return any_stub_table_changed;
 }
@@ -7032,7 +7228,7 @@ Target_arm<big_endian>::do_relax(
 template<bool big_endian>
 void
 Target_arm<big_endian>::relocate_stub(
-    Reloc_stub* stub,
+    Stub* stub,
     const Relocate_info<32, big_endian>* relinfo,
     Output_section* output_section,
     unsigned char* view,
