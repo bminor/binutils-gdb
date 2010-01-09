@@ -1,5 +1,25 @@
 2010-01-08  Ian Lance Taylor  <iant@google.com>
 
+	PR 11108
+	* symtab.h (class Symbol): Remove fields is_target_special_ and
+	has_plt_offset_.  Add field is_defined_in_discarded_section_.
+	(Symbol::is_defined_in_discarded_section): New function.
+	(Symbol::set_is_defined_in_discarded_section): New function.
+	(Symbol::has_plt_offset): Rewrite.
+	(Symbol::set_plt_offset): Verify that new offset is not -1U.
+	* symtab.cc (Symbol::init_fields): Initialize plt_offset_ to -1U.
+	Don't initialize is_target_special_ or has_plt_offset_.
+	Initialize is_defined_in_discarded_section_.
+	(Symbol_table::add_from_relobj): If appropriate, set
+	is_defined_in_discarded_section.
+	* resolve.cc (Symbol::override_base_with_special): Don't test
+	is_target_special_.  Change has_plt_offset_ to has_plt_offset().
+	* target-reloc.h (relocate_section): Do special handling for
+	symbols defined in discarded sections for global symbols as well
+	as local symbols.
+
+2010-01-08  Ian Lance Taylor  <iant@google.com>
+
 	* dynobj.cc (big_endian>::find_dynsym_sections): Set pi to NULL in
 	the SHT_SYMTAB case.
 

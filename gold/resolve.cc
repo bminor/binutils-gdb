@@ -859,9 +859,8 @@ Symbol::override_base_with_special(const Symbol* from)
 
   // We shouldn't see these flags.  If we do, we need to handle them
   // somehow.
-  gold_assert(!from->is_target_special_ || this->is_target_special_);
   gold_assert(!from->is_forwarder_);
-  gold_assert(!from->has_plt_offset_);
+  gold_assert(!from->has_plt_offset());
   gold_assert(!from->has_warning_);
   gold_assert(!from->is_copied_from_dynobj_);
   gold_assert(!from->is_forced_local_);

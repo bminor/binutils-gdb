@@ -1,6 +1,6 @@
 // target-reloc.h -- target specific relocation support  -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -217,6 +217,8 @@ relocate_section(
 
       Symbol_value<size> symval;
       const Symbol_value<size> *psymval;
+      bool is_defined_in_discarded_section;
+      unsigned int shndx;
       if (r_sym < local_count
 	  && (reloc_symbol_changes == NULL
 	      || (*reloc_symbol_changes)[i] == NULL))
@@ -230,38 +232,12 @@ relocate_section(
           // counterpart in the kept section.  The symbol must not 
           // correspond to a section we are folding.
 	  bool is_ordinary;
-	  unsigned int shndx = psymval->input_shndx(&is_ordinary);
-	  if (is_ordinary
-	      && shndx != elfcpp::SHN_UNDEF
-	      && !object->is_section_included(shndx) 
-              && !(relinfo->symtab->is_section_folded(object, shndx)))
-	    {
-	      if (comdat_behavior == CB_UNDETERMINED)
-	        {
-	          std::string name = object->section_name(relinfo->data_shndx);
-	          comdat_behavior = get_comdat_behavior(name.c_str());
-	        }
-	      if (comdat_behavior == CB_PRETEND)
-	        {
-                  bool found;
-	          typename elfcpp::Elf_types<size>::Elf_Addr value =
-	            object->map_to_kept_section(shndx, &found);
-	          if (found)
-	            symval.set_output_value(value + psymval->input_value());
-                  else
-                    symval.set_output_value(0);
-	        }
-	      else
-	        {
-	          if (comdat_behavior == CB_WARNING)
-                    gold_warning_at_location(relinfo, i, offset,
-                                             _("relocation refers to discarded "
-                                               "comdat section"));
-                  symval.set_output_value(0);
-	        }
-	      symval.set_no_output_symtab_entry();
-	      psymval = &symval;
-	    }
+	  shndx = psymval->input_shndx(&is_ordinary);
+	  is_defined_in_discarded_section =
+	    (is_ordinary
+	     && shndx != elfcpp::SHN_UNDEF
+	     && !object->is_section_included(shndx)
+	     && !relinfo->symtab->is_section_folded(object, shndx));
 	}
       else
 	{
@@ -284,6 +260,46 @@ relocate_section(
 	    symval.set_no_output_symtab_entry();
 	  symval.set_output_value(sym->value());
 	  psymval = &symval;
+
+	  is_defined_in_discarded_section =
+	    (gsym->is_defined_in_discarded_section()
+	     && gsym->is_undefined());
+	  shndx = 0;
+	}
+
+      Symbol_value<size> symval2;
+      if (is_defined_in_discarded_section)
+	{
+	  if (comdat_behavior == CB_UNDETERMINED)
+	    {
+	      std::string name = object->section_name(relinfo->data_shndx);
+	      comdat_behavior = get_comdat_behavior(name.c_str());
+	    }
+	  if (comdat_behavior == CB_PRETEND)
+	    {
+	      // FIXME: This case does not work for global symbols.
+	      // We have no place to store the original section index.
+	      // Fortunately this does not matter for comdat sections,
+	      // only for sections explicitly discarded by a linker
+	      // script.
+	      bool found;
+	      typename elfcpp::Elf_types<size>::Elf_Addr value =
+		object->map_to_kept_section(shndx, &found);
+	      if (found)
+		symval2.set_output_value(value + psymval->input_value());
+	      else
+		symval2.set_output_value(0);
+	    }
+	  else
+	    {
+	      if (comdat_behavior == CB_WARNING)
+		gold_warning_at_location(relinfo, i, offset,
+					 _("relocation refers to discarded "
+					   "section"));
+	      symval2.set_output_value(0);
+	    }
+	  symval2.set_no_output_symtab_entry();
+	  psymval = &symval2;
 	}
 
       if (!relocate.relocate(relinfo, target, output_section, i, reloc,
@@ -302,6 +318,7 @@ relocate_section(
       if (sym != NULL
 	  && sym->is_undefined()
 	  && sym->binding() != elfcpp::STB_WEAK
+	  && !is_defined_in_discarded_section
           && !target->is_defined_by_abi(sym)
 	  && (!parameters->options().shared()       // -shared
               || parameters->options().defs()))     // -z defs

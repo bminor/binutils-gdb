@@ -59,24 +59,23 @@ Symbol::init_fields(const char* name, const char* version,
   this->symtab_index_ = 0;
   this->dynsym_index_ = 0;
   this->got_offsets_.init();
-  this->plt_offset_ = 0;
+  this->plt_offset_ = -1U;
   this->type_ = type;
   this->binding_ = binding;
   this->visibility_ = visibility;
   this->nonvis_ = nonvis;
-  this->is_target_special_ = false;
   this->is_def_ = false;
   this->is_forwarder_ = false;
   this->has_alias_ = false;
   this->needs_dynsym_entry_ = false;
   this->in_reg_ = false;
   this->in_dyn_ = false;
-  this->has_plt_offset_ = false;
   this->has_warning_ = false;
   this->is_copied_from_dynobj_ = false;
   this->is_forced_local_ = false;
   this->is_ordinary_shndx_ = false;
   this->in_real_elf_ = false;
+  this->is_defined_in_discarded_section_ = false;
 }
 
 // Return the demangled version of the symbol's name, but only
@@ -1070,10 +1069,14 @@ Symbol_table::add_from_relobj(
 
       // A symbol defined in a section which we are not including must
       // be treated as an undefined symbol.
+      bool is_defined_in_discarded_section = false;
       if (st_shndx != elfcpp::SHN_UNDEF
 	  && is_ordinary
 	  && !relobj->is_section_included(st_shndx))
-	st_shndx = elfcpp::SHN_UNDEF;
+	{
+	  st_shndx = elfcpp::SHN_UNDEF;
+	  is_defined_in_discarded_section = true;
+	}
 
       // In an object file, an '@' in the name separates the symbol
       // name from the version name.  If there are two '@' characters,
@@ -1189,6 +1192,9 @@ Symbol_table::add_from_relobj(
 
       if (is_forced_local)
 	this->force_local(res);
+
+      if (is_defined_in_discarded_section)
+	res->set_is_defined_in_discarded_section();
 
       (*sympointers)[i] = res;
     }

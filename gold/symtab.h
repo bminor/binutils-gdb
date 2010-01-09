@@ -1,6 +1,6 @@
 // symtab.h -- the gold symbol table   -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -308,6 +308,18 @@ class Symbol
   set_in_real_elf()
   { this->in_real_elf_ = true; }
 
+  // Return whether this symbol was defined in a section that was
+  // discarded from the link.  This is used to control some error
+  // reporting.
+  bool
+  is_defined_in_discarded_section() const
+  { return this->is_defined_in_discarded_section_; }
+
+  // Mark this symbol as having been defined in a discarded section.
+  void
+  set_is_defined_in_discarded_section()
+  { this->is_defined_in_discarded_section_ = true; }
+
   // Return the index of this symbol in the output file symbol table.
   // A value of -1U means that this symbol is not going into the
   // output file.  This starts out as zero, and is set to a non-zero
@@ -383,7 +395,7 @@ class Symbol
   // Return whether this symbol has an entry in the PLT section.
   bool
   has_plt_offset() const
-  { return this->has_plt_offset_; }
+  { return this->plt_offset_ != -1U; }
 
   // Return the offset into the PLT section of this symbol.
   unsigned int
@@ -397,7 +409,7 @@ class Symbol
   void
   set_plt_offset(unsigned int plt_offset)
   {
-    this->has_plt_offset_ = true;
+    gold_assert(plt_offset != -1U);
     this->plt_offset_ = plt_offset;
   }
 
@@ -870,16 +882,14 @@ class Symbol
   // non-zero value during Layout::finalize.
   unsigned int dynsym_index_;
 
-  // If this symbol has an entry in the GOT section (has_got_offset_
-  // is true), this holds the offset from the start of the GOT section.
-  // A symbol may have more than one GOT offset (e.g., when mixing
-  // modules compiled with two different TLS models), but will usually
-  // have at most one.
+  // The GOT section entries for this symbol.  A symbol may have more
+  // than one GOT offset (e.g., when mixing modules compiled with two
+  // different TLS models), but will usually have at most one.
   Got_offset_list got_offsets_;
 
-  // If this symbol has an entry in the PLT section (has_plt_offset_
-  // is true), then this is the offset from the start of the PLT
-  // section.
+  // If this symbol has an entry in the PLT section, then this is the
+  // offset from the start of the PLT section.  This is -1U if there
+  // is no PLT entry.
   unsigned int plt_offset_;
 
   // Symbol type (bits 0 to 3).
@@ -892,10 +902,7 @@ class Symbol
   unsigned int nonvis_ : 6;
   // The type of symbol (bits 16 to 18).
   Source source_ : 3;
-  // True if this symbol always requires special target-specific
-  // handling (bit 19).
-  bool is_target_special_ : 1;
-  // True if this is the default version of the symbol (bit 20).
+  // True if this is the default version of the symbol (bit 19).
   bool is_def_ : 1;
   // True if this symbol really forwards to another symbol.  This is
   // used when we discover after the fact that two different entries
@@ -903,37 +910,38 @@ class Symbol
   // never be set for a symbol found in the hash table, but may be set
   // for a symbol found in the list of symbols attached to an Object.
   // It forwards to the symbol found in the forwarders_ map of
-  // Symbol_table (bit 21).
+  // Symbol_table (bit 20).
   bool is_forwarder_ : 1;
   // True if the symbol has an alias in the weak_aliases table in
-  // Symbol_table (bit 22).
+  // Symbol_table (bit 21).
   bool has_alias_ : 1;
   // True if this symbol needs to be in the dynamic symbol table (bit
-  // 23).
+  // 22).
   bool needs_dynsym_entry_ : 1;
-  // True if we've seen this symbol in a regular object (bit 24).
+  // True if we've seen this symbol in a regular object (bit 23).
   bool in_reg_ : 1;
-  // True if we've seen this symbol in a dynamic object (bit 25).
+  // True if we've seen this symbol in a dynamic object (bit 24).
   bool in_dyn_ : 1;
-  // True if the symbol has an entry in the PLT section (bit 26).
-  bool has_plt_offset_ : 1;
   // True if this is a dynamic symbol which needs a special value in
-  // the dynamic symbol table (bit 27).
+  // the dynamic symbol table (bit 25).
   bool needs_dynsym_value_ : 1;
-  // True if there is a warning for this symbol (bit 28).
+  // True if there is a warning for this symbol (bit 26).
   bool has_warning_ : 1;
   // True if we are using a COPY reloc for this symbol, so that the
-  // real definition lives in a dynamic object (bit 29).
+  // real definition lives in a dynamic object (bit 27).
   bool is_copied_from_dynobj_ : 1;
   // True if this symbol was forced to local visibility by a version
-  // script (bit 30).
+  // script (bit 28).
   bool is_forced_local_ : 1;
   // True if the field u_.from_object.shndx is an ordinary section
   // index, not one of the special codes from SHN_LORESERVE to
-  // SHN_HIRESERVE (bit 31).
+  // SHN_HIRESERVE (bit 29).
   bool is_ordinary_shndx_ : 1;
-  // True if we've seen this symbol in a real ELF object.
+  // True if we've seen this symbol in a real ELF object (bit 30).
   bool in_real_elf_ : 1;
+  // True if this symbol is defined in a section which was discarded
+  // (bit 31).
+  bool is_defined_in_discarded_section_ : 1;
 };
 
 // The parts of a symbol which are size specific.  Using a template
