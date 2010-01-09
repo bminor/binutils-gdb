@@ -5045,6 +5045,9 @@ mips_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 	  static gdb_byte big_breakpoint[] = { 0, 0x5, 0, 0xd };
 	  static gdb_byte pmon_big_breakpoint[] = { 0, 0, 0, 0xd };
 	  static gdb_byte idt_big_breakpoint[] = { 0, 0, 0x0a, 0xd };
+	  /* Likewise, IRIX appears to expect a different breakpoint,
+	     although this is not apparent until you try to use pthreads. */
+	  static gdb_byte irix_big_breakpoint[] = { 0, 0, 0, 0xd };
 
 	  *lenptr = sizeof (big_breakpoint);
 
@@ -5054,6 +5057,8 @@ mips_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 		   || strcmp (target_shortname, "pmon") == 0
 		   || strcmp (target_shortname, "lsi") == 0)
 	    return pmon_big_breakpoint;
+	  else if (gdbarch_osabi (gdbarch) == GDB_OSABI_IRIX)
+	    return irix_big_breakpoint;
 	  else
 	    return big_breakpoint;
 	}

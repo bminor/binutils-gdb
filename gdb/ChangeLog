@@ -1,5 +1,12 @@
 2010-01-09  Joel Brobecker  <brobecker@adacore.com>
 
+	Use the correct breakpoint instruction on mips-irix.
+	* mips-tdep.c (mips_breakpoint_from_pc): Add new static variable
+	containing the correct breakpoint instruction to use on mips-irix.
+	Use it when the osabi is GDB_OSABI_IRIX.
+
+2010-01-09  Joel Brobecker  <brobecker@adacore.com>
+
 	-Wunused warning in procfs.c (mips-irix only).
 	* procfs.c (gdb_praddset, gdb_prdelset): New macros.  Use them
 	throughout instead of using praddset and prdelset respectively.
