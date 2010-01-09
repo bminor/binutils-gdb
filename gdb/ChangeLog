@@ -1,5 +1,11 @@
 2010-01-09  Joel Brobecker  <brobecker@adacore.com>
 
+	-Wunused warning in procfs.c (mips-irix only).
+	* procfs.c (gdb_praddset, gdb_prdelset): New macros.  Use them
+	throughout instead of using praddset and prdelset respectively.
+
+2010-01-09  Joel Brobecker  <brobecker@adacore.com>
+
 	GDB crash while stepping into function.
 	* infrun.c (handle_inferior_event): Refetch the current frame
 	after handling what.main_action, in case that pointer became

@@ -270,6 +270,15 @@ typedef pr_siginfo64_t gdb_siginfo_t;
 typedef struct siginfo gdb_siginfo_t;
 #endif
 
+/* On mips-irix, praddset and prdelset are defined in such a way that
+   they return a value, which causes GCC to emit a -Wunused error
+   because the returned value is not used.  Prevent this warning
+   by casting the return value to void.  On sparc-solaris, this issue
+   does not exist because the definition of these macros already include
+   that cast to void.  */
+#define gdb_praddset(sp, flag) ((void) praddset (sp, flag))
+#define gdb_prdelset(sp, flag) ((void) prdelset (sp, flag))
+
 /* gdb_premptysysset */
 #ifdef premptysysset
 #define gdb_premptysysset premptysysset
@@ -281,14 +290,14 @@ typedef struct siginfo gdb_siginfo_t;
 #ifdef praddsysset
 #define gdb_praddsysset praddsysset
 #else
-#define gdb_praddsysset praddset
+#define gdb_praddsysset gdb_praddset
 #endif
 
 /* prdelsysset */
 #ifdef prdelsysset
 #define gdb_prdelsysset prdelsysset
 #else
-#define gdb_prdelsysset prdelset
+#define gdb_prdelsysset gdb_prdelset
 #endif
 
 /* prissyssetmember */
@@ -2219,7 +2228,7 @@ proc_trace_signal (procinfo *pi, int signo)
     {
       if (proc_get_traced_signals (pi, &temp))
 	{
-	  praddset (&temp, signo);
+	  gdb_praddset (&temp, signo);
 	  return proc_set_traced_signals (pi, &temp);
 	}
     }
@@ -2253,7 +2262,7 @@ proc_ignore_signal (procinfo *pi, int signo)
     {
       if (proc_get_traced_signals (pi, &temp))
 	{
-	  prdelset (&temp, signo);
+	  gdb_prdelset (&temp, signo);
 	  return proc_set_traced_signals (pi, &temp);
 	}
     }
@@ -3491,7 +3500,7 @@ procfs_debug_inferior (procinfo *pi)
 #else
   /* Register to trace hardware faults in the child. */
   prfillset (&traced_faults);		/* trace all faults... */
-  prdelset  (&traced_faults, FLTPAGE);	/* except page fault.  */
+  gdb_prdelset  (&traced_faults, FLTPAGE);	/* except page fault.  */
 #endif
   if (!proc_set_traced_faults  (pi, &traced_faults))
     return __LINE__;
@@ -4642,9 +4651,9 @@ register_gdb_signals (procinfo *pi, gdb_sigset_t *signals)
     if (signal_stop_state  (target_signal_from_host (signo)) == 0 &&
 	signal_print_state (target_signal_from_host (signo)) == 0 &&
 	signal_pass_state  (target_signal_from_host (signo)) == 1)
-      prdelset (signals, signo);
+      gdb_prdelset (signals, signo);
     else
-      praddset (signals, signo);
+      gdb_praddset (signals, signo);
 
   return proc_set_traced_signals (pi, signals);
 }
