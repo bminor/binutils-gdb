@@ -4066,6 +4066,11 @@ infrun: not switching back to stepped thread, it has vanished\n");
       return;
     }
 
+  /* Re-fetch current thread's frame in case the code above caused
+     the frame cache to be re-initialized, making our FRAME variable
+     a dangling pointer.  */
+  frame = get_current_frame ();
+
   /* If stepping through a line, keep going if still within it.
 
      Note that step_range_end is the address of the first instruction

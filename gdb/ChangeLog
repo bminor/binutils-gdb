@@ -1,5 +1,12 @@
 2010-01-09  Joel Brobecker  <brobecker@adacore.com>
 
+	GDB crash while stepping into function.
+	* infrun.c (handle_inferior_event): Refetch the current frame
+	after handling what.main_action, in case that pointer became
+	dangling.
+
+2010-01-09  Joel Brobecker  <brobecker@adacore.com>
+
 	Fix build failure of solaris-hosted cross debuggers.
 	* ada-valprint.c, parse.c: Include defs.h before including ctype.h.
 
