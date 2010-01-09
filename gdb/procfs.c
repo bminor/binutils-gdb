@@ -51,6 +51,7 @@
 #include "inflow.h"
 #include "auxv.h"
 #include "procfs.h"
+#include "observer.h"
 
 /*
  * PROCFS.C
@@ -5146,13 +5147,27 @@ procfs_create_inferior (struct target_ops *ops, char *exec_file,
 		       NULL, NULL, shell_file);
 
   procfs_init_inferior (ops, pid);
+}
 
+/* An observer for the "inferior_created" event.  */
+
+static void
+procfs_inferior_created (struct target_ops *ops, int from_tty)
+{
 #ifdef SYS_syssgi
   /* Make sure to cancel the syssgi() syscall-exit notifications.  
      They should normally have been removed by now, but they may still
      be activated if the inferior doesn't use shared libraries, or if
      we didn't locate __dbx_link, or if we never stopped in __dbx_link.
-     See procfs_init_inferior() for more details.  */
+     See procfs_init_inferior() for more details.
+
+     Since these notifications are only ever enabled when we spawned
+     the inferior ourselves, there is nothing to do when the inferior
+     was created by attaching to an already running process, or when
+     debugging a core file.  */
+  if (current_inferior ()->attach_flag || !target_can_run (&current_target))
+    return;
+
   proc_trace_syscalls_1 (find_procinfo_or_die (PIDGET (inferior_ptid), 0),
                          SYS_syssgi, PR_SYSEXIT, FLAG_RESET, 0);
 #endif
@@ -6000,6 +6015,8 @@ proc_untrace_sysexit_cmd (char *args, int from_tty)
 void
 _initialize_procfs (void)
 {
+  observer_attach_inferior_created (procfs_inferior_created);
+
   add_info ("proc", info_proc_cmd, _("\
 Show /proc process information about any running process.\n\
 Specify process id, or use the program being debugged by default.\n\
