@@ -1,5 +1,17 @@
 2010-01-09  Joel Brobecker  <brobecker@adacore.com>
 
+	Signal unwinder for mips-irix N32.
+	* mips-irix-tdep.c: #include mips-tdep.h, trad-frame.h, and
+	tramp-frame.h.
+	(SIGTRAMP_FRAME_SIZE, SIGCONTEXT_PC_OFF, SIGCONTEXT_REGS_OFF)
+	(SIGCONTEXT_FPREGS_OFF, SIGCONTEXT_FPCSR_OFF, SIGCONTEXT_HI_OFF)
+	(SIGCONTEXT_LO_OFF): New macros. 
+	(mips_irix_n32_tramp_frame_init): New function. 
+	(mips_irix_n32_tramp_frame): New static constant.
+	(mips_irix_init_abi): Prepend the mips_irix_n32_tramp_frame unwinder.
+
+2010-01-09  Joel Brobecker  <brobecker@adacore.com>
+
 	Breakpoint in shared library does not work on mips-irix.
 	* procfs.c: #include "observer.h".
 	(procfs_inferior_created): New function, moving here the code

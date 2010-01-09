@@ -23,8 +23,10 @@
 #include "gdb_string.h"
 #include "solib.h"
 #include "solib-irix.h"
-
 #include "elf-bfd.h"
+#include "mips-tdep.h"
+#include "trad-frame.h"
+#include "tramp-frame.h"
 
 static void
 mips_irix_elf_osabi_sniff_abi_tag_sections (bfd *abfd, asection *sect,
@@ -77,11 +79,160 @@ mips_irix_elf_osabi_sniffer (bfd *abfd)
   return osabi;
 }
 
+/* Unwinding past the signal handler on mips-irix.
+
+   Note: The following has only been tested with N32, but can probably
+         be made to work with a small number of adjustments.
+
+   On mips-irix, the sigcontext_t structure is stored at the base
+   of the frame established by the _sigtramp function.  The definition
+   of this structure can be found in <sys/signal.h> (comments have been
+   C++'ified to avoid a collision with the C-style comment delimiters
+   used by this comment):
+
+      typedef struct sigcontext {
+        __uint32_t      sc_regmask;     // regs to restore in sigcleanup
+        __uint32_t      sc_status;      // cp0 status register
+        __uint64_t      sc_pc;          // pc at time of signal
+        // General purpose registers
+        __uint64_t      sc_regs[32];    // processor regs 0 to 31
+        // Floating point coprocessor state
+        __uint64_t      sc_fpregs[32];  // fp regs 0 to 31
+        __uint32_t      sc_ownedfp;     // fp has been used
+        __uint32_t      sc_fpc_csr;     // fpu control and status reg
+        __uint32_t      sc_fpc_eir;     // fpu exception instruction reg
+                                        // implementation/revision
+        __uint32_t      sc_ssflags;     // signal stack state to restore
+        __uint64_t      sc_mdhi;        // Multiplier hi and low regs
+        __uint64_t      sc_mdlo;
+        // System coprocessor registers at time of signal
+        __uint64_t      sc_cause;       // cp0 cause register
+        __uint64_t      sc_badvaddr;    // cp0 bad virtual address
+        __uint64_t      sc_triggersave; // state of graphics trigger (SGI)
+        sigset_t        sc_sigset;      // signal mask to restore
+        __uint64_t      sc_fp_rounded_result;   // for Ieee 754 support
+        __uint64_t      sc_pad[31];
+      } sigcontext_t;
+
+   The following macros provide the offset of some of the fields
+   used to retrieve the value of the registers before the signal
+   was raised.  */
+
+/* The size of the sigtramp frame.  The sigtramp frame base can then
+   be computed by adding this size to the SP.  */
+#define SIGTRAMP_FRAME_SIZE 48
+/* The offset in sigcontext_t where the PC is saved.  */
+#define SIGCONTEXT_PC_OFF 8
+/* The offset in sigcontext_t where the GP registers are saved.  */
+#define SIGCONTEXT_REGS_OFF (SIGCONTEXT_PC_OFF + 8)
+/* The offset in sigcontext_t where the FP regsiters are saved.  */
+#define SIGCONTEXT_FPREGS_OFF (SIGCONTEXT_REGS_OFF + 32 * 8)
+/* The offset in sigcontext_t where the FP CSR register is saved.  */
+#define SIGCONTEXT_FPCSR_OFF (SIGCONTEXT_FPREGS_OFF + 32 * 8 + 4)
+/* The offset in sigcontext_t where the multiplier hi register is saved.  */
+#define SIGCONTEXT_HI_OFF (SIGCONTEXT_FPCSR_OFF + 2 * 4)
+/* The offset in sigcontext_t where the multiplier lo register is saved.  */
+#define SIGCONTEXT_LO_OFF (SIGCONTEXT_HI_OFF + 4)
+
+/* Implement the "init" routine in struct tramp_frame for the N32 ABI
+   on mips-irix.  */
+static void
+mips_irix_n32_tramp_frame_init (const struct tramp_frame *self,
+				struct frame_info *this_frame,
+				struct trad_frame_cache *this_cache,
+				CORE_ADDR func)
+{
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  const int num_regs = gdbarch_num_regs (gdbarch);
+  int sp_cooked_regno = num_regs + MIPS_SP_REGNUM;
+  const CORE_ADDR sp = get_frame_register_signed (this_frame, sp_cooked_regno);
+  const CORE_ADDR sigcontext_base = sp + 48;
+  const struct mips_regnum *regs = mips_regnum (gdbarch);
+  int ireg;
+
+  trad_frame_set_reg_addr (this_cache, regs->pc + gdbarch_num_regs (gdbarch),
+                           sigcontext_base + SIGCONTEXT_PC_OFF);
+
+  for (ireg = 1; ireg < 32; ireg++)
+    trad_frame_set_reg_addr (this_cache, ireg + MIPS_ZERO_REGNUM + num_regs,
+                             sigcontext_base + SIGCONTEXT_REGS_OFF + ireg * 8);
+
+  for (ireg = 0; ireg < 32; ireg++)
+    trad_frame_set_reg_addr (this_cache, ireg + regs->fp0 + num_regs,
+                             sigcontext_base + SIGCONTEXT_FPREGS_OFF
+                               + ireg * 8);
+
+  trad_frame_set_reg_addr (this_cache, regs->fp_control_status + num_regs,
+                           sigcontext_base + SIGCONTEXT_FPCSR_OFF);
+
+  trad_frame_set_reg_addr (this_cache, regs->hi + num_regs,
+                           sigcontext_base + SIGCONTEXT_HI_OFF);
+
+  trad_frame_set_reg_addr (this_cache, regs->lo + num_regs,
+                           sigcontext_base + SIGCONTEXT_LO_OFF);
+
+  trad_frame_set_id (this_cache, frame_id_build (sigcontext_base, func));
+}
+
+/* The tramp_frame structure describing sigtramp frames on mips-irix N32.
+
+   Note that the list of instructions below is pretty much a pure dump
+   of function _sigtramp on mips-irix.  A few instructions are actually
+   not tested (mask set to 0), because a portion of these instructions
+   contain an address which changes due to relocation.  We could use
+   a smarter mask that checks the instrutction code alone, but given
+   the number of instructions already being checked, this seemed
+   unnecessary.  */
+
+static const struct tramp_frame mips_irix_n32_tramp_frame =
+{
+  SIGTRAMP_FRAME,
+  4,
+  {
+   { 0x3c0c8000, -1 }, /*    lui     t0,0x8000 */
+   { 0x27bdffd0, -1 }, /*    addiu   sp,sp,-48 */
+   { 0x008c6024, -1 }, /*    and     t0,a0,t0 */
+   { 0xffa40018, -1 }, /*    sd      a0,24(sp) */
+   { 0x00000000,  0 }, /*    beqz    t0,0xfaefcb8 <_sigtramp+40> */
+   { 0xffa60028, -1 }, /*    sd      a2,40(sp) */
+   { 0x01806027, -1 }, /*    nor     t0,t0,zero */
+   { 0xffa00020, -1 }, /*    sd      zero,32(sp) */
+   { 0x00000000,  0 }, /*    b       0xfaefcbc <_sigtramp+44> */
+   { 0x008c2024, -1 }, /*    and     a0,a0,t0 */
+   { 0xffa60020, -1 }, /*    sd      a2,32(sp) */
+   { 0x03e0c025, -1 }, /*    move    t8,ra */
+   { 0x00000000,  0 }, /*    bal     0xfaefcc8 <_sigtramp+56> */
+   { 0x00000000, -1 }, /*    nop */
+   { 0x3c0c0007, -1 }, /*    lui     t0,0x7 */
+   { 0x00e0c825, -1 }, /*    move    t9,a3 */
+   { 0x658c80fc, -1 }, /*    daddiu  t0,t0,-32516 */
+   { 0x019f602d, -1 }, /*    daddu   t0,t0,ra */
+   { 0x0300f825, -1 }, /*    move    ra,t8 */
+   { 0x8d8c9880, -1 }, /*    lw      t0,-26496(t0) */
+   { 0x8d8c0000, -1 }, /*    lw      t0,0(t0) */
+   { 0x8d8d0000, -1 }, /*    lw      t1,0(t0) */
+   { 0xffac0008, -1 }, /*    sd      t0,8(sp) */
+   { 0x0320f809, -1 }, /*    jalr    t9 */
+   { 0xffad0010, -1 }, /*    sd      t1,16(sp) */
+   { 0xdfad0010, -1 }, /*    ld      t1,16(sp) */
+   { 0xdfac0008, -1 }, /*    ld      t0,8(sp) */
+   { 0xad8d0000, -1 }, /*    sw      t1,0(t0) */
+   { 0xdfa40020, -1 }, /*    ld      a0,32(sp) */
+   { 0xdfa50028, -1 }, /*    ld      a1,40(sp) */
+   { 0xdfa60018, -1 }, /*    ld      a2,24(sp) */
+   { 0x24020440, -1 }, /*    li      v0,1088 */
+   { 0x0000000c, -1 }, /*    syscall */
+   { TRAMP_SENTINEL_INSN, -1 }
+  },
+  mips_irix_n32_tramp_frame_init
+};
+
 static void
 mips_irix_init_abi (struct gdbarch_info info,
                     struct gdbarch *gdbarch)
 {
   set_solib_ops (gdbarch, &irix_so_ops);
+  tramp_frame_prepend_unwinder (gdbarch, &mips_irix_n32_tramp_frame);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
