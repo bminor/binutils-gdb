@@ -1,5 +1,12 @@
 2010-01-09  Joel Brobecker  <brobecker@adacore.com>
 
+	Wrong return convention for arrays (mips-irix).
+	* mips-tdep.c (mips_n32n64_return_value): Arrays whose size is
+	128 bits or smaller are returned the same way as structs
+	and unions of the the same size.
+
+2010-01-09  Joel Brobecker  <brobecker@adacore.com>
+
 	Cannot set the PC on mips-irix.
 	* irix5-nat.c (fill_gregset): Check regno against the raw PC
 	register number, no the cooked one.
