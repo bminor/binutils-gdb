@@ -31,9 +31,8 @@
    during the process of parsing; the lower levels of the tree always
    come first in the result.  */
 
-#include <ctype.h>
-
 #include "defs.h"
+#include <ctype.h>
 #include "arch-utils.h"
 #include "gdb_string.h"
 #include "symtab.h"
