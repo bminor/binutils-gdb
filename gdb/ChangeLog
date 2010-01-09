@@ -1,5 +1,11 @@
 2010-01-09  Joel Brobecker  <brobecker@adacore.com>
 
+	Cannot set the PC on mips-irix.
+	* irix5-nat.c (fill_gregset): Check regno against the raw PC
+	register number, no the cooked one.
+
+2010-01-09  Joel Brobecker  <brobecker@adacore.com>
+
 	Error while loading core file on mips-irix.
 	* solib-irix.c (irix_solib_create_inferior_hook): Do nothing
 	if debugging from a core file.

@@ -98,7 +98,7 @@ fill_gregset (const struct regcache *regcache, gregset_t *gregsetp, int regno)
 	*(regp + regi) = extract_signed_integer (buf, size, byte_order);
       }
 
-  if ((regno == -1) || (regno == gdbarch_pc_regnum (gdbarch)))
+  if ((regno == -1) || (regno == mips_regnum (gdbarch)->pc))
     {
       regi = mips_regnum (gdbarch)->pc;
       size = register_size (gdbarch, regi);
