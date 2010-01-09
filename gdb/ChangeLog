@@ -1,5 +1,11 @@
 2010-01-09  Joel Brobecker  <brobecker@adacore.com>
 
+	GDB hangs when attaching to process on mips-irix.
+	* solib-irix.c (irix_solib_create_inferior_hook): Do nothing if
+	attaching to a process.
+
+2010-01-09  Joel Brobecker  <brobecker@adacore.com>
+
 	Use the correct breakpoint instruction on mips-irix.
 	* mips-tdep.c (mips_breakpoint_from_pc): Add new static variable
 	containing the correct breakpoint instruction to use on mips-irix.
