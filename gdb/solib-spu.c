@@ -50,25 +50,19 @@
 static void
 spu_relocate_main_executable (int spufs_fd)
 {
-  struct objfile *objfile;
-  struct cleanup *old_chain;
   struct section_offsets *new_offsets;
   int i;
 
-  for (objfile = symfile_objfile;
-       objfile;
-       objfile = objfile->separate_debug_objfile)
-    {
-      new_offsets = xcalloc (objfile->num_sections,
-			     sizeof (struct section_offsets));
-      old_chain = make_cleanup (xfree, new_offsets);
+  if (symfile_objfile == NULL)
+    return;
 
-      for (i = 0; i < objfile->num_sections; i++)
-        new_offsets->offsets[i] = SPUADDR (spufs_fd, 0);
+  new_offsets = alloca (symfile_objfile->num_sections
+			* sizeof (struct section_offsets));
 
-      objfile_relocate (objfile, new_offsets);
-      do_cleanups (old_chain);
-    }
+  for (i = 0; i < symfile_objfile->num_sections; i++)
+    new_offsets->offsets[i] = SPUADDR (spufs_fd, 0);
+
+  objfile_relocate (symfile_objfile, new_offsets);
 }
 
 /* When running a stand-alone SPE executable, we may need to skip one more

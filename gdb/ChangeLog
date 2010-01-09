@@ -1,3 +1,19 @@
+2010-01-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix displacement of separate debug info files.
+	* objfiles.c (objfile_relocate): Rename to ...
+	(objfile_relocate1): ... here and make it static.  Extend the comment.
+	(objfile_relocate): New function.
+	* solib-spu.c (spu_relocate_main_executable): Explicitly check if
+	SYMFILE_OBJFILE is NULL.  Remove variables objfile and old_chain.
+	Remove following of SEPARATE_DEBUG_OBJFILE.  new_offsets is now
+	allocated using alloca.
+	* symfile.c (copy_section_addr_info): Remove.
+	(build_section_addr_info_from_objfile): Make it global.  New variables
+	addr_bit and mask, use them.
+	* symfile.h (build_section_addr_info_from_objfile): New prototype.
+	(copy_section_addr_info): Remove.
+
 2010-01-09  Joel Brobecker  <brobecker@adacore.com>
 
 	Signal unwinder for mips-irix N32.

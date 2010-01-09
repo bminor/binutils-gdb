@@ -328,32 +328,6 @@ alloc_section_addr_info (size_t num_sections)
   return sap;
 }
 
-
-/* Return a freshly allocated copy of ADDRS.  The section names, if
-   any, are also freshly allocated copies of those in ADDRS.  */
-struct section_addr_info *
-copy_section_addr_info (struct section_addr_info *addrs)
-{
-  struct section_addr_info *copy
-    = alloc_section_addr_info (addrs->num_sections);
-  int i;
-
-  copy->num_sections = addrs->num_sections;
-  for (i = 0; i < addrs->num_sections; i++)
-    {
-      copy->other[i].addr = addrs->other[i].addr;
-      if (addrs->other[i].name)
-        copy->other[i].name = xstrdup (addrs->other[i].name);
-      else
-        copy->other[i].name = NULL;
-      copy->other[i].sectindex = addrs->other[i].sectindex;
-    }
-
-  return copy;
-}
-
-
-
 /* Build (allocate and populate) a section_addr_info struct from
    an existing section table. */
 
@@ -386,12 +360,17 @@ build_section_addr_info_from_section_table (const struct target_section *start,
 
 /* Create a section_addr_info from section offsets in OBJFILE.  */
 
-static struct section_addr_info *
+struct section_addr_info *
 build_section_addr_info_from_objfile (const struct objfile *objfile)
 {
   struct section_addr_info *sap;
   int i;
   struct bfd_section *sec;
+  int addr_bit = gdbarch_addr_bit (objfile->gdbarch);
+  CORE_ADDR mask = CORE_ADDR_MAX;
+
+  if (addr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
+    mask = ((CORE_ADDR) 1 << addr_bit) - 1;
 
   sap = alloc_section_addr_info (objfile->num_sections);
   for (i = 0, sec = objfile->obfd->sections;
@@ -400,7 +379,7 @@ build_section_addr_info_from_objfile (const struct objfile *objfile)
     {
       gdb_assert (sec != NULL);
       sap->other[i].addr = (bfd_get_section_vma (objfile->obfd, sec)
-                            + objfile->section_offsets->offsets[i]);
+                            + objfile->section_offsets->offsets[i]) & mask;
       sap->other[i].name = xstrdup (bfd_get_section_name (objfile->obfd, sec));
       sap->other[i].sectindex = sec->index;
     }

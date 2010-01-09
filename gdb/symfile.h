@@ -174,6 +174,9 @@ struct sym_fns
 
 };
 
+extern struct section_addr_info *
+	   build_section_addr_info_from_objfile (const struct objfile *objfile);
+
 extern void relative_addr_info_to_section_offsets
   (struct section_offsets *section_offsets, int num_sections,
    struct section_addr_info *addrs);
@@ -253,11 +256,6 @@ extern char *find_separate_debug_file_by_debuglink (struct objfile *);
 
 extern struct section_addr_info *alloc_section_addr_info (size_t
 							  num_sections);
-
-/* Return a freshly allocated copy of ADDRS.  The section names, if
-   any, are also freshly allocated copies of those in ADDRS.  */
-extern struct section_addr_info *(copy_section_addr_info 
-                                  (struct section_addr_info *addrs));
 
 /* Build (allocate and populate) a section_addr_info struct from an
    existing section table.  */
