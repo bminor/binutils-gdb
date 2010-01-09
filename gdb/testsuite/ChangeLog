@@ -1,3 +1,12 @@
+2010-01-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/corefile.exp: Move the core finding block out and call it as
+	core_find, new variable $corefile, replace corefile by $corefile and
+	[file tail $corefile] for usage vs. test names resp.
+	* lib/gdb.exp (core_find): Move it as a new function here.  New
+	parameter binfile and deletefiles.  New variable $destcore.  Pre-delete
+	$destcore.  Return "" on error.
+
 2010-01-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Workaround PR binutils/10802.

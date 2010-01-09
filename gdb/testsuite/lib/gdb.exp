@@ -3120,3 +3120,70 @@ if {[info exists TRANSCRIPT]} {
     return [uplevel real_send_gdb $args]
   }
 }
+
+proc core_find {binfile {deletefiles {}}} {
+    global objdir subdir
+
+    set destcore "$binfile.core"
+    file delete $destcore
+
+    # Create a core file named "$destcore" rather than just "core", to
+    # avoid problems with sys admin types that like to regularly prune all
+    # files named "core" from the system.
+    #
+    # Arbitrarily try setting the core size limit to "unlimited" since
+    # this does not hurt on systems where the command does not work and
+    # allows us to generate a core on systems where it does.
+    #
+    # Some systems append "core" to the name of the program; others append
+    # the name of the program to "core"; still others (like Linux, as of
+    # May 2003) create cores named "core.PID".  In the latter case, we
+    # could have many core files lying around, and it may be difficult to
+    # tell which one is ours, so let's run the program in a subdirectory.
+    set found 0
+    set coredir "${objdir}/${subdir}/coredir.[getpid]"
+    file mkdir $coredir
+    catch "system \"(cd ${coredir}; ulimit -c unlimited; ${binfile}; true) >/dev/null 2>&1\""
+    #      remote_exec host "${binfile}"
+    foreach i "${coredir}/core ${coredir}/core.coremaker.c ${binfile}.core" {
+	if [remote_file build exists $i] {
+	    remote_exec build "mv $i $destcore"
+	    set found 1
+	}
+    }
+    # Check for "core.PID".
+    if { $found == 0 } {
+	set names [glob -nocomplain -directory $coredir core.*]
+	if {[llength $names] == 1} {
+	    set corefile [file join $coredir [lindex $names 0]]
+	    remote_exec build "mv $corefile $destcore"
+	    set found 1
+	}
+    }
+    if { $found == 0 } {
+	# The braindamaged HPUX shell quits after the ulimit -c above
+	# without executing ${binfile}.  So we try again without the
+	# ulimit here if we didn't find a core file above.
+	# Oh, I should mention that any "braindamaged" non-Unix system has
+	# the same problem. I like the cd bit too, it's really neat'n stuff.
+	catch "system \"(cd ${objdir}/${subdir}; ${binfile}; true) >/dev/null 2>&1\""
+	foreach i "${objdir}/${subdir}/core ${objdir}/${subdir}/core.coremaker.c ${binfile}.core" {
+	    if [remote_file build exists $i] {
+		remote_exec build "mv $i $destcore"
+		set found 1
+	    }
+	}
+    }
+
+    # Try to clean up after ourselves. 
+    foreach deletefile $deletefiles {
+	remote_file build delete [file join $coredir $deletefile]
+    }
+    remote_exec build "rmdir $coredir"
+	
+    if { $found == 0  } {
+	warning "can't generate a core file - core tests suppressed - check ulimit -c"
+	return ""
+    }
+    return $destcore
+}
