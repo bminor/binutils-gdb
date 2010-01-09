@@ -1,3 +1,10 @@
+2010-01-09  Joel Brobecker  <brobecker@adacore.com>
+
+	Fix the documentation of valprint.c:value_print.
+	* valprint.c (value_print): Update the function description to
+	mention that the syntax of the output follows the current_language,
+	not necessarily C.
+
 2010-01-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix displacement of separate debug info files.

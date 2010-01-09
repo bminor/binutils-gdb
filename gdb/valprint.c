@@ -366,10 +366,11 @@ common_val_print (struct value *val, struct ui_file *stream, int recurse,
 		    stream, recurse, options, language);
 }
 
-/* Print the value VAL in C-ish syntax on stream STREAM according to
-   OPTIONS.
-   If the object printed is a string pointer, returns
-   the number of string bytes printed.  */
+/* Print on stream STREAM the value VAL according to OPTIONS.  The value
+   is printed using the current_language syntax.
+
+   If the object printed is a string pointer, return the number of string
+   bytes printed.  */
 
 int
 value_print (struct value *val, struct ui_file *stream,
