@@ -1,3 +1,10 @@
+2010-01-08  Ian Lance Taylor  <iant@google.com>
+
+	* script.cc (Version_script_info::build_expression_list_lookup):
+	Don't warn about ambiguous version, just record the ambiguity.
+	(Version_script_info::get_symbol_version_helper): Give error if
+	version is ambiguous.
+
 2010-01-08  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Stub_table::Stub_table): Initalize cortex_a8_stubs_,

@@ -1957,11 +1957,13 @@ Version_script_info::build_expression_list_lookup(
 	  if (!ins.second)
 	    {
 	      const Version_tree* v1 = ins.first->second;
-	      if (v1->tag != v->tag)
-		gold_error(_("'%s' appears in version script with both "
-			     "versions '%s' and '%s'"),
-			   exp.pattern.c_str(), v1->tag.c_str(),
-			   v->tag.c_str());
+	      if (v1 != NULL && v1->tag != v->tag)
+		{
+		  // This is an ambiguous match.  It's OK if it's just
+		  // documenting symbol versions, but not if we look
+		  // up this symbol.
+		  ins.first->second = NULL;
+		}
 	    }
 	}
     }
@@ -2037,7 +2039,16 @@ Version_script_info::get_symbol_version_helper(const char* symbol_name,
       if (pe != lookup->exact.end())
 	{
 	  if (pversion != NULL)
-	    *pversion = pe->second->tag;
+	    {
+	      if (pe->second != NULL)
+		*pversion = pe->second->tag;
+	      else
+		{
+		  gold_error(_("'%s' has multiple versions in version script"),
+			     name_to_match);
+		  return false;
+		}
+	    }
 
 	  // If we are using --no-undefined-version, and this is a
 	  // global symbol, we have to record that we have found this
