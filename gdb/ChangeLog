@@ -1,3 +1,8 @@
+2010-01-09  Joel Brobecker  <brobecker@adacore.com>
+
+	Fix build failure on sparc-solaris.
+	* procfs.c: (procfs_do_thread_registers) Use elfcore_write_lwpstatus.
+
 2010-01-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Move some symfile code into subroutines.

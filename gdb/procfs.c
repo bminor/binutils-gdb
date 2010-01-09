@@ -6074,7 +6074,7 @@ procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
   target_fetch_registers (regcache, -1);
 
   fill_gregset (regcache, &gregs, -1);
-#if defined (UNIXWARE)
+#if defined (NEW_PROC_API)
   note_data = (char *) elfcore_write_lwpstatus (obfd,
 						note_data,
 						note_size,
