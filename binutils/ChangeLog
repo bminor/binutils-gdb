@@ -1,3 +1,9 @@
+2010-01-09  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
 2010-01-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* version.c (print_version): Change to "Copyright 2010".

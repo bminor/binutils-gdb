@@ -1,3 +1,8 @@
+2010-01-09  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
 2010-01-08  Tristan Gingold  <gingold@adacore.com>
 
 	* archive.c: Remove bfd_special_undocumented_glue.

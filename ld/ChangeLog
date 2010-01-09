@@ -1,3 +1,8 @@
+2010-01-09  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+
 2010-01-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ldver.c (ldversion): Change to "Copyright 2010".

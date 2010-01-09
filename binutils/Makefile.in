@@ -121,6 +121,8 @@ am_dlltool_OBJECTS = dlltool.$(OBJEXT) defparse.$(OBJEXT) \
 dlltool_OBJECTS = $(am_dlltool_OBJECTS)
 am_dllwrap_OBJECTS = dllwrap.$(OBJEXT) version.$(OBJEXT)
 dllwrap_OBJECTS = $(am_dllwrap_OBJECTS)
+am_elfedit_OBJECTS = elfedit.$(OBJEXT) version.$(OBJEXT)
+elfedit_OBJECTS = $(am_elfedit_OBJECTS)
 am_nlmconv_OBJECTS = nlmconv.$(OBJEXT) nlmheader.$(OBJEXT) \
 	$(am__objects_1)
 nlmconv_OBJECTS = $(am_nlmconv_OBJECTS)
@@ -162,8 +164,6 @@ strip_new_LDADD = $(LDADD)
 am_sysdump_OBJECTS = sysdump.$(OBJEXT) $(am__objects_1)
 sysdump_OBJECTS = $(am_sysdump_OBJECTS)
 sysdump_LDADD = $(LDADD)
-am_elfedit_OBJECTS = elfedit.$(OBJEXT) version.$(OBJEXT)
-elfedit_OBJECTS = $(am_elfedit_OBJECTS)
 am_windmc_OBJECTS = windmc.$(OBJEXT) mcparse.$(OBJEXT) mclex.$(OBJEXT) \
 	winduni.$(OBJEXT) $(am__objects_1)
 windmc_OBJECTS = $(am_windmc_OBJECTS)
@@ -196,11 +196,11 @@ LTYACCCOMPILE = $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=compile $(YACC) $(YFLAGS) $(AM_YFLAGS)
 SOURCES = $(addr2line_SOURCES) $(ar_SOURCES) $(EXTRA_ar_SOURCES) \
 	$(coffdump_SOURCES) $(cxxfilt_SOURCES) $(dlltool_SOURCES) \
-	$(dllwrap_SOURCES) $(nlmconv_SOURCES) $(nm_new_SOURCES) \
-	$(objcopy_SOURCES) $(objdump_SOURCES) $(ranlib_SOURCES) \
-	$(readelf_SOURCES) $(size_SOURCES) $(srconv_SOURCES) \
-	$(strings_SOURCES) $(strip_new_SOURCES) $(sysdump_SOURCES) \
-	$(elfedit_SOURCES) $(windmc_SOURCES) $(windres_SOURCES)
+	$(dllwrap_SOURCES) $(elfedit_SOURCES) $(nlmconv_SOURCES) \
+	$(nm_new_SOURCES) $(objcopy_SOURCES) $(objdump_SOURCES) \
+	$(ranlib_SOURCES) $(readelf_SOURCES) $(size_SOURCES) \
+	$(srconv_SOURCES) $(strings_SOURCES) $(strip_new_SOURCES) \
+	$(sysdump_SOURCES) $(windmc_SOURCES) $(windres_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -355,7 +355,6 @@ libdir = @libdir@
 libexecdir = @libexecdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
-lt_ECHO = @lt_ECHO@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -687,6 +686,9 @@ dlltool$(EXEEXT): $(dlltool_OBJECTS) $(dlltool_DEPENDENCIES)
 dllwrap$(EXEEXT): $(dllwrap_OBJECTS) $(dllwrap_DEPENDENCIES) 
 	@rm -f dllwrap$(EXEEXT)
 	$(LINK) $(dllwrap_OBJECTS) $(dllwrap_LDADD) $(LIBS)
+elfedit$(EXEEXT): $(elfedit_OBJECTS) $(elfedit_DEPENDENCIES) 
+	@rm -f elfedit$(EXEEXT)
+	$(LINK) $(elfedit_OBJECTS) $(elfedit_LDADD) $(LIBS)
 nlmheader.h: nlmheader.c
 	@if test ! -f $@; then \
 	  rm -f nlmheader.c; \
@@ -725,9 +727,6 @@ strip-new$(EXEEXT): $(strip_new_OBJECTS) $(strip_new_DEPENDENCIES)
 sysdump$(EXEEXT): $(sysdump_OBJECTS) $(sysdump_DEPENDENCIES) 
 	@rm -f sysdump$(EXEEXT)
 	$(LINK) $(sysdump_OBJECTS) $(sysdump_LDADD) $(LIBS)
-elfedit$(EXEEXT): $(elfedit_OBJECTS) $(elfedit_DEPENDENCIES) 
-	@rm -f elfedit$(EXEEXT)
-	$(LINK) $(elfedit_OBJECTS) $(elfedit_LDADD) $(LIBS)
 mcparse.h: mcparse.c
 	@if test ! -f $@; then \
 	  rm -f mcparse.c; \
@@ -768,6 +767,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlltool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dllwrap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dwarf.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elfedit.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emul_$(EMULATION).Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emul_aix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emul_vanilla.Po@am__quote@
@@ -803,7 +803,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/strings.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sysdump.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unwind-ia64.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elfedit.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/version.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/windmc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/windres.Po@am__quote@

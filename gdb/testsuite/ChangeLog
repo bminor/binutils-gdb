@@ -1,3 +1,7 @@
+2010-01-09  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* gdb.cell/configure: Regenerate.
+
 2010-01-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/corefile.exp: Move the core finding block out and call it as

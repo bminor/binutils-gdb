@@ -1,3 +1,9 @@
+2010-01-09  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* avr/configure: Regenerate.
+	* cris/configure: Regenerate.
+	* microblaze/configure: Regenerate.
+
 2010-01-02  Doug Evans  <dje@sebabeach.org>
 
 	* cris/arch.c, * cris/arch.h, * cris/cpuall.h, * cris/cpuv10.c,
