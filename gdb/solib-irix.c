@@ -449,6 +449,11 @@ irix_solib_create_inferior_hook (int from_tty)
   if (inf->attach_flag)
     return;
 
+  /* Likewise when debugging from a core file, the shared libraries
+     have already been mapped, so nothing more to do.  */
+  if (!target_can_run (&current_target))
+    return;
+
   if (!enable_break ())
     {
       warning (_("shared library handler failed to enable breakpoint"));

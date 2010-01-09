@@ -1,5 +1,11 @@
 2010-01-09  Joel Brobecker  <brobecker@adacore.com>
 
+	Error while loading core file on mips-irix.
+	* solib-irix.c (irix_solib_create_inferior_hook): Do nothing
+	if debugging from a core file.
+
+2010-01-09  Joel Brobecker  <brobecker@adacore.com>
+
 	GDB hangs when attaching to process on mips-irix.
 	* solib-irix.c (irix_solib_create_inferior_hook): Do nothing if
 	attaching to a process.
