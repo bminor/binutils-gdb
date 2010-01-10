@@ -166,6 +166,24 @@ qTfP, qTsP
 
 Process record now works correctly with hardware watchpoints.
 
+Multiple bug fixes have been made to the mips-irix port, making it
+much more reliable. In particular:
+  - Debugging threaded applications is now possible again.  Previously,
+    GDB would hang while starting the program, or while waiting for
+    the program to stop at a breakpoint.
+  - Attaching to a running process no longer hangs.
+  - An error occurring while loading a core file has been fixed.
+  - Changing the value of the PC register now works again.  This fixes
+    problems observed when using the "jump" command, or when calling
+    a function from GDB, or even when assigning a new value to $pc.
+  - With the "finish" and "return" commands, the return value for functions
+    returning a small array is now correctly printed.
+  - It is now possible to break on shared library code which gets executed
+    during a shared library init phase (code executed while executing
+    their .init section).  Previously, the breakpoint would have no effect.
+  - GDB is now able to backtrace through the signal handler for
+    non-threaded programs.
+
 *** Changes in GDB 7.0
 
 * GDB now has an interface for JIT compilation.  Applications that

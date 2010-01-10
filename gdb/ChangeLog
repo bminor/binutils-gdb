@@ -1,3 +1,7 @@
+2010-01-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Document the improvements made to the mips-irix port.
+
 2010-01-09  Joel Brobecker  <brobecker@adacore.com>
 
 	Fix the documentation of valprint.c:value_print.
