@@ -693,9 +693,10 @@ free_all_objfiles (void)
 }
 
 /* Relocate OBJFILE to NEW_OFFSETS.  There should be OBJFILE->NUM_SECTIONS
-   entries in new_offsets.  SEPARATE_DEBUG_OBJFILE is not touched here.  */
+   entries in new_offsets.  SEPARATE_DEBUG_OBJFILE is not touched here.
+   Return non-zero iff any change happened.  */
 
-static void
+static int
 objfile_relocate1 (struct objfile *objfile, struct section_offsets *new_offsets)
 {
   struct obj_section *s;
@@ -714,7 +715,7 @@ objfile_relocate1 (struct objfile *objfile, struct section_offsets *new_offsets)
 	  something_changed = 1;
       }
     if (!something_changed)
-      return;
+      return 0;
   }
 
   /* OK, get all the symtabs.  */
@@ -850,6 +851,9 @@ objfile_relocate1 (struct objfile *objfile, struct section_offsets *new_offsets)
       exec_set_section_address (bfd_get_filename (objfile->obfd), idx,
 				obj_section_addr (s));
     }
+
+  /* Data changed.  */
+  return 1;
 }
 
 /* Relocate OBJFILE to NEW_OFFSETS.  There should be OBJFILE->NUM_SECTIONS
@@ -865,8 +869,9 @@ void
 objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 {
   struct objfile *debug_objfile;
+  int changed = 0;
 
-  objfile_relocate1 (objfile, new_offsets);
+  changed |= objfile_relocate1 (objfile, new_offsets);
 
   for (debug_objfile = objfile->separate_debug_objfile;
        debug_objfile;
@@ -894,13 +899,14 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 					     debug_objfile->num_sections,
 					     objfile_addrs);
 
-      objfile_relocate1 (debug_objfile, new_debug_offsets);
+      changed |= objfile_relocate1 (debug_objfile, new_debug_offsets);
 
       do_cleanups (my_cleanups);
     }
 
   /* Relocate breakpoints as necessary, after things are relocated. */
-  breakpoint_re_set ();
+  if (changed)
+    breakpoint_re_set ();
 }
 
 /* Return non-zero if OBJFILE has partial symbols.  */
