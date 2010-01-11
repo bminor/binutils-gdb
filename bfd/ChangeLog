@@ -1,5 +1,18 @@
 2010-01-11  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o.h (bfd_mach_o_backend_data): Add arch field.
+	(bfd_mach_o_set_arch_mach): New prototype.
+	* mach-o.c (bfd_mach_o_mkobject): Define with bfd_mach_o_gen_mkobject.
+	(bfd_mach_o_set_arch_mach): New function.
+	(bfd_mach_o_gen_mkobject): New function.
+	Set TARGET_ARCHITECTURE for the generic back-ends.
+	* mach-o-target.c (bfd_mach_o_set_arch_mach): Remove define.
+	Check that TARGET_ARCHITECTURE is defined.
+	Add TARGET_ARCHITECTURE in TARGET_NAME_BACKEND structure.
+	* mach-o-i386.c (TARGET_ARCHITECTURE): Define.
+
+2010-01-11  Tristan Gingold  <gingold@adacore.com>
+
         * archive.c (bfd_slurp_armap): Also check for Mach-O sorted armap.
 
 2010-01-11  Nick Clifton  <nickc@redhat.com>

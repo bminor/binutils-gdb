@@ -845,6 +845,7 @@ bfd_mach_o_data_struct;
 /* Target specific routines.  */
 typedef struct bfd_mach_o_backend_data
 {
+  enum bfd_architecture arch;
   bfd_boolean (*_bfd_mach_o_swap_reloc_in)(arelent *, bfd_mach_o_reloc_info *);
   bfd_boolean (*_bfd_mach_o_swap_reloc_out)(arelent *, bfd_mach_o_reloc_info *);
   bfd_boolean (*_bfd_mach_o_print_thread)(bfd *, bfd_mach_o_thread_flavour *,
@@ -865,6 +866,8 @@ const bfd_target *bfd_mach_o_object_p (bfd *);
 const bfd_target *bfd_mach_o_core_p (bfd *);
 const bfd_target *bfd_mach_o_archive_p (bfd *);
 bfd *bfd_mach_o_openr_next_archived_file (bfd *, bfd *);
+bfd_boolean bfd_mach_o_set_arch_mach (bfd *, enum bfd_architecture,
+                                      unsigned long);
 int bfd_mach_o_lookup_section (bfd *, asection *, bfd_mach_o_load_command **, bfd_mach_o_section **);
 int bfd_mach_o_lookup_command (bfd *, bfd_mach_o_load_command_type, bfd_mach_o_load_command **);
 bfd_boolean bfd_mach_o_write_contents (bfd *);

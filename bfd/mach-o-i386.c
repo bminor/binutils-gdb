@@ -288,6 +288,7 @@ bfd_mach_o_i386_print_thread (bfd *abfd, bfd_mach_o_thread_flavour *thread,
 
 #define TARGET_NAME 		mach_o_i386_vec
 #define TARGET_STRING 		"mach-o-i386"
+#define TARGET_ARCHITECTURE	bfd_arch_i386
 #define TARGET_BIG_ENDIAN 	0
 #define TARGET_ARCHIVE 		0
 #include "mach-o-target.c"

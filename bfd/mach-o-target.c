@@ -57,7 +57,6 @@
   _bfd_generic_copy_link_hash_symbol_type
 #define bfd_mach_o_bfd_final_link                     _bfd_generic_final_link
 #define bfd_mach_o_bfd_link_split_section             _bfd_generic_link_split_section
-#define bfd_mach_o_set_arch_mach                      bfd_default_set_arch_mach
 #define bfd_mach_o_bfd_merge_private_bfd_data         _bfd_generic_bfd_merge_private_bfd_data
 #define bfd_mach_o_bfd_set_private_flags              _bfd_generic_bfd_set_private_flags
 #define bfd_mach_o_get_section_contents               _bfd_generic_get_section_contents
@@ -85,6 +84,10 @@
 #error TARGET_STRING must be defined
 #endif /* TARGET_STRING */
 
+#ifndef TARGET_ARCHITECTURE
+#error TARGET_ARCHITECTURE must be defined
+#endif /* TARGET_ARCHITECTURE */
+
 #ifndef TARGET_BIG_ENDIAN
 #error TARGET_BIG_ENDIAN must be defined
 #endif /* TARGET_BIG_ENDIAN */
@@ -99,6 +102,7 @@
 
 static const bfd_mach_o_backend_data TARGET_NAME_BACKEND =
 {
+  TARGET_ARCHITECTURE,
   bfd_mach_o_swap_reloc_in,
   bfd_mach_o_swap_reloc_out,
   bfd_mach_o_print_thread
