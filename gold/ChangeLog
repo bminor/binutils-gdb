@@ -1,5 +1,8 @@
 2010-01-10  Ian Lance Taylor  <iant@google.com>
 
+	* resolve.cc (Symbol_table::resolve): Add symbols to list of ODR
+	candidates before doing symbol resolution.
+
 	* resolve.cc (Symbol_table::resolve): Add symbols to the list of
 	ODR candidates if only one is weak.
 

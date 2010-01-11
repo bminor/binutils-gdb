@@ -297,6 +297,38 @@ Symbol_table::resolve(Sized_symbol<size>* to,
         }
     }
 
+  // A new weak undefined reference, merging with an old weak
+  // reference, could be a One Definition Rule (ODR) violation --
+  // especially if the types or sizes of the references differ.  We'll
+  // store such pairs and look them up later to make sure they
+  // actually refer to the same lines of code.  We also check
+  // combinations of weak and strong, which might occur if one case is
+  // inline and the other is not.  (Note: not all ODR violations can
+  // be found this way, and not everything this finds is an ODR
+  // violation.  But it's helpful to warn about.)
+  bool to_is_ordinary;
+  if (parameters->options().detect_odr_violations()
+      && (sym.get_st_bind() == elfcpp::STB_WEAK
+	  || to->binding() == elfcpp::STB_WEAK)
+      && orig_st_shndx != elfcpp::SHN_UNDEF
+      && to->shndx(&to_is_ordinary) != elfcpp::SHN_UNDEF
+      && to_is_ordinary
+      && sym.get_st_size() != 0    // Ignore weird 0-sized symbols.
+      && to->symsize() != 0
+      && (sym.get_st_type() != to->type()
+          || sym.get_st_size() != to->symsize())
+      // C does not have a concept of ODR, so we only need to do this
+      // on C++ symbols.  These have (mangled) names starting with _Z.
+      && to->name()[0] == '_' && to->name()[1] == 'Z')
+    {
+      Symbol_location fromloc
+          = { object, orig_st_shndx, sym.get_st_value() };
+      Symbol_location toloc = { to->object(), to->shndx(&to_is_ordinary),
+				to->value() };
+      this->candidate_odr_violations_[to->name()].insert(fromloc);
+      this->candidate_odr_violations_[to->name()].insert(toloc);
+    }
+
   unsigned int frombits = symbol_to_bits(sym.get_st_bind(),
                                          object->is_dynamic(),
 					 st_shndx, is_ordinary,
@@ -336,38 +368,6 @@ Symbol_table::resolve(Sized_symbol<size>* to,
 	Symbol_table::report_resolve_problem(false,
 					     _("multiple common of '%s'"),
 					     to, OBJECT, object);
-    }
-
-  // A new weak undefined reference, merging with an old weak
-  // reference, could be a One Definition Rule (ODR) violation --
-  // especially if the types or sizes of the references differ.  We'll
-  // store such pairs and look them up later to make sure they
-  // actually refer to the same lines of code.  We also check
-  // combinations of weak and strong, which might occur if one case is
-  // inline and the other is not.  (Note: not all ODR violations can
-  // be found this way, and not everything this finds is an ODR
-  // violation.  But it's helpful to warn about.)
-  bool to_is_ordinary;
-  if (parameters->options().detect_odr_violations()
-      && (sym.get_st_bind() == elfcpp::STB_WEAK
-	  || to->binding() == elfcpp::STB_WEAK)
-      && orig_st_shndx != elfcpp::SHN_UNDEF
-      && to->shndx(&to_is_ordinary) != elfcpp::SHN_UNDEF
-      && to_is_ordinary
-      && sym.get_st_size() != 0    // Ignore weird 0-sized symbols.
-      && to->symsize() != 0
-      && (sym.get_st_type() != to->type()
-          || sym.get_st_size() != to->symsize())
-      // C does not have a concept of ODR, so we only need to do this
-      // on C++ symbols.  These have (mangled) names starting with _Z.
-      && to->name()[0] == '_' && to->name()[1] == 'Z')
-    {
-      Symbol_location fromloc
-          = { object, orig_st_shndx, sym.get_st_value() };
-      Symbol_location toloc = { to->object(), to->shndx(&to_is_ordinary),
-				to->value() };
-      this->candidate_odr_violations_[to->name()].insert(fromloc);
-      this->candidate_odr_violations_[to->name()].insert(toloc);
     }
 }
 
