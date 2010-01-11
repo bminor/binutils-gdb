@@ -1,3 +1,10 @@
+2010-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Tristan Gingold  <gingold@adacore.com>
+
+	* solib.c (info_sharedlibrary_command): Replace
+	objfile_has_partial_symbols and objfile_has_full_symbols calls by
+	objfile_has_symbols.
+
 2010-01-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Document the improvements made to the mips-irix port.

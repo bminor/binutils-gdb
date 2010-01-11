@@ -863,8 +863,7 @@ info_sharedlibrary_command (char *pattern, int from_tty)
 
       if (! ui_out_is_mi_like_p (interp_ui_out (top_level_interpreter ()))
 	  && so->symbols_loaded
-	  && !objfile_has_partial_symbols (so->objfile)
-	  && !objfile_has_full_symbols (so->objfile))
+	  && !objfile_has_symbols (so->objfile))
 	{
 	  so_missing_debug_info = 1;
 	  ui_out_field_string (uiout, "syms-read", "Yes (*)");
