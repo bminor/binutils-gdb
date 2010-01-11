@@ -1411,6 +1411,16 @@ parse_number (char *p, int len, int parsed_float, YYSTYPE *putithere)
 	  }
 	break;
 
+      case 'b':
+      case 'B':
+	if (len >= 3)
+	  {
+	    p += 2;
+	    base = 2;
+	    len -= 2;
+	  }
+	break;
+
       case 't':
       case 'T':
       case 'd':

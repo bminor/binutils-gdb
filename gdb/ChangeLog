@@ -1,4 +1,9 @@
 2010-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Implement binary numbers parsing.
+	* c-exp.y (parse_number): New case 'b' and 'B'.
+
+2010-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Tristan Gingold  <gingold@adacore.com>
 
 	* solib.c (info_sharedlibrary_command): Replace

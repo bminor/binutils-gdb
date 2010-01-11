@@ -78,6 +78,13 @@ proc test_integer_literals_accepted {} {
     gdb_test "p 0xabcdef" " = 11259375"
     gdb_test "p 0xAbCdEf" " = 11259375"
     gdb_test "p/x 0x123" " = 0x123"
+
+    # Test various binary values.
+
+    gdb_test "p 0b0" " = 0"
+    gdb_test "p 0b1111" " = 15"
+    gdb_test "p 0B1111" " = 15"
+    gdb_test "p -0b1111" " = -15"
 }
 
 proc test_character_literals_accepted {} {
@@ -99,7 +106,8 @@ proc test_character_literals_accepted {} {
 proc test_integer_literals_rejected {} {
     global gdb_prompt
 
-    test_print_reject "p 0x" 
+    test_print_reject "p 0x"
+    test_print_reject "p 0b"
     gdb_test "p ''" "(Empty character constant\\.|A character constant must contain at least one character\\.)"
     gdb_test "p '''" "(Empty character constant\\.|A character constant must contain at least one character\\.)"
     test_print_reject "p '\\'"
@@ -131,6 +139,11 @@ proc test_integer_literals_rejected {} {
 
     test_print_reject "p 0xG" 
     test_print_reject "p 0xAG" 
+
+    # Test various binary values.
+
+    test_print_reject "p 0b2" 
+    test_print_reject "p 0b12" 
 }
 
 proc test_print_all_chars {} {
