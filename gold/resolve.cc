@@ -342,13 +342,15 @@ Symbol_table::resolve(Sized_symbol<size>* to,
   // reference, could be a One Definition Rule (ODR) violation --
   // especially if the types or sizes of the references differ.  We'll
   // store such pairs and look them up later to make sure they
-  // actually refer to the same lines of code.  (Note: not all ODR
-  // violations can be found this way, and not everything this finds
-  // is an ODR violation.  But it's helpful to warn about.)
+  // actually refer to the same lines of code.  We also check
+  // combinations of weak and strong, which might occur if one case is
+  // inline and the other is not.  (Note: not all ODR violations can
+  // be found this way, and not everything this finds is an ODR
+  // violation.  But it's helpful to warn about.)
   bool to_is_ordinary;
   if (parameters->options().detect_odr_violations()
-      && sym.get_st_bind() == elfcpp::STB_WEAK
-      && to->binding() == elfcpp::STB_WEAK
+      && (sym.get_st_bind() == elfcpp::STB_WEAK
+	  || to->binding() == elfcpp::STB_WEAK)
       && orig_st_shndx != elfcpp::SHN_UNDEF
       && to->shndx(&to_is_ordinary) != elfcpp::SHN_UNDEF
       && to_is_ordinary
