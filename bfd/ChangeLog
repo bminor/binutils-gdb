@@ -1,5 +1,10 @@
 2010-01-11  Alan Modra  <amodra@gmail.com>
 
+	PR 11103
+	* dwarf1.c (parse_die): Correct FORM_STRING data pointer increment.
+
+2010-01-11  Alan Modra  <amodra@gmail.com>
+
 	PR 6832
 	* dwarf2.c (struct comp_unit): Add sec_info_ptr.
 	(find_abstract_instance_name): Use it.
