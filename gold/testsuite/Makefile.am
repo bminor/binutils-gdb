@@ -1097,7 +1097,7 @@ dynamic_list: basic_test.o gcctestdir/ld $(srcdir)/dynamic_list.t
 	  -Wl,--dynamic-list-cpp-new \
 	  -Wl,--dynamic-list-cpp-typeinfo
 dynamic_list.stdout: dynamic_list
-	$(TEST_READELF) -DWs dynamic_list > dynamic_list.stdout
+	$(TEST_READELF) -W --dyn-syms dynamic_list > dynamic_list.stdout
 
 check_PROGRAMS += thin_archive_test_1
 MOSTLYCLEANFILES += libthin1.a libthin3.a libthinall.a \

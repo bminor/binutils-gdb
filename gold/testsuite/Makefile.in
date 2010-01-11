@@ -2957,7 +2957,7 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  -Wl,--dynamic-list-cpp-new \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  -Wl,--dynamic-list-cpp-typeinfo
 @GCC_TRUE@@NATIVE_LINKER_TRUE@dynamic_list.stdout: dynamic_list
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -DWs dynamic_list > dynamic_list.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -W --dyn-syms dynamic_list > dynamic_list.stdout
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@libthin1.a: thin_archive_test_1.o alt/thin_archive_test_2.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	rm -f $@

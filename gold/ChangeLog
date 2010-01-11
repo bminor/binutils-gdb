@@ -1,3 +1,10 @@
+2010-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/11144
+	* testsuite/Makefile.am (dynamic_list.stdout): Use --dyn-syms
+	instead of -Ds.
+	* testsuite/Makefile.in: Regenerated.
+
 2010-01-10  Doug Kwan  <dougkwan@google.com>
 
 	* options.h (DEFINE_var): Use parentheses around argument varname__
