@@ -1,3 +1,7 @@
+2010-01-11  Tristan Gingold  <gingold@adacore.com>
+
+        * archive.c (bfd_slurp_armap): Also check for Mach-O sorted armap.
+
 2010-01-11  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-v850.c (v850_elf_perform_relocation): Fix overflow

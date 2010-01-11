@@ -1054,6 +1054,24 @@ bfd_slurp_armap (bfd *abfd)
       return FALSE;
 #endif
     }
+  else if (CONST_STRNEQ (nextname, "#1/20           "))
+    {
+      /* Mach-O has a special name for armap when the map is sorted by name.
+         However because this name has a space it is slightly more difficult
+         to check it.  */
+      struct ar_hdr hdr;
+      char extname[21];
+
+      if (bfd_bread (&hdr, sizeof (hdr), abfd) != sizeof (hdr))
+        return FALSE;
+      /* Read the extended name.  We know its length.  */
+      if (bfd_bread (extname, 20, abfd) != 20)
+        return FALSE;
+      if (bfd_seek (abfd, (file_ptr) -(sizeof (hdr) + 20), SEEK_CUR) != 0)
+        return FALSE;
+      if (CONST_STRNEQ (extname, "__.SYMDEF SORTED"))
+        return do_slurp_bsd_armap (abfd);
+    }
 
   bfd_has_map (abfd) = FALSE;
   return TRUE;
