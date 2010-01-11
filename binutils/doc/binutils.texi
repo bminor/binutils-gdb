@@ -3894,6 +3894,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{-t}|@option{--section-details}]
         [@option{-e}|@option{--headers}]
         [@option{-s}|@option{--syms}|@option{--symbols}]
+        [@option{--dyn-syms}]
         [@option{-n}|@option{--notes}]
         [@option{-r}|@option{--relocs}]
         [@option{-u}|@option{--unwind}]
@@ -3982,6 +3983,11 @@ Displays the detailed section information. Implies @option{-S}.
 @cindex ELF symbol table information
 Displays the entries in symbol table section of the file, if it has one.
 
+@item --dyn-syms
+@cindex ELF dynamic symbol table information
+Displays the entries in dynamic symbol table section of the file, if it
+has one.
+
 @item -e
 @itemx --headers
 Display all the headers in the file.  Equivalent to @option{-h -l -S}.
@@ -4021,8 +4027,8 @@ is any.
 @item -D
 @itemx --use-dynamic
 When displaying symbols, this option makes @command{readelf} use the
-symbol table in the file's dynamic section, rather than the one in the
-symbols section.
+symbol hash tables in the file's dynamic section, rather than the
+symbol table sections.
 
 @item -x <number or name>
 @itemx --hex-dump=<number or name>

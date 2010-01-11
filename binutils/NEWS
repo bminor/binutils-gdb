@@ -1,4 +1,7 @@
 -*- text -*-
+
+* Add --dyn-syms to readelf to dump dynamic symbol table.
+
 * A new tool - elfedit - has been added to directly manipulate ELF format
   binaries.
 

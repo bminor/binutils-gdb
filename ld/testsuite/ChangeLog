@@ -1,3 +1,8 @@
+2010-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/11146
+	* ld-elf/dynsym1.d: New.
+
 2010-01-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/11138
