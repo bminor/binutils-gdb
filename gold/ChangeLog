@@ -1,3 +1,9 @@
+2010-01-11  Doug Kwan  <dougkwan@google.com>
+
+	* Makefile.am (incremental_dump_DEPENDENCIES): Add libintl dependency.
+	(incremental_dump_LDADD): Add linking option for libintl.
+	* Makefile.in: Regenerate.
+
 2010-01-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/11144
