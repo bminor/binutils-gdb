@@ -550,7 +550,7 @@ v850_elf_perform_relocation (bfd *abfd,
       addend = (addend >> 16) + ((addend & 0x8000) != 0);
 
       /* This relocation cannot overflow.  */
-      if (addend > 0x7fff)
+      if (addend > 0xffff)
 	addend = 0;
 
       insn = addend;
