@@ -396,6 +396,17 @@ bfd_mach_o_segment_command;
 #define BFD_MACH_O_GENERIC_RELOC_PB_LA_PTR	3
 #define BFD_MACH_O_GENERIC_RELOC_LOCAL_SECTDIFF	4
 
+/* X86-64 relocations.  */
+#define BFD_MACH_O_X86_64_RELOC_UNSIGNED   0 /* Absolute addresses.  */
+#define BFD_MACH_O_X86_64_RELOC_SIGNED     1 /* 32-bit disp.  */
+#define BFD_MACH_O_X86_64_RELOC_BRANCH     2 /* 32-bit pcrel disp.  */
+#define BFD_MACH_O_X86_64_RELOC_GOT_LOAD   3 /* Movq load of a GOT entry.  */
+#define BFD_MACH_O_X86_64_RELOC_GOT        4 /* GOT reference.  */
+#define BFD_MACH_O_X86_64_RELOC_SUBTRACTOR 5 /* Symbol difference.  */
+#define BFD_MACH_O_X86_64_RELOC_SIGNED_1   6 /* 32-bit signed disp -1.  */
+#define BFD_MACH_O_X86_64_RELOC_SIGNED_2   7 /* 32-bit signed disp -2.  */
+#define BFD_MACH_O_X86_64_RELOC_SIGNED_4   8 /* 32-bit signed disp -4.  */
+
 /* Size of a relocation entry.  */
 #define BFD_MACH_O_RELENT_SIZE 8
 

@@ -1,5 +1,9 @@
 2010-01-11  Tristan Gingold  <gingold@adacore.com>
 
+	* mach-o.h: Add x86-64 relocation types.
+
+2010-01-11  Tristan Gingold  <gingold@adacore.com>
+
 	* mach-o.h (bfd_mach_o_backend_data): Add arch field.
 	(bfd_mach_o_set_arch_mach): New prototype.
 	* mach-o.c (bfd_mach_o_mkobject): Define with bfd_mach_o_gen_mkobject.
