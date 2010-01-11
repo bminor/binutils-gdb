@@ -1,5 +1,9 @@
 2010-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* NEWS: Document the 0b binary number prefix parsing.
+
+2010-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* objfiles.c (objfile_relocate1): Change the return type to int.
 	Describe the new return value.  Return non-zero if data changed.
 	(objfile_relocate): New variable changed.  Set it.  Call
