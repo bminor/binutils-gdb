@@ -1,5 +1,7 @@
 2010-01-11  Nick Clifton  <nickc@redhat.com>
 
+	* NEWS: Mention addition of elfedit.
+
 	* po/fi.po: Updated Finnish translation.
 
 2010-01-09  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
