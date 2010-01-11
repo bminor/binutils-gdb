@@ -244,12 +244,18 @@ struct Struct_special : public Struct_var
 // var() and set_var() as General_options methods.  Arguments as are
 // for the constructor for One_option.  param_type__ is the same as
 // type__ for built-in types, and "const type__ &" otherwise.
+//
+// When we define the linker command option "assert", the macro argument
+// varname__ of DEFINE_var below will be replaced by "assert".  On Mac OSX
+// assert.h is included implicitly by one of the library headers we use.  To
+// avoid unintended macro substitution of "assert()", we need to enclose
+// varname__ with parenthese.
 #define DEFINE_var(varname__, dashes__, shortname__, default_value__,        \
                    default_value_as_string__, helpstring__, helparg__,       \
                    optional_arg__, type__, param_type__, parse_fn__)	     \
  public:                                                                     \
   param_type__                                                               \
-  varname__() const                                                          \
+  (varname__)() const                                                        \
   { return this->varname__##_.value; }                                       \
                                                                              \
   bool                                                                       \

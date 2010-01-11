@@ -1,3 +1,8 @@
+2010-01-10  Doug Kwan  <dougkwan@google.com>
+
+	* options.h (DEFINE_var): Use parentheses around argument varname__
+	in macro body to avoid any unintended subsequent substitutions.
+
 2010-01-10  Ian Lance Taylor  <iant@google.com>
 
 	* resolve.cc (Symbol_table::resolve): Add symbols to list of ODR
