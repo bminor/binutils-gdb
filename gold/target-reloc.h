@@ -144,6 +144,31 @@ get_comdat_behavior(const char* name)
   return CB_WARNING;
 }
 
+// Give an error for a symbol with non-default visibility which is not
+// defined locally.
+
+inline void
+visibility_error(const Symbol* sym)
+{
+  const char* v;
+  switch (sym->visibility())
+    {
+    case elfcpp::STV_INTERNAL:
+      v = _("internal");
+      break;
+    case elfcpp::STV_HIDDEN:
+      v = _("hidden");
+      break;
+    case elfcpp::STV_PROTECTED:
+      v = _("protected");
+      break;
+    default:
+      gold_unreachable();
+    }
+  gold_error(_("%s symbol '%s' is not defined locally"),
+	     v, sym->name());
+}
+
 // This function implements the generic part of relocation processing.
 // The template parameter Relocate must be a class type which provides
 // a single function, relocate(), which implements the machine
@@ -323,6 +348,10 @@ relocate_section(
 	  && (!parameters->options().shared()       // -shared
               || parameters->options().defs()))     // -z defs
 	gold_undefined_symbol_at_location(sym, relinfo, i, offset);
+      else if (sym != NULL
+	       && sym->visibility() != elfcpp::STV_DEFAULT
+	       && (sym->is_undefined() || sym->is_from_dynobj()))
+	visibility_error(sym);
 
       if (sym != NULL && sym->has_warning())
 	relinfo->symtab->issue_warning(sym, relinfo, i, offset);

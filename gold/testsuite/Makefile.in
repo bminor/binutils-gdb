@@ -94,7 +94,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err ver_test_1.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_2.syms ver_test_4.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_5.syms ver_test_7.syms \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_10.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_10.syms protected_3.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4.stdout \
@@ -183,7 +183,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg.err debug_msg_so.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err ver_test_11.a \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	binary.txt \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_3.err binary.txt \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4 script_test_5 \
@@ -2905,6 +2905,15 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@protected_3_pic.o: protected_3.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@protected_4_pic.o: protected_4.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@protected_3.err: protected_4_pic.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	@echo $(CXXLINK) -Bgcctestdir/ -shared -o protected_4.so protected_4_pic.o "2>$@"
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	@if $(CXXLINK) -Bgcctestdir/ -shared -o protected_4.so protected_4_pic.o 2>$@; then \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	  echo 1>&2 "Link of protected_4.so should have failed"; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	  rm -f $@; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	  exit 1; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	fi
 @GCC_TRUE@@NATIVE_LINKER_TRUE@relro_test.so: gcctestdir/ld relro_test_pic.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared -Wl,-z,relro relro_test_pic.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@relro_test_pic.o: relro_test.cc
