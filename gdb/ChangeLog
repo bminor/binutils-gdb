@@ -1,5 +1,9 @@
 2010-01-12  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-valprint.c (ada_print_floating): Remove trailing space.
+
+2010-01-12  Joel Brobecker  <brobecker@adacore.com>
+
 	Add support for DW_AT_GNAT_descriptive_type.
 	* gdbtypes.h (enum type_specific_kind): New enum.
 	(struct main_type) [type_specific_field]: New component.

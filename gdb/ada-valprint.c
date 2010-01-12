@@ -332,7 +332,7 @@ ada_print_floating (const gdb_byte *valaddr, struct type *type,
   len = strlen (result);
 
   /* Modify for Ada rules.  */
-  
+
   s = strstr (result, "inf");
   if (s == NULL)
     s = strstr (result, "Inf");
