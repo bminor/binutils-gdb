@@ -1,5 +1,11 @@
 2010-01-12  Joel Brobecker  <brobecker@adacore.com>
 
+	Fix -Wunused warning in dec-thread.c.
+	* dec-thread.c (dec_thread_count_gdb_threads)
+	(dec_thread_add_gdb_thread): Prevent -Wunused warning.
+
+2010-01-12  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-valprint.c (ada_print_floating): Remove trailing space.
 
 2010-01-12  Joel Brobecker  <brobecker@adacore.com>

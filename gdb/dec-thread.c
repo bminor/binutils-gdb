@@ -352,7 +352,7 @@ dec_thread_count_gdb_threads (struct thread_info *ignored, void *context)
 {
   int *count = (int *) context;
 
-  *count++;
+  (void) *count++; /* The cast to void is to prevent a -Wunused warning.  */
   return 0;
 }
 
@@ -366,7 +366,7 @@ dec_thread_add_gdb_thread (struct thread_info *info, void *context)
   struct thread_info ***listp = (struct thread_info ***) context;
   
   **listp = info;
-  *listp++;
+  (void) *listp++; /* The cast to void is to prevent a -Wunused warning.  */
   return 0;
 }
 
