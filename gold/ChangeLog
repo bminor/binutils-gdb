@@ -1,5 +1,9 @@
 2010-01-11  Ian Lance Taylor  <iant@google.com>
 
+	* script.cc (Version_script_info::build_expression_list_lookup):
+	Change complaing about duplicate wildcard match from error to
+	warning.
+
 	* script.cc (class Lazy_demangler): Recreate--revert part of patch
 	of 2009-12-30.
 	(Version_script_info::Version_script_info): Initialize globs_,

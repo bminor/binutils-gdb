@@ -2145,9 +2145,9 @@ Version_script_info::build_expression_list_lookup(
 	{
 	  if (this->default_version_ != NULL
 	      && this->default_version_->tag != v->tag)
-	    gold_error(_("wildcard match appears in both version '%s' "
-			 "and '%s' in script"),
-		       this->default_version_->tag.c_str(), v->tag.c_str());
+	    gold_warning(_("wildcard match appears in both version '%s' "
+			   "and '%s' in script"),
+			 this->default_version_->tag.c_str(), v->tag.c_str());
 	  else if (this->default_version_ != NULL
 		   && this->default_is_global_ != is_global)
 	    gold_error(_("wildcard match appears as both global and local "
