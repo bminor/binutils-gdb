@@ -1,3 +1,40 @@
+2010-01-11  Ian Lance Taylor  <iant@google.com>
+
+	* script.cc (class Lazy_demangler): Recreate--revert part of patch
+	of 2009-12-30.
+	(Version_script_info::Version_script_info): Initialize globs_,
+	default_version_, default_is_global_, and exact_.  Don't
+	initialize globals_ or locals_.
+	(Version_script_info::build_lookup_tables): Build local symbols
+	first.
+	(Version_script_info::unquote): New function.
+	(Version_script_info::add_exact_match): New function.
+	(Version_script_info::build_expression_list_lookup): Remove lookup
+	parameter.  Add is_global parameter.  Change all callers.  Handle
+	wildcard pattern specially.  Unquote pattern.  Call
+	add_exact_match.
+	(Version_script_info::get_name_to_match): New function.
+	(Version_script_info::get_symbol_version): New function.
+	(Version_script_info::get_symbol_version_helper): Remove.
+	(Version_script_info::check_unmatched_names): Call unquote.
+	* script.h (class Version_script_info): Change get_symbol_version
+	to be non-inline and add is_global parameter; change all callers.
+	Rewrite symbol_is_local.  Update declarations.  Define struct
+	Version_tree_match, Exact, Globs.  Don't define struct Lookup.
+	Remove globals_ and locals_ members.  Add exact_, globs_,
+	default_version_, is_global_.
+	(Version_script_info::Glob): Remove pattern, add expression and
+	is_global.  Update constructor.  Change all callers.
+	* dynobj.cc (Versions::finalize): Mark the version symbol as the
+	default version.
+	(Versions::symbol_section_contents): If a symbol is undefined, or
+	defined in a dynamic object, set the version index to
+	VER_NDX_LOCAL.
+	* symtab.cc (Symbol_table::add_from_relobj): Don't call
+	symbol_is_local.
+	(Symbol_table::add_from_pluginobj): Likewise.
+	* testsuite/ver_matching_test.sh: blaza1 and blaza go into V2.
+
 2010-01-11  Doug Kwan  <dougkwan@google.com>
 
 	* Makefile.am (incremental_dump_DEPENDENCIES): Add libintl dependency.

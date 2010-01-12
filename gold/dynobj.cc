@@ -1560,6 +1560,7 @@ Versions::finalize(Symbol_table* symtab, unsigned int dynsym_index,
 						    false, false);
 	  vsym->set_needs_dynsym_entry();
           vsym->set_dynsym_index(dynsym_index);
+	  vsym->set_is_default();
 	  ++dynsym_index;
 	  syms->push_back(vsym);
 	  // The name is already in the dynamic pool.
@@ -1649,10 +1650,15 @@ Versions::symbol_section_contents(const Symbol_table* symtab,
     {
       unsigned int version_index;
       const char* version = (*p)->version();
-      if (version == NULL)
-	version_index = elfcpp::VER_NDX_GLOBAL;
-      else        
+      if (version != NULL)
 	version_index = this->version_index(symtab, dynpool, *p);
+      else
+	{
+	  if ((*p)->is_defined() && !(*p)->is_from_dynobj())
+	    version_index = elfcpp::VER_NDX_GLOBAL;
+	  else
+	    version_index = elfcpp::VER_NDX_LOCAL;
+	}
       // If the symbol was defined as foo@V1 instead of foo@@V1, add
       // the hidden bit.
       if ((*p)->version() != NULL && !(*p)->is_default())

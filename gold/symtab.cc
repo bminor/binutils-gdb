@@ -1113,11 +1113,13 @@ Symbol_table::add_from_relobj(
 	      // The symbol name did not have a version, but the
 	      // version script may assign a version anyway.
 	      std::string version;
-	      if (this->version_script_.get_symbol_version(name, &version))
+	      bool is_global;
+	      if (this->version_script_.get_symbol_version(name, &version,
+							   &is_global))
 		{
-		  // The version can be empty if the version script is
-		  // only used to force some symbols to be local.
-		  if (!version.empty())
+		  if (!is_global)
+		    is_forced_local = true;
+		  else if (!version.empty())
 		    {
 		      ver = this->namepool_.add_with_length(version.c_str(),
 							    version.length(),
@@ -1126,8 +1128,6 @@ Symbol_table::add_from_relobj(
 		      is_default_version = true;
 		    }
 		}
-	      else if (this->version_script_.symbol_is_local(name))
-		is_forced_local = true;
 	    }
 	}
 
@@ -1232,11 +1232,13 @@ Symbol_table::add_from_pluginobj(
           // The symbol name did not have a version, but the
           // version script may assign a version anyway.
           std::string version;
-          if (this->version_script_.get_symbol_version(name, &version))
+	  bool is_global;
+          if (this->version_script_.get_symbol_version(name, &version,
+						       &is_global))
             {
-              // The version can be empty if the version script is
-              // only used to force some symbols to be local.
-              if (!version.empty())
+	      if (!is_global)
+		is_forced_local = true;
+	      else if (!version.empty())
                 {
                   ver = this->namepool_.add_with_length(version.c_str(),
                                                         version.length(),
@@ -1245,8 +1247,6 @@ Symbol_table::add_from_pluginobj(
                   is_default_version = true;
                 }
             }
-          else if (this->version_script_.symbol_is_local(name))
-            is_forced_local = true;
         }
     }
 
@@ -1566,14 +1566,16 @@ Symbol_table::define_special_symbol(const char** pname, const char** pversion,
   bool is_default_version = false;
   if (*pversion == NULL)
     {
-      if (this->version_script_.get_symbol_version(*pname, &v))
+      bool is_global;
+      if (this->version_script_.get_symbol_version(*pname, &v, &is_global))
 	{
-	  if (!v.empty())
-	    *pversion = v.c_str();
-
-	  // If we get the version from a version script, then we are
-	  // also the default version.
-	  is_default_version = true;
+	  if (is_global && !v.empty())
+	    {
+	      *pversion = v.c_str();
+	      // If we get the version from a version script, then we
+	      // are also the default version.
+	      is_default_version = true;
+	    }
 	}
     }
 
