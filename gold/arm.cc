@@ -1178,6 +1178,10 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
   void
   do_read_symbols(Read_symbols_data* sd);
 
+  // Process relocs for garbage collection.
+  void
+  do_gc_process_relocs(Symbol_table*, Layout*, Read_relocs_data*);
+
  private:
   // List of stub tables.
   typedef std::vector<Stub_table<big_endian>*> Stub_table_list;
@@ -4235,6 +4239,44 @@ Arm_relobj<big_endian>::do_read_symbols(Read_symbols_data* sd)
     read_arm_attributes_section<big_endian>(this, sd); 
 }
 
+// Process relocations for garbage collection.  The ARM target uses .ARM.exidx
+// sections for unwinding.  These sections are referenced implicitly by 
+// text sections linked in the section headers.  If we ignore these implict
+// references, the .ARM.exidx sections and any .ARM.extab sections they use
+// will be garbage-collected incorrectly.  Hence we override the same function
+// in the base class to handle these implicit references.
+
+template<bool big_endian>
+void
+Arm_relobj<big_endian>::do_gc_process_relocs(Symbol_table* symtab,
+					     Layout* layout,
+					     Read_relocs_data* rd)
+{
+  // First, call base class method to process relocations in this object.
+  Sized_relobj<32, big_endian>::do_gc_process_relocs(symtab, layout, rd);
+
+  unsigned int shnum = this->shnum();
+  const unsigned int shdr_size = elfcpp::Elf_sizes<32>::shdr_size;
+  const unsigned char* pshdrs = this->get_view(this->elf_file()->shoff(),
+					       shnum * shdr_size,
+					       true, true);
+
+  // Scan section headers for sections of type SHT_ARM_EXIDX.  Add references
+  // to these from the linked text sections.
+  const unsigned char* ps = pshdrs + shdr_size;
+  for (unsigned int i = 1; i < shnum; ++i, ps += shdr_size)
+    {
+      elfcpp::Shdr<32, big_endian> shdr(ps);
+      if (shdr.get_sh_type() == elfcpp::SHT_ARM_EXIDX)
+	{
+	  // Found an .ARM.exidx section, add it to the set of reachable
+	  // sections from its linked text section.
+	  unsigned int text_shndx = this->adjust_shndx(shdr.get_sh_link());
+	  symtab->gc()->add_reference(this, text_shndx, this, i);
+	}
+    }
+}
+
 // Arm_dynobj methods.
 
 // Read the symbol information.
@@ -5081,12 +5123,12 @@ Target_arm<big_endian>::do_finalize_sections(
 				    Symbol_table::PREDEFINED,
 				    exidx_section, 0, 0, elfcpp::STT_OBJECT,
 				    elfcpp::STB_GLOBAL, elfcpp::STV_HIDDEN, 0,
-				    false, false);
+				    false, true);
       symtab->define_in_output_data("__exidx_end", NULL,
 				    Symbol_table::PREDEFINED,
 				    exidx_section, 0, 0, elfcpp::STT_OBJECT,
 				    elfcpp::STB_GLOBAL, elfcpp::STV_HIDDEN, 0,
-				    true, false);
+				    true, true);
 
       // For the ARM target, we need to add a PT_ARM_EXIDX segment for
       // the .ARM.exidx section.

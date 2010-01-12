@@ -1,3 +1,12 @@
+2010-01-11  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_relobj::do_gc_process_relocs): New method.
+	(Target_arm::do_finalize_sections): Define special EXIDX section
+	symbols only if referenced.
+	* gc.h (Garbage_collection::add_reference): New method.
+	(gc_process_relocs): Use Garbage_collection::add_reference to avoid
+	code duplication.
+
 2010-01-11  Ian Lance Taylor  <iant@google.com>
 
 	* script.cc (Version_script_info::build_expression_list_lookup):
