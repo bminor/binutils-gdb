@@ -1,3 +1,7 @@
+2010-01-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* configure: Regenerate (for _STRUCTURED_PROC).
+
 2010-01-12  Joel Brobecker  <brobecker@adacore.com>
 
 	Delete dead function.
