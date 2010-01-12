@@ -1,3 +1,8 @@
+2010-01-12  Alan Modra  <amodra@gmail.com>
+
+	PR 11122
+	* listing.c (print_source): Add one to line number.
+
 2010-01-09  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.in: Regenerate.
