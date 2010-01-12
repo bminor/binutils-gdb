@@ -50,6 +50,7 @@
 #include "valprint.h"
 #include "inferior.h"
 #include "osdata.h"
+#include "splay-tree.h"
 
 #include <ctype.h>
 #include <sys/time.h>
@@ -360,11 +361,55 @@ mi_cmd_thread_info (char *command, char **argv, int argc)
   print_thread_info (uiout, thread, -1);
 }
 
-static int
-print_one_inferior (struct inferior *inferior, void *arg)
+struct collect_cores_data
 {
-  if (inferior->pid != 0)
+  int pid;
+
+  VEC (int) *cores;
+};
+
+static int
+collect_cores (struct thread_info *ti, void *xdata)
+{
+  struct collect_cores_data *data = xdata;
+
+  if (ptid_get_pid (ti->ptid) == data->pid)
     {
+      int core = target_core_of_thread (ti->ptid);
+      if (core != -1)
+	VEC_safe_push (int, data->cores, core);
+    }
+
+  return 0;
+}
+
+static int *
+unique (int *b, int *e)
+{
+  int *d = b;
+  while (++b != e)
+    if (*d != *b)
+      *++d = *b;
+  return ++d;
+}
+
+struct print_one_inferior_data
+{
+  int recurse;
+  VEC (int) *inferiors;
+};
+
+static int
+print_one_inferior (struct inferior *inferior, void *xdata)
+{
+  struct print_one_inferior_data *top_data = xdata;
+
+  if (VEC_empty (int, top_data->inferiors)
+      || bsearch (&(inferior->pid), VEC_address (int, top_data->inferiors),
+		  VEC_length (int, top_data->inferiors), sizeof (int),
+		  compare_positive_ints))
+    {
+      struct collect_cores_data data;
       struct cleanup *back_to
 	= make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 
@@ -372,10 +417,211 @@ print_one_inferior (struct inferior *inferior, void *arg)
       ui_out_field_string (uiout, "type", "process");
       ui_out_field_int (uiout, "pid", inferior->pid);
 
+      data.pid = inferior->pid;
+      data.cores = 0;
+      iterate_over_threads (collect_cores, &data);
+
+      if (!VEC_empty (int, data.cores))
+	{
+	  int elt;
+	  int i;
+	  int *b, *e;
+	  struct cleanup *back_to_2 =
+	    make_cleanup_ui_out_list_begin_end (uiout, "cores");
+
+	  qsort (VEC_address (int, data.cores),
+		 VEC_length (int, data.cores), sizeof (int),
+		 compare_positive_ints);
+
+	  b = VEC_address (int, data.cores);
+	  e = b + VEC_length (int, data.cores);
+	  e = unique (b, e);
+
+	  for (; b != e; ++b)
+	    ui_out_field_int (uiout, NULL, *b);
+
+	  do_cleanups (back_to_2);
+	}
+
+      if (top_data->recurse)
+	print_thread_info (uiout, -1, inferior->pid);
+
       do_cleanups (back_to);
     }
 
   return 0;
+}
+
+/* Output a field named 'cores' with a list as the value.  The elements of
+   the list are obtained by splitting 'cores' on comma.  */
+
+static void
+output_cores (struct ui_out *uiout, const char *field_name, const char *xcores)
+{
+  struct cleanup *back_to = make_cleanup_ui_out_list_begin_end (uiout,
+								field_name);
+  char *cores = xstrdup (xcores);
+  char *p = cores;
+
+  make_cleanup (xfree, cores);
+
+  for (p = strtok (p, ","); p;  p = strtok (NULL, ","))
+    ui_out_field_string (uiout, NULL, p);
+
+  do_cleanups (back_to);
+}
+
+static void
+free_vector_of_ints (void *xvector)
+{
+  VEC (int) **vector = xvector;
+  VEC_free (int, *vector);
+}
+
+static void
+do_nothing (splay_tree_key k)
+{
+}
+
+static void
+free_vector_of_osdata_items (splay_tree_value xvalue)
+{
+  VEC (osdata_item_s) *value = (VEC (osdata_item_s) *) xvalue;
+  /* We don't free the items itself, it will be done separately.  */
+  VEC_free (osdata_item_s, value);
+}
+
+static int
+splay_tree_int_comparator (splay_tree_key xa, splay_tree_key xb)
+{
+  int a = xa;
+  int b = xb;
+  return a - b;
+}
+
+static void
+free_splay_tree (void *xt)
+{
+  splay_tree t = xt;
+  splay_tree_delete (t);
+}
+
+static void
+list_available_thread_groups (VEC (int) *ids, int recurse)
+{
+  struct osdata *data;
+  struct osdata_item *item;
+  int ix_items;
+  /* This keeps a map from integer (pid) to VEC (struct osdata_item *)*
+     The vector contains information about all threads for the given
+     pid.  */
+  splay_tree tree;
+
+  /* get_osdata will throw if it cannot return data.  */
+  data = get_osdata ("processes");
+  make_cleanup_osdata_free (data);
+
+  if (recurse)
+    {
+      struct osdata *threads = get_osdata ("threads");
+      make_cleanup_osdata_free (threads);
+
+      tree = splay_tree_new (splay_tree_int_comparator,
+			     do_nothing,
+			     free_vector_of_osdata_items);
+      make_cleanup (free_splay_tree, tree);
+
+      for (ix_items = 0;
+	   VEC_iterate (osdata_item_s, threads->items,
+			ix_items, item);
+	   ix_items++)
+	{
+	  const char *pid = get_osdata_column (item, "pid");
+	  int pid_i = strtoul (pid, NULL, 0);
+	  VEC (osdata_item_s) *vec = 0;
+
+	  splay_tree_node n = splay_tree_lookup (tree, pid_i);
+	  if (!n)
+	    {
+	      VEC_safe_push (osdata_item_s, vec, item);
+	      splay_tree_insert (tree, pid_i, (splay_tree_value)vec);
+	    }
+	  else
+	    {
+	      vec = (VEC (osdata_item_s) *) n->value;
+	      VEC_safe_push (osdata_item_s, vec, item);
+	      n->value = (splay_tree_value) vec;
+	    }
+	}
+    }
+
+  make_cleanup_ui_out_list_begin_end (uiout, "groups");
+
+  for (ix_items = 0;
+       VEC_iterate (osdata_item_s, data->items,
+		    ix_items, item);
+       ix_items++)
+    {
+      struct cleanup *back_to;
+
+      const char *pid = get_osdata_column (item, "pid");
+      const char *cmd = get_osdata_column (item, "command");
+      const char *user = get_osdata_column (item, "user");
+      const char *cores = get_osdata_column (item, "cores");
+
+      int pid_i = strtoul (pid, NULL, 0);
+
+      /* At present, the target will return all available processes
+	 and if information about specific ones was required, we filter
+	 undesired processes here.  */
+      if (ids && bsearch (&pid_i, VEC_address (int, ids),
+			  VEC_length (int, ids),
+			  sizeof (int), compare_positive_ints) == NULL)
+	continue;
+
+
+      back_to = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+
+      ui_out_field_fmt (uiout, "id", "%s", pid);
+      ui_out_field_string (uiout, "type", "process");
+      if (cmd)
+	ui_out_field_string (uiout, "description", cmd);
+      if (user)
+	ui_out_field_string (uiout, "user", user);
+      if (cores)
+	output_cores (uiout, "cores", cores);
+
+      if (recurse)
+	{
+	  splay_tree_node n = splay_tree_lookup (tree, pid_i);
+	  if (n)
+	    {
+	      VEC (osdata_item_s) *children = (VEC (osdata_item_s) *) n->value;
+	      struct osdata_item *child;
+	      int ix_child;
+
+	      make_cleanup_ui_out_list_begin_end (uiout, "threads");
+
+	      for (ix_child = 0;
+		   VEC_iterate (osdata_item_s, children, ix_child, child);
+		   ++ix_child)
+		{
+		  struct cleanup *back_to_2 =
+		    make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+
+		  const char *tid = get_osdata_column (child, "tid");
+		  const char *tcore = get_osdata_column (child, "core");
+		  ui_out_field_string (uiout, "id", tid);
+		  if (tcore)
+		    ui_out_field_string (uiout, "core", tcore);
+
+		  do_cleanups (back_to_2);
+		}
+	    }
+	}
+
+      do_cleanups (back_to);
+    }
 }
 
 void
@@ -383,70 +629,87 @@ mi_cmd_list_thread_groups (char *command, char **argv, int argc)
 {
   struct cleanup *back_to;
   int available = 0;
-  char *id = NULL;
+  int recurse = 0;
+  VEC (int) *ids = 0;
 
-  if (argc > 0 && strcmp (argv[0], "--available") == 0)
+  enum opt
     {
-      ++argv;
-      --argc;
-      available = 1;
-    }
+      AVAILABLE_OPT, RECURSE_OPT
+    };
+  static struct mi_opt opts[] =
+  {
+    {"-available", AVAILABLE_OPT, 0},
+    {"-recurse", RECURSE_OPT, 1},
+    { 0, 0, 0 }
+  };
 
-  if (argc > 0)
-    id = argv[0];
+  int optind = 0;
+  char *optarg;
 
-  back_to = make_cleanup (null_cleanup, NULL);
-
-  if (available && id)
+  while (1)
     {
-      error (_("Can only report top-level available thread groups"));
-    }
-  else if (available)
-    {
-      struct osdata *data;
-      struct osdata_item *item;
-      int ix_items;
-
-      data = get_osdata ("processes");
-      make_cleanup_osdata_free (data);
-
-      make_cleanup_ui_out_list_begin_end (uiout, "groups");
-
-      for (ix_items = 0;
-	   VEC_iterate (osdata_item_s, data->items,
-			ix_items, item);
-	   ix_items++)
+      int opt = mi_getopt ("-list-thread-groups", argc, argv, opts,
+			   &optind, &optarg);
+      if (opt < 0)
+	break;
+      switch ((enum opt) opt)
 	{
-	  struct cleanup *back_to =
-	    make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-
-	  const char *pid = get_osdata_column (item, "pid");
-	  const char *cmd = get_osdata_column (item, "command");
-	  const char *user = get_osdata_column (item, "user");
-
-	  ui_out_field_fmt (uiout, "id", "%s", pid);
-	  ui_out_field_string (uiout, "type", "process");
-	  if (cmd)
-	    ui_out_field_string (uiout, "description", cmd);
-	  if (user)
-	    ui_out_field_string (uiout, "user", user);
-
-	  do_cleanups (back_to);
+	case AVAILABLE_OPT:
+	  available = 1;
+	  break;
+	case RECURSE_OPT:
+	  if (strcmp (optarg, "0") == 0)
+	    ;
+	  else if (strcmp (optarg, "1") == 0)
+	    recurse = 1;
+	  else
+	    error ("only '0' and '1' are valid values for the '--recurse' option");
+	  break;
 	}
     }
-  else if (id)
+
+  for (; optind < argc; ++optind)
     {
-      int pid = atoi (id);
+      char *end;
+      int inf = strtoul (argv[optind], &end, 0);
+      if (*end != '\0')
+	error ("invalid group id '%s'", argv[optind]);
+      VEC_safe_push (int, ids, inf);
+    }
+  if (VEC_length (int, ids) > 1)
+    qsort (VEC_address (int, ids),
+	   VEC_length (int, ids),
+	   sizeof (int), compare_positive_ints);
+
+  back_to = make_cleanup (free_vector_of_ints, &ids);
+
+  if (available)
+    {
+      list_available_thread_groups (ids, recurse);
+    }
+  else if (VEC_length (int, ids) == 1)
+    {
+      /* Local thread groups, single id. */
+      int pid = *VEC_address (int, ids);
       if (!in_inferior_list (pid))
-	error ("Invalid thread group id '%s'", id);
-      print_thread_info (uiout, -1, pid);    
+	error ("Invalid thread group id '%d'", pid);
+      print_thread_info (uiout, -1, pid);
     }
   else
     {
+      struct print_one_inferior_data data;
+      data.recurse = recurse;
+      data.inferiors = ids;
+
+      /* Local thread groups.  Either no explicit ids -- and we
+	 print everything, or several explicit ids.  In both cases,
+	 we print more than one group, and have to use 'groups'
+	 as the top-level element.  */
       make_cleanup_ui_out_list_begin_end (uiout, "groups");
-      iterate_over_inferiors (print_one_inferior, NULL);
+      update_thread_list ();
+      iterate_over_inferiors (print_one_inferior, &data);
     }
-  
+
   do_cleanups (back_to);
 }
 

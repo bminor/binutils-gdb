@@ -444,7 +444,8 @@ RUNTESTFLAGS=
 
 # XML files to build in to GDB.
 XMLFILES = $(srcdir)/features/gdb-target.dtd $(srcdir)/features/xinclude.dtd \
-	$(srcdir)/features/library-list.dtd $(srcdir)/features/osdata.dtd
+	$(srcdir)/features/library-list.dtd $(srcdir)/features/osdata.dtd \
+	$(srcdir)/features/threads.dtd
 
 # This is ser-unix.o for any system which supports a v7/BSD/SYSV/POSIX
 # interface to the serial port.  Hopefully if get ported to OS/2, VMS,

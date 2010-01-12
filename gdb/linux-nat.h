@@ -89,6 +89,9 @@ struct lwp_info
      - TARGET_WAITKIND_SYSCALL_RETURN */
   int syscall_state;
 
+  /* The processor core this LWP was last seen on.  */
+  int core;
+
   /* Next LWP in list.  */
   struct lwp_info *next;
 };
@@ -163,3 +166,6 @@ void linux_nat_switch_fork (ptid_t new_ptid);
 
 /* Return the saved siginfo associated with PTID.  */
 struct siginfo *linux_nat_get_siginfo (ptid_t ptid);
+
+/* Compute and return the processor core of a given thread.  */
+int linux_nat_core_of_thread_1 (ptid_t ptid);

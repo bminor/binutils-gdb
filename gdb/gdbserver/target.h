@@ -283,6 +283,9 @@ struct target_ops
   /* If not NULL, target-specific routine to process monitor command.
      Returns 1 if handled, or 0 to perform default processing.  */
   int (*handle_monitor_command) (char *);
+
+  /* Returns the core given a thread, or -1 if not known.  */
+  int (*core_of_thread) (ptid_t);
 };
 
 extern struct target_ops *the_target;

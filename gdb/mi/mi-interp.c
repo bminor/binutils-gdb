@@ -339,6 +339,7 @@ mi_on_normal_stop (struct bpstats *bs, int print_frame)
 
   if (print_frame)
     {
+      int core;
       if (uiout != mi_uiout)
 	{
 	  /* The normal_stop function has printed frame information into 
@@ -364,6 +365,10 @@ mi_on_normal_stop (struct bpstats *bs, int print_frame)
 	}
       else
 	ui_out_field_string (mi_uiout, "stopped-threads", "all");
+
+      core = target_core_of_thread (inferior_ptid);
+      if (core != -1)
+	ui_out_field_int (mi_uiout, "core", core);
     }
   
   fputs_unfiltered ("*stopped", raw_stdout);

@@ -1,3 +1,8 @@
+2010-01-13  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* lib/mi-support.exp (mi_check_thread_states): Handle
+	core number in thread listing.
+
 2010-01-12  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/maint.exp: Adjust the expected output for the

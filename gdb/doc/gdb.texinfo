@@ -15542,6 +15542,10 @@ are:
 @tab @code{qXfer:siginfo:write}
 @tab @code{set $_siginfo}
 
+@item @code{threads}
+@tab @code{qXfer:threads:read}
+@tab @code{info threads}
+
 @item @code{get-thread-local-@*storage-address}
 @tab @code{qGetTLSAddr}
 @tab Displaying @code{__thread} variables
@@ -21828,6 +21832,7 @@ follow development on @email{gdb@@sourceware.org} and
 * GDB/MI Stream Records::
 * GDB/MI Async Records::
 * GDB/MI Frame Information::
+* GDB/MI Thread Information::
 @end menu
 
 @node GDB/MI Result Records
@@ -21920,7 +21925,7 @@ several times, either for different threads, because it cannot resume
 all threads together, or even for a single thread, if the thread must
 be stepped though some code before letting it run freely.
 
-@item *stopped,reason="@var{reason}",thread-id="@var{id}",stopped-threads="@var{stopped}"
+@item *stopped,reason="@var{reason}",thread-id="@var{id}",stopped-threads="@var{stopped}",core="@var{core}"
 The target has stopped.  The @var{reason} field can have one of the
 following values:
 
@@ -21960,7 +21965,9 @@ If all threads are stopped, the @var{stopped} field will have the
 value of @code{"all"}.  Otherwise, the value of the @var{stopped}
 field will be a list of thread identifiers.  Presently, this list will
 always include a single thread, but frontend should be prepared to see
-several threads in the list.
+several threads in the list.  The @var{core} field reports the
+processor core on which the stop event has happened.  This field may be absent
+if such information is not available.
 
 @item =thread-group-created,id="@var{id}"
 @itemx =thread-group-exited,id="@var{id}"
@@ -22035,6 +22042,34 @@ may be absent.
 The name of the binary file (either executable or shared library) the
 corresponds to the frame's code address.  This field may be absent.
 
+@end table
+
+@node GDB/MI Thread Information
+@subsection @sc{gdb/mi} Thread Information
+
+Whenever @value{GDBN} has to report an information about a thread, it
+uses a tuple with the following fields:
+
+@table @code
+@item id
+The numeric id assigned to the thread by @value{GDBN}.  This field is
+always present.
+
+@item target-id
+Target-specific string identifying the thread.  This field is always present.
+
+@item details
+Additional information about the thread provided by the target.
+It is supposed to be human-readable and not interpreted by the
+frontend.  This field is optional.
+
+@item state
+Either @samp{stopped} or @samp{running}, depending on whether the
+thread is presently running.  This field is always present.
+
+@item core
+The value of this field is an integer number of the processor core the
+thread was last seen on.  This field is optional.
 @end table
 
 
@@ -26349,20 +26384,84 @@ while the target is running.
 @subheading Synopsis
 
 @smallexample
--list-thread-groups [ --available ] [ @var{group} ]
+-list-thread-groups [ --available ] [ --recurse 1 ] [ @var{group} ... ]
 @end smallexample
 
-When used without the @var{group} parameter, lists top-level thread
-groups that are being debugged.  When used with the @var{group}
-parameter, the children of the specified group are listed.  The
-children can be either threads, or other groups.  At present,
-@value{GDBN} will not report both threads and groups as children at
-the same time, but it may change in future.
+Lists thread groups (@pxref{Thread groups}).  When a single thread
+group is passed as the argument, lists the children of that group.
+When several thread group are passed, lists information about those
+thread groups.  Without any parameters, lists information about all
+top-level thread groups.
 
-With the @samp{--available} option, instead of reporting groups that
-are been debugged, GDB will report all thread groups available on the
-target.  Using the @samp{--available} option together with @var{group}
-is not allowed.
+Normally, thread groups that are being debugged are reported.
+With the @samp{--available} option, @value{GDBN} reports thread groups
+available on the target.
+
+The output of this command may have either a @samp{threads} result or
+a @samp{groups} result.  The @samp{thread} result has a list of tuples
+as value, with each tuple describing a thread (@pxref{GDB/MI Thread
+Information}).  The @samp{groups} result has a list of tuples as value,
+each tuple describing a thread group.  If top-level groups are
+requested (that is, no parameter is passed), or when several groups
+are passed, the output always has a @samp{groups} result.  The format
+of the @samp{group} result is described below.
+
+To reduce the number of roundtrips it's possible to list thread groups
+together with their children, by passing the @samp{--recurse} option
+and the recursion depth.  Presently, only recursion depth of 1 is
+permitted.  If this option is present, then every reported thread group
+will also include its children, either as @samp{group} or
+@samp{threads} field.
+
+In general, any combination of option and parameters is permitted, with
+the following caveats:
+
+@itemize @bullet
+@item
+When a single thread group is passed, the output will typically
+be the @samp{threads} result.  Because threads may not contain
+anything, the @samp{recurse} option will be ignored.
+
+@item
+When the @samp{--available} option is passed, limited information may
+be available.  In particular, the list of threads of a process might
+be inaccessible.  Further, specifying specific thread groups might
+not give any performance advantage over listing all thread groups.
+The frontend should assume that @samp{-list-thread-groups --available}
+is always an expensive operation and cache the results.
+
+@end itemize
+
+The @samp{groups} result is a list of tuples, where each tuple may
+have the following fields:
+
+@table @code
+@item id
+Identifier of the thread group.  This field is always present.
+
+@item type
+The type of the thread group.  At present, only @samp{process} is a
+valid type.
+
+@item pid
+The target-specific process identifier.  This field is only present
+for thread groups of type @samp{process}.
+
+@item num_children
+The number of children this thread group has.  This field may be
+absent for an available thread group.
+
+@item threads
+This field has a list of tuples as value, each tuple describing a
+thread.  It may be present if the @samp{--recurse} option is
+specified, and it's actually possible to obtain the threads.
+
+@item cores
+This field is a list of integers, each identifying a core that one
+thread of the group is running on.  This field may be absent if
+such information is not available.
+
+@end table
 
 @subheading Example
 
@@ -26376,6 +26475,16 @@ is not allowed.
 @{id="1",target-id="Thread 0xb7e156b0 (LWP 21254)",
    frame=@{level="0",addr="0x0804891f",func="foo",args=[@{name="i",value="10"@}],
            file="/tmp/a.c",fullname="/tmp/a.c",line="158"@},state="running"@}]]
+-list-thread-groups --available
+^done,groups=[@{id="17",type="process",pid="yyy",num_children="2",cores=[1,2]@}]
+-list-thread-groups --available --recurse 1
+ ^done,groups=[@{id="17", types="process",pid="yyy",num_children="2",cores=[1,2],
+                threads=[@{id="1",target-id="Thread 0xb7e14b90",cores=[1]@},
+                         @{id="2",target-id="Thread 0xb7e14b90",cores=[2]@}]@},..]
+-list-thread-groups --available --recurse 1 17 18
+^done,groups=[@{id="17", types="process",pid="yyy",num_children="2",cores=[1,2],
+               threads=[@{id="1",target-id="Thread 0xb7e14b90",cores=[1]@},
+                        @{id="2",target-id="Thread 0xb7e14b90",cores=[2]@}]@},...]
 @end smallexample
 
 @subheading The @code{-interpreter-exec} Command
@@ -28125,6 +28234,7 @@ Show the current setting of the target wait timeout.
 * File-I/O Remote Protocol Extension::
 * Library List Format::
 * Memory Map Format::
+* Thread List Format::
 @end menu
 
 @node Overview
@@ -29025,6 +29135,10 @@ If @var{n} is @samp{thread}, then @var{r} is the @var{thread-id} of
 the stopped thread, as specified in @ref{thread-id syntax}.
 
 @item
+If @var{n} is @samp{core}, then @var{r} is the hexadecimal number of
+the core on which the stop event was detected.
+
+@item
 If @var{n} is a recognized @dfn{stop reason}, it describes a more
 specific event that stopped the target.  The currently defined stop
 reasons are listed below.  @var{aa} should be @samp{05}, the trap
@@ -29058,8 +29172,6 @@ logged execution events, because it has reached the end (or the
 beginning when executing backward) of the log.  The value of @var{r}
 will be either @samp{begin} or @samp{end}.  @xref{Reverse Execution}, 
 for more information.
-
-
 @end table
 
 @item W @var{AA}
@@ -29599,6 +29711,12 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
+@item @samp{qXfer:threads:read}
+@tab No
+@tab @samp{-}
+@tab Yes
+
+
 @item @samp{QNonStop}
 @tab No
 @tab @samp{-}
@@ -29681,6 +29799,10 @@ The remote stub understands the @samp{qXfer:siginfo:read} packet
 @item qXfer:siginfo:write
 The remote stub understands the @samp{qXfer:siginfo:write} packet
 (@pxref{qXfer siginfo write}).
+
+@item qXfer:threads:read
+The remote stub understands the @samp{qXfer:threads:read} packet
+(@pxref{qXfer threads read}).
 
 @item QNonStop
 The remote stub understands the @samp{QNonStop} packet
@@ -29878,6 +30000,15 @@ in that context to be accessed.
 This packet is not probed by default; the remote stub must request it,
 by supplying an appropriate @samp{qSupported} response
 (@pxref{qSupported}).
+
+@item qXfer:threads:read::@var{offset},@var{length}
+@anchor{qXfer threads read}
+Access the list of threads on target.  @xref{Thread List Format}.  The
+annex part of the generic @samp{qXfer} packet must be empty
+(@pxref{qXfer read}).
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
 
 @item qXfer:osdata:read::@var{offset},@var{length}
 @anchor{qXfer osdata read}
@@ -31909,6 +32040,30 @@ The formal DTD for memory map format is given below:
 <!ATTLIST property      name    CDATA   #REQUIRED>
 @end smallexample
 
+@node Thread List Format
+@section Thread List Format
+@cindex thread list format
+
+To efficiently update the list of threads and their attributes,
+@value{GDBN} issues the @samp{qXfer:threads:read} packet
+(@pxref{qXfer threads read}) and obtains the XML document with
+the following structure:
+
+@smallexample
+<?xml version="1.0"?>
+<threads>
+    <thread id="id" core="0">
+    ... description ...
+    </thread>
+</threads>
+@end smallexample
+
+Each @samp{thread} element must have the @samp{id} attribute that
+identifies the thread (@pxref{thread-id syntax}).  The
+@samp{core} attribute, if present, specifies which processor core
+the thread was last executing on.  The content of the of @samp{thread}
+element is interpreted as human-readable auxilliary information.
+
 @include agentexpr.texi
 
 @node Target Descriptions
@@ -32468,6 +32623,7 @@ An example document is:
     <column name="pid">1</column>
     <column name="user">root</column>
     <column name="command">/sbin/init</column>
+    <column name="cores">1,2,3</column>
   </item>
 </osdata>
 @end smallexample
@@ -32475,7 +32631,9 @@ An example document is:
 Each item should include a column whose name is @samp{pid}.  The value
 of that column should identify the process on the target.  The
 @samp{user} and @samp{command} columns are optional, and will be
-displayed by @value{GDBN}.  Target may provide additional columns,
+displayed by @value{GDBN}.  The @samp{cores} column, if present,
+should contain a comma-separated list of cores that this process
+is running on.  Target may provide additional columns,
 which @value{GDBN} currently ignores.
 
 @include gpl.texi

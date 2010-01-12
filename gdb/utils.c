@@ -3554,6 +3554,14 @@ gdb_buildargv (const char *s)
   return argv;
 }
 
+int
+compare_positive_ints (const void *ap, const void *bp)
+{
+  /* Because we know we're comparing two ints which are positive,
+     there's no danger of overflow here.  */
+  return * (int *) ap - * (int *) bp;
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_utils;
 

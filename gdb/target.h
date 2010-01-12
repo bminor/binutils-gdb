@@ -256,6 +256,8 @@ enum target_object
   /* Extra signal info.  Usually the contents of `siginfo_t' on unix
      platforms.  */
   TARGET_OBJECT_SIGNAL_INFO,
+  /* The list of threads that are being debugged.  */
+  TARGET_OBJECT_THREADS,
   /* Possible future objects: TARGET_OBJECT_FILE, ... */
 };
 
@@ -650,6 +652,14 @@ struct target_ops
     /* Set the target's tracing behavior in response to unexpected
        disconnection - set VAL to 1 to keep tracing, 0 to stop.  */
     void (*to_set_disconnected_tracing) (int val);
+
+    /* Return the processor core that thread PTID was last seen on.
+       This information is updated only when:
+       - update_thread_list is called
+       - thread stops
+       If the core cannot be determined -- either for the specified thread, or
+       right now, or in this debug session, or for this target -- return -1.  */
+    int (*to_core_of_thread) (struct target_ops *, ptid_t ptid);
 
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
@@ -1331,6 +1341,9 @@ extern int target_search_memory (CORE_ADDR start_addr,
     if (current_target.to_log_command)					\
       (*current_target.to_log_command) (p);				\
   while (0)
+
+
+extern int target_core_of_thread (ptid_t ptid);
 
 /* Routines for maintenance of the target structures...
 

@@ -114,10 +114,13 @@ free_thread (struct thread_info *tp)
 {
   clear_thread_inferior_resources (tp);
 
-  /* FIXME: do I ever need to call the back-end to give it a
-     chance at this private data before deleting the thread?  */
   if (tp->private)
-    xfree (tp->private);
+    {
+      if (tp->private_dtor)
+	tp->private_dtor (tp->private);
+      else
+	xfree (tp->private);
+    }
 
   xfree (tp);
 }
@@ -468,8 +471,7 @@ do_captured_list_thread_ids (struct ui_out *uiout, void *arg)
   struct cleanup *cleanup_chain;
   int current_thread = -1;
 
-  prune_threads ();
-  target_find_new_threads ();
+  update_thread_list ();
 
   cleanup_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "thread-ids");
 
@@ -748,8 +750,7 @@ print_thread_info (struct ui_out *uiout, int requested_thread, int pid)
   char *extra_info;
   int current_thread = -1;
 
-  prune_threads ();
-  target_find_new_threads ();
+  update_thread_list ();
   current_ptid = inferior_ptid;
 
   /* We'll be switching threads temporarily.  */
@@ -759,6 +760,7 @@ print_thread_info (struct ui_out *uiout, int requested_thread, int pid)
   for (tp = thread_list; tp; tp = tp->next)
     {
       struct cleanup *chain2;
+      int core;
 
       if (requested_thread != -1 && tp->num != requested_thread)
 	continue;
@@ -816,6 +818,10 @@ print_thread_info (struct ui_out *uiout, int requested_thread, int pid)
 	    state = "running";
 	  ui_out_field_string (uiout, "state", state);
 	}
+
+      core = target_core_of_thread (tp->ptid);
+      if (ui_out_is_mi_like_p (uiout) && core != -1)
+	ui_out_field_int (uiout, "core", core);
 
       do_cleanups (chain2);
     }
@@ -1058,8 +1064,7 @@ thread_apply_all_command (char *cmd, int from_tty)
   if (cmd == NULL || *cmd == '\000')
     error (_("Please specify a command following the thread ID list"));
 
-  prune_threads ();
-  target_find_new_threads ();
+  update_thread_list ();
 
   old_chain = make_cleanup_restore_current_thread ();
 
@@ -1243,6 +1248,13 @@ gdb_thread_select (struct ui_out *uiout, char *tidstr, char **error_message)
 				 error_message, RETURN_MASK_ALL) < 0)
     return GDB_RC_FAIL;
   return GDB_RC_OK;
+}
+
+void
+update_thread_list (void)
+{
+  prune_threads ();
+  target_find_new_threads ();
 }
 
 /* Commands with a prefix of `thread'.  */

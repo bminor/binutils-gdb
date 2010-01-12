@@ -417,6 +417,8 @@ char *ldirname (const char *filename);
 
 char **gdb_buildargv (const char *);
 
+int compare_positive_ints (const void *ap, const void *bp);
+
 /* From demangle.c */
 
 extern void set_demangling_style (char *);

@@ -3064,6 +3064,26 @@ target_store_registers (struct regcache *regcache, int regno)
   noprocess ();
 }
 
+int
+target_core_of_thread (ptid_t ptid)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_core_of_thread != NULL)
+	{
+	  int retval = t->to_core_of_thread (t, ptid);
+	  if (targetdebug)
+	    fprintf_unfiltered (gdb_stdlog, "target_core_of_thread (%d) = %d\n",
+				PIDGET (ptid), retval);
+	  return retval;
+	}
+    }
+
+  return -1;
+}
+
 static void
 debug_to_prepare_to_store (struct regcache *regcache)
 {

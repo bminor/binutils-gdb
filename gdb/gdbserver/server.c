@@ -707,6 +707,87 @@ handle_monitor_command (char *mon)
     }
 }
 
+static void
+handle_threads_qxfer_proper (struct buffer *buffer)
+{
+  struct inferior_list_entry *thread;
+
+  buffer_grow_str (buffer, "<threads>\n");
+
+  for (thread = all_threads.head; thread; thread = thread->next)
+    {
+      ptid_t ptid = thread_to_gdb_id ((struct thread_info *)thread);
+      char ptid_s[100];
+      int core = -1;
+      char core_s[21];
+
+      write_ptid (ptid_s, ptid);
+
+      if (the_target->core_of_thread)
+	core = (*the_target->core_of_thread) (ptid);
+
+      if (core != -1)
+	{
+	  sprintf (core_s, "%d", core);
+	  buffer_xml_printf (buffer, "<thread id=\"%s\" core=\"%s\"/>\n",
+			     ptid_s, core_s);
+	}
+      else
+	{
+	  buffer_xml_printf (buffer, "<thread id=\"%s\"/>\n",
+			     ptid_s);
+	}
+    }
+
+  buffer_grow_str0 (buffer, "</threads>\n");
+}
+
+static int
+handle_threads_qxfer (const char *annex,
+		      unsigned char *readbuf,
+		      CORE_ADDR offset, int length)
+{
+  static char *result = 0;
+  static unsigned int result_length = 0;
+
+  if (annex && strcmp (annex, "") != 0)
+    return 0;
+
+  if (offset == 0)
+    {
+      struct buffer buffer;
+      /* When asked for data at offset 0, generate everything and store into
+	 'result'.  Successive reads will be served off 'result'.  */
+      if (result)
+	free (result);
+
+      buffer_init (&buffer);
+
+      handle_threads_qxfer_proper (&buffer);
+
+      result = buffer_finish (&buffer);
+      result_length = strlen (result);
+      buffer_free (&buffer);
+    }
+
+  if (offset >= result_length)
+    {
+      /* We're out of data.  */
+      free (result);
+      result = NULL;
+      result_length = 0;
+      return 0;
+    }
+
+  if (length > result_length - offset)
+    length = result_length - offset;
+
+  memcpy (readbuf, result + offset, length);
+
+  return length;
+
+}
+
 /* Handle all of the extended 'q' packets.  */
 void
 handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
@@ -1112,6 +1193,43 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       return;
     }
 
+  if (strncmp ("qXfer:threads:read:", own_buf, 19) == 0)
+    {
+      unsigned char *data;
+      int n;
+      CORE_ADDR ofs;
+      unsigned int len;
+      char *annex;
+
+      require_running (own_buf);
+
+      /* Reject any annex; grab the offset and length.  */
+      if (decode_xfer_read (own_buf + 19, &annex, &ofs, &len) < 0
+	  || annex[0] != '\0')
+	{
+	  strcpy (own_buf, "E00");
+	  return;
+	}
+
+      /* Read one extra byte, as an indicator of whether there is
+	 more.  */
+      if (len > PBUFSIZ - 2)
+	len = PBUFSIZ - 2;
+      data = malloc (len + 1);
+      if (!data)
+	return;
+      n = handle_threads_qxfer (annex, data, ofs, len + 1);
+      if (n < 0)
+	write_enn (own_buf);
+      else if (n > len)
+	*new_packet_len_p = write_qxfer_response (own_buf, data, len, 1);
+      else
+	*new_packet_len_p = write_qxfer_response (own_buf, data, n, 0);
+
+      free (data);
+      return;
+    }
+
   /* Protocol features query.  */
   if (strncmp ("qSupported", own_buf, 10) == 0
       && (own_buf[10] == ':' || own_buf[10] == '\0'))
@@ -1167,6 +1285,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
       if (target_supports_non_stop ())
 	strcat (own_buf, ";QNonStop+");
+
+      strcat (own_buf, ";qXfer:threads:read+");
 
       return;
     }

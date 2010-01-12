@@ -1454,6 +1454,12 @@ thread_db_find_new_threads_1 (ptid_t ptid)
   thread_db_find_new_threads_2 (ptid, 0);
 }
 
+static int
+update_thread_core (struct lwp_info *info, void *closure)
+{
+  info->core = linux_nat_core_of_thread_1 (info->ptid);
+  return 0;
+}
 
 static void
 thread_db_find_new_threads (struct target_ops *ops)
@@ -1466,6 +1472,9 @@ thread_db_find_new_threads (struct target_ops *ops)
     return;
 
   thread_db_find_new_threads_1 (inferior_ptid);
+
+  iterate_over_lwps (minus_one_ptid /* iterate over all */,
+		     update_thread_core, NULL);
 }
 
 static char *

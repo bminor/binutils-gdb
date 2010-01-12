@@ -60,6 +60,7 @@
 #include "remote-fileio.h"
 #include "gdb/fileio.h"
 #include "gdb_stat.h"
+#include "xml-support.h"
 
 #include "memory-map.h"
 
@@ -323,6 +324,20 @@ struct remote_state
      responded to that.  */
   int ctrlc_pending_p;
 };
+
+/* Private data that we'll store in (struct thread_info)->private.  */
+struct private_thread_info
+{
+  char *extra;
+  int core;
+};
+
+static void
+free_private_thread_info (struct private_thread_info *info)
+{
+  xfree (info->extra);
+  xfree (info);
+}
 
 /* Returns true if the multi-process extensions are in effect.  */
 static int
@@ -1121,6 +1136,7 @@ enum {
   PACKET_qXfer_spu_read,
   PACKET_qXfer_spu_write,
   PACKET_qXfer_osdata,
+  PACKET_qXfer_threads,
   PACKET_qGetTLSAddr,
   PACKET_qSupported,
   PACKET_QPassSignals,
@@ -1395,7 +1411,7 @@ remote_notice_new_inferior (ptid_t currthread, int running)
 	      remote_add_thread (currthread, running);
 	      inferior_ptid = currthread;
 	    }
- 	  return;
+	  return;
 	}
 
       if (ptid_equal (magic_null_ptid, inferior_ptid))
@@ -1405,7 +1421,7 @@ remote_notice_new_inferior (ptid_t currthread, int running)
 	     doesn't support qC.  This is the first stop reported
 	     after an attach, so this is the main thread.  Update the
 	     ptid in the thread list.  */
-  	  thread_change_ptid (inferior_ptid, currthread);
+	  thread_change_ptid (inferior_ptid, currthread);
 	  return;
 	}
 
@@ -1427,6 +1443,26 @@ remote_notice_new_inferior (ptid_t currthread, int running)
     }
 }
 
+/* Return the private thread data, creating it if necessary.  */
+
+struct private_thread_info *
+demand_private_info (ptid_t ptid)
+{
+  struct thread_info *info = find_thread_ptid (ptid);
+
+  gdb_assert (info);
+
+  if (!info->private)
+    {
+      info->private = xmalloc (sizeof (*(info->private)));
+      info->private_dtor = free_private_thread_info;
+      info->private->core = -1;
+      info->private->extra = 0;
+    }
+
+  return info->private;
+}
+
 /* Call this function as a result of
    1) A halt indication (T packet) containing a thread id
    2) A direct query of currthread
@@ -1437,12 +1473,6 @@ static void
 record_currthread (ptid_t currthread)
 {
   general_thread = currthread;
-
-  if (ptid_equal (currthread, minus_one_ptid))
-    /* We're just invalidating the local thread mirror.  */
-    return;
-
-  remote_notice_new_inferior (currthread, 0);
 }
 
 static char *last_pass_packet;
@@ -2371,6 +2401,80 @@ remote_find_new_threads (void)
 			      CRAZY_MAX_THREADS);
 }
 
+#if defined(HAVE_LIBEXPAT)
+
+typedef struct thread_item
+{
+  ptid_t ptid;
+  char *extra;
+  int core;
+} thread_item_t;
+DEF_VEC_O(thread_item_t);
+
+struct threads_parsing_context
+{
+  VEC (thread_item_t) *items;
+};
+
+static void
+start_thread (struct gdb_xml_parser *parser,
+	      const struct gdb_xml_element *element,
+	      void *user_data, VEC(gdb_xml_value_s) *attributes)
+{
+  struct threads_parsing_context *data = user_data;
+
+  struct thread_item item;
+  char *id;
+
+  id = VEC_index (gdb_xml_value_s, attributes, 0)->value;
+  item.ptid = read_ptid (id, NULL);
+
+  if (VEC_length (gdb_xml_value_s, attributes) > 1)
+    item.core = *(ULONGEST *) VEC_index (gdb_xml_value_s, attributes, 1)->value;
+  else
+    item.core = -1;
+
+  item.extra = 0;
+
+  VEC_safe_push (thread_item_t, data->items, &item);
+}
+
+static void
+end_thread (struct gdb_xml_parser *parser,
+	    const struct gdb_xml_element *element,
+	    void *user_data, const char *body_text)
+{
+  struct threads_parsing_context *data = user_data;
+
+  if (body_text && *body_text)
+    VEC_last (thread_item_t, data->items)->extra = strdup (body_text);
+}
+
+const struct gdb_xml_attribute thread_attributes[] = {
+  { "id", GDB_XML_AF_NONE, NULL, NULL },
+  { "core", GDB_XML_AF_OPTIONAL, gdb_xml_parse_attr_ulongest, NULL },
+  { NULL, GDB_XML_AF_NONE, NULL, NULL }
+};
+
+const struct gdb_xml_element thread_children[] = {
+  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
+};
+
+const struct gdb_xml_element threads_children[] = {
+  { "thread", thread_attributes, thread_children,
+    GDB_XML_EF_REPEATABLE | GDB_XML_EF_OPTIONAL,
+    start_thread, end_thread },
+  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
+};
+
+const struct gdb_xml_element threads_elements[] = {
+  { "threads", NULL, threads_children,
+    GDB_XML_EF_NONE, NULL, NULL },
+  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
+};
+
+#endif
+
 /*
  * Find all threads for info threads command.
  * Uses new thread protocol contributed by Cisco.
@@ -2387,6 +2491,61 @@ remote_threads_info (struct target_ops *ops)
 
   if (remote_desc == 0)		/* paranoia */
     error (_("Command can only be used when connected to the remote target."));
+
+#if defined(HAVE_LIBEXPAT)
+  if (remote_protocol_packets[PACKET_qXfer_threads].support == PACKET_ENABLE)
+    {
+      char *xml = target_read_stralloc (&current_target,
+					 TARGET_OBJECT_THREADS, NULL);
+
+      struct cleanup *back_to = make_cleanup (xfree, xml);
+      if (xml && *xml)
+	{
+	  struct gdb_xml_parser *parser;
+	  struct threads_parsing_context context;
+	  struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
+
+	  context.items = 0;
+	  parser = gdb_xml_create_parser_and_cleanup (_("threads"),
+						      threads_elements,
+						      &context);
+
+	  gdb_xml_use_dtd (parser, "threads.dtd");
+
+	  if (gdb_xml_parse (parser, xml) == 0)
+	    {
+	      int i;
+	      struct thread_item *item;
+
+	      for (i = 0; VEC_iterate (thread_item_t, context.items, i, item); ++i)
+		{
+		  if (!ptid_equal (item->ptid, null_ptid))
+		    {
+		      struct private_thread_info *info;
+		      /* In non-stop mode, we assume new found threads
+			 are running until proven otherwise with a
+			 stop reply.  In all-stop, we can only get
+			 here if all threads are stopped.  */
+		      int running = non_stop ? 1 : 0;
+
+		      remote_notice_new_inferior (item->ptid, running);
+
+		      info = demand_private_info (item->ptid);
+		      info->core = item->core;
+		      info->extra = item->extra;
+		      item->extra = 0;
+		    }
+		  xfree (item->extra);
+		}
+	    }
+
+	  VEC_free (thread_item_t, context.items);
+	}
+
+      do_cleanups (back_to);
+      return;
+    }
+#endif
 
   if (use_threadinfo_query)
     {
@@ -2459,6 +2618,15 @@ remote_threads_extra_info (struct thread_info *tp)
     /* This is the main thread which was added by GDB.  The remote
        server doesn't know about it.  */
     return NULL;
+
+  if (remote_protocol_packets[PACKET_qXfer_threads].support == PACKET_ENABLE)
+    {
+      struct thread_info *info = find_thread_ptid (tp->ptid);
+      if (info && info->private)
+	return info->private->extra;
+      else
+	return NULL;
+    }
 
   if (use_threadextra_query)
     {
@@ -3245,6 +3413,8 @@ static struct protocol_feature remote_protocol_features[] = {
     PACKET_qXfer_spu_write },
   { "qXfer:osdata:read", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_osdata },
+  { "qXfer:threads:read", PACKET_DISABLE, remote_supported_packet,
+    PACKET_qXfer_threads },
   { "QPassSignals", PACKET_DISABLE, remote_supported_packet,
     PACKET_QPassSignals },
   { "QStartNoAckMode", PACKET_DISABLE, remote_supported_packet,
@@ -4359,6 +4529,8 @@ struct stop_reply
 
   int solibs_changed;
   int replay_event;
+
+  int core;
 };
 
 /* The list of already fetched and acknowledged stop events.  */
@@ -4522,6 +4694,7 @@ remote_parse_stop_reply (char *buf, struct stop_reply *event)
   event->replay_event = 0;
   event->stopped_by_watchpoint_p = 0;
   event->regcache = NULL;
+  event->core = -1;
 
   switch (buf[0])
     {
@@ -4548,7 +4721,8 @@ remote_parse_stop_reply (char *buf, struct stop_reply *event)
 	  /* If this packet is an awatch packet, don't parse the 'a'
 	     as a register number.  */
 
-	  if (strncmp (p, "awatch", strlen("awatch")) != 0)
+	  if (strncmp (p, "awatch", strlen("awatch")) != 0
+	      && strncmp (p, "core", strlen ("core") != 0))
 	    {
 	      /* Read the ``P'' register number.  */
 	      pnum = strtol (p, &p_temp, 16);
@@ -4593,6 +4767,12 @@ Packet: '%s'\n"),
 		  p_temp = strchr (p1 + 1, ';');
 		  if (p_temp)
 		    p = p_temp;
+		}
+	      else if (strncmp (p, "core", p1 - p) == 0)
+		{
+		  ULONGEST c;
+		  p = unpack_varlen_hex (++p1, &c);
+		  event->core = c;
 		}
 	      else
 		{
@@ -4803,6 +4983,7 @@ process_stop_reply (struct stop_reply *stop_reply,
 		    struct target_waitstatus *status)
 {
   ptid_t ptid;
+  struct thread_info *info;
 
   *status = stop_reply->ws;
   ptid = stop_reply->ptid;
@@ -4834,6 +5015,7 @@ process_stop_reply (struct stop_reply *stop_reply,
       remote_watch_data_address = stop_reply->watch_data_address;
 
       remote_notice_new_inferior (ptid, 0);
+      demand_private_info (ptid)->core = stop_reply->core;
     }
 
   stop_reply_xfree (stop_reply);
@@ -7676,6 +7858,11 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
        (ops, "osdata", annex, readbuf, offset, len,
         &remote_protocol_packets[PACKET_qXfer_osdata]);
 
+    case TARGET_OBJECT_THREADS:
+      gdb_assert (annex == NULL);
+      return remote_read_qxfer (ops, "threads", annex, readbuf, offset, len,
+				&remote_protocol_packets[PACKET_qXfer_threads]);
+
     default:
       return -1;
     }
@@ -9324,6 +9511,15 @@ remote_set_disconnected_tracing (int val)
     error (_("Target does not support this command."));
 }
 
+static int
+remote_core_of_thread (struct target_ops *ops, ptid_t ptid)
+{
+  struct thread_info *info = find_thread_ptid (ptid);
+  if (info && info->private)
+    return info->private->core;
+  return -1;
+}
+
 static void
 init_remote_ops (void)
 {
@@ -9397,6 +9593,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_trace_find = remote_trace_find;
   remote_ops.to_get_trace_state_variable_value = remote_get_trace_state_variable_value;
   remote_ops.to_set_disconnected_tracing = remote_set_disconnected_tracing;
+  remote_ops.to_core_of_thread = remote_core_of_thread;
 }
 
 /* Set up the extended remote vector by making a copy of the standard
@@ -9932,6 +10129,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_osdata],
                         "qXfer:osdata:read", "osdata", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_threads],
+			 "qXfer:threads:read", "threads", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_siginfo_read],
                          "qXfer:siginfo:read", "read-siginfo-object", 0);

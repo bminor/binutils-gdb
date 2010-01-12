@@ -1,3 +1,13 @@
+2010-01-13  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Thread Information): New.
+	(GDB/MI Async Records): Document the core field in *stopped.
+	(GDB/MI Miscellaneous Commands): Expand -list-thread-groups
+	documentation
+	(Process list): Document that osdata document may contain
+	threads.
+	(Remote Serial Protocol): Document qXfer:threads.
+
 2010-01-06  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.texinfo (Starting and Stopping Trace Experiments): Document

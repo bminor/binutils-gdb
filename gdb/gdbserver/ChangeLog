@@ -1,3 +1,17 @@
+2010-01-13  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* linux-low.c (linux_core_of_thread): New.
+	(compare_ints, show_process, list_threads): New.
+	(linux_qxfer_osdata): Report threads and cores.
+	(linux_target_op): Register linux_core_of_thread.
+	* remote-utils.c (prepare_resume_reply): Report the core.
+	(buffer_xml_printf): Support %d specifier.
+	* server.c (handle_threads_qxfer_proper, handle_threads_qxfer):
+	New.
+	(handle_query): Handle qXfer:threads.  Announce availability
+	thereof.
+	* target.h (struct target_ops): New field core_of_thread.
+
 2010-01-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* Makefile.in (clean): Remove new generated files.

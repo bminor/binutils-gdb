@@ -187,6 +187,10 @@ struct thread_info
 
   /* Private data used by the target vector implementation.  */
   struct private_thread_info *private;
+
+  /* Function that is called to free PRIVATE.  If this is NULL, then
+     xfree will be called on PRIVATE.  */
+  void (*private_dtor) (struct private_thread_info *);
 };
 
 /* Create an empty thread list, or empty the existing one.  */
@@ -345,5 +349,7 @@ extern struct cleanup *make_cleanup_restore_current_thread (void);
 /* Returns a pointer into the thread_info corresponding to
    INFERIOR_PTID.  INFERIOR_PTID *must* be in the thread list.  */
 extern struct thread_info* inferior_thread (void);
+
+extern void update_thread_list (void);
 
 #endif /* GDBTHREAD_H */

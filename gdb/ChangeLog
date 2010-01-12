@@ -1,3 +1,55 @@
+2010-01-13  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Implement core awareness.
+
+	* bcache.c (compare_ints): Remove
+	(print_percentage): Use compare_positive_ints.
+	* defs.h (compare_positive_ints): Declare.
+	* linux-nat.h (struct lin_lwp): New field core.
+	(linux_nat_core_of_thread_1): Declare.
+	* linux-nat.c (add_lwp): Init the 'core' field.
+	(linux_nat_wait_1): Record the core.
+	(linux_nat_core_of_thread_1, linux_nat_core_of_thread): New.
+	(linux_nat_add_target): Register the above.
+	* linux-thread-db.c (update_thread_core): New.
+	(thread_db_find_new_threads): Update core information for
+	every thread.
+	* remote.c (struct private_thread_info): New.
+	(free_private_thread_info, demand_private_info): New.
+	(PACKET_qXfer_threads, use_osdata_threads): New.
+	(struct thread_item, threads_parsing_context
+	(start_thread, end_thread, thread_attributes)
+	(thread_children, threads_children, threads_elements): New.
+	(remote_threads_info): Try qXfer:threads before anything
+	else.
+	(remote_protocol_packets): Register qXfer:threads.
+	(remote_open_1): Init use_osdata_threads.
+	(struct stop_reply): New field 'core'.
+	(remote_parse_stop_reply): Parse core number.
+	(process_stop_reply): Record core number.
+	(remote_xfer_partial): Handle qXfer:threads.
+	(remote_core_of_thread): New.
+	(init_remote_ops): Register remote_core_of_thread.
+	(_initialize_remote): Register qXfer:read.
+	* target.c (target_core_of_thread): New
+	* target.h (enum target_object): New value TARGET_OBJECT_THREADS.
+	(struct target_ops): New field to_core_of_threads.
+	(target_core_of_thread): Declare.
+	* gdbthread.h (struct thread_info): New field private_dtor.
+	* thread.c (print_thread_info): Report the core.
+	* ui-out.c (MAX_UI_OUT_LEVELS): Increase.
+	* utils.c (compare_positive_ints): New.
+	* features/threads.dtd: New.
+	* mi/mi-interp.c (mi_on_normal_stop): Report the core.
+	* mi/mi-main.c (struct collect_cores_data, collect_cores)
+	(do_nothing, free_vector_of_osdata_items)
+	(splay_tree_int_comparator, free_splay_tree): New.
+	(print_one_inferior_data): Implemented printing of selected
+	inferiors.  Collect and print cores.
+	(output_cores): New.
+	(mi_cmd_list_thread_groups): Support --recurse.  Permit specifying
+	thread groups together with --available.
+
 2010-01-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* configure: Regenerate (for _STRUCTURED_PROC).

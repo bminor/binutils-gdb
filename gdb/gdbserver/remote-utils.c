@@ -1170,6 +1170,7 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 	       gdbserver to know what inferior_ptid is.  */
 	    if (1 || !ptid_equal (general_thread, ptid))
 	      {
+		int core = -1;
 		/* In non-stop, don't change the general thread behind
 		   GDB's back.  */
 		if (!non_stop)
@@ -1179,6 +1180,17 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 		buf = write_ptid (buf, ptid);
 		strcat (buf, ";");
 		buf += strlen (buf);
+
+		if (the_target->core_of_thread)
+		  core = (*the_target->core_of_thread) (ptid);
+		if (core != -1)
+		  {
+		    sprintf (buf, "core:");
+		    buf += strlen (buf);
+		    sprintf (buf, "%x", core);
+		    strcat (buf, ";");
+		    buf += strlen (buf);
+		  }
 	      }
 	  }
 
@@ -1604,6 +1616,16 @@ buffer_xml_printf (struct buffer *buffer, const char *format, ...)
 	       prev = f + 1;
 	     }
 	     break;
+	   case 'd':
+	     {
+	       int i = va_arg (ap, int);
+	       char b[sizeof ("4294967295")];
+
+	       buffer_grow (buffer, prev, f - prev - 1);
+	       sprintf (b, "%d", i);
+	       buffer_grow_str (buffer, b);
+	       prev = f + 1;
+	     }
 	   }
 	 percent = 0;
        }
