@@ -1,5 +1,21 @@
 2010-01-11  Doug Kwan  <dougkwan@google.com>
 
+	* arm.cc (Arm_relocate_functions::thumb32_branch_offset,
+	Arm_relocate_functions::thumb32_branch_upper,
+	Arm_relocate_functions::thumb32_branch_lower,
+	Arm_relocate_functions::thumb32_cond_branch_offset,
+	Arm_relocate_functions::thumb32_cond_branch_upper,
+	Arm_relocate_functions::thumb32_cond_branch_lower,
+	Arm_relocate_functions::thm_jump19): New methods to handle THUMB
+	branch offset encoding.
+	(Arm_relocate_functions::thumb_branch_common): Use new branch
+	offset encoding methods to avoid code duplication.
+	(Stub_template::Stub_template) Handle THUMB16_SPECIAL_TYPE.
+	(Stub_addend_reader::operator()): Use new branch encoding method
+	to avoid code duplication.
+
+2010-01-11  Doug Kwan  <dougkwan@google.com>
+
 	* arm.cc (Arm_relobj::do_gc_process_relocs): New method.
 	(Target_arm::do_finalize_sections): Define special EXIDX section
 	symbols only if referenced.

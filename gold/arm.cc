@@ -2055,6 +2055,87 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 
  public:
 
+  // Return the branch offset of a 32-bit THUMB branch.
+  static inline int32_t
+  thumb32_branch_offset(uint16_t upper_insn, uint16_t lower_insn)
+  {
+    // We use the Thumb-2 encoding (backwards compatible with Thumb-1)
+    // involving the J1 and J2 bits.
+    uint32_t s = (upper_insn & (1U << 10)) >> 10;
+    uint32_t upper = upper_insn & 0x3ffU;
+    uint32_t lower = lower_insn & 0x7ffU;
+    uint32_t j1 = (lower_insn & (1U << 13)) >> 13;
+    uint32_t j2 = (lower_insn & (1U << 11)) >> 11;
+    uint32_t i1 = j1 ^ s ? 0 : 1;
+    uint32_t i2 = j2 ^ s ? 0 : 1;
+
+    return utils::sign_extend<25>((s << 24) | (i1 << 23) | (i2 << 22)
+				  | (upper << 12) | (lower << 1));
+  }
+
+  // Insert OFFSET to a 32-bit THUMB branch and return the upper instruction.
+  // UPPER_INSN is the original upper instruction of the branch.  Caller is
+  // responsible for overflow checking and BLX offset adjustment.
+  static inline uint16_t
+  thumb32_branch_upper(uint16_t upper_insn, int32_t offset)
+  {
+    uint32_t s = offset < 0 ? 1 : 0;
+    uint32_t bits = static_cast<uint32_t>(offset);
+    return (upper_insn & ~0x7ffU) | ((bits >> 12) & 0x3ffU) | (s << 10);
+  }
+
+  // Insert OFFSET to a 32-bit THUMB branch and return the lower instruction.
+  // LOWER_INSN is the original lower instruction of the branch.  Caller is
+  // responsible for overflow checking and BLX offset adjustment.
+  static inline uint16_t
+  thumb32_branch_lower(uint16_t lower_insn, int32_t offset)
+  {
+    uint32_t s = offset < 0 ? 1 : 0;
+    uint32_t bits = static_cast<uint32_t>(offset);
+    return ((lower_insn & ~0x2fffU)
+            | ((((bits >> 23) & 1) ^ !s) << 13)
+            | ((((bits >> 22) & 1) ^ !s) << 11)
+            | ((bits >> 1) & 0x7ffU));
+  }
+
+  // Return the branch offset of a 32-bit THUMB conditional branch.
+  static inline int32_t
+  thumb32_cond_branch_offset(uint16_t upper_insn, uint16_t lower_insn)
+  {
+    uint32_t s = (upper_insn & 0x0400U) >> 10;
+    uint32_t j1 = (lower_insn & 0x2000U) >> 13;
+    uint32_t j2 = (lower_insn & 0x0800U) >> 11;
+    uint32_t lower = (lower_insn & 0x07ffU);
+    uint32_t upper = (s << 8) | (j2 << 7) | (j1 << 6) | (upper_insn & 0x003fU);
+
+    return utils::sign_extend<21>((upper << 12) | (lower << 1));
+  }
+
+  // Insert OFFSET to a 32-bit THUMB conditional branch and return the upper
+  // instruction.  UPPER_INSN is the original upper instruction of the branch.
+  // Caller is responsible for overflow checking.
+  static inline uint16_t
+  thumb32_cond_branch_upper(uint16_t upper_insn, int32_t offset)
+  {
+    uint32_t s = offset < 0 ? 1 : 0;
+    uint32_t bits = static_cast<uint32_t>(offset);
+    return (upper_insn & 0xfbc0U) | (s << 10) | ((bits & 0x0003f000U) >> 12);
+  }
+
+  // Insert OFFSET to a 32-bit THUMB conditional branch and return the lower
+  // instruction.  LOWER_INSN is the original lower instruction of the branch.
+  // Caller is reponsible for overflow checking.
+  static inline uint16_t
+  thumb32_cond_branch_lower(uint16_t lower_insn, int32_t offset)
+  {
+    uint32_t bits = static_cast<uint32_t>(offset);
+    uint32_t j2 = (bits & 0x00080000U) >> 19;
+    uint32_t j1 = (bits & 0x00040000U) >> 18;
+    uint32_t lo = (bits & 0x00000ffeU) >> 1;
+
+    return (lower_insn & 0xd000U) | (j1 << 13) | (j2 << 11) | lo;
+  }
+
   // R_ARM_ABS8: S + A
   static inline typename This::Status
   abs8(unsigned char *view,
@@ -2187,6 +2268,12 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 			       object, r_sym, psymval, address, thumb_bit,
 			       is_weakly_undefined_without_plt);
   }
+
+  // R_ARM_THM_JUMP24: (S + A) | T - P
+  static typename This::Status
+  thm_jump19(unsigned char *view, const Arm_relobj<big_endian>* object,
+	     const Symbol_value<32>* psymval, Arm_address address,
+	     Arm_address thumb_bit);
 
   // R_ARM_THM_XPC22: (S + A) | T - P
   static inline typename This::Status
@@ -2679,20 +2766,7 @@ Arm_relocate_functions<big_endian>::thumb_branch_common(
       return This::STATUS_OKAY;
     }
  
-  // Fetch the addend.  We use the Thumb-2 encoding (backwards compatible
-  // with Thumb-1) involving the J1 and J2 bits.
-  uint32_t s = (upper_insn & (1 << 10)) >> 10;
-  uint32_t upper = upper_insn & 0x3ff;
-  uint32_t lower = lower_insn & 0x7ff;
-  uint32_t j1 = (lower_insn & (1 << 13)) >> 13;
-  uint32_t j2 = (lower_insn & (1 << 11)) >> 11;
-  uint32_t i1 = j1 ^ s ? 0 : 1;
-  uint32_t i2 = j2 ^ s ? 0 : 1;
- 
-  int32_t addend = (i1 << 23) | (i2 << 22) | (upper << 12) | (lower << 1);
-  // Sign extend.
-  addend = (addend | ((s ? 0 : 1) << 24)) - (1 << 24);
-
+  int32_t addend = This::thumb32_branch_offset(upper_insn, lower_insn);
   Arm_address branch_target = psymval->value(object, addend);
   int32_t branch_offset = branch_target - address;
 
@@ -2744,33 +2818,70 @@ Arm_relocate_functions<big_endian>::thumb_branch_common(
       lower_insn |= 0x1000U;
     }
 
-  uint32_t reloc_sign = (branch_offset < 0) ? 1 : 0;
-  uint32_t relocation = static_cast<uint32_t>(branch_offset);
-
   if ((lower_insn & 0x5000U) == 0x4000U)
     // For a BLX instruction, make sure that the relocation is rounded up
     // to a word boundary.  This follows the semantics of the instruction
     // which specifies that bit 1 of the target address will come from bit
     // 1 of the base address.
-    relocation = (relocation + 2U) & ~3U;
+    branch_offset = (branch_offset + 2) & ~3;
 
   // Put BRANCH_OFFSET back into the insn.  Assumes two's complement.
   // We use the Thumb-2 encoding, which is safe even if dealing with
   // a Thumb-1 instruction by virtue of our overflow check above.  */
-  upper_insn = (upper_insn & ~0x7ffU)
-                | ((relocation >> 12) & 0x3ffU)
-                | (reloc_sign << 10);
-  lower_insn = (lower_insn & ~0x2fffU)
-                | (((!((relocation >> 23) & 1U)) ^ reloc_sign) << 13)
-                | (((!((relocation >> 22) & 1U)) ^ reloc_sign) << 11)
-                | ((relocation >> 1) & 0x7ffU);
+  upper_insn = This::thumb32_branch_upper(upper_insn, branch_offset);
+  lower_insn = This::thumb32_branch_lower(lower_insn, branch_offset);
 
   elfcpp::Swap<16, big_endian>::writeval(wv, upper_insn);
   elfcpp::Swap<16, big_endian>::writeval(wv + 1, lower_insn);
 
   return ((thumb2
-	   ? utils::has_overflow<25>(relocation)
-	   : utils::has_overflow<23>(relocation))
+	   ? utils::has_overflow<25>(branch_offset)
+	   : utils::has_overflow<23>(branch_offset))
+	  ? This::STATUS_OVERFLOW
+	  : This::STATUS_OKAY);
+}
+
+// Relocate THUMB-2 long conditional branches.
+// If IS_WEAK_UNDEFINED_WITH_PLT is true.  The target symbol is weakly
+// undefined and we do not use PLT in this relocation.  In such a case,
+// the branch is converted into an NOP.
+
+template<bool big_endian>
+typename Arm_relocate_functions<big_endian>::Status
+Arm_relocate_functions<big_endian>::thm_jump19(
+    unsigned char *view,
+    const Arm_relobj<big_endian>* object,
+    const Symbol_value<32>* psymval,
+    Arm_address address,
+    Arm_address thumb_bit)
+{
+  typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
+  Valtype* wv = reinterpret_cast<Valtype*>(view);
+  uint32_t upper_insn = elfcpp::Swap<16, big_endian>::readval(wv);
+  uint32_t lower_insn = elfcpp::Swap<16, big_endian>::readval(wv + 1);
+  int32_t addend = This::thumb32_cond_branch_offset(upper_insn, lower_insn);
+
+  Arm_address branch_target = psymval->value(object, addend);
+  int32_t branch_offset = branch_target - address;
+
+  // ??? Should handle interworking?  GCC might someday try to
+  // use this for tail calls.
+  // FIXME: We do support thumb entry to PLT yet.
+  if (thumb_bit == 0)
+    {
+      gold_error(_("conditional branch to PLT in THUMB-2 not supported yet."));
+      return This::STATUS_BAD_RELOC;
+    }
+
+  // Put RELOCATION back into the insn.
+  upper_insn = This::thumb32_cond_branch_upper(upper_insn, branch_offset);
+  lower_insn = This::thumb32_cond_branch_lower(lower_insn, branch_offset);
+
+  // Put the relocated value back in the object file:
+  elfcpp::Swap<16, big_endian>::writeval(wv, upper_insn);
+  elfcpp::Swap<16, big_endian>::writeval(wv + 1, lower_insn);
+
+  return (utils::has_overflow<21>(branch_offset)
 	  ? This::STATUS_OVERFLOW
 	  : This::STATUS_OKAY);
 }
@@ -2897,6 +3008,7 @@ Stub_template::Stub_template(
       switch (insns[i].type())
 	{
 	case Insn_template::THUMB16_TYPE:
+	case Insn_template::THUMB16_SPECIAL_TYPE:
 	  if (i == 0)
 	    this->entry_in_thumb_mode_ = true;
 	  break;
@@ -4309,6 +4421,8 @@ Stub_addend_reader<elfcpp::SHT_REL, big_endian>::operator()(
     const unsigned char* view,
     const typename Reloc_types<elfcpp::SHT_REL, 32, big_endian>::Reloc&) const
 {
+  typedef struct Arm_relocate_functions<big_endian> RelocFuncs;
+  
   switch (r_type)
     {
     case elfcpp::R_ARM_CALL:
@@ -4325,23 +4439,11 @@ Stub_addend_reader<elfcpp::SHT_REL, big_endian>::operator()(
     case elfcpp::R_ARM_THM_JUMP24:
     case elfcpp::R_ARM_THM_XPC22:
       {
-	// Fetch the addend.  We use the Thumb-2 encoding (backwards
-	// compatible with Thumb-1) involving the J1 and J2 bits.
 	typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
 	const Valtype* wv = reinterpret_cast<const Valtype*>(view);
 	Valtype upper_insn = elfcpp::Swap<16, big_endian>::readval(wv);
 	Valtype lower_insn = elfcpp::Swap<16, big_endian>::readval(wv + 1);
-
-	uint32_t s = (upper_insn & (1 << 10)) >> 10;
-	uint32_t upper = upper_insn & 0x3ff;
-	uint32_t lower = lower_insn & 0x7ff;
-	uint32_t j1 = (lower_insn & (1 << 13)) >> 13;
-	uint32_t j2 = (lower_insn & (1 << 11)) >> 11;
-	uint32_t i1 = j1 ^ s ? 0 : 1;
-	uint32_t i2 = j2 ^ s ? 0 : 1;
-
-	return utils::sign_extend<25>((s << 24) | (i1 << 23) | (i2 << 22)
-				      | (upper << 12) | (lower << 1));
+	return RelocFuncs::thumb32_branch_offset(upper_insn, lower_insn);
       }
 
     case elfcpp::R_ARM_THM_JUMP19:
@@ -4350,16 +4452,7 @@ Stub_addend_reader<elfcpp::SHT_REL, big_endian>::operator()(
 	const Valtype* wv = reinterpret_cast<const Valtype*>(view);
 	Valtype upper_insn = elfcpp::Swap<16, big_endian>::readval(wv);
 	Valtype lower_insn = elfcpp::Swap<16, big_endian>::readval(wv + 1);
-
-	// Reconstruct the top three bits and squish the two 11 bit pieces
-	// together.
-	uint32_t S = (upper_insn & 0x0400) >> 10;
-	uint32_t J1 = (lower_insn & 0x2000) >> 13;
-	uint32_t J2 = (lower_insn & 0x0800) >> 11;
-	uint32_t upper =
-	  (S << 8) | (J2 << 7) | (J1 << 6) | (upper_insn & 0x003f);
-	uint32_t lower = (lower_insn & 0x07ff);
-	return utils::sign_extend<23>((upper << 12) | (lower << 1));
+	return RelocFuncs::thumb32_cond_branch_offset(upper_insn, lower_insn);
       }
 
     default:
