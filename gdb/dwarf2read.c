@@ -926,6 +926,13 @@ static void dwarf2_const_value_data (struct attribute *attr,
 
 static struct type *die_type (struct die_info *, struct dwarf2_cu *);
 
+static int need_gnat_info (struct dwarf2_cu *);
+
+static struct type *die_descriptive_type (struct die_info *, struct dwarf2_cu *);
+
+static void set_descriptive_type (struct type *, struct die_info *,
+				  struct dwarf2_cu *);
+
 static struct type *die_containing_type (struct die_info *,
 					 struct dwarf2_cu *);
 
@@ -4564,7 +4571,7 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
     TYPE_ALLOC (type, sizeof (struct field) * nfields);
   memset (TYPE_FIELDS (type), 0, sizeof (struct field) * nfields);
 
-  if (fip->non_public_fields)
+  if (fip->non_public_fields && cu->language != language_ada)
     {
       ALLOCATE_CPLUS_STRUCT_TYPE (type);
 
@@ -4583,7 +4590,7 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
 
   /* If the type has baseclasses, allocate and clear a bit vector for
      TYPE_FIELD_VIRTUAL_BITS.  */
-  if (fip->nbaseclasses)
+  if (fip->nbaseclasses && cu->language != language_ada)
     {
       int num_bytes = B_BYTES (fip->nbaseclasses);
       unsigned char *pointer;
@@ -4617,11 +4624,13 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
       switch (fieldp->accessibility)
 	{
 	case DW_ACCESS_private:
-	  SET_TYPE_FIELD_PRIVATE (type, nfields);
+	  if (cu->language != language_ada)
+	    SET_TYPE_FIELD_PRIVATE (type, nfields);
 	  break;
 
 	case DW_ACCESS_protected:
-	  SET_TYPE_FIELD_PROTECTED (type, nfields);
+	  if (cu->language != language_ada)
+	    SET_TYPE_FIELD_PROTECTED (type, nfields);
 	  break;
 
 	case DW_ACCESS_public:
@@ -4641,6 +4650,8 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
 	    {
 	    case DW_VIRTUALITY_virtual:
 	    case DW_VIRTUALITY_pure_virtual:
+	      if (cu->language == language_ada)
+		error ("unexpected virtuality in component of Ada type");
 	      SET_TYPE_FIELD_VIRTUAL (type, nfields);
 	      break;
 	    }
@@ -4663,6 +4674,9 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   char *physname;
   struct nextfnfield *new_fnfield;
   struct type *this_type;
+
+  if (cu->language == language_ada)
+    error ("unexpected member function in Ada type");
 
   /* Get name of member function.  */
   fieldname = dwarf2_name (die, cu);
@@ -4836,6 +4850,9 @@ dwarf2_attach_fn_fields_to_type (struct field_info *fip, struct type *type,
   struct fnfieldlist *flp;
   int total_length = 0;
   int i;
+
+  if (cu->language == language_ada)
+    error ("unexpected member functions in Ada type");
 
   ALLOCATE_CPLUS_STRUCT_TYPE (type);
   TYPE_FN_FIELDLISTS (type) = (struct fn_fieldlist *)
@@ -5037,6 +5054,8 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
   TYPE_STUB_SUPPORTED (type) = 1;
   if (die_is_declaration (die, cu))
     TYPE_STUB (type) = 1;
+
+  set_descriptive_type (type, die, cu);
 
   /* We need to add the type field to the die immediately so we don't
      infinitely recurse when dealing with pointers to the structure
@@ -5451,6 +5470,8 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
   if (name)
     TYPE_NAME (type) = name;
   
+  set_descriptive_type (type, die, cu);
+
   do_cleanups (back_to);
 
   /* Install the type in the die. */
@@ -6112,6 +6133,8 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr)
     TYPE_LENGTH (range_type) = DW_UNSND (attr);
+
+  set_descriptive_type (range_type, die, cu);
 
   return set_die_type (die, range_type, cu);
 }
@@ -8766,6 +8789,67 @@ die_type (struct die_info *die, struct dwarf2_cu *cu)
 		      cu->objfile->name);
     }
   return type;
+}
+
+/* True iff CU's producer generates GNAT Ada auxiliary information
+   that allows to find parallel types through that information instead
+   of having to do expensive parallel lookups by type name.  */
+
+static int
+need_gnat_info (struct dwarf2_cu *cu)
+{
+  /* FIXME: brobecker/2010-10-12: As of now, only the AdaCore version
+     of GNAT produces this auxiliary information, without any indication
+     that it is produced.  Part of enhancing the FSF version of GNAT
+     to produce that information will be to put in place an indicator
+     that we can use in order to determine whether the descriptive type
+     info is available or not.  One suggestion that has been made is
+     to use a new attribute, attached to the CU die.  For now, assume
+     that the descriptive type info is not available.  */
+  return 0;
+}
+
+
+/* Return the auxiliary type of the die in question using its
+   DW_AT_GNAT_descriptive_type attribute.  Returns NULL if the
+   attribute is not present.  */
+
+static struct type *
+die_descriptive_type (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct type *type;
+  struct attribute *type_attr;
+  struct die_info *type_die;
+
+  type_attr = dwarf2_attr (die, DW_AT_GNAT_descriptive_type, cu);
+  if (!type_attr)
+    return NULL;
+
+  type_die = follow_die_ref (die, type_attr, &cu);
+  type = tag_type_to_type (type_die, cu);
+  if (!type)
+    {
+      dump_die_for_error (type_die);
+      error (_("Dwarf Error: Problem turning type die at offset into gdb type [in module %s]"),
+		      cu->objfile->name);
+    }
+  return type;
+}
+
+/* If DIE has a descriptive_type attribute, then set the TYPE's
+   descriptive type accordingly.  */
+
+static void
+set_descriptive_type (struct type *type, struct die_info *die,
+		      struct dwarf2_cu *cu)
+{
+  struct type *descriptive_type = die_descriptive_type (die, cu);
+
+  if (descriptive_type)
+    {
+      ALLOCATE_GNAT_AUX_TYPE (type);
+      TYPE_DESCRIPTIVE_TYPE (type) = descriptive_type;
+    }
 }
 
 /* Return the containing type of the die in question using its
@@ -11723,6 +11807,19 @@ static struct type *
 set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 {
   struct dwarf2_offset_and_type **slot, ofs;
+
+  /* For Ada types, make sure that the gnat-specific data is always
+     initialized (if not already set).  There are a few types where
+     we should not be doing so, because the type-specific area is
+     already used to hold some other piece of info (eg: TYPE_CODE_FLT
+     where the type-specific area is used to store the floatformat).
+     But this is not a problem, because the gnat-specific information
+     is actually not needed for these types.  */
+  if (need_gnat_info (cu)
+      && TYPE_CODE (type) != TYPE_CODE_FUNC
+      && TYPE_CODE (type) != TYPE_CODE_FLT
+      && !HAVE_GNAT_AUX_INFO (type))
+    INIT_GNAT_SPECIFIC (type);
 
   if (cu->type_hash == NULL)
     {

@@ -1717,13 +1717,31 @@ const struct cplus_struct_type cplus_struct_default;
 void
 allocate_cplus_struct_type (struct type *type)
 {
-  if (!HAVE_CPLUS_STRUCT (type))
-    {
-      TYPE_CPLUS_SPECIFIC (type) = (struct cplus_struct_type *)
-	TYPE_ALLOC (type, sizeof (struct cplus_struct_type));
-      *(TYPE_CPLUS_SPECIFIC (type)) = cplus_struct_default;
-    }
+  if (HAVE_CPLUS_STRUCT (type))
+    /* Structure was already allocated.  Nothing more to do.  */
+    return;
+
+  TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_CPLUS_STUFF;
+  TYPE_RAW_CPLUS_SPECIFIC (type) = (struct cplus_struct_type *)
+    TYPE_ALLOC (type, sizeof (struct cplus_struct_type));
+  *(TYPE_RAW_CPLUS_SPECIFIC (type)) = cplus_struct_default;
 }
+
+const struct gnat_aux_type gnat_aux_default =
+  { NULL };
+
+/* Set the TYPE's type-specific kind to TYPE_SPECIFIC_GNAT_STUFF,
+   and allocate the associated gnat-specific data.  The gnat-specific
+   data is also initialized to gnat_aux_default.  */
+void
+allocate_gnat_aux_type (struct type *type)
+{
+  TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_GNAT_STUFF;
+  TYPE_GNAT_SPECIFIC (type) = (struct gnat_aux_type *)
+    TYPE_ALLOC (type, sizeof (struct gnat_aux_type));
+  *(TYPE_GNAT_SPECIFIC (type)) = gnat_aux_default;
+}
+
 
 /* Helper function to initialize the standard scalar types.
 
@@ -1777,10 +1795,19 @@ init_type (enum type_code code, int length, int flags,
   if (name && strcmp (name, "char") == 0)
     TYPE_NOSIGN (type) = 1;
 
-  if (code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION
-      || code == TYPE_CODE_NAMESPACE)
+  switch (code)
     {
-      INIT_CPLUS_SPECIFIC (type);
+      case TYPE_CODE_STRUCT:
+      case TYPE_CODE_UNION:
+      case TYPE_CODE_NAMESPACE:
+        INIT_CPLUS_SPECIFIC (type);
+        break;
+      case TYPE_CODE_FLT:
+        TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_FLOATFORMAT;
+        break;
+      case TYPE_CODE_FUNC:
+        TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_CALLING_CONVENTION;
+        break;
     }
   return type;
 }
@@ -2495,6 +2522,17 @@ print_cplus_stuff (struct type *type, int spaces)
     }
 }
 
+/* Print the contents of the TYPE's type_specific union, assuming that
+   its type-specific kind is TYPE_SPECIFIC_GNAT_STUFF.  */
+
+static void
+print_gnat_stuff (struct type *type, int spaces)
+{
+  struct type *descriptive_type = TYPE_DESCRIPTIVE_TYPE (type);
+
+  recursive_dump_type (descriptive_type, spaces + 2);
+}
+
 static struct obstack dont_print_type_obstack;
 
 void
@@ -2506,7 +2544,7 @@ recursive_dump_type (struct type *type, int spaces)
     obstack_begin (&dont_print_type_obstack, 0);
 
   if (TYPE_NFIELDS (type) > 0
-      || (TYPE_CPLUS_SPECIFIC (type) && TYPE_NFN_FIELDS (type) > 0))
+      || (HAVE_CPLUS_STRUCT (type) && TYPE_NFN_FIELDS (type) > 0))
     {
       struct type **first_dont_print
 	= (struct type **) obstack_base (&dont_print_type_obstack);
@@ -2775,55 +2813,55 @@ recursive_dump_type (struct type *type, int spaces)
     }
   printfi_filtered (spaces, "vptr_fieldno %d\n", 
 		    TYPE_VPTR_FIELDNO (type));
-  switch (TYPE_CODE (type))
+
+  switch (TYPE_SPECIFIC_FIELD (type))
     {
-    case TYPE_CODE_STRUCT:
-      printfi_filtered (spaces, "cplus_stuff ");
-      gdb_print_host_address (TYPE_CPLUS_SPECIFIC (type), 
-			      gdb_stdout);
-      puts_filtered ("\n");
-      print_cplus_stuff (type, spaces);
-      break;
+      case TYPE_SPECIFIC_CPLUS_STUFF:
+	printfi_filtered (spaces, "cplus_stuff ");
+	gdb_print_host_address (TYPE_CPLUS_SPECIFIC (type), 
+				gdb_stdout);
+	puts_filtered ("\n");
+	print_cplus_stuff (type, spaces);
+	break;
 
-    case TYPE_CODE_FLT:
-      printfi_filtered (spaces, "floatformat ");
-      if (TYPE_FLOATFORMAT (type) == NULL)
-	puts_filtered ("(null)");
-      else
-	{
-	  puts_filtered ("{ ");
-	  if (TYPE_FLOATFORMAT (type)[0] == NULL
-	      || TYPE_FLOATFORMAT (type)[0]->name == NULL)
-	    puts_filtered ("(null)");
-	  else
-	    puts_filtered (TYPE_FLOATFORMAT (type)[0]->name);
+      case TYPE_SPECIFIC_GNAT_STUFF:
+	printfi_filtered (spaces, "gnat_stuff ");
+	gdb_print_host_address (TYPE_GNAT_SPECIFIC (type), gdb_stdout);
+	puts_filtered ("\n");
+	print_gnat_stuff (type, spaces);
+	break;
 
-	  puts_filtered (", ");
-	  if (TYPE_FLOATFORMAT (type)[1] == NULL
-	      || TYPE_FLOATFORMAT (type)[1]->name == NULL)
-	    puts_filtered ("(null)");
-	  else
-	    puts_filtered (TYPE_FLOATFORMAT (type)[1]->name);
+      case TYPE_SPECIFIC_FLOATFORMAT:
+	printfi_filtered (spaces, "floatformat ");
+	if (TYPE_FLOATFORMAT (type) == NULL)
+	  puts_filtered ("(null)");
+	else
+	  {
+	    puts_filtered ("{ ");
+	    if (TYPE_FLOATFORMAT (type)[0] == NULL
+		|| TYPE_FLOATFORMAT (type)[0]->name == NULL)
+	      puts_filtered ("(null)");
+	    else
+	      puts_filtered (TYPE_FLOATFORMAT (type)[0]->name);
 
-	  puts_filtered (" }");
-	}
-      puts_filtered ("\n");
-      break;
+	    puts_filtered (", ");
+	    if (TYPE_FLOATFORMAT (type)[1] == NULL
+		|| TYPE_FLOATFORMAT (type)[1]->name == NULL)
+	      puts_filtered ("(null)");
+	    else
+	      puts_filtered (TYPE_FLOATFORMAT (type)[1]->name);
 
-    default:
-      /* We have to pick one of the union types to be able print and
-         test the value.  Pick cplus_struct_type, even though we know
-         it isn't any particular one.  */
-      printfi_filtered (spaces, "type_specific ");
-      gdb_print_host_address (TYPE_CPLUS_SPECIFIC (type), gdb_stdout);
-      if (TYPE_CPLUS_SPECIFIC (type) != NULL)
-	{
-	  printf_filtered (_(" (unknown data form)"));
-	}
-      printf_filtered ("\n");
-      break;
+	    puts_filtered (" }");
+	  }
+	puts_filtered ("\n");
+	break;
 
+      case TYPE_SPECIFIC_CALLING_CONVENTION:
+	printfi_filtered (spaces, "calling_convention %d\n",
+                          TYPE_CALLING_CONVENTION (type));
+	break;
     }
+
   if (spaces == 0)
     obstack_free (&dont_print_type_obstack, NULL);
 }

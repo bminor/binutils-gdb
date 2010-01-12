@@ -186,7 +186,7 @@ total_number_of_methods (struct type *type)
   int count;
 
   CHECK_TYPEDEF (type);
-  if (TYPE_CPLUS_SPECIFIC (type) == NULL)
+  if (! HAVE_CPLUS_STRUCT (type))
     return 0;
   count = TYPE_NFN_FIELDS_TOTAL (type);
 

@@ -340,6 +340,26 @@ enum field_loc_kind
     FIELD_LOC_KIND_DWARF_BLOCK	/* dwarf_block */
   };
 
+/* A discriminant to determine which field in the main_type.type_specific
+   union is being used, if any.
+
+   For types such as TYPE_CODE_FLT or TYPE_CODE_FUNC, the use of this
+   discriminant is really redundant, as we know from the type code
+   which field is going to be used.  As such, it would be possible to
+   reduce the size of this enum in order to save a bit or two for
+   other fields of struct main_type.  But, since we still have extra
+   room , and for the sake of clarity and consistency, we treat all fields
+   of the union the same way.  */
+
+enum type_specific_kind
+{
+  TYPE_SPECIFIC_NONE,
+  TYPE_SPECIFIC_CPLUS_STUFF,
+  TYPE_SPECIFIC_GNAT_STUFF,
+  TYPE_SPECIFIC_FLOATFORMAT,
+  TYPE_SPECIFIC_CALLING_CONVENTION
+};
+
 /* This structure is space-critical.
    Its layout has been tweaked to reduce the space used.  */
 
@@ -366,6 +386,10 @@ struct main_type
   unsigned int flag_nottext : 1;
   unsigned int flag_fixed_instance : 1;
   unsigned int flag_objfile_owned : 1;
+
+  /* A discriminant telling us which field of the type_specific union
+     is being used for this type, if any.  */
+  ENUM_BITFIELD(type_specific_kind) type_specific_field : 3;
 
   /* Number of fields described for this type.  This field appears at
      this location because it packs nicely here.  */
@@ -553,6 +577,10 @@ struct main_type
        cplus_struct_type. */
 
     struct cplus_struct_type *cplus_stuff;
+
+    /* GNAT_STUFF is for types for which the GNAT Ada compiler
+       provides additional information.  */
+    struct gnat_aux_type *gnat_stuff;
 
     /* FLOATFORMAT is for TYPE_CODE_FLT.  It is a pointer to two
        floatformat objects that describe the floating-point value
@@ -825,6 +853,15 @@ struct badness_vector
     int *rank;
   };
 
+/* GNAT Ada-specific information for various Ada types.  */
+struct gnat_aux_type
+  {
+    /* Parallel type used to encode information about dynamic types
+       used in Ada (such as variant records, variable-size array,
+       etc).  */
+    struct type* descriptive_type;
+  };
+
 /* The default value of TYPE_CPLUS_SPECIFIC(T) points to the
    this shared static structure. */
 
@@ -833,10 +870,27 @@ extern const struct cplus_struct_type cplus_struct_default;
 extern void allocate_cplus_struct_type (struct type *);
 
 #define INIT_CPLUS_SPECIFIC(type) \
-  (TYPE_CPLUS_SPECIFIC(type)=(struct cplus_struct_type*)&cplus_struct_default)
+  (TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_CPLUS_STUFF, \
+   TYPE_RAW_CPLUS_SPECIFIC (type) = (struct cplus_struct_type*) &cplus_struct_default)
+
 #define ALLOCATE_CPLUS_STRUCT_TYPE(type) allocate_cplus_struct_type (type)
+
 #define HAVE_CPLUS_STRUCT(type) \
-  (TYPE_CPLUS_SPECIFIC(type) != &cplus_struct_default)
+  (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_CPLUS_STUFF \
+   && TYPE_RAW_CPLUS_SPECIFIC (type) !=  &cplus_struct_default)
+
+extern const struct gnat_aux_type gnat_aux_default;
+
+extern void allocate_gnat_aux_type (struct type *);
+
+#define INIT_GNAT_SPECIFIC(type) \
+  (TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_GNAT_STUFF, \
+   TYPE_GNAT_SPECIFIC (type) = (struct gnat_aux_type *) &gnat_aux_default)
+#define ALLOCATE_GNAT_AUX_TYPE(type) allocate_gnat_aux_type (type)
+/* A macro that returns non-zero if the type-specific data should be
+   read as "gnat-stuff".  */
+#define HAVE_GNAT_AUX_INFO(type) \
+  (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_GNAT_STUFF)
 
 #define TYPE_INSTANCE_FLAGS(thistype) (thistype)->instance_flags
 #define TYPE_MAIN_TYPE(thistype) (thistype)->main_type
@@ -890,9 +944,22 @@ extern void allocate_cplus_struct_type (struct type *);
 #define TYPE_NFN_FIELDS_TOTAL(thistype) TYPE_CPLUS_SPECIFIC(thistype)->nfn_fields_total
 #define TYPE_NTEMPLATE_ARGS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->ntemplate_args
 #define TYPE_DECLARED_TYPE(thistype) TYPE_CPLUS_SPECIFIC(thistype)->declared_type
+#define TYPE_SPECIFIC_FIELD(thistype) \
+  TYPE_MAIN_TYPE(thistype)->type_specific_field
 #define	TYPE_TYPE_SPECIFIC(thistype) TYPE_MAIN_TYPE(thistype)->type_specific
-#define TYPE_CPLUS_SPECIFIC(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.cplus_stuff
+/* We need this tap-dance with the TYPE_RAW_SPECIFIC because of the case
+   where we're trying to print an Ada array using the C language.
+   In that case, there is no "cplus_stuff", but the C language assumes
+   that there is.  What we do, in that case, is pretend that there is
+   an implicit one which is the default cplus stuff.  */
+#define TYPE_CPLUS_SPECIFIC(thistype) \
+   (!HAVE_CPLUS_STRUCT(thistype) \
+    ? (struct cplus_struct_type*)&cplus_struct_default \
+    : TYPE_RAW_CPLUS_SPECIFIC(thistype))
+#define TYPE_RAW_CPLUS_SPECIFIC(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.cplus_stuff
 #define TYPE_FLOATFORMAT(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.floatformat
+#define TYPE_GNAT_SPECIFIC(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.gnat_stuff
+#define TYPE_DESCRIPTIVE_TYPE(thistype) TYPE_GNAT_SPECIFIC(thistype)->descriptive_type
 #define TYPE_CALLING_CONVENTION(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.calling_convention
 #define TYPE_BASECLASS(thistype,index) TYPE_FIELD_TYPE(thistype, index)
 #define TYPE_N_BASECLASSES(thistype) TYPE_CPLUS_SPECIFIC(thistype)->n_baseclasses
@@ -1004,7 +1071,7 @@ extern void allocate_cplus_struct_type (struct type *);
 #define TYPE_IS_OPAQUE(thistype) (((TYPE_CODE (thistype) == TYPE_CODE_STRUCT) ||        \
                                    (TYPE_CODE (thistype) == TYPE_CODE_UNION))        && \
                                   (TYPE_NFIELDS (thistype) == 0)                     && \
-                                  (TYPE_CPLUS_SPECIFIC (thistype) && (TYPE_NFN_FIELDS (thistype) == 0)) && \
+                                  (HAVE_CPLUS_STRUCT (thistype) && (TYPE_NFN_FIELDS (thistype) == 0)) && \
                                   (TYPE_STUB (thistype) || !TYPE_STUB_SUPPORTED (thistype)))
 
 struct builtin_type

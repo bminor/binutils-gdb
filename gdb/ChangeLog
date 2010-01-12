@@ -1,3 +1,52 @@
+2010-01-12  Joel Brobecker  <brobecker@adacore.com>
+
+	Add support for DW_AT_GNAT_descriptive_type.
+	* gdbtypes.h (enum type_specific_kind): New enum.
+	(struct main_type) [type_specific_field]: New component.
+	[type_specific]: Add new component "gnat_stuff".
+	(struct gnat_aux_type): New type.
+	(INIT_CPLUS_SPECIFIC): Also set TYPE_SPECIFIC_FIELD (type).
+	(HAVE_CPLUS_STRUCT): Also check TYPE_SPECIFIC_FIELD (type).
+	(gnat_aux_default, allocate_gnat_aux_type): Add declaration.
+	(INIT_GNAT_SPECIFIC, ALLOCATE_GNAT_AUX_TYPE, HAVE_GNAT_AUX_INFO)
+	(TYPE_SPECIFIC_FIELD): New macros.
+	(TYPE_CPLUS_SPECIFIC): Return cplus_struct_default if the given
+	type does not hold any cplus-specific data.
+	(TYPE_RAW_CPLUS_SPECIFIC): New macro.
+	(TYPE_GNAT_SPECIFIC, TYPE_DESCRIPTIVE_TYPE): New macros.
+	(TYPE_IS_OPAQUE): Use HAVE_CPLUS_STRUCT to check if type has
+	cplus-specific data.
+	* gdbtypes.c (allocate_cplus_struct_type): Minor stylistic rewrite.
+	Set new component TYPE_SPECIFIC_FIELD (type).
+	(gnat_aux_default): New constant.
+	(allocate_gnat_aux_type): New function.
+	(init_type): Add initialization the type-specific stuff for
+	TYPE_CODE_FLT and TYPE_CODE_FUNC types.
+	(print_gnat_stuff): New function.
+	(recursive_dump_type): Use HAVE_CPLUS_STRUCT to check for cplus-
+	specific data.  Adjust code that prints the contents of the
+	type-specific union using the TYPE_SPECIFIC_FIELD value.
+	* dwarf2read.c (dwarf2_attach_fields_to_type): Do not allocate
+	the type cplus stuff for Ada types.
+	(dwarf2_add_member_fn, dwarf2_attach_fn_fields_to_type):
+	Error out if these routines are called with an Ada type.
+	(read_structure_type, read_array_type, read_subrange_type):
+	Add call to set_descriptive_type.
+	(set_die_type): Initialize the gnat-specific data if necessary.
+	(need_gnat_info, die_descriptive_type, set_descriptive_type):
+	New functions.
+	* ada-lang.c (decode_constrained_packed_array_type): Use
+	decode_constrained_packed_array_type instead of doing a standard
+	lookup to locate a parallel type.
+	(find_parallel_type_by_descriptive_type): New function.
+	(ada_find_parallel_type_with_name): New function.
+	(ada_find_parallel_type): Reimplement using
+	ada_find_parallel_type_with_name.
+	* ada-valprint.c (print_field_values): Use HAVE_CPLUS_STRUCT
+	to check if type has a cplus stuff.
+	* linespec.c (total_number_of_methods): Likewise.
+	* mdebugread.c (new_type): Likewise.
+
 2010-01-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* NEWS: Document the 0b binary number prefix parsing.

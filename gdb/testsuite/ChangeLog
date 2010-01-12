@@ -1,3 +1,9 @@
+2010-01-12  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/maint.exp: Adjust the expected output for the
+	"maint print type" test. Use gdb_test_multiple instead of
+	gdb_sent/gdb_expect.
+
 2010-01-11  Doug Evans  <dje@google.com>
 
 	* lib/gdbserver-support.exp (gdbserver_download_current_prog): Rename

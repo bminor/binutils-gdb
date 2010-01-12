@@ -1077,8 +1077,7 @@ print_field_values (struct type *type, const gdb_byte *valaddr,
 
 	  /* Bitfields require special handling, especially due to byte
 	     order problems.  */
-	  if (TYPE_CPLUS_SPECIFIC (type) != NULL
-	      && TYPE_FIELD_IGNORE (type, i))
+	  if (HAVE_CPLUS_STRUCT (type) && TYPE_FIELD_IGNORE (type, i))
 	    {
 	      fputs_filtered (_("<optimized out or zero length>"), stream);
 	    }

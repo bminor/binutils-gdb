@@ -157,6 +157,9 @@ static struct type *ada_lookup_struct_elt_type (struct type *, char *,
 
 static struct value *evaluate_subexp_type (struct expression *, int *);
 
+static struct type *ada_find_parallel_type_with_name (struct type *,
+                                                      const char *);
+
 static int is_dynamic_field (struct type *, int);
 
 static struct type *to_fixed_variant_branch_type (struct type *,
@@ -1874,13 +1877,13 @@ decode_constrained_packed_array_type (struct type *type)
   memcpy (name, raw_name, tail - raw_name);
   name[tail - raw_name] = '\000';
 
-  sym = standard_lookup (name, get_selected_block (0), VAR_DOMAIN);
-  if (sym == NULL || SYMBOL_TYPE (sym) == NULL)
+  shadow_type = ada_find_parallel_type_with_name (type, name);
+
+  if (shadow_type == NULL)
     {
       lim_warning (_("could not find bounds information on packed array"));
       return NULL;
     }
-  shadow_type = SYMBOL_TYPE (sym);
   CHECK_TYPEDEF (shadow_type);
 
   if (TYPE_CODE (shadow_type) != TYPE_CODE_ARRAY)
@@ -6666,30 +6669,89 @@ ada_type_name (struct type *type)
     return TYPE_TAG_NAME (type);
 }
 
-/* Find a parallel type to TYPE whose name is formed by appending
+/* Search the list of "descriptive" types associated to TYPE for a type
+   whose name is NAME.  */
+
+static struct type *
+find_parallel_type_by_descriptive_type (struct type *type, const char *name)
+{
+  struct type *result;
+
+  /* If there no descriptive-type info, then there is no parallel type
+     to be found.  */
+  if (!HAVE_GNAT_AUX_INFO (type))
+    return NULL;
+
+  result = TYPE_DESCRIPTIVE_TYPE (type);
+  while (result != NULL)
+    {
+      char *result_name = ada_type_name (result);
+
+      if (result_name == NULL)
+        {
+          warning (_("unexpected null name on descriptive type"));
+          return NULL;
+        }
+
+      /* If the names match, stop.  */
+      if (strcmp (result_name, name) == 0)
+	break;
+
+      /* Otherwise, look at the next item on the list, if any.  */
+      if (HAVE_GNAT_AUX_INFO (result))
+	result = TYPE_DESCRIPTIVE_TYPE (result);
+      else
+	result = NULL;
+    }
+
+  /* If we didn't find a match, see whether this is a packed array.  With
+     older compilers, the descriptive type information is either absent or
+     irrelevant when it comes to packed arrays so the above lookup fails.
+     Fall back to using a parallel lookup by name in this case.  */
+  if (result == NULL && ada_is_packed_array_type (type))
+    return ada_find_any_type (name);
+
+  return result;
+}
+
+/* Find a parallel type to TYPE with the specified NAME, using the
+   descriptive type taken from the debugging information, if available,
+   and otherwise using the (slower) name-based method.  */
+
+static struct type *
+ada_find_parallel_type_with_name (struct type *type, const char *name)
+{
+  struct type *result = NULL;
+
+  if (HAVE_GNAT_AUX_INFO (type))
+    result = find_parallel_type_by_descriptive_type (type, name);
+  else
+    result = ada_find_any_type (name);
+
+  return result;
+}
+
+/* Same as above, but specify the name of the parallel type by appending
    SUFFIX to the name of TYPE.  */
 
 struct type *
 ada_find_parallel_type (struct type *type, const char *suffix)
 {
-  static char *name;
-  static size_t name_len = 0;
+  char *name, *typename = ada_type_name (type);
   int len;
-  char *typename = ada_type_name (type);
 
   if (typename == NULL)
     return NULL;
 
   len = strlen (typename);
 
-  GROW_VECT (name, name_len, len + strlen (suffix) + 1);
+  name = (char *) alloca (len + strlen (suffix) + 1);
 
   strcpy (name, typename);
   strcpy (name + len, suffix);
 
-  return ada_find_any_type (name);
+  return ada_find_parallel_type_with_name (type, name);
 }
-
 
 /* If TYPE is a variable-size record type, return the corresponding template
    type describing its fields.  Otherwise, return NULL.  */
