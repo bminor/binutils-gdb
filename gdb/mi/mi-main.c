@@ -513,9 +513,10 @@ list_available_thread_groups (VEC (int) *ids, int recurse)
   struct osdata_item *item;
   int ix_items;
   /* This keeps a map from integer (pid) to VEC (struct osdata_item *)*
-     The vector contains information about all threads for the given
-     pid.  */
-  splay_tree tree;
+     The vector contains information about all threads for the given pid.
+     This is assigned an initial value to avoid "may be used uninitialized"
+     warning from gcc.  */
+  splay_tree tree = NULL;
 
   /* get_osdata will throw if it cannot return data.  */
   data = get_osdata ("processes");

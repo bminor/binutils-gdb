@@ -1,3 +1,8 @@
+2010-01-12  Doug Evans  <dje@google.com>
+
+	* mi/mi-main.c (list_available_thread_groups): Avoid "may be used
+	uninitialized" warning from gcc on local `tree'.
+
 2010-01-13  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Implement core awareness.
