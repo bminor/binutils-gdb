@@ -35,7 +35,8 @@ CFLAGS=/include=([],[-.include])$(DEFS)
 else
 OPT=/noopt/debug
 CFLAGS=/name=(as_is,shortened)/include=([],"../include")\
- /define=("unlink=remove",DEBUGDIR="""GNU$$DEBUGDIR:""",$(DEFS))$(OPT)
+ /define=("unlink=remove",DEBUGDIR="""GNU$$DEBUGDIR:""",$(DEFS))\
+ /warns=(infor=missingreturn)$(OPT)
 endif
 
 libbfd.olb: $(OBJS)
