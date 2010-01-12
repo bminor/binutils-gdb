@@ -139,8 +139,10 @@ proc skip_gdbserver_tests { } {
 
 # Download the currently loaded program to the target if necessary.
 # Return the target system filename.
+# NOTE: This was named "gdbserver_download", but that collides with the
+# dejagnu "download" API function when using load_generic_config "gdbserver".
 
-proc gdbserver_download { } {
+proc gdbserver_download_current_prog { } {
     global gdbserver_host_exec
     global gdbserver_host_mtime
     global gdbserver_server_exec
@@ -266,7 +268,7 @@ proc gdbserver_start { options arguments } {
 # Returns the target protocol and socket to connect to.
 
 proc gdbserver_spawn { child_args } {
-    set target_exec [gdbserver_download]
+    set target_exec [gdbserver_download_current_prog]
 
     # Fire off the debug agent.  This flavour of gdbserver takes as
     # arguments the port information, the name of the executable file to
