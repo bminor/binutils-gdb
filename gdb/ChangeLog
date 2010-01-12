@@ -1,5 +1,10 @@
 2010-01-12  Joel Brobecker  <brobecker@adacore.com>
 
+	Delete dead function.
+	* ada-lang.c (extract_string): Delete.  No longer used.
+
+2010-01-12  Joel Brobecker  <brobecker@adacore.com>
+
 	Fix -Wunused warning in dec-thread.c.
 	* dec-thread.c (dec_thread_count_gdb_threads)
 	(dec_thread_add_gdb_thread): Prevent -Wunused warning.
