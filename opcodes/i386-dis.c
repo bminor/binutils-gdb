@@ -144,10 +144,7 @@ static int prefixes;
 static int rex;
 /* Bits of REX we've already used.  */
 static int rex_used;
-/* Original REX prefix.  */
-static int rex_original;
-/* REX bits in original REX prefix ignored.  It may not be the same
-   as rex_original since some bits may not be ignored.  */
+/* REX bits in original REX prefix ignored.  */
 static int rex_ignored;
 /* Mark parts used in the REX prefix.  When we are testing for
    empty prefix (for 8bit register REX extension), just mask it
@@ -11423,7 +11420,6 @@ ckprefix (void)
 {
   int newrex, i, length;
   rex = 0;
-  rex_original = 0;
   rex_ignored = 0;
   prefixes = 0;
   used_prefixes = 0;
@@ -11537,7 +11533,6 @@ ckprefix (void)
       if (*codep != FWAIT_OPCODE)
 	all_prefixes[i++] = *codep;
       rex = newrex;
-      rex_original = rex;
       codep++;
       length++;
     }
@@ -12340,7 +12335,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
 	  }
     }
 
-  /* Check if the REX prefix used.  */
+  /* Check if the REX prefix is used.  */
   if (rex_ignored == 0 && (rex ^ rex_used) == 0)
     all_prefixes[last_rex_prefix] = 0;
 
