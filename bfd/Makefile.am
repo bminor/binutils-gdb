@@ -609,6 +609,7 @@ BFD64_BACKENDS = \
 	elf64-x86-64.lo \
 	elf64.lo \
 	elfn32-mips.lo \
+	mach-o-x86-64.lo \
 	mmo.lo \
 	nlm32-alpha.lo \
 	nlm64.lo \
@@ -639,6 +640,7 @@ BFD64_BACKENDS_CFILES = \
 	elf64-x86-64.c \
 	elf64.c \
 	elfn32-mips.c \
+	mach-o-x86-64.c \
 	mmo.c \
 	nlm32-alpha.c \
 	nlm64.c \

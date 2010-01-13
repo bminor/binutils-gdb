@@ -1,5 +1,18 @@
 2010-01-13  Tristan Gingold  <gingold@adacore.com>
 
+	* config.bfd: Remove duplicated target vector for i386-*-darwin.
+	Appends new arch instead of overriding.
+	Use mach_o_x86_64_vec for x86_64-*-darwin.
+	* configure.in: Add mach_o_x86_64_vec.
+	* configure: Regenerate.
+	* targets.c: Declare mach_o_x86_64_vec, add it to _bfd_target_vector.
+	* Makefile.am (BFD64_BACKENDS): Add mach-o-x86-64.lo
+	(BFD64_BACKENDS_CFILES): Add mach-o-x86-64.c
+	* Makefile.in: Regenerate.
+	* mach-o-x86-64.c: New file.
+
+2010-01-13  Tristan Gingold  <gingold@adacore.com>
+
 	* reloc.c: Add MACH_O_X86_64 relocations.
 	* bfd-in2.h: Regenerate.
 	* libbfd.h: Regenerate.
