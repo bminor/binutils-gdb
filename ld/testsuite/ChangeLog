@@ -1,3 +1,8 @@
+2010-01-13  Nick Clifton  <nickc@redhat.com>
+
+	* ld-scrips/sort.exp: Skip these tests when the target is the
+	h8300.
+
 2010-01-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/11146

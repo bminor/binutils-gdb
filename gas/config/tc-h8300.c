@@ -139,6 +139,48 @@ pint (int arg ATTRIBUTE_UNUSED)
   cons (Hmode ? 4 : 2);
 }
 
+/* Like obj_elf_section, but issues a warning for new
+   sections which do not have an attribute specification.  */
+
+static void
+h8300_elf_section (int push)
+{
+  static const char * known_data_sections [] = { ".rodata", ".tdata", ".tbss" };
+  static const char * known_data_prefixes [] = { ".debug", ".gnu.warning" };
+  char * saved_ilp = input_line_pointer;
+  char * name;
+
+  name = obj_elf_section_name ();
+  if (name == NULL)
+    return;
+
+  if (* input_line_pointer != ','
+      && bfd_get_section_by_name (stdoutput, name) == NULL)
+    {
+      signed int i;
+
+      /* Ignore this warning for well known data sections.  */
+      for (i = ARRAY_SIZE (known_data_sections); i--;)
+	if (strcmp (name, known_data_sections[i]) == 0)
+	  break;
+
+      if (i < 0)
+	for (i = ARRAY_SIZE (known_data_prefixes); i--;)
+	  if (strncmp (name, known_data_prefixes[i],
+		       strlen (known_data_prefixes[i])) == 0)
+	    break;
+
+      if (i < 0)
+	as_warn (_("new section '%s' defined without attributes - this might cause problems"), name);
+    }
+
+  /* FIXME: We ought to free the memory allocated by obj_elf_section_name()
+     for 'name', but we do not know if it was taken from the obstack, via
+     demand_copy_C_string(), or xmalloc()ed.  */
+  input_line_pointer = saved_ilp;
+  obj_elf_section (push);
+}
+
 /* This table describes all the machine specific pseudo-ops the assembler
    has to support.  The fields are:
    pseudo-op name without dot
@@ -165,6 +207,14 @@ const pseudo_typeS md_pseudo_table[] =
   {"import",  s_ignore, 0},
   {"page",    listing_eject, 0},
   {"program", s_ignore, 0},
+
+#ifdef OBJ_ELF
+  {"section",   h8300_elf_section, 0},
+  {"section.s", h8300_elf_section, 0},
+  {"sect",      h8300_elf_section, 0},
+  {"sect.s",    h8300_elf_section, 0},
+#endif
+
   {0, 0, 0}
 };
 
@@ -2139,9 +2189,11 @@ md_number_to_chars (char *ptr, valueT use, int nbytes)
 }
 
 long
-md_pcrel_from (fixS *fixP ATTRIBUTE_UNUSED)
+md_pcrel_from (fixS *fixp)
 {
-  abort ();
+  as_bad_where (fixp->fx_file, fixp->fx_line,
+		_("Unexpected reference to a symbol in a non-code section"));
+  return 0;
 }
 
 arelent *

@@ -1,3 +1,11 @@
+2010-01-13  Nick Clifton  <nickc@redhat.com>
+
+	* gas/elf/section0.d: Skip this test for the h8300.
+	* gas/elf/section1.d: Likewise.
+	* gas/elf/section6.d: Likewise.
+	* gas/elf/elf.exp: Skip section2 and section5 tests when the
+	target is the h8300.
+
 2010-01-06  Quentin Neill  <quentin.neill@amd.com>
 
 	* gas/i386/i386.exp: Add new amdfam15 test cases.

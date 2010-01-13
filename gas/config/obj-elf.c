@@ -855,7 +855,7 @@ obj_elf_section_word (char *str, size_t len, int *type)
 }
 
 /* Get name of section.  */
-static char *
+char *
 obj_elf_section_name (void)
 {
   char *name;

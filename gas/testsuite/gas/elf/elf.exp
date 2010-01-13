@@ -126,10 +126,18 @@ if { ([istarget "*-*-*elf*"]
     }
     run_dump_test "section0" 
     run_dump_test "section1" 
-    run_elf_list_test "section2" "$target_machine" "-al" "-s" ""
+    if {! [istarget "h8300-*-*"]} then {
+	# The h8300 port issues a warning message for
+	# new sections created without atrributes.
+	run_elf_list_test "section2" "$target_machine" "-al" "-s" ""
+    }
     run_dump_test "section3" 
     run_dump_test "section4"
-    run_elf_list_test "section5" "" "-al" "-SW" "| grep \" \\\\.test\\\[0-9\\\]\""
+    if {! [istarget "h8300-*-*"]} then {
+	# The h8300 port issues a warning message for
+	# new sections created without atrributes.
+	run_elf_list_test "section5" "" "-al" "-SW" "| grep \" \\\\.test\\\[0-9\\\]\""
+    }
     run_dump_test "struct" 
     run_dump_test "symtab"
     run_dump_test "symver"
