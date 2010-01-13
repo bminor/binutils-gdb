@@ -303,22 +303,7 @@ normalize (const char *file, bfd *abfd)
   if (full_pathname)
     return file;
 
-  filename = strrchr (file, '/');
-#ifdef HAVE_DOS_BASED_FILE_SYSTEM
-  {
-    /* We could have foo/bar\\baz, or foo\\bar, or d:bar.  */
-    char *bslash = strrchr (file, '\\');
-
-    if (filename == NULL || (bslash != NULL && bslash > filename))
-      filename = bslash;
-    if (filename == NULL && file[0] != '\0' && file[1] == ':')
-      filename = file + 1;
-  }
-#endif
-  if (filename != (char *) NULL)
-    filename++;
-  else
-    filename = file;
+  filename = lbasename (file);
 
   if (ar_truncate
       && abfd != NULL
@@ -397,24 +382,8 @@ main (int argc, char **argv)
 
   if (is_ranlib < 0)
     {
-      char *temp;
+      const char *temp = lbasename (program_name);
 
-      temp = strrchr (program_name, '/');
-#ifdef HAVE_DOS_BASED_FILE_SYSTEM
-      {
-	/* We could have foo/bar\\baz, or foo\\bar, or d:bar.  */
-	char *bslash = strrchr (program_name, '\\');
-
-	if (temp == NULL || (bslash != NULL && bslash > temp))
-	  temp = bslash;
-	if (temp == NULL && program_name[0] != '\0' && program_name[1] == ':')
-	  temp = program_name + 1;
-      }
-#endif
-      if (temp == NULL)
-	temp = program_name;
-      else
-	++temp;
       if (strlen (temp) >= 6
 	  && FILENAME_CMP (temp + strlen (temp) - 6, "ranlib") == 0)
 	is_ranlib = 1;

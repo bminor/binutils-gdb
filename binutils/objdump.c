@@ -1156,21 +1156,7 @@ update_source_path (const char *filename)
     return NULL;
 
   /* Get the name of the file.  */
-  fname = strrchr (filename, '/');
-#ifdef HAVE_DOS_BASED_FILE_SYSTEM
-  {
-    /* We could have a mixed forward/back slash case.  */
-    char *backslash = strrchr (filename, '\\');
-    if (fname == NULL || (backslash != NULL && backslash > fname))
-      fname = backslash;
-    if (fname == NULL && filename[0] != '\0' && filename[1] == ':')
-      fname = filename + 1;
-  }
-#endif
-  if (fname == NULL)
-    fname = filename;
-  else
-    ++fname;
+  fname = lbasename (filename);
 
   /* If file exists under a new path, we need to add it to the list
      so that show_line knows about it.  */

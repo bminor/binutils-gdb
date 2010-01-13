@@ -1,3 +1,9 @@
+2010-01-13  Tristan Gingold  <gingold@adacore.com>
+
+	* ar.c (main): Use lbasename.
+	(normalize): Ditto.
+	* objdump.c (update_source_path): Ditto.
+
 2010-01-12  Tristan Gingold  <gingold@adacore.com>
 
 	* makefile.vms (CFLAGS): Turns warnings into informational messages.
