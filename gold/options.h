@@ -1,6 +1,6 @@
 // options.h -- handle command line options for gold  -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -580,13 +580,17 @@ class General_options
   // alphabetical order).  For both, lowercase sorts before uppercase.
   // The -z options come last.
 
+  DEFINE_bool(add_needed, options::TWO_DASHES, '\0', false,
+	      N_("Not supported"),
+	      N_("Do not copy DT_NEEDED tags from shared libraries"));
+
   DEFINE_bool(allow_shlib_undefined, options::TWO_DASHES, '\0', false,
               N_("Allow unresolved references in shared libraries"),
               N_("Do not allow unresolved references in shared libraries"));
 
   DEFINE_bool(as_needed, options::TWO_DASHES, '\0', false,
-              N_("Only set DT_NEEDED for dynamic libs if used"),
-              N_("Always DT_NEEDED for dynamic libs"));
+              N_("Only set DT_NEEDED for shared libraries if used"),
+              N_("Always DT_NEEDED for shared libraries"));
 
   // This should really be an "enum", but it's too easy for folks to
   // forget to update the list as they add new targets.  So we just
@@ -626,6 +630,10 @@ class General_options
               N_("[none]"),
               {"none"});
 #endif
+
+  DEFINE_bool(copy_dt_needed_entries, options::TWO_DASHES, '\0', false,
+	      N_("Not supported"),
+	      N_("Do not copy DT_NEEDED tags from shared libraries"));
 
   DEFINE_bool(define_common, options::TWO_DASHES, 'd', false,
               N_("Define common symbols"),
