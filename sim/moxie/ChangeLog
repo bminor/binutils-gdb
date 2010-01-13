@@ -1,3 +1,8 @@
+2010-01-13  Anthony Green  <green@moxielogic.com>
+
+	* interp.c (sim_open): Initialize the SIM_DESC object properly
+	with sim_config() and sim_post_argv_init().
+
 2010-01-09  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.

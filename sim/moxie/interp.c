@@ -1176,6 +1176,22 @@ sim_open (kind, cb, abfd, argv)
   
   set_initial_gprs ();	/* Reset the GPR registers.  */
   
+  /* Configure/verify the target byte order and other runtime
+     configuration options */
+  if (sim_config (sd) != SIM_RC_OK)
+    {
+      sim_module_uninstall (sd);
+      return 0;
+    }
+
+  if (sim_post_argv_init (sd) != SIM_RC_OK)
+    {
+      /* Uninstall the modules to avoid memory leaks,
+	 file descriptor leaks, etc.  */
+      sim_module_uninstall (sd);
+      return 0;
+    }
+
   return sd;
 }
 
