@@ -522,3 +522,9 @@ if { $linux_gnu } {
 }
 
 run_dump_test "undefined"
+
+# Test the conversion from jr to b
+if { $linux_gnu } {
+    run_dump_test "jr-to-b-1"
+    run_dump_test "jr-to-b-2"
+}

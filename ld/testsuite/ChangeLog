@@ -1,3 +1,9 @@
+2010-01-13  Chao-ying Fu  <fu@mips.com>
+
+	* ld-mips-elf/jr-to-b-1.d, ld-mips-elf/jr-to-b-2.d: New tests.
+	* ld-mips-elf/jr-to-b-1.s, ld-mips-elf/jr-to-b-2.s: Source.
+	* ld-mips-elf/mips-elf.exp: Run new tests.
+
 2010-01-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ld-arm/arm-elf.exp (armelftests): Assemble Cortex-A8 tests with
