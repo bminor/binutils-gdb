@@ -1,3 +1,12 @@
+2010-01-13  Ian Lance Taylor  <iant@google.com>
+
+	Bring over from mainline:
+	2010-01-08  Ian Lance Taylor  <iant@google.com>
+
+	PR 11072
+	* layout.cc (Layout::include_section): Remove .gnu_debuglink
+	sections.
+
 2009-11-06  Ian Lance Taylor  <iant@google.com>
 
 	Bring over from mainline:

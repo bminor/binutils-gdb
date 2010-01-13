@@ -1,6 +1,6 @@
 // layout.cc -- lay out output file sections for gold
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -349,6 +349,11 @@ Layout::include_section(Sized_relobj<size, big_endian>*, const char* name,
           if (is_prefix_of(".gnu.lto_", name))
             return false;
         }
+      // The GNU linker strips .gnu_debuglink sections, so we do too.
+      // This is a feature used to keep debugging information in
+      // separate files.
+      if (strcmp(name, ".gnu_debuglink") == 0)
+	return false;
       return true;
 
     default:
