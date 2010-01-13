@@ -4563,8 +4563,35 @@ BFD_RELOC_XTENSA_ASM_EXPAND.  */
 BFD_RELOC_MACH_O_PAIR.  */
   BFD_RELOC_MACH_O_SECTDIFF,
 
-/* Mach-O generic relocations.  */
+/* Pair of relocation.  Contains the first symbol.  */
   BFD_RELOC_MACH_O_PAIR,
+
+/* PCREL relocations.  They are marked as branch to create PLT entry if
+required.  */
+  BFD_RELOC_MACH_O_X86_64_BRANCH32,
+  BFD_RELOC_MACH_O_X86_64_BRANCH8,
+
+/* Used when referencing a GOT entry.  */
+  BFD_RELOC_MACH_O_X86_64_GOT,
+
+/* Used when loading a GOT entry with movq.  It is specially marked so that
+the linker could optimize the movq to a leaq if possible.  */
+  BFD_RELOC_MACH_O_X86_64_GOT_LOAD,
+
+/* Symbol will be substracted.  Must be followed by a BFD_RELOC_64.  */
+  BFD_RELOC_MACH_O_X86_64_SUBTRACTOR32,
+
+/* Symbol will be substracted.  Must be followed by a BFD_RELOC_64.  */
+  BFD_RELOC_MACH_O_X86_64_SUBTRACTOR64,
+
+/* Same as BFD_RELOC_32_PCREL but with an implicit -1 addend.  */
+  BFD_RELOC_MACH_O_X86_64_PCREL32_1,
+
+/* Same as BFD_RELOC_32_PCREL but with an implicit -2 addend.  */
+  BFD_RELOC_MACH_O_X86_64_PCREL32_2,
+
+/* Same as BFD_RELOC_32_PCREL but with an implicit -4 addend.  */
+  BFD_RELOC_MACH_O_X86_64_PCREL32_4,
 
 /* This is a 32 bit reloc for the microblaze that stores the 
 low 16 bits of a value  */
