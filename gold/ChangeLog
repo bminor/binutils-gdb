@@ -1,3 +1,13 @@
+2010-01-12  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_relobj::mapping_symbols_info_): New data member.
+	(Arm_relobj::Mapping_symbol_position,
+	 Arm_reloj::Mapping_symbol_position_less,
+	 Arm_relobj::Mapping_symbols_info): New types.
+	(Target_arm::is_mapping_symbol_name): New method definition.
+	(Arm_relobj::do_count_local_symbols): Save information about mapping
+	symbols.
+
 2010-01-11  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_relocate_functions::thumb32_branch_offset,

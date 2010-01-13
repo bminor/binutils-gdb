@@ -1069,7 +1069,8 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
              const typename elfcpp::Ehdr<32, big_endian>& ehdr)
     : Sized_relobj<32, big_endian>(name, input_file, offset, ehdr),
       stub_tables_(), local_symbol_is_thumb_function_(),
-      attributes_section_data_(NULL), section_has_cortex_a8_workaround_(NULL)
+      attributes_section_data_(NULL), mapping_symbols_info_(),
+      section_has_cortex_a8_workaround_(NULL)
   { }
 
   ~Arm_relobj()
@@ -1133,6 +1134,26 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
   attributes_section_data() const
   { return this->attributes_section_data_; }
 
+  // Mapping symbol location.
+  typedef std::pair<unsigned int, Arm_address> Mapping_symbol_position;
+
+  // Functor for STL container.
+  struct Mapping_symbol_position_less
+  {
+    bool
+    operator()(const Mapping_symbol_position& p1,
+	       const Mapping_symbol_position& p2) const
+    {
+      return (p1.first < p2.first
+	      || (p1.first == p2.first && p1.second < p2.second));
+    }
+  };
+  
+  // We only care about the first character of a mapping symbol, so
+  // we only store that instead of the whole symbol name.
+  typedef std::map<Mapping_symbol_position, char,
+		   Mapping_symbol_position_less> Mapping_symbols_info;
+
   // Whether a section contains any Cortex-A8 workaround.
   bool
   section_has_cortex_a8_workaround(unsigned int shndx) const
@@ -1193,6 +1214,8 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
   elfcpp::Elf_Word processor_specific_flags_;
   // Object attributes if there is an .ARM.attributes section or NULL.
   Attributes_section_data* attributes_section_data_;
+  // Mapping symbols information.
+  Mapping_symbols_info mapping_symbols_info_;
   // Bitmap to indicate sections with Cortex-A8 workaround or NULL.
   std::vector<bool>* section_has_cortex_a8_workaround_;
 };
@@ -1578,6 +1601,16 @@ class Target_arm : public Sized_target<32, big_endian>
   // Whether relocation type uses LSB to distinguish THUMB addresses.
   static bool
   reloc_uses_thumb_bit(unsigned int r_type);
+
+  // Whether NAME belongs to a mapping symbol.
+  static bool
+  is_mapping_symbol_name(const char* name)
+  {
+    return (name
+	    && name[0] == '$'
+	    && (name[1] == 'a' || name[1] == 't' || name[1] == 'd')
+	    && (name[2] == '\0' || name[2] == '.'));
+  }
 
  protected:
   // Make an ELF object.
@@ -4209,6 +4242,27 @@ Arm_relobj<big_endian>::do_count_local_symbols(
   const unsigned char* psyms = this->get_view(symtabshdr.get_sh_offset(),
 					      locsize, true, true);
 
+  // For mapping symbol processing, we need to read the symbol names.
+  unsigned int strtab_shndx = this->adjust_shndx(symtabshdr.get_sh_link());
+  if (strtab_shndx >= this->shnum())
+    {
+      this->error(_("invalid symbol table name index: %u"), strtab_shndx);
+      return;
+    }
+
+  elfcpp::Shdr<32, big_endian>
+    strtabshdr(this, this->elf_file()->section_header(strtab_shndx));
+  if (strtabshdr.get_sh_type() != elfcpp::SHT_STRTAB)
+    {
+      this->error(_("symbol table name section has wrong type: %u"),
+	          static_cast<unsigned int>(strtabshdr.get_sh_type()));
+      return;
+    }
+  const char* pnames =
+    reinterpret_cast<const char*>(this->get_view(strtabshdr.get_sh_offset(),
+						 strtabshdr.get_sh_size(),
+						 false, false));
+
   // Loop over the local symbols and mark any local symbols pointing
   // to THUMB functions.
 
@@ -4222,6 +4276,17 @@ Arm_relobj<big_endian>::do_count_local_symbols(
       elfcpp::STT st_type = sym.get_st_type();
       Symbol_value<32>& lv((*plocal_values)[i]);
       Arm_address input_value = lv.input_value();
+
+      // Check to see if this is a mapping symbol.
+      const char* sym_name = pnames + sym.get_st_name();
+      if (Target_arm<big_endian>::is_mapping_symbol_name(sym_name))
+	{
+	  unsigned int input_shndx = sym.get_st_shndx();  
+
+	  // Strip of LSB in case this is a THUMB symbol.
+	  Mapping_symbol_position msp(input_shndx, input_value & ~1U);
+	  this->mapping_symbols_info_[msp] = sym_name[1];
+	}
 
       if (st_type == elfcpp::STT_ARM_TFUNC
 	  || (st_type == elfcpp::STT_FUNC && ((input_value & 1) != 0)))
