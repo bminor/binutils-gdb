@@ -1,6 +1,15 @@
 2010-01-13  Ian Lance Taylor  <iant@google.com>
 
 	Bring over from mainline:
+	2010-01-07  Ian Lance Taylor  <iant@google.com>
+
+	PR 11042
+	* copy-relocs.cc (Copy_relocs::emit_copy_reloc): Mark the dynamic
+	object as needed.
+
+2010-01-13  Ian Lance Taylor  <iant@google.com>
+
+	Bring over from mainline:
 	2010-01-08  Ian Lance Taylor  <iant@google.com>
 
 	PR 11072
