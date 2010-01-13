@@ -12339,19 +12339,19 @@ print_insn (bfd_vma pc, disassemble_info *info)
   if (rex_ignored == 0 && (rex ^ rex_used) == 0)
     all_prefixes[last_rex_prefix] = 0;
 
-  /* Check if the SEG prefix used.  */
+  /* Check if the SEG prefix is used.  */
   if ((prefixes & (PREFIX_CS | PREFIX_SS | PREFIX_DS | PREFIX_ES
 		   | PREFIX_FS | PREFIX_GS)) != 0
       && (used_prefixes
 	  & seg_prefix (all_prefixes[last_seg_prefix])) != 0)
     all_prefixes[last_seg_prefix] = 0;
 
-  /* Check if the ADDR prefix used.  */
+  /* Check if the ADDR prefix is used.  */
   if ((prefixes & PREFIX_ADDR) != 0
       && (used_prefixes & PREFIX_ADDR) != 0)
     all_prefixes[last_addr_prefix] = 0;
 
-  /* Check if the DATA prefix used.  */
+  /* Check if the DATA prefix is used.  */
   if ((prefixes & PREFIX_DATA) != 0
       && (used_prefixes & PREFIX_DATA) != 0)
     all_prefixes[last_data_prefix] = 0;
