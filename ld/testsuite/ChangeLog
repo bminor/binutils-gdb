@@ -1,3 +1,8 @@
+2010-01-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-arm/arm-elf.exp (armelftests): Assemble Cortex-A8 tests with
+	-mcpu=cortex-a8.
+
 2010-01-13  Nick Clifton  <nickc@redhat.com>
 
 	* ld-scrips/sort.exp: Skip these tests when the target is the

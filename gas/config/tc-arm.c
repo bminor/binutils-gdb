@@ -10623,7 +10623,7 @@ do_t_nop (void)
 	{
 	  /* PR9722: Check for Thumb2 availability before
 	     generating a thumb2 nop instruction.  */
-	  if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_arch_t2))
+	  if (ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6t2))
 	    {
 	      inst.instruction = THUMB_OP16 (inst.instruction);
 	      inst.instruction |= inst.operands[0].imm << 4;

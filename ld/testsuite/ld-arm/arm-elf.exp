@@ -207,11 +207,13 @@ set armelftests {
      {{objdump -dr cortex-a8-fix-blx-rel-thumb.d}}
      "cortex-a8-fix-blx-rel-thumb"}
     {"Cortex-A8 erratum fix, relocate bl.w and far call"
-     "-EL -Ttext=0x00 --fix-cortex-a8 --defsym far_fn1=0x80000000 --defsym far_fn2=0x80000004  --defsym far_fn=0x7fff0000 --defsym _start=0" "-EL" {cortex-a8-far-1.s cortex-a8-far-2.s}
+     "-EL -Ttext=0x00 --fix-cortex-a8 --defsym far_fn1=0x80000000 --defsym far_fn2=0x80000004  --defsym far_fn=0x7fff0000 --defsym _start=0"
+     "-EL -mcpu=cortex-a8" {cortex-a8-far-1.s cortex-a8-far-2.s}
      {{objdump -dr cortex-a8-far.d}}
      "cortex-a8-far"}
     {"Cortex-A8 erratum fix, headers"
-     "-EL --fix-cortex-a8 -T cortex-a8-fix-hdr.t" "-EL" {cortex-a8-fix-hdr.s}
+     "-EL --fix-cortex-a8 -T cortex-a8-fix-hdr.t"
+     "-EL -mcpu=cortex-a8" {cortex-a8-fix-hdr.s}
      {{objdump -dr cortex-a8-fix-hdr.d}}
      "cortex-a8-fix-hdr"}
     {"Unwinding and -gc-sections" "-gc-sections" "" {gc-unwind.s}

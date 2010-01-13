@@ -1,3 +1,7 @@
+2010-01-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* config/tc-arm.c (do_t_nop): Correct check for Thumb-2 NOP.
+
 2010-01-13  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-h8300.c (h8300_elf_section): New function - issue a
