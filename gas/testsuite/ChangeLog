@@ -1,5 +1,9 @@
 2010-01-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gas/arm/thumb-nop.s: Add .syntax unified.
+
+2010-01-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gas/arm/thumb-nop.d, gas/arm/thumb-nop.s: New test.
 	* gas/arm/relax_branch_align.d: Expect a default NOP instruction.
 	* gas/arm/vfp1_t2.d, gas/arm/vfp1xD_t2.d: Specify a CPU with
