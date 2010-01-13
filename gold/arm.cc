@@ -1309,6 +1309,49 @@ struct Stub_addend_reader<elfcpp::SHT_RELA, big_endian>
   { return reloc.get_r_addend(); }
 };
 
+// Cortex_a8_reloc class.  We keep record of relocation that may need
+// the Cortex-A8 erratum workaround.
+
+class Cortex_a8_reloc
+{
+ public:
+  Cortex_a8_reloc(Reloc_stub* reloc_stub, unsigned r_type,
+		  Arm_address destination)
+    : reloc_stub_(reloc_stub), r_type_(r_type), destination_(destination)
+  { }
+
+  ~Cortex_a8_reloc()
+  { }
+
+  // Accessors:  This is a read-only class.
+  
+  // Return the relocation stub associated with this relocation if there is
+  // one.
+  const Reloc_stub*
+  reloc_stub() const
+  { return this->reloc_stub_; } 
+  
+  // Return the relocation type.
+  unsigned int
+  r_type() const
+  { return this->r_type_; }
+
+  // Return the destination address of the relocation.  LSB stores the THUMB
+  // bit.
+  Arm_address
+  destination() const
+  { return this->destination_; }
+
+ private:
+  // Associated relocation stub if there is one, or NULL.
+  const Reloc_stub* reloc_stub_;
+  // Relocation type.
+  unsigned int r_type_;
+  // Destination address of this relocation.  LSB is used to distinguish
+  // ARM/THUMB mode.
+  Arm_address destination_;
+};
+
 // Utilities for manipulating integers of up to 32-bits
 
 namespace utils
@@ -1384,7 +1427,8 @@ class Target_arm : public Sized_target<32, big_endian>
       copy_relocs_(elfcpp::R_ARM_COPY), dynbss_(NULL), stub_tables_(),
       stub_factory_(Stub_factory::get_instance()), may_use_blx_(false),
       should_force_pic_veneer_(false), arm_input_section_map_(),
-      attributes_section_data_(NULL)
+      attributes_section_data_(NULL), fix_cortex_a8_(false),
+      cortex_a8_relocs_info_()
   { }
 
   // Whether we can use BLX.
@@ -1611,6 +1655,11 @@ class Target_arm : public Sized_target<32, big_endian>
 	    && (name[1] == 'a' || name[1] == 't' || name[1] == 'd')
 	    && (name[2] == '\0' || name[2] == '.'));
   }
+
+  // Whether we work around the Cortex-A8 erratum.
+  bool
+  fix_cortex_a8() const
+  { return this->fix_cortex_a8_; }
 
  protected:
   // Make an ELF object.
@@ -1932,6 +1981,10 @@ class Target_arm : public Sized_target<32, big_endian>
 			Input_section_specifier::equal_to>
 	  Arm_input_section_map;
     
+  // Map output addresses to relocs for Cortex-A8 erratum.
+  typedef Unordered_map<Arm_address, const Cortex_a8_reloc*>
+	  Cortex_a8_relocs_info;
+
   // The GOT section.
   Output_data_got<32, big_endian>* got_;
   // The PLT section.
@@ -1956,6 +2009,10 @@ class Target_arm : public Sized_target<32, big_endian>
   Arm_input_section_map arm_input_section_map_;
   // Attributes section data in output.
   Attributes_section_data* attributes_section_data_;
+  // Whether we want to fix code for Cortex-A8 erratum.
+  bool fix_cortex_a8_;
+  // Map addresses to relocs for Cortex-A8 erratum.
+  Cortex_a8_relocs_info cortex_a8_relocs_info_;
 };
 
 template<bool big_endian>
@@ -7081,34 +7138,49 @@ Target_arm<big_endian>::scan_reloc_for_stub(
       gold_unreachable();
     }
 
+  Reloc_stub* stub = NULL;
   Stub_type stub_type =
     Reloc_stub::stub_type_for_reloc(r_type, address, destination,
 				    target_is_thumb);
-
-  // This reloc does not need a stub.
-  if (stub_type == arm_stub_none)
-    return;
-
-  // Try looking up an existing stub from a stub table.
-  Stub_table<big_endian>* stub_table = 
-    arm_relobj->stub_table(relinfo->data_shndx);
-  gold_assert(stub_table != NULL);
-   
-  // Locate stub by destination.
-  Reloc_stub::Key stub_key(stub_type, gsym, arm_relobj, r_sym, addend);
-
-  // Create a stub if there is not one already
-  Reloc_stub* stub = stub_table->find_reloc_stub(stub_key);
-  if (stub == NULL)
+  if (stub_type != arm_stub_none)
     {
-      // create a new stub and add it to stub table.
-      stub = this->stub_factory().make_reloc_stub(stub_type);
-      stub_table->add_reloc_stub(stub, stub_key);
+      // Try looking up an existing stub from a stub table.
+      Stub_table<big_endian>* stub_table = 
+	arm_relobj->stub_table(relinfo->data_shndx);
+      gold_assert(stub_table != NULL);
+   
+      // Locate stub by destination.
+      Reloc_stub::Key stub_key(stub_type, gsym, arm_relobj, r_sym, addend);
+
+      // Create a stub if there is not one already
+      stub = stub_table->find_reloc_stub(stub_key);
+      if (stub == NULL)
+	{
+	  // create a new stub and add it to stub table.
+	  stub = this->stub_factory().make_reloc_stub(stub_type);
+	  stub_table->add_reloc_stub(stub, stub_key);
+	}
+
+      // Record the destination address.
+      stub->set_destination_address(destination
+				    | (target_is_thumb ? 1 : 0));
     }
 
-  // Record the destination address.
-  stub->set_destination_address(destination
-				| (target_is_thumb ? 1 : 0));
+  // For Cortex-A8, we need to record a relocation at 4K page boundary.
+  if (this->fix_cortex_a8_
+      && (r_type == elfcpp::R_ARM_THM_JUMP24
+	  || r_type == elfcpp::R_ARM_THM_JUMP19
+	  || r_type == elfcpp::R_ARM_THM_CALL
+	  || r_type == elfcpp::R_ARM_THM_XPC22)
+      && (address & 0xfffU) == 0xffeU)
+    {
+      // Found a candidate.  Note we haven't checked the destination is
+      // within 4K here: if we do so (and don't create a record) we can't
+      // tell that a branch should have been relocated when scanning later.
+      this->cortex_a8_relocs_info_[address] =
+	new Cortex_a8_reloc(stub, r_type,
+			    destination | (target_is_thumb ? 1 : 0));
+    }
 }
 
 // This function scans a relocation sections for stub generation.
@@ -7390,7 +7462,17 @@ Target_arm<big_endian>::do_relax(
     }
 
   typedef typename Stub_table_list::iterator Stub_table_iterator;
-
+  if (this->fix_cortex_a8_)
+    {
+      // Clear all Cortex-A8 reloc information.
+      for (typename Cortex_a8_relocs_info::const_iterator p =
+	     this->cortex_a8_relocs_info_.begin();
+	   p != this->cortex_a8_relocs_info_.end();
+	   ++p)
+	delete p->second;
+      this->cortex_a8_relocs_info_.clear();
+    }
+  
   // scan relocs for stubs
   for (Input_objects::Relobj_iterator op = input_objects->relobj_begin();
        op != input_objects->relobj_end();

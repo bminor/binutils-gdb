@@ -1,5 +1,20 @@
 2010-01-12  Doug Kwan  <dougkwan@google.com>
 
+	* arm.cc (Cortex_a8_reloc): New class.
+	(Target_arm::Target_arm): Initialize new data members fix_cortex_a8_
+	and cortex_a8_relocs_info_.
+	(Target_arm::fix_cortex_a8): New method definition.
+	(Target_arm::Cortex_a8_relocs_info): New type.
+	(Target_arm::fix_cortex_a8_, Target_arm::cortex_a8_relocs_info_):
+	New data member declarations.
+	(Target_arm::scan_reloc_for_stub): Record information about
+	relocations for THUMB branches that might be exempted from the
+	Cortex-A8 workaround.
+	(Target_arm::do_relax): Clear all Cortex-A8 relocation information
+	at the beginning of a relaxation pass.
+
+2010-01-12  Doug Kwan  <dougkwan@google.com>
+
 	* arm.cc (Arm_relobj::mapping_symbols_info_): New data member.
 	(Arm_relobj::Mapping_symbol_position,
 	 Arm_reloj::Mapping_symbol_position_less,
