@@ -1,3 +1,22 @@
+2010-01-13  Chao-ying Fu  <fu@mips.com>
+
+	* elfxx-mips.c (JR_TO_B_P): New define to transform JR to B.
+	It is true for all CPUs.
+	(jal_reloc_p): New function.
+	(mips_elf_calculate_relocation): Rename require_jalxp to
+	cross_mode_jump_p.
+	Update comment for CROSS_MODE_JUMP_P.
+	Set up cross_mode_jump_p based on the mode change.
+	(mips_elf_perform_relocation): Rename require_jalx to cross_mode_jump_p.
+	Update comment for CROSS_MODE_JUMP_P.
+	Test cross_mode_jump_p and jal_reloc_p to turn jal to jalx.
+	Use !cross_mode_jump_p to guard conversion.
+	Convert "jr t9" to "b", if possible.
+	(_bfd_mips_elf_relocate_section): Rename require_jalx to
+	cross_mode_jump_p.
+	Pass &cross_mode_jump_p to call mips_elf_calculate_relocation.
+	Pass cross_mode_jump_p to call mips_elf_perform_relocation.
+
 2010-01-13  Nick Clifton  <nickc@redhat.com>
 
 	* cpu-m32c.c (m32c_scan): New function.  Ensures that a scan for
