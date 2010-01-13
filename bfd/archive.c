@@ -1312,23 +1312,7 @@ normalize (bfd *abfd, const char *file)
 static const char *
 normalize (bfd *abfd ATTRIBUTE_UNUSED, const char *file)
 {
-  const char *filename = strrchr (file, '/');
-
-#ifdef HAVE_DOS_BASED_FILE_SYSTEM
-  {
-    /* We could have foo/bar\\baz, or foo\\bar, or d:bar.  */
-    char *bslash = strrchr (file, '\\');
-    if (filename == NULL || (bslash != NULL && bslash > filename))
-      filename = bslash;
-    if (filename == NULL && file[0] != '\0' && file[1] == ':')
-      filename = file + 1;
-  }
-#endif
-  if (filename != NULL)
-    filename++;
-  else
-    filename = file;
-  return filename;
+  return lbasename (file);
 }
 #endif
 
@@ -1820,24 +1804,8 @@ bfd_bsd_truncate_arname (bfd *abfd, const char *pathname, char *arhdr)
 {
   struct ar_hdr *hdr = (struct ar_hdr *) arhdr;
   size_t length;
-  const char *filename = strrchr (pathname, '/');
+  const char *filename = lbasename (pathname);
   size_t maxlen = ar_maxnamelen (abfd);
-
-#ifdef HAVE_DOS_BASED_FILE_SYSTEM
-  {
-    /* We could have foo/bar\\baz, or foo\\bar, or d:bar.  */
-    char *bslash = strrchr (pathname, '\\');
-    if (filename == NULL || (bslash != NULL && bslash > filename))
-      filename = bslash;
-    if (filename == NULL && pathname[0] != '\0' && pathname[1] == ':')
-      filename = pathname + 1;
-  }
-#endif
-
-  if (filename == NULL)
-    filename = pathname;
-  else
-    ++filename;
 
   length = strlen (filename);
 
@@ -1868,25 +1836,8 @@ bfd_gnu_truncate_arname (bfd *abfd, const char *pathname, char *arhdr)
 {
   struct ar_hdr *hdr = (struct ar_hdr *) arhdr;
   size_t length;
-  const char *filename = strrchr (pathname, '/');
+  const char *filename = lbasename (pathname);
   size_t maxlen = ar_maxnamelen (abfd);
-
-#ifdef HAVE_DOS_BASED_FILE_SYSTEM
-  {
-    /* We could have foo/bar\\baz, or foo\\bar, or d:bar.  */
-    char *bslash = strrchr (pathname, '\\');
-
-    if (filename == NULL || (bslash != NULL && bslash > filename))
-      filename = bslash;
-    if (filename == NULL && pathname[0] != '\0' && pathname[1] == ':')
-      filename = pathname + 1;
-  }
-#endif
-
-  if (filename == NULL)
-    filename = pathname;
-  else
-    ++filename;
 
   length = strlen (filename);
 

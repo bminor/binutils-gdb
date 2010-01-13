@@ -1,3 +1,9 @@
+2010-01-13  Tristan Gingold  <gingold@adacore.com>
+
+	* archive.c (normalize): Use lbasename.
+	(bfd_bsd_truncate_arname): Ditto.
+	(bfd_gnu_truncate_arname): Ditto.
+
 2010-01-12  Tristan Gingold  <gingold@adacore.com>
 
 	* makefile.vms (CFLAGS): Turns warnings into informational messages.
@@ -21,7 +27,7 @@
 
 2010-01-11  Tristan Gingold  <gingold@adacore.com>
 
-        * archive.c (bfd_slurp_armap): Also check for Mach-O sorted armap.
+	* archive.c (bfd_slurp_armap): Also check for Mach-O sorted armap.
 
 2010-01-11  Nick Clifton  <nickc@redhat.com>
 
