@@ -1,3 +1,11 @@
+2010-01-13  Nick Clifton  <nickc@redhat.com>
+
+	* cpu-m32c.c (m32c_scan): New function.  Ensures that a scan for
+	"m32c" returns the m32c arch_info_struct and not the m16c
+	arch_info_struct.
+	(arch_info_struct): Use the new scan function.
+	(bfd_m32c_arch): Likewise.
+
 2010-01-13  Tristan Gingold  <gingold@adacore.com>
 
 	* config.bfd: Remove duplicated target vector for i386-*-darwin.
