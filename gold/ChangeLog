@@ -1,3 +1,18 @@
+2010-01-13  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_relobj::section_needs_reloc_stub_scanning,
+	Arm_relobj::section_needs_cortex_a8_stub_scanning,
+	Arm_relobj::scan_section_for_cortex_a8_erratum,
+	Arm_relobj::scan_span_for_cortex_a8_erratum): New methods.
+	(Arm_relobj::scan_sections_for_stubs): Move code deciding what
+	sections to scan for relocation stubs into a new method
+	Arm_relobj::section_needs_reloc_stub_scanning.  Handle both
+	relocation and Cortex-A8 stub scanning.
+	(Target_arm::do_relax): Force stubs to be after stubbed sections
+	if fixing the Cortex-A8 erratum.  Remove all Cortex-A8 stubs at
+	the beginning of a new relaxation pass.  Update a comment. 
+	(Target_arm::scan_span_for_cortex_a8_erratum): New method definition.
+
 2010-01-12  Ian Lance Taylor  <iant@google.com>
 
 	* target-reloc.h (visibility_error): New inline function.
