@@ -1,3 +1,12 @@
+2010-01-12  Ian Lance Taylor  <iant@google.com>
+
+	* target-reloc.h (visibility_error): New inline function.
+	(relocate_section): Call visibility_error.
+	* testsuite/Makefile.am (check_DATA): Add protected_3.err.
+	(MOSTLYCLEANFILES): Likewise.
+	(protected_4_pic.o, protected_3.err): New targets.
+	* testsuite/protected_4.cc: New file.
+
 2010-01-12  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Cortex_a8_reloc): New class.
