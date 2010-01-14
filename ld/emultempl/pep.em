@@ -1582,6 +1582,7 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
   char *dollar = NULL;
   lang_output_section_statement_type *os;
   lang_statement_list_type add_child;
+  lang_output_section_statement_type *match_by_name = NULL;
   lang_statement_union_type **pl;
 
   /* Look through the script to see where to place this section.  */
@@ -1620,7 +1621,20 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
 	    lang_add_section (&add_child, s, os);
 	    break;
 	  }
+
+	/* Save unused output sections in case we can match them
+	   against orphans later.  */
+	if (os->bfd_section == NULL)
+	  match_by_name = os;
       }
+
+  /* If we didn't match an active output section, see if we matched an
+     unused one and use that.  */
+  if (os == NULL && match_by_name)
+    {
+      lang_add_section (&match_by_name->children, s, match_by_name);
+      return match_by_name;
+    }
 
   if (os == NULL)
     {

@@ -1782,6 +1782,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
   struct orphan_save *place;
   lang_output_section_statement_type *after;
   lang_output_section_statement_type *os;
+  lang_output_section_statement_type *match_by_name = NULL;
   int isdyn = 0;
   int iself = s->owner->xvec->flavour == bfd_target_elf_flavour;
   unsigned int sh_type = iself ? elf_section_type (s) : SHT_NULL;
@@ -1837,7 +1838,20 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 	    lang_add_section (&os->children, s, os);
 	    return os;
 	  }
+
+	/* Save unused output sections in case we can match them
+	   against orphans later.  */
+	if (os->bfd_section == NULL)
+	  match_by_name = os;
       }
+
+  /* If we didn't match an active output section, see if we matched an
+     unused one and use that.  */
+  if (match_by_name)
+    {
+      lang_add_section (&match_by_name->children, s, match_by_name);
+      return match_by_name;
+    }
 
   if (!orphan_init_done)
     {

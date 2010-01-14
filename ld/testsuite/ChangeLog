@@ -1,3 +1,9 @@
+2010-01-13  DJ Delorie  <dj@redhat.com>
+
+	* ld-elf/orphan4.d: New.
+	* ld-elf/orphan4.ld: New.
+	* ld-elf/orphan4.s: New.
+
 2010-01-13  Chao-ying Fu  <fu@mips.com>
 
 	* ld-mips-elf/jr-to-b-1.d, ld-mips-elf/jr-to-b-2.d: New tests.
