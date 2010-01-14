@@ -568,11 +568,12 @@ scan_dyntag (int dyntag, bfd *abfd, CORE_ADDR *ptr)
 {
   int arch_size, step, sect_size;
   long dyn_tag;
-  CORE_ADDR dyn_ptr, dyn_addr;
+  CORE_ADDR dyn_ptr;
   gdb_byte *bufend, *bufstart, *buf;
   Elf32_External_Dyn *x_dynp_32;
   Elf64_External_Dyn *x_dynp_64;
   struct bfd_section *sect;
+  struct target_section *target_section;
 
   if (abfd == NULL)
     return 0;
@@ -588,7 +589,13 @@ scan_dyntag (int dyntag, bfd *abfd, CORE_ADDR *ptr)
   sect = bfd_get_section_by_name (abfd, ".dynamic");
   if (sect == NULL)
     return 0;
-  dyn_addr = bfd_section_vma (abfd, sect);
+
+  for (target_section = current_target_sections->sections;
+       target_section < current_target_sections->sections_end;
+       target_section++)
+    if (sect == target_section->the_bfd_section)
+      break;
+  gdb_assert (target_section < current_target_sections->sections_end);
 
   /* Read in .dynamic from the BFD.  We will get the actual value
      from memory later.  */
@@ -630,7 +637,7 @@ scan_dyntag (int dyntag, bfd *abfd, CORE_ADDR *ptr)
 	     CORE_ADDR ptr_addr;
 
 	     ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
-	     ptr_addr = dyn_addr + (buf - bufstart) + arch_size / 8;
+	     ptr_addr = target_section->addr + (buf - bufstart) + arch_size / 8;
 	     if (target_read_memory (ptr_addr, ptr_buf, arch_size / 8) == 0)
 	       dyn_ptr = extract_typed_address (ptr_buf, ptr_type);
 	     *ptr = dyn_ptr;
@@ -1951,8 +1958,19 @@ elf_lookup_lib_symbol (const struct objfile *objfile,
 		       const char *linkage_name,
 		       const domain_enum domain)
 {
-  if (objfile->obfd == NULL
-     || scan_dyntag (DT_SYMBOLIC, objfile->obfd, NULL) != 1)
+  bfd *abfd;
+
+  if (objfile == symfile_objfile)
+    abfd = exec_bfd;
+  else
+    {
+      /* OBJFILE should have been passed as the non-debug one.  */
+      gdb_assert (objfile->separate_debug_objfile_backlink == NULL);
+
+      abfd = objfile->obfd;
+    }
+
+  if (abfd == NULL || scan_dyntag (DT_SYMBOLIC, abfd, NULL) != 1)
     return NULL;
 
   return lookup_global_symbol_from_objfile

@@ -1,5 +1,10 @@
 2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.base/break-interp.exp (test_core): New proc.
+	(test_ld): Call it.
+
+2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.base/break-interp-main.c, gdb.base/break-interp-lib.c: New.
 	* gdb.base/break-interp.exp: Exit on skip_shlib_tests.  Change $srcfile.
 	New variables $binfile_lib and $srcfile_lib.  Call get_compiler_info

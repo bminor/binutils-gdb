@@ -1470,7 +1470,12 @@ lookup_objfile_from_block (const struct block *block)
   /* Go through SYMTABS.  */
   ALL_SYMTABS (obj, s)
     if (block == BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK))
-      return obj;
+      {
+	if (obj->separate_debug_objfile_backlink)
+	  obj = obj->separate_debug_objfile_backlink;
+
+	return obj;
+      }
 
   return NULL;
 }

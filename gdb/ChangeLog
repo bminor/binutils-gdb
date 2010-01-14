@@ -1,5 +1,14 @@
 2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* solib-svr4.c (scan_dyntag): Remove variable dyn_addr.  New variable
+	target_section.  Find SECT in current_target_sections, gdb_assert it.
+	(elf_lookup_lib_symbol): Pass the binary file if given symfile_objfile.
+	New variable abfd.
+	* symtab.c (lookup_objfile_from_block): Return the binary file instead
+	of separate debug info file.
+
+2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Support PIEs with no symfile_objfile.
 	* exec.c (print_section_info <abfd == exec_bfd>): Relocate Entry point.
 	* solib-svr4.c (svr4_relocate_main_executable <exec_bfd>): New block.
