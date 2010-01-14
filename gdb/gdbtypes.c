@@ -3157,7 +3157,7 @@ arch_complex_type (struct gdbarch *gdbarch,
 }
 
 /* Allocate a TYPE_CODE_FLAGS type structure associated with GDBARCH.
-   NAME is the type name.  LENGTH is the number of flag bits.  */
+   NAME is the type name.  LENGTH is the size of the flag word in bytes.  */
 struct type *
 arch_flags_type (struct gdbarch *gdbarch, char *name, int length)
 {

@@ -1,3 +1,8 @@
+2010-01-14  Doug Evans  <dje@google.com>
+
+	* gdbtypes.c (arch_flags_type): Fix comment.
+	* gdbtypes.h (arch_composite_type): Fix comment.
+
 2009-01-14  Tristan Gingold  <gingold@adacore.com>
 
 	* machoread.c (macho_add_oso_symfile): Add symfile_flags parameter.

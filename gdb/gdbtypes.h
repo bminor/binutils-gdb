@@ -1263,7 +1263,7 @@ extern struct type *arch_complex_type (struct gdbarch *, char *,
 
 /* Helper functions to construct a struct or record type.  An
    initially empty type is created using arch_composite_type().
-   Fields are then added using append_struct_type_field().  A union
+   Fields are then added using append_composite_type_field*().  A union
    type has its size set to the largest field.  A struct type has each
    field packed against the previous.  */
 
