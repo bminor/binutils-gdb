@@ -1,5 +1,5 @@
 /* bfin-lex.l  ADI Blackfin lexer
-   Copyright 2005, 2006, 2007, 2008
+   Copyright 2005, 2006, 2007, 2008, 2010
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -341,7 +341,6 @@ static long parse_int (char **end)
   int shiftvalue = 0;
   char * char_bag;
   long value = 0;
-  char c;
   char *arg = *end;
 
   while (*arg && *arg == ' ')
@@ -363,7 +362,7 @@ static long parse_int (char **end)
 
       case '0':  /* Accept different formated integers hex octal and binary. */
         {
-	  c = *++arg;
+	  char c = *++arg;
           arg++;
 	  if (c == 'x' || c == 'X') /* Hex input.  */
 	    fmt = 'h';
@@ -460,7 +459,7 @@ static long parse_int (char **end)
         {
           while (1)
             {
-              int c;
+              char c;
               c = *arg++;
               if (c >= '0' && c <= '9')
                 value = (value * 10) + (c - '0');

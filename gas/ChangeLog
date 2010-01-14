@@ -1,3 +1,14 @@
+2010-01-14  Jie Zhang  <jie.zhang@analog.com>
+
+	* config/bfin-aux.h: Remove argument names in function
+	declarations.
+	* config/bfin-lex.l (parse_int): Fix shadowed variable name
+	warning.
+	* config/bfin-parse.y (value_match): Remove argument names
+	in declaration.
+	(notethat): Likewise.
+	(yyerror): Likewise.
+
 2010-01-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* config/tc-arm.c (do_t_nop): Correct check for Thumb-2 NOP.
