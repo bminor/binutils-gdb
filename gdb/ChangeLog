@@ -1,5 +1,22 @@
 2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Support Valgrind attachments broken by the PIE support.
+	* auxv.c: Include gdbcore.h.
+	(procfs_xfer_auxv): Make static.  Reduce its comment.  Drop its
+	parameters ops, object and annex.  Remove their assertions.
+	(ld_so_xfer_auxv, memory_xfer_auxv): New function.
+	* auxv.h (procfs_xfer_auxv): Remove comment.  Rename to ...
+	(memory_xfer_auxv): ... here.
+	* linux-nat.c (linux_xfer_partial): Rename procfs_xfer_auxv to
+	memory_xfer_auxv.
+	* procfs.c (procfs_xfer_partial): Likewise.
+	* solib-svr4.c (svr4_relocate_main_executable): New prototype.
+	(svr4_special_symbol_handling): Call svr4_relocate_main_executable.
+	(svr4_solib_create_inferior_hook): Conditionalize the
+	svr4_relocate_main_executable call.
+
+2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* solib-svr4.c (scan_dyntag): Remove variable dyn_addr.  New variable
 	target_section.  Find SECT in current_target_sections, gdb_assert it.
 	(elf_lookup_lib_symbol): Pass the binary file if given symfile_objfile.

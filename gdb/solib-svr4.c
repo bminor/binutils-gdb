@@ -50,6 +50,7 @@
 
 static struct link_map_offsets *svr4_fetch_link_map_offsets (void);
 static int svr4_have_link_map_offsets (void);
+static void svr4_relocate_main_executable (void);
 
 /* Link map info to include in an allocated so_list entry */
 
@@ -1540,6 +1541,7 @@ enable_break (struct svr4_info *info, int from_tty)
 static void
 svr4_special_symbol_handling (void)
 {
+  svr4_relocate_main_executable ();
 }
 
 /* Decide if the objfile needs to be relocated.  As indicated above,
@@ -1729,7 +1731,8 @@ svr4_solib_create_inferior_hook (int from_tty)
   info = get_svr4_info ();
 
   /* Relocate the main executable if necessary.  */
-  svr4_relocate_main_executable ();
+  if (current_inferior ()->attach_flag == 0)
+    svr4_relocate_main_executable ();
 
   if (!svr4_have_link_map_offsets ())
     return;

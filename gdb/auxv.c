@@ -25,6 +25,7 @@
 #include "inferior.h"
 #include "valprint.h"
 #include "gdb_assert.h"
+#include "gdbcore.h"
 
 #include "auxv.h"
 #include "elf/common.h"
@@ -33,15 +34,11 @@
 #include <fcntl.h>
 
 
-/* This function is called like a to_xfer_partial hook, but must be
-   called with TARGET_OBJECT_AUXV.  It handles access via
-   /proc/PID/auxv, which is a common method for native targets.  */
+/* This function handles access via /proc/PID/auxv, which is a common method
+   for native targets.  */
 
-LONGEST
-procfs_xfer_auxv (struct target_ops *ops,
-		  enum target_object object,
-		  const char *annex,
-		  gdb_byte *readbuf,
+static LONGEST
+procfs_xfer_auxv (gdb_byte *readbuf,
 		  const gdb_byte *writebuf,
 		  ULONGEST offset,
 		  LONGEST len)
@@ -49,9 +46,6 @@ procfs_xfer_auxv (struct target_ops *ops,
   char *pathname;
   int fd;
   LONGEST n;
-
-  gdb_assert (object == TARGET_OBJECT_AUXV);
-  gdb_assert (readbuf || writebuf);
 
   pathname = xstrprintf ("/proc/%d/auxv", PIDGET (inferior_ptid));
   fd = open (pathname, writebuf != NULL ? O_WRONLY : O_RDONLY);
@@ -70,6 +64,143 @@ procfs_xfer_auxv (struct target_ops *ops,
   (void) close (fd);
 
   return n;
+}
+
+/* This function handles access via ld.so's symbol `_dl_auxv'.  */
+
+static LONGEST
+ld_so_xfer_auxv (gdb_byte *readbuf,
+		 const gdb_byte *writebuf,
+		 ULONGEST offset,
+		 LONGEST len)
+{
+  struct minimal_symbol *msym;
+  CORE_ADDR data_address, pointer_address;
+  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
+  size_t ptr_size = TYPE_LENGTH (ptr_type);
+  size_t auxv_pair_size = 2 * ptr_size;
+  gdb_byte *ptr_buf = alloca (ptr_size);
+  LONGEST retval;
+  size_t block;
+
+  msym = lookup_minimal_symbol ("_dl_auxv", NULL, NULL);
+  if (msym == NULL)
+    return -1;
+
+  if (MSYMBOL_SIZE (msym) != ptr_size)
+    return -1;
+
+  /* POINTER_ADDRESS is a location where the `_dl_auxv' variable resides.
+     DATA_ADDRESS is the inferior value present in `_dl_auxv', therefore the
+     real inferior AUXV address.  */
+
+  pointer_address = SYMBOL_VALUE_ADDRESS (msym);
+
+  data_address = read_memory_typed_address (pointer_address, ptr_type);
+
+  /* Possibly still not initialized such as during an inferior startup.  */
+  if (data_address == 0)
+    return -1;
+
+  data_address += offset;
+
+  if (writebuf != NULL)
+    {
+      if (target_write_memory (data_address, writebuf, len) == 0)
+	return len;
+      else
+	return -1;
+    }
+
+  /* Stop if trying to read past the existing AUXV block.  The final AT_NULL
+     was already returned before.  */
+
+  if (offset >= auxv_pair_size)
+    {
+      if (target_read_memory (data_address - auxv_pair_size, ptr_buf,
+			      ptr_size) != 0)
+	return -1;
+
+      if (extract_typed_address (ptr_buf, ptr_type) == AT_NULL)
+	return 0;
+    }
+
+  retval = 0;
+  block = 0x400;
+  gdb_assert (block % auxv_pair_size == 0);
+
+  while (len > 0)
+    {
+      if (block > len)
+	block = len;
+
+      /* Reading sizes smaller than AUXV_PAIR_SIZE is not supported.  Tails
+	 unaligned to AUXV_PAIR_SIZE will not be read during a call (they
+	 should be completed during next read with new/extended buffer).  */
+
+      block &= -auxv_pair_size;
+      if (block == 0)
+	return retval;
+
+      if (target_read_memory (data_address, readbuf, block) != 0)
+	{
+	  if (block <= auxv_pair_size)
+	    return retval;
+
+	  block = auxv_pair_size;
+	  continue;
+	}
+
+      data_address += block;
+      len -= block;
+
+      /* Check terminal AT_NULL.  This function is being called indefinitely
+         being extended its READBUF until it returns EOF (0).  */
+
+      while (block >= auxv_pair_size)
+	{
+	  retval += auxv_pair_size;
+
+	  if (extract_typed_address (readbuf, ptr_type) == AT_NULL)
+	    return retval;
+
+	  readbuf += auxv_pair_size;
+	  block -= auxv_pair_size;
+	}
+    }
+
+  return retval;
+}
+
+/* This function is called like a to_xfer_partial hook, but must be
+   called with TARGET_OBJECT_AUXV.  It handles access to AUXV.  */
+
+LONGEST
+memory_xfer_auxv (struct target_ops *ops,
+		  enum target_object object,
+		  const char *annex,
+		  gdb_byte *readbuf,
+		  const gdb_byte *writebuf,
+		  ULONGEST offset,
+		  LONGEST len)
+{
+  gdb_assert (object == TARGET_OBJECT_AUXV);
+  gdb_assert (readbuf || writebuf);
+
+   /* ld_so_xfer_auxv is the only function safe for virtual executables being
+      executed by valgrind's memcheck.  As using ld_so_xfer_auxv is problematic
+      during inferior startup GDB does call it only for attached processes.  */
+
+  if (current_inferior ()->attach_flag != 0)
+    {
+      LONGEST retval;
+
+      retval = ld_so_xfer_auxv (readbuf, writebuf, offset, len);
+      if (retval != -1)
+	return retval;
+    }
+
+  return procfs_xfer_auxv (readbuf, writebuf, offset, len);
 }
 
 /* Read one auxv entry from *READPTR, not reading locations >= ENDPTR.

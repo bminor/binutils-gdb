@@ -4387,7 +4387,7 @@ procfs_xfer_partial (struct target_ops *ops, enum target_object object,
 
 #ifdef NEW_PROC_API
     case TARGET_OBJECT_AUXV:
-      return procfs_xfer_auxv (ops, object, annex, readbuf, writebuf,
+      return memory_xfer_auxv (ops, object, annex, readbuf, writebuf,
 			       offset, len);
 #endif
 

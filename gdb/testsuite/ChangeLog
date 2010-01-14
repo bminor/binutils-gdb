@@ -1,5 +1,9 @@
 2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.base/valgrind-db-attach.exp, gdb.base/valgrind-db-attach.c: New.
+
+2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.base/break-interp-lib.c: Include unistd.h, assert.h and stdio.h.
 	(libfunc): New parameter action.  Implement also selectable "sleep".
 	* gdb.base/break-interp-main.c: Include assert.h.
