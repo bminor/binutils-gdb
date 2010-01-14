@@ -1,4 +1,9 @@
 2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Eli Zaretskii  <eliz@gnu.org>
+
+	* NEWS: Document the PIE support.
+
+2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* linux-tdep.c: Remove includes gdbcore.h, observer.h and elf-bfd.h.
 	(check_is_pie_binary, _initialize_linux_tdep): Remove.

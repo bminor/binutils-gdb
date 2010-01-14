@@ -189,6 +189,11 @@ much more reliable. In particular:
   - GDB is now able to backtrace through the signal handler for
     non-threaded programs.
 
+PIE (Position Independent Executable) programs debugging is now supported.
+This includes debugging execution of PIC (Position Independent Code) shared
+libraries although for that, it should be possible to run such libraries as an
+executable program.
+
 *** Changes in GDB 7.0
 
 * GDB now has an interface for JIT compilation.  Applications that
