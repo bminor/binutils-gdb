@@ -1802,6 +1802,8 @@ get_AT_name (unsigned long attribute)
     case DW_AT_GNU_exclusive_locks_required:	return "DW_AT_GNU_exclusive_locks_required";
     case DW_AT_GNU_shared_locks_required:	return "DW_AT_GNU_shared_locks_required";
     case DW_AT_GNU_odr_signature:		return "DW_AT_GNU_odr_signature";
+    case DW_AT_use_GNAT_descriptive_type:	return "DW_AT_use_GNAT_descriptive_type";
+    case DW_AT_GNAT_descriptive_type:		return "DW_AT_GNAT_descriptive_type";
 
       /* UPC extension.  */
     case DW_AT_upc_threads_scaled:	return "DW_AT_upc_threads_scaled";

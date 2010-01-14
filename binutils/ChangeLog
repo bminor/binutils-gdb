@@ -1,3 +1,8 @@
+2010-01-14  Tristan Gingold  <gingold@adacore.com>
+
+	* dwarf.c (get_AT_name): Handle DW_AT_use_GNAT_descriptive_type
+	and DW_AT_GNAT_descriptive_type.
+
 2010-01-13  Tristan Gingold  <gingold@adacore.com>
 
 	* ar.c (main): Use lbasename.
