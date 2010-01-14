@@ -16,9 +16,25 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <signal.h>
+#include <unistd.h>
+#include <assert.h>
+#include <stdio.h>
 
 void
-libfunc (void)
+libfunc (const char *action)
 {
-  raise (SIGSEGV);
+  assert (action != NULL);
+
+  if (strcmp (action, "segv") == 0)
+    raise (SIGSEGV);
+
+  if (strcmp (action, "sleep") == 0)
+    {
+      puts ("sleeping");
+      fflush (stdout);
+
+      sleep (60);
+    }
+
+  assert (0);
 }

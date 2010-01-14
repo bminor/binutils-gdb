@@ -240,7 +240,7 @@ proc reach {func command} {
 proc test_core {file} {
     global srcdir subdir gdb_prompt
 
-    set corefile [core_find $file]
+    set corefile [core_find $file {} "segv"]
     if {$corefile == ""} {
 	return
     }
@@ -258,6 +258,44 @@ proc test_core {file} {
     gdb_test "bt" "#\[0-9\]+ +\[^\r\n\]*\\mlibfunc\\M\[^\r\n\]*\r\n#\[0-9\]+ +\[^\r\n\]*\\mmain\\M.*" "core main bt"
 }
 
+proc test_attach {file} {
+    global board_info
+
+    gdb_exit
+
+    set test "sleep function started"
+
+    set command "${file} sleep"
+    set res [remote_spawn host $command];
+    if { $res < 0 || $res == "" } {
+	perror "Spawning $command failed."
+	fail $test
+	return
+    }
+    set pid [exp_pid -i $res]
+    gdb_expect {
+	-re "sleeping\r\n" {
+	    pass $test
+	}
+	eof {
+	    fail "$test (eof)"
+	    return
+	}
+	timeout {
+	    fail "$test (timeout)"
+	    return
+	}
+    }
+
+    gdb_exit
+    gdb_start
+    gdb_test "attach $pid" "Attaching to process $pid\r\n.*" "attach"
+    gdb_test "bt" "#\[0-9\]+ +\[^\r\n\]*\\mlibfunc\\M\[^\r\n\]*\r\n#\[0-9\]+ +\[^\r\n\]*\\mmain\\M.*" "attach main bt"
+    gdb_exit
+
+    remote_exec host "kill -9 $pid"
+}
+
 proc test_ld {file ifmain trynosym} {
     global srcdir subdir gdb_prompt
 
@@ -270,7 +308,7 @@ proc test_ld {file ifmain trynosym} {
     gdb_reinitialize_dir $srcdir/$subdir
     gdb_load $file
 
-    reach "dl_main" run
+    reach "dl_main" "run segv"
 
     gdb_test "bt" "#0 +\[^\r\n\]*\\mdl_main\\M.*" "dl bt"
 
@@ -282,6 +320,8 @@ proc test_ld {file ifmain trynosym} {
 	gdb_test "bt" "#0 +\[^\r\n\]*\\mlibfunc\\M\[^\r\n\]*\r\n#1 +\[^\r\n\]*\\mmain\\M.*" "main bt"
 
 	test_core $file
+
+	test_attach $file
     }
 
     if !$trynosym {

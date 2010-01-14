@@ -15,12 +15,16 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-extern void libfunc (void);
+#include <assert.h>
+
+extern void libfunc (const char *action);
 
 int
-main (void)
+main (int argc, char **argv)
 {
-  libfunc ();
+  assert (argc == 2);
+
+  libfunc (argv[1]);
 
   return 0;
 }

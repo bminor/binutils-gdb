@@ -1,5 +1,17 @@
 2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.base/break-interp-lib.c: Include unistd.h, assert.h and stdio.h.
+	(libfunc): New parameter action.  Implement also selectable "sleep".
+	* gdb.base/break-interp-main.c: Include assert.h.
+	(libfunc): New parameter action.
+	(main): New parameters argc and argv.  Assert argc.  Pass argv.
+	* gdb.base/break-interp.exp (test_core): Pass the "segv" argument.
+	(test_attach): New proc.
+	(test_ld): Pass new "segv" exec parameter.  Call also test_attach.
+	* lib/gdb.exp (core_find): New parameter arg.  Pass it to $binfile.
+
+2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.base/break-interp.exp (test_core): New proc.
 	(test_ld): Call it.
 
