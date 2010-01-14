@@ -255,6 +255,19 @@ proc test_value_in_inferior {} {
   gdb_test "python print repr(nullst)" "u'divide\\\\x00et'"
 }
 
+proc test_lazy_strings {} {
+
+  global hex
+
+  gdb_test "print sptr" "\"pointer\""
+  gdb_py_test_silent_cmd "python sptr = gdb.history (0)" "Get value from history" 1
+
+  gdb_py_test_silent_cmd "python lstr = sptr.lazy_string()" "Aquire lazy string" 1
+  gdb_test "python print lstr.type" "const char \*." "Test type name equality"
+  gdb_test "python print sptr.type" "const char \*." "Test type name equality"
+}
+
+
 # A few objfile tests.
 proc test_objfiles {} {
     gdb_test "python\nok=False\nfor file in gdb.objfiles():\n  if 'py-value' in file.filename:\n    ok=True\nprint ok\nend" "True"
@@ -402,6 +415,7 @@ if ![runto_main] then {
 }
 
 test_value_in_inferior
+test_lazy_strings
 test_value_after_death
 
 # The following test recompiles the binary to test either C or C++

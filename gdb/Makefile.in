@@ -270,6 +270,7 @@ SUBDIR_PYTHON_OBS = \
 	py-cmd.o \
 	py-frame.o \
 	py-function.o \
+	py-lazy-string.o \
 	py-objfile.o \
 	py-prettyprint.o \
 	py-type.o \
@@ -280,6 +281,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-cmd.c \
 	python/py-frame.c \
 	python/py-function.c \
+	python/py-lazy-string.c \
 	python/py-objfile.c \
 	python/py-prettyprint.c \
 	python/py-type.c \
@@ -1978,6 +1980,10 @@ py-frame.o: $(srcdir)/python/py-frame.c
 
 py-function.o: $(srcdir)/python/py-function.c
 	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-function.c
+	$(POSTCOMPILE)
+
+py-lazy-string.o: $(srcdir)/python/py-lazy-string.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-lazy-string.c
 	$(POSTCOMPILE)
 
 py-objfile.o: $(srcdir)/python/py-objfile.c

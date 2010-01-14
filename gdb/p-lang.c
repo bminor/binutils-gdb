@@ -214,7 +214,7 @@ pascal_printchar (int c, struct type *type, struct ui_file *stream)
 void
 pascal_printstr (struct ui_file *stream, struct type *type,
 		 const gdb_byte *string, unsigned int length,
-		 int force_ellipses,
+		 const char *encoding, int force_ellipses,
 		 const struct value_print_options *options)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));

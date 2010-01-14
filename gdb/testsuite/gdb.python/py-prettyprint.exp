@@ -102,6 +102,7 @@ proc run_lang_tests {lang} {
     gdb_test "print x" " = \"this is x\""
     gdb_test "print cstring" " = \"const string\""
 
+    gdb_test "print estring" "\"embedded x\\\\201\\\\202\\\\203\\\\204\""
     gdb_test "print c" " = container \"container\" with 2 elements = {$nl *.0. = 23,$nl *.1. = 72$nl}"
 
     gdb_test "continue" "Program exited normally\."

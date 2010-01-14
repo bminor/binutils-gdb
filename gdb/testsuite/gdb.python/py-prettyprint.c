@@ -34,6 +34,10 @@ struct ns {
   int length;
 };
 
+struct lazystring {
+  const char *lazy_str;
+};
+
 #ifdef __cplusplus
 struct S : public s {
   int zs;
@@ -193,6 +197,7 @@ main ()
   /* Clearing by being `static' could invoke an other GDB C++ bug.  */
   struct nullstr nullstr;
 
+
   init_ss(&ss, 1, 2);
   init_ss(ssa+0, 3, 4);
   init_ss(ssa+1, 5, 6);
@@ -201,6 +206,9 @@ main ()
   struct ns  ns;
   ns.null_str = "embedded\0null\0string";
   ns.length = 20;
+
+  struct lazystring estring;
+  estring.lazy_str = "embedded x\201\202\203\204" ;
 
 #ifdef __cplusplus
   S cps;

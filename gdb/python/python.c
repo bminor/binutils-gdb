@@ -623,6 +623,7 @@ Enables or disables auto-loading of Python code when an object is opened."),
   gdbpy_initialize_functions ();
   gdbpy_initialize_types ();
   gdbpy_initialize_objfile ();
+  gdbpy_initialize_lazy_string ();
 
   PyRun_SimpleString ("import gdb");
   PyRun_SimpleString ("gdb.pretty_printers = []");

@@ -19420,6 +19420,7 @@ situation, a Python @code{KeyboardInterrupt} exception is thrown.
 * Functions In Python::         Writing new convenience functions.
 * Objfiles In Python::          Object files.
 * Frames In Python::            Acessing inferior stack frames from Python.
+* Lazy Strings In Python::      Python representation of lazy strings.
 @end menu
 
 @node Basic Python
@@ -19693,6 +19694,30 @@ argument to Python's @code{string.decode} method.
 
 If the optional @var{length} argument is given, the string will be
 fetched and converted to the given length.
+@end defmethod
+
+@defmethod Value lazy_string @r{[}encoding@r{]} @r{[}length@r{]}
+If this @code{gdb.Value} represents a string, then this method
+converts the contents to a @code{gdb.LazyString} (@pxref{Lazy Strings
+In Python}).  Otherwise, this method will throw an exception.
+
+If the optional @var{encoding} argument is given, it must be a string
+naming the encoding of the @code{gdb.LazyString}.  Some examples are:
+@samp{ascii}, @samp{iso-8859-6} or @samp{utf-8}.  If the
+@var{encoding} argument is an encoding that @value{GDBN} does
+recognize, @value{GDBN} will raise an error.
+
+When a lazy string is printed, the @value{GDBN} encoding machinery is
+used to convert the string during printing.  If the optional
+@var{encoding} argument is not provided, or is an empty string,
+@value{GDBN} will automatically select the encoding most suitable for
+the string type.  For further information on encoding in @value{GDBN}
+please see @ref{Character Sets}.
+
+If the optional @var{length} argument is given, the string will be
+fetched and encoded to the length of characters specified.  If
+the @var{length} argument is not provided, the string will be fetched
+and encoded until a null of appropriate width is found.
 @end defmethod
 @end table
 
@@ -20630,6 +20655,61 @@ Return the value of the given variable in this frame.  @var{variable} must
 be a string.
 @end defmethod
 @end table
+
+@node Lazy Strings In Python
+@subsubsection Python representation of lazy strings.
+
+@cindex lazy strings in python
+@tindex gdb.LazyString
+
+A @dfn{lazy string} is a string whose contents is not retrieved or
+encoded until it is needed.
+
+A @code{gdb.LazyString} is represented in @value{GDBN} as an
+@code{address} that points to a region of memory, an @code{encoding}
+that will be used to encode that region of memory, and a @code{length}
+to delimit the region of memory that represents the string.  The
+difference between a @code{gdb.LazyString} and a string wrapped within
+a @code{gdb.Value} is that a @code{gdb.LazyString} will be treated
+differently by @value{GDBN} when printing.  A @code{gdb.LazyString} is
+retrieved and encoded during printing, while a @code{gdb.Value}
+wrapping a string is immediately retrieved and encoded on creation.
+
+A @code{gdb.LazyString} object has the following functions:
+
+@defmethod LazyString value
+Convert the @code{gdb.LazyString} to a @code{gdb.Value}.  This value
+will point to the string in memory, but will lose all the delayed
+retrieval, encoding and handling that @value{GDBN} applies to a
+@code{gdb.LazyString}.
+@end defmethod
+
+@defivar LazyString address
+This attribute holds the address of the string.  This attribute is not
+writable.
+@end defivar
+
+@defivar LazyString length
+This attribute holds the length of the string in characters.  If the
+length is -1, then the string will be fetched and encoded up to the
+first null of appropriate width.  This attribute is not writable.
+@end defivar
+
+@defivar LazyString encoding
+This attribute holds the encoding that will be applied to the string
+when the string is printed by @value{GDBN}.  If the encoding is not
+set, or contains an empty string,  then @value{GDBN} will select the
+most appropriate encoding when the string is printed.  This attribute
+is not writable.
+@end defivar
+
+@defivar LazyString type
+This attribute holds the type that is represented by the lazy string's
+type.  For a lazy string this will always be a pointer type.  To
+resolve this to the lazy string's character type, use the type's
+@code{target} method.  @xref{Types In Python}.  This attribute is not
+writable.
+@end defivar
 
 @node Interpreters
 @chapter Command Interpreters

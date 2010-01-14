@@ -1,3 +1,10 @@
+2010-01-13  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.texinfo (Values From Inferior): Document lazy_string value
+	method.
+	(Python API): Add Lazy strings menu item.
+	(Lazy Strings In Python): New node.
+
 2010-01-13  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Thread Information): New.

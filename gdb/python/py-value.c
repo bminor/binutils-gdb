@@ -220,6 +220,36 @@ valpy_get_type (PyObject *self, void *closure)
   return obj->type;
 }
 
+/* Implementation of gdb.Value.lazy_string ([encoding] [, length]) ->
+   string.  Return a PyObject representing a lazy_string_object type.
+   A lazy string is a pointer to a string with an optional encoding and
+   length.  If ENCODING is not given, encoding is set to None.  If an
+   ENCODING is provided the encoding parameter is set to ENCODING, but
+   the string is not encoded.  If LENGTH is provided then the length
+   parameter is set to LENGTH, otherwise length will be set to -1 (first
+   null of appropriate with).  */
+static PyObject *
+valpy_lazy_string (PyObject *self, PyObject *args, PyObject *kw)
+{
+  int length = -1;
+  struct value *value = ((value_object *) self)->value;
+  const char *user_encoding = NULL;
+  static char *keywords[] = { "encoding", "length", NULL };
+  PyObject *str_obj;
+
+  if (!PyArg_ParseTupleAndKeywords (args, kw, "|si", keywords,
+				    &user_encoding, &length))
+    return NULL;
+
+  if (TYPE_CODE (value_type (value)) == TYPE_CODE_PTR)
+    value = value_ind (value);
+
+  str_obj = gdbpy_create_lazy_string_object (value_address (value), length,
+					     user_encoding, value_type (value));
+
+  return (PyObject *) str_obj;
+}
+
 /* Implementation of gdb.Value.string ([encoding] [, errors]
    [, length]) -> string.  Return Unicode string with value contents.
    If ENCODING is not given, the string is assumed to be encoded in
@@ -939,6 +969,13 @@ convert_value_from_python (PyObject *obj)
 	}
       else if (PyObject_TypeCheck (obj, &value_object_type))
 	value = value_copy (((value_object *) obj)->value);
+      else if (gdbpy_is_lazy_string (obj))
+	{
+	  PyObject *result;
+	  PyObject *function = PyString_FromString ("value");
+	  result = PyObject_CallMethodObjArgs (obj, function,  NULL);
+	  value = value_copy (((value_object *) result)->value);
+	}
       else
 	PyErr_Format (PyExc_TypeError, _("Could not convert Python object: %s"),
 		      PyString_AsString (PyObject_Str (obj)));
@@ -1001,6 +1038,9 @@ static PyGetSetDef value_object_getset[] = {
 static PyMethodDef value_object_methods[] = {
   { "cast", valpy_cast, METH_VARARGS, "Cast the value to the supplied type." },
   { "dereference", valpy_dereference, METH_NOARGS, "Dereferences the value." },
+  { "lazy_string", (PyCFunction) valpy_lazy_string, METH_VARARGS | METH_KEYWORDS,
+    "lazy_string ([encoding]  [, length]) -> lazy_string\n\
+Return a lazy string representation of the value." },
   { "string", (PyCFunction) valpy_string, METH_VARARGS | METH_KEYWORDS,
     "string ([encoding] [, errors] [, length]) -> string\n\
 Return Unicode string representation of the value." },

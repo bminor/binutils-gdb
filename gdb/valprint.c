@@ -1452,7 +1452,8 @@ val_print_string (struct type *elttype, CORE_ADDR addr, int len,
 	{
 	  fputs_filtered (" ", stream);
 	}
-      LA_PRINT_STRING (stream, elttype, buffer, bytes_read / width, force_ellipsis, options);
+      LA_PRINT_STRING (stream, elttype, buffer, bytes_read / width,
+		       NULL, force_ellipsis, options);
     }
 
   if (errcode != 0)

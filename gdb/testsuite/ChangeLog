@@ -1,3 +1,12 @@
+2010-01-13  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.python/py-value.exp (test_lazy_strings): Add lazy string test.
+	* gdb.python/py-prettyprint.py (pp_ls): New printer.
+	* gdb.python/py-prettyprint.exp (run_lang_tests): Add lazy string
+	test.
+	* gdb.python/py-prettyprint.c: Define lazystring test structure.
+	* gdb.python/py-mi.exp: Add lazy string test.
+
 2010-01-13  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* lib/mi-support.exp (mi_check_thread_states): Handle

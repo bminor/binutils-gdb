@@ -71,6 +71,8 @@ PyObject *gdbpy_history (PyObject *self, PyObject *args);
 PyObject *gdbpy_frame_stop_reason_string (PyObject *, PyObject *);
 PyObject *gdbpy_selected_frame (PyObject *self, PyObject *args);
 PyObject *gdbpy_lookup_type (PyObject *self, PyObject *args, PyObject *kw);
+PyObject *gdbpy_create_lazy_string_object (CORE_ADDR address, long length,
+					   const char *encoding, struct type *type);
 
 PyObject *value_to_value_object (struct value *v);
 PyObject *type_to_type_object (struct type *);
@@ -88,6 +90,7 @@ void gdbpy_initialize_commands (void);
 void gdbpy_initialize_types (void);
 void gdbpy_initialize_functions (void);
 void gdbpy_initialize_objfile (void);
+void gdbpy_initialize_lazy_string (void);
 
 struct cleanup *make_cleanup_py_decref (PyObject *py);
 
@@ -117,6 +120,10 @@ PyObject *python_string_to_target_python_string (PyObject *obj);
 char *python_string_to_host_string (PyObject *obj);
 PyObject *target_string_to_unicode (const gdb_byte *str, int length);
 int gdbpy_is_string (PyObject *obj);
+int gdbpy_is_lazy_string (PyObject *result);
+gdb_byte *gdbpy_extract_lazy_string (PyObject *string,
+				     struct type **str_type, 
+				     long *length, char **encoding);
 
 /* Note that these are declared here, and not in python.h with the
    other pretty-printer functions, because they refer to PyObject.  */

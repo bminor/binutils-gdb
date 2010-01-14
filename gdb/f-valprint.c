@@ -259,7 +259,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
     case TYPE_CODE_STRING:
       f77_get_dynamic_length_of_aggregate (type);
       LA_PRINT_STRING (stream, builtin_type (gdbarch)->builtin_char,
-		       valaddr, TYPE_LENGTH (type), 0, options);
+		       valaddr, TYPE_LENGTH (type), NULL, 0, options);
       break;
 
     case TYPE_CODE_ARRAY:

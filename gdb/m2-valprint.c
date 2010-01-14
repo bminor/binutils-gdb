@@ -360,8 +360,8 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 		}
 
 	      LA_PRINT_STRING (stream, TYPE_TARGET_TYPE (type),
-			       valaddr + embedded_offset, len, 0,
-			       options);
+			       valaddr + embedded_offset, len, NULL,
+			       0, options);
 	      i = len;
 	    }
 	  else

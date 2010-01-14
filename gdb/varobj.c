@@ -2453,11 +2453,15 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
   struct cleanup *old_chain;
   gdb_byte *thevalue = NULL;
   struct value_print_options opts;
-  int len = 0;
+  struct type *type = NULL;
+  long len = 0;
+  char *encoding = NULL;
+  struct gdbarch *gdbarch = NULL;
 
   if (value == NULL)
     return NULL;
 
+  gdbarch = get_type_arch (value_type (value));
 #if HAVE_PYTHON
   {
     struct cleanup *back_to = varobj_ensure_python_env (var);
@@ -2489,20 +2493,31 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
 						  &replacement);
 	    if (output)
 	      {
-		PyObject *py_str
-		  = python_string_to_target_python_string (output);
-		if (py_str)
+		if (gdbpy_is_lazy_string (output))
 		  {
-		    char *s = PyString_AsString (py_str);
-		    len = PyString_Size (py_str);
-		    thevalue = xmemdup (s, len + 1, len + 1);
-		    Py_DECREF (py_str);
+		    thevalue = gdbpy_extract_lazy_string (output, &type,
+							  &len, &encoding);
+		    string_print = 1;
+		  }
+		else
+		  {
+		    PyObject *py_str
+		      = python_string_to_target_python_string (output);
+		    if (py_str)
+		      {
+			char *s = PyString_AsString (py_str);
+			len = PyString_Size (py_str);
+			thevalue = xmemdup (s, len + 1, len + 1);
+			type = builtin_type (gdbarch)->builtin_char;
+			Py_DECREF (py_str);
+		      }
 		  }
 		Py_DECREF (output);
 	      }
 	    if (thevalue && !string_print)
 	      {
 		do_cleanups (back_to);
+		xfree (encoding);
 		return thevalue;
 	      }
 	    if (replacement)
@@ -2521,10 +2536,9 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
   opts.raw = 1;
   if (thevalue)
     {
-      struct gdbarch *gdbarch = get_type_arch (value_type (value));
       make_cleanup (xfree, thevalue);
-      LA_PRINT_STRING (stb, builtin_type (gdbarch)->builtin_char,
-		       thevalue, len, 0, &opts);
+      make_cleanup (xfree, encoding);
+      LA_PRINT_STRING (stb, type, thevalue, len, encoding, 0, &opts);
     }
   else
     common_val_print (value, stb, 0, &opts, current_language);

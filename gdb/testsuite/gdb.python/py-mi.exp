@@ -67,6 +67,10 @@ mi_create_varobj_checked string string_1 \
     "struct string_repr" \
     "create string_1 varobj"
 
+mi_create_varobj_checked lstring estring \
+    "struct lazystring" \
+    "create estring varobj"
+
 mi_gdb_test "-data-evaluate-expression \"string_1 = string_2\"" ".*" \
     "assign string_1 from string_2"
 

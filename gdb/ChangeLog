@@ -1,3 +1,50 @@
+2010-01-13  Phil Muldoon  <pmuldoon@redhat.com>
+
+	PR python/10705
+
+	* python/python-internal.h: Add lazy_string_object_type
+	definition.
+	(create_lazy_string_object, gdbpy_initialize_lazy_string)
+	(gdbpy_is_lazystring, gdbpy_extract_lazy_string): Define.
+	* python/py-value.c (valpy_lazy_string): New function.
+	(convert_value_from_python): Add lazy string conversion.
+	* python/py-prettyprint.c (pretty_print_one_value): Check if
+	return is also a lazy string.
+	(print_string_repr): Add lazy string printing branch.
+	(print_children): Likewise.
+	* python/py-lazy-string.c: New file. Implement lazy strings.
+	* python/python.c (_initialize_python): Call
+	gdbpy_initialize_lazy_string.
+	* varobj.c (value_get_print_value): Add lazy string printing
+	branch.  Account for encoding.
+	* c-lang.c (c_printstr): Account for new encoding argument.  If
+	encoding is NULL, find encoding suited for type, otherwise use
+	user encoding.
+	* language.h (language_defn): Add encoding argument.
+	(LA_PRINT_STRING): Likewise.
+	* language.c (unk_lang_printstr): Update to reflect new encoding
+	argument to language_defn.
+	* ada-lang.h (ada_printstr): Likewise.
+	* c-lang.h (c_printstr): Likewise.
+	* p-lang.h (pascal_printstr);
+	* f-lang.c (f_printstr): Likewise.
+	* m2-lang.c (m2_printstr): Likewise.
+	* objc-lang.c (objc_printstr): Likewise.
+	* p-lang.c (pascal_printstr): Likewise.
+	* scm-lang.c (scm_printstr): Likewise.
+	* c-valprint.c (c_val_print): Update LA_PRINT_STRING call for
+	encoding argument.
+	* ada-valprint.c (ada_printstr): Likewise.
+	* f-valprint.c (f_val_print): Likewise
+	* m2-valprint.c (m2_val_print): Likewise.
+	* p-valprint.c (pascal_val_print): Likewise.
+	* expprint.c (print_subexp_standard): Likewise.
+	* valprint.c (val_print_string): Likewise.
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add py-lazy-string.
+	(SUBDIR_PYTHON_SRCS): Likewise.
+	(py-lazy-string.o): New rule.
+
+
 2010-01-13  Doug Evans  <dje@google.com>
 
 	* mi/mi-main.c (list_available_thread_groups): Avoid "may be used

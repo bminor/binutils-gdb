@@ -369,7 +369,7 @@ c_printchar (int c, struct type *type, struct ui_file *stream)
 
 void
 c_printstr (struct ui_file *stream, struct type *type, const gdb_byte *string,
-	    unsigned int length, int force_ellipses,
+	    unsigned int length, const char *user_encoding, int force_ellipses,
 	    const struct value_print_options *options)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
@@ -381,6 +381,7 @@ c_printstr (struct ui_file *stream, struct type *type, const gdb_byte *string,
   struct obstack wchar_buf, output;
   struct cleanup *cleanup;
   enum c_string_type str_type;
+  const char *type_encoding;
   const char *encoding;
   struct wchar_iterator *iter;
   int finished = 0;
@@ -395,7 +396,7 @@ c_printstr (struct ui_file *stream, struct type *type, const gdb_byte *string,
 				    width, byte_order) == 0))
     length--;
 
-  str_type = classify_type (type, byte_order, &encoding) & ~C_CHAR;
+  str_type = classify_type (type, byte_order, &type_encoding) & ~C_CHAR;
   switch (str_type)
     {
     case C_STRING:
@@ -410,6 +411,8 @@ c_printstr (struct ui_file *stream, struct type *type, const gdb_byte *string,
       fputs_filtered ("U", stream);
       break;
     }
+
+  encoding = (user_encoding && *user_encoding) ? user_encoding : type_encoding;
 
   if (length == 0)
     {

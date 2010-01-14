@@ -81,7 +81,7 @@ extern void c_printchar (int, struct type *, struct ui_file *);
 
 extern void c_printstr (struct ui_file * stream, struct type *elttype,
 			const gdb_byte *string, unsigned int length,
-			int force_ellipses,
+			const char *user_encoding, int force_ellipses,
 			const struct value_print_options *options);
 
 extern void c_language_arch_info (struct gdbarch *gdbarch,

@@ -104,7 +104,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 		}
 
 	      LA_PRINT_STRING (stream, TYPE_TARGET_TYPE (type),
-			       valaddr + embedded_offset, len, 0,
+			       valaddr + embedded_offset, len, NULL, 0,
 			       options);
 	      i = len;
 	    }
@@ -306,7 +306,9 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
                                      &string_pos, &char_type, NULL))
 	    {
 	      len = extract_unsigned_integer (valaddr + embedded_offset + length_pos, length_size, byte_order);
-	      LA_PRINT_STRING (stream, char_type, valaddr + embedded_offset + string_pos, len, 0, options);
+	      LA_PRINT_STRING (stream, char_type, 
+			       valaddr + embedded_offset + string_pos,
+			       len, NULL, 0, options);
 	    }
 	  else
 	    pascal_object_print_value_fields (type, valaddr + embedded_offset, address, stream,

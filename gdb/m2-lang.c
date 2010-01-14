@@ -104,7 +104,7 @@ m2_printchar (int c, struct type *type, struct ui_file *stream)
 
 static void
 m2_printstr (struct ui_file *stream, struct type *type, const gdb_byte *string,
-	     unsigned int length, int force_ellipses,
+	     unsigned int length, const char *encoding, int force_ellipses,
 	     const struct value_print_options *options)
 {
   unsigned int i;

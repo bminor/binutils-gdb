@@ -556,7 +556,7 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
 
 void
 ada_printstr (struct ui_file *stream, struct type *type, const gdb_byte *string,
-	      unsigned int length, int force_ellipses,
+	      unsigned int length, const char *encoding, int force_ellipses,
 	      const struct value_print_options *options)
 {
   printstr (stream, type, string, length, force_ellipses, TYPE_LENGTH (type),

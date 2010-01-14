@@ -1083,7 +1083,7 @@ unk_lang_printchar (int c, struct type *type, struct ui_file *stream)
 static void
 unk_lang_printstr (struct ui_file *stream, struct type *type,
 		   const gdb_byte *string, unsigned int length,
-		   int force_ellipses,
+		   const char *encoding, int force_ellipses,
 		   const struct value_print_options *options)
 {
   error (_("internal error - unimplemented function unk_lang_printstr called."));

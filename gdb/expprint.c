@@ -188,7 +188,7 @@ print_subexp_standard (struct expression *exp, int *pos,
 	   additional parameter to LA_PRINT_STRING.  -fnf */
 	get_user_print_options (&opts);
 	LA_PRINT_STRING (stream, builtin_type (exp->gdbarch)->builtin_char,
-			 &exp->elts[pc + 2].string, nargs, 0, &opts);
+			 &exp->elts[pc + 2].string, nargs, NULL, 0, &opts);
       }
       return;
 
@@ -207,7 +207,7 @@ print_subexp_standard (struct expression *exp, int *pos,
 	fputs_filtered ("@\"", stream);
 	get_user_print_options (&opts);
 	LA_PRINT_STRING (stream, builtin_type (exp->gdbarch)->builtin_char,
-			 &exp->elts[pc + 2].string, nargs, 0, &opts);
+			 &exp->elts[pc + 2].string, nargs, NULL, 0, &opts);
 	fputs_filtered ("\"", stream);
       }
       return;
@@ -293,7 +293,7 @@ print_subexp_standard (struct expression *exp, int *pos,
 	  struct value_print_options opts;
 	  get_user_print_options (&opts);
 	  LA_PRINT_STRING (stream, builtin_type (exp->gdbarch)->builtin_char,
-			   tempstr, nargs - 1, 0, &opts);
+			   tempstr, nargs - 1, NULL, 0, &opts);
 	  (*pos) = pc;
 	}
       else
