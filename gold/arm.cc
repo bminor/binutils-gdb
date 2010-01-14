@@ -4203,9 +4203,11 @@ Arm_relobj<big_endian>::section_needs_reloc_stub_scanning(
   if (this->adjust_shndx(shdr.get_sh_link()) != this->symtab_shndx())
     return false;
 
-  const unsigned int reloc_size = (sh_type == elfcpp::SHT_REL
-				   ? elfcpp::Elf_sizes<32>::rel_size
-				   : elfcpp::Elf_sizes<32>::rela_size);
+  unsigned int reloc_size;
+  if (sh_type == elfcpp::SHT_REL)
+    reloc_size = elfcpp::Elf_sizes<32>::rel_size;
+  else
+    reloc_size = elfcpp::Elf_sizes<32>::rela_size;
 
   // Ignore reloc section with unexpected entsize or uneven size.
   // The error will be reported in the final link.
@@ -4380,9 +4382,11 @@ Arm_relobj<big_endian>::scan_sections_for_stubs(
 	  relinfo.reloc_shndx = i;
 	  relinfo.data_shndx = index;
 	  unsigned int sh_type = shdr.get_sh_type();
-	  const unsigned int reloc_size = (sh_type == elfcpp::SHT_REL
-					   ? elfcpp::Elf_sizes<32>::rel_size
-					   : elfcpp::Elf_sizes<32>::rela_size);
+	  unsigned int reloc_size;
+	  if (sh_type == elfcpp::SHT_REL)
+	    reloc_size = elfcpp::Elf_sizes<32>::rel_size;
+	  else
+	    reloc_size = elfcpp::Elf_sizes<32>::rela_size;
 
 	  Output_section* os = out_sections[index];
 	  arm_target->scan_section_for_stubs(&relinfo, sh_type, prelocs,
