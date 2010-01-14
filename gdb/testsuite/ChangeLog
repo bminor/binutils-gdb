@@ -1,5 +1,13 @@
 2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.base/break-interp-main.c, gdb.base/break-interp-lib.c: New.
+	* gdb.base/break-interp.exp: Exit on skip_shlib_tests.  Change $srcfile.
+	New variables $binfile_lib and $srcfile_lib.  Call get_compiler_info
+	and gdb_compile_shlib.  Use new -Wl compiler options.
+	(dl bt, main bt): New tests.
+
+2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Support PIEs with no symfile_objfile.
 	* gdb.base/break-interp.exp: New argument at the test_ld calls.
 	(test_ld): New parameter trynosym.

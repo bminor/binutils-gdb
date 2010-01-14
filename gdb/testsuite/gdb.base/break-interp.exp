@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # This test only works on GNU/Linux.
-if { ![isnative] || [is_remote host] || ![istarget *-linux*] } {
+if { ![isnative] || [is_remote host] || ![istarget *-linux*] || [skip_shlib_tests]} {
     continue
 }
 
@@ -23,7 +23,21 @@ set binprefix ${objdir}/${subdir}/${test}
 # Only to get the $interp_system name.
 set srcfile_test "start.c"
 set binfile_test ${test}-test
-set srcfile "start.c"
+set binfile_lib ${objdir}/${subdir}/${test}.so
+set srcfile "${test}-main.c"
+set srcfile_lib "${test}-lib.c"
+
+if [get_compiler_info ${binfile_lib}] {
+    return -1
+}
+
+# Use -soname so that it is listed with " => " by ldd and this testcase makes
+# a copy of ${binfile_lib} for each prelink variant.
+
+if {[gdb_compile_shlib ${srcdir}/${subdir}/${srcfile_lib} ${binfile_lib} [list debug additional_flags=-Wl,-soname,${test}.so]] != ""} {
+    return -1
+}
+
 if {[build_executable ${test}.exp $binfile_test ${srcfile_test} {}] == -1} {
     return -1
 }
@@ -236,8 +250,15 @@ proc test_ld {file ifmain trynosym} {
     gdb_load $file
 
     reach "dl_main" run
+
+    gdb_test "bt" "#0 +\[^\r\n\]*\\mdl_main\\M.*" "dl bt"
+
     if $ifmain {
 	reach "main" continue
+
+	reach "libfunc" continue
+
+	gdb_test "bt" "#0 +\[^\r\n\]*\\mlibfunc\\M\[^\r\n\]*\r\n#1 +\[^\r\n\]*\\mmain\\M.*" "main bt"
     }
 
     if !$trynosym {
@@ -389,6 +410,7 @@ foreach ldprelink {NO YES} {
 		    lappend pf_prefix "$binname:"
 
 		    set opts "additional_flags=-Wl,--dynamic-linker,$interp,-rpath,$dir"
+		    lappend opts "additional_flags=-Wl,$binfile_lib,-rpath,[file dirname $binfile_lib]"
 		    if {$binsepdebug != "NO"} {
 			lappend opts {debug}
 		    }
