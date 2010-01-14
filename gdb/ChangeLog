@@ -1,3 +1,12 @@
+2010-01-14  Joel Brobecker  <brobecker@adacore.com>
+
+	Tru64: Dead threads are never deleted.
+	* dec-thread.c (dec_thread_ptid_is_alive): New function.
+	(dec_thread_count_gdb_threads): Fix counter increment.
+	(dec_thread_add_gdb_thread): Fix *listp increment.
+	(resync_thread_list): Fix bug in deletion of dead threads that
+	caused all threads to be deleted, instead of just the dead ones.
+
 2010-01-13  Phil Muldoon  <pmuldoon@redhat.com>
 
 	PR python/10705
