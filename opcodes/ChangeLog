@@ -1,3 +1,29 @@
+2010-01-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (names_mm): New.
+	(intel_names_mm): Likewise.
+	(att_names_mm): Likewise.
+	(names_xmm): Likewise.
+	(intel_names_xmm): Likewise.
+	(att_names_xmm): Likewise.
+	(names_ymm): Likewise.
+	(intel_names_ymm): Likewise.
+	(att_names_ymm): Likewise.
+	(print_insn): Set names_mm, names_xmm and names_ymm.
+	(OP_MMX): Use names_mm, names_xmm and names_ymm.
+	(OP_XMM): Likewise.
+	(OP_EM): Likewise.
+	(OP_EMC): Likewise.
+	(OP_MXC): Likewise.
+	(OP_EX): Likewise.
+	(XMM_Fixup): Likewise.
+	(OP_VEX): Likewise.
+	(OP_EX_VexReg): Likewise.
+	(OP_Vex_2src): Likewise.
+	(OP_Vex_2src_1): Likewise.
+	(OP_Vex_2src_2): Likewise.
+	(OP_REG_VexI4): Likewise.
+
 2010-01-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (print_insn): Update comments.
