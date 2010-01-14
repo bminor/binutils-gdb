@@ -1,3 +1,7 @@
+2009-11-17  Edward Nevill <edward.nevill@arm.com>
+
+	* arm-dis.c (print_insn_thumb32): Handle undefined instruction.
+
 2009-10-06  Nick Clifton  <nickc@redhat.com>
 
 	* po/fi.po: Updated Finnish translation.
