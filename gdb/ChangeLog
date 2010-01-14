@@ -1,3 +1,12 @@
+2009-01-14  Tristan Gingold  <gingold@adacore.com>
+
+	* machoread.c (macho_add_oso_symfile): Add symfile_flags parameter.
+	Call xstrdup for abfd->filename.  Pass symfile_flags and objfile flags
+	to symbol_file_add_from_bfd.  Add OSO as separate objfile.
+	(macho_oso_symfile): Add symfile_flags parameter.  Pass it to
+	macho_add_oso_symfile.
+	(macho_symfile_read): Pass symfile_flags to macho_oso_symfile.
+
 2010-01-14  Joel Brobecker  <brobecker@adacore.com>
 
 	Tru64: Dead threads are never deleted.

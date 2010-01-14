@@ -292,8 +292,10 @@ oso_el_compare_name (const void *vl, const void *vr)
 /* Add an oso file as a symbol file.  */
 
 static void
-macho_add_oso_symfile (oso_el *oso, bfd *abfd, struct objfile *main_objfile)
+macho_add_oso_symfile (oso_el *oso, bfd *abfd,
+                       struct objfile *main_objfile, int symfile_flags)
 {
+  struct objfile *objfile;
   struct section_addr_info *addrs;
   int len;
   int i;
@@ -363,13 +365,24 @@ macho_add_oso_symfile (oso_el *oso, bfd *abfd, struct objfile *main_objfile)
                            addrs->other[j].name);
     }
 
-  symbol_file_add_from_bfd (abfd, 0, addrs, 0);
+  /* Make sure that the filename was malloc'ed.  The current filename comes
+     either from an OSO symbol name or from an archive name.  Memory for both
+     is not managed by gdb.  */
+  abfd->filename = xstrdup (abfd->filename);
+
+  /* We need to clear SYMFILE_MAINLINE to avoid interractive question
+     from symfile.c:symbol_file_add_with_addrs_or_offsets.  */
+  objfile = symbol_file_add_from_bfd
+    (abfd, symfile_flags & ~SYMFILE_MAINLINE, addrs,
+     main_objfile->flags & (OBJF_REORDERED | OBJF_SHARED
+                            | OBJF_READNOW | OBJF_USERLOADED));
+  add_separate_debug_objfile (objfile, main_objfile);
 }
 
 /* Read symbols from the vector of oso files.  */
 
 static void
-macho_oso_symfile (struct objfile *main_objfile)
+macho_oso_symfile (struct objfile *main_objfile, int symfile_flags)
 {
   int ix;
   VEC (oso_el) *vec;
@@ -453,7 +466,8 @@ macho_oso_symfile (struct objfile *main_objfile)
                       && !memcmp (member_name, oso2->name + pfx_len + 1,
                                   member_len))
                     {
-                      macho_add_oso_symfile (oso2, member_bfd, main_objfile);
+                      macho_add_oso_symfile (oso2, member_bfd,
+                                             main_objfile, symfile_flags);
                       oso2->name = NULL;
                       break;
                     }
@@ -486,7 +500,7 @@ macho_oso_symfile (struct objfile *main_objfile)
             warning (_("`%s': can't open to read symbols: %s."), oso->name,
                      bfd_errmsg (bfd_get_error ()));
           else
-            macho_add_oso_symfile (oso, abfd, main_objfile);
+            macho_add_oso_symfile (oso, abfd, main_objfile, symfile_flags);
 
           ix++;
         }
@@ -670,7 +684,7 @@ macho_symfile_read (struct objfile *objfile, int symfile_flags)
 
   /* Then the oso.  */
   if (oso_vector != NULL)
-    macho_oso_symfile (objfile);
+    macho_oso_symfile (objfile, symfile_flags);
 }
 
 static void
