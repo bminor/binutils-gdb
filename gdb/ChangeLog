@@ -1,5 +1,11 @@
 2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Support PIEs with no symfile_objfile.
+	* exec.c (print_section_info <abfd == exec_bfd>): Relocate Entry point.
+	* solib-svr4.c (svr4_relocate_main_executable <exec_bfd>): New block.
+
+2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* solib-svr4.c (svr4_relocate_main_executable): Move the static exec
 	code part to ...
 	(svr4_static_exec_displacement): ... a new function.

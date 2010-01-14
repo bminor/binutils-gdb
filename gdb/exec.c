@@ -674,8 +674,36 @@ print_section_info (struct target_section_table *t, bfd *abfd)
   wrap_here ("        ");
   printf_filtered (_("file type %s.\n"), bfd_get_target (abfd));
   if (abfd == exec_bfd)
-    printf_filtered (_("\tEntry point: %s\n"),
-                     paddress (gdbarch, bfd_get_start_address (abfd)));
+    {
+      bfd_vma displacement;
+
+      for (p = t->sections; p < t->sections_end; p++)
+	{
+	  asection *asect = p->the_bfd_section;
+
+	  if ((bfd_get_section_flags (abfd, asect) & (SEC_ALLOC | SEC_LOAD))
+	      != (SEC_ALLOC | SEC_LOAD))
+	    continue;
+
+	  if (bfd_get_section_vma (abfd, asect) <= abfd->start_address
+	      && abfd->start_address < (bfd_get_section_vma (abfd, asect)
+					+ bfd_get_section_size (asect)))
+	    {
+	      displacement = p->addr - bfd_get_section_vma (abfd, asect);
+	      break;
+	    }
+	}
+      if (p == t->sections_end)
+	{
+	  warning (_("Cannot find section for the entry point of %s.\n"),
+		   bfd_get_filename (abfd));
+	  displacement = 0;
+	}
+
+      printf_filtered (_("\tEntry point: %s\n"),
+		       paddress (gdbarch, (bfd_get_start_address (abfd)
+					   + displacement)));
+    }
   for (p = t->sections; p < t->sections_end; p++)
     {
       printf_filtered ("\t%s", hex_string_custom (p->addr, wid));

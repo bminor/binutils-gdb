@@ -1649,6 +1649,15 @@ svr4_relocate_main_executable (void)
 
       objfile_relocate (symfile_objfile, new_offsets);
     }
+  else if (exec_bfd)
+    {
+      asection *asect;
+
+      for (asect = exec_bfd->sections; asect != NULL; asect = asect->next)
+	exec_set_section_address (bfd_get_filename (exec_bfd), asect->index,
+				  (bfd_section_vma (exec_bfd, asect)
+				   + displacement));
+    }
 }
 
 /*

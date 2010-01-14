@@ -1,5 +1,12 @@
 2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Support PIEs with no symfile_objfile.
+	* gdb.base/break-interp.exp: New argument at the test_ld calls.
+	(test_ld): New parameter trynosym.
+	(test_ld <$trynosym>): New block.
+
+2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.base/break-interp.exp: New file.
 
 2010-01-13  Phil Muldoon  <pmuldoon@redhat.com>
