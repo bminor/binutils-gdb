@@ -277,12 +277,12 @@ enum
   Vex,
   /* How to encode VEX.vvvv:
      0: VEX.vvvv must be 1111b.
-     1: VEX.DNS.  Register-only source is encoded in VEX.vvvv where
+     1: VEX.NDS.  Register-only source is encoded in VEX.vvvv where
 	the content of source registers will be preserved.
 	VEX.DDS.  The second register operand is encoded in VEX.vvvv 
 	where the content of first source register will be overwritten
 	by the result.
-	For assembler, there are no difference between VEX.DNS and
+	For assembler, there are no difference between VEX.NDS and
 	VEX.DDS.
      2. VEX.NDD.  Register destination is encoded in VEX.vvvv.
      3. VEX.LWP.  Register destination is encoded in VEX.vvvv and one

@@ -1,5 +1,10 @@
 2010-01-14  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-opc.h (VexVVVV): Replace VEX.DNS with VEX.NDS in
+	comments.
+
+2010-01-14  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c (names_mm): New.
 	(intel_names_mm): Likewise.
 	(att_names_mm): Likewise.
