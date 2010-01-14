@@ -1620,13 +1620,15 @@ static CORE_ADDR
 svr4_exec_displacement (void)
 {
   int found;
+  /* ENTRY_POINT is a possible function descriptor - before
+     a call to gdbarch_convert_from_func_ptr_addr.  */
   CORE_ADDR entry_point;
 
   if (exec_bfd == NULL)
     return 0;
 
   if (target_auxv_search (&current_target, AT_ENTRY, &entry_point) == 1)
-    return entry_point - exec_entry_point (exec_bfd, &current_target);
+    return entry_point - bfd_get_start_address (exec_bfd);
 
   return svr4_static_exec_displacement ();
 }

@@ -1,5 +1,10 @@
 2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* solib-svr4.c (svr4_exec_displacement): New comment for entry_point.
+	Replace exec_entry_point call by bfd_get_start_address.
+
+2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Support Valgrind attachments broken by the PIE support.
 	* auxv.c: Include gdbcore.h.
 	(procfs_xfer_auxv): Make static.  Reduce its comment.  Drop its
