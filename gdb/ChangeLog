@@ -1,3 +1,13 @@
+2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* solib-svr4.c (svr4_relocate_main_executable): Move the static exec
+	code part to ...
+	(svr4_static_exec_displacement): ... a new function.
+	(svr4_exec_displacement): New function.
+	(svr4_relocate_main_executable): Call svr4_exec_displacement.  Allocate
+	new_offsets using alloca now.  Remove variable old_chain and changed.
+	Call objfile_relocate unconditionally now.
+
 2010-01-14  Doug Evans  <dje@google.com>
 
 	* gdbtypes.c (arch_flags_type): Fix comment.

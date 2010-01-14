@@ -1,3 +1,7 @@
+2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/break-interp.exp: New file.
+
 2010-01-13  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.python/py-value.exp (test_lazy_strings): Add lazy string test.
