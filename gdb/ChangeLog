@@ -1,5 +1,10 @@
 2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* linux-tdep.c: Remove includes gdbcore.h, observer.h and elf-bfd.h.
+	(check_is_pie_binary, _initialize_linux_tdep): Remove.
+
+2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* solib-svr4.c (svr4_exec_displacement): New comment for entry_point.
 	Replace exec_entry_point call by bfd_get_start_address.
 

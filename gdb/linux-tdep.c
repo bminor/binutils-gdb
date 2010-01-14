@@ -18,13 +18,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "gdbcore.h"
 #include "gdbtypes.h"
 #include "linux-tdep.h"
-#include "observer.h"
 #include "auxv.h"
 #include "target.h"
-#include "elf-bfd.h"
 #include "elf/common.h"
 
 /* This function is suitable for architectures that don't
@@ -154,34 +151,4 @@ linux_has_shared_address_space (void)
        && target_auxv_search (&current_target, AT_PAGESZ, &dummy) == 0);
 
   return target_is_uclinux;
-}
-
-/* Observer for the executable_changed event, to check whether the new
-   exec binary is a PIE (Position Independent Executable) specimen, which
-   is currently unsupported.  */
-
-static void
-check_is_pie_binary (void)
-{
-  Elf_Internal_Ehdr *elf_hdr;
-
-  if (!exec_bfd)
-    return;
-  else if (bfd_get_flavour (exec_bfd) != bfd_target_elf_flavour)
-    return;
-
-  if (elf_tdata (exec_bfd)->elf_header->e_type == ET_DYN)
-    warning (_("\
-The current binary is a PIE (Position Independent Executable), which\n\
-GDB does NOT currently support.  Most debugger features will fail if used\n\
-in this session.\n"));
-}
-
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-extern initialize_file_ftype _initialize_linux_tdep;
-
-void
-_initialize_linux_tdep (void)
-{
-  observer_attach_executable_changed (check_is_pie_binary);
 }

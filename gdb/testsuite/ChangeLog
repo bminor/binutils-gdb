@@ -1,5 +1,9 @@
 2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.base/pie-support.exp, gdb.base/pie-support.c: Remove.
+
+2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.base/valgrind-db-attach.exp, gdb.base/valgrind-db-attach.c: New.
 
 2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
