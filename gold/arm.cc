@@ -122,6 +122,9 @@ const int32_t THM2_MAX_BWD_BRANCH_OFFSET = (-(1 << 24) + 4);
 // R_ARM_MOVT_PREL
 // R_ARM_THM_MOVW_PREL_NC
 // R_ARM_THM_MOVT_PREL
+// R_ARM_THM_JUMP6
+// R_ARM_THM_JUMP8
+// R_ARM_THM_JUMP11
 // 
 // TODOs:
 // - Support more relocation types as needed. 
@@ -2408,6 +2411,66 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
     return thumb_branch_common(elfcpp::R_ARM_THM_XPC22, relinfo, view, gsym,
 			       object, r_sym, psymval, address, thumb_bit,
 			       is_weakly_undefined_without_plt);
+  }
+
+  // R_ARM_THM_JUMP6: S + A – P
+  static inline typename This::Status
+  thm_jump6(unsigned char *view,
+	    const Sized_relobj<32, big_endian>* object,
+	    const Symbol_value<32>* psymval,
+	    Arm_address address)
+  {
+    typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
+    typedef typename elfcpp::Swap<16, big_endian>::Valtype Reltype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype val = elfcpp::Swap<16, big_endian>::readval(wv);
+    // bit[9]:bit[7:3]:’0’ (mask: 0x02f8)
+    Reltype addend = (((val & 0x0200) >> 3) | ((val & 0x00f8) >> 2));
+    Reltype x = (psymval->value(object, addend) - address);
+    val = (val & 0xfd07) | ((x  & 0x0040) << 3) | ((val & 0x003e) << 2);
+    elfcpp::Swap<16, big_endian>::writeval(wv, val);
+    // CZB does only forward jumps.
+    return ((x > 0x007e)
+	    ? This::STATUS_OVERFLOW
+	    : This::STATUS_OKAY);
+  }
+
+  // R_ARM_THM_JUMP8: S + A – P
+  static inline typename This::Status
+  thm_jump8(unsigned char *view,
+	    const Sized_relobj<32, big_endian>* object,
+	    const Symbol_value<32>* psymval,
+	    Arm_address address)
+  {
+    typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
+    typedef typename elfcpp::Swap<16, big_endian>::Valtype Reltype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype val = elfcpp::Swap<16, big_endian>::readval(wv);
+    Reltype addend = utils::sign_extend<8>((val & 0x00ff) << 1);
+    Reltype x = (psymval->value(object, addend) - address);
+    elfcpp::Swap<16, big_endian>::writeval(wv, (val & 0xff00) | ((x & 0x01fe) >> 1));
+    return (utils::has_overflow<8>(x)
+	    ? This::STATUS_OVERFLOW
+	    : This::STATUS_OKAY);
+  }
+
+  // R_ARM_THM_JUMP11: S + A – P
+  static inline typename This::Status
+  thm_jump11(unsigned char *view,
+	    const Sized_relobj<32, big_endian>* object,
+	    const Symbol_value<32>* psymval,
+	    Arm_address address)
+  {
+    typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
+    typedef typename elfcpp::Swap<16, big_endian>::Valtype Reltype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype val = elfcpp::Swap<16, big_endian>::readval(wv);
+    Reltype addend = utils::sign_extend<11>((val & 0x07ff) << 1);
+    Reltype x = (psymval->value(object, addend) - address);
+    elfcpp::Swap<16, big_endian>::writeval(wv, (val & 0xf800) | ((x & 0x0ffe) >> 1));
+    return (utils::has_overflow<11>(x)
+	    ? This::STATUS_OVERFLOW
+	    : This::STATUS_OKAY);
   }
 
   // R_ARM_BASE_PREL: B(S) + A - P
@@ -5138,6 +5201,9 @@ Target_arm<big_endian>::Scan::local(Symbol_table* symtab,
     case elfcpp::R_ARM_MOVT_PREL:
     case elfcpp::R_ARM_THM_MOVW_PREL_NC:
     case elfcpp::R_ARM_THM_MOVT_PREL:
+    case elfcpp::R_ARM_THM_JUMP6:
+    case elfcpp::R_ARM_THM_JUMP8:
+    case elfcpp::R_ARM_THM_JUMP11:
       break;
 
     case elfcpp::R_ARM_GOTOFF32:
@@ -5266,6 +5332,9 @@ Target_arm<big_endian>::Scan::global(Symbol_table* symtab,
     case elfcpp::R_ARM_MOVT_PREL:
     case elfcpp::R_ARM_THM_MOVW_PREL_NC:
     case elfcpp::R_ARM_THM_MOVT_PREL:
+    case elfcpp::R_ARM_THM_JUMP6:
+    case elfcpp::R_ARM_THM_JUMP8:
+    case elfcpp::R_ARM_THM_JUMP11:
       break;
 
     case elfcpp::R_ARM_THM_ABS5:
@@ -6001,6 +6070,21 @@ Target_arm<big_endian>::Relocate::relocate(
 					   thumb_bit);
       break;
 
+    case elfcpp::R_ARM_THM_JUMP6:
+      reloc_status =
+	Arm_relocate_functions::thm_jump6(view, object, psymval, address);
+      break;
+
+    case elfcpp::R_ARM_THM_JUMP8:
+      reloc_status =
+	Arm_relocate_functions::thm_jump8(view, object, psymval, address);
+      break;
+
+    case elfcpp::R_ARM_THM_JUMP11:
+      reloc_status =
+	Arm_relocate_functions::thm_jump11(view, object, psymval, address);
+      break;
+
     case elfcpp::R_ARM_PREL31:
       reloc_status = Arm_relocate_functions::prel31(view, object, psymval,
 						    address, thumb_bit);
@@ -6127,6 +6211,9 @@ Target_arm<big_endian>::Relocatable_size_for_reloc::get_size_for_reloc(
 
     case elfcpp::R_ARM_ABS16:
     case elfcpp::R_ARM_THM_ABS5:
+    case elfcpp::R_ARM_THM_JUMP6:
+    case elfcpp::R_ARM_THM_JUMP8:
+    case elfcpp::R_ARM_THM_JUMP11:
       return 2;
 
     case elfcpp::R_ARM_ABS32:
