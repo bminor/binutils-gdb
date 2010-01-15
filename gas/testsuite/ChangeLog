@@ -1,3 +1,10 @@
+2010-01-15  Sebastian Pop  <sebastian.pop@amd.com>
+
+	* gas/i386/x86-64-xop.d: Add missing patterns.
+	* gas/i386/x86-64-xop.s: Same.
+	* gas/i386/xop.d: Same.
+	* gas/i386/xop.s: Same.
+
 2010-01-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gas/arm/thumb-nop.s: Add .syntax unified.

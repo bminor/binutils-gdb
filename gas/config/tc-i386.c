@@ -3018,8 +3018,8 @@ md_assemble (char *line)
      instructions may define INT_OPCODE as well, so avoid this corner
      case for those instructions that use MODRM.  */
   if (i.tm.base_opcode == INT_OPCODE
-      && i.op[0].imms->X_add_number == 3
-      && !i.tm.opcode_modifier.modrm)
+      && !i.tm.opcode_modifier.modrm
+      && i.op[0].imms->X_add_number == 3)
     {
       i.tm.base_opcode = INT3_OPCODE;
       i.imm_operands = 0;

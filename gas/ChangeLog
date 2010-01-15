@@ -1,3 +1,8 @@
+2010-01-15  Sebastian Pop  <sebastian.pop@amd.com>
+
+	* config/tc-i386.c (md_assemble): Before accessing the IMM field
+	check that it's not an XOP insn.
+
 2010-01-14  Jie Zhang  <jie.zhang@analog.com>
 
 	* config/bfin-aux.h: Remove argument names in function
