@@ -1,5 +1,11 @@
 2010-01-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix compilation warning on gcc-3.4.
+	* exec.c (print_section_info): Move the `displacement' variable
+	initialization to its declaration.
+
+2010-01-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb-gdb.py (StructMainTypePrettyPrinter): Fix TYPE_CODE_RANGE
 	comparison.
 
