@@ -1,3 +1,13 @@
+2010-01-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* configure.ac (AC_CHECK_FUNCS): Check for setrlimit and getrlimit.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* utils.c: Include sys/resource.h.
+	(dump_core, can_dump_core): New.
+	(internal_vproblem): Update the comment.  Check can_dump_core while
+	setting dump_core_p.  Replace two abort calls by dump_core calls.
+
 2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Eli Zaretskii  <eliz@gnu.org>
 

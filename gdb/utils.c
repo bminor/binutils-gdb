@@ -26,6 +26,9 @@
 #include "event-top.h"
 #include "exceptions.h"
 #include "gdbthread.h"
+#ifdef HAVE_SYS_RESOURCE_H
+#include <sys/resource.h>
+#endif /* HAVE_SYS_RESOURCE_H */
 
 #ifdef TUI
 #include "tui/tui.h"		/* For tui_get_command_dimension.   */
@@ -843,6 +846,44 @@ error_stream (struct ui_file *stream)
   error (("%s"), message);
 }
 
+/* Dump core trying to increase the core soft limit to hard limit first.  */
+
+static void
+dump_core (void)
+{
+#ifdef HAVE_SETRLIMIT
+  struct rlimit rlim = { RLIM_INFINITY, RLIM_INFINITY };
+
+  setrlimit (RLIMIT_CORE, &rlim);
+#endif /* HAVE_SETRLIMIT */
+
+  abort ();		/* NOTE: GDB has only three calls to abort().  */
+}
+
+/* Check whether GDB will be able to dump core using the dump_core function.  */
+
+static int
+can_dump_core (const char *reason)
+{
+#ifdef HAVE_GETRLIMIT
+  struct rlimit rlim;
+
+  /* Be quiet and assume we can dump if an error is returned.  */
+  if (getrlimit (RLIMIT_CORE, &rlim) != 0)
+    return 1;
+
+  if (rlim.rlim_max == 0)
+    {
+      fprintf_unfiltered (gdb_stderr,
+			  _("%s\nUnable to dump core, use `ulimit -c unlimited'"
+			    " before executing GDB next time.\n"), reason);
+      return 0;
+    }
+#endif /* HAVE_GETRLIMIT */
+
+  return 1;
+}
+
 /* Allow the user to configure the debugger behavior with respect to
    what to do when an internal problem is detected.  */
 
@@ -893,7 +934,7 @@ internal_vproblem (struct internal_problem *problem,
       case 1:
 	dejavu = 2;
 	fputs_unfiltered (msg, gdb_stderr);
-	abort ();	/* NOTE: GDB has only four calls to abort().  */
+	abort ();	/* NOTE: GDB has only three calls to abort().  */
       default:
 	dejavu = 3;
         /* Newer GLIBC versions put the warn_unused_result attribute
@@ -902,7 +943,7 @@ internal_vproblem (struct internal_problem *problem,
            does not fix this problem.  This is the solution suggested
            at http://gcc.gnu.org/bugzilla/show_bug.cgi?id=25509.  */
 	if (write (STDERR_FILENO, msg, sizeof (msg)) != sizeof (msg))
-          abort (); /* NOTE: GDB has only four calls to abort().  */
+          abort (); /* NOTE: GDB has only three calls to abort().  */
 	exit (1);
       }
   }
@@ -951,13 +992,18 @@ further debugging may prove unreliable.", file, line, problem->name, msg);
 
   if (problem->should_dump_core == internal_problem_ask)
     {
-      /* Default (yes/batch case) is to dump core.  This leaves a GDB
-         `dropping' so that it is easier to see that something went
-         wrong in GDB.  */
-      dump_core_p = query (_("%s\nCreate a core file of GDB? "), reason);
+      if (!can_dump_core (reason))
+	dump_core_p = 0;
+      else
+	{
+	  /* Default (yes/batch case) is to dump core.  This leaves a GDB
+	     `dropping' so that it is easier to see that something went
+	     wrong in GDB.  */
+	  dump_core_p = query (_("%s\nCreate a core file of GDB? "), reason);
+	}
     }
   else if (problem->should_dump_core == internal_problem_yes)
-    dump_core_p = 1;
+    dump_core_p = can_dump_core (reason);
   else if (problem->should_dump_core == internal_problem_no)
     dump_core_p = 0;
   else
@@ -966,7 +1012,7 @@ further debugging may prove unreliable.", file, line, problem->name, msg);
   if (quit_p)
     {
       if (dump_core_p)
-	abort ();		/* NOTE: GDB has only four calls to abort().  */
+	dump_core ();
       else
 	exit (1);
     }
@@ -976,7 +1022,7 @@ further debugging may prove unreliable.", file, line, problem->name, msg);
 	{
 #ifdef HAVE_WORKING_FORK
 	  if (fork () == 0)
-	    abort ();		/* NOTE: GDB has only four calls to abort().  */
+	    dump_core ();
 #endif
 	}
     }
