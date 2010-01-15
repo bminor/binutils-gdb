@@ -2305,12 +2305,12 @@ _bfd_vms_slurp_lnk (bfd * abfd ATTRIBUTE_UNUSED,
 
    This is still under construction and therefore not documented.  */
 
-static void start_etir_record (bfd *abfd, int index, uquad offset,
+static void start_etir_record (bfd *abfd, int sec_index, uquad offset,
 			       bfd_boolean justoffset);
 static void start_first_etbt_record (bfd *abfd);
 static void start_another_etbt_record (bfd *abfd);
 static void sto_imm (bfd *abfd, bfd_size_type, unsigned char *, bfd_vma vaddr,
-		     int index, const char *name);
+		     int sec_index, const char *name);
 static void end_etir_record (bfd *abfd);
 static void etir_output_check (bfd *abfd, asection *section, bfd_vma vaddr,
 			       int checklen);

@@ -1,3 +1,9 @@
+2010-01-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix compilation warning on gcc-3.4.
+	* vms-tir.c (start_etir_record, sto_imm): Rename the prototype
+	parameter index to sec_index according to the function definition.
+
 2010-01-13  Chao-ying Fu  <fu@mips.com>
 
 	* elfxx-mips.c (JR_TO_B_P): New define to transform JR to B.
