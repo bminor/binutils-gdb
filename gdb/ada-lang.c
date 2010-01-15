@@ -6929,14 +6929,16 @@ ada_template_to_fixed_record_type_1 (struct type *type,
         }
       else
         {
-          TYPE_FIELD_TYPE (rtype, f) = TYPE_FIELD_TYPE (type, f);
+          struct type *field_type = TYPE_FIELD_TYPE (type, f);
+
+          TYPE_FIELD_TYPE (rtype, f) = field_type;
           TYPE_FIELD_NAME (rtype, f) = TYPE_FIELD_NAME (type, f);
           if (TYPE_FIELD_BITSIZE (type, f) > 0)
             bit_incr = fld_bit_len =
               TYPE_FIELD_BITSIZE (rtype, f) = TYPE_FIELD_BITSIZE (type, f);
           else
             bit_incr = fld_bit_len =
-              TYPE_LENGTH (TYPE_FIELD_TYPE (type, f)) * TARGET_CHAR_BIT;
+              TYPE_LENGTH (ada_check_typedef (field_type)) * TARGET_CHAR_BIT;
         }
       if (off + fld_bit_len > bit_len)
         bit_len = off + fld_bit_len;

@@ -1,5 +1,12 @@
 2010-01-15  Joel Brobecker  <brobecker@adacore.com>
 
+	"info tasks" broken by typedefs in ATCB type definitions.
+	* ada-lang.c (ada_template_to_fixed_record_type_1): Add call to
+	ada_check_typedef before retrieving the length of the type for
+	regular fields.
+
+2010-01-15  Joel Brobecker  <brobecker@adacore.com>
+
 	Do not use name-based lookup for unconstrained packed arrays.
 	* ada-lang.c (find_parallel_type_by_descriptive_type):
 	Limit the fallback to name-based lookups to the case where
