@@ -6687,7 +6687,7 @@ find_parallel_type_by_descriptive_type (struct type *type, const char *name)
      older compilers, the descriptive type information is either absent or
      irrelevant when it comes to packed arrays so the above lookup fails.
      Fall back to using a parallel lookup by name in this case.  */
-  if (result == NULL && ada_is_packed_array_type (type))
+  if (result == NULL && ada_is_constrained_packed_array_type (type))
     return ada_find_any_type (name);
 
   return result;

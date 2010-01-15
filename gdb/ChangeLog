@@ -1,5 +1,12 @@
 2010-01-15  Joel Brobecker  <brobecker@adacore.com>
 
+	Do not use name-based lookup for unconstrained packed arrays.
+	* ada-lang.c (find_parallel_type_by_descriptive_type):
+	Limit the fallback to name-based lookups to the case where
+	the type is a constrained packed array.
+
+2010-01-15  Joel Brobecker  <brobecker@adacore.com>
+
 	Enhance gdb-gdb.py to handle main_type.type_specific.
 	* gdb-gdb.py: Print the type-specific part of struct main_type.
 
