@@ -32,6 +32,9 @@ struct bp_target_info;
 struct regcache;
 struct target_section_table;
 struct trace_state_variable;
+struct trace_status;
+struct uploaded_tsv;
+struct uploaded_tp;
 
 /* This include file defines the interface between the main part
    of the debugger, and the part which is target-specific, or
@@ -632,7 +635,7 @@ struct target_ops
     void (*to_trace_start) (void);
 
     /* Get the current status of a tracing run.  */
-    int (*to_get_trace_status) (int *stop_reason);
+    int (*to_get_trace_status) (struct trace_status *ts);
 
     /* Stop a trace run.  */
     void (*to_trace_stop) (void);
@@ -648,6 +651,15 @@ struct target_ops
        1 if the value is known and writing the value itself into the
        location pointed to by VAL, else returning 0.  */
     int (*to_get_trace_state_variable_value) (int tsv, LONGEST *val);
+
+    int (*to_save_trace_data) (char *filename);
+
+    int (*to_upload_tracepoints) (struct uploaded_tp **utpp);
+
+    int (*to_upload_trace_state_variables) (struct uploaded_tsv **utsvp);
+
+    LONGEST (*to_get_raw_trace_data) (gdb_byte *buf,
+				      ULONGEST offset, LONGEST len);
 
     /* Set the target's tracing behavior in response to unexpected
        disconnection - set VAL to 1 to keep tracing, 0 to stop.  */
@@ -1319,8 +1331,8 @@ extern int target_search_memory (CORE_ADDR start_addr,
 #define target_trace_set_readonly_regions() \
   (*current_target.to_trace_set_readonly_regions) ()
 
-#define target_get_trace_status(stop_reason) \
-  (*current_target.to_get_trace_status) (stop_reason)
+#define target_get_trace_status(ts) \
+  (*current_target.to_get_trace_status) (ts)
 
 #define target_trace_stop() \
   (*current_target.to_trace_stop) ()
@@ -1330,6 +1342,18 @@ extern int target_search_memory (CORE_ADDR start_addr,
 
 #define target_get_trace_state_variable_value(tsv,val) \
   (*current_target.to_get_trace_state_variable_value) ((tsv), (val))
+
+#define target_save_trace_data(filename) \
+  (*current_target.to_save_trace_data) (filename)
+
+#define target_upload_tracepoints(utpp) \
+  (*current_target.to_upload_tracepoints) (utpp)
+
+#define target_upload_trace_state_variables(utsvp) \
+  (*current_target.to_upload_trace_state_variables) (utsvp)
+
+#define target_get_raw_trace_data(buf,offset,len) \
+  (*current_target.to_get_raw_trace_data) ((buf), (offset), (len))
 
 #define target_set_disconnected_tracing(val) \
   (*current_target.to_set_disconnected_tracing) (val)

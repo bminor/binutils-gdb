@@ -9847,27 +9847,61 @@ ftrace_command (char *arg, int from_tty)
   set_tracepoint_count (breakpoint_count);
 }
 
-extern void create_tracepoint_from_upload (int num, enum bptype type,
-					   ULONGEST addr);
-
-void
-create_tracepoint_from_upload (int num, enum bptype type, ULONGEST addr)
+/* Given information about a tracepoint as recorded on a target (which
+   can be either a live system or a trace file), attempt to create an
+   equivalent GDB tracepoint.  This is not a reliable process, since
+   the target does not necessarily have all the information used when
+   the tracepoint was originally defined.  */
+  
+struct breakpoint *
+create_tracepoint_from_upload (struct uploaded_tp *utp)
 {
   char buf[100];
   struct breakpoint *tp;
+  
+  /* In the absence of a source location, fall back to raw address.  */
+  sprintf (buf, "*%s", paddress (get_current_arch(), utp->addr));
 
-  sprintf (buf, "*0x%s", paddress (get_current_arch (), addr));
-  if (type == bp_fast_tracepoint)
-    ftrace_command (buf, 0);
-  else
-    trace_command (buf, 0);
+  break_command_really (get_current_arch (),
+			buf, 
+			NULL, 0, 1 /* parse arg */,
+			0 /* tempflag */,
+			(utp->type == bp_fast_tracepoint) /* hardwareflag */,
+			1 /* traceflag */,
+			0 /* Ignore count */,
+			pending_break_support, 
+			NULL,
+			0 /* from_tty */,
+			utp->enabled /* enabled */);
+  set_tracepoint_count (breakpoint_count);
+  
+    tp = get_tracepoint (tracepoint_count);
 
-  /* Record that this tracepoint is numbered differently on host and
-     target.  */
-  tp = get_tracepoint (tracepoint_count);
-  tp->number_on_target = num;
-}
+  if (utp->pass > 0)
+    {
+      sprintf (buf, "%d %d", utp->pass, tp->number);
 
+      trace_pass_command (buf, 0);
+    }
+
+  if (utp->cond)
+    {
+      printf_filtered ("Want to restore a condition\n");
+    }
+
+  if (utp->numactions > 0)
+    {
+      printf_filtered ("Want to restore action list\n");
+    }
+
+  if (utp->num_step_actions > 0)
+    {
+      printf_filtered ("Want to restore action list\n");
+    }
+
+  return tp;
+  }
+  
 /* Print information on tracepoint number TPNUM_EXP, or all if
    omitted.  */
 

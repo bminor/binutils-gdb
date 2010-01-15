@@ -694,6 +694,10 @@ update_current_target (void)
       INHERIT (to_trace_stop, t);
       INHERIT (to_trace_find, t);
       INHERIT (to_get_trace_state_variable_value, t);
+      INHERIT (to_save_trace_data, t);
+      INHERIT (to_upload_tracepoints, t);
+      INHERIT (to_upload_trace_state_variables, t);
+      INHERIT (to_get_raw_trace_data, t);
       INHERIT (to_set_disconnected_tracing, t);
       INHERIT (to_magic, t);
       /* Do not inherit to_memory_map.  */
@@ -859,7 +863,7 @@ update_current_target (void)
 	    (void (*) (void))
 	    tcomplain);
   de_fault (to_get_trace_status,
-	    (int (*) (int *))
+	    (int (*) (struct trace_status *))
 	    return_minus_one);
   de_fault (to_trace_stop,
 	    (void (*) (void))
@@ -870,6 +874,18 @@ update_current_target (void)
   de_fault (to_get_trace_state_variable_value,
 	    (int (*) (int, LONGEST *))
 	    return_zero);
+  de_fault (to_save_trace_data,
+	    (int (*) (char *))
+	    tcomplain);
+  de_fault (to_upload_tracepoints,
+	    (int (*) (struct uploaded_tp **))
+	    return_zero);
+  de_fault (to_upload_trace_state_variables,
+	    (int (*) (struct uploaded_tsv **))
+	    return_zero);
+  de_fault (to_get_raw_trace_data,
+	    (LONGEST (*) (gdb_byte *, ULONGEST, LONGEST))
+	    tcomplain);
   de_fault (to_set_disconnected_tracing,
 	    (void (*) (int))
 	    tcomplain);

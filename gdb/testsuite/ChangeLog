@@ -1,3 +1,8 @@
+2010-01-15  Stan Shebs  <stan@codesourcery.com>
+
+	* gdb.trace/tfile.c: New file.
+	* gdb.trace/tfile.exp: New file.
+	
 2010-01-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/pie-support.exp, gdb.base/pie-support.c: Remove.

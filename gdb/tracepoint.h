@@ -61,11 +61,78 @@ struct trace_state_variable
 
     /* The value of a variable is a 64-bit signed integer.  */
     LONGEST value;
+
+    /* This is true for variables that are predefined and built into
+       the target.  */
+    int builtin;
+   };
+
+/* The trace status encompasses various info about the general state
+   of the tracing run.  */
+
+enum trace_stop_reason
+  {
+    trace_stop_reason_unknown,
+    trace_never_run,
+    tstop_command,
+    trace_buffer_full,
+    trace_disconnected,
+    tracepoint_passcount
   };
 
-extern unsigned long trace_running_p;
+struct trace_status
+{
+  /* This is true if the status is coming from a file rather
+     than a live target.  */
+  int from_file;
+
+  /* This is true if the value of the running field is known.  */
+  int running_known;
+
+  int running;
+
+  enum trace_stop_reason stop_reason;
+
+  int stopping_tracepoint;
+
+  int traceframe_count;
+
+  size_t buffer_size;
+
+  size_t buffer_free;
+};
+
+struct trace_status *current_trace_status (void);
 
 extern char *default_collect;
+
+/* Struct to collect random info about tracepoints on the target.  */
+
+struct uploaded_tp {
+  int number;
+  enum bptype type;
+  ULONGEST addr;
+  int enabled;
+  int step;
+  int pass;
+  int orig_size;
+  char *cond;
+  int numactions;
+  char *actions[100];
+  int num_step_actions;
+  char *step_actions[100];
+  struct uploaded_tp *next;
+};
+
+/* Struct recording info about trace state variables on the target.  */
+
+struct uploaded_tsv {
+  const char *name;
+  int number;
+  LONGEST initial_value;
+  int builtin;
+  struct uploaded_tsv *next;
+};
 
 /* A hook used to notify the UI of tracepoint operations.  */
 
@@ -80,5 +147,16 @@ extern void end_actions_pseudocommand (char *args, int from_tty);
 extern void while_stepping_pseudocommand (char *args, int from_tty);
 
 extern struct trace_state_variable *find_trace_state_variable (const char *name);
+
+extern void parse_trace_status (char *line, struct trace_status *ts);
+
+extern void parse_tracepoint_definition (char *line, struct uploaded_tp **utpp);
+extern void parse_tsv_definition (char *line, struct uploaded_tsv **utsvp);
+
+extern struct uploaded_tp *get_uploaded_tp (int num, ULONGEST addr,
+					    struct uploaded_tp **utpp);
+extern struct breakpoint *create_tracepoint_from_upload (struct uploaded_tp *utp);
+extern void merge_uploaded_tracepoints (struct uploaded_tp **utpp);
+extern void merge_uploaded_trace_state_variables (struct uploaded_tsv **utsvp);
 
 #endif	/* TRACEPOINT_H */

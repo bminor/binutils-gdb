@@ -37,6 +37,7 @@
 #include "user-regs.h"
 #include "language.h"
 #include "dictionary.h"
+#include "breakpoint.h"
 #include "tracepoint.h"
 
 /* To make sense of this file, you should read doc/agentexpr.texi.

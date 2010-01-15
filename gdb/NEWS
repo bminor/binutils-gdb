@@ -61,6 +61,16 @@ Renesas RX			rx
   tell the target agent whether to continue running a trace if the
   connection is lost unexpectedly.
 
+  ** Trace files
+
+  GDB now has the ability to save the trace buffer into a file, and
+  then use that file as a target, similarly to you can do with
+  corefiles.  You can select trace frames, print data that was
+  collected in them, and use tstatus to display the state of the
+  tracing run at the moment that it was saved.  To create a trace
+  file, use "tsave <filename>", and to use it, do "target tfile
+  <name>".
+  
 * Changed commands
 
 disassemble

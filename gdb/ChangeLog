@@ -1,3 +1,78 @@
+2010-01-15  Stan Shebs  <stan@codesourcery.com>
+
+	Add trace file support.
+	* tracepoint.h (enum trace_stop_reason): New enum.
+	(struct trace_status): New struct.
+	(parse_trace_status): Declare.
+	(struct uploaded_tp): Move here from remote.c,
+	add fields for actions.
+	(struct uploaded_tsv): New struct.
+	* tracepoint.c (tfile_ops): New target vector.
+	(trace_fd): New global.
+	(tfile_open): New function.
+	(tfile_close): New function.
+	(tfile_files_info): New function.
+	(tfile_get_trace_status): New function.
+	(tfile_get_traceframe_address): New function.
+	(tfile_trace_find): New function.
+	(tfile_fetch_registers): New function.
+	(tfile_xfer_partial): New function.
+	(tfile_get_trace_state_variable_value): New function.
+	(init_tfile_ops): New function.
+	(_initialize_tracepoint): Call it, add tfile target.
+	(trace_status): New global.
+	(current_trace_status): New function.
+	(trace_running_p): Remove, change all users to get from
+	current_trace_status()->running.
+	(get_trace_status): Remove.
+	(trace_status_command): Call target_get_trace_status directly,
+	report more detail including tracing stop reasons.
+	(trace_find_command): Always allow tfind on a file.
+	(trace_find_pc_command): Ditto.
+	(trace_find_tracepoint_command): Ditto.
+	(trace_find_line_command): Ditto.
+	(trace_find_range_command): Ditto.
+	(trace_find_outside_command): Ditto.
+	(trace_frames_offset, cur_offset): Declare as off_t.
+	(trace_regblock_size): Rename from reg_size, update users.
+	(parse_trace_status): New function.
+	(tfile_interp_line): New function.
+	(disconnect_or_stop_tracing): Ensure current trace
+	status before asking what to do.
+	(stop_reason_names): New global.
+	(trace_save_command): New command.
+	(get_uploaded_tp): Move here from remote.c.
+	(find_matching_tracepoint): Ditto.
+	(merge_uploaded_tracepoints): New function.
+	(parse_trace_status): Use stop_reason_names.
+	(_initialize_tracepoint): Define tsave command.
+	* target.h (target_ops): New fields to_save_trace_data,
+	to_upload_tracepoints, to_upload_trace_state_variables,
+	to_get_raw_trace_data, change to_get_trace_status
+	to take a pointer to a status struct.
+	(target_save_trace_data): New macro.
+	(target_upload_tracepoints): New macro.
+	(target_upload_trace_state_variables): New macro.
+	(target_get_raw_trace_data): New macro.
+	* target.c (update_current_target): Add new methods, change
+	signature of to_get_trace_status.
+	* remote.c (hex2bin): Make globally visible.
+	(bin2hex): Ditto.
+	(remote_download_trace_state_variable): Download name also.
+	(remote_get_trace_status): Update parameter, use
+	parse_trace_status.
+	(remote_save_trace_data): New function.
+	(remote_upload_tracepoints): New function.
+	(remote_upload_trace_state_variables): New function.
+	(remote_get_raw_trace_data): New function.
+	(remote_start_remote): Use them.
+	(_initialize_remote_ops): Add operations.
+	* ax-gdb.c: Include breakpoint.h.
+	* breakpoint.c (create_tracepoint_from_upload): Use
+	break_command_really, return tracepoint, warn about unimplemented
+	parts.
+	* NEWS: Mention trace file addition.
+
 2010-01-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix compilation warning on gcc-3.4.
@@ -163,7 +238,6 @@
 	* Makefile.in (SUBDIR_PYTHON_OBS): Add py-lazy-string.
 	(SUBDIR_PYTHON_SRCS): Likewise.
 	(py-lazy-string.o): New rule.
-
 
 2010-01-13  Doug Evans  <dje@google.com>
 

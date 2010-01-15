@@ -174,6 +174,7 @@ software in general.  We will miss him.
                                 @value{GDBN}
 * Operating System Information:: Getting additional information from
                                  the operating system
+* Trace File Format::		GDB trace file format
 * Copying::			GNU General Public License says
                                 how you can copy and share GDB
 * GNU Free Documentation License::  The license for this documentation
@@ -9292,12 +9293,17 @@ support tracepoints as of this writing.  The format of the remote
 packets used to implement tracepoints are described in @ref{Tracepoint
 Packets}.
 
+It is also possible to get trace data from a file, in a manner reminiscent
+of corefiles; you specify the filename, and use @code{tfind} to search
+through the file.  @xref{Trace Files}, for more details.
+
 This chapter describes the tracepoint commands and features.
 
 @menu
 * Set Tracepoints::
 * Analyze Collected Data::
 * Tracepoint Variables::
+* Trace Files::
 @end menu
 
 @node Set Tracepoints
@@ -10080,6 +10086,41 @@ which are managed by the target.
 > tfind
 > end
 @end smallexample
+
+@node Trace Files
+@section Using Trace Files
+@cindex trace files
+
+In some situations, the target running a trace experiment may no
+longer be available; perhaps it crashed, or the hardware was needed
+for a different activity.  To handle these cases, you can arrange to
+dump the trace data into a file, and later use that file as a source
+of trace data, via the @code{target tfile} command.
+
+@table @code
+
+@kindex tsave
+@item tsave [ -r ] @var{filename}
+Save the trace data to @var{filename}.  By default, this command
+assumes that @var{filename} refers to the host filesystem, so if
+necessary @value{GDBN} will copy raw trace data up from the target and
+then save it.  If the target supports it, you can also supply the
+optional argument @code{-r} (``remote'') to direct the target to save
+the data directly into @var{filename} in its own filesystem, which may be
+more efficient if the trace buffer is very large.  (Note, however, that
+@code{target tfile} can only read from files accessible to the host.)
+
+@kindex target tfile
+@kindex tfile
+@item target tfile @var{filename}
+Use the file named @var{filename} as a source of trace data.  Commands
+that examine data work as they do with a live target, but it is not
+possible to run any new trace experiments.  @code{tstatus} will report
+the state of the trace run at the moment the data was saved, as well
+as the current trace frame you are examining.  @var{filename} must be
+on a filesystem accessible to the host.
+
+@end table
 
 @node Overlays
 @chapter Debugging Programs That Use Overlays
@@ -29964,10 +30005,12 @@ encoded).  @value{GDBN} will continue to supply the values of symbols
 (if available), until the target ceases to request them.
 @end table
 
+@item qTBuffer
 @item QTDisconnected
 @itemx QTDP
 @itemx QTDV
-@itemx QTfP
+@itemx qTfP
+@itemx qTfV
 @itemx QTFrame
 @xref{Tracepoint Packets}.
 
@@ -29996,7 +30039,9 @@ the command by a @samp{,}, not a @samp{:}, contrary to the naming
 conventions above.  Please don't use this packet as a model for new
 packets.)
 
-@item QTsP
+@item QTSave
+@item qTsP
+@item qTsV
 @itemx QTStart    
 @itemx QTStop     
 @itemx QTinit     
@@ -30454,6 +30499,29 @@ the target.  @value{GDBN} sends @code{qTfP} to get the first piece
 of data, and multiple @code{qTsP} to get additional pieces.  Replies
 to these packets generally take the form of the @code{QTDP} packets
 that define tracepoints. (FIXME add detailed syntax)
+
+@item qTfV
+@itemx qTsV
+These packets request data about trace state variables that are on the
+target.  @value{GDBN} sends @code{qTfV} to get the first vari of data,
+and multiple @code{qTsV} to get additional variables.  Replies to
+these packets follow the syntax of the @code{QTDV} packets that define
+trace state variables.
+
+@item QTSave:@var{filename}
+This packet directs the target to save trace data to the file name
+@var{filename} in the target's filesystem.  @var{filename} is encoded
+as a hex string; the interpretation of the file name (relative vs
+absolute, wild cards, etc) is up to the target.
+
+@item qTBuffer:@var{offset},@var{len}
+Return up to @var{len} bytes of the current contents of trace buffer,
+starting at @var{offset}.  The trace buffer is treated as if it were
+a contiguous collection of traceframes, as per the trace file format.
+The reply consists as many hex-encoded bytes as the target can deliver
+in a packet; it is not an error to return fewer than were asked for.
+A reply consisting of just @code{l} indicates that no bytes are
+available.
 
 @end table
 
@@ -32145,6 +32213,59 @@ the thread was last executing on.  The content of the of @samp{thread}
 element is interpreted as human-readable auxilliary information.
 
 @include agentexpr.texi
+
+@node Trace File Format
+@appendix Trace File Format
+@cindex trace file format
+
+The trace file comes in three parts: a header, a textual description
+section, and a trace frame section with binary data.
+
+The header has the form @code{\x7fTRACE0\n}.  The first byte is
+@code{0x7f} so as to indicate that the file contains binary data,
+while the @code{0} is a version number that may have different values
+in the future.
+
+The description section consists of multiple lines of @sc{ascii} text
+separated by newline characters (@code{0xa}).  The lines may include a
+variety of optional descriptive or context-setting information, such
+as tracepoint definitions or register set size.  @value{GDBN} will
+ignore any line that it does not recognize.  An empty line marks the end
+of this section.
+
+@c FIXME add some specific types of data
+
+The trace frame section consists of a number of consecutive frames.
+Each frame begins with a two-byte tracepoint number, followed by a
+four-byte size giving the amount of data in the frame.  The data in
+the frame consists of a number of blocks, each introduced by a
+character indicating its type (at least register, memory, and trace
+state variable).  The data in this section is raw binary, not a
+hexadecimal or other encoding; its endianness matches the target's
+endianness.
+
+@c FIXME bi-arch may require endianness/arch info in description section
+
+@table @code
+@item R @var{bytes}
+Register block.  The number and ordering of bytes matches that of a
+@code{g} packet in the remote protocol.  Note that these are the
+actual bytes, in target order and @value{GDBN} register order, not a
+hexadecimal encoding.
+
+@item M @var{address} @var{length} @var{bytes}...
+Memory block.  This is a contiguous block of memory, at the 8-byte
+address @var{address}, with a 2-byte length @var{length}, followed by
+@var{length} bytes.
+
+@item V @var{number} @var{value}
+Trace state variable block.  This records the 8-byte signed value
+@var{value} of trace state variable numbered @var{number}.
+
+@end table
+
+Future enhancements of the trace file format may include additional types
+of blocks.
 
 @node Target Descriptions
 @appendix Target Descriptions

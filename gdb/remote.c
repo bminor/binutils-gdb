@@ -189,9 +189,9 @@ static void record_currthread (ptid_t currthread);
 
 static int fromhex (int a);
 
-static int hex2bin (const char *hex, gdb_byte *bin, int count);
+extern int hex2bin (const char *hex, gdb_byte *bin, int count);
 
-static int bin2hex (const gdb_byte *bin, char *hex, int count);
+extern int bin2hex (const gdb_byte *bin, char *hex, int count);
 
 static int putpkt_binary (char *buf, int cnt);
 
@@ -215,8 +215,12 @@ static char *write_ptid (char *buf, const char *endbuf, ptid_t ptid);
 static ptid_t read_ptid (char *buf, char **obuf);
 
 struct remote_state;
-static void remote_get_tracing_state (struct remote_state *);
+static int remote_get_trace_status (struct trace_status *ts);
 
+static int remote_upload_tracepoints (struct uploaded_tp **utpp);
+
+static int remote_upload_trace_state_variables (struct uploaded_tsv **utsvp);
+  
 static void remote_query_supported (void);
 
 static void remote_check_symbols (struct objfile *objfile);
@@ -3158,7 +3162,23 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
      previously; find out where things are at.  */
   if (rs->disconnected_tracing)
     {
-      remote_get_tracing_state (rs);
+      struct uploaded_tp *uploaded_tps = NULL;
+      struct uploaded_tsv *uploaded_tsvs = NULL;
+
+      remote_get_trace_status (current_trace_status ());
+      if (current_trace_status ()->running)
+	printf_filtered (_("Trace is already running on the target.\n"));
+
+      /* Get trace state variables first, they may be checked when
+	 parsing uploaded commands.  */
+
+      remote_upload_trace_state_variables (&uploaded_tsvs);
+
+      merge_uploaded_trace_state_variables (&uploaded_tsvs);
+
+      remote_upload_tracepoints (&uploaded_tps);
+
+      merge_uploaded_tracepoints (&uploaded_tps);
     }
 
   /* If breakpoints are global, insert them now.  */
@@ -3948,7 +3968,7 @@ fromhex (int a)
     error (_("Reply contains invalid hex digit %d"), a);
 }
 
-static int
+int
 hex2bin (const char *hex, gdb_byte *bin, int count)
 {
   int i;
@@ -3978,7 +3998,7 @@ tohex (int nib)
     return 'a' + nib - 10;
 }
 
-static int
+int
 bin2hex (const gdb_byte *bin, char *hex, int count)
 {
   int i;
@@ -8034,7 +8054,7 @@ remote_rcmd (char *command,
     {
       char *buf;
 
-      /* XXX - see also tracepoint.c:remote_get_noisy_reply().  */
+      /* XXX - see also remote_get_noisy_reply().  */
       rs->buf[0] = '\0';
       getpkt (&rs->buf, &rs->buf_size, 0);
       buf = rs->buf;
@@ -9342,9 +9362,15 @@ static void
 remote_download_trace_state_variable (struct trace_state_variable *tsv)
 {
   struct remote_state *rs = get_remote_state ();
+  char *p;
 
-  sprintf (rs->buf, "QTDV:%x:%s",
-	   tsv->number, phex ((ULONGEST) tsv->initial_value, 8));
+  sprintf (rs->buf, "QTDV:%x:%s:%x:",
+	   tsv->number, phex ((ULONGEST) tsv->initial_value, 8), tsv->builtin);
+  p = rs->buf + strlen (rs->buf);
+  if ((p - rs->buf) + strlen (tsv->name) * 2 >= get_remote_packet_size ())
+    error (_("Trace state variable name too long for tsv definition packet"));
+  p += 2 * bin2hex ((gdb_byte *) (tsv->name), p, 0);
+  *p++ = '\0';
   putpkt (rs->buf);
   remote_get_noisy_reply (&target_buf, &target_buf_size);
 }
@@ -9395,16 +9421,39 @@ remote_trace_start ()
 }
 
 static int
-remote_get_trace_status (int *stop_reason)
+remote_get_trace_status (struct trace_status *ts)
 {
-  putpkt ("qTStatus");
-  remote_get_noisy_reply (&target_buf, &target_buf_size);
+  char *p, *p1, *p_temp;
+  ULONGEST val;
+  /* FIXME we need to get register block size some other way */
+  extern int trace_regblock_size;
+  trace_regblock_size = get_remote_arch_state ()->sizeof_g_packet;
 
-  if (target_buf[0] != 'T' ||
-      (target_buf[1] != '0' && target_buf[1] != '1'))
+  putpkt ("qTStatus");
+  getpkt (&target_buf, &target_buf_size, 0);
+  /* FIXME should handle more variety of replies */
+
+  p = target_buf;
+
+  /* If the remote target doesn't do tracing, flag it.  */
+  if (*p == '\0')
+    return -1;
+
+  /* We're working with a live target.  */
+  ts->from_file = 0;
+
+  /* Set some defaults.  */
+  ts->running_known = 0;
+  ts->stop_reason = trace_stop_reason_unknown;
+  ts->traceframe_count = -1;
+  ts->buffer_free = 0;
+
+  if (*p++ != 'T')
     error (_("Bogus trace status reply from target: %s"), target_buf);
 
-  return (target_buf[1] == '1');
+  parse_trace_status (p, ts);
+
+  return ts->running;
 }
 
 static void
@@ -9434,16 +9483,16 @@ remote_trace_find (enum trace_find_type type, int num,
       sprintf (p, "%x", num);
       break;
     case tfind_pc:
-      sprintf (p, "pc:%s", paddress (target_gdbarch, addr1));
+      sprintf (p, "pc:%s", phex_nz (addr1, 0));
       break;
     case tfind_tp:
       sprintf (p, "tdp:%x", num);
       break;
     case tfind_range:
-      sprintf (p, "range:%s:%s", paddress (target_gdbarch, addr1), paddress (target_gdbarch, addr2));
+      sprintf (p, "range:%s:%s", phex_nz (addr1, 0), phex_nz (addr2, 0));
       break;
     case tfind_outside:
-      sprintf (p, "outside:%s:%s", paddress (target_gdbarch, addr1), paddress (target_gdbarch, addr2));
+      sprintf (p, "outside:%s:%s", phex_nz (addr1, 0), phex_nz (addr2, 0));
       break;
     default:
       error ("Unknown trace find type %d", type);
@@ -9497,6 +9546,67 @@ remote_get_trace_state_variable_value (int tsvnum, LONGEST *val)
 	}
     }
   return 0;
+}
+
+static int
+remote_save_trace_data (char *filename)
+{
+  struct remote_state *rs = get_remote_state ();
+  char *p, *reply;
+
+  p = rs->buf;
+  strcpy (p, "QTSave:");
+  p += strlen (p);
+  if ((p - rs->buf) + strlen (filename) * 2 >= get_remote_packet_size ())
+    error (_("Remote file name too long for trace save packet"));
+  p += 2 * bin2hex ((gdb_byte *) filename, p, 0);
+  *p++ = '\0';
+  putpkt (rs->buf);
+  remote_get_noisy_reply (&target_buf, &target_buf_size);
+  return 0;
+}
+
+/* This is basically a memory transfer, but needs to be its own packet
+   because we don't know how the target actually organizes its trace
+   memory, plus we want to be able to ask for as much as possible, but
+   not be unhappy if we don't get as much as we ask for.  */
+
+static LONGEST
+remote_get_raw_trace_data (gdb_byte *buf, ULONGEST offset, LONGEST len)
+{
+  struct remote_state *rs = get_remote_state ();
+  char *reply;
+  char *p;
+  int rslt;
+
+  p = rs->buf;
+  strcpy (p, "qTBuffer:");
+  p += strlen (p);
+  p += hexnumstr (p, offset);
+  *p++ = ',';
+  p += hexnumstr (p, len);
+  *p++ = '\0';
+
+  putpkt (rs->buf);
+  reply = remote_get_noisy_reply (&target_buf, &target_buf_size);
+  if (reply && *reply)
+    {
+      /* 'l' by itself means we're at the end of the buffer and
+	 there is nothing more to get.  */
+      if (*reply == 'l')
+	return 0;
+
+      /* Convert the reply into binary.  Limit the number of bytes to
+	 convert according to our passed-in buffer size, rather than
+	 what was returned in the packet; if the target is
+	 unexpectedly generous and gives us a bigger reply than we
+	 asked for, we don't want to crash.  */
+      rslt = hex2bin (target_buf, buf, len);
+      return rslt;
+    }
+
+  /* Something went wrong, flag as an error.  */
+  return -1;
 }
 
 static void
@@ -9592,6 +9702,10 @@ Specify the serial device it is connected to\n\
   remote_ops.to_trace_stop = remote_trace_stop;
   remote_ops.to_trace_find = remote_trace_find;
   remote_ops.to_get_trace_state_variable_value = remote_get_trace_state_variable_value;
+  remote_ops.to_save_trace_data = remote_save_trace_data;
+  remote_ops.to_upload_tracepoints = remote_upload_tracepoints;
+  remote_ops.to_upload_trace_state_variables = remote_upload_trace_state_variables;
+  remote_ops.to_get_raw_trace_data = remote_get_raw_trace_data;
   remote_ops.to_set_disconnected_tracing = remote_set_disconnected_tracing;
   remote_ops.to_core_of_thread = remote_core_of_thread;
 }
@@ -9744,181 +9858,51 @@ remote_new_objfile (struct objfile *objfile)
     remote_check_symbols (objfile);
 }
 
-/* Struct to collect random info about tracepoints on the target.  */
-
-struct uploaded_tp {
-  int number;
-  enum bptype type;
-  ULONGEST addr;
-  int enabled;
-  int step;
-  int pass;
-  int orig_size;
-  char *cond;
-  int cond_len;
-  struct uploaded_tp *next;
-};
-
-struct uploaded_tp *uploaded_tps;
-
-struct uploaded_tp *
-get_uploaded_tp (int num)
+/* Pull all the tracepoints defined on the target and create local
+   data structures representing them.  We don't want to create real
+   tracepoints yet, we don't want to mess up the user's existing
+   collection.  */
+  
+static int
+remote_upload_tracepoints (struct uploaded_tp **utpp)
 {
-  struct uploaded_tp *utp;
-
-  for (utp = uploaded_tps; utp; utp = utp->next)
-    if (utp->number == num)
-      return utp;
-  utp = (struct uploaded_tp *) xmalloc (sizeof (struct uploaded_tp));
-  utp->number = num;
-  utp->next = uploaded_tps;
-  uploaded_tps = utp;
-  return utp;
-}
-
-/* Look for an existing tracepoint that seems similar enough to the
-   uploaded one.  Enablement isn't checked, because the user can
-   toggle that freely, and may have done so in anticipation of the
-   next trace run.  */
-
-struct breakpoint *
-find_matching_tracepoint (struct uploaded_tp *utp)
-{
-  VEC(breakpoint_p) *tp_vec = all_tracepoints ();
-  int ix;
-  struct breakpoint *t;
-
-  for (ix = 0; VEC_iterate (breakpoint_p, tp_vec, ix, t); ix++)
-    {
-      if (t->type == utp->type
-	  && (t->loc && t->loc->address == utp->addr)
-	  && t->step_count == utp->step
-	  && t->pass_count == utp->pass
-	  /* FIXME also test conditionals and actions */
-	  )
-	return t;
-    }
-  return NULL;
-}
-
-/* Find out everything we can about the trace run that was already
-   happening on the target.  This includes both running/stopped, and
-   the tracepoints that were in use.  */
-
-static void
-remote_get_tracing_state (struct remote_state *rs)
-{
+  struct remote_state *rs = get_remote_state ();
   char *p;
-  ULONGEST num, addr, step, pass, orig_size, xlen;
-  int enabled, i;
-  enum bptype type;
-  char *cond;
-  struct uploaded_tp *utp;
-  struct breakpoint *t;
-  extern void get_trace_status ();
 
-  get_trace_status ();
-  if (trace_running_p)
-    printf_filtered (_("Trace is running on the target.\n"));
-
+  /* Ask for a first packet of tracepoint definition.  */
   putpkt ("qTfP");
   getpkt (&rs->buf, &rs->buf_size, 0);
   p = rs->buf;
-  while (*p != '\0')
+  while (*p && *p != 'l')
     {
-      if (*p == 'T')
-	{
-	  p++;
-	  p = unpack_varlen_hex (p, &num);
-	  p++;
-	  p = unpack_varlen_hex (p, &addr);
-	  p++;
-	  enabled = (*p++ == 'E');
-	  p++;
-	  p = unpack_varlen_hex (p, &step);
-	  p++;
-	  p = unpack_varlen_hex (p, &pass);
-	  p++;
-	  type = bp_tracepoint;
-	  cond = NULL;
-	  while (*p)
-	    {
-	      if (*p == 'F')
-		{
-		  type = bp_fast_tracepoint;
-		  p++;
-		  p = unpack_varlen_hex (p, &orig_size);
-		}
-	      else if (*p == 'X')
-		{
-		  p++;
-		  p = unpack_varlen_hex (p, &xlen);
-		  p++;  /* skip the comma */
-		  cond = (char *) xmalloc (xlen);
-		  hex2bin (p, cond, xlen);
-		  p += 2 * xlen;
-		}
-	      else
-		/* Silently skip over anything else.  */
-		p++;
-	    }
-	  utp = get_uploaded_tp (num);
-	  utp->type = type;
-	  utp->addr = addr;
-	  utp->enabled = enabled;
-	  utp->step = step;
-	  utp->pass = pass;
-	  utp->cond = cond;
-	  utp->cond_len = xlen;
-	}
-      else if (*p == 'A')
-	{
-	  p++;
-	  p = unpack_varlen_hex (p, &num);
-	  p++;
-	  p = unpack_varlen_hex (p, &addr);
-	  p++;
-	  utp = get_uploaded_tp (num);
-	  /* FIXME save the action */
-	}
-      else if (*p == 'S')
-	{
-	  p++;
-	  p = unpack_varlen_hex (p, &num);
-	  p++;
-	  p = unpack_varlen_hex (p, &addr);
-	  p++;
-	  utp = get_uploaded_tp (num);
-	  /* FIXME save the action */
-	}
-      else if (*p == 'l')
-	{
-	  /* No more tracepoint info, get out of the loop.  */
-	  break;
-	}
+      parse_tracepoint_definition (p, utpp);
+      /* Ask for another packet of tracepoint definition.  */
       putpkt ("qTsP");
       getpkt (&rs->buf, &rs->buf_size, 0);
       p = rs->buf;
     }
-  /* Got all the tracepoint info, now look for matches among what we
-     already have in GDB.  */
-  for (utp = uploaded_tps; utp; utp = utp->next)
+  return 0;
+}
+
+static int
+remote_upload_trace_state_variables (struct uploaded_tsv **utsvp)
+{
+  struct remote_state *rs = get_remote_state ();
+  char *p;
+
+  /* Ask for a first packet of variable definition.  */
+  putpkt ("qTfV");
+  getpkt (&rs->buf, &rs->buf_size, 0);
+  p = rs->buf;
+  while (*p && *p != 'l')
     {
-      t = find_matching_tracepoint (utp);
-      if (t)
-	{
-	  printf_filtered (_("Assuming tracepoint %d is same as target's tracepoint %d.\n"),
-			   t->number, utp->number);
-	  t->number_on_target = utp->number;
-	}
-      else
-	{
-	  extern void create_tracepoint_from_upload (int num, ULONGEST addr);
-	  create_tracepoint_from_upload (utp->number, utp->addr);
-	}
+      parse_tsv_definition (p, utsvp);
+      /* Ask for another packet of variable definition.  */
+      putpkt ("qTsV");
+      getpkt (&rs->buf, &rs->buf_size, 0);
+      p = rs->buf;
     }
-  /* FIXME free all the space */
-  uploaded_tps = NULL;
+  return 0;
 }
 
 void
