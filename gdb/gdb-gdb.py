@@ -187,6 +187,30 @@ class StructMainTypePrettyPrinter:
         if b['high_undefined'] != 0:
             high += " (undefined)"
         return "bounds = {%s, %s}" % (low, high)
+    def type_specific_img(self):
+        """Return a string image of the main_type type_specific union.
+        Only the relevant component of that union is printed (based on
+        the value of the type_specific_kind field.
+        """
+        type_specific_kind = str(self.val['type_specific_field'])
+        type_specific = self.val['type_specific']
+        if type_specific_kind == "TYPE_SPECIFIC_NONE":
+            img = 'type_specific_field = %s' % type_specific_kind
+        elif type_specific_kind == "TYPE_SPECIFIC_CPLUS_STUFF":
+            img = "cplus_stuff = %s" % type_specific['cplus_stuff']
+        elif type_specific_kind == "TYPE_SPECIFIC_GNAT_STUFF":
+            img = ("gnat_stuff = {descriptive_type = %s}"
+                   % type_specific['gnat_stuff']['descriptive_type'])
+        elif type_specific_kind == "TYPE_SPECIFIC_FLOATFORMAT":
+            img = "floatformat[0..1] = %s" % type_specific['floatformat']
+        elif type_specific_kind == "TYPE_SPECIFIC_CALLING_CONVENTION":
+            img = ("calling_convention = %d"
+                   % type_specific['calling_convention'])
+        else:
+            img = ("type_specific = ??? (unknown type_secific_kind: %s)"
+                   % type_specific_kind)
+        return img
+
     def to_string(self):
         """Return a pretty-printed image of our main_type.
         """
@@ -200,14 +224,11 @@ class StructMainTypePrettyPrinter:
         fields.append("vptr_basetype = %s" % self.val['vptr_basetype'])
         if self.val['nfields'] > 0:
             for fieldno in range(self.val['nfields']):
-                fields.append("field[%d]:")
                 fields.append(self.struct_field_img(fieldno))
         if self.val.type.code == gdb.TYPE_CODE_RANGE:
             fields.append(self.bounds_img())
-        # FIXME: We need to print the type_specific field as well.
-        # But I will wait for a patch that introduces a discriminant.
-        # This will simplify the selection of the right component in
-        # that union.
+        fields.append(self.type_specific_img())
+
         return "\n{" + ",\n ".join(fields) + "}"
 
 def type_lookup_function(val):

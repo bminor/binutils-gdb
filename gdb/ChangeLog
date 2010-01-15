@@ -1,3 +1,8 @@
+2010-01-15  Joel Brobecker  <brobecker@adacore.com>
+
+	Enhance gdb-gdb.py to handle main_type.type_specific.
+	* gdb-gdb.py: Print the type-specific part of struct main_type.
+
 2010-01-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* configure.ac (AC_CHECK_FUNCS): Check for setrlimit and getrlimit.
