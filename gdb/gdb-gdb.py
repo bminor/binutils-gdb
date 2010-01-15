@@ -225,7 +225,7 @@ class StructMainTypePrettyPrinter:
         if self.val['nfields'] > 0:
             for fieldno in range(self.val['nfields']):
                 fields.append(self.struct_field_img(fieldno))
-        if self.val.type.code == gdb.TYPE_CODE_RANGE:
+        if self.val['code'] == gdb.TYPE_CODE_RANGE:
             fields.append(self.bounds_img())
         fields.append(self.type_specific_img())
 

@@ -1,3 +1,8 @@
+2010-01-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb-gdb.py (StructMainTypePrettyPrinter): Fix TYPE_CODE_RANGE
+	comparison.
+
 2010-01-15  Eric Botcazou  <botcazou@adacore.com>
 
 	"info tasks" broken by typedefs in ATCB type definitions.
