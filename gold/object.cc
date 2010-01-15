@@ -1321,7 +1321,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
         }
     }
 
-  if (!is_gc_pass_one)
+  if (!is_gc_pass_two)
     layout->layout_gnu_stack(seen_gnu_stack, gnu_stack_flags);
 
   // When doing a relocatable link handle the reloc sections at the

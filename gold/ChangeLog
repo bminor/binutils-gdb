@@ -1,3 +1,8 @@
+2010-01-14  Sriraman Tallam  <tmsriram@google.com>
+
+	* object.cc (Sized_relobj::do_layout): Change to call layout_gnu_stack
+	in the first pass of do_layout.
+
 2010-01-13  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_relobj::section_needs_reloc_stub_scanning,
