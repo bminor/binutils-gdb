@@ -1,3 +1,19 @@
+2010-01-14  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (map, utility): Include headers.
+	(Target_arm::apply_cortex_a8_workaround): New method.
+	(Arm_relobj::do_relocate_sections): Apply any Cortex-A8 workaround.
+	(Target_arm::Scan::local): Handle R_ARM_THM_JUMP24, R_ARM_THM_JUMP19.
+	(Target_arm::Scan::global): R_ARM_THM_JUMP19.
+	(Target_arm::do_finalize_sections): Set fix_cortex_a8_ according to
+	the --[no-]fix-cortex-a8 command line options.
+	(Target_arm::Relocate::relocate): Handle R_ARM_JUMP19.
+	(Target_arm::relocate_stub): Use addend in instruction template.
+	* options.h (DEFINE_bool): Set the user-set flag.
+	(General_options): Add --[no-]-fix-cortex options.
+	* output.cc (Output_section::convert_input_sections_to_relaxed_sections)
+	: Update fast look-up map after conversion. 
+
 2010-01-14  Sriraman Tallam  <tmsriram@google.com>
 
 	* object.cc (Sized_relobj::do_layout): Change to call layout_gnu_stack

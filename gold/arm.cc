@@ -30,6 +30,8 @@
 #include <cstdio>
 #include <string>
 #include <algorithm>
+#include <map>
+#include <utility>
 
 #include "elfcpp.h"
 #include "parameters.h"
@@ -1685,6 +1687,11 @@ class Target_arm : public Sized_target<32, big_endian>
   scan_span_for_cortex_a8_erratum(Arm_relobj<big_endian>*, unsigned int,
 				  section_size_type, section_size_type,
 				  const unsigned char*, Arm_address);
+
+  // Apply Cortex-A8 workaround to a branch.
+  void
+  apply_cortex_a8_workaround(const Cortex_a8_stub*, Arm_address,
+			     unsigned char*, Arm_address);
 
  protected:
   // Make an ELF object.
@@ -4554,36 +4561,65 @@ Arm_relobj<big_endian>::do_relocate_sections(
       Arm_input_section<big_endian>* arm_input_section =
 	arm_target->find_arm_input_section(this, i);
 
-      if (arm_input_section == NULL
-	  || !arm_input_section->is_stub_table_owner()
-	  || arm_input_section->stub_table()->empty())
-	continue;
+      if (arm_input_section != NULL
+	  && arm_input_section->is_stub_table_owner()
+	  && !arm_input_section->stub_table()->empty())
+	{
+	  // We cannot discard a section if it owns a stub table.
+	  Output_section* os = this->output_section(i);
+	  gold_assert(os != NULL);
 
-      // We cannot discard a section if it owns a stub table.
-      Output_section* os = this->output_section(i);
-      gold_assert(os != NULL);
+	  relinfo.reloc_shndx = elfcpp::SHN_UNDEF;
+	  relinfo.reloc_shdr = NULL;
+	  relinfo.data_shndx = i;
+	  relinfo.data_shdr = pshdrs + i * elfcpp::Elf_sizes<32>::shdr_size;
 
-      relinfo.reloc_shndx = elfcpp::SHN_UNDEF;
-      relinfo.reloc_shdr = NULL;
-      relinfo.data_shndx = i;
-      relinfo.data_shdr = pshdrs + i * elfcpp::Elf_sizes<32>::shdr_size;
+	  gold_assert((*pviews)[i].view != NULL);
 
-      gold_assert((*pviews)[i].view != NULL);
+	  // We are passed the output section view.  Adjust it to cover the
+	  // stub table only.
+	  Stub_table<big_endian>* stub_table = arm_input_section->stub_table();
+	  gold_assert((stub_table->address() >= (*pviews)[i].address)
+		      && ((stub_table->address() + stub_table->data_size())
+			  <= (*pviews)[i].address + (*pviews)[i].view_size));
 
-      // We are passed the output section view.  Adjust it to cover the
-      // stub table only.
-      Stub_table<big_endian>* stub_table = arm_input_section->stub_table();
-      gold_assert((stub_table->address() >= (*pviews)[i].address)
-		  && ((stub_table->address() + stub_table->data_size())
-		      <= (*pviews)[i].address + (*pviews)[i].view_size));
-
-      off_t offset = stub_table->address() - (*pviews)[i].address;
-      unsigned char* view = (*pviews)[i].view + offset;
-      Arm_address address = stub_table->address();
-      section_size_type view_size = stub_table->data_size();
+	  off_t offset = stub_table->address() - (*pviews)[i].address;
+	  unsigned char* view = (*pviews)[i].view + offset;
+	  Arm_address address = stub_table->address();
+	  section_size_type view_size = stub_table->data_size();
  
-      stub_table->relocate_stubs(&relinfo, arm_target, os, view, address,
-				 view_size);
+	  stub_table->relocate_stubs(&relinfo, arm_target, os, view, address,
+				     view_size);
+	}
+
+      // Apply Cortex A8 workaround if applicable.
+      if (this->section_has_cortex_a8_workaround(i))
+	{
+	  unsigned char* view = (*pviews)[i].view;
+	  Arm_address view_address = (*pviews)[i].address;
+	  section_size_type view_size = (*pviews)[i].view_size;
+	  Stub_table<big_endian>* stub_table = this->stub_tables_[i];
+
+	  // Adjust view to cover section.
+	  Output_section* os = this->output_section(i);
+	  gold_assert(os != NULL);
+	  Arm_address section_address = os->output_address(this, i, 0);
+	  uint64_t section_size = this->section_size(i);
+
+	  gold_assert(section_address >= view_address
+		      && ((section_address + section_size)
+			  <= (view_address + view_size)));
+
+	  unsigned char* section_view = view + (section_address - view_address);
+
+	  // Apply the Cortex-A8 workaround to the output address range
+	  // corresponding to this input section.
+	  stub_table->apply_cortex_a8_workaround_to_address_range(
+	      arm_target,
+	      section_view,
+	      section_address,
+	      section_size);
+	}
     }
 }
 
@@ -5086,6 +5122,8 @@ Target_arm<big_endian>::Scan::local(Symbol_table* symtab,
     case elfcpp::R_ARM_CALL:
     case elfcpp::R_ARM_PREL31:
     case elfcpp::R_ARM_JUMP24:
+    case elfcpp::R_ARM_THM_JUMP24:
+    case elfcpp::R_ARM_THM_JUMP19:
     case elfcpp::R_ARM_PLT32:
     case elfcpp::R_ARM_THM_ABS5:
     case elfcpp::R_ARM_ABS8:
@@ -5272,6 +5310,7 @@ Target_arm<big_endian>::Scan::global(Symbol_table* symtab,
 
     case elfcpp::R_ARM_JUMP24:
     case elfcpp::R_ARM_THM_JUMP24:
+    case elfcpp::R_ARM_THM_JUMP19:
     case elfcpp::R_ARM_CALL:
     case elfcpp::R_ARM_THM_CALL:
 
@@ -5474,11 +5513,27 @@ Target_arm<big_endian>::do_finalize_sections(
     }
 
   // Check BLX use.
-  Object_attribute* attr =
+  const Object_attribute* cpu_arch_attr =
     this->get_aeabi_object_attribute(elfcpp::Tag_CPU_arch);
-  if (attr->int_value() > elfcpp::TAG_CPU_ARCH_V4)
+  if (cpu_arch_attr->int_value() > elfcpp::TAG_CPU_ARCH_V4)
     this->set_may_use_blx(true);
  
+  // Check if we need to use Cortex-A8 workaround.
+  if (parameters->options().user_set_fix_cortex_a8())
+    this->fix_cortex_a8_ = parameters->options().fix_cortex_a8();
+  else
+    {
+      // If neither --fix-cortex-a8 nor --no-fix-cortex-a8 is used, turn on
+      // Cortex-A8 erratum workaround for ARMv7-A or ARMv7 with unknown
+      // profile.  
+      const Object_attribute* cpu_arch_profile_attr =
+	this->get_aeabi_object_attribute(elfcpp::Tag_CPU_arch_profile);
+      this->fix_cortex_a8_ =
+	(cpu_arch_attr->int_value() == elfcpp::TAG_CPU_ARCH_V7
+         && (cpu_arch_profile_attr->int_value() == 'A'
+             || cpu_arch_profile_attr->int_value() == 0));
+    }
+  
   // Fill in some more dynamic tags.
   const Reloc_section* rel_plt = (this->plt_ == NULL
 				  ? NULL
@@ -5938,6 +5993,12 @@ Target_arm<big_endian>::Relocate::relocate(
 	Arm_relocate_functions::thm_jump24(relinfo, view, gsym, object, r_sym,
 					   psymval, address, thumb_bit,
 					   is_weakly_undefined_without_plt);
+      break;
+
+    case elfcpp::R_ARM_THM_JUMP19:
+      reloc_status =
+	Arm_relocate_functions::thm_jump19(view, object, psymval, address,
+					   thumb_bit);
       break;
 
     case elfcpp::R_ARM_PREL31:
@@ -7711,7 +7772,7 @@ Target_arm<big_endian>::relocate_stub(
       gold_assert(reloc_offset + reloc_size <= view_size);
 
       // This is the address of the stub destination.
-      Arm_address target = stub->reloc_target(i);
+      Arm_address target = stub->reloc_target(i) + insn->reloc_addend();
       Symbol_value<32> symval;
       symval.set_output_value(target);
 
@@ -7947,6 +8008,58 @@ Target_arm<big_endian>::scan_span_for_cortex_a8_erratum(
       last_was_32bit = insn_32bit;
       last_was_branch = is_32bit_branch;
     }
+}
+
+// Apply the Cortex-A8 workaround.
+
+template<bool big_endian>
+void
+Target_arm<big_endian>::apply_cortex_a8_workaround(
+    const Cortex_a8_stub* stub,
+    Arm_address stub_address,
+    unsigned char* insn_view,
+    Arm_address insn_address)
+{
+  typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
+  Valtype* wv = reinterpret_cast<Valtype*>(insn_view);
+  Valtype upper_insn = elfcpp::Swap<16, big_endian>::readval(wv);
+  Valtype lower_insn = elfcpp::Swap<16, big_endian>::readval(wv + 1);
+  off_t branch_offset = stub_address - (insn_address + 4);
+
+  typedef struct Arm_relocate_functions<big_endian> RelocFuncs;
+  switch (stub->stub_template()->type())
+    {
+    case arm_stub_a8_veneer_b_cond:
+      gold_assert(!utils::has_overflow<21>(branch_offset));
+      upper_insn = RelocFuncs::thumb32_cond_branch_upper(upper_insn,
+							 branch_offset);
+      lower_insn = RelocFuncs::thumb32_cond_branch_lower(lower_insn,
+							 branch_offset);
+      break;
+
+    case arm_stub_a8_veneer_b:
+    case arm_stub_a8_veneer_bl:
+    case arm_stub_a8_veneer_blx:
+      if ((lower_insn & 0x5000U) == 0x4000U)
+	// For a BLX instruction, make sure that the relocation is
+	// rounded up to a word boundary.  This follows the semantics of
+	// the instruction which specifies that bit 1 of the target
+	// address will come from bit 1 of the base address.
+	branch_offset = (branch_offset + 2) & ~3;
+
+      // Put BRANCH_OFFSET back into the insn.
+      gold_assert(!utils::has_overflow<25>(branch_offset));
+      upper_insn = RelocFuncs::thumb32_branch_upper(upper_insn, branch_offset);
+      lower_insn = RelocFuncs::thumb32_branch_lower(lower_insn, branch_offset);
+      break;
+
+    default:
+      gold_unreachable();
+    }
+
+  // Put the relocated value back in the object file:
+  elfcpp::Swap<16, big_endian>::writeval(wv, upper_insn);
+  elfcpp::Swap<16, big_endian>::writeval(wv + 1, lower_insn);
 }
 
 template<bool big_endian>

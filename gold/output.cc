@@ -2272,6 +2272,15 @@ Output_section::convert_input_sections_to_relaxed_sections(
 	    relaxed_sections,
 	    map,
 	    &this->input_sections_);
+
+  // Update fast look-up map.
+  if (this->is_relaxed_input_section_map_valid_)
+    for (size_t i = 0; i < relaxed_sections.size(); ++i)
+      {
+	Output_relaxed_input_section* poris = relaxed_sections[i];
+	Input_section_specifier iss(poris->relobj(), poris->shndx());
+	this->relaxed_input_section_map_[iss] = poris;
+      }
 }
 
 // Update the output section flags based on input section flags.

@@ -315,7 +315,10 @@ struct Struct_special : public Struct_var
     void                                                                 \
     parse_to_value(const char*, const char*,                             \
                    Command_line*, General_options* options)              \
-    { options->set_##varname__(false); }                                 \
+    {                                                                    \
+      options->set_##varname__(false);                                   \
+      options->set_user_set_##varname__();                               \
+    }                                                                    \
                                                                          \
     options::One_option option;                                          \
   };                                                                     \
@@ -718,6 +721,10 @@ class General_options
 
   DEFINE_string(fini, options::ONE_DASH, '\0', "_fini",
                 N_("Call SYMBOL at unload-time"), N_("SYMBOL"));
+
+  DEFINE_bool(fix_cortex_a8, options::TWO_DASHES, '\0', false,
+	      N_("(ARM only) Fix binaries for Cortex-A8 erratum."),
+	      N_("(ARM only) Do not fix binaries for Cortex-A8 erratum."));
 
   DEFINE_bool(g, options::EXACTLY_ONE_DASH, '\0', false,
 	      N_("Ignored"), NULL);
