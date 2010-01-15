@@ -30,21 +30,6 @@
 	* doc/binutils.texi: Document --dyn-syms for readelf.  Mention
 	symbol hash tables for -D.
 
-2010-01-11  H.J. Lu  <hongjiu.lu@intel.com>
-
-	PR ld/11146
-	* readelf.c (do_dyn_syms): New.
-	(OPTION_DYN_SYMS): Likewise.
-	(options): Add "dyn-syms".
-	(usage): Add --dyn-syms.
-	(parse_args): Handle OPTION_DYN_SYMS.
-	(process_symbol_table): Handle do_dyn_syms.
-	(process_object): Likewise.
-	(process_archive): Likewise.
-
-	* doc/binutils.texi: Document --dyn-syms for readelf.  Mention
-	symbol hash tables for -D.
-
 2010-01-11  Nick Clifton  <nickc@redhat.com>
 
 	* NEWS: Mention addition of elfedit.
