@@ -1,4 +1,4 @@
-2010-01-15  Joel Brobecker  <brobecker@adacore.com>
+2010-01-15  Eric Botcazou  <botcazou@adacore.com>
 
 	"info tasks" broken by typedefs in ATCB type definitions.
 	* ada-lang.c (ada_template_to_fixed_record_type_1): Add call to
