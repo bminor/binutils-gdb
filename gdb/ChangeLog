@@ -1,3 +1,18 @@
+2010-01-16  Stan Shebs  <stan@codesourcery.com>
+
+	* tracepoint.h (struct trace_status): Use unsigned long long
+	instead of size_t.
+	* tracepoint.c (trace_status_command): Fix printf directive.
+	(trace_save_command): Check fwrite returns, fix printf directive.
+	(trace_filename): New global.
+	(tfile_open): Set it, check read returns.
+	(tfile_close): Free trace_filename.
+	(tfile_get_traceframe_address): Check read returns.
+	(tfile_trace_find): Ditto.
+	(tfile_fetch_registers): Ditto.
+	(tfile_xfer_partial): Ditto.
+	(tfile_get_trace_state_variable_value): Ditto.
+
 2010-01-15  Stan Shebs  <stan@codesourcery.com>
 
 	Add trace file support.

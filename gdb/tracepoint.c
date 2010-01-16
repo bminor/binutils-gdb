@@ -1647,7 +1647,7 @@ trace_status_command (char *args, int from_tty)
 
   if (ts->buffer_free)
     {
-      printf_filtered (_("Trace buffer has %d bytes free.\n"),
+      printf_filtered (_("Trace buffer has %llu bytes free.\n"),
 		       ts->buffer_free);
     }
 
@@ -2342,6 +2342,7 @@ trace_save_command (char *args, int from_tty)
   ULONGEST offset = 0;
 #define MAX_TRACE_UPLOAD 2000
   gdb_byte buf[MAX_TRACE_UPLOAD];
+  int written;
 
   if (args == NULL)
     error_no_arg (_("file in which to save trace data"));
@@ -2389,7 +2390,9 @@ trace_save_command (char *args, int from_tty)
   /* Write a file header, with a high-bit-set char to indicate a
      binary file, plus a hint as what this file is, and a version
      number in case of future needs.  */
-  fwrite ("\x7fTRACE0\n", 8, 1, fp);
+  written = fwrite ("\x7fTRACE0\n", 8, 1, fp);
+  if (written < 8)
+    perror_with_name (pathname);
 
   /* Write descriptive info.  */
 
@@ -2397,10 +2400,10 @@ trace_save_command (char *args, int from_tty)
   fprintf (fp, "R %x\n", trace_regblock_size);
 
   /* Write out status of the tracing run (aka "tstatus" info).  */
-  fprintf (fp, "status %c;%s:%x;tframes:%x;tfree:%x\n",
+  fprintf (fp, "status %c;%s:%x;tframes:%x;tfree:%llx\n",
 	   (ts->running ? '1' : '0'),
 	   stop_reason_names[ts->stop_reason], ts->stopping_tracepoint,
-	   ts->traceframe_count, (unsigned int) ts->buffer_free);
+	   ts->traceframe_count, ts->buffer_free);
 
   /* Note that we want to upload tracepoints and save those, rather
      than simply writing out the local ones, because the user may have
@@ -2473,12 +2476,16 @@ trace_save_command (char *args, int from_tty)
       /* No more data is forthcoming, we're done.  */
       if (gotten == 0)
 	break;
-      fwrite (buf, gotten, 1, fp);
+      written = fwrite (buf, gotten, 1, fp);
+      if (written < gotten)
+	perror_with_name (pathname);
       offset += gotten;
     }
 
   /* Mark the end of trace data.  */
-  fwrite (&gotten, 4, 1, fp);
+  written = fwrite (&gotten, 4, 1, fp);
+  if (written < 4)
+    perror_with_name (pathname);
 
   do_cleanups (cleanup);
   if (from_tty)
@@ -2766,6 +2773,7 @@ struct target_ops tfile_ops;
 
 #define TRACE_HEADER_SIZE 8
 
+char *trace_filename;
 int trace_fd = -1;
 off_t trace_frames_offset;
 off_t cur_offset;
@@ -2786,7 +2794,7 @@ tfile_open (char *filename, int from_tty)
   char header[TRACE_HEADER_SIZE];
   char linebuf[1000]; /* should be max remote packet size or so */
   char byte;
-  int bytes, i;
+  int bytes, i, gotten;
   struct trace_status *ts;
   struct uploaded_tp *uploaded_tps = NULL;
   struct uploaded_tsv *uploaded_tsvs = NULL;
@@ -2819,11 +2827,17 @@ tfile_open (char *filename, int from_tty)
   push_target (&tfile_ops);
   discard_cleanups (old_chain);
 
+  trace_filename = xstrdup (filename);
   trace_fd = scratch_chan;
 
   bytes = 0;
   /* Read the file header and test for validity.  */
-  read (trace_fd, &header, TRACE_HEADER_SIZE);
+  gotten = read (trace_fd, &header, TRACE_HEADER_SIZE);
+  if (gotten < 0)
+    perror_with_name (trace_filename);
+  else if (gotten < TRACE_HEADER_SIZE)
+    error (_("Premature end of file while reading trace file"));
+
   bytes += TRACE_HEADER_SIZE;
   if (!(header[0] == 0x7f
 	&& (strncmp (header + 1, "TRACE0\n", 7) == 0)))
@@ -2844,7 +2858,12 @@ tfile_open (char *filename, int from_tty)
   i = 0;
   while (1)
     {
-      read (trace_fd, &byte, 1);
+      gotten = read (trace_fd, &byte, 1);
+      if (gotten < 0)
+	perror_with_name (trace_filename);
+      else if (gotten < 1)
+	error (_("Premature end of file while reading trace file"));
+
       ++bytes;
       if (byte == '\n')
 	{
@@ -3112,6 +3131,8 @@ tfile_close (int quitting)
 
   close (trace_fd);
   trace_fd = -1;
+  if (trace_filename)
+    xfree (trace_filename);
 }
 
 static void
@@ -3144,12 +3165,18 @@ tfile_get_traceframe_address (off_t tframe_offset)
   short tpnum;
   struct breakpoint *tp;
   off_t saved_offset = cur_offset;
+  int gotten;
 
   /* FIXME dig pc out of collected registers */
 
   /* Fall back to using tracepoint address.  */
   lseek (trace_fd, tframe_offset, SEEK_SET);
-  read (trace_fd, &tpnum, 2);
+  gotten = read (trace_fd, &tpnum, 2);
+  if (gotten < 0)
+    perror_with_name (trace_filename);
+  else if (gotten < 2)
+    error (_("Premature end of file while reading trace file"));
+
   tp = get_tracepoint_by_number_on_target (tpnum);
   if (tp && tp->loc)
     addr = tp->loc->address;
@@ -3170,7 +3197,7 @@ tfile_trace_find (enum trace_find_type type, int num,
 		  ULONGEST addr1, ULONGEST addr2, int *tpp)
 {
   short tpnum;
-  int tfnum = 0, found = 0;
+  int tfnum = 0, found = 0, gotten;
   int data_size;
   struct breakpoint *tp;
   off_t offset, tframe_offset;
@@ -3181,11 +3208,19 @@ tfile_trace_find (enum trace_find_type type, int num,
   while (1)
     {
       tframe_offset = offset;
-      read (trace_fd, &tpnum, 2);
+      gotten = read (trace_fd, &tpnum, 2);
+      if (gotten < 0)
+	perror_with_name (trace_filename);
+      else if (gotten < 2)
+	error (_("Premature end of file while reading trace file"));
       offset += 2;
       if (tpnum == 0)
 	break;
-      read (trace_fd, &data_size, 4);	
+      gotten = read (trace_fd, &data_size, 4);	
+      if (gotten < 0)
+	perror_with_name (trace_filename);
+      else if (gotten < 4)
+	error (_("Premature end of file while reading trace file"));
       offset += 4;
       switch (type)
 	{
@@ -3246,7 +3281,7 @@ tfile_fetch_registers (struct target_ops *ops,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   char block_type;
-  int i, pos, offset, regn, regsize;
+  int i, pos, offset, regn, regsize, gotten;
   unsigned short mlen;
   char *regs;
 
@@ -3261,12 +3296,22 @@ tfile_fetch_registers (struct target_ops *ops,
   pos = 0;
   while (pos < cur_data_size)
     {
-      read (trace_fd, &block_type, 1);
+      gotten = read (trace_fd, &block_type, 1);
+      if (gotten < 0)
+	perror_with_name (trace_filename);
+      else if (gotten < 1)
+	error (_("Premature end of file while reading trace file"));
+
       ++pos;
       switch (block_type)
 	{
 	case 'R':
-	  read (trace_fd, regs, trace_regblock_size);
+	  gotten = read (trace_fd, regs, trace_regblock_size);
+	  if (gotten < 0)
+	    perror_with_name (trace_filename);
+	  else if (gotten < trace_regblock_size)
+	    error (_("Premature end of file while reading trace file"));
+
 	  /* Assume the block is laid out in GDB register number order,
 	     each register with the size that it has in GDB.  */
 	  offset = 0;
@@ -3293,7 +3338,11 @@ tfile_fetch_registers (struct target_ops *ops,
 	  return;
 	case 'M':
 	  lseek (trace_fd, 8, SEEK_CUR);
-	  read (trace_fd, &mlen, 2);
+	  gotten = read (trace_fd, &mlen, 2);
+	  if (gotten < 0)
+	    perror_with_name (trace_filename);
+	  else if (gotten < 2)
+	    error (_("Premature end of file while reading trace file"));
 	  lseek (trace_fd, mlen, SEEK_CUR);
 	  pos += (8 + 2 + mlen);
 	  break;
@@ -3315,7 +3364,7 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
 		    const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
 {
   char block_type;
-  int pos;
+  int pos, gotten;
   ULONGEST maddr;
   unsigned short mlen;
 
@@ -3330,7 +3379,11 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
   pos = 0;
   while (pos < cur_data_size)
     {
-      read (trace_fd, &block_type, 1);
+      gotten = read (trace_fd, &block_type, 1);
+      if (gotten < 0)
+	perror_with_name (trace_filename);
+      else if (gotten < 1)
+	error (_("Premature end of file while reading trace file"));
       ++pos;
       switch (block_type)
 	{
@@ -3339,11 +3392,25 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
 	  pos += trace_regblock_size;
 	  break;
 	case 'M':
-	  read (trace_fd, &maddr, 8);
-	  read (trace_fd, &mlen, 2);
+	  gotten = read (trace_fd, &maddr, 8);
+	  if (gotten < 0)
+	    perror_with_name (trace_filename);
+	  else if (gotten < 8)
+	    error (_("Premature end of file while reading trace file"));
+
+	  gotten = read (trace_fd, &mlen, 2);
+	  if (gotten < 0)
+	    perror_with_name (trace_filename);
+	  else if (gotten < 2)
+	    error (_("Premature end of file while reading trace file"));
 	  if (maddr <= offset && (offset + len) <= (maddr + mlen))
 	    {
-	      read (trace_fd, readbuf, mlen);
+	      gotten = read (trace_fd, readbuf, mlen);
+	      if (gotten < 0)
+		perror_with_name (trace_filename);
+	      else if (gotten < mlen)
+		error (_("Premature end of file qwhile reading trace file"));
+
 	      return mlen;
 	    }
 	  lseek (trace_fd, mlen, SEEK_CUR);
@@ -3370,14 +3437,18 @@ static int
 tfile_get_trace_state_variable_value (int tsvnum, LONGEST *val)
 {
   char block_type;
-  int pos, vnum;
+  int pos, vnum, gotten;
   unsigned short mlen;
 
   lseek (trace_fd, cur_offset, SEEK_SET);
   pos = 0;
   while (pos < cur_data_size)
     {
-      read (trace_fd, &block_type, 1);
+      gotten = read (trace_fd, &block_type, 1);
+      if (gotten < 0)
+	perror_with_name (trace_filename);
+      else if (gotten < 1)
+	error (_("Premature end of file while reading trace file"));
       ++pos;
       switch (block_type)
 	{
@@ -3387,15 +3458,27 @@ tfile_get_trace_state_variable_value (int tsvnum, LONGEST *val)
 	  break;
 	case 'M':
 	  lseek (trace_fd, 8, SEEK_CUR);
-	  read (trace_fd, &mlen, 2);
+	  gotten = read (trace_fd, &mlen, 2);
+	  if (gotten < 0)
+	    perror_with_name (trace_filename);
+	  else if (gotten < 2)
+	    error (_("Premature end of file while reading trace file"));
 	  lseek (trace_fd, mlen, SEEK_CUR);
 	  pos += (8 + 2 + mlen);
 	  break;
 	case 'V':
-	  read (trace_fd, &vnum, 4);
+	  gotten = read (trace_fd, &vnum, 4);
+	  if (gotten < 0)
+	    perror_with_name (trace_filename);
+	  else if (gotten < 4)
+	    error (_("Premature end of file while reading trace file"));
 	  if (tsvnum == vnum)
 	    {
-	      read (trace_fd, val, 8);
+	      gotten = read (trace_fd, val, 8);
+	      if (gotten < 0)
+		perror_with_name (trace_filename);
+	      else if (gotten < 8)
+		error (_("Premature end of file while reading trace file"));
 	      return 1;
 	    }
 	  lseek (trace_fd, 8, SEEK_CUR);

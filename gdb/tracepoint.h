@@ -97,9 +97,9 @@ struct trace_status
 
   int traceframe_count;
 
-  size_t buffer_size;
+  unsigned long long buffer_size;
 
-  size_t buffer_free;
+  unsigned long long buffer_free;
 };
 
 struct trace_status *current_trace_status (void);
