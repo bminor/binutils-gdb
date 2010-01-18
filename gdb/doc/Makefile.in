@@ -147,7 +147,8 @@ STABS_DOC_FILES = \
 ANNOTATE_DOC_SOURCE_INCLUDES = \
 	$(srcdir)/fdl.texi
 ANNOTATE_DOC_BUILD_INCLUDES = \
-	gdb-cfg.texi
+	gdb-cfg.texi \
+	GDBvn.texi
 ANNOTATE_DOC_FILES = \
 	$(srcdir)/annotate.texinfo \
 	$(ANNOTATE_DOC_SOURCE_INCLUDES) \

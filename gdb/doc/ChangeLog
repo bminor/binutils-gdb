@@ -1,3 +1,7 @@
+2010-01-18  Jie Zhang  <jie.zhang@analog.com>
+
+	* Makefile.in (ANNOTATE_DOC_BUILD_INCLUDES): Add GDBvn.texi.
+
 2010-01-15  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.texinfo (Trace Files): New section.
