@@ -27,6 +27,7 @@
 #include "observer.h"
 #include "value.h"
 #include "language.h"
+#include "exceptions.h"
 
 #include <ctype.h>
 
@@ -45,7 +46,6 @@ static int gdbpy_auto_load = 1;
 #include "cli/cli-decode.h"
 #include "charset.h"
 #include "top.h"
-#include "exceptions.h"
 #include "python-internal.h"
 #include "version.h"
 #include "target.h"

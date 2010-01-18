@@ -1,5 +1,11 @@
 2010-01-18  Joel Brobecker  <brobecker@adacore.com>
 
+	Fix build failure when building without Python support.
+	* python/python.c: Always include exceptions.h, even when HAVE_PYTHON
+	is not defined.
+
+2010-01-18  Joel Brobecker  <brobecker@adacore.com>
+
 	Use XVS field type instead of doing a parallel lookup.
 	* ada-lang.c (ada_get_base_type): Follow the XVS field type
 	if it is a reference type instead of doing a type lookup using
