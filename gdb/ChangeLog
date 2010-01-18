@@ -1,3 +1,16 @@
+2010-01-18  Joel Brobecker  <brobecker@adacore.com>
+
+	Trust PAD types instead of using PAD___XVS.
+	* ada-lang.c (trust_pad_over_xvs): New static variable.
+	(ada_is_aligner_type): If !trust_pad_over_xvs and there is a
+	parallel XVS type, follow the XVS type instead of the PAD type.
+	(unwrap_value): Make sure that there is no parallel XVE type
+	before returning the value as is.
+	(set_ada_list, show_ada_list): New static variables.
+	(set_ada_command, show_ada_command): New functions.
+	(_initialize_ada_language): Add new "set/show ada" prefix commands.
+	Add new "set/show ada trust-PAD-over-XVS" setting.
+
 2010-01-18  Tom Tromey  <tromey@redhat.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
