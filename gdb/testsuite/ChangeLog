@@ -1,3 +1,10 @@
+2010-01-18  Tom Tromey  <tromey@redhat.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.python/source2.py: New file.
+	* gdb.python/source1: New file.
+	* gdb.python/python.exp: Test "source" command.
+
 2010-01-15  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.trace/tfile.c: New file.
