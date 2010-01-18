@@ -75,6 +75,9 @@ enum errors {
   /* Error accessing memory.  */
   MEMORY_ERROR,
 
+  /* Feature is not supported in this copy of GDB.  */
+  UNSUPPORTED_ERROR,
+
   /* Add more errors here.  */
   NR_ERRORS
 };

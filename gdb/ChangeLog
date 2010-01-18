@@ -1,3 +1,17 @@
+2010-01-18  Tom Tromey  <tromey@redhat.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	Allow "source" to load python scripts.
+	* exceptions.h (enum errors): Add UNSUPPORTED_ERROR.
+	* python/python.c (source_python_script): New function.
+	* python/python.h (source_python_script): Add declaration.
+	* cli/cli-cmds.c: #include exceptions.h and python/python.h.
+	(script_ext_off, script_ext_soft, script_ext_strict)
+	(script_ext_enums, script_ext_mode): New static constants.
+	(show_script_ext_mode, find_and_open_script): New functions.
+	(source_script): Enhance to handle Python scripts.
+	(init_cli_cmds): Add set/show script-extension commands.
+
 2010-01-16  Stan Shebs  <stan@codesourcery.com>
 
 	* tracepoint.h (struct trace_status): Use unsigned long long

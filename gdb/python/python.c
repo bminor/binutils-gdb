@@ -343,6 +343,22 @@ gdbpy_parse_and_eval (PyObject *self, PyObject *args)
   return value_to_value_object (result);
 }
 
+/* Read a file as Python code.  STREAM is the input file; FILE is the
+   name of the file.  */
+
+void
+source_python_script (FILE *stream, char *file)
+{
+  PyGILState_STATE state;
+
+  state = PyGILState_Ensure ();
+
+  PyRun_SimpleFile (stream, file);
+
+  fclose (stream);
+  PyGILState_Release (state);
+}
+
 
 
 /* Printing.  */
@@ -523,6 +539,14 @@ void
 eval_python_from_control_command (struct command_line *cmd)
 {
   error (_("Python scripting is not supported in this copy of GDB."));
+}
+
+void
+source_python_script (FILE *stream, char *file)
+{
+  fclose (stream);
+  throw_error (UNSUPPORTED_ERROR,
+	       _("Python scripting is not supported in this copy of GDB."));
 }
 
 #endif /* HAVE_PYTHON */

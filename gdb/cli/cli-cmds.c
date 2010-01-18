@@ -19,6 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "exceptions.h"
 #include "arch-utils.h"
 #include "readline/readline.h"
 #include "readline/tilde.h"
@@ -46,6 +47,8 @@ extern void disconnect_or_stop_tracing (int from_tty);
 #include "cli/cli-script.h"
 #include "cli/cli-setshow.h"
 #include "cli/cli-cmds.h"
+
+#include "python/python.h"
 
 #ifdef TUI
 #include "tui/tui.h"		/* For tui_active et.al.   */
@@ -186,6 +189,21 @@ struct cmd_list_element *showchecklist;
 
 int source_verbose = 0;
 int trace_commands = 0;
+
+/* 'script-extension' option support.  */
+
+static const char script_ext_off[] = "off";
+static const char script_ext_soft[] = "soft";
+static const char script_ext_strict[] = "strict";
+
+static const char *script_ext_enums[] = {
+  script_ext_off,
+  script_ext_soft,
+  script_ext_strict,
+  NULL
+};
+
+static const char *script_ext_mode = script_ext_soft;
 
 /* Utility used everywhere when at least one argument is needed and
    none is supplied. */
@@ -441,18 +459,25 @@ cd_command (char *dir, int from_tty)
     pwd_command ((char *) 0, 1);
 }
 
-void
-source_script (char *file, int from_tty)
+/* Show the current value of the 'script-extension' option.  */
+
+static void
+show_script_ext_mode (struct ui_file *file, int from_tty,
+		     struct cmd_list_element *c, const char *value)
 {
-  FILE *stream;
-  struct cleanup *old_cleanups;
+  fprintf_filtered (file, _("\
+Script filename extension recognition is \"%s\".\n"),
+		    value);
+}
+
+static int
+find_and_open_script (int from_tty, char **filep, FILE **streamp,
+		      struct cleanup **cleanupp)
+{
+  char *file = *filep;
   char *full_pathname = NULL;
   int fd;
-
-  if (file == NULL || *file == 0)
-    {
-      error (_("source command requires file name of file to source."));
-    }
+  struct cleanup *old_cleanups;
 
   file = tilde_expand (file);
   old_cleanups = make_cleanup (xfree, file);
@@ -476,12 +501,58 @@ source_script (char *file, int from_tty)
       else
 	{
 	  do_cleanups (old_cleanups);
-	  return;
+	  return 0;
 	}
     }
 
-  stream = fdopen (fd, FOPEN_RT);
-  script_from_file (stream, file);
+  *streamp = fdopen (fd, FOPEN_RT);
+  *filep = file;
+  *cleanupp = old_cleanups;
+
+  return 1;
+}
+
+void
+source_script (char *file, int from_tty)
+{
+  FILE *stream;
+  struct cleanup *old_cleanups;
+
+  if (file == NULL || *file == 0)
+    {
+      error (_("source command requires file name of file to source."));
+    }
+
+  if (!find_and_open_script (from_tty, &file, &stream, &old_cleanups))
+    return;
+
+  if (script_ext_mode != script_ext_off
+      && strlen (file) > 3 && !strcmp (&file[strlen (file) - 3], ".py"))
+    {
+      volatile struct gdb_exception e;
+
+      TRY_CATCH (e, RETURN_MASK_ERROR)
+	{
+	  source_python_script (stream, file);
+	}
+      if (e.reason < 0)
+	{
+	  /* Should we fallback to ye olde GDB script mode?  */
+	  if (script_ext_mode == script_ext_soft
+	      && e.reason == RETURN_ERROR && e.error == UNSUPPORTED_ERROR)
+	    {
+	      if (!find_and_open_script (from_tty, &file, &stream, &old_cleanups))
+		return;
+
+	      script_from_file (stream, file);
+	    }
+	  else
+	    /* Nope, just punt.  */
+	    throw_exception (e);
+	}
+    }
+  else
+    script_from_file (stream, file);
 
   do_cleanups (old_cleanups);
 }
@@ -1313,6 +1384,19 @@ when GDB is started."), gdbinit);
   c = add_cmd ("source", class_support, source_command,
 	       source_help_text, &cmdlist);
   set_cmd_completer (c, filename_completer);
+
+  add_setshow_enum_cmd ("script-extension", class_support,
+			script_ext_enums, &script_ext_mode, _("\
+Set mode for script filename extension recognition."), _("\
+Show mode for script filename extension recognition."), _("\
+off  == no filename extension recognition (all sourced files are GDB scripts)\n\
+soft == evaluate script according to filename extension, fallback to GDB script"
+  "\n\
+strict == evaluate script according to filename extension, error if not supported"
+  ),
+			NULL,
+			show_script_ext_mode,
+			&setlist, &showlist);
 
   add_com ("quit", class_support, quit_command, _("Exit gdb."));
   c = add_com ("help", class_support, help_command,
