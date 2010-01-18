@@ -1,5 +1,12 @@
 2010-01-18  Joel Brobecker  <brobecker@adacore.com>
 
+	Use XVS field type instead of doing a parallel lookup.
+	* ada-lang.c (ada_get_base_type): Follow the XVS field type
+	if it is a reference type instead of doing a type lookup using
+	the XVS field name.
+
+2010-01-18  Joel Brobecker  <brobecker@adacore.com>
+
 	Trust PAD types instead of using PAD___XVS.
 	* ada-lang.c (trust_pad_over_xvs): New static variable.
 	(ada_is_aligner_type): If !trust_pad_over_xvs and there is a
