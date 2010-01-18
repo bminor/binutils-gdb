@@ -1,3 +1,7 @@
+2010-01-18  Masaki Muranaka  <monaka@monami-software.com>  (tiny change)
+
+	* interp.c: Don't include sysdep.h
+
 2010-01-09  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.

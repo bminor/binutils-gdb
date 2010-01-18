@@ -64,8 +64,6 @@ code on the hardware.
 #include "gdb/callback.h"   /* GDB simulator callback interface */
 #include "gdb/remote-sim.h" /* GDB simulator interface */
 
-#include "sysdep.h"
-
 #ifndef PARAMS
 #define PARAMS(x) 
 #endif
