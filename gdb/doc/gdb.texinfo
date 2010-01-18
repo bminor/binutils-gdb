@@ -963,8 +963,11 @@ Connect to process ID @var{number}, as with the @code{attach} command.
 @itemx -x @var{file}
 @cindex @code{--command}
 @cindex @code{-x}
-Execute @value{GDBN} commands from file @var{file}.  @xref{Command
-Files,, Command files}.
+Execute commands from file @var{file}.  If @var{file} ends in
+@samp{.py}, then the file is evaluated as Python code.  If Python
+support is not enabled in this @value{GDBN}, then the file is assumed to
+contain @value{GDBN} commands, regardless of its extension.
+@xref{Command Files,, Command files}.
 
 @item -eval-command @var{command}
 @itemx -ex @var{command}
@@ -19158,6 +19161,11 @@ on the search path (specified with the @samp{directory} command).
 If @code{-v}, for verbose mode, is given then @value{GDBN} displays
 each command as it is executed.  The option must be given before
 @var{filename}, and is interpreted as part of the filename anywhere else.
+
+If @var{filename} ends in @samp{.py}, then @value{GDBN} evaluates the
+contents of the file as Python code.  If Python support is not compiled
+in to @value{GDBN}, then the file is assumed to contain @value{GDBN}
+commands, regardless of its extension.
 
 Commands that would ask for confirmation if used interactively proceed
 without asking when used in a command file.  Many @value{GDBN} commands that

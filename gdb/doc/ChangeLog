@@ -1,3 +1,8 @@
+2010-01-18  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (File Options): Document -x on .py files.
+	(Command Files): Document handling of Python scripts.
+
 2010-01-18  Jie Zhang  <jie.zhang@analog.com>
 
 	* Makefile.in (ANNOTATE_DOC_BUILD_INCLUDES): Add GDBvn.texi.
