@@ -233,6 +233,12 @@ enum exp_opcode
        It casts the value of the following subexpression.  */
     UNOP_CAST,
 
+    /* The C++ dynamic_cast operator.  */
+    UNOP_DYNAMIC_CAST,
+
+    /* The C++ reinterpret_cast operator.  */
+    UNOP_REINTERPRET_CAST,
+
     /* UNOP_MEMVAL is followed by a type pointer in the next exp_element
        With another UNOP_MEMVAL at the end, this makes three exp_elements.
        It casts the contents of the word addressed by the value of the

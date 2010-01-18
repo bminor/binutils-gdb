@@ -10,6 +10,30 @@ struct B: public A
   B (int aa, int bb): A (aa), b(bb) {}
 };
 
+
+struct Alpha
+{
+  virtual void x() { }
+};
+
+struct Gamma
+{
+};
+
+struct Derived : public Alpha
+{
+};
+
+struct VirtuallyDerived : public virtual Alpha
+{
+};
+
+struct DoublyDerived : public VirtuallyDerived,
+		       public virtual Alpha,
+		       public Gamma
+{
+};
+
 int
 main (int argc, char **argv)
 {
@@ -17,6 +41,12 @@ main (int argc, char **argv)
   B *b = (B *) a;
   A &ar = *b;
   B &br = (B&)ar;
+
+  Derived derived;
+  DoublyDerived doublyderived;
+
+  Alpha *ad = &derived;
+  Alpha *add = &doublyderived;
 
   return 0;  /* breakpoint spot: casts.exp: 1 */
 }

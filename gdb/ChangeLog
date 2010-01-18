@@ -1,3 +1,34 @@
+2010-01-18  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/9680:
+	* c-exp.y (REINTERPRET_CAST, DYNAMIC_CAST, STATIC_CAST)
+	(CONST_CAST): New tokens.
+	(exp): Add new productions.
+	(ident_tokens): Add const_cast, dynamic_cast, static_cast, and
+	reinterpret_cast.
+	(is_cast_operator): New function.
+	(yylex): Handle cast operators specially.
+	* eval.c (evaluate_subexp_standard) <UNOP_DYNAMIC_CAST,
+	UNOP_REINTERPRET_CAST>: New cases.
+	* expprint.c (print_subexp_standard): Likewise.
+	(op_name_standard): Likewise.
+	(dump_subexp_body_standard): Likewise.
+	* parse.c (operator_length_standard): Likewise.
+	* expression.h (enum exp_opcode): New constants UNOP_DYNAMIC_CAST,
+	UNOP_REINTERPRET_CAST.
+	* gdbtypes.c (class_types_same_p): New function.
+	(is_ancestor): Use it.
+	(is_public_ancestor): New function.
+	(is_unique_ancestor_worker): Likewise.
+	(is_unique_ancestor): Likewise.
+	* gdbtypes.h (class_types_same_p, is_public_ancestor)
+	(is_unique_ancestor): Declare.
+	* valops.c (value_reinterpret_cast): New function.
+	(dynamic_cast_check_1): Likewise.
+	(dynamic_cast_check_2): Likewise.
+	(value_dynamic_cast): Likewise.
+	* value.h (value_reinterpret_cast, value_dynamic_cast): Declare.
+
 2010-01-18  Joel Brobecker  <brobecker@adacore.com>
 
 	Fix build failure when building without Python support.

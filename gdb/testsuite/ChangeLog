@@ -1,4 +1,10 @@
 2010-01-18  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/9680:
+	* gdb.cp/casts.cc: Add new classes and variables.
+	* gdb.cp/casts.exp: Test new operators.
+
+2010-01-18  Tom Tromey  <tromey@redhat.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.python/source2.py: New file.

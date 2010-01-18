@@ -1367,7 +1367,13 @@ extern int get_vptr_fieldno (struct type *, struct type **);
 
 extern int get_discrete_bounds (struct type *, LONGEST *, LONGEST *);
 
+extern int class_types_same_p (const struct type *, const struct type *);
+
 extern int is_ancestor (struct type *, struct type *);
+
+extern int is_public_ancestor (struct type *, struct type *);
+
+extern int is_unique_ancestor (struct type *, struct value *);
 
 /* Overload resolution */
 

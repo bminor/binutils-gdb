@@ -206,6 +206,7 @@ static struct stoken operator_stoken (const char *);
 %token ERROR
 %token NEW DELETE
 %type <sval> operator
+%token REINTERPRET_CAST DYNAMIC_CAST STATIC_CAST CONST_CAST
 
 /* Special type cases, put in to allow the parser to distinguish different
    legal basetypes.  */
@@ -589,6 +590,32 @@ exp	:	SIZEOF '(' type ')'	%prec UNARY
 			  CHECK_TYPEDEF ($3);
 			  write_exp_elt_longcst ((LONGEST) TYPE_LENGTH ($3));
 			  write_exp_elt_opcode (OP_LONG); }
+	;
+
+exp	:	REINTERPRET_CAST '<' type '>' '(' exp ')' %prec UNARY
+			{ write_exp_elt_opcode (UNOP_REINTERPRET_CAST);
+			  write_exp_elt_type ($3);
+			  write_exp_elt_opcode (UNOP_REINTERPRET_CAST); }
+	;
+
+exp	:	STATIC_CAST '<' type '>' '(' exp ')' %prec UNARY
+			{ write_exp_elt_opcode (UNOP_CAST);
+			  write_exp_elt_type ($3);
+			  write_exp_elt_opcode (UNOP_CAST); }
+	;
+
+exp	:	DYNAMIC_CAST '<' type '>' '(' exp ')' %prec UNARY
+			{ write_exp_elt_opcode (UNOP_DYNAMIC_CAST);
+			  write_exp_elt_type ($3);
+			  write_exp_elt_opcode (UNOP_DYNAMIC_CAST); }
+	;
+
+exp	:	CONST_CAST '<' type '>' '(' exp ')' %prec UNARY
+			{ /* We could do more error checking here, but
+			     it doesn't seem worthwhile.  */
+			  write_exp_elt_opcode (UNOP_CAST);
+			  write_exp_elt_type ($3);
+			  write_exp_elt_opcode (UNOP_CAST); }
 	;
 
 string_exp:
@@ -1894,7 +1921,12 @@ static const struct token ident_tokens[] =
     {"or", OROR, BINOP_END, 1},
     {"or_eq", ASSIGN_MODIFY, BINOP_BITWISE_IOR, 1},
     {"xor", '^', OP_NULL, 1},
-    {"xor_eq", ASSIGN_MODIFY, BINOP_BITWISE_XOR, 1}
+    {"xor_eq", ASSIGN_MODIFY, BINOP_BITWISE_XOR, 1},
+
+    {"const_cast", CONST_CAST, OP_NULL, 1 },
+    {"dynamic_cast", DYNAMIC_CAST, OP_NULL, 1 },
+    {"static_cast", STATIC_CAST, OP_NULL, 1 },
+    {"reinterpret_cast", REINTERPRET_CAST, OP_NULL, 1 }
   };
 
 /* When we find that lexptr (the global var defined in parse.c) is
@@ -1972,6 +2004,16 @@ scan_macro_cleanup (void *dummy)
   obstack_free (&expansion_obstack, NULL);
 }
 
+/* Return true iff the token represents a C++ cast operator.  */
+
+static int
+is_cast_operator (const char *token, int len)
+{
+  return (! strncmp (token, "dynamic_cast", len)
+	  || ! strncmp (token, "static_cast", len)
+	  || ! strncmp (token, "reinterpret_cast", len)
+	  || ! strncmp (token, "const_cast", len));
+}
 
 /* The scope used for macro expansion.  */
 static struct macro_scope *expression_macro_scope;
@@ -2235,16 +2277,19 @@ yylex (void)
 	 FIXME: This mishandles `print $a<4&&$a>3'.  */
 
       if (c == '<')
-	{ 
-               /* Scan ahead to get rest of the template specification.  Note
-                  that we look ahead only when the '<' adjoins non-whitespace
-                  characters; for comparison expressions, e.g. "a < b > c",
-                  there must be spaces before the '<', etc. */
+	{
+	  if (! is_cast_operator (tokstart, namelen))
+	    {
+	      /* Scan ahead to get rest of the template specification.  Note
+		 that we look ahead only when the '<' adjoins non-whitespace
+		 characters; for comparison expressions, e.g. "a < b > c",
+		 there must be spaces before the '<', etc. */
                
-               char * p = find_template_name_end (tokstart + namelen);
-               if (p)
-                 namelen = p - tokstart;
-               break;
+	      char * p = find_template_name_end (tokstart + namelen);
+	      if (p)
+		namelen = p - tokstart;
+	    }
+	  break;
 	}
       c = tokstart[++namelen];
     }

@@ -2413,6 +2413,22 @@ evaluate_subexp_standard (struct type *expect_type,
 	arg1 = value_cast (type, arg1);
       return arg1;
 
+    case UNOP_DYNAMIC_CAST:
+      (*pos) += 2;
+      type = exp->elts[pc + 1].type;
+      arg1 = evaluate_subexp (type, exp, pos, noside);
+      if (noside == EVAL_SKIP)
+	goto nosideret;
+      return value_dynamic_cast (type, arg1);
+
+    case UNOP_REINTERPRET_CAST:
+      (*pos) += 2;
+      type = exp->elts[pc + 1].type;
+      arg1 = evaluate_subexp (type, exp, pos, noside);
+      if (noside == EVAL_SKIP)
+	goto nosideret;
+      return value_reinterpret_cast (type, arg1);
+
     case UNOP_MEMVAL:
       (*pos) += 2;
       arg1 = evaluate_subexp (expect_type, exp, pos, noside);
