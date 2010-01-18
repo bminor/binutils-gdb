@@ -1,6 +1,6 @@
 /* Support for the generic parts of most COFF variants, for BFD.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -3093,8 +3093,29 @@ coff_compute_section_file_positions (bfd * abfd)
   asection *previous = NULL;
   file_ptr sofar = bfd_coff_filhsz (abfd);
   bfd_boolean align_adjust;
+  int target_index;
 #ifdef ALIGN_SECTIONS_IN_FILE
   file_ptr old_sofar;
+#endif
+
+#ifdef COFF_IMAGE_WITH_PE
+  int page_size;
+
+  if (coff_data (abfd)->link_info)
+    {
+      page_size = pe_data (abfd)->pe_opthdr.FileAlignment;
+
+      /* If no file alignment has been set, default to one.
+	 This repairs 'ld -r' for arm-wince-pe target.  */
+      if (page_size == 0)
+	page_size = 1;
+    }
+  else
+    page_size = PE_DEF_FILE_ALIGNMENT;
+#else
+#ifdef COFF_PAGE_SIZE
+  int page_size = COFF_PAGE_SIZE;
+#endif
 #endif
 
 #ifdef RS6000COFF_C
@@ -3136,26 +3157,6 @@ coff_compute_section_file_positions (bfd * abfd)
     }
 #endif
 
-#ifdef COFF_IMAGE_WITH_PE
-  int page_size;
-
-  if (coff_data (abfd)->link_info)
-    {
-      page_size = pe_data (abfd)->pe_opthdr.FileAlignment;
-
-      /* If no file alignment has been set, default to one.
-	 This repairs 'ld -r' for arm-wince-pe target.  */
-      if (page_size == 0)
-	page_size = 1;
-    }
-  else
-    page_size = PE_DEF_FILE_ALIGNMENT;
-#else
-#ifdef COFF_PAGE_SIZE
-  int page_size = COFF_PAGE_SIZE;
-#endif
-#endif
-
   if (bfd_get_start_address (abfd))
     /*  A start address may have been added to the original file. In this
 	case it will need an optional header to record it.  */
@@ -3191,7 +3192,6 @@ coff_compute_section_file_positions (bfd * abfd)
     unsigned int count;
     asection **section_list;
     unsigned int i;
-    int target_index;
     bfd_size_type amt;
 
 #ifdef COFF_PAGE_SIZE
@@ -3254,13 +3254,19 @@ coff_compute_section_file_positions (bfd * abfd)
 #else /* ! COFF_IMAGE_WITH_PE */
   {
     /* Set the target_index field.  */
-    int target_index;
-
     target_index = 1;
     for (current = abfd->sections; current != NULL; current = current->next)
       current->target_index = target_index++;
   }
 #endif /* ! COFF_IMAGE_WITH_PE */
+
+  if (target_index >= 32768)
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      (*_bfd_error_handler)
+	(_("%B: too many sections (%d)"), abfd, target_index);
+      return FALSE;
+    }
 
   align_adjust = FALSE;
   for (current = abfd->sections;

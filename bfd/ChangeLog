@@ -1,3 +1,10 @@
+2010-01-18  Alan Modra  <amodra@gmail.com>
+
+	PR 11168
+	* coffcode.h (coff_compute_section_file_positions): Move Rs6000COFF_C
+	block past vars in COFF_IMAGE_WITH_PE block.  Report error on more
+	than 32k sections.
+
 2010-01-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix compilation warning on gcc-3.4.
