@@ -1,3 +1,8 @@
+2010-01-19  Daisuke Hatayama  <d.hatayama@jp.fujitsu.com>
+	    Alan Modra <amodra@gmail.com>
+
+        * readelf.c (process_file_header): Handle e_phnum extension.
+
 2010-01-14  Tristan Gingold  <gingold@adacore.com>
 
 	* dwarf.c (get_AT_name): Handle DW_AT_use_GNAT_descriptive_type
