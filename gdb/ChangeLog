@@ -1,5 +1,9 @@
 2010-01-19  Joel Brobecker  <brobecker@adacore.com>
 
+	* NEWS: Add entry for "set/show ada trust-PAD-over-XVS" commands.
+
+2010-01-19  Joel Brobecker  <brobecker@adacore.com>
+
 	* configure.host: Make x86_64-*-solaris2.1[0-9]* an alias of
 	i[34567]86-*-solaris2.1[0-9]*.
 	* configure.tgt: Likewise.
