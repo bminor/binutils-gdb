@@ -1,3 +1,12 @@
+2010-01-19  Daisuke Hatayama  <d.hatayama@jp.fujitsu.com>
+	    Alan Modra <amodra@gmail.com>
+
+        * elfcode.h (elf_swap_ehdr_out): Handle e_phnum > 0xffff.
+	(elf_object_p): Read e_phnum extension.
+	(elf_write_shdrs_and_ehdr): Write e_phnum extension.
+        * elfcore.h (elf_core_file_p): Read e_phnum extension.  Sanity check
+	that we can read last program header.
+
 2010-01-19  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* elf32-arm.c (elf32_arm_howto_table_1): Correct bitsize of
