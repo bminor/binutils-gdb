@@ -81,6 +81,14 @@ info variables
   The info variables command now displays variable definitions.  Files
   which only declare a variable are not shown.
 
+source
+  The source command is now capable of sourcing Python scripts.
+  This feature is dependent on the debugger being build with Python
+  support.
+
+  Related to this enhancement is also the introduction of a new command
+  "set script-extension" (see below).
+
 * New commands (for set/show, see "New options" below)
 
 record save [<FILENAME>]
@@ -162,6 +170,15 @@ show disconnected-tracing
    If set to 1, the target is instructed to continue tracing if it
    loses its connection to GDB.  If 0, the target is to stop tracing
    upon disconnection.
+
+set script-extension off|soft|strict
+show script-extension
+   If set to "off", the debugger does not perform any script language
+   recognition, and all sourced files are assumed to be GDB scripts.
+   If set to "soft" (the default), files are sourced according to
+   filename extension, falling back to GDB scripts if the first
+   evaluation failed.
+   If set to "strict", files are sourced according to filename extension.
 
 * New remote packets
 

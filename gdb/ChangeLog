@@ -1,5 +1,11 @@
 2010-01-19  Joel Brobecker  <brobecker@adacore.com>
 
+	* NEWS: Document the source command enhancement allowing it
+	to load Python scripts. Document the "set/show script-extension"
+	commands.
+
+2010-01-19  Joel Brobecker  <brobecker@adacore.com>
+
 	Add -Wunused-function to compile flags.
 	* configure.ac: Add -Wunused-function to build_warnings.
 	* configure: Regenerate.
