@@ -1305,41 +1305,6 @@ hppa_write_pc (struct regcache *regcache, CORE_ADDR pc)
   regcache_cooked_write_unsigned (regcache, HPPA_PCOQ_TAIL_REGNUM, pc + 4);
 }
 
-/* return the alignment of a type in bytes. Structures have the maximum
-   alignment required by their fields. */
-
-static int
-hppa_alignof (struct type *type)
-{
-  int max_align, align, i;
-  CHECK_TYPEDEF (type);
-  switch (TYPE_CODE (type))
-    {
-    case TYPE_CODE_PTR:
-    case TYPE_CODE_INT:
-    case TYPE_CODE_FLT:
-      return TYPE_LENGTH (type);
-    case TYPE_CODE_ARRAY:
-      return hppa_alignof (TYPE_INDEX_TYPE (type));
-    case TYPE_CODE_STRUCT:
-    case TYPE_CODE_UNION:
-      max_align = 1;
-      for (i = 0; i < TYPE_NFIELDS (type); i++)
-	{
-	  /* Bit fields have no real alignment. */
-	  /* if (!TYPE_FIELD_BITPOS (type, i)) */
-	  if (!TYPE_FIELD_BITSIZE (type, i))	/* elz: this should be bitsize */
-	    {
-	      align = hppa_alignof (TYPE_FIELD_TYPE (type, i));
-	      max_align = max (max_align, align);
-	    }
-	}
-      return max_align;
-    default:
-      return 4;
-    }
-}
-
 /* For the given instruction (INST), return any adjustment it makes
    to the stack pointer or zero for no adjustment. 
 

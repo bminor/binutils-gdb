@@ -244,40 +244,6 @@ static const unsigned char sigtramp_retcode_mipseb[RETCODE_SIZE] =
   0x00, 0x00, 0x00, 0x0c,	/* syscall */
 };
 
-static LONGEST
-mipsnbsd_sigtramp_offset (struct frame_info *this_frame)
-{
-  CORE_ADDR pc = get_frame_pc (this_frame);
-  const char *retcode = gdbarch_byte_order (get_frame_arch (this_frame))
-			== BFD_ENDIAN_BIG ? sigtramp_retcode_mipseb :
-			sigtramp_retcode_mipsel;
-  unsigned char ret[RETCODE_SIZE], w[4];
-  LONGEST off;
-  int i;
-
-  if (!safe_frame_unwind_memory (this_frame, pc, w, sizeof (w)))
-    return -1;
-
-  for (i = 0; i < RETCODE_NWORDS; i++)
-    {
-      if (memcmp (w, retcode + (i * 4), 4) == 0)
-	break;
-    }
-  if (i == RETCODE_NWORDS)
-    return -1;
-
-  off = i * 4;
-  pc -= off;
-
-  if (!safe_frame_unwind_memory (this_frame, pc, ret, sizeof (ret)))
-    return -1;
-
-  if (memcmp (ret, retcode, RETCODE_SIZE) == 0)
-    return off;
-
-  return -1;
-}
-
 /* Figure out where the longjmp will land.  We expect that we have
    just entered longjmp and haven't yet setup the stack frame, so the
    args are still in the argument regs.  MIPS_A0_REGNUM points at the
@@ -408,15 +374,6 @@ mipsnbsd_init_abi (struct gdbarch_info info,
 	       mipsnbsd_lp64_fetch_link_map_offsets));
 }
 
-
-static enum gdb_osabi
-mipsnbsd_core_osabi_sniffer (bfd *abfd)
-{
-  if (strcmp (bfd_get_target (abfd), "netbsd-core") == 0)
-    return GDB_OSABI_NETBSD_ELF;
-
-  return GDB_OSABI_UNKNOWN;
-}
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_mipsnbsd_tdep;

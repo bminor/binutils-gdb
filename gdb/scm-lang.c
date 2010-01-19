@@ -35,8 +35,6 @@
 #include "objfiles.h"
 
 extern void _initialize_scheme_language (void);
-static struct value *evaluate_subexp_scm (struct type *, struct expression *,
-				      int *, enum noside);
 static struct value *scm_lookup_name (struct gdbarch *, char *);
 static int in_eval_c (void);
 

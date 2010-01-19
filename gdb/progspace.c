@@ -243,20 +243,6 @@ save_current_program_space (void)
   return old_chain;
 }
 
-/* Find program space number NUM; returns NULL if not found.  */
-
-static struct program_space *
-find_program_space_by_num (int num)
-{
-  struct program_space *pspace;
-
-  ALL_PSPACES (pspace)
-    if (pspace->num == num)
-      return pspace;
-
-  return NULL;
-}
-
 /* Returns true iff there's no inferior bound to PSPACE.  */
 
 static int

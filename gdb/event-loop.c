@@ -262,7 +262,6 @@ static void create_file_handler (int fd, int mask, handler_func *proc,
 				 gdb_client_data client_data);
 static void handle_file_event (event_data data);
 static void check_async_event_handlers (void);
-static void check_async_signal_handlers (void);
 static int gdb_wait_for_event (int);
 static void poll_timers (void);
 

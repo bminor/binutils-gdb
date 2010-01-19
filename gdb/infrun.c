@@ -68,8 +68,6 @@ static int hook_stop_stub (void *);
 
 static int restore_selected_frame (void *);
 
-static void build_infrun (void);
-
 static int follow_fork (void);
 
 static void set_schedlock_func (char *args, int from_tty,
@@ -1856,13 +1854,14 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
      or a return command, we often end up a few instructions forward, still 
      within the original line we started.
 
-     An attempt was made to have init_execution_control_state () refresh
-     the prev_pc value before calculating the line number.  This approach
-     did not work because on platforms that use ptrace, the pc register
-     cannot be read unless the inferior is stopped.  At that point, we
-     are not guaranteed the inferior is stopped and so the regcache_read_pc ()
-     call can fail.  Setting the prev_pc value here ensures the value is 
-     updated correctly when the inferior is stopped.  */
+     An attempt was made to refresh the prev_pc at the same time the
+     execution_control_state is initialized (for instance, just before
+     waiting for an inferior event).  But this approach did not work
+     because of platforms that use ptrace, where the pc register cannot
+     be read unless the inferior is stopped.  At that point, we are not
+     guaranteed the inferior is stopped and so the regcache_read_pc() call
+     can fail.  Setting the prev_pc value here ensures the value is updated
+     correctly when the inferior is stopped.  */
   tp->prev_pc = regcache_read_pc (get_current_regcache ());
 
   /* Fill in with reasonable starting values.  */
@@ -1998,8 +1997,6 @@ struct execution_control_state
   int new_thread_event;
   int wait_some_more;
 };
-
-static void init_execution_control_state (struct execution_control_state *ecs);
 
 static void handle_inferior_event (struct execution_control_state *ecs);
 
@@ -2401,15 +2398,6 @@ set_step_info (struct frame_info *frame, struct symtab_and_line sal)
 
   tp->current_symtab = sal.symtab;
   tp->current_line = sal.line;
-}
-
-/* Prepare an execution control state for looping through a
-   wait_for_inferior-type loop.  */
-
-static void
-init_execution_control_state (struct execution_control_state *ecs)
-{
-  ecs->random_signal = 0;
 }
 
 /* Clear context switchable stepping state.  */

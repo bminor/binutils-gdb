@@ -46,8 +46,6 @@
 
 static void target_info (char *, int);
 
-static void kill_or_be_killed (int);
-
 static void default_terminal_info (char *, int);
 
 static int default_watchpoint_addr_within_range (struct target_ops *,
@@ -72,8 +70,6 @@ void target_ignore (void);
 static void target_command (char *, int);
 
 static struct target_ops *find_default_run_target (char *);
-
-static void nosupport_runtime (void);
 
 static LONGEST default_xfer_partial (struct target_ops *ops,
 				     enum target_object object,
@@ -520,46 +516,9 @@ nosymbol (char *name, CORE_ADDR *addrp)
 }
 
 static void
-nosupport_runtime (void)
-{
-  if (ptid_equal (inferior_ptid, null_ptid))
-    noprocess ();
-  else
-    error (_("No run-time support for this"));
-}
-
-
-static void
 default_terminal_info (char *args, int from_tty)
 {
   printf_unfiltered (_("No saved terminal information.\n"));
-}
-
-/* This is the default target_create_inferior and target_attach function.
-   If the current target is executing, it asks whether to kill it off.
-   If this function returns without calling error(), it has killed off
-   the target, and the operation should be attempted.  */
-
-static void
-kill_or_be_killed (int from_tty)
-{
-  if (target_has_execution)
-    {
-      printf_unfiltered (_("You are already running a program:\n"));
-      target_files_info ();
-      if (query (_("Kill it? ")))
-	{
-	  target_kill ();
-	  if (target_has_execution)
-	    error (_("Killing the program did not help."));
-	  return;
-	}
-      else
-	{
-	  error (_("Program not killed."));
-	}
-    }
-  tcomplain ();
 }
 
 /* A default implementation for the to_get_ada_task_ptid target method.

@@ -1,3 +1,26 @@
+2010-01-19  Joel Brobecker  <brobecker@adacore.com>
+
+	Delete unused or undefined functions.
+	* breakpoint.c (ep_parse_optional_filename): Delete.
+	* dcache.c (dcache_write_line): Remove declaration.
+	* infrun.c (build_infrun): Remove declaration.
+	* tracepoint.c (tracepoint_save_command): Remove declaration.
+	* linux-nat.c (init_lwp_list): Delete. No longer used.
+	* event-loop.c (check_async_signal_handlers): Delete declaration.
+	* infrun.c (init_execution_control_state): Delete.
+	(proceed): Update comment to avoid mentioning
+	init_execution_control_state.
+	* target.c (kill_or_be_killed, nosupport_runtime): Delete.
+	* ada-lang.c (ada_to_static_fixed_value): Delete.
+	* scm-lang.c (evaluate_subexp_scm): Delete declaration.
+	* cp-namespace.c (cp_copy_usings): Delete.
+	* xml-syscall.c (xml_number_of_syscalls): Delete.
+	* progspace.c (find_program_space_by_num): Delete.
+	* inflow.c (handle_sigio): Delete declaration.
+	* hppa-tdep.c (hppa_alignof): Delete.
+	* mipsnbsd-tdep.c (mipsnbsd_sigtramp_offset)
+	(mipsnbsd_core_osabi_sniffer): Delete.
+
 2010-01-18  Tom Tromey  <tromey@redhat.com>
 
 	PR c++/9680:

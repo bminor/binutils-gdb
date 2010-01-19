@@ -33,9 +33,6 @@
 #include "frame.h"
 #include "buildsym.h"
 
-static struct using_direct *cp_copy_usings (struct using_direct *using,
-					    struct obstack *obstack);
-
 static struct symbol *lookup_namespace_scope (const char *name,
 					      const char *linkage_name,
 					      const struct block *block,
@@ -220,36 +217,6 @@ cp_add_using (const char *dest,
   retval->next = next;
 
   return retval;
-}
-
-/* Make a copy of the using directives in the list pointed to by
-   USING, using OBSTACK to allocate memory.  Free all memory pointed
-   to by USING via xfree.  */
-
-static struct using_direct *
-cp_copy_usings (struct using_direct *using,
-		struct obstack *obstack)
-{
-  if (using == NULL)
-    {
-      return NULL;
-    }
-  else
-    {
-      struct using_direct *retval
-	= obstack_alloc (obstack, sizeof (struct using_direct));
-      retval->import_src = obsavestring (using->import_src, strlen (using->import_src),
-				    obstack);
-      retval->import_dest = obsavestring (using->import_dest, strlen (using->import_dest),
-				    obstack);
-      retval->next = cp_copy_usings (using->next, obstack);
-
-      xfree (using->import_src);
-      xfree (using->import_dest);
-      xfree (using);
-
-      return retval;
-    }
 }
 
 /* The C++-specific version of name lookup for static and global

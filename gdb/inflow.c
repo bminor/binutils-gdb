@@ -43,10 +43,6 @@
 #define O_NOCTTY 0
 #endif
 
-#if defined (SIGIO) && defined (FASYNC) && defined (FD_SET) && defined (F_SETOWN)
-static void handle_sigio (int);
-#endif
-
 extern void _initialize_inflow (void);
 
 static void pass_signal (int);

@@ -1105,25 +1105,6 @@ status_to_str (int status)
   return buf;
 }
 
-/* Initialize the list of LWPs.  Note that this module, contrary to
-   what GDB's generic threads layer does for its thread list,
-   re-initializes the LWP lists whenever we mourn or detach (which
-   doesn't involve mourning) the inferior.  */
-
-static void
-init_lwp_list (void)
-{
-  struct lwp_info *lp, *lpnext;
-
-  for (lp = lwp_list; lp; lp = lpnext)
-    {
-      lpnext = lp->next;
-      xfree (lp);
-    }
-
-  lwp_list = NULL;
-}
-
 /* Remove all LWPs belong to PID from the lwp list.  */
 
 static void

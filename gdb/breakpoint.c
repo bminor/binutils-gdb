@@ -187,8 +187,6 @@ static void stopat_command (char *arg, int from_tty);
 
 static char *ep_parse_optional_if_clause (char **arg);
 
-static char *ep_parse_optional_filename (char **arg);
-
 static void catch_exception_command_1 (enum exception_event_kind ex_event, 
 				       char *arg, int tempflag, int from_tty);
 
@@ -7649,42 +7647,6 @@ ep_parse_optional_if_clause (char **arg)
   (*arg) += strlen (cond_string);
 
   return cond_string;
-}
-
-/* This function attempts to parse an optional filename from the arg
-   string.  If one is not found, it returns NULL.
-
-   Else, it returns a pointer to the parsed filename.  (This function
-   makes no attempt to verify that a file of that name exists, or is
-   accessible.)  And, it updates arg to point to the first character
-   following the parsed filename in the arg string.
-
-   Note that clients needing to preserve the returned filename for
-   future access should copy it to their own buffers. */
-static char *
-ep_parse_optional_filename (char **arg)
-{
-  static char filename[1024];
-  char *arg_p = *arg;
-  int i;
-  char c;
-
-  if ((*arg_p == '\0') || isspace (*arg_p))
-    return NULL;
-
-  for (i = 0;; i++)
-    {
-      c = *arg_p;
-      if (isspace (c))
-	c = '\0';
-      filename[i] = c;
-      if (c == '\0')
-	break;
-      arg_p++;
-    }
-  *arg = arg_p;
-
-  return filename;
 }
 
 /* Commands to deal with catching events, such as signals, exceptions,

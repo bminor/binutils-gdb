@@ -7575,22 +7575,6 @@ ada_to_fixed_value (struct value *val)
                                     value_address (val),
                                     val);
 }
-
-/* A value representing VAL, but with a standard (static-sized) type
-   chosen to approximate the real type of VAL as well as possible, but
-   without consulting any runtime values.  For Ada dynamic-sized
-   types, therefore, the type of the result is likely to be inaccurate.  */
-
-static struct value *
-ada_to_static_fixed_value (struct value *val)
-{
-  struct type *type =
-    to_static_fixed_type (static_unwrap_type (value_type (val)));
-  if (type == value_type (val))
-    return val;
-  else
-    return coerce_unspec_val_to_type (val, type);
-}
 
 
 /* Attributes */

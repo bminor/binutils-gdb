@@ -117,8 +117,6 @@ typedef void (block_func) (struct dcache_block *block, void *param);
 
 static struct dcache_block *dcache_hit (DCACHE *dcache, CORE_ADDR addr);
 
-static int dcache_write_line (DCACHE *dcache, struct dcache_block *db);
-
 static int dcache_read_line (DCACHE *dcache, struct dcache_block *db);
 
 static struct dcache_block *dcache_alloc (DCACHE *dcache, CORE_ADDR addr);

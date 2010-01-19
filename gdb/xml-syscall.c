@@ -354,13 +354,6 @@ xml_get_syscall_name (const struct syscalls_info *sysinfo,
   return NULL;
 }
 
-static int
-xml_number_of_syscalls (const struct syscalls_info *sysinfo)
-{
-  return (sysinfo == NULL ? 0 : VEC_length (syscall_desc_p,
-                                            sysinfo->syscalls));
-}
-
 static const char **
 xml_list_of_syscalls (const struct syscalls_info *sysinfo)
 {

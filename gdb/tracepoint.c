@@ -164,7 +164,6 @@ static void trace_find_tracepoint_command (char *, int);
 static void trace_find_line_command (char *, int);
 static void trace_find_range_command (char *, int);
 static void trace_find_outside_command (char *, int);
-static void tracepoint_save_command (char *, int);
 static void trace_dump_command (char *, int);
 
 /* support routines */
