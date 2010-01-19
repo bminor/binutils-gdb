@@ -3217,6 +3217,17 @@ watchpoint_check (void *p)
       struct gdbarch *frame_arch = get_frame_arch (frame);
       CORE_ADDR frame_pc = get_frame_pc (frame);
 
+      /* in_function_epilogue_p() returns a non-zero value if we're still
+	 in the function but the stack frame has already been invalidated.
+	 Since we can't rely on the values of local variables after the
+	 stack has been destroyed, we are treating the watchpoint in that
+	 state as `not changed' without further checking.  Don't mark
+	 watchpoints as changed if the current frame is in an epilogue -
+	 even if they are in some other frame, our view of the stack
+	 is likely to be wrong and frame_find_by_id could error out.  */
+      if (gdbarch_in_function_epilogue_p (frame_arch, frame_pc))
+	return WP_VALUE_NOT_CHANGED;
+
       fr = frame_find_by_id (b->watchpoint_frame);
       within_current_scope = (fr != NULL);
 
@@ -3232,17 +3243,6 @@ watchpoint_check (void *p)
 				SYMBOL_BLOCK_VALUE (function)))
 	    within_current_scope = 0;
 	}
-
-      /* in_function_epilogue_p() returns a non-zero value if we're still
-	 in the function but the stack frame has already been invalidated.
-	 Since we can't rely on the values of local variables after the
-	 stack has been destroyed, we are treating the watchpoint in that
-	 state as `not changed' without further checking.  Don't mark
-	 watchpoints as changed if the current frame is in an epilogue -
-	 even if they are in some other frame, our view of the stack
-	 is likely to be wrong.  */
-      if (gdbarch_in_function_epilogue_p (frame_arch, frame_pc))
-	return WP_VALUE_NOT_CHANGED;
 
       if (within_current_scope)
 	/* If we end up stopping, the current frame will get selected

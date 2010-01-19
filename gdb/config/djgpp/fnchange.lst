@@ -401,6 +401,9 @@
 @V@/gdb/testsuite/gdb.base/watchpoint-solib.c @V@/gdb/testsuite/gdb.base/wp-solib.c
 @V@/gdb/testsuite/gdb.base/watchpoint-hw.exp @V@/gdb/testsuite/gdb.base/wp-hw.exp
 @V@/gdb/testsuite/gdb.base/watchpoint-solib.exp @V@/gdb/testsuite/gdb.base/wp-solib.exp
+@V@/gdb/testsuite/gdb.base/watchpoint-cond-gone.exp @V@/gdb/testsuite/gdb.base/wpcondg.exp
+@V@/gdb/testsuite/gdb.base/watchpoint-cond-gone.c @V@/gdb/testsuite/gdb.base/wpcondg.c
+@V@/gdb/testsuite/gdb.base/watchpoint-cond-gone-stripped.c @V@/gdb/testsuite/gdb.base/wpcondgs.c
 @V@/gdb/testsuite/gdb.cell/coremaker-spu.c @V@/gdb/testsuite/gdb.cell/core-spu.c
 @V@/gdb/testsuite/gdb.cell/ea-cache-spu.c @V@/gdb/testsuite/gdb.cell/ea-spu.c
 @V@/gdb/testsuite/gdb.cell/mem-access-spu.c @V@/gdb/testsuite/gdb.cell/mem-spu.c

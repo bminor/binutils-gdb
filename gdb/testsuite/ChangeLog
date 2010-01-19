@@ -1,3 +1,8 @@
+2010-01-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/watchpoint-cond-gone.exp, gdb.base/watchpoint-cond-gone.c,
+	gdb.base/watchpoint-cond-gone-stripped.c: New.
+
 2010-01-19  Tom Tromey  <tromey@redhat.com>
 
 	PR c++/8000:

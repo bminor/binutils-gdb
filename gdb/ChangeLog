@@ -1,3 +1,12 @@
+2010-01-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* breakpoint.c (watchpoint_check): Check the call
+	gdbarch_in_function_epilogue_p before calling frame_find_by_id.
+	Extend the comment.
+	* config/djgpp/fnchange.lst: Add translations for 
+	watchpoint-cond-gone.exp, watchpoint-cond-gone.c and
+	watchpoint-cond-gone-stripped.c.
+
 2010-01-19  Tom Tromey  <tromey@redhat.com>
 
 	PR c++/8000:
