@@ -858,6 +858,10 @@ read_attribute_value (struct attribute *attr,
       attr->u.val = read_8_bytes (abfd, info_ptr);
       info_ptr += 8;
       break;
+    case DW_FORM_ref_sig8:
+      attr->u.val = read_8_bytes (abfd, info_ptr);
+      info_ptr += 8;
+      break;
     case DW_FORM_ref_udata:
       attr->u.val = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
       info_ptr += bytes_read;
