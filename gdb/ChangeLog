@@ -1,5 +1,11 @@
 2010-01-19  Joel Brobecker  <brobecker@adacore.com>
 
+	Add -Wunused-function to compile flags.
+	* configure.ac: Add -Wunused-function to build_warnings.
+	* configure: Regenerate.
+
+2010-01-19  Joel Brobecker  <brobecker@adacore.com>
+
 	"delete" ada-lex.c:input function, not used.
 	* ada-lex.l: #define YY_NO_INPUT.
 
