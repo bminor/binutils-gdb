@@ -164,7 +164,7 @@ gdb_expect {
 # Break on a function in a namespace
 
 gdb_test "break AAA::xyzq" \
-    "Breakpoint.*at $hex: file.*namespace.cc, line 42\\."
+    "Breakpoint.*at $hex: file.*namespace.cc, line 47\\."
 
 # Call a function in a nested namespace
 
@@ -189,7 +189,7 @@ gdb_expect {
 # Break on a function in a nested namespace
 
 gdb_test "break BBB::CCC::xyzq" \
-    "Breakpoint.*at $hex: file.*namespace.cc, line 58\\."
+    "Breakpoint.*at $hex: file.*namespace.cc, line 63\\."
 
 # Print address of a function in a class in a namespace
 
@@ -214,7 +214,7 @@ gdb_expect {
 # Break on a function in a class in a namespace
 
 gdb_test "break BBB::Class::xyzq" \
-    "Breakpoint.*at $hex: file.*namespace.cc, line 63\\."
+    "Breakpoint.*at $hex: file.*namespace.cc, line 68\\."
 
 # Test to see if the appropriate namespaces are in scope when trying
 # to print out stuff from within a function defined within a
@@ -271,3 +271,6 @@ gdb_test "print G::Xg" "\\$\[0-9\].* = 10"
 gdb_test "print G::XgX" "\\$\[0-9\].* = 11"
 gdb_test "print cXOtherFile" "No symbol \"cXOtherFile\" in current context."
 gdb_test "print XOtherFile" "No symbol \"XOtherFile\" in current context."
+
+# Enum tests.
+gdb_test "print AAA::ALPHA" "\\$\[0-9\].* = AAA::ALPHA"

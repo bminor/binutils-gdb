@@ -1,3 +1,9 @@
+2010-01-19  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/8000:
+	* dwarf2read.c (partial_die_parent_scope): Put enumeration type
+	into parent scope, and enumerator into grandparent scope.
+
 2010-01-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Add entry for "set/show ada trust-PAD-over-XVS" commands.

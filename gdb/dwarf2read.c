@@ -2386,7 +2386,8 @@ partial_die_parent_scope (struct partial_die_info *pdi,
       || parent->tag == DW_TAG_structure_type
       || parent->tag == DW_TAG_class_type
       || parent->tag == DW_TAG_interface_type
-      || parent->tag == DW_TAG_union_type)
+      || parent->tag == DW_TAG_union_type
+      || parent->tag == DW_TAG_enumeration_type)
     {
       if (grandparent_scope == NULL)
 	parent->scope = parent->name;
@@ -2394,7 +2395,7 @@ partial_die_parent_scope (struct partial_die_info *pdi,
 	parent->scope = typename_concat (&cu->comp_unit_obstack, grandparent_scope,
 					 parent->name, cu);
     }
-  else if (parent->tag == DW_TAG_enumeration_type)
+  else if (parent->tag == DW_TAG_enumerator)
     /* Enumerators should not get the name of the enumeration as a prefix.  */
     parent->scope = grandparent_scope;
   else

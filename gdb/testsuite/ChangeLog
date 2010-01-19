@@ -1,3 +1,11 @@
+2010-01-19  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/8000:
+	* gdb.cp/namespace.exp: Use new enum.  Fix line numbers in
+	existing tests.
+	* gdb.cp/namespace.cc (AAA::SomeEnum): New enum.
+	(main): Use AAA::SomeEnum.
+
 2010-01-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.mi/mi-break.exp (set line_callme_head, set line_callme_body): New.

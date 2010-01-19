@@ -8,6 +8,11 @@ namespace AAA {
     int xx;
     int fum (int);
   };
+  enum SomeEnum {
+    ALPHA,
+    BETA,
+    DELTA
+  };
 };
 
 int AAA::inA::fum (int i)
@@ -174,6 +179,7 @@ int main ()
 {
   using AAA::inA;
   char c1;
+  AAA::SomeEnum var = AAA::ALPHA;
 
   using namespace BBB;
   
