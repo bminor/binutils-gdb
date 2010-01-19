@@ -1,3 +1,11 @@
+2010-01-19  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* elf32-arm.c (elf32_arm_howto_table_1): Correct bitsize of
+	R_ARM_THM_CALL entry.
+	(elf32_arm_final_link_relocate): Correct calculation of
+	reloc_signed_max when doing a R_ARM_THM_CALL, R_ARM_THM_XPC22,
+	or R_ARM_THM_JUMP24 relocation.
+
 2010-01-18  Alan Modra  <amodra@gmail.com>
 
 	PR 11168

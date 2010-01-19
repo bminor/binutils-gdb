@@ -1,6 +1,6 @@
 /* 32-bit ELF support for ARM
    Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
-   2008, 2009  Free Software Foundation, Inc.
+   2008, 2009, 2010  Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -222,7 +222,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
   HOWTO (R_ARM_THM_CALL,	/* type */
 	 1,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 25,			/* bitsize */
+	 24,			/* bitsize */
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed,/* complain_on_overflow */
@@ -7552,7 +7552,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	bitsize = howto->bitsize;
 	if (!thumb2)
 	  bitsize -= 2;
-	reloc_signed_max = ((1 << (bitsize - 1)) - 1) >> howto->rightshift;
+	reloc_signed_max = (1 << (bitsize - 1)) - 1;
 	reloc_signed_min = ~reloc_signed_max;
 
 	/* Assumes two's complement.  */
