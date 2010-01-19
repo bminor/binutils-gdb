@@ -184,15 +184,6 @@ int remote_debug = 0;
 char *lim_at_start;
 #endif
 
-/* Signal to catch ^Z typed while reading a command: SIGTSTP or SIGCONT.  */
-
-#ifndef STOP_SIGNAL
-#ifdef SIGTSTP
-#define STOP_SIGNAL SIGTSTP
-static void stop_sig (int);
-#endif
-#endif
-
 /* Hooks for alternate command interfaces.  */
 
 /* Called after most modules have been initialized, but before taking users
@@ -785,57 +776,6 @@ gdb_readline_wrapper (char *prompt)
 }
 
 
-#ifdef STOP_SIGNAL
-static void
-stop_sig (int signo)
-{
-#if STOP_SIGNAL == SIGTSTP
-  signal (SIGTSTP, SIG_DFL);
-#if HAVE_SIGPROCMASK
-  {
-    sigset_t zero;
-
-    sigemptyset (&zero);
-    sigprocmask (SIG_SETMASK, &zero, 0);
-  }
-#elif HAVE_SIGSETMASK
-  sigsetmask (0);
-#endif
-  kill (getpid (), SIGTSTP);
-  signal (SIGTSTP, stop_sig);
-#else
-  signal (STOP_SIGNAL, stop_sig);
-#endif
-  printf_unfiltered ("%s", get_prompt ());
-  gdb_flush (gdb_stdout);
-
-  /* Forget about any previous command -- null line now will do nothing.  */
-  dont_repeat ();
-}
-#endif /* STOP_SIGNAL */
-
-/* Initialize signal handlers. */
-static void
-float_handler (int signo)
-{
-  /* This message is based on ANSI C, section 4.7.  Note that integer
-     divide by zero causes this, so "float" is a misnomer.  */
-  signal (SIGFPE, float_handler);
-  error (_("Erroneous arithmetic operation."));
-}
-
-static void
-do_nothing (int signo)
-{
-  /* Under System V the default disposition of a signal is reinstated after
-     the signal is caught and delivered to an application process.  On such
-     systems one must restore the replacement signal handler if one wishes
-     to continue handling the signal in one's program.  On BSD systems this
-     is not needed but it is harmless, and it simplifies the code to just do
-     it unconditionally. */
-  signal (signo, do_nothing);
-}
-
 /* The current saved history number from operate-and-get-next.
    This is -1 if not valid.  */
 static int operate_saved_history = -1;

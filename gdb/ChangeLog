@@ -1,3 +1,7 @@
+2010-01-19  Tom Tromey  <tromey@redhat.com>
+
+	* top.c (stop_sig, float_handler, do_nothing): Remove.
+
 2010-01-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* breakpoint.c (watchpoint_check): Check the call
