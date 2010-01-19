@@ -1,3 +1,19 @@
+2010-01-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.mi/mi-break.exp (set line_callme_head, set line_callme_body): New.
+	(test_ignore_count): Declare line_callme_body global.
+	(run to breakpoint with ignore count): Use line_callme_body.
+	* gdb.mi/mi-cli.exp (set line_main_head, set line_main_body)
+	(set line_main_hello, set line_main_return): Reindent.
+	(set line_callee4_head, set line_callee4_body, set line_callee4_next):
+	New.
+	(continue to callee4): Use line_callee4_body.
+	(check *stopped from CLI command): Use line_callee4_next.
+	* gdb.mi/mi2-cli.exp (set line_main_head, set line_main_body)
+	(set line_main_hello, set line_main_return): Reindent.
+	(set line_callee4_head, set line_callee4_body): New.
+	(continue to callee4): Use line_callee4_body.
+
 2010-01-18  Tom Tromey  <tromey@redhat.com>
 
 	PR c++/9680:

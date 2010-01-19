@@ -56,6 +56,8 @@ set line_callee1_head  [gdb_get_line_number "callee1 ("]
 set line_callee1_body  [expr $line_callee1_head + 2]
 set line_main_head     [gdb_get_line_number "main ("]
 set line_main_body     [expr $line_main_head + 2]
+set line_callme_head   [gdb_get_line_number "callme ("]
+set line_callme_body   [expr $line_callme_head + 2]
 
 set fullname "fullname=\"${fullname_syntax}${srcfile}\""
 
@@ -152,6 +154,7 @@ proc test_rbreak_creation_and_listing {} {
 
 proc test_ignore_count {} {
     global mi_gdb_prompt
+    global line_callme_body
 
     mi_gdb_test "-break-insert -i 1 callme" \
         "\\^done.*ignore=\"1\".*" \
@@ -159,7 +162,7 @@ proc test_ignore_count {} {
 
     mi_run_cmd
 
-    mi_expect_stop "breakpoint-hit" "callme" "\{name=\"i\",value=\"2\"\}" ".*basics.c" "52" \
+    mi_expect_stop "breakpoint-hit" "callme" "\{name=\"i\",value=\"2\"\}" ".*basics.c" $line_callme_body \
         {"" "disp=\"keep\"" } "run to breakpoint with ignore count"
 }
 

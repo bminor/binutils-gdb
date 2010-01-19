@@ -63,10 +63,12 @@ mi_gdb_test "-interpreter-exec console \"file $binfile\"" \
 
 mi_run_to_main
 
-set line_main_head   [gdb_get_line_number "main ("]
-set line_main_body   [expr $line_main_head + 2]
-set line_main_hello  [gdb_get_line_number "Hello, World!"]
-set line_main_return [expr $line_main_hello + 2]
+set line_main_head    [gdb_get_line_number "main ("]
+set line_main_body    [expr $line_main_head + 2]
+set line_main_hello   [gdb_get_line_number "Hello, World!"]
+set line_main_return  [expr $line_main_hello + 2]
+set line_callee4_head [gdb_get_line_number "callee4 ("]
+set line_callee4_body [expr $line_callee4_head + 2]
 
 mi_gdb_test "-interpreter-exec console \"set args foobar\"" \
   {\^done} \
@@ -97,7 +99,7 @@ mi_gdb_test "-interpreter-exec console \"list\"" \
   ".*\~\"$line_main_body\[\\\\t \]*callee1.*;\\\\n\".*\\^done" \
   "-interpreter-exec console \"list\""
 
-mi_execute_to "exec-continue" "breakpoint-hit" "callee4" "" ".*basics.c" "28" \
+mi_execute_to "exec-continue" "breakpoint-hit" "callee4" "" ".*basics.c" $line_callee4_body \
     { "" "disp=\"keep\"" } \
     "continue to callee4"
 
