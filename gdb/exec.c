@@ -145,12 +145,6 @@ exec_close_1 (int quitting)
 	  warning (_("cannot close \"%s\": %s"),
 		   vp->name, bfd_errmsg (bfd_get_error ()));
 
-      /* FIXME: This routine is #if 0'd in symfile.c.  What should we
-         be doing here?  Should we just free everything in
-         vp->objfile->symtabs?  Should free_objfile do that?
-         FIXME-as-well: free_objfile already free'd vp->name, so it isn't
-         valid here.  */
-      free_named_symtabs (vp->name);
       xfree (vp);
     }
 

@@ -215,8 +215,6 @@ extern void sort_pst_symbols (struct partial_symtab *);
 
 extern struct symtab *allocate_symtab (char *, struct objfile *);
 
-extern int free_named_symtabs (char *);
-
 extern void add_symtab_fns (struct sym_fns *);
 
 /* This enum encodes bit-flags passed as ADD_FLAGS parameter to

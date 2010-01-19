@@ -402,9 +402,6 @@ coff_end_symtab (struct objfile *objfile)
 
   symtab = end_symtab (current_source_end_addr, objfile, SECT_OFF_TEXT (objfile));
 
-  if (symtab != NULL)
-    free_named_symtabs (symtab->filename);
-
   /* Reinitialize for beginning of new file. */
   last_source_file = NULL;
 }

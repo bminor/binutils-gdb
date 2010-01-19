@@ -1,5 +1,19 @@
 2010-01-19  Joel Brobecker  <brobecker@adacore.com>
 
+	Delete free_named_symtabs and associated cleanup.
+	* symfile.h (free_named_symtabs): Delete declaration.
+	* symfile.c: Remove some commented out code (clear_symtab_users_once).
+	(cashier_psymtab): Comment function out.
+	Delete declaration.
+	(free_named_symtabs): Delete.
+	* coffread.c (coff_end_symtab): Remove call to free_named_symtabs.
+	* dbxread.c (end_psymtab): Likewise.
+	* dwarf2read.c (process_psymtab_comp_unit): Ditto.
+	* exec.c (exec_close_1): Ditto.
+	* xcoffread.c (xcoff_end_psymtab): Likewise.
+
+2010-01-19  Joel Brobecker  <brobecker@adacore.com>
+
 	* stack.c (print_block_frame_labels): Comment function out.
 
 2010-01-19  Joel Brobecker  <brobecker@adacore.com>

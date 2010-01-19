@@ -2016,12 +2016,6 @@ process_psymtab_comp_unit (struct objfile *objfile,
     (objfile->static_psymbols.list + pst->statics_offset);
   sort_pst_symbols (pst);
 
-  /* If there is already a psymtab or symtab for a file of this
-     name, remove it. (If there is a symtab, more drastic things
-     also happen.) This happens in VxWorks.  */
-  if (! this_cu->from_debug_types)
-    free_named_symtabs (pst->filename);
-
   info_ptr = (beg_of_comp_unit + cu.header.length
 	      + cu.header.initial_length_size);
 

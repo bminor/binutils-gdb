@@ -2048,11 +2048,6 @@ xcoff_end_psymtab (struct partial_symtab *pst, char **include_list,
 
   sort_pst_symbols (pst);
 
-  /* If there is already a psymtab or symtab for a file of this name,
-     remove it.  (If there is a symtab, more drastic things also
-     happen.)  This happens in VxWorks.  */
-  free_named_symtabs (pst->filename);
-
   if (num_includes == 0
       && number_dependencies == 0
       && pst->n_global_syms == 0
