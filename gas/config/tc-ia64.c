@@ -11699,7 +11699,6 @@ ia64_vms_note (void)
   char *p;
   asection *seg = now_seg;
   subsegT subseg = now_subseg;
-  Elf_Internal_Note i_note;
   asection *secp = NULL;
   char *bname;
   char buf [256];
@@ -11712,39 +11711,27 @@ ia64_vms_note (void)
 			 secp,
 			 SEC_HAS_CONTENTS | SEC_READONLY);
 
-  /* Module header note.  */
+  /* Module header note (MHD).  */
   bname = xstrdup (lbasename (out_file_name));
   if ((p = strrchr (bname, '.')))
     *p = '\0';
-
-  i_note.namesz = 8;
-  i_note.descsz = 40 + strlen (bname);
-  i_note.type = NT_VMS_MHD;
-
-  p = frag_more (sizeof (i_note.namesz));
-  number_to_chars_littleendian (p, i_note.namesz, 8);
-
-  p = frag_more (sizeof (i_note.descsz));
-  number_to_chars_littleendian (p, i_note.descsz, 8);
-
-  p = frag_more (sizeof (i_note.type));
-  number_to_chars_littleendian (p, i_note.type, 8);
+  
+  /* VMS note header is 24 bytes long.  */
+  p = frag_more (8 + 8 + 8);
+  number_to_chars_littleendian (p + 0, 8, 8);
+  number_to_chars_littleendian (p + 8, 40 + strlen (bname), 8);
+  number_to_chars_littleendian (p + 16, NT_VMS_MHD, 8);
 
   p = frag_more (8);
   strcpy (p, "IPF/VMS");
 
-  get_vms_time (buf);
-  p = frag_more (17);
-  strcpy (p, buf);
-
-  p = frag_more (17);
-  strcpy (p, "24-FEB-2005 15:00");
-
-  p = frag_more (strlen (bname) + 1);
+  p = frag_more (17 + 17 + strlen (bname) + 1 + 5);
+  get_vms_time (p);
+  strcpy (p + 17, "24-FEB-2005 15:00");
+  p += 17 + 17;
   strcpy (p, bname);
+  p += strlen (bname) + 1;
   free (bname);
-
-  p = frag_more (5);
   strcpy (p, "V1.0");
 
   frag_align (3, 0, 0);
@@ -11753,18 +11740,10 @@ ia64_vms_note (void)
   sprintf (buf, "GNU assembler version %s (%s) using BFD version %s",
 	   VERSION, TARGET_ALIAS, BFD_VERSION_STRING);
 
-  i_note.namesz = 8;
-  i_note.descsz = 1 + strlen (buf);
-  i_note.type = NT_VMS_LNM;
-
-  p = frag_more (sizeof (i_note.namesz));
-  number_to_chars_littleendian (p, i_note.namesz, 8);
-
-  p = frag_more (sizeof (i_note.descsz));
-  number_to_chars_littleendian (p, i_note.descsz, 8);
-
-  p = frag_more (sizeof (i_note.type));
-  number_to_chars_littleendian (p, i_note.type, 8);
+  p = frag_more (8 + 8 + 8);
+  number_to_chars_littleendian (p + 0, 8, 8);
+  number_to_chars_littleendian (p + 8, strlen (buf) + 1, 8);
+  number_to_chars_littleendian (p + 16, NT_VMS_LNM, 8);
 
   p = frag_more (8);
   strcpy (p, "IPF/VMS");
