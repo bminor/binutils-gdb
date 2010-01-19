@@ -19164,7 +19164,7 @@ each command as it is executed.  The option must be given before
 
 If @var{filename} ends in @samp{.py}, then @value{GDBN} evaluates the
 contents of the file as Python code.  If Python support is not compiled
-in to @value{GDBN}, then the file is assumed to contain @value{GDBN}
+into @value{GDBN}, then the file is assumed to contain @value{GDBN}
 commands, regardless of its extension.
 
 Commands that would ask for confirmation if used interactively proceed

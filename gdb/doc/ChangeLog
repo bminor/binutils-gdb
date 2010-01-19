@@ -1,3 +1,7 @@
+2010-01-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Command Files): Fix typo.
+
 2010-01-18  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (File Options): Document -x on .py files.
