@@ -302,6 +302,15 @@ enum EM
   // Old MN10200 objects used 0xdead (EM_MN10200 is correct).
 };
 
+// A special value found in the Ehdr e_phnum field.
+
+enum
+{
+  // Number of program segments stored in sh_info field of first
+  // section headre.
+  PN_XNUM = 0xffff
+};
+
 // Special section indices.
 
 enum

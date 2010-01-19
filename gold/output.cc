@@ -213,7 +213,9 @@ Output_section_headers::do_sized_write(Output_file* of)
     else
       oshdr.put_sh_link(shstrndx);
 
-    oshdr.put_sh_info(0);
+    size_t segment_count = this->segment_list_->size();
+    oshdr.put_sh_info(segment_count >= elfcpp::PN_XNUM ? segment_count : 0);
+
     oshdr.put_sh_addralign(0);
     oshdr.put_sh_entsize(0);
   }
@@ -470,8 +472,11 @@ Output_file_header::do_sized_write(Output_file* of)
   else
     {
       oehdr.put_e_phentsize(elfcpp::Elf_sizes<size>::phdr_size);
-      oehdr.put_e_phnum(this->segment_header_->data_size()
-			/ elfcpp::Elf_sizes<size>::phdr_size);
+      size_t phnum = (this->segment_header_->data_size()
+		      / elfcpp::Elf_sizes<size>::phdr_size);
+      if (phnum > elfcpp::PN_XNUM)
+	phnum = elfcpp::PN_XNUM;
+      oehdr.put_e_phnum(phnum);
     }
 
   oehdr.put_e_shentsize(elfcpp::Elf_sizes<size>::shdr_size);

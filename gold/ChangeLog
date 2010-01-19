@@ -1,3 +1,10 @@
+2010-01-19  Ian Lance Taylor  <iant@google.com>
+
+	* output.cc (Output_section_headers::do_sized_write): Write large
+	segment count to sh_info field.
+	(Output_file_header::do_sized_write): For large segment count,
+	write PN_XNUM to e_phnum field.
+
 2010-01-15  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
 
 	* arm.cc (Arm_relocate_functions::thm_jump6): New function.

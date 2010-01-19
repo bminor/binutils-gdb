@@ -1,3 +1,7 @@
+2010-01-19  Ian Lance Taylor  <iant@google.com>
+
+	* elfcpp.h (PN_XNUM): Define.
+
 2009-12-14  Ian Lance Taylor  <iant@google.com>
 
 	* elfcpp_file.h: Revert last patch.
