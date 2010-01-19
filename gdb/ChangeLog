@@ -1,5 +1,9 @@
 2010-01-19  Joel Brobecker  <brobecker@adacore.com>
 
+	* stack.c (print_block_frame_labels): Comment function out.
+
+2010-01-19  Joel Brobecker  <brobecker@adacore.com>
+
 	Delete unused or undefined functions.
 	* breakpoint.c (ep_parse_optional_filename): Delete.
 	* dcache.c (dcache_write_line): Remove declaration.

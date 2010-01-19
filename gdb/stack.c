@@ -1487,8 +1487,16 @@ print_block_frame_locals (struct block *b, struct frame_info *frame,
   return values_printed;
 }
 
+
 /* Same, but print labels.  */
 
+#if 0
+/* Commented out, as the code using this function has also been
+   commented out.  FIXME:brobecker/2009-01-13: Find out why the code
+   was commented out in the first place.  The discussion introducing
+   this change (2007-12-04: Support lexical blocks and function bodies
+   that occupy non-contiguous address ranges) did not explain why
+   this change was made.  */
 static int
 print_block_frame_labels (struct gdbarch *gdbarch, struct block *b,
 			  int *have_default, struct ui_file *stream)
@@ -1526,6 +1534,7 @@ print_block_frame_labels (struct gdbarch *gdbarch, struct block *b,
 
   return values_printed;
 }
+#endif
 
 /* Print on STREAM all the local variables in frame FRAME, including
    all the blocks active in that frame at its current PC.
