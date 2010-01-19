@@ -1,5 +1,10 @@
 2010-01-19  Joel Brobecker  <brobecker@adacore.com>
 
+	"delete" ada-lex.c:input function, not used.
+	* ada-lex.l: #define YY_NO_INPUT.
+
+2010-01-19  Joel Brobecker  <brobecker@adacore.com>
+
 	Delete free_named_symtabs and associated cleanup.
 	* symfile.h (free_named_symtabs): Delete declaration.
 	* symfile.c: Remove some commented out code (clear_symtab_users_once).

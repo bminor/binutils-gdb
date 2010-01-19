@@ -58,6 +58,10 @@ static int find_dot_all (const char *);
 #undef YY_DECL
 #define YY_DECL static int yylex ( void )
 
+/* Flex generates a static function "input" which is not used.
+   Defining YY_NO_INPUT comments it out.  */
+#define YY_NO_INPUT
+
 #undef YY_INPUT
 #define YY_INPUT(BUF, RESULT, MAX_SIZE) \
     if ( *lexptr == '\000' ) \
