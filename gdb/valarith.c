@@ -1128,6 +1128,18 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	      v = v1 < v2;
 	      break;
 
+	    case BINOP_GTR:
+	      v = v1 > v2;
+	      break;
+
+	    case BINOP_LEQ:
+	      v = v1 <= v2;
+	      break;
+
+	    case BINOP_GEQ:
+	      v = v1 >= v2;
+	      break;
+
 	    default:
 	      error (_("Invalid binary operation on numbers."));
 	    }
@@ -1237,8 +1249,24 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	      v = v1 == v2;
 	      break;
 
+            case BINOP_NOTEQUAL:
+              v = v1 != v2;
+              break;
+
 	    case BINOP_LESS:
 	      v = v1 < v2;
+	      break;
+
+	    case BINOP_GTR:
+	      v = v1 > v2;
+	      break;
+
+	    case BINOP_LEQ:
+	      v = v1 <= v2;
+	      break;
+
+	    case BINOP_GEQ:
+	      v = v1 >= v2;
 	      break;
 
 	    default:

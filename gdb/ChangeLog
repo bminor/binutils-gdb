@@ -1,3 +1,13 @@
+2010-01-20  Tom Tromey  <tromey@redhat.com>
+
+	PR backtrace/10770:
+	* valarith.c (value_binop): Handle BINOP_GTR, BINOP_LEQ, and
+	BINOP_GEQ.  Handle BINOP_NOTEQUAL in the signed case.
+	* dwarf2expr.c (new_dwarf_expr_context): Allocate
+	dwarf_stack_values, not CORE_ADDRs.
+	(execute_stack_op): Change DW_OP_div and comparison operators to
+	use signed operands.
+
 2010-01-20  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Per-inferior args and tty and environment.

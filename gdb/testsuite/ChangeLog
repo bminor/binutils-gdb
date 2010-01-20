@@ -1,3 +1,10 @@
+2010-01-20  Tom Tromey  <tromey@redhat.com>
+
+	PR backtrace/10770:
+	* gdb.dwarf2/pr10770.exp: New file.
+	* gdb.dwarf2/pr10770.c: New file.
+	* gdb.dwarf2/Makefile.in (EXECUTABLES): Add pr10770.
+
 2010-01-20  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.mi/mi-async.exp: Remove check for 'async' target, because

@@ -44,7 +44,8 @@ new_dwarf_expr_context (void)
   retval = xcalloc (1, sizeof (struct dwarf_expr_context));
   retval->stack_len = 0;
   retval->stack_allocated = 10;
-  retval->stack = xmalloc (retval->stack_allocated * sizeof (CORE_ADDR));
+  retval->stack = xmalloc (retval->stack_allocated
+			   * sizeof (struct dwarf_stack_value));
   retval->num_pieces = 0;
   retval->pieces = 0;
   retval->max_recursion_depth = 0x100;
@@ -712,7 +713,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	       the right width.  */
 	    CORE_ADDR first, second;
 	    enum exp_opcode binop;
-	    struct value *val1, *val2;
+	    struct value *val1 = NULL, *val2 = NULL;
 	    struct type *stype, *utype;
 
 	    second = dwarf_expr_fetch (ctx, 0);
@@ -723,8 +724,6 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 
 	    utype = unsigned_address_type (ctx->gdbarch, ctx->addr_size);
 	    stype = signed_address_type (ctx->gdbarch, ctx->addr_size);
-	    val1 = value_from_longest (utype, first);
-	    val2 = value_from_longest (utype, second);
 
 	    switch (op)
 	      {
@@ -733,6 +732,8 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 		break;
 	      case DW_OP_div:
 		binop = BINOP_DIV;
+		val1 = value_from_longest (stype, first);
+		val2 = value_from_longest (stype, second);
                 break;
 	      case DW_OP_minus:
 		binop = BINOP_SUB;
@@ -764,26 +765,45 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 		break;
 	      case DW_OP_le:
 		binop = BINOP_LEQ;
+		val1 = value_from_longest (stype, first);
+		val2 = value_from_longest (stype, second);
 		break;
 	      case DW_OP_ge:
 		binop = BINOP_GEQ;
+		val1 = value_from_longest (stype, first);
+		val2 = value_from_longest (stype, second);
 		break;
 	      case DW_OP_eq:
 		binop = BINOP_EQUAL;
+		val1 = value_from_longest (stype, first);
+		val2 = value_from_longest (stype, second);
 		break;
 	      case DW_OP_lt:
 		binop = BINOP_LESS;
+		val1 = value_from_longest (stype, first);
+		val2 = value_from_longest (stype, second);
 		break;
 	      case DW_OP_gt:
 		binop = BINOP_GTR;
+		val1 = value_from_longest (stype, first);
+		val2 = value_from_longest (stype, second);
 		break;
 	      case DW_OP_ne:
 		binop = BINOP_NOTEQUAL;
+		val1 = value_from_longest (stype, first);
+		val2 = value_from_longest (stype, second);
 		break;
 	      default:
 		internal_error (__FILE__, __LINE__,
 				_("Can't be reached."));
 	      }
+
+	    /* We use unsigned operands by default.  */
+	    if (val1 == NULL)
+	      val1 = value_from_longest (utype, first);
+	    if (val2 == NULL)
+	      val2 = value_from_longest (utype, second);
+
 	    result = value_as_long (value_binop (val1, val2, binop));
 	  }
 	  break;
