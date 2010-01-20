@@ -1,3 +1,9 @@
+2010-01-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* varobj.c (varobj_add_child, install_dynamic_child): Wrap into #if
+	HAVE_PYTHON.
+	(instantiate_pretty_printer): Move HAVE_PYTHON outside of the function.
+
 2010-01-20  Joel Brobecker  <brobecker@adacore.com>
 
 	Get rid of ada-lang.c:function_name_from_pc.

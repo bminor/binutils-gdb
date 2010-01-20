@@ -293,8 +293,12 @@ static int varobj_value_is_changeable_p (struct varobj *var);
 
 static int is_root_p (struct varobj *var);
 
+#if HAVE_PYTHON
+
 static struct varobj *
 varobj_add_child (struct varobj *var, const char *name, struct value *value);
+
+#endif /* HAVE_PYTHON */
 
 /* C implementation */
 
@@ -759,12 +763,13 @@ varobj_delete (struct varobj *var, char ***dellist, int only_children)
   return delcount;
 }
 
+#if HAVE_PYTHON
+
 /* Convenience function for varobj_set_visualizer.  Instantiate a
    pretty-printer for a given value.  */
 static PyObject *
 instantiate_pretty_printer (PyObject *constructor, struct value *value)
 {
-#if HAVE_PYTHON
   PyObject *val_obj = NULL; 
   PyObject *printer;
 
@@ -775,9 +780,10 @@ instantiate_pretty_printer (PyObject *constructor, struct value *value)
   printer = PyObject_CallFunctionObjArgs (constructor, val_obj, NULL);
   Py_DECREF (val_obj);
   return printer;
-#endif
   return NULL;
 }
+
+#endif
 
 /* Set/Get variable object display format */
 
@@ -899,6 +905,8 @@ restrict_range (VEC (varobj_p) *children, int *from, int *to)
     }
 }
 
+#if HAVE_PYTHON
+
 /* A helper for update_dynamic_varobj_children that installs a new
    child when needed.  */
 
@@ -934,8 +942,6 @@ install_dynamic_child (struct varobj *var,
 	VEC_safe_push (varobj_p, *unchanged, existing);
     }
 }
-
-#if HAVE_PYTHON
 
 static int
 dynamic_varobj_has_child_method (struct varobj *var)
@@ -1158,6 +1164,8 @@ varobj_list_children (struct varobj *var, int *from, int *to)
   return var->children;
 }
 
+#if HAVE_PYTHON
+
 static struct varobj *
 varobj_add_child (struct varobj *var, const char *name, struct value *value)
 {
@@ -1167,6 +1175,8 @@ varobj_add_child (struct varobj *var, const char *name, struct value *value)
   VEC_safe_push (varobj_p, var->children, v);
   return v;
 }
+
+#endif /* HAVE_PYTHON */
 
 /* Obtain the type of an object Variable as a string similar to the one gdb
    prints on the console */
