@@ -227,14 +227,16 @@ solib_find (char *in_pathname, int *fd)
 
   /* If not found, next search the inferior's $PATH environment variable. */
   if (found_file < 0 && gdb_sysroot_is_empty)
-    found_file = openp (get_in_environ (inferior_environ, "PATH"),
+    found_file = openp (get_in_environ (current_inferior ()->environment,
+					"PATH"),
 			OPF_TRY_CWD_FIRST, in_pathname, O_RDONLY | O_BINARY,
 			&temp_pathname);
 
   /* If not found, next search the inferior's $LD_LIBRARY_PATH 
      environment variable. */
   if (found_file < 0 && gdb_sysroot_is_empty)
-    found_file = openp (get_in_environ (inferior_environ, "LD_LIBRARY_PATH"),
+    found_file = openp (get_in_environ (current_inferior ()->environment,
+					"LD_LIBRARY_PATH"),
 			OPF_TRY_CWD_FIRST, in_pathname, O_RDONLY | O_BINARY,
 			&temp_pathname);
 

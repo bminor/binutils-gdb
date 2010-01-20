@@ -29,6 +29,7 @@
 #include "gdbthread.h"
 #include "gdbcore.h"
 #include "symfile.h"
+#include "environ.h"
 
 void _initialize_inferiors (void);
 
@@ -87,6 +88,9 @@ free_inferior (struct inferior *inf)
 {
   discard_all_inferior_continuations (inf);
   inferior_free_data (inf);
+  xfree (inf->args);
+  xfree (inf->terminal);
+  free_environ (inf->environment);
   xfree (inf->private);
   xfree (inf);
 }
@@ -123,6 +127,9 @@ add_inferior_silent (int pid)
   inf->num = ++highest_inferior_num;
   inf->next = inferior_list;
   inferior_list = inf;
+
+  inf->environment = make_environ ();
+  init_environ (inf->environment);
 
   inferior_alloc_data (inf);
 

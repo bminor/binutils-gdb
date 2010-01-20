@@ -131,8 +131,6 @@ extern int sync_execution;
 
 /* Inferior environment. */
 
-extern struct gdb_environ *inferior_environ;
-
 extern void clear_proceed_status (void);
 
 extern void proceed (CORE_ADDR, enum target_signal, int);
@@ -253,15 +251,13 @@ void set_step_info (struct frame_info *frame, struct symtab_and_line sal);
 
 /* From infcmd.c */
 
-extern void tty_command (char *, int);
-
 extern void post_create_inferior (struct target_ops *, int);
 
 extern void attach_command (char *, int);
 
 extern char *get_inferior_args (void);
 
-extern char *set_inferior_args (char *);
+extern void set_inferior_args (char *);
 
 extern void set_inferior_args_vector (int, char **);
 
@@ -426,6 +422,25 @@ struct inferior
 
   /* The program space bound to this inferior.  */
   struct program_space *pspace;
+
+  /* The arguments string to use when running.  */
+  char *args;
+
+  /* The size of elements in argv.  */
+  int argc;
+
+  /* The vector version of arguments.  If ARGC is nonzero,
+     then we must compute ARGS from this (via the target).
+     This is always coming from main's argv and therefore
+     should never be freed.  */
+  char **argv;
+
+  /* The name of terminal device to use for I/O.  */
+  char *terminal;
+
+  /* Environment to use for running inferior,
+     in format described in environ.h.  */
+  struct gdb_environ *environment;
 
   /* See the definition of stop_kind above.  */
   enum stop_kind stop_soon;
