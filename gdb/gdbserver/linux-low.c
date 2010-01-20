@@ -93,6 +93,10 @@
 #define __WALL          0x40000000 /* Wait for any child.  */
 #endif
 
+#ifndef W_STOPCODE
+#define W_STOPCODE(sig) ((sig) << 8 | 0x7f)
+#endif
+
 #ifdef __UCLIBC__
 #if !(defined(__UCLIBC_HAS_MMU__) || defined(__ARCH_HAS_MMU__))
 #define HAS_NOMMU

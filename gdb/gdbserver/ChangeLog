@@ -3,6 +3,7 @@
 	* linux-low.c (linux_create_inferior): Wrap use of __SIGRTMIN in
 	#ifdef.
 	(linux_wait_for_event1, linux_init_signals): Ditto.
+	(W_STOPCODE): Provide definition if missing.
 
 2010-01-13  Vladimir Prus  <vladimir@codesourcery.com>
 
