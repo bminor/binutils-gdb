@@ -1,3 +1,14 @@
+2010-01-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.threads/watchthreads-reorder.c (gdbstop_mutex): Remove.
+	(thread1_func): Protect thread1_tid with thread1_tid_cond by
+	thread1_tid_mutex.  Remove gdbstop_mutex handling.
+	(thread2_func): Protect thread2_tid with thread2_tid_cond by
+	thread2_tid_mutex.  Remove gdbstop_mutex handling.
+	(main): Move thread1_tid_mutex and thread2_tid_mutex locks before
+	pthread_create.  Remove gdbstop_mutex handling.  New comment.  Replace
+	pthread_cond_wait conditionalizations by while loops.
+
 2010-01-20  Tom Tromey  <tromey@redhat.com>
 
 	PR backtrace/10770:
