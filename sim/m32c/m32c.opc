@@ -125,7 +125,7 @@ prefix (src_allowed, dest_allowed, index_bytewidth)
   mb = sign_ext (s, dc.bytes * 8); \
   v = ma op mb op c; \
   tprintf("%d " #op " %d " #op " %d = %d\n", ma, mb, c, v); \
-  set_oszc (v, dc.bytes, ll > ((1 op 1) ? b2mask[dc.bytes] : 0)); \
+  set_oszc (v, dc.bytes, (1 op 1) ? (ll > b2mask[dc.bytes]) : (ll >= 0)); \
   put_dest (dc, v); \
 }
 

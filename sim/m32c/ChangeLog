@@ -1,3 +1,8 @@
+2010-01-20  DJ Delorie  <dj@redhat.com>
+
+	* m32c.opc (MATH_OP): When doing subtraction, also set carry if
+	the result is zero.
+
 2010-01-09  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.
