@@ -6781,7 +6781,7 @@ read_partial_die (struct partial_die_info *part_die,
 	    default:
 	      part_die->name
 		= dwarf2_canonicalize_name (DW_STRING (&attr), cu,
-					    &cu->comp_unit_obstack);
+					    &cu->objfile->objfile_obstack);
 	      break;
 	    }
 	  break;
