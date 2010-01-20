@@ -28,6 +28,7 @@
 
 #include "elfcpp.h"
 #include "symtab.h"
+#include "object.h"
 #include "icf.h"
 
 namespace gold
@@ -45,16 +46,8 @@ class Output_section;
 class General_options;
 class Layout;
 
-typedef std::pair<Object *, unsigned int> Section_id;
-
 class Garbage_collection
 {
-  struct Section_id_hash
-  {
-    size_t operator()(const Section_id& loc) const
-    { return reinterpret_cast<uintptr_t>(loc.first) ^ loc.second; }
-  };
-
  public:
 
   typedef Unordered_set<Section_id, Section_id_hash> Sections_reachable;

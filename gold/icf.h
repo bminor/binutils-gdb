@@ -27,6 +27,7 @@
 
 #include "elfcpp.h"
 #include "symtab.h"
+#include "object.h"
 
 namespace gold
 {
@@ -35,17 +36,9 @@ class Object;
 class Input_objects;
 class Symbol_table;
 
-typedef std::pair<Object*, unsigned int> Section_id;
-
 class Icf
 {
  public:
-  struct Section_id_hash
-  {
-    size_t operator()(const Section_id& loc) const
-    { return reinterpret_cast<uintptr_t>(loc.first) ^ loc.second; }
-  };
-
   typedef std::vector<Section_id> Sections_reachable_list;
   typedef std::vector<Symbol*> Symbol_info;
   typedef std::vector<std::pair<long long, long long> > Addend_info;

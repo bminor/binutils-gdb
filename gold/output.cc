@@ -2072,8 +2072,8 @@ Output_section::add_relaxed_input_section(Output_relaxed_input_section* poris)
   this->add_output_section_data(&inp);
   if (this->is_relaxed_input_section_map_valid_)
     {
-      Input_section_specifier iss(poris->relobj(), poris->shndx());
-      this->relaxed_input_section_map_[iss] = poris;
+      Const_section_id csid(poris->relobj(), poris->shndx());
+      this->relaxed_input_section_map_[csid] = poris;
     }
 
   // For a relaxed section, we use the current data size.  Linker scripts
@@ -2145,8 +2145,8 @@ Output_section::add_merge_input_section(Relobj* object, unsigned int shndx,
 		  && merge_section->addralign() == addralign);
 
       // Link input section to found merge section.
-      Input_section_specifier iss(object, shndx);
-      this->merge_section_map_[iss] = merge_section;
+      Const_section_id csid(object, shndx);
+      this->merge_section_map_[csid] = merge_section;
       return true;
     }
 
@@ -2181,8 +2181,8 @@ Output_section::add_merge_input_section(Relobj* object, unsigned int shndx,
   // Add input section to new merge section and link input section to new
   // merge section in map.
   pomb->add_input_section(object, shndx);
-  Input_section_specifier iss(object, shndx);
-  this->merge_section_map_[iss] = pomb;
+  Const_section_id csid(object, shndx);
+  this->merge_section_map_[csid] = pomb;
 
   return true;
 }
@@ -2201,15 +2201,15 @@ Output_section::build_relaxation_map(
       const Input_section& is(input_sections[i]);
       if (is.is_input_section() || is.is_relaxed_input_section())
 	{
-	  Input_section_specifier iss(is.relobj(), is.shndx());
-	  (*relaxation_map)[iss] = i;
+	  Section_id sid(is.relobj(), is.shndx());
+	  (*relaxation_map)[sid] = i;
 	}
     }
 }
 
 // Convert regular input sections in INPUT_SECTIONS into relaxed input
-// sections in RELAXED_SECTIONS.  MAP is a prebuilt map from input section
-// specifier to indices of INPUT_SECTIONS.
+// sections in RELAXED_SECTIONS.  MAP is a prebuilt map from section id
+// indices of INPUT_SECTIONS.
 
 void
 Output_section::convert_input_sections_in_list_to_relaxed_sections(
@@ -2220,8 +2220,8 @@ Output_section::convert_input_sections_in_list_to_relaxed_sections(
   for (size_t i = 0; i < relaxed_sections.size(); ++i)
     {
       Output_relaxed_input_section* poris = relaxed_sections[i];
-      Input_section_specifier iss(poris->relobj(), poris->shndx());
-      Relaxation_map::const_iterator p = map.find(iss);
+      Section_id sid(poris->relobj(), poris->shndx());
+      Relaxation_map::const_iterator p = map.find(sid);
       gold_assert(p != map.end());
       gold_assert((*input_sections)[p->second].is_input_section());
       (*input_sections)[p->second] = Input_section(poris);
@@ -2283,8 +2283,8 @@ Output_section::convert_input_sections_to_relaxed_sections(
     for (size_t i = 0; i < relaxed_sections.size(); ++i)
       {
 	Output_relaxed_input_section* poris = relaxed_sections[i];
-	Input_section_specifier iss(poris->relobj(), poris->shndx());
-	this->relaxed_input_section_map_[iss] = poris;
+	Const_section_id csid(poris->relobj(), poris->shndx());
+	this->relaxed_input_section_map_[csid] = poris;
       }
 }
 
@@ -2329,9 +2329,9 @@ Output_section_data*
 Output_section::find_merge_section(const Relobj* object,
 				   unsigned int shndx) const
 {
-  Input_section_specifier iss(object, shndx);
+  Const_section_id csid(object, shndx);
   Output_section_data_by_input_section_map::const_iterator p =
-    this->merge_section_map_.find(iss);
+    this->merge_section_map_.find(csid);
   if (p != this->merge_section_map_.end())
     {
       Output_section_data* posd = p->second;
@@ -2360,16 +2360,16 @@ Output_section::find_relaxed_input_section(const Relobj* object,
 	   ++p)
 	if (p->is_relaxed_input_section())
 	  {
-	    Input_section_specifier iss(p->relobj(), p->shndx());
-	    this->relaxed_input_section_map_[iss] =
+	    Const_section_id csid(p->relobj(), p->shndx());
+	    this->relaxed_input_section_map_[csid] =
 	      p->relaxed_input_section();
 	  }
       this->is_relaxed_input_section_map_valid_ = true;
     }
 
-  Input_section_specifier iss(object, shndx);
+  Const_section_id csid(object, shndx);
   Output_relaxed_input_section_by_input_section_map::const_iterator p =
-    this->relaxed_input_section_map_.find(iss);
+    this->relaxed_input_section_map_.find(csid);
   if (p != this->relaxed_input_section_map_.end())
     return p->second;
   else

@@ -2114,10 +2114,9 @@ class Target_arm : public Sized_target<32, big_endian>
   typedef typename std::vector<Stub_table<big_endian>*> Stub_table_list;
 
   // Map input section to Arm_input_section.
-  typedef Unordered_map<Input_section_specifier,
+  typedef Unordered_map<Section_id,
 			Arm_input_section<big_endian>*,
-			Input_section_specifier::hash,
-			Input_section_specifier::equal_to>
+			Section_id_hash>
 	  Arm_input_section_map;
     
   // Map output addresses to relocs for Cortex-A8 erratum.
@@ -7543,7 +7542,7 @@ Target_arm<big_endian>::new_arm_input_section(
     Relobj* relobj,
     unsigned int shndx)
 {
-  Input_section_specifier iss(relobj, shndx);
+  Section_id sid(relobj, shndx);
 
   Arm_input_section<big_endian>* arm_input_section =
     new Arm_input_section<big_endian>(relobj, shndx);
@@ -7551,7 +7550,7 @@ Target_arm<big_endian>::new_arm_input_section(
 
   // Register new Arm_input_section in map for look-up.
   std::pair<typename Arm_input_section_map::iterator, bool> ins =
-    this->arm_input_section_map_.insert(std::make_pair(iss, arm_input_section));
+    this->arm_input_section_map_.insert(std::make_pair(sid, arm_input_section));
 
   // Make sure that it we have not created another Arm_input_section
   // for this input section already.
@@ -7569,9 +7568,9 @@ Target_arm<big_endian>::find_arm_input_section(
     Relobj* relobj,
     unsigned int shndx) const
 {
-  Input_section_specifier iss(relobj, shndx);
+  Section_id sid(relobj, shndx);
   typename Arm_input_section_map::const_iterator p =
-    this->arm_input_section_map_.find(iss);
+    this->arm_input_section_map_.find(sid);
   return (p != this->arm_input_section_map_.end()) ? p->second : NULL;
 }
 

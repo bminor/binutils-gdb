@@ -1,3 +1,36 @@
+2010-01-20  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Target_arm::Arm_input_section_map): Change key type from
+	Input_section_specifier to Section_id.
+	(Target_arm::new_arm_input_section: Adjust code for change of key
+	type.
+	(Target_arm::find_arm_input_section): Ditto.
+	* gc.h (object.h): Include for Section_id nand Section_id_hash.
+	(Section_id): Remove.
+	(Garbage_collection::Section_id_hash): Remove.
+	* icf.h (object.h): Include for Section_id nand Section_id_hash.
+	(Section_id): Remove.
+	(Icf::Section_id_hash): Remove.
+	* object.h (Section_id, Const_section_id, Section_id_hash,
+	Const_section_id_hash): New type definitions.
+	* output.cc (Output_section::add_relaxed_input_section): Change to
+	use Const_section_id instead of Input_section_specifier as key type.
+	(Output_section::add_merge_input_section): Ditto.
+	(Output_section::build_relaxation_map): Change to use Section_id
+	instead of Input_section_specifier as key type.
+ 	(Output_section::convert_input_sections_in_list_to_relaxed_sections):
+	Ditto.
+	(Output_section::convert_input_sections_to_relaxed_sections): Change
+	to use Const_section_id instead of Input_section_specifier as key type.
+ 	(Output_section::find_merge_section): Ditto.
+	(Output_section::find_relaxed_input_section): Ditto.
+	* output.h (Input_section_specifier): Remove class.
+	(Output_section::Output_section_data_by_input_section_map): Change
+	key type to Const_section_id.
+	(Output_section::Output_relaxed_input_section_by_input_section_map):
+	Ditto.
+	(Output_section::Relaxation_map): Change key type to Section_id.
+
 2010-01-20  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
 
 	* gold/arm.cc: Added support for R_ARM_V4BX relocation

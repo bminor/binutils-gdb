@@ -47,62 +47,6 @@ class Sized_target;
 template<int size, bool big_endian>
 class Sized_relobj;
 
-// This class specifies an input section.  It is used as a key type
-// for maps.
-
-class Input_section_specifier
-{
- public:
-  Input_section_specifier(const Relobj* relobj, unsigned int shndx)
-    : relobj_(relobj), shndx_(shndx)
-  { }
-   
-  // Return Relobj of this.
-  const Relobj*
-  relobj() const
-  { return this->relobj_; }
-
-  // Return section index of this.
-  unsigned int
-  shndx() const
-  { return this->shndx_; }
-
-  // Whether this equals to another specifier ISS.
-  bool
-  eq(const Input_section_specifier& iss) const
-  { return this->relobj_ == iss.relobj_ && this->shndx_ == iss.shndx_; }
-
-  // Compute a hash value of this.
-  size_t
-  hash_value() const
-  {
-     return (gold::string_hash<char>(this->relobj_->name().c_str())
-	     ^ this->shndx_);
-   }
-
-  // Functors for containers.
-  struct equal_to
-  {
-    bool
-    operator()(const Input_section_specifier& iss1,
-	       const Input_section_specifier& iss2) const
-    { return iss1.eq(iss2); }
-  };
- 
-  struct hash
-  {
-    size_t
-    operator()(const Input_section_specifier& iss) const
-    { return iss.hash_value(); }
-  };
-
- private:
-  // An object.
-  const Relobj* relobj_;
-  // A section index. 
-  unsigned int shndx_;
-};
-
 // An abtract class for data which has to go into the output file.
 
 class Output_data
@@ -3396,25 +3340,20 @@ class Output_section : public Output_data
 			Merge_section_properties::equal_to>
     Merge_section_by_properties_map;
 
-  // Map that link Input_section_specifier to Output_section_data.
-  typedef Unordered_map<Input_section_specifier, Output_section_data*,
-			Input_section_specifier::hash,
-			Input_section_specifier::equal_to>
+  // Map that link Const_section_id to Output_section_data.
+  typedef Unordered_map<Const_section_id, Output_section_data*,
+			Const_section_id_hash>
     Output_section_data_by_input_section_map;
 
-  // Map that link Input_section_specifier to Output_relaxed_input_section.
-  typedef Unordered_map<Input_section_specifier, Output_relaxed_input_section*,
-			Input_section_specifier::hash,
-			Input_section_specifier::equal_to>
+  // Map that link Const_section_id to Output_relaxed_input_section.
+  typedef Unordered_map<Const_section_id, Output_relaxed_input_section*,
+			Const_section_id_hash>
     Output_relaxed_input_section_by_input_section_map;
 
   // Map used during relaxation of existing sections.  This map
-  // an input section specifier to an input section list index.
-  // We assume that Input_section_list is a vector.
-  typedef Unordered_map<Input_section_specifier, size_t,
-			Input_section_specifier::hash,
-			Input_section_specifier::equal_to>
-    Relaxation_map;
+  // a section id an input section list index.  We assume that
+  // Input_section_list is a vector.
+  typedef Unordered_map<Section_id, size_t, Section_id_hash> Relaxation_map;
 
   // Add a new output section by Input_section.
   void
