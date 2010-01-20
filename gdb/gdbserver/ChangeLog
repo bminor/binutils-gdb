@@ -1,3 +1,9 @@
+2010-01-20  Doug Evans  <dje@google.com>
+
+	* linux-low.c (linux_create_inferior): Wrap use of __SIGRTMIN in
+	#ifdef.
+	(linux_wait_for_event1, linux_init_signals): Ditto.
+
 2010-01-13  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* linux-low.c (linux_core_of_thread): New.

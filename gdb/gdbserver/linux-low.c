@@ -498,7 +498,9 @@ linux_create_inferior (char *program, char **allargs)
     {
       ptrace (PTRACE_TRACEME, 0, 0, 0);
 
+#ifdef __SIGRTMIN /* Bionic doesn't use SIGRTMIN the way glibc does.  */
       signal (__SIGRTMIN + 1, SIG_DFL);
+#endif
 
       setpgid (0, 0);
 
@@ -1209,7 +1211,7 @@ linux_wait_for_event_1 (ptid_t ptid, int *wstat, int options)
       if (WIFSTOPPED (*wstat)
 	  && !event_child->stepping
 	  && (
-#ifdef USE_THREAD_DB
+#if defined (USE_THREAD_DB) && defined (__SIGRTMIN)
 	      (current_process ()->private->thread_db != NULL
 	       && (WSTOPSIG (*wstat) == __SIGRTMIN
 		   || WSTOPSIG (*wstat) == __SIGRTMIN + 1))
@@ -3410,7 +3412,9 @@ linux_init_signals ()
 {
   /* FIXME drow/2002-06-09: As above, we should check with LinuxThreads
      to find what the cancel signal actually is.  */
+#ifdef __SIGRTMIN /* Bionic doesn't use SIGRTMIN the way glibc does.  */
   signal (__SIGRTMIN+1, SIG_IGN);
+#endif
 }
 
 void
