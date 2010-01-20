@@ -61,10 +61,12 @@ struct win32_target_ops
   void (*thread_added) (win32_thread_info *th);
 
   /* Fetch register from gdbserver regcache data.  */
-  void (*fetch_inferior_register) (win32_thread_info *th, int r);
+  void (*fetch_inferior_register) (struct regcache *regcache,
+				   win32_thread_info *th, int r);
 
   /* Store a new register value into the thread context of TH.  */
-  void (*store_inferior_register) (win32_thread_info *th, int r);
+  void (*store_inferior_register) (struct regcache *regcache,
+				   win32_thread_info *th, int r);
 
   void (*single_step) (win32_thread_info *th);
 

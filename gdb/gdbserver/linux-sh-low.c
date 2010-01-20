@@ -59,18 +59,18 @@ sh_cannot_fetch_register (int regno)
 }
 
 static CORE_ADDR
-sh_get_pc ()
+sh_get_pc (struct regcache *regcache)
 {
   unsigned long pc;
-  collect_register_by_name ("pc", &pc);
+  collect_register_by_name (regcache, "pc", &pc);
   return pc;
 }
 
 static void
-sh_set_pc (CORE_ADDR pc)
+sh_set_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   unsigned long newpc = pc;
-  supply_register_by_name ("pc", &newpc);
+  supply_register_by_name (regcache, "pc", &newpc);
 }
 
 /* Correct in either endianness, obviously.  */
@@ -94,13 +94,13 @@ sh_breakpoint_at (CORE_ADDR where)
 /* Provide only a fill function for the general register set.  ps_lgetregs
    will use this for NPTL support.  */
 
-static void sh_fill_gregset (void *buf)
+static void sh_fill_gregset (struct regcache *regcache, void *buf)
 {
   int i;
 
   for (i = 0; i < 23; i++)
     if (sh_regmap[i] != -1)
-      collect_register (i, (char *) buf + sh_regmap[i]);
+      collect_register (regcache, i, (char *) buf + sh_regmap[i]);
 }
 
 struct regset_info target_regsets[] = {

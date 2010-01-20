@@ -113,7 +113,7 @@ sparc_cannot_fetch_register (int regno)
 }
 
 static void
-sparc_fill_gregset_to_stack (const void *buf)
+sparc_fill_gregset_to_stack (struct regcache *regcache, const void *buf)
 {
   int i;
   CORE_ADDR addr = 0;
@@ -128,14 +128,14 @@ sparc_fill_gregset_to_stack (const void *buf)
 
   for (i = l0_regno; i <= i7_regno; i++)
     {
-      collect_register (i, tmp_reg_buf);
+      collect_register (regcache, i, tmp_reg_buf);
       (*the_target->write_memory) (addr, tmp_reg_buf, sizeof(tmp_reg_buf));
       addr += sizeof(tmp_reg_buf);
     }
 }
 
 static void
-sparc_fill_gregset (void *buf)
+sparc_fill_gregset (struct regcache *regcache, void *buf)
 {
   int i;
   int range;
@@ -143,25 +143,25 @@ sparc_fill_gregset (void *buf)
   for (range = 0; range < N_GREGS_RANGES; range++)
     for (i = gregs_ranges[range].regno_start; i <= gregs_ranges[range].regno_end; i++)
       if (sparc_regmap[i] != -1)
-	collect_register (i, ((char *) buf) + sparc_regmap[i]);
+	collect_register (regcache, i, ((char *) buf) + sparc_regmap[i]);
 
-  sparc_fill_gregset_to_stack (buf);
+  sparc_fill_gregset_to_stack (regcache, buf);
 }
 
 static void
-sparc_fill_fpregset (void *buf)
+sparc_fill_fpregset (struct regcache *regcache, void *buf)
 {
   int i;
   int range;
 
   for (range = 0; range < N_FPREGS_RANGES; range++)
     for (i = fpregs_ranges[range].regno_start; i <= fpregs_ranges[range].regno_end; i++)
-      collect_register (i, ((char *) buf) + sparc_regmap[i]);
+      collect_register (regcache, i, ((char *) buf) + sparc_regmap[i]);
 
 }
 
 static void
-sparc_store_gregset_from_stack (const void *buf)
+sparc_store_gregset_from_stack (struct regcache *regcache, const void *buf)
 {
   int i;
   CORE_ADDR addr = 0;
@@ -177,13 +177,13 @@ sparc_store_gregset_from_stack (const void *buf)
   for (i = l0_regno; i <= i7_regno; i++)
     {
       (*the_target->read_memory) (addr, tmp_reg_buf, sizeof(tmp_reg_buf));
-      supply_register (i, tmp_reg_buf);
+      supply_register (regcache, i, tmp_reg_buf);
       addr += sizeof(tmp_reg_buf);
     }
 }
 
 static void
-sparc_store_gregset (const void *buf)
+sparc_store_gregset (struct regcache *regcache, const void *buf)
 {
   int i;
   char zerobuf[8];
@@ -194,31 +194,33 @@ sparc_store_gregset (const void *buf)
   for (range = 0; range < N_GREGS_RANGES; range++)
     for (i = gregs_ranges[range].regno_start; i <= gregs_ranges[range].regno_end; i++)
       if (sparc_regmap[i] != -1)
-	supply_register (i, ((char *) buf) + sparc_regmap[i]);
+	supply_register (regcache, i, ((char *) buf) + sparc_regmap[i]);
       else
-	supply_register (i, zerobuf);
+	supply_register (regcache, i, zerobuf);
 
-  sparc_store_gregset_from_stack (buf);
+  sparc_store_gregset_from_stack (regcache, buf);
 }
 
 static void
-sparc_store_fpregset (const void *buf)
+sparc_store_fpregset (struct regcache *regcache, const void *buf)
 {
   int i;
   int range;
 
   for (range = 0; range < N_FPREGS_RANGES; range++)
-    for (i = fpregs_ranges[range].regno_start; i <= fpregs_ranges[range].regno_end; i++)
-      supply_register (i, ((char *) buf) + sparc_regmap[i]);
+    for (i = fpregs_ranges[range].regno_start;
+	 i <= fpregs_ranges[range].regno_end;
+	 i++)
+      supply_register (regcache, i, ((char *) buf) + sparc_regmap[i]);
 }
 
 extern int debug_threads;
 
 static CORE_ADDR
-sparc_get_pc ()
+sparc_get_pc (struct regcache *regcache)
 {
-  CORE_ADDR pc;
-  collect_register_by_name ("pc", &pc);
+  unsigned long pc;
+  collect_register_by_name (regcache, "pc", &pc);
   if (debug_threads)
     fprintf (stderr, "stop pc is %08lx\n", pc);
   return pc;
@@ -247,11 +249,12 @@ sparc_breakpoint_at (CORE_ADDR where)
    is outside of the function.  So rather than importing software single-step,
    we can just run until exit.  */
 static CORE_ADDR
-sparc_reinsert_addr ()
+sparc_reinsert_addr (void)
 {
+  struct regcache *regcache = get_thread_regcache (current_inferior, 1);
   CORE_ADDR lr;
   /* O7 is the equivalent to the 'lr' of other archs.  */
-  collect_register_by_name ("o7", &lr);
+  collect_register_by_name (regcache, "o7", &lr);
   return lr;
 }
 

@@ -93,17 +93,19 @@ regptr (CONTEXT* c, int r)
 
 /* Fetch register from gdbserver regcache data.  */
 static void
-arm_fetch_inferior_register (win32_thread_info *th, int r)
+arm_fetch_inferior_register (struct regcache *regcache,
+			     win32_thread_info *th, int r)
 {
   char *context_offset = regptr (&th->context, r);
-  supply_register (r, context_offset);
+  supply_register (regcache, r, context_offset);
 }
 
 /* Store a new register value into the thread context of TH.  */
 static void
-arm_store_inferior_register (win32_thread_info *th, int r)
+arm_store_inferior_register (struct regcache *regcache,
+			     win32_thread_info *th, int r)
 {
-  collect_register (r, regptr (&th->context, r));
+  collect_register (regcache, r, regptr (&th->context, r));
 }
 
 /* Correct in either endianness.  We do not support Thumb yet.  */

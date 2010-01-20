@@ -115,15 +115,15 @@ mips_cannot_store_register (int regno)
 }
 
 static CORE_ADDR
-mips_get_pc ()
+mips_get_pc (struct regcache *regcache)
 {
   union mips_register pc;
-  collect_register_by_name ("pc", pc.buf);
+  collect_register_by_name (regcache, "pc", pc.buf);
   return register_size (0) == 4 ? pc.reg32 : pc.reg64;
 }
 
 static void
-mips_set_pc (CORE_ADDR pc)
+mips_set_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   union mips_register newpc;
   if (register_size (0) == 4)
@@ -131,7 +131,7 @@ mips_set_pc (CORE_ADDR pc)
   else
     newpc.reg64 = pc;
 
-  supply_register_by_name ("pc", newpc.buf);
+  supply_register_by_name (regcache, "pc", newpc.buf);
 }
 
 /* Correct in either endianness.  */
@@ -142,10 +142,11 @@ static const unsigned int mips_breakpoint = 0x0005000d;
    is outside of the function.  So rather than importing software single-step,
    we can just run until exit.  */
 static CORE_ADDR
-mips_reinsert_addr ()
+mips_reinsert_addr (void)
 {
+  struct regcache *regcache = get_thread_regcache (current_inferior, 1);
   union mips_register ra;
-  collect_register_by_name ("r31", ra.buf);
+  collect_register_by_name (regcache, "r31", ra.buf);
   return register_size (0) == 4 ? ra.reg32 : ra.reg64;
 }
 
@@ -183,24 +184,26 @@ ps_get_thread_area (const struct ps_prochandle *ph,
 #ifdef HAVE_PTRACE_GETREGS
 
 static void
-mips_collect_register (int use_64bit, int regno, union mips_register *reg)
+mips_collect_register (struct regcache *regcache,
+		       int use_64bit, int regno, union mips_register *reg)
 {
   union mips_register tmp_reg;
 
   if (use_64bit)
     {
-      collect_register (regno, &tmp_reg.reg64);
+      collect_register (regcache, regno, &tmp_reg.reg64);
       *reg = tmp_reg;
     }
   else
     {
-      collect_register (regno, &tmp_reg.reg32);
+      collect_register (regcache, regno, &tmp_reg.reg32);
       reg->reg64 = tmp_reg.reg32;
     }
 }
 
 static void
-mips_supply_register (int use_64bit, int regno, const union mips_register *reg)
+mips_supply_register (struct regcache *regcache,
+		      int use_64bit, int regno, const union mips_register *reg)
 {
   int offset = 0;
 
@@ -209,33 +212,35 @@ mips_supply_register (int use_64bit, int regno, const union mips_register *reg)
   if (__BYTE_ORDER == __BIG_ENDIAN && !use_64bit)
     offset = 4;
 
-  supply_register (regno, reg->buf + offset);
+  supply_register (regcache, regno, reg->buf + offset);
 }
 
 static void
-mips_collect_register_32bit (int use_64bit, int regno, unsigned char *buf)
+mips_collect_register_32bit (struct regcache *regcache,
+			     int use_64bit, int regno, unsigned char *buf)
 {
   union mips_register tmp_reg;
   int reg32;
 
-  mips_collect_register (use_64bit, regno, &tmp_reg);
+  mips_collect_register (regcache, use_64bit, regno, &tmp_reg);
   reg32 = tmp_reg.reg64;
   memcpy (buf, &reg32, 4);
 }
 
 static void
-mips_supply_register_32bit (int use_64bit, int regno, const unsigned char *buf)
+mips_supply_register_32bit (struct regcache *regcache,
+			    int use_64bit, int regno, const unsigned char *buf)
 {
   union mips_register tmp_reg;
   int reg32;
 
   memcpy (&reg32, buf, 4);
   tmp_reg.reg64 = reg32;
-  mips_supply_register (use_64bit, regno, &tmp_reg);
+  mips_supply_register (regcache, use_64bit, regno, &tmp_reg);
 }
 
 static void
-mips_fill_gregset (void *buf)
+mips_fill_gregset (struct regcache *regcache, void *buf)
 {
   union mips_register *regset = buf;
   int i, use_64bit;
@@ -243,20 +248,27 @@ mips_fill_gregset (void *buf)
   use_64bit = (register_size (0) == 8);
 
   for (i = 1; i < 32; i++)
-    mips_collect_register (use_64bit, i, regset + i);
+    mips_collect_register (regcache, use_64bit, i, regset + i);
 
-  mips_collect_register (use_64bit, find_regno ("lo"), regset + 32);
-  mips_collect_register (use_64bit, find_regno ("hi"), regset + 33);
-  mips_collect_register (use_64bit, find_regno ("pc"), regset + 34);
-  mips_collect_register (use_64bit, find_regno ("badvaddr"), regset + 35);
-  mips_collect_register (use_64bit, find_regno ("status"), regset + 36);
-  mips_collect_register (use_64bit, find_regno ("cause"), regset + 37);
+  mips_collect_register (regcache, use_64bit,
+			 find_regno ("lo"), regset + 32);
+  mips_collect_register (regcache, use_64bit,
+			 find_regno ("hi"), regset + 33);
+  mips_collect_register (regcache, use_64bit,
+			 find_regno ("pc"), regset + 34);
+  mips_collect_register (regcache, use_64bit,
+			 find_regno ("badvaddr"), regset + 35);
+  mips_collect_register (regcache, use_64bit,
+			 find_regno ("status"), regset + 36);
+  mips_collect_register (regcache, use_64bit,
+			 find_regno ("cause"), regset + 37);
 
-  mips_collect_register (use_64bit, find_regno ("restart"), regset + 0);
+  mips_collect_register (regcache, use_64bit,
+			 find_regno ("restart"), regset + 0);
 }
 
 static void
-mips_store_gregset (const void *buf)
+mips_store_gregset (struct regcache *regcache, const void *buf)
 {
   const union mips_register *regset = buf;
   int i, use_64bit;
@@ -264,20 +276,24 @@ mips_store_gregset (const void *buf)
   use_64bit = (register_size (0) == 8);
 
   for (i = 0; i < 32; i++)
-    mips_supply_register (use_64bit, i, regset + i);
+    mips_supply_register (regcache, use_64bit, i, regset + i);
 
-  mips_supply_register (use_64bit, find_regno ("lo"), regset + 32);
-  mips_supply_register (use_64bit, find_regno ("hi"), regset + 33);
-  mips_supply_register (use_64bit, find_regno ("pc"), regset + 34);
-  mips_supply_register (use_64bit, find_regno ("badvaddr"), regset + 35);
-  mips_supply_register (use_64bit, find_regno ("status"), regset + 36);
-  mips_supply_register (use_64bit, find_regno ("cause"), regset + 37);
+  mips_supply_register (regcache, use_64bit, find_regno ("lo"), regset + 32);
+  mips_supply_register (regcache, use_64bit, find_regno ("hi"), regset + 33);
+  mips_supply_register (regcache, use_64bit, find_regno ("pc"), regset + 34);
+  mips_supply_register (regcache, use_64bit,
+			find_regno ("badvaddr"), regset + 35);
+  mips_supply_register (regcache, use_64bit,
+			find_regno ("status"), regset + 36);
+  mips_supply_register (regcache, use_64bit,
+			find_regno ("cause"), regset + 37);
 
-  mips_supply_register (use_64bit, find_regno ("restart"), regset + 0);
+  mips_supply_register (regcache, use_64bit,
+			find_regno ("restart"), regset + 0);
 }
 
 static void
-mips_fill_fpregset (void *buf)
+mips_fill_fpregset (struct regcache *regcache, void *buf)
 {
   union mips_register *regset = buf;
   int i, use_64bit, first_fp, big_endian;
@@ -289,18 +305,19 @@ mips_fill_fpregset (void *buf)
   /* See GDB for a discussion of this peculiar layout.  */
   for (i = 0; i < 32; i++)
     if (use_64bit)
-      collect_register (first_fp + i, regset[i].buf);
+      collect_register (regcache, first_fp + i, regset[i].buf);
     else
-      collect_register (first_fp + i,
+      collect_register (regcache, first_fp + i,
 			regset[i & ~1].buf + 4 * (big_endian != (i & 1)));
 
-  mips_collect_register_32bit (use_64bit, find_regno ("fcsr"), regset[32].buf);
-  mips_collect_register_32bit (use_64bit, find_regno ("fir"),
+  mips_collect_register_32bit (regcache, use_64bit,
+			       find_regno ("fcsr"), regset[32].buf);
+  mips_collect_register_32bit (regcache, use_64bit, find_regno ("fir"),
 			       regset[32].buf + 4);
 }
 
 static void
-mips_store_fpregset (const void *buf)
+mips_store_fpregset (struct regcache *regcache, const void *buf)
 {
   const union mips_register *regset = buf;
   int i, use_64bit, first_fp, big_endian;
@@ -312,13 +329,14 @@ mips_store_fpregset (const void *buf)
   /* See GDB for a discussion of this peculiar layout.  */
   for (i = 0; i < 32; i++)
     if (use_64bit)
-      supply_register (first_fp + i, regset[i].buf);
+      supply_register (regcache, first_fp + i, regset[i].buf);
     else
-      supply_register (first_fp + i,
+      supply_register (regcache, first_fp + i,
 		       regset[i & ~1].buf + 4 * (big_endian != (i & 1)));
 
-  mips_supply_register_32bit (use_64bit, find_regno ("fcsr"), regset[32].buf);
-  mips_supply_register_32bit (use_64bit, find_regno ("fir"),
+  mips_supply_register_32bit (regcache, use_64bit,
+			      find_regno ("fcsr"), regset[32].buf);
+  mips_supply_register_32bit (regcache, use_64bit, find_regno ("fir"),
 			      regset[32].buf + 4);
 }
 #endif /* HAVE_PTRACE_GETREGS */

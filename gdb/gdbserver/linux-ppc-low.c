@@ -169,26 +169,27 @@ ppc_cannot_fetch_register (int regno)
 }
 
 static void
-ppc_collect_ptrace_register (int regno, char *buf)
+ppc_collect_ptrace_register (struct regcache *regcache, int regno, char *buf)
 {
   int size = register_size (regno);
 
   memset (buf, 0, sizeof (long));
 
   if (size < sizeof (long))
-    collect_register (regno, buf + sizeof (long) - size);
+    collect_register (regcache, regno, buf + sizeof (long) - size);
   else
-    collect_register (regno, buf);
+    collect_register (regcache, regno, buf);
 }
 
 static void
-ppc_supply_ptrace_register (int regno, const char *buf)
+ppc_supply_ptrace_register (struct regcache *regcache,
+			    int regno, const char *buf)
 {
   int size = register_size (regno);
   if (size < sizeof (long))
-    supply_register (regno, buf + sizeof (long) - size);
+    supply_register (regcache, regno, buf + sizeof (long) - size);
   else
-    supply_register (regno, buf);
+    supply_register (regcache, regno, buf);
 }
 
 
@@ -199,7 +200,7 @@ ppc_supply_ptrace_register (int regno, const char *buf)
    return to FD and ADDR the file handle and NPC parameter address
    used with the system call.  Return non-zero if successful.  */
 static int
-parse_spufs_run (int *fd, CORE_ADDR *addr)
+parse_spufs_run (struct regcache *regcache, int *fd, CORE_ADDR *addr)
 {
   CORE_ADDR curr_pc;
   int curr_insn;
@@ -208,10 +209,10 @@ parse_spufs_run (int *fd, CORE_ADDR *addr)
   if (register_size (0) == 4)
     {
       unsigned int pc, r0, r3, r4;
-      collect_register_by_name ("pc", &pc);
-      collect_register_by_name ("r0", &r0);
-      collect_register_by_name ("orig_r3", &r3);
-      collect_register_by_name ("r4", &r4);
+      collect_register_by_name (regcache, "pc", &pc);
+      collect_register_by_name (regcache, "r0", &r0);
+      collect_register_by_name (regcache, "orig_r3", &r3);
+      collect_register_by_name (regcache, "r4", &r4);
       curr_pc = (CORE_ADDR) pc;
       curr_r0 = (int) r0;
       *fd = (int) r3;
@@ -220,10 +221,10 @@ parse_spufs_run (int *fd, CORE_ADDR *addr)
   else
     {
       unsigned long pc, r0, r3, r4;
-      collect_register_by_name ("pc", &pc);
-      collect_register_by_name ("r0", &r0);
-      collect_register_by_name ("orig_r3", &r3);
-      collect_register_by_name ("r4", &r4);
+      collect_register_by_name (regcache, "pc", &pc);
+      collect_register_by_name (regcache, "r0", &r0);
+      collect_register_by_name (regcache, "orig_r3", &r3);
+      collect_register_by_name (regcache, "r4", &r4);
       curr_pc = (CORE_ADDR) pc;
       curr_r0 = (int) r0;
       *fd = (int) r3;
@@ -245,12 +246,12 @@ parse_spufs_run (int *fd, CORE_ADDR *addr)
 }
 
 static CORE_ADDR
-ppc_get_pc (void)
+ppc_get_pc (struct regcache *regcache)
 {
   CORE_ADDR addr;
   int fd;
 
-  if (parse_spufs_run (&fd, &addr))
+  if (parse_spufs_run (regcache, &fd, &addr))
     {
       unsigned int pc;
       (*the_target->read_memory) (addr, (unsigned char *) &pc, 4);
@@ -259,24 +260,24 @@ ppc_get_pc (void)
   else if (register_size (0) == 4)
     {
       unsigned int pc;
-      collect_register_by_name ("pc", &pc);
+      collect_register_by_name (regcache, "pc", &pc);
       return (CORE_ADDR) pc;
     }
   else
     {
       unsigned long pc;
-      collect_register_by_name ("pc", &pc);
+      collect_register_by_name (regcache, "pc", &pc);
       return (CORE_ADDR) pc;
     }
 }
 
 static void
-ppc_set_pc (CORE_ADDR pc)
+ppc_set_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   CORE_ADDR addr;
   int fd;
 
-  if (parse_spufs_run (&fd, &addr))
+  if (parse_spufs_run (regcache, &fd, &addr))
     {
       unsigned int newpc = pc;
       (*the_target->write_memory) (addr, (unsigned char *) &newpc, 4);
@@ -284,12 +285,12 @@ ppc_set_pc (CORE_ADDR pc)
   else if (register_size (0) == 4)
     {
       unsigned int newpc = pc;
-      supply_register_by_name ("pc", &newpc);
+      supply_register_by_name (regcache, "pc", &newpc);
     }
   else
     {
       unsigned long newpc = pc;
-      supply_register_by_name ("pc", &newpc);
+      supply_register_by_name (regcache, "pc", &newpc);
     }
 }
 
@@ -449,18 +450,18 @@ ppc_breakpoint_at (CORE_ADDR where)
 /* Provide only a fill function for the general register set.  ps_lgetregs
    will use this for NPTL support.  */
 
-static void ppc_fill_gregset (void *buf)
+static void ppc_fill_gregset (struct regcache *regcache, void *buf)
 {
   int i;
 
   for (i = 0; i < 32; i++)
-    ppc_collect_ptrace_register (i, (char *) buf + ppc_regmap[i]);
+    ppc_collect_ptrace_register (regcache, i, (char *) buf + ppc_regmap[i]);
 
   for (i = 64; i < 70; i++)
-    ppc_collect_ptrace_register (i, (char *) buf + ppc_regmap[i]);
+    ppc_collect_ptrace_register (regcache, i, (char *) buf + ppc_regmap[i]);
 
   for (i = 71; i < 73; i++)
-    ppc_collect_ptrace_register (i, (char *) buf + ppc_regmap[i]);
+    ppc_collect_ptrace_register (regcache, i, (char *) buf + ppc_regmap[i]);
 }
 
 #ifndef PTRACE_GETVSXREGS
@@ -471,7 +472,7 @@ static void ppc_fill_gregset (void *buf)
 #define SIZEOF_VSXREGS 32*8
 
 static void
-ppc_fill_vsxregset (void *buf)
+ppc_fill_vsxregset (struct regcache *regcache, void *buf)
 {
   int i, base;
   char *regset = buf;
@@ -481,11 +482,11 @@ ppc_fill_vsxregset (void *buf)
 
   base = find_regno ("vs0h");
   for (i = 0; i < 32; i++)
-    collect_register (base + i, &regset[i * 8]);
+    collect_register (regcache, base + i, &regset[i * 8]);
 }
 
 static void
-ppc_store_vsxregset (const void *buf)
+ppc_store_vsxregset (struct regcache *regcache, const void *buf)
 {
   int i, base;
   const char *regset = buf;
@@ -495,7 +496,7 @@ ppc_store_vsxregset (const void *buf)
 
   base = find_regno ("vs0h");
   for (i = 0; i < 32; i++)
-    supply_register (base + i, &regset[i * 8]);
+    supply_register (regcache, base + i, &regset[i * 8]);
 }
 
 #ifndef PTRACE_GETVRREGS
@@ -506,7 +507,7 @@ ppc_store_vsxregset (const void *buf)
 #define SIZEOF_VRREGS 33*16+4
 
 static void
-ppc_fill_vrregset (void *buf)
+ppc_fill_vrregset (struct regcache *regcache, void *buf)
 {
   int i, base;
   char *regset = buf;
@@ -516,14 +517,14 @@ ppc_fill_vrregset (void *buf)
 
   base = find_regno ("vr0");
   for (i = 0; i < 32; i++)
-    collect_register (base + i, &regset[i * 16]);
+    collect_register (regcache, base + i, &regset[i * 16]);
 
-  collect_register_by_name ("vscr", &regset[32 * 16 + 12]);
-  collect_register_by_name ("vrsave", &regset[33 * 16]);
+  collect_register_by_name (regcache, "vscr", &regset[32 * 16 + 12]);
+  collect_register_by_name (regcache, "vrsave", &regset[33 * 16]);
 }
 
 static void
-ppc_store_vrregset (const void *buf)
+ppc_store_vrregset (struct regcache *regcache, const void *buf)
 {
   int i, base;
   const char *regset = buf;
@@ -533,10 +534,10 @@ ppc_store_vrregset (const void *buf)
 
   base = find_regno ("vr0");
   for (i = 0; i < 32; i++)
-    supply_register (base + i, &regset[i * 16]);
+    supply_register (regcache, base + i, &regset[i * 16]);
 
-  supply_register_by_name ("vscr", &regset[32 * 16 + 12]);
-  supply_register_by_name ("vrsave", &regset[33 * 16]);
+  supply_register_by_name (regcache, "vscr", &regset[32 * 16 + 12]);
+  supply_register_by_name (regcache, "vrsave", &regset[33 * 16]);
 }
 
 #ifndef PTRACE_GETEVRREGS
@@ -552,7 +553,7 @@ struct gdb_evrregset_t
 };
 
 static void
-ppc_fill_evrregset (void *buf)
+ppc_fill_evrregset (struct regcache *regcache, void *buf)
 {
   int i, ev0;
   struct gdb_evrregset_t *regset = buf;
@@ -562,14 +563,14 @@ ppc_fill_evrregset (void *buf)
 
   ev0 = find_regno ("ev0h");
   for (i = 0; i < 32; i++)
-    collect_register (ev0 + i, &regset->evr[i]);
+    collect_register (regcache, ev0 + i, &regset->evr[i]);
 
-  collect_register_by_name ("acc", &regset->acc);
-  collect_register_by_name ("spefscr", &regset->spefscr);
+  collect_register_by_name (regcache, "acc", &regset->acc);
+  collect_register_by_name (regcache, "spefscr", &regset->spefscr);
 }
 
 static void
-ppc_store_evrregset (const void *buf)
+ppc_store_evrregset (struct regcache *regcache, const void *buf)
 {
   int i, ev0;
   const struct gdb_evrregset_t *regset = buf;
@@ -579,10 +580,10 @@ ppc_store_evrregset (const void *buf)
 
   ev0 = find_regno ("ev0h");
   for (i = 0; i < 32; i++)
-    supply_register (ev0 + i, &regset->evr[i]);
+    supply_register (regcache, ev0 + i, &regset->evr[i]);
 
-  supply_register_by_name ("acc", &regset->acc);
-  supply_register_by_name ("spefscr", &regset->spefscr);
+  supply_register_by_name (regcache, "acc", &regset->acc);
+  supply_register_by_name (regcache, "spefscr", &regset->spefscr);
 }
 
 struct regset_info target_regsets[] = {

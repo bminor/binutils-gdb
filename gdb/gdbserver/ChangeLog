@@ -1,3 +1,129 @@
+2010-01-20  Pedro Alves  <pedro@codesourcery.com>
+
+	* regcache.h (struct thread_info): Forward declare.
+	(struct regcache): New.
+	(new_register_cache): Adjust prototype.
+	(get_thread_regcache): Declare.
+	(free_register_cache): Adjust prototype.
+	(registers_to_string, registers_from_string): Ditto.
+	(supply_register, supply_register_by_name, collect_register)
+	(collect_register_as_string, collect_register_by_name): Ditto.
+	* regcache.c (struct inferior_regcache_data): Delete.
+	(get_regcache): Rename to ...
+	(get_thread_regcache): ... this.  Adjust.  Switch inferior before
+	fetching registers.
+	(regcache_invalidate_one): Adjust.
+	(regcache_invalidate): Fix prototype.
+	(new_register_cache): Return the new register cache.
+	(free_register_cache): Change prototype.
+	(realloc_register_cache): Adjust.
+	(registers_to_string): Change prototype to take a regcache.  Adjust.
+	(registers_from_string): Ditto.
+	(register_data): Ditto.
+	(supply_register): Ditto.
+	(supply_register_by_name): Ditto.
+	(collect_register): Ditto.
+	(collect_register_as_string): Ditto.
+	(collect_register_by_name): Ditto.
+	* server.c (process_serial_event): Adjust.
+	* linux-low.h (regset_fill_func, regset_store_func): Change
+	prototype.
+	(get_pc, set_pc, collect_ptrace_register, supply_ptrace_register):
+	Change prototype.
+	* linux-low.c (get_stop_pc): Adjust.
+	(check_removed_breakpoint): Adjust.
+	(linux_wait_for_event): Adjust.
+	(linux_resume_one_lwp): Adjust.
+	(fetch_register): Add regcache parameter.  Adjust.
+	(usr_store_inferior_registers): Ditto.
+	(regsets_fetch_inferior_registers): Ditto.
+	(regsets_store_inferior_registers): Ditto.
+	(linux_fetch_registers, linux_store_registers): Ditto.
+	* i387-fp.c (i387_cache_to_fsave): Change prototype to take a
+	regcache.  Adjust.
+	(i387_fsave_to_cache, i387_cache_to_fxsave, i387_fxsave_to_cache): Ditto.
+	* i387-fp.h (i387_cache_to_fsave, i387_fsave_to_cache): Change
+	prototype to take a regcache.
+	(i387_cache_to_fxsave, i387_fxsave_to_cache): Ditto.
+	* remote-utils.c (convert_ascii_to_int, outreg)
+	(prepare_resume_reply): Change prototype to take a regcache.
+	Adjust.
+	* target.h (struct target_ops) <fetch_registers, store_registers>:
+	Change prototype to take a regcache.
+	(fetch_inferior_registers, store_inferior_registers): Change
+	prototype to take a regcache.  Adjust.
+	* proc-service.c (ps_lgetregs): Adjust.
+	* linux-x86-low.c (x86_fill_gregset, x86_store_gregset)
+	(x86_fill_fpregset, x86_store_fpregset, x86_fill_fpxregset)
+	(x86_store_fpxregset, x86_get_pc, x86_set_pc): Change prototype to
+	take a regcache.  Adjust.
+	* linux-arm-low.c (arm_fill_gregset, arm_store_gregset)
+	(arm_fill_wmmxregset, arm_store_wmmxregset, arm_fill_vfpregset)
+	(arm_store_vfpregset, arm_get_pc, arm_set_pc):
+	(arm_breakpoint_at): Change prototype to take a regcache.  Adjust.
+	* linux-cris-low.c (cris_get_pc, cris_set_pc)
+	(cris_cannot_fetch_register):
+	(cris_breakpoint_at): Change prototype to take a regcache.
+	Adjust.
+	* linux-crisv32-low.c (cris_get_pc, cris_set_pc,
+	cris_reinsert_addr, cris_write_data_breakpoint): Change prototype
+	to take a regcache.  Adjust.
+	(cris_breakpoint_at, cris_insert_point, cris_remove_point):
+	Adjust.
+	* linux-m32r-low.c (m32r_get_pc, m32r_set_pc): Change prototype to
+	take a regcache.  Adjust.
+	* linux-m68k-low.c (m68k_fill_gregset, m68k_store_gregset)
+	(m68k_fill_fpregset, m68k_store_fpregset, m68k_get_pc,
+	(m68k_set_pc): Change prototype to take a regcache.  Adjust.
+	* linux-mips-low.c (mips_get_pc):
+	(mips_set_pc): Change prototype to take a regcache.  Adjust.
+	(mips_reinsert_addr): Adjust.
+	(mips_collect_register): Change prototype to take a regcache.
+	Adjust.
+	(mips_supply_register):
+	(mips_collect_register_32bit, mips_supply_register_32bit)
+	(mips_fill_gregset, mips_store_gregset, mips_fill_fpregset)
+	(mips_store_fpregset): Ditto.
+	* linux-ppc-low.c (ppc_supply_ptrace_register, ppc_supply_ptrace_register):
+	Ditto.
+	(parse_spufs_run): Adjust.
+	(ppc_get_pc, ppc_set_pc, ppc_fill_gregset, ppc_fill_vsxregset)
+	(ppc_store_vsxregset, ppc_fill_vrregset, ppc_store_vrregset)
+	(ppc_fill_evrregset, ppc_store_evrregset): Change prototype to
+	take a regcache.  Adjust.
+	* linux-s390-low.c (s390_collect_ptrace_register)
+	(s390_supply_ptrace_register, s390_fill_gregset, s390_get_pc)
+	(s390_set_pc): Change prototype to take a regcache.  Adjust.
+	(s390_arch_setup): Adjust.
+	* linux-sh-low.c (sh_get_pc, sh_breakpoint_at)
+	(sh_fill_gregset): Change prototype to take a regcache.  Adjust.
+	* linux-sparc-low.c (sparc_fill_gregset_to_stack)
+	(sparc_fill_gregset, sparc_store_gregset_from_stack)
+	(sparc_store_gregset, sparc_get_pc): Change prototype to take a
+	regcache.  Adjust.
+	(sparc_breakpoint_at): Adjust.
+	* linux-xtensa-low.c (xtensa_fill_gregset):
+	(xtensa_store_gregset):
+	(xtensa_fill_xtregset, xtensa_store_xtregset, xtensa_get_pc)
+	(xtensa_set_pc): Change prototype to take a regcache.  Adjust.
+	* nto-low.c (nto_fetch_registers, nto_store_registers): Change
+	prototype to take a regcache.  Adjust.
+	* win32-arm-low.c (arm_fetch_inferior_register)
+	(arm_store_inferior_register): Change prototype to take a
+	regcache.  Adjust.
+	* win32-i386-low.c (i386_fetch_inferior_register)
+	(i386_store_inferior_register): Change prototype to take a
+	regcache.  Adjust.
+	* win32-low.c (child_fetch_inferior_registers)
+	(child_store_inferior_registers): Change prototype to take a
+	regcache.  Adjust.
+	(win32_wait): Adjust.
+	(win32_fetch_inferior_registers): Change prototype to take a
+	regcache.  Adjust.
+	(win32_store_inferior_registers): Adjust.
+	* win32-low.h (struct win32_target_ops) <fetch_inferior_register,
+	store_inferior_register>: Change prototype to take a regcache.
+
 2010-01-20  Doug Evans  <dje@google.com>
 
 	* linux-low.c (linux_create_inferior): Wrap use of __SIGRTMIN in

@@ -81,17 +81,17 @@ arm_cannot_fetch_register (int regno)
 }
 
 static void
-arm_fill_gregset (void *buf)
+arm_fill_gregset (struct regcache *regcache, void *buf)
 {
   int i;
 
   for (i = 0; i < arm_num_regs; i++)
     if (arm_regmap[i] != -1)
-      collect_register (i, ((char *) buf) + arm_regmap[i]);
+      collect_register (regcache, i, ((char *) buf) + arm_regmap[i]);
 }
 
 static void
-arm_store_gregset (const void *buf)
+arm_store_gregset (struct regcache *regcache, const void *buf)
 {
   int i;
   char zerobuf[8];
@@ -99,13 +99,13 @@ arm_store_gregset (const void *buf)
   memset (zerobuf, 0, 8);
   for (i = 0; i < arm_num_regs; i++)
     if (arm_regmap[i] != -1)
-      supply_register (i, ((char *) buf) + arm_regmap[i]);
+      supply_register (regcache, i, ((char *) buf) + arm_regmap[i]);
     else
-      supply_register (i, zerobuf);
+      supply_register (regcache, i, zerobuf);
 }
 
 static void
-arm_fill_wmmxregset (void *buf)
+arm_fill_wmmxregset (struct regcache *regcache, void *buf)
 {
   int i;
 
@@ -113,15 +113,16 @@ arm_fill_wmmxregset (void *buf)
     return;
 
   for (i = 0; i < 16; i++)
-    collect_register (arm_num_regs + i, (char *) buf + i * 8);
+    collect_register (regcache, arm_num_regs + i, (char *) buf + i * 8);
 
   /* We only have access to wcssf, wcasf, and wcgr0-wcgr3.  */
   for (i = 0; i < 6; i++)
-    collect_register (arm_num_regs + i + 16, (char *) buf + 16 * 8 + i * 4);
+    collect_register (regcache, arm_num_regs + i + 16,
+		      (char *) buf + 16 * 8 + i * 4);
 }
 
 static void
-arm_store_wmmxregset (const void *buf)
+arm_store_wmmxregset (struct regcache *regcache, const void *buf)
 {
   int i;
 
@@ -129,15 +130,16 @@ arm_store_wmmxregset (const void *buf)
     return;
 
   for (i = 0; i < 16; i++)
-    supply_register (arm_num_regs + i, (char *) buf + i * 8);
+    supply_register (regcache, arm_num_regs + i, (char *) buf + i * 8);
 
   /* We only have access to wcssf, wcasf, and wcgr0-wcgr3.  */
   for (i = 0; i < 6; i++)
-    supply_register (arm_num_regs + i + 16, (char *) buf + 16 * 8 + i * 4);
+    supply_register (regcache, arm_num_regs + i + 16,
+		     (char *) buf + 16 * 8 + i * 4);
 }
 
 static void
-arm_fill_vfpregset (void *buf)
+arm_fill_vfpregset (struct regcache *regcache, void *buf)
 {
   int i, num, base;
 
@@ -151,13 +153,13 @@ arm_fill_vfpregset (void *buf)
 
   base = find_regno ("d0");
   for (i = 0; i < num; i++)
-    collect_register (base + i, (char *) buf + i * 8);
+    collect_register (regcache, base + i, (char *) buf + i * 8);
 
-  collect_register_by_name ("fpscr", (char *) buf + 32 * 8);
+  collect_register_by_name (regcache, "fpscr", (char *) buf + 32 * 8);
 }
 
 static void
-arm_store_vfpregset (const void *buf)
+arm_store_vfpregset (struct regcache *regcache, const void *buf)
 {
   int i, num, base;
 
@@ -171,28 +173,28 @@ arm_store_vfpregset (const void *buf)
 
   base = find_regno ("d0");
   for (i = 0; i < num; i++)
-    supply_register (base + i, (char *) buf + i * 8);
+    supply_register (regcache, base + i, (char *) buf + i * 8);
 
-  supply_register_by_name ("fpscr", (char *) buf + 32 * 8);
+  supply_register_by_name (regcache, "fpscr", (char *) buf + 32 * 8);
 }
 
 extern int debug_threads;
 
 static CORE_ADDR
-arm_get_pc ()
+arm_get_pc (struct regcache *regcache)
 {
   unsigned long pc;
-  collect_register_by_name ("pc", &pc);
+  collect_register_by_name (regcache, "pc", &pc);
   if (debug_threads)
     fprintf (stderr, "stop pc is %08lx\n", pc);
   return pc;
 }
 
 static void
-arm_set_pc (CORE_ADDR pc)
+arm_set_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   unsigned long newpc = pc;
-  supply_register_by_name ("pc", &newpc);
+  supply_register_by_name (regcache, "pc", &newpc);
 }
 
 /* Correct in either endianness.  */
@@ -210,9 +212,10 @@ static const unsigned long arm_eabi_breakpoint = 0xe7f001f0;
 static int
 arm_breakpoint_at (CORE_ADDR where)
 {
+  struct regcache *regcache = get_thread_regcache (current_inferior, 1);
   unsigned long cpsr;
 
-  collect_register_by_name ("cpsr", &cpsr);
+  collect_register_by_name (regcache, "cpsr", &cpsr);
 
   if (cpsr & 0x20)
     {
@@ -243,10 +246,11 @@ arm_breakpoint_at (CORE_ADDR where)
    is outside of the function.  So rather than importing software single-step,
    we can just run until exit.  */
 static CORE_ADDR
-arm_reinsert_addr ()
+arm_reinsert_addr (void)
 {
+  struct regcache *regcache = get_thread_regcache (current_inferior, 1);
   unsigned long pc;
-  collect_register_by_name ("lr", &pc);
+  collect_register_by_name (regcache, "lr", &pc);
   return pc;
 }
 

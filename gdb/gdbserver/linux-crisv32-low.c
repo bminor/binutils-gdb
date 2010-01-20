@@ -54,20 +54,20 @@ static int cris_regmap[] = {
 extern int debug_threads;
 
 static CORE_ADDR
-cris_get_pc (void)
+cris_get_pc (struct regcache *regcache)
 {
   unsigned long pc;
-  collect_register_by_name ("pc", &pc);
+  collect_register_by_name (regcache, "pc", &pc);
   if (debug_threads)
     fprintf (stderr, "stop pc is %08lx\n", pc);
   return pc;
 }
 
 static void
-cris_set_pc (CORE_ADDR pc)
+cris_set_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   unsigned long newpc = pc;
-  supply_register_by_name ("pc", &newpc);
+  supply_register_by_name (regcache, "pc", &newpc);
 }
 
 static const unsigned short cris_breakpoint = 0xe938;
@@ -99,39 +99,41 @@ cris_breakpoint_at (CORE_ADDR where)
 static CORE_ADDR
 cris_reinsert_addr (void)
 {
+  struct regcache *regcache = get_thread_regcache (current_inferior, 1);
   unsigned long pc;
-  collect_register_by_name ("srp", &pc);
+  collect_register_by_name (regcache, "srp", &pc);
   return pc;
 }
 
 static void
-cris_write_data_breakpoint (int bp, unsigned long start, unsigned long end)
+cris_write_data_breakpoint (struct regcache *regcache,
+			    int bp, unsigned long start, unsigned long end)
 {
   switch (bp)
     {
     case 0:
-      supply_register_by_name ("s3", &start);
-      supply_register_by_name ("s4", &end);
+      supply_register_by_name (regcache, "s3", &start);
+      supply_register_by_name (regcache, "s4", &end);
       break;
     case 1:
-      supply_register_by_name ("s5", &start);
-      supply_register_by_name ("s6", &end);
+      supply_register_by_name (regcache, "s5", &start);
+      supply_register_by_name (regcache, "s6", &end);
       break;
     case 2:
-      supply_register_by_name ("s7", &start);
-      supply_register_by_name ("s8", &end);
+      supply_register_by_name (regcache, "s7", &start);
+      supply_register_by_name (regcache, "s8", &end);
       break;
     case 3:
-      supply_register_by_name ("s9", &start);
-      supply_register_by_name ("s10", &end);
+      supply_register_by_name (regcache, "s9", &start);
+      supply_register_by_name (regcache, "s10", &end);
       break;
     case 4:
-      supply_register_by_name ("s11", &start);
-      supply_register_by_name ("s12", &end);
+      supply_register_by_name (regcache, "s11", &start);
+      supply_register_by_name (regcache, "s12", &end);
       break;
     case 5:
-      supply_register_by_name ("s13", &start);
-      supply_register_by_name ("s14", &end);
+      supply_register_by_name (regcache, "s13", &start);
+      supply_register_by_name (regcache, "s14", &end);
       break;
     }
 }
@@ -143,6 +145,7 @@ cris_insert_point (char type, CORE_ADDR addr, int len)
   unsigned long bp_ctrl;
   unsigned long start, end;
   unsigned long ccs;
+  struct regcache *regcache;
 
   /* Breakpoint/watchpoint types (GDB terminology):
      0 = memory breakpoint for instructions
@@ -158,13 +161,15 @@ cris_insert_point (char type, CORE_ADDR addr, int len)
       return 1;
     }
 
+  regcache = get_thread_regcache (current_inferior, 1);
+
   /* Read watchpoints are set as access watchpoints, because of GDB's
      inability to deal with pure read watchpoints.  */
   if (type == '3')
     type = '4';
 
   /* Get the configuration register.  */
-  collect_register_by_name ("s0", &bp_ctrl);
+  collect_register_by_name (regcache, "s0", &bp_ctrl);
 
   /* The watchpoint allocation scheme is the simplest possible.
      For example, if a region is watched for read and
@@ -202,19 +207,19 @@ cris_insert_point (char type, CORE_ADDR addr, int len)
     }
 
   /* Setup the configuration register.  */
-  supply_register_by_name ("s0", &bp_ctrl);
+  supply_register_by_name (regcache, "s0", &bp_ctrl);
 
   /* Setup the range.  */
   start = addr;
   end = addr + len - 1;
 
   /* Configure the watchpoint register.  */
-  cris_write_data_breakpoint (bp, start, end);
+  cris_write_data_breakpoint (regcache, bp, start, end);
 
-  collect_register_by_name ("ccs", &ccs);
+  collect_register_by_name (regcache, "ccs", &ccs);
   /* Set the S1 flag to enable watchpoints.  */
   ccs |= (1 << 19);
-  supply_register_by_name ("ccs", &ccs);
+  supply_register_by_name (regcache, "ccs", &ccs);
 
   return 0;
 }
@@ -225,6 +230,7 @@ cris_remove_point (char type, CORE_ADDR addr, int len)
   int bp;
   unsigned long bp_ctrl;
   unsigned long start, end;
+  struct regcache *regcache;
 
   /* Breakpoint/watchpoint types:
      0 = memory breakpoint for instructions
@@ -236,13 +242,15 @@ cris_remove_point (char type, CORE_ADDR addr, int len)
   if (type < '2' || type > '4')
     return -1;
 
+  regcache = get_thread_regcache (current_inferior, 1);
+
   /* Read watchpoints are set as access watchpoints, because of GDB's
      inability to deal with pure read watchpoints.  */
   if (type == '3')
     type = '4';
 
   /* Get the configuration register.  */
-  collect_register_by_name ("s0", &bp_ctrl);
+  collect_register_by_name (regcache, "s0", &bp_ctrl);
 
   /* Try to find a watchpoint that is configured for the
      specified range, then check that read/write also matches.  */
@@ -254,18 +262,18 @@ cris_remove_point (char type, CORE_ADDR addr, int len)
   unsigned long bp_d_regs[12];
 
   /* Get all range registers to simplify search.  */
-  collect_register_by_name ("s3", &bp_d_regs[0]);
-  collect_register_by_name ("s4", &bp_d_regs[1]);
-  collect_register_by_name ("s5", &bp_d_regs[2]);
-  collect_register_by_name ("s6", &bp_d_regs[3]);
-  collect_register_by_name ("s7", &bp_d_regs[4]);
-  collect_register_by_name ("s8", &bp_d_regs[5]);
-  collect_register_by_name ("s9", &bp_d_regs[6]);
-  collect_register_by_name ("s10", &bp_d_regs[7]);
-  collect_register_by_name ("s11", &bp_d_regs[8]);
-  collect_register_by_name ("s12", &bp_d_regs[9]);
-  collect_register_by_name ("s13", &bp_d_regs[10]);
-  collect_register_by_name ("s14", &bp_d_regs[11]);
+  collect_register_by_name (regcache, "s3", &bp_d_regs[0]);
+  collect_register_by_name (regcache, "s4", &bp_d_regs[1]);
+  collect_register_by_name (regcache, "s5", &bp_d_regs[2]);
+  collect_register_by_name (regcache, "s6", &bp_d_regs[3]);
+  collect_register_by_name (regcache, "s7", &bp_d_regs[4]);
+  collect_register_by_name (regcache, "s8", &bp_d_regs[5]);
+  collect_register_by_name (regcache, "s9", &bp_d_regs[6]);
+  collect_register_by_name (regcache, "s10", &bp_d_regs[7]);
+  collect_register_by_name (regcache, "s11", &bp_d_regs[8]);
+  collect_register_by_name (regcache, "s12", &bp_d_regs[9]);
+  collect_register_by_name (regcache, "s13", &bp_d_regs[10]);
+  collect_register_by_name (regcache, "s14", &bp_d_regs[11]);
 
   for (bp = 0; bp < 6; bp++)
     {
@@ -299,11 +307,11 @@ cris_remove_point (char type, CORE_ADDR addr, int len)
      start/end addresses.  */
   bp_ctrl &= ~(3 << (2 + (bp * 4)));
   /* Setup the configuration register.  */
-  supply_register_by_name ("s0", &bp_ctrl);
+  supply_register_by_name (regcache, "s0", &bp_ctrl);
 
   start = end = 0;
   /* Configure the watchpoint register.  */
-  cris_write_data_breakpoint (bp, start, end);
+  cris_write_data_breakpoint (regcache, bp, start, end);
 
   /* Note that we don't clear the S1 flag here.  It's done when continuing.  */
   return 0;

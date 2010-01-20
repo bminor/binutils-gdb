@@ -173,7 +173,7 @@ i386_cannot_fetch_register (int regno)
 }
 
 static void
-x86_fill_gregset (void *buf)
+x86_fill_gregset (struct regcache *regcache, void *buf)
 {
   int i;
 
@@ -182,19 +182,20 @@ x86_fill_gregset (void *buf)
     {
       for (i = 0; i < X86_64_NUM_REGS; i++)
 	if (x86_64_regmap[i] != -1)
-	  collect_register (i, ((char *) buf) + x86_64_regmap[i]);
+	  collect_register (regcache, i, ((char *) buf) + x86_64_regmap[i]);
       return;
     }
 #endif
 
   for (i = 0; i < I386_NUM_REGS; i++)
-    collect_register (i, ((char *) buf) + i386_regmap[i]);
+    collect_register (regcache, i, ((char *) buf) + i386_regmap[i]);
 
-  collect_register_by_name ("orig_eax", ((char *) buf) + ORIG_EAX * 4);
+  collect_register_by_name (regcache, "orig_eax",
+			    ((char *) buf) + ORIG_EAX * 4);
 }
 
 static void
-x86_store_gregset (const void *buf)
+x86_store_gregset (struct regcache *regcache, const void *buf)
 {
   int i;
 
@@ -203,49 +204,50 @@ x86_store_gregset (const void *buf)
     {
       for (i = 0; i < X86_64_NUM_REGS; i++)
 	if (x86_64_regmap[i] != -1)
-	  supply_register (i, ((char *) buf) + x86_64_regmap[i]);
+	  supply_register (regcache, i, ((char *) buf) + x86_64_regmap[i]);
       return;
     }
 #endif
 
   for (i = 0; i < I386_NUM_REGS; i++)
-    supply_register (i, ((char *) buf) + i386_regmap[i]);
+    supply_register (regcache, i, ((char *) buf) + i386_regmap[i]);
 
-  supply_register_by_name ("orig_eax", ((char *) buf) + ORIG_EAX * 4);
+  supply_register_by_name (regcache, "orig_eax",
+			   ((char *) buf) + ORIG_EAX * 4);
 }
 
 static void
-x86_fill_fpregset (void *buf)
+x86_fill_fpregset (struct regcache *regcache, void *buf)
 {
 #ifdef __x86_64__
-  i387_cache_to_fxsave (buf);
+  i387_cache_to_fxsave (regcache, buf);
 #else
-  i387_cache_to_fsave (buf);
+  i387_cache_to_fsave (regcache, buf);
 #endif
 }
 
 static void
-x86_store_fpregset (const void *buf)
+x86_store_fpregset (struct regcache *regcache, const void *buf)
 {
 #ifdef __x86_64__
-  i387_fxsave_to_cache (buf);
+  i387_fxsave_to_cache (regcache, buf);
 #else
-  i387_fsave_to_cache (buf);
+  i387_fsave_to_cache (regcache, buf);
 #endif
 }
 
 #ifndef __x86_64__
 
 static void
-x86_fill_fpxregset (void *buf)
+x86_fill_fpxregset (struct regcache *regcache, void *buf)
 {
-  i387_cache_to_fxsave (buf);
+  i387_cache_to_fxsave (regcache, buf);
 }
 
 static void
-x86_store_fpxregset (const void *buf)
+x86_store_fpxregset (struct regcache *regcache, const void *buf)
 {
-  i387_fxsave_to_cache (buf);
+  i387_fxsave_to_cache (regcache, buf);
 }
 
 #endif
@@ -280,38 +282,38 @@ struct regset_info target_regsets[] =
 };
 
 static CORE_ADDR
-x86_get_pc (void)
+x86_get_pc (struct regcache *regcache)
 {
   int use_64bit = register_size (0) == 8;
 
   if (use_64bit)
     {
       unsigned long pc;
-      collect_register_by_name ("rip", &pc);
+      collect_register_by_name (regcache, "rip", &pc);
       return (CORE_ADDR) pc;
     }
   else
     {
       unsigned int pc;
-      collect_register_by_name ("eip", &pc);
+      collect_register_by_name (regcache, "eip", &pc);
       return (CORE_ADDR) pc;
     }
 }
 
 static void
-x86_set_pc (CORE_ADDR pc)
+x86_set_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   int use_64bit = register_size (0) == 8;
 
   if (use_64bit)
     {
       unsigned long newpc = pc;
-      supply_register_by_name ("rip", &newpc);
+      supply_register_by_name (regcache, "rip", &newpc);
     }
   else
     {
       unsigned int newpc = pc;
-      supply_register_by_name ("eip", &newpc);
+      supply_register_by_name (regcache, "eip", &newpc);
     }
 }
 

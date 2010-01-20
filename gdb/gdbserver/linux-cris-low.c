@@ -62,20 +62,20 @@ cris_cannot_fetch_register (int regno)
 extern int debug_threads;
 
 static CORE_ADDR
-cris_get_pc (void)
+cris_get_pc (struct regcache *regcache, void)
 {
   unsigned long pc;
-  collect_register_by_name ("pc", &pc);
+  collect_register_by_name (regcache, "pc", &pc);
   if (debug_threads)
     fprintf (stderr, "stop pc is %08lx\n", pc);
   return pc;
 }
 
 static void
-cris_set_pc (CORE_ADDR pc)
+cris_set_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   unsigned long newpc = pc;
-  supply_register_by_name ("pc", &newpc);
+  supply_register_by_name (regcache, "pc", &newpc);
 }
 
 static const unsigned short cris_breakpoint = 0xe938;
@@ -102,8 +102,9 @@ cris_breakpoint_at (CORE_ADDR where)
 static CORE_ADDR
 cris_reinsert_addr (void)
 {
+  struct regcache *regcache = get_thread_regcache (current_inferior, 1);
   unsigned long pc;
-  collect_register_by_name ("srp", &pc);
+  collect_register_by_name (regcache, "srp", &pc);
   return pc;
 }
 

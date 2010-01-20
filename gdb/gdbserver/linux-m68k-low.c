@@ -71,40 +71,40 @@ m68k_cannot_fetch_register (int regno)
 #include <sys/ptrace.h>
 
 static void
-m68k_fill_gregset (void *buf)
+m68k_fill_gregset (struct regcache *regcache, void *buf)
 {
   int i;
 
   for (i = 0; i < m68k_num_gregs; i++)
-    collect_register (i, (char *) buf + m68k_regmap[i]);
+    collect_register (regcache, i, (char *) buf + m68k_regmap[i]);
 }
 
 static void
-m68k_store_gregset (const void *buf)
+m68k_store_gregset (struct regcache *regcache, const void *buf)
 {
   int i;
 
   for (i = 0; i < m68k_num_gregs; i++)
-    supply_register (i, (const char *) buf + m68k_regmap[i]);
+    supply_register (regcache, i, (const char *) buf + m68k_regmap[i]);
 }
 
 static void
-m68k_fill_fpregset (void *buf)
+m68k_fill_fpregset (struct regcache *regcache, void *buf)
 {
   int i;
 
   for (i = m68k_num_gregs; i < m68k_num_regs; i++)
-    collect_register (i, ((char *) buf
-			  + (m68k_regmap[i] - m68k_regmap[m68k_num_gregs])));
+    collect_register (regcache, i, ((char *) buf
+			 + (m68k_regmap[i] - m68k_regmap[m68k_num_gregs])));
 }
 
 static void
-m68k_store_fpregset (const void *buf)
+m68k_store_fpregset (struct regcache *regcache, const void *buf)
 {
   int i;
 
   for (i = m68k_num_gregs; i < m68k_num_regs; i++)
-    supply_register (i, ((const char *) buf
+    supply_register (regcache, i, ((const char *) buf
 			 + (m68k_regmap[i] - m68k_regmap[m68k_num_gregs])));
 }
 
@@ -126,20 +126,20 @@ static const unsigned char m68k_breakpoint[] = { 0x4E, 0x4F };
 #define m68k_breakpoint_len 2
 
 static CORE_ADDR
-m68k_get_pc ()
+m68k_get_pc (struct regcache *regcache)
 {
   unsigned long pc;
 
-  collect_register_by_name ("pc", &pc);
+  collect_register_by_name (regcache, "pc", &pc);
   return pc;
 }
 
 static void
-m68k_set_pc (CORE_ADDR value)
+m68k_set_pc (struct regcache *regcache, CORE_ADDR value)
 {
   unsigned long newpc = value;
 
-  supply_register_by_name ("pc", &newpc);
+  supply_register_by_name (regcache, "pc", &newpc);
 }
 
 static int

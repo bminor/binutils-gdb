@@ -24,8 +24,8 @@
 #include "gdb_proc_service.h"
 
 #ifdef HAVE_LINUX_REGSETS
-typedef void (*regset_fill_func) (void *);
-typedef void (*regset_store_func) (const void *);
+typedef void (*regset_fill_func) (struct regcache *, void *);
+typedef void (*regset_store_func) (struct regcache *, const void *);
 enum regset_type {
   GENERAL_REGS,
   FP_REGS,
@@ -70,8 +70,8 @@ struct linux_target_ops
      store the register, and 2 if failure to store the register
      is acceptable.  */
   int (*cannot_store_register) (int);
-  CORE_ADDR (*get_pc) (void);
-  void (*set_pc) (CORE_ADDR newpc);
+  CORE_ADDR (*get_pc) (struct regcache *regcache);
+  void (*set_pc) (struct regcache *regcache, CORE_ADDR newpc);
   const unsigned char *breakpoint;
   int breakpoint_len;
   CORE_ADDR (*breakpoint_reinsert_addr) (void);
@@ -88,8 +88,10 @@ struct linux_target_ops
 
   /* Hooks to reformat register data for PEEKUSR/POKEUSR (in particular
      for registers smaller than an xfer unit).  */
-  void (*collect_ptrace_register) (int regno, char *buf);
-  void (*supply_ptrace_register) (int regno, const char *buf);
+  void (*collect_ptrace_register) (struct regcache *regcache,
+				   int regno, char *buf);
+  void (*supply_ptrace_register) (struct regcache *regcache,
+				  int regno, const char *buf);
 
   /* Hook to convert from target format to ptrace format and back.
      Returns true if any conversion was done; false otherwise.

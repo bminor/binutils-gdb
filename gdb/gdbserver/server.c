@@ -2456,15 +2456,25 @@ process_serial_event (void)
 	}
       break;
     case 'g':
-      require_running (own_buf);
-      set_desired_inferior (1);
-      registers_to_string (own_buf);
+      {
+	struct regcache *regcache;
+
+	require_running (own_buf);
+	set_desired_inferior (1);
+	regcache = get_thread_regcache (current_inferior, 1);
+	registers_to_string (regcache, own_buf);
+      }
       break;
     case 'G':
-      require_running (own_buf);
-      set_desired_inferior (1);
-      registers_from_string (&own_buf[1]);
-      write_ok (own_buf);
+ 	{
+	  struct regcache *regcache;
+
+	  require_running (own_buf);
+	  set_desired_inferior (1);
+	  regcache = get_thread_regcache (current_inferior, 1);
+	  registers_from_string (regcache, &own_buf[1]);
+	  write_ok (own_buf);
+	}
       break;
     case 'm':
       require_running (own_buf);

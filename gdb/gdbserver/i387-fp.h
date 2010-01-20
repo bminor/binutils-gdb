@@ -20,11 +20,11 @@
 #ifndef I387_FP_H
 #define I387_FP_H
 
-void i387_cache_to_fsave (void *buf);
-void i387_fsave_to_cache (const void *buf);
+void i387_cache_to_fsave (struct regcache *regcache, void *buf);
+void i387_fsave_to_cache (struct regcache *regcache, const void *buf);
 
-void i387_cache_to_fxsave (void *buf);
-void i387_fxsave_to_cache (const void *buf);
+void i387_cache_to_fxsave (struct regcache *regcache, void *buf);
+void i387_fxsave_to_cache (struct regcache *regcache, const void *buf);
 
 extern int num_xmm_registers;
 

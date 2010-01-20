@@ -21,14 +21,27 @@
 #define REGCACHE_H
 
 struct inferior_list_entry;
+struct thread_info;
+
+/* The data for the register cache.  Note that we have one per
+   inferior; this is primarily for simplicity, as the performance
+   benefit is minimal.  */
+
+struct regcache
+{
+  int registers_valid;
+  unsigned char *registers;
+};
 
 /* Create a new register cache for INFERIOR.  */
 
-void *new_register_cache (void);
+struct regcache *new_register_cache (void);
+
+struct regcache *get_thread_regcache (struct thread_info *thread, int fetch);
 
 /* Release all memory associated with the register cache for INFERIOR.  */
 
-void free_register_cache (void *regcache);
+void free_register_cache (struct regcache *regcache);
 
 /* Invalidate cached registers for one or all threads.  */
 
@@ -38,11 +51,11 @@ void regcache_invalidate (void);
 /* Convert all registers to a string in the currently specified remote
    format.  */
 
-void registers_to_string (char *buf);
+void registers_to_string (struct regcache *regcache, char *buf);
 
 /* Convert a string to register values and fill our register cache.  */
 
-void registers_from_string (char *buf);
+void registers_from_string (struct regcache *regcache, char *buf);
 
 /* Return a pointer to the description of register ``n''.  */
 
@@ -57,14 +70,15 @@ int find_regno (const char *name);
 extern const char **gdbserver_expedite_regs;
 extern const char *gdbserver_xmltarget;
 
-void supply_register (int n, const void *buf);
+void supply_register (struct regcache *regcache, int n, const void *buf);
 
-void supply_register_by_name (const char *name, const void *buf);
+void supply_register_by_name (struct regcache *regcache,
+			      const char *name, const void *buf);
 
-void collect_register (int n, void *buf);
+void collect_register (struct regcache *regcache, int n, void *buf);
 
-void collect_register_as_string (int n, char *buf);
+void collect_register_as_string (struct regcache *regcache, int n, char *buf);
 
-void collect_register_by_name (const char *name, void *buf);
+void collect_register_by_name (struct regcache *regcache, const char *name, void *buf);
 
 #endif /* REGCACHE_H */

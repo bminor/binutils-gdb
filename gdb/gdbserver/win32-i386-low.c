@@ -271,7 +271,8 @@ static const int mappings[] = {
 
 /* Fetch register from gdbserver regcache data.  */
 static void
-i386_fetch_inferior_register (win32_thread_info *th, int r)
+i386_fetch_inferior_register (struct regcache *regcache,
+			      win32_thread_info *th, int r)
 {
   char *context_offset = (char *) &th->context + mappings[r];
 
@@ -279,23 +280,24 @@ i386_fetch_inferior_register (win32_thread_info *th, int r)
   if (r == FCS_REGNUM)
     {
       l = *((long *) context_offset) & 0xffff;
-      supply_register (r, (char *) &l);
+      supply_register (regcache, r, (char *) &l);
     }
   else if (r == FOP_REGNUM)
     {
       l = (*((long *) context_offset) >> 16) & ((1 << 11) - 1);
-      supply_register (r, (char *) &l);
+      supply_register (regcache, r, (char *) &l);
     }
   else
-    supply_register (r, context_offset);
+    supply_register (regcache, r, context_offset);
 }
 
 /* Store a new register value into the thread context of TH.  */
 static void
-i386_store_inferior_register (win32_thread_info *th, int r)
+i386_store_inferior_register (struct regcache *regcache,
+			      win32_thread_info *th, int r)
 {
   char *context_offset = (char *) &th->context + mappings[r];
-  collect_register (r, context_offset);
+  collect_register (regcache, r, context_offset);
 }
 
 static const unsigned char i386_win32_breakpoint = 0xcc;

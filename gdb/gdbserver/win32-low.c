@@ -372,29 +372,29 @@ child_continue (DWORD continue_status, int thread_id)
 
 /* Fetch register(s) from the current thread context.  */
 static void
-child_fetch_inferior_registers (int r)
+child_fetch_inferior_registers (struct regcache *regcache, int r)
 {
   int regno;
   win32_thread_info *th = thread_rec (current_inferior_ptid (), TRUE);
   if (r == -1 || r > NUM_REGS)
-    child_fetch_inferior_registers (NUM_REGS);
+    child_fetch_inferior_registers (regcache, NUM_REGS);
   else
     for (regno = 0; regno < r; regno++)
-      (*the_low_target.fetch_inferior_register) (th, regno);
+      (*the_low_target.fetch_inferior_register) (regcache, th, regno);
 }
 
 /* Store a new register value into the current thread context.  We don't
    change the program's context until later, when we resume it.  */
 static void
-child_store_inferior_registers (int r)
+child_store_inferior_registers (struct regcache *regcache, int r)
 {
   int regno;
   win32_thread_info *th = thread_rec (current_inferior_ptid (), TRUE);
   if (r == -1 || r == 0 || r > NUM_REGS)
-    child_store_inferior_registers (NUM_REGS);
+    child_store_inferior_registers (regcache, NUM_REGS);
   else
     for (regno = 0; regno < r; regno++)
-      (*the_low_target.store_inferior_register) (th, regno);
+      (*the_low_target.store_inferior_register) (regcache, th, regno);
 }
 
 /* Map the Windows error number in ERROR to a locale-dependent error
@@ -1569,6 +1569,7 @@ static ptid_t
 win32_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 {
   struct process_info *process;
+  struct regcache *regcache;
 
   while (1)
     {
@@ -1590,7 +1591,8 @@ win32_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 	  OUTMSG2 (("Child Stopped with signal = %d \n",
 		    ourstatus->value.sig));
 
-	  child_fetch_inferior_registers (-1);
+	  regcache = get_thread_regcache (current_inferior, 1);
+	  child_fetch_inferior_registers (regcache, -1);
 
 	  if (ourstatus->kind == TARGET_WAITKIND_LOADED
 	      && !server_waiting)
@@ -1622,17 +1624,17 @@ win32_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 /* Fetch registers from the inferior process.
    If REGNO is -1, fetch all registers; otherwise, fetch at least REGNO.  */
 static void
-win32_fetch_inferior_registers (int regno)
+win32_fetch_inferior_registers (struct regcache *regcache, int regno)
 {
-  child_fetch_inferior_registers (regno);
+  child_fetch_inferior_registers (regcache, regno);
 }
 
 /* Store registers to the inferior process.
    If REGNO is -1, store all registers; otherwise, store at least REGNO.  */
 static void
-win32_store_inferior_registers (int regno)
+win32_store_inferior_registers (struct regcache *regcache, int regno)
 {
-  child_store_inferior_registers (regno);
+  child_store_inferior_registers (regcache, regno);
 }
 
 /* Read memory from the inferior process.  This should generally be

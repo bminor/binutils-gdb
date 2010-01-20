@@ -166,13 +166,13 @@ struct target_ops
 
      If REGNO is -1, fetch all registers; otherwise, fetch at least REGNO.  */
 
-  void (*fetch_registers) (int regno);
+  void (*fetch_registers) (struct regcache *regcache, int regno);
 
   /* Store registers to the inferior process.
 
      If REGNO is -1, store all registers; otherwise, store at least REGNO.  */
 
-  void (*store_registers) (int regno);
+  void (*store_registers) (struct regcache *regcache, int regno);
 
   /* Read memory from the inferior process.  This should generally be
      called through read_inferior_memory, which handles breakpoint shadowing.
@@ -307,11 +307,11 @@ void set_target_ops (struct target_ops *);
 #define mythread_alive(pid) \
   (*the_target->thread_alive) (pid)
 
-#define fetch_inferior_registers(regno) \
-  (*the_target->fetch_registers) (regno)
+#define fetch_inferior_registers(regcache, regno)	\
+  (*the_target->fetch_registers) (regcache, regno)
 
-#define store_inferior_registers(regno) \
-  (*the_target->store_registers) (regno)
+#define store_inferior_registers(regcache, regno) \
+  (*the_target->store_registers) (regcache, regno)
 
 #define join_inferior(pid) \
   (*the_target->join) (pid)
