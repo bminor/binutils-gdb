@@ -1,3 +1,8 @@
+2010-01-20  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.mi/mi-async.exp: Remove check for 'async' target, because
+	that target was removed, and the test always runs native anyway.
+
 2010-01-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/watchpoint-cond-gone.exp, gdb.base/watchpoint-cond-gone.c,

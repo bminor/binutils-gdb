@@ -17,10 +17,11 @@
 # Test asynchronous Machine Interface (MI) responses.
 #
 
-# This currently only works with native linux and the async remote protocol.
-if { !([isnative] && [istarget *-linux*]) \
-     && (![target_info exists gdb_protocol] \
-         || [target_info gdb_protocol] != "async") } then {
+# Because of the way this test is written, using 'start' and not using
+# mi_run_cmd, it ignores whatever target the rest of GDB testsuite is
+# using, and always tries to run natively.  So, don't do anything unless
+# we're actually testing native.
+if { !([isnative] && [istarget *-linux*]) } then {
   return
 }
 
