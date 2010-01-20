@@ -1,3 +1,29 @@
+2010-01-20  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
+
+	* gold/arm.cc: Added support for R_ARM_V4BX relocation
+	(class Arm_v4bx_stub): New class.
+	(DEF_STUBS): Updated definition to support v4_veneer_bx.
+	(Stub_factory::make_arm_v4bx_stub): New method.
+	(Stub_factory::elf32_arm_stub_v4_veneer_bx): New veneer template.
+	(Stub_table::empty): Handle v4bx stubs.
+	(Stub_table::add_arm_v4bx_stub): New method.
+	(Stub_table::find_arm_v4bx_stub): New method.
+	(Arm_relocate_functions::v4bx): New method.
+	(Target_arm::fix_v4bx): New method.
+	(Target_arm::Target_arm): Handle R_ARM_V4BX.
+	(Stub_table::relocate_stubs): Likewise.
+	(Stub_table::do_write): Likewise.
+	(Stub_table::update_data_size_and_addralign): Likewise.
+	(Stub_table::finalize_stubs):  Likewise.
+	(Target_arm::Scan::local): Likewise.
+	(Target_arm::Scan::global): Likewise.
+	(Target_arm::do_finalize_sections): Likewise.
+	(Target_arm::Relocate::relocate): Likewise.
+	(Target_arm::Relocatable_size_for_reloc::get_size_for_reloc):
+	Likewise.
+	(Target_arm::scan_reloc_for_stub): Likewise.
+	(Target_arm::scan_reloc_section_for_stubs): Likewise.
+
 2010-01-19  Ian Lance Taylor  <iant@google.com>
 
 	* output.cc (Output_section_headers::do_sized_write): Write large

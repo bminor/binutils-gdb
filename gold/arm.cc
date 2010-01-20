@@ -122,6 +122,7 @@ const int32_t THM2_MAX_BWD_BRANCH_OFFSET = (-(1 << 24) + 4);
 // R_ARM_MOVT_PREL
 // R_ARM_THM_MOVW_PREL_NC
 // R_ARM_THM_MOVT_PREL
+// R_ARM_V4BX
 // R_ARM_THM_JUMP6
 // R_ARM_THM_JUMP8
 // R_ARM_THM_JUMP11
@@ -254,7 +255,8 @@ class Insn_template
   DEF_STUB(a8_veneer_b_cond) \
   DEF_STUB(a8_veneer_b) \
   DEF_STUB(a8_veneer_bl) \
-  DEF_STUB(a8_veneer_blx)
+  DEF_STUB(a8_veneer_blx) \
+  DEF_STUB(v4_veneer_bx)
 
 // Stub types.
 
@@ -275,7 +277,7 @@ typedef enum
     arm_stub_cortex_a8_last = arm_stub_a8_veneer_blx,
     
     // Last stub type.
-    arm_stub_type_last = arm_stub_a8_veneer_blx
+    arm_stub_type_last = arm_stub_v4_veneer_bx
   } Stub_type;
 #undef DEF_STUB
 
@@ -748,6 +750,64 @@ class Cortex_a8_stub : public Stub
   uint32_t original_insn_;
 };
 
+// ARMv4 BX Rx branch relocation stub class.
+class Arm_v4bx_stub : public Stub
+{
+ public:
+  ~Arm_v4bx_stub()
+  { }
+
+  // Return the associated register.
+  uint32_t
+  reg() const
+  { return this->reg_; }
+
+ protected:
+  // Arm V4BX stubs are created via a stub factory.  So these are protected.
+  Arm_v4bx_stub(const Stub_template* stub_template, const uint32_t reg)
+    : Stub(stub_template), reg_(reg)
+  { }
+
+  friend class Stub_factory;
+
+  // Return the relocation target address of the i-th relocation in the
+  // stub.
+  Arm_address
+  do_reloc_target(size_t)
+  { gold_unreachable(); }
+
+  // This may be overridden in the child class.
+  virtual void
+  do_write(unsigned char* view, section_size_type view_size, bool big_endian)
+  {
+    if (big_endian)
+      this->do_fixed_endian_v4bx_write<true>(view, view_size);
+    else
+      this->do_fixed_endian_v4bx_write<false>(view, view_size);
+  }
+
+ private:
+  // A template to implement do_write.
+  template<bool big_endian>
+  void inline
+  do_fixed_endian_v4bx_write(unsigned char* view, section_size_type)
+  {
+    const Insn_template* insns = this->stub_template()->insns();
+    elfcpp::Swap<32, big_endian>::writeval(view,
+					   (insns[0].data()
+					   + (this->reg_ << 16)));
+    view += insns[0].size();
+    elfcpp::Swap<32, big_endian>::writeval(view,
+					   (insns[1].data() + this->reg_));
+    view += insns[1].size();
+    elfcpp::Swap<32, big_endian>::writeval(view,
+					   (insns[2].data() + this->reg_));
+  }
+
+  // A register index (r0-r14), which is associated with the stub.
+  uint32_t reg_;
+};
+
 // Stub factory class.
 
 class Stub_factory
@@ -782,6 +842,16 @@ class Stub_factory
 			      source, destination, original_insn);
   }
 
+  // Make an ARM V4BX relocation stub.
+  // This method creates a stub from the arm_stub_v4_veneer_bx template only.
+  Arm_v4bx_stub*
+  make_arm_v4bx_stub(uint32_t reg) const
+  {
+    gold_assert(reg < 0xf);
+    return new Arm_v4bx_stub(this->stub_templates_[arm_stub_v4_veneer_bx],
+			     reg);
+  }
+
  private:
   // Constructor and destructor are protected since we only return a single
   // instance created in Stub_factory::get_instance().
@@ -804,7 +874,7 @@ class Stub_table : public Output_data
  public:
   Stub_table(Arm_input_section<big_endian>* owner)
     : Output_data(), owner_(owner), reloc_stubs_(), cortex_a8_stubs_(),
-      prev_data_size_(0), prev_addralign_(1)
+      arm_v4bx_stubs_(0xf), prev_data_size_(0), prev_addralign_(1)
   { }
 
   ~Stub_table()
@@ -818,7 +888,11 @@ class Stub_table : public Output_data
   // Whether this stub table is empty.
   bool
   empty() const
-  { return this->reloc_stubs_.empty() && this->cortex_a8_stubs_.empty(); }
+  {
+    return (this->reloc_stubs_.empty()
+	    && this->cortex_a8_stubs_.empty()
+	    && this->arm_v4bx_stubs_.empty());
+  }
 
   // Return the current data size.
   off_t
@@ -845,6 +919,15 @@ class Stub_table : public Output_data
     this->cortex_a8_stubs_.insert(value);
   }
 
+  // Add an ARM V4BX relocation stub. A register index will be retrieved
+  // from the stub.
+  void
+  add_arm_v4bx_stub(Arm_v4bx_stub* stub)
+  {
+    gold_assert(stub != NULL && this->arm_v4bx_stubs_[stub->reg()] == NULL);
+    this->arm_v4bx_stubs_[stub->reg()] = stub;
+  }
+
   // Remove all Cortex-A8 stubs.
   void
   remove_all_cortex_a8_stubs();
@@ -855,6 +938,15 @@ class Stub_table : public Output_data
   {
     typename Reloc_stub_map::const_iterator p = this->reloc_stubs_.find(key);
     return (p != this->reloc_stubs_.end()) ? p->second : NULL;
+  }
+
+  // Look up an arm v4bx relocation stub using the register index.
+  // Return NULL if there is none.
+  Arm_v4bx_stub*
+  find_arm_v4bx_stub(const uint32_t reg) const
+  {
+    gold_assert(reg < 0xf);
+    return this->arm_v4bx_stubs_[reg];
   }
 
   // Relocate stubs in this stub table.
@@ -916,6 +1008,8 @@ class Stub_table : public Output_data
   // List of Cortex-A8 stubs ordered by addresses of branches being
   // fixed up in output.
   typedef std::map<Arm_address, Cortex_a8_stub*> Cortex_a8_stub_list;
+  // List of Arm V4BX relocation stubs ordered by associated registers.
+  typedef std::vector<Arm_v4bx_stub*> Arm_v4bx_stub_list;
 
   // Owner of this stub table.
   Arm_input_section<big_endian>* owner_;
@@ -923,6 +1017,8 @@ class Stub_table : public Output_data
   Reloc_stub_map reloc_stubs_;
   // The cortex_a8_stubs.
   Cortex_a8_stub_list cortex_a8_stubs_;
+  // The Arm V4BX relocation stubs.
+  Arm_v4bx_stub_list arm_v4bx_stubs_;
   // data size of this in the previous pass.
   off_t prev_data_size_;
   // address alignment of this in the previous pass.
@@ -1452,7 +1548,7 @@ class Target_arm : public Sized_target<32, big_endian>
       stub_factory_(Stub_factory::get_instance()), may_use_blx_(false),
       should_force_pic_veneer_(false), arm_input_section_map_(),
       attributes_section_data_(NULL), fix_cortex_a8_(false),
-      cortex_a8_relocs_info_()
+      cortex_a8_relocs_info_(), fix_v4bx_(0)
   { }
 
   // Whether we can use BLX.
@@ -1684,6 +1780,14 @@ class Target_arm : public Sized_target<32, big_endian>
   bool
   fix_cortex_a8() const
   { return this->fix_cortex_a8_; }
+
+  // Whether we fix R_ARM_V4BX relocation.
+  // 0 - do not fix
+  // 1 - replace with MOV instruction (armv4 target)
+  // 2 - make interworking veneer (>= armv4t targets only)
+  int
+  fix_v4bx() const
+  { return this->fix_v4bx_; }
 
   // Scan a span of THUMB code section for Cortex-A8 erratum.
   void
@@ -2048,6 +2152,8 @@ class Target_arm : public Sized_target<32, big_endian>
   bool fix_cortex_a8_;
   // Map addresses to relocs for Cortex-A8 erratum.
   Cortex_a8_relocs_info cortex_a8_relocs_info_;
+  // Whether we need to fix code for V4BX relocations.
+  int fix_v4bx_;
 };
 
 template<bool big_endian>
@@ -2743,6 +2849,49 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
     val = This::insert_val_thumb_movw_movt(val, x);
     elfcpp::Swap<16, big_endian>::writeval(wv, val >> 16);
     elfcpp::Swap<16, big_endian>::writeval(wv + 1, val & 0xffff);
+    return This::STATUS_OKAY;
+  }
+
+  // R_ARM_V4BX
+  static inline typename This::Status
+  v4bx(const Relocate_info<32, big_endian>* relinfo,
+       unsigned char *view,
+       const Arm_relobj<big_endian>* object,
+       const Arm_address address,
+       const bool is_interworking)
+  {
+
+    typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype val = elfcpp::Swap<32, big_endian>::readval(wv);
+
+    // Ensure that we have a BX instruction.
+    gold_assert((val & 0x0ffffff0) == 0x012fff10);
+    const uint32_t reg = (val & 0xf);
+    if (is_interworking && reg != 0xf)
+      {
+	Stub_table<big_endian>* stub_table =
+	    object->stub_table(relinfo->data_shndx);
+	gold_assert(stub_table != NULL);
+
+	Arm_v4bx_stub* stub = stub_table->find_arm_v4bx_stub(reg);
+	gold_assert(stub != NULL);
+
+	int32_t veneer_address =
+	    stub_table->address() + stub->offset() - 8 - address;
+	gold_assert((veneer_address <= ARM_MAX_FWD_BRANCH_OFFSET)
+		    && (veneer_address >= ARM_MAX_BWD_BRANCH_OFFSET));
+	// Replace with a branch to veneer (B <addr>)
+	val = (val & 0xf0000000) | 0x0a000000
+	      | ((veneer_address >> 2) & 0x00ffffff);
+      }
+    else
+      {
+	// Preserve Rm (lowest four bits) and the condition code
+	// (highest four bits). Other bits encode MOV PC,Rm.
+	val = (val & 0xf000000f) | 0x01a0f000;
+      }
+    elfcpp::Swap<32, big_endian>::writeval(wv, val);
     return This::STATUS_OKAY;
   }
 };
@@ -3676,6 +3825,15 @@ Stub_factory::Stub_factory()
       Insn_template::arm_rel_insn(0xea000000, -8)	// b dest
     };
 
+  // Stub used to provide an interworking for R_ARM_V4BX relocation
+  // (bx r[n] instruction).
+  static const Insn_template elf32_arm_stub_v4_veneer_bx[] =
+    {
+      Insn_template::arm_insn(0xe3100001),		// tst   r<n>, #1
+      Insn_template::arm_insn(0x01a0f000),		// moveq pc, r<n>
+      Insn_template::arm_insn(0xe12fff10)		// bx    r<n>
+    };
+
   // Fill in the stub template look-up table.  Stub templates are constructed
   // per instance of Stub_factory for fast look-up without locking
   // in a thread-enabled environment.
@@ -3770,6 +3928,16 @@ Stub_table<big_endian>::relocate_stubs(
        ++p)
     this->relocate_stub(p->second, relinfo, arm_target, output_section, view,
 			address, view_size);
+
+  // Relocate all ARM V4BX stubs.
+  for (Arm_v4bx_stub_list::iterator p = this->arm_v4bx_stubs_.begin();
+       p != this->arm_v4bx_stubs_.end();
+       ++p)
+    {
+      if (*p != NULL)
+	this->relocate_stub(*p, relinfo, arm_target, output_section, view,
+			    address, view_size);
+    }
 }
 
 // Write out the stubs to file.
@@ -3811,6 +3979,22 @@ Stub_table<big_endian>::do_write(Output_file* of)
 		  big_endian);
     }
 
+  // Write ARM V4BX relocation stubs.
+  for (Arm_v4bx_stub_list::const_iterator p = this->arm_v4bx_stubs_.begin();
+       p != this->arm_v4bx_stubs_.end();
+       ++p)
+    {
+      if (*p == NULL)
+	continue;
+
+      Arm_address address = this->address() + (*p)->offset();
+      gold_assert(address
+		  == align_address(address,
+				   (*p)->stub_template()->alignment()));
+      (*p)->write(oview + (*p)->offset(), (*p)->stub_template()->size(),
+		  big_endian);
+    }
+
   of->write_output_view(this->offset(), oview_size, oview);
 }
 
@@ -3842,6 +4026,19 @@ Stub_table<big_endian>::update_data_size_and_addralign()
        ++p)
     {
       const Stub_template* stub_template = p->second->stub_template();
+      addralign = std::max(addralign, stub_template->alignment());
+      size = (align_address(size, stub_template->alignment())
+	      + stub_template->size());
+    }
+
+  for (Arm_v4bx_stub_list::const_iterator p = this->arm_v4bx_stubs_.begin();
+       p != this->arm_v4bx_stubs_.end();
+       ++p)
+    {
+      if (*p == NULL)
+	continue;
+
+      const Stub_template* stub_template = (*p)->stub_template();
       addralign = std::max(addralign, stub_template->alignment());
       size = (align_address(size, stub_template->alignment())
 	      + stub_template->size());
@@ -3896,6 +4093,20 @@ Stub_table<big_endian>::finalize_stubs()
       Arm_relobj<big_endian>* arm_relobj =
 	Arm_relobj<big_endian>::as_arm_relobj(stub->relobj());
       arm_relobj->mark_section_for_cortex_a8_workaround(stub->shndx());
+    }
+
+  for (Arm_v4bx_stub_list::const_iterator p = this->arm_v4bx_stubs_.begin();
+      p != this->arm_v4bx_stubs_.end();
+      ++p)
+    {
+      if (*p == NULL)
+	continue;
+
+      const Stub_template* stub_template = (*p)->stub_template();
+      uint64_t stub_addralign = stub_template->alignment();
+      off = align_address(off, stub_addralign);
+      (*p)->set_offset(off);
+      off += stub_template->size();
     }
 
   gold_assert(off <= this->prev_data_size_);
@@ -5204,6 +5415,7 @@ Target_arm<big_endian>::Scan::local(Symbol_table* symtab,
     case elfcpp::R_ARM_THM_JUMP6:
     case elfcpp::R_ARM_THM_JUMP8:
     case elfcpp::R_ARM_THM_JUMP11:
+    case elfcpp::R_ARM_V4BX:
       break;
 
     case elfcpp::R_ARM_GOTOFF32:
@@ -5335,6 +5547,7 @@ Target_arm<big_endian>::Scan::global(Symbol_table* symtab,
     case elfcpp::R_ARM_THM_JUMP6:
     case elfcpp::R_ARM_THM_JUMP8:
     case elfcpp::R_ARM_THM_JUMP11:
+    case elfcpp::R_ARM_V4BX:
       break;
 
     case elfcpp::R_ARM_THM_ABS5:
@@ -5603,6 +5816,13 @@ Target_arm<big_endian>::do_finalize_sections(
              || cpu_arch_profile_attr->int_value() == 0));
     }
   
+  // Check if we can use V4BX interworking.
+  // The V4BX interworking stub contains BX instruction,
+  // which is not specified for some profiles.
+  if (this->fix_v4bx() == 2 && !this->may_use_blx())
+    gold_error(_("unable to provide V4BX reloc interworking fix up; "
+	         "the target profile does not support BX instruction"));
+
   // Fill in some more dynamic tags.
   const Reloc_section* rel_plt = (this->plt_ == NULL
 				  ? NULL
@@ -6090,6 +6310,13 @@ Target_arm<big_endian>::Relocate::relocate(
 						    address, thumb_bit);
       break;
 
+    case elfcpp::R_ARM_V4BX:
+      if (target->fix_v4bx() > 0)
+	reloc_status =
+	  Arm_relocate_functions::v4bx(relinfo, view, object, address,
+				       (target->fix_v4bx() == 2));
+      break;
+
     case elfcpp::R_ARM_TARGET1:
       // This should have been mapped to another type already.
       // Fall through.
@@ -6238,6 +6465,7 @@ Target_arm<big_endian>::Relocatable_size_for_reloc::get_size_for_reloc(
     case elfcpp::R_ARM_MOVT_PREL:
     case elfcpp::R_ARM_THM_MOVW_PREL_NC:
     case elfcpp::R_ARM_THM_MOVT_PREL:
+    case elfcpp::R_ARM_V4BX:
       return 4;
 
     case elfcpp::R_ARM_TARGET1:
@@ -7382,6 +7610,29 @@ Target_arm<big_endian>::scan_reloc_for_stub(
   const Arm_relobj<big_endian>* arm_relobj =
     Arm_relobj<big_endian>::as_arm_relobj(relinfo->object);
 
+  if (r_type == elfcpp::R_ARM_V4BX)
+    {
+      const uint32_t reg = (addend & 0xf);
+      if (this->fix_v4bx() == 2 && reg < 0xf)
+	{
+	  // Try looking up an existing stub from a stub table.
+	  Stub_table<big_endian>* stub_table =
+	    arm_relobj->stub_table(relinfo->data_shndx);
+	  gold_assert(stub_table != NULL);
+
+	  if (stub_table->find_arm_v4bx_stub(reg) == NULL)
+	    {
+	      // create a new stub and add it to stub table.
+	      Arm_v4bx_stub* stub =
+		this->stub_factory().make_arm_v4bx_stub(reg);
+	      gold_assert(stub != NULL);
+	      stub_table->add_arm_v4bx_stub(stub);
+	    }
+	}
+
+      return;
+    }
+
   bool target_is_thumb;
   Symbol_value<32> symval;
   if (gsym != NULL)
@@ -7553,7 +7804,8 @@ Target_arm<big_endian>::scan_reloc_section_for_stubs(
          && (r_type != elfcpp::R_ARM_THM_CALL)
          && (r_type != elfcpp::R_ARM_THM_XPC22)
          && (r_type != elfcpp::R_ARM_THM_JUMP24)
-         && (r_type != elfcpp::R_ARM_THM_JUMP19))
+         && (r_type != elfcpp::R_ARM_THM_JUMP19)
+         && (r_type != elfcpp::R_ARM_V4BX))
 	continue;
 
       section_offset_type offset =
@@ -7566,6 +7818,18 @@ Target_arm<big_endian>::scan_reloc_section_for_stubs(
 						 offset);
 	  if (offset == -1)
 	    continue;
+	}
+
+      if (r_type == elfcpp::R_ARM_V4BX)
+	{
+	  // Get the BX instruction.
+	  typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
+	  const Valtype* wv = reinterpret_cast<const Valtype*>(view + offset);
+	  elfcpp::Elf_types<32>::Elf_Swxword insn =
+	      elfcpp::Swap<32, big_endian>::readval(wv);
+	  this->scan_reloc_for_stub(relinfo, r_type, NULL, 0, NULL,
+				    insn, NULL);
+	  continue;
 	}
 
       // Get the addend.
