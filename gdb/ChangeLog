@@ -1,3 +1,12 @@
+2010-01-20  Joel Brobecker  <brobecker@adacore.com>
+
+	Get rid of ada-lang.c:function_name_from_pc.
+	* ada-lang.c: Add "stack.h" #include.
+	(function_name_from_pc): Delete.
+	(is_known_support_routine): Replace call to function_name_from_pc
+	by call to find_frame_funname.
+	(ada_unhandled_exception_name_addr_from_raise): Likewise.
+
 2010-01-19  Tom Tromey  <tromey@redhat.com>
 
 	PR c++/11026:

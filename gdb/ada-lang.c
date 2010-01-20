@@ -56,6 +56,7 @@
 #include "source.h"
 #include "observer.h"
 #include "vec.h"
+#include "stack.h"
 
 /* Define whether or not the C operator '/' truncates towards zero for
    differently signed operands (truncation direction is undefined in C). 
@@ -10150,21 +10151,6 @@ ada_executable_changed_observer (void)
   exception_info = NULL;
 }
 
-/* Return the name of the function at PC, NULL if could not find it.
-   This function only checks the debugging information, not the symbol
-   table.  */
-
-static char *
-function_name_from_pc (CORE_ADDR pc)
-{
-  char *func_name;
-
-  if (!find_pc_partial_function (pc, &func_name, NULL, NULL))
-    return NULL;
-
-  return func_name;
-}
-
 /* True iff FRAME is very likely to be that of a function that is
    part of the runtime system.  This is all very heuristic, but is
    intended to be used as advice as to what frames are uninteresting
@@ -10175,6 +10161,7 @@ is_known_support_routine (struct frame_info *frame)
 {
   struct symtab_and_line sal;
   char *func_name;
+  enum language func_lang;
   int i;
 
   /* If this code does not have any debugging information (no symtab),
@@ -10210,7 +10197,7 @@ is_known_support_routine (struct frame_info *frame)
 
   /* Check whether the function is a GNAT-generated entity.  */
 
-  func_name = function_name_from_pc (get_frame_address_in_block (frame));
+  find_frame_funname (frame, &func_name, &func_lang);
   if (func_name == NULL)
     return 1;
 
@@ -10275,8 +10262,10 @@ ada_unhandled_exception_name_addr_from_raise (void)
 
   while (fi != NULL)
     {
-      const char *func_name =
-        function_name_from_pc (get_frame_address_in_block (fi));
+      char *func_name;
+      enum language func_lang;
+
+      find_frame_funname (fi, &func_name, &func_lang);
       if (func_name != NULL
           && strcmp (func_name, exception_info->catch_exception_sym) == 0)
         break; /* We found the frame we were looking for...  */
