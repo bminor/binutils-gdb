@@ -2294,11 +2294,11 @@ print_arm_address (bfd_vma pc, struct disassemble_info *info, long given)
 
       func (stream, "[pc");
 
+      if (NEGATIVE_BIT_SET)
+	offset = - offset;
+
       if (PRE_BIT_SET)
 	{
-	  if (NEGATIVE_BIT_SET)
-	    offset = - offset;
-
 	  /* Pre-indexed.  */
 	  func (stream, ", #%d]", offset);
 

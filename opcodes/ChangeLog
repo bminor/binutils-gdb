@@ -1,3 +1,9 @@
+2010-01-20  Nick Clifton  <nickc@redhat.com>
+
+	PR 11170
+	* arm-dis.c (print_arm_address): Do not ignore negative bit in PC
+	based post-indexed addressing.
+
 2010-01-15  Sebastian Pop  <sebastian.pop@amd.com>
 
 	* i386-opc.tbl: Support all the possible aliases for VPCOM* insns.
