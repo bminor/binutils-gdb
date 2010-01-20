@@ -327,6 +327,11 @@ proc run_dump_test { name {extra_options {}} } {
 	    unresolved $subdir/$name
 	    return
 	}
+
+	# Permit the option to use $srcdir to refer to the source
+	# directory.
+	regsub -all "\\\$srcdir" "$opt_val" "$srcdir/$subdir" opt_val
+
 	if [string length $opts($opt_name)] {
 	    perror "option $opt_name multiply set in $file.d"
 	    unresolved $subdir/$name
@@ -343,6 +348,11 @@ proc run_dump_test { name {extra_options {}} } {
 	    unresolved $subdir/$name
 	    return
 	}
+
+	# Permit the option to use $srcdir to refer to the source
+	# directory.
+	regsub -all "\\\$srcdir" "$opt_val" "$srcdir/$subdir" opt_val
+
 	# add extra option to end of existing option, adding space
 	# if necessary.
 	if [string length $opts($opt_name)] {

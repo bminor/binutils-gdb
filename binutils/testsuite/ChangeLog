@@ -1,3 +1,12 @@
+2010-01-19  Ian Lance Taylor  <iant@google.com>
+
+	* lib/utils-lib.exp (run_dump_test): Permit option values to use
+	$srcdir to refer to the source directory.
+	* binutils-all/add-section.d: New test.
+	* binutils-all/add-empty-section.d: New test.
+	* binutils-all/empty-file: New test input file.
+	* binutils-all/objcopy.exp: Run new tests.
+
 2010-01-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* binutils-all/elfedit-2.d: New.

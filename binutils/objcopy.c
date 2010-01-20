@@ -3306,10 +3306,8 @@ copy_main (int argc, char *argv[])
 	case OPTION_ADD_SECTION:
 	  {
 	    const char *s;
-	    off_t size;
+	    size_t off, alloc;
 	    struct section_add *pa;
-	    int len;
-	    char *name;
 	    FILE *f;
 
 	    s = strchr (optarg, '=');
@@ -3317,34 +3315,40 @@ copy_main (int argc, char *argv[])
 	    if (s == NULL)
 	      fatal (_("bad format for %s"), "--add-section");
 
-	    size = get_file_size (s + 1);
-	    if (size < 1)
-	      {
-		status = 1;
-		break;
-	      }
-
 	    pa = (struct section_add *) xmalloc (sizeof (struct section_add));
-
-	    len = s - optarg;
-	    name = (char *) xmalloc (len + 1);
-	    strncpy (name, optarg, len);
-	    name[len] = '\0';
-	    pa->name = name;
-
+	    pa->name = xstrndup (optarg, s - optarg);
 	    pa->filename = s + 1;
-	    pa->size = size;
-	    pa->contents = (bfd_byte *) xmalloc (size);
+
+	    /* We don't use get_file_size so that we can do
+	         --add-section .note.GNU_stack=/dev/null
+	       get_file_size doesn't work on /dev/null.  */
 
 	    f = fopen (pa->filename, FOPEN_RB);
-
 	    if (f == NULL)
 	      fatal (_("cannot open: %s: %s"),
 		     pa->filename, strerror (errno));
 
-	    if (fread (pa->contents, 1, pa->size, f) == 0
-		|| ferror (f))
-	      fatal (_("%s: fread failed"), pa->filename);
+	    off = 0;
+	    alloc = 4096;
+	    pa->contents = (bfd_byte *) xmalloc (alloc);
+	    while (!feof (f))
+	      {
+		off_t got;
+
+		if (off == alloc)
+		  {
+		    alloc <<= 1;
+		    pa->contents = (bfd_byte *) xrealloc (pa->contents, alloc);
+		  }
+
+		got = fread (pa->contents + off, 1, alloc - off, f);
+		if (ferror (f))
+		  fatal (_("%s: fread failed"), pa->filename);
+
+		off += got;
+	      }
+
+	    pa->size = off;
 
 	    fclose (f);
 

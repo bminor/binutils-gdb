@@ -1,3 +1,8 @@
+2010-01-19  Ian Lance Taylor  <iant@google.com>
+
+	* objcopy.c (copy_main): Rewrite OPTION_ADD_SECTION code to work
+	with non-ordinary files like /dev/null.
+
 2010-01-19  Daisuke Hatayama  <d.hatayama@jp.fujitsu.com>
 	    Alan Modra <amodra@gmail.com>
 
