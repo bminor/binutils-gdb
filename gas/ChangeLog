@@ -1,7 +1,17 @@
+2010-01-20  Nick Clifton  <nickc@redhat.com>
+
+	PR 11109
+	* config/tc-arm.c (do_neon_cvt): Rename to do_neon_cvt_1.  Add
+	code to handle round-to-zero for VCVT conversions.
+	(do_neon_cvt): New.  Call do_neon_cvt_1.
+	(do_neon_cvtr): New.  Call do_neon_cvt_1.
+	(insns): Use do_neon_cvt for VCVT insn and do_neon_cvtr for VCVTR
+	insn.
+
 2010-01-18  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-ia64.c (ia64_vms_note): Generate 24 bytes note headers.
-	
+
 2010-01-15  Sebastian Pop  <sebastian.pop@amd.com>
 
 	* config/tc-i386.c (md_assemble): Before accessing the IMM field

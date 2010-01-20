@@ -1,3 +1,9 @@
+2010-01-20  Nick Clifton  <nickc@redhat.com>
+
+	PR 11109
+	* gas/arm/vfp-neon-syntax.d: Update expected disassembly.
+	* gas/arm/vfp-neon-syntax_t2.d: Likewise.
+
 2010-01-15  Sebastian Pop  <sebastian.pop@amd.com>
 
 	* gas/i386/x86-64-xop.d: Add missing patterns.

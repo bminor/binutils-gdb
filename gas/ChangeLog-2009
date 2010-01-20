@@ -34,7 +34,7 @@
 	register.
 	(do_mrs): Likewise.
 	(do_mul): Likewise.
-	
+
 2009-12-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (process_suffix): Set i.suffix to 0 in
@@ -54,7 +54,7 @@
 
 2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>
 
-	* config/tc-i386.c (process_operands): Check vexsources 
+	* config/tc-i386.c (process_operands): Check vexsources
 	instead of vex3sources.
 	(build_modrm_byte): Check vexsources instead of vex2sources
 	and vex3sources.
@@ -264,12 +264,12 @@
 
 	* config/m68k-parse.h (enum m68k_register): Add ACR[4-7], RGPIOBAR.
 	* config/tc-m68k.c (mcf5206_ctrl): Fix whitespace.
-	(mcf52223_ctrl): Remove non-existent registers. 
+	(mcf52223_ctrl): Remove non-existent registers.
 	(mcf54418): Define.
 	(mcf54455): Remove MBAR.
 	(m68k_cpus): Add lines for MCF5441x family.
 	(m68k_ip, init_table): Handle RGPIOBAR, ACR[4-7].
-	
+
 2009-11-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* doc/c-i386.texi: Move .lwp.
