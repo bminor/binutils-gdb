@@ -153,7 +153,8 @@ struct pending_signals
   struct pending_signals *prev;
 };
 
-#define PTRACE_ARG3_TYPE long
+#define PTRACE_ARG3_TYPE void *
+#define PTRACE_ARG4_TYPE void *
 #define PTRACE_XFER_TYPE long
 
 #ifdef HAVE_LINUX_REGSETS
@@ -385,7 +386,7 @@ handle_extended_wait (struct lwp_info *event_child, int wstat)
 	    warning ("wait returned unexpected status 0x%x", status);
 	}
 
-      ptrace (PTRACE_SETOPTIONS, new_pid, 0, PTRACE_O_TRACECLONE);
+      ptrace (PTRACE_SETOPTIONS, new_pid, 0, (PTRACE_ARG4_TYPE) PTRACE_O_TRACECLONE);
 
       ptid = ptid_build (pid_of (event_child), new_pid, 0);
       new_lwp = (struct lwp_info *) add_lwp (ptid);
@@ -1184,7 +1185,7 @@ linux_wait_for_event_1 (ptid_t ptid, int *wstat, int options)
       if (event_child->must_set_ptrace_flags)
 	{
 	  ptrace (PTRACE_SETOPTIONS, lwpid_of (event_child),
-		  0, PTRACE_O_TRACECLONE);
+		  0, (PTRACE_ARG4_TYPE) PTRACE_O_TRACECLONE);
 	  event_child->must_set_ptrace_flags = 0;
 	}
 
@@ -1866,7 +1867,10 @@ linux_resume_one_lwp (struct lwp_info *lwp,
   errno = 0;
   lwp->stopped = 0;
   lwp->stepping = step;
-  ptrace (step ? PTRACE_SINGLESTEP : PTRACE_CONT, lwpid_of (lwp), 0, signal);
+  ptrace (step ? PTRACE_SINGLESTEP : PTRACE_CONT, lwpid_of (lwp), 0,
+	  /* Coerce to a uintptr_t first to avoid potential gcc warning
+	     of coercing an 8 byte integer to a 4 byte pointer.  */
+	  (PTRACE_ARG4_TYPE) (uintptr_t) signal);
 
   current_inferior = saved_inferior;
   if (errno)
@@ -2149,7 +2153,10 @@ fetch_register (struct regcache *regcache, int regno)
     {
       errno = 0;
       *(PTRACE_XFER_TYPE *) (buf + i) =
-	ptrace (PTRACE_PEEKUSER, pid, (PTRACE_ARG3_TYPE) regaddr, 0);
+	ptrace (PTRACE_PEEKUSER, pid,
+		/* Coerce to a uintptr_t first to avoid potential gcc warning
+		   of coercing an 8 byte integer to a 4 byte pointer.  */
+		(PTRACE_ARG3_TYPE) (uintptr_t) regaddr, 0);
       regaddr += sizeof (PTRACE_XFER_TYPE);
       if (errno != 0)
 	{
@@ -2219,8 +2226,11 @@ usr_store_inferior_registers (struct regcache *regcache, int regno)
       for (i = 0; i < size; i += sizeof (PTRACE_XFER_TYPE))
 	{
 	  errno = 0;
-	  ptrace (PTRACE_POKEUSER, pid, (PTRACE_ARG3_TYPE) regaddr,
-		  *(PTRACE_XFER_TYPE *) (buf + i));
+	  ptrace (PTRACE_POKEUSER, pid,
+		/* Coerce to a uintptr_t first to avoid potential gcc warning
+		   about coercing an 8 byte integer to a 4 byte pointer.  */
+		  (PTRACE_ARG3_TYPE) (uintptr_t) regaddr,
+		  (PTRACE_ARG4_TYPE) *(PTRACE_XFER_TYPE *) (buf + i));
 	  if (errno != 0)
 	    {
 	      /* At this point, ESRCH should mean the process is
@@ -2472,7 +2482,10 @@ linux_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
   for (i = 0; i < count; i++, addr += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;
-      buffer[i] = ptrace (PTRACE_PEEKTEXT, pid, (PTRACE_ARG3_TYPE) addr, 0);
+      /* Coerce the 3rd arg to a uintptr_t first to avoid potential gcc warning
+	 about coercing an 8 byte integer to a 4 byte pointer.  */
+      buffer[i] = ptrace (PTRACE_PEEKTEXT, pid,
+			  (PTRACE_ARG3_TYPE) (uintptr_t) addr, 0);
       if (errno)
 	return errno;
     }
@@ -2519,14 +2532,19 @@ linux_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
 
   /* Fill start and end extra bytes of buffer with existing memory data.  */
 
-  buffer[0] = ptrace (PTRACE_PEEKTEXT, pid, (PTRACE_ARG3_TYPE) addr, 0);
+  /* Coerce the 3rd arg to a uintptr_t first to avoid potential gcc warning
+     about coercing an 8 byte integer to a 4 byte pointer.  */
+  buffer[0] = ptrace (PTRACE_PEEKTEXT, pid,
+		      (PTRACE_ARG3_TYPE) (uintptr_t) addr, 0);
 
   if (count > 1)
     {
       buffer[count - 1]
 	= ptrace (PTRACE_PEEKTEXT, pid,
-		  (PTRACE_ARG3_TYPE) (addr + (count - 1)
-				      * sizeof (PTRACE_XFER_TYPE)),
+		  /* Coerce to a uintptr_t first to avoid potential gcc warning
+		     about coercing an 8 byte integer to a 4 byte pointer.  */
+		  (PTRACE_ARG3_TYPE) (uintptr_t) (addr + (count - 1)
+						  * sizeof (PTRACE_XFER_TYPE)),
 		  0);
     }
 
@@ -2539,7 +2557,11 @@ linux_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
   for (i = 0; i < count; i++, addr += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;
-      ptrace (PTRACE_POKETEXT, pid, (PTRACE_ARG3_TYPE) addr, buffer[i]);
+      ptrace (PTRACE_POKETEXT, pid,
+	      /* Coerce to a uintptr_t first to avoid potential gcc warning
+		 about coercing an 8 byte integer to a 4 byte pointer.  */
+	      (PTRACE_ARG3_TYPE) (uintptr_t) addr,
+	      (PTRACE_ARG4_TYPE) buffer[i]);
       if (errno)
 	return errno;
     }
@@ -2606,7 +2628,8 @@ linux_test_for_tracefork (void)
   if (! WIFSTOPPED (status))
     error ("linux_test_for_tracefork: waitpid: unexpected status %d.", status);
 
-  ret = ptrace (PTRACE_SETOPTIONS, child_pid, 0, PTRACE_O_TRACEFORK);
+  ret = ptrace (PTRACE_SETOPTIONS, child_pid, 0,
+		(PTRACE_ARG4_TYPE) PTRACE_O_TRACEFORK);
   if (ret != 0)
     {
       ret = ptrace (PTRACE_KILL, child_pid, 0, 0);

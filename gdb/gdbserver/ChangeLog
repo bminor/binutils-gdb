@@ -1,5 +1,14 @@
 2010-01-21  Doug Evans  <dje@google.com>
 
+	* linux-low.c (PTRACE_ARG3_TYPE): Change from long to void*.
+	(PTRACE_ARG4_TYPE): New macro.
+	(handle_extended_wait): Cast ptrace arg4 to PTRACE_ARG4_TYPE.
+	(linux_wait_for_event_1, linux_resume_one_lwp): Ditto.
+	(fetch_register): Cast to uintptr_t before casting to PTRACE_ARG3_TYPE.
+	(usr_store_inferior_registers): Ditto.
+	(linux_read_memory, linux_write_memory): Ditto.
+	(linux_test_for_tracefork): Ditto.
+
 	* linux-arm-low.c: Remove redundant include of gdb_proc_service.h.
 	Only include elf.h if gdb_proc_service.h didn't include linux/elf.h.
 
