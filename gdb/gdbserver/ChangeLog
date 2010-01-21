@@ -1,3 +1,7 @@
+2010-01-21  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-ppc-low.c (ppc_arch_setup): Adjust to regcache changes.
+
 2010-01-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* linux-s390-low.c (s390_collect_ptrace_register)

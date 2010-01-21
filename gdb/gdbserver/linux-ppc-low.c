@@ -335,6 +335,7 @@ ppc_arch_setup (void)
 {
 #ifdef __powerpc64__
   long msr;
+  struct regcache *regcache;
 
   /* On a 64-bit host, assume 64-bit inferior process with no
      AltiVec registers.  Reset ppc_hwcap to ensure that the
@@ -344,7 +345,8 @@ ppc_arch_setup (void)
 
   /* Only if the high bit of the MSR is set, we actually have
      a 64-bit inferior.  */
-  collect_register_by_name ("msr", &msr);
+  regcache = get_thread_regcache (current_inferior, 1);
+  collect_register_by_name (regcache, "msr", &msr);
   if (msr < 0)
     {
       ppc_get_hwcap (&ppc_hwcap);
