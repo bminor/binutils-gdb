@@ -1,3 +1,10 @@
+2010-02-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (mod_table): Use FXSAVE on xsave and xrstor.
+
+	* i386-opc.tbl: Add xsave64 and xrstor64.
+	* i386-tbl.h: Regenerated.
+
 2010-01-20  Nick Clifton  <nickc@redhat.com>
 
 	PR 11170

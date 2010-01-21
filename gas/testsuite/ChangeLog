@@ -1,3 +1,10 @@
+2010-02-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/x86-64-xsave.s: Add tests for xsave64 and xrstor64.
+
+	* gas/i386/x86-64-xsave-intel.d: Updated.
+	* gas/i386/x86-64-xsave.d: Likewise.
+
 2010-01-20  Nick Clifton  <nickc@redhat.com>
 
 	PR 11109

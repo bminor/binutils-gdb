@@ -11127,17 +11127,17 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0FAE_REG_4 */
-    { "xsave",		{ M } },
+    { "xsave",		{ FXSAVE } },
     { "(bad)",		{ XX } },
   },
   {
     /* MOD_0FAE_REG_5 */
-    { "xrstor",		{ M } },
+    { "xrstor",		{ FXSAVE } },
     { RM_TABLE (RM_0FAE_REG_5) },
   },
   {
     /* MOD_0FAE_REG_6 */
-    { "xsaveopt",	{ M } },
+    { "(bad)",		{ XX } },
     { RM_TABLE (RM_0FAE_REG_6) },
   },
   {
