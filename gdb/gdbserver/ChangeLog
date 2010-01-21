@@ -1,3 +1,8 @@
+2010-01-21  Pedro Alves  <pedro@codesourcery.com>
+
+	* spu-low.c (spu_fetch_registers, spu_store_registers): Change
+	prototype to take a regcache.  Adjust.
+
 2010-01-20  Pedro Alves  <pedro@codesourcery.com>
 
 	* regcache.h (struct thread_info): Forward declare.
