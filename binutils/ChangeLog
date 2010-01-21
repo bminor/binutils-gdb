@@ -1,3 +1,7 @@
+2010-01-21  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+	
+	* readelf.c (get_machine_flags): Handle EF_S390_HIGH_GPRS.
+
 2010-01-19  Ian Lance Taylor  <iant@google.com>
 
 	* objcopy.c (copy_main): Rewrite OPTION_ADD_SECTION code to work

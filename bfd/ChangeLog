@@ -1,3 +1,8 @@
+2010-01-21  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+	
+	* elf32-s390.c (elf32_s390_merge_private_bfd_data): New function.
+	(bfd_elf32_bfd_merge_private_bfd_data): New macro definition.
+
 2010-01-19  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf2.c (read_attribute_value): Add DW_FORM_ref_sig8.

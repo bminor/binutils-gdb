@@ -3483,6 +3483,13 @@ elf_s390_plt_sym_val (bfd_vma i, const asection *plt,
   return plt->vma + PLT_FIRST_ENTRY_SIZE + i * PLT_ENTRY_SIZE;
 }
 
+static bfd_boolean
+elf32_s390_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+{
+  elf_elfheader (obfd)->e_flags |= elf_elfheader (ibfd)->e_flags;
+  return TRUE;
+}
+
 
 #define TARGET_BIG_SYM	bfd_elf32_s390_vec
 #define TARGET_BIG_NAME	"elf32-s390"
@@ -3505,6 +3512,8 @@ elf_s390_plt_sym_val (bfd_vma i, const asection *plt,
 #define bfd_elf32_bfd_link_hash_table_create  elf_s390_link_hash_table_create
 #define bfd_elf32_bfd_reloc_type_lookup	      elf_s390_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup elf_s390_reloc_name_lookup
+
+#define bfd_elf32_bfd_merge_private_bfd_data  elf32_s390_merge_private_bfd_data
 
 #define elf_backend_adjust_dynamic_symbol     elf_s390_adjust_dynamic_symbol
 #define elf_backend_check_relocs	      elf_s390_check_relocs

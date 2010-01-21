@@ -2265,3 +2265,10 @@ tc_s390_regname_to_dw2regnum (char *regname)
     regnum = 33;
   return regnum;
 }
+
+void
+s390_elf_final_processing (void)
+{
+  if (s390_arch_size == 32 && (current_mode_mask & (1 << S390_OPCODE_ZARCH)))
+    elf_elfheader (stdoutput)->e_flags |= EF_S390_HIGH_GPRS;
+}

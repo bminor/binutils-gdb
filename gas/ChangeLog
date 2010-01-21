@@ -1,3 +1,10 @@
+2010-01-21  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+	
+	* config/tc-s390.c (s390_elf_final_processing): New function.
+	* config/tc-s390.h (elf_tc_final_processing): New macro definition.
+	(s390_elf_final_processing): Added prototype.
+
+
 2010-01-20  Nick Clifton  <nickc@redhat.com>
 
 	PR 11109
