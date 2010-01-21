@@ -1,3 +1,19 @@
+2010-01-21  Jon Grant  <jg@jguk.org>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR 4437
+	* ldfile.c: (ldfile_open_file): Do not stop link upon encountering
+	a missing file or library.  Instead mark the entry as missing and
+	set the global flag to indicate that missing files were
+	encountered.
+	* ldlang.c (missing_files): New exported variable.
+	(load_symbols): Skip loading if the file is missing.
+	(open_input_bfds): Terminate link if any input files were
+	missing.
+	* ldlang.h (struct lang_input_statement_struct): Add missing_file
+	field.
+	Add export of missing_file variable.
+
 2010-01-13  DJ Delorie  <dj@redhat.com>
 
 	* emultempl/elf32.em (_place_orphan): If an input section doesn't

@@ -1,6 +1,6 @@
 /* Linker file opening and searching.
    Copyright 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2007, 2008, 2009 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -363,7 +363,10 @@ ldfile_open_file_search (const char *arch,
   return FALSE;
 }
 
-/* Open the input file specified by ENTRY.  */
+/* Open the input file specified by ENTRY.
+   PR 4437: Do not stop on the first missing file, but
+   continue processing other input files in case there
+   are more errors to report.  */
 
 void
 ldfile_open_file (lang_input_statement_type *entry)
@@ -375,11 +378,15 @@ ldfile_open_file (lang_input_statement_type *entry)
     {
       if (ldfile_try_open_bfd (entry->filename, entry))
 	return;
+
       if (strcmp (entry->filename, entry->local_sym_name) != 0)
-	einfo (_("%F%P: %s (%s): No such file: %E\n"),
+	einfo (_("%P: cannot find %s (%s): %E\n"),
 	       entry->filename, entry->local_sym_name);
       else
-	einfo (_("%F%P: %s: No such file: %E\n"), entry->local_sym_name);
+	einfo (_("%P: cannot find %s: %E\n"), entry->local_sym_name);
+
+      entry->missing_file = TRUE;
+      missing_file = TRUE;
     }
   else
     {
@@ -406,13 +413,18 @@ ldfile_open_file (lang_input_statement_type *entry)
 	 again.  */
       if (found)
 	entry->search_dirs_flag = FALSE;
-      else if (entry->sysrooted
+      else
+	{
+	  if (entry->sysrooted
 	       && ld_sysroot
 	       && IS_ABSOLUTE_PATH (entry->local_sym_name))
-	einfo (_("%F%P: cannot find %s inside %s\n"),
-	       entry->local_sym_name, ld_sysroot);
-      else
-	einfo (_("%F%P: cannot find %s\n"), entry->local_sym_name);
+	    einfo (_("%P: cannot find %s inside %s\n"),
+		   entry->local_sym_name, ld_sysroot);
+	  else
+	    einfo (_("%P: cannot find %s\n"), entry->local_sym_name);
+	  entry->missing_file = TRUE;
+	  missing_file = TRUE;
+	}
     }
 }
 

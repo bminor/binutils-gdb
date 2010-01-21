@@ -1,6 +1,6 @@
 /* Linker command language support.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
@@ -64,6 +64,8 @@ static lang_statement_list_type statement_list;
 static struct bfd_hash_table lang_definedness_table;
 static lang_statement_list_type *stat_save[10];
 static lang_statement_list_type **stat_save_ptr = &stat_save[0];
+static struct unique_sections *unique_section_list;
+static bfd_boolean ldlang_sysrooted_script = FALSE;
 
 /* Forward declarations.  */
 static void exp_init_os (etree_type *);
@@ -101,8 +103,7 @@ bfd_boolean lang_float_flag = FALSE;
 bfd_boolean delete_output_file_on_failure = FALSE;
 struct lang_phdr *lang_phdr_list;
 struct lang_nocrossrefs *nocrossref_list;
-static struct unique_sections *unique_section_list;
-static bfd_boolean ldlang_sysrooted_script = FALSE;
+bfd_boolean missing_file = FALSE;
 
  /* Functions that traverse the linker script and might evaluate
     DEFINED() need to increment this.  */
@@ -1060,6 +1061,8 @@ new_afile (const char *name,
   p->add_DT_NEEDED_for_regular = add_DT_NEEDED_for_regular;
   p->whole_archive = whole_archive;
   p->loaded = FALSE;
+  p->missing_file = FALSE;
+
   lang_statement_append (&input_file_chain,
 			 (lang_statement_union_type *) p,
 			 &p->next_real_file);
@@ -2583,6 +2586,10 @@ load_symbols (lang_input_statement_type *entry,
 
   ldfile_open_file (entry);
 
+  /* Do not process further if the file was missing.  */
+  if (entry->missing_file)
+    return TRUE;
+
   if (! bfd_check_format (entry->the_bfd, bfd_archive)
       && ! bfd_check_format_matches (entry->the_bfd, bfd_object, &matching))
     {
@@ -3164,6 +3171,10 @@ open_input_bfds (lang_statement_union_type *s, bfd_boolean force)
 	  break;
 	}
     }
+
+  /* Exit if any of the files were missing.  */
+  if (missing_file)
+    einfo ("%F");
 }
 
 /* Add a symbol to a hash of symbols used in DEFINED (NAME) expressions.  */
