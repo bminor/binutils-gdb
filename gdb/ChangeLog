@@ -1,3 +1,8 @@
+2010-01-21  Kai Tietz  <kai.tietz@onevision.com>
+
+	* inflow.c (check_syscall): Guard by #if clause for GO32 and
+	WIN32 targets.
+
 2010-01-20  Tom Tromey  <tromey@redhat.com>
 
 	PR backtrace/10770:
