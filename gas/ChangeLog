@@ -1,3 +1,9 @@
+2010-01-21  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* config/te-solaris.h (DWARF2_EH_FRAME_READ_ONLY): Make read-only
+	on 64-bit Solaris/x86.
+	Include obj-format.h earlier.
+
 2010-01-12  Alan Modra  <amodra@gmail.com>
 
 	PR 11122
