@@ -1,3 +1,7 @@
+2010-01-21  Nick Clifton  <nickc@redhat.com>
+
+	* arm-dis.c: Fix mis-applied patch.
+
 2009-11-17  Edward Nevill <edward.nevill@arm.com>
 
 	* arm-dis.c (print_insn_thumb32): Handle undefined instruction.

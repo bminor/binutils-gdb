@@ -3928,16 +3928,15 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		      c += 1 << width;
 		      break;
 
+		    case 'x':
+		      func (stream, "0x%lx", val & 0xffffffffUL);
+		      break;
+
 		    default:
 		      abort ();
 		    }
 		}
 		      
-		    case 'x':
-		      func (stream, "0x%lx", val & 0xffffffffUL);
-		      break;
-		break;
-
 	      default:
 		abort ();
 	      }
