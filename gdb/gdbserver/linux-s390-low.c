@@ -118,8 +118,9 @@ s390_collect_ptrace_register (struct regcache *regcache, int regno, char *buf)
       if ((regno ^ 1) < the_low_target.num_regs
 	  && the_low_target.regmap[regno ^ 1] == regaddr)
 	{
-	  collect_register (regno & ~1, buf);
-	  collect_register ((regno & ~1) + 1, buf + sizeof (long) - size);
+	  collect_register (regcache, regno & ~1, buf);
+	  collect_register (regcache, (regno & ~1) + 1,
+			    buf + sizeof (long) - size);
 	}
       else if (regaddr == PT_PSWADDR
 	       || (regaddr >= PT_GPR0 && regaddr <= PT_GPR15))
@@ -133,7 +134,7 @@ s390_collect_ptrace_register (struct regcache *regcache, int regno, char *buf)
 	buf[size] |= 0x80;
     }
   else
-    collect_register (regno, buf);
+    collect_register (regcache, regno, buf);
 }
 
 static void
@@ -147,8 +148,9 @@ s390_supply_ptrace_register (struct regcache *regcache, int regno, const char *b
       if ((regno ^ 1) < the_low_target.num_regs
 	  && the_low_target.regmap[regno ^ 1] == regaddr)
 	{
-	  supply_register (regno & ~1, buf);
-	  supply_register ((regno & ~1) + 1, buf + sizeof (long) - size);
+	  supply_register (regcache, regno & ~1, buf);
+	  supply_register (regcache, (regno & ~1) + 1,
+			   buf + sizeof (long) - size);
 	}
       else if (regaddr == PT_PSWADDR
 	       || (regaddr >= PT_GPR0 && regaddr <= PT_GPR15))

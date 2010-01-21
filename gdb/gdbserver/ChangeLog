@@ -1,3 +1,8 @@
+2010-01-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linux-s390-low.c (s390_collect_ptrace_register)
+	(s390_supply_ptrace_register): Adjust it for the new regcache parameter.
+
 2010-01-21  Doug Evans  <dje@google.com>
 
 	* linux-low.c (PTRACE_ARG3_TYPE): Change from long to void*.
