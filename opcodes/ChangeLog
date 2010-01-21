@@ -1,4 +1,4 @@
-2010-02-21  H.J. Lu  <hongjiu.lu@intel.com>
+2010-01-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (mod_table): Use FXSAVE on xsave and xrstor.
 
