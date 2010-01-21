@@ -1,3 +1,16 @@
+2010-01-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (File Options): Adjust the documentation of this
+	switch to refer to the "source" command rather than partially
+	duplicating some of the relevant information.
+	(Extending GDB): Introduce and document the set/show script-extension
+	setting.
+	(Command Files): Add note explaining that the "source" command
+	is also used to evalute scripts written in other languages.
+	Remove the short slightly incorrect reference to sourcing Python
+	scripts.
+	(Python Commands): Document how to execute a Python script from GDB.
+
 2010-01-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Command Files): Fix typo.

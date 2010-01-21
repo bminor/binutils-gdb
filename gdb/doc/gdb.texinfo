@@ -963,10 +963,8 @@ Connect to process ID @var{number}, as with the @code{attach} command.
 @itemx -x @var{file}
 @cindex @code{--command}
 @cindex @code{-x}
-Execute commands from file @var{file}.  If @var{file} ends in
-@samp{.py}, then the file is evaluated as Python code.  If Python
-support is not enabled in this @value{GDBN}, then the file is assumed to
-contain @value{GDBN} commands, regardless of its extension.
+Execute commands from file @var{file}.  The contents of this file is
+evaluated exactly as the @code{source} command would.
 @xref{Command Files,, Command files}.
 
 @item -eval-command @var{command}
@@ -12849,6 +12847,34 @@ by qualifying the problematic names with package
 @code{Standard} explicitly.  
 @end itemize
 
+Older versions of the compiler sometimes generate erroneous debugging
+information, resulting in the debugger incorrectly printing the value
+of affected entities.  In some cases, the debugger is able to work
+around an issue automatically. In other cases, the debugger is able
+to work around the issue, but the work-around has to be specifically
+enabled.
+
+@kindex set ada trust-PAD-over-XVS
+@kindex show ada trust-PAD-over-XVS
+@table @code
+
+@item set ada trust-PAD-over-XVS on
+Configure GDB to strictly follow the GNAT encoding when computing the
+value of Ada entities, particularly when @code{PAD} and @code{PAD___XVS}
+types are involved (see @code{ada/exp_dbug.ads} in the GCC sources for
+a complete description of the encoding used by the GNAT compiler).
+This is the default.
+
+@item set ada trust-PAD-over-XVS off
+This is related to the encoding using by the GNAT compiler.  If @value{GDBN}
+sometimes prints the wrong value for certain entities, changing @code{ada
+trust-PAD-over-XVS} to @code{off} activates a work-around which may fix
+the issue.  It is always safe to set @code{ada trust-PAD-over-XVS} to
+@code{off}, but this incurs a slight performance penalty, so it is
+recommended to leave this setting to @code{on} unless necessary.
+
+@end table
+
 @node Unsupported Languages
 @section Unsupported Languages
 
@@ -18907,6 +18933,38 @@ Displays whether the debugger is operating in interactive mode or not.
 on composition of @value{GDBN} commands, and the second is based on the
 Python scripting language.
 
+To facilitate the use of these extensions, @value{GDBN} is capable
+of evaluating the contents of a file.  When doing so, @value{GDBN}
+can recognize which scripting language is being used by looking at
+the filename extension.  Files with an unrecognized filename extension
+are always treated as a @value{GDBN} Command Files.
+@xref{Command Files,, Command files}.
+
+You can control how @value{GDBN} evaluates these files with the following
+setting:
+
+@table @code
+@kindex set script-extension
+@kindex show script-extension
+@item set script-extension off
+All scripts are always evaluated as @value{GDBN} Command Files.
+
+@item set script-extension soft
+The debugger determines the scripting language based on filename
+extension.  If this scripting language is supported, @value{GDBN}
+evaluates the script using that language.  Otherwise, it evaluates
+the file as a @value{GDBN} Command File.
+
+@item set script-extension strict
+The debugger determines the scripting language based on filename
+extension, and evaluates the script using that language.  If the
+language is not supported, then the evaluation fails.
+
+@item show script-extension
+Display the current value of the @code{script-extension} option.
+
+@end table
+
 @menu
 * Sequences::          Canned Sequences of Commands
 * Python::             Scripting @value{GDBN} using Python
@@ -19140,7 +19198,10 @@ does not mean to repeat the last command, as it would from the
 terminal.
 
 You can request the execution of a command file with the @code{source}
-command:
+command.  Note that the @code{source} command is also used to evaluate
+scripts that are not Command Files.  The exact behavior can be configured
+using the @code{script-extension} setting.
+@xref{Extending GDB,, Extending GDB}.
 
 @table @code
 @kindex source
@@ -19161,11 +19222,6 @@ on the search path (specified with the @samp{directory} command).
 If @code{-v}, for verbose mode, is given then @value{GDBN} displays
 each command as it is executed.  The option must be given before
 @var{filename}, and is interpreted as part of the filename anywhere else.
-
-If @var{filename} ends in @samp{.py}, then @value{GDBN} evaluates the
-contents of the file as Python code.  If Python support is not compiled
-into @value{GDBN}, then the file is assumed to contain @value{GDBN}
-commands, regardless of its extension.
 
 Commands that would ask for confirmation if used interactively proceed
 without asking when used in a command file.  Many @value{GDBN} commands that
@@ -19442,6 +19498,20 @@ in a Python script.  This can be controlled using @code{maint set
 python print-stack}: if @code{on}, the default, then Python stack
 printing is enabled; if @code{off}, then Python stack printing is
 disabled.
+@end table
+
+It is also possible to execute a Python script from the @value{GDBN}
+interpreter:
+
+@table @code
+@item source @file{script-name}
+The script name must end with @samp{.py} and @value{GDBN} must be configured
+to recognize the script language based on filename extension using
+the @code{script-extension} setting.  @xref{Extending GDB, ,Extending GDB}.
+
+@item python execfile ("script-name")
+This method is based on the @code{execfile} Python built-in function,
+and thus is always available.
 @end table
 
 @node Python API
