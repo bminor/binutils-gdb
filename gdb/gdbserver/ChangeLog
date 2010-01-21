@@ -1,3 +1,8 @@
+2010-01-21  Doug Evans  <dje@google.com>
+
+	* linux-arm-low.c: Remove redundant include of gdb_proc_service.h.
+	Only include elf.h if gdb_proc_service.h didn't include linux/elf.h.
+
 2010-01-21  Pedro Alves  <pedro@codesourcery.com>
 
 	* proc-service.c (ps_lgetregs): Don't refetch registers from the

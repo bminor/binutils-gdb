@@ -20,10 +20,12 @@
 #include "server.h"
 #include "linux-low.h"
 
+/* Don't include elf.h if linux/elf.h got included by gdb_proc_service.h.
+   On Bionic elf.h and linux/elf.h have conflicting definitions.  */
+#ifndef ELFMAG0
 #include <elf.h>
+#endif
 #include <sys/ptrace.h>
-
-#include "gdb_proc_service.h"
 
 /* Defined in auto-generated files.  */
 void init_registers_arm (void);
