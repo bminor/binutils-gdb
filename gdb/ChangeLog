@@ -1,3 +1,12 @@
+2010-01-21  Tom Tromey  <tromey@redhat.com>
+
+	PR symtab/11198:
+	* symtab.h (lookup_minimal_symbol_and_objfile): Declare.
+	* minsyms.c (lookup_minimal_symbol_and_objfile): New function.
+	* glibc-tdep.c (find_minsym_and_objfile): Remove.
+	(glibc_skip_solib_resolver): Use
+	lookup_minimal_symbol_and_objfile.
+
 2010-01-21  Kai Tietz  <kai.tietz@onevision.com>
 
 	* inflow.c (check_syscall): Guard by #if clause for GO32 and

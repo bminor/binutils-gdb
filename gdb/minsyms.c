@@ -693,6 +693,37 @@ lookup_minimal_symbol_by_pc (CORE_ADDR pc)
 {
   return lookup_minimal_symbol_by_pc_section (pc, NULL);
 }
+
+/* Find the minimal symbol named NAME, and return both the minsym
+   struct and its objfile.  This only checks the linkage name.  Sets
+   *OBJFILE_P and returns the minimal symbol, if it is found.  If it
+   is not found, returns NULL.  */
+
+struct minimal_symbol *
+lookup_minimal_symbol_and_objfile (const char *name,
+				   struct objfile **objfile_p)
+{
+  struct objfile *objfile;
+  unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
+
+  ALL_OBJFILES (objfile)
+    {
+      struct minimal_symbol *msym;
+
+      for (msym = objfile->msymbol_hash[hash];
+	   msym != NULL;
+	   msym = msym->hash_next)
+	{
+	  if (strcmp (SYMBOL_LINKAGE_NAME (msym), name) == 0)
+	    {
+	      *objfile_p = objfile;
+	      return msym;
+	    }
+	}
+    }
+
+  return 0;
+}
 
 
 /* Return leading symbol character for a BFD. If BFD is NULL,

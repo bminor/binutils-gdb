@@ -28,35 +28,6 @@
 
 /* Calling functions in shared libraries.  */
 
-/* Find the minimal symbol named NAME, and return both the minsym
-   struct and its objfile.  This probably ought to be in minsym.c, but
-   everything there is trying to deal with things like C++ and
-   SOFUN_ADDRESS_MAYBE_TURQUOISE, ...  Since this is so simple, it may
-   be considered too special-purpose for general consumption.  */
-
-static struct minimal_symbol *
-find_minsym_and_objfile (char *name, struct objfile **objfile_p)
-{
-  struct objfile *objfile;
-
-  ALL_OBJFILES (objfile)
-    {
-      struct minimal_symbol *msym;
-
-      ALL_OBJFILE_MSYMBOLS (objfile, msym)
-	{
-	  if (SYMBOL_LINKAGE_NAME (msym)
-	      && strcmp (SYMBOL_LINKAGE_NAME (msym), name) == 0)
-	    {
-	      *objfile_p = objfile;
-	      return msym;
-	    }
-	}
-    }
-
-  return 0;
-}
-
 /* See the comments for SKIP_SOLIB_RESOLVER at the top of infrun.c.
    This function:
    1) decides whether a PLT has sent us into the linker to resolve
@@ -85,7 +56,7 @@ glibc_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 
   struct objfile *objfile;
   struct minimal_symbol *resolver 
-    = find_minsym_and_objfile ("_dl_runtime_resolve", &objfile);
+    = lookup_minimal_symbol_and_objfile ("_dl_runtime_resolve", &objfile);
 
   if (resolver)
     {
