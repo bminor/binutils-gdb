@@ -1,5 +1,10 @@
 2010-01-21  Pedro Alves  <pedro@codesourcery.com>
 
+	* proc-service.c (ps_lgetregs): Don't refetch registers from the
+	target.
+
+2010-01-21  Pedro Alves  <pedro@codesourcery.com>
+
 	* spu-low.c (spu_fetch_registers, spu_store_registers): Change
 	prototype to take a regcache.  Adjust.
 
