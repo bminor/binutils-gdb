@@ -1,5 +1,11 @@
+2010-01-21  Nick Clifton  <nickc@redhat.com>
+
+	* elflink.c (elf_link_add_object_symbols): Look up name of
+	undefined symbol both before and after versioning has been
+	applied.  Do not bother with symbols that are weakly undefined.
+
 2010-01-21  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
-	
+
 	* elf32-s390.c (elf32_s390_merge_private_bfd_data): New function.
 	(bfd_elf32_bfd_merge_private_bfd_data): New macro definition.
 
