@@ -1,3 +1,7 @@
+2010-01-22  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_exidx_fixup): New class.
+
 2010-01-21  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_exidx_cantunwind, Arm_exidx_merged_section): New

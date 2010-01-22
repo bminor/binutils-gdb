@@ -68,6 +68,8 @@ class Arm_exidx_cantunwind;
 
 class Arm_exidx_merged_section;
 
+class Arm_exidx_fixup;
+
 template<bool big_endian>
 class Arm_output_section;
 
@@ -1215,6 +1217,80 @@ class Arm_input_section : public Output_relaxed_input_section
   uint64_t original_size_;
   // Stub table.
   Stub_table<big_endian>* stub_table_;
+};
+
+// Arm_exidx_fixup class.  This is used to define a number of methods
+// and keep states for fixing up EXIDX coverage.
+
+class Arm_exidx_fixup
+{
+ public:
+  Arm_exidx_fixup(Output_section* exidx_output_section)
+    : exidx_output_section_(exidx_output_section), last_unwind_type_(UT_NONE),
+      last_inlined_entry_(0), last_input_section_(NULL),
+      section_offset_map_(NULL)
+  { }
+
+  ~Arm_exidx_fixup()
+  { delete this->section_offset_map_; }
+
+  // Process an EXIDX section for entry merging.  Return  number of bytes to
+  // be deleted in output.  If parts of the input EXIDX section are merged
+  // a heap allocated Arm_exidx_section_offset_map is store in the located
+  // PSECTION_OFFSET_MAP.  The caller owns the map and is reponsible for
+  // releasing it.
+  template<bool big_endian>
+  uint32_t
+  process_exidx_section(const Arm_exidx_input_section* exidx_input_section,
+			Arm_exidx_section_offset_map** psection_offset_map);
+  
+  // Append an EXIDX_CANTUNWIND entry pointing at the end of the last
+  // input section, if there is not one already.
+  void
+  add_exidx_cantunwind_as_needed();
+
+ private:
+  // Copying is not allowed.
+  Arm_exidx_fixup(const Arm_exidx_fixup&);
+  Arm_exidx_fixup& operator=(const Arm_exidx_fixup&);
+
+  // Type of EXIDX unwind entry.
+  enum Unwind_type
+  {
+    // No type.
+    UT_NONE,
+    // EXIDX_CANTUNWIND.
+    UT_EXIDX_CANTUNWIND,
+    // Inlined entry.
+    UT_INLINED_ENTRY,
+    // Normal entry.
+    UT_NORMAL_ENTRY,
+  };
+
+  // Process an EXIDX entry.  We only care about the second word of the
+  // entry.  Return true if the entry can be deleted.
+  bool
+  process_exidx_entry(uint32_t second_word);
+
+  // Update the current section offset map during EXIDX section fix-up.
+  // If there is no map, create one.  INPUT_OFFSET is the offset of a
+  // reference point, DELETED_BYTES is the number of deleted by in the
+  // section so far.  If DELETE_ENTRY is true, the reference point and
+  // all offsets after the previous reference point are discarded.
+  void
+  update_offset_map(section_offset_type input_offset,
+		    section_size_type deleted_bytes, bool delete_entry);
+
+  // EXIDX output section.
+  Output_section* exidx_output_section_;
+  // Unwind type of the last EXIDX entry processed.
+  Unwind_type last_unwind_type_;
+  // Last seen inlined EXIDX entry.
+  uint32_t last_inlined_entry_;
+  // Last processed EXIDX input section.
+  Arm_exidx_input_section* last_input_section_;
+  // Section offset map created in process_exidx_section.
+  Arm_exidx_section_offset_map* section_offset_map_;
 };
 
 // Arm output section class.  This is defined mainly to add a number of
@@ -4593,6 +4669,151 @@ Arm_exidx_merged_section::do_write(Output_file* of)
 
   gold_assert(convert_to_section_size_type(out_start) == oview_size);
   of->write_output_view(this->offset(), oview_size, oview);
+}
+
+// Arm_exidx_fixup methods.
+
+// Append an EXIDX_CANTUNWIND in the current output section if the last entry
+// is not an EXIDX_CANTUNWIND entry already.  The new EXIDX_CANTUNWIND entry
+// points to the end of the last seen EXIDX section.
+
+void
+Arm_exidx_fixup::add_exidx_cantunwind_as_needed()
+{
+  if (this->last_unwind_type_ != UT_EXIDX_CANTUNWIND
+      && this->last_input_section_ != NULL)
+    {
+      Relobj* relobj = this->last_input_section_->relobj();
+      unsigned int shndx = this->last_input_section_->shndx();
+      Arm_exidx_cantunwind* cantunwind =
+	new Arm_exidx_cantunwind(relobj, shndx);
+      this->exidx_output_section_->add_output_section_data(cantunwind);
+      this->last_unwind_type_ = UT_EXIDX_CANTUNWIND;
+    }
+}
+
+// Process an EXIDX section entry in input.  Return whether this entry
+// can be deleted in the output.  SECOND_WORD in the second word of the
+// EXIDX entry.
+
+bool
+Arm_exidx_fixup::process_exidx_entry(uint32_t second_word)
+{
+  bool delete_entry;
+  if (second_word == elfcpp::EXIDX_CANTUNWIND)
+    {
+      // Merge if previous entry is also an EXIDX_CANTUNWIND.
+      delete_entry = this->last_unwind_type_ == UT_EXIDX_CANTUNWIND;
+      this->last_unwind_type_ = UT_EXIDX_CANTUNWIND;
+    }
+  else if ((second_word & 0x80000000) != 0)
+    {
+      // Inlined unwinding data.  Merge if equal to previous.
+      delete_entry = (this->last_unwind_type_ == UT_INLINED_ENTRY
+		      && this->last_inlined_entry_ == second_word);
+      this->last_unwind_type_ = UT_INLINED_ENTRY;
+      this->last_inlined_entry_ = second_word;
+    }
+  else
+    {
+      // Normal table entry.  In theory we could merge these too,
+      // but duplicate entries are likely to be much less common.
+      delete_entry = false;
+      this->last_unwind_type_ = UT_NORMAL_ENTRY;
+    }
+  return delete_entry;
+}
+
+// Update the current section offset map during EXIDX section fix-up.
+// If there is no map, create one.  INPUT_OFFSET is the offset of a
+// reference point, DELETED_BYTES is the number of deleted by in the
+// section so far.  If DELETE_ENTRY is true, the reference point and
+// all offsets after the previous reference point are discarded.
+
+void
+Arm_exidx_fixup::update_offset_map(
+    section_offset_type input_offset,
+    section_size_type deleted_bytes,
+    bool delete_entry)
+{
+  if (this->section_offset_map_ == NULL)
+    this->section_offset_map_ = new Arm_exidx_section_offset_map();
+  section_offset_type output_offset = (delete_entry
+				       ? -1
+				       : input_offset - deleted_bytes);
+  (*this->section_offset_map_)[input_offset] = output_offset;
+}
+
+// Process EXIDX_INPUT_SECTION for EXIDX entry merging.  Return the number of
+// bytes deleted.  If some entries are merged, also store a pointer to a newly
+// created Arm_exidx_section_offset_map object in *PSECTION_OFFSET_MAP.  The
+// caller owns the map and is responsible for releasing it after use.
+
+template<bool big_endian>
+uint32_t
+Arm_exidx_fixup::process_exidx_section(
+    const Arm_exidx_input_section* exidx_input_section,
+    Arm_exidx_section_offset_map** psection_offset_map)
+{
+  Relobj* relobj = exidx_input_section->relobj();
+  unsigned shndx = exidx_input_section->shndx();
+  section_size_type section_size;
+  const unsigned char* section_contents =
+    relobj->section_contents(shndx, &section_size, false);
+
+  if ((section_size % 8) != 0)
+    {
+      // Something is wrong with this section.  Better not touch it.
+      gold_error(_("uneven .ARM.exidx section size in %s section %u"),
+		 relobj->name().c_str(), shndx);
+      this->last_input_section_ = exidx_input_section;
+      this->last_unwind_type_ = UT_NONE;
+      return 0;
+    }
+  
+  uint32_t deleted_bytes = 0;
+  bool prev_delete_entry = false;
+  gold_assert(this->section_offset_map_ == NULL);
+
+  for (section_size_type i = 0; i < section_size; i += 8)
+    {
+      typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
+      const Valtype* wv =
+	  reinterpret_cast<const Valtype*>(section_contents + i + 4);
+      uint32_t second_word = elfcpp::Swap<32, big_endian>::readval(wv);
+
+      bool delete_entry = this->process_exidx_entry(second_word);
+
+      // Entry deletion causes changes in output offsets.  We use a std::map
+      // to record these.  And entry (x, y) means input offset x
+      // is mapped to output offset y.  If y is invalid_offset, then x is
+      // dropped in the output.  Because of the way std::map::lower_bound
+      // works, we record the last offset in a region w.r.t to keeping or
+      // dropping.  If there is no entry (x0, y0) for an input offset x0,
+      // the output offset y0 of it is determined by the output offset y1 of
+      // the smallest input offset x1 > x0 that there is an (x1, y1) entry
+      // in the map.  If y1 is not -1, then y0 = y1 + x0 - x1.  Othewise, y1
+      // y0 is also -1.
+      if (delete_entry != prev_delete_entry && i != 0)
+	this->update_offset_map(i - 1, deleted_bytes, prev_delete_entry);
+
+      // Update total deleted bytes for this entry.
+      if (delete_entry)
+	deleted_bytes += 8;
+
+      prev_delete_entry = delete_entry;
+    }
+  
+  // If section offset map is not NULL, make an entry for the end of
+  // section.
+  if (this->section_offset_map_ != NULL)
+    update_offset_map(section_size - 1, deleted_bytes, prev_delete_entry);
+
+  *psection_offset_map = this->section_offset_map_;
+  this->section_offset_map_ = NULL;
+  this->last_input_section_ = exidx_input_section;
+  
+  return deleted_bytes;
 }
 
 // Arm_output_section methods.
