@@ -404,7 +404,10 @@ SUBWORDXFSI (XF in, int word)
   /* Note: typedef struct { SI parts[3]; } XF; */
   union { XF in; SI out[3]; } x;
   x.in = in;
-  return x.out[word];
+  if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
+    return x.out[word];
+  else
+    return x.out[2 - word];
 }
 
 SEMOPS_INLINE SI
@@ -413,16 +416,16 @@ SUBWORDTFSI (TF in, int word)
   /* Note: typedef struct { SI parts[4]; } TF; */
   union { TF in; SI out[4]; } x;
   x.in = in;
-  return x.out[word];
+  if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
+    return x.out[word];
+  else
+    return x.out[3 - word];
 }
 
 SEMOPS_INLINE DI
 JOINSIDI (SI x0, SI x1)
 {
-  if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
-    return MAKEDI (x0, x1);
-  else
-    return MAKEDI (x1, x0);
+  return MAKEDI (x0, x1);
 }
 
 SEMOPS_INLINE DF
