@@ -67,6 +67,8 @@ class Arm_input_section;
 template<bool big_endian>
 class Arm_output_section;
 
+class Arm_exidx_input_section;
+
 template<bool big_endian>
 class Arm_relobj;
 
@@ -1158,6 +1160,63 @@ class Arm_output_section : public Output_section
 			 std::vector<Output_relaxed_input_section*>*);
 };
 
+// Arm_exidx_input_section class.  This represents an EXIDX input section.
+
+class Arm_exidx_input_section
+{
+ public:
+  static const section_offset_type invalid_offset =
+    static_cast<section_offset_type>(-1);
+
+  Arm_exidx_input_section(Relobj* relobj, unsigned int shndx,
+			  unsigned int link, uint32_t size, uint32_t addralign)
+    : relobj_(relobj), shndx_(shndx), link_(link), size_(size),
+      addralign_(addralign)
+  { }
+
+  ~Arm_exidx_input_section()
+  { }
+  	
+  // Accessors:  This is a read-only class.
+
+  // Return the object containing this EXIDX input section.
+  Relobj*
+  relobj() const
+  { return this->relobj_; }
+
+  // Return the section index of this EXIDX input section.
+  unsigned int
+  shndx() const
+  { return this->shndx_; }
+
+  // Return the section index of linked text section in the same object.
+  unsigned int
+  link() const
+  { return this->link_; }
+
+  // Return size of the EXIDX input section.
+  uint32_t
+  size() const
+  { return this->size_; }
+
+  // Reutnr address alignment of EXIDX input section.
+  uint32_t
+  addralign() const
+  { return this->addralign_; }
+
+ private:
+  // Object containing this.
+  Relobj* relobj_;
+  // Section index of this.
+  unsigned int shndx_;
+  // text section linked to this in the same object.
+  unsigned int link_;
+  // Size of this.  For ARM 32-bit is sufficient.
+  uint32_t size_;
+  // Address alignment of this.  For ARM 32-bit is sufficient.
+  uint32_t addralign_;
+};
+
 // Arm_relobj class.
 
 template<bool big_endian>
@@ -1273,6 +1332,29 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
     (*this->section_has_cortex_a8_workaround_)[shndx] = true;
   }
 
+  // Return the EXIDX section of an text section with index SHNDX or NULL
+  // if the text section has no associated EXIDX section.
+  const Arm_exidx_input_section*
+  exidx_input_section_by_link(unsigned int shndx) const
+  {
+    Exidx_section_map::const_iterator p = this->exidx_section_map_.find(shndx);
+    return ((p != this->exidx_section_map_.end()
+	     && p->second->link() == shndx)
+	    ? p->second
+	    : NULL);
+  }
+
+  // Return the EXIDX section with index SHNDX or NULL if there is none.
+  const Arm_exidx_input_section*
+  exidx_input_section_by_shndx(unsigned shndx) const
+  {
+    Exidx_section_map::const_iterator p = this->exidx_section_map_.find(shndx);
+    return ((p != this->exidx_section_map_.end()
+	     && p->second->shndx() == shndx)
+	    ? p->second
+	    : NULL);
+  }
+
  protected:
   // Post constructor setup.
   void
@@ -1324,8 +1406,17 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
 				     unsigned int, Output_section*,
 				     Target_arm<big_endian>*);
 
-  // List of stub tables.
+  // Make a new Arm_exidx_input_section object for EXIDX section with
+  // index SHNDX and section header SHDR.
+  void
+  make_exidx_input_section(unsigned int shndx,
+			   const elfcpp::Shdr<32, big_endian>& shdr);
+
   typedef std::vector<Stub_table<big_endian>*> Stub_table_list;
+  typedef Unordered_map<unsigned int, const Arm_exidx_input_section*>
+    Exidx_section_map;
+
+  // List of stub tables.
   Stub_table_list stub_tables_;
   // Bit vector to tell if a local symbol is a thumb function or not.
   // This is only valid after do_count_local_symbol is called.
@@ -1338,6 +1429,8 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
   Mapping_symbols_info mapping_symbols_info_;
   // Bitmap to indicate sections with Cortex-A8 workaround or NULL.
   std::vector<bool>* section_has_cortex_a8_workaround_;
+  // Map a text section to its associated .ARM.exidx section, if there is one.
+  Exidx_section_map exidx_section_map_;
 };
 
 // Arm_dynobj class.
@@ -4896,35 +4989,47 @@ Arm_relobj<big_endian>::do_relocate_sections(
     }
 }
 
-// Helper functions for both Arm_relobj and Arm_dynobj to read ARM
-// ABI information.
+// Create a new EXIDX input section object for EXIDX section SHNDX with
+// header SHDR.
 
 template<bool big_endian>
-Attributes_section_data*
-read_arm_attributes_section(
-    Object* object,
-    Read_symbols_data *sd)
+void
+Arm_relobj<big_endian>::make_exidx_input_section(
+    unsigned int shndx,
+    const elfcpp::Shdr<32, big_endian>& shdr)
 {
-  // Read the attributes section if there is one.
-  // We read from the end because gas seems to put it near the end of
-  // the section headers.
-  const size_t shdr_size = elfcpp::Elf_sizes<32>::shdr_size;
-  const unsigned char *ps =
-    sd->section_headers->data() + shdr_size * (object->shnum() - 1);
-  for (unsigned int i = object->shnum(); i > 0; --i, ps -= shdr_size)
+  // Link .text section to its .ARM.exidx section in the same object.
+  unsigned int text_shndx = this->adjust_shndx(shdr.get_sh_link());
+
+  // Issue an error and ignore this EXIDX section if it does not point
+  // to any text section.
+  if (text_shndx == elfcpp::SHN_UNDEF)
     {
-      elfcpp::Shdr<32, big_endian> shdr(ps);
-      if (shdr.get_sh_type() == elfcpp::SHT_ARM_ATTRIBUTES)
-	{
-	  section_offset_type section_offset = shdr.get_sh_offset();
-	  section_size_type section_size =
-	    convert_to_section_size_type(shdr.get_sh_size());
-	  File_view* view = object->get_lasting_view(section_offset,
-						     section_size, true, false);
-	  return new Attributes_section_data(view->data(), section_size);
-	}
+      gold_error(_("EXIDX section %u in %s has no linked text section"),
+		 shndx, this->name().c_str());
+      return;
     }
-  return NULL;
+  
+  // Issue an error and ignore this EXIDX section if it points to a text
+  // section already has an EXIDX section.
+  if (this->exidx_section_map_[text_shndx] != NULL)
+    {
+      gold_error(_("EXIDX sections %u and %u both link to text section %u "
+		   "in %s"),
+		 shndx, this->exidx_section_map_[text_shndx]->shndx(),
+		 text_shndx, this->name().c_str());
+      return;
+    }
+
+  // Create an Arm_exidx_input_section object for this EXIDX section.
+  Arm_exidx_input_section* exidx_input_section =
+    new Arm_exidx_input_section(this, shndx, text_shndx, shdr.get_sh_size(),
+				shdr.get_sh_addralign());
+  this->exidx_section_map_[text_shndx] = exidx_input_section;
+
+  // Also map the EXIDX section index to this.
+  gold_assert(this->exidx_section_map_[shndx] == NULL);
+  this->exidx_section_map_[shndx] = exidx_input_section;
 }
 
 // Read the symbol information.
@@ -4942,8 +5047,29 @@ Arm_relobj<big_endian>::do_read_symbols(Read_symbols_data* sd)
 					      true, false);
   elfcpp::Ehdr<32, big_endian> ehdr(pehdr);
   this->processor_specific_flags_ = ehdr.get_e_flags();
-  this->attributes_section_data_ =
-    read_arm_attributes_section<big_endian>(this, sd); 
+
+  // Go over the section headers and look for .ARM.attributes and .ARM.exidx
+  // sections.
+  const size_t shdr_size = elfcpp::Elf_sizes<32>::shdr_size;
+  const unsigned char *ps =
+    sd->section_headers->data() + shdr_size;
+  for (unsigned int i = 1; i < this->shnum(); ++i, ps += shdr_size)
+    {
+      elfcpp::Shdr<32, big_endian> shdr(ps);
+      if (shdr.get_sh_type() == elfcpp::SHT_ARM_ATTRIBUTES)
+	{
+     	  gold_assert(this->attributes_section_data_ == NULL);
+	  section_offset_type section_offset = shdr.get_sh_offset();
+	  section_size_type section_size =
+	    convert_to_section_size_type(shdr.get_sh_size());
+	  File_view* view = this->get_lasting_view(section_offset,
+						   section_size, true, false);
+	  this->attributes_section_data_ =
+	    new Attributes_section_data(view->data(), section_size);
+	}
+      else if (shdr.get_sh_type() == elfcpp::SHT_ARM_EXIDX)
+	this->make_exidx_input_section(i, shdr);
+    }
 }
 
 // Process relocations for garbage collection.  The ARM target uses .ARM.exidx
@@ -5001,8 +5127,28 @@ Arm_dynobj<big_endian>::do_read_symbols(Read_symbols_data* sd)
 					      true, false);
   elfcpp::Ehdr<32, big_endian> ehdr(pehdr);
   this->processor_specific_flags_ = ehdr.get_e_flags();
-  this->attributes_section_data_ =
-    read_arm_attributes_section<big_endian>(this, sd); 
+
+  // Read the attributes section if there is one.
+  // We read from the end because gas seems to put it near the end of
+  // the section headers.
+  const size_t shdr_size = elfcpp::Elf_sizes<32>::shdr_size;
+  const unsigned char *ps =
+    sd->section_headers->data() + shdr_size * (this->shnum() - 1);
+  for (unsigned int i = this->shnum(); i > 0; --i, ps -= shdr_size)
+    {
+      elfcpp::Shdr<32, big_endian> shdr(ps);
+      if (shdr.get_sh_type() == elfcpp::SHT_ARM_ATTRIBUTES)
+	{
+	  section_offset_type section_offset = shdr.get_sh_offset();
+	  section_size_type section_size =
+	    convert_to_section_size_type(shdr.get_sh_size());
+	  File_view* view = this->get_lasting_view(section_offset,
+						   section_size, true, false);
+	  this->attributes_section_data_ =
+	    new Attributes_section_data(view->data(), section_size);
+	  break;
+	}
+    }
 }
 
 // Stub_addend_reader methods.

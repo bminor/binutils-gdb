@@ -1,3 +1,15 @@
+2010-01-21  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_exidx_input_section): New class.
+	(Arm_relobj::exidx_input_section_by_link,
+	Arm_relobj::exidx_input_section_by_shndx,
+	Arm_relobj::make_exidx_input_section): New methods.
+	(read_arm_attributes_section): Remove.
+	(Arm_relobj::do_read_symbols): Look for ARM.exidx sections and record
+	information about them.
+	(Arm_dynobj::do_read_symbols): Move code in read_arm_attributes_section
+	to here.
+
 2010-01-20  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Target_arm::Arm_input_section_map): Change key type from
