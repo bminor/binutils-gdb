@@ -1,3 +1,13 @@
+2010-01-22  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
+
+	* gold/arm.cc (Target_arm): Updated fix_v4bx method and usage of
+	Fix_v4bx enum values .
+	* gold/options.h (General_options): New option definitions.
+	(General_options::fix_v4bx): New method.
+	(General_options::Fix_v4bx): New enum.
+	* gold/options.cc (General_options::parse_fix_v4bx): New method.
+	(General_options::parse_fix_v4bx_interworking): New method.
+
 2010-01-22  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_exidx_fixup): New class.

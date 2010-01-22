@@ -1812,7 +1812,7 @@ class Target_arm : public Sized_target<32, big_endian>
       stub_factory_(Stub_factory::get_instance()), may_use_blx_(false),
       should_force_pic_veneer_(false), arm_input_section_map_(),
       attributes_section_data_(NULL), fix_cortex_a8_(false),
-      cortex_a8_relocs_info_(), fix_v4bx_(0)
+      cortex_a8_relocs_info_()
   { }
 
   // Whether we can use BLX.
@@ -2049,9 +2049,9 @@ class Target_arm : public Sized_target<32, big_endian>
   // 0 - do not fix
   // 1 - replace with MOV instruction (armv4 target)
   // 2 - make interworking veneer (>= armv4t targets only)
-  int
+  General_options::Fix_v4bx
   fix_v4bx() const
-  { return this->fix_v4bx_; }
+  { return parameters->options().fix_v4bx(); }
 
   // Scan a span of THUMB code section for Cortex-A8 erratum.
   void
@@ -2415,8 +2415,6 @@ class Target_arm : public Sized_target<32, big_endian>
   bool fix_cortex_a8_;
   // Map addresses to relocs for Cortex-A8 erratum.
   Cortex_a8_relocs_info cortex_a8_relocs_info_;
-  // Whether we need to fix code for V4BX relocations.
-  int fix_v4bx_;
 };
 
 template<bool big_endian>
@@ -6451,7 +6449,8 @@ Target_arm<big_endian>::do_finalize_sections(
   // Check if we can use V4BX interworking.
   // The V4BX interworking stub contains BX instruction,
   // which is not specified for some profiles.
-  if (this->fix_v4bx() == 2 && !this->may_use_blx())
+  if (this->fix_v4bx() == General_options::FIX_V4BX_INTERWORKING
+      && !this->may_use_blx())
     gold_error(_("unable to provide V4BX reloc interworking fix up; "
 	         "the target profile does not support BX instruction"));
 
@@ -6943,10 +6942,14 @@ Target_arm<big_endian>::Relocate::relocate(
       break;
 
     case elfcpp::R_ARM_V4BX:
-      if (target->fix_v4bx() > 0)
-	reloc_status =
-	  Arm_relocate_functions::v4bx(relinfo, view, object, address,
-				       (target->fix_v4bx() == 2));
+      if (target->fix_v4bx() > General_options::FIX_V4BX_NONE)
+	{
+	  const bool is_v4bx_interworking =
+	      (target->fix_v4bx() == General_options::FIX_V4BX_INTERWORKING);
+	  reloc_status =
+	    Arm_relocate_functions::v4bx(relinfo, view, object, address,
+					 is_v4bx_interworking);
+	}
       break;
 
     case elfcpp::R_ARM_TARGET1:
@@ -8245,7 +8248,8 @@ Target_arm<big_endian>::scan_reloc_for_stub(
   if (r_type == elfcpp::R_ARM_V4BX)
     {
       const uint32_t reg = (addend & 0xf);
-      if (this->fix_v4bx() == 2 && reg < 0xf)
+      if (this->fix_v4bx() == General_options::FIX_V4BX_INTERWORKING
+	  && reg < 0xf)
 	{
 	  // Try looking up an existing stub from a stub table.
 	  Stub_table<big_endian>* stub_table =

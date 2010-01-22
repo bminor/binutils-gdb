@@ -726,6 +726,15 @@ class General_options
 	      N_("(ARM only) Fix binaries for Cortex-A8 erratum."),
 	      N_("(ARM only) Do not fix binaries for Cortex-A8 erratum."));
 
+  DEFINE_special(fix_v4bx, options::TWO_DASHES, '\0',
+                 N_("(ARM only) Rewrite BX rn as MOV pc, rn for ARMv4"),
+                 NULL);
+
+  DEFINE_special(fix_v4bx_interworking, options::TWO_DASHES, '\0',
+                 N_("(ARM only) Rewrite BX rn branch to ARMv4 interworking "
+                    "veneer"),
+                 NULL);
+
   DEFINE_bool(g, options::EXACTLY_ONE_DASH, '\0', false,
 	      N_("Ignored"), NULL);
 
@@ -1218,6 +1227,20 @@ class General_options
   bool
   section_start(const char* secname, uint64_t* paddr) const;
 
+  enum Fix_v4bx
+  {
+    // Leave original instruction.
+    FIX_V4BX_NONE,
+    // Replace instruction.
+    FIX_V4BX_REPLACE,
+    // Generate an interworking veneer.
+    FIX_V4BX_INTERWORKING
+  };
+
+  Fix_v4bx
+  fix_v4bx() const
+  { return (this->fix_v4bx_); }
+
  private:
   // Don't copy this structure.
   General_options(const General_options&);
@@ -1307,6 +1330,8 @@ class General_options
   Unordered_set<std::string> symbols_to_retain_;
   // Map from section name to address from --section-start.
   std::map<std::string, uint64_t> section_starts_;
+  // Whether to process armv4 bx instruction relocation.
+  Fix_v4bx fix_v4bx_;
 };
 
 // The position-dependent options.  We use this to store the state of

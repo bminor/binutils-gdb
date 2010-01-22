@@ -586,6 +586,20 @@ General_options::string_to_object_format(const char* arg)
     }
 }
 
+void
+General_options::parse_fix_v4bx(const char*, const char*,
+                                Command_line*)
+{
+  this->fix_v4bx_ = FIX_V4BX_REPLACE;
+}
+
+void
+General_options::parse_fix_v4bx_interworking(const char*, const char*,
+					     Command_line*)
+{
+  this->fix_v4bx_ = FIX_V4BX_INTERWORKING;
+}
+
 } // End namespace gold.
 
 namespace
