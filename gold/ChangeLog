@@ -1,5 +1,11 @@
 2010-01-21  Doug Kwan  <dougkwan@google.com>
 
+	* arm.cc (Arm_exidx_cantunwind, Arm_exidx_merged_section): New
+	classes.
+	(Arm_exidx_section_offset_map): New type.
+
+2010-01-21  Doug Kwan  <dougkwan@google.com>
+
 	* arm.cc (Arm_exidx_input_section): New class.
 	(Arm_relobj::exidx_input_section_by_link,
 	Arm_relobj::exidx_input_section_by_shndx,

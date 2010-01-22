@@ -321,6 +321,13 @@ enum
   AEABI_enum_forced_wide = 3
 };
 
+// For Exception Index Table. (Exception handling ABI for the ARM
+// architectue, Section 5)
+enum
+{
+  EXIDX_CANTUNWIND = 1,
+};
+
 } // End namespace elfcpp.
 
 #endif // !defined(ELFCPP_ARM_H)

@@ -64,6 +64,10 @@ class Stub_table;
 template<bool big_endian>
 class Arm_input_section;
 
+class Arm_exidx_cantunwind;
+
+class Arm_exidx_merged_section;
+
 template<bool big_endian>
 class Arm_output_section;
 
@@ -1025,6 +1029,97 @@ class Stub_table : public Output_data
   off_t prev_data_size_;
   // address alignment of this in the previous pass.
   uint64_t prev_addralign_;
+};
+
+// Arm_exidx_cantunwind class.  This represents an EXIDX_CANTUNWIND entry
+// we add to the end of an EXIDX input section that goes into the output.
+
+class Arm_exidx_cantunwind : public Output_section_data
+{
+ public:
+  Arm_exidx_cantunwind(Relobj* relobj, unsigned int shndx)
+    : Output_section_data(8, 4, true), relobj_(relobj), shndx_(shndx)
+  { }
+
+  // Return the object containing the section pointed by this.
+  Relobj*
+  relobj() const
+  { return this->relobj_; }
+
+  // Return the section index of the section pointed by this.
+  unsigned int
+  shndx() const
+  { return this->shndx_; }
+
+ protected:
+  void
+  do_write(Output_file* of)
+  {
+    if (parameters->target().is_big_endian())
+      this->do_fixed_endian_write<true>(of);
+    else
+      this->do_fixed_endian_write<false>(of);
+  }
+
+ private:
+  // Implement do_write for a given endianity.
+  template<bool big_endian>
+  void inline
+  do_fixed_endian_write(Output_file*);
+  
+  // The object containing the section pointed by this.
+  Relobj* relobj_;
+  // The section index of the section pointed by this.
+  unsigned int shndx_;
+};
+
+// During EXIDX coverage fix-up, we compact an EXIDX section.  The
+// Offset map is used to map input section offset within the EXIDX section
+// to the output offset from the start of this EXIDX section. 
+
+typedef std::map<section_offset_type, section_offset_type>
+	Arm_exidx_section_offset_map;
+
+// Arm_exidx_merged_section class.  This represents an EXIDX input section
+// with some of its entries merged.
+
+class Arm_exidx_merged_section : public Output_relaxed_input_section
+{
+ public:
+  // Constructor for Arm_exidx_merged_section.
+  // EXIDX_INPUT_SECTION points to the unmodified EXIDX input section.
+  // SECTION_OFFSET_MAP points to a section offset map describing how
+  // parts of the input section are mapped to output.  DELETED_BYTES is
+  // the number of bytes deleted from the EXIDX input section.
+  Arm_exidx_merged_section(
+      const Arm_exidx_input_section& exidx_input_section,
+      const Arm_exidx_section_offset_map& section_offset_map,
+      uint32_t deleted_bytes);
+
+  // Return the original EXIDX input section.
+  const Arm_exidx_input_section&
+  exidx_input_section() const
+  { return this->exidx_input_section_; }
+
+  // Return the section offset map.
+  const Arm_exidx_section_offset_map&
+  section_offset_map() const
+  { return this->section_offset_map_; }
+
+ protected:
+  // Write merged section into file OF.
+  void
+  do_write(Output_file* of);
+
+  bool
+  do_output_offset(const Relobj*, unsigned int, section_offset_type,
+		  section_offset_type*) const;
+
+ private:
+  // Original EXIDX input section.
+  const Arm_exidx_input_section& exidx_input_section_;
+  // Section offset map.
+  const Arm_exidx_section_offset_map& section_offset_map_;
 };
 
 // A class to wrap an ordinary input section containing executable code.
@@ -4327,6 +4422,177 @@ Arm_input_section<big_endian>::do_reset_address_and_file_offset()
     }
 
   this->set_current_data_size(off);
+}
+
+// Arm_exidx_cantunwind methods.
+
+// Write this to Output file OF for a fixed endianity.
+
+template<bool big_endian>
+void
+Arm_exidx_cantunwind::do_fixed_endian_write(Output_file* of)
+{
+  off_t offset = this->offset();
+  const section_size_type oview_size = 8;
+  unsigned char* const oview = of->get_output_view(offset, oview_size);
+  
+  typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
+  Valtype* wv = reinterpret_cast<Valtype*>(oview);
+
+  Output_section* os = this->relobj_->output_section(this->shndx_);
+  gold_assert(os != NULL);
+
+  Arm_relobj<big_endian>* arm_relobj =
+    Arm_relobj<big_endian>::as_arm_relobj(this->relobj_);
+  Arm_address output_offset =
+    arm_relobj->get_output_section_offset(this->shndx_);
+  Arm_address section_start;
+  if(output_offset != Arm_relobj<big_endian>::invalid_address)
+    section_start = os->address() + output_offset;
+  else
+    {
+      // Currently this only happens for a relaxed section.
+      const Output_relaxed_input_section* poris =
+	os->find_relaxed_input_section(this->relobj_, this->shndx_);
+      gold_assert(poris != NULL);
+      section_start = poris->address();
+    }
+
+  // We always append this to the end of an EXIDX section.
+  Arm_address output_address =
+    section_start + this->relobj_->section_size(this->shndx_);
+
+  // Write out the entry.  The first word either points to the beginning
+  // or after the end of a text section.  The second word is the special
+  // EXIDX_CANTUNWIND value.
+  elfcpp::Swap<32, big_endian>::writeval(wv, output_address);
+  elfcpp::Swap<32, big_endian>::writeval(wv + 1, elfcpp::EXIDX_CANTUNWIND);
+
+  of->write_output_view(this->offset(), oview_size, oview);
+}
+
+// Arm_exidx_merged_section methods.
+
+// Constructor for Arm_exidx_merged_section.
+// EXIDX_INPUT_SECTION points to the unmodified EXIDX input section.
+// SECTION_OFFSET_MAP points to a section offset map describing how
+// parts of the input section are mapped to output.  DELETED_BYTES is
+// the number of bytes deleted from the EXIDX input section.
+
+Arm_exidx_merged_section::Arm_exidx_merged_section(
+    const Arm_exidx_input_section& exidx_input_section,
+    const Arm_exidx_section_offset_map& section_offset_map,
+    uint32_t deleted_bytes)
+  : Output_relaxed_input_section(exidx_input_section.relobj(),
+				 exidx_input_section.shndx(),
+				 exidx_input_section.addralign()),
+    exidx_input_section_(exidx_input_section),
+    section_offset_map_(section_offset_map)
+{
+  // Fix size here so that we do not need to implement set_final_data_size.
+  this->set_data_size(exidx_input_section.size() - deleted_bytes);
+  this->fix_data_size();
+}
+
+// Given an input OBJECT, an input section index SHNDX within that
+// object, and an OFFSET relative to the start of that input
+// section, return whether or not the corresponding offset within
+// the output section is known.  If this function returns true, it
+// sets *POUTPUT to the output offset.  The value -1 indicates that
+// this input offset is being discarded.
+
+bool
+Arm_exidx_merged_section::do_output_offset(
+    const Relobj* relobj,
+    unsigned int shndx,
+    section_offset_type offset,
+    section_offset_type* poutput) const
+{
+  // We only handle offsets for the original EXIDX input section.
+  if (relobj != this->exidx_input_section_.relobj()
+      || shndx != this->exidx_input_section_.shndx())
+    return false;
+
+  if (offset < 0 || offset >= this->exidx_input_section_.size())
+    // Input offset is out of valid range.
+    *poutput = -1;
+  else
+    {
+      // We need to look up the section offset map to determine the output
+      // offset.  Find the reference point in map that is first offset
+      // bigger than or equal to this offset.
+      Arm_exidx_section_offset_map::const_iterator p =
+	this->section_offset_map_.lower_bound(offset);
+
+      // The section offset maps are build such that this should not happen if
+      // input offset is in the valid range.
+      gold_assert(p != this->section_offset_map_.end());
+
+      // We need to check if this is dropped.
+     section_offset_type ref = p->first;
+     section_offset_type mapped_ref = p->second;
+
+      if (mapped_ref != Arm_exidx_input_section::invalid_offset)
+	// Offset is present in output.
+	*poutput = mapped_ref + (offset - ref);
+      else
+	// Offset is discarded owing to EXIDX entry merging.
+	*poutput = -1;
+    }
+  
+  return true;
+}
+
+// Write this to output file OF.
+
+void
+Arm_exidx_merged_section::do_write(Output_file* of)
+{
+  // If we retain or discard the whole EXIDX input section,  we would
+  // not be here.
+  gold_assert(this->data_size() != this->exidx_input_section_.size()
+	      && this->data_size() != 0);
+
+  off_t offset = this->offset();
+  const section_size_type oview_size = this->data_size();
+  unsigned char* const oview = of->get_output_view(offset, oview_size);
+  
+  Output_section* os = this->relobj()->output_section(this->shndx());
+  gold_assert(os != NULL);
+
+  // Get contents of EXIDX input section.
+  section_size_type section_size;
+  const unsigned char* section_contents =
+    this->relobj()->section_contents(this->shndx(), &section_size, false); 
+  gold_assert(section_size == this->exidx_input_section_.size());
+
+  // Go over spans of input offsets and write only those that are not
+  // discarded.
+  section_offset_type in_start = 0;
+  section_offset_type out_start = 0;
+  for(Arm_exidx_section_offset_map::const_iterator p =
+        this->section_offset_map_.begin();
+      p != this->section_offset_map_.end();
+      ++p)
+    {
+      section_offset_type in_end = p->first;
+      gold_assert(in_end >= in_start);
+      section_offset_type out_end = p->second;
+      size_t in_chunk_size = convert_types<size_t>(in_end - in_start + 1);
+      if (out_end != -1)
+	{
+	  size_t out_chunk_size =
+	    convert_types<size_t>(out_end - out_start + 1);
+	  gold_assert(out_chunk_size == in_chunk_size);
+	  memcpy(oview + out_start, section_contents + in_start,
+		 out_chunk_size);
+	  out_start += out_chunk_size;
+	}
+      in_start += in_chunk_size;
+    }
+
+  gold_assert(convert_to_section_size_type(out_start) == oview_size);
+  of->write_output_view(this->offset(), oview_size, oview);
 }
 
 // Arm_output_section methods.
