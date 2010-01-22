@@ -1,3 +1,9 @@
+2010-01-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR symtab/11199:
+	* gdb.dwarf2/member-ptr-forwardref.exp,
+	gdb.dwarf2/member-ptr-forwardref.S: New.
+
 2010-01-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.threads/watchthreads-reorder.c (gdbstop_mutex): Remove.

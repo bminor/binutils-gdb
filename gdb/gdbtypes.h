@@ -1312,6 +1312,8 @@ extern void smash_to_method_type (struct type *type, struct type *domain,
 extern void smash_to_memberptr_type (struct type *, struct type *,
 				     struct type *);
 
+extern void smash_to_methodptr_type (struct type *, struct type *);
+
 extern struct type *allocate_stub_method (struct type *);
 
 extern char *type_name_no_tag (const struct type *);

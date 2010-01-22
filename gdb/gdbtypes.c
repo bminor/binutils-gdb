@@ -673,10 +673,7 @@ lookup_methodptr_type (struct type *to_type)
   struct type *mtype;
 
   mtype = alloc_type_copy (to_type);
-  TYPE_TARGET_TYPE (mtype) = to_type;
-  TYPE_DOMAIN_TYPE (mtype) = TYPE_DOMAIN_TYPE (to_type);
-  TYPE_LENGTH (mtype) = cplus_method_ptr_size (to_type);
-  TYPE_CODE (mtype) = TYPE_CODE_METHODPTR;
+  smash_to_methodptr_type (mtype, to_type);
   return mtype;
 }
 
@@ -979,6 +976,22 @@ smash_to_memberptr_type (struct type *type, struct type *domain,
   TYPE_LENGTH (type)
     = gdbarch_ptr_bit (get_type_arch (to_type)) / TARGET_CHAR_BIT;
   TYPE_CODE (type) = TYPE_CODE_MEMBERPTR;
+}
+
+/* Smash TYPE to be a type of pointer to methods type TO_TYPE.
+
+   When "smashing" the type, we preserve the objfile that the old type
+   pointed to, since we aren't changing where the type is actually
+   allocated.  */
+
+void
+smash_to_methodptr_type (struct type *type, struct type *to_type)
+{
+  smash_type (type);
+  TYPE_TARGET_TYPE (type) = to_type;
+  TYPE_DOMAIN_TYPE (type) = TYPE_DOMAIN_TYPE (to_type);
+  TYPE_LENGTH (type) = cplus_method_ptr_size (to_type);
+  TYPE_CODE (type) = TYPE_CODE_METHODPTR;
 }
 
 /* Smash TYPE to be a type of method of DOMAIN with type TO_TYPE.

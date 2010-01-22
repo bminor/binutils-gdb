@@ -4892,68 +4892,48 @@ is_vtable_name (const char *name, struct dwarf2_cu *cu)
 }
 
 /* GCC outputs unnamed structures that are really pointers to member
-   functions, with the ABI-specified layout.  If DIE (from CU) describes
-   such a structure, set its type, and return nonzero.  Otherwise return
-   zero.
+   functions, with the ABI-specified layout.  If TYPE describes
+   such a structure, smash it into a member function type.
 
    GCC shouldn't do this; it should just output pointer to member DIEs.
    This is GCC PR debug/28767.  */
 
-static struct type *
-quirk_gcc_member_function_pointer (struct die_info *die, struct dwarf2_cu *cu)
+static void
+quirk_gcc_member_function_pointer (struct type *type, struct objfile *objfile)
 {
-  struct objfile *objfile = cu->objfile;
-  struct type *type;
-  struct die_info *pfn_die, *delta_die;
-  struct attribute *pfn_name, *delta_name;
-  struct type *pfn_type, *domain_type;
+  struct type *pfn_type, *domain_type, *new_type;
 
   /* Check for a structure with no name and two children.  */
-  if (die->tag != DW_TAG_structure_type
-      || dwarf2_attr (die, DW_AT_name, cu) != NULL
-      || die->child == NULL
-      || die->child->sibling == NULL
-      || (die->child->sibling->sibling != NULL
-	  && die->child->sibling->sibling->tag != DW_TAG_padding))
-    return NULL;
+  if (TYPE_CODE (type) != TYPE_CODE_STRUCT || TYPE_NFIELDS (type) != 2)
+    return;
 
   /* Check for __pfn and __delta members.  */
-  pfn_die = die->child;
-  pfn_name = dwarf2_attr (pfn_die, DW_AT_name, cu);
-  if (pfn_die->tag != DW_TAG_member
-      || pfn_name == NULL
-      || DW_STRING (pfn_name) == NULL
-      || strcmp ("__pfn", DW_STRING (pfn_name)) != 0)
-    return NULL;
-
-  delta_die = pfn_die->sibling;
-  delta_name = dwarf2_attr (delta_die, DW_AT_name, cu);
-  if (delta_die->tag != DW_TAG_member
-      || delta_name == NULL
-      || DW_STRING (delta_name) == NULL
-      || strcmp ("__delta", DW_STRING (delta_name)) != 0)
-    return NULL;
+  if (TYPE_FIELD_NAME (type, 0) == NULL
+      || strcmp (TYPE_FIELD_NAME (type, 0), "__pfn") != 0
+      || TYPE_FIELD_NAME (type, 1) == NULL
+      || strcmp (TYPE_FIELD_NAME (type, 1), "__delta") != 0)
+    return;
 
   /* Find the type of the method.  */
-  pfn_type = die_type (pfn_die, cu);
+  pfn_type = TYPE_FIELD_TYPE (type, 0);
   if (pfn_type == NULL
       || TYPE_CODE (pfn_type) != TYPE_CODE_PTR
       || TYPE_CODE (TYPE_TARGET_TYPE (pfn_type)) != TYPE_CODE_FUNC)
-    return NULL;
+    return;
 
   /* Look for the "this" argument.  */
   pfn_type = TYPE_TARGET_TYPE (pfn_type);
   if (TYPE_NFIELDS (pfn_type) == 0
+      /* || TYPE_FIELD_TYPE (pfn_type, 0) == NULL */
       || TYPE_CODE (TYPE_FIELD_TYPE (pfn_type, 0)) != TYPE_CODE_PTR)
-    return NULL;
+    return;
 
   domain_type = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (pfn_type, 0));
-  type = alloc_type (objfile);
-  smash_to_method_type (type, domain_type, TYPE_TARGET_TYPE (pfn_type),
+  new_type = alloc_type (objfile);
+  smash_to_method_type (new_type, domain_type, TYPE_TARGET_TYPE (pfn_type),
 			TYPE_FIELDS (pfn_type), TYPE_NFIELDS (pfn_type),
 			TYPE_VARARGS (pfn_type));
-  type = lookup_methodptr_type (type);
-  return set_die_type (die, type, cu);
+  smash_to_methodptr_type (type, new_type);
 }
 
 /* Called when we find the DIE that starts a structure or union scope
@@ -4980,10 +4960,6 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
   struct attribute *attr;
   char *name;
   struct cleanup *back_to = make_cleanup (null_cleanup, 0);
-
-  type = quirk_gcc_member_function_pointer (die, cu);
-  if (type)
-    return type;
 
   /* If the definition of this type lives in .debug_types, read that type.
      Don't follow DW_AT_specification though, that will take us back up
@@ -5162,6 +5138,8 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 	    }
 	}
     }
+
+  quirk_gcc_member_function_pointer (type, cu->objfile);
 
   do_cleanups (back_to);
   return type;

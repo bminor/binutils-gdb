@@ -1,3 +1,14 @@
+2010-01-22  Tom Tromey  <tromey@redhat.com>
+
+	PR symtab/11199:
+	* dwarf2read.c (quirk_gcc_member_function_pointer): Change return
+	type and arguments.  Use smash_to_methodptr_type.
+	(read_structure_type): Call quirk_gcc_member_function_pointer
+	later.
+	* gdbtypes.h (smash_to_methodptr_type): Declare.
+	* gdbtypes.c (smash_to_methodptr_type): New function.
+	(lookup_methodptr_type): Use it.
+
 2010-01-21  Tom Tromey  <tromey@redhat.com>
 
 	PR symtab/11198:
