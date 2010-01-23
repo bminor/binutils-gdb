@@ -1,3 +1,13 @@
+2010-01-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/avx.s: Add more tests.
+	* gas/i386/x86-64-avx.s: Likewise.
+
+	* gas/i386/avx-intel.d: Updated.
+	* gas/i386/avx.d: Likewise.
+	* gas/i386/x86-64-avx-intel.d: Likewise.
+	* gas/i386/x86-64-avx.d: Likewise.
+
 2010-01-23  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
 	* gas/ppc/xcoff-ref-1.s, gas/ppc/xcoff-ref-1.l: New test.

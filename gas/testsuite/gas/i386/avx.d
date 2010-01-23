@@ -258,6 +258,18 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 e2 7d 0f 21       	vtestpd \(%ecx\),%ymm4
 [ 	]*[a-f0-9]+:	c4 e2 7d 0e f4       	vtestps %ymm4,%ymm6
 [ 	]*[a-f0-9]+:	c4 e2 7d 0e 21       	vtestps \(%ecx\),%ymm4
+[ 	]*[a-f0-9]+:	c5 fd 28 f4          	vmovapd %ymm4,%ymm6
+[ 	]*[a-f0-9]+:	c5 fd 29 21          	vmovapd %ymm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fc 28 f4          	vmovaps %ymm4,%ymm6
+[ 	]*[a-f0-9]+:	c5 fc 29 21          	vmovaps %ymm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fd 6f f4          	vmovdqa %ymm4,%ymm6
+[ 	]*[a-f0-9]+:	c5 fd 7f 21          	vmovdqa %ymm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fe 6f f4          	vmovdqu %ymm4,%ymm6
+[ 	]*[a-f0-9]+:	c5 fe 7f 21          	vmovdqu %ymm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fd 10 f4          	vmovupd %ymm4,%ymm6
+[ 	]*[a-f0-9]+:	c5 fd 11 21          	vmovupd %ymm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fc 10 f4          	vmovups %ymm4,%ymm6
+[ 	]*[a-f0-9]+:	c5 fc 11 21          	vmovups %ymm4,\(%ecx\)
 [ 	]*[a-f0-9]+:	c5 ff f0 21          	vlddqu \(%ecx\),%ymm4
 [ 	]*[a-f0-9]+:	c5 fd e7 21          	vmovntdq %ymm4,\(%ecx\)
 [ 	]*[a-f0-9]+:	c5 fd 2b 21          	vmovntpd %ymm4,\(%ecx\)
@@ -1691,6 +1703,24 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 e2 7d 0e f4       	vtestps %ymm4,%ymm6
 [ 	]*[a-f0-9]+:	c4 e2 7d 0e 21       	vtestps \(%ecx\),%ymm4
 [ 	]*[a-f0-9]+:	c4 e2 7d 0e 21       	vtestps \(%ecx\),%ymm4
+[ 	]*[a-f0-9]+:	c5 fd 28 f4          	vmovapd %ymm4,%ymm6
+[ 	]*[a-f0-9]+:	c5 fd 29 21          	vmovapd %ymm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fd 29 21          	vmovapd %ymm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fc 28 f4          	vmovaps %ymm4,%ymm6
+[ 	]*[a-f0-9]+:	c5 fc 29 21          	vmovaps %ymm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fc 29 21          	vmovaps %ymm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fd 6f f4          	vmovdqa %ymm4,%ymm6
+[ 	]*[a-f0-9]+:	c5 fd 7f 21          	vmovdqa %ymm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fd 7f 21          	vmovdqa %ymm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fe 6f f4          	vmovdqu %ymm4,%ymm6
+[ 	]*[a-f0-9]+:	c5 fe 7f 21          	vmovdqu %ymm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fe 7f 21          	vmovdqu %ymm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fd 10 f4          	vmovupd %ymm4,%ymm6
+[ 	]*[a-f0-9]+:	c5 fd 11 21          	vmovupd %ymm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fd 11 21          	vmovupd %ymm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fc 10 f4          	vmovups %ymm4,%ymm6
+[ 	]*[a-f0-9]+:	c5 fc 11 21          	vmovups %ymm4,\(%ecx\)
+[ 	]*[a-f0-9]+:	c5 fc 11 21          	vmovups %ymm4,\(%ecx\)
 [ 	]*[a-f0-9]+:	c5 ff f0 21          	vlddqu \(%ecx\),%ymm4
 [ 	]*[a-f0-9]+:	c5 ff f0 21          	vlddqu \(%ecx\),%ymm4
 [ 	]*[a-f0-9]+:	c5 fd e7 21          	vmovntdq %ymm4,\(%ecx\)

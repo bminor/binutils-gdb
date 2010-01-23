@@ -270,6 +270,20 @@ _start:
 	vtestps %ymm4,%ymm6
 	vtestps (%ecx),%ymm4
 
+# Tests for op ymm, ymm/mem256
+	vmovapd %ymm4,%ymm6
+	vmovapd %ymm4,(%ecx)
+	vmovaps %ymm4,%ymm6
+	vmovaps %ymm4,(%ecx)
+	vmovdqa %ymm4,%ymm6
+	vmovdqa %ymm4,(%ecx)
+	vmovdqu %ymm4,%ymm6
+	vmovdqu %ymm4,(%ecx)
+	vmovupd %ymm4,%ymm6
+	vmovupd %ymm4,(%ecx)
+	vmovups %ymm4,%ymm6
+	vmovups %ymm4,(%ecx)
+
 # Tests for op mem256, ymm
 	vlddqu (%ecx),%ymm4
 
@@ -1830,6 +1844,26 @@ _start:
 	vtestps ymm6,ymm4
 	vtestps ymm4,YMMWORD PTR [ecx]
 	vtestps ymm4,[ecx]
+
+# Tests for op ymm, ymm/mem256
+	vmovapd ymm6,ymm4
+	vmovapd YMMWORD PTR [ecx],ymm4
+	vmovapd [ecx],ymm4
+	vmovaps ymm6,ymm4
+	vmovaps YMMWORD PTR [ecx],ymm4
+	vmovaps [ecx],ymm4
+	vmovdqa ymm6,ymm4
+	vmovdqa YMMWORD PTR [ecx],ymm4
+	vmovdqa [ecx],ymm4
+	vmovdqu ymm6,ymm4
+	vmovdqu YMMWORD PTR [ecx],ymm4
+	vmovdqu [ecx],ymm4
+	vmovupd ymm6,ymm4
+	vmovupd YMMWORD PTR [ecx],ymm4
+	vmovupd [ecx],ymm4
+	vmovups ymm6,ymm4
+	vmovups YMMWORD PTR [ecx],ymm4
+	vmovups [ecx],ymm4
 
 # Tests for op mem256, ymm
 	vlddqu ymm4,YMMWORD PTR [ecx]
