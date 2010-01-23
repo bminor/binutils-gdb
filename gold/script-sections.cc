@@ -1409,9 +1409,9 @@ Output_section_element_input::set_section_addresses(
 	      layout->new_output_section_data_from_script(posd);
 	    }
 
-	  output_section->add_input_section_for_script(p->input_section(),
-						       p->size(),
-						       this_subalign);
+	  output_section->add_simple_input_section(p->input_section(),
+						   p->size(),
+						   this_subalign);
 
 	  dot = address + p->size();
 	}
@@ -2315,7 +2315,7 @@ Orphan_output_section::set_section_addresses(Symbol_table*, Layout*,
       }
 
       address = align_address(address, addralign);
-      this->os_->add_input_section_for_script(*p, size, addralign);
+      this->os_->add_simple_input_section(*p, size, addralign);
       address += size;
     }
 

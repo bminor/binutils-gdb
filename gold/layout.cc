@@ -1401,8 +1401,15 @@ Layout::clean_up_after_relaxation()
        p != this->section_list_.end();
        ++p)
     {
-      (*p)->reset_address_and_file_offset();
       (*p)->restore_states();
+
+      // If an input section changes size because of relaxation,
+      // we need to adjust the section offsets of all input sections.
+      // after such a section.
+      if ((*p)->section_offsets_need_adjustment())
+	(*p)->adjust_section_offsets();
+
+      (*p)->reset_address_and_file_offset();
     }
   
   // Reset special output object address and file offsets.

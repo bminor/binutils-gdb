@@ -1890,6 +1890,7 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
     is_dynamic_linker_section_(false),
     generate_code_fills_at_write_(false),
     is_entsize_zero_(false),
+    section_offsets_need_adjustment_(false),
     tls_offset_(0),
     checkpoint_(NULL),
     merge_section_map_(),
@@ -3043,12 +3044,12 @@ Output_section::get_input_sections(
   return data_size;
 }
 
-// Add an input section from a script.
+// Add an simple input section.
 
 void
-Output_section::add_input_section_for_script(const Simple_input_section& sis,
-					     off_t data_size,
-					     uint64_t addralign)
+Output_section::add_simple_input_section(const Simple_input_section& sis,
+					 off_t data_size,
+					 uint64_t addralign)
 {
   if (addralign > this->addralign_)
     this->addralign_ = addralign;
@@ -3067,7 +3068,7 @@ Output_section::add_input_section_for_script(const Simple_input_section& sis,
   this->input_sections_.push_back(is);
 }
 
-//
+// Save states for relaxation.
 
 void
 Output_section::save_states()
@@ -3080,6 +3081,19 @@ Output_section::save_states()
 				  this->attached_input_sections_are_sorted_);
   this->checkpoint_ = checkpoint;
   gold_assert(this->fills_.empty());
+}
+
+void
+Output_section::discard_states()
+{
+  gold_assert(this->checkpoint_ != NULL);
+  delete this->checkpoint_;
+  this->checkpoint_ = NULL;
+  gold_assert(this->fills_.empty());
+
+  // Simply invalidate the relaxed input section map since we do not keep
+  // track of it.
+  this->is_relaxed_input_section_map_valid_ = false;
 }
 
 void
@@ -3114,6 +3128,29 @@ Output_section::restore_states()
   // Simply invalidate the relaxed input section map since we do not keep
   // track of it.
   this->is_relaxed_input_section_map_valid_ = false;
+}
+
+// Update the section offsets of input sections in this.  This is required if
+// relaxation causes some input sections to change sizes.
+
+void
+Output_section::adjust_section_offsets()
+{
+  if (!this->section_offsets_need_adjustment_)
+    return;
+
+  off_t off = 0;
+  for (Input_section_list::iterator p = this->input_sections_.begin();
+       p != this->input_sections_.end();
+       ++p)
+    {
+      off = align_address(off, p->addralign());
+      if (p->is_input_section())
+	p->relobj()->set_section_offset(p->shndx(), off);
+      off += p->data_size();
+    }
+
+  this->section_offsets_need_adjustment_ = false;
 }
 
 // Print to the map file.

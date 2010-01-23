@@ -8716,12 +8716,36 @@ Target_arm<big_endian>::do_relax(
   // or addresses alignments changed.  These are the only things that
   // matter.
   bool any_stub_table_changed = false;
+  Unordered_set<const Output_section*> sections_needing_adjustment;
   for (Stub_table_iterator sp = this->stub_tables_.begin();
        (sp != this->stub_tables_.end()) && !any_stub_table_changed;
        ++sp)
     {
       if ((*sp)->update_data_size_and_addralign())
-	any_stub_table_changed = true;
+	{
+	  // Update data size of stub table owner.
+	  Arm_input_section<big_endian>* owner = (*sp)->owner();
+	  uint64_t address = owner->address();
+	  off_t offset = owner->offset();
+	  owner->reset_address_and_file_offset();
+	  owner->set_address_and_file_offset(address, offset);
+
+	  sections_needing_adjustment.insert(owner->output_section());
+	  any_stub_table_changed = true;
+	}
+    }
+
+  // Output_section_data::output_section() returns a const pointer but we
+  // need to update output sections, so we record all output sections needing
+  // update above and scan the sections here to find out what sections need
+  // to be updated.
+  for(Layout::Section_list::const_iterator p = layout->section_list().begin();
+      p != layout->section_list().end();
+      ++p)
+    {
+      if (sections_needing_adjustment.find(*p)
+	  != sections_needing_adjustment.end())
+	(*p)->set_section_offsets_need_adjustment();
     }
 
   // Finalize the stubs in the last relaxation pass.

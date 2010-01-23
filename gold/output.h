@@ -2718,10 +2718,10 @@ class Output_section : public Output_data
   get_input_sections(uint64_t address, const std::string& fill,
 		     std::list<Simple_input_section>*);
 
-  // Add an input section from a script.
+  // Add a simple input section.
   void
-  add_input_section_for_script(const Simple_input_section& input_section,
-			       off_t data_size, uint64_t addralign);
+  add_simple_input_section(const Simple_input_section& input_section,
+			   off_t data_size, uint64_t addralign);
 
   // Set the current size of the output section.
   void
@@ -2744,6 +2744,10 @@ class Output_section : public Output_data
   void
   restore_states();
 
+  // Discard states.
+  void
+  discard_states();
+
   // Convert existing input sections to relaxed input sections.
   void
   convert_input_sections_to_relaxed_sections(
@@ -2754,6 +2758,21 @@ class Output_section : public Output_data
   const Output_relaxed_input_section*
   find_relaxed_input_section(const Relobj* object, unsigned int shndx) const;
   
+  // Whether section offsets need adjustment due to relaxation.
+  bool
+  section_offsets_need_adjustment() const
+  { return this->section_offsets_need_adjustment_; }
+
+  // Set section_offsets_need_adjustment to be true.
+  void
+  set_section_offsets_need_adjustment()
+  { this->section_offsets_need_adjustment_ = true; }
+
+  // Adjust section offsets of input sections in this.  This is
+  // requires if relaxation caused some input sections to change sizes.
+  void
+  adjust_section_offsets();
+
   // Print merge statistics to stderr.
   void
   print_merge_stats();
@@ -3509,6 +3528,8 @@ class Output_section : public Output_data
   bool generate_code_fills_at_write_ : 1;
   // Whether the entry size field should be zero.
   bool is_entsize_zero_ : 1;
+  // Whether section offsets need adjustment due to relaxation.
+  bool section_offsets_need_adjustment_ : 1;
   // For SHT_TLS sections, the offset of this section relative to the base
   // of the TLS segment.
   uint64_t tls_offset_;

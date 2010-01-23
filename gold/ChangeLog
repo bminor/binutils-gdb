@@ -1,3 +1,29 @@
+2010-01-22  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Target_arm::do_relax): Record an output section for section
+	offset adjustment it contains any stub table that has changed.
+	* layout.cc (Layout::clean_up_after_relaxation): Adjust section
+	offsets in an output section if necessary.
+	* output.cc (Output_section::Output_section): Initialize
+	section_offsets_need_adjustments_.
+	(Output_section::add_input_section_for_script): Renamed to
+	Output_section::add_simple_input_section.
+	(Output_section::save_states): Add a comment.
+	(Output_section::discard_states): New method defintion.
+	(Output_section::adjust_section_offsets): Same.
+	* output.h (Output_section::add_input_section_for_script): Renamed to
+	Output_section::add_simple_input_section.
+	(Output_section::discard_states): New method declaration.
+	(Output_section::adjust_section_offsets): Same.
+	(Output_section::section_offsets_need_adjustment,
+	Output_section::set_section_offsets_need_adjustment): New method
+	definitions.
+	(Output_section::section_offsets_need_adjustment_): New data member.
+	* script-sections.cc
+	(Output_section_element_input::set_section_address): Adjust code for
+	renaming of Output_section::add_input_section_for_script.
+	(Orphan_output_section::set_section_address): Same.
+
 2010-01-22  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
 
 	* gold/arm.cc (Target_arm): Updated fix_v4bx method and usage of
