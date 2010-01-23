@@ -1,3 +1,11 @@
+2010-01-23  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
+	* coff-rs6000.c (xcoff_howto_table): Change size to 0 and bitsize to 1.
+	(_bfd_xcoff_reloc_type_lookup): Handle BFD_RELOC_NONE.
+	* coff64-rs6000.c (xcoff64_howto_table): Change size to 0 and
+	bitsize to 1.
+	(xcoff64_reloc_type_lookup): Handle BFD_RELOC_NONE.
+
 2010-01-21  Nick Clifton  <nickc@redhat.com>
 
 	* elflink.c (elf_link_add_object_symbols): Look up name of

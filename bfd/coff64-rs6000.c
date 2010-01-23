@@ -1594,11 +1594,11 @@ reloc_howto_type xcoff64_howto_table[] =
 
   EMPTY_HOWTO (0xe),
 
-  /* Non-relocating reference.	*/
+  /* Non-relocating reference.  Bitsize is 1 so that r_rsize is 0.  */
   HOWTO (R_REF,			/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
@@ -1882,6 +1882,8 @@ xcoff64_reloc_type_lookup (abfd, code)
       return &xcoff64_howto_table[0x1c];
     case BFD_RELOC_64:
       return &xcoff64_howto_table[0];
+    case BFD_RELOC_NONE:
+      return &xcoff64_howto_table[0xf];
     default:
       return NULL;
     }

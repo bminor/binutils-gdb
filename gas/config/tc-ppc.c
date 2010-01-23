@@ -108,6 +108,7 @@ static void ppc_change_csect (symbolS *, offsetT);
 static void ppc_function (int);
 static void ppc_extern (int);
 static void ppc_lglobl (int);
+static void ppc_ref (int);
 static void ppc_section (int);
 static void ppc_named_section (int);
 static void ppc_stabx (int);
@@ -212,6 +213,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "extern",	ppc_extern,	0 },
   { "function",	ppc_function,	0 },
   { "lglobl",	ppc_lglobl,	0 },
+  { "ref",	ppc_ref,	0 },
   { "rename",	ppc_rename,	0 },
   { "section",	ppc_named_section, 0 },
   { "stabx",	ppc_stabx,	0 },
@@ -3559,6 +3561,58 @@ ppc_lglobl (int ignore ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
+/* The .ref pseudo-op.  It takes a list of symbol names and inserts R_REF
+   relocations at the beginning of the current csect.
+
+   (In principle, there's no reason why the relocations _have_ to be at
+   the beginning.  Anywhere in the csect would do.  However, inserting
+   at the beginning is what the native assmebler does, and it helps to
+   deal with cases where the .ref statements follow the section contents.)
+
+   ??? .refs don't work for empty .csects.  However, the native assembler
+   doesn't report an error in this case, and neither yet do we.  */
+
+static void
+ppc_ref (int ignore ATTRIBUTE_UNUSED)
+{
+  char *name;
+  char c;
+
+  if (ppc_current_csect == NULL)
+    {
+      as_bad (_(".ref outside .csect"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  do
+    {
+      name = input_line_pointer;
+      c = get_symbol_end ();
+
+      fix_at_start (symbol_get_frag (ppc_current_csect), 0,
+		    symbol_find_or_make (name), 0, FALSE, BFD_RELOC_NONE);
+
+      *input_line_pointer = c;
+      SKIP_WHITESPACE ();
+      c = *input_line_pointer;
+      if (c == ',')
+	{
+	  input_line_pointer++;
+	  SKIP_WHITESPACE ();
+	  if (is_end_of_line[(unsigned char) *input_line_pointer])
+	    {
+	      as_bad (_("missing symbol name"));
+	      ignore_rest_of_line ();
+	      return;
+	    }
+	}
+    }
+  while (c == ',');
+
+  demand_empty_rest_of_line ();
+}
+
 /* The .rename pseudo-op.  The RS/6000 assembler can rename symbols,
    although I don't know why it bothers.  */
 
@@ -6031,6 +6085,11 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
 			      PPC_HA (value), 2);
 	  break;
+
+#ifdef OBJ_XCOFF
+	case BFD_RELOC_NONE:
+	  break;
+#endif
 
 #ifdef OBJ_ELF
 	case BFD_RELOC_PPC64_HIGHER:

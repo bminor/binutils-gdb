@@ -1,3 +1,9 @@
+2010-01-23  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
+	* ld-powerpc/aix-ref-1-32.od, ld-powerpc/aix-ref-1-64.od,
+	ld-powerpc/aix-ref-1.s: New tests.
+	* ld-powerpc/aix52.exp: Run them.
+
 2010-01-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/orphan4.d: Support 64bit targets.
