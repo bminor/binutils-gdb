@@ -1,5 +1,9 @@
 2010-01-24  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (prefix_table): Remove trailing { Bad_Opcode }.
+
+2010-01-24  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-dis.c (vex_len_table): Remove trailing { Bad_Opcode }.
 
 2010-01-24  H.J. Lu  <hongjiu.lu@intel.com>

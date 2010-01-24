@@ -4437,7 +4437,6 @@ static const struct dis386 prefix_table[][4] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { VEX_LEN_TABLE (VEX_LEN_3820_P_2) },
-    { Bad_Opcode },
   },
 
   /* PREFIX_VEX_3821 */
