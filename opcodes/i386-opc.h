@@ -271,9 +271,11 @@ enum
   /* insn has VEX prefix:
 	1: 128bit VEX prefix.
 	2: 256bit VEX prefix.
+	3: Scalar VEX prefix.
    */
-#define VEX128	1
-#define VEX256	2
+#define VEX128		1
+#define VEX256		2
+#define VEXScalar	3
   Vex,
   /* How to encode VEX.vvvv:
      0: VEX.vvvv must be 1111b.

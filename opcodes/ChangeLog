@@ -1,3 +1,11 @@
+2010-01-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.h (VEXScalar): New.
+
+	* i386-opc.tbl: Replace "Vex" with "Vex=3" on AVX scalar
+	instructions.
+	* i386-tbl.h: Regenerated.
+
 2010-01-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (mod_table): Use FXSAVE on xsave and xrstor.
