@@ -62,7 +62,7 @@ if ![runto_main] then {
 set function standard
 
 set retcode [gdb_test_multiple "disassemble $function" "Disassemble function '$function'" {
-    -re ".*($hex) <$function\\+0>.*($hex) <$function\\+4>.*($hex) <$function\\+5>.*($hex) <$function\\+6>.*$gdb_prompt $" {
+    -re ".*($hex) <\\+0>.*($hex) <\\+4>.*($hex) <\\+5>.*($hex) <\\+6>.*$gdb_prompt $" {
       set function_start $expect_out(1,string);
       set address $expect_out(2,string);
       set address1 $expect_out(3,string);

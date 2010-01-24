@@ -1,3 +1,8 @@
+2010-01-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.arch/i386-bp_permanent.exp (Disassemble function '$function'):
+	Adjust it for DISASSEMBLY_OMIT_FNAME.
+
 2010-01-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR symtab/11199:
