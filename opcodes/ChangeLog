@@ -1,3 +1,26 @@
+2010-01-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (Bad_Opcode): New.
+	(bad_opcode): Likewise.
+	(dis386): Replace { "(bad)", { XX } } with { Bad_Opcode }.
+	(dis386_twobyte): Likewise.
+	(reg_table): Likewise.
+	(prefix_table): Likewise.
+	(x86_64_table): Likewise.
+	(vex_len_table): Likewise.
+	(vex_w_table): Likewise.
+	(mod_table): Likewise.
+	(rm_table): Likewise.
+	(float_reg): Likewise.
+	(reg_table): Remove trailing "(bad)" entries.
+	(prefix_table): Likewise.
+	(x86_64_table): Likewise.
+	(vex_len_table): Likewise.
+	(vex_w_table): Likewise.
+	(mod_table): Likewise.
+	(rm_table): Likewise.
+	(get_valid_dis386): Handle bytemode 0.
+
 2010-01-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.h (VEXScalar): New.
