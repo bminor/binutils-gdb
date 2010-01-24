@@ -1,3 +1,8 @@
+2010-01-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (build_vex_prefix): Set i.vex.bytes[0] to
+	0xc4 individually.
+
 2010-01-23  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
 	* write.h (fix_at_start): Declare.
