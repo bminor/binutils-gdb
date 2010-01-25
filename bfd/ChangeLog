@@ -1,3 +1,17 @@
+2010-01-25  Alan Modra  <amodra@gmail.com>
+
+	2009-12-11  Nick Clifton  <nickc@redhat.com>
+	* elf32-ppc.c: Fix shadowed variable warnings.
+	* elf64-ppc.c: Likewise.
+
+	2009-11-18  Alan Modra  <amodra@bigpond.net.au>
+	* bfd-in.h (_bfd_elf_ppc_at_tls_transform): Declare.
+	* bfd-in2.h: Regenerate.
+	* elf64-ppc.c (ppc64_elf_relocate_section): Move code for R_PPC64_TLS
+	insn optimisation to..
+	* elf32-ppc.c (_bfd_elf_ppc_at_tls_transform): ..here.  New function.
+	(ppc_elf_relocate_section): Use it.
+
 2010-01-11  Alan Modra  <amodra@gmail.com>
 
 	PR 11103
