@@ -88,22 +88,22 @@ CPU (h_cr[(index)]) = (x);\
 #define SET_H_FR(a1, x) (CPU (h_fr)[a1] = (x))
   /* Single/Double precision floating point registers */
   DF h_fsd[16];
-#define GET_H_FSD(index) ((GET_H_PRBIT ()) ? (GET_H_DRC (index)) : (CGEN_CPU_FPU (current_cpu)->ops->fextsfdf (CGEN_CPU_FPU (current_cpu), CPU (h_fr[index]))))
+#define GET_H_FSD(index) ((GET_H_PRBIT ()) ? (GET_H_DRC (index)) : (CGEN_CPU_FPU (current_cpu)->ops->fextsfdf (CGEN_CPU_FPU (current_cpu), FPCONV_DEFAULT, CPU (h_fr[index]))))
 #define SET_H_FSD(index, x) \
 do { \
 if (GET_H_PRBIT ()) {\
 SET_H_DRC ((index), (x));\
 } else {\
-SET_H_FRC ((index), CGEN_CPU_FPU (current_cpu)->ops->ftruncdfsf (CGEN_CPU_FPU (current_cpu), (x)));\
+SET_H_FRC ((index), CGEN_CPU_FPU (current_cpu)->ops->ftruncdfsf (CGEN_CPU_FPU (current_cpu), FPCONV_DEFAULT, (x)));\
 }\
 ;} while (0)
   /* floating point registers for fmov */
   DF h_fmov[16];
-#define GET_H_FMOV(index) ((NOTBI (GET_H_SZBIT ())) ? (CGEN_CPU_FPU (current_cpu)->ops->fextsfdf (CGEN_CPU_FPU (current_cpu), GET_H_FRC (index))) : (((((((index) & (1))) == (1))) ? (GET_H_XD (((index) & ((~ (1)))))) : (GET_H_DR (index)))))
+#define GET_H_FMOV(index) ((NOTBI (GET_H_SZBIT ())) ? (CGEN_CPU_FPU (current_cpu)->ops->fextsfdf (CGEN_CPU_FPU (current_cpu), FPCONV_DEFAULT, GET_H_FRC (index))) : (((((((index) & (1))) == (1))) ? (GET_H_XD (((index) & ((~ (1)))))) : (GET_H_DR (index)))))
 #define SET_H_FMOV(index, x) \
 do { \
 if (NOTBI (GET_H_SZBIT ())) {\
-SET_H_FRC ((index), CGEN_CPU_FPU (current_cpu)->ops->ftruncdfsf (CGEN_CPU_FPU (current_cpu), (x)));\
+SET_H_FRC ((index), CGEN_CPU_FPU (current_cpu)->ops->ftruncdfsf (CGEN_CPU_FPU (current_cpu), FPCONV_DEFAULT, (x)));\
 } else {\
 if ((((((index)) & (1))) == (1))) {\
 SET_H_XD ((((index)) & ((~ (1)))), (x));\

@@ -1,5 +1,12 @@
 2010-01-24  Doug Evans  <dje@sebabeach.org>
 
+	* cgen-accfp.c (fextsfdf): New arg how.  All callers updated.
+	(ftruncdfsf, floatsisf, flostsidf, ufloatsisf, fixsfsi, fixdfsi,
+	ufixsfsi): Ditto.
+	* cgen-fpu.h (CGEN_FPCONV_KIND): New enum.
+	(struct cgen_fp_ops): Update signatures of floating point conversion
+	operations.
+
 	* Make-common.in (CGEN_SIM_DEPS): Define.
 	(CGEN_INCLUDE_DEPS): Use it.
 	(CGEN_MAIN_CPU_DEPS): Simplify.

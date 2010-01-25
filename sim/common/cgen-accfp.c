@@ -285,7 +285,7 @@ gesf (CGEN_FPU* fpu, SF x, SF y)
 }
 
 static DF
-fextsfdf (CGEN_FPU* fpu, SF x)
+fextsfdf (CGEN_FPU* fpu, int how UNUSED, SF x)
 {
   sim_fpu op1;
   unsigned64 res;
@@ -297,7 +297,7 @@ fextsfdf (CGEN_FPU* fpu, SF x)
 }
 
 static SF
-ftruncdfsf (CGEN_FPU* fpu, DF x)
+ftruncdfsf (CGEN_FPU* fpu, int how UNUSED, DF x)
 {
   sim_fpu op1;
   unsigned32 res;
@@ -309,7 +309,7 @@ ftruncdfsf (CGEN_FPU* fpu, DF x)
 }
 
 static SF
-floatsisf (CGEN_FPU* fpu, SI x)
+floatsisf (CGEN_FPU* fpu, int how UNUSED, SI x)
 {
   sim_fpu ans;
   unsigned32 res;
@@ -320,7 +320,7 @@ floatsisf (CGEN_FPU* fpu, SI x)
 }
 
 static DF
-floatsidf (CGEN_FPU* fpu, SI x)
+floatsidf (CGEN_FPU* fpu, int how UNUSED, SI x)
 {
   sim_fpu ans;
   unsigned64 res;
@@ -331,7 +331,7 @@ floatsidf (CGEN_FPU* fpu, SI x)
 }
 
 static SF
-ufloatsisf (CGEN_FPU* fpu, USI x)
+ufloatsisf (CGEN_FPU* fpu, int how UNUSED, USI x)
 {
   sim_fpu ans;
   unsigned32 res;
@@ -342,7 +342,7 @@ ufloatsisf (CGEN_FPU* fpu, USI x)
 }
 
 static SI
-fixsfsi (CGEN_FPU* fpu, SF x)
+fixsfsi (CGEN_FPU* fpu, int how UNUSED, SF x)
 {
   sim_fpu op1;
   unsigned32 res;
@@ -353,7 +353,7 @@ fixsfsi (CGEN_FPU* fpu, SF x)
 }
 
 static SI
-fixdfsi (CGEN_FPU* fpu, DF x)
+fixdfsi (CGEN_FPU* fpu, int how UNUSED, DF x)
 {
   sim_fpu op1;
   unsigned32 res;
@@ -364,7 +364,7 @@ fixdfsi (CGEN_FPU* fpu, DF x)
 }
 
 static USI
-ufixsfsi (CGEN_FPU* fpu, SF x)
+ufixsfsi (CGEN_FPU* fpu, int how UNUSED, SF x)
 {
   sim_fpu op1;
   unsigned32 res;
