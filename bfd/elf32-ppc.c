@@ -1,6 +1,6 @@
 /* PowerPC-specific support for 32-bit ELF
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -6669,6 +6669,51 @@ _bfd_elf_ppc_at_tls_transform (unsigned int insn, unsigned int reg)
   return insn;
 }
 
+/* If INSN is an opcode that may be used with an @tprel operand, return
+   the transformed insn for an undefined weak symbol, ie. with the
+   thread pointer REG operand removed.  Otherwise return 0.  */
+
+unsigned int
+_bfd_elf_ppc_at_tprel_transform (unsigned int insn, unsigned int reg)
+{
+  if ((insn & (0x1f << 16)) == reg << 16
+      && ((insn & (0x3f << 26)) == 14u << 26 /* addi */
+	  || (insn & (0x3f << 26)) == 15u << 26 /* addis */
+	  || (insn & (0x3f << 26)) == 32u << 26 /* lwz */
+	  || (insn & (0x3f << 26)) == 34u << 26 /* lbz */
+	  || (insn & (0x3f << 26)) == 36u << 26 /* stw */
+	  || (insn & (0x3f << 26)) == 38u << 26 /* stb */
+	  || (insn & (0x3f << 26)) == 40u << 26 /* lhz */
+	  || (insn & (0x3f << 26)) == 42u << 26 /* lha */
+	  || (insn & (0x3f << 26)) == 44u << 26 /* sth */
+	  || (insn & (0x3f << 26)) == 46u << 26 /* lmw */
+	  || (insn & (0x3f << 26)) == 47u << 26 /* stmw */
+	  || (insn & (0x3f << 26)) == 48u << 26 /* lfs */
+	  || (insn & (0x3f << 26)) == 50u << 26 /* lfd */
+	  || (insn & (0x3f << 26)) == 52u << 26 /* stfs */
+	  || (insn & (0x3f << 26)) == 54u << 26 /* stfd */
+	  || ((insn & (0x3f << 26)) == 58u << 26 /* lwa,ld,lmd */
+	      && (insn & 3) != 1)
+	  || ((insn & (0x3f << 26)) == 62u << 26 /* std, stmd */
+	      && ((insn & 3) == 0 || (insn & 3) == 3))))
+    {
+      insn &= ~(0x1f << 16);
+    }
+  else if ((insn & (0x1f << 21)) == reg << 21
+	   && ((insn & (0x3e << 26)) == 24u << 26 /* ori, oris */
+	       || (insn & (0x3e << 26)) == 26u << 26 /* xori,xoris */
+	       || (insn & (0x3e << 26)) == 28u << 26 /* andi,andis */))
+    {
+      insn &= ~(0x1f << 21);
+      insn |= (insn & (0x1f << 16)) << 5;
+      if ((insn & (0x3e << 26)) == 26 << 26 /* xori,xoris */)
+	insn -= 2 >> 26;  /* convert to ori,oris */
+    }
+  else
+    insn = 0;
+  return insn;
+}
+
 /* The RELOCATE_SECTION function is called by the ELF backend linker
    to handle the relocations for a section.
 
@@ -7471,6 +7516,21 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_TPREL16_LO:
 	case R_PPC_TPREL16_HI:
 	case R_PPC_TPREL16_HA:
+	  if (h != NULL
+	      && h->root.type == bfd_link_hash_undefweak
+	      && h->dynindx == -1)
+	    {
+	      /* Make this relocation against an undefined weak symbol
+		 resolve to zero.  This is really just a tweak, since
+		 code using weak externs ought to check that they are
+		 defined before using them.  */
+	      bfd_byte *p = contents + rel->r_offset - d_offset;
+	      unsigned int insn = bfd_get_32 (output_bfd, p);
+	      insn = _bfd_elf_ppc_at_tprel_transform (insn, 2);
+	      if (insn != 0)
+		bfd_put_32 (output_bfd, insn, p);
+	      break;
+	    }
 	  addend -= htab->elf.tls_sec->vma + TP_OFFSET;
 	  /* The TPREL16 relocs shouldn't really be used in shared
 	     libs as they will result in DT_TEXTREL being set, but
