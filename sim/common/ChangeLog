@@ -1,3 +1,9 @@
+2010-01-24  Doug Evans  <dje@sebabeach.org>
+
+	* Make-common.in (CGEN_SIM_DEPS): Define.
+	(CGEN_INCLUDE_DEPS): Use it.
+	(CGEN_MAIN_CPU_DEPS): Simplify.
+
 2010-01-22  Doug Evans  <dje@sebabeach.org>
 
 	* cgen-ops.h (SUBWORDXFSI): Fix word ordering.

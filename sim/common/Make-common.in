@@ -181,14 +181,21 @@ SIM_NEW_COMMON_OBJS = \
 	\
 	$(SIM_HW_OBJS) \
 
+# cgen-sim.h and the headers it includes
+CGEN_SIM_DEPS = \
+	$(srccom)/cgen-sim.h \
+	$(srccom)/cgen-defs.h \
+	$(srccom)/cgen-scache.h \
+	$(srccom)/cgen-fpu.h \
+	$(srccom)/cgen-par.h \
+	$(srccom)/cgen-cpu.h \
+	$(srccom)/cgen-trace.h \
+	cpuall.h
+
 # Add this to SIM_EXTRA_DEPS.
 CGEN_INCLUDE_DEPS = \
-	$(srccom)/cgen-cpu.h \
-	$(srccom)/cgen-defs.h \
+	$(CGEN_SIM_DEPS) \
 	$(srccom)/cgen-engine.h \
-	$(srccom)/cgen-scache.h \
-	$(srccom)/cgen-sim.h \
-	$(srccom)/cgen-trace.h \
 	$(srccom)/cgen-types.h \
 	$(srcdir)/../../include/opcode/cgen.h
 
@@ -590,11 +597,8 @@ nrun.o: $(srccom)/nrun.c config.h tconfig.h $(remote_sim_h) $(callback_h) \
 # For use in Makefile.in for cpu-specific files.
 CGEN_MAIN_CPU_DEPS = \
 	$(SIM_MAIN_DEPS) \
-	$(CGEN_INCLUDE_DEPS) \
 	$(srccom)/cgen-ops.h \
-	$(srccom)/cgen-mem.h \
-	$(srccom)/cgen-par.h \
-	$(srccom)/cgen-fpu.h
+	$(srccom)/cgen-mem.h
 
 cgen-run.o: $(srccom)/cgen-run.c $(sim_main_headers)
 	$(CC) -c $(srccom)/cgen-run.c $(ALL_CFLAGS)
