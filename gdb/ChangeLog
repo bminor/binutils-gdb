@@ -1,3 +1,9 @@
+2010-01-25  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/11049:
+	* c-valprint.c (c_val_print): Fix test of extract_unsigned_integer
+	result.
+
 2010-01-25  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* configure.ac: Only use host_os part when disabling TUI on osf.

@@ -1,3 +1,9 @@
+2010-01-25  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/11049:
+	* gdb.base/printcmds.exp (test_print_typedef_arrays): Add test
+	with "set print null-stop on".
+
 2010-01-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.arch/i386-bp_permanent.exp (Disassemble function '$function'):

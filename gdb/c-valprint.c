@@ -191,7 +191,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 			&& temp_len < options->print_max
 			&& extract_unsigned_integer (valaddr + embedded_offset
 						     + temp_len * eltlen,
-						     eltlen, byte_order) == 0);
+						     eltlen, byte_order) != 0);
 		       ++temp_len)
 		    ;
 		  len = temp_len;
