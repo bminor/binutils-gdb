@@ -1,5 +1,18 @@
 2010-01-25  Alan Modra  <amodra@gmail.com>
 
+	PR ld/11217
+	* elf64-ppc.c (ppc64_elf_tls_optimize): Optimize tls sequences
+	with relocations against undefined weak symbols.
+	(ppc64_elf_relocate_section): Don't optimize calls to undefined
+	weak functions if the symbol is dynamic.
+	(ppc64_elf_relocate_section): Edit tprel tls sequences.
+	* elf32-ppc.c (ppc_elf_relocate_section): Likewise.
+	(_bfd_elf_ppc_at_tprel_transform): New function.
+	* bfd-in.h (_bfd_elf_ppc_at_tprel_transform): Declare.
+	* bfd-in2.h: Regenerate.
+
+2010-01-25  Alan Modra  <amodra@gmail.com>
+
 	2009-12-11  Nick Clifton  <nickc@redhat.com>
 	* elf32-ppc.c: Fix shadowed variable warnings.
 	* elf64-ppc.c: Likewise.

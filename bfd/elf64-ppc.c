@@ -7409,10 +7409,13 @@ ppc64_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 
 		  if (h != NULL)
 		    {
-		      if (h->root.type != bfd_link_hash_defined
-			  && h->root.type != bfd_link_hash_defweak)
+		      if (h->root.type == bfd_link_hash_defined
+			  || h->root.type == bfd_link_hash_defweak)
+			value = h->root.u.def.value;
+		      else if (h->root.type == bfd_link_hash_undefweak)
+			value = 0;
+		      else
 			continue;
-		      value = h->root.u.def.value;
 		    }
 		  else
 		    /* Symbols referenced by TLS relocs must be of type
@@ -7425,11 +7428,17 @@ ppc64_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 		      || !h->def_dynamic)
 		    {
 		      is_local = TRUE;
-		      value += sym_sec->output_offset;
-		      value += sym_sec->output_section->vma;
-		      value -= htab->elf.tls_sec->vma;
-		      ok_tprel = (value + TP_OFFSET + ((bfd_vma) 1 << 31)
-				  < (bfd_vma) 1 << 32);
+		      if (h != NULL
+			  && h->root.type == bfd_link_hash_undefweak)
+			ok_tprel = TRUE;
+		      else
+			{
+			  value += sym_sec->output_offset;
+			  value += sym_sec->output_section->vma;
+			  value -= htab->elf.tls_sec->vma;
+			  ok_tprel = (value + TP_OFFSET + ((bfd_vma) 1 << 31)
+				      < (bfd_vma) 1 << 32);
+			}
 		    }
 
 		  r_type = ELF64_R_TYPE (rel->r_info);
@@ -11498,6 +11507,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	     checking whether the function is defined.  */
 	  else if (h != NULL
 		   && h->elf.root.type == bfd_link_hash_undefweak
+		   && h->elf.dynindx == -1
 		   && r_type == R_PPC64_REL24
 		   && relocation == 0
 		   && addend == 0)
@@ -11833,6 +11843,22 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_TPREL16_HIGHERA:
 	case R_PPC64_TPREL16_HIGHEST:
 	case R_PPC64_TPREL16_HIGHESTA:
+	  if (h != NULL
+	      && h->elf.root.type == bfd_link_hash_undefweak
+	      && h->elf.dynindx == -1)
+	    {
+	      /* Make this relocation against an undefined weak symbol
+		 resolve to zero.  This is really just a tweak, since
+		 code using weak externs ought to check that they are
+		 defined before using them.  */
+	      bfd_byte *p = contents + rel->r_offset - d_offset;
+
+	      insn = bfd_get_32 (output_bfd, p);
+	      insn = _bfd_elf_ppc_at_tprel_transform (insn, 13);
+	      if (insn != 0)
+		bfd_put_32 (output_bfd, insn, p);
+	      break;
+	    }
 	  addend -= htab->elf.tls_sec->vma + TP_OFFSET;
 	  if (info->shared)
 	    /* The TPREL16 relocs shouldn't really be used in shared
