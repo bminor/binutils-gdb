@@ -4587,7 +4587,9 @@ Arm_exidx_merged_section::do_output_offset(
       || shndx != this->exidx_input_section_.shndx())
     return false;
 
-  if (offset < 0 || offset >= this->exidx_input_section_.size())
+  section_offset_type section_size =
+    convert_types<section_offset_type>(this->exidx_input_section_.size());
+  if (offset < 0 || offset >= section_size)
     // Input offset is out of valid range.
     *poutput = -1;
   else

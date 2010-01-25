@@ -1,3 +1,8 @@
+2010-01-25  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_exidx_merged_section::do_output_offset):
+	Fix warning due to signed and unsigned comparison on a 32-bit host.
+
 2010-01-22  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Target_arm::do_relax): Record an output section for section
