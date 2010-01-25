@@ -536,7 +536,7 @@ close_map (struct read_map_ctxt *ctxt)
 static struct so_list *
 osf_current_sos (void)
 {
-  struct so_list *head = NULL, *tail, *newtail, so;
+  struct so_list *head = NULL, *tail = NULL, *newtail, so;
   struct read_map_ctxt ctxt;
   int skipped_main;
 

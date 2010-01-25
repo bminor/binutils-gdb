@@ -1,3 +1,11 @@
+2010-01-25  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* configure.ac: Only use host_os part when disabling TUI on osf.
+	Use test to check variables, prefix strings with x.
+	* configure: Regenerate.
+
+	* solib-osf.c (osf_current_sos): Initialize tail.
+
 2010-01-25  gingold  <gingold@adacore.com>
 
         * windows-nat.c (windows_continue): Use %x to print thread id.

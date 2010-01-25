@@ -447,11 +447,11 @@ AM_ICONV
 # broken on alpha-osf.
 
 case $host_os in
-  alpha*-*-osf* )
-    if "$enable_tui" = "yes"; then
+  osf* )
+    if test x"$enable_tui" = xyes; then
       AC_MSG_ERROR([Building GDB with TUI mode is not supported on this host])
     fi
-    if "$enable_tui" = "auto"; then
+    if test x"$enable_tui" = xauto; then
       enable_tui=no
     fi
     ;;
