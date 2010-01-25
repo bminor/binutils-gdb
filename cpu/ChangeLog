@@ -1,3 +1,10 @@
+2010-01-24  Doug Evans  <dje@sebabeach.org>
+
+	* frv.cpu (floating-point-conversion): Update call to fp conv op.
+	(floating-point-dual-conversion, ne-floating-point-dual-conversion,
+	conditional-floating-point-conversion, ne-floating-point-conversion,
+	float-parallel-mul-add-double-semantics): Ditto.
+
 2010-01-05  Doug Evans  <dje@sebabeach.org>
 
 	* m32c.cpu (f-dsp-32-u24): Fix mode of extract handler.
