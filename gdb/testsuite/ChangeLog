@@ -1,3 +1,9 @@
+2010-01-26  Tom Tromey  <tromey@redhat.com>
+
+	PR exp/7643:
+	* gdb.base/printcmds.exp (test_print_string_constants): Remove
+	setup_kfail.
+
 2010-01-14  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* gdb.cp/nsrecurs.exp: New test.

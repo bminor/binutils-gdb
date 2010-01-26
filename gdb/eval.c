@@ -2629,7 +2629,7 @@ evaluate_subexp_for_address (struct expression *exp, int *pos,
 	  goto default_case_after_eval;
 	}
 
-      return x;
+      return coerce_array (x);
 
     case UNOP_MEMVAL:
       (*pos) += 3;

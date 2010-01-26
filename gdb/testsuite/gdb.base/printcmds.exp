@@ -647,7 +647,6 @@ proc test_print_string_constants {} {
     gdb_test "p *\"foo\""		" = 102 'f'"
     gdb_test "ptype *\"foo\""		" = char"
     gdb_test "p &*\"foo\""		" = \"foo\""
-    setup_kfail "gdb/538" *-*-*
     gdb_test "ptype &*\"foo\""	"type = char \\*"
     gdb_test "p (char *)\"foo\""	" = \"foo\""
 }

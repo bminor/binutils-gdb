@@ -1,3 +1,9 @@
+2010-01-26  Tom Tromey  <tromey@redhat.com>
+
+	PR exp/7643:
+	* eval.c (evaluate_subexp_for_address) <UNOP_IND>: Call
+	coerce_array on result.
+
 2010-01-26  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* cp-namespace.c (cp_lookup_symbol_namespace): Added
