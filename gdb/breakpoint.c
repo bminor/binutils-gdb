@@ -3668,7 +3668,6 @@ bpstat_stop_status (struct address_space *aspace,
     }
 
   bs->next = NULL;		/* Terminate the chain */
-  bs = root_bs->next;		/* Re-grab the head of the chain */
 
   /* If we aren't stopping, the value of some hardware watchpoint may
      not have changed, but the intermediate memory locations we are
