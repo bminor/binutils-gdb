@@ -1,3 +1,35 @@
+namespace O
+{
+  int ox = 4;
+}
+
+namespace PQ
+{
+  int marker6 ()
+  {
+    return 0;
+  }
+}
+
+namespace P
+{
+  using namespace O;
+}
+
+//--------------
+namespace C
+{
+  int cc = 3;
+}
+
+using namespace C;
+int marker5 ()
+{
+  cc;
+  return PQ::marker6 ();
+}
+
+
 namespace A
 {
   int _a = 1;
@@ -6,7 +38,7 @@ namespace A
 
 int marker4(){
 	using A::x;
-	return 0;
+	return marker5 ();
 }
 
 int marker3(){
@@ -34,7 +66,7 @@ int marker1()
       }
     }
   }
-  return total;
+  return marker2() + total;
 }
 
 int main()

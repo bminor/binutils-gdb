@@ -28,6 +28,11 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
     return -1
 }
 
+if [get_compiler_info ${binfile}] {
+    return -1
+}
+
+
 # Get things started.
 
 gdb_exit
@@ -73,7 +78,13 @@ gdb_test "print B::a" "= 1"
 gdb_breakpoint "marker3"
 gdb_continue_to_breakpoint "marker3"
 
-gdb_test "print _a" "No symbol \"_a\" in current context." "Print a without import"
+# gcc-4-3 puts import statements for aliases in
+# the global scope instead of the corresponding
+# function scope. These wrong import statements throw
+# this test off. This is fixed in gcc-4-4.
+if [test_compiler_info gcc-4-3-*] then { setup_xfail *-*-* }
+
+gdb_test "print _a" "No symbol \"_a\" in current context." "Print _a without import"
 
 ############################################
 # Test printing of individually imported elements
@@ -85,3 +96,25 @@ if ![runto marker4] then {
 }
 
 gdb_test "print x" "= 2"
+
+############################################
+# test printing of namespace imported into
+# file scope.
+
+if ![runto marker5] then {
+    perror "couldn't run to marker5"
+    continue
+}
+
+gdb_test "print cc" "= 3"
+
+############################################
+# test printing of namespace imported into
+# file scope.
+
+if ![runto PQ::marker6] then {
+    perror "couldn't run to PQ::marker6"
+    continue
+}
+
+gdb_test "print ox" "No symbol \"ox\" in current context."

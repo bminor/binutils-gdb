@@ -1,3 +1,18 @@
+2010-01-26  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	PR gdb/10929:
+	* dwarf2read.c (read_lexical_block_scope): Create blocks for
+	scopes which contain using directives even if they contain no
+	declarations.
+	* symtab.c (lookup_symbol_aux): Pass lowest level block to
+	la_lookup_symbol_nonlocal.
+	* cp-namespace.c (cp_lookup_symbol_nonlocal): call
+	cp_lookup_symbol_namespace.
+	(cp_lookup_symbol_namespace): Perform an import lookup at every
+	block level.
+	(cp_lookup_symbol_imports): New function.
+	(cp_lookup_symbol_in_namespace): New function.
+
 2010-01-25  Tom Tromey  <tromey@redhat.com>
 
 	PR gdb/11049:

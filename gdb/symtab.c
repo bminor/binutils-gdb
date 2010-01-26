@@ -1367,13 +1367,14 @@ lookup_symbol_aux (const char *name, const char *linkage_name,
       && block != NULL)
     {
       struct symbol *sym = NULL;
+      const struct block *function_block = block;
       /* 'this' is only defined in the function's block, so find the
 	 enclosing function block.  */
-      for (; block && !BLOCK_FUNCTION (block);
-	   block = BLOCK_SUPERBLOCK (block));
+      for (; function_block && !BLOCK_FUNCTION (function_block);
+	   function_block = BLOCK_SUPERBLOCK (function_block));
 
-      if (block && !dict_empty (BLOCK_DICT (block)))
-	sym = lookup_block_symbol (block, langdef->la_name_of_this,
+      if (function_block && !dict_empty (BLOCK_DICT (function_block)))
+	sym = lookup_block_symbol (function_block, langdef->la_name_of_this,
 				   NULL, VAR_DOMAIN);
       if (sym)
 	{

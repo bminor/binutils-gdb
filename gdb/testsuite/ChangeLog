@@ -1,3 +1,14 @@
+2010-01-26  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* gdb.cp/namespace-using.exp: Add test for printing of namespaces
+	imported into file scope.
+	Marked test as xfail.
+	* gdb.cp/namespace-using.cc (marker5): New function.
+	* gdb.cp/shadow.exp: New test.
+	* gdb.cp/shadow.cc: New test program.
+	* gdb.cp/nsimport.exp: New test.
+	* gdb.cp/nsimport.cc: New test program.
+
 2010-01-25  Tom Tromey  <tromey@redhat.com>
 
 	PR gdb/11049:

@@ -3952,7 +3952,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
     }
   new = pop_context ();
 
-  if (local_symbols != NULL)
+  if (local_symbols != NULL || using_directives != NULL)
     {
       struct block *block
         = finish_block (0, &local_symbols, new->old_blocks, new->start_addr,
