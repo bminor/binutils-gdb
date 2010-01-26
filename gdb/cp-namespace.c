@@ -215,6 +215,7 @@ cp_add_using (const char *dest,
   retval->import_src = savestring (src, strlen(src));
   retval->import_dest = savestring (dest, strlen(dest));
   retval->next = next;
+  retval->searched = 0;
 
   return retval;
 }
@@ -240,7 +241,8 @@ cp_lookup_symbol_nonlocal (const char *name,
   if (sym != NULL)
     return sym;
 
-  return cp_lookup_symbol_namespace (scope, name, linkage_name, block, domain);
+  return cp_lookup_symbol_namespace (scope, name, linkage_name, block, domain,
+                                     1);
 }
 
 /* Look up NAME in the C++ namespace NAMESPACE. Other arguments are as in
@@ -270,19 +272,46 @@ cp_lookup_symbol_in_namespace (const char *namespace,
     }
 }
 
+/* Used for cleanups to reset the "searched" flag incase
+   of an error.  */
+
+static void
+reset_directive_searched (void *data)
+{
+  struct using_direct *direct = data;
+  direct->searched = 0;
+}
+
 /* Search for NAME by applying all import statements belonging
-   to BLOCK which are applicable in SCOPE.  */
+   to BLOCK which are applicable in SCOPE.
+   If SEARCH_PARENTS the search will include imports which are applicable in
+   parents of SCOPE.
+   Example:
+
+     namespace A{
+       using namespace X;
+       namespace B{
+         using namespace Y;
+       }
+     }
+
+   If SCOPE is "A::B" and SEARCH_PARENTS is true the imports of namespaces X
+   and Y will be considered. If SEARCH_PARENTS is false only the import of Y
+   is considered.  */
 
 static struct symbol *
 cp_lookup_symbol_imports (const char *scope,
                           const char *name,
                           const char *linkage_name,
                           const struct block *block,
-                          const domain_enum domain)
+                          const domain_enum domain,
+                          const int search_parents)
 {
-  const struct using_direct *current;
+  struct using_direct *current;
   struct symbol *sym;
   int len;
+  int directive_match;
+  struct cleanup *searched_cleanup;
 
   /* First, try to find the symbol in the given namespace.  */
   sym = cp_lookup_symbol_in_namespace (scope, name, linkage_name, block,
@@ -298,23 +327,40 @@ cp_lookup_symbol_imports (const char *scope,
        current != NULL;
        current = current->next)
     {
+      len = strlen (current->import_dest);
+      directive_match = (search_parents
+                         ? (strncmp (scope, current->import_dest,
+                                     strlen (current->import_dest)) == 0
+                            && (len == 0
+                                || scope[len] == ':' || scope[len] == '\0'))
+                         : strcmp (scope, current->import_dest) == 0);
 
       /* If the import destination is the current scope or one of its ancestors then
          it is applicable.  */
-      len = strlen (current->import_dest);
-      if (strncmp (scope, current->import_dest, len) == 0
-	  && (len == 0 || scope[len] == ':' || scope[len] == '\0'))
+      if (directive_match && !current->searched)
 	{
-	  sym = cp_lookup_symbol_in_namespace (current->import_src, name,
-					       linkage_name, block, domain);
-	  if (sym != NULL)
-	    return sym;
+	/* Mark this import as searched so that the recursive call does not
+           search it again.  */
+	current->searched = 1;
+	searched_cleanup = make_cleanup (reset_directive_searched, current);
+
+	sym = cp_lookup_symbol_namespace (current->import_src,
+	                                  name,
+	                                  linkage_name,
+	                                  block,
+	                                  domain,
+	                                  0);
+
+	current->searched = 0;
+	discard_cleanups (searched_cleanup);
+
+	if (sym != NULL)
+	  return sym;
 	}
     }
 
   return NULL;
 }
-
 
  /* Searches for NAME in the current namespace, and by applying relevant import
     statements belonging to BLOCK and its parents. SCOPE is the namespace scope
@@ -325,14 +371,16 @@ cp_lookup_symbol_namespace (const char *scope,
                             const char *name,
                             const char *linkage_name,
                             const struct block *block,
-                            const domain_enum domain)
+                            const domain_enum domain,
+                            const int search_parents)
 {
   struct symbol *sym;
 
   /* Search for name in namespaces imported to this and parent blocks.  */
   while (block != NULL)
     {
-      sym = cp_lookup_symbol_imports (scope,name, linkage_name, block, domain);
+      sym = cp_lookup_symbol_imports (scope, name, linkage_name, block, domain,
+                                      search_parents);
 
       if (sym)
 	return sym;

@@ -47,6 +47,9 @@ struct using_direct
   char *import_src;
   char *import_dest;
   struct using_direct *next;
+
+  /* Used during import search to temporarily mark this node as searched.  */
+  int searched;
 };
 
 
@@ -107,7 +110,8 @@ extern struct symbol *cp_lookup_symbol_namespace (const char *namespace,
 						  const char *name,
 						  const char *linkage_name,
 						  const struct block *block,
-						  const domain_enum domain);
+						  const domain_enum domain,
+						  const int search_parents);
 
 extern struct type *cp_lookup_nested_type (struct type *parent_type,
 					   const char *nested_name,

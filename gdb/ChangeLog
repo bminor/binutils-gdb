@@ -1,5 +1,18 @@
 2010-01-26  Sami Wagiaalla  <swagiaal@redhat.com>
 
+	* cp-namespace.c (cp_lookup_symbol_namespace): Added
+	search_parent argument.
+	(cp_add_using): Initialize 'searched' field.
+	(reset_directive_searched): New function.
+	* cp-support.h: Add 'searched' field to using_direct struct.
+	(cp_lookup_symbol_imports): Ditto.
+	* cp-namespace.c (cp_lookup_symbol_imports): Ditto.
+	Perform recursive search.
+	Implement non parent search.
+	* valops.c (value_maybe_namespace_elt): Updated.
+
+2010-01-26  Sami Wagiaalla  <swagiaal@redhat.com>
+
 	PR gdb/10929:
 	* dwarf2read.c (read_lexical_block_scope): Create blocks for
 	scopes which contain using directives even if they contain no

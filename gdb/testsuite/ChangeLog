@@ -1,3 +1,12 @@
+2010-01-14  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* gdb.cp/nsrecurs.exp: New test.
+	* gdb.cp/nsrecurs.cc: New test program.
+	* gdb.cp/nsstress.exp: New test.
+	* gdb.cp/nsstress.cc: New test program.
+	* gdb.cp/nsdecl.exp: New test.
+	* gdb.cp/nsdecl.cc: New test program.
+
 2010-01-26  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* gdb.cp/namespace-using.exp: Add test for printing of namespaces
