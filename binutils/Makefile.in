@@ -1221,8 +1221,8 @@ sysinfo.o: sysinfo.c
 	  $(CC_FOR_BUILD) -c -I. $(AM_CFLAGS) $(CFLAGS_FOR_BUILD) $(NO_WERROR) $(srcdir)/sysinfo.c ; \
 	fi
 
-bin2c$(EXEEXT_FOR_BUILD):
-	$(CC_FOR_BUILD) -o $@ $(AM_CPPFLAGS) $(AM_CFLAGS) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) $(srcdir)/bin2c.c $(srcdir)/version.c
+bin2c$(EXEEXT_FOR_BUILD): $(LIBINTL_DEP)
+	$(CC_FOR_BUILD) -o $@ $(AM_CPPFLAGS) $(AM_CFLAGS) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) $(srcdir)/bin2c.c $(srcdir)/version.c $(LIBINTL)
 
 embedspu: embedspu.sh
 	sed "s@^program_transform_name=@program_transform_name=$(program_transform_name)@" < $< > $@

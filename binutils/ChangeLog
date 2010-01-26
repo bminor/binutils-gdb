@@ -1,3 +1,8 @@
+2010-01-26  Tristan Gingold  <gingold@adacore.com>
+
+	* Makefile.am (bin2c): Add libintl dependance and library.
+	* Makefile.in: Regenerate.
+
 2010-01-21  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 	
 	* readelf.c (get_machine_flags): Handle EF_S390_HIGH_GPRS.
