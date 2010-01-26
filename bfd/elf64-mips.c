@@ -3313,6 +3313,7 @@ extern bfd_boolean bfd_elf64_archive_write_armap
 #define bfd_elf64_archive_truncate_arname \
 			_bfd_archive_coff_truncate_arname
 #define bfd_elf64_archive_read_ar_hdr	_bfd_archive_coff_read_ar_hdr
+#define bfd_elf64_archive_write_ar_hdr	_bfd_archive_coff_write_ar_hdr
 #define bfd_elf64_archive_openr_next_archived_file \
 			_bfd_archive_coff_openr_next_archived_file
 #define bfd_elf64_archive_get_elt_at_index \

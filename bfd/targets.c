@@ -328,6 +328,7 @@ BFD_JUMP_TABLE macros.
 .  NAME##_truncate_arname, \
 .  NAME##_write_armap, \
 .  NAME##_read_ar_hdr, \
+.  NAME##_write_ar_hdr, \
 .  NAME##_openr_next_archived_file, \
 .  NAME##_get_elt_at_index, \
 .  NAME##_generic_stat_arch_elt, \
@@ -341,6 +342,7 @@ BFD_JUMP_TABLE macros.
 .  bfd_boolean (*write_armap)
 .    (bfd *, unsigned int, struct orl *, unsigned int, int);
 .  void *      (*_bfd_read_ar_hdr_fn) (bfd *);
+.  bfd_boolean (*_bfd_write_ar_hdr_fn) (bfd *, bfd *);
 .  bfd *       (*openr_next_archived_file) (bfd *, bfd *);
 .#define bfd_get_elt_at_index(b,i) BFD_SEND (b, _bfd_get_elt_at_index, (b,i))
 .  bfd *       (*_bfd_get_elt_at_index) (bfd *, symindex);

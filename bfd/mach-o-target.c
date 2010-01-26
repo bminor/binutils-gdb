@@ -25,16 +25,6 @@
 #ifndef MACH_O_TARGET_COMMON_DEFINED
 #define MACH_O_TARGET_COMMON_DEFINED
 
-#define bfd_mach_o_mkarchive                          _bfd_noarchive_mkarchive
-#define bfd_mach_o_read_ar_hdr                        _bfd_noarchive_read_ar_hdr
-#define bfd_mach_o_slurp_armap                        _bfd_noarchive_slurp_armap
-#define bfd_mach_o_slurp_extended_name_table          _bfd_noarchive_slurp_extended_name_table
-#define bfd_mach_o_construct_extended_name_table      _bfd_noarchive_construct_extended_name_table
-#define bfd_mach_o_truncate_arname                    _bfd_noarchive_truncate_arname
-#define bfd_mach_o_write_armap                        _bfd_noarchive_write_armap
-#define bfd_mach_o_get_elt_at_index                   _bfd_noarchive_get_elt_at_index
-#define bfd_mach_o_generic_stat_arch_elt              _bfd_noarchive_generic_stat_arch_elt
-#define bfd_mach_o_update_armap_timestamp             _bfd_noarchive_update_armap_timestamp
 #define bfd_mach_o_close_and_cleanup                  _bfd_generic_close_and_cleanup
 #define bfd_mach_o_bfd_free_cached_info               _bfd_generic_bfd_free_cached_info
 #define bfd_mach_o_new_section_hook                   _bfd_generic_new_section_hook
@@ -176,7 +166,7 @@ const bfd_target TARGET_NAME =
 #if TARGET_ARCHIVE
   BFD_JUMP_TABLE_ARCHIVE (bfd_mach_o),
 #else
-  BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_bsd),
+  BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_bsd44),
 #endif
   BFD_JUMP_TABLE_SYMBOLS (bfd_mach_o),
   BFD_JUMP_TABLE_RELOCS (bfd_mach_o),

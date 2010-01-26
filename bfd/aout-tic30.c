@@ -837,6 +837,9 @@ tic30_aout_set_arch_mach (bfd *abfd,
 #ifndef MY_read_ar_hdr
 #define MY_read_ar_hdr			_bfd_generic_read_ar_hdr
 #endif
+#ifndef MY_write_ar_hdr
+#define MY_write_ar_hdr			_bfd_generic_write_ar_hdr
+#endif
 #ifndef	MY_truncate_arname
 #define	MY_truncate_arname		bfd_bsd_truncate_arname
 #endif

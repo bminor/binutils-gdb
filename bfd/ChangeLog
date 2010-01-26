@@ -1,3 +1,61 @@
+2010-01-26  Tristan Gingold  <gingold@adacore.com>
+
+	* targets.c (BFD_JUMP_TABLE_ARCHIVE): Add initializer for write_ar_hdr.
+	(bfd_target): Add _bfd_write_ar_hdr_fn field.
+	* archive.c (is_bsd44_extended_name): New macro.
+	(_bfd_generic_read_ar_hdr_mag): Use it.  Add extra_size.
+	(bfd_slurp_armap): Also check for "__.SYMDEF" as a BSD4.4 extended
+	name.
+	(_bfd_archive_bsd44_construct_extended_name_table): New function.
+	(_bfd_generic_write_ar_hdr): Ditto.
+	(_bfd_bsd44_write_ar_hdr): Ditto.
+	(_bfd_write_archive_contents): Call _bfd_write_ar_hdr.
+	(bsd_write_armap): Adjust firstreal computation.
+	* libbfd-in.h (struct areltdata): Add extra_size field.
+	(_bfd_generic_write_ar_hdr): Add prototype.
+	(_bfd_bsd44_write_ar_hdr): Ditto.
+	(_bfd_write_ar_hdr): Define.
+	(_bfd_noarchive_write_ar_hdr): Ditto.
+	(_bfd_archive_bsd_write_ar_hdr): Ditto.
+	(_bfd_archive_coff_write_ar_hdr): Ditto.
+	(_bfd_archive_bsd44_slurp_armap): Ditto.
+	(_bfd_archive_bsd44_slurp_extended_name_table): Ditto.
+	(_bfd_archive_bsd44_construct_extended_name_table): New prototype.
+	(_bfd_archive_bsd44_truncate_arname): Ditto.
+	(_bfd_archive_bsd44_write_armap): Ditto.
+	(_bfd_archive_bsd44_read_ar_hdr): Ditto.
+	(_bfd_archive_bsd44_write_ar_hdr): Ditto.
+	(_bfd_archive_bsd44_openr_next_archived_file): Ditto.
+	(_bfd_archive_bsd44_get_elt_at_index): Ditto.
+	(_bfd_archive_bsd44_generic_stat_arch_elt): Ditto.
+	(_bfd_archive_bsd44_update_armap_timestamp): Ditto.
+	* libbfd.h: Regenerate.
+	* oasys.c (oasys_write_ar_hdr): Define.
+	* libecoff.h (_bfd_ecoff_write_ar_hdr): Define.
+	* ieee.c (ieee_write_ar_hdr): Define.
+	* elf64-mips.c (bfd_elf64_archive_write_ar_hdr): Define.
+	* coff-rs6000.c (rs6000coff_vec): Adjust for write_ar_hdr field.
+	(bfd_pmac_xcoff_backend_data): Ditto.
+	* coff64-rs6000.c (rs6000coff64_vec): Ditto.
+	(bfd_xcoff_aix5_backend_data): Ditto.
+	* coff-alpha.c (alpha_ecoff_write_ar_hdr): Define.
+	* aout-target.h (MY_write_ar_hdr): Define it if not defined.
+	* aout-tic30.c (MY_write_ar_hdr): Ditto.
+	* mach-o-target.c (TARGET_NAME): Use _bfd_archive_bsd44 archive.
+	(bfd_mach_o_mkarchive, bfd_mach_o_read_ar_hdr)
+	(bfd_mach_o_slurp_armap, bfd_mach_o_slurp_extended_name_table)
+	(bfd_mach_o_construct_extended_name_table)
+	(bfd_mach_o_truncate_arname, bfd_mach_o_write_armap)
+	(bfd_mach_o_get_elt_at_index, bfd_mach_o_generic_stat_arch_elt)
+	(bfd_mach_o_update_armap_timestamp): Moved to mach-o.c
+	* mach-o.c (bfd_mach_o_mkarchive, bfd_mach_o_read_ar_hdr)
+	(bfd_mach_o_slurp_armap, bfd_mach_o_slurp_extended_name_table)
+	(bfd_mach_o_construct_extended_name_table)
+	(bfd_mach_o_truncate_arname, bfd_mach_o_write_armap)
+	(bfd_mach_o_get_elt_at_index, bfd_mach_o_generic_stat_arch_elt)
+	(bfd_mach_o_update_armap_timestamp): Moved from mach-o-target.c
+	* bfd-in2.h: Regenerate.
+
 2010-01-26  Alan Modra  <amodra@gmail.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 

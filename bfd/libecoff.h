@@ -270,6 +270,7 @@ extern bfd_boolean _bfd_ecoff_slurp_armap (bfd *);
 extern bfd_boolean _bfd_ecoff_write_armap
   (bfd *, unsigned int, struct orl *, unsigned int, int);
 #define _bfd_ecoff_read_ar_hdr _bfd_generic_read_ar_hdr
+#define _bfd_ecoff_write_ar_hdr _bfd_generic_write_ar_hdr
 #define _bfd_ecoff_openr_next_archived_file \
   bfd_generic_openr_next_archived_file
 #define _bfd_ecoff_get_elt_at_index _bfd_generic_get_elt_at_index

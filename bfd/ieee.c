@@ -3743,6 +3743,7 @@ ieee_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
     (bfd *, unsigned int, struct orl *, unsigned int, int)) \
    bfd_true)
 #define ieee_read_ar_hdr bfd_nullvoidptr
+#define ieee_write_ar_hdr ((bfd_boolean (*) (bfd *, bfd *)) bfd_false)
 #define ieee_update_armap_timestamp bfd_true
 #define ieee_get_elt_at_index _bfd_generic_get_elt_at_index
 

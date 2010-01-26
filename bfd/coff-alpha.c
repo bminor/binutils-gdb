@@ -2065,6 +2065,7 @@ alpha_adjust_headers (abfd, fhdr, ahdr)
   _bfd_ecoff_construct_extended_name_table
 #define alpha_ecoff_truncate_arname _bfd_ecoff_truncate_arname
 #define alpha_ecoff_write_armap _bfd_ecoff_write_armap
+#define alpha_ecoff_write_ar_hdr _bfd_generic_write_ar_hdr
 #define alpha_ecoff_generic_stat_arch_elt _bfd_ecoff_generic_stat_arch_elt
 #define alpha_ecoff_update_armap_timestamp _bfd_ecoff_update_armap_timestamp
 

@@ -104,7 +104,6 @@ SUBSECTION
 
    BSD 4.4 uses a third scheme:  It writes a long filename
    directly after the header.  This allows 'ar q' to work.
-   We currently can read BSD 4.4 archives, but not write them.
 */
 
 /* Summary of archive member names:
@@ -125,7 +124,6 @@ SUBSECTION
  "/18             " - SVR4 style, name at offset 18 in name table.
  "#1/23           " - Long name (or embedded spaces) 23 characters long,
 		      BSD 4.4 style, full name follows header.
-		      Implemented for reading, not writing.
  " 18             " - Long name 18 characters long, extended pseudo-BSD.
  */
 
@@ -159,6 +157,11 @@ struct ar_cache {
 
 #define arch_eltdata(bfd) ((struct areltdata *) ((bfd)->arelt_data))
 #define arch_hdr(bfd) ((struct ar_hdr *) arch_eltdata (bfd)->arch_header)
+
+/* True iff NAME designated a BSD 4.4 extended name.  */
+
+#define is_bsd44_extended_name(NAME) \
+  (NAME[0] == '#'  && NAME[1] == '1' && NAME[2] == '/' && ISDIGIT (NAME[3]))
 
 void
 _bfd_ar_spacepad (char *p, size_t n, const char *fmt, long val)
@@ -415,6 +418,7 @@ _bfd_generic_read_ar_hdr_mag (bfd *abfd, const char *mag)
   bfd_size_type allocsize = sizeof (struct areltdata) + sizeof (struct ar_hdr);
   char *allocptr = 0;
   file_ptr origin = 0;
+  unsigned int extra_size = 0;
 
   if (bfd_bread (hdrp, sizeof (struct ar_hdr), abfd) != sizeof (struct ar_hdr))
     {
@@ -450,17 +454,14 @@ _bfd_generic_read_ar_hdr_mag (bfd *abfd, const char *mag)
       if (filename == NULL)
 	return NULL;
     }
-  /* BSD4.4-style long filename.
-     Only implemented for reading, so far!  */
-  else if (hdr.ar_name[0] == '#'
-	   && hdr.ar_name[1] == '1'
-	   && hdr.ar_name[2] == '/'
-	   && ISDIGIT (hdr.ar_name[3]))
+  /* BSD4.4-style long filename.  */
+  else if (is_bsd44_extended_name (hdr.ar_name))
     {
       /* BSD-4.4 extended name */
       namelen = atoi (&hdr.ar_name[3]);
       allocsize += namelen + 1;
       parsed_size -= namelen;
+      extra_size = namelen;
 
       allocptr = (char *) bfd_zalloc (abfd, allocsize);
       if (allocptr == NULL)
@@ -515,6 +516,7 @@ _bfd_generic_read_ar_hdr_mag (bfd *abfd, const char *mag)
   ared->arch_header = allocptr + sizeof (struct areltdata);
   memcpy (ared->arch_header, &hdr, sizeof (struct ar_hdr));
   ared->parsed_size = parsed_size;
+  ared->extra_size = extra_size;
   ared->origin = origin;
 
   if (filename != NULL)
@@ -1069,7 +1071,8 @@ bfd_slurp_armap (bfd *abfd)
         return FALSE;
       if (bfd_seek (abfd, (file_ptr) -(sizeof (hdr) + 20), SEEK_CUR) != 0)
         return FALSE;
-      if (CONST_STRNEQ (extname, "__.SYMDEF SORTED"))
+      if (CONST_STRNEQ (extname, "__.SYMDEF SORTED")
+          || CONST_STRNEQ (extname, "__.SYMDEF"))
         return do_slurp_bsd_armap (abfd);
     }
 
@@ -1599,6 +1602,103 @@ _bfd_construct_extended_name_table (bfd *abfd,
 
   return TRUE;
 }
+
+/* Do not construct an extended name table but transforms name field into
+   its extended form.  */
+
+bfd_boolean
+_bfd_archive_bsd44_construct_extended_name_table (bfd *abfd,
+                                                  char **tabloc,
+                                                  bfd_size_type *tablen,
+                                                  const char **name)
+{
+  unsigned int maxname = abfd->xvec->ar_max_namelen;
+  bfd *current;
+
+  *tablen = 0;
+  *tabloc = NULL;
+  *name = NULL;
+
+  for (current = abfd->archive_head;
+       current != NULL;
+       current = current->archive_next)
+    {
+      const char *normal = normalize (current, current->filename);
+      int has_space = 0;
+      unsigned int len;
+
+      if (normal == NULL)
+	return FALSE;
+
+      for (len = 0; normal[len]; len++)
+        if (normal[len] == ' ')
+          has_space = 1;
+
+      if (len > maxname || has_space)
+	{
+          struct ar_hdr *hdr = arch_hdr (current);
+
+          len = (len + 3) & ~3;
+          arch_eltdata (current)->extra_size = len;
+          _bfd_ar_spacepad (hdr->ar_name, maxname, "#1/%u", len);
+	}
+    }
+
+  return TRUE;
+}
+
+/* Write an archive header.  */
+
+bfd_boolean
+_bfd_generic_write_ar_hdr (bfd *archive, bfd *abfd)
+{
+  struct ar_hdr *hdr = arch_hdr (abfd);
+
+  if (bfd_bwrite (hdr, sizeof (*hdr), archive) != sizeof (*hdr))
+    return FALSE;
+  return TRUE;
+}
+
+/* Write an archive header using BSD4.4 convention.  */
+
+bfd_boolean
+_bfd_bsd44_write_ar_hdr (bfd *archive, bfd *abfd)
+{
+  struct ar_hdr *hdr = arch_hdr (abfd);
+
+  if (is_bsd44_extended_name (hdr->ar_name))
+    {
+      /* This is a BSD 4.4 extended name.  */
+      const char *fullname = normalize (abfd, abfd->filename);
+      unsigned int len = strlen (fullname);
+      unsigned int padded_len = (len + 3) & ~3;
+
+      BFD_ASSERT (padded_len == arch_eltdata (abfd)->extra_size);
+
+      _bfd_ar_spacepad (hdr->ar_size, sizeof (hdr->ar_size), "%-10ld",
+                        arch_eltdata (abfd)->parsed_size + padded_len);
+
+      if (bfd_bwrite (hdr, sizeof (*hdr), archive) != sizeof (*hdr))
+        return FALSE;
+
+      if (bfd_bwrite (fullname, len, archive) != len)
+        return FALSE;
+      if (len & 3)
+        {
+          static const char pad[3] = { 0, 0, 0 };
+
+          len = 4 - (len & 3);
+          if (bfd_bwrite (pad, len, archive) != len)
+            return FALSE;
+        }
+    }
+  else
+    {
+      if (bfd_bwrite (hdr, sizeof (*hdr), archive) != sizeof (*hdr))
+        return FALSE;
+    }
+  return TRUE;
+}
 
 /* A couple of functions for creating ar_hdrs.  */
 
@@ -1957,12 +2057,10 @@ _bfd_write_archive_contents (bfd *arch)
     {
       char buffer[DEFAULT_BUFFERSIZE];
       unsigned int remaining = arelt_size (current);
-      struct ar_hdr *hdr = arch_hdr (current);
 
       /* Write ar header.  */
-      if (bfd_bwrite (hdr, sizeof (*hdr), arch)
-	  != sizeof (*hdr))
-	return FALSE;
+      if (!_bfd_write_ar_hdr (arch, current))
+        return FALSE;
       if (bfd_is_thin_archive (arch))
         continue;
       if (bfd_seek (current, (file_ptr) 0, SEEK_SET) != 0)
@@ -2235,7 +2333,10 @@ bsd_write_armap (bfd *arch,
 	{
 	  do
 	    {
-	      firstreal += arelt_size (current) + sizeof (struct ar_hdr);
+              struct areltdata *ared = arch_eltdata (current);
+
+	      firstreal += (ared->parsed_size + ared->extra_size
+                            + sizeof (struct ar_hdr));
 	      firstreal += firstreal % 2;
 	      current = current->archive_next;
 	    }
