@@ -1888,15 +1888,14 @@ display_uses_solib_p (const struct display *d,
 	{
 	  const struct block *const block = elts[i + 1].block;
 	  const struct symbol *const symbol = elts[i + 2].symbol;
-	  const struct obj_section *const section =
-	    SYMBOL_OBJ_SECTION (symbol);
 
 	  if (block != NULL
 	      && solib_contains_address_p (solib,
 					   block->startaddr))
 	    return 1;
 
-	  if (section && section->objfile == solib->objfile)
+	  /* SYMBOL_OBJ_SECTION (symbol) may be NULL.  */
+	  if (SYMBOL_SYMTAB (symbol)->objfile == solib->objfile)
 	    return 1;
 	}
       endpos -= oplen;

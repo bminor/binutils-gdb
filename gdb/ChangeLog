@@ -1,3 +1,8 @@
+2010-01-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* printcmd.c (display_uses_solib_p): Remove variable section.  Access
+	objfile via SYMBOL_SYMTAB.
+
 2010-01-26  Tom Tromey  <tromey@redhat.com>
 
 	PR exp/7643:
