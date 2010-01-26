@@ -8579,7 +8579,9 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
     {
       /* If we have an undefined symbol reference here then it must have
 	 come from a shared library that is being linked in.  (Undefined
-	 references in regular files have already been handled).  */
+	 references in regular files have already been handled unless
+	 they are in unreferenced sections which are removed by garbage
+	 collection).  */
       bfd_boolean ignore_undef = FALSE;
 
       /* Some symbols may be special in that the fact that they're
@@ -8590,12 +8592,13 @@ elf_link_output_extsym (struct elf_link_hash_entry *h, void *data)
       /* If we are reporting errors for this situation then do so now.  */
       if (ignore_undef == FALSE
 	  && h->ref_dynamic
-	  && ! h->ref_regular
+	  && (!h->ref_regular || finfo->info->gc_sections)
 	  && ! elf_link_check_versioned_symbol (finfo->info, bed, h)
 	  && finfo->info->unresolved_syms_in_shared_libs != RM_IGNORE)
 	{
 	  if (! (finfo->info->callbacks->undefined_symbol
-		 (finfo->info, h->root.root.string, h->root.u.undef.abfd,
+		 (finfo->info, h->root.root.string,
+		  h->ref_regular ? NULL : h->root.u.undef.abfd,
 		  NULL, 0, finfo->info->unresolved_syms_in_shared_libs == RM_GENERATE_ERROR)))
 	    {
 	      eoinfo->failed = TRUE;

@@ -92,3 +92,11 @@ test_gc "Check --gc-section/-r/-u" "gcrel" $ld "-r --gc-sections -u used_func"
 run_dump_test "noent"
 run_dump_test "abi-note"
 run_dump_test "start"
+if { [is_remote host] || [which $CC] != 0 } {
+    if { [istarget "*-*-linux*"] } {
+	ld_compile "$CC -fPIC $CFLAGS $cflags" $srcdir/$subdir/pr11218-1.c tmpdir/pr11218-1.o
+	ld_simple_link $ld tmpdir/pr11218-1.so "-shared tmpdir/pr11218-1.o"
+ 	ld_compile "$CC -c $CFLAGS $cflags" $srcdir/$subdir/pr11218-2.c tmpdir/pr11218-2.o
+	run_dump_test "pr11218"
+    }
+}

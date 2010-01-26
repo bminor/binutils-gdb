@@ -1,3 +1,10 @@
+2010-01-26  Alan Modra  <amodra@gmail.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/11218
+	* elflink.c (elf_link_output_extsym): Do not ignore undefined
+	symbols with ref_regular set when gc_sections is active.
+
 2010-01-25  Alan Modra  <amodra@gmail.com>
 
 	PR ld/11217

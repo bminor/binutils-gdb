@@ -1,3 +1,11 @@
+2010-01-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/11218
+	* ld-gc/dummy.s: New.
+	* ld-gc/pr11218-1.c: Likewise.
+	* ld-gc/pr11218-2.c: Likewise.
+	* ld-gc/pr11218.d: Likewise.
+
 2010-01-23  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
 	* ld-powerpc/aix-ref-1-32.od, ld-powerpc/aix-ref-1-64.od,
