@@ -1,3 +1,36 @@
+2010-01-26  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (set): Include.
+	(class Arm_exidx_fixup): Change type of last_input_section_ to const
+	pointer type.
+ 	(Arm_output_section::Text_section_list): New type.
+	(Arm_output_section::append_text_sections_to_list): New method.
+	(Arm_output_section::fix_exidx_coverage): Ditto.
+	(Arm_relobj::Arm_relobj): Initialize exidx_section_map_.
+   	(Arm_relobj::convert_input_section_to_relaxed_section): Use
+	Relobj::set_section_offset() instead of
+	Sized_relobj::invalidate_section_offset().
+   	(Arm_relobj::section_needs_reloc_stub_scanning): Add an extra
+	parameter for section headers. Ignore relocation sections for
+	unallocated sections and EXIDX sections.
+	(Target_arm::fix_exidx_coverage): New method.
+	(Target_arm::output_section_address_less_than): New type.
+	(Arm_exidx_fixup::add_exidx_cantunwind_as_needed): Use index of the
+	linked text section instead of the EXIDX section.
+	(Arm_output_section::create_stub_group): Add an assertion to check
+	that this is not an EXIDX output section.
+	(Arm_output_section::append_text_sections_to_list): New method.
+	(Arm_output_section::fix_exidx_coverage): Ditto.
+	(Arm_relobj::scan_sections_for_stubs): Adjust call to
+   	Arm_relobj::section_needs_reloc_stub_scanning.
+	(Target_arm::do_relax): Fix EXIDX output section coverage in the
+	first pass.
+	(Target_arm::fix_exidx_coverage): New method.
+	* object.h (Relobj::set_output_section): New method.
+	(Sized_relobj::invalidate_section_offset): Remove method.
+	(Sized_relobj::do_invalidate_section_offset): Remove method.
+	(Sized_relobj::do_set_section_offset): Handle offset value -1.
+
 2010-01-25  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_exidx_merged_section::do_output_offset):

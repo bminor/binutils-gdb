@@ -747,6 +747,16 @@ class Relobj : public Object
     return this->output_sections_[shndx];
   }
 
+  // The the output section of the input section with index SHNDX.
+  // This is only used currently to remove a section from the link in
+  // relaxation.
+  void
+  set_output_section(unsigned int shndx, Output_section* os)
+  {
+    gold_assert(shndx < this->output_sections_.size());
+    this->output_sections_[shndx] = os;
+  }
+  
   // Given a section index, return the offset in the Output_section.
   // The return value will be -1U if the section is specially mapped,
   // such as a merge section.
@@ -1484,11 +1494,6 @@ class Sized_relobj : public Relobj
   Address
   map_to_kept_section(unsigned int shndx, bool* found) const;
 
-  // Make section offset invalid.  This is needed for relaxation.
-  void
-  invalidate_section_offset(unsigned int shndx)
-  { this->do_invalidate_section_offset(shndx); }
-
  protected:
   // Set up.
   virtual void
@@ -1626,15 +1631,10 @@ class Sized_relobj : public Relobj
   do_set_section_offset(unsigned int shndx, uint64_t off)
   {
     gold_assert(shndx < this->section_offsets_.size());
-    this->section_offsets_[shndx] = convert_types<Address, uint64_t>(off);
-  }
-
-  // Set the offset of a section to invalid_address.
-  virtual void
-  do_invalidate_section_offset(unsigned int shndx)
-  {
-    gold_assert(shndx < this->section_offsets_.size());
-    this->section_offsets_[shndx] = invalid_address;
+    this->section_offsets_[shndx] =
+      (off == static_cast<uint64_t>(-1)
+       ? invalid_address
+       : convert_types<Address, uint64_t>(off));
   }
 
   // Adjust a section index if necessary.
