@@ -3732,6 +3732,8 @@ struct ppc_link_hash_table
 
   /* Temp used when calculating TOC pointers.  */
   bfd_vma toc_curr;
+  bfd *toc_bfd;
+  asection *toc_first_sec;
 
   /* Highest input section id.  */
   int top_id;
@@ -9612,6 +9614,8 @@ ppc64_elf_setup_section_lists (bfd *output_bfd,
     htab->stub_group[id].toc_off = TOC_BASE_OFF;
 
   elf_gp (output_bfd) = htab->toc_curr = ppc64_elf_toc (output_bfd);
+  htab->toc_bfd = NULL;
+  htab->toc_first_sec = NULL;
 
   /* We can't use output_bfd->section_count here to find the top output
      section index as some sections may have been removed, and
@@ -9646,11 +9650,21 @@ ppc64_elf_next_toc_section (struct bfd_link_info *info, asection *isec)
 
   if (!htab->no_multi_toc)
     {
-      bfd_vma addr = isec->output_offset + isec->output_section->vma;
-      bfd_vma off = addr - htab->toc_curr;
+      bfd_vma addr, off;
 
+      if (htab->toc_bfd != isec->owner)
+	{
+	  htab->toc_bfd = isec->owner;
+	  htab->toc_first_sec = isec;
+	}
+      addr = isec->output_offset + isec->output_section->vma;
+      off = addr - htab->toc_curr;
       if (off + isec->size > 0x10000)
-	htab->toc_curr = addr;
+	{
+	  addr = (htab->toc_first_sec->output_offset
+		  + htab->toc_first_sec->output_section->vma);
+	  htab->toc_curr = addr;
+	}
 
       elf_gp (isec->owner) = (htab->toc_curr
 			      - elf_gp (isec->output_section->owner)
@@ -11745,10 +11759,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    if (off >= (bfd_vma) -2)
 	      abort ();
 
-	    relocation = got->output_offset + off;
-
-	    /* TOC base (r2) is TOC start plus 0x8000.  */
-	    addend = -TOC_BASE_OFF;
+	    relocation = got->output_section->vma + got->output_offset + off;
+	    addend = -(TOCstart + htab->stub_group[input_section->id].toc_off);
 	  }
 	  break;
 

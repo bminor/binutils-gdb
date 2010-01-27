@@ -1,3 +1,12 @@
+2010-01-27  Alan Modra  <amodra@gmail.com>
+
+	PR ld/11217
+	* elf64-ppc.c (struct ppc_link_hash_table): Add toc_bfd, toc_first_sec.
+	(ppc64_elf_setup_section_lists): Init them.
+	(ppc64_elf_next_toc_section): Don't partition multi-toc between .got
+	and .toc on the same input file.
+	(ppc64_elf_relocate_section): Correct GOT entry offset.
+
 2010-01-25  Alan Modra  <amodra@gmail.com>
 
 	PR ld/11217
