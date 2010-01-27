@@ -4,6 +4,8 @@
 
 2010-01-27  Doug Evans  <dje@google.com>
 
+	* solib-svr4.c (solib_break_names): Add __dl_rtld_db_dlactivity.
+
 	* breakpoint.c (bpstat_stop_status): Delete useless code.
 
 2010-01-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
