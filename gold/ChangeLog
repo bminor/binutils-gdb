@@ -1,3 +1,20 @@
+2010-01-27  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
+
+	* arm.cc: Added support for ARM group relocations.
+	(Target_arm::reloc_needs_sym_origin): New method.
+	(Arm_relocate_functions::calc_grp_kn): New method.
+	(Arm_relocate_functions::calc_grp_residual): New method.
+	(Arm_relocate_functions::calc_grp_gn): New method.
+	(Arm_relocate_functions::arm_grp_alu): New Method.
+	(Arm_relocate_functions::arm_grp_ldr): New Method.
+	(Arm_relocate_functions::arm_grp_ldrs): New Method.
+	(Arm_relocate_functions::arm_grp_ldc): New Method.
+	(Target_arm::Scan::local): Handle the ARM group relocations.
+	(Target_arm::Scan::global): Likewise.
+	(Target_arm::Relocate::relocate): Likewise.
+	(Target_arm::Relocatable_size_for_reloc::get_size_for_reloc):
+	Likewise.
+
 2010-01-26  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (set): Include.

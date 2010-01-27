@@ -1,6 +1,6 @@
 // arm.cc -- arm target support for gold.
 
-// Copyright 2009 Free Software Foundation, Inc.
+// Copyright 2009, 2010 Free Software Foundation, Inc.
 // Written by Doug Kwan <dougkwan@google.com> based on the i386 code
 // by Ian Lance Taylor <iant@google.com>.
 // This file also contains borrowed and adapted code from
@@ -96,48 +96,38 @@ const int32_t THM2_MAX_BWD_BRANCH_OFFSET = (-(1 << 24) + 4);
 // The arm target class.
 //
 // This is a very simple port of gold for ARM-EABI.  It is intended for
-// supporting Android only for the time being.  Only these relocation types
-// are supported.
-//
-// R_ARM_NONE
-// R_ARM_ABS32
-// R_ARM_ABS32_NOI
-// R_ARM_ABS16
-// R_ARM_ABS12
-// R_ARM_ABS8
-// R_ARM_THM_ABS5
-// R_ARM_BASE_ABS
-// R_ARM_REL32
-// R_ARM_THM_CALL
-// R_ARM_COPY
-// R_ARM_GLOB_DAT
-// R_ARM_BASE_PREL
-// R_ARM_JUMP_SLOT
-// R_ARM_RELATIVE
-// R_ARM_GOTOFF32
-// R_ARM_GOT_BREL
-// R_ARM_GOT_PREL
-// R_ARM_PLT32
-// R_ARM_CALL
-// R_ARM_JUMP24
-// R_ARM_TARGET1
-// R_ARM_PREL31
-// R_ARM_ABS8
-// R_ARM_MOVW_ABS_NC
-// R_ARM_MOVT_ABS
-// R_ARM_THM_MOVW_ABS_NC
-// R_ARM_THM_MOVT_ABS
-// R_ARM_MOVW_PREL_NC
-// R_ARM_MOVT_PREL
-// R_ARM_THM_MOVW_PREL_NC
-// R_ARM_THM_MOVT_PREL
-// R_ARM_V4BX
-// R_ARM_THM_JUMP6
-// R_ARM_THM_JUMP8
-// R_ARM_THM_JUMP11
+// supporting Android only for the time being.
 // 
 // TODOs:
-// - Support more relocation types as needed. 
+// - Support the following relocation types as needed:
+//	R_ARM_SBREL32
+//	R_ARM_THM_PC8
+//	R_ARM_LDR_SBREL_11_0_NC
+//	R_ARM_ALU_SBREL_19_12_NC
+//	R_ARM_ALU_SBREL_27_20_CK
+//	R_ARM_SBREL31
+//	R_ARM_THM_ALU_PREL_11_0
+//	R_ARM_THM_PC12
+//	R_ARM_REL32_NOI
+//	R_ARM_MOVW_BREL_NC
+//	R_ARM_MOVT_BREL
+//	R_ARM_MOVW_BREL
+//	R_ARM_THM_MOVW_BREL_NC
+//	R_ARM_THM_MOVT_BREL
+//	R_ARM_THM_MOVW_BREL
+//	R_ARM_PLT32_ABS
+//	R_ARM_GOT_ABS
+//	R_ARM_GOT_BREL12
+//	R_ARM_GOTOFF12
+//	R_ARM_TLS_GD32
+//	R_ARM_TLS_LDM32
+//	R_ARM_TLS_LDO32
+//	R_ARM_TLS_IE32
+//	R_ARM_TLS_LE32
+//	R_ARM_TLS_LDO12
+//	R_ARM_TLS_LE12
+//	R_ARM_TLS_IE12GP
+//
 // - Make PLTs more flexible for different architecture features like
 //   Thumb-2 and BE8.
 // There are probably a lot more.
@@ -2245,6 +2235,47 @@ class Target_arm : public Sized_target<32, big_endian>
 	  return true;
 	}
     }
+
+    // Return whether we need to calculate the addressing origin of
+    // the output segment defining the symbol - B(S).
+    static bool
+    reloc_needs_sym_origin(unsigned int r_type)
+    {
+      switch (r_type)
+	{
+	case elfcpp::R_ARM_SBREL32:
+	case elfcpp::R_ARM_BASE_PREL:
+	case elfcpp::R_ARM_BASE_ABS:
+	case elfcpp::R_ARM_LDR_SBREL_11_0_NC:
+	case elfcpp::R_ARM_ALU_SBREL_19_12_NC:
+	case elfcpp::R_ARM_ALU_SBREL_27_20_CK:
+	case elfcpp::R_ARM_SBREL31:
+	case elfcpp::R_ARM_ALU_SB_G0_NC:
+	case elfcpp::R_ARM_ALU_SB_G0:
+	case elfcpp::R_ARM_ALU_SB_G1_NC:
+	case elfcpp::R_ARM_ALU_SB_G1:
+	case elfcpp::R_ARM_ALU_SB_G2:
+	case elfcpp::R_ARM_LDR_SB_G0:
+	case elfcpp::R_ARM_LDR_SB_G1:
+	case elfcpp::R_ARM_LDR_SB_G2:
+	case elfcpp::R_ARM_LDRS_SB_G0:
+	case elfcpp::R_ARM_LDRS_SB_G1:
+	case elfcpp::R_ARM_LDRS_SB_G2:
+	case elfcpp::R_ARM_LDC_SB_G0:
+	case elfcpp::R_ARM_LDC_SB_G1:
+	case elfcpp::R_ARM_LDC_SB_G2:
+	case elfcpp::R_ARM_MOVW_BREL_NC:
+	case elfcpp::R_ARM_MOVT_BREL:
+	case elfcpp::R_ARM_MOVW_BREL:
+	case elfcpp::R_ARM_THM_MOVW_BREL_NC:
+	case elfcpp::R_ARM_THM_MOVT_BREL:
+	case elfcpp::R_ARM_THM_MOVW_BREL:
+	  return true;
+
+	default:
+	  return false;
+	}
+    }
   };
 
   // A class which returns the size required for a relocation type,
@@ -2555,6 +2586,66 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
     val |= (x & 0x0700) << 4;
     val |= (x & 0x00ff);
     return val;
+  }
+
+  // Calculate the smallest constant Kn for the specified residual.
+  // (see (AAELF 4.6.1.4 Static ARM relocations, Group Relocations, p.32)
+  static uint32_t
+  calc_grp_kn(typename elfcpp::Swap<32, big_endian>::Valtype residual)
+  {
+    int32_t msb;
+
+    if (residual == 0)
+      return 0;
+    // Determine the most significant bit in the residual and
+    // align the resulting value to a 2-bit boundary.
+    for (msb = 30; (msb >= 0) && !(residual & (3 << msb)); msb -= 2)
+      ;
+    // The desired shift is now (msb - 6), or zero, whichever
+    // is the greater.
+    return (((msb - 6) < 0) ? 0 : (msb - 6));
+  }
+
+  // Calculate the final residual for the specified group index.
+  // If the passed group index is less than zero, the method will return
+  // the value of the specified residual without any change.
+  // (see (AAELF 4.6.1.4 Static ARM relocations, Group Relocations, p.32)
+  static typename elfcpp::Swap<32, big_endian>::Valtype
+  calc_grp_residual(typename elfcpp::Swap<32, big_endian>::Valtype residual,
+		    const int group)
+  {
+    for (int n = 0; n <= group; n++)
+      {
+	// Calculate which part of the value to mask.
+	uint32_t shift = calc_grp_kn(residual);
+	// Calculate the residual for the next time around.
+	residual &= ~(residual & (0xff << shift));
+      }
+
+    return residual;
+  }
+
+  // Calculate the value of Gn for the specified group index.
+  // We return it in the form of an encoded constant-and-rotation.
+  // (see (AAELF 4.6.1.4 Static ARM relocations, Group Relocations, p.32)
+  static typename elfcpp::Swap<32, big_endian>::Valtype
+  calc_grp_gn(typename elfcpp::Swap<32, big_endian>::Valtype residual,
+	      const int group)
+  {
+    typename elfcpp::Swap<32, big_endian>::Valtype gn = 0;
+    uint32_t shift = 0;
+
+    for (int n = 0; n <= group; n++)
+      {
+	// Calculate which part of the value to mask.
+	shift = calc_grp_kn(residual);
+	// Calculate Gn in 32-bit as well as encoded constant-and-rotation form.
+	gn = residual & (0xff << shift);
+	// Calculate the residual for the next time around.
+	residual &= ~gn;
+      }
+    // Return Gn in the form of an encoded constant-and-rotation.
+    return ((gn >> shift) | ((gn <= 0xff ? 0 : (32 - shift) / 2) << 8));
   }
 
   // Handle ARM long branches.
@@ -3179,6 +3270,177 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 	val = (val & 0xf000000f) | 0x01a0f000;
       }
     elfcpp::Swap<32, big_endian>::writeval(wv, val);
+    return This::STATUS_OKAY;
+  }
+
+  // R_ARM_ALU_PC_G0_NC: ((S + A) | T) - P
+  // R_ARM_ALU_PC_G0:    ((S + A) | T) - P
+  // R_ARM_ALU_PC_G1_NC: ((S + A) | T) - P
+  // R_ARM_ALU_PC_G1:    ((S + A) | T) - P
+  // R_ARM_ALU_PC_G2:    ((S + A) | T) - P
+  // R_ARM_ALU_SB_G0_NC: ((S + A) | T) - B(S)
+  // R_ARM_ALU_SB_G0:    ((S + A) | T) - B(S)
+  // R_ARM_ALU_SB_G1_NC: ((S + A) | T) - B(S)
+  // R_ARM_ALU_SB_G1:    ((S + A) | T) - B(S)
+  // R_ARM_ALU_SB_G2:    ((S + A) | T) - B(S)
+  static inline typename This::Status
+  arm_grp_alu(unsigned char* view,
+	const Sized_relobj<32, big_endian>* object,
+	const Symbol_value<32>* psymval,
+	const int group,
+	Arm_address address,
+	Arm_address thumb_bit,
+	bool check_overflow)
+  {
+    typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype insn = elfcpp::Swap<32, big_endian>::readval(wv);
+
+    // ALU group relocations are allowed only for the ADD/SUB instructions.
+    // (0x00800000 - ADD, 0x00400000 - SUB)
+    const Valtype opcode = insn & 0x01e00000;
+    if (opcode != 0x00800000 && opcode != 0x00400000)
+      return This::STATUS_BAD_RELOC;
+
+    // Determine a sign for the addend.
+    const int sign = (opcode == 0x00800000) ? 1 : -1;
+    // shifter = rotate_imm * 2
+    const uint32_t shifter = (insn & 0xf00) >> 7;
+    // Initial addend value.
+    int32_t addend = insn & 0xff;
+    // Rotate addend right by shifter.
+    addend = (addend >> shifter) | (addend << (32 - shifter));
+    // Apply a sign to the added.
+    addend *= sign;
+
+    int32_t x = ((psymval->value(object, addend) | thumb_bit) - address);
+    Valtype gn = Arm_relocate_functions::calc_grp_gn(abs(x), group);
+    // Check for overflow if required
+    if (check_overflow
+	&& (Arm_relocate_functions::calc_grp_residual(abs(x), group) != 0))
+      return This::STATUS_OVERFLOW;
+
+    // Mask out the value and the ADD/SUB part of the opcode; take care
+    // not to destroy the S bit.
+    insn &= 0xff1ff000;
+    // Set the opcode according to whether the value to go in the
+    // place is negative.
+    insn |= ((x < 0) ? 0x00400000 : 0x00800000);
+    // Encode the offset (encoded Gn).
+    insn |= gn;
+
+    elfcpp::Swap<32, big_endian>::writeval(wv, insn);
+    return This::STATUS_OKAY;
+  }
+
+  // R_ARM_LDR_PC_G0: S + A - P
+  // R_ARM_LDR_PC_G1: S + A - P
+  // R_ARM_LDR_PC_G2: S + A - P
+  // R_ARM_LDR_SB_G0: S + A - B(S)
+  // R_ARM_LDR_SB_G1: S + A - B(S)
+  // R_ARM_LDR_SB_G2: S + A - B(S)
+  static inline typename This::Status
+  arm_grp_ldr(unsigned char* view,
+	const Sized_relobj<32, big_endian>* object,
+	const Symbol_value<32>* psymval,
+	const int group,
+	Arm_address address)
+  {
+    typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype insn = elfcpp::Swap<32, big_endian>::readval(wv);
+
+    const int sign = (insn & 0x00800000) ? 1 : -1;
+    int32_t addend = (insn & 0xfff) * sign;
+    int32_t x = (psymval->value(object, addend) - address);
+    // Calculate the relevant G(n-1) value to obtain this stage residual.
+    Valtype residual =
+	Arm_relocate_functions::calc_grp_residual(abs(x), group - 1);
+    if (residual >= 0x1000)
+      return This::STATUS_OVERFLOW;
+
+    // Mask out the value and U bit.
+    insn &= 0xff7ff000;
+    // Set the U bit for non-negative values.
+    if (x >= 0)
+      insn |= 0x00800000;
+    insn |= residual;
+
+    elfcpp::Swap<32, big_endian>::writeval(wv, insn);
+    return This::STATUS_OKAY;
+  }
+
+  // R_ARM_LDRS_PC_G0: S + A - P
+  // R_ARM_LDRS_PC_G1: S + A - P
+  // R_ARM_LDRS_PC_G2: S + A - P
+  // R_ARM_LDRS_SB_G0: S + A - B(S)
+  // R_ARM_LDRS_SB_G1: S + A - B(S)
+  // R_ARM_LDRS_SB_G2: S + A - B(S)
+  static inline typename This::Status
+  arm_grp_ldrs(unsigned char* view,
+	const Sized_relobj<32, big_endian>* object,
+	const Symbol_value<32>* psymval,
+	const int group,
+	Arm_address address)
+  {
+    typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype insn = elfcpp::Swap<32, big_endian>::readval(wv);
+
+    const int sign = (insn & 0x00800000) ? 1 : -1;
+    int32_t addend = (((insn & 0xf00) >> 4) + (insn & 0xf)) * sign;
+    int32_t x = (psymval->value(object, addend) - address);
+    // Calculate the relevant G(n-1) value to obtain this stage residual.
+    Valtype residual =
+	Arm_relocate_functions::calc_grp_residual(abs(x), group - 1);
+   if (residual >= 0x100)
+      return This::STATUS_OVERFLOW;
+
+    // Mask out the value and U bit.
+    insn &= 0xff7ff0f0;
+    // Set the U bit for non-negative values.
+    if (x >= 0)
+      insn |= 0x00800000;
+    insn |= ((residual & 0xf0) << 4) | (residual & 0xf);
+
+    elfcpp::Swap<32, big_endian>::writeval(wv, insn);
+    return This::STATUS_OKAY;
+  }
+
+  // R_ARM_LDC_PC_G0: S + A - P
+  // R_ARM_LDC_PC_G1: S + A - P
+  // R_ARM_LDC_PC_G2: S + A - P
+  // R_ARM_LDC_SB_G0: S + A - B(S)
+  // R_ARM_LDC_SB_G1: S + A - B(S)
+  // R_ARM_LDC_SB_G2: S + A - B(S)
+  static inline typename This::Status
+  arm_grp_ldc(unsigned char* view,
+      const Sized_relobj<32, big_endian>* object,
+      const Symbol_value<32>* psymval,
+      const int group,
+      Arm_address address)
+  {
+    typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype insn = elfcpp::Swap<32, big_endian>::readval(wv);
+
+    const int sign = (insn & 0x00800000) ? 1 : -1;
+    int32_t addend = ((insn & 0xff) << 2) * sign;
+    int32_t x = (psymval->value(object, addend) - address);
+    // Calculate the relevant G(n-1) value to obtain this stage residual.
+    Valtype residual =
+      Arm_relocate_functions::calc_grp_residual(abs(x), group - 1);
+    if ((residual & 0x3) != 0 || residual >= 0x400)
+      return This::STATUS_OVERFLOW;
+
+    // Mask out the value and U bit.
+    insn &= 0xff7fff00;
+    // Set the U bit for non-negative values.
+    if (x >= 0)
+      insn |= 0x00800000;
+    insn |= (residual >> 2);
+
+    elfcpp::Swap<32, big_endian>::writeval(wv, insn);
     return This::STATUS_OKAY;
   }
 };
@@ -6256,6 +6518,34 @@ Target_arm<big_endian>::Scan::local(Symbol_table* symtab,
     case elfcpp::R_ARM_THM_JUMP8:
     case elfcpp::R_ARM_THM_JUMP11:
     case elfcpp::R_ARM_V4BX:
+    case elfcpp::R_ARM_ALU_PC_G0_NC:
+    case elfcpp::R_ARM_ALU_PC_G0:
+    case elfcpp::R_ARM_ALU_PC_G1_NC:
+    case elfcpp::R_ARM_ALU_PC_G1:
+    case elfcpp::R_ARM_ALU_PC_G2:
+    case elfcpp::R_ARM_ALU_SB_G0_NC:
+    case elfcpp::R_ARM_ALU_SB_G0:
+    case elfcpp::R_ARM_ALU_SB_G1_NC:
+    case elfcpp::R_ARM_ALU_SB_G1:
+    case elfcpp::R_ARM_ALU_SB_G2:
+    case elfcpp::R_ARM_LDR_PC_G0:
+    case elfcpp::R_ARM_LDR_PC_G1:
+    case elfcpp::R_ARM_LDR_PC_G2:
+    case elfcpp::R_ARM_LDR_SB_G0:
+    case elfcpp::R_ARM_LDR_SB_G1:
+    case elfcpp::R_ARM_LDR_SB_G2:
+    case elfcpp::R_ARM_LDRS_PC_G0:
+    case elfcpp::R_ARM_LDRS_PC_G1:
+    case elfcpp::R_ARM_LDRS_PC_G2:
+    case elfcpp::R_ARM_LDRS_SB_G0:
+    case elfcpp::R_ARM_LDRS_SB_G1:
+    case elfcpp::R_ARM_LDRS_SB_G2:
+    case elfcpp::R_ARM_LDC_PC_G0:
+    case elfcpp::R_ARM_LDC_PC_G1:
+    case elfcpp::R_ARM_LDC_PC_G2:
+    case elfcpp::R_ARM_LDC_SB_G0:
+    case elfcpp::R_ARM_LDC_SB_G1:
+    case elfcpp::R_ARM_LDC_SB_G2:
       break;
 
     case elfcpp::R_ARM_GOTOFF32:
@@ -6388,6 +6678,34 @@ Target_arm<big_endian>::Scan::global(Symbol_table* symtab,
     case elfcpp::R_ARM_THM_JUMP8:
     case elfcpp::R_ARM_THM_JUMP11:
     case elfcpp::R_ARM_V4BX:
+    case elfcpp::R_ARM_ALU_PC_G0_NC:
+    case elfcpp::R_ARM_ALU_PC_G0:
+    case elfcpp::R_ARM_ALU_PC_G1_NC:
+    case elfcpp::R_ARM_ALU_PC_G1:
+    case elfcpp::R_ARM_ALU_PC_G2:
+    case elfcpp::R_ARM_ALU_SB_G0_NC:
+    case elfcpp::R_ARM_ALU_SB_G0:
+    case elfcpp::R_ARM_ALU_SB_G1_NC:
+    case elfcpp::R_ARM_ALU_SB_G1:
+    case elfcpp::R_ARM_ALU_SB_G2:
+    case elfcpp::R_ARM_LDR_PC_G0:
+    case elfcpp::R_ARM_LDR_PC_G1:
+    case elfcpp::R_ARM_LDR_PC_G2:
+    case elfcpp::R_ARM_LDR_SB_G0:
+    case elfcpp::R_ARM_LDR_SB_G1:
+    case elfcpp::R_ARM_LDR_SB_G2:
+    case elfcpp::R_ARM_LDRS_PC_G0:
+    case elfcpp::R_ARM_LDRS_PC_G1:
+    case elfcpp::R_ARM_LDRS_PC_G2:
+    case elfcpp::R_ARM_LDRS_SB_G0:
+    case elfcpp::R_ARM_LDRS_SB_G1:
+    case elfcpp::R_ARM_LDRS_SB_G2:
+    case elfcpp::R_ARM_LDC_PC_G0:
+    case elfcpp::R_ARM_LDC_PC_G1:
+    case elfcpp::R_ARM_LDC_PC_G2:
+    case elfcpp::R_ARM_LDC_SB_G0:
+    case elfcpp::R_ARM_LDC_SB_G1:
+    case elfcpp::R_ARM_LDC_SB_G2:
       break;
 
     case elfcpp::R_ARM_THM_ABS5:
@@ -6881,6 +7199,28 @@ Target_arm<big_endian>::Relocate::relocate(
   // a local symbol.
   unsigned int r_sym = elfcpp::elf_r_sym<32>(rel.get_r_info());
 
+  // Get the addressing origin of the output segment defining the
+  // symbol gsym if needed (AAELF 4.6.1.2 Relocation types).
+  Arm_address sym_origin = 0;
+  if (Relocate::reloc_needs_sym_origin(r_type))
+    {
+      if (r_type == elfcpp::R_ARM_BASE_ABS && gsym == NULL)
+	// R_ARM_BASE_ABS with the NULL symbol will give the
+	// absolute address of the GOT origin (GOT_ORG) (see ARM IHI
+	// 0044C (AAELF): 4.6.1.8 Proxy generating relocations).
+	sym_origin = target->got_plt_section()->address();
+      else if (gsym == NULL)
+	sym_origin = 0;
+      else if (gsym->source() == Symbol::IN_OUTPUT_SEGMENT)
+	sym_origin = gsym->output_segment()->vaddr();
+      else if (gsym->source() == Symbol::IN_OUTPUT_DATA)
+	sym_origin = gsym->output_data()->address();
+
+      // TODO: Assumes the segment base to be zero for the global symbols
+      // till the proper support for the segment-base-relative addressing
+      // will be implemented.  This is consistent with GNU ld.
+    }
+
   typename Arm_relocate_functions::Status reloc_status =
 	Arm_relocate_functions::STATUS_OKAY;
   switch (r_type)
@@ -7026,23 +7366,9 @@ Target_arm<big_endian>::Relocate::relocate(
       break;
 
     case elfcpp::R_ARM_BASE_PREL:
-      {
-	uint32_t origin;
-	// Get the addressing origin of the output segment defining the 
-	// symbol gsym (AAELF 4.6.1.2 Relocation types)
-	gold_assert(gsym != NULL); 
-	if (gsym->source() == Symbol::IN_OUTPUT_SEGMENT)
-	  origin = gsym->output_segment()->vaddr();
-	else if (gsym->source () == Symbol::IN_OUTPUT_DATA)
-	  origin = gsym->output_data()->address();
-	else
-	  {
-            gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
-				   _("cannot find origin of R_ARM_BASE_PREL"));
-	    return true;
-	  }
-	reloc_status = Arm_relocate_functions::base_prel(view, origin, address);
-      }
+      gold_assert(gsym != NULL);
+      reloc_status =
+	  Arm_relocate_functions::base_prel(view, sym_origin, address);
       break;
 
     case elfcpp::R_ARM_BASE_ABS:
@@ -7051,26 +7377,7 @@ Target_arm<big_endian>::Relocate::relocate(
 				      output_section))
 	  break;
 
-	uint32_t origin;
-	// Get the addressing origin of the output segment defining
-	// the symbol gsym (AAELF 4.6.1.2 Relocation types).
-	if (gsym == NULL)
-	  // R_ARM_BASE_ABS with the NULL symbol will give the
-	  // absolute address of the GOT origin (GOT_ORG) (see ARM IHI
-	  // 0044C (AAELF): 4.6.1.8 Proxy generating relocations).
-	  origin = target->got_plt_section()->address();
-	else if (gsym->source() == Symbol::IN_OUTPUT_SEGMENT)
-	  origin = gsym->output_segment()->vaddr();
-	else if (gsym->source () == Symbol::IN_OUTPUT_DATA)
-	  origin = gsym->output_data()->address();
-	else
-	  {
-            gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
-				   _("cannot find origin of R_ARM_BASE_ABS"));
-	    return true;
-	  }
-
-	reloc_status = Arm_relocate_functions::base_abs(view, origin);
+	reloc_status = Arm_relocate_functions::base_abs(view, sym_origin);
       }
       break;
 
@@ -7160,6 +7467,174 @@ Target_arm<big_endian>::Relocate::relocate(
 	    Arm_relocate_functions::v4bx(relinfo, view, object, address,
 					 is_v4bx_interworking);
 	}
+      break;
+
+    case elfcpp::R_ARM_ALU_PC_G0_NC:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_alu(view, object, psymval, 0,
+					      address, thumb_bit, false);
+      break;
+
+    case elfcpp::R_ARM_ALU_PC_G0:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_alu(view, object, psymval, 0,
+					      address, thumb_bit, true);
+      break;
+
+    case elfcpp::R_ARM_ALU_PC_G1_NC:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_alu(view, object, psymval, 1,
+					      address, thumb_bit, false);
+      break;
+
+    case elfcpp::R_ARM_ALU_PC_G1:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_alu(view, object, psymval, 1,
+					      address, thumb_bit, true);
+      break;
+
+    case elfcpp::R_ARM_ALU_PC_G2:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_alu(view, object, psymval, 2,
+					      address, thumb_bit, true);
+      break;
+
+    case elfcpp::R_ARM_ALU_SB_G0_NC:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_alu(view, object, psymval, 0,
+					      sym_origin, thumb_bit, false);
+      break;
+
+    case elfcpp::R_ARM_ALU_SB_G0:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_alu(view, object, psymval, 0,
+					      sym_origin, thumb_bit, true);
+      break;
+
+    case elfcpp::R_ARM_ALU_SB_G1_NC:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_alu(view, object, psymval, 1,
+					      sym_origin, thumb_bit, false);
+      break;
+
+    case elfcpp::R_ARM_ALU_SB_G1:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_alu(view, object, psymval, 1,
+					      sym_origin, thumb_bit, true);
+      break;
+
+    case elfcpp::R_ARM_ALU_SB_G2:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_alu(view, object, psymval, 2,
+					      sym_origin, thumb_bit, true);
+      break;
+
+    case elfcpp::R_ARM_LDR_PC_G0:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_ldr(view, object, psymval, 0,
+					      address);
+      break;
+
+    case elfcpp::R_ARM_LDR_PC_G1:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_ldr(view, object, psymval, 1,
+					      address);
+      break;
+
+    case elfcpp::R_ARM_LDR_PC_G2:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_ldr(view, object, psymval, 2,
+					      address);
+      break;
+
+    case elfcpp::R_ARM_LDR_SB_G0:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_ldr(view, object, psymval, 0,
+					      sym_origin);
+      break;
+
+    case elfcpp::R_ARM_LDR_SB_G1:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_ldr(view, object, psymval, 1,
+					      sym_origin);
+      break;
+
+    case elfcpp::R_ARM_LDR_SB_G2:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_ldr(view, object, psymval, 2,
+					      sym_origin);
+      break;
+
+    case elfcpp::R_ARM_LDRS_PC_G0:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_ldrs(view, object, psymval, 0,
+					       address);
+      break;
+
+    case elfcpp::R_ARM_LDRS_PC_G1:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_ldrs(view, object, psymval, 1,
+					       address);
+      break;
+
+    case elfcpp::R_ARM_LDRS_PC_G2:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_ldrs(view, object, psymval, 2,
+					       address);
+      break;
+
+    case elfcpp::R_ARM_LDRS_SB_G0:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_ldrs(view, object, psymval, 0,
+					       sym_origin);
+      break;
+
+    case elfcpp::R_ARM_LDRS_SB_G1:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_ldrs(view, object, psymval, 1,
+					       sym_origin);
+      break;
+
+    case elfcpp::R_ARM_LDRS_SB_G2:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_ldrs(view, object, psymval, 2,
+					       sym_origin);
+      break;
+
+    case elfcpp::R_ARM_LDC_PC_G0:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_ldc(view, object, psymval, 0,
+					      address);
+      break;
+
+    case elfcpp::R_ARM_LDC_PC_G1:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_ldc(view, object, psymval, 1,
+					      address);
+      break;
+
+    case elfcpp::R_ARM_LDC_PC_G2:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_ldc(view, object, psymval, 2,
+					      address);
+      break;
+
+    case elfcpp::R_ARM_LDC_SB_G0:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_ldc(view, object, psymval, 0,
+					      sym_origin);
+      break;
+
+    case elfcpp::R_ARM_LDC_SB_G1:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_ldc(view, object, psymval, 1,
+					      sym_origin);
+      break;
+
+    case elfcpp::R_ARM_LDC_SB_G2:
+      reloc_status =
+	  Arm_relocate_functions::arm_grp_ldc(view, object, psymval, 2,
+					      sym_origin);
       break;
 
     case elfcpp::R_ARM_TARGET1:
@@ -7311,6 +7786,34 @@ Target_arm<big_endian>::Relocatable_size_for_reloc::get_size_for_reloc(
     case elfcpp::R_ARM_THM_MOVW_PREL_NC:
     case elfcpp::R_ARM_THM_MOVT_PREL:
     case elfcpp::R_ARM_V4BX:
+    case elfcpp::R_ARM_ALU_PC_G0_NC:
+    case elfcpp::R_ARM_ALU_PC_G0:
+    case elfcpp::R_ARM_ALU_PC_G1_NC:
+    case elfcpp::R_ARM_ALU_PC_G1:
+    case elfcpp::R_ARM_ALU_PC_G2:
+    case elfcpp::R_ARM_ALU_SB_G0_NC:
+    case elfcpp::R_ARM_ALU_SB_G0:
+    case elfcpp::R_ARM_ALU_SB_G1_NC:
+    case elfcpp::R_ARM_ALU_SB_G1:
+    case elfcpp::R_ARM_ALU_SB_G2:
+    case elfcpp::R_ARM_LDR_PC_G0:
+    case elfcpp::R_ARM_LDR_PC_G1:
+    case elfcpp::R_ARM_LDR_PC_G2:
+    case elfcpp::R_ARM_LDR_SB_G0:
+    case elfcpp::R_ARM_LDR_SB_G1:
+    case elfcpp::R_ARM_LDR_SB_G2:
+    case elfcpp::R_ARM_LDRS_PC_G0:
+    case elfcpp::R_ARM_LDRS_PC_G1:
+    case elfcpp::R_ARM_LDRS_PC_G2:
+    case elfcpp::R_ARM_LDRS_SB_G0:
+    case elfcpp::R_ARM_LDRS_SB_G1:
+    case elfcpp::R_ARM_LDRS_SB_G2:
+    case elfcpp::R_ARM_LDC_PC_G0:
+    case elfcpp::R_ARM_LDC_PC_G1:
+    case elfcpp::R_ARM_LDC_PC_G2:
+    case elfcpp::R_ARM_LDC_SB_G0:
+    case elfcpp::R_ARM_LDC_SB_G1:
+    case elfcpp::R_ARM_LDC_SB_G2:
       return 4;
 
     case elfcpp::R_ARM_TARGET1:
