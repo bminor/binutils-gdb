@@ -1,5 +1,10 @@
 -*- text -*-
 
+Changes in 2.20.1:
+
+* GAS now understands an extended syntax in the .section directive flags
+  for COFF targets that allows the section's alignment to be specified.
+
 Changes in 2.20:
 
 * GNU/Linux targets now supports "gnu_unique_object" as a value in the .type

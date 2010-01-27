@@ -23,6 +23,7 @@
 #define OBJ_HEADER "obj-coff.h"
 
 #include "as.h"
+#include "safe-ctype.h"
 #include "obstack.h"
 #include "subsegs.h"
 
@@ -1543,6 +1544,7 @@ coff_frob_file_after_relocs (void)
   						 'r' for read-only data
   						 's' for shared data (PE)
 						 'y' for noread
+					   '0' - '9' for power-of-two alignment (GNU extension).
    But if the argument is not a quoted string, treat it as a
    subsegment number.
 
@@ -1555,6 +1557,7 @@ obj_coff_section (int ignore ATTRIBUTE_UNUSED)
   /* Strip out the section name.  */
   char *section_name;
   char c;
+  int alignment = -1;
   char *name;
   unsigned int exp;
   flagword flags, oldflags;
@@ -1597,6 +1600,11 @@ obj_coff_section (int ignore ATTRIBUTE_UNUSED)
 		 attr != '"'
 		 && ! is_end_of_line[attr])
 	    {
+	      if (ISDIGIT (attr))
+		{
+		  alignment = attr - '0';
+		  continue;
+		}
 	      switch (attr)
 		{
 		case 'b':
@@ -1673,6 +1681,8 @@ obj_coff_section (int ignore ATTRIBUTE_UNUSED)
     }
 
   sec = subseg_new (name, (subsegT) exp);
+  if (alignment >= 0)
+    sec->alignment_power = alignment;
 
   oldflags = bfd_get_section_flags (stdoutput, sec);
   if (oldflags == SEC_NO_FLAGS)

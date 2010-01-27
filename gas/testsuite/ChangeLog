@@ -1,3 +1,12 @@
+2010-01-27  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	Backport from trunk:
+	* gas/pe/section-align-1.s: New test source file.
+	* gas/pe/section-align-1.d: Likewise control script.
+	* gas/pe/section-align-2.s: Likewise ...
+	* gas/pe/section-align-2.d: ... and likewise.
+	* gas/pe/pe.exp: Invoke new testcases.
+
 2009-12-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from trunk:
