@@ -1,3 +1,8 @@
+2010-01-27  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* gdb.cp/namespace-using.exp: Rename to nsusing.exp.
+	* gdb.cp/namespace-using.cc: Rename to nsusing.cc.
+
 2010-01-26  Tom Tromey  <tromey@redhat.com>
 
 	PR exp/7643:

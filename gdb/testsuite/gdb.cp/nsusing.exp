@@ -20,7 +20,7 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
-set testfile namespace-using
+set testfile nsusing
 set srcfile ${testfile}.cc
 set binfile ${objdir}/${subdir}/${testfile}
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
