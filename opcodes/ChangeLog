@@ -1,3 +1,45 @@
+2010-01-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (XMScalar): New.
+	(EXdScalar): Likewise.
+	(EXqScalar): Likewise.
+	(EXqScalarS): Likewise.
+	(VexScalar): Likewise.
+	(EXdVexScalarS): Likewise.
+	(EXqVexScalarS): Likewise.
+	(XMVexScalar): Likewise.
+	(scalar_mode): Likewise.
+	(d_scalar_mode): Likewise.
+	(d_scalar_swap_mode): Likewise.
+	(q_scalar_mode): Likewise.
+	(q_scalar_swap_mode): Likewise.
+	(vex_scalar_mode): Likewise.
+	(vex_len_table): Duplcate entries for VEX_LEN_10_P_1,
+	VEX_LEN_10_P_3, VEX_LEN_11_P_1, VEX_LEN_11_P_3, VEX_LEN_2A_P_1,
+	VEX_LEN_2A_P_3, VEX_LEN_2C_P_3, VEX_LEN_2D_P_1, VEX_LEN_2E_P_0,
+	VEX_LEN_2E_P_2, VEX_LEN_2F_P_2, VEX_LEN_51_P_1, VEX_LEN_51_P_3,
+	VEX_LEN_52_P_1, VEX_LEN_53_P_1, VEX_LEN_58_P_1, VEX_LEN_58_P_3,
+	VEX_LEN_59_P_1, VEX_LEN_5A_P_1, VEX_LEN_5A_P_3, VEX_LEN_5C_P_1,
+	VEX_LEN_5C_P_3, VEX_LEN_5D_P_1, VEX_LEN_5D_P_3, VEX_LEN_5E_P_1,
+	VEX_LEN_5E_P_3, VEX_LEN_5F_P_1, VEX_LEN_5F_P_3, VEX_LEN_6E_P_2,
+	VEX_LEN_7E_P_1, VEX_LEN_7E_P_2, VEX_LEN_D6_P_2, VEX_LEN_C2_P_1,
+	VEX_LEN_C2_P_3, VEX_LEN_3A0A_P_2 and VEX_LEN_3A0B_P_2.
+	(vex_w_table): Update entries for VEX_W_10_P_1, VEX_W_10_P_3,
+	VEX_W_11_P_1, VEX_W_11_P_3, VEX_W_2E_P_0, VEX_W_2E_P_2,
+	VEX_W_2F_P_0, VEX_W_2F_P_2, VEX_W_51_P_1, VEX_W_51_P_3,
+	VEX_W_52_P_1, VEX_W_53_P_1, VEX_W_58_P_1, VEX_W_58_P_3,
+	VEX_W_59_P_1, VEX_W_59_P_3, VEX_W_5A_P_1, VEX_W_5A_P_3,
+	VEX_W_5C_P_1, VEX_W_5C_P_3, VEX_W_5D_P_1, VEX_W_5D_P_3,
+	VEX_W_5E_P_1, VEX_W_5E_P_3, VEX_W_5F_P_1, VEX_W_5F_P_3,
+	VEX_W_7E_P_1, VEX_W_D6_P_2  VEX_W_C2_P_1, VEX_W_C2_P_3,
+	VEX_W_3A0A_P_2 and VEX_W_3A0B_P_2.
+	(intel_operand_size): Handle d_scalar_mode, d_scalar_swap_mode,
+	q_scalar_mode, q_scalar_swap_mode.
+	(OP_XMM): Handle scalar_mode.
+	(OP_EX): Handle d_scalar_mode, d_scalar_swap_mode, q_scalar_mode
+	and q_scalar_swap_mode.
+	(OP_VEX): Handle vex_scalar_mode.
+
 2010-01-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (prefix_table): Remove trailing { Bad_Opcode }.

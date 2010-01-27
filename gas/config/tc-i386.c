@@ -448,6 +448,13 @@ static unsigned int no_cond_jump_promotion = 0;
 /* Encode SSE instructions with VEX prefix.  */
 static unsigned int sse2avx;
 
+/* Encode scalar AVX instructions with specific vector length.  */
+static enum
+  {
+    vex128 = 0,
+    vex256
+  } avxscalar;
+
 /* Pre-defined "_GLOBAL_OFFSET_TABLE_".  */
 static symbolS *GOT_symbol;
 
@@ -2706,7 +2713,10 @@ build_vex_prefix (const insn_template *t)
       i.tm = t[1];
     }
 
-  vector_length = i.tm.opcode_modifier.vex == VEX256 ? 1 : 0;
+  if (i.tm.opcode_modifier.vex == VEXScalar)
+    vector_length = avxscalar;
+  else
+    vector_length = i.tm.opcode_modifier.vex == VEX256 ? 1 : 0;
 
   switch ((i.tm.base_opcode >> 8) & 0xff)
     {
@@ -7868,6 +7878,7 @@ const char *md_shortopts = "qn";
 #define OPTION_MOLD_GCC (OPTION_MD_BASE + 9)
 #define OPTION_MSSE2AVX (OPTION_MD_BASE + 10)
 #define OPTION_MSSE_CHECK (OPTION_MD_BASE + 11)
+#define OPTION_MAVXSCALAR (OPTION_MSSE_CHECK + 11)
 
 struct option md_longopts[] =
 {
@@ -7886,6 +7897,7 @@ struct option md_longopts[] =
   {"mold-gcc", no_argument, NULL, OPTION_MOLD_GCC},
   {"msse2avx", no_argument, NULL, OPTION_MSSE2AVX},
   {"msse-check", required_argument, NULL, OPTION_MSSE_CHECK},
+  {"mavxscalar", required_argument, NULL, OPTION_MAVXSCALAR},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -8096,6 +8108,15 @@ md_parse_option (int c, char *arg)
 	as_fatal (_("Invalid -msse-check= option: `%s'"), arg);
       break;
 
+    case OPTION_MAVXSCALAR:
+      if (strcasecmp (arg, "128") == 0)
+	avxscalar = vex128;
+      else if (strcasecmp (arg, "256") == 0)
+	avxscalar = vex256;
+      else
+	as_fatal (_("Invalid -mavxscalar= option: `%s'"), arg);
+      break;
+
     default:
       return 0;
     }
@@ -8219,6 +8240,9 @@ md_show_usage (FILE *stream)
   fprintf (stream, _("\
   -msse-check=[none|error|warning]\n\
                           check SSE instructions\n"));
+  fprintf (stream, _("\
+  -mavxscalar=[128|256]   encode scalar AVX instructions with specific vector\n\
+                           length\n"));
   fprintf (stream, _("\
   -mmnemonic=[att|intel]  use AT&T/Intel mnemonic\n"));
   fprintf (stream, _("\

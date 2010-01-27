@@ -189,6 +189,16 @@ will make the assembler issue a warning for any SSE intruction.
 @option{-msse-check=@var{error}} will make the assembler issue an error
 for any SSE intruction.
 
+@cindex @samp{-mavxscalar=} option, i386
+@cindex @samp{-mavxscalar=} option, x86-64
+@item -mavxscalar=@var{128}
+@item -mavxscalar=@var{256}
+This options control how the assembler should encode scalar AVX
+instructions.  @option{-mavxscalar=@var{128}} will encode scalar
+AVX instructions with 128bit vector length, which is the default.
+@option{-mavxscalar=@var{256}} will encode scalar AVX instructions
+with 256bit vector length.
+
 @cindex @samp{-mmnemonic=} option, i386
 @cindex @samp{-mmnemonic=} option, x86-64
 @item -mmnemonic=@var{att}

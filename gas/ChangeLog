@@ -1,3 +1,15 @@
+2010-01-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (avxscalar): New.
+	(OPTION_MAVXSCALAR): Likewise.
+	(build_vex_prefix): Select vector_length for scalar instructions
+	based on avxscalar.
+	(md_longopts): Add OPTION_MAVXSCALAR.
+	(md_parse_option): Handle OPTION_MAVXSCALAR.
+	(md_show_usage): Add -mavxscalar=.
+
+	* doc/c-i386.texi: Document -mavxscalar=.
+
 2010-01-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (build_vex_prefix): Set i.vex.bytes[0] to

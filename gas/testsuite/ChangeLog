@@ -1,3 +1,15 @@
+2010-01-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/avx-scalar-intel.d: New.
+	* gas/i386/avx-scalar.d: Likewise.
+	* gas/i386/avx-scalar.s: Likewise.
+	* gas/i386/x86-64-avx-scalar-intel.d: Likewise.
+	* gas/i386/x86-64-avx-scalar.d: Likewise.
+	* gas/i386/x86-64-avx-scalar.s: Likewise.
+
+	* gas/i386/i386.exp: Run avx-scalar, avx-scalar-intel,
+	x86-64-avx-scalar and x86-64-avx-scalar-intel.
+
 2010-01-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/avx.s: Add more tests.
