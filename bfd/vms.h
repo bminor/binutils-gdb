@@ -544,10 +544,10 @@ extern int _bfd_vms_decode_relocs
 #define EOBJ_S_C_ETBT 13	/* EVAX Taceback information record.	*/
 #define EOBJ_S_C_MAXRECTYP 13	/* EVAX Lst assigned record type.	*/
 
-#define OBJ_S_K_SUBTYP 1		 
-#define OBJ_S_C_SUBTYP 1		 
-#define EOBJ_S_K_SUBTYP 4		 
-#define EOBJ_S_C_SUBTYP 4		 
+#define OBJ_S_K_SUBTYP 1
+#define OBJ_S_C_SUBTYP 1
+#define EOBJ_S_K_SUBTYP 4
+#define EOBJ_S_C_SUBTYP 4
 #define OBJ_S_C_MAXRECSIZ 2048	/* Maximu legal record size.           */
 #define EOBJ_S_C_MAXRECSIZ 8192 /* Maximu legal record size.           */
 #define OBJ_S_C_STRLVL 0	/* Structre level.                     */
@@ -562,18 +562,18 @@ extern int _bfd_vms_decode_relocs
 
 #define EVAX_OFFSET	256	/* Type ofset for EVAX codes in switch.  */
 
-/* Miscellaneous definitions.  */	 
+/* Miscellaneous definitions.  */
 
-#if __GNUC__				 
-typedef unsigned long long uquad;	 
-#else					 
-typedef unsigned long uquad;		 
-#endif					 
+#if __GNUC__
+typedef unsigned long long uquad;
+#else
+typedef unsigned long uquad;
+#endif
 
 #define MAX_OUTREC_SIZE 4096
 #define MIN_OUTREC_LUFT 64
 
-/* VMS module header.  */		 
+/* VMS module header.  */
 
 struct hdr_struct
 {
@@ -587,7 +587,6 @@ struct hdr_struct
   char *hdr_c_lnm;
   char *hdr_c_src;
   char *hdr_c_ttl;
-  char *hdr_c_cpr;
 };
 
 #define EMH_S_W_HDRTYP   4
@@ -676,8 +675,22 @@ struct eom_struct
 #define DBG_S_L_DMT_PSECT_LENGTH 4
 #define DBG_S_C_DMT_PSECT_SIZE   8
 
+/* File format.  */
+enum file_format_enum
+  {
+    /* Not yet known.  */
+    FF_UNKNOWN,
 
-enum file_format_enum { FF_UNKNOWN, FF_FOREIGN, FF_NATIVE };
+    /* Unix format.  Each record is preceeded by the record length,
+       on 2 bytes.  */
+    FF_FOREIGN,
+
+    /* Native (=VMS) format.  The file only contains the content of the
+       records.  This may also appear on Unix, depending on which tool
+       was used to transfer files.  */
+    FF_NATIVE
+  };
+
 enum file_type_enum { FT_UNKNOWN, FT_MODULE, FT_IMAGE };
 
 typedef struct vms_symbol_struct
@@ -840,7 +853,7 @@ struct vms_section_data_struct
 
 #define vms_section_data(sec) \
   ((struct vms_section_data_struct *)sec->used_by_bfd)
- 
+
 struct evax_private_udata_struct
 {
   asymbol *bsym;
@@ -850,8 +863,8 @@ struct evax_private_udata_struct
 };
 
 #define SECTION_NAME_TEMPLATE "__SEC__%d"
-					 
-#if VMS_DEBUG				 
+
+#if VMS_DEBUG
 extern void _bfd_vms_debug (int, char *, ...) ATTRIBUTE_PRINTF_2;
 extern void _bfd_hexdump   (int, unsigned char *, int, int);
 
@@ -859,8 +872,8 @@ extern void _bfd_hexdump   (int, unsigned char *, int, int);
 #define vms_debug2(X) _bfd_vms_debug X
 #else
 #define vms_debug2(X)
-#endif					 
-					 
+#endif
+
 extern struct bfd_hash_entry * _bfd_vms_hash_newfunc (struct bfd_hash_entry *, struct bfd_hash_table *, const char *);
 extern void        _bfd_vms_get_header_values (bfd *, unsigned char *, int *, int *);
 extern int         _bfd_vms_get_record  (bfd *abf);

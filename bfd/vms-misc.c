@@ -211,7 +211,7 @@ _bfd_vms_get_header_values (bfd * abfd ATTRIBUTE_UNUSED,
    can view and change the attributes of a file.  Changing from
    'variable length' to 'fixed length, 512 bytes' reveals the
    record size at the first 2 bytes of every record.  The same
-   happens during the transfer of object files from VMS to Unix,
+   may happen during the transfer of object files from VMS to Unix,
    at least with UCX, the DEC implementation of TCP/IP.
 
    The VMS format repeats the size at bytes 2 & 3 of every record.
@@ -355,6 +355,8 @@ _bfd_vms_get_object_record (bfd *abfd)
     test_len = 0;
   else
     {
+      int off = 0;
+
       /* See _bfd_vms_get_first_record.  */
       test_len = 6;
 
@@ -366,10 +368,16 @@ _bfd_vms_get_object_record (bfd *abfd)
 	      bfd_set_error (bfd_error_file_truncated);
 	      return -1;
 	    }
+          /* Alignment byte may be present or not.  This is not easy to
+             detect but all object record types are not 0 (on Alpha VMS).
+             We also hope that pad byte is 0.  */
+          if (PRIV (vms_buf)[0])
+            off = 1;
 	}
 
       /* Read the record header  */
-      if (bfd_bread (PRIV (vms_buf), test_len, abfd) != test_len)
+      if (bfd_bread (PRIV (vms_buf) + off, test_len - off, abfd)
+          != test_len - off)
 	{
 	  bfd_set_error (bfd_error_file_truncated);
 	  return -1;

@@ -90,7 +90,6 @@ static bfd_boolean vms_set_section_contents
 #define vms_get_synthetic_symtab          _bfd_nodynamic_get_synthetic_symtab
 
 #define vms_bfd_copy_private_bfd_data	  _bfd_generic_bfd_copy_private_bfd_data
-#define vms_bfd_print_private_bfd_data	  _bfd_generic_bfd_print_private_bfd_data
 #define vms_bfd_free_cached_info	  _bfd_generic_bfd_free_cached_info
 #define vms_bfd_copy_private_section_data _bfd_generic_bfd_copy_private_section_data
 #define vms_bfd_copy_private_symbol_data  _bfd_generic_bfd_copy_private_symbol_data
@@ -195,7 +194,7 @@ fill_section_ptr (struct bfd_hash_entry *entry, void *sections)
     }
   else if (sec == (unsigned long)-1)
     sym->section = &bfd_und_section;
-    
+
   return TRUE;
 }
 
@@ -516,11 +515,11 @@ vms_convert_to_var (char *vms_filename)
   fab.fab$b_fac = FAB$M_PUT;
   fab.fab$l_fop = FAB$M_ESC;
   fab.fab$l_ctx = RME$C_SETRFM;
-  
+
   sys$open (&fab);
-  
+
   fab.fab$b_rfm = FAB$C_VAR;
-  
+
   sys$modify (&fab);
   sys$close (&fab);
 }
@@ -972,7 +971,7 @@ vms_slurp_reloc_table (bfd *abfd, asection *section, asymbol **symbols)
 static long
 vms_get_reloc_upper_bound (bfd *abfd ATTRIBUTE_UNUSED, asection *section)
 {
-  return (section->reloc_count + 1) * sizeof (arelent *);  
+  return (section->reloc_count + 1) * sizeof (arelent *);
 }
 
 /* Convert relocations from VMS (external) form into BFD internal
@@ -1409,6 +1408,22 @@ vms_set_section_contents (bfd * abfd,
     return FALSE;
 
   memcpy (section->contents + offset, location, (size_t) count);
+  return TRUE;
+}
+
+static bfd_boolean
+vms_bfd_print_private_bfd_data (bfd *abfd, void *ptr)
+{
+  FILE *file = (FILE *)ptr;
+
+  fprintf (file, _("structure level: %d\n"), PRIV(hdr_data.hdr_b_strlvl));
+  fprintf (file, _("module name    : %s\n"), PRIV(hdr_data.hdr_t_name));
+  fprintf (file, _("module version : %s\n"), PRIV(hdr_data.hdr_t_version));
+  fprintf (file, _("module date    : %s\n"), PRIV(hdr_data.hdr_t_date));
+  fprintf (file, _("language name  : %s\n"), PRIV(hdr_data.hdr_c_lnm));
+  fprintf (file, _("source files   : %s\n"), PRIV(hdr_data.hdr_c_src));
+  fprintf (file, _("title          : %s\n"), PRIV(hdr_data.hdr_c_ttl));
+
   return TRUE;
 }
 

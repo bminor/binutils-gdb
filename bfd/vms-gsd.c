@@ -204,7 +204,7 @@ vms_esecflag_by_name (struct sec_flags_struct *section_flags,
 
 #if VMS_DEBUG
 
-struct flagdescstruct { char *name; flagword value; };
+struct flagdescstruct { const char *name; flagword value; };
 
 static const struct flagdescstruct gpsflagdesc[] =
 {
@@ -231,7 +231,7 @@ static const struct flagdescstruct gsyflagdesc[] =
   { "REL",  GSY_S_M_REL },
   { "COMM", EGSY_S_V_COMM },
   { "VECEP", EGSY_S_V_VECEP },
-  { "NORM", EGCY_S_V_NORM },
+  { "NORM", EGSY_S_V_NORM },
   { NULL, 0 }
 };
 

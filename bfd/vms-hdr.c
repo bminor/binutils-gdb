@@ -1397,7 +1397,7 @@ int
 _bfd_vms_write_dbg (bfd *abfd ATTRIBUTE_UNUSED, int objtype ATTRIBUTE_UNUSED)
 {
 #if VMS_DEBUG
-  _bfd_vms_debug (2, "vms_write_dbg (%p, objtype)\n", abfd, objtype);
+  _bfd_vms_debug (2, "vms_write_dbg (%p, %d)\n", abfd, objtype);
 #endif
 
   return 0;

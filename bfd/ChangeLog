@@ -1,3 +1,17 @@
+2010-01-27  Tristan Gingold  <gingold@adacore.com>
+
+	* vms.h: Remove trailing spaces.
+	(struct hdr_struct): Remove unused hdr_c_cpr field.
+	(enum file_format_enum): Add comments.
+	* vms.c (vms_bfd_print_private_bfd_data): New function that
+	replaces the macro.
+	Remove trailing spaces.
+	* vms-misc.c: Improve comments.
+	(_bfd_vms_get_object_record): Also handle files without pads.
+	* vms-hdr.c (_bfd_vms_write_dbg): Fix format string.
+	* vms-gsd.c (struct flagdescstruct): Make name field const.
+	(gsyflagdesc): Fix typo.
+
 2010-01-27  Alan Modra  <amodra@gmail.com>
 
 	PR ld/11217
