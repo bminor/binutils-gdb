@@ -1,5 +1,10 @@
 -*- text -*-
 
+* GAS now understands an extended syntax in the .section directive flags
+  for COFF targets that allows the section's alignment to be specified.  This
+  feature has also been backported to the 2.20 release series, starting with
+  2.20.1.
+
 * Add support for the Renesas RX processor.
 
 Changes in 2.20:

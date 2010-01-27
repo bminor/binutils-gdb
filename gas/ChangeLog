@@ -1,3 +1,10 @@
+2010-01-27  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* NEWS: Mention new feature.
+	* config/obj-coff.c (obj_coff_section): Accept digits and use
+	to override default section alignment power if specified.
+	* doc/as.texinfo (.section directive): Update documentation.
+
 2010-01-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (avxscalar): New.

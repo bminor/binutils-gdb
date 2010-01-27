@@ -32,3 +32,6 @@ run_dump_test "aligncomm-a"
 run_dump_test "aligncomm-b"
 run_dump_test "aligncomm-c"
 run_dump_test "aligncomm-d"
+
+run_dump_test "section-align-1"
+run_dump_test "section-align-3"
