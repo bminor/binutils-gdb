@@ -1,3 +1,11 @@
+2010-01-27  Christopher Faylor  <me+cygwin@cgf.cx>
+
+	* windows-nat.c (windows_initialization_done): New variable.
+	(get_windows_debug_event): Issue error when process dies before
+	completely initializing.
+	(do_initial_windows_stuff): Set flag to indicate when we are done with
+	the initial steps of attaching to the child.
+
 2010-01-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* symtab.h (struct symbol <symtab>): New comment on NULL values.
