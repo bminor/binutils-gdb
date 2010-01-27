@@ -554,7 +554,8 @@ struct symbol
   struct type *type;
 
   /* The symbol table containing this symbol.  This is the file
-     associated with LINE.  */
+     associated with LINE.  It can be NULL during symbols read-in but it is
+     never NULL during normal operation.  */
   struct symtab *symtab;
 
   /* Domain code.  */
