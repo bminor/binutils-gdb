@@ -502,17 +502,18 @@ foreach ldprelink {NO YES} {
 		    file mkdir $dir
 
 		    set command "ldd $exec"
+		    set test "ldd [file tail $exec]"
 		    set result [catch "exec $command" output]
 		    verbose -log "result of $command is $result"
 		    verbose -log "output of $command is $output"
 		    if {$result != 0 || $output == ""} {
-			fail $command
+			fail $test
 		    } else {
-			pass $command
+			pass $test
 		    }
 
 		    # gdb testsuite will put there also needless -lm.
-		    set test "$command output contains libc"
+		    set test "$test output contains libc"
 		    set libc [regexp -all -inline -line {^.* => (/[^ ]+).*$} $output]
 		    if {[llength $libc] == 0} {
 			fail $test
@@ -528,7 +529,7 @@ foreach ldprelink {NO YES} {
 			lappend dests $dest
 		    }
 
-		    if {[prelink$binprelink "--dynamic-linker=$interp --ld-library-path=$dir $exec $interp [concat $dests]" $exec]
+		    if {[prelink$binprelink "--dynamic-linker=$interp --ld-library-path=$dir $exec $interp [concat $dests]" [file tail $exec]]
 		        && [copy $interp_saved $interp]} {
 			test_ld $exec 1 [expr {$binsepdebug == "NO"}]
 		    }
