@@ -1,3 +1,8 @@
+2010-01-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 11225
+	* gas/pe/aligncomm-c.d: Dump all sections.
+
 2010-01-27  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* gas/pe/section-align-1.s: New test source file.

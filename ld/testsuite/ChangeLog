@@ -1,3 +1,8 @@
+2010-01-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 11225
+	* ld-sh/refdbg-0-dso.d: Dump all sections.
+
 2010-01-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/11218

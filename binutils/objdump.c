@@ -1,6 +1,6 @@
 /* objdump.c -- dump information about an object file.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -117,13 +117,16 @@ static const char *prefix;		/* --prefix */
 static int prefix_strip;		/* --prefix-strip */
 static size_t prefix_length;
 
-/* Pointer to an array of section names provided by
-   one or more "-j secname" command line options.  */
-static char **only;
-/* The total number of slots in the only[] array.  */
-static size_t only_size = 0;
-/* The number of occupied slots in the only[] array.  */
-static size_t only_used = 0;
+/* A structure to record the sections mentioned in -j switches.  */
+struct only
+{
+  const char * name; /* The name of the section.  */
+  bfd_boolean  seen; /* A flag to indicate that the section has been found in one or more input files.  */
+  struct only * next; /* Pointer to the next structure in the list.  */
+};
+/* Pointer to an array of 'only' structures.
+   This pointer is NULL if the -j switch has not been used.  */
+static struct only * only_list = NULL;
 
 /* Variables for handling include file path table.  */
 static const char **include_paths;
@@ -326,17 +329,78 @@ nonfatal (const char *msg)
 static bfd_boolean
 process_section_p (asection * section)
 {
-  size_t i;
+  struct only * only;
 
-  if (only == NULL)
+  if (only_list == NULL)
     return TRUE;
 
-  for (i = 0; i < only_used; i++)
-    if (strcmp (only [i], section->name) == 0)
-      return TRUE;
+  for (only = only_list; only; only = only->next)
+    if (strcmp (only->name, section->name) == 0)
+      {
+	only->seen = TRUE;
+	return TRUE;
+      }
 
   return FALSE;
 }
+
+/* Add an entry to the 'only' list.  */
+
+static void
+add_only (char * name)
+{
+  struct only * only;
+
+  /* First check to make sure that we do not
+     already have an entry for this name.  */
+  for (only = only_list; only; only = only->next)
+    if (strcmp (only->name, name) == 0)
+      return;
+
+  only = xmalloc (sizeof * only);
+  only->name = name;
+  only->seen = FALSE;
+  only->next = only_list;
+  only_list = only;
+}
+
+/* Release the memory used by the 'only' list.
+   PR 11225: Issue a warning message for unseen sections.
+   Only do this if none of the sections were seen.  This is mainly to support
+   tools like the GAS testsuite where an object file is dumped with a list of
+   generic section names known to be present in a range of different file
+   formats.  */
+
+static void
+free_only_list (void)
+{
+  bfd_boolean at_least_one_seen = FALSE;
+  struct only * only;
+  struct only * next;
+
+  if (only_list == NULL)
+    return;
+
+  for (only = only_list; only; only = only->next)
+    if (only->seen)
+      {
+	at_least_one_seen = TRUE;
+	break;
+      }
+
+  for (only = only_list; only; only = next)
+    {
+      if (! at_least_one_seen)
+	{
+	  non_fatal (_("Section '%s' mentioned in a -j option, but not found in any input file"),
+		     only->name);
+	  exit_status = 1;
+	}
+      next = only->next;
+      free (only);
+    }
+}
+
 
 static void
 dump_section_header (bfd *abfd, asection *section,
@@ -1782,7 +1846,7 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
   /* Sections that do not contain machine
      code are not normally disassembled.  */
   if (! disassemble_all
-      && only == NULL
+      && only_list == NULL
       && ((section->flags & (SEC_CODE | SEC_HAS_CONTENTS))
 	  != (SEC_CODE | SEC_HAS_CONTENTS)))
     return;
@@ -3193,12 +3257,7 @@ main (int argc, char **argv)
 	    disassembler_options = optarg;
 	  break;
 	case 'j':
-	  if (only_used == only_size)
-	    {
-	      only_size += 8;
-	      only = (char **) xrealloc (only, only_size * sizeof (char *));
-	    }
-	  only [only_used++] = optarg;
+	  add_only (optarg);
 	  break;
 	case 'F':
 	  display_file_offsets = TRUE;
@@ -3408,6 +3467,8 @@ main (int argc, char **argv)
 	for (; optind < argc;)
 	  display_file (argv[optind++], target);
     }
+
+  free_only_list ();
 
   END_PROGRESS (program_name);
 

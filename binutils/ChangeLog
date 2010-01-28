@@ -1,10 +1,21 @@
+2010-01-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 11225
+	* objdump.c (only): Replace with linked list.
+	(only_size, only_used): Replace with only_list.
+	(process_section_p): Set seen field on matches sections.
+	(add_only): New function.
+	(free_only_list): New function.
+	(disassemble_section): Check only_list.
+	(main): Use add_only and free_only_list.
+
 2010-01-26  Tristan Gingold  <gingold@adacore.com>
 
 	* Makefile.am (bin2c): Add libintl dependance and library.
 	* Makefile.in: Regenerate.
 
 2010-01-21  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
-	
+
 	* readelf.c (get_machine_flags): Handle EF_S390_HIGH_GPRS.
 
 2010-01-19  Ian Lance Taylor  <iant@google.com>
