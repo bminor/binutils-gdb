@@ -998,7 +998,8 @@ When the function is done executing, GDB will silently stop."),
      and the dummy frame has already been popped.  */
 
   {
-    struct regcache *retbuf = regcache_xmalloc (gdbarch);
+    struct address_space *aspace = get_regcache_aspace (stop_registers);
+    struct regcache *retbuf = regcache_xmalloc (gdbarch, aspace);
     struct cleanup *retbuf_cleanup = make_cleanup_regcache_xfree (retbuf);
     struct value *retval = NULL;
 

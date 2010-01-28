@@ -31,7 +31,8 @@ extern struct regcache *get_thread_arch_regcache (ptid_t, struct gdbarch *);
 
 void regcache_xfree (struct regcache *regcache);
 struct cleanup *make_cleanup_regcache_xfree (struct regcache *regcache);
-struct regcache *regcache_xmalloc (struct gdbarch *gdbarch);
+struct regcache *regcache_xmalloc (struct gdbarch *gdbarch,
+				   struct address_space *aspace);
 
 /* Return REGCACHE's architecture.  */
 

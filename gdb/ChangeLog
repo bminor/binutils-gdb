@@ -1,3 +1,14 @@
+2010-01-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* regcache.c (regcache_xmalloc): Add aspace argument.  Use it
+	for the new regcache.  All callers updated.
+	(regcache_cpy, regcache_cpy_no_passthrough): Do not set aspace here.
+	(get_thread_arch_regcache): Do not set aspace here.
+	* regcache.h (regcache_xmalloc): Update declaration.
+
+	* frame.c, infcall.c, ppc-linux-tdep.c: Calls to
+	regcache_xmalloc updated.
+
 2010-01-28  Joel Brobecker  <brobecker@adacore.com>
 
 	Another -Wunused-function error in procfs.c (sparc-solaris)

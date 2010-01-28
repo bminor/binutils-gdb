@@ -1421,7 +1421,8 @@ ppu2spu_sniffer (const struct frame_unwind *self,
 	  struct ppu2spu_cache *cache
 	    = FRAME_OBSTACK_CALLOC (1, struct ppu2spu_cache);
 
-	  struct regcache *regcache = regcache_xmalloc (data.gdbarch);
+	  struct address_space *aspace = get_frame_address_space (this_frame);
+	  struct regcache *regcache = regcache_xmalloc (data.gdbarch, aspace);
 	  struct cleanup *cleanups = make_cleanup_regcache_xfree (regcache);
 	  regcache_save (regcache, ppu2spu_unwind_register, &data);
 	  discard_cleanups (cleanups);

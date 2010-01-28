@@ -212,7 +212,7 @@ struct regcache
 };
 
 struct regcache *
-regcache_xmalloc (struct gdbarch *gdbarch)
+regcache_xmalloc (struct gdbarch *gdbarch, struct address_space *aspace)
 {
   struct regcache_descr *descr;
   struct regcache *regcache;
@@ -224,7 +224,7 @@ regcache_xmalloc (struct gdbarch *gdbarch)
     = XCALLOC (descr->sizeof_raw_registers, gdb_byte);
   regcache->register_valid_p
     = XCALLOC (descr->sizeof_raw_register_valid_p, gdb_byte);
-  regcache->aspace = NULL;
+  regcache->aspace = aspace;
   regcache->readonly_p = 1;
   regcache->ptid = minus_one_ptid;
   return regcache;
@@ -358,8 +358,6 @@ regcache_cpy (struct regcache *dst, struct regcache *src)
   gdb_assert (src != dst);
   gdb_assert (src->readonly_p || dst->readonly_p);
 
-  dst->aspace = src->aspace;
-
   if (!src->readonly_p)
     regcache_save (dst, do_cooked_read, src);
   else if (!dst->readonly_p)
@@ -379,7 +377,6 @@ regcache_cpy_no_passthrough (struct regcache *dst, struct regcache *src)
      silly - it would mean that valid_p would be completely invalid.  */
   gdb_assert (dst->readonly_p);
 
-  dst->aspace = src->aspace;
   memcpy (dst->registers, src->registers, dst->descr->sizeof_raw_registers);
   memcpy (dst->register_valid_p, src->register_valid_p,
 	  dst->descr->sizeof_raw_register_valid_p);
@@ -389,7 +386,7 @@ struct regcache *
 regcache_dup (struct regcache *src)
 {
   struct regcache *newbuf;
-  newbuf = regcache_xmalloc (src->descr->gdbarch);
+  newbuf = regcache_xmalloc (src->descr->gdbarch, get_regcache_aspace (src));
   regcache_cpy (newbuf, src);
   return newbuf;
 }
@@ -398,7 +395,7 @@ struct regcache *
 regcache_dup_no_passthrough (struct regcache *src)
 {
   struct regcache *newbuf;
-  newbuf = regcache_xmalloc (src->descr->gdbarch);
+  newbuf = regcache_xmalloc (src->descr->gdbarch, get_regcache_aspace (src));
   regcache_cpy_no_passthrough (newbuf, src);
   return newbuf;
 }
@@ -453,10 +450,10 @@ get_thread_arch_regcache (ptid_t ptid, struct gdbarch *gdbarch)
 	&& get_regcache_arch (list->regcache) == gdbarch)
       return list->regcache;
 
-  new_regcache = regcache_xmalloc (gdbarch);
+  new_regcache = regcache_xmalloc (gdbarch,
+				   target_thread_address_space (ptid));
   new_regcache->readonly_p = 0;
   new_regcache->ptid = ptid;
-  new_regcache->aspace = target_thread_address_space (ptid);
   gdb_assert (new_regcache->aspace != NULL);
 
   list = xmalloc (sizeof (struct regcache_list));
