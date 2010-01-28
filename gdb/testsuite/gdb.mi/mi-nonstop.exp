@@ -22,6 +22,15 @@ if {[mi_gdb_start]} {
     continue
 }
 
+proc mi_nonstop_resume { command test } {
+    if { [mi_send_resuming_command $command $test] != 0 } {
+	# If a resume fails, assume non-stop is broken or unsupported
+	# for this target.  We have logged a FAIL or UNSUPPORTED; skip
+	# the remaining tests to limit timeouts.
+	return -code continue
+    }
+}
+
 #
 # Start here
 #
@@ -60,7 +69,7 @@ if { [mi_run_to_main] < 0 } {
 
 mi_create_breakpoint break_at_me 2 keep break_at_me .* .* .* "breakpoint at marker"
 
-mi_send_resuming_command "exec-continue" "resume 1"
+mi_nonstop_resume "exec-continue" "resume 1"
 mi_expect_stop "breakpoint-hit" "break_at_me" ".*" "non-stop.c" ".*" {"" "disp=\"keep\""} "w0,i0 stop"
 mi_expect_stop "breakpoint-hit" "break_at_me" ".*" "non-stop.c" ".*" {"" "disp=\"keep\""} "w1,i0 stop"
 
@@ -71,12 +80,12 @@ mi_create_varobj I_W0 "i" "create varobj in first thread"
 mi_gdb_test "-thread-select 3" "\\^done.*" "select thread 3"
 mi_create_varobj I_W1 "i" "create varobj in second thread" 
 
-mi_send_resuming_command "exec-continue --thread 2" "resume 1"
+mi_nonstop_resume "exec-continue --thread 2" "resume 1"
 mi_check_thread_states {"running" "running" "stopped"} "thread state, resume 1"
 mi_expect_stop "breakpoint-hit" "break_at_me" ".*" "non-stop.c" ".*" {"" "disp=\"keep\""} "w0,i1 stop"
 mi_check_thread_states {"running" "stopped" "stopped"} "thread state, stop 2"
 
-mi_send_resuming_command "exec-continue --thread 3" "resume 2"
+mi_nonstop_resume "exec-continue --thread 3" "resume 2"
 mi_check_thread_states {"running" "stopped" "running"} "thread state, resume 2"
 mi_expect_stop "breakpoint-hit" "break_at_me" ".*" "non-stop.c" ".*" {"" "disp=\"keep\""} "w1,i1 stop"
 mi_check_thread_states {"running" "stopped" "stopped"} "thread state, stop 3"
@@ -118,8 +127,8 @@ mi_expect_stop "breakpoint-hit" "break_at_me" ".*" "non-stop.c" ".*" {"" "disp=\
 # running thread.
 mi_gdb_test "-break-condition --thread 1 2 id==1" "\\^done" "set condition, 1"
 
-mi_send_resuming_command "exec-continue --thread 2" "resume 2"
-mi_send_resuming_command "exec-continue --thread 3" "resume 3"
+mi_nonstop_resume "exec-continue --thread 2" "resume 2"
+mi_nonstop_resume "exec-continue --thread 3" "resume 3"
 
 sleep 2
 mi_expect_stop "breakpoint-hit" "break_at_me" ".*" "non-stop.c" ".*" {"" "disp=\"keep\""} "w0,i3 stop"

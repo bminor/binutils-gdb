@@ -1565,13 +1565,17 @@ proc mi_send_resuming_command_raw {command test} {
             # as real failure.
 	    return 0
         }
-        -re ".*${mi_gdb_prompt}" {
-            fail "$test (failed to resume)"
-	    return -1
+        -re "\\^error,msg=\"Displaced stepping is only supported in ARM mode\".*" {
+            unsupported "$test (Thumb mode)"
+            return -1
         }
         -re "\\^error,msg=.*" {
             fail "$test (MI error)"
             return -1
+        }
+        -re ".*${mi_gdb_prompt}" {
+            fail "$test (failed to resume)"
+	    return -1
         }
         timeout {
 	    fail "$test"

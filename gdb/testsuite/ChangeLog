@@ -1,3 +1,10 @@
+2010-01-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.mi/mi-nonstop.exp (mi_nonstop_resume): New function.
+	(Top level): Use it to resume.
+	* lib/mi-support.exp (mi_send_resuming_command_raw): Recognize
+	the Thumb mode displaced stepping error as unsupported.
+
 2010-01-28  Sami Wagiaalla  <swagiaal@redhat.com>
 
     * gdb.cp/nsusing.exp: Added more tests.
