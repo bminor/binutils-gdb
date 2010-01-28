@@ -354,6 +354,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EXxmmq { OP_EX, xmmq_mode }
 #define EXymmq { OP_EX, ymmq_mode }
 #define EXVexWdq { OP_EX, vex_w_dq_mode }
+#define EXVexWdqScalar { OP_EX, vex_scalar_w_dq_mode }
 #define MS { OP_MS, v_mode }
 #define XS { OP_XS, v_mode }
 #define EMCq { OP_EMC, q_mode }
@@ -481,6 +482,8 @@ enum
   q_scalar_swap_mode,
   /* like vex_mode, ignore vector length.  */
   vex_scalar_mode,
+  /* like vex_w_dq_mode, ignore vector length.  */
+  vex_scalar_w_dq_mode,
 
   es_reg,
   cs_reg,
@@ -4695,7 +4698,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfmadd132s%XW", { XM, Vex, EXVexWdq } },
+    { "vfmadd132s%XW", { XMScalar, VexScalar, EXVexWdqScalar } },
   },
 
   /* PREFIX_VEX_389A */
@@ -4709,7 +4712,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfmsub132s%XW", { XM, Vex, EXVexWdq } },
+    { "vfmsub132s%XW", { XMScalar, VexScalar, EXVexWdqScalar } },
   },
 
   /* PREFIX_VEX_389C */
@@ -4723,7 +4726,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfnmadd132s%XW", { XM, Vex, EXVexWdq } },
+    { "vfnmadd132s%XW", { XMScalar, VexScalar, EXVexWdqScalar } },
   },
 
   /* PREFIX_VEX_389E */
@@ -4737,7 +4740,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfnmsub132s%XW", { XM, Vex, EXVexWdq } },
+    { "vfnmsub132s%XW", { XMScalar, VexScalar, EXVexWdqScalar } },
   },
 
   /* PREFIX_VEX_38A6 */
@@ -4766,7 +4769,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfmadd213s%XW", { XM, Vex, EXVexWdq } },
+    { "vfmadd213s%XW", { XMScalar, VexScalar, EXVexWdqScalar } },
   },
 
   /* PREFIX_VEX_38AA */
@@ -4780,7 +4783,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfmsub213s%XW", { XM, Vex, EXVexWdq } },
+    { "vfmsub213s%XW", { XMScalar, VexScalar, EXVexWdqScalar } },
   },
 
   /* PREFIX_VEX_38AC */
@@ -4794,7 +4797,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfnmadd213s%XW", { XM, Vex, EXVexWdq } },
+    { "vfnmadd213s%XW", { XMScalar, VexScalar, EXVexWdqScalar } },
   },
 
   /* PREFIX_VEX_38AE */
@@ -4808,7 +4811,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfnmsub213s%XW", { XM, Vex, EXVexWdq } },
+    { "vfnmsub213s%XW", { XMScalar, VexScalar, EXVexWdqScalar } },
   },
 
   /* PREFIX_VEX_38B6 */
@@ -4836,7 +4839,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfmadd231s%XW", { XM, Vex, EXVexWdq } },
+    { "vfmadd231s%XW", { XMScalar, VexScalar, EXVexWdqScalar } },
   },
 
   /* PREFIX_VEX_38BA */
@@ -4850,7 +4853,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfmsub231s%XW", { XM, Vex, EXVexWdq } },
+    { "vfmsub231s%XW", { XMScalar, VexScalar, EXVexWdqScalar } },
   },
 
   /* PREFIX_VEX_38BC */
@@ -4864,7 +4867,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfnmadd231s%XW", { XM, Vex, EXVexWdq } },
+    { "vfnmadd231s%XW", { XMScalar, VexScalar, EXVexWdqScalar } },
   },
 
   /* PREFIX_VEX_38BE */
@@ -4878,7 +4881,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfnmsub231s%XW", { XM, Vex, EXVexWdq } },
+    { "vfnmsub231s%XW", { XMScalar, VexScalar, EXVexWdqScalar } },
   },
 
   /* PREFIX_VEX_38DB */
@@ -12776,6 +12779,7 @@ intel_operand_size (int bytemode, int sizeflag)
       oappend ("OWORD PTR ");
       break;
     case vex_w_dq_mode:
+    case vex_scalar_w_dq_mode:
       if (!need_vex)
 	abort ();
 
@@ -13969,7 +13973,8 @@ OP_EX (int bytemode, int sizeflag)
       && bytemode != d_scalar_mode
       && bytemode != d_scalar_swap_mode 
       && bytemode != q_scalar_mode
-      && bytemode != q_scalar_swap_mode)
+      && bytemode != q_scalar_swap_mode
+      && bytemode != vex_scalar_w_dq_mode)
     {
       switch (vex.length)
 	{

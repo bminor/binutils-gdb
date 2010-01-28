@@ -1,3 +1,15 @@
+2010-01-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (EXVexWdqScalar): New.
+	(vex_scalar_w_dq_mode): Likewise.
+	(prefix_table): Update entries for PREFIX_VEX_3899,
+	PREFIX_VEX_389B, PREFIX_VEX_389D, PREFIX_VEX_389F,
+	PREFIX_VEX_38A9, PREFIX_VEX_38AB, PREFIX_VEX_38AD,
+	PREFIX_VEX_38AF, PREFIX_VEX_38B9, PREFIX_VEX_38BB,
+	PREFIX_VEX_38BD and PREFIX_VEX_38BF.
+	(intel_operand_size): Handle vex_scalar_w_dq_mode.
+	(OP_EX): Likewise.
+
 2010-01-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (XMScalar): New.

@@ -1,3 +1,15 @@
+2010-01-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/fma-scalar-intel.d: New.
+	* gas/i386/fma-scalar.d: Likewise.
+	* gas/i386/fma-scalar.s: Likewise.
+	* gas/i386/x86-64-fma-scalar-intel.d: Likewise.
+	* gas/i386/x86-64-fma-scalar.d: Likewise.
+	* gas/i386/x86-64-fma-scalar.s: Likewise.
+
+	* gas/i386/i386.exp: Run fma-scalar, fma-scalar-intel,
+	x86-64-fma-scalar and x86-64-fma-scalar-intel.
+
 2010-01-28  Nick Clifton  <nickc@redhat.com>
 
 	PR 11225
