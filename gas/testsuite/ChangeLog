@@ -1,3 +1,8 @@
+2010-01-28  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* gas/pe/section-align-1.d: Don't test section flags.
+	* gas/pe/section-align-2.d: Likewise.
+
 2010-01-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/fma-scalar-intel.d: New.
