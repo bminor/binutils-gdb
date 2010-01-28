@@ -1,3 +1,13 @@
+2010-01-28  Joel Brobecker  <brobecker@adacore.com>
+
+	Another -Wunused-function error in procfs.c (sparc-solaris)
+	* procfs.c (insert_dbx_link_breakpoint): Delete declaration.  Move up.
+	Only define if SYS_syssgi is defined.
+	(remove_dbx_link_breakpoint): Delete declaration.  Move up.
+	(dbx_link_addr, insert_dbx_link_bpt_in_file)
+	(insert_dbx_link_bpt_in_region): Move up.  Only define if SYS_syssgi
+	is itself defined.
+
 2010-01-27  Christopher Faylor  <me+cygwin@cgf.cx>
 
 	* windows-nat.c (windows_initialization_done): New variable.

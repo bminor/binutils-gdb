@@ -3463,8 +3463,6 @@ static void do_detach (int signo);
 static int register_gdb_signals (procinfo *, gdb_sigset_t *);
 static void proc_trace_syscalls_1 (procinfo *pi, int syscallnum,
                                    int entry_or_exit, int mode, int from_tty);
-static int insert_dbx_link_breakpoint (procinfo *pi);
-static void remove_dbx_link_breakpoint (void);
 
 /* On mips-irix, we need to insert a breakpoint at __dbx_link during
    the startup phase.  The following two variables are used to record
@@ -3947,6 +3945,135 @@ syscall_is_lwp_create (procinfo *pi, int scall)
 #endif
   return 0;
 }
+
+/* Remove the breakpoint that we inserted in __dbx_link().
+   Does nothing if the breakpoint hasn't been inserted or has already
+   been removed.  */
+
+static void
+remove_dbx_link_breakpoint (void)
+{
+  if (dbx_link_bpt_addr == 0)
+    return;
+
+  if (deprecated_remove_raw_breakpoint (target_gdbarch, dbx_link_bpt) != 0)
+    warning (_("Unable to remove __dbx_link breakpoint."));
+
+  dbx_link_bpt_addr = 0;
+  dbx_link_bpt = NULL;
+}
+
+#ifdef SYS_syssgi
+/* Return the address of the __dbx_link() function in the file
+   refernced by ABFD by scanning its symbol table.  Return 0 if
+   the symbol was not found.  */
+
+static CORE_ADDR
+dbx_link_addr (bfd *abfd)
+{
+  long storage_needed;
+  asymbol **symbol_table;
+  long number_of_symbols;
+  long i;
+
+  storage_needed = bfd_get_symtab_upper_bound (abfd);
+  if (storage_needed <= 0)
+    return 0;
+
+  symbol_table = (asymbol **) xmalloc (storage_needed);
+  make_cleanup (xfree, symbol_table);
+
+  number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
+
+  for (i = 0; i < number_of_symbols; i++)
+    {
+      asymbol *sym = symbol_table[i];
+
+      if ((sym->flags & BSF_GLOBAL)
+          && sym->name != NULL && strcmp (sym->name, "__dbx_link") == 0)
+        return (sym->value + sym->section->vma);
+    }
+
+  /* Symbol not found, return NULL.  */
+  return 0;
+}
+
+/* Search the symbol table of the file referenced by FD for a symbol
+   named __dbx_link(). If found, then insert a breakpoint at this location,
+   and return nonzero.  Return zero otherwise.  */
+
+static int
+insert_dbx_link_bpt_in_file (int fd, CORE_ADDR ignored)
+{
+  bfd *abfd;
+  long storage_needed;
+  CORE_ADDR sym_addr;
+
+  abfd = bfd_fdopenr ("unamed", 0, fd);
+  if (abfd == NULL)
+    {
+      warning (_("Failed to create a bfd: %s."), bfd_errmsg (bfd_get_error ()));
+      return 0;
+    }
+
+  if (!bfd_check_format (abfd, bfd_object))
+    {
+      /* Not the correct format, so we can not possibly find the dbx_link
+         symbol in it.  */
+      bfd_close (abfd);
+      return 0;
+    }
+
+  sym_addr = dbx_link_addr (abfd);
+  if (sym_addr != 0)
+    {
+      /* Insert the breakpoint.  */
+      dbx_link_bpt_addr = sym_addr;
+      dbx_link_bpt = deprecated_insert_raw_breakpoint (target_gdbarch, NULL,
+						       sym_addr);
+      if (dbx_link_bpt == NULL)
+        {
+          warning (_("Failed to insert dbx_link breakpoint."));
+          bfd_close (abfd);
+          return 0;
+        }
+      bfd_close (abfd);
+      return 1;
+    }
+
+  bfd_close (abfd);
+  return 0;
+}
+
+/* If the given memory region MAP contains a symbol named __dbx_link,
+   insert a breakpoint at this location and return nonzero.  Return
+   zero otherwise.  */
+
+static int
+insert_dbx_link_bpt_in_region (struct prmap *map,
+                               int (*child_func) (),
+                               void *data)
+{
+  procinfo *pi = (procinfo *) data;
+
+  /* We know the symbol we're looking for is in a text region, so
+     only look for it if the region is a text one.  */
+  if (map->pr_mflags & MA_EXEC)
+    return solib_mappings_callback (map, insert_dbx_link_bpt_in_file, pi);
+
+  return 0;
+}
+
+/* Search all memory regions for a symbol named __dbx_link.  If found,
+   insert a breakpoint at its location, and return nonzero.  Return zero
+   otherwise.  */
+
+static int
+insert_dbx_link_breakpoint (procinfo *pi)
+{
+  return iterate_over_mappings (pi, NULL, pi, insert_dbx_link_bpt_in_region);
+}
+#endif
 
 /*
  * Function: target_wait
@@ -5606,133 +5733,6 @@ proc_find_memory_regions (int (*func) (CORE_ADDR,
 
   return iterate_over_mappings (pi, func, data,
 				find_memory_regions_callback);
-}
-
-/* Remove the breakpoint that we inserted in __dbx_link().
-   Does nothing if the breakpoint hasn't been inserted or has already
-   been removed.  */
-
-static void
-remove_dbx_link_breakpoint (void)
-{
-  if (dbx_link_bpt_addr == 0)
-    return;
-
-  if (deprecated_remove_raw_breakpoint (target_gdbarch, dbx_link_bpt) != 0)
-    warning (_("Unable to remove __dbx_link breakpoint."));
-
-  dbx_link_bpt_addr = 0;
-  dbx_link_bpt = NULL;
-}
-
-/* Return the address of the __dbx_link() function in the file
-   refernced by ABFD by scanning its symbol table.  Return 0 if
-   the symbol was not found.  */
-
-static CORE_ADDR
-dbx_link_addr (bfd *abfd)
-{
-  long storage_needed;
-  asymbol **symbol_table;
-  long number_of_symbols;
-  long i;
-
-  storage_needed = bfd_get_symtab_upper_bound (abfd);
-  if (storage_needed <= 0)
-    return 0;
-
-  symbol_table = (asymbol **) xmalloc (storage_needed);
-  make_cleanup (xfree, symbol_table);
-
-  number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
-
-  for (i = 0; i < number_of_symbols; i++)
-    {
-      asymbol *sym = symbol_table[i];
-
-      if ((sym->flags & BSF_GLOBAL)
-          && sym->name != NULL && strcmp (sym->name, "__dbx_link") == 0)
-        return (sym->value + sym->section->vma);
-    }
-
-  /* Symbol not found, return NULL.  */
-  return 0;
-}
-
-/* Search the symbol table of the file referenced by FD for a symbol
-   named __dbx_link(). If found, then insert a breakpoint at this location,
-   and return nonzero.  Return zero otherwise.  */
-
-static int
-insert_dbx_link_bpt_in_file (int fd, CORE_ADDR ignored)
-{
-  bfd *abfd;
-  long storage_needed;
-  CORE_ADDR sym_addr;
-
-  abfd = bfd_fdopenr ("unamed", 0, fd);
-  if (abfd == NULL)
-    {
-      warning (_("Failed to create a bfd: %s."), bfd_errmsg (bfd_get_error ()));
-      return 0;
-    }
-
-  if (!bfd_check_format (abfd, bfd_object))
-    {
-      /* Not the correct format, so we can not possibly find the dbx_link
-         symbol in it.  */
-      bfd_close (abfd);
-      return 0;
-    }
-
-  sym_addr = dbx_link_addr (abfd);
-  if (sym_addr != 0)
-    {
-      /* Insert the breakpoint.  */
-      dbx_link_bpt_addr = sym_addr;
-      dbx_link_bpt = deprecated_insert_raw_breakpoint (target_gdbarch, NULL,
-						       sym_addr);
-      if (dbx_link_bpt == NULL)
-        {
-          warning (_("Failed to insert dbx_link breakpoint."));
-          bfd_close (abfd);
-          return 0;
-        }
-      bfd_close (abfd);
-      return 1;
-    }
-
-  bfd_close (abfd);
-  return 0;
-} 
-
-/* If the given memory region MAP contains a symbol named __dbx_link,
-   insert a breakpoint at this location and return nonzero.  Return
-   zero otherwise.  */
-
-static int
-insert_dbx_link_bpt_in_region (struct prmap *map,
-                               int (*child_func) (),
-                               void *data)
-{     
-  procinfo *pi = (procinfo *) data;
-        
-  /* We know the symbol we're looking for is in a text region, so
-     only look for it if the region is a text one.  */
-  if (map->pr_mflags & MA_EXEC)
-    return solib_mappings_callback (map, insert_dbx_link_bpt_in_file, pi);
- 
-  return 0;
-}           
-
-/* Search all memory regions for a symbol named __dbx_link.  If found,
-   insert a breakpoint at its location, and return nonzero.  Return zero
-   otherwise.  */
-
-static int
-insert_dbx_link_breakpoint (procinfo *pi)
-{
-  return iterate_over_mappings (pi, NULL, pi, insert_dbx_link_bpt_in_region);
 }
 
 /*
