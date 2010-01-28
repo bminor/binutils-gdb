@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Test recursive namespace lookup
-
 if $tracelevel then {
     strace $tracelevel
 }
@@ -25,7 +23,8 @@ set bug_id 0
 set testfile nsrecurs
 set srcfile ${testfile}.cc
 set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" \
+      "${binfile}" executable {debug c++}] != "" } {
     untested "Couldn't compile test program"
     return -1
 }
@@ -65,3 +64,13 @@ gdb_test "print dx" "= 99"
 # anonymous namespace imports.
 
 gdb_test "print xx" "= 999"
+
+############################################
+# Test printing using recursive namespace
+# aliases.
+
+setup_kfail "gdb/10541" "*-*-*"
+gdb_test "ptype G::GF" "= namespace F"
+
+setup_kfail "gdb/10541" "*-*-*"
+gdb_test "print G::GF::FE::ex" "= 9999"

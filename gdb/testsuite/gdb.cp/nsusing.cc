@@ -1,34 +1,77 @@
-namespace O
+namespace M
 {
-  int ox = 4;
+  int x = 911;
 }
 
-namespace PQ
+namespace N
 {
-  int marker6 ()
+  int x = 912;
+}
+
+int marker10 ()
+{
+  using namespace M;
+  int y = x + 1; // marker10 stop
+  using namespace N;
+  return y;
+}
+
+namespace J
+{
+  int jx = 44;
+}
+
+namespace K
+{
+  int marker9 ()
   {
-    return 0;
+    //x;
+    return marker10 ();
   }
 }
 
-namespace P
+namespace L
 {
-  using namespace O;
+  using namespace J;
+  int marker8 ()
+  {
+    jx;
+    return K::marker9 ();
+  }
 }
 
-//--------------
-namespace C
+namespace G
 {
-  int cc = 3;
+  namespace H
+  {
+    int ghx = 6;
+  }
 }
 
-using namespace C;
-int marker5 ()
+namespace I
 {
-  cc;
-  return PQ::marker6 ();
+  int marker7 ()
+  {
+    using namespace G::H;
+    ghx;
+    return L::marker8 ();
+  }
 }
 
+namespace E
+{
+  namespace F
+  {
+    int efx = 5;
+  }
+}
+
+using namespace E::F;
+int marker6 ()
+{
+  efx;
+  return I::marker7 ();
+}
 
 namespace A
 {
@@ -36,42 +79,61 @@ namespace A
   int x = 2;
 }
 
-int marker4(){
-	using A::x;
-	return marker5 ();
+namespace C
+{
+  int cc = 3;
 }
 
-int marker3(){
-	return marker4();
+namespace D
+{
+  int dx = 4;
 }
 
-int marker2()
+using namespace C;
+int marker5 ()
+{
+  cc;
+  return marker6 ();
+}
+
+int marker4 ()
+{
+  using D::dx;
+  return marker5 ();
+}
+
+int marker3 ()
+{
+  return marker4 ();
+}
+
+int marker2 ()
 {
   namespace B = A;
   B::_a;
-  return marker3();
+  return marker3 ();
 }
 
-int marker1()
+int marker1 ()
 {
   int total = 0;
-  {
-    int b = 1;
     {
-      using namespace A;
-      int c = 2;
-      {
-        int d = 3;
-        total = _a + b + c + d + marker2(); // marker1 stop
-      }
+      int b = 1;
+        {
+          using namespace A;
+          int c = 2;
+            {
+              int d = 3;
+              total = _a + b + c + d + marker2 (); // marker1 stop
+            }
+        }
     }
-  }
-  return marker2() + total;
+  return marker2 () + total;
 }
 
-int main()
+int main ()
 {
   using namespace A;
   _a;
-  return marker1();
+  return marker1 ();
 }
