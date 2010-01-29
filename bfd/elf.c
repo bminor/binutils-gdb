@@ -7800,7 +7800,10 @@ elfcore_grok_lwpstatus (bfd *abfd, Elf_Internal_Note *note)
   memcpy (&lwpstat, note->descdata, sizeof (lwpstat));
 
   elf_tdata (abfd)->core_lwpid = lwpstat.pr_lwpid;
-  elf_tdata (abfd)->core_signal = lwpstat.pr_cursig;
+  /* Do not overwrite the core signal if it has already been set by
+     another thread.  */
+  if (elf_tdata (abfd)->core_signal == 0)
+    elf_tdata (abfd)->core_signal = lwpstat.pr_cursig;
 
   /* Make a ".reg/999" section.  */
 

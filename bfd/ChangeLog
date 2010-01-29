@@ -1,3 +1,8 @@
+2010-01-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* elf.c (elfcore_grok_lwpstatus): Do not overwrite the core signal
+	if it has already been set.
+
 2010-01-27  Tristan Gingold  <gingold@adacore.com>
 
 	* vms.h: Remove trailing spaces.
