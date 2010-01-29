@@ -9,6 +9,7 @@
 
 2010-01-29  Joel Brobecker  <brobecker@adacore.com>
 
+	amd64-windows: Integer parameters in function calls.
 	* i386-tdep.h (enum amd64_reg_class): New, moved here from
 	amd64-tdep.c.
 	(struct gdbarch_tdep): Add fields call_dummy_num_integer_regs,
