@@ -82,18 +82,28 @@ struct gdbarch_tdep
   int call_dummy_num_integer_regs;
   int *call_dummy_integer_regs;
 
-  /* Classify TYPE according to calling conventions, and store
-     the result in CLASS.  Used on amd64 only.  */
+  /* Used on amd64 only.  Classify TYPE according to calling conventions,
+     and store the result in CLASS.  */
   void (*classify) (struct type *type, enum amd64_reg_class class[2]);
 
-  /* Non-zero if the first few MEMORY arguments should be passed by
-     pointer.
+  /* Used on amd64 only.  Non-zero if the first few MEMORY arguments
+     should be passed by pointer.
 
      More precisely, MEMORY arguments are passed through the stack.
      But certain architectures require that their address be passed
      by register as well, if there are still some integer registers
      available for argument passing.  */
   int memory_args_by_pointer;
+
+  /* Used on amd64 only.
+
+     If non-zero, then the callers of a function are expected to reserve
+     some space in the stack just before the area where the PC is saved
+     so that the callee may save the integer-parameter registers there.
+     The amount of space is dependent on the list of registers used for
+     integer parameter passing (see component call_dummy_num_integer_regs
+     above).  */
+  int integer_param_regs_saved_in_caller_frame;
 
   /* Floating-point registers.  */
   struct regset *fpregset;

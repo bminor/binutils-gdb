@@ -701,6 +701,7 @@ amd64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		       int struct_return, CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   gdb_byte buf[8];
 
   /* Pass arguments.  */
@@ -717,6 +718,11 @@ amd64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       store_unsigned_integer (buf, 8, byte_order, struct_addr);
       regcache_cooked_write (regcache, arg_regnum, buf);
     }
+
+  /* Reserve some memory on the stack for the integer-parameter registers,
+     if required by the ABI.  */
+  if (tdep->integer_param_regs_saved_in_caller_frame)
+    sp -= tdep->call_dummy_num_integer_regs * 8;
 
   /* Store return address.  */
   sp -= 8;
