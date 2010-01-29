@@ -1,5 +1,19 @@
 2010-01-29  Doug Kwan  <dougkwan@google.com>
 
+	* arm.cc (Arm_relocate_functions::arm_branch_common) Change visibility
+	to public.
+	(Arm_relocate_functions::thumb_branch_common): Ditto.
+	(Arm_relocate_functions::thm_call, Arm_relocate_functions::thm_jump24,
+	Arm_relocate_functions::thm_xpc22, Arm_relocate_functions::plt32,
+	Arm_relocate_functions::xpc25, Arm_relocate_functions::call,
+	Arm_relocate_functions::jump24): Remove.
+	(Target_arm::Relocate::relocate): Adjust code to call
+	Arm_relocation_functions::arm_branch_common and
+	Arm_relocation_functions::thumb_branch_common instead of their removed
+	wrappers.  Merge switch-cases together to reduce source code size.  
+
+2010-01-29  Doug Kwan  <dougkwan@google.com>
+
 	* arm.cc (Arm_relobj::Arm_relobj): Initialize new data member
 	output_local_symbol_count_needs_update_.
 	(Arm_relobj::output_local_symbol_count_needs_update,

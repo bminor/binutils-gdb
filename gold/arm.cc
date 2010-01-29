@@ -2659,6 +2659,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
     return ((gn >> shift) | ((gn <= 0xff ? 0 : (32 - shift) / 2) << 8));
   }
 
+ public:
   // Handle ARM long branches.
   static typename This::Status
   arm_branch_common(unsigned int, const Relocate_info<32, big_endian>*,
@@ -2673,7 +2674,6 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 		      const Arm_relobj<big_endian>*, unsigned int,
 		      const Symbol_value<32>*, Arm_address, Arm_address, bool);
 
- public:
 
   // Return the branch offset of a 32-bit THUMB branch.
   static inline int32_t
@@ -2863,50 +2863,11 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
     return This::STATUS_OKAY;
   }
 
-  // R_ARM_THM_CALL: (S + A) | T - P
-  static inline typename This::Status
-  thm_call(const Relocate_info<32, big_endian>* relinfo, unsigned char *view,
-	   const Sized_symbol<32>* gsym, const Arm_relobj<big_endian>* object,
-	   unsigned int r_sym, const Symbol_value<32>* psymval,
-	   Arm_address address, Arm_address thumb_bit,
-	   bool is_weakly_undefined_without_plt)
-  {
-    return thumb_branch_common(elfcpp::R_ARM_THM_CALL, relinfo, view, gsym,
-			       object, r_sym, psymval, address, thumb_bit,
-			       is_weakly_undefined_without_plt);
-  }
-
-  // R_ARM_THM_JUMP24: (S + A) | T - P
-  static inline typename This::Status
-  thm_jump24(const Relocate_info<32, big_endian>* relinfo, unsigned char *view,
-	     const Sized_symbol<32>* gsym, const Arm_relobj<big_endian>* object,
-	     unsigned int r_sym, const Symbol_value<32>* psymval,
-	     Arm_address address, Arm_address thumb_bit,
-	     bool is_weakly_undefined_without_plt)
-  {
-    return thumb_branch_common(elfcpp::R_ARM_THM_JUMP24, relinfo, view, gsym,
-			       object, r_sym, psymval, address, thumb_bit,
-			       is_weakly_undefined_without_plt);
-  }
-
   // R_ARM_THM_JUMP24: (S + A) | T - P
   static typename This::Status
   thm_jump19(unsigned char *view, const Arm_relobj<big_endian>* object,
 	     const Symbol_value<32>* psymval, Arm_address address,
 	     Arm_address thumb_bit);
-
-  // R_ARM_THM_XPC22: (S + A) | T - P
-  static inline typename This::Status
-  thm_xpc22(const Relocate_info<32, big_endian>* relinfo, unsigned char *view,
-	    const Sized_symbol<32>* gsym, const Arm_relobj<big_endian>* object,
-	    unsigned int r_sym, const Symbol_value<32>* psymval,
-	    Arm_address address, Arm_address thumb_bit,
-	    bool is_weakly_undefined_without_plt)
-  {
-    return thumb_branch_common(elfcpp::R_ARM_THM_XPC22, relinfo, view, gsym,
-			       object, r_sym, psymval, address, thumb_bit,
-			       is_weakly_undefined_without_plt);
-  }
 
   // R_ARM_THM_JUMP6: S + A – P
   static inline typename This::Status
@@ -3004,74 +2965,6 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
   {
     Base::rel32(view, got_entry - address);
     return This::STATUS_OKAY;
-  }
-
-  // R_ARM_PLT32: (S + A) | T - P
-  static inline typename This::Status
-  plt32(const Relocate_info<32, big_endian>* relinfo,
-	unsigned char *view,
-	const Sized_symbol<32>* gsym,
-	const Arm_relobj<big_endian>* object,
-	unsigned int r_sym,
-	const Symbol_value<32>* psymval,
-	Arm_address address,
-	Arm_address thumb_bit,
-	bool is_weakly_undefined_without_plt)
-  {
-    return arm_branch_common(elfcpp::R_ARM_PLT32, relinfo, view, gsym,
-			     object, r_sym, psymval, address, thumb_bit,
-			     is_weakly_undefined_without_plt);
-  }
-
-  // R_ARM_XPC25: (S + A) | T - P
-  static inline typename This::Status
-  xpc25(const Relocate_info<32, big_endian>* relinfo,
-	unsigned char *view,
-	const Sized_symbol<32>* gsym,
-	const Arm_relobj<big_endian>* object,
-	unsigned int r_sym,
-	const Symbol_value<32>* psymval,
-	Arm_address address,
-	Arm_address thumb_bit,
-	bool is_weakly_undefined_without_plt)
-  {
-    return arm_branch_common(elfcpp::R_ARM_XPC25, relinfo, view, gsym,
-			     object, r_sym, psymval, address, thumb_bit,
-			     is_weakly_undefined_without_plt);
-  }
-
-  // R_ARM_CALL: (S + A) | T - P
-  static inline typename This::Status
-  call(const Relocate_info<32, big_endian>* relinfo,
-       unsigned char *view,
-       const Sized_symbol<32>* gsym,
-       const Arm_relobj<big_endian>* object,
-       unsigned int r_sym,
-       const Symbol_value<32>* psymval,
-       Arm_address address,
-       Arm_address thumb_bit,
-       bool is_weakly_undefined_without_plt)
-  {
-    return arm_branch_common(elfcpp::R_ARM_CALL, relinfo, view, gsym,
-			     object, r_sym, psymval, address, thumb_bit,
-			     is_weakly_undefined_without_plt);
-  }
-
-  // R_ARM_JUMP24: (S + A) | T - P
-  static inline typename This::Status
-  jump24(const Relocate_info<32, big_endian>* relinfo,
-	 unsigned char *view,
-	 const Sized_symbol<32>* gsym,
-	 const Arm_relobj<big_endian>* object,
-	 unsigned int r_sym,
-	 const Symbol_value<32>* psymval,
-	 Arm_address address,
-	 Arm_address thumb_bit,
-	 bool is_weakly_undefined_without_plt)
-  {
-    return arm_branch_common(elfcpp::R_ARM_JUMP24, relinfo, view, gsym,
-			     object, r_sym, psymval, address, thumb_bit,
-			     is_weakly_undefined_without_plt);
   }
 
   // R_ARM_PREL: (S + A) | T - P
@@ -7545,25 +7438,14 @@ Target_arm<big_endian>::Relocate::relocate(
 	reloc_status = Arm_relocate_functions::thm_abs5(view, object, psymval);
       break;
 
+    // Thumb long branches.
     case elfcpp::R_ARM_THM_CALL:
-      reloc_status =
-	Arm_relocate_functions::thm_call(relinfo, view, gsym, object, r_sym,
-					 psymval, address, thumb_bit,
-					 is_weakly_undefined_without_plt);
-      break;
-
-    case elfcpp::R_ARM_XPC25:
-      reloc_status =
-	Arm_relocate_functions::xpc25(relinfo, view, gsym, object, r_sym,
-				      psymval, address, thumb_bit,
-				      is_weakly_undefined_without_plt);
-      break;
-
     case elfcpp::R_ARM_THM_XPC22:
+    case elfcpp::R_ARM_THM_JUMP24:
       reloc_status =
-	Arm_relocate_functions::thm_xpc22(relinfo, view, gsym, object, r_sym,
-					  psymval, address, thumb_bit,
-					  is_weakly_undefined_without_plt);
+	Arm_relocate_functions::thumb_branch_common(
+	    r_type, relinfo, view, gsym, object, r_sym, psymval, address,
+	    thumb_bit, is_weakly_undefined_without_plt);
       break;
 
     case elfcpp::R_ARM_GOTOFF32:
@@ -7609,6 +7491,9 @@ Target_arm<big_endian>::Relocate::relocate(
       break;
 
     case elfcpp::R_ARM_PLT32:
+    case elfcpp::R_ARM_CALL:
+    case elfcpp::R_ARM_JUMP24:
+    case elfcpp::R_ARM_XPC25:
       gold_assert(gsym == NULL
 		  || gsym->has_plt_offset()
 		  || gsym->final_value_is_known()
@@ -7616,30 +7501,9 @@ Target_arm<big_endian>::Relocate::relocate(
 		      && !gsym->is_from_dynobj()
 		      && !gsym->is_preemptible()));
       reloc_status =
-	Arm_relocate_functions::plt32(relinfo, view, gsym, object, r_sym,
-				      psymval, address, thumb_bit,
-				      is_weakly_undefined_without_plt);
-      break;
-
-    case elfcpp::R_ARM_CALL:
-      reloc_status =
-	Arm_relocate_functions::call(relinfo, view, gsym, object, r_sym,
-				     psymval, address, thumb_bit,
-				     is_weakly_undefined_without_plt);
-      break;
-
-    case elfcpp::R_ARM_JUMP24:
-      reloc_status =
-	Arm_relocate_functions::jump24(relinfo, view, gsym, object, r_sym,
-				       psymval, address, thumb_bit,
-				       is_weakly_undefined_without_plt);
-      break;
-
-    case elfcpp::R_ARM_THM_JUMP24:
-      reloc_status =
-	Arm_relocate_functions::thm_jump24(relinfo, view, gsym, object, r_sym,
-					   psymval, address, thumb_bit,
-					   is_weakly_undefined_without_plt);
+    	Arm_relocate_functions::arm_branch_common(
+	    r_type, relinfo, view, gsym, object, r_sym, psymval, address,
+	    thumb_bit, is_weakly_undefined_without_plt);
       break;
 
     case elfcpp::R_ARM_THM_JUMP19:
