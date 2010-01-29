@@ -124,5 +124,7 @@ proc finish_tests { } {
     finish_abbreviation "fin"
 }
 
+set prev_timeout $timeout
 set timeout 30
 finish_tests
+set timeout $prev_timeout

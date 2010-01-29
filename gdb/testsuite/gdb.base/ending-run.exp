@@ -261,8 +261,6 @@ if {! [target_info exists use_gdb_stub]
 	unsupported "continue after exit"
     }
 
-    set timeout $old_timeout
-
     if {$program_exited_normally} {
         gdb_test "n" ".*The program is not being run.*" "don't step after run"
     } elseif {$program_not_exited} {
@@ -284,6 +282,8 @@ if {! [target_info exists use_gdb_stub]
 	}
     }
 }
+
+set timeout $old_timeout
 
 #remote_exec build "rm -f ${binfile}"
 return 0

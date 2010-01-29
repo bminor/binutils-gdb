@@ -53,6 +53,7 @@ gdb_load $binfile
     gdb_test "watch ival1" "" ""
     gdb_test "watch ival3" "" ""
 
+    set prev_timeout $timeout
     set timeout 600
 
     gdb_test "cont" "Continuing.*\[Ww\]atchpoint.*ival1.*Old value = -1.*New value = 0.*ival1 = count; ival2 = count;.*" "watchpoint hit, first time"
@@ -102,4 +103,4 @@ gdb_load $binfile
     # Check that the hit count is reported correctly
     gdb_test "info break" ".*watchpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+ival3\r\n\[ \t]+breakpoint already hit 5 times.*" "Watchpoint hit count is 5"
 
-   
+set timeout $prev_timeout

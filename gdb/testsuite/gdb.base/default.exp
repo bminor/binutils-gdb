@@ -20,6 +20,7 @@
 gdb_exit
 gdb_start
 
+set prev_timeout $timeout
 set timeout 60
 
 #
@@ -801,3 +802,5 @@ gdb_test "where" "No stack." "where"
 gdb_test "x" "Argument required .starting display address.*" "x"
 
 gdb_exit
+
+set timeout $prev_timeout

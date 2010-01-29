@@ -1149,6 +1149,7 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
+set prev_timeout $timeout
 if [istarget "mips*tx39-*"] {
     set timeout 300
 } else {
@@ -1223,3 +1224,5 @@ funcargs_reload
 localvars_in_indirect_call
 funcargs_reload
 test_stepping_over_trampolines
+
+set timeout $prev_timeout

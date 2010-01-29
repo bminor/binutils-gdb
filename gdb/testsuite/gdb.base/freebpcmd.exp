@@ -108,6 +108,7 @@ if {$i >= [llength $lines]} {
 
 gdb_run_cmd
 
+set prev_timeout $timeout
 set timeout 120
 
 gdb_test_multiple "" "run program with breakpoint commands" {
@@ -121,3 +122,5 @@ gdb_test_multiple "" "run program with breakpoint commands" {
         kfail "gdb/1489" "run program with breakpoint commands (GDB died)"
     }
 }
+
+set timeout $prev_timeout

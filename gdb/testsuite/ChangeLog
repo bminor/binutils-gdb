@@ -1,3 +1,14 @@
+2010-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/call-strs.exp, gdb.base/default.exp,
+	gdb.base/ending-run.exp, gdb.base/finish.exp, gdb.base/funcargs.exp,
+	gdb.base/huge.exp, gdb.base/nodebug.exp, gdb.base/ptype.exp,
+	gdb.base/restore.exp, gdb.base/return.exp, gdb.base/setvar.exp,
+	gdb.base/watchpoints.exp, gdb.threads/gcore-thread.exp,
+	gdb.base/watchpoint-solib.exp: Save and restore timeout.
+	* gdb.base/ending-run.exp: Correct restore of timeout.
+	* gdb.base/page.exp: Remove unnecessary timeout setting.
+
 2010-01-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/rec_return: New testcase.

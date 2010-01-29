@@ -55,6 +55,7 @@ set horiz "\[^\n\r\]*"
 # regexp for newline
 set nl "\[\r\n\]+"
 
+set prev_timeout $timeout
 set timeout 30
 
 send_gdb "help gcore\n"
@@ -174,3 +175,4 @@ gdb_test "info threads" ".* thread2 .*" \
 gdb_test "info threads" ".*${nl}\\* ${horiz} thread2 .*" \
 	"thread2 is current thread in corefile"
 
+set timeout $prev_timeout

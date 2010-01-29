@@ -20,11 +20,6 @@ if $tracelevel {
     strace $tracelevel
 }
 
-global message
-global timeout
-
-set timeout 200
-
 gdb_exit
 gdb_start
 

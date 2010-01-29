@@ -91,5 +91,7 @@ proc return_tests { } {
     gdb_test "p tmp3" ".* = 5.*" "correct value returned double test (known problem with sparc solaris)"
 }
 
+set prev_timeout $timeout
 set timeout 30
 return_tests
+set timeout $prev_timeout

@@ -95,12 +95,13 @@ send_gdb "set print sevenbit-strings\n" ; gdb_expect -re "$gdb_prompt $"
 send_gdb "set print address off\n" ; gdb_expect -re "$gdb_prompt $"
 send_gdb "set width 0\n" ; gdb_expect -re "$gdb_prompt $"
 
-set timeout 120
-
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
     continue
 }
+
+set prev_timeout $timeout
+set timeout 120
 
 #step
 send_gdb "step\n"
@@ -263,4 +264,6 @@ if ![gdb_skip_stdio_test "call str_func(s,s,s,s,s,s,s,s)"] {
 }
 
 gdb_exit
-return 0
+
+set timeout $prev_timeout
+

@@ -374,7 +374,8 @@ v_long_member = 3,.*v_float_member = 4,.*v_double_member = 5.*\}" \
 
 # We need to up this because this can be really slow on some boards.
 # (malloc() is called as part of the test).
-set timeout 60;
+set prev_timeout $timeout
+set timeout 60
 
 # Change the values
 test_set "set variable v_struct1 = {32, 33, 34, 35, 36, 37}" \
@@ -391,6 +392,8 @@ test_set "set variable v_struct1 = {'h', 1, 2, 3, 4.0, 5.0}" \
 .*v_int_member = 2,.*\
 v_long_member = 3,.*v_float_member = 4,.*v_double_member = 5.*\\}" \
   "set print structure #3"
+
+set timeout $prev_timeout
 
 # Test printing of enumeration bitfields.
 # GNU C supports them, some other compilers don't.

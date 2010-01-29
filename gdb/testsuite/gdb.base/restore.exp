@@ -116,5 +116,7 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
+set prev_timeout $timeout
 set timeout 30
 restore_tests
+set timeout $prev_timeout
