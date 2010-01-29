@@ -1,3 +1,8 @@
+2010-01-29  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* gas/pe/section-align-1.d: Generalise to pass on more targets.
+	* gas/pe/section-align-2.d: Likewise.
+
 2010-01-27  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	Backport from trunk:
