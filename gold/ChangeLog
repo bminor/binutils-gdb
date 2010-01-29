@@ -1,3 +1,20 @@
+2010-01-29  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_relobj::Arm_relobj): Initialize new data member
+	output_local_symbol_count_needs_update_.
+	(Arm_relobj::output_local_symbol_count_needs_update,
+	 Arm_relobj::set_output_local_symbol_count_needs_update,
+	 Arm_relobj::update_output_local_symbol_count): New methods.
+	(Arm_relobj::output_local_symbol_count_needs_update_): New data
+	member.
+	(Arm_exidx_cantunwind::do_fixed_endian_write): Write address
+	of pointed function as in a R_ARM_PREL31 relocation.
+	(Arm_output_section<big_endian>::fix_exidx_coverage): Mark objects
+	for output local symbol count updating.
+	(Target_arm::do_relax): Update output local symbol counts in objects
+	if necessary.
+	* object.h (Sized_relobj::set_output_local_symbol_count): New method.
+
 2010-01-29  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
 
 	* arm.cc: Added support for the ARM relocations:

@@ -1399,7 +1399,8 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
     : Sized_relobj<32, big_endian>(name, input_file, offset, ehdr),
       stub_tables_(), local_symbol_is_thumb_function_(),
       attributes_section_data_(NULL), mapping_symbols_info_(),
-      section_has_cortex_a8_workaround_(NULL), exidx_section_map_()
+      section_has_cortex_a8_workaround_(NULL), exidx_section_map_(),
+      output_local_symbol_count_needs_update_(false)
   { }
 
   ~Arm_relobj()
@@ -1524,6 +1525,20 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
 	    : NULL);
   }
 
+  // Whether output local symbol count needs updating.
+  bool
+  output_local_symbol_count_needs_update() const
+  { return this->output_local_symbol_count_needs_update_; }
+
+  // Set output_local_symbol_count_needs_update flag to be true.
+  void
+  set_output_local_symbol_count_needs_update()
+  { this->output_local_symbol_count_needs_update_ = true; }
+  
+  // Update output local symbol count at the end of relaxation.
+  void
+  update_output_local_symbol_count();
+
  protected:
   // Post constructor setup.
   void
@@ -1600,6 +1615,8 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
   std::vector<bool>* section_has_cortex_a8_workaround_;
   // Map a text section to its associated .ARM.exidx section, if there is one.
   Exidx_section_map exidx_section_map_;
+  // Whether output local symbol count needs updating.
+  bool output_local_symbol_count_needs_update_;
 };
 
 // Arm_dynobj class.
@@ -4866,7 +4883,10 @@ Arm_exidx_cantunwind::do_fixed_endian_write(Output_file* of)
   // Write out the entry.  The first word either points to the beginning
   // or after the end of a text section.  The second word is the special
   // EXIDX_CANTUNWIND value.
-  elfcpp::Swap<32, big_endian>::writeval(wv, output_address);
+  uint32_t prel31_offset = output_address - this->address();
+  if (utils::has_overflow<31>(offset))
+    gold_error(_("PREL31 overflow in EXIDX_CANTUNWIND entry"));
+  elfcpp::Swap<32, big_endian>::writeval(wv, prel31_offset & 0x7fffffffU);
   elfcpp::Swap<32, big_endian>::writeval(wv + 1, elfcpp::EXIDX_CANTUNWIND);
 
   of->write_output_view(this->offset(), oview_size, oview);
@@ -5469,6 +5489,10 @@ Arm_output_section<big_endian>::fix_exidx_coverage(
 	  // The whole EXIDX section got merged.  Remove it from output.
 	  gold_assert(section_offset_map == NULL);
 	  exidx_relobj->set_output_section(exidx_shndx, NULL);
+
+	  // All local symbols defined in this input section will be dropped.
+	  // We need to adjust output local symbol count.
+	  arm_relobj->set_output_local_symbol_count_needs_update();
 	}
       else if (deleted_bytes > 0)
 	{
@@ -5480,6 +5504,11 @@ Arm_output_section<big_endian>::fix_exidx_coverage(
 					 *section_offset_map, deleted_bytes);
 	  this->add_relaxed_input_section(merged_section);
 	  arm_relobj->convert_input_section_to_relaxed_section(exidx_shndx);
+
+	  // All local symbols defined in discarded portions of this input
+	  // section will be dropped.  We need to adjust output local symbol
+	  // count.
+	  arm_relobj->set_output_local_symbol_count_needs_update();
 	}
       else
 	{
@@ -6104,6 +6133,99 @@ Arm_relobj<big_endian>::do_gc_process_relocs(Symbol_table* symtab,
 	  symtab->gc()->add_reference(this, text_shndx, this, i);
 	}
     }
+}
+
+// Update output local symbol count.  Owing to EXIDX entry merging, some local
+// symbols  will be removed in output.  Adjust output local symbol count
+// accordingly.  We can only changed the static output local symbol count.  It
+// is too late to change the dynamic symbols.
+
+template<bool big_endian>
+void
+Arm_relobj<big_endian>::update_output_local_symbol_count()
+{
+  // Caller should check that this needs updating.  We want caller checking
+  // because output_local_symbol_count_needs_update() is most likely inlined.
+  gold_assert(this->output_local_symbol_count_needs_update_);
+
+  gold_assert(this->symtab_shndx() != -1U);
+  if (this->symtab_shndx() == 0)
+    {
+      // This object has no symbols.  Weird but legal.
+      return;
+    }
+
+  // Read the symbol table section header.
+  const unsigned int symtab_shndx = this->symtab_shndx();
+  elfcpp::Shdr<32, big_endian>
+    symtabshdr(this, this->elf_file()->section_header(symtab_shndx));
+  gold_assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
+
+  // Read the local symbols.
+  const int sym_size = elfcpp::Elf_sizes<32>::sym_size;
+  const unsigned int loccount = this->local_symbol_count();
+  gold_assert(loccount == symtabshdr.get_sh_info());
+  off_t locsize = loccount * sym_size;
+  const unsigned char* psyms = this->get_view(symtabshdr.get_sh_offset(),
+					      locsize, true, true);
+
+  // Loop over the local symbols.
+
+  typedef typename Sized_relobj<32, big_endian>::Output_sections
+     Output_sections;
+  const Output_sections& out_sections(this->output_sections());
+  unsigned int shnum = this->shnum();
+  unsigned int count = 0;
+  // Skip the first, dummy, symbol.
+  psyms += sym_size;
+  for (unsigned int i = 1; i < loccount; ++i, psyms += sym_size)
+    {
+      elfcpp::Sym<32, big_endian> sym(psyms);
+
+      Symbol_value<32>& lv((*this->local_values())[i]);
+
+      // This local symbol was already discarded by do_count_local_symbols.
+      if (!lv.needs_output_symtab_entry())
+	continue;
+
+      bool is_ordinary;
+      unsigned int shndx = this->adjust_sym_shndx(i, sym.get_st_shndx(),
+						  &is_ordinary);
+
+      if (shndx < shnum)
+	{
+	  Output_section* os = out_sections[shndx];
+
+	  // This local symbol no longer has an output section.  Discard it.
+	  if (os == NULL)
+	    {
+	      lv.set_no_output_symtab_entry();
+	      continue;
+	    }
+
+	  // Currently we only discard parts of EXIDX input sections.
+	  // We explicitly check for a merged EXIDX input section to avoid
+	  // calling Output_section_data::output_offset unless necessary.
+	  if ((this->get_output_section_offset(shndx) == invalid_address)
+	      && (this->exidx_input_section_by_shndx(shndx) != NULL))
+	    {
+	      section_offset_type output_offset =
+		os->output_offset(this, shndx, lv.input_value());
+	      if (output_offset == -1)
+		{
+		  // This symbol is defined in a part of an EXIDX input section
+		  // that is discarded due to entry merging.
+		  lv.set_no_output_symtab_entry();
+		  continue;
+		}	
+	    }
+	}
+
+      ++count;
+    }
+
+  this->set_output_local_symbol_count(count);
+  this->output_local_symbol_count_needs_update_ = false;
 }
 
 // Arm_dynobj methods.
@@ -6777,6 +6899,8 @@ Target_arm<big_endian>::Scan::global(Symbol_table* symtab,
       break;
 
     case elfcpp::R_ARM_REL32:
+      break;
+
     case elfcpp::R_ARM_PREL31:
       {
 	// Make a dynamic relocation if necessary.
@@ -9569,10 +9693,27 @@ Target_arm<big_endian>::do_relax(
 
   // Finalize the stubs in the last relaxation pass.
   if (!continue_relaxation)
-    for (Stub_table_iterator sp = this->stub_tables_.begin();
-	 (sp != this->stub_tables_.end()) && !any_stub_table_changed;
-	 ++sp)
-      (*sp)->finalize_stubs();
+    {
+      for (Stub_table_iterator sp = this->stub_tables_.begin();
+	   (sp != this->stub_tables_.end()) && !any_stub_table_changed;
+	    ++sp)
+	(*sp)->finalize_stubs();
+
+      // Update output local symbol counts of objects if necessary.
+      for (Input_objects::Relobj_iterator op = input_objects->relobj_begin();
+	   op != input_objects->relobj_end();
+	   ++op)
+	{
+	  Arm_relobj<big_endian>* arm_relobj =
+	    Arm_relobj<big_endian>::as_arm_relobj(*op);
+
+	  // Update output local symbol counts.  We need to discard local
+	  // symbols defined in parts of input sections that are discarded by
+	  // relaxation.
+	  if (arm_relobj->output_local_symbol_count_needs_update())
+	    arm_relobj->update_output_local_symbol_count();
+	}
+    }
 
   return continue_relaxation;
 }

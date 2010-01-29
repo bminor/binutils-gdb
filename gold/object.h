@@ -1689,6 +1689,11 @@ class Sized_relobj : public Relobj
   do_relocate_sections(const Symbol_table* symtab, const Layout* layout,
 		       const unsigned char* pshdrs, Views* pviews);
 
+  // Allow a child to set output local symbol count.
+  void
+  set_output_local_symbol_count(unsigned int value)
+  { this->output_local_symbol_count_ = value; }
+   
  private:
   // For convenience.
   typedef Sized_relobj<size, big_endian> This;
