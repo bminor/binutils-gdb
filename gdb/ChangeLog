@@ -1,7 +1,15 @@
 2010-01-29  Joel Brobecker  <brobecker@adacore.com>
 
+	Implement return values on amd64-windows.
+	* amd64-windows-tdep.c: #include gdbcore.h and regcache.h.
+	(amd64_windows_return_value): New function.
+	(amd64_windows_init_abi): Call set_gdbarch_return_value with
+	amd64_windows_return_value.
+
+2010-01-29  Joel Brobecker  <brobecker@adacore.com>
+
 	amd64-windows: 32 bytes allocated on stack by caller for integer
-	parameter registers
+	parameter registers.
 	* i386-tdep.h (struct gdbarch_tdep): Add new field
 	integer_param_regs_saved_in_caller_frame.
 	* amd64-windows-tdep.c (amd64_windows_init_abi): Set

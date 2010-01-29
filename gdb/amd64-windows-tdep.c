@@ -21,6 +21,8 @@
 #include "solib.h"
 #include "solib-target.h"
 #include "gdbtypes.h"
+#include "gdbcore.h"
+#include "regcache.h"
 
 /* The registers used to pass integer arguments during a function call.  */
 static int amd64_windows_dummy_call_integer_regs[] =
@@ -68,6 +70,58 @@ amd64_windows_classify (struct type *type, enum amd64_reg_class class[2])
     }
 }
 
+/* Implement the "return_value" gdbarch method for amd64-windows.  */
+
+static enum return_value_convention
+amd64_windows_return_value (struct gdbarch *gdbarch, struct type *func_type,
+			    struct type *type, struct regcache *regcache,
+			    gdb_byte *readbuf, const gdb_byte *writebuf)
+{
+  int len = TYPE_LENGTH (type);
+  int regnum = -1;
+
+  /* See if our value is returned through a register.  If it is, then
+     store the associated register number in REGNUM.  */
+  switch (TYPE_CODE (type))
+    {
+      case TYPE_CODE_FLT:
+      case TYPE_CODE_DECFLOAT:
+        /* __m128, __m128i, __m128d, floats, and doubles are returned
+           via XMM0.  */
+        if (len == 4 || len == 8 || len == 16)
+          regnum = AMD64_XMM0_REGNUM;
+        break;
+      default:
+        /* All other values that are 1, 2, 4 or 8 bytes long are returned
+           via RAX.  */
+        if (len == 1 || len == 2 || len == 4 || len == 8)
+          regnum = AMD64_RAX_REGNUM;
+        break;
+    }
+
+  if (regnum < 0)
+    {
+      /* RAX contains the address where the return value has been stored.  */
+      if (readbuf)
+        {
+	  ULONGEST addr;
+
+	  regcache_raw_read_unsigned (regcache, AMD64_RAX_REGNUM, &addr);
+	  read_memory (addr, readbuf, TYPE_LENGTH (type));
+	}
+      return RETURN_VALUE_ABI_RETURNS_ADDRESS;
+    }
+  else
+    {
+      /* Extract the return value from the register where it was stored.  */
+      if (readbuf)
+	regcache_raw_read_part (regcache, regnum, 0, len, readbuf);
+      if (writebuf)
+	regcache_raw_write_part (regcache, regnum, 0, len, writebuf);
+      return RETURN_VALUE_REGISTER_CONVENTION;
+    }
+}
+
 static void
 amd64_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -85,6 +139,7 @@ amd64_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->classify = amd64_windows_classify;
   tdep->memory_args_by_pointer = 1;
   tdep->integer_param_regs_saved_in_caller_frame = 1;
+  set_gdbarch_return_value (gdbarch, amd64_windows_return_value);
 
   set_solib_ops (gdbarch, &solib_target_so_ops);
 }
