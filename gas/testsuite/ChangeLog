@@ -1,3 +1,10 @@
+2010-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gas/arm/dis-data.d: Update test name.  Do not expect
+	.word output.
+	* gas/arm/dis-data2.d, gas/arm/dis-data2.s,
+	gas/arm/dis-data3.d, gas/arm/dis-data3.s: New tests.
+
 2010-01-29  Nick Clifton  <nickc@redhat.com>
 
 	PR 11136

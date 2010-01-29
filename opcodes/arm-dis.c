@@ -45,6 +45,16 @@
 #define NUM_ELEM(a)     (sizeof (a) / sizeof (a)[0])
 #endif
 
+struct arm_private_data
+{
+  /* The features to use when disassembling optional instructions.  */
+  arm_feature_set features;
+
+  /* Whether any mapping symbols are present in the provided symbol
+     table.  -1 if we do not know yet, otherwise 0 or 1.  */
+  int has_mapping_symbols;
+};
+
 struct opcode32
 {
   unsigned long arch;		/* Architecture defining this insn.  */
@@ -1750,7 +1760,8 @@ print_insn_coprocessor (bfd_vma pc,
   fprintf_ftype func = info->fprintf_func;
   unsigned long mask;
   unsigned long value = 0;
-  unsigned long allowed_arches = ((arm_feature_set *) info->private_data)->coproc;
+  struct arm_private_data *private_data = info->private_data;
+  unsigned long allowed_arches = private_data->features.coproc;
   int cond;
 
   for (insn = coprocessor_opcodes; insn->assembler; insn++)
@@ -1776,7 +1787,7 @@ print_insn_coprocessor (bfd_vma pc,
 	    continue;
 
 	  case SENTINEL_GENERIC_START:
-	    allowed_arches = ((arm_feature_set *) info->private_data)->core;
+	    allowed_arches = private_data->features.core;
 	    continue;
 
 	  default:
@@ -2843,6 +2854,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
   const struct opcode32 *insn;
   void *stream = info->stream;
   fprintf_ftype func = info->fprintf_func;
+  struct arm_private_data *private_data = info->private_data;
 
   if (print_insn_coprocessor (pc, info, given, FALSE))
     return;
@@ -2855,7 +2867,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
       if ((given & insn->mask) != insn->value)
 	continue;
     
-      if ((insn->arch & ((arm_feature_set *) info->private_data)->core) == 0)
+      if ((insn->arch & private_data->features.core) == 0)
 	continue;
 
       /* Special case: an instruction with all bits set in the condition field
@@ -3057,7 +3069,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			  /* The p-variants of tst/cmp/cmn/teq are the pre-V6
 			     mechanism for setting PSR flag bits.  They are
 			     obsolete in V6 onwards.  */
-			  if (((((arm_feature_set *) info->private_data)->core) & ARM_EXT_V6) == 0)
+			  if ((private_data->features.core & ARM_EXT_V6) == 0)
 			    func (stream, "p");
 			}
 		      break;
@@ -4268,7 +4280,44 @@ find_ifthen_state (bfd_vma pc,
     ifthen_state = 0;
 }
 
-/* Try to infer the code type (Arm or Thumb) from a symbol.
+/* Returns nonzero and sets *MAP_TYPE if the N'th symbol is a
+   mapping symbol.  */
+
+static int
+is_mapping_symbol (struct disassemble_info *info, int n,
+		   enum map_type *map_type)
+{
+  const char *name;
+
+  name = bfd_asymbol_name (info->symtab[n]);
+  if (name[0] == '$' && (name[1] == 'a' || name[1] == 't' || name[1] == 'd')
+      && (name[2] == 0 || name[2] == '.'))
+    {
+      *map_type = ((name[1] == 'a') ? MAP_ARM
+		   : (name[1] == 't') ? MAP_THUMB
+		   : MAP_DATA);
+      return TRUE;
+    }
+
+  return FALSE;
+}
+
+/* Try to infer the code type (ARM or Thumb) from a mapping symbol.
+   Returns nonzero if *MAP_TYPE was set.  */
+
+static int
+get_map_sym_type (struct disassemble_info *info,
+		  int n,
+		  enum map_type *map_type)
+{
+  /* If the symbol is in a different section, ignore it.  */
+  if (info->section != NULL && info->section != info->symtab[n]->section)
+    return FALSE;
+
+  return is_mapping_symbol (info, n, map_type);
+}
+
+/* Try to infer the code type (ARM or Thumb) from a non-mapping symbol.
    Returns nonzero if *MAP_TYPE was set.  */
 
 static int
@@ -4278,7 +4327,10 @@ get_sym_code_type (struct disassemble_info *info,
 {
   elf_symbol_type *es;
   unsigned int type;
-  const char *name;
+
+  /* If the symbol is in a different section, ignore it.  */
+  if (info->section != NULL && info->section != info->symtab[n]->section)
+    return FALSE;
 
   es = *(elf_symbol_type **)(info->symtab + n);
   type = ELF_ST_TYPE (es->internal_elf_sym.st_info);
@@ -4287,17 +4339,6 @@ get_sym_code_type (struct disassemble_info *info,
   if (type == STT_FUNC || type == STT_ARM_TFUNC)
     {
       *map_type = (type == STT_ARM_TFUNC) ? MAP_THUMB : MAP_ARM;
-      return TRUE;
-    }
-
-  /* Check for mapping symbols.  */
-  name = bfd_asymbol_name (info->symtab[n]);
-  if (name[0] == '$' && (name[1] == 'a' || name[1] == 't' || name[1] == 'd')
-      && (name[2] == 0 || name[2] == '.'))
-    {
-      *map_type = ((name[1] == 'a') ? MAP_ARM
-		   : (name[1] == 't') ? MAP_THUMB
-		   : MAP_DATA);
       return TRUE;
     }
 
@@ -4355,12 +4396,12 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
   long		given;
   int           status;
   int           is_thumb = FALSE;
-  int           is_data = (bfd_asymbol_flavour (*info->symtab)
-			   == bfd_target_elf_flavour) ? TRUE : FALSE;
+  int           is_data = FALSE;
   int           little_code;
   unsigned int	size = 4;
   void	 	(*printer) (bfd_vma, struct disassemble_info *, long);
   bfd_boolean   found = FALSE;
+  struct arm_private_data *private_data;
 
   if (info->disassembler_options)
     {
@@ -4373,7 +4414,7 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
   /* PR 10288: Control which instructions will be disassembled.  */
   if (info->private_data == NULL)
     {
-      static arm_feature_set features;
+      static struct arm_private_data private;
 
       if ((info->flags & USER_SPECIFIED_MACHINE_TYPE) == 0)
 	/* If the user did not use the -m command line switch then default to
@@ -4399,67 +4440,124 @@ print_insn (bfd_vma pc, struct disassemble_info *info, bfd_boolean little)
       /* Compute the architecture bitmask from the machine number.
 	 Note: This assumes that the machine number will not change
 	 during disassembly....  */
-      select_arm_features (info->mach, & features);
+      select_arm_features (info->mach, & private.features);
 
-      info->private_data = & features;
+      private.has_mapping_symbols = -1;
+
+      info->private_data = & private;
     }
-  
+
+  private_data = info->private_data;
+
   /* Decide if our code is going to be little-endian, despite what the
      function argument might say.  */
   little_code = ((info->endian_code == BFD_ENDIAN_LITTLE) || little);
 
-  /* First check the full symtab for a mapping symbol, even if there
-     are no usable non-mapping symbols for this address.  */
+  /* For ELF, consult the symbol table to determine what kind of code
+     or data we have.  */
   if (info->symtab_size != 0
       && bfd_asymbol_flavour (*info->symtab) == bfd_target_elf_flavour)
     {
       bfd_vma addr;
-      int n;
+      int n, start;
       int last_sym = -1;
-      enum map_type type = MAP_DATA;
+      enum map_type type = MAP_ARM;
 
-      if (pc <= last_mapping_addr)
-	last_mapping_sym = -1;
-      is_thumb = (last_type == MAP_THUMB);
-      found = FALSE;
       /* Start scanning at the start of the function, or wherever
 	 we finished last time.  */
-      n = info->symtab_pos + 1;
-      if (n < last_mapping_sym)
-	n = last_mapping_sym;
+      start = info->symtab_pos + 1;
+      if (start < last_mapping_sym)
+	start = last_mapping_sym;
+      found = FALSE;
 
-      /* Scan up to the location being disassembled.  */
-      for (; n < info->symtab_size; n++)
+      /* First, look for mapping symbols.  */
+      if (private_data->has_mapping_symbols != 0)
 	{
-	  addr = bfd_asymbol_value (info->symtab[n]);
-	  if (addr > pc)
-	    break;
-	  if ((info->section == NULL
-	       || info->section == info->symtab[n]->section)
-	      && get_sym_code_type (info, n, &type))
+	  /* Scan up to the location being disassembled.  */
+	  for (n = start; n < info->symtab_size; n++)
 	    {
-	      last_sym = n;
+	      addr = bfd_asymbol_value (info->symtab[n]);
+	      if (addr > pc)
+		break;
+	      if (get_map_sym_type (info, n, &type))
+		{
+		  last_sym = n;
+		  found = TRUE;
+		}
+	    }
+
+	  if (!found)
+	    {
+	      /* No mapping symbol found at this address.  Look backwards
+		 for a preceeding one.  */
+	      for (n = start - 1; n >= 0; n--)
+		{
+		  if (get_map_sym_type (info, n, &type))
+		    {
+		      last_sym = n;
+		      found = TRUE;
+		      break;
+		    }
+		}
+	    }
+
+	  if (found)
+	    private_data->has_mapping_symbols = 1;
+
+	  /* No mapping symbols were found.  A leading $d may be
+	     omitted for sections which start with data; but for
+	     compatibility with legacy and stripped binaries, only
+	     assume the leading $d if there is at least one mapping
+	     symbol in the file.  */
+	  if (!found && private_data->has_mapping_symbols == -1)
+	    {
+	      /* Look for mapping symbols, in any section.  */
+	      for (n = 0; n < info->symtab_size; n++)
+		if (is_mapping_symbol (info, n, &type))
+		  {
+		    private_data->has_mapping_symbols = 1;
+		    break;
+		  }
+	      if (private_data->has_mapping_symbols == -1)
+		private_data->has_mapping_symbols = 0;
+	    }
+
+	  if (!found && private_data->has_mapping_symbols == 1)
+	    {
+	      type = MAP_DATA;
 	      found = TRUE;
 	    }
 	}
 
+      /* Next search for function symbols to separate ARM from Thumb
+	 in binaries without mapping symbols.  */
       if (!found)
 	{
-	  n = info->symtab_pos;
-	  if (n < last_mapping_sym - 1)
-	    n = last_mapping_sym - 1;
-
-	  /* No mapping symbol found at this address.  Look backwards
-	     for a preceeding one.  */
-	  for (; n >= 0; n--)
+	  /* Scan up to the location being disassembled.  */
+	  for (n = start; n < info->symtab_size; n++)
 	    {
-	      if ((info->section == NULL
-		   || info->section == info->symtab[n]->section)
-		  && get_sym_code_type (info, n, &type))
+	      addr = bfd_asymbol_value (info->symtab[n]);
+	      if (addr > pc)
+		break;
+	      if (get_sym_code_type (info, n, &type))
 		{
 		  last_sym = n;
 		  found = TRUE;
-		  break;
+		}
+	    }
+
+	  if (!found)
+	    {
+	      /* No mapping symbol found at this address.  Look backwards
+		 for a preceeding one.  */
+	      for (n = start - 1; n >= 0; n--)
+		{
+		  if (get_sym_code_type (info, n, &type))
+		    {
+		      last_sym = n;
+		      found = TRUE;
+		      break;
+		    }
 		}
 	    }
 	}

@@ -1,3 +1,15 @@
+2010-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* opcodes/arm-dis.c (struct arm_private_data): New.
+	(print_insn_coprocessor, print_insn_arm): Update to use struct
+	arm_private_data.
+	(is_mapping_symbol, get_map_sym_type): New functions.
+	(get_sym_code_type): Check the symbol's section.  Do not check
+	mapping symbols.
+	(print_insn): Default to disassembling ARM mode code.  Check
+	for mapping symbols separately from other symbols.  Use
+	struct arm_private_data.
+
 2010-01-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (EXVexWdqScalar): New.
