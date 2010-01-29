@@ -20,14 +20,69 @@
 #include "amd64-tdep.h"
 #include "solib.h"
 #include "solib-target.h"
+#include "gdbtypes.h"
+
+/* The registers used to pass integer arguments during a function call.  */
+static int amd64_windows_dummy_call_integer_regs[] =
+{
+  AMD64_RCX_REGNUM,          /* %rcx */
+  AMD64_RDX_REGNUM,          /* %rdx */
+  8,                         /* %r8 */
+  9                          /* %r9 */
+};
+
+/* Implement the "classify" method in the gdbarch_tdep structure
+   for amd64-windows.  */
+
+static void
+amd64_windows_classify (struct type *type, enum amd64_reg_class class[2])
+{
+  switch (TYPE_CODE (type))
+    {
+      case TYPE_CODE_ARRAY:
+	/* Arrays are always passed by memory.	*/
+	class[0] = class[1] = AMD64_MEMORY;
+	break;
+
+      case TYPE_CODE_STRUCT:
+      case TYPE_CODE_UNION:
+        /* Struct/Union types whose size is 1, 2, 4, or 8 bytes
+	   are passed as if they were integers of the same size.
+	   Types of different sizes are passed by memory.  */
+	if (TYPE_LENGTH (type) == 1
+	    || TYPE_LENGTH (type) == 2
+	    || TYPE_LENGTH (type) == 4
+	    || TYPE_LENGTH (type) == 8)
+	  {
+	    class[0] = AMD64_INTEGER;
+	    class[1] = AMD64_NO_CLASS;
+	  }
+	else
+	  class[0] = class[1] = AMD64_MEMORY;
+	break;
+
+      default:
+	/* For all the other types, the conventions are the same as
+	   with the System V ABI.  */
+	amd64_classify (type, class);
+    }
+}
 
 static void
 amd64_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
   amd64_init_abi (info, gdbarch);
 
   /* On Windows, "long"s are only 32bit.  */
   set_gdbarch_long_bit (gdbarch, 32);
+
+  /* Function calls.  */
+  tdep->call_dummy_num_integer_regs =
+    ARRAY_SIZE (amd64_windows_dummy_call_integer_regs);
+  tdep->call_dummy_integer_regs = amd64_windows_dummy_call_integer_regs;
+  tdep->classify = amd64_windows_classify;
 
   set_solib_ops (gdbarch, &solib_target_so_ops);
 }

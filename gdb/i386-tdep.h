@@ -53,6 +53,20 @@ enum struct_return
   reg_struct_return		/* Return "short" structures in registers.  */
 };
 
+/* Register classes as defined in the AMD x86-64 psABI.  */
+
+enum amd64_reg_class
+{
+  AMD64_INTEGER,
+  AMD64_SSE,
+  AMD64_SSEUP,
+  AMD64_X87,
+  AMD64_X87UP,
+  AMD64_COMPLEX_X87,
+  AMD64_NO_CLASS,
+  AMD64_MEMORY
+};
+
 /* i386 architecture specific information.  */
 struct gdbarch_tdep
 {
@@ -61,6 +75,16 @@ struct gdbarch_tdep
   int *gregset_reg_offset;
   int gregset_num_regs;
   size_t sizeof_gregset;
+
+  /* The general-purpose registers used to pass integers when making
+     function calls.  This only applies to amd64, as all parameters
+     are passed through the stack on x86.  */
+  int call_dummy_num_integer_regs;
+  int *call_dummy_integer_regs;
+
+  /* Classify TYPE according to calling conventions, and store
+     the result in CLASS.  Used on amd64 only.  */
+  void (*classify) (struct type *type, enum amd64_reg_class class[2]);
 
   /* Floating-point registers.  */
   struct regset *fpregset;

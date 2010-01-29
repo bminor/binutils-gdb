@@ -98,6 +98,9 @@ extern void amd64_supply_fxsave (struct regcache *regcache, int regnum,
 
 extern void amd64_collect_fxsave (const struct regcache *regcache, int regnum,
 				  void *fxsave);
+
+void amd64_classify (struct type *type, enum amd64_reg_class class[2]);
+
 
 
 /* Variables exported from amd64nbsd-tdep.c.  */

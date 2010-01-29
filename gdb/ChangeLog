@@ -1,3 +1,28 @@
+2010-01-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* i386-tdep.h (enum amd64_reg_class): New, moved here from
+	amd64-tdep.c.
+	(struct gdbarch_tdep): Add fields call_dummy_num_integer_regs,
+	call_dummy_integer_regs, and classify.
+	* amd64-tdep.h (amd64_classify): Add declaration.
+	* amd64-tdep.c (amd64_dummy_call_integer_regs): New static constant.
+	(amd64_reg_class): Delete, moved to i386-tdep.h.
+	(amd64_classify): Make non-static.  Move declaration to amd64-tdep.h.
+	Replace call to amd64_classify by call to tdep->classify.
+	(amd64_push_arguments): Get the list of registers to use for
+	passing integer parameters from the gdbarch tdep structure,
+	rather than using a hardcoded one.  Replace calls to amd64_classify
+	by calls to tdep->classify.
+	(amd64_push_dummy_call): Get the register number used for
+	the "hidden" argument from tdep->call_dummy_integer_regs.
+	(amd64_init_abi): Initialize tdep->call_dummy_num_integer_regs
+	and tdep->call_dummy_integer_regs.  Set tdep->classify.
+	* amd64-windows-tdep.c: Add include of gdbtypes.h.
+	(amd64_windows_dummy_call_integer_regs): New static global.
+	(amd64_windows_classify): New function.
+	(amd64_windows_init_abi): Initialize tdep->call_dummy_num_integer_regs
+	tdep->call_dummy_integer_regs and tdep->classify.
+
 2010-01-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* regcache.c (regcache_xmalloc): Add aspace argument.  Use it
