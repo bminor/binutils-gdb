@@ -540,7 +540,8 @@ static CORE_ADDR
 amd64_push_arguments (struct regcache *regcache, int nargs,
 		      struct value **args, CORE_ADDR sp, int struct_return)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int *integer_regs = tdep->call_dummy_integer_regs;
   int num_integer_regs = tdep->call_dummy_num_integer_regs;
 
@@ -553,6 +554,11 @@ amd64_push_arguments (struct regcache *regcache, int nargs,
     AMD64_XMM0_REGNUM + 6, AMD64_XMM0_REGNUM + 7,
   };
   struct value **stack_args = alloca (nargs * sizeof (struct value *));
+  /* An array that mirrors the stack_args array.  For all arguments
+     that are passed by MEMORY, if that argument's address also needs
+     to be stored in a register, the ARG_ADDR_REGNO array will contain
+     that register number (or a negative value otherwise).  */
+  int *arg_addr_regno = alloca (nargs * sizeof (int));
   int num_stack_args = 0;
   int num_elements = 0;
   int element = 0;
@@ -596,7 +602,19 @@ amd64_push_arguments (struct regcache *regcache, int nargs,
 	{
 	  /* The argument will be passed on the stack.  */
 	  num_elements += ((len + 7) / 8);
-	  stack_args[num_stack_args++] = args[i];
+	  stack_args[num_stack_args] = args[i];
+          /* If this is an AMD64_MEMORY argument whose address must also
+             be passed in one of the integer registers, reserve that
+             register and associate this value to that register so that
+             we can store the argument address as soon as we know it.  */
+          if (class[0] == AMD64_MEMORY
+              && tdep->memory_args_by_pointer
+              && integer_reg < tdep->call_dummy_num_integer_regs)
+            arg_addr_regno[num_stack_args] =
+              tdep->call_dummy_integer_regs[integer_reg++];
+          else
+            arg_addr_regno[num_stack_args] = -1;
+          num_stack_args++;
 	}
       else
 	{
@@ -652,8 +670,19 @@ amd64_push_arguments (struct regcache *regcache, int nargs,
       struct type *type = value_type (stack_args[i]);
       const gdb_byte *valbuf = value_contents (stack_args[i]);
       int len = TYPE_LENGTH (type);
+      CORE_ADDR arg_addr = sp + element * 8;
 
-      write_memory (sp + element * 8, valbuf, len);
+      write_memory (arg_addr, valbuf, len);
+      if (arg_addr_regno[i] >= 0)
+        {
+          /* We also need to store the address of that argument in
+             the given register.  */
+          gdb_byte buf[8];
+          enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
+          store_unsigned_integer (buf, 8, byte_order, arg_addr);
+          regcache_cooked_write (regcache, arg_addr_regno[i], buf);
+        }
       element += ((len + 7) / 8);
     }
 

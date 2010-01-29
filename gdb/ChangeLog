@@ -1,5 +1,14 @@
 2010-01-29  Joel Brobecker  <brobecker@adacore.com>
 
+	amd64-windows: memory args passed by pointer during function calls.
+	* i386-tdep.h (gdbarch_tdep): Add field memory_args_by_pointer.
+	* amd64-tdep.c (amd64_push_arguments): Add handling of architectures
+	where tdep->memory_args_by_pointer is non-zero.
+	* amd64-windows-tdep.c (amd64_windows_init_abi): Set
+	tdep->memory_args_by_pointer to 1.
+
+2010-01-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* i386-tdep.h (enum amd64_reg_class): New, moved here from
 	amd64-tdep.c.
 	(struct gdbarch_tdep): Add fields call_dummy_num_integer_regs,

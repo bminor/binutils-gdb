@@ -83,6 +83,7 @@ amd64_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     ARRAY_SIZE (amd64_windows_dummy_call_integer_regs);
   tdep->call_dummy_integer_regs = amd64_windows_dummy_call_integer_regs;
   tdep->classify = amd64_windows_classify;
+  tdep->memory_args_by_pointer = 1;
 
   set_solib_ops (gdbarch, &solib_target_so_ops);
 }
