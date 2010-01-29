@@ -1,3 +1,9 @@
+2010-01-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 11136
+	* config/tc-arm.c (neon_check_type): Handle a neon_shape value of
+	NS_NULL.
+
 2010-01-27  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* NEWS: Mention new feature.
@@ -42,7 +48,7 @@
 	Include obj-format.h earlier.
 
 2010-01-21  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
-	
+
 	* config/tc-s390.c (s390_elf_final_processing): New function.
 	* config/tc-s390.h (elf_tc_final_processing): New macro definition.
 	(s390_elf_final_processing): Added prototype.

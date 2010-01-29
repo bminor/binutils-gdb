@@ -1,3 +1,9 @@
+2010-01-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 11136
+	* gas/arm/neon-omit.s: Add instruction that causes crash.
+	* gas/arm/neon-omit.d: Add expected disassembly.
+
 2010-01-28  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* gas/pe/section-align-1.d: Don't test section flags.

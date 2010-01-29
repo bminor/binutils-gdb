@@ -12043,8 +12043,17 @@ neon_check_type (unsigned els, enum neon_shape ns, ...)
             {
               if ((thisarg & N_VFP) != 0)
                 {
-                  enum neon_shape_el regshape = neon_shape_tab[ns].el[i];
-                  unsigned regwidth = neon_shape_el_size[regshape], match;
+                  enum neon_shape_el regshape;
+                  unsigned regwidth, match;
+
+		  /* PR 11136: Catch the case where we are passed a shape of NS_NULL.  */
+		  if (ns == NS_NULL)
+		    {
+		      first_error (_("invalid instruction shape"));
+		      return badtype;
+		    }
+                  regshape = neon_shape_tab[ns].el[i];
+                  regwidth = neon_shape_el_size[regshape];
 
                   /* In VFP mode, operands must match register widths. If we
                      have a key operand, use its width, else use the width of
@@ -12193,9 +12202,8 @@ try_vfp_nsyn (int args, void (*pfn) (enum neon_shape))
       pfn (rs);
       return SUCCESS;
     }
-  else
-    inst.error = NULL;
 
+  inst.error = NULL;
   return FAIL;
 }
 
