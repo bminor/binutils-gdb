@@ -1,5 +1,9 @@
 2010-01-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/rec_return: New testcase.
+
+2010-01-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/call_pn: New testcase.
 
 2010-01-28  Daniel Jacobowitz  <dan@codesourcery.com>

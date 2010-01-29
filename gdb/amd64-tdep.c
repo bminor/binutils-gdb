@@ -347,6 +347,12 @@ amd64_classify_aggregate (struct type *type, enum amd64_reg_class class[2])
 	  struct type *subtype = check_typedef (TYPE_FIELD_TYPE (type, i));
 	  int pos = TYPE_FIELD_BITPOS (type, i) / 64;
 	  enum amd64_reg_class subclass[2];
+	  int bitsize = TYPE_FIELD_BITSIZE (type, i);
+	  int endpos;
+
+	  if (bitsize == 0)
+	    bitsize = TYPE_LENGTH (subtype) * 8;
+	  endpos = (TYPE_FIELD_BITPOS (type, i) + bitsize - 1) / 64;
 
 	  /* Ignore static fields.  */
 	  if (field_is_static (&TYPE_FIELD (type, i)))
@@ -356,6 +362,30 @@ amd64_classify_aggregate (struct type *type, enum amd64_reg_class class[2])
 
 	  amd64_classify (subtype, subclass);
 	  class[pos] = amd64_merge_classes (class[pos], subclass[0]);
+	  if (bitsize <= 64 && pos == 0 && endpos == 1)
+	    /* This is a bit of an odd case:  We have a field that would
+	       normally fit in one of the two eightbytes, except that
+	       it is placed in a way that this field straddles them.
+	       This has been seen with a structure containing an array.
+
+	       The ABI is a bit unclear in this case, but we assume that
+	       this field's class (stored in subclass[0]) must also be merged
+	       into class[1].  In other words, our field has a piece stored
+	       in the second eight-byte, and thus its class applies to
+	       the second eight-byte as well.
+
+	       In the case where the field length exceeds 8 bytes,
+	       it should not be necessary to merge the field class
+	       into class[1].  As LEN > 8, subclass[1] is necessarily
+	       different from AMD64_NO_CLASS.  If subclass[1] is equal
+	       to subclass[0], then the normal class[1]/subclass[1]
+	       merging will take care of everything.  For subclass[1]
+	       to be different from subclass[0], I can only see the case
+	       where we have a SSE/SSEUP or X87/X87UP pair, which both
+	       use up all 16 bytes of the aggregate, and are already
+	       handled just fine (because each portion sits on its own
+	       8-byte).  */
+	    class[1] = amd64_merge_classes (class[1], subclass[0]);
 	  if (pos == 0)
 	    class[1] = amd64_merge_classes (class[1], subclass[1]);
 	}

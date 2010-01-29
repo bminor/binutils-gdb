@@ -1,3 +1,10 @@
+2010-01-29  Paul Hilfinger  <hilfinger@adacore.com>
+
+	amd64 - function returning record with field straddling 2 registers.
+	* amd64-tdep.c (amd_classify_aggregate): Handle the case of
+	a record of length <= 16 in which a field straddles the two
+	eightbytes.
+
 2010-01-29  Joel Brobecker  <brobecker@adacore.com>
 
 	Implement return values on amd64-windows.
