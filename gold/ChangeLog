@@ -1,3 +1,24 @@
+2010-01-29  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
+
+	* arm.cc: Added support for the ARM relocations:
+	R_ARM_MOVW_BREL_NC, R_ARM_MOVT_BREL, R_ARM_MOVW_BREL,
+	R_ARM_THM_MOVW_BREL_NC, R_ARM_THM_MOVT_BREL, R_ARM_THM_MOVW_BREL.
+	(Arm_relocate_functions::movw_rel_nc): Renamed (was
+	movw_prel_nc).
+	(Arm_relocate_functions::movw_rel): New method.
+	(Arm_relocate_functions::movt_rel): Renamed (was movt_prel).
+	(Arm_relocate_functions::thm_movw_rel_nc): Renamed (was
+	thm_movw_prel_nc).
+	(Arm_relocate_functions::thm_movw_rel): New method.
+	(Arm_relocate_functions::thm_movt_rel): Renamed (was
+	thm_movt_prel).
+	(Target_arm::Scan::local): Handle MOVW_BREL/MOVT_BREL
+	relocations.
+	(Target_arm::Scan::global): Likewise.
+	(Target_arm::Relocate::relocate): Likewise.
+	(Target_arm::Relocatable_size_for_reloc::get_size_for_reloc):
+	Likewise.
+
 2010-01-27  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
 
 	* arm.cc: Added support for ARM group relocations.

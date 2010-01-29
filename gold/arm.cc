@@ -109,12 +109,6 @@ const int32_t THM2_MAX_BWD_BRANCH_OFFSET = (-(1 << 24) + 4);
 //	R_ARM_THM_ALU_PREL_11_0
 //	R_ARM_THM_PC12
 //	R_ARM_REL32_NOI
-//	R_ARM_MOVW_BREL_NC
-//	R_ARM_MOVT_BREL
-//	R_ARM_MOVW_BREL
-//	R_ARM_THM_MOVW_BREL_NC
-//	R_ARM_THM_MOVT_BREL
-//	R_ARM_THM_MOVW_BREL
 //	R_ARM_PLT32_ABS
 //	R_ARM_GOT_ABS
 //	R_ARM_GOT_BREL12
@@ -3155,12 +3149,13 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
   }
 
   // R_ARM_MOVW_PREL_NC: (S + A) | T - P
+  // R_ARM_MOVW_BREL_NC: ((S + A) | T) – B(S)
   static inline typename This::Status
-  movw_prel_nc(unsigned char *view,
-	       const Sized_relobj<32, big_endian>* object,
-	       const Symbol_value<32>* psymval,
-	       Arm_address address,
-	       Arm_address thumb_bit)
+  movw_rel_nc(unsigned char* view,
+	      const Sized_relobj<32, big_endian>* object,
+	      const Symbol_value<32>* psymval,
+	      Arm_address address,
+	      Arm_address thumb_bit)
   {
     typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
@@ -3172,12 +3167,32 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
     return This::STATUS_OKAY;
   }
 
-  // R_ARM_MOVT_PREL: S + A - P
+  // R_ARM_MOVW_BREL: ((S + A) | T) – B(S)
   static inline typename This::Status
-  movt_prel(unsigned char *view,
-	    const Sized_relobj<32, big_endian>* object,
-	    const Symbol_value<32>* psymval,
-            Arm_address address)
+  movw_rel(unsigned char* view,
+	   const Sized_relobj<32, big_endian>* object,
+	   const Symbol_value<32>* psymval,
+	   Arm_address address,
+	   Arm_address thumb_bit)
+  {
+    typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype val = elfcpp::Swap<32, big_endian>::readval(wv);
+    Valtype addend = This::extract_arm_movw_movt_addend(val);
+    Valtype x = (psymval->value(object, addend) | thumb_bit) - address;
+    val = This::insert_val_arm_movw_movt(val, x);
+    elfcpp::Swap<32, big_endian>::writeval(wv, val);
+    return ((x >= 0x10000) ?
+    	    This::STATUS_OVERFLOW : This::STATUS_OKAY);
+  }
+
+  // R_ARM_MOVT_PREL: S + A - P
+  // R_ARM_MOVT_BREL: S + A – B(S)
+  static inline typename This::Status
+  movt_rel(unsigned char* view,
+	   const Sized_relobj<32, big_endian>* object,
+	   const Symbol_value<32>* psymval,
+           Arm_address address)
   {
     typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
@@ -3190,12 +3205,13 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
   }
 
   // R_ARM_THM_MOVW_PREL_NC: (S + A) | T - P
+  // R_ARM_THM_MOVW_BREL_NC: ((S + A) | T) – B(S)
   static inline typename This::Status
-  thm_movw_prel_nc(unsigned char *view,
-	           const Sized_relobj<32, big_endian>* object,
-	           const Symbol_value<32>* psymval,
-	           Arm_address address,
-	           Arm_address thumb_bit)
+  thm_movw_rel_nc(unsigned char *view,
+	          const Sized_relobj<32, big_endian>* object,
+	          const Symbol_value<32>* psymval,
+	          Arm_address address,
+	          Arm_address thumb_bit)
   {
     typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
     typedef typename elfcpp::Swap<32, big_endian>::Valtype Reltype;
@@ -3210,12 +3226,35 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
     return This::STATUS_OKAY;
   }
 
-  // R_ARM_THM_MOVT_PREL: S + A - P
+  // R_ARM_THM_MOVW_BREL: ((S + A) | T) – B(S)
   static inline typename This::Status
-  thm_movt_prel(unsigned char *view,
-	        const Sized_relobj<32, big_endian>* object,
-	        const Symbol_value<32>* psymval,
-	        Arm_address address)
+  thm_movw_rel(unsigned char *view,
+	       const Sized_relobj<32, big_endian>* object,
+	       const Symbol_value<32>* psymval,
+	       Arm_address address,
+	       Arm_address thumb_bit)
+  {
+    typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
+    typedef typename elfcpp::Swap<32, big_endian>::Valtype Reltype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Reltype val = (elfcpp::Swap<16, big_endian>::readval(wv) << 16)
+		  | elfcpp::Swap<16, big_endian>::readval(wv + 1);
+    Reltype addend = This::extract_thumb_movw_movt_addend(val);
+    Reltype x = (psymval->value(object, addend) | thumb_bit) - address;
+    val = This::insert_val_thumb_movw_movt(val, x);
+    elfcpp::Swap<16, big_endian>::writeval(wv, val >> 16);
+    elfcpp::Swap<16, big_endian>::writeval(wv + 1, val & 0xffff);
+    return ((x >= 0x10000) ?
+    	    This::STATUS_OVERFLOW : This::STATUS_OKAY);
+  }
+
+  // R_ARM_THM_MOVT_PREL: S + A - P
+  // R_ARM_THM_MOVT_BREL: S + A – B(S)
+  static inline typename This::Status
+  thm_movt_rel(unsigned char* view,
+	       const Sized_relobj<32, big_endian>* object,
+	       const Symbol_value<32>* psymval,
+	       Arm_address address)
   {
     typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
     typedef typename elfcpp::Swap<32, big_endian>::Valtype Reltype;
@@ -6514,6 +6553,12 @@ Target_arm<big_endian>::Scan::local(Symbol_table* symtab,
     case elfcpp::R_ARM_MOVT_PREL:
     case elfcpp::R_ARM_THM_MOVW_PREL_NC:
     case elfcpp::R_ARM_THM_MOVT_PREL:
+    case elfcpp::R_ARM_MOVW_BREL_NC:
+    case elfcpp::R_ARM_MOVT_BREL:
+    case elfcpp::R_ARM_MOVW_BREL:
+    case elfcpp::R_ARM_THM_MOVW_BREL_NC:
+    case elfcpp::R_ARM_THM_MOVT_BREL:
+    case elfcpp::R_ARM_THM_MOVW_BREL:
     case elfcpp::R_ARM_THM_JUMP6:
     case elfcpp::R_ARM_THM_JUMP8:
     case elfcpp::R_ARM_THM_JUMP11:
@@ -6674,6 +6719,12 @@ Target_arm<big_endian>::Scan::global(Symbol_table* symtab,
     case elfcpp::R_ARM_MOVT_PREL:
     case elfcpp::R_ARM_THM_MOVW_PREL_NC:
     case elfcpp::R_ARM_THM_MOVT_PREL:
+    case elfcpp::R_ARM_MOVW_BREL_NC:
+    case elfcpp::R_ARM_MOVT_BREL:
+    case elfcpp::R_ARM_MOVW_BREL:
+    case elfcpp::R_ARM_THM_MOVW_BREL_NC:
+    case elfcpp::R_ARM_THM_MOVT_BREL:
+    case elfcpp::R_ARM_THM_MOVW_BREL:
     case elfcpp::R_ARM_THM_JUMP6:
     case elfcpp::R_ARM_THM_JUMP8:
     case elfcpp::R_ARM_THM_JUMP11:
@@ -7303,27 +7354,62 @@ Target_arm<big_endian>::Relocate::relocate(
       break;
 
     case elfcpp::R_ARM_MOVW_PREL_NC:
-      reloc_status = Arm_relocate_functions::movw_prel_nc(view, object,
-							  psymval, address,
-							  thumb_bit);
+      reloc_status = Arm_relocate_functions::movw_rel_nc(view, object,
+							 psymval, address,
+							 thumb_bit);
+      break;
+
+    case elfcpp::R_ARM_MOVW_BREL_NC:
+      reloc_status = Arm_relocate_functions::movw_rel_nc(view, object,
+							 psymval, sym_origin,
+							 thumb_bit);
+      break;
+
+    case elfcpp::R_ARM_MOVW_BREL:
+      reloc_status = Arm_relocate_functions::movw_rel(view, object,
+						      psymval, sym_origin,
+						      thumb_bit);
       break;
 
     case elfcpp::R_ARM_MOVT_PREL:
-      reloc_status = Arm_relocate_functions::movt_prel(view, object,
-                                                       psymval, address);
+      reloc_status = Arm_relocate_functions::movt_rel(view, object,
+                                                      psymval, address);
+      break;
+
+    case elfcpp::R_ARM_MOVT_BREL:
+      reloc_status = Arm_relocate_functions::movt_rel(view, object,
+                                                      psymval, sym_origin);
       break;
 
     case elfcpp::R_ARM_THM_MOVW_PREL_NC:
-      reloc_status = Arm_relocate_functions::thm_movw_prel_nc(view, object,
-							      psymval, address,
-							      thumb_bit);
+      reloc_status = Arm_relocate_functions::thm_movw_rel_nc(view, object,
+							     psymval, address,
+							     thumb_bit);
+      break;
+
+    case elfcpp::R_ARM_THM_MOVW_BREL_NC:
+      reloc_status = Arm_relocate_functions::thm_movw_rel_nc(view, object,
+							     psymval,
+							     sym_origin,
+							     thumb_bit);
+      break;
+
+    case elfcpp::R_ARM_THM_MOVW_BREL:
+      reloc_status = Arm_relocate_functions::thm_movw_rel(view, object,
+							  psymval, sym_origin,
+							  thumb_bit);
       break;
 
     case elfcpp::R_ARM_THM_MOVT_PREL:
-      reloc_status = Arm_relocate_functions::thm_movt_prel(view, object,
-							   psymval, address);
+      reloc_status = Arm_relocate_functions::thm_movt_rel(view, object,
+							  psymval, address);
       break;
 	
+    case elfcpp::R_ARM_THM_MOVT_BREL:
+      reloc_status = Arm_relocate_functions::thm_movt_rel(view, object,
+							  psymval, sym_origin);
+      break;
+
     case elfcpp::R_ARM_REL32:
       reloc_status = Arm_relocate_functions::rel32(view, object, psymval,
 						   address, thumb_bit);
@@ -7785,6 +7871,12 @@ Target_arm<big_endian>::Relocatable_size_for_reloc::get_size_for_reloc(
     case elfcpp::R_ARM_MOVT_PREL:
     case elfcpp::R_ARM_THM_MOVW_PREL_NC:
     case elfcpp::R_ARM_THM_MOVT_PREL:
+    case elfcpp::R_ARM_MOVW_BREL_NC:
+    case elfcpp::R_ARM_MOVT_BREL:
+    case elfcpp::R_ARM_MOVW_BREL:
+    case elfcpp::R_ARM_THM_MOVW_BREL_NC:
+    case elfcpp::R_ARM_THM_MOVT_BREL:
+    case elfcpp::R_ARM_THM_MOVW_BREL:
     case elfcpp::R_ARM_V4BX:
     case elfcpp::R_ARM_ALU_PC_G0_NC:
     case elfcpp::R_ARM_ALU_PC_G0:
