@@ -1,3 +1,10 @@
+2010-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* infrun.c (prepare_to_proceed): Handle other signals which might
+	match a breakpoint.
+	(handle_inferior_event): Move the check for unusual breakpoint
+	signals earlier.
+
 2010-01-29  Paul Hilfinger  <hilfinger@adacore.com>
 
 	amd64 - function returning record with field straddling 2 registers.

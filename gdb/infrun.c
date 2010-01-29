@@ -1640,7 +1640,10 @@ prepare_to_proceed (int step)
 
   /* Make sure we were stopped at a breakpoint.  */
   if (wait_status.kind != TARGET_WAITKIND_STOPPED
-      || wait_status.value.sig != TARGET_SIGNAL_TRAP)
+      || (wait_status.value.sig != TARGET_SIGNAL_TRAP
+	  && wait_status.value.sig != TARGET_SIGNAL_ILL
+	  && wait_status.value.sig != TARGET_SIGNAL_SEGV
+	  && wait_status.value.sig != TARGET_SIGNAL_EMT))
     {
       return 0;
     }
@@ -2661,6 +2664,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 {
   struct frame_info *frame;
   struct gdbarch *gdbarch;
+  struct regcache *regcache;
   int sw_single_step_trap_p = 0;
   int stopped_by_watchpoint;
   int stepped_after_stopped_by_watchpoint = 0;
@@ -2720,6 +2724,30 @@ handle_inferior_event (struct execution_control_state *ecs)
   reinit_frame_cache ();
 
   breakpoint_retire_moribund ();
+
+  /* First, distinguish signals caused by the debugger from signals
+     that have to do with the program's own actions.  Note that
+     breakpoint insns may cause SIGTRAP or SIGILL or SIGEMT, depending
+     on the operating system version.  Here we detect when a SIGILL or
+     SIGEMT is really a breakpoint and change it to SIGTRAP.  We do
+     something similar for SIGSEGV, since a SIGSEGV will be generated
+     when we're trying to execute a breakpoint instruction on a
+     non-executable stack.  This happens for call dummy breakpoints
+     for architectures like SPARC that place call dummies on the
+     stack.  */
+  regcache = get_thread_regcache (ecs->ptid);
+  if (ecs->ws.kind == TARGET_WAITKIND_STOPPED
+      && (ecs->ws.value.sig == TARGET_SIGNAL_ILL
+	  || ecs->ws.value.sig == TARGET_SIGNAL_SEGV
+	  || ecs->ws.value.sig == TARGET_SIGNAL_EMT)
+      && breakpoint_inserted_here_p (get_regcache_aspace (regcache),
+				     regcache_read_pc (regcache)))
+    {
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog,
+			    "infrun: Treating signal as SIGTRAP\n");
+      ecs->ws.value.sig = TARGET_SIGNAL_TRAP;
+    }
 
   /* Mark the non-executing threads accordingly.  In all-stop, all
      threads of all processes are stopped when we get any event
@@ -3500,27 +3528,7 @@ targets should add new threads to the thread list themselves in non-stop mode.")
      3) set ecs->random_signal to 1, and the decision between 1 and 2
      will be made according to the signal handling tables.  */
 
-  /* First, distinguish signals caused by the debugger from signals
-     that have to do with the program's own actions.  Note that
-     breakpoint insns may cause SIGTRAP or SIGILL or SIGEMT, depending
-     on the operating system version.  Here we detect when a SIGILL or
-     SIGEMT is really a breakpoint and change it to SIGTRAP.  We do
-     something similar for SIGSEGV, since a SIGSEGV will be generated
-     when we're trying to execute a breakpoint instruction on a
-     non-executable stack.  This happens for call dummy breakpoints
-     for architectures like SPARC that place call dummies on the
-     stack.
-
-     If we're doing a displaced step past a breakpoint, then the
-     breakpoint is always inserted at the original instruction;
-     non-standard signals can't be explained by the breakpoint.  */
   if (ecs->event_thread->stop_signal == TARGET_SIGNAL_TRAP
-      || (! ecs->event_thread->trap_expected
-          && breakpoint_inserted_here_p (get_regcache_aspace (get_current_regcache ()),
-					 stop_pc)
-	  && (ecs->event_thread->stop_signal == TARGET_SIGNAL_ILL
-	      || ecs->event_thread->stop_signal == TARGET_SIGNAL_SEGV
-	      || ecs->event_thread->stop_signal == TARGET_SIGNAL_EMT))
       || stop_soon == STOP_QUIETLY || stop_soon == STOP_QUIETLY_NO_SIGSTOP
       || stop_soon == STOP_QUIETLY_REMOTE)
     {

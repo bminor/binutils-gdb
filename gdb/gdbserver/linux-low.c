@@ -455,7 +455,8 @@ get_stop_pc (void)
   struct regcache *regcache = get_thread_regcache (current_inferior, 1);
   CORE_ADDR stop_pc = (*the_low_target.get_pc) (regcache);
 
-  if (! get_thread_lwp (current_inferior)->stepping)
+  if (! get_thread_lwp (current_inferior)->stepping
+      && WSTOPSIG (get_thread_lwp (current_inferior)->last_status) == SIGTRAP)
     stop_pc -= the_low_target.decr_pc_after_break;
 
   if (debug_threads)
@@ -1244,17 +1245,27 @@ linux_wait_for_event_1 (ptid_t ptid, int *wstat, int options)
 	  continue;
 	}
 
-      /* If this event was not handled above, and is not a SIGTRAP, report
-	 it.  */
-      if (!WIFSTOPPED (*wstat) || WSTOPSIG (*wstat) != SIGTRAP)
+      /* If this event was not handled above, and is not a SIGTRAP,
+	 report it.  SIGILL and SIGSEGV are also treated as traps in case
+	 a breakpoint is inserted at the current PC.  */
+      if (!WIFSTOPPED (*wstat)
+	  || (WSTOPSIG (*wstat) != SIGTRAP && WSTOPSIG (*wstat) != SIGILL
+	      && WSTOPSIG (*wstat) != SIGSEGV))
 	return lwpid_of (event_child);
 
       /* If this target does not support breakpoints, we simply report the
-	 SIGTRAP; it's of no concern to us.  */
+	 signal; it's of no concern to us.  */
       if (the_low_target.get_pc == NULL)
 	return lwpid_of (event_child);
 
       stop_pc = get_stop_pc ();
+
+      /* Only handle SIGILL or SIGSEGV if we've hit a recognized
+	 breakpoint.  */
+      if (WSTOPSIG (*wstat) != SIGTRAP
+	  && (event_child->stepping
+	      || ! (*the_low_target.breakpoint_at) (stop_pc)))
+	return lwpid_of (event_child);
 
       /* bp_reinsert will only be set if we were single-stepping.
 	 Notice that we will resume the process after hitting

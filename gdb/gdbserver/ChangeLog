@@ -1,3 +1,9 @@
+2010-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-low.c (get_stop_pc): Check for SIGTRAP.
+	(linux_wait_for_event_1): Handle SIGILL and SIGSEGV as possible
+	breakpoints.
+
 2010-01-21  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-ppc-low.c (ppc_arch_setup): Adjust to regcache changes.
