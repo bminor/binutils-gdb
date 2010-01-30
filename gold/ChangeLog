@@ -1,3 +1,15 @@
+2010-01-29  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
+
+	* gold/arm.cc: Added support for the ARM relocations: R_ARM_THM_PC8,
+	R_ARM_THM_PC12, R_ARM_THM_ALU_PREL_11_0.
+	(Arm_relocate_functions::thm_alu11): New Method.
+	(Arm_relocate_functions::thm_pc8): New Method.
+	(Arm_relocate_functions::thm_pc12): New Method.
+	(Target_arm::Scan::local): Handle the relocations.
+	(Target_arm::Scan::global): Likewise.
+	(Target_arm::Relocate::relocate): Likewise.
+	(Target_arm:Relocatable_size_for_reloc::get_size_for_reloc): Likewise.
+
 2010-01-29  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Target_arm::Scan::global): General PLTs for the same set

@@ -101,13 +101,10 @@ const int32_t THM2_MAX_BWD_BRANCH_OFFSET = (-(1 << 24) + 4);
 // TODOs:
 // - Support the following relocation types as needed:
 //	R_ARM_SBREL32
-//	R_ARM_THM_PC8
 //	R_ARM_LDR_SBREL_11_0_NC
 //	R_ARM_ALU_SBREL_19_12_NC
 //	R_ARM_ALU_SBREL_27_20_CK
 //	R_ARM_SBREL31
-//	R_ARM_THM_ALU_PREL_11_0
-//	R_ARM_THM_PC12
 //	R_ARM_REL32_NOI
 //	R_ARM_PLT32_ABS
 //	R_ARM_GOT_ABS
@@ -3177,6 +3174,115 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
     elfcpp::Swap<16, big_endian>::writeval(wv, val >> 16);
     elfcpp::Swap<16, big_endian>::writeval(wv + 1, val & 0xffff);
     return This::STATUS_OKAY;
+  }
+
+  // R_ARM_THM_ALU_PREL_11_0: ((S + A) | T) - Pa (Thumb32)
+  static inline typename This::Status
+  thm_alu11(unsigned char* view,
+	    const Sized_relobj<32, big_endian>* object,
+	    const Symbol_value<32>* psymval,
+	    Arm_address address,
+	    Arm_address thumb_bit)
+  {
+    typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
+    typedef typename elfcpp::Swap<32, big_endian>::Valtype Reltype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Reltype insn = (elfcpp::Swap<16, big_endian>::readval(wv) << 16)
+		   | elfcpp::Swap<16, big_endian>::readval(wv + 1);
+
+    //	      f e d c b|a|9|8 7 6 5|4|3 2 1 0||f|e d c|b a 9 8|7 6 5 4 3 2 1 0
+    // -----------------------------------------------------------------------
+    // ADD{S} 1 1 1 1 0|i|0|1 0 0 0|S|1 1 0 1||0|imm3 |Rd     |imm8
+    // ADDW   1 1 1 1 0|i|1|0 0 0 0|0|1 1 0 1||0|imm3 |Rd     |imm8
+    // ADR[+] 1 1 1 1 0|i|1|0 0 0 0|0|1 1 1 1||0|imm3 |Rd     |imm8
+    // SUB{S} 1 1 1 1 0|i|0|1 1 0 1|S|1 1 0 1||0|imm3 |Rd     |imm8
+    // SUBW   1 1 1 1 0|i|1|0 1 0 1|0|1 1 0 1||0|imm3 |Rd     |imm8
+    // ADR[-] 1 1 1 1 0|i|1|0 1 0 1|0|1 1 1 1||0|imm3 |Rd     |imm8
+
+    // Determine a sign for the addend.
+    const int sign = ((insn & 0xf8ef0000) == 0xf0ad0000
+		      || (insn & 0xf8ef0000) == 0xf0af0000) ? -1 : 1;
+    // Thumb2 addend encoding:
+    // imm12 := i | imm3 | imm8
+    int32_t addend = (insn & 0xff)
+		     | ((insn & 0x00007000) >> 4)
+		     | ((insn & 0x04000000) >> 15);
+    // Apply a sign to the added.
+    addend *= sign;
+
+    int32_t x = (psymval->value(object, addend) | thumb_bit)
+		- (address & 0xfffffffc);
+    Reltype val = abs(x);
+    // Mask out the value and a distinct part of the ADD/SUB opcode
+    // (bits 7:5 of opword).
+    insn = (insn & 0xfb0f8f00)
+	   | (val & 0xff)
+	   | ((val & 0x700) << 4)
+	   | ((val & 0x800) << 15);
+    // Set the opcode according to whether the value to go in the
+    // place is negative.
+    if (x < 0)
+      insn |= 0x00a00000;
+
+    elfcpp::Swap<16, big_endian>::writeval(wv, insn >> 16);
+    elfcpp::Swap<16, big_endian>::writeval(wv + 1, insn & 0xffff);
+    return ((val > 0xfff) ?
+    	    This::STATUS_OVERFLOW : This::STATUS_OKAY);
+  }
+
+  // R_ARM_THM_PC8: S + A - Pa (Thumb)
+  static inline typename This::Status
+  thm_pc8(unsigned char* view,
+	  const Sized_relobj<32, big_endian>* object,
+	  const Symbol_value<32>* psymval,
+	  Arm_address address)
+  {
+    typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
+    typedef typename elfcpp::Swap<16, big_endian>::Valtype Reltype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Valtype insn = elfcpp::Swap<16, big_endian>::readval(wv);
+    Reltype addend = ((insn & 0x00ff) << 2);
+    int32_t x = (psymval->value(object, addend) - (address & 0xfffffffc));
+    Reltype val = abs(x);
+    insn = (insn & 0xff00) | ((val & 0x03fc) >> 2);
+
+    elfcpp::Swap<16, big_endian>::writeval(wv, insn);
+    return ((val > 0x03fc)
+	    ? This::STATUS_OVERFLOW
+	    : This::STATUS_OKAY);
+  }
+
+  // R_ARM_THM_PC12: S + A - Pa (Thumb32)
+  static inline typename This::Status
+  thm_pc12(unsigned char* view,
+	   const Sized_relobj<32, big_endian>* object,
+	   const Symbol_value<32>* psymval,
+	   Arm_address address)
+  {
+    typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
+    typedef typename elfcpp::Swap<32, big_endian>::Valtype Reltype;
+    Valtype* wv = reinterpret_cast<Valtype*>(view);
+    Reltype insn = (elfcpp::Swap<16, big_endian>::readval(wv) << 16)
+		   | elfcpp::Swap<16, big_endian>::readval(wv + 1);
+    // Determine a sign for the addend (positive if the U bit is 1).
+    const int sign = (insn & 0x00800000) ? 1 : -1;
+    int32_t addend = (insn & 0xfff);
+    // Apply a sign to the added.
+    addend *= sign;
+
+    int32_t x = (psymval->value(object, addend) - (address & 0xfffffffc));
+    Reltype val = abs(x);
+    // Mask out and apply the value and the U bit.
+    insn = (insn & 0xff7ff000) | (val & 0xfff);
+    // Set the U bit according to whether the value to go in the
+    // place is positive.
+    if (x >= 0)
+      insn |= 0x00800000;
+
+    elfcpp::Swap<16, big_endian>::writeval(wv, insn >> 16);
+    elfcpp::Swap<16, big_endian>::writeval(wv + 1, insn & 0xffff);
+    return ((val > 0xfff) ?
+    	    This::STATUS_OVERFLOW : This::STATUS_OKAY);
   }
 
   // R_ARM_V4BX
@@ -6578,6 +6684,9 @@ Target_arm<big_endian>::Scan::local(Symbol_table* symtab,
     case elfcpp::R_ARM_THM_JUMP8:
     case elfcpp::R_ARM_THM_JUMP11:
     case elfcpp::R_ARM_V4BX:
+    case elfcpp::R_ARM_THM_PC8:
+    case elfcpp::R_ARM_THM_PC12:
+    case elfcpp::R_ARM_THM_ALU_PREL_11_0:
     case elfcpp::R_ARM_ALU_PC_G0_NC:
     case elfcpp::R_ARM_ALU_PC_G0:
     case elfcpp::R_ARM_ALU_PC_G1_NC:
@@ -6744,6 +6853,9 @@ Target_arm<big_endian>::Scan::global(Symbol_table* symtab,
     case elfcpp::R_ARM_THM_JUMP8:
     case elfcpp::R_ARM_THM_JUMP11:
     case elfcpp::R_ARM_V4BX:
+    case elfcpp::R_ARM_THM_PC8:
+    case elfcpp::R_ARM_THM_PC12:
+    case elfcpp::R_ARM_THM_ALU_PREL_11_0:
     case elfcpp::R_ARM_ALU_PC_G0_NC:
     case elfcpp::R_ARM_ALU_PC_G0:
     case elfcpp::R_ARM_ALU_PC_G1_NC:
@@ -7523,6 +7635,22 @@ Target_arm<big_endian>::Relocate::relocate(
 	}
       break;
 
+    case elfcpp::R_ARM_THM_PC8:
+      reloc_status =
+	Arm_relocate_functions::thm_pc8(view, object, psymval, address);
+      break;
+
+    case elfcpp::R_ARM_THM_PC12:
+      reloc_status =
+	Arm_relocate_functions::thm_pc12(view, object, psymval, address);
+      break;
+
+    case elfcpp::R_ARM_THM_ALU_PREL_11_0:
+      reloc_status =
+	Arm_relocate_functions::thm_alu11(view, object, psymval, address,
+					  thumb_bit);
+      break;
+
     case elfcpp::R_ARM_ALU_PC_G0_NC:
       reloc_status =
 	  Arm_relocate_functions::arm_grp_alu(view, object, psymval, 0,
@@ -7815,6 +7943,7 @@ Target_arm<big_endian>::Relocatable_size_for_reloc::get_size_for_reloc(
     case elfcpp::R_ARM_THM_JUMP6:
     case elfcpp::R_ARM_THM_JUMP8:
     case elfcpp::R_ARM_THM_JUMP11:
+    case elfcpp::R_ARM_THM_PC8:
       return 2;
 
     case elfcpp::R_ARM_ABS32:
@@ -7846,6 +7975,8 @@ Target_arm<big_endian>::Relocatable_size_for_reloc::get_size_for_reloc(
     case elfcpp::R_ARM_THM_MOVT_BREL:
     case elfcpp::R_ARM_THM_MOVW_BREL:
     case elfcpp::R_ARM_V4BX:
+    case elfcpp::R_ARM_THM_PC12:
+    case elfcpp::R_ARM_THM_ALU_PREL_11_0:
     case elfcpp::R_ARM_ALU_PC_G0_NC:
     case elfcpp::R_ARM_ALU_PC_G0:
     case elfcpp::R_ARM_ALU_PC_G1_NC:
