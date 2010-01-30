@@ -1,3 +1,16 @@
+2010-01-30  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
+	* write.h (fix_at_start): Declare.
+	* write.c (fix_new_internal): Add at_beginning parameter.
+	Use it instead of REVERSE_SORT_RELOCS.  Fix the handling of
+	seg_fix_tailP for the at_beginning/REVERSE_SORT_RELOCS case.
+	(fix_new, fix_new_exp): Update accordingly.
+	(fix_at_start): New function.
+	* config/tc-ppc.c (md_pseudo_table): Add .ref to the OBJ_XCOFF section.
+	(ppc_ref): New function, for OBJ_XCOFF.
+	(md_apply_fix): Handle BFD_RELOC_NONE for OBJ_XCOFF.
+	* config/te-i386aix.h (REVERSE_SORT_RELOCS): Remove #undef.
+
 2010-01-27  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	Backport from trunk:

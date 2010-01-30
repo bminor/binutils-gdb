@@ -1,3 +1,8 @@
+2010-01-30  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
+	* gas/ppc/xcoff-ref-1.s, gas/ppc/xcoff-ref-1.l: New test.
+	* gas/ppc/aix.exp: Run it.
+
 2010-01-29  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* gas/pe/section-align-1.d: Generalise to pass on more targets.

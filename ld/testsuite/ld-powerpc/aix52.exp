@@ -196,6 +196,11 @@ set aix52tests {
      "" {aix-rel-1.s}
      {{objdump -hr aix-rel-1.od}} "aix-rel-1.ro"}
 
+    {".ref test 1" "-efoo1"
+     "" {aix-ref-1.s}
+     {{objdump -dr aix-ref-1-SIZE.od}}
+     "aix-ref-1"}
+
     {"Weak test 1 (rel)" "-r"
      "" {aix-weak-1a.s aix-weak-1b.s}
      {{nm {} aix-weak-1-rel.nd} {objdump -h aix-weak-1-rel.hd}}
