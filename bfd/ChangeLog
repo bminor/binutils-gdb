@@ -1,3 +1,10 @@
+2010-01-30  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* elf32-hppa.c (final_link_relocate): Convert R_PARISC_TLS_GD21L,
+	R_PARISC_TLS_LDM21L and R_PARISC_TLS_IE21L relocations that use the
+	linkage table pointer to use the global table pointer if not doing
+	a shared link.
+
 2010-01-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* elf.c (elfcore_grok_lwpstatus): Do not overwrite the core signal
