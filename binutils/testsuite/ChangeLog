@@ -1,3 +1,13 @@
+2010-01-30  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	* binutils-all/windres/html.rc: Don't xfail x86_64-*-mingw*.
+	* binutils-all/windres/lang.rc: Likewise.
+	* binutils-all/windres/messagetable.rc: Likewise.
+	* binutils-all/windres/strtab1.rc: Likewise.
+	* binutils-all/windres/strtab2.rc: Likewise.
+	* binutils-all/windres/version.rc: Likewise.
+	* binutils-all/windres/version_cat.rc: Likewise.
+
 2010-01-19  Ian Lance Taylor  <iant@google.com>
 
 	* lib/utils-lib.exp (run_dump_test): Permit option values to use
