@@ -6792,9 +6792,6 @@ Target_arm<big_endian>::Scan::global(Symbol_table* symtab,
       break;
 
     case elfcpp::R_ARM_REL32:
-      break;
-
-    case elfcpp::R_ARM_PREL31:
       {
 	// Make a dynamic relocation if necessary.
 	int flags = Symbol::NON_PIC_REF;
@@ -6821,26 +6818,9 @@ Target_arm<big_endian>::Scan::global(Symbol_table* symtab,
     case elfcpp::R_ARM_THM_JUMP19:
     case elfcpp::R_ARM_CALL:
     case elfcpp::R_ARM_THM_CALL:
-
-      if (Target_arm<big_endian>::Scan::symbol_needs_plt_entry(gsym))
-	target->make_plt_entry(symtab, layout, gsym);
-      else
-	{
-	   // Check to see if this is a function that would need a PLT
-	   // but does not get one because the function symbol is untyped.
-	   // This happens in assembly code missing a proper .type directive.
-	  if ((!gsym->is_undefined() || parameters->options().shared())
-	      && !parameters->doing_static_link()
-	      && gsym->type() == elfcpp::STT_NOTYPE
-	      && (gsym->is_from_dynobj()
-		  || gsym->is_undefined()
-		  || gsym->is_preemptible()))
-	    gold_error(_("%s is not a function."),
-		       gsym->demangled_name().c_str());
-	}
-      break;
-
     case elfcpp::R_ARM_PLT32:
+    case elfcpp::R_ARM_PREL31:
+    case elfcpp::R_ARM_PC24:
       // If the symbol is fully resolved, this is just a relative
       // local reloc.  Otherwise we need a PLT entry.
       if (gsym->final_value_is_known())

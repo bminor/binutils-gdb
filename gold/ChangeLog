@@ -1,5 +1,10 @@
 2010-01-29  Doug Kwan  <dougkwan@google.com>
 
+	* arm.cc (Target_arm::Scan::global): General PLTs for the same set
+	of relocation types as ld.
+
+2010-01-29  Doug Kwan  <dougkwan@google.com>
+
 	* arm.cc (Arm_relocate_functions::arm_branch_common) Change visibility
 	to public.
 	(Arm_relocate_functions::thumb_branch_common): Ditto.
