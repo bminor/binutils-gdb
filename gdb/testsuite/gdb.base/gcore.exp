@@ -69,13 +69,9 @@ proc capture_command_output { command prefix } {
     global expect_out
 
     set output_string ""
-    send_gdb "$command\n"
-    gdb_expect {
+    gdb_test_multiple "$command" "capture_command_output for $command" {
 	-re "${command}\[\r\n\]+${prefix}(.*)\[\r\n\]+$gdb_prompt $" {
 	    set output_string $expect_out(1,string)
-	}
-	default {
-	    fail "capture_command_output failed on $command."
 	}
     }
     return $output_string

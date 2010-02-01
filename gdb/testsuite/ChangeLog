@@ -1,5 +1,10 @@
 2010-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.base/gcore.exp (capture_command_output): Use
+	gdb_test_multiple.
+
+2010-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.arch/thumb2-it.S (it_breakpoints): New function.
 	* gdb.arch/thumb2-it.exp (test_it_break): New function.
 	(Top level): Call it.
