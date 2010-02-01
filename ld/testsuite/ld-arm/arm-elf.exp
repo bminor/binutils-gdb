@@ -433,6 +433,25 @@ set armeabitests {
     {"Long branch with mixed text and data" "-T arm.ld" "" {farcall-data.s}
      {{objdump -dr farcall-data.d}}
      "farcall-data"}
+
+    {"R_ARM_THM_JUMP24 Relocation veneers: Short 1" 
+     "-defsym _start=0x8000 --section-start destsect=0x00009000" 
+     "-march=armv7-a -mthumb" 
+     {jump-reloc-veneers.s}
+     {{objdump -d jump-reloc-veneers-short1.d}}
+     "jump-reloc-veneers-short1"}
+    {"R_ARM_THM_JUMP24 Relocation veneers: Short 2" 
+     "-defsym _start=0x8000 --section-start destsect=0x00900000" 
+     "-march=armv7-a -mthumb" 
+     {jump-reloc-veneers.s}
+     {{objdump -d jump-reloc-veneers-short2.d}}
+     "jump-reloc-veneers-short2"}
+    {"R_ARM_THM_JUMP24 Relocation veneers: Long" 
+     "-defsym _start=0x8000 --section-start destsect=0x09000000" 
+     "-march=armv7-a -mthumb" 
+     {jump-reloc-veneers.s}
+     {{objdump -d jump-reloc-veneers-long.d}}
+     "jump-reloc-veneers-long"}
 }
 
 run_ld_link_tests $armeabitests
