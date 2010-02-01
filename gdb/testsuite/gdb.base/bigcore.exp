@@ -147,6 +147,7 @@ gdb_test_multiple "info program" $test {
 set oldtimeout $timeout
 set timeout 600
 gdb_test "signal SIGABRT" "Program terminated with signal SIGABRT, .*"
+set timeout $oldtimeout
 
 # Find the corefile
 set file ""

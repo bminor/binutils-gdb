@@ -167,6 +167,7 @@ if ![file exists $binfile] then {
         # here.
 	gdb_expect {
 	    -re "^(\r\n|)data\r\n(|data\r\n)$" { pass "echo data" }
+	    -re "Undefined command.*$gdb_prompt " { fail "echo data" }
 	    timeout { fail "echo data (timeout)" }
 	    eof { fail "echo data (eof)" }
 	}

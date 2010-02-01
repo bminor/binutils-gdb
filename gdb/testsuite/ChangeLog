@@ -1,5 +1,10 @@
 2010-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.base/bigcore.exp: Reset increased timeout.
+	* gdb.base/interrupt.exp: Match unexpected gdb prompt.
+
+2010-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.base/gcore.exp (capture_command_output): Use
 	gdb_test_multiple.
 
