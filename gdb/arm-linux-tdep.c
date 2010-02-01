@@ -74,6 +74,14 @@ static const char arm_linux_thumb_be_breakpoint[] = {0xde, 0x01};
 
 static const char arm_linux_thumb_le_breakpoint[] = {0x01, 0xde};
 
+/* Because the 16-bit Thumb breakpoint is affected by Thumb-2 IT blocks,
+   we must use a length-appropriate breakpoint for 32-bit Thumb
+   instructions.  See also thumb_get_next_pc.  */
+
+static const char arm_linux_thumb2_be_breakpoint[] = { 0xf7, 0xf0, 0xa0, 0x00 };
+
+static const char arm_linux_thumb2_le_breakpoint[] = { 0xf0, 0xf7, 0x00, 0xa0 };
+
 /* Description of the longjmp buffer.  */
 #define ARM_LINUX_JB_ELEMENT_SIZE	INT_REGISTER_SIZE
 #define ARM_LINUX_JB_PC			21
@@ -851,6 +859,7 @@ arm_linux_init_abi (struct gdbarch_info info,
       else
 	tdep->arm_breakpoint = arm_linux_arm_be_breakpoint;
       tdep->thumb_breakpoint = arm_linux_thumb_be_breakpoint;
+      tdep->thumb2_breakpoint = arm_linux_thumb2_be_breakpoint;
     }
   else
     {
@@ -859,9 +868,11 @@ arm_linux_init_abi (struct gdbarch_info info,
       else
 	tdep->arm_breakpoint = arm_linux_arm_le_breakpoint;
       tdep->thumb_breakpoint = arm_linux_thumb_le_breakpoint;
+      tdep->thumb2_breakpoint = arm_linux_thumb2_le_breakpoint;
     }
   tdep->arm_breakpoint_size = sizeof (arm_linux_arm_le_breakpoint);
   tdep->thumb_breakpoint_size = sizeof (arm_linux_thumb_le_breakpoint);
+  tdep->thumb2_breakpoint_size = sizeof (arm_linux_thumb2_le_breakpoint);
 
   if (tdep->fp_model == ARM_FLOAT_AUTO)
     tdep->fp_model = ARM_FLOAT_FPA;

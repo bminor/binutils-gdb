@@ -1,3 +1,7 @@
+2010-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.arch/thumb2-it.S, gdb.arch/thumb2-it.exp: New files.
+
 2010-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/call-strs.exp, gdb.base/default.exp,

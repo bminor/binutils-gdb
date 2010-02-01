@@ -167,8 +167,15 @@ struct gdbarch_tdep
 
   const char *arm_breakpoint;	/* Breakpoint pattern for an ARM insn.  */
   int arm_breakpoint_size;	/* And its size.  */
-  const char *thumb_breakpoint;	/* Breakpoint pattern for an ARM insn.  */
+  const char *thumb_breakpoint;	/* Breakpoint pattern for a Thumb insn.  */
   int thumb_breakpoint_size;	/* And its size.  */
+
+  /* If the Thumb breakpoint is an undefined instruction (which is
+     affected by IT blocks) rather than a BKPT instruction (which is
+     not), then we need a 32-bit Thumb breakpoint to preserve the
+     instruction count in IT blocks.  */
+  const char *thumb2_breakpoint;
+  int thumb2_breakpoint_size;
 
   int jb_pc;			/* Offset to PC value in jump buffer. 
 				   If this is negative, longjmp support

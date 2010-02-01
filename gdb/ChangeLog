@@ -1,5 +1,22 @@
 2010-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* arm-linux-tdep.c (arm_linux_thumb2_be_breakpoint)
+	(arm_linux_thumb2_le_breakpoint): New constants.
+	(arm_linux_init_abi): Set thumb2_breakpoint and
+	thumb2_breakpoint_size.
+	* arm-tdep.c (thumb_insn_size, thumb_advance_itstate): New functions.
+	(thumb_get_next_pc): Add a comment.  Rename IT to ITSTATE.
+	Implement support for single stepping through IT blocks if
+	a 32-bit Thumb breakpoint instruction is available.
+	(arm_breakpoint_from_pc): If a 32-bit Thumb breakpoint instruction
+	is available, use it when needed.
+	(arm_remote_breakpoint_from_pc): New function.
+	(arm_gdbarch_init): Register arm_remote_breakpoint_from_pc.
+	* arm-tdep.h (struct gdbarch_tdep): Correct thumb_breakpoint
+	comment.  Add thumb2_breakpoint and thumb2_breakpoint_size.
+
+2010-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* arch-utils.c (default_remote_breakpoint_from_pc): New function.
 	* arch-utils.h (default_remote_breakpoint_from_pc): Declare.
 	* gdbarch.c, gdbarch.h: Regenerated.

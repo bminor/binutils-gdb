@@ -1,3 +1,9 @@
+2010-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-arm-low.c (thumb_breakpoint_len): Delete.
+	(thumb2_breakpoint): New.
+	(arm_breakpoint_at): Check for Thumb-2 breakpoints.
+
 2010-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-low.c (get_stop_pc): Check for SIGTRAP.

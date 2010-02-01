@@ -2256,17 +2256,50 @@ bitcount (unsigned long val)
   return nbits;
 }
 
+/* Return the size in bytes of the complete Thumb instruction whose
+   first halfword is INST1.  */
+
+static int
+thumb_insn_size (unsigned short inst1)
+{
+  if ((inst1 & 0xe000) == 0xe000 && (inst1 & 0x1800) != 0)
+    return 4;
+  else
+    return 2;
+}
+
+static int
+thumb_advance_itstate (unsigned int itstate)
+{
+  /* Preserve IT[7:5], the first three bits of the condition.  Shift
+     the upcoming condition flags left by one bit.  */
+  itstate = (itstate & 0xe0) | ((itstate << 1) & 0x1f);
+
+  /* If we have finished the IT block, clear the state.  */
+  if ((itstate & 0x0f) == 0)
+    itstate = 0;
+
+  return itstate;
+}
+
+/* Find the next PC after the current instruction executes.  In some
+   cases we can not statically determine the answer (see the IT state
+   handling in this function); in that case, a breakpoint may be
+   inserted in addition to the returned PC, which will be used to set
+   another breakpoint by our caller.  */
+
 static CORE_ADDR
 thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct address_space *aspace = get_frame_address_space (frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   unsigned long pc_val = ((unsigned long) pc) + 4;	/* PC after prefetch */
   unsigned short inst1;
   CORE_ADDR nextpc = pc + 2;		/* default is next instruction */
   unsigned long offset;
-  ULONGEST status, it;
+  ULONGEST status, itstate;
 
   inst1 = read_memory_unsigned_integer (pc, 2, byte_order_for_code);
 
@@ -2279,18 +2312,100 @@ thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
      block is active.  These bits read as zero on earlier
      processors.  */
   status = get_frame_register_unsigned (frame, ARM_PS_REGNUM);
-  it = ((status >> 8) & 0xfc) | ((status >> 25) & 0x3);
+  itstate = ((status >> 8) & 0xfc) | ((status >> 25) & 0x3);
 
-  /* On GNU/Linux, where this routine is used, we use an undefined
-     instruction as a breakpoint.  Unlike BKPT, IT can disable execution
-     of the undefined instruction.  So we might miss the breakpoint!  */
-  if (((inst1 & 0xff00) == 0xbf00 && (inst1 & 0x000f) != 0) || (it & 0x0f))
-    error (_("Stepping through Thumb-2 IT blocks is not yet supported"));
+  /* If-Then handling.  On GNU/Linux, where this routine is used, we
+     use an undefined instruction as a breakpoint.  Unlike BKPT, IT
+     can disable execution of the undefined instruction.  So we might
+     miss the breakpoint if we set it on a skipped conditional
+     instruction.  Because conditional instructions can change the
+     flags, affecting the execution of further instructions, we may
+     need to set two breakpoints.  */
 
-  if (it & 0x0f)
+  if (gdbarch_tdep (gdbarch)->thumb2_breakpoint != NULL)
+    {
+      if ((inst1 & 0xff00) == 0xbf00 && (inst1 & 0x000f) != 0)
+	{
+	  /* An IT instruction.  Because this instruction does not
+	     modify the flags, we can accurately predict the next
+	     executed instruction.  */
+	  itstate = inst1 & 0x00ff;
+	  pc += thumb_insn_size (inst1);
+
+	  while (itstate != 0 && ! condition_true (itstate >> 4, status))
+	    {
+	      inst1 = read_memory_unsigned_integer (pc, 2, byte_order_for_code);
+	      pc += thumb_insn_size (inst1);
+	      itstate = thumb_advance_itstate (itstate);
+	    }
+
+	  return pc;
+	}
+      else if (itstate != 0)
+	{
+	  /* We are in a conditional block.  Check the condition.  */
+	  if (! condition_true (itstate >> 4, status))
+	    {
+	      /* Advance to the next executed instruction.  */
+	      pc += thumb_insn_size (inst1);
+	      itstate = thumb_advance_itstate (itstate);
+
+	      while (itstate != 0 && ! condition_true (itstate >> 4, status))
+		{
+		  inst1 = read_memory_unsigned_integer (pc, 2, byte_order_for_code);
+		  pc += thumb_insn_size (inst1);
+		  itstate = thumb_advance_itstate (itstate);
+		}
+
+	      return pc;
+	    }
+	  else if ((itstate & 0x0f) == 0x08)
+	    {
+	      /* This is the last instruction of the conditional
+		 block, and it is executed.  We can handle it normally
+		 because the following instruction is not conditional,
+		 and we must handle it normally because it is
+		 permitted to branch.  Fall through.  */
+	    }
+	  else
+	    {
+	      int cond_negated;
+
+	      /* There are conditional instructions after this one.
+		 If this instruction modifies the flags, then we can
+		 not predict what the next executed instruction will
+		 be.  Fortunately, this instruction is architecturally
+		 forbidden to branch; we know it will fall through.
+		 Start by skipping past it.  */
+	      pc += thumb_insn_size (inst1);
+	      itstate = thumb_advance_itstate (itstate);
+
+	      /* Set a breakpoint on the following instruction.  */
+	      gdb_assert ((itstate & 0x0f) != 0);
+	      insert_single_step_breakpoint (gdbarch, aspace, pc);
+	      cond_negated = (itstate >> 4) & 1;
+
+	      /* Skip all following instructions with the same
+		 condition.  If there is a later instruction in the IT
+		 block with the opposite condition, set the other
+		 breakpoint there.  If not, then set a breakpoint on
+		 the instruction after the IT block.  */
+	      do
+		{
+		  inst1 = read_memory_unsigned_integer (pc, 2, byte_order_for_code);
+		  pc += thumb_insn_size (inst1);
+		  itstate = thumb_advance_itstate (itstate);
+		}
+	      while (itstate != 0 && ((itstate >> 4) & 1) == cond_negated);
+
+	      return pc;
+	    }
+	}
+    }
+  else if (itstate & 0x0f)
     {
       /* We are in a conditional block.  Check the condition.  */
-      int cond = it >> 4;
+      int cond = itstate >> 4;
 
       if (! condition_true (cond, status))
 	{
@@ -2301,6 +2416,8 @@ thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 	  else
 	    return pc + 2;
 	}
+
+      /* Otherwise, handle the instruction normally.  */
     }
 
   if ((inst1 & 0xff00) == 0xbd00)	/* pop {rlist, pc} */
@@ -4749,10 +4866,29 @@ static const unsigned char *
 arm_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
 
   if (arm_pc_is_thumb (*pcptr))
     {
       *pcptr = UNMAKE_THUMB_ADDR (*pcptr);
+
+      /* If we have a separate 32-bit breakpoint instruction for Thumb-2,
+	 check whether we are replacing a 32-bit instruction.  */
+      if (tdep->thumb2_breakpoint != NULL)
+	{
+	  gdb_byte buf[2];
+	  if (target_read_memory (*pcptr, buf, 2) == 0)
+	    {
+	      unsigned short inst1;
+	      inst1 = extract_unsigned_integer (buf, 2, byte_order_for_code);
+	      if ((inst1 & 0xe000) == 0xe000 && (inst1 & 0x1800) != 0)
+		{
+		  *lenptr = tdep->thumb2_breakpoint_size;
+		  return tdep->thumb2_breakpoint;
+		}
+	    }
+	}
+
       *lenptr = tdep->thumb_breakpoint_size;
       return tdep->thumb_breakpoint;
     }
@@ -4761,6 +4897,20 @@ arm_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
       *lenptr = tdep->arm_breakpoint_size;
       return tdep->arm_breakpoint;
     }
+}
+
+static void
+arm_remote_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
+			       int *kindptr)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  arm_breakpoint_from_pc (gdbarch, pcptr, kindptr);
+
+  if (arm_pc_is_thumb (*pcptr) && *kindptr == 4)
+    /* The documented magic value for a 32-bit Thumb-2 breakpoint, so
+       that this is not confused with a 32-bit ARM breakpoint.  */
+    *kindptr = 3;
 }
 
 /* Extract from an array REGBUF containing the (raw) register state a
@@ -6091,6 +6241,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Breakpoint manipulation.  */
   set_gdbarch_breakpoint_from_pc (gdbarch, arm_breakpoint_from_pc);
+  set_gdbarch_remote_breakpoint_from_pc (gdbarch,
+					 arm_remote_breakpoint_from_pc);
 
   /* Information about registers, etc.  */
   set_gdbarch_deprecated_fp_regnum (gdbarch, ARM_FP_REGNUM);	/* ??? */

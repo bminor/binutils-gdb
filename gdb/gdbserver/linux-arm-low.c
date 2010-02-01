@@ -203,7 +203,7 @@ arm_set_pc (struct regcache *regcache, CORE_ADDR pc)
 static const unsigned long arm_breakpoint = 0xef9f0001;
 #define arm_breakpoint_len 4
 static const unsigned short thumb_breakpoint = 0xde01;
-#define thumb_breakpoint_len 2
+static const unsigned short thumb2_breakpoint[] = { 0xf7f0, 0xa000 };
 
 /* For new EABI binaries.  We recognize it regardless of which ABI
    is used for gdbserver, so single threaded debugging should work
@@ -227,6 +227,13 @@ arm_breakpoint_at (CORE_ADDR where)
       (*the_target->read_memory) (where, (unsigned char *) &insn, 2);
       if (insn == thumb_breakpoint)
 	return 1;
+
+      if (insn == thumb2_breakpoint[0])
+	{
+	  (*the_target->read_memory) (where + 2, (unsigned char *) &insn, 2);
+	  if (insn == thumb2_breakpoint[1])
+	    return 1;
+	}
     }
   else
     {
