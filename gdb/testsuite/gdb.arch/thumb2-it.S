@@ -136,4 +136,47 @@ it_8:
 	addlt	r0, #8	@ Not reached
 	bx	lr	@ Done, Check $r0 == 1
 
+	.type it_breakpoints,%function
+	.thumb_func
+it_breakpoints:
+	mov	r0, #0
+	cmp	r0, #0
+	it	eq	@ Location 1 @ Break 1
+	moveq	r0, #0
+
+	it	eq	@ Location 2
+	moveq	r0, #0	@ Break 2
+
+	it	ne	@ Location 3
+	movne	r0, #0	@ Break 3
+
+	@ An IT block of maximum size.
+	itttt	eq	@ Location 4
+	moveq.w	r0, #0
+	moveq.w	r0, #0
+	moveq.w	r0, #0
+	moveq.w	r0, #0	@ Break 4
+
+	@ Just outside an IT block.
+	it	eq
+	moveq	r0, #0
+	mov	r0, #0	@ Location 5 @ Break 5
+
+	@ After something that looks like an IT block, but
+	@ is the second half of an instruction.
+	.p2align 6
+	cmp	r0, r0
+	b	1f
+	b.w	.+0xe14	@ 0xf000 0xbf08 -> second half is IT EQ
+1:	mov	r0, #0	@ Location 6 @ Break 6
+
+	@ After something that looks like an IT block, but
+	@ is data.
+	.p2align 6
+	b	1f
+	.short	0xbf08
+1:	mov	r0, #0	@ Location 7 @ Break 7
+
+	bx	lr
+
 #endif /* __thumb2__ */

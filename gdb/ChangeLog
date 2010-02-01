@@ -1,5 +1,15 @@
 2010-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* arm-tdep.c (arm_find_mapping_symbol): New function, from
+	arm_pc_is_thumb.
+	(arm_pc_is_thumb): Use arm_find_mapping_symbol.
+	(extend_buffer_earlier): New function.
+	(MAX_IT_BLOCK_PREFIX, IT_SCAN_THRESHOLD): New constants.
+	(arm_adjust_breakpoint_address): New function.
+	(arm_gdbarch_init): Register arm_adjust_breakpoint_address.
+
+2010-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* arm-linux-tdep.c (arm_linux_thumb2_be_breakpoint)
 	(arm_linux_thumb2_le_breakpoint): New constants.
 	(arm_linux_init_abi): Set thumb2_breakpoint and
