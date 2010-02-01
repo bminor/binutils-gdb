@@ -1,3 +1,8 @@
+2010-02-01  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* binutils-all/note-1.d: New.
+	* binutils-all/objcopy.exp: Add it.
+
 2010-01-30  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	* binutils-all/windres/html.rc: Don't xfail x86_64-*-mingw*.

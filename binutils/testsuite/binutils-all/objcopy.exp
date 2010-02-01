@@ -835,6 +835,7 @@ if [is_elf_format] {
     objcopy_test_readelf "ELF group" group-3.s
     objcopy_test_readelf "ELF group" group-4.s
     run_dump_test "copy-1"
+    run_dump_test "note-1"
 }
 
 run_dump_test "copy-2"

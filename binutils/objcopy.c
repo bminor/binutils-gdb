@@ -1608,7 +1608,12 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	    }
 	  else
 	    {
-	      padd->section = bfd_make_section_with_flags (obfd, padd->name, flags);
+	      /* We use LINKER_CREATED here so that the backend hooks
+	         will create any special section type information,
+	         instead of presuming we know what we're doing merely
+	         because we set the flags.  */
+	      padd->section = bfd_make_section_with_flags
+		(obfd, padd->name, flags | SEC_LINKER_CREATED);
 	      if (padd->section == NULL)
 		{
 		  bfd_nonfatal_message (NULL, obfd, NULL,
