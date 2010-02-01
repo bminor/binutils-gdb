@@ -6324,6 +6324,7 @@ som_bfd_link_split_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 
 #define	som_close_and_cleanup		        som_bfd_free_cached_info
 #define som_read_ar_hdr			        _bfd_generic_read_ar_hdr
+#define som_write_ar_hdr		        _bfd_generic_write_ar_hdr
 #define som_openr_next_archived_file	        bfd_generic_openr_next_archived_file
 #define som_get_elt_at_index		        _bfd_generic_get_elt_at_index
 #define som_generic_stat_arch_elt	        bfd_generic_stat_arch_elt
