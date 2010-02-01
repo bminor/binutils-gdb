@@ -1,5 +1,11 @@
 2010-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdbarch.sh: Set LANG and LC_ALL to C, not c.
+	(remote_breakpoint_for_pc): Correct invalid_p check.
+	* gdbarch.c: Regenerated.
+
+2010-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* arm-tdep.c (arm_find_mapping_symbol): New function, from
 	arm_pc_is_thumb.
 	(arm_pc_is_thumb): Use arm_find_mapping_symbol.

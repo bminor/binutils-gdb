@@ -596,8 +596,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
     fprintf_unfiltered (log, "\n\tinner_than");
   if (gdbarch->breakpoint_from_pc == 0)
     fprintf_unfiltered (log, "\n\tbreakpoint_from_pc");
-  if (gdbarch->remote_breakpoint_from_pc == default_remote_breakpoint_from_pc)
-    fprintf_unfiltered (log, "\n\tremote_breakpoint_from_pc");
+  /* Skip verify of remote_breakpoint_from_pc, invalid_p == 0 */
   /* Skip verify of adjust_breakpoint_address, has predicate */
   /* Skip verify of memory_insert_breakpoint, invalid_p == 0 */
   /* Skip verify of memory_remove_breakpoint, invalid_p == 0 */
