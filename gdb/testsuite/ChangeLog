@@ -1,3 +1,8 @@
+2010-02-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/symbol-without-target_section.exp,
+	gdb.base/symbol-without-target_section.c: New.
+
 2010-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/bigcore.exp: Reset increased timeout.

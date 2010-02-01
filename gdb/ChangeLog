@@ -1,3 +1,10 @@
+2010-02-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* solib-svr4.c (scan_dyntag): New variable dyn_addr.  Replace gdb_assert
+	by a conditional setting DYN_ADDR.  Use DYN_ADDR.
+	* config/djgpp/fnchange.lst: Add translations for
+	symbol-without-target_section.exp and symbol-without-target_section.c.
+
 2010-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdbarch.sh: Set LANG and LC_ALL to C, not c.

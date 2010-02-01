@@ -570,7 +570,7 @@ scan_dyntag (int dyntag, bfd *abfd, CORE_ADDR *ptr)
 {
   int arch_size, step, sect_size;
   long dyn_tag;
-  CORE_ADDR dyn_ptr;
+  CORE_ADDR dyn_ptr, dyn_addr;
   gdb_byte *bufend, *bufstart, *buf;
   Elf32_External_Dyn *x_dynp_32;
   Elf64_External_Dyn *x_dynp_64;
@@ -597,7 +597,17 @@ scan_dyntag (int dyntag, bfd *abfd, CORE_ADDR *ptr)
        target_section++)
     if (sect == target_section->the_bfd_section)
       break;
-  gdb_assert (target_section < current_target_sections->sections_end);
+  if (target_section < current_target_sections->sections_end)
+    dyn_addr = target_section->addr;
+  else
+    {
+      /* ABFD may come from OBJFILE acting only as a symbol file without being
+	 loaded into the target (see add_symbol_file_command).  This case is
+	 such fallback to the file VMA address without the possibility of
+	 having the section relocated to its actual in-memory address.  */
+
+      dyn_addr = bfd_section_vma (abfd, sect);
+    }
 
   /* Read in .dynamic from the BFD.  We will get the actual value
      from memory later.  */
@@ -639,7 +649,7 @@ scan_dyntag (int dyntag, bfd *abfd, CORE_ADDR *ptr)
 	     CORE_ADDR ptr_addr;
 
 	     ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
-	     ptr_addr = target_section->addr + (buf - bufstart) + arch_size / 8;
+	     ptr_addr = dyn_addr + (buf - bufstart) + arch_size / 8;
 	     if (target_read_memory (ptr_addr, ptr_buf, arch_size / 8) == 0)
 	       dyn_ptr = extract_typed_address (ptr_buf, ptr_type);
 	     *ptr = dyn_ptr;

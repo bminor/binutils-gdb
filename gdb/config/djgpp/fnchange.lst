@@ -394,6 +394,8 @@
 @V@/gdb/testsuite/gdb.base/solib-symbol-main.c @V@/gdb/testsuite/gdb.base/so-symmain.c
 @V@/gdb/testsuite/gdb.base/solib-overlap-lib.c @V@/gdb/testsuite/gdb.base/so-ovrlib.c
 @V@/gdb/testsuite/gdb.base/solib-overlap-main.c @V@/gdb/testsuite/gdb.base/so-ovrmain.c
+@V@/gdb/testsuite/gdb.base/gdb.base/symbol-without-target_section.exp @V@/gdb/testsuite/gdb.base/symnosec.exp
+@V@/gdb/testsuite/gdb.base/gdb.base/symbol-without-target_section.c @V@/gdb/testsuite/gdb.base/symnosec.c
 @V@/gdb/testsuite/gdb.base/type-opaque-lib.c @V@/gdb/testsuite/gdb.base/ty-opqlib.c
 @V@/gdb/testsuite/gdb.base/type-opaque-main.c @V@/gdb/testsuite/gdb.base/ty-opqmain.c
 @V@/gdb/testsuite/gdb.base/watchpoint-hw.c @V@/gdb/testsuite/gdb.base/wp-hw.c
