@@ -1,5 +1,12 @@
 2010-02-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	PR libc/11214:
+	* gdb.threads/current-lwp-dead.c: Include features.h.
+	(HAS_NOMMU): New.
+	(fn, main): Move CLONE_VM into [__UCLIBC__ && HAS_NOMMU].
+
+2010-02-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.base/symbol-without-target_section.exp,
 	gdb.base/symbol-without-target_section.c: New.
 

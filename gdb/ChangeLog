@@ -1,7 +1,14 @@
+2010-02-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR libc/11214:
+	* linux-low.c (linux_tracefork_child) [!(__UCLIBC__ && HAS_NOMMU)]: New.
+	(linux_test_for_tracefork): Move `stack' into [__UCLIBC__ && HAS_NOMMU].
+	(linux_test_for_tracefork) [!(__UCLIBC__ && HAS_NOMMU)]: New.
+
 2010-02-01  Michael Matz  <matz@suse.de>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 
-        * i386-tdep.c (i386_frame_cache): Assume valid anonymous
+	* i386-tdep.c (i386_frame_cache): Assume valid anonymous
 	functions use a frame pointer.
 
 2010-02-01  Jan Kratochvil  <jan.kratochvil@redhat.com>

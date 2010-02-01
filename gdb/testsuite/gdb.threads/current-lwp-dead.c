@@ -30,6 +30,13 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+#include <features.h>
+#ifdef __UCLIBC__
+#if !(defined(__UCLIBC_HAS_MMU__) || defined(__ARCH_HAS_MMU__))
+#define HAS_NOMMU
+#endif
+#endif
+
 #define STACK_SIZE 0x1000
 
 static int
@@ -51,8 +58,11 @@ fn (void *unused)
   stack = malloc (STACK_SIZE);
   assert (stack != NULL);
 
-  new_pid = clone (fn_return, stack + STACK_SIZE, CLONE_FILES | CLONE_VM, NULL,
-		   NULL, NULL, NULL);
+  new_pid = clone (fn_return, stack + STACK_SIZE, CLONE_FILES
+#if defined(__UCLIBC__) && defined(HAS_NOMMU)
+		   | CLONE_VM
+#endif /* defined(__UCLIBC__) && defined(HAS_NOMMU) */
+		   , NULL, NULL, NULL, NULL);
   assert (new_pid > 0);
 
   return 0;
@@ -67,8 +77,11 @@ main (int argc, char **argv)
   stack = malloc (STACK_SIZE);
   assert (stack != NULL);
 
-  new_pid = clone (fn, stack + STACK_SIZE, CLONE_FILES | CLONE_VM, NULL, NULL,
-		   NULL, NULL);
+  new_pid = clone (fn, stack + STACK_SIZE, CLONE_FILES
+#if defined(__UCLIBC__) && defined(HAS_NOMMU)
+		   | CLONE_VM
+#endif /* defined(__UCLIBC__) && defined(HAS_NOMMU) */
+		   , NULL, NULL, NULL, NULL);
   assert (new_pid > 0);
 
   return 0;

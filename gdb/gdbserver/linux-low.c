@@ -2597,6 +2597,14 @@ linux_tracefork_child (void *arg)
 {
   ptrace (PTRACE_TRACEME, 0, 0, 0);
   kill (getpid (), SIGSTOP);
+
+#if !(defined(__UCLIBC__) && defined(HAS_NOMMU))
+
+  if (fork () == 0)
+    linux_tracefork_grandchild (NULL);
+
+#else /* defined(__UCLIBC__) && defined(HAS_NOMMU) */
+
 #ifdef __ia64__
   __clone2 (linux_tracefork_grandchild, arg, STACK_SIZE,
 	    CLONE_VM | SIGCHLD, NULL);
@@ -2604,6 +2612,9 @@ linux_tracefork_child (void *arg)
   clone (linux_tracefork_grandchild, arg + STACK_SIZE,
 	 CLONE_VM | SIGCHLD, NULL);
 #endif
+
+#endif /* defined(__UCLIBC__) && defined(HAS_NOMMU) */
+
   _exit (0);
 }
 
@@ -2616,18 +2627,31 @@ linux_test_for_tracefork (void)
 {
   int child_pid, ret, status;
   long second_pid;
+#if defined(__UCLIBC__) && defined(HAS_NOMMU)
   char *stack = xmalloc (STACK_SIZE * 4);
+#endif /* defined(__UCLIBC__) && defined(HAS_NOMMU) */
 
   linux_supports_tracefork_flag = 0;
+
+#if !(defined(__UCLIBC__) && defined(HAS_NOMMU))
+
+  child_pid = fork ();
+  if (child_pid == 0)
+    linux_tracefork_child (NULL);
+
+#else /* defined(__UCLIBC__) && defined(HAS_NOMMU) */
 
   /* Use CLONE_VM instead of fork, to support uClinux (no MMU).  */
 #ifdef __ia64__
   child_pid = __clone2 (linux_tracefork_child, stack, STACK_SIZE,
 			CLONE_VM | SIGCHLD, stack + STACK_SIZE * 2);
-#else
+#else /* !__ia64__ */
   child_pid = clone (linux_tracefork_child, stack + STACK_SIZE,
 		     CLONE_VM | SIGCHLD, stack + STACK_SIZE * 2);
-#endif
+#endif /* !__ia64__ */
+
+#endif /* defined(__UCLIBC__) && defined(HAS_NOMMU) */
+
   if (child_pid == -1)
     perror_with_name ("clone");
 
@@ -2696,7 +2720,9 @@ linux_test_for_tracefork (void)
     }
   while (WIFSTOPPED (status));
 
+#if defined(__UCLIBC__) && defined(HAS_NOMMU)
   free (stack);
+#endif /* defined(__UCLIBC__) && defined(HAS_NOMMU) */
 }
 
 
