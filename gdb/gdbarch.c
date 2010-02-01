@@ -188,6 +188,7 @@ struct gdbarch
   gdbarch_skip_main_prologue_ftype *skip_main_prologue;
   gdbarch_inner_than_ftype *inner_than;
   gdbarch_breakpoint_from_pc_ftype *breakpoint_from_pc;
+  gdbarch_remote_breakpoint_from_pc_ftype *remote_breakpoint_from_pc;
   gdbarch_adjust_breakpoint_address_ftype *adjust_breakpoint_address;
   gdbarch_memory_insert_breakpoint_ftype *memory_insert_breakpoint;
   gdbarch_memory_remove_breakpoint_ftype *memory_remove_breakpoint;
@@ -330,6 +331,7 @@ struct gdbarch startup_gdbarch =
   0,  /* skip_main_prologue */
   0,  /* inner_than */
   0,  /* breakpoint_from_pc */
+  default_remote_breakpoint_from_pc,  /* remote_breakpoint_from_pc */
   0,  /* adjust_breakpoint_address */
   default_memory_insert_breakpoint,  /* memory_insert_breakpoint */
   default_memory_remove_breakpoint,  /* memory_remove_breakpoint */
@@ -456,6 +458,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->value_from_register = default_value_from_register;
   gdbarch->pointer_to_address = unsigned_pointer_to_address;
   gdbarch->address_to_pointer = unsigned_address_to_pointer;
+  gdbarch->remote_breakpoint_from_pc = default_remote_breakpoint_from_pc;
   gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
   gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
   gdbarch->remote_register_number = default_remote_register_number;
@@ -593,6 +596,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
     fprintf_unfiltered (log, "\n\tinner_than");
   if (gdbarch->breakpoint_from_pc == 0)
     fprintf_unfiltered (log, "\n\tbreakpoint_from_pc");
+  if (gdbarch->remote_breakpoint_from_pc == default_remote_breakpoint_from_pc)
+    fprintf_unfiltered (log, "\n\tremote_breakpoint_from_pc");
   /* Skip verify of adjust_breakpoint_address, has predicate */
   /* Skip verify of memory_insert_breakpoint, invalid_p == 0 */
   /* Skip verify of memory_remove_breakpoint, invalid_p == 0 */
@@ -1066,6 +1071,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: regset_from_core_section = <%s>\n",
                       host_address_to_string (gdbarch->regset_from_core_section));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: remote_breakpoint_from_pc = <%s>\n",
+                      host_address_to_string (gdbarch->remote_breakpoint_from_pc));
   fprintf_unfiltered (file,
                       "gdbarch_dump: remote_register_number = <%s>\n",
                       host_address_to_string (gdbarch->remote_register_number));
@@ -2282,6 +2290,23 @@ set_gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch,
                                 gdbarch_breakpoint_from_pc_ftype breakpoint_from_pc)
 {
   gdbarch->breakpoint_from_pc = breakpoint_from_pc;
+}
+
+void
+gdbarch_remote_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *kindptr)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->remote_breakpoint_from_pc != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_remote_breakpoint_from_pc called\n");
+  gdbarch->remote_breakpoint_from_pc (gdbarch, pcptr, kindptr);
+}
+
+void
+set_gdbarch_remote_breakpoint_from_pc (struct gdbarch *gdbarch,
+                                       gdbarch_remote_breakpoint_from_pc_ftype remote_breakpoint_from_pc)
+{
+  gdbarch->remote_breakpoint_from_pc = remote_breakpoint_from_pc;
 }
 
 int

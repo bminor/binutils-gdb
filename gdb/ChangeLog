@@ -1,3 +1,12 @@
+2010-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arch-utils.c (default_remote_breakpoint_from_pc): New function.
+	* arch-utils.h (default_remote_breakpoint_from_pc): Declare.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* gdbarch.sh (remote_breakpoint_from_pc): New architecture method.
+	* remote.c (remote_insert_breakpoint, remote_insert_hw_breakpoint): Use
+	gdbarch_remote_breakpoint_from_pc.
+
 2010-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* infrun.c (prepare_to_proceed): Handle other signals which might

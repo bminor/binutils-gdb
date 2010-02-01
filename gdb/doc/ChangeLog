@@ -1,3 +1,10 @@
+2010-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (Architecture-Specific Protocol Details): New section.
+	Document ARM breakpoint types.
+	(Register Packet Format): Move into the new section.
+	(Packets): Describe the KIND argument for Z0, z0, Z1, and z1 packets.
+
 2010-01-21  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (File Options): Adjust the documentation of this

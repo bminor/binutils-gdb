@@ -28422,7 +28422,7 @@ Show the current setting of the target wait timeout.
 * Packets::
 * Stop Reply Packets::
 * General Query Packets::
-* Register Packet Format::
+* Architecture-Specific Protocol Details::
 * Tracepoint Packets::
 * Host I/O Packets::
 * Interrupts::
@@ -29169,14 +29169,13 @@ for success
 for an error
 @end table
 
-@item z @var{type},@var{addr},@var{length}
-@itemx Z @var{type},@var{addr},@var{length}
+@item z @var{type},@var{addr},@var{kind}
+@itemx Z @var{type},@var{addr},@var{kind}
 @anchor{insert breakpoint or watchpoint packet}
 @cindex @samp{z} packet
 @cindex @samp{Z} packets
 Insert (@samp{Z}) or remove (@samp{z}) a @var{type} breakpoint or
-watchpoint starting at address @var{address} and covering the next
-@var{length} bytes.
+watchpoint starting at address @var{address} of kind @var{kind}.
 
 Each breakpoint and watchpoint packet @var{type} is documented
 separately.
@@ -29188,18 +29187,20 @@ remote target shall support either both or neither of a given
 avoid potential problems with duplicate packets, the operations should
 be implemented in an idempotent way.}
 
-@item z0,@var{addr},@var{length}
-@itemx Z0,@var{addr},@var{length}
+@item z0,@var{addr},@var{kind}
+@itemx Z0,@var{addr},@var{kind}
 @cindex @samp{z0} packet
 @cindex @samp{Z0} packet
 Insert (@samp{Z0}) or remove (@samp{z0}) a memory breakpoint at address
-@var{addr} of size @var{length}.
+@var{addr} of type @var{kind}.
 
 A memory breakpoint is implemented by replacing the instruction at
 @var{addr} with a software breakpoint or trap instruction.  The
-@var{length} is used by targets that indicates the size of the
-breakpoint (in bytes) that should be inserted (e.g., the @sc{arm} and
-@sc{mips} can insert either a 2 or 4 byte breakpoint).
+@var{kind} is target-specific and typically indicates the size of
+the breakpoint in bytes that should be inserted.  E.g., the @sc{arm}
+and @sc{mips} can insert either a 2 or 4 byte breakpoint.  Some
+architectures have additional meanings for @var{kind};
+see @ref{Architecture-Specific Protocol Details}.
 
 @emph{Implementation note: It is possible for a target to copy or move
 code that contains memory breakpoints (e.g., when implementing
@@ -29216,15 +29217,16 @@ not supported
 for an error
 @end table
 
-@item z1,@var{addr},@var{length}
-@itemx Z1,@var{addr},@var{length}
+@item z1,@var{addr},@var{kind}
+@itemx Z1,@var{addr},@var{kind}
 @cindex @samp{z1} packet
 @cindex @samp{Z1} packet
 Insert (@samp{Z1}) or remove (@samp{z1}) a hardware breakpoint at
-address @var{addr} of size @var{length}.
+address @var{addr}.
 
 A hardware breakpoint is implemented using a mechanism that is not
-dependant on being able to modify the target's memory.
+dependant on being able to modify the target's memory.  @var{kind}
+has the same meaning as in @samp{Z0} packets.
 
 @emph{Implementation note: A hardware breakpoint is not affected by code
 movement.}
@@ -29239,11 +29241,12 @@ not supported
 for an error
 @end table
 
-@item z2,@var{addr},@var{length}
-@itemx Z2,@var{addr},@var{length}
+@item z2,@var{addr},@var{kind}
+@itemx Z2,@var{addr},@var{kind}
 @cindex @samp{z2} packet
 @cindex @samp{Z2} packet
-Insert (@samp{Z2}) or remove (@samp{z2}) a write watchpoint.
+Insert (@samp{Z2}) or remove (@samp{z2}) a write watchpoint at @var{addr}.
+@var{kind} is interpreted as the number of bytes to watch.
 
 Reply:
 @table @samp
@@ -29255,11 +29258,12 @@ not supported
 for an error
 @end table
 
-@item z3,@var{addr},@var{length}
-@itemx Z3,@var{addr},@var{length}
+@item z3,@var{addr},@var{kind}
+@itemx Z3,@var{addr},@var{kind}
 @cindex @samp{z3} packet
 @cindex @samp{Z3} packet
-Insert (@samp{Z3}) or remove (@samp{z3}) a read watchpoint.
+Insert (@samp{Z3}) or remove (@samp{z3}) a read watchpoint at @var{addr}.
+@var{kind} is interpreted as the number of bytes to watch.
 
 Reply:
 @table @samp
@@ -29271,11 +29275,12 @@ not supported
 for an error
 @end table
 
-@item z4,@var{addr},@var{length}
-@itemx Z4,@var{addr},@var{length}
+@item z4,@var{addr},@var{kind}
+@itemx Z4,@var{addr},@var{kind}
 @cindex @samp{z4} packet
 @cindex @samp{Z4} packet
-Insert (@samp{Z4}) or remove (@samp{z4}) an access watchpoint.
+Insert (@samp{Z4}) or remove (@samp{z4}) an access watchpoint at @var{addr}.
+@var{kind} is interpreted as the number of bytes to watch.
 
 Reply:
 @table @samp
@@ -30338,8 +30343,35 @@ A badly formed request or an error was encountered.
 
 @end table
 
-@node Register Packet Format
-@section Register Packet Format
+@node Architecture-Specific Protocol Details
+@section Architecture-Specific Protocol Details
+
+This section describes how the remote protocol is applied to specific
+target architectures.  Also see @ref{Standard Target Features}, for
+details of XML target descriptions for each architecture.
+
+@subsection ARM
+
+@subsubsection Breakpoint Kinds
+
+These breakpoint kinds are defined for the @samp{Z0} and @samp{Z1} packets.
+
+@table @r
+
+@item 2
+16-bit Thumb mode breakpoint.
+
+@item 3
+32-bit Thumb mode (Thumb-2) breakpoint.
+
+@item 4
+32-bit ARM mode breakpoint.
+
+@end table
+
+@subsection MIPS
+
+@subsubsection Register Packet Format
 
 The following @code{g}/@code{G} packets have previously been defined.
 In the below, some thirty-two bit registers are transferred as

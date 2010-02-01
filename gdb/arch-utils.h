@@ -159,4 +159,7 @@ extern int default_fast_tracepoint_valid_at (struct gdbarch *gdbarch,
 					     CORE_ADDR addr,
 					     int *isize, char **msg);
 
+extern void default_remote_breakpoint_from_pc (struct gdbarch *,
+					       CORE_ADDR *pcptr, int *kindptr);
+
 #endif

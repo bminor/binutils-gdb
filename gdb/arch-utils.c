@@ -776,6 +776,13 @@ default_fast_tracepoint_valid_at (struct gdbarch *gdbarch,
   return 1;
 }
 
+void
+default_remote_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
+				   int *kindptr)
+{
+  gdbarch_breakpoint_from_pc (gdbarch, pcptr, kindptr);
+}
+
 /* */
 
 extern initialize_file_ftype _initialize_gdbarch_utils; /* -Wmissing-prototypes */

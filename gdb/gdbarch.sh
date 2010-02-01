@@ -486,6 +486,10 @@ m:CORE_ADDR:skip_prologue:CORE_ADDR ip:ip:0:0
 M:CORE_ADDR:skip_main_prologue:CORE_ADDR ip:ip
 f:int:inner_than:CORE_ADDR lhs, CORE_ADDR rhs:lhs, rhs:0:0
 m:const gdb_byte *:breakpoint_from_pc:CORE_ADDR *pcptr, int *lenptr:pcptr, lenptr::0:
+# Return the adjusted address and kind to use for Z0/Z1 packets.
+# KIND is usually the memory length of the breakpoint, but may have a
+# different target-specific meaning.
+m:void:remote_breakpoint_from_pc:CORE_ADDR *pcptr, int *kindptr:pcptr, kindptr::default_remote_breakpoint_from_pc:
 M:CORE_ADDR:adjust_breakpoint_address:CORE_ADDR bpaddr:bpaddr
 m:int:memory_insert_breakpoint:struct bp_target_info *bp_tgt:bp_tgt:0:default_memory_insert_breakpoint::0
 m:int:memory_remove_breakpoint:struct bp_target_info *bp_tgt:bp_tgt:0:default_memory_remove_breakpoint::0

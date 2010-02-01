@@ -7245,7 +7245,7 @@ remote_insert_breakpoint (struct gdbarch *gdbarch,
       char *p;
       int bpsize;
 
-      gdbarch_breakpoint_from_pc (gdbarch, &addr, &bpsize);
+      gdbarch_remote_breakpoint_from_pc (gdbarch, &addr, &bpsize);
 
       rs = get_remote_state ();
       p = rs->buf;
@@ -7447,7 +7447,7 @@ remote_insert_hw_breakpoint (struct gdbarch *gdbarch,
   /* The length field should be set to the size of a breakpoint
      instruction, even though we aren't inserting one ourselves.  */
 
-  gdbarch_breakpoint_from_pc
+  gdbarch_remote_breakpoint_from_pc
     (gdbarch, &bp_tgt->placed_address, &bp_tgt->placed_size);
 
   if (remote_protocol_packets[PACKET_Z1].support == PACKET_DISABLE)
