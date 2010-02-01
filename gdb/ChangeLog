@@ -1,3 +1,9 @@
+2010-02-01  Michael Matz  <matz@suse.de>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+        * i386-tdep.c (i386_frame_cache): Assume valid anonymous
+	functions use a frame pointer.
+
 2010-02-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* solib-svr4.c (scan_dyntag): New variable dyn_addr.  Replace gdb_assert

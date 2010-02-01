@@ -1395,12 +1395,24 @@ i386_frame_cache (struct frame_info *this_frame, void **this_cache)
 	  /* This will be added back below.  */
 	  cache->saved_regs[I386_EIP_REGNUM] -= cache->base;
 	}
-      else
+      else if (cache->pc != 0
+	       || target_read_memory (get_frame_pc (this_frame), buf, 1))
 	{
+	  /* We're in a known function, but did not find a frame
+	     setup.  Assume that the function does not use %ebp.
+	     Alternatively, we may have jumped to an invalid
+	     address; in that case there is definitely no new
+	     frame in %ebp.  */
 	  get_frame_register (this_frame, I386_ESP_REGNUM, buf);
 	  cache->base = extract_unsigned_integer (buf, 4, byte_order)
 			+ cache->sp_offset;
 	}
+      else
+	/* We're in an unknown function.  We could not find the start
+	   of the function to analyze the prologue; our best option is
+	   to assume a typical frame layout with the caller's %ebp
+	   saved.  */
+	cache->saved_regs[I386_EBP_REGNUM] = 0;
     }
 
   /* Now that we have the base address for the stack frame we can
