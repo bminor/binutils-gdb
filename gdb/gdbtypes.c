@@ -1132,13 +1132,6 @@ lookup_union (char *name, struct block *block)
   if (TYPE_CODE (t) == TYPE_CODE_UNION)
     return t;
 
-  /* C++ unions may come out with TYPE_CODE_CLASS, but we look at
-   * a further "declared_type" field to discover it is really a union.
-   */
-  if (HAVE_CPLUS_STRUCT (t))
-    if (TYPE_DECLARED_TYPE (t) == DECLARED_TYPE_UNION)
-      return t;
-
   /* If we get here, it's not a union.  */
   error (_("This context has class, struct or enum %s, not a union."), 
 	 name);

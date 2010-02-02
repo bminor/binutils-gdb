@@ -45,4 +45,4 @@ gdb_test "show cp-abi" {The currently selected C\+\+ ABI is "gnu-v3".*}
 
 gdb_load ${binfile}
 
-gdb_test "ptype c" "type = class C {\[\r\n \t\]*int \\(C::\\*fp\\)\\(C \\*\\);\[\r\n \t\]*}"
+gdb_test "ptype c" "type = struct C {\[\r\n \t\]*private:\[\r\n \t\]*int \\(C::\\*fp\\)\\(C \\*\\);\[\r\n \t\]*}"

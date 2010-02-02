@@ -547,9 +547,9 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
   wrap_here ("    ");
   if (show < 0)
     {
-      if (TYPE_CODE (type) == DECLARED_TYPE_STRUCT)
+      if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
 	fprintf_filtered (stream, "RECORD ... END ");
-      else if (TYPE_DECLARED_TYPE (type) == DECLARED_TYPE_UNION)
+      else if (TYPE_CODE (type) == TYPE_CODE_UNION)
 	fprintf_filtered (stream, "CASE ... END ");
     }
   else if (show > 0)

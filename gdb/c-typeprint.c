@@ -702,35 +702,10 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 
     case TYPE_CODE_STRUCT:
       c_type_print_modifier (type, stream, 0, 1);
-      /* Note TYPE_CODE_STRUCT and TYPE_CODE_CLASS have the same value,
-       * so we use another means for distinguishing them.
-       */
-      if (HAVE_CPLUS_STRUCT (type))
-	{
-	  switch (TYPE_DECLARED_TYPE (type))
-	    {
-	    case DECLARED_TYPE_CLASS:
-	      fprintf_filtered (stream, "class ");
-	      break;
-	    case DECLARED_TYPE_UNION:
-	      fprintf_filtered (stream, "union ");
-	      break;
-	    case DECLARED_TYPE_STRUCT:
-	      fprintf_filtered (stream, "struct ");
-	      break;
-	    default:
-	      /* If there is a CPLUS_STRUCT, assume class if not
-	       * otherwise specified in the declared_type field.
-	       */
-	      fprintf_filtered (stream, "class ");
-	      break;
-	    }			/* switch */
-	}
+      if (TYPE_DECLARED_CLASS (type))
+	fprintf_filtered (stream, "class ");
       else
-	{
-	  /* If not CPLUS_STRUCT, then assume it's a C struct */
-	  fprintf_filtered (stream, "struct ");
-	}
+	fprintf_filtered (stream, "struct ");
       goto struct_union;
 
     case TYPE_CODE_UNION:
@@ -786,8 +761,7 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 	     masquerading as a class, if all members are public, there's
 	     no need for a "public:" label. */
 
-	  if ((TYPE_DECLARED_TYPE (type) == DECLARED_TYPE_CLASS)
-	      || (TYPE_DECLARED_TYPE (type) == DECLARED_TYPE_TEMPLATE))
+	  if (TYPE_DECLARED_CLASS (type))
 	    {
 	      QUIT;
 	      len = TYPE_NFIELDS (type);
@@ -815,8 +789,7 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 		    }
 		}
 	    }
-	  else if ((TYPE_DECLARED_TYPE (type) == DECLARED_TYPE_STRUCT)
-		   || (TYPE_DECLARED_TYPE (type) == DECLARED_TYPE_UNION))
+	  else
 	    {
 	      QUIT;
 	      len = TYPE_NFIELDS (type);
@@ -863,10 +836,7 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 		  || TYPE_FIELD_ARTIFICIAL (type, i))
 		continue;
 
-	      /* If this is a C++ class we can print the various C++ section
-	         labels. */
-
-	      if (HAVE_CPLUS_STRUCT (type) && need_access_label)
+	      if (need_access_label)
 		{
 		  if (TYPE_FIELD_PROTECTED (type, i))
 		    {

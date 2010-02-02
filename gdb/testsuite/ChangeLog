@@ -1,5 +1,10 @@
 2010-02-02  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.dwarf2/member-ptr-forwardref.exp: Update expected result for
+	type-printing change.
+
+2010-02-02  Tom Tromey  <tromey@redhat.com>
+
 	PR c++/11226, PR c++/9629, PR c++/9688, PR c++/8890:
 	* gdb.cp/virtbase.cc: New file.
 	* gdb.cp/virtbase.exp: New file.

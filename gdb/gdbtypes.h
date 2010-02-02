@@ -279,6 +279,12 @@ enum type_instance_flag_value
 #define TYPE_OWNER(t) TYPE_MAIN_TYPE(t)->owner
 #define TYPE_OBJFILE(t) (TYPE_OBJFILE_OWNED(t)? TYPE_OWNER(t).objfile : NULL)
 
+/* True if this type was declared using the "class" keyword.  This is
+   only valid for C++ structure types, and only used for displaying
+   the type.  If false, the structure was declared as a "struct".  */
+
+#define TYPE_DECLARED_CLASS(t) (TYPE_MAIN_TYPE (t)->flag_declared_class)
+
 /* Constant type.  If this is set, the corresponding type has a
  * const modifier.
  */
@@ -386,6 +392,9 @@ struct main_type
   unsigned int flag_nottext : 1;
   unsigned int flag_fixed_instance : 1;
   unsigned int flag_objfile_owned : 1;
+  /* True if this type was declared with "class" rather than
+     "struct".  */
+  unsigned int flag_declared_class : 1;
 
   /* A discriminant telling us which field of the type_specific union
      is being used for this type, if any.  */
@@ -676,19 +685,10 @@ struct cplus_struct_type
 
     short nfn_fields_total;
 
-    /* The "declared_type" field contains a code saying how the
-       user really declared this type, e.g., "class s", "union s",
-       "struct s".
-       The 3 above things come out from the C++ compiler looking like classes, 
-       but we keep track of the real declaration so we can give
-       the correct information on "ptype". (Note: TEMPLATE may not
-       belong in this list...)  */
+    /* Number of template arguments, placed here for better struct
+       packing.  */
 
-#define DECLARED_TYPE_CLASS 0
-#define DECLARED_TYPE_UNION 1
-#define DECLARED_TYPE_STRUCT 2
-#define DECLARED_TYPE_TEMPLATE 3
-    short declared_type;	/* One of the above codes */
+    short ntemplate_args;
 
     /* For derived classes, the number of base classes is given by n_baseclasses
        and virtual_field_bits is a bit vector containing one bit per base class.
@@ -813,7 +813,6 @@ struct cplus_struct_type
      * is a name. "type" will typically just point to a "struct type" with
      * the placeholder TYPE_CODE_TEMPLATE_ARG type.
      */
-    short ntemplate_args;
     struct template_arg
       {
 	char *name;
@@ -943,7 +942,6 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_NFN_FIELDS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->nfn_fields
 #define TYPE_NFN_FIELDS_TOTAL(thistype) TYPE_CPLUS_SPECIFIC(thistype)->nfn_fields_total
 #define TYPE_NTEMPLATE_ARGS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->ntemplate_args
-#define TYPE_DECLARED_TYPE(thistype) TYPE_CPLUS_SPECIFIC(thistype)->declared_type
 #define TYPE_SPECIFIC_FIELD(thistype) \
   TYPE_MAIN_TYPE(thistype)->type_specific_field
 #define	TYPE_TYPE_SPECIFIC(thistype) TYPE_MAIN_TYPE(thistype)->type_specific

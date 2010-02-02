@@ -1,5 +1,21 @@
 2010-02-02  Tom Tromey  <tromey@redhat.com>
 
+	* m2-typeprint.c (m2_record_fields): Don't use
+	TYPE_DECLARED_TYPE.
+	* gdbtypes.h (TYPE_DECLARED_CLASS): New macro.
+	(struct main_type) <flag_declared_class>: New field.
+	(struct cplus_struct_type) <declared_type>: Remove.
+	<ntemplate_args>: Move earlier.
+	(DECLARED_TYPE_CLASS, DECLARED_TYPE_UNION, DECLARED_TYPE_STRUCT)
+	(DECLARED_TYPE_TEMPLATE): Remove.
+	(TYPE_DECLARED_TYPE): Remove.
+	* gdbtypes.c (lookup_union): Don't use TYPE_DECLARED_TYPE.
+	* dwarf2read.c (read_structure_type): Set TYPE_DECLARED_CLASS.
+	* c-typeprint.c (c_type_print_base): Use TYPE_DECLARED_CLASS, not
+	TYPE_DECLARED_TYPE.
+
+2010-02-02  Tom Tromey  <tromey@redhat.com>
+
 	PR c++/11226, PR c++/9629, PR c++/9688, PR c++/8890:
 	* valops.c (search_struct_field): Compute nbases after calling
 	CHECK_TYPEDEF.
