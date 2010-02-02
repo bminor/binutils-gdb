@@ -55,3 +55,8 @@ gdb_continue_to_breakpoint "third breakpoint"
 
 # In PR 9629, we failed to print v correctly here.
 gdb_test "print *(D *) e" " = {<C> = {v = 11}, _vptr.D = $hex}"
+
+# A regression test reported to Red Hat bugzilla, see:
+# https://bugzilla.redhat.com/show_bug.cgi?id=560741
+gdb_test "set print object on" ""
+gdb_test "print/x b->mA" " = 0xaaaaaaaa"

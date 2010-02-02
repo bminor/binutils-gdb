@@ -1,5 +1,11 @@
 2010-02-02  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.cp/virtbase.exp: Add regression tests.
+	* gdb.cp/virtbase.cc (RHA, RHB, RHC): New classes.
+	(main): Instantiate RHC.
+
+2010-02-02  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.dwarf2/member-ptr-forwardref.exp: Update expected result for
 	type-printing change.
 

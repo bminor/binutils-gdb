@@ -46,12 +46,44 @@ struct D:virtual C{};
 
 class E:B,D{};
 
+// These classes are for another regression test, from
+// https://bugzilla.redhat.com/show_bug.cgi?id=560741
+
+class RHA
+{
+public:
+  RHA() : mA(0xaaaaaaaa) {}
+  virtual void a() = 0;  
+  int mA;
+};
+
+class RHB
+{
+public:
+  RHB() : mB(0xbbbbbbbb) {}
+  virtual void b() = 0;
+  int mB;
+};
+
+class RHC : public RHA,
+	  public RHB
+{
+public:
+  RHC() : RHA(), RHB() {}
+  virtual void a() {}
+  virtual void b() {}
+};
+
+
+
+
 int main() {
   ph::Derived tst;
   tst.get_y();
   tst.get_z();
 
   E *e = new E;
+  RHB *b = new RHC();
 
   return 0;			// breakpoint 3
 }

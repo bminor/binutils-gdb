@@ -1,5 +1,10 @@
 2010-02-02  Tom Tromey  <tromey@redhat.com>
 
+	* valops.c (value_cast_structs): Try downcasting using the RTTI
+	type.
+
+2010-02-02  Tom Tromey  <tromey@redhat.com>
+
 	* gnu-v2-abi.c: Don't include gnu-v2-abi.h.
 	(gnuv2_baseclass_offset): Now static.
 	* Makefile.in (HFILES_NO_SRCDIR): Remove gnu-v2-abi.h.
