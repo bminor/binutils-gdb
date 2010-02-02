@@ -1,3 +1,10 @@
+2010-02-02  Nicolas Roche  <roche@sourceware.org>
+            Joel Brobecker  <brobecker@adacore.com>
+
+	* inferiors.c (find_inferior): Add function documentation.
+	(unloaded_dll): Handle the case where the unloaded dll has not
+	been previously registered in the dll list.
+
 2010-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-arm-low.c (thumb_breakpoint_len): Delete.
