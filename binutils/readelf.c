@@ -10415,6 +10415,8 @@ get_note_type (unsigned e_type)
 	return _("NT_PPC_VMX (ppc Altivec registers)");
       case NT_PPC_VSX:
 	return _("NT_PPC_VSX (ppc VSX registers)");
+      case NT_X86_XSTATE:
+	return _("NT_X86_XSTATE (x86 XSAVE extended state)");
       case NT_S390_HIGH_GPRS:
 	return _("NT_S390_HIGH_GPRS (s390 upper register halves)");
       case NT_PSTATUS:

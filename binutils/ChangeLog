@@ -1,3 +1,7 @@
+2010-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (get_note_type): Handle NT_X86_XSTATE.
+
 2010-02-01  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* objcopy.c (copy_object): Set SEC_LINKER_CREATED when adding

@@ -1,3 +1,12 @@
+2010-02-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (elfcore_write_xstatereg): New.
+
+	* elf.c (elfcore_grok_xstatereg): New.
+	(elfcore_write_xstatereg): Likewise.
+	(elfcore_grok_note): Handle NT_X86_XSTATE.
+	(elfcore_write_register_note): Handle .reg-xstate section.
+
 2010-02-01  Tristan Gingold  <gingold@adacore.com>
 
 	* som.c (som_write_ar_hdr): Define this macro.

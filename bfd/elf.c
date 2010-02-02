@@ -7628,6 +7628,16 @@ elfcore_grok_prxfpreg (bfd *abfd, Elf_Internal_Note *note)
   return elfcore_make_note_pseudosection (abfd, ".reg-xfp", note);
 }
 
+/* Linux dumps the Intel XSAVE extended state in a note named "LINUX"
+   with a note type of NT_X86_XSTATE.  Just include the whole note's
+   contents literally.  */
+
+static bfd_boolean
+elfcore_grok_xstatereg (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-xstate", note);
+}
+
 static bfd_boolean
 elfcore_grok_ppc_vmx (bfd *abfd, Elf_Internal_Note *note)
 {
@@ -7993,6 +8003,13 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
       if (note->namesz == 6
 	  && strcmp (note->namedata, "LINUX") == 0)
 	return elfcore_grok_prxfpreg (abfd, note);
+      else
+	return TRUE;
+
+    case NT_X86_XSTATE:		/* Linux XSAVE extension */
+      if (note->namesz == 6
+	  && strcmp (note->namedata, "LINUX") == 0)
+	return elfcore_grok_xstatereg (abfd, note);
       else
 	return TRUE;
 
@@ -8636,6 +8653,15 @@ elfcore_write_prxfpreg (bfd *abfd,
 }
 
 char *
+elfcore_write_xstatereg (bfd *abfd, char *buf, int *bufsiz,
+			 const void *xfpregs, int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+			     note_name, NT_X86_XSTATE, xfpregs, size);
+}
+
+char *
 elfcore_write_ppc_vmx (bfd *abfd,
 		       char *buf,
 		       int *bufsiz,
@@ -8684,6 +8710,8 @@ elfcore_write_register_note (bfd *abfd,
     return elfcore_write_prfpreg (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-xfp") == 0)
     return elfcore_write_prxfpreg (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-xstate") == 0)
+    return elfcore_write_xstatereg (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-ppc-vmx") == 0)
     return elfcore_write_ppc_vmx (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-ppc-vsx") == 0)
