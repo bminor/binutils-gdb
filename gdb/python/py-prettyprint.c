@@ -538,7 +538,8 @@ apply_val_pretty_printer (struct type *type, const gdb_byte *valaddr,
   /* Instantiate the printer.  */
   if (valaddr)
     valaddr += embedded_offset;
-  value = value_from_contents_and_address (type, valaddr, address);
+  value = value_from_contents_and_address (type, valaddr,
+					   address + embedded_offset);
 
   val_obj = value_to_value_object (value);
   if (! val_obj)

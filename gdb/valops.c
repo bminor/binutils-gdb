@@ -1787,9 +1787,10 @@ search_struct_field (char *name, struct value *arg1, int offset,
 		     struct type *type, int looking_for_baseclass)
 {
   int i;
-  int nbases = TYPE_N_BASECLASSES (type);
+  int nbases;
 
   CHECK_TYPEDEF (type);
+  nbases = TYPE_N_BASECLASSES (type);
 
   if (!looking_for_baseclass)
     for (i = TYPE_NFIELDS (type) - 1; i >= nbases; i--)
@@ -2762,6 +2763,9 @@ int
 check_field (struct type *type, const char *name)
 {
   int i;
+
+  /* The type may be a stub.  */
+  CHECK_TYPEDEF (type);
 
   for (i = TYPE_NFIELDS (type) - 1; i >= TYPE_N_BASECLASSES (type); i--)
     {

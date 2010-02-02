@@ -153,7 +153,7 @@ gdb_test "break A2::'operator +'" ".*Breakpoint $decimal at.*"
 gdb_test "print c" "\\\$\[0-9\]* = {m = {z = .*}}"
 gdb_test "print *c" "\\\$\[0-9\]* = \\(Member &\\) @$hex: {z = .*}"
 gdb_test "print &*c" "\\\$\[0-9\]* = \\(Member \\*\\) $hex"
-gdb_test "ptype &*c" "type = struct Member {\[\r\n \]+int z;\[\r\n\]+} &\\*"
+gdb_test "ptype &*c" "type = (struct|class) Member {(\[\r\n \]+public:)?\[\r\n \]+int z;\[\r\n\]+} &\\*"
 
 gdb_exit
 return 0

@@ -102,6 +102,12 @@ extern void cp_print_value_fields (struct type *, struct type *,
 				   const struct value_print_options *,
 				   struct type **, int);
 
+extern void cp_print_value_fields_rtti (struct type *,
+					const gdb_byte *, int, CORE_ADDR,
+					struct ui_file *, int,
+					const struct value_print_options *,
+					struct type **, int);
+
 extern int cp_is_vtbl_ptr_type (struct type *);
 
 extern int cp_is_vtbl_member (struct type *);

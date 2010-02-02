@@ -1,3 +1,23 @@
+2010-02-02  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/11226, PR c++/9629, PR c++/9688, PR c++/8890:
+	* valops.c (search_struct_field): Compute nbases after calling
+	CHECK_TYPEDEF.
+	(check_field): Call CHECK_TYPEDEF.
+	* cp-valprint.c (cp_print_value): Pass correct address to
+	baseclass_offset.  Fix check for virtual base past the end of the
+	object.  Don't offset address passed to cp_print_value_fields or
+	apply_val_pretty_printer.
+	(cp_print_value_fields): Fix call to val_print.
+	(cp_print_value_fields_rtti): New function.
+	* c-valprint.c (c_val_print): Use cp_print_value_fields_rtti.
+	* p-valprint.c (pascal_object_print_value_fields): Fix call to
+	val_print.
+	* python/py-prettyprint.c (apply_val_pretty_printer): Add embedded
+	offset to address.
+	* language.h (struct language_defn) <la_val_print>: Document.
+	* c-lang.h (cp_print_value_fields_rtti): Declare.
+
 2010-02-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR libc/11214:

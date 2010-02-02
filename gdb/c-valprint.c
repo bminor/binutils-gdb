@@ -389,8 +389,9 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 					  options->addressprint);
 	}
       else
-	cp_print_value_fields (type, type, valaddr, embedded_offset, address, stream,
-			       recurse, options, NULL, 0);
+	cp_print_value_fields_rtti (type, valaddr,
+				    embedded_offset, address, stream,
+				    recurse, options, NULL, 0);
       break;
 
     case TYPE_CODE_ENUM:

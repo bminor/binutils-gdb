@@ -295,7 +295,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		  opts.deref_ref = 0;
 		  val_print (TYPE_FIELD_TYPE (type, i),
 			     valaddr, offset + TYPE_FIELD_BITPOS (type, i) / 8,
-			     address + TYPE_FIELD_BITPOS (type, i) / 8,
+			     address,
 			     stream, recurse + 1, &opts,
 			     current_language);
 		}
@@ -319,6 +319,39 @@ cp_print_value_fields (struct type *type, struct type *real_type,
     }				/* if there are data fields */
 
   fprintf_filtered (stream, "}");
+}
+
+/* Like cp_print_value_fields, but find the runtime type of the object
+   and pass it as the `real_type' argument to cp_print_value_fields.
+   This function is a hack to work around the fact that
+   common_val_print passes the embedded offset to val_print, but not
+   the enclosing type.  */
+
+void
+cp_print_value_fields_rtti (struct type *type,
+			    const gdb_byte *valaddr, int offset,
+			    CORE_ADDR address,
+			    struct ui_file *stream, int recurse,
+			    const struct value_print_options *options,
+			    struct type **dont_print_vb, int dont_print_statmem)
+{
+  struct value *value;
+  int full, top, using_enc;
+  struct type *real_type;
+
+  /* Ugh, we have to convert back to a value here.  */
+  value = value_from_contents_and_address (type, valaddr + offset,
+					   address + offset);
+  /* We don't actually care about most of the result here -- just the
+     type.  We already have the correct offset, due to how val_print
+     was initially called.  */
+  real_type = value_rtti_type (value, &full, &top, &using_enc);
+  if (!real_type)
+    real_type = type;
+
+  cp_print_value_fields (type, real_type, valaddr, offset,
+			 address, stream, recurse, options,
+			 dont_print_vb, dont_print_statmem);
 }
 
 /* Special val_print routine to avoid printing multiple copies of virtual
@@ -373,7 +406,7 @@ cp_print_value (struct type *type, struct type *real_type,
       thisoffset = offset;
       thistype = real_type;
 
-      boffset = baseclass_offset (type, i, valaddr + offset, address);
+      boffset = baseclass_offset (type, i, valaddr + offset, address + offset);
       skip = ((boffset == -1) || (boffset + offset) < 0) ? 1 : -1;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
@@ -384,7 +417,7 @@ cp_print_value (struct type *type, struct type *real_type,
 
 	  if (boffset != -1
 	      && ((boffset + offset) < 0
-		  || (boffset + offset) >= TYPE_LENGTH (type)))
+		  || (boffset + offset) >= TYPE_LENGTH (real_type)))
 	    {
 	      /* FIXME (alloca): unsafe if baseclass is really really large. */
 	      gdb_byte *buf = alloca (TYPE_LENGTH (baseclass));
@@ -427,14 +460,14 @@ cp_print_value (struct type *type, struct type *real_type,
 	  if (!options->raw)
 	    result = apply_val_pretty_printer (baseclass, base_valaddr,
 					       thisoffset + boffset,
-					       address + boffset,
+					       address,
 					       stream, recurse,
 					       options,
 					       current_language);
 	  	  
 	  if (!result)
 	    cp_print_value_fields (baseclass, thistype, base_valaddr,
-				   thisoffset + boffset, address + boffset,
+				   thisoffset + boffset, address,
 				   stream, recurse, options,
 				   ((struct type **)
 				    obstack_base (&dont_print_vb_obstack)),
@@ -501,7 +534,8 @@ cp_print_static_field (struct type *type,
 		    sizeof (CORE_ADDR));
 
       CHECK_TYPEDEF (type);
-      cp_print_value_fields (type, type, value_contents_all (val),
+      cp_print_value_fields (type, value_enclosing_type (val),
+			     value_contents_all (val),
 			     value_embedded_offset (val), addr,
 			     stream, recurse, options, NULL, 1);
       return;
