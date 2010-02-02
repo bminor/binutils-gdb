@@ -1,3 +1,14 @@
+2010-02-01  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_exidx_fixup::Arm_exidx_fixup): Initialize
+	first_output_text_section_.
+	(Arm_exidx_fixup::first_output_text_section): New method definition.
+	(Arm_exidx_fixup::first_output_text_section_): New data member.
+	(Arm_exidx_fixup::process_exidx_section): Record the first text
+	output section seen.
+	(Arm_output_section::fix_exidx_coverage): Set correct linked section
+	and entsize in output section header.
+
 2010-01-29  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
 
 	* gold/arm.cc: Added support for the ARM relocations: R_ARM_THM_PC8,

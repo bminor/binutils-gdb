@@ -1210,7 +1210,7 @@ class Arm_exidx_fixup
   Arm_exidx_fixup(Output_section* exidx_output_section)
     : exidx_output_section_(exidx_output_section), last_unwind_type_(UT_NONE),
       last_inlined_entry_(0), last_input_section_(NULL),
-      section_offset_map_(NULL)
+      section_offset_map_(NULL), first_output_text_section_(NULL)
   { }
 
   ~Arm_exidx_fixup()
@@ -1230,6 +1230,12 @@ class Arm_exidx_fixup
   // input section, if there is not one already.
   void
   add_exidx_cantunwind_as_needed();
+
+  // Return the output section for the text section which is linked to the
+  // first exidx input in output.
+  Output_section*
+  first_output_text_section() const
+  { return this->first_output_text_section_; }
 
  private:
   // Copying is not allowed.
@@ -1273,6 +1279,9 @@ class Arm_exidx_fixup
   const Arm_exidx_input_section* last_input_section_;
   // Section offset map created in process_exidx_section.
   Arm_exidx_section_offset_map* section_offset_map_;
+  // Output section for the text section which is linked to the first exidx
+  // input in output.
+  Output_section* first_output_text_section_;
 };
 
 // Arm output section class.  This is defined mainly to add a number of
@@ -5159,6 +5168,17 @@ Arm_exidx_fixup::process_exidx_section(
   this->section_offset_map_ = NULL;
   this->last_input_section_ = exidx_input_section;
   
+  // Set the first output text section so that we can link the EXIDX output
+  // section to it.  Ignore any EXIDX input section that is completely merged.
+  if (this->first_output_text_section_ == NULL
+      && deleted_bytes != section_size)
+    {
+      unsigned int link = exidx_input_section->link();
+      Output_section* os = relobj->output_section(link);
+      gold_assert(os != NULL);
+      this->first_output_text_section_ = os;
+    }
+
   return deleted_bytes;
 }
 
@@ -5547,6 +5567,11 @@ Arm_output_section<big_endian>::fix_exidx_coverage(
 	}
     }
     
+  // Link exidx output section to the first seen output section and
+  // set correct entry size.
+  this->set_link_section(exidx_fixup.first_output_text_section());
+  this->set_entsize(8);
+
   // Make changes permanent.
   this->save_states();
   this->set_section_offsets_need_adjustment();
