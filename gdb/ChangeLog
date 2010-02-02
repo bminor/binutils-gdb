@@ -1,5 +1,12 @@
 2010-02-02  Tom Tromey  <tromey@redhat.com>
 
+	* gnu-v2-abi.c: Don't include gnu-v2-abi.h.
+	(gnuv2_baseclass_offset): Now static.
+	* Makefile.in (HFILES_NO_SRCDIR): Remove gnu-v2-abi.h.
+	* gnu-v2-abi.h: Remove.
+
+2010-02-02  Tom Tromey  <tromey@redhat.com>
+
 	* m2-typeprint.c (m2_record_fields): Don't use
 	TYPE_DECLARED_TYPE.
 	* gdbtypes.h (TYPE_DECLARED_CLASS): New macro.

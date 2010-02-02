@@ -28,7 +28,6 @@
 #include "demangle.h"
 #include "cp-abi.h"
 #include "cp-support.h"
-#include "gnu-v2-abi.h"
 
 #include <ctype.h>
 
@@ -346,7 +345,7 @@ vb_match (struct type *type, int index, struct type *basetype)
 
    -1 is returned on error. */
 
-int
+static int
 gnuv2_baseclass_offset (struct type *type, int index,
 			const bfd_byte *valaddr, CORE_ADDR address)
 {
