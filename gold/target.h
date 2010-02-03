@@ -325,6 +325,12 @@ class Target
   attributes_order(int num) const
   { return this->do_attributes_order(num); }
 
+  // When a target is selected as the default target, we call this method,
+  // which may be used for expensive, target-specific initialization.
+  void
+  select_as_default_target()
+  { this->do_select_as_default_target(); } 
+
  protected:
   // This struct holds the constant information for a child class.  We
   // use a struct to avoid the overhead of virtual function calls for
@@ -509,6 +515,11 @@ class Target
   virtual int
   do_attributes_order(int num) const
   { return num; }
+
+  // This may be overridden by the child class.
+  virtual void
+  do_select_as_default_target()
+  { }
 
  private:
   // The implementations of the four do_make_elf_object virtual functions are

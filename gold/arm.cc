@@ -50,6 +50,7 @@
 #include "defstd.h"
 #include "gc.h"
 #include "attributes.h"
+#include "arm-reloc-property.h"
 
 namespace
 {
@@ -99,29 +100,24 @@ const int32_t THM2_MAX_BWD_BRANCH_OFFSET = (-(1 << 24) + 4);
 // supporting Android only for the time being.
 // 
 // TODOs:
-// - Support the following relocation types as needed:
-//	R_ARM_SBREL32
-//	R_ARM_LDR_SBREL_11_0_NC
-//	R_ARM_ALU_SBREL_19_12_NC
-//	R_ARM_ALU_SBREL_27_20_CK
-//	R_ARM_SBREL31
-//	R_ARM_REL32_NOI
-//	R_ARM_PLT32_ABS
-//	R_ARM_GOT_ABS
-//	R_ARM_GOT_BREL12
-//	R_ARM_GOTOFF12
-//	R_ARM_TLS_GD32
-//	R_ARM_TLS_LDM32
-//	R_ARM_TLS_LDO32
-//	R_ARM_TLS_IE32
-//	R_ARM_TLS_LE32
-//	R_ARM_TLS_LDO12
-//	R_ARM_TLS_LE12
-//	R_ARM_TLS_IE12GP
-//
+// - Implement all static relocation types documented in arm-reloc.def.
 // - Make PLTs more flexible for different architecture features like
 //   Thumb-2 and BE8.
 // There are probably a lot more.
+
+// Ideally we would like to avoid using global variables but this is used
+// very in many places and sometimes in loops.  If we use a function
+// returning a static instance of Arm_reloc_property_table, it will very
+// slow in an threaded environment since the static instance needs to be
+// locked.  The pointer is below initialized in the
+// Target::do_select_as_default_target() hook so that we do not spend time
+// building the table if we are not linking ARM objects.
+//
+// An alternative is to to process the information in arm-reloc.def in
+// compilation time and generate a representation of it in PODs only.  That
+// way we can avoid initialization when the linker starts.
+
+Arm_reloc_property_table *arm_reloc_property_table = NULL;
 
 // Instruction template class.  This class is similar to the insn_sequence
 // struct in bfd/elf32-arm.c.
@@ -2132,6 +2128,17 @@ class Target_arm : public Sized_target<32, big_endian>
   // Reorder tags during output.
   int
   do_attributes_order(int num) const;
+
+  // This is called when the target is selected as the default.
+  void
+  do_select_as_default_target()
+  {
+    // No locking is required since there should only be one default target.
+    // We cannot have both the big-endian and little-endian ARM targets
+    // as the default.
+    gold_assert(arm_reloc_property_table == NULL);
+    arm_reloc_property_table = new Arm_reloc_property_table();
+  }
 
  private:
   // The class which scans relocations.

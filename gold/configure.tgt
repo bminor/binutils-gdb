@@ -106,6 +106,7 @@ powerpc64-*)
   ;;
 armeb*-*-*|armbe*-*-*)
  targ_obj=arm
+ targ_extra_obj=arm-reloc-property
  targ_machine=EM_ARM
  targ_size=32
  targ_big_endian=true
@@ -113,6 +114,7 @@ armeb*-*-*|armbe*-*-*)
  ;;
 arm*-*-*)
  targ_obj=arm
+ targ_extra_obj=arm-reloc-property
  targ_machine=EM_ARM
  targ_size=32
  targ_big_endian=false

@@ -1,3 +1,25 @@
+2010-02-02  Doug Kwan  <dougkwan@google.com>
+
+	* Makefile.am (HFILES): Add arm-reloc-property.h.
+	(DEFFILES): New.
+ 	(TARGETSOURCES): Add arm-reloc-property.cc
+ 	(ALL_TARGETOBJS): Add arm-reloc-property.$(OBJEXT)
+	(libgold_a_SOURCES): $(DEFFILES)
+	* Makefile.in: Regenerate.
+	* arm-reloc-property.cc: New file.
+	* arm-reloc-property.h: New file.
+	* arm-reloc.def: New file.
+	* arm.cc: Update comments.
+	(arm-reloc-property.h): New included header.
+	(arm_reloc_property_table): New global variable.
+	(Target_arm::do_select_as_default_target): New method definition.
+	* configure.tgt (armeb*-*-*,armbe*-*-*,arm*-*-*): Add
+	arm-reloc-property to targ_extra_obj.
+	* parameters.cc (set_parameters_target): Call
+	Target::select_as_default_target().
+	* target.h (Target::select_as_default_target): New method definition.
+	(Target::do_select_as_default_target): Same.
+
 2010-02-01  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_exidx_fixup::Arm_exidx_fixup): Initialize

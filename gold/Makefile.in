@@ -92,7 +92,7 @@ am__objects_1 = archive.$(OBJEXT) attributes.$(OBJEXT) \
 am__objects_2 =
 am__objects_3 = yyscript.$(OBJEXT)
 am_libgold_a_OBJECTS = $(am__objects_1) $(am__objects_2) \
-	$(am__objects_3)
+	$(am__objects_3) $(am__objects_2)
 libgold_a_OBJECTS = $(am_libgold_a_OBJECTS)
 PROGRAMS = $(noinst_PROGRAMS)
 am_incremental_dump_OBJECTS = incremental-dump.$(OBJEXT)
@@ -398,6 +398,7 @@ CCFILES = \
 	workqueue-threads.cc
 
 HFILES = \
+	arm-reloc-property.h \
 	archive.h \
 	attributes.h \
 	binary.h \
@@ -448,15 +449,16 @@ HFILES = \
 YFILES = \
 	yyscript.y
 
+DEFFILES = arm-reloc.def
 EXTRA_DIST = yyscript.c yyscript.h
 TARGETSOURCES = \
-	i386.cc x86_64.cc sparc.cc powerpc.cc arm.cc
+	i386.cc x86_64.cc sparc.cc powerpc.cc arm.cc arm-reloc-property.cc
 
 ALL_TARGETOBJS = \
 	i386.$(OBJEXT) x86_64.$(OBJEXT) sparc.$(OBJEXT) powerpc.$(OBJEXT) \
-	arm.$(OBJEXT)
+	arm.$(OBJEXT) arm-reloc-property.$(OBJEXT)
 
-libgold_a_SOURCES = $(CCFILES) $(HFILES) $(YFILES)
+libgold_a_SOURCES = $(CCFILES) $(HFILES) $(YFILES) $(DEFFILES)
 libgold_a_LIBADD = $(LIBOBJS)
 sources_var = main.cc
 deps_var = $(TARGETOBJS) libgold.a $(LIBIBERTY) $(LIBINTL_DEP)
@@ -598,6 +600,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mremap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/pread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/archive.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arm-reloc-property.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/attributes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binary.Po@am__quote@

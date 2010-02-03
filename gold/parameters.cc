@@ -141,7 +141,10 @@ set_parameters_options(const General_options* options)
 
 void
 set_parameters_target(Target* target)
-{ static_parameters.set_target(target); }
+{
+  static_parameters.set_target(target);
+  target->select_as_default_target();
+}
 
 void
 set_parameters_doing_static_link(bool doing_static_link)
