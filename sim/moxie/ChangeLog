@@ -1,3 +1,8 @@
+2010-02-03  Anthony Green  <green@moxielogic.com>
+
+	* interp.c (sim_resume): nop is 0x0f, and 0x00 is an illegal
+	instruction.
+
 2010-01-13  Anthony Green  <green@moxielogic.com>
 
 	* interp.c (sim_open): Add period to end of sentence in comment.

@@ -414,7 +414,10 @@ sim_resume (sd, step, siggnal)
 	  int opcode = inst >> 8;
 	  switch (opcode)
 	    {
-	    case 0x00: /* nop */
+	    case 0x00: /* bad */
+	      opc = opcode;
+	      TRACE("SIGILL0");
+	      cpu.asregs.exception = SIGILL;
 	      break;
 	    case 0x01: /* ldi.l (immediate) */
 	      {
@@ -587,16 +590,17 @@ sim_resume (sd, step, siggnal)
 		cpu.asregs.cc = cc;
 	      }
 	      break;
-	    case 0x0f:
-	    case 0x10:
-	    case 0x11:
-	    case 0x12:
-	    case 0x13:
-	    case 0x14:
-	    case 0x15:
-	    case 0x16:
-	    case 0x17:
-	    case 0x18:
+	    case 0x0f: /* nop */
+	      break;
+	    case 0x10: /* bad */
+	    case 0x11: /* bad */
+	    case 0x12: /* bad */
+	    case 0x13: /* bad */
+	    case 0x14: /* bad */
+	    case 0x15: /* bad */
+	    case 0x16: /* bad */
+	    case 0x17: /* bad */
+	    case 0x18: /* bad */
 	      {
 		opc = opcode;
 		TRACE("SIGILL0");
