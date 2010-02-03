@@ -1057,6 +1057,7 @@ static struct sym_fns elf_sym_fns =
   elf_symfile_segments,		/* sym_segments: Get segment information from
 				   a file.  */
   NULL,                         /* sym_read_linetable */
+  default_symfile_relocate,	/* sym_relocate: Relocate a debug section.  */
   NULL				/* next: pointer to next struct sym_fns */
 };
 

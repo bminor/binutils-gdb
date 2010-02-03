@@ -1,3 +1,22 @@
+2010-02-03  Tristan Gingold  <gingold@adacore.com>
+
+	* symfile.h (struct sym_fns): Add sym_relocate field.
+	(default_symfile_relocate): New prototype.
+	(symfile_relocate_debug_section): First argument is now an objfile.
+	* symfile.c (default_symfile_relocate): Rename from
+	symfile_relocate_debug_section, first argument is now an objfile.
+	(symfile_relocate_debug_section): New function.
+	* coffread.c (coff_sym_fns): Set sym_relocate field.
+	* somread.c (som_sym_fns): Ditto.
+	* mipsread.c (ecoff_sym_fns): Ditto.
+	* machoread.c (macho_sym_fns): Ditto.
+	* elfread.c (elf_sym_fns): Ditto.
+	* dwarf2read.c (dwarf2_read_section): Ditto.
+	* xcoffread.c (xcoff_sym_fns): Ditto.
+	* dbxread.c (aout_sym_fns): Ditto.
+	(dbx_psymtab_to_symtab): Adjust call to symfile_relocate_debug_section.
+	(elfstab_build_psymtabs): Ditto.
+
 2010-02-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* defs.h (MAX_REGISTER_SIZE): Increase to 32.

@@ -3627,6 +3627,27 @@ symfile_dummy_outputs (bfd *abfd, asection *sectp, void *dummy)
   sectp->output_offset = 0;
 }
 
+/* Default implementation for sym_relocate.  */
+
+
+bfd_byte *
+default_symfile_relocate (struct objfile *objfile, asection *sectp,
+                          bfd_byte *buf)
+{
+  bfd *abfd = objfile->obfd;
+
+  /* We're only interested in sections with relocation
+     information.  */
+  if ((sectp->flags & SEC_RELOC) == 0)
+    return NULL;
+
+  /* We will handle section offsets properly elsewhere, so relocate as if
+     all sections begin at 0.  */
+  bfd_map_over_sections (abfd, symfile_dummy_outputs, NULL);
+
+  return bfd_simple_get_relocated_section_contents (abfd, sectp, buf, NULL);
+}
+
 /* Relocate the contents of a debug section SECTP in ABFD.  The
    contents are stored in BUF if it is non-NULL, or returned in a
    malloc'd buffer otherwise.
@@ -3642,18 +3663,12 @@ symfile_dummy_outputs (bfd *abfd, asection *sectp, void *dummy)
    debug section.  */
 
 bfd_byte *
-symfile_relocate_debug_section (bfd *abfd, asection *sectp, bfd_byte *buf)
+symfile_relocate_debug_section (struct objfile *objfile,
+                                asection *sectp, bfd_byte *buf)
 {
-  /* We're only interested in sections with relocation
-     information.  */
-  if ((sectp->flags & SEC_RELOC) == 0)
-    return NULL;
+  gdb_assert (objfile->sf->sym_relocate);
 
-  /* We will handle section offsets properly elsewhere, so relocate as if
-     all sections begin at 0.  */
-  bfd_map_over_sections (abfd, symfile_dummy_outputs, NULL);
-
-  return bfd_simple_get_relocated_section_contents (abfd, sectp, buf, NULL);
+  return (*objfile->sf->sym_relocate) (objfile, sectp, buf);
 }
 
 struct symfile_segment_data *

@@ -163,7 +163,14 @@ struct sym_fns
   /* This function should read the linetable from the objfile when
      the line table cannot be read while processing the debugging
      information.  */
+
   void (*sym_read_linetable) (void);
+
+  /* Relocate the contents of a debug section SECTP.  The
+     contents are stored in BUF if it is non-NULL, or returned in a
+     malloc'd buffer otherwise.  */
+
+  bfd_byte *(*sym_relocate) (struct objfile *, asection *sectp, bfd_byte *buf);
 
   /* Finds the next struct sym_fns.  They are allocated and
      initialized in whatever module implements the functions pointed
@@ -194,6 +201,12 @@ extern void default_symfile_offsets (struct objfile *objfile,
    do anything special.  */
 
 extern struct symfile_segment_data *default_symfile_segments (bfd *abfd);
+
+/* The default version of sym_fns.sym_relocate for readers that don't
+   do anything special.  */
+
+extern bfd_byte *default_symfile_relocate (struct objfile *objfile,
+                                           asection *sectp, bfd_byte *buf);
 
 extern void extend_psymbol_list (struct psymbol_allocation_list *,
 				 struct objfile *);
@@ -374,8 +387,8 @@ extern void symbol_file_clear (int from_tty);
 /* Default overlay update function.  */
 extern void simple_overlay_update (struct obj_section *);
 
-extern bfd_byte *symfile_relocate_debug_section (bfd *abfd, asection *sectp,
-						 bfd_byte * buf);
+extern bfd_byte *symfile_relocate_debug_section (struct objfile *, asection *,
+						 bfd_byte *);
 
 extern int symfile_map_offsets_to_segments (bfd *,
 					    struct symfile_segment_data *,

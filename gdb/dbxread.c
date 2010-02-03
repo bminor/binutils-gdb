@@ -2473,7 +2473,7 @@ Shouldn't happen.\n",
       if (DBX_STAB_SECTION (pst->objfile))
 	{
 	  stabs_data
-	    = symfile_relocate_debug_section (pst->objfile->obfd,
+	    = symfile_relocate_debug_section (pst->objfile,
 					      DBX_STAB_SECTION (pst->objfile),
 					      NULL);
 	  if (stabs_data)
@@ -3460,7 +3460,7 @@ elfstab_build_psymtabs (struct objfile *objfile, asection *stabsect,
 
   symbuf_read = 0;
   symbuf_left = bfd_section_size (objfile->obfd, stabsect);
-  stabs_data = symfile_relocate_debug_section (objfile->obfd, stabsect, NULL);
+  stabs_data = symfile_relocate_debug_section (objfile, stabsect, NULL);
   if (stabs_data)
     back_to = make_cleanup (free_current_contents, (void *) &stabs_data);
 
@@ -3571,6 +3571,7 @@ static struct sym_fns aout_sym_fns =
   default_symfile_segments,	/* sym_segments: Get segment information from
 				   a file.  */
   NULL,                         /* sym_read_linetable */
+  default_symfile_relocate,	/* sym_relocate: Relocate a debug section.  */
   NULL				/* next: pointer to next struct sym_fns */
 };
 

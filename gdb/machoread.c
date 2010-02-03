@@ -759,6 +759,9 @@ static struct sym_fns macho_sym_fns = {
   macho_symfile_offsets,        /* sym_offsets:  xlate external to internal form */
   default_symfile_segments,	/* sym_segments: Get segment information from
 				   a file.  */
+  NULL,                         /* sym_read_linetable */
+  default_symfile_relocate,	/* sym_relocate: Relocate a debug section.  */
+
   NULL                          /* next: pointer to next struct sym_fns */
 };
 

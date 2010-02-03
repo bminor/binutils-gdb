@@ -1412,7 +1412,7 @@ dwarf2_read_section (struct objfile *objfile, struct dwarf2_section_info *info)
      http://sourceware.org/ml/gdb-patches/2002-04/msg00136.html .
      We never compress sections in .o files, so we only need to
      try this when the section is not compressed.  */
-  retbuf = symfile_relocate_debug_section (abfd, sectp, buf);
+  retbuf = symfile_relocate_debug_section (objfile, sectp, buf);
   if (retbuf != NULL)
     {
       info->buffer = retbuf;
