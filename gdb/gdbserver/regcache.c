@@ -215,7 +215,10 @@ register_data (struct regcache *regcache, int n, int fetch)
 void
 supply_register (struct regcache *regcache, int n, const void *buf)
 {
-  memcpy (register_data (regcache, n, 0), buf, register_size (n));
+  if (buf)
+    memcpy (register_data (regcache, n, 0), buf, register_size (n));
+  else
+    memset (register_data (regcache, n, 0), 0, register_size (n));
 }
 
 void

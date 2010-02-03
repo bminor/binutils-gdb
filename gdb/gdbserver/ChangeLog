@@ -1,5 +1,9 @@
+2010-02-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* regcache.c (supply_register): Clear regcache if buf is NULL.
+
 2010-02-02  Nicolas Roche  <roche@sourceware.org>
-            Joel Brobecker  <brobecker@adacore.com>
+	    Joel Brobecker  <brobecker@adacore.com>
 
 	* inferiors.c (find_inferior): Add function documentation.
 	(unloaded_dll): Handle the case where the unloaded dll has not
