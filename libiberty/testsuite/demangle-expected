@@ -3926,6 +3926,17 @@ S<int>::x::{lambda()#3}::operator()() const
 --format=gnu-v3
 _Z1fN1SUt_E
 f(S::{unnamed type#1})
+--format=gnu-v3
+_Z1fDv32_f
+f(float vector[32])
+--format=gnu-v3
+_Z1fIfLi4EEvDv_T0__T_
+void f<float, 4>(float vector[4])
+_Z1fI1AEDTclonplfp_fp_EET_
+decltype ((operator+)({parm#1}, {parm#1})) f<A>(A)
+--format=gnu-v3
+_Z1hI1AEDTcldtfp_miEET_
+decltype (({parm#1}.(operator-))()) h<A>(A)
 #
 # Ada (GNAT) tests.
 #
@@ -4019,5 +4030,8 @@ prot.lock.update
 --format=gnat
 prot__lock__update_E6s
 prot.lock.update
-
-
+#
+# Used to crash the demangler.
+--format=gnu-v3
+DFA
+DFA

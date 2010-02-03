@@ -1,3 +1,17 @@
+2010-02-03  Jason Merrill  <jason@redhat.com>
+
+	* cp-demangle.c (d_expression): Handle dependent operator name.
+
+	PR c++/12909
+	* cp-demangle.c (d_number_component, d_vector_type): New.
+	(cplus_demangle_type, d_print_comp, d_print_mod): Handle vectors.
+
+2010-01-25  Ian Lance Taylor  <iant@google.com>
+
+	* cp-demangle.c (cplus_demangle_type): Check for invalid type
+	after "DF".
+	* testsuite/demangle-expected: Add test.
+
 2010-01-20  Jason Merrill  <jason@redhat.com>
 
 	PR c++/42338
@@ -294,7 +308,7 @@
 	with other than 1 operand.
 	(d_print_comp): Handle function parameters.  Fix bug with
 	function used in type of function.
-	* testsuite/demangle-expected: Upate tests.
+	* testsuite/demangle-expected: Update tests.
 
 2009-02-21  Mark Mitchell  <mark@codesourcery.com>
 
