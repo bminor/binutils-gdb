@@ -1,3 +1,8 @@
+2010-02-03  Anthony Green  <green@moxielogic.com>
+
+	* moxie-opc.c (moxie_form1_opc_info): Move "nop" from 0x00 to
+	0x0f, and make 0x00 an illegal instruction.
+
 2010-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* opcodes/arm-dis.c (struct arm_private_data): New.

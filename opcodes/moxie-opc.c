@@ -50,9 +50,12 @@
    oooo         - form 3 opcode number
    vvvvvvvvvv   - 10-bit immediate value.  */
 
+/* Note that currently two opcodes are reserved as bad, so that all
+   instructions starting with 0x00 and 0xff fault.  */
+
 const moxie_opc_info_t moxie_form1_opc_info[64] =
   {
-    { 0x00, MOXIE_F1_NARG, "nop" },
+    { 0x00, MOXIE_F1_NARG, "bad" },  // Reserved as bad.
     { 0x01, MOXIE_F1_A4,   "ldi.l" },
     { 0x02, MOXIE_F1_AB,   "mov" },
     { 0x03, MOXIE_F1_M,    "jsra" },
@@ -67,7 +70,7 @@ const moxie_opc_info_t moxie_form1_opc_info[64] =
     { 0x0c, MOXIE_F1_ABi4, "ldo.l" },
     { 0x0d, MOXIE_F1_AiB4, "sto.l" },
     { 0x0e, MOXIE_F1_AB,   "cmp" },
-    { 0x0f, MOXIE_F1_NARG, "bad" },
+    { 0x0f, MOXIE_F1_NARG, "nop" },
     { 0x10, MOXIE_F1_NARG, "bad" },
     { 0x11, MOXIE_F1_NARG, "bad" },
     { 0x12, MOXIE_F1_NARG, "bad" },
@@ -143,7 +146,7 @@ const moxie_opc_info_t moxie_form3_opc_info[16] =
     { 0x0c, MOXIE_F3_NARG, "bad" },
     { 0x0d, MOXIE_F3_NARG, "bad" },
     { 0x0e, MOXIE_F3_NARG, "bad" },
-    { 0x0f, MOXIE_F3_NARG, "bad" }
+    { 0x0f, MOXIE_F3_NARG, "bad" }  // Reserved as bad.
   };
 
 
