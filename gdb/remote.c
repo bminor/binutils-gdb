@@ -327,9 +327,6 @@ struct remote_state
   /* Nonzero if the user has pressed Ctrl-C, but the target hasn't
      responded to that.  */
   int ctrlc_pending_p;
-
-  /* GDBARCH associated with this target.  */
-  struct gdbarch *gdbarch;
 };
 
 /* Private data that we'll store in (struct thread_info)->private.  */
@@ -568,9 +565,6 @@ init_remote_state (struct gdbarch *gdbarch)
       rs->buf_size = 2 * rsa->remote_packet_size;
       rs->buf = xrealloc (rs->buf, rs->buf_size);
     }
-
-  /* Record our GDBARCH.  */
-  rs->gdbarch = gdbarch;
 
   return rsa;
 }
@@ -3481,7 +3475,7 @@ remote_query_supported (void)
   rs->buf[0] = 0;
   if (remote_protocol_packets[PACKET_qSupported].support != PACKET_DISABLE)
     {
-      const char *qsupported = gdbarch_qsupported (rs->gdbarch);
+      const char *qsupported = gdbarch_qsupported (target_gdbarch);
       if (qsupported)
 	{
 	  char *q;

@@ -1,5 +1,12 @@
 2010-02-03  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* remote.c (remote_state): Remove gdbarch.
+	(init_remote_state): Don't set gdbarch.
+	(remote_query_supported): Pass target_gdbarch instead of
+	rs->gdbarch to gdbarch_qsupported.
+
+2010-02-03  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* gdbarch.sh: Add qsupported.
 
 	* gdbarch.c: Regenerated.
