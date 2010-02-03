@@ -252,6 +252,7 @@ struct gdbarch
   int has_global_breakpoints;
   gdbarch_has_shared_address_space_ftype *has_shared_address_space;
   gdbarch_fast_tracepoint_valid_at_ftype *fast_tracepoint_valid_at;
+  const char * qsupported;
 };
 
 
@@ -395,6 +396,7 @@ struct gdbarch startup_gdbarch =
   0,  /* has_global_breakpoints */
   default_has_shared_address_space,  /* has_shared_address_space */
   default_fast_tracepoint_valid_at,  /* fast_tracepoint_valid_at */
+  0,  /* qsupported */
   /* startup_gdbarch() */
 };
 
@@ -661,6 +663,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of has_global_breakpoints, invalid_p == 0 */
   /* Skip verify of has_shared_address_space, invalid_p == 0 */
   /* Skip verify of fast_tracepoint_valid_at, invalid_p == 0 */
+  /* Skip verify of qsupported, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &length);
   make_cleanup (xfree, buf);
   if (length > 0)
@@ -1034,6 +1037,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: push_dummy_code = <%s>\n",
                       host_address_to_string (gdbarch->push_dummy_code));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: qsupported = %s\n",
+                      gdbarch->qsupported);
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_read_pc_p() = %d\n",
                       gdbarch_read_pc_p (gdbarch));
@@ -3574,6 +3580,23 @@ set_gdbarch_fast_tracepoint_valid_at (struct gdbarch *gdbarch,
                                       gdbarch_fast_tracepoint_valid_at_ftype fast_tracepoint_valid_at)
 {
   gdbarch->fast_tracepoint_valid_at = fast_tracepoint_valid_at;
+}
+
+const char *
+gdbarch_qsupported (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of qsupported, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_qsupported called\n");
+  return gdbarch->qsupported;
+}
+
+void
+set_gdbarch_qsupported (struct gdbarch *gdbarch,
+                        const char * qsupported)
+{
+  gdbarch->qsupported = qsupported;
 }
 
 

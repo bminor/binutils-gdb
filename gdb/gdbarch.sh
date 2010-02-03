@@ -766,6 +766,9 @@ m:int:has_shared_address_space:void:::default_has_shared_address_space::0
 
 # True if a fast tracepoint can be set at an address.
 m:int:fast_tracepoint_valid_at:CORE_ADDR addr, int *isize, char **msg:addr, isize, msg::default_fast_tracepoint_valid_at::0
+
+# Not NULL if a target has additonal field for qSupported.
+v:const char *:qsupported:::0:0::0:gdbarch->qsupported
 EOF
 }
 
