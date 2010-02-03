@@ -1,3 +1,10 @@
+2010-02-03  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/ppc64elf.em (build_toc_list): Report errors from
+	ppc64_elf_next_toc_section.
+	(after_allocation): Update for changed function names and params.
+	Run second pass of multitoc partitioning.
+
 2010-01-21  Jon Grant  <jg@jguk.org>
 	    Nick Clifton  <nickc@redhat.com>
 

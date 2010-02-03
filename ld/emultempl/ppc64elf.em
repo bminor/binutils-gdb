@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-# Copyright 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+# Copyright 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
 # Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
@@ -279,7 +279,10 @@ build_toc_list (lang_statement_union_type *statement)
       if (!((lang_input_statement_type *) i->owner->usrdata)->just_syms_flag
 	  && (i->flags & SEC_EXCLUDE) == 0
 	  && i->output_section == toc_section)
-	ppc64_elf_next_toc_section (&link_info, i);
+	{
+	  if (!ppc64_elf_next_toc_section (&link_info, i))
+	    einfo ("%X%P: linker script separates .got and .toc\n");
+	}
     }
 }
 
@@ -319,27 +322,34 @@ gld${EMULATION_NAME}_after_allocation (void)
      stubs.  */
   if (stub_file != NULL && !link_info.relocatable)
     {
-      int ret = ppc64_elf_setup_section_lists (link_info.output_bfd,
-					       &link_info,
-					       no_multi_toc);
+      int ret = ppc64_elf_setup_section_lists (&link_info,
+					       &ppc_add_stub_section,
+					       &ppc_layout_sections_again);
       if (ret < 0)
 	einfo ("%X%P: can not size stub section: %E\n");
       else if (ret > 0)
 	{
-	  toc_section = bfd_get_section_by_name (link_info.output_bfd, ".got");
-	  if (toc_section != NULL)
+	  ppc64_elf_start_multitoc_partition (&link_info);
+
+	  if (!no_multi_toc)
+	    {
+	      toc_section = bfd_get_section_by_name (link_info.output_bfd,
+						     ".got");
+	      if (toc_section != NULL)
+		lang_for_each_statement (build_toc_list);
+	    }
+
+	  if (ppc64_elf_layout_multitoc (&link_info)
+	      && !no_multi_toc
+	      && toc_section != NULL)
 	    lang_for_each_statement (build_toc_list);
 
-	  ppc64_elf_reinit_toc (link_info.output_bfd, &link_info);
+	  ppc64_elf_finish_multitoc_partition (&link_info);
 
 	  lang_for_each_statement (build_section_lists);
 
 	  /* Call into the BFD backend to do the real work.  */
-	  if (!ppc64_elf_size_stubs (link_info.output_bfd,
-				     &link_info,
-				     group_size,
-				     &ppc_add_stub_section,
-				     &ppc_layout_sections_again))
+	  if (!ppc64_elf_size_stubs (&link_info, group_size))
 	    einfo ("%X%P: can not size stub section: %E\n");
 	}
     }

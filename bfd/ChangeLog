@@ -1,3 +1,32 @@
+2010-02-03  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (struct plt_entry): Move earlier in file.
+	(struct got_entry): Likewise.  Add is_indirect and got.ent fields.
+	(struct ppc64_elf_obj_tdata): Change tlsld_got to be a struct got_entry.
+	Update all uses.
+	(struct ppc_link_hash_table): Add got_reli_size and second_toc_pass.
+	Remove no_multi_toc.
+	(update_local_sym_info, ppc64_elf_check_relocs): Clear is_indirect
+	when allocating a new struct got_entry.
+	(allocate_got): New function, extracted from..
+	(allocate_dynrelocs): ..here.  Abort on got entry in non-ppc64 bfd.
+	(ppc64_elf_size_dynamic_sections): Track got relocs allocated in
+	.reliplt by got_reli_size.  Set owner on ppc64_tlsld_got entries.
+	(ppc64_elf_setup_section_lists): Remove output_bfd param and
+	no_multi_toc, add add_stub_section and layout_sections_again.  Stash
+	new params in htab.  Extract some code to..
+	(ppc64_elf_start_multitoc_partition): ..here.  New function.
+	(ppc64_elf_next_toc_section): Check for linker script errors.  Handle
+	second pass toc scan.
+	(merge_got_entries, merge_global_got, reallocate_got): New functions.
+	(ppc64_elf_reinit_toc): Rename to..
+	(ppc64_elf_finish_multitoc_partition): ..this.
+	(ppc64_elf_layout_multitoc): New function.
+	(ppc64_elf_size_stubs): Delete output_bfd, add_stub_section and
+	layout_sections_again params.
+	(ppc64_elf_relocate_section): Handle indirect got entries.
+	* elf64-ppc.h: Update prototypes.  Declare new functions.
+
 2010-02-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-bfd.h (elfcore_write_xstatereg): New.
