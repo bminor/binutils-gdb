@@ -7916,26 +7916,27 @@ Target_arm<big_endian>::relocate_section(
   typedef typename Target_arm<big_endian>::Relocate Arm_relocate;
   gold_assert(sh_type == elfcpp::SHT_REL);
 
-  Arm_input_section<big_endian>* arm_input_section =
-    this->find_arm_input_section(relinfo->object, relinfo->data_shndx);
-
-  // This is an ARM input section and the view covers the whole output
-  // section.
-  if (arm_input_section != NULL)
+  // See if we are relocating a relaxed input section.  If so, the view
+  // covers the whole output section and we need to adjust accordingly.
+  if (needs_special_offset_handling)
     {
-      gold_assert(needs_special_offset_handling);
-      Arm_address section_address = arm_input_section->address();
-      section_size_type section_size = arm_input_section->data_size();
+      const Output_relaxed_input_section* poris =
+	output_section->find_relaxed_input_section(relinfo->object,
+						   relinfo->data_shndx);
+      if (poris != NULL)
+	{
+	  Arm_address section_address = poris->address();
+	  section_size_type section_size = poris->data_size();
 
-      gold_assert((arm_input_section->address() >= address)
-		  && ((arm_input_section->address()
-		       + arm_input_section->data_size())
-		      <= (address + view_size)));
+	  gold_assert((section_address >= address)
+		      && ((section_address + section_size)
+			  <= (address + view_size)));
 
-      off_t offset = section_address - address;
-      view += offset;
-      address += offset;
-      view_size = section_size;
+	  off_t offset = section_address - address;
+	  view += offset;
+	  address += offset;
+	  view_size = section_size;
+	}
     }
 
   gold::relocate_section<32, big_endian, Target_arm, elfcpp::SHT_REL,

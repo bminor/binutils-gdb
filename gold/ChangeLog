@@ -1,5 +1,10 @@
 2010-02-02  Doug Kwan  <dougkwan@google.com>
 
+	* arm.cc (Target_arm::relocate_section): Do view adjustment for all
+	types of relaxed input section.
+
+2010-02-02  Doug Kwan  <dougkwan@google.com>
+
 	* Makefile.am (HFILES): Add arm-reloc-property.h.
 	(DEFFILES): New.
  	(TARGETSOURCES): Add arm-reloc-property.cc
