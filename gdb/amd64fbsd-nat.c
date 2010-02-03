@@ -125,7 +125,7 @@ amd64fbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
   regcache_raw_supply (regcache, 13, &pcb->pcb_r13);
   regcache_raw_supply (regcache, 14, &pcb->pcb_r14);
   regcache_raw_supply (regcache, 15, &pcb->pcb_r15);
-#if (__FreeBSD_version <  800075)
+#if (__FreeBSD_version < 800075) && (__FreeBSD_kernel_version < 800075)
   /* struct pcb provides the pcb_ds/pcb_es/pcb_fs/pcb_gs fields only
      up until __FreeBSD_version 800074: The removal of these fields
      occurred on 2009-04-01 while the __FreeBSD_version number was

@@ -1,3 +1,8 @@
+2010-02-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* amd64fbsd-nat.c (amd64fbsd_supply_pcb): Also check for
+	__FreeBSD_kernel_version.
+
 2010-02-03  Tristan Gingold  <gingold@adacore.com>
 
 	* symfile.h (struct sym_fns): Add sym_relocate field.
