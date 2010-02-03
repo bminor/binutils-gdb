@@ -603,8 +603,8 @@ static const arch_entry cpu_arch[] =
     CPU_K8_FLAGS, 0 },
   { STRING_COMMA_LEN ("amdfam10"), PROCESSOR_AMDFAM10,
     CPU_AMDFAM10_FLAGS, 0 },
-  { STRING_COMMA_LEN ("amdfam15"), PROCESSOR_AMDFAM15,
-    CPU_AMDFAM15_FLAGS, 0 },
+  { STRING_COMMA_LEN ("bdver1"), PROCESSOR_BDVER1,
+    CPU_BDVER1_FLAGS, 0 },
   { STRING_COMMA_LEN (".8087"), PROCESSOR_UNKNOWN,
     CPU_8087_FLAGS, 0 },
   { STRING_COMMA_LEN (".287"), PROCESSOR_UNKNOWN,
@@ -966,7 +966,7 @@ i386_align_code (fragS *fragP, int count)
      PROCESSOR_CORE, PROCESSOR_CORE2, PROCESSOR_COREI7, and
      PROCESSOR_GENERIC64, alt_long_patt will be used.
      3. For PROCESSOR_ATHLON, PROCESSOR_K6, PROCESSOR_K8 and
-     PROCESSOR_AMDFAM10, and PROCESSOR_AMDFAM15, alt_short_patt
+     PROCESSOR_AMDFAM10, and PROCESSOR_BDVER1, alt_short_patt
      will be used.
 
      When -mtune= isn't used, alt_long_patt will be used if
@@ -1020,7 +1020,7 @@ i386_align_code (fragS *fragP, int count)
 	    case PROCESSOR_ATHLON:
 	    case PROCESSOR_K8:
 	    case PROCESSOR_AMDFAM10:
-	    case PROCESSOR_AMDFAM15:
+	    case PROCESSOR_BDVER1:
 	      patt = alt_short_patt;
 	      break;
 	    case PROCESSOR_I386:
@@ -1048,7 +1048,7 @@ i386_align_code (fragS *fragP, int count)
 	    case PROCESSOR_ATHLON:
 	    case PROCESSOR_K8:
 	    case PROCESSOR_AMDFAM10:
-	    case PROCESSOR_AMDFAM15:
+	    case PROCESSOR_BDVER1:
 	    case PROCESSOR_GENERIC32:
 	      /* We use cpu_arch_isa_flags to check if we CAN optimize
 		 for Cpu686.  */

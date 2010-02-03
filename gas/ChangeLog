@@ -1,3 +1,10 @@
+2010-02-03  Quentin Neill  <quentin.neill@amd.com>
+
+	* config/tc-i386.c (cpu_arch): Change amdfam15 to bdver1.
+	(i386_align_code): Rename  PROCESSOR_AMDFAM15 to PROCESSOR_BDVER1.
+	* config/tc-i386.h (processor_type): Same.
+	* doc/c-i386.texi: Change amdfam15 to bdver1.
+
 2010-01-29  Nick Clifton  <nickc@redhat.com>
 
 	PR 11136

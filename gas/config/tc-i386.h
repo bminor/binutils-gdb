@@ -221,7 +221,7 @@ enum processor_type
   PROCESSOR_GENERIC32,
   PROCESSOR_GENERIC64,
   PROCESSOR_AMDFAM10,
-  PROCESSOR_AMDFAM15
+  PROCESSOR_BDVER1
 };
 
 extern enum processor_type cpu_arch_tune;

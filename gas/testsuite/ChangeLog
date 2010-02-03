@@ -1,3 +1,11 @@
+2010-02-03  Quentin Neill  <quentin.neill@amd.com>
+
+	* gas/i386/i386.exp: Rename amdfam15 test cases to bdver1.
+	* gas/i386/x86-64-nops-1-amdfam15.d: Renamed test case to
+	gas/i386/x86-64-nops-1-bdver1.d.
+	* gas/i386/nops-1-amdfam15.d: Renamed test case to
+	gas/i386/nops-1-bdver1.d.
+
 2010-01-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gas/arm/dis-data.d: Update test name.  Do not expect
