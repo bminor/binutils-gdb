@@ -57,7 +57,8 @@ tui_init (int top_level)
 
   tui_initialize_io ();
   tui_initialize_win ();
-  tui_initialize_readline ();
+  if (ui_file_isatty (gdb_stdout))
+    tui_initialize_readline ();
 
   return NULL;
 }

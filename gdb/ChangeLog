@@ -1,5 +1,11 @@
 2010-02-04  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR tui/9622
+	* tui/tui-interp.c (tui_init): Call tui_initialize_readline
+	only if gdb_stdout is a tty.
+
+2010-02-04  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* target-descriptions.c: Include "osabi.h".
 	(maint_print_c_tdesc_cmd): Generate set_tdesc_osabi for valid
 	OSABI.
