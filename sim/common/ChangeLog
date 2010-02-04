@@ -1,3 +1,8 @@
+2010-02-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-base.h: Declare sim_state.cpu as a pointer in the comment.  Drop
+	& from the STATE_CPU() examples.
+
 2010-01-24  Doug Evans  <dje@sebabeach.org>
 
 	* cgen-accfp.c (fextsfdf): New arg how.  All callers updated.
