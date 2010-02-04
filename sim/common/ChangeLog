@@ -1,5 +1,9 @@
 2010-02-04  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-model.c: Include sim-model.h
+
+2010-02-04  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-base.h: Declare sim_state.cpu as a pointer in the comment.  Drop
 	& from the STATE_CPU() examples.
 
