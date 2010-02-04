@@ -1,6 +1,6 @@
 /* CRIS-specific support for 32-bit ELF.
-   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
-   Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
+   2010  Free Software Foundation, Inc.
    Contributed by Axis Communications AB.
    Written by Hans-Peter Nilsson, based on elf32-fr30.c
    PIC and shlib bits based primarily on elf32-m68k.c and elf32-i386.c.
@@ -885,13 +885,14 @@ struct elf_cris_link_hash_table
 #define elf_cris_link_hash_traverse(table, func, info)			\
   (elf_link_hash_traverse						\
    (&(table)->root,							\
-    (bfd_boolean (*) PARAMS ((struct elf_link_hash_entry *, PTR))) (func), \
+    (bfd_boolean (*) (struct elf_link_hash_entry *, void *)) (func),	\
     (info)))
 
 /* Get the CRIS ELF linker hash table from a link_info structure.  */
 
 #define elf_cris_hash_table(p) \
-  ((struct elf_cris_link_hash_table *) (p)->hash)
+  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
+  == CRIS_ELF_DATA ? ((struct elf_cris_link_hash_table *) ((p)->hash)) : NULL)
 
 /* Get the CRIS ELF linker hash entry from a regular hash entry (the
    "parent class").  The .root reference is just a simple type
@@ -903,10 +904,9 @@ struct elf_cris_link_hash_table
 /* Create an entry in a CRIS ELF linker hash table.  */
 
 static struct bfd_hash_entry *
-elf_cris_link_hash_newfunc (entry, table, string)
-     struct bfd_hash_entry *entry;
-     struct bfd_hash_table *table;
-     const char *string;
+elf_cris_link_hash_newfunc (struct bfd_hash_entry *entry,
+			    struct bfd_hash_table *table,
+			    const char *string)
 {
   struct elf_cris_link_hash_entry *ret =
     (struct elf_cris_link_hash_entry *) entry;
@@ -940,8 +940,7 @@ elf_cris_link_hash_newfunc (entry, table, string)
 /* Create a CRIS ELF linker hash table.  */
 
 static struct bfd_link_hash_table *
-elf_cris_link_hash_table_create (abfd)
-     bfd *abfd;
+elf_cris_link_hash_table_create (bfd *abfd)
 {
   struct elf_cris_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf_cris_link_hash_table);
@@ -952,7 +951,8 @@ elf_cris_link_hash_table_create (abfd)
 
   if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
 				      elf_cris_link_hash_newfunc,
-				      sizeof (struct elf_cris_link_hash_entry)))
+				      sizeof (struct elf_cris_link_hash_entry),
+				      CRIS_ELF_DATA))
     {
       free (ret);
       return NULL;
@@ -1027,17 +1027,16 @@ static int additional_relocation_error_msg_count = 10;
    copied, for further comments.  */
 
 static bfd_boolean
-cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
-			   contents, relocs, local_syms, local_sections)
-     bfd *output_bfd ATTRIBUTE_UNUSED;
-     struct bfd_link_info *info;
-     bfd *input_bfd;
-     asection *input_section;
-     bfd_byte *contents;
-     Elf_Internal_Rela *relocs;
-     Elf_Internal_Sym *local_syms;
-     asection **local_sections;
+cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
+			   struct bfd_link_info *info,
+			   bfd *input_bfd,
+			   asection *input_section,
+			   bfd_byte *contents,
+			   Elf_Internal_Rela *relocs,
+			   Elf_Internal_Sym *local_syms,
+			   asection **local_sections)
 {
+  struct elf_cris_link_hash_table * htab;
   bfd *dynobj;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
@@ -1048,6 +1047,10 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
   asection *srelgot;
+
+  htab = elf_cris_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
 
   dynobj = elf_hash_table (info)->dynobj;
   local_got_offsets = elf_local_got_offsets (input_bfd);
@@ -1587,8 +1590,6 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			  indx = elf_section_data (osec)->dynindx;
 			  if (indx == 0)
 			    {
-			      struct elf_cris_link_hash_table *htab;
-			      htab = elf_cris_hash_table (info);
 			      osec = htab->root.text_index_section;
 			      indx = elf_section_data (osec)->dynindx;
 			    }
@@ -1644,14 +1645,14 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 
 	  BFD_ASSERT ((input_section->flags & SEC_ALLOC) == 0
-		      || elf_cris_hash_table (info)->dtpmod_refcount != 0);
+		      || htab->dtpmod_refcount != 0);
 
 	  /* Fill in a R_CRIS_DTPMOD reloc at offset 3 if we haven't
 	     already done so.  Note that we do this in .got.plt, not
 	     in .got, as .got.plt contains the first part, still the
 	     reloc is against .got, because the linker script directs
 	     (is required to direct) them both into .got.  */
-	  if (elf_cris_hash_table (info)->dtpmod_refcount > 0
+	  if (htab->dtpmod_refcount > 0
 	      && (input_section->flags & SEC_ALLOC) != 0)
 	    {
 	      asection *sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
@@ -1686,8 +1687,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      /* Reverse the sign to mark that we've emitted the
 		 required GOT entry.  */
-	      elf_cris_hash_table (info)->dtpmod_refcount
-		= -elf_cris_hash_table (info)->dtpmod_refcount;
+	      htab->dtpmod_refcount = - htab->dtpmod_refcount;
 	    }
 
 	  /* The relocation is the offset from the start of the module
@@ -2113,12 +2113,12 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
    dynamic sections here.  */
 
 static bfd_boolean
-elf_cris_finish_dynamic_symbol (output_bfd, info, h, sym)
-     bfd *output_bfd;
-     struct bfd_link_info *info;
-     struct elf_link_hash_entry *h;
-     Elf_Internal_Sym *sym;
+elf_cris_finish_dynamic_symbol (bfd *output_bfd,
+				struct bfd_link_info *info,
+				struct elf_link_hash_entry *h,
+				Elf_Internal_Sym *sym)
 {
+  struct elf_cris_link_hash_table * htab;
   bfd *dynobj;
 
   /* Where in the plt entry to put values.  */
@@ -2134,6 +2134,10 @@ elf_cris_finish_dynamic_symbol (output_bfd, info, h, sym)
   int plt_entry_size = PLT_ENTRY_SIZE;
   const bfd_byte *plt_entry = elf_cris_plt_entry;
   const bfd_byte *plt_pic_entry = elf_cris_pic_plt_entry;
+
+  htab = elf_cris_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
 
   /* Adjust the various PLT entry offsets.  */
   if (bfd_get_mach (output_bfd) == bfd_mach_cris_v32)
@@ -2174,7 +2178,7 @@ elf_cris_finish_dynamic_symbol (output_bfd, info, h, sym)
 	 processed as part of the runtime lazy .rela.plt relocation).
 	 FIXME: There be literal constants here...  */
       bfd_vma rela_plt_index
-	= (elf_cris_hash_table (info)->dtpmod_refcount != 0
+	= (htab->dtpmod_refcount != 0
 	   ? gotplt_offset/4 - 2 - 3 : gotplt_offset/4 - 3);
 
       /* Get the offset into the .got table of the entry that corresponds
@@ -2185,7 +2189,7 @@ elf_cris_finish_dynamic_symbol (output_bfd, info, h, sym)
       bfd_vma got_offset
 	= (has_gotplt
 	   ? gotplt_offset
-	   : h->got.offset + elf_cris_hash_table(info)->next_gotplt_entry);
+	   : h->got.offset + htab->next_gotplt_entry);
 
       /* This symbol has an entry in the procedure linkage table.  Set it
 	 up.  */
@@ -2537,6 +2541,7 @@ cris_elf_gc_sweep_hook (bfd *abfd,
 			asection *sec,
 			const Elf_Internal_Rela *relocs)
 {
+  struct elf_cris_link_hash_table * htab;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
   bfd_signed_vma *local_got_refcounts;
@@ -2551,6 +2556,10 @@ cris_elf_gc_sweep_hook (bfd *abfd,
   dynobj = elf_hash_table (info)->dynobj;
   if (dynobj == NULL)
     return TRUE;
+
+  htab = elf_cris_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
@@ -2689,9 +2698,9 @@ cris_elf_gc_sweep_hook (bfd *abfd,
 	    break;
 	  /* Fall through.  */
 	case R_CRIS_16_DTPREL:
-	  elf_cris_hash_table (info)->dtpmod_refcount--;
-	  if (elf_cris_hash_table (info)->dtpmod_refcount == 0)
-	    elf_cris_hash_table (info)->next_gotplt_entry -= 8;
+	  htab->dtpmod_refcount--;
+	  if (htab->dtpmod_refcount == 0)
+	    htab->next_gotplt_entry -= 8;
 	  BFD_ASSERT (local_got_refcounts != NULL);
 	  local_got_refcounts[-1]--;
 	  break;
@@ -2856,13 +2865,17 @@ elf_cris_hide_symbol (info, h, force_local)
    understand.  */
 
 static bfd_boolean
-elf_cris_adjust_dynamic_symbol (info, h)
-     struct bfd_link_info *info;
-     struct elf_link_hash_entry *h;
+elf_cris_adjust_dynamic_symbol (struct bfd_link_info *info,
+				struct elf_link_hash_entry *h)
 {
+  struct elf_cris_link_hash_table * htab;
   bfd *dynobj;
   asection *s;
   bfd_size_type plt_entry_size;
+
+  htab = elf_cris_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
 
   dynobj = elf_hash_table (info)->dynobj;
 
@@ -2988,8 +3001,8 @@ elf_cris_adjust_dynamic_symbol (info, h)
       /* We also need to make an entry in the .got.plt section, which
 	 will be placed in the .got section by the linker script.  */
       ((struct elf_cris_link_hash_entry *) h)->gotplt_offset
-	= elf_cris_hash_table (info)->next_gotplt_entry;
-      elf_cris_hash_table (info)->next_gotplt_entry += 4;
+	= htab->next_gotplt_entry;
+      htab->next_gotplt_entry += 4;
 
       s = bfd_get_section_by_name (dynobj, ".got.plt");
       BFD_ASSERT (s != NULL);
@@ -3113,12 +3126,12 @@ elf_cris_copy_indirect_symbol (struct bfd_link_info *info,
 /* Look through the relocs for a section during the first phase.  */
 
 static bfd_boolean
-cris_elf_check_relocs (abfd, info, sec, relocs)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     asection *sec;
-     const Elf_Internal_Rela *relocs;
+cris_elf_check_relocs (bfd *abfd,
+		       struct bfd_link_info *info,
+		       asection *sec,
+		       const Elf_Internal_Rela *relocs)
 {
+  struct elf_cris_link_hash_table * htab;
   bfd *dynobj;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
@@ -3131,6 +3144,10 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 
   if (info->relocatable)
     return TRUE;
+
+  htab = elf_cris_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
 
   dynobj = elf_hash_table (info)->dynobj;
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -3183,9 +3200,10 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 	case R_CRIS_16_DTPREL:
 	  /* The first .got.plt entry is right after the R_CRIS_DTPMOD
 	     entry at index 3. */
-	  if (elf_cris_hash_table (info)->dtpmod_refcount == 0)
-	    elf_cris_hash_table (info)->next_gotplt_entry += 8;
-	  elf_cris_hash_table (info)->dtpmod_refcount++;
+	  if (htab->dtpmod_refcount == 0)
+	    htab->next_gotplt_entry += 8;
+
+	  htab->dtpmod_refcount++;
 	  /* Fall through.  */
 
 	case R_CRIS_32_IE:
@@ -3718,14 +3736,18 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 /* Set the sizes of the dynamic sections.  */
 
 static bfd_boolean
-elf_cris_size_dynamic_sections (output_bfd, info)
-     bfd *output_bfd ATTRIBUTE_UNUSED;
-     struct bfd_link_info *info;
+elf_cris_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
+				struct bfd_link_info *info)
 {
+  struct elf_cris_link_hash_table * htab;
   bfd *dynobj;
   asection *s;
   bfd_boolean plt;
   bfd_boolean relocs;
+
+  htab = elf_cris_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
 
   dynobj = elf_hash_table (info)->dynobj;
   BFD_ASSERT (dynobj != NULL);
@@ -3744,9 +3766,8 @@ elf_cris_size_dynamic_sections (output_bfd, info)
   else
     {
       /* Adjust all expected GOTPLT uses to use a GOT entry instead.  */
-      elf_cris_link_hash_traverse (elf_cris_hash_table (info),
-				   elf_cris_adjust_gotplt_to_got,
-				   (PTR) info);
+      elf_cris_link_hash_traverse (htab, elf_cris_adjust_gotplt_to_got,
+				   info);
 
       /* We may have created entries in the .rela.got section.
 	 However, if we are not creating the dynamic sections, we will
@@ -3766,13 +3787,13 @@ elf_cris_size_dynamic_sections (output_bfd, info)
      visibility changes.  For programs, we discard space for relocs for
      symbols not referenced by any dynamic object.  */
   if (info->shared)
-    elf_cris_link_hash_traverse (elf_cris_hash_table (info),
+    elf_cris_link_hash_traverse (htab,
 				 elf_cris_discard_excess_dso_dynamics,
-				 (PTR) info);
+				 info);
   else
-    elf_cris_link_hash_traverse (elf_cris_hash_table (info),
+    elf_cris_link_hash_traverse (htab,
 				 elf_cris_discard_excess_program_dynamics,
-				 (PTR) info);
+				 info);
 
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
@@ -3800,13 +3821,13 @@ elf_cris_size_dynamic_sections (output_bfd, info)
 	  /* The .got.plt contains the .got header as well as the
 	     actual .got.plt contents.  The .got header may contain a
 	     R_CRIS_DTPMOD entry at index 3.  */
-	  s->size += elf_cris_hash_table (info)->dtpmod_refcount != 0
+	  s->size += htab->dtpmod_refcount != 0
 	    ? 8 : 0;
 	}
       else if (CONST_STRNEQ (name, ".rela"))
 	{
 	  if (strcmp (name, ".rela.got") == 0
-	      && elf_cris_hash_table (info)->dtpmod_refcount != 0
+	      && htab->dtpmod_refcount != 0
 	      && info->shared)
 	    s->size += sizeof (Elf32_External_Rela);
 

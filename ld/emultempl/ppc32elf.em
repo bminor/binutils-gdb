@@ -29,7 +29,7 @@ fragment <<EOF
 
 #define is_ppc_elf(bfd) \
   (bfd_get_flavour (bfd) == bfd_target_elf_flavour \
-   && elf_object_id (bfd) == PPC32_ELF_TDATA)
+   && elf_object_id (bfd) == PPC32_ELF_DATA)
 
 /* Whether to run tls optimization.  */
 static int notlsopt = 0;

@@ -74,7 +74,7 @@ static void
 ppc_create_output_section_statements (void)
 {
   if (!(bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour
-	&& elf_object_id (link_info.output_bfd) == PPC64_ELF_TDATA))
+	&& elf_object_id (link_info.output_bfd) == PPC64_ELF_DATA))
     return;
 
   link_info.wrap_char = '.';

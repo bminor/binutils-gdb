@@ -27,7 +27,7 @@ fragment <<EOF
 #define is_mips_elf(bfd)				\
   (bfd_get_flavour (bfd) == bfd_target_elf_flavour	\
    && elf_tdata (bfd) != NULL				\
-   && elf_object_id (bfd) == MIPS_ELF_TDATA)
+   && elf_object_id (bfd) == MIPS_ELF_DATA)
 
 /* Fake input file for stubs.  */
 static lang_input_statement_type *stub_file;

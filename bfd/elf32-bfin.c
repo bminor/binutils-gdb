@@ -1,5 +1,6 @@
 /* ADI Blackfin BFD support for 32-bit ELF.
-   Copyright 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+   Copyright 2005, 2006, 2007, 2008, 2009, 2010
+   Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -1716,8 +1717,8 @@ bfin_gc_sweep_hook (bfd * abfd,
 extern const bfd_target bfd_elf32_bfinfdpic_vec;
 #define IS_FDPIC(bfd) ((bfd)->xvec == &bfd_elf32_bfinfdpic_vec)
 
-/* An extension of the elf hash table data structure, containing some
-   additional Blackfin-specific data.  */
+/* An extension of the elf hash table data structure,
+   containing some additional Blackfin-specific data.  */
 struct bfinfdpic_elf_link_hash_table
 {
   struct elf_link_hash_table elf;
@@ -1748,7 +1749,8 @@ struct bfinfdpic_elf_link_hash_table
 /* Get the Blackfin ELF linker hash table from a link_info structure.  */
 
 #define bfinfdpic_hash_table(info) \
-  ((struct bfinfdpic_elf_link_hash_table *) ((info)->hash))
+  (elf_hash_table_id ((struct elf_link_hash_table *) ((info)->hash)) \
+  == BFIN_ELF_DATA ? ((struct bfinfdpic_elf_link_hash_table *) ((info)->hash)) : NULL)
 
 #define bfinfdpic_got_section(info) \
   (bfinfdpic_hash_table (info)->sgot)
@@ -1814,7 +1816,8 @@ bfinfdpic_elf_link_hash_table_create (bfd *abfd)
 
   if (!_bfd_elf_link_hash_table_init (&ret->elf, abfd,
 				      _bfd_elf_link_hash_newfunc,
-				      sizeof (struct elf_link_hash_entry)))
+				      sizeof (struct elf_link_hash_entry),
+				      BFIN_ELF_DATA))
     {
       free (ret);
       return NULL;
@@ -5192,7 +5195,8 @@ bfin_link_hash_table_create (bfd * abfd)
 
   if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
 				      bfin_link_hash_newfunc,
-				      sizeof (struct elf_link_hash_entry)))
+				      sizeof (struct elf_link_hash_entry),
+				      BFIN_ELF_DATA))
     {
       free (ret);
       return NULL;

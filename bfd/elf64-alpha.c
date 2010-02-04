@@ -1,6 +1,6 @@
 /* Alpha specific support for 64-bit ELF
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007, 2008, 2009  Free Software Foundation, Inc.
+   2006, 2007, 2008, 2009, 2010  Free Software Foundation, Inc.
    Contributed by Richard Henderson <rth@tamu.edu>.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -216,7 +216,8 @@ struct alpha_elf_link_hash_table
 /* Get the Alpha ELF linker hash table from a link_info structure.  */
 
 #define alpha_elf_hash_table(p) \
-  ((struct alpha_elf_link_hash_table *) ((p)->hash))
+  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
+  == ALPHA_ELF_DATA ? ((struct alpha_elf_link_hash_table *) ((p)->hash)) : NULL)
 
 /* Get the object's symbols as our own entry type.  */
 
@@ -287,7 +288,8 @@ elf64_alpha_bfd_link_hash_table_create (bfd *abfd)
 
   if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
 				      elf64_alpha_link_hash_newfunc,
-				      sizeof (struct alpha_elf_link_hash_entry)))
+				      sizeof (struct alpha_elf_link_hash_entry),
+				      ALPHA_ELF_DATA))
     {
       free (ret);
       return NULL;
@@ -333,13 +335,13 @@ struct alpha_elf_obj_tdata
 #define is_alpha_elf(bfd) \
   (bfd_get_flavour (bfd) == bfd_target_elf_flavour \
    && elf_tdata (bfd) != NULL \
-   && elf_object_id (bfd) == ALPHA_ELF_TDATA)
+   && elf_object_id (bfd) == ALPHA_ELF_DATA)
 
 static bfd_boolean
 elf64_alpha_mkobject (bfd *abfd)
 {
   return bfd_elf_allocate_object (abfd, sizeof (struct alpha_elf_obj_tdata),
-				  ALPHA_ELF_TDATA);
+				  ALPHA_ELF_DATA);
 }
 
 static bfd_boolean
@@ -2322,7 +2324,13 @@ elf64_alpha_calc_got_offsets_for_symbol (struct alpha_elf_link_hash_entry *h,
 static void
 elf64_alpha_calc_got_offsets (struct bfd_link_info *info)
 {
-  bfd *i, *got_list = alpha_elf_hash_table(info)->got_list;
+  bfd *i, *got_list;
+  struct alpha_elf_link_hash_table * htab;
+
+  htab = alpha_elf_hash_table (info);
+  if (htab == NULL)
+    return;
+  got_list = htab->got_list;
 
   /* First, zero out the .got sizes, as we may be recalculating the
      .got after optimizing it.  */
@@ -2330,7 +2338,7 @@ elf64_alpha_calc_got_offsets (struct bfd_link_info *info)
     alpha_elf_tdata(i)->got->size = 0;
 
   /* Next, fill in the offsets for all the global entries.  */
-  alpha_elf_link_hash_traverse (alpha_elf_hash_table (info),
+  alpha_elf_link_hash_traverse (htab,
 				elf64_alpha_calc_got_offsets_for_symbol,
 				NULL);
 
@@ -2368,8 +2376,12 @@ static bfd_boolean
 elf64_alpha_size_got_sections (struct bfd_link_info *info)
 {
   bfd *i, *got_list, *cur_got_obj = NULL;
+  struct alpha_elf_link_hash_table * htab;
 
-  got_list = alpha_elf_hash_table (info)->got_list;
+  htab = alpha_elf_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+  got_list = htab->got_list;
 
   /* On the first time through, pretend we have an existing got list
      consisting of all of the input files.  */
@@ -2409,7 +2421,7 @@ elf64_alpha_size_got_sections (struct bfd_link_info *info)
       if (got_list == NULL)
 	return TRUE;
 
-      alpha_elf_hash_table (info)->got_list = got_list;
+      htab->got_list = got_list;
     }
 
   cur_got_obj = got_list;
@@ -2480,6 +2492,11 @@ elf64_alpha_size_plt_section (struct bfd_link_info *info)
   asection *splt, *spltrel, *sgotplt;
   unsigned long entries;
   bfd *dynobj;
+  struct alpha_elf_link_hash_table * htab;
+
+  htab = alpha_elf_hash_table (info);
+  if (htab == NULL)
+    return;
 
   dynobj = elf_hash_table(info)->dynobj;
   splt = bfd_get_section_by_name (dynobj, ".plt");
@@ -2488,7 +2505,7 @@ elf64_alpha_size_plt_section (struct bfd_link_info *info)
 
   splt->size = 0;
 
-  alpha_elf_link_hash_traverse (alpha_elf_hash_table (info),
+  alpha_elf_link_hash_traverse (htab,
 				elf64_alpha_size_plt_section_1, splt);
 
   /* Every plt entry requires a JMP_SLOT relocation.  */
@@ -2518,20 +2535,24 @@ elf64_alpha_always_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 				  struct bfd_link_info *info)
 {
   bfd *i;
+  struct alpha_elf_link_hash_table * htab;
 
   if (info->relocatable)
     return TRUE;
 
+  htab = alpha_elf_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   /* First, take care of the indirect symbols created by versioning.  */
-  alpha_elf_link_hash_traverse (alpha_elf_hash_table (info),
-				elf64_alpha_merge_ind_symbols,
+  alpha_elf_link_hash_traverse (htab, elf64_alpha_merge_ind_symbols,
 				NULL);
 
   if (!elf64_alpha_size_got_sections (info))
     return FALSE;
 
   /* Allocate space for all of the .got subsections.  */
-  i = alpha_elf_hash_table (info)->got_list;
+  i = htab->got_list;
   for ( ; i ; i = alpha_elf_tdata(i)->got_link_next)
     {
       asection *s = alpha_elf_tdata(i)->got;
@@ -2687,12 +2708,17 @@ elf64_alpha_size_rela_got_section (struct bfd_link_info *info)
   unsigned long entries;
   bfd *i, *dynobj;
   asection *srel;
+  struct alpha_elf_link_hash_table * htab;
+
+  htab = alpha_elf_hash_table (info);
+  if (htab == NULL)
+    return;
 
   /* Shared libraries often require RELATIVE relocs, and some relocs
      require attention for the main application as well.  */
 
   entries = 0;
-  for (i = alpha_elf_hash_table(info)->got_list;
+  for (i = htab->got_list;
        i ; i = alpha_elf_tdata(i)->got_link_next)
     {
       bfd *j;
@@ -2725,7 +2751,7 @@ elf64_alpha_size_rela_got_section (struct bfd_link_info *info)
   srel->size = sizeof (Elf64_External_Rela) * entries;
 
   /* Now do the non-local symbols.  */
-  alpha_elf_link_hash_traverse (alpha_elf_hash_table (info),
+  alpha_elf_link_hash_traverse (htab,
 				elf64_alpha_size_rela_got_1, info);
 }
 
@@ -2738,6 +2764,11 @@ elf64_alpha_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   bfd *dynobj;
   asection *s;
   bfd_boolean relplt;
+  struct alpha_elf_link_hash_table * htab;
+
+  htab = alpha_elf_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
 
   dynobj = elf_hash_table(info)->dynobj;
   BFD_ASSERT(dynobj != NULL);
@@ -2757,7 +2788,7 @@ elf64_alpha_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 symbols need dynamic relocation entries and which don't.  We've
 	 collected information in check_relocs that we can now apply to
 	 size the dynamic relocation sections.  */
-      alpha_elf_link_hash_traverse (alpha_elf_hash_table (info),
+      alpha_elf_link_hash_traverse (htab,
 				    elf64_alpha_calc_dynrel_sizes, info);
 
       elf64_alpha_size_rela_got_section (info);
@@ -3597,6 +3628,11 @@ elf64_alpha_relax_section (bfd *abfd, asection *sec,
   Elf_Internal_Sym *isymbuf = NULL;
   struct alpha_elf_got_entry **local_got_entries;
   struct alpha_relax_info info;
+  struct alpha_elf_link_hash_table * htab;
+
+  htab = alpha_elf_hash_table (link_info);
+  if (htab == NULL)
+    return FALSE;
 
   /* There's nothing to change, yet.  */
   *again = FALSE;
@@ -3610,9 +3646,9 @@ elf64_alpha_relax_section (bfd *abfd, asection *sec,
   BFD_ASSERT (is_alpha_elf (abfd));
 
   /* Make sure our GOT and PLT tables are up-to-date.  */
-  if (alpha_elf_hash_table(link_info)->relax_trip != link_info->relax_trip)
+  if (htab->relax_trip != link_info->relax_trip)
     {
-      alpha_elf_hash_table(link_info)->relax_trip = link_info->relax_trip;
+      htab->relax_trip = link_info->relax_trip;
 
       /* This should never fail after the initial round, since the only
 	 error is GOT overflow, and relaxation only shrinks the table.  */
@@ -4933,7 +4969,12 @@ elf64_alpha_final_link (bfd *abfd, struct bfd_link_info *info)
   const struct ecoff_debug_swap *swap
     = get_elf_backend_data (abfd)->elf_backend_ecoff_debug_swap;
   HDRR *symhdr = &debug.symbolic_header;
-  PTR mdebug_handle = NULL;
+  void * mdebug_handle = NULL;
+  struct alpha_elf_link_hash_table * htab;
+
+  htab = alpha_elf_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
 
   /* Go through the sections and collect the mdebug information.  */
   mdebug_sec = NULL;
@@ -5088,8 +5129,7 @@ elf64_alpha_final_link (bfd *abfd, struct bfd_link_info *info)
 		    continue;
 
 		  name = input_debug.ssext + ext.asym.iss;
-		  h = alpha_elf_link_hash_lookup (alpha_elf_hash_table (info),
-						  name, FALSE, FALSE, TRUE);
+		  h = alpha_elf_link_hash_lookup (htab, name, FALSE, FALSE, TRUE);
 		  if (h == NULL || h->esym.ifd != -2)
 		    continue;
 
@@ -5153,7 +5193,7 @@ elf64_alpha_final_link (bfd *abfd, struct bfd_link_info *info)
   /* The .got subsections...  */
   {
     bfd *i, *dynobj = elf_hash_table(info)->dynobj;
-    for (i = alpha_elf_hash_table(info)->got_list;
+    for (i = htab->got_list;
 	 i != NULL;
 	 i = alpha_elf_tdata(i)->got_link_next)
       {

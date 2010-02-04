@@ -1,6 +1,6 @@
 /* AVR-specific support for 32-bit ELF
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
-   Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
+   2010  Free Software Foundation, Inc.
    Contributed by Denis Chertykov <denisc@overta.ru>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -38,7 +38,7 @@ static bfd_boolean debug_stubs = FALSE;
 
 /* We use two hash tables to hold information for linking avr objects.
 
-   The first is the elf32_avr_link_hash_tablse which is derived from the
+   The first is the elf32_avr_link_hash_table which is derived from the
    stanard ELF linker hash table.  We use this as a place to attach the other
    hash table and some static information.
 
@@ -104,8 +104,8 @@ struct elf32_avr_link_hash_table
 /* Various hash macros and functions.  */
 #define avr_link_hash_table(p) \
   /* PR 3874: Check that we have an AVR style hash table before using it.  */\
-  ((p)->hash->table.newfunc != elf32_avr_link_hash_newfunc ? NULL : \
-   ((struct elf32_avr_link_hash_table *) ((p)->hash)))
+  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
+  == AVR_ELF_DATA ? ((struct elf32_avr_link_hash_table *) ((p)->hash)) : NULL)
 
 #define avr_stub_hash_entry(ent) \
   ((struct elf32_avr_stub_hash_entry *)(ent))
@@ -617,7 +617,8 @@ elf32_avr_link_hash_table_create (bfd *abfd)
 
   if (!_bfd_elf_link_hash_table_init (&htab->etab, abfd,
                                       elf32_avr_link_hash_newfunc,
-                                      sizeof (struct elf_link_hash_entry)))
+                                      sizeof (struct elf_link_hash_entry),
+				      AVR_ELF_DATA))
     {
       free (htab);
       return NULL;
@@ -1166,6 +1167,9 @@ elf32_avr_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
   Elf_Internal_Rela *           rel;
   Elf_Internal_Rela *           relend;
   struct elf32_avr_link_hash_table * htab = avr_link_hash_table (info);
+
+  if (htab == NULL)
+    return FALSE;
 
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
@@ -2563,7 +2567,7 @@ elf32_avr_setup_section_lists (bfd *output_bfd,
   asection *section;
   asection **input_list, **list;
   bfd_size_type amt;
-  struct elf32_avr_link_hash_table *htab = avr_link_hash_table(info);
+  struct elf32_avr_link_hash_table *htab = avr_link_hash_table (info);
 
   if (htab == NULL || htab->no_stubs)
     return 0;

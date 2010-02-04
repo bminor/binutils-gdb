@@ -1,6 +1,6 @@
 /* IA-64 support for 64-bit ELF
    Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
-   2008, 2009  Free Software Foundation, Inc.
+   2008, 2009, 2010  Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -70,7 +70,7 @@
 #define NELEMS(a)	((int) (sizeof (a) / sizeof ((a)[0])))
 
 typedef struct bfd_hash_entry *(*new_hash_entry_func)
-  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
+  (struct bfd_hash_entry *, struct bfd_hash_table *, const char *);
 
 /* In dynamically (linker-) created sections, we generally need to keep track
    of the place a symbol or expression got allocated to. This is done via hash
@@ -163,23 +163,23 @@ struct elfNN_ia64_link_hash_table
   /* The main hash table.  */
   struct elf_link_hash_table root;
 
-  asection *fptr_sec;		/* function descriptor table (or NULL) */
-  asection *rel_fptr_sec;	/* dynamic relocation section for same */
-  asection *pltoff_sec;		/* private descriptors for plt (or NULL) */
-  asection *rel_pltoff_sec;	/* dynamic relocation section for same */
+  asection *fptr_sec;		/* Function descriptor table (or NULL).  */
+  asection *rel_fptr_sec;	/* Dynamic relocation section for same.  */
+  asection *pltoff_sec;		/* Private descriptors for plt (or NULL).  */
+  asection *rel_pltoff_sec;	/* Dynamic relocation section for same.  */
 
-  bfd_size_type minplt_entries;	/* number of minplt entries */
-  unsigned reltext : 1;		/* are there relocs against readonly sections? */
-  unsigned self_dtpmod_done : 1;/* has self DTPMOD entry been finished? */
-  bfd_vma self_dtpmod_offset;	/* .got offset to self DTPMOD entry */
+  bfd_size_type minplt_entries;	/* Number of minplt entries.  */
+  unsigned reltext : 1;		/* Are there relocs against readonly sections?  */
+  unsigned self_dtpmod_done : 1;/* Has self DTPMOD entry been finished?  */
+  bfd_vma self_dtpmod_offset;	/* .got offset to self DTPMOD entry.  */
   /* There are maybe R_IA64_GPREL22 relocations, including those
      optimized from R_IA64_LTOFF22X, against non-SHF_IA_64_SHORT
      sections.  We need to record those sections so that we can choose
      a proper GP to cover all R_IA64_GPREL22 relocations.  */
-  asection *max_short_sec;	/* maximum short output section */
-  bfd_vma max_short_offset;	/* maximum short offset */
-  asection *min_short_sec;	/* minimum short output section */
-  bfd_vma min_short_offset;	/* minimum short offset */
+  asection *max_short_sec;	/* Maximum short output section.  */
+  bfd_vma max_short_offset;	/* Maximum short offset.  */
+  asection *min_short_sec;	/* Minimum short output section.  */
+  bfd_vma min_short_offset;	/* Minimum short offset.  */
 
   htab_t loc_hash_table;
   void *loc_hash_memory;
@@ -193,7 +193,8 @@ struct elfNN_ia64_allocate_data
 };
 
 #define elfNN_ia64_hash_table(p) \
-  ((struct elfNN_ia64_link_hash_table *) ((p)->hash))
+  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
+  == IA64_ELF_DATA ? ((struct elfNN_ia64_link_hash_table *) ((p)->hash)) : NULL)
 
 static struct elfNN_ia64_dyn_sym_info * get_dyn_sym_info
   (struct elfNN_ia64_link_hash_table *ia64_info,
@@ -843,16 +844,19 @@ elfNN_ia64_relax_section (bfd *abfd, asection *sec,
       || (link_info->relax_pass == 1 && sec->skip_relax_pass_1))
     return TRUE;
 
+  ia64_info = elfNN_ia64_hash_table (link_info);
+  if (ia64_info == NULL)
+    return FALSE;
+
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
 
   /* Load the relocations for this section.  */
   internal_relocs = (_bfd_elf_link_read_relocs
-		     (abfd, sec, (PTR) NULL, (Elf_Internal_Rela *) NULL,
+		     (abfd, sec, NULL, (Elf_Internal_Rela *) NULL,
 		      link_info->keep_memory));
   if (internal_relocs == NULL)
     return FALSE;
 
-  ia64_info = elfNN_ia64_hash_table (link_info);
   irelend = internal_relocs + sec->reloc_count;
 
   /* Get the section contents.  */
@@ -1884,21 +1888,22 @@ elfNN_ia64_local_htab_eq (const void *ptr1, const void *ptr2)
    derived hash table to keep information specific to the IA-64 ElF
    linker (without using static variables).  */
 
-static struct bfd_link_hash_table*
+static struct bfd_link_hash_table *
 elfNN_ia64_hash_table_create (bfd *abfd)
 {
   struct elfNN_ia64_link_hash_table *ret;
 
   ret = bfd_zmalloc ((bfd_size_type) sizeof (*ret));
   if (!ret)
-    return 0;
+    return NULL;
 
   if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
 				      elfNN_ia64_new_elf_hash_entry,
-				      sizeof (struct elfNN_ia64_link_hash_entry)))
+				      sizeof (struct elfNN_ia64_link_hash_entry),
+				      IA64_ELF_DATA))
     {
       free (ret);
-      return 0;
+      return NULL;
     }
 
   ret->loc_hash_table = htab_try_create (1024, elfNN_ia64_local_htab_hash,
@@ -1907,7 +1912,7 @@ elfNN_ia64_hash_table_create (bfd *abfd)
   if (!ret->loc_hash_table || !ret->loc_hash_memory)
     {
       free (ret);
-      return 0;
+      return NULL;
     }
 
   return &ret->root.root;
@@ -2053,6 +2058,8 @@ elfNN_ia64_create_dynamic_sections (bfd *abfd,
     return FALSE;
 
   ia64_info = elfNN_ia64_hash_table (info);
+  if (ia64_info == NULL)
+    return FALSE;
 
   {
     flagword flags = bfd_get_section_flags (abfd, ia64_info->root.sgot);
@@ -2680,6 +2687,8 @@ elfNN_ia64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   ia64_info = elfNN_ia64_hash_table (info);
+  if (ia64_info == NULL)
+    return FALSE;
 
   got = fptr = srel = pltoff = NULL;
 
@@ -3107,7 +3116,7 @@ elfNN_ia64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 static bfd_boolean
 allocate_global_data_got (struct elfNN_ia64_dyn_sym_info *dyn_i,
-			  PTR data)
+			  void * data)
 {
   struct elfNN_ia64_allocate_data *x = (struct elfNN_ia64_allocate_data *)data;
 
@@ -3135,6 +3144,9 @@ allocate_global_data_got (struct elfNN_ia64_dyn_sym_info *dyn_i,
 	  struct elfNN_ia64_link_hash_table *ia64_info;
 
 	  ia64_info = elfNN_ia64_hash_table (x->info);
+	  if (ia64_info == NULL)
+	    return FALSE;
+
 	  if (ia64_info->self_dtpmod_offset == (bfd_vma) -1)
 	    {
 	      ia64_info->self_dtpmod_offset = x->ofs;
@@ -3155,7 +3167,7 @@ allocate_global_data_got (struct elfNN_ia64_dyn_sym_info *dyn_i,
 
 static bfd_boolean
 allocate_global_fptr_got (struct elfNN_ia64_dyn_sym_info *dyn_i,
-			  PTR data)
+			  void * data)
 {
   struct elfNN_ia64_allocate_data *x = (struct elfNN_ia64_allocate_data *)data;
 
@@ -3344,6 +3356,8 @@ allocate_dynrel_entries (struct elfNN_ia64_dyn_sym_info *dyn_i,
   bfd_boolean dynamic_symbol, shared, resolved_zero;
 
   ia64_info = elfNN_ia64_hash_table (x->info);
+  if (ia64_info == NULL)
+    return FALSE;
 
   /* Note that this can't be used in relation to FPTR relocs below.  */
   dynamic_symbol = elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info, 0);
@@ -3491,6 +3505,8 @@ elfNN_ia64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   dynobj = elf_hash_table(info)->dynobj;
   ia64_info = elfNN_ia64_hash_table (info);
+  if (ia64_info == NULL)
+    return FALSE;
   ia64_info->self_dtpmod_offset = (bfd_vma) -1;
   BFD_ASSERT(dynobj != NULL);
   data.info = info;
@@ -3996,6 +4012,9 @@ set_got_entry (bfd *abfd, struct bfd_link_info *info,
   bfd_vma got_offset;
 
   ia64_info = elfNN_ia64_hash_table (info);
+  if (ia64_info == NULL)
+    return 0;
+
   got_sec = ia64_info->root.sgot;
 
   switch (dyn_r_type)
@@ -4133,6 +4152,9 @@ set_fptr_entry (bfd *abfd, struct bfd_link_info *info,
   asection *fptr_sec;
 
   ia64_info = elfNN_ia64_hash_table (info);
+  if (ia64_info == NULL)
+    return 0;
+
   fptr_sec = ia64_info->fptr_sec;
 
   if (!dyn_i->fptr_done)
@@ -4183,6 +4205,9 @@ set_pltoff_entry (bfd *abfd, struct bfd_link_info *info,
   asection *pltoff_sec;
 
   ia64_info = elfNN_ia64_hash_table (info);
+  if (ia64_info == NULL)
+    return 0;
+
   pltoff_sec = ia64_info->pltoff_sec;
 
   /* Don't do anything if this symbol uses a real PLT entry.  In
@@ -4283,6 +4308,8 @@ elfNN_ia64_choose_gp (bfd *abfd, struct bfd_link_info *info)
   struct elfNN_ia64_link_hash_table *ia64_info;
 
   ia64_info = elfNN_ia64_hash_table (info);
+  if (ia64_info == NULL)
+    return FALSE;
 
   /* Find the min and max vma of all sections marked short.  Also collect
      min and max vma of any type, for use in selecting a nice gp.  */
@@ -4423,6 +4450,8 @@ elfNN_ia64_final_link (bfd *abfd, struct bfd_link_info *info)
   asection *unwind_output_sec;
 
   ia64_info = elfNN_ia64_hash_table (info);
+  if (ia64_info == NULL)
+    return FALSE;
 
   /* Make sure we've got ourselves a nice fat __gp value.  */
   if (!info->relocatable)
@@ -4505,6 +4534,8 @@ elfNN_ia64_relocate_section (bfd *output_bfd,
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   ia64_info = elfNN_ia64_hash_table (info);
+  if (ia64_info == NULL)
+    return FALSE;
 
   /* Infect various flags from the input section to the output section.  */
   if (info->relocatable)
@@ -5233,6 +5264,9 @@ elfNN_ia64_finish_dynamic_symbol (bfd *output_bfd,
   struct elfNN_ia64_dyn_sym_info *dyn_i;
 
   ia64_info = elfNN_ia64_hash_table (info);
+  if (ia64_info == NULL)
+    return FALSE;
+
   dyn_i = get_dyn_sym_info (ia64_info, h, NULL, NULL, FALSE);
 
   /* Fill in the PLT data, if required.  */
@@ -5319,6 +5353,9 @@ elfNN_ia64_finish_dynamic_sections (bfd *abfd,
   bfd *dynobj;
 
   ia64_info = elfNN_ia64_hash_table (info);
+  if (ia64_info == NULL)
+    return FALSE;
+
   dynobj = ia64_info->root.dynobj;
 
   if (elf_hash_table (info)->dynamic_sections_created)

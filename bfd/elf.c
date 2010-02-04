@@ -232,7 +232,7 @@ bfd_elf_gnu_hash (const char *namearg)
 bfd_boolean
 bfd_elf_allocate_object (bfd *abfd,
 			 size_t object_size,
-			 enum elf_object_id object_id)
+			 enum elf_target_id object_id)
 {
   BFD_ASSERT (object_size >= sizeof (struct elf_obj_tdata));
   abfd->tdata.any = bfd_zalloc (abfd, object_size);
@@ -249,7 +249,7 @@ bfd_boolean
 bfd_elf_make_generic_object (bfd *abfd)
 {
   return bfd_elf_allocate_object (abfd, sizeof (struct elf_obj_tdata),
-				  GENERIC_ELF_TDATA);
+				  GENERIC_ELF_DATA);
 }
 
 bfd_boolean

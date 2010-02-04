@@ -1,5 +1,5 @@
 /* 32-bit ELF support for S+core.
-   Copyright 2009 Free Software Foundation, Inc.
+   Copyright 2009, 2010 Free Software Foundation, Inc.
    Contributed by
    Brain.lin (brain.lin@sunplusct.com)
    Mei Ligang (ligang@sunnorth.com.cn)
@@ -34,13 +34,6 @@
 #include "elf32-score.h"
 
 
-/* Score ELF linker hash table.  */
-struct score_elf_link_hash_table
-{
-  /* The main hash table.  */
-  struct elf_link_hash_table root;
-};
-
 /* The SCORE ELF linker needs additional information for each symbol in
    the global hash table.  */
 struct score_elf_link_hash_entry
@@ -65,13 +58,9 @@ struct score_elf_link_hash_entry
 /* Traverse a score ELF linker hash table.  */
 #define score_elf_link_hash_traverse(table, func, info) \
   (elf_link_hash_traverse \
-   (&(table)->root, \
+   ((table),						     \
     (bfd_boolean (*) (struct elf_link_hash_entry *, void *)) (func), \
     (info)))
-
-/* Get the SCORE elf linker hash table from a link_info structure.  */
-#define score_elf_hash_table(info) \
-  ((struct score_elf_link_hash_table *) ((info)->hash))
 
 /* This structure is used to hold .got entries while estimating got sizes.  */
 struct score_got_entry
@@ -1020,10 +1009,9 @@ score_elf_sort_hash_table (struct bfd_link_info *info,
        too large offsets.  */
     - (g->next ? g->assigned_gotno : 0);
   hsd.max_non_got_dynindx = max_local;
-  score_elf_link_hash_traverse (((struct score_elf_link_hash_table *)
-                                 elf_hash_table (info)),
-                                 score_elf_sort_hash_table_f,
-                                 &hsd);
+  score_elf_link_hash_traverse (elf_hash_table (info),
+				score_elf_sort_hash_table_f,
+				&hsd);
 
   /* There should have been enough room in the symbol table to
      accommodate both the GOT and non-GOT symbols.  */
@@ -1036,36 +1024,6 @@ score_elf_sort_hash_table (struct bfd_link_info *info,
   g->global_gotsym = hsd.low;
 
   return TRUE;
-}
-
-/* Create an entry in an score ELF linker hash table.  */
-
-static struct bfd_hash_entry *
-score_elf_link_hash_newfunc (struct bfd_hash_entry *entry,
-                             struct bfd_hash_table *table,
-                             const char *string)
-{
-  struct score_elf_link_hash_entry *ret = (struct score_elf_link_hash_entry *) entry;
-
-  /* Allocate the structure if it has not already been allocated by a subclass.  */
-  if (ret == NULL)
-    ret = bfd_hash_allocate (table, sizeof (struct score_elf_link_hash_entry));
-  if (ret == NULL)
-    return (struct bfd_hash_entry *) ret;
-
-  /* Call the allocation method of the superclass.  */
-  ret = ((struct score_elf_link_hash_entry *)
-         _bfd_elf_link_hash_newfunc ((struct bfd_hash_entry *) ret, table, string));
-
-  if (ret != NULL)
-    {
-      ret->possibly_dynamic_relocs = 0;
-      ret->readonly_reloc = FALSE;
-      ret->no_fn_stub = FALSE;
-      ret->forced_local = FALSE;
-    }
-
-  return (struct bfd_hash_entry *) ret;
 }
 
 /* Returns the first relocation of type r_type found, beginning with
@@ -3839,28 +3797,6 @@ s7_elf32_score_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED, bfd_reloc_code_rea
       return &elf32_score_howto_table[elf32_score_reloc_map[i].elf_reloc_val];
 
   return NULL;
-}
-
-/* Create a score elf linker hash table.  */
-
-struct bfd_link_hash_table *
-s7_elf32_score_link_hash_table_create (bfd *abfd)
-{
-  struct score_elf_link_hash_table *ret;
-  bfd_size_type amt = sizeof (struct score_elf_link_hash_table);
-
-  ret = bfd_malloc (amt);
-  if (ret == NULL)
-    return NULL;
-
-  if (!_bfd_elf_link_hash_table_init (&ret->root, abfd, score_elf_link_hash_newfunc,
-                                      sizeof (struct score_elf_link_hash_entry)))
-    {
-      free (ret);
-      return NULL;
-    }
-
-  return &ret->root.root;
 }
 
 bfd_boolean

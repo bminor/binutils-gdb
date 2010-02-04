@@ -576,7 +576,8 @@ struct elf32_mb_link_hash_table
 /* Get the ELF linker hash table from a link_info structure.  */
 
 #define elf32_mb_hash_table(p)				\
-  ((struct elf32_mb_link_hash_table *) ((p)->hash))
+  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
+  == MICROBLAZE_ELF_DATA ? ((struct elf32_mb_link_hash_table *) ((p)->hash)) : NULL)
 
 /* Create an entry in a microblaze ELF linker hash table.  */
 
@@ -621,7 +622,8 @@ microblaze_elf_link_hash_table_create (bfd *abfd)
     return NULL;
 
   if (!_bfd_elf_link_hash_table_init (&ret->elf, abfd, link_hash_newfunc,
-				      sizeof (struct elf32_mb_link_hash_entry)))
+				      sizeof (struct elf32_mb_link_hash_entry),
+				      MICROBLAZE_ELF_DATA))
     {
       free (ret);
       return NULL;
@@ -709,6 +711,9 @@ microblaze_elf_relocate_section (bfd *output_bfd,
     microblaze_elf_howto_init ();
 
   htab = elf32_mb_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   local_got_offsets = elf_local_got_offsets (input_bfd);
 
   sreloc = elf_section_data (input_section)->sreloc;
@@ -1867,6 +1872,9 @@ create_got_section (bfd *dynobj, struct bfd_link_info *info)
   if (! _bfd_elf_create_got_section (dynobj, info))
     return FALSE;
   htab = elf32_mb_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   htab->sgot = bfd_get_section_by_name (dynobj, ".got");
   htab->sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
   if (!htab->sgot || !htab->sgotplt)
@@ -1906,6 +1914,9 @@ microblaze_elf_check_relocs (bfd * abfd,
     return TRUE;
 
   htab = elf32_mb_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   local_got_offsets = elf_local_got_offsets (abfd);
   symtab_hdr = & elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
@@ -2148,6 +2159,9 @@ microblaze_elf_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
   struct elf32_mb_link_hash_table *htab;
 
   htab = elf32_mb_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   if (!htab->sgot && !create_got_section (dynobj, info))
     return FALSE;
 
@@ -2228,6 +2242,8 @@ microblaze_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   bfd *dynobj;
 
   htab = elf32_mb_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
 
   /* If this is a function, put it in the procedure linkage table.  We
      will fill in the contents of the procedure linkage table later,
@@ -2376,6 +2392,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * dat)
 
   info = (struct bfd_link_info *) dat;
   htab = elf32_mb_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
 
   if (htab->elf.dynamic_sections_created
       && h->plt.refcount > 0)
@@ -2538,6 +2556,9 @@ microblaze_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   bfd *ibfd;
 
   htab = elf32_mb_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   dynobj = htab->elf.dynobj;
   BFD_ASSERT (dynobj != NULL);
 
@@ -2730,6 +2751,9 @@ microblaze_elf_finish_dynamic_symbol (bfd *output_bfd,
   struct elf32_mb_link_hash_table *htab;
 
   htab = elf32_mb_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   dynobj = htab->elf.dynobj;
 
   if (h->plt.offset != (bfd_vma) -1)
@@ -2888,6 +2912,9 @@ microblaze_elf_finish_dynamic_sections (bfd *output_bfd,
   struct elf32_mb_link_hash_table *htab;
 
   htab = elf32_mb_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   dynobj = htab->elf.dynobj;
 
   sdyn = bfd_get_section_by_name (dynobj, ".dynamic");

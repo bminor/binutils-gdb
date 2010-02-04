@@ -1,3 +1,54 @@
+2010-02-03  Nick Clifton  <nickc@redhat.com>
+
+	* elf-bfd.h (emum elf_object_id): Rename to elf_target_id.  Add
+	entries for other architectures.
+	(struct elf_link_hash_table): Add hash_table_id field.
+	(elf_hash_table_id): New accessor macro.
+	* elflink.c (_bfd_elf_link_hash_table_init): Add target_id
+	parameter.
+	* elf-m10300.c (elf32_mn10300_hash_table): Check table id before
+	returning cast pointer.
+	(elf32_mn10300_link_hash_table_create): Identify new table as
+	containing MN10300 extensions.
+	(mn10300_elf_relax_section): Check pointer returned by
+	elf32_mn10300_hash_table.
+	* elf32-arm.c: Likewise, except using ARM extensions.
+	* elf32-avr.c: Likewise, except using AVR extensions.
+	* elf32-bfin.c: Likewise, except using BFIN extensions.
+	* elf32-cris.c: Likewise, except using CRIS extensions.
+	* elf32-frv.c: Likewise, except using FRV extensions.
+	* elf32-hppa.c: Likewise, except using HPPA32 extensions.
+	* elf32-i386.c: Likewise, except using I386 extensions.
+	* elf32-lm32.c: Likewise, except using LM32 extensions.
+	* elf32-m32r.c: Likewise, except using M32RM extensions.
+	* elf32-m68hc11.c: Likewise, except using M68HC11 extensions.
+	* elf32-m68hc1x.c: Likewise, except using M68HC11 extensions.
+	* elf32-m68hc1x.h: Likewise, except using M68HC11 extensions.
+	* elf32-m68k.c: Likewise, except using M68K extensions.
+	* elf32-microblaze.c: Likewise, except using MICROBLAZE extensions.
+	* elf32-ppc.c: Likewise, except using PPC32 extensions.
+	* elf32-s390.c: Likewise, except using S390 extensions.
+	* elf32-sh.c: Likewise, except using SH extensions.
+	* elf32-spu.c: Likewise, except using SPU extensions.
+	* elf32-xtensa.c: Likewise, except using XTENSA extensions.
+	* elf64-alpha.c: Likewise, except using ALPHA extensions.
+	* elf64-hppa.c: Likewise, except using HPPA64 extensions.
+	* elf64-ppc.c: Likewise, except using PPC64 extensions.
+	* elf64-s390.c: Likewise, except using S390 extensions.
+	* elf64-x86-64.c: Likewise, except using X86_64 extensions.
+	* elfxx-ia64.c: Likewise, except using IA64 extensions.
+	* elfxx-mips.c: Likewise, except using MIPS extensions.
+	* elfxx-sparc.c: Likewise, except using SPARC extensions.
+	* elfxx-sparc.h: Likewise, except using SPARC extensions.
+	* elf32-cr16.c (struct elf32_cr16_link_hash_table): Delete
+	redundant structure.
+	(elf32_cr16_hash_table): Delete unused macro.
+	(elf32_cr16_link_hash_traverse): Delete unused macro.
+	* elf32-score.c: Likewise.
+	* elf32-score7.c: Likewise.
+	* elf32-vax.c: Likewise.
+	* elf64-sh64.c: Likewise.
+
 2010-02-03  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (struct plt_entry): Move earlier in file.

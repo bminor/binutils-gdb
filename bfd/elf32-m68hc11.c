@@ -1,5 +1,5 @@
 /* Motorola 68HC11-specific support for 32-bit ELF
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2010
    Free Software Foundation, Inc.
    Contributed by Stephane Carrez (stcarrez@nerim.fr)
    (Heavily copied from the D10V port by Martin Hunt (hunt@cygnus.com))
@@ -409,6 +409,8 @@ m68hc11_elf_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   info = (struct bfd_link_info *) in_arg;
 
   htab = m68hc11_elf_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
 
   stub_sec = stub_entry->stub_sec;
 

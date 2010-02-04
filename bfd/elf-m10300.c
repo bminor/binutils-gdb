@@ -1,6 +1,6 @@
 /* Matsushita 10300 specific support for 32-bit ELF
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+   2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -98,7 +98,8 @@ struct elf32_mn10300_link_hash_table
 /* Get the MN10300 ELF linker hash table from a link_info structure.  */
 
 #define elf32_mn10300_hash_table(p) \
-  ((struct elf32_mn10300_link_hash_table *) ((p)->hash))
+  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
+  == MN10300_ELF_DATA ? ((struct elf32_mn10300_link_hash_table *) ((p)->hash)) : NULL)
 
 #define elf32_mn10300_link_hash_traverse(table, func, info)		\
   (elf_link_hash_traverse						\
@@ -2076,6 +2077,8 @@ mn10300_elf_relax_section (bfd *abfd,
 
   /* We need a pointer to the mn10300 specific hash table.  */
   hash_table = elf32_mn10300_hash_table (link_info);
+  if (hash_table == NULL)
+    return FALSE;
 
   /* Initialize fields in each hash table entry the first time through.  */
   if ((hash_table->flags & MN10300_HASH_ENTRIES_INITIALIZED) == 0)
@@ -3977,7 +3980,8 @@ elf32_mn10300_link_hash_table_create (bfd *abfd)
 
   if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
 				      elf32_mn10300_link_hash_newfunc,
-				      sizeof (struct elf32_mn10300_link_hash_entry)))
+				      sizeof (struct elf32_mn10300_link_hash_entry),
+				      MN10300_ELF_DATA))
     {
       free (ret);
       return NULL;
@@ -3994,7 +3998,8 @@ elf32_mn10300_link_hash_table_create (bfd *abfd)
 
   if (!_bfd_elf_link_hash_table_init (&ret->static_hash_table->root, abfd,
 				      elf32_mn10300_link_hash_newfunc,
-				      sizeof (struct elf32_mn10300_link_hash_entry)))
+				      sizeof (struct elf32_mn10300_link_hash_entry),
+				      MN10300_ELF_DATA))
     {
       free (ret->static_hash_table);
       free (ret);

@@ -32,7 +32,8 @@
    linking with -Bsymbolic.  We store the information in a field
    extending the regular ELF linker hash table.  */
 
-struct elf32_cr16_link_hash_entry {
+struct elf32_cr16_link_hash_entry
+{
   /* The basic elf link hash table entry.  */
   struct elf_link_hash_entry root;
 
@@ -65,35 +66,6 @@ struct elf32_cr16_link_hash_entry {
   /* Calculated value.  */
   bfd_vma value;
 };
-
-/* We derive a hash table from the main elf linker hash table so
-   we can store state variables and a secondary hash table without
-   resorting to global variables.  */
-struct elf32_cr16_link_hash_table {
-  /* The main hash table.  */
-  struct elf_link_hash_table root;
-
-  /* A hash table for static functions.  We could derive a new hash table
-     instead of using the full elf32_cr16_link_hash_table if we wanted
-     to save some memory.  */
-  struct elf32_cr16_link_hash_table *static_hash_table;
-
-  /* Random linker state flags.  */
-#define CR16_HASH_ENTRIES_INITIALIZED 0x1
-  char flags;
-};
-
-/* For CR16 linker hash table.  */
-
-/* Get the CR16 ELF linker hash table from a link_info structure.  */
-
-#define elf32_cr16_hash_table(p) \
-  ((struct elf32_cr16_link_hash_table *) ((p)->hash))
-
-#define elf32_cr16_link_hash_traverse(table, func, info)                    \
- (elf_link_hash_traverse                                                    \
-  (&(table)->root,                                                          \
-   (bfd_boolean (*) ((struct elf_link_hash_entry *, void *))) (func), (info)))
 
 /* cr16_reloc_map array maps BFD relocation enum into a CRGAS relocation type.  */
 
@@ -1700,40 +1672,23 @@ elf32_cr16_link_hash_newfunc (struct bfd_hash_entry *entry,
 static struct bfd_link_hash_table *
 elf32_cr16_link_hash_table_create (bfd *abfd)
 {
-  struct elf32_cr16_link_hash_table *ret;
-  bfd_size_type amt = sizeof (struct elf32_cr16_link_hash_table);
+  struct elf_link_hash_table *ret;
+  bfd_size_type amt = sizeof (struct elf_link_hash_table);
 
-  ret = (struct elf32_cr16_link_hash_table *) bfd_malloc (amt);
-  if (ret == (struct elf32_cr16_link_hash_table *) NULL)
+  ret = (struct elf_link_hash_table *) bfd_malloc (amt);
+  if (ret == (struct elf_link_hash_table *) NULL)
     return NULL;
 
-  if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
+  if (!_bfd_elf_link_hash_table_init (ret, abfd,
                                       elf32_cr16_link_hash_newfunc,
-                                      sizeof (struct elf32_cr16_link_hash_entry)))
+                                      sizeof (struct elf32_cr16_link_hash_entry),
+				      GENERIC_ELF_DATA))
     {
       free (ret);
       return NULL;
     }
 
-  ret->flags = 0;
-  amt = sizeof (struct elf_link_hash_table);
-  ret->static_hash_table
-    = (struct elf32_cr16_link_hash_table *) bfd_malloc (amt);
-  if (ret->static_hash_table == NULL)
-    {
-      free (ret);
-      return NULL;
-    }
-
-  if (!_bfd_elf_link_hash_table_init (&ret->static_hash_table->root, abfd,
-                                      elf32_cr16_link_hash_newfunc,
-                                      sizeof (struct elf32_cr16_link_hash_entry)))
-    {
-      free (ret->static_hash_table);
-      free (ret);
-      return NULL;
-    }
-  return &ret->root.root;
+  return &ret->root;
 }
 
 /* Free an cr16 ELF linker hash table.  */
@@ -1741,11 +1696,9 @@ elf32_cr16_link_hash_table_create (bfd *abfd)
 static void
 elf32_cr16_link_hash_table_free (struct bfd_link_hash_table *hash)
 {
-  struct elf32_cr16_link_hash_table *ret
-    = (struct elf32_cr16_link_hash_table *) hash;
+  struct elf_link_hash_table *ret
+    = (struct elf_link_hash_table *) hash;
 
-  _bfd_generic_link_hash_table_free
-    ((struct bfd_link_hash_table *) ret->static_hash_table);
   _bfd_generic_link_hash_table_free
     ((struct bfd_link_hash_table *) ret);
 }

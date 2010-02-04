@@ -1,6 +1,6 @@
 /* Intel 80386/80486-specific support for 32-bit ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -634,13 +634,13 @@ struct elf_i386_obj_tdata
 #define is_i386_elf(bfd)				\
   (bfd_get_flavour (bfd) == bfd_target_elf_flavour	\
    && elf_tdata (bfd) != NULL				\
-   && elf_object_id (bfd) == I386_ELF_TDATA)
+   && elf_object_id (bfd) == I386_ELF_DATA)
 
 static bfd_boolean
 elf_i386_mkobject (bfd *abfd)
 {
   return bfd_elf_allocate_object (abfd, sizeof (struct elf_i386_obj_tdata),
-				  I386_ELF_TDATA);
+				  I386_ELF_DATA);
 }
 
 /* i386 ELF linker hash table.  */
@@ -653,19 +653,8 @@ struct elf_i386_link_hash_table
   asection *sdynbss;
   asection *srelbss;
 
-  /* The (unloaded but important) .rel.plt.unloaded section on VxWorks.  */
-  asection *srelplt2;
-
-  /* True if the target system is VxWorks.  */
-  int is_vxworks;
-
-  /* Value used to fill the last word of the first plt entry.  */
-  bfd_byte plt0_pad_byte;
-
-  /* The index of the next unused R_386_TLS_DESC slot in .rel.plt.  */
-  bfd_vma next_tls_desc_index;
-
-  union {
+  union
+  {
     bfd_signed_vma refcount;
     bfd_vma offset;
   } tls_ldm_got;
@@ -682,13 +671,26 @@ struct elf_i386_link_hash_table
 
   /* Used by local STT_GNU_IFUNC symbols.  */
   htab_t loc_hash_table;
-  void *loc_hash_memory;
+  void * loc_hash_memory;
+
+  /* The (unloaded but important) .rel.plt.unloaded section on VxWorks.  */
+  asection *srelplt2;
+
+  /* True if the target system is VxWorks.  */
+  int is_vxworks;
+
+  /* The index of the next unused R_386_TLS_DESC slot in .rel.plt.  */
+  bfd_vma next_tls_desc_index;
+
+  /* Value used to fill the last word of the first plt entry.  */
+  bfd_byte plt0_pad_byte;
 };
 
 /* Get the i386 ELF linker hash table from a link_info structure.  */
 
 #define elf_i386_hash_table(p) \
-  ((struct elf_i386_link_hash_table *) ((p)->hash))
+  (elf_hash_table_id  ((struct elf_link_hash_table *) ((p)->hash)) \
+  == I386_ELF_DATA ? ((struct elf_i386_link_hash_table *) ((p)->hash)) : NULL)
 
 #define elf_i386_compute_jump_table_size(htab) \
   ((htab)->next_tls_desc_index * 4)
@@ -808,7 +810,8 @@ elf_i386_link_hash_table_create (bfd *abfd)
 
   if (!_bfd_elf_link_hash_table_init (&ret->elf, abfd,
 				      elf_i386_link_hash_newfunc,
-				      sizeof (struct elf_i386_link_hash_entry)))
+				      sizeof (struct elf_i386_link_hash_entry),
+				      I386_ELF_DATA))
     {
       free (ret);
       return NULL;
@@ -867,6 +870,9 @@ elf_i386_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
     return FALSE;
 
   htab = elf_i386_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   htab->sdynbss = bfd_get_section_by_name (dynobj, ".dynbss");
   if (!info->shared)
     htab->srelbss = bfd_get_section_by_name (dynobj, ".rel.bss");
@@ -1234,12 +1240,19 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
 	name = h->root.root.string;
       else
 	{
-	  Elf_Internal_Sym *isym;
 	  struct elf_i386_link_hash_table *htab;
+
 	  htab = elf_i386_hash_table (info);
-	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
-					abfd, r_symndx);
-	  name = bfd_elf_sym_name (abfd, symtab_hdr, isym, NULL);
+	  if (htab == NULL)
+	    name = "*unknown*";
+	  else
+	    {
+	      Elf_Internal_Sym *isym;
+
+	      isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+					    abfd, r_symndx);
+	      name = bfd_elf_sym_name (abfd, symtab_hdr, isym, NULL);
+	    }
 	}
 
       (*_bfd_error_handler)
@@ -1278,6 +1291,9 @@ elf_i386_check_relocs (bfd *abfd,
   BFD_ASSERT (is_i386_elf (abfd));
 
   htab = elf_i386_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
 
@@ -1757,6 +1773,7 @@ elf_i386_gc_sweep_hook (bfd *abfd,
 			asection *sec,
 			const Elf_Internal_Rela *relocs)
 {
+  struct elf_i386_link_hash_table *htab;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
   bfd_signed_vma *local_got_refcounts;
@@ -1764,6 +1781,10 @@ elf_i386_gc_sweep_hook (bfd *abfd,
 
   if (info->relocatable)
     return TRUE;
+
+  htab = elf_i386_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
 
   elf_section_data (sec)->local_dynrel = NULL;
 
@@ -1810,8 +1831,8 @@ elf_i386_gc_sweep_hook (bfd *abfd,
       switch (r_type)
 	{
 	case R_386_TLS_LDM:
-	  if (elf_i386_hash_table (info)->tls_ldm_got.refcount > 0)
-	    elf_i386_hash_table (info)->tls_ldm_got.refcount -= 1;
+	  if (htab->tls_ldm_got.refcount > 0)
+	    htab->tls_ldm_got.refcount -= 1;
 	  break;
 
 	case R_386_TLS_GD:
@@ -1946,6 +1967,8 @@ elf_i386_adjust_dynamic_symbol (struct bfd_link_info *info,
     }
 
   htab = elf_i386_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
 
   /* If there aren't any dynamic relocs in read-only sections, then
      we can keep the dynamic relocs and avoid the copy reloc.  This
@@ -2025,6 +2048,8 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
   info = (struct bfd_link_info *) inf;
   htab = elf_i386_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
 
   /* Since STT_GNU_IFUNC symbol must go through PLT, we handle it
      here if it is defined and referenced in a non-shared object.  */
@@ -2348,6 +2373,8 @@ elf_i386_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   bfd *ibfd;
 
   htab = elf_i386_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
   dynobj = htab->elf.dynobj;
   if (dynobj == NULL)
     abort ();
@@ -2634,9 +2661,14 @@ elf_i386_always_size_sections (bfd *output_bfd,
 
       if (tlsbase && tlsbase->type == STT_TLS)
 	{
+	  struct elf_i386_link_hash_table *htab;
 	  struct bfd_link_hash_entry *bh = NULL;
 	  const struct elf_backend_data *bed
 	    = get_elf_backend_data (output_bfd);
+
+	  htab = elf_i386_hash_table (info);
+	  if (htab == NULL)
+	    return FALSE;
 
 	  if (!(_bfd_generic_link_add_one_symbol
 		(info, output_bfd, "_TLS_MODULE_BASE_", BSF_LOCAL,
@@ -2644,7 +2676,7 @@ elf_i386_always_size_sections (bfd *output_bfd,
 		 bed->collect, &bh)))
 	    return FALSE;
 
-	  elf_i386_hash_table (info)->tls_module_base = bh;
+	  htab->tls_module_base = bh;
 
 	  tlsbase = (struct elf_link_hash_entry *)bh;
 	  tlsbase->def_regular = 1;
@@ -2698,17 +2730,21 @@ elf_i386_fake_sections (bfd *abfd ATTRIBUTE_UNUSED,
 static void
 elf_i386_set_tls_module_base (struct bfd_link_info *info)
 {
+  struct elf_i386_link_hash_table *htab;
   struct bfd_link_hash_entry *base;
 
   if (!info->executable)
     return;
 
-  base = elf_i386_hash_table (info)->tls_module_base;
-
-  if (!base)
+  htab = elf_i386_hash_table (info);
+  if (htab == NULL)
     return;
 
-  base->u.def.value = elf_hash_table (info)->tls_size;
+  base = htab->tls_module_base;
+  if (base == NULL)
+    return;
+
+  base->u.def.value = htab->elf.tls_size;
 }
 
 /* Return the base VMA address which should be subtracted from real addresses
@@ -2762,6 +2798,8 @@ elf_i386_relocate_section (bfd *output_bfd,
   BFD_ASSERT (is_i386_elf (input_bfd));
   
   htab = elf_i386_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
   symtab_hdr = &elf_symtab_hdr (input_bfd);
   sym_hashes = elf_sym_hashes (input_bfd);
   local_got_offsets = elf_local_got_offsets (input_bfd);
@@ -4046,6 +4084,8 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
   struct elf_i386_link_hash_table *htab;
 
   htab = elf_i386_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
 
   if (h->plt.offset != (bfd_vma) -1)
     {
@@ -4365,6 +4405,9 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
   asection *sdyn;
 
   htab = elf_i386_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   dynobj = htab->elf.dynobj;
   sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
 

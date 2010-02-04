@@ -41,7 +41,7 @@ static void
 alpha_after_open (void)
 {
   if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour
-      && elf_object_id (link_info.output_bfd) == ALPHA_ELF_TDATA)
+      && elf_object_id (link_info.output_bfd) == ALPHA_ELF_DATA)
     {
       unsigned int num_plt;
       lang_output_section_statement_type *os;

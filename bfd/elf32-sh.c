@@ -1,6 +1,6 @@
 /* Renesas / SuperH SH specific support for 32-bit ELF
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+   2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
    Contributed by Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -2157,7 +2157,7 @@ struct sh_elf_obj_tdata
 #define is_sh_elf(bfd) \
   (bfd_get_flavour (bfd) == bfd_target_elf_flavour \
    && elf_tdata (bfd) != NULL \
-   && elf_object_id (bfd) == SH_ELF_TDATA)
+   && elf_object_id (bfd) == SH_ELF_DATA)
 
 /* Override the generic function because we need to store sh_elf_obj_tdata
    as the specific tdata.  */
@@ -2166,7 +2166,7 @@ static bfd_boolean
 sh_elf_mkobject (bfd *abfd)
 {
   return bfd_elf_allocate_object (abfd, sizeof (struct sh_elf_obj_tdata),
-				  SH_ELF_TDATA);
+				  SH_ELF_DATA);
 }
 
 /* sh ELF linker hash table.  */
@@ -2215,7 +2215,8 @@ struct elf_sh_link_hash_table
 /* Get the sh ELF linker hash table from a link_info structure.  */
 
 #define sh_elf_hash_table(p) \
-  ((struct elf_sh_link_hash_table *) ((p)->hash))
+  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
+  == SH_ELF_DATA ? ((struct elf_sh_link_hash_table *) ((p)->hash)) : NULL)
 
 /* Create an entry in an sh ELF linker hash table.  */
 
@@ -2267,7 +2268,8 @@ sh_elf_link_hash_table_create (bfd *abfd)
 
   if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
 				      sh_elf_link_hash_newfunc,
-				      sizeof (struct elf_sh_link_hash_entry)))
+				      sizeof (struct elf_sh_link_hash_entry),
+				      SH_ELF_DATA))
     {
       free (ret);
       return NULL;
@@ -2301,6 +2303,9 @@ create_got_section (bfd *dynobj, struct bfd_link_info *info)
     return FALSE;
 
   htab = sh_elf_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   htab->sgot = bfd_get_section_by_name (dynobj, ".got");
   htab->sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
   htab->srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
@@ -2336,6 +2341,9 @@ sh_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
     }
 
   htab = sh_elf_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   if (htab->root.dynamic_sections_created)
     return TRUE;
 
@@ -2482,6 +2490,8 @@ sh_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   asection *s;
 
   htab = sh_elf_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
 
   /* Make sure we know what is going on here.  */
   BFD_ASSERT (htab->root.dynobj != NULL
@@ -2628,6 +2638,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
   info = (struct bfd_link_info *) inf;
   htab = sh_elf_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
 
   eh = (struct elf_sh_link_hash_entry *) h;
   if ((h->got.refcount > 0
@@ -2935,6 +2947,9 @@ sh_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   bfd *ibfd;
 
   htab = sh_elf_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   dynobj = htab->root.dynobj;
   BFD_ASSERT (dynobj != NULL);
 
@@ -3182,6 +3197,8 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
   BFD_ASSERT (is_sh_elf (input_bfd));
 
   htab = sh_elf_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
   symtab_hdr = &elf_symtab_hdr (input_bfd);
   sym_hashes = elf_sym_hashes (input_bfd);
   dynobj = htab->root.dynobj;
@@ -4860,6 +4877,9 @@ sh_elf_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
   sym_hashes = elf_sym_hashes (abfd);
 
   htab = sh_elf_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   local_got_offsets = elf_local_got_offsets (abfd);
 
   rel_end = relocs + sec->reloc_count;
@@ -5414,6 +5434,8 @@ sh_elf_finish_dynamic_symbol (bfd *output_bfd, struct bfd_link_info *info,
   struct elf_sh_link_hash_table *htab;
 
   htab = sh_elf_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
 
   if (h->plt.offset != (bfd_vma) -1)
     {
@@ -5718,6 +5740,9 @@ sh_elf_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
   asection *sdyn;
 
   htab = sh_elf_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   sgot = htab->sgotplt;
   sdyn = bfd_get_section_by_name (htab->root.dynobj, ".dynamic");
 

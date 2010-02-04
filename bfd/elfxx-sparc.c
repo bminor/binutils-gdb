@@ -1,5 +1,5 @@
 /* SPARC-specific support for ELF
-   Copyright 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+   Copyright 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -523,13 +523,13 @@ struct _bfd_sparc_elf_obj_tdata
 #define is_sparc_elf(bfd)				\
   (bfd_get_flavour (bfd) == bfd_target_elf_flavour	\
    && elf_tdata (bfd) != NULL				\
-   && elf_object_id (bfd) == SPARC_ELF_TDATA)
+   && elf_object_id (bfd) == SPARC_ELF_DATA)
 
 bfd_boolean
 _bfd_sparc_elf_mkobject (bfd *abfd)
 {
   return bfd_elf_allocate_object (abfd, sizeof (struct _bfd_sparc_elf_obj_tdata),
-				  SPARC_ELF_TDATA);
+				  SPARC_ELF_DATA);
 }
 
 static void
@@ -875,7 +875,8 @@ _bfd_sparc_elf_link_hash_table_create (bfd *abfd)
     }
 
   if (!_bfd_elf_link_hash_table_init (&ret->elf, abfd, link_hash_newfunc,
-				      sizeof (struct _bfd_sparc_elf_link_hash_entry)))
+				      sizeof (struct _bfd_sparc_elf_link_hash_entry),
+				      SPARC_ELF_DATA))
     {
       free (ret);
       return NULL;
@@ -896,6 +897,8 @@ create_got_section (bfd *dynobj, struct bfd_link_info *info)
     return FALSE;
 
   htab = _bfd_sparc_elf_hash_table (info);
+  BFD_ASSERT (htab != NULL);
+
   htab->sgot = bfd_get_section_by_name (dynobj, ".got");
   BFD_ASSERT (htab->sgot != NULL);
 
@@ -926,6 +929,8 @@ _bfd_sparc_elf_create_dynamic_sections (bfd *dynobj,
   struct _bfd_sparc_elf_link_hash_table *htab;
 
   htab = _bfd_sparc_elf_hash_table (info);
+  BFD_ASSERT (htab != NULL);
+
   if (!htab->sgot && !create_got_section (dynobj, info))
     return FALSE;
 
@@ -1093,6 +1098,7 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
     return TRUE;
 
   htab = _bfd_sparc_elf_hash_table (info);
+  BFD_ASSERT (htab != NULL);
   symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
   local_got_offsets = elf_local_got_offsets (abfd);
@@ -1565,6 +1571,7 @@ _bfd_sparc_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
   elf_section_data (sec)->local_dynrel = NULL;
 
   htab = _bfd_sparc_elf_hash_table (info);
+  BFD_ASSERT (htab != NULL);
   symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
   local_got_refcounts = elf_local_got_refcounts (abfd);
@@ -1710,6 +1717,7 @@ _bfd_sparc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   asection *s;
 
   htab = _bfd_sparc_elf_hash_table (info);
+  BFD_ASSERT (htab != NULL);
 
   /* Make sure we know what is going on here.  */
   BFD_ASSERT (htab->elf.dynobj != NULL
@@ -1851,6 +1859,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
 
   info = (struct bfd_link_info *) inf;
   htab = _bfd_sparc_elf_hash_table (info);
+  BFD_ASSERT (htab != NULL);
 
   if (htab->elf.dynamic_sections_created
       && h->plt.refcount > 0)
@@ -2144,6 +2153,7 @@ _bfd_sparc_elf_size_dynamic_sections (bfd *output_bfd,
   bfd *ibfd;
 
   htab = _bfd_sparc_elf_hash_table (info);
+  BFD_ASSERT (htab != NULL);
   dynobj = htab->elf.dynobj;
   BFD_ASSERT (dynobj != NULL);
 
@@ -2511,6 +2521,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
   bfd_boolean is_vxworks_tls;
 
   htab = _bfd_sparc_elf_hash_table (info);
+  BFD_ASSERT (htab != NULL);
   symtab_hdr = &elf_symtab_hdr (input_bfd);
   sym_hashes = elf_sym_hashes (input_bfd);
   local_got_offsets = elf_local_got_offsets (input_bfd);
@@ -3606,6 +3617,8 @@ sparc_vxworks_build_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
   Elf_Internal_Rela rela;
 
   htab = _bfd_sparc_elf_hash_table (info);
+  BFD_ASSERT (htab != NULL);
+
   if (info->shared)
     {
       plt_entry = sparc_vxworks_shared_plt_entry;
@@ -3694,6 +3707,7 @@ _bfd_sparc_elf_finish_dynamic_symbol (bfd *output_bfd,
   const struct elf_backend_data *bed;
 
   htab = _bfd_sparc_elf_hash_table (info);
+  BFD_ASSERT (htab != NULL);
   dynobj = htab->elf.dynobj;
   bed = get_elf_backend_data (output_bfd);
 
@@ -3872,6 +3886,7 @@ sparc_finish_dyn (bfd *output_bfd, struct bfd_link_info *info,
   bfd_boolean abi_64_p;
 
   htab = _bfd_sparc_elf_hash_table (info);
+  BFD_ASSERT (htab != NULL);
   bed = get_elf_backend_data (output_bfd);
   dynsize = bed->s->sizeof_dyn;
   dynconend = sdyn->contents + sdyn->size;
@@ -3963,6 +3978,7 @@ sparc_vxworks_finish_exec_plt (bfd *output_bfd, struct bfd_link_info *info)
   bfd_byte *loc;
 
   htab = _bfd_sparc_elf_hash_table (info);
+  BFD_ASSERT (htab != NULL);
 
   /* Calculate the absolute value of _GLOBAL_OFFSET_TABLE_.  */
   got_base = (htab->elf.hgot->root.u.def.section->output_section->vma
@@ -4038,6 +4054,8 @@ sparc_vxworks_finish_shared_plt (bfd *output_bfd, struct bfd_link_info *info)
   unsigned int i;
 
   htab = _bfd_sparc_elf_hash_table (info);
+  BFD_ASSERT (htab != NULL);
+
   for (i = 0; i < ARRAY_SIZE (sparc_vxworks_shared_plt0_entry); i++)
     bfd_put_32 (output_bfd, sparc_vxworks_shared_plt0_entry[i],
 		htab->splt->contents + i * 4);
@@ -4051,6 +4069,7 @@ _bfd_sparc_elf_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *i
   struct _bfd_sparc_elf_link_hash_table *htab;
 
   htab = _bfd_sparc_elf_hash_table (info);
+  BFD_ASSERT (htab != NULL);
   dynobj = htab->elf.dynobj;
 
   sdyn = bfd_get_section_by_name (dynobj, ".dynamic");

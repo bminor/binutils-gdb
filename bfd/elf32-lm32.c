@@ -1,5 +1,5 @@
 /* Lattice Mico32-specific support for 32-bit ELF
-   Copyright 2008, 2009  Free Software Foundation, Inc.
+   Copyright 2008, 2009, 2010  Free Software Foundation, Inc.
    Contributed by Jon Beniston <jon@beniston.com>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -102,7 +102,8 @@ struct elf_lm32_link_hash_table
 /* Get the lm32 ELF linker hash table from a link_info structure.  */
 
 #define lm32_elf_hash_table(p) \
-  ((struct elf_lm32_link_hash_table *) ((p)->hash))
+  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
+  == LM32_ELF_DATA ? ((struct elf_lm32_link_hash_table *) ((p)->hash)) : NULL)
 
 #define lm32fdpic_got_section(info) \
   (lm32_elf_hash_table (info)->sgot)
@@ -164,7 +165,8 @@ lm32_elf_link_hash_table_create (bfd *abfd)
 
   if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
 				      lm32_elf_link_hash_newfunc,
-				      sizeof (struct elf_lm32_link_hash_entry)))
+				      sizeof (struct elf_lm32_link_hash_entry),
+				      LM32_ELF_DATA))
     {
       free (ret);
       return NULL;
@@ -219,10 +221,13 @@ create_got_section (bfd *dynobj, struct bfd_link_info *info)
   if (s != NULL && (s->flags & SEC_LINKER_CREATED) != 0)
     return TRUE;
 
+  htab = lm32_elf_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   if (! _bfd_elf_create_got_section (dynobj, info))
     return FALSE;
 
-  htab = lm32_elf_hash_table (info);
   htab->sgot = bfd_get_section_by_name (dynobj, ".got");
   htab->sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
   htab->srelgot = bfd_get_section_by_name (dynobj, ".rela.got");
@@ -241,7 +246,10 @@ create_rofixup_section (bfd *dynobj, struct bfd_link_info *info)
   struct elf_lm32_link_hash_table *htab;
   htab = lm32_elf_hash_table (info);
 
-  /* Fixup section for R_LM32_32 relocs */
+  if (htab == NULL)
+    return FALSE;
+
+  /* Fixup section for R_LM32_32 relocs.  */
   lm32fdpic_fixup32_section (info) = bfd_make_section_with_flags (dynobj,
                                                                    ".rofixup",
 				                                   (SEC_ALLOC
@@ -818,11 +826,13 @@ lm32_elf_relocate_section (bfd *output_bfd,
   Elf_Internal_Shdr *symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (input_bfd);
   Elf_Internal_Rela *rel, *relend;
-
   struct elf_lm32_link_hash_table *htab = lm32_elf_hash_table (info);
   bfd *dynobj;
   bfd_vma *local_got_offsets;
   asection *sgot, *splt, *sreloc;
+
+  if (htab == NULL)
+    return FALSE;
 
   dynobj = htab->root.dynobj;
   local_got_offsets = elf_local_got_offsets (input_bfd);
@@ -1296,6 +1306,9 @@ lm32_elf_check_relocs (bfd *abfd,
     sym_hashes_end -= symtab_hdr->sh_info;
 
   htab = lm32_elf_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   dynobj = htab->root.dynobj;
   local_got_offsets = elf_local_got_offsets (abfd);
 
@@ -1424,6 +1437,9 @@ lm32_elf_finish_dynamic_sections (bfd *output_bfd,
   asection *sgot;
 
   htab = lm32_elf_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   dynobj = htab->root.dynobj;
 
   sgot = htab->sgotplt;
@@ -1603,6 +1619,9 @@ lm32_elf_finish_dynamic_symbol (bfd *output_bfd,
   bfd_byte *loc;
 
   htab = lm32_elf_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   dynobj = htab->root.dynobj;
 
   if (h->plt.offset != (bfd_vma) -1)
@@ -1884,6 +1903,9 @@ lm32_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      same memory location for the variable.  */
 
   htab = lm32_elf_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   s = htab->sdynbss;
   BFD_ASSERT (s != NULL);
 
@@ -1926,6 +1948,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 
   info = (struct bfd_link_info *) inf;
   htab = lm32_elf_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
 
   eh = (struct elf_lm32_link_hash_entry *) h;
 
@@ -2142,6 +2166,9 @@ lm32_elf_size_dynamic_sections (bfd *output_bfd,
   bfd *ibfd;
 
   htab = lm32_elf_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   dynobj = htab->root.dynobj;
   BFD_ASSERT (dynobj != NULL);
 
@@ -2469,6 +2496,8 @@ lm32_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   int ptralign = 2; /* 32bit */
 
   htab = lm32_elf_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
 
   /* Make sure we have a GOT - For the case where we have a dynamic object
      but none of the relocs in check_relocs */

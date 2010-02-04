@@ -1,3 +1,11 @@
+2010-02-03  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/alphaelf.em: Update value expected from elf_object_id.
+	* emultempl/hppaelf.em: Likewise.
+	* emultempl/mipself.em: Likewise.
+	* emultempl/ppc32elf.em: Likewise.
+	* emultempl/ppc64elf.em: Likewise.
+
 2010-02-03  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/ppc64elf.em (build_toc_list): Report errors from

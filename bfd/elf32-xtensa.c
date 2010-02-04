@@ -1,5 +1,5 @@
 /* Xtensa-specific support for 32-bit ELF.
-   Copyright 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   Copyright 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -572,13 +572,13 @@ struct elf_xtensa_obj_tdata
 #define is_xtensa_elf(bfd) \
   (bfd_get_flavour (bfd) == bfd_target_elf_flavour \
    && elf_tdata (bfd) != NULL \
-   && elf_object_id (bfd) == XTENSA_ELF_TDATA)
+   && elf_object_id (bfd) == XTENSA_ELF_DATA)
 
 static bfd_boolean
 elf_xtensa_mkobject (bfd *abfd)
 {
   return bfd_elf_allocate_object (abfd, sizeof (struct elf_xtensa_obj_tdata),
-				  XTENSA_ELF_TDATA);
+				  XTENSA_ELF_DATA);
 }
 
 /* Xtensa ELF linker hash table.  */
@@ -610,7 +610,8 @@ struct elf_xtensa_link_hash_table
 /* Get the Xtensa ELF linker hash table from a link_info structure.  */
 
 #define elf_xtensa_hash_table(p) \
-  ((struct elf_xtensa_link_hash_table *) ((p)->hash))
+  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
+  == XTENSA_ELF_DATA ? ((struct elf_xtensa_link_hash_table *) ((p)->hash)) : NULL)
 
 /* Create an entry in an Xtensa ELF linker hash table.  */
 
@@ -656,7 +657,8 @@ elf_xtensa_link_hash_table_create (bfd *abfd)
 
   if (!_bfd_elf_link_hash_table_init (&ret->elf, abfd,
 				      elf_xtensa_link_hash_newfunc,
-				      sizeof (struct elf_xtensa_link_hash_entry)))
+				      sizeof (struct elf_xtensa_link_hash_entry),
+				      XTENSA_ELF_DATA))
     {
       free (ret);
       return NULL;
@@ -977,6 +979,9 @@ elf_xtensa_check_relocs (bfd *abfd,
   BFD_ASSERT (is_xtensa_elf (abfd));
 
   htab = elf_xtensa_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
 
@@ -1278,6 +1283,8 @@ elf_xtensa_gc_sweep_hook (bfd *abfd,
   struct elf_xtensa_link_hash_table *htab;
 
   htab = elf_xtensa_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
 
   if (info->relocatable)
     return TRUE;
@@ -1397,6 +1404,8 @@ elf_xtensa_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
   flagword flags, noalloc_flags;
 
   htab = elf_xtensa_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
 
   /* First do all the standard stuff.  */
   if (! _bfd_elf_create_dynamic_sections (dynobj, info))
@@ -1523,6 +1532,8 @@ elf_xtensa_allocate_dynrelocs (struct elf_link_hash_entry *h, void *arg)
 
   info = (struct bfd_link_info *) arg;
   htab = elf_xtensa_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
 
   /* If we saw any use of an IE model for this symbol, we can then optimize
      away GOT entries for any TLSDESC_FN relocs.  */
@@ -1552,6 +1563,8 @@ elf_xtensa_allocate_local_got_size (struct bfd_link_info *info)
   bfd *i;
 
   htab = elf_xtensa_hash_table (info);
+  if (htab == NULL)
+    return;
 
   for (i = info->input_bfds; i; i = i->link_next)
     {
@@ -1602,6 +1615,9 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   plt_chunks = 0;
 
   htab = elf_xtensa_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   dynobj = elf_hash_table (info)->dynobj;
   if (dynobj == NULL)
     abort ();
@@ -1835,6 +1851,9 @@ elf_xtensa_always_size_sections (bfd *output_bfd,
   asection *tls_sec;
 
   htab = elf_xtensa_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   tls_sec = htab->elf.tls_sec;
 
   if (tls_sec && (htab->tlsbase->tls_type & GOT_TLS_ANY) != 0)
@@ -2546,6 +2565,9 @@ elf_xtensa_relocate_section (bfd *output_bfd,
   BFD_ASSERT (is_xtensa_elf (input_bfd));
 
   htab = elf_xtensa_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
   local_got_tls_types = elf_xtensa_local_got_tls_type (input_bfd);
@@ -3231,6 +3253,9 @@ elf_xtensa_finish_dynamic_sections (bfd *output_bfd,
     return TRUE;
 
   htab = elf_xtensa_hash_table (info);
+  if (htab == NULL)
+    return FALSE;
+
   dynobj = elf_hash_table (info)->dynobj;
   sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
   BFD_ASSERT (sdyn != NULL);
@@ -9495,6 +9520,9 @@ shrink_dynamic_reloc_sections (struct bfd_link_info *info,
   bfd_boolean dynamic_symbol;
 
   htab = elf_xtensa_hash_table (info);
+  if (htab == NULL)
+    return;
+
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
 
@@ -10225,6 +10253,9 @@ elf_xtensa_get_plt_section (struct bfd_link_info *info, int chunk)
   if (chunk == 0)
     {
       htab = elf_xtensa_hash_table (info);
+      if (htab == NULL)
+	return NULL;
+
       return htab->splt;
     }
 
@@ -10244,6 +10275,8 @@ elf_xtensa_get_gotplt_section (struct bfd_link_info *info, int chunk)
   if (chunk == 0)
     {
       htab = elf_xtensa_hash_table (info);
+      if (htab == NULL)
+	return NULL;
       return htab->sgotplt;
     }
 

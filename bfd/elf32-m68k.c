@@ -1,6 +1,6 @@
 /* Motorola 68k series support for 32-bit ELF
    Copyright 1993, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -937,7 +937,8 @@ struct elf_m68k_link_hash_table
 /* Get the m68k ELF linker hash table from a link_info structure.  */
 
 #define elf_m68k_hash_table(p) \
-  ((struct elf_m68k_link_hash_table *) (p)->hash)
+  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
+  == M68K_ELF_DATA ? ((struct elf_m68k_link_hash_table *) ((p)->hash)) : NULL)
 
 /* Shortcut to multi-GOT data.  */
 #define elf_m68k_multi_got(INFO) (&elf_m68k_hash_table (INFO)->multi_got_)
@@ -945,10 +946,9 @@ struct elf_m68k_link_hash_table
 /* Create an entry in an m68k ELF linker hash table.  */
 
 static struct bfd_hash_entry *
-elf_m68k_link_hash_newfunc (entry, table, string)
-     struct bfd_hash_entry *entry;
-     struct bfd_hash_table *table;
-     const char *string;
+elf_m68k_link_hash_newfunc (struct bfd_hash_entry *entry,
+			    struct bfd_hash_table *table,
+			    const char *string)
 {
   struct bfd_hash_entry *ret = entry;
 
@@ -975,8 +975,7 @@ elf_m68k_link_hash_newfunc (entry, table, string)
 /* Create an m68k ELF linker hash table.  */
 
 static struct bfd_link_hash_table *
-elf_m68k_link_hash_table_create (abfd)
-     bfd *abfd;
+elf_m68k_link_hash_table_create (bfd *abfd)
 {
   struct elf_m68k_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf_m68k_link_hash_table);
@@ -987,7 +986,8 @@ elf_m68k_link_hash_table_create (abfd)
 
   if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
 				      elf_m68k_link_hash_newfunc,
-				      sizeof (struct elf_m68k_link_hash_entry)))
+				      sizeof (struct elf_m68k_link_hash_entry),
+				      M68K_ELF_DATA))
     {
       free (ret);
       return NULL;

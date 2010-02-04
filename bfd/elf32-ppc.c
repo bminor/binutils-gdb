@@ -1796,7 +1796,7 @@ struct ppc_elf_obj_tdata
 
 #define is_ppc_elf(bfd) \
   (bfd_get_flavour (bfd) == bfd_target_elf_flavour \
-   && elf_object_id (bfd) == PPC32_ELF_TDATA)
+   && elf_object_id (bfd) == PPC32_ELF_DATA)
 
 /* Override the generic function because we store some extras.  */
 
@@ -1804,7 +1804,7 @@ static bfd_boolean
 ppc_elf_mkobject (bfd *abfd)
 {
   return bfd_elf_allocate_object (abfd, sizeof (struct ppc_elf_obj_tdata),
-				  PPC32_ELF_TDATA);
+				  PPC32_ELF_DATA);
 }
 
 /* Fix bad default arch selected for a 32 bit input bfd when the
@@ -2782,7 +2782,8 @@ struct ppc_elf_link_hash_table
 /* Get the PPC ELF linker hash table from a link_info structure.  */
 
 #define ppc_elf_hash_table(p) \
-  ((struct ppc_elf_link_hash_table *) (p)->hash)
+  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
+  == PPC32_ELF_DATA ? ((struct ppc_elf_link_hash_table *) ((p)->hash)) : NULL)
 
 /* Create an entry in a PPC ELF linker hash table.  */
 
@@ -2826,7 +2827,8 @@ ppc_elf_link_hash_table_create (bfd *abfd)
 
   if (!_bfd_elf_link_hash_table_init (&ret->elf, abfd,
 				      ppc_elf_link_hash_newfunc,
-				      sizeof (struct ppc_elf_link_hash_entry)))
+				      sizeof (struct ppc_elf_link_hash_entry),
+				      PPC32_ELF_DATA))
     {
       free (ret);
       return NULL;
