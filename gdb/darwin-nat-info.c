@@ -843,32 +843,6 @@ info_mach_exceptions_command (char *args, int from_tty)
     }
 }
 
-static void
-darwin_list_gdb_ports (const char *msg)
-{
-  mach_port_name_array_t names;
-  mach_port_type_array_t types;
-  unsigned int name_count, type_count;
-  kern_return_t result;
-  int i;
-
-  result = mach_port_names (mach_task_self (),
-			    &names, &name_count, &types, &type_count);
-  MACH_CHECK_ERROR (result);
-
-  gdb_assert (name_count == type_count);
-
-  printf_unfiltered (_("Ports for %s:"), msg);
-  for (i = 0; i < name_count; ++i)
-    printf_unfiltered (_(" 0x%04x"), names[i]);
-  printf_unfiltered (_("\n"));
-
-  vm_deallocate (mach_task_self (), (vm_address_t) names,
-                 (name_count * sizeof (mach_port_t)));
-  vm_deallocate (mach_task_self (), (vm_address_t) types,
-                 (type_count * sizeof (mach_port_type_t)));
-}
-
 void
 _initialize_darwin_info_commands (void)
 {

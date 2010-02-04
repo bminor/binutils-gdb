@@ -99,8 +99,6 @@ static ptid_t darwin_wait (ptid_t ptid, struct target_waitstatus *status);
 
 static void darwin_mourn_inferior (struct target_ops *ops);
 
-static int darwin_lookup_task (char *args, task_t * ptask, int *ppid);
-
 static void darwin_kill_inferior (struct target_ops *ops);
 
 static void darwin_ptrace_me (void);

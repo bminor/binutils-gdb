@@ -38,18 +38,6 @@
 /* If non-zero displays debugging message.  */
 static int mach_o_debug_level = 0;
 
-static void
-macho_new_init (struct objfile *objfile)
-{
-}
-
-static void
-macho_symfile_init (struct objfile *objfile)
-{
-  objfile->flags |= OBJF_REORDERED;
-  init_entry_point_info (objfile);
-}
-
 /* Dwarf debugging information are never in the final executable.  They stay
    in object files and the executable contains the list of object files read
    during the link.
@@ -77,15 +65,28 @@ typedef struct oso_el
 }
 oso_el;
 
-/* Vector of object files to be read after the executable.  */
+/* Vector of object files to be read after the executable.  This is one
+   global variable but it's life-time is the one of macho_symfile_read.  */
 DEF_VEC_O (oso_el);
 static VEC (oso_el) *oso_vector;
 
-/*  Add a new OSO to the vector.  */
+static void
+macho_new_init (struct objfile *objfile)
+{
+}
 
 static void
-macho_add_oso (const asymbol *oso_sym, int nbr_sections,
-	       asymbol **symbols, bfd_vma *offsets)
+macho_symfile_init (struct objfile *objfile)
+{
+  objfile->flags |= OBJF_REORDERED;
+  init_entry_point_info (objfile);
+}
+
+/*  Add a new OSO to the vector of OSO to load.  */
+
+static void
+macho_register_oso (const asymbol *oso_sym, int nbr_sections,
+                    asymbol **symbols, bfd_vma *offsets)
 {
   oso_el el;
 
@@ -135,8 +136,8 @@ macho_symtab_read (struct objfile *objfile,
               /* An empty SO entry terminates a chunk for an OSO file.  */
 	      if ((sym->name == NULL || sym->name[0] == 0) && oso_file != NULL)
 		{
-		  macho_add_oso (oso_file, nbr_sections,
-                                 first_symbol, first_offset);
+		  macho_register_oso (oso_file, nbr_sections,
+                                      first_symbol, first_offset);
 		  first_symbol = NULL;
 		  first_offset = NULL;
 		  oso_file = NULL;
@@ -258,7 +259,7 @@ macho_symtab_read (struct objfile *objfile,
 
   /* Just in case there is no trailing SO entry.  */
   if (oso_file != NULL)
-    macho_add_oso (oso_file, nbr_sections, first_symbol, first_offset);
+    macho_register_oso (oso_file, nbr_sections, first_symbol, first_offset);
 }
 
 /* If NAME describes an archive member (ie: ARCHIVE '(' MEMBER ')'),
@@ -303,7 +304,7 @@ macho_add_oso_symfile (oso_el *oso, bfd *abfd,
 
   if (mach_o_debug_level > 0)
     printf_unfiltered (_("Loading symbols from oso: %s\n"), oso->name);
-      
+
   if (!bfd_check_format (abfd, bfd_object))
     {
       warning (_("`%s': can't read symbols: %s."), oso->name,
@@ -382,7 +383,7 @@ macho_add_oso_symfile (oso_el *oso, bfd *abfd,
 /* Read symbols from the vector of oso files.  */
 
 static void
-macho_oso_symfile (struct objfile *main_objfile, int symfile_flags)
+macho_symfile_read_all_oso (struct objfile *main_objfile, int symfile_flags)
 {
   int ix;
   VEC (oso_el) *vec;
@@ -684,7 +685,7 @@ macho_symfile_read (struct objfile *objfile, int symfile_flags)
 
   /* Then the oso.  */
   if (oso_vector != NULL)
-    macho_oso_symfile (objfile, symfile_flags);
+    macho_symfile_read_all_oso (objfile, symfile_flags);
 }
 
 static void

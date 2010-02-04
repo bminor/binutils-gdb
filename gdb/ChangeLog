@@ -1,3 +1,14 @@
+2010-02-04  Tristan Gingold  <gingold@adacore.com>
+
+	* machoread.c (macho_add_oso): Renamed to macho_register_oso.
+	(macho_symtab_read): Adjust calls to macho_add_oso.
+	(macho_oso_symfile): Renamed to macho_symfile_read_all_oso.
+	(macho_symfile_read): Adjust call to macho_oso_symfile.
+	(macho_new_init): Move this function after declarations.
+	(macho_symfile_init): Ditto.
+	* darwin-nat-info.c (darwin_lib_gdb_ports): Remove.
+	* darwin-nat.c (darwin_lookup_task): Remove unused prototype.
+
 2010-02-04  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Include MI command in remotelog.
