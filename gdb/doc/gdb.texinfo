@@ -13825,8 +13825,8 @@ in stabs format.
 @kindex readnow
 @cindex reading symbols immediately
 @cindex symbols, reading immediately
-@item symbol-file @var{filename} @r{[} -readnow @r{]}
-@itemx file @var{filename} @r{[} -readnow @r{]}
+@item symbol-file @r{[} -readnow @r{]} @var{filename}
+@itemx file @r{[} -readnow @r{]} @var{filename}
 You can override the @value{GDBN} two-stage strategy for reading symbol
 tables by using the @samp{-readnow} option with any of the commands that
 load symbol table information, if you want to be sure @value{GDBN} has the

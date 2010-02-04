@@ -1,3 +1,9 @@
+2010-02-04  Tom Tromey  <tromey@redhat.com>
+
+	PR cli/8830:
+	* gdb.texinfo (Files): -readnow comes before the filename for file
+	and symbol-file.
+
 2010-02-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (Architecture-Specific Protocol Details): New section.
