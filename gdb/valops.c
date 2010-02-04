@@ -1903,7 +1903,9 @@ search_struct_field (char *name, struct value *arg1, int offset,
 
 	  boffset = baseclass_offset (type, i,
 				      value_contents (arg1) + offset,
-				      value_address (arg1) + offset);
+				      value_address (arg1)
+				      + value_embedded_offset (arg1)
+				      + offset);
 	  if (boffset == -1)
 	    error (_("virtual baseclass botch"));
 
@@ -1911,8 +1913,9 @@ search_struct_field (char *name, struct value *arg1, int offset,
 	     by the user program. Make sure that it still points to a
 	     valid memory location.  */
 
-	  boffset += offset;
-	  if (boffset < 0 || boffset >= TYPE_LENGTH (type))
+	  boffset += value_embedded_offset (arg1) + offset;
+	  if (boffset < 0
+	      || boffset >= TYPE_LENGTH (value_enclosing_type (arg1)))
 	    {
 	      CORE_ADDR base_addr;
 
@@ -1927,18 +1930,9 @@ search_struct_field (char *name, struct value *arg1, int offset,
 	    }
 	  else
 	    {
-	      if (VALUE_LVAL (arg1) == lval_memory && value_lazy (arg1))
-		v2  = allocate_value_lazy (basetype);
-	      else
-		{
-		  v2  = allocate_value (basetype);
-		  memcpy (value_contents_raw (v2),
-			  value_contents_raw (arg1) + boffset,
-			  TYPE_LENGTH (basetype));
-		}
-	      set_value_component_location (v2, arg1);
-	      VALUE_FRAME_ID (v2) = VALUE_FRAME_ID (arg1);
-	      set_value_offset (v2, value_offset (arg1) + boffset);
+	      v2 = value_copy (arg1);
+	      deprecated_set_value_type (v2, basetype);
+	      set_value_embedded_offset (v2, boffset);
 	    }
 
 	  if (found_baseclass)

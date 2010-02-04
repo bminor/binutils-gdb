@@ -1,3 +1,9 @@
+2010-02-04  Tom Tromey  <tromey@redhat.com>
+
+	* valops.c (search_struct_field): Account for
+	value_embedded_offset.  Fix check for virtual base past the end of
+	the object.  Use value_copy when making a slice of the value.
+
 2010-02-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR tui/9622

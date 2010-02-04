@@ -1,3 +1,7 @@
+2010-02-04  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.cp/virtbase.exp: Make test case names unique.
+
 2010-02-02  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.cp/virtbase.exp: Add regression tests.
