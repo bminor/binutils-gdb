@@ -29,6 +29,7 @@
 #include "vec.h"
 #include "xml-support.h"
 #include "xml-tdesc.h"
+#include "osabi.h"
 
 #include "gdb_assert.h"
 #include "gdb_obstack.h"
@@ -1348,6 +1349,7 @@ maint_print_c_tdesc_cmd (char *args, int from_tty)
   printf_unfiltered ("/* THIS FILE IS GENERATED.  Original: %s */\n\n",
 		     filename);
   printf_unfiltered ("#include \"defs.h\"\n");
+  printf_unfiltered ("#include \"osabi.h\"\n");
   printf_unfiltered ("#include \"target-descriptions.h\"\n");
   printf_unfiltered ("\n");
 
@@ -1366,6 +1368,15 @@ maint_print_c_tdesc_cmd (char *args, int from_tty)
       printf_unfiltered
 	("  set_tdesc_architecture (result, bfd_scan_arch (\"%s\"));\n",
 	 tdesc_architecture (tdesc)->printable_name);
+      printf_unfiltered ("\n");
+    }
+
+  if (tdesc_osabi (tdesc) > GDB_OSABI_UNKNOWN
+      && tdesc_osabi (tdesc) < GDB_OSABI_INVALID)
+    {
+      printf_unfiltered
+	("  set_tdesc_osabi (result, osabi_from_tdesc_string (\"%s\"));\n",
+	 gdbarch_osabi_name (tdesc_osabi (tdesc)));
       printf_unfiltered ("\n");
     }
 

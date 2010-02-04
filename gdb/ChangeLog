@@ -1,3 +1,9 @@
+2010-02-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* target-descriptions.c: Include "osabi.h".
+	(maint_print_c_tdesc_cmd): Generate set_tdesc_osabi for valid
+	OSABI.
+
 2010-02-04  Tristan Gingold  <gingold@adacore.com>
 
 	* machoread.c (macho_add_oso): Renamed to macho_register_oso.
