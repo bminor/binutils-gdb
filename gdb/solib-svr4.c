@@ -1318,6 +1318,25 @@ enable_break (struct svr4_info *info, int from_tty)
 							      sym_addr,
 							      &current_target));
 
+      /* On at least some versions of Solaris there's a dynamic relocation
+	 on _r_debug.r_brk and SYM_ADDR may not be relocated yet, e.g., if
+	 we get control before the dynamic linker has self-relocated.
+	 Check if SYM_ADDR is in a known section, if it is assume we can
+	 trust its value.  This is just a heuristic though, it could go away
+	 or be replaced if it's getting in the way.
+
+	 On ARM we need to know whether the ISA of rtld_db_dlactivity (or
+	 however it's spelled in your particular system) is ARM or Thumb.
+	 That knowledge is encoded in the address, if it's Thumb the low bit
+	 is 1.  However, we've stripped that info above and it's not clear
+	 what all the consequences are of passing a non-addr_bits_remove'd
+	 address to create_solib_event_breakpoint.  The call to
+	 find_pc_section verifies we know about the address and have some
+	 hope of computing the right kind of breakpoint to use (via
+	 symbol info).  It does mean that GDB needs to be pointed at a
+	 non-stripped version of the dynamic linker in order to obtain
+	 information it already knows about.  Sigh.  */
+
       os = find_pc_section (sym_addr);
       if (os != NULL)
 	{

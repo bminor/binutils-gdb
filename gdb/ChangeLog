@@ -1,3 +1,7 @@
+2010-02-04  Doug Evans  <dje@google.com>
+
+	* solib-svr4.c (enable_break): Add comment.
+
 2010-02-04  Anthony Green  <green@moxielogic.com>
 
 	* moxie-tdep.c (moxie_analyze_prologue): Fail protocol analysis
