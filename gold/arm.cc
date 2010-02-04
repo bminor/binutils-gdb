@@ -2043,10 +2043,6 @@ class Target_arm : public Sized_target<32, big_endian>
 	     parameters->sized_target<32, big_endian>());
   }
 
-  // Whether relocation type uses LSB to distinguish THUMB addresses.
-  static bool
-  reloc_uses_thumb_bit(unsigned int r_type);
-
   // Whether NAME belongs to a mapping symbol.
   static bool
   is_mapping_symbol_name(const char* name)
@@ -2257,47 +2253,6 @@ class Target_arm : public Sized_target<32, big_endian>
 
 	default:
 	  return true;
-	}
-    }
-
-    // Return whether we need to calculate the addressing origin of
-    // the output segment defining the symbol - B(S).
-    static bool
-    reloc_needs_sym_origin(unsigned int r_type)
-    {
-      switch (r_type)
-	{
-	case elfcpp::R_ARM_SBREL32:
-	case elfcpp::R_ARM_BASE_PREL:
-	case elfcpp::R_ARM_BASE_ABS:
-	case elfcpp::R_ARM_LDR_SBREL_11_0_NC:
-	case elfcpp::R_ARM_ALU_SBREL_19_12_NC:
-	case elfcpp::R_ARM_ALU_SBREL_27_20_CK:
-	case elfcpp::R_ARM_SBREL31:
-	case elfcpp::R_ARM_ALU_SB_G0_NC:
-	case elfcpp::R_ARM_ALU_SB_G0:
-	case elfcpp::R_ARM_ALU_SB_G1_NC:
-	case elfcpp::R_ARM_ALU_SB_G1:
-	case elfcpp::R_ARM_ALU_SB_G2:
-	case elfcpp::R_ARM_LDR_SB_G0:
-	case elfcpp::R_ARM_LDR_SB_G1:
-	case elfcpp::R_ARM_LDR_SB_G2:
-	case elfcpp::R_ARM_LDRS_SB_G0:
-	case elfcpp::R_ARM_LDRS_SB_G1:
-	case elfcpp::R_ARM_LDRS_SB_G2:
-	case elfcpp::R_ARM_LDC_SB_G0:
-	case elfcpp::R_ARM_LDC_SB_G1:
-	case elfcpp::R_ARM_LDC_SB_G2:
-	case elfcpp::R_ARM_MOVW_BREL_NC:
-	case elfcpp::R_ARM_MOVT_BREL:
-	case elfcpp::R_ARM_MOVW_BREL:
-	case elfcpp::R_ARM_THM_MOVW_BREL_NC:
-	case elfcpp::R_ARM_THM_MOVT_BREL:
-	case elfcpp::R_ARM_THM_MOVW_BREL:
-	  return true;
-
-	default:
-	  return false;
 	}
     }
   };
@@ -2999,142 +2954,62 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 	    This::STATUS_OVERFLOW : This::STATUS_OKAY);
   }
 
-  // R_ARM_MOVW_ABS_NC: (S + A) | T
-  static inline typename This::Status 
-  movw_abs_nc(unsigned char *view,
-	      const Sized_relobj<32, big_endian>* object,
-	      const Symbol_value<32>* psymval,
-	      Arm_address thumb_bit)
-  {
-    typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
-    Valtype* wv = reinterpret_cast<Valtype*>(view);
-    Valtype val = elfcpp::Swap<32, big_endian>::readval(wv);
-    Valtype addend =  This::extract_arm_movw_movt_addend(val);
-    Valtype x = psymval->value(object, addend) | thumb_bit;
-    val = This::insert_val_arm_movw_movt(val, x);
-    elfcpp::Swap<32, big_endian>::writeval(wv, val);
-    return This::STATUS_OKAY;
-  }
-
-  // R_ARM_MOVT_ABS: S + A
-  static inline typename This::Status
-  movt_abs(unsigned char *view,
-	   const Sized_relobj<32, big_endian>* object,
-           const Symbol_value<32>* psymval)
-  {
-    typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
-    Valtype* wv = reinterpret_cast<Valtype*>(view);
-    Valtype val = elfcpp::Swap<32, big_endian>::readval(wv);
-    Valtype addend = This::extract_arm_movw_movt_addend(val);
-    Valtype x = psymval->value(object, addend) >> 16;
-    val = This::insert_val_arm_movw_movt(val, x);
-    elfcpp::Swap<32, big_endian>::writeval(wv, val);
-    return This::STATUS_OKAY;
-  }
-
-  //  R_ARM_THM_MOVW_ABS_NC: S + A | T
-  static inline typename This::Status 
-  thm_movw_abs_nc(unsigned char *view,
-	          const Sized_relobj<32, big_endian>* object,
-	          const Symbol_value<32>* psymval,
-	          Arm_address thumb_bit)
-  {
-    typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
-    typedef typename elfcpp::Swap<32, big_endian>::Valtype Reltype;
-    Valtype* wv = reinterpret_cast<Valtype*>(view);
-    Reltype val = ((elfcpp::Swap<16, big_endian>::readval(wv) << 16)
-		   | elfcpp::Swap<16, big_endian>::readval(wv + 1));
-    Reltype addend = extract_thumb_movw_movt_addend(val);
-    Reltype x = psymval->value(object, addend) | thumb_bit;
-    val = This::insert_val_thumb_movw_movt(val, x);
-    elfcpp::Swap<16, big_endian>::writeval(wv, val >> 16);
-    elfcpp::Swap<16, big_endian>::writeval(wv + 1, val & 0xffff);
-    return This::STATUS_OKAY;
-  }
-
-  //  R_ARM_THM_MOVT_ABS: S + A
-  static inline typename This::Status 
-  thm_movt_abs(unsigned char *view,
-	       const Sized_relobj<32, big_endian>* object,
-	       const Symbol_value<32>* psymval)
-  {
-    typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
-    typedef typename elfcpp::Swap<32, big_endian>::Valtype Reltype;
-    Valtype* wv = reinterpret_cast<Valtype*>(view);
-    Reltype val = ((elfcpp::Swap<16, big_endian>::readval(wv) << 16)
-		   | elfcpp::Swap<16, big_endian>::readval(wv + 1));
-    Reltype addend = This::extract_thumb_movw_movt_addend(val);
-    Reltype x = psymval->value(object, addend) >> 16;
-    val = This::insert_val_thumb_movw_movt(val, x);
-    elfcpp::Swap<16, big_endian>::writeval(wv, val >> 16);
-    elfcpp::Swap<16, big_endian>::writeval(wv + 1, val & 0xffff);
-    return This::STATUS_OKAY;
-  }
-
+  // R_ARM_MOVW_ABS_NC: (S + A) | T	(relative address base is )
   // R_ARM_MOVW_PREL_NC: (S + A) | T - P
-  // R_ARM_MOVW_BREL_NC: ((S + A) | T) – B(S)
+  // R_ARM_MOVW_BREL_NC: ((S + A) | T) - B(S)
+  // R_ARM_MOVW_BREL: ((S + A) | T) - B(S)
   static inline typename This::Status
-  movw_rel_nc(unsigned char* view,
-	      const Sized_relobj<32, big_endian>* object,
-	      const Symbol_value<32>* psymval,
-	      Arm_address address,
-	      Arm_address thumb_bit)
+  movw(unsigned char* view,
+       const Sized_relobj<32, big_endian>* object,
+       const Symbol_value<32>* psymval,
+       Arm_address relative_address_base,
+       Arm_address thumb_bit,
+       bool check_overflow)
   {
     typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
     Valtype val = elfcpp::Swap<32, big_endian>::readval(wv);
     Valtype addend = This::extract_arm_movw_movt_addend(val);
-    Valtype x = (psymval->value(object, addend) | thumb_bit) - address;
+    Valtype x = ((psymval->value(object, addend) | thumb_bit)
+		 - relative_address_base);
     val = This::insert_val_arm_movw_movt(val, x);
     elfcpp::Swap<32, big_endian>::writeval(wv, val);
-    return This::STATUS_OKAY;
+    return ((check_overflow && utils::has_overflow<16>(x))
+	    ? This::STATUS_OVERFLOW
+	    : This::STATUS_OKAY);
   }
 
-  // R_ARM_MOVW_BREL: ((S + A) | T) – B(S)
-  static inline typename This::Status
-  movw_rel(unsigned char* view,
-	   const Sized_relobj<32, big_endian>* object,
-	   const Symbol_value<32>* psymval,
-	   Arm_address address,
-	   Arm_address thumb_bit)
-  {
-    typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
-    Valtype* wv = reinterpret_cast<Valtype*>(view);
-    Valtype val = elfcpp::Swap<32, big_endian>::readval(wv);
-    Valtype addend = This::extract_arm_movw_movt_addend(val);
-    Valtype x = (psymval->value(object, addend) | thumb_bit) - address;
-    val = This::insert_val_arm_movw_movt(val, x);
-    elfcpp::Swap<32, big_endian>::writeval(wv, val);
-    return ((x >= 0x10000) ?
-    	    This::STATUS_OVERFLOW : This::STATUS_OKAY);
-  }
-
+  // R_ARM_MOVT_ABS: S + A	(relative address base is 0)
   // R_ARM_MOVT_PREL: S + A - P
-  // R_ARM_MOVT_BREL: S + A – B(S)
+  // R_ARM_MOVT_BREL: S + A - B(S)
   static inline typename This::Status
-  movt_rel(unsigned char* view,
-	   const Sized_relobj<32, big_endian>* object,
-	   const Symbol_value<32>* psymval,
-           Arm_address address)
+  movt(unsigned char* view,
+       const Sized_relobj<32, big_endian>* object,
+       const Symbol_value<32>* psymval,
+       Arm_address relative_address_base)
   {
     typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
     Valtype val = elfcpp::Swap<32, big_endian>::readval(wv);
     Valtype addend = This::extract_arm_movw_movt_addend(val);
-    Valtype x = (psymval->value(object, addend) - address) >> 16;
+    Valtype x = (psymval->value(object, addend) - relative_address_base) >> 16;
     val = This::insert_val_arm_movw_movt(val, x);
     elfcpp::Swap<32, big_endian>::writeval(wv, val);
+    // FIXME: IHI0044D says that we should check for overflow.
     return This::STATUS_OKAY;
   }
 
+  // R_ARM_THM_MOVW_ABS_NC: S + A | T		(relative_address_base is 0)
   // R_ARM_THM_MOVW_PREL_NC: (S + A) | T - P
-  // R_ARM_THM_MOVW_BREL_NC: ((S + A) | T) – B(S)
+  // R_ARM_THM_MOVW_BREL_NC: ((S + A) | T) - B(S)
+  // R_ARM_THM_MOVW_BREL: ((S + A) | T) - B(S)
   static inline typename This::Status
-  thm_movw_rel_nc(unsigned char *view,
-	          const Sized_relobj<32, big_endian>* object,
-	          const Symbol_value<32>* psymval,
-	          Arm_address address,
-	          Arm_address thumb_bit)
+  thm_movw(unsigned char *view,
+	   const Sized_relobj<32, big_endian>* object,
+	   const Symbol_value<32>* psymval,
+	   Arm_address relative_address_base,
+	   Arm_address thumb_bit,
+	   bool check_overflow)
   {
     typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
     typedef typename elfcpp::Swap<32, big_endian>::Valtype Reltype;
@@ -3142,42 +3017,24 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
     Reltype val = (elfcpp::Swap<16, big_endian>::readval(wv) << 16)
 		  | elfcpp::Swap<16, big_endian>::readval(wv + 1);
     Reltype addend = This::extract_thumb_movw_movt_addend(val);
-    Reltype x = (psymval->value(object, addend) | thumb_bit) - address;
+    Reltype x =
+      (psymval->value(object, addend) | thumb_bit) - relative_address_base;
     val = This::insert_val_thumb_movw_movt(val, x);
     elfcpp::Swap<16, big_endian>::writeval(wv, val >> 16);
     elfcpp::Swap<16, big_endian>::writeval(wv + 1, val & 0xffff);
-    return This::STATUS_OKAY;
+    return ((check_overflow && utils::has_overflow<16>(x))
+    	    ? This::STATUS_OVERFLOW
+	    : This::STATUS_OKAY);
   }
 
-  // R_ARM_THM_MOVW_BREL: ((S + A) | T) – B(S)
-  static inline typename This::Status
-  thm_movw_rel(unsigned char *view,
-	       const Sized_relobj<32, big_endian>* object,
-	       const Symbol_value<32>* psymval,
-	       Arm_address address,
-	       Arm_address thumb_bit)
-  {
-    typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
-    typedef typename elfcpp::Swap<32, big_endian>::Valtype Reltype;
-    Valtype* wv = reinterpret_cast<Valtype*>(view);
-    Reltype val = (elfcpp::Swap<16, big_endian>::readval(wv) << 16)
-		  | elfcpp::Swap<16, big_endian>::readval(wv + 1);
-    Reltype addend = This::extract_thumb_movw_movt_addend(val);
-    Reltype x = (psymval->value(object, addend) | thumb_bit) - address;
-    val = This::insert_val_thumb_movw_movt(val, x);
-    elfcpp::Swap<16, big_endian>::writeval(wv, val >> 16);
-    elfcpp::Swap<16, big_endian>::writeval(wv + 1, val & 0xffff);
-    return ((x >= 0x10000) ?
-    	    This::STATUS_OVERFLOW : This::STATUS_OKAY);
-  }
-
+  // R_ARM_THM_MOVT_ABS: S + A		(relative address base is 0)
   // R_ARM_THM_MOVT_PREL: S + A - P
-  // R_ARM_THM_MOVT_BREL: S + A – B(S)
+  // R_ARM_THM_MOVT_BREL: S + A - B(S)
   static inline typename This::Status
-  thm_movt_rel(unsigned char* view,
-	       const Sized_relobj<32, big_endian>* object,
-	       const Symbol_value<32>* psymval,
-	       Arm_address address)
+  thm_movt(unsigned char* view,
+	   const Sized_relobj<32, big_endian>* object,
+	   const Symbol_value<32>* psymval,
+	   Arm_address relative_address_base)
   {
     typedef typename elfcpp::Swap<16, big_endian>::Valtype Valtype;
     typedef typename elfcpp::Swap<32, big_endian>::Valtype Reltype;
@@ -3185,7 +3042,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
     Reltype val = (elfcpp::Swap<16, big_endian>::readval(wv) << 16)
 		  | elfcpp::Swap<16, big_endian>::readval(wv + 1);
     Reltype addend = This::extract_thumb_movw_movt_addend(val);
-    Reltype x = (psymval->value(object, addend) - address) >> 16;
+    Reltype x = (psymval->value(object, addend) - relative_address_base) >> 16;
     val = This::insert_val_thumb_movw_movt(val, x);
     elfcpp::Swap<16, big_endian>::writeval(wv, val >> 16);
     elfcpp::Swap<16, big_endian>::writeval(wv + 1, val & 0xffff);
@@ -3363,6 +3220,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 	Arm_address thumb_bit,
 	bool check_overflow)
   {
+    gold_assert(group >= 0 && group < 3);
     typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
     Valtype insn = elfcpp::Swap<32, big_endian>::readval(wv);
@@ -3417,6 +3275,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 	const int group,
 	Arm_address address)
   {
+    gold_assert(group >= 0 && group < 3);
     typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
     Valtype insn = elfcpp::Swap<32, big_endian>::readval(wv);
@@ -3454,6 +3313,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
 	const int group,
 	Arm_address address)
   {
+    gold_assert(group >= 0 && group < 3);
     typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
     Valtype insn = elfcpp::Swap<32, big_endian>::readval(wv);
@@ -3491,6 +3351,7 @@ class Arm_relocate_functions : public Relocate_functions<32, big_endian>
       const int group,
       Arm_address address)
   {
+    gold_assert(group >= 0 && group < 3);
     typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
     Valtype* wv = reinterpret_cast<Valtype*>(view);
     Valtype insn = elfcpp::Swap<32, big_endian>::readval(wv);
@@ -7286,6 +7147,17 @@ Target_arm<big_endian>::Relocate::relocate(
   typedef Arm_relocate_functions<big_endian> Arm_relocate_functions;
 
   r_type = get_real_reloc_type(r_type);
+  const Arm_reloc_property* reloc_property =
+    arm_reloc_property_table->get_implemented_static_reloc_property(r_type);
+  if (reloc_property == NULL)
+    {
+      std::string reloc_name =
+	arm_reloc_property_table->reloc_name_in_error_message(r_type);
+      gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+			     _("cannot relocate %s in object file"),
+			     reloc_name.c_str());
+      return true;
+    }
 
   const Arm_relobj<big_endian>* object =
     Arm_relobj<big_endian>::as_arm_relobj(relinfo->object);
@@ -7348,7 +7220,7 @@ Target_arm<big_endian>::Relocate::relocate(
 
   // Strip LSB if this points to a THUMB target.
   if (thumb_bit != 0
-      && Target_arm<big_endian>::reloc_uses_thumb_bit(r_type) 
+      && reloc_property->uses_thumb_bit() 
       && ((psymval->value(object, 0) & 1) != 0))
     {
       Arm_address stripped_value =
@@ -7394,7 +7266,7 @@ Target_arm<big_endian>::Relocate::relocate(
   // Get the addressing origin of the output segment defining the
   // symbol gsym if needed (AAELF 4.6.1.2 Relocation types).
   Arm_address sym_origin = 0;
-  if (Relocate::reloc_needs_sym_origin(r_type))
+  if (reloc_property->uses_symbol_base())
     {
       if (r_type == elfcpp::R_ARM_BASE_ABS && gsym == NULL)
 	// R_ARM_BASE_ABS with the NULL symbol will give the
@@ -7413,8 +7285,31 @@ Target_arm<big_endian>::Relocate::relocate(
       // will be implemented.  This is consistent with GNU ld.
     }
 
+  // For relative addressing relocation, find out the relative address base.
+  Arm_address relative_address_base = 0;
+  switch(reloc_property->relative_address_base())
+    {
+    case Arm_reloc_property::RAB_NONE:
+      break;
+    case Arm_reloc_property::RAB_B_S:
+      relative_address_base = sym_origin;
+      break;
+    case Arm_reloc_property::RAB_GOT_ORG:
+      relative_address_base = target->got_plt_section()->address();
+      break;
+    case Arm_reloc_property::RAB_P:
+      relative_address_base = address;
+      break;
+    case Arm_reloc_property::RAB_Pa:
+      relative_address_base = address & 0xfffffffcU;
+      break;
+    default:
+      gold_unreachable(); 
+    }
+    
   typename Arm_relocate_functions::Status reloc_status =
 	Arm_relocate_functions::STATUS_OKAY;
+  bool check_overflow = reloc_property->checks_overflow();
   switch (r_type)
     {
     case elfcpp::R_ARM_NONE:
@@ -7456,9 +7351,9 @@ Target_arm<big_endian>::Relocate::relocate(
     case elfcpp::R_ARM_MOVW_ABS_NC:
       if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, true,
 				    output_section))
-	reloc_status = Arm_relocate_functions::movw_abs_nc(view, object,
-							   psymval,
-       						           thumb_bit);
+	reloc_status = Arm_relocate_functions::movw(view, object, psymval,
+						    0, thumb_bit,
+						    check_overflow);
       else
 	gold_error(_("relocation R_ARM_MOVW_ABS_NC cannot be used when making"
 		     "a shared object; recompile with -fPIC"));
@@ -7467,7 +7362,7 @@ Target_arm<big_endian>::Relocate::relocate(
     case elfcpp::R_ARM_MOVT_ABS:
       if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, true,
 				    output_section))
-	reloc_status = Arm_relocate_functions::movt_abs(view, object, psymval);
+	reloc_status = Arm_relocate_functions::movt(view, object, psymval, 0);
       else
 	gold_error(_("relocation R_ARM_MOVT_ABS cannot be used when making"
 		     "a shared object; recompile with -fPIC"));
@@ -7476,9 +7371,8 @@ Target_arm<big_endian>::Relocate::relocate(
     case elfcpp::R_ARM_THM_MOVW_ABS_NC:
       if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, true,
 				    output_section))
-	reloc_status = Arm_relocate_functions::thm_movw_abs_nc(view, object,
-							       psymval,
-       						               thumb_bit);
+	reloc_status = Arm_relocate_functions::thm_movw(view, object, psymval,
+       						        0, thumb_bit, false);
       else
 	gold_error(_("relocation R_ARM_THM_MOVW_ABS_NC cannot be used when"
 		     "making a shared object; recompile with -fPIC"));
@@ -7487,70 +7381,45 @@ Target_arm<big_endian>::Relocate::relocate(
     case elfcpp::R_ARM_THM_MOVT_ABS:
       if (should_apply_static_reloc(gsym, Symbol::ABSOLUTE_REF, true,
 				    output_section))
-	reloc_status = Arm_relocate_functions::thm_movt_abs(view, object,
-							    psymval);
+	reloc_status = Arm_relocate_functions::thm_movt(view, object,
+							psymval, 0);
       else
 	gold_error(_("relocation R_ARM_THM_MOVT_ABS cannot be used when"
 		     "making a shared object; recompile with -fPIC"));
       break;
 
     case elfcpp::R_ARM_MOVW_PREL_NC:
-      reloc_status = Arm_relocate_functions::movw_rel_nc(view, object,
-							 psymval, address,
-							 thumb_bit);
-      break;
-
     case elfcpp::R_ARM_MOVW_BREL_NC:
-      reloc_status = Arm_relocate_functions::movw_rel_nc(view, object,
-							 psymval, sym_origin,
-							 thumb_bit);
-      break;
-
     case elfcpp::R_ARM_MOVW_BREL:
-      reloc_status = Arm_relocate_functions::movw_rel(view, object,
-						      psymval, sym_origin,
-						      thumb_bit);
+      reloc_status =
+	Arm_relocate_functions::movw(view, object, psymval,
+				     relative_address_base, thumb_bit,
+				     check_overflow);
       break;
 
     case elfcpp::R_ARM_MOVT_PREL:
-      reloc_status = Arm_relocate_functions::movt_rel(view, object,
-                                                      psymval, address);
-      break;
-
     case elfcpp::R_ARM_MOVT_BREL:
-      reloc_status = Arm_relocate_functions::movt_rel(view, object,
-                                                      psymval, sym_origin);
+      reloc_status =
+	Arm_relocate_functions::movt(view, object, psymval,
+				     relative_address_base);
       break;
 
     case elfcpp::R_ARM_THM_MOVW_PREL_NC:
-      reloc_status = Arm_relocate_functions::thm_movw_rel_nc(view, object,
-							     psymval, address,
-							     thumb_bit);
-      break;
-
     case elfcpp::R_ARM_THM_MOVW_BREL_NC:
-      reloc_status = Arm_relocate_functions::thm_movw_rel_nc(view, object,
-							     psymval,
-							     sym_origin,
-							     thumb_bit);
-      break;
-
     case elfcpp::R_ARM_THM_MOVW_BREL:
-      reloc_status = Arm_relocate_functions::thm_movw_rel(view, object,
-							  psymval, sym_origin,
-							  thumb_bit);
+      reloc_status =
+	Arm_relocate_functions::thm_movw(view, object, psymval,
+					 relative_address_base,
+					 thumb_bit, check_overflow);
       break;
 
     case elfcpp::R_ARM_THM_MOVT_PREL:
-      reloc_status = Arm_relocate_functions::thm_movt_rel(view, object,
-							  psymval, address);
+    case elfcpp::R_ARM_THM_MOVT_BREL:
+      reloc_status =
+	Arm_relocate_functions::thm_movt(view, object, psymval,
+					 relative_address_base);
       break;
 	
-    case elfcpp::R_ARM_THM_MOVT_BREL:
-      reloc_status = Arm_relocate_functions::thm_movt_rel(view, object,
-							  psymval, sym_origin);
-      break;
-
     case elfcpp::R_ARM_REL32:
       reloc_status = Arm_relocate_functions::rel32(view, object, psymval,
 						   address, thumb_bit);
@@ -7684,192 +7553,60 @@ Target_arm<big_endian>::Relocate::relocate(
       break;
 
     case elfcpp::R_ARM_ALU_PC_G0_NC:
-      reloc_status =
-	  Arm_relocate_functions::arm_grp_alu(view, object, psymval, 0,
-					      address, thumb_bit, false);
-      break;
-
     case elfcpp::R_ARM_ALU_PC_G0:
-      reloc_status =
-	  Arm_relocate_functions::arm_grp_alu(view, object, psymval, 0,
-					      address, thumb_bit, true);
-      break;
-
     case elfcpp::R_ARM_ALU_PC_G1_NC:
-      reloc_status =
-	  Arm_relocate_functions::arm_grp_alu(view, object, psymval, 1,
-					      address, thumb_bit, false);
-      break;
-
     case elfcpp::R_ARM_ALU_PC_G1:
-      reloc_status =
-	  Arm_relocate_functions::arm_grp_alu(view, object, psymval, 1,
-					      address, thumb_bit, true);
-      break;
-
     case elfcpp::R_ARM_ALU_PC_G2:
-      reloc_status =
-	  Arm_relocate_functions::arm_grp_alu(view, object, psymval, 2,
-					      address, thumb_bit, true);
-      break;
-
     case elfcpp::R_ARM_ALU_SB_G0_NC:
-      reloc_status =
-	  Arm_relocate_functions::arm_grp_alu(view, object, psymval, 0,
-					      sym_origin, thumb_bit, false);
-      break;
-
     case elfcpp::R_ARM_ALU_SB_G0:
-      reloc_status =
-	  Arm_relocate_functions::arm_grp_alu(view, object, psymval, 0,
-					      sym_origin, thumb_bit, true);
-      break;
-
     case elfcpp::R_ARM_ALU_SB_G1_NC:
-      reloc_status =
-	  Arm_relocate_functions::arm_grp_alu(view, object, psymval, 1,
-					      sym_origin, thumb_bit, false);
-      break;
-
     case elfcpp::R_ARM_ALU_SB_G1:
-      reloc_status =
-	  Arm_relocate_functions::arm_grp_alu(view, object, psymval, 1,
-					      sym_origin, thumb_bit, true);
-      break;
-
     case elfcpp::R_ARM_ALU_SB_G2:
       reloc_status =
-	  Arm_relocate_functions::arm_grp_alu(view, object, psymval, 2,
-					      sym_origin, thumb_bit, true);
+	Arm_relocate_functions::arm_grp_alu(view, object, psymval,
+					    reloc_property->group_index(),
+					    relative_address_base,
+					    thumb_bit, check_overflow);
       break;
 
     case elfcpp::R_ARM_LDR_PC_G0:
-      reloc_status =
-	  Arm_relocate_functions::arm_grp_ldr(view, object, psymval, 0,
-					      address);
-      break;
-
     case elfcpp::R_ARM_LDR_PC_G1:
-      reloc_status =
-	  Arm_relocate_functions::arm_grp_ldr(view, object, psymval, 1,
-					      address);
-      break;
-
     case elfcpp::R_ARM_LDR_PC_G2:
-      reloc_status =
-	  Arm_relocate_functions::arm_grp_ldr(view, object, psymval, 2,
-					      address);
-      break;
-
     case elfcpp::R_ARM_LDR_SB_G0:
-      reloc_status =
-	  Arm_relocate_functions::arm_grp_ldr(view, object, psymval, 0,
-					      sym_origin);
-      break;
-
     case elfcpp::R_ARM_LDR_SB_G1:
-      reloc_status =
-	  Arm_relocate_functions::arm_grp_ldr(view, object, psymval, 1,
-					      sym_origin);
-      break;
-
     case elfcpp::R_ARM_LDR_SB_G2:
       reloc_status =
-	  Arm_relocate_functions::arm_grp_ldr(view, object, psymval, 2,
-					      sym_origin);
+	  Arm_relocate_functions::arm_grp_ldr(view, object, psymval,
+					      reloc_property->group_index(),
+					      relative_address_base);
       break;
 
     case elfcpp::R_ARM_LDRS_PC_G0:
-      reloc_status =
-	  Arm_relocate_functions::arm_grp_ldrs(view, object, psymval, 0,
-					       address);
-      break;
-
     case elfcpp::R_ARM_LDRS_PC_G1:
-      reloc_status =
-	  Arm_relocate_functions::arm_grp_ldrs(view, object, psymval, 1,
-					       address);
-      break;
-
     case elfcpp::R_ARM_LDRS_PC_G2:
-      reloc_status =
-	  Arm_relocate_functions::arm_grp_ldrs(view, object, psymval, 2,
-					       address);
-      break;
-
     case elfcpp::R_ARM_LDRS_SB_G0:
-      reloc_status =
-	  Arm_relocate_functions::arm_grp_ldrs(view, object, psymval, 0,
-					       sym_origin);
-      break;
-
     case elfcpp::R_ARM_LDRS_SB_G1:
-      reloc_status =
-	  Arm_relocate_functions::arm_grp_ldrs(view, object, psymval, 1,
-					       sym_origin);
-      break;
-
     case elfcpp::R_ARM_LDRS_SB_G2:
       reloc_status =
-	  Arm_relocate_functions::arm_grp_ldrs(view, object, psymval, 2,
-					       sym_origin);
+	  Arm_relocate_functions::arm_grp_ldrs(view, object, psymval,
+					       reloc_property->group_index(),
+					       relative_address_base);
       break;
 
     case elfcpp::R_ARM_LDC_PC_G0:
-      reloc_status =
-	  Arm_relocate_functions::arm_grp_ldc(view, object, psymval, 0,
-					      address);
-      break;
-
     case elfcpp::R_ARM_LDC_PC_G1:
-      reloc_status =
-	  Arm_relocate_functions::arm_grp_ldc(view, object, psymval, 1,
-					      address);
-      break;
-
     case elfcpp::R_ARM_LDC_PC_G2:
-      reloc_status =
-	  Arm_relocate_functions::arm_grp_ldc(view, object, psymval, 2,
-					      address);
-      break;
-
     case elfcpp::R_ARM_LDC_SB_G0:
-      reloc_status =
-	  Arm_relocate_functions::arm_grp_ldc(view, object, psymval, 0,
-					      sym_origin);
-      break;
-
     case elfcpp::R_ARM_LDC_SB_G1:
-      reloc_status =
-	  Arm_relocate_functions::arm_grp_ldc(view, object, psymval, 1,
-					      sym_origin);
-      break;
-
     case elfcpp::R_ARM_LDC_SB_G2:
       reloc_status =
-	  Arm_relocate_functions::arm_grp_ldc(view, object, psymval, 2,
-					      sym_origin);
-      break;
-
-    case elfcpp::R_ARM_TARGET1:
-      // This should have been mapped to another type already.
-      // Fall through.
-    case elfcpp::R_ARM_COPY:
-    case elfcpp::R_ARM_GLOB_DAT:
-    case elfcpp::R_ARM_JUMP_SLOT:
-    case elfcpp::R_ARM_RELATIVE:
-      // These are relocations which should only be seen by the
-      // dynamic linker, and should never be seen here.
-      gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
-			     _("unexpected reloc %u in object file"),
-			     r_type);
+	  Arm_relocate_functions::arm_grp_ldc(view, object, psymval,
+					      reloc_property->group_index(),
+					      relative_address_base);
       break;
 
     default:
-      gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
-			     _("unsupported reloc %u"),
-			     r_type);
-      break;
+      gold_unreachable();
     }
 
   // Report any errors.
@@ -7963,98 +7700,16 @@ Target_arm<big_endian>::Relocatable_size_for_reloc::get_size_for_reloc(
     Relobj* object)
 {
   r_type = get_real_reloc_type(r_type);
-  switch (r_type)
+  const Arm_reloc_property* arp =
+      arm_reloc_property_table->get_implemented_static_reloc_property(r_type);
+  if (arp != NULL)
+    return arp->size();
+  else
     {
-    case elfcpp::R_ARM_NONE:
-      return 0;
-
-    case elfcpp::R_ARM_ABS8:
-      return 1;
-
-    case elfcpp::R_ARM_ABS16:
-    case elfcpp::R_ARM_THM_ABS5:
-    case elfcpp::R_ARM_THM_JUMP6:
-    case elfcpp::R_ARM_THM_JUMP8:
-    case elfcpp::R_ARM_THM_JUMP11:
-    case elfcpp::R_ARM_THM_PC8:
-      return 2;
-
-    case elfcpp::R_ARM_ABS32:
-    case elfcpp::R_ARM_ABS32_NOI:
-    case elfcpp::R_ARM_ABS12:
-    case elfcpp::R_ARM_BASE_ABS:
-    case elfcpp::R_ARM_REL32:
-    case elfcpp::R_ARM_THM_CALL:
-    case elfcpp::R_ARM_GOTOFF32:
-    case elfcpp::R_ARM_BASE_PREL:
-    case elfcpp::R_ARM_GOT_BREL:
-    case elfcpp::R_ARM_GOT_PREL:
-    case elfcpp::R_ARM_PLT32:
-    case elfcpp::R_ARM_CALL:
-    case elfcpp::R_ARM_JUMP24:
-    case elfcpp::R_ARM_PREL31:
-    case elfcpp::R_ARM_MOVW_ABS_NC:
-    case elfcpp::R_ARM_MOVT_ABS:
-    case elfcpp::R_ARM_THM_MOVW_ABS_NC:
-    case elfcpp::R_ARM_THM_MOVT_ABS:
-    case elfcpp::R_ARM_MOVW_PREL_NC:
-    case elfcpp::R_ARM_MOVT_PREL:
-    case elfcpp::R_ARM_THM_MOVW_PREL_NC:
-    case elfcpp::R_ARM_THM_MOVT_PREL:
-    case elfcpp::R_ARM_MOVW_BREL_NC:
-    case elfcpp::R_ARM_MOVT_BREL:
-    case elfcpp::R_ARM_MOVW_BREL:
-    case elfcpp::R_ARM_THM_MOVW_BREL_NC:
-    case elfcpp::R_ARM_THM_MOVT_BREL:
-    case elfcpp::R_ARM_THM_MOVW_BREL:
-    case elfcpp::R_ARM_V4BX:
-    case elfcpp::R_ARM_THM_PC12:
-    case elfcpp::R_ARM_THM_ALU_PREL_11_0:
-    case elfcpp::R_ARM_ALU_PC_G0_NC:
-    case elfcpp::R_ARM_ALU_PC_G0:
-    case elfcpp::R_ARM_ALU_PC_G1_NC:
-    case elfcpp::R_ARM_ALU_PC_G1:
-    case elfcpp::R_ARM_ALU_PC_G2:
-    case elfcpp::R_ARM_ALU_SB_G0_NC:
-    case elfcpp::R_ARM_ALU_SB_G0:
-    case elfcpp::R_ARM_ALU_SB_G1_NC:
-    case elfcpp::R_ARM_ALU_SB_G1:
-    case elfcpp::R_ARM_ALU_SB_G2:
-    case elfcpp::R_ARM_LDR_PC_G0:
-    case elfcpp::R_ARM_LDR_PC_G1:
-    case elfcpp::R_ARM_LDR_PC_G2:
-    case elfcpp::R_ARM_LDR_SB_G0:
-    case elfcpp::R_ARM_LDR_SB_G1:
-    case elfcpp::R_ARM_LDR_SB_G2:
-    case elfcpp::R_ARM_LDRS_PC_G0:
-    case elfcpp::R_ARM_LDRS_PC_G1:
-    case elfcpp::R_ARM_LDRS_PC_G2:
-    case elfcpp::R_ARM_LDRS_SB_G0:
-    case elfcpp::R_ARM_LDRS_SB_G1:
-    case elfcpp::R_ARM_LDRS_SB_G2:
-    case elfcpp::R_ARM_LDC_PC_G0:
-    case elfcpp::R_ARM_LDC_PC_G1:
-    case elfcpp::R_ARM_LDC_PC_G2:
-    case elfcpp::R_ARM_LDC_SB_G0:
-    case elfcpp::R_ARM_LDC_SB_G1:
-    case elfcpp::R_ARM_LDC_SB_G2:
-      return 4;
-
-    case elfcpp::R_ARM_TARGET1:
-      // This should have been mapped to another type already.
-      // Fall through.
-    case elfcpp::R_ARM_COPY:
-    case elfcpp::R_ARM_GLOB_DAT:
-    case elfcpp::R_ARM_JUMP_SLOT:
-    case elfcpp::R_ARM_RELATIVE:
-      // These are relocations which should only be seen by the
-      // dynamic linker, and should never be seen here.
-      gold_error(_("%s: unexpected reloc %u in object file"),
-		 object->name().c_str(), r_type);
-      return 0;
-
-    default:
-      object->error(_("unsupported reloc %u in object file"), r_type);
+      std::string reloc_name =
+	arm_reloc_property_table->reloc_name_in_error_message(r_type);
+      gold_error(_("%s: unexpected %s in object file"),
+		 object->name().c_str(), reloc_name.c_str());
       return 0;
     }
 }
@@ -9057,54 +8712,6 @@ Target_arm<big_endian>::merge_object_attributes(
     }
 }
 
-// Return whether a relocation type used the LSB to distinguish THUMB
-// addresses.
-template<bool big_endian>
-bool
-Target_arm<big_endian>::reloc_uses_thumb_bit(unsigned int r_type)
-{
-  switch (r_type)
-    {
-    case elfcpp::R_ARM_PC24:
-    case elfcpp::R_ARM_ABS32:
-    case elfcpp::R_ARM_REL32:
-    case elfcpp::R_ARM_SBREL32:
-    case elfcpp::R_ARM_THM_CALL:
-    case elfcpp::R_ARM_GLOB_DAT:
-    case elfcpp::R_ARM_JUMP_SLOT:
-    case elfcpp::R_ARM_GOTOFF32:
-    case elfcpp::R_ARM_PLT32:
-    case elfcpp::R_ARM_CALL:
-    case elfcpp::R_ARM_JUMP24:
-    case elfcpp::R_ARM_THM_JUMP24:
-    case elfcpp::R_ARM_SBREL31:
-    case elfcpp::R_ARM_PREL31:
-    case elfcpp::R_ARM_MOVW_ABS_NC:
-    case elfcpp::R_ARM_MOVW_PREL_NC:
-    case elfcpp::R_ARM_THM_MOVW_ABS_NC:
-    case elfcpp::R_ARM_THM_MOVW_PREL_NC:
-    case elfcpp::R_ARM_THM_JUMP19:
-    case elfcpp::R_ARM_THM_ALU_PREL_11_0:
-    case elfcpp::R_ARM_ALU_PC_G0_NC:
-    case elfcpp::R_ARM_ALU_PC_G0:
-    case elfcpp::R_ARM_ALU_PC_G1_NC:
-    case elfcpp::R_ARM_ALU_PC_G1:
-    case elfcpp::R_ARM_ALU_PC_G2:
-    case elfcpp::R_ARM_ALU_SB_G0_NC:
-    case elfcpp::R_ARM_ALU_SB_G0:
-    case elfcpp::R_ARM_ALU_SB_G1_NC:
-    case elfcpp::R_ARM_ALU_SB_G1:
-    case elfcpp::R_ARM_ALU_SB_G2:
-    case elfcpp::R_ARM_MOVW_BREL_NC:
-    case elfcpp::R_ARM_MOVW_BREL:
-    case elfcpp::R_ARM_THM_MOVW_BREL_NC:
-    case elfcpp::R_ARM_THM_MOVW_BREL:
-      return true;
-    default:
-      return false;
-    }
-}
-
 // Stub-generation methods for Target_arm.
 
 // Make a new Arm_input_section object.
@@ -9239,8 +8846,11 @@ Target_arm<big_endian>::scan_reloc_for_stub(
     }
 
   // Strip LSB if this points to a THUMB target.
+  const Arm_reloc_property* reloc_property =
+    arm_reloc_property_table->get_implemented_static_reloc_property(r_type);
+  gold_assert(reloc_property != NULL);
   if (target_is_thumb
-      && Target_arm<big_endian>::reloc_uses_thumb_bit(r_type)
+      && reloc_property->uses_thumb_bit()
       && ((psymval->value(arm_relobj, 0) & 1) != 0))
     {
       Arm_address stripped_value =

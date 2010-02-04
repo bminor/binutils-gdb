@@ -284,4 +284,47 @@ Arm_reloc_property_table::Arm_reloc_property_table()
 #undef RD
 }
 
+// Return a string describing a relocation code that fails to get a
+// relocation property in get_implemented_static_reloc_property().
+
+std::string
+Arm_reloc_property_table::reloc_name_in_error_message(unsigned int code)
+{
+  gold_assert(code < Property_table_size);
+
+  const Arm_reloc_property* arp = this->table_[code];
+
+  if (arp == NULL)
+    {
+      char buffer[100];
+      sprintf(buffer, _("invalid reloc %u"), code);
+      return std::string(buffer);
+    }
+  
+  // gold only implements static relocation codes.
+  Arm_reloc_property::Reloc_type reloc_type = arp->reloc_type();
+  gold_assert(reloc_type == Arm_reloc_property::RT_STATIC
+	      || !arp->is_implemented());
+
+  const char* prefix = NULL;
+  switch (reloc_type)
+    {
+    case Arm_reloc_property::RT_STATIC:
+      prefix = arp->is_implemented() ? _("reloc ") : _("unimplemented reloc ");
+      break;
+    case Arm_reloc_property::RT_DYNAMIC:
+      prefix = _("dynamic reloc ");
+      break;
+    case Arm_reloc_property::RT_PRIVATE:
+      prefix = _("private reloc ");
+      break;
+    case Arm_reloc_property::RT_OBSOLETE:
+      prefix = _("obsolete reloc ");
+      break;
+    default:
+      gold_unreachable();
+    }
+  return std::string(prefix) + arp->name();
+}
+
 } // End namespace gold.

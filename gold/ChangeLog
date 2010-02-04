@@ -1,3 +1,48 @@
+2010-02-03  Doug Kwan  <dougkwan@google.com>
+
+	* arm-reloc-property.cc
+	(Arm_reloc_property_table::reloc_name_in_error_message): New method
+	definition.
+	* arm-reloc-property.h
+	(Arm_reloc_property_table::get_implemented_static_reloc_property):
+	New method definition.
+	(Arm_reloc_property_table::reloc_name_in_error_message): New method
+	declaration.
+	* arm-reloc.def (THM_MOVT_ABS, THM_MOVT_PREL, THM_MOVT_BREL): Change
+	overflow to N.
+	(GOT_PREL): Change implemented to Y.
+	* arm.cc (Target_arm::reloc_uses_thumb_bit): Remove method.
+	(Target_arm::Relocate::reloc_needs_sym_origin): Remove method.
+	(Arm_relocate_functions::movw_abs_nc): Remove method.
+	(Arm_relocate_functions::movt_abs): Ditto.
+	(Arm_relocate_functions::thm_movw_abs_nc): Ditto.
+	(Arm_relocate_functions::thm_movt_abs): Ditto.
+	(Arm_relocate_functions::movw_rel_nc): Ditto.
+	(Arm_relocate_functions::movw_rel): Ditto.
+	(Arm_relocate_functions::movt_rel): Ditto.
+	(Arm_relocate_functions:thm_movw_rel_nc): Ditto.
+	(Arm_relocate_functions:thm_movw_rel): Ditto.
+	(Arm_relocate_functions:thm_movt_rel): Ditto.
+	(Arm_relocate_functions::movw, Arm_relocate_functions::movt,
+	(Arm_relocate_functions::thm_movw, Arm_relocate_functions::thm_movt):
+	New method definitions.
+	(Arm_relocation_functions::arm_grp_alu): Add assertion for group index.
+	(Arm_relocation_functions::arm_grp_ldr): Ditto.
+	(Arm_relocation_functions::arm_grp_ldrs): Ditto.
+	(Arm_relocation_functions::arm_grp_ldc): Ditto.
+	(Target_arm::Relocate::relocate): Check for non-static or
+	unimplemented relocation code and exit early.  Change calls to
+	Target_arm::reloc_uses_thumb_bit and
+	Target_arm::Reloc::reloc_needs_sym_origin to use relocation property
+	instead.  Refactor code to handle similar relocations to increase
+	code sharing.  Remove check for unsupported relocation code in switch
+	statement.
+	(Target_arm::Relocatable_size_for_reloc::get_size_for_reloc): Use
+	relocation property table to find out size.  Change error message to
+	print out the name of a relocation code instead of the numeric value.
+	(Target_arm::scan_reloc_for_stub): Use relocation property table
+	instead of calling Target_arm::reloc_uses_thumb_bit().
+
 2010-02-02  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Target_arm::relocate_section): Do view adjustment for all

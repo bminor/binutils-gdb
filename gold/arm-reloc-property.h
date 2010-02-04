@@ -293,6 +293,25 @@ class Arm_reloc_property_table
     return this->table_[code];
   }
 
+  // Like get_reloc_property but only return non-NULL if relocation code is
+  // static and implemented.
+  const Arm_reloc_property*
+  get_implemented_static_reloc_property(unsigned int code) const
+  {
+    gold_assert(code < Property_table_size);
+    const Arm_reloc_property* arp = this->table_[code];
+    return ((arp != NULL
+	     && (arp->reloc_type() == Arm_reloc_property::RT_STATIC)
+	     && arp->is_implemented())
+	    ? arp
+	    : NULL);
+  }
+  
+  // Return a string describing the a relocation code that is not
+  // an implemented static reloc code.
+  std::string
+  reloc_name_in_error_message(unsigned int code);
+
  private:
   // Copying is not allowed.
   Arm_reloc_property_table(const Arm_reloc_property_table&);
