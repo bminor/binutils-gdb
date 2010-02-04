@@ -1541,6 +1541,8 @@ mi_execute_command (char *cmd, int from_tty)
   if (cmd == 0)
     quit_force (NULL, from_tty);
 
+  target_log_command (cmd);
+
   command = mi_parse (cmd);
 
   if (command != NULL)

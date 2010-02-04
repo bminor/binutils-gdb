@@ -1,3 +1,9 @@
+2010-02-04  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Include MI command in remotelog.
+
+	* mi/mi-main.c (mi_execute_command): Call target_log_command.
+
 2010-02-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* remote.c (remote_state): Remove gdbarch.
