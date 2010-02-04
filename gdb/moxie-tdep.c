@@ -174,6 +174,8 @@ moxie_analyze_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
 	  cache->saved_regs[regnum] = cache->framesize;
 	  next_addr += 2;
 	}
+      else
+	break;
     }
 
   inst = read_memory_unsigned_integer (next_addr, 2, byte_order);

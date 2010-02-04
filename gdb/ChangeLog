@@ -1,3 +1,8 @@
+2010-02-04  Anthony Green  <green@moxielogic.com>
+
+	* moxie-tdep.c (moxie_analyze_prologue): Fail protocol analysis
+	gracefully.
+
 2010-02-04  Tom Tromey  <tromey@redhat.com>
 
 	* valops.c (search_struct_field): Account for
