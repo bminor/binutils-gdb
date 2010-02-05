@@ -38,14 +38,21 @@ struct demangle_component;
 
 /* This struct is designed to store data from using directives.  It
    says that names from namespace IMPORT_SRC should be visible within
-   namespace IMPORT_DEST. IMPORT_DEST should always be a strict initial
-   substring of IMPORT_SRC. These form a linked list; NEXT is the next element
-   of the list.  */
+   namespace IMPORT_DEST.  These form a linked list; NEXT is the next element
+   of the list.  If the imported namespace has been aliased, ALIAS is set to a
+   string representing the alias.  Otherwise, ALIAS is NULL.
+   Eg:
+       namespace C = A::B;
+   ALIAS = "C"
+*/
 
 struct using_direct
 {
   char *import_src;
   char *import_dest;
+
+  char *alias;
+
   struct using_direct *next;
 
   /* Used during import search to temporarily mark this node as searched.  */
@@ -82,10 +89,12 @@ extern int cp_validate_operator (const char *input);
 extern int cp_is_anonymous (const char *namespace);
 
 extern void cp_add_using_directive (const char *dest,
-                                    const char *src);
+                                    const char *src,
+                                    const char *alias);
 
 extern struct using_direct *cp_add_using (const char *dest,
                                           const char *src,
+                                          const char *alias,
 					  struct using_direct *next);
 
 extern void cp_initialize_namespace (void);

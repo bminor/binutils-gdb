@@ -3385,6 +3385,8 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
   struct dwarf2_cu *imported_cu;
   const char *imported_name;
   const char *imported_name_prefix;
+  char *import_alias;
+
   const char *import_prefix;
   char *canonical_name;
 
@@ -3436,7 +3438,8 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
       return;
     }
 
-  /* FIXME: dwarf2_name (die); for the local name after import.  */
+  /* Figure out the local name after import.  */
+  import_alias = dwarf2_name (die, cu);
 
   /* Figure out where the statement is being imported to.  */
   import_prefix = determine_prefix (die, cu);
@@ -3447,7 +3450,8 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
 
   if (strlen (imported_name_prefix) > 0)
     {
-      canonical_name = alloca (strlen (imported_name_prefix) + 2 + strlen (imported_name) + 1);
+      canonical_name = alloca (strlen (imported_name_prefix)
+                               + 2 + strlen (imported_name) + 1);
       strcpy (canonical_name, imported_name_prefix);
       strcat (canonical_name, "::");
       strcat (canonical_name, imported_name);
@@ -3458,7 +3462,10 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
       strcpy (canonical_name, imported_name);
     }
 
-  using_directives = cp_add_using (import_prefix,canonical_name, using_directives);
+  using_directives = cp_add_using (import_prefix,
+                                   canonical_name,
+                                   import_alias,
+                                   using_directives);
 }
 
 static void
@@ -5617,7 +5624,7 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
       if (is_anonymous)
 	{
 	  const char *previous_prefix = determine_prefix (die, cu);
-	  cp_add_using_directive (previous_prefix, TYPE_NAME (type));
+	  cp_add_using_directive (previous_prefix, TYPE_NAME (type), NULL);
 	}
     }
 

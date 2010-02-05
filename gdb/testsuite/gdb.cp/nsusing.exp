@@ -116,14 +116,11 @@ if ![runto marker2] then {
     continue
 }
 
-setup_kfail "gdb/7935" "*-*-*"
 gdb_test "print B::_a" "= 1"
 
-setup_kfail "gdb/7935" "*-*-*"
 gdb_test "print _a" "No symbol \"_a\" in current context." \
     "print _a in namespace alias scope"
 
-setup_kfail "gdb/7935" "*-*-*"
 gdb_test "print x" "No symbol \"x\" in current context." \
     "print x in namespace alias scope"
 

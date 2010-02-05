@@ -1,3 +1,16 @@
+2010-02-05  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	PR c++/7935:
+	* cp-support.h: Added char* alias element to using_direct data
+	struct.
+	(cp_add_using): Added char* alias argument.
+	(cp_add_using_directive): Ditto.
+	* cp-namespace.c: Updated with the above changes.
+	(cp_lookup_symbol_imports): Check for aliases.
+	* dwarf2read.c (read_import_statement): Figure out local alias
+	for the import and pass it on to cp_add_using.
+	(read_namespace): Pass alias argument to cp_add_using.
+
 2010-02-05  Hui Zhu  <teawater@gmail.com>
 
 	* defs.h (gdb_bfd_errmsg): New extern.
