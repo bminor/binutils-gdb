@@ -1,3 +1,8 @@
+2010-02-05  Doug Evans  <dje@google.com>
+
+	* gdbint.texinfo (Testsuite): Add a new section to document the
+	various DejaGnu variables that may be overridden.
+
 2010-02-04  Tom Tromey  <tromey@redhat.com>
 
 	PR cli/8830:

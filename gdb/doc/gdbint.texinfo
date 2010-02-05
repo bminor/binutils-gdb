@@ -7599,6 +7599,14 @@ will give a result of ``UNRESOLVED'', like this:
 UNRESOLVED: gdb.base/example.exp: This test script does not work on a remote host.
 @end smallexample
 
+@section Testsuite Parameters
+
+Several variables exist to modify the behavior of the testsuite.
+
+@itemize @bullet
+
+@item @code{TRANSCRIPT}
+
 Sometimes it is convenient to get a transcript of the commands which
 the testsuite sends to @value{GDBN}.  For example, if @value{GDBN}
 crashes during testing, a transcript can be used to more easily
@@ -7619,6 +7627,44 @@ make check RUNTESTFLAGS=TRANSCRIPT=y
 
 Note that the transcript is not always complete.  In particular, tests
 of completion can yield partial command lines.
+
+@item @code{GDB}
+
+Sometimes one wishes to test a different @value{GDBN} than the one in the build
+directory.  For example, one may wish to run the testsuite on
+@file{/usr/bin/gdb}.
+
+@smallexample
+make check RUNTESTFLAGS=GDB=/usr/bin/gdb
+@end smallexample
+
+@item @code{GDBSERVER}
+
+When testing a different @value{GDBN}, it is often useful to also test a
+different gdbserver.
+
+@smallexample
+make check RUNTESTFLAGS="GDB=/usr/bin/gdb GDBSERVER=/usr/bin/gdbserver"
+@end smallexample
+
+@end itemize
+
+There are two ways to run the testsuite and pass additional parameters
+to DejaGnu.  The first is with @kbd{make check} and specifying the
+makefile variable @samp{RUNTESTFLAGS}.
+
+@smallexample
+make check RUNTESTFLAGS=TRANSCRIPT=y
+@end smallexample
+
+The second is to cd to the @file{testsuite} directory and invoke the DejaGnu
+@command{runtest} command directly.
+
+@smallexample
+cd testsuite
+make site.exp
+runtest TRANSCRIPT=y
+@end smallexample
 
 @section Testsuite Organization
 
