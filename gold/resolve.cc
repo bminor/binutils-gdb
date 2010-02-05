@@ -916,7 +916,10 @@ Symbol_table::override_with_special(Sized_symbol<size>* tosym,
 // script to restrict this to only the ones needed for implemented
 // targets.
 
-#ifdef HAVE_TARGET_32_LITTLE
+// We have to instantiate both big and little endian versions because
+// these are used by other templates that depends on size only.
+
+#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
 template
 void
 Symbol_table::resolve<32, false>(
@@ -927,9 +930,7 @@ Symbol_table::resolve<32, false>(
     unsigned int orig_st_shndx,
     Object* object,
     const char* version);
-#endif
 
-#ifdef HAVE_TARGET_32_BIG
 template
 void
 Symbol_table::resolve<32, true>(
@@ -942,7 +943,7 @@ Symbol_table::resolve<32, true>(
     const char* version);
 #endif
 
-#ifdef HAVE_TARGET_64_LITTLE
+#if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
 template
 void
 Symbol_table::resolve<64, false>(
@@ -953,9 +954,7 @@ Symbol_table::resolve<64, false>(
     unsigned int orig_st_shndx,
     Object* object,
     const char* version);
-#endif
 
-#ifdef HAVE_TARGET_64_BIG
 template
 void
 Symbol_table::resolve<64, true>(

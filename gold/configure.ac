@@ -162,6 +162,9 @@ for targ in $target $canon_targets; do
   fi
 done
 
+# Remove any duplicates.
+targetobjs=`echo $targetobjs | tr ' ' '\n' | sort | uniq | tr '\n' ' '`
+
 if test -n "$targ_32_little"; then
   AC_DEFINE(HAVE_TARGET_32_LITTLE, 1,
 	      [Define to support 32-bit little-endian targets])

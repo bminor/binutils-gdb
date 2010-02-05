@@ -3410,6 +3410,9 @@ fi
   fi
 done
 
+# Remove any duplicates.
+targetobjs=`echo $targetobjs | tr ' ' '\n' | sort | uniq | tr '\n' ' '`
+
 if test -n "$targ_32_little"; then
 
 $as_echo "#define HAVE_TARGET_32_LITTLE 1" >>confdefs.h

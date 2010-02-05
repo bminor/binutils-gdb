@@ -1,3 +1,12 @@
+2010-02-04  Doug Kwan  <dougkwan@google.com>
+
+	PR 11247
+	* arm-reloc-property.cc (cstdio): Include.
+	* configure.ac (targetobjs): Remove duplicates.
+	* configure: Regenerate.
+	* resolve.cc (Symbol_table::resolve): Explicit instantiate both
+	big and little endian version for a given address size.
+
 2010-02-03  Doug Kwan  <dougkwan@google.com>
 
 	* arm-reloc-property.cc

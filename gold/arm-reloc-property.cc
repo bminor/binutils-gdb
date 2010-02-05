@@ -22,6 +22,7 @@
 
 #include "gold.h"
 
+#include <cstdio>
 #include <cstring>
 #include <stack>
 #include <string>
