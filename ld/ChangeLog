@@ -1,3 +1,8 @@
+2010-02-05  Ryan Mansfield  <rmansfield@qnx.com>
+
+	* emultempl/armelf.em (PARSE_AND_LIST_OPTIONS): Fix help for
+	--target1-abs and --target1-rel options.
+
 2010-02-03  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/alphaelf.em: Update value expected from elf_object_id.
