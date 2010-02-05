@@ -1,3 +1,9 @@
+2010-02-05  Joseph Myers  <joseph@codesourcery.com>
+
+	* Makefile.am (CPU_TYPES, OBJ_FORMATS, CPU_OBJ_VALID,
+	MULTI_CPU_TYPES, MULTI_CPU_OBJ_VALID): Remove.
+	* Makefile.in: Regenerate.
+
 2010-02-03  Quentin Neill  <quentin.neill@amd.com>
 
 	* config/tc-i386.c (cpu_arch): Change amdfam15 to bdver1.
