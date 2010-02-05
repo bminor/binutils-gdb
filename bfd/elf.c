@@ -4462,6 +4462,22 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		}
 	      p->p_memsz += adjust;
 
+	      if (p->p_paddr + p->p_memsz != sec->lma)
+		{
+		  /* This behavior is a compromise--ld has long
+		     silently changed the lma of sections when
+		     lma - vma is not equal for every section in a
+		     pheader--but only in the internal elf structures.
+		     Silently changing the lma is probably a bug, but
+		     changing it would have subtle and unknown
+		     consequences for existing scripts.
+
+		     Instead modify the bfd data structure to reflect
+		     what happened.  This at least fixes the values
+		     for the lma in the mapfile.  */
+		  sec->lma = p->p_paddr + p->p_memsz;
+		}
+
 	      if (this_hdr->sh_type != SHT_NOBITS)
 		{
 		  if (p->p_filesz + adjust < p->p_memsz)
