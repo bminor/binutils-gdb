@@ -11919,7 +11919,7 @@ CC="$lt_save_CC"
 
 
 
-ALL_LINGUAS="fr sv tr es da vi zh_CN zh_TW ga fi id"
+ALL_LINGUAS="fr sv tr es da vi zh_CN zh_TW ga fi id bg"
 # If we haven't got the data from the intl directory,
 # assume NLS is disabled.
 USE_NLS=no

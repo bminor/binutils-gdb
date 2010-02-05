@@ -1,3 +1,9 @@
+2010-02-05  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (ALL_LIBGUAS): Add bg.
+	* configure: Regenerate.
+	* po/bg.po: New Bulgarian translation.
+
 2010-02-05  Ryan Mansfield  <rmansfield@qnx.com>
 
 	* emultempl/armelf.em (PARSE_AND_LIST_OPTIONS): Fix help for
