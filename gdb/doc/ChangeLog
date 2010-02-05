@@ -2,6 +2,7 @@
 
 	* gdbint.texinfo (Testsuite): Add a new section to document the
 	various DejaGnu variables that may be overridden.
+	Document INTERNAL_GDBFLAGS.
 
 2010-02-04  Tom Tromey  <tromey@redhat.com>
 

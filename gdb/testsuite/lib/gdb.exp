@@ -54,7 +54,10 @@ if ![info exists GDBFLAGS] {
 verbose "using GDBFLAGS = $GDBFLAGS" 2
 
 # INTERNAL_GDBFLAGS contains flags that the testsuite requires.
-set INTERNAL_GDBFLAGS "-nw -nx"
+global INTERNAL_GDBFLAGS
+if ![info exists INTERNAL_GDBFLAGS] {
+    set INTERNAL_GDBFLAGS "-nw -nx"
+}
 
 # The variable gdb_prompt is a regexp which matches the gdb prompt.
 # Set it if it is not already set.

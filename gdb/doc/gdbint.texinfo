@@ -7647,6 +7647,33 @@ different gdbserver.
 make check RUNTESTFLAGS="GDB=/usr/bin/gdb GDBSERVER=/usr/bin/gdbserver"
 @end smallexample
 
+@item @code{INTERNAL_GDBFLAGS}
+
+When running the testsuite normally one doesn't want whatever is in
+@file{~/.gdbinit} to interfere with the tests, therefore the test harness
+passes @option{-nx} to @value{GDBN}.  One also doesn't want any windowed
+version of @value{GDBN}, e.g., @command{gdbtui}, to run.
+This is achieved via @code{INTERNAL_GDBFLAGS}.  
+
+@smallexample
+set INTERNAL_GDBFLAGS "-nw -nx"
+@end smallexample
+
+This is all well and good, except when testing an installed @value{GDBN}
+that has been configured with @option{--with-system-gdbinit}.  Here one
+does not want @file{~/.gdbinit} loaded but one may want the system
+@file{.gdbinit} file loaded.  This can be achieved by pointing @code{$HOME}
+at a directory without a @file{.gdbinit} and by overriding
+@code{INTERNAL_GDBFLAGS} and removing @option{-nx}.
+
+@smallexample
+cd testsuite
+HOME=`pwd` runtest \
+  GDB=/usr/bin/gdb \
+  GDBSERVER=/usr/bin/gdbserver \
+  INTERNAL_GDBFLAGS=-nw
+@end smallexample
+
 @end itemize
 
 There are two ways to run the testsuite and pass additional parameters

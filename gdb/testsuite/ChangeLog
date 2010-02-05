@@ -1,3 +1,8 @@
+2010-02-05  Doug Evans  <dje@google.com>
+
+	* lib/gdb.exp (INTERNAL_GDBFLAGS): Don't override value provided by
+	user.
+
 2010-02-05  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	PR c++/7935:
