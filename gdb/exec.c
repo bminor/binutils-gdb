@@ -219,6 +219,7 @@ exec_file_attach (char *filename, int from_tty)
       char *scratch_pathname;
       int scratch_chan;
       struct target_section *sections = NULL, *sections_end = NULL;
+      char **matching;
 
       scratch_chan = openp (getenv ("PATH"), OPF_TRY_CWD_FIRST, filename,
 		   write_files ? O_RDWR | O_BINARY : O_RDONLY | O_BINARY,
@@ -253,13 +254,14 @@ exec_file_attach (char *filename, int from_tty)
       scratch_pathname = xstrdup (scratch_pathname);
       cleanups = make_cleanup (xfree, scratch_pathname);
 
-      if (!bfd_check_format (exec_bfd, bfd_object))
+      if (!bfd_check_format_matches (exec_bfd, bfd_object, &matching))
 	{
 	  /* Make sure to close exec_bfd, or else "run" might try to use
 	     it.  */
 	  exec_close ();
 	  error (_("\"%s\": not in executable format: %s"),
-		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
+		 scratch_pathname,
+		 gdb_bfd_errmsg (bfd_get_error (), matching));
 	}
 
       /* FIXME - This should only be run for RS6000, but the ifdef is a poor

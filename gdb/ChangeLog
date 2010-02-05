@@ -1,3 +1,12 @@
+2010-02-05  Hui Zhu  <teawater@gmail.com>
+
+	* defs.h (gdb_bfd_errmsg): New extern.
+	* exec.c (exec_file_attach): Change bfd_errmsg to
+	gdb_bfd_errmsg.
+	* utils.c (AMBIGUOUS_MESS1): New macro.
+	(AMBIGUOUS_MESS2): New macro.
+	(gdb_bfd_errmsg): New function.
+
 2010-02-04  Doug Evans  <dje@google.com>
 
 	* solib-svr4.c (enable_break): Add comment.
