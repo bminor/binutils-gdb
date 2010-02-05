@@ -3973,12 +3973,14 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	                         fpscr_vxsnan | fpscr_vximz,
 	                         0, /*single?*/
 	                         0) /*negate?*/) {
+	  union { double d; unsigned64 u; } tmp;
 	  invalid_arithemetic_operation(processor, cia,
-	                                (unsigned64*)&product, *frA, 0, *frC,
+	                                &tmp.u, *frA, 0, *frC,
 	                                0, /*instruction_is_frsp*/
 	                                0, /*instruction_is_convert_to_64bit*/
 	                                0, /*instruction_is_convert_to_32bit*/
 	                                0); /*single-precision*/
+	  product = tmp.d;
 	}
 	else {
 	  /*HACK!*/
@@ -4018,12 +4020,14 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	                         fpscr_vxsnan | fpscr_vximz,
 	                         1, /*single?*/
 	                         0) /*negate?*/) {
+	  union { double d; unsigned64 u; } tmp;
 	  invalid_arithemetic_operation(processor, cia,
-	                                (unsigned64*)&product, *frA, 0, *frC,
+	                                &tmp.u, *frA, 0, *frC,
 	                                0, /*instruction_is_frsp*/
 	                                0, /*instruction_is_convert_to_64bit*/
 	                                0, /*instruction_is_convert_to_32bit*/
 	                                0); /*single-precision*/
+	  product = tmp.d;
 	}
 	else {
 	  /*HACK!*/
@@ -4063,12 +4067,14 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	                         fpscr_vxsnan | fpscr_vximz,
 	                         0, /*single?*/
 	                         0) /*negate?*/) {
+	  union { double d; unsigned64 u; } tmp;
 	  invalid_arithemetic_operation(processor, cia,
-	                                (unsigned64*)&product, *frA, 0, *frC,
+	                                &tmp.u, *frA, 0, *frC,
 	                                0, /*instruction_is_frsp*/
 	                                0, /*instruction_is_convert_to_64bit*/
 	                                0, /*instruction_is_convert_to_32bit*/
 	                                0); /*single-precision*/
+	  product = tmp.d;
 	}
 	else {
 	  /*HACK!*/
@@ -4108,12 +4114,14 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	                         fpscr_vxsnan | fpscr_vximz,
 	                         1, /*single?*/
 	                         0) /*negate?*/) {
+	  union { double d; unsigned64 u; } tmp;
 	  invalid_arithemetic_operation(processor, cia,
-	                                (unsigned64*)&product, *frA, 0, *frC,
+	                                &tmp.u, *frA, 0, *frC,
 	                                0, /*instruction_is_frsp*/
 	                                0, /*instruction_is_convert_to_64bit*/
 	                                0, /*instruction_is_convert_to_32bit*/
 	                                0); /*single-precision*/
+	  product = tmp.d;
 	}
 	else {
 	  /*HACK!*/
@@ -4153,8 +4161,9 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	                         fpscr_vxsnan | fpscr_vximz,
 	                         0, /*single?*/
 	                         0) /*negate?*/) {
+	  union { double d; unsigned64 u; } tmp;
 	  invalid_arithemetic_operation(processor, cia,
-	                                (unsigned64*)&product, *frA, 0, *frC,
+	                                &tmp.u, *frA, 0, *frC,
 	                                0, /*instruction_is_frsp*/
 	                                0, /*instruction_is_convert_to_64bit*/
 	                                0, /*instruction_is_convert_to_32bit*/
@@ -4198,12 +4207,14 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	                         fpscr_vxsnan | fpscr_vximz,
 	                         1, /*single?*/
 	                         0) /*negate?*/) {
+	  union { double d; unsigned64 u; } tmp;
 	  invalid_arithemetic_operation(processor, cia,
-	                                (unsigned64*)&product, *frA, 0, *frC,
+	                                &tmp.u, *frA, 0, *frC,
 	                                0, /*instruction_is_frsp*/
 	                                0, /*instruction_is_convert_to_64bit*/
 	                                0, /*instruction_is_convert_to_32bit*/
 	                                0); /*single-precision*/
+	  product = tmp.d;
 	}
 	else {
 	  /*HACK!*/
@@ -4243,12 +4254,14 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	                         fpscr_vxsnan | fpscr_vximz,
 	                         0, /*single?*/
 	                         0) /*negate?*/) {
+	  union { double d; unsigned64 u; } tmp;
 	  invalid_arithemetic_operation(processor, cia,
-	                                (unsigned64*)&product, *frA, 0, *frC,
+	                                &tmp.u, *frA, 0, *frC,
 	                                0, /*instruction_is_frsp*/
 	                                0, /*instruction_is_convert_to_64bit*/
 	                                0, /*instruction_is_convert_to_32bit*/
 	                                0); /*single-precision*/
+	  product = tmp.d;
 	}
 	else {
 	  /*HACK!*/
@@ -4288,12 +4301,14 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	                         fpscr_vxsnan | fpscr_vximz,
 	                         1, /*single?*/
 	                         0) /*negate?*/) {
+	  union { double d; unsigned64 u; } tmp;
 	  invalid_arithemetic_operation(processor, cia,
-	                                (unsigned64*)&product, *frA, 0, *frC,
+	                                &tmp.u, *frA, 0, *frC,
 	                                0, /*instruction_is_frsp*/
 	                                0, /*instruction_is_convert_to_64bit*/
 	                                0, /*instruction_is_convert_to_32bit*/
 	                                0); /*single-precision*/
+	  product = tmp.d;
 	}
 	else {
 	  /*HACK!*/

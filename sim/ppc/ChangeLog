@@ -1,3 +1,8 @@
+2010-02-05  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* ppc-instructions: Fix aliasing bugs when calling
+	invalid_arithemetic_operation.
+
 2009-11-13  Nathan Froyd  <froydnj@codesourcery.com>
 
 	* configure.ac: If build != host, create a separate build-config.h
