@@ -75,9 +75,6 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 bfd_boolean density_supported = XCHAL_HAVE_DENSITY;
 bfd_boolean absolute_literals_supported = XSHAL_USE_ABSOLUTE_LITERALS;
 
-/* Maximum width we would pad an unreachable frag to get alignment.  */
-#define UNREACHABLE_MAX_WIDTH  8
-
 static vliw_insn cur_vinsn;
 
 unsigned xtensa_num_pipe_stages;
@@ -7120,7 +7117,7 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
 	{
 	  gas_assert (finish_frag);
 	  frag_var (rs_machine_dependent,
-		    UNREACHABLE_MAX_WIDTH, UNREACHABLE_MAX_WIDTH,
+		    xtensa_fetch_width, xtensa_fetch_width,
 		    RELAX_UNREACHABLE,
 		    frag_now->fr_symbol, frag_now->fr_offset, NULL);
 	  xtensa_set_frag_assembly_state (frag_now);
@@ -7129,7 +7126,7 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
 	{
 	  gas_assert (finish_frag);
 	  frag_var (rs_machine_dependent,
-		    UNREACHABLE_MAX_WIDTH, UNREACHABLE_MAX_WIDTH,
+		    xtensa_fetch_width, xtensa_fetch_width,
 		    RELAX_MAYBE_UNREACHABLE,
 		    frag_now->fr_symbol, frag_now->fr_offset, NULL);
 	  xtensa_set_frag_assembly_state (frag_now);
@@ -8941,7 +8938,7 @@ future_alignment_required (fragS *fragP, long stretch ATTRIBUTE_UNUSED)
 	{
 	  if (this_frag->fr_subtype == RELAX_UNREACHABLE)
 	    {
-	      gas_assert (opt_diff <= UNREACHABLE_MAX_WIDTH);
+	      gas_assert (opt_diff <= (signed) xtensa_fetch_width);
 	      return opt_diff;
 	    }
 	  return 0;
@@ -9023,7 +9020,8 @@ bytes_to_stretch (fragS *this_frag,
 {
   int bytes_short = desired_diff - num_widens;
 
-  gas_assert (desired_diff >= 0 && desired_diff < 8);
+  gas_assert (desired_diff >= 0 
+	      && desired_diff < (signed) xtensa_fetch_width);
   if (desired_diff == 0)
     return 0;
 
