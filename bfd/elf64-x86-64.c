@@ -639,7 +639,7 @@ elf64_x86_64_link_hash_table_create (bfd *abfd)
   ret->tls_ld_got.refcount = 0;
   ret->sgotplt_jump_table_size = 0;
   ret->tls_module_base = NULL;
-  
+
   ret->loc_hash_table = htab_try_create (1024,
 					 elf64_x86_64_local_htab_hash,
 					 elf64_x86_64_local_htab_eq,
@@ -1116,7 +1116,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 						   TRUE);
 	      if (h == NULL)
 		return FALSE;
-	      
+
 	      /* Fake a STT_GNU_IFUNC symbol.  */
 	      h->type = STT_GNU_IFUNC;
 	      h->def_regular = 1;
@@ -1168,7 +1168,7 @@ elf64_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      /* It is referenced by a non-shared object. */
 	      h->ref_regular = 1;
 	      h->needs_plt = 1;
- 
+
 	      /* STT_GNU_IFUNC symbol must go through PLT.  */
 	      h->plt.refcount += 1;
 
@@ -3782,7 +3782,7 @@ elf64_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 	 corresponds to this symbol.  This is the index of this symbol
 	 in all the symbols for which we are making plt entries.  The
 	 first entry in the procedure linkage table is reserved.
-	 
+
 	 Get the offset into the .got table of the entry that
 	 corresponds to this function.	Each .got entry is GOT_ENTRY_SIZE
 	 bytes. The first three are reserved for the dynamic linker.

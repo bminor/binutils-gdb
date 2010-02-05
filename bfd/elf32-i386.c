@@ -1334,7 +1334,7 @@ elf_i386_check_relocs (bfd *abfd,
 						   TRUE);
 	      if (h == NULL)
 		return FALSE;
-	      
+
 	      /* Fake a STT_GNU_IFUNC symbol.  */
 	      h->type = STT_GNU_IFUNC;
 	      h->def_regular = 1;
@@ -1383,7 +1383,7 @@ elf_i386_check_relocs (bfd *abfd,
 	      /* It is referenced by a non-shared object. */
 	      h->ref_regular = 1;
 	      h->needs_plt = 1;
- 
+
 	      /* STT_GNU_IFUNC symbol must go through PLT.  */
 	      h->plt.refcount += 1;
 
@@ -2796,7 +2796,7 @@ elf_i386_relocate_section (bfd *output_bfd,
   bfd_boolean is_vxworks_tls;
 
   BFD_ASSERT (is_i386_elf (input_bfd));
-  
+
   htab = elf_i386_hash_table (info);
   if (htab == NULL)
     return FALSE;
@@ -3082,7 +3082,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		  /* We can't use h->got.offset here to save state, or
 		     even just remember the offset, as finish_dynamic_symbol
 		     would use that as offset into .got.  */
-		  
+
 		  if (htab->elf.splt != NULL)
 		    {
 		      plt_index = h->plt.offset / PLT_ENTRY_SIZE - 1;
@@ -3514,7 +3514,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		     xchg %ax,%ax  */
 
 		  bfd_vma roff;
-		  
+
 		  roff = rel->r_offset;
 		  bfd_put_8 (output_bfd, 0x66, contents + roff);
 		  bfd_put_8 (output_bfd, 0x90, contents + roff + 1);
@@ -4130,7 +4130,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 	 Get the offset into the .got table of the entry that
 	 corresponds to this function.  Each .got entry is 4 bytes.
 	 The first three are reserved.
-	 
+
 	 For static executables, we don't reserve anything.  */
 
       if (plt == htab->elf.splt)
