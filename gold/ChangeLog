@@ -1,3 +1,10 @@
+2010-02-05  Doug Kwan  <dougkwan@google.com>
+
+	PR 11247
+	* arm.cc (Arm_relobj::section_is_scannable): New method.
+	(Arm_relobj::section_needs_reloc_stub_scanning): Use it.
+	(Arm_relobj::section_needs_cortex_a8_stub_scanning): Same.
+
 2010-02-04  Doug Kwan  <dougkwan@google.com>
 
 	PR 11247

@@ -1580,6 +1580,11 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
 				    const Relobj::Output_sections&,
 				    const Symbol_table *, const unsigned char*);
 
+  // Whether a section is a scannable text section.
+  bool
+  section_is_scannable(const elfcpp::Shdr<32, big_endian>&, unsigned int,
+		       const Output_section*, const Symbol_table *);
+
   // Whether a section needs to be scanned for the Cortex-A8 erratum.
   bool
   section_needs_cortex_a8_stub_scanning(const elfcpp::Shdr<32, big_endian>&,
@@ -5447,6 +5452,44 @@ Arm_output_section<big_endian>::fix_exidx_coverage(
 
 // Arm_relobj methods.
 
+// Determine if an input section is scannable for stub processing.  SHDR is
+// the header of the section and SHNDX is the section index.  OS is the output
+// section for the input section and SYMTAB is the global symbol table used to
+// look up ICF information.
+
+template<bool big_endian>
+bool
+Arm_relobj<big_endian>::section_is_scannable(
+    const elfcpp::Shdr<32, big_endian>& shdr,
+    unsigned int shndx,
+    const Output_section* os,
+    const Symbol_table *symtab)
+{
+  // Skip any empty sections, unallocated sections or sections whose
+  // type are not SHT_PROGBITS.
+  if (shdr.get_sh_size() == 0
+      || (shdr.get_sh_flags() & elfcpp::SHF_ALLOC) == 0
+      || shdr.get_sh_type() != elfcpp::SHT_PROGBITS)
+    return false;
+
+  // Skip any discarded or ICF'ed sections.
+  if (os == NULL || symtab->is_section_folded(this, shndx))
+    return false;
+
+  // If this requires special offset handling, check to see if it is
+  // a relaxed section.  If this is not, then it is a merged section that
+  // we cannot handle.
+  if (this->is_output_section_offset_invalid(shndx))
+    {
+      const Output_relaxed_input_section* poris =
+	os->find_relaxed_input_section(this, shndx);
+      if (poris == NULL)
+	return false;
+    }
+
+  return true;
+}
+
 // Determine if we want to scan the SHNDX-th section for relocation stubs.
 // This is a helper for Arm_relobj::scan_sections_for_stubs() below.
 
@@ -5467,26 +5510,6 @@ Arm_relobj<big_endian>::section_needs_reloc_stub_scanning(
   if (sh_size == 0)
     return false;
 
-  // Ignore reloc section with bad info.  This error will be
-  // reported in the final link.
-  unsigned int index = this->adjust_shndx(shdr.get_sh_info());
-  if (index >= this->shnum())
-    return false;
-
-  // This relocation section is against a section which we
-  // discarded or if the section is folded into another
-  // section due to ICF.
-  if (out_sections[index] == NULL || symtab->is_section_folded(this, index))
-    return false;
-
-  // Check the section to which relocations are applied.  Ignore relocations
-  // to unallocated sections or EXIDX sections.
-  const unsigned int shdr_size = elfcpp::Elf_sizes<32>::shdr_size;
-  const elfcpp::Shdr<32, big_endian> data_shdr(pshdrs + index * shdr_size);
-  if ((data_shdr.get_sh_flags() & elfcpp::SHF_ALLOC) == 0
-      || data_shdr.get_sh_type() == elfcpp::SHT_ARM_EXIDX)
-    return false;
-
   // Ignore reloc section with unexpected symbol table.  The
   // error will be reported in the final link.
   if (this->adjust_shndx(shdr.get_sh_link()) != this->symtab_shndx())
@@ -5503,7 +5526,16 @@ Arm_relobj<big_endian>::section_needs_reloc_stub_scanning(
   if (reloc_size != shdr.get_sh_entsize() || sh_size % reloc_size != 0)
     return false;
 
-  return true;
+  // Ignore reloc section with bad info.  This error will be
+  // reported in the final link.
+  unsigned int index = this->adjust_shndx(shdr.get_sh_info());
+  if (index >= this->shnum())
+    return false;
+
+  const unsigned int shdr_size = elfcpp::Elf_sizes<32>::shdr_size;
+  const elfcpp::Shdr<32, big_endian> text_shdr(pshdrs + index * shdr_size);
+  return this->section_is_scannable(text_shdr, index,
+				   out_sections[index], symtab);
 }
 
 // Determine if we want to scan the SHNDX-th section for non-relocation stubs.
@@ -5517,15 +5549,9 @@ Arm_relobj<big_endian>::section_needs_cortex_a8_stub_scanning(
     Output_section* os,
     const Symbol_table* symtab)
 {
-  // We only scan non-empty code sections.
-  if ((shdr.get_sh_flags() & elfcpp::SHF_EXECINSTR) == 0
-      || shdr.get_sh_size() == 0)
+  if (!this->section_is_scannable(shdr, shndx, os, symtab))
     return false;
 
-  // Ignore discarded or ICF'ed sections.
-  if (os == NULL || symtab->is_section_folded(this, shndx))
-    return false;
-  
   // Find output address of section.
   Arm_address address = os->output_address(this, shndx, 0);
 
