@@ -1,3 +1,9 @@
+2010-02-06  Ian Lance Taylor  <iant@google.com>
+
+	* configure.ac: Rewrite targetobjs duplicate removal code to use
+	only shell constructs.
+	* configure: Rebuild.
+
 2010-02-05  Doug Kwan  <dougkwan@google.com>
 
 	PR 11247

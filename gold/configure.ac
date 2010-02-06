@@ -163,7 +163,14 @@ for targ in $target $canon_targets; do
 done
 
 # Remove any duplicates.
-targetobjs=`echo $targetobjs | tr ' ' '\n' | sort | uniq | tr '\n' ' '`
+to=""
+for t in $targetobjs; do
+  case " $to " in
+  *" $t "*) ;;
+  *) to="$to $t" ;;
+  esac
+done
+targetobjs=$to
 
 if test -n "$targ_32_little"; then
   AC_DEFINE(HAVE_TARGET_32_LITTLE, 1,
