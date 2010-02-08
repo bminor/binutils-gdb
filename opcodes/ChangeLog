@@ -1,3 +1,9 @@
+2010-02-08  Philipp Tomsich  <philipp.tomsich@theobroma-systems.com>
+
+	* ppc-dis.c (ppc_opts): Add titan entry.
+	* ppc-opc.c (TITAN, MULHW): Define.
+	(powerpc_opcodes): Support AppliedMicro Titan core (APM83xxx).
+
 2010-02-03  Quentin Neill  <quentin.neill@amd.com>
 
 	* i386-gen.c (cpu_flag_init): Rename CPU_AMDFAM15_FLAGS

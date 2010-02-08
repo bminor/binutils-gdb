@@ -1,3 +1,8 @@
+2010-02-08  Philipp Tomsich  <philipp.tomsich@theobroma-systems.com>
+
+	* gas/ppc/titan.d, * gas/ppc/titan.s: New test.
+	* gas/ppc/ppc.exp: Run it.
+
 2010-02-03  Quentin Neill  <quentin.neill@amd.com>
 
 	* gas/i386/i386.exp: Rename amdfam15 test cases to bdver1.

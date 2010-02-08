@@ -1,3 +1,9 @@
+2010-02-08  Philipp Tomsich  <philipp.tomsich@theobroma-systems.com>
+
+	* config/tc-ppc.c (md_show_usage): Mention -mtitan.  Don't use tabs.
+	(ppc_mach): Handle titan.
+	* doc/c-ppc.texi: Mention -mtitan.
+
 2010-02-05  Joseph Myers  <joseph@codesourcery.com>
 
 	* Makefile.am (CPU_TYPES, OBJ_FORMATS, CPU_OBJ_VALID,

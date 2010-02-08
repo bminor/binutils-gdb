@@ -50,5 +50,6 @@ if { [istarget powerpc*-*-*] } then {
 	run_dump_test "power7"
 	run_dump_test "vsx"
 	run_dump_test "476"
+	run_dump_test "titan"
     }
 }

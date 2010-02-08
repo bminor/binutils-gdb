@@ -164,6 +164,9 @@ struct ppc_mopt ppc_opts[] = {
     0 },
   { "spe",     (PPC_OPCODE_PPC | PPC_OPCODE_EFS),
     PPC_OPCODE_SPE },
+  { "titan",   (PPC_OPCODE_PPC | PPC_OPCODE_BOOKE | PPC_OPCODE_32 
+                | PPC_OPCODE_PMR | PPC_OPCODE_RFMCI | PPC_OPCODE_TITAN),
+    0 },
   { "vsx",     (PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC),
     PPC_OPCODE_VSX },
 };

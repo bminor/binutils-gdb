@@ -1,4 +1,4 @@
-@c Copyright 2001, 2002, 2003, 2005, 2006, 2007, 2008
+@c Copyright 2001, 2002, 2003, 2005, 2006, 2007, 2008, 2009, 2010
 @c Free Software Foundation, Inc.
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
@@ -69,6 +69,9 @@ Generate code for Motorola e500 core complex.
 
 @item -mspe
 Generate code for Motorola SPE instructions.
+
+@item -mtitan
+Generate code for AppliedMicro Titan core complex.
 
 @item -mppc64bridge
 Generate code for PowerPC 64, including bridge insns.
