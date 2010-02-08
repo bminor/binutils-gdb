@@ -2413,7 +2413,22 @@ proc default_gdb_init { args } {
     }
 }
 
+# The default timeout used when testing GDB commands.  We want to use
+# the same timeout as the default dejagnu timeout, unless the user has
+# already provided a specific value (probably through a site.exp file).
+global gdb_test_timeout
+if ![info exists gdb_test_timeout] {
+    set gdb_test_timeout $timeout
+}
+
 proc gdb_init { args } {
+    # Reset the timeout value to the default.  This way, any testcase
+    # that changes the timeout value without resetting it cannot affect
+    # the timeout used in subsequent testcases.
+    global gdb_test_timeout
+    global timeout
+    set timeout $gdb_test_timeout
+
     return [eval default_gdb_init $args];
 }
 
