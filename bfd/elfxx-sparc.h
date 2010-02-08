@@ -47,10 +47,6 @@ struct _bfd_sparc_elf_link_hash_table
   struct elf_link_hash_table elf;
 
   /* Short-cuts to get to dynamic linker sections.  */
-  asection *sgot;
-  asection *srelgot;
-  asection *splt;
-  asection *srelplt;
   asection *sdynbss;
   asection *srelbss;
 
@@ -68,9 +64,6 @@ struct _bfd_sparc_elf_link_hash_table
 
   /* The (unloaded but important) .rela.plt.unloaded section, for VxWorks.  */
   asection *srelplt2;
-
-  /* .got.plt is only used on VxWorks.  */
-  asection *sgotplt;
 
   void (*put_word) (bfd *, bfd_vma, void *);
   bfd_vma (*r_info) (Elf_Internal_Rela *, bfd_vma, bfd_vma);

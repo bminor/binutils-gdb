@@ -1,3 +1,37 @@
+2010-02-08  David S. Miller  <davem@davemloft.net>
+
+	* elfxx-sparc.h (struct _bfd_sparc_elf_link_hash_table): Remove sgot,
+	srelgot, splt, srelplt, and sgotplt members in favor of generic copies.
+
+	* elfxx-sparc.c (create_got_section): Delete.
+	(_bfd_sparc_elf_create_dynamic_sections): Don't call, the dynamic
+	section creator does that work for us.  Use ->elf.foo instead of
+	->foo where applicable.
+	(_bfd_sparc_elf_check_relocs): Use ->elf.foo instead of ->foo
+	where applicable.
+	(allocate_dynrelocs): Likewise.
+	(_bfd_sparc_elf_size_dynamic_sections): Likewise.
+	(_bfd_sparc_elf_relocate_section): Likewise.
+	(sparc_vxworks_build_plt_entry): Likewise.
+	(_bfd_sparc_elf_finish_dynamic_symbol): Likewise.
+	(sparc_finish_dyn): Likewise.
+	(sparc_vxworks_finish_exec_plt): Likewise.
+	(sparc_vxworks_finish_shared_plt): Likewise.
+	(_bfd_sparc_elf_finish_dynamic_sections): Likewise.
+
+	* elfxx-sparc.c (_bfd_sparc_elf_check_relocs): Use the SYMBOL_*
+	macros for visibilty and locality checks.
+	(_bfd_sparc_elf_adjust_dynamic_symbol): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(_bfd_sparc_elf_relocate_section): Likewise.
+	(_bfd_sparc_elf_finish_dynamic_symbol):Likewise.
+
+	* elfxx-sparc.c (_bfd_sparc_elf_finish_dynamic_symbol): Remove set
+	but never used local var 'dynobj'.
+
+	* elfxx-sparc.c (_bfd_sparc_elf_adjust_dynamic_symbol): Handle
+	nocopyreloc.
+
 2010-02-08  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
 	* xcofflink.c (_bfd_xcoff_bfd_final_link): When calculating
