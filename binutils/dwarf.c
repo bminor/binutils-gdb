@@ -4114,6 +4114,8 @@ display_debug_frames (struct dwarf_section *section,
 		    q += 1 + size_of_encoded_value (*q);
 		  else if (*p == 'R')
 		    fc->fde_encoding = *q++;
+		  else if (*p == 'S')
+		    ;
 		  else
 		    break;
 		  p++;
