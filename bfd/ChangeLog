@@ -1,3 +1,7 @@
+2010-02-08  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_check_relocs): Remove dead ifunc code.
+
 2010-02-05  Sterling Augustine  <sterling@tensilica.com>
 
 	* elf.c (assign_file_positions_for_load_sections) Update lma of

@@ -3447,7 +3447,6 @@ ppc_elf_check_relocs (bfd *abfd,
       enum elf_ppc_reloc_type r_type;
       struct elf_link_hash_entry *h;
       int tls_type;
-      struct plt_entry **ifunc;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       if (r_symndx < symtab_hdr->sh_info)
@@ -3475,46 +3474,38 @@ ppc_elf_check_relocs (bfd *abfd,
 	}
 
       tls_type = 0;
-      ifunc = NULL;
       r_type = ELF32_R_TYPE (rel->r_info);
-      if (!htab->is_vxworks)
+      if (h == NULL && !htab->is_vxworks)
 	{
-	  if (h != NULL)
+	  Elf_Internal_Sym *isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+							  abfd, r_symndx);
+	  if (isym == NULL)
+	    return FALSE;
+
+	  if (ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC
+	      && (!info->shared
+		  || is_branch_reloc (r_type)))
 	    {
-	      if (h->type == STT_GNU_IFUNC)
-		ifunc = &h->plt.plist;
-	    }
-	  else
-	    {
-	      Elf_Internal_Sym *isym = bfd_sym_from_r_symndx (&htab->sym_cache,
-							      abfd, r_symndx);
-	      if (isym == NULL)
+	      struct plt_entry **ifunc;
+	      bfd_vma addend;
+
+	      ifunc = update_local_sym_info (abfd, symtab_hdr, r_symndx,
+					     PLT_IFUNC);
+	      if (ifunc == NULL)
 		return FALSE;
 
-	      if (ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC
-		  && (!info->shared
-		      || is_branch_reloc (r_type)))
+	      /* STT_GNU_IFUNC symbols must have a PLT entry;
+		 In a non-pie executable even when there are
+		 no plt calls.  */
+	      addend = 0;
+	      if (r_type == R_PPC_PLTREL24)
 		{
-		  bfd_vma addend;
-
-		  ifunc = update_local_sym_info (abfd, symtab_hdr, r_symndx,
-						 PLT_IFUNC);
-		  if (ifunc == NULL)
-		    return FALSE;
-
-		  /* STT_GNU_IFUNC symbols must have a PLT entry;
-		     In a non-pie executable even when there are
-		     no plt calls.  */
-		  addend = 0;
-		  if (r_type == R_PPC_PLTREL24)
-		    {
-		      ppc_elf_tdata (abfd)->makes_plt_call = 1;
-		      if (info->shared)
-			addend = rel->r_addend;
-		    }
-		  if (!update_plt_info (abfd, ifunc, got2, addend))
-		    return FALSE;
+		  ppc_elf_tdata (abfd)->makes_plt_call = 1;
+		  if (info->shared)
+		    addend = rel->r_addend;
 		}
+	      if (!update_plt_info (abfd, ifunc, got2, addend))
+		return FALSE;
 	    }
 	}
 
