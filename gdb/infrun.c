@@ -2664,7 +2664,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 {
   struct frame_info *frame;
   struct gdbarch *gdbarch;
-  struct regcache *regcache;
   int sw_single_step_trap_p = 0;
   int stopped_by_watchpoint;
   int stepped_after_stopped_by_watchpoint = 0;
@@ -2735,18 +2734,21 @@ handle_inferior_event (struct execution_control_state *ecs)
      non-executable stack.  This happens for call dummy breakpoints
      for architectures like SPARC that place call dummies on the
      stack.  */
-  regcache = get_thread_regcache (ecs->ptid);
   if (ecs->ws.kind == TARGET_WAITKIND_STOPPED
       && (ecs->ws.value.sig == TARGET_SIGNAL_ILL
 	  || ecs->ws.value.sig == TARGET_SIGNAL_SEGV
-	  || ecs->ws.value.sig == TARGET_SIGNAL_EMT)
-      && breakpoint_inserted_here_p (get_regcache_aspace (regcache),
-				     regcache_read_pc (regcache)))
+	  || ecs->ws.value.sig == TARGET_SIGNAL_EMT))
     {
-      if (debug_infrun)
-	fprintf_unfiltered (gdb_stdlog,
-			    "infrun: Treating signal as SIGTRAP\n");
-      ecs->ws.value.sig = TARGET_SIGNAL_TRAP;
+      struct regcache *regcache = get_thread_regcache (ecs->ptid);
+
+      if (breakpoint_inserted_here_p (get_regcache_aspace (regcache),
+				      regcache_read_pc (regcache)))
+	{
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: Treating signal as SIGTRAP\n");
+	  ecs->ws.value.sig = TARGET_SIGNAL_TRAP;
+	}
     }
 
   /* Mark the non-executing threads accordingly.  In all-stop, all

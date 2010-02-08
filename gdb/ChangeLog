@@ -1,3 +1,8 @@
+2010-02-08  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* infrun.c (handle_inferior_event): Do not look up regcache
+	for exited processes.
+
 Mon Feb  8 13:17:10 2010  Chris Moller  <moller@mollerware.com>
 
 	PR gdb/10728
