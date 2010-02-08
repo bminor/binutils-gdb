@@ -8317,7 +8317,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   asection *s;
   struct ppc_link_hash_entry *eh;
   struct ppc_dyn_relocs *p;
-  struct got_entry *gent;
+  struct got_entry **pgent, *gent;
 
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
@@ -8416,7 +8416,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    gent->tls_type = TLS_TLS | TLS_TPREL;
 	}
 
-  for (gent = h->got.glist; gent != NULL; gent = gent->next)
+  pgent = &h->got.glist;
+  while ((gent = *pgent) != NULL)
     if (gent->got.refcount > 0)
       {
 	/* Make sure this symbol is output as a dynamic symbol.
@@ -8435,7 +8436,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    && !h->def_dynamic)
 	  {
 	    ppc64_tlsld_got (gent->owner)->got.refcount += 1;
-	    gent->got.offset = (bfd_vma) -1;
+	    *pgent = gent->next;
 	    continue;
 	  }
 
@@ -8443,9 +8444,10 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  abort ();
 
 	allocate_got (h, info, gent);
+	pgent = &gent->next;
       }
     else
-      gent->got.offset = (bfd_vma) -1;
+      *pgent = gent->next;
 
   if (eh->dyn_relocs == NULL
       || (!htab->elf.dynamic_sections_created
@@ -8663,15 +8665,16 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       srel = ppc64_elf_tdata (ibfd)->relgot;
       for (; lgot_ents < end_lgot_ents; ++lgot_ents, ++lgot_masks)
 	{
-	  struct got_entry *ent;
+	  struct got_entry **pent, *ent;
 
-	  for (ent = *lgot_ents; ent != NULL; ent = ent->next)
+	  pent = lgot_ents;
+	  while ((ent = *pent) != NULL)
 	    if (ent->got.refcount > 0)
 	      {
 		if ((ent->tls_type & *lgot_masks & TLS_LD) != 0)
 		  {
 		    ppc64_tlsld_got (ibfd)->got.refcount += 1;
-		    ent->got.offset = (bfd_vma) -1;
+		    *pent = ent->next;
 		  }
 		else
 		  {
@@ -8689,10 +8692,11 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 			htab->got_reli_size
 			  += num * sizeof (Elf64_External_Rela);
 		      }
+		    pent = &ent->next;
 		  }
 	      }
 	    else
-	      ent->got.offset = (bfd_vma) -1;
+	      *pent = ent->next;
 	}
 
       /* Allocate space for calls to local STT_GNU_IFUNC syms in .iplt.  */
@@ -9848,36 +9852,24 @@ ppc64_elf_next_toc_section (struct bfd_link_info *info, asection *isec)
   return TRUE;
 }
 
-/* This function removes unneeded got entries (those with got.offset == -1)
-   and merges entries in the same toc group.  */
+/* This function merges got entries in the same toc group.  */
 
 static void
 merge_got_entries (struct got_entry **pent)
 {
   struct got_entry *ent, *ent2;
 
-  while ((ent = *pent) != NULL)
-    {
-      if (!ent->is_indirect)
-	{
-	  if (ent->got.offset == (bfd_vma) -1)
-	    {
-	      *pent = ent->next;
-	      continue;
-	    }
-	  for (ent2 = ent->next; ent2 != NULL; ent2 = ent2->next)
-	    if (!ent2->is_indirect
-		&& ent2->got.offset != (bfd_vma) -1
-		&& ent2->addend == ent->addend
-		&& ent2->tls_type == ent->tls_type
-		&& elf_gp (ent2->owner) == elf_gp (ent->owner))
-	      {
-		ent2->is_indirect = TRUE;
-		ent2->got.ent = ent;
-	      }
-	}
-      pent = &ent->next;
-    }
+  for (ent = *pent; ent != NULL; ent = ent->next)
+    if (!ent->is_indirect)
+      for (ent2 = ent->next; ent2 != NULL; ent2 = ent2->next)
+	if (!ent2->is_indirect
+	    && ent2->addend == ent->addend
+	    && ent2->tls_type == ent->tls_type
+	    && elf_gp (ent2->owner) == elf_gp (ent->owner))
+	  {
+	    ent2->is_indirect = TRUE;
+	    ent2->got.ent = ent;
+	  }
 }
 
 /* Called via elf_link_hash_traverse to merge GOT entries for global

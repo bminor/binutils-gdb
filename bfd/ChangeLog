@@ -1,5 +1,11 @@
 2010-02-09  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (allocate_dynrelocs): Remove unused got structs here..
+	(ppc64_elf_size_dynamic_sections): ..and here..
+	(merge_got_entries): ..rather than here.
+
+2010-02-09  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (struct ppc_link_hash_table): Add do_multi_toc.
 	(has_small_toc_reloc): Define.
 	(ppc64_elf_check_relocs): Set the above flags.
