@@ -1,10 +1,16 @@
+2010-02-08  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-powerpc/apuinfo-nul.s: New.
+	* ld-powerpc/apuinfo.rd: Add it.
+	* ld-powerpc/powerpc.exp: Likewise.
+
 2010-02-01  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
-        * ld-arm/jump-reloc-veneers-long.d: New test.
-        * ld-arm/jump-reloc-veneers-short1.d: Likewise.
-        * ld-arm/jump-reloc-veneers-short2.d: Likewise.
-        * ld-arm/jump-reloc-veneers.s: Likewise.
-        * ld-arm/arm-elf.exp (armelftests): Run them.
+	* ld-arm/jump-reloc-veneers-long.d: New test.
+	* ld-arm/jump-reloc-veneers-short1.d: Likewise.
+	* ld-arm/jump-reloc-veneers-short2.d: Likewise.
+	* ld-arm/jump-reloc-veneers.s: Likewise.
+	* ld-arm/arm-elf.exp (armelftests): Run them.
 
 2010-01-28  Nick Clifton  <nickc@redhat.com>
 

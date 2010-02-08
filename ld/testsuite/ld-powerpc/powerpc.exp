@@ -101,7 +101,7 @@ set ppcelftests {
     {"Reloc section order" "-melf32ppc -shared -z nocombreloc" "-a32" {reloc.s}
      {{objdump -hw reloc.d}} "reloc.so"}
     {"APUinfo section processing" "-melf32ppc"
-     "-a32 -me500" {apuinfo1.s apuinfo2.s}
+     "-a32 -me500" {apuinfo1.s apuinfo-nul.s apuinfo2.s}
     {{readelf -x2 apuinfo.rd}} "apuinfo"}
     {"TLS32 static exec" "-melf32ppc" "-a32"  {tls32.s tlslib32.s}
      {{objdump -dr tls32.d} {objdump -sj.got tls32.g}

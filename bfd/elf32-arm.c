@@ -9831,7 +9831,8 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	{
 	  _bfd_error_handler
 	    (_("error: %B uses VFP register arguments, %B does not"),
-	     ibfd, obfd);
+	     in_attr[Tag_ABI_VFP_args].i ? ibfd : obfd,
+	     in_attr[Tag_ABI_VFP_args].i ? obfd : ibfd);
 	  result = FALSE;
 	}
     }

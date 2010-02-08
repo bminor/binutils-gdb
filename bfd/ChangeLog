@@ -1,3 +1,9 @@
+2010-02-08  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* elf32-ppc.c (ppc_elf_begin_write_processing): Allow empty
+	apuinfo sections, only scan input sections once and reuse the
+	buffer.
+
 2010-02-08  Philipp Tomsich  <philipp.tomsich@theobroma-systems.com>
 
 	* archures.c (bfd_mach_ppc_titan): Define.
