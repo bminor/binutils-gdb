@@ -53,12 +53,12 @@ extern int overload_debug;
 static int typecmp (int staticp, int varargs, int nargs,
 		    struct field t1[], struct value *t2[]);
 
-static struct value *search_struct_field (char *, struct value *, 
+static struct value *search_struct_field (const char *, struct value *, 
 					  int, struct type *, int);
 
-static struct value *search_struct_method (char *, struct value **,
-				       struct value **,
-				       int, int *, struct type *);
+static struct value *search_struct_method (const char *, struct value **,
+					   struct value **,
+					   int, int *, struct type *);
 
 static int find_oload_champ_namespace (struct type **, int,
 				       const char *, const char *,
@@ -100,7 +100,7 @@ static CORE_ADDR allocate_space_in_inferior (int);
 
 static struct value *cast_into_complex (struct type *, struct value *);
 
-static struct fn_field *find_method_list (struct value **, char *,
+static struct fn_field *find_method_list (struct value **, const char *,
 					  int, struct type *, int *,
 					  struct type **, int *);
 
@@ -1806,7 +1806,7 @@ typecmp (int staticp, int varargs, int nargs,
    fields, look for a baseclass named NAME.  */
 
 static struct value *
-search_struct_field (char *name, struct value *arg1, int offset,
+search_struct_field (const char *name, struct value *arg1, int offset,
 		     struct type *type, int looking_for_baseclass)
 {
   int i;
@@ -1963,7 +1963,7 @@ search_struct_field (char *name, struct value *arg1, int offset,
    (value) -1, else return NULL.  */
 
 static struct value *
-search_struct_method (char *name, struct value **arg1p,
+search_struct_method (const char *name, struct value **arg1p,
 		      struct value **args, int offset,
 		      int *static_memfuncp, struct type *type)
 {
@@ -2093,7 +2093,7 @@ search_struct_method (char *name, struct value **arg1p,
 
 struct value *
 value_struct_elt (struct value **argp, struct value **args,
-		  char *name, int *static_memfuncp, char *err)
+		  const char *name, int *static_memfuncp, const char *err)
 {
   struct type *t;
   struct value *v;
@@ -2188,7 +2188,7 @@ value_struct_elt (struct value **argp, struct value **args,
 */
 
 static struct fn_field *
-find_method_list (struct value **argp, char *method,
+find_method_list (struct value **argp, const char *method,
 		  int offset, struct type *type, int *num_fns,
 		  struct type **basetype, int *boffset)
 {
@@ -2258,7 +2258,7 @@ find_method_list (struct value **argp, char *method,
 */
 
 struct fn_field *
-value_find_oload_method_list (struct value **argp, char *method, 
+value_find_oload_method_list (struct value **argp, const char *method,
 			      int offset, int *num_fns, 
 			      struct type **basetype, int *boffset)
 {
@@ -2315,7 +2315,7 @@ value_find_oload_method_list (struct value **argp, char *method,
 
 int
 find_overload_match (struct type **arg_types, int nargs, 
-		     char *name, int method, int lax, 
+		     const char *name, int method, int lax, 
 		     struct value **objp, struct symbol *fsym,
 		     struct value **valp, struct symbol **symp, 
 		     int *staticp)

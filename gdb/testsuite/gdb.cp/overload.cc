@@ -42,7 +42,18 @@ int overloadargs (int a1, int a2, int a3, int a4, int a5, int a6, int a7,
 int overloadargs (int a1, int a2, int a3, int a4, int a5, int a6, int a7,
                    int a8, int a9, int a10, int a11);
 
+};
 
+struct K {
+  static int staticoverload ();
+  static int staticoverload (int);
+  static int staticoverload (int, int);
+};
+
+namespace N {
+  int nsoverload () { return 1; }
+  int nsoverload (int x) { return x; }
+  int nsoverload (int x, int y) { return x + y; }
 };
 
 int intToChar (char c)
@@ -96,6 +107,14 @@ int main ()
     foo foo_instance1(111);
     foo foo_instance2(222, str);
     foo foo_instance3(foo_instance2);
+
+    // Some calls to ensure all the functions are emitted.
+    K::staticoverload();
+    K::staticoverload(2);
+    K::staticoverload(2, 3);
+    N::nsoverload();
+    N::nsoverload(2);
+    N::nsoverload(2, 3);
 
     #ifdef usestubs
        set_debug_traps();
@@ -196,3 +215,6 @@ int foo::overloadargs (int a1, int a2, int a3, int a4, int a5, int a6, int a7,
 
 
 
+int K::staticoverload () { return 1; }
+int K::staticoverload (int x) { return x; }
+int K::staticoverload (int x, int y) { return x + y; }

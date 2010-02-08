@@ -299,6 +299,16 @@ gdb_test "print overloadNamespace(1)" ".\[0-9\]* = 1"
 gdb_test "print overloadNamespace('a')" ".\[0-9\]* = 1"
 gdb_test "print overloadNamespace(dummyInstance)" ".\[0-9\]* = 2"
 
+# Static methods.
+gdb_test "print K::staticoverload ()" " = 1"
+gdb_test "print K::staticoverload (2)" " = 2"
+gdb_test "print K::staticoverload (2, 3)" " = 5"
+
+# Namespace-qualified functions.
+gdb_test "print N::nsoverload ()" " = 1"
+gdb_test "print N::nsoverload (2)" " = 2"
+gdb_test "print N::nsoverload (2, 3)" " = 5"
+
 if ![runto 'XXX::marker2'] then {
     perror "couldn't run to XXX::marker2"
     continue

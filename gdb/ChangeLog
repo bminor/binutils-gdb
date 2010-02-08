@@ -1,3 +1,17 @@
+2010-02-08  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/8017:
+	* value.h: Update.
+	* valops.c (search_struct_field): Make 'name' const.
+	(search_struct_method): Likewise.
+	(find_method_list): Make 'method' const.
+	(value_struct_elt): Make 'name' and 'err' const.
+	(value_find_oload_method_list): Make 'method' const.
+	(find_overload_match): Make 'name' const.
+	* eval.c (evaluate_subexp_standard): New locals function,
+	function_name.
+	<OP_FUNCALL>: Handle OP_SCOPE specially.
+
 2010-02-08  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* infrun.c (handle_inferior_event): Do not look up regcache

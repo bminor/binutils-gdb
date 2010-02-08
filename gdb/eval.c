@@ -696,6 +696,8 @@ evaluate_subexp_standard (struct type *expect_type,
   long mem_offset;
   struct type **arg_types;
   int save_pos1;
+  struct symbol *function = NULL;
+  char *function_name = NULL;
 
   pc = (*pos)++;
   op = exp->elts[pc].opcode;
@@ -1410,6 +1412,47 @@ evaluate_subexp_standard (struct type *expect_type,
 	  /* Now, say which argument to start evaluating from */
 	  tem = 2;
 	}
+      else if (op == OP_SCOPE
+	       && overload_resolution
+	       && (exp->language_defn->la_language == language_cplus))
+	{
+	  /* Unpack it locally so we can properly handle overload
+	     resolution.  */
+	  struct type *qual_type;
+	  char *name;
+	  int local_tem;
+
+	  pc2 = (*pos)++;
+	  local_tem = longest_to_int (exp->elts[pc2 + 2].longconst);
+	  (*pos) += 4 + BYTES_TO_EXP_ELEM (local_tem + 1);
+	  type = exp->elts[pc2 + 1].type;
+	  name = &exp->elts[pc2 + 3].string;
+
+	  function = NULL;
+	  function_name = NULL;
+	  if (TYPE_CODE (type) == TYPE_CODE_NAMESPACE)
+	    {
+	      function = cp_lookup_symbol_namespace (TYPE_TAG_NAME (type),
+						     name, NULL,
+						     get_selected_block (0),
+						     VAR_DOMAIN, 1);
+	      if (function == NULL)
+		error (_("No symbol \"%s\" in namespace \"%s\"."), 
+		       name, TYPE_TAG_NAME (type));
+
+	      tem = 1;
+	    }
+	  else
+	    {
+	      gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
+			  || TYPE_CODE (type) == TYPE_CODE_UNION);
+	      function_name = name;
+
+	      arg2 = value_zero (type, lval_memory);
+	      ++nargs;
+	      tem = 2;
+	    }
+	}
       else
 	{
 	  /* Non-method function call */
@@ -1441,15 +1484,22 @@ evaluate_subexp_standard (struct type *expect_type,
       /* signal end of arglist */
       argvec[tem] = 0;
 
-      if (op == STRUCTOP_STRUCT || op == STRUCTOP_PTR)
+      if (op == STRUCTOP_STRUCT || op == STRUCTOP_PTR
+	  || (op == OP_SCOPE && function_name != NULL))
 	{
 	  int static_memfuncp;
-	  char tstr[256];
+	  char *tstr;
 
 	  /* Method invocation : stuff "this" as first parameter */
 	  argvec[1] = arg2;
-	  /* Name of method from expression */
-	  strcpy (tstr, &exp->elts[pc2 + 2].string);
+
+	  if (op != OP_SCOPE)
+	    {
+	      /* Name of method from expression */
+	      tstr = &exp->elts[pc2 + 2].string;
+	    }
+	  else
+	    tstr = function_name;
 
 	  if (overload_resolution && (exp->language_defn->la_language == language_cplus))
 	    {
@@ -1466,7 +1516,13 @@ evaluate_subexp_standard (struct type *expect_type,
 					  &arg2 /* the object */ , NULL,
 					  &valp, NULL, &static_memfuncp);
 
-
+	      if (op == OP_SCOPE && !static_memfuncp)
+		{
+		  /* For the time being, we don't handle this.  */
+		  error (_("Call to overloaded function %s requires "
+			   "`this' pointer"),
+			 function_name);
+		}
 	      argvec[1] = arg2;	/* the ``this'' pointer */
 	      argvec[0] = valp;	/* use the method found after overload resolution */
 	    }
@@ -1499,7 +1555,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  argvec[1] = arg2;
 	  argvec[0] = arg1;
 	}
-      else if (op == OP_VAR_VALUE)
+      else if (op == OP_VAR_VALUE || (op == OP_SCOPE && function != NULL))
 	{
 	  /* Non-member function being called */
           /* fn: This can only be done for C++ functions.  A C-style function
@@ -1511,6 +1567,9 @@ evaluate_subexp_standard (struct type *expect_type,
 	      /* Language is C++, do some overload resolution before evaluation */
 	      struct symbol *symp;
 
+	      if (op == OP_VAR_VALUE)
+		function = exp->elts[save_pos1+2].symbol;
+
 	      /* Prepare list of argument types for overload resolution */
 	      arg_types = (struct type **) alloca (nargs * (sizeof (struct type *)));
 	      for (ix = 1; ix <= nargs; ix++)
@@ -1518,12 +1577,18 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	      (void) find_overload_match (arg_types, nargs, NULL /* no need for name */ ,
 				 0 /* not method */ , 0 /* strict match */ ,
-		      NULL, exp->elts[save_pos1+2].symbol /* the function */ ,
+		      NULL, function /* the function */ ,
 					  NULL, &symp, NULL);
 
-	      /* Now fix the expression being evaluated */
-	      exp->elts[save_pos1+2].symbol = symp;
-	      argvec[0] = evaluate_subexp_with_coercion (exp, &save_pos1, noside);
+	      if (op == OP_VAR_VALUE)
+		{
+		  /* Now fix the expression being evaluated */
+		  exp->elts[save_pos1+2].symbol = symp;
+		  argvec[0] = evaluate_subexp_with_coercion (exp, &save_pos1,
+							     noside);
+		}
+	      else
+		argvec[0] = value_of_variable (symp, get_selected_block (0));
 	    }
 	  else
 	    {

@@ -1,3 +1,12 @@
+2010-02-08  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/8017:
+	* gdb.cp/overload.exp: Add tests.
+	* gdb.cp/overload.cc (struct K): New.
+	(namespace N): New.
+	(main): Call new functions.
+	(K::staticoverload): Define.
+
 Mon Feb  8 13:18:22 2010  Chris Moller  <moller@mollerware.com>
 
 	PR gdb/10728
