@@ -154,10 +154,13 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		       struct type **dont_print_vb, int dont_print_statmem)
 {
   int i, len, n_baseclasses;
-  char *last_dont_print = obstack_next_free (&dont_print_statmem_obstack);
   int fields_seen = 0;
 
   CHECK_TYPEDEF (type);
+  
+  if (recurse == 0
+      && obstack_object_size (&dont_print_statmem_obstack) > 0)
+    obstack_free (&dont_print_statmem_obstack, NULL);
 
   fprintf_filtered (stream, "{");
   len = TYPE_NFIELDS (type);
@@ -177,14 +180,13 @@ cp_print_value_fields (struct type *type, struct type *real_type,
     fprintf_filtered (stream, "<No data fields>");
   else
     {
-      struct obstack tmp_obstack = dont_print_statmem_obstack;
-
+      void *statmem_obstack_top = NULL;
+      
       if (dont_print_statmem == 0)
 	{
-	  /* If we're at top level, carve out a completely fresh
-	     chunk of the obstack and use that until this particular
-	     invocation returns.  */
-	  obstack_finish (&dont_print_statmem_obstack);
+	  /* Set the current printed-statics stack top.  */
+	  statmem_obstack_top
+	    = obstack_next_free (&dont_print_statmem_obstack);
 	}
 
       for (i = n_baseclasses; i < len; i++)
@@ -305,10 +307,9 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 
       if (dont_print_statmem == 0)
 	{
-	  /* Free the space used to deal with the printing
-	     of the members from top level.  */
-	  obstack_free (&dont_print_statmem_obstack, last_dont_print);
-	  dont_print_statmem_obstack = tmp_obstack;
+	  /* In effect, a pop of the printed-statics stack.  */
+	  if (obstack_object_size (&dont_print_statmem_obstack) > 0) 
+	    obstack_free (&dont_print_statmem_obstack, statmem_obstack_top);
 	}
 
       if (options->pretty)
@@ -515,8 +516,8 @@ cp_print_static_field (struct type *type,
 
       first_dont_print
 	= (CORE_ADDR *) obstack_base (&dont_print_statmem_obstack);
-      i = (CORE_ADDR *) obstack_next_free (&dont_print_statmem_obstack)
-	- first_dont_print;
+      i = obstack_object_size (&dont_print_statmem_obstack)
+	/ sizeof (CORE_ADDR);
 
       while (--i >= 0)
 	{
@@ -671,8 +672,6 @@ Show printing of object's derived type based on vtable info."), NULL,
 			   show_objectprint,
 			   &setprintlist, &showprintlist);
 
+  obstack_begin (&dont_print_statmem_obstack, 32 * sizeof (CORE_ADDR));
   obstack_begin (&dont_print_vb_obstack, 32 * sizeof (struct type *));
-  obstack_specify_allocation (&dont_print_statmem_obstack,
-			      32 * sizeof (CORE_ADDR), sizeof (CORE_ADDR),
-			      xmalloc, xfree);
 }

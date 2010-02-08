@@ -1,3 +1,9 @@
+2010-02-08  Chris Moller  <cmoller@redhat.com>
+
+	PR gdb/9067
+	* cp-valprint.c (cp_print_value_fields) Fix use of obstacks.
+	cp_print_static_field)  Fix use of obstacks.
+	
 2010-02-08  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-nat.c (linux_nat_resume): In non-stop, also only tag
