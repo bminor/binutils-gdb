@@ -1,3 +1,9 @@
+2010-02-08  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
+	* xcofflink.c (_bfd_xcoff_bfd_final_link): When calculating
+	max_contents_size, only consider sections whose contents must
+	be swapped in.
+
 2010-02-09  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (allocate_dynrelocs): Remove unused got structs here..

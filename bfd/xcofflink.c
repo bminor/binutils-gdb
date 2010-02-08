@@ -5872,10 +5872,13 @@ _bfd_xcoff_bfd_final_link (bfd *abfd, struct bfd_link_info *info)
 
 	      o->reloc_count += sec->reloc_count;
 
-	      if (sec->rawsize > max_contents_size)
-		max_contents_size = sec->rawsize;
-	      if (sec->size > max_contents_size)
-		max_contents_size = sec->size;
+	      if ((sec->flags & SEC_IN_MEMORY) == 0)
+		{
+		  if (sec->rawsize > max_contents_size)
+		    max_contents_size = sec->rawsize;
+		  if (sec->size > max_contents_size)
+		    max_contents_size = sec->size;
+		}
 	      if (coff_section_data (sec->owner, sec) != NULL
 		  && xcoff_section_data (sec->owner, sec) != NULL
 		  && (xcoff_section_data (sec->owner, sec)->lineno_count
