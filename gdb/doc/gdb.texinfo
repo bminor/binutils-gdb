@@ -32787,6 +32787,7 @@ registers using the capitalization used in the description.
 
 @menu
 * ARM Features::
+* i386 Features::
 * MIPS Features::
 * M68K Features::
 * PowerPC Features::
@@ -32821,6 +32822,45 @@ VFP double-precision registers as vectors and to synthesize the
 quad-precision registers from pairs of double-precision registers.
 If this feature is present, @samp{org.gnu.gdb.arm.vfp} must also
 be present and include 32 double-precision registers.
+
+@node i386 Features
+@subsection i386 Features
+@cindex target descriptions, i386 features
+
+The @samp{org.gnu.gdb.i386.core} feature is required for i386/amd64
+targets.  It should describe the following registers:
+
+@itemize @minus
+@item
+@samp{eax} through @samp{edi} plus @samp{eip} for i386
+@item
+@samp{rax} through @samp{r15} plus @samp{rip} for amd64
+@item
+@samp{eflags}, @samp{cs}, @samp{ss}, @samp{ds}, @samp{es},
+@samp{fs}, @samp{gs}
+@item 
+@samp{st0} through @samp{st7}
+@item 
+@samp{fctrl}, @samp{fstat}, @samp{ftag}, @samp{fiseg}, @samp{fioff},
+@samp{foseg}, @samp{fooff} and @samp{fop}
+@end itemize
+
+The register sets may be different, depending on the target.
+
+The @samp{org.gnu.gdb.i386.sse} feature is required.  It should
+describe registers:
+
+@itemize @minus
+@item
+@samp{xmm0} through @samp{xmm7} for i386
+@item
+@samp{xmm0} through @samp{xmm15} for amd64
+@item 
+@samp{mxcsr}
+@end itemize
+
+The @samp{org.gnu.gdb.i386.linux} feature is optional.  It should
+describe a single register, @samp{orig_eax}.
 
 @node MIPS Features
 @subsection MIPS Features
