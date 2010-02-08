@@ -1,3 +1,8 @@
+2010-02-08  Christophe Lyon  <christophe.lyon@st.com>
+
+	* objdump.c (disassemble_bytes): Clear aux->reloc before printing
+	a new address, so as not to reuse a previous, non-related reloc.
+
 2010-02-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (get_note_type): Handle NT_X86_XSTATE.

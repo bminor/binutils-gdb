@@ -1,3 +1,11 @@
+2010-02-08  Christophe Lyon  <christophe.lyon@st.com>
+
+	* gas/arm/arm-it-auto.d: Update expected results.
+	* gas/arm/bl-local-v4t.d: Likewise.
+	* gas/arm/blx-local.d: Likewise.
+	* gas/arm/thumb-w-good.d: Likewise.
+	* gas/arm/wince.d: Likewise.
+
 2010-02-08  Philipp Tomsich  <philipp.tomsich@theobroma-systems.com>
 
 	* gas/ppc/titan.d, * gas/ppc/titan.s: New test.

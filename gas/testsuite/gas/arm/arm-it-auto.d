@@ -71,11 +71,11 @@ Disassembly of section .text:
 0000008c <main\+0x8c> bf18      	it	ne
 0000008e <main\+0x8e> 200d      	movne	r0, #13
 00000090 <main\+0x90> f... f... 	bl	0000000. <f.*>
-00000094 <f\+0x94> bd10      	pop	{r4, pc}
-00000096 <f\+0x96> f... f... 	bl	0000000. <f.*>
-0000009a <f\+0x9a> bfb8      	it	lt
-0000009c <f\+0x9c> 2000      	movlt	r0, #0
-0000009e <f\+0x9e> 4348      	muls	r0, r1
-000000a0 <f\+0xa0> bfb8      	it	lt
-000000a2 <f\+0xa2> 2000      	movlt	r0, #0
-000000a4 <f\+0xa4> 4348      	muls	r0, r1
+00000094 <main\+0x94> bd10      	pop	{r4, pc}
+00000096 <main\+0x96> f... f... 	bl	0000000. <f.*>
+0000009a <main\+0x9a> bfb8      	it	lt
+0000009c <main\+0x9c> 2000      	movlt	r0, #0
+0000009e <main\+0x9e> 4348      	muls	r0, r1
+000000a0 <main\+0xa0> bfb8      	it	lt
+000000a2 <main\+0xa2> 2000      	movlt	r0, #0
+000000a4 <main\+0xa4> 4348      	muls	r0, r1

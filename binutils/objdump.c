@@ -1516,6 +1516,9 @@ disassemble_bytes (struct disassemble_info * inf,
       previous_octets = octets;
       octets = 0;
 
+      /* Make sure we don't use relocs from previous instructions.  */
+      aux->reloc = NULL;
+
       /* If we see more than SKIP_ZEROES octets of zeroes, we just
 	 print `...'.  */
       for (z = addr_offset * opb; z < stop_offset * opb; z++)
@@ -1619,8 +1622,6 @@ disassemble_bytes (struct disassemble_info * inf,
 		      inf->flags |= INSN_HAS_RELOC;
 		      aux->reloc = **relppp;
 		    }
-		  else
-		    aux->reloc = NULL;
 		}
 
 	      octets = (*disassemble_fn) (section->vma + addr_offset, inf);
