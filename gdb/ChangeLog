@@ -1,3 +1,16 @@
+2010-02-08  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-nat.c (linux_nat_resume): In non-stop, also only tag
+	resumed LWPs as resumed.
+	(linux_nat_wait_1): If there's no resumed LWP in the set of LWPs
+	we're waiting for, bail out with TARGET_WAITKIND_IGNORE, instead
+	of throwing an internal error.  If an LWP of a process we're not
+	waiting for reports a signal, don't force collecting a SIGSTOP,
+	and if it was breakpoint hit in non-stop mode, cancel it.  Don't
+	go through all LWPs cancelling breakpoints in non-stop mode.
+	(resume_stopped_resumed_lwps): New.
+	(linux_nat_wait): Use it.
+
 2010-02-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* features/Makefile (WHICH): Add i386/i386, i386/i386-linux,

@@ -1912,14 +1912,8 @@ linux_nat_resume (struct target_ops *ops,
   resume_many = (ptid_equal (minus_one_ptid, ptid)
 		 || ptid_is_pid (ptid));
 
-  if (!non_stop)
-    {
-      /* Mark the lwps we're resuming as resumed.  */
-      iterate_over_lwps (minus_one_ptid, resume_clear_callback, NULL);
-      iterate_over_lwps (ptid, resume_set_callback, NULL);
-    }
-  else
-    iterate_over_lwps (minus_one_ptid, resume_set_callback, NULL);
+  /* Mark the lwps we're resuming as resumed.  */
+  iterate_over_lwps (ptid, resume_set_callback, NULL);
 
   /* See if it's the current inferior that should be handled
      specially.  */
@@ -3262,8 +3256,20 @@ retry:
   lp = NULL;
   status = 0;
 
-  /* Make sure there is at least one LWP that has been resumed.  */
-  gdb_assert (iterate_over_lwps (ptid, resumed_callback, NULL));
+  /* Make sure that of those LWPs we want to get an event from, there
+     is at least one LWP that has been resumed.  If there's none, just
+     bail out.  The core may just be flushing asynchronously all
+     events.  */
+  if (iterate_over_lwps (ptid, resumed_callback, NULL) == NULL)
+    {
+      ourstatus->kind = TARGET_WAITKIND_IGNORE;
+
+      if (debug_linux_nat_async)
+	fprintf_unfiltered (gdb_stdlog, "LLW: exit (no resumed LWP)\n");
+
+      restore_child_signals_mask (&prev_mask);
+      return minus_one_ptid;
+    }
 
   /* First check if there is a LWP with a wait status pending.  */
   if (pid == -1)
@@ -3394,6 +3400,8 @@ retry:
 	      && ptid_is_pid (ptid)
 	      && ptid_get_pid (lp->ptid) != ptid_get_pid (ptid))
 	    {
+	      gdb_assert (lp->resumed);
+
 	      if (debug_linux_nat)
 		fprintf (stderr, "LWP %ld got an event %06x, leaving pending.\n",
 			 ptid_get_lwp (lp->ptid), status);
@@ -3402,12 +3410,30 @@ retry:
 		{
 		  if (WSTOPSIG (lp->status) != SIGSTOP)
 		    {
-		      stop_callback (lp, NULL);
+		      /* Cancel breakpoint hits.  The breakpoint may
+			 be removed before we fetch events from this
+			 process to report to the core.  It is best
+			 not to assume the moribund breakpoints
+			 heuristic always handles these cases --- it
+			 could be too many events go through to the
+			 core before this one is handled.  All-stop
+			 always cancels breakpoint hits in all
+			 threads.  */
+		      if (non_stop
+			  && lp->waitstatus.kind == TARGET_WAITKIND_IGNORE
+			  && WSTOPSIG (lp->status) == SIGTRAP
+			  && cancel_breakpoint (lp))
+			{
+			  /* Throw away the SIGTRAP.  */
+			  lp->status = 0;
 
-		      /* Resume in order to collect the sigstop.  */
-		      ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0, 0);
-
-		      stop_wait_callback (lp, NULL);
+			  if (debug_linux_nat)
+			    fprintf (stderr,
+				     "LLW: LWP %ld hit a breakpoint while waiting "
+				     "for another process; cancelled it\n",
+				     ptid_get_lwp (lp->ptid));
+			}
+		      lp->stopped = 1;
 		    }
 		  else
 		    {
@@ -3597,12 +3623,19 @@ retry:
 	 starvation.  */
       if (pid == -1)
 	select_event_lwp (ptid, &lp, &status);
-    }
 
-  /* Now that we've selected our final event LWP, cancel any
-     breakpoints in other LWPs that have hit a GDB breakpoint.  See
-     the comment in cancel_breakpoints_callback to find out why.  */
-  iterate_over_lwps (minus_one_ptid, cancel_breakpoints_callback, lp);
+      /* Now that we've selected our final event LWP, cancel any
+	 breakpoints in other LWPs that have hit a GDB breakpoint.
+	 See the comment in cancel_breakpoints_callback to find out
+	 why.  */
+      iterate_over_lwps (minus_one_ptid, cancel_breakpoints_callback, lp);
+
+      /* In all-stop, from the core's perspective, all LWPs are now
+	 stopped until a new resume action is sent over.  */
+      iterate_over_lwps (minus_one_ptid, resume_clear_callback, NULL);
+    }
+  else
+    lp->resumed = 0;
 
   if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP)
     {
@@ -3628,6 +3661,47 @@ retry:
   return lp->ptid;
 }
 
+/* Resume LWPs that are currently stopped without any pending status
+   to report, but are resumed from the core's perspective.  */
+
+static int
+resume_stopped_resumed_lwps (struct lwp_info *lp, void *data)
+{
+  ptid_t *wait_ptid_p = data;
+
+  if (lp->stopped
+      && lp->resumed
+      && lp->status == 0
+      && lp->waitstatus.kind == TARGET_WAITKIND_IGNORE)
+    {
+      gdb_assert (is_executing (lp->ptid));
+
+      /* Don't bother if there's a breakpoint at PC that we'd hit
+	 immediately, and we're not waiting for this LWP.  */
+      if (!ptid_match (lp->ptid, *wait_ptid_p))
+	{
+	  struct regcache *regcache = get_thread_regcache (lp->ptid);
+	  CORE_ADDR pc = regcache_read_pc (regcache);
+
+	  if (breakpoint_inserted_here_p (get_regcache_aspace (regcache), pc))
+	    return 0;
+	}
+
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog,
+			    "RSRL: resuming stopped-resumed LWP %s\n",
+			    target_pid_to_str (lp->ptid));
+
+      linux_ops->to_resume (linux_ops, pid_to_ptid (GET_LWP (lp->ptid)),
+			    lp->step, TARGET_SIGNAL_0);
+      lp->stopped = 0;
+      memset (&lp->siginfo, 0, sizeof (lp->siginfo));
+      lp->stopped_by_watchpoint = 0;
+    }
+
+  return 0;
+}
+
 static ptid_t
 linux_nat_wait (struct target_ops *ops,
 		ptid_t ptid, struct target_waitstatus *ourstatus,
@@ -3641,6 +3715,16 @@ linux_nat_wait (struct target_ops *ops,
   /* Flush the async file first.  */
   if (target_can_async_p ())
     async_file_flush ();
+
+  /* Resume LWPs that are currently stopped without any pending status
+     to report, but are resumed from the core's perspective.  LWPs get
+     in this state if we find them stopping at a time we're not
+     interested in reporting the event (target_wait on a
+     specific_process, for example, see linux_nat_wait_1), and
+     meanwhile the event became uninteresting.  Don't bother resuming
+     LWPs we're not going to wait for if they'd stop immediately.  */
+  if (non_stop)
+    iterate_over_lwps (minus_one_ptid, resume_stopped_resumed_lwps, &ptid);
 
   event_ptid = linux_nat_wait_1 (ops, ptid, ourstatus, target_options);
 
