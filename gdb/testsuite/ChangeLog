@@ -1,3 +1,12 @@
+Mon Feb  8 13:18:22 2010  Chris Moller  <moller@mollerware.com>
+
+	PR gdb/10728
+	* gdb.cp/pr10728-x.h: New file.
+	* gdb.cp/pr10728-x.cc: New file.
+	* gdb.cp/pr10728-y.cc: New file.
+	* gdb.cp/pr10728.exp: New file.
+	* gdb.cp/Makefile.in (EXECUTABLES): Add pr10728
+
 Mon Feb  8 12:54:54 2010  Chris Moller  <moller@mollerware.com>
 
 	PR gdb/9067

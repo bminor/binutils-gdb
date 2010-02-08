@@ -122,6 +122,13 @@ First argument of `-' is a pointer and second argument is neither\n\
 an integer nor a pointer of the same type."));
 
   sz = TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type1)));
+  if (sz == 0) 
+    {
+      warning (_("Type size unknown, assuming 1. "
+               "Try casting to a known type, or void *."));
+      sz = 1;
+    }
+
   return (value_as_long (arg1) - value_as_long (arg2)) / sz;
 }
 

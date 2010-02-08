@@ -1,3 +1,9 @@
+Mon Feb  8 13:17:10 2010  Chris Moller  <moller@mollerware.com>
+
+	PR gdb/10728
+	* valarith.c (value_ptrdiff): Added a test for a zero type length,
+	warn if found, and assume length = 1. 
+
 2010-02-08  Chris Moller  <cmoller@redhat.com>
 
 	PR gdb/9067
