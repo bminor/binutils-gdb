@@ -3799,9 +3799,22 @@ struct ppc_link_hash_table
 
 /* Rename some of the generic section flags to better document how they
    are used here.  */
-#define has_toc_reloc has_gp_reloc
-#define makes_toc_func_call need_finalize_relax
-#define call_check_in_progress reloc_done
+
+/* Nonzero if this section has TLS related relocations.  */
+#define has_tls_reloc sec_flg0
+
+/* Nonzero if this section has a call to __tls_get_addr.  */
+#define has_tls_get_addr_call sec_flg1
+
+/* Nonzero if this section has any toc or got relocs.  */
+#define has_toc_reloc sec_flg2
+
+/* Nonzero if this section has a call to another section that uses
+   the toc or got.  */
+#define makes_toc_func_call sec_flg4
+
+/* Recursion protection when determining above flag.  */
+#define call_check_in_progress sec_flg5
 
 /* Get the ppc64 ELF linker hash table from a link_info structure.  */
 

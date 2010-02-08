@@ -2748,6 +2748,15 @@ struct ppc_elf_link_hash_table
   struct sym_cache sym_cache;
 };
 
+/* Rename some of the generic section flags to better document how they
+   are used here.  */
+
+/* Nonzero if this section has TLS related relocations.  */
+#define has_tls_reloc sec_flg0
+
+/* Nonzero if this section has a call to __tls_get_addr.  */
+#define has_tls_get_addr_call sec_flg1
+
 /* Get the PPC ELF linker hash table from a link_info structure.  */
 
 #define ppc_elf_hash_table(p) \

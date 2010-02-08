@@ -1,3 +1,17 @@
+2010-02-08  Alan Modra  <amodra@gmail.com>
+
+	* section.c (struct bfd_section): Delete has_tls_reloc,
+	has_tls_get_addr_call, has_gp_reloc, need_finalize_relax, reloc_done.
+	Add sec_flg0 thru sec_flg5.
+	(BFD_FAKE_SECTION): Update for changed flags.
+	* ecoff.c (bfd_debug_section): Likewise.
+	* elf32-ppc.c (has_tls_reloc, has_tls_get_addr_call): Define.
+	* elf64-ppc.c (has_tls_reloc, has_tls_get_addr_call): Define.
+	(has_toc_reloc, makes_toc_func_call, call_check_in_progress): Update.
+	* elf32-xtensa.c (reloc_done): Define.
+	* elfxx-ia64.c (skip_relax_pass_0, skip_relax_pass_1): Update.
+	* bfd-in2.h: Regenerate.
+
 2010-02-08  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.c (bfd_mach_o_canonicalize_one_reloc): Set reloc.r_extern

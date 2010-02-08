@@ -155,6 +155,10 @@ static bfd_boolean relaxing_section = FALSE;
 
 int elf32xtensa_no_literal_movement = 1;
 
+/* Rename one of the generic section flags to better document how it
+   is used here.  */
+/* Whether relocations have been processed.  */
+#define reloc_done sec_flg0
 
 static reloc_howto_type elf_howto_table[] =
 {

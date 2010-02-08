@@ -755,8 +755,8 @@ elfNN_ia64_relax_brl (bfd_byte *contents, bfd_vma off)
 
 /* Rename some of the generic section flags to better document how they
    are used here.  */
-#define skip_relax_pass_0 need_finalize_relax
-#define skip_relax_pass_1 has_gp_reloc
+#define skip_relax_pass_0 sec_flg0
+#define skip_relax_pass_1 sec_flg1
 
 
 /* These functions do relaxation for IA-64 ELF.  */

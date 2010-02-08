@@ -1,6 +1,6 @@
 /* Generic ECOFF (Extended-COFF) routines.
    Copyright 1990, 1991, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
    Original version by Per Bothner.
    Full support added by Ian Lance Taylor, ian@cygnus.com.
@@ -56,14 +56,14 @@ static asection bfd_debug_section =
 {
   /* name,      id,  index, next, prev, flags, user_set_vma,       */
      "*DEBUG*", 0,   0,     NULL, NULL, 0,     0,
-  /* linker_mark, linker_has_input, gc_mark,                       */
-     0,           0,                1,
-  /* segment_mark, sec_info_type, use_rela_p, has_tls_reloc,       */
-     0,            0,             0,          0,
-  /* has_tls_get_addr_call, has_gp_reloc, need_finalize_relax,     */
-     0,                     0,            0,
-  /* reloc_done, vma, lma, size, rawsize, relax, relax_count,      */
-     0,          0,   0,   0,    0,       0,     0,
+  /* linker_mark, linker_has_input, gc_mark, segment_mark,         */
+     0,           0,                1,       0,
+  /* sec_info_type, use_rela_p,                                    */
+     0,             0,
+  /* sec_flg0, sec_flg1, sec_flg2, sec_flg3, sec_flg4, sec_flg5,   */
+     0,        0,        0,        0,        0,        0,
+  /* vma, lma, size, rawsize, relax, relax_count,                  */
+     0,   0,   0,    0,       0,     0,
   /* output_offset, output_section, alignment_power,               */
      0,             NULL,           0,
   /* relocation, orelocation, reloc_count, filepos, rel_filepos,   */
