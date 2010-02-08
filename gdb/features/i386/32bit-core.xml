@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!-- Copyright (C) 2010 Free Software Foundation, Inc.
+
+     Copying and distribution of this file, with or without modification,
+     are permitted in any medium without royalty provided the copyright
+     notice and this notice are preserved.  -->
+
+<!DOCTYPE feature SYSTEM "gdb-target.dtd">
+<feature name="org.gnu.gdb.i386.core">
+  <reg name="eax" bitsize="32" type="int32"/>
+  <reg name="ecx" bitsize="32" type="int32"/>
+  <reg name="edx" bitsize="32" type="int32"/>
+  <reg name="ebx" bitsize="32" type="int32"/>
+  <reg name="esp" bitsize="32" type="data_ptr"/>
+  <reg name="ebp" bitsize="32" type="data_ptr"/>
+  <reg name="esi" bitsize="32" type="int32"/>
+  <reg name="edi" bitsize="32" type="int32"/>
+
+  <reg name="eip" bitsize="32" type="code_ptr"/>
+  <reg name="eflags" bitsize="32" type="i386_eflags"/>
+  <reg name="cs" bitsize="32" type="int32"/>
+  <reg name="ss" bitsize="32" type="int32"/>
+  <reg name="ds" bitsize="32" type="int32"/>
+  <reg name="es" bitsize="32" type="int32"/>
+  <reg name="fs" bitsize="32" type="int32"/>
+  <reg name="gs" bitsize="32" type="int32"/>
+
+  <reg name="st0" bitsize="80" type="i387_ext"/>
+  <reg name="st1" bitsize="80" type="i387_ext"/>
+  <reg name="st2" bitsize="80" type="i387_ext"/>
+  <reg name="st3" bitsize="80" type="i387_ext"/>
+  <reg name="st4" bitsize="80" type="i387_ext"/>
+  <reg name="st5" bitsize="80" type="i387_ext"/>
+  <reg name="st6" bitsize="80" type="i387_ext"/>
+  <reg name="st7" bitsize="80" type="i387_ext"/>
+
+  <reg name="fctrl" bitsize="32" type="int" group="float"/>
+  <reg name="fstat" bitsize="32" type="int" group="float"/>
+  <reg name="ftag" bitsize="32" type="int" group="float"/>
+  <reg name="fiseg" bitsize="32" type="int" group="float"/>
+  <reg name="fioff" bitsize="32" type="int" group="float"/>
+  <reg name="foseg" bitsize="32" type="int" group="float"/>
+  <reg name="fooff" bitsize="32" type="int" group="float"/>
+  <reg name="fop" bitsize="32" type="int" group="float"/>
+</feature>

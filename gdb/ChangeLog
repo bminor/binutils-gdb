@@ -1,3 +1,30 @@
+2010-02-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* features/Makefile (WHICH): Add i386/i386, i386/i386-linux,
+	i386/amd64 and i386/amd64-linux.
+	(i386/i386-expedite): New.
+	(i386/i386-linux-expedite): Likewise.
+	(i386/amd64-expedite):Likewise.
+	(i386/amd64-linux-expedite): Likewise.
+	($(outdir)/i386/i386-linux.dat): Likewise.
+	($(outdir)/i386/amd64.dat): Likewise.
+	($(outdir)/i386/amd64-linux.dat): Likewise.
+
+	* features/i386/32bit-core.xml: New.
+	* features/i386/32bit-linux.xml: Likewise.
+	* features/i386/32bit-sse.xml: Likewise.
+	* features/i386/64bit-core.xml: Likewise.
+	* features/i386/64bit-linux.xml: Likewise.
+	* features/i386/64bit-sse.xml: Likewise.
+	* features/i386/i386-linux.xml: Likewise.
+	* features/i386/i386.xml: Likewise.
+	* features/i386/amd64-linux.xml: Likewise.
+	* features/i386/amd64.xml: Likewise.
+	* features/i386/i386-linux.c: Likewise.
+	* features/i386/i386.c: Likewise.
+	* features/i386/amd64-linux.c: Likewise.
+	* features/i386/amd64.c: Likewise.
+
 2010-02-05  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	PR c++/7935:

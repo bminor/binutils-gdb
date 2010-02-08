@@ -31,6 +31,8 @@
 #   make GDB=/path/to/gdb XMLTOC="xml files" cfiles
 
 WHICH = arm-with-iwmmxt arm-with-vfpv2 arm-with-vfpv3 arm-with-neon \
+	i386/i386 i386/i386-linux \
+	i386/amd64 i386/amd64-linux \
 	mips-linux mips64-linux \
 	rs6000/powerpc-32l rs6000/powerpc-altivec32l rs6000/powerpc-e500l \
 	rs6000/powerpc-64l rs6000/powerpc-altivec64l rs6000/powerpc-vsx32l \
@@ -39,6 +41,10 @@ WHICH = arm-with-iwmmxt arm-with-vfpv2 arm-with-vfpv3 arm-with-neon \
 
 # Record which registers should be sent to GDB by default after stop.
 arm-expedite = r11,sp,pc
+i386/i386-expedite = ebp,esp,eip
+i386/i386-linux-expedite = ebp,esp,eip
+i386/amd64-expedite = rbp,rsp,rip
+i386/amd64-linux-expedite = rbp,rsp,rip
 mips-expedite = r29,pc
 mips64-expedite = r29,pc
 powerpc-expedite = r1,pc
@@ -78,3 +84,9 @@ cfiles: $(CFILES)
 
 # Other dependencies.
 $(outdir)/arm-with-iwmmxt.dat: arm-core.xml xscale-iwmmxt.xml
+$(outdir)/i386/i386.dat: i386/32bit-core.xml i386/32bit-sse.xml
+$(outdir)/i386/i386-linux.dat: i386/32bit-core.xml i386/32bit-sse.xml \
+			       i386/32bit-linux.xml
+$(outdir)/i386/amd64.dat: i386/64bit-core.xml i386/64bit-sse.xml
+$(outdir)/i386/amd64-linux.dat: i386/64bit-core.xml i386/64bit-sse.xml \
+			        i386/64bit-linux.xml
