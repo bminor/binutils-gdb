@@ -103,12 +103,10 @@ ppc_before_allocation (void)
   if (stub_file != NULL)
     {
       if (!no_opd_opt
-	  && !ppc64_elf_edit_opd (link_info.output_bfd, &link_info,
-				  non_overlapping_opd))
+	  && !ppc64_elf_edit_opd (&link_info, non_overlapping_opd))
 	einfo ("%X%P: can not edit %s %E\n", "opd");
 
-      if (ppc64_elf_tls_setup (link_info.output_bfd, &link_info,
-			       no_tls_get_addr_opt)
+      if (ppc64_elf_tls_setup (&link_info, no_tls_get_addr_opt, &no_multi_toc)
 	  && !no_tls_opt)
 	{
 	  /* Size the sections.  This is premature, but we want to know the
@@ -117,7 +115,7 @@ ppc_before_allocation (void)
 	  expld.dataseg.phase = exp_dataseg_none;
 	  one_lang_size_sections_pass (NULL, TRUE);
 
-	  if (!ppc64_elf_tls_optimize (link_info.output_bfd, &link_info))
+	  if (!ppc64_elf_tls_optimize (&link_info))
 	    einfo ("%X%P: TLS problem %E\n");
 
 	  /* We must not cache anything from the preliminary sizing.  */
@@ -126,7 +124,7 @@ ppc_before_allocation (void)
 
       if (!no_toc_opt
 	  && !link_info.relocatable
-	  && !ppc64_elf_edit_toc (link_info.output_bfd, &link_info))
+	  && !ppc64_elf_edit_toc (&link_info))
 	einfo ("%X%P: can not edit %s %E\n", "toc");
     }
 

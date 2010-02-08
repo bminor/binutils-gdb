@@ -3781,6 +3781,7 @@ struct ppc_link_hash_table
   unsigned int no_tls_get_addr_opt:1;
 
   /* Support for multiple toc sections.  */
+  unsigned int do_multi_toc:1;
   unsigned int multi_toc_needed:1;
   unsigned int second_toc_pass:1;
 
@@ -3808,6 +3809,10 @@ struct ppc_link_hash_table
 
 /* Nonzero if this section has any toc or got relocs.  */
 #define has_toc_reloc sec_flg2
+
+/* Nonzero if this section has small toc/got relocs, ie. that expect
+   the reloc to be in the range -32768 to 32767.  */
+#define has_small_toc_reloc sec_flg3
 
 /* Nonzero if this section has a call to another section that uses
    the toc or got.  */
@@ -5010,6 +5015,17 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_GOT16_LO_DS:
 	  /* This symbol requires a global offset table entry.  */
 	  sec->has_toc_reloc = 1;
+	  if (r_type == R_PPC64_GOT_TLSLD16
+	      || r_type == R_PPC64_GOT_TLSGD16
+	      || r_type == R_PPC64_GOT_TPREL16_DS
+	      || r_type == R_PPC64_GOT_DTPREL16_DS
+	      || r_type == R_PPC64_GOT16
+	      || r_type == R_PPC64_GOT16_DS)
+	    {
+	      htab->do_multi_toc = 1;
+	      sec->has_small_toc_reloc = 1;
+	    }
+
 	  if (ppc64_elf_tdata (abfd)->got == NULL
 	      && !create_got_section (abfd, info))
 	    return FALSE;
@@ -5106,10 +5122,12 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  break;
 
 	case R_PPC64_TOC16:
+	case R_PPC64_TOC16_DS:
+	  htab->do_multi_toc = 1;
+	  sec->has_small_toc_reloc = 1;
 	case R_PPC64_TOC16_LO:
 	case R_PPC64_TOC16_HI:
 	case R_PPC64_TOC16_HA:
-	case R_PPC64_TOC16_DS:
 	case R_PPC64_TOC16_LO_DS:
 	  sec->has_toc_reloc = 1;
 	  break;
@@ -6883,8 +6901,7 @@ dec_dynrel_count (bfd_vma r_info,
    applications.  */
 
 bfd_boolean
-ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
-		    bfd_boolean non_overlapping)
+ppc64_elf_edit_opd (struct bfd_link_info *info, bfd_boolean non_overlapping)
 {
   bfd *ibfd;
   bfd_boolean some_edited = FALSE;
@@ -7054,7 +7071,7 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
 	  new_contents = NULL;
 	  amt = sec->size * sizeof (long) / 8;
 	  opd = &ppc64_elf_section_data (sec)->u.opd;
-	  opd->adjust = bfd_zalloc (obfd, amt);
+	  opd->adjust = bfd_zalloc (sec->owner, amt);
 	  if (opd->adjust == NULL)
 	    return FALSE;
 	  ppc64_elf_section_data (sec)->sec_type = sec_opd;
@@ -7285,15 +7302,20 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
 /* Set htab->tls_get_addr and call the generic ELF tls_setup function.  */
 
 asection *
-ppc64_elf_tls_setup (bfd *obfd,
-		     struct bfd_link_info *info,
-		     int no_tls_get_addr_opt)
+ppc64_elf_tls_setup (struct bfd_link_info *info,
+		     int no_tls_get_addr_opt,
+		     int *no_multi_toc)
 {
   struct ppc_link_hash_table *htab;
 
   htab = ppc_hash_table (info);
   if (htab == NULL)
     return NULL;
+
+  if (*no_multi_toc)
+    htab->do_multi_toc = 0;
+  else if (!htab->do_multi_toc)
+    *no_multi_toc = 1;
 
   htab->tls_get_addr = ((struct ppc_link_hash_entry *)
 			elf_link_hash_lookup (&htab->elf, ".__tls_get_addr",
@@ -7375,7 +7397,7 @@ ppc64_elf_tls_setup (bfd *obfd,
 	no_tls_get_addr_opt = TRUE;
     }
   htab->no_tls_get_addr_opt = no_tls_get_addr_opt;
-  return _bfd_elf_tls_setup (obfd, info);
+  return _bfd_elf_tls_setup (info->output_bfd, info);
 }
 
 /* Return TRUE iff REL is a branch reloc with a global symbol matching
@@ -7412,7 +7434,7 @@ branch_reloc_hash_match (const bfd *ibfd,
    dynamic relocations.  */
 
 bfd_boolean
-ppc64_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
+ppc64_elf_tls_optimize (struct bfd_link_info *info)
 {
   bfd *ibfd;
   asection *sec;
@@ -7852,7 +7874,7 @@ adjust_toc_syms (struct elf_link_hash_entry *h, void *inf)
    unused .toc entries.  */
 
 bfd_boolean
-ppc64_elf_edit_toc (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
+ppc64_elf_edit_toc (struct bfd_link_info *info)
 {
   bfd *ibfd;
   struct adjust_toc_info toc_inf;

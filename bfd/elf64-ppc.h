@@ -22,13 +22,13 @@
 void ppc64_elf_init_stub_bfd
   (bfd *, struct bfd_link_info *);
 bfd_boolean ppc64_elf_edit_opd
-  (bfd *, struct bfd_link_info *, bfd_boolean);
+  (struct bfd_link_info *, bfd_boolean);
 asection *ppc64_elf_tls_setup
-  (bfd *, struct bfd_link_info *, int);
+  (struct bfd_link_info *, int, int *);
 bfd_boolean ppc64_elf_tls_optimize
-  (bfd *, struct bfd_link_info *);
+  (struct bfd_link_info *);
 bfd_boolean ppc64_elf_edit_toc
-  (bfd *, struct bfd_link_info *);
+  (struct bfd_link_info *);
 bfd_vma ppc64_elf_toc
   (bfd *);
 int ppc64_elf_setup_section_lists

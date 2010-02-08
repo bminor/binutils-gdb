@@ -1,3 +1,14 @@
+2010-02-09  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (struct ppc_link_hash_table): Add do_multi_toc.
+	(has_small_toc_reloc): Define.
+	(ppc64_elf_check_relocs): Set the above flags.
+	(ppc64_elf_edit_opd): Delete obfd param.
+	(ppc64_elf_tls_optimize): Likewise.
+	(ppc64_elf_edit_toc): Likewise.
+	(ppc64_elf_tls_setup): Likewise.  Add no_multi_toc param.
+	* elf64-ppc.h: Update prototypes.
+
 2010-02-08  Alan Modra  <amodra@gmail.com>
 
 	* section.c (struct bfd_section): Delete has_tls_reloc,

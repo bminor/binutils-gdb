@@ -1,3 +1,8 @@
+2010-02-09  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/ppc64elf.em (ppc_before_allocation): Update for changed
+	function parameters.
+
 2010-02-05  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in (ALL_LIBGUAS): Add bg.
