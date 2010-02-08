@@ -23,11 +23,12 @@
 # Written by Nick Clifton <nickc@redhat.com>
 
 
-# IFUNC support has only been implemented for the ix86, x86_64 and powerpc
-# so far.
+# IFUNC support has only been implemented for the ix86, x86_64, powerpc,
+# and sparc so far.
 if {!(([istarget "i?86-*-*"]
        || [istarget "x86_64-*-*"]
-       || [istarget "powerpc*-*-*"])
+       || [istarget "powerpc*-*-*"]
+       || [istarget "sparc*-*-*"])
       && ([istarget "*-*-elf*"]
 	  || ([istarget "*-*-linux*"]
 	      && ![istarget "*-*-*aout*"]

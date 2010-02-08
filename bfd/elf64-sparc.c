@@ -424,6 +424,9 @@ elf64_sparc_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 {
   static const char *const stt_types[] = { "NOTYPE", "OBJECT", "FUNCTION" };
 
+  if (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
+    elf_tdata (info->output_bfd)->has_ifunc_symbols = TRUE;
+
   if (ELF_ST_TYPE (sym->st_info) == STT_REGISTER)
     {
       int reg;
@@ -856,6 +859,8 @@ const struct elf_size_info elf64_sparc_size_info =
   _bfd_sparc_elf_plt_sym_val
 #define bfd_elf64_bfd_link_hash_table_create \
   _bfd_sparc_elf_link_hash_table_create
+#define bfd_elf64_bfd_link_hash_table_free \
+  _bfd_sparc_elf_link_hash_table_free
 #define elf_info_to_howto \
   _bfd_sparc_elf_info_to_howto
 #define elf_backend_copy_indirect_symbol \
@@ -910,6 +915,8 @@ const struct elf_size_info elf64_sparc_size_info =
 /* Section 5.2.4 of the ABI specifies a 256-byte boundary for the table.  */
 #define elf_backend_plt_alignment 8
 
+#define elf_backend_post_process_headers	_bfd_elf_set_osabi
+
 #include "elf64-target.h"
 
 /* FreeBSD support */
@@ -920,8 +927,6 @@ const struct elf_size_info elf64_sparc_size_info =
 #undef	ELF_OSABI
 #define	ELF_OSABI ELFOSABI_FREEBSD
 
-#undef  elf_backend_post_process_headers
-#define elf_backend_post_process_headers	_bfd_elf_set_osabi
 #undef  elf64_bed
 #define elf64_bed				elf64_sparc_fbsd_bed
 

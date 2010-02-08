@@ -167,6 +167,23 @@ elf32_sparc_reloc_type_class (const Elf_Internal_Rela *rela)
     }
 }
 
+/* Hook called by the linker routine which adds symbols from an object
+   file.  */
+
+static bfd_boolean
+elf32_sparc_add_symbol_hook (bfd * abfd ATTRIBUTE_UNUSED,
+			     struct bfd_link_info * info ATTRIBUTE_UNUSED,
+			     Elf_Internal_Sym * sym,
+			     const char ** namep ATTRIBUTE_UNUSED,
+			     flagword * flagsp ATTRIBUTE_UNUSED,
+			     asection ** secp ATTRIBUTE_UNUSED,
+			     bfd_vma * valp ATTRIBUTE_UNUSED)
+{
+  if (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
+    elf_tdata (info->output_bfd)->has_ifunc_symbols = TRUE;
+  return TRUE;
+}
+
 #define TARGET_BIG_SYM	bfd_elf32_sparc_vec
 #define TARGET_BIG_NAME	"elf32-sparc"
 #define ELF_ARCH	bfd_arch_sparc
@@ -188,6 +205,8 @@ elf32_sparc_reloc_type_class (const Elf_Internal_Rela *rela)
   _bfd_sparc_elf_reloc_name_lookup
 #define bfd_elf32_bfd_link_hash_table_create \
 					_bfd_sparc_elf_link_hash_table_create
+#define bfd_elf32_bfd_link_hash_table_free \
+					_bfd_sparc_elf_link_hash_table_free
 #define bfd_elf32_bfd_relax_section	_bfd_sparc_elf_relax_section
 #define bfd_elf32_new_section_hook	_bfd_sparc_elf_new_section_hook
 #define elf_backend_copy_indirect_symbol \
@@ -219,6 +238,9 @@ elf32_sparc_reloc_type_class (const Elf_Internal_Rela *rela)
 #define elf_backend_want_plt_sym 1
 #define elf_backend_got_header_size 4
 #define elf_backend_rela_normal 1
+
+#define elf_backend_post_process_headers	_bfd_elf_set_osabi
+#define elf_backend_add_symbol_hook		elf32_sparc_add_symbol_hook
 
 #include "elf32-target.h"
 

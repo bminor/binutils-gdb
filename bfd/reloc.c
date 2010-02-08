@@ -1870,6 +1870,10 @@ ENUMX
   BFD_RELOC_SPARC_GOTDATA_OP_LOX10
 ENUMX
   BFD_RELOC_SPARC_GOTDATA_OP
+ENUMX
+  BFD_RELOC_SPARC_JMP_IREL
+ENUMX
+  BFD_RELOC_SPARC_IRELATIVE
 ENUMDOC
   SPARC ELF relocations.  There is probably some overlap with other
   relocation types already defined.

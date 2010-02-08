@@ -32,6 +32,49 @@
 	* elfxx-sparc.c (_bfd_sparc_elf_adjust_dynamic_symbol): Handle
 	nocopyreloc.
 
+	* reloc.c (BFD_RELOC_SPARC_JMP_IREL): New.
+	(BFD_RELOC_SPARC_IRELATIVE): Likewise.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+	* elfxx-sparc.h (_bfd_sparc_elf_link_hash_table): Add loc_hash_table
+	and loc_hash_memory.
+	(_bfd_sparc_elf_link_hash_table_free): Declare.
+	* elf32-sparc.c (elf32_sparc_add_symbol_hook): New.
+	(elf_backend_add_symbol_hook, elf_backend_post_process_headers,
+	bfd_elf32_bfd_link_hash_table_free): Define.
+	* elf64-sparc.c (elf64_sparc_add_symbol_hook): Set
+	has_ifunc_symbols if STT_GNU_IFUNC.
+	(bfd_elf64_bfd_link_hash_table_free): Define.
+	(elf_backend_post_process_headers): Define always.
+	* elfxx-sparc.c (sparc_jmp_irel_howto, sparc_irelative_howto): New.
+	(sparc_reloc_map): Add entries for new IFUNC relocs.
+	(_bfd_sparc_elf_reloc_type_lookup): Handle new IFUNC relocs.
+	(_bfd_sparc_elf_info_to_howto_ptr): Likewise.
+	(elf_sparc_local_htab_hash, elf_sparc_local_htab_eq,
+	elf_sparc_get_local_sym_hash): New.
+	(_bfd_sparc_elf_create_dynamic_sections): Move PLT ops initialization
+	from here...
+	(_bfd_sparc_elf_link_hash_table_create): ... to here.  Allocate
+	local hash table.
+	(_bfd_sparc_elf_link_hash_table_free): New.
+	(create_ifunc_sections): New.
+	(_bfd_sparc_elf_check_relocs): Unconditionally assign htab->elf.dynobj
+	and call create_ifunc_sections().  For local STT_GNU_IFUNC symbols
+	cons up a fake local hash table entry for it.  Unconditionally add
+	a PLT refcount for STT_GNU_IFUNC symbols when h->def_regular.  Count
+	dyn relocs for ifunc.
+	(_bfd_sparc_elf_adjust_dynamic_symbol): Handle ifunc.
+	(allocate_dynrelocs):  Unconditionally emit a PLT entry when
+	STT_GNU_IFUNC and h->def_regular.  Count GOT dyn relocs for ifunc.
+	(allocate_local_dynrelocs): New function.
+	(_bfd_sparc_elf_size_dynamic_sections): Invoke it over the local hash
+	table.  Emit dynamic relocs to irelplt when not shared.  Treat iplt
+	like splt.
+	(_bfd_sparc_elf_relocate_section): Handle ifunc relocations by hand.
+	(_bfd_sparc_elf_finish_dynamic_symbol): Adjust for non-dynamic ifunc
+	plt in iplt/irelplt.
+
 2010-02-08  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
 	* xcofflink.c (_bfd_xcoff_bfd_final_link): When calculating
