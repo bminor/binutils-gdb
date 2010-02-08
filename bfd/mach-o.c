@@ -705,12 +705,16 @@ bfd_mach_o_canonicalize_one_reloc (bfd *abfd, char *buf,
       res->addend = 0;
       res->address = addr;
       if (symnum & BFD_MACH_O_R_EXTERN)
-        sym = syms + num;
+        {
+          sym = syms + num;
+          reloc.r_extern = 1;
+        }
       else
         {
           BFD_ASSERT (num != 0);
           BFD_ASSERT (num <= mdata->nsects);
           sym = mdata->sections[num - 1]->bfdsection->symbol_ptr_ptr;
+          reloc.r_extern = 0;
         }
       res->sym_ptr_ptr = sym;
       reloc.r_type = BFD_MACH_O_GET_R_TYPE (symnum);
