@@ -1,8 +1,22 @@
+2010-02-08  Sterling Augustine  <sterling@tensilica.com>
+
+	* config/tc-xtensa.c (frag_format_size): Generalize logic to
+	handle more instruction	sizes and fetch widths.
+	(branch_align_power): Likewise.
+	(text_align_power): Likewise.
+	(bytes_to_stretch): Likewise.
+
 2010-02-08  Philipp Tomsich  <philipp.tomsich@theobroma-systems.com>
 
 	* config/tc-ppc.c (md_show_usage): Mention -mtitan.  Don't use tabs.
 	(ppc_mach): Handle titan.
 	* doc/c-ppc.texi: Mention -mtitan.
+
+2010-02-05  Sterling Augustine  <sterling@tensilica.com>
+
+	* config/tc-xtensa.c (UNREACHABLE_MAX_WIDTH): Delete and
+	replace with...
+	(xtensa_fetch_width) ...this.
 
 2010-02-05  Joseph Myers  <joseph@codesourcery.com>
 

@@ -4521,12 +4521,18 @@ frag_format_size (const fragS *fragP)
 	 be accompanied by major changes to make use of that data.
 
 	 In any event, we can tell that we are expanding from a single-slot
-	 three-byte format to a wider one with the logic below.  */
+	 format to a wider one with the logic below.  */
 
-      if (fmt_size <= 3 && fragP->tc_frag_data.text_expansion[0] != 3)
-	return 3 + fragP->tc_frag_data.text_expansion[0];
-      else
-	return 3;
+      int i;
+      int relaxed_size = fmt_size + fragP->tc_frag_data.text_expansion[0];
+
+      for (i = 0; i < xtensa_isa_num_formats (isa); i++)
+	{
+	  if (relaxed_size == xtensa_format_length (isa, i))
+	    return relaxed_size;
+	}
+
+      return 3;
     }
 
   if (fragP->tc_frag_data.slot_subtypes[0] == RELAX_NARROW)
@@ -8226,8 +8232,33 @@ get_text_align_power (unsigned target_size)
 {
   if (target_size <= 4)
     return 2;
-  gas_assert (target_size == 8);
-  return 3;
+
+  if (target_size <= 8)
+    return 3;
+
+  if (target_size <= 16)
+    return 4;
+
+  if (target_size <= 32)
+    return 5;
+
+  if (target_size <= 64)
+    return 6;
+
+  if (target_size <= 128)
+    return 7;
+
+  if (target_size <= 256)
+    return 8;
+
+  if (target_size <= 512)
+    return 9;
+
+  if (target_size <= 1024)
+    return 10;
+
+  gas_assert (0);
+  return 0;
 }
 
 
@@ -8300,19 +8331,17 @@ get_text_align_fill_size (addressT address,
 static int
 branch_align_power (segT sec)
 {
-  /* If the Xtensa processor has a fetch width of 8 bytes, and the section
-     is aligned to at least an 8-byte boundary, then a branch target need
-     only fit within an 8-byte aligned block of memory to avoid a stall.
-     Otherwise, try to fit branch targets within 4-byte aligned blocks
-     (which may be insufficient, e.g., if the section has no alignment, but
-     it's good enough).  */
-  if (xtensa_fetch_width == 8)
-    {
-      if (get_recorded_alignment (sec) >= 3)
-	return 3;
-    }
-  else
-    gas_assert (xtensa_fetch_width == 4);
+  /* If the Xtensa processor has a fetch width of X, and
+     the section is aligned to at least that boundary, then a branch
+     target need only fit within that aligned block of memory to avoid
+     a stall.  Otherwise, try to fit branch targets within 4-byte
+     aligned blocks (which may be insufficient, e.g., if the section
+     has no alignment, but it's good enough).  */
+  int fetch_align = get_text_align_power(xtensa_fetch_width);
+  int sec_align = get_recorded_alignment (sec);
+
+  if (sec_align >= fetch_align)
+    return fetch_align;
 
   return 2;
 }
@@ -8976,39 +9005,11 @@ future_alignment_required (fragS *fragP, long stretch ATTRIBUTE_UNUSED)
 /* The idea: widen everything you can to get a target or loop aligned,
    then start using NOPs.
 
-   When we must have a NOP, here is a table of how we decide
-   (so you don't have to fight through the control flow below):
-
    wide_nops   = the number of wide NOPs available for aligning
    narrow_nops = the number of narrow NOPs available for aligning
 		 (a subset of wide_nops)
    widens      = the number of narrow instructions that should be widened
 
-   Desired   wide   narrow
-   Diff      nop    nop      widens
-   1           0      0         1
-   2           0      1         0
-   3a          1      0         0
-    b          0      1         1 (case 3a makes this case unnecessary)
-   4a          1      0         1
-    b          0      2         0
-    c          0      1         2 (case 4a makes this case unnecessary)
-   5a          1      0         2
-    b          1      1         0
-    c          0      2         1 (case 5b makes this case unnecessary)
-   6a          2      0         0
-    b          1      0         3
-    c          0      1         4 (case 6b makes this case unnecessary)
-    d          1      1         1 (case 6a makes this case unnecessary)
-    e          0      2         2 (case 6a makes this case unnecessary)
-    f          0      3         0 (case 6a makes this case unnecessary)
-   7a          1      0         4
-    b          2      0         1
-    c          1      1         2 (case 7b makes this case unnecessary)
-    d          0      1         5 (case 7a makes this case unnecessary)
-    e          0      2         3 (case 7b makes this case unnecessary)
-    f          0      3         1 (case 7b makes this case unnecessary)
-    g          1      2         1 (case 7b makes this case unnecessary)
 */
 
 static long
@@ -9018,6 +9019,9 @@ bytes_to_stretch (fragS *this_frag,
 		  int num_widens,
 		  int desired_diff)
 {
+  int nops_needed;
+  int nop_bytes;
+  int extra_bytes;
   int bytes_short = desired_diff - num_widens;
 
   gas_assert (desired_diff >= 0 
@@ -9048,100 +9052,58 @@ bytes_to_stretch (fragS *this_frag,
   /* From here we will need at least one NOP to get an alignment.
      However, we may not be able to align at all, in which case,
      don't widen.  */
-  if (this_frag->fr_subtype == RELAX_FILL_NOP)
-    {
-      switch (desired_diff)
-	{
-	case 1:
-	  return 0;
-	case 2:
-	  if (!this_frag->tc_frag_data.is_no_density && narrow_nops == 1)
-	    return 2; /* case 2 */
-	  return 0;
-	case 3:
-	  if (wide_nops > 1)
-	    return 0;
-	  else
-	    return 3; /* case 3a */
-	case 4:
-	  if (num_widens >= 1 && wide_nops == 1)
-	    return 3; /* case 4a */
-	  if (!this_frag->tc_frag_data.is_no_density && narrow_nops == 2)
-	    return 2; /* case 4b */
-	  return 0;
-	case 5:
-	  if (num_widens >= 2 && wide_nops == 1)
-	    return 3; /* case 5a */
-	  /* We will need two nops.  Are there enough nops
-	     between here and the align target?  */
-	  if (wide_nops < 2 || narrow_nops == 0)
-	    return 0;
-	  /* Are there other nops closer that can serve instead?  */
-	  if (wide_nops > 2 && narrow_nops > 1)
-	    return 0;
-	  /* Take the density one first, because there might not be
-	     another density one available.  */
-	  if (!this_frag->tc_frag_data.is_no_density)
-	    return 2; /* case 5b narrow */
-	  else
-	    return 3; /* case 5b wide */
-	  return 0;
-	case 6:
-	  if (wide_nops == 2)
-	    return 3; /* case 6a */
-	  else if (num_widens >= 3 && wide_nops == 1)
-	    return 3; /* case 6b */
-	  return 0;
-	case 7:
-	  if (wide_nops == 1 && num_widens >= 4)
-	    return 3; /* case 7a */
-	  else if (wide_nops == 2 && num_widens >= 1)
-	    return 3; /* case 7b */
-	  return 0;
-	default:
-	  gas_assert (0);
-	}
-    }
-  else
-    {
-      /* We will need a NOP no matter what, but should we widen
-	 this instruction to help?
+  nops_needed = desired_diff / 3;
 
-	 This is a RELAX_NARROW frag.  */
-      switch (desired_diff)
-	{
-	case 1:
-	  gas_assert (0);
-	  return 0;
-	case 2:
-	case 3:
-	  return 0;
-	case 4:
-	  if (wide_nops >= 1 && num_widens == 1)
-	    return 1; /* case 4a */
-	  return 0;
-	case 5:
-	  if (wide_nops >= 1 && num_widens == 2)
-	    return 1; /* case 5a */
-	  return 0;
-	case 6:
-	  if (wide_nops >= 2)
-	    return 0; /* case 6a */
-	  else if (wide_nops >= 1 && num_widens == 3)
-	    return 1; /* case 6b */
-	  return 0;
-	case 7:
-	  if (wide_nops >= 1 && num_widens == 4)
-	    return 1; /* case 7a */
-	  else if (wide_nops >= 2 && num_widens == 1)
-	    return 1; /* case 7b */
-	  return 0;
-	default:
-	  gas_assert (0);
-	  return 0;
-	}
+  /* If there aren't enough nops, don't widen.  */
+  if (nops_needed > wide_nops)
+    return 0;
+
+  /* First try it with all wide nops.  */
+  nop_bytes = nops_needed * 3;
+  extra_bytes = desired_diff - nop_bytes;
+
+  if (nop_bytes + num_widens >= desired_diff)
+    {
+      if (this_frag->fr_subtype == RELAX_FILL_NOP)
+	return 3;
+      else if (num_widens == extra_bytes)
+	return 1;
+      return 0;
     }
-  gas_assert (0);
+
+  /* Add a narrow nop.  */
+  nops_needed++;
+  nop_bytes += 2;
+  extra_bytes -= 2;
+  if (narrow_nops == 0 || nops_needed > wide_nops)
+    return 0;
+
+  if (nop_bytes + num_widens >= desired_diff && extra_bytes >= 0)
+    {
+      if (this_frag->fr_subtype == RELAX_FILL_NOP)
+	return !this_frag->tc_frag_data.is_no_density ? 2 : 3;
+      else if (num_widens == extra_bytes)
+	return 1;
+      return 0;
+    }
+
+  /* Replace a wide nop with a narrow nop--we can get here if
+     extra_bytes was negative in the previous conditional.  */
+  if (narrow_nops == 1)
+    return 0;
+  nop_bytes--;
+  extra_bytes++;
+  if (nop_bytes + num_widens >= desired_diff)
+    {
+      if (this_frag->fr_subtype == RELAX_FILL_NOP)
+	return !this_frag->tc_frag_data.is_no_density ? 2 : 3;
+      else if (num_widens == extra_bytes)
+	return 1;
+      return 0;
+    }
+
+  /* If we can't satisfy any of the above cases, then we can't align
+     using padding or fill nops.  */
   return 0;
 }
 
