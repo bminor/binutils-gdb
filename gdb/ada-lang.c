@@ -8906,7 +8906,14 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       else if (noside == EVAL_AVOID_SIDE_EFFECTS)
         {
           type = static_unwrap_type (SYMBOL_TYPE (exp->elts[pc + 2].symbol));
-          if (ada_is_tagged_type (type, 0))
+          /* Check to see if this is a tagged type.  We also need to handle
+             the case where the type is a reference to a tagged type, but
+             we have to be careful to exclude pointers to tagged types.
+             The latter should be shown as usual (as a pointer), whereas
+             a reference should mostly be transparent to the user.  */
+          if (ada_is_tagged_type (type, 0)
+              || (TYPE_CODE(type) == TYPE_CODE_REF
+                  && ada_is_tagged_type (TYPE_TARGET_TYPE (type), 0)))
           {
             /* Tagged types are a little special in the fact that the real
                type is dynamic and can only be determined by inspecting the

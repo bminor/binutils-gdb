@@ -1,3 +1,10 @@
+2010-02-09  Joel Brobecker  <brobecker@adacore.com>
+
+	Wrong type description for tagged type parameter.
+	* ada-lang.c (ada_evaluate_subexp) [OP_VAR_VALUE]: When noside is
+	EVAL_AVOID_SIDE_EFFECTS, also handle the case when type is a
+	reference to a tagged type.
+
 2010-02-09  Tristan Gingold  <gingold@adacore.com>
 
 	* objfiles.c (objfile_separate_debug_iterate): Do not iterate on
