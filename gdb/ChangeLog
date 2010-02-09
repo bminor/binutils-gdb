@@ -1,3 +1,15 @@
+2010-02-09  Tristan Gingold  <gingold@adacore.com>
+
+	* machoread.c (macho_symfile_relocate): New function.
+	(macho_sym_fns): Use macho_symfile_relocate instead of
+	default_symfile_relocate.
+	(macho_oso_data): New type.
+	(current_oso): New variable.
+	(macho_add_oso_symfile): Do not compute section_addr_info, but
+	instead set vma of sections.
+	Do not set SYMFILE_VERBOSE to call symbol_file_add_from_bfd.
+	Set and clear current_oso.
+
 2010-02-09  Joel Brobecker  <brobecker@adacore.com>
 
 	Wrong type description for tagged type parameter.

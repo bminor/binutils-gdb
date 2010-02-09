@@ -70,6 +70,23 @@ oso_el;
 DEF_VEC_O (oso_el);
 static VEC (oso_el) *oso_vector;
 
+struct macho_oso_data
+{
+  /* Per objfile symbol table.  This is used to apply relocation to sections
+     It is loaded only once, then relocated, and free after sections are
+     relocated.  */
+  asymbol **symbol_table;
+
+  /* The offsets for this objfile.  Used to relocate the symbol_table.  */
+  struct oso_el *oso;
+
+  struct objfile *main_objfile;
+};
+
+/* Data for OSO being processed.  */
+
+static struct macho_oso_data current_oso;
+
 static void
 macho_new_init (struct objfile *objfile)
 {
@@ -297,8 +314,6 @@ macho_add_oso_symfile (oso_el *oso, bfd *abfd,
                        struct objfile *main_objfile, int symfile_flags)
 {
   struct objfile *objfile;
-  struct section_addr_info *addrs;
-  int len;
   int i;
   char leading_char;
 
@@ -314,56 +329,58 @@ macho_add_oso_symfile (oso_el *oso, bfd *abfd,
     }
 
   bfd_set_cacheable (abfd, 1);
-  
-  /* Compute addr length.  */
-  len = 0;
-  for (i = 0; i < oso->num_sections; i++)
-    if (oso->symbols[i] != NULL)
-      len++;
-  
-  addrs = alloc_section_addr_info (len);
+
+  /* Relocate sections.  */
 
   leading_char = bfd_get_symbol_leading_char (main_objfile->obfd);
 
-  len = 0;
   for (i = 0; i < oso->num_sections; i++)
-    if (oso->symbols[i] != NULL)
-      {
-        if (oso->offsets[i])
-          addrs->other[len].addr = oso->offsets[i];
-        else
-          {
-            struct minimal_symbol *msym;
-            const char *name = oso->symbols[i]->name;
-            
-            if (name[0] == leading_char)
-              ++name;
-
-            if (mach_o_debug_level > 3)
-              printf_unfiltered (_("resolve sect %s with %s\n"),
-                                 oso->symbols[i]->section->name,
-                                 oso->symbols[i]->name);
-            msym = lookup_minimal_symbol (name, NULL, main_objfile);
-            if (msym == NULL)
-              {
-                warning (_("can't find symbol '%s' in minsymtab"),
-                         oso->symbols[i]->name);
-                addrs->other[len].addr = 0;
-              }
-            else
-              addrs->other[len].addr = SYMBOL_VALUE_ADDRESS (msym);
-          }
-        addrs->other[len].name = (char *)oso->symbols[i]->section->name;
-        len++;
-      }
-      
-  if (mach_o_debug_level > 1)
     {
-      int j;
-      for (j = 0; j < addrs->num_sections; j++)
+      asection *sect;
+      const char *sectname;
+      bfd_vma vma;
+
+      /* Empty slot.  */
+      if (oso->symbols[i] == NULL)
+        continue;
+
+      if (oso->offsets[i])
+        vma = oso->offsets[i];
+      else
+        {
+          struct minimal_symbol *msym;
+          const char *name = oso->symbols[i]->name;
+
+          if (name[0] == leading_char)
+            ++name;
+
+          if (mach_o_debug_level > 3)
+            printf_unfiltered (_("resolve sect %s with %s\n"),
+                               oso->symbols[i]->section->name,
+                               oso->symbols[i]->name);
+          msym = lookup_minimal_symbol (name, NULL, main_objfile);
+          if (msym == NULL)
+            {
+              warning (_("can't find symbol '%s' in minsymtab"), name);
+              continue;
+            }
+          else
+            vma = SYMBOL_VALUE_ADDRESS (msym);
+        }
+      sectname = (char *)oso->symbols[i]->section->name;
+
+      sect = bfd_get_section_by_name (abfd, sectname);
+      if (sect == NULL)
+        {
+          warning (_("can't find section '%s' in OSO file %s"),
+                   sectname, oso->name);
+          continue;
+        }
+      bfd_set_section_vma (abfd, sect, vma);
+
+      if (mach_o_debug_level > 1)
         printf_unfiltered (_("  %s: %s\n"),
-                           core_addr_to_string (addrs->other[j].addr),
-                           addrs->other[j].name);
+                           core_addr_to_string (vma), sectname);
     }
 
   /* Make sure that the filename was malloc'ed.  The current filename comes
@@ -371,13 +388,23 @@ macho_add_oso_symfile (oso_el *oso, bfd *abfd,
      is not managed by gdb.  */
   abfd->filename = xstrdup (abfd->filename);
 
+  gdb_assert (current_oso.symbol_table == NULL);
+  current_oso.main_objfile = main_objfile;
+
   /* We need to clear SYMFILE_MAINLINE to avoid interractive question
      from symfile.c:symbol_file_add_with_addrs_or_offsets.  */
   objfile = symbol_file_add_from_bfd
-    (abfd, symfile_flags & ~SYMFILE_MAINLINE, addrs,
+    (abfd, symfile_flags & ~(SYMFILE_MAINLINE | SYMFILE_VERBOSE), NULL,
      main_objfile->flags & (OBJF_REORDERED | OBJF_SHARED
                             | OBJF_READNOW | OBJF_USERLOADED));
   add_separate_debug_objfile (objfile, main_objfile);
+
+  current_oso.main_objfile = NULL;
+  if (current_oso.symbol_table)
+    {
+      xfree (current_oso.symbol_table);
+      current_oso.symbol_table = NULL;
+    }
 }
 
 /* Read symbols from the vector of oso files.  */
@@ -688,6 +715,65 @@ macho_symfile_read (struct objfile *objfile, int symfile_flags)
     macho_symfile_read_all_oso (objfile, symfile_flags);
 }
 
+static bfd_byte *
+macho_symfile_relocate (struct objfile *objfile, asection *sectp,
+                        bfd_byte *buf)
+{
+  bfd *abfd = objfile->obfd;
+
+  /* We're only interested in sections with relocation
+     information.  */
+  if ((sectp->flags & SEC_RELOC) == 0)
+    return NULL;
+
+  if (mach_o_debug_level > 0)
+    printf_unfiltered (_("Relocate section '%s' of %s\n"),
+                       sectp->name, objfile->name);
+
+  if (current_oso.symbol_table == NULL)
+    {
+      int storage;
+      int i;
+      char leading_char;
+
+      storage = bfd_get_symtab_upper_bound (abfd);
+      current_oso.symbol_table = (asymbol **) xmalloc (storage);
+      bfd_canonicalize_symtab (abfd, current_oso.symbol_table);
+
+      leading_char = bfd_get_symbol_leading_char (abfd);
+
+      for (i = 0; current_oso.symbol_table[i]; i++)
+        {
+          asymbol *sym = current_oso.symbol_table[i];
+
+          if (bfd_is_com_section (sym->section))
+            {
+              /* This one must be solved.  */
+              struct minimal_symbol *msym;
+              const char *name = sym->name;
+
+              if (name[0] == leading_char)
+                name++;
+
+              msym = lookup_minimal_symbol
+                (name, NULL, current_oso.main_objfile);
+              if (msym == NULL)
+                {
+                  warning (_("can't find symbol '%s' in minsymtab"), name);
+                  continue;
+                }
+              else
+                {
+                  sym->section = &bfd_abs_section;
+                  sym->value = SYMBOL_VALUE_ADDRESS (msym);
+                }
+            }
+        }
+    }
+
+  return bfd_simple_get_relocated_section_contents (abfd, sectp, buf, NULL);
+}
+
 static void
 macho_symfile_finish (struct objfile *objfile)
 {
@@ -761,7 +847,7 @@ static struct sym_fns macho_sym_fns = {
   default_symfile_segments,	/* sym_segments: Get segment information from
 				   a file.  */
   NULL,                         /* sym_read_linetable */
-  default_symfile_relocate,	/* sym_relocate: Relocate a debug section.  */
+  macho_symfile_relocate,	/* sym_relocate: Relocate a debug section.  */
 
   NULL                          /* next: pointer to next struct sym_fns */
 };
