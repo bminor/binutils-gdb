@@ -9922,30 +9922,7 @@ ppc64_elf_layout_multitoc (struct bfd_link_info *info)
 
   htab->multi_toc_needed = htab->toc_curr != elf_gp (info->output_bfd);
 
-  /* Merge local got entries within a toc group.  */
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
-    {
-      struct got_entry **lgot_ents;
-      struct got_entry **end_lgot_ents;
-      Elf_Internal_Shdr *symtab_hdr;
-      bfd_size_type locsymcount;
-
-      if (!is_ppc64_elf (ibfd))
-	continue;
-
-      lgot_ents = elf_local_got_ents (ibfd);
-      if (!lgot_ents)
-	continue;
-
-      symtab_hdr = &elf_symtab_hdr (ibfd);
-      locsymcount = symtab_hdr->sh_info;
-      end_lgot_ents = lgot_ents + locsymcount;
-
-      for (; lgot_ents < end_lgot_ents; ++lgot_ents)
-	merge_got_entries (lgot_ents);
-    }
-
-  /* And the same for global sym got entries.  */
+  /* Merge global sym got entries within a toc group.  */
   elf_link_hash_traverse (&htab->elf, merge_global_got, info);
 
   /* And tlsld_got.  */
@@ -10033,23 +10010,22 @@ ppc64_elf_layout_multitoc (struct bfd_link_info *info)
 	  struct got_entry *ent;
 
 	  for (ent = *lgot_ents; ent != NULL; ent = ent->next)
-	    if (!ent->is_indirect)
-	      {
-		unsigned int num = 1;
-		ent->got.offset = s->size;
-		if ((ent->tls_type & *lgot_masks & TLS_GD) != 0)
-		  num = 2;
-		s->size += num * 8;
-		if (info->shared)
-		  srel->size += num * sizeof (Elf64_External_Rela);
-		else if ((*lgot_masks & PLT_IFUNC) != 0)
-		  {
-		    htab->reliplt->size
-		      += num * sizeof (Elf64_External_Rela);
-		    htab->got_reli_size
-		      += num * sizeof (Elf64_External_Rela);
-		  }
-	      }
+	    {
+	      unsigned int num = 1;
+	      ent->got.offset = s->size;
+	      if ((ent->tls_type & *lgot_masks & TLS_GD) != 0)
+		num = 2;
+	      s->size += num * 8;
+	      if (info->shared)
+		srel->size += num * sizeof (Elf64_External_Rela);
+	      else if ((*lgot_masks & PLT_IFUNC) != 0)
+		{
+		  htab->reliplt->size
+		    += num * sizeof (Elf64_External_Rela);
+		  htab->got_reli_size
+		    += num * sizeof (Elf64_External_Rela);
+		}
+	    }
 	}
     }
 
