@@ -8306,6 +8306,26 @@ allocate_got (struct elf_link_hash_entry *h,
     }
 }
 
+/* This function merges got entries in the same toc group.  */
+
+static void
+merge_got_entries (struct got_entry **pent)
+{
+  struct got_entry *ent, *ent2;
+
+  for (ent = *pent; ent != NULL; ent = ent->next)
+    if (!ent->is_indirect)
+      for (ent2 = ent->next; ent2 != NULL; ent2 = ent2->next)
+	if (!ent2->is_indirect
+	    && ent2->addend == ent->addend
+	    && ent2->tls_type == ent->tls_type
+	    && elf_gp (ent2->owner) == elf_gp (ent->owner))
+	  {
+	    ent2->is_indirect = TRUE;
+	    ent2->got.ent = ent;
+	  }
+}
+
 /* Allocate space in .plt, .got and associated reloc sections for
    dynamic relocs.  */
 
@@ -8416,9 +8436,30 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    gent->tls_type = TLS_TLS | TLS_TPREL;
 	}
 
+  /* Remove any list entry that won't generate a word in the GOT before
+     we call merge_got_entries.  Otherwise we risk merging to empty
+     entries.  */
   pgent = &h->got.glist;
   while ((gent = *pgent) != NULL)
     if (gent->got.refcount > 0)
+      {
+	if ((gent->tls_type & TLS_LD) != 0
+	    && !h->def_dynamic)
+	  {
+	    ppc64_tlsld_got (gent->owner)->got.refcount += 1;
+	    *pgent = gent->next;
+	  }
+	else
+	  pgent = &gent->next;
+      }
+    else
+      *pgent = gent->next;
+
+  if (!htab->do_multi_toc)
+    merge_got_entries (&h->got.glist);
+
+  for (gent = h->got.glist; gent != NULL; gent = gent->next)
+    if (!gent->is_indirect)
       {
 	/* Make sure this symbol is output as a dynamic symbol.
 	   Undefined weak syms won't yet be marked as dynamic,
@@ -8432,22 +8473,11 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	      return FALSE;
 	  }
 
-	if ((gent->tls_type & TLS_LD) != 0
-	    && !h->def_dynamic)
-	  {
-	    ppc64_tlsld_got (gent->owner)->got.refcount += 1;
-	    *pgent = gent->next;
-	    continue;
-	  }
-
 	if (!is_ppc64_elf (gent->owner))
 	  abort ();
 
 	allocate_got (h, info, gent);
-	pgent = &gent->next;
       }
-    else
-      *pgent = gent->next;
 
   if (eh->dyn_relocs == NULL
       || (!htab->elf.dynamic_sections_created
@@ -8587,6 +8617,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   asection *s;
   bfd_boolean relocs;
   bfd *ibfd;
+  struct got_entry *first_tlsld;
 
   htab = ppc_hash_table (info);
   if (htab == NULL)
@@ -8722,25 +8753,39 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
      sym dynamic relocs.  */
   elf_link_hash_traverse (&htab->elf, allocate_dynrelocs, info);
 
+  first_tlsld = NULL;
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
     {
+      struct got_entry *ent;
+
       if (!is_ppc64_elf (ibfd))
 	continue;
 
-      if (ppc64_tlsld_got (ibfd)->got.refcount > 0)
+      ent = ppc64_tlsld_got (ibfd);
+      if (ent->got.refcount > 0)
 	{
-	  s = ppc64_elf_tdata (ibfd)->got;
-	  ppc64_tlsld_got (ibfd)->got.offset = s->size;
-	  ppc64_tlsld_got (ibfd)->owner = ibfd;
-	  s->size += 16;
-	  if (info->shared)
+	  if (!htab->do_multi_toc && first_tlsld != NULL)
 	    {
-	      asection *srel = ppc64_elf_tdata (ibfd)->relgot;
-	      srel->size += sizeof (Elf64_External_Rela);
+	      ent->is_indirect = TRUE;
+	      ent->got.ent = first_tlsld;
+	    }
+	  else
+	    {
+	      if (first_tlsld == NULL)
+		first_tlsld = ent;
+	      s = ppc64_elf_tdata (ibfd)->got;
+	      ent->got.offset = s->size;
+	      ent->owner = ibfd;
+	      s->size += 16;
+	      if (info->shared)
+		{
+		  asection *srel = ppc64_elf_tdata (ibfd)->relgot;
+		  srel->size += sizeof (Elf64_External_Rela);
+		}
 	    }
 	}
       else
-	ppc64_tlsld_got (ibfd)->got.offset = (bfd_vma) -1;
+	ent->got.offset = (bfd_vma) -1;
     }
 
   /* We now have determined the sizes of the various dynamic sections.
@@ -9855,26 +9900,6 @@ ppc64_elf_next_toc_section (struct bfd_link_info *info, asection *isec)
   return TRUE;
 }
 
-/* This function merges got entries in the same toc group.  */
-
-static void
-merge_got_entries (struct got_entry **pent)
-{
-  struct got_entry *ent, *ent2;
-
-  for (ent = *pent; ent != NULL; ent = ent->next)
-    if (!ent->is_indirect)
-      for (ent2 = ent->next; ent2 != NULL; ent2 = ent2->next)
-	if (!ent2->is_indirect
-	    && ent2->addend == ent->addend
-	    && ent2->tls_type == ent->tls_type
-	    && elf_gp (ent2->owner) == elf_gp (ent->owner))
-	  {
-	    ent2->is_indirect = TRUE;
-	    ent2->got.ent = ent;
-	  }
-}
-
 /* Called via elf_link_hash_traverse to merge GOT entries for global
    symbol H.  */
 
@@ -9924,6 +9949,9 @@ ppc64_elf_layout_multitoc (struct bfd_link_info *info)
   bfd_boolean done_something;
 
   htab->multi_toc_needed = htab->toc_curr != elf_gp (info->output_bfd);
+
+  if (!htab->do_multi_toc)
+    return FALSE;
 
   /* Merge global sym got entries within a toc group.  */
   elf_link_hash_traverse (&htab->elf, merge_global_got, info);

@@ -1,3 +1,11 @@
+2010-02-09  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (merge_got_entries): Move earlier in file.
+	(allocate_dynrelocs): Merge got entries here if not doing multi-toc.
+	(ppc64_elf_size_dynamic_sections): Similarly merge tlsld_got.
+	(ppc64_elf_layout_multitoc): Don't resize if we have already
+	merged got entries.
+
 2010-02-09  Michael Holzheu  <holzheu@de.ibm.com>
 
 	* elf-bfd.h (elfcore_write_s390_timer, elfcore_write_s390_todcmp,
