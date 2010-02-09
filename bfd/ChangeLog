@@ -1,3 +1,9 @@
+2010-02-09  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (struct got_entry): Make tls_type and is_indirect
+	unsigned char.  Update variables and code using them throughout file.
+	(struct ppc_link_hash_entry): Likewise for tls_mask.
+
 2010-02-08  David S. Miller  <davem@davemloft.net>
 
 	* elfxx-sparc.h (struct _bfd_sparc_elf_link_hash_table): Remove sgot,
