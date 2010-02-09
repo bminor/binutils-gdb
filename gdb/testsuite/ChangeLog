@@ -1,3 +1,7 @@
+2010-02-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/ptype_tagged_param: New testcase.
+
 2010-02-08  Tom Tromey  <tromey@redhat.com>
 
 	PR c++/8017:
