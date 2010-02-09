@@ -4,6 +4,11 @@
 	unaligned for R_SPARC_16, R_SPARC_32, or R_SPARC_64, use the unaligned
 	relocation helper function.
 
+	* sparc.cc (Target_sparc::Scan::local): Handle R_SPARC_GOTDATA_OP*
+	just like R_SPARC_GOT{10,13,22}.
+	(Target_sparc::Scan::local): Likewise.
+	(Target_sparc::Relocate:relocate): Likewise.
+
 2010-02-06  Ian Lance Taylor  <iant@google.com>
 
 	* configure.ac: Rewrite targetobjs duplicate removal code to use

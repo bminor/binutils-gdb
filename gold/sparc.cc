@@ -1703,6 +1703,9 @@ Target_sparc<size, big_endian>::Scan::local(
     case elfcpp::R_SPARC_PC22:
       break;
 
+    case elfcpp::R_SPARC_GOTDATA_OP:
+    case elfcpp::R_SPARC_GOTDATA_OP_HIX22:
+    case elfcpp::R_SPARC_GOTDATA_OP_LOX10:
     case elfcpp::R_SPARC_GOT10:
     case elfcpp::R_SPARC_GOT13:
     case elfcpp::R_SPARC_GOT22:
@@ -2070,6 +2073,9 @@ Target_sparc<size, big_endian>::Scan::global(
       }
       break;
 
+    case elfcpp::R_SPARC_GOTDATA_OP:
+    case elfcpp::R_SPARC_GOTDATA_OP_HIX22:
+    case elfcpp::R_SPARC_GOTDATA_OP_LOX10:
     case elfcpp::R_SPARC_GOT10:
     case elfcpp::R_SPARC_GOT13:
     case elfcpp::R_SPARC_GOT22:
@@ -2412,6 +2418,9 @@ Target_sparc<size, big_endian>::Relocate::relocate(
   unsigned int got_offset = 0;
   switch (r_type)
     {
+    case elfcpp::R_SPARC_GOTDATA_OP:
+    case elfcpp::R_SPARC_GOTDATA_OP_HIX22:
+    case elfcpp::R_SPARC_GOTDATA_OP_LOX10:
     case elfcpp::R_SPARC_GOT10:
     case elfcpp::R_SPARC_GOT13:
     case elfcpp::R_SPARC_GOT22:
@@ -2526,10 +2535,15 @@ Target_sparc<size, big_endian>::Relocate::relocate(
       Reloc::lo10(view, got_offset, addend);
       break;
 
+    case elfcpp::R_SPARC_GOTDATA_OP:
+      break;
+
+    case elfcpp::R_SPARC_GOTDATA_OP_LOX10:
     case elfcpp::R_SPARC_GOT13:
       Reloc::rela32_13(view, got_offset, addend);
       break;
 
+    case elfcpp::R_SPARC_GOTDATA_OP_HIX22:
     case elfcpp::R_SPARC_GOT22:
       Reloc::hi22(view, got_offset, addend);
       break;
