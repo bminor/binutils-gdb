@@ -1,3 +1,10 @@
+2010-02-08  Christophe Lyon  <christophe.lyon@st.com>
+
+	* config/tc-arm.c (md_pcrel_from_section): Keep base to zero for
+	non-local branches (BFD_RELOC_THUMB_PCREL_BRANCH23,
+	BFD_RELOC_THUMB_PCREL_BLX, BFD_RELOC_ARM_PCREL_BLX,
+	BFD_RELOC_ARM_PCREL_CALL)
+
 2010-02-08  Sterling Augustine  <sterling@tensilica.com>
 
 	* config/tc-xtensa.c (frag_format_size): Generalize logic to
