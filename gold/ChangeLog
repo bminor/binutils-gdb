@@ -1,3 +1,13 @@
+2010-02-08  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_relobj::simple_input_section_output_address): New
+	method.
+	(Arm_relobj::section_needs_cortex_a8_stub_scanning,
+	Arm_relobj::scan_section_for_cortex_a8_stubs,
+	Arm_relobj::do_relocation_section): Instead of calling
+	Output_section::output_address, use faster
+	Arm_relobj::simple_input_section_output_address.
+
 2010-02-08  David S. Miller  <davem@davemloft.net>
 
 	* sparc.cc (Target_sparc::Relocate::relocate): If relocation offset is

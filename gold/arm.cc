@@ -1603,6 +1603,11 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
   make_exidx_input_section(unsigned int shndx,
 			   const elfcpp::Shdr<32, big_endian>& shdr);
 
+  // Return the output address of either a plain input section or a
+  // relaxed input section.  SHNDX is the section index.
+  Arm_address
+  simple_input_section_output_address(unsigned int, Output_section*);
+
   typedef std::vector<Stub_table<big_endian>*> Stub_table_list;
   typedef Unordered_map<unsigned int, const Arm_exidx_input_section*>
     Exidx_section_map;
@@ -5538,6 +5543,29 @@ Arm_relobj<big_endian>::section_needs_reloc_stub_scanning(
 				   out_sections[index], symtab);
 }
 
+// Return the output address of either a plain input section or a relaxed
+// input section.  SHNDX is the section index.  We define and use this
+// instead of calling Output_section::output_address because that is slow
+// for large output.
+
+template<bool big_endian>
+Arm_address
+Arm_relobj<big_endian>::simple_input_section_output_address(
+    unsigned int shndx,
+    Output_section* os)
+{
+  if (this->is_output_section_offset_invalid(shndx))
+    {
+      const Output_relaxed_input_section* poris =
+	os->find_relaxed_input_section(this, shndx);
+      // We do not handle merged sections here.
+      gold_assert(poris != NULL);
+      return poris->address();
+    }
+  else
+    return os->address() + this->get_output_section_offset(shndx);
+}
+
 // Determine if we want to scan the SHNDX-th section for non-relocation stubs.
 // This is a helper for Arm_relobj::scan_sections_for_stubs() below.
 
@@ -5552,11 +5580,9 @@ Arm_relobj<big_endian>::section_needs_cortex_a8_stub_scanning(
   if (!this->section_is_scannable(shdr, shndx, os, symtab))
     return false;
 
-  // Find output address of section.
-  Arm_address address = os->output_address(this, shndx, 0);
-
   // If the section does not cross any 4K-boundaries, it does not need to
   // be scanned.
+  Arm_address address = this->simple_input_section_output_address(shndx, os);
   if ((address & ~0xfffU) == ((address + shdr.get_sh_size() - 1) & ~0xfffU))
     return false;
 
@@ -5573,7 +5599,8 @@ Arm_relobj<big_endian>::scan_section_for_cortex_a8_erratum(
     Output_section* os,
     Target_arm<big_endian>* arm_target)
 {
-  Arm_address output_address = os->output_address(this, shndx, 0);
+  Arm_address output_address =
+    this->simple_input_section_output_address(shndx, os);
 
   // Get the section contents.
   section_size_type input_view_size = 0;
@@ -5912,7 +5939,8 @@ Arm_relobj<big_endian>::do_relocate_sections(
 	  // Adjust view to cover section.
 	  Output_section* os = this->output_section(i);
 	  gold_assert(os != NULL);
-	  Arm_address section_address = os->output_address(this, i, 0);
+	  Arm_address section_address =
+	    this->simple_input_section_output_address(i, os);
 	  uint64_t section_size = this->section_size(i);
 
 	  gold_assert(section_address >= view_address
