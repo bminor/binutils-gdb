@@ -1369,6 +1369,11 @@ Target_sparc<size, big_endian>::make_plt_entry(Symbol_table* symtab,
       // Create the GOT sections first.
       this->got_section(symtab, layout);
 
+      // Ensure that .rela.dyn always appears before .rela.plt  This is
+      // necessary due to how, on Sparc and some other targets, .rela.dyn
+      // needs to include .rela.plt in it's range.
+      this->rela_dyn_section(layout);
+
       this->plt_ = new Output_data_plt_sparc<size, big_endian>(layout);
       layout->add_output_section_data(".plt", elfcpp::SHT_PROGBITS,
 				      (elfcpp::SHF_ALLOC
@@ -2338,7 +2343,7 @@ Target_sparc<size, big_endian>::do_finalize_sections(
 				  ? NULL
 				  : this->plt_->rel_plt());
   layout->add_target_dynamic_tags(false, this->plt_, rel_plt,
-				  this->rela_dyn_, true);
+				  this->rela_dyn_, true, true);
 
   // Emit any relocs we saved in an attempt to avoid generating COPY
   // relocs.

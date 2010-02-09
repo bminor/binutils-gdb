@@ -4,6 +4,29 @@
 	R_SPARC_RELATIVE using ->add_local_relative().
 	(Target_sparc::Scan::global): Likewise for ->add_global_relative().
 
+	* output.h (Output_data_dynamic::add_section_size): New method
+	that takes two Output_data objects.
+	(Output_data_dynamic::Dynamic_entry): Create storage for secondary
+	entry param.  Handle it in initializers.
+	* output.cc (Output_data_dynamic::Dynamic_entry::write): For
+	DYNAMIC_SECTION_SIZE, add in second object size if non-NULL.
+	* layout.h (Layout::add_target_dynamic_tags): Add dynrel_includes_plt
+	arg.
+	* layout.cc (Layout::add_target_dynamic_tags): If dynrel_includes_plt,
+	and .rela.plt exists, set DT_REL{,A}SZ to sum of .rela.dyn and .rela.plt
+	* arm.cc (Target_arm::do_finalize_sections): Update to pass false
+	for dynrel_includes_plt.
+	* i386.cc (Target_i386::do_finalize_sections): Likewise.
+	* x86_64.cc (Target_x86_64::do_finalize_sections): Likewise.
+	* sparc.cc (Target_sparc::make_plt_entry): Force .rela.dyn to be output
+	before .rela.plt
+	(Target_sparc::do_finalize_sections): Update to pass true for
+	dynrel_includes_plt.
+	* powerpc.cc (Target_powerpc::make_plt_entry): Force .rela.dyn to be
+	output before .rela.plt
+	(Target_powerpc::do_finalize_sections): Update to pass true for
+	dynrel_includes_plt when 32-bit.
+
 2010-02-08  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_relobj::simple_input_section_output_address): New

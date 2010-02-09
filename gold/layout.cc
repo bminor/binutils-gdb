@@ -3240,7 +3240,7 @@ void
 Layout::add_target_dynamic_tags(bool use_rel, const Output_data* plt_got,
 				const Output_data* plt_rel,
 				const Output_data_reloc_generic* dyn_rel,
-				bool add_debug)
+				bool add_debug, bool dynrel_includes_plt)
 {
   Output_data_dynamic* odyn = this->dynamic_data_;
   if (odyn == NULL)
@@ -3261,8 +3261,12 @@ Layout::add_target_dynamic_tags(bool use_rel, const Output_data* plt_got,
     {
       odyn->add_section_address(use_rel ? elfcpp::DT_REL : elfcpp::DT_RELA,
 				dyn_rel);
-      odyn->add_section_size(use_rel ? elfcpp::DT_RELSZ : elfcpp::DT_RELASZ,
-			     dyn_rel);
+      if (plt_rel != NULL && dynrel_includes_plt)
+	odyn->add_section_size(use_rel ? elfcpp::DT_RELSZ : elfcpp::DT_RELASZ,
+			       dyn_rel, plt_rel);
+      else
+	odyn->add_section_size(use_rel ? elfcpp::DT_RELSZ : elfcpp::DT_RELASZ,
+			       dyn_rel);
       const int size = parameters->target().get_size();
       elfcpp::DT rel_tag;
       int rel_size;

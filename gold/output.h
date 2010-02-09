@@ -1997,6 +1997,12 @@ class Output_data_dynamic : public Output_section_data
   add_section_size(elfcpp::DT tag, const Output_data* od)
   { this->add_entry(Dynamic_entry(tag, od, true)); }
 
+  // Add a new dynamic entry with the total size of two output datas.
+  void
+  add_section_size(elfcpp::DT tag, const Output_data* od,
+		   const Output_data* od2)
+  { this->add_entry(Dynamic_entry(tag, od, od2)); }
+
   // Add a new dynamic entry with the address of a symbol.
   void
   add_symbol(elfcpp::DT tag, const Symbol* sym)
@@ -2045,7 +2051,19 @@ class Output_data_dynamic : public Output_section_data
 	offset_(section_size
 		? DYNAMIC_SECTION_SIZE
 		: DYNAMIC_SECTION_ADDRESS)
-    { this->u_.od = od; }
+    {
+      this->u_.od = od;
+      this->od2 = NULL;
+    }
+
+    // Create an entry with the size of two sections.
+    Dynamic_entry(elfcpp::DT tag, const Output_data* od, const Output_data* od2)
+      : tag_(tag),
+	offset_(DYNAMIC_SECTION_SIZE)
+    {
+      this->u_.od = od;
+      this->od2 = od2;
+    }
 
     // Create an entry with the address of a section plus a constant offset.
     Dynamic_entry(elfcpp::DT tag, const Output_data* od, unsigned int offset)
@@ -2101,6 +2119,8 @@ class Output_data_dynamic : public Output_section_data
       // For DYNAMIC_STRING.
       const char* str;
     } u_;
+    // For DYNAMIC_SYMBOL with two sections.
+    const Output_data* od2;
     // The dynamic tag.
     elfcpp::DT tag_;
     // The type of entry (Classification) or offset within a section.

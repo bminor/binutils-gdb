@@ -1560,6 +1560,8 @@ Output_data_dynamic::Dynamic_entry::write(
 
     case DYNAMIC_SECTION_SIZE:
       val = this->u_.od->data_size();
+      if (this->od2 != NULL)
+	val += this->od2->data_size();
       break;
 
     case DYNAMIC_SYMBOL:
