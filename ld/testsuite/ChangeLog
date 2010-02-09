@@ -1,3 +1,8 @@
+2010-02-09  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* ld-elfvsb/elfvsb.exp: Fix tests for arm*-*-linux*.
+	* ld-shared/shared.exp: Likewise.
+
 2010-02-08  David S. Miller  <davem@davemloft.net>
 
 	* ld-ifunc/ifunc.exp: Run for sparc.
