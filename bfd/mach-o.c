@@ -714,6 +714,12 @@ bfd_mach_o_canonicalize_one_reloc (bfd *abfd, char *buf,
           BFD_ASSERT (num != 0);
           BFD_ASSERT (num <= mdata->nsects);
           sym = mdata->sections[num - 1]->bfdsection->symbol_ptr_ptr;
+          /* For a symbol defined in section S, the addend (stored in the
+             binary) contains the address of the section.  To comply with
+             bfd conventio, substract the section address.
+             Use the address from the header, so that the user can modify
+             the vma of the section.  */
+          res->addend = -mdata->sections[num - 1]->addr;
           reloc.r_extern = 0;
         }
       res->sym_ptr_ptr = sym;
