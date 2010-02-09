@@ -1,3 +1,17 @@
+2010-02-09  Michael Holzheu  <holzheu@de.ibm.com>
+
+	* elf-bfd.h (elfcore_write_s390_timer, elfcore_write_s390_todcmp,
+	elfcore_write_s390_todpreg, elfcore_write_s390_ctrs,
+	elfcore_write_s390_prefix): New.
+	* elf.c (elfcore_write_s390_timer, elfcore_write_s390_todcmp,
+	elfcore_write_s390_todpreg, elfcore_write_s390_ctrs,
+	elfcore_write_s390_prefix): New.
+	(elfcore_grok_note): Handle NT_S390_TIMER, NT_S390_TODCMP,
+	NT_S390_TODPREG, NT_S390_CTRS and NT_S390_PREFIX.
+	(elfcore_write_register_note): Handle .reg-s390-timer, 
+	.reg-s390-todcmp, .reg-s390-todpreg, .reg-s390-ctrs,
+	.reg-s390-prefix section.
+
 2010-02-09  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (struct got_entry): Make tls_type and is_indirect

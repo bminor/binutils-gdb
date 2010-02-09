@@ -7672,6 +7672,36 @@ elfcore_grok_s390_high_gprs (bfd *abfd, Elf_Internal_Note *note)
   return elfcore_make_note_pseudosection (abfd, ".reg-s390-high-gprs", note);
 }
 
+static bfd_boolean
+elfcore_grok_s390_timer (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-s390-timer", note);
+}
+
+static bfd_boolean
+elfcore_grok_s390_todcmp (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-s390-todcmp", note);
+}
+
+static bfd_boolean
+elfcore_grok_s390_todpreg (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-s390-todpreg", note);
+}
+
+static bfd_boolean
+elfcore_grok_s390_ctrs (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-s390-ctrs", note);
+}
+
+static bfd_boolean
+elfcore_grok_s390_prefix (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-s390-prefix", note);
+}
+
 #if defined (HAVE_PRPSINFO_T)
 typedef prpsinfo_t   elfcore_psinfo_t;
 #if defined (HAVE_PRPSINFO32_T)		/* Sparc64 cross Sparc32 */
@@ -8047,6 +8077,41 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
       if (note->namesz == 6
           && strcmp (note->namedata, "LINUX") == 0)
         return elfcore_grok_s390_high_gprs (abfd, note);
+      else
+        return TRUE;
+
+    case NT_S390_TIMER:
+      if (note->namesz == 6
+          && strcmp (note->namedata, "LINUX") == 0)
+        return elfcore_grok_s390_timer (abfd, note);
+      else
+        return TRUE;
+
+    case NT_S390_TODCMP:
+      if (note->namesz == 6
+          && strcmp (note->namedata, "LINUX") == 0)
+        return elfcore_grok_s390_todcmp (abfd, note);
+      else
+        return TRUE;
+
+    case NT_S390_TODPREG:
+      if (note->namesz == 6
+          && strcmp (note->namedata, "LINUX") == 0)
+        return elfcore_grok_s390_todpreg (abfd, note);
+      else
+        return TRUE;
+
+    case NT_S390_CTRS:
+      if (note->namesz == 6
+          && strcmp (note->namedata, "LINUX") == 0)
+        return elfcore_grok_s390_ctrs (abfd, note);
+      else
+        return TRUE;
+
+    case NT_S390_PREFIX:
+      if (note->namesz == 6
+          && strcmp (note->namedata, "LINUX") == 0)
+        return elfcore_grok_s390_prefix (abfd, note);
       else
         return TRUE;
 
@@ -8715,6 +8780,66 @@ elfcore_write_s390_high_gprs (bfd *abfd,
 }
 
 char *
+elfcore_write_s390_timer (bfd *abfd,
+                          char *buf,
+                          int *bufsiz,
+                          const void *s390_timer,
+                          int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+                             note_name, NT_S390_TIMER, s390_timer, size);
+}
+
+char *
+elfcore_write_s390_todcmp (bfd *abfd,
+                           char *buf,
+                           int *bufsiz,
+                           const void *s390_todcmp,
+                           int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+                             note_name, NT_S390_TODCMP, s390_todcmp, size);
+}
+
+char *
+elfcore_write_s390_todpreg (bfd *abfd,
+                            char *buf,
+                            int *bufsiz,
+                            const void *s390_todpreg,
+                            int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+                             note_name, NT_S390_TODPREG, s390_todpreg, size);
+}
+
+char *
+elfcore_write_s390_ctrs (bfd *abfd,
+                         char *buf,
+                         int *bufsiz,
+                         const void *s390_ctrs,
+                         int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+                             note_name, NT_S390_CTRS, s390_ctrs, size);
+}
+
+char *
+elfcore_write_s390_prefix (bfd *abfd,
+                           char *buf,
+                           int *bufsiz,
+                           const void *s390_prefix,
+                           int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+                             note_name, NT_S390_PREFIX, s390_prefix, size);
+}
+
+char *
 elfcore_write_register_note (bfd *abfd,
 			     char *buf,
 			     int *bufsiz,
@@ -8734,6 +8859,16 @@ elfcore_write_register_note (bfd *abfd,
     return elfcore_write_ppc_vsx (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-s390-high-gprs") == 0)
     return elfcore_write_s390_high_gprs (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-s390-timer") == 0)
+    return elfcore_write_s390_timer (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-s390-todcmp") == 0)
+    return elfcore_write_s390_todcmp (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-s390-todpreg") == 0)
+    return elfcore_write_s390_todpreg (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-s390-ctrs") == 0)
+    return elfcore_write_s390_ctrs (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-s390-prefix") == 0)
+    return elfcore_write_s390_prefix (abfd, buf, bufsiz, data, size);
   return NULL;
 }
 

@@ -2175,6 +2175,16 @@ extern char *elfcore_write_ppc_vmx
   (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_ppc_vsx
   (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_s390_timer
+  (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_s390_todcmp
+  (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_s390_todpreg
+  (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_s390_ctrs
+  (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_s390_prefix
+  (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_lwpstatus
   (bfd *, char *, int *, long, int, const void *);
 extern char *elfcore_write_register_note

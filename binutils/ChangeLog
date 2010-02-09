@@ -1,3 +1,8 @@
+2010-02-09  Michael Holzheu  <holzheu@de.ibm.com>
+
+	* readelf.c (get_note_type): Handle NT_S390_TIMER, NT_S390_TODCMP,
+	NT_S390_TODPREG, NT_S390_CTRS and NT_S390_PREFIX.
+
 2010-02-08  Jim Blandy  <jimb@red-bean.com>
 
 	* dwarf.c (display_debug_frames): Skip the 'S' character in CFI
