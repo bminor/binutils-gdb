@@ -2592,6 +2592,10 @@ struct ppc64_elf_obj_tdata
 
   /* A copy of relocs before they are modified for --emit-relocs.  */
   Elf_Internal_Rela *opd_relocs;
+
+  /* Nonzero if this bfd has small toc/got relocs, ie. that expect
+     the reloc to be in the range -32768 to 32767.  */
+  unsigned int has_small_toc_reloc;
 };
 
 #define ppc64_elf_tdata(bfd) \
@@ -3810,16 +3814,12 @@ struct ppc_link_hash_table
 /* Nonzero if this section has any toc or got relocs.  */
 #define has_toc_reloc sec_flg2
 
-/* Nonzero if this section has small toc/got relocs, ie. that expect
-   the reloc to be in the range -32768 to 32767.  */
-#define has_small_toc_reloc sec_flg3
-
 /* Nonzero if this section has a call to another section that uses
    the toc or got.  */
-#define makes_toc_func_call sec_flg4
+#define makes_toc_func_call sec_flg3
 
 /* Recursion protection when determining above flag.  */
-#define call_check_in_progress sec_flg5
+#define call_check_in_progress sec_flg4
 
 /* Get the ppc64 ELF linker hash table from a link_info structure.  */
 
@@ -5023,7 +5023,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      || r_type == R_PPC64_GOT16_DS)
 	    {
 	      htab->do_multi_toc = 1;
-	      sec->has_small_toc_reloc = 1;
+	      ppc64_elf_tdata (abfd)->has_small_toc_reloc = 1;
 	    }
 
 	  if (ppc64_elf_tdata (abfd)->got == NULL
@@ -5124,7 +5124,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_TOC16:
 	case R_PPC64_TOC16_DS:
 	  htab->do_multi_toc = 1;
-	  sec->has_small_toc_reloc = 1;
+	  ppc64_elf_tdata (abfd)->has_small_toc_reloc = 1;
 	case R_PPC64_TOC16_LO:
 	case R_PPC64_TOC16_HI:
 	case R_PPC64_TOC16_HA:
@@ -9790,7 +9790,7 @@ bfd_boolean
 ppc64_elf_next_toc_section (struct bfd_link_info *info, asection *isec)
 {
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
-  bfd_vma addr, off;
+  bfd_vma addr, off, limit;
 
   if (htab == NULL)
     return FALSE;
@@ -9806,7 +9806,10 @@ ppc64_elf_next_toc_section (struct bfd_link_info *info, asection *isec)
 
       addr = isec->output_offset + isec->output_section->vma;
       off = addr - htab->toc_curr;
-      if (off + isec->size > 0x10000)
+      limit = 0x80008000;
+      if (ppc64_elf_tdata (isec->owner)->has_small_toc_reloc)
+	limit = 0x10000;
+      if (off + isec->size > limit)
 	{
 	  addr = (htab->toc_first_sec->output_offset
 		  + htab->toc_first_sec->output_section->vma);

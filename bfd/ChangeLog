@@ -6,6 +6,13 @@
 
 	* elf64-ppc.c (ppc64_elf_layout_multitoc): Don't merge local got ents.
 
+	* elf64-ppc.c (has_small_toc_reloc): Don't define.
+	(makes_toc_func_call, call_check_in_progress): Shuffle flags.
+	(struct ppc64_elf_obj_tdata): Add has_small_toc_reloc.  Update
+	code setting the flag.
+	(ppc64_elf_next_toc_section): Group big-toc sections in
+	0x80008000 chunks.
+
 2010-02-08  David S. Miller  <davem@davemloft.net>
 
 	* elfxx-sparc.h (struct _bfd_sparc_elf_link_hash_table): Remove sgot,
