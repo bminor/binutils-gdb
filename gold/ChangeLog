@@ -1,3 +1,9 @@
+2010-02-09  David S. Miller  <davem@davemloft.net>
+
+	* sparc.cc (Target_sparc::Scan::local): Do not emit relocs other than
+	R_SPARC_RELATIVE using ->add_local_relative().
+	(Target_sparc::Scan::global): Likewise for ->add_global_relative().
+
 2010-02-08  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_relobj::simple_input_section_output_address): New
