@@ -1,3 +1,9 @@
+2010-02-08  David S. Miller  <davem@davemloft.net>
+
+	* sparc.cc (Target_sparc::Relocate::relocate): If relocation offset is
+	unaligned for R_SPARC_16, R_SPARC_32, or R_SPARC_64, use the unaligned
+	relocation helper function.
+
 2010-02-06  Ian Lance Taylor  <iant@google.com>
 
 	* configure.ac: Rewrite targetobjs duplicate removal code to use

@@ -2447,14 +2447,30 @@ Target_sparc<size, big_endian>::Relocate::relocate(
       break;
 
     case elfcpp::R_SPARC_16:
-      Relocate_functions<size, big_endian>::rela16(view, object,
-						   psymval, addend);
+      if (rela.get_r_offset() & 0x1)
+	{
+	  // The assembler can sometimes emit unaligned relocations
+	  // for dwarf2 cfi directives. 
+	  Reloc::ua16(view, object, psymval, addend);
+	}
+      else
+	Relocate_functions<size, big_endian>::rela16(view, object,
+						     psymval, addend);
       break;
 
     case elfcpp::R_SPARC_32:
       if (!parameters->options().output_is_position_independent())
-	Relocate_functions<size, big_endian>::rela32(view, object,
-						     psymval, addend);
+	{
+	  if (rela.get_r_offset() & 0x3)
+	    {
+	      // The assembler can sometimes emit unaligned relocations
+	      // for dwarf2 cfi directives. 
+	      Reloc::ua32(view, object, psymval, addend);
+	    }
+	  else
+	    Relocate_functions<size, big_endian>::rela32(view, object,
+							 psymval, addend);
+	}
       break;
 
     case elfcpp::R_SPARC_DISP8:
@@ -2563,8 +2579,17 @@ Target_sparc<size, big_endian>::Relocate::relocate(
 
     case elfcpp::R_SPARC_64:
       if (!parameters->options().output_is_position_independent())
-	      Relocate_functions<size, big_endian>::rela64(view, object,
-							   psymval, addend);
+	{
+	  if (rela.get_r_offset() & 0x7)
+	    {
+	      // The assembler can sometimes emit unaligned relocations
+	      // for dwarf2 cfi directives. 
+	      Reloc::ua64(view, object, psymval, addend);
+	    }
+	  else
+	    Relocate_functions<size, big_endian>::rela64(view, object,
+							 psymval, addend);
+	}
       break;
 
     case elfcpp::R_SPARC_OLO10:
