@@ -32749,6 +32749,15 @@ Double precision IEEE floating point.
 @item arm_fpa_ext
 The 12-byte extended precision format used by ARM FPA registers.
 
+@item i387_ext
+The 10-byte extended precision format used by x87 registers.
+
+@item i386_eflags
+32bit @sc{eflags} register used by x86.
+
+@item i386_mxcsr
+32bit @sc{mxcsr} register used by x86.
+
 @end table
 
 @node Standard Target Features

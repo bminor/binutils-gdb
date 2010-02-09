@@ -1,3 +1,8 @@
+2010-02-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gdb.texinfo (Predefined Target Types): Add i387_ext,
+	i386_eflags and i386_mxcsr.
+
 2010-02-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gdb.texinfo: Document i386 target features.
