@@ -1,3 +1,8 @@
+2010-02-09  Tristan Gingold  <gingold@adacore.com>
+
+	* objfiles.c (objfile_separate_debug_iterate): Do not iterate on
+	brothers of the parent.
+
 2010-02-08  Tom Tromey  <tromey@redhat.com>
 
 	PR c++/8017:
