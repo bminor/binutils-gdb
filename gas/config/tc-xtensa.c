@@ -4649,6 +4649,12 @@ next_frag_is_loop_target (const fragS *fragP)
 }
 
 
+/* As specified in the relaxation table, when a loop instruction is
+   relaxed, there are 24 bytes between the loop instruction itself and
+   the first instruction in the loop.  */
+
+#define RELAXED_LOOP_INSN_BYTES 24
+
 static addressT
 next_frag_pre_opcode_bytes (const fragS *fragp)
 {
@@ -4671,7 +4677,7 @@ next_frag_pre_opcode_bytes (const fragS *fragp)
      been relaxed.  Note that we can assume that the LOOP
      instruction is in slot 0 because loops aren't bundleable.  */
   if (next_fragp->tc_frag_data.slot_subtypes[0] > RELAX_IMMED)
-      return get_expanded_loop_offset (next_opcode);
+      return get_expanded_loop_offset (next_opcode) + RELAXED_LOOP_INSN_BYTES;
 
   return 0;
 }
@@ -7401,9 +7407,36 @@ xtensa_mark_zcl_first_insns (void)
 		    || fragP->fr_subtype == RELAX_CHECK_ALIGN_NEXT_OPCODE))
 	      {
 		/* Find the loop frag.  */
-		fragS *targ_frag = next_non_empty_frag (fragP);
+		fragS *loop_frag = next_non_empty_frag (fragP);
 		/* Find the first insn frag.  */
-		targ_frag = next_non_empty_frag (targ_frag);
+		fragS *targ_frag = next_non_empty_frag (loop_frag);
+
+	      /* Handle a corner case that comes up in hardware
+		 diagnostics.  The original assembly looks like this:
+		 
+		 loop aX, LabelA
+		 <empty_frag>--not found by next_non_empty_frag
+		 loop aY, LabelB
+
+		 Depending on the start address, the assembler may or
+		 may not change it to look something like this:
+
+		 loop aX, LabelA
+		 nop--frag isn't empty anymore
+		 loop aY, LabelB
+
+		 So set up to check the alignment of the nop if it
+		 exists  */
+		while (loop_frag != targ_frag)
+		  {
+		    if (loop_frag->fr_type == rs_machine_dependent
+			&& (loop_frag->fr_subtype == RELAX_ALIGN_NEXT_OPCODE
+			    || loop_frag->fr_subtype 
+			    == RELAX_CHECK_ALIGN_NEXT_OPCODE))
+		      targ_frag = loop_frag;
+		    else
+		      loop_frag = loop_frag->fr_next;
+		  }
 
 		/* Of course, sometimes (mostly for toy test cases) a
 		   zero-cost loop instruction is the last in a section.  */

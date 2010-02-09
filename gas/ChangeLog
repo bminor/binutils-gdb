@@ -1,3 +1,9 @@
+2010-02-09  Sterling Augustine  <sterling@tensilica.com>
+
+	* config/tc-xtensa.c (RELAXED_LOOP_INSN_BYTES): New.
+	(next_frag_pre_opcode_bytes): Use RELAXED_LOOP_INSN_BYTES.
+	(xtensa_mark_zcl_first_insns): Rewrite to handle corner case.
+
 2010-02-08  Christophe Lyon  <christophe.lyon@st.com>
 
 	* config/tc-arm.c (md_pcrel_from_section): Keep base to zero for
