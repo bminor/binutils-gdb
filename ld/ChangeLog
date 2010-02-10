@@ -1,3 +1,15 @@
+2010-02-10  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
+	* Makefile.am (CFILES): Add ldlex-wrapper.c.
+	(OFILES): Replace ldlex.c with ldlex-wrapper.c.
+	(ldlex.o): Replace with...
+	(ldlex-wrapper.o): ...this new rule.
+	(EXTRA_ld_new_SOURCES): Add ldlex.l.
+	(ld_new_SOURCES): Replace ldlex.l with ldlex-wrapper.c.
+	* Makefile.in: Regenerate.
+	* ldlex.l (sysdep.h): Don't include here.
+	* ldlex-wrapper.c: New file.
+
 2010-01-08  Alan Modra  <amodra@gmail.com>
 
 	PR 11107
