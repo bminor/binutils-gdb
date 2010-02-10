@@ -262,7 +262,7 @@ amd64_linux_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
     return (group == system_reggroup
             || group == save_reggroup
             || group == restore_reggroup);
-  return default_register_reggroup_p (gdbarch, regnum, group);
+  return i386_register_reggroup_p (gdbarch, regnum, group);
 }
 
 /* Set the program counter for process PTID to PC.  */

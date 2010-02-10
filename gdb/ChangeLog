@@ -1,3 +1,9 @@
+2010-02-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gdb/11265
+	* amd64-linux-tdep.c (amd64_linux_register_reggroup_p): Call
+	i386_register_reggroup_p instead of default_register_reggroup_p.
+
 2010-02-10  Tom Tromey  <tromey@redhat.com>
 
 	* parser-defs.h (parser_debug): Declare.
