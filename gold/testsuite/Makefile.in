@@ -165,6 +165,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_10 = tls_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pie_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pie_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_ie_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_gd_to_ie_test
@@ -389,6 +390,7 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pic_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pie_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pie_pic_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_ie_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_gd_to_ie_test$(EXEEXT)
@@ -760,6 +762,12 @@ am__tls_pic_test_SOURCES_DIST = tls_test_main.cc
 tls_pic_test_OBJECTS = $(am_tls_pic_test_OBJECTS)
 tls_pic_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(tls_pic_test_LDFLAGS) $(LDFLAGS) -o $@
+tls_pie_pic_test_SOURCES = tls_pie_pic_test.c
+tls_pie_pic_test_OBJECTS = tls_pie_pic_test.$(OBJEXT)
+tls_pie_pic_test_LDADD = $(LDADD)
+tls_pie_pic_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 tls_pie_test_SOURCES = tls_pie_test.c
 tls_pie_test_OBJECTS = tls_pie_test.$(OBJEXT)
 tls_pie_test_LDADD = $(LDADD)
@@ -1105,7 +1113,7 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	$(script_test_1_SOURCES) $(script_test_2_SOURCES) \
 	script_test_3.c $(searched_file_test_SOURCES) \
 	$(thin_archive_test_1_SOURCES) $(thin_archive_test_2_SOURCES) \
-	$(tls_pic_test_SOURCES) tls_pie_test.c \
+	$(tls_pic_test_SOURCES) tls_pie_pic_test.c tls_pie_test.c \
 	$(tls_shared_gd_to_ie_test_SOURCES) \
 	$(tls_shared_gnu2_gd_to_ie_test_SOURCES) \
 	$(tls_shared_gnu2_test_SOURCES) $(tls_shared_ie_test_SOURCES) \
@@ -1168,8 +1176,8 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(am__searched_file_test_SOURCES_DIST) \
 	$(am__thin_archive_test_1_SOURCES_DIST) \
 	$(am__thin_archive_test_2_SOURCES_DIST) \
-	$(am__tls_pic_test_SOURCES_DIST) tls_pie_test.c \
-	$(am__tls_shared_gd_to_ie_test_SOURCES_DIST) \
+	$(am__tls_pic_test_SOURCES_DIST) tls_pie_pic_test.c \
+	tls_pie_test.c $(am__tls_shared_gd_to_ie_test_SOURCES_DIST) \
 	$(am__tls_shared_gnu2_gd_to_ie_test_SOURCES_DIST) \
 	$(am__tls_shared_gnu2_test_SOURCES_DIST) \
 	$(am__tls_shared_ie_test_SOURCES_DIST) \
@@ -2008,6 +2016,15 @@ thin_archive_test_2$(EXEEXT): $(thin_archive_test_2_OBJECTS) $(thin_archive_test
 tls_pic_test$(EXEEXT): $(tls_pic_test_OBJECTS) $(tls_pic_test_DEPENDENCIES) 
 	@rm -f tls_pic_test$(EXEEXT)
 	$(tls_pic_test_LINK) $(tls_pic_test_OBJECTS) $(tls_pic_test_LDADD) $(LIBS)
+@GCC_FALSE@tls_pie_pic_test$(EXEEXT): $(tls_pie_pic_test_OBJECTS) $(tls_pie_pic_test_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f tls_pie_pic_test$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(tls_pie_pic_test_OBJECTS) $(tls_pie_pic_test_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@tls_pie_pic_test$(EXEEXT): $(tls_pie_pic_test_OBJECTS) $(tls_pie_pic_test_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f tls_pie_pic_test$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(tls_pie_pic_test_OBJECTS) $(tls_pie_pic_test_LDADD) $(LIBS)
+@TLS_FALSE@tls_pie_pic_test$(EXEEXT): $(tls_pie_pic_test_OBJECTS) $(tls_pie_pic_test_DEPENDENCIES) 
+@TLS_FALSE@	@rm -f tls_pie_pic_test$(EXEEXT)
+@TLS_FALSE@	$(LINK) $(tls_pie_pic_test_OBJECTS) $(tls_pie_pic_test_LDADD) $(LIBS)
 @GCC_FALSE@tls_pie_test$(EXEEXT): $(tls_pie_test_OBJECTS) $(tls_pie_test_DEPENDENCIES) 
 @GCC_FALSE@	@rm -f tls_pie_test$(EXEEXT)
 @GCC_FALSE@	$(LINK) $(tls_pie_test_OBJECTS) $(tls_pie_test_LDADD) $(LIBS)
@@ -2202,6 +2219,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testfile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testmain.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thin_archive_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_pie_pic_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_pie_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_test_file2.Po@am__quote@
@@ -2785,6 +2803,10 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_pie_test: tls_test_main_pie.o tls_test_pie.o tls_test_file2_pie.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@		tls_test_c_pie.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -pie tls_test_main_pie.o tls_test_pie.o tls_test_file2_pie.o tls_test_c_pie.o -lpthread
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_pie_pic_test: tls_test_main_pie.o tls_test_pic.o tls_test_file2_pic.o \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@		tls_test_c_pic.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -pie tls_test_main_pie.o tls_test_pic.o tls_test_file2_pic.o tls_test_c_pic.o -lpthread
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_test_gnu2.o: tls_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@	$(CXXCOMPILE) -c -fpic -mtls-dialect=gnu2 -o $@ $<

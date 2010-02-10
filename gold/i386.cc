@@ -1897,10 +1897,9 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 
   elfcpp::Elf_types<32>::Elf_Addr value = psymval->value(object, 0);
 
-  const bool is_final =
-    (gsym == NULL
-     ? !parameters->options().output_is_position_independent()
-     : gsym->final_value_is_known());
+  const bool is_final = (gsym == NULL
+			 ? !parameters->options().shared()
+			 : gsym->final_value_is_known());
   const tls::Tls_optimization optimized_type
       = Target_i386::optimize_tls_reloc(is_final, r_type);
   switch (r_type)
