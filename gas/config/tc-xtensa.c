@@ -5016,16 +5016,22 @@ xtensa_find_unaligned_loops (bfd *abfd ATTRIBUTE_UNUSED,
 	      addressT frag_addr;
 	      xtensa_format fmt;
 
-	      xtensa_insnbuf_from_chars
-		(isa, insnbuf, (unsigned char *) frag->fr_literal, 0);
-	      fmt = xtensa_format_decode (isa, insnbuf);
-	      op_size = xtensa_format_length (isa, fmt);
-	      frag_addr = frag->fr_address % xtensa_fetch_width;
-
-	      if (frag_addr + op_size > xtensa_fetch_width)
-		as_warn_where (frag->fr_file, frag->fr_line,
-			       _("unaligned loop: %d bytes at 0x%lx"),
-			       op_size, (long) frag->fr_address);
+	      if (frag->fr_fix == 0)
+		frag = next_non_empty_frag (frag);
+	      
+	      if (frag)
+		{
+		  xtensa_insnbuf_from_chars
+		    (isa, insnbuf, (unsigned char *) frag->fr_literal, 0);
+		  fmt = xtensa_format_decode (isa, insnbuf);
+		  op_size = xtensa_format_length (isa, fmt);
+		  frag_addr = frag->fr_address % xtensa_fetch_width;
+		  
+		  if (frag_addr + op_size > xtensa_fetch_width)
+		    as_warn_where (frag->fr_file, frag->fr_line,
+				   _("unaligned loop: %d bytes at 0x%lx"),
+				   op_size, (long) frag->fr_address);
+		}
 	    }
 	  frag = frag->fr_next;
 	}
