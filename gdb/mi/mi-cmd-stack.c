@@ -138,7 +138,7 @@ parse_print_values (char *name)
 	    mi_no_values, mi_all_values, mi_simple_values);
 }
 
-/* Print a list of the locals for the current frame. With argument of
+/* Print a list of the locals for the current frame.  With argument of
    0, print only the names, with argument of 1 print also the
    values. */
 void
@@ -155,7 +155,7 @@ mi_cmd_stack_list_locals (char *command, char **argv, int argc)
    list_args_or_locals (locals, parse_print_values (argv[0]), frame);
 }
 
-/* Print a list of the arguments for the current frame. With argument
+/* Print a list of the arguments for the current frame.  With argument
    of 0, print only the names, with argument of 1 print also the
    values. */
 void
@@ -216,8 +216,9 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
 }
 
 /* Print a list of the local variables (including arguments) for the 
-   current frame. With argument of 0, print only the names, with 
-   argument of 1 print also the values. */
+   current frame.  ARGC must be 1 and ARGV[0] specify if only the names,
+   or both names and values of the variables must be printed.  See 
+   parse_print_value for possible values.  */
 void
 mi_cmd_stack_list_variables (char *command, char **argv, int argc)
 {
@@ -227,9 +228,9 @@ mi_cmd_stack_list_variables (char *command, char **argv, int argc)
   if (argc != 1)
     error (_("Usage: PRINT_VALUES"));
 
-   frame = get_selected_frame (NULL);
+  frame = get_selected_frame (NULL);
 
-   list_args_or_locals (all, parse_print_values (argv[0]), frame);
+  list_args_or_locals (all, parse_print_values (argv[0]), frame);
 }
 
 
@@ -311,10 +312,12 @@ list_args_or_locals (enum what_to_list what, int values, struct frame_info *fi)
 	      struct cleanup *cleanup_tuple = NULL;
 	      struct symbol *sym2;
 	      struct value *val;
-	      if (values != PRINT_NO_VALUES)
+	      if (values != PRINT_NO_VALUES || what == all)
 		cleanup_tuple =
 		  make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 	      ui_out_field_string (uiout, "name", SYMBOL_PRINT_NAME (sym));
+	      if (what == all && SYMBOL_IS_ARGUMENT (sym))
+		ui_out_field_int (uiout, "arg", 1);
 
 	      if (SYMBOL_IS_ARGUMENT (sym))
 		sym2 = lookup_symbol (SYMBOL_NATURAL_NAME (sym),
@@ -341,7 +344,6 @@ list_args_or_locals (enum what_to_list what, int values, struct frame_info *fi)
 			 language_def (SYMBOL_LANGUAGE (sym2)));
 		      ui_out_field_stream (uiout, "value", stb);
 		    }
-		  do_cleanups (cleanup_tuple);
 		  break;
 		case PRINT_ALL_VALUES:
 		  {
@@ -353,10 +355,12 @@ list_args_or_locals (enum what_to_list what, int values, struct frame_info *fi)
 		      (val, stb->stream, 0, &opts,
 		       language_def (SYMBOL_LANGUAGE (sym2)));
 		    ui_out_field_stream (uiout, "value", stb);
-		    do_cleanups (cleanup_tuple);
 		  }
 		  break;
 		}
+
+	      if (values != PRINT_NO_VALUES || what == all)
+		do_cleanups (cleanup_tuple);
 	    }
 	}
       if (BLOCK_FUNCTION (block))
