@@ -1199,10 +1199,11 @@ PowerPC options:\n\
 -mppc64bridge		generate code for PowerPC 64, including bridge insns\n\
 -mbooke			generate code for 32-bit PowerPC BookE\n\
 -ma2			generate code for A2 architecture\n\
--mpower4		generate code for Power4 architecture\n\
--mpower5		generate code for Power5 architecture\n\
--mpower6		generate code for Power6 architecture\n\
--mpower7		generate code for Power7 architecture\n\
+-mpower4, -mpwr4	generate code for Power4 architecture\n\
+-mpower5, -mpwr5, -mpwr5x\n\
+			generate code for Power5 architecture\n\
+-mpower6, -mpwr6	generate code for Power6 architecture\n\
+-mpower7, -mpwr7	generate code for Power7 architecture\n\
 -mcell			generate code for Cell Broadband Engine architecture\n\
 -mcom			generate code Power/PowerPC common instructions\n\
 -many			generate code for any architecture (PWR/PWRX/PPC)\n"));

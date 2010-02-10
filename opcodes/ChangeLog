@@ -1,3 +1,8 @@
+2010-02-10  Richard Sandiford  <r.sandiford@uk.ibm.com>
+
+	* ppc-dis.c (ppc_opts): Add "pwr4", "pwr5", "pwr5x", "pwr6"
+	and "pwr7".  Move "a2" into alphabetical order.
+
 2010-01-21  Nick Clifton  <nickc@redhat.com>
 
 	* arm-dis.c: Fix mis-applied patch.
