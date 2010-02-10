@@ -23,8 +23,8 @@ class TypeFlag:
     and its value.
 
     In the GDB sources, struct type has a component called instance_flags
-    whose the value is the addition of various flags.  These flags are
-    defined by two emumerates: type_flag_value, and type_instance_flag_value.
+    in which the value is the addition of various flags.  These flags are
+    defined by two enumerates: type_flag_value, and type_instance_flag_value.
     This class helps us recreate a list with all these flags that is
     easy to manipulate and sort.  Because all flag names start with either
     TYPE_FLAG_ or TYPE_INSTANCE_FLAG_, a short_name attribute is provided

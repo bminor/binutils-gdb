@@ -1,3 +1,7 @@
+2010-02-10  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb-gdb.py: Comment fix.
+
 2010-02-09  Tristan Gingold  <gingold@adacore.com>
 
 	* machoread.c (macho_symfile_relocate): New function.
