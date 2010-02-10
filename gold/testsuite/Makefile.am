@@ -588,6 +588,7 @@ if TLS
 
 check_PROGRAMS += tls_test
 check_PROGRAMS += tls_pic_test
+check_PROGRAMS += tls_pie_test
 check_PROGRAMS += tls_shared_test
 check_PROGRAMS += tls_shared_ie_test
 check_PROGRAMS += tls_shared_gd_to_ie_test
@@ -624,6 +625,18 @@ tls_pic_test_DEPENDENCIES = gcctestdir/ld tls_test_pic.o tls_test_file2_pic.o \
 tls_pic_test_LDFLAGS = -Bgcctestdir/
 tls_pic_test_LDADD = tls_test_pic.o tls_test_file2_pic.o tls_test_c_pic.o \
 	-lpthread
+
+tls_test_main_pie.o: tls_test_main.cc tls_test.h
+	$(CXXCOMPILE) -c -fpie -o $@ $<
+tls_test_pie.o: tls_test.cc tls_test.h
+	$(CXXCOMPILE) -c -fpie -o $@ $<
+tls_test_file2_pie.o: tls_test_file2.cc tls_test.h
+	$(CXXCOMPILE) -c -fpie -o $@ $<
+tls_test_c_pie.o: tls_test_c.c
+	$(COMPILE) -c -fpic $(TLS_TEST_C_CFLAGS) -o $@ $<
+tls_pie_test: tls_test_main_pie.o tls_test_pie.o tls_test_file2_pie.o \
+		tls_test_c_pie.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -pie tls_test_main_pie.o tls_test_pie.o tls_test_file2_pie.o tls_test_c_pie.o -lpthread
 
 tls_shared_test_SOURCES = tls_test_main.cc
 tls_shared_test_DEPENDENCIES = gcctestdir/ld tls_test_shared.so
