@@ -1,3 +1,8 @@
+2010-02-10  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Debugging Output): Document set debug parser and
+	show debug parser.
+
 2010-02-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gdb.texinfo (Predefined Target Types): Add i387_ext,

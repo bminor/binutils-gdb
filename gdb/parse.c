@@ -109,6 +109,18 @@ show_expressiondebug (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("Expression debugging is %s.\n"), value);
 }
 
+
+/* Non-zero if an expression parser should set yydebug.  */
+int parser_debug;
+
+static void
+show_parserdebug (struct ui_file *file, int from_tty,
+		  struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Parser debugging is %s.\n"), value);
+}
+
+
 static void free_funcalls (void *ignore);
 
 static int prefixify_expression (struct expression *);
@@ -1376,5 +1388,13 @@ Show expression debugging."), _("\
 When non-zero, the internal representation of expressions will be printed."),
 			    NULL,
 			    show_expressiondebug,
+			    &setdebuglist, &showdebuglist);
+  add_setshow_boolean_cmd ("parser", class_maintenance,
+			    &parser_debug, _("\
+Set parser debugging."), _("\
+Show parser debugging."), _("\
+When non-zero, expression parser tracing will be enabled."),
+			    NULL,
+			    show_parserdebug,
 			    &setdebuglist, &showdebuglist);
 }

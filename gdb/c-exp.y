@@ -2450,6 +2450,9 @@ c_parse (void)
   gdb_assert (! macro_original_text);
   make_cleanup (scan_macro_cleanup, 0);
 
+  make_cleanup_restore_integer (&yydebug);
+  yydebug = parser_debug;
+
   /* Initialize some state used by the lexer.  */
   last_was_structop = 0;
   saw_name_at_eof = 0;

@@ -18848,6 +18848,15 @@ is off.
 @item show debug overload
 Displays the current state of displaying @value{GDBN} C@t{++} overload
 debugging info.
+@cindex expression parser, debugging info
+@cindex debug expression parser
+@item set debug parser
+Turns on or off the display of expression parser debugging output.
+Internally, this sets the @code{yydebug} variable in the expression
+parser.  @xref{Tracing, , Tracing Your Parser, bison, Bison}, for
+details.  The default is off.
+@item show debug parser
+Show the current state of expression parser debugging.
 @cindex packets, reporting on stdout
 @cindex serial connections, debugging
 @cindex debug remote protocol

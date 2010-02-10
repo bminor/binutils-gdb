@@ -29,6 +29,8 @@
 
 struct block;
 
+extern int parser_debug;
+
 extern struct expression *expout;
 extern int expout_size;
 extern int expout_ptr;

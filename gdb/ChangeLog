@@ -1,3 +1,12 @@
+2010-02-10  Tom Tromey  <tromey@redhat.com>
+
+	* parser-defs.h (parser_debug): Declare.
+	* parse.c (_initialize_parse): Install "debug parser" set/show
+	command.
+	(parser_debug): New global.
+	(show_parserdebug): New function.
+	* c-exp.y (c_parse): Set yydebug.
+
 2010-02-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* target-descriptions.c (tdesc_type): Add TDESC_TYPE_I387_EXT,
