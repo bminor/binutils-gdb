@@ -176,6 +176,10 @@ const char *tdesc_register_name (struct gdbarch *gdbarch, int regno);
 
 struct type *tdesc_register_type (struct gdbarch *gdbarch, int regno);
 
+/* Return the type associated with ID, from the target description. */
+
+struct type *tdesc_find_type (struct gdbarch *gdbarch, const char *id);
+
 /* Check whether REGNUM is a member of REGGROUP using the target
    description.  Return -1 if the target description does not
    specify a group.  */

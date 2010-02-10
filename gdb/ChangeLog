@@ -1,3 +1,15 @@
+2010-02-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* target-descriptions.c (tdesc_type): Add TDESC_TYPE_I387_EXT,
+	TDESC_TYPE_I386_EFLAGS and TDESC_TYPE_I386_MXCSR.
+	(tdesc_predefined_types): Add i387_ext, i386_eflags and
+	i386_mxcsr.
+	(tdesc_find_type): New.
+	(tdesc_gdb_type): Use tdesc_find_type.  Handle TDESC_TYPE_I387_EXT,
+	TDESC_TYPE_I386_EFLAGS and TDESC_TYPE_I386_MXCSR.
+
+	* target-descriptions.h (tdesc_find_type): New.
+
 2010-02-10  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb-gdb.py: Comment fix.

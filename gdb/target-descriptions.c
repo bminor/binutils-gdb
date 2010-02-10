@@ -117,6 +117,9 @@ typedef struct tdesc_type
     TDESC_TYPE_IEEE_SINGLE,
     TDESC_TYPE_IEEE_DOUBLE,
     TDESC_TYPE_ARM_FPA_EXT,
+    TDESC_TYPE_I387_EXT,
+    TDESC_TYPE_I386_EFLAGS,
+    TDESC_TYPE_I386_MXCSR,
 
     /* Types defined by a target feature.  */
     TDESC_TYPE_VECTOR,
@@ -461,7 +464,10 @@ static struct tdesc_type tdesc_predefined_types[] =
   { "data_ptr", TDESC_TYPE_DATA_PTR },
   { "ieee_single", TDESC_TYPE_IEEE_SINGLE },
   { "ieee_double", TDESC_TYPE_IEEE_DOUBLE },
-  { "arm_fpa_ext", TDESC_TYPE_ARM_FPA_EXT }
+  { "arm_fpa_ext", TDESC_TYPE_ARM_FPA_EXT },
+  { "i387_ext", TDESC_TYPE_I387_EXT },
+  { "i386_eflags", TDESC_TYPE_I386_EFLAGS },
+  { "i386_mxcsr", TDESC_TYPE_I386_MXCSR }
 };
 
 /* Return the type associated with ID in the context of FEATURE, or
@@ -486,12 +492,38 @@ tdesc_named_type (const struct tdesc_feature *feature, const char *id)
   return NULL;
 }
 
+/* Lookup type associated with ID.  */
+
+struct type *
+tdesc_find_type (struct gdbarch *gdbarch, const char *id)
+{
+  struct tdesc_arch_reg *reg;
+  struct tdesc_arch_data *data;
+  int i, num_regs;
+
+  data = gdbarch_data (gdbarch, tdesc_data);
+  num_regs = VEC_length (tdesc_arch_reg, data->arch_regs);
+  for (i = 0; i < num_regs; i++)
+    {
+      reg = VEC_index (tdesc_arch_reg, data->arch_regs, i);
+      if (reg->reg
+	  && reg->reg->tdesc_type
+	  && reg->type
+	  && strcmp (id, reg->reg->tdesc_type->name) == 0)
+	return reg->type;
+    }
+
+  return NULL;
+}
+
 /* Construct, if necessary, and return the GDB type implementing target
    type TDESC_TYPE for architecture GDBARCH.  */
 
 static struct type *
 tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
 {
+  struct type *type;
+
   switch (tdesc_type->kind)
     {
     /* Predefined types.  */
@@ -531,6 +563,16 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
     case TDESC_TYPE_DATA_PTR:
       return builtin_type (gdbarch)->builtin_data_ptr;
 
+    default:
+      break;
+    }
+
+  type = tdesc_find_type (gdbarch, tdesc_type->name);
+  if (type)
+    return type;
+
+  switch (tdesc_type->kind)
+    {
     case TDESC_TYPE_IEEE_SINGLE:
       return arch_float_type (gdbarch, -1, "builtin_type_ieee_single",
 			      floatformats_ieee_single);
@@ -542,6 +584,61 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
     case TDESC_TYPE_ARM_FPA_EXT:
       return arch_float_type (gdbarch, -1, "builtin_type_arm_ext",
 			      floatformats_arm_ext);
+
+    case TDESC_TYPE_I387_EXT:
+      return arch_float_type (gdbarch, -1, "builtin_type_i387_ext",
+			      floatformats_i387_ext);
+
+    case TDESC_TYPE_I386_EFLAGS:
+      {
+	struct type *type;
+
+	type = arch_flags_type (gdbarch, "builtin_type_i386_eflags", 4);
+	append_flags_type_flag (type, 0, "CF");
+	append_flags_type_flag (type, 1, NULL);
+	append_flags_type_flag (type, 2, "PF");
+	append_flags_type_flag (type, 4, "AF");
+	append_flags_type_flag (type, 6, "ZF");
+	append_flags_type_flag (type, 7, "SF");
+	append_flags_type_flag (type, 8, "TF");
+	append_flags_type_flag (type, 9, "IF");
+	append_flags_type_flag (type, 10, "DF");
+	append_flags_type_flag (type, 11, "OF");
+	append_flags_type_flag (type, 14, "NT");
+	append_flags_type_flag (type, 16, "RF");
+	append_flags_type_flag (type, 17, "VM");
+	append_flags_type_flag (type, 18, "AC");
+	append_flags_type_flag (type, 19, "VIF");
+	append_flags_type_flag (type, 20, "VIP");
+	append_flags_type_flag (type, 21, "ID");
+
+	return type;
+      }
+    break;
+
+    case TDESC_TYPE_I386_MXCSR:
+      {
+	struct type *type;
+
+	type = arch_flags_type (gdbarch, "builtin_type_i386_mxcsr", 4);
+	append_flags_type_flag (type, 0, "IE");
+	append_flags_type_flag (type, 1, "DE");
+	append_flags_type_flag (type, 2, "ZE");
+	append_flags_type_flag (type, 3, "OE");
+	append_flags_type_flag (type, 4, "UE");
+	append_flags_type_flag (type, 5, "PE");
+	append_flags_type_flag (type, 6, "DAZ");
+	append_flags_type_flag (type, 7, "IM");
+	append_flags_type_flag (type, 8, "DM");
+	append_flags_type_flag (type, 9, "ZM");
+	append_flags_type_flag (type, 10, "OM");
+	append_flags_type_flag (type, 11, "UM");
+	append_flags_type_flag (type, 12, "PM");
+	append_flags_type_flag (type, 15, "FZ");
+
+	return type;
+      }
+    break;
 
     /* Types defined by a target feature.  */
     case TDESC_TYPE_VECTOR:
