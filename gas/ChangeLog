@@ -30,7 +30,6 @@
 	* config/tc-ppc.c (md_show_usage): Add -mpwr4, -mpwr5, -mpwr5x,
 	-mpwr6 and -mpwr7.
 
->>>>>>> 1.4086
 2010-02-09  Sterling Augustine  <sterling@tensilica.com>
 
 	* config/tc-xtensa.c (RELAXED_LOOP_INSN_BYTES): New.
