@@ -1,3 +1,8 @@
+2010-02-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* breakpoint.c (delete_breakpoint) <bpt->related_breakpoint != NULL>:
+	New.
+
 2010-02-11  Pedro Alves  <pedro@codesourcery.com>
 
 	* ax-gdb.c (gen_exp_binop_rest) [BINOP_SUBSCRIPT]: Error out on

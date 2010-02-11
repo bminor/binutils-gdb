@@ -8691,6 +8691,16 @@ delete_breakpoint (struct breakpoint *bpt)
   if (bpt->type == bp_none)
     return;
 
+  /* At least avoid this stale reference until the reference counting of
+     breakpoints gets resolved.  */
+  if (bpt->related_breakpoint != NULL)
+    {
+      gdb_assert (bpt->related_breakpoint->related_breakpoint == bpt);
+      bpt->related_breakpoint->disposition = disp_del_at_next_stop;
+      bpt->related_breakpoint->related_breakpoint = NULL;
+      bpt->related_breakpoint = NULL;
+    }
+
   observer_notify_breakpoint_deleted (bpt->number);
 
   if (breakpoint_chain == bpt)
