@@ -11203,7 +11203,6 @@ xg_get_single_slot (xtensa_opcode opcode)
 void
 istack_init (IStack *stack)
 {
-  memset (stack, 0, sizeof (IStack));
   stack->ninsn = 0;
 }
 

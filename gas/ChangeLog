@@ -1,9 +1,13 @@
+2010-02-11  Sterling Augustine  <sterling@jaw.hq.tensilica.com>
+
+	* config/tc-xtensa.c (istack_init): Don't call memset.
+
 2010-02-11  Sterling Augustine  <sterling@tensilica.com>
 
 	* config/tc-xtensa.c (cache_literal_section): Handle prefixes as
 	well as suffixes.
 
-2010-02-10  Sterling Augustine  <sterling@tensilica.com>
+2010-02-11  Sterling Augustine  <sterling@tensilica.com>
 
 	* config/tc-xtensa.c (xtensa_find_unaligned_loops): Rewrite.
 
