@@ -1,3 +1,10 @@
+2010-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c: Update copyright.
+	* i386-gen.c: Likewise.
+	* i386-opc.h: Likewise.
+	* i386-opc.tbl: Likewise.
+
 2010-02-10  Quentin Neill  <quentin.neill@amd.com>
 	    Sebastian Pop  <sebastian.pop@amd.com>
 
