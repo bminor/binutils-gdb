@@ -1,5 +1,15 @@
 2010-02-10  Ian Lance Taylor  <iant@google.com>
 
+	* dirsearch.cc (Dirsearch::initialize): Add all blockers before
+	queueing any tasks.
+	* gold.cc (queue_middle_gc_tasks): Likewise.  Fix final blocker.
+	(queue_middle_tasks): Add all blockers before queueing any tasks.
+	(queue_final_tasks): Likewise.
+	* token.h (Task_token::add_blockers): New function.
+	* object.h (Input_objects::number_of_relobjs): New function.
+
+2010-02-10  Ian Lance Taylor  <iant@google.com>
+
 	* i386.cc (Relocate::relocate_tls): A local symbol is final if not
 	shared, not if not position independent.
 	* x86_64.cc (Relocate::relocate_tls): Likewise.

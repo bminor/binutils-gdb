@@ -1,6 +1,6 @@
 // dirsearch.cc -- directory searching for gold
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -229,13 +229,11 @@ Dirsearch::initialize(Workqueue* workqueue,
   gold_assert(caches == NULL);
   caches = new Dir_caches;
   this->directories_ = directories;
+  this->token_.add_blockers(directories->size());
   for (General_options::Dir_list::const_iterator p = directories->begin();
        p != directories->end();
        ++p)
-    {
-      this->token_.add_blocker();
-      workqueue->queue(new Dir_cache_task(p->name().c_str(), this->token_));
-    }
+    workqueue->queue(new Dir_cache_task(p->name().c_str(), this->token_));
 }
 
 // Search for a file.  NOTE: we only log failed file-lookup attempts

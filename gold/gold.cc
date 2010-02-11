@@ -266,24 +266,20 @@ queue_middle_gc_tasks(const General_options& options,
   // Read_relocs for all the objects must be done and processed to find
   // unused sections before any scanning of the relocs can take place.
   Task_token* blocker = new Task_token(true);
+  blocker->add_blockers(input_objects->number_of_relobjs());
   Task_token* symtab_lock = new Task_token(false);
   for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
        p != input_objects->relobj_end();
        ++p)
-    {
-      // We can read and process the relocations in any order.  
-      blocker->add_blocker();
-      workqueue->queue(new Read_relocs(symtab, layout, *p, symtab_lock,
-				       blocker));
-    }
+    workqueue->queue(new Read_relocs(symtab, layout, *p, symtab_lock,
+				     blocker));
 
-  Task_token* this_blocker = new Task_token(true);
   workqueue->queue(new Task_function(new Middle_runner(options,
                                                        input_objects,
                                                        symtab,
                                                        layout,
                                                        mapfile),
-                                     this_blocker,
+                                     blocker,
                                      "Task_function Middle_runner"));
 }
 
@@ -480,6 +476,10 @@ queue_middle_tasks(const General_options& options,
   layout->define_group_signatures(symtab);
 
   Task_token* blocker = new Task_token(true);
+  blocker->add_blockers(input_objects->number_of_relobjs());
+  if (parameters->options().define_common())
+    blocker->add_blocker();
+
   Task_token* symtab_lock = new Task_token(false);
 
   // If doing garbage collection, the relocations have already been read.
@@ -490,12 +490,9 @@ queue_middle_tasks(const General_options& options,
       for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
            p != input_objects->relobj_end();
            ++p)
-        {
-          blocker->add_blocker();
-          workqueue->queue(new Scan_relocs(symtab, layout, *p, 
-					   (*p)->get_relocs_data(),
-					   symtab_lock, blocker));
-        }
+	workqueue->queue(new Scan_relocs(symtab, layout, *p, 
+					 (*p)->get_relocs_data(),
+					 symtab_lock, blocker));
     }
   else
     {
@@ -519,7 +516,6 @@ queue_middle_tasks(const General_options& options,
           // So we queue up a task for each object to read the
           // relocations.  That task will in turn queue a task to wait
           // until it can write to the symbol table.
-          blocker->add_blocker();
           workqueue->queue(new Read_relocs(symtab, layout, *p, symtab_lock,
 					   blocker));
         }
@@ -528,11 +524,8 @@ queue_middle_tasks(const General_options& options,
   // Allocate common symbols.  This requires write access to the
   // symbol table, but is independent of the relocation processing.
   if (parameters->options().define_common())
-    {
-      blocker->add_blocker();
-      workqueue->queue(new Allocate_commons_task(symtab, layout, mapfile,
-						 symtab_lock, blocker));
-    }
+    workqueue->queue(new Allocate_commons_task(symtab, layout, mapfile,
+					       symtab_lock, blocker));
 
   // When all those tasks are complete, we can start laying out the
   // output file.
@@ -570,17 +563,26 @@ queue_final_tasks(const General_options& options,
   // written out.
   Task_token* input_sections_blocker = NULL;
   if (!any_postprocessing_sections)
-    input_sections_blocker = new Task_token(true);
+    {
+      input_sections_blocker = new Task_token(true);
+      input_sections_blocker->add_blockers(input_objects->number_of_relobjs());
+    }
 
   // Use a blocker to block any objects which have to wait for the
   // output sections to complete before they can apply relocations.
   Task_token* output_sections_blocker = new Task_token(true);
+  output_sections_blocker->add_blocker();
 
   // Use a blocker to block the final cleanup task.
   Task_token* final_blocker = new Task_token(true);
+  // Write_symbols_task, Write_sections_task, Write_data_task,
+  // Relocate_tasks.
+  final_blocker->add_blockers(3);
+  final_blocker->add_blockers(input_objects->number_of_relobjs());
+  if (!any_postprocessing_sections)
+    final_blocker->add_blocker();
 
   // Queue a task to write out the symbol table.
-  final_blocker->add_blocker();
   workqueue->queue(new Write_symbols_task(layout,
 					  symtab,
 					  input_objects,
@@ -590,13 +592,10 @@ queue_final_tasks(const General_options& options,
 					  final_blocker));
 
   // Queue a task to write out the output sections.
-  output_sections_blocker->add_blocker();
-  final_blocker->add_blocker();
   workqueue->queue(new Write_sections_task(layout, of, output_sections_blocker,
 					   final_blocker));
 
   // Queue a task to write out everything else.
-  final_blocker->add_blocker();
   workqueue->queue(new Write_data_task(layout, symtab, of, final_blocker));
 
   // Queue a task for each input object to relocate the sections and
@@ -604,15 +603,10 @@ queue_final_tasks(const General_options& options,
   for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
        p != input_objects->relobj_end();
        ++p)
-    {
-      if (input_sections_blocker != NULL)
-	input_sections_blocker->add_blocker();
-      final_blocker->add_blocker();
-      workqueue->queue(new Relocate_task(symtab, layout, *p, of,
-					 input_sections_blocker,
-					 output_sections_blocker,
-					 final_blocker));
-    }
+    workqueue->queue(new Relocate_task(symtab, layout, *p, of,
+				       input_sections_blocker,
+				       output_sections_blocker,
+				       final_blocker));
 
   // Queue a task to write out the output sections which depend on
   // input sections.  If there are any sections which require
@@ -620,7 +614,6 @@ queue_final_tasks(const General_options& options,
   // the output file.
   if (!any_postprocessing_sections)
     {
-      final_blocker->add_blocker();
       Task* t = new Write_after_input_sections_task(layout, of,
 						    input_sections_blocker,
 						    final_blocker);

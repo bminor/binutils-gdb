@@ -2009,6 +2009,11 @@ class Input_objects
   any_dynamic() const
   { return !this->dynobj_list_.empty(); }
 
+  // Return the number of non dynamic objects.
+  int
+  number_of_relobjs() const
+  { return this->relobj_list_.size(); }
+
   // Return the number of input objects.
   int
   number_of_input_objects() const
