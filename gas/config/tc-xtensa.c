@@ -10423,15 +10423,25 @@ cache_literal_section (bfd_boolean use_abs_literals)
     }
   else
     {
-      /* If the section name ends with ".text", then replace that suffix
-	 instead of appending an additional suffix.  */
+      /* If the section name begins or ends with ".text", then replace
+	 that portion instead of appending an additional suffix.  */
       size_t len = strlen (text_name);
-      if (len >= 5 && strcmp (text_name + len - 5, ".text") == 0)
+      if (len >= 5
+	  && (strcmp (text_name + len - 5, ".text") == 0
+	      || strncmp (text_name, ".text", 5) == 0))
 	len -= 5;
 
       name = xmalloc (len + strlen (base_name) + 1);
-      strcpy (name, text_name);
-      strcpy (name + len, base_name);
+      if (strncmp (text_name, ".text", 5) == 0)
+	{
+	  strcpy (name, base_name);
+	  strcat (name, text_name + 5);
+	}
+      else
+	{
+	  strcpy (name, text_name);
+	  strcpy (name + len, base_name);
+	}
     }
 
   /* Canonicalize section names to allow renaming literal sections.

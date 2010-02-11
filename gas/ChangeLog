@@ -1,3 +1,12 @@
+2010-02-11  Sterling Augustine  <sterling@tensilica.com>
+
+	* config/tc-xtensa.c (cache_literal_section): Handle prefixes as
+	well as suffixes.
+
+2010-02-10  Sterling Augustine  <sterling@tensilica.com>
+
+	* config/tc-xtensa.c (xtensa_find_unaligned_loops): Rewrite.
+
 2010-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (build_modrm_byte): Reformat.
@@ -21,6 +30,7 @@
 	* config/tc-ppc.c (md_show_usage): Add -mpwr4, -mpwr5, -mpwr5x,
 	-mpwr6 and -mpwr7.
 
+>>>>>>> 1.4086
 2010-02-09  Sterling Augustine  <sterling@tensilica.com>
 
 	* config/tc-xtensa.c (RELAXED_LOOP_INSN_BYTES): New.
