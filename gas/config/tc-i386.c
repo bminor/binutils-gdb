@@ -5051,13 +5051,15 @@ build_modrm_byte (void)
               nds = tmp;
             }
 
-          gas_assert (operand_type_equal (&i.tm.operand_types[reg_slot], &regxmm)
+          gas_assert (operand_type_equal (&i.tm.operand_types[reg_slot],
+					  &regxmm)
                       || operand_type_equal (&i.tm.operand_types[reg_slot],
                                              &regymm));
           exp->X_op = O_constant;
           exp->X_add_number
               = ((i.op[reg_slot].regs->reg_num
-                  + ((i.op[reg_slot].regs->reg_flags & RegRex) ? 8 : 0)) << 4);
+                  + ((i.op[reg_slot].regs->reg_flags & RegRex) ? 8 : 0))
+		 << 4);
         }
       else
         {
@@ -5096,12 +5098,14 @@ build_modrm_byte (void)
               i.types[imm_slot].bitfield.imm8 = 1;
             }
 
-          gas_assert (operand_type_equal (&i.tm.operand_types[reg_slot], &regxmm)
-                  || operand_type_equal (&i.tm.operand_types[reg_slot],
-                                         &regymm));
+          gas_assert (operand_type_equal (&i.tm.operand_types[reg_slot],
+					  &regxmm)
+		      || operand_type_equal (&i.tm.operand_types[reg_slot],
+					     &regymm));
           i.op[imm_slot].imms->X_add_number
               |= ((i.op[reg_slot].regs->reg_num
-                   + ((i.op[reg_slot].regs->reg_flags & RegRex) ? 8 : 0)) << 4);
+                   + ((i.op[reg_slot].regs->reg_flags & RegRex) ? 8 : 0))
+		  << 4);
         }
 
       gas_assert (operand_type_equal (&i.tm.operand_types[nds], &regxmm)

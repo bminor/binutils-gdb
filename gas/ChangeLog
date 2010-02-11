@@ -1,5 +1,9 @@
 2010-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (build_modrm_byte): Reformat.
+
+2010-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c: Update copyright.
 
 2010-02-10  Quentin Neill  <quentin.neill@amd.com>
