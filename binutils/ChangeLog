@@ -1,3 +1,8 @@
+2010-02-05  Christophe Lyon  <christophe.lyon@st.com>
+
+	* objdump.c (disassemble_bytes): Clear aux->reloc before printing
+	a new address, so as not to reuse a previous, non-related reloc.
+
 2010-01-05  Alan Modra  <amodra@gmail.com>
 
 	PR 11129

@@ -23,7 +23,7 @@ Disassembly of section .text:
 0+2c <[^>]*> 0afffffc 	beq	00000024 <fooundefthumb>
 0+30 <[^>]*> eafffffb 	b	00000024 <fooundefthumb>
 0+34 <[^>]*> 0bfffffe 	bleq	00000020 <foo>	34: R_ARM_JUMP24	foo
-0+58 <[^>]*> 0afffffe 	beq	00000020 <foo>	38: R_ARM_JUMP24	foo
-0+5c <[^>]*> eafffffe 	b	00000020 <foo>	3c: R_ARM_JUMP24	foo
-0+60 <[^>]*> e1a00000 	nop			; \(mov r0, r0\)
-0+64 <[^>]*> e1a00000 	nop			; \(mov r0, r0\)
+0+38 <[^>]*> 0afffffe 	beq	00000020 <foo>	38: R_ARM_JUMP24	foo
+0+3c <[^>]*> eafffffe 	b	00000020 <foo>	3c: R_ARM_JUMP24	foo
+0+40 <[^>]*> e1a00000 	nop			; \(mov r0, r0\)
+0+44 <[^>]*> e1a00000 	nop			; \(mov r0, r0\)
