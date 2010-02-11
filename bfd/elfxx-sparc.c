@@ -1345,8 +1345,6 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      case R_SPARC_GOT10:
 	      case R_SPARC_GOT13:
 	      case R_SPARC_GOT22:
-	      case R_SPARC_GOTDATA_HIX22:
-	      case R_SPARC_GOTDATA_LOX10:
 	      case R_SPARC_GOTDATA_OP_HIX22:
 	      case R_SPARC_GOTDATA_OP_LOX10:
 		tls_type = GOT_NORMAL;
@@ -1386,7 +1384,16 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		    _bfd_sparc_elf_local_got_tls_type (abfd)
 		      = (char *) (local_got_refcounts + symtab_hdr->sh_info);
 		  }
-		local_got_refcounts[r_symndx] += 1;
+		switch (r_type)
+		  {
+		  case R_SPARC_GOTDATA_OP_HIX22:
+		  case R_SPARC_GOTDATA_OP_LOX10:
+		    break;
+
+		  default:
+		    local_got_refcounts[r_symndx] += 1;
+		    break;
+		  }
 		old_tls_type = _bfd_sparc_elf_local_got_tls_type (abfd) [r_symndx];
 	      }
 
@@ -1766,8 +1773,17 @@ _bfd_sparc_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 	    }
 	  else
 	    {
-	      if (local_got_refcounts[r_symndx] > 0)
-		local_got_refcounts[r_symndx]--;
+	      switch (r_type)
+		{
+		case R_SPARC_GOTDATA_OP_HIX22:
+		case R_SPARC_GOTDATA_OP_LOX10:
+		  break;
+
+		default:
+		  if (local_got_refcounts[r_symndx] > 0)
+		    local_got_refcounts[r_symndx]--;
+		  break;
+		}
 	    }
 	  break;
 
@@ -2672,6 +2688,21 @@ tpoff (struct bfd_link_info *info, bfd_vma address)
   return address - htab->tls_size - htab->tls_sec->vma;
 }
 
+/* Return the relocation value for a %gdop relocation.  */
+
+static bfd_vma
+gdopoff (struct bfd_link_info *info, bfd_vma address)
+{
+  struct elf_link_hash_table *htab = elf_hash_table (info);
+  bfd_vma got_base;
+
+  got_base = (htab->hgot->root.u.def.value
+	      + htab->hgot->root.u.def.section->output_offset
+	      + htab->hgot->root.u.def.section->output_section->vma);
+
+  return address - got_base;
+}
+
 /* Relocate a SPARC ELF section.  */
 
 bfd_boolean
@@ -2821,10 +2852,17 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 
 	  switch (r_type)
 	    {
-	    case R_SPARC_GOTDATA_HIX22:
-	    case R_SPARC_GOTDATA_LOX10:
+	    case R_SPARC_GOTDATA_OP:
+	      continue;
+
 	    case R_SPARC_GOTDATA_OP_HIX22:
 	    case R_SPARC_GOTDATA_OP_LOX10:
+	      r_type = (r_type == R_SPARC_GOTDATA_OP_HIX22
+			? R_SPARC_GOT22
+			: R_SPARC_GOT10);
+	      howto = _bfd_sparc_elf_howto_table + r_type;
+	      /* Fall through.  */
+
 	    case R_SPARC_GOT10:
 	    case R_SPARC_GOT13:
 	    case R_SPARC_GOT22:
@@ -2911,19 +2949,37 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 
       switch (r_type)
 	{
-	case R_SPARC_GOTDATA_HIX22:
-	case R_SPARC_GOTDATA_LOX10:
 	case R_SPARC_GOTDATA_OP_HIX22:
 	case R_SPARC_GOTDATA_OP_LOX10:
-	  /* We don't support these code transformation optimizations
-	     yet, so just leave the sequence alone and treat as
-	     GOT22/GOT10.  */
-	  if (r_type == R_SPARC_GOTDATA_HIX22
-	      || r_type == R_SPARC_GOTDATA_OP_HIX22)
-	    r_type = R_SPARC_GOT22;
+	  if (SYMBOL_REFERENCES_LOCAL (info, h))
+	    r_type = (r_type == R_SPARC_GOTDATA_OP_HIX22
+		      ? R_SPARC_GOTDATA_HIX22
+		      : R_SPARC_GOTDATA_LOX10);
 	  else
-	    r_type = R_SPARC_GOT10;
-	  /* Fall through. */
+	    r_type = (r_type == R_SPARC_GOTDATA_OP_HIX22
+		      ? R_SPARC_GOT22
+		      : R_SPARC_GOT10);
+	  howto = _bfd_sparc_elf_howto_table + r_type;
+	  break;
+
+	case R_SPARC_GOTDATA_OP:
+	  if (SYMBOL_REFERENCES_LOCAL (info, h))
+	    {
+	      bfd_vma insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+
+	      /* {ld,ldx} [%rs1 + %rs2], %rd --> add %rs1, %rs2, %rd */
+	      relocation = 0x80000000 | (insn & 0x3e07c01f);
+	      bfd_put_32 (output_bfd, relocation, contents + rel->r_offset);
+	    }
+	  continue;
+	}
+
+      switch (r_type)
+	{
+	case R_SPARC_GOTDATA_HIX22:
+	case R_SPARC_GOTDATA_LOX10:
+	  relocation = gdopoff (info, relocation);
+	  break;
 
 	case R_SPARC_GOT10:
 	case R_SPARC_GOT13:
@@ -3576,11 +3632,6 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	    }
 	  continue;
 
-	case R_SPARC_GOTDATA_OP:
-	  /* We don't support gotdata code transformation optimizations
-	     yet, so simply leave the sequence as-is.  */
-	  continue;
-
 	case R_SPARC_TLS_IE_LD:
 	case R_SPARC_TLS_IE_LDX:
 	  if (! info->shared && (h == NULL || h->dynindx == -1))
@@ -3704,12 +3755,15 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 
 	  r = bfd_reloc_ok;
 	}
-      else if (r_type == R_SPARC_HIX22)
+      else if (r_type == R_SPARC_HIX22
+	       || r_type == R_SPARC_GOTDATA_HIX22)
 	{
 	  bfd_vma x;
 
 	  relocation += rel->r_addend;
-	  relocation = relocation ^ MINUS_ONE;
+	  if (r_type == R_SPARC_HIX22
+	      || (bfd_signed_vma) relocation < 0)
+	    relocation = relocation ^ MINUS_ONE;
 
 	  x = bfd_get_32 (input_bfd, contents + rel->r_offset);
 	  x = (x & ~(bfd_vma) 0x3fffff) | ((relocation >> 10) & 0x3fffff);
@@ -3720,12 +3774,17 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 				  bfd_arch_bits_per_address (input_bfd),
 				  relocation);
 	}
-      else if (r_type == R_SPARC_LOX10)
+      else if (r_type == R_SPARC_LOX10
+	       || r_type == R_SPARC_GOTDATA_LOX10)
 	{
 	  bfd_vma x;
 
 	  relocation += rel->r_addend;
-	  relocation = (relocation & 0x3ff) | 0x1c00;
+	  if (r_type == R_SPARC_LOX10
+	      || (bfd_signed_vma) relocation < 0)
+	    relocation = (relocation & 0x3ff) | 0x1c00;
+	  else
+	    relocation = (relocation & 0x3ff);
 
 	  x = bfd_get_32 (input_bfd, contents + rel->r_offset);
 	  x = (x & ~(bfd_vma) 0x1fff) | relocation;

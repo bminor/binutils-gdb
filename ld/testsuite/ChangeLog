@@ -1,3 +1,13 @@
+2010-02-11  David S. Miller  <davem@davemloft.net>
+
+	* ld-sparc/gotop32.s: Add local symbol case.
+	* ld-sparc/gotop64.s: Likewise.
+	* ld-sparc/gotop32.rd: Adjust expected results.
+	* ld-sparc/gotop32.td: Likewise.
+	* ld-sparc/gotop64.dd: Likewise.
+	* ld-sparc/gotop64.rd: Likewise.
+	* ld-sparc/gotop64.td: Likewise.
+
 2010-02-09  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* ld-elfvsb/elfvsb.exp: Fix tests for arm*-*-linux*.

@@ -1,3 +1,16 @@
+2010-02-11  David S. Miller  <davem@davemloft.net>
+
+	* elfxx-sparc.c (_bfd_sparc_elf_check_relocs): For R_SPARC_GOTDATA_OP_HIX22
+	and R_SPARC_GOTDATA_OP_LOX10, only bump the GOT refcount for global
+	symbols.
+	(_bfd_sparc_elf_gc_sweep_hook): Likewise only decrement the GOT count for
+	these relocs on global symbols.
+	(gdopoff): New.
+	(_bfd_sparc_elf_relocate_section): Perform GOTDATA optimizations on
+	local symbol references which are not STT_GNU_IFUNC.  Handle
+	relocation of them like R_SPARC_HIX22 and R_SPARC_LOX10 respectively,
+	and deal with negative vs. non-negative values properly.
+
 2010-02-09  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.c (bfd_mach_o_canonicalize_one_reloc): Adjust addend for
