@@ -2190,9 +2190,9 @@ Input_objects::check_dynamic_dependencies() const
       (*p)->set_has_unknown_needed_entries(!found_all);
 
       // --copy-dt-needed-entries aka --add-needed is a GNU ld option
-      // --that gold does not support.  However, they cause no trouble
-      // --unless there is a DT_NEEDED entry that we don't know about;
-      // --warn only in that case.
+      // that gold does not support.  However, they cause no trouble
+      // unless there is a DT_NEEDED entry that we don't know about;
+      // warn only in that case.
       if (!found_all
 	  && !issued_copy_dt_needed_error
 	  && (parameters->options().copy_dt_needed_entries()
