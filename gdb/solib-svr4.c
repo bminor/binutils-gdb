@@ -217,7 +217,19 @@ LM_ADDR_CHECK (struct so_list *so, bfd *abfd)
 	     location, or anything, really.  To avoid regressions,
 	     don't adjust the base offset in the latter case, although
 	     odds are that, if things really changed, debugging won't
-	     quite work.  */
+	     quite work.
+
+	     One could expect more the condition
+	       ((l_addr & align) == 0 && ((l_dynaddr - dynaddr) & align) == 0)
+	     but the one below is relaxed for PPC.  The PPC kernel supports
+	     either 4k or 64k page sizes.  To be prepared for 64k pages,
+	     PPC ELF files are built using an alignment requirement of 64k.
+	     However, when running on a kernel supporting 4k pages, the memory
+	     mapping of the library may not actually happen on a 64k boundary!
+
+	     (In the usual case where (l_addr & align) == 0, this check is
+	     equivalent to the possibly expected check above.)  */
+
 	  if ((l_addr & align) == ((l_dynaddr - dynaddr) & align))
 	    {
 	      l_addr = l_dynaddr - dynaddr;

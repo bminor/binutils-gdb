@@ -1,3 +1,8 @@
+2010-02-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* solib-svr4.c (LM_ADDR_CHECK): New comment on PPC-aware condition.
+
 2010-02-11  Pedro Alves  <pedro@codesourcery.com>
 
 	* ax-gdb.c (gen_exp_binop_rest) [BINOP_SUBSCRIPT]: Error out if
