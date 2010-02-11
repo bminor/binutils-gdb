@@ -1,5 +1,12 @@
 2010-02-10  Ian Lance Taylor  <iant@google.com>
 
+	* i386.cc (Relocate::relocate_tls): A local symbol is final if not
+	shared, not if not position independent.
+	* x86_64.cc (Relocate::relocate_tls): Likewise.
+	* testsuite/Makefile.am (check_PROGRAMS): Add tls_pie_pic_test.
+	(tls_pie_pic_test): New target.
+	* testsuite/Makefile.in: Rebuild.
+
 	* testsuite/Makefile.am (check_PROGRAMS): Add tls_pie_test.
 	(tls_test_main_pie.o, tls_test_pie.o): New targets.
 	(tls_test_file2_pie.o, tls_test_c_pie.o, tls_pie_test): Likewise.
