@@ -590,6 +590,10 @@ extern struct value *value_x_unop (struct value *arg1, enum exp_opcode op,
 extern struct value *value_fn_field (struct value **arg1p, struct fn_field *f,
 				     int j, struct type *type, int offset);
 
+extern int binop_types_user_defined_p (enum exp_opcode op,
+				       struct type *type1,
+				       struct type *type2);
+
 extern int binop_user_defined_p (enum exp_opcode op, struct value *arg1,
 				 struct value *arg2);
 

@@ -1885,11 +1885,35 @@ gen_expr_binop_rest (struct expression *exp,
 		 aop_rem_signed, aop_rem_unsigned, 1, "remainder");
       break;
     case BINOP_SUBSCRIPT:
-      gen_ptradd (ax, value, value1, value2);
-      if (!pointer_type (value->type))
-	error (_("Invalid combination of types in array subscripting."));
-      gen_deref (ax, value);
-      break;
+      {
+	struct type *type;
+
+	if (binop_types_user_defined_p (op, value1->type, value2->type))
+	  {
+	    error (_("\
+cannot subscript requested type: cannot call user defined functions"));
+	  }
+	else
+	  {
+	    /* If the user attempts to subscript something that is not
+	       an array or pointer type (like a plain int variable for
+	       example), then report this as an error.  */
+	    type = check_typedef (value1->type);
+	    if (TYPE_CODE (type) != TYPE_CODE_ARRAY
+		&& TYPE_CODE (type) != TYPE_CODE_PTR)
+	      {
+		if (TYPE_NAME (type))
+		  error (_("cannot subscript something of type `%s'"),
+			 TYPE_NAME (type));
+		else
+		  error (_("cannot subscript requested type"));
+	      }
+	  }
+
+	gen_ptradd (ax, value, value1, value2);
+	gen_deref (ax, value);
+	break;
+      }
     case BINOP_BITWISE_AND:
       gen_binop (ax, value, value1, value2,
 		 aop_bit_and, aop_bit_and, 0, "bitwise and");

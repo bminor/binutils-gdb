@@ -263,22 +263,35 @@ value_bitstring_subscript (struct type *type,
    For now, we do not overload the `=' operator.  */
 
 int
-binop_user_defined_p (enum exp_opcode op, struct value *arg1, struct value *arg2)
+binop_types_user_defined_p (enum exp_opcode op,
+			    struct type *type1, struct type *type2)
 {
-  struct type *type1, *type2;
   if (op == BINOP_ASSIGN || op == BINOP_CONCAT)
     return 0;
 
-  type1 = check_typedef (value_type (arg1));
+  type1 = check_typedef (type1);
   if (TYPE_CODE (type1) == TYPE_CODE_REF)
     type1 = check_typedef (TYPE_TARGET_TYPE (type1));
 
-  type2 = check_typedef (value_type (arg2));
+  type2 = check_typedef (type1);
   if (TYPE_CODE (type2) == TYPE_CODE_REF)
     type2 = check_typedef (TYPE_TARGET_TYPE (type2));
 
   return (TYPE_CODE (type1) == TYPE_CODE_STRUCT
 	  || TYPE_CODE (type2) == TYPE_CODE_STRUCT);
+}
+
+/* Check to see if either argument is a structure, or a reference to
+   one.  This is called so we know whether to go ahead with the normal
+   binop or look for a user defined function instead.
+
+   For now, we do not overload the `=' operator.  */
+
+int
+binop_user_defined_p (enum exp_opcode op,
+		      struct value *arg1, struct value *arg2)
+{
+  return binop_types_user_defined_p (op, value_type (arg1), value_type (arg2));
 }
 
 /* Check to see if argument is a structure.  This is called so
