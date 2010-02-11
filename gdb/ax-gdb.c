@@ -1082,6 +1082,8 @@ gen_deref (struct agent_expr *ax, struct axs_value *value)
      T" to "T", and mark the value as an lvalue in memory.  Leave it
      to the consumer to actually dereference it.  */
   value->type = check_typedef (TYPE_TARGET_TYPE (value->type));
+  if (TYPE_CODE (value->type) == TYPE_CODE_VOID)
+    error (_("Attempt to dereference a generic pointer."));
   value->kind = ((TYPE_CODE (value->type) == TYPE_CODE_FUNC)
 		 ? axs_rvalue : axs_lvalue_memory);
 }

@@ -1,3 +1,7 @@
+2010-02-11  Pedro Alves  <pedro@codesourcery.com>
+
+	* ax-gdb.c (gen_deref): Don't allow dereferencing void pointers.
+
 2010-02-11  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* mi/mi-cmd-stack.c (mi_cmd_stack_list_locals): Add extra
