@@ -1910,6 +1910,9 @@ cannot subscript requested type: cannot call user defined functions"));
 	      }
 	  }
 
+	if (!is_integral_type (value2->type))
+	  error (_("Argument to arithmetic operation not a number or boolean."));
+
 	gen_ptradd (ax, value, value1, value2);
 	gen_deref (ax, value);
 	break;
