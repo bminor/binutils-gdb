@@ -1,3 +1,10 @@
+2010-02-08  Christophe Lyon  <christophe.lyon@st.com>
+
+	* gas/arm/branch-reloc.s, gas/arm/branch-reloc.d,
+	gas/arm/branch-reloc.l: New tests and expected results with all
+	variants of call: ARM/Thumb, local/global, inter/intra-section,
+	using BL/BLX.
+
 2010-02-05  Christophe Lyon  <christophe.lyon@st.com>
 
 	* gas/arm/arm-it-auto.d, gas/arm/bl-local-v4t.d,

@@ -19041,6 +19041,8 @@ md_pcrel_from_section (fixS * fixP, segT seg)
 
     case BFD_RELOC_THUMB_PCREL_BRANCH23:
        if (fixP->fx_addsy
+	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
+	  && (!S_IS_EXTERNAL (fixP->fx_addsy))
 	  && ARM_IS_FUNC (fixP->fx_addsy)
  	  && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t))
  	base = fixP->fx_where + fixP->fx_frag->fr_address;
@@ -19050,6 +19052,8 @@ md_pcrel_from_section (fixS * fixP, segT seg)
 	 zero.  */
      case BFD_RELOC_THUMB_PCREL_BLX:
        if (fixP->fx_addsy
+	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
+	  && (!S_IS_EXTERNAL (fixP->fx_addsy))
  	  && THUMB_IS_FUNC (fixP->fx_addsy)
  	  && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t))
  	base = fixP->fx_where + fixP->fx_frag->fr_address;
@@ -19059,6 +19063,8 @@ md_pcrel_from_section (fixS * fixP, segT seg)
 	 loader expects the relocation not to take this into account.  */
     case BFD_RELOC_ARM_PCREL_BLX:
        if (fixP->fx_addsy
+	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
+	  && (!S_IS_EXTERNAL (fixP->fx_addsy))
  	  && ARM_IS_FUNC (fixP->fx_addsy)
  	  && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t))
  	base = fixP->fx_where + fixP->fx_frag->fr_address;
@@ -19066,6 +19072,8 @@ md_pcrel_from_section (fixS * fixP, segT seg)
 
       case BFD_RELOC_ARM_PCREL_CALL:
        if (fixP->fx_addsy
+	  && (S_GET_SEGMENT (fixP->fx_addsy) == seg)
+	  && (!S_IS_EXTERNAL (fixP->fx_addsy))
  	  && THUMB_IS_FUNC (fixP->fx_addsy)
  	  && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5t))
  	base = fixP->fx_where + fixP->fx_frag->fr_address;
