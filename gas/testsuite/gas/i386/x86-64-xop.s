@@ -310,6 +310,78 @@ _start:
     VPCOMW         $0x3,%xmm0,%xmm0,%xmm15
     VPCOMW         $0xFF,(%rcx),%xmm11,%xmm0
     VPCOMW         $0x3,(%rsi),%xmm15,%xmm1
+# Testing VPERMIL2PD imm8, xmm4, xmm3/mem128, xmm2, xmm1 (at&t syntax)
+    VPERMIL2PD     $0x3,%xmm14,%xmm13,%xmm11,%xmm10
+    VPERMIL2PD     $0x2,%xmm15,(%rdi,%r8),%xmm1,%xmm0
+    VPERMIL2PD     $0x1,%xmm0,0x23(%r12,%r12,8),%xmm0,%xmm2
+    VPERMIL2PD     $0x0,%xmm3,%xmm15,%xmm13,%xmm2
+    VPERMIL2PD     $0x2,%xmm3,%xmm14,%xmm11,%xmm0
+    VPERMIL2PD     $0x1,%xmm0,(%rdx),%xmm1,%xmm0
+    VPERMIL2PD     $0x3,%xmm3,%xmm0,%xmm0,%xmm9
+    VPERMIL2PD     $0x0,%xmm2,0x23(%r12,%r12,8),%xmm0,%xmm3
+# Testing VPERMIL2PD imm8, xmm4/mem128, xmm3, xmm2, xmm1 (at&t syntax)
+    VPERMIL2PD     $0x0,%xmm0,%xmm7,%xmm11,%xmm0
+    VPERMIL2PD     $0x1,%xmm4,%xmm5,%xmm15,%xmm0
+    VPERMIL2PD     $0x3,0x4(%r12,%rbx,4),%xmm8,%xmm0,%xmm10
+    VPERMIL2PD     $0x2,%xmm1,%xmm0,%xmm7,%xmm6
+    VPERMIL2PD     $0x1,(%r13,%rbx),%xmm12,%xmm6,%xmm10
+    VPERMIL2PD     $0x2,%xmm4,%xmm6,%xmm0,%xmm9
+    VPERMIL2PD     $0x0,(%rbx,%rbx,8),%xmm8,%xmm6,%xmm11
+    VPERMIL2PD     $0x3,%xmm5,%xmm13,%xmm6,%xmm0
+# Testing VPERMIL2PD imm8, ymm4, ymm3/mem256, ymm2, ymm1 (at&t syntax)
+    VPERMIL2PD     $0x1,%ymm7,%ymm5,%ymm0,%ymm13
+    VPERMIL2PD     $0x0,%ymm7,(%rcx,%r9,2),%ymm4,%ymm12
+    VPERMIL2PD     $0x3,%ymm3,(%r14,%r11),%ymm0,%ymm8
+    VPERMIL2PD     $0x2,%ymm7,0x107(%r9,%rax,4),%ymm0,%ymm9
+    VPERMIL2PD     $0x2,%ymm7,(%r14,%r11),%ymm0,%ymm8
+    VPERMIL2PD     $0x3,%ymm0,(%rcx,%r9,2),%ymm4,%ymm0
+    VPERMIL2PD     $0x1,%ymm8,(%r14,%r11),%ymm11,%ymm5
+    VPERMIL2PD     $0x0,%ymm2,(%rsi),%ymm0,%ymm13
+# Testing VPERMIL2PD imm8, ymm4/mem256, ymm3, ymm2, ymm1 (at&t syntax)
+    VPERMIL2PD     $0x1,(%rcx,%rsi),%ymm0,%ymm10,%ymm15
+    VPERMIL2PD     $0x2,(%r9),%ymm12,%ymm0,%ymm0
+    VPERMIL2PD     $0x0,0x15D8D9(%rcx,%r14,1),%ymm8,%ymm11,%ymm4
+    VPERMIL2PD     $0x3,%ymm9,%ymm12,%ymm0,%ymm0
+    VPERMIL2PD     $0x3,(%r13,%r11,1),%ymm1,%ymm14,%ymm8
+    VPERMIL2PD     $0x0,0x15D8D9(%rcx,%r14,1),%ymm0,%ymm0,%ymm11
+    VPERMIL2PD     $0x1,(%r13,%r11,1),%ymm1,%ymm15,%ymm0
+    VPERMIL2PD     $0x2,%ymm9,%ymm13,%ymm11,%ymm5
+# Testing VPERMIL2PS imm8, xmm4, xmm3/mem128, xmm2, xmm1 (at&t syntax)
+    VPERMIL2PS     $0x2,%xmm0,0x23(%r12,%r12,8),%xmm0,%xmm15
+    VPERMIL2PS     $0x0,%xmm0,0x23(%r12,%r12,8),%xmm3,%xmm9
+    VPERMIL2PS     $0x3,%xmm0,%xmm12,%xmm7,%xmm11
+    VPERMIL2PS     $0x1,%xmm3,(%rdx),%xmm0,%xmm0
+    VPERMIL2PS     $0x2,%xmm3,(%r14,%r9,1),%xmm0,%xmm0
+    VPERMIL2PS     $0x1,%xmm3,(%rdx),%xmm1,%xmm0
+    VPERMIL2PS     $0x0,%xmm3,%xmm8,%xmm0,%xmm12
+    VPERMIL2PS     $0x3,%xmm3,(%r14,%r9,1),%xmm1,%xmm2
+# Testing VPERMIL2PS imm8, xmm4/mem128, xmm3, xmm2, xmm1 (at&t syntax)
+    VPERMIL2PS     $0x1,(%r13,%rax),%xmm0,%xmm0,%xmm11
+    VPERMIL2PS     $0x3,(%rdi),%xmm15,%xmm6,%xmm10
+    VPERMIL2PS     $0x2,%xmm0,%xmm13,%xmm0,%xmm0
+    VPERMIL2PS     $0x0,%xmm4,%xmm0,%xmm14,%xmm10
+    VPERMIL2PS     $0x1,%xmm0,%xmm0,%xmm3,%xmm11
+    VPERMIL2PS     $0x2,(%rbx,%rbx,8),%xmm11,%xmm6,%xmm10
+    VPERMIL2PS     $0x3,%xmm4,%xmm5,%xmm6,%xmm15
+    VPERMIL2PS     $0x0,0x4(%r12,%rbx,4),%xmm0,%xmm0,%xmm10
+# Testing VPERMIL2PS imm8, ymm4, ymm3/mem256, ymm2, ymm1 (at&t syntax)
+    VPERMIL2PS     $0x1,%ymm0,(%rsi),%ymm0,%ymm0
+    VPERMIL2PS     $0x2,%ymm15,0x107(%r9,%rax,4),%ymm11,%ymm0
+    VPERMIL2PS     $0x0,%ymm7,%ymm0,%ymm4,%ymm0
+    VPERMIL2PS     $0x3,%ymm7,(%rcx,%r9,2),%ymm4,%ymm15
+    VPERMIL2PS     $0x2,%ymm0,%ymm0,%ymm4,%ymm15
+    VPERMIL2PS     $0x3,%ymm0,0x107(%r9,%rax,4),%ymm15,%ymm13
+    VPERMIL2PS     $0x0,%ymm7,%ymm8,%ymm14,%ymm13
+    VPERMIL2PS     $0x1,%ymm7,%ymm15,%ymm4,%ymm13
+# Testing VPERMIL2PS imm8, ymm4/mem256, ymm3, ymm2, ymm1 (at&t syntax)
+    VPERMIL2PS     $0x0,0x15D8D9(%rcx,%r14,1),%ymm0,%ymm0,%ymm15
+    VPERMIL2PS     $0x3,(%r13,%r11,1),%ymm12,%ymm15,%ymm4
+    VPERMIL2PS     $0x2,0x15D8D9(%rcx,%r14,1),%ymm0,%ymm0,%ymm0
+    VPERMIL2PS     $0x1,%ymm0,%ymm2,%ymm3,%ymm4
+    VPERMIL2PS     $0x3,(%rcx,%rsi),%ymm12,%ymm0,%ymm4
+    VPERMIL2PS     $0x2,(%rcx,%rsi),%ymm1,%ymm0,%ymm4
+    VPERMIL2PS     $0x0,(%r13,%r11,1),%ymm0,%ymm0,%ymm4
+    VPERMIL2PS     $0x1,%ymm8,%ymm7,%ymm4,%ymm0
 # Tests for op VPHADDBD xmm2/mem128, xmm1  (at&t syntax)
     VPHADDBD       %xmm2,%xmm15
     VPHADDBD       %xmm0,%xmm12

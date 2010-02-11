@@ -1,3 +1,11 @@
+2010-02-10  Quentin Neill  <quentin.neill@amd.com>
+	    Sebastian Pop  <sebastian.pop@amd.com>
+
+	* gas/i386/x86-64-xop.d: Add vpermil2p[sd] tests.
+	* gas/i386/x86-64-xop.s: Likewise.
+	* gas/i386/xop.d: Likewise.
+	* gas/i386/xop.s: Likewise.
+
 2010-02-08  Christophe Lyon  <christophe.lyon@st.com>
 
 	* gas/arm/branch-reloc.s, gas/arm/branch-reloc.d,

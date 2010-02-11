@@ -1,3 +1,24 @@
+2010-02-10  Quentin Neill  <quentin.neill@amd.com>
+	    Sebastian Pop  <sebastian.pop@amd.com>
+
+	* i386-dis.c (OP_EX_VexImmW): Reintroduced
+	function to handle 5th imm8 operand.
+	(PREFIX_VEX_3A48): Added.
+	(PREFIX_VEX_3A49): Added.
+	(VEX_W_3A48_P_2): Added.
+	(VEX_W_3A49_P_2): Added.
+	(prefix table): Added entries for PREFIX_VEX_3A48
+	and PREFIX_VEX_3A49.
+	(vex table): Added entries for VEX_W_3A48_P_2 and
+	and VEX_W_3A49_P_2.
+	* i386-gen.c (operand_type_init): Added OPERAND_TYPE_VEC_IMM4
+	for Vec_Imm4 operands.
+	* i386-opc.h (enum): Added Vec_Imm4.
+	(i386_operand_type): Added vec_imm4.
+	* i386-opc.tbl: Add entries for vpermilp[ds].
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Regenerated.
+
 2010-02-10  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
 	* ppc-dis.c (ppc_opts): Add "pwr4", "pwr5", "pwr5x", "pwr6"

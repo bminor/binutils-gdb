@@ -1436,6 +1436,7 @@ static const i386_operand_type imm64 = OPERAND_TYPE_IMM64;
 static const i386_operand_type imm16_32 = OPERAND_TYPE_IMM16_32;
 static const i386_operand_type imm16_32s = OPERAND_TYPE_IMM16_32S;
 static const i386_operand_type imm16_32_32s = OPERAND_TYPE_IMM16_32_32S;
+static const i386_operand_type vec_imm4 = OPERAND_TYPE_VEC_IMM4;
 
 enum operand_type
 {
@@ -1710,6 +1711,12 @@ fits_in_unsigned_long (offsetT num ATTRIBUTE_UNUSED)
   return (num & (((offsetT) 2 << 31) - 1)) == num;
 #endif
 }				/* fits_in_unsigned_long() */
+
+static INLINE int
+fits_in_imm4 (offsetT num)
+{
+  return (num & 0xf) == num;
+}
 
 static i386_operand_type
 smallest_imm_type (offsetT num)
@@ -3724,6 +3731,29 @@ optimize_disp (void)
       }
 }
 
+/* Check if operands are valid for the instrucrtion.  Update VEX
+   operand types.  */
+
+static int
+VEX_check_operands (const insn_template *t)
+{
+  if (!t->opcode_modifier.vex)
+    return 0;
+
+  /* Only check VEX_Imm4, which must be the first operand.  */
+  if (t->operand_types[0].bitfield.vec_imm4)
+    {
+      if (i.op[0].imms->X_op != O_constant
+	  || !fits_in_imm4 (i.op[0].imms->X_add_number))
+	return 1;
+
+      /* Turn off Imm8 so that update_imm won't complain.  */
+      i.types[0] = vec_imm4;
+    }
+
+  return 0;
+}
+
 static const insn_template *
 match_template (void)
 {
@@ -4027,6 +4057,10 @@ check_reverse:
 	  found_reverse_match = 0;
 	  continue;
 	}
+
+      /* Check if VEX operands are valid.  */
+      if (VEX_check_operands (t))
+	continue;
 
       /* We've found a match; break out of loop.  */
       break;
@@ -4960,53 +4994,119 @@ build_modrm_byte (void)
       expressionS *exp;
 
       if (i.tm.opcode_modifier.veximmext
-	  && i.tm.opcode_modifier.immext)
-	{
-	  dest = i.operands - 2;
-	  gas_assert (dest == 3);
-	}
+          && i.tm.opcode_modifier.immext)
+        {
+          dest = i.operands - 2;
+          gas_assert (dest == 3);
+        }
       else
-	dest = i.operands - 1;
+        dest = i.operands - 1;
       nds = dest - 1;
 
-      /* This instruction must have 4 register operands
-	 or 3 register operands plus 1 memory operand.
-	 It must have VexNDS and VexImmExt.  */
+      /* There are 2 kinds of instructions:
+         1. 5 operands: 4 register operands or 3 register operands
+         plus 1 memory operand plus one Vec_Imm4 operand, VexXDS, and
+         VexW0 or VexW1.  The destination must be either XMM or YMM
+         register.
+         2. 4 operands: 4 register operands or 3 register operands
+         plus 1 memory operand, VexXDS, and VexImmExt  */
       gas_assert ((i.reg_operands == 4
-		      || (i.reg_operands == 3 && i.mem_operands == 1))
-		  && i.tm.opcode_modifier.vexvvvv == VEXXDS
-		  && i.tm.opcode_modifier.veximmext
-	    && (operand_type_equal (&i.tm.operand_types[dest], &regxmm)
-		|| operand_type_equal (&i.tm.operand_types[dest], &regymm)));
+                   || (i.reg_operands == 3 && i.mem_operands == 1))
+                  && i.tm.opcode_modifier.vexvvvv == VEXXDS
+                  && (i.tm.opcode_modifier.veximmext
+                      || (i.imm_operands == 1
+                          && i.types[0].bitfield.vec_imm4
+                          && (i.tm.opcode_modifier.vexw == VEXW0
+                              || i.tm.opcode_modifier.vexw == VEXW1)
+                          && (operand_type_equal (&i.tm.operand_types[dest], &regxmm)
+                              || operand_type_equal (&i.tm.operand_types[dest], &regymm)))));
 
-      /* Generate an 8bit immediate operand to encode the register
-	 operand.  */
-      exp = &im_expressions[i.imm_operands++];
-      i.op[i.operands].imms = exp;
-      i.types[i.operands] = imm8;
-      i.operands++;
-      /* If VexW1 is set, the first operand is the source and
-	 the second operand is encoded in the immediate operand.  */
-      if (i.tm.opcode_modifier.vexw == VEXW1)
-	{
-	  source = 0;
-	  reg_slot = 1;
-	}
+      if (i.imm_operands == 0)
+        {
+          /* When there is no immediate operand, generate an 8bit
+             immediate operand to encode the first operand.  */
+          exp = &im_expressions[i.imm_operands++];
+          i.op[i.operands].imms = exp;
+          i.types[i.operands] = imm8;
+          i.operands++;
+          /* If VexW1 is set, the first operand is the source and
+             the second operand is encoded in the immediate operand.  */
+          if (i.tm.opcode_modifier.vexw == VEXW1)
+            {
+              source = 0;
+              reg_slot = 1;
+            }
+          else
+            {
+              source = 1;
+              reg_slot = 0;
+            }
+
+          /* FMA swaps REG and NDS.  */
+          if (i.tm.cpu_flags.bitfield.cpufma)
+            {
+              unsigned int tmp;
+              tmp = reg_slot;
+              reg_slot = nds;
+              nds = tmp;
+            }
+
+          gas_assert (operand_type_equal (&i.tm.operand_types[reg_slot], &regxmm)
+                      || operand_type_equal (&i.tm.operand_types[reg_slot],
+                                             &regymm));
+          exp->X_op = O_constant;
+          exp->X_add_number
+              = ((i.op[reg_slot].regs->reg_num
+                  + ((i.op[reg_slot].regs->reg_flags & RegRex) ? 8 : 0)) << 4);
+        }
       else
-	{
-	  source = 1;
-	  reg_slot = 0;
-	}
-      gas_assert ((operand_type_equal (&i.tm.operand_types[reg_slot], &regxmm)
-		   || operand_type_equal (&i.tm.operand_types[reg_slot],
-					  &regymm))
-		  && (operand_type_equal (&i.tm.operand_types[nds], &regxmm)
-		      || operand_type_equal (&i.tm.operand_types[nds],
-					     &regymm)));
-      exp->X_op = O_constant;
-      exp->X_add_number
-	= ((i.op[reg_slot].regs->reg_num
-	    + ((i.op[reg_slot].regs->reg_flags & RegRex) ? 8 : 0)) << 4);
+        {
+          unsigned int imm_slot;
+
+          if (i.tm.opcode_modifier.vexw == VEXW0)
+            {
+              /* If VexW0 is set, the third operand is the source and
+                 the second operand is encoded in the immediate
+                 operand.  */
+              source = 2;
+              reg_slot = 1;
+            }
+          else
+            {
+              /* VexW1 is set, the second operand is the source and
+                 the third operand is encoded in the immediate
+                 operand.  */
+              source = 1;
+              reg_slot = 2;
+            }
+
+          if (i.tm.opcode_modifier.immext)
+            {
+              /* When ImmExt is set, the immdiate byte is the last
+                 operand.  */
+              imm_slot = i.operands - 1;
+              source--;
+              reg_slot--;
+            }
+          else
+            {
+              imm_slot = 0;
+
+              /* Turn on Imm8 so that output_imm will generate it.  */
+              i.types[imm_slot].bitfield.imm8 = 1;
+            }
+
+          gas_assert (operand_type_equal (&i.tm.operand_types[reg_slot], &regxmm)
+                  || operand_type_equal (&i.tm.operand_types[reg_slot],
+                                         &regymm));
+          i.op[imm_slot].imms->X_add_number
+              |= ((i.op[reg_slot].regs->reg_num
+                   + ((i.op[reg_slot].regs->reg_flags & RegRex) ? 8 : 0)) << 4);
+        }
+
+      gas_assert (operand_type_equal (&i.tm.operand_types[nds], &regxmm)
+                  || operand_type_equal (&i.tm.operand_types[nds],
+                                         &regymm));
       i.vex.register_specifier = i.op[nds].regs;
     }
   else

@@ -500,6 +500,9 @@ enum
   /* Any memory size.  */
   Anysize,
 
+  /* Vector 4 bit immediate.  */
+  Vec_Imm4,
+
   /* The last bitfield in i386_operand_type.  */
   OTMax
 };
@@ -561,6 +564,7 @@ typedef union i386_operand_type
       unsigned int ymmword:1;
       unsigned int unspecified:1;
       unsigned int anysize:1;
+      unsigned int vec_imm4:1;
 #ifdef OTUnused
       unsigned int unused:(OTNumOfBits - OTUnused);
 #endif

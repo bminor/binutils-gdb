@@ -1,3 +1,13 @@
+2010-02-10  Quentin Neill  <quentin.neill@amd.com>
+	    Sebastian Pop  <sebastian.pop@amd.com>
+
+	* config/tc-i386.c (vec_imm4) New operand type.
+	(fits_in_imm4): New.
+	(VEX_check_operands): New.
+	(check_reverse): Call VEX_check_operands.
+	(build_modrm_byte): Reintroduce code for 5
+	operand insns.  Fix whitespace.
+
 2010-02-10  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
 	* config/tc-ppc.c (md_show_usage): Add -mpwr4, -mpwr5, -mpwr5x,

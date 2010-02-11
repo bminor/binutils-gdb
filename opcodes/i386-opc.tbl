@@ -2553,6 +2553,8 @@ vfnmsubss, 4, 0x667e, None, 1, CpuFMA4, Modrm|Vex|VexOpcode=2|VexVVVV=1|VexW=2|V
 vfnmsubss, 4, 0x667e, None, 1, CpuFMA4, Modrm|Vex|VexOpcode=2|VexVVVV=1|VexW=1|VexSources=2|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VexImmExt, {RegXMM, Dword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM, RegXMM }
 
 // XOP instructions
+// We add Imm8 to Vex_Imm4.  We use Imm8 to indicate that the operand
+// is an immediate.  We will check if its value will fit 4 bits.
 
 vfrczpd,    2, 0x81, None, 1, CpuXOP, Modrm|VexOpcode=4|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Vex,   { Xmmword|RegXMM|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, RegXMM }
 vfrczpd,    2, 0x81, None, 1, CpuXOP, Modrm|VexOpcode=4|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Vex=2, { Ymmword|RegYMM|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, RegYMM }
@@ -2572,6 +2574,14 @@ vpcomud,    4, 0xee, None, 1, CpuXOP, Modrm|VexOpcode=3|VexVVVV=1|VexW=1|IgnoreS
 vpcomuq,    4, 0xef, None, 1, CpuXOP, Modrm|VexOpcode=3|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Vex, { Imm8, Xmmword|RegXMM|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, RegXMM, RegXMM }
 vpcomuw,    4, 0xed, None, 1, CpuXOP, Modrm|VexOpcode=3|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Vex, { Imm8, Xmmword|RegXMM|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, RegXMM, RegXMM }
 vpcomw,     4, 0xcd, None, 1, CpuXOP, Modrm|VexOpcode=3|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Vex, { Imm8, Xmmword|RegXMM|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, RegXMM, RegXMM }
+vpermil2pd, 5, 0x6649, None, 1, CpuXOP, Modrm|VexOpcode=2|VexVVVV=1|VexW=1|Vex=1|VexSources=2|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VexImmExt, { Imm8|Vec_Imm4, RegXMM, Xmmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM, RegXMM }
+vpermil2pd, 5, 0x6649, None, 1, CpuXOP, Modrm|VexOpcode=2|VexVVVV=1|VexW=2|Vex=1|VexSources=2|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VexImmExt, { Imm8|Vec_Imm4, Xmmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM, RegXMM, RegXMM }
+vpermil2pd, 5, 0x6649, None, 1, CpuXOP, Modrm|VexOpcode=2|VexVVVV=1|VexW=1|Vex=2|VexSources=2|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VexImmExt, { Imm8|Vec_Imm4, RegYMM, Ymmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegYMM, RegYMM, RegYMM }
+vpermil2pd, 5, 0x6649, None, 1, CpuXOP, Modrm|VexOpcode=2|VexVVVV=1|VexW=2|Vex=2|VexSources=2|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VexImmExt, { Imm8|Vec_Imm4, Ymmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegYMM, RegYMM, RegYMM, RegYMM }
+vpermil2ps, 5, 0x6648, None, 1, CpuXOP, Modrm|VexOpcode=2|VexVVVV=1|VexW=1|Vex=1|VexSources=2|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VexImmExt, { Imm8|Vec_Imm4, RegXMM, Xmmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM, RegXMM }
+vpermil2ps, 5, 0x6648, None, 1, CpuXOP, Modrm|VexOpcode=2|VexVVVV=1|VexW=2|Vex=1|VexSources=2|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VexImmExt, { Imm8|Vec_Imm4, Xmmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM, RegXMM, RegXMM }
+vpermil2ps, 5, 0x6648, None, 1, CpuXOP, Modrm|VexOpcode=2|VexVVVV=1|VexW=1|Vex=2|VexSources=2|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VexImmExt, { Imm8|Vec_Imm4, RegYMM, Ymmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegYMM, RegYMM, RegYMM }
+vpermil2ps, 5, 0x6648, None, 1, CpuXOP, Modrm|VexOpcode=2|VexVVVV=1|VexW=2|Vex=2|VexSources=2|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VexImmExt, { Imm8|Vec_Imm4, Ymmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegYMM, RegYMM, RegYMM, RegYMM }
 vpcomltb,   3, 0xcc, 0x0, 1, CpuXOP, Modrm|VexOpcode=3|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Vex|ImmExt, { Xmmword|RegXMM|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, RegXMM, RegXMM }
 vpcomltd,   3, 0xce, 0x0, 1, CpuXOP, Modrm|VexOpcode=3|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Vex|ImmExt, { Xmmword|RegXMM|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, RegXMM, RegXMM }
 vpcomltq,   3, 0xcf, 0x0, 1, CpuXOP, Modrm|VexOpcode=3|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Vex|ImmExt, { Xmmword|RegXMM|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, RegXMM, RegXMM }

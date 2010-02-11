@@ -310,6 +310,78 @@ _start:
     VPCOMW         $0x3,(%eax),%xmm5,%xmm1
     VPCOMW         $0x3,%xmm0,%xmm0,%xmm7
     VPCOMW         $0xFF,%xmm7,%xmm5,%xmm0
+# Testing VPERMIL2PD imm8, xmm4, xmm3/mem128, xmm2, xmm1 (at&t syntax)
+    VPERMIL2PD     $0x0,%xmm5,(%eax),%xmm7,%xmm0
+    VPERMIL2PD     $0x1,%xmm1,%xmm2,%xmm4,%xmm0
+    VPERMIL2PD     $0x2,%xmm4,(%eax),%xmm7,%xmm2
+    VPERMIL2PD     $0x3,%xmm3,(%ebx,%eax,4),%xmm4,%xmm7
+    VPERMIL2PD     $0x0,%xmm3,%xmm7,%xmm0,%xmm6
+    VPERMIL2PD     $0x1,%xmm7,(%esi,%edx),%xmm0,%xmm2
+    VPERMIL2PD     $0x2,%xmm3,%xmm5,%xmm4,%xmm7
+    VPERMIL2PD     $0x3,%xmm3,%xmm0,%xmm1,%xmm2
+# Testing VPERMIL2PD imm8, xmm4/mem128, xmm3, xmm2, xmm1 (at&t syntax)
+    VPERMIL2PD     $0x2,%xmm7,%xmm1,%xmm2,%xmm6
+    VPERMIL2PD     $0x1,0x788(%ecx,%ebx,1),%xmm0,%xmm2,%xmm7
+    VPERMIL2PD     $0x0,%xmm4,%xmm1,%xmm0,%xmm7
+    VPERMIL2PD     $0x3,%xmm3,%xmm7,%xmm4,%xmm0
+    VPERMIL2PD     $0x3,0x788(%ecx,%ebx,2),%xmm7,%xmm0,%xmm6
+    VPERMIL2PD     $0x1,%xmm3,%xmm7,%xmm5,%xmm0
+    VPERMIL2PD     $0x2,%xmm2,%xmm1,%xmm4,%xmm6
+    VPERMIL2PD     $0x3,%xmm0,%xmm3,%xmm2,%xmm7
+# Testing VPERMIL2PD imm8, ymm4, ymm3/mem256, ymm2, ymm1 (at&t syntax)
+    VPERMIL2PD     $0x3,%ymm6,%ymm7,%ymm1,%ymm2
+    VPERMIL2PD     $0x1,%ymm6,%ymm7,%ymm1,%ymm4
+    VPERMIL2PD     $0x2,%ymm0,0x5(%edi,%eax,4),%ymm5,%ymm7
+    VPERMIL2PD     $0x0,%ymm5,%ymm6,%ymm0,%ymm2
+    VPERMIL2PD     $0x3,%ymm4,%ymm7,%ymm3,%ymm0
+    VPERMIL2PD     $0x0,%ymm7,%ymm6,%ymm2,%ymm0
+    VPERMIL2PD     $0x2,%ymm4,(%esi),%ymm1,%ymm7
+    VPERMIL2PD     $0x1,%ymm6,%ymm0,%ymm1,%ymm7
+# Testing VPERMIL2PD imm8, ymm4/mem256, ymm3, ymm2, ymm1 (at&t syntax)
+    VPERMIL2PD     $0x1,(%ecx),%ymm5,%ymm7,%ymm0
+    VPERMIL2PD     $0x3,(%esi,%eax,2),%ymm4,%ymm7,%ymm0
+    VPERMIL2PD     $0x0,(%ecx),%ymm0,%ymm3,%ymm7
+    VPERMIL2PD     $0x2,(%esi,%eax,1),%ymm2,%ymm6,%ymm7
+    VPERMIL2PD     $0x0,(%ecx),%ymm0,%ymm6,%ymm1
+    VPERMIL2PD     $0x2,%ymm2,%ymm3,%ymm7,%ymm0
+    VPERMIL2PD     $0x3,%ymm0,%ymm2,%ymm7,%ymm1
+    VPERMIL2PD     $0x1,%ymm5,%ymm0,%ymm4,%ymm7
+# Testing VPERMIL2PS imm8, xmm4, xmm3/mem128, xmm2, xmm1 (at&t syntax)
+    VPERMIL2PS     $0x3,%xmm3,%xmm4,%xmm0,%xmm7
+    VPERMIL2PS     $0x1,%xmm0,(%eax),%xmm4,%xmm7
+    VPERMIL2PS     $0x2,%xmm3,(%eax),%xmm7,%xmm7
+    VPERMIL2PS     $0x3,%xmm7,(%ebx,%eax,8),%xmm7,%xmm2
+    VPERMIL2PS     $0x2,%xmm7,%xmm0,%xmm7,%xmm7
+    VPERMIL2PS     $0x3,%xmm7,(%esi,%edx),%xmm0,%xmm7
+    VPERMIL2PS     $0x1,%xmm7,%xmm4,%xmm7,%xmm7
+    VPERMIL2PS     $0x0,%xmm3,(%eax),%xmm7,%xmm2
+# Testing VPERMIL2PS imm8, xmm4/mem128, xmm3, xmm2, xmm1 (at&t syntax)
+    VPERMIL2PS     $0x2,(%ebx),%xmm7,%xmm7,%xmm6
+    VPERMIL2PS     $0x3,(%ebx,%ebx),%xmm7,%xmm5,%xmm0
+    VPERMIL2PS     $0x0,(%ebx,%ebx),%xmm1,%xmm7,%xmm6
+    VPERMIL2PS     $0x2,%xmm0,%xmm1,%xmm2,%xmm7
+    VPERMIL2PS     $0x2,(%ebx,%ebx),%xmm7,%xmm2,%xmm6
+    VPERMIL2PS     $0x3,(%ebx,%ebx),%xmm1,%xmm7,%xmm6
+    VPERMIL2PS     $0x0,(%ebx,%ebx),%xmm7,%xmm2,%xmm7
+    VPERMIL2PS     $0x1,%xmm7,%xmm1,%xmm7,%xmm7
+# Testing VPERMIL2PS imm8, ymm4, ymm3/mem256, ymm2, ymm1 (at&t syntax)
+    VPERMIL2PS     $0x1,%ymm6,%ymm7,%ymm1,%ymm2
+    VPERMIL2PS     $0x3,%ymm7,%ymm6,%ymm7,%ymm0
+    VPERMIL2PS     $0x2,%ymm5,%ymm6,%ymm7,%ymm2
+    VPERMIL2PS     $0x0,%ymm2,%ymm0,%ymm7,%ymm7
+    VPERMIL2PS     $0x3,%ymm6,(%edi,%ecx,8),%ymm7,%ymm0
+    VPERMIL2PS     $0x2,%ymm6,%ymm7,%ymm7,%ymm0
+    VPERMIL2PS     $0x0,%ymm7,%ymm6,%ymm1,%ymm2
+    VPERMIL2PS     $0x1,%ymm6,(%esi),%ymm1,%ymm0
+# Testing VPERMIL2PS imm8, ymm4/mem256, ymm3, ymm2, ymm1 (at&t syntax)
+    VPERMIL2PS     $0x2,0xC(%ebx,%eax,2),%ymm4,%ymm0,%ymm7
+    VPERMIL2PS     $0x1,%ymm5,%ymm6,%ymm2,%ymm0
+    VPERMIL2PS     $0x3,(%esi,%eax,1),%ymm4,%ymm6,%ymm7
+    VPERMIL2PS     $0x1,(%esi,%ebx,8),%ymm3,%ymm6,%ymm0
+    VPERMIL2PS     $0x0,(%eax,%ecx,2),%ymm7,%ymm0,%ymm1
+    VPERMIL2PS     $0x2,%ymm6,%ymm7,%ymm7,%ymm7
+    VPERMIL2PS     $0x3,%ymm4,%ymm3,%ymm2,%ymm0
+    VPERMIL2PS     $0x0,%ymm0,%ymm6,%ymm7,%ymm7
 # Tests for op VPHADDBD xmm2/mem128, xmm1  (at&t syntax)
     VPHADDBD       %xmm7,%xmm7
     VPHADDBD       %xmm0,%xmm6

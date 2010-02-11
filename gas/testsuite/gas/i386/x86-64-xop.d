@@ -294,6 +294,70 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	8f 68 78 cd f8 03[ 	]+vpcomw \$0x3,%xmm0,%xmm0,%xmm15
 [ 	]*[a-f0-9]+:	8f e8 20 cd 01 ff[ 	]+vpcomw \$0xff,\(%rcx\),%xmm11,%xmm0
 [ 	]*[a-f0-9]+:	8f e8 00 cd 0e 03[ 	]+vpcomw \$0x3,\(%rsi\),%xmm15,%xmm1
+[ 	]*[a-f0-9]+:	c4 43 21 49 d5 e3[ 	]+vpermil2pd \$0x3,%xmm14,%xmm13,%xmm11,%xmm10
+[ 	]*[a-f0-9]+:	c4 a3 71 49 04 07 f2[ 	]+vpermil2pd \$0x2,%xmm15,\(%rdi,%r8,1\),%xmm1,%xmm0
+[ 	]*[a-f0-9]+:	c4 83 79 49 54 e4 23 01[ 	]+vpermil2pd \$0x1,%xmm0,0x23\(%r12,%r12,8\),%xmm0,%xmm2
+[ 	]*[a-f0-9]+:	c4 c3 11 49 d7 30[ 	]+vpermil2pd \$0x0,%xmm3,%xmm15,%xmm13,%xmm2
+[ 	]*[a-f0-9]+:	c4 c3 21 49 c6 32[ 	]+vpermil2pd \$0x2,%xmm3,%xmm14,%xmm11,%xmm0
+[ 	]*[a-f0-9]+:	c4 e3 71 49 02 01[ 	]+vpermil2pd \$0x1,%xmm0,\(%rdx\),%xmm1,%xmm0
+[ 	]*[a-f0-9]+:	c4 63 79 49 c8 33[ 	]+vpermil2pd \$0x3,%xmm3,%xmm0,%xmm0,%xmm9
+[ 	]*[a-f0-9]+:	c4 83 79 49 5c e4 23 20[ 	]+vpermil2pd \$0x0,%xmm2,0x23\(%r12,%r12,8\),%xmm0,%xmm3
+[ 	]*[a-f0-9]+:	c4 e3 21 49 c7 00[ 	]+vpermil2pd \$0x0,%xmm0,%xmm7,%xmm11,%xmm0
+[ 	]*[a-f0-9]+:	c4 e3 01 49 c5 41[ 	]+vpermil2pd \$0x1,%xmm4,%xmm5,%xmm15,%xmm0
+[ 	]*[a-f0-9]+:	c4 43 f9 49 54 9c 04 83[ 	]+vpermil2pd \$0x3,0x4\(%r12,%rbx,4\),%xmm8,%xmm0,%xmm10
+[ 	]*[a-f0-9]+:	c4 e3 41 49 f0 12[ 	]+vpermil2pd \$0x2,%xmm1,%xmm0,%xmm7,%xmm6
+[ 	]*[a-f0-9]+:	c4 43 c9 49 54 1d 00 c1[ 	]+vpermil2pd \$0x1,0x0\(%r13,%rbx,1\),%xmm12,%xmm6,%xmm10
+[ 	]*[a-f0-9]+:	c4 63 79 49 ce 42[ 	]+vpermil2pd \$0x2,%xmm4,%xmm6,%xmm0,%xmm9
+[ 	]*[a-f0-9]+:	c4 63 c9 49 1c db 80[ 	]+vpermil2pd \$0x0,\(%rbx,%rbx,8\),%xmm8,%xmm6,%xmm11
+[ 	]*[a-f0-9]+:	c4 c3 49 49 c5 53[ 	]+vpermil2pd \$0x3,%xmm5,%xmm13,%xmm6,%xmm0
+[ 	]*[a-f0-9]+:	c4 63 7d 49 ed 71[ 	]+vpermil2pd \$0x1,%ymm7,%ymm5,%ymm0,%ymm13
+[ 	]*[a-f0-9]+:	c4 23 5d 49 24 49 70[ 	]+vpermil2pd \$0x0,%ymm7,\(%rcx,%r9,2\),%ymm4,%ymm12
+[ 	]*[a-f0-9]+:	c4 03 7d 49 04 1e 33[ 	]+vpermil2pd \$0x3,%ymm3,\(%r14,%r11,1\),%ymm0,%ymm8
+[ 	]*[a-f0-9]+:	c4 43 7d 49 8c 81 07 01 00 00 72[ 	]+vpermil2pd \$0x2,%ymm7,0x107\(%r9,%rax,4\),%ymm0,%ymm9
+[ 	]*[a-f0-9]+:	c4 03 7d 49 04 1e 72[ 	]+vpermil2pd \$0x2,%ymm7,\(%r14,%r11,1\),%ymm0,%ymm8
+[ 	]*[a-f0-9]+:	c4 a3 5d 49 04 49 03[ 	]+vpermil2pd \$0x3,%ymm0,\(%rcx,%r9,2\),%ymm4,%ymm0
+[ 	]*[a-f0-9]+:	c4 83 25 49 2c 1e 81[ 	]+vpermil2pd \$0x1,%ymm8,\(%r14,%r11,1\),%ymm11,%ymm5
+[ 	]*[a-f0-9]+:	c4 63 7d 49 2e 20[ 	]+vpermil2pd \$0x0,%ymm2,\(%rsi\),%ymm0,%ymm13
+[ 	]*[a-f0-9]+:	c4 63 ad 49 3c 31 01[ 	]+vpermil2pd \$0x1,\(%rcx,%rsi,1\),%ymm0,%ymm10,%ymm15
+[ 	]*[a-f0-9]+:	c4 c3 fd 49 01 c2[ 	]+vpermil2pd \$0x2,\(%r9\),%ymm12,%ymm0,%ymm0
+[ 	]*[a-f0-9]+:	c4 a3 a5 49 a4 31 d9 d8 15 00 80[ 	]+vpermil2pd \$0x0,0x15d8d9\(%rcx,%r14,1\),%ymm8,%ymm11,%ymm4
+[ 	]*[a-f0-9]+:	c4 c3 7d 49 c4 93[ 	]+vpermil2pd \$0x3,%ymm9,%ymm12,%ymm0,%ymm0
+[ 	]*[a-f0-9]+:	c4 03 8d 49 44 1d 00 13[ 	]+vpermil2pd \$0x3,0x0\(%r13,%r11,1\),%ymm1,%ymm14,%ymm8
+[ 	]*[a-f0-9]+:	c4 23 fd 49 9c 31 d9 d8 15 00 00[ 	]+vpermil2pd \$0x0,0x15d8d9\(%rcx,%r14,1\),%ymm0,%ymm0,%ymm11
+[ 	]*[a-f0-9]+:	c4 83 85 49 44 1d 00 11[ 	]+vpermil2pd \$0x1,0x0\(%r13,%r11,1\),%ymm1,%ymm15,%ymm0
+[ 	]*[a-f0-9]+:	c4 c3 25 49 ed 92[ 	]+vpermil2pd \$0x2,%ymm9,%ymm13,%ymm11,%ymm5
+[ 	]*[a-f0-9]+:	c4 03 79 48 7c e4 23 02[ 	]+vpermil2ps \$0x2,%xmm0,0x23\(%r12,%r12,8\),%xmm0,%xmm15
+[ 	]*[a-f0-9]+:	c4 03 61 48 4c e4 23 00[ 	]+vpermil2ps \$0x0,%xmm0,0x23\(%r12,%r12,8\),%xmm3,%xmm9
+[ 	]*[a-f0-9]+:	c4 43 41 48 dc 03[ 	]+vpermil2ps \$0x3,%xmm0,%xmm12,%xmm7,%xmm11
+[ 	]*[a-f0-9]+:	c4 e3 79 48 02 31[ 	]+vpermil2ps \$0x1,%xmm3,\(%rdx\),%xmm0,%xmm0
+[ 	]*[a-f0-9]+:	c4 83 79 48 04 0e 32[ 	]+vpermil2ps \$0x2,%xmm3,\(%r14,%r9,1\),%xmm0,%xmm0
+[ 	]*[a-f0-9]+:	c4 e3 71 48 02 31[ 	]+vpermil2ps \$0x1,%xmm3,\(%rdx\),%xmm1,%xmm0
+[ 	]*[a-f0-9]+:	c4 43 79 48 e0 30[ 	]+vpermil2ps \$0x0,%xmm3,%xmm8,%xmm0,%xmm12
+[ 	]*[a-f0-9]+:	c4 83 71 48 14 0e 33[ 	]+vpermil2ps \$0x3,%xmm3,\(%r14,%r9,1\),%xmm1,%xmm2
+[ 	]*[a-f0-9]+:	c4 43 f9 48 5c 05 00 01[ 	]+vpermil2ps \$0x1,0x0\(%r13,%rax,1\),%xmm0,%xmm0,%xmm11
+[ 	]*[a-f0-9]+:	c4 63 c9 48 17 f3[ 	]+vpermil2ps \$0x3,\(%rdi\),%xmm15,%xmm6,%xmm10
+[ 	]*[a-f0-9]+:	c4 c3 79 48 c5 02[ 	]+vpermil2ps \$0x2,%xmm0,%xmm13,%xmm0,%xmm0
+[ 	]*[a-f0-9]+:	c4 63 09 48 d0 40[ 	]+vpermil2ps \$0x0,%xmm4,%xmm0,%xmm14,%xmm10
+[ 	]*[a-f0-9]+:	c4 63 61 48 d8 01[ 	]+vpermil2ps \$0x1,%xmm0,%xmm0,%xmm3,%xmm11
+[ 	]*[a-f0-9]+:	c4 63 c9 48 14 db b2[ 	]+vpermil2ps \$0x2,\(%rbx,%rbx,8\),%xmm11,%xmm6,%xmm10
+[ 	]*[a-f0-9]+:	c4 63 49 48 fd 43[ 	]+vpermil2ps \$0x3,%xmm4,%xmm5,%xmm6,%xmm15
+[ 	]*[a-f0-9]+:	c4 43 f9 48 54 9c 04 00[ 	]+vpermil2ps \$0x0,0x4\(%r12,%rbx,4\),%xmm0,%xmm0,%xmm10
+[ 	]*[a-f0-9]+:	c4 e3 7d 48 06 01[ 	]+vpermil2ps \$0x1,%ymm0,\(%rsi\),%ymm0,%ymm0
+[ 	]*[a-f0-9]+:	c4 c3 25 48 84 81 07 01 00 00 f2[ 	]+vpermil2ps \$0x2,%ymm15,0x107\(%r9,%rax,4\),%ymm11,%ymm0
+[ 	]*[a-f0-9]+:	c4 e3 5d 48 c0 70[ 	]+vpermil2ps \$0x0,%ymm7,%ymm0,%ymm4,%ymm0
+[ 	]*[a-f0-9]+:	c4 23 5d 48 3c 49 73[ 	]+vpermil2ps \$0x3,%ymm7,\(%rcx,%r9,2\),%ymm4,%ymm15
+[ 	]*[a-f0-9]+:	c4 63 5d 48 f8 02[ 	]+vpermil2ps \$0x2,%ymm0,%ymm0,%ymm4,%ymm15
+[ 	]*[a-f0-9]+:	c4 43 05 48 ac 81 07 01 00 00 03[ 	]+vpermil2ps \$0x3,%ymm0,0x107\(%r9,%rax,4\),%ymm15,%ymm13
+[ 	]*[a-f0-9]+:	c4 43 0d 48 e8 70[ 	]+vpermil2ps \$0x0,%ymm7,%ymm8,%ymm14,%ymm13
+[ 	]*[a-f0-9]+:	c4 43 5d 48 ef 71[ 	]+vpermil2ps \$0x1,%ymm7,%ymm15,%ymm4,%ymm13
+[ 	]*[a-f0-9]+:	c4 23 fd 48 bc 31 d9 d8 15 00 00[ 	]+vpermil2ps \$0x0,0x15d8d9\(%rcx,%r14,1\),%ymm0,%ymm0,%ymm15
+[ 	]*[a-f0-9]+:	c4 83 85 48 64 1d 00 c3[ 	]+vpermil2ps \$0x3,0x0\(%r13,%r11,1\),%ymm12,%ymm15,%ymm4
+[ 	]*[a-f0-9]+:	c4 a3 fd 48 84 31 d9 d8 15 00 02[ 	]+vpermil2ps \$0x2,0x15d8d9\(%rcx,%r14,1\),%ymm0,%ymm0,%ymm0
+[ 	]*[a-f0-9]+:	c4 e3 65 48 e2 01[ 	]+vpermil2ps \$0x1,%ymm0,%ymm2,%ymm3,%ymm4
+[ 	]*[a-f0-9]+:	c4 e3 fd 48 24 31 c3[ 	]+vpermil2ps \$0x3,\(%rcx,%rsi,1\),%ymm12,%ymm0,%ymm4
+[ 	]*[a-f0-9]+:	c4 e3 fd 48 24 31 12[ 	]+vpermil2ps \$0x2,\(%rcx,%rsi,1\),%ymm1,%ymm0,%ymm4
+[ 	]*[a-f0-9]+:	c4 83 fd 48 64 1d 00 00[ 	]+vpermil2ps \$0x0,0x0\(%r13,%r11,1\),%ymm0,%ymm0,%ymm4
+[ 	]*[a-f0-9]+:	c4 e3 5d 48 c7 81[ 	]+vpermil2ps \$0x1,%ymm8,%ymm7,%ymm4,%ymm0
 [ 	]*[a-f0-9]+:	8f 69 78 c2 fa[ 	]+vphaddbd %xmm2,%xmm15
 [ 	]*[a-f0-9]+:	8f 69 78 c2 e0[ 	]+vphaddbd %xmm0,%xmm12
 [ 	]*[a-f0-9]+:	8f c9 78 c2 04 24[ 	]+vphaddbd \(%r12\),%xmm0

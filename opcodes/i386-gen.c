@@ -254,6 +254,8 @@ static initializer operand_type_init[] =
     "Imm32|Imm32S|Imm64|Disp32" },
   { "OPERAND_TYPE_IMM32_32S_64_DISP32_64",
     "Imm32|Imm32S|Imm64|Disp32|Disp64" },
+  { "OPERAND_TYPE_VEC_IMM4",
+    "Vec_Imm4" },
 };
 
 typedef struct bitfield
@@ -414,6 +416,7 @@ static bitfield operand_types[] =
   BITFIELD (Ymmword),
   BITFIELD (Unspecified),
   BITFIELD (Anysize),
+  BITFIELD (Vec_Imm4),
 #ifdef OTUnused
   BITFIELD (OTUnused),
 #endif
