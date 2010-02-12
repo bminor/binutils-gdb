@@ -1,3 +1,13 @@
+2010-02-12  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (break_command_really): Change return type to int.
+	Return false if no breakpoint was created, true otherwise.
+	(trace_command): Don't set the tracepoint count if no tracepoint
+	was created.
+	(ftrace_command): Ditto.
+	(create_tracepoint_from_upload): Bail out if the tracepoint wasn't
+	created in the breakpoints table.
+
 2010-02-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Ulrich Weigand  <uweigand@de.ibm.com>
 
