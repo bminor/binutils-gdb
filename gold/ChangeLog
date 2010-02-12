@@ -1,3 +1,21 @@
+2010-02-11  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Target_arm::Scan::local): Fix bugs in relocation handling.
+	(Target_arm::Scan::global): Ditto.  Also remove a comment before the
+	beginning of function.
+	(Target_arm::Relocate::relocate): Remove error messages for MOVW_ABS
+	and MOVT_ABS relocations.  Those are non issued in scanning.  Fix
+	parameter is_32bit in calls to should_apply_static_reloc.
+	* testsuite/Makefile.am (check_SCRIPTS): Add arm_abs_global.sh.
+	(check_DATA): Add arm_abs_global.stdout.
+	(arm_abs_lib.o, libarm_abs.so, arm_abs_global.o, arm_abs_global,
+	arm_abs_global.stdout): New rules.
+	(MOSTLLYCLEANFILES): Add arm_abs_global
+	* Makefile.in: Regenerate.
+	* testsuite/arm_abs_global.s: New file.
+	* testsuite/arm_abs_global.sh: Ditto.
+	* testsuite/arm_abs_lib.s: Ditto.
+
 2010-02-11  Ian Lance Taylor  <iant@google.com>
 
 	* gold.cc (queue_middle_gc_tasks): Use a separate blocker for each

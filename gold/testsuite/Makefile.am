@@ -1435,3 +1435,22 @@ MOSTLYCLEANFILES += split_x86_64_1 split_x86_64_2 split_x86_64_3 \
 	split_x86_64_4 split_x86_64_r
 
 endif DEFAULT_TARGET_X86_64
+
+if DEFAULT_TARGET_ARM
+
+check_SCRIPTS += arm_abs_global.sh
+check_DATA += arm_abs_global.stdout
+arm_abs_lib.o: arm_abs_lib.s
+	$(TEST_AS) -march=armv7-a -o $@ $<
+libarm_abs.so: arm_abs_lib.o
+	../ld-new -shared -o $@ arm_abs_lib.o
+arm_abs_global.o: arm_abs_global.s
+	$(TEST_AS) -march=armv7-a -o $@ $<
+arm_abs_global: arm_abs_global.o libarm_abs.so
+	../ld-new -o $@ arm_abs_global.o -L. -larm_abs
+arm_abs_global.stdout: arm_abs_global
+	$(TEST_READELF) -r $< > $@
+
+MOSTLYCLEANFILES += arm_abs_global
+
+endif DEFAULT_TARGET_ARM
