@@ -121,35 +121,50 @@ void
 mi_cmd_exec_next (char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  mi_execute_async_cli_command ("next", argv, argc);
+  if (argc > 0 && strcmp(argv[0], "--reverse") == 0)
+    mi_execute_async_cli_command ("reverse-next", argv + 1, argc - 1);
+  else
+    mi_execute_async_cli_command ("next", argv, argc);
 }
 
 void
 mi_cmd_exec_next_instruction (char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  mi_execute_async_cli_command ("nexti", argv, argc);
+  if (argc > 0 && strcmp(argv[0], "--reverse") == 0)
+    mi_execute_async_cli_command ("reverse-nexti", argv + 1, argc - 1);
+  else
+    mi_execute_async_cli_command ("nexti", argv, argc);
 }
 
 void
 mi_cmd_exec_step (char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  mi_execute_async_cli_command ("step", argv, argc);
+  if (argc > 0 && strcmp(argv[0], "--reverse") == 0)
+    mi_execute_async_cli_command ("reverse-step", argv + 1, argc - 1);
+  else
+    mi_execute_async_cli_command ("step", argv, argc);
 }
 
 void
 mi_cmd_exec_step_instruction (char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  mi_execute_async_cli_command ("stepi", argv, argc);
+  if (argc > 0 && strcmp(argv[0], "--reverse") == 0)
+    mi_execute_async_cli_command ("reverse-stepi", argv + 1, argc - 1);
+  else
+    mi_execute_async_cli_command ("stepi", argv, argc);
 }
 
 void
 mi_cmd_exec_finish (char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  mi_execute_async_cli_command ("finish", argv, argc);
+  if (argc > 0 && strcmp(argv[0], "--reverse") == 0)
+    mi_execute_async_cli_command ("reverse-finish", argv + 1, argc - 1);
+  else
+    mi_execute_async_cli_command ("finish", argv, argc);
 }
 
 void
@@ -195,8 +210,8 @@ proceed_thread_callback (struct thread_info *thread, void *arg)
   return 0;
 }
 
-void
-mi_cmd_exec_continue (char *command, char **argv, int argc)
+static void
+exec_continue (char **argv, int argc)
 {
   if (argc == 0)
     continue_1 (0);
@@ -217,7 +232,47 @@ mi_cmd_exec_continue (char *command, char **argv, int argc)
       do_cleanups (old_chain);            
     }
   else
-    error ("Usage: -exec-continue [--all|--thread-group id]");
+    error ("Usage: -exec-continue [--reverse] [--all|--thread-group id]");
+}
+
+/* continue in reverse direction:
+   XXX: code duplicated from reverse.c */
+
+static void
+exec_direction_default (void *notused)
+{
+  /* Return execution direction to default state.  */
+  execution_direction = EXEC_FORWARD;
+}
+
+static void
+exec_reverse_continue (char **argv, int argc)
+{
+  enum exec_direction_kind dir = execution_direction;
+  struct cleanup *old_chain;
+
+  if (dir == EXEC_ERROR)
+    error (_("Target %s does not support this command."), target_shortname);
+
+  if (dir == EXEC_REVERSE)
+    error (_("Already in reverse mode."));
+
+  if (!target_can_execute_reverse)
+    error (_("Target %s does not support this command."), target_shortname);
+
+  old_chain = make_cleanup (exec_direction_default, NULL);
+  execution_direction = EXEC_REVERSE;
+  exec_continue (argv, argc);
+  do_cleanups (old_chain);
+}
+
+void
+mi_cmd_exec_continue (char *command, char **argv, int argc)
+{
+  if (argc > 0 && strcmp(argv[0], "--reverse") == 0)
+    exec_reverse_continue (argv + 1, argc - 1);
+  else
+    exec_continue (argv, argc);
 }
 
 static int

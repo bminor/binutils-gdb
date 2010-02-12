@@ -1,3 +1,10 @@
+2010-02-12  Tomas Holmberg <th@virtutech.com>
+
+	* mi/mi-main.c: Added the --reverse flag to the following MI
+	commands: exec-continue, exec-finish, exec-next, exec-step,
+	exec-next-instruction, exec-step-instruction. This is to
+	support reverse execution over the MI interface to gdb.
+
 2010-02-12  Pedro Alves  <pedro@codesourcery.com>
 
 	* tracepoint.c (_initialize_tracepoint): Specify that the address
