@@ -70,7 +70,5 @@ Disassembly of section .text:
 0+0fc <[^>]+> [^<]+<UNPREDICTABLE>
 0+100 <[^>]+> [^<]+<UNPREDICTABLE>
 0+104 <[^>]+> [^<]+<UNPREDICTABLE>
-0+108 <[^>]+> [^<]+<UNPREDICTABLE>
-0+10c <[^>]+> [^<]+<UNPREDICTABLE>
-0+110 <[^>]+> e1a00000[ 	]+nop[ 	]+; \(mov r0, r0\)
+0+108 <[^>]+> e1a00000[ 	]+nop[ 	]+; \(mov r0, r0\)
 #pass

@@ -55,8 +55,6 @@ unpredictable:
         .word   0xe92f0010      @ stmdb   r15!, { r4 }
         .word   0xe82f0020      @ stmda   r15!, { r5 }
 
-        strb    pc, [r0, r1]
-        strbt   pc, [r0], r1
         .word   0xe180f0b1      @ strh    pc, [r0, r1]
 
         .word   0xe103f092      @ swp     r15, r2, [r3]
