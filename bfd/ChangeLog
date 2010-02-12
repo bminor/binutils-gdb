@@ -1,3 +1,8 @@
+2010-02-12  Daniel Gutson  <dgutson@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_output_arch_local_syms): add
+	missing mapping symbol to data only sections.
+
 2010-02-11  David S. Miller  <davem@davemloft.net>
 
 	* elfxx-sparc.c (_bfd_sparc_elf_check_relocs): For R_SPARC_GOTDATA_OP_HIX22

@@ -13004,7 +13004,9 @@ arm_map_one_stub (struct bfd_hash_entry * gen_entry,
   return TRUE;
 }
 
-/* Output mapping symbols for linker generated sections.  */
+/* Output mapping symbols for linker generated sections,
+   and for those data-only sections that do not have a
+   $d.  */
 
 static bfd_boolean
 elf32_arm_output_arch_local_syms (bfd *output_bfd,
@@ -13019,6 +13021,7 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
   struct elf32_arm_link_hash_table *htab;
   bfd_vma offset;
   bfd_size_type size;
+  bfd *input_bfd;
 
   htab = elf32_arm_hash_table (info);
   if (htab == NULL)
@@ -13029,6 +13032,32 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
   osi.finfo = finfo;
   osi.info = info;
   osi.func = func;
+
+  /* Add a $d mapping symbol to data-only sections that
+     don't have any mapping symbol.  This may result in (harmless) redundant
+     mapping symbols.  */
+  for (input_bfd = info->input_bfds;
+       input_bfd != NULL;
+       input_bfd = input_bfd->link_next)
+    {
+      if ((input_bfd->flags & (BFD_LINKER_CREATED | HAS_SYMS)) == HAS_SYMS)
+	for (osi.sec = input_bfd->sections;
+	     osi.sec != NULL;
+	     osi.sec = osi.sec->next)
+	  {
+	    if (osi.sec->output_section != NULL
+		&& (osi.sec->flags & (SEC_HAS_CONTENTS | SEC_LINKER_CREATED))
+		   == SEC_HAS_CONTENTS
+		&& get_arm_elf_section_data (osi.sec) != NULL
+		&& get_arm_elf_section_data (osi.sec)->mapcount == 0)
+	      {
+		osi.sec_shndx = _bfd_elf_section_from_bfd_section
+		  (output_bfd, osi.sec->output_section);
+		if (osi.sec_shndx != (int)SHN_BAD)
+		  elf32_arm_output_map_sym (&osi, ARM_MAP_DATA, 0);
+	      }
+	  }
+    }
 
   /* ARM->Thumb glue.  */
   if (htab->arm_glue_size > 0)

@@ -1,3 +1,10 @@
+2010-02-12  Daniel Gutson  <dgutson@codesourcery.com>
+
+	* ld-arm/arm-elf.exp (armelftests): New test case added.
+	* ld-arm/data-only-map.s: New file.
+	* ld-arm/data-only-map.d: New file.
+	* ld-arm/data-only-map.ld: New file. 
+
 2010-02-11  David S. Miller  <davem@davemloft.net>
 
 	* ld-sparc/gotop32.s: Add local symbol case.
