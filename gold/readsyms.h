@@ -1,6 +1,6 @@
 // readsyms.h -- read input file symbols for gold   -*- C++ -*-
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -35,6 +35,7 @@ class Input_objects;
 class Symbol_table;
 class Input_group;
 class Archive;
+class Finish_group;
 
 // This Task is responsible for reading the symbols from an input
 // file.  This also includes reading the relocations so that we can
@@ -200,6 +201,43 @@ class Input_group
   Archives archives_;
 };
 
+// This class starts the handling of a group.  It exists only to pick
+// up the number of undefined symbols at that point, so that we only
+// run back through the group if we saw a new undefined symbol.
+
+class Start_group : public Task
+{
+ public:
+  Start_group(Symbol_table* symtab, Finish_group* finish_group,
+	      Task_token* this_blocker, Task_token* next_blocker)
+    : symtab_(symtab), finish_group_(finish_group),
+      this_blocker_(this_blocker), next_blocker_(next_blocker)
+  { }
+
+  ~Start_group();
+
+  // The standard Task methods.
+
+  Task_token*
+  is_runnable();
+
+  void
+  locks(Task_locker*);
+
+  void
+  run(Workqueue*);
+
+  std::string
+  get_name() const
+  { return "Start_group"; }
+
+ private:
+  Symbol_table* symtab_;
+  Finish_group* finish_group_;
+  Task_token* this_blocker_;
+  Task_token* next_blocker_;
+};
+
 // This class is used to finish up handling a group.  It is just a
 // closure.
 
@@ -208,15 +246,27 @@ class Finish_group : public Task
  public:
   Finish_group(Input_objects* input_objects, Symbol_table* symtab,
 	       Layout* layout, Mapfile* mapfile, Input_group* input_group,
-	       int saw_undefined, Task_token* this_blocker,
 	       Task_token* next_blocker)
     : input_objects_(input_objects), symtab_(symtab),
       layout_(layout), mapfile_(mapfile), input_group_(input_group),
-      saw_undefined_(saw_undefined), this_blocker_(this_blocker),
-      next_blocker_(next_blocker)
+      saw_undefined_(0), this_blocker_(NULL), next_blocker_(next_blocker)
   { }
 
   ~Finish_group();
+
+  // Set the number of undefined symbols when we start processing the
+  // group.  This is called by the Start_group task.
+  void
+  set_saw_undefined(size_t saw_undefined)
+  { this->saw_undefined_ = saw_undefined; }
+
+  // Set the blocker to use for this task.
+  void
+  set_blocker(Task_token* this_blocker)
+  {
+    gold_assert(this->this_blocker_ == NULL);
+    this->this_blocker_ = this_blocker;
+  }
 
   // The standard Task methods.
 
@@ -239,7 +289,7 @@ class Finish_group : public Task
   Layout* layout_;
   Mapfile* mapfile_;
   Input_group* input_group_;
-  int saw_undefined_;
+  size_t saw_undefined_;
   Task_token* this_blocker_;
   Task_token* next_blocker_;
 };

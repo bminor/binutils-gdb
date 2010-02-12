@@ -1,3 +1,60 @@
+2010-02-11  Ian Lance Taylor  <iant@google.com>
+
+	* gold-threads.h (class Once): Define.
+	(class Initialize_lock): Rewrite as child of Once.
+	* gold-threads.cc (class Once_initialize): Define.
+	(once_pointer_control): New static variable.
+	(once_pointer, once_arg): New static variables.
+	(c_run_once): New static function.
+	(Once::Once, Once::run_once, Once::internal_run): New functions.
+	(class Initialize_lock_once): Remove.
+	(initialize_lock_control): Remove.
+	(initialize_lock_pointer): Remove.
+	(initialize_lock_once): Remove.
+	(Initialize_lock::Initialize_lock): Move to gold-threads.h.
+	(Initialize_lock::initialize): Rewrite.
+	(Initialize_lock::do_run_once): New function.
+	* archive.cc (Archive::interpret_header): Only clear name if it is
+	not already empty.
+	* fileread.cc: Include "gold-threads.h"
+	(file_counts_lock): New static variable.
+	(file_counts_initialize_lock): Likewise.
+	(File_read::release): Only increment counts when using --stats.
+	Use a lock around the increment.
+	* parameters.cc (class Set_parameters_target_once): Define.
+	(set_parameters_target_once): New static variable.
+	(Parameters::Parameters): Move here from parameters.h.
+	(Parameters::set_target): Rewrite.
+	(Parameters::set_target_once): New function.
+	(Parameters::clear_target): Move here and rewrite.
+	* parameters.h (class Parameters): Update declarations.  Add
+	set_parameters_target_once_ field.
+	(Parameters::Parameters): Move to parameters.cc.
+	(Parameters::clear_target): Likewise.
+	* readsyms.cc (Read_symbols::do_group): Create a Start_group
+	task.
+	(Start_group::~Start_group): New function.
+	(Start_group::is_runnable): New function.
+	(Start_group::locks, Start_group::run): New functions.
+	(Finish_group::run): Change saw_undefined to size_t.
+	* readsyms.h (class Start_group): Define.
+	(class Finish_group): Change saw_undefined_ field to size_t.
+	(Finish_group::Finish_group): Remove saw_undefined and
+	this_blocker parameters.  Change all callers.
+	(Finish_group::set_saw_undefined): New function.
+	(Finish_group::set_blocker): New function.
+	* symtab.h (class Symbol_table): Change saw_undefined to return
+	size_t.  Change saw_undefined_ field to size_t.
+	* target-select.cc (Set_target_once::do_run_once): New function.
+	(Target_selector::Target_selector): Initialize set_target_once_
+	field.  Don't initialize lock_ and initialize_lock_ fields.
+	(Target_selector::instantiate_target): Rewrite.
+	(Target_selector::set_target): New function.
+	* target-select.h (class Set_target_once): Define.
+	(class Target_selector): Update declarations.  Make
+	Set_target_once a friend.  Remove lock_ and initialize_lock_
+	fields.  Add set_target_once_ field.
+
 2010-02-10  Ian Lance Taylor  <iant@google.com>
 
 	* dirsearch.cc (Dirsearch::initialize): Add all blockers before

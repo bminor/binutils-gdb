@@ -1354,7 +1354,7 @@ class Symbol_table
   get_sized_symbol(const Symbol*) const;
 
   // Return the count of undefined symbols seen.
-  int
+  size_t
   saw_undefined() const
   { return this->saw_undefined_; }
 
@@ -1709,7 +1709,7 @@ class Symbol_table
 
   // We increment this every time we see a new undefined symbol, for
   // use in archive groups.
-  int saw_undefined_;
+  size_t saw_undefined_;
   // The index of the first global symbol in the output file.
   unsigned int first_global_index_;
   // The file offset within the output symtab section where we should

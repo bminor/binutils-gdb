@@ -1,6 +1,6 @@
 // target-select.h -- select a target for an object file  -*- C++ -*-
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -31,6 +31,24 @@ namespace gold
 {
 
 class Target;
+class Target_selector;
+
+// Used to set the target only once.
+
+class Set_target_once : public Once
+{
+ public:
+  Set_target_once(Target_selector* target_selector)
+    : target_selector_(target_selector)
+  { }
+
+ protected:
+  void
+  do_run_once(void*);
+
+ private:
+  Target_selector* target_selector_;
+};
 
 // We want to avoid a master list of targets, which implies using a
 // global constructor.  And we also want the program to start up as
@@ -141,6 +159,12 @@ class Target_selector
   instantiate_target();
 
  private:
+  // Set the target.
+  void
+  set_target();
+
+  friend class Set_target_once;
+
   // ELF machine code.
   const int machine_;
   // Target size--32 or 64.
@@ -154,11 +178,8 @@ class Target_selector
   // The singleton Target structure--this points to an instance of the
   // real implementation.
   Target* instantiated_target_;
-  // Lock to make sure that we don't instantiate the target more than
-  // once.
-  Lock* lock_;
-  // We only want to initialize the lock_ pointer once.
-  Initialize_lock initialize_lock_;
+  // Used to set the target only once.
+  Set_target_once set_target_once_;
 };
 
 // Select the target for an ELF file.

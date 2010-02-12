@@ -1,6 +1,6 @@
 // archive.cc -- archive support for gold
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -275,7 +275,8 @@ Archive::interpret_header(const Archive_header* hdr, off_t off,
   else if (hdr->ar_name[1] == ' ')
     {
       // This is the symbol table.
-      pname->clear();
+      if (!pname->empty())
+	pname->clear();
     }
   else if (hdr->ar_name[1] == '/')
     {

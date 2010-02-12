@@ -1,6 +1,6 @@
 // parameters.cc -- general parameters for a link using gold
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -29,6 +29,47 @@
 
 namespace gold
 {
+
+// Our local version of the variable, which is not const.
+
+static Parameters static_parameters;
+
+// The global variable.
+
+const Parameters* parameters = &static_parameters;
+
+// A helper class to set the target once.
+
+class Set_parameters_target_once : public Once
+{
+ public:
+  Set_parameters_target_once(Parameters* parameters)
+    : parameters_(parameters)
+  { }
+
+ protected:
+  void
+  do_run_once(void* arg)
+  { this->parameters_->set_target_once(static_cast<Target*>(arg)); }
+
+ private:
+  Parameters* parameters_;
+};
+
+// We only need one Set_parameters_target_once.
+
+static
+Set_parameters_target_once set_parameters_target_once(&static_parameters);
+
+// Class Parameters.
+
+Parameters::Parameters()
+   : errors_(NULL), options_(NULL), target_(NULL),
+     doing_static_link_valid_(false), doing_static_link_(false),
+     debug_(0),
+     set_parameters_target_once_(&set_parameters_target_once)
+ {
+ }
 
 void
 Parameters::set_errors(Errors* errors)
@@ -61,10 +102,28 @@ Parameters::set_doing_static_link(bool doing_static_link)
 void
 Parameters::set_target(Target* target)
 {
-  if (!this->target_valid())
-    this->target_ = target;
-  else
-    gold_assert(target == this->target_);
+  this->set_parameters_target_once_->run_once(static_cast<void*>(target));
+  gold_assert(target == this->target_);
+}
+
+// This is called at most once.
+
+void
+Parameters::set_target_once(Target* target)
+{
+  gold_assert(this->target_ == NULL);
+  this->target_ = target;
+}
+
+// Clear the target, for testing.
+
+void
+Parameters::clear_target()
+{
+  this->target_ = NULL;
+  // We need a new Set_parameters_target_once so that we can set the
+  // target again.
+  this->set_parameters_target_once_ = new Set_parameters_target_once(this);
 }
 
 // Return whether TARGET is compatible with the target we are using.
@@ -121,15 +180,6 @@ Parameters::size_and_endianness() const
   else
     gold_unreachable();
 }
-
-
-// Our local version of the variable, which is not const.
-
-static Parameters static_parameters;
-
-// The global variable.
-
-const Parameters* parameters = &static_parameters;
 
 void
 set_parameters_errors(Errors* errors)

@@ -1,6 +1,6 @@
 // fileread.cc -- read files for gold
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -38,6 +38,7 @@
 #include "target.h"
 #include "binary.h"
 #include "descriptors.h"
+#include "gold-threads.h"
 #include "fileread.h"
 
 #ifndef HAVE_READV
@@ -94,6 +95,10 @@ File_read::View::is_locked()
 }
 
 // Class File_read.
+
+// A lock for the File_read static variables.
+static Lock* file_counts_lock = NULL;
+static Initialize_lock file_counts_initialize_lock(&file_counts_lock);
 
 // The File_read static variables.
 unsigned long long File_read::total_mapped_bytes;
@@ -204,11 +209,17 @@ File_read::release()
 {
   gold_assert(this->is_locked());
 
-  File_read::total_mapped_bytes += this->mapped_bytes_;
-  File_read::current_mapped_bytes += this->mapped_bytes_;
+  if (!parameters->options_valid() || parameters->options().stats())
+    {
+      file_counts_initialize_lock.initialize();
+      Hold_optional_lock hl(file_counts_lock);
+      File_read::total_mapped_bytes += this->mapped_bytes_;
+      File_read::current_mapped_bytes += this->mapped_bytes_;
+      if (File_read::current_mapped_bytes > File_read::maximum_mapped_bytes)
+	File_read::maximum_mapped_bytes = File_read::current_mapped_bytes;
+    }
+
   this->mapped_bytes_ = 0;
-  if (File_read::current_mapped_bytes > File_read::maximum_mapped_bytes)
-    File_read::maximum_mapped_bytes = File_read::current_mapped_bytes;
 
   // Only clear views if there is only one attached object.  Otherwise
   // we waste time trying to clear cached archive views.  Similarly

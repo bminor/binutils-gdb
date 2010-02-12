@@ -1,6 +1,6 @@
 // fileread.h -- read files for gold   -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -218,16 +218,15 @@ class File_read
   File_read(const File_read&);
   File_read& operator=(const File_read&);
 
-  // Total bytes mapped into memory during the link.  This variable
-  // may not be accurate when running multi-threaded.
+  // Total bytes mapped into memory during the link if --stats.
   static unsigned long long total_mapped_bytes;
 
-  // Current number of bytes mapped into memory during the link.  This
-  // variable may not be accurate when running multi-threaded.
+  // Current number of bytes mapped into memory during the link if
+  // --stats.
   static unsigned long long current_mapped_bytes;
 
-  // High water mark of bytes mapped into memory during the link.
-  // This variable may not be accurate when running multi-threaded.
+  // High water mark of bytes mapped into memory during the link if
+  // --stats.
   static unsigned long long maximum_mapped_bytes;
 
   // A view into the file.

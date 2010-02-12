@@ -1,6 +1,6 @@
 // readsyms.cc -- read input file symbols for gold
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -360,6 +360,19 @@ Read_symbols::do_group(Workqueue* workqueue)
   const Input_file_group* group = this->input_argument_->group();
   Task_token* this_blocker = this->this_blocker_;
 
+  Finish_group* finish_group = new Finish_group(this->input_objects_,
+						this->symtab_,
+						this->layout_,
+						this->mapfile_,
+						input_group,
+						this->next_blocker_);
+
+  Task_token* next_blocker = new Task_token(true);
+  next_blocker->add_blocker();
+  workqueue->queue_soon(new Start_group(this->symtab_, finish_group,
+					this_blocker, next_blocker));
+  this_blocker = next_blocker;
+
   for (Input_file_group::const_iterator p = group->begin();
        p != group->end();
        ++p)
@@ -367,7 +380,7 @@ Read_symbols::do_group(Workqueue* workqueue)
       const Input_argument* arg = &*p;
       gold_assert(arg->is_file());
 
-      Task_token* next_blocker = new Task_token(true);
+      next_blocker = new Task_token(true);
       next_blocker->add_blocker();
       workqueue->queue_soon(new Read_symbols(this->input_objects_,
 					     this->symtab_, this->layout_,
@@ -377,15 +390,9 @@ Read_symbols::do_group(Workqueue* workqueue)
       this_blocker = next_blocker;
     }
 
-  const int saw_undefined = this->symtab_->saw_undefined();
-  workqueue->queue_soon(new Finish_group(this->input_objects_,
-					 this->symtab_,
-					 this->layout_,
-					 this->mapfile_,
-					 input_group,
-					 saw_undefined,
-					 this_blocker,
-					 this->next_blocker_));
+  finish_group->set_blocker(this_blocker);
+
+  workqueue->queue_soon(finish_group);
 }
 
 // Return a debugging name for a Read_symbols task.
@@ -476,6 +483,40 @@ Add_symbols::run(Workqueue*)
   this->sd_ = NULL;
 }
 
+// Class Start_group.
+
+Start_group::~Start_group()
+{
+  if (this->this_blocker_ != NULL)
+    delete this->this_blocker_;
+  // next_blocker_ is deleted by the task associated with the first
+  // file in the group.
+}
+
+// We need to wait for THIS_BLOCKER_ and unblock NEXT_BLOCKER_.
+
+Task_token*
+Start_group::is_runnable()
+{
+  if (this->this_blocker_ != NULL && this->this_blocker_->is_blocked())
+    return this->this_blocker_;
+  return NULL;
+}
+
+void
+Start_group::locks(Task_locker* tl)
+{
+  tl->add(this, this->next_blocker_);
+}
+
+// Store the number of undefined symbols we see now.
+
+void
+Start_group::run(Workqueue*)
+{
+  this->finish_group_->set_saw_undefined(this->symtab_->saw_undefined());
+}
+
 // Class Finish_group.
 
 Finish_group::~Finish_group()
@@ -507,7 +548,7 @@ Finish_group::locks(Task_locker* tl)
 void
 Finish_group::run(Workqueue*)
 {
-  int saw_undefined = this->saw_undefined_;
+  size_t saw_undefined = this->saw_undefined_;
   while (saw_undefined != this->symtab_->saw_undefined())
     {
       saw_undefined = this->symtab_->saw_undefined();

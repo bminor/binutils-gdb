@@ -1,6 +1,6 @@
 // parameters.h -- general parameters for a link using gold  -*- C++ -*-
 
-// Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -31,6 +31,7 @@ class Errors;
 class Target;
 template<int size, bool big_endian>
 class Sized_target;
+class Set_parameters_target_once;
 
 // Here we define the Parameters class which simply holds simple
 // general parameters which apply to the entire link.  We use a global
@@ -49,11 +50,7 @@ class Sized_target;
 class Parameters
 {
  public:
-  Parameters()
-    : errors_(NULL), options_(NULL), target_(NULL),
-      doing_static_link_valid_(false), doing_static_link_(false),
-      debug_(0)
-  { }
+  Parameters();
 
   // These should be called as soon as they are known.
   void
@@ -112,8 +109,7 @@ class Parameters
 
   // Clear the target, for testing.
   void
-  clear_target()
-  { this->target_ = NULL; }
+  clear_target();
 
   // Return true if TARGET is compatible with the current target.
   bool
@@ -150,12 +146,18 @@ class Parameters
 
 
  private:
+  void
+  set_target_once(Target*);
+
+  friend class Set_parameters_target_once;
+
   Errors* errors_;
   const General_options* options_;
   Target* target_;
   bool doing_static_link_valid_;
   bool doing_static_link_;
   int debug_;
+  Set_parameters_target_once* set_parameters_target_once_;
 };
 
 // This is a global variable.
