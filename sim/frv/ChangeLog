@@ -1,3 +1,7 @@
+2010-02-11  Doug Evans  <dje@sebabeach.org>
+
+	* cpu.h, * decode.c, * model.c, * sem.c: Regenerate.
+
 2010-01-24  Doug Evans  <dje@sebabeach.org>
 
 	* sem.c: Regenerate.

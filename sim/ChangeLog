@@ -1,3 +1,10 @@
+2010-02-11  Doug Evans  <dje@sebabeach.org>
+
+	* cris/cpuv10.h, * cris/cpuv32.h, * cris/cris-desc.c,
+	* cris/cris-desc.h, * cris/decodev10.c, * cris/decodev32.c,
+	* cris/modelv10.c, * cris/modelv32.c, * cris/semcrisv10f-switch.c,
+	* cris/semcrisv32f-switch.c: Regenerate.
+
 2010-01-09  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* avr/configure: Regenerate.

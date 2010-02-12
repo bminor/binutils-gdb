@@ -128,7 +128,7 @@ typedef struct {
 union sem_fields {
   struct { /* no operands */
     int empty;
-  } fmt_empty;
+  } sfmt_empty;
   struct { /*  */
     UINT f_uimm8;
   } sfmt_clrpsw;

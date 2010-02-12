@@ -256,7 +256,8 @@ static const struct insn_sem sh64_media_insn_sem[] =
   { SH_INSN_XORI, SH64_MEDIA_INSN_XORI, SH64_MEDIA_SFMT_XORI },
 };
 
-static const struct insn_sem sh64_media_insn_sem_invalid = {
+static const struct insn_sem sh64_media_insn_sem_invalid =
+{
   VIRTUAL_INSN_X_INVALID, SH64_MEDIA_INSN_X_INVALID, SH64_MEDIA_SFMT_EMPTY
 };
 
@@ -1535,7 +1536,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_empty:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */
@@ -1727,7 +1728,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_brk:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */
@@ -3239,7 +3240,7 @@ sh64_media_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_nop:
   {
     const IDESC *idesc = &sh64_media_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */

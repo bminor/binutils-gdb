@@ -178,7 +178,8 @@ static const struct insn_sem m32rxf_insn_sem[] =
   { M32R_INSN_BTST, M32RXF_INSN_BTST, M32RXF_SFMT_BTST, M32RXF_INSN_PAR_BTST, M32RXF_INSN_WRITE_BTST },
 };
 
-static const struct insn_sem m32rxf_insn_sem_invalid = {
+static const struct insn_sem m32rxf_insn_sem_invalid =
+{
   VIRTUAL_INSN_X_INVALID, M32RXF_INSN_X_INVALID, M32RXF_SFMT_EMPTY, NOPAR, NOPAR
 };
 
@@ -703,7 +704,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_empty:
   {
     const IDESC *idesc = &m32rxf_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */
@@ -1951,7 +1952,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_nop:
   {
     const IDESC *idesc = &m32rxf_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */
@@ -1987,7 +1988,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_rte:
   {
     const IDESC *idesc = &m32rxf_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */
@@ -2491,7 +2492,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_sadd:
   {
     const IDESC *idesc = &m32rxf_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */
@@ -2594,7 +2595,7 @@ m32rxf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_sc:
   {
     const IDESC *idesc = &m32rxf_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */

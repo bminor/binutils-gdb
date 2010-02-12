@@ -791,7 +791,8 @@ static const struct insn_sem frvbf_insn_sem[] =
   { FRV_INSN_FNOP, FRVBF_INSN_FNOP, FRVBF_SFMT_REI },
 };
 
-static const struct insn_sem frvbf_insn_sem_invalid = {
+static const struct insn_sem frvbf_insn_sem_invalid =
+{
   VIRTUAL_INSN_X_INVALID, FRVBF_INSN_X_INVALID, FRVBF_SFMT_EMPTY
 };
 
@@ -3250,7 +3251,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_empty:
   {
     const IDESC *idesc = &frvbf_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */
@@ -7737,7 +7738,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_rei:
   {
     const IDESC *idesc = &frvbf_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */

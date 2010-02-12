@@ -242,7 +242,8 @@ static const struct insn_sem sh64_compact_insn_sem[] =
   { SH_INSN_XTRCT_COMPACT, SH64_COMPACT_INSN_XTRCT_COMPACT, SH64_COMPACT_SFMT_ADD_COMPACT },
 };
 
-static const struct insn_sem sh64_compact_insn_sem_invalid = {
+static const struct insn_sem sh64_compact_insn_sem_invalid =
+{
   VIRTUAL_INSN_X_INVALID, SH64_COMPACT_INSN_X_INVALID, SH64_COMPACT_SFMT_EMPTY
 };
 
@@ -2645,7 +2646,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_empty:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */
@@ -2944,7 +2945,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_brk_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */
@@ -3010,7 +3011,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_clrmac_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */
@@ -3023,7 +3024,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_clrs_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */
@@ -3036,7 +3037,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_clrt_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */
@@ -3153,7 +3154,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_div0u_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */
@@ -3820,7 +3821,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_frchg_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */
@@ -3833,7 +3834,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_fschg_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */
@@ -5584,7 +5585,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_nop_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */
@@ -5646,7 +5647,7 @@ sh64_compact_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_rts_compact:
   {
     const IDESC *idesc = &sh64_compact_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */

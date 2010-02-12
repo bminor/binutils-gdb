@@ -431,7 +431,7 @@ typedef struct {
 union sem_fields {
   struct { /* no operands */
     int empty;
-  } fmt_empty;
+  } sfmt_empty;
   struct { /*  */
     unsigned short out_h_spr_USI_2;
   } sfmt_break;

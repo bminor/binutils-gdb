@@ -110,7 +110,8 @@ static const struct insn_sem lm32bf_insn_sem[] =
   { LM32_INSN_SCALL, LM32BF_INSN_SCALL, LM32BF_SFMT_BREAK },
 };
 
-static const struct insn_sem lm32bf_insn_sem_invalid = {
+static const struct insn_sem lm32bf_insn_sem_invalid =
+{
   VIRTUAL_INSN_X_INVALID, LM32BF_INSN_X_INVALID, LM32BF_SFMT_EMPTY
 };
 
@@ -348,7 +349,7 @@ lm32bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_empty:
   {
     const IDESC *idesc = &lm32bf_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */
@@ -814,7 +815,7 @@ lm32bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_break:
   {
     const IDESC *idesc = &lm32bf_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */

@@ -284,7 +284,7 @@ typedef struct {
 union sem_fields {
   struct { /* no operands */
     int empty;
-  } fmt_empty;
+  } sfmt_empty;
   struct { /*  */
     UINT f_u4;
   } sfmt_break;

@@ -256,7 +256,8 @@ static const struct insn_sem crisv32f_insn_sem[] =
   { CRIS_INSN_FTAGD, CRISV32F_INSN_FTAGD, CRISV32F_SFMT_FIDXI },
 };
 
-static const struct insn_sem crisv32f_insn_sem_invalid = {
+static const struct insn_sem crisv32f_insn_sem_invalid =
+{
   VIRTUAL_INSN_X_INVALID, CRISV32F_INSN_X_INVALID, CRISV32F_SFMT_EMPTY
 };
 
@@ -1910,7 +1911,7 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_empty:
   {
     const IDESC *idesc = &crisv32f_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */
@@ -4364,7 +4365,7 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_rfg:
   {
     const IDESC *idesc = &crisv32f_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */
@@ -4404,7 +4405,7 @@ crisv32f_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_halt:
   {
     const IDESC *idesc = &crisv32f_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */

@@ -192,7 +192,8 @@ static const struct insn_sem iq2000bf_insn_sem[] =
   { IQ2000_INSN_BMB, IQ2000BF_INSN_BMB, IQ2000BF_SFMT_BBV },
 };
 
-static const struct insn_sem iq2000bf_insn_sem_invalid = {
+static const struct insn_sem iq2000bf_insn_sem_invalid =
+{
   VIRTUAL_INSN_X_INVALID, IQ2000BF_INSN_X_INVALID, IQ2000BF_SFMT_EMPTY
 };
 
@@ -879,7 +880,7 @@ iq2000bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_empty:
   {
     const IDESC *idesc = &iq2000bf_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */
@@ -1379,7 +1380,7 @@ iq2000bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_break:
   {
     const IDESC *idesc = &iq2000bf_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */
@@ -1398,7 +1399,7 @@ iq2000bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_syscall:
   {
     const IDESC *idesc = &iq2000bf_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */
@@ -1460,7 +1461,7 @@ iq2000bf_decode (SIM_CPU *current_cpu, IADDR pc,
  extract_sfmt_bctxt:
   {
     const IDESC *idesc = &iq2000bf_insn_data[itype];
-#define FLD(f) abuf->fields.fmt_empty.f
+#define FLD(f) abuf->fields.sfmt_empty.f
 
 
   /* Record the fields for the semantic handler.  */
