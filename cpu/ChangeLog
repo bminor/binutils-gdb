@@ -1,3 +1,22 @@
+2010-02-11  Doug Evans  <dje@sebabeach.org>
+
+	* m32r.cpu (HASH-PREFIX): Delete.
+	(duhpo, dshpo): New pmacros.
+	(simm8, simm16): Delete HASH-PREFIX attribute, define with dshpo.
+	(uimm3, uimm4, uimm5, uimm8, uimm16, imm1): Delete HASH-PREFIX
+	attribute, define with dshpo.
+	(uimm24): Delete HASH-PREFIX attribute.
+	* m32r.opc (CGEN_PRINT_NORMAL): Delete.
+	(print_signed_with_hash_prefix): New function.
+	(print_unsigned_with_hash_prefix): New function.
+	* xc16x.cpu (dowh): New pmacro.
+	(upof16): Define with dowh, specify print handler.
+	(qbit, qlobit, qhibit): Ditto.
+	(upag16): Ditto.
+	* xc16x.opc (CGEN_PRINT_NORMAL): Delete.
+	(print_with_dot_prefix): New functions.
+	(print_with_pof_prefix, print_with_pag_prefix): New functions.
+
 2010-01-24  Doug Evans  <dje@sebabeach.org>
 
 	* frv.cpu (floating-point-conversion): Update call to fp conv op.
