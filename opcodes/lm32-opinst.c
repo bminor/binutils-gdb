@@ -31,11 +31,7 @@ This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
 /* Operand references.  */
 
-#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
 #define OP_ENT(op) LM32_OPERAND_##op
-#else
-#define OP_ENT(op) LM32_OPERAND_/**/op
-#endif
 #define INPUT CGEN_OPINST_INPUT
 #define OUTPUT CGEN_OPINST_OUTPUT
 #define END CGEN_OPINST_END

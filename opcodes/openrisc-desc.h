@@ -28,11 +28,7 @@ This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 #define CGEN_ARCH openrisc
 
 /* Given symbol S, return openrisc_cgen_<S>.  */
-#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
 #define CGEN_SYM(s) openrisc##_cgen_##s
-#else
-#define CGEN_SYM(s) openrisc/**/_cgen_/**/s
-#endif
 
 
 /* Selected cpu families.  */

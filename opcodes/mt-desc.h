@@ -28,11 +28,7 @@ This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 #define CGEN_ARCH mt
 
 /* Given symbol S, return mt_cgen_<S>.  */
-#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
 #define CGEN_SYM(s) mt##_cgen_##s
-#else
-#define CGEN_SYM(s) mt/**/_cgen_/**/s
-#endif
 
 
 /* Selected cpu families.  */

@@ -187,11 +187,7 @@ static unsigned int dis_hash_insn (const char *, CGEN_INSN_INT);
 
 /* Instruction formats.  */
 
-#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
 #define F(f) & mep_cgen_ifld_table[MEP_##f]
-#else
-#define F(f) & mep_cgen_ifld_table[MEP_/**/f]
-#endif
 static const CGEN_IFMT ifmt_empty ATTRIBUTE_UNUSED = {
   0, 0, 0x0, { { 0 } }
 };
@@ -586,16 +582,8 @@ static const CGEN_IFMT ifmt_cpfmulia1u_b_P1 ATTRIBUTE_UNUSED = {
 
 #undef F
 
-#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
 #define A(a) (1 << CGEN_INSN_##a)
-#else
-#define A(a) (1 << CGEN_INSN_/**/a)
-#endif
-#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
 #define OPERAND(op) MEP_OPERAND_##op
-#else
-#define OPERAND(op) MEP_OPERAND_/**/op
-#endif
 #define MNEM CGEN_SYNTAX_MNEMONIC /* syntax value for mnemonic */
 #define OP(field) CGEN_SYNTAX_MAKE_FIELD (OPERAND (field))
 
@@ -6094,11 +6082,7 @@ static const CGEN_OPCODE mep_cgen_insn_opcode_table[MAX_INSNS] =
 
 /* Formats for ALIAS macro-insns.  */
 
-#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
 #define F(f) & mep_cgen_ifld_table[MEP_##f]
-#else
-#define F(f) & mep_cgen_ifld_table[MEP_/**/f]
-#endif
 static const CGEN_IFMT ifmt_nop ATTRIBUTE_UNUSED = {
   16, 16, 0xffff, { { F (F_MAJOR) }, { F (F_RN) }, { F (F_RM) }, { F (F_SUB4) }, { 0 } }
 };
@@ -6155,16 +6139,8 @@ static const CGEN_IFMT ifmt_lmcp16_0 ATTRIBUTE_UNUSED = {
 
 /* Each non-simple macro entry points to an array of expansion possibilities.  */
 
-#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
 #define A(a) (1 << CGEN_INSN_##a)
-#else
-#define A(a) (1 << CGEN_INSN_/**/a)
-#endif
-#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
 #define OPERAND(op) MEP_OPERAND_##op
-#else
-#define OPERAND(op) MEP_OPERAND_/**/op
-#endif
 #define MNEM CGEN_SYNTAX_MNEMONIC /* syntax value for mnemonic */
 #define OP(field) CGEN_SYNTAX_MAKE_FIELD (OPERAND (field))
 

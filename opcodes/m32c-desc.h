@@ -28,11 +28,7 @@ This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 #define CGEN_ARCH m32c
 
 /* Given symbol S, return m32c_cgen_<S>.  */
-#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
 #define CGEN_SYM(s) m32c##_cgen_##s
-#else
-#define CGEN_SYM(s) m32c/**/_cgen_/**/s
-#endif
 
 
 /* Selected cpu families.  */
@@ -59,8 +55,6 @@ This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
 /* Maximum number of fields in an instruction.  */
 #define CGEN_ACTUAL_MAX_IFMT_OPERANDS 13
-
-/* Enums.  */
 
 /* Attributes.  */
 

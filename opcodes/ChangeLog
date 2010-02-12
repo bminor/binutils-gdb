@@ -1,3 +1,18 @@
+2010-02-11  Doug Evans  <dje@sebabeach.org>
+
+	* fr30-desc.c, * fr30-desc.h, * fr30-opc.c,
+	* frv-desc.c, * frv-desc.h, * frv-opc.c,
+	* ip2k-desc.c, * ip2k-desc.h, * ip2k-opc.c,
+	* iq2000-desc.c, * iq2000-desc.h, * iq2000-opc.c,
+	* lm32-desc.c, * lm32-desc.h, * lm32-opc.c, * lm32-opinst.c,
+	* m32c-desc.c, * m32c-desc.h, * m32c-opc.c,
+	* m32r-desc.c, * m32r-desc.h, * m32r-opc.c, * m32r-opinst.c,
+	* mep-desc.c, * mep-desc.h, * mep-opc.c,
+	* mt-desc.c, * mt-desc.h, * mt-opc.c,
+	* openrisc-desc.c, * openrisc-desc.h, * openrisc-opc.c,
+	* xc16x-desc.c, * xc16x-desc.h, * xc16x-opc.c,
+	* xstormy16-desc.c, * xstormy16-desc.h, * xstormy16-opc.c: Regenerate.
+
 2010-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c: Update copyright.

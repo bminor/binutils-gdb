@@ -28,11 +28,7 @@ This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 #define CGEN_ARCH xstormy16
 
 /* Given symbol S, return xstormy16_cgen_<S>.  */
-#if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
 #define CGEN_SYM(s) xstormy16##_cgen_##s
-#else
-#define CGEN_SYM(s) xstormy16/**/_cgen_/**/s
-#endif
 
 
 /* Selected cpu families.  */
