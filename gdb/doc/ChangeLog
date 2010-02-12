@@ -1,3 +1,10 @@
+2010-02-12  Jakob Engblom  <jakob@virtutech.com>
+
+	* gdb.texinfo (MI commands): Added documentation of --reverse
+	option to a set of MI commands. Restructured documentation of MI
+	commands --exec-continue to reflect the complexity of reverse
+	execution.
+
 2010-02-12  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.texinfo (Using the Collected Data): Specify that the address

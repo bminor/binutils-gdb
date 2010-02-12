@@ -5366,7 +5366,7 @@ line of a function back to its return to its caller
 Like @code{nexti}, @code{reverse-nexti} executes a single instruction
 in reverse, except that called functions are ``un-executed'' atomically.
 That is, if the previously executed instruction was a return from
-another instruction, @code{reverse-nexti} will continue to execute
+another function, @code{reverse-nexti} will continue to execute
 in reverse until the call to that function (from the current stack
 frame) is reached.
 
@@ -23317,20 +23317,29 @@ other cases.
 @subsubheading Synopsis
 
 @smallexample
- -exec-continue [--all|--thread-group N]
+ -exec-continue [--reverse] [--all|--thread-group N]
 @end smallexample
 
-Resumes the execution of the inferior program until a breakpoint is
-encountered, or until the inferior exits.  In all-stop mode
-(@pxref{All-Stop Mode}), may resume only one thread, or all threads,
-depending on the value of the @samp{scheduler-locking} variable.  In
-non-stop mode (@pxref{Non-Stop Mode}), if the @samp{--all} is not
-specified, only the thread specified with the @samp{--thread} option
-(or current thread, if no @samp{--thread} is provided) is resumed.  If
-@samp{--all} is specified, all threads will be resumed.  The
-@samp{--all} option is ignored in all-stop mode.  If the
-@samp{--thread-group} options is specified, then all threads in that
-thread group are resumed.
+Resumes the execution of the inferior program, which will continue
+to execute until it reaches a debugger stop event.  If the 
+@samp{--reverse} option is specified, execution resumes in reverse until 
+it reaches a stop event.  Stop events may include
+@itemize @bullet
+@item
+breakpoints or watchpoints
+@item
+signals or exceptions
+@item
+the end of the process (or its beginning under @samp{--reverse})
+@item
+the end or beginning of a replay log if one is being used.
+@end itemize
+In all-stop mode (@pxref{All-Stop
+Mode}), may resume only one thread, or all threads, depending on the
+value of the @samp{scheduler-locking} variable.  If @samp{--all} is
+specified, all threads will be resumed.  The @samp{--all} option is
+ignored in all-stop mode.  If the @samp{--thread-group} options is
+specified, then all threads in that thread group are resumed.
 
 @subsubheading @value{GDBN} Command
 
@@ -23356,11 +23365,14 @@ line="13"@}
 @subsubheading Synopsis
 
 @smallexample
- -exec-finish
+ -exec-finish [--reverse]
 @end smallexample
 
 Resumes the execution of the inferior program until the current
 function is exited.  Displays the results returned by the function.
+If the @samp{--reverse} option is specified, resumes the reverse
+execution of the inferior program until the point where current
+function was called.
 
 @subsubheading @value{GDBN} Command
 
@@ -23479,11 +23491,18 @@ The corresponding @value{GDBN} command is @samp{jump}.
 @subsubheading Synopsis
 
 @smallexample
- -exec-next
+ -exec-next [--reverse]
 @end smallexample
 
 Resumes execution of the inferior program, stopping when the beginning
 of the next source line is reached.
+
+If the @samp{--reverse} option is specified, resumes reverse execution
+of the inferior program, stopping at the beginning of the previous
+source line.  If you issue this command on the first line of a
+function, it will take you back to the caller of that function, to the
+source line where the function was called.
+
 
 @subsubheading @value{GDBN} Command
 
@@ -23506,13 +23525,19 @@ The corresponding @value{GDBN} command is @samp{next}.
 @subsubheading Synopsis
 
 @smallexample
- -exec-next-instruction
+ -exec-next-instruction [--reverse]
 @end smallexample
 
 Executes one machine instruction.  If the instruction is a function
 call, continues until the function returns.  If the program stops at an
 instruction in the middle of a source line, the address will be
 printed as well.
+
+If the @samp{--reverse} option is specified, resumes reverse execution
+of the inferior program, stopping at the previous instruction.  If the
+previously executed instruction was a return from another function,
+it will continue to execute in reverse until the call to that function
+(from the current stack frame) is reached.
 
 @subsubheading @value{GDBN} Command
 
@@ -23656,13 +23681,15 @@ signal-meaning="Interrupt"
 @subsubheading Synopsis
 
 @smallexample
- -exec-step
+ -exec-step [--reverse]
 @end smallexample
 
 Resumes execution of the inferior program, stopping when the beginning
 of the next source line is reached, if the next source line is not a
 function call.  If it is, stop at the first instruction of the called
-function.
+function.  If the @samp{--reverse} option is specified, resumes reverse
+execution of the inferior program, stopping at the beginning of the
+previously executed source line.
 
 @subsubheading @value{GDBN} Command
 
@@ -23700,14 +23727,16 @@ Regular stepping:
 @subsubheading Synopsis
 
 @smallexample
- -exec-step-instruction
+ -exec-step-instruction [--reverse]
 @end smallexample
 
-Resumes the inferior which executes one machine instruction.  The
-output, once @value{GDBN} has stopped, will vary depending on whether
-we have stopped in the middle of a source line or not.  In the former
-case, the address at which the program stopped will be printed as
-well.
+Resumes the inferior which executes one machine instruction.  If the
+@samp{--reverse} option is specified, resumes reverse execution of the
+inferior program, stopping at the previously executed instruction.
+The output, once @value{GDBN} has stopped, will vary depending on
+whether we have stopped in the middle of a source line or not.  In the
+former case, the address at which the program stopped will be printed
+as well.
 
 @subsubheading @value{GDBN} Command
 
