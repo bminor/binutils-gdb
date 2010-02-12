@@ -103,6 +103,9 @@ enum reloc_func
     FUNC_LT_DTP_RELATIVE,
     FUNC_LT_TP_RELATIVE,
     FUNC_IPLT_RELOC,
+#ifdef TE_VMS
+    FUNC_SLOTCOUNT_RELOC,
+#endif
   };
 
 enum reg_symbol
@@ -162,6 +165,11 @@ struct label_fix
   struct symbol *sym;
   bfd_boolean dw2_mark_labels;
 };
+
+#ifdef TE_VMS
+/* An internally used relocation.  */
+#define DUMMY_RELOC_IA64_SLOTCOUNT	(BFD_RELOC_UNUSED + 1)
+#endif
 
 /* This is the endianness of the current section.  */
 extern int target_big_endian;
@@ -575,6 +583,9 @@ pseudo_func[] =
     { NULL, 0, { 0 } },	/* placeholder for FUNC_LT_DTP_RELATIVE */
     { NULL, 0, { 0 } },	/* placeholder for FUNC_LT_TP_RELATIVE */
     { "iplt",	PSEUDO_FUNC_RELOC, { 0 } },
+#ifdef TE_VMS
+    { "slotcount", PSEUDO_FUNC_RELOC, { 0 } },
+#endif
 
     /* mbtype4 constants:  */
     { "alt",	PSEUDO_FUNC_CONST, { 0xa } },
@@ -7158,6 +7169,12 @@ md_begin (void)
     symbol_new (".<iplt>", undefined_section, FUNC_IPLT_RELOC,
 		&zero_address_frag);
 
+#ifdef TE_VMS
+  pseudo_func[FUNC_SLOTCOUNT_RELOC].u.sym =
+    symbol_new (".<slotcount>", undefined_section, FUNC_SLOTCOUNT_RELOC,
+		&zero_address_frag);
+#endif
+
  if (md.tune != itanium1)
    {
      /* Convert MFI NOPs bundles into MMI NOPs bundles.  */
@@ -7744,6 +7761,15 @@ ia64_parse_name (char *name, expressionS *e, char *nextcharP)
 	    }
 	  /* Skip ')'.  */
 	  ++input_line_pointer;
+#ifdef TE_VMS
+          if (idx == FUNC_SLOTCOUNT_RELOC)
+            {
+              /* @slotcount can accept any expression.  Canonicalize.  */
+              e->X_add_symbol = make_expr_symbol (e);
+              e->X_op = O_symbol;
+              e->X_add_number = 0;
+            }
+#endif
 	  if (e->X_op != O_symbol)
 	    {
 	      if (e->X_op != O_pseudo_fixup)
@@ -11109,6 +11135,11 @@ ia64_gen_real_reloc_type (struct symbol *sym, bfd_reloc_code_real_type r_type)
 	}
       break;
 
+#ifdef TE_VMS
+    case FUNC_SLOTCOUNT_RELOC:
+      return DUMMY_RELOC_IA64_SLOTCOUNT;
+#endif
+
     default:
       abort ();
     }
@@ -11278,12 +11309,48 @@ md_apply_fix (fixS *fix, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  S_SET_THREAD_LOCAL (fix->fx_addsy);
 	  break;
 
+#ifdef TE_VMS
+        case DUMMY_RELOC_IA64_SLOTCOUNT:
+	  as_bad_where (fix->fx_file, fix->fx_line,
+			_("cannot resolve @slotcount parameter"));
+	  fix->fx_done = 1;
+	  return;
+#endif
+
 	default:
 	  break;
 	}
     }
   else if (fix->tc_fix_data.opnd == IA64_OPND_NIL)
     {
+#ifdef TE_VMS
+      if (fix->fx_r_type == DUMMY_RELOC_IA64_SLOTCOUNT)
+        {
+          /* For @slotcount, convert an addresses difference to a slots
+             difference.  */
+          valueT v;
+
+          v = (value >> 4) * 3;
+          switch (value & 0x0f)
+            {
+            case 0:
+            case 1:
+            case 2:
+              v += value & 0x0f;
+              break;
+            case 0x0f:
+              v += 2;
+              break;
+            case 0x0e:
+              v += 1;
+              break;
+            default:
+              as_bad (_("invalid @slotcount value"));
+            }
+          value = v;
+        }
+#endif
+
       if (fix->tc_fix_data.bigendian)
 	number_to_chars_bigendian (fixpos, value, fix->fx_size);
       else

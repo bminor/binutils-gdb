@@ -1,3 +1,15 @@
+2010-02-12  Tristan Gingold  <gingold@adacore.com>
+	    Douglas B Rupp  <rupp@gnat.com>
+
+	* config/tc-ia64.c (enum reloc_func): Add FUNC_SLOTCOUNT_RELOC.
+	(DUMMY_RELOC_IA64_SLOTCOUNT): Added.
+	(pseudo_func): Add an entry for slotcount.
+	(md_begin): Initialize slotcount pseudo symbol.
+	(ia64_parse_name): Handle @slotcount parameter.
+	(ia64_gen_real_reloc_type): Handle slotcount.
+	(md_apply_fix): Ditto.
+	* doc/c-ia64.texi (IA-64-Relocs): Document @slotcount.
+
 2010-02-11  Sterling Augustine  <sterling@jaw.hq.tensilica.com>
 
 	* config/tc-xtensa.c (istack_init): Don't call memset.

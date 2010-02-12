@@ -1,3 +1,8 @@
+2010-02-12  Tristan Gingold  <gingold@adacore.com>
+
+	* gas/ia64/slotcount.s, gas/ia64/slotcount.s: New test.
+	* gas/ia64/ia64.exp: Add slotcount test (vms only).
+
 2010-02-10  Quentin Neill  <quentin.neill@amd.com>
 	    Sebastian Pop  <sebastian.pop@amd.com>
 

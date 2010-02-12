@@ -120,7 +120,7 @@ Reference Guide.
 * IA-64-Chars::                Special Characters
 * IA-64-Regs::                 Register Names
 * IA-64-Bits::                 Bit Names
-@c * IA-64-Relocs::               Relocations		// to be written
+* IA-64-Relocs::               Relocations
 @end menu
 
 @node IA-64-Chars
@@ -169,6 +169,21 @@ a value of 0x2000.  These masks are primarily intended for use with
 the @samp{ssm}/@samp{sum} and @samp{rsm}/@samp{rum}
 instructions, but they can be used anywhere else where an integer
 constant is expected.
+
+@node IA-64-Relocs
+@subsection Relocations
+@cindex IA-64 relocations
+
+In addition to the standard IA-64 relocations, the following relocations are
+implemented by @code{@value{AS}}:
+
+@table @code
+@item @@slotcount(@var{V})
+Convert the address offset @var{V} into a slot count.  This pseudo
+function is available only on VMS.  The expression @var{V} must be
+known at assembly time: it can't reference undefined symbols or symbols in
+different sections.
+@end table
 
 @node IA-64 Opcodes
 @section Opcodes
