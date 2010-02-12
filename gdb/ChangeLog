@@ -1,3 +1,9 @@
+2010-02-12  Pedro Alves  <pedro@codesourcery.com>
+
+	* tracepoint.c (_initialize_tracepoint): Specify that the address
+	range of `tfind outsize' is exclusive, and that the address range
+	of `tfind range' is inclusive, in the commands' help strings.
+
 2010-02-12  Joel Brobecker  <brobecker@adacore.com>
 
 	Spurious "dll not found" error messages on x64-windows.

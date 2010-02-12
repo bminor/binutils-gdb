@@ -9900,11 +9900,11 @@ snapshot with the same value of PC as the current snapshot.
 
 @item tfind outside @var{addr1}, @var{addr2}
 Find the next snapshot whose PC is outside the given range of
-addresses.
+addresses (exclusive).
 
 @item tfind range @var{addr1}, @var{addr2}
 Find the next snapshot whose PC is between @var{addr1} and
-@var{addr2}.  @c FIXME: Is the range inclusive or exclusive?
+@var{addr2} (inclusive).
 
 @item tfind line @r{[}@var{file}:@r{]}@var{n}
 Find the next snapshot associated with the source line @var{n}.  If
@@ -30549,12 +30549,12 @@ is a hexadecimal number.
 @item QTFrame:range:@var{start}:@var{end}
 Like @samp{QTFrame:@var{n}}, but select the first tracepoint frame after the
 currently selected frame whose PC is between @var{start} (inclusive)
-and @var{end} (exclusive); @var{start} and @var{end} are hexadecimal
+and @var{end} (inclusive); @var{start} and @var{end} are hexadecimal
 numbers.
 
 @item QTFrame:outside:@var{start}:@var{end}
 Like @samp{QTFrame:range:@var{start}:@var{end}}, but select the first
-frame @emph{outside} the given range of addresses.
+frame @emph{outside} the given range of addresses (exclusive).
 
 @item QTStart
 Begin the tracepoint experiment.  Begin collecting data from tracepoint

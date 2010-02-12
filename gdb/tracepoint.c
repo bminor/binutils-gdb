@@ -3610,12 +3610,12 @@ No argument means forward by one frame; '-' means backward by one frame."),
 		  &tfindlist, "tfind ", 1, &cmdlist);
 
   add_cmd ("outside", class_trace, trace_find_outside_command, _("\
-Select a trace frame whose PC is outside the given range.\n\
+Select a trace frame whose PC is outside the given range (exclusive).\n\
 Usage: tfind outside addr1, addr2"),
 	   &tfindlist);
 
   add_cmd ("range", class_trace, trace_find_range_command, _("\
-Select a trace frame whose PC is in the given range.\n\
+Select a trace frame whose PC is in the given range (inclusive).\n\
 Usage: tfind range addr1,addr2"),
 	   &tfindlist);
 

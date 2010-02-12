@@ -1,3 +1,12 @@
+2010-02-12  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (Using the Collected Data): Specify that the address
+	range of `tfind outsize' is exclusive, and that the address range
+	of `tfind range' is inclusive.
+	(Tracepoint Packets): Specify that the address range of
+	`QTFrame:range' is inclusive, and that the address range of
+	`QTFrame:outside' is exclusive
+
 2010-02-12  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Result Records): Clarify ^running.
