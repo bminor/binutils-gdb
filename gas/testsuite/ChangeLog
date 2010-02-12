@@ -1,3 +1,18 @@
+2010-02-12  Daniel Gutson  <dgutson@codesourcery.com>
+
+	* gas/arm/sp-pc-validations-bad.d: New testcase.
+	* gas/arm/sp-pc-validations-bad.l: New file.
+	* gas/arm/sp-pc-validations-bad.s: New file.
+	* gas/arm/sp-pc-validations-bad-t.d: New testcase.
+	* gas/arm/sp-pc-validations-bad-t.l: New file.
+	* gas/arm/sp-pc-validations-bad-t.s: New file.
+	* gas/arm/sp-pc-usage-t.d: Removed invalid insns.
+	* gas/arm/sp-pc-usage-t.s: Likewise.
+	* gas/arm/unpredictable.d: Likewise.
+	* gas/arm/unpredictable.s: Likewise.
+	* gas/arm/thumb2_bcond.d: Added test.
+	* gas/arm/thumb2_bcond.s: Likewise.
+
 2010-02-12  Tristan Gingold  <gingold@adacore.com>
 
 	* gas/ia64/slotcount.s, gas/ia64/slotcount.s: New test.
