@@ -1,6 +1,6 @@
 // reloc.h -- relocate input files for gold   -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -62,12 +62,13 @@ class Output_data_reloc;
 class Read_relocs : public Task
 {
  public:
-  // SYMTAB_LOCK is used to lock the symbol table.  BLOCKER should be
-  // unblocked when the Scan_relocs task completes.
+  //   THIS_BLOCKER and NEXT_BLOCKER are passed along to a Scan_relocs
+  // or Gc_process_relocs task, so that they run in a deterministic
+  // order.
   Read_relocs(Symbol_table* symtab, Layout* layout, Relobj* object,
-	      Task_token* symtab_lock, Task_token* blocker)
+	      Task_token* this_blocker, Task_token* next_blocker)
     : symtab_(symtab), layout_(layout), object_(object),
-      symtab_lock_(symtab_lock), blocker_(blocker)
+      this_blocker_(this_blocker), next_blocker_(next_blocker)
   { }
 
   // The standard Task methods.
@@ -88,8 +89,8 @@ class Read_relocs : public Task
   Symbol_table* symtab_;
   Layout* layout_;
   Relobj* object_;
-  Task_token* symtab_lock_;
-  Task_token* blocker_;
+  Task_token* this_blocker_;
+  Task_token* next_blocker_;
 };
 
 // Process the relocs to figure out which sections are garbage.
@@ -98,14 +99,17 @@ class Read_relocs : public Task
 class Gc_process_relocs : public Task
 {
  public:
-  // SYMTAB_LOCK is used to lock the symbol table.  BLOCKER should be
-  // unblocked when the task completes.
+  // THIS_BLOCKER prevents this task from running until the previous
+  // one is finished.  NEXT_BLOCKER prevents the next task from
+  // running.
   Gc_process_relocs(Symbol_table* symtab, Layout* layout, Relobj* object,
-		    Read_relocs_data* rd, Task_token* symtab_lock,
-		    Task_token* blocker)
+		    Read_relocs_data* rd, Task_token* this_blocker,
+		    Task_token* next_blocker)
     : symtab_(symtab), layout_(layout), object_(object), rd_(rd),
-      symtab_lock_(symtab_lock), blocker_(blocker)
+      this_blocker_(this_blocker), next_blocker_(next_blocker)
   { }
+
+  ~Gc_process_relocs();
 
   // The standard Task methods.
 
@@ -126,8 +130,8 @@ class Gc_process_relocs : public Task
   Layout* layout_;
   Relobj* object_;
   Read_relocs_data* rd_;
-  Task_token* symtab_lock_;
-  Task_token* blocker_;
+  Task_token* this_blocker_;
+  Task_token* next_blocker_;
 };
 
 // Scan the relocations for an object to see if they require any
@@ -136,14 +140,17 @@ class Gc_process_relocs : public Task
 class Scan_relocs : public Task
 {
  public:
-  // SYMTAB_LOCK is used to lock the symbol table.  BLOCKER should be
-  // unblocked when the task completes.
+  // THIS_BLOCKER prevents this task from running until the previous
+  // one is finished.  NEXT_BLOCKER prevents the next task from
+  // running.
   Scan_relocs(Symbol_table* symtab, Layout* layout, Relobj* object,
-	      Read_relocs_data* rd, Task_token* symtab_lock,
-	      Task_token* blocker)
+	      Read_relocs_data* rd, Task_token* this_blocker,
+	      Task_token* next_blocker)
     : symtab_(symtab), layout_(layout), object_(object), rd_(rd),
-      symtab_lock_(symtab_lock), blocker_(blocker)
+      this_blocker_(this_blocker), next_blocker_(next_blocker)
   { }
+
+  ~Scan_relocs();
 
   // The standard Task methods.
 
@@ -164,8 +171,8 @@ class Scan_relocs : public Task
   Layout* layout_;
   Relobj* object_;
   Read_relocs_data* rd_;
-  Task_token* symtab_lock_;
-  Task_token* blocker_;
+  Task_token* this_blocker_;
+  Task_token* next_blocker_;
 };
 
 // A class to perform all the relocations for an object file.

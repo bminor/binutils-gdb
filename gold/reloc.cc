@@ -1,6 +1,6 @@
 // reloc.cc -- relocate input files for gold.
 
-// Copyright 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -75,15 +75,15 @@ Read_relocs::run(Workqueue* workqueue)
       workqueue->queue_next(new Gc_process_relocs(this->symtab_,
                                                   this->layout_, 
                                                   this->object_, rd,
-                                                  this->symtab_lock_, 
-                                                  this->blocker_));
+                                                  this->this_blocker_,
+						  this->next_blocker_));
     }
   else
     {
       workqueue->queue_next(new Scan_relocs(this->symtab_, this->layout_,
 					    this->object_, rd,
-                                            this->symtab_lock_, 
-                                            this->blocker_));
+                                            this->this_blocker_,
+					    this->next_blocker_));
     }
 }
 
@@ -97,13 +97,22 @@ Read_relocs::get_name() const
 
 // Gc_process_relocs methods.
 
-// These tasks process the relocations read by Read_relocs and 
+Gc_process_relocs::~Gc_process_relocs()
+{
+  if (this->this_blocker_ != NULL)
+    delete this->this_blocker_;
+}
+
+// These tasks process the relocations read by Read_relocs and
 // determine which sections are referenced and which are garbage.
-// This task is done only when --gc-sections is used.
+// This task is done only when --gc-sections is used.  This is blocked
+// by THIS_BLOCKER_.  It unblocks NEXT_BLOCKER_.
 
 Task_token*
 Gc_process_relocs::is_runnable()
 {
+  if (this->this_blocker_ != NULL && this->this_blocker_->is_blocked())
+    return this->this_blocker_;
   if (this->object_->is_locked())
     return this->object_->token();
   return NULL;
@@ -113,7 +122,7 @@ void
 Gc_process_relocs::locks(Task_locker* tl)
 {
   tl->add(this, this->object_->token());
-  tl->add(this, this->blocker_);
+  tl->add(this, this->next_blocker_);
 }
 
 void
@@ -133,6 +142,12 @@ Gc_process_relocs::get_name() const
 
 // Scan_relocs methods.
 
+Scan_relocs::~Scan_relocs()
+{
+  if (this->this_blocker_ != NULL)
+    delete this->this_blocker_;
+}
+
 // These tasks scan the relocations read by Read_relocs and mark up
 // the symbol table to indicate which relocations are required.  We
 // use a lock on the symbol table to keep them from interfering with
@@ -141,8 +156,8 @@ Gc_process_relocs::get_name() const
 Task_token*
 Scan_relocs::is_runnable()
 {
-  if (!this->symtab_lock_->is_writable())
-    return this->symtab_lock_;
+  if (this->this_blocker_ != NULL && this->this_blocker_->is_blocked())
+    return this->this_blocker_;
   if (this->object_->is_locked())
     return this->object_->token();
   return NULL;
@@ -155,8 +170,7 @@ void
 Scan_relocs::locks(Task_locker* tl)
 {
   tl->add(this, this->object_->token());
-  tl->add(this, this->symtab_lock_);
-  tl->add(this, this->blocker_);
+  tl->add(this, this->next_blocker_);
 }
 
 // Scan the relocs.

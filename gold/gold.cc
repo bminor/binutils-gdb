@@ -265,21 +265,23 @@ queue_middle_gc_tasks(const General_options& options,
 {
   // Read_relocs for all the objects must be done and processed to find
   // unused sections before any scanning of the relocs can take place.
-  Task_token* blocker = new Task_token(true);
-  blocker->add_blockers(input_objects->number_of_relobjs());
-  Task_token* symtab_lock = new Task_token(false);
+  Task_token* this_blocker = NULL;
   for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
        p != input_objects->relobj_end();
        ++p)
-    workqueue->queue(new Read_relocs(symtab, layout, *p, symtab_lock,
-				     blocker));
-
+    {
+      Task_token* next_blocker = new Task_token(true);
+      next_blocker->add_blocker();
+      workqueue->queue(new Read_relocs(symtab, layout, *p, this_blocker,
+				       next_blocker));
+      this_blocker = next_blocker;
+    }
   workqueue->queue(new Task_function(new Middle_runner(options,
                                                        input_objects,
                                                        symtab,
                                                        layout,
                                                        mapfile),
-                                     blocker,
+                                     this_blocker,
                                      "Task_function Middle_runner"));
 }
 
@@ -475,12 +477,18 @@ queue_middle_tasks(const General_options& options,
   // Make sure we have symbols for any required group signatures.
   layout->define_group_signatures(symtab);
 
-  Task_token* blocker = new Task_token(true);
-  blocker->add_blockers(input_objects->number_of_relobjs());
-  if (parameters->options().define_common())
-    blocker->add_blocker();
+  Task_token* this_blocker = NULL;
 
-  Task_token* symtab_lock = new Task_token(false);
+  // Allocate common symbols.  We use a blocker to run this before the
+  // Scan_relocs tasks, because it writes to the symbol table just as
+  // they do.
+  if (parameters->options().define_common())
+    {
+      this_blocker = new Task_token(true);
+      this_blocker->add_blocker();
+      workqueue->queue(new Allocate_commons_task(symtab, layout, mapfile,
+						 this_blocker));
+    }
 
   // If doing garbage collection, the relocations have already been read.
   // Otherwise, read and scan the relocations.
@@ -490,9 +498,14 @@ queue_middle_tasks(const General_options& options,
       for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
            p != input_objects->relobj_end();
            ++p)
-	workqueue->queue(new Scan_relocs(symtab, layout, *p, 
-					 (*p)->get_relocs_data(),
-					 symtab_lock, blocker));
+	{
+	  Task_token* next_blocker = new Task_token(true);
+	  next_blocker->add_blocker();
+	  workqueue->queue(new Scan_relocs(symtab, layout, *p, 
+					   (*p)->get_relocs_data(),
+					   this_blocker, next_blocker));
+	  this_blocker = next_blocker;
+	}
     }
   else
     {
@@ -511,21 +524,13 @@ queue_middle_tasks(const General_options& options,
            p != input_objects->relobj_end();
            ++p)
         {
-          // We can read and process the relocations in any order.  But we
-          // only want one task to write to the symbol table at a time.
-          // So we queue up a task for each object to read the
-          // relocations.  That task will in turn queue a task to wait
-          // until it can write to the symbol table.
-          workqueue->queue(new Read_relocs(symtab, layout, *p, symtab_lock,
-					   blocker));
+	  Task_token* next_blocker = new Task_token(true);
+	  next_blocker->add_blocker();
+          workqueue->queue(new Read_relocs(symtab, layout, *p, this_blocker,
+					   next_blocker));
+	  this_blocker = next_blocker;
         }
     }
-
-  // Allocate common symbols.  This requires write access to the
-  // symbol table, but is independent of the relocation processing.
-  if (parameters->options().define_common())
-    workqueue->queue(new Allocate_commons_task(symtab, layout, mapfile,
-					       symtab_lock, blocker));
 
   // When all those tasks are complete, we can start laying out the
   // output file.
@@ -537,7 +542,7 @@ queue_middle_tasks(const General_options& options,
                                                             target,
 							    layout,
 							    mapfile),
-				     blocker,
+				     this_blocker,
 				     "Task_function Layout_task_runner"));
 }
 

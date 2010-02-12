@@ -1,5 +1,33 @@
 2010-02-11  Ian Lance Taylor  <iant@google.com>
 
+	* gold.cc (queue_middle_gc_tasks): Use a separate blocker for each
+	Read_relocs task.
+	(queue_middle_tasks): Likewise, and also for Scan_relocs.  Run
+	Allocate_commons_task first.
+	* reloc.cc (Read_relocs::run): Pass next_blocker_ down to next
+	task, rather than symtab_lock_.
+	(Gc_process_relocs::~Gc_process_relocs): New function.
+	(Gc_process_relocs::is_runnable): Check this_blocker_.
+	(Gc_process_relocs::locks): Use next_blocker_ rather than
+	blocker_.
+	(Scan_relocs::~Scan_relocs): New function.
+	(Scan_relocs::is_runnable): Check this_blocker_ rather than
+	symtab_lock_.
+	(Scan_relocs::locks): Drop symtab_lock_ and blocker_.  Add
+	next_blocker_.
+	* reloc.h (class Read_relocs): Drop symtab_lock_ and blocker_
+	fields.  Add this_blocker_ and next_blocker_ fields.  Adjust
+	constructor accordingly.
+	(class Gc_process_relocs): Likewise.
+	(class Scan_relocs): Likewise.
+	* common.h (class Allocate_commons_task): Remove symtab_lock_
+	field, and corresponding constructor parameter.
+	* common.cc (Allocate_commons_tasK::is_runnable): Remove use of
+	symtab_lock_.
+	(Allocate_commons_task::locks): Likewise.
+
+2010-02-11  Ian Lance Taylor  <iant@google.com>
+
 	* gold-threads.h (class Once): Define.
 	(class Initialize_lock): Rewrite as child of Once.
 	* gold-threads.cc (class Once_initialize): Define.
