@@ -1,3 +1,9 @@
+2010-02-12  Tomas Holmberg <th@virtutech.com>
+
+	* mi-reverse.exp: New file. Test for reverse option to the
+	following MI commands: exec-continue, exec-finish, exec-next,
+	exec-step, exec-next-instruction, exec-step-instruction.
+	
 2010-02-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/ptype_tagged_param: New testcase.
