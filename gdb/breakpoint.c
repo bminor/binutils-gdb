@@ -4812,8 +4812,6 @@ allocate_bp_location (struct breakpoint *bpt)
   switch (bpt->type)
     {
     case bp_breakpoint:
-    case bp_tracepoint:
-    case bp_fast_tracepoint:
     case bp_until:
     case bp_finish:
     case bp_longjmp:
@@ -4838,6 +4836,8 @@ allocate_bp_location (struct breakpoint *bpt)
       break;
     case bp_watchpoint:
     case bp_catchpoint:
+    case bp_tracepoint:
+    case bp_fast_tracepoint:
       loc->loc_type = bp_loc_other;
       break;
     default:
@@ -8575,7 +8575,8 @@ update_global_location_list (int should_insert)
 	  || b->enable_state == bp_startup_disabled
 	  || !loc->enabled
 	  || loc->shlib_disabled
-	  || !breakpoint_address_is_meaningful (b))
+	  || !breakpoint_address_is_meaningful (b)
+	  || tracepoint_type (b))
 	continue;
 
       /* Permanent breakpoint should always be inserted.  */

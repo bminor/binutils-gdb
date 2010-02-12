@@ -1,5 +1,13 @@
 2010-02-12  Pedro Alves  <pedro@codesourcery.com>
 
+	* breakpoint.c (allocate_bp_location): Use bp_loc_other for
+	bp_tracepoint and bp_fast_tracepoint, not
+	bp_loc_software_breakpoint.
+	(update_global_location_list): Tracepoints are never duplicates of
+	anything.
+
+2010-02-12  Pedro Alves  <pedro@codesourcery.com>
+
 	* breakpoint.c (break_command_really): Change return type to int.
 	Return false if no breakpoint was created, true otherwise.
 	(trace_command): Don't set the tracepoint count if no tracepoint
