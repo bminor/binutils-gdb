@@ -64,6 +64,7 @@
 #include "windows-tdep.h"
 #include "windows-nat.h"
 #include "i386-nat.h"
+#include "complaints.h"
 
 #define AdjustTokenPrivileges		dyn_AdjustTokenPrivileges
 #define DebugActiveProcessStop		dyn_DebugActiveProcessStop
@@ -783,8 +784,15 @@ handle_unload_dll (void *dummy)
 	return 1;
       }
 
-  error (_("Error: dll starting at %s not found."),
-	   host_address_to_string (lpBaseOfDll));
+  /* We did not find any DLL that was previously loaded at this address,
+     so register a complaint.  We do not report an error, because we have
+     observed that this may be happening under some circumstances.  For
+     instance, running 32bit applications on x64 Windows causes us to receive
+     4 mysterious UNLOAD_DLL_DEBUG_EVENTs during the startup phase (these
+     events are apparently caused by the WOW layer, the interface between
+     32bit and 64bit worlds).  */
+  complaint (&symfile_complaints, _("dll starting at %s not found."),
+	     host_address_to_string (lpBaseOfDll));
 
   return 0;
 }

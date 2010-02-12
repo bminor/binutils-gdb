@@ -1,3 +1,9 @@
+2010-02-12  Joel Brobecker  <brobecker@adacore.com>
+
+	Spurious "dll not found" error messages on x64-windows.
+	* windows-nat.c: Add include of complaints.h.
+	(handle_unload_dll): Change dll-not-found error into a complaint.
+
 2010-02-12  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (allocate_bp_location): Use bp_loc_other for
