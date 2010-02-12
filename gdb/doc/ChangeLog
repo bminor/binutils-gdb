@@ -1,3 +1,7 @@
+2010-02-12  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Result Records): Clarify ^running.
+
 2010-02-10  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Debugging Output): Document set debug parser and

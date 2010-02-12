@@ -22059,9 +22059,12 @@ values.
 
 @item "^running"
 @findex ^running
-@c Is this one correct?  Should it be an out-of-band notification?
-The asynchronous operation was successfully started.  The target is
-running.
+This result record is equivalent to @samp{^done}.  Historically, it
+was output instead of @samp{^done} if the command has resumed the
+target.  This behaviour is maintained for backward compatibility, but
+all frontends should treat @samp{^done} and @samp{^running}
+identically and rely on the @samp{*running} output record to determine
+which threads are resumed.
 
 @item "^connected"
 @findex ^connected
