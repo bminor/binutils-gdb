@@ -1,3 +1,7 @@
+2010-02-12  Doug Evans  <dje@sebabeach.org>
+
+	* decode-media.c, * decode-media.h: Regenerate.
+
 2010-02-11  Doug Evans  <dje@sebabeach.org>
 
 	* decode-compact.c, * decode-media.c, * defs-compact.h, * defs-media.h,

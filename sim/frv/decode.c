@@ -64,7 +64,7 @@ static const struct insn_sem frvbf_insn_sem[] =
   { FRV_INSN_SLL, FRVBF_INSN_SLL, FRVBF_SFMT_ADD },
   { FRV_INSN_SRL, FRVBF_INSN_SRL, FRVBF_SFMT_ADD },
   { FRV_INSN_SRA, FRVBF_INSN_SRA, FRVBF_SFMT_ADD },
-  { FRV_INSN_SLASS, FRVBF_INSN_SLASS, FRVBF_SFMT_ADD },
+  { FRV_INSN_SLASS, FRVBF_INSN_SLASS, FRVBF_SFMT_SLASS },
   { FRV_INSN_SCUTSS, FRVBF_INSN_SCUTSS, FRVBF_SFMT_SCUTSS },
   { FRV_INSN_SCAN, FRVBF_INSN_SCAN, FRVBF_SFMT_ADD },
   { FRV_INSN_CADD, FRVBF_INSN_CADD, FRVBF_SFMT_CADD },
@@ -103,8 +103,8 @@ static const struct insn_sem frvbf_insn_sem[] =
   { FRV_INSN_SUBX, FRVBF_INSN_SUBX, FRVBF_SFMT_ADDX },
   { FRV_INSN_ADDXCC, FRVBF_INSN_ADDXCC, FRVBF_SFMT_ADDCC },
   { FRV_INSN_SUBXCC, FRVBF_INSN_SUBXCC, FRVBF_SFMT_ADDCC },
-  { FRV_INSN_ADDSS, FRVBF_INSN_ADDSS, FRVBF_SFMT_ADD },
-  { FRV_INSN_SUBSS, FRVBF_INSN_SUBSS, FRVBF_SFMT_ADD },
+  { FRV_INSN_ADDSS, FRVBF_INSN_ADDSS, FRVBF_SFMT_SLASS },
+  { FRV_INSN_SUBSS, FRVBF_INSN_SUBSS, FRVBF_SFMT_SLASS },
   { FRV_INSN_ADDI, FRVBF_INSN_ADDI, FRVBF_SFMT_ADDI },
   { FRV_INSN_SUBI, FRVBF_INSN_SUBI, FRVBF_SFMT_ADDI },
   { FRV_INSN_ANDI, FRVBF_INSN_ANDI, FRVBF_SFMT_ADDI },
@@ -322,8 +322,8 @@ static const struct insn_sem frvbf_insn_sem[] =
   { FRV_INSN_BP, FRVBF_INSN_BP, FRVBF_SFMT_BEQ },
   { FRV_INSN_BV, FRVBF_INSN_BV, FRVBF_SFMT_BEQ },
   { FRV_INSN_BNV, FRVBF_INSN_BNV, FRVBF_SFMT_BEQ },
-  { FRV_INSN_FBRA, FRVBF_INSN_FBRA, FRVBF_SFMT_BRA },
-  { FRV_INSN_FBNO, FRVBF_INSN_FBNO, FRVBF_SFMT_BNO },
+  { FRV_INSN_FBRA, FRVBF_INSN_FBRA, FRVBF_SFMT_FBRA },
+  { FRV_INSN_FBNO, FRVBF_INSN_FBNO, FRVBF_SFMT_FBNO },
   { FRV_INSN_FBNE, FRVBF_INSN_FBNE, FRVBF_SFMT_FBNE },
   { FRV_INSN_FBEQ, FRVBF_INSN_FBEQ, FRVBF_SFMT_FBNE },
   { FRV_INSN_FBLG, FRVBF_INSN_FBLG, FRVBF_SFMT_FBNE },
@@ -355,8 +355,8 @@ static const struct insn_sem frvbf_insn_sem[] =
   { FRV_INSN_BPLR, FRVBF_INSN_BPLR, FRVBF_SFMT_BEQLR },
   { FRV_INSN_BVLR, FRVBF_INSN_BVLR, FRVBF_SFMT_BEQLR },
   { FRV_INSN_BNVLR, FRVBF_INSN_BNVLR, FRVBF_SFMT_BEQLR },
-  { FRV_INSN_FBRALR, FRVBF_INSN_FBRALR, FRVBF_SFMT_BRALR },
-  { FRV_INSN_FBNOLR, FRVBF_INSN_FBNOLR, FRVBF_SFMT_BNOLR },
+  { FRV_INSN_FBRALR, FRVBF_INSN_FBRALR, FRVBF_SFMT_FBRALR },
+  { FRV_INSN_FBNOLR, FRVBF_INSN_FBNOLR, FRVBF_SFMT_FBNOLR },
   { FRV_INSN_FBEQLR, FRVBF_INSN_FBEQLR, FRVBF_SFMT_FBEQLR },
   { FRV_INSN_FBNELR, FRVBF_INSN_FBNELR, FRVBF_SFMT_FBEQLR },
   { FRV_INSN_FBLGLR, FRVBF_INSN_FBLGLR, FRVBF_SFMT_FBEQLR },
@@ -387,8 +387,8 @@ static const struct insn_sem frvbf_insn_sem[] =
   { FRV_INSN_BCPLR, FRVBF_INSN_BCPLR, FRVBF_SFMT_BCEQLR },
   { FRV_INSN_BCVLR, FRVBF_INSN_BCVLR, FRVBF_SFMT_BCEQLR },
   { FRV_INSN_BCNVLR, FRVBF_INSN_BCNVLR, FRVBF_SFMT_BCEQLR },
-  { FRV_INSN_FCBRALR, FRVBF_INSN_FCBRALR, FRVBF_SFMT_BCRALR },
-  { FRV_INSN_FCBNOLR, FRVBF_INSN_FCBNOLR, FRVBF_SFMT_BCNOLR },
+  { FRV_INSN_FCBRALR, FRVBF_INSN_FCBRALR, FRVBF_SFMT_FCBRALR },
+  { FRV_INSN_FCBNOLR, FRVBF_INSN_FCBNOLR, FRVBF_SFMT_FCBNOLR },
   { FRV_INSN_FCBEQLR, FRVBF_INSN_FCBEQLR, FRVBF_SFMT_FCBEQLR },
   { FRV_INSN_FCBNELR, FRVBF_INSN_FCBNELR, FRVBF_SFMT_FCBEQLR },
   { FRV_INSN_FCBLGLR, FRVBF_INSN_FCBLGLR, FRVBF_SFMT_FCBEQLR },
@@ -404,9 +404,9 @@ static const struct insn_sem frvbf_insn_sem[] =
   { FRV_INSN_FCBULR, FRVBF_INSN_FCBULR, FRVBF_SFMT_FCBEQLR },
   { FRV_INSN_FCBOLR, FRVBF_INSN_FCBOLR, FRVBF_SFMT_FCBEQLR },
   { FRV_INSN_JMPL, FRVBF_INSN_JMPL, FRVBF_SFMT_JMPL },
-  { FRV_INSN_CALLL, FRVBF_INSN_CALLL, FRVBF_SFMT_JMPL },
+  { FRV_INSN_CALLL, FRVBF_INSN_CALLL, FRVBF_SFMT_CALLL },
   { FRV_INSN_JMPIL, FRVBF_INSN_JMPIL, FRVBF_SFMT_JMPIL },
-  { FRV_INSN_CALLIL, FRVBF_INSN_CALLIL, FRVBF_SFMT_JMPIL },
+  { FRV_INSN_CALLIL, FRVBF_INSN_CALLIL, FRVBF_SFMT_CALLIL },
   { FRV_INSN_CALL, FRVBF_INSN_CALL, FRVBF_SFMT_CALL },
   { FRV_INSN_RETT, FRVBF_INSN_RETT, FRVBF_SFMT_RETT },
   { FRV_INSN_REI, FRVBF_INSN_REI, FRVBF_SFMT_REI },
@@ -426,7 +426,7 @@ static const struct insn_sem frvbf_insn_sem[] =
   { FRV_INSN_TP, FRVBF_INSN_TP, FRVBF_SFMT_TEQ },
   { FRV_INSN_TV, FRVBF_INSN_TV, FRVBF_SFMT_TEQ },
   { FRV_INSN_TNV, FRVBF_INSN_TNV, FRVBF_SFMT_TEQ },
-  { FRV_INSN_FTRA, FRVBF_INSN_FTRA, FRVBF_SFMT_TRA },
+  { FRV_INSN_FTRA, FRVBF_INSN_FTRA, FRVBF_SFMT_FTRA },
   { FRV_INSN_FTNO, FRVBF_INSN_FTNO, FRVBF_SFMT_REI },
   { FRV_INSN_FTNE, FRVBF_INSN_FTNE, FRVBF_SFMT_FTNE },
   { FRV_INSN_FTEQ, FRVBF_INSN_FTEQ, FRVBF_SFMT_FTNE },
@@ -458,7 +458,7 @@ static const struct insn_sem frvbf_insn_sem[] =
   { FRV_INSN_TIP, FRVBF_INSN_TIP, FRVBF_SFMT_TIEQ },
   { FRV_INSN_TIV, FRVBF_INSN_TIV, FRVBF_SFMT_TIEQ },
   { FRV_INSN_TINV, FRVBF_INSN_TINV, FRVBF_SFMT_TIEQ },
-  { FRV_INSN_FTIRA, FRVBF_INSN_FTIRA, FRVBF_SFMT_TIRA },
+  { FRV_INSN_FTIRA, FRVBF_INSN_FTIRA, FRVBF_SFMT_FTIRA },
   { FRV_INSN_FTINO, FRVBF_INSN_FTINO, FRVBF_SFMT_REI },
   { FRV_INSN_FTINE, FRVBF_INSN_FTINE, FRVBF_SFMT_FTINE },
   { FRV_INSN_FTIEQ, FRVBF_INSN_FTIEQ, FRVBF_SFMT_FTINE },
@@ -551,7 +551,7 @@ static const struct insn_sem frvbf_insn_sem[] =
   { FRV_INSN_CFCKU, FRVBF_INSN_CFCKU, FRVBF_SFMT_CFCKNE },
   { FRV_INSN_CFCKO, FRVBF_INSN_CFCKO, FRVBF_SFMT_CFCKNE },
   { FRV_INSN_CJMPL, FRVBF_INSN_CJMPL, FRVBF_SFMT_CJMPL },
-  { FRV_INSN_CCALLL, FRVBF_INSN_CCALLL, FRVBF_SFMT_CJMPL },
+  { FRV_INSN_CCALLL, FRVBF_INSN_CCALLL, FRVBF_SFMT_CCALLL },
   { FRV_INSN_ICI, FRVBF_INSN_ICI, FRVBF_SFMT_ICI },
   { FRV_INSN_DCI, FRVBF_INSN_DCI, FRVBF_SFMT_ICI },
   { FRV_INSN_ICEI, FRVBF_INSN_ICEI, FRVBF_SFMT_ICEI },
@@ -1299,7 +1299,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
             itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           case 61 :
             if ((entire_insn & 0x7ffc0fc0) == 0x78100040)
-              { itype = FRVBF_INSN_FTRA; goto extract_sfmt_tra; }
+              { itype = FRVBF_INSN_FTRA; goto extract_sfmt_ftra; }
             itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
@@ -1345,7 +1345,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           {
           case 0 :
             if ((entire_insn & 0x7ffcffff) == 0x1c0000)
-              { itype = FRVBF_INSN_FBNO; goto extract_sfmt_bno; }
+              { itype = FRVBF_INSN_FBNO; goto extract_sfmt_fbno; }
             itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           case 1 : itype = FRVBF_INSN_FBU; goto extract_sfmt_fbne;
           case 2 : itype = FRVBF_INSN_FBGT; goto extract_sfmt_fbne;
@@ -1363,7 +1363,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           case 14 : itype = FRVBF_INSN_FBO; goto extract_sfmt_fbne;
           case 15 :
             if ((entire_insn & 0x7ffc0000) == 0x781c0000)
-              { itype = FRVBF_INSN_FBRA; goto extract_sfmt_bra; }
+              { itype = FRVBF_INSN_FBRA; goto extract_sfmt_fbra; }
             itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
@@ -1607,7 +1607,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
             itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           case 1 :
             if ((entire_insn & 0x7ffc0fc0) == 0x2300000)
-              { itype = FRVBF_INSN_CALLL; goto extract_sfmt_jmpl; }
+              { itype = FRVBF_INSN_CALLL; goto extract_sfmt_calll; }
             itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
@@ -1623,7 +1623,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
             itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           case 1 :
             if ((entire_insn & 0x7ffc0000) == 0x2340000)
-              { itype = FRVBF_INSN_CALLIL; goto extract_sfmt_jmpil; }
+              { itype = FRVBF_INSN_CALLIL; goto extract_sfmt_callil; }
             itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
@@ -1655,11 +1655,11 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
             }
           case 2 :
             if ((entire_insn & 0x7ffcffff) == 0x38c000)
-              { itype = FRVBF_INSN_FBNOLR; goto extract_sfmt_bnolr; }
+              { itype = FRVBF_INSN_FBNOLR; goto extract_sfmt_fbnolr; }
             itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           case 3 :
             if ((entire_insn & 0x7ffcffff) == 0x38e000)
-              { itype = FRVBF_INSN_FCBNOLR; goto extract_sfmt_bcnolr; }
+              { itype = FRVBF_INSN_FCBNOLR; goto extract_sfmt_fcbnolr; }
             itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           case 4 :
             if ((entire_insn & 0x79fcffff) == 0x8384000)
@@ -1895,11 +1895,11 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
             itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           case 62 :
             if ((entire_insn & 0x7ffcffff) == 0x7838c000)
-              { itype = FRVBF_INSN_FBRALR; goto extract_sfmt_bralr; }
+              { itype = FRVBF_INSN_FBRALR; goto extract_sfmt_fbralr; }
             itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           case 63 :
             if ((entire_insn & 0x7ffcefff) == 0x7838e000)
-              { itype = FRVBF_INSN_FCBRALR; goto extract_sfmt_bcralr; }
+              { itype = FRVBF_INSN_FCBRALR; goto extract_sfmt_fcbralr; }
             itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
@@ -1972,7 +1972,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           case 14 : itype = FRVBF_INSN_FTIO; goto extract_sfmt_ftine;
           case 15 :
             if ((entire_insn & 0x7ffc0000) == 0x78740000)
-              { itype = FRVBF_INSN_FTIRA; goto extract_sfmt_tira; }
+              { itype = FRVBF_INSN_FTIRA; goto extract_sfmt_ftira; }
             itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           }
@@ -2034,15 +2034,15 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           {
           case 0 :
             if ((entire_insn & 0x1fc0fc0) == 0x1180000)
-              { itype = FRVBF_INSN_ADDSS; goto extract_sfmt_add; }
+              { itype = FRVBF_INSN_ADDSS; goto extract_sfmt_slass; }
             itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           case 1 :
             if ((entire_insn & 0x1fc0fc0) == 0x1180040)
-              { itype = FRVBF_INSN_SUBSS; goto extract_sfmt_add; }
+              { itype = FRVBF_INSN_SUBSS; goto extract_sfmt_slass; }
             itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           case 2 :
             if ((entire_insn & 0x1fc0fc0) == 0x1180080)
-              { itype = FRVBF_INSN_SLASS; goto extract_sfmt_add; }
+              { itype = FRVBF_INSN_SLASS; goto extract_sfmt_slass; }
             itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
           case 4 :
             if ((entire_insn & 0x1ffffc0) == 0x1180100)
@@ -2326,7 +2326,7 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
                 itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               case 3 :
                 if ((entire_insn & 0x7ffc00c0) == 0x3a80080)
-                  { itype = FRVBF_INSN_CCALLL; goto extract_sfmt_cjmpl; }
+                  { itype = FRVBF_INSN_CCALLL; goto extract_sfmt_ccalll; }
                 itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
               }
@@ -3438,6 +3438,38 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
       FLD (in_GRj) = f_GRj;
       FLD (in_h_iacc0_DI_0) = 0;
       FLD (out_h_iacc0_DI_0) = 0;
+    }
+#endif
+#undef FLD
+    return idesc;
+  }
+
+ extract_sfmt_slass:
+  {
+    const IDESC *idesc = &frvbf_insn_data[itype];
+    CGEN_INSN_WORD insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_addcc.f
+    UINT f_GRk;
+    UINT f_GRi;
+    UINT f_GRj;
+
+    f_GRk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
+    f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
+    f_GRj = EXTRACT_LSB0_UINT (insn, 32, 5, 6);
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_GRi) = f_GRi;
+  FLD (f_GRj) = f_GRj;
+  FLD (f_GRk) = f_GRk;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_slass", "f_GRi 0x%x", 'x', f_GRi, "f_GRj 0x%x", 'x', f_GRj, "f_GRk 0x%x", 'x', f_GRk, (char *) 0));
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      FLD (in_GRi) = f_GRi;
+      FLD (in_GRj) = f_GRj;
+      FLD (out_GRk) = f_GRk;
     }
 #endif
 #undef FLD
@@ -7338,6 +7370,52 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     return idesc;
   }
 
+ extract_sfmt_fbra:
+  {
+    const IDESC *idesc = &frvbf_insn_data[itype];
+    CGEN_INSN_WORD insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_fbne.f
+    UINT f_hint;
+    SI f_label16;
+
+    f_hint = EXTRACT_LSB0_UINT (insn, 32, 17, 2);
+    f_label16 = ((((EXTRACT_LSB0_SINT (insn, 32, 15, 16)) << (2))) + (pc));
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_hint) = f_hint;
+  FLD (i_label16) = f_label16;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_fbra", "f_hint 0x%x", 'x', f_hint, "label16 0x%x", 'x', f_label16, (char *) 0));
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+    }
+#endif
+#undef FLD
+    return idesc;
+  }
+
+ extract_sfmt_fbno:
+  {
+    const IDESC *idesc = &frvbf_insn_data[itype];
+    CGEN_INSN_WORD insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_fbne.f
+    UINT f_hint;
+    SI f_label16;
+
+    f_hint = EXTRACT_LSB0_UINT (insn, 32, 17, 2);
+    f_label16 = ((((EXTRACT_LSB0_SINT (insn, 32, 15, 16)) << (2))) + (pc));
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_hint) = f_hint;
+  FLD (i_label16) = f_label16;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_fbno", "f_hint 0x%x", 'x', f_hint, "label16 0x%x", 'x', f_label16, (char *) 0));
+
+#undef FLD
+    return idesc;
+  }
+
  extract_sfmt_fbne:
   {
     const IDESC *idesc = &frvbf_insn_data[itype];
@@ -7473,6 +7551,54 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     return idesc;
   }
 
+ extract_sfmt_fbralr:
+  {
+    const IDESC *idesc = &frvbf_insn_data[itype];
+    CGEN_INSN_WORD insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+    UINT f_hint;
+
+    f_hint = EXTRACT_LSB0_UINT (insn, 32, 17, 2);
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_hint) = f_hint;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_fbralr", "f_hint 0x%x", 'x', f_hint, (char *) 0));
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      FLD (in_h_spr_USI_272) = 272;
+    }
+#endif
+#undef FLD
+    return idesc;
+  }
+
+ extract_sfmt_fbnolr:
+  {
+    const IDESC *idesc = &frvbf_insn_data[itype];
+    CGEN_INSN_WORD insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+    UINT f_hint;
+
+    f_hint = EXTRACT_LSB0_UINT (insn, 32, 17, 2);
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_hint) = f_hint;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_fbnolr", "f_hint 0x%x", 'x', f_hint, (char *) 0));
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      FLD (in_h_spr_USI_272) = 272;
+    }
+#endif
+#undef FLD
+    return idesc;
+  }
+
  extract_sfmt_fbeqlr:
   {
     const IDESC *idesc = &frvbf_insn_data[itype];
@@ -7589,6 +7715,61 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     return idesc;
   }
 
+ extract_sfmt_fcbralr:
+  {
+    const IDESC *idesc = &frvbf_insn_data[itype];
+    CGEN_INSN_WORD insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+    UINT f_hint;
+    UINT f_ccond;
+
+    f_hint = EXTRACT_LSB0_UINT (insn, 32, 17, 2);
+    f_ccond = EXTRACT_LSB0_UINT (insn, 32, 12, 1);
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_ccond) = f_ccond;
+  FLD (f_hint) = f_hint;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_fcbralr", "f_ccond 0x%x", 'x', f_ccond, "f_hint 0x%x", 'x', f_hint, (char *) 0));
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      FLD (in_h_spr_USI_272) = 272;
+      FLD (in_h_spr_USI_273) = 273;
+      FLD (out_h_spr_USI_273) = 273;
+    }
+#endif
+#undef FLD
+    return idesc;
+  }
+
+ extract_sfmt_fcbnolr:
+  {
+    const IDESC *idesc = &frvbf_insn_data[itype];
+    CGEN_INSN_WORD insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_fcbeqlr.f
+    UINT f_hint;
+
+    f_hint = EXTRACT_LSB0_UINT (insn, 32, 17, 2);
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_hint) = f_hint;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_fcbnolr", "f_hint 0x%x", 'x', f_hint, (char *) 0));
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      FLD (in_h_spr_USI_272) = 272;
+      FLD (in_h_spr_USI_273) = 273;
+      FLD (out_h_spr_USI_273) = 273;
+    }
+#endif
+#undef FLD
+    return idesc;
+  }
+
  extract_sfmt_fcbeqlr:
   {
     const IDESC *idesc = &frvbf_insn_data[itype];
@@ -7653,6 +7834,37 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     return idesc;
   }
 
+ extract_sfmt_calll:
+  {
+    const IDESC *idesc = &frvbf_insn_data[itype];
+    CGEN_INSN_WORD insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_cjmpl.f
+    UINT f_LI;
+    UINT f_GRi;
+    UINT f_GRj;
+
+    f_LI = EXTRACT_LSB0_UINT (insn, 32, 25, 1);
+    f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
+    f_GRj = EXTRACT_LSB0_UINT (insn, 32, 5, 6);
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_GRi) = f_GRi;
+  FLD (f_GRj) = f_GRj;
+  FLD (f_LI) = f_LI;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_calll", "f_GRi 0x%x", 'x', f_GRi, "f_GRj 0x%x", 'x', f_GRj, "f_LI 0x%x", 'x', f_LI, (char *) 0));
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      FLD (in_GRi) = f_GRi;
+      FLD (in_GRj) = f_GRj;
+    }
+#endif
+#undef FLD
+    return idesc;
+  }
+
  extract_sfmt_jmpil:
   {
     const IDESC *idesc = &frvbf_insn_data[itype];
@@ -7671,6 +7883,36 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
   FLD (f_LI) = f_LI;
   FLD (f_d12) = f_d12;
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_jmpil", "f_GRi 0x%x", 'x', f_GRi, "f_LI 0x%x", 'x', f_LI, "f_d12 0x%x", 'x', f_d12, (char *) 0));
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      FLD (in_GRi) = f_GRi;
+    }
+#endif
+#undef FLD
+    return idesc;
+  }
+
+ extract_sfmt_callil:
+  {
+    const IDESC *idesc = &frvbf_insn_data[itype];
+    CGEN_INSN_WORD insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_jmpil.f
+    UINT f_LI;
+    UINT f_GRi;
+    INT f_d12;
+
+    f_LI = EXTRACT_LSB0_UINT (insn, 32, 25, 1);
+    f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_GRi) = f_GRi;
+  FLD (f_LI) = f_LI;
+  FLD (f_d12) = f_d12;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_callil", "f_GRi 0x%x", 'x', f_GRi, "f_LI 0x%x", 'x', f_LI, "f_d12 0x%x", 'x', f_d12, (char *) 0));
 
 #if WITH_PROFILE_MODEL_P
   /* Record the fields for profiling.  */
@@ -7818,6 +8060,39 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     return idesc;
   }
 
+ extract_sfmt_ftra:
+  {
+    const IDESC *idesc = &frvbf_insn_data[itype];
+    CGEN_INSN_WORD insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_ftne.f
+    UINT f_GRi;
+    UINT f_GRj;
+
+    f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
+    f_GRj = EXTRACT_LSB0_UINT (insn, 32, 5, 6);
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_GRi) = f_GRi;
+  FLD (f_GRj) = f_GRj;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_ftra", "f_GRi 0x%x", 'x', f_GRi, "f_GRj 0x%x", 'x', f_GRj, (char *) 0));
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      FLD (in_GRi) = f_GRi;
+      FLD (in_GRj) = f_GRj;
+      FLD (out_h_spr_USI_1) = 1;
+      FLD (out_h_spr_USI_768) = 768;
+      FLD (out_h_spr_USI_769) = 769;
+      FLD (out_h_spr_USI_770) = 770;
+      FLD (out_h_spr_USI_771) = 771;
+    }
+#endif
+#undef FLD
+    return idesc;
+  }
+
  extract_sfmt_ftne:
   {
     const IDESC *idesc = &frvbf_insn_data[itype];
@@ -7912,6 +8187,38 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     {
       FLD (in_GRi) = f_GRi;
       FLD (in_ICCi_2) = f_ICCi_2;
+      FLD (out_h_spr_USI_1) = 1;
+      FLD (out_h_spr_USI_768) = 768;
+      FLD (out_h_spr_USI_769) = 769;
+      FLD (out_h_spr_USI_770) = 770;
+      FLD (out_h_spr_USI_771) = 771;
+    }
+#endif
+#undef FLD
+    return idesc;
+  }
+
+ extract_sfmt_ftira:
+  {
+    const IDESC *idesc = &frvbf_insn_data[itype];
+    CGEN_INSN_WORD insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_ftine.f
+    UINT f_GRi;
+    INT f_d12;
+
+    f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
+    f_d12 = EXTRACT_LSB0_SINT (insn, 32, 11, 12);
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_GRi) = f_GRi;
+  FLD (f_d12) = f_d12;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_ftira", "f_GRi 0x%x", 'x', f_GRi, "f_d12 0x%x", 'x', f_d12, (char *) 0));
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      FLD (in_GRi) = f_GRi;
       FLD (out_h_spr_USI_1) = 1;
       FLD (out_h_spr_USI_768) = 768;
       FLD (out_h_spr_USI_769) = 769;
@@ -8299,6 +8606,44 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
   FLD (f_LI) = f_LI;
   FLD (f_cond) = f_cond;
   TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_cjmpl", "f_CCi 0x%x", 'x', f_CCi, "f_GRi 0x%x", 'x', f_GRi, "f_GRj 0x%x", 'x', f_GRj, "f_LI 0x%x", 'x', f_LI, "f_cond 0x%x", 'x', f_cond, (char *) 0));
+
+#if WITH_PROFILE_MODEL_P
+  /* Record the fields for profiling.  */
+  if (PROFILE_MODEL_P (current_cpu))
+    {
+      FLD (in_CCi) = f_CCi;
+      FLD (in_GRi) = f_GRi;
+      FLD (in_GRj) = f_GRj;
+    }
+#endif
+#undef FLD
+    return idesc;
+  }
+
+ extract_sfmt_ccalll:
+  {
+    const IDESC *idesc = &frvbf_insn_data[itype];
+    CGEN_INSN_WORD insn = entire_insn;
+#define FLD(f) abuf->fields.sfmt_cjmpl.f
+    UINT f_LI;
+    UINT f_GRi;
+    UINT f_CCi;
+    UINT f_cond;
+    UINT f_GRj;
+
+    f_LI = EXTRACT_LSB0_UINT (insn, 32, 25, 1);
+    f_GRi = EXTRACT_LSB0_UINT (insn, 32, 17, 6);
+    f_CCi = EXTRACT_LSB0_UINT (insn, 32, 11, 3);
+    f_cond = EXTRACT_LSB0_UINT (insn, 32, 8, 1);
+    f_GRj = EXTRACT_LSB0_UINT (insn, 32, 5, 6);
+
+  /* Record the fields for the semantic handler.  */
+  FLD (f_CCi) = f_CCi;
+  FLD (f_GRi) = f_GRi;
+  FLD (f_GRj) = f_GRj;
+  FLD (f_LI) = f_LI;
+  FLD (f_cond) = f_cond;
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_ccalll", "f_CCi 0x%x", 'x', f_CCi, "f_GRi 0x%x", 'x', f_GRi, "f_GRj 0x%x", 'x', f_GRj, "f_LI 0x%x", 'x', f_LI, "f_cond 0x%x", 'x', f_cond, (char *) 0));
 
 #if WITH_PROFILE_MODEL_P
   /* Record the fields for profiling.  */
