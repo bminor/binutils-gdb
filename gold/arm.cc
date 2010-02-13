@@ -2171,6 +2171,25 @@ class Target_arm : public Sized_target<32, big_endian>
 	   const elfcpp::Rel<32, big_endian>& reloc, unsigned int r_type,
 	   Symbol* gsym);
 
+    inline bool
+    local_reloc_may_be_function_pointer(Symbol_table* , Layout* , Target_arm* ,
+  	          			Sized_relobj<32, big_endian>* ,
+        	  			unsigned int ,
+  	          			Output_section* ,
+	          			const elfcpp::Rel<32, big_endian>& ,
+					unsigned int ,
+ 	          			const elfcpp::Sym<32, big_endian>&)
+    { return false; }
+
+    inline bool
+    global_reloc_may_be_function_pointer(Symbol_table* , Layout* , Target_arm* ,
+  	           			 Sized_relobj<32, big_endian>* ,
+	           			 unsigned int ,
+	           			 Output_section* ,
+	           			 const elfcpp::Rel<32, big_endian>& ,
+					 unsigned int , Symbol*)
+    { return false; }
+
    private:
     static void
     unsupported_reloc_local(Sized_relobj<32, big_endian>*,

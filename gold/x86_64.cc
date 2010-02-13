@@ -39,6 +39,7 @@
 #include "tls.h"
 #include "freebsd.h"
 #include "gc.h"
+#include "icf.h"
 
 namespace
 {
@@ -68,6 +69,16 @@ class Target_x86_64 : public Target_freebsd<64, false>
       got_mod_index_offset_(-1U), tlsdesc_reloc_info_(),
       tls_base_symbol_defined_(false)
   { }
+
+  // This function should be defined in targets that can use relocation
+  // types to determine (implemented in local_reloc_may_be_function_pointer
+  // and global_reloc_may_be_function_pointer)
+  // if a function's pointer is taken.  ICF uses this in safe mode to only
+  // fold those functions whose pointer is defintely not taken.  For x86_64
+  // pie binaries, safe ICF cannot be done by looking at relocation types.
+  inline bool
+  can_check_for_function_pointers() const
+  { return !parameters->options().pie(); }
 
   // Hook for a new output section.
   void
@@ -224,6 +235,26 @@ class Target_x86_64 : public Target_freebsd<64, false>
 	   const elfcpp::Rela<64, false>& reloc, unsigned int r_type,
 	   Symbol* gsym);
 
+    inline bool
+    local_reloc_may_be_function_pointer(Symbol_table* symtab, Layout* layout,
+					Target_x86_64* target,
+			        	Sized_relobj<64, false>* object,
+		  			unsigned int data_shndx,
+		  			Output_section* output_section,
+		  			const elfcpp::Rela<64, false>& reloc,
+					unsigned int r_type,
+				  	const elfcpp::Sym<64, false>& lsym);
+
+    inline bool
+    global_reloc_may_be_function_pointer(Symbol_table* symtab, Layout* layout,
+ 					 Target_x86_64* target,
+         	   			 Sized_relobj<64, false>* object,
+        	   			 unsigned int data_shndx,
+		   			 Output_section* output_section,
+		   			 const elfcpp::Rela<64, false>& reloc,
+					 unsigned int r_type,
+		  			 Symbol* gsym);
+
   private:
     static void
     unsupported_reloc_local(Sized_relobj<64, false>*, unsigned int r_type);
@@ -234,6 +265,9 @@ class Target_x86_64 : public Target_freebsd<64, false>
 
     void
     check_non_pic(Relobj*, unsigned int r_type);
+
+    inline bool
+    possible_function_pointer_reloc(unsigned int r_type);
 
     // Whether we have issued an error about a non-PIC compilation.
     bool issued_non_pic_error_;
@@ -1362,6 +1396,76 @@ Target_x86_64::Scan::unsupported_reloc_global(Sized_relobj<64, false>* object,
 {
   gold_error(_("%s: unsupported reloc %u against global symbol %s"),
 	     object->name().c_str(), r_type, gsym->demangled_name().c_str());
+}
+
+// Returns true if this relocation type could be that of a function pointer
+// only if the target is not position-independent code.
+inline bool
+Target_x86_64::Scan::possible_function_pointer_reloc(unsigned int r_type)
+{
+  if (parameters->options().shared())
+    return false;
+
+  switch (r_type)
+    {
+    case elfcpp::R_X86_64_64:
+    case elfcpp::R_X86_64_32:
+    case elfcpp::R_X86_64_32S:
+    case elfcpp::R_X86_64_16:
+    case elfcpp::R_X86_64_8:
+      {
+        return true;
+      }
+    }
+  return false;
+}
+
+// For safe ICF, scan a relocation for a local symbol to check if it
+// corresponds to a function pointer being taken.  In that case mark
+// the function whose pointer was taken as not foldable.
+
+inline bool
+Target_x86_64::Scan::local_reloc_may_be_function_pointer(
+  Symbol_table* ,
+  Layout* ,
+  Target_x86_64* ,
+  Sized_relobj<64, false>* ,
+  unsigned int ,
+  Output_section* ,
+  const elfcpp::Rela<64, false>& ,
+  unsigned int r_type,
+  const elfcpp::Sym<64, false>&)
+{
+  // When building a shared library, do not fold any local symbols as it is
+  // not possible to distinguish pointer taken versus a call by looking at
+  // the relocation types.
+  return (parameters->options().shared()
+          || possible_function_pointer_reloc(r_type));
+}
+
+// For safe ICF, scan a relocation for a global symbol to check if it
+// corresponds to a function pointer being taken.  In that case mark
+// the function whose pointer was taken as not foldable.
+
+inline bool
+Target_x86_64::Scan::global_reloc_may_be_function_pointer(
+  Symbol_table*,
+  Layout* ,
+  Target_x86_64* ,
+  Sized_relobj<64, false>* ,
+  unsigned int ,
+  Output_section* ,
+  const elfcpp::Rela<64, false>& ,
+  unsigned int r_type,
+  Symbol* gsym)
+{
+  // When building a shared library, do not fold symbols whose visibility
+  // is hidden, internal or protected.
+  return ((parameters->options().shared()
+           && (gsym->visibility() == elfcpp::STV_INTERNAL
+	       || gsym->visibility() == elfcpp::STV_PROTECTED
+	       || gsym->visibility() == elfcpp::STV_HIDDEN))
+          || possible_function_pointer_reloc(r_type));
 }
 
 // Scan a relocation for a global symbol.

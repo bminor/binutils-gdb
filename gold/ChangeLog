@@ -1,3 +1,38 @@
+2010-02-12  Sriraman Tallam  <tmsriram@google.com>
+
+	* arm.cc (Scan::local_reloc_may_be_function_pointer): New function.
+	(Scan::global_reloc_may_be_function_pointer): New function.
+	* sparc.cc (Scan::local_reloc_may_be_function_pointer): New function.
+	(Scan::global_reloc_may_be_function_pointer): New function.
+	* powerpc.cc (Scan::local_reloc_may_be_function_pointer): New function.
+	(Scan::global_reloc_may_be_function_pointer): New function.
+	* i386.cc (Scan::local_reloc_may_be_function_pointer): New function.
+	(Scan::global_reloc_may_be_function_pointer): New function.
+	* x86_64.cc (Scan::local_reloc_may_be_function_pointer): New function.
+	(Scan::global_reloc_may_be_function_pointer): New function.
+	(Scan::possible_function_pointer_reloc): New function.
+	(Target_x86_64::can_check_for_function_pointers): New function.
+	* gc.h (gc_process_relocs): Scan relocation types to determine if
+	function pointers were taken for targets that support it.
+	* icf.cc (Icf::find_identical_sections): Include functions for
+	folding in safe ICF whose pointer is not taken.
+	* icf.h (Secn_fptr_taken_set): New typedef.
+	(fptr_section_id_): New member.
+	(section_has_function_pointers): New function.
+	(set_section_has_function_pointers): New function.
+	(check_section_for_function_pointers): New function.
+	* options.h: Fix comment for safe ICF option.
+	* target.h (can_check_for_function_pointers): New function.
+	* testsuite/Makefile.am: Add icf_safe_so_test test case.
+	Modify icf_safe_test for X86-64.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/icf_safe_so_test.cc: New file.
+	* testsuite/icf_safe_so_test.sh: New file.
+	* testsuite/icf_safe_test.cc (kept_func_3): New function.
+	(main): Change to take pointer to function kept_func_3.
+	* testsuite/icf_safe_test.sh (arch_specific_safe_fold): Check if safe
+	folding is done correctly for X86-64.
+
 2010-02-12  David S. Miller  <davem@davemloft.net>
 
 	* output.h (Output_reloc<SHT_REL>::Output_reloc): Add

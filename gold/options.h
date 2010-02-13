@@ -914,7 +914,8 @@ class General_options
 
   DEFINE_enum(icf, options::TWO_DASHES, '\0', "none",
               N_("Identical Code Folding. "
-                 "\'--icf=safe\' folds only ctors and dtors."),
+                 "\'--icf=safe\' Folds ctors, dtors and functions whose"
+                 " pointers are definitely not taken."),
 	      ("[none,all,safe]"),	
               {"none", "all", "safe"});
 

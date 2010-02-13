@@ -202,6 +202,26 @@ class Target_i386 : public Target_freebsd<32, false>
 	   const elfcpp::Rel<32, false>& reloc, unsigned int r_type,
 	   Symbol* gsym);
 
+    inline bool
+    local_reloc_may_be_function_pointer(Symbol_table* , Layout* , Target_i386* ,
+		  			Sized_relobj<32, false>* ,
+		  			unsigned int ,
+		  			Output_section* ,
+		  			const elfcpp::Rel<32, false>& ,
+	 				unsigned int ,
+		  			const elfcpp::Sym<32, false>&)
+    { return false; }
+
+    inline bool
+    global_reloc_may_be_function_pointer(Symbol_table* , Layout* ,
+					 Target_i386* ,
+		   			 Sized_relobj<32, false>* ,
+		   			 unsigned int ,
+		   			 Output_section* ,
+		   			 const elfcpp::Rel<32, false>& ,
+					 unsigned int , Symbol*)
+    { return false; }
+
     static void
     unsupported_reloc_local(Sized_relobj<32, false>*, unsigned int r_type);
 

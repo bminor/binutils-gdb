@@ -183,6 +183,28 @@ class Target_powerpc : public Sized_target<size, big_endian>
 	   const elfcpp::Rela<size, big_endian>& reloc, unsigned int r_type,
 	   Symbol* gsym);
 
+    inline bool
+    local_reloc_may_be_function_pointer(Symbol_table* , Layout* ,
+					Target_powerpc* ,
+	          			Sized_relobj<size, big_endian>* ,
+			                unsigned int ,
+	          			Output_section* ,
+	          			const elfcpp::Rela<size, big_endian>& ,
+					unsigned int ,
+	          			const elfcpp::Sym<size, big_endian>&)
+    { return false; }
+
+    inline bool
+    global_reloc_may_be_function_pointer(Symbol_table* , Layout* ,
+					 Target_powerpc* ,
+		   			 Sized_relobj<size, big_endian>* ,
+		   			 unsigned int ,
+		   			 Output_section* ,
+		   			 const elfcpp::Rela<size,
+							    big_endian>& ,
+					 unsigned int , Symbol*)
+    { return false; }
+
   private:
     static void
     unsupported_reloc_local(Sized_relobj<size, big_endian>*,

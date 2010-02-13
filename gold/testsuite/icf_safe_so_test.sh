@@ -1,6 +1,6 @@
-# icf_safe_test.sh -- test --icf=safe
+# icf_safe_so_test.sh -- test --icf=safe
 
-# Copyright 2009 Free Software Foundation, Inc.
+# Copyright 2010 Free Software Foundation, Inc.
 # Written by Sriraman Tallam <tmsriram@google.com>.
 
 # This file is part of gold.
@@ -21,15 +21,15 @@
 # MA 02110-1301, USA.
 
 # The goal of this program is to verify if --icf=safe  works as expected.
-# File icf_safe_test.cc is in this test. This program checks if only
-# ctors and dtors are folded, except for x86-64, which uses relocation
-# types to detect if function pointers are taken.
+# File icf_safe_so_test.cc is in this test.  The goal of this script is
+# to verify if identical code folding in safe mode correctly folds
+# functions in a shared object.
 
 check_nofold()
 {
     func_addr_1=`grep $2 $1 | awk '{print $1}'`
     func_addr_2=`grep $3 $1 | awk '{print $1}'`
-    if [ $func_addr_1 = $func_addr_2 ]
+    if [ $func_addr_1 = $func_addr_2 ];
     then
         echo "Safe Identical Code Folding folded" $2 "and" $3
 	exit 1
@@ -40,7 +40,7 @@ check_fold()
 {
     func_addr_1=`grep $2 $1 | awk '{print $1}'`
     func_addr_2=`grep $3 $1 | awk '{print $1}'`
-    if [ $func_addr_1 != $func_addr_2 ]
+    if [ $func_addr_1 != $func_addr_2 ];
     then
         echo "Safe Identical Code Folding did not fold " $2 "and" $3
 	exit 1
@@ -58,8 +58,12 @@ arch_specific_safe_fold()
     fi
 }
 
-arch_specific_safe_fold icf_safe_test_1.stdout icf_safe_test_2.stdout \
- "kept_func_1" "kept_func_2"
-check_fold   icf_safe_test_1.stdout "_ZN1AD1Ev" "_ZN1AC1Ev"
-check_nofold icf_safe_test_1.stdout "kept_func_3" "kept_func_1"
-check_nofold icf_safe_test_1.stdout "kept_func_3" "kept_func_2"
+check_nofold icf_safe_so_test_1.stdout "foo_prot" "foo_hidden"
+check_nofold icf_safe_so_test_1.stdout "foo_prot" "foo_internal"
+check_nofold icf_safe_so_test_1.stdout "foo_prot" "foo_static"
+check_nofold icf_safe_so_test_1.stdout "foo_hidden" "foo_internal"
+check_nofold icf_safe_so_test_1.stdout "foo_hidden" "foo_static"
+check_nofold icf_safe_so_test_1.stdout "foo_internal" "foo_static"
+arch_specific_safe_fold icf_safe_so_test_1.stdout icf_safe_so_test_2.stdout \
+  "foo_glob" "bar_glob"
+

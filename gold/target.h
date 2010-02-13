@@ -64,6 +64,13 @@ class Target
   virtual ~Target()
   { }
 
+  // Virtual function which is set to return true by a target if
+  // it can use relocation types to determine if a function's
+  // pointer is taken.
+  virtual bool
+  can_check_for_function_pointers() const
+  { return false; }
+
   // Return the bit size that this target implements.  This should
   // return 32 or 64.
   int

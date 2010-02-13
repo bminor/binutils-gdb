@@ -101,6 +101,36 @@
 // when folding takes place.  This could lead to unexpected run-time
 // behaviour.
 //
+// Safe Folding :
+// ------------
+//
+// ICF in safe mode folds only ctors and dtors if their function pointers can
+// never be taken.  Also, for X86-64, safe folding uses the relocation
+// type to determine if a function's pointer is taken or not and only folds
+// functions whose pointers are definitely not taken.
+//
+// Caveat with safe folding :
+// ------------------------
+//
+// This applies only to x86_64.
+//
+// Position independent executables are created from PIC objects (compiled
+// with -fPIC) and/or PIE objects (compiled with -fPIE).  For PIE objects, the
+// relocation types for function pointer taken and a call are the same.
+// Now, it is not always possible to tell if an object used in the link of
+// a pie executable is a PIC object or a PIE object.  Hence, for pie
+// executables, using relocation types to disambiguate function pointers is
+// currently disabled.
+//
+// Further, it is not correct to use safe folding to build non-pie
+// executables using PIC/PIE objects.  PIC/PIE objects have different
+// relocation types for function pointers than non-PIC objects, and the
+// current implementation of safe folding does not handle those relocation
+// types.  Hence, if used, functions whose pointers are taken could still be
+// folded causing unpredictable run-time behaviour if the pointers were used
+// in comparisons.
+//
+//
 //
 // How to run  : --icf=[safe|all|none]
 // Optional parameters : --icf-iterations <num> --print-icf-sections
@@ -560,6 +590,7 @@ Icf::find_identical_sections(const Input_objects* input_objects,
   std::vector<unsigned int> num_tracked_relocs;
   std::vector<bool> is_secn_or_group_unique;
   std::vector<std::string> section_contents;
+  const Target& target = parameters->target();
 
   // Decide which sections are possible candidates first.
 
@@ -577,14 +608,18 @@ Icf::find_identical_sections(const Input_objects* input_objects,
           if (parameters->options().gc_sections()
               && symtab->gc()->is_section_garbage(*p, i))
               continue;
+	  const char* mangled_func_name = strrchr(section_name, '.');
+	  gold_assert(mangled_func_name != NULL);
 	  // With --icf=safe, check if the mangled function name is a ctor
 	  // or a dtor.  The mangled function name can be obtained from the
 	  // section name by stripping the section prefix.
-	  const char* mangled_func_name = strrchr(section_name, '.');
-	  gold_assert(mangled_func_name != NULL);
 	  if (parameters->options().icf_safe_folding()
-	      && !is_function_ctor_or_dtor(mangled_func_name + 1))
-	    continue;
+              && !is_function_ctor_or_dtor(mangled_func_name + 1)
+	      && (!target.can_check_for_function_pointers()
+                  || section_has_function_pointers(*p, i)))
+            {
+	      continue;
+            }
           this->id_section_.push_back(Section_id(*p, i));
           this->section_id_[Section_id(*p, i)] = section_num;
           this->kept_section_id_.push_back(section_num);
