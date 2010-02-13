@@ -1,3 +1,8 @@
+2010-02-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbint.texinfo (Testsuite): New section "Testsuite Configuration",
+	documenting the gdb_test_timeout variable.
+
 2010-02-12  Jakob Engblom  <jakob@virtutech.com>
 
 	* gdb.texinfo (MI commands): Added documentation of --reverse

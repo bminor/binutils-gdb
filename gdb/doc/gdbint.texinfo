@@ -7693,6 +7693,38 @@ make site.exp
 runtest TRANSCRIPT=y
 @end smallexample
 
+@section Testsuite Configuration
+@cindex Testsuite Configuration
+
+It is possible to adjust the behavior of the testsuite by defining
+the global variables listed below, either in a @file{site.exp} file,
+or in a board file.
+
+@itemize @bullet
+
+@item @code{gdb_test_timeout}
+
+Defining this variable changes the default timeout duration used during
+communication with @value{GDBN}.  More specifically, the global variable
+used during testing is @code{timeout}, but this variable gets reset to
+@code{gdb_test_timeout} at the beginning of each testcase, making sure
+that any local change to @code{timeout} in a testcase does not affect
+subsequent testcases.
+
+This global variable comes in handy when the debugger is slower than
+normal due to the testing environment, triggering unexpected @code{TIMEOUT}
+test failures.  Examples include when testing on a remote machine, or
+against a system where communications are slow.
+
+If not specifically defined, this variable gets automatically defined
+to the same value as @code{timeout} during the testsuite initialization.
+The default value of the timeout is defined in the file
+@file{gdb/testsuite/config/unix.exp} that is part of the @value{GDBN}
+test suite@footnote{If you are using a board file, it could override
+the test-suite default; search the board file for "timeout".}.
+
+@end itemize
+
 @section Testsuite Organization
 
 @cindex test suite organization
