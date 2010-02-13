@@ -1,3 +1,7 @@
+2010-02-12  Doug Evans  <dje@sebabeach.org>
+
+	* lm32-opinst.c: Regenerate.
+
 2010-02-11  Doug Evans  <dje@sebabeach.org>
 
 	* cgen-dis.in (print_normal): Delete CGEN_PRINT_NORMAL.

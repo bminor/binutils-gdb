@@ -208,8 +208,22 @@ static const CGEN_OPINST sfmt_bret_ops[] ATTRIBUTE_UNUSED = {
   { END, (const char *)0, (enum cgen_hw_type)0, (enum cgen_mode)0, (enum cgen_operand_type)0, 0, 0 }
 };
 
+static const CGEN_OPINST sfmt_mvi_ops[] ATTRIBUTE_UNUSED = {
+  { INPUT, "imm", HW_H_SINT, CGEN_MODE_INT, OP_ENT (IMM), 0, 0 },
+  { INPUT, "r0", HW_H_GR, CGEN_MODE_SI, OP_ENT (R0), 0, 0 },
+  { OUTPUT, "r1", HW_H_GR, CGEN_MODE_SI, OP_ENT (R1), 0, 0 },
+  { END, (const char *)0, (enum cgen_hw_type)0, (enum cgen_mode)0, (enum cgen_operand_type)0, 0, 0 }
+};
+
 static const CGEN_OPINST sfmt_mvui_ops[] ATTRIBUTE_UNUSED = {
   { INPUT, "lo16", HW_H_UINT, CGEN_MODE_UINT, OP_ENT (LO16), 0, 0 },
+  { OUTPUT, "r1", HW_H_GR, CGEN_MODE_SI, OP_ENT (R1), 0, 0 },
+  { END, (const char *)0, (enum cgen_hw_type)0, (enum cgen_mode)0, (enum cgen_operand_type)0, 0, 0 }
+};
+
+static const CGEN_OPINST sfmt_mvhi_ops[] ATTRIBUTE_UNUSED = {
+  { INPUT, "hi16", HW_H_UINT, CGEN_MODE_UINT, OP_ENT (HI16), 0, 0 },
+  { INPUT, "r0", HW_H_GR, CGEN_MODE_SI, OP_ENT (R0), 0, 0 },
   { OUTPUT, "r1", HW_H_GR, CGEN_MODE_SI, OP_ENT (R1), 0, 0 },
   { END, (const char *)0, (enum cgen_hw_type)0, (enum cgen_mode)0, (enum cgen_operand_type)0, 0, 0 }
 };
@@ -421,9 +435,9 @@ static const CGEN_OPINST *lm32_cgen_opinst_table[MAX_INSNS] = {
   & sfmt_bret_ops[0],
   & sfmt_bret_ops[0],
   & sfmt_sextb_ops[0],
-  & sfmt_addi_ops[0],
+  & sfmt_mvi_ops[0],
   & sfmt_mvui_ops[0],
-  & sfmt_andhii_ops[0],
+  & sfmt_mvhi_ops[0],
   & sfmt_mva_ops[0],
   & sfmt_sextb_ops[0],
   & sfmt_nop_ops[0],
