@@ -176,7 +176,7 @@ LM_ADDR_CHECK (struct so_list *so, bfd *abfd)
   if (so->lm_info->l_addr == (CORE_ADDR)-1)
     {
       struct bfd_section *dyninfo_sect;
-      CORE_ADDR l_addr, l_dynaddr, dynaddr, align = 0x1000;
+      CORE_ADDR l_addr, l_dynaddr, dynaddr;
 
       l_addr = LM_ADDR_FROM_LINK_MAP (so);
 
@@ -193,6 +193,8 @@ LM_ADDR_CHECK (struct so_list *so, bfd *abfd)
 
       if (dynaddr + l_addr != l_dynaddr)
 	{
+	  CORE_ADDR align = 0x1000;
+
 	  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
 	    {
 	      Elf_Internal_Ehdr *ehdr = elf_tdata (abfd)->elf_header;
