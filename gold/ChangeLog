@@ -1,3 +1,32 @@
+2010-02-12  David S. Miller  <davem@davemloft.net>
+
+	* output.h (Output_reloc<SHT_REL>::Output_reloc): Add
+	is_symbolless parameter.
+	(Output_reloc<SHT_REL>::is_symbolless): New.
+	(Output_reloc<SHT_REL>::is_symbolless_): New.
+	(Output_reloc<SHT_REL>::type_): Decrease to 29 bits.
+	(Output_reloc<SHT_RELA>::Output_reloc): Add is_symbolless parameter.
+	(Output_reloc<SHT_RELA>::is_symbolless): New.
+	(Output_data_reloc::add_global): Handle is_symbolless.
+	(Output_data_reloc::add_global_relative): Likewise.
+	(Output_data_reloc::add_local): Likewise.
+	(Output_data_reloc::add_local_relative): Likewise.
+	(Output_data_reloc::add_symbolless_global_addend): New.
+	(Output_data_reloc::add_symbolless_local_addend): New.
+	* output.cc (Output_reloc<SHT_REL>::Output_reloc): Handle
+	is_symbolless.
+	(Output_reloc::set_needs_dynsym_index): Test ->is_symbolless_
+	instead of ->is_relative_
+	(Output_reloc::write): Likewise.
+	(Output_reloc::get_symbol_index): Return 0 when ->is_symbolless_
+	(Output_reloc::write_rel): Simplify.
+
+	* sparc.cc (Target_sparc::Scan::local): Use
+	->add_symbolless_local_addend as needed.
+	(Target_sparc::Scan::global): Use ->add_symbolless_global_addend as
+	needed.  Also, emit appropriate unaligned vs. aligned dynamic reloc
+	based upon relocation offset.
+
 2010-02-11  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Target_arm::Scan::local): Fix bugs in relocation handling.

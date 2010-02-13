@@ -1686,20 +1686,11 @@ Target_sparc<size, big_endian>::Scan::local(
             }
           else
             {
-	      unsigned int shndx = lsym.get_st_shndx();
-	      bool is_ordinary;
-
               gold_assert(lsym.get_st_value() == 0);
-	      shndx = object->adjust_sym_shndx(r_sym, shndx,
-					       &is_ordinary);
-	      if (!is_ordinary)
-		object->error(_("section symbol %u has bad shndx %u"),
-			      r_sym, shndx);
-	      else
-		rela_dyn->add_local_section(object, shndx,
-					    r_type, output_section,
-					    data_shndx, reloc.get_r_offset(),
-					    reloc.get_r_addend());
+	      rela_dyn->add_symbolless_local_addend(object, r_sym, orig_r_type,
+						    output_section, data_shndx,
+						    reloc.get_r_offset(),
+						    reloc.get_r_addend());
             }
         }
       break;
@@ -1847,13 +1838,15 @@ Target_sparc<size, big_endian>::Scan::local(
 		if (!object->local_has_got_offset(r_sym, GOT_TYPE_TLS_OFFSET))
 		  {
 		    Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+		    unsigned int off = got->add_constant(0);
 
-		    got->add_local_with_rela(object, r_sym,
-					     GOT_TYPE_TLS_OFFSET,
-					     rela_dyn,
-					     (size == 64 ?
-					      elfcpp::R_SPARC_TLS_TPOFF64 :
-					      elfcpp::R_SPARC_TLS_TPOFF32));
+		    object->set_local_got_offset(r_sym, GOT_TYPE_TLS_OFFSET, off);
+
+		    rela_dyn->add_symbolless_local_addend(object, r_sym,
+							  (size == 64 ?
+							   elfcpp::R_SPARC_TLS_TPOFF64 :
+							   elfcpp::R_SPARC_TLS_TPOFF32),
+							  got, off, 0);
 		  }
 	      }
 	    else if (optimized_type != tls::TLSOPT_TO_LE)
@@ -1869,9 +1862,9 @@ Target_sparc<size, big_endian>::Scan::local(
                 gold_assert(lsym.get_st_type() != elfcpp::STT_SECTION);
                 unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
                 Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-                rela_dyn->add_local(object, r_sym, r_type,
-				    output_section, data_shndx,
-				    reloc.get_r_offset(), 0);
+                rela_dyn->add_symbolless_local_addend(object, r_sym, r_type,
+						      output_section, data_shndx,
+						      reloc.get_r_offset(), 0);
 	      }
 	    break;
 	  }
@@ -2046,6 +2039,38 @@ Target_sparc<size, big_endian>::Scan::global(
         // Make a dynamic relocation if necessary.
         if (gsym->needs_dynamic_reloc(Symbol::ABSOLUTE_REF))
           {
+	    unsigned int r_off = reloc.get_r_offset();
+
+	    // The assembler can sometimes emit unaligned relocations
+	    // for dwarf2 cfi directives. 
+	    switch (r_type)
+	      {
+	      case elfcpp::R_SPARC_16:
+		if (r_off & 0x1)
+		  orig_r_type = r_type = elfcpp::R_SPARC_UA16;
+		break;
+	      case elfcpp::R_SPARC_32:
+		if (r_off & 0x3)
+		  orig_r_type = r_type = elfcpp::R_SPARC_UA32;
+		break;
+	      case elfcpp::R_SPARC_64:
+		if (r_off & 0x7)
+		  orig_r_type = r_type = elfcpp::R_SPARC_UA64;
+		break;
+	      case elfcpp::R_SPARC_UA16:
+		if (!(r_off & 0x1))
+		  orig_r_type = r_type = elfcpp::R_SPARC_16;
+		break;
+	      case elfcpp::R_SPARC_UA32:
+		if (!(r_off & 0x3))
+		  orig_r_type = r_type = elfcpp::R_SPARC_32;
+		break;
+	      case elfcpp::R_SPARC_UA64:
+		if (!(r_off & 0x7))
+		  orig_r_type = r_type = elfcpp::R_SPARC_64;
+		break;
+	      }
+
             if (gsym->may_need_copy_reloc())
               {
 	        target->copy_reloc(symtab, layout, object,
@@ -2066,10 +2091,19 @@ Target_sparc<size, big_endian>::Scan::global(
                 Reloc_section* rela_dyn = target->rela_dyn_section(layout);
 
 		check_non_pic(object, r_type);
-		rela_dyn->add_global(gsym, orig_r_type, output_section,
-				     object, data_shndx,
-				     reloc.get_r_offset(),
-				     reloc.get_r_addend());
+		if (gsym->is_from_dynobj()
+		    || gsym->is_undefined()
+		    || gsym->is_preemptible())
+		  rela_dyn->add_global(gsym, orig_r_type, output_section,
+				       object, data_shndx,
+				       reloc.get_r_offset(),
+				       reloc.get_r_addend());
+		else
+		  rela_dyn->add_symbolless_global_addend(gsym, orig_r_type,
+							 output_section,
+							 object, data_shndx,
+							 reloc.get_r_offset(),
+							 reloc.get_r_addend());
               }
           }
       }
@@ -2201,10 +2235,10 @@ Target_sparc<size, big_endian>::Scan::global(
 	    if (parameters->options().shared())
 	      {
 		Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-		rela_dyn->add_global(gsym, orig_r_type,
-				     output_section, object,
-				     data_shndx, reloc.get_r_offset(),
-				     0);
+		rela_dyn->add_symbolless_global_addend(gsym, orig_r_type,
+						       output_section, object,
+						       data_shndx, reloc.get_r_offset(),
+						       0);
 	      }
 	    break;
 

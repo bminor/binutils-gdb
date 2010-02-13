@@ -638,9 +638,11 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     unsigned int type,
     Output_data* od,
     Address address,
-    bool is_relative)
+    bool is_relative,
+    bool is_symbolless)
   : address_(address), local_sym_index_(GSYM_CODE), type_(type),
-    is_relative_(is_relative), is_section_symbol_(false), shndx_(INVALID_CODE)
+    is_relative_(is_relative), is_symbolless_(is_symbolless),
+    is_section_symbol_(false), shndx_(INVALID_CODE)
 {
   // this->type_ is a bitfield; make sure TYPE fits.
   gold_assert(this->type_ == type);
@@ -657,9 +659,11 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     Sized_relobj<size, big_endian>* relobj,
     unsigned int shndx,
     Address address,
-    bool is_relative)
+    bool is_relative,
+    bool is_symbolless)
   : address_(address), local_sym_index_(GSYM_CODE), type_(type),
-    is_relative_(is_relative), is_section_symbol_(false), shndx_(shndx)
+    is_relative_(is_relative), is_symbolless_(is_symbolless),
+    is_section_symbol_(false), shndx_(shndx)
 {
   gold_assert(shndx != INVALID_CODE);
   // this->type_ is a bitfield; make sure TYPE fits.
@@ -680,10 +684,11 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     Output_data* od,
     Address address,
     bool is_relative,
+    bool is_symbolless,
     bool is_section_symbol)
   : address_(address), local_sym_index_(local_sym_index), type_(type),
-    is_relative_(is_relative), is_section_symbol_(is_section_symbol),
-    shndx_(INVALID_CODE)
+    is_relative_(is_relative), is_symbolless_(is_symbolless),
+    is_section_symbol_(is_section_symbol), shndx_(INVALID_CODE)
 {
   gold_assert(local_sym_index != GSYM_CODE
               && local_sym_index != INVALID_CODE);
@@ -703,10 +708,11 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     unsigned int shndx,
     Address address,
     bool is_relative,
+    bool is_symbolless,
     bool is_section_symbol)
   : address_(address), local_sym_index_(local_sym_index), type_(type),
-    is_relative_(is_relative), is_section_symbol_(is_section_symbol),
-    shndx_(shndx)
+    is_relative_(is_relative), is_symbolless_(is_symbolless),
+    is_section_symbol_(is_section_symbol), shndx_(shndx)
 {
   gold_assert(local_sym_index != GSYM_CODE
               && local_sym_index != INVALID_CODE);
@@ -728,7 +734,8 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     Output_data* od,
     Address address)
   : address_(address), local_sym_index_(SECTION_CODE), type_(type),
-    is_relative_(false), is_section_symbol_(true), shndx_(INVALID_CODE)
+    is_relative_(false), is_symbolless_(false),
+    is_section_symbol_(true), shndx_(INVALID_CODE)
 {
   // this->type_ is a bitfield; make sure TYPE fits.
   gold_assert(this->type_ == type);
@@ -748,7 +755,8 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     unsigned int shndx,
     Address address)
   : address_(address), local_sym_index_(SECTION_CODE), type_(type),
-    is_relative_(false), is_section_symbol_(true), shndx_(shndx)
+    is_relative_(false), is_symbolless_(false),
+    is_section_symbol_(true), shndx_(shndx)
 {
   gold_assert(shndx != INVALID_CODE);
   // this->type_ is a bitfield; make sure TYPE fits.
@@ -769,7 +777,8 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     Output_data* od,
     Address address)
   : address_(address), local_sym_index_(0), type_(type),
-    is_relative_(false), is_section_symbol_(false), shndx_(INVALID_CODE)
+    is_relative_(false), is_symbolless_(false),
+    is_section_symbol_(false), shndx_(INVALID_CODE)
 {
   // this->type_ is a bitfield; make sure TYPE fits.
   gold_assert(this->type_ == type);
@@ -784,7 +793,8 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     unsigned int shndx,
     Address address)
   : address_(address), local_sym_index_(0), type_(type),
-    is_relative_(false), is_section_symbol_(false), shndx_(shndx)
+    is_relative_(false), is_symbolless_(false),
+    is_section_symbol_(false), shndx_(shndx)
 {
   gold_assert(shndx != INVALID_CODE);
   // this->type_ is a bitfield; make sure TYPE fits.
@@ -802,7 +812,8 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     Output_data* od,
     Address address)
   : address_(address), local_sym_index_(TARGET_CODE), type_(type),
-    is_relative_(false), is_section_symbol_(false), shndx_(INVALID_CODE)
+    is_relative_(false), is_symbolless_(false),
+    is_section_symbol_(false), shndx_(INVALID_CODE)
 {
   // this->type_ is a bitfield; make sure TYPE fits.
   gold_assert(this->type_ == type);
@@ -818,7 +829,8 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     unsigned int shndx,
     Address address)
   : address_(address), local_sym_index_(TARGET_CODE), type_(type),
-    is_relative_(false), is_section_symbol_(false), shndx_(shndx)
+    is_relative_(false), is_symbolless_(false),
+    is_section_symbol_(false), shndx_(shndx)
 {
   gold_assert(shndx != INVALID_CODE);
   // this->type_ is a bitfield; make sure TYPE fits.
@@ -834,7 +846,7 @@ void
 Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::
 set_needs_dynsym_index()
 {
-  if (this->is_relative_)
+  if (this->is_symbolless_)
     return;
   switch (this->local_sym_index_)
     {
@@ -876,6 +888,8 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::get_symbol_index()
   const
 {
   unsigned int index;
+  if (this->is_symbolless_)
+    return 0;
   switch (this->local_sym_index_)
     {
     case INVALID_CODE:
@@ -995,7 +1009,7 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::write_rel(
     Write_rel* wr) const
 {
   wr->put_r_offset(this->get_address());
-  unsigned int sym_index = this->is_relative_ ? 0 : this->get_symbol_index();
+  unsigned int sym_index = this->get_symbol_index();
   wr->put_r_info(elfcpp::elf_r_info<size>(sym_index, this->type_));
 }
 
@@ -1097,7 +1111,7 @@ Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>::write(
   if (this->rel_.is_target_specific())
     addend = parameters->target().reloc_addend(this->rel_.target_arg(),
 					       this->rel_.type(), addend);
-  else if (this->rel_.is_relative())
+  else if (this->rel_.is_symbolless())
     addend = this->rel_.symbol_value(addend);
   else if (this->rel_.is_local_section_symbol())
     addend = this->rel_.local_section_offset(addend);
