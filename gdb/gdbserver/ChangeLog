@@ -1,3 +1,8 @@
+2010-02-12  Doug Evans  <dje@google.com>
+
+	* linux-low.c (linux_supports_tracefork_flag): Document.
+	(linux_look_up_symbols): Add comment.
+
 2010-02-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* regcache.c (supply_register): Clear regcache if buf is NULL.

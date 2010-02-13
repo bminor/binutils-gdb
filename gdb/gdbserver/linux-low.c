@@ -2580,6 +2580,7 @@ linux_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
   return 0;
 }
 
+/* Non-zero if the kernel supports PTRACE_O_TRACEFORK.  */
 static int linux_supports_tracefork_flag;
 
 /* Helper functions for linux_test_for_tracefork, called via clone ().  */
@@ -2735,6 +2736,9 @@ linux_look_up_symbols (void)
   if (proc->private->thread_db != NULL)
     return;
 
+  /* If the kernel supports tracing forks then it also supports tracing
+     clones, and then we don't need to use the magic thread event breakpoint
+     to learn about threads.  */
   thread_db_init (!linux_supports_tracefork_flag);
 #endif
 }
