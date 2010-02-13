@@ -109,6 +109,9 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
+# Print the "adjusting expectations" message.
+gdb_test "set verbose on"
+
 set test "prelink"
 global gdb_prompt
 gdb_test_multiple "core-file $objdir/$subdir/prelink.core" "$test" {

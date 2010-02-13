@@ -1,3 +1,8 @@
+2010-02-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* solib-svr4.c: (LM_ADDR_CHECK): Print successful prelink adjustment
+	only if INFO_VERBOSE.
+
 2010-02-12  Tomas Holmberg <th@virtutech.com>
 
 	* mi/mi-main.c: Added the --reverse flag to the following MI

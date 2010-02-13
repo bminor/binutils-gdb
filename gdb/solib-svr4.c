@@ -234,10 +234,13 @@ LM_ADDR_CHECK (struct so_list *so, bfd *abfd)
 	    {
 	      l_addr = l_dynaddr - dynaddr;
 
-	      warning (_(".dynamic section for \"%s\" "
-		     "is not at the expected address"), so->so_name);
-	      warning (_("difference appears to be caused by prelink, "
-			 "adjusting expectations"));
+	      if (info_verbose)
+		{
+		  warning (_(".dynamic section for \"%s\" "
+			     "is not at the expected address"), so->so_name);
+		  warning (_("difference appears to be caused by prelink, "
+			     "adjusting expectations"));
+		}
 	    }
 	  else
 	    warning (_(".dynamic section for \"%s\" "
