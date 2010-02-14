@@ -1,3 +1,7 @@
+2010-02-14  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* ppc-instructions: Fix missing assignment in last change.
+
 2010-02-05  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* ppc-instructions: Fix aliasing bugs when calling

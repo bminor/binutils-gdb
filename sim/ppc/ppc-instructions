@@ -4168,6 +4168,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	                                0, /*instruction_is_convert_to_64bit*/
 	                                0, /*instruction_is_convert_to_32bit*/
 	                                0); /*single-precision*/
+	  product = tmp.d;
 	}
 	else {
 	  /*HACK!*/
