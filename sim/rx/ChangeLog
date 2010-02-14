@@ -1,3 +1,12 @@
+2010-01-30  Masaki Muranaka  <monaka@monami-software.com>
+
+        * configure.in: Check if the host has getopt.h.
+        * configure: Regenerate.
+        * config.in: Regenerate.
+        * main.c: Include config.h.
+	Use HAVE_STDLIB_H, HAVE_UNISTD_H, HAVE_GETOPT_H.
+	Include getopt.h in case HAVE_GETOPT_H is defined.
+
 2009-12-22  Yoshinori Sato  <ysato@users.sourceforge.jp>
 
 	* rx/rx.c (decode_opcode): btst bit address mask fix.

@@ -4517,6 +4517,19 @@ sim_link_files="${sim_link_files} ${TARG_VALS_DEF}"
 sim_link_links="${sim_link_links} targ-vals.def"
 
 
+for ac_header in getopt.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "getopt.h" "ac_cv_header_getopt_h" "$ac_includes_default"
+if test "x$ac_cv_header_getopt_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_GETOPT_H 1
+_ACEOF
+
+fi
+
+done
+
+
 
 ac_sources="$sim_link_files"
 ac_dests="$sim_link_links"
