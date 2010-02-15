@@ -691,17 +691,10 @@ inf_ttrace_attach (struct target_ops *ops, char *args, int from_tty)
 {
   char *exec_file;
   pid_t pid;
-  char *dummy;
   ttevent_t tte;
   struct inferior *inf;
 
-  if (!args)
-    error_no_arg (_("process-id to attach"));
-
-  dummy = args;
-  pid = strtol (args, &dummy, 0);
-  if (pid == 0 && args == dummy)
-    error (_("Illegal process-id: %s."), args);
+  pid = parse_pid_to_attach (args);
 
   if (pid == getpid ())		/* Trying to masturbate?  */
     error (_("I refuse to debug myself!"));

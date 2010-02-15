@@ -3857,17 +3857,12 @@ extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
 {
   struct remote_state *rs = get_remote_state ();
   int pid;
-  char *dummy;
   char *wait_status = NULL;
 
-  if (!args)
-    error_no_arg (_("process-id to attach"));
+  pid = parse_pid_to_attach (args);
 
-  dummy = args;
-  pid = strtol (args, &dummy, 0);
-  /* Some targets don't set errno on errors, grrr!  */
-  if (pid == 0 && args == dummy)
-    error (_("Illegal process-id: %s."), args);
+  /* Remote PID can be freely equal to getpid, do not check it here the same
+     way as in other targets.  */
 
   if (remote_protocol_packets[PACKET_vAttach].support == PACKET_DISABLE)
     error (_("This target does not support attaching to a process"));

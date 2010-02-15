@@ -93,7 +93,28 @@ proc do_attach_tests {} {
 
     set test "attach to nonsense is prohibited"
     gdb_test_multiple "attach abc" "$test" {
-	-re "Illegal process-id: abc.*$gdb_prompt $" {
+	-re "Illegal process-id: abc\\.\r\n$gdb_prompt $" {
+	    pass "$test"
+	}
+	-re "Attaching to.*, process .*couldn't open /proc file.*$gdb_prompt $" {
+	    # Response expected from /proc-based systems.
+	    pass "$test" 
+	}
+	-re "Can't attach to process..*$gdb_prompt $" {
+	    # Response expected on Cygwin
+	    pass "$test"
+	}
+	-re "Attaching to.*$gdb_prompt $" {
+	    fail "$test (bogus pid allowed)"
+	}
+    }
+
+    # Verify that we cannot attach to nonsense even if its initial part is
+    # a valid PID.
+
+    set test "attach to digits-starting nonsense is prohibited"
+    gdb_test_multiple "attach ${testpid}x" "$test" {
+	-re "Illegal process-id: ${testpid}x\\.\r\n$gdb_prompt $" {
 	    pass "$test"
 	}
 	-re "Attaching to.*, process .*couldn't open /proc file.*$gdb_prompt $" {

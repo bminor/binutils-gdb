@@ -1,3 +1,17 @@
+2010-02-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* defs.h (parse_pid_to_attach): New.
+	* utils.c (parse_pid_to_attach): New.
+	* darwin-nat.c (darwin_attach): Replace ARGS parsing by parse_pid.
+	* gnu-nat.c (gnu_attach): Likewise.
+	* nto-procfs.c (procfs_attach): Likewise.
+	* procfs.c (procfs_attach): Likewise.
+	* windows-nat.c (windows_attach): Likewise.
+	* inf-ptrace.c (inf_ptrace_attach): Likewise.  Remove variable dummy.
+	* inf-ttrace.c (inf_ttrace_attach): Likewise.
+	* remote.c (extended_remote_attach_1): Likewise.  New comment on getpid
+	check.
+
 2010-02-14  Masaki Muranaka  <monaka@monami-software.com>
 
 	* MAINTAINERS: Add myself for write after approval privileges.

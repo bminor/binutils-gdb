@@ -1514,12 +1514,9 @@ darwin_attach (struct target_ops *ops, char *args, int from_tty)
   struct inferior *inf;
   kern_return_t kret;
 
-  if (!args)
-    error_no_arg (_("process-id to attach"));
+  pid = parse_pid_to_attach (args);
 
-  pid = atoi (args);
-
-  if (pid == getpid ())		/* Trying to masturbate? */
+  if (pid == getpid ())		/* Trying to masturbate?  */
     error (_("I refuse to debug myself!"));
 
   if (from_tty)

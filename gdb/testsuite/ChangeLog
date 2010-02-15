@@ -1,3 +1,9 @@
+2010-02-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/attach.exp (attach to nonsense is prohibited): Make the
+	"Illegal process-id" expect string more exact.
+	(attach to digits-starting nonsense is prohibited): New.
+
 2010-02-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/prelink.exp (set verbose on): New.

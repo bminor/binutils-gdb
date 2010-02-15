@@ -426,6 +426,8 @@ int compare_positive_ints (const void *ap, const void *bp);
 
 extern const char *gdb_bfd_errmsg (bfd_error_type error_tag, char **matching);
 
+extern int parse_pid_to_attach (char *args);
+
 /* From demangle.c */
 
 extern void set_demangling_style (char *);

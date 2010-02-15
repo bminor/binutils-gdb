@@ -3606,10 +3606,8 @@ procfs_attach (struct target_ops *ops, char *args, int from_tty)
   char *exec_file;
   int   pid;
 
-  if (!args)
-    error_no_arg (_("process-id to attach"));
+  pid = parse_pid_to_attach (args);
 
-  pid = atoi (args);
   if (pid == getpid ())
     error (_("Attaching GDB to itself is not a good idea..."));
 

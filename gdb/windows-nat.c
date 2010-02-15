@@ -1691,16 +1691,13 @@ windows_attach (struct target_ops *ops, char *args, int from_tty)
   BOOL ok;
   DWORD pid;
 
-  if (!args)
-    error_no_arg (_("process-id to attach"));
+  pid = parse_pid_to_attach (args);
 
   if (set_process_privilege (SE_DEBUG_NAME, TRUE) < 0)
     {
       printf_unfiltered ("Warning: Failed to get SE_DEBUG_NAME privilege\n");
       printf_unfiltered ("This can cause attach to fail on Windows NT/2K/XP\n");
     }
-
-  pid = strtoul (args, 0, 0);		/* Windows pid */
 
   windows_init_thread_list ();
   ok = DebugActiveProcess (pid);
