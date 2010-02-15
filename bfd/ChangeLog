@@ -1,3 +1,9 @@
+2010-02-15  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	PR binutils/11280
+	* configure.host (*-*-solaris2.11):  Add host define to select
+	valid default code page for windres/windmc on solaris.
+
 2010-02-15  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: Updated Vietnamese translation.
