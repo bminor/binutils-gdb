@@ -832,7 +832,7 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 	      /* If we have a virtual table pointer, omit it.  Even if
 		 virtual table pointers are not specifically marked in
 		 the debug info, they should be artificial.  */
-	      if ((type == basetype && i == vptr_fieldno)
+	      if ((i == vptr_fieldno && type == basetype)
 		  || TYPE_FIELD_ARTIFICIAL (type, i))
 		continue;
 

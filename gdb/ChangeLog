@@ -1,3 +1,7 @@
+2010-02-15  Tom Tromey  <tromey@redhat.com>
+
+	* c-typeprint.c (c_type_print_base): Reverse order of test.
+
 2010-02-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* solib-svr4.c (LM_ADDR_CHECK): New variable minpagesize.  Optionally
