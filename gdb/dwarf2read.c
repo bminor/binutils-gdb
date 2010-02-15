@@ -2765,7 +2765,7 @@ guess_structure_name (struct partial_die_info *struct_pdi,
 		  struct_pdi->name
 		    = obsavestring (actual_class_name,
 				    strlen (actual_class_name),
-				    &cu->comp_unit_obstack);
+				    &cu->objfile->objfile_obstack);
 		  xfree (actual_class_name);
 		}
 	      break;

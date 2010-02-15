@@ -1,5 +1,10 @@
 2010-02-15  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (guess_structure_name): Allocate name on the
+	objfile obstack.
+
+2010-02-15  Tom Tromey  <tromey@redhat.com>
+
 	* c-typeprint.c (c_type_print_base): Reverse order of test.
 
 2010-02-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
