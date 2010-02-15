@@ -194,6 +194,7 @@ LM_ADDR_CHECK (struct so_list *so, bfd *abfd)
       if (dynaddr + l_addr != l_dynaddr)
 	{
 	  CORE_ADDR align = 0x1000;
+	  CORE_ADDR minpagesize = align;
 
 	  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
 	    {
@@ -206,6 +207,8 @@ LM_ADDR_CHECK (struct so_list *so, bfd *abfd)
 	      for (i = 0; i < ehdr->e_phnum; i++)
 		if (phdr[i].p_type == PT_LOAD && phdr[i].p_align > align)
 		  align = phdr[i].p_align;
+
+	      minpagesize = get_elf_backend_data (abfd)->minpagesize;
 	    }
 
 	  /* Turn it into a mask.  */
@@ -230,9 +233,12 @@ LM_ADDR_CHECK (struct so_list *so, bfd *abfd)
 	     mapping of the library may not actually happen on a 64k boundary!
 
 	     (In the usual case where (l_addr & align) == 0, this check is
-	     equivalent to the possibly expected check above.)  */
+	     equivalent to the possibly expected check above.)
 
-	  if ((l_addr & align) == ((l_dynaddr - dynaddr) & align))
+	     Even on PPC it must be zero-aligned at least for MINPAGESIZE.  */
+
+	  if ((l_addr & (minpagesize - 1)) == 0
+	      && (l_addr & align) == ((l_dynaddr - dynaddr) & align))
 	    {
 	      l_addr = l_dynaddr - dynaddr;
 

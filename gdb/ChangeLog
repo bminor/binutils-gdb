@@ -1,5 +1,10 @@
 2010-02-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* solib-svr4.c (LM_ADDR_CHECK): New variable minpagesize.  Optionally
+	initialize it from ELF BFD.  Extend the prelink condition by it.
+
+2010-02-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* defs.h (parse_pid_to_attach): New.
 	* utils.c (parse_pid_to_attach): New.
 	* darwin-nat.c (darwin_attach): Replace ARGS parsing by parse_pid.
