@@ -1,3 +1,7 @@
+2010-02-15  Nick Clifton  <nickc@redhat.com>
+
+	* po/vi.po: Updated Vietnamese translation.
+
 2010-02-12  Doug Evans  <dje@sebabeach.org>
 
 	* lm32-opinst.c: Regenerate.

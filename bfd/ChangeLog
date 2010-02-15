@@ -1,3 +1,7 @@
+2010-02-15  Nick Clifton  <nickc@redhat.com>
+
+	* po/vi.po: Updated Vietnamese translation.
+
 2010-02-12  Daniel Gutson  <dgutson@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_output_arch_local_syms): add

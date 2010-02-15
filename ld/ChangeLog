@@ -1,3 +1,7 @@
+2010-02-15  Nick Clifton  <nickc@redhat.com>
+
+	* po/vi.po: Updated Vietnamese translation.
+
 2010-02-10  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
 	* Makefile.am (CFILES): Add ldlex-wrapper.c.

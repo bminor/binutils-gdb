@@ -1,15 +1,15 @@
 # Vietnamese translation for BFD.
-# Copyright © 2009 Free Software Foundation, Inc.
+# Copyright © 2010 Free Software Foundation, Inc.
 # This file is distributed under the same license as the binutils package.
 # Phần Vĩnh Thịnh <teppi@gmail.com>, 2005.
-# Clytie Siddall <clytie@riverland.net.au>, 2008-2009.
+# Clytie Siddall <clytie@riverland.net.au>, 2008-2010.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: bfd 2.19.90\n"
+"Project-Id-Version: bfd 2.20\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2009-09-07 14:05+0200\n"
-"PO-Revision-Date: 2009-09-18 16:56+0930\n"
+"PO-Revision-Date: 2010-02-13 19:00+1030\n"
 "Last-Translator: Clytie Siddall <clytie@riverland.net.au>\n"
 "Language-Team: Vietnamese <vi-VN@googlegroups.com>\n"
 "MIME-Version: 1.0\n"
