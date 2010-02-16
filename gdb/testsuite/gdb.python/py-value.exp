@@ -227,7 +227,9 @@ proc test_value_in_inferior {} {
   gdb_py_test_silent_cmd "python arg0 = argv.dereference ()" "dereference value" 1
 
   # Check that the dereferenced value is sane
-  gdb_test "python print arg0" "0x.*$testfile\"" "verify dereferenced value"
+  if { ! [target_info exists noargs] } {
+    gdb_test "python print arg0" "0x.*$testfile\"" "verify dereferenced value"
+  }
 
   # Smoke-test is_optimized_out attribute
   gdb_test "python print 'result =', arg0.is_optimized_out" "= False" "Test is_optimized_out attribute"

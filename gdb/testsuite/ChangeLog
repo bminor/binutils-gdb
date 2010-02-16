@@ -1,5 +1,10 @@
 2010-02-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.python/py-value.exp (test_value_in_inferior): Skip arg0 test
+	if arguments are not supported.
+
+2010-02-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.cp/overload.exp: Allow foo::overload1arg's "this" pointer to
 	be const or non-const.
 
