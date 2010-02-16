@@ -9,5 +9,5 @@ Disassembly of section destsect:
 
 Disassembly of section .text:
 
-00008054 <[^>]*>:
-    8054:	f0f7 9fd4 	b.w	900000 <dest>
+000080.. <[^>]*>:
+    80..:	f0f7 9f.. 	b.w	900000 <dest>

@@ -1,3 +1,10 @@
+2010-02-15  Matthew Gretton-Dann <matthew.gretton-dann@arm.com>
+
+	* ld-arm/jump-reloc-veneers-long.d: Correct testcase for
+	  arm-none-eabi target.
+	* ld-arm/jump-reloc-veneers-short1.d: Likewise
+	* ld-arm/jump-reloc-veneers-short2.d: Likewise
+
 2010-02-12  Daniel Gutson  <dgutson@codesourcery.com>
 
 	* ld-arm/arm-elf.exp (armelftests): New test case added.
