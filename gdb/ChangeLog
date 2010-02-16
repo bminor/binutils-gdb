@@ -1,5 +1,11 @@
 2010-02-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gcore.c (do_bfd_delete_cleanup): New function.
+	(gcore_command): Use it.  Discard the cleanup after success.
+	(gcore_copy_callback): Delete dead code.
+
+2010-02-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* symfile.c (addr_info_make_relative): Always use
 	find_lowest_section.
 

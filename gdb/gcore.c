@@ -102,6 +102,16 @@ write_gcore_file (bfd *obfd)
     }
 }
 
+static void
+do_bfd_delete_cleanup (void *arg)
+{
+  bfd *obfd = arg;
+  const char *filename = obfd->filename;
+
+  bfd_close (arg);
+  unlink (filename);
+}
+
 /* gcore_command -- implements the 'gcore' command.
    Generate a core file from the inferior process.  */
 
@@ -132,8 +142,8 @@ gcore_command (char *args, int from_tty)
   /* Open the output file.  */
   obfd = create_gcore_bfd (corefilename);
 
-  /* Need a cleanup that will close the file (FIXME: delete it?).  */
-  old_chain = make_cleanup_bfd_close (obfd);
+  /* Need a cleanup that will close and delete the file.  */
+  old_chain = make_cleanup (do_bfd_delete_cleanup, obfd);
 
   /* Call worker function.  */
   write_gcore_file (obfd);
@@ -141,9 +151,8 @@ gcore_command (char *args, int from_tty)
   /* Succeeded.  */
   fprintf_filtered (gdb_stdout, "Saved corefile %s\n", corefilename);
 
-  /* Clean-ups will close the output file and free malloc memory.  */
-  do_cleanups (old_chain);
-  return;
+  discard_cleanups (old_chain);
+  bfd_close (obfd);
 }
 
 static unsigned long
@@ -521,9 +530,6 @@ gcore_copy_callback (bfd *obfd, asection *osec, void *ignored)
 
   size = min (total_size, MAX_COPY_BYTES);
   memhunk = xmalloc (size);
-  /* ??? This is crap since xmalloc should never return NULL.  */
-  if (memhunk == NULL)
-    error (_("Not enough memory to create corefile."));
   old_chain = make_cleanup (xfree, memhunk);
 
   while (total_size > 0)
