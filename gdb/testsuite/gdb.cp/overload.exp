@@ -348,13 +348,13 @@ gdb_test "print foo::overload1arg(char***)" \
     "print foo::overload1arg(char***)"
 
 gdb_test "print foo::overload1arg(void)" \
-    "\\$$decimal = {int \\(foo \\* const\\)} $hex <foo::overload1arg\\(\\)>" \
+    "\\$$decimal = {int \\(foo \\*( const|)\\)} $hex <foo::overload1arg\\(\\)>" \
     "print foo::overload1arg(void)"
 
 foreach t [list char "signed char" "unsigned char" "short" \
 	       "unsigned short" int "unsigned int" long "unsigned long" \
 	       float double] {
     gdb_test "print foo::overload1arg($t)" \
-	"\\$$decimal = {int \\(foo \\* const, $t\\)} $hex <foo::overload1arg\\($t\\)>" \
+	"\\$$decimal = {int \\(foo \\*( const|), $t\\)} $hex <foo::overload1arg\\($t\\)>" \
 	"print foo::overload1arg($t)"
 }

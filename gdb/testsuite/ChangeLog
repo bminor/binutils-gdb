@@ -1,5 +1,10 @@
 2010-02-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.cp/overload.exp: Allow foo::overload1arg's "this" pointer to
+	be const or non-const.
+
+2010-02-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.mi/mi-break.exp (test_breakpoint_commands): Use
 	mi_send_resuming_command to send -exec-continue.
 
