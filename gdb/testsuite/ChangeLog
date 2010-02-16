@@ -1,5 +1,10 @@
 2010-02-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.base/valgrind-db-attach.exp: Use unsupported instead of xfail.
+	Recognize "command not found".
+
+2010-02-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.arch/thumb2-it.exp (test_it_break): Handle hardware
 	single-stepping.
 

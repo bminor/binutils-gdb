@@ -34,8 +34,7 @@ set cmd "valgrind --db-attach=yes $db_command $binfile"
 set res [remote_spawn host $cmd];
 if { $res < 0 || $res == "" } {
     verbose -log "Spawning $cmd failed."
-    setup_xfail *-*-*
-    fail $test
+    unsupported $test
     return -1
 }
 pass $test
@@ -49,8 +48,13 @@ gdb_test_multiple "" $test {
 	pass $test
     }
     -re "valgrind: failed to start tool 'memcheck' for platform '.*': No such file or directory" {
-	setup_xfail *-*-*
-	fail $test
+	unsupported $test
+	return -1
+    }
+    -re "command not found" {
+	# The spawn succeeded, but then valgrind was not found - e.g. if
+	# we spawned SSH to a remote system.
+	unsupported $test
 	return -1
     }
 }
