@@ -1,3 +1,8 @@
+2010-02-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* symfile.c (addr_info_make_relative): Always use
+	find_lowest_section.
+
 2010-02-16  Sami Wagiaalla <swagiaal@redhat.com>
 
 	* NEWS: Added entry for namespace fixes.

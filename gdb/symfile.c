@@ -573,11 +573,9 @@ addr_info_make_relative (struct section_addr_info *addrs, bfd *abfd)
   int i;
 
   /* Find lowest loadable section to be used as starting point for
-     continguous sections. FIXME!! won't work without call to find
-     .text first, but this assumes text is lowest section. */
-  lower_sect = bfd_get_section_by_name (abfd, ".text");
-  if (lower_sect == NULL)
-    bfd_map_over_sections (abfd, find_lowest_section, &lower_sect);
+     continguous sections.  */
+  lower_sect = NULL;
+  bfd_map_over_sections (abfd, find_lowest_section, &lower_sect);
   if (lower_sect == NULL)
     {
       warning (_("no loadable sections found in added symbol-file %s"),
