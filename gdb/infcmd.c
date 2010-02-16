@@ -197,10 +197,12 @@ show_inferior_tty_command (struct ui_file *file, int from_tty,
 {
   /* Note that we ignore the passed-in value in favor of computing it
      directly.  */
+  const char *inferior_io_terminal = get_inferior_io_terminal ();
+  if (inferior_io_terminal == NULL)
+    inferior_io_terminal = "";
   fprintf_filtered (gdb_stdout,
-		    _("argument list to give program being debugged when "
-		      "it is started is %s"),
-		    get_inferior_io_terminal ());
+		    _("Terminal for future runs of program being debugged "
+		      "is \"%s\".\n"), inferior_io_terminal);
 }
 
 char *

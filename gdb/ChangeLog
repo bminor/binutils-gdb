@@ -1,5 +1,10 @@
 2010-02-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* infcmd.c (show_inferior_tty_command): Check for NULL.
+	Correct output message.
+
+2010-02-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* linespec.c (decode_line_1): Handle FILE:FUNCTION even if
 	FUNCTION contains parentheses.  Improve removal of a trailing
 	single quote.
