@@ -724,14 +724,11 @@ gdb_test "cd ${fullsrcdir}" \
 
 
 # GDB used to fail adding / on directories, on the first try only.
-# Do not use the `completion' start here as it would conflict with the
-# testcase (complete 'file ./gdb.base/complet') expectations.
-set uniquedir ${objdir}/${subdir}/compl-uNiQuEdIr
+set uniquedir ../testsuite/gdb.base/comp-dir
 set escapeduniquedir [string_to_regexp ${uniquedir}]
 set uniquesu subdi
 set uniquesub ${uniquesu}r
 set escapeuniquesub [string_to_regexp ${uniquesub}]
-file mkdir ${uniquedir}/${uniquesub}
 send_gdb "dir ${uniquedir}\t"
 gdb_expect {
 	-re "${escapeduniquedir}/" {

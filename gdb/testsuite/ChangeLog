@@ -1,5 +1,11 @@
 2010-02-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.base/comp-dir/subdir/dummy.txt: New file.
+	* gdb.base/completion.exp: Use comp-dir/subdir instead of creating
+	a temporary directory.
+
+2010-02-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.base/charset.exp: Use a single regular expression to match
 	show host-charset and show target-charset output.
 
