@@ -1,5 +1,9 @@
 2010-02-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.cp/cpcompletion.exp: Specify source file name explicitly.
+
+2010-02-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.base/comp-dir/subdir/dummy.txt: New file.
 	* gdb.base/completion.exp: Use comp-dir/subdir instead of creating
 	a temporary directory.

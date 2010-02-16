@@ -76,8 +76,9 @@ gdb_load ${binfile}
 
 set bp_location [gdb_get_line_number "Set breakpoint here" ${testfile}.cc]
 
-if {![runto $bp_location]} {
+if {![runto "${testfile}.cc:$bp_location"]} {
     perror "test suppressed"
+    return
 }
 
 # This also tests inheritance -- completion should only see a single
