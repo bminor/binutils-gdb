@@ -80,8 +80,7 @@ gdb_test "set tdesc file $srcdir/$subdir/single-reg.xml" \
 # Copy the core registers into the objdir if necessary, so that they
 # will be found by <xi:include>.
 foreach src ${core-regs} {
-    file delete "$src"
-    file copy "$srcdir/../features/$regdir$src" "$src"
+    set file [remote_download host "$srcdir/../features/$regdir$src" "$src"]
 }
 
 # Similarly, we need to copy files under test into the objdir.
@@ -91,9 +90,9 @@ proc load_description { file errmsg } {
     global gdb_prompt
     global core-regs
 
-    file delete "regs.xml"
+    file delete "$subdir/regs.xml"
     set ifd [open "$srcdir/$subdir/$file" r]
-    set ofd [open "regs.xml" w]
+    set ofd [open "$subdir/regs.xml" w]
     while {[gets $ifd line] >= 0} {
 	if {[regexp {<xi:include href="core-regs.xml"/>} $line]} {
 	    foreach src ${core-regs} {
@@ -105,16 +104,19 @@ proc load_description { file errmsg } {
     }
     close $ifd
     close $ofd
+    remote_download host "$subdir/regs.xml" "regs.xml"
+    file delete "$subdir/regs.xml"
 
     # Anchor the test output, so that error messages are detected.
     set cmd "set tdesc filename regs.xml"
-    set msg "set tdesc filename $file"
+    set msg "set tdesc filename regs.xml - from $file"
     set cmd_regex [string_to_regexp $cmd]
     gdb_test_multiple $cmd $msg {
 	-re "^$cmd_regex\r\n$errmsg$gdb_prompt $" {
 	    pass $msg
 	}
     }
+    remote_file host delete "regs.xml"
 }
 
 load_description "extra-regs.xml" ""
@@ -130,6 +132,5 @@ load_description "core-only.xml" ""
 gdb_test "ptype \$extrareg" "type = void"
 
 foreach src ${core-regs} {
-    file delete "$src"
+    remote_file host delete "$src"
 }
-file delete "regs.xml"

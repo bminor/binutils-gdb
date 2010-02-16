@@ -58,13 +58,15 @@ if { "$arch1" == "" || "$arch2" == "" || "$default_arch" == "" } {
 
 proc set_arch { arch which } {
     global gdb_prompt
+    global subdir
 
-    set fd [open "tdesc-arch.xml" w]
+    set fd [open "$subdir/tdesc-arch.xml" w]
     puts $fd \
 	"<target>
 	    <architecture>$arch</architecture>
 	 </target>"
     close $fd
+    remote_download host "${subdir}/tdesc-arch.xml" "tdesc-arch.xml"
 
     # Anchor the test output, so that error messages are detected.
     set cmd "set tdesc filename tdesc-arch.xml"
@@ -84,19 +86,21 @@ proc set_arch { arch which } {
 	"The target architecture is set automatically \\(currently $arch\\)" \
 	"$cmd ($which architecture)"
 
-    file delete "tdesc-arch.xml"
+    file delete "${subdir}/tdesc-arch.xml"
+    remote_file host delete "tdesc-arch.xml"
 }
 
 set_arch $arch1 first
 set_arch $arch2 second
 
 # Check an invalid architecture setting.
-set fd [open "tdesc-arch.xml" w]
+set fd [open "${subdir}/tdesc-arch.xml" w]
 puts $fd \
     "<target>
        <architecture>invalid</architecture>
      </target>"
 close $fd
+remote_download host "$subdir/tdesc-arch.xml" "tdesc-arch.xml"
 
 set cmd "set tdesc filename tdesc-arch.xml"
 gdb_test $cmd \
@@ -108,4 +112,5 @@ gdb_test $cmd \
     "The target architecture is set automatically \\(currently $default_arch\\)" \
     "$cmd (invalid architecture)"
 
-file delete "tdesc-arch.xml"
+file delete "${subdir}/tdesc-arch.xml"
+remote_file host delete "tdesc-arch.xml"
