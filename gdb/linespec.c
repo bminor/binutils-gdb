@@ -698,6 +698,8 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   int is_quote_enclosed;
   int is_objc_method = 0;
   char *saved_arg = *argptr;
+  /* If IS_QUOTED, the end of the quoted bit.  */
+  char *end_quote = NULL;
 
   if (not_found_ptr)
     *not_found_ptr = 0;
@@ -717,6 +719,8 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   */
 
   set_flags (*argptr, &is_quoted, &paren_pointer);
+  if (is_quoted)
+    end_quote = skip_quoted (*argptr);
 
   /* Check to see if it's a multipart linespec (with colons or
      periods).  */
@@ -747,13 +751,13 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
       return values;
   }
 
+  if (is_quoted)
+    *argptr = *argptr + 1;
+
   /* Does it look like there actually were two parts?  */
 
-  if ((p[0] == ':' || p[0] == '.') && paren_pointer == NULL)
+  if (p[0] == ':' || p[0] == '.')
     {
-      if (is_quoted)
-	*argptr = *argptr + 1;
-      
       /* Is it a C++ or Java compound data structure?
 	 The check on p[1] == ':' is capturing the case of "::",
 	 since p[0]==':' was checked above.  
@@ -762,14 +766,30 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 	 can return now. */
 	
       if (p[0] == '.' || p[1] == ':')
-	return decode_compound (argptr, funfirstline, canonical,
-				saved_arg, p, not_found_ptr);
+	{
+	  if (paren_pointer == NULL)
+	    return decode_compound (argptr, funfirstline, canonical,
+				    saved_arg, p, not_found_ptr);
+	  /* Otherwise, fall through to decode_variable below.  */
+	}
+      else
+	{
+	  /* No, the first part is a filename; set file_symtab to be that file's
+	     symtab.  Also, move argptr past the filename.  */
 
-      /* No, the first part is a filename; set file_symtab to be that file's
-	 symtab.  Also, move argptr past the filename.  */
+	  file_symtab = symtab_from_filename (argptr, p, is_quote_enclosed,
+					      not_found_ptr);
 
-      file_symtab = symtab_from_filename (argptr, p, is_quote_enclosed, 
-		      			  not_found_ptr);
+	  /* Check for single quotes on the non-filename part.  */
+	  if (!is_quoted)
+	    {
+	      is_quoted = (**argptr
+			   && strchr (get_gdb_completer_quote_characters (),
+				      **argptr) != NULL);
+	      if (is_quoted)
+		end_quote = skip_quoted (*argptr);
+	    }
+	}
     }
 #if 0
   /* No one really seems to know why this was added. It certainly
@@ -829,7 +849,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
     p = skip_quoted (*argptr + (((*argptr)[1] == '$') ? 2 : 1));
   else if (is_quoted)
     {
-      p = skip_quoted (*argptr);
+      p = end_quote;
       if (p[-1] != '\'')
 	error (_("Unmatched single quote."));
     }
@@ -862,6 +882,8 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
       copy[p - *argptr - 1] = '\0';
       copy++;
     }
+  else if (is_quoted)
+    copy[p - *argptr - 1] = '\0';
   while (*p == ' ' || *p == '\t')
     p++;
   *argptr = p;

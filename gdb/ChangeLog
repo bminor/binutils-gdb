@@ -1,5 +1,11 @@
 2010-02-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* linespec.c (decode_line_1): Handle FILE:FUNCTION even if
+	FUNCTION contains parentheses.  Improve removal of a trailing
+	single quote.
+
+2010-02-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gcore.c (do_bfd_delete_cleanup): New function.
 	(gcore_command): Use it.  Discard the cleanup after success.
 	(gcore_copy_callback): Delete dead code.

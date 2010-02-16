@@ -1,5 +1,14 @@
 2010-02-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.base/list.exp (test_list_filename_and_function): Add test
+	with single quotes.
+	* gdb.cp/overload.cc (intToChar): Rewrite onto one line for easy
+	matching.
+	* gdb.cp/overload.exp: Add tests with filename, function, and quotes.
+	Add KFAIL'd tests for PR gdb/11289.
+
+2010-02-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.cp/cpcompletion.exp: Specify source file name explicitly.
 
 2010-02-16  Daniel Jacobowitz  <dan@codesourcery.com>

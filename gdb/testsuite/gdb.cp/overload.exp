@@ -293,6 +293,21 @@ gdb_test "list \"foo::overloadfnarg(int, int (*)(int))\"" \
    "int foo::overloadfnarg.*\\(int arg, int \\(\\*foo\\) \\(int\\)\\).*" \
    "list overloaded function with function ptr args - quotes around argument"
 
+# Test list with filename.
+
+gdb_test "list ${srcfile}:intToChar" "int intToChar.*"
+gdb_test "list ${srcfile}:intToChar(char)" "int intToChar.*"
+gdb_test "list ${srcfile}:'intToChar(char)'" "int intToChar.*"
+gdb_test "list '${srcfile}:intToChar(char)'" "int intToChar.*"
+
+# And with filename and namespace... which does not work.
+
+setup_kfail *-*-* gdb/11289
+gdb_test "list ${srcfile}:foo::overloadfnarg(int)" "int foo::overloadfnarg"
+
+setup_kfail *-*-* gdb/11289
+gdb_test "list ${srcfile}:'foo::overloadfnarg(int)'" "int foo::overloadfnarg"
+
 # Now some tests to see how overloading and namespaces interact.
 
 gdb_test "print overloadNamespace(1)" ".\[0-9\]* = 1"

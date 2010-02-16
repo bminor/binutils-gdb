@@ -56,10 +56,7 @@ namespace N {
   int nsoverload (int x, int y) { return x + y; }
 };
 
-int intToChar (char c)
-{
-  return 297;
-}
+int intToChar (char c) { return 297; }
 
 void marker1()
 {}
