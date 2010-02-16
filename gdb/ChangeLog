@@ -1,3 +1,7 @@
+2010-02-16  Sami Wagiaalla <swagiaal@redhat.com>
+
+	* NEWS: Added entry for namespace fixes.
+
 2010-02-15  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (guess_structure_name): Allocate name on the

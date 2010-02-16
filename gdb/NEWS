@@ -3,6 +3,14 @@
 
 *** Changes since GDB 7.0
 
+* Namespace Support
+
+  GDB now supports importing of namespaces in C++.  This enables the
+  user to inspect variables from imported namespaces.  Support for
+  namepace aliasing has also been added.  So, if a namespace is 
+  aliased in the current scope (e.g. namepace C=A; ) the user can 
+  print variables using the alias (e.g. (gdb) print C::x).
+
 * New targets
 
 Xilinx MicroBlaze		microblaze-*-*
