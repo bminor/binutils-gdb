@@ -232,11 +232,10 @@ proc test_breakpoint_commands {} {
         "\\^done" \
         "breakpoint commands: set commands"
 
-    mi_gdb_test "-exec-continue" \
+    mi_send_resuming_command "exec-continue" "test hitting breakpoint with commands"
+    mi_gdb_test "" \
         ".*\\\$1 = 0.*\\\$10 = 9.*\\*running.*\\*stopped,reason=\"exited-normally\".*" \
-        "test hitting breakpoint with commands"    
-
-
+        "test hitting breakpoint with commands"
 }
 
 test_tbreak_creation_and_listing
