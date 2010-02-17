@@ -84,4 +84,7 @@ if ![set_lang_java] then {
     gdb_test "call x.dothat(55)" "new value is 58\r\n.*= 62.*" "virtual fn call"
     gdb_test "p x.addprint(1,2,3)" "sum is 6\r\n.*" "inherited static call"
     gdb_test "call x.addk(44)" "adding k gives 121\r\n.*= 121.*" "inherited virtual fn call"
+
+    # Regression test for a crasher.
+    gdb_test "print *jprint.props" " = .*" "print a java.util.Properties"
 }

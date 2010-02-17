@@ -1,6 +1,6 @@
 // jprint.java test program.
 //
-// Copyright 2004
+// Copyright 2004, 2010
 // Free Software Foundation, Inc.
 //
 // Written by Jeff Johnston <jjohnstn@redhat.com> 
@@ -21,6 +21,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import java.util.Properties;
+
 class jvclass {
   public static int k;
   static {
@@ -39,6 +41,8 @@ class jvclass {
 }
     
 public class jprint extends jvclass {
+  public static Properties props = new Properties ();
+
   public int dothat (int x) {
     int y = x + 3;
     System.out.println ("new value is " + y);

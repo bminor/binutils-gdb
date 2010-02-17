@@ -1,3 +1,8 @@
+2010-02-17  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.java/jprint.java (jprint.props): New field.
+	* gdb.java/jprint.exp (set_lang_java): Add regression test.
+
 2010-02-17  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.base/charset.exp: Don't assume new `regsub' syntax

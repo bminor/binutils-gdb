@@ -1504,7 +1504,12 @@ objfiles_changed (void)
 struct bfd *
 gdb_bfd_ref (struct bfd *abfd)
 {
-  int *p_refcount = bfd_usrdata (abfd);
+  int *p_refcount;
+
+  if (abfd == NULL)
+    return NULL;
+
+  p_refcount = bfd_usrdata (abfd);
 
   if (p_refcount != NULL)
     {
