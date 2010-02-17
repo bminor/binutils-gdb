@@ -1,3 +1,9 @@
+2010-02-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR shlibs/11293
+	* solib-svr4.c (enable_break): Check size of CORE_ADDR instead
+	of ULONGEST for address size.
+
 2010-02-17  Tom Tromey  <tromey@redhat.com>
 
 	* NEWS: Add C++ improvements section.

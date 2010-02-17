@@ -1459,9 +1459,9 @@ enable_break (struct svr4_info *info, int from_tty)
 	       invalid addresses like 0x101234567 for 32bit inferiors on 64bit
 	       GDB.  */
 
-	    if (addr_bit < (sizeof (ULONGEST) * HOST_CHAR_BIT))
+	    if (addr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
 	      {
-		CORE_ADDR space_size = (ULONGEST) 1 << addr_bit;
+		CORE_ADDR space_size = (CORE_ADDR) 1 << addr_bit;
 		CORE_ADDR tmp_entry_point = exec_entry_point (tmp_bfd,
 							      tmp_bfd_target);
 
