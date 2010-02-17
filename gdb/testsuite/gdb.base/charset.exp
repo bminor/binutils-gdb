@@ -140,7 +140,7 @@ send_gdb "set host-charset\n"
 gdb_expect {
     -re "Requires an argument. Valid arguments are (.*)\\.\r\n$gdb_prompt $" {
 	set host_charset_list $expect_out(1,string)
-	set host_charset_list [regsub -all {, } $host_charset_list {,}]
+	regsub -all {, } $host_charset_list {,} host_charset_list
 	foreach host_charset [split $host_charset_list ","] {
 	    set charsets($host_charset) 1
 	}
@@ -168,7 +168,7 @@ send_gdb "set target-charset\n"
 gdb_expect {
     -re "Requires an argument. Valid arguments are (.*)\\.\r\n$gdb_prompt $" {
 	set target_charset_list $expect_out(1,string)
-	set target_charset_list [regsub -all {, } $target_charset_list {,}]
+	regsub -all {, } $target_charset_list {,} target_charset_list
 	foreach target_charset [split $target_charset_list ","] {
 	    if {! [info exists charsets($target_charset)]} {
 		set charsets($target_charset) 0
