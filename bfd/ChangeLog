@@ -1,3 +1,9 @@
+2010-02-15  Dave Korn  <dave.korn.cygwin@gmail.com>
+
+	PR binutils/11280
+	* configure.host (*-*-solaris2.11):  Add host define to select
+	valid default code page for windres/windmc on solaris.
+
 2010-01-30  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
 	* coff-rs6000.c (xcoff_howto_table): Change size to 0 and bitsize to 1.
