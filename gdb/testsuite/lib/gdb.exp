@@ -2830,7 +2830,7 @@ proc build_id_debug_filename_get { exec } {
     }
     # Convert it to hex.
     binary scan $data H* data
-    set data [regsub {^..} $data {\0/}]
+    regsub {^..} $data {\0/} data
     return ".build-id/${data}.debug";
 }
 

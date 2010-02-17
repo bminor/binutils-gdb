@@ -1,5 +1,10 @@
 2010-02-17  Pedro Alves  <pedro@codesourcery.com>
 
+	* lib/gdb.exp (build_id_debug_filename_get): Don't assume new
+	`regsub' syntax available.
+
+2010-02-17  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdb.base/shmain.c (main): Remove printf call.
 	* gdb.base/sizeof.c (main): Cast return of sizeof to int.
 	* gdb.base/unload.c (main): Make format of fprintf a string
