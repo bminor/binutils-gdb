@@ -1451,7 +1451,32 @@ enable_break (struct svr4_info *info, int from_tty)
          from our so_list, then try using the AT_BASE auxilliary entry.  */
       if (!load_addr_found)
         if (target_auxv_search (&current_target, AT_BASE, &load_addr) > 0)
-          load_addr_found = 1;
+	  {
+	    int addr_bit = gdbarch_addr_bit (target_gdbarch);
+
+	    /* Ensure LOAD_ADDR has proper sign in its possible upper bits so
+	       that `+ load_addr' will overflow CORE_ADDR width not creating
+	       invalid addresses like 0x101234567 for 32bit inferiors on 64bit
+	       GDB.  */
+
+	    if (addr_bit < (sizeof (ULONGEST) * HOST_CHAR_BIT))
+	      {
+		CORE_ADDR space_size = (ULONGEST) 1 << addr_bit;
+		CORE_ADDR tmp_entry_point = exec_entry_point (tmp_bfd,
+							      tmp_bfd_target);
+
+		gdb_assert (load_addr < space_size);
+
+		/* TMP_ENTRY_POINT exceeding SPACE_SIZE would be for prelinked
+		   64bit ld.so with 32bit executable, it should not happen.  */
+
+		if (tmp_entry_point < space_size
+		    && tmp_entry_point + load_addr >= space_size)
+		  load_addr -= space_size;
+	      }
+
+	    load_addr_found = 1;
+	  }
 
       /* Otherwise we find the dynamic linker's base address by examining
 	 the current pc (which should point at the entry point for the

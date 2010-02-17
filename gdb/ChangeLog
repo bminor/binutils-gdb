@@ -1,3 +1,8 @@
+2010-02-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* solib-svr4.c (enable_break <target_auxv_search>): New variable
+	addr_bit.  Adjust LOAD_ADDR sign for cross-arch inferiors.
+
 2010-02-17  Tristan Gingold  <gingold@adacore.com>
 	    Petr Hluzín <petr.hluzin@gmail.com>
 
