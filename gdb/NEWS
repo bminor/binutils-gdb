@@ -3,13 +3,26 @@
 
 *** Changes since GDB 7.0
 
-* Namespace Support
+* C++ Improvements
+
+  ** Namespace Support
 
   GDB now supports importing of namespaces in C++.  This enables the
   user to inspect variables from imported namespaces.  Support for
   namepace aliasing has also been added.  So, if a namespace is 
   aliased in the current scope (e.g. namepace C=A; ) the user can 
   print variables using the alias (e.g. (gdb) print C::x).
+
+  ** Bug Fixes
+
+  All known bugs relating to the printing of virtual base class were
+  fixed.  It is now possible to call overloaded static methods using a
+  qualified name.
+
+  ** Cast Operators
+
+  The C++ cast operators static_cast<>, dynamic_cast<>, const_cast<>,
+  and reinterpret_cast<> are now handled by the C++ expression parser.
 
 * New targets
 
