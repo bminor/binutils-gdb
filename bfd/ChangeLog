@@ -1,4 +1,4 @@
-2010-02-15  Dave Korn  <dave.korn.cygwin@gmail.com>
+2010-02-17  Dave Korn  <dave.korn.cygwin@gmail.com>
 
 	PR binutils/11280
 	* configure.host (*-*-solaris2.11):  Add host define to select
