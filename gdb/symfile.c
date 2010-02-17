@@ -371,16 +371,16 @@ build_section_addr_info_from_objfile (const struct objfile *objfile)
     mask = ((CORE_ADDR) 1 << addr_bit) - 1;
 
   sap = alloc_section_addr_info (objfile->num_sections);
-  for (i = 0, sec = objfile->obfd->sections;
-       i < objfile->num_sections;
-       i++, sec = sec->next)
-    {
-      gdb_assert (sec != NULL);
-      sap->other[i].addr = (bfd_get_section_vma (objfile->obfd, sec)
-                            + objfile->section_offsets->offsets[i]) & mask;
-      sap->other[i].name = xstrdup (bfd_get_section_name (objfile->obfd, sec));
-      sap->other[i].sectindex = sec->index;
-    }
+  for (i = 0, sec = objfile->obfd->sections; sec != NULL; sec = sec->next)
+    if (bfd_get_section_flags (objfile->obfd, sec) & (SEC_ALLOC | SEC_LOAD))
+      {
+	sap->other[i].addr = (bfd_get_section_vma (objfile->obfd, sec)
+			      + objfile->section_offsets->offsets[i]) & mask;
+	sap->other[i].name = xstrdup (bfd_get_section_name (objfile->obfd,
+							    sec));
+	sap->other[i].sectindex = sec->index;
+	i++;
+      }
   return sap;
 }
 
