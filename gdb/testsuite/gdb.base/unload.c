@@ -44,7 +44,7 @@ int main()
   
   if (!handle)
     {
-      fprintf (stderr, dlerror ());
+      fprintf (stderr, "%s\n", dlerror ());
       exit (1);
     }
 
@@ -53,9 +53,9 @@ int main()
   if (!unloadshr)
     {
 #ifdef __WIN32__
-      fprintf (stderr, "error %d occurred", GetLastError ());
+      fprintf (stderr, "error %d occurred\n", GetLastError ());
 #else
-      fprintf (stderr, "%s", dlerror ());
+      fprintf (stderr, "%s\n", dlerror ());
 #endif
       exit (1);
     }
@@ -71,7 +71,7 @@ int main()
   
   if (!handle)
     {
-      fprintf (stderr, dlerror ());
+      fprintf (stderr, "%s\n", dlerror ());
       exit (1);
     }
 
@@ -80,9 +80,9 @@ int main()
   if (!unloadshr)
     {
 #ifdef __WIN32__
-      fprintf (stderr, "error %d occurred", GetLastError ());
+      fprintf (stderr, "error %d occurred\n", GetLastError ());
 #else
-      fprintf (stderr, "%s", dlerror ());
+      fprintf (stderr, "%s\n", dlerror ());
 #endif
       exit (1);
     }

@@ -46,7 +46,6 @@ int main()
   g = shr2(g);
   g = mainshr1(g);
   sg = 1.1;
-  printf("address of sg is 0x%x\n", &sg);
   y.a = 3;
   y.b = 4;
   g = local_structarg(y);

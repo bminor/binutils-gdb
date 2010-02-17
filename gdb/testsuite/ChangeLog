@@ -1,3 +1,11 @@
+2010-02-17  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/shmain.c (main): Remove printf call.
+	* gdb.base/sizeof.c (main): Cast return of sizeof to int.
+	* gdb.base/unload.c (main): Make format of fprintf a string
+	literal.  Add missing endlines to prints to stderr.
+	* gdb.base/watchpoint-solib.c (open_shlib): Ditto.
+
 2010-02-17  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.java/jprint.java (jprint.props): New field.
