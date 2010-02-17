@@ -54,9 +54,9 @@ typedef int Py_ssize_t;
    PyGILState_STATE will be.  */
 #ifndef WITH_THREAD
 #define PyGILState_Ensure() ((PyGILState_STATE) 0)
-#define PyGILState_Release(ARG) (ARG)
+#define PyGILState_Release(ARG) ((void)(ARG))
 #define PyEval_InitThreads() 0
-#define PyThreadState_Swap(ARG) (ARG)
+#define PyThreadState_Swap(ARG) ((void)(ARG))
 #define PyEval_InitThreads() 0
 #define PyEval_ReleaseLock() 0
 #endif
