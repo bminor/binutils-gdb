@@ -1,6 +1,6 @@
 2010-02-17  Pedro Alves  <pedro@codesourcery.com>
 
-        * gdb.base/charset.exp: Don't assume new `regsub' syntax
+	* gdb.base/charset.exp: Don't assume new `regsub' syntax
 	available.
 
 2010-02-16  Daniel Jacobowitz  <dan@codesourcery.com>
