@@ -686,7 +686,7 @@ avr_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc_beg, CORE_ADDR pc_end,
           info->saved_regs[AVR_SREG_REGNUM].addr = 3;
           info->saved_regs[0].addr = 2;
           info->saved_regs[1].addr = 1;
-          info->size += 3;
+          info->size += 2;
 	}
     }
 
@@ -708,9 +708,7 @@ avr_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc_beg, CORE_ADDR pc_end,
 	break;
     }
 
-  if (vpc >= AVR_MAX_PROLOGUE_SIZE)
-     fprintf_unfiltered (gdb_stderr,
-                         _("Hit end of prologue while scanning pushes\n"));
+  gdb_assert (vpc < AVR_MAX_PROLOGUE_SIZE);
 
   /* Handle static small stack allocation using rcall or push.  */
 

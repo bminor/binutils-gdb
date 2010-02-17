@@ -1,3 +1,9 @@
+2010-02-17  Tristan Gingold  <gingold@adacore.com>
+	    Petr Hluzín <petr.hluzin@gmail.com>
+
+	* avr-tdep.c (avr_scan_prologue): Convert an if statement to a
+	gdb_assert.  Fix info->size for SIG prologue.
+
 2010-02-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* infcmd.c (show_inferior_tty_command): Check for NULL.
