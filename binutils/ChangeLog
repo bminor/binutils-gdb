@@ -1,3 +1,11 @@
+2010-02-18  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* readelf.c (arm_attr_tag_Advanced_SIMD_arch): Add description of
+	newly permitted attribute values.
+	(arm_attr_tag_Virtualization_use): Likewise.
+	(arm_attr_tag_DIV_use): Add description of new attribute.
+	(arm_attr_tag_MPextension_use_legacy): Likewise.
+
 2010-02-15  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: Updated Vietnamese translation.

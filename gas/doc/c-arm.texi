@@ -587,9 +587,10 @@ The @var{tag} is either an attribute number, or one of the following:
 @code{Tag_ABI_optimization_goals}, @code{Tag_ABI_FP_optimization_goals},
 @code{Tag_compatibility}, @code{Tag_CPU_unaligned_access},
 @code{Tag_VFP_HP_extension}, @code{Tag_ABI_FP_16bit_format},
+@code{Tag_MPextension_use}, @code{Tag_DIV_use},
 @code{Tag_nodefaults}, @code{Tag_also_compatible_with},
 @code{Tag_conformance}, @code{Tag_T2EE_use},
-@code{Tag_Virtualization_use}, @code{Tag_MPextension_use}
+@code{Tag_Virtualization_use}
 
 The @var{value} is either a @code{number}, @code{"string"}, or
 @code{number, "string"} depending on the tag.

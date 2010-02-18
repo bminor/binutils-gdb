@@ -23043,12 +23043,14 @@ arm_convert_symbolic_attribute (const char *name)
       T (Tag_CPU_unaligned_access),
       T (Tag_VFP_HP_extension),
       T (Tag_ABI_FP_16bit_format),
+      T (Tag_MPextension_use),
+      T (Tag_DIV_use),
       T (Tag_nodefaults),
       T (Tag_also_compatible_with),
       T (Tag_conformance),
       T (Tag_T2EE_use),
       T (Tag_Virtualization_use),
-      T (Tag_MPextension_use)
+      /* We deliberately do not include Tag_MPextension_use_legacy.  */
 #undef T
     };
   unsigned int i;

@@ -9812,11 +9812,33 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
       /* This is the first object.  Copy the attributes.  */
       _bfd_elf_copy_obj_attributes (ibfd, obfd);
 
+      out_attr = elf_known_obj_attributes_proc (obfd);
+
       /* Use the Tag_null value to indicate the attributes have been
 	 initialized.  */
-      elf_known_obj_attributes_proc (obfd)[0].i = 1;
+      out_attr[0].i = 1;
 
-      return TRUE;
+      /* We do not output objects with Tag_MPextension_use_legacy - we move
+	 the attribute's value to Tag_MPextension_use.  */
+      if (out_attr[Tag_MPextension_use_legacy].i != 0)
+	{
+	  if (out_attr[Tag_MPextension_use].i != 0
+	      && out_attr[Tag_MPextension_use_legacy].i
+	        != out_attr[Tag_MPextension_use].i)
+	    {
+	      _bfd_error_handler
+		(_("Error: %B has both the current and legacy "
+		   "Tag_MPextension_use attributes"), ibfd);
+	      result = FALSE;
+	    }
+
+	  out_attr[Tag_MPextension_use] =
+	    out_attr[Tag_MPextension_use_legacy];
+	  out_attr[Tag_MPextension_use_legacy].type = 0;
+	  out_attr[Tag_MPextension_use_legacy].i = 0;
+	}
+
+      return result;
     }
 
   in_attr = elf_known_obj_attributes_proc (ibfd);
@@ -10149,6 +10171,52 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	    }
 	  if (in_attr[i].i != 0)
 	    out_attr[i].i = in_attr[i].i;
+	  break;
+
+	case Tag_DIV_use:
+	  /* This tag is set to zero if we can use UDIV and SDIV in Thumb
+	     mode on a v7-M or v7-R CPU; to one if we can not use UDIV or
+	     SDIV at all; and to two if we can use UDIV or SDIV on a v7-A
+	     CPU.  We will merge as follows: If the input attribute's value
+	     is one then the output attribute's value remains unchanged.  If
+	     the input attribute's value is zero or two then if the output
+	     attribute's value is one the output value is set to the input
+	     value, otherwise the output value must be the same as the
+	     inputs.  */ 
+	  if (in_attr[i].i != 1 && out_attr[i].i != 1) 
+	    { 
+	      if (in_attr[i].i != out_attr[i].i)
+		{
+		  _bfd_error_handler
+		    (_("DIV usage mismatch between %B and %B"),
+		     ibfd, obfd); 
+		  result = FALSE;
+		}
+	    } 
+
+	  if (in_attr[i].i != 1)
+	    out_attr[i].i = in_attr[i].i; 
+	  
+	  break;
+
+	case Tag_MPextension_use_legacy:
+	  /* We don't output objects with Tag_MPextension_use_legacy - we
+	     move the value to Tag_MPextension_use.  */
+	  if (in_attr[i].i != 0 && in_attr[Tag_MPextension_use].i != 0)
+	    {
+	      if (in_attr[Tag_MPextension_use].i != in_attr[i].i)
+		{
+		  _bfd_error_handler
+		    (_("%B has has both the current and legacy "
+		       "Tag_MPextension_use attributes"), 
+		     ibfd);
+		  result = FALSE;
+		}
+	    }
+
+	  if (in_attr[i].i > out_attr[Tag_MPextension_use].i)
+	    out_attr[Tag_MPextension_use] = in_attr[i];
+
 	  break;
 
 	case Tag_nodefaults:

@@ -296,6 +296,15 @@ set armeabitests {
      {"EABI attribute merging 5" "-r" "" {attr-merge-5.s attr-merge-5.s}
       {{readelf -A attr-merge-5.attr}}
       "attr-merge-5"}
+     {"EABI attribute merging 6" "-r" "" {attr-merge-6a.s attr-merge-6b.s}
+      {{readelf -A attr-merge-6.attr}}
+      "attr-merge-6"}
+     {"EABI attribute merging 6 reversed" "-r" "" {attr-merge-6b.s attr-merge-6a.s}
+      {{readelf -A attr-merge-6.attr}}
+      "attr-merge-6r"}
+     {"EABI attribute merging 7" "-r" "" {attr-merge-7a.s attr-merge-7b.s}
+      {{readelf -A attr-merge-7.attr}}
+      "attr-merge-7"}
      {"EABI attribute arch merging 1" "-r" "" {arch-v6k.s arch-v6t2.s}
       {{readelf -A attr-merge-arch-1.attr}}
       "attr-merge-arch-1"}

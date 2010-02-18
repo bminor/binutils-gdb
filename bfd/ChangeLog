@@ -1,3 +1,9 @@
+2010-02-18  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Add support for
+	merging Tag_DIV_use, Tag_MPextension_use, and
+	Tag_MPextension_use_legacy tags.
+
 2010-02-18  Alan Modra  <amodra@gmail.com>
 
 	* elf.c (bfd_elf_set_group_contents): Revert accidental 2009-01-15

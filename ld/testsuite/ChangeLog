@@ -1,3 +1,18 @@
+2010-02-18  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* ld-arm/attr-merge-3.attr: Fix test for new attribute values.
+	* ld-arm/attr-merge-3b.s: Likewise.
+	* ld-arm/attr-merge-unknown-1.d: Fix test now that 42 is a recognised
+	attribute ID.
+	* ld-arm/attr-merge-unknown-1.s: Likewise.
+	* ld-arm/attr-merge-6.attr: New test.
+	* ld-arm/attr-merge-6a.s: Likewise.
+	* ld-arm/attr-merge-6b.s: Likewise.
+	* ld-arm/attr-merge-7.attr: Likewise.
+	* ld-arm/attr-merge-7a.s: Likewise.
+	* ld-arm/attr-merge-7b.s: Likewise.
+	* ld-arm/arm-elf.exp: Run the new tests.
+
 2010-02-15  Matthew Gretton-Dann <matthew.gretton-dann@arm.com>
 
 	* ld-arm/jump-reloc-veneers-long.d: Correct testcase for
