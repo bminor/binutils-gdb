@@ -1,3 +1,8 @@
+2010-02-18  Alan Modra  <amodra@gmail.com>
+
+	* binutils-all/group-5.s, * binutils-all/group-5.d: New test.
+	* binutils-all/objcopy.exp: Run it.
+
 2010-02-01  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* binutils-all/note-1.d: New.
