@@ -210,6 +210,20 @@ show ada trust-PAD-over-XVS
    off, but this introduces a slight performance penalty.  The default
    is on.
 
+* Python API Improvements
+
+  ** GDB provides the new class gdb.LazyString.  This is useful in
+     some pretty-printing cases.  The new method gdb.Value.lazy_string
+     provides a simple way to create objects of this type.
+
+  ** The fields returned by gdb.Type.fields now have an
+     `is_base_class' attribute.
+
+  ** The new method gdb.Type.range returns the range of an array type.
+
+  ** The new method gdb.parse_and_eval can be used to parse and
+     evaluate an expression.
+
 * New remote packets
 
 QTDV

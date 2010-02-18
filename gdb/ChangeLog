@@ -1,3 +1,7 @@
+2010-02-17  Tom Tromey  <tromey@redhat.com>
+
+	* NEWS: Add Python API Improvements section.
+
 2010-02-18  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* NEWS: Correct typo.
