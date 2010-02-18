@@ -3715,7 +3715,7 @@ symfile_map_offsets_to_segments (bfd *abfd, struct symfile_segment_data *data,
 
   /* It doesn't make sense to call this function unless you have some
      segment base addresses.  */
-  gdb_assert (segment_bases > 0);
+  gdb_assert (num_segment_bases > 0);
 
   /* If we do not have segment mappings for the object file, we
      can not relocate it by segments.  */

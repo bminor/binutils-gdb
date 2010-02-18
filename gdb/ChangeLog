@@ -1,3 +1,8 @@
+2010-02-18  Harald Koenig  <H.Koenig@science-computing.de>
+
+	* mi/mi-main.c (mi_cmd_exec_jump): Drop unneeded `return'.
+	* symfile.c (symfile_map_offsets_to_segments): Fix assertion.
+
 2010-02-17  Tom Tromey  <tromey@redhat.com>
 
 	* NEWS: Add Python API Improvements section.

@@ -190,7 +190,7 @@ void
 mi_cmd_exec_jump (char *args, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  return mi_execute_async_cli_command ("jump", argv, argc);
+  mi_execute_async_cli_command ("jump", argv, argc);
 }
  
 static int
