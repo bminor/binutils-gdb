@@ -638,21 +638,13 @@
 ; code.  Usually there's a bit of over-specification, but in more complicated
 ; instruction sets there isn't.
 
-;; Print some operands take a hash prefix.
-;; ??? Why don't we also handle one when parsing?
+; M32R specific operand attributes:
 
-(define-pmacro (duhpo x-name x-comment x-attrs x-type x-index)
-  (define-operand (name x-name) (comment x-comment)
-    (.splice attrs (.unsplice x-attrs))
-    (type x-type) (index x-index)
-    (handlers (print "unsigned_with_hash_prefix")))
-)
-
-(define-pmacro (dshpo x-name x-comment x-attrs x-type x-index)
-  (define-operand (name x-name) (comment x-comment)
-    (.splice attrs (.unsplice x-attrs))
-    (type x-type) (index x-index)
-    (handlers (print "signed_with_hash_prefix")))
+(define-attr
+  (for operand)
+  (type boolean)
+  (name HASH-PREFIX)
+  (comment "immediates have an optional '#' prefix")
 )
 
 ; ??? Convention says this should be o-sr, but then the insn definitions
@@ -670,23 +662,21 @@
 (dnop scr    "source control register"      () h-cr   f-r2)
 (dnop dcr    "destination control register" () h-cr   f-r1)
 
-(dshpo simm8  "8 bit signed immediate"       () h-sint f-simm8)
-(dshpo simm16 "16 bit signed immediate"      () h-sint f-simm16)
-(duhpo uimm3  "3 bit unsigned number"        () h-uint f-uimm3)
-(duhpo uimm4  "4 bit trap number"            () h-uint f-uimm4)
-(duhpo uimm5  "5 bit shift count"            () h-uint f-uimm5)
-(duhpo uimm8  "8 bit unsigned immediate"     () h-uint f-uimm8)
-(duhpo uimm16 "16 bit unsigned immediate"    () h-uint f-uimm16)
+(dnop simm8  "8 bit signed immediate"       (HASH-PREFIX) h-sint f-simm8)
+(dnop simm16 "16 bit signed immediate"      (HASH-PREFIX) h-sint f-simm16)
+(dnop uimm3  "3 bit unsigned number"        (HASH-PREFIX) h-uint f-uimm3)
+(dnop uimm4  "4 bit trap number"            (HASH-PREFIX) h-uint f-uimm4)
+(dnop uimm5  "5 bit shift count"            (HASH-PREFIX) h-uint f-uimm5)
+(dnop uimm8  "8 bit unsigned immediate"     (HASH-PREFIX) h-uint f-uimm8)
+(dnop uimm16 "16 bit unsigned immediate"    (HASH-PREFIX) h-uint f-uimm16)
 
-(duhpo imm1 "1 bit immediate" ((MACH m32rx,m32r2)) h-uint f-imm1)
-
-(dnop accd   "accumulator destination register" ((MACH m32rx,m32r2)) h-accums f-accd)
-(dnop accs   "accumulator source register"  ((MACH m32rx,m32r2))     h-accums f-accs)
-(dnop acc    "accumulator reg (d)"          ((MACH m32rx,m32r2))     h-accums f-acc)
+(dnop imm1   "1 bit immediate"              ((MACH m32rx,m32r2) HASH-PREFIX) h-uint f-imm1)
+(dnop accd   "accumulator destination register" ((MACH m32rx,m32r2))        h-accums f-accd)
+(dnop accs   "accumulator source register"  ((MACH m32rx,m32r2))            h-accums f-accs)
+(dnop acc    "accumulator reg (d)"          ((MACH m32rx,m32r2))            h-accums f-acc)
 
 ; slo16,ulo16 are used in both with-hash-prefix/no-hash-prefix cases.
-; e.g. add3 r3,r3,#1 and ld r3,@(4,r4).  We could use special handlers on
-; the operands themselves.
+; e.g. add3 r3,r3,#1 and ld r3,@(4,r4).  We could use HASH-PREFIX.
 ; Instead we create a fake operand `hash'.  The m32r is an illustration port,
 ; so we often try out various ways of doing things.
 
@@ -726,7 +716,7 @@
   (handlers (parse "ulo16"))
 )
 
-(dnop uimm24 "24 bit address" () h-addr f-uimm24)
+(dnop uimm24 "24 bit address" (HASH-PREFIX) h-addr f-uimm24)
 
 (define-operand
   (name disp8)
