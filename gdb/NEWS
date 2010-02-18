@@ -266,7 +266,7 @@ the target for evaluation using the same bytecode format as is used
 for tracepoint actions.
 
 * "disassemble" command with a /r modifier, print the raw instructions
-in hex as well as in symbolic form."
+in hex as well as in symbolic form.
 
 * Process record and replay
 
