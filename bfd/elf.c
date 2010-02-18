@@ -1,7 +1,7 @@
 /* ELF executable support for BFD.
 
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -2743,17 +2743,16 @@ bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
   while (elt != NULL)
     {
       asection *s;
-      unsigned int idx;
 
       s = elt;
-      if (! elf_discarded_section (s))
+      if (!gas)
+	s = s->output_section;
+      if (s != NULL
+	  && !bfd_is_abs_section (s))
 	{
+	  unsigned int idx = elf_section_data (s)->this_idx;
+
 	  loc -= 4;
-	  if (!gas)
-	    s = s->output_section;
-	  idx = 0;
-	  if (s != NULL)
-	    idx = elf_section_data (s)->this_idx;
 	  H_PUT_32 (abfd, idx, loc);
 	}
       elt = elf_next_in_group (elt);
@@ -6160,21 +6159,27 @@ _bfd_elf_copy_private_header_data (bfd *ibfd, bfd *obfd)
 	return FALSE;
     }
 
-  /* _bfd_elf_copy_private_section_data copied over the SHF_GROUP flag
-     but this might be wrong if we deleted the group section.  */
   for (isec = ibfd->sections; isec != NULL; isec = isec->next)
-    if (elf_section_type (isec) == SHT_GROUP
-	&& isec->output_section == NULL)
+    if (elf_section_type (isec) == SHT_GROUP)
       {
 	asection *first = elf_next_in_group (isec);
 	asection *s = first;
 	while (s != NULL)
 	  {
-	    if (s->output_section != NULL)
+	    /* If this member section is being output but the
+	       SHT_GROUP section is not, then clear the group info
+	       set up by _bfd_elf_copy_private_section_data.  */
+	    if (s->output_section != NULL
+		&& isec->output_section == NULL)
 	      {
 		elf_section_flags (s->output_section) &= ~SHF_GROUP;
 		elf_group_name (s->output_section) = NULL;
 	      }
+	    /* Conversely, if the member section is not being output
+	       but the SHT_GROUP section is, then adjust its size.  */
+	    else if (s->output_section == NULL
+		     && isec->output_section != NULL)
+	      isec->output_section->size -= 4;
 	    s = elf_next_in_group (s);
 	    if (s == first)
 	      break;
