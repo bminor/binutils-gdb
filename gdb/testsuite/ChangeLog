@@ -1,3 +1,7 @@
+2010-02-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.python/py-type.exp: Check for Python support.
+
 2010-02-17  Pedro Alves  <pedro@codesourcery.com>
 
 	* lib/gdb.exp (build_id_debug_filename_get): Don't assume new

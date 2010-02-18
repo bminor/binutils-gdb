@@ -128,6 +128,15 @@ proc test_range {} {
 # Perform C Tests.
 build_inferior "c"
 restart_gdb "break to inspect struct and array."
+
+gdb_test_multiple "python print 'hello, world!'" "verify python support" {
+    -re "not supported.*$gdb_prompt $"	{
+      unsupported "python support is disabled"
+      return -1
+    }
+    -re "$gdb_prompt $"	{}
+}
+
 test_fields "c"
 
 # Perform C++ Tests.
