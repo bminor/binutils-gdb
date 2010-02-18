@@ -1,5 +1,9 @@
 2010-02-18  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
+	* ld-arm/attr-merge-6.attr: Add new test.  Missed off last commit.
+
+2010-02-18  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
 	* ld-arm/attr-merge-3.attr: Fix test for new attribute values.
 	* ld-arm/attr-merge-3b.s: Likewise.
 	* ld-arm/attr-merge-unknown-1.d: Fix test now that 42 is a recognised
