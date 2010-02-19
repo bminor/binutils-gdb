@@ -1,3 +1,9 @@
+2010-02-19  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (get_group_flags): Return empty string when flags zero.
+	Add space in other returned values.
+	(process_section_groups): Adjust format string.
+
 2010-02-18  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* readelf.c (arm_attr_tag_Advanced_SIMD_arch): Add description of

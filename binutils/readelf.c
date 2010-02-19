@@ -4633,11 +4633,14 @@ get_group_flags (unsigned int flags)
   static char buff[32];
   switch (flags)
     {
+    case 0:
+      return "";
+
     case GRP_COMDAT:
-      return "COMDAT";
+      return "COMDAT ";
 
    default:
-      snprintf (buff, sizeof (buff), _("[<unknown>: 0x%x]"), flags);
+      snprintf (buff, sizeof (buff), _("[<unknown>: 0x%x] "), flags);
       break;
     }
   return buff;
@@ -4797,7 +4800,7 @@ process_section_groups (FILE * file)
 
 	  if (do_section_groups)
 	    {
-	      printf ("\n%s group section [%5u] `%s' [%s] contains %u sections:\n",
+	      printf ("\n%sgroup section [%5u] `%s' [%s] contains %u sections:\n",
 		      get_group_flags (entry), i, name, group_name, size);
 
 	      printf (_("   [Index]    Name\n"));
