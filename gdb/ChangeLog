@@ -1,5 +1,10 @@
 2010-02-19  Joel Brobecker  <brobecker@adacore.com>
 
+	* README: Update GDB version number to 7.0.90.
+	* version.in: Likewise.
+
+2010-02-19  Joel Brobecker  <brobecker@adacore.com>
+
 	Workaround for PR/10966:
 	* linespec.c (add_matching_methods): Only match methods that are
 	in the VAR_DOMAIN and whose class is LOC_BLOCK.
