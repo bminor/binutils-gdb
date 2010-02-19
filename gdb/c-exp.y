@@ -162,7 +162,7 @@ static struct stoken operator_stoken (const char *);
 
 %type <voidval> exp exp1 type_exp start variable qualified_name lcurly
 %type <lval> rcurly
-%type <tval> type typebase qualified_type
+%type <tval> type typebase
 %type <tvec> nonempty_typelist
 /* %type <bval> block */
 
@@ -212,7 +212,7 @@ static struct stoken operator_stoken (const char *);
    legal basetypes.  */
 %token SIGNED_KEYWORD LONG SHORT INT_KEYWORD CONST_KEYWORD VOLATILE_KEYWORD DOUBLE_KEYWORD
 
-%token <voidval> VARIABLE
+%token <sval> VARIABLE
 
 %token <opcode> ASSIGN_MODIFY
 
@@ -581,7 +581,9 @@ exp	:	variable
 	;
 
 exp	:	VARIABLE
-			/* Already written by write_dollar_variable. */
+			{
+			  write_dollar_variable ($1);
+			}
 	;
 
 exp	:	SIZEOF '(' type ')'	%prec UNARY
@@ -743,9 +745,9 @@ variable:	block COLONCOLON name
 			  write_exp_elt_opcode (OP_VAR_VALUE); }
 	;
 
-qualified_name:	typebase COLONCOLON name
+qualified_name:	TYPENAME COLONCOLON name
 			{
-			  struct type *type = $1;
+			  struct type *type = $1.type;
 			  CHECK_TYPEDEF (type);
 			  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
 			      && TYPE_CODE (type) != TYPE_CODE_UNION
@@ -758,9 +760,9 @@ qualified_name:	typebase COLONCOLON name
 			  write_exp_string ($3);
 			  write_exp_elt_opcode (OP_SCOPE);
 			}
-	|	typebase COLONCOLON '~' name
+	|	TYPENAME COLONCOLON '~' name
 			{
-			  struct type *type = $1;
+			  struct type *type = $1.type;
 			  struct stoken tmp_token;
 			  CHECK_TYPEDEF (type);
 			  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
@@ -782,12 +784,19 @@ qualified_name:	typebase COLONCOLON name
 			  write_exp_string (tmp_token);
 			  write_exp_elt_opcode (OP_SCOPE);
 			}
+	|	TYPENAME COLONCOLON name COLONCOLON name
+			{
+			  char *copy = copy_name ($3);
+			  error (_("No type \"%s\" within class "
+				   "or namespace \"%s\"."),
+				 copy, TYPE_NAME ($1.type));
+			}
 	;
 
 variable:	qualified_name
-	|	COLONCOLON name
+	|	COLONCOLON name_not_typename
 			{
-			  char *name = copy_name ($2);
+			  char *name = copy_name ($2.stoken);
 			  struct symbol *sym;
 			  struct minimal_symbol *msymbol;
 
@@ -1037,77 +1046,6 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 			{ $$ = follow_types ($2); }
 	| typebase const_or_volatile_or_space_identifier_noopt 
 			{ $$ = follow_types ($1); }
-	| qualified_type
-	;
-
-/* FIXME: carlton/2003-09-25: This next bit leads to lots of
-   reduce-reduce conflicts, because the parser doesn't know whether or
-   not to use qualified_name or qualified_type: the rules are
-   identical.  If the parser is parsing 'A::B::x', then, when it sees
-   the second '::', it knows that the expression to the left of it has
-   to be a type, so it uses qualified_type.  But if it is parsing just
-   'A::B', then it doesn't have any way of knowing which rule to use,
-   so there's a reduce-reduce conflict; it picks qualified_name, since
-   that occurs earlier in this file than qualified_type.
-
-   There's no good way to fix this with the grammar as it stands; as
-   far as I can tell, some of the problems arise from ambiguities that
-   GDB introduces ('start' can be either an expression or a type), but
-   some of it is inherent to the nature of C++ (you want to treat the
-   input "(FOO)" fairly differently depending on whether FOO is an
-   expression or a type, and if FOO is a complex expression, this can
-   be hard to determine at the right time).  Fortunately, it works
-   pretty well in most cases.  For example, if you do 'ptype A::B',
-   where A::B is a nested type, then the parser will mistakenly
-   misidentify it as an expression; but evaluate_subexp will get
-   called with 'noside' set to EVAL_AVOID_SIDE_EFFECTS, and everything
-   will work out anyways.  But there are situations where the parser
-   will get confused: the most common one that I've run into is when
-   you want to do
-
-     print *((A::B *) x)"
-
-   where the parser doesn't realize that A::B has to be a type until
-   it hits the first right paren, at which point it's too late.  (The
-   workaround is to type "print *(('A::B' *) x)" instead.)  (And
-   another solution is to fix our symbol-handling code so that the
-   user never wants to type something like that in the first place,
-   because we get all the types right without the user's help!)
-
-   Perhaps we could fix this by making the lexer smarter.  Some of
-   this functionality used to be in the lexer, but in a way that
-   worked even less well than the current solution: that attempt
-   involved having the parser sometimes handle '::' and having the
-   lexer sometimes handle it, and without a clear division of
-   responsibility, it quickly degenerated into a big mess.  Probably
-   the eventual correct solution will give more of a role to the lexer
-   (ideally via code that is shared between the lexer and
-   decode_line_1), but I'm not holding my breath waiting for somebody
-   to get around to cleaning this up...  */
-
-qualified_type: typebase COLONCOLON name
-		{
-		  struct type *type = $1;
-		  struct type *new_type;
-		  char *ncopy = alloca ($3.length + 1);
-
-		  memcpy (ncopy, $3.ptr, $3.length);
-		  ncopy[$3.length] = '\0';
-
-		  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
-		      && TYPE_CODE (type) != TYPE_CODE_UNION
-		      && TYPE_CODE (type) != TYPE_CODE_NAMESPACE)
-		    error ("`%s' is not defined as an aggregate type.",
-			   TYPE_NAME (type));
-
-		  new_type = cp_lookup_nested_type (type, ncopy,
-						    expression_context_block);
-		  if (new_type == NULL)
-		    error ("No type \"%s\" within class or namespace \"%s\".",
-			   ncopy, TYPE_NAME (type));
-		  
-		  $$ = new_type;
-		}
 	;
 
 typename:	TYPENAME
@@ -2031,7 +1969,7 @@ static int last_was_structop;
 /* Read one token, getting characters through lexptr.  */
 
 static int
-yylex (void)
+lex_one_token (void)
 {
   int c;
   int namelen;
@@ -2346,85 +2284,250 @@ yylex (void)
       }
 
   if (*tokstart == '$')
+    return VARIABLE;
+
+  if (in_parse_field && *lexptr == '\0')
+    saw_name_at_eof = 1;
+  return NAME;
+}
+
+/* An object of this type is pushed on a FIFO by the "outer" lexer.  */
+typedef struct
+{
+  int token;
+  union YYSTYPE value;
+} token_and_value;
+
+DEF_VEC_O (token_and_value);
+
+/* A FIFO of tokens that have been read but not yet returned to the
+   parser.  */
+static VEC (token_and_value) *token_fifo;
+
+/* Non-zero if the lexer should return tokens from the FIFO.  */
+static int popping;
+
+/* Temporary storage for c_lex; this holds symbol names as they are
+   built up.  */
+static struct obstack name_obstack;
+
+/* Classify a NAME token.  The contents of the token are in `yylval'.
+   Updates yylval and returns the new token type.  BLOCK is the block
+   in which lookups start; this can be NULL to mean the global
+   scope.  */
+static int
+classify_name (struct block *block)
+{
+  struct symbol *sym;
+  char *copy;
+  int is_a_field_of_this = 0;
+
+  copy = copy_name (yylval.sval);
+
+  sym = lookup_symbol (copy, block, VAR_DOMAIN, 
+		       parse_language->la_language == language_cplus
+		       ? &is_a_field_of_this : (int *) NULL);
+
+  if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
     {
-      write_dollar_variable (yylval.sval);
-      return VARIABLE;
+      yylval.ssym.sym = sym;
+      yylval.ssym.is_a_field_of_this = is_a_field_of_this;
+      return BLOCKNAME;
     }
-  
-  /* Use token-type BLOCKNAME for symbols that happen to be defined as
-     functions or symtabs.  If this is not so, then ...
-     Use token-type TYPENAME for symbols that happen to be defined
-     currently as names of types; NAME for other symbols.
-     The caller is not constrained to care about the distinction.  */
-  {
-    struct symbol *sym;
-    int is_a_field_of_this = 0;
-    int hextype;
+  else if (!sym)
+    {
+      /* See if it's a file name. */
+      struct symtab *symtab;
 
-    sym = lookup_symbol (copy, expression_context_block,
-			 VAR_DOMAIN,
-			 parse_language->la_language == language_cplus
-			 ? &is_a_field_of_this : (int *) NULL);
-    /* Call lookup_symtab, not lookup_partial_symtab, in case there are
-       no psymtabs (coff, xcoff, or some future change to blow away the
-       psymtabs once once symbols are read).  */
-    if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
-      {
-	yylval.ssym.sym = sym;
-	yylval.ssym.is_a_field_of_this = is_a_field_of_this;
-	return BLOCKNAME;
-      }
-    else if (!sym)
-      {				/* See if it's a file name. */
-	struct symtab *symtab;
+      symtab = lookup_symtab (copy);
+      if (symtab)
+	{
+	  yylval.bval = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), STATIC_BLOCK);
+	  return FILENAME;
+	}
+    }
 
-	symtab = lookup_symtab (copy);
-
-	if (symtab)
-	  {
-	    yylval.bval = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), STATIC_BLOCK);
-	    return FILENAME;
-	  }
-      }
-
-    if (sym && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
-        {
-	  /* NOTE: carlton/2003-09-25: There used to be code here to
-	     handle nested types.  It didn't work very well.  See the
-	     comment before qualified_type for more info.  */
-	  yylval.tsym.type = SYMBOL_TYPE (sym);
-	  return TYPENAME;
-        }
-    yylval.tsym.type
-      = language_lookup_primitive_type_by_name (parse_language,
-						parse_gdbarch, copy);
-    if (yylval.tsym.type != NULL)
+  if (sym && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+    {
+      yylval.tsym.type = SYMBOL_TYPE (sym);
       return TYPENAME;
+    }
 
-    /* Input names that aren't symbols but ARE valid hex numbers,
-       when the input radix permits them, can be names or numbers
-       depending on the parse.  Note we support radixes > 16 here.  */
-    if (!sym 
-        && ((tokstart[0] >= 'a' && tokstart[0] < 'a' + input_radix - 10)
-	    || (tokstart[0] >= 'A' && tokstart[0] < 'A' + input_radix - 10)))
-      {
- 	YYSTYPE newlval;	/* Its value is ignored.  */
-	hextype = parse_number (tokstart, namelen, 0, &newlval);
-	if (hextype == INT)
-	  {
-	    yylval.ssym.sym = sym;
-	    yylval.ssym.is_a_field_of_this = is_a_field_of_this;
-	    return NAME_OR_INT;
-	  }
-      }
+  yylval.tsym.type
+    = language_lookup_primitive_type_by_name (parse_language,
+					      parse_gdbarch, copy);
+  if (yylval.tsym.type != NULL)
+    return TYPENAME;
 
-    /* Any other kind of symbol */
-    yylval.ssym.sym = sym;
-    yylval.ssym.is_a_field_of_this = is_a_field_of_this;
-    if (in_parse_field && *lexptr == '\0')
-      saw_name_at_eof = 1;
+  /* Input names that aren't symbols but ARE valid hex numbers, when
+     the input radix permits them, can be names or numbers depending
+     on the parse.  Note we support radixes > 16 here.  */
+  if (!sym
+      && ((copy[0] >= 'a' && copy[0] < 'a' + input_radix - 10)
+	  || (copy[0] >= 'A' && copy[0] < 'A' + input_radix - 10)))
+    {
+      YYSTYPE newlval;	/* Its value is ignored.  */
+      int hextype = parse_number (copy, yylval.sval.length, 0, &newlval);
+      if (hextype == INT)
+	{
+	  yylval.ssym.sym = sym;
+	  yylval.ssym.is_a_field_of_this = is_a_field_of_this;
+	  return NAME_OR_INT;
+	}
+    }
+
+  /* Any other kind of symbol */
+  yylval.ssym.sym = sym;
+  yylval.ssym.is_a_field_of_this = is_a_field_of_this;
+  return NAME;
+}
+
+/* Like classify_name, but used by the inner loop of the lexer, when a
+   name might have already been seen.  FIRST_NAME is true if the token
+   in `yylval' is the first component of a name, false otherwise.  If
+   this function returns NAME, it might not have updated `yylval'.
+   This is ok because the caller only cares about TYPENAME.  */
+static int
+classify_inner_name (struct block *block, int first_name)
+{
+  struct type *type, *new_type;
+  char *copy;
+
+  if (first_name)
+    return classify_name (block);
+
+  type = check_typedef (yylval.tsym.type);
+  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
+      && TYPE_CODE (type) != TYPE_CODE_UNION
+      && TYPE_CODE (type) != TYPE_CODE_NAMESPACE)
+    /* We know the caller won't expect us to update yylval.  */
     return NAME;
-  }
+
+  copy = copy_name (yylval.tsym.stoken);
+  new_type = cp_lookup_nested_type (type, copy, block);
+
+  if (new_type == NULL)
+    /* We know the caller won't expect us to update yylval.  */
+    return NAME;
+
+  yylval.tsym.type = new_type;
+  return TYPENAME;
+}
+
+/* The outer level of a two-level lexer.  This calls the inner lexer
+   to return tokens.  It then either returns these tokens, or
+   aggregates them into a larger token.  This lets us work around a
+   problem in our parsing approach, where the parser could not
+   distinguish between qualified names and qualified types at the
+   right point.
+   
+   This approach is still not ideal, because it mishandles template
+   types.  See the comment in lex_one_token for an example.  However,
+   this is still an improvement over the earlier approach, and will
+   suffice until we move to better parsing technology.  */
+static int
+yylex (void)
+{
+  token_and_value current;
+  char *name;
+  int first_was_coloncolon, last_was_coloncolon, first_iter;
+
+  if (popping && !VEC_empty (token_and_value, token_fifo))
+    {
+      token_and_value tv = *VEC_index (token_and_value, token_fifo, 0);
+      VEC_ordered_remove (token_and_value, token_fifo, 0);
+      yylval = tv.value;
+      return tv.token;
+    }
+  popping = 0;
+
+  current.token = lex_one_token ();
+  if (current.token == NAME)
+    current.token = classify_name (expression_context_block);
+  if (parse_language->la_language != language_cplus
+      || (current.token != TYPENAME && current.token != COLONCOLON))
+    return current.token;
+
+  first_was_coloncolon = current.token == COLONCOLON;
+  last_was_coloncolon = first_was_coloncolon;
+  obstack_free (&name_obstack, obstack_base (&name_obstack));
+  if (!last_was_coloncolon)
+    obstack_grow (&name_obstack, yylval.sval.ptr, yylval.sval.length);
+  current.value = yylval;
+  first_iter = 1;
+  while (1)
+    {
+      token_and_value next;
+
+      next.token = lex_one_token ();
+      next.value = yylval;
+
+      if (next.token == NAME && last_was_coloncolon)
+	{
+	  int classification;
+
+	  classification = classify_inner_name (first_was_coloncolon
+						? NULL
+						: expression_context_block,
+						first_iter);
+	  /* We keep going until we either run out of names, or until
+	     we have a qualified name which is not a type.  */
+	  if (classification != TYPENAME)
+	    {
+	      /* Push the final component and leave the loop.  */
+	      VEC_safe_push (token_and_value, token_fifo, &next);
+	      break;
+	    }
+
+	  /* Update the partial name we are constructing.  */
+	  if (!first_iter)
+	    {
+	      /* We don't want to put a leading "::" into the name.  */
+	      obstack_grow_str (&name_obstack, "::");
+	    }
+	  obstack_grow (&name_obstack, next.value.sval.ptr,
+			next.value.sval.length);
+
+	  yylval.sval.ptr = obstack_base (&name_obstack);
+	  yylval.sval.length = obstack_object_size (&name_obstack);
+	  current.value = yylval;
+	  current.token = classification;
+
+	  last_was_coloncolon = 0;
+	}
+      else if (next.token == COLONCOLON && !last_was_coloncolon)
+	last_was_coloncolon = 1;
+      else
+	{
+	  /* We've reached the end of the name.  */
+	  VEC_safe_push (token_and_value, token_fifo, &next);
+	  break;
+	}
+
+      first_iter = 0;
+    }
+
+  popping = 1;
+
+  /* If we ended with a "::", insert it too.  */
+  if (last_was_coloncolon)
+    {
+      token_and_value cc;
+      memset (&cc, 0, sizeof (token_and_value));
+      if (first_was_coloncolon)
+	{
+	  yylval = cc.value;
+	  return COLONCOLON;
+	}
+      cc.token = COLONCOLON;
+      VEC_safe_insert (token_and_value, token_fifo, 0, &cc);
+    }
+
+  yylval = current.value;
+  yylval.sval.ptr = obstack_copy0 (&expansion_obstack,
+				   yylval.sval.ptr,
+				   yylval.sval.length);
+  return current.token;
 }
 
 int
@@ -2456,6 +2559,11 @@ c_parse (void)
   /* Initialize some state used by the lexer.  */
   last_was_structop = 0;
   saw_name_at_eof = 0;
+
+  VEC_free (token_and_value, token_fifo);
+  popping = 0;
+  obstack_init (&name_obstack);
+  make_cleanup_obstack_free (&name_obstack);
 
   result = yyparse ();
   do_cleanups (back_to);

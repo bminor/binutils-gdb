@@ -1,3 +1,22 @@
+2010-02-19  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/8693, PR c++/9496:
+	* cp-namespace.c (cp_lookup_nested_type): Handle TYPE_CODE_UNION.
+	* c-exp.y (lex_one_token): Rename from yylex.  Don't call
+	write_dollar_variable.  Don't try to classify NAME tokens.
+	(token_and_value): New type.
+	(token_fifo, popping, name_obstack): New globals.
+	(classify_name): New function.
+	(classify_inner_name): Likewise.
+	(yylex): Likewise.
+	(VARIABLE): Now has type sval.
+	(exp : VARIABLE): Call write_dollar_variable.
+	(qualified_name): Use TYPENAME, not typebase.  Add production for
+	multiple "::" instances.
+	(variable): Use name_not_typename.
+	(qualified_type): Remove.
+	(typebase): Update.
+
 2010-02-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* symfile.c (addr_info_make_relative): Extend comment.  Move SECT to

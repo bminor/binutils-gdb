@@ -1,3 +1,9 @@
+2010-02-19  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/8693, PR c++/9496:
+	* gdb.cp/namespace.exp: Remove some setup_kfail calls.  Added
+	regression tests.
+
 2010-02-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix compatibility with m68k as.
