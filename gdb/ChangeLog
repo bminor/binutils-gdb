@@ -1,3 +1,8 @@
+2010-02-19  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.1 branch created (branch timestamp: 2010-02-18 20:00 UTC)
+	* version.in: Bump version to 7.0.90.20100218-cvs.
+
 2010-02-18  Harald Koenig  <H.Koenig@science-computing.de>
 
 	* mi/mi-main.c (mi_cmd_exec_jump): Drop unneeded `return'.
