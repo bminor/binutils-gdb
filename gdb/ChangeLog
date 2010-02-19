@@ -1,5 +1,9 @@
 2010-02-19  Joel Brobecker  <brobecker@adacore.com>
 
+	GDB 7.0.90 released.
+
+2010-02-19  Joel Brobecker  <brobecker@adacore.com>
+
 	* README: Update GDB version number to 7.0.90.
 	* version.in: Likewise.
 
