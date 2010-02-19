@@ -562,13 +562,13 @@ relative_addr_info_to_section_offsets (struct section_offsets *section_offsets,
 }
 
 /* Relativize absolute addresses in ADDRS into offsets based on ABFD.  Fill-in
-   also SECTINDEXes there.  */
+   also SECTINDEXes specific to ABFD there.  This function can be used to
+   rebase ADDRS to start referencing different BFD than before.  */
 
 void
 addr_info_make_relative (struct section_addr_info *addrs, bfd *abfd)
 {
   asection *lower_sect;
-  asection *sect;
   CORE_ADDR lower_offset;
   int i;
 
@@ -597,25 +597,29 @@ addr_info_make_relative (struct section_addr_info *addrs, bfd *abfd)
 
   for (i = 0; i < addrs->num_sections && addrs->other[i].name; i++)
     {
-      if (addrs->other[i].addr != 0)
+      asection *sect = bfd_get_section_by_name (abfd, addrs->other[i].name);
+
+      if (sect)
 	{
-	  sect = bfd_get_section_by_name (abfd, addrs->other[i].name);
-	  if (sect)
+	  /* This is the index used by BFD. */
+	  addrs->other[i].sectindex = sect->index;
+
+	  if (addrs->other[i].addr != 0)
 	    {
 	      addrs->other[i].addr -= bfd_section_vma (abfd, sect);
 	      lower_offset = addrs->other[i].addr;
-	      /* This is the index used by BFD. */
-	      addrs->other[i].sectindex = sect->index;
 	    }
 	  else
-	    {
-	      warning (_("section %s not found in %s"), addrs->other[i].name,
-		       bfd_get_filename (abfd));
-	      addrs->other[i].addr = 0;
-	    }
+	    addrs->other[i].addr = lower_offset;
 	}
       else
-	addrs->other[i].addr = lower_offset;
+	{
+	  warning (_("section %s not found in %s"), addrs->other[i].name,
+		   bfd_get_filename (abfd));
+	  addrs->other[i].addr = 0;
+
+	  /* SECTINDEX is invalid if ADDR is zero.  */
+	}
     }
 }
 

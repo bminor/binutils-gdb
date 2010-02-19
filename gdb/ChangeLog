@@ -1,3 +1,10 @@
+2010-02-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* symfile.c (addr_info_make_relative): Extend comment.  Move SECT to
+	a more inner block.  Initialize ADDR by LOWER_OFFSET only if it was
+	found by bfd_get_section_by_name.
+	* symfile.h (struct section_addr_info) <sectindex>: New comment.
+
 2010-02-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Add new "[...] since 7.1" section.  Rename the "[...] since
