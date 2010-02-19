@@ -1,5 +1,22 @@
 2010-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* p-typeprint.c (pascal_type_print_varspec_prefix): Update.
+	* m2-typeprint.c (m2_print_type): Update.
+	* gdbtypes.c (recursive_dump_type): Update.
+	(copy_type_recursive): Update.
+	* c-typeprint.c (c_type_print_varspec_prefix): Update.
+	(c_type_print_base): Update.
+	* gdbtypes.h (TYPE_CODE_TEMPLATE, TYPE_CODE_TEMPLATE_ARG):
+	Remove.
+	(struct cplus_struct_type) <ntemplate_args>: Remove.
+	<struct template_arg>: Remove.
+	<is_dynamic>: Move earlier.
+	(TYPE_TEMPLATE_ARGS): Remove.
+	(TYPE_NTEMPLATE_ARGS): Remove.
+	(TYPE_TEMPLATE_ARG): Remove.
+
+2010-02-19  Tom Tromey  <tromey@redhat.com>
+
 	PR c++/8693, PR c++/9496:
 	* cp-namespace.c (cp_lookup_nested_type): Handle TYPE_CODE_UNION.
 	* c-exp.y (lex_one_token): Rename from yylex.  Don't call

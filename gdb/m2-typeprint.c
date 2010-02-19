@@ -146,9 +146,6 @@ m2_print_type (struct type *type, char *varstring, struct ui_file *stream,
       m2_range (type, stream, show, level);
       break;
 
-    case TYPE_CODE_TEMPLATE:
-      break;
-
     default:
       m2_type_name (type, stream);
       break;

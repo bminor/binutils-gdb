@@ -2755,12 +2755,6 @@ recursive_dump_type (struct type *type, int spaces)
     case TYPE_CODE_TYPEDEF:
       printf_filtered ("(TYPE_CODE_TYPEDEF)");
       break;
-    case TYPE_CODE_TEMPLATE:
-      printf_filtered ("(TYPE_CODE_TEMPLATE)");
-      break;
-    case TYPE_CODE_TEMPLATE_ARG:
-      printf_filtered ("(TYPE_CODE_TEMPLATE_ARG)");
-      break;
     case TYPE_CODE_NAMESPACE:
       printf_filtered ("(TYPE_CODE_NAMESPACE)");
       break;
@@ -3123,7 +3117,6 @@ copy_type_recursive (struct objfile *objfile,
     TYPE_FLOATFORMAT (new_type) = TYPE_FLOATFORMAT (type);
   else if (TYPE_CODE (type) == TYPE_CODE_STRUCT
 	   || TYPE_CODE (type) == TYPE_CODE_UNION
-	   || TYPE_CODE (type) == TYPE_CODE_TEMPLATE
 	   || TYPE_CODE (type) == TYPE_CODE_NAMESPACE)
     INIT_CPLUS_SPECIFIC (new_type);
 

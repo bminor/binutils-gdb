@@ -292,7 +292,6 @@ c_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
     case TYPE_CODE_STRING:
     case TYPE_CODE_BITSTRING:
     case TYPE_CODE_COMPLEX:
-    case TYPE_CODE_TEMPLATE:
     case TYPE_CODE_NAMESPACE:
     case TYPE_CODE_DECFLOAT:
       /* These types need no prefix.  They are listed here so that
@@ -616,7 +615,6 @@ c_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
     case TYPE_CODE_STRING:
     case TYPE_CODE_BITSTRING:
     case TYPE_CODE_COMPLEX:
-    case TYPE_CODE_TEMPLATE:
     case TYPE_CODE_NAMESPACE:
     case TYPE_CODE_DECFLOAT:
       /* These types do not need a suffix.  They are listed so that
@@ -1099,25 +1097,6 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
       /* This should not occur */
       fprintf_filtered (stream, _("<range type>"));
       break;
-
-    case TYPE_CODE_TEMPLATE:
-      /* Called on "ptype t" where "t" is a template.
-         Prints the template header (with args), e.g.:
-         template <class T1, class T2> class "
-         and then merges with the struct/union/class code to
-         print the rest of the definition. */
-      c_type_print_modifier (type, stream, 0, 1);
-      fprintf_filtered (stream, "template <");
-      for (i = 0; i < TYPE_NTEMPLATE_ARGS (type); i++)
-	{
-	  struct template_arg templ_arg;
-	  templ_arg = TYPE_TEMPLATE_ARG (type, i);
-	  fprintf_filtered (stream, "class %s", templ_arg.name);
-	  if (i < TYPE_NTEMPLATE_ARGS (type) - 1)
-	    fprintf_filtered (stream, ", ");
-	}
-      fprintf_filtered (stream, "> class ");
-      goto struct_union;
 
     case TYPE_CODE_NAMESPACE:
       fputs_filtered ("namespace ", stream);

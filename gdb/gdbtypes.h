@@ -131,8 +131,6 @@ enum type_code
     TYPE_CODE_COMPLEX,		/* Complex float */
 
     TYPE_CODE_TYPEDEF,
-    TYPE_CODE_TEMPLATE,		/* C++ template */
-    TYPE_CODE_TEMPLATE_ARG,	/* C++ template arg */
 
     TYPE_CODE_NAMESPACE,	/* C++ namespace.  */
 
@@ -685,10 +683,12 @@ struct cplus_struct_type
 
     short nfn_fields_total;
 
-    /* Number of template arguments, placed here for better struct
-       packing.  */
-
-    short ntemplate_args;
+    /* One if this struct is a dynamic class, as defined by the
+       Itanium C++ ABI: if it requires a virtual table pointer,
+       because it or any of its base classes have one or more virtual
+       member functions or virtual base classes.  Minus one if not
+       dynamic.  Zero if not yet computed.  */
+    int is_dynamic : 2;
 
     /* For derived classes, the number of base classes is given by n_baseclasses
        and virtual_field_bits is a bit vector containing one bit per base class.
@@ -806,20 +806,6 @@ struct cplus_struct_type
       }
      *fn_fieldlists;
 
-    /* If this "struct type" describes a template, then it 
-     * has arguments. "template_args" points to an array of
-     * template arg descriptors, of length "ntemplate_args".
-     * The only real information in each of these template arg descriptors
-     * is a name. "type" will typically just point to a "struct type" with
-     * the placeholder TYPE_CODE_TEMPLATE_ARG type.
-     */
-    struct template_arg
-      {
-	char *name;
-	struct type *type;
-      }
-     *template_args;
-
     /* Pointer to information about enclosing scope, if this is a
      * local type.  If it is not a local type, this is NULL
      */
@@ -829,13 +815,6 @@ struct cplus_struct_type
 	int line;
       }
      *localtype_ptr;
-
-    /* One if this struct is a dynamic class, as defined by the
-       Itanium C++ ABI: if it requires a virtual table pointer,
-       because it or any of its base classes have one or more virtual
-       member functions or virtual base classes.  Minus one if not
-       dynamic.  Zero if not yet computed.  */
-    int is_dynamic : 2;
   };
 
 /* Struct used in computing virtual base list */
@@ -909,7 +888,6 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_CODE(thistype) TYPE_MAIN_TYPE(thistype)->code
 #define TYPE_NFIELDS(thistype) TYPE_MAIN_TYPE(thistype)->nfields
 #define TYPE_FIELDS(thistype) TYPE_MAIN_TYPE(thistype)->flds_bnds.fields
-#define TYPE_TEMPLATE_ARGS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->template_args
 
 #define TYPE_INDEX_TYPE(type) TYPE_FIELD_TYPE (type, 0)
 #define TYPE_RANGE_DATA(thistype) TYPE_MAIN_TYPE(thistype)->flds_bnds.bounds
@@ -941,7 +919,6 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_FN_FIELDS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->fn_fields
 #define TYPE_NFN_FIELDS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->nfn_fields
 #define TYPE_NFN_FIELDS_TOTAL(thistype) TYPE_CPLUS_SPECIFIC(thistype)->nfn_fields_total
-#define TYPE_NTEMPLATE_ARGS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->ntemplate_args
 #define TYPE_SPECIFIC_FIELD(thistype) \
   TYPE_MAIN_TYPE(thistype)->type_specific_field
 #define	TYPE_TYPE_SPECIFIC(thistype) TYPE_MAIN_TYPE(thistype)->type_specific
@@ -1004,7 +981,6 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_FIELD_ARTIFICIAL(thistype, n) FIELD_ARTIFICIAL(TYPE_FIELD(thistype,n))
 #define TYPE_FIELD_BITSIZE(thistype, n) FIELD_BITSIZE(TYPE_FIELD(thistype,n))
 #define TYPE_FIELD_PACKED(thistype, n) (FIELD_BITSIZE(TYPE_FIELD(thistype,n))!=0)
-#define TYPE_TEMPLATE_ARG(thistype, n) TYPE_CPLUS_SPECIFIC(thistype)->template_args[n]
 
 #define TYPE_FIELD_PRIVATE_BITS(thistype) \
   TYPE_CPLUS_SPECIFIC(thistype)->private_field_bits
