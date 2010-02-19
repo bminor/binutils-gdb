@@ -1597,11 +1597,23 @@ class Arm_relobj : public Sized_relobj<32, big_endian>
 				     unsigned int, Output_section*,
 				     Target_arm<big_endian>*);
 
+  // Find the linked text section of an EXIDX section by looking at the
+  // first reloction of the EXIDX section.  PSHDR points to the section
+  // headers of a relocation section and PSYMS points to the local symbols.
+  // PSHNDX points to a location storing the text section index if found.
+  // Return whether we can find the linked section.
+  bool
+  find_linked_text_section(const unsigned char* pshdr,
+			   const unsigned char* psyms, unsigned int* pshndx);
+
+  //
   // Make a new Arm_exidx_input_section object for EXIDX section with
-  // index SHNDX and section header SHDR.
+  // index SHNDX and section header SHDR.  TEXT_SHNDX is the section
+  // index of the linked text section.
   void
   make_exidx_input_section(unsigned int shndx,
-			   const elfcpp::Shdr<32, big_endian>& shdr);
+			   const elfcpp::Shdr<32, big_endian>& shdr,
+			   unsigned int text_shndx);
 
   // Return the output address of either a plain input section or a
   // relaxed input section.  SHNDX is the section index.
@@ -1995,6 +2007,11 @@ class Target_arm : public Sized_target<32, big_endian>
   bool
   do_is_defined_by_abi(Symbol* sym) const
   { return strcmp(sym->name(), "__tls_get_addr") == 0; }
+
+  // Return whether there is a GOT section.
+  bool
+  has_got_section() const
+  { return this->got_ != NULL; }
 
   // Return the size of the GOT section.
   section_size_type
@@ -5618,6 +5635,17 @@ Arm_relobj<big_endian>::scan_section_for_cortex_a8_erratum(
     Output_section* os,
     Target_arm<big_endian>* arm_target)
 {
+  // Look for the first mapping symbol in this section.  It should be
+  // at (shndx, 0).
+  Mapping_symbol_position section_start(shndx, 0);
+  typename Mapping_symbols_info::const_iterator p =
+    this->mapping_symbols_info_.lower_bound(section_start);
+
+  // There are no mapping symbols for this section.  Treat it as a data-only
+  // section.
+  if (p == this->mapping_symbols_info_.end() || p->first.first != shndx)
+    return;
+
   Arm_address output_address =
     this->simple_input_section_output_address(shndx, os);
 
@@ -5631,21 +5659,6 @@ Arm_relobj<big_endian>::scan_section_for_cortex_a8_erratum(
   // THUMB code only.  Second, we only want to look at the 4K-page boundary
   // to speed up the scanning.
   
-  // Look for the first mapping symbol in this section.  It should be
-  // at (shndx, 0).
-  Mapping_symbol_position section_start(shndx, 0);
-  typename Mapping_symbols_info::const_iterator p =
-    this->mapping_symbols_info_.lower_bound(section_start);
-
-  if (p == this->mapping_symbols_info_.end()
-      || p->first != section_start)
-    {
-      gold_warning(_("Cortex-A8 erratum scanning failed because there "
-		     "is no mapping symbols for section %u of %s"),
-		   shndx, this->name().c_str());
-      return;
-    }
- 
   while (p != this->mapping_symbols_info_.end()
 	&& p->first.first == shndx)
     {
@@ -5979,27 +5992,95 @@ Arm_relobj<big_endian>::do_relocate_sections(
     }
 }
 
-// Create a new EXIDX input section object for EXIDX section SHNDX with
-// header SHDR.
+// Find the linked text section of an EXIDX section by looking the the first
+// relocation.  4.4.1 of the EHABI specifications says that an EXIDX section
+// must be linked to to its associated code section via the sh_link field of
+// its section header.  However, some tools are broken and the link is not
+// always set.  LD just drops such an EXIDX section silently, causing the
+// associated code not unwindabled.   Here we try a little bit harder to
+// discover the linked code section.
+//
+// PSHDR points to the section header of a relocation section of an EXIDX
+// section.  If we can find a linked text section, return true and
+// store the text section index in the location PSHNDX.  Otherwise
+// return false.
+
+template<bool big_endian>
+bool
+Arm_relobj<big_endian>::find_linked_text_section(
+    const unsigned char* pshdr,
+    const unsigned char* psyms,
+    unsigned int* pshndx)
+{
+  elfcpp::Shdr<32, big_endian> shdr(pshdr);
+  
+  // If there is no relocation, we cannot find the linked text section.
+  size_t reloc_size;
+  if (shdr.get_sh_type() == elfcpp::SHT_REL)
+      reloc_size = elfcpp::Elf_sizes<32>::rel_size;
+  else
+      reloc_size = elfcpp::Elf_sizes<32>::rela_size;
+  size_t reloc_count = shdr.get_sh_size() / reloc_size;
+ 
+  // Get the relocations.
+  const unsigned char* prelocs =
+      this->get_view(shdr.get_sh_offset(), shdr.get_sh_size(), true, false); 
+
+  // Find the REL31 relocation for the first word of the first EXIDX entry.
+  for (size_t i = 0; i < reloc_count; ++i, prelocs += reloc_size)
+    {
+      Arm_address r_offset;
+      typename elfcpp::Elf_types<32>::Elf_WXword r_info;
+      if (shdr.get_sh_type() == elfcpp::SHT_REL)
+	{
+	  typename elfcpp::Rel<32, big_endian> reloc(prelocs);
+	  r_info = reloc.get_r_info();
+	  r_offset = reloc.get_r_offset();
+	}
+      else
+	{
+	  typename elfcpp::Rela<32, big_endian> reloc(prelocs);
+	  r_info = reloc.get_r_info();
+	  r_offset = reloc.get_r_offset();
+	}
+
+      unsigned int r_type = elfcpp::elf_r_type<32>(r_info);
+      if (r_type != elfcpp::R_ARM_PREL31 && r_type != elfcpp::R_ARM_SBREL31)
+	continue;
+
+      unsigned int r_sym = elfcpp::elf_r_sym<32>(r_info);
+      if (r_sym == 0
+	  || r_sym >= this->local_symbol_count()
+	  || r_offset != 0)
+	continue;
+
+      // This is the relocation for the first word of the first EXIDX entry.
+      // We expect to see a local section symbol.
+      const int sym_size = elfcpp::Elf_sizes<32>::sym_size;
+      elfcpp::Sym<32, big_endian> sym(psyms + r_sym * sym_size);
+      if (sym.get_st_type() == elfcpp::STT_SECTION)
+	{
+	  *pshndx = this->adjust_shndx(sym.get_st_shndx());
+	  return true;
+	}
+      else
+	return false;
+    }
+
+  return false;
+}
+
+// Make an EXIDX input section object for an EXIDX section whose index is
+// SHNDX.  SHDR is the section header of the EXIDX section and TEXT_SHNDX
+// is the section index of the linked text section.
 
 template<bool big_endian>
 void
 Arm_relobj<big_endian>::make_exidx_input_section(
     unsigned int shndx,
-    const elfcpp::Shdr<32, big_endian>& shdr)
+    const elfcpp::Shdr<32, big_endian>& shdr,
+    unsigned int text_shndx)
 {
-  // Link .text section to its .ARM.exidx section in the same object.
-  unsigned int text_shndx = this->adjust_shndx(shdr.get_sh_link());
-
-  // Issue an error and ignore this EXIDX section if it does not point
-  // to any text section.
-  if (text_shndx == elfcpp::SHN_UNDEF)
-    {
-      gold_error(_("EXIDX section %u in %s has no linked text section"),
-		 shndx, this->name().c_str());
-      return;
-    }
-  
   // Issue an error and ignore this EXIDX section if it points to a text
   // section already has an EXIDX section.
   if (this->exidx_section_map_[text_shndx] != NULL)
@@ -6040,9 +6121,10 @@ Arm_relobj<big_endian>::do_read_symbols(Read_symbols_data* sd)
 
   // Go over the section headers and look for .ARM.attributes and .ARM.exidx
   // sections.
+  std::vector<unsigned int> deferred_exidx_sections;
   const size_t shdr_size = elfcpp::Elf_sizes<32>::shdr_size;
-  const unsigned char *ps =
-    sd->section_headers->data() + shdr_size;
+  const unsigned char* pshdrs = sd->section_headers->data();
+  const unsigned char *ps = pshdrs + shdr_size;
   for (unsigned int i = 1; i < this->shnum(); ++i, ps += shdr_size)
     {
       elfcpp::Shdr<32, big_endian> shdr(ps);
@@ -6058,7 +6140,79 @@ Arm_relobj<big_endian>::do_read_symbols(Read_symbols_data* sd)
 	    new Attributes_section_data(view->data(), section_size);
 	}
       else if (shdr.get_sh_type() == elfcpp::SHT_ARM_EXIDX)
-	this->make_exidx_input_section(i, shdr);
+	{
+	  unsigned int text_shndx = this->adjust_shndx(shdr.get_sh_link());
+	  if (text_shndx >= this->shnum())
+	    gold_error(_("EXIDX section %u linked to invalid section %u"),
+		       i, text_shndx);
+	  else if (text_shndx == elfcpp::SHN_UNDEF)
+	    deferred_exidx_sections.push_back(i);
+	  else
+	    this->make_exidx_input_section(i, shdr, text_shndx);
+	}
+    }
+
+  // Some tools are broken and they do not set the link of EXIDX sections. 
+  // We look at the first relocation to figure out the linked sections.
+  if (!deferred_exidx_sections.empty())
+    {
+      // We need to go over the section headers again to find the mapping
+      // from sections being relocated to their relocation sections.  This is
+      // a bit inefficient as we could do that in the loop above.  However,
+      // we do not expect any deferred EXIDX sections normally.  So we do not
+      // want to slow down the most common path.
+      typedef Unordered_map<unsigned int, unsigned int> Reloc_map;
+      Reloc_map reloc_map;
+      ps = pshdrs + shdr_size;
+      for (unsigned int i = 1; i < this->shnum(); ++i, ps += shdr_size)
+	{
+	  elfcpp::Shdr<32, big_endian> shdr(ps);
+	  elfcpp::Elf_Word sh_type = shdr.get_sh_type();
+	  if (sh_type == elfcpp::SHT_REL || sh_type == elfcpp::SHT_RELA)
+	    {
+	      unsigned int info_shndx = this->adjust_shndx(shdr.get_sh_info());
+	      if (info_shndx >= this->shnum())
+		gold_error(_("relocation section %u has invalid info %u"),
+			   i, info_shndx);
+	      Reloc_map::value_type value(info_shndx, i);
+	      std::pair<Reloc_map::iterator, bool> result =
+		reloc_map.insert(value);
+	      if (!result.second)
+		gold_error(_("section %u has multiple relocation sections "
+			     "%u and %u"),
+			   info_shndx, i, reloc_map[info_shndx]);
+	    }
+	}
+
+      // Read the symbol table section header.
+      const unsigned int symtab_shndx = this->symtab_shndx();
+      elfcpp::Shdr<32, big_endian>
+	  symtabshdr(this, this->elf_file()->section_header(symtab_shndx));
+      gold_assert(symtabshdr.get_sh_type() == elfcpp::SHT_SYMTAB);
+
+      // Read the local symbols.
+      const int sym_size =elfcpp::Elf_sizes<32>::sym_size;
+      const unsigned int loccount = this->local_symbol_count();
+      gold_assert(loccount == symtabshdr.get_sh_info());
+      off_t locsize = loccount * sym_size;
+      const unsigned char* psyms = this->get_view(symtabshdr.get_sh_offset(),
+						  locsize, true, true);
+
+      // Process the deferred EXIDX sections. 
+      for(unsigned int i = 0; i < deferred_exidx_sections.size(); ++i)
+	{
+	  unsigned int shndx = deferred_exidx_sections[i];
+	  elfcpp::Shdr<32, big_endian> shdr(pshdrs + shndx * shdr_size);
+	  unsigned int text_shndx;
+	  Reloc_map::const_iterator it = reloc_map.find(shndx);
+	  if (it != reloc_map.end()
+	      && find_linked_text_section(pshdrs + it->second * shdr_size,
+					  psyms, &text_shndx))
+	    this->make_exidx_input_section(shndx, shdr, text_shndx);
+	  else
+	    gold_error(_("EXIDX section %u has no linked text section."),
+		       shndx);
+	}
     }
 }
 
@@ -6562,15 +6716,21 @@ Target_arm<big_endian>::Scan::check_non_pic(Relobj* object,
       return;
 
     default:
-      // This prevents us from issuing more than one error per reloc
-      // section.  But we can still wind up issuing more than one
-      // error per object file.
-      if (this->issued_non_pic_error_)
+      {
+	// This prevents us from issuing more than one error per reloc
+	// section.  But we can still wind up issuing more than one
+	// error per object file.
+	if (this->issued_non_pic_error_)
+	  return;
+	const Arm_reloc_property* reloc_property =
+	  arm_reloc_property_table->get_reloc_property(r_type);
+	gold_assert(reloc_property != NULL);
+	object->error(_("requires unsupported dynamic reloc %s; "
+		      "recompile with -fPIC"),
+		      reloc_property->name().c_str());
+	this->issued_non_pic_error_ = true;
 	return;
-      object->error(_("requires unsupported dynamic reloc; "
-		      "recompile with -fPIC"));
-      this->issued_non_pic_error_ = true;
-      return;
+      }
 
     case elfcpp::R_ARM_NONE:
       gold_unreachable();
@@ -6802,6 +6962,13 @@ Target_arm<big_endian>::Scan::global(Symbol_table* symtab,
 				     unsigned int r_type,
 				     Symbol* gsym)
 {
+  // A reference to _GLOBAL_OFFSET_TABLE_ implies that we need a got
+  // section.  We check here to avoid creating a dynamic reloc against
+  // _GLOBAL_OFFSET_TABLE_.
+  if (!target->has_got_section()
+      && strcmp(gsym->name(), "_GLOBAL_OFFSET_TABLE_") == 0)
+    target->got_section(symtab, layout);
+
   r_type = get_real_reloc_type(r_type);
   switch (r_type)
     {
