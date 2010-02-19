@@ -1,3 +1,9 @@
+2010-02-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix compatibility with m68k as.
+	* gdb.dwarf2/member-ptr-forwardref.S: Use .data section.  Use .2byte.
+	Use only /* comments */.
+
 2010-02-18  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* configure.ac: Add gdb.multi/Makefile to AC_OUTPUT.
