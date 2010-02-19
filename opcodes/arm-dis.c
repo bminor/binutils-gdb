@@ -3935,6 +3935,7 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		    default:
 		      abort ();
 		    }
+		  break;
 		}
 		      
 	      default:

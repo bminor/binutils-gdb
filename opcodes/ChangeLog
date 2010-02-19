@@ -1,3 +1,7 @@
+2010-02-18  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* arm-dis.c: Fix mis-applied patch.
+
 2010-02-10  Richard Sandiford  <r.sandiford@uk.ibm.com>
 
 	* ppc-dis.c (ppc_opts): Add "pwr4", "pwr5", "pwr5x", "pwr6"
