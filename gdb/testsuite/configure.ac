@@ -142,8 +142,8 @@ AC_OUTPUT([Makefile \
   gdb.ada/Makefile \
   gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile \
   gdb.cp/Makefile gdb.disasm/Makefile gdb.dwarf2/Makefile \
-  gdb.fortran/Makefile gdb.server/Makefile \
-  gdb.java/Makefile gdb.mi/Makefile gdb.modula2/Makefile \
+  gdb.fortran/Makefile gdb.server/Makefile gdb.java/Makefile \
+  gdb.mi/Makefile gdb.modula2/Makefile gdb.multi/Makefile \
   gdb.objc/Makefile gdb.opt/Makefile gdb.pascal/Makefile \
   gdb.python/Makefile gdb.reverse/Makefile \
   gdb.threads/Makefile gdb.trace/Makefile gdb.xml/Makefile])

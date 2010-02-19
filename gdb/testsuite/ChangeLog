@@ -1,3 +1,8 @@
+2010-02-18  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* configure.ac: Add gdb.multi/Makefile to AC_OUTPUT.
+	* configure: Regenerate.
+
 2010-02-18  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.python/py-type.exp: Check for Python support.
