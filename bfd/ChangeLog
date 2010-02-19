@@ -1,3 +1,12 @@
+2010-02-19  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (_bfd_elf_fixup_group_sections): New function, split out from..
+	(_bfd_elf_copy_private_header_data): ..here.
+	* elflink.c (_bfd_elf_size_group_sections): New function.
+	(bfd_elf_size_dynamic_sections): Call it.
+	* elf-bfd.h (_bfd_elf_size_group_sections): Declare.
+	(_bfd_elf_fixup_group_sections): Declare.
+
 2010-02-18  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Add support for

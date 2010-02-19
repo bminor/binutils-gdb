@@ -1,3 +1,10 @@
+2010-02-19  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (unique_section_p): Add os param.  Allow group
+	sections to match /DISCARD/.  Update all callers.
+	* emultempl/genelf.em (gld${EMULATION_NAME}_before_allocation): New.
+	(LDEMUL_BEFORE_ALLOCATION): Define.
+
 2010-02-15  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: Updated Vietnamese translation.

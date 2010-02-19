@@ -48,6 +48,15 @@ gld${EMULATION_NAME}_after_open (void)
 }
 
 static void
+gld${EMULATION_NAME}_before_allocation (void)
+{
+  if (link_info.relocatable
+      && !_bfd_elf_size_group_sections (&link_info))
+    einfo ("%X%P: can not size group sections: %E\n");
+  before_allocation_default ();
+}
+
+static void
 gld${EMULATION_NAME}_after_allocation (void)
 {
   gld${EMULATION_NAME}_map_segments (FALSE);
@@ -56,4 +65,5 @@ EOF
 # Put these extra routines in ld_${EMULATION_NAME}_emulation
 #
 LDEMUL_AFTER_OPEN=gld${EMULATION_NAME}_after_open
+LDEMUL_BEFORE_ALLOCATION=gld${EMULATION_NAME}_before_allocation
 LDEMUL_AFTER_ALLOCATION=gld${EMULATION_NAME}_after_allocation

@@ -195,7 +195,8 @@ input_statement_is_archive_path (const char *file_spec, char *sep,
 }
 
 static bfd_boolean
-unique_section_p (const asection *sec)
+unique_section_p (const asection *sec,
+		  const lang_output_section_statement_type *os)
 {
   struct unique_sections *unam;
   const char *secnam;
@@ -203,7 +204,8 @@ unique_section_p (const asection *sec)
   if (link_info.relocatable
       && sec->owner != NULL
       && bfd_is_group_section (sec->owner, sec))
-    return TRUE;
+    return !(os != NULL
+	     && strcmp (os->name, DISCARD_SECTION_NAME) == 0);
 
   secnam = sec->name;
   for (unam = unique_section_list; unam; unam = unam->next)
@@ -445,12 +447,15 @@ output_section_callback_fast (lang_wild_statement_type *ptr,
 			      struct wildcard_list *sec,
 			      asection *section,
 			      lang_input_statement_type *file,
-			      void *output ATTRIBUTE_UNUSED)
+			      void *output)
 {
   lang_section_bst_type *node;
   lang_section_bst_type **tree;
+  lang_output_section_statement_type *os;
 
-  if (unique_section_p (section))
+  os = (lang_output_section_statement_type *) output;
+
+  if (unique_section_p (section, os))
     return;
 
   node = (lang_section_bst_type *) xmalloc (sizeof (lang_section_bst_type));
@@ -2415,9 +2420,12 @@ output_section_callback (lang_wild_statement_type *ptr,
 			 void *output)
 {
   lang_statement_union_type *before;
+  lang_output_section_statement_type *os;
+
+  os = (lang_output_section_statement_type *) output;
 
   /* Exclude sections that match UNIQUE_SECTION_LIST.  */
-  if (unique_section_p (section))
+  if (unique_section_p (section, os))
     return;
 
   before = wild_sort (ptr, sec, file, section);
@@ -2428,16 +2436,14 @@ output_section_callback (lang_wild_statement_type *ptr,
      of the current list.  */
 
   if (before == NULL)
-    lang_add_section (&ptr->children, section,
-		      (lang_output_section_statement_type *) output);
+    lang_add_section (&ptr->children, section, os);
   else
     {
       lang_statement_list_type list;
       lang_statement_union_type **pp;
 
       lang_list_init (&list);
-      lang_add_section (&list, section,
-			(lang_output_section_statement_type *) output);
+      lang_add_section (&list, section, os);
 
       /* If we are discarding the section, LIST.HEAD will
 	 be NULL.  */
@@ -2464,14 +2470,18 @@ check_section_callback (lang_wild_statement_type *ptr ATTRIBUTE_UNUSED,
 			struct wildcard_list *sec ATTRIBUTE_UNUSED,
 			asection *section,
 			lang_input_statement_type *file ATTRIBUTE_UNUSED,
-			void *data)
+			void *output)
 {
+  lang_output_section_statement_type *os;
+
+  os = (lang_output_section_statement_type *) output;
+
   /* Exclude sections that match UNIQUE_SECTION_LIST.  */
-  if (unique_section_p (section))
+  if (unique_section_p (section, os))
     return;
 
   if (section->output_section == NULL && (section->flags & SEC_READONLY) == 0)
-    ((lang_output_section_statement_type *) data)->all_input_readonly = FALSE;
+    os->all_input_readonly = FALSE;
 }
 
 /* This is passed a file name which must have been seen already and
@@ -5848,7 +5858,8 @@ lang_place_orphans (void)
 		  const char *name = s->name;
 		  int constraint = 0;
 
-		  if (config.unique_orphan_sections || unique_section_p (s))
+		  if (config.unique_orphan_sections
+		      || unique_section_p (s, NULL))
 		    constraint = SPECIAL;
 
 		  if (!ldemul_place_orphan (s, name, constraint))
