@@ -80,6 +80,8 @@ struct section_addr_info
   {
     CORE_ADDR addr;
     char *name;
+
+    /* SECTINDEX must be valid for associated BFD if ADDR is not zero.  */
     int sectindex;
   } other[1];
 };
