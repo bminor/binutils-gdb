@@ -1,3 +1,22 @@
+2010-02-19  Doug Kwan  <dougkwan@google.com>
+
+	* arm-reloc.def: Mark R_ARM_TLS_GD32, R_ARM_TLS_LDM32,
+	R_ARM_TLS_LDO32, R_ARM_TLS_IE32 and R_ARM_TLS_LE32 are implemented.
+	* arm.cc (Arm_relocation_functions): New forward declaration.
+	(Target_arm::Target_arm): Initialize new data members
+	got_mod_index_offset_ and tls_base_symbol_defined_.
+	(Target_arm::Relocate::relocate_tls): New method.
+	(Target_arm::optimize_tls_reloc, Target_arm::define_tls_base_symbol,
+	 Target_arm::got_mod_index_entry, Target_arm::rel_tls_desc_section):
+	New methods.
+   	(Target_arm::Got_type): Add GOT_TYPE_TLS_NOFFSET, GOT_TYPE_OFFSET,
+	GOT_TYPE_TLS_PAIR and GOT_TYPE_TLS_DESC.
+	(Target_arm::got_mod_index_offset_,
+	Target_arm::tls_base_symbol_defined_): New data members.
+	(Target_arm::Scan::local, Target::Scan::global,
+	Target_arm::Relocate::relocate): Handle 32-bit initial TLS
+	relocations.
+
 2010-02-18  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_relobj::find_linked_text_section): New method.

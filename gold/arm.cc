@@ -81,6 +81,9 @@ template<bool big_endian>
 class Arm_relobj;
 
 template<bool big_endian>
+class Arm_relocate_functions;
+
+template<bool big_endian>
 class Target_arm;
 
 // For convenience.
@@ -1847,11 +1850,12 @@ class Target_arm : public Sized_target<32, big_endian>
   Target_arm()
     : Sized_target<32, big_endian>(&arm_info),
       got_(NULL), plt_(NULL), got_plt_(NULL), rel_dyn_(NULL),
-      copy_relocs_(elfcpp::R_ARM_COPY), dynbss_(NULL), stub_tables_(),
-      stub_factory_(Stub_factory::get_instance()), may_use_blx_(false),
-      should_force_pic_veneer_(false), arm_input_section_map_(),
-      attributes_section_data_(NULL), fix_cortex_a8_(false),
-      cortex_a8_relocs_info_()
+      copy_relocs_(elfcpp::R_ARM_COPY), dynbss_(NULL), 
+      got_mod_index_offset_(-1U), tls_base_symbol_defined_(false),
+      stub_tables_(), stub_factory_(Stub_factory::get_instance()),
+      may_use_blx_(false), should_force_pic_veneer_(false),
+      arm_input_section_map_(), attributes_section_data_(NULL),
+      fix_cortex_a8_(false), cortex_a8_relocs_info_()
   { }
 
   // Whether we can use BLX.
@@ -2301,6 +2305,16 @@ class Target_arm : public Sized_target<32, big_endian>
 	  return true;
 	}
     }
+
+   private:
+    // Do a TLS relocation.
+    inline typename Arm_relocate_functions<big_endian>::Status
+    relocate_tls(const Relocate_info<32, big_endian>*, Target_arm<big_endian>*,
+                 size_t, const elfcpp::Rel<32, big_endian>&, unsigned int,
+		 const Sized_symbol<32>*, const Symbol_value<32>*,
+		 unsigned char*, elfcpp::Elf_types<32>::Elf_Addr,
+		 section_size_type);
+
   };
 
   // A class which returns the size required for a relocation type,
@@ -2311,6 +2325,11 @@ class Target_arm : public Sized_target<32, big_endian>
     unsigned int
     get_size_for_reloc(unsigned int, Relobj*);
   };
+
+  // Adjust TLS relocation type based on the options and whether this
+  // is a local symbol.
+  static tls::Tls_optimization
+  optimize_tls_reloc(bool is_final, int r_type);
 
   // Get the GOT section, creating it if necessary.
   Output_data_got<32, big_endian>*
@@ -2328,6 +2347,15 @@ class Target_arm : public Sized_target<32, big_endian>
   void
   make_plt_entry(Symbol_table*, Layout*, Symbol*);
 
+  // Define the _TLS_MODULE_BASE_ symbol in the TLS segment.
+  void
+  define_tls_base_symbol(Symbol_table*, Layout*);
+
+  // Create a GOT entry for the TLS module index.
+  unsigned int
+  got_mod_index_entry(Symbol_table* symtab, Layout* layout,
+		      Sized_relobj<32, big_endian>* object);
+
   // Get the PLT section.
   const Output_data_plt_arm<big_endian>*
   plt_section() const
@@ -2339,6 +2367,10 @@ class Target_arm : public Sized_target<32, big_endian>
   // Get the dynamic reloc section, creating it if necessary.
   Reloc_section*
   rel_dyn_section(Layout*);
+
+  // Get the section to use for TLS_DESC relocations.
+  Reloc_section*
+  rel_tls_desc_section(Layout*) const;
 
   // Return true if the symbol may need a COPY relocation.
   // References from an executable object to non-function symbols
@@ -2454,7 +2486,11 @@ class Target_arm : public Sized_target<32, big_endian>
   // The types of GOT entries needed for this platform.
   enum Got_type
   {
-    GOT_TYPE_STANDARD = 0	// GOT entry for a regular symbol
+    GOT_TYPE_STANDARD = 0,      // GOT entry for a regular symbol
+    GOT_TYPE_TLS_NOFFSET = 1,   // GOT entry for negative TLS offset
+    GOT_TYPE_TLS_OFFSET = 2,    // GOT entry for positive TLS offset
+    GOT_TYPE_TLS_PAIR = 3,      // GOT entry for TLS module/offset pair
+    GOT_TYPE_TLS_DESC = 4       // GOT entry for TLS_DESC pair
   };
 
   typedef typename std::vector<Stub_table<big_endian>*> Stub_table_list;
@@ -2481,6 +2517,10 @@ class Target_arm : public Sized_target<32, big_endian>
   Copy_relocs<elfcpp::SHT_REL, 32, big_endian> copy_relocs_;
   // Space for variables copied with a COPY reloc.
   Output_data_space* dynbss_;
+  // Offset of the GOT entry for the TLS module index.
+  unsigned int got_mod_index_offset_;
+  // True if the _TLS_MODULE_BASE_ symbol has been defined.
+  bool tls_base_symbol_defined_;
   // Vector of Stub_tables created.
   Stub_table_list stub_tables_;
   // Stub factory.
@@ -6673,6 +6713,79 @@ Target_arm<big_endian>::make_plt_entry(Symbol_table* symtab, Layout* layout,
   this->plt_->add_entry(gsym);
 }
 
+// Get the section to use for TLS_DESC relocations.
+
+template<bool big_endian>
+typename Target_arm<big_endian>::Reloc_section*
+Target_arm<big_endian>::rel_tls_desc_section(Layout* layout) const
+{
+  return this->plt_section()->rel_tls_desc(layout);
+}
+
+// Define the _TLS_MODULE_BASE_ symbol in the TLS segment.
+
+template<bool big_endian>
+void
+Target_arm<big_endian>::define_tls_base_symbol(
+    Symbol_table* symtab,
+    Layout* layout)
+{
+  if (this->tls_base_symbol_defined_)
+    return;
+
+  Output_segment* tls_segment = layout->tls_segment();
+  if (tls_segment != NULL)
+    {
+      bool is_exec = parameters->options().output_is_executable();
+      symtab->define_in_output_segment("_TLS_MODULE_BASE_", NULL,
+				       Symbol_table::PREDEFINED,
+				       tls_segment, 0, 0,
+				       elfcpp::STT_TLS,
+				       elfcpp::STB_LOCAL,
+				       elfcpp::STV_HIDDEN, 0,
+				       (is_exec
+					? Symbol::SEGMENT_END
+					: Symbol::SEGMENT_START),
+				       true);
+    }
+  this->tls_base_symbol_defined_ = true;
+}
+
+// Create a GOT entry for the TLS module index.
+
+template<bool big_endian>
+unsigned int
+Target_arm<big_endian>::got_mod_index_entry(
+    Symbol_table* symtab,
+    Layout* layout,
+    Sized_relobj<32, big_endian>* object)
+{
+  if (this->got_mod_index_offset_ == -1U)
+    {
+      gold_assert(symtab != NULL && layout != NULL && object != NULL);
+      Reloc_section* rel_dyn = this->rel_dyn_section(layout);
+      Output_data_got<32, big_endian>* got = this->got_section(symtab, layout);
+      unsigned int got_offset = got->add_constant(0);
+      rel_dyn->add_local(object, 0, elfcpp::R_ARM_TLS_DTPMOD32, got,
+                         got_offset);
+      got->add_constant(0);
+      this->got_mod_index_offset_ = got_offset;
+    }
+  return this->got_mod_index_offset_;
+}
+
+// Optimize the TLS relocation type based on what we know about the
+// symbol.  IS_FINAL is true if the final address of this symbol is
+// known at link time.
+
+template<bool big_endian>
+tls::Tls_optimization
+Target_arm<big_endian>::optimize_tls_reloc(bool, int)
+{
+  // FIXME: Currently we do not do any TLS optimization.
+  return tls::TLSOPT_NONE;
+}
+
 // Report an unsupported relocation against a local symbol.
 
 template<bool big_endian>
@@ -6927,6 +7040,97 @@ Target_arm<big_endian>::Scan::local(Symbol_table* symtab,
       // dynamic linker, and should never be seen here.
       gold_error(_("%s: unexpected reloc %u in object file"),
 		 object->name().c_str(), r_type);
+      break;
+
+
+      // These are initial TLS relocs, which are expected when
+      // linking.
+    case elfcpp::R_ARM_TLS_GD32:	// Global-dynamic
+    case elfcpp::R_ARM_TLS_LDM32:	// Local-dynamic
+    case elfcpp::R_ARM_TLS_LDO32:	// Alternate local-dynamic
+    case elfcpp::R_ARM_TLS_IE32:	// Initial-exec
+    case elfcpp::R_ARM_TLS_LE32:	// Local-exec
+      {
+	bool output_is_shared = parameters->options().shared();
+	const tls::Tls_optimization optimized_type
+            = Target_arm<big_endian>::optimize_tls_reloc(!output_is_shared,
+							 r_type);
+	switch (r_type)
+	  {
+	  case elfcpp::R_ARM_TLS_GD32:		// Global-dynamic
+	    if (optimized_type == tls::TLSOPT_NONE)
+	      {
+	        // Create a pair of GOT entries for the module index and
+	        // dtv-relative offset.
+                Output_data_got<32, big_endian>* got
+                    = target->got_section(symtab, layout);
+                unsigned int r_sym = elfcpp::elf_r_sym<32>(reloc.get_r_info());
+		unsigned int shndx = lsym.get_st_shndx();
+		bool is_ordinary;
+		shndx = object->adjust_sym_shndx(r_sym, shndx, &is_ordinary);
+		if (!is_ordinary)
+		  object->error(_("local symbol %u has bad shndx %u"),
+			      r_sym, shndx);
+                else
+		  got->add_local_pair_with_rel(object, r_sym, shndx,
+					       GOT_TYPE_TLS_PAIR,
+					       target->rel_dyn_section(layout),
+					       elfcpp::R_ARM_TLS_DTPMOD32, 0);
+	      }
+	    else
+	      // FIXME: TLS optimization not supported yet.
+	      gold_unreachable();
+	    break;
+
+	  case elfcpp::R_ARM_TLS_LDM32:		// Local-dynamic
+	    if (optimized_type == tls::TLSOPT_NONE)
+	      {
+	        // Create a GOT entry for the module index.
+	        target->got_mod_index_entry(symtab, layout, object);
+	      }
+	    else
+	      // FIXME: TLS optimization not supported yet.
+	      gold_unreachable();
+	    break;
+
+	  case elfcpp::R_ARM_TLS_LDO32:		// Alternate local-dynamic
+	    break;
+
+	  case elfcpp::R_ARM_TLS_IE32:		// Initial-exec
+	    layout->set_has_static_tls();
+	    if (optimized_type == tls::TLSOPT_NONE)
+	      {
+	        // Create a GOT entry for the tp-relative offset.
+                Output_data_got<32, big_endian>* got
+                    = target->got_section(symtab, layout);
+                unsigned int r_sym = elfcpp::elf_r_sym<32>(reloc.get_r_info());
+		got->add_local_with_rel(object, r_sym, GOT_TYPE_TLS_OFFSET,
+					target->rel_dyn_section(layout),
+					elfcpp::R_ARM_TLS_TPOFF32);
+	      }
+	    else
+	      // FIXME: TLS optimization not supported yet.
+	      gold_unreachable();
+	    break;
+
+	  case elfcpp::R_ARM_TLS_LE32:		// Local-exec
+	    layout->set_has_static_tls();
+	    if (output_is_shared)
+	      {
+	        // We need to create a dynamic relocation.
+                gold_assert(lsym.get_st_type() != elfcpp::STT_SECTION);
+                unsigned int r_sym = elfcpp::elf_r_sym<32>(reloc.get_r_info());
+		Reloc_section* rel_dyn = target->rel_dyn_section(layout);
+		rel_dyn->add_local(object, r_sym, elfcpp::R_ARM_TLS_TPOFF32,
+				   output_section, data_shndx,
+				   reloc.get_r_offset());
+	      }
+	    break;
+
+	  default:
+	    gold_unreachable();
+	  }
+      }
       break;
 
     default:
@@ -7185,6 +7389,84 @@ Target_arm<big_endian>::Scan::global(Symbol_table* symtab,
 		 object->name().c_str(), r_type);
       break;
 
+      // These are initial tls relocs, which are expected when
+      // linking.
+    case elfcpp::R_ARM_TLS_GD32:	// Global-dynamic
+    case elfcpp::R_ARM_TLS_LDM32:	// Local-dynamic
+    case elfcpp::R_ARM_TLS_LDO32:	// Alternate local-dynamic
+    case elfcpp::R_ARM_TLS_IE32:	// Initial-exec
+    case elfcpp::R_ARM_TLS_LE32:	// Local-exec
+      {
+	const bool is_final = gsym->final_value_is_known();
+	const tls::Tls_optimization optimized_type
+            = Target_arm<big_endian>::optimize_tls_reloc(is_final, r_type);
+	switch (r_type)
+	  {
+	  case elfcpp::R_ARM_TLS_GD32:		// Global-dynamic
+	    if (optimized_type == tls::TLSOPT_NONE)
+	      {
+	        // Create a pair of GOT entries for the module index and
+	        // dtv-relative offset.
+                Output_data_got<32, big_endian>* got
+                    = target->got_section(symtab, layout);
+                got->add_global_pair_with_rel(gsym, GOT_TYPE_TLS_PAIR,
+					      target->rel_dyn_section(layout),
+					      elfcpp::R_ARM_TLS_DTPMOD32,
+					      elfcpp::R_ARM_TLS_DTPOFF32);
+	      }
+	    else
+	      // FIXME: TLS optimization not supported yet.
+	      gold_unreachable();
+	    break;
+
+	  case elfcpp::R_ARM_TLS_LDM32:		// Local-dynamic
+	    if (optimized_type == tls::TLSOPT_NONE)
+	      {
+	        // Create a GOT entry for the module index.
+	        target->got_mod_index_entry(symtab, layout, object);
+	      }
+	    else
+	      // FIXME: TLS optimization not supported yet.
+	      gold_unreachable();
+	    break;
+
+	  case elfcpp::R_ARM_TLS_LDO32:		// Alternate local-dynamic
+	    break;
+
+	  case elfcpp::R_ARM_TLS_IE32:		// Initial-exec
+	    layout->set_has_static_tls();
+	    if (optimized_type == tls::TLSOPT_NONE)
+	      {
+	        // Create a GOT entry for the tp-relative offset.
+                Output_data_got<32, big_endian>* got
+                    = target->got_section(symtab, layout);
+                got->add_global_with_rel(gsym, GOT_TYPE_TLS_OFFSET,
+                                         target->rel_dyn_section(layout),
+                                         elfcpp::R_ARM_TLS_TPOFF32);
+	      }
+	    else
+	      // FIXME: TLS optimization not supported yet.
+	      gold_unreachable();
+	    break;
+
+	  case elfcpp::R_ARM_TLS_LE32:	// Local-exec
+	    layout->set_has_static_tls();
+	    if (parameters->options().shared())
+	      {
+	        // We need to create a dynamic relocation.
+                Reloc_section* rel_dyn = target->rel_dyn_section(layout);
+                rel_dyn->add_global(gsym, elfcpp::R_ARM_TLS_TPOFF32,
+				    output_section, object,
+                                    data_shndx, reloc.get_r_offset());
+	      }
+	    break;
+
+	  default:
+	    gold_unreachable();
+	  }
+      }
+      break;
+
     default:
       unsupported_reloc_global(object, r_type, gsym);
       break;
@@ -7436,7 +7718,7 @@ Target_arm<big_endian>::Relocate::relocate(
     const Symbol_value<32>* psymval,
     unsigned char* view,
     Arm_address address,
-    section_size_type /* view_size */ )
+    section_size_type view_size)
 {
   typedef Arm_relocate_functions<big_endian> Arm_relocate_functions;
 
@@ -7584,6 +7866,10 @@ Target_arm<big_endian>::Relocate::relocate(
   switch(reloc_property->relative_address_base())
     {
     case Arm_reloc_property::RAB_NONE:
+    // Relocations with relative address bases RAB_TLS and RAB_tp are
+    // handled by relocate_tls.  So we do not need to do anything here.
+    case Arm_reloc_property::RAB_TLS:
+    case Arm_reloc_property::RAB_tp:
       break;
     case Arm_reloc_property::RAB_B_S:
       relative_address_base = sym_origin;
@@ -7887,6 +8173,18 @@ Target_arm<big_endian>::Relocate::relocate(
 					      relative_address_base);
       break;
 
+      // These are initial tls relocs, which are expected when
+      // linking.
+    case elfcpp::R_ARM_TLS_GD32:	// Global-dynamic
+    case elfcpp::R_ARM_TLS_LDM32:	// Local-dynamic
+    case elfcpp::R_ARM_TLS_LDO32:	// Alternate local-dynamic
+    case elfcpp::R_ARM_TLS_IE32:	// Initial-exec
+    case elfcpp::R_ARM_TLS_LE32:	// Local-exec
+      reloc_status =
+	this->relocate_tls(relinfo, target, relnum, rel, r_type, gsym, psymval,
+			   view, address, view_size);
+      break;
+
     default:
       gold_unreachable();
     }
@@ -7914,6 +8212,125 @@ Target_arm<big_endian>::Relocate::relocate(
     }
 
   return true;
+}
+
+// Perform a TLS relocation.
+
+template<bool big_endian>
+inline typename Arm_relocate_functions<big_endian>::Status
+Target_arm<big_endian>::Relocate::relocate_tls(
+    const Relocate_info<32, big_endian>* relinfo,
+    Target_arm<big_endian>* target,
+    size_t relnum,
+    const elfcpp::Rel<32, big_endian>& rel,
+    unsigned int r_type,
+    const Sized_symbol<32>* gsym,
+    const Symbol_value<32>* psymval,
+    unsigned char* view,
+    elfcpp::Elf_types<32>::Elf_Addr,
+    section_size_type /*view_size*/ )
+{
+  typedef Arm_relocate_functions<big_endian> ArmRelocFuncs;
+  Output_segment* tls_segment = relinfo->layout->tls_segment();
+
+  const Sized_relobj<32, big_endian>* object = relinfo->object;
+
+  elfcpp::Elf_types<32>::Elf_Addr value = psymval->value(object, 0);
+
+  const bool is_final = (gsym == NULL
+			 ? !parameters->options().shared()
+			 : gsym->final_value_is_known());
+  const tls::Tls_optimization optimized_type
+      = Target_arm<big_endian>::optimize_tls_reloc(is_final, r_type);
+  switch (r_type)
+    {
+    case elfcpp::R_ARM_TLS_GD32:	// Global-dynamic
+        {
+          unsigned int got_type = GOT_TYPE_TLS_PAIR;
+          unsigned int got_offset;
+          if (gsym != NULL)
+            {
+              gold_assert(gsym->has_got_offset(got_type));
+              got_offset = gsym->got_offset(got_type) - target->got_size();
+            }
+          else
+            {
+              unsigned int r_sym = elfcpp::elf_r_sym<32>(rel.get_r_info());
+              gold_assert(object->local_has_got_offset(r_sym, got_type));
+              got_offset = (object->local_got_offset(r_sym, got_type)
+			    - target->got_size());
+            }
+          if (optimized_type == tls::TLSOPT_NONE)
+            {
+              // Relocate the field with the offset of the pair of GOT
+              // entries.
+              Relocate_functions<32, big_endian>::rel32(view, got_offset);
+              return ArmRelocFuncs::STATUS_OKAY;
+            }
+        }
+      break;
+
+    case elfcpp::R_ARM_TLS_LDM32:	// Local-dynamic
+      if (optimized_type == tls::TLSOPT_NONE)
+        {
+          // Relocate the field with the offset of the GOT entry for
+          // the module index.
+          unsigned int got_offset;
+          got_offset = (target->got_mod_index_entry(NULL, NULL, NULL)
+			- target->got_size());
+          Relocate_functions<32, big_endian>::rel32(view, got_offset);
+	  return ArmRelocFuncs::STATUS_OKAY;
+        }
+      break;
+
+    case elfcpp::R_ARM_TLS_LDO32:	// Alternate local-dynamic
+      Relocate_functions<32, big_endian>::rel32(view, value);
+      return ArmRelocFuncs::STATUS_OKAY;
+
+    case elfcpp::R_ARM_TLS_IE32:	// Initial-exec
+      if (optimized_type == tls::TLSOPT_NONE)
+        {
+          // Relocate the field with the offset of the GOT entry for
+          // the tp-relative offset of the symbol.
+	  unsigned int got_type = GOT_TYPE_TLS_OFFSET;
+          unsigned int got_offset;
+          if (gsym != NULL)
+            {
+              gold_assert(gsym->has_got_offset(got_type));
+              got_offset = gsym->got_offset(got_type);
+            }
+          else
+            {
+              unsigned int r_sym = elfcpp::elf_r_sym<32>(rel.get_r_info());
+              gold_assert(object->local_has_got_offset(r_sym, got_type));
+              got_offset = object->local_got_offset(r_sym, got_type);
+            }
+          // All GOT offsets are relative to the end of the GOT.
+          got_offset -= target->got_size();
+          Relocate_functions<32, big_endian>::rel32(view, got_offset);
+	  return ArmRelocFuncs::STATUS_OKAY;
+        }
+      break;
+
+    case elfcpp::R_ARM_TLS_LE32:	// Local-exec
+      // If we're creating a shared library, a dynamic relocation will
+      // have been created for this location, so do not apply it now.
+      if (!parameters->options().shared())
+        {
+          gold_assert(tls_segment != NULL);
+          value = tls_segment->memsz() - value;
+          Relocate_functions<32, false>::rel32(view, value);
+        }
+      return ArmRelocFuncs::STATUS_OKAY;
+    
+    default:
+      gold_unreachable();
+    }
+
+  gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
+			 _("unsupported reloc %u"),
+			 r_type);
+  return ArmRelocFuncs::STATUS_BAD_RELOC;
 }
 
 // Relocate section data.
