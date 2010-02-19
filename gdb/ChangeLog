@@ -1,5 +1,10 @@
 2010-02-19  Joel Brobecker  <brobecker@adacore.com>
 
+	* NEWS: Add new "[...] since 7.1" section.  Rename the "[...] since
+	7.0 section" into "Changes in 7.1".
+
+2010-02-19  Joel Brobecker  <brobecker@adacore.com>
+
 	GDB 7.1 branch created (branch timestamp: 2010-02-18 20:00 UTC)
 	* version.in: Bump version to 7.1.50.20100219-cvs.
 
