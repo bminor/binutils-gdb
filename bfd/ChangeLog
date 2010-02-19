@@ -1,3 +1,13 @@
+2010-02-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_add_symbol_hook): Don't set
+	has_ifunc_symbols if the symbol comes from a shared library.
+	* elf32-ppc.c (ppc_elf_add_symbol_hook): Likewise.
+	* elf32-sparc.c (elf32_sparc_add_symbol_hook): Likewise.
+	* elf64-ppc.c (ppc64_elf_add_symbol_hook): Likewise.
+	* elf64-sparc.c (elf64_sparc_add_symbol_hook): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_add_symbol_hook): Likewise.
+
 2010-02-19  Alan Modra  <amodra@gmail.com>
 
 	* elf.c (_bfd_elf_fixup_group_sections): New function, split out from..

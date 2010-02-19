@@ -258,8 +258,8 @@ if {! [check_osabi tmpdir/static_prog {UNIX - Linux}]} {
     fail "Static ifunc-using executable does not have an OS/ABI field of LINUX"
     set fails [expr $fails + 1]
 }
-if {! [check_osabi tmpdir/dynamic_prog {UNIX - Linux}]} {
-    fail "Dynamic ifunc-using executable does not have an OS/ABI field of LINUX"
+if {! [check_osabi tmpdir/dynamic_prog {UNIX - System V}]} {
+    fail "Dynamic ifunc-using executable does not have an OS/ABI field of System V"
     set fails [expr $fails + 1]
 }
 if {! [check_osabi tmpdir/static_nonifunc_prog {UNIX - System V}]} {

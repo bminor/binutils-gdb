@@ -1,3 +1,8 @@
+2010-02-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-ifunc/ifunc.exp: Expect System V OSABI in dynamic
+	ifunc-using executable.
+
 2010-02-19  Alan Modra  <amodra@gmail.com>
 
 	* ld-elf/group.ld: Discard .dropme sections.
