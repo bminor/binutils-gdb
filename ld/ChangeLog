@@ -1,5 +1,10 @@
 2010-02-19  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.am (eelf32_i960.c): Depend on ELF_GEN_DEPS, not ELF_DEPS.
+	* Makefile.in: Regenerate.
+
+2010-02-19  Alan Modra  <amodra@gmail.com>
+
 	* ldlang.c (unique_section_p): Add os param.  Allow group
 	sections to match /DISCARD/.  Update all callers.
 	* emultempl/genelf.em (gld${EMULATION_NAME}_before_allocation): New.
