@@ -7820,7 +7820,7 @@ appear anywhere else in the directory.
 * Debugging GDB::		Debugging @value{GDBN} with itself
 @end menu
 
-@node Getting Started,,, Hints
+@node Getting Started
 
 @section Getting Started
 
@@ -7903,7 +7903,7 @@ wondering if anyone could give me some tips about understanding
 @value{GDBN}''---if we had some magic secret we would put it in this manual.
 Suggestions for improving the manual are always welcome, of course.
 
-@node Debugging GDB,,,Hints
+@node Debugging GDB
 
 @section Debugging @value{GDBN} with itself
 @cindex debugging @value{GDBN}
