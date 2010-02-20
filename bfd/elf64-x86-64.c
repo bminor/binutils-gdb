@@ -4254,7 +4254,7 @@ elf64_x86_64_add_symbol_hook (bfd *abfd,
 	}
       *secp = lcomm;
       *valp = sym->st_size;
-      break;
+      return TRUE;
     }
 
   if ((abfd->flags & DYNAMIC) == 0

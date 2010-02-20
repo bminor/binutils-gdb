@@ -1,3 +1,8 @@
+2010-02-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf64_x86_64_add_symbol_hook): Don't check
+	STT_GNU_IFUNC on large common symbol.
+
 2010-02-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_add_symbol_hook): Don't set
