@@ -181,9 +181,10 @@ gc_process_relocs(
   const int reloc_size = Reloc_types<sh_type, size, big_endian>::reloc_size;
   const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
 
-  std::vector<Section_id>* secvec = NULL;
-  std::vector<Symbol*>* symvec = NULL;
-  std::vector<std::pair<long long, long long> >* addendvec = NULL;
+  Icf::Sections_reachable_info* secvec = NULL;
+  Icf::Symbol_info* symvec = NULL;
+  Icf::Addend_info* addendvec = NULL;
+  Icf::Offset_info* offsetvec = NULL;
   bool is_icf_tracked = false;
   const char* cident_section_name = NULL;
 
@@ -198,9 +199,12 @@ gc_process_relocs(
     {
       is_icf_tracked = true;
       Section_id src_id(src_obj, src_indx);
-      secvec = &symtab->icf()->section_reloc_list()[src_id];
-      symvec = &symtab->icf()->symbol_reloc_list()[src_id];
-      addendvec = &symtab->icf()->addend_reloc_list()[src_id];
+      Icf::Reloc_info* reloc_info =
+        &symtab->icf()->reloc_info_list()[src_id];
+      secvec = &reloc_info->section_info;
+      symvec = &reloc_info->symbol_info;
+      addendvec = &reloc_info->addend_info;
+      offsetvec = &reloc_info->offset_info;
     }
 
   check_section_for_function_pointers =
@@ -236,6 +240,9 @@ gc_process_relocs(
               long long symvalue = static_cast<long long>(lsym.get_st_value());
               (*addendvec).push_back(std::make_pair(symvalue,
                                               static_cast<long long>(addend)));
+              uint64_t reloc_offset =
+                convert_to_section_size_type(reloc.get_r_offset());
+	      (*offsetvec).push_back(reloc_offset);
             }
 
 	  // When doing safe folding, check to see if this relocation is that
@@ -301,6 +308,9 @@ gc_process_relocs(
                         static_cast<long long>(sized_gsym->value());
               (*addendvec).push_back(std::make_pair(symvalue,
                                         static_cast<long long>(addend)));
+              uint64_t reloc_offset =
+                convert_to_section_size_type(reloc.get_r_offset());
+	      (*offsetvec).push_back(reloc_offset);
 	    }
         }
       if (parameters->options().gc_sections())

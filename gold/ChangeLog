@@ -1,3 +1,20 @@
+2010-02-20  Sriraman Tallam  <tmsriram@google.com>
+
+	* gc.h (gc_process_relocs): Change vectors to point to the new list.
+	Add reloc offset information.
+	* icf.cc (get_section_contents): Change iterators to point to the new
+	vectors. Add reloc offset information to the contents.
+	* icf.h (Icf::Sections_reachable_info): New typedef.
+	(Icf::Sections_reachable_list): New typedef.
+	(Icf::Offset_info): New typedef.
+	(Icf::Reloc_info): New struct typedef.
+	(Icf::Reloc_info_list): New typedef.
+	(Icf::symbol_reloc_list): Delete method.
+	(Icf::addend_reloc_list): Delete method.
+	(Icf::section_reloc_list): Delete method.
+	(Icf::reloc_info_list): New method.
+	(Icf::reloc_info_list_): New member.
+
 2010-02-19  Doug Kwan  <dougkwan@google.com>
 
 	* arm-reloc.def: Mark R_ARM_TLS_GD32, R_ARM_TLS_LDM32,

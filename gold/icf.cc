@@ -248,39 +248,38 @@ get_section_contents(bool first_iteration,
   if (num_tracked_relocs)
     *num_tracked_relocs = 0;
 
-  Icf::Section_list& seclist = symtab->icf()->section_reloc_list();
-  Icf::Symbol_list& symlist = symtab->icf()->symbol_reloc_list();
-  Icf::Addend_list& addendlist = symtab->icf()->addend_reloc_list();
+  Icf::Reloc_info_list& reloc_info_list = 
+    symtab->icf()->reloc_info_list();
 
-  Icf::Section_list::iterator it_seclist = seclist.find(secn);
-  Icf::Symbol_list::iterator it_symlist = symlist.find(secn);
-  Icf::Addend_list::iterator it_addendlist = addendlist.find(secn);
+  Icf::Reloc_info_list::iterator it_reloc_info_list =
+    reloc_info_list.find(secn);
 
   buffer.clear();
   icf_reloc_buffer.clear();
 
   // Process relocs and put them into the buffer.
 
-  if (it_seclist != seclist.end())
+  if (it_reloc_info_list != reloc_info_list.end())
     {
-      gold_assert(it_symlist != symlist.end());
-      gold_assert(it_addendlist != addendlist.end());
-      Icf::Sections_reachable_list v = it_seclist->second;
-      Icf::Symbol_info s = it_symlist->second;
-      Icf::Addend_info a = it_addendlist->second;
-      Icf::Sections_reachable_list::iterator it_v = v.begin();
+      Icf::Sections_reachable_info v =
+        (it_reloc_info_list->second).section_info;
+      Icf::Symbol_info s = (it_reloc_info_list->second).symbol_info;
+      Icf::Addend_info a = (it_reloc_info_list->second).addend_info;
+      Icf::Offset_info o = (it_reloc_info_list->second).offset_info;
+      Icf::Sections_reachable_info::iterator it_v = v.begin();
       Icf::Symbol_info::iterator it_s = s.begin();
       Icf::Addend_info::iterator it_a = a.begin();
+      Icf::Offset_info::iterator it_o = o.begin();
 
-      for (; it_v != v.end(); ++it_v, ++it_s, ++it_a)
+      for (; it_v != v.end(); ++it_v, ++it_s, ++it_a, ++it_o)
         {
-          // ADDEND_STR stores the symbol value and addend, each
-          // atmost 16 hex digits long.  it_v points to a pair
+          // ADDEND_STR stores the symbol value and addend and offset,
+          // each atmost 16 hex digits long.  it_a points to a pair
           // where first is the symbol value and second is the
           // addend.
-          char addend_str[34];
-          snprintf(addend_str, sizeof(addend_str), "%llx %llx",
-                   (*it_a).first, (*it_a).second);
+          char addend_str[50];
+          snprintf(addend_str, sizeof(addend_str), "%llx %llx %lux",
+                   (*it_a).first, (*it_a).second, (*it_o));
           Section_id reloc_secn(it_v->first, it_v->second);
 
           // If this reloc turns back and points to the same section,
