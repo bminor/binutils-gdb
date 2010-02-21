@@ -1,3 +1,10 @@
+2010-02-22  Alan Modra  <amodra@gmail.com>
+
+	* reloc.c (bfd_check_overflow): When forming addrmask, shift
+	fieldmask left by rightshift.
+	(_bfd_relocate_contents): Likewise.  Use rightshift addrmask in all
+	overflow checks.
+
 2010-02-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf64_x86_64_add_symbol_hook): Don't check
