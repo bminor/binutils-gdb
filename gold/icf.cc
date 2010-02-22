@@ -278,8 +278,13 @@ get_section_contents(bool first_iteration,
           // where first is the symbol value and second is the
           // addend.
           char addend_str[50];
-          snprintf(addend_str, sizeof(addend_str), "%llx %llx %lux",
-                   (*it_a).first, (*it_a).second, (*it_o));
+
+	  // It would be nice if we could use format macros in inttypes.h
+	  // here but there are not in ISO/IEC C++ 1998.
+          snprintf(addend_str, sizeof(addend_str), "%llx %llx %llux",
+                   static_cast<long long>((*it_a).first),
+		   static_cast<long long>((*it_a).second),
+		   static_cast<unsigned long long>(*it_o));
           Section_id reloc_secn(it_v->first, it_v->second);
 
           // If this reloc turns back and points to the same section,

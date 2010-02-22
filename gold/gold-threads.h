@@ -200,6 +200,10 @@ class Once
  public:
   Once();
 
+  virtual
+  ~Once()
+  { }
+
   // Call this function to do whatever it is.  We pass an argument
   // even though you have to use a child class because in some uses
   // setting the argument would itself require a Once class.

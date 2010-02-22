@@ -1,3 +1,10 @@
+2010-02-22  Doug Kwan  <dougkwan@google.com>
+
+	* gold-threads.h (Once::~Once): Explicitly define virtual destructor.
+	* icf.cc (get_section_contents): Cast snprintf arguments to long long
+	types to avoid warnings due to different uint64_t implementations
+	on different hosts.
+
 2010-02-21  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_relocate_functions::arm_branch_common): Fix bug in
