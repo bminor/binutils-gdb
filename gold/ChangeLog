@@ -1,3 +1,33 @@
+2010-02-21  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_relocate_functions::arm_branch_common): Fix bug in
+	handling of the maximum backward branch offset.
+     	(Arm_relocate_functions::thumb_branch_common): Ditto.
+	* testsuite/Makefile.am (check_SCRIPTS): Add arm_branch_in_range.sh.
+	(check_DATA): Add arm_bl_in_range.stdout, arm_bl_out_of_range.stdout
+	thumb_bl_in_range.stdout, thumb_bl_out_of_range.stdout, 
+	thumb2_bl_in_range.stdout and thumb2_bl_out_of_range.stdout.
+	(arm_bl_in_range.stdout, arm_bl_in_range, arm_bl_in_range.o,
+	arm_bl_out_of_range.stdout, arm_bl_out_of_range,
+	arm_bl_out_of_range.o, thumb_bl_in_range.stdout, thumb_bl_in_range,
+	thumb_bl_in_range.o, thumb_bl_out_of_range.stdout,
+	thumb_bl_out_of_range thumb_bl_out_of_range.o,
+	thumb2_bl_in_range.stdout, thumb2_bl_in_range, thumb2_bl_in_range.o
+	thumb2_bl_out_of_range.stdout, thumb2_bl_out_of_range,
+	thumb2_bl_out_of_range.o): New rules.
+	(MOSTLYCLEANFILES): Add arm_bl_in_range, arm_bl_out_of_range,
+	thumb_bl_in_range, thumb_bl_out_of_range, thumb2_bl_in_range and
+	thumb2_bl_out_of_range
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/arm_bl_in_range.s: New file.
+	* testsuite/arm_bl_out_of_range.s: Ditto.
+	* testsuite/arm_branch_in_range.sh: Ditto.
+	* testsuite/arm_branch_range.t: Ditto.
+	* testsuite/thumb2_branch_range.t: Ditto.
+	* testsuite/thumb_bl_in_range.s: Ditto.
+	* testsuite/thumb_bl_out_of_range.s: Ditto.
+	* testsuite/thumb_branch_range.t: Ditto.
+
 2010-02-20  Sriraman Tallam  <tmsriram@google.com>
 
 	* gc.h (gc_process_relocs): Change vectors to point to the new list.

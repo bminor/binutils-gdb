@@ -3547,12 +3547,14 @@ Arm_relocate_functions<big_endian>::arm_branch_common(
   // to switch mode.
   bool may_use_blx = arm_target->may_use_blx();
   Reloc_stub* stub = NULL;
-  if ((branch_offset > ARM_MAX_FWD_BRANCH_OFFSET)
-      || (branch_offset < ARM_MAX_BWD_BRANCH_OFFSET)
+  if (utils::has_overflow<26>(branch_offset)
       || ((thumb_bit != 0) && !(may_use_blx && r_type == elfcpp::R_ARM_CALL)))
     {
+      Valtype unadjusted_branch_target = psymval->value(object, 0);
+
       Stub_type stub_type =
-	Reloc_stub::stub_type_for_reloc(r_type, address, branch_target,
+	Reloc_stub::stub_type_for_reloc(r_type, address,
+					unadjusted_branch_target,
 					(thumb_bit != 0));
       if (stub_type != arm_stub_none)
 	{
@@ -3566,8 +3568,7 @@ Arm_relocate_functions<big_endian>::arm_branch_common(
 	  thumb_bit = stub->stub_template()->entry_in_thumb_mode() ? 1 : 0;
 	  branch_target = stub_table->address() + stub->offset() + addend;
 	  branch_offset = branch_target - address;
-	  gold_assert((branch_offset <= ARM_MAX_FWD_BRANCH_OFFSET)
-		      && (branch_offset >= ARM_MAX_BWD_BRANCH_OFFSET));
+	  gold_assert(!utils::has_overflow<26>(branch_offset));
 	}
     }
 
@@ -3675,19 +3676,19 @@ Arm_relocate_functions<big_endian>::thumb_branch_common(
   // to switch mode.
   bool may_use_blx = arm_target->may_use_blx();
   bool thumb2 = arm_target->using_thumb2();
-  if ((!thumb2
-       && (branch_offset > THM_MAX_FWD_BRANCH_OFFSET
-	   || (branch_offset < THM_MAX_BWD_BRANCH_OFFSET)))
-      || (thumb2
-	  && (branch_offset > THM2_MAX_FWD_BRANCH_OFFSET
-	      || (branch_offset < THM2_MAX_BWD_BRANCH_OFFSET)))
+  if ((!thumb2 && utils::has_overflow<23>(branch_offset))
+      || (thumb2 && utils::has_overflow<25>(branch_offset))
       || ((thumb_bit == 0)
           && (((r_type == elfcpp::R_ARM_THM_CALL) && !may_use_blx)
 	      || r_type == elfcpp::R_ARM_THM_JUMP24)))
     {
+      Arm_address unadjusted_branch_target = psymval->value(object, 0);
+
       Stub_type stub_type =
-	Reloc_stub::stub_type_for_reloc(r_type, address, branch_target,
+	Reloc_stub::stub_type_for_reloc(r_type, address,
+					unadjusted_branch_target,
 					(thumb_bit != 0));
+
       if (stub_type != arm_stub_none)
 	{
 	  Stub_table<big_endian>* stub_table =

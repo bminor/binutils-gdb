@@ -322,9 +322,21 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @DEFAULT_TARGET_X86_64_TRUE@am__append_37 = split_x86_64_1 split_x86_64_2 split_x86_64_3 \
 @DEFAULT_TARGET_X86_64_TRUE@	split_x86_64_4 split_x86_64_r
 
-@DEFAULT_TARGET_ARM_TRUE@am__append_38 = arm_abs_global.sh
-@DEFAULT_TARGET_ARM_TRUE@am__append_39 = arm_abs_global.stdout
-@DEFAULT_TARGET_ARM_TRUE@am__append_40 = arm_abs_global
+@DEFAULT_TARGET_ARM_TRUE@am__append_38 = arm_abs_global.sh \
+@DEFAULT_TARGET_ARM_TRUE@	arm_branch_in_range.sh
+@DEFAULT_TARGET_ARM_TRUE@am__append_39 = arm_abs_global.stdout \
+@DEFAULT_TARGET_ARM_TRUE@	arm_bl_in_range.stdout \
+@DEFAULT_TARGET_ARM_TRUE@	arm_bl_out_of_range.stdout \
+@DEFAULT_TARGET_ARM_TRUE@	thumb_bl_in_range.stdout \
+@DEFAULT_TARGET_ARM_TRUE@	thumb_bl_out_of_range.stdout \
+@DEFAULT_TARGET_ARM_TRUE@	thumb2_bl_in_range.stdout \
+@DEFAULT_TARGET_ARM_TRUE@	thumb2_bl_out_of_range.stdout
+@DEFAULT_TARGET_ARM_TRUE@am__append_40 = arm_abs_global \
+@DEFAULT_TARGET_ARM_TRUE@	arm_bl_in_range arm_bl_out_of_range \
+@DEFAULT_TARGET_ARM_TRUE@	thumb_bl_in_range \
+@DEFAULT_TARGET_ARM_TRUE@	thumb_bl_out_of_range \
+@DEFAULT_TARGET_ARM_TRUE@	thumb2_bl_in_range \
+@DEFAULT_TARGET_ARM_TRUE@	thumb2_bl_out_of_range
 subdir = testsuite
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -2648,7 +2660,7 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--icf=all -Wl,--keep-unique,_Z11unique_funcv icf_keep_unique_test.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_keep_unique_test.stdout: icf_keep_unique_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) -C icf_keep_unique_test > icf_keep_unique_test.stdout
-@GCC_TRUE@@NATIVE_LINKER_TRUE@icf_safe_test.o: icf_safe_test.cc 
+@GCC_TRUE@@NATIVE_LINKER_TRUE@icf_safe_test.o: icf_safe_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_safe_test: icf_safe_test.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--icf=safe icf_safe_test.o
@@ -2656,7 +2668,7 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) icf_safe_test > icf_safe_test_1.stdout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_safe_test_2.stdout: icf_safe_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -h icf_safe_test > icf_safe_test_2.stdout
-@GCC_TRUE@@NATIVE_LINKER_TRUE@icf_safe_so_test.o: icf_safe_so_test.cc 
+@GCC_TRUE@@NATIVE_LINKER_TRUE@icf_safe_so_test.o: icf_safe_so_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -ffunction-sections -fPIC -g -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_safe_so_test: icf_safe_so_test.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -Wl,--icf=safe icf_safe_so_test.o -fPIC -shared
@@ -3221,6 +3233,60 @@ uninstall-am:
 @DEFAULT_TARGET_ARM_TRUE@	../ld-new -o $@ arm_abs_global.o -L. -larm_abs
 @DEFAULT_TARGET_ARM_TRUE@arm_abs_global.stdout: arm_abs_global
 @DEFAULT_TARGET_ARM_TRUE@	$(TEST_READELF) -r $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@arm_bl_in_range.stdout: arm_bl_in_range
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@arm_bl_in_range: arm_bl_in_range.o
+@DEFAULT_TARGET_ARM_TRUE@	../ld-new -T $(srcdir)/arm_branch_range.t -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@arm_bl_in_range.o: arm_bl_in_range.s
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@arm_bl_out_of_range.stdout: arm_bl_out_of_range
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -S $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@arm_bl_out_of_range: arm_bl_out_of_range.o
+@DEFAULT_TARGET_ARM_TRUE@	../ld-new -T $(srcdir)/arm_branch_range.t -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@arm_bl_out_of_range.o: arm_bl_out_of_range.s
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@thumb_bl_in_range.stdout: thumb_bl_in_range
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@thumb_bl_in_range: thumb_bl_in_range.o
+@DEFAULT_TARGET_ARM_TRUE@	../ld-new -T $(srcdir)/thumb_branch_range.t -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@thumb_bl_in_range.o: thumb_bl_in_range.s
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ -march=armv5te $<
+
+@DEFAULT_TARGET_ARM_TRUE@thumb_bl_out_of_range.stdout: thumb_bl_out_of_range
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@thumb_bl_out_of_range: thumb_bl_in_range.o
+@DEFAULT_TARGET_ARM_TRUE@	../ld-new -T $(srcdir)/thumb_branch_range.t -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@thumb_bl_out_of_range.o: thumb_bl_in_range.s
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ -march=armv5te $<
+
+@DEFAULT_TARGET_ARM_TRUE@thumb2_bl_in_range.stdout: thumb2_bl_in_range
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@thumb2_bl_in_range: thumb2_bl_in_range.o
+@DEFAULT_TARGET_ARM_TRUE@	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@thumb2_bl_in_range.o: thumb_bl_in_range.s
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ -march=armv7-a $<
+
+@DEFAULT_TARGET_ARM_TRUE@thumb2_bl_out_of_range.stdout: thumb2_bl_out_of_range
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@thumb2_bl_out_of_range: thumb2_bl_in_range.o
+@DEFAULT_TARGET_ARM_TRUE@	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@thumb2_bl_out_of_range.o: thumb_bl_in_range.s
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ -march=armv7-a $<
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

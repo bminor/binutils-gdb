@@ -1467,4 +1467,66 @@ arm_abs_global.stdout: arm_abs_global
 
 MOSTLYCLEANFILES += arm_abs_global
 
+check_SCRIPTS += arm_branch_in_range.sh
+check_DATA += arm_bl_in_range.stdout arm_bl_out_of_range.stdout \
+	thumb_bl_in_range.stdout thumb_bl_out_of_range.stdout \
+	thumb2_bl_in_range.stdout thumb2_bl_out_of_range.stdout
+
+arm_bl_in_range.stdout: arm_bl_in_range
+	$(TEST_OBJDUMP) -D $< > $@
+
+arm_bl_in_range: arm_bl_in_range.o
+	../ld-new -T $(srcdir)/arm_branch_range.t -o $@ $<
+
+arm_bl_in_range.o: arm_bl_in_range.s
+	$(TEST_AS) -o $@ $<
+
+arm_bl_out_of_range.stdout: arm_bl_out_of_range
+	$(TEST_OBJDUMP) -S $< > $@
+
+arm_bl_out_of_range: arm_bl_out_of_range.o
+	../ld-new -T $(srcdir)/arm_branch_range.t -o $@ $<
+
+arm_bl_out_of_range.o: arm_bl_out_of_range.s
+	$(TEST_AS) -o $@ $<
+
+thumb_bl_in_range.stdout: thumb_bl_in_range
+	$(TEST_OBJDUMP) -D $< > $@
+
+thumb_bl_in_range: thumb_bl_in_range.o
+	../ld-new -T $(srcdir)/thumb_branch_range.t -o $@ $<
+
+thumb_bl_in_range.o: thumb_bl_in_range.s
+	$(TEST_AS) -o $@ -march=armv5te $<
+
+thumb_bl_out_of_range.stdout: thumb_bl_out_of_range
+	$(TEST_OBJDUMP) -D $< > $@
+
+thumb_bl_out_of_range: thumb_bl_in_range.o
+	../ld-new -T $(srcdir)/thumb_branch_range.t -o $@ $<
+
+thumb_bl_out_of_range.o: thumb_bl_in_range.s
+	$(TEST_AS) -o $@ -march=armv5te $<
+
+thumb2_bl_in_range.stdout: thumb2_bl_in_range
+	$(TEST_OBJDUMP) -D $< > $@
+
+thumb2_bl_in_range: thumb2_bl_in_range.o
+	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
+
+thumb2_bl_in_range.o: thumb_bl_in_range.s
+	$(TEST_AS) -o $@ -march=armv7-a $<
+
+thumb2_bl_out_of_range.stdout: thumb2_bl_out_of_range
+	$(TEST_OBJDUMP) -D $< > $@
+
+thumb2_bl_out_of_range: thumb2_bl_in_range.o
+	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
+
+thumb2_bl_out_of_range.o: thumb_bl_in_range.s
+	$(TEST_AS) -o $@ -march=armv7-a $<
+
+MOSTLYCLEANFILES += arm_bl_in_range arm_bl_out_of_range thumb_bl_in_range \
+	thumb_bl_out_of_range thumb2_bl_in_range thumb2_bl_out_of_range
+
 endif DEFAULT_TARGET_ARM
