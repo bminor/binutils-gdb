@@ -1,3 +1,9 @@
+2010-02-22  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	PR 9861
+	* config/tc-arm.c (CPU_DEFAULT): Do not define based upon build
+	compiler's predefines.
+
 2010-02-19  Alan Modra  <amodra@gmail.com>
 
 	* configure.tgt: Whiltespace.  Sort moxie entry.
