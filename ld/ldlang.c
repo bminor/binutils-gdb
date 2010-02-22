@@ -68,7 +68,6 @@ static struct unique_sections *unique_section_list;
 static bfd_boolean ldlang_sysrooted_script = FALSE;
 
 /* Forward declarations.  */
-static void exp_init_os (etree_type *);
 static void init_map_userdata (bfd *, asection *, void *);
 static lang_input_statement_type *lookup_name (const char *);
 static struct bfd_hash_entry *lang_definedness_newfunc
@@ -2048,12 +2047,8 @@ sort_def_symbol (struct bfd_link_hash_entry *hash_entry,
 /* Initialize an output section.  */
 
 static void
-init_os (lang_output_section_statement_type *s, asection *isec,
-	 flagword flags)
+init_os (lang_output_section_statement_type *s, asection *isec, flagword flags)
 {
-  if (s->bfd_section != NULL)
-    return;
-
   if (strcmp (s->name, DISCARD_SECTION_NAME) == 0)
     einfo (_("%P%F: Illegal use of `%s' section\n"), DISCARD_SECTION_NAME);
 
@@ -2077,14 +2072,6 @@ init_os (lang_output_section_statement_type *s, asection *isec,
       memset (new_userdata, 0, sizeof (fat_section_userdata_type));
       get_userdata (s->bfd_section) = new_userdata;
     }
-
-  /* If there is a base address, make sure that any sections it might
-     mention are initialized.  */
-  if (s->addr_tree != NULL)
-    exp_init_os (s->addr_tree);
-
-  if (s->load_base != NULL)
-    exp_init_os (s->load_base);
 
   /* If supplied an alignment, set it.  */
   if (s->section_alignment != -1)
@@ -3430,10 +3417,10 @@ map_input_to_output_sections
   (lang_statement_union_type *s, const char *target,
    lang_output_section_statement_type *os)
 {
-  flagword flags;
-
   for (; s != NULL; s = s->header.next)
     {
+      lang_output_section_statement_type *tos;
+
       switch (s->header.type)
 	{
 	case lang_wild_statement_enum:
@@ -3445,29 +3432,23 @@ map_input_to_output_sections
 					os);
 	  break;
 	case lang_output_section_statement_enum:
-	  if (s->output_section_statement.constraint)
+	  tos = &s->output_section_statement;
+	  if (tos->constraint != 0)
 	    {
-	      if (s->output_section_statement.constraint != ONLY_IF_RW
-		  && s->output_section_statement.constraint != ONLY_IF_RO)
+	      if (tos->constraint != ONLY_IF_RW
+		  && tos->constraint != ONLY_IF_RO)
 		break;
-	      s->output_section_statement.all_input_readonly = TRUE;
-	      check_input_sections (s->output_section_statement.children.head,
-				    &s->output_section_statement);
-	      if ((s->output_section_statement.all_input_readonly
-		   && s->output_section_statement.constraint == ONLY_IF_RW)
-		  || (!s->output_section_statement.all_input_readonly
-		      && s->output_section_statement.constraint == ONLY_IF_RO))
+	      tos->all_input_readonly = TRUE;
+	      check_input_sections (tos->children.head, tos);
+	      if (tos->all_input_readonly != (tos->constraint == ONLY_IF_RO))
 		{
-		  s->output_section_statement.constraint = -1;
+		  tos->constraint = -1;
 		  break;
 		}
 	    }
-
-	  map_input_to_output_sections (s->output_section_statement.children.head,
+	  map_input_to_output_sections (tos->children.head,
 					target,
-					&s->output_section_statement);
-	  break;
-	case lang_output_statement_enum:
+					tos);
 	  break;
 	case lang_target_statement_enum:
 	  target = s->target_statement.target;
@@ -3477,19 +3458,102 @@ map_input_to_output_sections
 					target,
 					os);
 	  break;
+	case lang_address_statement_enum:
+	  /* Mark the specified section with the supplied address.
+	     If this section was actually a segment marker, then the
+	     directive is ignored if the linker script explicitly
+	     processed the segment marker.  Originally, the linker
+	     treated segment directives (like -Ttext on the
+	     command-line) as section directives.  We honor the
+	     section directive semantics for backwards compatibilty;
+	     linker scripts that do not specifically check for
+	     SEGMENT_START automatically get the old semantics.  */
+	  if (!s->address_statement.segment
+	      || !s->address_statement.segment->used)
+	    {
+	      const char *name = s->address_statement.section_name;
+
+	      /* Create the output section statement here rather than
+		 in create_other_output_sections so that orphans with
+		 a set address will be placed after other script
+		 sections.  If we let the orphan placement code place
+		 them in amongst other sections then the address will
+		 affect following script sections, which is likely to
+		 surprise naive users.  */
+	      tos = lang_output_section_statement_lookup (name, 0, TRUE);
+	      tos->addr_tree = s->address_statement.address;
+	    }
+	  break;
+	case lang_output_statement_enum:
+	case lang_data_statement_enum:
+	case lang_input_section_enum:
+	case lang_fill_statement_enum:
+	case lang_object_symbols_statement_enum:
+	case lang_reloc_statement_enum:
+	case lang_padding_statement_enum:
+	case lang_input_statement_enum:
+	case lang_assignment_statement_enum:
+	case lang_insert_statement_enum:
+	  break;
+	}
+    }
+}
+
+/* Create any other output sections, such as needed for data statements
+   or those referenced in expressions.  */
+
+static void
+create_other_output_sections
+  (lang_statement_union_type *s,
+   lang_output_section_statement_type *os)
+{
+  lang_output_section_statement_type *tos;
+  flagword flags;
+
+  for (; s != NULL; s = s->header.next)
+    {
+      switch (s->header.type)
+	{
+	case lang_wild_statement_enum:
+	  break;
+	case lang_constructors_statement_enum:
+	  create_other_output_sections (constructor_list.head, os);
+	  break;
+	case lang_output_section_statement_enum:
+	  tos = &s->output_section_statement;
+	  if (tos->constraint != 0
+	      && tos->constraint != ONLY_IF_RW
+	      && tos->constraint != ONLY_IF_RO)
+	    break;
+	  create_other_output_sections (tos->children.head, tos);
+	  if (tos->bfd_section != NULL)
+	    {
+	      /* If there is a base address, make sure that any sections
+		 it might mention are initialized.  */
+	      if (tos->addr_tree != NULL)
+		exp_init_os (tos->addr_tree);
+	      if (tos->load_base != NULL)
+		exp_init_os (tos->load_base);
+	    }
+	  break;
+	case lang_output_statement_enum:
+	case lang_target_statement_enum:
+	  break;
+	case lang_group_statement_enum:
+	  create_other_output_sections (s->group_statement.children.head, os);
+	  break;
 	case lang_data_statement_enum:
 	  /* Make sure that any sections mentioned in the expression
 	     are initialized.  */
 	  exp_init_os (s->data_statement.exp);
+	  if (os->bfd_section == NULL)
+	    init_os (os, NULL, 0);
 	  flags = SEC_HAS_CONTENTS;
 	  /* The output section gets contents, and then we inspect for
 	     any flags set in the input script which override any ALLOC.  */
 	  if (!(os->flags & SEC_NEVER_LOAD))
 	    flags |= SEC_ALLOC | SEC_LOAD;
-	  if (os->bfd_section == NULL)
-	    init_os (os, NULL, flags);
-	  else
-	    os->bfd_section->flags |= flags;
+	  os->bfd_section->flags |= flags;
 	  break;
 	case lang_input_section_enum:
 	  break;
@@ -3510,25 +3574,14 @@ map_input_to_output_sections
 	  exp_init_os (s->assignment_statement.exp);
 	  break;
 	case lang_address_statement_enum:
-	  /* Mark the specified section with the supplied address.
-	     If this section was actually a segment marker, then the
-	     directive is ignored if the linker script explicitly
-	     processed the segment marker.  Originally, the linker
-	     treated segment directives (like -Ttext on the
-	     command-line) as section directives.  We honor the
-	     section directive semantics for backwards compatibilty;
-	     linker scripts that do not specifically check for
-	     SEGMENT_START automatically get the old semantics.  */
 	  if (!s->address_statement.segment
 	      || !s->address_statement.segment->used)
 	    {
-	      lang_output_section_statement_type *aos
-		= (lang_output_section_statement_lookup
-		   (s->address_statement.section_name, 0, TRUE));
+	      const char *name = s->address_statement.section_name;
 
-	      if (aos->bfd_section == NULL)
-		init_os (aos, NULL, 0);
-	      aos->addr_tree = s->address_statement.address;
+	      tos = lang_output_section_find (name);
+	      if (tos->bfd_section == NULL)
+		init_os (tos, NULL, 0);
 	    }
 	  break;
 	case lang_insert_statement_enum:
@@ -6346,6 +6399,10 @@ lang_process (void)
 
   /* Find any sections not attached explicitly and handle them.  */
   lang_place_orphans ();
+
+  /* Create sections for data statements and those referenced in
+     expressions but otherwise empty.  */
+  create_other_output_sections (statement_list.head, NULL);
 
   if (! link_info.relocatable)
     {
