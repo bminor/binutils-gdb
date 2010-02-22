@@ -1264,9 +1264,10 @@ extern char *normal_pid_to_str (ptid_t ptid);
     (*current_target.to_region_ok_for_hw_watchpoint) (addr, len)
 
 
-/* Set/clear a hardware watchpoint starting at ADDR, for LEN bytes.  TYPE is 0
-   for write, 1 for read, and 2 for read/write accesses.  Returns 0 for
-   success, non-zero for failure.  */
+/* Set/clear a hardware watchpoint starting at ADDR, for LEN bytes.
+   TYPE is 0 for write, 1 for read, and 2 for read/write accesses.
+   Returns 0 for success, 1 if the watchpoint type is not supported,
+   -1 for failure.  */
 
 #define	target_insert_watchpoint(addr, len, type)	\
      (*current_target.to_insert_watchpoint) (addr, len, type)

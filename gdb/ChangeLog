@@ -1,3 +1,21 @@
+2010-02-22  Pedro Alves  <pedro@codesourcery.com>
+
+	PR9605
+
+	gdb/
+	* breakpoint.c (insert_bp_location): If inserting the read
+	watchpoint failed, fallback to an access watchpoint.
+	(bpstat_check_watchpoint): Stop for read watchpoint triggers even
+	if the value changed, if not watching the same memory for writes.
+	(watchpoint_locations_match): Add comment.
+	(update_global_location_list): Copy the location's watchpoint type.
+	* i386-nat.c (i386_length_and_rw_bits): It's an internal error to
+	handle read watchpoints here.
+	(i386_insert_watchpoint): Read watchpoints aren't supported.
+	* remote.c (remote_insert_watchpoint): Return 1 for unsupported
+	packets.
+	* target.h (target_insert_watchpoint): Update description.
+
 2010-02-19  Tom Tromey  <tromey@redhat.com>
 
 	* p-typeprint.c (pascal_type_print_varspec_prefix): Update.

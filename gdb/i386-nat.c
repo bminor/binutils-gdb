@@ -268,7 +268,8 @@ i386_length_and_rw_bits (int len, enum target_hw_bp_type type)
 	rw = DR_RW_WRITE;
 	break;
       case hw_read:
-	/* The i386 doesn't support data-read watchpoints.  */
+	internal_error (__FILE__, __LINE__,
+			_("The i386 doesn't support data-read watchpoints.\n"));
       case hw_access:
 	rw = DR_RW_READ;
 	break;
@@ -486,6 +487,9 @@ static int
 i386_insert_watchpoint (CORE_ADDR addr, int len, int type)
 {
   int retval;
+
+  if (type == hw_read)
+    return 1; /* unsupported */
 
   if (((len != 1 && len !=2 && len !=4) && !(TARGET_HAS_DR_LEN_8 && len == 8))
       || addr % len != 0)

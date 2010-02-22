@@ -219,7 +219,7 @@ i386_length_and_rw_bits (int len, enum target_hw_bp_type type)
 	rw = DR_RW_WRITE;
 	break;
       case hw_read:
-	/* The i386 doesn't support data-read watchpoints.  */
+	fatal ("The i386 doesn't support data-read watchpoints.\n");
       case hw_access:
 	rw = DR_RW_READ;
 	break;
@@ -457,6 +457,9 @@ i386_low_insert_watchpoint (struct i386_debug_reg_state *state,
 {
   int retval;
   enum target_hw_bp_type type = Z_packet_to_hw_type (type_from_packet);
+
+  if (type == hw_read)
+    return 1; /* unsupported */
 
   if (((len != 1 && len != 2 && len != 4)
        && !(TARGET_HAS_DR_LEN_8 && len == 8))

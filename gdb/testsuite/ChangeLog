@@ -1,3 +1,9 @@
+2010-02-22  Pedro Alves  <pedro@codesourcery.com>
+
+	PR9605
+
+	* gdb.base/watch-read.c, gdb.base/watch-read.exp: New files.
+
 2010-02-19  Tom Tromey  <tromey@redhat.com>
 
 	PR c++/8693, PR c++/9496:

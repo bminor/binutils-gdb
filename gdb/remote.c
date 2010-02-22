@@ -7341,7 +7341,7 @@ remote_insert_watchpoint (CORE_ADDR addr, int len, int type)
   enum Z_packet_type packet = watchpoint_to_Z_packet (type);
 
   if (remote_protocol_packets[PACKET_Z0 + packet].support == PACKET_DISABLE)
-    return -1;
+    return 1;
 
   sprintf (rs->buf, "Z%x,", packet);
   p = strchr (rs->buf, '\0');
@@ -7355,8 +7355,9 @@ remote_insert_watchpoint (CORE_ADDR addr, int len, int type)
   switch (packet_ok (rs->buf, &remote_protocol_packets[PACKET_Z0 + packet]))
     {
     case PACKET_ERROR:
-    case PACKET_UNKNOWN:
       return -1;
+    case PACKET_UNKNOWN:
+      return 1;
     case PACKET_OK:
       return 0;
     }

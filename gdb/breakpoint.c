@@ -127,6 +127,9 @@ static int breakpoint_address_match (struct address_space *aspace1,
 				     struct address_space *aspace2,
 				     CORE_ADDR addr2);
 
+static int watchpoint_locations_match (struct bp_location *loc1,
+				       struct bp_location *loc2);
+
 static void breakpoints_info (char *, int);
 
 static void breakpoint_1 (int, int);
@@ -1485,10 +1488,43 @@ Note: automatically using hardware breakpoints for read-only addresses.\n"));
 	      watchpoints.  It's not clear that it's necessary... */
 	   && bpt->owner->disposition != disp_del_at_next_stop)
     {
-      val = target_insert_watchpoint (bpt->address, 
+      val = target_insert_watchpoint (bpt->address,
 				      bpt->length,
 				      bpt->watchpoint_type);
-      bpt->inserted = (val != -1);
+
+      /* If trying to set a read-watchpoint, and it turns out it's not
+	 supported, try emulating one with an access watchpoint.  */
+      if (val == 1 && bpt->watchpoint_type == hw_read)
+	{
+	  struct bp_location *loc, **loc_temp;
+
+	  /* But don't try to insert it, if there's already another
+	     hw_access location that would be considered a duplicate
+	     of this one.  */
+	  ALL_BP_LOCATIONS (loc, loc_temp)
+	    if (loc != bpt
+		&& loc->watchpoint_type == hw_access
+		&& watchpoint_locations_match (bpt, loc))
+	      {
+		bpt->duplicate = 1;
+		bpt->inserted = 1;
+		bpt->target_info = loc->target_info;
+		bpt->watchpoint_type = hw_access;
+		val = 0;
+		break;
+	      }
+
+	  if (val == 1)
+	    {
+	      val = target_insert_watchpoint (bpt->address,
+					      bpt->length,
+					      hw_access);
+	      if (val == 0)
+		bpt->watchpoint_type = hw_access;
+	    }
+	}
+
+      bpt->inserted = (val == 0);
     }
 
   else if (bpt->owner->type == bp_catchpoint)
@@ -3434,11 +3470,67 @@ bpstat_check_watchpoint (bpstat bs)
 	    case WP_VALUE_CHANGED:
 	      if (b->type == bp_read_watchpoint)
 		{
-		  /* Don't stop: read watchpoints shouldn't fire if
-		     the value has changed.  This is for targets
-		     which cannot set read-only watchpoints.  */
-		  bs->print_it = print_it_noop;
-		  bs->stop = 0;
+		  /* There are two cases to consider here:
+
+		     1. we're watching the triggered memory for reads.
+		     In that case, trust the target, and always report
+		     the watchpoint hit to the user.  Even though
+		     reads don't cause value changes, the value may
+		     have changed since the last time it was read, and
+		     since we're not trapping writes, we will not see
+		     those, and as such we should ignore our notion of
+		     old value.
+
+		     2. we're watching the triggered memory for both
+		     reads and writes.  There are two ways this may
+		     happen:
+
+		     2.1. this is a target that can't break on data
+		     reads only, but can break on accesses (reads or
+		     writes), such as e.g., x86.  We detect this case
+		     at the time we try to insert read watchpoints.
+
+		     2.2. otherwise, the target supports read
+		     watchpoints, but, the user set an access or write
+		     watchpoint watching the same memory as this read
+		     watchpoint.
+
+		     If we're watching memory writes as well as reads,
+		     ignore watchpoint hits when we find that the
+		     value hasn't changed, as reads don't cause
+		     changes.  This still gives false positives when
+		     the program writes the same value to memory as
+		     what there was already in memory (we will confuse
+		     it for a read), but it's much better than
+		     nothing.  */
+
+		  int other_write_watchpoint = 0;
+
+		  if (bl->watchpoint_type == hw_read)
+		    {
+		      struct breakpoint *other_b;
+
+		      ALL_BREAKPOINTS (other_b)
+			if ((other_b->type == bp_hardware_watchpoint
+			     || other_b->type == bp_access_watchpoint)
+			    && (other_b->watchpoint_triggered
+				== watch_triggered_yes))
+			  {
+			    other_write_watchpoint = 1;
+			    break;
+			  }
+		    }
+
+		  if (other_write_watchpoint
+		      || bl->watchpoint_type == hw_access)
+		    {
+		      /* We're watching the same memory for writes,
+			 and the value changed since the last time we
+			 updated it, so this trap must be for a write.
+			 Ignore it.  */
+		      bs->print_it = print_it_noop;
+		      bs->stop = 0;
+		    }
 		}
 	      break;
 	    case WP_VALUE_NOT_CHANGED:
@@ -4697,6 +4789,12 @@ breakpoint_address_is_meaningful (struct breakpoint *bpt)
 static int
 watchpoint_locations_match (struct bp_location *loc1, struct bp_location *loc2)
 {
+  /* Note that this checks the owner's type, not the location's.  In
+     case the target does not support read watchpoints, but does
+     support access watchpoints, we'll have bp_read_watchpoint
+     watchpoints with hw_access locations.  Those should be considered
+     duplicates of hw_read locations.  The hw_read locations will
+     become hw_access locations later.  */
   return (loc1->owner->type == loc2->owner->type
 	  && loc1->pspace->aspace == loc2->pspace->aspace
 	  && loc1->address == loc2->address
@@ -8459,6 +8557,16 @@ update_global_location_list (int should_insert)
 			  /* For the sake of should_be_inserted.
 			     Duplicates check below will fix up this later.  */
 			  loc2->duplicate = 0;
+
+			  /* Read watchpoint locations are switched to
+			     access watchpoints, if the former are not
+			     supported, but the latter are.  */
+			  if (is_hardware_watchpoint (old_loc->owner))
+			    {
+			      gdb_assert (is_hardware_watchpoint (loc2->owner));
+			      loc2->watchpoint_type = old_loc->watchpoint_type;
+			    }
+
 			  if (loc2 != old_loc && should_be_inserted (loc2))
 			    {
 			      loc2->inserted = 1;
