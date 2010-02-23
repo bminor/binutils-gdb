@@ -1,3 +1,9 @@
+2010-02-23  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2loc.c (read_pieced_value) <DWARF_VALUE_STACK>: Correctly
+	handle big-endian values.
+	(dwarf2_evaluate_loc_desc) <DWARF_VALUE_STACK>: Likewise.
+
 2010-02-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* symfile.c (addr_info_make_relative): Extend comment.  Move SECT to
