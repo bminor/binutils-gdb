@@ -1,3 +1,8 @@
+2010-02-23  Alan Modra  <amodra@gmail.com>
+
+	PR ld/11304
+	* ldlang.c: Revert last patch.
+
 2010-02-23  Nick Clifton  <nickc@redhat.com>
 
 	* po/bg.po: Updated Bulgarian translation.
