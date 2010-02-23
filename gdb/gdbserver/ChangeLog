@@ -1,3 +1,9 @@
+2010-02-23  Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+	* configure.ac: Check for libdl.  If it is not available link against
+	static libthread_db.
+	* configure: Regenerate.
+
 2010-02-22  Pedro Alves  <pedro@codesourcery.com>
 
 	PR9605
