@@ -24,4 +24,4 @@ Disassembly of section .text:
 0+02a <[^>]+> be00      	bkpt	0x0000
 0+02c <[^>]+> bf00      	nople
 0+02e <[^>]+> bf00      	nop
-0+030 <[^>]+> bf00      	nop
+#...
