@@ -1,3 +1,8 @@
+2010-02-23  Daniel Gutson  <dgutson@codesourcery.com>
+
+	* config/tc-arm.c (do_rd_rm_rn): Added warning
+	for obsolete insns.
+
 2010-02-23  Andrew Zabolotny  <anpaza@mail.ru>
 
 	PR binutils/11297

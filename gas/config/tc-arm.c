@@ -6970,8 +6970,16 @@ do_rd_rm_rn (void)
   unsigned Rn = inst.operands[2].reg;
   /* Enforce restrictions on SWP instruction.  */
   if ((inst.instruction & 0x0fbfffff) == 0x01000090)
-    constraint (Rn == inst.operands[0].reg || Rn == inst.operands[1].reg,
-		_("Rn must not overlap other operands"));
+    {
+      constraint (Rn == inst.operands[0].reg || Rn == inst.operands[1].reg,
+		  _("Rn must not overlap other operands"));
+
+      /* SWP{b} is deprecated for ARMv6* and ARMv7.  */
+      if (warn_on_deprecated
+	  && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6))
+	as_warn (_("swp{b} use is deprecated for this architecture"));
+
+    }
   inst.instruction |= inst.operands[0].reg << 12;
   inst.instruction |= inst.operands[1].reg;
   inst.instruction |= Rn << 16;

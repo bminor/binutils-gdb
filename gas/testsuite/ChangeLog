@@ -1,3 +1,9 @@
+2010-02-23  Daniel Gutson  <dgutson@codesourcery.com>
+
+    * gas/arm/depr-swp.d: New test case.
+    * gas/arm/depr-swp.s: New file.
+    * gas/arm/depr-swp.l: New file.
+
 2010-02-23  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/thumb2_bcond.d: Allow for varying number of nops at the
