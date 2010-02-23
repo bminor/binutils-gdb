@@ -1700,7 +1700,8 @@ VEC(varobj_update_result) *varobj_update (struct varobj **varp, int explicit)
 
   if (!(*varp)->root->is_valid)
     {
-      varobj_update_result r = {*varp};
+      varobj_update_result r = {0};
+      r.varobj = *varp;
       r.status = VAROBJ_INVALID;
       VEC_safe_push (varobj_update_result, result, &r);
       return result;
@@ -1708,7 +1709,8 @@ VEC(varobj_update_result) *varobj_update (struct varobj **varp, int explicit)
 
   if ((*varp)->root->rootvar == *varp)
     {
-      varobj_update_result r = {*varp};
+      varobj_update_result r = {0};
+      r.varobj = *varp;
       r.status = VAROBJ_IN_SCOPE;
 
       /* Update the root variable. value_of_root can return NULL
@@ -1738,7 +1740,8 @@ VEC(varobj_update_result) *varobj_update (struct varobj **varp, int explicit)
     }
   else
     {
-      varobj_update_result r = {*varp};
+      varobj_update_result r = {0};
+      r.varobj = *varp;
       VEC_safe_push (varobj_update_result, stack, &r);
     }
 
@@ -1815,7 +1818,8 @@ VEC(varobj_update_result) *varobj_update (struct varobj **varp, int explicit)
 	      for (i = VEC_length (varobj_p, changed) - 1; i >= 0; --i)
 		{
 		  varobj_p tmp = VEC_index (varobj_p, changed, i);
-		  varobj_update_result r = {tmp};
+		  varobj_update_result r = {0};
+		  r.varobj = tmp;
 		  r.changed = 1;
 		  r.value_installed = 1;
 		  VEC_safe_push (varobj_update_result, stack, &r);
@@ -1825,7 +1829,8 @@ VEC(varobj_update_result) *varobj_update (struct varobj **varp, int explicit)
 		  varobj_p tmp = VEC_index (varobj_p, unchanged, i);
 	      	  if (!tmp->frozen)
 	      	    {
-	      	      varobj_update_result r = {tmp};
+	      	      varobj_update_result r = {0};
+		      r.varobj = tmp;
 	      	      r.value_installed = 1;
 	      	      VEC_safe_push (varobj_update_result, stack, &r);
 	      	    }
@@ -1852,7 +1857,8 @@ VEC(varobj_update_result) *varobj_update (struct varobj **varp, int explicit)
 	  /* Child may be NULL if explicitly deleted by -var-delete.  */
 	  if (c != NULL && !c->frozen)
 	    {
-	      varobj_update_result r = {c};
+	      varobj_update_result r = {0};
+	      r.varobj = c;
 	      VEC_safe_push (varobj_update_result, stack, &r);
 	    }
 	}
