@@ -1,4 +1,11 @@
 2010-02-23  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
+
+	* arm.cc (Target_arm::do_finalize_sections): Create attribute
+	section if it does not already exist.
+	* attributes.cc	(Attributes_section_data::Attributes_section_data):
+	Don't crash if size is zero.
+
+2010-02-23  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
 	    Ian Lance Taylor  <iant@google.com>
 
 	* gold.cc (queue_middle_tasks): If no input files were opened,

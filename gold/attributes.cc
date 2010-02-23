@@ -278,7 +278,7 @@ Attributes_section_data::Attributes_section_data(
 
   const unsigned char *p = view;
   p = view;
-  if (*(p++) == 'A')
+  if (size > 0 && p != NULL && *(p++) == 'A')
     {
       size--;
       while (size > 0)
