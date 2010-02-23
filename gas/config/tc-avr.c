@@ -1,7 +1,7 @@
 /* tc-avr.c -- Assembler code for the ATMEL AVR
 
-   Copyright 1999, 2000, 2001, 2002, 2004, 2005, 2006, 2007, 2008, 2009
-   Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2004, 2005, 2006, 2007, 2008, 2009,
+   2010  Free Software Foundation, Inc.
    Contributed by Denis Chertykov <denisc@overta.ru>
 
    This file is part of GAS, the GNU Assembler.
@@ -1153,6 +1153,13 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
 	  bfd_putl16 ((bfd_vma) value, where);
 	  break;
 
+	case BFD_RELOC_8:
+          if (value > 255 || value < -128)
+	    as_warn_where (fixP->fx_file, fixP->fx_line,
+                           _("operand out of range: %ld"), value);
+          *where = value;
+	  break;
+
 	case BFD_RELOC_AVR_16_PM:
 	  bfd_putl16 ((bfd_vma) (value >> 1), where);
 	  break;
@@ -1442,7 +1449,9 @@ avr_cons_fix_new (fragS *frag,
 {
   if (exp_mod_pm == 0)
     {
-      if (nbytes == 2)
+      if (nbytes == 1)
+	fix_new_exp (frag, where, nbytes, exp, FALSE, BFD_RELOC_8);
+      else if (nbytes == 2)
 	fix_new_exp (frag, where, nbytes, exp, FALSE, BFD_RELOC_16);
       else if (nbytes == 4)
 	fix_new_exp (frag, where, nbytes, exp, FALSE, BFD_RELOC_32);

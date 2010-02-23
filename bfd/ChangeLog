@@ -1,3 +1,9 @@
+2010-02-23  Andrew Zabolotny  <anpaza@mail.ru>
+
+	PR binutils/11297
+	* elf32-avr.c (elf_avr_howto_table): Add R_AVR_8.
+	(avr_reloc_map): Map BFD_RELOC_8 to R_AVR_8.
+
 2010-02-22  Alan Modra  <amodra@gmail.com>
 
 	* reloc.c (bfd_check_overflow): When forming addrmask, shift

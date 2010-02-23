@@ -473,7 +473,7 @@ static reloc_howto_type elf_avr_howto_table[] =
 	 0xffff,		/* dst_mask */
 	 FALSE), 		/* pcrel_offset */
   /* A low 8 bit absolute relocation of 24 bit program memory address.
-     For LDI command.  Will be changed when linker stubs are needed. */
+     For LDI command.  Will be changed when linker stubs are needed.  */
   HOWTO (R_AVR_LO8_LDI_GS,      /* type */
          1,                     /* rightshift */
          1,                     /* size (0 = byte, 1 = short, 2 = long) */
@@ -488,7 +488,7 @@ static reloc_howto_type elf_avr_howto_table[] =
          0xffff,                /* dst_mask */
          FALSE),                /* pcrel_offset */
   /* A low 8 bit absolute relocation of 24 bit program memory address.
-     For LDI command.  Will be changed when linker stubs are needed. */
+     For LDI command.  Will be changed when linker stubs are needed.  */
   HOWTO (R_AVR_HI8_LDI_GS,      /* type */
          9,                     /* rightshift */
          1,                     /* size (0 = byte, 1 = short, 2 = long) */
@@ -501,7 +501,21 @@ static reloc_howto_type elf_avr_howto_table[] =
          FALSE,                 /* partial_inplace */
          0xffff,                /* src_mask */
          0xffff,                /* dst_mask */
-         FALSE)                 /* pcrel_offset */
+         FALSE),                /* pcrel_offset */
+  /* 8 bit offset.  */
+  HOWTO (R_AVR_8,		/* type */
+	 0,			/* rightshift */
+	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield,/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_AVR_8",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0x000000ff,		/* src_mask */
+	 0x000000ff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 };
 
 /* Map BFD reloc types to AVR ELF reloc types.  */
@@ -539,7 +553,8 @@ static const struct avr_reloc_map avr_reloc_map[] =
   { BFD_RELOC_AVR_CALL,             R_AVR_CALL },
   { BFD_RELOC_AVR_LDI,              R_AVR_LDI  },
   { BFD_RELOC_AVR_6,                R_AVR_6    },
-  { BFD_RELOC_AVR_6_ADIW,           R_AVR_6_ADIW }
+  { BFD_RELOC_AVR_6_ADIW,           R_AVR_6_ADIW },
+  { BFD_RELOC_8,                    R_AVR_8 }
 };
 
 /* Meant to be filled one day with the wrap around address for the

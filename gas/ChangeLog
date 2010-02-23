@@ -1,3 +1,9 @@
+2010-02-23  Andrew Zabolotny  <anpaza@mail.ru>
+
+	PR binutils/11297
+	* config/tc-avr.c (md_apply_fix): Handle BFD_RELOC_8.
+	(avr_cons_fix_new): Handle fixups of a single byte.
+
 2010-02-22  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	PR 9861
