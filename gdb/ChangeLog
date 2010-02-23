@@ -1,5 +1,9 @@
 2010-02-23  Harald Koenig  <H.Koenig@science-computing.de>
 
+	* c-exp.y (token_and_value): s/union YYSTYPE/YYSTYPE.
+
+2010-02-23  Harald Koenig  <H.Koenig@science-computing.de>
+
 	* varobj.c (varobj_update): Avoid non-constants in initializers.
 
 2010-02-23  Tom Tromey  <tromey@redhat.com>

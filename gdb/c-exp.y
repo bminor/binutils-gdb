@@ -2295,7 +2295,7 @@ lex_one_token (void)
 typedef struct
 {
   int token;
-  union YYSTYPE value;
+  YYSTYPE value;
 } token_and_value;
 
 DEF_VEC_O (token_and_value);
