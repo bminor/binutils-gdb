@@ -532,6 +532,15 @@ queue_middle_tasks(const General_options& options,
         }
     }
 
+  // If we failed to open any input files, it's possible for
+  // THIS_BLOCKER to be NULL here.  There's no real point in
+  // continuing if that happens.
+  if (this_blocker == NULL)
+    {
+      gold_assert(parameters->errors()->error_count() > 0);
+      gold_exit(false);
+    }
+
   // When all those tasks are complete, we can start laying out the
   // output file.
   // TODO(csilvers): figure out a more principled way to get the target

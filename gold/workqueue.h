@@ -152,7 +152,7 @@ class Task_function : public Task
   Task_function(Task_function_runner* runner, Task_token* blocker,
 		const char* name)
     : runner_(runner), blocker_(blocker), name_(name)
-  { }
+  { gold_assert(blocker != NULL); }
 
   ~Task_function()
   {

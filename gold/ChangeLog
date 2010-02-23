@@ -1,3 +1,11 @@
+2010-02-23  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
+	    Ian Lance Taylor  <iant@google.com>
+
+	* gold.cc (queue_middle_tasks): If no input files were opened,
+	exit.
+	* workqueue.h (Task_function::Task_function): Assert that there is
+	a blocker.
+
 2010-02-22  Doug Kwan  <dougkwan@google.com>
 
 	* gold-threads.h (Once::~Once): Explicitly define virtual destructor.
