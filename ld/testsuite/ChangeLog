@@ -1,3 +1,8 @@
+2010-02-23  Nick Clifton  <nickc@redhat.com>
+
+	* ld-elf/orphan4.d: Allow for other sections to be present in the
+	output.
+
 2010-02-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-ifunc/ifunc.exp: Expect System V OSABI in dynamic
@@ -39,7 +44,7 @@
 	* ld-arm/arm-elf.exp (armelftests): New test case added.
 	* ld-arm/data-only-map.s: New file.
 	* ld-arm/data-only-map.d: New file.
-	* ld-arm/data-only-map.ld: New file. 
+	* ld-arm/data-only-map.ld: New file.
 
 2010-02-11  David S. Miller  <davem@davemloft.net>
 
