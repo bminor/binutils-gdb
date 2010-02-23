@@ -1,3 +1,9 @@
+2010-02-23  Peter Breitenlohner  <peb@mppmu.mpg.de>
+
+	PR binutils/11298
+	* doc/binutils.texi (windmc): Fix synopsis and description of
+	ASCII options.
+
 2010-02-19  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (get_group_flags): Return empty string when flags zero.

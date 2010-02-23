@@ -3147,7 +3147,7 @@ utilities, since it is only useful for Windows targets.
 @c man title windmc generates Windows message resources.
 
 @smallexample
-@c man begin SYNOPSIS windres
+@c man begin SYNOPSIS windmc
 windmc [options] input-file
 @c man end
 @end smallexample
@@ -3187,12 +3187,12 @@ Windows Message Compiler.
 @table @env
 @item -a
 @itemx --ascii_in
-Specifies that the input file specified is ANSI. This is the default
+Specifies that the input file specified is ASCII. This is the default
 behaviour.
 
 @item -A
 @itemx --ascii_out
-Specifies that messages in the output @code{bin} files should be in ANSI
+Specifies that messages in the output @code{bin} files should be in ASCII
 format.
 
 @item -b
