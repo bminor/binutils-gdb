@@ -892,32 +892,118 @@ static ptid_t deferred_step_ptid;
    displaced step operation on it.  See displaced_step_prepare and
    displaced_step_fixup for details.  */
 
-/* If this is not null_ptid, this is the thread carrying out a
-   displaced single-step.  This thread's state will require fixing up
-   once it has completed its step.  */
-static ptid_t displaced_step_ptid;
-
 struct displaced_step_request
 {
   ptid_t ptid;
   struct displaced_step_request *next;
 };
 
-/* A queue of pending displaced stepping requests.  */
-struct displaced_step_request *displaced_step_request_queue;
+/* Per-inferior displaced stepping state.  */
+struct displaced_step_inferior_state
+{
+  /* Pointer to next in linked list.  */
+  struct displaced_step_inferior_state *next;
 
-/* The architecture the thread had when we stepped it.  */
-static struct gdbarch *displaced_step_gdbarch;
+  /* The process this displaced step state refers to.  */
+  int pid;
 
-/* The closure provided gdbarch_displaced_step_copy_insn, to be used
-   for post-step cleanup.  */
-static struct displaced_step_closure *displaced_step_closure;
+  /* A queue of pending displaced stepping requests.  One entry per
+     thread that needs to do a displaced step.  */
+  struct displaced_step_request *step_request_queue;
 
-/* The address of the original instruction, and the copy we made.  */
-static CORE_ADDR displaced_step_original, displaced_step_copy;
+  /* If this is not null_ptid, this is the thread carrying out a
+     displaced single-step in process PID.  This thread's state will
+     require fixing up once it has completed its step.  */
+  ptid_t step_ptid;
 
-/* Saved contents of copy area.  */
-static gdb_byte *displaced_step_saved_copy;
+  /* The architecture the thread had when we stepped it.  */
+  struct gdbarch *step_gdbarch;
+
+  /* The closure provided gdbarch_displaced_step_copy_insn, to be used
+     for post-step cleanup.  */
+  struct displaced_step_closure *step_closure;
+
+  /* The address of the original instruction, and the copy we
+     made.  */
+  CORE_ADDR step_original, step_copy;
+
+  /* Saved contents of copy area.  */
+  gdb_byte *step_saved_copy;
+};
+
+/* The list of states of processes involved in displaced stepping
+   presently.  */
+static struct displaced_step_inferior_state *displaced_step_inferior_states;
+
+/* Get the displaced stepping state of process PID.  */
+
+static struct displaced_step_inferior_state *
+get_displaced_stepping_state (int pid)
+{
+  struct displaced_step_inferior_state *state;
+
+  for (state = displaced_step_inferior_states;
+       state != NULL;
+       state = state->next)
+    if (state->pid == pid)
+      return state;
+
+  return NULL;
+}
+
+/* Add a new displaced stepping state for process PID to the displaced
+   stepping state list, or return a pointer to an already existing
+   entry, if it already exists.  Never returns NULL.  */
+
+static struct displaced_step_inferior_state *
+add_displaced_stepping_state (int pid)
+{
+  struct displaced_step_inferior_state *state;
+
+  for (state = displaced_step_inferior_states;
+       state != NULL;
+       state = state->next)
+    if (state->pid == pid)
+      return state;
+
+  state = xcalloc (1, sizeof (*state));
+  state->pid = pid;
+  state->next = displaced_step_inferior_states;
+  displaced_step_inferior_states = state;
+
+  return state;
+}
+
+/* Remove the displaced stepping state of process PID.  */
+
+static void
+remove_displaced_stepping_state (int pid)
+{
+  struct displaced_step_inferior_state *it, **prev_next_p;
+
+  gdb_assert (pid != 0);
+
+  it = displaced_step_inferior_states;
+  prev_next_p = &displaced_step_inferior_states;
+  while (it)
+    {
+      if (it->pid == pid)
+	{
+	  *prev_next_p = it->next;
+	  xfree (it);
+	  return;
+	}
+
+      prev_next_p = &it->next;
+      it = *prev_next_p;
+    }
+}
+
+static void
+infrun_inferior_exit (struct inferior *inf)
+{
+  remove_displaced_stepping_state (inf->pid);
+}
 
 /* Enum strings for "set|show displaced-stepping".  */
 
@@ -974,23 +1060,25 @@ use_displaced_stepping (struct gdbarch *gdbarch)
 
 /* Clean out any stray displaced stepping state.  */
 static void
-displaced_step_clear (void)
+displaced_step_clear (struct displaced_step_inferior_state *displaced)
 {
   /* Indicate that there is no cleanup pending.  */
-  displaced_step_ptid = null_ptid;
+  displaced->step_ptid = null_ptid;
 
-  if (displaced_step_closure)
+  if (displaced->step_closure)
     {
-      gdbarch_displaced_step_free_closure (displaced_step_gdbarch,
-                                           displaced_step_closure);
-      displaced_step_closure = NULL;
+      gdbarch_displaced_step_free_closure (displaced->step_gdbarch,
+                                           displaced->step_closure);
+      displaced->step_closure = NULL;
     }
 }
 
 static void
-displaced_step_clear_cleanup (void *ignore)
+displaced_step_clear_cleanup (void *arg)
 {
-  displaced_step_clear ();
+  struct displaced_step_inferior_state *state = arg;
+
+  displaced_step_clear (state);
 }
 
 /* Dump LEN bytes at BUF in hex to FILE, followed by a newline.  */
@@ -1029,15 +1117,18 @@ displaced_step_prepare (ptid_t ptid)
   CORE_ADDR original, copy;
   ULONGEST len;
   struct displaced_step_closure *closure;
+  struct displaced_step_inferior_state *displaced;
 
   /* We should never reach this function if the architecture does not
      support displaced stepping.  */
   gdb_assert (gdbarch_displaced_step_copy_insn_p (gdbarch));
 
-  /* For the first cut, we're displaced stepping one thread at a
-     time.  */
+  /* We have to displaced step one thread at a time, as we only have
+     access to a single scratch space per inferior.  */
 
-  if (!ptid_equal (displaced_step_ptid, null_ptid))
+  displaced = add_displaced_stepping_state (ptid_get_pid (ptid));
+
+  if (!ptid_equal (displaced->step_ptid, null_ptid))
     {
       /* Already waiting for a displaced step to finish.  Defer this
 	 request and place in queue.  */
@@ -1052,16 +1143,16 @@ displaced_step_prepare (ptid_t ptid)
       new_req->ptid = ptid;
       new_req->next = NULL;
 
-      if (displaced_step_request_queue)
+      if (displaced->step_request_queue)
 	{
-	  for (req = displaced_step_request_queue;
+	  for (req = displaced->step_request_queue;
 	       req && req->next;
 	       req = req->next)
 	    ;
 	  req->next = new_req;
 	}
       else
-	displaced_step_request_queue = new_req;
+	displaced->step_request_queue = new_req;
 
       return 0;
     }
@@ -1073,7 +1164,7 @@ displaced_step_prepare (ptid_t ptid)
 			    target_pid_to_str (ptid));
     }
 
-  displaced_step_clear ();
+  displaced_step_clear (displaced);
 
   old_cleanups = save_inferior_ptid ();
   inferior_ptid = ptid;
@@ -1084,15 +1175,17 @@ displaced_step_prepare (ptid_t ptid)
   len = gdbarch_max_insn_length (gdbarch);
 
   /* Save the original contents of the copy area.  */
-  displaced_step_saved_copy = xmalloc (len);
+  displaced->step_saved_copy = xmalloc (len);
   ignore_cleanups = make_cleanup (free_current_contents,
-				  &displaced_step_saved_copy);
-  read_memory (copy, displaced_step_saved_copy, len);
+				  &displaced->step_saved_copy);
+  read_memory (copy, displaced->step_saved_copy, len);
   if (debug_displaced)
     {
       fprintf_unfiltered (gdb_stdlog, "displaced: saved %s: ",
 			  paddress (gdbarch, copy));
-      displaced_step_dump_bytes (gdb_stdlog, displaced_step_saved_copy, len);
+      displaced_step_dump_bytes (gdb_stdlog,
+				 displaced->step_saved_copy,
+				 len);
     };
 
   closure = gdbarch_displaced_step_copy_insn (gdbarch,
@@ -1103,13 +1196,13 @@ displaced_step_prepare (ptid_t ptid)
 
   /* Save the information we need to fix things up if the step
      succeeds.  */
-  displaced_step_ptid = ptid;
-  displaced_step_gdbarch = gdbarch;
-  displaced_step_closure = closure;
-  displaced_step_original = original;
-  displaced_step_copy = copy;
+  displaced->step_ptid = ptid;
+  displaced->step_gdbarch = gdbarch;
+  displaced->step_closure = closure;
+  displaced->step_original = original;
+  displaced->step_copy = copy;
 
-  make_cleanup (displaced_step_clear_cleanup, 0);
+  make_cleanup (displaced_step_clear_cleanup, displaced);
 
   /* Resume execution at the copy.  */
   regcache_write_pc (regcache, copy);
@@ -1138,34 +1231,40 @@ static void
 displaced_step_fixup (ptid_t event_ptid, enum target_signal signal)
 {
   struct cleanup *old_cleanups;
+  struct displaced_step_inferior_state *displaced
+    = get_displaced_stepping_state (ptid_get_pid (event_ptid));
 
-  /* Was this event for the pid we displaced?  */
-  if (ptid_equal (displaced_step_ptid, null_ptid)
-      || ! ptid_equal (displaced_step_ptid, event_ptid))
+  /* Was any thread of this process doing a displaced step?  */
+  if (displaced == NULL)
     return;
 
-  old_cleanups = make_cleanup (displaced_step_clear_cleanup, 0);
+  /* Was this event for the pid we displaced?  */
+  if (ptid_equal (displaced->step_ptid, null_ptid)
+      || ! ptid_equal (displaced->step_ptid, event_ptid))
+    return;
+
+  old_cleanups = make_cleanup (displaced_step_clear_cleanup, displaced);
 
   /* Restore the contents of the copy area.  */
   {
-    ULONGEST len = gdbarch_max_insn_length (displaced_step_gdbarch);
-    write_memory_ptid (displaced_step_ptid, displaced_step_copy,
-		       displaced_step_saved_copy, len);
+    ULONGEST len = gdbarch_max_insn_length (displaced->step_gdbarch);
+    write_memory_ptid (displaced->step_ptid, displaced->step_copy,
+		       displaced->step_saved_copy, len);
     if (debug_displaced)
       fprintf_unfiltered (gdb_stdlog, "displaced: restored %s\n",
-                          paddress (displaced_step_gdbarch,
-				    displaced_step_copy));
+                          paddress (displaced->step_gdbarch,
+				    displaced->step_copy));
   }
 
   /* Did the instruction complete successfully?  */
   if (signal == TARGET_SIGNAL_TRAP)
     {
       /* Fix up the resulting state.  */
-      gdbarch_displaced_step_fixup (displaced_step_gdbarch,
-                                    displaced_step_closure,
-                                    displaced_step_original,
-                                    displaced_step_copy,
-                                    get_thread_regcache (displaced_step_ptid));
+      gdbarch_displaced_step_fixup (displaced->step_gdbarch,
+                                    displaced->step_closure,
+                                    displaced->step_original,
+                                    displaced->step_copy,
+                                    get_thread_regcache (displaced->step_ptid));
     }
   else
     {
@@ -1173,17 +1272,18 @@ displaced_step_fixup (ptid_t event_ptid, enum target_signal signal)
          relocate the PC.  */
       struct regcache *regcache = get_thread_regcache (event_ptid);
       CORE_ADDR pc = regcache_read_pc (regcache);
-      pc = displaced_step_original + (pc - displaced_step_copy);
+      pc = displaced->step_original + (pc - displaced->step_copy);
       regcache_write_pc (regcache, pc);
     }
 
   do_cleanups (old_cleanups);
 
-  displaced_step_ptid = null_ptid;
+  displaced->step_ptid = null_ptid;
 
   /* Are there any pending displaced stepping requests?  If so, run
-     one now.  */
-  while (displaced_step_request_queue)
+     one now.  Leave the state object around, since we're likely to
+     need it again soon.  */
+  while (displaced->step_request_queue)
     {
       struct displaced_step_request *head;
       ptid_t ptid;
@@ -1192,9 +1292,9 @@ displaced_step_fixup (ptid_t event_ptid, enum target_signal signal)
       CORE_ADDR actual_pc;
       struct address_space *aspace;
 
-      head = displaced_step_request_queue;
+      head = displaced->step_request_queue;
       ptid = head->ptid;
-      displaced_step_request_queue = head->next;
+      displaced->step_request_queue = head->next;
       xfree (head);
 
       context_switch (ptid);
@@ -1225,8 +1325,8 @@ displaced_step_fixup (ptid_t event_ptid, enum target_signal signal)
 	      displaced_step_dump_bytes (gdb_stdlog, buf, sizeof (buf));
 	    }
 
-	  if (gdbarch_displaced_step_hw_singlestep
-		(gdbarch, displaced_step_closure))
+	  if (gdbarch_displaced_step_hw_singlestep (gdbarch,
+						    displaced->step_closure))
 	    target_resume (ptid, 1, TARGET_SIGNAL_0);
 	  else
 	    target_resume (ptid, 0, TARGET_SIGNAL_0);
@@ -1265,6 +1365,7 @@ static void
 infrun_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
 {
   struct displaced_step_request *it;
+  struct displaced_step_inferior_state *displaced;
 
   if (ptid_equal (inferior_ptid, old_ptid))
     inferior_ptid = new_ptid;
@@ -1272,15 +1373,20 @@ infrun_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
   if (ptid_equal (singlestep_ptid, old_ptid))
     singlestep_ptid = new_ptid;
 
-  if (ptid_equal (displaced_step_ptid, old_ptid))
-    displaced_step_ptid = new_ptid;
-
   if (ptid_equal (deferred_step_ptid, old_ptid))
     deferred_step_ptid = new_ptid;
 
-  for (it = displaced_step_request_queue; it; it = it->next)
-    if (ptid_equal (it->ptid, old_ptid))
-      it->ptid = new_ptid;
+  for (displaced = displaced_step_inferior_states;
+       displaced;
+       displaced = displaced->next)
+    {
+      if (ptid_equal (displaced->step_ptid, old_ptid))
+	displaced->step_ptid = new_ptid;
+
+      for (it = displaced->step_request_queue; it; it = it->next)
+	if (ptid_equal (it->ptid, old_ptid))
+	  it->ptid = new_ptid;
+    }
 }
 
 
@@ -1417,6 +1523,8 @@ a command like `return' or `jump' to continue execution."));
 	  || (step && gdbarch_software_single_step_p (gdbarch)))
       && sig == TARGET_SIGNAL_0)
     {
+      struct displaced_step_inferior_state *displaced;
+
       if (!displaced_step_prepare (inferior_ptid))
 	{
 	  /* Got placed in displaced stepping queue.  Will be resumed
@@ -1430,8 +1538,9 @@ a command like `return' or `jump' to continue execution."));
 	  return;
 	}
 
-      step = gdbarch_displaced_step_hw_singlestep
-	       (gdbarch, displaced_step_closure);
+      displaced = get_displaced_stepping_state (ptid_get_pid (inferior_ptid));
+      step = gdbarch_displaced_step_hw_singlestep (gdbarch,
+						   displaced->step_closure);
     }
 
   /* Do we need to do it the hard way, w/temp breakpoints?  */
@@ -1953,8 +2062,6 @@ init_wait_for_inferior (void)
   previous_inferior_ptid = null_ptid;
   init_infwait_state ();
 
-  displaced_step_clear ();
-
   /* Discard any skipped inlined frames.  */
   clear_inline_frame_state (minus_one_ptid);
 }
@@ -2098,28 +2205,34 @@ infrun_thread_stop_requested_callback (struct thread_info *info, void *arg)
 static void
 infrun_thread_stop_requested (ptid_t ptid)
 {
-  struct displaced_step_request *it, *next, *prev = NULL;
+  struct displaced_step_inferior_state *displaced;
 
   /* PTID was requested to stop.  Remove it from the displaced
      stepping queue, so we don't try to resume it automatically.  */
-  for (it = displaced_step_request_queue; it; it = next)
+
+  for (displaced = displaced_step_inferior_states;
+       displaced;
+       displaced = displaced->next)
     {
-      next = it->next;
+      struct displaced_step_request *it, **prev_next_p;
 
-      if (ptid_equal (it->ptid, ptid)
-	  || ptid_equal (minus_one_ptid, ptid)
-	  || (ptid_is_pid (ptid)
-	      && ptid_get_pid (ptid) == ptid_get_pid (it->ptid)))
+      it = displaced->step_request_queue;
+      prev_next_p = &displaced->step_request_queue;
+      while (it)
 	{
-	  if (displaced_step_request_queue == it)
-	    displaced_step_request_queue = it->next;
+	  if (ptid_match (it->ptid, ptid))
+	    {
+	      *prev_next_p = it->next;
+	      it->next = NULL;
+	      xfree (it);
+	    }
 	  else
-	    prev->next = it->next;
+	    {
+	      prev_next_p = &it->next;
+	    }
 
-	  xfree (it);
+	  it = *prev_next_p;
 	}
-      else
-	prev = it;
     }
 
   iterate_over_threads (infrun_thread_stop_requested_callback, &ptid);
@@ -6515,11 +6628,11 @@ Tells gdb whether to detach the child of a fork."),
   minus_one_ptid = ptid_build (-1, 0, 0);
   inferior_ptid = null_ptid;
   target_last_wait_ptid = minus_one_ptid;
-  displaced_step_ptid = null_ptid;
 
   observer_attach_thread_ptid_changed (infrun_thread_ptid_changed);
   observer_attach_thread_stop_requested (infrun_thread_stop_requested);
   observer_attach_thread_exit (infrun_thread_thread_exit);
+  observer_attach_inferior_exit (infrun_inferior_exit);
 
   /* Explicitly create without lookup, since that tries to create a
      value with a void typed value, and when we get here, gdbarch

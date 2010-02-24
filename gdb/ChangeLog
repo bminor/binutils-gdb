@@ -1,5 +1,30 @@
 2010-02-24  Pedro Alves  <pedro@codesourcery.com>
 
+	Per-process displaced stepping queue.
+
+	* infrun.c (displaced_step_ptid, displaced_step_request_queue)
+	(displaced_step_gdbarch, displaced_step_closure,
+	(displaced_step_original, displaced_step_copy): Move globals to
+	this...
+	(struct displaced_step_inferior_state): ... new structure.
+	(displaced_step_inferior_states): New global.
+	(get_displaced_stepping_state, add_displaced_stepping_state)
+	(remove_displaced_stepping_state, infrun_inferior_exit): New
+	functions.
+	(displaced_step_clear): Add displaced_step_inferior_state
+	parameter, and adjust to handle it.
+	(displaced_step_clear_cleanup): Parameter is now a
+	displaced_step_inferior_state.  Adjust.
+	(displaced_step_prepare): Adjust.
+	(displaced_step_fixup, displaced_step_fixup)
+	(infrun_thread_ptid_changed, resume): Adjust.
+	(init_wait_for_inferior): Don't call displaced_step_clear.
+	(infrun_thread_stop_requested): Rewrite.
+	(_initialize_infrun): Install infrun_inferior_exit as
+	inferior_exit observer.
+
+2010-02-24  Pedro Alves  <pedro@codesourcery.com>
+
 	* inferior.h (ptid_match): Declare.
 	* infrun.c (ptid_match): New.
 	* remote.c (queued_stop_reply): Rewrite and use ptid_match.
