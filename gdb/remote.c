@@ -4637,26 +4637,23 @@ do_stop_reply_xfree (void *arg)
 static struct stop_reply *
 queued_stop_reply (ptid_t ptid)
 {
-  struct stop_reply *it, *prev;
-  struct stop_reply head;
+  struct stop_reply *it;
+  struct stop_reply **it_link;
 
-  head.next = stop_reply_queue;
-  prev = &head;
-
-  it = head.next;
-
-  if (!ptid_equal (ptid, minus_one_ptid))
-    for (; it; prev = it, it = it->next)
-      if (ptid_equal (ptid, it->ptid))
-	break;
-
-  if (it)
+  it = stop_reply_queue;
+  it_link = &stop_reply_queue;
+  while (it)
     {
-      prev->next = it->next;
-      it->next = NULL;
-    }
+      if (ptid_match (it->ptid, ptid))
+	{
+	  *it_link = it->next;
+	  it->next = NULL;
+	  break;
+	}
 
-  stop_reply_queue = head.next;
+      it_link = &it->next;
+      it = *it_link;
+    }
 
   if (stop_reply_queue)
     /* There's still at least an event left.  */
@@ -6169,10 +6166,13 @@ handle_notification (char *buf, size_t length)
   if (strncmp (buf, "Stop:", 5) == 0)
     {
       if (pending_stop_reply)
-	/* We've already parsed the in-flight stop-reply, but the stub
-	   for some reason thought we didn't, possibly due to timeout
-	   on its side.  Just ignore it.  */
-	;
+	{
+	  /* We've already parsed the in-flight stop-reply, but the
+	     stub for some reason thought we didn't, possibly due to
+	     timeout on its side.  Just ignore it.  */
+	  if (remote_debug)
+	    fprintf_unfiltered (gdb_stdlog, "ignoring resent notification\n");
+	}
       else
 	{
 	  struct cleanup *old_chain;
@@ -6190,6 +6190,9 @@ handle_notification (char *buf, size_t length)
 	  /* Notify the event loop there's a stop reply to acknowledge
 	     and that there may be more events to fetch.  */
 	  mark_async_event_handler (remote_async_get_pending_events_token);
+
+	  if (remote_debug)
+	    fprintf_unfiltered (gdb_stdlog, "stop notification captured\n");
 	}
     }
   else

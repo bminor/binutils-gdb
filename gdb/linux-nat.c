@@ -1221,33 +1221,6 @@ find_lwp_pid (ptid_t ptid)
   return NULL;
 }
 
-/* Returns true if PTID matches filter FILTER.  FILTER can be the wild
-   card MINUS_ONE_PTID (all ptid match it); can be a ptid representing
-   a process (ptid_is_pid returns true), in which case, all lwps of
-   that give process match, lwps of other process do not; or, it can
-   represent a specific thread, in which case, only that thread will
-   match true.  PTID must represent an LWP, it can never be a wild
-   card.  */
-
-static int
-ptid_match (ptid_t ptid, ptid_t filter)
-{
-  /* Since both parameters have the same type, prevent easy mistakes
-     from happening.  */
-  gdb_assert (!ptid_equal (ptid, minus_one_ptid)
-	      && !ptid_equal (ptid, null_ptid));
-
-  if (ptid_equal (filter, minus_one_ptid))
-    return 1;
-  if (ptid_is_pid (filter)
-      && ptid_get_pid (ptid) == ptid_get_pid (filter))
-    return 1;
-  else if (ptid_equal (ptid, filter))
-    return 1;
-
-  return 0;
-}
-
 /* Call CALLBACK with its second argument set to DATA for every LWP in
    the list.  If CALLBACK returns 1 for a particular LWP, return a
    pointer to the structure describing that LWP immediately.

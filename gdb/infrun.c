@@ -6126,6 +6126,26 @@ ptid_is_pid (ptid_t ptid)
   return (ptid_get_lwp (ptid) == 0 && ptid_get_tid (ptid) == 0);
 }
 
+int
+ptid_match (ptid_t ptid, ptid_t filter)
+{
+  /* Since both parameters have the same type, prevent easy mistakes
+     from happening.  */
+  gdb_assert (!ptid_equal (ptid, minus_one_ptid)
+	      && !ptid_equal (ptid, null_ptid)
+	      && !ptid_is_pid (ptid));
+
+  if (ptid_equal (filter, minus_one_ptid))
+    return 1;
+  if (ptid_is_pid (filter)
+      && ptid_get_pid (ptid) == ptid_get_pid (filter))
+    return 1;
+  else if (ptid_equal (ptid, filter))
+    return 1;
+
+  return 0;
+}
+
 /* restore_inferior_ptid() will be used by the cleanup machinery
    to restore the inferior_ptid value saved in a call to
    save_inferior_ptid().  */

@@ -1,3 +1,11 @@
+2010-02-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* inferior.h (ptid_match): Declare.
+	* infrun.c (ptid_match): New.
+	* remote.c (queued_stop_reply): Rewrite and use ptid_match.
+	(handle_notification): Add debug output.
+	* linux-nat.c (ptid_match): Delete.
+
 2010-02-24  David S. Miller  <davem@davemloft.net>
 
 	* gdb_ptrace.h (PT_SYSCALL): If PTRACE_SYSCALL is available, use it.

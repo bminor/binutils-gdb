@@ -105,6 +105,16 @@ extern int ptid_equal (ptid_t p1, ptid_t p2);
 /* Return true if PTID represents a process id.  */
 extern int ptid_is_pid (ptid_t ptid);
 
+/* Returns true if PTID matches filter FILTER.  FILTER can be the wild
+   card MINUS_ONE_PTID (all ptid match it); can be a ptid representing
+   a process (ptid_is_pid returns true), in which case, all lwps and
+   threads of that given process match, lwps and threads of other
+   processes do not; or, it can represent a specific thread, in which
+   case, only that thread will match true.  PTID must represent a
+   specific LWP or THREAD, it can never be a wild card.  */
+
+extern int ptid_match (ptid_t ptid, ptid_t filter);
+
 /* Save value of inferior_ptid so that it may be restored by
    a later call to do_cleanups().  Returns the struct cleanup
    pointer needed for later doing the cleanup.  */
