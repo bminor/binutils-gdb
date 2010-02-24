@@ -3,6 +3,11 @@
 
 *** Changes since GDB 7.1
 
+* Python scripting
+
+The GDB Python API now has access to symbols, symbol tables, and
+frame's code blocks.
+
 *** Changes in GDB 7.1
 
 * C++ Improvements

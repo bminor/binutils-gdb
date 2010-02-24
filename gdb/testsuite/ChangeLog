@@ -1,5 +1,14 @@
 2010-02-24  Phil Muldoon  <pmuldoon@redhat.com>
 
+	* Makefile.in: Add py-block and py-symbol.
+	* gdb.python/py-symbol.exp: New File.
+	* gdb.python/py-symtab.exp: New File.
+	* gdb.python/py-block.exp: New File.
+	* gdb.python/py-symbol.c: New File.
+	* gdb.python/py-block.c: New File.
+
+2010-02-24  Phil Muldoon  <pmuldoon@redhat.com>
+
 	PR python/11314
 	* lib/gdb.exp (skip_python_tests): New function.
 	* gdb.python/py-cmd.exp: Use skip_python_tests.

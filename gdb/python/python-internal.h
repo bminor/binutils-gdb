@@ -61,32 +61,51 @@ typedef int Py_ssize_t;
 #define PyEval_ReleaseLock() 0
 #endif
 
+struct block;
+struct symbol;
+struct symtab_and_line;
 struct value;
 struct language_defn;
 
 extern PyObject *gdb_module;
 extern PyTypeObject value_object_type;
+extern PyTypeObject block_object_type;
+extern PyTypeObject symbol_object_type;
 
 PyObject *gdbpy_history (PyObject *self, PyObject *args);
 PyObject *gdbpy_frame_stop_reason_string (PyObject *, PyObject *);
+PyObject *gdbpy_lookup_symbol (PyObject *self, PyObject *args, PyObject *kw);
 PyObject *gdbpy_selected_frame (PyObject *self, PyObject *args);
+PyObject *gdbpy_block_for_pc (PyObject *self, PyObject *args);
 PyObject *gdbpy_lookup_type (PyObject *self, PyObject *args, PyObject *kw);
 PyObject *gdbpy_create_lazy_string_object (CORE_ADDR address, long length,
 					   const char *encoding, struct type *type);
 
+PyObject *symtab_and_line_to_sal_object (struct symtab_and_line sal);
+PyObject *symtab_to_symtab_object (struct symtab *symtab);
+PyObject *symbol_to_symbol_object (struct symbol *sym);
+PyObject *block_to_block_object (struct block *block, struct objfile *objfile);
 PyObject *value_to_value_object (struct value *v);
 PyObject *type_to_type_object (struct type *);
 PyObject *objfile_to_objfile_object (struct objfile *);
 
 PyObject *objfpy_get_printers (PyObject *, void *);
 
+struct block *block_object_to_block (PyObject *obj);
+struct symbol *symbol_object_to_symbol (PyObject *obj);
 struct value *value_object_to_value (PyObject *self);
 struct value *convert_value_from_python (PyObject *obj);
 struct type *type_object_to_type (PyObject *obj);
+struct symtab *symtab_object_to_symtab (PyObject *obj);
+struct symtab_and_line *sal_object_to_symtab_and_line (PyObject *obj);
 
 void gdbpy_initialize_values (void);
 void gdbpy_initialize_frames (void);
+void gdbpy_initialize_symtabs (void);
 void gdbpy_initialize_commands (void);
+void gdbpy_initialize_symbols (void);
+void gdbpy_initialize_symtabs (void);
+void gdbpy_initialize_blocks (void);
 void gdbpy_initialize_types (void);
 void gdbpy_initialize_functions (void);
 void gdbpy_initialize_objfile (void);

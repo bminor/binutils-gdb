@@ -267,23 +267,29 @@ SUBDIR_TUI_CFLAGS= \
 #
 SUBDIR_PYTHON_OBS = \
 	python.o \
+	py-block.o \
 	py-cmd.o \
 	py-frame.o \
 	py-function.o \
 	py-lazy-string.o \
 	py-objfile.o \
 	py-prettyprint.o \
+	py-symbol.o \
+	py-symtab.o \
 	py-type.o \
 	py-utils.o \
 	py-value.o
 SUBDIR_PYTHON_SRCS = \
 	python/python.c \
+	python/py-block.c \
 	python/py-cmd.c \
 	python/py-frame.c \
 	python/py-function.c \
 	python/py-lazy-string.c \
 	python/py-objfile.c \
 	python/py-prettyprint.c \
+	python/py-symbol.c \
+	python/py-symtab.c \
 	python/py-type.c \
 	python/py-utils.c \
 	python/py-value.c
@@ -1971,6 +1977,10 @@ python.o: $(srcdir)/python/python.c
 	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/python.c
 	$(POSTCOMPILE)
 
+py-block.o: $(srcdir)/python/py-block.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-block.c
+	$(POSTCOMPILE)
+
 py-cmd.o: $(srcdir)/python/py-cmd.c
 	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-cmd.c
 	$(POSTCOMPILE)
@@ -1993,6 +2003,14 @@ py-objfile.o: $(srcdir)/python/py-objfile.c
 
 py-prettyprint.o: $(srcdir)/python/py-prettyprint.c
 	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-prettyprint.c
+	$(POSTCOMPILE)
+
+py-symbol.o: $(srcdir)/python/py-symbol.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-symbol.c
+	$(POSTCOMPILE)
+
+py-symtab.o: $(srcdir)/python/py-symtab.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-symtab.c
 	$(POSTCOMPILE)
 
 py-type.o: $(srcdir)/python/py-type.c

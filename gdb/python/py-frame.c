@@ -26,6 +26,8 @@
 #include "stack.h"
 #include "value.h"
 #include "python-internal.h"
+#include "symfile.h"
+#include "objfiles.h"
 
 typedef struct {
   PyObject_HEAD
@@ -202,6 +204,64 @@ frapy_pc (PyObject *self, PyObject *args)
   return PyLong_FromUnsignedLongLong (pc);
 }
 
+/* Implementation of gdb.Frame.block (self) -> gdb.Block.
+   Returns the frame's code block.  */
+
+static PyObject *
+frapy_block (PyObject *self, PyObject *args)
+{
+  struct frame_info *frame;
+  struct block *block = NULL;
+  volatile struct gdb_exception except;
+  struct symtab_and_line sal;
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      FRAPY_REQUIRE_VALID ((frame_object *) self, frame);
+
+      find_frame_sal (frame, &sal);
+      block = block_for_pc (get_frame_address_in_block (frame));
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
+  if (!sal.symtab || !sal.symtab->objfile)
+    {
+      PyErr_SetString (PyExc_RuntimeError,
+		       "Cannot locate object file for block.");
+      return NULL;
+    }
+
+  if (block)
+    return block_to_block_object (block, sal.symtab->objfile);
+
+  Py_RETURN_NONE;
+}
+
+
+/* Implementation of gdb.Frame.function (self) -> gdb.Symbol.
+   Returns the symbol for the function corresponding to this frame.  */
+
+static PyObject *
+frapy_function (PyObject *self, PyObject *args)
+{
+  struct symbol *sym = NULL;
+  struct frame_info *frame;
+  volatile struct gdb_exception except;
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      FRAPY_REQUIRE_VALID ((frame_object *) self, frame);
+
+      sym = find_pc_function (get_frame_address_in_block (frame));
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
+  if (sym)
+    return symbol_to_symbol_object (sym);
+
+  Py_RETURN_NONE;
+}
+
 /* Convert a frame_info struct to a Python Frame object.
    Sets a Python exception and returns NULL on error.  */
 
@@ -296,6 +356,30 @@ frapy_newer (PyObject *self, PyObject *args)
   return next_obj;
 }
 
+/* Implementation of gdb.Frame.find_sal (self) -> gdb.Symtab_and_line.
+   Returns the frame's symtab and line.  */
+
+static PyObject *
+frapy_find_sal (PyObject *self, PyObject *args)
+{
+  struct frame_info *frame;
+  struct symtab_and_line sal;
+  struct objfile *objfile = NULL;
+  volatile struct gdb_exception except;
+  PyObject *sal_obj = NULL;   /* Initialize to appease gcc warning.  */
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      FRAPY_REQUIRE_VALID ((frame_object *) self, frame);
+
+      find_frame_sal (frame, &sal);
+      sal_obj = symtab_and_line_to_sal_object (sal);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
+  return sal_obj;
+}
+
 /* Implementation of gdb.Frame.read_var_value (self, variable) -> gdb.Value.
    Returns the value of the given variable in this frame.  The argument must be
    a string.  Returns None if GDB can't find the specified variable.  */
@@ -312,7 +396,9 @@ frapy_read_var (PyObject *self, PyObject *args)
   if (!PyArg_ParseTuple (args, "O", &sym_obj))
     return NULL;
 
-  if (gdbpy_is_string (sym_obj))
+  if (PyObject_TypeCheck (sym_obj, &symbol_object_type))
+    var = symbol_object_to_symbol (sym_obj);
+  else if (gdbpy_is_string (sym_obj))
     {
       char *var_name;
       struct block *block = NULL;
@@ -361,6 +447,26 @@ frapy_read_var (PyObject *self, PyObject *args)
 
   if (val)
     return value_to_value_object (val);
+
+  Py_RETURN_NONE;
+}
+
+/* Select this frame.  */
+
+static PyObject *
+frapy_select (PyObject *self, PyObject *args)
+{
+  struct frame_info *fi;
+  frame_object *frame = (frame_object *) self;
+  volatile struct gdb_exception except;
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      FRAPY_REQUIRE_VALID (frame, fi);
+
+      select_frame (fi);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
 
   Py_RETURN_NONE;
 }
@@ -484,15 +590,26 @@ Return the reason why it's not possible to find frames older than this." },
   { "pc", frapy_pc, METH_NOARGS,
     "pc () -> Long.\n\
 Return the frame's resume address." },
+  { "block", frapy_block, METH_NOARGS,
+    "block () -> gdb.Block.\n\
+Return the frame's code block." },
+  { "function", frapy_function, METH_NOARGS,
+    "function () -> gdb.Symbol.\n\
+Returns the symbol for the function corresponding to this frame." },
   { "older", frapy_older, METH_NOARGS,
     "older () -> gdb.Frame.\n\
 Return the frame that called this frame." },
   { "newer", frapy_newer, METH_NOARGS,
     "newer () -> gdb.Frame.\n\
 Return the frame called by this frame." },
+  { "find_sal", frapy_find_sal, METH_NOARGS,
+    "find_sal () -> gdb.Symtab_and_line.\n\
+Return the frame's symtab and line." },
   { "read_var", frapy_read_var, METH_VARARGS,
     "read_var (variable) -> gdb.Value.\n\
 Return the value of the variable in this frame." },
+  { "select", frapy_select, METH_NOARGS,
+    "Select this frame as the user's current frame." },
   {NULL}  /* Sentinel */
 };
 

@@ -1,3 +1,13 @@
+2010-02-24  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.texinfo (Frames In Python): Add block, find_sal, function
+	and select method descriptions.
+	(Python API): Add Blocks In Python, Symbols in Python and Symbol
+	Tables in Python to menu.
+	(Blocks In Python): New node.
+	(Symbols In Python): New node.
+	(Symbol Tables in Python): New node.
+
 2010-02-24  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Multiexec MI

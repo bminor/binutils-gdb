@@ -1,3 +1,31 @@
+2010-02-24  Phil Muldoon  <pmuldoon@redhat.com>
+   	    Tom Tromey  <tromey@redhat.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* python/python.c (_initialize_python): Call
+	gdbpy_initialize_symtabs, gdbpy_initialize_symbols and
+	gdbpy_initialize_blocks.
+	* python/python-internal.h: Declare struct symbol, block and
+	symtab_and_line.  Declare block_object_type and
+	symbol_object_type
+	(gdbpy_lookup_symbol gdbpy_block_for_pc)
+	(symtab_and_line_to_sal_object, symtab_to_symtab_object)
+	(symbol_to_symbol_object,  block_to_block_object)
+	(gdbpy_initialize_symtabs,gdbpy_initialize_symbols)
+	(gdbpy_initialize_blocks ): Declare.
+	* python/py-frame.c (frapy_block, frapy_function, frapy_find_sal)
+	(frapy_select): Add methods.
+	(frapy_read_var): Add symbol branch.
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add py-symbol, py-symtab,
+	py-block.
+	(SUBDIR_PYTHON_SRCS): Likewise.
+	(py-symbol.o): New rule.
+	(py-symtab.o): Likewise.
+	(py-block.o): Likewise.
+	* python/py-symbol.c: New file.
+	* python/py-symtab.c: Likewise.
+	* python/py-block.c: Likewise.
+
 2010-02-24  Pedro Alves  <pedro@codesourcery.com>
 
 	PR gdb/11321

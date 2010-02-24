@@ -644,6 +644,9 @@ Enables or disables auto-loading of Python code when an object is opened."),
   gdbpy_initialize_values ();
   gdbpy_initialize_frames ();
   gdbpy_initialize_commands ();
+  gdbpy_initialize_symbols ();
+  gdbpy_initialize_symtabs ();
+  gdbpy_initialize_blocks ();
   gdbpy_initialize_functions ();
   gdbpy_initialize_types ();
   gdbpy_initialize_objfile ();
@@ -724,7 +727,14 @@ Return a string explaining unwind stop reason." },
     METH_VARARGS | METH_KEYWORDS,
     "lookup_type (name [, block]) -> type\n\
 Return a Type corresponding to the given name." },
-
+  { "lookup_symbol", (PyCFunction) gdbpy_lookup_symbol,
+    METH_VARARGS | METH_KEYWORDS,
+    "lookup_symbol (name [, block] [, domain]) -> (symbol, is_field_of_this)\n\
+Return a tuple with the symbol corresponding to the given name (or None) and\n\
+a boolean indicating if name is a field of the current implied argument\n\
+`this' (when the current language is object-oriented)." },
+  { "block_for_pc", gdbpy_block_for_pc, METH_VARARGS,
+    "Return the block containing the given pc value, or None." },
   { "parse_and_eval", gdbpy_parse_and_eval, METH_VARARGS,
     "parse_and_eval (String) -> Value.\n\
 Parse String as an expression, evaluate it, and return the result as a Value."

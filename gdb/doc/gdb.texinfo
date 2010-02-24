@@ -19547,7 +19547,10 @@ situation, a Python @code{KeyboardInterrupt} exception is thrown.
 * Commands In Python::          Implementing new commands in Python.
 * Functions In Python::         Writing new convenience functions.
 * Objfiles In Python::          Object files.
-* Frames In Python::            Acessing inferior stack frames from Python.
+* Frames In Python::            Accessing inferior stack frames from Python.
+* Blocks In Python::            Accessing frame blocks from Python.
+* Symbols In Python::           Python representation of symbols.
+* Symbol Tables In Python::     Python representation of symbol tables.
 * Lazy Strings In Python::      Python representation of lazy strings.
 @end menu
 
@@ -20707,7 +20710,7 @@ information.
 @end defivar
 
 @node Frames In Python
-@subsubsection Acessing inferior stack frames from Python.
+@subsubsection Accessing inferior stack frames from Python.
 
 @cindex frames in python
 When the debugged program stops, @value{GDBN} is able to analyze its call
@@ -20770,6 +20773,15 @@ function to a string.
 Returns the frame's resume address.
 @end defmethod
 
+@defmethod Frame block
+Return the frame's code block.  @xref{Blocks In Python}.
+@end defmethod
+
+@defmethod Frame function
+Return the symbol for the function corresponding to this frame.
+@xref{Symbols In Python}.
+@end defmethod
+
 @defmethod Frame older
 Return the frame that called this frame.
 @end defmethod
@@ -20778,9 +20790,307 @@ Return the frame that called this frame.
 Return the frame called by this frame.
 @end defmethod
 
+@defmethod Frame find_sal
+Return the frame's symtab and line object.
+@xref{Symbol Tables In Python}.
+@end defmethod
+
 @defmethod Frame read_var variable
 Return the value of the given variable in this frame.  @var{variable} must
 be a string.
+@end defmethod
+
+@defmethod Frame select
+Set this frame to be the selected frame.  @xref{Stack, ,Examining the
+Stack}.
+@end defmethod
+@end table
+
+@node Blocks In Python
+@subsubsection Accessing frame blocks from Python.
+
+@cindex blocks in python
+@tindex gdb.Block
+
+Within each frame, @value{GDBN} maintains information on each block
+stored in that frame.  These blocks are organized hierarchically, and
+are represented individually in Python as a @code{gdb.Block}.
+Please see @ref{Frames In Python}, for a more in-depth discussion on
+frames.  Furthermore, see @ref{Stack, ,Examining the Stack}, for more
+detailed technical information on @value{GDBN}'s book-keeping of the
+stack.
+
+The following block-related functions are available in the @code{gdb}
+module:
+
+@findex gdb.block_for_pc
+@defun block_for_pc pc
+Return the @code{gdb.Block} containing the given @var{pc} value.  If the
+block cannot be found for the @var{pc} value specified, the function
+will return @code{None}.
+@end defun
+
+A @code{gdb.Block} object has the following attributes:
+
+@table @code
+@defivar Block start
+The start address of the block.  This attribute is not writable.
+@end defivar
+
+@defivar Block end
+The end address of the block.  This attribute is not writable.
+@end defivar
+
+@defivar Block function
+The name of the block represented as a @code{gdb.Symbol}.  If the
+block is not named, then this attribute holds @code{None}.  This
+attribute is not writable.
+@end defivar
+
+@defivar Block superblock
+The block containing this block.  If this parent block does not exist,
+this attribute holds @code{None}.  This attribute is not writable.
+@end defivar
+@end table
+
+@node Symbols In Python
+@subsubsection Python representation of Symbols.
+
+@cindex symbols in python
+@tindex gdb.Symbol
+
+@value{GDBN} represents every variable, function and type as an
+entry in a symbol table.  @xref{Symbols, ,Examining the Symbol Table}.
+Similarly, Python represents these symbols in @value{GDBN} with the
+@code{gdb.Symbol} object.
+
+The following symbol-related functions are available in the @code{gdb}
+module:
+
+@findex gdb.lookup_symbol
+@defun lookup_symbol name [block] [domain]
+This function searches for a symbol by name.  The search scope can be
+restricted to the parameters defined in the optional domain and block
+arguments.
+
+@var{name} is the name of the symbol.  It must be a string.  The
+optional @var{block} argument restricts the search to symbols visible
+in that @var{block}.  The @var{block} argument must be a
+@code{gdb.Block} object.  The optional @var{domain} argument restricts
+the search to the domain type.  The @var{domain} argument must be a
+domain constant defined in the @code{gdb} module and described later
+in this chapter.
+@end defun
+
+A @code{gdb.Symbol} object has the following attributes:
+
+@table @code
+@defivar Symbol symtab
+The symbol table in which the symbol appears.  This attribute is
+represented as a @code{gdb.Symtab} object.  @xref{Symbol Tables In
+Python}.  This attribute is not writable.
+@end defivar
+
+@defivar Symbol name
+The name of the symbol as a string.  This attribute is not writable.
+@end defivar
+
+@defivar Symbol linkage_name
+The name of the symbol, as used by the linker (i.e., may be mangled).
+This attribute is not writable.
+@end defivar
+
+@defivar Symbol print_name
+The name of the symbol in a form suitable for output.  This is either
+@code{name} or @code{linkage_name}, depending on whether the user
+asked @value{GDBN} to display demangled or mangled names.
+@end defivar
+
+@defivar Symbol addr_class
+The address class of the symbol.  This classifies how to find the value
+of a symbol.  Each address class is a constant defined in the
+@code{gdb} module and described later in this chapter.
+@end defivar
+
+@defivar Symbol is_argument
+@code{True} if the symbol is an argument of a function.
+@end defivar
+
+@defivar Symbol is_constant
+@code{True} if the symbol is a constant.
+@end defivar
+
+@defivar Symbol is_function
+@code{True} if the symbol is a function or a method.
+@end defivar
+
+@defivar Symbol is_variable
+@code{True} if the symbol is a variable.
+@end defivar
+@end table
+
+The available domain categories in @code{gdb.Symbol} are represented
+as constants in the @code{gdb} module:
+
+@table @code
+@findex SYMBOL_UNDEF_DOMAIN
+@findex gdb.SYMBOL_UNDEF_DOMAIN
+@item SYMBOL_UNDEF_DOMAIN
+This is used when a domain has not been discovered or none of the
+following domains apply.  This usually indicates an error either
+in the symbol information or in @value{GDBN}'s handling of symbols.
+@findex SYMBOL_VAR_DOMAIN
+@findex gdb.SYMBOL_VAR_DOMAIN
+@item SYMBOL_VAR_DOMAIN
+This domain contains variables, function names, typedef names and enum
+type values.
+@findex SYMBOL_STRUCT_DOMAIN
+@findex gdb.SYMBOL_STRUCT_DOMAIN
+@item SYMBOL_STRUCT_DOMAIN
+This domain holds struct, union and enum type names.
+@findex SYMBOL_LABEL_DOMAIN
+@findex gdb.SYMBOL_LABEL_DOMAIN
+@item SYMBOL_LABEL_DOMAIN
+This domain contains names of labels (for gotos).
+@findex SYMBOL_VARIABLES_DOMAIN
+@findex gdb.SYMBOL_VARIABLES_DOMAIN
+@item SYMBOL_VARIABLES_DOMAIN
+This domain holds a subset of the @code{SYMBOLS_VAR_DOMAIN}; it
+contains everything minus functions and types.
+@findex SYMBOL_FUNCTIONS_DOMAIN
+@findex gdb.SYMBOL_FUNCTIONS_DOMAIN
+@item SYMBOL_FUNCTION_DOMAIN
+This domain contains all functions.
+@findex SYMBOL_TYPES_DOMAIN
+@findex gdb.SYMBOL_TYPES_DOMAIN
+@item SYMBOL_TYPES_DOMAIN
+This domain contains all types.
+@end table
+
+The available address class categories in @code{gdb.Symbol} are represented
+as constants in the @code{gdb} module:
+
+@table @code
+@findex SYMBOL_LOC_UNDEF
+@findex gdb.SYMBOL_LOC_UNDEF
+@item SYMBOL_LOC_UNDEF
+If this is returned by address class, it indicates an error either in
+the symbol information or in @value{GDBN}'s handling of symbols.
+@findex SYMBOL_LOC_CONST
+@findex gdb.SYMBOL_LOC_CONST
+@item SYMBOL_LOC_CONST
+Value is constant int.
+@findex SYMBOL_LOC_STATIC
+@findex gdb.SYMBOL_LOC_STATIC
+@item SYMBOL_LOC_STATIC
+Value is at a fixed address.
+@findex SYMBOL_LOC_REGISTER
+@findex gdb.SYMBOL_LOC_REGISTER
+@item SYMBOL_LOC_REGISTER
+Value is in a register.
+@findex SYMBOL_LOC_ARG
+@findex gdb.SYMBOL_LOC_ARG
+@item SYMBOL_LOC_ARG
+Value is an argument.  This value is at the offset stored within the
+symbol inside the frame's argument list.
+@findex SYMBOL_LOC_REF_ARG
+@findex gdb.SYMBOL_LOC_REF_ARG
+@item SYMBOL_LOC_REF_ARG
+Value address is stored in the frame's argument list.  Just like
+@code{LOC_ARG} except that the value's address is stored at the
+offset, not the value itself.
+@findex SYMBOL_LOC_REGPARM_ADDR
+@findex gdb.SYMBOL_LOC_REGPARM_ADDR
+@item SYMBOL_LOC_REGPARM_ADDR
+Value is a specified register.  Just like @code{LOC_REGISTER} except
+the register holds the address of the argument instead of the argument
+itself.
+@findex SYMBOL_LOC_LOCAL
+@findex gdb.SYMBOL_LOC_LOCAL
+@item SYMBOL_LOC_LOCAL
+Value is a local variable.
+@findex SYMBOL_LOC_TYPEDEF
+@findex gdb.SYMBOL_LOC_TYPEDEF
+@item SYMBOL_LOC_TYPEDEF
+Value not used.  Symbols in the domain @code{SYMBOL_STRUCT_DOMAIN} all
+have this class.
+@findex SYMBOL_LOC_BLOCK
+@findex gdb.SYMBOL_LOC_BLOCK
+@item SYMBOL_LOC_BLOCK
+Value is a block.
+@findex SYMBOL_LOC_CONST_BYTES
+@findex gdb.SYMBOL_LOC_CONST_BYTES
+@item SYMBOL_LOC_CONST_BYTES
+Value is a byte-sequence.
+@findex SYMBOL_LOC_UNRESOLVED
+@findex gdb.SYMBOL_LOC_UNRESOLVED
+@item SYMBOL_LOC_UNRESOLVED
+Value is at a fixed address, but the address of the variable has to be
+determined from the minimal symbol table whenever the variable is
+referenced.
+@findex SYMBOL_LOC_OPTIMIZED_OUT
+@findex gdb.SYMBOL_LOC_OPTIMIZED_OUT
+@item SYMBOL_LOC_OPTIMIZED_OUT
+The value does not actually exist in the program.
+@findex SYMBOL_LOC_COMPUTED
+@findex gdb.SYMBOL_LOC_COMPUTED
+@item SYMBOL_LOC_COMPUTED
+The value's address is a computed location.
+@end table
+
+@node Symbol Tables In Python
+@subsubsection Symbol table representation in Python.
+
+@cindex symbol tables in python
+@tindex gdb.Symtab
+@tindex gdb.Symtab_and_line
+
+Access to symbol table data maintained by @value{GDBN} on the inferior
+is exposed to Python via two objects: @code{gdb.Symtab_and_line} and
+@code{gdb.Symtab}.  Symbol table and line data for a frame is returned
+from the @code{find_sal} method in @code{gdb.Frame} object.
+@xref{Frames In Python}.
+
+For more information on @value{GDBN}'s symbol table management, see
+@ref{Symbols, ,Examining the Symbol Table}, for more information.
+
+A @code{gdb.Symtab_and_line} object has the following attributes:
+
+@table @code
+@defivar Symtab_and_line symtab
+The symbol table object (@code{gdb.Symtab}) for this frame.
+This attribute is not writable.
+@end defivar
+
+@defivar Symtab_and_line pc
+Indicates the current program counter address.  This attribute is not
+writable.
+@end defivar
+
+@defivar Symtab_and_line line
+Indicates the current line number for this object.  This
+attribute is not writable.
+@end defivar
+@end table
+
+A @code{gdb.Symtab} object has the following attributes:
+
+@table @code
+@defivar Symtab filename
+The symbol table's source filename.  This attribute is not writable.
+@end defivar
+
+@defivar Symtab objfile
+The symbol table's backing object file.  @xref{Objfiles In Python}.
+This attribute is not writable.
+@end defivar
+@end table
+
+The following methods are provided:
+
+@table @code
+@defmethod Symtab fullname
+Return the symbol table's source absolute file name.
 @end defmethod
 @end table
 
