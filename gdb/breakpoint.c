@@ -10366,10 +10366,8 @@ add_catch_command (char *name, char *docstring,
 }
 
 static void
-clear_syscall_counts (int pid)
+clear_syscall_counts (struct inferior *inf)
 {
-  struct inferior *inf = find_inferior_pid (pid);
-
   inf->total_syscalls_count = 0;
   inf->any_syscall_count = 0;
   VEC_free (int, inf->syscalls_counts);

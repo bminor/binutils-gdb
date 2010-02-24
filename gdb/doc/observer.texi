@@ -199,13 +199,23 @@ The thread's ptid has changed.  The @var{old_ptid} parameter specifies
 the old value, and @var{new_ptid} specifies the new value.
 @end deftypefun
 
-@deftypefun void inferior_appeared (int @var{pid})
-@value{GDBN} has attached to a new inferior identified by @var{pid}.
+@deftypefun void inferior_added (struct inferior *@var{inf})
+The inferior @var{inf} has been added to the list of inferiors.  At
+this point, it might not be associated with any process.
 @end deftypefun
 
-@deftypefun void inferior_exit (int @var{pid})
-Either @value{GDBN} detached from the inferior, or the inferior
-exited.  The argument @var{pid} identifies the inferior.
+@deftypefun void inferior_appeared (struct inferior *@var{inf})
+The inferior identified by @var{inf} has been attached to a process.
+@end deftypefun
+
+@deftypefun void inferior_exit (struct inferior *@var{inf})
+Either the inferior associated with @var{inf} has been detached from the
+process, or the process has exited.
+@end deftypefun
+
+@deftypefun void inferior_removed (struct inferior *@var{inf})
+The inferior @var{inf} has been removed from the list of inferiors.
+This method is called immediately before freeing @var{inf}.
 @end deftypefun
 
 @deftypefun void memory_changed (CORE_ADDR @var{addr}, int @var{len}, const bfd_byte *@var{data})
@@ -213,8 +223,8 @@ Bytes from @var{data} to @var{data} + @var{len} have been written
 to the current inferior at @var{addr}.
 @end deftypefun
 
- @deftypefun void test_notification (int @var{somearg})
+@deftypefun void test_notification (int @var{somearg})
 This observer is used for internal testing.  Do not use.  
 See testsuite/gdb.gdb/observer.exp.
- @end deftypefun
+@end deftypefun
 

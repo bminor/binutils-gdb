@@ -33,6 +33,7 @@ static void build_table (struct mi_cmd *commands);
 
 struct mi_cmd mi_cmds[] =
 {
+  { "add-inferior", { NULL, 0 }, mi_cmd_add_inferior },
   { "break-after", { "ignore", 1 }, NULL },
   { "break-condition", { "cond", 1 }, NULL },
   { "break-commands", { NULL, 0 }, mi_cmd_break_commands },
@@ -84,6 +85,7 @@ struct mi_cmd mi_cmds[] =
   { "list-features", { NULL, 0 }, mi_cmd_list_features},
   { "list-target-features", { NULL, 0 }, mi_cmd_list_target_features},
   { "list-thread-groups", { NULL, 0 }, mi_cmd_list_thread_groups },  
+  { "remove-inferior", { NULL, 0 }, mi_cmd_remove_inferior },
   { "stack-info-depth", { NULL, 0 }, mi_cmd_stack_info_depth},
   { "stack-info-frame", { NULL, 0 }, mi_cmd_stack_info_frame},
   { "stack-list-arguments", { NULL, 0 }, mi_cmd_stack_list_args},

@@ -46,6 +46,8 @@ struct mi_parse
     char *args;
     char **argv;
     int argc;
+    int all;
+    int thread_group; /* At present, the same as inferior number.  */
     int thread;
     int frame;
   };

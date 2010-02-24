@@ -397,7 +397,7 @@ jit_inferior_created_observer (struct target_ops *objfile, int from_tty)
    for example when it crashes.  */
 
 static void
-jit_inferior_exit_hook (int pid)
+jit_inferior_exit_hook (struct inferior *inf)
 {
   struct objfile *objf;
   struct objfile *temp;

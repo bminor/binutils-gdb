@@ -1,3 +1,20 @@
+2010-02-24  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Multiexec MI
+
+	gdb/
+	* breakpoint.c (clear_syscall_counts): Take struct inferior*.
+
+	gdb/doc/
+	* gdb.texinfo (GDB/MI Command Syntax): Document notification
+	changes.
+	(GDB/MI Program Execution): Document current behaviour of
+	--all and --thread-group.
+	(GDB/MI Miscellaneous Commands): Document -add-inferior and
+	-remove-inferior.
+	* observer.texi (inferior_added, inferior_removed): New
+	observers.
+
 2010-02-19  Tom Tromey  <tromey@redhat.com>
 
 	* gdbint.texinfo (Getting Started): Fix @node.

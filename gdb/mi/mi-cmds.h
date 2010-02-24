@@ -36,6 +36,7 @@ extern const char mi_all_values[];
 typedef void (mi_cmd_argv_ftype) (char *command, char **argv, int argc);
 
 /* Function implementing each command */
+extern mi_cmd_argv_ftype mi_cmd_add_inferior;
 extern mi_cmd_argv_ftype mi_cmd_break_insert;
 extern mi_cmd_argv_ftype mi_cmd_break_commands;
 extern mi_cmd_argv_ftype mi_cmd_break_watch;
@@ -71,6 +72,7 @@ extern mi_cmd_argv_ftype mi_cmd_interpreter_exec;
 extern mi_cmd_argv_ftype mi_cmd_list_features;
 extern mi_cmd_argv_ftype mi_cmd_list_target_features;
 extern mi_cmd_argv_ftype mi_cmd_list_thread_groups;
+extern mi_cmd_argv_ftype mi_cmd_remove_inferior;
 extern mi_cmd_argv_ftype mi_cmd_stack_info_depth;
 extern mi_cmd_argv_ftype mi_cmd_stack_info_frame;
 extern mi_cmd_argv_ftype mi_cmd_stack_list_args;

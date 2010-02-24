@@ -21736,6 +21736,11 @@ groups can be obtained using @samp{-list-thread-groups --available}.
 In general, the content of a thread group may be only retrieved only
 after attaching to that thread group.
 
+Thread groups are related to inferiors (@pxref{Inferiors and
+Programs}).  Each inferior corresponds to a thread group of a special
+type @samp{process}, and some additional operations are permitted on
+such thread groups.
+
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Command Syntax
 @section @sc{gdb/mi} Command Syntax
@@ -22180,9 +22185,24 @@ several threads in the list.  The @var{core} field reports the
 processor core on which the stop event has happened.  This field may be absent
 if such information is not available.
 
-@item =thread-group-created,id="@var{id}"
+@item =thread-group-added,id="@var{id}"
+@itemx =thread-group-removed,id="@var{id}"
+A thread group was either added or removed.  The @var{id} field
+contains the @value{GDBN} identifier of the thread group.  When a thread
+group is added, it generally might not be associated with a running
+process.  When a thread group is removed, its id becomes invalid and
+cannot be used in any way.
+
+@item =thread-group-started,id="@var{id}",pid="@var{pid}"
+A thread group became associated with a running program,
+either because the program was just started or the thread group
+was attached to a program.  The @var{id} field contains the
+@value{GDBN} identifier of the thread group.  The @var{pid} field
+contains process identifier, specific to the operating system.
+
 @itemx =thread-group-exited,id="@var{id}"
-A thread thread group either was attached to, or has exited/detached
+A thread group is no longer associated with a running program,
+either because the program has exited, or because it was detached
 from.  The @var{id} field contains the @value{GDBN} identifier of the
 thread group.
 
@@ -22213,12 +22233,19 @@ opaque identifier of the library.  For remote debugging case,
 library file on the target, and on the host respectively.  For native
 debugging, both those fields have the same value.  The
 @var{symbols-loaded} field reports if the debug symbols for this
-library are loaded.
+library are loaded.  The @var{thread-group} field, if present,
+specifies the id of the thread group in whose context the library was loaded.
+If the field is absent, it means the library was loaded in the context
+of all present thread groups.
 
 @item =library-unloaded,...
 Reports that a library was unloaded by the program.  This notification
 has 3 fields---@var{id}, @var{target-name} and @var{host-name} with
-the same meaning as for the @code{=library-loaded} notification
+the same meaning as for the @code{=library-loaded} notification.
+The @var{thread-group} field, if present, specifies the id of the
+thread group in whose context the library was unloaded.  If the field is
+absent, it means the library was unloaded in the context of all present
+thread groups.
 
 @end table
 
@@ -23337,7 +23364,7 @@ the end or beginning of a replay log if one is being used.
 In all-stop mode (@pxref{All-Stop
 Mode}), may resume only one thread, or all threads, depending on the
 value of the @samp{scheduler-locking} variable.  If @samp{--all} is
-specified, all threads will be resumed.  The @samp{--all} option is
+specified, all threads (in all inferiors) will be resumed.  The @samp{--all} option is
 ignored in all-stop mode.  If the @samp{--thread-group} options is
 specified, then all threads in that thread group are resumed.
 
@@ -23429,9 +23456,9 @@ asynchronous just like other execution commands.  That is, first the
 reported after that using the @samp{*stopped} notification.
 
 In non-stop mode, only the context thread is interrupted by default.
-All threads will be interrupted if the @samp{--all} option is
-specified.  If the @samp{--thread-group} option is specified, all
-threads in that group will be interrupted.
+All threads (in all inferiors) will be interrupted if the
+@samp{--all}  option is specified.  If the @samp{--thread-group}
+option is specified, all threads in that group will be interrupted.
 
 @subsubheading @value{GDBN} Command
 
@@ -23608,13 +23635,18 @@ fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="18"@}
 @subsubheading Synopsis
 
 @smallexample
- -exec-run
+ -exec-run [--all | --thread-group N]
 @end smallexample
 
 Starts execution of the inferior from the beginning.  The inferior
 executes until either a breakpoint is encountered or the program
 exits.  In the latter case the output will include an exit code, if
 the program has exited exceptionally.
+
+When no option is specified, the current inferior is started.  If the
+@samp{--thread-group} option is specified, it should refer to a thread
+group of type @samp{process}, and that thread group will be started.
+If the @samp{--all} option is specified, then all inferiors will be started.
 
 @subsubheading @value{GDBN} Command
 
@@ -26678,6 +26710,8 @@ have the following fields:
 @table @code
 @item id
 Identifier of the thread group.  This field is always present.
+The identifier is an opaque string; frontends should not try to
+convert it to an integer, even though it might look like one.
 
 @item type
 The type of the thread group.  At present, only @samp{process} is a
@@ -26685,7 +26719,7 @@ valid type.
 
 @item pid
 The target-specific process identifier.  This field is only present
-for thread groups of type @samp{process}.
+for thread groups of type @samp{process} and only if the process exists.
 
 @item num_children
 The number of children this thread group has.  This field may be
@@ -26700,6 +26734,11 @@ specified, and it's actually possible to obtain the threads.
 This field is a list of integers, each identifying a core that one
 thread of the group is running on.  This field may be absent if
 such information is not available.
+
+@item executable
+The name of the executable file that corresponds to this thread group.
+The field is only present for thread groups of type @samp{process},
+and only if there is a corresponding executable file.
 
 @end table
 
@@ -26725,6 +26764,31 @@ such information is not available.
 ^done,groups=[@{id="17", types="process",pid="yyy",num_children="2",cores=[1,2],
                threads=[@{id="1",target-id="Thread 0xb7e14b90",cores=[1]@},
                         @{id="2",target-id="Thread 0xb7e14b90",cores=[2]@}]@},...]
+@end smallexample
+
+
+@subheading The @code{-add-inferior} Command
+@findex -add-inferior
+
+@subheading Synopsis
+
+@smallexample
+-add-inferior
+@end smallexample
+
+Creates a new inferior (@pxref{Inferiors and Programs}).  The created
+inferior is not associated with any executable.  Such association may
+be established with the @samp{-file-exec-and-symbols} command
+(@pxref{GDB/MI File Commands}).  The command response has a single
+field, @samp{thread-group}, whose value is the identifier of the
+thread group corresponding to the new inferior.
+
+@subheading Example
+
+@smallexample
+@value{GDBP}
+-add-inferior
+^done,thread-group="i3"
 @end smallexample
 
 @subheading The @code{-interpreter-exec} Command

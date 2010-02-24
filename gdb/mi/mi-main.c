@@ -78,6 +78,11 @@ static struct mi_timestamp *current_command_ts;
 static int do_timings = 0;
 
 char *current_token;
+/* Few commands would like to know if options like --thread-group
+   were explicitly specified.  This variable keeps the current
+   parsed command including all option, and make it possible.  */
+static struct mi_parse *current_context;
+
 int running_result_record_printed = 1;
 
 /* Flag indicating that the target has proceeded since the last
@@ -193,55 +198,79 @@ mi_cmd_exec_jump (char *args, char **argv, int argc)
   mi_execute_async_cli_command ("jump", argv, argc);
 }
  
-static int
-proceed_thread_callback (struct thread_info *thread, void *arg)
+static void
+proceed_thread (struct thread_info *thread, int pid)
 {
-  int pid = *(int *)arg;
-
   if (!is_stopped (thread->ptid))
-    return 0;
+    return;
 
-  if (PIDGET (thread->ptid) != pid)
-    return 0;
+  if (pid != 0 && PIDGET (thread->ptid) != pid)
+    return;
 
   switch_to_thread (thread->ptid);
   clear_proceed_status ();
   proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
+}
+
+
+static int
+proceed_thread_callback (struct thread_info *thread, void *arg)
+{
+  int pid = *(int *)arg;
+  proceed_thread (thread, pid);
   return 0;
 }
 
 static void
 exec_continue (char **argv, int argc)
 {
-  if (argc == 0)
-    continue_1 (0);
-  else if (argc == 1 && strcmp (argv[0], "--all") == 0)
-    continue_1 (1);
-  else if (argc == 2 && strcmp (argv[0], "--thread-group") == 0)
+  if (non_stop)
     {
-      struct cleanup *old_chain;
-      int pid;
-      if (argv[1] == NULL || argv[1] == '\0')
-	error ("Thread group id not specified");
-      pid = atoi (argv[1]);
-      if (!in_inferior_list (pid))
-	error ("Invalid thread group id '%s'", argv[1]);
+      /* In non-stop mode, 'resume' always resumes a single thread.  Therefore,
+	 to resume all threads of the current inferior, or all threads in all
+	 inferiors, we need to iterate over threads.
 
-      old_chain = make_cleanup_restore_current_thread ();
-      iterate_over_threads (proceed_thread_callback, &pid);
-      do_cleanups (old_chain);            
+	 See comment on infcmd.c:proceed_thread_callback for rationale.  */
+      if (current_context->all || current_context->thread_group != -1)
+	{
+	  int pid = 0;
+	  struct cleanup *back_to = make_cleanup_restore_current_thread ();
+
+	  if (!current_context->all)
+	    {
+	      struct inferior *inf = find_inferior_id (current_context->thread_group);
+	      pid = inf->pid;
+	    }
+	  iterate_over_threads (proceed_thread_callback, &pid);
+	  do_cleanups (back_to);
+	}
+      else
+	{
+	  continue_1 (0);
+	}
     }
   else
-    error ("Usage: -exec-continue [--reverse] [--all|--thread-group id]");
+    {
+      struct cleanup *back_to = make_cleanup_restore_integer (&sched_multi);
+      if (current_context->all)
+	{
+	  sched_multi = 1;
+	  continue_1 (0);
+	}
+      else
+	{
+	  /* In all-stop mode, -exec-continue traditionally resumed either
+	     all threads, or one thread, depending on the 'scheduler-locking'
+	     variable.  Let's continue to do the same.  */
+	  continue_1 (1);
+	}
+      do_cleanups (back_to);
+    }
 }
 
-/* continue in reverse direction:
-   XXX: code duplicated from reverse.c */
-
 static void
-exec_direction_default (void *notused)
+exec_direction_forward (void *notused)
 {
-  /* Return execution direction to default state.  */
   execution_direction = EXEC_FORWARD;
 }
 
@@ -260,7 +289,7 @@ exec_reverse_continue (char **argv, int argc)
   if (!target_can_execute_reverse)
     error (_("Target %s does not support this command."), target_shortname);
 
-  old_chain = make_cleanup (exec_direction_default, NULL);
+  old_chain = make_cleanup (exec_direction_forward, NULL);
   execution_direction = EXEC_REVERSE;
   exec_continue (argv, argc);
   do_cleanups (old_chain);
@@ -269,7 +298,7 @@ exec_reverse_continue (char **argv, int argc)
 void
 mi_cmd_exec_continue (char *command, char **argv, int argc)
 {
-  if (argc > 0 && strcmp(argv[0], "--reverse") == 0)
+  if (argc > 0 && strcmp (argv[0], "--reverse") == 0)
     exec_reverse_continue (argv + 1, argc - 1);
   else
     exec_continue (argv, argc);
@@ -298,44 +327,78 @@ interrupt_thread_callback (struct thread_info *thread, void *arg)
 void
 mi_cmd_exec_interrupt (char *command, char **argv, int argc)
 {
-  if (argc == 0)
+  /* In all-stop mode, everything stops, so we don't need to try
+     anything specific.  */
+  if (!non_stop)
     {
-      if (!is_running (inferior_ptid))
-	error ("Current thread is not running.");
-
       interrupt_target_1 (0);
+      return;
     }
-  else if (argc == 1 && strcmp (argv[0], "--all") == 0)
+
+  if (current_context->all)
     {
-      if (!any_running ())
-	error ("Inferior not running.");
-      
+      /* This will interrupt all threads in all inferiors.  */
       interrupt_target_1 (1);
     }
-  else if (argc == 2 && strcmp (argv[0], "--thread-group") == 0)
+  else if (current_context->thread_group != -1)
     {
-      struct cleanup *old_chain;
-      int pid;
-      if (argv[1] == NULL || argv[1] == '\0')
-	error ("Thread group id not specified");
-      pid = atoi (argv[1]);
-      if (!in_inferior_list (pid))
-	error ("Invalid thread group id '%s'", argv[1]);
-
-      old_chain = make_cleanup_restore_current_thread ();
-      iterate_over_threads (interrupt_thread_callback, &pid);
-      do_cleanups (old_chain);
+      struct inferior *inf = find_inferior_id (current_context->thread_group);
+      iterate_over_threads (interrupt_thread_callback, &inf->pid);
     }
   else
-    error ("Usage: -exec-interrupt [--all|--thread-group id]");
+    {
+      /* Interrupt just the current thread -- either explicitly
+	 specified via --thread or whatever was current before
+	 MI command was sent.  */
+      interrupt_target_1 (0);
+    }
+}
+
+static int
+run_one_inferior (struct inferior *inf, void *arg)
+{
+  struct thread_info *tp = 0;
+
+  if (inf->pid != 0)
+    {
+      if (inf->pid != ptid_get_pid (inferior_ptid))
+	{
+	  struct thread_info *tp;
+
+	  tp = any_thread_of_process (inf->pid);
+	  if (!tp)
+	    error (_("Inferior has no threads."));
+
+	  switch_to_thread (tp->ptid);
+	}
+    }
+  else
+    {
+      set_current_inferior (inf);
+      switch_to_thread (null_ptid);
+      set_current_program_space (inf->pspace);
+    }
+  mi_execute_cli_command ("run", target_can_async_p (),
+			  target_can_async_p () ? "&" : NULL);
+  return 0;
 }
 
 void
 mi_cmd_exec_run (char *command, char **argv, int argc)
 {
-  mi_execute_cli_command ("run", target_can_async_p (),
-			  target_can_async_p () ? "&" : NULL);
+  if (current_context->all)
+    {
+      struct cleanup *back_to = save_current_space_and_thread ();
+      iterate_over_inferiors (run_one_inferior, NULL);
+      do_cleanups (back_to);
+    }
+  else
+    {
+      mi_execute_cli_command ("run", target_can_async_p (),
+			      target_can_async_p () ? "&" : NULL);
+    }
 }
+
 
 static int
 find_thread_of_process (struct thread_info *ti, void *p)
@@ -475,13 +538,23 @@ print_one_inferior (struct inferior *inferior, void *xdata)
       struct cleanup *back_to
 	= make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 
-      ui_out_field_fmt (uiout, "id", "%d", inferior->pid);
+      ui_out_field_fmt (uiout, "id", "i%d", inferior->num);
       ui_out_field_string (uiout, "type", "process");
-      ui_out_field_int (uiout, "pid", inferior->pid);
+      if (inferior->pid != 0)
+	ui_out_field_int (uiout, "pid", inferior->pid);
 
-      data.pid = inferior->pid;
+      if (inferior->pspace->ebfd)
+	{
+	  ui_out_field_string (uiout, "executable",
+			       bfd_get_filename (inferior->pspace->ebfd));
+	}
+
       data.cores = 0;
-      iterate_over_threads (collect_cores, &data);
+      if (inferior->pid != 0)
+	{
+	  data.pid = inferior->pid;
+	  iterate_over_threads (collect_cores, &data);
+	}
 
       if (!VEC_empty (int, data.cores))
 	{
@@ -1492,6 +1565,40 @@ mi_cmd_list_target_features (char *command, char **argv, int argc)
   error ("-list-target-features should be passed no arguments");
 }
 
+void
+mi_cmd_add_inferior (char *command, char **argv, int argc)
+{
+  struct inferior *inf;
+
+  if (argc != 0)
+    error (_("-add-inferior should be passed no arguments"));
+
+  inf = add_inferior_with_spaces ();
+
+  ui_out_field_fmt (uiout, "inferior", "i%d", inf->num);
+}
+
+void
+mi_cmd_remove_inferior (char *command, char **argv, int argc)
+{
+  int id;
+  struct inferior *inf;
+
+  if (argc != 1)
+    error ("-remove-inferior should be passed a single argument");
+
+  if (sscanf (argv[1], "i%d", &id) != 1)
+    error ("the thread group id is syntactically invalid");
+
+  inf = find_inferior_id (id);
+  if (!inf)
+    error ("the specified thread group does not exist");
+
+  delete_inferior_1 (inf, 1 /* silent */);
+}
+
+
+
 /* Execute a command within a safe environment.
    Return <0 for error; >=0 for ok.
 
@@ -1693,8 +1800,36 @@ mi_cmd_execute (struct mi_parse *parse)
 
   cleanup = make_cleanup (null_cleanup, NULL);
 
+  if (parse->all && parse->thread_group != -1)
+    error (_("Cannot specify --thread-group together with --all"));
+
+  if (parse->all && parse->thread != -1)
+    error (_("Cannot specify --thread together with --all"));
+
+  if (parse->thread_group != -1 && parse->thread != -1)
+    error (_("Cannot specify --thread together with --thread-group"));
+
   if (parse->frame != -1 && parse->thread == -1)
     error (_("Cannot specify --frame without --thread"));
+
+  if (parse->thread_group != -1)
+    {
+      struct inferior *inf = find_inferior_id (parse->thread_group);
+      struct thread_info *tp = 0;
+
+      if (!inf)
+	error (_("Invalid thread group for the --tread-group option"));
+
+      set_current_inferior (inf);
+      /* This behaviour means that if --thread-group option identifies
+	 an inferior with multiple threads, then a random one will be picked.
+	 This is not a problem -- frontend should always provide --thread if
+	 it wishes to operate on a specific thread.  */
+      if (inf->pid != 0)
+	tp = any_thread_of_process (inf->pid);
+      switch_to_thread (tp ? tp->ptid : null_ptid);
+      set_current_program_space (inf->pspace);
+    }
 
   if (parse->thread != -1)
     {
@@ -1719,6 +1854,8 @@ mi_cmd_execute (struct mi_parse *parse)
       else
 	error (_("Invalid frame id: %d"), frame);
     }
+
+  current_context = parse;
 
   if (parse->cmd->argv_func != NULL)
     parse->cmd->argv_func (parse->command, parse->argv, parse->argc);

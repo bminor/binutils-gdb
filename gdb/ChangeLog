@@ -1,5 +1,48 @@
 2010-02-24  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Multiexec MI
+
+	* breakpoint.c (clear_syscall_counts): Take struct inferior*.
+	* inferior.c (add_inferior_silent): Notify inferior_added
+	observer.
+	(delete_inferior_1): Notify inferior_removed observer.
+	(exit_inferior_1): Pass inferior, not pid, to observer.
+	(inferior_appeared): Likewise.
+	(add_inferior_with_spaces): New.
+	(add_inferior_command): Use the above.
+	* inferior.h (delete_inferior_1, add_inferior_with_spaces):
+	Declare.
+
+	* inflow.c (inflow_inferior_exit): Likewise.
+	* jit.c (jit_inferior_exit_hook): Likewise.
+
+	* mi/mi-cmds.c (mi_cmds): Register add-inferior and
+	remove-inferior.
+	* mi/mi-cmds.h (mi_cmd_add_inferior, mi_cmd_remove_inferior): New.
+	* mi/mi-interp.c (mi_inferior_added, mi_inferior_removed): New.
+	(report_initial_inferior): New.
+	(mi_inferior_removed): Register the above. Make sure
+	inferior_added observer is called on the first inferior.
+	(mi_new_thread, mi_thread_exit): Thread group is now identified by
+	inferior number, not pid.
+	(mi_solib_loaded, mi_solib_unloaded): Report which inferiors are
+	affected.
+	* mi/mi-main.c (current_context): New.
+	(proceed_thread_callback): Use typed closure.
+	Proceed everything if pid is 0. Most implementation split into
+	(proceed_thread): ... this.
+	(run_one_inferior): New.
+	(mi_cmd_exec_continue, mi_cmd_exec_interrupt, mi_cmd_exec_run):
+	Adjust for multiexec behaviour.
+	(mi_cmd_add_inferior, mi_cmd_remove_inferior): New.
+	(mi_cmd_execute): Handle the 'thread-group' option here.
+	Do some extra checks.
+	* mi-parse.c (mi_parse): Handle the --all and --thread-group
+	options.
+	* mi-parse.h (struct mi_parse): New fields all and thread_group.
+
+2010-02-24  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Make -exec-run a proper MI commands.
 
 	* mi/mi-cmds.h (mi_cmd_exec_run): Declare.

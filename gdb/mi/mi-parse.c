@@ -151,6 +151,8 @@ mi_parse (char *cmd)
   char *chp;
   struct mi_parse *parse = XMALLOC (struct mi_parse);
   memset (parse, 0, sizeof (*parse));
+  parse->all = 0;
+  parse->thread_group = -1;
   parse->thread = -1;
   parse->frame = -1;
 
@@ -210,19 +212,42 @@ mi_parse (char *cmd)
   for (;;)
     {
       char *start = chp;
+      size_t as = sizeof ("--all ") - 1;
+      size_t tgs = sizeof ("--thread-group ") - 1;
       size_t ts = sizeof ("--thread ") - 1;
       size_t fs = sizeof ("--frame ") - 1;
+      if (strncmp (chp, "--all ", as) == 0)
+	{
+	  parse->all = 1;
+	  chp += as;
+	}
+      /* See if --all is the last token in the input.  */
+      if (strcmp (chp, "--all") == 0)
+	{
+          parse->all = 1;
+          chp += strlen (chp);
+        }
+      if (strncmp (chp, "--thread-group ", tgs) == 0)
+	{
+	  if (parse->thread_group != -1)
+	    error (_("Duplicate '--thread-group' option"));
+	  chp += tgs;
+	  if (*chp != 'i')
+	    error (_("Invalid thread group id"));
+	  chp += 1;
+	  parse->thread_group = strtol (chp, &chp, 10);
+	}
       if (strncmp (chp, "--thread ", ts) == 0)
 	{
 	  if (parse->thread != -1)
-	    error ("Duplicate '--thread' option");
+	    error (_("Duplicate '--thread' option"));
 	  chp += ts;
 	  parse->thread = strtol (chp, &chp, 10);
 	}
       else if (strncmp (chp, "--frame ", fs) == 0)
 	{
 	  if (parse->frame != -1)
-	    error ("Duplicate '--frame' option");
+	    error (_("Duplicate '--frame' option"));
 	  chp += fs;
 	  parse->frame = strtol (chp, &chp, 10);
 	}
@@ -230,7 +255,7 @@ mi_parse (char *cmd)
 	break;
 
       if (*chp != '\0' && !isspace (*chp))
-	error ("Invalid value for the '%s' option",
+	error (_("Invalid value for the '%s' option"),
 	       start[2] == 't' ? "--thread" : "--frame");
       while (isspace (*chp))
 	chp++;

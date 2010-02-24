@@ -500,9 +500,8 @@ get_inflow_inferior_data (struct inferior *inf)
    list.  */
 
 static void
-inflow_inferior_exit (int pid)
+inflow_inferior_exit (struct inferior *inf)
 {
-  struct inferior *inf = find_inferior_pid (pid);
   struct terminal_info *info;
 
   info = inferior_data (inf, inflow_inferior_data);
