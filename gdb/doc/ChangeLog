@@ -1,3 +1,7 @@
+2010-02-24  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Cygwin Native): Fix typo.
+
 2010-02-24  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.texinfo (Frames In Python): Add block, find_sal, function

@@ -16429,7 +16429,7 @@ inside the Cygwin DLL itself.
 @item set new-console @var{mode}
 If @var{mode} is @code{on} the debuggee will
 be started in a new console on next start.
-If @var{mode} is @code{off}i, the debuggee will
+If @var{mode} is @code{off}, the debuggee will
 be started in the same console as the debugger.
 
 @kindex show new-console
