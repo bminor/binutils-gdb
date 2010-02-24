@@ -464,9 +464,16 @@ class File_view
 class Input_file
 {
  public:
+  enum Format
+  {
+    FORMAT_NONE,
+    FORMAT_ELF,
+    FORMAT_BINARY
+  };
+
   Input_file(const Input_file_argument* input_argument)
     : input_argument_(input_argument), found_name_(), file_(),
-      is_in_sysroot_(false)
+      is_in_sysroot_(false), format_(FORMAT_NONE)
   { }
 
   // Create an input file with the contents already provided.  This is
@@ -536,6 +543,11 @@ class Input_file
   bool
   just_symbols() const;
 
+  // Return the format of the unconverted input file.
+  Format
+  format() const
+  { return this->format_; }
+
  private:
   Input_file(const Input_file&);
   Input_file& operator=(const Input_file&);
@@ -555,6 +567,8 @@ class Input_file
   File_read file_;
   // Whether we found the file in a directory in the system root.
   bool is_in_sysroot_;
+  // Format of unconverted input file.
+  Format format_;
 };
 
 } // end namespace gold

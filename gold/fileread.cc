@@ -938,17 +938,22 @@ Input_file::open(const Dirsearch& dirpath, const Task* task, int *pindex)
     this->input_argument_->options().format_enum();
   bool ok;
   if (format == General_options::OBJECT_FORMAT_ELF)
-    ok = this->file_.open(task, name);
+    {
+      ok = this->file_.open(task, name);
+      this->format_ = FORMAT_ELF;
+    }
   else
     {
       gold_assert(format == General_options::OBJECT_FORMAT_BINARY);
       ok = this->open_binary(task, name);
+      this->format_ = FORMAT_BINARY;
     }
 
   if (!ok)
     {
       gold_error(_("cannot open %s: %s"),
 		 name.c_str(), strerror(errno));
+      this->format_ = FORMAT_NONE;
       return false;
     }
 

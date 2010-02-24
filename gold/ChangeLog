@@ -1,5 +1,15 @@
 2010-02-24  Doug Kwan  <dougkwan@google.com>
 
+	* arm.cc (Target_arm::do_finalize_sections): Skip processor specific
+	flags and attributes merging if an input file is a binary file.
+	* fileread.cc (Input_file::open): Record format of original file.
+	* fileread.h (Input_file::Format): New enum type.
+   	(Input_file::Input_file): Initialize data member format_.
+	(Input_file::format): New method definition.
+	(Input_file::format_):: New data member.
+
+2010-02-24  Doug Kwan  <dougkwan@google.com>
+
 	* arm.cc (Arm_output_data_got): New class.
 	(ARM_TCB_SIZE): New constant
 	(Target_arm): Use Arm_output_data_got instead of Output_data_got.

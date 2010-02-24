@@ -7922,6 +7922,15 @@ Target_arm<big_endian>::do_finalize_sections(
        p != input_objects->relobj_end();
        ++p)
     {
+      // If this input file is a binary file, it has no processor
+      // specific flags and attributes section.
+      Input_file::Format format = (*p)->input_file()->format();
+      if (format != Input_file::FORMAT_ELF)
+	{
+	  gold_assert(format == Input_file::FORMAT_BINARY);
+	  continue;
+	}
+
       Arm_relobj<big_endian>* arm_relobj =
 	Arm_relobj<big_endian>::as_arm_relobj(*p);
       this->merge_processor_specific_flags(
