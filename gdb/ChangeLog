@@ -1,3 +1,18 @@
+2010-02-24  David S. Miller  <davem@davemloft.net>
+
+	* gdb_ptrace.h (PT_SYSCALL): If PTRACE_SYSCALL is available, use it.
+	* syscalls/sparc-linux.xml: New.
+	* syscalls/sparc64-linux.xml: New.
+	* Makefile.in (XML_SYSCALL_FILES): Add new syscall XML files.
+	* sparc-linux-tdep.c (XML_SYSCALL_FILENAME_SPARC32): Define.
+	(sparc32_linux_get_syscall_number): New function.
+	(sparc32_linux_init_abi): Set syscall XML file name and hook up
+	syscall number fetcher.
+	* sparc64-linux-tdep.c (XML_SYSCALL_FILENAME_SPARC64): Define.
+	(sparc64_linux_get_syscall_number): New function.
+	(sparc64_linux_init_abi): Set syscall XML file name and hook up
+	syscall number fetcher.
+
 2010-02-24  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Multiexec MI

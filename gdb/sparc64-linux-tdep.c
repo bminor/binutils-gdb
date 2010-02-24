@@ -31,6 +31,10 @@
 #include "symtab.h"
 #include "trad-frame.h"
 #include "tramp-frame.h"
+#include "xml-syscall.h"
+
+/* The syscall's XML filename for sparc 64-bit.  */
+#define XML_SYSCALL_FILENAME_SPARC64 "syscalls/sparc64-linux.xml"
 
 #include "sparc64-tdep.h"
 
@@ -205,6 +209,27 @@ sparc64_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
   regcache_cooked_write_unsigned (regcache, SPARC64_STATE_REGNUM, state);
 }
 
+static LONGEST
+sparc64_linux_get_syscall_number (struct gdbarch *gdbarch,
+				  ptid_t ptid)
+{
+  struct regcache *regcache = get_thread_regcache (ptid);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  /* The content of a register.  */
+  gdb_byte buf[8];
+  /* The result.  */
+  LONGEST ret;
+
+  /* Getting the system call number from the register.
+     When dealing with the sparc architecture, this information
+     is stored at the %g1 register.  */
+  regcache_cooked_read (regcache, SPARC_G1_REGNUM, buf);
+
+  ret = extract_signed_integer (buf, 8, byte_order);
+
+  return ret;
+}
+
 
 
 static void
@@ -244,6 +269,11 @@ sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->step_trap = sparc64_linux_step_trap;
 
   set_gdbarch_write_pc (gdbarch, sparc64_linux_write_pc);
+
+  /* Functions for 'catch syscall'.  */
+  set_xml_syscall_file_name (XML_SYSCALL_FILENAME_SPARC64);
+  set_gdbarch_get_syscall_number (gdbarch,
+                                  sparc64_linux_get_syscall_number);
 }
 
 

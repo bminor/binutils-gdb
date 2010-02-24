@@ -845,7 +845,8 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 XML_SYSCALLS_DIR = syscalls/
 XML_SYSCALLS_FILES = gdb-syscalls.dtd \
 		     ppc-linux.xml ppc64-linux.xml \
-		     i386-linux.xml amd64-linux.xml
+		     i386-linux.xml amd64-linux.xml \
+		     sparc-linux.xml sparc64-linux.xml
 
 TSOBS = inflow.o
 
