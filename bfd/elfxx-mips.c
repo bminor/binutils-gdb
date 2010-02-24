@@ -5755,9 +5755,7 @@ mips_elf_create_dynamic_relocation (bfd *output_bfd,
 
   /* We must now calculate the dynamic symbol table index to use
      in the relocation.  */
-  if (h != NULL
-      && (!h->root.def_regular
-	  || (info->shared && !info->symbolic && !h->root.forced_local)))
+  if (h != NULL && ! SYMBOL_REFERENCES_LOCAL (info, &h->root))
     {
       indx = h->root.dynindx;
       if (SGI_COMPAT (output_bfd))

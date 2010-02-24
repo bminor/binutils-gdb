@@ -1,3 +1,10 @@
+2010-02-24  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/10858
+	* elfxx-mips.c (mips_elf_create_dynamic_relocation): Ise
+	SYMBOL_REFERENCES_LOCAL to exclude entries from the dynamic symbol
+	table.
+
 2010-02-23  Andrew Zabolotny  <anpaza@mail.ru>
 
 	PR binutils/11297
