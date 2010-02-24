@@ -309,10 +309,6 @@ darwin_solib_create_inferior_hook (int from_tty)
   bfd *dyld_bfd = NULL;
   struct inferior *inf = current_inferior ();
 
-  /* First, remove all the solib event breakpoints.  Their addresses
-     may have changed since the last time we ran the program.  */
-  remove_solib_event_breakpoints ();
-
   /* Find the program interpreter.  */
   interp_name = find_program_interpreter ();
   if (!interp_name)

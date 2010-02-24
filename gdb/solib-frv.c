@@ -818,10 +818,6 @@ enable_break (void)
 {
   asection *interp_sect;
 
-  /* Remove all the solib event breakpoints.  Their addresses
-     may have changed since the last time we ran the program.  */
-  remove_solib_event_breakpoints ();
-
   if (symfile_objfile == NULL)
     {
       if (solib_frv_debug)

@@ -1315,10 +1315,6 @@ enable_break (struct svr4_info *info, int from_tty)
   gdb_byte *interp_name;
   CORE_ADDR sym_addr;
 
-  /* First, remove all the solib event breakpoints.  Their addresses
-     may have changed since the last time we ran the program.  */
-  remove_solib_event_breakpoints ();
-
   info->interp_text_sect_low = info->interp_text_sect_high = 0;
   info->interp_plt_sect_low = info->interp_plt_sect_high = 0;
 

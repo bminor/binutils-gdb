@@ -1,3 +1,15 @@
+2010-02-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (breakpoint_init_inferior): Also delete
+	bp_shlib_event breakpoints.
+	* solib-frv.c (enable_break): Remove call to
+	remove_solib_event_breakpoints.
+	* solib-svr4.c (enable_break): Ditto.
+	* solib-darwin.c (darwin_solib_create_inferior_hook): Ditto.
+	* solib-pa64.c (pa64_solib_create_inferior_hook): Ditto.
+	* solib-som.c (som_solib_create_inferior_hook): Ditto.
+	* solib-spu.c (spu_enable_break): Ditto.
+
 2010-02-23  Harald Koenig  <H.Koenig@science-computing.de>
 
 	* c-exp.y (token_and_value): s/union YYSTYPE/YYSTYPE.

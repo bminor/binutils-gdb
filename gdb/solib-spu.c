@@ -367,10 +367,6 @@ spu_enable_break (struct objfile *objfile)
 static void
 spu_solib_create_inferior_hook (int from_tty)
 {
-  /* Remove all previously installed solib breakpoints.  Both the SVR4
-     code and us will re-install all required breakpoints.  */
-  remove_solib_event_breakpoints ();
-
   /* Handle SPE stand-alone executables.  */
   if (spu_standalone_p ())
     {

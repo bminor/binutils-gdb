@@ -2248,13 +2248,31 @@ breakpoint_init_inferior (enum inf_context context)
     switch (b->type)
       {
       case bp_call_dummy:
-      case bp_watchpoint_scope:
 
 	/* If the call dummy breakpoint is at the entry point it will
-	   cause problems when the inferior is rerun, so we better
-	   get rid of it. 
+	   cause problems when the inferior is rerun, so we better get
+	   rid of it.  */
 
-	   Also get rid of scope breakpoints.  */
+      case bp_watchpoint_scope:
+
+	/* Also get rid of scope breakpoints.  */
+
+      case bp_shlib_event:
+
+	/* Also remove solib event breakpoints.  Their addresses may
+	   have changed since the last time we ran the program.
+	   Actually we may now be debugging against different target;
+	   and so the solib backend that installed this breakpoint may
+	   not be used in by the target.  E.g.,
+
+	   (gdb) file prog-linux
+	   (gdb) run               # native linux target
+	   ...
+	   (gdb) kill
+	   (gdb) file prog-win.exe
+	   (gdb) tar rem :9999     # remote Windows gdbserver.
+	*/
+
 	delete_breakpoint (b);
 	break;
 

@@ -338,10 +338,6 @@ pa64_solib_create_inferior_hook (int from_tty)
   struct objfile *objfile;
   CORE_ADDR anaddr;
 
-  /* First, remove all the solib event breakpoints.  Their addresses
-     may have changed since the last time we ran the program.  */
-  remove_solib_event_breakpoints ();
-
   if (symfile_objfile == NULL)
     return;
 
