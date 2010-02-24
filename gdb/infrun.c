@@ -51,6 +51,7 @@
 #include "record.h"
 #include "inline-frame.h"
 #include "jit.h"
+#include "tracepoint.h"
 
 /* Prototypes for local functions */
 
@@ -1760,6 +1761,16 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
     fprintf_unfiltered (gdb_stdlog,
 			"infrun: proceed (addr=%s, signal=%d, step=%d)\n",
 			paddress (gdbarch, addr), siggnal, step);
+
+  /* We're handling a live event, so make sure we're doing live
+     debugging.  If we're looking at traceframes while the target is
+     running, we're going to need to get back to that mode after
+     handling the event.  */
+  if (non_stop)
+    {
+      make_cleanup_restore_current_traceframe ();
+      set_traceframe_number (-1);
+    }
 
   if (non_stop)
     /* In non-stop, each thread is handled individually.  The context

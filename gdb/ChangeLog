@@ -1,3 +1,16 @@
+2010-02-24  Pedro Alves  <pedro@codesourcery.com>
+	    Stan Shebs  <stan@codesourcery.com>
+
+	* tracepoint.h (set_traceframe_number)
+	(cleanup_restore_current_traceframe): Declare.
+	* tracepoint.c (set_traceframe_number): New.
+	(struct current_traceframe_cleanup): New.
+	(do_restore_current_traceframe_cleanup)
+	(restore_current_traceframe_cleanup_dtor)
+	(make_cleanup_restore_current_traceframe): New.
+	* infrun.c: Include tracepoint.h.
+	(fetch_inferior_event): Switch out and in of tfind mode.
+
 2010-02-23  Harald Koenig  <H.Koenig@science-computing.de>
 
 	* varobj.c (varobj_update): Avoid non-constants in initializers.
