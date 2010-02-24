@@ -1,3 +1,23 @@
+2010-02-24  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_output_data_got): New class.
+	(ARM_TCB_SIZE): New constant
+	(Target_arm): Use Arm_output_data_got instead of Output_data_got.
+	(Arm_output_section::fix_exidx_coverage): Add a parameter for layout.
+	If user uses a script with a SECTIONS clause, issue only a warning
+	for a misplaced EXIDX input section.  Otherwise, issue an error.
+ 	(Arm_relobj::do_gc_process_relocs): Exit early if we are not doing
+	garbage collection.
+	(Target_arm::got_mode_index_entry): Handle static linking.
+	(Target_arm::Scan::local): Ditto.
+	(Target_arm::Scan::global): Ditto.
+	(Target_arm::Relocate::relocate_tls): Handle static linking.  Fix
+	all incorrectly implemented relocations.
+	(Target_arm::fix_exidx_coverage): Pass layout to 
+	Arm_output_section::fix_exidx_coverage.
+	* layout.cc (Layout::section_name_mapping): Remove trailing dots
+	from ".ARM.exidx." and ".ARM.extab.".
+
 2010-02-23  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
 
 	* arm.cc (Target_arm::do_finalize_sections): Create attribute

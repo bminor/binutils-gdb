@@ -3569,9 +3569,9 @@ const Layout::Section_name_mapping Layout::section_name_mapping[] =
   MAPPING_INIT(".gnu.linkonce.lr.", ".lrodata"),
   MAPPING_INIT(".gnu.linkonce.l.", ".ldata"),
   MAPPING_INIT(".gnu.linkonce.lb.", ".lbss"),
-  MAPPING_INIT(".ARM.extab.", ".ARM.extab"),
+  MAPPING_INIT(".ARM.extab", ".ARM.extab"),
   MAPPING_INIT(".gnu.linkonce.armextab.", ".ARM.extab"),
-  MAPPING_INIT(".ARM.exidx.", ".ARM.exidx"),
+  MAPPING_INIT(".ARM.exidx", ".ARM.exidx"),
   MAPPING_INIT(".gnu.linkonce.armexidx.", ".ARM.exidx"),
 };
 #undef MAPPING_INIT
