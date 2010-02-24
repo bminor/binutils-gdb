@@ -27,13 +27,9 @@ set binfile ${objdir}/${subdir}/${testfile}
 # Start with a fresh gdb.
 gdb_exit
 gdb_start
-gdb_test_multiple "python print 'hello, world!'" "verify python support" {
-    -re "not supported.*$gdb_prompt $"	{
-      unsupported "python support is disabled"
-      return -1
-    }
-    -re "$gdb_prompt $"	{}
-}
+
+# Skip all tests if Python scripting is not enabled.
+if { [skip_python_tests] } { continue }
 
 # Run a command in GDB, and report a failure if a Python exception is thrown.
 # If report_pass is true, report a pass if no exception is thrown.

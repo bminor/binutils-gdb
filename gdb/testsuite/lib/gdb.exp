@@ -1299,6 +1299,21 @@ proc skip_java_tests {} {
     return 0
 }
 
+# Return a 1 for configurations that do not support Python scripting.
+
+proc skip_python_tests {} {
+    global gdb_prompt
+    gdb_test_multiple "python print 'test'" "verify python support" {
+	-re "not supported.*$gdb_prompt $"	{
+	    unsupported "Python support is disabled."
+	    return 1
+	}
+	-re "$gdb_prompt $"	{}
+    }
+
+    return 0
+}
+
 # Return a 1 if we should skip shared library tests.
 
 proc skip_shlib_tests {} {

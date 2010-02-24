@@ -1,3 +1,15 @@
+2010-02-24  Phil Muldoon  <pmuldoon@redhat.com>
+
+	PR python/11314
+	* lib/gdb.exp (skip_python_tests): New function.
+	* gdb.python/py-cmd.exp: Use skip_python_tests.
+	* gdb.python/py-frame.exp: Likewise.
+	* gdb.python/py-function.exp: Likewise.
+	* gdb.python/py-prettyprint.exp: Likewise.
+	* gdb.python/py-template.exp: Likewise.
+	* gdb.python/py-type.exp: Likewise.
+	* gdb.python/py-value.exp: Likewise.
+
 2010-02-22  Pedro Alves  <pedro@codesourcery.com>
 
 	PR9605

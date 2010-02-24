@@ -44,13 +44,8 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 
-gdb_test_multiple "python print 'hello, world!'" "verify python support" {
-    -re "not supported.*$gdb_prompt $"	{
-      unsupported "python support is disabled"
-      return -1
-    }
-    -re "$gdb_prompt $"	{}
-}
+# Skip all tests if Python scripting is not enabled.
+if { [skip_python_tests] } { continue }
 
 gdb_py_test_multiple "input convenience function" \
   "python" "" \

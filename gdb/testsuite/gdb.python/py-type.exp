@@ -34,8 +34,8 @@ proc build_inferior {lang} {
   }
 }
 
-# Restart GDB, set breakpoint and run to that breakpoint.
-proc restart_gdb {bp} {
+# Restart GDB.
+proc restart_gdb {} { 
   global srcdir subdir srcfile binfile testfile hex
 
   gdb_exit
@@ -47,11 +47,13 @@ proc restart_gdb {bp} {
       perror "couldn't run to breakpoint"
       return
   }
+}
 
+# Set breakpoint and run to that breakpoint.
+proc runto_bp {bp} {
   gdb_breakpoint [gdb_get_line_number $bp]
   gdb_continue_to_breakpoint $bp
 }
-
 
 # Run a command in GDB, and report a failure if a Python exception is thrown.
 # If report_pass is true, report a pass if no exception is thrown.
@@ -127,21 +129,18 @@ proc test_range {} {
 
 # Perform C Tests.
 build_inferior "c"
-restart_gdb "break to inspect struct and array."
+restart_gdb 
 
-gdb_test_multiple "python print 'hello, world!'" "verify python support" {
-    -re "not supported.*$gdb_prompt $"	{
-      unsupported "python support is disabled"
-      return -1
-    }
-    -re "$gdb_prompt $"	{}
-}
+# Skip all tests if Python scripting is not enabled.
+if { [skip_python_tests] } { continue }
 
+runto_bp "break to inspect struct and array."
 test_fields "c"
 
 # Perform C++ Tests.
 build_inferior "c++"
-restart_gdb "break to inspect struct and array."
+restart_gdb 
+runto_bp "break to inspect struct and array."
 test_fields "c++"
 test_base_class
 test_range
