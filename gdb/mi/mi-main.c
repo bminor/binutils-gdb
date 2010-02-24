@@ -1818,7 +1818,7 @@ mi_cmd_execute (struct mi_parse *parse)
       struct thread_info *tp = 0;
 
       if (!inf)
-	error (_("Invalid thread group for the --tread-group option"));
+	error (_("Invalid thread group for the --thread-group option"));
 
       set_current_inferior (inf);
       /* This behaviour means that if --thread-group option identifies

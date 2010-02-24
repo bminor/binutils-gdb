@@ -1,3 +1,7 @@
+2010-02-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* mi/mi-main.c (mi_cmd_execute): Fix typo.
+
 2010-02-24  Phil Muldoon  <pmuldoon@redhat.com>
    	    Tom Tromey  <tromey@redhat.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
