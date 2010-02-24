@@ -65,7 +65,7 @@ struct mi_cmd mi_cmds[] =
   { "exec-next", { NULL, 0 }, mi_cmd_exec_next},
   { "exec-next-instruction", { NULL, 0 }, mi_cmd_exec_next_instruction},
   { "exec-return", { NULL, 0 }, mi_cmd_exec_return},
-  { "exec-run", { "run", 1 }, NULL},
+  { "exec-run", { NULL, 0}, mi_cmd_exec_run},
   { "exec-step", { NULL, 0 }, mi_cmd_exec_step},
   { "exec-step-instruction", { NULL, 0 }, mi_cmd_exec_step_instruction},
   { "exec-until", { "until", 1 }, NULL},

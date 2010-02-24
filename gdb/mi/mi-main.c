@@ -330,6 +330,13 @@ mi_cmd_exec_interrupt (char *command, char **argv, int argc)
     error ("Usage: -exec-interrupt [--all|--thread-group id]");
 }
 
+void
+mi_cmd_exec_run (char *command, char **argv, int argc)
+{
+  mi_execute_cli_command ("run", target_can_async_p (),
+			  target_can_async_p () ? "&" : NULL);
+}
+
 static int
 find_thread_of_process (struct thread_info *ti, void *p)
 {
