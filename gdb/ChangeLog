@@ -1,5 +1,15 @@
 2010-02-24  Pedro Alves  <pedro@codesourcery.com>
 
+	PR gdb/11321
+
+	* inferior.h (prepare_for_detach): Declare.
+	(struct inferior) <detaching>: New field.
+	* infrun.c (prepare_for_detach): New.
+	(handle_inferior_event) <random signal>: Don't stop if detaching.
+	* target.c (target_detach): Call prepare_for_detach.
+
+2010-02-24  Pedro Alves  <pedro@codesourcery.com>
+
 	Per-process displaced stepping queue.
 
 	* infrun.c (displaced_step_ptid, displaced_step_request_queue)

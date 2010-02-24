@@ -2331,6 +2331,84 @@ print_target_wait_results (ptid_t waiton_ptid, ptid_t result_ptid,
   ui_file_delete (tmp_stream);
 }
 
+/* Prepare and stabilize the inferior for detaching it.  E.g.,
+   detaching while a thread is displaced stepping is a recipe for
+   crashing it, as nothing would readjust the PC out of the scratch
+   pad.  */
+
+void
+prepare_for_detach (void)
+{
+  struct inferior *inf = current_inferior ();
+  ptid_t pid_ptid = pid_to_ptid (inf->pid);
+  struct cleanup *old_chain_1;
+  struct displaced_step_inferior_state *displaced;
+
+  displaced = get_displaced_stepping_state (inf->pid);
+
+  /* Is any thread of this process displaced stepping?  If not,
+     there's nothing else to do.  */
+  if (displaced == NULL || ptid_equal (displaced->step_ptid, null_ptid))
+    return;
+
+  if (debug_infrun)
+    fprintf_unfiltered (gdb_stdlog,
+			"displaced-stepping in-process while detaching");
+
+  old_chain_1 = make_cleanup_restore_integer (&inf->detaching);
+  inf->detaching = 1;
+
+  while (!ptid_equal (displaced->step_ptid, null_ptid))
+    {
+      struct cleanup *old_chain_2;
+      struct execution_control_state ecss;
+      struct execution_control_state *ecs;
+
+      ecs = &ecss;
+      memset (ecs, 0, sizeof (*ecs));
+
+      overlay_cache_invalid = 1;
+
+      /* We have to invalidate the registers BEFORE calling
+	 target_wait because they can be loaded from the target while
+	 in target_wait.  This makes remote debugging a bit more
+	 efficient for those targets that provide critical registers
+	 as part of their normal status mechanism. */
+
+      registers_changed ();
+
+      if (deprecated_target_wait_hook)
+	ecs->ptid = deprecated_target_wait_hook (pid_ptid, &ecs->ws, 0);
+      else
+	ecs->ptid = target_wait (pid_ptid, &ecs->ws, 0);
+
+      if (debug_infrun)
+	print_target_wait_results (pid_ptid, ecs->ptid, &ecs->ws);
+
+      /* If an error happens while handling the event, propagate GDB's
+	 knowledge of the executing state to the frontend/user running
+	 state.  */
+      old_chain_2 = make_cleanup (finish_thread_state_cleanup, &minus_one_ptid);
+
+      /* Now figure out what to do with the result of the result.  */
+      handle_inferior_event (ecs);
+
+      /* No error, don't finish the state yet.  */
+      discard_cleanups (old_chain_2);
+
+      /* Breakpoints and watchpoints are not installed on the target
+	 at this point, and signals are passed directly to the
+	 inferior, so this must mean the process is gone.  */
+      if (!ecs->wait_some_more)
+	{
+	  discard_cleanups (old_chain_1);
+	  error (_("Program exited while detaching"));
+	}
+    }
+
+  discard_cleanups (old_chain_1);
+}
+
 /* Wait for control to return from inferior to debugger.
 
    If TREAT_EXEC_AS_SIGTRAP is non-zero, then handle EXEC signals
@@ -3787,6 +3865,7 @@ process_event_stop_test:
     {
       /* Signal not for debugging purposes.  */
       int printed = 0;
+      struct inferior *inf = find_inferior_pid (ptid_get_pid (ecs->ptid));
 
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: random signal %d\n",
@@ -3805,7 +3884,8 @@ process_event_stop_test:
 	 to remain stopped.  */
       if (stop_soon != NO_STOP_QUIETLY
 	  || ecs->event_thread->stop_requested
-	  || signal_stop_state (ecs->event_thread->stop_signal))
+	  || (!inf->detaching
+	      && signal_stop_state (ecs->event_thread->stop_signal)))
 	{
 	  stop_stepping (ecs);
 	  return;

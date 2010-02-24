@@ -185,6 +185,8 @@ extern void address_to_signed_pointer (struct gdbarch *gdbarch,
 
 extern void wait_for_inferior (int treat_exec_as_sigtrap);
 
+extern void prepare_for_detach (void);
+
 extern void fetch_inferior_event (void *);
 
 extern void init_wait_for_inferior (void);
@@ -477,6 +479,9 @@ struct inferior
      not under our control to be done with the shared memory region,
      either by exiting or execing.  */
   int waiting_for_vfork_done;
+
+  /* True if we're in the process of detaching from this inferior.  */
+  int detaching;
 
   /* What is left to do for an execution command after any thread of
      this inferior stops.  For continuations associated with a

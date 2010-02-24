@@ -2077,6 +2077,8 @@ target_detach (char *args, int from_tty)
        them before detaching.  */
     remove_breakpoints_pid (PIDGET (inferior_ptid));
 
+  prepare_for_detach ();
+
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     {
       if (t->to_detach != NULL)
