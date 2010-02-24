@@ -140,6 +140,9 @@ extern void (*deprecated_trace_find_hook) (char *arg, int from_tty);
 extern void (*deprecated_trace_start_stop_hook) (int start, int from_tty);
 
 int get_traceframe_number (void);
+void set_traceframe_number (int);
+struct cleanup *make_cleanup_restore_current_traceframe (void);
+
 void free_actions (struct breakpoint *);
 enum actionline_type validate_actionline (char **, struct breakpoint *);
 
