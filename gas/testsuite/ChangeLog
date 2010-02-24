@@ -1,8 +1,17 @@
+2010-02-24  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/6773
+	* gas/arm/arch7em.d: Replace expected disassembly of
+	<prefix>addsubx with <prefix>asx.  Also replace <prefix>subaddx
+	with <prefix>sax.
+	* gas/arm/archv6.d: Likewise.
+	* gas/arm/thumb32.d: Likewise.
+
 2010-02-23  Daniel Gutson  <dgutson@codesourcery.com>
 
-    * gas/arm/depr-swp.d: New test case.
-    * gas/arm/depr-swp.s: New file.
-    * gas/arm/depr-swp.l: New file.
+	* gas/arm/depr-swp.d: New test case.
+	* gas/arm/depr-swp.s: New file.
+	* gas/arm/depr-swp.l: New file.
 
 2010-02-23  Nick Clifton  <nickc@redhat.com>
 
