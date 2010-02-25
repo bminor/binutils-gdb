@@ -1,5 +1,12 @@
 2010-02-24  Doug Kwan  <dougkwan@google.com>
 
+	* arm.cc (Target_arm::got_section): Make the .got section the first
+	non RELRO section in the data segment.
+	* testsuite/script_test_5.sh: Fix match patterns to avoid matching
+	suffixes of section names.
+
+2010-02-24  Doug Kwan  <dougkwan@google.com>
+
 	* arm.cc (Target_arm::do_finalize_sections): Skip processor specific
 	flags and attributes merging if an input file is a binary file.
 	* fileread.cc (Input_file::open): Record format of original file.
