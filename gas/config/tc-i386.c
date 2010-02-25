@@ -3815,7 +3815,7 @@ match_template (void)
 	continue;
 
       /* Check processor support.  */
-      i.err_msg = _("instruction not supported");
+      i.err_msg = _("unsupported");
       found_cpu_match = (cpu_flags_match (t)
 			 == CPU_FLAGS_PERFECT_MATCH);
       if (!found_cpu_match)
@@ -3827,7 +3827,7 @@ match_template (void)
 	continue;
 
       /* Check AT&T mnemonic.   */
-      i.err_msg = _("not supported with Intel mnemonic");
+      i.err_msg = _("unsupported with Intel mnemonic");
       if (intel_mnemonic && t->opcode_modifier.attmnemonic)
 	continue;
 

@@ -1,5 +1,9 @@
 2010-02-25  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (match_template): Update error messages.
+
+2010-02-25  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (_i386_insn): Add err_msg.
 	(operand_size_match): Set err_msg on failure.
 	(operand_type_match): Likewise.
