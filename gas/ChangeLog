@@ -1,3 +1,20 @@
+2010-02-25  Wu Zhangjin <wuzhangjin@gmail.com>
+
+	* config/tc-mips.c (mips_fix_loongson2f, mips_fix_loongson2f_nop,
+	mips_fix_loongson2f_jump): New variables.
+	(md_longopts): Add New options -mfix-loongson2f-nop/jump,
+	-mno-fix-loongson2f-nop/jump.
+	(md_parse_option): Initialize variables via above options.
+	(options): New enums for the above options.
+	(md_begin): Initialize nop_insn from LOONGSON2F_NOP_INSN.
+	(fix_loongson2f, fix_loongson2f_nop, fix_loongson2f_jump):
+	New functions.
+	(append_insn): call fix_loongson2f().
+	(mips_handle_align): Replace the implicit nops.
+	* config/tc-mips.h (MAX_MEM_FOR_RS_ALIGN_CODE): Modified
+	for the new mips_handle_align().
+	* doc/c-mips.texi: Document the new options.
+
 2010-02-23  Daniel Gutson  <dgutson@codesourcery.com>
 
 	* config/tc-arm.c (do_rd_rm_rn): Added warning
