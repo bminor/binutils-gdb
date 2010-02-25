@@ -1,3 +1,7 @@
+2010-02-25  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* symfile.c (find_lowest_section): Include SEC_ALLOC sections.
+
 2010-02-24  Pedro Alves  <pedro@codesourcery.com>
 
 	* mi/mi-main.c (mi_cmd_execute): Fix typo.

@@ -297,7 +297,7 @@ find_lowest_section (bfd *abfd, asection *sect, void *obj)
 {
   asection **lowest = (asection **) obj;
 
-  if (0 == (bfd_get_section_flags (abfd, sect) & SEC_LOAD))
+  if (0 == (bfd_get_section_flags (abfd, sect) & (SEC_ALLOC | SEC_LOAD)))
     return;
   if (!*lowest)
     *lowest = sect;		/* First loadable section */
