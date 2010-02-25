@@ -488,7 +488,8 @@ ALL_64_TARGET_OBS = \
 
 # All other target-dependent objects files (used with --enable-targets=all).
 ALL_TARGET_OBS = \
-	armbsd-tdep.o arm-linux-tdep.o armnbsd-tdep.o armobsd-tdep.o \
+	armbsd-tdep.o arm-linux-tdep.o arm-symbian-tdep.o \
+	armnbsd-tdep.o armobsd-tdep.o \
 	arm-tdep.o arm-wince-tdep.o \
 	avr-tdep.o \
 	cris-tdep.o \
@@ -1406,7 +1407,7 @@ ALLDEPFILES = \
 	amd64-dicos-tdep.c \
 	amd64-linux-nat.c amd64-linux-tdep.c \
 	amd64-sol2-tdep.c \
-	arm-linux-nat.c arm-linux-tdep.c arm-tdep.c \
+	arm-linux-nat.c arm-linux-tdep.c arm-symbian-tdep.c arm-tdep.c \
 	armnbsd-nat.c armbsd-tdep.c armnbsd-tdep.c armobsd-tdep.c \
 	avr-tdep.c \
 	bsd-uthread.c bsd-kvm.c \

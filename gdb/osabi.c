@@ -67,13 +67,12 @@ static const char * const gdb_osabi_names[] =
   "Interix",
   "HP/UX ELF",
   "HP/UX SOM",
-
   "QNX Neutrino",
-
   "Cygwin",
   "AIX",
   "DICOS",
   "Darwin",
+  "Symbian",
 
   "<invalid>"
 };

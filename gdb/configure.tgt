@@ -91,6 +91,10 @@ arm*-*-openbsd*)
 	gdb_target_obs="arm-tdep.o armbsd-tdep.o armobsd-tdep.o obsd-tdep.o \
 			corelow.o solib.o solib-svr4.o"
 	;;
+arm*-*-symbianelf*)
+	# Target: SymbianOS/arm
+	gdb_target_obs="arm-tdep.o solib-target.o arm-symbian-tdep.o"
+	;;
 arm*-*-* | thumb*-*-* | strongarm*-*-* | xscale-*-*)
 	# Target: ARM embedded system
 	gdb_target_obs="arm-tdep.o"
@@ -626,4 +630,6 @@ m68*-*-openbsd* | m88*-*-openbsd* | vax-*-openbsd*) ;;
 *-*-mingw* | *-*-cygwin*)
 		gdb_osabi=GDB_OSABI_CYGWIN ;;
 *-*-dicos*)	gdb_osabi=GDB_OSABI_DICOS ;;
+*-*-symbianelf*)
+		gdb_osabi=GDB_OSABI_SYMBIAN ;;
 esac

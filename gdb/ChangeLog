@@ -1,4 +1,17 @@
 2010-02-25  Daniel Jacobowitz  <dan@codesourcery.com>
+ 
+	Symbian config
+
+	gdb/
+	* arm-symbian-tdep.c: New.
+	* configure.tgt (arm*-*-symbianelf*): New target.
+	(*-*-symbianelf*): New OS.
+	* osabi.c (gdb_osabi_names): Add Symbian.
+	* defs.h (gdb_osabi): Add GDB_OSABI_SYMBIAN.
+	* Makefile.in (ALL_TARGET_OBJS): Add arm-symbian-tdep.o.
+	(ALLDEPFILES): Add arm-symbian-tdep.c.
+
+2010-02-25  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* symfile.c (find_lowest_section): Include SEC_ALLOC sections.
 
