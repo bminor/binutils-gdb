@@ -260,6 +260,9 @@ struct _i386_insn
 
     /* Swap operand in encoding.  */
     unsigned int swap_operand;
+
+    /* Error message.  */
+    const char *err_msg;
   };
 
 typedef struct _i386_insn i386_insn;
@@ -1557,9 +1560,14 @@ operand_size_match (const insn_template *t)
 	}
     }
 
-  if (match
-      || (!t->opcode_modifier.d && !t->opcode_modifier.floatd))
+  if (match)
     return match;
+  else if (!t->opcode_modifier.d && !t->opcode_modifier.floatd)
+    {
+mismatch:
+      i.err_msg = _("operand size mismatch");
+      return 0;
+    }
 
   /* Check reverse.  */
   gas_assert (i.operands == 2);
@@ -1569,17 +1577,11 @@ operand_size_match (const insn_template *t)
     {
       if (t->operand_types[j].bitfield.acc
 	  && !match_reg_size (t, j ? 0 : 1))
-	{
-	  match = 0;
-	  break;
-	}
+	goto mismatch;
 
       if (i.types[j].bitfield.mem
 	  && !match_mem_size (t, j ? 0 : 1))
-	{
-	  match = 0;
-	  break;
-	}
+	goto mismatch;
     }
 
   return match;
@@ -1602,10 +1604,15 @@ operand_type_match (i386_operand_type overlap,
   temp.bitfield.xmmword = 0;
   temp.bitfield.ymmword = 0;
   if (operand_type_all_zero (&temp))
-    return 0;
+    goto mismatch;
 
-  return (given.bitfield.baseindex == overlap.bitfield.baseindex
-	  && given.bitfield.jumpabsolute == overlap.bitfield.jumpabsolute);
+  if (given.bitfield.baseindex == overlap.bitfield.baseindex
+      && given.bitfield.jumpabsolute == overlap.bitfield.jumpabsolute)
+    return 1;
+
+mismatch:
+  i.err_msg = _("operand type mismatch");
+  return 0;
 }
 
 /* If given types g0 and g1 are registers they must be of the same type
@@ -1648,10 +1655,15 @@ operand_type_register_match (i386_operand_type m0,
       t1.bitfield.reg64 = 1;
     }
 
-  return (!(t0.bitfield.reg8 & t1.bitfield.reg8)
-	  && !(t0.bitfield.reg16 & t1.bitfield.reg16)
-	  && !(t0.bitfield.reg32 & t1.bitfield.reg32)
-	  && !(t0.bitfield.reg64 & t1.bitfield.reg64));
+  if (!(t0.bitfield.reg8 & t1.bitfield.reg8)
+      && !(t0.bitfield.reg16 & t1.bitfield.reg16)
+      && !(t0.bitfield.reg32 & t1.bitfield.reg32)
+      && !(t0.bitfield.reg64 & t1.bitfield.reg64))
+    return 1;
+
+  i.err_msg = _("register type mismatch");
+
+  return 0;
 }
 
 static INLINE unsigned int
@@ -3745,7 +3757,10 @@ VEX_check_operands (const insn_template *t)
     {
       if (i.op[0].imms->X_op != O_constant
 	  || !fits_in_imm4 (i.op[0].imms->X_add_number))
-	return 1;
+	{
+	  i.err_msg = _("Imm4 isn't the first operand");
+	  return 1;
+	}
 
       /* Turn off Imm8 so that update_imm won't complain.  */
       i.types[0] = vec_imm4;
@@ -3795,29 +3810,35 @@ match_template (void)
       addr_prefix_disp = -1;
 
       /* Must have right number of operands.  */
+      i.err_msg = _("number of operands mismatch");
       if (i.operands != t->operands)
 	continue;
 
       /* Check processor support.  */
+      i.err_msg = _("instruction not supported");
       found_cpu_match = (cpu_flags_match (t)
 			 == CPU_FLAGS_PERFECT_MATCH);
       if (!found_cpu_match)
 	continue;
 
       /* Check old gcc support. */
+      i.err_msg = _("only supported with old gcc");
       if (!old_gcc && t->opcode_modifier.oldgcc)
 	continue;
 
       /* Check AT&T mnemonic.   */
+      i.err_msg = _("not supported with Intel mnemonic");
       if (intel_mnemonic && t->opcode_modifier.attmnemonic)
 	continue;
 
-      /* Check AT&T syntax Intel syntax.   */
+      /* Check AT&T/Intel syntax.   */
+      i.err_msg = _("unsupported syntax");
       if ((intel_syntax && t->opcode_modifier.attsyntax)
 	  || (!intel_syntax && t->opcode_modifier.intelsyntax))
 	continue;
 
       /* Check the suffix, except for some instructions in intel mode.  */
+      i.err_msg = _("invalid instruction suffix");
       if ((!intel_syntax || !t->opcode_modifier.ignoresize)
 	  && ((t->opcode_modifier.no_bsuf && suffix_check.no_bsuf)
 	      || (t->opcode_modifier.no_wsuf && suffix_check.no_wsuf)
@@ -4069,12 +4090,8 @@ check_reverse:
   if (t == current_templates->end)
     {
       /* We found no match.  */
-      if (intel_syntax)
-	as_bad (_("ambiguous operand size or operands invalid for `%s'"),
-		current_templates->start->name);
-      else
-	as_bad (_("suffix or operands invalid for `%s'"),
-		current_templates->start->name);
+      as_bad (_("%s for `%s'"), i.err_msg,
+	      current_templates->start->name);
       return NULL;
     }
 

@@ -1,3 +1,12 @@
+2010-02-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (_i386_insn): Add err_msg.
+	(operand_size_match): Set err_msg on failure.
+	(operand_type_match): Likewise.
+	(operand_type_register_match): Likewise.
+	(VEX_check_operands): Likewise.
+	(match_template): Likewise.  Use i.err_msg with as_bad.
+
 2010-02-25  Wu Zhangjin <wuzhangjin@gmail.com>
 
 	* config/tc-mips.c (mips_fix_loongson2f, mips_fix_loongson2f_nop,
