@@ -1,3 +1,10 @@
+2010-02-25  Alan Modra  <amodra@gmail.com>
+
+	PR ld/11304
+	* elf.c (_bfd_elf_init_private_section_data): Rename need_group
+	to final_link and invert.  For final link allow some flags to
+	differ.  Don't specially allow flags to be all zero.
+
 2010-02-24  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/10858

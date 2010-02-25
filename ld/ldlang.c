@@ -2048,12 +2048,8 @@ sort_def_symbol (struct bfd_link_hash_entry *hash_entry,
 /* Initialize an output section.  */
 
 static void
-init_os (lang_output_section_statement_type *s, asection *isec,
-	 flagword flags)
+init_os (lang_output_section_statement_type *s, flagword flags)
 {
-  if (s->bfd_section != NULL)
-    return;
-
   if (strcmp (s->name, DISCARD_SECTION_NAME) == 0)
     einfo (_("%P%F: Illegal use of `%s' section\n"), DISCARD_SECTION_NAME);
 
@@ -2089,11 +2085,6 @@ init_os (lang_output_section_statement_type *s, asection *isec,
   /* If supplied an alignment, set it.  */
   if (s->section_alignment != -1)
     s->bfd_section->alignment_power = s->section_alignment;
-
-  if (isec)
-    bfd_init_private_section_data (isec->owner, isec,
-				   link_info.output_bfd, s->bfd_section,
-				   &link_info);
 }
 
 /* Make sure that all output sections mentioned in an expression are
@@ -2139,7 +2130,7 @@ exp_init_os (etree_type *exp)
 
 	    os = lang_output_section_find (exp->name.name);
 	    if (os != NULL && os->bfd_section == NULL)
-	      init_os (os, NULL, 0);
+	      init_os (os, 0);
 	  }
 	}
       break;
@@ -2183,6 +2174,7 @@ lang_add_section (lang_statement_list_type *ptr,
 {
   flagword flags = section->flags;
   bfd_boolean discard;
+  lang_input_section_type *new_section;
 
   /* Discard sections marked with SEC_EXCLUDE.  */
   discard = (flags & SEC_EXCLUDE) != 0;
@@ -2208,109 +2200,105 @@ lang_add_section (lang_statement_list_type *ptr,
       return;
     }
 
-  if (section->output_section == NULL)
+  if (section->output_section != NULL)
+    return;
+
+  /* We don't copy the SEC_NEVER_LOAD flag from an input section
+     to an output section, because we want to be able to include a
+     SEC_NEVER_LOAD section in the middle of an otherwise loaded
+     section (I don't know why we want to do this, but we do).
+     build_link_order in ldwrite.c handles this case by turning
+     the embedded SEC_NEVER_LOAD section into a fill.  */
+  flags &= ~ SEC_NEVER_LOAD;
+
+  /* If final link, don't copy the SEC_LINK_ONCE flags, they've
+     already been processed.  One reason to do this is that on pe
+     format targets, .text$foo sections go into .text and it's odd
+     to see .text with SEC_LINK_ONCE set.  */
+
+  if (!link_info.relocatable)
+    flags &= ~ (SEC_LINK_ONCE | SEC_LINK_DUPLICATES);
+
+  switch (output->sectype)
     {
-      bfd_boolean first;
-      lang_input_section_type *new_section;
+    case normal_section:
+    case overlay_section:
+      break;
+    case noalloc_section:
+      flags &= ~SEC_ALLOC;
+      break;
+    case noload_section:
+      flags &= ~SEC_LOAD;
+      flags |= SEC_NEVER_LOAD;
+      break;
+    }
 
-      /* We don't copy the SEC_NEVER_LOAD flag from an input section
-	 to an output section, because we want to be able to include a
-	 SEC_NEVER_LOAD section in the middle of an otherwise loaded
-	 section (I don't know why we want to do this, but we do).
-	 build_link_order in ldwrite.c handles this case by turning
-	 the embedded SEC_NEVER_LOAD section into a fill.  */
-      flags &= ~ SEC_NEVER_LOAD;
+  if (output->bfd_section == NULL)
+    init_os (output, flags);
 
-      switch (output->sectype)
-	{
-	case normal_section:
-	case overlay_section:
-	  break;
-	case noalloc_section:
-	  flags &= ~SEC_ALLOC;
-	  break;
-	case noload_section:
-	  flags &= ~SEC_LOAD;
-	  flags |= SEC_NEVER_LOAD;
-	  break;
-	}
+  /* If SEC_READONLY is not set in the input section, then clear
+     it from the output section.  */
+  output->bfd_section->flags &= flags | ~SEC_READONLY;
 
-      if (output->bfd_section == NULL)
-	init_os (output, section, flags);
-
-      first = ! output->bfd_section->linker_has_input;
-      output->bfd_section->linker_has_input = 1;
-
-      if (!link_info.relocatable
-	  && !stripped_excluded_sections)
-	{
-	  asection *s = output->bfd_section->map_tail.s;
-	  output->bfd_section->map_tail.s = section;
-	  section->map_head.s = NULL;
-	  section->map_tail.s = s;
-	  if (s != NULL)
-	    s->map_head.s = section;
-	  else
-	    output->bfd_section->map_head.s = section;
-	}
-
-      /* Add a section reference to the list.  */
-      new_section = new_stat (lang_input_section, ptr);
-
-      new_section->section = section;
-      section->output_section = output->bfd_section;
-
-      /* If final link, don't copy the SEC_LINK_ONCE flags, they've
-	 already been processed.  One reason to do this is that on pe
-	 format targets, .text$foo sections go into .text and it's odd
-	 to see .text with SEC_LINK_ONCE set.  */
-
-      if (! link_info.relocatable)
-	flags &= ~ (SEC_LINK_ONCE | SEC_LINK_DUPLICATES);
-
-      /* If this is not the first input section, and the SEC_READONLY
-	 flag is not currently set, then don't set it just because the
-	 input section has it set.  */
-
-      if (! first && (output->bfd_section->flags & SEC_READONLY) == 0)
-	flags &= ~ SEC_READONLY;
+  if (output->bfd_section->linker_has_input)
+    {
+      /* Only set SEC_READONLY flag on the first input section.  */
+      flags &= ~ SEC_READONLY;
 
       /* Keep SEC_MERGE and SEC_STRINGS only if they are the same.  */
-      if (! first
-	  && ((output->bfd_section->flags & (SEC_MERGE | SEC_STRINGS))
-	      != (flags & (SEC_MERGE | SEC_STRINGS))
-	      || ((flags & SEC_MERGE)
-		  && output->bfd_section->entsize != section->entsize)))
+      if ((output->bfd_section->flags & (SEC_MERGE | SEC_STRINGS))
+	  != (flags & (SEC_MERGE | SEC_STRINGS))
+	  || ((flags & SEC_MERGE) != 0
+	      && output->bfd_section->entsize != section->entsize))
 	{
 	  output->bfd_section->flags &= ~ (SEC_MERGE | SEC_STRINGS);
 	  flags &= ~ (SEC_MERGE | SEC_STRINGS);
 	}
-
-      output->bfd_section->flags |= flags;
-
-      if (flags & SEC_MERGE)
-	output->bfd_section->entsize = section->entsize;
-
-      /* If SEC_READONLY is not set in the input section, then clear
-	 it from the output section.  */
-      if ((section->flags & SEC_READONLY) == 0)
-	output->bfd_section->flags &= ~SEC_READONLY;
-
-      /* Copy over SEC_SMALL_DATA.  */
-      if (section->flags & SEC_SMALL_DATA)
-	output->bfd_section->flags |= SEC_SMALL_DATA;
-
-      if (section->alignment_power > output->bfd_section->alignment_power)
-	output->bfd_section->alignment_power = section->alignment_power;
-
-      if (bfd_get_arch (section->owner) == bfd_arch_tic54x
-	  && (section->flags & SEC_TIC54X_BLOCK) != 0)
-	{
-	  output->bfd_section->flags |= SEC_TIC54X_BLOCK;
-	  /* FIXME: This value should really be obtained from the bfd...  */
-	  output->block_value = 128;
-	}
     }
+  output->bfd_section->flags |= flags;
+
+  if (!output->bfd_section->linker_has_input)
+    {
+      output->bfd_section->linker_has_input = 1;
+      /* This must happen after flags have been updated.  The output
+	 section may have been created before we saw its first input
+	 section, eg. for a data statement.  */
+      bfd_init_private_section_data (section->owner, section,
+				     link_info.output_bfd,
+				     output->bfd_section,
+				     &link_info);
+      if ((flags & SEC_MERGE) != 0)
+	output->bfd_section->entsize = section->entsize;
+    }
+
+  if ((flags & SEC_TIC54X_BLOCK) != 0
+      && bfd_get_arch (section->owner) == bfd_arch_tic54x)
+    {
+      /* FIXME: This value should really be obtained from the bfd...  */
+      output->block_value = 128;
+    }
+
+  if (section->alignment_power > output->bfd_section->alignment_power)
+    output->bfd_section->alignment_power = section->alignment_power;
+
+  section->output_section = output->bfd_section;
+
+  if (!link_info.relocatable
+      && !stripped_excluded_sections)
+    {
+      asection *s = output->bfd_section->map_tail.s;
+      output->bfd_section->map_tail.s = section;
+      section->map_head.s = NULL;
+      section->map_tail.s = s;
+      if (s != NULL)
+	s->map_head.s = section;
+      else
+	output->bfd_section->map_head.s = section;
+    }
+
+  /* Add a section reference to the list.  */
+  new_section = new_stat (lang_input_section, ptr);
+  new_section->section = section;
 }
 
 /* Handle wildcard sorting.  This returns the lang_input_section which
@@ -3430,10 +3418,11 @@ map_input_to_output_sections
   (lang_statement_union_type *s, const char *target,
    lang_output_section_statement_type *os)
 {
-  flagword flags;
-
   for (; s != NULL; s = s->header.next)
     {
+      lang_output_section_statement_type *tos;
+      flagword flags;
+
       switch (s->header.type)
 	{
 	case lang_wild_statement_enum:
@@ -3445,27 +3434,23 @@ map_input_to_output_sections
 					os);
 	  break;
 	case lang_output_section_statement_enum:
-	  if (s->output_section_statement.constraint)
+	  tos = &s->output_section_statement;
+	  if (tos->constraint != 0)
 	    {
-	      if (s->output_section_statement.constraint != ONLY_IF_RW
-		  && s->output_section_statement.constraint != ONLY_IF_RO)
+	      if (tos->constraint != ONLY_IF_RW
+		  && tos->constraint != ONLY_IF_RO)
 		break;
-	      s->output_section_statement.all_input_readonly = TRUE;
-	      check_input_sections (s->output_section_statement.children.head,
-				    &s->output_section_statement);
-	      if ((s->output_section_statement.all_input_readonly
-		   && s->output_section_statement.constraint == ONLY_IF_RW)
-		  || (!s->output_section_statement.all_input_readonly
-		      && s->output_section_statement.constraint == ONLY_IF_RO))
+	      tos->all_input_readonly = TRUE;
+	      check_input_sections (tos->children.head, tos);
+	      if (tos->all_input_readonly != (tos->constraint == ONLY_IF_RO))
 		{
-		  s->output_section_statement.constraint = -1;
+		  tos->constraint = -1;
 		  break;
 		}
 	    }
-
-	  map_input_to_output_sections (s->output_section_statement.children.head,
+	  map_input_to_output_sections (tos->children.head,
 					target,
-					&s->output_section_statement);
+					tos);
 	  break;
 	case lang_output_statement_enum:
 	  break;
@@ -3481,13 +3466,23 @@ map_input_to_output_sections
 	  /* Make sure that any sections mentioned in the expression
 	     are initialized.  */
 	  exp_init_os (s->data_statement.exp);
-	  flags = SEC_HAS_CONTENTS;
-	  /* The output section gets contents, and then we inspect for
-	     any flags set in the input script which override any ALLOC.  */
-	  if (!(os->flags & SEC_NEVER_LOAD))
-	    flags |= SEC_ALLOC | SEC_LOAD;
+	  /* The output section gets CONTENTS, and usually ALLOC and
+	     LOAD, but the latter two may be overridden by the script.  */
+	  flags = SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD;
+	  switch (os->sectype)
+	    {
+	    case normal_section:
+	    case overlay_section:
+	      break;
+	    case noalloc_section:
+	      flags = SEC_HAS_CONTENTS;
+	      break;
+	    case noload_section:
+	      flags = SEC_HAS_CONTENTS | SEC_NEVER_LOAD;
+	      break;
+	    }
 	  if (os->bfd_section == NULL)
-	    init_os (os, NULL, flags);
+	    init_os (os, flags);
 	  else
 	    os->bfd_section->flags |= flags;
 	  break;
@@ -3499,11 +3494,11 @@ map_input_to_output_sections
 	case lang_padding_statement_enum:
 	case lang_input_statement_enum:
 	  if (os != NULL && os->bfd_section == NULL)
-	    init_os (os, NULL, 0);
+	    init_os (os, 0);
 	  break;
 	case lang_assignment_statement_enum:
 	  if (os != NULL && os->bfd_section == NULL)
-	    init_os (os, NULL, 0);
+	    init_os (os, 0);
 
 	  /* Make sure that any sections mentioned in the assignment
 	     are initialized.  */
@@ -3522,13 +3517,18 @@ map_input_to_output_sections
 	  if (!s->address_statement.segment
 	      || !s->address_statement.segment->used)
 	    {
-	      lang_output_section_statement_type *aos
-		= (lang_output_section_statement_lookup
-		   (s->address_statement.section_name, 0, TRUE));
+	      const char *name = s->address_statement.section_name;
 
-	      if (aos->bfd_section == NULL)
-		init_os (aos, NULL, 0);
-	      aos->addr_tree = s->address_statement.address;
+	      /* Create the output section statement here so that
+		 orphans with a set address will be placed after other
+		 script sections.  If we let the orphan placement code
+		 place them in amongst other sections then the address
+		 will affect following script sections, which is
+		 likely to surprise naive users.  */
+	      tos = lang_output_section_statement_lookup (name, 0, TRUE);
+	      tos->addr_tree = s->address_statement.address;
+	      if (tos->bfd_section == NULL)
+		init_os (tos, 0);
 	    }
 	  break;
 	case lang_insert_statement_enum:

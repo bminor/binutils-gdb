@@ -6056,18 +6056,21 @@ _bfd_elf_init_private_section_data (bfd *ibfd,
 
 {
   Elf_Internal_Shdr *ihdr, *ohdr;
-  bfd_boolean need_group = link_info == NULL || link_info->relocatable;
+  bfd_boolean final_link = link_info != NULL && !link_info->relocatable;
 
   if (ibfd->xvec->flavour != bfd_target_elf_flavour
       || obfd->xvec->flavour != bfd_target_elf_flavour)
     return TRUE;
 
-  /* Don't copy the output ELF section type from input if the
-     output BFD section flags have been set to something different.
-     elf_fake_sections will set ELF section type based on BFD
-     section flags.  */
+  /* For objcopy and relocatable link, don't copy the output ELF
+     section type from input if the output BFD section flags have been
+     set to something different.  For a final link allow some flags
+     that the linker clears to differ.  */
   if (elf_section_type (osec) == SHT_NULL
-      && (osec->flags == isec->flags || !osec->flags))
+      && (osec->flags == isec->flags
+	  || (final_link
+	      && ((osec->flags ^ isec->flags)
+		  & ~ (SEC_LINK_ONCE | SEC_LINK_DUPLICATES)) == 0)))
     elf_section_type (osec) = elf_section_type (isec);
 
   /* FIXME: Is this correct for all OS/PROC specific flags?  */
@@ -6078,7 +6081,7 @@ _bfd_elf_init_private_section_data (bfd *ibfd,
      SHT_GROUP section will have its elf_next_in_group pointing back
      to the input group members.  Ignore linker created group section.
      See elfNN_ia64_object_p in elfxx-ia64.c.  */
-  if (need_group)
+  if (!final_link)
     {
       if (elf_sec_group (isec) == NULL
 	  || (elf_sec_group (isec)->flags & SEC_LINKER_CREATED) == 0)

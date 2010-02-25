@@ -1,3 +1,15 @@
+2010-02-25  Alan Modra  <amodra@gmail.com>
+
+	PR ld/11304
+	* ldlang.c (init_os): Remove isec param.  Don't check for
+	bfd_section already set or call bfd_init_private_section_data
+	here.
+	(exp_init_os): Update init_os call.
+	(lang_add_section): Tidy.  Really don't set SEC_LINK_ONCE
+	flags.  Call bfd_init_private_section_data here.
+	(map_input_to_output_sections): Tidy.  Update init_os calls.
+	Use os->sectype to select sec flags for lang_data_statement.
+
 2010-02-23  Alan Modra  <amodra@gmail.com>
 
 	PR ld/11304
