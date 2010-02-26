@@ -1,3 +1,8 @@
+2010-02-25  David S. Miller  <davem@davemloft.net>
+
+	* gdb.base/catch-syscall.exp: Allow to run on sparc*-*-linux and
+	fix logic for setting all_syscalls_numbers.
+
 2010-02-24  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* Makefile.in: Add py-block and py-symbol.

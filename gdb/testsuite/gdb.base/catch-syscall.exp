@@ -54,7 +54,8 @@ if {![istarget "hppa*-hp-hpux*"] && ![istarget "*-linux*"]} then {
 # on some architecture.
 #if { ![istarget "i\[34567\]86-*-linux*"]
 if { ![istarget "x86_64-*-linux*"] && ![istarget "i\[34567\]86-*-linux*"]
-     && ![istarget "powerpc-*-linux*"] && ![istarget "powerpc64-*-linux*"] } {
+     && ![istarget "powerpc-*-linux*"] && ![istarget "powerpc64-*-linux*"]
+     && ![istarget "sparc-*-linux*"] && ![istarget "sparc64-*-linux*"] } {
      continue
 }
 
@@ -415,10 +416,11 @@ proc do_syscall_tests_without_xml {} {
 proc fill_all_syscalls_numbers {} {
     global all_syscalls_numbers
 
-    # For Linux on x86, PPC and PPC64, the numbers for the syscalls "close" and
-    # "chroot" are the same.
-    if { ![istarget "i\[34567\]86-*-linux*"]
-         || ![istarget "powerpc-*-linux*"] || ![istarget "powerpc64-*-linux*"] } {
+    # For Linux on x86, PPC, PPC64, SPARC and SPARC64, the numbers for the syscalls
+    # "close" and "chroot" are the same.
+    if { [istarget "i\[34567\]86-*-linux*"]
+         || [istarget "powerpc-*-linux*"] || [istarget "powerpc64-*-linux*"]
+         || [istarget "sparc-*-linux*"] || [istarget "sparc64-*-linux*"] } {
          set all_syscalls_numbers { "6" "61" }
     }
 }
