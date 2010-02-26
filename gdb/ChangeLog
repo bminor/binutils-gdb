@@ -1,3 +1,7 @@
+2010-02-26  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-tdep.c (thumb_get_next_pc): Correct conditional branch opcode.
+
 2010-02-26  Pedro Alves  <pedro@codesourcery.com>
 
 	* NEWS: Add "New targets" section, and mention ARM Symbian

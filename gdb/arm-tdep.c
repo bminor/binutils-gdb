@@ -2503,7 +2503,7 @@ thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 	      nextpc = get_frame_register_unsigned (frame, ARM_LR_REGNUM);
 	      nextpc -= inst2 & 0x00ff;
 	    }
-	  else if ((inst2 & 0xd000) == 0xc000 && (inst1 & 0x0380) != 0x0380)
+	  else if ((inst2 & 0xd000) == 0x8000 && (inst1 & 0x0380) != 0x0380)
 	    {
 	      /* Conditional branch.  */
 	      if (condition_true (bits (inst1, 6, 9), status))
