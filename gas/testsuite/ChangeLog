@@ -1,3 +1,9 @@
+2010-02-26  Jie Zhang  <jie@codesourcery.com>
+
+	* gas/arm/neon-ldst-align-bad.d: New test.
+	* gas/arm/neon-ldst-align-bad.l: New test.
+	* gas/arm/neon-ldst-align-bad.s: New test.
+
 2010-02-25  Wu Zhangjin  <wuzhangjin@gmail.com>
 
 	* gas/mips/loongson-2f-2.s: New test of -mfix-loongson2f-nop.

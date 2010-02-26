@@ -14662,12 +14662,13 @@ do_neon_ld_st_interleave (void)
       {
       case 64: alignbits = 1; break;
       case 128:
-        if (NEON_REGLIST_LENGTH (inst.operands[0].imm) == 3)
+        if (NEON_REGLIST_LENGTH (inst.operands[0].imm) != 2
+	    && NEON_REGLIST_LENGTH (inst.operands[0].imm) != 4)
           goto bad_alignment;
         alignbits = 2;
         break;
       case 256:
-        if (NEON_REGLIST_LENGTH (inst.operands[0].imm) == 3)
+        if (NEON_REGLIST_LENGTH (inst.operands[0].imm) != 4)
           goto bad_alignment;
         alignbits = 3;
         break;
