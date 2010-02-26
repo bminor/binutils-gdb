@@ -434,7 +434,7 @@ typy_get_sizeof (PyObject *self, void *closure)
 }
 
 static struct type *
-typy_lookup_typename (char *type_name)
+typy_lookup_typename (char *type_name, struct block *block)
 {
   struct type *type = NULL;
   volatile struct gdb_exception except;
@@ -448,7 +448,7 @@ typy_lookup_typename (char *type_name)
 	type = lookup_enum (type_name + 5, NULL);
       else
 	type = lookup_typename (python_language, python_gdbarch,
-				type_name, NULL, 0);
+				type_name, block, 0);
     }
   if (except.reason < 0)
     {
@@ -462,7 +462,8 @@ typy_lookup_typename (char *type_name)
 }
 
 static struct type *
-typy_lookup_type (struct demangle_component *demangled)
+typy_lookup_type (struct demangle_component *demangled,
+		  struct block *block)
 {
   struct type *type;
   char *type_name;
@@ -477,7 +478,7 @@ typy_lookup_type (struct demangle_component *demangled)
       || demangled_type == DEMANGLE_COMPONENT_CONST
       || demangled_type == DEMANGLE_COMPONENT_VOLATILE)
     {
-      type = typy_lookup_type (demangled->u.s_binary.left);
+      type = typy_lookup_type (demangled->u.s_binary.left, block);
       if (! type)
 	return NULL;
 
@@ -495,7 +496,7 @@ typy_lookup_type (struct demangle_component *demangled)
     }
 
   type_name = cp_comp_to_string (demangled, 10);
-  type = typy_lookup_typename (type_name);
+  type = typy_lookup_typename (type_name, block);
   xfree (type_name);
 
   return type;
@@ -509,9 +510,22 @@ typy_template_argument (PyObject *self, PyObject *args)
   struct demangle_component *demangled;
   const char *err;
   struct type *argtype;
+  struct block *block = NULL;
+  PyObject *block_obj = NULL;
 
-  if (! PyArg_ParseTuple (args, "i", &argno))
+  if (! PyArg_ParseTuple (args, "i|O", &argno, &block_obj))
     return NULL;
+
+  if (block_obj)
+    {
+      block = block_object_to_block (block_obj);
+      if (! block)
+	{
+	  PyErr_SetString (PyExc_RuntimeError,
+			   _("Second argument must be block."));
+	  return NULL;
+	}
+    }
 
   type = check_typedef (type);
   if (TYPE_CODE (type) == TYPE_CODE_REF)
@@ -519,7 +533,7 @@ typy_template_argument (PyObject *self, PyObject *args)
 
   if (TYPE_NAME (type) == NULL)
     {
-      PyErr_SetString (PyExc_RuntimeError, "null type name");
+      PyErr_SetString (PyExc_RuntimeError, _("Null type name."));
       return NULL;
     }
 
@@ -538,7 +552,7 @@ typy_template_argument (PyObject *self, PyObject *args)
 
   if (demangled->type != DEMANGLE_COMPONENT_TEMPLATE)
     {
-      PyErr_SetString (PyExc_RuntimeError, "type is not a template");
+      PyErr_SetString (PyExc_RuntimeError, _("Type is not a template."));
       return NULL;
     }
 
@@ -550,12 +564,12 @@ typy_template_argument (PyObject *self, PyObject *args)
 
   if (! demangled)
     {
-      PyErr_Format (PyExc_RuntimeError, "no argument %d in template",
+      PyErr_Format (PyExc_RuntimeError, _("No argument %d in template."),
 		    argno);
       return NULL;
     }
 
-  argtype = typy_lookup_type (demangled->u.s_binary.left);
+  argtype = typy_lookup_type (demangled->u.s_binary.left, block);
   if (! argtype)
     return NULL;
 
@@ -696,14 +710,28 @@ type_object_to_type (PyObject *obj)
 PyObject *
 gdbpy_lookup_type (PyObject *self, PyObject *args, PyObject *kw)
 {
-  static char *keywords[] = { "name", NULL };
+  static char *keywords[] = { "name", "block", NULL };
   char *type_name = NULL;
   struct type *type = NULL;
+  PyObject *block_obj = NULL;
+  struct block *block = NULL;
 
-  if (! PyArg_ParseTupleAndKeywords (args, kw, "s", keywords, &type_name))
+  if (! PyArg_ParseTupleAndKeywords (args, kw, "s|O", keywords,
+				     &type_name, &block_obj))
     return NULL;
 
-  type = typy_lookup_typename (type_name);
+  if (block_obj)
+    {
+      block = block_object_to_block (block_obj);
+      if (! block)
+	{
+	  PyErr_SetString (PyExc_RuntimeError,
+			   _("'block' argument must be a Block."));
+	  return NULL;
+	}
+    }
+
+  type = typy_lookup_typename (type_name, block);
   if (! type)
     return NULL;
 
@@ -777,7 +805,7 @@ Return a type formed by stripping this type of all typedefs."},
     "target () -> Type\n\
 Return the target type of this type." },
   { "template_argument", typy_template_argument, METH_VARARGS,
-    "template_argument (arg) -> Type\n\
+    "template_argument (arg, [block]) -> Type\n\
 Return the type of a template argument." },
   { "unqualified", typy_unqualified, METH_NOARGS,
     "unqualified () -> Type\n\

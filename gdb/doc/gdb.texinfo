@@ -19869,6 +19869,9 @@ module:
 This function looks up a type by name.  @var{name} is the name of the
 type to look up.  It must be a string.
 
+If @var{block} is given, then @var{name} is looked up in that scope.
+Otherwise, it is searched for globally.
+
 Ordinarily, this function will return an instance of @code{gdb.Type}.
 If the named type cannot be found, it will throw an exception.
 @end defun
@@ -19991,7 +19994,7 @@ If the type does not have a target, this method will throw an
 exception.
 @end defmethod
 
-@defmethod Type template_argument n
+@defmethod Type template_argument n [block]
 If this @code{gdb.Type} is an instantiation of a template, this will
 return a new @code{gdb.Type} which represents the type of the
 @var{n}th template argument.
@@ -19999,7 +20002,8 @@ return a new @code{gdb.Type} which represents the type of the
 If this @code{gdb.Type} is not a template type, this will throw an
 exception.  Ordinarily, only C@t{++} code will have template types.
 
-@var{name} is searched for globally.
+If @var{block} is given, then @var{name} is looked up in that scope.
+Otherwise, it is searched for globally.
 @end defmethod
 @end table
 

@@ -1,3 +1,9 @@
+2010-02-26  Phil Muldoon  <pmuldoon@redhat.com>
+            Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Types In Python): Describe block argument in
+	template_argument and gdb.lookup_type.
+
 2010-02-24  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Cygwin Native): Fix typo.

@@ -1,3 +1,11 @@
+2010-02-26  Phil Muldoon  <pmuldoon@redhat.com>
+            Tom Tromey  <tromey@redhat.com>
+
+	* python/py-type.c (typy_lookup_typename): Add in block argument.
+	If provided restrict lookup to specified blocks.
+	(gdbpy_lookup_type): Likewise.
+	(typy_lookup_type): Likewise.
+
 2010-02-25  Daniel Jacobowitz  <dan@codesourcery.com>
  
 	Symbian config
