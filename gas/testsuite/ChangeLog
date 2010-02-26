@@ -1,5 +1,11 @@
 2010-02-26  Jie Zhang  <jie@codesourcery.com>
 
+	* gas/arm/thumb32.s, gas/arm/thumb32.d: Add a new test
+	for strexd.
+	* gas/arm/thumb32.l: Adjust.
+
+2010-02-26  Jie Zhang  <jie@codesourcery.com>
+
 	* gas/arm/neon-ldst-align-bad.d: New test.
 	* gas/arm/neon-ldst-align-bad.l: New test.
 	* gas/arm/neon-ldst-align-bad.s: New test.

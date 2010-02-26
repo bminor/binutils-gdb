@@ -11275,8 +11275,7 @@ do_t_strexd (void)
 
   constraint (inst.operands[0].reg == inst.operands[1].reg
 	      || inst.operands[0].reg == inst.operands[2].reg
-	      || inst.operands[0].reg == inst.operands[3].reg
-	      || inst.operands[1].reg == inst.operands[2].reg,
+	      || inst.operands[0].reg == inst.operands[3].reg,
 	      BAD_OVERLAP);
 
   inst.instruction |= inst.operands[0].reg;

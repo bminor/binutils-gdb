@@ -400,6 +400,7 @@ ldxstx:
 	strexh	r1, r2, [r4]
 	strex	r1, r2, [r4]
 	strexd	r1, r2, r3, [r4]
+	strexd	r1, r3, r3, [r4]
 
 	ldrex	r1, [r4,#516]
 	strex	r1, r2, [r4,#516]
