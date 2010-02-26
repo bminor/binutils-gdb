@@ -1,6 +1,7 @@
-#as:
+#as: -EB
 #objdump: -dr
-#name: dj2
+#source: dj2.s
+#name: dj2.be
 
 .*: +file format .*
 

@@ -1,3 +1,7 @@
+2010-02-26  Doug Evans  <dje@sebabeach.org>
+
+	* configure.tgt: Fix mep cpu case.
+
 2010-02-26  Jie Zhang  <jie@codesourcery.com>
 
 	* config/tc-arm.c (do_t_strexd): Remove

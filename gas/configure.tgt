@@ -54,7 +54,7 @@ case ${cpu} in
   m6811|m6812|m68hc12)	cpu_type=m68hc11 ;;
   m683??)		cpu_type=m68k ;;
   maxq)			cpu_type=maxq ;;
-  mep-*-elf)		cpu_type=mep endian=big ;;
+  mep)			cpu_type=mep endian=little ;;
   microblaze*)		cpu_type=microblaze ;;
   mips*el)		cpu_type=mips endian=little ;;
   mips*)		cpu_type=mips endian=big ;;

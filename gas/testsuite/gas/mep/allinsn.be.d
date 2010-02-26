@@ -1,6 +1,7 @@
-#as:
+#as: -EB
 #objdump: -dr
-#name: allinsn
+#source: allinsn.s
+#name: allinsn.be
 
 .*: +file format .*
 

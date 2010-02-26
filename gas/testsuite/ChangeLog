@@ -1,3 +1,12 @@
+2010-02-26  Doug Evans  <dje@sebabeach.org>
+
+	* gas/mep/allinsn.be.d: Renamed from allinsn.d.  Pass -EB.
+	* gas/mep/allinsn.exp: branch1 is now bi-endian.
+	* gas/mep/branch1.be.d: Renamed from branch1.d.  Pass -EB.
+	* gas/mep/branch1.le.d: New file.
+	* gas/mep/dj1.be.d: Renamed from dj1.d.  Pass -EB.
+	* gas/mep/dj2.be.d: Renamed from dj2.d.  Pass -EB.
+
 2010-02-26  Jie Zhang  <jie@codesourcery.com>
 
 	* gas/arm/thumb32.s, gas/arm/thumb32.d: Add a new test

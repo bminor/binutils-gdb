@@ -1,6 +1,7 @@
-#as:
+#as: -EB
 #objdump: -dr
-#name: dj1
+#source: dj1.s
+#name: dj1.be
 
 dump.o:     file format elf32-mep
 
