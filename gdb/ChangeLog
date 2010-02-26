@@ -1,3 +1,13 @@
+2010-02-26  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* dwarf2loc.c (struct piece_closure): Remove ARCH member,
+	add ADDR_SIZE member.
+	(allocate_piece_closure): Update.
+	(copy_pieced_value_closure): Likewise.
+	(dwarf2_evaluate_loc_desc): Likewise.
+	(read_pieced_value): Use DWARF address size instead of
+	GDB's gdbarch_addr_bit as size of values on the DWARF stack.
+
 2010-02-26  Phil Muldoon  <pmuldoon@redhat.com>
             Tom Tromey  <tromey@redhat.com>
 
