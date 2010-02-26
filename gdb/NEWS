@@ -8,6 +8,10 @@
 The GDB Python API now has access to symbols, symbol tables, and
 frame's code blocks.
 
+* New targets
+
+ARM Symbian			arm*-*-symbianelf*
+
 *** Changes in GDB 7.1
 
 * C++ Improvements
