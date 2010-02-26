@@ -63,7 +63,7 @@ responsibility among the other maintainers.
   ARM (Symbian)	   Mark Mitchell <mark@codesourcery.com>
   AVR		   Denis Chertykov <denisc@overta.ru>
   AVR		   Marek Michalkiewicz <marekm@amelek.gda.pl>
-  BFIN		   Jie Zhang <jie.zhang@analog.com>
+  BFIN		   Jie Zhang <jie@codesourcery.com>
   BFIN		   Bernd Schmidt <bernd.schmidt@analog.com>
   BUILD SYSTEM	   Daniel Jacobowitz <dan@debian.org>
   CR16		   M R Swami Reddy <MR.Swami.Reddy@nsc.com>
