@@ -3292,7 +3292,7 @@ mips_load (char *file, int from_tty)
          to a different value than GDB thinks it has. The following ensures
          that the regcache_write_pc() WILL update the PC value: */
       regcache_invalidate (regcache,
-			   gdbarch_pc_regnum (get_regcache_arch (regcache)));
+			   mips_regnum (get_regcache_arch (regcache))->pc);
     }
   if (exec_bfd)
     regcache_write_pc (regcache, bfd_get_start_address (exec_bfd));

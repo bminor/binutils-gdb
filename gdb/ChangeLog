@@ -1,3 +1,8 @@
+2010-02-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* remote-mips.c (mips_load): Don't use pseudo-register when
+	invalidating regcache.
+
 2010-02-26  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* arm-tdep.c (thumb_get_next_pc): Correct conditional branch opcode.
