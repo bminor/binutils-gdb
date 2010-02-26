@@ -11790,6 +11790,8 @@ neon_select_shape (enum neon_shape shape, ...)
             case SE_L:
               break;
             }
+	  if (!matches)
+	    break;
         }
       if (matches)
         break;

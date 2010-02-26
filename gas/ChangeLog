@@ -1,5 +1,11 @@
 2010-02-26  Jie Zhang  <jie@codesourcery.com>
 
+	* config/tc-arm.c (neon_select_shape): No need to match
+	the remaining operands in the shape when one operand does
+	not match.
+
+2010-02-26  Jie Zhang  <jie@codesourcery.com>
+
 	* config/tc-arm.c (do_neon_ld_st_interleave): Reject bad
 	alignment.
 
