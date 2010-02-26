@@ -1,3 +1,12 @@
+2010-02-26  Alan Modra  <amodra@gmail.com>
+
+	* scripttempl/elf.sc (.fini_array): Place input .fini_array after
+	.fini_array.*.
+	* scripttempl/armbpabi.sc: Likewise.
+	* scripttempl/elf32sh-symbian.sc: Likewise.
+	* scripttempl/elf64hppa.sc: Likewise.
+	* scripttempl/elfxtensa.sc: Likewise.
+
 2010-02-25  Alan Modra  <amodra@gmail.com>
 
 	PR ld/11304
