@@ -1,3 +1,8 @@
+2010-02-25  Doug Evans  <dje@sebabeach.org>
+
+	* cgen.c: Whitespace fixes.
+	(weak_operand_overflow_check): Formatting fix.
+
 2010-02-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (match_template): Update error messages.
