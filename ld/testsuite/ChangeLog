@@ -1,3 +1,7 @@
+2010-02-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/init-fini-arrays.d: Pass --wide to readelf.
+
 2010-02-27  Jie Zhang  <jie@codesourcery.com>
 
 	* ld-elf/init-fini-arrays.s: New test.
