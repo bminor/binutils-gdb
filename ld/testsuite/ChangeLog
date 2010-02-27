@@ -1,3 +1,8 @@
+2010-02-27  Jie Zhang  <jie@codesourcery.com>
+
+	* ld-elf/init-fini-arrays.s: New test.
+	* ld-elf/init-fini-arrays.d: New test.
+
 2010-02-24  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* ld-arm/group-relocs.s: Mark code sections as executable.

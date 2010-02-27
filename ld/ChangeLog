@@ -1,3 +1,12 @@
+2010-02-27  Jie Zhang  <jie@codesourcery.com>
+
+	* scripttempl/armbpabi.sc: Don't combine .init_array.* or
+	.fini_array.* when do relocatable linking.
+	* scripttempl/elf.sc: Likewise.
+	* scripttempl/elf32sh-symbian.sc: Likewise.
+	* scripttempl/elf64hppa.sc: Likewise.
+	* scripttempl/elfxtensa.sc: Likewise.
+
 2010-02-26  Alan Modra  <amodra@gmail.com>
 
 	* scripttempl/elf.sc (.fini_array): Place input .fini_array after
