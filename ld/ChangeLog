@@ -1,3 +1,8 @@
+2010-02-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/11330
+	* ld.texinfo: Replace explicitely with explicitly.
+
 2010-02-27  Jie Zhang  <jie@codesourcery.com>
 
 	* scripttempl/armbpabi.sc: Don't combine .init_array.* or

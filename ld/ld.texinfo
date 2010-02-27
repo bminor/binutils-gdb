@@ -1384,7 +1384,7 @@ the linker recursively marks as used any section referenced by their
 relocations.  See @samp{--entry} and @samp{--undefined}.
 
 This option can be set when doing a partial link (enabled with option
-@samp{-r}).  In this case the root of symbols kept must be explicitely 
+@samp{-r}).  In this case the root of symbols kept must be explicitly 
 specified either by an @samp{--entry} or @samp{--undefined} option or by
 a @code{ENTRY} command in the linker script.
 
