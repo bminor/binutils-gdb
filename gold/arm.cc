@@ -2444,6 +2444,8 @@ class Target_arm : public Sized_target<32, big_endian>
 	case elfcpp::R_ARM_THM_JUMP19:
 	case elfcpp::R_ARM_PLT32:
 	case elfcpp::R_ARM_THM_XPC22:
+	case elfcpp::R_ARM_PREL31:
+	case elfcpp::R_ARM_SBREL31:
 	  return false;
 
 	default:

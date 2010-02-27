@@ -1,5 +1,12 @@
 2010-02-26  Doug Kwan  <dougkwan@google.com>
 
+	* arm.cc (Target_arm::Relocate::reloc_is_non_pic): Treat
+	R_ARM_PREL31 and R_ARM_SBREL31 as position independent.
+	* testsuite/debug_msg.sh: Avoid matching source line number for
+	use of global variable undef_int.
+
+2010-02-26  Doug Kwan  <dougkwan@google.com>
+
 	* arm.cc (Target_arm::scan_reloc_for_stub): Move code handling
 	R_ARM_V4BX to Target_arm::scan_reloc_section_for_stubs.
 	(Target_arm::scan_reloc_section_for_stubs): Instead of calling

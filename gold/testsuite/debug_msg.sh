@@ -66,10 +66,10 @@ check debug_msg.err "debug_msg.o: in function Base::virtfn():.*/debug_msg.cc:50:
 check debug_msg.err "debug_msg.o: in function Derived::virtfn():.*/debug_msg.cc:55: error: undefined reference to 'undef_fn2()'"
 check debug_msg.err "debug_msg.o: in function int testfn<int>(int):.*/debug_msg.cc:43: error: undefined reference to 'undef_fn1()'"
 check debug_msg.err "debug_msg.o: in function int testfn<int>(int):.*/debug_msg.cc:44: error: undefined reference to 'undef_fn2()'"
-check debug_msg.err "debug_msg.o: in function int testfn<int>(int):.*/debug_msg.cc:45: error: undefined reference to 'undef_int'"
+check debug_msg.err "debug_msg.o: in function int testfn<int>(int):.*/debug_msg.cc:.*: error: undefined reference to 'undef_int'"
 check debug_msg.err "debug_msg.o: in function int testfn<double>(double):.*/debug_msg.cc:43: error: undefined reference to 'undef_fn1()'"
 check debug_msg.err "debug_msg.o: in function int testfn<double>(double):.*/debug_msg.cc:44: error: undefined reference to 'undef_fn2()'"
-check debug_msg.err "debug_msg.o: in function int testfn<double>(double):.*/debug_msg.cc:45: error: undefined reference to 'undef_int'"
+check debug_msg.err "debug_msg.o: in function int testfn<double>(double):.*/debug_msg.cc:.*: error: undefined reference to 'undef_int'"
 
 # Check we detected the ODR (One Definition Rule) violation.
 check debug_msg.err ": symbol 'Ordering::operator()(int, int)' defined in multiple places (possible ODR violation):"
