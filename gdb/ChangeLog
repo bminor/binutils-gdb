@@ -1,3 +1,11 @@
+2010-02-26  David Daney  <ddaney.caviumnetworks.com>
+
+	* mips-linux-tdep.c: Update struct sigframe comments.
+	(SIGFRAME_CODE_OFFSET): Delete macro.
+	(mips_linux_o32_sigframe_init): Calculate sigcontext_base using
+	this_frame's sp.
+	(mips_linux_n32n64_sigframe_init): Same.
+
 2010-02-26  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* arm-tdep.c (thumb_get_next_pc): Correct conditional branch opcode.
