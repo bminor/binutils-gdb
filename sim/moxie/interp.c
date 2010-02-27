@@ -1307,11 +1307,12 @@ sim_create_inferior (sd, prog_bfd, argv, env)
   set_initial_gprs ();
   issue_messages = l;
   
-  cpu.asregs.regs[PC_REGNO] = bfd_get_start_address (prog_bfd);
+  if (prog_bfd != NULL)
+    cpu.asregs.regs[PC_REGNO] = bfd_get_start_address (prog_bfd);
 
   /* Copy args into target memory.  */
   avp = argv;
-  for (argc = 0; *avp; avp++)
+  for (argc = 0; avp && *avp; avp++)
     argc++;
 
   /* Target memory looks like this:
