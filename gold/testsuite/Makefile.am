@@ -1529,4 +1529,31 @@ thumb2_bl_out_of_range.o: thumb_bl_in_range.s
 MOSTLYCLEANFILES += arm_bl_in_range arm_bl_out_of_range thumb_bl_in_range \
 	thumb_bl_out_of_range thumb2_bl_in_range thumb2_bl_out_of_range
 
+check_SCRIPTS += arm_fix_v4bx.sh
+check_DATA += arm_fix_v4bx.stdout arm_fix_v4bx_interworking.stdout \
+	arm_no_fix_v4bx.stdout
+
+arm_fix_v4bx.stdout: arm_fix_v4bx
+	$(TEST_OBJDUMP) -D -j.text $< > $@
+
+arm_fix_v4bx: arm_fix_v4bx.o
+	../ld-new --fix-v4bx -o $@ $<
+
+arm_fix_v4bx.o: arm_fix_v4bx.s
+	$(TEST_AS) -o $@ $<
+
+arm_fix_v4bx_interworking.stdout: arm_fix_v4bx_interworking
+	$(TEST_OBJDUMP) -D -j.text $< > $@
+
+arm_fix_v4bx_interworking: arm_fix_v4bx.o
+	../ld-new --fix-v4bx-interworking -o $@ $<
+
+arm_no_fix_v4bx.stdout: arm_no_fix_v4bx
+	$(TEST_OBJDUMP) -D -j.text $< > $@
+
+arm_no_fix_v4bx: arm_fix_v4bx.o
+	../ld-new -o $@ $<
+
+MOSTLYCLEANFILES += arm_fix_v4bx arm_fix_v4bx_interworking arm_no_fix_v4bx
+
 endif DEFAULT_TARGET_ARM

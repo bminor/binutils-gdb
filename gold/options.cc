@@ -830,7 +830,8 @@ General_options::General_options()
     implicit_incremental_(false),
     excluded_libs_(),
     symbols_to_retain_(),
-    section_starts_()
+    section_starts_(),
+    fix_v4bx_(FIX_V4BX_NONE)
 {
   // Turn off option registration once construction is complete.
   gold::options::ready_to_register = false;

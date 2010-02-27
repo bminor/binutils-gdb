@@ -323,20 +323,26 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @DEFAULT_TARGET_X86_64_TRUE@	split_x86_64_4 split_x86_64_r
 
 @DEFAULT_TARGET_ARM_TRUE@am__append_38 = arm_abs_global.sh \
-@DEFAULT_TARGET_ARM_TRUE@	arm_branch_in_range.sh
+@DEFAULT_TARGET_ARM_TRUE@	arm_branch_in_range.sh \
+@DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx.sh
 @DEFAULT_TARGET_ARM_TRUE@am__append_39 = arm_abs_global.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	arm_bl_in_range.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	arm_bl_out_of_range.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	thumb_bl_in_range.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	thumb_bl_out_of_range.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	thumb2_bl_in_range.stdout \
-@DEFAULT_TARGET_ARM_TRUE@	thumb2_bl_out_of_range.stdout
+@DEFAULT_TARGET_ARM_TRUE@	thumb2_bl_out_of_range.stdout \
+@DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx.stdout \
+@DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx_interworking.stdout \
+@DEFAULT_TARGET_ARM_TRUE@	arm_no_fix_v4bx.stdout
 @DEFAULT_TARGET_ARM_TRUE@am__append_40 = arm_abs_global \
 @DEFAULT_TARGET_ARM_TRUE@	arm_bl_in_range arm_bl_out_of_range \
 @DEFAULT_TARGET_ARM_TRUE@	thumb_bl_in_range \
 @DEFAULT_TARGET_ARM_TRUE@	thumb_bl_out_of_range \
 @DEFAULT_TARGET_ARM_TRUE@	thumb2_bl_in_range \
-@DEFAULT_TARGET_ARM_TRUE@	thumb2_bl_out_of_range
+@DEFAULT_TARGET_ARM_TRUE@	thumb2_bl_out_of_range arm_fix_v4bx \
+@DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx_interworking \
+@DEFAULT_TARGET_ARM_TRUE@	arm_no_fix_v4bx
 subdir = testsuite
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -3287,6 +3293,27 @@ uninstall-am:
 
 @DEFAULT_TARGET_ARM_TRUE@thumb2_bl_out_of_range.o: thumb_bl_in_range.s
 @DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ -march=armv7-a $<
+
+@DEFAULT_TARGET_ARM_TRUE@arm_fix_v4bx.stdout: arm_fix_v4bx
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@arm_fix_v4bx: arm_fix_v4bx.o
+@DEFAULT_TARGET_ARM_TRUE@	../ld-new --fix-v4bx -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@arm_fix_v4bx.o: arm_fix_v4bx.s
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@arm_fix_v4bx_interworking.stdout: arm_fix_v4bx_interworking
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@arm_fix_v4bx_interworking: arm_fix_v4bx.o
+@DEFAULT_TARGET_ARM_TRUE@	../ld-new --fix-v4bx-interworking -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@arm_no_fix_v4bx.stdout: arm_no_fix_v4bx
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D -j.text $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@arm_no_fix_v4bx: arm_fix_v4bx.o
+@DEFAULT_TARGET_ARM_TRUE@	../ld-new -o $@ $<
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

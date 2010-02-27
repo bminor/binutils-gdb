@@ -9880,30 +9880,6 @@ Target_arm<big_endian>::scan_reloc_for_stub(
   const Arm_relobj<big_endian>* arm_relobj =
     Arm_relobj<big_endian>::as_arm_relobj(relinfo->object);
 
-  if (r_type == elfcpp::R_ARM_V4BX)
-    {
-      const uint32_t reg = (addend & 0xf);
-      if (this->fix_v4bx() == General_options::FIX_V4BX_INTERWORKING
-	  && reg < 0xf)
-	{
-	  // Try looking up an existing stub from a stub table.
-	  Stub_table<big_endian>* stub_table =
-	    arm_relobj->stub_table(relinfo->data_shndx);
-	  gold_assert(stub_table != NULL);
-
-	  if (stub_table->find_arm_v4bx_stub(reg) == NULL)
-	    {
-	      // create a new stub and add it to stub table.
-	      Arm_v4bx_stub* stub =
-		this->stub_factory().make_arm_v4bx_stub(reg);
-	      gold_assert(stub != NULL);
-	      stub_table->add_arm_v4bx_stub(stub);
-	    }
-	}
-
-      return;
-    }
-
   bool target_is_thumb;
   Symbol_value<32> symval;
   if (gsym != NULL)
@@ -10094,15 +10070,36 @@ Target_arm<big_endian>::scan_reloc_section_for_stubs(
 	    continue;
 	}
 
+      // Create a v4bx stub if --fix-v4bx-interworking is used.
       if (r_type == elfcpp::R_ARM_V4BX)
 	{
-	  // Get the BX instruction.
-	  typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
-	  const Valtype* wv = reinterpret_cast<const Valtype*>(view + offset);
-	  elfcpp::Elf_types<32>::Elf_Swxword insn =
-	      elfcpp::Swap<32, big_endian>::readval(wv);
-	  this->scan_reloc_for_stub(relinfo, r_type, NULL, 0, NULL,
-				    insn, NULL);
+	  if (this->fix_v4bx() == General_options::FIX_V4BX_INTERWORKING)
+	    {
+	      // Get the BX instruction.
+	      typedef typename elfcpp::Swap<32, big_endian>::Valtype Valtype;
+	      const Valtype* wv =
+		reinterpret_cast<const Valtype*>(view + offset);
+	      elfcpp::Elf_types<32>::Elf_Swxword insn =
+		elfcpp::Swap<32, big_endian>::readval(wv);
+	      const uint32_t reg = (insn & 0xf);
+
+	      if (reg < 0xf)
+		{
+		  // Try looking up an existing stub from a stub table.
+		  Stub_table<big_endian>* stub_table =
+		    arm_object->stub_table(relinfo->data_shndx);
+		  gold_assert(stub_table != NULL);
+
+		  if (stub_table->find_arm_v4bx_stub(reg) == NULL)
+		    {
+		      // create a new stub and add it to stub table.
+		      Arm_v4bx_stub* stub =
+		        this->stub_factory().make_arm_v4bx_stub(reg);
+		      gold_assert(stub != NULL);
+		      stub_table->add_arm_v4bx_stub(stub);
+		    }
+		}
+	    }
 	  continue;
 	}
 
