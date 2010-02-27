@@ -797,7 +797,7 @@ static const struct tramp_frame mips_linux_n64_rt_sigframe = {
 
    struct sigframe {
      u32 sf_ass[4];            [argument save space for o32]
-     u32 sf_code[2];           [signal trampoline]
+     u32 sf_code[2];           [signal trampoline or fill]
      struct sigcontext sf_sc;
      sigset_t sf_mask;
    };
@@ -827,7 +827,7 @@ static const struct tramp_frame mips_linux_n64_rt_sigframe = {
 
    struct rt_sigframe {
      u32 rs_ass[4];            [argument save space for o32]
-     u32 rs_code[2]            [signal trampoline]
+     u32 rs_code[2]            [signal trampoline or fill]
      struct siginfo rs_info;
      struct ucontext rs_uc;
    };
@@ -842,7 +842,6 @@ static const struct tramp_frame mips_linux_n64_rt_sigframe = {
    };  */
 /* *INDENT-ON* */
 
-#define SIGFRAME_CODE_OFFSET         (4 * 4)
 #define SIGFRAME_SIGCONTEXT_OFFSET   (6 * 4)
 
 #define RTSIGFRAME_SIGINFO_SIZE      128
@@ -871,14 +870,15 @@ mips_linux_o32_sigframe_init (const struct tramp_frame *self,
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   int ireg, reg_position;
-  CORE_ADDR sigcontext_base = func - SIGFRAME_CODE_OFFSET;
+  CORE_ADDR frame_sp = get_frame_sp (this_frame);
+  CORE_ADDR sigcontext_base;
   const struct mips_regnum *regs = mips_regnum (gdbarch);
   CORE_ADDR regs_base;
 
   if (self == &mips_linux_o32_sigframe)
-    sigcontext_base += SIGFRAME_SIGCONTEXT_OFFSET;
+    sigcontext_base = frame_sp + SIGFRAME_SIGCONTEXT_OFFSET;
   else
-    sigcontext_base += RTSIGFRAME_SIGCONTEXT_OFFSET;
+    sigcontext_base = frame_sp + RTSIGFRAME_SIGCONTEXT_OFFSET;
 
   /* I'm not proud of this hack.  Eventually we will have the
      infrastructure to indicate the size of saved registers on a
@@ -947,9 +947,7 @@ mips_linux_o32_sigframe_init (const struct tramp_frame *self,
 			   sigcontext_base + SIGCONTEXT_BADVADDR);
 
   /* Choice of the bottom of the sigframe is somewhat arbitrary.  */
-  trad_frame_set_id (this_cache,
-		     frame_id_build (func - SIGFRAME_CODE_OFFSET,
-				     func));
+  trad_frame_set_id (this_cache, frame_id_build (frame_sp, func));
 }
 
 /* *INDENT-OFF* */
@@ -957,7 +955,7 @@ mips_linux_o32_sigframe_init (const struct tramp_frame *self,
 
   struct rt_sigframe_n32 {
     u32 rs_ass[4];                  [ argument save space for o32 ]
-    u32 rs_code[2];                 [ signal trampoline ]
+    u32 rs_code[2];                 [ signal trampoline or fill ]
     struct siginfo rs_info;
     struct ucontextn32 rs_uc;
   };
@@ -1038,13 +1036,14 @@ mips_linux_n32n64_sigframe_init (const struct tramp_frame *self,
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   int ireg, reg_position;
-  CORE_ADDR sigcontext_base = func - SIGFRAME_CODE_OFFSET;
+  CORE_ADDR frame_sp = get_frame_sp (this_frame);
+  CORE_ADDR sigcontext_base;
   const struct mips_regnum *regs = mips_regnum (gdbarch);
 
   if (self == &mips_linux_n32_rt_sigframe)
-    sigcontext_base += N32_SIGFRAME_SIGCONTEXT_OFFSET;
+    sigcontext_base = frame_sp + N32_SIGFRAME_SIGCONTEXT_OFFSET;
   else
-    sigcontext_base += N64_SIGFRAME_SIGCONTEXT_OFFSET;
+    sigcontext_base = frame_sp + N64_SIGFRAME_SIGCONTEXT_OFFSET;
 
   if (mips_linux_restart_reg_p (gdbarch))
     trad_frame_set_reg_addr (this_cache,
@@ -1082,9 +1081,7 @@ mips_linux_n32n64_sigframe_init (const struct tramp_frame *self,
 			   sigcontext_base + N64_SIGCONTEXT_LO);
 
   /* Choice of the bottom of the sigframe is somewhat arbitrary.  */
-  trad_frame_set_id (this_cache,
-		     frame_id_build (func - SIGFRAME_CODE_OFFSET,
-				     func));
+  trad_frame_set_id (this_cache, frame_id_build (frame_sp, func));
 }
 
 static void
