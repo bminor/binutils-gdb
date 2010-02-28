@@ -1,3 +1,8 @@
+2010-02-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/callfuncs.exp: New tests for $spval 0 and -1.  Remove return.
+
 2010-02-25  David S. Miller  <davem@davemloft.net>
 
 	* gdb.base/catch-syscall.exp: Allow to run on sparc*-*-linux and

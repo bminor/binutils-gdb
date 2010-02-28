@@ -469,5 +469,17 @@ if {$old_reg_content == $new_reg_content} then {
     fail "nested call dummies preserve register contents"
 }
 
-return 0
+# GDB should not crash by internal error on $sp underflow during the inferior
+# call.  It is OK it will stop on some: Cannot access memory at address 0x$hex.
 
+if {![target_info exists gdb,nosignals] && ![istarget "*-*-uclinux*"]} {
+    gdb_test {set $old_sp = $sp}
+
+    gdb_test {set $sp = 0}
+    gdb_test "call doubleit (1)" "" "sp == 0: call doubleit (1)"
+
+    gdb_test {set $sp = -1}
+    gdb_test "call doubleit (1)" "" "sp == -1: call doubleit (1)"
+
+    gdb_test {set $sp = $old_sp}
+}

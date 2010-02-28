@@ -518,10 +518,9 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	      /* Stack grows up.  */
 	      sp = gdbarch_frame_align (gdbarch, old_sp + 1);
 	  }
-	gdb_assert ((gdbarch_inner_than (gdbarch, 1, 2)
-		    && sp <= old_sp)
-		    || (gdbarch_inner_than (gdbarch, 2, 1)
-		       && sp >= old_sp));
+	/* SP may have underflown address zero here from OLD_SP.  Memory access
+	   functions will probably fail in such case but that is a target's
+	   problem.  */
       }
     else
       /* FIXME: cagney/2002-09-18: Hey, you loose!
