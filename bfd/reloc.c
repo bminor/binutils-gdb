@@ -1,6 +1,6 @@
 /* BFD support for handling relocation entries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -504,7 +504,7 @@ bfd_check_overflow (enum complain_overflow how,
      overflow check.  */
   fieldmask = N_ONES (bitsize);
   signmask = ~fieldmask;
-  addrmask = N_ONES (addrsize) | fieldmask;
+  addrmask = N_ONES (addrsize) | (fieldmask << rightshift);
   a = (relocation & addrmask) >> rightshift;;
 
   switch (how)
@@ -1434,9 +1434,11 @@ _bfd_relocate_contents (reloc_howto_type *howto,
          See also bfd_check_overflow.  */
       fieldmask = N_ONES (howto->bitsize);
       signmask = ~fieldmask;
-      addrmask = N_ONES (bfd_arch_bits_per_address (input_bfd)) | fieldmask;
+      addrmask = (N_ONES (bfd_arch_bits_per_address (input_bfd))
+		  | (fieldmask << rightshift));
       a = (relocation & addrmask) >> rightshift;
       b = (x & howto->src_mask & addrmask) >> bitpos;
+      addrmask >>= rightshift;
 
       switch (howto->complain_on_overflow)
 	{
@@ -1454,7 +1456,7 @@ _bfd_relocate_contents (reloc_howto_type *howto,
 	     field.  Note that when bfd_vma is 32 bits, a 32-bit reloc
 	     can't overflow, which is exactly what we want.  */
 	  ss = a & signmask;
-	  if (ss != 0 && ss != ((addrmask >> rightshift) & signmask))
+	  if (ss != 0 && ss != (addrmask & signmask))
 	    flag = bfd_reloc_overflow;
 
 	  /* We only need this next bit of code if the sign bit of B
@@ -2023,6 +2025,10 @@ ENUMX
   BFD_RELOC_SPU_PPU64
 ENUMX
   BFD_RELOC_SPU_ADD_PIC
+ENUMX
+  BFD_RELOC_SPU_PIC18
+ENUMX
+  BFD_RELOC_SPU_STUB
 ENUMDOC
   SPU Relocations.
 

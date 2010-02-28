@@ -424,7 +424,8 @@ elf64_sparc_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 {
   static const char *const stt_types[] = { "NOTYPE", "OBJECT", "FUNCTION" };
 
-  if (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
+  if ((abfd->flags & DYNAMIC) == 0
+      && ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
     elf_tdata (info->output_bfd)->has_ifunc_symbols = TRUE;
 
   if (ELF_ST_TYPE (sym->st_info) == STT_REGISTER)

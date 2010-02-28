@@ -1,3 +1,54 @@
+2010-02-25  Alan Modra  <amodra@gmail.com>
+
+	PR ld/11304
+	* elf.c (_bfd_elf_init_private_section_data): Rename need_group
+	to final_link and invert.  For final link allow some flags to
+	differ.  Don't specially allow flags to be all zero.
+
+2010-02-24  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/10858
+	* elfxx-mips.c (mips_elf_create_dynamic_relocation): Ise
+	SYMBOL_REFERENCES_LOCAL to exclude entries from the dynamic symbol
+	table.
+
+2010-02-23  Andrew Zabolotny  <anpaza@mail.ru>
+
+	PR binutils/11297
+	* elf32-avr.c (elf_avr_howto_table): Add R_AVR_8.
+	(avr_reloc_map): Map BFD_RELOC_8 to R_AVR_8.
+
+2010-02-22  Alan Modra  <amodra@gmail.com>
+
+	* reloc.c (bfd_check_overflow): When forming addrmask, shift
+	fieldmask left by rightshift.
+	(_bfd_relocate_contents): Likewise.  Use rightshift addrmask in all
+	overflow checks.
+
+2010-02-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf64_x86_64_add_symbol_hook): Don't check
+	STT_GNU_IFUNC on large common symbol.
+
+2010-02-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_add_symbol_hook): Don't set
+	has_ifunc_symbols if the symbol comes from a shared library.
+	* elf32-ppc.c (ppc_elf_add_symbol_hook): Likewise.
+	* elf32-sparc.c (elf32_sparc_add_symbol_hook): Likewise.
+	* elf64-ppc.c (ppc64_elf_add_symbol_hook): Likewise.
+	* elf64-sparc.c (elf64_sparc_add_symbol_hook): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_add_symbol_hook): Likewise.
+
+2010-02-19  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (_bfd_elf_fixup_group_sections): New function, split out from..
+	(_bfd_elf_copy_private_header_data): ..here.
+	* elflink.c (_bfd_elf_size_group_sections): New function.
+	(bfd_elf_size_dynamic_sections): Call it.
+	* elf-bfd.h (_bfd_elf_size_group_sections): Declare.
+	(_bfd_elf_fixup_group_sections): Declare.
+
 2010-02-18  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Add support for

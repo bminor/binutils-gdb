@@ -171,7 +171,7 @@ elf32_sparc_reloc_type_class (const Elf_Internal_Rela *rela)
    file.  */
 
 static bfd_boolean
-elf32_sparc_add_symbol_hook (bfd * abfd ATTRIBUTE_UNUSED,
+elf32_sparc_add_symbol_hook (bfd * abfd,
 			     struct bfd_link_info * info ATTRIBUTE_UNUSED,
 			     Elf_Internal_Sym * sym,
 			     const char ** namep ATTRIBUTE_UNUSED,
@@ -179,7 +179,8 @@ elf32_sparc_add_symbol_hook (bfd * abfd ATTRIBUTE_UNUSED,
 			     asection ** secp ATTRIBUTE_UNUSED,
 			     bfd_vma * valp ATTRIBUTE_UNUSED)
 {
-  if (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
+  if ((abfd->flags & DYNAMIC) == 0
+      && ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
     elf_tdata (info->output_bfd)->has_ifunc_symbols = TRUE;
   return TRUE;
 }

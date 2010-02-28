@@ -4557,7 +4557,7 @@ make_fdh (struct bfd_link_info *info,
    function type.  */
 
 static bfd_boolean
-ppc64_elf_add_symbol_hook (bfd *ibfd ATTRIBUTE_UNUSED,
+ppc64_elf_add_symbol_hook (bfd *ibfd,
 			   struct bfd_link_info *info,
 			   Elf_Internal_Sym *isym,
 			   const char **name ATTRIBUTE_UNUSED,
@@ -4566,7 +4566,10 @@ ppc64_elf_add_symbol_hook (bfd *ibfd ATTRIBUTE_UNUSED,
 			   bfd_vma *value ATTRIBUTE_UNUSED)
 {
   if (ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
-    elf_tdata (info->output_bfd)->has_ifunc_symbols = TRUE;
+    {
+      if ((ibfd->flags & DYNAMIC) == 0)
+	elf_tdata (info->output_bfd)->has_ifunc_symbols = TRUE;
+    }
   else if (ELF_ST_TYPE (isym->st_info) == STT_FUNC)
     ;
   else if (*sec != NULL
