@@ -1,3 +1,10 @@
+2010-02-28  Corinna Vinschen  <vinschen@redhat.com>
+
+	* Makefile.in (SUBDIR_MI_OBS): Move mi-common.o from here...
+	(COMMON_OBS): ... to here since it's used unconditionally.
+	(SUBDIR_MI_SRCS): Move mi/mi-common.c from here...
+	(SFILES): To here.
+
 2010-02-26  David Daney  <ddaney@caviumnetworks.com>
 
 	* mips-linux-tdep.c: Update struct sigframe comments.
