@@ -20799,9 +20799,13 @@ Return the frame's symtab and line object.
 @xref{Symbol Tables In Python}.
 @end defmethod
 
-@defmethod Frame read_var variable
-Return the value of the given variable in this frame.  @var{variable} must
-be a string.
+@defmethod Frame read_var variable @r{[}block@r{]}
+Return the value of @var{variable} in this frame.  If the optional
+argument @var{block} is provided, search for the variable from that
+block; otherwise start at the frame's current block (which is
+determined by the frame's current program counter).  @var{variable}
+must be a string or a @code{gdb.Symbol} object.  @var{block} must be a
+@code{gdb.Block} object.
 @end defmethod
 
 @defmethod Frame select

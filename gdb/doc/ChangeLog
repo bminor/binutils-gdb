@@ -1,3 +1,8 @@
+2010-02-28  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.texinfo (Frames In Python): Add block parameter and
+	description to read_var text.
+
 2010-02-26  Phil Muldoon  <pmuldoon@redhat.com>
             Tom Tromey  <tromey@redhat.com>
 

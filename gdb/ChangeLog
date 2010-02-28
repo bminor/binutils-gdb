@@ -1,3 +1,9 @@
+2010-02-28  Phil Muldoon  <pmuldoon@redhat.com>
+
+	PR python/11036
+	* python/py-frame.c (frapy_read_var): Add block argument and logic
+	to cope with user provided blocks.
+
 2010-02-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* infcall.c (call_function_by_hand): Remove gdb_assert on sp and old_sp.

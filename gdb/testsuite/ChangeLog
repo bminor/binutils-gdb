@@ -1,3 +1,8 @@
+2010-02-28  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.python/py-frame.exp: Add read_var block tests.
+	* gdb.python/py-frame.c (block): New function.
+
 2010-02-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 

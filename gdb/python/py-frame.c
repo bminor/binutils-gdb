@@ -380,20 +380,22 @@ frapy_find_sal (PyObject *self, PyObject *args)
   return sal_obj;
 }
 
-/* Implementation of gdb.Frame.read_var_value (self, variable) -> gdb.Value.
-   Returns the value of the given variable in this frame.  The argument must be
-   a string.  Returns None if GDB can't find the specified variable.  */
-
+/* Implementation of gdb.Frame.read_var_value (self, variable,
+   [block]) -> gdb.Value.  If the optional block argument is provided
+   start the search from that block, otherwise search from the frame's
+   current block (determined by examining the resume address of the
+   frame).  The variable argument must be a string or an instance of a
+   gdb.Symbol.  The block argument must be an instance of gdb.Block.  */
 static PyObject *
 frapy_read_var (PyObject *self, PyObject *args)
 {
   struct frame_info *frame;
-  PyObject *sym_obj;
+  PyObject *sym_obj, *block_obj = NULL;
   struct symbol *var = NULL;	/* gcc-4.3.2 false warning.  */
   struct value *val = NULL;
   volatile struct gdb_exception except;
 
-  if (!PyArg_ParseTuple (args, "O", &sym_obj))
+  if (!PyArg_ParseTuple (args, "O|O", &sym_obj, &block_obj))
     return NULL;
 
   if (PyObject_TypeCheck (sym_obj, &symbol_object_type))
@@ -410,11 +412,23 @@ frapy_read_var (PyObject *self, PyObject *args)
 	return NULL;
       cleanup = make_cleanup (xfree, var_name);
 
+      if (block_obj)
+	{
+	  block = block_object_to_block (block_obj);
+	  if (!block)
+	    {
+	      PyErr_SetString (PyExc_RuntimeError,
+			       _("Second argument must be block."));
+	      return NULL;
+	    }
+	}
+
       TRY_CATCH (except, RETURN_MASK_ALL)
 	{
 	  FRAPY_REQUIRE_VALID ((frame_object *) self, frame);
 
-	  block = block_for_pc (get_frame_address_in_block (frame));
+	  if (!block)
+	    block = block_for_pc (get_frame_address_in_block (frame));
 	  var = lookup_symbol (var_name, block, VAR_DOMAIN, NULL);
 	}
       GDB_PY_HANDLE_EXCEPTION (except);
@@ -445,10 +459,15 @@ frapy_read_var (PyObject *self, PyObject *args)
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 
-  if (val)
-    return value_to_value_object (val);
+  if (!val)
+    {
+      PyErr_Format (PyExc_ValueError,
+		    _("Variable cannot be found for symbol '%s'."),
+		    SYMBOL_NATURAL_NAME (var));
+      return NULL;
+    }
 
-  Py_RETURN_NONE;
+  return value_to_value_object (val);
 }
 
 /* Select this frame.  */
