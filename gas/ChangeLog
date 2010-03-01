@@ -1,3 +1,7 @@
+2010-03-01  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-score7.c (s7_frag_check): Add ATTRIBUTE_UNUSED.
+
 2010-02-08  Christophe Lyon  <christophe.lyon@st.com>
 
 	* config/tc-arm.c (md_pcrel_from_section): Keep base to zero for
