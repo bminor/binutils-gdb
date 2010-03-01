@@ -1,3 +1,31 @@
+2010-03-01  Corinna Vinschen  <vinschen@redhat.com>
+
+	* remote-fileio.c (remote_fileio_func_rename): Use Cygwin 1.7
+	cygwin_conv_path API rather than the deprecated
+	cygwin_conv_to_full_posix_path.
+	* windows-nat.c:
+	(GetModuleFileNameExA): Undefine for Cygwin.
+	(GetModuleFileNameExW): Define for Cygwin.
+	(get_module_name): Change size of pathbuf to PATH_MAX for Cygwin.
+	Call GetModuleFileNameExW and convert path to POSIX using
+	cygwin_conv_path.
+	(windows_make_so): Always define p.  Drop unused variable m.
+	Don't use Win32 functions to check file existance, rather use
+	access on Cygwin.  Fetch system directory using GetSystemDirectoryW.
+	Use canonicalize_file_name to get full path.
+	(get_image_name): Use wcstombs, rather than WideCharToMultiByte
+	to convert Unicode pathname to multibyte on Cygwin.  Otherwise,
+	use correct target buffer size in call to WideCharToMultiByte.
+	(handle_load_dll): Change size of dll_buf to PATH_MAX for Cygwin.
+	(windows_pid_to_exec_file): Change size of path to PATH_MAX for Cygwin.
+	(windows_create_inferior): Convert all paths and arguments to wchar_t
+	and use CreateProcessW on Cygwin.
+	(_initialize_windows_nat): Disable DOS-style path warning on Cygwin.
+	(bad_GetModuleFileNameExA): Undefine for Cygwin.
+	(bad_GetModuleFileNameExW): Define for Cygwin.
+	(_initialize_loadable): Load GetModuleFileNameExW into
+	dyn_GetModuleFileNameExW on Cygwin.  Don't load ANSI function on Cygwin.
+
 2010-02-28  Phil Muldoon  <pmuldoon@redhat.com>
 
 	PR python/11036

@@ -1021,12 +1021,14 @@ remote_fileio_func_rename (char *buf)
 		errno = EISDIR;
 	      else
 		{
-		  char oldfullpath[PATH_MAX + 1];
-		  char newfullpath[PATH_MAX + 1];
+		  char oldfullpath[PATH_MAX];
+		  char newfullpath[PATH_MAX];
 		  int len;
 
-		  cygwin_conv_to_full_posix_path (oldpath, oldfullpath);
-		  cygwin_conv_to_full_posix_path (newpath, newfullpath);
+		  cygwin_conv_path (CCP_WIN_A_TO_POSIX, oldpath, oldfullpath,
+				    PATH_MAX);
+		  cygwin_conv_path (CCP_WIN_A_TO_POSIX, newpath, newfullpath,
+				    PATH_MAX);
 		  len = strlen (oldfullpath);
 		  if (newfullpath[len] == '/'
 		      && !strncmp (oldfullpath, newfullpath, len))
