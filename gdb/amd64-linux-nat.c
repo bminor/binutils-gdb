@@ -674,6 +674,39 @@ amd64_linux_siginfo_fixup (struct siginfo *native, gdb_byte *inf, int direction)
     return 0;
 }
 
+/* Get Linux/x86 target description from running target.
+
+   Value of CS segment register:
+     1. 64bit process: 0x33.
+     2. 32bit process: 0x23.
+ */
+
+#define AMD64_LINUX_USER64_CS	0x33
+
+static const struct target_desc *
+amd64_linux_read_description (struct target_ops *ops)
+{
+  unsigned long cs;
+  int tid;
+
+  /* GNU/Linux LWP ID's are process ID's.  */
+  tid = TIDGET (inferior_ptid);
+  if (tid == 0)
+    tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
+
+  /* Get CS register.  */
+  errno = 0;
+  cs = ptrace (PTRACE_PEEKUSER, tid,
+	       offsetof (struct user_regs_struct, cs), 0);
+  if (errno != 0)
+    perror_with_name (_("Couldn't get CS register"));
+
+  if (cs == AMD64_LINUX_USER64_CS)
+    return tdesc_amd64_linux;
+  else
+    return tdesc_i386_linux;
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_amd64_linux_nat (void);
 
@@ -711,6 +744,8 @@ _initialize_amd64_linux_nat (void)
   /* Add our register access methods.  */
   t->to_fetch_registers = amd64_linux_fetch_inferior_registers;
   t->to_store_registers = amd64_linux_store_inferior_registers;
+
+  t->to_read_description = amd64_linux_read_description;
 
   /* Register the target.  */
   linux_nat_add_target (t);

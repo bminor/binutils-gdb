@@ -22,6 +22,18 @@
 # Default hostio_last_error implementation
 srv_hostio_err_objs="hostio-errno.o"
 
+srv_i386_regobj=i386.o
+srv_i386_linux_regobj=i386-linux.o
+srv_amd64_regobj=amd64.o
+srv_amd64_linux_regobj=amd64-linux.o
+
+srv_i386_32bit_xmlfiles="i386/32bit-core.xml i386/32bit-sse.xml"
+srv_i386_64bit_xmlfiles="i386/64bit-core.xml i386/64bit-sse.xml"
+srv_i386_xmlfiles="i386/i386.xml $srv_i386_32bit_xmlfiles"
+srv_amd64_xmlfiles="i386/amd64.xml $srv_i386_64bit_xmlfiles"
+srv_i386_linux_xmlfiles="i386/i386-linux.xml i386/32bit-linux.xml $srv_i386_32bit_xmlfiles"
+srv_amd64_linux_xmlfiles="i386/amd64-linux.xml i386/64bit-linux.xml $srv_i386_64bit_xmlfiles"
+
 # Input is taken from the "${target}" variable.
 
 case "${target}" in
@@ -60,12 +72,15 @@ case "${target}" in
 			srv_linux_usrregs=yes
 			srv_linux_thread_db=yes
 			;;
-  i[34567]86-*-cygwin*)	srv_regobj=reg-i386.o
+  i[34567]86-*-cygwin*)	srv_regobj="$srv_i386_regobj"
 			srv_tgtobj="i386-low.o win32-low.o win32-i386-low.o"
+			srv_xmlfiles="$srv_i386_xmlfiles"
 			;;
-  i[34567]86-*-linux*)	srv_regobj=reg-i386-linux.o
+  i[34567]86-*-linux*)	srv_regobj="$srv_i386_linux_regobj"
+			srv_xmlfiles="$srv_i386_linux_xmlfiles"
 			if test "$gdb_cv_i386_is_x86_64" = yes ; then
-			    srv_regobj="reg-x86-64-linux.o $srv_regobj"
+			    srv_regobj="$srv_regobj $srv_amd64_linux_regobj"
+			    srv_xmlfiles="${srv_xmlfiles} $srv_amd64_linux_xmlfiles"
 			fi
 			srv_tgtobj="linux-low.o linux-x86-low.o i386-low.o i387-fp.o"
 			srv_linux_usrregs=yes
@@ -73,20 +88,23 @@ case "${target}" in
 			srv_linux_thread_db=yes
 			;;
   i[34567]86-*-mingw32ce*)
-			srv_regobj=reg-i386.o
+			srv_regobj="$srv_i386_regobj"
 			srv_tgtobj="i386-low.o win32-low.o win32-i386-low.o"
 			srv_tgtobj="${srv_tgtobj} wincecompat.o"
+			srv_xmlfiles="$srv_i386_xmlfiles"
 			# hostio_last_error implementation is in win32-low.c
 			srv_hostio_err_objs=""
 			srv_mingw=yes
 			srv_mingwce=yes
 			;;
-  i[34567]86-*-mingw*)	srv_regobj=reg-i386.o
+  i[34567]86-*-mingw*)	srv_regobj="$srv_i386_regobj"
 			srv_tgtobj="i386-low.o win32-low.o win32-i386-low.o"
+			srv_xmlfiles="$srv_i386_xmlfiles"
 			srv_mingw=yes
 			;;
-  i[34567]86-*-nto*)	srv_regobj=reg-i386.o
+  i[34567]86-*-nto*)	srv_regobj="$srv_i386_regobj"
 			srv_tgtobj="nto-low.o nto-x86-low.o"
+			srv_xmlfiles="$srv_i386_xmlfiles"
 			srv_qnx="yes"
 			;;
   ia64-*-linux*)	srv_regobj=reg-ia64.o
@@ -206,8 +224,9 @@ case "${target}" in
   spu*-*-*)		srv_regobj=reg-spu.o
 			srv_tgtobj="spu-low.o"
 			;;
-  x86_64-*-linux*)	srv_regobj="reg-x86-64-linux.o reg-i386-linux.o"
+  x86_64-*-linux*)	srv_regobj="$srv_amd64_linux_regobj $srv_i386_linux_regobj"
 			srv_tgtobj="linux-low.o linux-x86-low.o i386-low.o i387-fp.o"
+			srv_xmlfiles="$srv_i386_linux_xmlfiles $srv_amd64_linux_xmlfiles"
 			srv_linux_usrregs=yes # This is for i386 progs.
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes

@@ -1,3 +1,8 @@
+2010-03-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gdb.xml/tdesc-regs.exp (architecture): New.  Set it for x86.
+	(load_description): Set architecture if defined.
+
 2010-02-28  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.python/py-frame.exp: Add read_var block tests.

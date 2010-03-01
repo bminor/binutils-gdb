@@ -1,5 +1,6 @@
+# DO NOT EDIT: generated from i386/i386.xml
 name:i386
-xmlarch:i386
+xmltarget:i386.xml
 expedite:ebp,esp,eip
 32:eax
 32:ecx

@@ -853,6 +853,14 @@ i386_linux_child_post_startup_inferior (ptid_t ptid)
   super_post_startup_inferior (ptid);
 }
 
+/* Get Linux/x86 target description from running target.  */
+
+static const struct target_desc *
+i386_linux_read_description (struct target_ops *ops)
+{
+  return tdesc_i386_linux;
+}
+
 void
 _initialize_i386_linux_nat (void)
 {
@@ -880,6 +888,8 @@ _initialize_i386_linux_nat (void)
   /* Add our register access methods.  */
   t->to_fetch_registers = i386_linux_fetch_inferior_registers;
   t->to_store_registers = i386_linux_store_inferior_registers;
+
+  t->to_read_description = i386_linux_read_description;
 
   /* Register the target.  */
   linux_nat_add_target (t);

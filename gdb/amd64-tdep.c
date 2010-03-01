@@ -42,6 +42,8 @@
 #include "amd64-tdep.h"
 #include "i387-tdep.h"
 
+#include "features/i386/amd64.c"
+
 /* Note that the AMD64 architecture was previously known as x86-64.
    The latter is (forever) engraved into the canonical system name as
    returned by config.guess, and used as the name for the AMD64 port
@@ -82,47 +84,6 @@ static int amd64_dummy_call_integer_regs[] =
   8,				/* %r8 */
   9				/* %r9 */
 };
-
-/* Return the name of register REGNUM.  */
-
-const char *
-amd64_register_name (struct gdbarch *gdbarch, int regnum)
-{
-  if (regnum >= 0 && regnum < AMD64_NUM_REGS)
-    return amd64_register_names[regnum];
-
-  return NULL;
-}
-
-/* Return the GDB type object for the "standard" data type of data in
-   register REGNUM. */
-
-struct type *
-amd64_register_type (struct gdbarch *gdbarch, int regnum)
-{
-  if (regnum >= AMD64_RAX_REGNUM && regnum <= AMD64_RDI_REGNUM)
-    return builtin_type (gdbarch)->builtin_int64;
-  if (regnum == AMD64_RBP_REGNUM || regnum == AMD64_RSP_REGNUM)
-    return builtin_type (gdbarch)->builtin_data_ptr;
-  if (regnum >= AMD64_R8_REGNUM && regnum <= AMD64_R15_REGNUM)
-    return builtin_type (gdbarch)->builtin_int64;
-  if (regnum == AMD64_RIP_REGNUM)
-    return builtin_type (gdbarch)->builtin_func_ptr;
-  if (regnum == AMD64_EFLAGS_REGNUM)
-    return i386_eflags_type (gdbarch);
-  if (regnum >= AMD64_CS_REGNUM && regnum <= AMD64_GS_REGNUM)
-    return builtin_type (gdbarch)->builtin_int32;
-  if (regnum >= AMD64_ST0_REGNUM && regnum <= AMD64_ST0_REGNUM + 7)
-    return i387_ext_type (gdbarch);
-  if (regnum >= AMD64_FCTRL_REGNUM && regnum <= AMD64_FCTRL_REGNUM + 7)
-    return builtin_type (gdbarch)->builtin_int32;
-  if (regnum >= AMD64_XMM0_REGNUM && regnum <= AMD64_XMM0_REGNUM + 15)
-    return i386_sse_type (gdbarch);
-  if (regnum == AMD64_MXCSR_REGNUM)
-    return i386_mxcsr_type (gdbarch);
-
-  internal_error (__FILE__, __LINE__, _("invalid regnum"));
-}
 
 /* DWARF Register Number Mapping as defined in the System V psABI,
    section 3.6.  */
@@ -2153,10 +2114,18 @@ void
 amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  const struct target_desc *tdesc = info.target_desc;
 
   /* AMD64 generally uses `fxsave' instead of `fsave' for saving its
      floating-point registers.  */
   tdep->sizeof_fpregset = I387_SIZEOF_FXSAVE;
+
+  if (! tdesc_has_registers (tdesc))
+    tdesc = tdesc_amd64;
+  tdep->tdesc = tdesc;
+
+  tdep->num_core_regs = AMD64_NUM_GREGS + I387_NUM_REGS;
+  tdep->register_names = amd64_register_names;
 
   /* AMD64 has an FPU and 16 SSE registers.  */
   tdep->st0_regnum = AMD64_ST0_REGNUM;
@@ -2173,8 +2142,6 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_long_double_bit (gdbarch, 128);
 
   set_gdbarch_num_regs (gdbarch, AMD64_NUM_REGS);
-  set_gdbarch_register_name (gdbarch, amd64_register_name);
-  set_gdbarch_register_type (gdbarch, amd64_register_type);
 
   /* Register numbers of various important registers.  */
   set_gdbarch_sp_regnum (gdbarch, AMD64_RSP_REGNUM); /* %rsp */
@@ -2235,6 +2202,15 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 					  amd64_regset_from_core_section);
 
   set_gdbarch_get_longjmp_target (gdbarch, amd64_get_longjmp_target);
+}
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+void _initialize_amd64_tdep (void);
+
+void
+_initialize_amd64_tdep (void)
+{
+  initialize_tdesc_amd64 ();
 }
 
 

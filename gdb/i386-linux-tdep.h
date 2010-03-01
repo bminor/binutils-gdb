@@ -35,4 +35,7 @@
 /* Total number of registers for GNU/Linux.  */
 #define I386_LINUX_NUM_REGS (I386_LINUX_ORIG_EAX_REGNUM + 1)
 
+/* Linux target description.  */
+extern struct target_desc *tdesc_i386_linux;
+
 #endif /* i386-linux-tdep.h */

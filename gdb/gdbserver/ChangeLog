@@ -1,3 +1,50 @@
+2010-03-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in (clean): Replace reg-i386.c, reg-x86-64.c,
+	reg-i386-linux.c and reg-x86-64-linux.c with i386.c, amd64.c,
+	i386-linux.c and amd64-linux.c.
+	(reg-i386.o): Removed.
+	(reg-i386.c): Likewise.
+	(reg-i386-linux.o): Likewise.
+	(reg-i386-linux.c): Likewise.
+	(reg-x86-64.o): Likewise.
+	(reg-x86-64.c): Likewise.
+	(reg-x86-64-linux.o): Likewise.
+	(reg-x86-64-linux.c): Likewise.
+	(i386.o): New.
+	(i386.c): Likewise.
+	(i386-linux.o): Likewise.
+	(i386-linux.c): Likewise.
+	(amd64.o): Likewise.
+	(amd64.c): Likewise.
+	(amd64-linux.o): Likewise.
+	(amd64-linux.c): Likewise.
+
+	* configure.srv (srv_i386_regobj): New.
+	(srv_i386_linux_regobj): Likewise.
+	(srv_amd64_regobj): Likewise.
+	(srv_amd64_linux_regobj): Likewise.
+	(srv_i386_32bit_xmlfiles): Likewise.
+	(srv_i386_64bit_xmlfiles): Likewise.
+	(srv_i386_xmlfiles): Likewise.
+	(srv_amd64_xmlfiles): Likewise.
+	(srv_i386_linux_xmlfiles): Likewise.
+	(srv_amd64_linux_xmlfiles): Likewise.
+	(i[34567]86-*-cygwin*): Set srv_regobj to $srv_i386_regobj.  Set
+	srv_xmlfiles to $srv_i386_xmlfiles.
+	(i[34567]86-*-mingw32ce*): Likewise.
+	(i[34567]86-*-mingw*): Likewise.
+	(i[34567]86-*-nto*): Likewise.
+	(i[34567]86-*-linux*): Set srv_regobj to $srv_i386_linux_regobj
+	and $srv_amd64_linux_regobj.  Set srv_xmlfiles to
+	$srv_i386_linux_xmlfiles and $srv_amd64_linux_xmlfiles.
+	(x86_64-*-linux*): Likewise.
+
+	* linux-x86-low.c (init_registers_x86_64_linux): Removed.
+	(init_registers_amd64_linux): New.
+	(x86_arch_setup): Replace init_registers_x86_64_linux with
+	init_registers_amd64_linux.
+
 2010-02-23  Maxim Kuvyrkov  <maxim@codesourcery.com>
 
 	* configure.ac: Check for libdl.  If it is not available link against

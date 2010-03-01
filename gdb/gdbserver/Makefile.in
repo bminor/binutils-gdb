@@ -203,9 +203,9 @@ clean:
 	rm -f *.o ${ADD_FILES} *~
 	rm -f version.c
 	rm -f gdbserver$(EXEEXT) gdbreplay$(EXEEXT) core make.log
-	rm -f reg-arm.c reg-i386.c reg-ia64.c reg-m32r.c reg-m68k.c
-	rm -f reg-sh.c reg-sparc.c reg-spu.c reg-x86-64.c reg-i386-linux.c
-	rm -f reg-cris.c reg-crisv32.c reg-x86-64-linux.c reg-xtensa.c
+	rm -f reg-arm.c i386.c reg-ia64.c reg-m32r.c reg-m68k.c
+	rm -f reg-sh.c reg-sparc.c reg-spu.c amd64.c i386-linux.c
+	rm -f reg-cris.c reg-crisv32.c amd64-linux.c reg-xtensa.c
 	rm -f arm-with-iwmmxt.c
 	rm -f arm-with-vfpv2.c arm-with-vfpv3.c arm-with-neon.c
 	rm -f mips-linux.c mips64-linux.c
@@ -345,12 +345,12 @@ reg-cris.c : $(srcdir)/../regformats/reg-cris.dat $(regdat_sh)
 reg-crisv32.o : reg-crisv32.c $(regdef_h)
 reg-crisv32.c : $(srcdir)/../regformats/reg-crisv32.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-crisv32.dat reg-crisv32.c
-reg-i386.o : reg-i386.c $(regdef_h)
-reg-i386.c : $(srcdir)/../regformats/reg-i386.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-i386.dat reg-i386.c
-reg-i386-linux.o : reg-i386-linux.c $(regdef_h)
-reg-i386-linux.c : $(srcdir)/../regformats/reg-i386-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-i386-linux.dat reg-i386-linux.c
+i386.o : i386.c $(regdef_h)
+i386.c : $(srcdir)/../regformats/i386/i386.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386.dat i386.c
+i386-linux.o : i386-linux.c $(regdef_h)
+i386-linux.c : $(srcdir)/../regformats/i386/i386-linux.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/i386-linux.dat i386-linux.c
 reg-ia64.o : reg-ia64.c $(regdef_h)
 reg-ia64.c : $(srcdir)/../regformats/reg-ia64.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-ia64.dat reg-ia64.c
@@ -432,12 +432,12 @@ reg-sparc64.c : $(srcdir)/../regformats/reg-sparc64.dat $(regdat_sh)
 reg-spu.o : reg-spu.c $(regdef_h)
 reg-spu.c : $(srcdir)/../regformats/reg-spu.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-spu.dat reg-spu.c
-reg-x86-64.o : reg-x86-64.c $(regdef_h)
-reg-x86-64.c : $(srcdir)/../regformats/reg-x86-64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-x86-64.dat reg-x86-64.c
-reg-x86-64-linux.o : reg-x86-64-linux.c $(regdef_h)
-reg-x86-64-linux.c : $(srcdir)/../regformats/reg-x86-64-linux.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-x86-64-linux.dat reg-x86-64-linux.c
+amd64.o : amd64.c $(regdef_h)
+amd64.c : $(srcdir)/../regformats/i386/amd64.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64.dat amd64.c
+amd64-linux.o : amd64-linux.c $(regdef_h)
+amd64-linux.c : $(srcdir)/../regformats/i386/amd64-linux.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/i386/amd64-linux.dat amd64-linux.c
 reg-xtensa.o : reg-xtensa.c $(regdef_h)
 reg-xtensa.c : $(srcdir)/../regformats/reg-xtensa.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-xtensa.dat reg-xtensa.c

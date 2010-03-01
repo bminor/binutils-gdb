@@ -122,7 +122,7 @@ i386nto_regset_id (int regno)
     return NTO_REG_END;
   else if (regno < I386_NUM_GREGS)
     return NTO_REG_GENERAL;
-  else if (regno < I386_NUM_GREGS + I386_NUM_FREGS)
+  else if (regno < I386_NUM_GREGS + I387_NUM_REGS)
     return NTO_REG_FLOAT;
   else if (regno < I386_SSE_NUM_REGS)
     return NTO_REG_FLOAT; /* We store xmm registers in fxsave_area.  */

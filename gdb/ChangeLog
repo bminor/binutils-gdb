@@ -1,3 +1,98 @@
+2010-03-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* amd64-linux-nat.c (AMD64_LINUX_USER64_CS): New.
+	(amd64_linux_read_description): Likewise.
+	(_initialize_amd64_linux_nat): Set to_read_description to
+	amd64_linux_read_description.
+
+	* amd64-linux-tdep.c: Include "features/i386/amd64-linux.c".
+	(amd64_linux_register_name): Removed.
+	(amd64_linux_register_type): Likewise.
+	(amd64_linux_core_read_description): New.
+	(amd64_linux_init_abi): Set target description to
+	tdesc_amd64_linux if needed.  Support orig_rax in target
+	description.  Don't call set_gdbarch_register_name nor
+	set_gdbarch_register_type.  Call
+	set_gdbarch_core_read_description.
+	(_initialize_amd64_linux_tdep): Call
+	initialize_tdesc_amd64_linux.
+
+	* amd64-linux-tdep.h (tdesc_amd64_linux): New.
+
+	* amd64-tdep.c:  Include "features/i386/amd64.c".
+	(amd64_register_names): Removed.
+	(amd64_register_name): Likewise.
+	(amd64_register_type): Likewise.
+	(amd64_init_abi):  Set num_core_regs and register_names.  Set
+	target description to tdesc_amd64 if needed.  Don't call 
+	set_gdbarch_register_name nor set_gdbarch_register_type.
+	(_initialize_amd64_tdep): New.
+
+	* i386-linux-nat.c (i386_linux_read_description): New.
+	(_initialize_i386_linux_nat): Set to_read_description to
+	i386_linux_read_description.
+
+	* i386-linux-tdep.c: Include "features/i386/i386-linux.c".
+	(i386_linux_register_name): Removed.
+	(i386_linux_core_read_description): New.
+	(i386_linux_read_description): Likewise.
+	(i386_linux_init_abi): Don't call set_gdbarch_register_name.
+	Set target description to tdesc_i386_linux if needed.  Support
+	orig_eax.  Set register_reggroup_p.  Call
+	set_gdbarch_core_read_description.
+	(_initialize_i386_linux_tdep): Call initialize_tdesc_i386_linux.
+
+	* i386-linux-tdep.h (tdesc_i386_linux): New.
+
+	* i386-nto-tdep.c (i386nto_regset_id): Replace I386_NUM_FREGS
+	with I387_NUM_REGS.
+
+	* i386-tdep.c: Include "features/i386/i386.c".
+	(i386_register_names): Make it const.
+	(i386_mmx_names): Likewise.
+	(i386_num_register_names): Removed.
+	(i386_register_name): Likewise.
+	(i386_eflags_type): Likewise.
+	(i386_mxcsr_type): Likewise.
+	(i386_sse_type): Likewise.
+	(i386_register_type): Likewise.
+	(i387_ext_type): Call tdesc_find_type instead of arch_float_type.
+	(i386_pseudo_register_name): New.
+	(i386_pseudo_register_type): Likewise.
+	(i386_mmx_type): Make it static.
+	(i386_gdbarch_init): Check arch.  Replace I386_NUM_FREGS with
+	I387_NUM_REGS.  Set num_core_regs and register_names.  Don't
+	call set_gdbarch_register_name nor set_gdbarch_register_type.
+	Set register_reggroup_p.  Set target description to tdesc_i386
+	if needed.  Call set_tdesc_pseudo_register_type,
+	set_tdesc_pseudo_register_name and tdesc_use_registers.
+	(_initialize_i386_tdep): Call initialize_tdesc_i386.
+	initialize_tdesc_x86_64.
+
+	* i386-tdep.h (gdbarch_tdep): Remove i386_eflags_type,
+	i386_mxcsr_type and i386_sse_type.  Add num_core_regs,
+	register_names, tdesc and register_reggroup_p.
+	(I386_NUM_FREGS): Removed.
+	(i386_eflags_type): Likewise.
+	(i386_mxcsr_type): Likewise.
+	(i386_mmx_type): Likewise.
+	(i386_sse_type): Likewise.
+	(i386_register_name): Likewise.
+	(i386_regnum): Add I386_MXCSR_REGNUM.
+	(I386_SSE_NUM_REGS): Defined with I386_MXCSR_REGNUM.
+
+	* i387-tdep.h (I387_NUM_REGS): New.
+
+	* regformats/i386/i386-linux.dat: Generated.
+	* regformats/i386/i386.dat: Likewise.
+	* regformats/i386/amd64-linux.dat: Likewise.
+	* regformats/i386/amd64.dat: Likewise.
+
+	* regformats/reg-i386-linux.dat: Removed.
+	* regformats/reg-i386.dat: Likewise.
+	* regformats/reg-x86-64-linux.dat: Likewise.
+	* regformats/reg-x86-64.dat: Likewise.
+
 2010-03-01  Corinna Vinschen  <vinschen@redhat.com>
 
 	* remote-fileio.c (remote_fileio_func_rename): Use Cygwin 1.7

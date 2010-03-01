@@ -54,9 +54,11 @@
 #include "record.h"
 #include <stdint.h>
 
+#include "features/i386/i386.c"
+
 /* Register names.  */
 
-static char *i386_register_names[] =
+static const char *i386_register_names[] =
 {
   "eax",   "ecx",    "edx",   "ebx",
   "esp",   "ebp",    "esi",   "edi",
@@ -71,11 +73,9 @@ static char *i386_register_names[] =
   "mxcsr"
 };
 
-static const int i386_num_register_names = ARRAY_SIZE (i386_register_names);
-
 /* Register names for MMX pseudo-registers.  */
 
-static char *i386_mmx_names[] =
+static const char *i386_mmx_names[] =
 {
   "mm0", "mm1", "mm2", "mm3",
   "mm4", "mm5", "mm6", "mm7"
@@ -147,16 +147,11 @@ i386_fpc_regnum_p (struct gdbarch *gdbarch, int regnum)
 
 /* Return the name of register REGNUM.  */
 
-const char *
-i386_register_name (struct gdbarch *gdbarch, int regnum)
+static const char *
+i386_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
 {
-  if (i386_mmx_regnum_p (gdbarch, regnum))
-    return i386_mmx_names[regnum - I387_MM0_REGNUM (gdbarch_tdep (gdbarch))];
-
-  if (regnum >= 0 && regnum < i386_num_register_names)
-    return i386_register_names[regnum];
-
-  return NULL;
+  gdb_assert (i386_mmx_regnum_p (gdbarch, regnum));
+  return i386_mmx_names[regnum - I387_MM0_REGNUM (gdbarch_tdep (gdbarch))];
 }
 
 /* Convert a dbx register number REG to the appropriate register
@@ -2112,87 +2107,22 @@ i386_return_value (struct gdbarch *gdbarch, struct type *func_type,
 }
 
 
-/* Construct types for ISA-specific registers.  */
-struct type *
-i386_eflags_type (struct gdbarch *gdbarch)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  if (!tdep->i386_eflags_type)
-    {
-      struct type *type;
-
-      type = arch_flags_type (gdbarch, "builtin_type_i386_eflags", 4);
-      append_flags_type_flag (type, 0, "CF");
-      append_flags_type_flag (type, 1, NULL);
-      append_flags_type_flag (type, 2, "PF");
-      append_flags_type_flag (type, 4, "AF");
-      append_flags_type_flag (type, 6, "ZF");
-      append_flags_type_flag (type, 7, "SF");
-      append_flags_type_flag (type, 8, "TF");
-      append_flags_type_flag (type, 9, "IF");
-      append_flags_type_flag (type, 10, "DF");
-      append_flags_type_flag (type, 11, "OF");
-      append_flags_type_flag (type, 14, "NT");
-      append_flags_type_flag (type, 16, "RF");
-      append_flags_type_flag (type, 17, "VM");
-      append_flags_type_flag (type, 18, "AC");
-      append_flags_type_flag (type, 19, "VIF");
-      append_flags_type_flag (type, 20, "VIP");
-      append_flags_type_flag (type, 21, "ID");
-
-      tdep->i386_eflags_type = type;
-    }
-
-  return tdep->i386_eflags_type;
-}
-
-struct type *
-i386_mxcsr_type (struct gdbarch *gdbarch)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  if (!tdep->i386_mxcsr_type)
-    {
-      struct type *type;
-
-      type = arch_flags_type (gdbarch, "builtin_type_i386_mxcsr", 4);
-      append_flags_type_flag (type, 0, "IE");
-      append_flags_type_flag (type, 1, "DE");
-      append_flags_type_flag (type, 2, "ZE");
-      append_flags_type_flag (type, 3, "OE");
-      append_flags_type_flag (type, 4, "UE");
-      append_flags_type_flag (type, 5, "PE");
-      append_flags_type_flag (type, 6, "DAZ");
-      append_flags_type_flag (type, 7, "IM");
-      append_flags_type_flag (type, 8, "DM");
-      append_flags_type_flag (type, 9, "ZM");
-      append_flags_type_flag (type, 10, "OM");
-      append_flags_type_flag (type, 11, "UM");
-      append_flags_type_flag (type, 12, "PM");
-      append_flags_type_flag (type, 15, "FZ");
-
-      tdep->i386_mxcsr_type = type;
-    }
-
-  return tdep->i386_mxcsr_type;
-}
-
 struct type *
 i387_ext_type (struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (!tdep->i387_ext_type)
-    tdep->i387_ext_type
-      = arch_float_type (gdbarch, -1, "builtin_type_i387_ext",
-			 floatformats_i387_ext);
+    {
+      tdep->i387_ext_type = tdesc_find_type (gdbarch, "i387_ext");
+      gdb_assert (tdep->i387_ext_type != NULL);
+    }
 
   return tdep->i387_ext_type;
 }
 
 /* Construct vector type for MMX registers.  */
-struct type *
+static struct type *
 i386_mmx_type (struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -2233,84 +2163,14 @@ i386_mmx_type (struct gdbarch *gdbarch)
   return tdep->i386_mmx_type;
 }
 
-struct type *
-i386_sse_type (struct gdbarch *gdbarch)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  if (!tdep->i386_sse_type)
-    {
-      const struct builtin_type *bt = builtin_type (gdbarch);
-
-      /* The type we're building is this: */
-#if 0
-      union __gdb_builtin_type_vec128i
-      {
-        int128_t uint128;
-        int64_t v2_int64[2];
-        int32_t v4_int32[4];
-        int16_t v8_int16[8];
-        int8_t v16_int8[16];
-        double v2_double[2];
-        float v4_float[4];
-      };
-#endif
-
-      struct type *t;
-
-      t = arch_composite_type (gdbarch,
-			       "__gdb_builtin_type_vec128i", TYPE_CODE_UNION);
-      append_composite_type_field (t, "v4_float",
-				   init_vector_type (bt->builtin_float, 4));
-      append_composite_type_field (t, "v2_double",
-				   init_vector_type (bt->builtin_double, 2));
-      append_composite_type_field (t, "v16_int8",
-				   init_vector_type (bt->builtin_int8, 16));
-      append_composite_type_field (t, "v8_int16",
-				   init_vector_type (bt->builtin_int16, 8));
-      append_composite_type_field (t, "v4_int32",
-				   init_vector_type (bt->builtin_int32, 4));
-      append_composite_type_field (t, "v2_int64",
-				   init_vector_type (bt->builtin_int64, 2));
-      append_composite_type_field (t, "uint128", bt->builtin_int128);
-
-      TYPE_VECTOR (t) = 1;
-      TYPE_NAME (t) = "builtin_type_vec128i";
-      tdep->i386_sse_type = t;
-    }
-
-  return tdep->i386_sse_type;
-}
-
 /* Return the GDB type object for the "standard" data type of data in
-   register REGNUM.  Perhaps %esi and %edi should go here, but
-   potentially they could be used for things other than address.  */
+   register REGNUM. */
 
 static struct type *
-i386_register_type (struct gdbarch *gdbarch, int regnum)
+i386_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 {
-  if (regnum == I386_EIP_REGNUM)
-    return builtin_type (gdbarch)->builtin_func_ptr;
-
-  if (regnum == I386_EFLAGS_REGNUM)
-    return i386_eflags_type (gdbarch);
-
-  if (regnum == I386_EBP_REGNUM || regnum == I386_ESP_REGNUM)
-    return builtin_type (gdbarch)->builtin_data_ptr;
-
-  if (i386_fp_regnum_p (gdbarch, regnum))
-    return i387_ext_type (gdbarch);
-
-  if (i386_mmx_regnum_p (gdbarch, regnum))
-    return i386_mmx_type (gdbarch);
-
-  if (i386_sse_regnum_p (gdbarch, regnum))
-    return i386_sse_type (gdbarch);
-
-  if (regnum == I387_MXCSR_REGNUM (gdbarch_tdep (gdbarch)))
-    return i386_mxcsr_type (gdbarch);
-
-  return builtin_type (gdbarch)->builtin_int;
+  gdb_assert (i386_mmx_regnum_p (gdbarch, regnum));
+  return i386_mmx_type (gdbarch);
 }
 
 /* Map a cooked register onto a raw register or memory.  For the i386,
@@ -2761,7 +2621,7 @@ i386_go32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* DJGPP does not support the SSE registers.  */
   tdep->num_xmm_regs = 0;
-  set_gdbarch_num_regs (gdbarch, I386_NUM_GREGS + I386_NUM_FREGS);
+  set_gdbarch_num_regs (gdbarch, I386_NUM_GREGS + I387_NUM_REGS);
 
   /* Native compiler is GCC, which uses the SVR4 register numbering
      even in COFF and STABS.  See the comment in i386_gdbarch_init,
@@ -5623,12 +5483,50 @@ i386_fast_tracepoint_valid_at (struct gdbarch *gdbarch,
   return 1;
 }
 
+static int
+i386_validate_tdesc_p (struct gdbarch_tdep *tdep,
+		       struct tdesc_arch_data *tdesc_data)
+{
+  const struct target_desc *tdesc = tdep->tdesc;
+  const struct tdesc_feature *feature_core, *feature_vector;
+  int i, num_regs, valid_p;
+
+  if (! tdesc_has_registers (tdesc))
+    return 0;
+
+  /* Get core registers.  */
+  feature_core = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.core");
+
+  /* Get SSE registers.  */
+  feature_vector = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.sse");
+
+  if (feature_core == NULL || feature_vector == NULL)
+    return 0;
+
+  valid_p = 1;
+
+  num_regs = tdep->num_core_regs;
+  for (i = 0; i < num_regs; i++)
+    valid_p &= tdesc_numbered_register (feature_core, tdesc_data, i,
+					tdep->register_names[i]);
+
+  /* Need to include %mxcsr, so add one.  */
+  num_regs += tdep->num_xmm_regs + 1;
+  for (; i < num_regs; i++)
+    valid_p &= tdesc_numbered_register (feature_vector, tdesc_data, i,
+					tdep->register_names[i]);
+
+  return valid_p;
+}
+
 
 static struct gdbarch *
 i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
+  struct tdesc_arch_data *tdesc_data;
+  const struct target_desc *tdesc;
 
   /* If there is already a candidate, use it.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
@@ -5695,12 +5593,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      bits, a `long double' actually takes up 96, probably to enforce
      alignment.  */
   set_gdbarch_long_double_bit (gdbarch, 96);
-
-  /* The default ABI includes general-purpose registers, 
-     floating-point registers, and the SSE registers.  */
-  set_gdbarch_num_regs (gdbarch, I386_SSE_NUM_REGS);
-  set_gdbarch_register_name (gdbarch, i386_register_name);
-  set_gdbarch_register_type (gdbarch, i386_register_type);
 
   /* Register numbers of various important registers.  */
   set_gdbarch_sp_regnum (gdbarch, I386_ESP_REGNUM); /* %esp */
@@ -5772,11 +5664,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
 
-  /* Wire in the MMX registers.  */
-  set_gdbarch_num_pseudo_regs (gdbarch, i386_num_mmx_regs);
-  set_gdbarch_pseudo_register_read (gdbarch, i386_pseudo_register_read);
-  set_gdbarch_pseudo_register_write (gdbarch, i386_pseudo_register_write);
-
   set_gdbarch_print_insn (gdbarch, i386_print_insn);
 
   set_gdbarch_dummy_id (gdbarch, i386_dummy_id);
@@ -5785,7 +5672,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Add the i386 register groups.  */
   i386_add_reggroups (gdbarch);
-  set_gdbarch_register_reggroup_p (gdbarch, i386_register_reggroup_p);
+  tdep->register_reggroup_p = i386_register_reggroup_p;
 
   /* Helper for function argument information.  */
   set_gdbarch_fetch_pointer_argument (gdbarch, i386_fetch_pointer_argument);
@@ -5803,8 +5690,48 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   frame_base_set_default (gdbarch, &i386_frame_base);
 
+  /* Wire in the MMX registers.  */
+  set_gdbarch_num_pseudo_regs (gdbarch, i386_num_mmx_regs);
+  set_gdbarch_pseudo_register_read (gdbarch, i386_pseudo_register_read);
+  set_gdbarch_pseudo_register_write (gdbarch, i386_pseudo_register_write);
+
+  set_tdesc_pseudo_register_type (gdbarch, i386_pseudo_register_type);
+  set_tdesc_pseudo_register_name (gdbarch, i386_pseudo_register_name);
+
+  /* The default ABI includes general-purpose registers, 
+     floating-point registers, and the SSE registers.  */
+  set_gdbarch_num_regs (gdbarch, I386_SSE_NUM_REGS);
+
+  /* Get the x86 target description from INFO.  */
+  tdesc = info.target_desc;
+  if (! tdesc_has_registers (tdesc))
+    tdesc = tdesc_i386;
+  tdep->tdesc = tdesc;
+
+  tdep->num_core_regs = I386_NUM_GREGS + I387_NUM_REGS;
+  tdep->register_names = i386_register_names;
+
+  tdesc_data = tdesc_data_alloc ();
+
   /* Hook in ABI-specific overrides, if they have been registered.  */
+  info.tdep_info = (void *) tdesc_data;
   gdbarch_init_osabi (info, gdbarch);
+
+  /* Target description may be changed.  */
+  tdesc = tdep->tdesc;
+
+  if (!i386_validate_tdesc_p (tdep, tdesc_data))
+    {
+      tdesc_data_cleanup (tdesc_data);
+      xfree (tdep);
+      gdbarch_free (gdbarch);
+      return NULL;
+    }
+
+  tdesc_use_registers (gdbarch, tdesc, tdesc_data);
+
+  /* Override gdbarch_register_reggroup_p set in tdesc_use_registers.  */
+  set_gdbarch_register_reggroup_p (gdbarch, tdep->register_reggroup_p);
 
   /* Hook in the legacy prologue-based unwinders last (fallback).  */
   frame_unwind_append_unwinder (gdbarch, &i386_sigtramp_frame_unwind);
@@ -5882,4 +5809,7 @@ is \"default\"."),
 
   /* Initialize the i386-specific register groups.  */
   i386_init_reggroups ();
+
+  /* Initialize the standard target descriptions.  */
+  initialize_tdesc_i386 ();
 }

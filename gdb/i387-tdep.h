@@ -27,6 +27,9 @@ struct regcache;
 struct type;
 struct ui_file;
 
+/* Number of i387 floating point registers.  */
+#define I387_NUM_REGS	16
+
 #define I387_ST0_REGNUM(tdep) ((tdep)->st0_regnum)
 #define I387_NUM_XMM_REGS(tdep) ((tdep)->num_xmm_regs)
 #define I387_MM0_REGNUM(tdep) ((tdep)->mm0_regnum)

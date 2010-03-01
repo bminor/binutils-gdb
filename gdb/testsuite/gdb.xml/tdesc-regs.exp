@@ -25,6 +25,7 @@ gdb_start
 
 set core-regs ""
 set regdir ""
+set architecture ""
 switch -glob -- [istarget] {
     "*arm-*-*" {
         set core-regs {arm-core.xml}
@@ -54,6 +55,16 @@ switch -glob -- [istarget] {
 	# Simply return unconditionally here.
 	unsupported "register tests"
 	return 0
+    }
+    "i?86-*-*" {
+	set architecture "i386"
+	set regdir "i386/"
+        set core-regs {32bit-core.xml 32bit-sse.xml}
+    }
+    "x86_64-*-*" {
+	set architecture "i386:x86-64"
+	set regdir "i386/"
+        set core-regs {64bit-core.xml 64bit-sse.xml}
     }
 }
 
@@ -89,12 +100,16 @@ proc load_description { file errmsg } {
     global subdir
     global gdb_prompt
     global core-regs
+    global architecture
 
     file delete "$subdir/regs.xml"
     set ifd [open "$srcdir/$subdir/$file" r]
     set ofd [open "$subdir/regs.xml" w]
     while {[gets $ifd line] >= 0} {
 	if {[regexp {<xi:include href="core-regs.xml"/>} $line]} {
+	    if {! [string equal ${architecture} ""]} {
+		puts $ofd "  <architecture>${architecture}</architecture>"
+	    }
 	    foreach src ${core-regs} {
 		puts $ofd "  <xi:include href=\"$src\"/>"
 	    }
