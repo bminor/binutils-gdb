@@ -141,6 +141,11 @@ gdb_test "ptype \$vecreg" "type = int8_t \\\[4\\\]"
 gdb_test "ptype \$unionreg" \
     "type = union {\r\n *v4int8 v4;\r\n *v2int16 v2;\r\n}"
 gdb_test "ptype \$unionreg.v4" "type = int8_t \\\[4\\\]"
+gdb_test "ptype \$structreg" \
+    "type = struct struct1 {\r\n *v4int8 v4;\r\n *v2int16 v2;\r\n}"
+gdb_test "ptype \$structreg.v4" "type = int8_t \\\[4\\\]"
+gdb_test "ptype \$bitfields" \
+    "type = struct struct2 {\r\n *uint64_t f1 : 35;\r\n *uint64_t f2 : 1;\r\n}"
 
 load_description "core-only.xml" ""
 # The extra register from the previous description should be gone.

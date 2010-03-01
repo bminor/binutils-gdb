@@ -1,3 +1,10 @@
+2010-03-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.xml/extra-regs.xml: Add struct1, struct2, and flags
+	types.  Add structreg, bitfields, and flags registers.
+	* gdb.xml/tdesc-regs.exp: Test structreg and bitfields
+	registers.
+
 2010-03-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gdb.xml/tdesc-regs.exp (architecture): New.  Set it for x86.

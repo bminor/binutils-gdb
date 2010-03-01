@@ -3303,10 +3303,11 @@ arch_composite_type (struct gdbarch *gdbarch, char *name, enum type_code code)
 }
 
 /* Add new field with name NAME and type FIELD to composite type T.
-   ALIGNMENT (if non-zero) specifies the minimum field alignment.  */
-void
-append_composite_type_field_aligned (struct type *t, char *name,
-				     struct type *field, int alignment)
+   Do not set the field's position or adjust the type's length;
+   the caller should do so.  Return the new field.  */
+struct field *
+append_composite_type_field_raw (struct type *t, char *name,
+				 struct type *field)
 {
   struct field *f;
   TYPE_NFIELDS (t) = TYPE_NFIELDS (t) + 1;
@@ -3316,6 +3317,16 @@ append_composite_type_field_aligned (struct type *t, char *name,
   memset (f, 0, sizeof f[0]);
   FIELD_TYPE (f[0]) = field;
   FIELD_NAME (f[0]) = name;
+  return f;
+}
+
+/* Add new field with name NAME and type FIELD to composite type T.
+   ALIGNMENT (if non-zero) specifies the minimum field alignment.  */
+void
+append_composite_type_field_aligned (struct type *t, char *name,
+				     struct type *field, int alignment)
+{
+  struct field *f = append_composite_type_field_raw (t, name, field);
   if (TYPE_CODE (t) == TYPE_CODE_UNION)
     {
       if (TYPE_LENGTH (t) < TYPE_LENGTH (field))

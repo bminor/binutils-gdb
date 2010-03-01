@@ -33073,6 +33073,47 @@ each of which has a @var{name} and a @var{type}:
 </union>
 @end smallexample
 
+@cindex <struct>
+If a register's value is composed from several separate values, define
+it with a structure type.  There are two forms of the @samp{<struct>}
+element; a @samp{<struct>} element must either contain only bitfields
+or contain no bitfields.  If the structure contains only bitfields,
+its total size in bytes must be specified, each bitfield must have an
+explicit start and end, and bitfields are automatically assigned an
+integer type.  The field's @var{start} should be less than or
+equal to its @var{end}, and zero represents the least significant bit.
+
+@smallexample
+<struct id="@var{id}" size="@var{size}">
+  <field name="@var{name}" start="@var{start}" end="@var{end}"/>
+  @dots{}
+</struct>
+@end smallexample
+
+If the structure contains no bitfields, then each field has an
+explicit type, and no implicit padding is added.
+
+@smallexample
+<struct id="@var{id}">
+  <field name="@var{name}" type="@var{type}"/>
+  @dots{}
+</struct>
+@end smallexample
+
+@cindex <flags>
+If a register's value is a series of single-bit flags, define it with
+a flags type.  The @samp{<flags>} element has an explicit @var{size}
+and contains one or more @samp{<field>} elements.  Each field has a
+@var{name}, a @var{start}, and an @var{end}.  Only single-bit flags
+are supported.
+
+@smallexample
+<flags id="@var{id}" size="@var{size}">
+  <field name="@var{name}" start="@var{start}" end="@var{end}"/>
+  @dots{}
+</flags>
+@end smallexample
+
 @subsection Registers
 @cindex <reg>
 

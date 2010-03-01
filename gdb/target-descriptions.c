@@ -90,8 +90,16 @@ typedef struct tdesc_type_field
 {
   char *name;
   struct tdesc_type *type;
+  int start, end;
 } tdesc_type_field;
 DEF_VEC_O(tdesc_type_field);
+
+typedef struct tdesc_type_flag
+{
+  char *name;
+  int start;
+} tdesc_type_flag;
+DEF_VEC_O(tdesc_type_flag);
 
 typedef struct tdesc_type
 {
@@ -123,7 +131,9 @@ typedef struct tdesc_type
 
     /* Types defined by a target feature.  */
     TDESC_TYPE_VECTOR,
-    TDESC_TYPE_UNION
+    TDESC_TYPE_STRUCT,
+    TDESC_TYPE_UNION,
+    TDESC_TYPE_FLAGS
   } kind;
 
   /* Kind-specific data.  */
@@ -136,11 +146,19 @@ typedef struct tdesc_type
       int count;
     } v;
 
-    /* Union type.  */
+    /* Struct or union type.  */
     struct
     {
       VEC(tdesc_type_field) *fields;
+      LONGEST size;
     } u;
+
+    /* Flags type.  */
+    struct
+    {
+      VEC(tdesc_type_flag) *flags;
+      LONGEST size;
+    } f;
   } u;
 } *tdesc_type_p;
 DEF_VEC_P(tdesc_type_p);
@@ -652,6 +670,66 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
 	return type;
       }
 
+    case TDESC_TYPE_STRUCT:
+      {
+	struct type *type, *field_type;
+	struct tdesc_type_field *f;
+	int ix;
+
+	type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
+	TYPE_NAME (type) = xstrdup (tdesc_type->name);
+	TYPE_TAG_NAME (type) = TYPE_NAME (type);
+
+	for (ix = 0;
+	     VEC_iterate (tdesc_type_field, tdesc_type->u.u.fields, ix, f);
+	     ix++)
+	  {
+	    if (f->type == NULL)
+	      {
+		/* Bitfield.  */
+		struct field *fld;
+		struct type *field_type;
+		int bitsize, total_size;
+
+		/* This invariant should be preserved while creating
+		   types.  */
+		gdb_assert (tdesc_type->u.u.size != 0);
+		if (tdesc_type->u.u.size > 4)
+		  field_type = builtin_type (gdbarch)->builtin_uint64;
+		else
+		  field_type = builtin_type (gdbarch)->builtin_uint32;
+
+		fld = append_composite_type_field_raw (type, xstrdup (f->name),
+						       field_type);
+
+		/* For little-endian, BITPOS counts from the LSB of
+		   the structure and marks the LSB of the field.  For
+		   big-endian, BITPOS counts from the MSB of the
+		   structure and marks the MSB of the field.  Either
+		   way, it is the number of bits to the "left" of the
+		   field.  To calculate this in big-endian, we need
+		   the total size of the structure.  */
+		bitsize = f->end - f->start + 1;
+		total_size = tdesc_type->u.u.size * TARGET_CHAR_BIT;
+		if (gdbarch_bits_big_endian (gdbarch))
+		  FIELD_BITPOS (fld[0]) = total_size - f->start - bitsize;
+		else
+		  FIELD_BITPOS (fld[0]) = f->start;
+		FIELD_BITSIZE (fld[0]) = bitsize;
+	      }
+	    else
+	      {
+		field_type = tdesc_gdb_type (gdbarch, f->type);
+		append_composite_type_field (type, xstrdup (f->name),
+					     field_type);
+	      }
+	  }
+
+	if (tdesc_type->u.u.size != 0)
+	  TYPE_LENGTH (type) = tdesc_type->u.u.size;
+	return type;
+      }
+
     case TDESC_TYPE_UNION:
       {
 	struct type *type, *field_type;
@@ -668,12 +746,30 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
 	    field_type = tdesc_gdb_type (gdbarch, f->type);
 	    append_composite_type_field (type, xstrdup (f->name), field_type);
 
-	    /* If any of the children of this union are vectors, flag the
+	    /* If any of the children of a union are vectors, flag the
 	       union as a vector also.  This allows e.g. a union of two
 	       vector types to show up automatically in "info vector".  */
 	    if (TYPE_VECTOR (field_type))
 	      TYPE_VECTOR (type) = 1;
 	  }
+	return type;
+      }
+
+    case TDESC_TYPE_FLAGS:
+      {
+	struct type *type, *field_type;
+	struct tdesc_type_flag *f;
+	int ix;
+
+	type = arch_flags_type (gdbarch, xstrdup (tdesc_type->name),
+				tdesc_type->u.f.size);
+	for (ix = 0;
+	     VEC_iterate (tdesc_type_flag, tdesc_type->u.f.flags, ix, f);
+	     ix++)
+	  /* Note that contrary to the function name, this call will
+	     just set the properties of an already-allocated
+	     field.  */
+	  append_flags_type_flag (type, f->start, f->name);
 
 	return type;
       }
@@ -1161,6 +1257,7 @@ tdesc_free_type (struct tdesc_type *type)
 
   switch (type->kind)
     {
+    case TDESC_TYPE_STRUCT:
     case TDESC_TYPE_UNION:
       {
 	struct tdesc_type_field *f;
@@ -1172,6 +1269,20 @@ tdesc_free_type (struct tdesc_type *type)
 	  xfree (f->name);
 
 	VEC_free (tdesc_type_field, type->u.u.fields);
+      }
+      break;
+
+    case TDESC_TYPE_FLAGS:
+      {
+	struct tdesc_type_flag *f;
+	int ix;
+
+	for (ix = 0;
+	     VEC_iterate (tdesc_type_flag, type->u.f.flags, ix, f);
+	     ix++)
+	  xfree (f->name);
+
+	VEC_free (tdesc_type_flag, type->u.f.flags);
       }
       break;
 
@@ -1199,6 +1310,29 @@ tdesc_create_vector (struct tdesc_feature *feature, const char *name,
 }
 
 struct tdesc_type *
+tdesc_create_struct (struct tdesc_feature *feature, const char *name)
+{
+  struct tdesc_type *type = XZALLOC (struct tdesc_type);
+
+  type->name = xstrdup (name);
+  type->kind = TDESC_TYPE_STRUCT;
+
+  VEC_safe_push (tdesc_type_p, feature->types, type);
+  return type;
+}
+
+/* Set the total length of TYPE.  Structs which contain bitfields may
+   omit the reserved bits, so the end of the last field may not
+   suffice.  */
+
+void
+tdesc_set_struct_size (struct tdesc_type *type, LONGEST size)
+{
+  gdb_assert (type->kind == TDESC_TYPE_STRUCT);
+  type->u.u.size = size;
+}
+
+struct tdesc_type *
 tdesc_create_union (struct tdesc_feature *feature, const char *name)
 {
   struct tdesc_type *type = XZALLOC (struct tdesc_type);
@@ -1210,18 +1344,68 @@ tdesc_create_union (struct tdesc_feature *feature, const char *name)
   return type;
 }
 
+struct tdesc_type *
+tdesc_create_flags (struct tdesc_feature *feature, const char *name,
+		    LONGEST size)
+{
+  struct tdesc_type *type = XZALLOC (struct tdesc_type);
+
+  type->name = xstrdup (name);
+  type->kind = TDESC_TYPE_FLAGS;
+  type->u.f.size = size;
+
+  VEC_safe_push (tdesc_type_p, feature->types, type);
+  return type;
+}
+
+/* Add a new field.  Return a temporary pointer to the field, which
+   is only valid until the next call to tdesc_add_field (the vector
+   might be reallocated).  */
+
 void
 tdesc_add_field (struct tdesc_type *type, const char *field_name,
 		 struct tdesc_type *field_type)
 {
   struct tdesc_type_field f = { 0 };
 
-  gdb_assert (type->kind == TDESC_TYPE_UNION);
+  gdb_assert (type->kind == TDESC_TYPE_UNION
+	      || type->kind == TDESC_TYPE_STRUCT);
 
   f.name = xstrdup (field_name);
   f.type = field_type;
 
   VEC_safe_push (tdesc_type_field, type->u.u.fields, &f);
+}
+
+/* Add a new bitfield.  */
+
+void
+tdesc_add_bitfield (struct tdesc_type *type, const char *field_name,
+		    int start, int end)
+{
+  struct tdesc_type_field f = { 0 };
+
+  gdb_assert (type->kind == TDESC_TYPE_STRUCT);
+
+  f.name = xstrdup (field_name);
+  f.start = start;
+  f.end = end;
+
+  VEC_safe_push (tdesc_type_field, type->u.u.fields, &f);
+}
+
+void
+tdesc_add_flag (struct tdesc_type *type, int start,
+		const char *flag_name)
+{
+  struct tdesc_type_flag f = { 0 };
+
+  gdb_assert (type->kind == TDESC_TYPE_FLAGS);
+
+  f.name = xstrdup (flag_name);
+  f.start = start;
+
+  VEC_safe_push (tdesc_type_flag, type->u.f.flags, &f);
 }
 
 static void

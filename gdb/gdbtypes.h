@@ -1249,6 +1249,8 @@ extern void append_composite_type_field_aligned (struct type *t,
 						 char *name,
 						 struct type *field,
 						 int alignment);
+struct field *append_composite_type_field_raw (struct type *t, char *name,
+					       struct type *field);
 
 /* Helper functions to construct a bit flags type.  An initially empty
    type is created using arch_flag_type().  Flags are then added using

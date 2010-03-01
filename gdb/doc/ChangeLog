@@ -1,3 +1,7 @@
+2010-03-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (Types): Describe <struct> and <flags>.
+
 2010-02-28  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.texinfo (Frames In Python): Add block parameter and

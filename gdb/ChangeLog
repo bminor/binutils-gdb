@@ -1,3 +1,33 @@
+2010-03-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdbtypes.c (append_composite_type_field_raw): New.
+	(append_composite_type_field_aligned): Use the new function.
+	* gdbtypes.h (append_composite_type_field_raw): Declare.
+	* target-descriptions.c (struct tdesc_type_field): Add start and end.
+	(struct tdesc_type_flag): New type.
+	(struct tdesc_type): Add TDESC_TYPE_STRUCT and TDESC_TYPE_FLAGS to
+	kind.  Add size to u.u.  Add u.f for flags.
+	(tdesc_gdb_type): Handle TDESC_TYPE_STRUCT and TDESC_TYPE_FLAGS.
+	(tdesc_free_type): Likewise.
+	(tdesc_create_struct, tdesc_set_struct_size, tdesc_create_flags): New.
+	(tdesc_add_field): Handle TDESC_TYPE_STRUCT.
+	(tdesc_add_bitfield, tdesc_add_flag): New.
+	* target-descriptions.h (tdesc_create_struct, tdesc_set_struct_size)
+	(tdesc_create_flags, tdesc_add_bitfield, tdesc_add_flag): Declare.
+	* xml-tdesc.c (struct tdesc_parsing_data): Rename current_union to
+	current_type.  Add current_type_size and current_type_is_flags.
+	(tdesc_start_union): Clear the new fields.
+	(tdesc_start_struct, tdesc_start_flags): New.
+	(tdesc_start_field): Handle struct fields, including bitfields.
+	(field_attributes): Make type optional.  Add start and end.
+	(union_children): Rename to struct_union_children.
+	(union_attributes): Rename to struct_union_attributes.  Add optional
+	size.
+	(flags_attributes): New.
+	(feature_children): Add struct and flags.
+	* features/gdb-target.dtd: Add flags and struct to features.
+	Make field type optional.  Add field start and end.
+
 2010-03-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* amd64-linux-nat.c (AMD64_LINUX_USER64_CS): New.
