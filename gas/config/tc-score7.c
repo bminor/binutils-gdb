@@ -6280,7 +6280,7 @@ s7_atof (int type, char *litP, int *sizeP)
    Called after md_convert_frag().  */
 
 static void
-s7_frag_check (fragS * fragp)
+s7_frag_check (fragS * fragp ATTRIBUTE_UNUSED)
 {
   know (fragp->insn_addr <= s7_RELAX_PAD_BYTE);
 }

@@ -1,3 +1,7 @@
+2010-03-01  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-score7.c (s7_frag_check): Add ATTRIBUTE_UNUSED.
+
 2010-02-26  Doug Evans  <dje@sebabeach.org>
 
 	* configure.tgt: Fix mep cpu case.
