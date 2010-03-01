@@ -582,19 +582,40 @@ Layout::layout(Sized_relobj<size, big_endian>* object, unsigned int shndx,
 
   Output_section* os;
 
+  // Sometimes .init_array*, .preinit_array* and .fini_array* do not have
+  // correct section types.  Force them here.
+  elfcpp::Elf_Word sh_type = shdr.get_sh_type();
+  if (sh_type == elfcpp::SHT_PROGBITS)
+    {
+      static const char init_array_prefix[] = ".init_array";
+      static const char preinit_array_prefix[] = ".preinit_array";
+      static const char fini_array_prefix[] = ".fini_array";
+      static size_t init_array_prefix_size = sizeof(init_array_prefix) - 1;
+      static size_t preinit_array_prefix_size =
+	sizeof(preinit_array_prefix) - 1;
+      static size_t fini_array_prefix_size = sizeof(fini_array_prefix) - 1;
+
+      if (strncmp(name, init_array_prefix, init_array_prefix_size) == 0)
+	sh_type = elfcpp::SHT_INIT_ARRAY;
+      else if (strncmp(name, preinit_array_prefix, preinit_array_prefix_size)
+	       == 0)
+	sh_type = elfcpp::SHT_PREINIT_ARRAY;
+      else if (strncmp(name, fini_array_prefix, fini_array_prefix_size) == 0)
+	sh_type = elfcpp::SHT_FINI_ARRAY;
+    }
+
   // In a relocatable link a grouped section must not be combined with
   // any other sections.
   if (parameters->options().relocatable()
       && (shdr.get_sh_flags() & elfcpp::SHF_GROUP) != 0)
     {
       name = this->namepool_.add(name, true, NULL);
-      os = this->make_output_section(name, shdr.get_sh_type(),
-				     shdr.get_sh_flags(), false, false,
-				     false, false, false);
+      os = this->make_output_section(name, sh_type, shdr.get_sh_flags(), false,
+				     false, false, false, false);
     }
   else
     {
-      os = this->choose_output_section(object, name, shdr.get_sh_type(),
+      os = this->choose_output_section(object, name, sh_type,
 				       shdr.get_sh_flags(), true, false,
 				       false, false, false, false);
       if (os == NULL)

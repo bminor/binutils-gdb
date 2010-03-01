@@ -3378,8 +3378,16 @@ class Output_section : public Output_data
   // This class is used to sort the input sections.
   class Input_section_sort_entry;
 
-  // This is the sort comparison function.
+  // This is the sort comparison function for ctors and dtors.
   struct Input_section_sort_compare
+  {
+    bool
+    operator()(const Input_section_sort_entry&,
+	       const Input_section_sort_entry&) const;
+  };
+
+  // This is the sort comparison function for .init_array and .fini_array.
+  struct Input_section_sort_init_fini_compare
   {
     bool
     operator()(const Input_section_sort_entry&,

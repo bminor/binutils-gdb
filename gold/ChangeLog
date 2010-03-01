@@ -1,3 +1,19 @@
+2010-03-01  Doug Kwan  <dougkwan@google.com>
+
+	* layout.cc (Layout::Layout): Force section types of .init_array*,
+	.preinit_array* and .fini_array* sections.
+	* output.cc (Output_section::Input_section_sort_entry::has_priority):
+	Fix check of return value of std::string::find.().
+	(Output_section::Input_section_sort_compare::operator()): Remove
+	comment about .init_array.
+	(Output_section::Input_section_sort_init_fini_compare::operator()):
+	New method.
+	(Output_section::sort_attached_input_sections): Handle .init_array
+	and .fini_array specially.
+	* output.h (Output_section::Inut_section_sort_compare): Update
+	comment.
+	(Output_section::Input_section_sort_init_fini_compare): New struct.
+
 2010-02-26  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Target_arm::Relocate::reloc_is_non_pic): Treat
