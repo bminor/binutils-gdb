@@ -22,6 +22,22 @@
     <field name="v2_int64" type="v2i64"/>
     <field name="uint128" type="uint128"/>
   </union>
+  <flags id="i386_mxcsr" size="4">
+    <field name="IE" start="0" end="0"/>
+    <field name="DE" start="1" end="1"/>
+    <field name="ZE" start="2" end="2"/>
+    <field name="OE" start="3" end="3"/>
+    <field name="UE" start="4" end="4"/>
+    <field name="PE" start="5" end="5"/>
+    <field name="DAZ" start="6" end="6"/>
+    <field name="IM" start="7" end="7"/>
+    <field name="DM" start="8" end="8"/>
+    <field name="ZM" start="9" end="9"/>
+    <field name="OM" start="10" end="10"/>
+    <field name="UM" start="11" end="11"/>
+    <field name="PM" start="12" end="12"/>
+    <field name="FZ" start="15" end="15"/>
+  </flags>
 
   <reg name="xmm0" bitsize="128" type="vec128" regnum="40"/>
   <reg name="xmm1" bitsize="128" type="vec128"/>

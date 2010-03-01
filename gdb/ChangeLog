@@ -1,3 +1,23 @@
+2010-03-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* target-descriptions.c (tdesc_type): Remove
+	TDESC_TYPE_I386_EFLAGS and TDESC_TYPE_I386_MXCSR.
+	(tdesc_predefined_types): Likewise.
+	(tdesc_gdb_type): Likewise.  Pass NULL to append_flags_type_flag
+	if flag name is empty.
+	(maint_print_c_tdesc_cmd): Handle TDESC_TYPE_FLAGS.
+
+	* features/i386/32bit-core.xml: Define i386_eflags.
+	* features/i386/64bit-core.xml: Likewise.
+
+	* features/i386/32bit-sse.xml: Define i386_mxcsr.
+	* features/i386/64bit-sse.xml: Likewise.
+
+	* features/i386/amd64-linux.c: Regenerated.
+	* features/i386/amd64.c: Likewise.
+	* features/i386/i386-linux.c: Likewise.
+	* features/i386/i386.c: Likewise.
+
 2010-03-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdbtypes.c (append_composite_type_field_raw): New.

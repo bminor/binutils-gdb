@@ -126,8 +126,6 @@ typedef struct tdesc_type
     TDESC_TYPE_IEEE_DOUBLE,
     TDESC_TYPE_ARM_FPA_EXT,
     TDESC_TYPE_I387_EXT,
-    TDESC_TYPE_I386_EFLAGS,
-    TDESC_TYPE_I386_MXCSR,
 
     /* Types defined by a target feature.  */
     TDESC_TYPE_VECTOR,
@@ -483,9 +481,7 @@ static struct tdesc_type tdesc_predefined_types[] =
   { "ieee_single", TDESC_TYPE_IEEE_SINGLE },
   { "ieee_double", TDESC_TYPE_IEEE_DOUBLE },
   { "arm_fpa_ext", TDESC_TYPE_ARM_FPA_EXT },
-  { "i387_ext", TDESC_TYPE_I387_EXT },
-  { "i386_eflags", TDESC_TYPE_I386_EFLAGS },
-  { "i386_mxcsr", TDESC_TYPE_I386_MXCSR }
+  { "i387_ext", TDESC_TYPE_I387_EXT }
 };
 
 /* Return the type associated with ID in the context of FEATURE, or
@@ -607,57 +603,6 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
       return arch_float_type (gdbarch, -1, "builtin_type_i387_ext",
 			      floatformats_i387_ext);
 
-    case TDESC_TYPE_I386_EFLAGS:
-      {
-	struct type *type;
-
-	type = arch_flags_type (gdbarch, "builtin_type_i386_eflags", 4);
-	append_flags_type_flag (type, 0, "CF");
-	append_flags_type_flag (type, 1, NULL);
-	append_flags_type_flag (type, 2, "PF");
-	append_flags_type_flag (type, 4, "AF");
-	append_flags_type_flag (type, 6, "ZF");
-	append_flags_type_flag (type, 7, "SF");
-	append_flags_type_flag (type, 8, "TF");
-	append_flags_type_flag (type, 9, "IF");
-	append_flags_type_flag (type, 10, "DF");
-	append_flags_type_flag (type, 11, "OF");
-	append_flags_type_flag (type, 14, "NT");
-	append_flags_type_flag (type, 16, "RF");
-	append_flags_type_flag (type, 17, "VM");
-	append_flags_type_flag (type, 18, "AC");
-	append_flags_type_flag (type, 19, "VIF");
-	append_flags_type_flag (type, 20, "VIP");
-	append_flags_type_flag (type, 21, "ID");
-
-	return type;
-      }
-    break;
-
-    case TDESC_TYPE_I386_MXCSR:
-      {
-	struct type *type;
-
-	type = arch_flags_type (gdbarch, "builtin_type_i386_mxcsr", 4);
-	append_flags_type_flag (type, 0, "IE");
-	append_flags_type_flag (type, 1, "DE");
-	append_flags_type_flag (type, 2, "ZE");
-	append_flags_type_flag (type, 3, "OE");
-	append_flags_type_flag (type, 4, "UE");
-	append_flags_type_flag (type, 5, "PE");
-	append_flags_type_flag (type, 6, "DAZ");
-	append_flags_type_flag (type, 7, "IM");
-	append_flags_type_flag (type, 8, "DM");
-	append_flags_type_flag (type, 9, "ZM");
-	append_flags_type_flag (type, 10, "OM");
-	append_flags_type_flag (type, 11, "UM");
-	append_flags_type_flag (type, 12, "PM");
-	append_flags_type_flag (type, 15, "FZ");
-
-	return type;
-      }
-    break;
-
     /* Types defined by a target feature.  */
     case TDESC_TYPE_VECTOR:
       {
@@ -769,7 +714,8 @@ tdesc_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *tdesc_type)
 	  /* Note that contrary to the function name, this call will
 	     just set the properties of an already-allocated
 	     field.  */
-	  append_flags_type_flag (type, f->start, f->name);
+	  append_flags_type_flag (type, f->start,
+				  *f->name ? f->name : NULL);
 
 	return type;
       }
@@ -1602,6 +1548,7 @@ maint_print_c_tdesc_cmd (char *args, int from_tty)
   struct tdesc_reg *reg;
   struct tdesc_type *type;
   struct tdesc_type_field *f;
+  struct tdesc_type_flag *flag;
   int ix, ix2, ix3;
 
   /* Use the global target-supplied description, not the current
@@ -1714,6 +1661,18 @@ maint_print_c_tdesc_cmd (char *args, int from_tty)
 		    ("  tdesc_add_field (type, \"%s\", field_type);\n",
 		     f->name);
 		}
+	      break;
+	    case TDESC_TYPE_FLAGS:
+	      printf_unfiltered
+		("  field_type = tdesc_create_flags (feature, \"%s\", %d);\n",
+		 type->name, (int) type->u.f.size);
+	      for (ix3 = 0;
+		   VEC_iterate (tdesc_type_flag, type->u.f.flags, ix3,
+				flag);
+		   ix3++)
+		printf_unfiltered
+		  ("  tdesc_add_flag (field_type, %d, \"%s\");\n",
+		   flag->start, flag->name);
 	      break;
 	    default:
 	      error (_("C output is not supported type \"%s\"."), type->name);
