@@ -1,6 +1,7 @@
 /* tc-sh.c -- Assemble code for the Renesas / SuperH SH
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007, 2008, 2009  Free Software Foundation, Inc.
+   2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1679,36 +1680,6 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 	  sh_operand_info *user = operands + n;
 	  sh_arg_type arg = this_try->arg[n];
 
-	  if (SH_MERGE_ARCH_SET_VALID (valid_arch, arch_sh2a_nofpu_up)
-	      && (   arg == A_DISP_REG_M
-		  || arg == A_DISP_REG_N))
-	    {
-	      /* Check a few key IMM* fields for overflow.  */
-	      int opf;
-	      long val = user->immediate.X_add_number;
-
-	      for (opf = 0; opf < 4; opf ++)
-		switch (this_try->nibbles[opf])
-		  {
-		  case IMM0_4:
-		  case IMM1_4:
-		    if (val < 0 || val > 15)
-		      goto fail;
-		    break;
-		  case IMM0_4BY2:
-		  case IMM1_4BY2:
-		    if (val < 0 || val > 15 * 2)
-		      goto fail;
-		    break;
-		  case IMM0_4BY4:
-		  case IMM1_4BY4:
-		    if (val < 0 || val > 15 * 4)
-		      goto fail;
-		    break;
-		  default:
-		    break;
-		  }
-	    }
 	  switch (arg)
 	    {
 	    case A_DISP_PC:
@@ -2201,6 +2172,36 @@ get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 	    default:
 	      printf (_("unhandled %d\n"), arg);
 	      goto fail;
+	    }
+	  if (SH_MERGE_ARCH_SET_VALID (valid_arch, arch_sh2a_nofpu_up)
+	      && (   arg == A_DISP_REG_M
+		  || arg == A_DISP_REG_N))
+	    {
+	      /* Check a few key IMM* fields for overflow.  */
+	      int opf;
+	      long val = user->immediate.X_add_number;
+
+	      for (opf = 0; opf < 4; opf ++)
+		switch (this_try->nibbles[opf])
+		  {
+		  case IMM0_4:
+		  case IMM1_4:
+		    if (val < 0 || val > 15)
+		      goto fail;
+		    break;
+		  case IMM0_4BY2:
+		  case IMM1_4BY2:
+		    if (val < 0 || val > 15 * 2)
+		      goto fail;
+		    break;
+		  case IMM0_4BY4:
+		  case IMM1_4BY4:
+		    if (val < 0 || val > 15 * 4)
+		      goto fail;
+		    break;
+		  default:
+		    break;
+		  }
 	    }
 	}
       if ( !SH_MERGE_ARCH_SET_VALID (valid_arch, this_try->arch))
