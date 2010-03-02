@@ -633,6 +633,7 @@ spu_analyze_prologue (struct gdbarch *gdbarch,
   int found_sp = 0;
   int found_fp = 0;
   int found_lr = 0;
+  int found_bc = 0;
   int reg_immed[SPU_NUM_GPRS];
   gdb_byte buf[16];
   CORE_ADDR prolog_pc = start_pc;
@@ -661,8 +662,9 @@ spu_analyze_prologue (struct gdbarch *gdbarch,
 	- The first instruction to set up the stack pointer.
 	- The first instruction to set up the frame pointer.
 	- The first instruction to save the link register.
+	- The first instruction to save the backchain.
 
-     We return the instruction after the latest of these three,
+     We return the instruction after the latest of these four,
      or the incoming PC if none is found.  The first instruction
      to set up the stack pointer also defines the frame size.
 
@@ -769,6 +771,14 @@ spu_analyze_prologue (struct gdbarch *gdbarch,
               && !found_lr)
 	    {
 	      found_lr = 1;
+	      prolog_pc = pc + 4;
+	    }
+
+	  if (ra == SPU_RAW_SP_REGNUM
+	      && (found_sp? immed == 0 : rt == SPU_RAW_SP_REGNUM)
+	      && !found_bc)
+	    {
+	      found_bc = 1;
 	      prolog_pc = pc + 4;
 	    }
 	}
