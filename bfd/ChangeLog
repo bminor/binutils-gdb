@@ -1,3 +1,31 @@
+2010-03-02  Christophe Lyon  <christophe.lyon@st.com>
+	Alan Modra  <amodra@gmail.com>
+
+	* elf32-arm.c (a8_erratum_fix): Add st_type field to record the
+	destination mode of the a8 stub.
+	(elf32_arm_link_hash_table): Add top_id field.
+	(elf32_arm_link_hash_table_create): Initialize top_id.
+	(arm_type_of_stub): Update prototype, st_type can now be updated
+	by this function. Actual destination address in case of PLT is
+	computed here, to help factorizing code.
+	(elf32_arm_stub_name): Update prototype, use stub_type additional
+	parameter to build stub name.
+	(elf32_arm_get_stub_entry): Update prototype, use stub_type
+	additional parameter to build stub entry.
+	(arm_build_one_stub): Use bfd_put_16/bfd_put_32 instead of
+	put_thumb_insn/put_arm_insn as BE8 encoding is now handled later.
+	Call elf32_arm_final_link_relocate to process all in-stub
+	relocations.
+	(elf32_arm_setup_section_lists): Update top_id.
+	(cortex_a8_erratum_scan): Record stub destination mode.
+	(elf32_arm_size_stubs): Update call to arm_type_of_stub according
+	to new prototype.
+	(elf32_arm_final_link_relocate): Enable processing of in-stub
+	REL32 relocations. Rely on arm_type_of_stub to detect if a stub is
+	needed, enabling code factorization.
+	(elf32_arm_final_link): Process stub sections.
+	(elf32_arm_output_map_sym): Add entry to code/data map.
+
 2010-03-01  David S. Miller  <davem@davemloft.net>
 
 	* elfxx-sparc.c (_bfd_sparc_elf_check_relocs): When STT_GNU_IFUNC and

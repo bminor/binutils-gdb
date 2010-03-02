@@ -1,3 +1,28 @@
+2010-03-02  Christophe Lyon  <christophe.lyon@st.com>
+	Alan Modra  <amodra@gmail.com>
+
+	* ld-arm/arm-elf.exp: Change .text start address for
+	farcall-thumb-arm tests. Add v4t variant for farcall-mixed-lib
+	test.
+	* ld-arm/farcall-mixed-lib-v4t.d: New test.
+	* ld-arm/farcall-mixed-lib1.s: Don't force armv5t.
+	* ld-arm/farcall-mixed-lib2.s: Likewise.
+	* ld-arm/arm-call.d: Update expected results.
+	* ld-arm/cortex-a8-far.d: Likewise.
+	* ld-arm/farcall-group-size2.d: Likewise.
+	* ld-arm/farcall-group.d: Likewise.
+	* ld-arm/farcall-mix.d: Likewise.
+	* ld-arm/farcall-mix2.d: Likewise.
+	* ld-arm/farcall-mixed-app-v5.d: Likewise.
+	* ld-arm/farcall-mixed-app.d: Likewise.
+	* ld-arm/farcall-mixed-lib.d: Likewise.
+	* ld-arm/farcall-thumb-arm.d: Likewise.
+	* ld-arm/farcall-thumb-arm-blx.d: Likewise.
+	* ld-arm/farcall-thumb-arm-pic-veneer.d: Likewise.
+	* ld-arm/farcall-thumb-arm-blx-pic-veneer.d: Likewise.
+	* ld-arm/farcall-thumb-arm.s: Update test. Add a new call to
+	potentially generate different types of stubs.
+
 2010-02-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/init-fini-arrays.d: Pass --wide to readelf.
