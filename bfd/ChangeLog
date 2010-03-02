@@ -5,6 +5,11 @@
 	(allocate_dynrelocs): Only force output of STT_GNU_IFUNC plt entries
 	and dynamic relocations if h->ref_regular.
 
+	* elfxx-sparc.c (struct elf_reloc_map): Delete.
+	(sparc_reloc_map): Delete.
+	(_bfd_sparc_elf_reloc_type_lookup): Explicitly handle each
+	relocation type in switch statements.
+
 2010-02-25  Alan Modra  <amodra@gmail.com>
 
 	PR ld/11304
