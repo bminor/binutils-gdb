@@ -2695,7 +2695,8 @@ add_partial_subprogram (struct partial_die_info *pdi,
 	      baseaddr = ANOFFSET (objfile->section_offsets,
 				   SECT_OFF_TEXT (objfile));
 	      addrmap_set_empty (objfile->psymtabs_addrmap,
-				 pdi->lowpc, pdi->highpc - 1,
+				 pdi->lowpc + baseaddr,
+				 pdi->highpc - 1 + baseaddr,
 				 cu->per_cu->psymtab);
 	    }
           if (!pdi->is_declaration)
