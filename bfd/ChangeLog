@@ -1,3 +1,10 @@
+2010-03-01  David S. Miller  <davem@davemloft.net>
+
+	* elfxx-sparc.c (_bfd_sparc_elf_check_relocs): When STT_GNU_IFUNC and
+	h->def_regular, set h->ref_regular.
+	(allocate_dynrelocs): Only force output of STT_GNU_IFUNC plt entries
+	and dynamic relocations if h->ref_regular.
+
 2010-02-25  Alan Modra  <amodra@gmail.com>
 
 	PR ld/11304

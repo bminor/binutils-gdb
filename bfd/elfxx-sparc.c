@@ -1277,7 +1277,10 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       if (h && h->type == STT_GNU_IFUNC)
 	{
 	  if (h->def_regular)
-	    h->plt.refcount += 1;
+	    {
+	      h->ref_regular = 1;
+	      h->plt.refcount += 1;
+	    }
 	}
 
       /* Compatibility with old R_SPARC_REV32 reloc conflicting
@@ -2022,7 +2025,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
   if ((htab->elf.dynamic_sections_created
        && h->plt.refcount > 0)
       || (h->type == STT_GNU_IFUNC
-	  && h->def_regular))
+	  && h->def_regular
+	  && h->ref_regular))
     {
       /* Make sure this symbol is output as a dynamic symbol.
 	 Undefined weak syms won't yet be marked as dynamic.  */
@@ -2034,7 +2038,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
 	}
 
       if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info->shared, h)
-	  || h->type == STT_GNU_IFUNC)
+	  || (h->type == STT_GNU_IFUNC
+	      && h->def_regular))
 	{
 	  asection *s = htab->elf.splt;
 
