@@ -1,3 +1,8 @@
+2010-03-02  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (add_partial_subprogram): Add missing baseaddr to
+	lowpc,highpc args to addrmap_set_empty.
+
 2010-03-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* amd64-tdep.c (amd64_byte_names): New.
