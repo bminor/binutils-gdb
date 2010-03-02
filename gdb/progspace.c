@@ -430,24 +430,30 @@ void
 update_address_spaces (void)
 {
   int shared_aspace = gdbarch_has_shared_address_space (target_gdbarch);
-  struct address_space *aspace = NULL;
   struct program_space *pspace;
+  struct inferior *inf;
 
   init_address_spaces ();
 
-  ALL_PSPACES (pspace)
+  if (shared_aspace)
     {
-      free_address_space (pspace->aspace);
-
-      if (shared_aspace)
-	{
-	  if (aspace == NULL)
-	    aspace = new_address_space ();
-	  pspace->aspace = aspace;
-	}
-      else
-	pspace->aspace = new_address_space ();
+      struct address_space *aspace = new_address_space ();
+      free_address_space (current_program_space->aspace);
+      ALL_PSPACES (pspace)
+	pspace->aspace = aspace;
     }
+  else
+    ALL_PSPACES (pspace)
+      {
+	free_address_space (pspace->aspace);
+	pspace->aspace = new_address_space ();
+      }
+
+  for (inf = inferior_list; inf; inf = inf->next)
+    if (gdbarch_has_global_solist (target_gdbarch))
+      inf->aspace = maybe_new_address_space ();
+    else
+      inf->aspace = inf->pspace->aspace;
 }
 
 /* Save the current program space so that it may be restored by a later
