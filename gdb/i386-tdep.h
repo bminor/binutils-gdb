@@ -114,9 +114,31 @@ struct gdbarch_tdep
      absence of an FPU.  */
   int st0_regnum;
 
+  /* Number of MMX registers.  */
+  int num_mmx_regs;
+
   /* Register number for %mm0.  Set this to -1 to indicate the absence
      of MMX support.  */
   int mm0_regnum;
+
+  /* Number of byte registers.  */
+  int num_byte_regs;
+
+  /* Register pseudo number for %al.  */
+  int al_regnum;
+
+  /* Number of pseudo word registers.  */
+  int num_word_regs;
+
+  /* Register number for %ax.  */
+  int ax_regnum;
+
+  /* Number of pseudo dword registers.  */
+  int num_dword_regs;
+
+  /* Register number for %eax.  Set this to -1 to indicate the absence
+     of pseudo dword register support.  */
+  int eax_regnum;
 
   /* Number of core registers.  */
   int num_core_regs;
@@ -249,6 +271,21 @@ enum record_i386_regnum
 
 /* Types for i386-specific registers.  */
 extern struct type *i387_ext_type (struct gdbarch *gdbarch);
+
+/* Checks of different pseudo-registers.  */
+extern int i386_byte_regnum_p (struct gdbarch *gdbarch, int regnum);
+extern int i386_word_regnum_p (struct gdbarch *gdbarch, int regnum);
+extern int i386_dword_regnum_p (struct gdbarch *gdbarch, int regnum);
+
+extern const char *i386_pseudo_register_name (struct gdbarch *gdbarch,
+					      int regnum);
+
+extern void i386_pseudo_register_read (struct gdbarch *gdbarch,
+				       struct regcache *regcache,
+				       int regnum, gdb_byte *buf);
+extern void i386_pseudo_register_write (struct gdbarch *gdbarch,
+					struct regcache *regcache,
+					int regnum, const gdb_byte *buf);
 
 /* Segment selectors.  */
 #define I386_SEL_RPL	0x0003  /* Requester's Privilege Level mask.  */

@@ -1,3 +1,13 @@
+2010-03-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gdb.arch/amd64-byte.exp: New.
+	* gdb.arch/amd64-dword.exp: Likewise.
+	* gdb.arch/amd64-pseudo.c: Likewise.
+	* gdb.arch/amd64-word.exp: Likewise.
+	* gdb.arch/i386-byte.exp: Likewise.
+	* gdb.arch/i386-pseudo.c: Likewise.
+	* gdb.arch/i386-word.exp: Likewise.
+
 2010-03-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.xml/extra-regs.xml: Add struct1, struct2, and flags

@@ -210,6 +210,107 @@ amd64_arch_reg_to_regnum (int reg)
   return amd64_arch_regmap[reg];
 }
 
+/* Register names for byte pseudo-registers.  */
+
+static const char *amd64_byte_names[] =
+{
+  "al", "bl", "cl", "dl", "sil", "dil", "bpl", "spl",
+  "r8l", "r9l", "r10l", "r11l", "r12l", "r13l", "r14l", "r15l"
+};
+
+/* Register names for word pseudo-registers.  */
+
+static const char *amd64_word_names[] =
+{
+  "ax", "bx", "cx", "dx", "si", "di", "bp", "sp", 
+  "r8w", "r9w", "r10w", "r11w", "r12w", "r13w", "r14w", "r15w"
+};
+
+/* Register names for dword pseudo-registers.  */
+
+static const char *amd64_dword_names[] =
+{
+  "eax", "ebx", "ecx", "edx", "esi", "edi", "ebp", "esp", 
+  "r8d", "r9d", "r10d", "r11d", "r12d", "r13d", "r14d", "r15d"
+};
+
+/* Return the name of register REGNUM.  */
+
+static const char *
+amd64_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  if (i386_byte_regnum_p (gdbarch, regnum))
+    return amd64_byte_names[regnum - tdep->al_regnum];
+  else if (i386_word_regnum_p (gdbarch, regnum))
+    return amd64_word_names[regnum - tdep->ax_regnum];
+  else if (i386_dword_regnum_p (gdbarch, regnum))
+    return amd64_dword_names[regnum - tdep->eax_regnum];
+  else
+    return i386_pseudo_register_name (gdbarch, regnum);
+}
+
+static void
+amd64_pseudo_register_read (struct gdbarch *gdbarch,
+			    struct regcache *regcache,
+			    int regnum, gdb_byte *buf)
+{
+  gdb_byte raw_buf[MAX_REGISTER_SIZE];
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (i386_byte_regnum_p (gdbarch, regnum))
+    {
+      int gpnum = regnum - tdep->al_regnum;
+
+      /* Extract (always little endian).  */
+      regcache_raw_read (regcache, gpnum, raw_buf);
+      memcpy (buf, raw_buf, 1);
+    }
+  else if (i386_dword_regnum_p (gdbarch, regnum))
+    {
+      int gpnum = regnum - tdep->eax_regnum;
+      /* Extract (always little endian).  */
+      regcache_raw_read (regcache, gpnum, raw_buf);
+      memcpy (buf, raw_buf, 4);
+    }
+  else
+    i386_pseudo_register_read (gdbarch, regcache, regnum, buf);
+}
+
+static void
+amd64_pseudo_register_write (struct gdbarch *gdbarch,
+			     struct regcache *regcache,
+			     int regnum, const gdb_byte *buf)
+{
+  gdb_byte raw_buf[MAX_REGISTER_SIZE];
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (i386_byte_regnum_p (gdbarch, regnum))
+    {
+      int gpnum = regnum - tdep->al_regnum;
+
+      /* Read ...  */
+      regcache_raw_read (regcache, gpnum, raw_buf);
+      /* ... Modify ... (always little endian).  */
+      memcpy (raw_buf, buf, 1);
+      /* ... Write.  */
+      regcache_raw_write (regcache, gpnum, raw_buf);
+    }
+  else if (i386_dword_regnum_p (gdbarch, regnum))
+    {
+      int gpnum = regnum - tdep->eax_regnum;
+
+      /* Read ...  */
+      regcache_raw_read (regcache, gpnum, raw_buf);
+      /* ... Modify ... (always little endian).  */
+      memcpy (raw_buf, buf, 4);
+      /* ... Write.  */
+      regcache_raw_write (regcache, gpnum, raw_buf);
+    }
+  else
+    i386_pseudo_register_write (gdbarch, regcache, regnum, buf);
+}
+
 
 
 /* Return the union class of CLASS1 and CLASS2.  See the psABI for
@@ -2127,6 +2228,19 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->num_core_regs = AMD64_NUM_GREGS + I387_NUM_REGS;
   tdep->register_names = amd64_register_names;
 
+  tdep->num_byte_regs = 16;
+  tdep->num_word_regs = 16;
+  tdep->num_dword_regs = 16;
+  /* Avoid wiring in the MMX registers for now.  */
+  tdep->num_mmx_regs = 0;
+
+  set_gdbarch_pseudo_register_read (gdbarch,
+				    amd64_pseudo_register_read);
+  set_gdbarch_pseudo_register_write (gdbarch,
+				     amd64_pseudo_register_write);
+
+  set_tdesc_pseudo_register_name (gdbarch, amd64_pseudo_register_name);
+
   /* AMD64 has an FPU and 16 SSE registers.  */
   tdep->st0_regnum = AMD64_ST0_REGNUM;
   tdep->num_xmm_regs = 16;
@@ -2177,10 +2291,6 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_return_value (gdbarch, amd64_return_value);
 
   set_gdbarch_skip_prologue (gdbarch, amd64_skip_prologue);
-
-  /* Avoid wiring in the MMX registers for now.  */
-  set_gdbarch_num_pseudo_regs (gdbarch, 0);
-  tdep->mm0_regnum = -1;
 
   tdep->record_regmap = amd64_record_regmap;
 

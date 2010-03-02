@@ -1,3 +1,48 @@
+2010-03-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* amd64-tdep.c (amd64_byte_names): New.
+	(amd64_word_names): Likewise.
+	(amd64_dword_names): Likewise.
+	(amd64_pseudo_register_name): Likewise.
+	(amd64_pseudo_register_read): Likewise.
+	(amd64_pseudo_register_write): Likewise.
+	(amd64_init_abi): Set num_byte_regs, num_word_regs, num_dword_regs
+	and num_mmx_regs.  Call set_gdbarch_pseudo_register_read,
+	set_gdbarch_pseudo_register_write and
+	set_tdesc_pseudo_register_name.  Don't call
+	set_gdbarch_num_pseudo_regs.  Don't set mm0_regnum.
+
+	* i386-tdep.c (i386_num_mmx_regs): Removed.
+	(i386_num_pseudo_regs): Likewise.
+	(i386_byte_names): New.
+	(i386_word_names): Likewise.
+	(i386_byte_regnum_p): Likewise.
+	(i386_word_regnum_p): Likewise.
+	(i386_mmx_regnum_p): Updated.
+	(i386_pseudo_register_name): Make it global.  Handle byte and
+	word pseudo-registers.
+	(i386_pseudo_register_read): Likewise.
+	(i386_pseudo_register_write): Likewise.
+	(i386_pseudo_register_type): Handle byte, word and dword
+	pseudo-registers
+	(i386_register_reggroup_p): Don't include pseudo
+	registers, except for MXX, in any register groups.  Don't
+	include pseudo byte, word, dword registers in general_reggroup.
+	(i386_gdbarch_init): Set num_byte_regs, num_word_regs,
+	num_dword_regs, al_regnum, ax_regnum and eax_regnum.  Put MMX
+	pseudo-registers after word pseudo-registers.  Call
+	set_gdbarch_num_pseudo_regs after calling gdbarch_init_osabi.
+
+	* i386-tdep.h (gdbarch_tdep): Add num_mmx_regs, num_byte_regs,
+	al_regnum, num_word_regs, ax_regnum, num_dword_regs and
+	eax_regnum.
+	(i386_byte_regnum_p): New.
+	(i386_word_regnum_p): Likewise.
+	(i386_dword_regnum_p): Likewise.
+	(i386_pseudo_register_name): Likewise.
+	(i386_pseudo_register_read): Likewise.
+	(i386_pseudo_register_write): Likewise.
+
 2010-03-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* target-descriptions.c (tdesc_type): Remove

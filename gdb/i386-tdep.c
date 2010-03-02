@@ -81,17 +81,72 @@ static const char *i386_mmx_names[] =
   "mm4", "mm5", "mm6", "mm7"
 };
 
-static const int i386_num_mmx_regs = ARRAY_SIZE (i386_mmx_names);
+/* Register names for byte pseudo-registers.  */
+
+static const char *i386_byte_names[] =
+{
+  "al", "cl", "dl", "bl", 
+  "ah", "ch", "dh", "bh"
+};
+
+/* Register names for word pseudo-registers.  */
+
+static const char *i386_word_names[] =
+{
+  "ax", "cx", "dx", "bx",
+  "sp", "bp", "si", "di"
+};
+
+/* MMX register?  */
 
 static int
 i386_mmx_regnum_p (struct gdbarch *gdbarch, int regnum)
 {
-  int mm0_regnum = gdbarch_tdep (gdbarch)->mm0_regnum;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int mm0_regnum = tdep->mm0_regnum;
 
   if (mm0_regnum < 0)
     return 0;
 
-  return (regnum >= mm0_regnum && regnum < mm0_regnum + i386_num_mmx_regs);
+  regnum -= mm0_regnum;
+  return regnum >= 0 && regnum < tdep->num_mmx_regs;
+}
+
+/* Byte register?  */
+
+int
+i386_byte_regnum_p (struct gdbarch *gdbarch, int regnum)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  regnum -= tdep->al_regnum;
+  return regnum >= 0 && regnum < tdep->num_byte_regs;
+}
+
+/* Word register?  */
+
+int
+i386_word_regnum_p (struct gdbarch *gdbarch, int regnum)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  regnum -= tdep->ax_regnum;
+  return regnum >= 0 && regnum < tdep->num_word_regs;
+}
+
+/* Dword register?  */
+
+int
+i386_dword_regnum_p (struct gdbarch *gdbarch, int regnum)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int eax_regnum = tdep->eax_regnum;
+
+  if (eax_regnum < 0)
+    return 0;
+
+  regnum -= eax_regnum;
+  return regnum >= 0 && regnum < tdep->num_dword_regs;
 }
 
 /* SSE register?  */
@@ -147,11 +202,18 @@ i386_fpc_regnum_p (struct gdbarch *gdbarch, int regnum)
 
 /* Return the name of register REGNUM.  */
 
-static const char *
+const char *
 i386_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
 {
-  gdb_assert (i386_mmx_regnum_p (gdbarch, regnum));
-  return i386_mmx_names[regnum - I387_MM0_REGNUM (gdbarch_tdep (gdbarch))];
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  if (i386_mmx_regnum_p (gdbarch, regnum))
+    return i386_mmx_names[regnum - I387_MM0_REGNUM (tdep)];
+  else if (i386_byte_regnum_p (gdbarch, regnum))
+    return i386_byte_names[regnum - tdep->al_regnum];
+  else if (i386_word_regnum_p (gdbarch, regnum))
+    return i386_word_names[regnum - tdep->ax_regnum];
+
+  internal_error (__FILE__, __LINE__, _("invalid regnum"));
 }
 
 /* Convert a dbx register number REG to the appropriate register
@@ -2169,8 +2231,20 @@ i386_mmx_type (struct gdbarch *gdbarch)
 static struct type *
 i386_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 {
-  gdb_assert (i386_mmx_regnum_p (gdbarch, regnum));
-  return i386_mmx_type (gdbarch);
+  if (i386_mmx_regnum_p (gdbarch, regnum))
+    return i386_mmx_type (gdbarch);
+  else
+    {
+      const struct builtin_type *bt = builtin_type (gdbarch);
+      if (i386_byte_regnum_p (gdbarch, regnum))
+	return bt->builtin_int8;
+      else if (i386_word_regnum_p (gdbarch, regnum))
+	return bt->builtin_int16;
+      else if (i386_dword_regnum_p (gdbarch, regnum))
+	return bt->builtin_int32;
+    }
+
+  internal_error (__FILE__, __LINE__, _("invalid regnum"));
 }
 
 /* Map a cooked register onto a raw register or memory.  For the i386,
@@ -2192,41 +2266,104 @@ i386_mmx_regnum_to_fp_regnum (struct regcache *regcache, int regnum)
   return (I387_ST0_REGNUM (tdep) + fpreg);
 }
 
-static void
+void
 i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			   int regnum, gdb_byte *buf)
 {
+  gdb_byte raw_buf[MAX_REGISTER_SIZE];
+
   if (i386_mmx_regnum_p (gdbarch, regnum))
     {
-      gdb_byte mmx_buf[MAX_REGISTER_SIZE];
       int fpnum = i386_mmx_regnum_to_fp_regnum (regcache, regnum);
 
       /* Extract (always little endian).  */
-      regcache_raw_read (regcache, fpnum, mmx_buf);
-      memcpy (buf, mmx_buf, register_size (gdbarch, regnum));
+      regcache_raw_read (regcache, fpnum, raw_buf);
+      memcpy (buf, raw_buf, register_size (gdbarch, regnum));
     }
   else
-    regcache_raw_read (regcache, regnum, buf);
+    {
+      struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+      if (i386_word_regnum_p (gdbarch, regnum))
+	{
+	  int gpnum = regnum - tdep->ax_regnum;
+
+	  /* Extract (always little endian).  */
+	  regcache_raw_read (regcache, gpnum, raw_buf);
+	  memcpy (buf, raw_buf, 2);
+	}
+      else if (i386_byte_regnum_p (gdbarch, regnum))
+	{
+	  /* Check byte pseudo registers last since this function will
+	     be called from amd64_pseudo_register_read, which handles
+	     byte pseudo registers differently.  */
+	  int gpnum = regnum - tdep->al_regnum;
+
+	  /* Extract (always little endian).  We read both lower and
+	     upper registers.  */
+	  regcache_raw_read (regcache, gpnum % 4, raw_buf);
+	  if (gpnum >= 4)
+	    memcpy (buf, raw_buf + 1, 1);
+	  else
+	    memcpy (buf, raw_buf, 1);
+	}
+      else
+	internal_error (__FILE__, __LINE__, _("invalid regnum"));
+    }
 }
 
-static void
+void
 i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 			    int regnum, const gdb_byte *buf)
 {
+  gdb_byte raw_buf[MAX_REGISTER_SIZE];
+
   if (i386_mmx_regnum_p (gdbarch, regnum))
     {
-      gdb_byte mmx_buf[MAX_REGISTER_SIZE];
       int fpnum = i386_mmx_regnum_to_fp_regnum (regcache, regnum);
 
       /* Read ...  */
-      regcache_raw_read (regcache, fpnum, mmx_buf);
+      regcache_raw_read (regcache, fpnum, raw_buf);
       /* ... Modify ... (always little endian).  */
-      memcpy (mmx_buf, buf, register_size (gdbarch, regnum));
+      memcpy (raw_buf, buf, register_size (gdbarch, regnum));
       /* ... Write.  */
-      regcache_raw_write (regcache, fpnum, mmx_buf);
+      regcache_raw_write (regcache, fpnum, raw_buf);
     }
   else
-    regcache_raw_write (regcache, regnum, buf);
+    {
+      struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+      if (i386_word_regnum_p (gdbarch, regnum))
+	{
+	  int gpnum = regnum - tdep->ax_regnum;
+
+	  /* Read ...  */
+	  regcache_raw_read (regcache, gpnum, raw_buf);
+	  /* ... Modify ... (always little endian).  */
+	  memcpy (raw_buf, buf, 2);
+	  /* ... Write.  */
+	  regcache_raw_write (regcache, gpnum, raw_buf);
+	}
+      else if (i386_byte_regnum_p (gdbarch, regnum))
+	{
+	  /* Check byte pseudo registers last since this function will
+	     be called from amd64_pseudo_register_read, which handles
+	     byte pseudo registers differently.  */
+	  int gpnum = regnum - tdep->al_regnum;
+
+	  /* Read ...  We read both lower and upper registers.  */
+	  regcache_raw_read (regcache, gpnum % 4, raw_buf);
+	  /* ... Modify ... (always little endian).  */
+	  if (gpnum >= 4)
+	    memcpy (raw_buf + 1, buf, 1);
+	  else
+	    memcpy (raw_buf, buf, 1);
+	  /* ... Write.  */
+	  regcache_raw_write (regcache, gpnum % 4, raw_buf);
+	}
+      else
+	internal_error (__FILE__, __LINE__, _("invalid regnum"));
+    }
 }
 
 
@@ -2663,22 +2800,46 @@ int
 i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 			  struct reggroup *group)
 {
-  int sse_regnum_p = (i386_sse_regnum_p (gdbarch, regnum)
-		      || i386_mxcsr_regnum_p (gdbarch, regnum));
-  int fp_regnum_p = (i386_fp_regnum_p (gdbarch, regnum)
-		     || i386_fpc_regnum_p (gdbarch, regnum));
-  int mmx_regnum_p = (i386_mmx_regnum_p (gdbarch, regnum));
+  int sse_regnum_p, fp_regnum_p, mmx_regnum_p, byte_regnum_p,
+      word_regnum_p, dword_regnum_p;
 
+  /* Don't include pseudo registers, except for MMX, in any register
+     groups.  */
+  byte_regnum_p = i386_byte_regnum_p (gdbarch, regnum);
+  if (byte_regnum_p)
+    return 0;
+
+  word_regnum_p = i386_word_regnum_p (gdbarch, regnum);
+  if (word_regnum_p)
+    return 0;
+
+  dword_regnum_p = i386_dword_regnum_p (gdbarch, regnum);
+  if (dword_regnum_p)
+    return 0;
+
+  mmx_regnum_p = i386_mmx_regnum_p (gdbarch, regnum);
   if (group == i386_mmx_reggroup)
     return mmx_regnum_p;
+
+  sse_regnum_p = (i386_sse_regnum_p (gdbarch, regnum)
+		  || i386_mxcsr_regnum_p (gdbarch, regnum));
   if (group == i386_sse_reggroup)
     return sse_regnum_p;
   if (group == vector_reggroup)
-    return (mmx_regnum_p || sse_regnum_p);
+    return mmx_regnum_p || sse_regnum_p;
+
+  fp_regnum_p = (i386_fp_regnum_p (gdbarch, regnum)
+		 || i386_fpc_regnum_p (gdbarch, regnum));
   if (group == float_reggroup)
     return fp_regnum_p;
+
   if (group == general_reggroup)
-    return (!fp_regnum_p && !mmx_regnum_p && !sse_regnum_p);
+    return (!fp_regnum_p
+	    && !mmx_regnum_p
+	    && !sse_regnum_p
+	    && !byte_regnum_p
+	    && !word_regnum_p
+	    && !dword_regnum_p);
 
   return default_register_reggroup_p (gdbarch, regnum, group);
 }
@@ -5527,6 +5688,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   struct gdbarch *gdbarch;
   struct tdesc_arch_data *tdesc_data;
   const struct target_desc *tdesc;
+  int mm0_regnum;
 
   /* If there is already a candidate, use it.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
@@ -5562,11 +5724,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      former over the latter.  */
 
   tdep->st0_regnum = I386_ST0_REGNUM;
-
-  /* The MMX registers are implemented as pseudo-registers.  Put off
-     calculating the register number for %mm0 until we know the number
-     of raw registers.  */
-  tdep->mm0_regnum = 0;
 
   /* I386_NUM_XREGS includes %mxcsr, so substract one.  */
   tdep->num_xmm_regs = I386_NUM_XREGS - 1;
@@ -5690,8 +5847,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   frame_base_set_default (gdbarch, &i386_frame_base);
 
-  /* Wire in the MMX registers.  */
-  set_gdbarch_num_pseudo_regs (gdbarch, i386_num_mmx_regs);
+  /* Pseudo registers may be changed by amd64_init_abi.  */
   set_gdbarch_pseudo_register_read (gdbarch, i386_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, i386_pseudo_register_write);
 
@@ -5711,11 +5867,23 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->num_core_regs = I386_NUM_GREGS + I387_NUM_REGS;
   tdep->register_names = i386_register_names;
 
+  tdep->num_byte_regs = 8;
+  tdep->num_word_regs = 8;
+  tdep->num_dword_regs = 0;
+  tdep->num_mmx_regs = 8;
+
   tdesc_data = tdesc_data_alloc ();
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   info.tdep_info = (void *) tdesc_data;
   gdbarch_init_osabi (info, gdbarch);
+
+  /* Wire in pseudo registers.  Number of pseudo registers may be
+     changed.  */
+  set_gdbarch_num_pseudo_regs (gdbarch, (tdep->num_byte_regs
+					 + tdep->num_word_regs
+					 + tdep->num_dword_regs
+					 + tdep->num_mmx_regs));
 
   /* Target description may be changed.  */
   tdesc = tdep->tdesc;
@@ -5733,6 +5901,28 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Override gdbarch_register_reggroup_p set in tdesc_use_registers.  */
   set_gdbarch_register_reggroup_p (gdbarch, tdep->register_reggroup_p);
 
+  /* Make %al the first pseudo-register.  */
+  tdep->al_regnum = gdbarch_num_regs (gdbarch);
+  tdep->ax_regnum = tdep->al_regnum + tdep->num_byte_regs;
+
+  mm0_regnum = tdep->ax_regnum + tdep->num_word_regs;
+  if (tdep->num_dword_regs)
+    {
+      /* Support dword pseudo-registesr if it hasn't been disabled,  */
+      tdep->eax_regnum = mm0_regnum;
+      mm0_regnum = tdep->eax_regnum + tdep->num_dword_regs;
+    }
+  else
+    tdep->eax_regnum = -1;
+
+  if (tdep->num_mmx_regs != 0)
+    {
+      /* Support MMX pseudo-registesr if MMX hasn't been disabled,  */
+      tdep->mm0_regnum = mm0_regnum;
+    }
+  else
+    tdep->mm0_regnum = -1;
+
   /* Hook in the legacy prologue-based unwinders last (fallback).  */
   frame_unwind_append_unwinder (gdbarch, &i386_sigtramp_frame_unwind);
   frame_unwind_append_unwinder (gdbarch, &i386_frame_unwind);
@@ -5743,11 +5933,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       && !gdbarch_regset_from_core_section_p (gdbarch))
     set_gdbarch_regset_from_core_section (gdbarch,
 					  i386_regset_from_core_section);
-
-  /* Unless support for MMX has been disabled, make %mm0 the first
-     pseudo-register.  */
-  if (tdep->mm0_regnum == 0)
-    tdep->mm0_regnum = gdbarch_num_regs (gdbarch);
 
   set_gdbarch_skip_permanent_breakpoint (gdbarch,
 					 i386_skip_permanent_breakpoint);
