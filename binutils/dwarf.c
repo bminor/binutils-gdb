@@ -227,7 +227,7 @@ print_dwarf_vma (dwarf_vma val, unsigned byte_size)
   fputs (buff + (byte_size == 4 ? 8 : 0), stdout);
 }
 
-static unsigned long int
+unsigned long int
 read_leb128 (unsigned char *data, unsigned int *length_return, int sign)
 {
   unsigned long int result = 0;

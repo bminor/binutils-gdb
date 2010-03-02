@@ -285,6 +285,11 @@ static void (* byte_put) (unsigned char *, bfd_vma, int);
 #define streq(a,b)	  (strcmp ((a), (b)) == 0)
 #define strneq(a,b,n)	  (strncmp ((a), (b), (n)) == 0)
 #define const_strneq(a,b) (strncmp ((a), (b), sizeof (b) - 1) == 0)
+
+#define REMOVE_ARCH_BITS(ADDR) do {		\
+    if (elf_header.e_machine == EM_ARM)		\
+      (ADDR) &= ~1;				\
+  } while (0)
 
 static void *
 get_data (void * var, FILE * file, long offset, size_t size, size_t nmemb,
@@ -542,6 +547,33 @@ find_section (const char * name)
       return section_headers + i;
 
   return NULL;
+}
+
+/* Return a pointer to a section containing ADDR, or NULL if no such
+   section exists.  */
+
+static Elf_Internal_Shdr *
+find_section_by_address (bfd_vma addr)
+{
+  unsigned int i;
+
+  for (i = 0; i < elf_header.e_shnum; i++)
+    {
+      Elf_Internal_Shdr *sec = section_headers + i;
+      if (addr >= sec->sh_addr && addr < sec->sh_addr + sec->sh_size)
+	return sec;
+    }
+
+  return NULL;
+}
+
+/* Read an unsigned LEB128 encoded value from p.  Set *PLEN to the number of
+   bytes read.  */
+
+static unsigned long
+read_uleb128 (unsigned char *data, unsigned int *length_return)
+{
+  return read_leb128 (data, length_return, 0);
 }
 
 /* Guess the relocation size commonly used by the specific machines.  */
@@ -5089,16 +5121,22 @@ find_symbol_for_address (Elf_Internal_Sym * symtab,
   Elf_Internal_Sym * best = NULL;
   unsigned long i;
 
+  REMOVE_ARCH_BITS (addr.offset);
+
   for (i = 0, sym = symtab; i < nsyms; ++i, ++sym)
     {
+      bfd_vma value = sym->st_value;
+
+      REMOVE_ARCH_BITS (value);
+
       if (ELF_ST_TYPE (sym->st_info) == STT_FUNC
 	  && sym->st_name != 0
 	  && (addr.section == SHN_UNDEF || addr.section == sym->st_shndx)
-	  && addr.offset >= sym->st_value
-	  && addr.offset - sym->st_value < dist)
+	  && addr.offset >= value
+	  && addr.offset - value < dist)
 	{
 	  best = sym;
-	  dist = addr.offset - sym->st_value;
+	  dist = addr.offset - value;
 	  if (!dist)
 	    break;
 	}
@@ -5761,6 +5799,579 @@ hppa_process_unwind (FILE * file)
   return 1;
 }
 
+struct arm_section
+{
+  unsigned char *data;
+
+  Elf_Internal_Shdr *sec;
+  Elf_Internal_Rela *rela;
+  unsigned long nrelas;
+  unsigned int rel_type;
+
+  Elf_Internal_Rela *next_rela;
+};
+
+struct arm_unw_aux_info
+{
+  FILE *file;
+
+  Elf_Internal_Sym *symtab;	/* The symbol table.  */
+  unsigned long nsyms;		/* Number of symbols.  */
+  char *strtab;			/* The string table.  */
+  unsigned long strtab_size;	/* Size of string table.  */
+};
+
+static const char *
+arm_print_vma_and_name (struct arm_unw_aux_info *aux,
+			bfd_vma fn, struct absaddr addr)
+{
+  const char *procname;
+  bfd_vma sym_offset;
+
+  if (addr.section == SHN_UNDEF)
+    addr.offset = fn;
+
+  find_symbol_for_address (aux->symtab, aux->nsyms, aux->strtab,
+			   aux->strtab_size, addr, &procname,
+			   &sym_offset);
+
+  print_vma (fn, PREFIX_HEX);
+
+  if (procname)
+    {
+      fputs (" <", stdout);
+      fputs (procname, stdout);
+
+      if (sym_offset)
+	printf ("+0x%lx", (unsigned long) sym_offset);
+      fputc ('>', stdout);
+    }
+
+  return procname;
+}
+
+static void
+arm_free_section (struct arm_section *arm_sec)
+{
+  if (arm_sec->data != NULL)
+    free (arm_sec->data);
+
+  if (arm_sec->rela != NULL)
+    free (arm_sec->rela);
+}
+
+static int
+arm_section_get_word (struct arm_unw_aux_info *aux,
+		      struct arm_section *arm_sec,
+		      Elf_Internal_Shdr *sec, bfd_vma word_offset,
+		      unsigned int *wordp, struct absaddr *addr)
+{
+  Elf_Internal_Rela *rp;
+  Elf_Internal_Sym *sym;
+  const char * relname;
+  unsigned int word;
+  bfd_boolean wrapped;
+
+  addr->section = SHN_UNDEF;
+  addr->offset = 0;
+
+  if (sec != arm_sec->sec)
+    {
+      Elf_Internal_Shdr *relsec;
+
+      arm_free_section (arm_sec);
+
+      arm_sec->sec = sec;
+      arm_sec->data = get_data (NULL, aux->file, sec->sh_offset, 1,
+				sec->sh_size, _("unwind data"));
+
+      arm_sec->rela = NULL;
+      arm_sec->nrelas = 0;
+
+      for (relsec = section_headers;
+	   relsec < section_headers + elf_header.e_shnum;
+	   ++relsec)
+	{
+	  if (relsec->sh_info >= elf_header.e_shnum
+	      || section_headers + relsec->sh_info != sec)
+	    continue;
+
+	  if (relsec->sh_type == SHT_REL)
+	    {
+	      if (!slurp_rel_relocs (aux->file, relsec->sh_offset,
+				     relsec->sh_size,
+				     & arm_sec->rela, & arm_sec->nrelas))
+		return 0;
+	      break;
+	    }
+	  else if (relsec->sh_type == SHT_RELA)
+	    {
+	      if (!slurp_rela_relocs (aux->file, relsec->sh_offset,
+				      relsec->sh_size,
+				      & arm_sec->rela, & arm_sec->nrelas))
+		return 0;
+	      break;
+	    }
+	}
+
+      arm_sec->next_rela = arm_sec->rela;
+    }
+
+  if (arm_sec->data == NULL)
+    return 0;
+
+  word = byte_get (arm_sec->data + word_offset, 4);
+
+  wrapped = FALSE;
+  for (rp = arm_sec->next_rela; rp != arm_sec->rela + arm_sec->nrelas; rp++)
+    {
+      bfd_vma prelval, offset;
+
+      if (rp->r_offset > word_offset && !wrapped)
+	{
+	  rp = arm_sec->rela;
+	  wrapped = TRUE;
+	}
+      if (rp->r_offset > word_offset)
+	break;
+
+      if (rp->r_offset & 3)
+	{
+	  warn (_("Skipping unexpected relocation at offset 0x%lx\n"),
+		(unsigned long) rp->r_offset);
+	  continue;
+	}
+
+      if (rp->r_offset < word_offset)
+	continue;
+
+      relname = elf_arm_reloc_type (ELF32_R_TYPE (rp->r_info));
+
+      if (streq (relname, "R_ARM_NONE"))
+	continue;
+
+      if (! streq (relname, "R_ARM_PREL31"))
+	{
+	  warn (_("Skipping unexpected relocation type %s\n"), relname);
+	  continue;
+	}
+
+      sym = aux->symtab + ELF32_R_SYM (rp->r_info);
+
+      if (arm_sec->rel_type == SHT_REL)
+	{
+	  offset = word & 0x7fffffff;
+	  if (offset & 0x40000000)
+	    offset |= ~ (bfd_vma) 0x7fffffff;
+	}
+      else
+	offset = rp->r_addend;
+
+      offset += sym->st_value;
+      prelval = offset - (arm_sec->sec->sh_addr + rp->r_offset);
+
+      word = (word & ~ (bfd_vma) 0x7fffffff) | (prelval & 0x7fffffff);
+      addr->section = sym->st_shndx;
+      addr->offset = offset;
+      break;
+    }
+
+  *wordp = word;
+  arm_sec->next_rela = rp;
+
+  return 1;
+}
+
+static void
+decode_arm_unwind (struct arm_unw_aux_info *aux,
+		   unsigned int word, unsigned int remaining,
+		   bfd_vma data_offset, Elf_Internal_Shdr *data_sec,
+		   struct arm_section *data_arm_sec)
+{
+  int per_index;
+  unsigned int more_words;
+  struct absaddr addr;
+
+#define ADVANCE							\
+  if (remaining == 0 && more_words)				\
+    {								\
+      data_offset += 4;						\
+      if (!arm_section_get_word (aux, data_arm_sec, data_sec,	\
+				 data_offset, &word, &addr))	\
+	return;							\
+      remaining = 4;						\
+      more_words--;						\
+    }								\
+
+#define GET_OP(OP)			\
+  ADVANCE;				\
+  if (remaining)			\
+    {					\
+      remaining--;			\
+      (OP) = word >> 24;		\
+      word <<= 8;			\
+    }					\
+  else					\
+    {					\
+      printf ("[Truncated opcode]\n");	\
+      return;				\
+    }					\
+  printf (_("0x%02x "), OP)
+
+  if (remaining == 0)
+    {
+      /* Fetch the first word.  */
+      if (!arm_section_get_word (aux, data_arm_sec, data_sec, data_offset,
+				 &word, &addr))
+	return;
+      remaining = 4;
+    }
+
+  if ((word & 0x80000000) == 0)
+    {
+      /* Expand prel31 for personality routine.  */
+      bfd_vma fn;
+      const char *procname;
+
+      fn = word;
+      if (fn & 0x40000000)
+	fn |= ~ (bfd_vma) 0x7fffffff;
+      fn = fn + data_sec->sh_addr + data_offset;
+
+      printf (_("  Personality routine: "));
+      procname = arm_print_vma_and_name (aux, fn, addr);
+      fputc ('\n', stdout);
+
+      /* The GCC personality routines use the standard compact
+	 encoding, starting with one byte giving the number of
+	 words.  */
+      if (procname != NULL
+	  && (const_strneq (procname, "__gcc_personality_v0")
+	      || const_strneq (procname, "__gxx_personality_v0")
+	      || const_strneq (procname, "__gcj_personality_v0")
+	      || const_strneq (procname, "__gnu_objc_personality_v0")))
+	{
+	  remaining = 0;
+	  more_words = 1;
+	  ADVANCE;
+	  if (!remaining)
+	    {
+	      printf (_("  [Truncated data]\n"));
+	      return;
+	    }
+	  more_words = word >> 24;
+	  word <<= 8;
+	  remaining--;
+	}
+      else
+	return;
+    }
+  else
+    {
+      
+      per_index = (word >> 24) & 0x7f;
+      if (per_index != 0 && per_index != 1 && per_index != 2)
+	{
+	  printf (_("  [reserved compact index %d]\n"), per_index);
+	  return;
+	}
+
+      printf (_("  Compact model %d\n"), per_index);
+      if (per_index == 0)
+	{
+	  more_words = 0;
+	  word <<= 8;
+	  remaining--;
+	}
+      else
+	{
+	  more_words = (word >> 16) & 0xff;
+	  word <<= 16;
+	  remaining -= 2;
+	}
+    }
+
+  /* Decode the unwinding instructions.  */
+  while (1)
+    {
+      unsigned int op, op2;
+
+      ADVANCE;
+      if (remaining == 0)
+	break;
+      remaining--;
+      op = word >> 24;
+      word <<= 8;
+
+      printf (_("  0x%02x "), op);
+
+      if ((op & 0xc0) == 0x00)
+	{
+	  int offset = ((op & 0x3f) << 2) + 4;
+	  printf (_("     vsp = vsp + %d"), offset);
+	}
+      else if ((op & 0xc0) == 0x40)
+	{
+	  int offset = ((op & 0x3f) << 2) + 4;
+	  printf (_("     vsp = vsp - %d"), offset);
+	}
+      else if ((op & 0xf0) == 0x80)
+	{
+	  GET_OP (op2);
+	  if (op == 0x80 && op2 == 0)
+	    printf (_("Refuse to unwind"));
+	  else
+	    {
+	      unsigned int mask = ((op & 0x0f) << 8) | op2;
+	      int first = 1;
+	      int i;
+	      printf ("pop {");
+	      for (i = 0; i < 12; i++)
+		if (mask & (1 << i))
+		  {
+		    if (first)
+		      first = 0;
+		    else
+		      printf (", ");
+		    printf ("r%d", 4 + i);
+		  }
+	      printf ("}");
+	    }
+	}
+      else if ((op & 0xf0) == 0x90)
+	{
+	  if (op == 0x9d || op == 0x9f)
+	    printf (_("     [Reserved]"));
+	  else
+	    printf (_("     vsp = r%d"), op & 0x0f);
+	}
+      else if ((op & 0xf0) == 0xa0)
+	{
+	  int end = 4 + (op & 0x07);
+	  int first = 1;
+	  int i;
+	  printf ("     pop {");
+	  for (i = 4; i <= end; i++)
+	    {
+	      if (first)
+		first = 0;
+	      else
+		printf (", ");
+	      printf ("r%d", i);
+	    }
+	  if (op & 0x08)
+	    {
+	      if (first)
+		printf (", ");
+	      printf ("r14");
+	    }
+	  printf ("}");
+	}
+      else if (op == 0xb0)
+	printf (_("     finish"));
+      else if (op == 0xb1)
+	{
+	  GET_OP (op2);
+	  if (op2 == 0 || (op2 & 0xf0) != 0)
+	    printf (_("[Spare]"));
+	  else
+	    {
+	      unsigned int mask = op2 & 0x0f;
+	      int first = 1;
+	      int i;
+	      printf ("pop {");
+	      for (i = 0; i < 12; i++)
+		if (mask & (1 << i))
+		  {
+		    if (first)
+		      first = 0;
+		    else
+		      printf (", ");
+		    printf ("r%d", i);
+		  }
+	      printf ("}");
+	    }
+	}
+      else if (op == 0xb2)
+	{
+	  unsigned char buf[5];
+	  unsigned int i, len;
+	  unsigned long offset;
+	  for (i = 0; i < 9; i++)
+	    {
+	      GET_OP (buf[i]);
+	      if ((buf[i] & 0x80) == 0)
+		break;
+	    }
+	  assert (i < sizeof (buf));
+	  offset = read_uleb128 (buf, &len);
+	  assert (len == i + 1);
+	  offset = offset * 4 + 0x204;
+	  printf (_("vsp = vsp + %ld"), offset);
+	}
+      else
+	{
+	  if (op == 0xb3 || op == 0xc6 || op == 0xc7 || op == 0xc8 || op == 0xc9)
+	    {
+	      GET_OP (op2);
+	      printf (_("[unsupported two-byte opcode]"));
+	    }
+	  else
+	    {
+	      printf (_("     [unsupported opcode]"));
+	    }
+	}
+      printf ("\n");
+    }
+
+  /* Decode the descriptors.  Not implemented.  */
+}
+
+static void
+dump_arm_unwind (struct arm_unw_aux_info *aux, Elf_Internal_Shdr *exidx_sec)
+{
+  struct arm_section exidx_arm_sec, extab_arm_sec;
+  unsigned int i, exidx_len;
+
+  memset (&exidx_arm_sec, 0, sizeof (exidx_arm_sec));
+  memset (&extab_arm_sec, 0, sizeof (extab_arm_sec));
+  exidx_len = exidx_sec->sh_size / 8;
+
+  for (i = 0; i < exidx_len; i++)
+    {
+      unsigned int exidx_fn, exidx_entry;
+      struct absaddr fn_addr, entry_addr;
+      bfd_vma fn;
+
+      fputc ('\n', stdout);
+
+      if (!arm_section_get_word (aux, &exidx_arm_sec, exidx_sec,
+				 8 * i, &exidx_fn, &fn_addr)
+	  || !arm_section_get_word (aux, &exidx_arm_sec, exidx_sec,
+				    8 * i + 4, &exidx_entry, &entry_addr))
+	{
+	  arm_free_section (&exidx_arm_sec);
+	  arm_free_section (&extab_arm_sec);
+	  return;
+	}
+
+      fn = exidx_fn & 0x7fffffff;
+      if (fn & 0x40000000)
+	fn |= ~ (bfd_vma) 0x7fffffff;
+      fn = fn + exidx_sec->sh_addr + 8 * i;
+
+      arm_print_vma_and_name (aux, fn, entry_addr);
+      fputs (": ", stdout);
+
+      if (exidx_entry == 1)
+	{
+	  print_vma (exidx_entry, PREFIX_HEX);
+	  fputs (" [cantunwind]\n", stdout);
+	}
+      else if (exidx_entry & 0x80000000)
+	{
+	  print_vma (exidx_entry, PREFIX_HEX);
+	  fputc ('\n', stdout);
+	  decode_arm_unwind (aux, exidx_entry, 4, 0, NULL, NULL);
+	}
+      else
+	{
+	  bfd_vma table, table_offset;
+	  Elf_Internal_Shdr *table_sec;
+
+	  fputs ("@", stdout);
+	  table = exidx_entry;
+	  if (table & 0x40000000)
+	    table |= ~ (bfd_vma) 0x7fffffff;
+	  table = table + exidx_sec->sh_addr + 8 * i + 4;
+	  print_vma (table, PREFIX_HEX);
+	  printf ("\n");
+
+	  /* Locate the matching .ARM.extab.  */
+	  if (entry_addr.section != SHN_UNDEF
+	      && entry_addr.section < elf_header.e_shnum)
+	    {
+	      table_sec = section_headers + entry_addr.section;
+	      table_offset = entry_addr.offset;
+	    }
+	  else
+	    {
+	      table_sec = find_section_by_address (table);
+	      if (table_sec != NULL)
+		table_offset = table - table_sec->sh_addr;
+	    }
+	  if (table_sec == NULL)
+	    {
+	      warn (_("Could not locate .ARM.extab section containing 0x%lx.\n"),
+		    (unsigned long) table);
+	      continue;
+	    }
+	  decode_arm_unwind (aux, 0, 0, table_offset, table_sec,
+			     &extab_arm_sec);
+	}
+    }
+
+  printf ("\n");
+
+  arm_free_section (&exidx_arm_sec);
+  arm_free_section (&extab_arm_sec);
+}
+
+static int
+arm_process_unwind (FILE *file)
+{
+  struct arm_unw_aux_info aux;
+  Elf_Internal_Shdr *unwsec = NULL;
+  Elf_Internal_Shdr *strsec;
+  Elf_Internal_Shdr *sec;
+  unsigned long i;
+
+  memset (& aux, 0, sizeof (aux));
+  aux.file = file;
+
+  if (string_table == NULL)
+    return 1;
+
+  for (i = 0, sec = section_headers; i < elf_header.e_shnum; ++i, ++sec)
+    {
+      if (sec->sh_type == SHT_SYMTAB && sec->sh_link < elf_header.e_shnum)
+	{
+	  aux.nsyms = sec->sh_size / sec->sh_entsize;
+	  aux.symtab = GET_ELF_SYMBOLS (file, sec);
+
+	  strsec = section_headers + sec->sh_link;
+	  aux.strtab = get_data (NULL, file, strsec->sh_offset,
+				 1, strsec->sh_size, _("string table"));
+	  aux.strtab_size = aux.strtab != NULL ? strsec->sh_size : 0;
+	}
+      else if (sec->sh_type == SHT_ARM_EXIDX)
+	unwsec = sec;
+    }
+
+  if (!unwsec)
+    printf (_("\nThere are no unwind sections in this file.\n"));
+
+  for (i = 0, sec = section_headers; i < elf_header.e_shnum; ++i, ++sec)
+    {
+      if (sec->sh_type == SHT_ARM_EXIDX)
+	{
+	  printf (_("\nUnwind table index '%s' at offset 0x%lx contains %lu entries:\n"),
+		  SECTION_NAME (sec),
+		  (unsigned long) sec->sh_offset,
+		  (unsigned long) (sec->sh_size / (2 * eh_addr_size)));
+
+	  dump_arm_unwind (&aux, sec);
+	}
+    }
+
+  if (aux.symtab)
+    free (aux.symtab);
+  if (aux.strtab)
+    free ((char *) aux.strtab);
+
+  return 1;
+}
+
 static int
 process_unwind (FILE * file)
 {
@@ -5770,6 +6381,7 @@ process_unwind (FILE * file)
     int (* handler)(FILE *);
   } handlers[] =
   {
+    { EM_ARM, arm_process_unwind },
     { EM_IA_64, ia64_process_unwind },
     { EM_PARISC, hppa_process_unwind },
     { 0, 0 }
@@ -9176,33 +9788,6 @@ static arm_attr_public_tag arm_attr_public_tags[] =
   LOOKUP(70, MPextension_use_legacy)
 };
 #undef LOOKUP
-
-/* Read an unsigned LEB128 encoded value from p.  Set *PLEN to the number of
-   bytes read.  */
-
-static unsigned int
-read_uleb128 (unsigned char * p, unsigned int * plen)
-{
-  unsigned char c;
-  unsigned int val;
-  int shift;
-  int len;
-
-  val = 0;
-  shift = 0;
-  len = 0;
-  do
-    {
-      c = *(p++);
-      len++;
-      val |= ((unsigned int)c & 0x7f) << shift;
-      shift += 7;
-    }
-  while (c & 0x80);
-
-  *plen = len;
-  return val;
-}
 
 static unsigned char *
 display_arm_attribute (unsigned char * p)

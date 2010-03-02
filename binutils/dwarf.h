@@ -133,3 +133,6 @@ void *xcrealloc (void *, size_t, size_t);
 
 void error (const char *, ...) ATTRIBUTE_PRINTF_1;
 void warn (const char *, ...) ATTRIBUTE_PRINTF_1;
+
+unsigned long int read_leb128 (unsigned char *data,
+			       unsigned int *length_return, int sign);

@@ -1,3 +1,19 @@
+2010-03-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* NEWS: Document .ARM.exidx / .ARM.extab support.
+
+	* dwarf.c (read_leb128): Make non-static.
+	* dwarf.h (read_leb128): Declare.
+	* readelf.c (REMOVE_ARCH_BITS): Define.
+	(find_section_by_address): New.
+	(read_uleb128): Move higher.  Use read_leb128 from dwarf.c.
+	(find_symbol_for_address): Handle the Thumb bit for ARM, by
+	using REMOVE_ARCH_BITS.
+	(struct arm_section, struct arm_unw_aux_info, arm_print_vma_and_name)
+	(arm_free_section, arm_section_get_word, decode_arm_unwind)
+	(dump_arm_unwind, arm_process_unwind): New.
+	(process_unwind): Handle ARM.
+
 2010-02-26  Jie Zhang  <jie@codesourcery.com>
 
 	* MAINTAINERS: Update my email address.
