@@ -263,7 +263,7 @@ static int mi_command_line_array_cnt;
 static int mi_command_line_array_ptr;
 
 static char *
-mi_read_next_line ()
+mi_read_next_line (void)
 {
   if (mi_command_line_array_ptr == mi_command_line_array_cnt)
     return NULL;

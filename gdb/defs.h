@@ -707,7 +707,7 @@ struct command_line
   };
 
 extern struct command_line *read_command_lines (char *, int, int);
-extern struct command_line *read_command_lines_1 (char * (*) (), int);
+extern struct command_line *read_command_lines_1 (char * (*) (void), int);
 
 extern void free_command_lines (struct command_line **);
 

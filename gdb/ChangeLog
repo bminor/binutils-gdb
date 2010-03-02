@@ -1,3 +1,12 @@
+2010-03-02  Tom Tromey  <tromey@redhat.com>
+
+	* mi/mi-cmd-break.c (mi_read_next_line): Add missing 'void'.
+	* defs.h (read_command_lines_1): Add missing 'void'.
+	* cli/cli-script.c (recurse_read_control_structure): Add missing
+	'void'.
+	(read_next_line): Likewise.
+	(read_command_lines_1): Likewise.
+
 2010-03-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* spu-tdep.c (spu_analyze_prologue): Track instruction to

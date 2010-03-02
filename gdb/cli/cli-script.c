@@ -39,14 +39,14 @@
 /* Prototypes for local functions */
 
 static enum command_control_type
-recurse_read_control_structure (char * (*read_next_line_func) (), 
+recurse_read_control_structure (char * (*read_next_line_func) (void),
 				struct command_line *current_cmd);
 
 static char *insert_args (char *line);
 
 static struct cleanup * setup_user_args (char *p);
 
-static char *read_next_line ();
+static char *read_next_line (void);
 
 /* Level of control structure when reading.  */
 static int control_level;
@@ -845,7 +845,7 @@ realloc_body_list (struct command_line *command, int new_length)
    from stdout.  */
 
 static char *
-read_next_line ()
+read_next_line (void)
 {
   char *prompt_ptr, control_prompt[256];
   int i = 0;
@@ -997,7 +997,7 @@ process_next_line (char *p, struct command_line **command, int parse_commands)
 */
 
 static enum command_control_type
-recurse_read_control_structure (char * (*read_next_line_func) (), 
+recurse_read_control_structure (char * (*read_next_line_func) (void),
 				struct command_line *current_cmd)
 {
   int current_body, i;
@@ -1145,7 +1145,7 @@ read_command_lines (char *prompt_arg, int from_tty, int parse_commands)
    obtained using READ_NEXT_LINE_FUNC.  */
 
 struct command_line *
-read_command_lines_1 (char * (*read_next_line_func) (), int parse_commands)
+read_command_lines_1 (char * (*read_next_line_func) (void), int parse_commands)
 {
   struct command_line *head, *tail, *next;
   struct cleanup *old_chain;
