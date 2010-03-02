@@ -1,3 +1,10 @@
+2010-03-02  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* ld-arm/arm-merge-incompatible.d: New test.
+	* ld-arm/arm-merge-incompatiblea.s: Likewise.
+	* ld-arm/arm-merge-incompatibleb.s: Likewise.
+	* ld-arm/arm-elf.exp: Run the new test.
+
 2010-03-02  Christophe Lyon  <christophe.lyon@st.com>
 	Alan Modra  <amodra@gmail.com>
 

@@ -10340,7 +10340,8 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
     }
 
   /* Merge Tag_compatibility attributes and any common GNU ones.  */
-  _bfd_elf_merge_object_attributes (ibfd, obfd);
+  if (!_bfd_elf_merge_object_attributes (ibfd, obfd))
+    return FALSE;
 
   /* Check for any attributes not known on ARM.  */
   in_list = elf_other_obj_attributes_proc (ibfd);
