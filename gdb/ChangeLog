@@ -1,3 +1,8 @@
+2010-03-03  H.J. Lu  <hongjiu.lu@intel.com>
+	    Eli Zaretskii  <eliz@gnu.org>
+
+	* NEWS: Add X86 general purpose registers section.
+
 2010-03-03  Tom Tromey  <tromey@redhat.com>
 
 	PR mi/11098:
