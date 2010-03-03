@@ -1,3 +1,9 @@
+2010-03-03  Tom Tromey  <tromey@redhat.com>
+
+	PR mi/11098:
+	* varobj.c (install_new_value): Handle case where new print_value
+	is NULL.
+
 2010-03-03  Dainis Jonitis  <jonitis@gmail.com>
 
 	PR gdb/11345:
