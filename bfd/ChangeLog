@@ -1,3 +1,9 @@
+2010-03-01  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.in: Bump version to 2.20.1
+	* Makefile.am (RELEASE): Set.
+	* configure, Makefile.in: Regenerate.
+
 2010-02-19  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	2010-01-19  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
