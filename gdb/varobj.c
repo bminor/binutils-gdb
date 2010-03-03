@@ -1593,7 +1593,10 @@ install_new_value (struct varobj *var, struct value *value, int initial)
     {
       xfree (print_value);
       print_value = value_get_print_value (var->value, var->format, var);
-      if (!var->print_value || strcmp (var->print_value, print_value) != 0)
+      if ((var->print_value == NULL && print_value != NULL)
+	  || (var->print_value != NULL && print_value == NULL)
+	  || (var->print_value != NULL && print_value != NULL
+	      && strcmp (var->print_value, print_value) != 0))
 	changed = 1;
     }
   if (var->print_value)
