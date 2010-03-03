@@ -1,3 +1,8 @@
+2010-03-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_output_arch_local_syms): Do not add
+	a mapping symbol to an empty section.
+
 2010-03-02  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Add a check of the
