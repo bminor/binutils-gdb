@@ -1929,7 +1929,7 @@ proc gdb_compile {source dest type options} {
 proc gdb_compile_pthreads {source dest type options} {
     set built_binfile 0
     set why_msg "unrecognized error"
-    foreach lib {-lpthreads -lpthread -lthread} {
+    foreach lib {-lpthreads -lpthread -lthread ""} {
         # This kind of wipes out whatever libs the caller may have
         # set.  Or maybe theirs will override ours.  How infelicitous.
         set options_with_lib [concat $options [list libs=$lib quiet]]

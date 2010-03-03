@@ -1,5 +1,8 @@
 2010-03-03  Doug Evans  <dje@google.com>
 
+	* lib/gdb.exp (gdb_compile_pthreads): Handle case where
+	libc contains libpthread.
+
 	* gdb.threads/linux-dp.c (shared_random): Call rand instead of rand_r.
 	* gdb.threads/linux-dp.exp: Compile with gdb_compile_pthreads instead
 	of gdb_compile.  Add another pattern to match android backtrace.
