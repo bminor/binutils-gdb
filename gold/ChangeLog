@@ -1,3 +1,7 @@
+2010-03-03  Nick Clifton  <nickc@redhat.com>
+
+	* po/fi.po: New Finnish translation.
+
 2010-03-01  Doug Kwan  <dougkwan@google.com>
 
 	* layout.cc (Layout::Layout): Force section types of .init_array*,
