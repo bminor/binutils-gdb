@@ -2642,8 +2642,11 @@ printf_command (char *arg, int from_tty)
 	/* Skip to the next substring.  */
 	current_substring += strlen (current_substring) + 1;
       }
-    /* Print the portion of the format string after the last argument.  */
-    puts_filtered (last_arg);
+    /* Print the portion of the format string after the last argument.
+       Note that this will not include any ordinary %-specs, but it
+       might include "%%".  That is why we use printf_filtered and not
+       puts_filtered here.  */
+    printf_filtered (last_arg);
   }
   do_cleanups (old_cleanups);
 }

@@ -1,3 +1,9 @@
+2010-03-03  Dainis Jonitis  <jonitis@gmail.com>
+
+	PR gdb/11345:
+	* printcmd.c (printf_command): Print end of format string using
+	printf_filtered.
+
 2010-03-02  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (add_partial_subprogram): Add missing baseaddr to
