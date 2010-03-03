@@ -279,7 +279,7 @@ relocate_section(
 	    }
 
 	  sym = static_cast<const Sized_symbol<size>*>(gsym);
-	  if (sym->has_symtab_index())
+	  if (sym->has_symtab_index() && sym->symtab_index() != -1U)
 	    symval.set_output_symtab_index(sym->symtab_index());
 	  else
 	    symval.set_no_output_symtab_entry();
@@ -491,6 +491,9 @@ scan_relocatable_relocs(
 		  if (strategy != Relocatable_relocs::RELOC_DISCARD)
                     object->output_section(shndx)->set_needs_symtab_index();
 		}
+
+	      if (strategy == Relocatable_relocs::RELOC_COPY)
+		object->set_must_have_output_symtab_entry(r_sym);
 	    }
 	}
 

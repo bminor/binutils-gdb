@@ -6506,7 +6506,7 @@ Arm_relobj<big_endian>::update_output_local_symbol_count()
       Symbol_value<32>& lv((*this->local_values())[i]);
 
       // This local symbol was already discarded by do_count_local_symbols.
-      if (!lv.needs_output_symtab_entry())
+      if (!lv.is_output_symtab_index_set())
 	continue;
 
       bool is_ordinary;

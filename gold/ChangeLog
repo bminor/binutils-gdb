@@ -1,3 +1,50 @@
+2010-03-03  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
+	    Ian Lance Taylor  <iant@google.com>
+
+	* target-reloc.h (relocate_section): Check the symbol table index
+	for -1U before setting the local symbol index.
+	(scan_relocatable_relocs): If copying the relocation, record that
+	the local symbol is required.
+	* object.h (Symbol_value::is_output_symtab_index_set): New
+	function.
+	(Symbol_value::may_be_discarded_from_output_symtab): New
+	function.
+	(Symbol_value::has_output_symtab_entry): New function.
+	(Symbol_value::needs_output_symtab_entry): Remove.
+	(Symbol_value::output_symtab_index): Make sure the symbol index is
+	set.
+	(Symbol_value::set_output_symtab_index): Make sure the symbol
+	index is not set.  Make sure the new index is valid.
+	(Symbol_value::set_must_have_output_symtab_entry): New function.
+	(Symbol_value::has_output_dynsym_entry): New function.
+	(Symbol_value::set_output_dynsym_index): Make sure the new index
+	is valid.
+	(Sized_relobj::set_must_have_output_symtab_entry): New function.
+	* object.cc (Sized_relobj::do_count_local_symbols): Only discard a
+	local symbol if permitted.
+	(Sized_relobj::do_finalize_local_symbols): Call
+	is_output_symtab_index_set rather than needs_output_symtab_entry.
+	(Sized_relobj::write_local_symbols): Call has_output_symtab_entry
+	rather than needs_output_symtab_entry.  Call
+	has_output_dynsym_entry rather than needs_output_dynsym_entry.
+	* arm.cc (Arm_relobj::update_output_local_symbol_count): Call
+	is_output_symtab_index_set rather than needs_output_symtab_entry.
+	* testsuite/discard_locals_relocatable_test.c: New file.
+	* testsuite/discard_locals_test.sh: Test -r.
+	* testsuite/Makefile.am (check_DATA): Add
+	discard_locals_relocatable_test1.syms,
+	discard_local_relocatable_test2.syms.
+	(MOSTLYCLEANFILES): Likewise.  Also add
+	discard_locals_relocatable_test1.lout and
+	discard_locals_relocatable_test2.out.
+	(discard_locals_relocatable_test1.syms): New target.
+	(discard_locals_relocatable_test.o): New target.
+	(discard_locals_relocatable_test1.out): New target.
+	(discard_locals_relocatable_test2.syms): New target.
+	(discard_locals_relocatable_test2.out): New target.
+	(various): Add missing ../ld-new dependencies.
+	* testsuite/Makefile.in: Rebuild.
+
 2010-03-03  Nick Clifton  <nickc@redhat.com>
 
 	* po/fi.po: New Finnish translation.

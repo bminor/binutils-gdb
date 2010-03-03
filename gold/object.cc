@@ -1591,7 +1591,7 @@ Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
           ++dyncount;
         }
 
-      if (discard_all)
+      if (discard_all && lv.may_be_discarded_from_output_symtab())
 	{
 	  lv.set_no_output_symtab_entry();
 	  continue;
@@ -1612,6 +1612,7 @@ Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
       if (discard_locals
 	  && sym.get_st_type() != elfcpp::STT_FILE
 	  && !lv.needs_output_dynsym_entry()
+	  && lv.may_be_discarded_from_output_symtab()
 	  && parameters->target().is_local_label_name(name))
 	{
 	  lv.set_no_output_symtab_entry();
@@ -1774,7 +1775,7 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
 				+ lv.input_value());
 	}
 
-      if (lv.needs_output_symtab_entry())
+      if (!lv.is_output_symtab_index_set())
         {
           lv.set_output_symtab_index(index);
           ++index;
@@ -1937,16 +1938,16 @@ Sized_relobj<size, big_endian>::write_local_symbols(
 	  st_shndx = out_sections[st_shndx]->out_shndx();
 	  if (st_shndx >= elfcpp::SHN_LORESERVE)
 	    {
-	      if (lv.needs_output_symtab_entry() && !strip_all)
+	      if (lv.has_output_symtab_entry())
 		symtab_xindex->add(lv.output_symtab_index(), st_shndx);
-	      if (lv.needs_output_dynsym_entry())
+	      if (lv.has_output_dynsym_entry())
 		dynsym_xindex->add(lv.output_dynsym_index(), st_shndx);
 	      st_shndx = elfcpp::SHN_XINDEX;
 	    }
 	}
 
       // Write the symbol to the output symbol table.
-      if (!strip_all && lv.needs_output_symtab_entry())
+      if (lv.has_output_symtab_entry())
         {
           elfcpp::Sym_write<size, big_endian> osym(ov);
 
@@ -1963,7 +1964,7 @@ Sized_relobj<size, big_endian>::write_local_symbols(
         }
 
       // Write the symbol to the output dynamic symbol table.
-      if (lv.needs_output_dynsym_entry())
+      if (lv.has_output_dynsym_entry())
         {
           gold_assert(dyn_ov < dyn_oview + dyn_output_size);
           elfcpp::Sym_write<size, big_endian> osym(dyn_ov);
