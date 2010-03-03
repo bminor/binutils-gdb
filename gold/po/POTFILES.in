@@ -1,5 +1,6 @@
 archive.cc
 archive.h
+arm.cc
 binary.cc
 binary.h
 common.cc
@@ -27,11 +28,17 @@ errors.h
 expression.cc
 fileread.cc
 fileread.h
+freebsd.h
+gc.cc
+gc.h
 gold-threads.cc
 gold-threads.h
 gold.cc
 gold.h
 i386.cc
+icf.cc
+icf.h
+incremental.cc
 layout.cc
 layout.h
 mapfile.cc
@@ -46,6 +53,8 @@ output.cc
 output.h
 parameters.cc
 parameters.h
+plugin.cc
+plugin.h
 powerpc.cc
 readsyms.cc
 readsyms.h
@@ -68,6 +77,7 @@ symtab.h
 target-reloc.h
 target-select.cc
 target-select.h
+target.cc
 target.h
 tls.h
 token.h
