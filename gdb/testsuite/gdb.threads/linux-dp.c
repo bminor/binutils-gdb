@@ -71,11 +71,10 @@ shared_printf (char *format, ...)
 int 
 shared_random ()
 {
-  static unsigned int seed;
   int result;
 
   pthread_mutex_lock (&random_mutex);
-  result = rand_r (&seed);
+  result = rand ();
   pthread_mutex_unlock (&random_mutex);
   return result;
 }

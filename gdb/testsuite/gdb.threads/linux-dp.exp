@@ -49,7 +49,7 @@ if ![istarget *-*-linux-gnu*] then {
 set testfile "linux-dp"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
-if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug libs=-lpthread}] != ""} {
+if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != ""} {
     return -1
 }
 
@@ -247,11 +247,11 @@ gdb_breakpoint "print_philosopher thread 5"
 gdb_continue_to_breakpoint "thread 5's print"
 # When there is no debugging info available for the thread library,
 # the backtrace entry for philosopher's caller looks like:
-#    #1  0x4001c548 in pthread_create () from /lib/libpthread.so.0
+#    #2  0x4001c548 in pthread_create () from /lib/libpthread.so.0
 # If you do have debug info, the output obviously depends more on the
 # exact library in use; under NPTL, you get:
 #    #2  0x0012b7fc in start_thread (arg=0x21) at pthread_create.c:264
-gdb_test "where" "print_philosopher.*philosopher.* \(from .*libpthread\|at pthread_create\).*" \
+gdb_test "where" "print_philosopher.*philosopher.* \(from .*libpthread\|at pthread_create\|in pthread_create\).*" \
 	"first thread-specific breakpoint hit"
 
 # Make sure it's catching the right thread.  Try hitting the
