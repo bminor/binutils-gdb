@@ -1,3 +1,8 @@
+2010-03-03  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/11345:
+	* gdb.base/printcmds.exp (test_printf): Add test.
+
 2010-03-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gdb.arch/amd64-byte.exp: New.

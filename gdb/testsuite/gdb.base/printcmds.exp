@@ -686,6 +686,10 @@ proc test_printf {} {
 
     # Regression test for C lexer bug.
     gdb_test "printf \"%c\\n\", \"x\"\[1,0\]" "x"
+
+    # Regression test for "%% at end of format string.
+    # See http://sourceware.org/bugzilla/show_bug.cgi?id=11345
+    gdb_test "printf \"%%%d%%\\n\", 5" "%5%"
 }
 
 #Test printing DFP values with printf
