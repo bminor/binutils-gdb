@@ -1,3 +1,10 @@
+2010-03-04  Keith Seitz  <keiths@redhat.com>
+
+	* linespec.c (decode_line_1): Update comments for is_quote_enclosed.
+	If the filename portion of the linespec was quoted, recheck the
+	remainder for additional quoting.
+	(locate_first_half): Skip over completer chars, too.
+
 2010-03-04  Tom Tromey  <tromey@redhat.com>
 
 	* printcmd.c (printf_command): Pass dummy argument to

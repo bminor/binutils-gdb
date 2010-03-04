@@ -694,12 +694,14 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   /* This says whether or not something in *ARGPTR is quoted with
      completer_quotes (i.e. with single quotes).  */
   int is_quoted;
-  /* Is part of *ARGPTR is enclosed in double quotes?  */
+  /* Is *ARGPTR is enclosed in double quotes?  */
   int is_quote_enclosed;
   int is_objc_method = 0;
   char *saved_arg = *argptr;
   /* If IS_QUOTED, the end of the quoted bit.  */
   char *end_quote = NULL;
+  /* The "first half" of the linespec.  */
+  char *first_half;
 
   if (not_found_ptr)
     *not_found_ptr = 0;
@@ -731,7 +733,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
      will point to "". If this is a C++ name, like "A::B::foo", p will
      point to "::B::foo". Argptr is not changed by this call.  */
 
-  p = locate_first_half (argptr, &is_quote_enclosed);
+  first_half = p = locate_first_half (argptr, &is_quote_enclosed);
 
   /* Check if this is an Objective-C method (anything that starts with
      a '+' or '-' and a '[').  */
@@ -750,9 +752,6 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
     if (values.sals != NULL)
       return values;
   }
-
-  if (is_quoted)
-    *argptr = *argptr + 1;
 
   /* Does it look like there actually were two parts?  */
 
@@ -827,6 +826,17 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 
   /* file_symtab is specified file's symtab, or 0 if no file specified.
      arg no longer contains the file name.  */
+
+  /* If the filename was quoted, we must re-check the quotation.  */
+
+  if (end_quote == first_half && *end_quote!= '\0')
+    {
+      is_quoted = (**argptr
+		   && strchr (get_gdb_completer_quote_characters (),
+			      **argptr) != NULL);
+      if (is_quoted)
+	end_quote = skip_quoted (*argptr);
+    }
 
   /* Check whether arg is all digits (and sign).  */
 
@@ -1056,7 +1066,14 @@ locate_first_half (char **argptr, int *is_quote_enclosed)
       p++;
     }
   else
-    *is_quote_enclosed = 0;
+    {
+      *is_quote_enclosed = 0;
+      if (strchr (get_gdb_completer_quote_characters (), *p))
+	{
+	  ++(*argptr);
+	  ++p;
+	}
+    }
   for (; *p; p++)
     {
       if (p[0] == '<')
@@ -1574,7 +1591,8 @@ symtab_from_filename (char **argptr, char *p, int is_quote_enclosed,
   copy = (char *) alloca (p - *argptr + 1);
   memcpy (copy, *argptr, p - *argptr);
   /* It may have the ending quote right after the file name.  */
-  if (is_quote_enclosed && copy[p - *argptr - 1] == '"')
+  if ((is_quote_enclosed && copy[p - *argptr - 1] == '"')
+      || copy[p - *argptr - 1] == '\'')
     copy[p - *argptr - 1] = 0;
   else
     copy[p - *argptr] = 0;
