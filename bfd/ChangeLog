@@ -1,3 +1,14 @@
+2010-03-04  Alan Modra  <amodra@gmail.com>
+
+	PR 11302
+	* dwarf2.c (read_abbrevs): Return NULL on alloc failures.
+	(read_attribute_value, decode_line_info): Likewise.
+	(add_line_info, read_rangelist): Return FALSE on alloc failures.
+	(arange_add, sort_line_sequences): Likewise.
+	(find_abstract_instance_name): Handle failures from called funcs.
+	(scan_unit_for_symbols, parse_comp_unit, decode_line_info): Likewise.
+	(find_line): Realloc to a temp, and handle alloc fail.
+
 2010-03-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_output_arch_local_syms): Do not add
