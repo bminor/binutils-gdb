@@ -1236,6 +1236,8 @@ arm_stub_unwind_sniffer (const struct frame_unwind *self,
 
   addr_in_block = get_frame_address_in_block (this_frame);
   if (in_plt_section (addr_in_block, NULL)
+      /* We also use the stub winder if the target memory is unreadable
+	 to avoid having the prologue unwinder trying to read it.  */
       || target_read_memory (get_frame_pc (this_frame), dummy, 4) != 0)
     return 1;
 

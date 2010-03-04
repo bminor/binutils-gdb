@@ -1,3 +1,7 @@
+2010-03-04  Doug Evans  <dje@google.com>
+
+	* arm-tdep.c (arm_stub_unwind_sniffer): Add comment.
+
 2010-03-04  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (update_watchpoint): Create a sentinel location if
