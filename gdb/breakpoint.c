@@ -1237,6 +1237,19 @@ update_watchpoint (struct breakpoint *b, int reparse)
 	    value_free (v);
 	}
 
+      /* If a software watchpoint is not watching any memory, then the
+	 above left it without any location set up.  But,
+	 bpstat_stop_status requires a location to be able to report
+	 stops, so make sure there's at least a dummy one.  */
+      if (b->type == bp_watchpoint && b->loc == NULL)
+	{
+	  b->loc = allocate_bp_location (b);
+	  b->loc->pspace = frame_pspace;
+	  b->loc->address = -1;
+	  b->loc->length = -1;
+	  b->loc->watchpoint_type = -1;
+	}
+
       /* We just regenerated the list of breakpoint locations.
          The new location does not have its condition field set to anything
          and therefore, we must always reparse the cond_string, independently
@@ -4516,7 +4529,14 @@ breakpoint_address_bits (struct breakpoint *b)
 
   for (loc = b->loc; loc; loc = loc->next)
     {
-      int addr_bit = gdbarch_addr_bit (loc->gdbarch);
+      int addr_bit;
+
+      /* Software watchpoints that aren't watching memory don't have
+	 an address to print.  */
+      if (b->type == bp_watchpoint && loc->watchpoint_type == -1)
+	continue;
+
+      addr_bit = gdbarch_addr_bit (loc->gdbarch);
       if (addr_bit > print_address_bits)
 	print_address_bits = addr_bit;
     }

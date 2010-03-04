@@ -1,5 +1,11 @@
 2010-03-04  Pedro Alves  <pedro@codesourcery.com>
 
+	* breakpoint.c (update_watchpoint): Create a sentinel location if
+	the software watchpoint isn't watching any memory.
+	(breakpoint_address_bits): Skip dummy software watchpoint locations.
+
+2010-03-04  Pedro Alves  <pedro@codesourcery.com>
+
 	* utils.c (fputs_maybe_filtered): Check if there's already a top
 	level interpreter before dereferencing it.  If there isn't one,
 	don't paginate either.

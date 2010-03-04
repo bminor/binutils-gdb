@@ -1,3 +1,7 @@
+2010-03-04  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/watch-non-mem.c, gdb.base/watch-non-mem.exp: New.
+
 2010-03-03  Doug Evans  <dje@google.com>
 
 	* lib/gdb.exp (gdb_compile_pthreads): Handle case where
