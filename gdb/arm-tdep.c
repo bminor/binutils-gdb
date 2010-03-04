@@ -334,6 +334,9 @@ arm_find_mapping_symbol (CORE_ADDR memaddr, CORE_ADDR *start)
   return 0;
 }
 
+static CORE_ADDR arm_get_next_pc_raw (struct frame_info *frame, 
+				      CORE_ADDR pc, int insert_bkpt);
+
 /* Determine if the program counter specified in MEMADDR is in a Thumb
    function.  This function should be called for addresses unrelated to
    any executing frame; otherwise, prefer arm_frame_is_thumb.  */
@@ -375,9 +378,29 @@ arm_pc_is_thumb (CORE_ADDR memaddr)
      target, then trust the current value of $cpsr.  This lets
      "display/i $pc" always show the correct mode (though if there is
      a symbol table we will not reach here, so it still may not be
-     displayed in the mode it will be executed).  */
+     displayed in the mode it will be executed).  
+   
+     As a further heuristic if we detect that we are doing a single-step we
+     see what state executing the current instruction ends up with us being
+     in.  */
   if (target_has_registers)
-    return arm_frame_is_thumb (get_current_frame ());
+    {
+      struct frame_info *current_frame = get_current_frame ();
+      CORE_ADDR current_pc = get_frame_pc (current_frame);
+      int is_thumb = arm_frame_is_thumb (current_frame);
+      CORE_ADDR next_pc;
+      if (memaddr == current_pc)
+	return is_thumb;
+      else
+	{
+	  struct gdbarch *gdbarch = get_frame_arch (current_frame);
+	  next_pc = arm_get_next_pc_raw (current_frame, current_pc, FALSE);
+	  if (memaddr == gdbarch_addr_bits_remove (gdbarch, next_pc))
+	    return IS_THUMB_ADDR (next_pc);
+	  else
+	    return is_thumb;
+	}
+    }
 
   /* Otherwise we're out of luck; we assume ARM.  */
   return 0;
@@ -2313,7 +2336,7 @@ thumb_advance_itstate (unsigned int itstate)
    another breakpoint by our caller.  */
 
 static CORE_ADDR
-thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
+thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc, int insert_bkpt)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct address_space *aspace = get_frame_address_space (frame);
@@ -2324,6 +2347,9 @@ thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
   CORE_ADDR nextpc = pc + 2;		/* default is next instruction */
   unsigned long offset;
   ULONGEST status, itstate;
+
+  nextpc = MAKE_THUMB_ADDR (nextpc);
+  pc_val = MAKE_THUMB_ADDR (pc_val);
 
   inst1 = read_memory_unsigned_integer (pc, 2, byte_order_for_code);
 
@@ -2363,7 +2389,7 @@ thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 	      itstate = thumb_advance_itstate (itstate);
 	    }
 
-	  return pc;
+	  return MAKE_THUMB_ADDR (pc);
 	}
       else if (itstate != 0)
 	{
@@ -2381,7 +2407,7 @@ thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 		  itstate = thumb_advance_itstate (itstate);
 		}
 
-	      return pc;
+	      return MAKE_THUMB_ADDR (pc);
 	    }
 	  else if ((itstate & 0x0f) == 0x08)
 	    {
@@ -2406,7 +2432,8 @@ thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 
 	      /* Set a breakpoint on the following instruction.  */
 	      gdb_assert ((itstate & 0x0f) != 0);
-	      insert_single_step_breakpoint (gdbarch, aspace, pc);
+	      if (insert_bkpt)
+	        insert_single_step_breakpoint (gdbarch, aspace, pc);
 	      cond_negated = (itstate >> 4) & 1;
 
 	      /* Skip all following instructions with the same
@@ -2422,7 +2449,7 @@ thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 		}
 	      while (itstate != 0 && ((itstate >> 4) & 1) == cond_negated);
 
-	      return pc;
+	      return MAKE_THUMB_ADDR (pc);
 	    }
 	}
     }
@@ -2436,9 +2463,9 @@ thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 	  /* Advance to the next instruction.  All the 32-bit
 	     instructions share a common prefix.  */
 	  if ((inst1 & 0xe000) == 0xe000 && (inst1 & 0x1800) != 0)
-	    return pc + 4;
+	    return MAKE_THUMB_ADDR (pc + 4);
 	  else
-	    return pc + 2;
+	    return MAKE_THUMB_ADDR (pc + 2);
 	}
 
       /* Otherwise, handle the instruction normally.  */
@@ -2453,9 +2480,6 @@ thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
       offset = bitcount (bits (inst1, 0, 7)) * INT_REGISTER_SIZE;
       sp = get_frame_register_unsigned (frame, ARM_SP_REGNUM);
       nextpc = read_memory_unsigned_integer (sp + offset, 4, byte_order);
-      nextpc = gdbarch_addr_bits_remove (gdbarch, nextpc);
-      if (nextpc == pc)
-	error (_("Infinite loop detected"));
     }
   else if ((inst1 & 0xf000) == 0xd000)	/* conditional branch */
     {
@@ -2474,6 +2498,7 @@ thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 
       /* Default to the next instruction.  */
       nextpc = pc + 4;
+      nextpc = MAKE_THUMB_ADDR (nextpc);
 
       if ((inst1 & 0xf800) == 0xf000 && (inst2 & 0x8000) == 0x8000)
 	{
@@ -2566,6 +2591,7 @@ thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 	{
 	  /* MOV PC or MOVS PC.  */
 	  nextpc = get_frame_register_unsigned (frame, bits (inst2, 0, 3));
+	  nextpc = MAKE_THUMB_ADDR (nextpc);
 	}
       else if ((inst1 & 0xff70) == 0xf850 && (inst2 & 0xf000) == 0xf000)
 	{
@@ -2634,10 +2660,6 @@ thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 	nextpc = pc_val;
       else
 	nextpc = get_frame_register_unsigned (frame, bits (inst1, 3, 6));
-
-      nextpc = gdbarch_addr_bits_remove (gdbarch, nextpc);
-      if (nextpc == pc)
-	error (_("Infinite loop detected"));
     }
   else if ((inst1 & 0xf500) == 0xb100)
     {
@@ -2650,12 +2672,20 @@ thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
       else if (!bit (inst1, 11) && reg == 0)
 	nextpc = pc_val + imm;
     }
-
   return nextpc;
 }
 
-CORE_ADDR
-arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
+/* Get the raw next address.  PC is the current program counter, in 
+   FRAME.  INSERT_BKPT should be TRUE if we want a breakpoint set on 
+   the alternative next instruction if there are two options.
+
+   The value returned has the execution state of the next instruction 
+   encoded in it.  Use IS_THUMB_ADDR () to see whether the instruction is
+   in Thumb-State, and gdbarch_addr_bits_remove () to get the plain memory
+   address.
+*/
+static CORE_ADDR
+arm_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc, int insert_bkpt)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -2666,7 +2696,7 @@ arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
   CORE_ADDR nextpc;
 
   if (arm_frame_is_thumb (frame))
-    return thumb_get_next_pc (frame, pc);
+    return thumb_get_next_pc_raw (frame, pc, insert_bkpt);
 
   pc_val = (unsigned long) pc;
   this_instr = read_memory_unsigned_integer (pc, 4, byte_order_for_code);
@@ -2683,10 +2713,7 @@ arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 	  /* Branch with Link and change to Thumb.  */
 	  nextpc = BranchDest (pc, this_instr);
 	  nextpc |= bit (this_instr, 24) << 1;
-
-	  nextpc = gdbarch_addr_bits_remove (gdbarch, nextpc);
-	  if (nextpc == pc)
-	    error (_("Infinite loop detected"));
+	  nextpc = MAKE_THUMB_ADDR (nextpc);
 	  break;
 	}
       case 0xc:
@@ -2722,14 +2749,8 @@ arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 		|| bits (this_instr, 4, 27) == 0x12fff3)
 	      {
 		rn = bits (this_instr, 0, 3);
-		result = (rn == 15) ? pc_val + 8
+		nextpc = (rn == 15) ? pc_val + 8
 				    : get_frame_register_unsigned (frame, rn);
-		nextpc = (CORE_ADDR) gdbarch_addr_bits_remove
-				       (gdbarch, result);
-
-		if (nextpc == pc)
-		  error (_("Infinite loop detected"));
-
 		return nextpc;
 	      }
 
@@ -2807,11 +2828,14 @@ arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 		result = ~operand2;
 		break;
 	      }
-	    nextpc = (CORE_ADDR) gdbarch_addr_bits_remove
-				   (gdbarch, result);
 
-	    if (nextpc == pc)
-	      error (_("Infinite loop detected"));
+            /* In 26-bit APCS the bottom two bits of the result are 
+	       ignored, and we always end up in ARM state.  */
+	    if (!arm_apcs_32)
+	      nextpc = arm_addr_bits_remove (gdbarch, result);
+	    else
+	      nextpc = result;
+
 	    break;
 	  }
 
@@ -2851,11 +2875,6 @@ arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 		    }
 		  nextpc = (CORE_ADDR) read_memory_integer ((CORE_ADDR) base,
 							    4, byte_order);
-
-		  nextpc = gdbarch_addr_bits_remove (gdbarch, nextpc);
-
-		  if (nextpc == pc)
-		    error (_("Infinite loop detected"));
 		}
 	    }
 	  break;
@@ -2890,10 +2909,6 @@ arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 								  + offset),
 						       4, byte_order);
 		  }
-		  nextpc = gdbarch_addr_bits_remove
-			     (gdbarch, nextpc);
-		  if (nextpc == pc)
-		    error (_("Infinite loop detected"));
 		}
 	    }
 	  break;
@@ -2902,10 +2917,6 @@ arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 	case 0xa:		/* branch */
 	  {
 	    nextpc = BranchDest (pc, this_instr);
-
-	    nextpc = gdbarch_addr_bits_remove (gdbarch, nextpc);
-	    if (nextpc == pc)
-	      error (_("Infinite loop detected"));
 	    break;
 	  }
 
@@ -2921,6 +2932,18 @@ arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 	}
     }
 
+  return nextpc;
+}
+
+CORE_ADDR
+arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
+{
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  CORE_ADDR nextpc = 
+    gdbarch_addr_bits_remove (gdbarch, 
+			      arm_get_next_pc_raw (frame, pc, TRUE));
+  if (nextpc == pc)
+    error (_("Infinite loop detected"));
   return nextpc;
 }
 

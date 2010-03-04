@@ -1,3 +1,12 @@
+2010-03-04  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* arm-tdep.c (arm_pc_is_thumb): Add heuristic that tries to get
+	the state right when single stepping.
+	(arm_get_next_pc_raw, thumb_get_next_pc_raw): New functions.
+	Get the next PC along with the instruction state.
+	(thumb_get_next_pc): Remove.
+	(arm_get_next_pc): Modified to use arm_get_next_pc_raw.
+
 2010-03-04  Hui Zhu  <teawater@gmail.com>
 
 	* i386-tdep.c (i386_process_record): Change "addr" to "tmpu64".
