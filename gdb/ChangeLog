@@ -1,3 +1,7 @@
+2010-03-04  Hui Zhu  <teawater@gmail.com>
+
+	* i386-tdep.c (i386_process_record): Change "addr" to "tmpu64".
+
 2010-03-03  Pedro Alves  <pedro@codesourcery.com>
 
 	* utils.c (fputs_maybe_filtered): Always disable pagination if the

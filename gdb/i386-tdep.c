@@ -5388,7 +5388,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 		    return -1;
 		  if (record_arch_list_add_mem (tmpu64, 2))
 		    return -1;
-		  addr += 2;
+		  tmpu64 += 2;
                   if (ir.regmap[X86_RECORD_R8_REGNUM])
                     {
                       if (record_arch_list_add_mem (tmpu64, 8))
