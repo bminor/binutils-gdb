@@ -299,6 +299,8 @@ gdb_test "list ${srcfile}:intToChar" "int intToChar.*"
 gdb_test "list ${srcfile}:intToChar(char)" "int intToChar.*"
 gdb_test "list ${srcfile}:'intToChar(char)'" "int intToChar.*"
 gdb_test "list '${srcfile}:intToChar(char)'" "int intToChar.*"
+gdb_test "list '${srcfile}':intToChar(char)" "int intToChar.*"
+gdb_test "list '${srcfile}':'intToChar(char)'" "int intToChar.*"
 
 # And with filename and namespace... which does not work.
 

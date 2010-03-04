@@ -1,3 +1,9 @@
+2010-03-04  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.cp/overload.exp: Test that the filename portion of a linespec
+	can be quoted.  Test that both the filename and function/line
+	portions can be quoted at the same time.
+
 2010-03-04  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.base/watch-non-mem.c, gdb.base/watch-non-mem.exp: New.
