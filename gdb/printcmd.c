@@ -2645,8 +2645,10 @@ printf_command (char *arg, int from_tty)
     /* Print the portion of the format string after the last argument.
        Note that this will not include any ordinary %-specs, but it
        might include "%%".  That is why we use printf_filtered and not
-       puts_filtered here.  */
-    printf_filtered (last_arg);
+       puts_filtered here.  Also, we pass a dummy argument because
+       some platforms have modified GCC to include -Wformat-security
+       by default, which will warn here if there is no argument.  */
+    printf_filtered (last_arg, 0);
   }
   do_cleanups (old_cleanups);
 }
