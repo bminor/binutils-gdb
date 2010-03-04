@@ -71,6 +71,7 @@
 #include <time.h>
 
 #include "gdb_usleep.h"
+#include "interps.h"
 
 #if !HAVE_DECL_MALLOC
 extern PTR malloc ();		/* ARI: PTR */
@@ -2209,8 +2210,10 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
     return;
 
   /* Don't do any filtering if it is disabled.  */
-  if ((stream != gdb_stdout) || !pagination_enabled
-      || (lines_per_page == UINT_MAX && chars_per_line == UINT_MAX))
+  if (stream != gdb_stdout
+      || !pagination_enabled
+      || (lines_per_page == UINT_MAX && chars_per_line == UINT_MAX)
+      || ui_out_is_mi_like_p (interp_ui_out (top_level_interpreter ())))
     {
       fputs_unfiltered (linebuffer, stream);
       return;
