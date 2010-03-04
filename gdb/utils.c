@@ -2213,6 +2213,7 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
   if (stream != gdb_stdout
       || !pagination_enabled
       || (lines_per_page == UINT_MAX && chars_per_line == UINT_MAX)
+      || top_level_interpreter () == NULL
       || ui_out_is_mi_like_p (interp_ui_out (top_level_interpreter ())))
     {
       fputs_unfiltered (linebuffer, stream);
