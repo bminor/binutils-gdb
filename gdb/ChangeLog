@@ -1,3 +1,9 @@
+2010-03-04  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (skip_one_die) <DW_FORM_ref_addr>: Use offset size
+	in DWARF 3 and later.
+	(read_attribute_value) <DW_FORM_ref_addr>: Likewise.
+
 2010-03-04  Keith Seitz  <keiths@redhat.com>
 
 	* linespec.c (decode_line_1): Update comments for is_quote_enclosed.
