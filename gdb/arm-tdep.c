@@ -1198,9 +1198,7 @@ struct frame_unwind arm_prologue_unwind = {
 static struct arm_prologue_cache *
 arm_make_stub_cache (struct frame_info *this_frame)
 {
-  int reg;
   struct arm_prologue_cache *cache;
-  CORE_ADDR unwound_fp;
 
   cache = FRAME_OBSTACK_ZALLOC (struct arm_prologue_cache);
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
