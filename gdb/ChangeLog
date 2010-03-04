@@ -1,3 +1,8 @@
+2010-03-04  Tom Tromey  <tromey@redhat.com>
+
+	* printcmd.c (printf_command): Pass dummy argument to
+	printf_filtered.
+
 2010-03-04  Doug Evans  <dje@google.com>
 
 	* arm-tdep.c (arm_stub_unwind_sniffer): Add comment.
