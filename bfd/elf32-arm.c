@@ -13172,6 +13172,8 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
 	     osi.sec = osi.sec->next)
 	  {
 	    if (osi.sec->output_section != NULL
+		&& ((osi.sec->output_section->flags & (SEC_ALLOC | SEC_CODE))
+		    != 0)
 		&& (osi.sec->flags & (SEC_HAS_CONTENTS | SEC_LINKER_CREATED))
 		   == SEC_HAS_CONTENTS
 		&& get_arm_elf_section_data (osi.sec) != NULL

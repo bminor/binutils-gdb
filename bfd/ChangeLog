@@ -1,3 +1,8 @@
+2010-03-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_output_arch_local_syms): Skip non-program
+	sections.
+
 2010-03-04  Alan Modra  <amodra@gmail.com>
 
 	PR 11302
