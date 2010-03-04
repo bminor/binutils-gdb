@@ -625,7 +625,8 @@ validate_actionline (char **line, struct breakpoint *t)
   struct cmd_list_element *c;
   struct expression *exp = NULL;
   struct cleanup *old_chain = NULL;
-  char *p;
+  char *p, *tmp_p;
+  struct bp_location *loc;
 
   /* if EOF is typed, *line is NULL */
   if (*line == NULL)
@@ -671,48 +672,53 @@ validate_actionline (char **line, struct breakpoint *t)
 		}
 	      /* else fall thru, treat p as an expression and parse it!  */
 	    }
-	  exp = parse_exp_1 (&p, block_for_pc (t->loc->address), 1);
-	  old_chain = make_cleanup (free_current_contents, &exp);
-
-	  if (exp->elts[0].opcode == OP_VAR_VALUE)
+	  tmp_p = p;
+	  for (loc = t->loc; loc; loc = loc->next)
 	    {
-	      if (SYMBOL_CLASS (exp->elts[2].symbol) == LOC_CONST)
+	      p = tmp_p;
+	      exp = parse_exp_1 (&p, block_for_pc (loc->address), 1);
+	      old_chain = make_cleanup (free_current_contents, &exp);
+
+	      if (exp->elts[0].opcode == OP_VAR_VALUE)
 		{
-		  warning (_("constant %s (value %ld) will not be collected."),
-			   SYMBOL_PRINT_NAME (exp->elts[2].symbol),
-			   SYMBOL_VALUE (exp->elts[2].symbol));
-		  return BADLINE;
+		  if (SYMBOL_CLASS (exp->elts[2].symbol) == LOC_CONST)
+		    {
+		      warning (_("constant %s (value %ld) will not be collected."),
+			       SYMBOL_PRINT_NAME (exp->elts[2].symbol),
+			       SYMBOL_VALUE (exp->elts[2].symbol));
+		      return BADLINE;
+		    }
+		  else if (SYMBOL_CLASS (exp->elts[2].symbol) == LOC_OPTIMIZED_OUT)
+		    {
+		      warning (_("%s is optimized away and cannot be collected."),
+			       SYMBOL_PRINT_NAME (exp->elts[2].symbol));
+		      return BADLINE;
+		    }
 		}
-	      else if (SYMBOL_CLASS (exp->elts[2].symbol) == LOC_OPTIMIZED_OUT)
-		{
-		  warning (_("%s is optimized away and cannot be collected."),
-			   SYMBOL_PRINT_NAME (exp->elts[2].symbol));
-		  return BADLINE;
-		}
+
+	      /* We have something to collect, make sure that the expr to
+		 bytecode translator can handle it and that it's not too
+		 long.  */
+	      aexpr = gen_trace_for_expr (loc->address, exp);
+	      make_cleanup_free_agent_expr (aexpr);
+
+	      if (aexpr->len > MAX_AGENT_EXPR_LEN)
+		error (_("expression too complicated, try simplifying"));
+
+	      ax_reqs (aexpr, &areqs);
+	      (void) make_cleanup (xfree, areqs.reg_mask);
+
+	      if (areqs.flaw != agent_flaw_none)
+		error (_("malformed expression"));
+
+	      if (areqs.min_height < 0)
+		error (_("gdb: Internal error: expression has min height < 0"));
+
+	      if (areqs.max_height > 20)
+		error (_("expression too complicated, try simplifying"));
+
+	      do_cleanups (old_chain);
 	    }
-
-	  /* We have something to collect, make sure that the expr to
-	     bytecode translator can handle it and that it's not too
-	     long.  */
-	  aexpr = gen_trace_for_expr (t->loc->address, exp);
-	  make_cleanup_free_agent_expr (aexpr);
-
-	  if (aexpr->len > MAX_AGENT_EXPR_LEN)
-	    error (_("expression too complicated, try simplifying"));
-
-	  ax_reqs (aexpr, &areqs);
-	  (void) make_cleanup (xfree, areqs.reg_mask);
-
-	  if (areqs.flaw != agent_flaw_none)
-	    error (_("malformed expression"));
-
-	  if (areqs.min_height < 0)
-	    error (_("gdb: Internal error: expression has min height < 0"));
-
-	  if (areqs.max_height > 20)
-	    error (_("expression too complicated, try simplifying"));
-
-	  do_cleanups (old_chain);
 	}
       while (p && *p++ == ',');
       return GENERIC;
@@ -727,20 +733,25 @@ validate_actionline (char **line, struct breakpoint *t)
 	  while (isspace ((int) *p))
 	    p++;
 
-	  /* Only expressions are allowed for this action.  */
-	  exp = parse_exp_1 (&p, block_for_pc (t->loc->address), 1);
-	  old_chain = make_cleanup (free_current_contents, &exp);
+	  tmp_p = p;
+	  for (loc = t->loc; loc; loc = loc->next)
+	    {
+	      p = tmp_p;
+	      /* Only expressions are allowed for this action.  */
+	      exp = parse_exp_1 (&p, block_for_pc (loc->address), 1);
+	      old_chain = make_cleanup (free_current_contents, &exp);
 
-	  /* We have something to evaluate, make sure that the expr to
-	     bytecode translator can handle it and that it's not too
-	     long.  */
-	  aexpr = gen_eval_for_expr (t->loc->address, exp);
-	  make_cleanup_free_agent_expr (aexpr);
+	      /* We have something to evaluate, make sure that the expr to
+		 bytecode translator can handle it and that it's not too
+		 long.  */
+	      aexpr = gen_eval_for_expr (loc->address, exp);
+	      make_cleanup_free_agent_expr (aexpr);
 
-	  if (aexpr->len > MAX_AGENT_EXPR_LEN)
-	    error (_("expression too complicated, try simplifying"));
+	      if (aexpr->len > MAX_AGENT_EXPR_LEN)
+		error (_("expression too complicated, try simplifying"));
 
-	  do_cleanups (old_chain);
+	      do_cleanups (old_chain);
+	    }
 	}
       while (p && *p++ == ',');
       return GENERIC;
@@ -1238,8 +1249,8 @@ stringify_collection_list (struct collection_list *list, char *string)
 
 /* Render all actions into gdb protocol.  */
 /*static*/ void
-encode_actions (struct breakpoint *t, char ***tdp_actions,
-		char ***stepping_actions)
+encode_actions (struct breakpoint *t, struct bp_location *tloc,
+		char ***tdp_actions, char ***stepping_actions)
 {
   static char tdp_buff[2048], step_buff[2048];
   char *action_exp;
@@ -1263,7 +1274,7 @@ encode_actions (struct breakpoint *t, char ***tdp_actions,
   *stepping_actions = NULL;
 
   gdbarch_virtual_frame_pointer (t->gdbarch,
-				 t->loc->address, &frame_reg, &frame_offset);
+				 tloc->address, &frame_reg, &frame_offset);
 
   action = t->actions;
 
@@ -1322,7 +1333,7 @@ encode_actions (struct breakpoint *t, char ***tdp_actions,
 		{
 		  add_local_symbols (collect,
 				     t->gdbarch,
-				     t->loc->address,
+				     tloc->address,
 				     frame_reg,
 				     frame_offset,
 				     'A');
@@ -1332,7 +1343,7 @@ encode_actions (struct breakpoint *t, char ***tdp_actions,
 		{
 		  add_local_symbols (collect,
 				     t->gdbarch,
-				     t->loc->address,
+				     tloc->address,
 				     frame_reg,
 				     frame_offset,
 				     'L');
@@ -1346,7 +1357,7 @@ encode_actions (struct breakpoint *t, char ***tdp_actions,
 		  struct agent_reqs areqs;
 
 		  exp = parse_exp_1 (&action_exp, 
-				     block_for_pc (t->loc->address), 1);
+				     block_for_pc (tloc->address), 1);
 		  old_chain = make_cleanup (free_current_contents, &exp);
 
 		  switch (exp->elts[0].opcode)
@@ -1381,11 +1392,11 @@ encode_actions (struct breakpoint *t, char ***tdp_actions,
 				      t->gdbarch,
 				      frame_reg,
 				      frame_offset,
-				      t->loc->address);
+				      tloc->address);
 		      break;
 
 		    default:	/* full-fledged expression */
-		      aexpr = gen_trace_for_expr (t->loc->address, exp);
+		      aexpr = gen_trace_for_expr (tloc->address, exp);
 
 		      old_chain1 = make_cleanup_free_agent_expr (aexpr);
 
@@ -1443,10 +1454,10 @@ encode_actions (struct breakpoint *t, char ***tdp_actions,
 		  struct agent_reqs areqs;
 
 		  exp = parse_exp_1 (&action_exp, 
-				     block_for_pc (t->loc->address), 1);
+				     block_for_pc (tloc->address), 1);
 		  old_chain = make_cleanup (free_current_contents, &exp);
 
-		  aexpr = gen_eval_for_expr (t->loc->address, exp);
+		  aexpr = gen_eval_for_expr (tloc->address, exp);
 		  old_chain1 = make_cleanup_free_agent_expr (aexpr);
 
 		  ax_reqs (aexpr, &areqs);
@@ -2224,6 +2235,7 @@ trace_dump_command (char *args, int from_tty)
   struct cleanup *old_cleanups;
   int stepping_actions = 0;
   int stepping_frame = 0;
+  struct bp_location *loc;
 
   if (tracepoint_number == -1)
     {
@@ -2249,7 +2261,14 @@ trace_dump_command (char *args, int from_tty)
   regcache = get_current_regcache ();
   gdbarch = get_regcache_arch (regcache);
 
-  stepping_frame = (t->loc->address != (regcache_read_pc (regcache)));
+  /* If the traceframe's address matches any of the tracepoint's
+     locations, assume it is a direct hit rather than a while-stepping
+     frame.  (FIXME this is not reliable, should record each frame's
+     type.)  */
+  stepping_frame = 1;
+  for (loc = t->loc; loc; loc = loc->next)
+    if (loc->address == regcache_read_pc (regcache))
+      stepping_frame = 0;
 
   for (action = t->actions; action; action = action->next)
     {
@@ -3239,6 +3258,7 @@ tfile_get_traceframe_address (off_t tframe_offset)
     error (_("Premature end of file while reading trace file"));
 
   tp = get_tracepoint_by_number_on_target (tpnum);
+  /* FIXME this is a poor heuristic if multiple locations */
   if (tp && tp->loc)
     addr = tp->loc->address;
 

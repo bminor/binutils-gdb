@@ -72,8 +72,8 @@
 static char *target_buf;
 static long target_buf_size;
 /*static*/ void
-encode_actions (struct breakpoint *t, char ***tdp_actions,
-		char ***stepping_actions);
+encode_actions (struct breakpoint *t, struct bp_location *tloc,
+		char ***tdp_actions, char ***stepping_actions);
 
 /* The size to align memory write packets, when practical.  The protocol
    does not guarantee any alignment, and gdb will generate short
@@ -9253,6 +9253,7 @@ free_actions_list (char **actions_list)
 static void
 remote_download_tracepoint (struct breakpoint *t)
 {
+  struct bp_location *loc;
   CORE_ADDR tpaddr;
   char tmp[40];
   char buf[2048];
@@ -9264,111 +9265,116 @@ remote_download_tracepoint (struct breakpoint *t)
   struct cleanup *aexpr_chain = NULL;
   char *pkt;
 
-  encode_actions (t, &tdp_actions, &stepping_actions);
-  old_chain = make_cleanup (free_actions_list_cleanup_wrapper,
-			    tdp_actions);
-  (void) make_cleanup (free_actions_list_cleanup_wrapper, stepping_actions);
-
-  tpaddr = t->loc->address;
-  sprintf_vma (tmp, (t->loc ? tpaddr : 0));
-  sprintf (buf, "QTDP:%x:%s:%c:%lx:%x", t->number, 
-	   tmp, /* address */
-	   (t->enable_state == bp_enabled ? 'E' : 'D'),
-	   t->step_count, t->pass_count);
-  /* Fast tracepoints are mostly handled by the target, but we can
-     tell the target how big of an instruction block should be moved
-     around.  */
-  if (t->type == bp_fast_tracepoint)
+  /* Iterate over all the tracepoint locations.  It's up to the target to
+     notice multiple tracepoint packets with the same number but different
+     addresses, and treat them as multiple locations.  */
+  for (loc = t->loc; loc; loc = loc->next)
     {
-      /* Only test for support at download time; we may not know
-	 target capabilities at definition time.  */
-      if (remote_supports_fast_tracepoints ())
-	{
-	  int isize;
+      encode_actions (t, loc, &tdp_actions, &stepping_actions);
+      old_chain = make_cleanup (free_actions_list_cleanup_wrapper,
+				tdp_actions);
+      (void) make_cleanup (free_actions_list_cleanup_wrapper, stepping_actions);
 
-	  if (gdbarch_fast_tracepoint_valid_at (target_gdbarch,
-						tpaddr, &isize, NULL))
-	    sprintf (buf + strlen (buf), ":F%x", isize);
+      tpaddr = loc->address;
+      sprintf_vma (tmp, (loc ? tpaddr : 0));
+      sprintf (buf, "QTDP:%x:%s:%c:%lx:%x", t->number, 
+	       tmp, /* address */
+	       (t->enable_state == bp_enabled ? 'E' : 'D'),
+	       t->step_count, t->pass_count);
+      /* Fast tracepoints are mostly handled by the target, but we can
+	 tell the target how big of an instruction block should be moved
+	 around.  */
+      if (t->type == bp_fast_tracepoint)
+	{
+	  /* Only test for support at download time; we may not know
+	     target capabilities at definition time.  */
+	  if (remote_supports_fast_tracepoints ())
+	    {
+	      int isize;
+
+	      if (gdbarch_fast_tracepoint_valid_at (target_gdbarch,
+						    tpaddr, &isize, NULL))
+		sprintf (buf + strlen (buf), ":F%x", isize);
+	      else
+		/* If it passed validation at definition but fails now,
+		   something is very wrong.  */
+		internal_error (__FILE__, __LINE__,
+				"Fast tracepoint not valid during download");
+	    }
 	  else
-	    /* If it passed validation at definition but fails now,
-	       something is very wrong.  */
-	    internal_error (__FILE__, __LINE__,
-			    "Fast tracepoint not valid during download");
+	    /* Fast tracepoints are functionally identical to regular
+	       tracepoints, so don't take lack of support as a reason to
+	       give up on the trace run.  */
+	    warning (_("Target does not support fast tracepoints, downloading %d as regular tracepoint"), t->number);
 	}
-      else
-	/* Fast tracepoints are functionally identical to regular
-	   tracepoints, so don't take lack of support as a reason to
-	   give up on the trace run.  */
-	warning (_("Target does not support fast tracepoints, downloading %d as regular tracepoint"), t->number);
-    }
-  /* If the tracepoint has a conditional, make it into an agent
-     expression and append to the definition.  */
-  if (t->loc->cond)
-    {
-      /* Only test support at download time, we may not know target
-	 capabilities at definition time.  */
-      if (remote_supports_cond_tracepoints ())
+      /* If the tracepoint has a conditional, make it into an agent
+	 expression and append to the definition.  */
+      if (loc->cond)
 	{
-	  aexpr = gen_eval_for_expr (t->loc->address, t->loc->cond);
-	  aexpr_chain = make_cleanup_free_agent_expr (aexpr);
-	  sprintf (buf + strlen (buf), ":X%x,", aexpr->len);
-	  pkt = buf + strlen (buf);
-	  for (ndx = 0; ndx < aexpr->len; ++ndx)
-	    pkt = pack_hex_byte (pkt, aexpr->buf[ndx]);
-	  *pkt = '\0';
-	  do_cleanups (aexpr_chain);
+	  /* Only test support at download time, we may not know target
+	     capabilities at definition time.  */
+	  if (remote_supports_cond_tracepoints ())
+	    {
+	      aexpr = gen_eval_for_expr (tpaddr, loc->cond);
+	      aexpr_chain = make_cleanup_free_agent_expr (aexpr);
+	      sprintf (buf + strlen (buf), ":X%x,", aexpr->len);
+	      pkt = buf + strlen (buf);
+	      for (ndx = 0; ndx < aexpr->len; ++ndx)
+		pkt = pack_hex_byte (pkt, aexpr->buf[ndx]);
+	      *pkt = '\0';
+	      do_cleanups (aexpr_chain);
+	    }
+	  else
+	    warning (_("Target does not support conditional tracepoints, ignoring tp %d cond"), t->number);
 	}
-      else
-	warning (_("Target does not support conditional tracepoints, ignoring tp %d cond"), t->number);
-    }
 
-  if (t->actions || *default_collect)
-    strcat (buf, "-");
-  putpkt (buf);
-  remote_get_noisy_reply (&target_buf, &target_buf_size);
-  if (strcmp (target_buf, "OK"))
-    error (_("Target does not support tracepoints."));
+      if (t->actions || *default_collect)
+	strcat (buf, "-");
+      putpkt (buf);
+      remote_get_noisy_reply (&target_buf, &target_buf_size);
+      if (strcmp (target_buf, "OK"))
+	error (_("Target does not support tracepoints."));
 
-  if (!t->actions && !*default_collect)
-    return;
+      if (!t->actions && !*default_collect)
+	continue;
 
-  /* do_single_steps (t); */
-  if (tdp_actions)
-    {
-      for (ndx = 0; tdp_actions[ndx]; ndx++)
+      /* do_single_steps (t); */
+      if (tdp_actions)
 	{
-	  QUIT;	/* allow user to bail out with ^C */
-	  sprintf (buf, "QTDP:-%x:%s:%s%c",
-		   t->number, tmp, /* address */
-		   tdp_actions[ndx],
-		   ((tdp_actions[ndx + 1] || stepping_actions)
-		    ? '-' : 0));
-	  putpkt (buf);
-	  remote_get_noisy_reply (&target_buf,
-				  &target_buf_size);
-	  if (strcmp (target_buf, "OK"))
-	    error (_("Error on target while setting tracepoints."));
+	  for (ndx = 0; tdp_actions[ndx]; ndx++)
+	    {
+	      QUIT;	/* allow user to bail out with ^C */
+	      sprintf (buf, "QTDP:-%x:%s:%s%c",
+		       t->number, tmp, /* address */
+		       tdp_actions[ndx],
+		       ((tdp_actions[ndx + 1] || stepping_actions)
+			? '-' : 0));
+	      putpkt (buf);
+	      remote_get_noisy_reply (&target_buf,
+				      &target_buf_size);
+	      if (strcmp (target_buf, "OK"))
+		error (_("Error on target while setting tracepoints."));
+	    }
 	}
-    }
-  if (stepping_actions)
-    {
-      for (ndx = 0; stepping_actions[ndx]; ndx++)
+      if (stepping_actions)
 	{
-	  QUIT;	/* allow user to bail out with ^C */
-	  sprintf (buf, "QTDP:-%x:%s:%s%s%s",
-		   t->number, tmp, /* address */
-		   ((ndx == 0) ? "S" : ""),
-		   stepping_actions[ndx],
-		   (stepping_actions[ndx + 1] ? "-" : ""));
-	  putpkt (buf);
-	  remote_get_noisy_reply (&target_buf,
-				  &target_buf_size);
-	  if (strcmp (target_buf, "OK"))
-	    error (_("Error on target while setting tracepoints."));
+	  for (ndx = 0; stepping_actions[ndx]; ndx++)
+	    {
+	      QUIT;	/* allow user to bail out with ^C */
+	      sprintf (buf, "QTDP:-%x:%s:%s%s%s",
+		       t->number, tmp, /* address */
+		       ((ndx == 0) ? "S" : ""),
+		       stepping_actions[ndx],
+		       (stepping_actions[ndx + 1] ? "-" : ""));
+	      putpkt (buf);
+	      remote_get_noisy_reply (&target_buf,
+				      &target_buf_size);
+	      if (strcmp (target_buf, "OK"))
+		error (_("Error on target while setting tracepoints."));
+	    }
 	}
+      do_cleanups (old_chain);
     }
-  do_cleanups (old_chain);
-  return;
 }
 
 static void

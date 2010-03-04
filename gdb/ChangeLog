@@ -1,3 +1,11 @@
+2010-03-03 Stan Shebs  <stan@codesourcery.com>
+
+	* remote.c (remote_download_tracepoint): Iterate over locations.
+	* tracepoint.c (validate_actionline): Ditto.
+	(encode_actions): Add location argument.
+	(trace_dump_command): Check all locations to see if stepping
+	frame.
+	
 2010-03-03  H.J. Lu  <hongjiu.lu@intel.com>
 	    Eli Zaretskii  <eliz@gnu.org>
 
