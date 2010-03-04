@@ -22,8 +22,8 @@
 
 # The goal of this program is to verify if --icf=safe  works as expected.
 # File icf_safe_test.cc is in this test. This program checks if only
-# ctors and dtors are folded, except for x86-64, which uses relocation
-# types to detect if function pointers are taken.
+# ctors and dtors are folded, except for x86 (32 and 64 bit), which
+# uses relocation types to detect if function pointers are taken.
 
 check_nofold()
 {
@@ -49,7 +49,7 @@ check_fold()
 
 arch_specific_safe_fold()
 {
-    grep_x86_64=`grep -q "Advanced Micro Devices X86-64" $2`
+    grep_x86=`grep -q -e "Advanced Micro Devices X86-64" -e "Intel 80386" $2`
     if [ $? == 0 ];
     then
       check_fold $1 $3 $4

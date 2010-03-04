@@ -127,6 +127,7 @@ class Icf
     return (parameters->options().icf_safe_folding()
 	    && target->can_check_for_function_pointers()
             && !is_prefix_of(".rodata._ZTV", section_name.c_str())
+            && !is_prefix_of(".data.rel.ro._ZTV", section_name.c_str())
             && !is_prefix_of(".eh_frame", section_name.c_str()));
   }
 

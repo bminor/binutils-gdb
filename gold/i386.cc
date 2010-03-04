@@ -64,6 +64,10 @@ class Target_i386 : public Target_freebsd<32, false>
       got_mod_index_offset_(-1U), tls_base_symbol_defined_(false)
   { }
 
+  inline bool
+  can_check_for_function_pointers() const
+  { return true; }
+
   // Process the relocations to determine unreferenced sections for 
   // garbage collection.
   void
@@ -203,24 +207,27 @@ class Target_i386 : public Target_freebsd<32, false>
 	   Symbol* gsym);
 
     inline bool
-    local_reloc_may_be_function_pointer(Symbol_table* , Layout* , Target_i386* ,
-		  			Sized_relobj<32, false>* ,
-		  			unsigned int ,
-		  			Output_section* ,
-		  			const elfcpp::Rel<32, false>& ,
-	 				unsigned int ,
-		  			const elfcpp::Sym<32, false>&)
-    { return false; }
+    local_reloc_may_be_function_pointer(Symbol_table* symtab, Layout* layout,
+ 					Target_i386* target,
+	  				Sized_relobj<32, false>* object,
+	  				unsigned int data_shndx,
+	  				Output_section* output_section,
+	  				const elfcpp::Rel<32, false>& reloc,
+					unsigned int r_type,
+	  				const elfcpp::Sym<32, false>& lsym);
 
     inline bool
-    global_reloc_may_be_function_pointer(Symbol_table* , Layout* ,
-					 Target_i386* ,
-		   			 Sized_relobj<32, false>* ,
-		   			 unsigned int ,
-		   			 Output_section* ,
-		   			 const elfcpp::Rel<32, false>& ,
-					 unsigned int , Symbol*)
-    { return false; }
+    global_reloc_may_be_function_pointer(Symbol_table* symtab, Layout* layout,
+					 Target_i386* target,
+	   				 Sized_relobj<32, false>* object,
+				         unsigned int data_shndx,
+	   				 Output_section* output_section,
+					 const elfcpp::Rel<32, false>& reloc,
+					 unsigned int r_type,
+			   		 Symbol* gsym);
+
+    inline bool
+    possible_function_pointer_reloc(unsigned int r_type);
 
     static void
     unsupported_reloc_local(Sized_relobj<32, false>*, unsigned int r_type);
@@ -1232,6 +1239,55 @@ Target_i386::Scan::unsupported_reloc_global(Sized_relobj<32, false>* object,
 {
   gold_error(_("%s: unsupported reloc %u against global symbol %s"),
 	     object->name().c_str(), r_type, gsym->demangled_name().c_str());
+}
+
+inline bool
+Target_i386::Scan::possible_function_pointer_reloc(unsigned int r_type)
+{
+  switch (r_type)
+    {
+    case elfcpp::R_386_32:
+    case elfcpp::R_386_16:
+    case elfcpp::R_386_8:
+    case elfcpp::R_386_GOTOFF:
+    case elfcpp::R_386_GOT32:
+      {
+        return true;
+      }
+    default:
+      return false;
+    }
+  return false;
+}
+
+inline bool
+Target_i386::Scan::local_reloc_may_be_function_pointer(
+  Symbol_table* ,
+  Layout* ,
+  Target_i386* ,
+  Sized_relobj<32, false>* ,
+  unsigned int ,
+  Output_section* ,
+  const elfcpp::Rel<32, false>& ,
+  unsigned int r_type,
+  const elfcpp::Sym<32, false>&)
+{
+  return possible_function_pointer_reloc(r_type);
+}
+
+inline bool
+Target_i386::Scan::global_reloc_may_be_function_pointer(
+  Symbol_table* ,
+  Layout* ,
+  Target_i386* ,
+  Sized_relobj<32, false>* ,
+  unsigned int ,
+  Output_section* ,
+  const elfcpp::Rel<32, false>& ,
+  unsigned int r_type,
+  Symbol*)
+{
+  return possible_function_pointer_reloc(r_type);
 }
 
 // Scan a relocation for a global symbol.

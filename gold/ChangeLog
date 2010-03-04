@@ -1,3 +1,17 @@
+2010-03-03  Sriraman Tallam  <tmsriram@google.com>
+
+	* i386.cc (Target_i386::can_check_for_function_pointers): New function.
+	(Scan::possible_function_pointer_reloc): New function.
+	(Scan::local_reloc_may_be_function_pointer): Change to call
+	possible_function_pointer_reloc.
+	(Scan::global_reloc_may_be_function_pointer): Ditto.
+	* icf.h (Icf::check_section_for_function_pointers): Change to reject
+	relocations in ".data.rel.ro._ZTV" section.
+	* testsuite/icf_safe_so_test.sh: Change to pass i386.
+	* testsuite/icf_safe_so_test.cc: Ditto.
+	* testsuite/icf_safe_test.cc: Ditto.
+	* testsuite/icf_safe_test.sh: Ditto.
+
 2010-03-03  Viktor Kutuzov  <vkutuzov@accesssoftek.com>
 	    Ian Lance Taylor  <iant@google.com>
 
