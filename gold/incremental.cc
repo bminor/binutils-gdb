@@ -23,6 +23,7 @@
 #include "gold.h"
 
 #include <cstdarg>
+#include "libiberty.h"
 
 #include "elfcpp.h"
 #include "output.h"
