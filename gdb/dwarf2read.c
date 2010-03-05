@@ -2882,8 +2882,15 @@ skip_one_die (gdb_byte *buffer, gdb_byte *info_ptr,
     skip_attribute:
       switch (form)
 	{
-	case DW_FORM_addr:
 	case DW_FORM_ref_addr:
+	  /* In DWARF 2, DW_FORM_ref_addr is address sized; in DWARF 3
+	     and later it is offset sized.  */
+	  if (cu->header.version == 2)
+	    info_ptr += cu->header.addr_size;
+	  else
+	    info_ptr += cu->header.offset_size;
+	  break;
+	case DW_FORM_addr:
 	  info_ptr += cu->header.addr_size;
 	  break;
 	case DW_FORM_data1:
@@ -7017,8 +7024,14 @@ read_attribute_value (struct attribute *attr, unsigned form,
   attr->form = form;
   switch (form)
     {
-    case DW_FORM_addr:
     case DW_FORM_ref_addr:
+      if (cu->header.version == 2)
+	DW_ADDR (attr) = read_address (abfd, info_ptr, cu, &bytes_read);
+      else
+	DW_ADDR (attr) = read_offset (abfd, info_ptr, &cu->header, &bytes_read);
+      info_ptr += bytes_read;
+      break;
+    case DW_FORM_addr:
       DW_ADDR (attr) = read_address (abfd, info_ptr, cu, &bytes_read);
       info_ptr += bytes_read;
       break;
