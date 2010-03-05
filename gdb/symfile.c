@@ -364,18 +364,13 @@ build_section_addr_info_from_objfile (const struct objfile *objfile)
   struct section_addr_info *sap;
   int i;
   struct bfd_section *sec;
-  int addr_bit = gdbarch_addr_bit (objfile->gdbarch);
-  CORE_ADDR mask = CORE_ADDR_MAX;
-
-  if (addr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
-    mask = ((CORE_ADDR) 1 << addr_bit) - 1;
 
   sap = alloc_section_addr_info (objfile->num_sections);
   for (i = 0, sec = objfile->obfd->sections; sec != NULL; sec = sec->next)
     if (bfd_get_section_flags (objfile->obfd, sec) & (SEC_ALLOC | SEC_LOAD))
       {
 	sap->other[i].addr = (bfd_get_section_vma (objfile->obfd, sec)
-			      + objfile->section_offsets->offsets[i]) & mask;
+			      + objfile->section_offsets->offsets[i]);
 	sap->other[i].name = xstrdup (bfd_get_section_name (objfile->obfd,
 							    sec));
 	sap->other[i].sectindex = sec->index;
