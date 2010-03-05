@@ -1,3 +1,8 @@
+2010-03-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* python/py-lazy-string.c (gdbpy_extract_lazy_string): Extract
+	address as UnsignedLongLong, not LongLong.
+
 2010-03-05  Kevin Buettner  <kevinb@redhat.com>
             Pedro Alves  <pedro@codesourcery.com>
 
