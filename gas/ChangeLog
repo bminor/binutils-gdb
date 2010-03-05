@@ -1,3 +1,7 @@
+2010-03-05  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (arm_cpu_option_table): Add cortex-m4.
+
 2010-03-02  Andrew Stubbs  <ams@codesourcery.com>
 
 	* config/tc-sh.c (get_specific): Move overflow checking code to avoid
