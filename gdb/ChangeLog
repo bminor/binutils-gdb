@@ -1,3 +1,21 @@
+2010-03-05  Kevin Buettner  <kevinb@redhat.com>
+            Pedro Alves  <pedro@codesourcery.com>
+
+	* remote-mips.c (gdbthread.h): Include.
+	(remote_mips_ptid): Declare.
+	(mips_error): Only mourn the inferior when inferior_ptid is non-null.
+	(common_open): Set inferior_ptid, add it as an inferior, and
+	as a thread too.  Delete FIXME comment regarding start_remote().
+	(mips_close): Invoke generic_mourn_inferior().
+	(mips_kill): Make sure that target_mourn_inferior is invoked.
+	(mips_mourn_inferior): Don't invoke generic_mourn_inferior, as
+	it's now invoked from mips_close().
+	(mips_load): Don't null out inferior_ptid.  Don't call
+	clear_symtab_users().
+	(mips_thread_alive, mips_pid_to_str): New functions.
+	(_initialize_remote_mips): Initialize remote_mips_ptid.  Initialize
+	to_thread_alive and to_pid_to_str operations.
+
 2010-03-04  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (skip_one_die) <DW_FORM_ref_addr>: Use offset size

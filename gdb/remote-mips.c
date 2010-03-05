@@ -35,6 +35,7 @@
 #include "regcache.h"
 #include <ctype.h>
 #include "mips-tdep.h"
+#include "gdbthread.h"
 
 
 /* Breakpoint types.  Values 0, 1, and 2 must agree with the watch
@@ -440,6 +441,11 @@ struct lsi_error lsi_error_table[] =
    of warnings returned by PMON when hardware breakpoints are used.  */
 static int monitor_warnings;
 
+/* This is the ptid we use while we're connected to the remote.  Its
+   value is arbitrary, as the remote-mips target doesn't have a notion of
+   processes or threads, but we need something non-null to place in
+   inferior_ptid.  */
+static ptid_t remote_mips_ptid;
 
 static void
 close_ports (void)
@@ -483,7 +489,8 @@ mips_error (char *string,...)
   close_ports ();
 
   printf_unfiltered ("Ending remote MIPS debugging.\n");
-  target_mourn_inferior ();
+  if (!ptid_equal (inferior_ptid, null_ptid))
+    target_mourn_inferior ();
 
   deprecated_throw_reason (RETURN_ERROR);
 }
@@ -1563,7 +1570,9 @@ device is attached to the target board (e.g., /dev/ttya).\n"
   /* Switch to using remote target now.  */
   push_target (ops);
 
-  /* FIXME: Should we call start_remote here?  */
+  inferior_ptid = remote_mips_ptid;
+  inferior_appeared (current_inferior (), ptid_get_pid (inferior_ptid));
+  add_thread_silent (inferior_ptid);
 
   /* Try to figure out the processor model if possible.  */
   deprecated_mips_set_processor_regs_hack ();
@@ -1639,6 +1648,8 @@ mips_close (int quitting)
 
       close_ports ();
     }
+
+  generic_mourn_inferior ();
 }
 
 /* Detach from the remote board.  */
@@ -2140,7 +2151,10 @@ static void
 mips_kill (struct target_ops *ops)
 {
   if (!mips_wait_flag)
-    return;
+    {
+      target_mourn_inferior ();
+      return;
+    }
 
   interrupt_count++;
 
@@ -2172,6 +2186,8 @@ Give up (and stop debugging it)? ")))
     printf_unfiltered ("Sending break\n");
 
   serial_send_break (mips_desc);
+
+  target_mourn_inferior ();
 
 #if 0
   if (mips_is_open)
@@ -2210,19 +2226,17 @@ Can't pass arguments to remote MIPS board; arguments ignored.");
 
   init_wait_for_inferior ();
 
-  /* FIXME: Should we set inferior_ptid here?  */
-
   regcache_write_pc (get_current_regcache (), entry_pt);
 }
 
-/* Clean up after a process.  Actually nothing to do.  */
+/* Clean up after a process. The bulk of the work is done in mips_close(),
+   which is called when unpushing the target.  */
 
 static void
 mips_mourn_inferior (struct target_ops *ops)
 {
   if (current_ops != NULL)
     unpush_target (current_ops);
-  generic_mourn_inferior ();
 }
 
 /* We can write a breakpoint and read the shadow contents in one
@@ -3296,18 +3310,36 @@ mips_load (char *file, int from_tty)
     }
   if (exec_bfd)
     regcache_write_pc (regcache, bfd_get_start_address (exec_bfd));
-
-  inferior_ptid = null_ptid;	/* No process now */
-
-/* This is necessary because many things were based on the PC at the time that
-   we attached to the monitor, which is no longer valid now that we have loaded
-   new code (and just changed the PC).  Another way to do this might be to call
-   normal_stop, except that the stack may not be valid, and things would get
-   horribly confused... */
-
-  clear_symtab_users ();
 }
 
+/* Check to see if a thread is still alive.  */
+ 
+static int
+mips_thread_alive (struct target_ops *ops, ptid_t ptid)
+{
+  if (ptid_equal (ptid, remote_mips_ptid))
+    /* The monitor's task is always alive.  */
+    return 1;
+
+  return 0;
+}
+
+/* Convert a thread ID to a string.  Returns the string in a static
+   buffer.  */
+
+static char *
+mips_pid_to_str (struct target_ops *ops, ptid_t ptid)
+{
+  static char buf[64];
+
+  if (ptid_equal (ptid, remote_mips_ptid))
+    {
+      xsnprintf (buf, sizeof buf, "Thread <main>");
+      return buf;
+    }
+
+  return normal_pid_to_str (ptid);
+}
 
 /* Pass the command argument as a packet to PMON verbatim.  */
 
@@ -3351,6 +3383,8 @@ _initialize_remote_mips (void)
   mips_ops.to_load = mips_load;
   mips_ops.to_create_inferior = mips_create_inferior;
   mips_ops.to_mourn_inferior = mips_mourn_inferior;
+  mips_ops.to_thread_alive = mips_thread_alive;
+  mips_ops.to_pid_to_str = mips_pid_to_str;
   mips_ops.to_log_command = serial_log_command;
   mips_ops.to_stratum = process_stratum;
   mips_ops.to_has_all_memory = default_child_has_all_memory;
@@ -3458,4 +3492,5 @@ Use \"on\" to enable the masking and \"off\" to disable it."),
 			   NULL,
 			   NULL, /* FIXME: i18n: */
 			   &setlist, &showlist);
+  remote_mips_ptid = ptid_build (42000, 0, 42000);
 }
