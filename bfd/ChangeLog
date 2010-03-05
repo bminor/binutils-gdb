@@ -1,3 +1,38 @@
+2010-03-05  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* elflink.c (bfd_elf_size_dynamic_sections): Don't emit base
+	version twice.
+	Skip it when constructing def.vd_next.
+
+	* elf32-i386.c (TARGET_LITTLE_SYM): Redefine to
+	bfd_elf32_i386_sol2_vec.
+	(TARGET_LITTLE_NAME): Redefine to elf32-i386-sol2.
+	(elf32_bed): Redefine to elf32_i386_sol2_bed.
+	(elf_backend_want_plt_sym): Redefine to 1.
+
+	* elf64-x86-64.c (TARGET_LITTLE_SYM): Redefine to
+	bfd_elf64_x86_64_sol2_vec.
+	(TARGET_LITTLE_NAME): Redefine to elf64-x86-64-sol2.
+	(elf64_bed): Redefine to elf64_x86_64_sol2_bed.
+	(elf_backend_want_plt_sym): Redefine to 1.
+
+	* config.bfd (i[3-7]86-*-solaris2*): Set targ_defvec to
+	bfd_elf32_i386_sol2_vec.
+	Replace bfd_elf64_x86_64_vec by bfd_elf64_x86_64_sol2_vec in
+	targ64_selvecs.
+	(x86_64-*-solaris2*): Set targ_defvec to bfd_elf32_i386_sol2_vec.
+	Replace bfd_elf64_x86_64_vec by bfd_elf64_x86_64_sol2_vec in
+	targ_selvecs.
+
+	* configure.in: Handle bfd_elf32_i386_sol2_vec,
+	bfd_elf64_x86_64_sol2_vec.
+	* configure: Regenerate.
+
+	* targets.c (bfd_elf32_i386_sol2_vec): Declare.
+	(bfd_elf64_x86_64_sol2_vec): Declare.
+	(_bfd_target_vector): Add bfd_elf32_i386_sol2_vec,
+	bfd_elf64_x86_64_sol2_vec.
+
 2010-03-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_output_arch_local_syms): Skip non-program

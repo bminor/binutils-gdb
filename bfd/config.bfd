@@ -499,15 +499,15 @@ case "${targ}" in
     targ_selvecs=i386coff_vec
     ;;
   i[3-7]86-*-solaris2*)
-    targ_defvec=bfd_elf32_i386_vec
-    targ_selvecs=i386coff_vec
-    targ64_selvecs="bfd_elf64_x86_64_vec bfd_elf64_l1om_vec"
+    targ_defvec=bfd_elf32_i386_sol2_vec
+    targ_selvecs="i386coff_vec"
+    targ64_selvecs="bfd_elf64_x86_64_sol2_vec bfd_elf64_l1om_vec"
     want64=true
     ;;
 #ifdef BFD64
   x86_64-*-solaris2*)
-    targ_defvec=bfd_elf32_i386_vec
-    targ_selvecs="bfd_elf64_x86_64_vec bfd_elf64_l1om_vec i386coff_vec"
+    targ_defvec=bfd_elf32_i386_sol2_vec
+    targ_selvecs="bfd_elf64_x86_64_sol2_vec bfd_elf64_l1om_vec i386coff_vec"
     want64=true
     ;;
 #endif

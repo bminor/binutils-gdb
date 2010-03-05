@@ -5946,6 +5946,10 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	    {
 	      struct bfd_elf_version_deps *n;
 
+	      /* Don't emit base version twice.  */
+	      if (t->vernum == 0)
+		continue;
+
 	      size += sizeof (Elf_External_Verdef);
 	      size += sizeof (Elf_External_Verdaux);
 	      ++cdefs;
@@ -6045,6 +6049,10 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	      unsigned int cdeps;
 	      struct bfd_elf_version_deps *n;
 
+	      /* Don't emit the base version twice.  */
+	      if (t->vernum == 0)
+		continue;
+
 	      cdeps = 0;
 	      for (n = t->deps; n != NULL; n = n->next)
 		++cdeps;
@@ -6076,7 +6084,13 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	      def.vd_hash = bfd_elf_hash (t->name);
 	      def.vd_aux = sizeof (Elf_External_Verdef);
 	      def.vd_next = 0;
-	      if (t->next != NULL)
+
+	      /* If a basever node is next, it *must* be the last node in
+		 the chain, otherwise Verdef construction breaks.  */
+	      if (t->next != NULL && t->next->vernum == 0)
+		BFD_ASSERT (t->next->next == NULL);
+
+	      if (t->next != NULL && t->next->vernum != 0)
 		def.vd_next = (sizeof (Elf_External_Verdef)
 			       + (cdeps + 1) * sizeof (Elf_External_Verdaux));
 
@@ -6177,7 +6191,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	    unsigned int crefs;
 	    bfd_byte *p;
 
-	    /* Build the version definition section.  */
+	    /* Build the version dependency section.  */
 	    size = 0;
 	    crefs = 0;
 	    for (t = elf_tdata (output_bfd)->verref;

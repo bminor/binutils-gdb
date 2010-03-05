@@ -4719,6 +4719,29 @@ elf_i386_fbsd_post_process_headers (bfd *abfd, struct bfd_link_info *info)
 
 #include "elf32-target.h"
 
+/* Solaris 2.  */
+
+#undef	TARGET_LITTLE_SYM
+#define	TARGET_LITTLE_SYM		bfd_elf32_i386_sol2_vec
+#undef	TARGET_LITTLE_NAME
+#define	TARGET_LITTLE_NAME		"elf32-i386-sol2"
+
+/* Restore default: we cannot use ELFOSABI_SOLARIS, otherwise ELFOSABI_NONE
+   objects won't be recognized.  */
+#undef ELF_OSABI
+
+#undef	elf32_bed
+#define	elf32_bed			elf32_i386_sol2_bed
+
+/* The Solaris 2 ABI requires a plt symbol on all platforms.
+
+   Cf. Linker and Libraries Guide, Ch. 2, Link-Editor, Generating the Output
+   File, p.63.  */
+#undef elf_backend_want_plt_sym
+#define elf_backend_want_plt_sym	1
+
+#include "elf32-target.h"
+
 /* VxWorks support.  */
 
 #undef	TARGET_LITTLE_SYM

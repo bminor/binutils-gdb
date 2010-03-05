@@ -207,13 +207,13 @@ x86_64-*-linux-*)	targ_emul=elf_x86_64
 			tdir_i386linux=`echo ${targ_alias}aout | sed -e 's/x86_64/i386/'`
 			tdir_elf_i386=`echo ${targ_alias} | sed -e 's/x86_64/i386/'` ;;
 i[3-7]86-*-sysv[45]*)	targ_emul=elf_i386 ;;
-i[3-7]86-*-solaris2*)	targ_emul=elf_i386_ldso
-                        targ_extra_emuls="elf_i386 elf_x86_64 elf_l1om"
+i[3-7]86-*-solaris2*)	targ_emul=elf_i386_sol2
+                        targ_extra_emuls="elf_i386_ldso elf_i386 elf_x86_64_sol2 elf_x86_64 elf_l1om"
 			targ_extra_libpath=$targ_extra_emuls
                         ;;
 x86_64-*-solaris2*)
-			targ_emul=elf_x86_64
-			targ_extra_emuls="elf_i386 elf_i386_ldso elf_l1om"
+			targ_emul=elf_x86_64_sol2
+			targ_extra_emuls="elf_x86_64 elf_i386_sol2 elf_i386_ldso elf_i386 elf_l1om"
 			targ_extra_libpath=elf_i386
 			tdir_elf_i386=`echo ${targ_alias} | sed -e 's/x86_64/i386/'` ;;
 i[3-7]86-*-unixware)	targ_emul=elf_i386 ;;
@@ -601,14 +601,15 @@ sparc64-*-netbsd* | sparc64-*-openbsd*)
 sparc*-*-netbsd*elf*)	targ_emul=elf32_sparc ;;
 sparc*-*-netbsd*)	targ_emul=sparcnbsd ;;
 sparc-*-solaris2.[0-6] | sparc-*-solaris2.[0-6].*)
-			targ_emul=elf32_sparc ;;
-sparc-*-solaris2*)	targ_emul=elf32_sparc
-			targ_extra_emuls="elf64_sparc"
+			targ_emul=elf32_sparc_sol2
+			targ_extra_emuls=elf32_sparc ;;
+sparc-*-solaris2*)	targ_emul=elf32_sparc_sol2
+			targ_extra_emuls="elf32_sparc elf64_sparc_sol2 elf64_sparc"
 			targ_extra_libpath=$targ_extra_emuls
 			tdir_elf64_sparc=`echo ${targ_alias} | sed -e 's/32//'`	;;
 sparcv9-*-solaris2* | sparc64-*-solaris2*)
-			targ_emul=elf64_sparc
-			targ_extra_emuls="elf32_sparc"
+			targ_emul=elf64_sparc_sol2
+			targ_extra_emuls="elf64_sparc elf32_sparc_sol2 elf32_sparc"
 			targ_extra_libpath=$targ_extra_emuls
 			tdir_elf32_sparc=`echo ${targ_alias} | sed -e 's/64//'` ;;
 sparc*-*-solaris2*)	targ_emul=elf32_sparc ;;

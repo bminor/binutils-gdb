@@ -1,3 +1,30 @@
+2010-03-05  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* Makefile.am (ALL_EMULATIONS): Add eelf32_sparc_sol2.o,
+	eelf_i386_sol2.o.
+	(ALL_64_EMULATIONS): Add eelf_x86_64_sol2.o, eelf64_sparc_sol2.o.
+	(eelf32_sparc_sol2.c): New rule.
+	(eelf64_sparc_sol2.c): Likewise.
+	(eelf_x86_64_sol2.c): Likewise.
+	(eelf_i386_sol2.c): Likewise.
+	* Makefile.in: Regenerate.
+	* configure.tgt (i[3-7]86-*-solaris2*): Change targ_emul to
+	elf_i386_sol2.
+	Add elf_i386_ldso, elf_x86_64_sol2 to targ_extra_emuls.
+	(x86_64-*-solaris2*): Change targ_emul to elf_x86_64_sol2.
+	Add elf_x86_64, elf_i386_sol2, elf_i386 to targ_extra_emuls.
+	(sparc-*-solaris2.[0-6]*): Change targ_emul to elf32_sparc_sol2.
+	Add target_extra_emuls.
+	(sparc-*-solaris2*): Change targ_emul to elf32_sparc_sol2.
+	Add elf32_sparc, elf64_sparc_sol2 to targ_extra_emuls.
+	(sparcv9-*-solaris2*): Change targ_emul to elf64_sparc_sol2.
+	Add elf64_sparc, elf32_sparc_sol2 to target_extra_emuls.
+	* emulparams/elf32_sparc_sol2.sh: New file.
+	* emulparams/elf64_sparc_sol2.sh: New file.
+	* emulparams/elf_i386_sol2.sh: New file.
+	* emulparams/elf_x86_64_sol2.sh: New file.
+	* emultempl/solaris2.em: New file.
+
 2010-02-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/11330
