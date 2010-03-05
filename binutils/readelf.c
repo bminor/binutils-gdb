@@ -7267,7 +7267,15 @@ get_ver_flags (unsigned int flags)
       strcat (buff, "WEAK ");
     }
 
-  if (flags & ~(VER_FLG_BASE | VER_FLG_WEAK))
+  if (flags & VER_FLG_INFO)
+    {
+      if (flags & (VER_FLG_BASE|VER_FLG_WEAK))
+	strcat (buff, "| ");
+
+      strcat (buff, "INFO ");
+    }
+
+  if (flags & ~(VER_FLG_BASE | VER_FLG_WEAK | VER_FLG_INFO))
     strcat (buff, "| <unknown>");
 
   return buff;

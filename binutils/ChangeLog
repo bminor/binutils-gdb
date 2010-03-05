@@ -1,3 +1,7 @@
+2010-03-05  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* readelf.c (get_ver_flags): Handle VER_FLG_INFO.
+
 2010-03-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* NEWS: Document .ARM.exidx / .ARM.extab support.

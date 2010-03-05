@@ -1,3 +1,12 @@
+2010-03-05  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* dynobj.h (Verdef::Verdef): Add is_info arg, is_info member
+	function, is_info_ member.
+	* dynobj.cc (Verdef::write): Set VER_FLG_INFO if this->is_info_.
+	(Versions::Versions): Update caller.
+	(Versions::define_base_version): Likewise.
+	(Versions::add_def): Likewise.
+
 2010-03-03  Sriraman Tallam  <tmsriram@google.com>
 
 	* i386.cc (Target_i386::can_check_for_function_pointers): New function.
