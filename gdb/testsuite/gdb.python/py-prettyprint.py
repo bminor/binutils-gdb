@@ -97,7 +97,7 @@ class pp_nullstr:
         self.val = val
 
     def to_string(self):
-        return self.val['s'].string(gdb.parameter('target-charset'))
+        return self.val['s'].string(gdb.target_charset())
 
 class pp_ns:
     "Print a std::basic_string of some kind"
@@ -107,7 +107,7 @@ class pp_ns:
 
     def to_string(self):
         len = self.val['length']
-        return self.val['null_str'].string (gdb.parameter ('target-charset'), length = len)
+        return self.val['null_str'].string (gdb.target_charset(), length = len)
 
     def display_hint (self):
         return 'string'

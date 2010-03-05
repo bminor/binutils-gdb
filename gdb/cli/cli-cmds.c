@@ -618,7 +618,7 @@ echo_command (char *text, int from_tty)
 	    if (*p == 0)
 	      return;
 
-	    c = parse_escape (&p);
+	    c = parse_escape (get_current_arch (), &p);
 	    if (c >= 0)
 	      printf_filtered ("%c", c);
 	  }

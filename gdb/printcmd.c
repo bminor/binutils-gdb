@@ -2372,7 +2372,7 @@ printf_command (char *arg, int from_tty)
 	      obstack_init (&output);
 	      inner_cleanup = make_cleanup_obstack_free (&output);
 
-	      convert_between_encodings (target_wide_charset (byte_order),
+	      convert_between_encodings (target_wide_charset (gdbarch),
 					 host_charset (),
 					 str, j, wcwidth,
 					 &output, translit_char);
@@ -2404,7 +2404,7 @@ printf_command (char *arg, int from_tty)
 	      obstack_init (&output);
 	      inner_cleanup = make_cleanup_obstack_free (&output);
 
-	      convert_between_encodings (target_wide_charset (byte_order),
+	      convert_between_encodings (target_wide_charset (gdbarch),
 					 host_charset (),
 					 bytes, TYPE_LENGTH (valtype),
 					 TYPE_LENGTH (valtype),

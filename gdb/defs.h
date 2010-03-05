@@ -899,7 +899,7 @@ extern char *xstrvprintf (const char *format, va_list ap)
 extern int xsnprintf (char *str, size_t size, const char *format, ...)
      ATTR_FORMAT (printf, 3, 4);
 
-extern int parse_escape (char **);
+extern int parse_escape (struct gdbarch *, char **);
 
 /* Message to be printed before the error message, when an error occurs.  */
 

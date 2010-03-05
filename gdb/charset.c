@@ -27,6 +27,7 @@
 #include "charset-list.h"
 #include "vec.h"
 #include "environ.h"
+#include "arch-utils.h"
 
 #include <stddef.h>
 #include "gdb_string.h"
@@ -213,22 +214,34 @@ show_host_charset_name (struct ui_file *file, int from_tty,
     fprintf_filtered (file, _("The host character set is \"%s\".\n"), value);
 }
 
-static const char *target_charset_name = GDB_DEFAULT_TARGET_CHARSET;
+static const char *target_charset_name = "auto";
 static void
 show_target_charset_name (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("The target character set is \"%s\".\n"),
-		    value);
+  if (!strcmp (value, "auto"))
+    fprintf_filtered (file,
+		      _("The target character set is \"auto; "
+		        "currently %s\".\n"),
+		      gdbarch_auto_charset (get_current_arch ()));
+  else
+    fprintf_filtered (file, _("The target character set is \"%s\".\n"),
+		      value);
 }
 
-static const char *target_wide_charset_name = GDB_DEFAULT_TARGET_WIDE_CHARSET;
+static const char *target_wide_charset_name = "auto";
 static void
 show_target_wide_charset_name (struct ui_file *file, int from_tty,
 			       struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("The target wide character set is \"%s\".\n"),
-		    value);
+  if (!strcmp (value, "auto"))
+    fprintf_filtered (file,
+		      _("The target wide character set is \"auto; "
+		        "currently %s\".\n"),
+		      gdbarch_auto_wide_charset (get_current_arch ()));
+  else
+    fprintf_filtered (file, _("The target wide character set is \"%s\".\n"),
+		      value);
 }
 
 static const char *default_charset_names[] =
@@ -245,21 +258,33 @@ static const char **charset_enum;
 static const char *target_wide_charset_be_name;
 static const char *target_wide_charset_le_name;
 
-/* A helper function for validate which sets the target wide big- and
-   little-endian character set names, if possible.  */
+/* The architecture for which the BE- and LE-names are valid.  */
+static struct gdbarch *be_le_arch;
+
+/* A helper function which sets the target wide big- and little-endian
+   character set names, if possible.  */
 
 static void
-set_be_le_names (void)
+set_be_le_names (struct gdbarch *gdbarch)
 {
   int i, len;
+  const char *target_wide;
+
+  if (be_le_arch == gdbarch)
+    return;
+  be_le_arch = gdbarch;
 
   target_wide_charset_le_name = NULL;
   target_wide_charset_be_name = NULL;
 
-  len = strlen (target_wide_charset_name);
+  target_wide = target_wide_charset_name;
+  if (!strcmp (target_wide, "auto"))
+    target_wide = gdbarch_auto_wide_charset (gdbarch);
+
+  len = strlen (target_wide);
   for (i = 0; charset_enum[i]; ++i)
     {
-      if (strncmp (target_wide_charset_name, charset_enum[i], len))
+      if (strncmp (target_wide, charset_enum[i], len))
 	continue;
       if ((charset_enum[i][len] == 'B'
 	   || charset_enum[i][len] == 'L')
@@ -278,24 +303,29 @@ set_be_le_names (void)
    target-wide-charset', 'set charset' sfunc's.  */
 
 static void
-validate (void)
+validate (struct gdbarch *gdbarch)
 {
   iconv_t desc;
   const char *host_cset = host_charset ();
+  const char *target_cset = target_charset (gdbarch);
+  const char *target_wide_cset = target_wide_charset_name;
+  if (!strcmp (target_wide_cset, "auto"))
+    target_wide_cset = gdbarch_auto_wide_charset (gdbarch);
 
-  desc = iconv_open (target_wide_charset_name, host_cset);
+  desc = iconv_open (target_wide_cset, host_cset);
   if (desc == (iconv_t) -1)
     error ("Cannot convert between character sets `%s' and `%s'",
-	   target_wide_charset_name, host_cset);
+	   target_wide_cset, host_cset);
   iconv_close (desc);
 
-  desc = iconv_open (target_charset_name, host_cset);
+  desc = iconv_open (target_cset, host_cset);
   if (desc == (iconv_t) -1)
     error ("Cannot convert between character sets `%s' and `%s'",
-	   target_charset_name, host_cset);
+	   target_cset, host_cset);
   iconv_close (desc);
 
-  set_be_le_names ();
+  /* Clear the cache.  */
+  be_le_arch = NULL;
 }
 
 /* This is the sfunc for the 'set charset' command.  */
@@ -304,7 +334,7 @@ set_charset_sfunc (char *charset, int from_tty, struct cmd_list_element *c)
 {
   /* CAREFUL: set the target charset here as well. */
   target_charset_name = host_charset_name;
-  validate ();
+  validate (get_current_arch ());
 }
 
 /* 'set host-charset' command sfunc.  We need a wrapper here because
@@ -313,7 +343,7 @@ static void
 set_host_charset_sfunc (char *charset, int from_tty,
 			struct cmd_list_element *c)
 {
-  validate ();
+  validate (get_current_arch ());
 }
 
 /* Wrapper for the 'set target-charset' command.  */
@@ -321,7 +351,7 @@ static void
 set_target_charset_sfunc (char *charset, int from_tty,
 			  struct cmd_list_element *c)
 {
-  validate ();
+  validate (get_current_arch ());
 }
 
 /* Wrapper for the 'set target-wide-charset' command.  */
@@ -329,7 +359,7 @@ static void
 set_target_wide_charset_sfunc (char *charset, int from_tty,
 			       struct cmd_list_element *c)
 {
-  validate ();
+  validate (get_current_arch ());
 }
 
 /* sfunc for the 'show charset' command.  */
@@ -354,14 +384,19 @@ host_charset (void)
 }
 
 const char *
-target_charset (void)
+target_charset (struct gdbarch *gdbarch)
 {
+  if (!strcmp (target_charset_name, "auto"))
+    return gdbarch_auto_charset (gdbarch);
   return target_charset_name;
 }
 
 const char *
-target_wide_charset (enum bfd_endian byte_order)
+target_wide_charset (struct gdbarch *gdbarch)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
+  set_be_le_names (gdbarch);
   if (byte_order == BFD_ENDIAN_BIG)
     {
       if (target_wide_charset_be_name)
@@ -372,6 +407,9 @@ target_wide_charset (enum bfd_endian byte_order)
       if (target_wide_charset_le_name)
 	return target_wide_charset_le_name;
     }
+
+  if (!strcmp (target_wide_charset_name, "auto"))
+    return gdbarch_auto_wide_charset (gdbarch);
 
   return target_wide_charset_name;
 }
@@ -851,13 +889,27 @@ find_charset_names (void)
 #endif /* HAVE_ICONVLIST || HAVE_LIBICONVLIST */
 #endif /* PHONY_ICONV */
 
+/* The "auto" target charset used by default_auto_charset.  */
+static const char *auto_target_charset_name = GDB_DEFAULT_TARGET_CHARSET;
+
+const char *
+default_auto_charset (void)
+{
+  return auto_target_charset_name;
+}
+
+const char *
+default_auto_wide_charset (void)
+{
+  return GDB_DEFAULT_TARGET_WIDE_CHARSET;
+}
+
 void
 _initialize_charset (void)
 {
   struct cmd_list_element *new_cmd;
 
-  /* The first element is always "auto"; then we skip it for the
-     commands where it is not allowed.  */
+  /* The first element is always "auto".  */
   VEC_safe_push (char_ptr, charsets, xstrdup ("auto"));
   find_charset_names ();
 
@@ -868,20 +920,30 @@ _initialize_charset (void)
 
 #ifndef PHONY_ICONV
 #ifdef HAVE_LANGINFO_CODESET
-  auto_host_charset_name = nl_langinfo (CODESET);
+  /* The result of nl_langinfo may be overwritten later.  This may
+     leak a little memory, if the user later changes the host charset,
+     but that doesn't matter much.  */
+  auto_host_charset_name = xstrdup (nl_langinfo (CODESET));
   /* Solaris will return `646' here -- but the Solaris iconv then
      does not accept this.  Darwin (and maybe FreeBSD) may return "" here,
      which GNU libiconv doesn't like (infinite loop).  */
   if (!strcmp (auto_host_charset_name, "646") || !*auto_host_charset_name)
     auto_host_charset_name = "ASCII";
-  target_charset_name = auto_host_charset_name;
+  auto_target_charset_name = auto_host_charset_name;
+#elif defined (USE_WIN32API)
+  {
+    static w32_host_default_charset[16]; /* "CP" + x<=5 digits + paranoia. */
 
-  set_be_le_names ();
+    snprintf (w32_host_default_charset, sizeof w32_host_default_charset,
+	      "CP%d", GetACP());
+    auto_host_charset_name = w32_host_default_charset;
+    auto_target_charset_name = auto_host_charset_name;
+  }
 #endif
 #endif
 
   add_setshow_enum_cmd ("charset", class_support,
-			&charset_enum[1], &host_charset_name, _("\
+			charset_enum, &host_charset_name, _("\
 Set the host and target character sets."), _("\
 Show the host and target character sets."), _("\
 The `host character set' is the one used by the system GDB is running on.\n\
@@ -909,7 +971,7 @@ To see a list of the character sets GDB supports, type `set host-charset <TAB>'.
 			&setlist, &showlist);
 
   add_setshow_enum_cmd ("target-charset", class_support,
-			&charset_enum[1], &target_charset_name, _("\
+			charset_enum, &target_charset_name, _("\
 Set the target character set."), _("\
 Show the target character set."), _("\
 The `target character set' is the one used by the program being debugged.\n\
@@ -921,7 +983,7 @@ To see a list of the character sets GDB supports, type `set target-charset'<TAB>
 			&setlist, &showlist);
 
   add_setshow_enum_cmd ("target-wide-charset", class_support,
-			&charset_enum[1], &target_wide_charset_name,
+			charset_enum, &target_wide_charset_name,
 			_("\
 Set the target wide character set."), _("\
 Show the target wide character set."), _("\

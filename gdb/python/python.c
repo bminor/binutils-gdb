@@ -283,6 +283,24 @@ gdbpy_parameter (PyObject *self, PyObject *args)
   return parameter_to_python (cmd);
 }
 
+/* Wrapper for target_charset.  */
+
+static PyObject *
+gdbpy_target_charset (PyObject *self, PyObject *args)
+{
+  const char *cset = target_charset (python_gdbarch);
+  return PyUnicode_Decode (cset, strlen (cset), host_charset (), NULL);
+}
+
+/* Wrapper for target_wide_charset.  */
+
+static PyObject *
+gdbpy_target_wide_charset (PyObject *self, PyObject *args)
+{
+  const char *cset = target_wide_charset (python_gdbarch);
+  return PyUnicode_Decode (cset, strlen (cset), host_charset (), NULL);
+}
+
 /* A Python function which evaluates a string using the gdb CLI.  */
 
 static PyObject *
@@ -739,6 +757,13 @@ a boolean indicating if name is a field of the current implied argument\n\
     "parse_and_eval (String) -> Value.\n\
 Parse String as an expression, evaluate it, and return the result as a Value."
   },
+
+  { "target_charset", gdbpy_target_charset, METH_NOARGS,
+    "target_charset () -> string.\n\
+Return the name of the current target charset." },
+  { "target_wide_charset", gdbpy_target_wide_charset, METH_NOARGS,
+    "target_wide_charset () -> string.\n\
+Return the name of the current target wide charset." },
 
   { "write", gdbpy_write, METH_VARARGS,
     "Write a string using gdb's filtered stream." },

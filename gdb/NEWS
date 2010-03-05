@@ -13,8 +13,10 @@
 
 * Python scripting
 
-The GDB Python API now has access to symbols, symbol tables, and
-frame's code blocks.
+** The GDB Python API now has access to symbols, symbol tables, and
+   frame's code blocks.
+
+** New methods gdb.target_charset and gdb.target_wide_charset.
 
 * New targets
 

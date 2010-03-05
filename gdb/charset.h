@@ -33,8 +33,8 @@
    result is owned by the charset module; the caller should not free
    it.  */
 const char *host_charset (void);
-const char *target_charset (void);
-const char *target_wide_charset (enum bfd_endian byte_order);
+const char *target_charset (struct gdbarch *gdbarch);
+const char *target_wide_charset (struct gdbarch *gdbarch);
 
 /* These values are used to specify the type of transliteration done
    by convert_between_encodings.  */

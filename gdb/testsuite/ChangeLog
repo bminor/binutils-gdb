@@ -1,3 +1,9 @@
+2010-03-05  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.python/py-prettyprint.py (pp_nullstr.to_string): Use
+	gdb.target_charset.
+	(pp_ns.to_string): Likewise.
+
 2010-03-04  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.cp/overload.exp: Test that the filename portion of a linespec

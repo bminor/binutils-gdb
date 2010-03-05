@@ -129,7 +129,8 @@ unicode_to_encoded_python_string (PyObject *unicode_str, const char *charset)
 char *
 unicode_to_target_string (PyObject *unicode_str)
 {
-  return unicode_to_encoded_string (unicode_str, target_charset ());
+  return unicode_to_encoded_string (unicode_str,
+				    target_charset (python_gdbarch));
 }
 
 /* Returns a PyObject with the contents of the given unicode string
@@ -139,7 +140,8 @@ unicode_to_target_string (PyObject *unicode_str)
 PyObject *
 unicode_to_target_python_string (PyObject *unicode_str)
 {
-  return unicode_to_encoded_python_string (unicode_str, target_charset ());
+  return unicode_to_encoded_python_string (unicode_str,
+					   target_charset (python_gdbarch));
 }
 
 /* Converts a python string (8-bit or unicode) to a target string in
@@ -208,7 +210,7 @@ target_string_to_unicode (const gdb_byte *str, int length)
   if (length == -1)
     length = strlen (str);
 
-  return PyUnicode_Decode (str, length, target_charset (), NULL);
+  return PyUnicode_Decode (str, length, target_charset (python_gdbarch), NULL);
 }
 
 /* Return true if OBJ is a Python string or unicode object, false

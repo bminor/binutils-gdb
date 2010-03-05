@@ -1,3 +1,62 @@
+2010-03-05  Corinna Vinschen  <vinschen@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* utils.c (host_char_to_target): Add 'gdbarch' argument.
+	(parse_escape): Likewise.
+	* python/py-utils.c (unicode_to_target_string): Update.
+	(unicode_to_target_python_string): Update.
+	(target_string_to_unicode): Update.
+	* printcmd.c (printf_command): Update.
+	* p-exp.y (yylex): Update.
+	* objc-exp.y (yylex): Update.
+	* mi/mi-parse.c: Include charset.h.
+	(mi_parse_escape): New function.
+	(mi_parse_argv): Use it.
+	* jv-exp.y (yylex): Update.
+	* i386-cygwin-tdep.c (i386_cygwin_auto_wide_charset): New
+	function.
+	(i386_cygwin_init_abi): Call set_gdbarch_auto_wide_charset.
+	* gdbarch.sh (auto_charset, auto_wide_charset): New.
+	* gdbarch.c: Rebuild.
+	* gdbarch.h: Rebuild.
+	* defs.h (parse_escape): Update.
+	* cli/cli-setshow.c: Include arch-utils.h.
+	(do_setshow_command): Update.
+	* cli/cli-cmds.c (echo_command): Update.
+	* charset.h (target_charset, target_wide_charset): Update.
+	* charset.c: Include arch-utils.h.
+	(target_charset_name): Default to "auto".
+	(target_wide_charset_name): Likewise.
+	(show_target_charset_name): Handle "auto".
+	(show_target_wide_charset_name): Likewise.
+	(be_le_arch): New global.
+	(set_be_le_names): Add 'gdbarch' argument.
+	(validate): Likewise.  Don't call set_be_le_names.
+	(set_charset_sfunc, set_host_charset_sfunc)
+	(set_target_charset_sfunc, set_target_wide_charset_sfunc):
+	Update.
+	(target_charset): Add 'gdbarch' argument.
+	(target_wide_charset): Likewise.  Remove 'byte_order' argument.
+	(auto_target_charset_name): New global.
+	(default_auto_charset, default_auto_wide_charset): New functions.
+	(_initialize_charset): Set auto_target_charset_name.  Allow "auto"
+	for target charsets.  Copy result of nl_langinfo.  Use GetACP if
+	USE_WIN32API.
+	* c-lang.c (charset_for_string_type): Add 'gdbarch' argument,
+	remove 'byte_order' argument.  Update.
+	(classify_type): Likewise.
+	(c_emit_char): Update.
+	(c_printchar): Update.
+	(c_printstr): Update.
+	(c_get_string): Update.
+	(evaluate_subexp_c): Update.
+	* arch-utils.h (default_auto_charset, default_auto_wide_charset):
+	Declare.
+	* python/python.c (gdbpy_target_charset): New function.
+	(gdbpy_target_wide_charset): Likewise.
+	(GdbMethods): Update.
+	* NEWS: Update.
+
 2010-03-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* symfile.c (build_section_addr_info_from_objfile): Do not mask

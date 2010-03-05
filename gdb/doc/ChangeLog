@@ -1,5 +1,10 @@
 2010-03-05  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.texinfo (Basic Python): Document target_charset and
+	target_wide_charset.
+
+2010-03-05  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.texinfo (Data): Link to pretty-printing.
 	(Output Formats): Likewise.  Correct text.
 

@@ -769,6 +769,11 @@ m:int:fast_tracepoint_valid_at:CORE_ADDR addr, int *isize, char **msg:addr, isiz
 
 # Not NULL if a target has additonal field for qSupported.
 v:const char *:qsupported:::0:0::0:gdbarch->qsupported
+
+# Return the "auto" target charset.
+f:const char *:auto_charset:void::default_auto_charset:default_auto_charset::0
+# Return the "auto" target wide charset.
+f:const char *:auto_wide_charset:void::default_auto_wide_charset:default_auto_wide_charset::0
 EOF
 }
 

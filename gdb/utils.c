@@ -1653,7 +1653,7 @@ query (const char *ctlstr, ...)
    function returns 1.  Otherwise, the function returns 0.  */
 
 static int
-host_char_to_target (int c, int *target_c)
+host_char_to_target (struct gdbarch *gdbarch, int c, int *target_c)
 {
   struct obstack host_data;
   char the_char = c;
@@ -1663,7 +1663,7 @@ host_char_to_target (int c, int *target_c)
   obstack_init (&host_data);
   cleanups = make_cleanup_obstack_free (&host_data);
 
-  convert_between_encodings (target_charset (), host_charset (),
+  convert_between_encodings (target_charset (gdbarch), host_charset (),
 			     &the_char, 1, 1, &host_data, translit_none);
 
   if (obstack_object_size (&host_data) == 1)
@@ -1692,7 +1692,7 @@ host_char_to_target (int c, int *target_c)
    after the zeros.  A value of 0 does not mean end of string.  */
 
 int
-parse_escape (char **string_ptr)
+parse_escape (struct gdbarch *gdbarch, char **string_ptr)
 {
   int target_char = -2;	/* initialize to avoid GCC warnings */
   int c = *(*string_ptr)++;
@@ -1758,11 +1758,11 @@ parse_escape (char **string_ptr)
       break;
     }
 
-  if (!host_char_to_target (c, &target_char))
+  if (!host_char_to_target (gdbarch, c, &target_char))
     error
       ("The escape sequence `\%c' is equivalent to plain `%c', which"
        " has no equivalent\n" "in the `%s' character set.", c, c,
-       target_charset ());
+       target_charset (gdbarch));
   return target_char;
 }
 

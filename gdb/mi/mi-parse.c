@@ -23,9 +23,82 @@
 #include "defs.h"
 #include "mi-cmds.h"
 #include "mi-parse.h"
+#include "charset.h"
 
 #include <ctype.h>
 #include "gdb_string.h"
+
+/* Like parse_escape, but leave the results as a host char, not a
+   target char.  */
+
+static int
+mi_parse_escape (char **string_ptr)
+{
+  int c = *(*string_ptr)++;
+  switch (c)
+    {
+      case '\n':
+	return -2;
+      case 0:
+	(*string_ptr)--;
+	return 0;
+
+      case '0':
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+	{
+	  int i = host_hex_value (c);
+	  int count = 0;
+	  while (++count < 3)
+	    {
+	      c = (**string_ptr);
+	      if (isdigit (c) && c != '8' && c != '9')
+		{
+		  (*string_ptr)++;
+		  i *= 8;
+		  i += host_hex_value (c);
+		}
+	      else
+		{
+		  break;
+		}
+	    }
+	  return i;
+	}
+
+    case 'a':
+      c = '\a';
+      break;
+    case 'b':
+      c = '\b';
+      break;
+    case 'f':
+      c = '\f';
+      break;
+    case 'n':
+      c = '\n';
+      break;
+    case 'r':
+      c = '\r';
+      break;
+    case 't':
+      c = '\t';
+      break;
+    case 'v':
+      c = '\v';
+      break;
+
+    default:
+      break;
+    }
+
+  return c;
+}
 
 static void
 mi_parse_argv (char *args, struct mi_parse *parse)
@@ -60,7 +133,7 @@ mi_parse_argv (char *args, struct mi_parse *parse)
 		if (*chp == '\\')
 		  {
 		    chp++;
-		    if (parse_escape (&chp) <= 0)
+		    if (mi_parse_escape (&chp) <= 0)
 		      {
 			/* Do not allow split lines or "\000" */
 			freeargv (argv);
@@ -93,7 +166,7 @@ mi_parse_argv (char *args, struct mi_parse *parse)
 		if (*chp == '\\')
 		  {
 		    chp++;
-		    arg[len] = parse_escape (&chp);
+		    arg[len] = mi_parse_escape (&chp);
 		  }
 		else
 		  arg[len] = *chp++;

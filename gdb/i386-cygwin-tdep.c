@@ -205,6 +205,12 @@ i386_cygwin_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   return i386_pe_skip_trampoline_code (frame, pc, NULL);
 }
 
+static const char *
+i386_cygwin_auto_wide_charset (void)
+{
+  return "UTF-16";
+}
+
 static void
 i386_cygwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -227,6 +233,8 @@ i386_cygwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     (gdbarch, i386_windows_regset_from_core_section);
   set_gdbarch_core_xfer_shared_libraries
     (gdbarch, windows_core_xfer_shared_libraries);
+
+  set_gdbarch_auto_wide_charset (gdbarch, i386_cygwin_auto_wide_charset);
 }
 
 static enum gdb_osabi

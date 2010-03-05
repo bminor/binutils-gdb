@@ -19634,6 +19634,21 @@ Flush @value{GDBN}'s paginated standard output stream.  Flushing
 function.
 @end defun
 
+@findex gdb.target_charset
+@defun target_charset
+Return the name of the current target character set (@pxref{Character
+Sets}).  This differs from @code{gdb.parameter('target-charset')} in
+that @samp{auto} is never returned.
+@end defun
+
+@findex gdb.target_wide_charset
+@defun target_wide_charset
+Return the name of the current target wide character set
+(@pxref{Character Sets}).  This differs from
+@code{gdb.parameter('target-wide-charset')} in that @samp{auto} is
+never returned.
+@end defun
+
 @node Exception Handling
 @subsubsection Exception Handling
 @cindex python exceptions
