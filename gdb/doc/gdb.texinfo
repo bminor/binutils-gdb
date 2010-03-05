@@ -6661,7 +6661,8 @@ The usual way to examine data in your program is with the @code{print}
 command (abbreviated @code{p}), or its synonym @code{inspect}.  It
 evaluates and prints the value of an expression of the language your
 program is written in (@pxref{Languages, ,Using @value{GDBN} with
-Different Languages}).
+Different Languages}).  It may also print the expression using a
+Python-based pretty-printer (@pxref{Pretty Printing}).
 
 @table @code
 @item print @var{expr}
@@ -7159,8 +7160,10 @@ array.
 @item r
 @cindex raw printing
 Print using the @samp{raw} formatting.  By default, @value{GDBN} will
-use a type-specific pretty-printer.  The @samp{r} format bypasses any
-pretty-printer which might exist for the value's type.
+use a Python-based pretty-printer, if one is available (@pxref{Pretty
+Printing}).  This typically results in a higher-level display of the
+value's contents.  The @samp{r} format bypasses any Python
+pretty-printer which might exist.
 @end table
 
 For example, to print the program counter in hex (@pxref{Registers}), type

@@ -1,3 +1,8 @@
+2010-03-05  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Data): Link to pretty-printing.
+	(Output Formats): Likewise.  Correct text.
+
 2010-03-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (Types): Describe <struct> and <flags>.
