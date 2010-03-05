@@ -1,3 +1,8 @@
+2010-03-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* python/py-lazy-string.c (gdbpy_extract_lazy_string): Extract
+	address as UnsignedLongLong, not LongLong.
+
 2010-03-04  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (skip_one_die) <DW_FORM_ref_addr>: Use offset size

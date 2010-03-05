@@ -187,7 +187,7 @@ gdbpy_extract_lazy_string (PyObject *string, struct type **str_type,
     goto error;
 
   *length = PyLong_AsLong (py_len);
-  addr = PyLong_AsLongLong (py_addr);
+  addr = PyLong_AsUnsignedLongLong (py_addr);
 
   /* If the user supplies Py_None an encoding, set encoding to NULL.
      This will trigger the resulting LA_PRINT_CALL to automatically
