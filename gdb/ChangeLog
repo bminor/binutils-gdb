@@ -1,5 +1,10 @@
 2010-03-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* symfile.c (build_section_addr_info_from_objfile): Do not mask
+	off high address bits.
+
+2010-03-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* python/py-lazy-string.c (gdbpy_extract_lazy_string): Extract
 	address as UnsignedLongLong, not LongLong.
 
