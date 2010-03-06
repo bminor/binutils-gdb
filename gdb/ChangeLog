@@ -1,3 +1,24 @@
+2010-03-06  Christopher Faylor  <me+cygwin@cgf.cx>
+
+	* windows-nat.c: Reorganize #ifdef __CYGWIN__ considerations into one
+	block.  Define helper macros to reduce ifdefs in code.
+	(get_module_name): Use cygwin_buf_t for buffer and __PMAX for buffer
+	size.  Call unadorned GetModuleFileNameEx rather than
+	GetModuleFileNameEx*.
+	(windows_make_so): Use __PMAX to denote maximum buffer size and
+	cygwin_buf_t for buffer type.  Use GetSystemDirectory{W,A} as
+	appropriate.
+	(get_image_name): Use __PMAX to denote maximum buffer size.
+	(handle_load_dll): Likewise.
+	(windows_pid_to_exec_file): Likewise.
+	(windows_create_inferior): Add many accommodations for older Cygwin and
+	non-Cygwin.
+	(bad_GetModuleFileNameExW): Control inclusion of this function based on
+	__USEWIDE conditional.
+	(bad_GetModuleFileNameExA): Likewise.
+	(_initialize_loadable): Just use real function names without the dyn_
+	part since they are defined earlier.
+
 2010-03-05  Corinna Vinschen  <vinschen@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>
 
