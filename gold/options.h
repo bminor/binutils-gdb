@@ -875,6 +875,10 @@ class General_options
 			 N_("Sort common symbols by alignment"),
 			 N_("[={ascending,descending}]"));
 
+  DEFINE_uint(spare_dynamic_tags, options::TWO_DASHES, '\0', 5,
+	      N_("Dynamic tag slots to reserve (default 5)"),
+	      N_("COUNT"));
+
   DEFINE_bool(strip_all, options::TWO_DASHES, 's', false,
               N_("Strip all symbols"), NULL);
   DEFINE_bool(strip_debug, options::TWO_DASHES, 'S', false,

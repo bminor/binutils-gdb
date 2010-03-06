@@ -1,5 +1,11 @@
 2010-03-05  Ian Lance Taylor  <iant@google.com>
 
+	* options.h (class General_options): Add --spare-dynamic-tags.
+	* output.cc (Output_data_dynamic::set_final_data_size): Implement
+	--spare-dynamic-tags.
+
+2010-03-05  Ian Lance Taylor  <iant@google.com>
+
 	* incremental.cc: Include "libiberty.h".
 
 2010-03-05  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>

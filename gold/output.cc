@@ -1622,9 +1622,13 @@ Output_data_dynamic::set_final_data_size()
 {
   // Add the terminating entry if it hasn't been added.
   // Because of relaxation, we can run this multiple times.
-  if (this->entries_.empty()
-      || this->entries_.rbegin()->tag() != elfcpp::DT_NULL)
-    this->add_constant(elfcpp::DT_NULL, 0);
+  if (this->entries_.empty() || this->entries_.back().tag() != elfcpp::DT_NULL)
+    {
+      int extra = parameters->options().spare_dynamic_tags();
+      for (int i = 0; i < extra; ++i)
+	this->add_constant(elfcpp::DT_NULL, 0);
+      this->add_constant(elfcpp::DT_NULL, 0);
+    }
 
   int dyn_size;
   if (parameters->target().get_size() == 32)
