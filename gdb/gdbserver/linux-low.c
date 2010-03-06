@@ -1067,11 +1067,12 @@ retry:
       && the_low_target.get_pc != NULL)
     {
       struct thread_info *saved_inferior = current_inferior;
-      struct regcache *regcache = get_thread_regcache (current_inferior, 1);
+      struct regcache *regcache;
       CORE_ADDR pc;
 
       current_inferior = (struct thread_info *)
 	find_inferior_id (&all_threads, child->head.id);
+      regcache = get_thread_regcache (current_inferior, 1);
       pc = (*the_low_target.get_pc) (regcache);
       fprintf (stderr, "linux_wait_for_lwp: pc is 0x%lx\n", (long) pc);
       current_inferior = saved_inferior;

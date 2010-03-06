@@ -1,3 +1,8 @@
+2010-03-06  Simo Melenius  <simo.melenius@iki.fi>
+
+	* linux-low.c (linux_wait_for_lwp): Fetch the regcache after
+	switching the current inferior, not before.
+
 2010-03-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.in (clean): Replace reg-i386.c, reg-x86-64.c,
