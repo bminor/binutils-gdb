@@ -1,3 +1,8 @@
+2010-03-06  Simo Melenius  <simo.melenius@iki.fi>
+
+	* linux-low.c (linux_wait_for_lwp): Fetch the regcache after
+	switching the current inferior, not before.
+
 2010-02-12  Doug Evans  <dje@google.com>
 
 	* linux-low.c (linux_supports_tracefork_flag): Document.
