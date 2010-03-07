@@ -2682,6 +2682,15 @@ remote_threads_extra_info (struct thread_info *tp)
 }
 
 
+/* Implement the to_get_ada_task_ptid function for the remote targets.  */
+
+static ptid_t
+remote_get_ada_task_ptid (long lwp, long thread)
+{
+  return ptid_build (ptid_get_pid (inferior_ptid), 0, lwp);
+}
+
+
 /* Restart the remote side; this is an extended protocol operation.  */
 
 static void
@@ -9675,6 +9684,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_find_new_threads = remote_threads_info;
   remote_ops.to_pid_to_str = remote_pid_to_str;
   remote_ops.to_extra_thread_info = remote_threads_extra_info;
+  remote_ops.to_get_ada_task_ptid = remote_get_ada_task_ptid;
   remote_ops.to_stop = remote_stop;
   remote_ops.to_xfer_partial = remote_xfer_partial;
   remote_ops.to_rcmd = remote_rcmd;
@@ -10234,3 +10244,4 @@ Show the remote pathname for \"run\""), NULL, NULL, NULL,
   target_buf_size = 2048;
   target_buf = xmalloc (target_buf_size);
 }
+
