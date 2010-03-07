@@ -1,3 +1,8 @@
+2010-03-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* remote.c (remote_get_ada_task_ptid): New function.
+        (init_remote_ops): Set remote_ops.to_get_ada_task_ptid.
+
 2010-03-06  Christopher Faylor  <me+cygwin@cgf.cx>
 
 	* windows-nat.c: Reorganize #ifdef __CYGWIN__ considerations into one
