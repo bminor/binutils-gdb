@@ -91,7 +91,7 @@ static int mips_map_regno (struct gdbarch *, int);
 
 static void mips_prepare_to_store (struct regcache *regcache);
 
-static unsigned int mips_fetch_word (CORE_ADDR addr);
+static int mips_fetch_word (CORE_ADDR addr, unsigned int *valp);
 
 static int mips_store_word (CORE_ADDR addr, unsigned int value,
 			    int *old_contents);
@@ -1994,25 +1994,23 @@ mips_store_registers (struct target_ops *ops,
     mips_error ("Can't write register %d: %s", regno, safe_strerror (errno));
 }
 
-/* Fetch a word from the target board.  */
+/* Fetch a word from the target board.  Return word fetched in location
+   addressed by VALP.  Return 0 when successful; return positive error
+   code when not.  */
 
-static unsigned int
-mips_fetch_word (CORE_ADDR addr)
+static int
+mips_fetch_word (CORE_ADDR addr, unsigned int *valp)
 {
-  unsigned int val;
   int err;
 
-  val = mips_request ('d', addr, 0, &err, mips_receive_wait, NULL);
+  *valp = mips_request ('d', addr, 0, &err, mips_receive_wait, NULL);
   if (err)
     {
       /* Data space failed; try instruction space.  */
-      val = mips_request ('i', addr, 0, &err,
-			  mips_receive_wait, NULL);
-      if (err)
-	mips_error ("Can't read address %s: %s",
-		    paddress (target_gdbarch, addr), safe_strerror (errno));
+      *valp = mips_request ('i', addr, 0, &err,
+			    mips_receive_wait, NULL);
     }
-  return val;
+  return err;
 }
 
 /* Store a word to the target board.  Returns errno code or zero for
@@ -2078,17 +2076,25 @@ mips_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
       /* Fill start and end extra bytes of buffer with existing data.  */
       if (addr != memaddr || len < 4)
 	{
+	  unsigned int val;
+
+	  if (mips_fetch_word (addr, &val))
+	    return 0;
+
 	  /* Need part of initial word -- fetch it.  */
-	  store_unsigned_integer (&buffer[0], 4, byte_order,
-				  mips_fetch_word (addr));
+	  store_unsigned_integer (&buffer[0], 4, byte_order, val);
 	}
 
       if (count > 1)
 	{
+	  unsigned int val;
+
 	  /* Need part of last word -- fetch it.  FIXME: we do this even
 	     if we don't need it.  */
-	  store_unsigned_integer (&buffer[(count - 1) * 4], 4, byte_order,
-				  mips_fetch_word (addr + (count - 1) * 4));
+	  if (mips_fetch_word (addr + (count - 1) * 4, &val))
+	    return 0;
+
+	  store_unsigned_integer (&buffer[(count - 1) * 4], 4, byte_order, val);
 	}
 
       /* Copy data to be written over corresponding part of buffer */
@@ -2123,8 +2129,12 @@ mips_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
       /* Read all the longwords */
       for (i = 0; i < count; i++, addr += 4)
 	{
-	  store_unsigned_integer (&buffer[i * 4], 4, byte_order,
-				  mips_fetch_word (addr));
+	  unsigned int val;
+
+	  if (mips_fetch_word (addr, &val))
+	    return 0;
+
+	  store_unsigned_integer (&buffer[i * 4], 4, byte_order, val);
 	  QUIT;
 	}
 
