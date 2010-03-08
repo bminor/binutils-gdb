@@ -76,6 +76,9 @@ struct ui_file *gdb_stdtargin;
 struct ui_file *gdb_stdtarg;
 struct ui_file *gdb_stdtargerr;
 
+/* True if --batch or --batch-silent was seen.  */
+int batch_flag = 0;
+
 /* Support for the --batch-silent option.  */
 int batch_silent = 0;
 
@@ -247,7 +250,6 @@ captured_main (void *data)
   int argc = context->argc;
   char **argv = context->argv;
   static int quiet = 0;
-  static int batch = 0;
   static int set_args = 0;
 
   /* Pointers to various arguments from command line.  */
@@ -386,7 +388,7 @@ captured_main (void *data)
       {"nx", no_argument, &inhibit_gdbinit, 1},
       {"n", no_argument, &inhibit_gdbinit, 1},
       {"batch-silent", no_argument, 0, 'B'},
-      {"batch", no_argument, &batch, 1},
+      {"batch", no_argument, &batch_flag, 1},
       {"epoch", no_argument, &epoch_interface, 1},
 
     /* This is a synonym for "--annotate=1".  --annotate is now preferred,
@@ -537,7 +539,7 @@ captured_main (void *data)
 	      }
 	    break;
 	  case 'B':
-	    batch = batch_silent = 1;
+	    batch_flag = batch_silent = 1;
 	    gdb_stdout = ui_file_new();
 	    break;
 #ifdef GDBTK
@@ -631,7 +633,7 @@ extern int gdbtk_test (char *);
 	use_windows = 0;
       }
 
-    if (batch)
+    if (batch_flag)
       quiet = 1;
   }
 
@@ -803,15 +805,15 @@ Excess command line arguments ignored. (%s%s)\n"),
       /* The exec file and the symbol-file are the same.  If we can't
          open it, better only print one error message.
          catch_command_errors returns non-zero on success! */
-      if (catch_command_errors (exec_file_attach, execarg, !batch, RETURN_MASK_ALL))
-	catch_command_errors (symbol_file_add_main, symarg, !batch, RETURN_MASK_ALL);
+      if (catch_command_errors (exec_file_attach, execarg, !batch_flag, RETURN_MASK_ALL))
+	catch_command_errors (symbol_file_add_main, symarg, !batch_flag, RETURN_MASK_ALL);
     }
   else
     {
       if (execarg != NULL)
-	catch_command_errors (exec_file_attach, execarg, !batch, RETURN_MASK_ALL);
+	catch_command_errors (exec_file_attach, execarg, !batch_flag, RETURN_MASK_ALL);
       if (symarg != NULL)
-	catch_command_errors (symbol_file_add_main, symarg, !batch, RETURN_MASK_ALL);
+	catch_command_errors (symbol_file_add_main, symarg, !batch_flag, RETURN_MASK_ALL);
     }
 
   if (corearg && pidarg)
@@ -820,10 +822,10 @@ Can't attach to process and specify a core file at the same time."));
 
   if (corearg != NULL)
     catch_command_errors (core_file_command, corearg,
-			  !batch, RETURN_MASK_ALL);
+			  !batch_flag, RETURN_MASK_ALL);
   else if (pidarg != NULL)
     catch_command_errors (attach_command, pidarg,
-			  !batch, RETURN_MASK_ALL);
+			  !batch_flag, RETURN_MASK_ALL);
   else if (pid_or_core_arg)
     {
       /* The user specified 'gdb program pid' or gdb program core'.
@@ -833,13 +835,13 @@ Can't attach to process and specify a core file at the same time."));
       if (isdigit (pid_or_core_arg[0]))
 	{
 	  if (catch_command_errors (attach_command, pid_or_core_arg,
-				    !batch, RETURN_MASK_ALL) == 0)
+				    !batch_flag, RETURN_MASK_ALL) == 0)
 	    catch_command_errors (core_file_command, pid_or_core_arg,
-				  !batch, RETURN_MASK_ALL);
+				  !batch_flag, RETURN_MASK_ALL);
 	}
       else /* Can't be a pid, better be a corefile.  */
 	catch_command_errors (core_file_command, pid_or_core_arg,
-			      !batch, RETURN_MASK_ALL);
+			      !batch_flag, RETURN_MASK_ALL);
     }
 
   if (ttyarg != NULL)
@@ -859,17 +861,17 @@ Can't attach to process and specify a core file at the same time."));
     {
       if (cmdarg[i].type == CMDARG_FILE)
         catch_command_errors (source_script, cmdarg[i].string,
-			      !batch, RETURN_MASK_ALL);
+			      !batch_flag, RETURN_MASK_ALL);
       else  /* cmdarg[i].type == CMDARG_COMMAND */
         catch_command_errors (execute_command, cmdarg[i].string,
-			      !batch, RETURN_MASK_ALL);
+			      !batch_flag, RETURN_MASK_ALL);
     }
   xfree (cmdarg);
 
   /* Read in the old history after all the command files have been read. */
   init_history ();
 
-  if (batch)
+  if (batch_flag)
     {
       /* We have hit the end of the batch file.  */
       quit_force (NULL, 0);

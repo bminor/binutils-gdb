@@ -3,6 +3,8 @@
 
 *** Changes since GDB 7.1
 
+* The --batch flag now disables pagination and queries.
+
 * X86 general purpose registers
 
   GDB now supports reading/writing byte, word and double-word x86

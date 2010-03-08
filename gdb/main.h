@@ -34,5 +34,6 @@ extern int gdb_main (struct captured_main_args *);
 extern int return_child_result;
 extern int return_child_result_value;
 extern int batch_silent;
+extern int batch_flag;
 
 #endif

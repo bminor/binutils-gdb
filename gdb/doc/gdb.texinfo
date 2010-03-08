@@ -1028,7 +1028,9 @@ Run in batch mode.  Exit with status @code{0} after processing all the
 command files specified with @samp{-x} (and all commands from
 initialization files, if not inhibited with @samp{-n}).  Exit with
 nonzero status if an error occurs in executing the @value{GDBN} commands
-in the command files.
+in the command files.  Batch mode also disables pagination;
+@pxref{Screen Size} and acts as if @kbd{set confirm off} were in
+effect (@pxref{Messages/Warnings}).
 
 Batch mode may be useful for running @value{GDBN} as a filter, for
 example to download and run a program on another computer; in order to
@@ -18494,7 +18496,9 @@ from wrapping its output.
 @itemx set pagination off
 @kindex set pagination
 Turn the output pagination on or off; the default is on.  Turning
-pagination off is the alternative to @code{set height 0}.
+pagination off is the alternative to @code{set height 0}.  Note that
+running @value{GDBN} with the @option{--batch} option (@pxref{Mode
+Options, -batch}) also automatically disables pagination.
 
 @item show pagination
 @kindex show pagination
@@ -18717,7 +18721,9 @@ commands, you can disable this ``feature'':
 @cindex confirmation
 @cindex stupid questions
 @item set confirm off
-Disables confirmation requests.
+Disables confirmation requests.  Note that running @value{GDBN} with
+the @option{--batch} option (@pxref{Mode Options, -batch}) also
+automatically disables confirmation requests.
 
 @item set confirm on
 Enables confirmation requests (the default).

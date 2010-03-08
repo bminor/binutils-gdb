@@ -1,3 +1,14 @@
+2010-03-08  Tom Tromey  <tromey@redhat.com>
+
+	PR cli/9591:
+	* NEWS: Update.
+	* utils.c: Include main.h.
+	(fputs_maybe_filtered): Don't paginate if `batch_flag'.
+	(defaulted_query): Use default answer if `batch_flag'.
+	* main.h (batch_flag): Declare.
+	* main.c (batch_flag): New global.
+	(captured_main): Remove 'batch'.  Update.
+
 2010-03-08  Kevin Buettner  <kevinb@redhat.com>
 
 	From Richard Sandiford, Martin M. Hunt, Corinna Vinschen,

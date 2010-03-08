@@ -1,3 +1,11 @@
+2010-03-08  Tom Tromey  <tromey@redhat.com>
+
+	PR cli/9591:
+	* gdb.texinfo (Mode Options): Mention lack of pagination and
+	confirmation with --batch.
+	(Screen Size): Mention --batch.
+	(Messages/Warnings): Likewise.
+
 2010-03-05  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Basic Python): Document target_charset and

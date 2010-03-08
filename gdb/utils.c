@@ -58,6 +58,7 @@
 #include "gdb_obstack.h"
 #include "gdbcore.h"
 #include "top.h"
+#include "main.h"
 
 #include "inferior.h"		/* for signed_pointer_to_address */
 
@@ -1496,7 +1497,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
      question we're asking, and then answer the default automatically.  This
      way, important error messages don't get lost when talking to GDB
      over a pipe.  */
-  if (! input_from_terminal_p ())
+  if (batch_flag || ! input_from_terminal_p ())
     {
       wrap_here ("");
       vfprintf_filtered (gdb_stdout, ctlstr, args);
