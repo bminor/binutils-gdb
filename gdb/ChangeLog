@@ -1,3 +1,7 @@
+2020-03-08  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* p-lang.c (is_pascal_string_type): Check that TYPE arg is non NULL.
+
 2010-03-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Hui Zhu  <teawater@gmail.com>
 
