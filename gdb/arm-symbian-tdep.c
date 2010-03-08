@@ -69,6 +69,15 @@ arm_symbian_init_abi (struct gdbarch_info info,
   /* Shared library handling.  */
   set_gdbarch_skip_trampoline_code (gdbarch, arm_symbian_skip_trampoline_code);
 
+  /* On this target, the toolchain outputs ELF files, with `sym' for
+     filename extension (e.g., `FOO.sym'); these are post-linker
+     processed into PE-ish DLLs (e.g., `FOO.dll'), and it's these that
+     are actually copied to and run on the target.  Naturally, when
+     listing shared libraries, Symbian stubs report the DLL filenames.
+     Setting this makes it so that GDB automatically looks for the
+     corresponding ELF files on the host's filesystem.  */
+  set_gdbarch_solib_symbols_extension (gdbarch, "sym");
+
   set_solib_ops (gdbarch, &solib_target_so_ops);
 }
 

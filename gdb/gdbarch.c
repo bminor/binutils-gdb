@@ -77,6 +77,14 @@ pformat (const struct floatformat **format)
     return format[0]->name;
 }
 
+static const char *
+pstring (const char *string)
+{
+  if (string == NULL)
+    return "(null)";
+  return string;
+}
+
 
 /* Maintain the struct gdbarch object */
 
@@ -255,6 +263,7 @@ struct gdbarch
   const char * qsupported;
   gdbarch_auto_charset_ftype *auto_charset;
   gdbarch_auto_wide_charset_ftype *auto_wide_charset;
+  const char * solib_symbols_extension;
 };
 
 
@@ -401,6 +410,7 @@ struct gdbarch startup_gdbarch =
   0,  /* qsupported */
   default_auto_charset,  /* auto_charset */
   default_auto_wide_charset,  /* auto_wide_charset */
+  0,  /* solib_symbols_extension */
   /* startup_gdbarch() */
 };
 
@@ -1147,6 +1157,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: sofun_address_maybe_missing = %s\n",
                       plongest (gdbarch->sofun_address_maybe_missing));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: solib_symbols_extension = %s\n",
+                      pstring (gdbarch->solib_symbols_extension));
   fprintf_unfiltered (file,
                       "gdbarch_dump: sp_regnum = %s\n",
                       plongest (gdbarch->sp_regnum));
@@ -3645,6 +3658,22 @@ set_gdbarch_auto_wide_charset (struct gdbarch *gdbarch,
                                gdbarch_auto_wide_charset_ftype auto_wide_charset)
 {
   gdbarch->auto_wide_charset = auto_wide_charset;
+}
+
+const char *
+gdbarch_solib_symbols_extension (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_solib_symbols_extension called\n");
+  return gdbarch->solib_symbols_extension;
+}
+
+void
+set_gdbarch_solib_symbols_extension (struct gdbarch *gdbarch,
+                                     const char * solib_symbols_extension)
+{
+  gdbarch->solib_symbols_extension = solib_symbols_extension;
 }
 
 

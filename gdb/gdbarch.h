@@ -940,6 +940,16 @@ typedef const char * (gdbarch_auto_wide_charset_ftype) (void);
 extern const char * gdbarch_auto_wide_charset (struct gdbarch *gdbarch);
 extern void set_gdbarch_auto_wide_charset (struct gdbarch *gdbarch, gdbarch_auto_wide_charset_ftype *auto_wide_charset);
 
+/* If non-empty, this is a file extension that will be opened in place
+   of the file extension reported by the shared library list.
+  
+   This is most useful for toolchains that use a post-linker tool,
+   where the names of the files run on the target differ in extension
+   compared to the names of the files GDB should load for debug info. */
+
+extern const char * gdbarch_solib_symbols_extension (struct gdbarch *gdbarch);
+extern void set_gdbarch_solib_symbols_extension (struct gdbarch *gdbarch, const char * solib_symbols_extension);
+
 /* Definition for an unknown syscall, used basically in error-cases.  */
 #define UNKNOWN_SYSCALL (-1)
 

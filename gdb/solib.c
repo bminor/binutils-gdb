@@ -150,6 +150,30 @@ solib_find (char *in_pathname, int *fd)
   int found_file = -1;
   char *temp_pathname = NULL;
   int gdb_sysroot_is_empty;
+  const char *solib_symbols_extension
+    = gdbarch_solib_symbols_extension (target_gdbarch);
+
+  /* If solib_symbols_extension is set, replace the file's
+     extension.  */
+  if (solib_symbols_extension)
+    {
+      char *p = in_pathname + strlen (in_pathname);
+      while (p > in_pathname && *p != '.')
+	p--;
+
+      if (*p == '.')
+	{
+	  char *new_pathname;
+
+	  new_pathname = alloca (p - in_pathname + 1
+				 + strlen (solib_symbols_extension) + 1);
+	  memcpy (new_pathname, in_pathname, p - in_pathname + 1);
+	  strcpy (new_pathname + (p - in_pathname) + 1,
+		  solib_symbols_extension);
+
+	  in_pathname = new_pathname;
+	}
+    }
 
   gdb_sysroot_is_empty = (gdb_sysroot == NULL || *gdb_sysroot == 0);
 

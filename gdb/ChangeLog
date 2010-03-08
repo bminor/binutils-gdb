@@ -1,3 +1,14 @@
+2010-03-08  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* solib.c (solib_find): Replace extension if
+	solib_symbols_extension is set in the target gdbarch.
+	* arm-symbian-tdep.c (arm_symbian_init_abi): Set
+	solib_symbols_extension to "sym".
+	* gdbarch.sh (solib_symbols_extension): New variable.
+	(pstring): New function.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
 2010-03-08  Tom Tromey  <tromey@redhat.com>
 
 	PR cli/9591:

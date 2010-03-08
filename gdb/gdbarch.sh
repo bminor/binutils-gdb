@@ -774,6 +774,14 @@ v:const char *:qsupported:::0:0::0:gdbarch->qsupported
 f:const char *:auto_charset:void::default_auto_charset:default_auto_charset::0
 # Return the "auto" target wide charset.
 f:const char *:auto_wide_charset:void::default_auto_wide_charset:default_auto_wide_charset::0
+
+# If non-empty, this is a file extension that will be opened in place
+# of the file extension reported by the shared library list.
+#
+# This is most useful for toolchains that use a post-linker tool,
+# where the names of the files run on the target differ in extension
+# compared to the names of the files GDB should load for debug info.
+v:const char *:solib_symbols_extension:::::::pstring (gdbarch->solib_symbols_extension)
 EOF
 }
 
@@ -1243,6 +1251,14 @@ pformat (const struct floatformat **format)
   else
     /* Just print out one of them - this is only for diagnostics.  */
     return format[0]->name;
+}
+
+static const char *
+pstring (const char *string)
+{
+  if (string == NULL)
+    return "(null)";
+  return string;
 }
 
 EOF
