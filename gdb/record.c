@@ -867,6 +867,10 @@ record_open_1 (char *name, int from_tty)
     error (_("Could not find 'to_insert_breakpoint' method on the target stack."));
   if (!tmp_to_remove_breakpoint)
     error (_("Could not find 'to_remove_breakpoint' method on the target stack."));
+  if (!tmp_to_stopped_by_watchpoint)
+    error (_("Could not find 'to_stopped_by_watchpoint' method on the target stack."));
+  if (!tmp_to_stopped_data_address)
+    error (_("Could not find 'to_stopped_data_address' method on the target stack."));
 
   push_target (&record_ops);
 }
@@ -897,6 +901,8 @@ record_open (char *name, int from_tty)
   tmp_to_xfer_partial = NULL;
   tmp_to_insert_breakpoint = NULL;
   tmp_to_remove_breakpoint = NULL;
+  tmp_to_stopped_by_watchpoint = NULL;
+  tmp_to_stopped_data_address = NULL;
 
   /* Set the beneath function pointers.  */
   for (t = current_target.beneath; t != NULL; t = t->beneath)
