@@ -868,9 +868,16 @@ solib_svr4_r_map (struct svr4_info *info)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
   struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
+  CORE_ADDR addr = 0;
+  volatile struct gdb_exception ex;
 
-  return read_memory_typed_address (info->debug_base + lmo->r_map_offset,
-				    ptr_type);
+  TRY_CATCH (ex, RETURN_MASK_ERROR)
+    {
+      addr = read_memory_typed_address (info->debug_base + lmo->r_map_offset,
+                                        ptr_type);
+    }
+  exception_print (gdb_stderr, ex);
+  return addr;
 }
 
 /* Find r_brk from the inferior's debug base.  */

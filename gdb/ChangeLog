@@ -1,3 +1,10 @@
+2010-03-08  Joel Brobecker  <brobecker@adacore.com>
+
+	Memory error when reading wrong core file.
+	* solib-svr4.c (solib_svr4_r_map): catch and print all exception
+	errors while reading the inferior memory, and return zero if
+	an exception was raised.
+
 2010-03-07  Michael Snyder  <msnyder@vmware.com>
 
 	* record.c (record_restore): Rename tmpu8 to rectype.
