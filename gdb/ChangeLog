@@ -1,3 +1,10 @@
+2010-03-08  Kevin Buettner  <kevinb@redhat.com>
+
+	* remote-mips.c (mips_fetch_word): Add new parameter, `valp'.
+	Change return value to int.  Store value fetched in location
+	addressed by `val'.  Use function's return value as success
+	or failure indicator.  Adjust all callers.
+
 2020-03-08  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* p-lang.c (is_pascal_string_type): Check that TYPE arg is non NULL.
