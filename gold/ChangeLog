@@ -1,3 +1,10 @@
+2010-03-08  Doug Kwan  <dougkwan@google.com>
+
+	* gold/arm.cc (Arm_exidx_fixup::update_offset_map): Fix build breakage
+	due to a conversion warning.
+	(Arm_relobj::update_output_local_symbol_count): Check for local
+	symbol with unset output index.
+
 2010-03-05  Ian Lance Taylor  <iant@google.com>
 
 	* options.h (class General_options): Add --spare-dynamic-tags.

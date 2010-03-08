@@ -5194,9 +5194,10 @@ Arm_exidx_fixup::update_offset_map(
 {
   if (this->section_offset_map_ == NULL)
     this->section_offset_map_ = new Arm_exidx_section_offset_map();
-  section_offset_type output_offset = (delete_entry
-				       ? -1
-				       : input_offset - deleted_bytes);
+  section_offset_type output_offset =
+    (delete_entry
+     ? Arm_exidx_input_section::invalid_offset
+     : input_offset - deleted_bytes);
   (*this->section_offset_map_)[input_offset] = output_offset;
 }
 
@@ -6506,7 +6507,7 @@ Arm_relobj<big_endian>::update_output_local_symbol_count()
       Symbol_value<32>& lv((*this->local_values())[i]);
 
       // This local symbol was already discarded by do_count_local_symbols.
-      if (!lv.is_output_symtab_index_set())
+      if (lv.is_output_symtab_index_set() && !lv.has_output_symtab_entry())
 	continue;
 
       bool is_ordinary;
