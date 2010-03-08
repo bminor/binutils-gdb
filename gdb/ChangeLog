@@ -1,7 +1,14 @@
 2010-03-07  Michael Snyder  <msnyder@vmware.com>
 
-	* i386-tdep.c (i386_process_record): Rename local variables
-	tmpu16, tmpu32, tmpu64 to addr16, addr32, addr64.
+	* i386-tdep.c (i386_record_lea_modrm_addr): Rename local variables
+	tmpu8, tmpi16, tmpi32, tmpulongest to addr8, addr16, addr32, addr64.
+
+	(i386_record_push): Rename local tmpulongest to addr.
+
+	(i386_process_record): Rename local tmpulongest to addr.
+
+	Rename local variables tmpu16, tmpu32, tmpu64 to addr16, addr32,
+	addr64.
 
 	Rename local variable tmpu8 to opcode8 and regnum.
 

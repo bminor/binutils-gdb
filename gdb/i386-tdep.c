@@ -2948,10 +2948,10 @@ static int
 i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 {
   struct gdbarch *gdbarch = irp->gdbarch;
-  uint8_t tmpu8;
-  int16_t tmpi16;
-  int32_t tmpi32;
-  ULONGEST tmpulongest;
+  int8_t  addr8;
+  int16_t addr16;
+  int32_t addr32;
+  ULONGEST addr64;
 
   *addr = 0;
   if (irp->aflag)
@@ -2959,13 +2959,14 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
       /* 32 bits */
       int havesib = 0;
       uint8_t scale = 0;
+      uint8_t byte;
       uint8_t index = 0;
       uint8_t base = irp->rm;
 
       if (base == 4)
 	{
 	  havesib = 1;
-	  if (target_read_memory (irp->addr, &tmpu8, 1))
+	  if (target_read_memory (irp->addr, &byte, 1))
 	    {
 	      if (record_debug)
 		printf_unfiltered (_("Process record: error reading memory "
@@ -2974,9 +2975,9 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 	      return -1;
 	    }
 	  irp->addr++;
-	  scale = (tmpu8 >> 6) & 3;
-	  index = ((tmpu8 >> 3) & 7) | irp->rex_x;
-	  base = (tmpu8 & 7);
+	  scale = (byte >> 6) & 3;
+	  index = ((byte >> 3) & 7) | irp->rex_x;
+	  base = (byte & 7);
 	}
       base |= irp->rex_b;
 
@@ -2986,7 +2987,7 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 	  if ((base & 7) == 5)
 	    {
 	      base = 0xff;
-	      if (target_read_memory (irp->addr, (gdb_byte *) &tmpi32, 4))
+	      if (target_read_memory (irp->addr, (gdb_byte *) &addr32, 4))
 		{
 		  if (record_debug)
 		    printf_unfiltered (_("Process record: error reading "
@@ -2995,7 +2996,7 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 		  return -1;
 		}
 	      irp->addr += 4;
-	      *addr = tmpi32;
+	      *addr = addr32;
 	      if (irp->regmap[X86_RECORD_R8_REGNUM] && !havesib)
 		*addr += irp->addr + irp->rip_offset;
 	    }
@@ -3005,7 +3006,7 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 	    }
 	  break;
 	case 1:
-	  if (target_read_memory (irp->addr, &tmpu8, 1))
+	  if (target_read_memory (irp->addr, &addr8, 1))
 	    {
 	      if (record_debug)
 		printf_unfiltered (_("Process record: error reading memory "
@@ -3014,10 +3015,10 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 	      return -1;
 	    }
 	  irp->addr++;
-	  *addr = (int8_t) tmpu8;
+	  *addr = addr8;
 	  break;
 	case 2:
-	  if (target_read_memory (irp->addr, (gdb_byte *) &tmpi32, 4))
+	  if (target_read_memory (irp->addr, (gdb_byte *) &addr32, 4))
 	    {
 	      if (record_debug)
 		printf_unfiltered (_("Process record: error reading memory "
@@ -3025,34 +3026,34 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 				   paddress (gdbarch, irp->addr));
 	      return -1;
 	    }
-	  *addr = tmpi32;
+	  *addr = addr32;
 	  irp->addr += 4;
 	  break;
 	}
 
-      tmpulongest = 0;
+      addr64 = 0;
       if (base != 0xff)
         {
 	  if (base == 4 && irp->popl_esp_hack)
 	    *addr += irp->popl_esp_hack;
 	  regcache_raw_read_unsigned (irp->regcache, irp->regmap[base],
-                                      &tmpulongest);
+                                      &addr64);
 	}
       if (irp->aflag == 2)
         {
-	  *addr += tmpulongest;
+	  *addr += addr64;
         }
       else
-        *addr = (uint32_t) (tmpulongest + *addr);
+        *addr = (uint32_t) (addr64 + *addr);
 
       if (havesib && (index != 4 || scale != 0))
 	{
 	  regcache_raw_read_unsigned (irp->regcache, irp->regmap[index],
-                                      &tmpulongest);
+                                      &addr64);
 	  if (irp->aflag == 2)
-	    *addr += tmpulongest << scale;
+	    *addr += addr64 << scale;
 	  else
-	    *addr = (uint32_t) (*addr + (tmpulongest << scale));
+	    *addr = (uint32_t) (*addr + (addr64 << scale));
 	}
     }
   else
@@ -3063,8 +3064,7 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 	case 0:
 	  if (irp->rm == 6)
 	    {
-	      if (target_read_memory
-		  (irp->addr, (gdb_byte *) &tmpi16, 2))
+	      if (target_read_memory (irp->addr, (gdb_byte *) &addr16, 2))
 		{
 		  if (record_debug)
 		    printf_unfiltered (_("Process record: error reading "
@@ -3073,7 +3073,7 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 		  return -1;
 		}
 	      irp->addr += 2;
-	      *addr = tmpi16;
+	      *addr = addr16;
 	      irp->rm = 0;
 	      goto no_rm;
 	    }
@@ -3083,7 +3083,7 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 	    }
 	  break;
 	case 1:
-	  if (target_read_memory (irp->addr, &tmpu8, 1))
+	  if (target_read_memory (irp->addr, &addr8, 1))
 	    {
 	      if (record_debug)
 		printf_unfiltered (_("Process record: error reading memory "
@@ -3092,10 +3092,10 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 	      return -1;
 	    }
 	  irp->addr++;
-	  *addr = (int8_t) tmpu8;
+	  *addr = addr8;
 	  break;
 	case 2:
-	  if (target_read_memory (irp->addr, (gdb_byte *) &tmpi16, 2))
+	  if (target_read_memory (irp->addr, (gdb_byte *) &addr16, 2))
 	    {
 	      if (record_debug)
 		printf_unfiltered (_("Process record: error reading memory "
@@ -3104,7 +3104,7 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 	      return -1;
 	    }
 	  irp->addr += 2;
-	  *addr = tmpi16;
+	  *addr = addr16;
 	  break;
 	}
 
@@ -3113,66 +3113,66 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 	case 0:
 	  regcache_raw_read_unsigned (irp->regcache,
 				      irp->regmap[X86_RECORD_REBX_REGNUM],
-                                      &tmpulongest);
-	  *addr = (uint32_t) (*addr + tmpulongest);
+                                      &addr64);
+	  *addr = (uint32_t) (*addr + addr64);
 	  regcache_raw_read_unsigned (irp->regcache,
 				      irp->regmap[X86_RECORD_RESI_REGNUM],
-                                      &tmpulongest);
-	  *addr = (uint32_t) (*addr + tmpulongest);
+                                      &addr64);
+	  *addr = (uint32_t) (*addr + addr64);
 	  break;
 	case 1:
 	  regcache_raw_read_unsigned (irp->regcache,
 				      irp->regmap[X86_RECORD_REBX_REGNUM],
-                                      &tmpulongest);
-	  *addr = (uint32_t) (*addr + tmpulongest);
+                                      &addr64);
+	  *addr = (uint32_t) (*addr + addr64);
 	  regcache_raw_read_unsigned (irp->regcache,
 				      irp->regmap[X86_RECORD_REDI_REGNUM],
-                                      &tmpulongest);
-	  *addr = (uint32_t) (*addr + tmpulongest);
+                                      &addr64);
+	  *addr = (uint32_t) (*addr + addr64);
 	  break;
 	case 2:
 	  regcache_raw_read_unsigned (irp->regcache,
 				      irp->regmap[X86_RECORD_REBP_REGNUM],
-                                      &tmpulongest);
-	  *addr = (uint32_t) (*addr + tmpulongest);
+                                      &addr64);
+	  *addr = (uint32_t) (*addr + addr64);
 	  regcache_raw_read_unsigned (irp->regcache,
 				      irp->regmap[X86_RECORD_RESI_REGNUM],
-                                      &tmpulongest);
-	  *addr = (uint32_t) (*addr + tmpulongest);
+                                      &addr64);
+	  *addr = (uint32_t) (*addr + addr64);
 	  break;
 	case 3:
 	  regcache_raw_read_unsigned (irp->regcache,
 				      irp->regmap[X86_RECORD_REBP_REGNUM],
-                                      &tmpulongest);
-	  *addr = (uint32_t) (*addr + tmpulongest);
+                                      &addr64);
+	  *addr = (uint32_t) (*addr + addr64);
 	  regcache_raw_read_unsigned (irp->regcache,
 				      irp->regmap[X86_RECORD_REDI_REGNUM],
-                                      &tmpulongest);
-	  *addr = (uint32_t) (*addr + tmpulongest);
+                                      &addr64);
+	  *addr = (uint32_t) (*addr + addr64);
 	  break;
 	case 4:
 	  regcache_raw_read_unsigned (irp->regcache,
 				      irp->regmap[X86_RECORD_RESI_REGNUM],
-                                      &tmpulongest);
-	  *addr = (uint32_t) (*addr + tmpulongest);
+                                      &addr64);
+	  *addr = (uint32_t) (*addr + addr64);
 	  break;
 	case 5:
 	  regcache_raw_read_unsigned (irp->regcache,
 				      irp->regmap[X86_RECORD_REDI_REGNUM],
-                                      &tmpulongest);
-	  *addr = (uint32_t) (*addr + tmpulongest);
+                                      &addr64);
+	  *addr = (uint32_t) (*addr + addr64);
 	  break;
 	case 6:
 	  regcache_raw_read_unsigned (irp->regcache,
 				      irp->regmap[X86_RECORD_REBP_REGNUM],
-                                      &tmpulongest);
-	  *addr = (uint32_t) (*addr + tmpulongest);
+                                      &addr64);
+	  *addr = (uint32_t) (*addr + addr64);
 	  break;
 	case 7:
 	  regcache_raw_read_unsigned (irp->regcache,
 				      irp->regmap[X86_RECORD_REBX_REGNUM],
-                                      &tmpulongest);
-	  *addr = (uint32_t) (*addr + tmpulongest);
+                                      &addr64);
+	  *addr = (uint32_t) (*addr + addr64);
 	  break;
 	}
       *addr &= 0xffff;
@@ -3216,15 +3216,15 @@ i386_record_lea_modrm (struct i386_record_s *irp)
 static int
 i386_record_push (struct i386_record_s *irp, int size)
 {
-  ULONGEST tmpulongest;
+  ULONGEST addr;
 
   if (record_arch_list_add_reg (irp->regcache,
 				irp->regmap[X86_RECORD_RESP_REGNUM]))
     return -1;
   regcache_raw_read_unsigned (irp->regcache,
 			      irp->regmap[X86_RECORD_RESP_REGNUM],
-			      &tmpulongest);
-  if (record_arch_list_add_mem ((CORE_ADDR) tmpulongest - size, size))
+			      &addr);
+  if (record_arch_list_add_mem ((CORE_ADDR) addr - size, size))
     return -1;
 
   return 0;
@@ -3307,13 +3307,13 @@ static int i386_record_floats (struct gdbarch *gdbarch,
 
 int
 i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
-		     CORE_ADDR addr)
+		     CORE_ADDR input_addr)
 {
   int prefixes = 0;
   int regnum;
   uint32_t opcode;
   uint8_t  opcode8;
-  ULONGEST tmpulongest;
+  ULONGEST addr;
   struct i386_record_s ir;
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int rex = 0;
@@ -3322,8 +3322,8 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 
   memset (&ir, 0, sizeof (struct i386_record_s));
   ir.regcache = regcache;
-  ir.addr = addr;
-  ir.orig_addr = addr;
+  ir.addr = input_addr;
+  ir.orig_addr = input_addr;
   ir.aflag = 1;
   ir.dflag = 1;
   ir.override = -1;
@@ -4100,7 +4100,9 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	    ir.ot = ir.dflag + OT_WORD;
 	  if (ir.aflag == 2)
 	    {
-              if (target_read_memory (ir.addr, (gdb_byte *) &addr, 8))
+	      uint64_t addr64;
+
+              if (target_read_memory (ir.addr, (gdb_byte *) &addr64, 8))
 		{
 	          if (record_debug)
 		    printf_unfiltered (_("Process record: error reading "
@@ -4109,6 +4111,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 		  return -1;
 		}
 	      ir.addr += 8;
+	      addr = addr64;
 	    }
           else if (ir.aflag)
 	    {
@@ -4123,7 +4126,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 		  return -1;
 		}
 	      ir.addr += 4;
-              tmpulongest = addr32;
+              addr = addr32;
 	    }
           else
 	    {
@@ -4138,9 +4141,9 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 		  return -1;
 		}
 	      ir.addr += 2;
-              tmpulongest = addr16;
+              addr = addr16;
 	    }
-	  if (record_arch_list_add_mem (tmpulongest, 1 << ir.ot))
+	  if (record_arch_list_add_mem (addr, 1 << ir.ot))
 	    return -1;
         }
       break;
@@ -4748,8 +4751,8 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
     case 0x6d:
       regcache_raw_read_unsigned (ir.regcache,
                                   ir.regmap[X86_RECORD_RECX_REGNUM],
-                                  &tmpulongest);
-      if (tmpulongest)
+                                  &addr);
+      if (addr)
         {
           ULONGEST es, ds;
 
@@ -4759,7 +4762,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	    ir.ot = ir.dflag + OT_WORD;
           regcache_raw_read_unsigned (ir.regcache,
                                       ir.regmap[X86_RECORD_REDI_REGNUM],
-                                      &tmpulongest);
+                                      &addr);
 
           regcache_raw_read_unsigned (ir.regcache,
                                       ir.regmap[X86_RECORD_ES_REGNUM],
@@ -4778,7 +4781,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
             }
           else
             {
-              if (record_arch_list_add_mem (tmpulongest, 1 << ir.ot))
+              if (record_arch_list_add_mem (addr, 1 << ir.ot))
                 return -1;
             }
 
@@ -5044,17 +5047,17 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
             return -1;
           regcache_raw_read_unsigned (ir.regcache,
                                       ir.regmap[ir.reg | rex_r],
-                                      &tmpulongest);
+                                      &addr);
           switch (ir.dflag)
             {
             case 0:
-              addr64 += ((int16_t) tmpulongest >> 4) << 4;
+              addr64 += ((int16_t) addr >> 4) << 4;
               break;
             case 1:
-              addr64 += ((int32_t) tmpulongest >> 5) << 5;
+              addr64 += ((int32_t) addr >> 5) << 5;
               break;
             case 2:
-              addr64 += ((int64_t) tmpulongest >> 6) << 6;
+              addr64 += ((int64_t) addr >> 6) << 6;
               break;
             }
           if (record_arch_list_add_mem (addr64, 1 << ir.ot))
