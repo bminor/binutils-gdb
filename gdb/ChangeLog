@@ -28,7 +28,7 @@
 	addressed by `val'.  Use function's return value as success
 	or failure indicator.  Adjust all callers.
 
-2020-03-08  Pierre Muller  <muller@ics.u-strasbg.fr>
+2010-03-08  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* p-lang.c (is_pascal_string_type): Check that TYPE arg is non NULL.
 
