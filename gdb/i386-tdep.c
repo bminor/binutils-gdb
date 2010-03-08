@@ -3310,11 +3310,12 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 		     CORE_ADDR addr)
 {
   int prefixes = 0;
-  uint8_t tmpu8;
+  int regnum;
+  uint32_t opcode;
+  uint8_t  opcode8;
   uint16_t tmpu16;
   uint32_t tmpu32;
   ULONGEST tmpulongest;
-  uint32_t opcode;
   struct i386_record_s ir;
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int rex = 0;
@@ -3340,7 +3341,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   /* prefixes */
   while (1)
     {
-      if (target_read_memory (ir.addr, &tmpu8, 1))
+      if (target_read_memory (ir.addr, &opcode8, 1))
 	{
 	  if (record_debug)
 	    printf_unfiltered (_("Process record: error reading memory at "
@@ -3349,7 +3350,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	  return -1;
 	}
       ir.addr++;
-      switch (tmpu8)	/* Instruction prefixes */
+      switch (opcode8)	/* Instruction prefixes */
 	{
 	case REPE_PREFIX_OPCODE:
 	  prefixes |= PREFIX_REPZ;
@@ -3404,10 +3405,10 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
             {
                /* REX */
                rex = 1;
-               rex_w = (tmpu8 >> 3) & 1;
-               rex_r = (tmpu8 & 0x4) << 1;
-               ir.rex_x = (tmpu8 & 0x2) << 2;
-               ir.rex_b = (tmpu8 & 0x1) << 3;
+               rex_w = (opcode8 >> 3) & 1;
+               rex_r = (opcode8 & 0x4) << 1;
+               ir.rex_x = (opcode8 & 0x2) << 2;
+               ir.rex_b = (opcode8 & 0x1) << 3;
             }
 	  else					/* 32 bit target */
 	    goto out_prefixes;
@@ -3433,12 +3434,12 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
     ir.aflag = 2;
 
   /* now check op code */
-  opcode = (uint32_t) tmpu8;
+  opcode = (uint32_t) opcode8;
  reswitch:
   switch (opcode)
     {
     case 0x0f:
-      if (target_read_memory (ir.addr, &tmpu8, 1))
+      if (target_read_memory (ir.addr, &opcode8, 1))
 	{
 	  if (record_debug)
 	    printf_unfiltered (_("Process record: error reading memory at "
@@ -3447,7 +3448,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	  return -1;
 	}
       ir.addr++;
-      opcode = (uint16_t) tmpu8 | 0x0f00;
+      opcode = (uint16_t) opcode8 | 0x0f00;
       goto reswitch;
       break;
 
@@ -3876,9 +3877,10 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	  ir.addr -= 1;
 	  goto no_support;
 	}
-      for (tmpu8 = X86_RECORD_REAX_REGNUM; tmpu8 <= X86_RECORD_REDI_REGNUM;
-	   tmpu8++)
-	I386_RECORD_ARCH_LIST_ADD_REG (tmpu8);
+      for (regnum = X86_RECORD_REAX_REGNUM; 
+	   regnum <= X86_RECORD_REDI_REGNUM;
+	   regnum++)
+	I386_RECORD_ARCH_LIST_ADD_REG (regnum);
       break;
 
     case 0x8f:    /* pop */
@@ -4026,19 +4028,19 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       switch (ir.reg)
 	{
 	case 0:
-	  tmpu8 = X86_RECORD_ES_REGNUM;
+	  regnum = X86_RECORD_ES_REGNUM;
 	  break;
 	case 2:
-	  tmpu8 = X86_RECORD_SS_REGNUM;
+	  regnum = X86_RECORD_SS_REGNUM;
 	  break;
 	case 3:
-	  tmpu8 = X86_RECORD_DS_REGNUM;
+	  regnum = X86_RECORD_DS_REGNUM;
 	  break;
 	case 4:
-	  tmpu8 = X86_RECORD_FS_REGNUM;
+	  regnum = X86_RECORD_FS_REGNUM;
 	  break;
 	case 5:
-	  tmpu8 = X86_RECORD_GS_REGNUM;
+	  regnum = X86_RECORD_GS_REGNUM;
 	  break;
 	default:
 	  ir.addr -= 2;
@@ -4046,7 +4048,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	  goto no_support;
 	  break;
 	}
-      I386_RECORD_ARCH_LIST_ADD_REG (tmpu8);
+      I386_RECORD_ARCH_LIST_ADD_REG (regnum);
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
 
@@ -4226,22 +4228,22 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       switch (opcode)
 	{
 	case 0xc4:    /* les Gv */
-	  tmpu8 = X86_RECORD_ES_REGNUM;
+	  regnum = X86_RECORD_ES_REGNUM;
 	  break;
 	case 0xc5:    /* lds Gv */
-	  tmpu8 = X86_RECORD_DS_REGNUM;
+	  regnum = X86_RECORD_DS_REGNUM;
 	  break;
 	case 0x0fb2:  /* lss Gv */
-	  tmpu8 = X86_RECORD_SS_REGNUM;
+	  regnum = X86_RECORD_SS_REGNUM;
 	  break;
 	case 0x0fb4:  /* lfs Gv */
-	  tmpu8 = X86_RECORD_FS_REGNUM;
+	  regnum = X86_RECORD_FS_REGNUM;
 	  break;
 	case 0x0fb5:  /* lgs Gv */
-	  tmpu8 = X86_RECORD_GS_REGNUM;
+	  regnum = X86_RECORD_GS_REGNUM;
 	  break;
 	}
-      I386_RECORD_ARCH_LIST_ADD_REG (tmpu8);
+      I386_RECORD_ARCH_LIST_ADD_REG (regnum);
       I386_RECORD_ARCH_LIST_ADD_REG (ir.reg | rex_r);
       I386_RECORD_ARCH_LIST_ADD_REG (X86_RECORD_EFLAGS_REGNUM);
       break;
@@ -5093,7 +5095,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
       break;
 
     case 0x9b:    /* fwait */
-      if (target_read_memory (ir.addr, &tmpu8, 1))
+      if (target_read_memory (ir.addr, &opcode8, 1))
         {
           if (record_debug)
             printf_unfiltered (_("Process record: error reading memory at "
@@ -5101,7 +5103,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 			       paddress (gdbarch, ir.addr));
           return -1;
         }
-      opcode = (uint32_t) tmpu8;
+      opcode = (uint32_t) opcode8;
       ir.addr++;
       goto reswitch;
       break;
@@ -5118,7 +5120,8 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
     case 0xcd:    /* int */
       {
 	int ret;
-	if (target_read_memory (ir.addr, &tmpu8, 1))
+	uint8_t interrupt;
+	if (target_read_memory (ir.addr, &interrupt, 1))
 	  {
 	    if (record_debug)
 	      printf_unfiltered (_("Process record: error reading memory "
@@ -5127,12 +5130,12 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	    return -1;
 	  }
 	ir.addr++;
-	if (tmpu8 != 0x80
+	if (interrupt != 0x80
 	    || gdbarch_tdep (gdbarch)->i386_intx80_record == NULL)
 	  {
 	    printf_unfiltered (_("Process record doesn't support "
 				 "instruction int 0x%02x.\n"),
-			       tmpu8);
+			       interrupt);
 	    ir.addr -= 2;
 	    goto no_support;
 	  }
