@@ -1,5 +1,28 @@
 2010-03-08  Kevin Buettner  <kevinb@redhat.com>
 
+	From Richard Sandiford, Martin M. Hunt, Corinna Vinschen,
+	and Kevin Buettner:
+
+	* remote-mips.c (rockhopper_ops): New target_ops struct.
+	(MON_ROCKHOPPER): New mips_monitor_type.
+	(read_hex_value): New function.
+	(mips_request): Send 8-byte values with a 'T' packet.  Read the
+	packet argument as a string and use read_hex_value to parse it.  
+	(mips_exit_debug): Wait for response when using MON_ROCKHOPPER.
+	(rockhopper_open): New function.
+	(mips_wait): Read the PC, FP and SP fields as strings.  Use
+	read_hex_value to parse them and mips_set_register to commit them.
+	(mips_set_register): New function.
+	(mips_fetch_registers): Do not cast register value to "unsigned"
+	when reading a MON_ROCKHOPPER 't' packet.  Use mips_set_register.
+	(mips_store_registers): Use a 'T' packet to set registers when
+	using MON_ROCKHOPPER.
+	(pmon_end_download): Don't run initEther if using MON_ROCKHOPPER
+	and expect the total to be printed before the entry address.
+	(_initialize_remote_mips): Initialize and add rockhopper_ops.
+
+2010-03-08  Kevin Buettner  <kevinb@redhat.com>
+
 	* remote-mips.c (mips_fetch_word): Add new parameter, `valp'.
 	Change return value to int.  Store value fetched in location
 	addressed by `val'.  Use function's return value as success
