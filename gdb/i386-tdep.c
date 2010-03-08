@@ -3310,7 +3310,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 		     CORE_ADDR input_addr)
 {
   int prefixes = 0;
-  int regnum;
+  int regnum = 0;
   uint32_t opcode;
   uint8_t  opcode8;
   ULONGEST addr;
