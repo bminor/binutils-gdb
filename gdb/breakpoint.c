@@ -4670,6 +4670,8 @@ breakpoint_1 (int bnum, int allflag)
     annotate_breakpoints_table ();
 
   ALL_BREAKPOINTS (b)
+  {
+    QUIT;
     if (bnum == -1
 	|| bnum == b->number)
       {
@@ -4678,6 +4680,7 @@ breakpoint_1 (int bnum, int allflag)
 	if (allflag || user_settable_breakpoint (b))
 	  print_one_breakpoint (b, &last_loc, print_address_bits, allflag);
       }
+  }
   
   do_cleanups (bkpttbl_chain);
 
