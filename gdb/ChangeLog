@@ -1,5 +1,7 @@
 2010-03-07  Michael Snyder  <msnyder@vmware.com>
 
+	* record.c (record_restore): Rename tmpu8 to rectype.
+
 	* i386-tdep.c (i386_record_lea_modrm_addr): Rename local variables
 	tmpu8, tmpi16, tmpi32, tmpulongest to addr8, addr16, addr32, addr64.
 

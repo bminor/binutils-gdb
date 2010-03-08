@@ -2169,16 +2169,16 @@ record_restore (void)
   while (1)
     {
       int ret;
-      uint8_t tmpu8;
+      uint8_t rectype;
       uint32_t regnum, len, signal, count;
       uint64_t addr;
 
       /* We are finished when offset reaches osec_size.  */
       if (bfd_offset >= osec_size)
 	break;
-      bfdcore_read (core_bfd, osec, &tmpu8, sizeof (tmpu8), &bfd_offset);
+      bfdcore_read (core_bfd, osec, &rectype, sizeof (rectype), &bfd_offset);
 
-      switch (tmpu8)
+      switch (rectype)
         {
         case record_reg: /* reg */
           /* Get register number to regnum.  */
