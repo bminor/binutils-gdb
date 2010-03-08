@@ -1,3 +1,8 @@
+2010-03-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* symfile.c (addr_info_make_relative): New variable sect_name, use it.
+	Do not warn on ".gnu.liblist" and ".gnu.conflict".
+
 2010-03-08  Joel Brobecker  <brobecker@adacore.com>
 
 	Memory error when reading wrong core file.
