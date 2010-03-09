@@ -1,3 +1,113 @@
+2010-03-09  Keith Seitz  <keiths@redhat.com>
+
+	Based on work from Daniel Jacobowitz  <dan@codesourcery.com>
+	* c-typeprint.c (cp_type_print_method_args): For non-static methods,
+	print out const or volatile qualifiers, too.
+	(c_type_print_args): Add parameters show_artificial and language.
+	Skip artificial parameters when requested.
+	Use the appropriate language printer.
+	(c_type_print_varspec): Tell c_type_print_args to skip artificial
+	parameters and pass language_c.
+	* dwarf2read.c (die_list): New file global.
+	(struct partial_die_info): Update comments for name field.
+	(pdi_needs_namespace): Renamed to ...
+	(die_needs_namespace): ... this. Rewrite.
+	(dwarf2_linkage_name): Remove.
+	(add_partial_symbol): Do not predicate the call to
+	partial_die_full_name based on pdi_needs_namespace.
+	Remove call to cp_check_possible_namespace_symbols and associated
+	outdated comments.
+	(guess_structure_name): Do not inspect child subprogram DIEs.
+	(dwarf2_fullname): Update comments.
+	Use die_needs_namespace to assist in computing the name.
+	(read_func_scope): Use dwarf2_name to get the DIE's name.
+	Use dwarf2_physname to get the "linkage name" of the DIE.
+	(dwarf2_add_member_field): Use dwarf2_physname instead of
+	dwarf2_linkage_name.
+	(read_structure_type): For structs and classes, set TYPE_NAME, too.
+	(determine_class): Remove.
+	(read_partial_die): Ignore DW_AT_MIPS_linkage_name for all languages
+	except Ada.
+	(new_symbol): Unconditionally call dwarf2_name.
+	Compute the "linkage name" using dwarf2_physname.
+	Use dwarf2_name instead of dwarf2_full_name for enumerator DIEs.
+	When determining to scan for anonymous C++ namespaces, ignore
+	the linkage name.
+	(dwarf2_physname): New function.
+	(dwarf2_full_name): Move content to new function and call
+	that.
+	(dwarf2_compute_name): "New" function.
+	(_initialize_dwarf2_read): Initialize die_list.
+	* gnu-v3-eabi.c (gnu_v3_find_method_in): Remove unused variable
+	physname.
+	(gnu_v3_print_method_ptr): Use the physname for virtual methods
+	without a demangled name.
+	Print out type information for non-virtual methods.
+        * linespec.c (decode_line_1): Force ANY string using "::" (or
+	"." for java) to use decode_compound, and clean up any stray quoting.
+        If we found a file symtab, re-evaluate whether the remainder is_quoted.
+        (decode_compound): Stop consuming at an open parenthesis.
+        Keep template parameters.
+        Keep any overload information.
+        Keep keywords like "const".
+        Remove paren_pointer.
+        Move is_quoted check from set_flags to here.
+        Remove #if 0 code from 2000. Ten years is long enough.
+        (find_method): Before comparing symbol names, canonicalize the string
+        from the user.
+        If a specific overload is requested, find it. Otherwise throw an error.
+	(find_method_overload_end): New function.
+	(set_flags): Remove.
+        (decode_compound): Assume that parentheses are matched.
+        It's a lot easier.
+	* symtab.c (symbol_find_demangled_name): Add DMGL_VERBOSE flag
+	to cplus_demangle.
+	* linespec.c (decode_line_1): Keep important keywords like
+	"const" and "volatile".
+	* symtab.h (SYMBOL_CPLUS_DEMANGLED_NAME): Remove.
+	* typeprint.h (c_type_print_args): Add declaration.
+	* ui-file.c (do_ui_file_obsavestring): New function.
+	(ui_file_obsavestring): New function.
+	* ui-file.h (ui_file_obsavestring): Add declaration.
+	* valops.c (find_overload_match): Resolve the object to
+	a non-pointer type.
+	If the object is a data member, search the object for the member
+	and return with staticp set.
+	Use SYMBOL_NATURAL_NAME instead of SYMBOL_CPLUS_DEMANGLED_NAME.
+	Do not attempt to extract a function name from non-function types.
+	If the extracted function name and the original name are the same,
+	we don't have a C++ method.
+
+	From Jan Kratochvil  <jan.kratochvil@redhat.com>:    
+    	* dwarf2read.c (new_symbol <DW_TAG_enumerator>): Call dwarf2_full_name.
+
+	* ada-lang.c (ada_lookup_symbol): Remove linkage_name parameters
+	and arguments from symbol lookups.
+	* ax-gdb.c (gen_expr): Likewise.
+	* cp-namespace.c (cp_lookup_symbol_nonlocal, lookup_namespace_scope,
+	cp_lookup_symbol_namespace, lookup_symbol_file, lookup_nested_type,
+	lookup_possible_namespace_symbol): Likewise.
+	* cp-support.c (read_in_psymtabs): Likewise.
+	* cp-support.h (cp_lookup_symbol_nonlocal): Likewise.
+	* language.h (la_lookup_symbol_nonlocal): Likewise.
+	* scm-valprint.c (scm_inferior_print): Likewise.
+	* solib-darwin.c (darwin_relocate_section_addresses): Likewise.
+	* solib-svr.c (elf_lookup_lib): Likewise.
+	* solib.c (show_auto_solib_add): Likewise.
+	* solist.h (lookup_lib_global, solib_global_lookup): Likewise.
+	* symmisc.c (maintenance_check_symtabs): Likewise.
+	* symtab.c (lookup_symbol_in_language, lookup_symbol_aux,
+	lookup_symbol_aux_local, lookup_symbol_aux_block,
+	lookup_symbol_from_objfile, lookup_symbol_aux_symtabs,
+	lookup_symbol_aux_psymtabs,basic_lookup_symbol_nonlocal,
+	lookup_symbol_static, lookup_symbol_global, symbol_matches_domain,
+	basic_lookup_transparent_type, find_main_psymtab,
+	lookup_block_symbol): Likewise.
+	* symtab.h (basic_lookp_symbol_nonlocal, lookup_symbol_static,
+	lookup_symbol_global, lookup_symbol_aux_block,
+	lookup_symbol_partial_symbol, lookup_block_symbol,
+	lookup_global_symbol, value_maybe_namespace_elt): Likewise.
+
 2010-03-09  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* python/python-internal.h: Include symtab.h.

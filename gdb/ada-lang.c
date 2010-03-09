@@ -4781,14 +4781,10 @@ ada_lookup_symbol (const char *name, const struct block *block0,
 
 static struct symbol *
 ada_lookup_symbol_nonlocal (const char *name,
-                            const char *linkage_name,
                             const struct block *block,
                             const domain_enum domain)
 {
-  if (linkage_name == NULL)
-    linkage_name = name;
-  return ada_lookup_symbol (linkage_name, block_static_block (block), domain,
-                            NULL);
+  return ada_lookup_symbol (name, block_static_block (block), domain, NULL);
 }
 
 

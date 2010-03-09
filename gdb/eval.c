@@ -1433,7 +1433,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  if (TYPE_CODE (type) == TYPE_CODE_NAMESPACE)
 	    {
 	      function = cp_lookup_symbol_namespace (TYPE_TAG_NAME (type),
-						     name, NULL,
+						     name,
 						     get_selected_block (0),
 						     VAR_DOMAIN, 1);
 	      if (function == NULL)

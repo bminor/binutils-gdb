@@ -1819,7 +1819,9 @@ value_static_field (struct type *type, int fieldno)
   else
     {
       char *phys_name = TYPE_FIELD_STATIC_PHYSNAME (type, fieldno);
+	/*TYPE_FIELD_NAME (type, fieldno);*/
       struct symbol *sym = lookup_symbol (phys_name, 0, VAR_DOMAIN, 0);
+
       if (sym == NULL)
 	{
 	  /* With some compilers, e.g. HP aCC, static data members are reported

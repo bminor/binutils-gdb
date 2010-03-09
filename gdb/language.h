@@ -258,7 +258,6 @@ struct language_defn
        variables.  */
 
     struct symbol *(*la_lookup_symbol_nonlocal) (const char *,
-						 const char *,
 						 const struct block *,
 						 const domain_enum);
 

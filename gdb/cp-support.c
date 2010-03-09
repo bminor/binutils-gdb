@@ -840,9 +840,9 @@ read_in_psymtabs (const char *func_name)
     if (ps->readin)
       continue;
 
-    if ((lookup_partial_symbol (ps, func_name, NULL, 1, VAR_DOMAIN)
+    if ((lookup_partial_symbol (ps, func_name, 1, VAR_DOMAIN)
 	 != NULL)
-	|| (lookup_partial_symbol (ps, func_name, NULL, 0, VAR_DOMAIN)
+	|| (lookup_partial_symbol (ps, func_name, 0, VAR_DOMAIN)
 	    != NULL))
       psymtab_to_symtab (ps);
   }

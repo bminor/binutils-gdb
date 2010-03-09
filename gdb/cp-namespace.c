@@ -34,14 +34,12 @@
 #include "buildsym.h"
 
 static struct symbol *lookup_namespace_scope (const char *name,
-					      const char *linkage_name,
 					      const struct block *block,
 					      const domain_enum domain,
 					      const char *scope,
 					      int scope_len);
 
 static struct symbol *lookup_symbol_file (const char *name,
-					  const char *linkage_name,
 					  const struct block *block,
 					  const domain_enum domain,
 					  int anonymous_namespace);
@@ -231,26 +229,23 @@ cp_add_using (const char *dest,
 /* The C++-specific version of name lookup for static and global
    names.  This makes sure that names get looked for in all namespaces
    that are in scope.  NAME is the natural name of the symbol that
-   we're looking for, LINKAGE_NAME (which is optional) is its linkage
-   name, BLOCK is the block that we're searching within, DOMAIN says
-   what kind of symbols we're looking for, and if SYMTAB is non-NULL,
-   we should store the symtab where we found the symbol in it.  */
+   we're looking for, BLOCK is the block that we're searching within,
+   DOMAIN says what kind of symbols we're looking for, and if SYMTAB is
+   non-NULL, we should store the symtab where we found the symbol in it.  */
 
 struct symbol *
 cp_lookup_symbol_nonlocal (const char *name,
-			   const char *linkage_name,
 			   const struct block *block,
 			   const domain_enum domain)
 {
   struct symbol *sym;
   const char *scope = block_scope (block);
 
-  sym = lookup_namespace_scope (name, linkage_name, block, domain, scope, 0);
+  sym = lookup_namespace_scope (name, block, domain, scope, 0);
   if (sym != NULL)
     return sym;
 
-  return cp_lookup_symbol_namespace (scope, name, linkage_name, block, domain,
-                                     1);
+  return cp_lookup_symbol_namespace (scope, name, block, domain, 1);
 }
 
 /* Look up NAME in the C++ namespace NAMESPACE. Other arguments are as in
@@ -259,14 +254,12 @@ cp_lookup_symbol_nonlocal (const char *name,
 static struct symbol *
 cp_lookup_symbol_in_namespace (const char *namespace,
                                const char *name,
-                               const char *linkage_name,
                                const struct block *block,
                                const domain_enum domain)
 {
   if (namespace[0] == '\0')
     {
-      return lookup_symbol_file (name, linkage_name, block,
-                                 domain, 0);
+      return lookup_symbol_file (name, block, domain, 0);
     }
   else
     {
@@ -275,8 +268,8 @@ cp_lookup_symbol_in_namespace (const char *namespace,
       strcpy (concatenated_name, namespace);
       strcat (concatenated_name, "::");
       strcat (concatenated_name, name);
-      return lookup_symbol_file (concatenated_name, linkage_name,
-                                 block, domain,cp_is_anonymous (namespace));
+      return lookup_symbol_file (concatenated_name, block,
+				 domain,cp_is_anonymous (namespace));
     }
 }
 
@@ -310,7 +303,6 @@ reset_directive_searched (void *data)
 static struct symbol *
 cp_lookup_symbol_imports (const char *scope,
                           const char *name,
-                          const char *linkage_name,
                           const struct block *block,
                           const domain_enum domain,
                           const int search_parents)
@@ -322,8 +314,7 @@ cp_lookup_symbol_imports (const char *scope,
   struct cleanup *searched_cleanup;
 
   /* First, try to find the symbol in the given namespace.  */
-  sym = cp_lookup_symbol_in_namespace (scope, name, linkage_name, block,
-                                       domain);
+  sym = cp_lookup_symbol_in_namespace (scope, name, block, domain);
   if (sym != NULL)
     return sym;
 
@@ -359,7 +350,6 @@ cp_lookup_symbol_imports (const char *scope,
 	  {
 	    sym = cp_lookup_symbol_in_namespace (scope,
 	                                         current->import_src,
-	                                         linkage_name,
 	                                         block,
 	                                         domain);
 	  }
@@ -369,7 +359,6 @@ cp_lookup_symbol_imports (const char *scope,
                NAMESPACE to direct the search towards the imported namespace.  */
 	    sym = cp_lookup_symbol_imports (current->import_src,
 	                                    name,
-	                                    linkage_name,
 	                                    block,
 	                                    domain,
 	                                    0);
@@ -392,7 +381,6 @@ cp_lookup_symbol_imports (const char *scope,
 struct symbol*
 cp_lookup_symbol_namespace (const char *scope,
                             const char *name,
-                            const char *linkage_name,
                             const struct block *block,
                             const domain_enum domain,
                             const int search_parents)
@@ -402,7 +390,7 @@ cp_lookup_symbol_namespace (const char *scope,
   /* Search for name in namespaces imported to this and parent blocks.  */
   while (block != NULL)
     {
-      sym = cp_lookup_symbol_imports (scope, name, linkage_name, block, domain,
+      sym = cp_lookup_symbol_imports (scope, name, block, domain,
                                       search_parents);
 
       if (sym)
@@ -431,7 +419,6 @@ cp_lookup_symbol_namespace (const char *scope,
 
 static struct symbol *
 lookup_namespace_scope (const char *name,
-			const char *linkage_name,
 			const struct block *block,
 			const domain_enum domain,
 			const char *scope,
@@ -453,8 +440,7 @@ lookup_namespace_scope (const char *name,
 	  new_scope_len += 2;
 	}
       new_scope_len += cp_find_first_component (scope + new_scope_len);
-      sym = lookup_namespace_scope (name, linkage_name, block,
-				    domain, scope, new_scope_len);
+      sym = lookup_namespace_scope (name, block, domain, scope, new_scope_len);
       if (sym != NULL)
 	return sym;
     }
@@ -465,8 +451,7 @@ lookup_namespace_scope (const char *name,
   namespace = alloca (scope_len + 1);
   strncpy (namespace, scope, scope_len);
   namespace[scope_len] = '\0';
-  return cp_lookup_symbol_in_namespace (namespace, name, linkage_name,
-                                        block, domain);
+  return cp_lookup_symbol_in_namespace (namespace, name, block, domain);
 }
 
 /* Look up NAME in BLOCK's static block and in global blocks.  If
@@ -476,14 +461,13 @@ lookup_namespace_scope (const char *name,
 
 static struct symbol *
 lookup_symbol_file (const char *name,
-		    const char *linkage_name,
 		    const struct block *block,
 		    const domain_enum domain,
 		    int anonymous_namespace)
 {
   struct symbol *sym = NULL;
 
-  sym = lookup_symbol_static (name, linkage_name, block, domain);
+  sym = lookup_symbol_static (name, block, domain);
   if (sym != NULL)
     return sym;
 
@@ -496,12 +480,11 @@ lookup_symbol_file (const char *name,
       const struct block *global_block = block_global_block (block);
       
       if (global_block != NULL)
-	sym = lookup_symbol_aux_block (name, linkage_name, global_block,
-				       domain);
+	sym = lookup_symbol_aux_block (name, global_block, domain);
     }
   else
     {
-      sym = lookup_symbol_global (name, linkage_name, block, domain);
+      sym = lookup_symbol_global (name, block, domain);
     }
 
   if (sym != NULL)
@@ -552,7 +535,6 @@ cp_lookup_nested_type (struct type *parent_type,
 	const char *parent_name = TYPE_TAG_NAME (parent_type);
 	struct symbol *sym = cp_lookup_symbol_in_namespace (parent_name,
 	                                                    nested_name,
-	                                                    NULL,
 	                                                    block,
 	                                                    VAR_DOMAIN);
 	if (sym == NULL || SYMBOL_CLASS (sym) != LOC_TYPEDEF)
@@ -798,7 +780,7 @@ check_one_possible_namespace_symbol (const char *name, int len,
 
   memcpy (name_copy, name, len);
   name_copy[len] = '\0';
-  sym = lookup_block_symbol (block, name_copy, NULL, VAR_DOMAIN);
+  sym = lookup_block_symbol (block, name_copy, VAR_DOMAIN);
 
   if (sym == NULL)
     {
@@ -839,7 +821,7 @@ lookup_possible_namespace_symbol (const char *name)
       struct symbol *sym;
 
       sym = lookup_block_symbol (get_possible_namespace_block (objfile),
-				 name, NULL, VAR_DOMAIN);
+				 name, VAR_DOMAIN);
 
       if (sym != NULL)
 	return sym;

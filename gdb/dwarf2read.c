@@ -48,6 +48,8 @@
 #include "gdbcmd.h"
 #include "block.h"
 #include "addrmap.h"
+#include "typeprint.h"
+#include "jv-lang.h"
 
 #include <fcntl.h>
 #include "gdb_string.h"
@@ -487,8 +489,7 @@ struct partial_die_info
     unsigned int has_byte_size : 1;
 
     /* The name of this DIE.  Normally the value of DW_AT_name, but
-       sometimes DW_TAG_MIPS_linkage_name or a string computed in some
-       other fashion.  */
+       sometimes a default name for unnamed DIEs.  */
     char *name;
 
     /* The scope to prepend to our children.  This is generally
@@ -788,8 +789,6 @@ static void scan_partial_symbols (struct partial_die_info *,
 static void add_partial_symbol (struct partial_die_info *,
 				struct dwarf2_cu *);
 
-static int pdi_needs_namespace (enum dwarf_tag tag);
-
 static void add_partial_namespace (struct partial_die_info *pdi,
 				   CORE_ADDR *lowpc, CORE_ADDR *highpc,
 				   int need_pc, struct dwarf2_cu *cu);
@@ -984,9 +983,6 @@ static void dwarf2_attach_fn_fields_to_type (struct field_info *,
 
 static void process_structure_scope (struct die_info *, struct dwarf2_cu *);
 
-static const char *determine_class_name (struct die_info *die,
-					 struct dwarf2_cu *cu);
-
 static void read_common_block (struct die_info *, struct dwarf2_cu *);
 
 static void read_namespace (struct die_info *die, struct dwarf2_cu *);
@@ -1027,8 +1023,6 @@ static gdb_byte *read_full_die (const struct die_reader_specs *reader,
 				int *);
 
 static void process_die (struct die_info *, struct dwarf2_cu *);
-
-static char *dwarf2_linkage_name (struct die_info *, struct dwarf2_cu *);
 
 static char *dwarf2_canonicalize_name (char *, struct dwarf2_cu *,
 				       struct obstack *);
@@ -2441,12 +2435,9 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
-  if (pdi_needs_namespace (pdi->tag))
-    {
-      actual_name = partial_die_full_name (pdi, cu);
-      if (actual_name)
-	built_actual_name = 1;
-    }
+  actual_name = partial_die_full_name (pdi, cu);
+  if (actual_name)
+    built_actual_name = 1;
 
   if (actual_name == NULL)
     actual_name = pdi->name;
@@ -2586,47 +2577,8 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
       break;
     }
 
-  /* Check to see if we should scan the name for possible namespace
-     info.  Only do this if this is C++, if we don't have namespace
-     debugging info in the file, if the psym is of an appropriate type
-     (otherwise we'll have psym == NULL), and if we actually had a
-     mangled name to begin with.  */
-
-  /* FIXME drow/2004-02-22: Why don't we do this for classes, i.e. the
-     cases which do not set PSYM above?  */
-
-  if (cu->language == language_cplus
-      && cu->has_namespace_info == 0
-      && psym != NULL
-      && SYMBOL_CPLUS_DEMANGLED_NAME (psym) != NULL)
-    cp_check_possible_namespace_symbols (SYMBOL_CPLUS_DEMANGLED_NAME (psym),
-					 objfile);
-
   if (built_actual_name)
     xfree (actual_name);
-}
-
-/* Determine whether a die of type TAG living in a C++ class or
-   namespace needs to have the name of the scope prepended to the
-   name listed in the die.  */
-
-static int
-pdi_needs_namespace (enum dwarf_tag tag)
-{
-  switch (tag)
-    {
-    case DW_TAG_namespace:
-    case DW_TAG_typedef:
-    case DW_TAG_class_type:
-    case DW_TAG_interface_type:
-    case DW_TAG_structure_type:
-    case DW_TAG_union_type:
-    case DW_TAG_enumeration_type:
-    case DW_TAG_enumerator:
-      return 1;
-    default:
-      return 0;
-    }
 }
 
 /* Read a partial die corresponding to a namespace; also, add a symbol
@@ -2740,7 +2692,6 @@ guess_structure_name (struct partial_die_info *struct_pdi,
 	 could fix this by only using the demangled name to get the
 	 prefix (but see comment in read_structure_type).  */
 
-      struct partial_die_info *child_pdi = struct_pdi->die_child;
       struct partial_die_info *real_pdi;
 
       /* If this DIE (this DIE's specification, if any) has a parent, then
@@ -2753,27 +2704,6 @@ guess_structure_name (struct partial_die_info *struct_pdi,
 
       if (real_pdi->die_parent != NULL)
 	return;
-
-      while (child_pdi != NULL)
-	{
-	  if (child_pdi->tag == DW_TAG_subprogram)
-	    {
-	      char *actual_class_name
-		= language_class_name_from_physname (cu->language_defn,
-						     child_pdi->name);
-	      if (actual_class_name != NULL)
-		{
-		  struct_pdi->name
-		    = obsavestring (actual_class_name,
-				    strlen (actual_class_name),
-				    &cu->objfile->objfile_obstack);
-		  xfree (actual_class_name);
-		}
-	      break;
-	    }
-
-	  child_pdi = child_pdi->die_sibling;
-	}
     }
 }
 
@@ -3345,42 +3275,156 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
     }
 }
 
+/* A helper function for dwarf2_compute_name which determines whether DIE
+   needs to have the name of the scope prepended to the name listed in the
+   die.  */
+
+static int
+die_needs_namespace (struct die_info *die, struct dwarf2_cu *cu)
+{
+  switch (die->tag)
+    {
+    case DW_TAG_namespace:
+    case DW_TAG_typedef:
+    case DW_TAG_class_type:
+    case DW_TAG_interface_type:
+    case DW_TAG_structure_type:
+    case DW_TAG_union_type:
+    case DW_TAG_enumeration_type:
+    case DW_TAG_enumerator:
+    case DW_TAG_subprogram:
+    case DW_TAG_member:
+      return 1;
+
+    case DW_TAG_variable:
+      /* We only need to prefix "globally" visible variables.  These include
+	 any variable marked with DW_AT_external or any variable that
+	 lives in a namespace.  [Variables in anonymous namespaces
+	 require prefixing, but they are not DW_AT_external.]  */
+
+      if (dwarf2_attr (die, DW_AT_specification, cu))
+	{
+	  struct dwarf2_cu *spec_cu = cu;
+	  return die_needs_namespace (die_specification (die, &spec_cu),
+				      spec_cu);
+	}
+
+      if (dwarf2_attr (die, DW_AT_external, cu)
+	  || die->parent->tag == DW_TAG_namespace)
+	return 1;
+
+      return 0;
+
+    default:
+      return 0;
+    }
+}
+
+/* Compute the fully qualified name of DIE in CU.  If PHYSNAME is nonzero,
+   compute the physname for the object, which include a method's
+   formal parameters (C++/Java) and return type (Java).
+
+   The result is allocated on the objfile_obstack and canonicalized.  */
+
+static const char *
+dwarf2_compute_name (char *name, struct die_info *die, struct dwarf2_cu *cu,
+		     int physname)
+{
+  if (name == NULL)
+    name = dwarf2_name (die, cu);
+
+  /* These are the only languages we know how to qualify names in.  */
+  if (name != NULL
+      && (cu->language == language_cplus || cu->language == language_java))
+    {
+      if (die_needs_namespace (die, cu))
+	{
+	  long length;
+	  char *prefix;
+	  struct ui_file *buf;
+
+	  prefix = determine_prefix (die, cu);
+	  buf = mem_fileopen ();
+	  if (*prefix != '\0')
+	    {
+	      char *prefixed_name = typename_concat (NULL, prefix, name, cu);
+	      fputs_unfiltered (prefixed_name, buf);
+	      xfree (prefixed_name);
+	    }
+	  else
+	    fputs_unfiltered (name ? name : "", buf);
+
+	  /* For Java and C++ methods, append formal parameter type
+	     information, if PHYSNAME.  */
+	  
+	  if (physname && die->tag == DW_TAG_subprogram
+	      && (cu->language == language_cplus
+		  || cu->language == language_java))
+	    {
+	      struct type *type = read_type_die (die, cu);
+
+	      c_type_print_args (type, buf, 0, cu->language);
+
+	      if (cu->language == language_java)
+		{
+		  /* For java, we must append the return type to method
+		     names. */
+		  if (die->tag == DW_TAG_subprogram)
+		    java_print_type (TYPE_TARGET_TYPE (type), "", buf,
+				     0, 0);
+		}
+	      else if (cu->language == language_cplus)
+		{
+		  if (TYPE_NFIELDS (type) > 0
+		      && TYPE_FIELD_ARTIFICIAL (type, 0)
+		      && TYPE_CONST (TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, 0))))
+		    fputs_unfiltered (" const", buf);
+		}
+	    }
+
+	  name = ui_file_obsavestring (buf, &cu->objfile->objfile_obstack,
+				       &length);
+	  ui_file_delete (buf);
+
+	  if (cu->language == language_cplus)
+	    {
+	      char *cname
+		= dwarf2_canonicalize_name (name, cu,
+					    &cu->objfile->objfile_obstack);
+	      if (cname != NULL)
+		name = cname;
+	    }
+	}
+    }
+
+  return name;
+}
+
 /* Return the fully qualified name of DIE, based on its DW_AT_name.
    If scope qualifiers are appropriate they will be added.  The result
    will be allocated on the objfile_obstack, or NULL if the DIE does
-   not have a name.  */
+   not have a name.  NAME may either be from a previous call to
+   dwarf2_name or NULL.
+
+   The output string will be canonicalized (if C++/Java). */
 
 static const char *
-dwarf2_full_name (struct die_info *die, struct dwarf2_cu *cu)
+dwarf2_full_name (char *name, struct die_info *die, struct dwarf2_cu *cu)
 {
-  struct attribute *attr;
-  char *prefix, *name;
-  struct ui_file *buf = NULL;
+  return dwarf2_compute_name (name, die, cu, 0);
+}
 
-  name = dwarf2_name (die, cu);
-  if (!name)
-    return NULL;
+/* Construct a physname for the given DIE in CU.  NAME may either be
+   from a previous call to dwarf2_name or NULL.  The result will be
+   allocated on the objfile_objstack or NULL if the DIE does not have a
+   name.
 
-  /* These are the only languages we know how to qualify names in.  */
-  if (cu->language != language_cplus
-      && cu->language != language_java)
-    return name;
+   The output string will be canonicalized (if C++/Java).  */
 
-  /* If no prefix is necessary for this type of DIE, return the
-     unqualified name.  The other three tags listed could be handled
-     in pdi_needs_namespace, but that requires broader changes.  */
-  if (!pdi_needs_namespace (die->tag)
-      && die->tag != DW_TAG_subprogram
-      && die->tag != DW_TAG_variable
-      && die->tag != DW_TAG_member)
-    return name;
-
-  prefix = determine_prefix (die, cu);
-  if (*prefix != '\0')
-    name = typename_concat (&cu->objfile->objfile_obstack, prefix,
-			    name, cu);
-
-  return name;
+static const char *
+dwarf2_physname (char *name, struct die_info *die, struct dwarf2_cu *cu)
+{
+  return dwarf2_compute_name (name, die, cu, 1);
 }
 
 /* Read the import statement specified by the given die and record it.  */
@@ -3858,7 +3902,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
-  name = dwarf2_linkage_name (die, cu);
+  name = dwarf2_name (die, cu);
 
   /* Ignore functions with missing or empty names and functions with
      missing or invalid low and high pc attributes.  */
@@ -4532,7 +4576,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 	return;
 
       /* Get physical name.  */
-      physname = dwarf2_linkage_name (die, cu);
+      physname = (char *) dwarf2_physname (fieldname, die, cu);
 
       /* The name is already allocated along with this objfile, so we don't
 	 need to duplicate it for the type.  */
@@ -4694,7 +4738,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
     return;
 
   /* Get the mangled name.  */
-  physname = dwarf2_linkage_name (die, cu);
+  physname = (char *) dwarf2_physname (fieldname, die, cu);
 
   /* Look up member function name in fieldlist.  */
   for (i = 0; i < fip->nfnfields; i++)
@@ -5001,14 +5045,18 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
       if (cu->language == language_cplus
 	  || cu->language == language_java)
 	{
-	  const char *new_prefix = determine_class_name (die, cu);
-	  TYPE_TAG_NAME (type) = (char *) new_prefix;
+	  TYPE_TAG_NAME (type) = (char *) dwarf2_full_name (name, die, cu);
+	  if (die->tag == DW_TAG_structure_type
+	      || die->tag == DW_TAG_class_type)
+	    TYPE_NAME (type) = TYPE_TAG_NAME (type);
 	}
       else
 	{
 	  /* The name is already allocated along with this objfile, so
 	     we don't need to duplicate it for the type.  */
-	  TYPE_TAG_NAME (type) = name;
+	  TYPE_TAG_NAME (type) = (char *) name;
+	  if (die->tag == DW_TAG_class_type)
+	    TYPE_NAME (type) = TYPE_TAG_NAME (type);
 	}
     }
 
@@ -5227,7 +5275,7 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
   type = alloc_type (objfile);
 
   TYPE_CODE (type) = TYPE_CODE_ENUM;
-  name = dwarf2_full_name (die, cu);
+  name = dwarf2_full_name (NULL, die, cu);
   if (name != NULL)
     TYPE_TAG_NAME (type) = (char *) name;
 
@@ -5250,51 +5298,6 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
     TYPE_STUB (type) = 1;
 
   return set_die_type (die, type, cu);
-}
-
-/* Determine the name of the type represented by DIE, which should be
-   a named C++ or Java compound type.  Return the name in question,
-   allocated on the objfile obstack.  */
-
-static const char *
-determine_class_name (struct die_info *die, struct dwarf2_cu *cu)
-{
-  const char *new_prefix = NULL;
-
-  /* If we don't have namespace debug info, guess the name by trying
-     to demangle the names of members, just like we did in
-     guess_structure_name.  */
-  if (!processing_has_namespace_info)
-    {
-      struct die_info *child;
-
-      for (child = die->child;
-	   child != NULL && child->tag != 0;
-	   child = sibling_die (child))
-	{
-	  if (child->tag == DW_TAG_subprogram)
-	    {
-	      char *phys_prefix
-		= language_class_name_from_physname (cu->language_defn,
-						     dwarf2_linkage_name
-						     (child, cu));
-
-	      if (phys_prefix != NULL)
-		{
-		  new_prefix
-		    = obsavestring (phys_prefix, strlen (phys_prefix),
-				    &cu->objfile->objfile_obstack);
-		  xfree (phys_prefix);
-		  break;
-		}
-	    }
-	}
-    }
-
-  if (new_prefix == NULL)
-    new_prefix = dwarf2_full_name (die, cu);
-
-  return new_prefix;
 }
 
 /* Given a pointer to a die which begins an enumeration, process all
@@ -5952,7 +5955,7 @@ read_typedef (struct die_info *die, struct dwarf2_cu *cu)
   const char *name = NULL;
   struct type *this_type;
 
-  name = dwarf2_full_name (die, cu);
+  name = dwarf2_full_name (NULL, die, cu);
   this_type = init_type (TYPE_CODE_TYPEDEF, 0,
 			 TYPE_FLAG_TARGET_STUB, NULL, objfile);
   TYPE_NAME (this_type) = (char *) name;
@@ -6780,7 +6783,8 @@ read_partial_die (struct partial_die_info *part_die,
 	    }
 	  break;
 	case DW_AT_MIPS_linkage_name:
-	  part_die->name = DW_STRING (&attr);
+	  if (cu->language == language_ada)
+	    part_die->name = DW_STRING (&attr);
 	  break;
 	case DW_AT_low_pc:
 	  has_low_pc_attr = 1;
@@ -8351,13 +8355,11 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
-  if (die->tag != DW_TAG_namespace)
-    name = dwarf2_linkage_name (die, cu);
-  else
-    name = TYPE_NAME (type);
-
+  name = dwarf2_name (die, cu);
   if (name)
     {
+      const char *linkagename;
+
       sym = (struct symbol *) obstack_alloc (&objfile->objfile_obstack,
 					     sizeof (struct symbol));
       OBJSTAT (objfile, n_syms++);
@@ -8365,7 +8367,8 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 
       /* Cache this symbol's name and the name's demangled form (if any).  */
       SYMBOL_LANGUAGE (sym) = cu->language;
-      SYMBOL_SET_NAMES (sym, name, strlen (name), 0, objfile);
+      linkagename = dwarf2_physname (name, die, cu);
+      SYMBOL_SET_NAMES (sym, linkagename, strlen (linkagename), 0, objfile);
 
       /* Default assumptions.
          Use the passed type or decode it from the die.  */
@@ -8590,7 +8593,8 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	  }
 	  break;
 	case DW_TAG_typedef:
-	  SYMBOL_LINKAGE_NAME (sym) = (char *) dwarf2_full_name (die, cu);
+	  SYMBOL_LINKAGE_NAME (sym)
+	    = (char *) dwarf2_full_name (name, die, cu);
 	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	  add_symbol_to_list (sym, cu->list_in_scope);
@@ -8602,7 +8606,8 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	  add_symbol_to_list (sym, cu->list_in_scope);
 	  break;
 	case DW_TAG_enumerator:
-	  SYMBOL_LINKAGE_NAME (sym) = (char *) dwarf2_full_name (die, cu);
+	  SYMBOL_LINKAGE_NAME (sym)
+	    = (char *) dwarf2_full_name (name, die, cu);
 	  attr = dwarf2_attr (die, DW_AT_const_value, cu);
 	  if (attr)
 	    {
@@ -8639,8 +8644,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
       /* For the benefit of old versions of GCC, check for anonymous
 	 namespaces based on the demangled name.  */
       if (!processing_has_namespace_info
-	  && cu->language == language_cplus
-	  && dwarf2_attr (die, DW_AT_MIPS_linkage_name, cu) != NULL)
+	  && cu->language == language_cplus)
 	cp_scan_for_anonymous_namespaces (sym);
     }
   return (sym);
@@ -9090,19 +9094,6 @@ static struct die_info *
 sibling_die (struct die_info *die)
 {
   return die->sibling;
-}
-
-/* Get linkage name of a die, return NULL if not found.  */
-
-static char *
-dwarf2_linkage_name (struct die_info *die, struct dwarf2_cu *cu)
-{
-  struct attribute *attr;
-
-  attr = dwarf2_attr (die, DW_AT_MIPS_linkage_name, cu);
-  if (attr && DW_STRING (attr))
-    return DW_STRING (attr);
-  return dwarf2_name (die, cu);
 }
 
 /* Get name of a die, return NULL if not found.  */

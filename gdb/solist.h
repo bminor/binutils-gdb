@@ -117,7 +117,6 @@ struct target_so_ops
     /* Hook for looking up global symbols in a library-specific way.  */
     struct symbol * (*lookup_lib_global_symbol) (const struct objfile *objfile,
 						 const char *name,
-						 const char *linkage_name,
 						 const domain_enum domain);
 
     /* Given two so_list objects, one from the GDB thread list
@@ -157,7 +156,6 @@ extern struct target_so_ops *current_target_so_ops;
 /* Handler for library-specific global symbol lookup in solib.c.  */
 struct symbol *solib_global_lookup (const struct objfile *objfile,
 				    const char *name,
-				    const char *linkage_name,
 				    const domain_enum domain);
 
 #endif

@@ -172,9 +172,6 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, struct obj_section *);
 #define SYMBOL_SECTION(symbol)		(symbol)->ginfo.section
 #define SYMBOL_OBJ_SECTION(symbol)	(symbol)->ginfo.obj_section
 
-#define SYMBOL_CPLUS_DEMANGLED_NAME(symbol)	\
-  (symbol)->ginfo.language_specific.cplus_specific.demangled_name
-
 /* Initializes the language dependent portion of a symbol
    depending upon the language for the symbol. */
 #define SYMBOL_INIT_LANGUAGE_SPECIFIC(symbol,language) \
@@ -994,7 +991,6 @@ extern struct symbol *lookup_symbol (const char *, const struct block *,
    that can't think of anything better to do.  */
 
 extern struct symbol *basic_lookup_symbol_nonlocal (const char *,
-						    const char *,
 						    const struct block *,
 						    const domain_enum);
 
@@ -1005,7 +1001,6 @@ extern struct symbol *basic_lookup_symbol_nonlocal (const char *,
    is one; do nothing if BLOCK is NULL or a global block.  */
 
 extern struct symbol *lookup_symbol_static (const char *name,
-					    const char *linkage_name,
 					    const struct block *block,
 					    const domain_enum domain);
 
@@ -1013,7 +1008,6 @@ extern struct symbol *lookup_symbol_static (const char *name,
    necessary).  */
 
 extern struct symbol *lookup_symbol_global (const char *name,
-					    const char *linkage_name,
 					    const struct block *block,
 					    const domain_enum domain);
 
@@ -1022,21 +1016,18 @@ extern struct symbol *lookup_symbol_global (const char *name,
    will fix up the symbol if necessary.  */
 
 extern struct symbol *lookup_symbol_aux_block (const char *name,
-					       const char *linkage_name,
 					       const struct block *block,
 					       const domain_enum domain);
 
 /* Lookup a partial symbol.  */
 
 extern struct partial_symbol *lookup_partial_symbol (struct partial_symtab *,
-						     const char *,
 						     const char *, int,
 						     domain_enum);
 
 /* lookup a symbol by name, within a specified block */
 
 extern struct symbol *lookup_block_symbol (const struct block *, const char *,
-					   const char *,
 					   const domain_enum);
 
 /* lookup a [struct, union, enum] by name, within a specified block */
@@ -1372,7 +1363,6 @@ extern /*const */ char *main_name (void);
 /* Check global symbols in objfile.  */
 struct symbol *lookup_global_symbol_from_objfile (const struct objfile *objfile,
 						  const char *name,
-						  const char *linkage_name,
 						  const domain_enum domain);
 
 extern struct symtabs_and_lines

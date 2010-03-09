@@ -1178,13 +1178,12 @@ show_auto_solib_add (struct ui_file *file, int from_tty,
 struct symbol *
 solib_global_lookup (const struct objfile *objfile,
 		     const char *name,
-		     const char *linkage_name,
 		     const domain_enum domain)
 {
   struct target_so_ops *ops = solib_ops (target_gdbarch);
 
   if (ops->lookup_lib_global_symbol != NULL)
-    return ops->lookup_lib_global_symbol (objfile, name, linkage_name, domain);
+    return ops->lookup_lib_global_symbol (objfile, name, domain);
   return NULL;
 }
 

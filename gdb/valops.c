@@ -2346,12 +2346,25 @@ find_overload_match (struct type **arg_types, int nargs,
   if (method)
     {
       gdb_assert (obj);
+
+      /* OBJ may be a pointer value rather than the object itself.  */
+      obj = coerce_ref (obj);
+      while (TYPE_CODE (check_typedef (value_type (obj))) == TYPE_CODE_PTR)
+	obj = coerce_ref (value_ind (obj));
       obj_type_name = TYPE_NAME (value_type (obj));
-      /* Hack: evaluate_subexp_standard often passes in a pointer
-         value rather than the object itself, so try again.  */
-      if ((!obj_type_name || !*obj_type_name) 
-	  && (TYPE_CODE (value_type (obj)) == TYPE_CODE_PTR))
-	obj_type_name = TYPE_NAME (TYPE_TARGET_TYPE (value_type (obj)));
+
+      /* First check whether this is a data member, e.g. a pointer to
+	 a function.  */
+      if (TYPE_CODE (check_typedef (value_type (obj))) == TYPE_CODE_STRUCT)
+	{
+	  *valp = search_struct_field (name, obj, 0,
+				       check_typedef (value_type (obj)), 0);
+	  if (*valp)
+	    {
+	      *staticp = 1;
+	      return 0;
+	    }
+	}
 
       fns_ptr = value_find_oload_method_list (&temp, name, 
 					      0, &num_fns, 
@@ -2371,16 +2384,29 @@ find_overload_match (struct type **arg_types, int nargs,
     }
   else
     {
-      const char *qualified_name = SYMBOL_CPLUS_DEMANGLED_NAME (fsym);
+      const char *qualified_name = SYMBOL_NATURAL_NAME (fsym);
 
-      /* If we have a C++ name, try to extract just the function
-	 part.  */
-      if (qualified_name)
-	func_name = cp_func_name (qualified_name);
+      /* If we have a function with a C++ name, try to extract just
+	 the function part.  Do not try this for non-functions (e.g.
+	 function pointers).  */
+      if (qualified_name
+	  && TYPE_CODE (check_typedef (SYMBOL_TYPE (fsym))) == TYPE_CODE_FUNC)
+	{
+	  func_name = cp_func_name (qualified_name);
 
-      /* If there was no C++ name, this must be a C-style function.
-	 Just return the same symbol.  Do the same if cp_func_name
-	 fails for some reason.  */
+	  /* If cp_func_name did not remove anything, the name of the
+	     symbol did not include scope or argument types - it was
+	     probably a C-style function.  */
+	  if (func_name && strcmp (func_name, qualified_name) == 0)
+	    {
+	      xfree (func_name);
+	      func_name = NULL;
+	    }
+	}
+
+      /* If there was no C++ name, this must be a C-style function or
+	 not a function at all.  Just return the same symbol.  Do the
+	 same if cp_func_name fails for some reason.  */
       if (func_name == NULL)
         {
 	  *symp = fsym;
@@ -3117,7 +3143,7 @@ value_maybe_namespace_elt (const struct type *curtype,
   struct symbol *sym;
   struct value *result;
 
-  sym = cp_lookup_symbol_namespace (namespace_name, name, NULL,
+  sym = cp_lookup_symbol_namespace(namespace_name, name,
 				    get_selected_block (0), 
 				    VAR_DOMAIN, 1);
 
@@ -3261,7 +3287,7 @@ value_of_local (const char *name, int complain)
 
   /* Calling lookup_block_symbol is necessary to get the LOC_REGISTER
      symbol instead of the LOC_ARG one (if both exist).  */
-  sym = lookup_block_symbol (b, name, NULL, VAR_DOMAIN);
+  sym = lookup_block_symbol (b, name, VAR_DOMAIN);
   if (sym == NULL)
     {
       if (complain)

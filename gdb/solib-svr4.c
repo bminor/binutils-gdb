@@ -2041,7 +2041,6 @@ struct target_so_ops svr4_so_ops;
 static struct symbol *
 elf_lookup_lib_symbol (const struct objfile *objfile,
 		       const char *name,
-		       const char *linkage_name,
 		       const domain_enum domain)
 {
   bfd *abfd;
@@ -2059,8 +2058,7 @@ elf_lookup_lib_symbol (const struct objfile *objfile,
   if (abfd == NULL || scan_dyntag (DT_SYMBOLIC, abfd, NULL) != 1)
     return NULL;
 
-  return lookup_global_symbol_from_objfile
-		(objfile, name, linkage_name, domain);
+  return lookup_global_symbol_from_objfile (objfile, name, domain);
 }
 
 extern initialize_file_ftype _initialize_svr4_solib; /* -Wmissing-prototypes */

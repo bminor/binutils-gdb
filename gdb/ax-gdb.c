@@ -1812,7 +1812,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
 
 	/* Calling lookup_block_symbol is necessary to get the LOC_REGISTER
 	   symbol instead of the LOC_ARG one (if both exist).  */
-	sym = lookup_block_symbol (b, this_name, NULL, VAR_DOMAIN);
+	sym = lookup_block_symbol (b, this_name, VAR_DOMAIN);
 	if (!sym)
 	  error (_("no `%s' found"), this_name);
 

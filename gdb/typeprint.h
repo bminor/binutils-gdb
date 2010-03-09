@@ -20,10 +20,13 @@
 #ifndef TYPEPRINT_H
 #define TYPEPRINT_H
 
+enum language;
 struct ui_file;
 
 void print_type_scalar (struct type * type, LONGEST, struct ui_file *);
 
 void c_type_print_varspec_suffix (struct type *, struct ui_file *, int,
 				  int, int);
+
+void c_type_print_args (struct type *, struct ui_file *, int, enum language);
 #endif
