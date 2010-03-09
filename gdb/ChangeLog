@@ -1,3 +1,12 @@
+2010-03-09  Christopher Faylor  <me+cygwin@cgf.cx>
+	    Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* windows-nat.c (cygwin_conv_path): Redefine to properly convert
+	from/to posix/win32.
+	(windows_make_so): Use non-Cygwin 1.7 specific function.
+	(windows_create_inferior): Make sure that cygallargs points to
+	original args in non Cygwin 1.7. case.
+
 2010-03-09  Michael Snyder  <msnyder@vmware.com>
 
 	* i386-tdep.c (i386_record_lea_modrm_addr): Use extract_signed_int

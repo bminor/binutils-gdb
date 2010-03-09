@@ -115,6 +115,12 @@ static struct target_ops windows_ops;
 #   define GetModuleFileNameEx_name "GetModuleFileNameExW"
 #   define bad_GetModuleFileNameEx bad_GetModuleFileNameExW
 # else
+#   define CCP_POSIX_TO_WIN_W 1
+#   define CCP_WIN_W_TO_POSIX 3
+#   define cygwin_conv_path(op, from, to, size)  \
+         (op == CCP_WIN_W_TO_POSIX) ? \
+         cygwin_conv_to_full_posix_path (from, to) : \
+         cygwin_conv_to_win32_path (from, to)
 #   define cygwin_conv_path(op, from, to, size) cygwin_conv_to_full_posix_path (from, to)
     typedef char cygwin_buf_t;
     static DWORD WINAPI (*GetModuleFileNameEx) (HANDLE, HMODULE, LPSTR, DWORD);
@@ -122,6 +128,7 @@ static struct target_ops windows_ops;
 #   define CreateProcess CreateProcessA
 #   define GetModuleFileNameEx_name "GetModuleFileNameExA"
 #   define bad_GetModuleFileNameEx bad_GetModuleFileNameExA
+#   define CW_SET_DOS_FILE_WARNING -1	/* no-op this for older Cygwin */
 # endif
 #endif
 
@@ -706,7 +713,7 @@ windows_make_so (const char *name, LPVOID load_addr)
 		      SO_NAME_MAX_PATH_SIZE);
   else
     {
-      char *rname = canonicalize_file_name (name);
+      char *rname = realpath (name, NULL);
       if (rname && strlen (rname) < SO_NAME_MAX_PATH_SIZE)
 	{
 	  strcpy (so->so_name, rname);
@@ -1945,6 +1952,8 @@ windows_create_inferior (struct target_ops *ops, char *exec_file,
 	error (_("Error starting executable: %d"), errno);
       cygallargs = (wchar_t *) alloca (len * sizeof (wchar_t));
       mbstowcs (cygallargs, allargs, len);
+#else
+      cygallargs = allargs;
 #endif
     }
   else
