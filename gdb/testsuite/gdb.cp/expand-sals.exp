@@ -46,7 +46,7 @@ gdb_continue_to_breakpoint "caller" ".*caller-line.*"
 
 # Test GDB caught this return call and not the next one through B::B()
 gdb_test "bt" \
-	 "#0 \[^\r\n\]* A \[^\r\n\]*\r\n#1 \[^\r\n\]* main \[^\r\n\]*" \
+	 "#0 \[^\r\n\]* (A::)?A \[^\r\n\]*\r\n#1 \[^\r\n\]* main \[^\r\n\]*" \
 	 "bt from A"
 
 gdb_continue_to_breakpoint "next caller func" ".*func-line.*"

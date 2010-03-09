@@ -30,7 +30,7 @@ proc get_func_address { func } {
     global gdb_prompt hex
 
     set rfunc [string_to_regexp $func]
-    gdb_test_multiple "print '${func}'" "get address of ${func}" {
+    gdb_test_multiple "print ${func}" "get address of ${func}" {
 	-re "\\\$\[0-9\]+ = \\{.*\\} (0|($hex) <${rfunc}>)\[\r\n\]+${gdb_prompt} $" {
 	    # $1 = {int ()} 0x24 <function_bar>
 	    # But if the function is at zero, the name may be omitted.
@@ -130,7 +130,7 @@ gdb_test "add-symbol-file ${binfile} 0 -s ${func1_sec} 0x10000 -s ${func2_sec} 0
 	"y"
 
 # Make sure the function addresses were updated.
-gdb_test "break *'$func1_name'" \
+gdb_test "break *$func1_name" \
     "Breakpoint $decimal at 0x1....: file .*"
-gdb_test "break *'$func2_name'" \
+gdb_test "break *$func2_name" \
     "Breakpoint $decimal at 0x2....: file .*"

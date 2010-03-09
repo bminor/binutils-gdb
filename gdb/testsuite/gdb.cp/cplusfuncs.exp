@@ -66,9 +66,25 @@ set dm_type_unsigned_int	"unsigned"
 set dm_type_void		"void"
 set dm_type_void_star		"void*"
 
+# Some other vagaries of GDB's type printing machinery.  The integer types
+# may have unsigned before or after their length, and may have "int"
+# appended.  The char* conversion operator may have name "char*" even if
+# the type is "char *", because the name comes from the debug information
+# and the type from GDB.  Function types may not see through typedefs.
+
+set dm_type_short		"short"
+set dm_type_long		"long"
+set dm_type_unsigned_short	"unsigned short"
+set dm_type_unsigned_long	"unsigned long"
+set dm_operator_char_star	"char*"
+set dm_operator_char_star_quoted	"char\\*"
+set dm_type_typedef		0
+
 proc probe_demangler { } {
     global gdb_prompt
     global dm_operator_comma
+    global dm_operator_char_star
+    global dm_operator_char_star_quoted
     global dm_type_char_star
     global dm_type_char_star_quoted
     global dm_type_foo_ref
@@ -77,6 +93,11 @@ proc probe_demangler { } {
     global dm_type_unsigned_int
     global dm_type_void
     global dm_type_void_star
+    global dm_type_short
+    global dm_type_unsigned_short
+    global dm_type_long
+    global dm_type_unsigned_long
+    global dm_type_typedef
 
     send_gdb "print &foo::operator,(foo&)\n"
     gdb_expect {
@@ -94,6 +115,26 @@ proc probe_demangler { } {
 	}
 	timeout {
 	    fail "detect dm_operator_comma"
+	}
+    }
+
+    send_gdb "print &foo::operator char*($dm_type_void)\n"
+    gdb_expect {
+	-re ".*foo::operator char \\*\\(void\\).*\r\n$gdb_prompt $" {
+	    # v2 demangler or GDB type printer
+	    set dm_operator_char_star "char *"
+	    set dm_operator_char_star_quoted "char \\*"
+	    pass "detect dm_operator_char_star"
+	}
+	-re ".*foo::operator char\\*\\(\\).*\r\n$gdb_prompt $" {
+	    # v3 demangler
+	    pass "detect dm_operator_char_star"
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "detect dm_operator_char_star"
+	}
+	timeout {
+	    fail "detect dm_operator_char_star"
 	}
     }
 
@@ -166,6 +207,11 @@ proc probe_demangler { } {
 	    # v3 demangler
 	    pass "detect dm_type_long_star"
 	}
+	-re ".*dm_type_long_star\\(long int \\*\\).*\r\n$gdb_prompt $" {
+	    # GCC v3 and GDB's type printer
+	    set dm_type_long_star "long int *"
+	    pass "detect dm_type_long_star"
+	}
 	-re ".*$gdb_prompt $" {
 	    fail "detect dm_type_long_star"
 	}
@@ -228,6 +274,101 @@ proc probe_demangler { } {
 	}
 	timeout {
 	    fail "detect dm_type_void_star (timeout)"
+	}
+    }
+
+    send_gdb "print &dm_type_short\n"
+    gdb_expect {
+	-re ".*dm_type_short\\(short\\).*\r\n$gdb_prompt $" {
+	    # v2 and v3 demanglers
+	    pass "detect dm_type_short"
+	}
+	-re ".*dm_type_short\\(short int\\).*\r\n$gdb_prompt $" {
+	    # GDB type printer
+	    set dm_type_short "short int"
+	    pass "detect dm_type_short"
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "detect dm_type_short"
+	}
+	timeout {
+	    fail "detect dm_type_short (timeout)"
+	}
+    }
+
+    send_gdb "print &dm_type_unsigned_short\n"
+    gdb_expect {
+	-re ".*dm_type_unsigned_short\\(unsigned short\\).*\r\n$gdb_prompt $" {
+	    # v2 and v3 demanglers
+	    pass "detect dm_type_unsigned_short"
+	}
+	-re ".*dm_type_unsigned_short\\(short unsigned int\\).*\r\n$gdb_prompt $" {
+	    # GDB type printer
+	    set dm_type_unsigned_short "short unsigned int"
+	    pass "detect dm_type_unsigned_short"
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "detect dm_type_unsigned_short"
+	}
+	timeout {
+	    fail "detect dm_type_unsigned_short (timeout)"
+	}
+    }
+
+    send_gdb "print &dm_type_long\n"
+    gdb_expect {
+	-re ".*dm_type_long\\(long\\).*\r\n$gdb_prompt $" {
+	    # v2 and v3 demanglers
+	    pass "detect dm_type_long"
+	}
+	-re ".*dm_type_long\\(long int\\).*\r\n$gdb_prompt $" {
+	    # GDB type printer
+	    set dm_type_long "long int"
+	    pass "detect dm_type_long"
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "detect dm_type_long"
+	}
+	timeout {
+	    fail "detect dm_type_long (timeout)"
+	}
+    }
+
+    send_gdb "print &dm_type_unsigned_long\n"
+    gdb_expect {
+	-re ".*dm_type_unsigned_long\\(unsigned long\\).*\r\n$gdb_prompt $" {
+	    # v2 and v3 demanglers
+	    pass "detect dm_type_unsigned_long"
+	}
+	-re ".*dm_type_unsigned_long\\(long unsigned int\\).*\r\n$gdb_prompt $" {
+	    # GDB type printer
+	    set dm_type_unsigned_long "long unsigned int"
+	    pass "detect dm_type_unsigned_long"
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "detect dm_type_unsigned_long"
+	}
+	timeout {
+	    fail "detect dm_type_unsigned_long (timeout)"
+	}
+    }
+
+    send_gdb "print &dm_type_typedef\n"
+    gdb_expect {
+	-re ".*dm_type_typedef\\(int\\).*\r\n$gdb_prompt $" {
+	    # v2 and v3 demanglers
+	    pass "detect dm_type_typedef"
+	}
+	-re ".*dm_type_typedef\\(myint\\).*\r\n$gdb_prompt $" {
+	    # GDB type printer
+	    set dm_type_typedef 1
+	    pass "detect dm_type_typedef"
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "detect dm_type_typedef"
+	}
+	timeout {
+	    fail "detect dm_type_typedef (timeout)"
 	}
     }
 }
@@ -351,8 +492,9 @@ proc print_addr { name } {
 
 proc test_lookup_operator_functions {} {
     global dm_operator_comma
+    global dm_operator_char_star
     global dm_type_char_star
-    global dm_type_char_star_quoted
+    global dm_operator_char_star_quoted
     global dm_type_foo_ref
     global dm_type_void
     global dm_type_void_star
@@ -410,8 +552,8 @@ proc test_lookup_operator_functions {} {
 
     info_func "operator int("	"int foo::operator int($dm_type_void);"
     info_func "operator()("	"void foo::operator()($dm_type_foo_ref);"
-    info_func "operator $dm_type_char_star_quoted\(" \
-				"char *foo::operator $dm_type_char_star\($dm_type_void);"
+    info_func "operator $dm_operator_char_star_quoted\(" \
+				"char *foo::operator $dm_operator_char_star\($dm_type_void);"
 
 }
 
@@ -426,6 +568,7 @@ proc test_paddr_operator_functions {} {
     global dm_type_unsigned_int
     global dm_type_void
     global dm_type_void_star
+    global dm_operator_char_star
 
     print_addr "foo::operator*($dm_type_foo_ref)"
     print_addr "foo::operator%($dm_type_foo_ref)"
@@ -479,7 +622,7 @@ proc test_paddr_operator_functions {} {
     }
 
     print_addr "foo::operator int($dm_type_void)"
-    print_addr "foo::operator $dm_type_char_star\($dm_type_void)"
+    print_addr "foo::operator $dm_operator_char_star\($dm_type_void)"
 }
 
 #
@@ -489,17 +632,21 @@ proc test_paddr_operator_functions {} {
 proc test_paddr_overloaded_functions {} {
     global dm_type_unsigned_int
     global dm_type_void
+    global dm_type_short
+    global dm_type_unsigned_short
+    global dm_type_long
+    global dm_type_unsigned_long
 
     print_addr "overload1arg($dm_type_void)"
     print_addr "overload1arg(char)"
     print_addr "overload1arg(signed char)"
     print_addr "overload1arg(unsigned char)"
-    print_addr "overload1arg(short)"
-    print_addr "overload1arg(unsigned short)"
+    print_addr "overload1arg($dm_type_short)"
+    print_addr "overload1arg($dm_type_unsigned_short)"
     print_addr "overload1arg(int)"
     print_addr "overload1arg($dm_type_unsigned_int)"
-    print_addr "overload1arg(long)"
-    print_addr "overload1arg(unsigned long)"
+    print_addr "overload1arg($dm_type_long)"
+    print_addr "overload1arg($dm_type_unsigned_long)"
     print_addr "overload1arg(float)"
     print_addr "overload1arg(double)"
 
@@ -522,17 +669,31 @@ proc test_paddr_hairy_functions {} {
     global dm_type_char_star
     global dm_type_int_star
     global dm_type_long_star
+    global dm_type_typedef
 
     print_addr_2 "hairyfunc1" "hairyfunc1(int)"
-    print_addr_2 "hairyfunc2" "hairyfunc2(int (*)($dm_type_char_star))"
-    print_addr_2 "hairyfunc3" "hairyfunc3(int (*)(short (*)($dm_type_long_star)))"
-    print_addr_2 "hairyfunc4" "hairyfunc4(int (*)(short (*)($dm_type_char_star)))"
 
-    # gdb-gnats bug gdb/19:
-    # "gdb v3 demangler fails on hairyfunc5 hairyfunc6 hairyfunc7"
-    print_addr_2_kfail "hairyfunc5" "hairyfunc5(int (*(*)($dm_type_char_star))(long))" "hairyfunc5(int (*)(long) (*)(char*))" "gdb/19"
-    print_addr_2_kfail "hairyfunc6" "hairyfunc6(int (*(*)($dm_type_int_star))(long))" "hairyfunc6(int (*)(long) (*)(int*))" "gdb/19"
-    print_addr_2_kfail "hairyfunc7" "hairyfunc7(int (*(*)(int (*)($dm_type_char_star)))(long))" "hairyfunc7(int (*)(long) (*)(int (*)(char*)))" "gdb/19"
+    if {$dm_type_typedef == 0} {
+	print_addr_2 "hairyfunc2" "hairyfunc2(int (*)($dm_type_char_star))"
+	print_addr_2 "hairyfunc3" "hairyfunc3(int (*)(short (*)($dm_type_long_star)))"
+	print_addr_2 "hairyfunc4" "hairyfunc4(int (*)(short (*)($dm_type_char_star)))"
+
+	# gdb-gnats bug gdb/19:
+	# "gdb v3 demangler fails on hairyfunc5 hairyfunc6 hairyfunc7"
+	print_addr_2_kfail "hairyfunc5" "hairyfunc5(int (*(*)($dm_type_char_star))(long))" "hairyfunc5(int (*)(long) (*)(char*))" "gdb/19"
+	print_addr_2_kfail "hairyfunc6" "hairyfunc6(int (*(*)($dm_type_int_star))(long))" "hairyfunc6(int (*)(long) (*)(int*))" "gdb/19"
+	print_addr_2_kfail "hairyfunc7" "hairyfunc7(int (*(*)(int (*)($dm_type_char_star)))(long))" "hairyfunc7(int (*)(long) (*)(int (*)(char*)))" "gdb/19"
+    } else {
+	print_addr_2 "hairyfunc2" "hairyfunc2(PFPc_i)"
+	print_addr_2 "hairyfunc3" "hairyfunc3(PFPFPl_s_i)"
+	print_addr_2 "hairyfunc4" "hairyfunc4(PFPFPc_s_i)"
+
+	# gdb-gnats bug gdb/19:
+	# "gdb v3 demangler fails on hairyfunc5 hairyfunc6 hairyfunc7"
+	print_addr_2 "hairyfunc5" "hairyfunc5(PFPc_PFl_i)"
+	print_addr_2 "hairyfunc6" "hairyfunc6(PFPi_PFl_i)"
+	print_addr_2 "hairyfunc7" "hairyfunc7(PFPFPc_i_PFl_i)"
+    }
 }
 
 proc do_tests {} {

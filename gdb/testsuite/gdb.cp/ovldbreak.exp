@@ -23,7 +23,8 @@
 # overloaded member functions
 #
 
-
+global timeout
+set timeout 15
 if $tracelevel then {
         strace $tracelevel
         }
@@ -127,10 +128,24 @@ proc set_bp_overloaded {name expectedmenu mychoice bpnumber linenumber} {
 }
 
 # This is the expected menu for overload1arg.
-# Note the arg type variations on lines 6 and 13.
+# Note the arg type variations for void and integer types.
 # This accommodates different versions of g++.
 
-set menu_overload1arg "\\\[0\\\] cancel\r\n\\\[1\\\] all\r\n\\\[2\\\] foo::overload1arg\\(double\\) at.*$srcfile:121\r\n\\\[3\\\] foo::overload1arg\\(float\\) at.*$srcfile:120\r\n\\\[4\\\] foo::overload1arg\\(unsigned long\\) at.*$srcfile:119\r\n\\\[5\\\] foo::overload1arg\\(long\\) at.*$srcfile:118\r\n\\\[6\\\] foo::overload1arg\\((unsigned int|unsigned)\\) at.*$srcfile:117\r\n\\\[7\\\] foo::overload1arg\\(int\\) at.*$srcfile:116\r\n\\\[8\\\] foo::overload1arg\\(unsigned short\\) at.*$srcfile:115\r\n\\\[9\\\] foo::overload1arg\\(short\\) at.*$srcfile:114\r\n\\\[10\\\] foo::overload1arg\\(unsigned char\\) at.*$srcfile:113\r\n\\\[11\\\] foo::overload1arg\\(signed char\\) at.*$srcfile:112\r\n\\\[12\\\] foo::overload1arg\\(char\\) at.*$srcfile:111\r\n\\\[13\\\] foo::overload1arg\\((void|)\\) at.*$srcfile:110\r\n> $"
+set    menu_overload1arg "\\\[0\\\] cancel\r\n"
+append menu_overload1arg "\\\[1\\\] all\r\n"
+append menu_overload1arg "\\\[2\\\] foo::overload1arg\\(double\\) at.*$srcfile:121\r\n"
+append menu_overload1arg "\\\[3\\\] foo::overload1arg\\(float\\) at.*$srcfile:120\r\n"
+append menu_overload1arg "\\\[4\\\] foo::overload1arg\\((unsigned long|long unsigned)( int)?\\) at.*$srcfile:119\r\n"
+append menu_overload1arg "\\\[5\\\] foo::overload1arg\\(long( int)?\\) at.*$srcfile:118\r\n"
+append menu_overload1arg "\\\[6\\\] foo::overload1arg\\((unsigned int|unsigned)\\) at.*$srcfile:117\r\n"
+append menu_overload1arg "\\\[7\\\] foo::overload1arg\\(int\\) at.*$srcfile:116\r\n"
+append menu_overload1arg "\\\[8\\\] foo::overload1arg\\((unsigned short|short unsigned)( int)?\\) at.*$srcfile:115\r\n"
+append menu_overload1arg "\\\[9\\\] foo::overload1arg\\(short( int)?\\) at.*$srcfile:114\r\n"
+append menu_overload1arg "\\\[10\\\] foo::overload1arg\\(unsigned char\\) at.*$srcfile:113\r\n"
+append menu_overload1arg "\\\[11\\\] foo::overload1arg\\(signed char\\) at.*$srcfile:112\r\n"
+append menu_overload1arg "\\\[12\\\] foo::overload1arg\\(char\\) at.*$srcfile:111\r\n"
+append menu_overload1arg "\\\[13\\\] foo::overload1arg\\((void|)\\) at.*$srcfile:110\r\n"
+append menu_overload1arg "> $"
 
 # Set multiple-symbols to "ask", to allow us to test the use
 # of the multiple-choice menu when breaking on an overloaded method.
@@ -157,17 +172,17 @@ set_bp_overloaded "foo::overload1arg" "$menu_overload1arg" 13   13 110
 
 gdb_test "info break" \
     "Num     Type\[\t \]+Disp Enb Address\[\t \]+What.*
-\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in main at.*$srcfile:49\r
+\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in main(\\((|void)\\))? at.*$srcfile:49\r
 \[\t \]+breakpoint already hit 1 time\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(char\\) at.*$srcfile:111\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(signed char\\) at.*$srcfile:112\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(unsigned char\\) at.*$srcfile:113\r
-\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(short\\) at.*$srcfile:114\r
-\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(unsigned short\\) at.*$srcfile:115\r
+\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(short( int)?\\) at.*$srcfile:114\r
+\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\((unsigned short|short unsigned)( int)?\\) at.*$srcfile:115\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(int\\) at.*$srcfile:116\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\((unsigned|unsigned int)\\) at.*$srcfile:117\r
-\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(long\\) at.*$srcfile:118\r
-\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(unsigned long\\) at.*$srcfile:119\r
+\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(long( int)?\\) at.*$srcfile:118\r
+\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\((unsigned long|long unsigned)( int)?\\) at.*$srcfile:119\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(float\\) at.*$srcfile:120\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(double\\) at.*$srcfile:121\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\((void|)\\) at.*$srcfile:110" \
@@ -215,17 +230,17 @@ gdb_expect {
 
 gdb_test "info break" \
     "Num     Type\[\t \]+Disp Enb Address\[\t \]+What.*
-\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in main at.*$srcfile:49\r
+\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in main(\\((|void)\\))? at.*$srcfile:49\r
 \[\t \]+breakpoint already hit 1 time\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(char\\) at.*$srcfile:111\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(signed char\\) at.*$srcfile:112\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(unsigned char\\) at.*$srcfile:113\r
-\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(short\\) at.*$srcfile:114\r
-\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(unsigned short\\) at.*$srcfile:115\r
+\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(short( int)?\\) at.*$srcfile:114\r
+\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\((unsigned short|short unsigned)( int)?\\) at.*$srcfile:115\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(int\\) at.*$srcfile:116\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\((unsigned|unsigned int)\\) at.*$srcfile:117\r
-\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(long\\) at.*$srcfile:118\r
-\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(unsigned long\\) at.*$srcfile:119\r
+\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(long( int)?\\) at.*$srcfile:118\r
+\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\((unsigned long|long unsigned)( int)?\\) at.*$srcfile:119\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(float\\) at.*$srcfile:120\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(double\\) at.*$srcfile:121\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\((void|)\\) at.*$srcfile:110" \
@@ -296,12 +311,12 @@ gdb_test "info break" \
     "Num     Type\[\t \]+Disp Enb Address\[\t \]+What.*
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(double\\) at.*$srcfile:121\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(float\\) at.*$srcfile:120\r
-\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(unsigned long\\) at.*$srcfile:119\r
-\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(long\\) at.*$srcfile:118\r
+\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\((unsigned long|long unsigned)( int)?\\) at.*$srcfile:119\r
+\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(long( int)?\\) at.*$srcfile:118\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\((unsigned|unsigned int)\\) at.*$srcfile:117\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(int\\) at.*$srcfile:116\r
-\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(unsigned short\\) at.*$srcfile:115\r
-\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(short\\) at.*$srcfile:114\r
+\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\((unsigned short|short unsigned)( int)?\\) at.*$srcfile:115\r
+\[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(short( int)?\\) at.*$srcfile:114\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(unsigned char\\) at.*$srcfile:113\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(signed char\\) at.*$srcfile:112\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(char\\) at.*$srcfile:111\r

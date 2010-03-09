@@ -71,8 +71,8 @@ if ![set_lang_java] then {
     # signature.
     runto_main
     set function "${testfile}.main(java.lang.String\[\])"
-    gdb_breakpoint "\'$function\'" { allow-pending }
-    gdb_breakpoint "\'${function}void\'" { allow-pending }
+    gdb_breakpoint "$function" { allow-pending }
+    gdb_breakpoint "${function}void" { allow-pending }
     gdb_continue_to_breakpoint $function
 
     send_gdb "ptype jmisc\n"   

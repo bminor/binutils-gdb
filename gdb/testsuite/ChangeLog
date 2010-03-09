@@ -1,3 +1,54 @@
+2010-03-08  Keith Seitz  <keiths@redhat.com>
+
+        * gdb.cp/cp-relocate.exp: Remove single-quoting of C++ methods.
+        * gdb.cp/cplusfuncs.cc (dm_type_short): New function.
+        (dm_type_long): New function.
+        (dm_type_unsigned_short): New function.
+        (dm_type_unsigned_long): New function.
+        (myint): New typedef.
+        * gdb.cp/cplusfuncs.exp (probe_demangler): Add tests for short,
+        long, unsigned shor and long, operator char*, and typedef.
+        (test_lookup_operator_functions): Add operator char* test.
+        (test_paddr_operator_functions): Likewise.
+        (test_paddr_overloaded_functions): Use probe values for
+        short, long, and unsigned short and long.
+        (test_paddr_hairy_functions): If the demangler probe detected
+        gdb type printers, "expect" them. Otherwise "expect" the v2 or v3
+        demangler.
+        * gdb.cp/expand-sals.exp: Backtrace may contain class names.
+        * gdb.cp/member-ptr.exp: Refine expected result for "print pmf"
+        and "print null_pmf".
+        Add test "ptype a.*pmf".
+        * gdb.cp/overload.exp: Allow optional "int" to appear with
+        "short" and "long".
+        * gdb.cp/ovldbreak.exp: Use append to construct super-duper
+        long expect value for men_overload1arg.
+        Allow "int" to appear with "short" and "long".
+        When testing "info break", add argument for main (void).
+        Also allow "int" to appear with "short" and "long".
+        Ditto with "unsigned" and "long long".
+	* gdb.java/jmain.exp: Do not enclose methods names in single
+	quotes.
+	* gdb.java/jmisc.exp: Likewise.
+	* gdb.java/jprint.exp: Likewise.
+	* gdb.python/py-symbol.exp: Update expected "linkage_name" value.
+
+	From Jan Kratochvil  <jan.kratochvil@redhat.com>:
+	* gdb.cp/exception.exp (backtrace after first throw)
+	(backtrace after second throw): Allow a namespace before __cxa_throw.
+	(backtrace after first catch, backtrace after second catch): Allow
+	a namespace before __cxa_begin_catch.
+
+	* gdb.cp/cpexprs.exp: New file.
+	* gdb.cp/cpexprs.cc: New file.
+
+	From Daniel Jacobowitz  <dan@codesourcery.com>
+	* gdb.cp/cpexprs.exp (escape): Delete.  Change all callers
+	to use string_to_regexp.
+	(ctor, dtor): New functions.  Use them to match constructor
+	and destructor function types.
+	(Top level): Use runto_main.
+
 2010-03-05  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.python/py-prettyprint.py (pp_nullstr.to_string): Use

@@ -65,7 +65,7 @@ gdb_test "break jmain.main" "${bpmain}"
 
 # Check that a fully qualified "main" works.
 gdb_load "${binfile}"
-set cmd "break \'${testfile}.main(java.lang.String\[\])\'"
+set cmd "break ${testfile}.main(java.lang.String\[\])"
 set msg $cmd
 gdb_test_multiple $cmd $msg {
     -re "${bpmain}\r\n$gdb_prompt $" {
@@ -79,7 +79,7 @@ gdb_test_multiple $cmd $msg {
 	gdb_test "n" "" ""
 
 	# Check again with a method signature at the end.
-	set cmd "break \'${testfile}.main(java.lang.String\[\])void\'"
+	set cmd "break ${testfile}.main(java.lang.String\[\])void"
 	set msg $cmd
 	gdb_test_multiple $cmd $msg {
 	    -re "${bpmain}\r\n$gdb_prompt $" {

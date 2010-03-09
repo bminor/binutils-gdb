@@ -420,7 +420,7 @@ gdb_test_multiple "ptype pmf" $name {
 
 set name "print pmf"
 gdb_test_multiple "print pmf" $name {
-    -re "$vhn = $hex <A::bar\\(int\\)>\r\n$gdb_prompt $" {
+    -re "$vhn = \\(int \\(A::\\*\\)\\(A \\*, int\\)\\) $hex <A::bar\\(int\\)>\r\n$gdb_prompt $" {
 	pass $name
     }
     -re "$vhn = .*not supported with HP aCC.*\r\n$gdb_prompt $" {
@@ -608,6 +608,8 @@ gdb_test_multiple "print (a.*pmf)(3)" $name {
     }
 }
 
+gdb_test "ptype a.*pmf" "type = int \\(A \\*, int\\)"
+
 # Print out a pointer to data member which requires looking into
 # a base class.
 gdb_test "print diamond_pmi" "$vhn = &Base::x"
@@ -658,5 +660,5 @@ gdb_test "print null_pmi = &A::j" "$vhn = &A::j"
 gdb_test "print null_pmi = 0" "$vhn = NULL"
 
 gdb_test "print null_pmf" "$vhn = NULL"
-gdb_test "print null_pmf = &A::foo" "$vhn = $hex <A::foo ?\\(int\\)>"
+gdb_test "print null_pmf = &A::foo" "$vhn = \\(int \\(A::\\*\\)\\(A \\*, int\\)\\) $hex <A::foo ?\\(int\\)>"
 gdb_test "print null_pmf = 0" "$vhn = NULL"
