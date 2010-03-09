@@ -116,6 +116,24 @@ proc gas_run { prog as_opts redir } {
     return [list $comp_output ""]
 }
 
+proc gas_run_stdin { prog as_opts redir } {
+    global AS
+    global ASFLAGS
+    global comp_output
+    global srcdir
+    global subdir
+    global host_triplet
+
+    set status [gas_host_run "$AS $ASFLAGS $as_opts < $srcdir/$subdir/$prog" "$redir"]
+    set comp_output [lindex $status 1]
+    if { [lindex $status 0] != 0 && [regexp "2>.*" $redir] } then {
+	append comp_output "child process exited abnormally"
+    }
+    set comp_output [prune_warnings $comp_output]
+    verbose "output was $comp_output"
+    return [list $comp_output ""]
+}
+
 proc all_ones { args } {
     foreach x $args { if [expr $x!=1] { return 0 } }
     return 1
@@ -983,6 +1001,25 @@ proc run_list_test { name {opts {}} {testname {}} } {
     }
     set file $srcdir/$subdir/$name
     gas_run ${name}.s $opts ">&dump.out"
+    if { [regexp_diff "dump.out" "${file}.l"] } then {
+	fail $testname
+	verbose "output is [file_contents "dump.out"]" 2
+	return
+    }
+    pass $testname
+}
+
+# run_list_test_stdin NAME (optional): OPTS TESTNAME
+#
+# Similar to run_list_test, but use stdin as input.
+
+proc run_list_test_stdin { name {opts {}} {testname {}} } {
+    global srcdir subdir
+    if { [string length $testname] == 0 } then {
+	set testname "[file tail $subdir] $name"
+    }
+    set file $srcdir/$subdir/$name
+    gas_run_stdin ${name}.s $opts ">&dump.out"
     if { [regexp_diff "dump.out" "${file}.l"] } then {
 	fail $testname
 	verbose "output is [file_contents "dump.out"]" 2

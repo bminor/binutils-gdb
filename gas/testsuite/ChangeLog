@@ -1,3 +1,19 @@
+2010-03-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/9966
+	PR gas/11356
+	* gas/i386/list-1.l: New.
+	* gas/i386/list-1.s: Likewise.
+	* gas/i386/list-2.l: Likewise.
+	* gas/i386/list-2.s: Likewise.
+	* gas/i386/list-3.l: Likewise.
+	* gas/i386/list-3.s: Likewise.
+
+	* gas/i386/i386.exp: Run list-1, list-2 and list-3.
+
+	* lib/gas-defs.exp (gas_run_stdin): New.
+	(run_list_test_stdin): Likewise.
+
 2010-02-26  Doug Evans  <dje@sebabeach.org>
 
 	* gas/mep/allinsn.be.d: Renamed from allinsn.d.  Pass -EB.
