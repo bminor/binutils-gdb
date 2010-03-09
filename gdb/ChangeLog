@@ -1,3 +1,10 @@
+2010-03-09  Joel Brobecker <brobecker@adacore.com>
+	    Pierre Muller <muller@ics.u-strasbg.fr>
+
+	* p-lang.c (is_pascal_string_type): Remove unneeded parentheses.
+	* p-valprint.c (pascal_val_print): Remove undeed block and fix
+	indentation.
+
 2010-03-08  Tom Tromey  <tromey@redhat.com>
 
 	* breakpoint.c (breakpoint_1): Add "QUIT".
