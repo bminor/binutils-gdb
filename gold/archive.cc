@@ -602,6 +602,78 @@ Archive::read_symbols(off_t off)
   this->members_[off] = member;
 }
 
+// When we see a symbol in an archive we might decide to include the member,
+// not include the member or be undecided.  This enum represents these
+// possibilities.
+
+enum Should_include
+{
+ SHOULD_INCLUDE_NO,
+ SHOULD_INCLUDE_YES,
+ SHOULD_INCLUDE_UNKNOWN
+};
+
+static Should_include
+should_include_member(Symbol_table* symtab, const char* sym_name, Symbol** symp,
+                      std::string* why, char** tmpbufp, size_t* tmpbuflen)
+{
+  // In an object file, and therefore in an archive map, an
+  // '@' in the name separates the symbol name from the
+  // version name.  If there are two '@' characters, this is
+  // the default version.
+  char* tmpbuf = *tmpbufp;
+  const char* ver = strchr(sym_name, '@');
+  bool def = false;
+  if (ver != NULL)
+    {
+      size_t symlen = ver - sym_name;
+      if (symlen + 1 > *tmpbuflen)
+        {
+          tmpbuf = static_cast<char*>(xrealloc(tmpbuf, symlen + 1));
+          *tmpbufp = tmpbuf;
+          *tmpbuflen = symlen + 1;
+        }
+      memcpy(tmpbuf, sym_name, symlen);
+      tmpbuf[symlen] = '\0';
+      sym_name = tmpbuf;
+
+      ++ver;
+      if (*ver == '@')
+        {
+          ++ver;
+          def = true;
+        }
+    }
+
+  Symbol* sym = symtab->lookup(sym_name, ver);
+  if (def
+      && ver != NULL
+      && (sym == NULL
+          || !sym->is_undefined()
+          || sym->binding() == elfcpp::STB_WEAK))
+    sym = symtab->lookup(sym_name, NULL);
+
+  *symp = sym;
+
+  if (sym == NULL)
+    {
+      // Check whether the symbol was named in a -u option.
+      if (!parameters->options().is_undefined(sym_name))
+	return SHOULD_INCLUDE_UNKNOWN;
+      else
+        {
+          *why = "-u ";
+          *why += sym_name;
+        }
+    }
+  else if (!sym->is_undefined())
+    return SHOULD_INCLUDE_NO;
+  else if (sym->binding() == elfcpp::STB_WEAK)
+    return SHOULD_INCLUDE_UNKNOWN;
+
+  return SHOULD_INCLUDE_YES;
+}
+
 // Select members from the archive and add them to the link.  We walk
 // through the elements in the archive map, and look each one up in
 // the symbol table.  If it exists as a strong undefined symbol, we
@@ -661,65 +733,22 @@ Archive::add_symbols(Symbol_table* symtab, Layout* layout,
 	  const char* sym_name = (this->armap_names_.data()
 				  + this->armap_[i].name_offset);
 
-	  // In an object file, and therefore in an archive map, an
-	  // '@' in the name separates the symbol name from the
-	  // version name.  If there are two '@' characters, this is
-	  // the default version.
-	  const char* ver = strchr(sym_name, '@');
-	  bool def = false;
-	  if (ver != NULL)
-	    {
-	      size_t symlen = ver - sym_name;
-	      if (symlen + 1 > tmpbuflen)
-		{
-		  tmpbuf = static_cast<char*>(realloc(tmpbuf, symlen + 1));
-		  tmpbuflen = symlen + 1;
-		}
-	      memcpy(tmpbuf, sym_name, symlen);
-	      tmpbuf[symlen] = '\0';
-	      sym_name = tmpbuf;
+          Symbol* sym;
+          std::string why;
+          Should_include t = should_include_member(symtab, sym_name,
+                                                   &sym, &why, &tmpbuf,
+                                                   &tmpbuflen);
 
-	      ++ver;
-	      if (*ver == '@')
-		{
-		  ++ver;
-		  def = true;
-		}
-	    }
+	  if (t == SHOULD_INCLUDE_NO || t == SHOULD_INCLUDE_YES)
+	    this->armap_checked_[i] = true;
 
-	  Symbol* sym = symtab->lookup(sym_name, ver);
-	  if (def
-	      && ver != NULL
-	      && (sym == NULL
-		  || !sym->is_undefined()
-		  || sym->binding() == elfcpp::STB_WEAK))
-	    sym = symtab->lookup(sym_name, NULL);
-
-	  if (sym == NULL)
-	    {
-	      // Check whether the symbol was named in a -u option.
-	      if (!parameters->options().is_undefined(sym_name))
-		continue;
-	    }
-	  else if (!sym->is_undefined())
-	    {
-              this->armap_checked_[i] = true;
-	      continue;
-	    }
-	  else if (sym->binding() == elfcpp::STB_WEAK)
+	  if (t != SHOULD_INCLUDE_YES)
 	    continue;
 
 	  // We want to include this object in the link.
 	  last_seen_offset = this->armap_[i].file_offset;
 	  this->seen_offsets_.insert(last_seen_offset);
-          this->armap_checked_[i] = true;
 
-	  std::string why;
-	  if (sym == NULL)
-	    {
-	      why = "-u ";
-	      why += sym_name;
-	    }
 	  if (!this->include_member(symtab, layout, input_objects,
 				    last_seen_offset, mapfile, sym,
 				    why.c_str()))
