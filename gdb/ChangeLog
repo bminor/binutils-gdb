@@ -1,3 +1,9 @@
+2010-03-09  Michael Snyder  <msnyder@vmware.com>
+
+	* i386-tdep.c (i386_record_lea_modrm_addr): Use extract_signed_int
+	after target_read_memory to get host byte order.
+	(i386_process_record): Ditto.
+
 2010-03-09  Keith Seitz  <keiths@redhat.com>
 
 	Based on work from Daniel Jacobowitz  <dan@codesourcery.com>

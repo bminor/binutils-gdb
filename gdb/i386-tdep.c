@@ -2948,10 +2948,9 @@ static int
 i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 {
   struct gdbarch *gdbarch = irp->gdbarch;
-  int8_t  addr8;
-  int16_t addr16;
-  int32_t addr32;
-  ULONGEST addr64;
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  gdb_byte buf[4];
+  ULONGEST offset64;
 
   *addr = 0;
   if (irp->aflag)
@@ -2987,7 +2986,7 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 	  if ((base & 7) == 5)
 	    {
 	      base = 0xff;
-	      if (target_read_memory (irp->addr, (gdb_byte *) &addr32, 4))
+	      if (target_read_memory (irp->addr, buf, 4))
 		{
 		  if (record_debug)
 		    printf_unfiltered (_("Process record: error reading "
@@ -2996,7 +2995,7 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 		  return -1;
 		}
 	      irp->addr += 4;
-	      *addr = addr32;
+	      *addr = extract_signed_integer (buf, 4, byte_order);
 	      if (irp->regmap[X86_RECORD_R8_REGNUM] && !havesib)
 		*addr += irp->addr + irp->rip_offset;
 	    }
@@ -3006,7 +3005,7 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 	    }
 	  break;
 	case 1:
-	  if (target_read_memory (irp->addr, &addr8, 1))
+	  if (target_read_memory (irp->addr, buf, 1))
 	    {
 	      if (record_debug)
 		printf_unfiltered (_("Process record: error reading memory "
@@ -3015,10 +3014,10 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 	      return -1;
 	    }
 	  irp->addr++;
-	  *addr = addr8;
+	  *addr = (int8_t) buf[0];
 	  break;
 	case 2:
-	  if (target_read_memory (irp->addr, (gdb_byte *) &addr32, 4))
+	  if (target_read_memory (irp->addr, buf, 4))
 	    {
 	      if (record_debug)
 		printf_unfiltered (_("Process record: error reading memory "
@@ -3026,34 +3025,34 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 				   paddress (gdbarch, irp->addr));
 	      return -1;
 	    }
-	  *addr = addr32;
+	  *addr = extract_signed_integer (buf, 4, byte_order);
 	  irp->addr += 4;
 	  break;
 	}
 
-      addr64 = 0;
+      offset64 = 0;
       if (base != 0xff)
         {
 	  if (base == 4 && irp->popl_esp_hack)
 	    *addr += irp->popl_esp_hack;
 	  regcache_raw_read_unsigned (irp->regcache, irp->regmap[base],
-                                      &addr64);
+                                      &offset64);
 	}
       if (irp->aflag == 2)
         {
-	  *addr += addr64;
+	  *addr += offset64;
         }
       else
-        *addr = (uint32_t) (addr64 + *addr);
+        *addr = (uint32_t) (offset64 + *addr);
 
       if (havesib && (index != 4 || scale != 0))
 	{
 	  regcache_raw_read_unsigned (irp->regcache, irp->regmap[index],
-                                      &addr64);
+                                      &offset64);
 	  if (irp->aflag == 2)
-	    *addr += addr64 << scale;
+	    *addr += offset64 << scale;
 	  else
-	    *addr = (uint32_t) (*addr + (addr64 << scale));
+	    *addr = (uint32_t) (*addr + (offset64 << scale));
 	}
     }
   else
@@ -3064,7 +3063,7 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 	case 0:
 	  if (irp->rm == 6)
 	    {
-	      if (target_read_memory (irp->addr, (gdb_byte *) &addr16, 2))
+	      if (target_read_memory (irp->addr, buf, 2))
 		{
 		  if (record_debug)
 		    printf_unfiltered (_("Process record: error reading "
@@ -3073,7 +3072,7 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 		  return -1;
 		}
 	      irp->addr += 2;
-	      *addr = addr16;
+	      *addr = extract_signed_integer (buf, 2, byte_order);
 	      irp->rm = 0;
 	      goto no_rm;
 	    }
@@ -3083,7 +3082,7 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 	    }
 	  break;
 	case 1:
-	  if (target_read_memory (irp->addr, &addr8, 1))
+	  if (target_read_memory (irp->addr, buf, 1))
 	    {
 	      if (record_debug)
 		printf_unfiltered (_("Process record: error reading memory "
@@ -3092,10 +3091,10 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 	      return -1;
 	    }
 	  irp->addr++;
-	  *addr = addr8;
+	  *addr = (int8_t) buf[0];
 	  break;
 	case 2:
-	  if (target_read_memory (irp->addr, (gdb_byte *) &addr16, 2))
+	  if (target_read_memory (irp->addr, buf, 2))
 	    {
 	      if (record_debug)
 		printf_unfiltered (_("Process record: error reading memory "
@@ -3104,7 +3103,7 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 	      return -1;
 	    }
 	  irp->addr += 2;
-	  *addr = addr16;
+	  *addr = extract_signed_integer (buf, 2, byte_order);
 	  break;
 	}
 
@@ -3113,66 +3112,66 @@ i386_record_lea_modrm_addr (struct i386_record_s *irp, uint64_t *addr)
 	case 0:
 	  regcache_raw_read_unsigned (irp->regcache,
 				      irp->regmap[X86_RECORD_REBX_REGNUM],
-                                      &addr64);
-	  *addr = (uint32_t) (*addr + addr64);
+                                      &offset64);
+	  *addr = (uint32_t) (*addr + offset64);
 	  regcache_raw_read_unsigned (irp->regcache,
 				      irp->regmap[X86_RECORD_RESI_REGNUM],
-                                      &addr64);
-	  *addr = (uint32_t) (*addr + addr64);
+                                      &offset64);
+	  *addr = (uint32_t) (*addr + offset64);
 	  break;
 	case 1:
 	  regcache_raw_read_unsigned (irp->regcache,
 				      irp->regmap[X86_RECORD_REBX_REGNUM],
-                                      &addr64);
-	  *addr = (uint32_t) (*addr + addr64);
+                                      &offset64);
+	  *addr = (uint32_t) (*addr + offset64);
 	  regcache_raw_read_unsigned (irp->regcache,
 				      irp->regmap[X86_RECORD_REDI_REGNUM],
-                                      &addr64);
-	  *addr = (uint32_t) (*addr + addr64);
+                                      &offset64);
+	  *addr = (uint32_t) (*addr + offset64);
 	  break;
 	case 2:
 	  regcache_raw_read_unsigned (irp->regcache,
 				      irp->regmap[X86_RECORD_REBP_REGNUM],
-                                      &addr64);
-	  *addr = (uint32_t) (*addr + addr64);
+                                      &offset64);
+	  *addr = (uint32_t) (*addr + offset64);
 	  regcache_raw_read_unsigned (irp->regcache,
 				      irp->regmap[X86_RECORD_RESI_REGNUM],
-                                      &addr64);
-	  *addr = (uint32_t) (*addr + addr64);
+                                      &offset64);
+	  *addr = (uint32_t) (*addr + offset64);
 	  break;
 	case 3:
 	  regcache_raw_read_unsigned (irp->regcache,
 				      irp->regmap[X86_RECORD_REBP_REGNUM],
-                                      &addr64);
-	  *addr = (uint32_t) (*addr + addr64);
+                                      &offset64);
+	  *addr = (uint32_t) (*addr + offset64);
 	  regcache_raw_read_unsigned (irp->regcache,
 				      irp->regmap[X86_RECORD_REDI_REGNUM],
-                                      &addr64);
-	  *addr = (uint32_t) (*addr + addr64);
+                                      &offset64);
+	  *addr = (uint32_t) (*addr + offset64);
 	  break;
 	case 4:
 	  regcache_raw_read_unsigned (irp->regcache,
 				      irp->regmap[X86_RECORD_RESI_REGNUM],
-                                      &addr64);
-	  *addr = (uint32_t) (*addr + addr64);
+                                      &offset64);
+	  *addr = (uint32_t) (*addr + offset64);
 	  break;
 	case 5:
 	  regcache_raw_read_unsigned (irp->regcache,
 				      irp->regmap[X86_RECORD_REDI_REGNUM],
-                                      &addr64);
-	  *addr = (uint32_t) (*addr + addr64);
+                                      &offset64);
+	  *addr = (uint32_t) (*addr + offset64);
 	  break;
 	case 6:
 	  regcache_raw_read_unsigned (irp->regcache,
 				      irp->regmap[X86_RECORD_REBP_REGNUM],
-                                      &addr64);
-	  *addr = (uint32_t) (*addr + addr64);
+                                      &offset64);
+	  *addr = (uint32_t) (*addr + offset64);
 	  break;
 	case 7:
 	  regcache_raw_read_unsigned (irp->regcache,
 				      irp->regmap[X86_RECORD_REBX_REGNUM],
-                                      &addr64);
-	  *addr = (uint32_t) (*addr + addr64);
+                                      &offset64);
+	  *addr = (uint32_t) (*addr + offset64);
 	  break;
 	}
       *addr &= 0xffff;
@@ -3309,11 +3308,13 @@ int
 i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 		     CORE_ADDR input_addr)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int prefixes = 0;
   int regnum = 0;
   uint32_t opcode;
   uint8_t  opcode8;
   ULONGEST addr;
+  gdb_byte buf[MAX_REGISTER_SIZE];
   struct i386_record_s ir;
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int rex = 0;
@@ -4100,9 +4101,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	    ir.ot = ir.dflag + OT_WORD;
 	  if (ir.aflag == 2)
 	    {
-	      uint64_t addr64;
-
-              if (target_read_memory (ir.addr, (gdb_byte *) &addr64, 8))
+              if (target_read_memory (ir.addr, buf, 8))
 		{
 	          if (record_debug)
 		    printf_unfiltered (_("Process record: error reading "
@@ -4111,13 +4110,11 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 		  return -1;
 		}
 	      ir.addr += 8;
-	      addr = addr64;
+	      addr = extract_unsigned_integer (buf, 8, byte_order);
 	    }
           else if (ir.aflag)
 	    {
-	      uint32_t addr32;
-
-              if (target_read_memory (ir.addr, (gdb_byte *) &addr32, 4))
+              if (target_read_memory (ir.addr, buf, 4))
 		{
 	          if (record_debug)
 		    printf_unfiltered (_("Process record: error reading "
@@ -4126,13 +4123,11 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 		  return -1;
 		}
 	      ir.addr += 4;
-              addr = addr32;
+              addr = extract_unsigned_integer (buf, 4, byte_order);
 	    }
           else
 	    {
-	      uint16_t addr16;
-
-              if (target_read_memory (ir.addr, (gdb_byte *) &addr16, 2))
+              if (target_read_memory (ir.addr, buf, 2))
 		{
 	          if (record_debug)
 		    printf_unfiltered (_("Process record: error reading "
@@ -4141,7 +4136,7 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 		  return -1;
 		}
 	      ir.addr += 2;
-              addr = addr16;
+              addr = extract_unsigned_integer (buf, 2, byte_order);
 	    }
 	  if (record_arch_list_add_mem (addr, 1 << ir.ot))
 	    return -1;
