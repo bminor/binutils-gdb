@@ -61,9 +61,11 @@ typedef int Py_ssize_t;
 #define PyEval_ReleaseLock() 0
 #endif
 
+/* In order to be able to parse symtab_and_line_to_sal_object function 
+   a real symtab_and_line structure is needed.  */
+#include "symtab.h"
+
 struct block;
-struct symbol;
-struct symtab_and_line;
 struct value;
 struct language_defn;
 

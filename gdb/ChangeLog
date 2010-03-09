@@ -1,3 +1,7 @@
+2010-03-09  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* python/python-internal.h: Include symtab.h.
+
 2010-03-09  Joel Brobecker <brobecker@adacore.com>
 	    Pierre Muller <muller@ics.u-strasbg.fr>
 
