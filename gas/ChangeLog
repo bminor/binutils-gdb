@@ -1,3 +1,8 @@
+2010-03-09  Alan Modra  <amodra@gmail.com>
+
+	PR gas/11356
+	* listing.c (listing_newline): Correct backslash quote logic.
+
 2010-03-08  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* config/tc-i386.h [TE_SOLARIS] (ELF_TARGET_FORMAT): Define.

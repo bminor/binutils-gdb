@@ -347,10 +347,12 @@ listing_newline (char *ps)
 			 || is_end_of_line [(unsigned char) *copy] != 1);
 	       copy++)
 	    {
-	      if (*copy == '\\')
-		seen_slash = ! seen_slash;
-	      else if (*copy == '"' && seen_slash)
-		seen_quote = ! seen_quote;
+	      if (seen_slash)
+		seen_slash = 0;
+	      else if (*copy == '\\')
+		seen_slash = 1;
+	      else if (*copy == '"')
+		seen_quote = !seen_quote;
 	    }
 
 	  len = copy - input_line_pointer + 1;
