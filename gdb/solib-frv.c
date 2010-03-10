@@ -26,4 +26,8 @@
 #define FDPIC_INTERP_REGNUM fdpic_loadmap_interp_regnum
 #define FDPIC_EXEC_REGNUM fdpic_loadmap_exec_regnum
 
+/* Provide a prototype to silence -Wmissing-prototypes and for init.c.  */
+extern initialize_file_ftype
+_initialize_fdpic_solib;
+
 #include "solib-fdpic.c"

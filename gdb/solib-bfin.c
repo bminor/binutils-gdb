@@ -28,4 +28,8 @@
 #define FDPIC_EXEC_REGNUM BFIN_FDPIC_EXEC_REGNUM
 #define LINKER_SYM(sym) "_"sym
 
+/* Provide a prototype to silence -Wmissing-prototypes and for init.c.  */
+extern initialize_file_ftype
+_initialize_fdpic_solib;
+
 #include "solib-fdpic.c"
