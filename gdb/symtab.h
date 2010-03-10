@@ -630,36 +630,6 @@ struct symbol
 #define SYMBOL_REGISTER_OPS(symbol)     (symbol)->ops.ops_register
 #define SYMBOL_LOCATION_BATON(symbol)   (symbol)->aux_value
 
-/* A partial_symbol records the name, domain, and address class of
-   symbols whose types we have not parsed yet.  For functions, it also
-   contains their memory address, so we can find them from a PC value.
-   Each partial_symbol sits in a partial_symtab, all of which are chained
-   on a  partial symtab list and which points to the corresponding 
-   normal symtab once the partial_symtab has been referenced.  */
-
-/* This structure is space critical.  See space comments at the top. */
-
-struct partial_symbol
-{
-
-  /* The general symbol info required for all types of symbols. */
-
-  struct general_symbol_info ginfo;
-
-  /* Name space code.  */
-
-  ENUM_BITFIELD(domain_enum_tag) domain : 6;
-
-  /* Address class (for info_symbols) */
-
-  ENUM_BITFIELD(address_class) aclass : 6;
-
-};
-
-#define PSYMBOL_DOMAIN(psymbol)	(psymbol)->domain
-#define PSYMBOL_CLASS(psymbol)		(psymbol)->aclass
-
-
 /* Each item represents a line-->pc (or the reverse) mapping.  This is
    somewhat more wasteful of space than one might wish, but since only
    the files which are actually debugged are read in to core, we don't
@@ -826,110 +796,6 @@ struct symtab
 #define SYMTAB_PSPACE(symtab)	(symtab)->objfile->pspace
 
 
-/* Each source file that has not been fully read in is represented by
-   a partial_symtab.  This contains the information on where in the
-   executable the debugging symbols for a specific file are, and a
-   list of names of global symbols which are located in this file.
-   They are all chained on partial symtab lists.
-
-   Even after the source file has been read into a symtab, the
-   partial_symtab remains around.  They are allocated on an obstack,
-   objfile_obstack.  FIXME, this is bad for dynamic linking or VxWorks-
-   style execution of a bunch of .o's.  */
-
-struct partial_symtab
-{
-
-  /* Chain of all existing partial symtabs.  */
-
-  struct partial_symtab *next;
-
-  /* Name of the source file which this partial_symtab defines */
-
-  char *filename;
-
-  /* Full path of the source file.  NULL if not known.  */
-
-  char *fullname;
-
-  /* Directory in which it was compiled, or NULL if we don't know.  */
-
-  char *dirname;
-
-  /* Information about the object file from which symbols should be read.  */
-
-  struct objfile *objfile;
-
-  /* Set of relocation offsets to apply to each section.  */
-
-  struct section_offsets *section_offsets;
-
-  /* Range of text addresses covered by this file; texthigh is the
-     beginning of the next section. */
-
-  CORE_ADDR textlow;
-  CORE_ADDR texthigh;
-
-  /* Array of pointers to all of the partial_symtab's which this one
-     depends on.  Since this array can only be set to previous or
-     the current (?) psymtab, this dependency tree is guaranteed not
-     to have any loops.  "depends on" means that symbols must be read
-     for the dependencies before being read for this psymtab; this is
-     for type references in stabs, where if foo.c includes foo.h, declarations
-     in foo.h may use type numbers defined in foo.c.  For other debugging
-     formats there may be no need to use dependencies.  */
-
-  struct partial_symtab **dependencies;
-
-  int number_of_dependencies;
-
-  /* Global symbol list.  This list will be sorted after readin to
-     improve access.  Binary search will be the usual method of
-     finding a symbol within it. globals_offset is an integer offset
-     within global_psymbols[].  */
-
-  int globals_offset;
-  int n_global_syms;
-
-  /* Static symbol list.  This list will *not* be sorted after readin;
-     to find a symbol in it, exhaustive search must be used.  This is
-     reasonable because searches through this list will eventually
-     lead to either the read in of a files symbols for real (assumed
-     to take a *lot* of time; check) or an error (and we don't care
-     how long errors take).  This is an offset and size within
-     static_psymbols[].  */
-
-  int statics_offset;
-  int n_static_syms;
-
-  /* Pointer to symtab eventually allocated for this source file, 0 if
-     !readin or if we haven't looked for the symtab after it was readin.  */
-
-  struct symtab *symtab;
-
-  /* Pointer to function which will read in the symtab corresponding to
-     this psymtab.  */
-
-  void (*read_symtab) (struct partial_symtab *);
-
-  /* Information that lets read_symtab() locate the part of the symbol table
-     that this psymtab corresponds to.  This information is private to the
-     format-dependent symbol reading routines.  For further detail examine
-     the various symbol reading modules.  Should really be (void *) but is
-     (char *) as with other such gdb variables.  (FIXME) */
-
-  char *read_symtab_private;
-
-  /* Non-zero if the symtab corresponding to this psymtab has been readin */
-
-  unsigned char readin;
-};
-
-/* A fast way to get from a psymtab to its symtab (after the first time).  */
-#define	PSYMTAB_TO_SYMTAB(pst)  \
-    ((pst) -> symtab != NULL ? (pst) -> symtab : psymtab_to_symtab (pst))
-
-
 /* The virtual function table is now an array of structures which have the
    form { int16 offset, delta; void *pfn; }. 
 
@@ -1019,12 +885,6 @@ extern struct symbol *lookup_symbol_aux_block (const char *name,
 					       const struct block *block,
 					       const domain_enum domain);
 
-/* Lookup a partial symbol.  */
-
-extern struct partial_symbol *lookup_partial_symbol (struct partial_symtab *,
-						     const char *, int,
-						     domain_enum);
-
 /* lookup a symbol by name, within a specified block */
 
 extern struct symbol *lookup_block_symbol (const struct block *, const char *,
@@ -1055,20 +915,10 @@ extern int find_pc_partial_function (CORE_ADDR, char **, CORE_ADDR *,
 
 extern void clear_pc_function_cache (void);
 
-/* from symtab.c: */
-
-/* lookup partial symbol table by filename */
-
-extern struct partial_symtab *lookup_partial_symtab (const char *);
-
-/* lookup partial symbol table by address */
-
-extern struct partial_symtab *find_pc_psymtab (CORE_ADDR);
-
 /* lookup partial symbol table by address and section */
 
-extern struct partial_symtab *find_pc_sect_psymtab (CORE_ADDR,
-						    struct obj_section *);
+extern struct symtab *find_pc_sect_symtab_via_partial (CORE_ADDR,
+						       struct obj_section *);
 
 /* lookup full symbol table by address */
 
@@ -1077,17 +927,6 @@ extern struct symtab *find_pc_symtab (CORE_ADDR);
 /* lookup full symbol table by address and section */
 
 extern struct symtab *find_pc_sect_symtab (CORE_ADDR, struct obj_section *);
-
-/* lookup partial symbol by address */
-
-extern struct partial_symbol *find_pc_psymbol (struct partial_symtab *,
-					       CORE_ADDR);
-
-/* lookup partial symbol by address and section */
-
-extern struct partial_symbol *find_pc_sect_psymbol (struct partial_symtab *,
-						    CORE_ADDR,
-						    struct obj_section *);
 
 extern int find_pc_line_pc_range (CORE_ADDR, CORE_ADDR *, CORE_ADDR *);
 
@@ -1264,8 +1103,6 @@ extern void free_symtab (struct symtab *);
 
 /* Symbol-reading stuff in symfile.c and solib.c.  */
 
-extern struct symtab *psymtab_to_symtab (struct partial_symtab *);
-
 extern void clear_solib (void);
 
 /* source.c */
@@ -1291,7 +1128,7 @@ extern char **make_source_files_completion_list (char *, char *);
 
 int matching_obj_sections (struct obj_section *, struct obj_section *);
 
-extern struct partial_symtab *find_main_psymtab (void);
+extern char *find_main_filename (void);
 
 extern struct symtab *find_line_symtab (struct symtab *, int, int *, int *);
 
@@ -1317,10 +1154,6 @@ extern CORE_ADDR skip_prologue_using_sal (struct gdbarch *gdbarch,
 
 extern struct symbol *fixup_symbol_section (struct symbol *,
 					    struct objfile *);
-
-extern struct partial_symbol *fixup_psymbol_section (struct partial_symbol
-						     *psym,
-						     struct objfile *objfile);
 
 /* Symbol searching */
 
@@ -1367,5 +1200,8 @@ struct symbol *lookup_global_symbol_from_objfile (const struct objfile *objfile,
 
 extern struct symtabs_and_lines
 expand_line_sal (struct symtab_and_line sal);
+
+void fixup_section (struct general_symbol_info *ginfo,
+		    CORE_ADDR addr, struct objfile *objfile);
 
 #endif /* !defined(SYMTAB_H) */

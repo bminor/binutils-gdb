@@ -1,6 +1,6 @@
 /* Read dbx symbol tables and convert to internal format, for GDB.
    Copyright (C) 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2008, 2009.
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2008, 2009, 2010.
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -55,6 +55,7 @@
 #include "complaints.h"
 #include "cp-abi.h"
 #include "cp-support.h"
+#include "psympriv.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -3572,6 +3573,7 @@ static struct sym_fns aout_sym_fns =
 				   a file.  */
   NULL,                         /* sym_read_linetable */
   default_symfile_relocate,	/* sym_relocate: Relocate a debug section.  */
+  &psym_functions,
   NULL				/* next: pointer to next struct sym_fns */
 };
 

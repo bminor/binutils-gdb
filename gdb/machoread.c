@@ -32,6 +32,7 @@
 #include "gdb_assert.h"
 #include "aout/stab_gnu.h"
 #include "vec.h"
+#include "psympriv.h"
 
 #include <string.h>
 
@@ -848,7 +849,7 @@ static struct sym_fns macho_sym_fns = {
 				   a file.  */
   NULL,                         /* sym_read_linetable */
   macho_symfile_relocate,	/* sym_relocate: Relocate a debug section.  */
-
+  &psym_functions,
   NULL                          /* next: pointer to next struct sym_fns */
 };
 

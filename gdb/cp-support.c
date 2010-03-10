@@ -38,6 +38,8 @@
 
 #include "safe-ctype.h"
 
+#include "psymtab.h"
+
 #define d_left(dc) (dc)->u.s_binary.left
 #define d_right(dc) (dc)->u.s_binary.right
 
@@ -61,8 +63,6 @@ static void make_symbol_overload_list_using (const char *func_name,
 					     const char *namespace);
 
 static void make_symbol_overload_list_qualified (const char *func_name);
-
-static void read_in_psymtabs (const char *oload_name);
 
 /* The list of "maint cplus" commands.  */
 
@@ -772,7 +772,11 @@ make_symbol_overload_list_qualified (const char *func_name)
   /* Look through the partial symtabs for all symbols which begin
      by matching FUNC_NAME.  Make sure we read that symbol table in. */
 
-  read_in_psymtabs (func_name);
+  ALL_OBJFILES (objfile)
+  {
+    if (objfile->sf)
+      objfile->sf->qf->expand_symtabs_for_function (objfile, func_name);
+  }
 
   /* Search upwards from currently selected frame (so that we can
      complete on local vars.  */
@@ -823,28 +827,6 @@ make_symbol_overload_list_qualified (const char *func_name)
     {
       overload_list_add_symbol (sym, func_name);
     }
-  }
-}
-
-/* Look through the partial symtabs for all symbols which begin
-   by matching FUNC_NAME.  Make sure we read that symbol table in. */
-
-static void
-read_in_psymtabs (const char *func_name)
-{
-  struct partial_symtab *ps;
-  struct objfile *objfile;
-
-  ALL_PSYMTABS (objfile, ps)
-  {
-    if (ps->readin)
-      continue;
-
-    if ((lookup_partial_symbol (ps, func_name, 1, VAR_DOMAIN)
-	 != NULL)
-	|| (lookup_partial_symbol (ps, func_name, 0, VAR_DOMAIN)
-	    != NULL))
-      psymtab_to_symtab (ps);
   }
 }
 

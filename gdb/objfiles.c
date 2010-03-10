@@ -52,6 +52,7 @@
 #include "exec.h"
 #include "observer.h"
 #include "complaints.h"
+#include "psymtab.h"
 
 /* Prototypes for local functions */
 
@@ -782,38 +783,8 @@ objfile_relocate1 (struct objfile *objfile, struct section_offsets *new_offsets)
     addrmap_relocate (objfile->psymtabs_addrmap,
 		      ANOFFSET (delta, SECT_OFF_TEXT (objfile)));
 
-  {
-    struct partial_symtab *p;
-
-    ALL_OBJFILE_PSYMTABS (objfile, p)
-    {
-      p->textlow += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
-      p->texthigh += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
-    }
-  }
-
-  {
-    struct partial_symbol **psym;
-
-    for (psym = objfile->global_psymbols.list;
-	 psym < objfile->global_psymbols.next;
-	 psym++)
-      {
-	fixup_psymbol_section (*psym, objfile);
-	if (SYMBOL_SECTION (*psym) >= 0)
-	  SYMBOL_VALUE_ADDRESS (*psym) += ANOFFSET (delta,
-						    SYMBOL_SECTION (*psym));
-      }
-    for (psym = objfile->static_psymbols.list;
-	 psym < objfile->static_psymbols.next;
-	 psym++)
-      {
-	fixup_psymbol_section (*psym, objfile);
-	if (SYMBOL_SECTION (*psym) >= 0)
-	  SYMBOL_VALUE_ADDRESS (*psym) += ANOFFSET (delta,
-						    SYMBOL_SECTION (*psym));
-      }
-  }
+  if (objfile->sf)
+    objfile->sf->qf->relocate (objfile, new_offsets, delta);
 
   {
     struct minimal_symbol *msym;
@@ -917,7 +888,7 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 int
 objfile_has_partial_symbols (struct objfile *objfile)
 {
-  return objfile->psymtabs != NULL;
+  return objfile->sf ? objfile->sf->qf->has_symbols (objfile) : 0;
 }
 
 /* Return non-zero if OBJFILE has full symbols.  */

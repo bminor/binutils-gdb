@@ -36,6 +36,7 @@
 #include "gdb-stabs.h"
 #include "complaints.h"
 #include "demangle.h"
+#include "psympriv.h"
 
 extern void _initialize_elfread (void);
 
@@ -1058,6 +1059,7 @@ static struct sym_fns elf_sym_fns =
 				   a file.  */
   NULL,                         /* sym_read_linetable */
   default_symfile_relocate,	/* sym_relocate: Relocate a debug section.  */
+  &psym_functions,
   NULL				/* next: pointer to next struct sym_fns */
 };
 

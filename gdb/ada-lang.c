@@ -58,6 +58,8 @@
 #include "vec.h"
 #include "stack.h"
 
+#include "psymtab.h"
+
 /* Define whether or not the C operator '/' truncates towards zero for
    differently signed operands (truncation direction is undefined in C). 
    Copied from valarith.c.  */
@@ -118,10 +120,6 @@ static void add_defn_to_vec (struct obstack *, struct symbol *,
 static int num_defns_collected (struct obstack *);
 
 static struct ada_symbol_info *defns_collected (struct obstack *, int);
-
-static struct partial_symbol *ada_lookup_partial_symbol (struct partial_symtab
-                                                         *, const char *, int,
-                                                         domain_enum, int);
 
 static struct value *resolve_subexp (struct expression **, int *, int,
                                      struct type *);
@@ -638,13 +636,10 @@ base_type (struct type *type)
                                 /* Language Selection */
 
 /* If the main program is in Ada, return language_ada, otherwise return LANG
-   (the main program is in Ada iif the adainit symbol is found).
-
-   MAIN_PST is not used.  */
+   (the main program is in Ada iif the adainit symbol is found).  */
 
 enum language
-ada_update_initial_language (enum language lang,
-                             struct partial_symtab *main_pst)
+ada_update_initial_language (enum language lang)
 {
   if (lookup_minimal_symbol ("adainit", (const char *) NULL,
                              (struct objfile *) NULL) != NULL)
@@ -4096,143 +4091,6 @@ defns_collected (struct obstack *obstackp, int finish)
     return (struct ada_symbol_info *) obstack_base (obstackp);
 }
 
-/* Look, in partial_symtab PST, for symbol NAME in given namespace.
-   Check the global symbols if GLOBAL, the static symbols if not.
-   Do wild-card match if WILD.  */
-
-static struct partial_symbol *
-ada_lookup_partial_symbol (struct partial_symtab *pst, const char *name,
-                           int global, domain_enum namespace, int wild)
-{
-  struct partial_symbol **start;
-  int name_len = strlen (name);
-  int length = (global ? pst->n_global_syms : pst->n_static_syms);
-  int i;
-
-  if (length == 0)
-    {
-      return (NULL);
-    }
-
-  start = (global ?
-           pst->objfile->global_psymbols.list + pst->globals_offset :
-           pst->objfile->static_psymbols.list + pst->statics_offset);
-
-  if (wild)
-    {
-      for (i = 0; i < length; i += 1)
-        {
-          struct partial_symbol *psym = start[i];
-
-          if (symbol_matches_domain (SYMBOL_LANGUAGE (psym),
-                                     SYMBOL_DOMAIN (psym), namespace)
-              && wild_match (name, name_len, SYMBOL_LINKAGE_NAME (psym)))
-            return psym;
-        }
-      return NULL;
-    }
-  else
-    {
-      if (global)
-        {
-          int U;
-          i = 0;
-          U = length - 1;
-          while (U - i > 4)
-            {
-              int M = (U + i) >> 1;
-              struct partial_symbol *psym = start[M];
-              if (SYMBOL_LINKAGE_NAME (psym)[0] < name[0])
-                i = M + 1;
-              else if (SYMBOL_LINKAGE_NAME (psym)[0] > name[0])
-                U = M - 1;
-              else if (strcmp (SYMBOL_LINKAGE_NAME (psym), name) < 0)
-                i = M + 1;
-              else
-                U = M;
-            }
-        }
-      else
-        i = 0;
-
-      while (i < length)
-        {
-          struct partial_symbol *psym = start[i];
-
-          if (symbol_matches_domain (SYMBOL_LANGUAGE (psym),
-                                     SYMBOL_DOMAIN (psym), namespace))
-            {
-              int cmp = strncmp (name, SYMBOL_LINKAGE_NAME (psym), name_len);
-
-              if (cmp < 0)
-                {
-                  if (global)
-                    break;
-                }
-              else if (cmp == 0
-                       && is_name_suffix (SYMBOL_LINKAGE_NAME (psym)
-                                          + name_len))
-                return psym;
-            }
-          i += 1;
-        }
-
-      if (global)
-        {
-          int U;
-          i = 0;
-          U = length - 1;
-          while (U - i > 4)
-            {
-              int M = (U + i) >> 1;
-              struct partial_symbol *psym = start[M];
-              if (SYMBOL_LINKAGE_NAME (psym)[0] < '_')
-                i = M + 1;
-              else if (SYMBOL_LINKAGE_NAME (psym)[0] > '_')
-                U = M - 1;
-              else if (strcmp (SYMBOL_LINKAGE_NAME (psym), "_ada_") < 0)
-                i = M + 1;
-              else
-                U = M;
-            }
-        }
-      else
-        i = 0;
-
-      while (i < length)
-        {
-          struct partial_symbol *psym = start[i];
-
-          if (symbol_matches_domain (SYMBOL_LANGUAGE (psym),
-                                     SYMBOL_DOMAIN (psym), namespace))
-            {
-              int cmp;
-
-              cmp = (int) '_' - (int) SYMBOL_LINKAGE_NAME (psym)[0];
-              if (cmp == 0)
-                {
-                  cmp = strncmp ("_ada_", SYMBOL_LINKAGE_NAME (psym), 5);
-                  if (cmp == 0)
-                    cmp = strncmp (name, SYMBOL_LINKAGE_NAME (psym) + 5,
-                                   name_len);
-                }
-
-              if (cmp < 0)
-                {
-                  if (global)
-                    break;
-                }
-              else if (cmp == 0
-                       && is_name_suffix (SYMBOL_LINKAGE_NAME (psym)
-                                          + name_len + 5))
-                return psym;
-            }
-          i += 1;
-        }
-    }
-  return NULL;
-}
-
 /* Return a minimal symbol matching NAME according to Ada decoding
    rules.  Returns NULL if there is no such minimal symbol.  Names 
    prefixed with "standard__" are handled specially: "standard__" is 
@@ -4611,6 +4469,30 @@ ada_add_local_symbols (struct obstack *obstackp, const char *name,
     add_symbols_from_enclosing_procs (obstackp, name, domain, wild_match);
 }
 
+/* An object of this type is used as the user_data argument when
+   calling the map_ada_symtabs method.  */
+
+struct ada_psym_data
+{
+  struct obstack *obstackp;
+  const char *name;
+  domain_enum domain;
+  int global;
+  int wild_match;
+};
+
+/* Callback function for map_ada_symtabs.  */
+
+static void
+ada_add_psyms (struct objfile *objfile, struct symtab *s, void *user_data)
+{
+  struct ada_psym_data *data = user_data;
+  const int block_kind = data->global ? GLOBAL_BLOCK : STATIC_BLOCK;
+  ada_add_block_symbols (data->obstackp,
+			 BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), block_kind),
+			 data->name, data->domain, objfile, data->wild_match);
+}
+
 /* Add to OBSTACKP all non-local symbols whose name and domain match
    NAME and DOMAIN respectively.  The search is performed on GLOBAL_BLOCK
    symbols if GLOBAL is non-zero, or on STATIC_BLOCK symbols otherwise.  */
@@ -4618,26 +4500,24 @@ ada_add_local_symbols (struct obstack *obstackp, const char *name,
 static void
 ada_add_non_local_symbols (struct obstack *obstackp, const char *name,
                            domain_enum domain, int global,
-                           int wild_match)
+                           int is_wild_match)
 {
   struct objfile *objfile;
-  struct partial_symtab *ps;
+  struct ada_psym_data data;
 
-  ALL_PSYMTABS (objfile, ps)
+  data.obstackp = obstackp;
+  data.name = name;
+  data.domain = domain;
+  data.global = global;
+  data.wild_match = is_wild_match;
+
+  ALL_OBJFILES (objfile)
   {
-    QUIT;
-    if (ps->readin
-        || ada_lookup_partial_symbol (ps, name, global, domain, wild_match))
-      {
-        struct symtab *s = PSYMTAB_TO_SYMTAB (ps);
-        const int block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
-
-        if (s == NULL || !s->primary)
-          continue;
-        ada_add_block_symbols (obstackp,
-                               BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), block_kind),
-                               name, domain, objfile, wild_match);
-      }
+    if (objfile->sf)
+      objfile->sf->qf->map_ada_symtabs (objfile, wild_match, is_name_suffix,
+					ada_add_psyms, name,
+					global, domain,
+					is_wild_match, &data);
   }
 }
 
@@ -5254,6 +5134,29 @@ symbol_completion_add (VEC(char_ptr) **sv,
   VEC_safe_push (char_ptr, *sv, completion);
 }
 
+/* An object of this type is passed as the user_data argument to the
+   map_partial_symbol_names method.  */
+struct add_partial_datum
+{
+  VEC(char_ptr) **completions;
+  char *text;
+  int text_len;
+  char *text0;
+  char *word;
+  int wild_match;
+  int encoded;
+};
+
+/* A callback for map_partial_symbol_names.  */
+static void
+ada_add_partial_symbol_completions (const char *name, void *user_data)
+{
+  struct add_partial_datum *data = user_data;
+  symbol_completion_add (data->completions, name,
+			 data->text, data->text_len, data->text0, data->word,
+			 data->wild_match, data->encoded);
+}
+
 /* Return a list of possible symbol names completing TEXT0.  The list
    is NULL terminated.  WORD is the entire command on which completion
    is made.  */
@@ -5268,7 +5171,6 @@ ada_make_symbol_completion_list (char *text0, char *word)
   VEC(char_ptr) *completions = VEC_alloc (char_ptr, 128);
   struct symbol *sym;
   struct symtab *s;
-  struct partial_symtab *ps;
   struct minimal_symbol *msymbol;
   struct objfile *objfile;
   struct block *b, *surrounding_static_block = 0;
@@ -5300,34 +5202,17 @@ ada_make_symbol_completion_list (char *text0, char *word)
     }
 
   /* First, look at the partial symtab symbols.  */
-  ALL_PSYMTABS (objfile, ps)
   {
-    struct partial_symbol **psym;
+    struct add_partial_datum data;
 
-    /* If the psymtab's been read in we'll get it when we search
-       through the blockvector.  */
-    if (ps->readin)
-      continue;
-
-    for (psym = objfile->global_psymbols.list + ps->globals_offset;
-         psym < (objfile->global_psymbols.list + ps->globals_offset
-                 + ps->n_global_syms); psym++)
-      {
-        QUIT;
-        symbol_completion_add (&completions, SYMBOL_LINKAGE_NAME (*psym),
-                               text, text_len, text0, word,
-                               wild_match, encoded);
-      }
-
-    for (psym = objfile->static_psymbols.list + ps->statics_offset;
-         psym < (objfile->static_psymbols.list + ps->statics_offset
-                 + ps->n_static_syms); psym++)
-      {
-        QUIT;
-        symbol_completion_add (&completions, SYMBOL_LINKAGE_NAME (*psym),
-                               text, text_len, text0, word,
-                               wild_match, encoded);
-      }
+    data.completions = &completions;
+    data.text = text;
+    data.text_len = text_len;
+    data.text0 = text0;
+    data.word = word;
+    data.wild_match = wild_match;
+    data.encoded = encoded;
+    map_partial_symbol_names (ada_add_partial_symbol_completions, &data);
   }
 
   /* At this point scan through the misc symbol vectors and add each
@@ -10120,7 +10005,7 @@ ada_exception_support_info_sniffer (void)
      started yet.  Inform the user of these two possible causes if
      applicable.  */
 
-  if (ada_update_initial_language (language_unknown, NULL) != language_ada)
+  if (ada_update_initial_language (language_unknown) != language_ada)
     error (_("Unable to insert catchpoint.  Is this an Ada main program?"));
 
   /* If the symbol does not exist, then check that the program is

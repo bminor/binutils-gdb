@@ -50,6 +50,7 @@
 #include "stabsread.h"
 #include "expression.h"
 #include "complaints.h"
+#include "psympriv.h"
 
 #include "gdb-stabs.h"
 
@@ -3036,6 +3037,7 @@ static struct sym_fns xcoff_sym_fns =
 				   a file.  */
   aix_process_linenos,          /* sym_read_linetable */
   default_symfile_relocate,	/* sym_relocate: Relocate a debug section.  */
+  &psym_functions,
   NULL				/* next: pointer to next struct sym_fns */
 };
 

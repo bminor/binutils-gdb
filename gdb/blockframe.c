@@ -37,6 +37,7 @@
 #include "gdbcmd.h"
 #include "block.h"
 #include "inline-frame.h"
+#include "psymtab.h"
 
 /* Return the innermost lexical block in execution
    in a specified stack frame.  The frame address is assumed valid.
@@ -188,10 +189,10 @@ find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
 			  CORE_ADDR *endaddr)
 {
   struct obj_section *section;
-  struct partial_symtab *pst;
   struct symbol *f;
   struct minimal_symbol *msymbol;
-  struct partial_symbol *psb;
+  struct symtab *symtab = NULL;
+  struct objfile *objfile;
   int i;
   CORE_ADDR mapped_pc;
 
@@ -212,55 +213,30 @@ find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
     goto return_cached_value;
 
   msymbol = lookup_minimal_symbol_by_pc_section (mapped_pc, section);
-  pst = find_pc_sect_psymtab (mapped_pc, section);
-  if (pst)
+  ALL_OBJFILES (objfile)
+  {
+    if (objfile->sf)
+      symtab = objfile->sf->qf->find_pc_sect_symtab (objfile, msymbol,
+						     mapped_pc, section, 0);
+    if (symtab)
+      break;
+  }
+
+  if (symtab)
     {
-      /* Need to read the symbols to get a good value for the end address.  */
-      if (endaddr != NULL && !pst->readin)
+      /* Checking whether the msymbol has a larger value is for the
+	 "pathological" case mentioned in print_frame_info.  */
+      f = find_pc_sect_function (mapped_pc, section);
+      if (f != NULL
+	  && (msymbol == NULL
+	      || (BLOCK_START (SYMBOL_BLOCK_VALUE (f))
+		  >= SYMBOL_VALUE_ADDRESS (msymbol))))
 	{
-	  /* Need to get the terminal in case symbol-reading produces
-	     output.  */
-	  target_terminal_ours_for_output ();
-	  PSYMTAB_TO_SYMTAB (pst);
-	}
-
-      if (pst->readin)
-	{
-	  /* Checking whether the msymbol has a larger value is for the
-	     "pathological" case mentioned in print_frame_info.  */
-	  f = find_pc_sect_function (mapped_pc, section);
-	  if (f != NULL
-	      && (msymbol == NULL
-		  || (BLOCK_START (SYMBOL_BLOCK_VALUE (f))
-		      >= SYMBOL_VALUE_ADDRESS (msymbol))))
-	    {
-	      cache_pc_function_low = BLOCK_START (SYMBOL_BLOCK_VALUE (f));
-	      cache_pc_function_high = BLOCK_END (SYMBOL_BLOCK_VALUE (f));
-	      cache_pc_function_name = SYMBOL_LINKAGE_NAME (f);
-	      cache_pc_function_section = section;
-	      goto return_cached_value;
-	    }
-	}
-      else
-	{
-	  /* Now that static symbols go in the minimal symbol table, perhaps
-	     we could just ignore the partial symbols.  But at least for now
-	     we use the partial or minimal symbol, whichever is larger.  */
-	  psb = find_pc_sect_psymbol (pst, mapped_pc, section);
-
-	  if (psb
-	      && (msymbol == NULL
-		  || (SYMBOL_VALUE_ADDRESS (psb)
-		      >= SYMBOL_VALUE_ADDRESS (msymbol))))
-	    {
-	      /* This case isn't being cached currently. */
-	      if (address)
-		*address = SYMBOL_VALUE_ADDRESS (psb);
-	      if (name)
-		*name = SYMBOL_LINKAGE_NAME (psb);
-	      /* endaddr non-NULL can't happen here.  */
-	      return 1;
-	    }
+	  cache_pc_function_low = BLOCK_START (SYMBOL_BLOCK_VALUE (f));
+	  cache_pc_function_high = BLOCK_END (SYMBOL_BLOCK_VALUE (f));
+	  cache_pc_function_name = SYMBOL_LINKAGE_NAME (f);
+	  cache_pc_function_section = section;
+	  goto return_cached_value;
 	}
     }
 

@@ -2294,6 +2294,12 @@ and all the psymbols themselves are allocated in a pair of large arrays
 on an obstack, so there is little to be gained by trying to free them
 unless you want to do a lot more work.
 
+Whether or not psymtabs are created depends on the objfile's symbol
+reader.  The core of @value{GDBN} hides the details of partial symbols
+and partial symbol tables behind a set of function pointers known as
+the @dfn{quick symbol functions}.  These are documented in
+@file{symfile.h}.
+
 @section Types
 
 @unnumberedsubsec Fundamental Types (e.g., @code{FT_VOID}, @code{FT_BOOLEAN}).

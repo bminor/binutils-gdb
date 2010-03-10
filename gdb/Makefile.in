@@ -674,7 +674,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	objfiles.c osabi.c observer.c osdata.c \
 	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c printcmd.c \
 	progspace.c \
-	prologue-value.c \
+	prologue-value.c psymtab.c \
 	regcache.c reggroups.c remote.c remote-fileio.c reverse.c \
 	scm-exp.c scm-lang.c scm-valprint.c \
 	sentinel-frame.c \
@@ -764,7 +764,8 @@ config/rs6000/nm-rs6000.h top.h bsd-kvm.h gdb-stabs.h reggroups.h \
 annotate.h sim-regno.h dictionary.h dfp.h main.h frame-unwind.h	\
 remote-fileio.h i386-linux-tdep.h vax-tdep.h objc-lang.h \
 sentinel-frame.h bcache.h symfile.h windows-tdep.h linux-tdep.h \
-gdb_usleep.h jit.h xml-syscall.h ada-operator.inc microblaze-tdep.h
+gdb_usleep.h jit.h xml-syscall.h ada-operator.inc microblaze-tdep.h \
+psymtab.h psympriv.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -801,7 +802,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	blockframe.o breakpoint.o findvar.o regcache.o \
 	charset.o disasm.o dummy-frame.o dfp.o \
 	source.o value.o eval.o valops.o valarith.o valprint.o printcmd.o \
-	block.o symtab.o symfile.o symmisc.o linespec.o dictionary.o \
+	block.o symtab.o psymtab.o symfile.o symmisc.o linespec.o dictionary.o \
 	infcall.o \
 	infcmd.o infrun.o \
 	expprint.o environ.o stack.o thread.o \

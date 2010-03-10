@@ -32,6 +32,7 @@
 #include "demangle.h"
 #include "som.h"
 #include "libhppa.h"
+#include "psymtab.h"
 
 #include "solib-som.h"
 
@@ -438,6 +439,7 @@ static struct sym_fns som_sym_fns =
 				   a file.  */
   NULL,                         /* sym_read_linetable */
   default_symfile_relocate,	/* sym_relocate: Relocate a debug section.  */
+  &psym_functions,
   NULL				/* next: pointer to next struct sym_fns */
 };
 

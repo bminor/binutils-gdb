@@ -45,6 +45,8 @@
 
 #include "coff-pe-read.h"
 
+#include "psymtab.h"
+
 extern void _initialize_coffread (void);
 
 struct coff_symfile_info
@@ -2129,6 +2131,7 @@ static struct sym_fns coff_sym_fns =
 				   a file.  */
   NULL,                         /* sym_read_linetable  */
   default_symfile_relocate,	/* sym_relocate: Relocate a debug section.  */
+  &psym_functions,
   NULL				/* next: pointer to next struct sym_fns */
 };
 

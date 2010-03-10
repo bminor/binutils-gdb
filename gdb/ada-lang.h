@@ -21,7 +21,6 @@
 #if !defined (ADA_LANG_H)
 #define ADA_LANG_H 1
 
-struct partial_symbol;
 struct frame_info;
 
 #include "value.h"
@@ -207,8 +206,7 @@ extern char *ada_decode_symbol (const struct general_symbol_info*);
 
 extern const char *ada_decode (const char*);
 
-extern enum language ada_update_initial_language (enum language, 
-						  struct partial_symtab*);
+extern enum language ada_update_initial_language (enum language);
 
 extern void clear_ada_sym_cache (void);
 

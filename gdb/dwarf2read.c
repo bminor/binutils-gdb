@@ -50,6 +50,7 @@
 #include "addrmap.h"
 #include "typeprint.h"
 #include "jv-lang.h"
+#include "psympriv.h"
 
 #include <fcntl.h>
 #include "gdb_string.h"

@@ -52,6 +52,9 @@
 #include <ctype.h>
 #include "gdb_string.h"
 
+#include "psymtab.h"
+#include "symfile.h"
+
 void (*deprecated_selected_frame_level_changed_hook) (int);
 
 /* The possible choices of "set print frame-arguments, and the value
@@ -1321,10 +1324,10 @@ backtrace_command_1 (char *count_exp, int show_locals, int from_tty)
       i = count;
       for (fi = trailing; fi != NULL && i--; fi = get_prev_frame (fi))
 	{
+	  CORE_ADDR pc;
 	  QUIT;
-	  ps = find_pc_psymtab (get_frame_address_in_block (fi));
-	  if (ps)
-	    PSYMTAB_TO_SYMTAB (ps); /* Force syms to come in.  */
+	  pc = get_frame_address_in_block (fi);
+	  find_pc_sect_symtab_via_partial (pc, find_pc_mapped_section (pc));
 	}
     }
 

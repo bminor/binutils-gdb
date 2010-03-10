@@ -1,3 +1,135 @@
+2010-03-10  Tom Tromey  <tromey@redhat.com>
+
+	* xcoffread.c: Include psymtab.h.
+	(xcoff_sym_fns): Update.
+	* symtab.h (struct partial_symbol): Remove.
+	(PSYMBOL_DOMAIN, PSYMBOL_CLASS): Remove.
+	(struct partial_symtab): Remove.
+	(PSYMTAB_TO_SYMTAB): Remove.
+	(lookup_partial_symbol, lookup_partial_symtab, find_pc_psymtab)
+	(find_pc_sect_psymtab): Remove.
+	(find_pc_sect_symtab_via_partial): Declare.
+	(find_pc_psymtab, find_pc_sect_psymbol, psymtab_to_symtab)
+	(find_main_psymtab): Remove.
+	(find_main_filename): Declare.
+	(fixup_psymbol_section): Remove.
+	(fixup_section): Declare.
+	* symtab.c: Include psymtab.h.
+	(lookup_symtab): Use lookup_symtab method.
+	(lookup_partial_symtab): Remove.
+	(find_pc_sect_psymtab_closer): Remove.
+	(find_pc_sect_psymtab): Remove.
+	(find_pc_sect_symtab_via_partial): New function.
+	(find_pc_psymtab, find_pc_sect_psymbol, find_pc_psymbol): Remove.
+	(fixup_section): No longer static.
+	(fixup_psymbol_section): Remove.
+	(lookup_symbol_aux): Use lookup_symbol_aux_quick.
+	(lookup_global_symbol_from_objfile): Likewise.
+	(lookup_symbol_aux_psymtabs): Remove.
+	(lookup_symbol_aux_quick): New function.
+	(lookup_symbol_global): Use lookup_symbol_aux_quick.
+	(lookup_partial_symbol): Remove.
+	(basic_lookup_transparent_type_quick): New function.
+	(basic_lookup_transparent_type): Use it.
+	(find_main_psymtab): Remove.
+	(find_main_filename): New function.
+	(find_pc_sect_symtab): Use find_pc_sect_symtab method.
+	(find_line_symtab): Use expand_symtabs_with_filename method.
+	(output_partial_symbol_filename): New function.
+	(sources_info): Use map_partial_symbol_filenames.
+	(struct search_symbols_data): New type.
+	(search_symbols_file_matches): New function.
+	(search_symbols_name_matches): Likewise.
+	(search_symbols): Use expand_symtabs_matching method.
+	(struct add_name_data): Rename from add_macro_name_data.
+	(add_macro_name): Update.
+	(add_partial_symbol_name): New function.
+	(default_make_symbol_completion_list): Use
+	map_partial_symbol_names.
+	(struct add_partial_symbol_name): New type.
+	(maybe_add_partial_symtab_filename): New function.
+	(make_source_files_completion_list): Use
+	map_partial_symbol_filenames.
+	(expand_line_sal): Use expand_symtabs_with_filename method.
+	* symmisc.c: Include psymtab.h.
+	(print_objfile_statistics): Use print_stats method.
+	(dump_objfile): Use dump method.
+	(dump_psymtab, maintenance_print_psymbols)
+	(maintenance_info_psymtabs, maintenance_check_symtabs)
+	(extend_psymbol_list): Remove.
+	* symfile.h (struct quick_symbol_functions): New struct.
+	(struct sym_fns) <qf>: New field.
+	(sort_pst_symbols): Remove.
+	(increment_reading_symtab): Declare.
+	* symfile.c: Include psymtab.h.
+	(compare_psymbols, sort_pst_symbols): Remove.
+	(psymtab_to_symtab): Remove.
+	(increment_reading_symtab): New function.
+	(symbol_file_add_with_addrs_or_offsets): Use expand_all_symtabs
+	method.
+	(set_initial_language): Use find_main_filename.
+	(allocate_psymtab, discard_psymtab, cashier_psymtab): Remove.
+	(free_named_symtabs): Remove unused code.
+	(start_psymtab_common, add_psymbol_to_bcache)
+	(append_psymbol_to_list, add_psymbol_to_list, init_psymbol_list):
+	Remove.
+	* stack.c: Include psymtab.h, symfile.h.
+	(backtrace_command_1): Use find_pc_sect_symtab_via_partial.
+	* source.h (psymtab_to_fullname): Don't declare.
+	* source.c: Include psymtab.h.
+	(select_source_symtab): Use find_last_source_symtab method.
+	(forget_cached_source_info): Use forget_cached_source_info
+	method.
+	(find_and_open_source): No longer static.
+	(psymtab_to_fullname): Remove.
+	* somread.c: Include psymtab.h.
+	(som_sym_fns): Update.
+	* psympriv.h: New file.
+	* psymtab.h: New file.
+	* psymtab.c: New file.
+	* objfiles.h: (ALL_OBJFILE_PSYMTABS): Remove.
+	(ALL_PSYMTABS, ALL_PSPACE_PSYMTABS): Likewise.
+	* objfiles.c: Include psymtab.h.
+	(objfile_relocate1): Use relocate method.
+	(objfile_has_partial_symbols): Use has_symbols method.
+	* mipsread.c: Include psymtab.h.
+	(ecoff_sym_fns): Update.
+	* mi/mi-cmd-file.c: Include psymtab.h.
+	(print_partial_file_name): New function.
+	(mi_cmd_file_list_exec_source_files): Use
+	map_partial_symbol_filenames.
+	* mdebugread.c: Include psympriv.h.
+	* machoread.c: Include psympriv.h.
+	(macho_sym_fns): Update.
+	* m2-exp.y (yylex): Use lookup_symtab.
+	* elfread.c: Include psympriv.h.
+	(elf_sym_fns): Update.
+	* dwarf2read.c: Include psympriv.h.
+	* dbxread.c: Include psympriv.h.
+	(aout_sym_fns): Update.
+	* cp-support.c: Include psymtab.h.
+	(read_in_psymtabs): Remove.
+	(make_symbol_overload_list_qualified): Use
+	expand_symtabs_for_function method.
+	* coffread.c: Include psympriv.h.
+	(coff_sym_fns): Update.
+	* blockframe.c: Include psymtab.h.
+	(find_pc_partial_function): Use find_pc_sect_symtab method.
+	* ada-lang.h (ada_update_initial_language): Update.
+	* ada-lang.c: Include psymtab.h.
+	(ada_update_initial_language): Remove 'main_pst' argument.
+	(ada_lookup_partial_symbol): Remove.
+	(struct ada_psym_data): New type.
+	(ada_add_psyms): New function.
+	(ada_add_non_local_symbols): Use map_ada_symtabs method.
+	(struct add_partial_datum): New type.
+	(ada_add_partial_symbol_completions): New function.
+	(ada_make_symbol_completion_list): Use map_partial_symbol_names.
+	(ada_exception_support_info_sniffer): Update.
+	* Makefile.in (SFILES): Add psymtab.c.
+	(COMMON_OBS): Add psymtab.o.
+	(HFILES_NO_SRCDIR): Add psymtab.h, psympriv.h.
+
 2010-03-10  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* remote-fileio.c (cygwin_conv_path): Define macro for old cygwin API.

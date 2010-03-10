@@ -25,6 +25,7 @@
 #include "symtab.h"
 #include "source.h"
 #include "objfiles.h"
+#include "psymtab.h"
 
 /* Return to the client the absolute path and line number of the 
    current file being executed. */
@@ -63,6 +64,21 @@ mi_cmd_file_list_exec_source_file (char *command, char **argv, int argc)
   ui_out_field_int (uiout, "macro-info", st.symtab->macro_table ? 1 : 0);
 }
 
+/* A callback for map_partial_symbol_filenames.  */
+static void
+print_partial_file_name (const char *filename, const char *fullname,
+			 void *ignore)
+{
+  ui_out_begin (uiout, ui_out_type_tuple, NULL);
+
+  ui_out_field_string (uiout, "file", filename);
+
+  if (fullname)
+    ui_out_field_string (uiout, "fullname", fullname);
+
+  ui_out_end (uiout, ui_out_type_tuple);
+}
+
 void
 mi_cmd_file_list_exec_source_files (char *command, char **argv, int argc)
 {
@@ -92,24 +108,7 @@ mi_cmd_file_list_exec_source_files (char *command, char **argv, int argc)
     ui_out_end (uiout, ui_out_type_tuple);
   }
 
-  /* Look at all of the psymtabs */
-  ALL_PSYMTABS (objfile, ps)
-  {
-    if (!ps->readin)
-      {
-	ui_out_begin (uiout, ui_out_type_tuple, NULL);
-
-	ui_out_field_string (uiout, "file", ps->filename);
-
-	/* Extract the fullname if it is not known yet */
-	psymtab_to_fullname (ps);
-
-	if (ps->fullname)
-	  ui_out_field_string (uiout, "fullname", ps->fullname);
-
-	ui_out_end (uiout, ui_out_type_tuple);
-      }
-  }
+  map_partial_symbol_filenames (print_partial_file_name, NULL);
 
   ui_out_end (uiout, ui_out_type_list);
 }

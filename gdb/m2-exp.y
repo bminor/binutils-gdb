@@ -1022,7 +1022,7 @@ yylex ()
     char *tmp = copy_name (yylval.sval);
     struct symbol *sym;
 
-    if (lookup_partial_symtab (tmp))
+    if (lookup_symtab (tmp))
       return BLOCKNAME;
     sym = lookup_symbol (tmp, expression_context_block, VAR_DOMAIN, 0);
     if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)

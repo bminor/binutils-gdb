@@ -42,6 +42,8 @@
 #include "elf/internal.h"
 #include "elf/mips.h"
 
+#include "psymtab.h"
+
 static void
 read_alphacoff_dynamic_symtab (struct section_offsets *,
 			       struct objfile *objfile);
@@ -400,6 +402,7 @@ static struct sym_fns ecoff_sym_fns =
 				   a file.  */
   NULL,                         /* sym_read_linetable */
   default_symfile_relocate,	/* sym_relocate: Relocate a debug section.  */
+  &psym_functions,
   NULL				/* next: pointer to next struct sym_fns */
 };
 
