@@ -389,6 +389,7 @@ get_section_contents(bool first_iteration,
                                                      char*>(str_contents),
                                     entsize);
                     }
+		  buffer.append("@");
                 }
               else if ((*it_s) != NULL)
                 {

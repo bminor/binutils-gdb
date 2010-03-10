@@ -1,3 +1,8 @@
+2010-03-09  Sriraman Tallam  <tmsriram@google.com>
+
+	* icf.cc (get_section_contents): Add '@' marker after processing the
+	merge reloc.
+
 2010-03-08  Doug Kwan  <dougkwan@google.com>
 
 	* gold/arm.cc (Arm_exidx_fixup::update_offset_map): Fix build breakage
