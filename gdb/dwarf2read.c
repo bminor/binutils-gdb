@@ -3530,10 +3530,10 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
       strcpy (canonical_name, imported_name);
     }
 
-  using_directives = cp_add_using (import_prefix,
-                                   canonical_name,
-                                   import_alias,
-                                   using_directives);
+  cp_add_using_directive (import_prefix,
+                          canonical_name,
+                          import_alias,
+                          &cu->objfile->objfile_obstack);
 }
 
 static void
@@ -5651,7 +5651,8 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
       if (is_anonymous)
 	{
 	  const char *previous_prefix = determine_prefix (die, cu);
-	  cp_add_using_directive (previous_prefix, TYPE_NAME (type), NULL);
+	  cp_add_using_directive (previous_prefix, TYPE_NAME (type), NULL,
+	                          &objfile->objfile_obstack);
 	}
     }
 

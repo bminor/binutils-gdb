@@ -1,3 +1,15 @@
+2010-03-10  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	PR C++/11236:
+	* cp-namespace.c (cp_add_using): Deleted.
+	(cp_add_using_directive): Use obstack allocations.
+	Merged the function cp_add_using into this one.
+	Added 'struct obstack *' argument.
+	(cp_scan_for_anonymous_namespaces): Updated.
+	* cp-support.h: Updated.
+	* dwarf2read.c (read_import_statement): Updated.
+	(read_namespace): Updated.
+
 2010-03-10  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* windows-nat.c (cygwin_conv_path): Remove old macro.
