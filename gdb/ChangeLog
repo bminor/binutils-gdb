@@ -1,3 +1,16 @@
+2010-03-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* solib-svr4.c (read_program_header): Support type == -1 to read
+	all program headers.
+	(read_program_headers_from_bfd): New function.
+	(svr4_static_exec_displacement): Remove and move the comment ...
+	(svr4_exec_displacement): ... here.  Remove variable found.  New
+	variable displacement.  Check also DYNAMIC.  Verify DISPLACEMENT
+	alignment for ELF targets.  Compare target vs. exec_bfd PHDRs for ELF
+	targets using read_program_headers_from_bfd.  Remove the call of
+	svr4_static_exec_displacement.
+
 2010-03-10  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (struct pubnames_header): Remove.
