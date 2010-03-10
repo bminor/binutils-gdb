@@ -1,4 +1,12 @@
 2010-03-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* solib-svr4.c (svr4_exec_displacement): Return now success, new
+	parameter displacementp.  Update comment.
+	(svr4_relocate_main_executable): Return if non-zero SECTION_OFFSETS
+	element exists.  Return if svr4_exec_displacement was not successful.
+	Update comment.
+
+2010-03-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* solib-svr4.c (read_program_header): Support type == -1 to read
