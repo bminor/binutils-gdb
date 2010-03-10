@@ -774,11 +774,14 @@ class General_options
   DEFINE_special(just_symbols, options::TWO_DASHES, '\0',
                  N_("Read only symbol values from FILE"), N_("FILE"));
 
-  DEFINE_bool(keep_files_mapped, options::TWO_DASHES, '\0',
+  DEFINE_bool(map_whole_files, options::TWO_DASHES, '\0',
 	      sizeof(void*) >= 8,
               N_("Map whole files to memory (default on 64-bit hosts)"),
               N_("Map relevant file parts to memory (default on 32-bit "
                  "hosts)"));
+  DEFINE_bool(keep_files_mapped, options::TWO_DASHES, '\0', true,
+              N_("Keep files mapped across passes (default)"),
+              N_("Release mapped files after each pass"));
 
   DEFINE_special(library, options::TWO_DASHES, 'l',
                  N_("Search for library LIBNAME"), N_("LIBNAME"));

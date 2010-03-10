@@ -470,6 +470,8 @@ Add_symbols::run(Workqueue*)
 
   if (!this->input_objects_->add_object(this->object_))
     {
+      delete this->sd_;
+      this->sd_ = NULL;
       this->object_->release();
       delete this->object_;
     }
@@ -477,10 +479,10 @@ Add_symbols::run(Workqueue*)
     {
       this->object_->layout(this->symtab_, this->layout_, this->sd_);
       this->object_->add_symbols(this->symtab_, this->sd_, this->layout_);
+      delete this->sd_;
+      this->sd_ = NULL;
       this->object_->release();
     }
-  delete this->sd_;
-  this->sd_ = NULL;
 }
 
 // Class Start_group.

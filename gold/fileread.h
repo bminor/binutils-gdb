@@ -170,7 +170,7 @@ class File_read
   // interface, and it would be nice to have something more automatic.
   void
   clear_uncached_views()
-  { this->clear_views(false); }
+  { this->clear_views(CLEAR_VIEWS_ARCHIVE); }
 
   // A struct used to do a multiple read.
   struct Read_multiple_entry
@@ -214,6 +214,17 @@ class File_read
   get_mtime();
 
  private:
+  // Control for what views to clear.
+  enum Clear_views_mode
+  {
+    // Clear uncached views not used by an archive.
+    CLEAR_VIEWS_NORMAL,
+    // Clear all uncached views (including in an archive).
+    CLEAR_VIEWS_ARCHIVE,
+    // Clear all views (i.e., we're destroying the file).
+    CLEAR_VIEWS_ALL
+  };
+
   // This class may not be copied.
   File_read(const File_read&);
   File_read& operator=(const File_read&);
@@ -303,6 +314,12 @@ class File_read
     accessed() const
     { return this->accessed_; }
 
+    // Returns TRUE if this view contains permanent data -- e.g., data that
+    // was supplied by the owner of the File object.
+    bool
+    is_permanent_view() const
+    { return this->data_ownership_ == DATA_NOT_OWNED; }
+
    private:
     View(const View&);
     View& operator=(const View&);
@@ -366,7 +383,7 @@ class File_read
 
   // Clear the file views.
   void
-  clear_views(bool);
+  clear_views(Clear_views_mode);
 
   // The size of a file page for buffering data.
   static const off_t page_size = 8192;

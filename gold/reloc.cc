@@ -179,9 +179,9 @@ void
 Scan_relocs::run(Workqueue*)
 {
   this->object_->scan_relocs(this->symtab_, this->layout_, this->rd_);
-  this->object_->release();
   delete this->rd_;
   this->rd_ = NULL;
+  this->object_->release();
 }
 
 // Return a debugging name for the task.

@@ -1,3 +1,27 @@
+2010-03-10  Cary Coutant  <ccoutant@google.com>
+
+	* fileread.cc (File_read::~File_read): Don't delete whole_file_view_.
+	(File_read::open[1]): Remove initial mapping of whole_file_view_.
+	(File_read::open[2]): Add whole_file_view_ to list of views.
+	(File_read::make_view): Remove test of whole_file_view_.
+	(File_read::find_or_make_view): Create whole_file_view_ if
+	necessary.
+	(File_read::clear_views): Replace bool parameter with enum;
+	adjust all callers.  Don't delete views with permanent data;
+	do delete cached views and views from archives if
+	--no-keep-files-mapped is set.  Set whole_file_view_ to NULL
+	if clearing the corresponding view.
+	* fileread.h (File_read::Clear_views_mode): New enum.
+	(File_read::View::is_permanent_view): New method.
+	(File_read::clear_views): Replace bool parameter
+	with enum; adjust all callers.
+	* options.h (General_options): Change keep_files_mapped option;
+	add map_whole_files.
+	* readsyms.cc (Add_symbols::run): Delete sd_ object before
+	releasing the file.
+	* reloc.cc (Scan_relocs::run): Delete rd_ object before releasing
+	the file.
+
 2010-03-10  David S. Miller  <davem@davemloft.net>
 
 	* sparc.cc (Target_sparc::Scan::local): Accept R_SPARC_WPLT30.
