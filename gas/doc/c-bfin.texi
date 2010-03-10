@@ -66,6 +66,14 @@ recognized:
 and
 @code{bf561}.
 
+@cindex @code{-mfdpic} command line option, Blackfin
+@item -mfdpic
+Assemble for the FDPIC ABI.
+
+@cindex @code{-mno-fdpic} command line option, Blackfin
+@cindex @code{-mnopic} command line option, Blackfin
+@item -mno-fdpic/-mnopic
+Disable -mfdpic.
 @end table
 
 @node Blackfin Syntax

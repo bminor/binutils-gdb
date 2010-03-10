@@ -39,6 +39,9 @@
 @ifset ARM/Thumb
 @set ARM
 @end ifset
+@ifset Blackfin
+@set Blackfin
+@end ifset
 @ifset BOUT
 @set aout-bout
 @end ifset
@@ -272,6 +275,14 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mapcs-32}|@b{-mapcs-26}|@b{-mapcs-float}|
     @b{-mapcs-reentrant}]
    [@b{-mthumb-interwork}] [@b{-k}]
+@end ifset
+@ifset Blackfin
+
+@emph{Target Blackfin options:}
+   [@b{-mcpu}=@var{processor}[-@var{sirevision}]]
+   [@b{-mfdpic}]
+   [@b{-mno-fdpic}]
+   [@b{-mnopic}]
 @end ifset
 @ifset CRIS
 
@@ -712,6 +723,21 @@ Specify that the code has been generated with interworking between Thumb and
 ARM code in mind.
 @item -k
 Specify that PIC code has been generated.
+@end table
+@end ifset
+
+@ifset Blackfin
+The following options are available when @value{AS} is configured for
+the Blackfin processor family.
+
+@table @gcctabopt
+@item -mcpu=@var{processor}@r{[}-@var{sirevision}@r{]}
+This option specifies the target processor.  The optional @var{sirevision}
+is not used in assembler.
+@item -mfdpic
+Assemble for the FDPIC ABI.
+@item -mno-fdpic/-mnopic
+Disable -mfdpic.
 @end table
 @end ifset
 
