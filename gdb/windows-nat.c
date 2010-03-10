@@ -121,7 +121,6 @@ static struct target_ops windows_ops;
          (op == CCP_WIN_W_TO_POSIX) ? \
          cygwin_conv_to_full_posix_path (from, to) : \
          cygwin_conv_to_win32_path (from, to)
-#   define cygwin_conv_path(op, from, to, size) cygwin_conv_to_full_posix_path (from, to)
     typedef char cygwin_buf_t;
     static DWORD WINAPI (*GetModuleFileNameEx) (HANDLE, HMODULE, LPSTR, DWORD);
 #   define STARTUPINFO STARTUPINFOA
