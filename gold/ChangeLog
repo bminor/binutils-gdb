@@ -1,3 +1,7 @@
+2010-03-10  David S. Miller  <davem@davemloft.net>
+
+	* sparc.cc (Target_sparc::Scan::local): Accept R_SPARC_WPLT30.
+
 2010-03-09  Sriraman Tallam  <tmsriram@google.com>
 
 	* icf.cc (get_section_contents): Add '@' marker after processing the

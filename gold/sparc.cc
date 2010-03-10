@@ -1719,6 +1719,7 @@ Target_sparc<size, big_endian>::Scan::local(
       break;
 
     case elfcpp::R_SPARC_WDISP30:
+    case elfcpp::R_SPARC_WPLT30:
     case elfcpp::R_SPARC_WDISP22:
     case elfcpp::R_SPARC_WDISP19:
     case elfcpp::R_SPARC_WDISP16:
