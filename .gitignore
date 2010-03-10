@@ -73,3 +73,8 @@ stamp-*
 /gmp*
 /isl*
 /gettext*
+
+site.bak
+site.exp
+*.log
+*.sum
