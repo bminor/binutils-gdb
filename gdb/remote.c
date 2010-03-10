@@ -5006,6 +5006,10 @@ remote_target::start_remote_1 (int from_tty, int extended_p)
 	  return false;
 	}
 
+      /* Get text, data & bss offsets.  */
+      if (gdbarch_use_get_offsets (target_gdbarch))
+	get_offsets ();
+
       /* Report all signals during attach/startup.  */
       pass_signals ({});
 

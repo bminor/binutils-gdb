@@ -1427,6 +1427,11 @@ typedef int (gdbarch_has_shared_address_space_ftype) (struct gdbarch *gdbarch);
 extern int gdbarch_has_shared_address_space (struct gdbarch *gdbarch);
 extern void set_gdbarch_has_shared_address_space (struct gdbarch *gdbarch, gdbarch_has_shared_address_space_ftype *has_shared_address_space);
 
+/* Query the remote side for the text, data and bss offsets. */
+
+extern int gdbarch_use_get_offsets (struct gdbarch *gdbarch);
+extern void set_gdbarch_use_get_offsets (struct gdbarch *gdbarch, int use_get_offsets);
+
 /* True if a fast tracepoint can be set at an address. */
 
 typedef int (gdbarch_fast_tracepoint_valid_at_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr, std::string *msg);

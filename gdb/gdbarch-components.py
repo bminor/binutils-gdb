@@ -2319,6 +2319,16 @@ True if inferiors share an address space (e.g., uClinux).
     invalid=False,
 )
 
+Value(
+    comment="""
+Query the remote side for the text, data and bss offsets.
+""",
+    type="int",
+    name="use_get_offsets",
+    predefault="1",
+    invalid=False,
+)
+
 Method(
     comment="""
 True if a fast tracepoint can be set at an address.

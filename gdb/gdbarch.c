@@ -226,6 +226,7 @@ struct gdbarch
   int has_global_solist = 0;
   int has_global_breakpoints = 0;
   gdbarch_has_shared_address_space_ftype *has_shared_address_space = default_has_shared_address_space;
+  int use_get_offsets = 1;
   gdbarch_fast_tracepoint_valid_at_ftype *fast_tracepoint_valid_at = default_fast_tracepoint_valid_at;
   gdbarch_guess_tracepoint_registers_ftype *guess_tracepoint_registers = default_guess_tracepoint_registers;
   gdbarch_auto_charset_ftype *auto_charset = default_auto_charset;
@@ -485,6 +486,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of has_global_solist, invalid_p == 0 */
   /* Skip verify of has_global_breakpoints, invalid_p == 0 */
   /* Skip verify of has_shared_address_space, invalid_p == 0 */
+  /* Skip verify of use_get_offsets, invalid_p == 0 */
   /* Skip verify of fast_tracepoint_valid_at, invalid_p == 0 */
   /* Skip verify of guess_tracepoint_registers, invalid_p == 0 */
   /* Skip verify of auto_charset, invalid_p == 0 */
@@ -1256,6 +1258,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   gdb_printf (file,
                       "gdbarch_dump: has_shared_address_space = <%s>\n",
                       host_address_to_string (gdbarch->has_shared_address_space));
+  gdb_printf (file,
+                      "gdbarch_dump: use_get_offsets = %s\n",
+                      plongest (gdbarch->use_get_offsets));
   gdb_printf (file,
                       "gdbarch_dump: fast_tracepoint_valid_at = <%s>\n",
                       host_address_to_string (gdbarch->fast_tracepoint_valid_at));
@@ -4799,6 +4804,23 @@ set_gdbarch_has_shared_address_space (struct gdbarch *gdbarch,
                                       gdbarch_has_shared_address_space_ftype has_shared_address_space)
 {
   gdbarch->has_shared_address_space = has_shared_address_space;
+}
+
+int
+gdbarch_use_get_offsets (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of use_get_offsets, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    gdb_printf (gdb_stdlog, "gdbarch_use_get_offsets called\n");
+  return gdbarch->use_get_offsets;
+}
+
+void
+set_gdbarch_use_get_offsets (struct gdbarch *gdbarch,
+                             int use_get_offsets)
+{
+  gdbarch->use_get_offsets = use_get_offsets;
 }
 
 int
