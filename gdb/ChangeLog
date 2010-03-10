@@ -1,3 +1,21 @@
+2010-03-10  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (condition_command): Handle watchpoint conditions.
+	(is_hardware_watchpoint): Add comment.
+	(is_watchpoint): New.
+	(update_watchpoint): Don't reparse the watchpoint's condition
+	unless necessary.
+	(WP_IGNORE): New.
+	(watchpoint_check): Use it.
+	(bpstat_check_watchpoint): Handle it.
+	(bpstat_check_breakpoint_conditions): Evaluate watchpoint local
+	conditions in a frame where it makes sense.
+	(watch_command_1): Store the innermost block of the condition
+	expression.
+	(delete_breakpoint): Delete the watchpoint condition expression.
+	* breakpoint.h (struct bp_location) <cond>: Update comment.
+	(struct breakpoint): New field `cond_exp_valid_block'.
+
 2010-03-09  Joel Brobecker  <brobecker@adacore.com>
 
 	Adjust handling of Ada DIEs after dwarf2_physname patch.

@@ -210,6 +210,8 @@ static void update_global_location_list_nothrow (int);
 
 static int is_hardware_watchpoint (struct breakpoint *bpt);
 
+static int is_watchpoint (struct breakpoint *bpt);
+
 static void insert_breakpoint_locations (void);
 
 static int syscall_catchpoint_p (struct breakpoint *b);
@@ -640,18 +642,16 @@ condition_command (char *arg, int from_tty)
 	struct bp_location *loc = b->loc;
 	for (; loc; loc = loc->next)
 	  {
-	    if (loc->cond)
-	      {
-		xfree (loc->cond);
-		loc->cond = 0;
-	      }
+	    xfree (loc->cond);
+	    loc->cond = NULL;
 	  }
-	if (b->cond_string != NULL)
-	  xfree (b->cond_string);
+	xfree (b->cond_string);
+	b->cond_string = NULL;
+	xfree (b->cond_exp);
+	b->cond_exp = NULL;
 
 	if (*p == 0)
 	  {
-	    b->cond_string = NULL;
 	    if (from_tty)
 	      printf_filtered (_("Breakpoint %d now unconditional.\n"), bnum);
 	  }
@@ -662,13 +662,26 @@ condition_command (char *arg, int from_tty)
 	       typed in or the decompiled expression.  */
 	    b->cond_string = xstrdup (arg);
 	    b->condition_not_parsed = 0;
-	    for (loc = b->loc; loc; loc = loc->next)
+
+	    if (is_watchpoint (b))
 	      {
+		innermost_block = NULL;
 		arg = p;
-		loc->cond =
-		  parse_exp_1 (&arg, block_for_pc (loc->address), 0);
+		b->cond_exp = parse_exp_1 (&arg, 0, 0);
 		if (*arg)
 		  error (_("Junk at end of expression"));
+		b->cond_exp_valid_block = innermost_block;
+	      }
+	    else
+	      {
+		for (loc = b->loc; loc; loc = loc->next)
+		  {
+		    arg = p;
+		    loc->cond =
+		      parse_exp_1 (&arg, block_for_pc (loc->address), 0);
+		    if (*arg)
+		      error (_("Junk at end of expression"));
+		  }
 	      }
 	  }
 	breakpoints_changed ();
@@ -908,12 +921,24 @@ insert_catchpoint (struct ui_out *uo, void *args)
   b->ops->insert (b);
 }
 
+/* Return true if BPT is of any hardware watchpoint kind.  */
+
 static int
 is_hardware_watchpoint (struct breakpoint *bpt)
 {
   return (bpt->type == bp_hardware_watchpoint
 	  || bpt->type == bp_read_watchpoint
 	  || bpt->type == bp_access_watchpoint);
+}
+
+/* Return true if BPT is of any watchpoint kind, hardware or
+   software.  */
+
+static int
+is_watchpoint (struct breakpoint *bpt)
+{
+  return (is_hardware_watchpoint (bpt)
+	  || bpt->type == bp_watchpoint);
 }
 
 /* Find the current value of a watchpoint on EXP.  Return the value in
@@ -1123,6 +1148,21 @@ update_watchpoint (struct breakpoint *b, int reparse)
       value_free (b->val);
       b->val = NULL;
       b->val_valid = 0;
+
+      /* Note that unlike with breakpoints, the watchpoint's condition
+	 expression is stored in the breakpoint object, not in the
+	 locations (re)created below.  */
+      if (b->cond_string != NULL)
+	{
+	  if (b->cond_exp != NULL)
+	    {
+	      xfree (b->cond_exp);
+	      b->cond_exp = NULL;
+	    }
+
+	  s = b->cond_string;
+	  b->cond_exp = parse_exp_1 (&s, b->cond_exp_valid_block, 0);
+	}
     }
 
   /* If we failed to parse the expression, for example because
@@ -1249,16 +1289,6 @@ update_watchpoint (struct breakpoint *b, int reparse)
 	  b->loc->length = -1;
 	  b->loc->watchpoint_type = -1;
 	}
-
-      /* We just regenerated the list of breakpoint locations.
-         The new location does not have its condition field set to anything
-         and therefore, we must always reparse the cond_string, independently
-         of the value of the reparse flag.  */
-      if (b->cond_string != NULL)
-	{
-	  char *s = b->cond_string;
-	  b->loc->cond = parse_exp_1 (&s, b->exp_valid_block, 0);
-	}
     }
   else if (!within_current_scope)
     {
@@ -1267,7 +1297,11 @@ Watchpoint %d deleted because the program has left the block \n\
 in which its expression is valid.\n"),
 		       b->number);
       if (b->related_breakpoint)
-	b->related_breakpoint->disposition = disp_del_at_next_stop;
+	{
+	  b->related_breakpoint->disposition = disp_del_at_next_stop;
+	  b->related_breakpoint->related_breakpoint = NULL;
+	  b->related_breakpoint= NULL;
+	}
       b->disposition = disp_del_at_next_stop;
     }
 
@@ -3251,6 +3285,8 @@ watchpoints_triggered (struct target_waitstatus *ws)
 #define WP_VALUE_CHANGED 2
 /* The value has not changed.  */
 #define WP_VALUE_NOT_CHANGED 3
+/* Ignore this watchpoint, no matter if the value changed or not.  */
+#define WP_IGNORE 4
 
 #define BP_TEMPFLAG 1
 #define BP_HARDWAREFLAG 2
@@ -3274,7 +3310,7 @@ watchpoint_check (void *p)
      watchpoint frame is in scope if the current thread is the thread
      that was used to create the watchpoint.  */
   if (!watchpoint_in_thread_scope (b))
-    return WP_VALUE_NOT_CHANGED;
+    return WP_IGNORE;
 
   if (b->exp_valid_block == NULL)
     within_current_scope = 1;
@@ -3293,7 +3329,7 @@ watchpoint_check (void *p)
 	 even if they are in some other frame, our view of the stack
 	 is likely to be wrong and frame_find_by_id could error out.  */
       if (gdbarch_in_function_epilogue_p (frame_arch, frame_pc))
-	return WP_VALUE_NOT_CHANGED;
+	return WP_IGNORE;
 
       fr = frame_find_by_id (b->watchpoint_frame);
       within_current_scope = (fr != NULL);
@@ -3344,14 +3380,12 @@ watchpoint_check (void *p)
 	  bs->old_val = b->val;
 	  b->val = new_val;
 	  b->val_valid = 1;
-	  /* We will stop here */
 	  return WP_VALUE_CHANGED;
 	}
       else
 	{
-	  /* Nothing changed, don't do anything.  */
+	  /* Nothing changed.  */
 	  value_free_to_mark (mark);
-	  /* We won't stop here */
 	  return WP_VALUE_NOT_CHANGED;
 	}
     }
@@ -3378,7 +3412,11 @@ watchpoint_check (void *p)
 which its expression is valid.\n");     
 
       if (b->related_breakpoint)
-	b->related_breakpoint->disposition = disp_del_at_next_stop;
+	{
+	  b->related_breakpoint->disposition = disp_del_at_next_stop;
+	  b->related_breakpoint->related_breakpoint = NULL;
+	  b->related_breakpoint = NULL;
+	}
       b->disposition = disp_del_at_next_stop;
 
       return WP_DELETED;
@@ -3497,6 +3535,10 @@ bpstat_check_watchpoint (bpstat bs)
 	      /* We've already printed what needs to be printed.  */
 	      bs->print_it = print_it_done;
 	      /* Stop.  */
+	      break;
+	    case WP_IGNORE:
+	      bs->print_it = print_it_noop;
+	      bs->stop = 0;
 	      break;
 	    case WP_VALUE_CHANGED:
 	      if (b->type == bp_read_watchpoint)
@@ -3617,16 +3659,24 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
   else if (bs->stop)
     {
       int value_is_zero = 0;
-      
+      struct expression *cond;
+
       /* If this is a scope breakpoint, mark the associated
 	 watchpoint as triggered so that we will handle the
 	 out-of-scope event.  We'll get to the watchpoint next
 	 iteration.  */
       if (b->type == bp_watchpoint_scope)
 	b->related_breakpoint->watchpoint_triggered = watch_triggered_yes;
-      
-      if (bl->cond && bl->owner->disposition != disp_del_at_next_stop)
+
+      if (is_watchpoint (b))
+	cond = b->cond_exp;
+      else
+	cond = bl->cond;
+
+      if (cond && bl->owner->disposition != disp_del_at_next_stop)
 	{
+	  int within_current_scope = 1;
+
 	  /* We use value_mark and value_free_to_mark because it could
 	     be a long time before we return to the command level and
 	     call free_all_values.  We can't call free_all_values
@@ -3640,15 +3690,50 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
 	     variables when we arrive at a breakpoint at the start
 	     of the inlined function; the current frame will be the
 	     call site.  */
-	  select_frame (get_current_frame ());
-	  value_is_zero
-	    = catch_errors (breakpoint_cond_eval, (bl->cond),
-			    "Error in testing breakpoint condition:\n",
-			    RETURN_MASK_ALL);
+	  if (!is_watchpoint (b) || b->cond_exp_valid_block == NULL)
+	    select_frame (get_current_frame ());
+	  else
+	    {
+	      struct frame_info *frame;
+
+	      /* For local watchpoint expressions, which particular
+		 instance of a local is being watched matters, so we
+		 keep track of the frame to evaluate the expression
+		 in.  To evaluate the condition however, it doesn't
+		 really matter which instantiation of the function
+		 where the condition makes sense triggers the
+		 watchpoint.  This allows an expression like "watch
+		 global if q > 10" set in `func', catch writes to
+		 global on all threads that call `func', or catch
+		 writes on all recursive calls of `func' by a single
+		 thread.  We simply always evaluate the condition in
+		 the innermost frame that's executing where it makes
+		 sense to evaluate the condition.  It seems
+		 intuitive.  */
+	      frame = block_innermost_frame (b->cond_exp_valid_block);
+	      if (frame != NULL)
+		select_frame (frame);
+	      else
+		within_current_scope = 0;
+	    }
+	  if (within_current_scope)
+	    value_is_zero
+	      = catch_errors (breakpoint_cond_eval, cond,
+			      "Error in testing breakpoint condition:\n",
+			      RETURN_MASK_ALL);
+	  else
+	    {
+	      warning (_("Watchpoint condition cannot be tested "
+			 "in the current scope"));
+	      /* If we failed to set the right context for this
+		 watchpoint, unconditionally report it.  */
+	      value_is_zero = 0;
+	    }
 	  /* FIXME-someday, should give breakpoint # */
 	  value_free_to_mark (mark);
 	}
-      if (bl->cond && value_is_zero)
+
+      if (cond && value_is_zero)
 	{
 	  bs->stop = 0;
 	}
@@ -7306,7 +7391,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   struct gdbarch *gdbarch = get_current_arch ();
   struct breakpoint *b, *scope_breakpoint = NULL;
   struct expression *exp;
-  struct block *exp_valid_block;
+  struct block *exp_valid_block = NULL, *cond_exp_valid_block = NULL;
   struct value *val, *mark;
   struct frame_info *frame;
   char *exp_start = NULL;
@@ -7411,8 +7496,14 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
     {
       struct expression *cond;
 
+      innermost_block = NULL;
       tok = cond_start = end_tok + 1;
       cond = parse_exp_1 (&tok, 0, 0);
+
+      /* The watchpoint expression may not be local, but the condition
+	 may still be.  E.g.: `watch global if local > 0'.  */
+      cond_exp_valid_block = innermost_block;
+
       xfree (cond);
       cond_end = tok;
     }
@@ -7453,7 +7544,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
      breakpoint at the point where we've left the scope of the watchpoint
      expression.  Create the scope breakpoint before the watchpoint, so
      that we will encounter it first in bpstat_stop_status.  */
-  if (innermost_block && frame)
+  if (exp_valid_block && frame)
     {
       if (frame_id_p (frame_unwind_caller_id (frame)))
 	{
@@ -7490,6 +7581,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   b->disposition = disp_donttouch;
   b->exp = exp;
   b->exp_valid_block = exp_valid_block;
+  b->cond_exp_valid_block = cond_exp_valid_block;
   b->exp_string = savestring (exp_start, exp_end - exp_start);
   b->val = val;
   b->val_valid = 1;
@@ -8865,20 +8957,14 @@ delete_breakpoint (struct breakpoint *bpt)
     }
 
   free_command_lines (&bpt->commands);
-  if (bpt->cond_string != NULL)
-    xfree (bpt->cond_string);
-  if (bpt->addr_string != NULL)
-    xfree (bpt->addr_string);
-  if (bpt->exp != NULL)
-    xfree (bpt->exp);
-  if (bpt->exp_string != NULL)
-    xfree (bpt->exp_string);
-  if (bpt->val != NULL)
-    value_free (bpt->val);
-  if (bpt->source_file != NULL)
-    xfree (bpt->source_file);
-  if (bpt->exec_pathname != NULL)
-    xfree (bpt->exec_pathname);
+  xfree (bpt->cond_string);
+  xfree (bpt->cond_exp);
+  xfree (bpt->addr_string);
+  xfree (bpt->exp);
+  xfree (bpt->exp_string);
+  value_free (bpt->val);
+  xfree (bpt->source_file);
+  xfree (bpt->exec_pathname);
   clean_up_filters (&bpt->syscalls_to_be_caught);
 
   /* Be sure no bpstat's are pointing at it after it's been freed.  */

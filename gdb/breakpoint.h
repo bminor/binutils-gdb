@@ -240,11 +240,13 @@ struct bp_location
      than reference counting.  */
   struct breakpoint *owner;
 
-  /* Conditional.  Break only if this expression's value is nonzero.  
-     Unlike string form of condition, which is associated with breakpoint,
-     this is associated with location, since if breakpoint has several
-     locations,  the evaluation of expression can be different for
-     different locations.  */
+  /* Conditional.  Break only if this expression's value is nonzero.
+     Unlike string form of condition, which is associated with
+     breakpoint, this is associated with location, since if breakpoint
+     has several locations, the evaluation of expression can be
+     different for different locations.  Only valid for real
+     breakpoints; a watchpoint's conditional expression is stored in
+     the owner breakpoint object.  */
   struct expression *cond;
 
   /* This location's address is in an unloaded solib, and so this
@@ -439,6 +441,11 @@ struct breakpoint
     /* The largest block within which it is valid, or NULL if it is
        valid anywhere (e.g. consists just of global symbols).  */
     struct block *exp_valid_block;
+    /* The conditional expression if any.  NULL if not a watchpoint.  */
+    struct expression *cond_exp;
+    /* The largest block within which it is valid, or NULL if it is
+       valid anywhere (e.g. consists just of global symbols).  */
+    struct block *cond_exp_valid_block;
     /* Value of the watchpoint the last time we checked it, or NULL
        when we do not know the value yet or the value was not
        readable.  VAL is never lazy.  */
