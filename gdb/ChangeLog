@@ -1,3 +1,7 @@
+2010-03-10  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* p-lang.c (is_pascal_string_type): Check that TYPE arg is non NULL.
+
 2010-03-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* remote.c (remote_get_ada_task_ptid): New function.
