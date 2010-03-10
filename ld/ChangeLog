@@ -1,3 +1,8 @@
+2010-03-11  George Gensure  <werkt0@gmail.com>
+
+	PR ld/11367
+	* ldcref.c (handle_asneeded_cref): Correct copying of refs.
+
 2010-03-05  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* Makefile.am (ALL_EMULATIONS): Add eelf32_sparc_sol2.o,

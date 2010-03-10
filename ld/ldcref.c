@@ -226,7 +226,7 @@ handle_asneeded_cref (bfd *abfd ATTRIBUTE_UNUSED,
 	      entsize += cref_table.root.entsize;
 	      c = (struct cref_hash_entry *) p;
 	      for (r = c->refs; r != NULL; r = r->next)
-		refsize += sizeof (struct cref_hash_entry);
+		refsize += sizeof (struct cref_ref);
 	    }
 	}
 
@@ -258,8 +258,8 @@ handle_asneeded_cref (bfd *abfd ATTRIBUTE_UNUSED,
 	      c = (struct cref_hash_entry *) p;
 	      for (r = c->refs; r != NULL; r = r->next)
 		{
-		  memcpy (old_ref, r, sizeof (struct cref_hash_entry));
-		  old_ref = (char *) old_ref + sizeof (struct cref_hash_entry);
+		  memcpy (old_ref, r, sizeof (struct cref_ref));
+		  old_ref = (char *) old_ref + sizeof (struct cref_ref);
 		}
 	    }
 	}
@@ -300,8 +300,8 @@ handle_asneeded_cref (bfd *abfd ATTRIBUTE_UNUSED,
 	      c = (struct cref_hash_entry *) p;
 	      for (r = c->refs; r != NULL; r = r->next)
 		{
-		  memcpy (r, old_ref, sizeof (struct cref_hash_entry));
-		  old_ref = (char *) old_ref + sizeof (struct cref_hash_entry);
+		  memcpy (r, old_ref, sizeof (struct cref_ref));
+		  old_ref = (char *) old_ref + sizeof (struct cref_ref);
 		}
 	    }
 	}
