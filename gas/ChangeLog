@@ -1,5 +1,10 @@
 2010-03-10  Mike Frysinger  <michael.frysinger@analog.com>
 
+	* bfin-defs.h, bfin-lex.l, bfin-parse.y, tc-bfin.c, tc-bfin.h:
+	Strip trailing whitespace.
+
+2010-03-10  Mike Frysinger  <michael.frysinger@analog.com>
+
 	* doc/c-bfin.texi (-mcpu): Add bf504 and bf506.
 	* config/tc-bfin.c (bfin_cpu_type): Add BFIN_CPU_BF504 and
 	BFIN_CPU_BF506.

@@ -85,7 +85,7 @@ bfin_pic_ptr (int nbytes)
   do
     {
       bfd_reloc_code_real_type reloc_type = BFD_RELOC_BFIN_FUNCDESC;
-      
+
       if (strncasecmp (input_line_pointer, "funcdesc(", 9) == 0)
 	{
 	  input_line_pointer += 9;
@@ -447,7 +447,7 @@ md_begin ()
   /* Ensure that lines can begin with '(', for multiple
      register stack pops. */
   lex_type ['('] = LEX_BEGIN_NAME;
-  
+
 #ifdef OBJ_ELF
   record_alignment (text_section, 2);
   record_alignment (data_section, 2);
@@ -460,7 +460,7 @@ md_begin ()
 #ifdef DEBUG
   extern int debug_codeselection;
   debug_codeselection = 1;
-#endif 
+#endif
 
   last_insn_size = 0;
 }
@@ -850,11 +850,11 @@ md_pcrel_from_section (fixP, sec)
 /* Return true if the fix can be handled by GAS, false if it must
    be passed through to the linker.  */
 
-bfd_boolean  
+bfd_boolean
 bfin_fix_adjustable (fixS *fixP)
-{         
+{
   switch (fixP->fx_r_type)
-    {     
+    {
   /* Adjust_reloc_syms doesn't know about the GOT.  */
     case BFD_RELOC_BFIN_GOT:
     case BFD_RELOC_BFIN_PLTPC:
@@ -862,10 +862,10 @@ bfin_fix_adjustable (fixS *fixP)
     case BFD_RELOC_VTABLE_INHERIT:
     case BFD_RELOC_VTABLE_ENTRY:
       return 0;
-        
+
     default:
       return 1;
-    }     
+    }
 }
 
 /* Special extra functions that help bfin-parse.y perform its job.  */
@@ -1946,7 +1946,7 @@ bfin_start_label (char *s, char *ptr)
     }
 
   return TRUE;
-} 
+}
 
 int
 bfin_force_relocation (struct fix *fixp)
@@ -2439,7 +2439,7 @@ decode_dsp32alu_0 (int iw0, int iw1)
 
   else if (aop == 0 && aopcde == 24)
     return DREG_MASK (dst0);
-  else if (aop == 1 && aopcde == 24) 
+  else if (aop == 1 && aopcde == 24)
     return DREG_MASK (dst0) | DREG_MASK (dst1);
   else if (aopcde == 13)
     return DREG_MASK (dst0) | DREG_MASK (dst1);

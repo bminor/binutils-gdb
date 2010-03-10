@@ -296,10 +296,10 @@ abort                                   return ABORT;
     yylval.value = parse_int (&yytext);
     return NUMBER;
   }
-[A-Za-z_$.][A-Za-z0-9_$.]* { 
+[A-Za-z_$.][A-Za-z0-9_$.]* {
     yylval.symbol = symbol_find_or_make (yytext);
     symbol_mark_used (yylval.symbol);
-    return SYMBOL; 
+    return SYMBOL;
   }
 [0-9][bfBF] {
     char *name;
@@ -312,8 +312,8 @@ abort                                   return ABORT;
 	if ((yylval.symbol != NULL)
              && (S_IS_DEFINED (yylval.symbol)))
           return SYMBOL;
-	as_bad ("backward reference to unknown label %d:", 
-						  (int) (ref[0] - '0')); 
+	as_bad ("backward reference to unknown label %d:",
+						  (int) (ref[0] - '0'));
       }
     else if (ref[1] == 'f' || ref[1] == 'F')
       {
@@ -328,8 +328,8 @@ abort                                   return ABORT;
 	yylval.symbol = symbol_find_or_make (name);
 	/* We have no need to check symbol properties.  */
 	return SYMBOL;
-      }                                  
-  }                                  
+      }
+  }
 [ \t\n]                                    ;
 "/*".*"*/"                                 ;
 .                                          return yytext[0];
@@ -416,7 +416,7 @@ static long parse_int (char **end)
         break;
 
 /* The assembler allows for fractional constants to be created
-   by either the 0.xxxx or the f#xxxx format 
+   by either the 0.xxxx or the f#xxxx format
 
    i.e.   0.5 would result in 0x4000
 
@@ -538,7 +538,7 @@ static int parse_halfreg (Register *r, int cl, char *rt)
 /* Our start state is KEYWORD as we have
    command keywords such as PREFETCH.  */
 
-void 
+void
 set_start_state (void)
 {
   BEGIN KEYWORD;
@@ -548,7 +548,7 @@ set_start_state (void)
 #ifndef yywrap
 int
 yywrap ()
-{ 
+{
   return 1;
 }
 #endif
