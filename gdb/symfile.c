@@ -395,7 +395,8 @@ place_section (bfd *abfd, asection *sect, section_offsets &offsets,
     }
   while (!done);
 
-  offsets[gdb_bfd_section_index (abfd, sect)] = start_addr;
+  offsets[gdb_bfd_section_index (abfd, sect)] =
+    start_addr - bfd_section_vma (sect);
   lowest = start_addr + bfd_section_size (sect);
 }
 
