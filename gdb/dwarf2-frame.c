@@ -1584,6 +1584,13 @@ dwarf2_frame_find_fde (CORE_ADDR *pc)
 
       fde_table = objfile_data (objfile, dwarf2_frame_objfile_data);
       if (fde_table == NULL)
+	{
+	  dwarf2_build_frame_info (objfile);
+	  fde_table = objfile_data (objfile, dwarf2_frame_objfile_data);
+	}
+      gdb_assert (fde_table != NULL);
+
+      if (fde_table->num_entries == 0)
 	continue;
 
       gdb_assert (objfile->section_offsets);
@@ -2027,6 +2034,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
   gdb_byte *frame_ptr;
   struct dwarf2_cie_table cie_table;
   struct dwarf2_fde_table fde_table;
+  struct dwarf2_fde_table *fde_table2;
 
   cie_table.num_entries = 0;
   cie_table.entries = NULL;
@@ -2098,9 +2106,17 @@ dwarf2_build_frame_info (struct objfile *objfile)
       cie_table.num_entries = 0;  /* Paranoia.  */
     }
 
-  if (fde_table.num_entries != 0)
+  /* Copy fde_table to obstack: it is needed at runtime.  */
+  fde_table2 = (struct dwarf2_fde_table *)
+    obstack_alloc (&objfile->objfile_obstack, sizeof (*fde_table2));
+
+  if (fde_table.num_entries == 0)
     {
-      struct dwarf2_fde_table *fde_table2;
+      fde_table2->entries = NULL;
+      fde_table2->num_entries = 0;
+    }
+  else
+    {
       struct dwarf2_fde *fde_prev = NULL;
       struct dwarf2_fde *first_non_zero_fde = NULL;
       int i;
@@ -2108,11 +2124,6 @@ dwarf2_build_frame_info (struct objfile *objfile)
       /* Prepare FDE table for lookups.  */
       qsort (fde_table.entries, fde_table.num_entries,
              sizeof (fde_table.entries[0]), qsort_fde_cmp);
-
-      /* Copy fde_table to obstack: it is needed at runtime.  */
-      fde_table2 = (struct dwarf2_fde_table *)
-          obstack_alloc (&objfile->objfile_obstack, sizeof (*fde_table2));
-      fde_table2->num_entries = 0;
 
       /* Check for leftovers from --gc-sections.  The GNU linker sets
 	 the relevant symbols to zero, but doesn't zero the FDE *end*
@@ -2140,6 +2151,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
       /* Since we'll be doing bsearch, squeeze out identical (except
 	 for eh_frame_p) fde entries so bsearch result is predictable.
 	 Also discard leftovers from --gc-sections.  */
+      fde_table2->num_entries = 0;
       for (i = 0; i < fde_table.num_entries; i++)
 	{
 	  struct dwarf2_fde *fde = fde_table.entries[i];
@@ -2160,11 +2172,12 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	  fde_prev = fde;
 	}
       fde_table2->entries = obstack_finish (&objfile->objfile_obstack);
-      set_objfile_data (objfile, dwarf2_frame_objfile_data, fde_table2);
 
       /* Discard the original fde_table.  */
       xfree (fde_table.entries);
     }
+
+  set_objfile_data (objfile, dwarf2_frame_objfile_data, fde_table2);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

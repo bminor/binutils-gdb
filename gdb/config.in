@@ -294,6 +294,9 @@
 /* Define to 1 if you have the <poll.h> header file. */
 #undef HAVE_POLL_H
 
+/* Define to 1 if you have the `posix_madvise' function. */
+#undef HAVE_POSIX_MADVISE
+
 /* Define to 1 if you have the `pread64' function. */
 #undef HAVE_PREAD64
 

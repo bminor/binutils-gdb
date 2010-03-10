@@ -1,5 +1,38 @@
 2010-03-10  Tom Tromey  <tromey@redhat.com>
 
+	* elfread.c (elf_symfile_read): Don't call
+	dwarf2_build_frame_info.
+	* dwarf2read.c (struct dwarf2_section_info) <readin>: New field.
+	(struct dwarf2_per_objfile) <objfile>: New field.
+	(dwarf2_has_info): Now idempotent.  Set objfile field.
+	(dwarf2_read_section): Check and set readin field.  Call
+	posix_madvise.
+	(dwarf2_build_psymtabs): Don't read all sections.
+	(read_type_comp_unit_head): Read types section.
+	(create_debug_types_hash_table): Likewise.
+	(init_cu_die_reader): Add asserts.
+	(process_type_comp_unit): Add assert.
+	(dwarf2_build_psymtabs_hard): Read info section.
+	(load_partial_comp_unit): Add assert.
+	(create_all_comp_units): Read info section.
+	(load_full_comp_unit): Likewise.
+	(dwarf2_ranges_read): Read ranges section.
+	(dwarf2_record_block_ranges): Add assert.
+	(dwarf2_read_abbrevs): Read abbrev section.
+	(read_indirect_string): Read str section.
+	(dwarf_decode_line_header): Read line section.
+	(read_signatured_type_at_offset): Read types section.
+	(dwarf_decode_macros): Read macinfo section.
+	(dwarf2_symbol_mark_computed): Read loc section.
+	* dwarf2-frame.c (dwarf2_frame_find_fde): Call
+	dwarf2_build_frame_info.
+	(dwarf2_build_frame_info): Unconditionally set
+	dwarf2_frame_objfile_data on the objfile.
+	* configure.ac: Check for posix_madvise.
+	* config.in, configure: Rebuild.
+
+2010-03-10  Tom Tromey  <tromey@redhat.com>
+
 	* xcoffread.c (xcoff_start_psymtab): Update.
 	(xcoff_end_psymtab): Update.
 	* psymtab.c (allocate_psymtab): Remove dead code.
@@ -12,7 +45,7 @@
 	* dbxread.c (start_psymtab): Update.
 	(end_psymtab): Likewise.
 
-2010-30-10  Tom Tromey  <tromey@redhat.com>
+2010-03-10  Tom Tromey  <tromey@redhat.com>
 
 	* xcoffread.c: Include psymtab.h.
 	(xcoff_sym_fns): Update.

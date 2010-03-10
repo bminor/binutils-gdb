@@ -802,7 +802,7 @@ AC_CHECK_FUNCS([canonicalize_file_name realpath getrusage getuid \
 		getgid pipe poll pread64 sbrk setpgid setpgrp setsid \
 		sigaction sigprocmask sigsetmask socketpair syscall \
 		ttrace wborder setlocale iconvlist libiconvlist btowc \
-		setrlimit getrlimit])
+		setrlimit getrlimit posix_madvise])
 AM_LANGINFO_CODESET
 
 # Check the return and argument types of ptrace.  No canned test for

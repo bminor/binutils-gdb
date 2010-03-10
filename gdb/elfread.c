@@ -886,10 +886,6 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
       dwarf2_build_psymtabs (objfile);
     }
 
-  /* FIXME: kettenis/20030504: This still needs to be integrated with
-     dwarf2read.c in a better way.  */
-  dwarf2_build_frame_info (objfile);
-
   /* If the file has its own symbol tables it has no separate debug info.
      `.dynsym'/`.symtab' go to MSYMBOLS, `.debug_info' goes to SYMTABS/PSYMTABS.
      `.gnu_debuglink' may no longer be present with `.note.gnu.build-id'.  */
