@@ -1,5 +1,19 @@
 2010-03-10  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (struct pubnames_header): Remove.
+	(_PUBNAMES_HEADER): Remove.
+	(_ACTUAL_PUBNAMES_HEADER_SIZE): Remove.
+	(struct aranges_header): Remove.
+	(_ARANGES_HEADER, _ACTUAL_ARANGES_HEADER_SIZE): Remove.
+	(struct dwarf2_per_objfile) <pubnames, aranges>: Remove.
+	(PUBNAMES_SECTION): Remove.
+	(ARANGES_SECTION): Remove.
+	(dwarf2_locate_sections): Don't handle pubnames or aranges.
+	(dwarf2_build_psymtabs): Remove dead code.
+	(dwarf2_build_psymtabs_easy): Remove.
+
+2010-03-10  Tom Tromey  <tromey@redhat.com>
+
 	* elfread.c (elf_symfile_read): Don't call
 	dwarf2_build_frame_info.
 	* dwarf2read.c (struct dwarf2_section_info) <readin>: New field.

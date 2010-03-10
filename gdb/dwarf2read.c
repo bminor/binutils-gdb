@@ -83,38 +83,6 @@ _COMP_UNIT_HEADER;
 #define _ACTUAL_COMP_UNIT_HEADER_SIZE 11
 #endif
 
-/* .debug_pubnames header
-   Because of alignment constraints, this structure has padding and cannot
-   be mapped directly onto the beginning of the .debug_info section.  */
-typedef struct pubnames_header
-  {
-    unsigned int length;	/* length of the .debug_pubnames
-				   contribution  */
-    unsigned char version;	/* version number -- 2 for DWARF
-				   version 2 */
-    unsigned int info_offset;	/* offset into .debug_info section */
-    unsigned int info_size;	/* byte size of .debug_info section
-				   portion */
-  }
-_PUBNAMES_HEADER;
-#define _ACTUAL_PUBNAMES_HEADER_SIZE 13
-
-/* .debug_pubnames header
-   Because of alignment constraints, this structure has padding and cannot
-   be mapped directly onto the beginning of the .debug_info section.  */
-typedef struct aranges_header
-  {
-    unsigned int length;	/* byte len of the .debug_aranges
-				   contribution */
-    unsigned short version;	/* version number -- 2 for DWARF
-				   version 2 */
-    unsigned int info_offset;	/* offset into .debug_info section */
-    unsigned char addr_size;	/* byte size of an address */
-    unsigned char seg_size;	/* byte size of segment descriptor */
-  }
-_ARANGES_HEADER;
-#define _ACTUAL_ARANGES_HEADER_SIZE 12
-
 /* .debug_line statement program prologue
    Because of alignment constraints, this structure has padding and cannot
    be mapped directly onto the beginning of the .debug_info section.  */
@@ -166,8 +134,6 @@ struct dwarf2_per_objfile
   struct dwarf2_section_info info;
   struct dwarf2_section_info abbrev;
   struct dwarf2_section_info line;
-  struct dwarf2_section_info pubnames;
-  struct dwarf2_section_info aranges;
   struct dwarf2_section_info loc;
   struct dwarf2_section_info macinfo;
   struct dwarf2_section_info str;
@@ -209,8 +175,6 @@ static struct dwarf2_per_objfile *dwarf2_per_objfile;
 #define INFO_SECTION     "debug_info"
 #define ABBREV_SECTION   "debug_abbrev"
 #define LINE_SECTION     "debug_line"
-#define PUBNAMES_SECTION "debug_pubnames"
-#define ARANGES_SECTION  "debug_aranges"
 #define LOC_SECTION      "debug_loc"
 #define MACINFO_SECTION  "debug_macinfo"
 #define STR_SECTION      "debug_str"
@@ -775,10 +739,6 @@ dwarf2_invalid_attrib_class_complaint (const char *arg1, const char *arg2)
 
 static void dwarf2_locate_sections (bfd *, asection *, void *);
 
-#if 0
-static void dwarf2_build_psymtabs_easy (struct objfile *);
-#endif
-
 static void dwarf2_create_include_psymtab (char *, struct partial_symtab *,
                                            struct objfile *);
 
@@ -1220,16 +1180,6 @@ dwarf2_locate_sections (bfd *abfd, asection *sectp, void *ignore_ptr)
       dwarf2_per_objfile->line.asection = sectp;
       dwarf2_per_objfile->line.size = bfd_get_section_size (sectp);
     }
-  else if (section_is_p (sectp->name, PUBNAMES_SECTION))
-    {
-      dwarf2_per_objfile->pubnames.asection = sectp;
-      dwarf2_per_objfile->pubnames.size = bfd_get_section_size (sectp);
-    }
-  else if (section_is_p (sectp->name, ARANGES_SECTION))
-    {
-      dwarf2_per_objfile->aranges.asection = sectp;
-      dwarf2_per_objfile->aranges.size = bfd_get_section_size (sectp);
-    }
   else if (section_is_p (sectp->name, LOC_SECTION))
     {
       dwarf2_per_objfile->loc.asection = sectp;
@@ -1473,57 +1423,8 @@ dwarf2_build_psymtabs (struct objfile *objfile)
       init_psymbol_list (objfile, 1024);
     }
 
-#if 0
-  if (dwarf_aranges_offset && dwarf_pubnames_offset)
-    {
-      /* Things are significantly easier if we have .debug_aranges and
-         .debug_pubnames sections */
-
-      dwarf2_build_psymtabs_easy (objfile);
-    }
-  else
-#endif
-    /* only test this case for now */
-    {
-      /* In this case we have to work a bit harder */
-      dwarf2_build_psymtabs_hard (objfile);
-    }
+  dwarf2_build_psymtabs_hard (objfile);
 }
-
-#if 0
-/* Build the partial symbol table from the information in the
-   .debug_pubnames and .debug_aranges sections.  */
-
-static void
-dwarf2_build_psymtabs_easy (struct objfile *objfile)
-{
-  bfd *abfd = objfile->obfd;
-  char *aranges_buffer, *pubnames_buffer;
-  char *aranges_ptr, *pubnames_ptr;
-  unsigned int entry_length, version, info_offset, info_size;
-
-  pubnames_buffer = dwarf2_read_section (objfile,
-					 dwarf_pubnames_section);
-  pubnames_ptr = pubnames_buffer;
-  while ((pubnames_ptr - pubnames_buffer) < dwarf2_per_objfile->pubnames.size)
-    {
-      unsigned int bytes_read;
-
-      entry_length = read_initial_length (abfd, pubnames_ptr, &bytes_read);
-      pubnames_ptr += bytes_read;
-      version = read_1_byte (abfd, pubnames_ptr);
-      pubnames_ptr += 1;
-      info_offset = read_4_bytes (abfd, pubnames_ptr);
-      pubnames_ptr += 4;
-      info_size = read_4_bytes (abfd, pubnames_ptr);
-      pubnames_ptr += 4;
-    }
-
-  aranges_buffer = dwarf2_read_section (objfile,
-					dwarf_aranges_section);
-
-}
-#endif
 
 /* Return TRUE if OFFSET is within CU_HEADER.  */
 
