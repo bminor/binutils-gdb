@@ -43,8 +43,18 @@ switch -glob -- [istarget] {
     "aarch64*-*-*" {
 	set asm-arch aarch64
     }
-    "bfin-*-*" {
+    "bfin-*-elf" {
         set asm-arch bfin
+	set debug-flags "-g"
+    }
+    "bfin-*-uclinux" {
+        set asm-arch bfin
+	set debug-flags "-g"
+	if ![target_info exists use_binfmt_flat] {
+	    verbose "Skipping asm-source.exp for bfin-uclinux fdpic."
+	    continue;
+	}
+	append link-flags " -elf2flt"
     }
     "frv-*-*" {
 	set asm-arch frv
