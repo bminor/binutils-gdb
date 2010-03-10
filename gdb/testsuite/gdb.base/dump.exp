@@ -19,6 +19,15 @@
 
 standard_testfile
 
+# Blackfin does not have MMU. The load address might change between
+# different invocations of application. So it is not guaranteed that
+# dump file from one invocation can be restored in another invocation.
+if { [istarget "bfin-*-uclinux"] || [istarget "bfin-*-linux-uclibc"] } then {
+    return 0
+}
+
+set testfile "dump"
+
 set options  {debug}
 
 set is64bitonly "no"
