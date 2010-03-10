@@ -210,7 +210,8 @@ avr-*-*)
 
 bfin-*-*linux*)
 	# Target: Blackfin Linux
-	gdb_target_obs="bfin-tdep.o bfin-linux-tdep.o linux-tdep.o"
+	gdb_target_obs="bfin-tdep.o bfin-linux-tdep.o linux-tdep.o
+			solib.o solib-bfin.o"
 	;;
 bfin-*-*)
 	# Target: Blackfin processor

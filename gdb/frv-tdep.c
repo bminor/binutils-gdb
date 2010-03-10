@@ -36,6 +36,7 @@
 #include "osabi.h"
 #include "infcall.h"
 #include "solib.h"
+#include "solib-fdpic.h"
 #include "frv-tdep.h"
 #include "objfiles.h"
 #include "gdbarch.h"
@@ -95,37 +96,6 @@ frv_abi (struct gdbarch *gdbarch)
 {
   frv_gdbarch_tdep *tdep = gdbarch_tdep<frv_gdbarch_tdep> (gdbarch);
   return tdep->frv_abi;
-}
-
-/* Fetch the interpreter and executable loadmap addresses (for shared
-   library support) for the FDPIC ABI.  Return 0 if successful, -1 if
-   not.  (E.g, -1 will be returned if the ABI isn't the FDPIC ABI.)  */
-int
-frv_fdpic_loadmap_addresses (struct gdbarch *gdbarch, CORE_ADDR *interp_addr,
-			     CORE_ADDR *exec_addr)
-{
-  if (frv_abi (gdbarch) != FRV_ABI_FDPIC)
-    return -1;
-  else
-    {
-      struct regcache *regcache = get_current_regcache ();
-
-      if (interp_addr != NULL)
-	{
-	  ULONGEST val;
-	  regcache_cooked_read_unsigned (regcache,
-					 fdpic_loadmap_interp_regnum, &val);
-	  *interp_addr = val;
-	}
-      if (exec_addr != NULL)
-	{
-	  ULONGEST val;
-	  regcache_cooked_read_unsigned (regcache,
-					 fdpic_loadmap_exec_regnum, &val);
-	  *exec_addr = val;
-	}
-      return 0;
-    }
 }
 
 /* Allocate a new variant structure, and set up default values for all
@@ -1146,7 +1116,7 @@ find_func_descr (struct gdbarch *gdbarch, CORE_ADDR entry_point)
       || entry_point != start_addr)
     return entry_point;
 
-  descr = frv_fdpic_find_canonical_descriptor (entry_point);
+  descr = fdpic_find_canonical_descriptor (entry_point);
 
   if (descr != 0)
     return descr;
@@ -1158,7 +1128,7 @@ find_func_descr (struct gdbarch *gdbarch, CORE_ADDR entry_point)
   store_unsigned_integer (valbuf, 4, byte_order, entry_point);
   write_memory (descr, valbuf, 4);
   store_unsigned_integer (valbuf, 4, byte_order,
-			  frv_fdpic_find_global_pointer (entry_point));
+			  fdpic_find_global_pointer (entry_point));
   write_memory (descr + 4, valbuf, 4);
   return descr;
 }
@@ -1174,7 +1144,7 @@ frv_convert_from_func_ptr_addr (struct gdbarch *gdbarch, CORE_ADDR addr,
   entry_point = get_target_memory_unsigned (targ, addr, 4, byte_order);
   got_address = get_target_memory_unsigned (targ, addr + 4, 4, byte_order);
 
-  if (got_address == frv_fdpic_find_global_pointer (entry_point))
+  if (got_address == fdpic_find_global_pointer (entry_point))
     return entry_point;
   else
     return addr;
@@ -1299,7 +1269,7 @@ frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       /* Set the GOT register for the FDPIC ABI.  */
       regcache_cooked_write_unsigned
 	(regcache, first_gpr_regnum + 15,
-	 frv_fdpic_find_global_pointer (func_addr));
+	 fdpic_find_global_pointer (func_addr));
     }
 
   /* Finally, update the SP register.  */
@@ -1548,7 +1518,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_convert_from_func_ptr_addr (gdbarch,
 					    frv_convert_from_func_ptr_addr);
 
-  set_gdbarch_so_ops (gdbarch, &frv_so_ops);
+  set_gdbarch_so_ops (gdbarch, &fdpic_so_ops);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
@@ -1558,7 +1528,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
-					     frv_fetch_objfile_link_map);
+					     fdpic_fetch_objfile_link_map);
 
   return gdbarch;
 }

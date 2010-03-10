@@ -1,5 +1,6 @@
-/* Handle FR-V (FDPIC) shared libraries for GDB, the GNU Debugger.
-   Copyright (C) 2004-2022 Free Software Foundation, Inc.
+/* Handle Blackfin (FDPIC) shared libraries for GDB, the GNU Debugger.
+   Copyright (C) 2004, 2006, 2007, 2008, 2009, 2010
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -17,13 +18,14 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "solib-fdpic.h"
-#include "frv-tdep.h"
-#include "elf/frv.h"
+#include "bfin-tdep.h"
+#include "elf/bfin.h"
 
-#define arch_abi frv_abi
-#define ARCH_ABI_FDPIC FRV_ABI_FDPIC
-#define R_ARCH_FUNCDESC R_FRV_FUNCDESC
-#define FDPIC_INTERP_REGNUM fdpic_loadmap_interp_regnum
-#define FDPIC_EXEC_REGNUM fdpic_loadmap_exec_regnum
+#define arch_abi bfin_abi
+#define ARCH_ABI_FDPIC BFIN_ABI_FDPIC
+#define R_ARCH_FUNCDESC R_BFIN_FUNCDESC
+#define FDPIC_INTERP_REGNUM BFIN_FDPIC_INTERP_REGNUM
+#define FDPIC_EXEC_REGNUM BFIN_FDPIC_EXEC_REGNUM
+#define LINKER_SYM(sym) "_"sym
 
 #include "solib-fdpic.c"

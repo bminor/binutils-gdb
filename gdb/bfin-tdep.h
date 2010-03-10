@@ -92,7 +92,8 @@ enum gdb_regnum {
 /* The ABIs for Blackfin.  */
 enum bfin_abi
 {
-  BFIN_ABI_FLAT
+  BFIN_ABI_FLAT,
+  BFIN_ABI_FDPIC
 };
 
 /* Target-dependent structure in gdbarch.  */

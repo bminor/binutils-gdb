@@ -95,30 +95,9 @@ enum {
   frv_num_pseudo_regs = last_pseudo_regnum - first_pseudo_regnum + 1,
 };
 
+struct gdbarch;
+
 /* Return the FR-V ABI associated with GDBARCH.  */
 enum frv_abi frv_abi (struct gdbarch *gdbarch);
-
-/* Fetch the interpreter and executable loadmap addresses (for shared
-   library support) for the FDPIC ABI.  Return 0 if successful, -1 if
-   not.  (E.g, -1 will be returned if the ABI isn't the FDPIC ABI.)  */
-int frv_fdpic_loadmap_addresses (struct gdbarch *gdbarch,
-				 CORE_ADDR *interp_addr, CORE_ADDR *exec_addr);
-
-/* Given a function entry point, find and return the GOT address for the
-   containing load module.  */
-CORE_ADDR frv_fdpic_find_global_pointer (CORE_ADDR addr);
-
-/* Given a function entry point, find and return the canonical descriptor
-   for that function, if one exists.  If no canonical descriptor could
-   be found, return 0.  */
-CORE_ADDR frv_fdpic_find_canonical_descriptor (CORE_ADDR entry_point);
-
-
-/* Given an objfile, return the address of its link map.  This value is
-   needed for TLS support.  */
-CORE_ADDR frv_fetch_objfile_link_map (struct objfile *objfile);
-
-struct target_so_ops;
-extern const struct target_so_ops frv_so_ops;
 
 #endif /* FRV_TDEP_H */

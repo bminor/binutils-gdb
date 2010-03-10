@@ -37,6 +37,8 @@
 #include "elf/bfin.h"
 #include "osabi.h"
 #include "infcall.h"
+#include "solib.h"
+#include "solib-fdpic.h"
 #include "xml-syscall.h"
 #include "bfin-tdep.h"
 
@@ -492,6 +494,58 @@ bfin_register_type (struct gdbarch *gdbarch, int regnum)
 }
 
 static CORE_ADDR
+find_func_descr (struct gdbarch *gdbarch, CORE_ADDR entry_point)
+{
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  CORE_ADDR descr;
+  char valbuf[4];
+
+  descr = fdpic_find_canonical_descriptor (entry_point);
+
+  if (descr != 0)
+    return descr;
+
+  /* Construct a non-canonical descriptor from space allocated on
+     the stack.  */
+
+  descr = value_as_long (value_allocate_space_in_inferior (8));
+  store_unsigned_integer (valbuf, 4, byte_order, entry_point);
+  write_memory (descr, valbuf, 4);
+  store_unsigned_integer (valbuf, 4, byte_order,
+                          fdpic_find_global_pointer (entry_point));
+  write_memory (descr + 4, valbuf, 4);
+  return descr;
+}
+
+static CORE_ADDR
+bfin_convert_from_func_ptr_addr (struct gdbarch *gdbarch, CORE_ADDR addr,
+				 struct target_ops *targ)
+{
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  CORE_ADDR entry_point;
+  CORE_ADDR got_address;
+
+  entry_point = get_target_memory_unsigned (targ, addr, 4, byte_order);
+  got_address = get_target_memory_unsigned (targ, addr + 4, 4, byte_order);
+
+  if (got_address == fdpic_find_global_pointer (entry_point))
+    return entry_point;
+  else
+    return addr;
+}
+
+static CORE_ADDR
+bfin_convert_from_addr_func_ptr (struct gdbarch *gdbarch, CORE_ADDR addr,
+				 struct target_ops *targ)
+{
+  CORE_ADDR descr;
+
+  descr = find_func_descr (gdbarch, addr);
+
+  return descr;
+}
+
+static CORE_ADDR
 bfin_push_dummy_call (struct gdbarch *gdbarch,
 		      struct value *function,
 		      struct regcache *regcache,
@@ -551,6 +605,14 @@ bfin_push_dummy_call (struct gdbarch *gdbarch,
      A dummy breakpoint will be setup to execute the call.  */
 
   regcache_cooked_write_unsigned (regcache, BFIN_RETS_REGNUM, bp_addr);
+
+  if (abi == BFIN_ABI_FDPIC)
+    {
+      /* Set the GOT register for the FDPIC ABI.  */
+      regcache_cooked_write_unsigned
+	(regcache, BFIN_P3_REGNUM,
+         fdpic_find_global_pointer (func_addr));
+    }
 
   /* Finally, update the stack pointer.  */
 
@@ -779,9 +841,19 @@ static struct gdbarch *
 bfin_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
+  int elf_flags;
   enum bfin_abi abi;
 
-  abi = BFIN_ABI_FLAT;
+  /* Extract the ELF flags, if available.  */
+  if (info.abfd && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
+    elf_flags = elf_elfheader (info.abfd)->e_flags;
+  else
+    elf_flags = 0;
+
+  if (elf_flags & EF_BFIN_FDPIC)
+    abi = BFIN_ABI_FDPIC;
+  else
+    abi = BFIN_ABI_FLAT;
 
   /* If there is already a candidate, use it.  */
 
@@ -824,6 +896,8 @@ bfin_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 8);
   set_gdbarch_frame_align (gdbarch, bfin_frame_align);
 
+  set_gdbarch_so_ops (gdbarch, &fdpic_so_ops);
+
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
 
@@ -832,6 +906,17 @@ bfin_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   frame_base_set_default (gdbarch, &bfin_frame_base);
 
   frame_unwind_append_unwinder (gdbarch, &bfin_frame_unwind);
+
+  if (bfin_abi (gdbarch) == BFIN_ABI_FDPIC)
+    {
+      set_gdbarch_convert_from_func_ptr_addr (gdbarch,
+					      bfin_convert_from_func_ptr_addr);
+      set_gdbarch_convert_from_addr_func_ptr (gdbarch,
+					      bfin_convert_from_addr_func_ptr);
+    }
+
+  if (bfin_abi (gdbarch) == BFIN_ABI_FDPIC)
+    set_gdbarch_use_get_offsets (gdbarch, 0);
 
   return gdbarch;
 }
