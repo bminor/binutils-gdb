@@ -34,6 +34,8 @@ is not used in assembler.  It's here such that GCC can easily pass down its
 error message if an attempt is made to assemble an instruction which
 will not execute on the target processor.  The following processor names are
 recognized: 
+@code{bf504},
+@code{bf506},
 @code{bf512},
 @code{bf514},
 @code{bf516},

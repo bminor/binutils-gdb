@@ -1,3 +1,10 @@
+2010-03-10  Mike Frysinger  <michael.frysinger@analog.com>
+
+	* doc/c-bfin.texi (-mcpu): Add bf504 and bf506.
+	* config/tc-bfin.c (bfin_cpu_type): Add BFIN_CPU_BF504 and
+	BFIN_CPU_BF506.
+	(bfin_cpus[]): Add 0.0 for bf504 and bf506.
+
 2010-03-10  Jie Zhang  <jie@codesourcery.com>
 
 	* doc/as.texinfo: Add Blackfin options.

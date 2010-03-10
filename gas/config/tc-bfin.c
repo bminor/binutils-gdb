@@ -151,6 +151,8 @@ const char FLT_CHARS[] = "fFdDxX";
 typedef enum bfin_cpu_type
 {
   BFIN_CPU_UNKNOWN,
+  BFIN_CPU_BF504,
+  BFIN_CPU_BF506,
   BFIN_CPU_BF512,
   BFIN_CPU_BF514,
   BFIN_CPU_BF516,
@@ -200,6 +202,10 @@ struct bfin_cpu
 
 struct bfin_cpu bfin_cpus[] =
 {
+  {"bf504", BFIN_CPU_BF504, 0x0000, AC_05000074},
+
+  {"bf506", BFIN_CPU_BF506, 0x0000, AC_05000074},
+
   {"bf512", BFIN_CPU_BF512, 0x0001, AC_05000074},
   {"bf512", BFIN_CPU_BF512, 0x0000, AC_05000074},
 
