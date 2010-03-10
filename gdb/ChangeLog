@@ -1,3 +1,8 @@
+2010-03-09  Joel Brobecker  <brobecker@adacore.com>
+
+	Adjust handling of Ada DIEs after dwarf2_physname patch.
+	* dwarf2read.c (dwarf2_compute_name): Add handling of Ada DIEs.
+
 2010-03-09  Christopher Faylor  <me+cygwin@cgf.cx>
 	    Pierre Muller  <muller@ics.u-strasbg.fr>
 
@@ -127,8 +132,8 @@
 
 	* python/python-internal.h: Include symtab.h.
 
-2010-03-09  Joel Brobecker <brobecker@adacore.com>
-	    Pierre Muller <muller@ics.u-strasbg.fr>
+2010-03-09  Joel Brobecker  <brobecker@adacore.com>
+	    Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* p-lang.c (is_pascal_string_type): Remove unneeded parentheses.
 	* p-valprint.c (pascal_val_print): Remove undeed block and fix

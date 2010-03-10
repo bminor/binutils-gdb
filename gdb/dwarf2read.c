@@ -3324,6 +3324,9 @@ die_needs_namespace (struct die_info *die, struct dwarf2_cu *cu)
    compute the physname for the object, which include a method's
    formal parameters (C++/Java) and return type (Java).
 
+   For Ada, return the DIE's linkage name rather than the fully qualified
+   name.  PHYSNAME is ignored..
+
    The result is allocated on the objfile_obstack and canonicalized.  */
 
 static const char *
@@ -3395,6 +3398,19 @@ dwarf2_compute_name (char *name, struct die_info *die, struct dwarf2_cu *cu,
 		name = cname;
 	    }
 	}
+    }
+  else if (cu->language == language_ada)
+    {
+      /* For Ada unit, we prefer the linkage name over the name, as
+	 the former contains the exported name, which the user expects
+	 to be able to reference.  Ideally, we want the user to be able
+	 to reference this entity using either natural or linkage name,
+	 but we haven't started looking at this enhancement yet.  */
+      struct attribute *attr;
+
+      attr = dwarf2_attr (die, DW_AT_MIPS_linkage_name, cu);
+      if (attr && DW_STRING (attr))
+	name = DW_STRING (attr);
     }
 
   return name;
