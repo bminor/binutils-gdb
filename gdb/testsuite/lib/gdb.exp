@@ -4536,6 +4536,16 @@ proc current_target_name { } {
     return $answer
 }
 
+proc gdb_get_exec_name { binfile } {
+    # FLAT toolchains have to load the .flt file to the board
+    if { [target_info exists use_binfmt_flat]
+	 && [file exists "${binfile}.flt"] } {
+	return "${binfile}.flt"
+    } else {
+	return ${binfile}
+    }
+}
+
 set gdb_wrapper_initialized 0
 set gdb_wrapper_target ""
 set gdb_wrapper_file ""
@@ -5023,6 +5033,16 @@ proc gdb_compile {source dest type options} {
 	    clone_output "gdb compile failed, $result"
 	}
     }
+
+    # FLAT toolchains output a bFLT file with the default name and create
+    # a secondary ELF file with a .gdb suffix.  GDB needs the ELF file in
+    # order to do debugging, so flip-flop things.
+    if { [target_info exists use_binfmt_flat]
+	 && [file exists "${dest}.gdb"] } {
+	file rename -force "${dest}" "${dest}.flt"
+	file rename -force "${dest}.gdb" "${dest}"
+    }
+
     return $result
 }
 
