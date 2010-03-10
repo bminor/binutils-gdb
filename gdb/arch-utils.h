@@ -90,6 +90,7 @@ extern int core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);
 
 extern CORE_ADDR core_addr_identity (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern gdbarch_convert_from_func_ptr_addr_ftype convert_from_func_ptr_addr_identity;
+extern gdbarch_convert_from_addr_func_ptr_ftype convert_from_addr_func_ptr_identity;
 
 /* No-op conversion of reg to regnum.  */
 

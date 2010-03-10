@@ -141,6 +141,7 @@ struct gdbarch
   gdbarch_stabs_argument_has_addr_ftype *stabs_argument_has_addr = default_stabs_argument_has_addr;
   int frame_red_zone_size = 0;
   gdbarch_convert_from_func_ptr_addr_ftype *convert_from_func_ptr_addr = convert_from_func_ptr_addr_identity;
+  gdbarch_convert_from_addr_func_ptr_ftype *convert_from_addr_func_ptr = convert_from_addr_func_ptr_identity;
   gdbarch_addr_bits_remove_ftype *addr_bits_remove = core_addr_identity;
   int significant_addr_bit = 0;
   gdbarch_memtag_to_string_ftype *memtag_to_string = default_memtag_to_string;
@@ -397,6 +398,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of stabs_argument_has_addr, invalid_p == 0 */
   /* Skip verify of frame_red_zone_size, invalid_p == 0 */
   /* Skip verify of convert_from_func_ptr_addr, invalid_p == 0 */
+  /* Skip verify of convert_from_addr_func_ptr, invalid_p == 0 */
   /* Skip verify of addr_bits_remove, invalid_p == 0 */
   /* Skip verify of significant_addr_bit, invalid_p == 0 */
   /* Skip verify of memtag_to_string, invalid_p == 0 */
@@ -876,6 +878,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   gdb_printf (file,
                       "gdbarch_dump: convert_from_func_ptr_addr = <%s>\n",
                       host_address_to_string (gdbarch->convert_from_func_ptr_addr));
+  gdb_printf (file,
+                      "gdbarch_dump: convert_from_addr_func_ptr = <%s>\n",
+                      host_address_to_string (gdbarch->convert_from_addr_func_ptr));
   gdb_printf (file,
                       "gdbarch_dump: addr_bits_remove = <%s>\n",
                       host_address_to_string (gdbarch->addr_bits_remove));
@@ -3059,6 +3064,23 @@ set_gdbarch_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
                                         gdbarch_convert_from_func_ptr_addr_ftype convert_from_func_ptr_addr)
 {
   gdbarch->convert_from_func_ptr_addr = convert_from_func_ptr_addr;
+}
+
+CORE_ADDR
+gdbarch_convert_from_addr_func_ptr (struct gdbarch *gdbarch, CORE_ADDR addr, struct target_ops *targ)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->convert_from_addr_func_ptr != NULL);
+  if (gdbarch_debug >= 2)
+    gdb_printf (gdb_stdlog, "gdbarch_convert_from_addr_func_ptr called\n");
+  return gdbarch->convert_from_addr_func_ptr (gdbarch, addr, targ);
+}
+
+void
+set_gdbarch_convert_from_addr_func_ptr (struct gdbarch *gdbarch,
+                                        gdbarch_convert_from_addr_func_ptr_ftype convert_from_addr_func_ptr)
+{
+  gdbarch->convert_from_addr_func_ptr = convert_from_addr_func_ptr;
 }
 
 CORE_ADDR

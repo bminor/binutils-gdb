@@ -192,6 +192,13 @@ convert_from_func_ptr_addr_identity (struct gdbarch *gdbarch, CORE_ADDR addr,
   return addr;
 }
 
+CORE_ADDR
+convert_from_addr_func_ptr_identity (struct gdbarch *gdbarch, CORE_ADDR addr,
+				     struct target_ops *targ)
+{
+  return addr;
+}
+
 int
 no_op_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {

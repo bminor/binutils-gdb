@@ -1121,6 +1121,14 @@ Method(
 )
 
 Method(
+    type="CORE_ADDR",
+    name="convert_from_addr_func_ptr",
+    params=[("CORE_ADDR", "addr"), ("struct target_ops *", "targ")],
+    predefault="convert_from_addr_func_ptr_identity",
+    invalid=False,
+)
+
+Method(
     comment="""
 On some machines there are bits in addresses which are not really
 part of the address, but are used by the kernel, the hardware, etc.

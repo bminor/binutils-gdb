@@ -601,6 +601,10 @@ typedef CORE_ADDR (gdbarch_convert_from_func_ptr_addr_ftype) (struct gdbarch *gd
 extern CORE_ADDR gdbarch_convert_from_func_ptr_addr (struct gdbarch *gdbarch, CORE_ADDR addr, struct target_ops *targ);
 extern void set_gdbarch_convert_from_func_ptr_addr (struct gdbarch *gdbarch, gdbarch_convert_from_func_ptr_addr_ftype *convert_from_func_ptr_addr);
 
+typedef CORE_ADDR (gdbarch_convert_from_addr_func_ptr_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr, struct target_ops *targ);
+extern CORE_ADDR gdbarch_convert_from_addr_func_ptr (struct gdbarch *gdbarch, CORE_ADDR addr, struct target_ops *targ);
+extern void set_gdbarch_convert_from_addr_func_ptr (struct gdbarch *gdbarch, gdbarch_convert_from_addr_func_ptr_ftype *convert_from_addr_func_ptr);
+
 /* On some machines there are bits in addresses which are not really
    part of the address, but are used by the kernel, the hardware, etc.
    for special purposes.  gdbarch_addr_bits_remove takes out any such bits so
