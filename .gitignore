@@ -72,3 +72,8 @@ stamp-*
 /mpc*
 /gmp*
 /isl*
+
+site.bak
+site.exp
+*.log
+*.sum
