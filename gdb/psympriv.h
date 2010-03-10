@@ -140,10 +140,9 @@ struct partial_symtab
   /* Information that lets read_symtab() locate the part of the symbol table
      that this psymtab corresponds to.  This information is private to the
      format-dependent symbol reading routines.  For further detail examine
-     the various symbol reading modules.  Should really be (void *) but is
-     (char *) as with other such gdb variables.  (FIXME) */
+     the various symbol reading modules.  */
 
-  char *read_symtab_private;
+  void *read_symtab_private;
 
   /* Non-zero if the symtab corresponding to this psymtab has been readin */
 

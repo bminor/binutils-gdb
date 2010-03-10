@@ -2189,8 +2189,8 @@ start_psymtab (struct objfile *objfile, char *filename, CORE_ADDR textlow,
   start_psymtab_common (objfile, objfile->section_offsets,
 			filename, textlow, global_syms, static_syms);
 
-  result->read_symtab_private = (char *)
-    obstack_alloc (&objfile->objfile_obstack, sizeof (struct symloc));
+  result->read_symtab_private = obstack_alloc (&objfile->objfile_obstack,
+					       sizeof (struct symloc));
   LDSYMOFF (result) = ldsymoff;
   result->read_symtab = dbx_psymtab_to_symtab;
   SYMBOL_SIZE (result) = symbol_size;
@@ -2334,8 +2334,7 @@ end_psymtab (struct partial_symtab *pst, char **include_list, int num_includes,
       /* Copy the sesction_offsets array from the main psymtab. */
       subpst->section_offsets = pst->section_offsets;
       subpst->read_symtab_private =
-	(char *) obstack_alloc (&objfile->objfile_obstack,
-				sizeof (struct symloc));
+	obstack_alloc (&objfile->objfile_obstack, sizeof (struct symloc));
       LDSYMOFF (subpst) =
 	LDSYMLEN (subpst) =
 	subpst->textlow =

@@ -1,5 +1,19 @@
 2010-03-10  Tom Tromey  <tromey@redhat.com>
 
+	* xcoffread.c (xcoff_start_psymtab): Update.
+	(xcoff_end_psymtab): Update.
+	* psymtab.c (allocate_psymtab): Remove dead code.
+	* psympriv.h (struct partial_symtab) <read_symtab_private>: Now
+	void*.
+	* mdebugread.c (parse_partial_symbols): Update.
+	(new_psymtab): Likewise.
+	* dwarf2read.c (process_psymtab_comp_unit): Update.
+	(psymtab_to_symtab_1): Update.
+	* dbxread.c (start_psymtab): Update.
+	(end_psymtab): Likewise.
+
+2010-30-10  Tom Tromey  <tromey@redhat.com>
+
 	* xcoffread.c: Include psymtab.h.
 	(xcoff_sym_fns): Update.
 	* symtab.h (struct partial_symbol): Remove.

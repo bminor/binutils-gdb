@@ -1951,7 +1951,7 @@ process_psymtab_comp_unit (struct objfile *objfile,
   if (attr != NULL)
     pst->dirname = DW_STRING (attr);
 
-  pst->read_symtab_private = (char *) this_cu;
+  pst->read_symtab_private = this_cu;
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
@@ -3055,7 +3055,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
         psymtab_to_symtab_1 (pst->dependencies[i]);
       }
 
-  per_cu = (struct dwarf2_per_cu_data *) pst->read_symtab_private;
+  per_cu = pst->read_symtab_private;
 
   if (per_cu == NULL)
     {

@@ -1420,17 +1420,6 @@ allocate_psymtab (const char *filename, struct objfile *objfile)
   psymtab->objfile = objfile;
   psymtab->next = objfile->psymtabs;
   objfile->psymtabs = psymtab;
-#if 0
-  {
-    struct partial_symtab **prev_pst;
-    psymtab->objfile = objfile;
-    psymtab->next = NULL;
-    prev_pst = &(objfile->psymtabs);
-    while ((*prev_pst) != NULL)
-      prev_pst = &((*prev_pst)->next);
-    (*prev_pst) = psymtab;
-  }
-#endif
 
   return (psymtab);
 }
