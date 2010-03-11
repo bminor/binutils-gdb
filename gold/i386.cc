@@ -2788,7 +2788,6 @@ bool
 Target_i386::do_is_call_to_non_split(const Symbol* sym, unsigned int) const
 {
   return (sym->type() == elfcpp::STT_FUNC
-	  && !this->is_defined_by_abi(sym)
 	  && !is_prefix_of("__i686.get_pc_thunk.", sym->name()));
 }
 
