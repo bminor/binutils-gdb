@@ -243,12 +243,10 @@ LM_ADDR_CHECK (struct so_list *so, bfd *abfd)
 	      l_addr = l_dynaddr - dynaddr;
 
 	      if (info_verbose)
-		{
-		  warning (_(".dynamic section for \"%s\" "
-			     "is not at the expected address"), so->so_name);
-		  warning (_("difference appears to be caused by prelink, "
-			     "adjusting expectations"));
-		}
+		printf_unfiltered (_("Using PIC (Position Independent Code) "
+				     "prelink displacement %s for \"%s\".\n"),
+				   paddress (target_gdbarch, l_addr),
+				   so->so_name);
 	    }
 	  else
 	    warning (_(".dynamic section for \"%s\" "
@@ -1765,6 +1763,18 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 
       if (!ok)
 	return 0;
+    }
+
+  if (info_verbose)
+    {
+      /* It can be printed repeatedly as there is no easy way to check
+	 the executable symbols/file has been already relocated to
+	 displacement.  */
+
+      printf_unfiltered (_("Using PIE (Position Independent Executable) "
+			   "displacement %s for \"%s\".\n"),
+			 paddress (target_gdbarch, displacement),
+			 bfd_get_filename (exec_bfd));
     }
 
   *displacementp = displacement;
