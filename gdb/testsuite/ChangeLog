@@ -1,3 +1,9 @@
+2010-03-10  Doug Evans  <dje@google.com>
+
+	* gdb.base/checkpoint.exp: Fix comment.
+	Lengthen timeout while doing >600 checkpoints test.
+	Rename duplicate "kill all one" test to keep test names unique.
+
 2010-03-03  Tom Tromey  <tromey@redhat.com>
 
 	PR gdb/11345:
