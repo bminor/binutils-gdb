@@ -247,6 +247,14 @@ class Target
   reloc_addend(void* arg, unsigned int type, uint64_t addend) const
   { return this->do_reloc_addend(arg, type, addend); }
 
+  // Return true if a reference to SYM from a reloc of type R_TYPE
+  // means that the current function may call an object compiled
+  // without -fsplit-stack.  SYM is known to be defined in an object
+  // compiled without -fsplit-stack.
+  bool
+  is_call_to_non_split(const Symbol* sym, unsigned int r_type) const
+  { return this->do_is_call_to_non_split(sym, r_type); }
+
   // A function starts at OFFSET in section SHNDX in OBJECT.  That
   // function was compiled with -fsplit-stack, but it refers to a
   // function which was compiled without -fsplit-stack.  VIEW is a
@@ -439,6 +447,12 @@ class Target
   virtual uint64_t
   do_reloc_addend(void*, unsigned int, uint64_t) const
   { gold_unreachable(); }
+
+  // Virtual function which may be overridden by the child class.  The
+  // default implementation is that any function not defined by the
+  // ABI is a call to a non-split function.
+  virtual bool
+  do_is_call_to_non_split(const Symbol* sym, unsigned int) const;
 
   // Virtual function which may be overridden by the child class.
   virtual void

@@ -1,3 +1,14 @@
+2010-03-10  Ian Lance Taylor  <iant@google.com>
+
+	* reloc.cc (Sized_relobj::split_stack_adjust_reltype): Call the
+	target to ask whether a reference to a symbol requires a stack
+	split.
+	* target.h (Target::is_call_to_non_split): New function.
+	(Target::do_is_call_to_non_split): Declare virtual function.
+	* target.cc: Include "symtab.h".
+	(Target::do_is_call_to_non_split): New function.
+	* i386.cc (Target_i386::do_is_call_to_non_split): New function.
+
 2010-03-10  Cary Coutant  <ccoutant@google.com>
 
 	* fileread.cc (File_read::~File_read): Don't delete whole_file_view_.

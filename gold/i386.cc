@@ -171,6 +171,10 @@ class Target_i386 : public Target_freebsd<32, false>
     return Target::do_is_local_label_name(name);
   }
 
+  // Return whether SYM is call to a non-split function.
+  bool
+  do_is_call_to_non_split(const Symbol* sym, unsigned int) const;
+
   // Adjust -fstack-split code which calls non-stack-split code.
   void
   do_calls_non_split(Relobj* object, unsigned int shndx,
@@ -2774,6 +2778,18 @@ Target_i386::do_code_fill(section_size_type length) const
   };
 
   return std::string(nops[length], length);
+}
+
+// Return whether SYM should be treated as a call to a non-split
+// function.  We don't want that to be true of a call to a
+// get_pc_thunk function.
+
+bool
+Target_i386::do_is_call_to_non_split(const Symbol* sym, unsigned int) const
+{
+  return (sym->type() == elfcpp::STT_FUNC
+	  && !this->is_defined_by_abi(sym)
+	  && !is_prefix_of("__i686.get_pc_thunk.", sym->name()));
 }
 
 // FNOFFSET in section SHNDX in OBJECT is the start of a function
