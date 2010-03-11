@@ -1,3 +1,17 @@
+2010-03-10  Kevin Buettner  <kevinb@redhat.com>
+
+	* remote-mips.c (close_ports, mips_initialize_cleanups)
+	(mips_exit_cleanups, mips_send_command, mips_open, pmon_open)
+	(ddb_open, lsi_open, mips_remove_breakpoint, mips_remove_watchpoint)
+	(mips_stopped_by_watchpoint, send_srec, pmon_checkset)
+	(pmon_make_fastrec, pmon_check_ack, mips_expect_download)
+	(pmon_check_entry_address, pmon_check_total, pmon_end_download)
+	(pmon_download, pmon_load_fast, _initialize_remote_mips): Add
+	comments describing each of these functions.
+	(mips_enter_debug, mips_exit_debug, common_open)
+	(mips_signal_from_protocol, pmon_makeb64, pmon_zeroset): Add
+	blank line after the comment describing the function.
+
 2010-03-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* solib-svr4.c (svr4_exec_displacement): Return now success, new

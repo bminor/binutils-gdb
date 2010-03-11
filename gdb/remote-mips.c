@@ -451,6 +451,9 @@ static int monitor_warnings;
    inferior_ptid.  */
 static ptid_t remote_mips_ptid;
 
+/* Close any ports which might be open.  Reset certain globals indicating
+   the state of those ports.  */
+
 static void
 close_ports (void)
 {
@@ -1290,17 +1293,24 @@ mips_request (int cmd,
   return rresponse;
 }
 
+/* Cleanup associated with mips_initialize().  */
+
 static void
 mips_initialize_cleanups (void *arg)
 {
   mips_initializing = 0;
 }
 
+/* Cleanup associated with mips_exit_debug().  */
+
 static void
 mips_exit_cleanups (void *arg)
 {
   mips_exiting = 0;
 }
+
+/* Send a command and wait for that command to be echoed back.  Wait,
+   too, for the following prompt.  */
 
 static void
 mips_send_command (const char *cmd, int prompt)
@@ -1313,6 +1323,7 @@ mips_send_command (const char *cmd, int prompt)
 }
 
 /* Enter remote (dbx) debug mode: */
+
 static void
 mips_enter_debug (void)
 {
@@ -1343,6 +1354,7 @@ mips_enter_debug (void)
 }
 
 /* Exit remote (dbx) debug mode, returning to the monitor prompt: */
+
 static int
 mips_exit_debug (void)
 {
@@ -1505,6 +1517,7 @@ mips_initialize (void)
 }
 
 /* Open a connection to the remote board.  */
+
 static void
 common_open (struct target_ops *ops, char *name, int from_tty,
 	     enum mips_monitor_type new_monitor,
@@ -1629,6 +1642,8 @@ device is attached to the target board (e.g., /dev/ttya).\n"
   xfree (serial_port_name);
 }
 
+/* Open a connection to an IDT board.  */
+
 static void
 mips_open (char *name, int from_tty)
 {
@@ -1652,11 +1667,15 @@ mips_open (char *name, int from_tty)
   common_open (&mips_ops, name, from_tty, MON_IDT, monitor_prompt);
 }
 
+/* Open a connection to a PMON board.  */
+
 static void
 pmon_open (char *name, int from_tty)
 {
   common_open (&pmon_ops, name, from_tty, MON_PMON, "PMON> ");
 }
+
+/* Open a connection to a DDB board.  */
 
 static void
 ddb_open (char *name, int from_tty)
@@ -1671,6 +1690,8 @@ rockhopper_open (char *name, int from_tty)
 {
   common_open (&rockhopper_ops, name, from_tty, MON_ROCKHOPPER, "NEC01>");
 }
+
+/* Open a connection to an LSI board.  */
 
 static void
 lsi_open (char *name, int from_tty)
@@ -1735,6 +1756,7 @@ mips_resume (struct target_ops *ops,
 
 /* Return the signal corresponding to SIG, where SIG is the number which
    the MIPS protocol uses for the signal.  */
+
 static enum target_signal
 mips_signal_from_protocol (int sig)
 {
@@ -2324,6 +2346,8 @@ mips_insert_breakpoint (struct gdbarch *gdbarch,
     return memory_insert_breakpoint (gdbarch, bp_tgt);
 }
 
+/* Remove a breakpoint.  */
+
 static int
 mips_remove_breakpoint (struct gdbarch *gdbarch,
 			struct bp_target_info *bp_tgt)
@@ -2382,6 +2406,8 @@ mips_insert_watchpoint (CORE_ADDR addr, int len, int type)
   return 0;
 }
 
+/* Remove a watchpoint.  */
+
 int
 mips_remove_watchpoint (CORE_ADDR addr, int len, int type)
 {
@@ -2390,6 +2416,9 @@ mips_remove_watchpoint (CORE_ADDR addr, int len, int type)
 
   return 0;
 }
+
+/* Test to see if a watchpoint has been hit.  Return 1 if so; return 0,
+   if not.  */
 
 int
 mips_stopped_by_watchpoint (void)
@@ -2685,6 +2714,11 @@ mips_common_breakpoint (%s):  Got error: 0x%x\n",
   return 0;
 }
 
+/* Send one S record as specified by SREC of length LEN, starting
+   at ADDR.  Note, however, that ADDR is not used except to provide
+   a useful message to the user in the event that a NACK is received
+   from the board.  */
+
 static void
 send_srec (char *srec, int len, CORE_ADDR addr)
 {
@@ -2905,6 +2939,7 @@ static char encoding[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01
    at a time (range 0..63).  Keep a checksum if required (passed
    pointer non-NULL). The function returns the number of encoded
    characters written into the buffer. */
+
 static int
 pmon_makeb64 (unsigned long v, char *p, int n, int *chksum)
 {
@@ -2949,6 +2984,7 @@ pmon_makeb64 (unsigned long v, char *p, int n, int *chksum)
 
 /* Shorthand function (that could be in-lined) to output the zero-fill
    escape sequence into the data stream. */
+
 static int
 pmon_zeroset (int recsize, char **buff, int *amount, unsigned int *chksum)
 {
@@ -2960,6 +2996,20 @@ pmon_zeroset (int recsize, char **buff, int *amount, unsigned int *chksum)
   *amount = 0;
   return (recsize + count + 2);
 }
+
+/* Add the checksum specified by *VALUE to end of the record under
+   construction.  *BUF specifies the location at which to begin
+   writing characters comprising the checksum information.  RECSIZE
+   specifies the size of the record constructed thus far.  (A trailing
+   NUL character may be present in the buffer holding the record, but
+   the record size does not include this character.)
+
+   Return the total size of the record after adding the checksum escape,
+   the checksum itself, and the trailing newline.
+   
+   The checksum specified by *VALUE is zeroed out prior to returning. 
+   Additionally, *BUF is updated to refer to the location just beyond
+   the record elements added by this call.  */
 
 static int
 pmon_checkset (int recsize, char **buff, int *value)
@@ -2990,6 +3040,32 @@ pmon_checkset (int recsize, char **buff, int *value)
 #define MAXRECSIZE (550)
 /* NOTE: This constant depends on the monitor being used. This value
    is for PMON 5.x on the Cogent Vr4300 board. */
+
+/* Create a FastLoad format record.
+
+   *OUTBUF is the buffer into which a FastLoad formatted record is
+   written.  On return, the pointer position represented by *OUTBUF
+   is updated to point at the end of the data, i.e. the next position
+   in the buffer that may be written.  No attempt is made to NUL-
+   terminate this portion of the record written to the buffer.
+   
+   INBUF contains the binary input data from which the FastLoad
+   formatted record will be built.  *INPTR is an index into this
+   buffer.  *INPTR is updated as the input is consumed.  Thus, on
+   return, the caller has access to the position of the next input
+   byte yet to be processed.  INAMOUNT is the size, in bytes, of the
+   input data.
+
+   *RECSIZE will be written with the size of the record written to the
+   output buffer prior to returning.  This size does not include a
+   NUL-termination byte as none is written to the output buffer.
+
+   *CSUM is the output buffer checksum.  It is updated as data is
+   written to the output buffer.
+   
+   *ZEROFILL is the current number of 3-byte zero sequences that have
+   been encountered.  It is both an input and an output to this
+   function.  */
 
 static void
 pmon_make_fastrec (char **outbuf, unsigned char *inbuf, int *inptr,
@@ -3048,6 +3124,10 @@ pmon_make_fastrec (char **outbuf, unsigned char *inbuf, int *inptr,
   return;
 }
 
+/* Attempt to read an ACK.  If an ACK is not read in a timely manner,
+   output the message specified by MESG.  Return -1 for failure, 0
+   for success.  */
+
 static int
 pmon_check_ack (char *mesg)
 {
@@ -3090,6 +3170,12 @@ pmon_start_download (void)
     }
 }
 
+/* Look for the string specified by STRING sent from the target board
+   during a download operation.  If the string in question is not
+   seen, output an error message, remove the temporary file, if
+   appropriate, and return 0.  Otherwise, return 1 to indicate
+   success.  */
+
 static int
 mips_expect_download (char *string)
 {
@@ -3104,6 +3190,15 @@ mips_expect_download (char *string)
     return 1;
 }
 
+/* Look for messages from the target board associated with the entry
+   address.
+
+   NOTE: This function doesn't indicate success or failure, so we
+   have no way to determine whether or not the output from the board
+   was correctly seen.  However, given that other items are checked
+   after this, it seems unlikely that those checks will pass if this
+   check doesn't first (silently) pass.  */
+
 static void
 pmon_check_entry_address (char *entry_address, int final)
 {
@@ -3113,6 +3208,10 @@ pmon_check_entry_address (char *entry_address, int final)
   mips_expect (hexnumber);
   mips_expect ("\r\n");
 }
+
+/* Look for messages from the target board showing the total number of
+   bytes downloaded to the board.  Output 1 for success if the tail
+   end of the message was read correctly, 0 otherwise.  */
 
 static int
 pmon_check_total (int bintotal)
@@ -3124,6 +3223,13 @@ pmon_check_total (int bintotal)
   return mips_expect_download (" bytes\r\n");
 }
 
+/* Look for the termination messages associated with the end of
+   a download to the board.
+
+   Also, when `tftp_in_use' is set, issue the load command to the
+   board causing the file to be transferred.  (This is done prior
+   to looking for the above mentioned termination messages.)  */
+   
 static void
 pmon_end_download (int final, int bintotal)
 {
@@ -3190,6 +3296,10 @@ pmon_end_download (int final, int bintotal)
     remove (tftp_localname);	/* Remove temporary file */
 }
 
+/* Write the buffer specified by BUFFER of length LENGTH to either
+   the board or the temporary file that'll eventually be transferred
+   to the board.  */
+
 static void
 pmon_download (char *buffer, int length)
 {
@@ -3198,6 +3308,9 @@ pmon_download (char *buffer, int length)
   else
     serial_write (udp_in_use ? udp_desc : mips_desc, buffer, length);
 }
+
+/* Open object or executable file, FILE, and send it to the board
+   using the FastLoad format.  */
 
 static void
 pmon_load_fast (char *file)
@@ -3429,6 +3542,10 @@ pmon_command (char *args, int from_tty)
 }
 
 extern initialize_file_ftype _initialize_remote_mips; /* -Wmissing-prototypes */
+
+/* Initialize mips_ops, lsi_ops, ddb_ops, pmon_ops, and rockhopper_ops.
+   Create target specific commands and perform other initializations
+   specific to this file.  */
 
 void
 _initialize_remote_mips (void)
