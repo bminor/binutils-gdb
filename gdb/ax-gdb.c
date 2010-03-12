@@ -1479,6 +1479,8 @@ gen_expr (struct expression *exp, union exp_element **pc,
     case BINOP_MUL:
     case BINOP_DIV:
     case BINOP_REM:
+    case BINOP_LSH:
+    case BINOP_RSH:
     case BINOP_SUBSCRIPT:
     case BINOP_BITWISE_AND:
     case BINOP_BITWISE_IOR:
@@ -1883,6 +1885,14 @@ gen_expr_binop_rest (struct expression *exp,
     case BINOP_REM:
       gen_binop (ax, value, value1, value2,
 		 aop_rem_signed, aop_rem_unsigned, 1, "remainder");
+      break;
+    case BINOP_LSH:
+      gen_binop (ax, value, value1, value2,
+		 aop_lsh, aop_lsh, 1, "left shift");
+      break;
+    case BINOP_RSH:
+      gen_binop (ax, value, value1, value2,
+		 aop_rsh_signed, aop_rsh_unsigned, 1, "right shift");
       break;
     case BINOP_SUBSCRIPT:
       {
