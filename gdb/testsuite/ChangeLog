@@ -1,3 +1,8 @@
+2010-03-12  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* gdb.cp/gdb2384-base.h: Created 'namespace B'.
+	* gdb.cp/gdb2384-base.cc: Use 'namespace B'.
+
 2010-03-12  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* lib/gdb.exp (gdb_test_multiple): Handle -timeout.
