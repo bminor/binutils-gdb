@@ -43,6 +43,7 @@
 #include "solib.h"
 #include "exec.h"
 #include "inline-frame.h"
+#include "tracepoint.h"
 
 static void target_info (char *, int);
 
@@ -1292,6 +1293,10 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
     inf = NULL;
 
   if (inf != NULL
+      /* The dcache reads whole cache lines; that doesn't play well
+	 with reading from a trace buffer, because reading outside of
+	 the collected memory range fails.  */
+      && get_traceframe_number () == -1
       && (region->attrib.cache
 	  || (stack_cache_enabled_p && object == TARGET_OBJECT_STACK_MEMORY)))
     {

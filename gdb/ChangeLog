@@ -1,3 +1,10 @@
+2010-03-12  Pedro Alves  <pedro@codesourcery.com>
+
+	* target.c (memory_xfer_partial): Don't use the stack cache if
+	inspecting trace frames.
+	* tracepoint.c (finish_tfind_command): Invalidate the target
+	dcache.
+
 2010-03-10  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* p-lang.c (is_pascal_string_type): Check that TYPE arg is non NULL.
