@@ -94,7 +94,7 @@ static const char *i386_byte_names[] =
 static const char *i386_word_names[] =
 {
   "ax", "cx", "dx", "bx",
-  "sp", "bp", "si", "di"
+  "", "bp", "si", "di"
 };
 
 /* MMX register?  */

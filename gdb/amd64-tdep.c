@@ -222,7 +222,7 @@ static const char *amd64_byte_names[] =
 
 static const char *amd64_word_names[] =
 {
-  "ax", "bx", "cx", "dx", "si", "di", "bp", "sp", 
+  "ax", "bx", "cx", "dx", "si", "di", "bp", "", 
   "r8w", "r9w", "r10w", "r11w", "r12w", "r13w", "r14w", "r15w"
 };
 

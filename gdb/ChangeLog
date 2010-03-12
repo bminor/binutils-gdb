@@ -1,3 +1,8 @@
+2010-03-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* amd64-tdep.c (amd64_word_names): Replace "sp" with "".
+	* i386-tdep.c (i386_word_names): Likewise.
+
 2010-03-12  Pedro Alves  <pedro@codesourcery.com>
 
 	* target.c (memory_xfer_partial): Don't use the stack cache if
