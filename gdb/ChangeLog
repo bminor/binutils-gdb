@@ -1,3 +1,10 @@
+2010-03-12  Pedro Alves  <pedro@codesourcery.com>
+
+	* target.c (memory_xfer_partial): Don't use the stack cache if
+	inspecting trace frames.
+	* tracepoint.c (finish_tfind_command): Invalidate the target
+	dcache.
+
 2010-03-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* solib-svr4.c (LM_ADDR_CHECK) <info_verbose>: Use printf_unfiltered

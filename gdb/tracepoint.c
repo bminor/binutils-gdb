@@ -1757,6 +1757,7 @@ finish_tfind_command (enum trace_find_type type, int num,
 
   reinit_frame_cache ();
   registers_changed ();
+  target_dcache_invalidate ();
   set_traceframe_num (target_frameno);
   set_tracepoint_num (tp ? tp->number : target_tracept);
   if (target_frameno == -1)
