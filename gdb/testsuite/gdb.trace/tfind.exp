@@ -147,7 +147,8 @@ gdb_expect {
 gdb_test "help tstop" "Stop trace data collection." "7.2: help tstop"
 
 # test tstatus (when trace off)
-gdb_test "tstatus" "\[Tt\]race.* not running.*" "test tstatus off"
+gdb_test "tstatus" "Trace stopped by a tstop command.*" \
+    "test tstatus off after tstop"
 
 ## record starting PC
 set save_pc [gdb_readexpr "(unsigned long) \$pc"];
@@ -333,7 +334,7 @@ set timeout 60
 send_gdb "disassemble gdb_c_test\n"
 # look for disassembly of function label
 gdb_expect {
-    -re "<gdb_c_test>:.*$gdb_prompt $"      { pass "8.36: trace disassembly" }
+    -re "<gdb_c_test(\.\[0-9\]+|)>:.*End of assembler dump.*$gdb_prompt $"      { pass "8.36: trace disassembly" }
     -re ".*$gdb_prompt $"                   { fail "8.36: trace disassembly" }
     timeout                       { fail "8.36: trace disassembly (timeout)" }
 }

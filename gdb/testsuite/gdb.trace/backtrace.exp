@@ -146,9 +146,20 @@ gdb_trace_setactions "8.6: setup TP to collect regs, args, and locals" \
 	"$tdp4" \
 	"collect \$regs, \$args, \$locs" "^$"
 
+if [istarget "x86_64-*"] then {
+    set fpreg "\$rbp"
+    set spreg "\$rsp"
+} elseif [istarget "i?86-*"] then {
+    set fpreg "\$ebp"
+    set spreg "\$esp"
+} else {
+    set fpreg "\$fp"
+    set spreg "\$sp"
+}
+
 gdb_trace_setactions "8.6: setup TP to collect stack mem cast expr" \
-	"$tdp6" \
-	"collect \$fp, \(\*\(void \*\*\) \(\$sp\)\) @ 64" "^$"
+       "$tdp6" \
+       "collect $fpreg, \(\*\(void \*\*\) \($spreg\)\) @ 64" "^$"
 
 gdb_test "tstart" "" ""
 

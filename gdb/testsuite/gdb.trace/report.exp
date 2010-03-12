@@ -155,9 +155,23 @@ gdb_trace_setactions "9.x: setup TP to collect locals" \
 	"$tdp4" \
 	"collect \$locs" "^$"
 
+if [istarget "x86_64-*"] then {
+    set fpreg "rbp"
+    set spreg "rsp"
+    set pcreg "rip"
+} elseif [istarget "i?86-*"] then {
+    set fpreg "ebp"
+    set spreg "esp"
+    set pcreg "eip"
+} else {
+    set fpreg "fp"
+    set spreg "sp"
+    set pcreg "pc"
+}
+
 gdb_trace_setactions "9.x: setup TP to collect stack memory" \
 	"$tdp5" \
-	"collect \$fp, \*\(void \*\*\) \$sp @ 64" "^$"
+	"collect \$$fpreg, \*\(void \*\*\) \$$spreg @ 64" "^$"
 
 gdb_trace_setactions "9.x: setup TP to collect expressions" \
 	"$tdp6" \
@@ -193,10 +207,11 @@ gdb_tfind_test "9.1: find frame for TP $tdp2" "tracepoint $tdp2" \
 
 # regs were collected at tdp2.
 # How to match for the output of "info registers" on an unknown architecture?
-# For now, assume that every architecture has a register called "pc".
+# For now, assume that most architectures have a register called "pc".
+
 gdb_test "tdump" \
-	"\[\r\n\]pc .*" \
-	"9.1: tdump, regs collected"
+       "\[\r\n\]$pcreg .*" \
+       "9.1: tdump, regs collected"
 
 gdb_tfind_test "9.1: find frame for TP $tdp3" "tracepoint $tdp3" \
 	"\$tracepoint" "$tdp3"
@@ -219,8 +234,8 @@ gdb_tfind_test "9.1: find frame for TP $tdp5" "tracepoint $tdp5" \
 
 # stack was collected at tdp5, plus the frame pointer
 gdb_test "tdump" \
-	".fp = .*sp @ 64 = .*" \
-	"9.1: tdump, memrange collected"
+       ".$fpreg = .*$spreg @ 64 = .*" \
+       "9.1: tdump, memrange collected"
 
 gdb_tfind_test "9.1: find frame for TP $tdp6" "tracepoint $tdp6" \
 	"\$tracepoint" "$tdp6"
@@ -321,6 +336,7 @@ gdb_expect {
     }
 }
 
+gdb_tfind_test "12.2: tfind end, selects no frame" "end" "-1"
 gdb_tfind_test "12.2: find first TDP #2 frame" "tracepoint $tdp2" \
 	"\$tracepoint" "$tdp2"
 
@@ -344,6 +360,7 @@ gdb_expect {
     }
 }
 
+gdb_tfind_test "12.3: tfind end, selects no frame" "end" "-1"
 gdb_tfind_test "12.3: find first TDP #3 frame" "tracepoint $tdp3" \
 	"\$tracepoint" "$tdp3"
 
@@ -367,6 +384,7 @@ gdb_expect {
     }
 }
 
+gdb_tfind_test "12.4: tfind end, selects no frame" "end" "-1"
 gdb_tfind_test "12.4: find first TDP #6 frame" "tracepoint $tdp6" \
 	"\$tracepoint" "$tdp6"
 

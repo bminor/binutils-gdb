@@ -63,9 +63,17 @@ gdb_test "trace gdb_c_test" \
 	"Tracepoint $decimal at .*" \
 	"Set tracepoint at gdb_c_test"
 
+if [istarget "x86_64-*"] then {
+    set fpreg "\$rbp"
+} elseif [istarget "i?86-*"] then {
+    set fpreg "\$ebp"
+} else {
+    set fpreg "\$fp"
+}
+
 gdb_trace_setactions "5.12: define while-stepping <stepcount>" \
 	"" \
-	"collect \$fp" "^$" \
+	"collect $fpreg" "^$" \
 	"while-stepping 5" "^$" \
 	"collect p" "^$" \
 	"end" "^$" \
