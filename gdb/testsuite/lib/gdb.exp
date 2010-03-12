@@ -601,12 +601,23 @@ proc gdb_test_multiple { command message user_code } {
     set processed_code ""
     set patterns ""
     set expecting_action 0
+    set expecting_arg 0
     foreach item $user_code subst_item $subst_code {
 	if { $item == "-n" || $item == "-notransfer" || $item == "-nocase" } {
 	    lappend processed_code $item
 	    continue
 	}
-	if {$item == "-indices" || $item == "-re" || $item == "-ex"} {
+	if { $item == "-indices" || $item == "-re" || $item == "-ex" } {
+	    lappend processed_code $item
+	    continue
+	}
+	if { $item == "-timeout" } {
+	    set expecting_arg 1
+	    lappend processed_code $item
+	    continue
+	}
+	if { $expecting_arg } {
+	    set expecting_arg 0
 	    lappend processed_code $item
 	    continue
 	}
