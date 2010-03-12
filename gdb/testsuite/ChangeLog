@@ -1,3 +1,28 @@
+2010-03-12  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	gdb/testsuite/
+	* lib/gdb.exp (skip_stl_tests): New.
+	(gdb_compile): Symbian needs -ldl.
+	(shlib_target_file): New.
+	(shlib_symbol_file): New.
+	(gdb_load_shlibs): Use shlib_target_file.
+	* lib/mi-support.exp (mi_load_shlibs): Use shlib_target_file.
+	* gdb.cp/exception.exp: Use skip_stl_tests.
+	* gdb.cp/bs15503.exp: Use skip_stl_tests.  Use untested.
+	* gdb.cp/try_catch.exp: Use skip_stl_tests.
+	* gdb.cp/mb-templates.exp: Ditto.
+	* gdb.base/commands.exp: Relax regexes.
+	* gdb.base/watchpoint-solib.exp: Don't skip on symbian.  Use
+	shlib_target_file and shlib_symbol_file.
+	* gdb.base/maint.exp: Allow lowercase t.  Allow .rodata in
+	sections.
+	* gdb.base/ending-run.exp: Accept E32Main for symbian.
+	* gdb.base/solib-disc.exp: Use
+	shlib_target_file and shlib_symbol_file.
+	* gdb.base/unload.exp: Don't skip on symbian.  Use
+	shlib_target_file and shlib_symbol_file.
+	* gdb.base/list.exp: Check use_gdb_stub instead of is_remote.
+
 2010-03-12  Pedro Alves  <pedro@codesourcery.com>
  
 	* gdb.trace/backtrace.exp: Adjust for x86 and x86_64.

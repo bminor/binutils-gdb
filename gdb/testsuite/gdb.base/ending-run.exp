@@ -188,6 +188,10 @@ gdb_expect {
 	# another `next' is necessary.
 	gdb_test "next" ".*in start_l ().*" "step out of main"
     }
+    -re "E32Main (.*).*$gdb_prompt $" {
+	# On SymbianOS there's a different function which calls main.
+	pass "step out of main"
+    }
     -re ".*in.*currently asm.*$gdb_prompt $" { 
         pass "step out of main"
     }

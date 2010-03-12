@@ -1850,13 +1850,14 @@ proc check_mi_and_console_threads {name} {
   }
 }
 
+# Download shared libraries to the target.
 proc mi_load_shlibs { args } {
     if {![is_remote target]} {
 	return
     }
 
     foreach file $args {
-	gdb_download $file
+	gdb_download [shlib_target_file $file]
     }
 
     # Even if the target supplies full paths for shared libraries,

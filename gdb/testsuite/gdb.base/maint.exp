@@ -305,7 +305,7 @@ gdb_expect  {
                  {
                   send_gdb "shell grep factorial msymbols_output\n"
                   gdb_expect {
-                        -re "\\\[ *$decimal\\\] T\[ \t\]+$hex factorial.*$gdb_prompt $"\
+                        -re "\\\[ *$decimal\\\] \[tT\]\[ \t\]+$hex factorial.*$gdb_prompt $"\
                                                { pass "maint print msymbols" }
                         -re ".*$gdb_prompt $"       { fail "maint print msymbols" }
                          timeout         { fail "(timeout) maint print msymbols" }
@@ -329,7 +329,7 @@ gdb_test_multiple "maint print msymbols msymbols_output2 ${subdir}/${testfile}" 
     	gdb_test_multiple "shell ls msymbols_output2" "maint print msymbols" {
 	    -re "msymbols_output2\r\n$gdb_prompt $" {
 	    	gdb_test_multiple "shell grep factorial msymbols_output2" "maint print msymbols" {
-		    -re "\\\[ *$decimal\\\] T\[ \t\]+$hex factorial.*$gdb_prompt $" {
+		    -re "\\\[ *$decimal\\\] \[tT\]\[ \t\]+$hex factorial.*$gdb_prompt $" {
 		    	pass "maint print msymbols"
 		    }
 		    -re ".*$gdb_prompt $" {
@@ -469,6 +469,7 @@ send_gdb "maint info sections DATA\n"
 gdb_expect {
     -re ".* \\.text .*$gdb_prompt $" { fail "maint info sections DATA" }
     -re ".* \\.data .*$gdb_prompt $" { pass "maint info sections DATA" }
+    -re ".* .rodata .*$gdb_prompt $" { pass "maint info sections DATA" }
     -re ".*$gdb_prompt $"          { fail "maint info sections DATA" }
     timeout              { fail "(timeout) maint info sections DATA" }
 }

@@ -22,7 +22,7 @@ if $tracelevel {
     strace $tracelevel
 }
 
-if { [skip_cplus_tests] } { continue }
+if { [skip_stl_tests] } { continue }
 
 # On SPU this test fails because the executable exceeds local storage size.
 if { [istarget "spu*-*-*"] } {
@@ -38,7 +38,7 @@ if [get_compiler_info ${binfile}] {
 }
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable "debug c++"] != "" } {
-    perror "Couldn't compile ${srcfile}"
+    untested bs15503.exp
     return -1
 }
 

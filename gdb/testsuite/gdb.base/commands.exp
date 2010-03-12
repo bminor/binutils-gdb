@@ -488,7 +488,7 @@ proc bp_deleted_in_command_test {} {
 
     gdb_run_cmd
     gdb_expect {
-        -re ".*factorial command-list executed.*1.*$gdb_prompt $" {
+        -re ".*factorial command-list executed.*$gdb_prompt $" {
 	    pass "run factorial until breakpoint"
         }
 	-re ".*$gdb_prompt $" {
@@ -550,7 +550,7 @@ proc temporary_breakpoint_commands {} {
 
     gdb_run_cmd
     gdb_expect {
-	-re ".*factorial tbreak commands executed.*1.*$gdb_prompt $" {
+	-re ".*factorial tbreak commands executed.*$gdb_prompt $" {
 	    pass "run factorial until temporary breakpoint"
 	}
 	timeout { fail "(timeout) run factorial until temporary breakpoint" }

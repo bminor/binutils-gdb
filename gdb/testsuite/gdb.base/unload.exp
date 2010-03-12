@@ -30,11 +30,6 @@ if {[skip_shlib_tests]} {
     return 0
 }
 
-# TODO: Use LoadLibrary on this target instead of dlopen.
-if {[istarget arm*-*-symbianelf*]} {
-    return 0
-}
-
 set testfile "unload"
 set libfile "unloadshr"
 set libfile2 "unloadshr2"
@@ -49,13 +44,17 @@ set libsrc  $srcdir/$subdir/$libfile.c
 set libsrc2  $srcdir/$subdir/$libfile2.c
 set lib_sl  $objdir/$subdir/$libname
 set lib_sl2  $objdir/$subdir/$libname2
+set lib_dlopen [shlib_target_file ${libname}]
+set lib_dlopen2 [shlib_target_file ${libname2}]
+set lib_syms [shlib_symbol_file ${libname}]
+set lib_syms2 [shlib_symbol_file ${libname2}]
 
 if [get_compiler_info ${binfile}] {
     return -1
 }
 
 set lib_opts debug
-set exec_opts [list debug shlib_load additional_flags=-DSHLIB_NAME\=\"${libname}\" additional_flags=-DSHLIB_NAME2\=\"${libname2}\"]
+set exec_opts [list debug shlib_load additional_flags=-DSHLIB_NAME\=\"${lib_dlopen}\" additional_flags=-DSHLIB_NAME2\=\"${lib_dlopen2}\"]
 
 if { [gdb_compile_shlib $libsrc $lib_sl $lib_opts] != ""
      || [gdb_compile_shlib $libsrc2 $lib_sl2 $lib_opts] != ""
@@ -106,7 +105,7 @@ gdb_test "info break" \
 gdb_breakpoint "$testfile.c:[gdb_get_line_number "y-set-1" $testfile.c]" temporary
 
 gdb_test "continue" \
-"Continuing.*warning: Temporarily disabling breakpoints for.*${libname}.*y-set-1.*" \
+"Continuing.*warning: Temporarily disabling breakpoints for.*${lib_syms}.*y-set-1.*" \
 "continuing to unloaded libfile"
 
 gdb_test "print y" " = 10" "print y from libfile"
@@ -129,7 +128,7 @@ gdb_test "info break" \
 gdb_breakpoint "$testfile.c:[gdb_get_line_number "y-set-1" $testfile.c]" temporary
 
 gdb_test "continue" \
-"Continuing.*warning: Temporarily disabling breakpoints for.*${libname}.*y-set-1.*" \
+"Continuing.*warning: Temporarily disabling breakpoints for.*${lib_syms}.*y-set-1.*" \
 "continuing to unloaded libfile"
 
 set unloadshr_line2 [gdb_get_line_number "unloadshr2 break" ${libsrcfile2}]
@@ -148,7 +147,7 @@ gdb_test "info break" \
 gdb_breakpoint "$testfile.c:[gdb_get_line_number "y-set-2" $testfile.c]"
 
 gdb_test "continue" \
-"Continuing.*warning: Temporarily disabling breakpoints for.*${libname2}.*y-set-2.*" \
+"Continuing.*warning: Temporarily disabling breakpoints for.*${lib_syms2}.*y-set-2.*" \
 "continuing to unloaded libfile2"
 
 gdb_test "print y" " = 200" "print y from libfile2"

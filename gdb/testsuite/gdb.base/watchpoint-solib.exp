@@ -27,11 +27,6 @@ if {[skip_shlib_tests]} {
     return 0
 }
 
-# TODO: Use LoadLibrary on this target instead of dlopen.
-if {[istarget arm*-*-symbianelf*]} {
-    return 0
-}
-
 set testfile "watchpoint-solib"
 set libfile "watchpoint-solib-shr"
 set libname "${libfile}.sl"
@@ -41,13 +36,15 @@ set binfile $objdir/$subdir/$testfile
 set shlibdir ${objdir}/${subdir}
 set libsrc  $srcdir/$subdir/$libfile.c
 set lib_sl  $objdir/$subdir/$libname
+set lib_dlopen [shlib_target_file ${libname}]
+set lib_syms [shlib_symbol_file ${libname}]
 
 if [get_compiler_info ${binfile}] {
     return -1
 }
 
 set lib_opts debug
-set exec_opts [list debug shlib_load additional_flags=-DSHLIB_NAME\=\"${libname}\"]
+set exec_opts [list debug shlib_load additional_flags=-DSHLIB_NAME\=\"${lib_dlopen}\"]
 
 if { [gdb_compile_shlib $libsrc $lib_sl $lib_opts] != ""
      || [gdb_compile $srcfile $binfile executable $exec_opts] != ""} {

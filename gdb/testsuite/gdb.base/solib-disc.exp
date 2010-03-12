@@ -32,6 +32,8 @@ set libsrc "${srcdir}/${subdir}/${libfile}.c"
 set libname "${libfile}.so"
 set libobj "${objdir}/${subdir}/${libname}"
 set execsrc "${srcdir}/${subdir}/${srcfile}"
+set lib_dlopen [shlib_target_file ${libname}]
+set lib_syms [shlib_symbol_file ${libname}]
 
 remote_exec build "rm -f ${binfile}"
 
@@ -39,7 +41,7 @@ if [get_compiler_info ${binfile}] {
     return -1
 }
 
-set exec_opts [list debug shlib_load additional_flags=-DSHLIB_NAME\=\"${libname}\"]
+set exec_opts [list debug shlib_load additional_flags=-DSHLIB_NAME\=\"${lib_dlopen}\"]
 
 if { [gdb_compile_shlib $libsrc $libobj {debug}] != ""
      || [gdb_compile $execsrc ${binfile} executable $exec_opts] != "" } {

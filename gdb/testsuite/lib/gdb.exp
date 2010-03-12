@@ -1281,6 +1281,18 @@ proc skip_cplus_tests {} {
     return 0
 }
 
+# Return a 1 for configurations for which don't have both C++ and the STL.
+
+proc skip_stl_tests {} {
+    # Symbian supports the C++ language, but the STL is missing
+    # (both headers and libraries).
+    if { [istarget "arm*-*-symbianelf*"] } {
+	return 1
+    }
+
+    return [skip_cplus_tests]
+}
+
 # Return a 1 if I don't even want to try to test FORTRAN.
 
 proc skip_fortran_tests {} {
@@ -1808,11 +1820,14 @@ proc gdb_compile {source dest type options} {
 	if { ([istarget "*-*-mingw*"]
 	      || [istarget *-*-cygwin*]
 	      || [istarget *-*-pe*]
-	      || [istarget arm*-*-symbianelf*]
 	      || [istarget hppa*-*-hpux*])} {
 	    # Do not need anything.
 	} elseif { [istarget *-*-openbsd*] } {
 	    lappend new_options "additional_flags=-Wl,-rpath,${outdir}"
+	} elseif { [istarget arm*-*-symbianelf*] } {
+	    if { $shlib_load } {
+		lappend new_options "libs=-ldl"
+	    }
 	} else {
 	    if { $shlib_load } {
 		lappend new_options "libs=-ldl"
@@ -2333,6 +2348,22 @@ proc gdb_load_cmd { args } {
     return -1
 }
 
+# Return the filename to download to the target and load on the target
+# for this shared library.  Normally just LIBNAME, unless shared libraries
+# for this target have separate link and load images.
+
+proc shlib_target_file { libname } {
+    return $libname
+}
+
+# Return the filename GDB will load symbols from when debugging this
+# shared library.  Normally just LIBNAME, unless shared libraries for
+# this target have separate link and load images.
+
+proc shlib_symbol_file { libname } {
+    return $libname
+}
+
 # gdb_download
 #
 # Copy a file to the remote target and return its target filename.
@@ -2356,7 +2387,7 @@ proc gdb_load_shlibs { args } {
     }
 
     foreach file $args {
-	gdb_download $file
+	gdb_download [shlib_target_file $file]
     }
 
     # Even if the target supplies full paths for shared libraries,
