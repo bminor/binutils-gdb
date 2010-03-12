@@ -8976,13 +8976,15 @@ ppc_type_of_stub (asection *input_sec,
       struct ppc_link_hash_entry *fdh = h;
       if (h->oh != NULL
 	  && h->oh->is_func_descriptor)
-	fdh = ppc_follow_link (h->oh);
+	{
+	  fdh = ppc_follow_link (h->oh);
+	  *hash = fdh;
+	}
 
       for (ent = fdh->elf.plt.plist; ent != NULL; ent = ent->next)
 	if (ent->addend == rel->r_addend
 	    && ent->plt.offset != (bfd_vma) -1)
 	  {
-	    *hash = fdh;
 	    *plt_ent = ent;
 	    return ppc_stub_plt_call;
 	  }
@@ -11933,7 +11935,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  >= 2 * max_br_offset)
 	      && r_type != R_PPC64_ADDR14_BRTAKEN
 	      && r_type != R_PPC64_ADDR14_BRNTAKEN)
-	    stub_entry = ppc_get_stub_entry (input_section, sec, h, rel,
+	    stub_entry = ppc_get_stub_entry (input_section, sec, fdh, rel,
 					     htab);
 
 	  if (stub_entry != NULL)

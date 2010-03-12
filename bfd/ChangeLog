@@ -1,3 +1,10 @@
+2010-03-13  Alan Modra  <amodra@gmail.com>
+
+	PR ld/11375
+	* elf64-ppc.c (ppc_type_of_stub): Always set *hash to the
+	function descriptor symbol if there is one, not just for plt stubs.
+	(ppc64_elf_relocate_section): Use fdh on all ppc_get_stub_entry calls.
+
 2010-03-05  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* elflink.c (bfd_elf_size_dynamic_sections): Don't emit base
