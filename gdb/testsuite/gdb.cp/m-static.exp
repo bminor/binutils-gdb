@@ -132,5 +132,10 @@ gdb_test "print test4.nowhere" "field nowhere is nonexistent or has been optimis
 # that GDB's current behavior in such situations is either consistent
 # across platforms or optimal, so I'm not including one now.
 
+# Step into test1.method and examine the method-scoped static.
+# This is a regression test for PR 9708.
+gdb_test "step" "gnu_obj_1::method.*"
+gdb_test "print svar" " = true"
+
 gdb_exit
 return 0

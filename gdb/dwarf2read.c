@@ -3204,6 +3204,8 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
 static int
 die_needs_namespace (struct die_info *die, struct dwarf2_cu *cu)
 {
+  struct attribute *attr;
+
   switch (die->tag)
     {
     case DW_TAG_namespace:
@@ -3231,11 +3233,17 @@ die_needs_namespace (struct die_info *die, struct dwarf2_cu *cu)
 				      spec_cu);
 	}
 
-      if (dwarf2_attr (die, DW_AT_external, cu)
-	  || die->parent->tag == DW_TAG_namespace)
-	return 1;
-
-      return 0;
+      attr = dwarf2_attr (die, DW_AT_external, cu);
+      if (attr == NULL && die->parent->tag != DW_TAG_namespace)
+	return 0;
+      /* A variable in a lexical block of some kind does not need a
+	 namespace, even though in C++ such variables may be external
+	 and have a mangled name.  */
+      if (die->parent->tag ==  DW_TAG_lexical_block
+	  || die->parent->tag ==  DW_TAG_try_block
+	  || die->parent->tag ==  DW_TAG_catch_block)
+	return 0;
+      return 1;
 
     default:
       return 0;
@@ -8413,7 +8421,15 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	      var_decode_location (attr, sym, cu);
 	      attr2 = dwarf2_attr (die, DW_AT_external, cu);
 	      if (attr2 && (DW_UNSND (attr2) != 0))
-		add_symbol_to_list (sym, &global_symbols);
+		{
+		  struct pending **list_to_add;
+
+		  /* A variable with DW_AT_external is never static,
+		     but it may be block-scoped.  */
+		  list_to_add = (cu->list_in_scope == &file_symbols
+				 ? &global_symbols : cu->list_in_scope);
+		  add_symbol_to_list (sym, list_to_add);
+		}
 	      else
 		add_symbol_to_list (sym, cu->list_in_scope);
 	    }

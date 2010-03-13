@@ -1,3 +1,10 @@
+2010-03-12  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/9708:
+	* gdb.cp/m-static.exp: Add regression test.
+	* gdb.cp/m-static.cc (method): New method.
+	(main): Call it.
+
 2010-03-12  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* gdb.cp/gdb2384-base.h: Created 'namespace B'.

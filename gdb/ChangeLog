@@ -1,3 +1,11 @@
+2010-03-12  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/9708:
+	* dwarf2read.c (die_needs_namespace) <DW_TAG_variable>: A variable
+	in a lexical block does not need a namespace.
+	(new_symbol) <DW_TAG_variable>: Put extern variables on
+	list_in_scope in all cases.
+
 2010-03-12 Stan Shebs  <stan@codesourcery.com>
 
 	* ax-gdb.c (gen_expr): Add shift expressions.
