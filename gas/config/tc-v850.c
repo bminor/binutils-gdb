@@ -1536,7 +1536,24 @@ v850_insert_operand (unsigned long insn,
 		min = 0;
 	    }
 
-	  if (val < (offsetT) min || val > (offsetT) max)
+	  /* Some people write constants with the sign extension done by
+	     hand but only up to 32 bits.  This shouldn't really be valid,
+	     but, to permit this code to assemble on a 64-bit host, we
+	     sign extend the 32-bit value to 64 bits if so doing makes the
+	     value valid.  */
+	  if (val > max
+	      && (offsetT) (val - 0x80000000 - 0x80000000) >= min
+	      && (offsetT) (val - 0x80000000 - 0x80000000) <= max)
+	    val = val - 0x80000000 - 0x80000000;
+
+	  /* Similarly, people write expressions like ~(1<<15), and expect
+	     this to be OK for a 32-bit unsigned value.  */
+	  else if (val < min
+		   && (offsetT) (val + 0x80000000 + 0x80000000) >= min
+		   && (offsetT) (val + 0x80000000 + 0x80000000) <= max)
+	    val = val + 0x80000000 + 0x80000000;
+
+	  else if (val < (offsetT) min || val > (offsetT) max)
 	    {
 	      char buf [128];
 

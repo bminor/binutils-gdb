@@ -1,3 +1,8 @@
+2010-03-13  Segher Boessenkool  <segher@kernel.crashing.org>
+
+	* config/tc-v850.c (v850_insert_operand): Handle out-of-range
+	assembler constants on 64-bit hosts.
+
 2010-03-10  Mike Frysinger  <michael.frysinger@analog.com>
 
 	* bfin-defs.h, bfin-lex.l, bfin-parse.y, tc-bfin.c, tc-bfin.h:
