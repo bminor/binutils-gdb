@@ -1656,7 +1656,10 @@ read_program_headers_from_bfd (bfd *abfd, int *phdrs_size)
   return buf;
 }
 
-/* We relocate all of the sections by the same amount.  This
+/* Return 1 and fill *DISPLACEMENTP with detected PIE offset of inferior
+   exec_bfd.  Otherwise return 0.
+
+   We relocate all of the sections by the same amount.  This
    behavior is mandated by recent editions of the System V ABI. 
    According to the System V Application Binary Interface,
    Edition 4.1, page 5-5:
@@ -1696,8 +1699,8 @@ read_program_headers_from_bfd (bfd *abfd, int *phdrs_size)
      should either be removed or modified to accomodate the new file
      type.  - Kevin, Nov 2000. ]  */
 
-static CORE_ADDR
-svr4_exec_displacement (void)
+static int
+svr4_exec_displacement (CORE_ADDR *displacementp)
 {
   /* ENTRY_POINT is a possible function descriptor - before
      a call to gdbarch_convert_from_func_ptr_addr.  */
@@ -1761,7 +1764,8 @@ svr4_exec_displacement (void)
 	return 0;
     }
 
-  return displacement;
+  *displacementp = displacement;
+  return 1;
 }
 
 /* Relocate the main executable.  This function should be called upon
@@ -1772,11 +1776,25 @@ svr4_exec_displacement (void)
 static void
 svr4_relocate_main_executable (void)
 {
-  CORE_ADDR displacement = svr4_exec_displacement ();
+  CORE_ADDR displacement;
 
-  /* Even if DISPLACEMENT is 0 still try to relocate it as this is a new
-     difference of in-memory vs. in-file addresses and we could already
-     relocate the executable at this function to improper address before.  */
+  if (symfile_objfile)
+    {
+      int i;
+
+      /* Remote target may have already set specific offsets by `qOffsets'
+	 which should be preferred.  */
+
+      for (i = 0; i < symfile_objfile->num_sections; i++)
+	if (ANOFFSET (symfile_objfile->section_offsets, i) != 0)
+	  return;
+    }
+
+  if (! svr4_exec_displacement (&displacement))
+    return;
+
+  /* Even DISPLACEMENT 0 is a valid new difference of in-memory vs. in-file
+     addresses.  */
 
   if (symfile_objfile)
     {
