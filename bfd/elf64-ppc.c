@@ -3820,6 +3820,7 @@ struct ppc_link_hash_table
 
 /* Recursion protection when determining above flag.  */
 #define call_check_in_progress sec_flg4
+#define call_check_done sec_flg5
 
 /* Get the ppc64 ELF linker hash table from a link_info structure.  */
 
@@ -4573,7 +4574,7 @@ ppc64_elf_add_symbol_hook (bfd *ibfd,
   else if (ELF_ST_TYPE (isym->st_info) == STT_FUNC)
     ;
   else if (*sec != NULL
-	   && strcmp (bfd_get_section_name (ibfd, *sec), ".opd") == 0)
+	   && strcmp ((*sec)->name, ".opd") == 0)
     isym->st_info = ELF_ST_INFO (ELF_ST_BIND (isym->st_info), STT_FUNC);
 
   return TRUE;
@@ -4880,7 +4881,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
   sreloc = NULL;
   opd_sym_map = NULL;
-  if (strcmp (bfd_get_section_name (abfd, sec), ".opd") == 0)
+  if (strcmp (sec->name, ".opd") == 0)
     {
       /* Garbage collection needs some extra help with .opd sections.
 	 We don't want to necessarily keep everything referenced by
@@ -8811,7 +8812,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
 	}
-      else if (CONST_STRNEQ (bfd_get_section_name (dynobj, s), ".rela"))
+      else if (CONST_STRNEQ (s->name, ".rela"))
 	{
 	  if (s->size != 0)
 	    {
@@ -10125,9 +10126,6 @@ ppc64_elf_finish_multitoc_partition (struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
 
-  if (htab == NULL)
-    return;
-
   /* After the second pass, toc_curr tracks the TOC offset used
      for code sections below in ppc64_elf_next_input_section.  */
   htab->toc_curr = TOC_BASE_OFF;
@@ -10144,10 +10142,10 @@ ppc64_elf_finish_multitoc_partition (struct bfd_link_info *info)
 static int
 toc_adjusting_stub_needed (struct bfd_link_info *info, asection *isec)
 {
-  Elf_Internal_Rela *relstart, *rel;
-  Elf_Internal_Sym *local_syms;
   int ret;
-  struct ppc_link_hash_table *htab;
+
+  /* Mark this section as checked.  */
+  isec->call_check_done = 1;
 
   /* We know none of our code bearing sections will need toc stubs.  */
   if ((isec->flags & SEC_LINKER_CREATED) != 0)
@@ -10159,179 +10157,189 @@ toc_adjusting_stub_needed (struct bfd_link_info *info, asection *isec)
   if (isec->output_section == NULL)
     return 0;
 
-  if (isec->reloc_count == 0)
-    return 0;
-
-  relstart = _bfd_elf_link_read_relocs (isec->owner, isec, NULL, NULL,
-					info->keep_memory);
-  if (relstart == NULL)
-    return -1;
-
-  /* Look for branches to outside of this section.  */
-  local_syms = NULL;
   ret = 0;
-  htab = ppc_hash_table (info);
-  if (htab == NULL)
-    return -1;
-
-  for (rel = relstart; rel < relstart + isec->reloc_count; ++rel)
+  if (isec->reloc_count != 0)
     {
-      enum elf_ppc64_reloc_type r_type;
-      unsigned long r_symndx;
-      struct elf_link_hash_entry *h;
-      struct ppc_link_hash_entry *eh;
-      Elf_Internal_Sym *sym;
-      asection *sym_sec;
-      struct _opd_sec_data *opd;
-      bfd_vma sym_value;
-      bfd_vma dest;
+      Elf_Internal_Rela *relstart, *rel;
+      Elf_Internal_Sym *local_syms;
+      struct ppc_link_hash_table *htab;
 
-      r_type = ELF64_R_TYPE (rel->r_info);
-      if (r_type != R_PPC64_REL24
-	  && r_type != R_PPC64_REL14
-	  && r_type != R_PPC64_REL14_BRTAKEN
-	  && r_type != R_PPC64_REL14_BRNTAKEN)
-	continue;
+      relstart = _bfd_elf_link_read_relocs (isec->owner, isec, NULL, NULL,
+					    info->keep_memory);
+      if (relstart == NULL)
+	return -1;
 
-      r_symndx = ELF64_R_SYM (rel->r_info);
-      if (!get_sym_h (&h, &sym, &sym_sec, NULL, &local_syms, r_symndx,
-		      isec->owner))
+      /* Look for branches to outside of this section.  */
+      local_syms = NULL;
+      htab = ppc_hash_table (info);
+      if (htab == NULL)
+	return -1;
+
+      for (rel = relstart; rel < relstart + isec->reloc_count; ++rel)
 	{
-	  ret = -1;
-	  break;
-	}
+	  enum elf_ppc64_reloc_type r_type;
+	  unsigned long r_symndx;
+	  struct elf_link_hash_entry *h;
+	  struct ppc_link_hash_entry *eh;
+	  Elf_Internal_Sym *sym;
+	  asection *sym_sec;
+	  struct _opd_sec_data *opd;
+	  bfd_vma sym_value;
+	  bfd_vma dest;
 
-      /* Calls to dynamic lib functions go through a plt call stub
-	 that uses r2.  */
-      eh = (struct ppc_link_hash_entry *) h;
-      if (eh != NULL
-	  && (eh->elf.plt.plist != NULL
-	      || (eh->oh != NULL
-		  && ppc_follow_link (eh->oh)->elf.plt.plist != NULL)))
-	{
-	  ret = 1;
-	  break;
-	}
-
-      if (sym_sec == NULL)
-	/* Ignore other undefined symbols.  */
-	continue;
-
-      /* Assume branches to other sections not included in the link need
-	 stubs too, to cover -R and absolute syms.  */
-      if (sym_sec->output_section == NULL)
-	{
-	  ret = 1;
-	  break;
-	}
-
-      if (h == NULL)
-	sym_value = sym->st_value;
-      else
-	{
-	  if (h->root.type != bfd_link_hash_defined
-	      && h->root.type != bfd_link_hash_defweak)
-	    abort ();
-	  sym_value = h->root.u.def.value;
-	}
-      sym_value += rel->r_addend;
-
-      /* If this branch reloc uses an opd sym, find the code section.  */
-      opd = get_opd_info (sym_sec);
-      if (opd != NULL)
-	{
-	  if (h == NULL && opd->adjust != NULL)
-	    {
-	      long adjust;
-
-	      adjust = opd->adjust[sym->st_value / 8];
-	      if (adjust == -1)
-		/* Assume deleted functions won't ever be called.  */
-		continue;
-	      sym_value += adjust;
-	    }
-
-	  dest = opd_entry_value (sym_sec, sym_value, &sym_sec, NULL);
-	  if (dest == (bfd_vma) -1)
+	  r_type = ELF64_R_TYPE (rel->r_info);
+	  if (r_type != R_PPC64_REL24
+	      && r_type != R_PPC64_REL14
+	      && r_type != R_PPC64_REL14_BRTAKEN
+	      && r_type != R_PPC64_REL14_BRNTAKEN)
 	    continue;
-	}
-      else
-	dest = (sym_value
-		+ sym_sec->output_offset
-		+ sym_sec->output_section->vma);
 
-      /* Ignore branch to self.  */
-      if (sym_sec == isec)
-	continue;
-
-      /* If the called function uses the toc, we need a stub.  */
-      if (sym_sec->has_toc_reloc
-	  || sym_sec->makes_toc_func_call)
-	{
-	  ret = 1;
-	  break;
-	}
-
-      /* Assume any branch that needs a long branch stub might in fact
-	 need a plt_branch stub.  A plt_branch stub uses r2.  */
-      else if (dest - (isec->output_offset
-		       + isec->output_section->vma
-		       + rel->r_offset) + (1 << 25) >= (2 << 25))
-	{
-	  ret = 1;
-	  break;
-	}
-
-      /* If calling back to a section in the process of being tested, we
-	 can't say for sure that no toc adjusting stubs are needed, so
-	 don't return zero.  */
-      else if (sym_sec->call_check_in_progress)
-	ret = 2;
-
-      /* Branches to another section that itself doesn't have any TOC
-	 references are OK.  Recursively call ourselves to check.  */
-      else if (sym_sec->id <= htab->top_id
-	       && htab->stub_group[sym_sec->id].toc_off == 0)
-	{
-	  int recur;
-
-	  /* Mark current section as indeterminate, so that other
-	     sections that call back to current won't be marked as
-	     known.  */
-	  isec->call_check_in_progress = 1;
-	  recur = toc_adjusting_stub_needed (info, sym_sec);
-	  isec->call_check_in_progress = 0;
-
-	  if (recur < 0)
+	  r_symndx = ELF64_R_SYM (rel->r_info);
+	  if (!get_sym_h (&h, &sym, &sym_sec, NULL, &local_syms, r_symndx,
+			  isec->owner))
 	    {
-	      /* An error.  Exit.  */
 	      ret = -1;
 	      break;
 	    }
-	  else if (recur <= 1)
+
+	  /* Calls to dynamic lib functions go through a plt call stub
+	     that uses r2.  */
+	  eh = (struct ppc_link_hash_entry *) h;
+	  if (eh != NULL
+	      && (eh->elf.plt.plist != NULL
+		  || (eh->oh != NULL
+		      && ppc_follow_link (eh->oh)->elf.plt.plist != NULL)))
 	    {
-	      /* Known result.  Mark as checked and set section flag.  */
-	      htab->stub_group[sym_sec->id].toc_off = 1;
-	      if (recur != 0)
-		{
-		  sym_sec->makes_toc_func_call = 1;
-		  ret = 1;
-		  break;
-		}
+	      ret = 1;
+	      break;
 	    }
+
+	  if (sym_sec == NULL)
+	    /* Ignore other undefined symbols.  */
+	    continue;
+
+	  /* Assume branches to other sections not included in the
+	     link need stubs too, to cover -R and absolute syms.  */
+	  if (sym_sec->output_section == NULL)
+	    {
+	      ret = 1;
+	      break;
+	    }
+
+	  if (h == NULL)
+	    sym_value = sym->st_value;
 	  else
 	    {
-	      /* Unknown result.  Continue checking.  */
-	      ret = 2;
+	      if (h->root.type != bfd_link_hash_defined
+		  && h->root.type != bfd_link_hash_defweak)
+		abort ();
+	      sym_value = h->root.u.def.value;
 	    }
+	  sym_value += rel->r_addend;
+
+	  /* If this branch reloc uses an opd sym, find the code section.  */
+	  opd = get_opd_info (sym_sec);
+	  if (opd != NULL)
+	    {
+	      if (h == NULL && opd->adjust != NULL)
+		{
+		  long adjust;
+
+		  adjust = opd->adjust[sym->st_value / 8];
+		  if (adjust == -1)
+		    /* Assume deleted functions won't ever be called.  */
+		    continue;
+		  sym_value += adjust;
+		}
+
+	      dest = opd_entry_value (sym_sec, sym_value, &sym_sec, NULL);
+	      if (dest == (bfd_vma) -1)
+		continue;
+	    }
+	  else
+	    dest = (sym_value
+		    + sym_sec->output_offset
+		    + sym_sec->output_section->vma);
+
+	  /* Ignore branch to self.  */
+	  if (sym_sec == isec)
+	    continue;
+
+	  /* If the called function uses the toc, we need a stub.  */
+	  if (sym_sec->has_toc_reloc
+	      || sym_sec->makes_toc_func_call)
+	    {
+	      ret = 1;
+	      break;
+	    }
+
+	  /* Assume any branch that needs a long branch stub might in fact
+	     need a plt_branch stub.  A plt_branch stub uses r2.  */
+	  else if (dest - (isec->output_offset
+			   + isec->output_section->vma
+			   + rel->r_offset) + (1 << 25) >= (2 << 25))
+	    {
+	      ret = 1;
+	      break;
+	    }
+
+	  /* If calling back to a section in the process of being
+	     tested, we can't say for sure that no toc adjusting stubs
+	     are needed, so don't return zero.  */
+	  else if (sym_sec->call_check_in_progress)
+	    ret = 2;
+
+	  /* Branches to another section that itself doesn't have any TOC
+	     references are OK.  Recursively call ourselves to check.  */
+	  else if (!sym_sec->call_check_done)
+	    {
+	      int recur;
+
+	      /* Mark current section as indeterminate, so that other
+		 sections that call back to current won't be marked as
+		 known.  */
+	      isec->call_check_in_progress = 1;
+	      recur = toc_adjusting_stub_needed (info, sym_sec);
+	      isec->call_check_in_progress = 0;
+
+	      if (recur != 0)
+		{
+		  ret = recur;
+		  if (recur != 2)
+		    break;
+		}
+	    }
+	}
+
+      if (local_syms != NULL
+	  && (elf_symtab_hdr (isec->owner).contents
+	      != (unsigned char *) local_syms))
+	free (local_syms);
+      if (elf_section_data (isec)->relocs != relstart)
+	free (relstart);
+    }
+
+  if ((ret & 1) == 0
+      && isec->map_head.s != NULL
+      && (strcmp (isec->output_section->name, ".init") == 0
+	  || strcmp (isec->output_section->name, ".fini") == 0))
+    {
+      if (isec->map_head.s->has_toc_reloc
+	  || isec->map_head.s->makes_toc_func_call)
+	ret = 1;
+      else if (!isec->map_head.s->call_check_done)
+	{
+	  int recur;
+	  isec->call_check_in_progress = 1;
+	  recur = toc_adjusting_stub_needed (info, isec->map_head.s);
+	  isec->call_check_in_progress = 0;
+	  if (recur != 0)
+	    ret = recur;
 	}
     }
 
-  if (local_syms != NULL
-      && (elf_symtab_hdr (isec->owner).contents != (unsigned char *) local_syms))
-    free (local_syms);
-  if (elf_section_data (isec)->relocs != relstart)
-    free (relstart);
+  if (ret == 1)
+    isec->makes_toc_func_call = 1;
 
   return ret;
 }
@@ -10377,21 +10385,53 @@ ppc64_elf_next_input_section (struct bfd_link_info *info, asection *isec)
 	  if (elf_gp (isec->owner) != 0)
 	    htab->toc_curr = elf_gp (isec->owner);
 	}
-      else if (htab->stub_group[isec->id].toc_off == 0)
-	{
-	  int ret = toc_adjusting_stub_needed (info, isec);
-	  if (ret < 0)
-	    return FALSE;
-	  else
-	    isec->makes_toc_func_call = ret & 1;
-	}
+      else if (!isec->call_check_done
+	       && toc_adjusting_stub_needed (info, isec) < 0)
+	return FALSE;
     }
 
   /* Functions that don't use the TOC can belong in any TOC group.
      Use the last TOC base.  This happens to make _init and _fini
-     pasting work.  */
+     pasting work, because the fragments generally don't use the TOC.  */
   htab->stub_group[isec->id].toc_off = htab->toc_curr;
   return TRUE;
+}
+
+/* Check that all .init and .fini sections use the same toc, if they
+   have toc relocs.  */
+
+static bfd_boolean
+check_pasted_section (struct bfd_link_info *info, const char *name)
+{
+  asection *o = bfd_get_section_by_name (info->output_bfd, name);
+
+  if (o != NULL)
+    {
+      struct ppc_link_hash_table *htab = ppc_hash_table (info);
+      bfd_vma toc_off = 0;
+      asection *i;
+
+      for (i = o->map_head.s; i != NULL; i = i->map_head.s)
+	if (i->has_toc_reloc)
+	  {
+	    if (toc_off == 0)
+	      toc_off = htab->stub_group[i->id].toc_off;
+	    else if (toc_off != htab->stub_group[i->id].toc_off)
+	      return FALSE;
+	  }
+      /* Make sure the whole pasted function uses the same toc offset.  */
+      if (toc_off != 0)
+	for (i = o->map_head.s; i != NULL; i = i->map_head.s)
+	  htab->stub_group[i->id].toc_off = toc_off;
+    }
+  return TRUE;
+}
+
+bfd_boolean
+ppc64_elf_check_init_fini (struct bfd_link_info *info)
+{
+  return (check_pasted_section (info, ".init")
+	  & check_pasted_section (info, ".fini"));
 }
 
 /* See whether we can group stub sections together.  Grouping stub

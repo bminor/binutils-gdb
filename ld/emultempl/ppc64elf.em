@@ -346,6 +346,9 @@ gld${EMULATION_NAME}_after_allocation (void)
 
 	  lang_for_each_statement (build_section_lists);
 
+	  if (!ppc64_elf_check_init_fini (&link_info))
+	    einfo ("%P: .init/.fini fragments use differing TOC pointers\n");
+
 	  /* Call into the BFD backend to do the real work.  */
 	  if (!ppc64_elf_size_stubs (&link_info, group_size))
 	    einfo ("%X%P: can not size stub section: %E\n");

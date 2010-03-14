@@ -1,3 +1,9 @@
+2010-03-14  Alan Modra  <amodra@gmail.com>
+
+	PR ld/11378
+	* emultempl/ppc64elf.em (gld${EMULATION_NAME}_after_allocation): Call
+	ppc64_elf_check_init_fini and warn if .init/.fini use different TOCs.
+
 2010-03-11  George Gensure  <werkt0@gmail.com>
 
 	PR ld/11367

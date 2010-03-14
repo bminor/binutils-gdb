@@ -1,3 +1,17 @@
+2010-03-14  Alan Modra  <amodra@gmail.com>
+
+	PR ld/11378
+	* elf64-ppc.h (ppc64_elf_check_init_fini): Declare.
+	* elf64-ppc.c (call_check_done): Define.
+	(ppc64_elf_add_symbol_hook): Substitute bfd_get_section_name macro.
+	(ppc64_elf_check_relocs, ppc64_elf_size_dynamic_sections): Likewise.
+	(ppc64_elf_finish_multitoc_partition): Remove unnecessary check.
+	(toc_adjusting_stub_needed): Use call_check_done rather than toc_off.
+	Simplify return logic.  Iterate over all .init and .fini fragments
+	by recursion.  Set makes_toc_func_call here..
+	(ppc64_elf_next_input_section): ..rather than here.
+	(check_pasted_section, ppc64_elf_check_init_fini): New functions.
+
 2010-03-13  Alan Modra  <amodra@gmail.com>
 
 	PR ld/11375

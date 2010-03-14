@@ -42,6 +42,8 @@ bfd_boolean ppc64_elf_layout_multitoc
   (struct bfd_link_info *);
 void ppc64_elf_finish_multitoc_partition
   (struct bfd_link_info *);
+bfd_boolean ppc64_elf_check_init_fini
+  (struct bfd_link_info *);
 bfd_boolean ppc64_elf_next_input_section
   (struct bfd_link_info *, asection *);
 bfd_boolean ppc64_elf_size_stubs
