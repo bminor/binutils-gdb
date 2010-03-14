@@ -1,3 +1,8 @@
+2010-03-14  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/solib-disc.c (main): Make format of fprintf a string
+	literal.  Add missing endlines to prints to stderr.
+
 2010-03-12  Tom Tromey  <tromey@redhat.com>
 
 	PR c++/9708:

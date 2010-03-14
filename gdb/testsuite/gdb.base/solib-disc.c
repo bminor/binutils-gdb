@@ -36,14 +36,14 @@ int main()
   handle = dlopen (SHLIB_NAME, RTLD_LAZY);
   if (!handle)
     {
-      fprintf (stderr, dlerror ());
+      fprintf (stderr, "%s\n", dlerror ());
       exit (1);
     }
 
   func = (void (*)(void)) dlsym (handle, "shrfunc");
   if (!func)
     {
-      fprintf (stderr, dlerror ());
+      fprintf (stderr, "%s\n", dlerror ());
       exit (1);
     }
 
