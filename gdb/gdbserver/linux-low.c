@@ -2556,9 +2556,8 @@ linux_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
   return 0;
 }
 
-/* Copy LEN bytes of data from debugger memory at MYADDR
-   to inferior's memory at MEMADDR.
-   On failure (cannot write the inferior)
+/* Copy LEN bytes of data from debugger memory at MYADDR to inferior's
+   memory at MEMADDR.  On failure (cannot write to the inferior)
    returns the value of errno.  */
 
 static int
@@ -2590,13 +2589,17 @@ linux_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
 
   /* Fill start and end extra bytes of buffer with existing memory data.  */
 
+  errno = 0;
   /* Coerce the 3rd arg to a uintptr_t first to avoid potential gcc warning
      about coercing an 8 byte integer to a 4 byte pointer.  */
   buffer[0] = ptrace (PTRACE_PEEKTEXT, pid,
 		      (PTRACE_ARG3_TYPE) (uintptr_t) addr, 0);
+  if (errno)
+    return errno;
 
   if (count > 1)
     {
+      errno = 0;
       buffer[count - 1]
 	= ptrace (PTRACE_PEEKTEXT, pid,
 		  /* Coerce to a uintptr_t first to avoid potential gcc warning
@@ -2604,9 +2607,11 @@ linux_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
 		  (PTRACE_ARG3_TYPE) (uintptr_t) (addr + (count - 1)
 						  * sizeof (PTRACE_XFER_TYPE)),
 		  0);
+      if (errno)
+	return errno;
     }
 
-  /* Copy data to be written over corresponding part of buffer */
+  /* Copy data to be written over corresponding part of buffer.  */
 
   memcpy ((char *) buffer + (memaddr & (sizeof (PTRACE_XFER_TYPE) - 1)), myaddr, len);
 

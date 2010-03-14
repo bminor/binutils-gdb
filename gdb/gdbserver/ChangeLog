@@ -1,5 +1,10 @@
 2010-03-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* linux-low.c (linux_write_memory): Bail out early if peeking
+	memory failed.
+
+2010-03-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* linux-low.h (struct lwp_info): New fields
 	`stopped_by_watchpoint' and `stopped_data_address'.
 	* linux-low.c (linux_wait_for_lwp): Check for watchpoint triggers
