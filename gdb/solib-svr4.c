@@ -451,6 +451,9 @@ bfd_lookup_symbol (bfd *abfd, char *symname)
 /* Read program header TYPE from inferior memory.  The header is found
    by scanning the OS auxillary vector.
 
+   If TYPE == -1, return the program headers instead of the contents of
+   one program header.
+
    Return a pointer to allocated memory holding the program header contents,
    or NULL on failure.  If sucessful, and unless P_SECT_SIZE is NULL, the
    size of those contents is returned to P_SECT_SIZE.  Likewise, the target
@@ -483,8 +486,13 @@ read_program_header (int type, int *p_sect_size, int *p_arch_size)
   else
     return 0;
 
-  /* Find .dynamic section via the PT_DYNAMIC PHDR.  */
-  if (arch_size == 32)
+  /* Find the requested segment.  */
+  if (type == -1)
+    {
+      sect_addr = at_phdr;
+      sect_size = at_phent * at_phnum;
+    }
+  else if (arch_size == 32)
     {
       Elf32_External_Phdr phdr;
       int i;
@@ -1622,55 +1630,30 @@ svr4_special_symbol_handling (void)
   svr4_relocate_main_executable ();
 }
 
-/* Decide if the objfile needs to be relocated.  As indicated above,
-   we will only be here when execution is stopped at the beginning
-   of the program.  Relocation is necessary if the address at which
-   we are presently stopped differs from the start address stored in
-   the executable AND there's no interpreter section.  The condition
-   regarding the interpreter section is very important because if
-   there *is* an interpreter section, execution will begin there
-   instead.  When there is an interpreter section, the start address
-   is (presumably) used by the interpreter at some point to start
-   execution of the program.
+/* Read the ELF program headers from ABFD.  Return the contents and
+   set *PHDRS_SIZE to the size of the program headers.  */
 
-   If there is an interpreter, it is normal for it to be set to an
-   arbitrary address at the outset.  The job of finding it is
-   handled in enable_break().
-
-   So, to summarize, relocations are necessary when there is no
-   interpreter section and the start address obtained from the
-   executable is different from the address at which GDB is
-   currently stopped.
-   
-   [ The astute reader will note that we also test to make sure that
-     the executable in question has the DYNAMIC flag set.  It is my
-     opinion that this test is unnecessary (undesirable even).  It
-     was added to avoid inadvertent relocation of an executable
-     whose e_type member in the ELF header is not ET_DYN.  There may
-     be a time in the future when it is desirable to do relocations
-     on other types of files as well in which case this condition
-     should either be removed or modified to accomodate the new file
-     type.  (E.g, an ET_EXEC executable which has been built to be
-     position-independent could safely be relocated by the OS if
-     desired.  It is true that this violates the ABI, but the ABI
-     has been known to be bent from time to time.)  - Kevin, Nov 2000. ]
-   */
-
-static CORE_ADDR
-svr4_static_exec_displacement (void)
+static gdb_byte *
+read_program_headers_from_bfd (bfd *abfd, int *phdrs_size)
 {
-  asection *interp_sect;
-  struct regcache *regcache
-    = get_thread_arch_regcache (inferior_ptid, target_gdbarch);
-  CORE_ADDR pc = regcache_read_pc (regcache);
+  Elf_Internal_Ehdr *ehdr;
+  gdb_byte *buf;
 
-  interp_sect = bfd_get_section_by_name (exec_bfd, ".interp");
-  if (interp_sect == NULL 
-      && (bfd_get_file_flags (exec_bfd) & DYNAMIC) != 0
-      && (exec_entry_point (exec_bfd, &exec_ops) != pc))
-    return pc - exec_entry_point (exec_bfd, &exec_ops);
+  ehdr = elf_elfheader (abfd);
 
-  return 0;
+  *phdrs_size = ehdr->e_phnum * ehdr->e_phentsize;
+  if (*phdrs_size == 0)
+    return NULL;
+
+  buf = xmalloc (*phdrs_size);
+  if (bfd_seek (abfd, ehdr->e_phoff, SEEK_SET) != 0
+      || bfd_bread (buf, *phdrs_size, abfd) != *phdrs_size)
+    {
+      xfree (buf);
+      return NULL;
+    }
+
+  return buf;
 }
 
 /* We relocate all of the sections by the same amount.  This
@@ -1692,23 +1675,93 @@ svr4_static_exec_displacement (void)
      memory image of the program during dynamic linking.
 
    The same language also appears in Edition 4.0 of the System V
-   ABI and is left unspecified in some of the earlier editions.  */
+   ABI and is left unspecified in some of the earlier editions.
+
+   Decide if the objfile needs to be relocated.  As indicated above, we will
+   only be here when execution is stopped.  But during attachment PC can be at
+   arbitrary address therefore regcache_read_pc can be misleading (contrary to
+   the auxv AT_ENTRY value).  Moreover for executable with interpreter section
+   regcache_read_pc would point to the interpreter and not the main executable.
+
+   So, to summarize, relocations are necessary when the start address obtained
+   from the executable is different from the address in auxv AT_ENTRY entry.
+   
+   [ The astute reader will note that we also test to make sure that
+     the executable in question has the DYNAMIC flag set.  It is my
+     opinion that this test is unnecessary (undesirable even).  It
+     was added to avoid inadvertent relocation of an executable
+     whose e_type member in the ELF header is not ET_DYN.  There may
+     be a time in the future when it is desirable to do relocations
+     on other types of files as well in which case this condition
+     should either be removed or modified to accomodate the new file
+     type.  - Kevin, Nov 2000. ]  */
 
 static CORE_ADDR
 svr4_exec_displacement (void)
 {
-  int found;
   /* ENTRY_POINT is a possible function descriptor - before
      a call to gdbarch_convert_from_func_ptr_addr.  */
-  CORE_ADDR entry_point;
+  CORE_ADDR entry_point, displacement;
 
   if (exec_bfd == NULL)
     return 0;
 
-  if (target_auxv_search (&current_target, AT_ENTRY, &entry_point) == 1)
-    return entry_point - bfd_get_start_address (exec_bfd);
+  /* Therefore for ELF it is ET_EXEC and not ET_DYN.  Both shared libraries
+     being executed themselves and PIE (Position Independent Executable)
+     executables are ET_DYN.  */
 
-  return svr4_static_exec_displacement ();
+  if ((bfd_get_file_flags (exec_bfd) & DYNAMIC) == 0)
+    return 0;
+
+  if (target_auxv_search (&current_target, AT_ENTRY, &entry_point) <= 0)
+    return 0;
+
+  displacement = entry_point - bfd_get_start_address (exec_bfd);
+
+  /* Verify the DISPLACEMENT candidate complies with the required page
+     alignment.  It is cheaper than the program headers comparison below.  */
+
+  if (bfd_get_flavour (exec_bfd) == bfd_target_elf_flavour)
+    {
+      const struct elf_backend_data *elf = get_elf_backend_data (exec_bfd);
+
+      /* p_align of PT_LOAD segments does not specify any alignment but
+	 only congruency of addresses:
+	   p_offset % p_align == p_vaddr % p_align
+	 Kernel is free to load the executable with lower alignment.  */
+
+      if ((displacement & (elf->minpagesize - 1)) != 0)
+	return 0;
+    }
+
+  /* Verify that the auxilliary vector describes the same file as exec_bfd, by
+     comparing their program headers.  If the program headers in the auxilliary
+     vector do not match the program headers in the executable, then we are
+     looking at a different file than the one used by the kernel - for
+     instance, "gdb program" connected to "gdbserver :PORT ld.so program".  */
+
+  if (bfd_get_flavour (exec_bfd) == bfd_target_elf_flavour)
+    {
+      /* Be optimistic and clear OK only if GDB was able to verify the headers
+	 really do not match.  */
+      int phdrs_size, phdrs2_size, ok = 1;
+      gdb_byte *buf, *buf2;
+
+      buf = read_program_header (-1, &phdrs_size, NULL);
+      buf2 = read_program_headers_from_bfd (exec_bfd, &phdrs2_size);
+      if (buf != NULL && buf2 != NULL
+	  && (phdrs_size != phdrs2_size
+	      || memcmp (buf, buf2, phdrs_size) != 0))
+	ok = 0;
+
+      xfree (buf);
+      xfree (buf2);
+
+      if (!ok)
+	return 0;
+    }
+
+  return displacement;
 }
 
 /* Relocate the main executable.  This function should be called upon
