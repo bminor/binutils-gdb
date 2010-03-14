@@ -1,3 +1,16 @@
+2010-03-14  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-low.h (struct lwp_info): New fields
+	`stopped_by_watchpoint' and `stopped_data_address'.
+	* linux-low.c (linux_wait_for_lwp): Check for watchpoint triggers
+	here, and cache them in the lwp object.
+	(wait_for_sigstop): Check stopped_by_watchpoint lwp field
+	directly.
+	(linux_resume_one_lwp): Clear the lwp's stopped_by_watchpoint
+	field.
+	(linux_stopped_by_watchpoint): Rewrite.
+	(linux_stopped_data_address): Rewrite.
+
 2010-03-06  Simo Melenius  <simo.melenius@iki.fi>
 
 	* linux-low.c (linux_wait_for_lwp): Fetch the regcache after

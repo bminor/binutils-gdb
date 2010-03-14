@@ -161,6 +161,16 @@ struct lwp_info
   int pending_is_breakpoint;
   CORE_ADDR pending_stop_pc;
 
+  /* STOPPED_BY_WATCHPOINT is non-zero if this LWP stopped with a data
+     watchpoint trap.  */
+  int stopped_by_watchpoint;
+
+  /* On architectures where it is possible to know the data address of
+     a triggered watchpoint, STOPPED_DATA_ADDRESS is non-zero, and
+     contains such data address.  Only valid if STOPPED_BY_WATCHPOINT
+     is true.  */
+  CORE_ADDR stopped_data_address;
+
   /* If this is non-zero, it is a breakpoint to be reinserted at our next
      stop (SIGTRAP stops only).  */
   CORE_ADDR bp_reinsert;
