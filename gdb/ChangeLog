@@ -1,3 +1,8 @@
+2010-03-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* charset.c [USE_WIN32API]: Include <windows.h>.
+	 (_initialize_charset): Correct type of w32_host_default_charset.
+
 2010-03-14  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (ptid_match): Don't assert that PTID is not a pid ptid.

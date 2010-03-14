@@ -33,6 +33,9 @@
 #include "gdb_string.h"
 #include <ctype.h>
 
+#ifdef USE_WIN32API
+#include <windows.h>
+#endif
 
 /* How GDB's character set support works
 
@@ -932,7 +935,7 @@ _initialize_charset (void)
   auto_target_charset_name = auto_host_charset_name;
 #elif defined (USE_WIN32API)
   {
-    static w32_host_default_charset[16]; /* "CP" + x<=5 digits + paranoia. */
+    static char w32_host_default_charset[16]; /* "CP" + x<=5 digits + paranoia. */
 
     snprintf (w32_host_default_charset, sizeof w32_host_default_charset,
 	      "CP%d", GetACP());
