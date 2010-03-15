@@ -44,6 +44,11 @@ struct demangle_component;
    Eg:
        namespace C = A::B;
    ALIAS = "C"
+   DECLARATION is the name of the imported declaration, if this import
+   statement represents one.
+   Eg:
+       using A::x;
+   Where x is variable in namespace A.  DECLARATION is set to x.
 */
 
 struct using_direct
@@ -52,6 +57,7 @@ struct using_direct
   char *import_dest;
 
   char *alias;
+  char *declaration;
 
   struct using_direct *next;
 
@@ -91,6 +97,7 @@ extern int cp_is_anonymous (const char *namespace);
 extern void cp_add_using_directive (const char *dest,
                                     const char *src,
                                     const char *alias,
+				    const char *declaration,
                                     struct obstack *obstack);
 
 extern void cp_initialize_namespace (void);
@@ -113,8 +120,14 @@ extern struct symbol *cp_lookup_symbol_nonlocal (const char *name,
 extern struct symbol *cp_lookup_symbol_namespace (const char *namespace,
 						  const char *name,
 						  const struct block *block,
-						  const domain_enum domain,
-						  const int search_parents);
+						  const domain_enum domain);
+
+extern struct symbol *cp_lookup_symbol_imports (const char *scope,
+                                                const char *name,
+                                                const struct block *block,
+                                                const domain_enum domain,
+                                                const int declaration_only,
+                                                const int search_parents);
 
 extern struct type *cp_lookup_nested_type (struct type *parent_type,
 					   const char *nested_name,

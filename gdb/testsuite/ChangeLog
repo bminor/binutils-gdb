@@ -1,3 +1,8 @@
+2010-03-15  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* gdb.cp/shadow.exp: Removed kfail; test has been fix.
+	* gdb.cp/nsusing.exp: Ditto.
+
 2010-03-15  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.cp/userdef.exp: Add tests for explicit calls to operator==.

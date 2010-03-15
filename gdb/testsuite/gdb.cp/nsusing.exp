@@ -154,7 +154,7 @@ if ![runto marker4] then {
     perror "couldn't run to breakpoint marker4"
     continue
 }
-setup_kfail "gdb/7936" "*-*-*"
+
 gdb_test "print dx" "= 4"
 
 ############################################

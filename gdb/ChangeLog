@@ -1,3 +1,25 @@
+2010-03-15  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	PR c++/7936:
+	* cp-support.h: Added char *declaration element to using_direct
+	data struct.
+	(cp_add_using): Added char *declaration argument.
+	(cp_add_using_directive): Ditto.
+	(cp_lookup_symbol_imports): made extern.
+	* cp-namespace.c: Updated with the above changes.
+	* dwarf2read.c (read_import_statement): Ditto.
+	(read_namespace): Ditto.
+	(read_import_statement): Support import declarations.
+	* cp-namespace.c (cp_lookup_symbol_imports): Check for imported
+	declarations.
+	Added support for 'declaration_only' search.
+	(cp_lookup_symbol_namespace): Attempt to search for the name as
+	is before consideration of imports.
+	* symtab.c (lookup_symbol_aux_local): Added a 'declaration_only'
+	search at every block level search.
+	Now takes language argument.
+	(lookup_symbol_aux): Updated.
+
 2010-03-15  Tom Tromey  <tromey@redhat.com>
 
 	* c-exp.y (name_not_typename): Add 'operator' clause.

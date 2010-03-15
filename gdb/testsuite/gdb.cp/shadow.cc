@@ -29,8 +29,10 @@ public:
                 using namespace A;
                 y++; // marker4
 
-                using A::x;
-                y++; // marker5
+                {
+                  using A::x;
+                  y++; // marker5
+                }
               }
           }
       }

@@ -85,5 +85,4 @@ gdb_test "print x" "= 55" "Print local x not namespace x"
 gdb_breakpoint [gdb_get_line_number "marker5"]
 gdb_continue_to_breakpoint "marker5"
 
-setup_kfail "gdb/7936" "*-*-*"
 gdb_test "print x" "= 11" "Print imported namespace x"

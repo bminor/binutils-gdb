@@ -3383,10 +3383,12 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
   struct dwarf2_cu *imported_cu;
   const char *imported_name;
   const char *imported_name_prefix;
-  char *import_alias;
-
+  const char *canonical_name;
+  const char *import_alias;
+  const char *imported_declaration = NULL;
   const char *import_prefix;
-  char *canonical_name;
+
+  char *temp;
 
   import_attr = dwarf2_attr (die, DW_AT_import, cu);
   if (import_attr == NULL)
@@ -3446,23 +3448,27 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
      to the name of the imported die.  */
   imported_name_prefix = determine_prefix (imported_die, imported_cu);
 
-  if (strlen (imported_name_prefix) > 0)
+  if (imported_die->tag != DW_TAG_namespace)
     {
-      canonical_name = alloca (strlen (imported_name_prefix)
-                               + 2 + strlen (imported_name) + 1);
-      strcpy (canonical_name, imported_name_prefix);
-      strcat (canonical_name, "::");
-      strcat (canonical_name, imported_name);
+      imported_declaration = imported_name;
+      canonical_name = imported_name_prefix;
+    }
+  else if (strlen (imported_name_prefix) > 0)
+    {
+      temp = alloca (strlen (imported_name_prefix)
+                     + 2 + strlen (imported_name) + 1);
+      strcpy (temp, imported_name_prefix);
+      strcat (temp, "::");
+      strcat (temp, imported_name);
+      canonical_name = temp;
     }
   else
-    {
-      canonical_name = alloca (strlen (imported_name) + 1);
-      strcpy (canonical_name, imported_name);
-    }
+    canonical_name = imported_name;
 
   cp_add_using_directive (import_prefix,
                           canonical_name,
                           import_alias,
+                          imported_declaration,
                           &cu->objfile->objfile_obstack);
 }
 
@@ -5584,7 +5590,7 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  const char *previous_prefix = determine_prefix (die, cu);
 	  cp_add_using_directive (previous_prefix, TYPE_NAME (type), NULL,
-	                          &objfile->objfile_obstack);
+	                          NULL, &objfile->objfile_obstack);
 	}
     }
 

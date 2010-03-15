@@ -1435,7 +1435,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	      function = cp_lookup_symbol_namespace (TYPE_TAG_NAME (type),
 						     name,
 						     get_selected_block (0),
-						     VAR_DOMAIN, 1);
+						     VAR_DOMAIN);
 	      if (function == NULL)
 		error (_("No symbol \"%s\" in namespace \"%s\"."), 
 		       name, TYPE_TAG_NAME (type));

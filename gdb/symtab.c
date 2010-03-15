@@ -95,7 +95,8 @@ static struct symbol *lookup_symbol_aux (const char *name,
 static
 struct symbol *lookup_symbol_aux_local (const char *name,
 					const struct block *block,
-					const domain_enum domain);
+					const domain_enum domain,
+					enum language language);
 
 static
 struct symbol *lookup_symbol_aux_symtabs (int block_index,
@@ -1029,12 +1030,12 @@ lookup_symbol_aux (const char *name, const struct block *block,
   /* Search specified block and its superiors.  Don't search
      STATIC_BLOCK or GLOBAL_BLOCK.  */
 
-  sym = lookup_symbol_aux_local (name, block, domain);
+  sym = lookup_symbol_aux_local (name, block, domain, language);
   if (sym != NULL)
     return sym;
 
   /* If requested to do so by the caller and if appropriate for LANGUAGE,
-     check to see if NAME is a field of `this'. */
+     check to see if NAME is a field of `this'.  */
 
   langdef = language_def (language);
 
@@ -1107,11 +1108,13 @@ lookup_symbol_aux (const char *name, const struct block *block,
 
 static struct symbol *
 lookup_symbol_aux_local (const char *name, const struct block *block,
-			 const domain_enum domain)
+                         const domain_enum domain,
+                         enum language language)
 {
   struct symbol *sym;
   const struct block *static_block = block_static_block (block);
-
+  const char *scope = block_scope (block);
+  
   /* Check if either no block is specified or it's a global block.  */
 
   if (static_block == NULL)
@@ -1122,6 +1125,18 @@ lookup_symbol_aux_local (const char *name, const struct block *block,
       sym = lookup_symbol_aux_block (name, block, domain);
       if (sym != NULL)
 	return sym;
+
+      if (language == language_cplus)
+        {
+          sym = cp_lookup_symbol_imports (scope,
+                                          name,
+                                          block,
+                                          domain,
+                                          1,
+                                          1);
+          if (sym != NULL)
+            return sym;
+        }
 
       if (BLOCK_FUNCTION (block) != NULL && block_inlined_p (block))
 	break;
