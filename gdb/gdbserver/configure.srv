@@ -119,7 +119,7 @@ case "${target}" in
   m68*-*-linux*)	if test "$gdb_cv_m68k_is_coldfire" = yes; then
                           srv_regobj=reg-cf.o
                         else
-                          src_regobj=reg-m68k.o
+                          srv_regobj=reg-m68k.o
                         fi
 			srv_tgtobj="linux-low.o linux-m68k-low.o"
 			srv_linux_usrregs=yes
@@ -129,7 +129,7 @@ case "${target}" in
   m68*-*-uclinux*)	if test "$gdb_cv_m68k_is_coldfire" = yes; then
                           srv_regobj=reg-cf.o
                         else
-                          src_regobj=reg-m68k.o
+                          srv_regobj=reg-m68k.o
                         fi
 			srv_tgtobj="linux-low.o linux-m68k-low.o"
 			srv_linux_usrregs=yes

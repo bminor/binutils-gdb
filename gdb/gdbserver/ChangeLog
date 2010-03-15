@@ -1,3 +1,7 @@
+2010-03-15  Andreas Schwab  <schwab@redhat.com>
+
+	* configure.srv: Fix typo setting srv_regobj.
+
 2010-03-15  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-low.c (fetch_register): Avoid passing a non string literal
