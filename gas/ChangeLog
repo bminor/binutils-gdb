@@ -1,5 +1,8 @@
 2010-03-15  Thomas Schwinge  <thomas@codesourcery.com>
 
+	* dw2gencfi.c (output_cie): Consider emitting the S augmentation in all
+	cases, and not only for .eh_frame.
+
 	* dw2gencfi.c (output_cie): Make it more explicit which code paths
 	belong to .eh_frame only.
 

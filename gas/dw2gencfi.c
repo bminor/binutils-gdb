@@ -1303,9 +1303,9 @@ output_cie (struct cie_entry *cie, bfd_boolean eh_frame, int align)
       if (cie->lsda_encoding != DW_EH_PE_omit)
 	out_one ('L');
       out_one ('R');
-      if (cie->signal_frame)
-	out_one ('S');
     }
+  if (cie->signal_frame)
+    out_one ('S');
   out_one (0);
   out_uleb128 (DWARF2_LINE_MIN_INSN_LENGTH);	/* Code alignment.  */
   out_sleb128 (DWARF2_CIE_DATA_ALIGNMENT);	/* Data alignment.  */
