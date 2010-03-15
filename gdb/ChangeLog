@@ -1,3 +1,8 @@
+2010-03-15  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (die_needs_namespace): Also return 0 for
+	DW_TAG_subprogram.
+
 2010-03-15  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	PR c++/7936:

@@ -3241,7 +3241,8 @@ die_needs_namespace (struct die_info *die, struct dwarf2_cu *cu)
 	 and have a mangled name.  */
       if (die->parent->tag ==  DW_TAG_lexical_block
 	  || die->parent->tag ==  DW_TAG_try_block
-	  || die->parent->tag ==  DW_TAG_catch_block)
+	  || die->parent->tag ==  DW_TAG_catch_block
+	  || die->parent->tag == DW_TAG_subprogram)
 	return 0;
       return 1;
 
