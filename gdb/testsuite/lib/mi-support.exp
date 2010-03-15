@@ -462,7 +462,12 @@ proc mi_gdb_target_load { } {
     global loadfile
     global GDB
     global mi_gdb_prompt
-    upvar timeout timeout
+
+    if [target_info exists gdb_load_timeout] {
+	set loadtimeout [target_info gdb_load_timeout]
+    } else {
+	set loadtimeout 1600
+    }
 
     if { [info procs gdbserver_gdb_load] != "" } {
 	mi_gdb_test "kill" ".*" ""
@@ -480,40 +485,40 @@ proc mi_gdb_target_load { } {
 	    -re ".*$mi_gdb_prompt$"
 	}
 	send_target_sid
-	gdb_expect 60 {
+	gdb_expect $loadtimeout {
 	    -re "\\^done.*$mi_gdb_prompt$" {
 	    }
 	    timeout {
-		perror "Unable to connect to SID target"
+		perror "Unable to connect to SID target (timeout)"
 		return -1
 	    }
 	}
 	send_gdb "48-target-download\n"
-	gdb_expect 10 {
+	gdb_expect $loadtimeout {
 	    -re "48\\^done.*$mi_gdb_prompt$" {
 	    }
 	    timeout {
-		perror "Unable to download to SID target"
+		perror "Unable to download to SID target (timeout)"
 		return -1
 	    }
 	}
     } elseif { [target_info protocol] == "sim" } {
 	# For the simulator, just connect to it directly.
 	send_gdb "47-target-select sim\n"
-	gdb_expect 10 {
+	gdb_expect $loadtimeout {
 	    -re "47\\^connected.*$mi_gdb_prompt$" {
 	    }
 	    timeout {
-		perror "Unable to select sim target"
+		perror "Unable to select sim target (timeout)"
 		return -1
 	    }
 	}
 	send_gdb "48-target-download\n"
-	gdb_expect 10 {
+	gdb_expect $loadtimeout {
 	    -re "48\\^done.*$mi_gdb_prompt$" {
 	    }
 	    timeout {
-		perror "Unable to download to sim target"
+		perror "Unable to download to sim target (timeout)"
 		return -1
 	    }
 	}
@@ -524,11 +529,11 @@ proc mi_gdb_target_load { } {
 	    return -1
 	}
 	send_gdb "48-target-download\n"
-	gdb_expect 10 {
+	gdb_expect $loadtimeout {
 	    -re "48\\^done.*$mi_gdb_prompt$" {
 	    }
 	    timeout {
-		perror "Unable to download to remote target"
+		perror "Unable to download to remote target (timeout)"
 		return -1
 	    }
 	}

@@ -1,3 +1,8 @@
+2010-03-15  Jie Zhang  <jie@codesourcery.com>
+
+	* lib/mi-support.exp (mi_gdb_target_load): Delete unused timeout var.
+	Declare and use new loadtimeout variable.
+
 2010-03-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/printcmds.exp: Use gdb_file_cmd instead of gdb_load.
