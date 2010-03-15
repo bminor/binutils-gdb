@@ -768,7 +768,7 @@ gdb_test "ptype \"abc\"" " = char \\\[4\\\]"
 gdb_test "print \$cvar = \"abc\"" " = \"abc\""
 gdb_test "print sizeof (\$cvar)" " = 4"
 
-gdb_load ${binfile}
+gdb_file_cmd ${binfile}
 
 gdb_test "print \$pc" "No registers\\." "print \$pc (with file)"
 
@@ -779,6 +779,7 @@ gdb_test "set width 0" ""
 if [set_lang_c] then {
     gdb_test "p ctable1\[120\]" "120 'x'" "p ctable1\[120\] #1"
 
+    gdb_load ${binfile}
     if [runto_main] then {
 	test_integer_literals_accepted
 	test_integer_literals_rejected

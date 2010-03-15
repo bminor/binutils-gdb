@@ -1,3 +1,8 @@
+2010-03-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/printcmds.exp: Use gdb_file_cmd instead of gdb_load.
+	Use gdb_load later.
+
 2010-03-14  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.base/solib-disc.c (main): Make format of fprintf a string
