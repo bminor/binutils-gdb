@@ -1,3 +1,8 @@
+2010-02-25  Ralf Corsepius  <ralf.corsepius@rtems.org>
+
+	* configure.ac: Exit if ${gdb_target_obs}" is not set.
+	* configure: Regenerate.
+
 2010-03-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* symfile.c (addr_info_make_relative): Ignore also missing ".dynbss"
