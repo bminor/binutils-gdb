@@ -576,16 +576,19 @@ addr_info_make_relative (struct section_addr_info *addrs, bfd *abfd)
 	  /* This section does not exist in ABFD, which is normally
 	     unexpected and we want to issue a warning.
 
-	     However, the ELF prelinker does create a couple of sections
-	     (".gnu.liblist" and ".gnu.conflict") which are marked in the main
-	     executable as loadable (they are loaded in memory from the
-	     DYNAMIC segment) and yet are not present in separate debug info
-	     files.  This is fine, and should not cause a warning.  Shared
-	     libraries contain just the section ".gnu.liblist" but it is not
-	     marked as loadable there.  */
+	     However, the ELF prelinker does create a few sections which are
+	     marked in the main executable as loadable (they are loaded in
+	     memory from the DYNAMIC segment) and yet are not present in
+	     separate debug info files.  This is fine, and should not cause
+	     a warning.  Shared libraries contain just the section
+	     ".gnu.liblist" but it is not marked as loadable there.  There is
+	     no other way to identify them than by their name as the sections
+	     created by prelink have no special flags.  */
 
 	  if (!(strcmp (sect_name, ".gnu.liblist") == 0
-		|| strcmp (sect_name, ".gnu.conflict") == 0))
+		|| strcmp (sect_name, ".gnu.conflict") == 0
+		|| strcmp (sect_name, ".dynbss") == 0
+		|| strcmp (sect_name, ".sdynbss") == 0))
 	    warning (_("section %s not found in %s"), sect_name,
 		     bfd_get_filename (abfd));
 

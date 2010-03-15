@@ -1,3 +1,8 @@
+2010-03-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* symfile.c (addr_info_make_relative): Ignore also missing ".dynbss"
+	and ".sdynbss".  Update the comment.
+
 2010-03-15  Jie Zhang  <jie@codesourcery.com>
 
 	* MAINTAINERS: Update my email address.
