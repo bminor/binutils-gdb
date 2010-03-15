@@ -1,3 +1,8 @@
+2010-03-15  Ralf Corsepius  <ralf.corsepius@rtems.org>
+
+	* configure.ac: Exit if ${gdb_target_obs}" is not set.
+	* configure: Regenerate.
+
 2010-03-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* solib-svr4.c (svr4_exec_displacement): Return now success, new

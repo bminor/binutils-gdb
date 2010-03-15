@@ -161,6 +161,9 @@ do
 
     . ${srcdir}/configure.tgt
 
+    AS_IF([test -z "${gdb_target_obs}"],
+      [AC_MSG_ERROR([configuration ${targ} is unsupported.])])
+
     # Target-specific object files
     for i in ${gdb_target_obs}; do
         case " $TARGET_OBS " in

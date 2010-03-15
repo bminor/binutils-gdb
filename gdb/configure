@@ -6927,6 +6927,10 @@ do
 
     . ${srcdir}/configure.tgt
 
+    if test -z "${gdb_target_obs}"; then :
+  as_fn_error "configuration ${targ} is unsupported." "$LINENO" 5
+fi
+
     # Target-specific object files
     for i in ${gdb_target_obs}; do
         case " $TARGET_OBS " in
