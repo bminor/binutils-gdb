@@ -1,4 +1,4 @@
-2010-02-25  Ralf Corsepius  <ralf.corsepius@rtems.org>
+2010-03-15  Ralf Corsepius  <ralf.corsepius@rtems.org>
 
 	* configure.ac: Exit if ${gdb_target_obs}" is not set.
 	* configure: Regenerate.
