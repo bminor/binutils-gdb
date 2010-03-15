@@ -8274,6 +8274,16 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
   return TRUE;
 }
 
+/* Return true iff input section I references the TOC using
+   instructions limited to +/-32k offsets.  */
+
+bfd_boolean
+ppc64_elf_has_small_toc_reloc (asection *i)
+{
+  return (is_ppc64_elf (i->owner)
+	  && ppc64_elf_tdata (i->owner)->has_small_toc_reloc);
+}
+
 /* Allocate space for one GOT entry.  */
 
 static void

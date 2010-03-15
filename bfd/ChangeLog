@@ -1,3 +1,8 @@
+2010-03-15  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_has_small_toc_reloc): New function.
+	* elf64-ppc.h (ppc64_elf_has_small_toc_reloc): Declare.
+
 2010-03-14  Alan Modra  <amodra@gmail.com>
 
 	PR ld/11378
