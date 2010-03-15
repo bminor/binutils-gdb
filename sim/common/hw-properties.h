@@ -120,7 +120,7 @@ const struct hw_property *hw_find_array_property
 void hw_add_boolean_property
 (struct hw *me,
  const char *property,
- int bool);
+ int boolean);
 
 int hw_find_boolean_property
 (struct hw *me,

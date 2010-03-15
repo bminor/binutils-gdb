@@ -1,3 +1,8 @@
+2010-03-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* hw-properties.h (hw_add_boolean_property): Rename "bool" to
+	"boolean".
+
 2010-02-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-model.c: Include sim-model.h
