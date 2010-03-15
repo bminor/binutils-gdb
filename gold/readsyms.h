@@ -128,12 +128,12 @@ class Add_symbols : public Task
   Add_symbols(Input_objects* input_objects, Symbol_table* symtab,
 	      Layout* layout, Dirsearch* dirpath, int dirindex,
 	      Mapfile* mapfile, const Input_argument* input_argument,
-	      Input_group* input_group, Object* object,
+	      Object* object,
 	      Read_symbols_data* sd, Task_token* this_blocker,
 	      Task_token* next_blocker)
     : input_objects_(input_objects), symtab_(symtab), layout_(layout),
       dirpath_(dirpath), dirindex_(dirindex), mapfile_(mapfile),
-      input_argument_(input_argument), input_group_(input_group),
+      input_argument_(input_argument),
       object_(object), sd_(sd), this_blocker_(this_blocker),
       next_blocker_(next_blocker)
   { }
@@ -163,7 +163,6 @@ private:
   int dirindex_;
   Mapfile* mapfile_;
   const Input_argument* input_argument_;
-  Input_group* input_group_;
   Object* object_;
   Read_symbols_data* sd_;
   Task_token* this_blocker_;
