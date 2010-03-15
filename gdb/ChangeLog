@@ -1,3 +1,7 @@
+2010-03-15  Jie Zhang  <jie@codesourcery.com>
+
+	* MAINTAINERS: Update my email address.
+
 2010-03-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdbtypes.h (TYPE_IS_OPAQUE): Correct HAVE_CPLUS_STRUCT check.
