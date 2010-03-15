@@ -1,3 +1,18 @@
+2010-03-15 Stan Shebs  <stan@codesourcery.com>
+
+	* ax-gdb.c: Include cp-support.h.
+	(find_field): Remove.
+	(gen_primitive_field): New function.
+	(gen_struct_ref_recursive): New function.
+	(gen_struct_ref): Rewrite to call gen_struct_ref_recursive instead
+	of find_field.
+	(gen_static_field): New function.
+	(gen_struct_elt_for_reference): New.
+	(gen_namespace_elt): New.
+	(gen_maybe_namespace_elt): New.
+	(gen_aggregate_elt_ref): New.
+	(gen_expr): Add OP_SCOPE, display opcode name in error message.
+
 2010-03-15  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (die_needs_namespace): Also return 0 for

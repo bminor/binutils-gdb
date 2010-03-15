@@ -39,6 +39,7 @@
 #include "dictionary.h"
 #include "breakpoint.h"
 #include "tracepoint.h"
+#include "cp-support.h"
 
 /* To make sense of this file, you should read doc/agentexpr.texi.
    Then look at the types and enums in ax-gdb.h.  For the code itself,
@@ -127,14 +128,25 @@ static void gen_logical_not (struct agent_expr *ax, struct axs_value *value,
 static void gen_complement (struct agent_expr *ax, struct axs_value *value);
 static void gen_deref (struct agent_expr *, struct axs_value *);
 static void gen_address_of (struct agent_expr *, struct axs_value *);
-static int find_field (struct type *type, char *name);
 static void gen_bitfield_ref (struct expression *exp, struct agent_expr *ax,
 			      struct axs_value *value,
 			      struct type *type, int start, int end);
+static void gen_primitive_field (struct expression *exp,
+				 struct agent_expr *ax,
+				 struct axs_value *value,
+				 int offset, int fieldno, struct type *type);
+static int gen_struct_ref_recursive (struct expression *exp,
+				     struct agent_expr *ax,
+				     struct axs_value *value,
+				     char *field, int offset,
+				     struct type *type);
 static void gen_struct_ref (struct expression *exp, struct agent_expr *ax,
 			    struct axs_value *value,
 			    char *field,
 			    char *operator_name, char *operand_name);
+static void gen_static_field (struct expression *exp,
+			      struct agent_expr *ax, struct axs_value *value,
+			      struct type *type, int fieldno);
 static void gen_repeat (struct expression *exp, union exp_element **pc,
 			struct agent_expr *ax, struct axs_value *value);
 static void gen_sizeof (struct expression *exp, union exp_element **pc,
@@ -1116,46 +1128,6 @@ gen_address_of (struct agent_expr *ax, struct axs_value *value)
       }
 }
 
-
-/* A lot of this stuff will have to change to support C++.  But we're
-   not going to deal with that at the moment.  */
-
-/* Find the field in the structure type TYPE named NAME, and return
-   its index in TYPE's field array.  */
-static int
-find_field (struct type *type, char *name)
-{
-  int i;
-
-  CHECK_TYPEDEF (type);
-
-  /* Make sure this isn't C++.  */
-  if (TYPE_N_BASECLASSES (type) != 0)
-    internal_error (__FILE__, __LINE__,
-		    _("find_field: derived classes supported"));
-
-  for (i = 0; i < TYPE_NFIELDS (type); i++)
-    {
-      char *this_name = TYPE_FIELD_NAME (type, i);
-
-      if (this_name)
-	{
-	  if (strcmp (name, this_name) == 0)
-	    return i;
-
-	  if (this_name[0] == '\0')
-	    internal_error (__FILE__, __LINE__,
-			    _("find_field: anonymous unions not supported"));
-	}
-    }
-
-  error (_("Couldn't find member named `%s' in struct/union `%s'"),
-	 name, TYPE_TAG_NAME (type));
-
-  return 0;
-}
-
-
 /* Generate code to push the value of a bitfield of a structure whose
    address is on the top of the stack.  START and END give the
    starting and one-past-ending *bit* numbers of the field within the
@@ -1316,6 +1288,90 @@ gen_bitfield_ref (struct expression *exp, struct agent_expr *ax,
   value->type = type;
 }
 
+/* Generate bytecodes for field number FIELDNO of type TYPE.  OFFSET
+   is an accumulated offset (in bytes), will be nonzero for objects
+   embedded in other objects, like C++ base classes.  Behavior should
+   generally follow value_primitive_field.  */
+
+static void
+gen_primitive_field (struct expression *exp,
+		     struct agent_expr *ax, struct axs_value *value,
+		     int offset, int fieldno, struct type *type)
+{
+  /* Is this a bitfield?  */
+  if (TYPE_FIELD_PACKED (type, fieldno))
+    gen_bitfield_ref (exp, ax, value, TYPE_FIELD_TYPE (type, fieldno),
+		      (offset * TARGET_CHAR_BIT
+		       + TYPE_FIELD_BITPOS (type, fieldno)),
+		      (offset * TARGET_CHAR_BIT
+		       + TYPE_FIELD_BITPOS (type, fieldno)
+		       + TYPE_FIELD_BITSIZE (type, fieldno)));
+  else
+    {
+      gen_offset (ax, offset
+		  + TYPE_FIELD_BITPOS (type, fieldno) / TARGET_CHAR_BIT);
+      value->kind = axs_lvalue_memory;
+      value->type = TYPE_FIELD_TYPE (type, fieldno);
+    }
+}
+
+/* Search for the given field in either the given type or one of its
+   base classes.  Return 1 if found, 0 if not.  */
+
+static int
+gen_struct_ref_recursive (struct expression *exp, struct agent_expr *ax,
+			  struct axs_value *value,
+			  char *field, int offset, struct type *type)
+{
+  int i, rslt;
+  int nbases = TYPE_N_BASECLASSES (type);
+
+  CHECK_TYPEDEF (type);
+
+  for (i = TYPE_NFIELDS (type) - 1; i >= nbases; i--)
+    {
+      char *this_name = TYPE_FIELD_NAME (type, i);
+
+      if (this_name)
+	{
+	  if (strcmp (field, this_name) == 0)
+	    {
+	      /* Note that bytecodes for the struct's base (aka
+		 "this") will have been generated already, which will
+		 be unnecessary but not harmful if the static field is
+		 being handled as a global.  */
+	      if (field_is_static (&TYPE_FIELD (type, i)))
+		{
+		  gen_static_field (exp, ax, value, type, i);
+		  return 1;
+		}
+
+	      gen_primitive_field (exp, ax, value, offset, i, type);
+	      return 1;
+	    }
+#if 0 /* is this right? */
+	  if (this_name[0] == '\0')
+	    internal_error (__FILE__, __LINE__,
+			    _("find_field: anonymous unions not supported"));
+#endif
+	}
+    }
+
+  /* Now scan through base classes recursively.  */
+  for (i = 0; i < nbases; i++)
+    {
+      struct type *basetype = check_typedef (TYPE_BASECLASS (type, i));
+
+      rslt = gen_struct_ref_recursive (exp, ax, value, field,
+				       offset + TYPE_BASECLASS_BITPOS (type, i) / TARGET_CHAR_BIT,
+				       basetype);
+      if (rslt)
+	return 1;
+    }
+
+  /* Not found anywhere, flag so caller can complain.  */
+  return 0;
+}
 
 /* Generate code to reference the member named FIELD of a structure or
    union.  The top of the stack, as described by VALUE, should have
@@ -1328,7 +1384,7 @@ gen_struct_ref (struct expression *exp, struct agent_expr *ax,
 		char *operator_name, char *operand_name)
 {
   struct type *type;
-  int i;
+  int found;
 
   /* Follow pointers until we reach a non-pointer.  These aren't the C
      semantics, but they're what the normal GDB evaluator does, so we
@@ -1351,22 +1407,151 @@ gen_struct_ref (struct expression *exp, struct agent_expr *ax,
   if (value->kind != axs_lvalue_memory)
     error (_("Structure does not live in memory."));
 
-  i = find_field (type, field);
+  /* Search through fields and base classes recursively.  */
+  found = gen_struct_ref_recursive (exp, ax, value, field, 0, type);
+  
+  if (!found)
+    error (_("Couldn't find member named `%s' in struct/union/class `%s'"),
+	   field, TYPE_TAG_NAME (type));
+}
 
-  /* Is this a bitfield?  */
-  if (TYPE_FIELD_PACKED (type, i))
-    gen_bitfield_ref (exp, ax, value, TYPE_FIELD_TYPE (type, i),
-		      TYPE_FIELD_BITPOS (type, i),
-		      (TYPE_FIELD_BITPOS (type, i)
-		       + TYPE_FIELD_BITSIZE (type, i)));
+static int
+gen_namespace_elt (struct expression *exp,
+		   struct agent_expr *ax, struct axs_value *value,
+		   const struct type *curtype, char *name);
+static int
+gen_maybe_namespace_elt (struct expression *exp,
+			 struct agent_expr *ax, struct axs_value *value,
+			 const struct type *curtype, char *name);
+
+static void
+gen_static_field (struct expression *exp,
+		  struct agent_expr *ax, struct axs_value *value,
+		  struct type *type, int fieldno)
+{
+  if (TYPE_FIELD_LOC_KIND (type, fieldno) == FIELD_LOC_KIND_PHYSADDR)
+    {
+      ax_const_l (ax, TYPE_FIELD_STATIC_PHYSADDR (type, fieldno));
+      value->kind = axs_lvalue_memory;
+      value->type = TYPE_FIELD_TYPE (type, fieldno);
+    }
   else
     {
-      gen_offset (ax, TYPE_FIELD_BITPOS (type, i) / TARGET_CHAR_BIT);
-      value->kind = axs_lvalue_memory;
-      value->type = TYPE_FIELD_TYPE (type, i);
+      char *phys_name = TYPE_FIELD_STATIC_PHYSNAME (type, fieldno);
+      struct symbol *sym = lookup_symbol (phys_name, 0, VAR_DOMAIN, 0);
+      if (sym == NULL)
+	error (_("symbol not found"));
+
+      gen_var_ref (exp->gdbarch, ax, value, sym);
     }
 }
 
+static int
+gen_struct_elt_for_reference (struct expression *exp,
+			      struct agent_expr *ax, struct axs_value *value,
+			      struct type *type, char *fieldname)
+{
+  struct type *t = type;
+  int i;
+  struct value *v, *result;
+
+  if (TYPE_CODE (t) != TYPE_CODE_STRUCT
+      && TYPE_CODE (t) != TYPE_CODE_UNION)
+    internal_error (__FILE__, __LINE__,
+		    _("non-aggregate type to gen_struct_elt_for_reference"));
+
+  for (i = TYPE_NFIELDS (t) - 1; i >= TYPE_N_BASECLASSES (t); i--)
+    {
+      char *t_field_name = TYPE_FIELD_NAME (t, i);
+
+      if (t_field_name && strcmp (t_field_name, fieldname) == 0)
+	{
+	  if (field_is_static (&TYPE_FIELD (t, i)))
+	    {
+	      gen_static_field (exp, ax, value, t, i);
+	      return 1;
+	    }
+	  if (TYPE_FIELD_PACKED (t, i))
+	    error (_("pointers to bitfield members not allowed"));
+
+	  /* FIXME we need a way to do "want_address" equivalent */	  
+
+	  error (_("Cannot reference non-static field \"%s\""), fieldname);
+	}
+    }
+
+  /* FIXME add other scoped-reference cases here */
+
+  /* Do a last-ditch lookup.  */
+  return gen_maybe_namespace_elt (exp, ax, value, type, fieldname);
+}
+
+/* C++: Return the member NAME of the namespace given by the type
+   CURTYPE.  */
+
+static int
+gen_namespace_elt (struct expression *exp,
+		   struct agent_expr *ax, struct axs_value *value,
+		   const struct type *curtype, char *name)
+{
+  int found = gen_maybe_namespace_elt (exp, ax, value, curtype, name);
+
+  if (!found)
+    error (_("No symbol \"%s\" in namespace \"%s\"."), 
+	   name, TYPE_TAG_NAME (curtype));
+
+  return found;
+}
+
+/* A helper function used by value_namespace_elt and
+   value_struct_elt_for_reference.  It looks up NAME inside the
+   context CURTYPE; this works if CURTYPE is a namespace or if CURTYPE
+   is a class and NAME refers to a type in CURTYPE itself (as opposed
+   to, say, some base class of CURTYPE).  */
+
+static int
+gen_maybe_namespace_elt (struct expression *exp,
+			 struct agent_expr *ax, struct axs_value *value,
+			 const struct type *curtype, char *name)
+{
+  const char *namespace_name = TYPE_TAG_NAME (curtype);
+  struct symbol *sym;
+
+  sym = cp_lookup_symbol_namespace (namespace_name, name,
+				    block_for_pc (ax->scope),
+				    VAR_DOMAIN, 0);
+
+  if (sym == NULL)
+    return 0;
+
+  gen_var_ref (exp->gdbarch, ax, value, sym);
+
+  return 1;
+}
+
+
+static int
+gen_aggregate_elt_ref (struct expression *exp,
+		       struct agent_expr *ax, struct axs_value *value,
+		       struct type *type, char *field,
+		       char *operator_name, char *operand_name)
+{
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
+      return gen_struct_elt_for_reference (exp, ax, value, type, field);
+      break;
+    case TYPE_CODE_NAMESPACE:
+      return gen_namespace_elt (exp, ax, value, type, field);
+      break;
+    default:
+      internal_error (__FILE__, __LINE__,
+		      _("non-aggregate type in gen_aggregate_elt_ref"));
+    }
+
+  return 0;
+}
 
 /* Generate code for GDB's magical `repeat' operator.  
    LVALUE @ INT creates an array INT elements long, and whose elements
@@ -1823,11 +2008,27 @@ gen_expr (struct expression *exp, union exp_element **pc,
       }
       break;
 
+    case OP_SCOPE:
+      {
+	struct type *type = (*pc)[1].type;
+	int length = longest_to_int ((*pc)[2].longconst);
+	char *name = &(*pc)[3].string;
+	int found;
+
+	found = gen_aggregate_elt_ref (exp, ax, value, type, name,
+				       "?", "??");
+	if (!found)
+	  error (_("There is no field named %s"), name);
+	(*pc) += 5 + BYTES_TO_EXP_ELEM (length + 1);
+      }
+      break;
+
     case OP_TYPE:
       error (_("Attempt to use a type name as an expression."));
 
     default:
-      error (_("Unsupported operator in expression."));
+      error (_("Unsupported operator %s (%d) in expression."),
+	     op_string (op), op);
     }
 }
 
