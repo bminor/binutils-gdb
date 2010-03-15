@@ -2217,23 +2217,13 @@ fetch_register (struct regcache *regcache, int regno)
 		(PTRACE_ARG3_TYPE) (uintptr_t) regaddr, 0);
       regaddr += sizeof (PTRACE_XFER_TYPE);
       if (errno != 0)
-	{
-	  /* Warning, not error, in case we are attached; sometimes the
-	     kernel doesn't let us at the registers.  */
-	  char *err = strerror (errno);
-	  char *msg = alloca (strlen (err) + 128);
-	  sprintf (msg, "reading register %d: %s", regno, err);
-	  error (msg);
-	  goto error_exit;
-	}
+	error ("reading register %d: %s", regno, strerror (errno));
     }
 
   if (the_low_target.supply_ptrace_register)
     the_low_target.supply_ptrace_register (regcache, regno, buf);
   else
     supply_register (regcache, regno, buf);
-
-error_exit:;
 }
 
 /* Fetch all registers, or just one, from the child process.  */
@@ -2299,14 +2289,7 @@ usr_store_inferior_registers (struct regcache *regcache, int regno)
 		return;
 
 	      if ((*the_low_target.cannot_store_register) (regno) == 0)
-		{
-		  char *err = strerror (errno);
-		  char *msg = alloca (strlen (err) + 128);
-		  sprintf (msg, "writing register %d: %s",
-			   regno, err);
-		  error (msg);
-		  return;
-		}
+		error ("writing register %d: %s", regno, strerror (errno));
 	    }
 	  regaddr += sizeof (PTRACE_XFER_TYPE);
 	}

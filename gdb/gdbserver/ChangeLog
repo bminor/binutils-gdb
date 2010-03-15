@@ -1,3 +1,9 @@
+2010-03-15  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-low.c (fetch_register): Avoid passing a non string literal
+	format to `error'.
+	(usr_store_inferior_registers): Ditto.
+
 2010-03-14  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-low.c (linux_write_memory): Bail out early if peeking
