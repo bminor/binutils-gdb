@@ -1,5 +1,9 @@
 2010-03-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdbtypes.h (TYPE_IS_OPAQUE): Correct HAVE_CPLUS_STRUCT check.
+
+2010-03-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* charset.c [USE_WIN32API]: Include <windows.h>.
 	 (_initialize_charset): Correct type of w32_host_default_charset.
 

@@ -1045,7 +1045,8 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_IS_OPAQUE(thistype) (((TYPE_CODE (thistype) == TYPE_CODE_STRUCT) ||        \
                                    (TYPE_CODE (thistype) == TYPE_CODE_UNION))        && \
                                   (TYPE_NFIELDS (thistype) == 0)                     && \
-                                  (HAVE_CPLUS_STRUCT (thistype) && (TYPE_NFN_FIELDS (thistype) == 0)) && \
+                                  (!HAVE_CPLUS_STRUCT (thistype)			\
+				   || TYPE_NFN_FIELDS (thistype) == 0) &&		\
                                   (TYPE_STUB (thistype) || !TYPE_STUB_SUPPORTED (thistype)))
 
 struct builtin_type
