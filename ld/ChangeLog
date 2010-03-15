@@ -1,3 +1,11 @@
+2010-03-15  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/ppc64elf.em (move_input_section, sort_toc_sections): New.
+	(ppc_before_allocation): Call sort_toc_sections.
+	(no_toc_sort, OPTION_NO_TOC_SORT): New.
+	(PARSE_AND_LIST_PROLOGUE, PARSE_AND_LIST_LONGOPTS,
+	 PARSE_AND_LIST_OPTIONS): Handle --no-toc-sort.
+
 2010-03-14  Alan Modra  <amodra@gmail.com>
 
 	PR ld/11378

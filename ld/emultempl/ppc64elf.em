@@ -58,6 +58,9 @@ static int no_toc_opt = 0;
 /* Whether to allow multiple toc sections.  */
 static int no_multi_toc = 0;
 
+/* Whether to sort input toc and got sections.  */
+static int no_toc_sort = 0;
+
 /* Whether to emit symbols for stubs.  */
 static int emit_stub_syms = -1;
 
@@ -97,6 +100,132 @@ ppc_create_output_section_statements (void)
   ppc64_elf_init_stub_bfd (stub_file->the_bfd, &link_info);
 }
 
+/* Move the input section statement at *U which happens to be on LIST
+   to be just before *TO.  */
+
+static void
+move_input_section (lang_statement_list_type *list,
+		    lang_statement_union_type **u,
+		    lang_statement_union_type **to)
+{
+  lang_statement_union_type *s = *u;
+  asection *i = s->input_section.section;
+  asection *p, *n;
+
+  /* Snip the input section from the statement list.  If it was the
+     last statement, fix the list tail pointer.  */
+  *u = s->header.next;
+  if (*u == NULL)
+    list->tail = u;
+  /* Add it back in the new position.  */
+  s->header.next = *to;
+  *to = s;
+  if (list->tail == to)
+    list->tail = &s->header.next;
+
+  /* Trim I off the bfd map_head/map_tail doubly linked lists.  */
+  n = i->map_head.s;
+  p = i->map_tail.s;
+  (p != NULL ? p : i->output_section)->map_head.s = n;
+  (n != NULL ? n : i->output_section)->map_tail.s = p;
+
+  /* Add I back on in its new position.  */
+  if (s->header.next->header.type == lang_input_section_enum)
+    {
+      n = s->header.next->input_section.section;
+      p = n->map_tail.s;
+    }
+  else
+    {
+      /* If the next statement is not an input section statement then
+	 TO must point at the previous input section statement
+	 header.next field.  */
+      lang_input_section_type *prev = (lang_input_section_type *)
+	((char *) to - offsetof (lang_statement_union_type, header.next));
+
+      ASSERT (prev->header.type == lang_input_section_enum);
+      p = prev->section;
+      n = p->map_head.s;
+    }
+  i->map_head.s = n;
+  i->map_tail.s = p;
+  (p != NULL ? p : i->output_section)->map_head.s = i;
+  (n != NULL ? n : i->output_section)->map_tail.s = i;
+}
+
+/* Sort input section statements in the linker script tree rooted at
+   LIST so that those whose owning bfd happens to have a section
+   called .init or .fini are placed first.  Place any TOC sections
+   referenced by small TOC relocs next, with TOC sections referenced
+   only by bigtoc relocs last.  */
+
+static void
+sort_toc_sections (lang_statement_list_type *list,
+		   lang_statement_union_type **ini,
+		   lang_statement_union_type **small)
+{
+  lang_statement_union_type *s, **u;
+  asection *i;
+
+  u = &list->head;
+  while ((s = *u) != NULL)
+    {
+      switch (s->header.type)
+	{
+	case lang_wild_statement_enum:
+	  sort_toc_sections (&s->wild_statement.children, ini, small);
+	  break;
+
+	case lang_group_statement_enum:
+	  sort_toc_sections (&s->group_statement.children, ini, small);
+	  break;
+
+	case lang_input_section_enum:
+	  i = s->input_section.section;
+	  /* Leave the stub_file .got where it is.  We put the .got
+	     header there.  */
+	  if (i->owner == stub_file->the_bfd)
+	    break;
+	  if (bfd_get_section_by_name (i->owner, ".init") != NULL
+	      || bfd_get_section_by_name (i->owner, ".fini") != NULL)
+	    {
+	      if (ini != NULL && *ini != s)
+		{
+		  move_input_section (list, u, ini);
+		  if (small == ini)
+		    small = &s->header.next;
+		  ini = &s->header.next;
+		  continue;
+		}
+	      if (small == ini)
+		small = &s->header.next;
+	      ini = &s->header.next;
+	      break;
+	    }
+	  else if (ini == NULL)
+	    ini = u;
+
+	  if (ppc64_elf_has_small_toc_reloc (i))
+	    {
+	      if (small != NULL && *small != s)
+		{
+		  move_input_section (list, u, small);
+		  small = &s->header.next;
+		  continue;
+		}
+	      small = &s->header.next;
+	    }
+	  else if (small == NULL)
+	    small = u;
+	  break;
+
+	default:
+	  break;
+	}
+      u = &s->header.next;
+    }
+}
+
 static void
 ppc_before_allocation (void)
 {
@@ -126,6 +255,15 @@ ppc_before_allocation (void)
 	  && !link_info.relocatable
 	  && !ppc64_elf_edit_toc (&link_info))
 	einfo ("%X%P: can not edit %s %E\n", "toc");
+
+      if (!no_toc_sort)
+	{
+	  lang_output_section_statement_type *toc_os;
+
+	  toc_os = lang_output_section_find (".got");
+	  if (toc_os != NULL)
+	    sort_toc_sections (&toc_os->children, NULL, NULL);
+	}
     }
 
   gld${EMULATION_NAME}_before_allocation ();
@@ -507,7 +645,8 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_NO_OPD_OPT		(OPTION_NO_TLS_GET_ADDR_OPT + 1)
 #define OPTION_NO_TOC_OPT		(OPTION_NO_OPD_OPT + 1)
 #define OPTION_NO_MULTI_TOC		(OPTION_NO_TOC_OPT + 1)
-#define OPTION_NON_OVERLAPPING_OPD	(OPTION_NO_MULTI_TOC + 1)
+#define OPTION_NO_TOC_SORT		(OPTION_NO_MULTI_TOC + 1)
+#define OPTION_NON_OVERLAPPING_OPD	(OPTION_NO_TOC_SORT + 1)
 '
 
 PARSE_AND_LIST_LONGOPTS='
@@ -521,6 +660,7 @@ PARSE_AND_LIST_LONGOPTS='
   { "no-opd-optimize", no_argument, NULL, OPTION_NO_OPD_OPT },
   { "no-toc-optimize", no_argument, NULL, OPTION_NO_TOC_OPT },
   { "no-multi-toc", no_argument, NULL, OPTION_NO_MULTI_TOC },
+  { "no-toc-sort", no_argument, NULL, OPTION_NO_TOC_SORT },
   { "non-overlapping-opd", no_argument, NULL, OPTION_NON_OVERLAPPING_OPD },
 '
 
@@ -564,6 +704,9 @@ PARSE_AND_LIST_OPTIONS='
 		   ));
   fprintf (file, _("\
   --no-multi-toc              Disallow automatic multiple toc sections.\n"
+		   ));
+  fprintf (file, _("\
+  --no-toc-sort               Don'\''t sort TOC and GOT sections.\n"
 		   ));
   fprintf (file, _("\
   --non-overlapping-opd       Canonicalize .opd, so that there are no\n\
@@ -615,6 +758,10 @@ PARSE_AND_LIST_ARGS_CASES='
 
     case OPTION_NO_MULTI_TOC:
       no_multi_toc = 1;
+      break;
+
+    case OPTION_NO_TOC_SORT:
+      no_toc_sort = 1;
       break;
 
     case OPTION_NON_OVERLAPPING_OPD:
