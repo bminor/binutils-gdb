@@ -1,3 +1,8 @@
+2010-03-15  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* dw2gencfi.c (output_cie): Make it more explicit which code paths
+	belong to .eh_frame only.
+
 2010-03-13  Segher Boessenkool  <segher@kernel.crashing.org>
 
 	* config/tc-v850.c (v850_insert_operand): Handle out-of-range
