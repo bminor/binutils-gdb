@@ -311,6 +311,11 @@ public:
   int z;
 };
 
+bool operator== (const Member &m1, const Member &m2)
+{
+  return m1.z == m2.z;
+}
+
 class Container
 {
 public:
@@ -330,8 +335,12 @@ int main (void)
  A1 two(4,5);
  A1 three(0,0);
  Container c;
+ Member mem1, mem2;
  int val;
  
+ mem1.z = 5;
+ mem2.z = 7;
+
  marker1(); // marker1-returns-here
  cout << one; // marker1-returns-here
  cout << two;

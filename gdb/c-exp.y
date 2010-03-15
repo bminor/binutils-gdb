@@ -1236,6 +1236,14 @@ name_not_typename :	NAME
    context where only a name could occur, this might be useful.
   	|	NAME_OR_INT
  */
+	|	operator
+			{
+			  $$.stoken = $1;
+			  $$.sym = lookup_symbol ($1.ptr,
+						  expression_context_block,
+						  VAR_DOMAIN,
+						  &$$.is_a_field_of_this);
+			}
 	;
 
 %%

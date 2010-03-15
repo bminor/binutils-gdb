@@ -1,3 +1,9 @@
+2010-03-15  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.cp/userdef.exp: Add tests for explicit calls to operator==.
+	* gdb.cp/userdef.cc (operator==): New function.
+	(main): New locals mem1, mem2.
+
 2010-03-15  Jie Zhang  <jie@codesourcery.com>
 
 	* lib/mi-support.exp (mi_gdb_target_load): Delete unused timeout var.

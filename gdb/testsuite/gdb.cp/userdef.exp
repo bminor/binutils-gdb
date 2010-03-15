@@ -113,6 +113,7 @@ gdb_test "print one > two" "\\\$\[0-9\]* = 0\[\r\n\]"
 gdb_test "print one >= two" "\\\$\[0-9\]* = 0\[\r\n\]"
 
 gdb_test "print one == two" "\\\$\[0-9\]* = 0\[\r\n\]"
+gdb_test "print one.operator== (two)" "\\\$\[0-9\]* = 0\[\r\n\]"
 
 gdb_test "print one != two" "\\\$\[0-9\]* = 1\[\r\n\]"
 
@@ -154,6 +155,9 @@ gdb_test "print c" "\\\$\[0-9\]* = {m = {z = .*}}"
 gdb_test "print *c" "\\\$\[0-9\]* = \\(Member &\\) @$hex: {z = .*}"
 gdb_test "print &*c" "\\\$\[0-9\]* = \\(Member \\*\\) $hex"
 gdb_test "ptype &*c" "type = (struct|class) Member {(\[\r\n \]+public:)?\[\r\n \]+int z;\[\r\n\]+} &\\*"
+
+gdb_test "print operator== (mem1, mem2)" " = false"
+gdb_test "print operator== (mem1, mem1)" " = true"
 
 gdb_exit
 return 0

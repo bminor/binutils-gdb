@@ -1,3 +1,7 @@
+2010-03-15  Tom Tromey  <tromey@redhat.com>
+
+	* c-exp.y (name_not_typename): Add 'operator' clause.
+
 2010-03-15  Ralf Corsepius  <ralf.corsepius@rtems.org>
 
 	* configure.ac: Exit if ${gdb_target_obs}" is not set.
