@@ -1519,7 +1519,7 @@ gen_maybe_namespace_elt (struct expression *exp,
 
   sym = cp_lookup_symbol_namespace (namespace_name, name,
 				    block_for_pc (ax->scope),
-				    VAR_DOMAIN, 0);
+				    VAR_DOMAIN);
 
   if (sym == NULL)
     return 0;
