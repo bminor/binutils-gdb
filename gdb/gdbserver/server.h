@@ -407,8 +407,38 @@ void freeargv (char **argv);
 void perror_with_name (const char *string);
 void error (const char *string,...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
 void fatal (const char *string,...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
+void internal_error (const char *file, int line, const char *, ...)
+     ATTR_NORETURN ATTR_FORMAT (printf, 3, 4);
 void warning (const char *string,...) ATTR_FORMAT (printf, 1, 2);
 char *paddress (CORE_ADDR addr);
+
+#define gdb_assert(expr)                                                      \
+  ((void) ((expr) ? 0 :                                                       \
+	   (gdb_assert_fail (#expr, __FILE__, __LINE__, ASSERT_FUNCTION), 0)))
+
+/* Version 2.4 and later of GCC define a magical variable `__PRETTY_FUNCTION__'
+   which contains the name of the function currently being defined.
+   This is broken in G++ before version 2.6.
+   C9x has a similar variable called __func__, but prefer the GCC one since
+   it demangles C++ function names.  */
+#if (GCC_VERSION >= 2004)
+#define ASSERT_FUNCTION		__PRETTY_FUNCTION__
+#else
+#if defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
+#define ASSERT_FUNCTION		__func__
+#endif
+#endif
+
+/* This prints an "Assertion failed" message, and exits.  */
+#if defined (ASSERT_FUNCTION)
+#define gdb_assert_fail(assertion, file, line, function)		\
+  internal_error (file, line, "%s: Assertion `%s' failed.",		\
+		  function, assertion)
+#else
+#define gdb_assert_fail(assertion, file, line, function)		\
+  internal_error (file, line, "Assertion `%s' failed.",			\
+		  assertion)
+#endif
 
 /* Maximum number of bytes to read/write at once.  The value here
    is chosen to fill up a packet (the headers account for the 32).  */

@@ -1,3 +1,9 @@
+2010-03-16  Pedro Alves  <pedro@codesourcery.com>
+
+	* server.h (internal_error): Declare.
+	(gdb_assert, ASSERT_FUNCTION, gdb_assert_fail): Define.
+	* utils.c (internal_error): New function.
+
 2010-03-15  Andreas Schwab  <schwab@redhat.com>
 
 	* configure.srv: Fix typo setting srv_regobj.

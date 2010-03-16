@@ -171,6 +171,22 @@ warning (const char *string,...)
   va_end (args);
 }
 
+/* Report a problem internal to GDBserver, and exit.  */
+
+void
+internal_error (const char *file, int line, const char *fmt, ...)
+{
+  va_list args;
+  va_start (args, fmt);
+
+  fprintf (stderr,  "\
+%s:%d: A problem internal to GDBserver has been detected.\n", file, line);
+  vfprintf (stderr, fmt, args);
+  fprintf (stderr, "\n");
+  va_end (args);
+  exit (1);
+}
+
 /* Temporary storage using circular buffer.  */
 #define NUMCELLS 4
 #define CELLSIZE 50
