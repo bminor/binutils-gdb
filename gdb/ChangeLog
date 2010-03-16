@@ -1,3 +1,7 @@
+2010-03-16  Holger Hans Peter Freyther  <zecke@selfish.org>
+
+	* linux-record.c (record_linux_msghdr): Remove unintended semicolons.
+
 2010-03-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* MAINTAINERS: Update my email address.

@@ -192,7 +192,7 @@ record_linux_msghdr (struct regcache *regcache,
           tmpint = (int) extract_unsigned_integer (iov + tdep->size_pointer,
                                                    tdep->size_size_t,
                                                    byte_order);
-          if (record_arch_list_add_mem (tmpaddr, tmpint));
+          if (record_arch_list_add_mem (tmpaddr, tmpint))
             return -1;
           addr += tdep->size_iovec;
         }
@@ -203,7 +203,7 @@ record_linux_msghdr (struct regcache *regcache,
   addr = extract_unsigned_integer (a, tdep->size_pointer, byte_order);
   a += tdep->size_pointer;
   tmpint = (int) extract_unsigned_integer (a, tdep->size_size_t, byte_order);
-  if (record_arch_list_add_mem ((CORE_ADDR) addr, tmpint));
+  if (record_arch_list_add_mem ((CORE_ADDR) addr, tmpint))
     return -1;
 
   return 0;
