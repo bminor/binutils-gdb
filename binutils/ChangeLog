@@ -1,3 +1,8 @@
+2010-03-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* MAINTAINERS: Update my email address.  List Tristan Gingold
+	as the release branch maintainer.
+
 2010-03-05  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* readelf.c (get_ver_flags): Handle VER_FLG_INFO.

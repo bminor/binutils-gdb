@@ -40,7 +40,7 @@ repository without obtaining approval first:
   DJ Delorie <dj@redhat.com>
   Alan Modra <amodra@gmail.com>
   Michael Meissner <gnu@the-meissners.org>
-  Daniel Jacobowitz <dan@debian.org>
+  Daniel Jacobowitz <dan@codesourcery.com>
   Richard Sandiford <rdsandiford@googlemail.com>
 
       --------- Maintainers ---------
@@ -65,7 +65,7 @@ responsibility among the other maintainers.
   AVR		   Marek Michalkiewicz <marekm@amelek.gda.pl>
   BFIN		   Jie Zhang <jie@codesourcery.com>
   BFIN		   Bernd Schmidt <bernd.schmidt@analog.com>
-  BUILD SYSTEM	   Daniel Jacobowitz <dan@debian.org>
+  BUILD SYSTEM	   Daniel Jacobowitz <dan@codesourcery.com>
   CR16		   M R Swami Reddy <MR.Swami.Reddy@nsc.com>
   CRIS		   Hans-Peter Nilsson <hp@axis.com>
   CRX		   M R Swami Reddy <MR.Swami.Reddy@nsc.com>
@@ -173,7 +173,7 @@ burden of maintaining the branch in sync with the mainline becomes too
 great).  If you are uncertain as to whether a patch is appropriate for
 the branch, ask the branch maintainer.  This is:
 
-   Daniel Jacobowitz  <dan@debian.org>
+   Tristan Gingold  <gingold@adacore.com>
 
     -------- Testsuites ---------------
 
