@@ -1,3 +1,10 @@
+2010-03-16  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (struct ppc_link_hash_table): Add do_toc_opt.
+	(ppc64_elf_edit_toc): Set it here.
+	(ha_reloc_match): New function.
+	(ppc64_elf_relocate_section): Optimize bigtoc insn sequences.
+
 2010-03-15  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_has_small_toc_reloc): New function.

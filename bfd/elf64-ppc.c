@@ -3788,6 +3788,7 @@ struct ppc_link_hash_table
   unsigned int do_multi_toc:1;
   unsigned int multi_toc_needed:1;
   unsigned int second_toc_pass:1;
+  unsigned int do_toc_opt:1;
 
   /* Set on error.  */
   unsigned int stub_error:1;
@@ -7882,7 +7883,9 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 {
   bfd *ibfd;
   struct adjust_toc_info toc_inf;
+  struct ppc_link_hash_table *htab = ppc_hash_table (info);
 
+  htab->do_toc_opt = 1;
   toc_inf.global_toc_syms = TRUE;
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
     {
@@ -11213,6 +11216,58 @@ ppc64_elf_action_discarded (asection *sec)
   return _bfd_elf_default_action_discarded (sec);
 }
 
+/* REL points to a low-part reloc on a bigtoc instruction sequence.
+   Find the matching high-part reloc instruction and verify that it
+   is addis REG,r2,x.  If so, return a pointer to the high-part reloc.  */
+
+static const Elf_Internal_Rela *
+ha_reloc_match (const Elf_Internal_Rela *relocs,
+		const Elf_Internal_Rela *rel,
+		unsigned int reg,
+		const bfd *input_bfd,
+		const bfd_byte *contents)
+{
+  enum elf_ppc64_reloc_type r_type, r_type_ha;
+  bfd_vma r_info_ha, r_addend;
+
+  r_type = ELF64_R_TYPE (rel->r_info);
+  switch (r_type)
+    {
+    case R_PPC64_GOT_TLSLD16_LO:
+    case R_PPC64_GOT_TLSGD16_LO:
+    case R_PPC64_GOT_TPREL16_LO_DS:
+    case R_PPC64_GOT_DTPREL16_LO_DS:
+    case R_PPC64_GOT16_LO:
+    case R_PPC64_TOC16_LO:
+      r_type_ha = r_type + 2;
+      break;
+    case R_PPC64_GOT16_LO_DS:
+      r_type_ha = R_PPC64_GOT16_HA;
+      break;
+    case R_PPC64_TOC16_LO_DS:
+      r_type_ha = R_PPC64_TOC16_HA;
+      break;
+    default:
+      abort ();
+    }
+  r_info_ha = ELF64_R_INFO (ELF64_R_SYM (rel->r_info), r_type_ha);
+  r_addend = rel->r_addend;
+
+  while (--rel >= relocs)
+    if (rel->r_info == r_info_ha
+	&& rel->r_addend == r_addend)
+      {
+	const bfd_byte *p = contents + (rel->r_offset & ~3);
+	unsigned int insn = bfd_get_32 (input_bfd, p);
+	if ((insn & ((0x3f << 26) | (0x1f << 16)))
+	    == ((15u << 26) | (2 << 16)) /* addis rt,r2,x */
+	    && (insn & (0x1f << 21)) == (reg << 21))
+	  return rel;
+	break;
+      }
+  return NULL;
+}
+
 /* The RELOCATE_SECTION function is called by the ELF backend linker
    to handle the relocations for a section.
 
@@ -11307,7 +11362,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
       bfd_vma relocation;
       bfd_boolean unresolved_reloc;
       bfd_boolean warned;
-      unsigned long insn, mask;
+      unsigned int insn;
+      bfd_vma mask;
       struct ppc_stub_hash_entry *stub_entry;
       bfd_vma max_br_offset;
       bfd_vma from;
@@ -12663,6 +12719,81 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  bfd_set_error (bfd_error_invalid_operation);
 	  ret = FALSE;
 	  continue;
+	}
+
+      /* Multi-instruction sequences that access the TOC can be
+	 optimized, eg. addis ra,r2,0; addi rb,ra,x;
+	 to             nop;           addi rb,r2,x;  */
+      switch (r_type)
+	{
+	default:
+	  break;
+
+	case R_PPC64_GOT_TLSLD16_HI:
+	case R_PPC64_GOT_TLSGD16_HI:
+	case R_PPC64_GOT_TPREL16_HI:
+	case R_PPC64_GOT_DTPREL16_HI:
+	case R_PPC64_GOT16_HI:
+	case R_PPC64_TOC16_HI:
+	  /* These relocs would only be useful if building up an
+	     offset to later add to r2, perhaps in an indexed
+	     addressing mode instruction.  Don't try to optimize.
+	     Unfortunately, the possibility of someone building up an
+	     offset like this or even with the HA relocs, means that
+	     we need to check the high insn when optimizing the low
+	     insn.  */
+	  break;
+
+	case R_PPC64_GOT_TLSLD16_HA:
+	case R_PPC64_GOT_TLSGD16_HA:
+	case R_PPC64_GOT_TPREL16_HA:
+	case R_PPC64_GOT_DTPREL16_HA:
+	case R_PPC64_GOT16_HA:
+	case R_PPC64_TOC16_HA:
+	  /* For now we don't nop out the first instruction.  */
+	  break;
+
+	case R_PPC64_GOT_TLSLD16_LO:
+	case R_PPC64_GOT_TLSGD16_LO:
+	case R_PPC64_GOT_TPREL16_LO_DS:
+	case R_PPC64_GOT_DTPREL16_LO_DS:
+	case R_PPC64_GOT16_LO:
+	case R_PPC64_GOT16_LO_DS:
+	case R_PPC64_TOC16_LO:
+	case R_PPC64_TOC16_LO_DS:
+	  if (htab->do_toc_opt && relocation + addend + 0x8000 < 0x10000)
+	    {
+	      bfd_byte *p = contents + (rel->r_offset & ~3);
+	      insn = bfd_get_32 (input_bfd, p);
+	      if ((insn & (0x3f << 26)) == 14u << 26 /* addi */
+		  || (insn & (0x3f << 26)) == 32u << 26 /* lwz */
+		  || (insn & (0x3f << 26)) == 34u << 26 /* lbz */
+		  || (insn & (0x3f << 26)) == 36u << 26 /* stw */
+		  || (insn & (0x3f << 26)) == 38u << 26 /* stb */
+		  || (insn & (0x3f << 26)) == 40u << 26 /* lhz */
+		  || (insn & (0x3f << 26)) == 42u << 26 /* lha */
+		  || (insn & (0x3f << 26)) == 44u << 26 /* sth */
+		  || (insn & (0x3f << 26)) == 46u << 26 /* lmw */
+		  || (insn & (0x3f << 26)) == 47u << 26 /* stmw */
+		  || (insn & (0x3f << 26)) == 48u << 26 /* lfs */
+		  || (insn & (0x3f << 26)) == 50u << 26 /* lfd */
+		  || (insn & (0x3f << 26)) == 52u << 26 /* stfs */
+		  || (insn & (0x3f << 26)) == 54u << 26 /* stfd */
+		  || ((insn & (0x3f << 26)) == 58u << 26 /* lwa,ld,lmd */
+		      && (insn & 3) != 1)
+		  || ((insn & (0x3f << 26)) == 62u << 26 /* std, stmd */
+		      && ((insn & 3) == 0 || (insn & 3) == 3)))
+		{
+		  unsigned int reg = (insn >> 16) & 0x1f;
+		  if (ha_reloc_match (relocs, rel, reg, input_bfd, contents))
+		    {
+		      insn &= ~(0x1f << 16);
+		      insn |= 2 << 16;
+		      bfd_put_32 (input_bfd, insn, p);
+		    }
+		}
+	    }
+	  break;
 	}
 
       /* Do any further special processing.  */
