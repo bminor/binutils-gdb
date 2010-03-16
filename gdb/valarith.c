@@ -198,7 +198,8 @@ value_subscripted_rvalue (struct value *array, LONGEST index, int lowerbound)
   unsigned int elt_offs = elt_size * longest_to_int (index - lowerbound);
   struct value *v;
 
-  if (index < lowerbound || elt_offs >= TYPE_LENGTH (array_type))
+  if (index < lowerbound || (!TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (array_type)
+			     && elt_offs >= TYPE_LENGTH (array_type)))
     error (_("no such vector element"));
 
   v = allocate_value (elt_type);
