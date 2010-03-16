@@ -1,3 +1,12 @@
+2010-03-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* hw-ports.c (TRACE): Delete.
+	* hw-properties.c (TRACE): Delete.
+	(hw_find_ihandle_runtime_property): Change TRACE to HW_TRACE.
+	(hw_find_integer_property): Likewise.
+	(hw_find_integer_array_property): Likewise.
+	(hw_add_duplicate_property): Likewise.
+
 2010-03-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* hw-properties.h (hw_add_boolean_property): Rename "bool" to
