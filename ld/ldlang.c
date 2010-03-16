@@ -1761,7 +1761,20 @@ lang_insert_orphan (asection *s,
     add_child = &os->children;
   lang_add_section (add_child, s, os);
 
-  lang_leave_output_section_statement (0, "*default*", NULL, NULL);
+  if (after && (s->flags & (SEC_LOAD | SEC_ALLOC)) != 0)
+    {
+      const char *region = (after->region
+			    ? after->region->name_list.name
+			    : DEFAULT_MEMORY_REGION);
+      const char *lma_region = (after->lma_region
+				? after->lma_region->name_list.name
+				: NULL);
+      lang_leave_output_section_statement (NULL, region, after->phdrs,
+					   lma_region);
+    }
+  else
+    lang_leave_output_section_statement (NULL, DEFAULT_MEMORY_REGION, NULL,
+					 NULL);
 
   if (ps != NULL && *ps == '\0')
     {

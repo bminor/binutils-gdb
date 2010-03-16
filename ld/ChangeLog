@@ -1,3 +1,8 @@
+2010-03-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ldlang.c (lang_insert_orphan): Place loadable orphans in the same
+	region and phdrs as their placement section.
+
 2010-03-15  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/ppc64elf.em (move_input_section, sort_toc_sections): New.

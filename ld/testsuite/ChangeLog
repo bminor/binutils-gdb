@@ -1,3 +1,8 @@
+2010-03-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-elf/orphan-region.d, ld-elf/orphan-region.ld,
+	ld-elf/orphan-region.s: New files.
+
 2010-03-02  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
 
 	* ld-arm/arm-merge-incompatible.d: New test.
