@@ -573,6 +573,9 @@ gmon_out_read (const char *filename)
       done (1);
     }
 
+  if (ifp != stdin)
+    fclose (ifp);
+
   if (output_style & STYLE_GMON_INFO)
     {
       printf (_("File `%s' (version %d) contains:\n"),

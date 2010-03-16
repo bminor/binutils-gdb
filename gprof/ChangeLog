@@ -1,3 +1,7 @@
+2010-03-16  Segher Boessenkool  <segher@kernel.crashing.org>
+
+	* gmon_io.c (gmon_out_read): Close file when done.
+
 2010-02-15  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: Updated Vietnamese translation.
