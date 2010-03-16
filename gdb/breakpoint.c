@@ -6461,12 +6461,12 @@ bp_loc_is_permanent (struct bp_location *loc)
    as condition expression.  */
 
 static void
-create_breakpoint (struct gdbarch *gdbarch,
-		   struct symtabs_and_lines sals, char *addr_string,
-		   char *cond_string,
-		   enum bptype type, enum bpdisp disposition,
-		   int thread, int task, int ignore_count, 
-		   struct breakpoint_ops *ops, int from_tty, int enabled)
+create_breakpoint_sal (struct gdbarch *gdbarch,
+		       struct symtabs_and_lines sals, char *addr_string,
+		       char *cond_string,
+		       enum bptype type, enum bpdisp disposition,
+		       int thread, int task, int ignore_count,
+		       struct breakpoint_ops *ops, int from_tty, int enabled)
 {
   struct breakpoint *b = NULL;
   int i;
@@ -6724,13 +6724,13 @@ expand_line_sal_maybe (struct symtab_and_line sal)
    COND and SALS arrays and each of those arrays contents. */
 
 static void
-create_breakpoints (struct gdbarch *gdbarch,
-		    struct symtabs_and_lines sals, char **addr_string,
-		    char *cond_string,
-		    enum bptype type, enum bpdisp disposition,
-		    int thread, int task, int ignore_count, 
-		    struct breakpoint_ops *ops, int from_tty,
-		    int enabled)
+create_breakpoints_sal (struct gdbarch *gdbarch,
+			struct symtabs_and_lines sals, char **addr_string,
+			char *cond_string,
+			enum bptype type, enum bpdisp disposition,
+			int thread, int task, int ignore_count,
+			struct breakpoint_ops *ops, int from_tty,
+			int enabled)
 {
   int i;
   for (i = 0; i < sals.nelts; ++i)
@@ -6738,9 +6738,9 @@ create_breakpoints (struct gdbarch *gdbarch,
       struct symtabs_and_lines expanded = 
 	expand_line_sal_maybe (sals.sals[i]);
 
-      create_breakpoint (gdbarch, expanded, addr_string[i],
-			 cond_string, type, disposition,
-			 thread, task, ignore_count, ops, from_tty, enabled);
+      create_breakpoint_sal (gdbarch, expanded, addr_string[i],
+			     cond_string, type, disposition,
+			     thread, task, ignore_count, ops, from_tty, enabled);
     }
 }
 
@@ -6955,16 +6955,16 @@ find_condition_and_thread (char *tok, CORE_ADDR pc,
    COND_STRING and THREAD parameters.  Returns true if any breakpoint
    was created; false otherwise.  */
 
-static int
-break_command_really (struct gdbarch *gdbarch,
-		      char *arg, char *cond_string, int thread,
-		      int parse_condition_and_thread,
-		      int tempflag, int hardwareflag, int traceflag,
-		      int ignore_count,
-		      enum auto_boolean pending_break_support,
-		      struct breakpoint_ops *ops,
-		      int from_tty,
-		      int enabled)
+int
+create_breakpoint (struct gdbarch *gdbarch,
+		   char *arg, char *cond_string, int thread,
+		   int parse_condition_and_thread,
+		   int tempflag, int hardwareflag, int traceflag,
+		   int ignore_count,
+		   enum auto_boolean pending_break_support,
+		   struct breakpoint_ops *ops,
+		   int from_tty,
+		   int enabled)
 {
   struct gdb_exception e;
   struct symtabs_and_lines sals;
@@ -7103,9 +7103,10 @@ break_command_really (struct gdbarch *gdbarch,
                 make_cleanup (xfree, cond_string);
             }
         }
-      create_breakpoints (gdbarch, sals, addr_string, cond_string, type_wanted,
-			  tempflag ? disp_del : disp_donttouch,
-			  thread, task, ignore_count, ops, from_tty, enabled);
+      create_breakpoints_sal (gdbarch, sals, addr_string, cond_string,
+			      type_wanted, tempflag ? disp_del : disp_donttouch,
+			      thread, task, ignore_count, ops, from_tty,
+			      enabled);
     }
   else
     {
@@ -7163,34 +7164,18 @@ break_command_1 (char *arg, int flag, int from_tty)
   int hardwareflag = flag & BP_HARDWAREFLAG;
   int tempflag = flag & BP_TEMPFLAG;
 
-  break_command_really (get_current_arch (),
-			arg,
-			NULL, 0, 1 /* parse arg */,
-			tempflag, hardwareflag, 0 /* traceflag */,
-			0 /* Ignore count */,
-			pending_break_support, 
-			NULL /* breakpoint_ops */,
-			from_tty,
-			1 /* enabled */);
+  create_breakpoint (get_current_arch (),
+		     arg,
+		     NULL, 0, 1 /* parse arg */,
+		     tempflag, hardwareflag, 0 /* traceflag */,
+		     0 /* Ignore count */,
+		     pending_break_support,
+		     NULL /* breakpoint_ops */,
+		     from_tty,
+		     1 /* enabled */);
 }
 
 
-void
-set_breakpoint (struct gdbarch *gdbarch,
-		char *address, char *condition,
-		int hardwareflag, int tempflag,
-		int thread, int ignore_count,
-		int pending, int enabled)
-{
-  break_command_really (gdbarch,
-			address, condition, thread,
-			0 /* condition and thread are valid.  */,
-			tempflag, hardwareflag, 0 /* traceflag */,
-			ignore_count,
-			pending 
-			? AUTO_BOOLEAN_TRUE : AUTO_BOOLEAN_FALSE,
-			NULL, 0, enabled);
-}
 
 /* Adjust SAL to the first instruction past the function prologue.
    The end of the prologue is determined using the line table from
@@ -8054,14 +8039,14 @@ handle_gnu_v3_exceptions (int tempflag, char *cond_string,
   else
     trigger_func_name = "__cxa_throw";
 
-  break_command_really (get_current_arch (),
-			trigger_func_name, cond_string, -1,
-			0 /* condition and thread are valid.  */,
-			tempflag, 0, 0,
-			0,
-			AUTO_BOOLEAN_TRUE /* pending */,
-			&gnu_v3_exception_catchpoint_ops, from_tty,
-			1 /* enabled */);
+  create_breakpoint (get_current_arch (),
+		     trigger_func_name, cond_string, -1,
+		     0 /* condition and thread are valid.  */,
+		     tempflag, 0, 0,
+		     0,
+		     AUTO_BOOLEAN_TRUE /* pending */,
+		     &gnu_v3_exception_catchpoint_ops, from_tty,
+		     1 /* enabled */);
 
   return 1;
 }
@@ -10026,32 +10011,32 @@ set_tracepoint_count (int num)
 void
 trace_command (char *arg, int from_tty)
 {
-  if (break_command_really (get_current_arch (),
-			    arg,
-			    NULL, 0, 1 /* parse arg */,
-			    0 /* tempflag */, 0 /* hardwareflag */,
-			    1 /* traceflag */,
-			    0 /* Ignore count */,
-			    pending_break_support,
-			    NULL,
-			    from_tty,
-			    1 /* enabled */))
+  if (create_breakpoint (get_current_arch (),
+			 arg,
+			 NULL, 0, 1 /* parse arg */,
+			 0 /* tempflag */, 0 /* hardwareflag */,
+			 1 /* traceflag */,
+			 0 /* Ignore count */,
+			 pending_break_support,
+			 NULL,
+			 from_tty,
+			 1 /* enabled */))
     set_tracepoint_count (breakpoint_count);
 }
 
 void
 ftrace_command (char *arg, int from_tty)
 {
-  if (break_command_really (get_current_arch (),
-			    arg,
-			    NULL, 0, 1 /* parse arg */,
-			    0 /* tempflag */, 1 /* hardwareflag */,
-			    1 /* traceflag */,
-			    0 /* Ignore count */,
-			    pending_break_support,
-			    NULL,
-			    from_tty,
-			    1 /* enabled */))
+  if (create_breakpoint (get_current_arch (),
+			 arg,
+			 NULL, 0, 1 /* parse arg */,
+			 0 /* tempflag */, 1 /* hardwareflag */,
+			 1 /* traceflag */,
+			 0 /* Ignore count */,
+			 pending_break_support,
+			 NULL,
+			 from_tty,
+			 1 /* enabled */))
     set_tracepoint_count (breakpoint_count);
 }
 
@@ -10070,17 +10055,17 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
   /* In the absence of a source location, fall back to raw address.  */
   sprintf (buf, "*%s", paddress (get_current_arch(), utp->addr));
 
-  if (!break_command_really (get_current_arch (),
-			     buf,
-			     NULL, 0, 1 /* parse arg */,
-			     0 /* tempflag */,
-			     (utp->type == bp_fast_tracepoint) /* hardwareflag */,
-			     1 /* traceflag */,
-			     0 /* Ignore count */,
-			     pending_break_support,
-			     NULL,
-			     0 /* from_tty */,
-			     utp->enabled /* enabled */))
+  if (!create_breakpoint (get_current_arch (),
+			  buf,
+			  NULL, 0, 1 /* parse arg */,
+			  0 /* tempflag */,
+			  (utp->type == bp_fast_tracepoint) /* hardwareflag */,
+			  1 /* traceflag */,
+			  0 /* Ignore count */,
+			  pending_break_support,
+			  NULL,
+			  0 /* from_tty */,
+			  utp->enabled /* enabled */))
     return NULL;
 
   set_tracepoint_count (breakpoint_count);

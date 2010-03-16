@@ -1,3 +1,18 @@
+2010-03-16  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Simplify MI breakpoint setting.
+
+	* breakpoint.c (break_command_really): Make nonstatic and
+	rename to...
+	(create_breakpoint): ...this. Rename prior function by this name
+	to...
+	(create_breakpoint_sal): ...this.
+	(create_breakpoints): Rename to...
+	(create_breakpoints_sal): ...this.
+	(set_breakpoint): Remove.
+	* breakpoint.h: Adjust to above changes.
+	* mi/mi-cmd-break.c (mi_cmd_break_insert): Simplify.
+
 2010-03-15 Stan Shebs  <stan@codesourcery.com>
 
 	* ax-gdb.c: Include cp-support.h.

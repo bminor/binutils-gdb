@@ -792,12 +792,15 @@ extern void awatch_command_wrapper (char *, int);
 extern void rwatch_command_wrapper (char *, int);
 extern void tbreak_command (char *, int);
 
-extern void set_breakpoint (struct gdbarch *gdbarch,
-			    char *address, char *condition,
-			    int hardwareflag, int tempflag,
-			    int thread, int ignore_count,
-			    int pending,
-			    int enabled);
+extern int create_breakpoint (struct gdbarch *gdbarch, char *arg,
+			      char *cond_string, int thread,
+			      int parse_condition_and_thread,
+			      int tempflag, int hardwareflag, int traceflag,
+			      int ignore_count,
+			      enum auto_boolean pending_break_support,
+			      struct breakpoint_ops *ops,
+			      int from_tty,
+			      int enabled);
 
 extern void insert_breakpoints (void);
 
