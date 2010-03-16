@@ -77,48 +77,50 @@ class Chunked_vector
 {
  public:
   Chunked_vector()
-    : chunks_()
+    : chunks_(), size_(0)
   { }
 
   // Clear the elements.
   void
   clear()
-  { this->chunks_.clear(); }
+  {
+    this->chunks_.clear();
+    this->size_ = 0;
+  }
 
   // Reserve elements.
   void
   reserve(unsigned int n)
   {
-    n += chunk_size - 1;
-    while (n >= chunk_size)
+    if (n > this->chunks_.size() * chunk_size)
       {
-	this->chunks_.push_back(Element_vector());
-	this->chunks_.back().reserve(chunk_size);
-	n -= chunk_size;
+	this->chunks_.resize((n + chunk_size - 1) / chunk_size);
+	// We need to call reserve() of all chunks since changing
+	// this->chunks_ casues Element_vectors to be copied.  The
+	// reserved capacity of an Element_vector may be lost in copying.
+	for (size_t i = 0; i < this->chunks_.size(); ++i)
+	  this->chunks_[i].reserve(chunk_size);
       }
   }
 
   // Get the number of elements.
   size_t
   size() const
-  {
-    if (this->chunks_.empty())
-      return 0;
-    else
-      return ((this->chunks_.size() - 1) * chunk_size
-	      + this->chunks_.back().size());
-  }
+  { return this->size_; }
 
   // Push a new element on the back of the vector.
   void
   push_back(const Element& element)
   {
-    if (this->chunks_.empty() || this->chunks_.back().size() == chunk_size)
+    size_t chunk_index = this->size_ / chunk_size;
+    if (chunk_index >= this->chunks_.size())
       {
 	this->chunks_.push_back(Element_vector());
 	this->chunks_.back().reserve(chunk_size);
+	gold_assert(chunk_index < this->chunks_.size());
       }
-    this->chunks_.back().push_back(element);
+    this->chunks_[chunk_index].push_back(element);
+    this->size_++;
   }
 
   // Return a reference to an entry in the vector.
@@ -137,6 +139,7 @@ class Chunked_vector
   typedef std::vector<Element_vector> Chunk_vector;
 
   Chunk_vector chunks_;
+  size_t size_;
 };
 
 
@@ -174,7 +177,10 @@ class Stringpool_template
   // should not be called for a proper ELF SHT_STRTAB section.
   void
   set_no_zero_null()
-  { this->zero_null_ = false; }
+  {
+    gold_assert(this->string_set_.empty());
+    this->zero_null_ = false;
+  }
 
   // Indicate that this string pool should be optimized, even if not
   // running with -O2.
@@ -282,6 +288,10 @@ class Stringpool_template
     char data[1];
   };
 
+  // Add a new key offset entry.
+  void
+  new_key_offset(size_t);
+
   // Copy a string into the buffers, returning a canonical string.
   const Stringpool_char*
   add_string(const Stringpool_char*, size_t);
@@ -372,6 +382,8 @@ class Stringpool_template
   bool zero_null_;
   // Whether to optimize the string table.
   bool optimize_;
+  // offset of the next string.
+  section_offset_type offset_;
 };
 
 // The most common type of Stringpool.

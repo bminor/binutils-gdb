@@ -1,3 +1,23 @@
+2010-03-15  Doug Kwan  <dougkwan@google.com>
+
+	* stringpool.cc (Stringpool_template::Stringpool_template): Initialize
+	offset_.
+	(Stringpool_template::new_key_offset): New method.
+	(Stringpool_template::add_string): Assign offsets when adding new
+	strings.
+	(Stringpool_template::set_string_offsets): Do not set string offsets
+	when not optimizing.
+	* stringpool.h (Chunked_vector::Chunked_vector): Initialize data
+	member size_.
+   	(Chunked_vector::clear): Clear size_.
+   	(Chunked_vector::reserve): Call reserve method of all Element_vectors.
+   	(Chunked_vector::size): Return size_.
+   	(Chunked_vector::push_back): Use size_ to find insert position.
+	(Chunked_vector::size_): New data member. 
+	(Stringpool_template::set_no_zero_null): Assert string set is empty.
+	(Stringpool_template::new_key_offset): New method declaration.
+	(Stringpool_template::offset_): New data member.
+
 2010-03-15   Rafael Espindola  <espindola@google.com>
 
 	* readsyms.cc (Read_symbols::do_read_symbols): Update calls to
