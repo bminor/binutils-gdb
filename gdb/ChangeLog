@@ -1,3 +1,7 @@
+2010-03-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* MAINTAINERS: Update my email address.
+
 2010-03-16  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Simplify MI breakpoint setting.

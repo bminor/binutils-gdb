@@ -164,7 +164,7 @@ Joel Brobecker			brobecker@adacore.com
 Kevin Buettner			kevinb@redhat.com
 Andrew Cagney			cagney@gnu.org
 Doug Evans			dje@google.com
-Daniel Jacobowitz		dan@debian.org
+Daniel Jacobowitz		dan@codesourcery.com
 Mark Kettenis           	kettenis@gnu.org
 Stan Shebs			stan@codesourcery.com
 Michael Snyder			msnyder@vmware.com
@@ -366,7 +366,7 @@ MS Windows (NT, '00, 9x, Me, XP) host & native
 GNU/Linux/x86 native & host
 			Mark Kettenis		kettenis@gnu.org
 GNU/Linux MIPS native & host
-			Daniel Jacobowitz	dan@debian.org
+			Daniel Jacobowitz	dan@codesourcery.com
 GNU/Linux m68k		Andreas Schwab		schwab@linux-m68k.org
 FreeBSD native & host	Mark Kettenis		kettenis@gnu.org
 
@@ -380,7 +380,7 @@ threads			Michael Snyder		msnyder@vmware.com
 language support
   Ada			Joel Brobecker		brobecker@adacore.com
 			Paul Hilfinger		hilfinger@gnat.com
-  C++			Daniel Jacobowitz	dan@debian.org
+  C++			Daniel Jacobowitz	dan@codesourcery.com
   Objective C support   Adam Fedor		fedor@gnu.org
 shared libs		Kevin Buettner		kevinb@redhat.com
 MI interface		Vladimir Prus		vladimir@codesourcery.com
@@ -402,7 +402,7 @@ libgui (w/foundry, sn)	Keith Seitz		keiths@redhat.com
 
 Misc:
 
-gdb/gdbserver		Daniel Jacobowitz	dan@debian.org
+gdb/gdbserver		Daniel Jacobowitz	dan@codesourcery.com
 
 Makefile.in, configure*	ALL
 
@@ -526,7 +526,7 @@ Martin Hunt					hunt@redhat.com
 Jim Ingham					jingham@apple.com
 Baurzhan Ismagulov				ibr@radix50.net
 Manoj Iyer					manjo@austin.ibm.com
-Daniel Jacobowitz				dan@debian.org
+Daniel Jacobowitz				dan@codesourcery.com
 Andreas Jaeger					aj@suse.de
 Jeff Johnston					jjohnstn@redhat.com
 Geoff Keating					geoffk@redhat.com
