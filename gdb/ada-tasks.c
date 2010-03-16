@@ -877,6 +877,19 @@ task_command_1 (char *taskno_str, int from_tty)
      to the thread list.  */
   target_find_new_threads ();
 
+  /* Verify that the ptid of the task we want to switch to is valid
+     (in other words, a ptid that GDB knows about).  Otherwise, we will
+     cause an assertion failure later on, when we try to determine
+     the ptid associated thread_info data.  We should normally never
+     encounter such an error, but the wrong ptid can actually easily be
+     computed if target_get_ada_task_ptid has not been implemented for
+     our target (yet).  Rather than cause an assertion error in that case,
+     it's nicer for the user to just refuse to perform the task switch.  */
+  if (!find_thread_ptid (task_info->ptid))
+    error (_("Unable to compute thread ID for task %d.\n"
+             "Cannot switch to this task."),
+           taskno);
+
   switch_to_thread (task_info->ptid);
   ada_find_printable_frame (get_selected_frame (NULL));
   printf_filtered (_("[Switching to task %d]\n"), taskno);

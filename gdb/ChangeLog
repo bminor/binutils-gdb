@@ -2,6 +2,11 @@
 
 	* linux-record.c (record_linux_msghdr): Remove unintended semicolons.
 
+2010-03-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-tasks.c (task_command_1): Check that the task ptid is valid
+	before doing the associated thread switch.
+
 2010-03-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* MAINTAINERS: Update my email address.
