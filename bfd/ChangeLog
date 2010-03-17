@@ -1,3 +1,7 @@
+2010-03-17  Alan Modra  <amodra@gmail.com>
+
+	* elf32-arm.c (cortex_a8_erratum_scan): Warning fix.
+
 2010-03-16  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (struct ppc_link_hash_table): Add do_toc_opt.

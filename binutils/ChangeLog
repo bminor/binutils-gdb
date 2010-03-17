@@ -1,3 +1,7 @@
+2010-03-17  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (dump_arm_unwind): Warning fix.
+
 2010-03-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* MAINTAINERS: Update my email address.  List Tristan Gingold

@@ -6276,7 +6276,7 @@ dump_arm_unwind (struct arm_unw_aux_info *aux, Elf_Internal_Shdr *exidx_sec)
 	}
       else
 	{
-	  bfd_vma table, table_offset;
+	  bfd_vma table, table_offset = 0;
 	  Elf_Internal_Shdr *table_sec;
 
 	  fputs ("@", stdout);

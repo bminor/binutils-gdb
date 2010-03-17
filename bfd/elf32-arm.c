@@ -4080,7 +4080,7 @@ cortex_a8_erratum_scan (bfd *input_bfd,
 		  && last_was_32bit
 		  && ! last_was_branch)
                 {
-                  bfd_signed_vma offset;
+                  bfd_signed_vma offset = 0;
                   bfd_boolean force_target_arm = FALSE;
 		  bfd_boolean force_target_thumb = FALSE;
                   bfd_vma target;
