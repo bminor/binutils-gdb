@@ -70,7 +70,7 @@ static struct value *const_var_ref (struct symbol *var);
 static struct value *const_expr (union exp_element **pc);
 static struct value *maybe_const_expr (union exp_element **pc);
 
-static void gen_traced_pop (struct agent_expr *, struct axs_value *);
+static void gen_traced_pop (struct gdbarch *, struct agent_expr *, struct axs_value *);
 
 static void gen_sign_extend (struct agent_expr *, struct type *);
 static void gen_extend (struct agent_expr *, struct type *);
@@ -144,7 +144,7 @@ static void gen_struct_ref (struct expression *exp, struct agent_expr *ax,
 			    struct axs_value *value,
 			    char *field,
 			    char *operator_name, char *operand_name);
-static void gen_static_field (struct expression *exp,
+static void gen_static_field (struct gdbarch *gdbarch,
 			      struct agent_expr *ax, struct axs_value *value,
 			      struct type *type, int fieldno);
 static void gen_repeat (struct expression *exp, union exp_element **pc,
@@ -331,11 +331,64 @@ maybe_const_expr (union exp_element **pc)
    emits the trace bytecodes at the appropriate points.  */
 static int trace_kludge;
 
+/* Scan for all static fields in the given class, including any base
+   classes, and generate tracing bytecodes for each.  */
+
+static void
+gen_trace_static_fields (struct gdbarch *gdbarch,
+			 struct agent_expr *ax,
+			 struct type *type)
+{
+  int i, nbases = TYPE_N_BASECLASSES (type);
+  struct axs_value value;
+
+  CHECK_TYPEDEF (type);
+
+  for (i = TYPE_NFIELDS (type) - 1; i >= nbases; i--)
+    {
+      if (field_is_static (&TYPE_FIELD (type, i)))
+	{
+	  gen_static_field (gdbarch, ax, &value, type, i);
+	  if (value.optimized_out)
+	    continue;
+	  switch (value.kind)
+	    {
+	    case axs_lvalue_memory:
+	      {
+		int length = TYPE_LENGTH (check_typedef (value.type));
+
+		ax_const_l (ax, length);
+		ax_simple (ax, aop_trace);
+	      }
+	      break;
+
+	    case axs_lvalue_register:
+	      /* We need to mention the register somewhere in the bytecode,
+		 so ax_reqs will pick it up and add it to the mask of
+		 registers used.  */
+	      ax_reg (ax, value.u.reg);
+
+	    default:
+	      break;
+	    }
+	}
+    }
+
+  /* Now scan through base classes recursively.  */
+  for (i = 0; i < nbases; i++)
+    {
+      struct type *basetype = check_typedef (TYPE_BASECLASS (type, i));
+
+      gen_trace_static_fields (gdbarch, ax, basetype);
+    }
+}
+
 /* Trace the lvalue on the stack, if it needs it.  In either case, pop
    the value.  Useful on the left side of a comma, and at the end of
    an expression being used for tracing.  */
 static void
-gen_traced_pop (struct agent_expr *ax, struct axs_value *value)
+gen_traced_pop (struct gdbarch *gdbarch,
+		struct agent_expr *ax, struct axs_value *value)
 {
   if (trace_kludge)
     switch (value->kind)
@@ -371,6 +424,12 @@ gen_traced_pop (struct agent_expr *ax, struct axs_value *value)
   else
     /* If we're not tracing, just pop the value.  */
     ax_simple (ax, aop_pop);
+
+  /* To trace C++ classes with static fields stored elsewhere.  */
+  if (trace_kludge
+      && (TYPE_CODE (value->type) == TYPE_CODE_STRUCT
+	  || TYPE_CODE (value->type) == TYPE_CODE_UNION))
+    gen_trace_static_fields (gdbarch, ax, value->type);
 }
 
 
@@ -554,6 +613,7 @@ gen_var_ref (struct gdbarch *gdbarch, struct agent_expr *ax,
 {
   /* Dereference any typedefs. */
   value->type = check_typedef (SYMBOL_TYPE (var));
+  value->optimized_out = 0;
 
   /* I'm imitating the code in read_var_value.  */
   switch (SYMBOL_CLASS (var))
@@ -650,8 +710,9 @@ gen_var_ref (struct gdbarch *gdbarch, struct agent_expr *ax,
       break;
 
     case LOC_OPTIMIZED_OUT:
-      error (_("The variable `%s' has been optimized out."),
-	     SYMBOL_PRINT_NAME (var));
+      /* Flag this, but don't say anything; leave it up to callers to
+	 warn the user.  */
+      value->optimized_out = 1;
       break;
 
     default:
@@ -1342,7 +1403,10 @@ gen_struct_ref_recursive (struct expression *exp, struct agent_expr *ax,
 		 being handled as a global.  */
 	      if (field_is_static (&TYPE_FIELD (type, i)))
 		{
-		  gen_static_field (exp, ax, value, type, i);
+		  gen_static_field (exp->gdbarch, ax, value, type, i);
+		  if (value->optimized_out)
+		    error (_("static field `%s' has been optimized out, cannot use"),
+			   field);
 		  return 1;
 		}
 
@@ -1425,7 +1489,7 @@ gen_maybe_namespace_elt (struct expression *exp,
 			 const struct type *curtype, char *name);
 
 static void
-gen_static_field (struct expression *exp,
+gen_static_field (struct gdbarch *gdbarch,
 		  struct agent_expr *ax, struct axs_value *value,
 		  struct type *type, int fieldno)
 {
@@ -1434,15 +1498,27 @@ gen_static_field (struct expression *exp,
       ax_const_l (ax, TYPE_FIELD_STATIC_PHYSADDR (type, fieldno));
       value->kind = axs_lvalue_memory;
       value->type = TYPE_FIELD_TYPE (type, fieldno);
+      value->optimized_out = 0;
     }
   else
     {
       char *phys_name = TYPE_FIELD_STATIC_PHYSNAME (type, fieldno);
       struct symbol *sym = lookup_symbol (phys_name, 0, VAR_DOMAIN, 0);
-      if (sym == NULL)
-	error (_("symbol not found"));
 
-      gen_var_ref (exp->gdbarch, ax, value, sym);
+      if (sym)
+	{
+	  gen_var_ref (gdbarch, ax, value, sym);
+  
+	  /* Don't error if the value was optimized out, we may be
+	     scanning all static fields and just want to pass over this
+	     and continue with the rest.  */
+	}
+      else
+	{
+	  /* Silently assume this was optimized out; class printing
+	     will let the user know why the data is missing.  */
+	  value->optimized_out = 1;
+	}
     }
 }
 
@@ -1468,7 +1544,10 @@ gen_struct_elt_for_reference (struct expression *exp,
 	{
 	  if (field_is_static (&TYPE_FIELD (t, i)))
 	    {
-	      gen_static_field (exp, ax, value, t, i);
+	      gen_static_field (exp->gdbarch, ax, value, t, i);
+	      if (value->optimized_out)
+		error (_("static field `%s' has been optimized out, cannot use"),
+		       fieldname);
 	      return 1;
 	    }
 	  if (TYPE_FIELD_PACKED (t, i))
@@ -1525,6 +1604,10 @@ gen_maybe_namespace_elt (struct expression *exp,
     return 0;
 
   gen_var_ref (exp->gdbarch, ax, value, sym);
+
+  if (value->optimized_out)
+    error (_("`%s' has been optimized out, cannot use"),
+	   SYMBOL_PRINT_NAME (sym));
 
   return 1;
 }
@@ -1815,7 +1898,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
       /* Don't just dispose of the left operand.  We might be tracing,
          in which case we want to emit code to trace it if it's an
          lvalue.  */
-      gen_traced_pop (ax, &value1);
+      gen_traced_pop (exp->gdbarch, ax, &value1);
       gen_expr (exp, pc, ax, value);
       /* It's the consumer's responsibility to trace the right operand.  */
       break;
@@ -1831,6 +1914,11 @@ gen_expr (struct expression *exp, union exp_element **pc,
 
     case OP_VAR_VALUE:
       gen_var_ref (exp->gdbarch, ax, value, (*pc)[2].symbol);
+
+      if (value->optimized_out)
+	error (_("`%s' has been optimized out, cannot use"),
+	       SYMBOL_PRINT_NAME ((*pc)[2].symbol));
+
       (*pc) += 4;
       break;
 
@@ -2004,6 +2092,11 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	  error (_("no `%s' found"), this_name);
 
 	gen_var_ref (exp->gdbarch, ax, value, sym);
+
+	if (value->optimized_out)
+	  error (_("`%s' has been optimized out, cannot use"),
+		 SYMBOL_PRINT_NAME (sym));
+
 	(*pc) += 2;
       }
       break;
@@ -2199,7 +2292,8 @@ cannot subscript requested type: cannot call user defined functions"));
    name comes from a list of local variables of a function.  */
 
 struct agent_expr *
-gen_trace_for_var (CORE_ADDR scope, struct symbol *var)
+gen_trace_for_var (CORE_ADDR scope, struct gdbarch *gdbarch,
+		   struct symbol *var)
 {
   struct cleanup *old_chain = 0;
   struct agent_expr *ax = new_agent_expr (scope);
@@ -2208,10 +2302,18 @@ gen_trace_for_var (CORE_ADDR scope, struct symbol *var)
   old_chain = make_cleanup_free_agent_expr (ax);
 
   trace_kludge = 1;
-  gen_var_ref (NULL, ax, &value, var);
+  gen_var_ref (gdbarch, ax, &value, var);
+
+  /* If there is no actual variable to trace, flag it by returning
+     an empty agent expression.  */
+  if (value.optimized_out)
+    {
+      do_cleanups (old_chain);
+      return NULL;
+    }
 
   /* Make sure we record the final object, and get rid of it.  */
-  gen_traced_pop (ax, &value);
+  gen_traced_pop (gdbarch, ax, &value);
 
   /* Oh, and terminate.  */
   ax_simple (ax, aop_end);
@@ -2245,7 +2347,7 @@ gen_trace_for_expr (CORE_ADDR scope, struct expression *expr)
   gen_expr (expr, &pc, ax, &value);
 
   /* Make sure we record the final object, and get rid of it.  */
-  gen_traced_pop (ax, &value);
+  gen_traced_pop (expr->gdbarch, ax, &value);
 
   /* Oh, and terminate.  */
   ax_simple (ax, aop_end);

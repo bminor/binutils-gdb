@@ -81,6 +81,10 @@ struct axs_value
        "pointer to" an object of this type. */
     struct type *type;
 
+    /* If nonzero, this is a variable which does not actually exist in
+       the program.  */
+    char optimized_out;
+
     union
       {
 	/* if kind == axs_lvalue_register, this is the register number */
@@ -99,7 +103,8 @@ struct axs_value
    function to discover which registers the expression uses.  */
 extern struct agent_expr *gen_trace_for_expr (CORE_ADDR, struct expression *);
 
-extern struct agent_expr *gen_trace_for_var (CORE_ADDR, struct symbol *);
+extern struct agent_expr *gen_trace_for_var (CORE_ADDR, struct gdbarch *,
+					     struct symbol *);
 
 extern struct agent_expr *gen_eval_for_expr (CORE_ADDR, struct expression *);
 

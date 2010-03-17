@@ -949,6 +949,7 @@ collect_symbol (struct collection_list *collect,
   unsigned long len;
   unsigned int reg;
   bfd_signed_vma offset;
+  int treat_as_expr = 0;
 
   len = TYPE_LENGTH (check_typedef (SYMBOL_TYPE (sym)));
   switch (SYMBOL_CLASS (sym))
@@ -973,7 +974,12 @@ collect_symbol (struct collection_list *collect,
 			   SYMBOL_PRINT_NAME (sym), len,
 			   tmp /* address */);
 	}
-      add_memrange (collect, memrange_absolute, offset, len);
+      /* A struct may be a C++ class with static fields, go to general
+	 expression handling.  */
+      if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT)
+	treat_as_expr = 1;
+      else
+	add_memrange (collect, memrange_absolute, offset, len);
       break;
     case LOC_REGISTER:
       reg = SYMBOL_REGISTER_OPS (sym)->register_number (sym, gdbarch);
@@ -1038,48 +1044,61 @@ collect_symbol (struct collection_list *collect,
       break;
 
     case LOC_COMPUTED:
-      {
-	struct agent_expr *aexpr;
-	struct cleanup *old_chain1 = NULL;
-	struct agent_reqs areqs;
-
-	aexpr = gen_trace_for_var (scope, sym);
-
-	old_chain1 = make_cleanup_free_agent_expr (aexpr);
-
-	ax_reqs (aexpr, &areqs);
-	if (areqs.flaw != agent_flaw_none)
-	  error (_("malformed expression"));
-	
-	if (areqs.min_height < 0)
-	  error (_("gdb: Internal error: expression has min height < 0"));
-	if (areqs.max_height > 20)
-	  error (_("expression too complicated, try simplifying"));
-
-	discard_cleanups (old_chain1);
-	add_aexpr (collect, aexpr);
-
-	/* take care of the registers */
-	if (areqs.reg_mask_len > 0)
-	  {
-	    int ndx1, ndx2;
-
-	    for (ndx1 = 0; ndx1 < areqs.reg_mask_len; ndx1++)
-	      {
-		QUIT;	/* allow user to bail out with ^C */
-		if (areqs.reg_mask[ndx1] != 0)
-		  {
-		    /* assume chars have 8 bits */
-		    for (ndx2 = 0; ndx2 < 8; ndx2++)
-		      if (areqs.reg_mask[ndx1] & (1 << ndx2))
-			/* it's used -- record it */
-			add_register (collect, 
-				      ndx1 * 8 + ndx2);
-		  }
-	      }
-	  }
-      }
+      treat_as_expr = 1;
       break;
+    }
+
+  /* Expressions are the most general case.  */
+  if (treat_as_expr)
+    {
+      struct agent_expr *aexpr;
+      struct cleanup *old_chain1 = NULL;
+      struct agent_reqs areqs;
+
+      aexpr = gen_trace_for_var (scope, gdbarch, sym);
+
+      /* It can happen that the symbol is recorded as a computed
+	 location, but it's been optimized away and doesn't actually
+	 have a location expression.  */
+      if (!aexpr)
+	{
+	  printf_filtered ("%s has been optimized out of existence.\n",
+			   SYMBOL_PRINT_NAME (sym));
+	  return;
+	}
+
+      old_chain1 = make_cleanup_free_agent_expr (aexpr);
+
+      ax_reqs (aexpr, &areqs);
+      if (areqs.flaw != agent_flaw_none)
+	error (_("malformed expression"));
+      
+      if (areqs.min_height < 0)
+	error (_("gdb: Internal error: expression has min height < 0"));
+      if (areqs.max_height > 20)
+	error (_("expression too complicated, try simplifying"));
+
+      discard_cleanups (old_chain1);
+      add_aexpr (collect, aexpr);
+
+      /* take care of the registers */
+      if (areqs.reg_mask_len > 0)
+	{
+	  int ndx1, ndx2;
+
+	  for (ndx1 = 0; ndx1 < areqs.reg_mask_len; ndx1++)
+	    {
+	      QUIT;	/* allow user to bail out with ^C */
+	      if (areqs.reg_mask[ndx1] != 0)
+		{
+		  /* assume chars have 8 bits */
+		  for (ndx2 = 0; ndx2 < 8; ndx2++)
+		    if (areqs.reg_mask[ndx1] & (1 << ndx2))
+		      /* it's used -- record it */
+		      add_register (collect, ndx1 * 8 + ndx2);
+		}
+	    }
+	}
     }
 }
 

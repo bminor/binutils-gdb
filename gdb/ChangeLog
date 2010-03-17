@@ -1,3 +1,23 @@
+2010-03-17 Stan Shebs  <stan@codesourcery.com>
+
+	* ax-gdb.h (struct axs_value): New field optimized_out.
+	(gen_trace_for_var): Add gdbarch argument.
+	* ax-gdb.c (gen_trace_static_fields): New function.
+	(gen_traced_pop): Call it, add gdbarch argument.
+	(gen_trace_for_expr): Update call to it.
+	(gen_trace_for_var): Ditto, and report optimized-out variables.
+	(gen_struct_ref_recursive): Check for optimized-out value.
+	(gen_struct_elt_for_reference): Ditto.
+	(gen_static_field): Pass gdbarch instead of expression, assume
+	optimization if field not found.
+	(gen_var_ref): Set the optimized_out flag.
+	(gen_expr): Error on optimized-out variable.
+	* tracepoint.c (collect_symbol): Handle struct-valued vars as
+	expressions, skip optimized-out variables with computed locations.
+	* dwarf2loc.c (dwarf2_tracepoint_var_ref): Flag instead of
+	erroring out if location expression missing.
+	(loclist_tracepoint_var_ref): Don't error out here.
+
 2010-03-17  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (dwarf2_get_section_info): Handle case where no

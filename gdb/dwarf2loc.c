@@ -619,11 +619,11 @@ dwarf2_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
 			   struct agent_expr *ax, struct axs_value *value,
 			   gdb_byte *data, int size)
 {
-  if (size == 0)
-    error (_("Symbol \"%s\" has been optimized out."),
-	   SYMBOL_PRINT_NAME (symbol));
-
-  if (size == 1
+  if (!data || size == 0)
+    {
+      value->optimized_out = 1;
+    }
+  else if (size == 1
       && data[0] >= DW_OP_reg0
       && data[0] <= DW_OP_reg31)
     {
@@ -883,8 +883,6 @@ loclist_tracepoint_var_ref (struct symbol *symbol, struct gdbarch *gdbarch,
   size_t size;
 
   data = find_location_expression (dlbaton, &size, ax->scope);
-  if (data == NULL)
-    error (_("Variable \"%s\" is not available."), SYMBOL_NATURAL_NAME (symbol));
 
   dwarf2_tracepoint_var_ref (symbol, gdbarch, ax, value, data, size);
 }
