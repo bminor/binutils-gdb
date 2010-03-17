@@ -1397,6 +1397,16 @@ dwarf2_get_section_info (struct objfile *objfile, const char *section_name,
   struct dwarf2_per_objfile *data
     = objfile_data (objfile, dwarf2_objfile_data_key);
   struct dwarf2_section_info *info;
+
+  /* We may see an objfile without any DWARF, in which case we just
+     return nothing.  */
+  if (data == NULL)
+    {
+      *sectp = NULL;
+      *bufp = NULL;
+      *sizep = 0;
+      return;
+    }
   if (section_is_p (section_name, EH_FRAME_SECTION))
     info = &data->eh_frame;
   else if (section_is_p (section_name, FRAME_SECTION))

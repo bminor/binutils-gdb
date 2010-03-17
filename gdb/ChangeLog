@@ -1,3 +1,8 @@
+2010-03-17  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (dwarf2_get_section_info): Handle case where no
+	DWARF data is available.
+
 2010-03-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* symfile.c (generic_load): Reset breakpoints after loading.
