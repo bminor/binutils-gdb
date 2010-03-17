@@ -1,3 +1,7 @@
+2010-03-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* symfile.c (generic_load): Reset breakpoints after loading.
+
 2010-03-17  Tom Tromey  <tromey@redhat.com>
 
 	* linux-nat.c (linux_nat_detach): Check debug_linux_nat.
