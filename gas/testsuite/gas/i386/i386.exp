@@ -223,9 +223,11 @@ if [expr [istarget "i*86-*-*"] || [istarget "x86_64-*-*"]] then {
     run_dump_test "string-ok"
     run_list_test "string-bad" ""
     run_list_test "space1" "-al"
-    run_list_test_stdin "list-1" "-al"
-    run_list_test_stdin "list-2" "-al"
-    run_list_test_stdin "list-3" "-al"
+    if [is_elf_format] then {
+	run_list_test_stdin "list-1" "-al"
+	run_list_test_stdin "list-2" "-al"
+	run_list_test_stdin "list-3" "-al"
+    }
 }
 
 if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] then {

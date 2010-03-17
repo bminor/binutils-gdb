@@ -1,3 +1,8 @@
+2010-03-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Run list-1, list-2 and list-3 only for
+	ELF tagets.
+
 2010-03-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/9966
