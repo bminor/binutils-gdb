@@ -1,3 +1,8 @@
+2010-03-17  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (lang_size_sections_1): Remove "s" param.  Set "s" from
+	*prev instead.  Update all callers.
+
 2010-03-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ldlang.c (lang_insert_orphan): Place loadable orphans in the same

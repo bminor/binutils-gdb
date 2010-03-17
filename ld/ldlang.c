@@ -4680,16 +4680,17 @@ os_region_check (lang_output_section_statement_type *os,
 
 static bfd_vma
 lang_size_sections_1
-  (lang_statement_union_type *s,
+  (lang_statement_union_type **prev,
    lang_output_section_statement_type *output_section_statement,
-   lang_statement_union_type **prev,
    fill_type *fill,
    bfd_vma dot,
    bfd_boolean *relax,
    bfd_boolean check_regions)
 {
+  lang_statement_union_type *s;
+
   /* Size up the sections from their constituent parts.  */
-  for (; s != NULL; s = s->header.next)
+  for (s = *prev; s != NULL; s = s->header.next)
     {
       switch (s->header.type)
 	{
@@ -4837,7 +4838,7 @@ lang_size_sections_1
 		os->bfd_section->output_offset = 0;
 	      }
 
-	    lang_size_sections_1 (os->children.head, os, &os->children.head,
+	    lang_size_sections_1 (&os->children.head, os,
 				  os->fill, newdot, relax, check_regions);
 
 	    os->processed_vma = TRUE;
@@ -4993,9 +4994,8 @@ lang_size_sections_1
 	  break;
 
 	case lang_constructors_statement_enum:
-	  dot = lang_size_sections_1 (constructor_list.head,
+	  dot = lang_size_sections_1 (&constructor_list.head,
 				      output_section_statement,
-				      &s->wild_statement.children.head,
 				      fill, dot, relax, check_regions);
 	  break;
 
@@ -5052,9 +5052,8 @@ lang_size_sections_1
 	  break;
 
 	case lang_wild_statement_enum:
-	  dot = lang_size_sections_1 (s->wild_statement.children.head,
+	  dot = lang_size_sections_1 (&s->wild_statement.children.head,
 				      output_section_statement,
-				      &s->wild_statement.children.head,
 				      fill, dot, relax, check_regions);
 	  break;
 
@@ -5071,7 +5070,7 @@ lang_size_sections_1
 	  {
 	    asection *i;
 
-	    i = (*prev)->input_section.section;
+	    i = s->input_section.section;
 	    if (relax)
 	      {
 		bfd_boolean again;
@@ -5184,9 +5183,8 @@ lang_size_sections_1
 	  break;
 
 	case lang_group_statement_enum:
-	  dot = lang_size_sections_1 (s->group_statement.children.head,
+	  dot = lang_size_sections_1 (&s->group_statement.children.head,
 				      output_section_statement,
-				      &s->group_statement.children.head,
 				      fill, dot, relax, check_regions);
 	  break;
 
@@ -5252,8 +5250,8 @@ void
 one_lang_size_sections_pass (bfd_boolean *relax, bfd_boolean check_regions)
 {
   lang_statement_iteration++;
-  lang_size_sections_1 (statement_list.head, abs_output_section,
-			&statement_list.head, 0, 0, relax, check_regions);
+  lang_size_sections_1 (&statement_list.head, abs_output_section,
+			0, 0, relax, check_regions);
 }
 
 void
