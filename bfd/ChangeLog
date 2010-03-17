@@ -1,3 +1,8 @@
+2010-03-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* reloc.c (BFD_RELOC_SPU_PIC18): Removed.
+	(BFD_RELOC_SPU_STUB): Likewise.
+
 2010-03-17  Jie Zhang  <jie@codesourcery.com>
 
 	* elf.c (assign_file_positions_for_load_sections): Avoid
