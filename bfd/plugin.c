@@ -240,7 +240,7 @@ bfd_plugin_object_p (bfd *abfd)
 
   if (abfd->iostream)
     {
-      file.fd = fileno (abfd->iostream);
+      file.fd = fileno ((FILE *) abfd->iostream);
       file.offset = 0;
       file.filesize = 0; /*FIXME*/
     }
@@ -248,7 +248,7 @@ bfd_plugin_object_p (bfd *abfd)
     {
       bfd *archive = abfd->my_archive;
       BFD_ASSERT (archive);
-      file.fd = fileno (archive->iostream);
+      file.fd = fileno ((FILE *) archive->iostream);
       file.offset = abfd->origin;
       file.filesize = arelt_size (abfd);
 

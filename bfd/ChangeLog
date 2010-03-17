@@ -1,5 +1,10 @@
 2010-03-17  Alan Modra  <amodra@gmail.com>
 
+	* plugin.c (bfd_plugin_object_p): Pass iostream to fileno using
+	proper type.
+
+2010-03-17  Alan Modra  <amodra@gmail.com>
+
 	* elf32-arm.c (cortex_a8_erratum_scan): Warning fix.
 
 2010-03-16  Alan Modra  <amodra@gmail.com>
