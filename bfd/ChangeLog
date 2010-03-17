@@ -1,3 +1,8 @@
+2010-03-17  Jie Zhang  <jie@codesourcery.com>
+
+	* elf.c (assign_file_positions_for_load_sections): Avoid
+	overflow.
+
 2010-03-17  Alan Modra  <amodra@gmail.com>
 
 	* plugin.c (bfd_plugin_object_p): Pass iostream to fileno using

@@ -4452,7 +4452,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	    {
 	      bfd_signed_vma adjust = sec->vma - (p->p_vaddr + p->p_memsz);
 
-	      if (adjust < 0)
+	      if (sec->vma < p->p_vaddr + p->p_memsz)
 		{
 		  (*_bfd_error_handler)
 		    (_("%B: section %A vma 0x%lx overlaps previous sections"),
