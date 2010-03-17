@@ -1863,11 +1863,13 @@ spu_catch_start (struct objfile *objfile)
   /* Use a numerical address for the set_breakpoint command to avoid having
      the breakpoint re-set incorrectly.  */
   xsnprintf (buf, sizeof buf, "*%s", core_addr_to_string (pc));
-  set_breakpoint (get_objfile_arch (objfile),
-		  buf, NULL /* condition */,
-		  0 /* hardwareflag */, 1 /* tempflag */,
-		  -1 /* thread */, 0 /* ignore_count */,
-		  0 /* pending */, 1 /* enabled */);
+  create_breakpoint (get_objfile_arch (objfile), buf /* arg */,
+		     NULL /* cond_string */, -1 /* thread */,
+		     0 /* parse_condition_and_thread */, 1 /* tempflag */,
+		     0 /* hardwareflag */, 0 /* traceflag */,
+		     0 /* ignore_count */,
+		     AUTO_BOOLEAN_FALSE /* pending_break_support */,
+		     NULL /* ops */, 0 /* from_tty */, 1 /* enabled */);
 }
 
 
