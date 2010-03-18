@@ -11,7 +11,7 @@
 	* ld-arm/arm-elf.exp: Run the new test.
 
 2010-03-02  Christophe Lyon  <christophe.lyon@st.com>
-	Alan Modra  <amodra@gmail.com>
+	    Alan Modra  <amodra@gmail.com>
 
 	* ld-arm/arm-elf.exp: Change .text start address for
 	farcall-thumb-arm tests. Add v4t variant for farcall-mixed-lib
