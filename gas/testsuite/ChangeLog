@@ -1,3 +1,9 @@
+2010-03-18  Wei Guozhi  <carrot@google.com>
+
+	PR gas/11323
+	* gas/arm/got_prel.s: New test case.
+	* gas/arm/got_prel.d: Expected disassembly.
+
 2010-03-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run list-1, list-2 and list-3 only for

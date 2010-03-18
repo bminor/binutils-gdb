@@ -452,7 +452,8 @@ The following relocations are supported:
 @code{TLSGD},
 @code{TLSLDM},
 @code{TLSLDO},
-@code{GOTTPOFF}
+@code{GOTTPOFF},
+@code{GOT_PREL}
 and
 @code{TPOFF}.
 

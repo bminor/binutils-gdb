@@ -3114,6 +3114,7 @@ pc-relative or some form of GOT-indirect relocation.  */
   BFD_RELOC_ARM_RELATIVE,
   BFD_RELOC_ARM_GOTOFF,
   BFD_RELOC_ARM_GOTPC,
+  BFD_RELOC_ARM_GOT_PREL,
 
 /* ARM thread-local storage relocations.  */
   BFD_RELOC_ARM_TLS_GD32,

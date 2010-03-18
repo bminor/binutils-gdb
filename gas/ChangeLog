@@ -1,3 +1,11 @@
+2010-03-18  Wei Guozhi  <carrot@google.com>
+
+	PR gas/11323
+	* config/tc-arm.c (reloc_names): New relocation names.
+	(md_apply_fix): New case for BFD_RELOC_ARM_GOT_PREL.
+	(tc_gen_reloc): New case for BFD_RELOC_ARM_GOT_PREL.
+	* doc/c-arm.texi (ARM-Relocations): Document the new relocation.
+
 2010-03-15  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* dw2gencfi.c (output_cie): Consider emitting the S augmentation in all

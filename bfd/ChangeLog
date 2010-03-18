@@ -1,3 +1,12 @@
+2010-03-18  Wei Guozhi  <carrot@google.com>
+
+	PR gas/11323
+	* elf32-arm.c (elf32_arm_reloc_map): Map BFD_RELOC_ARM_GOT_PREL to
+	R_ARM_GOT_PREL.
+	* reloc.c (BFD_RELOC_ARM_GOT_PREL): New ARM relocation.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2010-03-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* reloc.c (BFD_RELOC_SPU_PIC18): Removed.
