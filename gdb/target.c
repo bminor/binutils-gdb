@@ -659,6 +659,7 @@ update_current_target (void)
       INHERIT (to_upload_trace_state_variables, t);
       INHERIT (to_get_raw_trace_data, t);
       INHERIT (to_set_disconnected_tracing, t);
+      INHERIT (to_set_circular_trace_buffer, t);
       INHERIT (to_magic, t);
       /* Do not inherit to_memory_map.  */
       /* Do not inherit to_flash_erase.  */
@@ -848,7 +849,10 @@ update_current_target (void)
 	    tcomplain);
   de_fault (to_set_disconnected_tracing,
 	    (void (*) (int))
-	    tcomplain);
+	    target_ignore);
+  de_fault (to_set_circular_trace_buffer,
+	    (void (*) (int))
+	    target_ignore);
 #undef de_fault
 
   /* Finally, position the target-stack beneath the squashed

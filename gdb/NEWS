@@ -114,7 +114,14 @@ Renesas RX			rx
   tracing run at the moment that it was saved.  To create a trace
   file, use "tsave <filename>", and to use it, do "target tfile
   <name>".
-  
+
+  ** Circular trace buffer
+
+  You can ask the target agent to handle the trace buffer as a
+  circular buffer, discarding the oldest trace frames to make room for
+  newer ones, by setting circular-trace-buffer to on.  This feature may
+  not be available for all target agents.
+
 * Changed commands
 
 disassemble
@@ -215,6 +222,13 @@ show disconnected-tracing
    loses its connection to GDB.  If 0, the target is to stop tracing
    upon disconnection.
 
+set circular-trace-buffer
+show circular-trace-buffer
+   If set to on, the target is instructed to use a circular trace buffer
+   and discard the oldest trace frames instead of stopping the trace due
+   to a full trace buffer.  If set to off, the trace stops when the buffer
+   fills up.  Some targets may not support this.
+
 set script-extension off|soft|strict
 show script-extension
    If set to "off", the debugger does not perform any script language
@@ -257,6 +271,9 @@ qTV
 
 QTDisconnected
    Set desired tracing behavior upon disconnection.
+
+QTBuffer:circular
+   Set the trace buffer to be linear or circular.
 
 qTfP, qTsP
    Get data about the tracepoints currently in use.

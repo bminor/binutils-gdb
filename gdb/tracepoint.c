@@ -153,6 +153,11 @@ char *default_collect = "";
 
 static int disconnected_tracing;
 
+/* This variable controls whether we ask the target for a linear or
+   circular trace buffer.  */
+
+static int circular_trace_buffer;
+
 /* ======= Important command functions: ======= */
 static void trace_actions_command (char *, int);
 static void trace_start_command (char *, int);
@@ -1579,6 +1584,9 @@ trace_start_command (char *args, int from_tty)
   
   /* Tell target to treat text-like sections as transparent.  */
   target_trace_set_readonly_regions ();
+  /* Set some mode flags.  */
+  target_set_disconnected_tracing (disconnected_tracing);
+  target_set_circular_trace_buffer (circular_trace_buffer);
 
   /* Now insert traps and begin collecting data.  */
   target_trace_start ();
@@ -1668,16 +1676,34 @@ trace_status_command (char *args, int from_tty)
 	}
     }
 
-  if (ts->traceframe_count >= 0)
+  if (ts->traceframes_created >= 0
+      && ts->traceframe_count != ts->traceframes_created)
+    {
+      printf_filtered (_("Buffer contains %d trace frames (of %d created total).\n"),
+		       ts->traceframe_count, ts->traceframes_created);
+    }
+  else if (ts->traceframe_count >= 0)
     {
       printf_filtered (_("Collected %d trace frames.\n"),
 		       ts->traceframe_count);
     }
 
-  if (ts->buffer_free)
+  if (ts->buffer_free >= 0)
     {
-      printf_filtered (_("Trace buffer has %llu bytes free.\n"),
-		       ts->buffer_free);
+      if (ts->buffer_size >= 0)
+	{
+	  printf_filtered (_("Trace buffer has %d bytes of %d bytes free"),
+			   ts->buffer_free, ts->buffer_size);
+	  if (ts->buffer_size > 0)
+	    printf_filtered (_(" (%d%% full)"),
+			     ((int) ((((long long) (ts->buffer_size
+						    - ts->buffer_free)) * 100)
+				     / ts->buffer_size)));
+	  printf_filtered (_(".\n"));
+	}
+      else
+	printf_filtered (_("Trace buffer has %d bytes free.\n"),
+			 ts->buffer_free);
     }
 
   /* Now report on what we're doing with tfind.  */
@@ -2438,10 +2464,18 @@ trace_save_command (char *args, int from_tty)
   fprintf (fp, "R %x\n", trace_regblock_size);
 
   /* Write out status of the tracing run (aka "tstatus" info).  */
-  fprintf (fp, "status %c;%s:%x;tframes:%x;tfree:%llx\n",
+  fprintf (fp, "status %c;%s:%x",
 	   (ts->running ? '1' : '0'),
-	   stop_reason_names[ts->stop_reason], ts->stopping_tracepoint,
-	   ts->traceframe_count, ts->buffer_free);
+ 	   stop_reason_names[ts->stop_reason], ts->stopping_tracepoint);
+  if (ts->traceframe_count >= 0)
+    fprintf (fp, ";tframes:%x", ts->traceframe_count);
+  if (ts->traceframes_created >= 0)
+    fprintf (fp, ";tcreated:%x", ts->traceframes_created);
+  if (ts->buffer_free >= 0)
+    fprintf (fp, ";tfree:%x", ts->buffer_free);
+  if (ts->buffer_size >= 0)
+    fprintf (fp, ";tsize:%x", ts->buffer_size);
+  fprintf (fp, "\n");
 
   /* Note that we want to upload tracepoints and save those, rather
      than simply writing out the local ones, because the user may have
@@ -2544,6 +2578,13 @@ set_disconnected_tracing (char *args, int from_tty,
 			  struct cmd_list_element *c)
 {
   send_disconnected_tracing_value (disconnected_tracing);
+}
+
+static void
+set_circular_trace_buffer (char *args, int from_tty,
+			   struct cmd_list_element *c)
+{
+  target_set_circular_trace_buffer (circular_trace_buffer);
 }
 
 /* Convert the memory pointed to by mem into hex, placing result in buf.
@@ -3059,6 +3100,11 @@ parse_trace_status (char *line, struct trace_status *ts)
   ts->running_known = 1;
   ts->running = (*p++ == '1');
   ts->stop_reason = trace_stop_reason_unknown;
+  ts->traceframe_count = -1;
+  ts->traceframes_created = -1;
+  ts->buffer_free = -1;
+  ts->buffer_size = -1;
+
   while (*p++)
     {
       p1 = strchr (p, ':');
@@ -3086,15 +3132,25 @@ Status line: '%s'\n"), p, line);
 	  p = unpack_varlen_hex (++p1, &val);
 	  ts->stop_reason = tstop_command;
 	}
-      if (strncmp (p, "tframes", p1 - p) == 0)
+      else if (strncmp (p, "tframes", p1 - p) == 0)
 	{
 	  p = unpack_varlen_hex (++p1, &val);
 	  ts->traceframe_count = val;
 	}
-      if (strncmp (p, "tfree", p1 - p) == 0)
+      else if (strncmp (p, "tcreated", p1 - p) == 0)
+	{
+	  p = unpack_varlen_hex (++p1, &val);
+	  ts->traceframes_created = val;
+	}
+      else if (strncmp (p, "tfree", p1 - p) == 0)
 	{
 	  p = unpack_varlen_hex (++p1, &val);
 	  ts->buffer_free = val;
+	}
+      else if (strncmp (p, "tsize", p1 - p) == 0)
+	{
+	  p = unpack_varlen_hex (++p1, &val);
+	  ts->buffer_size = val;
 	}
       else
 	{
@@ -3815,6 +3871,18 @@ Use this to continue a tracing run even if GDB disconnects\n\
 or detaches from the target.  You can reconnect later and look at\n\
 trace data collected in the meantime."),
 			   set_disconnected_tracing,
+			   NULL,
+			   &setlist,
+			   &showlist);
+
+  add_setshow_boolean_cmd ("circular-trace-buffer", no_class,
+			   &circular_trace_buffer, _("\
+Set target's use of circular trace buffer."), _("\
+Show target's use of circular trace buffer."), _("\
+Use this to make the trace buffer into a circular buffer,\n\
+which will discard traceframes (oldest first) instead of filling\n\
+up and stopping the trace run."),
+			   set_circular_trace_buffer,
 			   NULL,
 			   &setlist,
 			   &showlist);

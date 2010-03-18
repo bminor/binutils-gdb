@@ -1,3 +1,29 @@
+2010-03-18  Stan Shebs  <stan@codesourcery.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* target.h (struct target_ops): New method
+	to_set_circular_trace_buffer.
+	(target_set_circular_trace_buffer): New macro.
+	* target.c (update_current_target): Add
+	to_set_circular_trace_buffer, fix to_set_disconnected_tracing
+	default behavior.
+	* remote.c (remote_set_circular_trace_buffer): New function.
+	(init_remote_ops): Add it to vector.
+	* tracepoint.h (struct trace_status): New field traceframes_created,
+	change buffer_size and buffer_free to int.
+	* tracepoint.c (circular_trace_buffer): New global.
+	(start_tracing): Send values of disconnected tracing and circular
+	trace buffer settings.
+	(set_circular_trace_buffer): New function.
+	(parse_trace_state): Handle total space and frames created.
+	(trace_status_command): Display total space and total frames
+	created.
+	(trace_save): Write out new status values.
+	(parse_trace_status): Set traceframe_count, traceframes_created,
+	buffer_free and buffer_size to -1 by default.
+	(_initialize_tracepoint): New setshow for circular-trace-buffer.
+	* NEWS: Mention the circular trace buffer option.
+
 2010-03-18  Tom Tromey  <tromey@redhat.com>
 
 	* infcmd.c (finish_command_continuation): Wrap print_return_value

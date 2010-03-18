@@ -78,8 +78,8 @@ gdb_test "tfind" "Target failed to find requested trace frame." \
 gdb_test "tstatus" \
     "Using a trace file.*
 Trace stopped by a tstop command.*
-Collected 1 trace frames.*
-Trace buffer has 256 bytes free.*
+Collected 1 trace frame.*
+Trace buffer has 256 bytes of 4096 bytes free \\(93% full\\).*
 Looking at trace frame 0, tracepoint .*" \
     "tstatus on trace file"
 

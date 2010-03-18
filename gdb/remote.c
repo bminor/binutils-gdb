@@ -9659,6 +9659,18 @@ remote_core_of_thread (struct target_ops *ops, ptid_t ptid)
 }
 
 static void
+remote_set_circular_trace_buffer (int val)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  sprintf (rs->buf, "QTBuffer:circular:%x", val);
+  putpkt (rs->buf);
+  remote_get_noisy_reply (&target_buf, &target_buf_size);
+  if (strcmp (target_buf, "OK"))
+    error (_("Target does not support this command."));
+}
+
+static void
 init_remote_ops (void)
 {
   remote_ops.to_shortname = "remote";
@@ -9736,6 +9748,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_upload_trace_state_variables = remote_upload_trace_state_variables;
   remote_ops.to_get_raw_trace_data = remote_get_raw_trace_data;
   remote_ops.to_set_disconnected_tracing = remote_set_disconnected_tracing;
+  remote_ops.to_set_circular_trace_buffer = remote_set_circular_trace_buffer;
   remote_ops.to_core_of_thread = remote_core_of_thread;
 }
 

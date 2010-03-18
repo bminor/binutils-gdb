@@ -197,6 +197,15 @@ gdb_load $binfile
 if [target_info exists gdb_stub] {
     gdb_step_for_stub;
 }
+
+gdb_test "set circular-trace-buffer on" "" "set circular-trace-buffer on"
+
+gdb_test "show circular-trace-buffer" "Target's use of circular trace buffer is on." "show circular-trace-buffer (on)"
+
+gdb_test "set circular-trace-buffer off" "" "set circular-trace-buffer off"
+
+gdb_test "show circular-trace-buffer" "Target's use of circular trace buffer is off." "show circular-trace-buffer (off)"
+
 # Body of test encased in a proc so we can return prematurely.
 if { ![gdb_trace_circular_tests] } then {
     # Set trace buffer attributes back to normal

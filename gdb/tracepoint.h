@@ -95,11 +95,21 @@ struct trace_status
 
   int stopping_tracepoint;
 
+  /* Number of traceframes currently in the buffer.  */
+
   int traceframe_count;
 
-  unsigned long long buffer_size;
+  /* Number of traceframes created since start of run.  */
 
-  unsigned long long buffer_free;
+  int traceframes_created;
+
+  /* Total size of the target's trace buffer.  */
+
+  int buffer_size;
+
+  /* Unused bytes left in the target's trace buffer.  */
+
+  int buffer_free;
 };
 
 struct trace_status *current_trace_status (void);

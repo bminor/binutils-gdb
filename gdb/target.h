@@ -664,6 +664,7 @@ struct target_ops
     /* Set the target's tracing behavior in response to unexpected
        disconnection - set VAL to 1 to keep tracing, 0 to stop.  */
     void (*to_set_disconnected_tracing) (int val);
+    void (*to_set_circular_trace_buffer) (int val);
 
     /* Return the processor core that thread PTID was last seen on.
        This information is updated only when:
@@ -1358,6 +1359,9 @@ extern int target_search_memory (CORE_ADDR start_addr,
 
 #define target_set_disconnected_tracing(val) \
   (*current_target.to_set_disconnected_tracing) (val)
+
+#define	target_set_circular_trace_buffer(val)	\
+  (*current_target.to_set_circular_trace_buffer) (val)
 
 /* Command logging facility.  */
 
