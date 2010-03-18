@@ -752,7 +752,7 @@ require_rvalue (struct agent_expr *ax, struct axs_value *value)
       || TYPE_CODE (value->type) == TYPE_CODE_STRUCT
       || TYPE_CODE (value->type) == TYPE_CODE_UNION
       || TYPE_CODE (value->type) == TYPE_CODE_FUNC)
-    error ("Value not scalar: cannot be an rvalue.");
+    error (_("Value not scalar: cannot be an rvalue."));
 
   switch (value->kind)
     {
