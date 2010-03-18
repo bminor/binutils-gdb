@@ -3,6 +3,13 @@
 	* infcmd.c (finish_command_continuation): Wrap print_return_value
 	in TRY_CATCH.
 
+2010-03-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2read.c (add_partial_subprogram): Make sure the subprogram
+	DIE has a name before creating the associated partial symbol.
+	(read_func_scope): Emit a complaint if the subprogram does not
+	have a name or when we can't extract the subprogram PC bounds.
+
 2010-03-18  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* mi/mi-main.c (mi_cmd_list_thread_groups): Use get_current_arch

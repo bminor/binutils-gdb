@@ -1,3 +1,8 @@
+2010-03-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/dw2-anonymous-func.S: New file.
+	* gdb.dwarf2/dw2-anonymous-func.exp: New testcase.
+
 2010-03-18  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.mi/gdb680.exp: Revert 2009-06-17 change.

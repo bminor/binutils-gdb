@@ -2583,7 +2583,11 @@ add_partial_subprogram (struct partial_die_info *pdi,
 				 cu->per_cu->psymtab);
 	    }
           if (!pdi->is_declaration)
-            add_partial_symbol (pdi, cu);
+	    /* Ignore subprogram DIEs that do not have a name, they are
+	       illegal.  Do not emit a complaint at this point, we will
+	       do so when we convert this psymtab into a symtab.  */
+	    if (pdi->name)
+	      add_partial_symbol (pdi, cu);
         }
     }
   
@@ -3867,10 +3871,23 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   name = dwarf2_name (die, cu);
 
-  /* Ignore functions with missing or empty names and functions with
-     missing or invalid low and high pc attributes.  */
-  if (name == NULL || !dwarf2_get_pc_bounds (die, &lowpc, &highpc, cu, NULL))
-    return;
+  /* Ignore functions with missing or empty names.  These are actually
+     illegal according to the DWARF standard.  */
+  if (name == NULL)
+    {
+      complaint (&symfile_complaints,
+                 _("missing name for subprogram DIE at %d"), die->offset);
+      return;
+    }
+
+  /* Ignore functions with missing or invalid low and high pc attributes.  */
+  if (!dwarf2_get_pc_bounds (die, &lowpc, &highpc, cu, NULL))
+    {
+      complaint (&symfile_complaints,
+                 _("cannot get low and high bounds for subprogram DIE at %d"),
+                 die->offset);
+      return;
+    }
 
   lowpc += baseaddr;
   highpc += baseaddr;
