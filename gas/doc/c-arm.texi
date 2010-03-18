@@ -770,7 +770,7 @@ or
 Make all unwinder annotations relative to a frame pointer.  Without this
 the unwinder will use offsets from the stack pointer.
 
-The syntax of this directive is the same as the @code{sub} or @code{mov}
+The syntax of this directive is the same as the @code{add} or @code{mov}
 instruction used to set the frame pointer.  @var{spreg} must be either
 @code{sp} or mentioned in a previous @code{.movsp} directive.
 
@@ -779,7 +779,7 @@ instruction used to set the frame pointer.  @var{spreg} must be either
 mov ip, sp
 @dots{}
 .setfp fp, ip, #4
-sub fp, ip, #4
+add fp, ip, #4
 @end smallexample
 
 @cindex @code{.secrel32} directive, ARM

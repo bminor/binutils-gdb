@@ -1,3 +1,7 @@
+2010-03-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* doc/c-arm.texi (.setfp): Correct example.
+
 2010-03-18  Wei Guozhi  <carrot@google.com>
 
 	PR gas/11323
