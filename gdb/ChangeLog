@@ -1,5 +1,7 @@
 2010-03-17 Stan Shebs  <stan@codesourcery.com>
 
+	* ax-gdb.c (require_rvalue): Disallow non-scalars.
+
 	* infcall.c: Include tracepoint.h.
 	(call_function_by_hand): Disallow calls in tfind mode.
 	* infcmd.c: Include tracepoint.h.

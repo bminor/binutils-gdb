@@ -745,6 +745,15 @@ gen_int_literal (struct agent_expr *ax, struct axs_value *value, LONGEST k,
 static void
 require_rvalue (struct agent_expr *ax, struct axs_value *value)
 {
+  /* Only deal with scalars, structs and such may be too large
+     to fit in a stack entry.  */
+  value->type = check_typedef (value->type);
+  if (TYPE_CODE (value->type) == TYPE_CODE_ARRAY
+      || TYPE_CODE (value->type) == TYPE_CODE_STRUCT
+      || TYPE_CODE (value->type) == TYPE_CODE_UNION
+      || TYPE_CODE (value->type) == TYPE_CODE_FUNC)
+    error ("Value not scalar: cannot be an rvalue.");
+
   switch (value->kind)
     {
     case axs_rvalue:
