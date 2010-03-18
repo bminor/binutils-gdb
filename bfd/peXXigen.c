@@ -740,7 +740,8 @@ _bfd_XXi_only_swap_filehdr_out (bfd * abfd, void * in, void * out)
   struct internal_filehdr *filehdr_in = (struct internal_filehdr *) in;
   struct external_PEI_filehdr *filehdr_out = (struct external_PEI_filehdr *) out;
 
-  if (pe_data (abfd)->has_reloc_section)
+  if (pe_data (abfd)->has_reloc_section
+      || pe_data (abfd)->dont_strip_reloc)
     filehdr_in->f_flags &= ~F_RELFLG;
 
   if (pe_data (abfd)->dll)
@@ -2206,6 +2207,14 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
       pe_data (obfd)->pe_opthdr.DataDirectory[PE_BASE_RELOCATION_TABLE].VirtualAddress = 0;
       pe_data (obfd)->pe_opthdr.DataDirectory[PE_BASE_RELOCATION_TABLE].Size = 0;
     }
+
+  /* For PIE, if there is .reloc, we won't add IMAGE_FILE_RELOCS_STRIPPED.
+     But there is no .reloc, we make sure that IMAGE_FILE_RELOCS_STRIPPED
+     won't be added.  */
+  if (! pe_data (ibfd)->has_reloc_section
+      && ! (pe_data (ibfd)->real_flags & IMAGE_FILE_RELOCS_STRIPPED))
+    pe_data (obfd)->dont_strip_reloc = 1;
+
   return TRUE;
 }
 

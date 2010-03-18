@@ -1,3 +1,15 @@
+2010-03-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/11396
+	* libcoff-in.h (pe_tdata): Add dont_strip_reloc.
+	* libcoff.h: Regenerated.
+
+	* peXXigen.c (_bfd_XXi_only_swap_filehdr_out): Clear F_RELFLG
+	if dont_strip_reloc is set.
+	(_bfd_XX_bfd_copy_private_bfd_data_common): Set
+	dont_strip_reloc on output if there is no .reloc and
+	IMAGE_FILE_RELOCS_STRIPPED isn't set in input.
+
 2010-03-18  Wei Guozhi  <carrot@google.com>
 
 	PR gas/11323
