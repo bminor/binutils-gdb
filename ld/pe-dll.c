@@ -1,6 +1,6 @@
 /* Routines to help build PEI-format DLLs (Win32 etc)
    Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
-   2008, 2009 Free Software Foundation, Inc.
+   2008, 2009, 2010 Free Software Foundation, Inc.
    Written by DJ Delorie <dj@cygnus.com>
 
    This file is part of the GNU Binutils.
@@ -2096,8 +2096,9 @@ make_one (def_file_export *exp, bfd *parent, bfd_boolean include_jmp_stub)
   bfd_set_arch_mach (abfd, pe_details->bfd_arch, 0);
 
   symptr = 0;
-  symtab = xmalloc (11 * sizeof (asymbol *));
-  tx  = quick_section (abfd, ".text",    SEC_CODE|SEC_HAS_CONTENTS, 2);
+  symtab = xmalloc (12 * sizeof (asymbol *));
+
+  tx  = quick_section (abfd, ".text", SEC_CODE | SEC_HAS_CONTENTS | SEC_READONLY, 2);
   id7 = quick_section (abfd, ".idata$7", SEC_HAS_CONTENTS, 2);
   id5 = quick_section (abfd, ".idata$5", SEC_HAS_CONTENTS, 2);
   id4 = quick_section (abfd, ".idata$4", SEC_HAS_CONTENTS, 2);
@@ -2146,6 +2147,9 @@ make_one (def_file_export *exp, bfd *parent, bfd_boolean include_jmp_stub)
 #ifdef pe_use_x86_64
 	  quick_reloc (abfd, 2, BFD_RELOC_32_PCREL, 2);
 #else
+	  /* Mark this object as SAFESEH compatible.  */
+	  quick_symbol (abfd, "", "@feat.00", "", bfd_abs_section_ptr,
+			BSF_LOCAL, 1);
           quick_reloc (abfd, 2, BFD_RELOC_32, 2);
 #endif
 	  break;
