@@ -1,3 +1,8 @@
+2010-03-18  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/default.exp: Adjust the expected output of the finish
+	and until commands when the inferior is not being run.
+
 2010-03-15  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* gdb.cp/shadow.exp: Removed kfail; test has been fix.

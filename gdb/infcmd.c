@@ -1274,10 +1274,10 @@ until_command (char *arg, int from_tty)
 {
   int async_exec = 0;
 
-  if (!target_has_execution)
-    error (_("The program is not running."));
-
+  ERROR_NO_INFERIOR;
   ensure_not_tfind_mode ();
+  ensure_valid_thread ();
+  ensure_not_running ();
 
   /* Find out whether we must run in the background. */
   if (arg != NULL)
@@ -1307,10 +1307,10 @@ advance_command (char *arg, int from_tty)
 {
   int async_exec = 0;
 
-  if (!target_has_execution)
-    error (_("The program is not running."));
-
+  ERROR_NO_INFERIOR;
   ensure_not_tfind_mode ();
+  ensure_valid_thread ();
+  ensure_not_running ();
 
   if (arg == NULL)
     error_no_arg (_("a location"));
@@ -1565,7 +1565,10 @@ finish_command (char *arg, int from_tty)
 
   int async_exec = 0;
 
+  ERROR_NO_INFERIOR;
   ensure_not_tfind_mode ();
+  ensure_valid_thread ();
+  ensure_not_running ();
 
   /* Find out whether we must run in the background.  */
   if (arg != NULL)
@@ -1590,8 +1593,6 @@ finish_command (char *arg, int from_tty)
 
   if (arg)
     error (_("The \"finish\" command does not take any arguments."));
-  if (!target_has_execution)
-    error (_("The program is not running."));
 
   frame = get_prev_frame (get_selected_frame (_("No selected frame.")));
   if (frame == 0)

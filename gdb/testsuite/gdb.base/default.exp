@@ -250,7 +250,7 @@ gdb_expect {
 }
 
 #test finish
-gdb_test "finish" "The program is not running." "finish"
+gdb_test "finish" "The program is not being run." "finish"
 #test forward-search
 # The message here comes from the regexp library, not gdb, and so can
 # vary on different systems.
@@ -753,9 +753,9 @@ gdb_test "tbreak" "No default breakpoint address now." "tbreak"
 #test tty
 gdb_test "tty" "Argument required .filename to set it to\..*" "tty"
 #test until "u" abbreviation
-gdb_test "u" "The program is not running." "until \"u\" abbreviation"
+gdb_test "u" "The program is not being run." "until \"u\" abbreviation"
 #test until
-gdb_test "until" "The program is not running." "until"
+gdb_test "until" "The program is not being run." "until"
 #test undisplay
 # FIXME -- need to dump full output to detailed log
 send_gdb "undisplay\n"
