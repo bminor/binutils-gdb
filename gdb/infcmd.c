@@ -54,8 +54,7 @@
 #include "gdbthread.h"
 #include "valprint.h"
 #include "inline-frame.h"
-
-extern void disconnect_or_stop_tracing (int from_tty);
+#include "tracepoint.h"
 
 /* Functions exported for general use, in inferior.h: */
 
@@ -648,10 +647,23 @@ ensure_valid_thread (void)
 Cannot execute this command without a live selected thread."));
 }
 
+/* If the user is looking at trace frames, any resumption of execution
+   is likely to mix up recorded and live target data. So simply
+   disallow those commands.  */
+
+void
+ensure_not_tfind_mode (void)
+{
+  if (get_traceframe_number () >= 0)
+    error (_("\
+Cannot execute this command while looking at trace frames."));
+}
+
 void
 continue_1 (int all_threads)
 {
   ERROR_NO_INFERIOR;
+  ensure_not_tfind_mode ();
 
   if (non_stop && all_threads)
     {
@@ -825,6 +837,7 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
   int thread = -1;
 
   ERROR_NO_INFERIOR;
+  ensure_not_tfind_mode ();
   ensure_valid_thread ();
   ensure_not_running ();
 
@@ -1046,6 +1059,7 @@ jump_command (char *arg, int from_tty)
   int async_exec = 0;
 
   ERROR_NO_INFERIOR;
+  ensure_not_tfind_mode ();
   ensure_valid_thread ();
   ensure_not_running ();
 
@@ -1148,6 +1162,7 @@ signal_command (char *signum_exp, int from_tty)
 
   dont_repeat ();		/* Too dangerous.  */
   ERROR_NO_INFERIOR;
+  ensure_not_tfind_mode ();
   ensure_valid_thread ();
   ensure_not_running ();
 
@@ -1262,6 +1277,8 @@ until_command (char *arg, int from_tty)
   if (!target_has_execution)
     error (_("The program is not running."));
 
+  ensure_not_tfind_mode ();
+
   /* Find out whether we must run in the background. */
   if (arg != NULL)
     async_exec = strip_bg_char (&arg);
@@ -1292,6 +1309,8 @@ advance_command (char *arg, int from_tty)
 
   if (!target_has_execution)
     error (_("The program is not running."));
+
+  ensure_not_tfind_mode ();
 
   if (arg == NULL)
     error_no_arg (_("a location"));
@@ -1545,6 +1564,8 @@ finish_command (char *arg, int from_tty)
   struct symbol *function;
 
   int async_exec = 0;
+
+  ensure_not_tfind_mode ();
 
   /* Find out whether we must run in the background.  */
   if (arg != NULL)

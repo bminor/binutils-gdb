@@ -21,6 +21,7 @@
 
 #include "defs.h"
 #include "breakpoint.h"
+#include "tracepoint.h"
 #include "target.h"
 #include "regcache.h"
 #include "inferior.h"
@@ -452,6 +453,9 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 
   if (!target_has_execution)
     noprocess ();
+
+  if (get_traceframe_number () >= 0)
+    error (_("May not call functions while looking at trace frames."));
 
   frame = get_current_frame ();
   gdbarch = get_frame_arch (frame);

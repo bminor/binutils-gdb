@@ -1,5 +1,18 @@
 2010-03-17 Stan Shebs  <stan@codesourcery.com>
 
+	* infcall.c: Include tracepoint.h.
+	(call_function_by_hand): Disallow calls in tfind mode.
+	* infcmd.c: Include tracepoint.h.
+	(ensure_not_tfind_mode): New function.
+	(continue_1): Call it.
+	(step_1) Ditto.
+	(jump_command): Ditto.
+	(signal_command): Ditto.
+	(advance_command): Ditto.
+	(until_command): Ditto.
+	(finish_command): Ditto.
+	* tracepoint.h (disconnect_or_stop_tracing): Declare.
+
 	* ax-gdb.h (struct axs_value): New field optimized_out.
 	(gen_trace_for_var): Add gdbarch argument.
 	* ax-gdb.c (gen_trace_static_fields): New function.
