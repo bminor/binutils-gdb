@@ -1,3 +1,7 @@
+2010-03-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (decode_arm_unwind): Increase buf size to 9 byte.
+
 2010-03-17  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (dump_arm_unwind): Warning fix.

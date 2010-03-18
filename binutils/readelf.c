@@ -6194,10 +6194,10 @@ decode_arm_unwind (struct arm_unw_aux_info *aux,
 	}
       else if (op == 0xb2)
 	{
-	  unsigned char buf[5];
+	  unsigned char buf[9];
 	  unsigned int i, len;
 	  unsigned long offset;
-	  for (i = 0; i < 9; i++)
+	  for (i = 0; i < sizeof (buf); i++)
 	    {
 	      GET_OP (buf[i]);
 	      if ((buf[i] & 0x80) == 0)
