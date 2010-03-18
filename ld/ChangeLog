@@ -1,3 +1,7 @@
+2010-03-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* scripttempl/elf.sc (INIT_ARRAY): Re-indent.
+
 2010-03-18  Aymeric Vincent  <vincent@labri.fr>
 
 	PR ld/11384
