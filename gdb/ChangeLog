@@ -1,5 +1,9 @@
 2010-03-18  Joel Brobecker  <brobecker@adacore.com>
 
+	GDB 7.1 released.
+
+2010-03-18  Joel Brobecker  <brobecker@adacore.com>
+
 	* NEWS: Change "Changes since GDB 7.0" into "Changes in GDB 7.1".
 
 2010-03-18  Joel Brobecker  <brobecker@adacore.com>
