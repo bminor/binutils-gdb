@@ -1,3 +1,8 @@
+2010-03-18  Aymeric Vincent  <vincent@labri.fr>
+
+	PR ld/11384
+	* emultempl/sh64elf.em: Add missing EOF.
+
 2010-03-18  Doug Semler  <dougsemler@gmail.com>
 
 	* pe-dll.c (make_one): Make text section readonly.

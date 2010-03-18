@@ -556,3 +556,6 @@ sh64_elf_${EMULATION_NAME}_after_allocation (void)
   cranges->size = crangesp - cranges->contents;
   cranges->rawsize = cranges->size;
 }
+EOF
+
+
