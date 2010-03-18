@@ -1,3 +1,8 @@
+2010-03-18  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* mi/mi-main.c (mi_cmd_list_thread_groups): Use get_current_arch
+	instead of selected frame architecture.
+
 2010-03-18  Pedro Alves  <pedro@codesourcery.com>
 
 	* infcmd.c (until_command): Use ERROR_NO_INFERIOR.  Ensure there's

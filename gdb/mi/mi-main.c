@@ -852,7 +852,6 @@ mi_cmd_list_thread_groups (char *command, char **argv, int argc)
 void
 mi_cmd_data_list_register_names (char *command, char **argv, int argc)
 {
-  struct frame_info *frame;
   struct gdbarch *gdbarch;
   int regnum, numregs;
   int i;
@@ -864,8 +863,7 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
      In this case, some entries of gdbarch_register_name will change depending
      upon the particular processor being debugged.  */
 
-  frame = get_selected_frame (NULL);
-  gdbarch = get_frame_arch (frame);
+  gdbarch = get_current_arch ();
   numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 
   cleanup = make_cleanup_ui_out_list_begin_end (uiout, "register-names");

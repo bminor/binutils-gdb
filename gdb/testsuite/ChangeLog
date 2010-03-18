@@ -1,3 +1,7 @@
+2010-03-18  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.mi/gdb680.exp: Revert 2009-06-17 change.
+
 2010-03-18  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.base/default.exp: Adjust the expected output of the finish
