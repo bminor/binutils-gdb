@@ -1,3 +1,8 @@
+2010-03-18  Tom Tromey  <tromey@redhat.com>
+
+	* infcmd.c (finish_command_continuation): Wrap print_return_value
+	in TRY_CATCH.
+
 2010-03-18  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* mi/mi-main.c (mi_cmd_list_thread_groups): Use get_current_arch

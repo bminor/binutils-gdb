@@ -1439,7 +1439,19 @@ finish_command_continuation (void *arg)
 			_("finish_command: function has no target type"));
 
       if (TYPE_CODE (value_type) != TYPE_CODE_VOID)
-	print_return_value (SYMBOL_TYPE (a->function), value_type);
+	{
+	  volatile struct gdb_exception ex;
+
+	  TRY_CATCH (ex, RETURN_MASK_ALL)
+	    {
+	      /* print_return_value can throw an exception in some
+		 circumstances.  We need to catch this so that we still
+		 delete the breakpoint.  */
+	      print_return_value (SYMBOL_TYPE (a->function), value_type);
+	    }
+	  if (ex.reason < 0)
+	    exception_print (gdb_stdout, ex);
+	}
     }
 
   /* We suppress normal call of normal_stop observer and do it here so
