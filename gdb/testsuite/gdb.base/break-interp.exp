@@ -141,7 +141,7 @@ proc prelinkNO {arg {name {}}} {
 	set output [lindex $run 1]
     }
     # Last line does miss the trailing \n.
-    if {$result == 1 && [regexp {^(/usr/sbin/prelink: [^ ]* does not have .gnu.prelink_undo section\n?)*$} $output]} {
+    if {$result == 1 && [regexp {^(/usr/sbin/prelink[^\r\n]*: [^ ]* does not have .gnu.prelink_undo section\n?)*$} $output]} {
 	pass $test
 	return 1
     } else {

@@ -1,3 +1,8 @@
+2010-03-19  Doug Evans  <dje@google.com>
+
+	* gdb.base/break-interp.exp (prelinkNO): Handle prelink binaries
+	named /usr/sbin/prelink<foo>.
+
 2010-03-18  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.trace/circ.exp: Test circular-trace-buffer.
