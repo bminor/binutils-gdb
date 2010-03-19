@@ -231,7 +231,7 @@ ax_const_l (struct agent_expr *x, LONGEST l)
      use the shortest representation.  */
   for (op = 0, size = 8; size < 64; size *= 2, op++)
     {
-      LONGEST lim = 1 << (size - 1);
+      LONGEST lim = ((LONGEST) 1) << (size - 1);
 
       if (-lim <= l && l <= lim - 1)
         break;
