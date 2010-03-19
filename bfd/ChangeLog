@@ -1,3 +1,22 @@
+2010-03-19  Jie Zhang  <jie@codesourcery.com>
+
+	* elf32-arm.c (struct section_list): Remove.
+	(section_list): Remove typedef.
+	(record_section_with_arm_elf_section_data): Remove.
+	(find_arm_elf_section_entry): Remove.
+	(get_arm_elf_section_data): Use is_arm_elf.
+	(unrecord_section_with_arm_elf_section_data): Remove.
+	(elf32_arm_new_section_hook): Don't call
+	record_section_with_arm_elf_section_data.
+	(elf32_arm_write_section): Set mapcount to -1 when
+	the map has been used. Don't call
+	unrecord_section_with_arm_elf_section_data.
+	(unrecord_section_via_map_over_sections): Remove.
+	(elf32_arm_close_and_cleanup): Remove.
+	(elf32_arm_bfd_free_cached_info): Remove.
+	(bfd_elf32_close_and_cleanup): Don't define.
+	(bfd_elf32_bfd_free_cached_info): Don't define.
+
 2010-03-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/11396
