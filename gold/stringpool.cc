@@ -36,7 +36,7 @@ namespace gold
 template<typename Stringpool_char>
 Stringpool_template<Stringpool_char>::Stringpool_template()
   : string_set_(), key_to_offset_(), strings_(), strtab_size_(0),
-    zero_null_(true), optimize_(false), offset_(0)
+    zero_null_(true), optimize_(false), offset_(sizeof(Stringpool_char))
 {
   if (parameters->options_valid() && parameters->options().optimize() >= 2)
     this->optimize_ = true;
@@ -238,9 +238,6 @@ template<typename Stringpool_char>
 void
 Stringpool_template<Stringpool_char>::new_key_offset(size_t length)
 {
-  if (this->key_to_offset_.size() == 0)
-    this->offset_ = this->zero_null_ ? sizeof(Stringpool_char) : 0;
-    
   section_offset_type offset;
   if (this->zero_null_ && length == 0)
     offset = 0;

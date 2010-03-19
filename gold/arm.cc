@@ -868,8 +868,9 @@ class Stub_table : public Output_data
 {
  public:
   Stub_table(Arm_input_section<big_endian>* owner)
-    : Output_data(), owner_(owner), reloc_stubs_(), cortex_a8_stubs_(),
-      arm_v4bx_stubs_(0xf), prev_data_size_(0), prev_addralign_(1)
+    : Output_data(), owner_(owner), reloc_stubs_(), reloc_stubs_size_(0),
+      reloc_stubs_addralign_(1), cortex_a8_stubs_(), arm_v4bx_stubs_(0xf),
+      prev_data_size_(0), prev_addralign_(1)
   { }
 
   ~Stub_table()
@@ -902,6 +903,15 @@ class Stub_table : public Output_data
     const Stub_template* stub_template = stub->stub_template();
     gold_assert(stub_template->type() == key.stub_type());
     this->reloc_stubs_[key] = stub;
+
+    // Assign stub offset early.  We can do this because we never remove
+    // reloc stubs and they are in the beginning of the stub table.
+    uint64_t align = stub_template->alignment();
+    this->reloc_stubs_size_ = align_address(this->reloc_stubs_size_, align);
+    stub->set_offset(this->reloc_stubs_size_);
+    this->reloc_stubs_size_ += stub_template->size();
+    this->reloc_stubs_addralign_ =
+      std::max(this->reloc_stubs_addralign_, align);
   }
 
   // Add a Cortex-A8 STUB that fixes up a THUMB branch at ADDRESS.
@@ -1010,6 +1020,10 @@ class Stub_table : public Output_data
   Arm_input_section<big_endian>* owner_;
   // The relocation stubs.
   Reloc_stub_map reloc_stubs_;
+  // Size of reloc stubs.
+  off_t reloc_stubs_size_;
+  // Maximum address alignment of reloc stubs.
+  uint64_t reloc_stubs_addralign_;
   // The cortex_a8_stubs.
   Cortex_a8_stub_list cortex_a8_stubs_;
   // The Arm V4BX relocation stubs.
@@ -4720,20 +4734,9 @@ template<bool big_endian>
 bool
 Stub_table<big_endian>::update_data_size_and_addralign()
 {
-  off_t size = 0;
-  unsigned addralign = 1;
-
   // Go over all stubs in table to compute data size and address alignment.
-  
-  for (typename Reloc_stub_map::const_iterator p = this->reloc_stubs_.begin();
-      p != this->reloc_stubs_.end();
-      ++p)
-    {
-      const Stub_template* stub_template = p->second->stub_template();
-      addralign = std::max(addralign, stub_template->alignment());
-      size = (align_address(size, stub_template->alignment())
-	      + stub_template->size());
-    }
+  off_t size = this->reloc_stubs_size_;
+  unsigned addralign = this->reloc_stubs_addralign_;
 
   for (Cortex_a8_stub_list::const_iterator p = this->cortex_a8_stubs_.begin();
        p != this->cortex_a8_stubs_.end();
@@ -4778,19 +4781,7 @@ template<bool big_endian>
 void
 Stub_table<big_endian>::finalize_stubs()
 {
-  off_t off = 0;
-  for (typename Reloc_stub_map::const_iterator p = this->reloc_stubs_.begin();
-      p != this->reloc_stubs_.end();
-      ++p)
-    {
-      Reloc_stub* stub = p->second;
-      const Stub_template* stub_template = stub->stub_template();
-      uint64_t stub_addralign = stub_template->alignment();
-      off = align_address(off, stub_addralign);
-      stub->set_offset(off);
-      off += stub_template->size();
-    }
-
+  off_t off = this->reloc_stubs_size_;
   for (Cortex_a8_stub_list::const_iterator p = this->cortex_a8_stubs_.begin();
        p != this->cortex_a8_stubs_.end();
        ++p)

@@ -1,3 +1,22 @@
+2010-03-19  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Stub_table::Stub_table): Initialize new data members
+	Stub_table::reloc_stubs_size_ and Stub_table::reloc_stubs_addralign_.
+	(Stub_table::add_reloc_stub): Assign stub offset and update
+	Stub_table::reloc_stubs_size_ and Stub_table::reloc_stubs_addralign_.
+	(Stub_table::reloc_stubs_size_, Stub_table::reloc_stubs_addralign_):
+	New data members.
+ 	(Stub_table::update_data_size_and_addralign): Use
+	Stub_table::reloc_stubs_size_ and Stub_table::reloc_stubs_addralign_
+	instead of going over all reloc stubs.
+ 	(Stub_table::finalize_stubs): Do not assign reloc stub offsets.
+	* stringpool.cc (Stringpool_template::Stringpool_template): Initialize
+	Stringpool_template::offset_ to size of Stringpool_char.
+ 	(Stringpool_template::new_key_offset): Remove code to initialize
+	Stringpool_template::offset_.
+	* stringpool.h (Stringpool_template::set_no_zero_null): Set
+	Stringpool_template::offset_ to zero.
+
 2010-03-15  Doug Kwan  <dougkwan@google.com>
 
 	* stringpool.cc (Stringpool_template::Stringpool_template): Initialize

@@ -178,8 +178,10 @@ class Stringpool_template
   void
   set_no_zero_null()
   {
-    gold_assert(this->string_set_.empty());
+    gold_assert(this->string_set_.empty()
+		&& this->offset_ == sizeof(Stringpool_char));
     this->zero_null_ = false;
+    this->offset_ = 0;
   }
 
   // Indicate that this string pool should be optimized, even if not
