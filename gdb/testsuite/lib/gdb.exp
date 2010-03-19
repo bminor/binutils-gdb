@@ -1267,6 +1267,8 @@ proc gdb_compile_test {src output} {
 	unsupported "compilation [file tail $src]"
     } elseif { [regexp {.*: command not found[\r|\n]*$} $output] } {
 	unsupported "compilation [file tail $src]"
+    } elseif { [regexp {.*: [^\r\n]*compiler not installed[^\r\n]*[\r|\n]*$} $output] } {
+	unsupported "compilation [file tail $src]"
     } else {
 	verbose -log "compilation failed: $output" 2
 	fail "compilation [file tail $src]"

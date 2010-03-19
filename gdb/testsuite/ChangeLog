@@ -1,5 +1,8 @@
 2010-03-19  Doug Evans  <dje@google.com>
 
+	* lib/gdb.exp (gdb_compile_test): Watch for "compiler not installed"
+	output from gcc.
+
 	* gdb.base/break-interp.exp (prelinkNO): Handle prelink binaries
 	named /usr/sbin/prelink<foo>.
 
