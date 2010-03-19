@@ -478,6 +478,7 @@ gen_fetch (struct agent_expr *ax, struct type *type)
     case TYPE_CODE_ENUM:
     case TYPE_CODE_INT:
     case TYPE_CODE_CHAR:
+    case TYPE_CODE_BOOL:
       /* It's a scalar value, so we know how to dereference it.  How
          many bytes long is it?  */
       switch (TYPE_LENGTH (type))
@@ -831,8 +832,9 @@ gen_usual_unary (struct expression *exp, struct agent_expr *ax,
     case TYPE_CODE_UNION:
       return;
 
-      /* If the value is an enum, call it an integer.  */
+      /* If the value is an enum or a bool, call it an integer.  */
     case TYPE_CODE_ENUM:
+    case TYPE_CODE_BOOL:
       value->type = builtin_type (exp->gdbarch)->builtin_int;
       break;
     }
@@ -998,6 +1000,7 @@ gen_cast (struct agent_expr *ax, struct axs_value *value, struct type *type)
       error (_("Invalid type cast: intended type must be scalar."));
 
     case TYPE_CODE_ENUM:
+    case TYPE_CODE_BOOL:
       /* We don't have to worry about the size of the value, because
          all our integral values are fully sign-extended, and when
          casting pointers we can do anything we like.  Is there any
@@ -1095,6 +1098,33 @@ an integer nor a pointer of the same type."));
   value->kind = axs_rvalue;
 }
 
+static void
+gen_equal (struct agent_expr *ax, struct axs_value *value,
+	   struct axs_value *value1, struct axs_value *value2,
+	   struct type *result_type)
+{
+  if (pointer_type (value1->type) || pointer_type (value2->type))
+    ax_simple (ax, aop_equal);
+  else
+    gen_binop (ax, value, value1, value2,
+	       aop_equal, aop_equal, 0, "equal");
+  value->type = result_type;
+  value->kind = axs_rvalue;
+}
+
+static void
+gen_less (struct agent_expr *ax, struct axs_value *value,
+	  struct axs_value *value1, struct axs_value *value2,
+	  struct type *result_type)
+{
+  if (pointer_type (value1->type) || pointer_type (value2->type))
+    ax_simple (ax, aop_less_unsigned);
+  else
+    gen_binop (ax, value, value1, value2,
+	       aop_less_signed, aop_less_unsigned, 0, "less than");
+  value->type = result_type;
+  value->kind = axs_rvalue;
+}
 
 /* Generate code for a binary operator that doesn't do pointer magic.
    We set VALUE to describe the result value; we assume VALUE1 and
@@ -1733,6 +1763,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
   struct axs_value value1, value2, value3;
   enum exp_opcode op = (*pc)[0].opcode, op2;
   int if1, go1, if2, go2, end;
+  struct type *int_type = builtin_type (exp->gdbarch)->builtin_int;
 
   /* If we're looking at a constant expression, just push its value.  */
   {
@@ -1794,7 +1825,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
       ax_const_l (ax, 0);
       ax_label (ax, end, ax->len);
       value->kind = axs_rvalue;
-      value->type = language_bool_type (exp->language_defn, exp->gdbarch);
+      value->type = int_type;
       break;
 
     case BINOP_LOGICAL_OR:
@@ -1813,7 +1844,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
       ax_const_l (ax, 1);
       ax_label (ax, end, ax->len);
       value->kind = axs_rvalue;
-      value->type = language_bool_type (exp->language_defn, exp->gdbarch);
+      value->type = int_type;
       break;
 
     case TERNOP_COND:
@@ -1824,8 +1855,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	 bytecodes in order, but if_goto jumps on true, so we invert
 	 the sense of A.  Then we can do B by dropping through, and
 	 jump to do C.  */
-      gen_logical_not (ax, &value1,
-		       language_bool_type (exp->language_defn, exp->gdbarch));
+      gen_logical_not (ax, &value1, int_type);
       if1 = ax_goto (ax, aop_if_goto);
       gen_expr (exp, pc, ax, &value2);
       gen_usual_unary (exp, ax, &value2);
@@ -2027,8 +2057,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
       (*pc)++;
       gen_expr (exp, pc, ax, value);
       gen_usual_unary (exp, ax, value);
-      gen_logical_not (ax, value,
-		       language_bool_type (exp->language_defn, exp->gdbarch));
+      gen_logical_not (ax, value, int_type);
       break;
 
     case UNOP_COMPLEMENT:
@@ -2144,6 +2173,8 @@ gen_expr_binop_rest (struct expression *exp,
 		     struct agent_expr *ax, struct axs_value *value,
 		     struct axs_value *value1, struct axs_value *value2)
 {
+  struct type *int_type = builtin_type (exp->gdbarch)->builtin_int;
+
   gen_expr (exp, pc, ax, value2);
   gen_usual_unary (exp, ax, value2);
   gen_usual_arithmetic (exp, ax, value1, value2);
@@ -2246,44 +2277,32 @@ cannot subscript requested type: cannot call user defined functions"));
       break;
 
     case BINOP_EQUAL:
-      gen_binop (ax, value, value1, value2,
-		 aop_equal, aop_equal, 0, "equal");
+      gen_equal (ax, value, value1, value2, int_type);
       break;
 
     case BINOP_NOTEQUAL:
-      gen_binop (ax, value, value1, value2,
-		 aop_equal, aop_equal, 0, "equal");
-      gen_logical_not (ax, value,
-		       language_bool_type (exp->language_defn,
-					   exp->gdbarch));
+      gen_equal (ax, value, value1, value2, int_type);
+      gen_logical_not (ax, value, int_type);
       break;
 
     case BINOP_LESS:
-      gen_binop (ax, value, value1, value2,
-		 aop_less_signed, aop_less_unsigned, 0, "less than");
+      gen_less (ax, value, value1, value2, int_type);
       break;
 
     case BINOP_GTR:
       ax_simple (ax, aop_swap);
-      gen_binop (ax, value, value1, value2,
-		 aop_less_signed, aop_less_unsigned, 0, "less than");
+      gen_less (ax, value, value1, value2, int_type);
       break;
 
     case BINOP_LEQ:
       ax_simple (ax, aop_swap);
-      gen_binop (ax, value, value1, value2,
-		 aop_less_signed, aop_less_unsigned, 0, "less than");
-      gen_logical_not (ax, value,
-		       language_bool_type (exp->language_defn,
-					   exp->gdbarch));
+      gen_less (ax, value, value1, value2, int_type);
+      gen_logical_not (ax, value, int_type);
       break;
 
     case BINOP_GEQ:
-      gen_binop (ax, value, value1, value2,
-		 aop_less_signed, aop_less_unsigned, 0, "less than");
-      gen_logical_not (ax, value,
-		       language_bool_type (exp->language_defn,
-					   exp->gdbarch));
+      gen_less (ax, value, value1, value2, int_type);
+      gen_logical_not (ax, value, int_type);
       break;
 
     default:

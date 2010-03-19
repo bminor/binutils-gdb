@@ -1,3 +1,14 @@
+2010-03-19  Stan Shebs  <stan@codesourcery.com>
+
+	* ax-gdb.c (gen_fetch): Handle bool.
+	(gen_usual_unary): Ditto.
+	(gen_cast): Ditto.
+	(gen_equal): New function.
+	(gen_less): New function.
+	(gen_expr_binop_rest): Call them, also return integer type from
+	logical operations.
+	(gen_expr): Ditto.
+
 2010-03-19  Tom Tromey  <tromey@redhat.com>
 
 	* jv-lang.c (jv_dynamics_objfile_data_key)
