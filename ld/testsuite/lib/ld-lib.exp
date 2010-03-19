@@ -1039,6 +1039,7 @@ proc regexp_diff { file_1 file_2 } {
     set end_2 0
     set differences 0
     set diff_pass 0
+    set fail_if_match 0
 
     if [file exists $file_1] then {
 	set file_a [open $file_1 r]
@@ -1071,6 +1072,10 @@ proc regexp_diff { file_1 file_2 } {
 		set end_2 1
 		set diff_pass 1
 		break
+	    } elseif [ string match "#failif" $line_b ] {
+		send_log "fail if no difference\n"
+		verbose "fail if no difference" 3
+		set fail_if_match 1
 	    } elseif [ string match "#..." $line_b ] {
 		if { [gets $file_b line_b] == $eof } {
 		    set end_2 1
@@ -1121,6 +1126,14 @@ proc regexp_diff { file_1 file_2 } {
 	send_log "$file_1 and $file_2 are different lengths\n"
 	verbose "$file_1 and $file_2 are different lengths" 3
 	set differences 1
+    }
+
+    if { $fail_if_match } {
+	if { $differences == 0 } {
+	    set differences 1
+	} else {
+	    set differences 0
+	}
     }
 
     close $file_a

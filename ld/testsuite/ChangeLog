@@ -1,3 +1,11 @@
+2010-03-19  Jie Zhang  <jie@codesourcery.com>
+
+	PR ld/11304
+	* ld-elf/pr11304.d: New test.
+	* ld-elf/pr11304a.s: New test.
+	* ld-elf/pr11304b.s: New test.
+	* lib/ld-lib.exp (regexp_diff): Add support for #failif.
+
 2010-03-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ld-elf/orphan-region.d, ld-elf/orphan-region.ld,
