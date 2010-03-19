@@ -1,3 +1,9 @@
+2010-03-19  Jie Zhang  <jie@codesourcery.com>
+
+	* gas/arm/mapmisc.s: Add the test case for two mapping
+	symbols having the same value.
+	* gas/arm/mapmisc.d: Likewise.
+
 2010-03-18  Wei Guozhi  <carrot@google.com>
 
 	PR gas/11323

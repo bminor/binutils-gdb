@@ -1,3 +1,8 @@
+2010-03-19  Jie Zhang  <jie@codesourcery.com>
+
+	* config/tc-arm.c (make_mapping_symbol): Hanle the case
+	that two mapping symbols have the same value.
+
 2010-03-18  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* doc/c-arm.texi (.setfp): Correct example.

@@ -34,3 +34,5 @@ foo:
 	nop
 	.incbin "mapmisc.dat"
 	nop
+	.fill 0, 0, 0
+	nop
