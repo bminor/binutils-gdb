@@ -1,3 +1,24 @@
+2010-03-19  Tom Tromey  <tromey@redhat.com>
+
+	* jv-lang.c (jv_dynamics_objfile_data_key)
+	(jv_type_objfile_data_key): New globals.
+	(class_symtab): Move earlier.
+	(jv_per_objfile_free): New function.
+	(get_dynamics_objfile): Call set_objfile_data.  Add 'gdbarch'
+	parameter.
+	Remove ancient #if 1.
+	(add_class_symbol): Remove redundant declaration.
+	(java_lookup_class): Use alloc_type, not alloc_type_arch.
+	(java_link_class_type): Mark as static.  Update.
+	(jv_clear_object_type): New function.
+	(set_java_object_type): Likewise.
+	(get_java_object_type): Use set_java_object_type.
+	(is_object_type): Likewise.
+	(_initialize_java_language): Register new objfile keys.
+	(get_java_class_symtab): Add 'gdbarch' parameter.
+	(add_class_symtab_symbol): Update.
+	(type_from_class): Update.
+
 2010-03-19  Stan Shebs  <stan@codesourcery.com>
 
 	* ax-general.c (ax_const_l): Fix a sizing bug. 
