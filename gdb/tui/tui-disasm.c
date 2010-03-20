@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "arch-utils.h"
 #include "symtab.h"
 #include "breakpoint.h"
 #include "frame.h"
@@ -330,7 +331,7 @@ tui_get_begin_asm_address (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
 {
   struct tui_gen_win_info *locator;
   struct tui_locator_element *element;
-  struct gdbarch *gdbarch = NULL;
+  struct gdbarch *gdbarch = get_current_arch ();
   CORE_ADDR addr;
 
   locator = tui_locator_win_info_ptr ();

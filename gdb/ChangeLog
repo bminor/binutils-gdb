@@ -1,3 +1,9 @@
+2010-03-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* tui/tui-disasm.c (tui_get_begin_asm_address): Default to
+	get_current_arch.
+	* tui/tui-layout.c (extract_display_start_addr): Likewise.
+
 2010-03-19  Stan Shebs  <stan@codesourcery.com>
 
 	* ax-gdb.c (gen_fetch): Handle bool.
