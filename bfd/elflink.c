@@ -1715,7 +1715,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
 	{
 	  if (! dynamic)
 	    {
-	      if (info->shared
+	      if (! info->executable
 		  || hi->ref_dynamic)
 		*dynsym = TRUE;
 	    }
@@ -1784,7 +1784,7 @@ nondefault:
 	    {
 	      if (! dynamic)
 		{
-		  if (info->shared
+		  if (! info->executable
 		      || hi->ref_dynamic)
 		    *dynsym = TRUE;
 		}

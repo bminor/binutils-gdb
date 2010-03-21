@@ -1,3 +1,9 @@
+2010-03-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/11413
+	* elflink.c (_bfd_elf_add_default_symbol): Check !executable
+	instead of shared.
+
 2010-03-19  Jie Zhang  <jie@codesourcery.com>
 
 	* elf32-arm.c (struct section_list): Remove.
