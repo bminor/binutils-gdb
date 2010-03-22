@@ -26,7 +26,7 @@ if [mi_gdb_start] {
 
 set testfile "py-prettyprint"
 set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+set binfile ${objdir}/${subdir}/py-mi
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DMI}] != "" } {
     untested mi2-var-child.exp
     return -1
