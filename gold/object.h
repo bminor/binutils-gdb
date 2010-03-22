@@ -30,6 +30,7 @@
 #include "elfcpp_file.h"
 #include "fileread.h"
 #include "target.h"
+#include "archive.h"
 
 namespace gold
 {
@@ -37,7 +38,6 @@ namespace gold
 class General_options;
 class Task;
 class Cref;
-class Archive;
 class Layout;
 class Output_section;
 class Output_file;
@@ -382,6 +382,12 @@ class Object
   add_symbols(Symbol_table* symtab, Read_symbols_data* sd, Layout *layout)
   { this->do_add_symbols(symtab, sd, layout); }
 
+  // Add symbol information to the global symbol table.
+  Archive::Should_include
+  should_include_member(Symbol_table* symtab, Read_symbols_data* sd,
+                        std::string* why)
+  { return this->do_should_include_member(symtab, sd, why); }
+
   // Functions and types for the elfcpp::Elf_file interface.  This
   // permit us to use Object as the File template parameter for
   // elfcpp::Elf_file.
@@ -510,6 +516,10 @@ class Object
   // child class.
   virtual void
   do_add_symbols(Symbol_table*, Read_symbols_data*, Layout*) = 0;
+
+  virtual Archive::Should_include
+  do_should_include_member(Symbol_table* symtab, Read_symbols_data*,
+                           std::string* why) = 0;
 
   // Return the location of the contents of a section.  Implemented by
   // child class.
@@ -1573,6 +1583,10 @@ class Sized_relobj : public Relobj
   // Add the symbols to the symbol table.
   void
   do_add_symbols(Symbol_table*, Read_symbols_data*, Layout*);
+
+  Archive::Should_include
+  do_should_include_member(Symbol_table* symtab, Read_symbols_data*,
+                           std::string* why);
 
   // Read the relocs.
   void

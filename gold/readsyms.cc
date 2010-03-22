@@ -127,7 +127,7 @@ Read_symbols::requeue(Workqueue* workqueue, Input_objects* input_objects,
 
   workqueue->queue(new Read_symbols(input_objects, symtab, layout, dirpath,
 				    dirindex, mapfile, input_argument,
-				    input_group, NULL, next_blocker));
+				    input_group, NULL, NULL, next_blocker));
 }
 
 // Return whether a Read_symbols task is runnable.  We can read an
@@ -149,8 +149,10 @@ Read_symbols::is_runnable()
 // locks here.
 
 void
-Read_symbols::locks(Task_locker*)
+Read_symbols::locks(Task_locker* tl)
 {
+  if (this->member_ != NULL)
+    tl->add(this, this->next_blocker_);
 }
 
 // Run a Read_symbols task.
@@ -165,6 +167,93 @@ Read_symbols::run(Workqueue* workqueue)
 					    this->next_blocker_));
 }
 
+// Handle a whole lib group. Other then collecting statisticts, this just
+// mimics what we do for regular object files in the command line.
+
+bool
+Read_symbols::do_whole_lib_group(Workqueue* workqueue)
+{
+  const Input_file_lib* lib_group = this->input_argument_->lib();
+
+  ++Lib_group::total_lib_groups;
+
+  Task_token* this_blocker = this->this_blocker_;
+  for (Input_file_lib::const_iterator i = lib_group->begin();
+       i != lib_group->end();
+       ++i)
+    {
+      ++Lib_group::total_members;
+      ++Lib_group::total_members_loaded;
+
+      const Input_argument* arg = &*i;
+
+      Task_token* next_blocker;
+      if (i != lib_group->end() - 1)
+        {
+          next_blocker = new Task_token(true);
+          next_blocker->add_blocker();
+        }
+      else
+        next_blocker = this->next_blocker_;
+
+      workqueue->queue_soon(new Read_symbols(this->input_objects_,
+					     this->symtab_, this->layout_,
+					     this->dirpath_, this->dirindex_,
+					     this->mapfile_, arg, NULL,
+					     NULL, this_blocker, next_blocker));
+      this_blocker = next_blocker;
+    }
+
+  return true;
+}
+
+// Handle a lib group. We set Read_symbols Tasks as usual, but have them
+// just record the symbol data instead of adding the objects.  We also start
+// a Add_lib_group_symbols Task which runs after we've read all the symbols.
+// In that task we process the members in a loop until we are done.
+
+bool
+Read_symbols::do_lib_group(Workqueue* workqueue)
+{
+  const Input_file_lib* lib_group = this->input_argument_->lib();
+
+  if (lib_group->options().whole_archive())
+    return this->do_whole_lib_group(workqueue);
+
+  Lib_group* lib = new Lib_group(lib_group, this);
+
+  Add_lib_group_symbols* add_lib_group_symbols =
+    new Add_lib_group_symbols(this->symtab_, this->layout_,
+			      this->input_objects_,
+			      lib, this->next_blocker_);
+
+
+  Task_token* next_blocker = new Task_token(true);
+  int j = 0;
+  for (Input_file_lib::const_iterator i = lib_group->begin();
+       i != lib_group->end();
+       ++i, ++j)
+    {
+      const Input_argument* arg = &*i;
+      Archive_member* m = lib->get_member(j);
+
+      next_blocker->add_blocker();
+
+      // Since this Read_symbols will not create an Add_symbols,
+      // just pass NULL as this_blocker.
+      workqueue->queue_soon(new Read_symbols(this->input_objects_,
+					     this->symtab_, this->layout_,
+					     this->dirpath_, this->dirindex_,
+					     this->mapfile_, arg, NULL,
+					     m, NULL, next_blocker));
+    }
+
+  add_lib_group_symbols->set_blocker(next_blocker);
+  workqueue->queue_soon(add_lib_group_symbols);
+
+  return true;
+}
+
 // Open the file and read the symbols.  Return true if a new task was
 // queued, false if that could not happen due to some error.
 
@@ -177,6 +266,9 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
       this->do_group(workqueue);
       return true;
     }
+
+  if (this->input_argument_->is_lib())
+    return this->do_lib_group(workqueue);
 
   Input_file* input_file = new Input_file(&this->input_argument_->file());
   if (!input_file->open(*this->dirpath_, this, &this->dirindex_))
@@ -212,7 +304,7 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
 
 	  if (this->layout_->incremental_inputs())
 	    {
-	      const Input_argument* ia = this->input_argument_;	      
+	      const Input_argument* ia = this->input_argument_;
 	      this->layout_->incremental_inputs()->report_archive(ia, arch);
 	    }
 
@@ -245,6 +337,13 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
 
           // We are done with the file at this point, so unlock it.
           obj->unlock(this);
+
+          if (this->member_ != NULL)
+	    {
+	      this->member_->sd_ = NULL;
+	      this->member_->obj_ = obj;
+	      return true;
+	    }
 
           workqueue->queue_next(new Add_symbols(this->input_objects_,
                                                 this->symtab_,
@@ -305,6 +404,13 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
       // Add_symbols task.
 
       input_file->file().unlock(this);
+
+      if (this->member_ != NULL)
+        {
+          this->member_->sd_ = sd;
+          this->member_->obj_ = obj;
+          return true;
+        }
 
       // We use queue_next because everything is cached for this
       // task to run right away if possible.
@@ -384,7 +490,7 @@ Read_symbols::do_group(Workqueue* workqueue)
 					     this->symtab_, this->layout_,
 					     this->dirpath_, this->dirindex_,
 					     this->mapfile_, arg, input_group,
-					     this_blocker, next_blocker));
+					     NULL, this_blocker, next_blocker));
       this_blocker = next_blocker;
     }
 
@@ -398,7 +504,39 @@ Read_symbols::do_group(Workqueue* workqueue)
 std::string
 Read_symbols::get_name() const
 {
-  if (!this->input_argument_->is_group())
+  if (this->input_argument_->is_group())
+    {
+      std::string ret("Read_symbols group (");
+      bool add_space = false;
+      const Input_file_group* group = this->input_argument_->group();
+      for (Input_file_group::const_iterator p = group->begin();
+           p != group->end();
+           ++p)
+      {
+        if (add_space)
+          ret += ' ';
+        ret += p->file().name();
+        add_space = true;
+      }
+      return ret + ')';
+    }
+  else if (this->input_argument_->is_lib())
+    {
+      std::string ret("Read_symbols lib (");
+      bool add_space = false;
+      const Input_file_lib* lib = this->input_argument_->lib();
+      for (Input_file_lib::const_iterator p = lib->begin();
+           p != lib->end();
+           ++p)
+      {
+        if (add_space)
+          ret += ' ';
+        ret += p->file().name();
+        add_space = true;
+      }
+      return ret + ')';
+    }
+  else
     {
       std::string ret("Read_symbols ");
       if (this->input_argument_->file().is_lib())
@@ -408,20 +546,6 @@ Read_symbols::get_name() const
       ret += this->input_argument_->file().name();
       return ret;
     }
-
-  std::string ret("Read_symbols group (");
-  bool add_space = false;
-  const Input_file_group* group = this->input_argument_->group();
-  for (Input_file_group::const_iterator p = group->begin();
-       p != group->end();
-       ++p)
-    {
-      if (add_space)
-	ret += ' ';
-      ret += p->file().name();
-      add_space = true;
-    }
-  return ret + ')';
 }
 
 // Class Add_symbols.

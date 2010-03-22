@@ -206,7 +206,7 @@ queue_initial_tasks(const General_options& options,
       next_blocker->add_blocker();
       workqueue->queue(new Read_symbols(input_objects, symtab, layout,
 					&search_path, 0, mapfile, &*p, NULL,
-					this_blocker, next_blocker));
+					NULL, this_blocker, next_blocker));
       this_blocker = next_blocker;
     }
 

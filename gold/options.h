@@ -53,6 +53,7 @@ class Command_line;
 class General_options;
 class Search_directory;
 class Input_file_group;
+class Input_file_lib;
 class Position_dependent_options;
 class Target;
 class Plugin_manager;
@@ -1033,6 +1034,12 @@ class General_options
   DEFINE_special(end_group, options::TWO_DASHES, ')',
                  N_("End a library search group"), NULL);
 
+
+  DEFINE_special(start_lib, options::TWO_DASHES, '\0',
+                 N_("Start a library"), NULL);
+  DEFINE_special(end_lib, options::TWO_DASHES, '\0',
+                 N_("End a library "), NULL);
+
   // The -z options.
 
   DEFINE_bool(combreloc, options::DASH_Z, '\0', true,
@@ -1500,12 +1507,17 @@ class Input_argument
  public:
   // Create a file or library argument.
   explicit Input_argument(Input_file_argument file)
-    : is_file_(true), file_(file), group_(NULL)
+    : is_file_(true), file_(file), group_(NULL), lib_(NULL)
   { }
 
   // Create a group argument.
   explicit Input_argument(Input_file_group* group)
-    : is_file_(false), group_(group)
+    : is_file_(false), group_(group), lib_(NULL)
+  { }
+
+  // Create a lib argument.
+  explicit Input_argument(Input_file_lib* lib)
+    : is_file_(false), group_(NULL), lib_(lib)
   { }
 
   // Return whether this is a file.
@@ -1516,7 +1528,12 @@ class Input_argument
   // Return whether this is a group.
   bool
   is_group() const
-  { return !this->is_file_; }
+  { return !this->is_file_ && this->lib_ == NULL; }
+
+  // Return whether this is a lib.
+  bool
+  is_lib() const
+  { return this->lib_ != NULL; }
 
   // Return the information about the file.
   const Input_file_argument&
@@ -1541,10 +1558,28 @@ class Input_argument
     return this->group_;
   }
 
+  // Return the information about the lib.
+  const Input_file_lib*
+  lib() const
+  {
+    gold_assert(!this->is_file_);
+    gold_assert(this->lib_);
+    return this->lib_;
+  }
+
+  Input_file_lib*
+  lib()
+  {
+    gold_assert(!this->is_file_);
+    gold_assert(this->lib_);
+    return this->lib_;
+  }
+
  private:
   bool is_file_;
   Input_file_argument file_;
   Input_file_group* group_;
+  Input_file_lib* lib_;
 };
 
 typedef std::vector<Input_argument> Input_argument_list;
@@ -1580,6 +1615,46 @@ class Input_file_group
   Input_argument_list files_;
 };
 
+// A lib from the command line.  This is a set of arguments within
+// --start-lib ... --end-lib.
+
+class Input_file_lib
+{
+ public:
+  typedef Input_argument_list::const_iterator const_iterator;
+
+  Input_file_lib(const Position_dependent_options& options)
+    : files_(), options_(options)
+  { }
+
+  // Add a file to the end of the lib.
+  void
+  add_file(const Input_file_argument& arg)
+  { this->files_.push_back(Input_argument(arg)); }
+
+  const Position_dependent_options&
+  options() const
+  { return this->options_; }
+
+  // Iterators to iterate over the lib contents.
+
+  const_iterator
+  begin() const
+  { return this->files_.begin(); }
+
+  const_iterator
+  end() const
+  { return this->files_.end(); }
+
+  size_t
+  size() const
+  { return this->files_.size(); }
+
+ private:
+  Input_argument_list files_;
+  Position_dependent_options options_;
+};
+
 // A list of files from the command line or a script.
 
 class Input_arguments
@@ -1588,7 +1663,7 @@ class Input_arguments
   typedef Input_argument_list::const_iterator const_iterator;
 
   Input_arguments()
-    : input_argument_list_(), in_group_(false)
+    : input_argument_list_(), in_group_(false), in_lib_(false)
   { }
 
   // Add a file.
@@ -1603,10 +1678,23 @@ class Input_arguments
   void
   end_group();
 
+  // Start a lib (the --start-lib option).
+  void
+  start_lib(const Position_dependent_options&);
+
+  // End a lib (the --end-lib option).
+  void
+  end_lib();
+
   // Return whether we are currently in a group.
   bool
   in_group() const
   { return this->in_group_; }
+
+  // Return whether we are currently in a lib.
+  bool
+  in_lib() const
+  { return this->in_lib_; }
 
   // The number of entries in the list.
   int
@@ -1631,6 +1719,7 @@ class Input_arguments
  private:
   Input_argument_list input_argument_list_;
   bool in_group_;
+  bool in_lib_;
 };
 
 

@@ -41,6 +41,22 @@ class Layout;
 class Symbol_table;
 class Object;
 class Read_symbols_data;
+class Input_file_lib;
+
+// An entry in the archive map of offsets to members.
+struct Archive_member
+{
+  Archive_member()
+      : obj_(NULL), sd_(NULL)
+  { }
+  Archive_member(Object* obj, Read_symbols_data* sd)
+      : obj_(obj), sd_(sd)
+  { }
+  // The object file.
+  Object* obj_;
+  // The data to pass from read_symbols() to add_symbols().
+  Read_symbols_data* sd_;
+};
 
 // This class represents an archive--generally a libNAME.a file.
 // Archives have a symbol table and a list of objects.
@@ -148,6 +164,22 @@ class Archive
   no_export()
   { return this->no_export_; }
 
+  // When we see a symbol in an archive we might decide to include the member,
+  // not include the member or be undecided. This enum represents these
+  // possibilities.
+
+  enum Should_include
+  {
+    SHOULD_INCLUDE_NO,
+    SHOULD_INCLUDE_YES,
+    SHOULD_INCLUDE_UNKNOWN
+  };
+
+  static Should_include
+  should_include_member(Symbol_table* symtab, const char* sym_name,
+                        Symbol** symp, std::string* why, char** tmpbufp,
+                        size_t* tmpbuflen);
+
  private:
   Archive(const Archive&);
   Archive& operator=(const Archive&);
@@ -236,21 +268,6 @@ class Archive
     off_t name_offset;
     // The file offset to the object in the archive.
     off_t file_offset;
-  };
-
-  // An entry in the archive map of offsets to members.
-  struct Archive_member
-  {
-    Archive_member()
-      : obj_(NULL), sd_(NULL)
-    { }
-    Archive_member(Object* obj, Read_symbols_data* sd)
-      : obj_(obj), sd_(sd)
-    { }
-    // The object file.
-    Object* obj_;
-    // The data to pass from read_symbols() to add_symbols().
-    Read_symbols_data* sd_;
   };
 
   // A simple hash code for off_t values.
@@ -348,6 +365,95 @@ class Add_archive_symbols : public Task
   const Input_argument* input_argument_;
   Archive* archive_;
   Input_group* input_group_;
+  Task_token* this_blocker_;
+  Task_token* next_blocker_;
+};
+
+// This class represents the files surrunded by a --start-lib ... --end-lib.
+
+class Lib_group
+{
+ public:
+  Lib_group(const Input_file_lib* lib, Task* task);
+
+  // Select members from the lib group as needed and add them to the link.
+  void
+  add_symbols(Symbol_table*, Layout*, Input_objects*);
+
+  // Include a member of the lib group in the link.
+  void
+  include_member(Symbol_table*, Layout*, Input_objects*, const Archive_member&);
+
+  Archive_member*
+  get_member(int i)
+  {
+    return &this->members_[i];
+  }
+
+  // Dump statistical information to stderr.
+  static void
+  print_stats();
+
+  // Total number of archives seen.
+  static unsigned int total_lib_groups;
+  // Total number of archive members seen.
+  static unsigned int total_members;
+  // Number of archive members loaded.
+  static unsigned int total_members_loaded;
+
+ private:
+  // For reading the files.
+  const Input_file_lib* lib_;
+  // The task reading this lib group.
+  Task *task_;
+  // Table of the objects in the group.
+  std::vector<Archive_member> members_;
+};
+
+// This class is used to pick out the desired elements and add them to the link.
+
+class Add_lib_group_symbols : public Task
+{
+ public:
+  Add_lib_group_symbols(Symbol_table* symtab, Layout* layout,
+                        Input_objects* input_objects,
+                        Lib_group* lib, Task_token* next_blocker)
+      : symtab_(symtab), layout_(layout), input_objects_(input_objects),
+        lib_(lib), this_blocker_(NULL), next_blocker_(next_blocker)
+  { }
+
+  ~Add_lib_group_symbols();
+
+  // The standard Task methods.
+
+  Task_token*
+  is_runnable();
+
+  void
+  locks(Task_locker*);
+
+  void
+  run(Workqueue*);
+
+  // Set the blocker to use for this task.
+  void
+  set_blocker(Task_token* this_blocker)
+  {
+    gold_assert(this->this_blocker_ == NULL);
+    this->this_blocker_ = this_blocker;
+  }
+
+  std::string
+  get_name() const
+  {
+    return "Add_lib_group_symbols";
+  }
+
+ private:
+  Symbol_table* symtab_;
+  Layout* layout_;
+  Input_objects* input_objects_;
+  Lib_group * lib_;
   Task_token* this_blocker_;
   Task_token* next_blocker_;
 };

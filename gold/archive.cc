@@ -602,20 +602,10 @@ Archive::read_symbols(off_t off)
   this->members_[off] = member;
 }
 
-// When we see a symbol in an archive we might decide to include the member,
-// not include the member or be undecided.  This enum represents these
-// possibilities.
-
-enum Should_include
-{
- SHOULD_INCLUDE_NO,
- SHOULD_INCLUDE_YES,
- SHOULD_INCLUDE_UNKNOWN
-};
-
-static Should_include
-should_include_member(Symbol_table* symtab, const char* sym_name, Symbol** symp,
-                      std::string* why, char** tmpbufp, size_t* tmpbuflen)
+Archive::Should_include
+Archive::should_include_member(Symbol_table* symtab, const char* sym_name,
+                               Symbol** symp, std::string* why, char** tmpbufp,
+                               size_t* tmpbuflen)
 {
   // In an object file, and therefore in an archive map, an
   // '@' in the name separates the symbol name from the
@@ -659,7 +649,7 @@ should_include_member(Symbol_table* symtab, const char* sym_name, Symbol** symp,
     {
       // Check whether the symbol was named in a -u option.
       if (!parameters->options().is_undefined(sym_name))
-	return SHOULD_INCLUDE_UNKNOWN;
+	return Archive::SHOULD_INCLUDE_UNKNOWN;
       else
         {
           *why = "-u ";
@@ -667,11 +657,11 @@ should_include_member(Symbol_table* symtab, const char* sym_name, Symbol** symp,
         }
     }
   else if (!sym->is_undefined())
-    return SHOULD_INCLUDE_NO;
+    return Archive::SHOULD_INCLUDE_NO;
   else if (sym->binding() == elfcpp::STB_WEAK)
-    return SHOULD_INCLUDE_UNKNOWN;
+    return Archive::SHOULD_INCLUDE_UNKNOWN;
 
-  return SHOULD_INCLUDE_YES;
+  return Archive::SHOULD_INCLUDE_YES;
 }
 
 // Select members from the archive and add them to the link.  We walk
@@ -735,14 +725,15 @@ Archive::add_symbols(Symbol_table* symtab, Layout* layout,
 
           Symbol* sym;
           std::string why;
-          Should_include t = should_include_member(symtab, sym_name,
-                                                   &sym, &why, &tmpbuf,
-                                                   &tmpbuflen);
+          Archive::Should_include t =
+              Archive::should_include_member(symtab, sym_name, &sym, &why,
+                                             &tmpbuf, &tmpbuflen);
 
-	  if (t == SHOULD_INCLUDE_NO || t == SHOULD_INCLUDE_YES)
+	  if (t == Archive::SHOULD_INCLUDE_NO
+              || t == Archive::SHOULD_INCLUDE_YES)
 	    this->armap_checked_[i] = true;
 
-	  if (t != SHOULD_INCLUDE_YES)
+	  if (t != Archive::SHOULD_INCLUDE_YES)
 	    continue;
 
 	  // We want to include this object in the link.
@@ -976,6 +967,147 @@ Add_archive_symbols::run(Workqueue* workqueue)
       delete this->archive_;
       this->archive_ = NULL;
     }
+}
+
+// Class Lib_group static variables.
+unsigned int Lib_group::total_lib_groups;
+unsigned int Lib_group::total_members;
+unsigned int Lib_group::total_members_loaded;
+
+Lib_group::Lib_group(const Input_file_lib* lib, Task* task)
+  : lib_(lib), task_(task), members_()
+{
+  this->members_.resize(lib->size());
+}
+
+// Select members from the lib group and add them to the link.  We walk
+// through the the members, and check if each one up should be included.
+// If the object says it should be included, we do so.  We have to do
+// this in a loop, since including one member may create new undefined
+// symbols which may be satisfied by other members.
+
+void
+Lib_group::add_symbols(Symbol_table* symtab, Layout* layout,
+                       Input_objects* input_objects)
+{
+  ++Lib_group::total_lib_groups;
+
+  Lib_group::total_members += this->members_.size();
+
+  bool added_new_object;
+  do
+    {
+      added_new_object = false;
+      unsigned int i = 0;
+      while (i < this->members_.size())
+	{
+	  const Archive_member& member = this->members_[i];
+	  Object *obj = member.obj_;
+	  std::string why;
+
+          // Skip files with no symbols. Plugin objects have
+          // member.sd_ == NULL.
+          if (obj != NULL
+	      && (member.sd_ == NULL || member.sd_->symbol_names != NULL))
+            {
+	      Archive::Should_include t = obj->should_include_member(symtab,
+								     member.sd_,
+								     &why);
+
+	      if (t != Archive::SHOULD_INCLUDE_YES)
+		{
+		  ++i;
+		  continue;
+		}
+
+	      this->include_member(symtab, layout, input_objects, member);
+
+	      added_new_object = true;
+	    }
+          else
+            {
+              if (member.sd_ != NULL)
+                delete member.sd_;
+            }
+
+	  this->members_[i] = this->members_.back();
+	  this->members_.pop_back();
+	}
+    }
+  while (added_new_object);
+}
+
+// Include a lib group member in the link.
+
+void
+Lib_group::include_member(Symbol_table* symtab, Layout* layout,
+			  Input_objects* input_objects,
+			  const Archive_member& member)
+{
+  ++Lib_group::total_members_loaded;
+
+  Object* obj = member.obj_;
+  gold_assert(obj != NULL);
+
+  Pluginobj* pluginobj = obj->pluginobj();
+  if (pluginobj != NULL)
+    {
+      pluginobj->add_symbols(symtab, NULL, layout);
+      return;
+    }
+
+  Read_symbols_data* sd = member.sd_;
+  gold_assert(sd != NULL);
+  obj->lock(this->task_);
+  if (input_objects->add_object(obj))
+    {
+      obj->layout(symtab, layout, sd);
+      obj->add_symbols(symtab, sd, layout);
+      // Unlock the file for the next task.
+      obj->unlock(this->task_);
+    }
+  delete sd;
+}
+
+// Print statistical information to stderr.  This is used for --stats.
+
+void
+Lib_group::print_stats()
+{
+  fprintf(stderr, _("%s: lib groups: %u\n"),
+          program_name, Lib_group::total_lib_groups);
+  fprintf(stderr, _("%s: total lib groups members: %u\n"),
+          program_name, Lib_group::total_members);
+  fprintf(stderr, _("%s: loaded lib groups members: %u\n"),
+          program_name, Lib_group::total_members_loaded);
+}
+
+Task_token*
+Add_lib_group_symbols::is_runnable()
+{
+  if (this->this_blocker_ != NULL && this->this_blocker_->is_blocked())
+    return this->this_blocker_;
+  return NULL;
+}
+
+void
+Add_lib_group_symbols::locks(Task_locker* tl)
+{
+  tl->add(this, this->next_blocker_);
+}
+
+void
+Add_lib_group_symbols::run(Workqueue*)
+{
+  this->lib_->add_symbols(this->symtab_, this->layout_, this->input_objects_);
+}
+
+Add_lib_group_symbols::~Add_lib_group_symbols()
+{
+  if (this->this_blocker_ != NULL)
+    delete this->this_blocker_;
+  // next_blocker_ is deleted by the task associated with the next
+  // input file.
 }
 
 } // End namespace gold.

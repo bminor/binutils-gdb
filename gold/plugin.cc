@@ -438,6 +438,7 @@ Plugin_manager::add_input_file(char *pathname, bool is_lib)
                                                 this->mapfile_,
                                                 input_argument,
                                                 NULL,
+                                                NULL,
                                                 this->this_blocker_,
                                                 next_blocker));
   this->this_blocker_ = next_blocker;
@@ -475,6 +476,17 @@ Pluginobj::get_symbol_resolution_info(int nsyms, ld_plugin_symbol* syms) const
 {
   if (nsyms > this->nsyms_)
     return LDPS_NO_SYMS;
+
+  if (static_cast<size_t>(nsyms) > this->symbols_.size())
+    {
+      // We never decided to include this object. We mark all symbols as
+      // preempted.
+      gold_assert (this->symbols_.size() == 0);
+      for (int i = 0; i < nsyms; i++)
+        syms[i].resolution = LDPR_PREEMPTED_REG;
+      return LDPS_OK;
+    }
+
   for (int i = 0; i < nsyms; i++)
     {
       ld_plugin_symbol* isym = &syms[i];
@@ -660,6 +672,34 @@ Sized_pluginobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
       this->symbols_[i] =
         symtab->add_from_pluginobj<size, big_endian>(this, name, ver, &sym);
     }
+}
+
+template<int size, bool big_endian>
+Archive::Should_include
+Sized_pluginobj<size, big_endian>::do_should_include_member(
+    Symbol_table* symtab, Read_symbols_data*, std::string* why)
+{
+  char* tmpbuf = NULL;
+  size_t tmpbuflen = 0;
+
+  for (int i = 0; i < this->nsyms_; ++i) {
+    const struct ld_plugin_symbol& sym = this->syms_[i];
+    const char* name = sym.name;
+    Symbol* symbol;
+    Archive::Should_include t = Archive::should_include_member(symtab, name,
+                                                               &symbol, why,
+                                                               &tmpbuf,
+                                                               &tmpbuflen);
+      if (t == Archive::SHOULD_INCLUDE_YES)
+	{
+	  if (tmpbuf != NULL)
+	    free(tmpbuf);
+	  return t;
+	}
+  }
+  if (tmpbuf != NULL)
+    free(tmpbuf);
+  return Archive::SHOULD_INCLUDE_UNKNOWN;
 }
 
 // Get the size of a section.  Not used for plugin objects.

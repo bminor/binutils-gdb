@@ -1486,6 +1486,55 @@ Sized_relobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
   sd->symbol_names = NULL;
 }
 
+// Find out if this object, that is a member of a lib group, should be included
+// in the link. We check every symbol defined by this object. If the symbol
+// table has a strong undefined reference to that symbol, we have to include
+// the object.
+
+template<int size, bool big_endian>
+Archive::Should_include
+Sized_relobj<size, big_endian>::do_should_include_member(Symbol_table* symtab,
+                                                         Read_symbols_data* sd,
+                                                         std::string* why)
+{
+  char* tmpbuf = NULL;
+  size_t tmpbuflen = 0;
+  const char* sym_names =
+      reinterpret_cast<const char*>(sd->symbol_names->data());
+  const unsigned char* syms =
+      sd->symbols->data() + sd->external_symbols_offset;
+  const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
+  size_t symcount = ((sd->symbols_size - sd->external_symbols_offset)
+                         / sym_size);
+
+  const unsigned char* p = syms;
+
+  for (size_t i = 0; i < symcount; ++i, p += sym_size)
+    {
+      elfcpp::Sym<size, big_endian> sym(p);
+      unsigned int st_shndx = sym.get_st_shndx();
+      if (st_shndx == elfcpp::SHN_UNDEF)
+	continue;
+
+      unsigned int st_name = sym.get_st_name();
+      const char* name = sym_names + st_name;
+      Symbol* symbol;
+      Archive::Should_include t = Archive::should_include_member(symtab, name,
+								 &symbol, why,
+								 &tmpbuf,
+								 &tmpbuflen);
+      if (t == Archive::SHOULD_INCLUDE_YES)
+	{
+	  if (tmpbuf != NULL)
+	    free(tmpbuf);
+	  return t;
+	}
+    }
+  if (tmpbuf != NULL)
+    free(tmpbuf);
+  return Archive::SHOULD_INCLUDE_UNKNOWN;
+}
+
 // First pass over the local symbols.  Here we add their names to
 // *POOL and *DYNPOOL, and we store the symbol value in
 // THIS->LOCAL_VALUES_.  This function is always called from a

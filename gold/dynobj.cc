@@ -751,6 +751,14 @@ Sized_dynobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
   this->clear_view_cache_marks();
 }
 
+template<int size, bool big_endian>
+Archive::Should_include
+Sized_dynobj<size, big_endian>::do_should_include_member(
+    Symbol_table*, Read_symbols_data*, std::string*)
+{
+  return Archive::SHOULD_INCLUDE_YES;
+}
+
 // Get symbol counts.
 
 template<int size, bool big_endian>

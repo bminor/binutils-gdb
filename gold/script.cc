@@ -1438,7 +1438,7 @@ read_input_script(Workqueue* workqueue, Symbol_table* symtab, Layout* layout,
 	}
       workqueue->queue_soon(new Read_symbols(input_objects, symtab,
 					     layout, dirsearch, 0, mapfile, &*p,
-					     input_group, this_blocker, nb));
+					     input_group, NULL, this_blocker, nb));
       this_blocker = nb;
     }
 

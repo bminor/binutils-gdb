@@ -58,12 +58,13 @@ class Read_symbols : public Task
   Read_symbols(Input_objects* input_objects, Symbol_table* symtab,
 	       Layout* layout, Dirsearch* dirpath, int dirindex,
 	       Mapfile* mapfile, const Input_argument* input_argument,
-	       Input_group* input_group, Task_token* this_blocker,
-	       Task_token* next_blocker)
+	       Input_group* input_group, Archive_member* member,
+               Task_token* this_blocker, Task_token* next_blocker)
     : input_objects_(input_objects), symtab_(symtab), layout_(layout),
       dirpath_(dirpath), dirindex_(dirindex), mapfile_(mapfile),
       input_argument_(input_argument), input_group_(input_group),
-      this_blocker_(this_blocker), next_blocker_(next_blocker)
+      member_(member), this_blocker_(this_blocker),
+      next_blocker_(next_blocker)
   { }
 
   ~Read_symbols();
@@ -99,6 +100,14 @@ class Read_symbols : public Task
   void
   do_group(Workqueue*);
 
+  // Handle --start-lib ... --end-lib
+  bool
+  do_lib_group(Workqueue*);
+
+  // Handle --whole-archive --start-lib ... --end-lib --no-whole-archive
+  bool
+  do_whole_lib_group(Workqueue*);
+
   // Open and identify the file.
   bool
   do_read_symbols(Workqueue*);
@@ -111,6 +120,7 @@ class Read_symbols : public Task
   Mapfile* mapfile_;
   const Input_argument* input_argument_;
   Input_group* input_group_;
+  Archive_member* member_;
   Task_token* this_blocker_;
   Task_token* next_blocker_;
 };

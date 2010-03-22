@@ -264,6 +264,7 @@ main(int argc, char** argv)
 #endif
       File_read::print_stats();
       Archive::print_stats();
+      Lib_group::print_stats();
       fprintf(stderr, _("%s: output file size: %lld bytes\n"),
 	      program_name, static_cast<long long>(layout.output_file_size()));
       symtab.print_stats();

@@ -1,3 +1,54 @@
+2010-03-22  Rafael Espindola  <espindola@google.com>
+
+	* archive.cc (Should_include): Move to archive.h.
+	(should_include_member): Make it a member of Archive.
+	(Lib_group): New.
+	(Add_lib_group_symbols): New.
+	* archive.h: Include options.h.
+	(Archive_member): Moved from Archive.
+	(Should_include): Moved from archive.cc.
+	(Lib_group): New.
+	(Add_lib_group_symbols): New.
+	* dynobj.cc (do_should_include_member): New.
+	* dynobj.h (do_should_include_member): New.
+	* gold.cc (queue_initial_tasks): Update call to queue.
+	* main.cc (main): Print lib group stats.
+	* object.cc (do_should_include_member): New.
+	* object.h: Include archive.h.
+	(Object::should_include_member): New.
+	(Object::do_should_include_member): New.
+	(Sized_relobj::do_should_include_member): New.
+	* options.cc (General_options::parse_start_lib): New.
+	(General_options::parse_end_lib): New.
+	(Input_arguments::add_file): Handle lib groups.
+	(Input_arguments::start_group): Check we are not in a lib.
+	(Input_arguments::start_lib): New.
+	(Input_arguments::end_lib): New.
+	* options.h (General_options): Add start_lib and end_lib.
+	(Input_argument::lib_): New.
+	(Input_argument::lib): New.
+	(Input_argument::is_lib): New.
+	(Input_file_lib): New.
+	(Input_arguments::in_lib_): New.
+	(Input_arguments::in_lib): New.
+	(Input_arguments::start_lib): New.
+	(Input_arguments::end_lib_): New.
+	* plugin.cc (Pluginobj::get_symbol_resolution_info): Mark symbols
+	in unused members as preempted.
+	(Sized_pluginobj::do_should_include_member): New.
+	* plugin.h (Sized_pluginobj::do_should_include_member): New.
+	* readsyms.cc (Read_symbols::locks): If we are just reading a member,
+	return the blocker.
+	(Read_symbols::do_whole_lib_group): New.
+	(Read_symbols::do_lib_group): New.
+	(Read_symbols::do_read_symbols): Handle lib groups.
+	(Read_symbols::get_name): Handle lib groups.
+	* readsyms.h (Read_symbols): Add an archive member pointer.
+	(Read_symbols::do_whole_lib_group): New.
+	(Read_symbols::do_lib_group): New.
+	(Read_symbols::member_): New.
+	* script.cc (read_input_script): Update call to queue_soon.
+
 2010-03-19  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Stub_table::Stub_table): Initialize new data members
