@@ -1,5 +1,10 @@
 2010-03-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* dg-extract-results.sh: Sync with GCC HEAD (import r155655, r157175
+	and r157645).
+
+2010-03-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.dwarf2/dw2-empty-namespace.exp, gdb.dwarf2/dw2-empty-namespace.S:
 	New.
 
