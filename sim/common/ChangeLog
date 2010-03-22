@@ -1,3 +1,9 @@
+2010-03-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim/common/sim-options.c (enum): Remove SIM_HAVE_BIENDIAN ifdef.
+	(standard_options): Likewise.
+	(standard_option_handler): Likewise.
+
 2010-03-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* hw-ports.c (TRACE): Delete.

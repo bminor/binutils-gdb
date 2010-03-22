@@ -100,9 +100,7 @@ typedef enum {
   OPTION_ENVIRONMENT,
   OPTION_ALIGNMENT,
   OPTION_VERBOSE,
-#if defined (SIM_HAVE_BIENDIAN)
   OPTION_ENDIAN,
-#endif
   OPTION_DEBUG,
 #ifdef SIM_HAVE_FLATMEM
   OPTION_MEM_SIZE,
@@ -124,11 +122,9 @@ static const OPTION standard_options[] =
       'v', NULL, "Verbose output",
       standard_option_handler },
 
-#if defined (SIM_HAVE_BIENDIAN) /* ??? && WITH_TARGET_BYTE_ORDER == 0 */
   { {"endian", required_argument, NULL, OPTION_ENDIAN},
       'E', "big|little", "Set endianness",
       standard_option_handler },
-#endif
 
 #ifdef SIM_HAVE_ENVIRONMENT
   /* This option isn't supported unless all choices are supported in keeping
@@ -226,7 +222,6 @@ standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
       STATE_VERBOSE_P (sd) = 1;
       break;
 
-#ifdef SIM_HAVE_BIENDIAN
     case OPTION_ENDIAN:
       if (strcmp (arg, "big") == 0)
 	{
@@ -254,7 +249,6 @@ standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 	  return SIM_RC_FAIL;
 	}
       break;
-#endif
 
     case OPTION_ENVIRONMENT:
       if (strcmp (arg, "user") == 0)
