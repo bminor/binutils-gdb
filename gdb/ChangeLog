@@ -1,14 +1,13 @@
+2010-03-22  Stan Shebs  <stan@codesourcery.com>
+
+	* value.c (value_static_field): Be lazy about the field's value.
+
 2010-03-22  Reid Kleckner  <reid@kleckner.net>
 
 	PR gdb/11094
 	* breakpoint.c (disable_breakpoints_in_unloaded_shlib): Add
 	bp_jit_event.
 	(disable_breakpoints_in_shlibs): Likewise.
-
-2010-03-22  Reid Kleckner  <reid@kleckner.net>
-
-	PR gdb/11094
-	* breakpoint.c (disable_breakpoints_in_unloaded_shlib): Add bp_jit_event
 
 2010-03-22  Ulrich Weigand  <uweigand@de.ibm.com>
 

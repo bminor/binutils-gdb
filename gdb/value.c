@@ -1813,8 +1813,8 @@ value_static_field (struct type *type, int fieldno)
 
   if (TYPE_FIELD_LOC_KIND (type, fieldno) == FIELD_LOC_KIND_PHYSADDR)
     {
-      retval = value_at (TYPE_FIELD_TYPE (type, fieldno),
-			 TYPE_FIELD_STATIC_PHYSADDR (type, fieldno));
+      retval = value_at_lazy (TYPE_FIELD_TYPE (type, fieldno),
+			      TYPE_FIELD_STATIC_PHYSADDR (type, fieldno));
     }
   else
     {
@@ -1831,8 +1831,8 @@ value_static_field (struct type *type, int fieldno)
 	    return NULL;
 	  else
 	    {
-	      retval = value_at (TYPE_FIELD_TYPE (type, fieldno),
-				 SYMBOL_VALUE_ADDRESS (msym));
+	      retval = value_at_lazy (TYPE_FIELD_TYPE (type, fieldno),
+				      SYMBOL_VALUE_ADDRESS (msym));
 	    }
 	}
       else
