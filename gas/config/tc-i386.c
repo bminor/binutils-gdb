@@ -204,6 +204,20 @@ union i386_op
     const reg_entry *regs;
   };
 
+enum i386_error
+  {
+    oprand_size_mismatch,
+    operand_type_mismatch,
+    register_type_mismatch,
+    number_of_operands_mismatch,
+    invalid_instruction_suffix,
+    bad_imm4,
+    old_gcc_only,
+    unsupported_with_intel_mnemonic,
+    unsupported_syntax,
+    unsupported
+  };
+
 struct _i386_insn
   {
     /* TM holds the template for the insn were currently assembling.  */
@@ -262,7 +276,7 @@ struct _i386_insn
     unsigned int swap_operand;
 
     /* Error message.  */
-    const char *err_msg;
+    enum i386_error error;
   };
 
 typedef struct _i386_insn i386_insn;
@@ -1565,7 +1579,7 @@ operand_size_match (const insn_template *t)
   else if (!t->opcode_modifier.d && !t->opcode_modifier.floatd)
     {
 mismatch:
-      i.err_msg = _("operand size mismatch");
+      i.error = oprand_size_mismatch;
       return 0;
     }
 
@@ -1611,7 +1625,7 @@ operand_type_match (i386_operand_type overlap,
     return 1;
 
 mismatch:
-  i.err_msg = _("operand type mismatch");
+  i.error = operand_type_mismatch;
   return 0;
 }
 
@@ -1661,7 +1675,7 @@ operand_type_register_match (i386_operand_type m0,
       && !(t0.bitfield.reg64 & t1.bitfield.reg64))
     return 1;
 
-  i.err_msg = _("register type mismatch");
+  i.error = register_type_mismatch;
 
   return 0;
 }
@@ -3758,7 +3772,7 @@ VEX_check_operands (const insn_template *t)
       if (i.op[0].imms->X_op != O_constant
 	  || !fits_in_imm4 (i.op[0].imms->X_add_number))
 	{
-	  i.err_msg = _("Imm4 isn't the first operand");
+	  i.error = bad_imm4;
 	  return 1;
 	}
 
@@ -3810,35 +3824,35 @@ match_template (void)
       addr_prefix_disp = -1;
 
       /* Must have right number of operands.  */
-      i.err_msg = _("number of operands mismatch");
+      i.error = number_of_operands_mismatch;
       if (i.operands != t->operands)
 	continue;
 
       /* Check processor support.  */
-      i.err_msg = _("unsupported");
+      i.error = unsupported;
       found_cpu_match = (cpu_flags_match (t)
 			 == CPU_FLAGS_PERFECT_MATCH);
       if (!found_cpu_match)
 	continue;
 
       /* Check old gcc support. */
-      i.err_msg = _("only supported with old gcc");
+      i.error = old_gcc_only;
       if (!old_gcc && t->opcode_modifier.oldgcc)
 	continue;
 
       /* Check AT&T mnemonic.   */
-      i.err_msg = _("unsupported with Intel mnemonic");
+      i.error = unsupported_with_intel_mnemonic;
       if (intel_mnemonic && t->opcode_modifier.attmnemonic)
 	continue;
 
       /* Check AT&T/Intel syntax.   */
-      i.err_msg = _("unsupported syntax");
+      i.error = unsupported_syntax;
       if ((intel_syntax && t->opcode_modifier.attsyntax)
 	  || (!intel_syntax && t->opcode_modifier.intelsyntax))
 	continue;
 
       /* Check the suffix, except for some instructions in intel mode.  */
-      i.err_msg = _("invalid instruction suffix");
+      i.error = invalid_instruction_suffix;
       if ((!intel_syntax || !t->opcode_modifier.ignoresize)
 	  && ((t->opcode_modifier.no_bsuf && suffix_check.no_bsuf)
 	      || (t->opcode_modifier.no_wsuf && suffix_check.no_wsuf)
@@ -4090,7 +4104,43 @@ check_reverse:
   if (t == current_templates->end)
     {
       /* We found no match.  */
-      as_bad (_("%s for `%s'"), i.err_msg,
+      const char *err_msg;
+      switch (i.error)
+	{
+	default:
+	  abort ();
+	case oprand_size_mismatch:
+	  err_msg = _("operand size mismatch");
+	  break;
+	case operand_type_mismatch:
+	  err_msg = _("operand type mismatch");
+	  break;
+	case register_type_mismatch:
+	  err_msg = _("register type mismatch");
+	  break;
+	case number_of_operands_mismatch:
+	  err_msg = _("number of operands mismatch");
+	  break;
+	case invalid_instruction_suffix:
+	  err_msg = _("invalid instruction suffix");
+	  break;
+	case bad_imm4:
+	  err_msg = _("Imm4 isn't the first operand");
+	  break;
+	case old_gcc_only:
+	  err_msg = _("only supported with old gcc");
+	  break;
+	case unsupported_with_intel_mnemonic:
+	  err_msg = _("unsupported with Intel mnemonic");
+	  break;
+	case unsupported_syntax:
+	  err_msg = _("unsupported syntax");
+	  break;
+	case unsupported:
+	  err_msg = _("unsupported");
+	  break;
+	}
+      as_bad (_("%s for `%s'"), err_msg,
 	      current_templates->start->name);
       return NULL;
     }

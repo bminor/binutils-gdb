@@ -1,3 +1,14 @@
+2010-03-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (i386_error): New.
+	(_i386_insn): Replace err_msg with error.
+	(operand_size_match): Set error instead of err_msg on failure.
+	(operand_type_match): Likewise.
+	(operand_type_register_match): Likewise.
+	(VEX_check_operands): Likewise.
+	(match_template): Likewise.  Use error instead of err_msg with
+	as_bad.
+
 2010-03-19  Jie Zhang  <jie@codesourcery.com>
 
 	* config/tc-arm.c (make_mapping_symbol): Hanle the case
