@@ -2307,6 +2307,19 @@ partial_die_parent_scope (struct partial_die_info *pdi,
 
   grandparent_scope = partial_die_parent_scope (parent, cu);
 
+  /* GCC 4.0 and 4.1 had a bug (PR c++/28460) where they generated bogus
+     DW_TAG_namespace DIEs with a name of "::" for the global namespace.
+     Work around this problem here.  */
+  if (cu->language == language_cplus
+      && parent->tag == DW_TAG_namespace 
+      && strcmp (parent->name, "::") == 0
+      && grandparent_scope == NULL)
+    {
+      parent->scope = NULL;
+      parent->scope_set = 1;
+      return NULL;
+    }
+
   if (parent->tag == DW_TAG_namespace
       || parent->tag == DW_TAG_structure_type
       || parent->tag == DW_TAG_class_type
@@ -9029,6 +9042,12 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
       {
       case DW_TAG_namespace:
 	parent_type = read_type_die (parent, cu);
+	/* GCC 4.0 and 4.1 had a bug (PR c++/28460) where they generated bogus
+	   DW_TAG_namespace DIEs with a name of "::" for the global namespace.
+	   Work around this problem here.  */
+	if (cu->language == language_cplus
+	    && strcmp (TYPE_TAG_NAME (parent_type), "::") == 0)
+	  return "";
 	/* We give a name to even anonymous namespaces.  */
 	return TYPE_TAG_NAME (parent_type);
       case DW_TAG_class_type:

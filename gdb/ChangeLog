@@ -1,3 +1,9 @@
+2010-03-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* dwarf2read.c (partial_die_parent_scope): Work around buggy
+	GCC 4.1 debug info generation (GCC PR c++/28460).
+	(determine_prefix): Likewise.
+
 2010-03-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* tui/tui-disasm.c (tui_get_begin_asm_address): Default to
