@@ -206,7 +206,7 @@ union i386_op
 
 enum i386_error
   {
-    oprand_size_mismatch,
+    operand_size_mismatch,
     operand_type_mismatch,
     register_type_mismatch,
     number_of_operands_mismatch,
@@ -1579,7 +1579,7 @@ operand_size_match (const insn_template *t)
   else if (!t->opcode_modifier.d && !t->opcode_modifier.floatd)
     {
 mismatch:
-      i.error = oprand_size_mismatch;
+      i.error = operand_size_mismatch;
       return 0;
     }
 
@@ -4109,7 +4109,7 @@ check_reverse:
 	{
 	default:
 	  abort ();
-	case oprand_size_mismatch:
+	case operand_size_mismatch:
 	  err_msg = _("operand size mismatch");
 	  break;
 	case operand_type_mismatch:

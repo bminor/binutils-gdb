@@ -1,5 +1,12 @@
 2010-03-21  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (i386_error): Replace oprand_size_mismatch
+	with operand_size_mismatch.
+	(operand_size_match): Updated.
+	(match_template): Likewise.
+
+2010-03-21  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (i386_error): New.
 	(_i386_insn): Replace err_msg with error.
 	(operand_size_match): Set error instead of err_msg on failure.
