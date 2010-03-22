@@ -1,3 +1,8 @@
+2010-03-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.dwarf2/dw2-empty-namespace.exp, gdb.dwarf2/dw2-empty-namespace.S:
+	New.
+
 2010-03-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.python/Makefile.in (EXECUTABLES): Add py-mi.
