@@ -1,3 +1,7 @@
+2010-03-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (lex_got): Use STRING_COMMA_LEN on gotrel.
+
 2010-03-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (i386_error): Replace oprand_size_mismatch
