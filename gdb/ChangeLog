@@ -1,3 +1,15 @@
+2010-03-22  Reid Kleckner  <reid@kleckner.net>
+
+	PR gdb/11094
+	* breakpoint.c (disable_breakpoints_in_unloaded_shlib): Add
+	bp_jit_event.
+	(disable_breakpoints_in_shlibs): Likewise.
+
+2010-03-22  Reid Kleckner  <reid@kleckner.net>
+
+	PR gdb/11094
+	* breakpoint.c (disable_breakpoints_in_unloaded_shlib): Add bp_jit_event
+
 2010-03-22  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* dwarf2read.c (partial_die_parent_scope): Work around buggy

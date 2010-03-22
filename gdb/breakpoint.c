@@ -5392,6 +5392,7 @@ disable_breakpoints_in_shlibs (void)
        all breakpoints.  If we don't set shlib_disabled here, we'll try
        to insert those breakpoints and fail.  */
     if (((b->type == bp_breakpoint)
+	 || (b->type == bp_jit_event)
 	 || (b->type == bp_hardware_breakpoint)
 	 || (tracepoint_type (b)))
 	&& loc->pspace == current_program_space
@@ -5432,7 +5433,9 @@ disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
 	 || loc->loc_type == bp_loc_software_breakpoint)
 	&& solib->pspace == loc->pspace
 	&& !loc->shlib_disabled
-	&& (b->type == bp_breakpoint || b->type == bp_hardware_breakpoint)
+	&& (b->type == bp_breakpoint
+	    || b->type == bp_jit_event
+	    || b->type == bp_hardware_breakpoint)
 	&& solib_contains_address_p (solib, loc->address))
       {
 	loc->shlib_disabled = 1;
