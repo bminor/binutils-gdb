@@ -338,6 +338,10 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @DEFAULT_TARGET_ARM_TRUE@	thumb_bl_out_of_range.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	thumb2_bl_in_range.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	thumb2_bl_out_of_range.stdout \
+@DEFAULT_TARGET_ARM_TRUE@	thumb_blx_in_range.stdout \
+@DEFAULT_TARGET_ARM_TRUE@	thumb_blx_out_of_range.stdout \
+@DEFAULT_TARGET_ARM_TRUE@	thumb2_blx_in_range.stdout \
+@DEFAULT_TARGET_ARM_TRUE@	thumb2_blx_out_of_range.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx_interworking.stdout \
 @DEFAULT_TARGET_ARM_TRUE@	arm_no_fix_v4bx.stdout
@@ -346,7 +350,11 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @DEFAULT_TARGET_ARM_TRUE@	thumb_bl_in_range \
 @DEFAULT_TARGET_ARM_TRUE@	thumb_bl_out_of_range \
 @DEFAULT_TARGET_ARM_TRUE@	thumb2_bl_in_range \
-@DEFAULT_TARGET_ARM_TRUE@	thumb2_bl_out_of_range arm_fix_v4bx \
+@DEFAULT_TARGET_ARM_TRUE@	thumb2_bl_out_of_range \
+@DEFAULT_TARGET_ARM_TRUE@	thumb_blx_in_range \
+@DEFAULT_TARGET_ARM_TRUE@	thumb_blx_out_of_range \
+@DEFAULT_TARGET_ARM_TRUE@	thumb2_blx_in_range \
+@DEFAULT_TARGET_ARM_TRUE@	thumb2_blx_out_of_range arm_fix_v4bx \
 @DEFAULT_TARGET_ARM_TRUE@	arm_fix_v4bx_interworking \
 @DEFAULT_TARGET_ARM_TRUE@	arm_no_fix_v4bx
 subdir = testsuite
@@ -3288,10 +3296,10 @@ uninstall-am:
 @DEFAULT_TARGET_ARM_TRUE@thumb_bl_out_of_range.stdout: thumb_bl_out_of_range
 @DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D $< > $@
 
-@DEFAULT_TARGET_ARM_TRUE@thumb_bl_out_of_range: thumb_bl_in_range.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@thumb_bl_out_of_range: thumb_bl_out_of_range.o ../ld-new
 @DEFAULT_TARGET_ARM_TRUE@	../ld-new -T $(srcdir)/thumb_branch_range.t -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@thumb_bl_out_of_range.o: thumb_bl_in_range.s
+@DEFAULT_TARGET_ARM_TRUE@thumb_bl_out_of_range.o: thumb_bl_out_of_range.s
 @DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ -march=armv5te $<
 
 @DEFAULT_TARGET_ARM_TRUE@thumb2_bl_in_range.stdout: thumb2_bl_in_range
@@ -3306,10 +3314,46 @@ uninstall-am:
 @DEFAULT_TARGET_ARM_TRUE@thumb2_bl_out_of_range.stdout: thumb2_bl_out_of_range
 @DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D $< > $@
 
-@DEFAULT_TARGET_ARM_TRUE@thumb2_bl_out_of_range: thumb2_bl_in_range.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@thumb2_bl_out_of_range: thumb2_bl_out_of_range.o ../ld-new
 @DEFAULT_TARGET_ARM_TRUE@	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
 
-@DEFAULT_TARGET_ARM_TRUE@thumb2_bl_out_of_range.o: thumb_bl_in_range.s
+@DEFAULT_TARGET_ARM_TRUE@thumb2_bl_out_of_range.o: thumb_bl_out_of_range.s
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ -march=armv7-a $<
+
+@DEFAULT_TARGET_ARM_TRUE@thumb_blx_in_range.stdout: thumb_blx_in_range
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@thumb_blx_in_range: thumb_blx_in_range.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@	../ld-new -T $(srcdir)/thumb_branch_range.t -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@thumb_blx_in_range.o: thumb_blx_in_range.s
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ -march=armv5te $<
+
+@DEFAULT_TARGET_ARM_TRUE@thumb_blx_out_of_range.stdout: thumb_blx_out_of_range
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@thumb_blx_out_of_range: thumb_blx_out_of_range.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@	../ld-new -T $(srcdir)/thumb_branch_range.t -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@thumb_blx_out_of_range.o: thumb_blx_out_of_range.s
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ -march=armv5te $<
+
+@DEFAULT_TARGET_ARM_TRUE@thumb2_blx_in_range.stdout: thumb2_blx_in_range
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@thumb2_blx_in_range: thumb2_blx_in_range.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@thumb2_blx_in_range.o: thumb_blx_in_range.s
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ -march=armv7-a $<
+
+@DEFAULT_TARGET_ARM_TRUE@thumb2_blx_out_of_range.stdout: thumb2_blx_out_of_range
+@DEFAULT_TARGET_ARM_TRUE@	$(TEST_OBJDUMP) -D $< > $@
+
+@DEFAULT_TARGET_ARM_TRUE@thumb2_blx_out_of_range: thumb2_blx_out_of_range.o ../ld-new
+@DEFAULT_TARGET_ARM_TRUE@	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
+
+@DEFAULT_TARGET_ARM_TRUE@thumb2_blx_out_of_range.o: thumb_blx_out_of_range.s
 @DEFAULT_TARGET_ARM_TRUE@	$(TEST_AS) -o $@ -march=armv7-a $<
 
 @DEFAULT_TARGET_ARM_TRUE@arm_fix_v4bx.stdout: arm_fix_v4bx

@@ -1,3 +1,33 @@
+2010-03-22  Doug Kwan  <dougkwan@google.com>
+
+	* arm.cc (Arm_relocate_functions::abs8,
+	Arm_relocate_functions::abs16): Use correct check for overflow
+	specified in the ARM ELF specs.
+	(Arm_relocate_functions): thumb_branch_common.  Handle bit 1 of branch
+	target of a BLX instruction specially.
+	(Reloc_stub::stub_type_for_reloc): Ditto.
+	(Relocate::relocate): Use symbolic names instead of numeric relocation
+	codes to report error.
+	(Target_arm::do_relox): Reduce default stub-group size for Cortex-A8
+	workaround.
+	* testsuite/Makefile.am (check_DATA): add thumb_blx_in_range.stdout,
+	thumb_blx_out_of_range.stdout, thumb2_blx_in_range.stdout and
+	thumb2_blx_out_of_range.stdout
+	(thumb_bl_out_of_range, thumb_bl_out_of_range.o,
+	thumb2_bl_out_of_range, thumb2_bl_out_of_range.o): Fix dependenices.
+	(thumb_blx_in_range.stdout, thumb_blx_in_range, thumb_blx_in_range.o,
+	thumb_blx_out_of_range.stdout, thumb_blx_out_of_range,
+	thumb_blx_out_of_range.o, thumb2_blx_in_range.stdout,
+	thumb2_blx_in_range, thumb2_blx_in_range.o,
+	thumb2_blx_out_of_range.stdout, thumb2_blx_out_of_range,
+	thumb2_blx_out_of_range.o): New rules.
+ 	(MOSTLYCLEANFILES): Add thumb_blx_in_range, thumb_blx_out_of_range,
+	thumb2_blx_in_range and	thumb2_blx_out_of_range.
+	* testsuite/Makefile.in: Regenerate.
+	* arm_branch_in_range.sh: Add tests for THUMB BLX.
+	* testsuite/thumb_blx_in_range.s: New file.
+	* testsuite/thumb_blx_out_of_range.s: New file.
+
 2010-03-22  Rafael Espindola  <espindola@google.com>
 
 	* archive.cc (Should_include): Move to archive.h.
