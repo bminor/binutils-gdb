@@ -73,10 +73,10 @@ thread1 (void *arg)
   int i;
   int z = 0;
 
-  if (verbose) printf ("thread1 (%0x) ; pid = %d\n", arg, getpid ());
+  if (verbose) printf ("thread1 (%0lx) ; pid = %d\n", (long) arg, getpid ());
   for (i=1; i <= 10000000; i++)
     {
-      if (verbose) printf("thread1 %d\n", pthread_self ());
+      if (verbose) printf("thread1 %ld\n", (long) pthread_self ());
       z += i;
       common_routine (1);
       sleep(1);
@@ -90,10 +90,10 @@ thread2 (void * arg)
   int i;
   int k = 0;
 
-  if (verbose) printf ("thread2 (%0x) ; pid = %d\n", arg, getpid ());
+  if (verbose) printf ("thread2 (%0lx) ; pid = %d\n", (long) arg, getpid ());
   for (i=1; i <= 10000000; i++)
     {
-      if (verbose) printf("thread2 %d\n", pthread_self ());
+      if (verbose) printf("thread2 %ld\n", (long) pthread_self ());
       k += i;
       common_routine (2);
       sleep(1);
@@ -146,7 +146,7 @@ main(argc, argv)
       perror ("pthread_create 1");
       exit (1);
     }
-  if (verbose) printf ("Made thread %d\n", tid1);
+  if (verbose) printf ("Made thread %ld\n", (long) tid1);
   sleep (1);
 
   if (pthread_create (&tid2, PTHREAD_CREATE_NULL_ARG2, thread2, (void *) 0xdeadbeef))
@@ -154,13 +154,13 @@ main(argc, argv)
       perror ("pthread_create 2");
       exit (1);
     }
-  if (verbose) printf("Made thread %d\n", tid2);
+  if (verbose) printf("Made thread %ld\n", (long) tid2);
 
   sleep (1);
 
   for (j = 1; j <= 10000000; j++)
     {
-      if (verbose) printf("top %d\n", pthread_self ());
+      if (verbose) printf("top %ld\n", (long) pthread_self ());
       common_routine (0);
       sleep(1);
       t += j;
