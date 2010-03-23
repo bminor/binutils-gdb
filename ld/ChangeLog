@@ -1,3 +1,9 @@
+2010-03-23  Joseph Myers  <joseph@codesourcery.com>
+
+	* scripttempl/elf.sc (RODATA_NAME, SDATA_NAME, SBSS_NAME,
+	BSS_NAME): Define if not already defined.  Use in place of some
+	hardcoded section names.
+
 2010-03-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* scripttempl/elf.sc (INIT_ARRAY): Re-indent.
