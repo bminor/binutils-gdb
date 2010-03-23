@@ -1,3 +1,7 @@
+2010-03-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (OPCODES_CFLAGS): Add -I$(OPCODES_SRC)/..
+
 2010-03-22  Stan Shebs  <stan@codesourcery.com>
 
 	* value.c (value_static_field): Be lazy about the field's value.

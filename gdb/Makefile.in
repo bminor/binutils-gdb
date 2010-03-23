@@ -309,7 +309,8 @@ OPCODES = $(OPCODES_DIR)/libopcodes.a
 # Where are the other opcode tables which only have header file
 # versions?
 OP_INCLUDE = $(INCLUDE_DIR)/opcode
-OPCODES_CFLAGS = -I$(OP_INCLUDE)
+# Some source files like to use #include "opcodes/file.h"
+OPCODES_CFLAGS = -I$(OP_INCLUDE) -I$(OPCODES_SRC)/..
 
 # The simulator is usually nonexistent; targets that include one
 # should set this to list all the .o or .a files to be linked in.
