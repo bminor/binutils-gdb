@@ -39,7 +39,6 @@
 	* mi/mi-cmd-break (mi_cmd_break_commands): Validate commands if
 	it's tracepoint.
 
-=======
 2010-03-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (OPCODES_CFLAGS): Add -I$(OPCODES_SRC)/..
