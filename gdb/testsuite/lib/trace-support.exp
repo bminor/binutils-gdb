@@ -121,7 +121,7 @@ proc gdb_trace_setactions { testname tracepoint args } {
 	    }
 	    exp_continue;
 	}
-	-re "\(.*\)\[\r\n\]+\[ \t]*> $" {
+	-re "\(.*\)\[\r\n\]+\[ \t]*>$" {
 	    if { $expected_result != "" } {
 		regsub "^\[^\r\n\]+\[\r\n\]+" "$expect_out(1,string)" "" out;
 		if ![regexp $expected_result $out] {

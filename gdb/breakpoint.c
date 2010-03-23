@@ -692,15 +692,107 @@ condition_command (char *arg, int from_tty)
   error (_("No breakpoint number %d."), bnum);
 }
 
-/* Set the command list of B to COMMANDS.  */
+/* Check that COMMAND do not contain commands that are suitable
+   only for tracepoints and not suitable for ordinary breakpoints.
+   Throw if any such commands is found.
+*/
+static void
+check_no_tracepoint_commands (struct command_line *commands)
+{
+  struct command_line *c;
+  for (c = commands; c; c = c->next)
+    {
+      int i;
+
+      if (c->control_type == while_stepping_control)
+	error (_("The 'while-stepping' command can only be used for tracepoints"));
+
+      for (i = 0; i < c->body_count; ++i)
+	check_no_tracepoint_commands ((c->body_list)[i]);
+
+      /* Not that command parsing removes leading whitespace and comment
+	 lines and also empty lines. So, we only need to check for
+	 command directly.  */
+      if (strstr (c->line, "collect ") == c->line)
+	error (_("The 'collect' command can only be used for tracepoints"));
+
+      if (strstr (c->line, "eval ") == c->line)
+	error (_("The 'eval' command can only be used for tracepoints"));
+    }
+}
+
+int
+breakpoint_is_tracepoint (const struct breakpoint *b)
+{
+  switch (b->type)
+    {
+    case bp_tracepoint:
+    case bp_fast_tracepoint:
+      return 1;
+    default:
+      return 0;
+
+    }
+}
+
+/* Set the command list of B to COMMANDS.  If breakpoint is tracepoint,
+   validate that only allowed commands are included.
+*/
 
 void
 breakpoint_set_commands (struct breakpoint *b, struct command_line *commands)
 {
+  if (breakpoint_is_tracepoint (b))
+    {
+      /* We need to verify that each top-level element of commands
+	 is valid for tracepoints, that there's at most one while-stepping
+	 element, and that while-stepping's body has valid tracing commands
+	 excluding nested while-stepping.  */
+      struct command_line *c;
+      struct command_line *while_stepping = 0;
+      for (c = commands; c; c = c->next)
+	{
+	  char *l = c->line;
+	  if (c->control_type == while_stepping_control)
+	    {
+	      if (b->type == bp_fast_tracepoint)
+		error (_("The 'while-stepping' command cannot be used for fast tracepoint"));
+
+	      if (while_stepping)
+		error (_("The 'while-stepping' command can be used only once"));
+	      else
+		while_stepping = c;
+	    }
+	}
+      if (while_stepping)
+	{
+	  struct command_line *c2;
+
+	  gdb_assert (while_stepping->body_count == 1);
+	  c2 = while_stepping->body_list[0];
+	  for (; c2; c2 = c2->next)
+	    {
+	      char *l = c2->line;
+	      if (c2->control_type == while_stepping_control)
+		error (_("The 'while-stepping' command cannot be nested"));
+	    }
+	}
+    }
+  else
+    {
+      check_no_tracepoint_commands (commands);
+    }
+
   free_command_lines (&b->commands);
   b->commands = commands;
   breakpoints_changed ();
   observer_notify_breakpoint_modified (b->number);
+}
+
+void check_tracepoint_command (char *line, void *closure)
+{
+  struct breakpoint *b = closure;
+  validate_actionline (&line, b);
 }
 
 static void
@@ -730,7 +822,12 @@ commands_command (char *arg, int from_tty)
 	char *tmpbuf = xstrprintf ("Type commands for when breakpoint %d is hit, one per line.", 
 				 bnum);
 	struct cleanup *cleanups = make_cleanup (xfree, tmpbuf);
-	l = read_command_lines (tmpbuf, from_tty, 1);
+
+	if (breakpoint_is_tracepoint (b))
+	  l = read_command_lines (tmpbuf, from_tty, 1,
+				  check_tracepoint_command, b);
+	else
+	  l = read_command_lines (tmpbuf, from_tty, 1, 0, 0);
 	do_cleanups (cleanups);
 	breakpoint_set_commands (b, l);
 	return;
@@ -4537,26 +4634,6 @@ print_one_breakpoint_location (struct breakpoint *b,
       ui_out_text (uiout, "\tpass count ");
       ui_out_field_int (uiout, "pass", b->pass_count);
       ui_out_text (uiout, " \n");
-    }
-
-  if (!part_of_multiple && b->step_count)
-    {
-      annotate_field (11);
-      ui_out_text (uiout, "\tstep count ");
-      ui_out_field_int (uiout, "step", b->step_count);
-      ui_out_text (uiout, " \n");
-    }
-
-  if (!part_of_multiple && b->actions)
-    {
-      struct action_line *action;
-      annotate_field (12);
-      for (action = b->actions; action; action = action->next)
-	{
-	  ui_out_text (uiout, "      A\t");
-	  ui_out_text (uiout, action->action);
-	  ui_out_text (uiout, "\n");
-	}
     }
 
   if (ui_out_is_mi_like_p (uiout) && !part_of_multiple)
@@ -10318,12 +10395,11 @@ tracepoint_save_command (char *args, int from_tty)
 {
   struct breakpoint *tp;
   int any_tp = 0;
-  struct action_line *line;
-  FILE *fp;
-  char *i1 = "    ", *i2 = "      ";
-  char *indent, *actionline, *pathname;
+  struct command_line *line;
+  char *pathname;
   char tmp[40];
   struct cleanup *cleanup;
+  struct ui_file *fp;
 
   if (args == 0 || *args == 0)
     error (_("Argument required (file name in which to save tracepoints)"));
@@ -10342,50 +10418,42 @@ tracepoint_save_command (char *args, int from_tty)
 
   pathname = tilde_expand (args);
   cleanup = make_cleanup (xfree, pathname);
-  fp = fopen (pathname, "w");
+  fp = gdb_fopen (pathname, "w");
   if (!fp)
     error (_("Unable to open file '%s' for saving tracepoints (%s)"),
 	   args, safe_strerror (errno));
-  make_cleanup_fclose (fp);
+  make_cleanup_ui_file_delete (fp);
   
   ALL_TRACEPOINTS (tp)
   {
     if (tp->addr_string)
-      fprintf (fp, "trace %s\n", tp->addr_string);
+      fprintf_unfiltered (fp, "trace %s\n", tp->addr_string);
     else
       {
 	sprintf_vma (tmp, tp->loc->address);
-	fprintf (fp, "trace *0x%s\n", tmp);
+	fprintf_unfiltered (fp, "trace *0x%s\n", tmp);
       }
 
     if (tp->pass_count)
-      fprintf (fp, "  passcount %d\n", tp->pass_count);
+      fprintf_unfiltered (fp, "  passcount %d\n", tp->pass_count);
 
-    if (tp->actions)
+    if (tp->commands)
       {
-	fprintf (fp, "  actions\n");
-	indent = i1;
-	for (line = tp->actions; line; line = line->next)
+	volatile struct gdb_exception ex;	
+
+	fprintf_unfiltered (fp, "  actions\n");
+	
+	ui_out_redirect (uiout, fp);
+	TRY_CATCH (ex, RETURN_MASK_ERROR)
 	  {
-	    struct cmd_list_element *cmd;
-
-	    QUIT;		/* allow user to bail out with ^C */
-	    actionline = line->action;
-	    while (isspace ((int) *actionline))
-	      actionline++;
-
-	    fprintf (fp, "%s%s\n", indent, actionline);
-	    if (*actionline != '#')	/* skip for comment lines */
-	      {
-		cmd = lookup_cmd (&actionline, cmdlist, "", -1, 1);
-		if (cmd == 0)
-		  error (_("Bad action list item: %s"), actionline);
-		if (cmd_cfunc_eq (cmd, while_stepping_pseudocommand))
-		  indent = i2;
-		else if (cmd_cfunc_eq (cmd, end_actions_pseudocommand))
-		  indent = i1;
-	      }
+	    print_command_lines (uiout, tp->commands, 2);
 	  }
+	ui_out_redirect (uiout, NULL);
+
+	if (ex.reason < 0)
+	  throw_exception (ex);
+
+	fprintf_unfiltered (fp, "  end\n");
       }
   }
   do_cleanups (cleanup);

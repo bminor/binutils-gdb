@@ -518,9 +518,6 @@ struct breakpoint
        disabling/ending.  */
     int pass_count;
 
-    /* Chain of action lines to execute when this tracepoint is hit.  */
-    struct action_line *actions;
-
     /* The number of the tracepoint on the target.  */
     int number_on_target;
   };
@@ -1007,5 +1004,11 @@ extern struct breakpoint *get_tracepoint_by_number (char **arg, int multi_p,
 /* Return a vector of all tracepoints currently defined.  The vector
    is newly allocated; the caller should free when done with it.  */
 extern VEC(breakpoint_p) *all_tracepoints (void);
+
+extern int breakpoint_is_tracepoint (const struct breakpoint *b);
+
+/* Function that can be passed to read_command_line to validate
+   that each command is suitable for tracepoint command list.  */
+extern void check_tracepoint_command (char *line, void *closure);
 
 #endif /* !defined (BREAKPOINT_H) */

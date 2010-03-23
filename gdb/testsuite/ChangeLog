@@ -1,3 +1,10 @@
+2010-03-24  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* lib/trace-support.exp (gdb_trace_setactions):
+	Don't expect whitespace after ">" prompt.
+	* gdb.trace/actions.exp: Adjust for output changes.
+	* gdb.trace/while-stepping.exp: Likewise.
+
 2010-03-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dg-extract-results.sh: Sync with GCC HEAD (import r155655, r157175

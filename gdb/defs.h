@@ -691,6 +691,7 @@ enum command_control_type
     if_control,
     commands_control,
     python_control,
+    while_stepping_control,
     invalid_control
   };
 
@@ -702,12 +703,21 @@ struct command_line
     struct command_line *next;
     char *line;
     enum command_control_type control_type;
+    /* The number of elements in body_list.  */
     int body_count;
+    /* For composite commands, the nested lists of
+       commands. For example, for "if" command this
+       will contain the then branch and the else
+       branch, if that is available.  */
     struct command_line **body_list;
   };
 
-extern struct command_line *read_command_lines (char *, int, int);
-extern struct command_line *read_command_lines_1 (char * (*) (void), int);
+extern struct command_line *read_command_lines (char *, int, int,
+						void (*)(char *, void *),
+						void *);
+extern struct command_line *read_command_lines_1 (char * (*) (void), int,
+						  void (*)(char *, void *),
+						  void *);
 
 extern void free_command_lines (struct command_line **);
 

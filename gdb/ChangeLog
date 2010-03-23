@@ -1,3 +1,45 @@
+2010-03-24  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Unify actions and commands
+
+	* defs.h (read_command_lines, read_command_lines_1): New
+	parameters validator and closure.
+	* tracepoint.h (struct action_line): Remove.
+	* breakpoint.h (struct breakpoint): Remove the 'actions'
+	field.
+	* defs.h (enum command_control_type): New value
+	while_stepping_control.
+	(struct command_line): Add comments.
+	* breakpoint.c (breakoint_is_tracepoint): New.
+	(breakpoint_set_commands): For tracepoints,
+	verify the commands are permissible.
+	(check_tracepoint_commands): New.
+	(commands_command): Require that each new line is validated using
+	check_tracepoint_command, if we set commands for a tracepoint.
+	(create_tracepoint_from_upload): Likewise.
+	(print_one_breakpoint_location): Remove the code to print
+	actions specifically.
+	(tracepoint_save_command): Relay to print_command_lines.
+	* cli/cli-script.c (process_next_line): New parameters validator
+	and closure. Handle 'while-stepping'. Call validator if not null.
+	(read_command_lines, read_command_lines1): Likewise.
+	(recurse_read_control_structure): New parameters validator and
+	closure. Handle while_stepping_control.
+	(print_command_lines): Handle while-stepping.
+	(get_command_line, define_command, document_command): Adjust.
+	* remote.c (remote_download_tracepoint): Adjust.
+	* tracepoint.c (make_cleanup_free_actions, read_actions)
+	(free_actions, do_free_actions_cleanup): Remove.
+	(trace_actions_command): Use read_command_lines.
+	(validate_actionline): Use error in one place.
+	(encode_actions_1): New, extracted from...
+	(encode_actions): ...this. Also use cleanups for exception
+	safety.
+	(trace_dump_command): Adjust.
+	* mi/mi-cmd-break (mi_cmd_break_commands): Validate commands if
+	it's tracepoint.
+
+=======
 2010-03-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (OPCODES_CFLAGS): Add -I$(OPCODES_SRC)/..

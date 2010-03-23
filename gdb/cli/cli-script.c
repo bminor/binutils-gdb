@@ -40,7 +40,9 @@
 
 static enum command_control_type
 recurse_read_control_structure (char * (*read_next_line_func) (void),
-				struct command_line *current_cmd);
+				struct command_line *current_cmd,
+				void (*validator)(char *, void *),
+				void *closure);
 
 static char *insert_args (char *line);
 
@@ -117,7 +119,8 @@ get_command_line (enum command_control_type type, char *arg)
   old_chain = make_cleanup_free_command_lines (&cmd);
 
   /* Read in the body of this command.  */
-  if (recurse_read_control_structure (read_next_line, cmd) == invalid_control)
+  if (recurse_read_control_structure (read_next_line, cmd, 0, 0)
+      == invalid_control)
     {
       warning (_("Error reading in canned sequence of commands."));
       do_cleanups (old_chain);
@@ -172,9 +175,16 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 	}
 
       /* A while command.  Recursively print its subcommands and continue.  */
-      if (list->control_type == while_control)
+      if (list->control_type == while_control
+	  || list->control_type == while_stepping_control)
 	{
-	  ui_out_field_fmt (uiout, NULL, "while %s", list->line);
+	  /* For while-stepping, the line includes the 'while-stepping' token.
+	     See comment in process_next_line for explanation.  Here,
+	     take care not print 'while-stepping' twice.  */
+	  if (list->control_type == while_control)
+	    ui_out_field_fmt (uiout, NULL, "while %s", list->line);
+	  else
+	    ui_out_field_string (uiout, NULL, list->line);
 	  ui_out_text (uiout, "\n");
 	  print_command_lines (uiout, *list->body_list, depth + 1);
 	  if (depth)
@@ -876,7 +886,8 @@ read_next_line (void)
    Otherwise, only "end" is recognized.  */
 
 static enum misc_command_type
-process_next_line (char *p, struct command_line **command, int parse_commands)
+process_next_line (char *p, struct command_line **command, int parse_commands,
+		   void (*validator)(char *, void *), void *closure)
 {
   char *p_end;
   char *p_start;
@@ -920,7 +931,22 @@ process_next_line (char *p, struct command_line **command, int parse_commands)
 
       /* Check for while, if, break, continue, etc and build a new command
 	 line structure for them.  */
-      if (p_end - p > 5 && !strncmp (p, "while", 5))
+      if ((p_end - p >= 14 && !strncmp (p, "while-stepping", 14))
+	  || (p_end -p >= 2 && !strncmp (p, "ws", 2)))
+	{
+	  /* Because validate_actionline and encode_action lookup
+	     command's line as command, we need the line to
+	     include 'while-stepping'.
+
+	     For 'ws' alias, the command will have 'ws', not expanded
+	     to 'while-stepping'. This is intentional -- we don't
+	     really want frontend to send a command list with 'ws',
+	     and next break-info returning command line with 'while-stepping'.
+	     This should work, but might cause the breakpoint to be marked as
+	     changed while it's actually not.  */
+	  *command = build_command_line (while_stepping_control, p);
+	}
+      else if (p_end - p > 5 && !strncmp (p, "while", 5))
 	{
 	  char *first_arg;
 	  first_arg = p + 5;
@@ -986,6 +1012,20 @@ process_next_line (char *p, struct command_line **command, int parse_commands)
       (*command)->body_list = NULL;
     }
 
+  if (validator)
+    {
+      volatile struct gdb_exception ex;
+      TRY_CATCH (ex, RETURN_MASK_ALL)
+	{
+	  validator ((*command)->line, closure);
+	}
+      if (ex.reason < 0)
+	{
+	  xfree (*command);
+	  throw_exception (ex);
+	}
+    }
+
   /* Nothing special.  */
   return ok_command;
 }
@@ -998,7 +1038,9 @@ process_next_line (char *p, struct command_line **command, int parse_commands)
 
 static enum command_control_type
 recurse_read_control_structure (char * (*read_next_line_func) (void),
-				struct command_line *current_cmd)
+				struct command_line *current_cmd,
+				void (*validator)(char *, void *),
+				void *closure)
 {
   int current_body, i;
   enum misc_command_type val;
@@ -1023,7 +1065,8 @@ recurse_read_control_structure (char * (*read_next_line_func) (void),
 
       next = NULL;
       val = process_next_line (read_next_line_func (), &next, 
-			       current_cmd->control_type != python_control);
+			       current_cmd->control_type != python_control,
+			       validator, closure);
 
       /* Just skip blanks and comments.  */
       if (val == nop_command)
@@ -1032,6 +1075,7 @@ recurse_read_control_structure (char * (*read_next_line_func) (void),
       if (val == end_command)
 	{
 	  if (current_cmd->control_type == while_control
+	      || current_cmd->control_type == while_stepping_control
 	      || current_cmd->control_type == if_control
 	      || current_cmd->control_type == python_control
 	      || current_cmd->control_type == commands_control)
@@ -1084,12 +1128,14 @@ recurse_read_control_structure (char * (*read_next_line_func) (void),
       /* If the latest line is another control structure, then recurse
          on it.  */
       if (next->control_type == while_control
+	  || next->control_type == while_stepping_control
 	  || next->control_type == if_control
 	  || next->control_type == python_control
 	  || next->control_type == commands_control)
 	{
 	  control_level++;
-	  ret = recurse_read_control_structure (read_next_line_func, next);
+	  ret = recurse_read_control_structure (read_next_line_func, next,
+						validator, closure);
 	  control_level--;
 
 	  if (ret != simple_control)
@@ -1114,7 +1160,8 @@ recurse_read_control_structure (char * (*read_next_line_func) (void),
 #define END_MESSAGE "End with a line saying just \"end\"."
 
 struct command_line *
-read_command_lines (char *prompt_arg, int from_tty, int parse_commands)
+read_command_lines (char *prompt_arg, int from_tty, int parse_commands,
+		    void (*validator)(char *, void *), void *closure)
 {
   struct command_line *head;
 
@@ -1132,7 +1179,8 @@ read_command_lines (char *prompt_arg, int from_tty, int parse_commands)
 	}
     }
 
-  head = read_command_lines_1 (read_next_line, parse_commands);
+  head = read_command_lines_1 (read_next_line, parse_commands,
+			       validator, closure);
 
   if (deprecated_readline_end_hook && from_tty && input_from_terminal_p ())
     {
@@ -1145,7 +1193,8 @@ read_command_lines (char *prompt_arg, int from_tty, int parse_commands)
    obtained using READ_NEXT_LINE_FUNC.  */
 
 struct command_line *
-read_command_lines_1 (char * (*read_next_line_func) (void), int parse_commands)
+read_command_lines_1 (char * (*read_next_line_func) (void), int parse_commands,
+		      void (*validator)(char *, void *), void *closure)
 {
   struct command_line *head, *tail, *next;
   struct cleanup *old_chain;
@@ -1159,7 +1208,8 @@ read_command_lines_1 (char * (*read_next_line_func) (void), int parse_commands)
   while (1)
     {
       dont_repeat ();
-      val = process_next_line (read_next_line_func (), &next, parse_commands);
+      val = process_next_line (read_next_line_func (), &next, parse_commands,
+			       validator, closure);
 
       /* Ignore blank lines or comments.  */
       if (val == nop_command)
@@ -1180,10 +1230,12 @@ read_command_lines_1 (char * (*read_next_line_func) (void), int parse_commands)
       if (next->control_type == while_control
 	  || next->control_type == if_control
 	  || next->control_type == python_control
-	  || next->control_type == commands_control)
+	  || next->control_type == commands_control
+	  || next->control_type == while_stepping_control)
 	{
 	  control_level++;
-	  ret = recurse_read_control_structure (read_next_line_func, next);
+	  ret = recurse_read_control_structure (read_next_line_func, next,
+						validator, closure);
 	  control_level--;
 
 	  if (ret == invalid_control)
@@ -1426,7 +1478,7 @@ define_command (char *comname, int from_tty)
       *tem = tolower (*tem);
 
   sprintf (tmpbuf, "Type commands for definition of \"%s\".", comfull);
-  cmds = read_command_lines (tmpbuf, from_tty, 1);
+  cmds = read_command_lines (tmpbuf, from_tty, 1, 0, 0);
 
   if (c && c->class == class_user)
     free_command_lines (&c->user_commands);
@@ -1475,7 +1527,7 @@ document_command (char *comname, int from_tty)
     error (_("Command \"%s\" is built-in."), comfull);
 
   sprintf (tmpbuf, "Type documentation for \"%s\".", comfull);
-  doclines = read_command_lines (tmpbuf, from_tty, 0);
+  doclines = read_command_lines (tmpbuf, from_tty, 0, 0, 0);
 
   if (c->doc)
     xfree (c->doc);

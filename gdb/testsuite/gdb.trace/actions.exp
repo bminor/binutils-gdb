@@ -88,8 +88,7 @@ gdb_trace_setactions "5.1b: set actions for first tracepoint" \
 gdb_test "info tracepoints" \
     "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
 \[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_c_test at .*$srcfile:\[0-9\]+.
-\[\t \]+A\[\t \]+collect gdb_char_test.
-\[\t \]+A\[\t \]+end.
+\[\t \]+collect gdb_char_test.
 \[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_asm_test at .*$srcfile:\[0-9\]+.
 \[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_recursion_test at .*$srcfile:\[0-9\]+" \
 		"5.1c: verify actions set for first tracepoint"
@@ -101,11 +100,9 @@ gdb_trace_setactions "5.1d: set actions for second tracepoint" \
 gdb_test "info tracepoints" \
     "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
 \[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_c_test at .*$srcfile:\[0-9\]+.
-\[\t \]+A\[\t \]+collect gdb_char_test.
-\[\t \]+A\[\t \]+end.
+\[\t \]+collect gdb_char_test.
 \[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_asm_test at .*$srcfile:\[0-9\]+.
-\[\t \]+A\[\t \]+collect gdb_short_test.
-\[\t \]+A\[\t \]+end.
+\[\t \]+collect gdb_short_test.
 \[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_recursion_test at .*$srcfile:\[0-9\]+" \
 		"5.1e: verify actions set for second tracepoint"
 
@@ -116,14 +113,11 @@ gdb_trace_setactions "5.2a: set actions for last (default) tracepoint" \
 gdb_test "info tracepoints" \
     "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
 \[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_c_test at .*$srcfile:\[0-9\]+.
-\[\t \]+A\[\t \]+collect gdb_char_test.
-\[\t \]+A\[\t \]+end.
+\[\t \]+collect gdb_char_test.
 \[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_asm_test at .*$srcfile:\[0-9\]+.
-\[\t \]+A\[\t \]+collect gdb_short_test.
-\[\t \]+A\[\t \]+end.
+\[\t \]+collect gdb_short_test.
 \[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_recursion_test at .*$srcfile:\[0-9\]+.
-\[\t \]+A\[\t \]+collect gdb_long_test.
-\[\t \]+A\[\t \]+end." \
+\[\t \]+collect gdb_long_test." \
 		"5.1e: verify actions set for second tracepoint"
 
 # 5.3 replace actions set earlier
@@ -135,14 +129,11 @@ gdb_trace_setactions "5.3a: reset actions for first tracepoint" \
 gdb_test "info tracepoints" \
     "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
 \[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_c_test at .*$srcfile:\[0-9\]+.
-\[\t \]+A\[\t \]+collect gdb_struct1_test.
-\[\t \]+A\[\t \]+end.
+\[\t \]+collect gdb_struct1_test.
 \[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_asm_test at .*$srcfile:\[0-9\]+.
-\[\t \]+A\[\t \]+collect gdb_short_test.
-\[\t \]+A\[\t \]+end.
+\[\t \]+collect gdb_short_test.
 \[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_recursion_test at .*$srcfile:\[0-9\]+.
-\[\t \]+A\[\t \]+collect gdb_long_test.
-\[\t \]+A\[\t \]+end." \
+\[\t \]+collect gdb_long_test." \
 		"5.3b: verify actions set for first tracepoint"
 
 #
@@ -184,7 +175,7 @@ gdb_test "actions [expr $trcpt2 + $trcpt3]" \
 gdb_trace_setactions "5.7: invalid action" \
 	"$trcpt1" \
 	"print gdb_c_test" \
-	"warning: .print gdb_c_test. is not a supported trace"
+	"'print gdb_c_test' is not a supported tracepoint action"
 
 # 5.8 help actions (collect, while-stepping, end)
 
@@ -230,13 +221,10 @@ gdb_trace_setactions "5.10a: set teval action for second tracepoint" \
 gdb_test "info tracepoints" \
     "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
 \[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_c_test at .*$srcfile:\[0-9\]+.
-\[\t \]+A\[\t \]+teval gdb_char_test.
-\[\t \]+A\[\t \]+end.
+\[\t \]+teval gdb_char_test.
 \[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_asm_test at .*$srcfile:\[0-9\]+.
-\[\t \]+A\[\t \]+teval \\\$tsv \\\+= 1.
-\[\t \]+A\[\t \]+end.
+\[\t \]+teval \\\$tsv \\\+= 1.
 \[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_recursion_test at .*$srcfile:\[0-9\]+.
-\[\t \]+A\[\t \]+collect gdb_long_test.
-\[\t \]+A\[\t \]+end." \
+\[\t \]+collect gdb_long_test." \
 		"5.10a: verify teval actions set for two tracepoints"
 

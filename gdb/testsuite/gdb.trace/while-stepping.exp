@@ -71,14 +71,8 @@ gdb_trace_setactions "5.12: set stepcount to $stepcount" \
 gdb_test "info tracepoints" \
     "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
 \[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_c_test at .*$srcfile:\[0-9\]+.
-\[\t \]+step count 12 .*" \
-	"5.12: confirm stepcount set to $stepcount"
-
-gdb_test "info tracepoints" \
-    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
-.*while-stepping $stepcount.*" \
+\[\t \]+while-stepping 12.*" \
 	"5.12: info trace shows \"while-stepping\""
-
 
 # 5.13 step out of context while collecting local variable
 #      [deferred to dynamic test section]
@@ -88,7 +82,7 @@ proc while_stepping_bogus_arg { bogus msgstring } {
 
     gdb_trace_setactions "$msgstring" \
 	    "" \
-	    "while-stepping $bogus" "\[Ee\]rror|\[Ww\]arning"
+	    "while-stepping $bogus" ".*bad step-count"
 }
 
 # 5.14 while-stepping (no argument)
@@ -109,7 +103,6 @@ gdb_test "info tracepoints" \
     "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
 \[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_c_test at .*$srcfile:\[0-9\]+.
 .*while-stepping $stepcount.*
-.*end.*
 .*end.*" \
 	"5.16: confirm actions, step without collecting anything"
 

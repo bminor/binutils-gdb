@@ -9337,14 +9337,14 @@ remote_download_tracepoint (struct breakpoint *t)
 	    warning (_("Target does not support conditional tracepoints, ignoring tp %d cond"), t->number);
 	}
 
-      if (t->actions || *default_collect)
+  if (t->commands || *default_collect)
 	strcat (buf, "-");
       putpkt (buf);
       remote_get_noisy_reply (&target_buf, &target_buf_size);
       if (strcmp (target_buf, "OK"))
 	error (_("Target does not support tracepoints."));
 
-      if (!t->actions && !*default_collect)
+  if (!t->commands && !*default_collect)
 	continue;
 
       /* do_single_steps (t); */

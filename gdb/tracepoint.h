@@ -20,13 +20,6 @@
 #if !defined (TRACEPOINT_H)
 #define TRACEPOINT_H 1
 
-/* The data structure for an action: */
-struct action_line
-  {
-    struct action_line *next;
-    char *action;
-  };
-
 enum actionline_type
   {
     BADLINE = -1,

@@ -20,6 +20,11 @@
 
 ** New methods gdb.target_charset and gdb.target_wide_charset.
 
+* Tracepoint actions were unified with breakpoint commands. In particular,
+there are no longer differences in "info break" output for breakpoints and
+tracepoints and the "commands" command can be used for both tracepoints and
+regular breakpoints.
+
 * New targets
 
 ARM Symbian			arm*-*-symbianelf*
