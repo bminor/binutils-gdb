@@ -1,5 +1,10 @@
 2010-03-24  Vladimir Prus  <vladimir@codesourcery.com>
 
+	* breakpoint.c (check_no_tracepoint_commands): Use
+	current spelling of 'teval'.
+
+2010-03-24  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Unify actions and commands
 
 	* defs.h (read_command_lines, read_command_lines_1): New

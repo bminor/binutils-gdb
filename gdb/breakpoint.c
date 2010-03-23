@@ -716,8 +716,8 @@ check_no_tracepoint_commands (struct command_line *commands)
       if (strstr (c->line, "collect ") == c->line)
 	error (_("The 'collect' command can only be used for tracepoints"));
 
-      if (strstr (c->line, "eval ") == c->line)
-	error (_("The 'eval' command can only be used for tracepoints"));
+      if (strstr (c->line, "teval ") == c->line)
+	error (_("The 'teval' command can only be used for tracepoints"));
     }
 }
 
