@@ -2126,6 +2126,91 @@ mi_cmd_trace_list_variables (char *command, char **argv, int argc)
 }
 
 void
+mi_cmd_trace_find (char *command, char **argv, int argc)
+{
+  char *mode;
+
+  if (argc == 0)
+    error (_("trace selection mode is required"));
+
+  mode = argv[0];
+
+  if (strcmp (mode, "none") == 0)
+    {
+      tfind_1 (tfind_number, -1, 0, 0, 0);
+      return;
+    }
+
+  if (current_trace_status ()->running)
+    error (_("May not look at trace frames while trace is running."));
+
+  if (strcmp (mode, "frame-number") == 0)
+    {
+      if (argc != 2)
+	error (_("frame number is required"));
+      tfind_1 (tfind_number, atoi (argv[1]), 0, 0, 0);
+    }
+  else if (strcmp (mode, "tracepoint-number") == 0)
+    {
+      if (argc != 2)
+	error (_("tracepoint number is required"));
+      tfind_1 (tfind_tp, atoi (argv[1]), 0, 0, 0);
+    }
+  else if (strcmp (mode, "pc") == 0)
+    {
+      if (argc != 2)
+	error (_("PC is required"));
+      tfind_1 (tfind_pc, 0, parse_and_eval_address (argv[1]), 0, 0);
+    }
+  else if (strcmp (mode, "pc-inside-range") == 0)
+    {
+      if (argc != 3)
+	error (_("Start and end PC are required"));
+      tfind_1 (tfind_range, 0, parse_and_eval_address (argv[1]),
+	       parse_and_eval_address (argv[2]), 0);
+    }
+  else if (strcmp (mode, "pc-outside-range") == 0)
+    {
+      if (argc != 3)
+	error (_("Start and end PC are required"));
+      tfind_1 (tfind_outside, 0, parse_and_eval_address (argv[1]),
+	       parse_and_eval_address (argv[2]), 0);
+    }
+  else if (strcmp (mode, "line") == 0)
+    {
+      struct symtabs_and_lines sals;
+      struct symtab_and_line sal;
+      static CORE_ADDR start_pc, end_pc;
+      struct cleanup *back_to;
+
+      if (argc != 2)
+	error (_("Line is required"));
+
+      sals = decode_line_spec (argv[1], 1);
+      back_to = make_cleanup (xfree, sals.sals);
+
+      sal = sals.sals[0];
+
+      if (sal.symtab == 0)
+	error (_("Could not find the specified line"));
+
+      if (sal.line > 0 && find_line_pc_range (sal, &start_pc, &end_pc))
+	tfind_1 (tfind_range, 0, start_pc, end_pc - 1, 0);
+      else
+	error (_("Could not find the specified line"));
+
+      do_cleanups (back_to);
+    }
+  else
+    error (_("Invalid mode '%s'"), mode);
+
+  if (has_stack_frames () || get_traceframe_number () >= 0)
+    {
+      print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
+    }
+}
+
+void
 mi_cmd_trace_start (char *command, char **argv, int argc)
 {
   start_tracing ();

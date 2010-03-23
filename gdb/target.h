@@ -643,7 +643,8 @@ struct target_ops
    /* Ask the target to find a trace frame of the given type TYPE,
       using NUM, ADDR1, and ADDR2 as search parameters.  Returns the
       number of the trace frame, and also the tracepoint number at
-      TPP.  */
+      TPP.  If no trace frame matches, return -1. May throw if the
+      operation fails.  */
     int (*to_trace_find) (enum trace_find_type type, int num,
 			  ULONGEST addr1, ULONGEST addr2, int *tpp);
 

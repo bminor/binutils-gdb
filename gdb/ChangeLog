@@ -1,5 +1,19 @@
 2010-03-24  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Implement -trace-find.
+
+	* mi/mi-cmds.c (mi_cmds): Register -trace-find.
+	* mi/mi-cmds.h (mi_cmd_trace_find): Declare.
+	* mi/mi-main.c (mi_cmd_trace_find): New.
+	* target.h (struct target_ops): Document to_trace_find.
+	* tracepoint.h (tfind_1): Declare.
+	* tracepoint.c (finish_tfind_command): Rename to...
+	(tfind_1): ...this.
+	* remote.c (remote_trace_find): Return -1 if target say
+	there's no frame.  Improve error diagnostics.
+
+2010-03-24  Vladimir Prus  <vladimir@codesourcery.com>
+
 	-trace-define-variable and -trace-list-variables.
 
 	* tracepoint.c (create_trace_state_variable): Make

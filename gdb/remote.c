@@ -9533,12 +9533,18 @@ remote_trace_find (enum trace_find_type type, int num,
     switch (*reply)
       {
       case 'F':
-	if ((target_frameno = (int) strtol (++reply, &reply, 16)) == -1)
-	  error (_("Target failed to find requested trace frame."));
+	p = ++reply;
+	target_frameno = (int) strtol (p, &reply, 16);
+	if (reply == p)
+	  error (_("Unable to parse trace frame number"));
+	if (target_frameno == -1)
+	  return -1;
 	break;
       case 'T':
-	if ((target_tracept = (int) strtol (++reply, &reply, 16)) == -1)
-	  error (_("Target failed to find requested trace frame."));
+	p = ++reply;
+	target_tracept = (int) strtol (p, &reply, 16);
+	if (reply == p)
+	  error (_("Unable to parse tracepoint number"));
 	break;
       case 'O':		/* "OK"? */
 	if (reply[1] == 'K' && reply[2] == '\0')

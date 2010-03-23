@@ -1732,10 +1732,10 @@ disconnect_or_stop_tracing (int from_tty)
 }
 
 /* Worker function for the various flavors of the tfind command.  */
-static void
-finish_tfind_command (enum trace_find_type type, int num,
-		      ULONGEST addr1, ULONGEST addr2,
-		      int from_tty)
+void
+tfind_1 (enum trace_find_type type, int num,
+	 ULONGEST addr1, ULONGEST addr2,
+	 int from_tty)
 {
   int target_frameno = -1, target_tracept = -1;
   struct frame_id old_frame_id;
@@ -1801,6 +1801,30 @@ finish_tfind_command (enum trace_find_type type, int num,
     set_traceframe_context (NULL);
   else
     set_traceframe_context (get_current_frame ());
+
+  if (traceframe_number >= 0)
+    {
+      /* Use different branches for MI and CLI to make CLI messages
+	 i18n-eable.  */
+      if (ui_out_is_mi_like_p (uiout))
+	{
+	  ui_out_field_string (uiout, "found", "1");
+	  ui_out_field_int (uiout, "tracepoint", tracepoint_number);
+	  ui_out_field_int (uiout, "traceframe", traceframe_number);
+	}
+      else
+	{
+	  printf_unfiltered (_("Found trace frame %d, tracepoint %d\n"),
+			     traceframe_number, tracepoint_number);
+	}
+    }
+  else
+    {
+      if (ui_out_is_mi_like_p (uiout))
+	ui_out_field_string (uiout, "found", "0");
+      else
+	printf_unfiltered (_("No trace frame found"));
+    }
 
   /* If we're in nonstop mode and getting out of looking at trace
      frames, there won't be any current frame to go back to and
@@ -1875,7 +1899,7 @@ trace_find_command (char *args, int from_tty)
   if (frameno < -1)
     error (_("invalid input (%d is less than zero)"), frameno);
 
-  finish_tfind_command (tfind_number, frameno, 0, 0, from_tty);
+  tfind_1 (tfind_number, frameno, 0, 0, from_tty);
 }
 
 /* tfind end */
@@ -1914,7 +1938,7 @@ trace_find_pc_command (char *args, int from_tty)
   else
     pc = parse_and_eval_address (args);
 
-  finish_tfind_command (tfind_pc, 0, pc, 0, from_tty);
+  tfind_1 (tfind_pc, 0, pc, 0, from_tty);
 }
 
 /* tfind tracepoint command */
@@ -1944,7 +1968,7 @@ trace_find_tracepoint_command (char *args, int from_tty)
   if (tp)
     tdp = tp->number_on_target;
 
-  finish_tfind_command (tfind_tp, tdp, 0, 0, from_tty);
+  tfind_1 (tfind_tp, tdp, 0, 0, from_tty);
 }
 
 /* TFIND LINE command:
@@ -2032,9 +2056,9 @@ trace_find_line_command (char *args, int from_tty)
 
   /* Find within range of stated line.  */
   if (args && *args)
-    finish_tfind_command (tfind_range, 0, start_pc, end_pc - 1, from_tty);
+    tfind_1 (tfind_range, 0, start_pc, end_pc - 1, from_tty);
   else
-    finish_tfind_command (tfind_outside, 0, start_pc, end_pc - 1, from_tty);
+    tfind_1 (tfind_outside, 0, start_pc, end_pc - 1, from_tty);
   do_cleanups (old_chain);
 }
 
@@ -2069,7 +2093,7 @@ trace_find_range_command (char *args, int from_tty)
       stop = start + 1;	/* ??? */
     }
 
-  finish_tfind_command (tfind_range, 0, start, stop, from_tty);
+  tfind_1 (tfind_range, 0, start, stop, from_tty);
 }
 
 /* tfind outside command */
@@ -2103,7 +2127,7 @@ trace_find_outside_command (char *args, int from_tty)
       stop = start + 1;	/* ??? */
     }
 
-  finish_tfind_command (tfind_outside, 0, start, stop, from_tty);
+  tfind_1 (tfind_outside, 0, start, stop, from_tty);
 }
 
 /* info scope command: list the locals for a scope.  */

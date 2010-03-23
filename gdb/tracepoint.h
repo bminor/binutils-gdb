@@ -20,6 +20,9 @@
 #if !defined (TRACEPOINT_H)
 #define TRACEPOINT_H 1
 
+#include "breakpoint.h"
+#include "target.h"
+
 enum actionline_type
   {
     BADLINE = -1,
@@ -176,5 +179,9 @@ extern void stop_tracing (void);
 extern void trace_status_mi (int on_stop);
 
 extern void tvariables_info_1 (void);
+
+extern void tfind_1 (enum trace_find_type type, int num,
+		     ULONGEST addr1, ULONGEST addr2,
+		     int from_tty);
 
 #endif	/* TRACEPOINT_H */
