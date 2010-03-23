@@ -1,3 +1,17 @@
+2010-03-23  Ian Lance Taylor  <iant@google.com>
+
+	* script-sections.cc (class Orphan_section_placement): Define
+	PLACE_TLS and PLACE_TLS_BSS.
+	(Orphan_section_placement::Orphan_section_placement): Initialize
+	new places.
+	(Orphan_section_placement::find_place): Handle SHF_TLS sections.
+	* testsuite/Makefile.am (check_PROGRAMS): Add tls_script_test.
+	(tls_script_test_SOURCES): Define.
+	(tls_script_test_DEPENDENCIES): Define.
+	(tls_script_test_LDFLAGS): Define.
+	(tls_script_test_LDADD): Define.
+	* testsuite/Makefile.in: Rebuild.
+
 2010-03-22  Doug Kwan  <dougkwan@google.com>
 
 	* arm.cc (Arm_relocate_functions::abs8,

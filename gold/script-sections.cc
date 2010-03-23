@@ -85,6 +85,8 @@ class Orphan_section_placement
     PLACE_TEXT,
     PLACE_RODATA,
     PLACE_DATA,
+    PLACE_TLS,
+    PLACE_TLS_BSS,
     PLACE_BSS,
     PLACE_REL,
     PLACE_INTERP,
@@ -122,6 +124,8 @@ Orphan_section_placement::Orphan_section_placement()
   this->initialize_place(PLACE_TEXT, ".text");
   this->initialize_place(PLACE_RODATA, ".rodata");
   this->initialize_place(PLACE_DATA, ".data");
+  this->initialize_place(PLACE_TLS, NULL);
+  this->initialize_place(PLACE_TLS_BSS, NULL);
   this->initialize_place(PLACE_BSS, ".bss");
   this->initialize_place(PLACE_REL, NULL);
   this->initialize_place(PLACE_INTERP, ".interp");
@@ -232,6 +236,13 @@ Orphan_section_placement::find_place(Output_section* os,
     index = PLACE_LAST;
   else if (type == elfcpp::SHT_NOTE)
     index = PLACE_INTERP;
+  else if ((flags & elfcpp::SHF_TLS) != 0)
+    {
+      if (type == elfcpp::SHT_NOBITS)
+	index = PLACE_TLS_BSS;
+      else
+	index = PLACE_TLS;
+    }
   else if (type == elfcpp::SHT_NOBITS)
     index = PLACE_BSS;
   else if ((flags & elfcpp::SHF_WRITE) != 0)
@@ -264,6 +275,14 @@ Orphan_section_placement::find_place(Output_section* os,
 	  break;
 	case PLACE_INTERP:
 	  follow = PLACE_TEXT;
+	  break;
+	case PLACE_TLS:
+	  follow = PLACE_DATA;
+	  break;
+	case PLACE_TLS_BSS:
+	  follow = PLACE_TLS;
+	  if (!this->places_[PLACE_TLS].have_location)
+	    follow = PLACE_DATA;
 	  break;
 	}
       if (follow != PLACE_MAX && this->places_[follow].have_location)
@@ -2300,7 +2319,7 @@ Orphan_output_section::set_section_addresses(Symbol_table*, Layout*,
       uint64_t addralign;
       uint64_t size;
 
-      // We know what are single-threaded, so it is OK to lock the
+      // We know we are single-threaded, so it is OK to lock the
       // object.
       {
 	const Task* task = reinterpret_cast<const Task*>(-1);
