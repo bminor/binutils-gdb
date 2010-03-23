@@ -1,5 +1,13 @@
 2010-03-24  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Implement -break-passcount.
+
+	* mi/mi-cmd-break.c (mi_cmd_break_passcount): New.
+	* mi/mi-cmds.c (mi_cmds): Register -break-passcount.
+	* mi/mi-cmds.h (mi_cmd_break_passcount): Declare.
+
+2010-03-24  Vladimir Prus  <vladimir@codesourcery.com>
+
 	-trace-start/-trace-end/-trace-status.
 
 	* mi/mi-cmds.c (mi_cmds): Register -trace-start, -trace-status

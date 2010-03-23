@@ -170,6 +170,31 @@ enum wp_type
   ACCESS_WP
 };
 
+void
+mi_cmd_break_passcount (char *command, char **argv, int argc)
+{
+  int n;
+  int p;
+  struct breakpoint *t;
+
+  if (argc != 2)
+    error (_("Usage: tracepoint-number passcount"));
+
+  n = atoi (argv[0]);
+  p = atoi (argv[1]);
+  t = get_tracepoint (n);
+
+  if (t)
+    {
+      t->pass_count = p;
+      observer_notify_tracepoint_modified (n);
+    }
+  else
+    {
+      error (_("Cound not find tracepoint %d"), n);
+    }
+}
+
 /* Insert a watchpoint. The type of watchpoint is specified by the
    first argument: 
    -break-watch <expr> --> insert a regular wp.  

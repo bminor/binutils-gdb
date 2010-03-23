@@ -43,6 +43,7 @@ struct mi_cmd mi_cmds[] =
   { "break-info", { "info break", 1 }, NULL },
   { "break-insert", { NULL, 0 }, mi_cmd_break_insert},
   { "break-list", { "info break", }, NULL },
+  { "break-passcount", { NULL, 0 }, mi_cmd_break_passcount},
   { "break-watch", { NULL, 0 }, mi_cmd_break_watch},
   { "data-disassemble", { NULL, 0 }, mi_cmd_disassemble},
   { "data-evaluate-expression", { NULL, 0 }, mi_cmd_data_evaluate_expression},
