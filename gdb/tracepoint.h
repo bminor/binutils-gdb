@@ -184,4 +184,6 @@ extern void tfind_1 (enum trace_find_type type, int num,
 		     ULONGEST addr1, ULONGEST addr2,
 		     int from_tty);
 
+extern void trace_save (const char *filename, int target_does_save);
+
 #endif	/* TRACEPOINT_H */

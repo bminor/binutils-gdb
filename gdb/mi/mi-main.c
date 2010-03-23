@@ -2211,6 +2211,32 @@ mi_cmd_trace_find (char *command, char **argv, int argc)
 }
 
 void
+mi_cmd_trace_save (char *command, char **argv, int argc)
+{
+  int target_saves = 0;
+  char *filename;
+
+  if (argc != 1 && argc != 2)
+    error (_("Usage: -trace-save [-r] filename"));
+
+  if (argc == 2)
+    {
+      filename = argv[1];
+      if (strcmp (argv[0], "-r") == 0)
+	target_saves = 1;
+      else
+	error (_("Invalid option: %s"), argv[0]);
+    }
+  else
+    {
+      filename = argv[0];
+    }
+
+  trace_save (filename, target_saves);
+}
+
+
+void
 mi_cmd_trace_start (char *command, char **argv, int argc)
 {
   start_tracing ();

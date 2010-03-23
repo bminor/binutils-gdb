@@ -836,7 +836,7 @@ update_current_target (void)
 	    (int (*) (int, LONGEST *))
 	    return_zero);
   de_fault (to_save_trace_data,
-	    (int (*) (char *))
+	    (int (*) (const char *))
 	    tcomplain);
   de_fault (to_upload_tracepoints,
 	    (int (*) (struct uploaded_tp **))

@@ -109,6 +109,7 @@ struct mi_cmd mi_cmds[] =
   { "trace-define-variable", { NULL, 0 }, mi_cmd_trace_define_variable },
   { "trace-find", { NULL, 0 }, mi_cmd_trace_find },
   { "trace-list-variables", { NULL, 0 }, mi_cmd_trace_list_variables },
+  { "trace-save", { NULL, 0 }, mi_cmd_trace_save },
   { "trace-start", { NULL, 0 }, mi_cmd_trace_start },
   { "trace-status", { NULL, 0 }, mi_cmd_trace_status },
   { "trace-stop", { NULL, 0 }, mi_cmd_trace_stop },

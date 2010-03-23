@@ -1,5 +1,22 @@
 2010-03-24  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Implement -trace-save.
+
+	* mi-cmds.h (mi_cmds_trace_save): Declare.
+	* mi-cmds.c (mi_cmds): Register -trace-save.
+	* mi/mi-main.c (mi_cmd_trace_save): New.
+	* remote.c (remote_save_trace_data): Take const parameter.
+	* target.h (struct target_ops::to_save_trace_data): Take
+	const parameter.
+	* target.c (update_current_target): Adjust to the above.
+	* tracepoint.c (trave_save): New, extracted from
+	(trace_save_command): ...this.
+	(tfile_trace_find): Remove message that is unnecessary now
+	that 'tfind' reports found frame.
+	* tracepoint.h (trace_save): Declare.
+
+2010-03-24  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Implement -trace-find.
 
 	* mi/mi-cmds.c (mi_cmds): Register -trace-find.

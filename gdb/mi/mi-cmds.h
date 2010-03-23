@@ -92,6 +92,7 @@ extern mi_cmd_argv_ftype mi_cmd_thread_select;
 extern mi_cmd_argv_ftype mi_cmd_trace_define_variable;
 extern mi_cmd_argv_ftype mi_cmd_trace_find;
 extern mi_cmd_argv_ftype mi_cmd_trace_list_variables;
+extern mi_cmd_argv_ftype mi_cmd_trace_save;
 extern mi_cmd_argv_ftype mi_cmd_trace_start;
 extern mi_cmd_argv_ftype mi_cmd_trace_status;
 extern mi_cmd_argv_ftype mi_cmd_trace_stop;

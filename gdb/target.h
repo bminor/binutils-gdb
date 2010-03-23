@@ -653,7 +653,7 @@ struct target_ops
        location pointed to by VAL, else returning 0.  */
     int (*to_get_trace_state_variable_value) (int tsv, LONGEST *val);
 
-    int (*to_save_trace_data) (char *filename);
+    int (*to_save_trace_data) (const char *filename);
 
     int (*to_upload_tracepoints) (struct uploaded_tp **utpp);
 

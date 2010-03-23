@@ -2405,13 +2405,15 @@ trace_dump_command (char *args, int from_tty)
 
 extern int trace_regblock_size;
 
-static void
-trace_save_command (char *args, int from_tty)
+/* Save tracepoint data to file named FILENAME.  If TARGET_DOES_SAVE is
+   non-zero, the save is performed on the target, otherwise GDB obtains all
+   trace data and saves it locally.  */
+
+void
+trace_save (const char *filename, int target_does_save)
 {
-  char **argv;
-  char *filename = NULL, *pathname;
-  int target_does_save = 0;
   struct cleanup *cleanup;
+  char *pathname;
   struct trace_status *ts = current_trace_status ();
   int err, status;
   FILE *fp;
@@ -2423,25 +2425,6 @@ trace_save_command (char *args, int from_tty)
 #define MAX_TRACE_UPLOAD 2000
   gdb_byte buf[MAX_TRACE_UPLOAD];
   int written;
-
-  if (args == NULL)
-    error_no_arg (_("file in which to save trace data"));
-
-  argv = gdb_buildargv (args);
-  make_cleanup_freeargv (argv);
-
-  for (; *argv; ++argv)
-    {
-      if (strcmp (*argv, "-r") == 0)
-	target_does_save = 1;
-      else if (**argv == '-')
-	error (_("unknown option `%s'"), *argv);
-      else
-	filename = *argv;
-    }
-
-  if (!filename)
-    error_no_arg (_("file in which to save trace data"));
 
   /* If the target is to save the data to a file on its own, then just
      send the command and be done with it.  */
@@ -2458,13 +2441,13 @@ trace_save_command (char *args, int from_tty)
      target is losing, we can get out without touching files.  */
   status = target_get_trace_status (ts);
 
-  pathname = tilde_expand (args);
+  pathname = tilde_expand (filename);
   cleanup = make_cleanup (xfree, pathname);
 
   fp = fopen (pathname, "w");
   if (!fp)
     error (_("Unable to open file '%s' for saving trace data (%s)"),
-	   args, safe_strerror (errno));
+	   filename, safe_strerror (errno));
   make_cleanup_fclose (fp);
 
   /* Write a file header, with a high-bit-set char to indicate a
@@ -2576,8 +2559,41 @@ trace_save_command (char *args, int from_tty)
     perror_with_name (pathname);
 
   do_cleanups (cleanup);
+}
+
+static void
+trace_save_command (char *args, int from_tty)
+{
+  int target_does_save = 0;
+  char **argv;
+  char *filename = NULL;
+  struct cleanup *back_to;
+
+  if (args == NULL)
+    error_no_arg (_("file in which to save trace data"));
+
+  argv = gdb_buildargv (args);
+  back_to = make_cleanup_freeargv (argv);
+
+  for (; *argv; ++argv)
+    {
+      if (strcmp (*argv, "-r") == 0)
+	target_does_save = 1;
+      else if (**argv == '-')
+	error (_("unknown option `%s'"), *argv);
+      else
+	filename = *argv;
+    }
+
+  if (!filename)
+    error_no_arg (_("file in which to save trace data"));
+
+  trace_save (filename, target_does_save);
+
   if (from_tty)
     printf_filtered (_("Trace data saved to file '%s'.\n"), args);
+
+  do_cleanups (back_to);
 }
 
 /* Tell the target what to do with an ongoing tracing run if GDB
@@ -3426,7 +3442,6 @@ tfile_trace_find (enum trace_find_type type, int num,
 	}
       if (found)
 	{
-	  printf_filtered ("Found traceframe %d.\n", tfnum);
 	  if (tpp)
 	    *tpp = tpnum;
 	  cur_offset = offset;
