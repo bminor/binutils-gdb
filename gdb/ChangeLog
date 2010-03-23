@@ -1,5 +1,23 @@
 2010-03-24  Vladimir Prus  <vladimir@codesourcery.com>
 
+	-trace-define-variable and -trace-list-variables.
+
+	* tracepoint.c (create_trace_state_variable): Make
+	private copy of name, as opposed to assuming the
+	pointer lives forever.
+	(tvariables_info_1): New.
+	(tvariables_info): Use the above.
+	* tracepoint.h (create_trace_state_variable, tvariables_info_1):
+	Declare.
+	* mi/mi-cmds.c (mi_cmds): Register -trace-define-variable
+	and -trace-list-variables.
+	* mi/mi-cmds.h (mi_cmd_trace_define_variable)
+	(mi_cmd_trace_list_variables): New.
+	* mi/mi-main.c (mi_cmd_trace_define_variable)
+	(mi_cmd_trace_list_variables): New.
+
+2010-03-24  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Implement -break-passcount.
 
 	* mi/mi-cmd-break.c (mi_cmd_break_passcount): New.

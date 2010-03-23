@@ -276,7 +276,7 @@ create_trace_state_variable (const char *name)
   struct trace_state_variable tsv;
 
   memset (&tsv, 0, sizeof (tsv));
-  tsv.name = name;
+  tsv.name = xstrdup (name);
   tsv.number = next_tsv_number++;
   return VEC_safe_push (tsv_s, tvariables, &tsv);
 }
@@ -305,6 +305,7 @@ delete_trace_state_variable (const char *name)
   for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
     if (strcmp (name, tsv->name) == 0)
       {
+	xfree ((void *)tsv->name);
 	VEC_unordered_remove (tsv_s, tvariables, ix);
 	return;
       }
@@ -406,17 +407,15 @@ delete_trace_variable_command (char *args, int from_tty)
   dont_repeat ();
 }
 
-/* List all the trace state variables.  */
-
-static void
-tvariables_info (char *args, int from_tty)
+void
+tvariables_info_1 (void)
 {
   struct trace_state_variable *tsv;
   int ix;
-  char *reply;
-  ULONGEST tval;
+  int count = 0;
+  struct cleanup *back_to;
 
-  if (VEC_length (tsv_s, tvariables) == 0)
+  if (VEC_length (tsv_s, tvariables) == 0 && !ui_out_is_mi_like_p (uiout))
     {
       printf_filtered (_("No trace state variables.\n"));
       return;
@@ -427,24 +426,56 @@ tvariables_info (char *args, int from_tty)
     tsv->value_known = target_get_trace_state_variable_value (tsv->number,
 							      &(tsv->value));
 
-  printf_filtered (_("Name\t\t  Initial\tCurrent\n"));
+  back_to = make_cleanup_ui_out_table_begin_end (uiout, 3,
+                                                 count, "trace-variables");
+  ui_out_table_header (uiout, 15, ui_left, "name", "Name");
+  ui_out_table_header (uiout, 11, ui_left, "initial", "Initial");
+  ui_out_table_header (uiout, 11, ui_left, "current", "Current");
+
+  ui_out_table_body (uiout);
 
   for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
     {
-      printf_filtered ("$%s", tsv->name);
-      print_spaces_filtered (17 - strlen (tsv->name), gdb_stdout);
-      printf_filtered ("%s ", plongest (tsv->initial_value));
-      print_spaces_filtered (11 - strlen (plongest (tsv->initial_value)), gdb_stdout);
+      struct cleanup *back_to2;
+      char *c;
+      char *name;
+
+      back_to2 = make_cleanup_ui_out_tuple_begin_end (uiout, "variable");
+
+      name = concat ("$", tsv->name, NULL);
+      make_cleanup (xfree, name);
+      ui_out_field_string (uiout, "name", name);
+      ui_out_field_string (uiout, "initial", plongest (tsv->initial_value));
+
       if (tsv->value_known)
-	printf_filtered ("  %s", plongest (tsv->value));
+        c = plongest (tsv->value);
+      else if (ui_out_is_mi_like_p (uiout))
+        /* For MI, we prefer not to use magic string constants, but rather
+           omit the field completely.  The difference between unknown and
+           undefined does not seem important enough to represent.  */
+        c = NULL;
       else if (current_trace_status ()->running || traceframe_number >= 0)
 	/* The value is/was defined, but we don't have it.  */
-	printf_filtered (_("  <unknown>"));
+        c = "<unknown>";
       else
 	/* It is not meaningful to ask about the value.  */
-	printf_filtered (_("  <undefined>"));
-      printf_filtered ("\n");
+        c = "<undefined>";
+      if (c)
+        ui_out_field_string (uiout, "current", c);
+      ui_out_text (uiout, "\n");
+
+      do_cleanups (back_to2);
     }
+
+  do_cleanups (back_to);
+}
+
+/* List all the trace state variables.  */
+
+static void
+tvariables_info (char *args, int from_tty)
+{
+  tvariables_info_1 ();
 }
 
 /* ACTIONS functions: */

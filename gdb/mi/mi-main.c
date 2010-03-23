@@ -2080,6 +2080,52 @@ print_diff (struct mi_timestamp *start, struct mi_timestamp *end)
   }
 
 void
+mi_cmd_trace_define_variable (char *command, char **argv, int argc)
+{
+  struct expression *expr;
+  struct cleanup *back_to;
+  LONGEST initval = 0;
+  struct trace_state_variable *tsv;
+  char *name = 0;
+
+  if (argc != 1 && argc != 2)
+    error (_("Usage: -trace-define-variable VARIABLE [VALUE]"));
+
+  expr = parse_expression (argv[0]);
+  back_to = make_cleanup (xfree, expr);
+
+  if (expr->nelts == 3 && expr->elts[0].opcode == OP_INTERNALVAR)
+    {
+      struct internalvar *intvar = expr->elts[1].internalvar;
+      if (intvar)
+	name = internalvar_name (intvar);
+    }
+
+  if (!name || *name == '\0')
+    error (_("Invalid name of trace variable"));
+
+  tsv = find_trace_state_variable (name);
+  if (!tsv)
+    tsv = create_trace_state_variable (name);
+
+  if (argc == 2)
+    initval = value_as_long (parse_and_eval (argv[1]));
+
+  tsv->initial_value = initval;
+
+  do_cleanups (back_to);
+}
+
+void
+mi_cmd_trace_list_variables (char *command, char **argv, int argc)
+{
+  if (argc != 0)
+    error (_("-trace-list-variables: no arguments are allowed"));
+
+  tvariables_info_1 ();
+}
+
+void
 mi_cmd_trace_start (char *command, char **argv, int argc)
 {
   start_tracing ();

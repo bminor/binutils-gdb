@@ -106,6 +106,8 @@ struct mi_cmd mi_cmds[] =
   { "thread-info", { NULL, 0 }, mi_cmd_thread_info },
   { "thread-list-ids", { NULL, 0 }, mi_cmd_thread_list_ids},
   { "thread-select", { NULL, 0 }, mi_cmd_thread_select},
+  { "trace-define-variable", { NULL, 0 }, mi_cmd_trace_define_variable },
+  { "trace-list-variables", { NULL, 0 }, mi_cmd_trace_list_variables },
   { "trace-start", { NULL, 0 }, mi_cmd_trace_start },
   { "trace-status", { NULL, 0 }, mi_cmd_trace_status },
   { "trace-stop", { NULL, 0 }, mi_cmd_trace_stop },

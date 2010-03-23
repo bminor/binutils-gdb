@@ -155,6 +155,7 @@ extern void end_actions_pseudocommand (char *args, int from_tty);
 extern void while_stepping_pseudocommand (char *args, int from_tty);
 
 extern struct trace_state_variable *find_trace_state_variable (const char *name);
+extern struct trace_state_variable *create_trace_state_variable (const char *name);
 
 extern void parse_trace_status (char *line, struct trace_status *ts);
 
@@ -173,5 +174,7 @@ extern void start_tracing (void);
 extern void stop_tracing (void);
 
 extern void trace_status_mi (int on_stop);
+
+extern void tvariables_info_1 (void);
 
 #endif	/* TRACEPOINT_H */
