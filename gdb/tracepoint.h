@@ -86,6 +86,8 @@ struct trace_status
 
   enum trace_stop_reason stop_reason;
 
+  /* If stop_reason == tracepoint_passcount, the on-target number
+     of the tracepoint which caused the stop.  */
   int stopping_tracepoint;
 
   /* Number of traceframes currently in the buffer.  */
@@ -166,5 +168,10 @@ extern void merge_uploaded_tracepoints (struct uploaded_tp **utpp);
 extern void merge_uploaded_trace_state_variables (struct uploaded_tsv **utsvp);
 
 extern void disconnect_or_stop_tracing (int from_tty);
+
+extern void start_tracing (void);
+extern void stop_tracing (void);
+
+extern void trace_status_mi (int on_stop);
 
 #endif	/* TRACEPOINT_H */

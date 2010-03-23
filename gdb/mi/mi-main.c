@@ -51,6 +51,7 @@
 #include "inferior.h"
 #include "osdata.h"
 #include "splay-tree.h"
+#include "tracepoint.h"
 
 #include <ctype.h>
 #include <sys/time.h>
@@ -2077,3 +2078,22 @@ print_diff (struct mi_timestamp *start, struct mi_timestamp *end)
        timeval_diff (start->utime, end->utime) / 1000000.0, 
        timeval_diff (start->stime, end->stime) / 1000000.0);
   }
+
+void
+mi_cmd_trace_start (char *command, char **argv, int argc)
+{
+  start_tracing ();
+}
+
+void
+mi_cmd_trace_status (char *command, char **argv, int argc)
+{
+  trace_status_mi (0);
+}
+
+void
+mi_cmd_trace_stop (char *command, char **argv, int argc)
+{
+  stop_tracing ();
+  trace_status_mi (1);
+}

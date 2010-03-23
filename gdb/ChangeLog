@@ -1,5 +1,22 @@
 2010-03-24  Vladimir Prus  <vladimir@codesourcery.com>
 
+	-trace-start/-trace-end/-trace-status.
+
+	* mi/mi-cmds.c (mi_cmds): Register -trace-start, -trace-status
+	and -trace-stop.
+	* mi/mi-cmds.h (mi_cmd_trace_start, mi_cmd_trace_status)
+	(mi_cmd_trace_stop): Declare.
+	* mi/mi-main.c (mi_cmd_trace_start, mi_cmd_trace_status)
+	(mi_cmd_trace_stop): New.
+	* tracepoint.c (start_tracing): New, extracted from...
+	(trace_start_command): ...this.
+	(trace_status_mi): New.
+	* tracepoint.h (struct trace_status): Document
+	stopping_tracepoint.
+	(start_tracing, stop_tracing, trace_status_mi): Declare.
+
+2010-03-24  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Implement creating tracepoints with -break-insert.
 
 	* mi/mi-cmd-break.c (mi_cmd_break_insert): Handle -a

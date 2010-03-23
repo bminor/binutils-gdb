@@ -1408,15 +1408,9 @@ add_aexpr (struct collection_list *collect, struct agent_expr *aexpr)
   collect->next_aexpr_elt++;
 }
 
-/* tstart command:
 
-   Tell target to clear any previous trace experiment.
-   Walk the list of tracepoints, and send them (and their actions)
-   to the target.  If no errors, 
-   Tell target to start a new trace experiment.  */
-
-static void
-trace_start_command (char *args, int from_tty)
+void
+start_tracing (void)
 {
   char buf[2048];
   VEC(breakpoint_p) *tp_vec = NULL;
@@ -1424,8 +1418,6 @@ trace_start_command (char *args, int from_tty)
   struct breakpoint *t;
   struct trace_state_variable *tsv;
   int any_downloaded = 0;
-
-  dont_repeat ();	/* Like "run", dangerous to repeat accidentally.  */
 
   target_trace_init ();
   
@@ -1465,6 +1457,21 @@ trace_start_command (char *args, int from_tty)
   current_trace_status()->running = 1;
 }
 
+/* tstart command:
+
+   Tell target to clear any previous trace experiment.
+   Walk the list of tracepoints, and send them (and their actions)
+   to the target.  If no errors,
+   Tell target to start a new trace experiment.  */
+
+static void
+trace_start_command (char *args, int from_tty)
+{
+  dont_repeat ();	/* Like "run", dangerous to repeat accidentally.  */
+
+  start_tracing ();
+}
+
 /* tstop command */
 static void
 trace_stop_command (char *args, int from_tty)
@@ -1473,7 +1480,7 @@ trace_stop_command (char *args, int from_tty)
 }
 
 void
-stop_tracing ()
+stop_tracing (void)
 {
   target_trace_stop ();
   /* should change in response to reply? */
@@ -1529,7 +1536,6 @@ trace_status_command (char *args, int from_tty)
 	  printf_filtered (_("Trace stopped because of disconnection.\n"));
 	  break;
 	case tracepoint_passcount:
-	  /* FIXME account for number on target */
 	  printf_filtered (_("Trace stopped by tracepoint %d.\n"),
 			   ts->stopping_tracepoint);
 	  break;
@@ -1580,6 +1586,94 @@ trace_status_command (char *args, int from_tty)
   else
     printf_filtered (_("Not looking at any trace frame.\n"));
 }
+
+/* Report the trace status to uiout, in a way suitable for MI, and not
+   suitable for CLI.  If ON_STOP is true, suppress a few fields that
+   are not meaningful in the -trace-stop response.
+
+   The implementation is essentially parallel to trace_status_command, but
+   merging them will result in unreadable code.  */
+void
+trace_status_mi (int on_stop)
+{
+  struct trace_status *ts = current_trace_status ();
+  int status;
+  char *string_status;
+
+  status = target_get_trace_status (ts);
+
+  if (status == -1 && !ts->from_file)
+    {
+      ui_out_field_string (uiout, "supported", "0");
+      return;
+    }
+
+  if (ts->from_file)
+    ui_out_field_string (uiout, "supported", "file");
+  else if (!on_stop)
+    ui_out_field_string (uiout, "supported", "1");
+
+  gdb_assert (ts->running_known);
+
+  if (ts->running)
+    {
+      ui_out_field_string (uiout, "running", "1");
+
+      /* Unlike CLI, do not show the state of 'disconnected-tracing' variable.
+	 Given that the frontend gets the status either on -trace-stop, or from
+	 -trace-status after re-connection, it does not seem like this
+	 information is necessary for anything.  It is not necessary for either
+	 figuring the vital state of the target nor for navigation of trace
+	 frames.  If the frontend wants to show the current state is some
+	 configure dialog, it can request the value when such dialog is
+	 invoked by the user.  */
+    }
+  else
+    {
+      char *stop_reason = NULL;
+      int stopping_tracepoint = -1;
+
+      if (!on_stop)
+	ui_out_field_string (uiout, "running", "0");
+
+      if (ts->stop_reason != trace_stop_reason_unknown)
+	{
+	  switch (ts->stop_reason)
+	    {
+	    case tstop_command:
+	      stop_reason = "request";
+	      break;
+	    case trace_buffer_full:
+	      stop_reason = "overflow";
+	      break;
+	    case trace_disconnected:
+	      stop_reason = "disconnection";
+	      break;
+	    case tracepoint_passcount:
+	      stop_reason = "passcount";
+	      stopping_tracepoint = ts->stopping_tracepoint;
+	      break;
+	    }
+	  
+	  if (stop_reason)
+	    {
+	      ui_out_field_string (uiout, "stop-reason", stop_reason);
+	      if (stopping_tracepoint != -1)
+		ui_out_field_int (uiout, "stopping-tracepoint",
+				  stopping_tracepoint);
+	    }
+	}
+    }
+
+
+  if ((int) ts->traceframe_count != -1)
+    ui_out_field_int (uiout, "frames", ts->traceframe_count);
+  if ((int) ts->buffer_size != -1)
+    ui_out_field_int (uiout, "buffer-size",  (int) ts->buffer_size);
+  if ((int) ts->buffer_free != -1)
+    ui_out_field_int (uiout, "buffer-free",  (int) ts->buffer_free);
+}
+
 
 void
 disconnect_or_stop_tracing (int from_tty)
