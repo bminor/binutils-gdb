@@ -1,5 +1,12 @@
 2010-03-24  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Implement creating tracepoints with -break-insert.
+
+	* mi/mi-cmd-break.c (mi_cmd_break_insert): Handle -a
+	to mean that tracepoint should be created.
+
+2010-03-24  Vladimir Prus  <vladimir@codesourcery.com>
+
 	* breakpoint.c (check_no_tracepoint_commands): Use
 	current spelling of 'teval'.
 
