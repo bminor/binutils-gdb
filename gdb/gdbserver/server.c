@@ -788,6 +788,47 @@ handle_threads_qxfer (const char *annex,
 
 }
 
+/* Table used by the crc32 function to calcuate the checksum.  */
+
+static unsigned int crc32_table[256] =
+{0, 0};
+
+/* Compute 32 bit CRC from inferior memory.
+
+   On success, return 32 bit CRC.
+   On failure, return (unsigned long long) -1.  */
+
+static unsigned long long
+crc32 (CORE_ADDR base, int len, unsigned int crc)
+{
+  if (!crc32_table[1])
+    {
+      /* Initialize the CRC table and the decoding table.  */
+      int i, j;
+      unsigned int c;
+
+      for (i = 0; i < 256; i++)
+	{
+	  for (c = i << 24, j = 8; j > 0; --j)
+	    c = c & 0x80000000 ? (c << 1) ^ 0x04c11db7 : (c << 1);
+	  crc32_table[i] = c;
+	}
+    }
+
+  while (len--)
+    {
+      unsigned char byte = 0;
+
+      /* Return failure if memory read fails.  */
+      if (read_inferior_memory (base, &byte, 1) != 0)
+	return (unsigned long long) -1;
+
+      crc = (crc << 8) ^ crc32_table[((crc >> 24) ^ byte) & 255];
+      base++;
+    }
+  return (unsigned long long) crc;
+}
+
 /* Handle all of the extended 'q' packets.  */
 void
 handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
@@ -1418,6 +1459,33 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	}
 
       strcpy (own_buf, process->attached ? "1" : "0");
+      return;
+    }
+
+  if (strncmp ("qCRC:", own_buf, 5) == 0)
+    {
+      /* CRC check (compare-section).  */
+      char *comma;
+      CORE_ADDR base;
+      int len;
+      unsigned long long crc;
+
+      require_running (own_buf);
+      base == strtoul (own_buf + 5, &comma, 16);
+      if (*comma++ != ',')
+	{
+	  write_enn (own_buf);
+	  return;
+	}
+      len = strtoul (comma, NULL, 16);
+      crc = crc32 (base, len, 0xffffffff);
+      /* Check for memory failure.  */
+      if (crc == (unsigned long long) -1)
+	{
+	  write_enn (own_buf);
+	  return;
+	}
+      sprintf (own_buf, "C%lx", (unsigned long) crc);
       return;
     }
 
