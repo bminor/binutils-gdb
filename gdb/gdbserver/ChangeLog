@@ -1,3 +1,8 @@
+2010-03-23  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-x86-low.c (x86_linux_prepare_to_resume): Clear DR6 if the
+	lwp had been stopped by a watchpoint.
+
 2010-03-16  Pedro Alves  <pedro@codesourcery.com>
 
 	* server.h (internal_error): Declare.
