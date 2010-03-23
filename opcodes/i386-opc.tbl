@@ -2706,17 +2706,13 @@ vpshlw,     3, 0x95, None, 1, CpuXOP, Modrm|VexOpcode=4|VexW=2|VexSources=1|No_w
 
 // LWP instructions
 
-llwpcb, 1, 0x12, 0x0, 1, CpuLWP, Modrm|VexOpcode=4|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Vex, { Reg16 }
-llwpcb, 1, 0x12, 0x0, 1, CpuLWP, Modrm|VexOpcode=4|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Vex=2, { Reg32 }
+llwpcb, 1, 0x12, 0x0, 1, CpuLWP, Modrm|VexOpcode=4|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Vex, { Reg32 }
 llwpcb, 1, 0x12, 0x0, 1, CpuLWP, Modrm|VexOpcode=4|VexW=2|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64|Vex, { Reg64 }
-slwpcb, 1, 0x12, 0x1, 1, CpuLWP, Modrm|VexOpcode=4|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Vex, { Reg16 }
-slwpcb, 1, 0x12, 0x1, 1, CpuLWP, Modrm|VexOpcode=4|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Vex=2, { Reg32 }
+slwpcb, 1, 0x12, 0x1, 1, CpuLWP, Modrm|VexOpcode=4|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Vex, { Reg32 }
 slwpcb, 1, 0x12, 0x1, 1, CpuLWP, Modrm|VexOpcode=4|VexW=2|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64|Vex, { Reg64 }
-lwpval, 3, 0x12, 0x1, 1, CpuLWP, Modrm|VexOpcode=5|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VexVVVV=3|Vex, { Imm16, Dword|Reg32|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, Reg16 }
-lwpval, 3, 0x12, 0x1, 1, CpuLWP, Modrm|VexOpcode=5|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VexVVVV=3|Vex=2, { Imm32|Imm32S, Dword|Reg32|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, Reg32 }
+lwpval, 3, 0x12, 0x1, 1, CpuLWP, Modrm|VexOpcode=5|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VexVVVV=3|Vex, { Imm32|Imm32S, Dword|Reg32|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, Reg32 }
 lwpval, 3, 0x12, 0x1, 1, CpuLWP, Modrm|VexOpcode=5|VexW=2|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VexVVVV=3|NoRex64|Vex, { Imm32|Imm32S, Dword|Reg32|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, Reg64 }
-lwpins, 3, 0x12, 0x0, 1, CpuLWP, Modrm|VexOpcode=5|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VexVVVV=3|Vex, { Imm16, Dword|Reg32|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, Reg16 }
-lwpins, 3, 0x12, 0x0, 1, CpuLWP, Modrm|VexOpcode=5|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VexVVVV=3|Vex=2, { Imm32|Imm32S, Dword|Reg32|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, Reg32 }
+lwpins, 3, 0x12, 0x0, 1, CpuLWP, Modrm|VexOpcode=5|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VexVVVV=3|Vex, { Imm32|Imm32S, Dword|Reg32|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, Reg32 }
 lwpins, 3, 0x12, 0x0, 1, CpuLWP, Modrm|VexOpcode=5|VexW=2|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VexVVVV=3|NoRex64|Vex, { Imm32|Imm32S, Dword|Reg32|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, Reg64 }
 
 // AMD 3DNow! instructions.

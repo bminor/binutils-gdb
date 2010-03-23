@@ -4,22 +4,6 @@
 	.text
 _start:
 
-	llwpcb %ax
-	llwpcb %cx
-	llwpcb %dx
-	llwpcb %bx
-	llwpcb %sp
-	llwpcb %bp
-	llwpcb %si
-	llwpcb %di
-	llwpcb %r8w
-	llwpcb %r9w
-	llwpcb %r10w
-	llwpcb %r11w
-	llwpcb %r12w
-	llwpcb %r13w
-	llwpcb %r14w
-	llwpcb %r15w
 	llwpcb %eax
 	llwpcb %ecx
 	llwpcb %edx
@@ -85,39 +69,7 @@ _start:
 	slwpcb %edx
 	slwpcb %ecx
 	slwpcb %eax
-	slwpcb %r15w
-	slwpcb %r14w
-	slwpcb %r13w
-	slwpcb %r12w
-	slwpcb %r11w
-	slwpcb %r10w
-	slwpcb %r9w
-	slwpcb %r8w
-	slwpcb %di
-	slwpcb %si
-	slwpcb %bp
-	slwpcb %sp
-	slwpcb %bx
-	slwpcb %dx
-	slwpcb %cx
-	slwpcb %ax
 
-	lwpins $0x1234, %eax, %ax
-	lwpins $0x1234, %ecx, %cx
-	lwpins $0x1234, %edx, %dx
-	lwpins $0x1234, %ebx, %bx
-	lwpins $0x1234, %esp, %sp
-	lwpins $0x1234, %ebp, %bp
-	lwpins $0x1234, %esi, %si
-	lwpins $0x1234, %edi, %di
-	lwpins $0x1234, %r8d, %r8w
-	lwpins $0x1234, %r9d, %r9w
-	lwpins $0x1234, %r10d, %r10w
-	lwpins $0x1234, %r11d, %r11w
-	lwpins $0x1234, %r12d, %r12w
-	lwpins $0x1234, %r13d, %r13w
-	lwpins $0x1234, %r14d, %r14w
-	lwpins $0x1234, %r15d, %r15w
 	lwpins $0x12345678, %r15d, %eax
 	lwpins $0x12345678, %r14d, %ecx
 	lwpins $0x12345678, %r13d, %edx
@@ -151,22 +103,6 @@ _start:
 	lwpins $0x12345678, %esi, %r14
 	lwpins $0x12345678, %edi, %r15
 
-	lwpval $0x1234, %eax, %ax
-	lwpval $0x1234, %ecx, %cx
-	lwpval $0x1234, %edx, %dx
-	lwpval $0x1234, %ebx, %bx
-	lwpval $0x1234, %esp, %sp
-	lwpval $0x1234, %ebp, %bp
-	lwpval $0x1234, %esi, %si
-	lwpval $0x1234, %edi, %di
-	lwpval $0x1234, %r8d, %r8w
-	lwpval $0x1234, %r9d, %r9w
-	lwpval $0x1234, %r10d, %r10w
-	lwpval $0x1234, %r11d, %r11w
-	lwpval $0x1234, %r12d, %r12w
-	lwpval $0x1234, %r13d, %r13w
-	lwpval $0x1234, %r14d, %r14w
-	lwpval $0x1234, %r15d, %r15w
 	lwpval $0x12345678, %r15d, %eax
 	lwpval $0x12345678, %r14d, %ecx
 	lwpval $0x12345678, %r13d, %edx
@@ -200,22 +136,6 @@ _start:
 	lwpval $0x12345678, %esi, %r14
 	lwpval $0x12345678, %edi, %r15
 
-	lwpins $0x1234, (%eax), %ax
-	lwpins $0x1234, (%ecx), %cx
-	lwpins $0x1234, (%edx), %dx
-	lwpins $0x1234, (%ebx), %bx
-	lwpins $0x1234, (%esp), %sp
-	lwpins $0x1234, (%ebp), %bp
-	lwpins $0x1234, (%esi), %si
-	lwpins $0x1234, (%edi), %di
-	lwpins $0x1234, (%r8d), %r8w
-	lwpins $0x1234, (%r9d), %r9w
-	lwpins $0x1234, (%r10d), %r10w
-	lwpins $0x1234, (%r11d), %r11w
-	lwpins $0x1234, (%r12d), %r12w
-	lwpins $0x1234, (%r13d), %r13w
-	lwpins $0x1234, (%r14d), %r14w
-	lwpins $0x1234, (%r15d), %r15w
 	lwpins $0x12345678, (%r15d), %eax
 	lwpins $0x12345678, (%r14d), %ecx
 	lwpins $0x12345678, (%r13d), %edx
@@ -249,22 +169,6 @@ _start:
 	lwpins $0x12345678, (%esi), %r14
 	lwpins $0x12345678, (%edi), %r15
 
-	lwpval $0x1234, (%eax), %ax
-	lwpval $0x1234, (%ecx), %cx
-	lwpval $0x1234, (%edx), %dx
-	lwpval $0x1234, (%ebx), %bx
-	lwpval $0x1234, (%esp), %sp
-	lwpval $0x1234, (%ebp), %bp
-	lwpval $0x1234, (%esi), %si
-	lwpval $0x1234, (%edi), %di
-	lwpval $0x1234, (%r8d), %r8w
-	lwpval $0x1234, (%r9d), %r9w
-	lwpval $0x1234, (%r10d), %r10w
-	lwpval $0x1234, (%r11d), %r11w
-	lwpval $0x1234, (%r12d), %r12w
-	lwpval $0x1234, (%r13d), %r13w
-	lwpval $0x1234, (%r14d), %r14w
-	lwpval $0x1234, (%r15d), %r15w
 	lwpval $0x12345678, (%r15d), %eax
 	lwpval $0x12345678, (%r14d), %ecx
 	lwpval $0x12345678, (%r13d), %edx
@@ -298,22 +202,6 @@ _start:
 	lwpval $0x12345678, (%esi), %r14
 	lwpval $0x12345678, (%edi), %r15
 
-	lwpins $0x1234, 0xcafe(%eax), %ax
-	lwpins $0x1234, 0xcafe(%ecx), %cx
-	lwpins $0x1234, 0xcafe(%edx), %dx
-	lwpins $0x1234, 0xcafe(%ebx), %bx
-	lwpins $0x1234, 0xcafe(%esp), %sp
-	lwpins $0x1234, 0xcafe(%ebp), %bp
-	lwpins $0x1234, 0xcafe(%esi), %si
-	lwpins $0x1234, 0xcafe(%edi), %di
-	lwpins $0x1234, 0xcafe(%r8d), %r8w
-	lwpins $0x1234, 0xcafe(%r9d), %r9w
-	lwpins $0x1234, 0xcafe(%r10d), %r10w
-	lwpins $0x1234, 0xcafe(%r11d), %r11w
-	lwpins $0x1234, 0xcafe(%r12d), %r12w
-	lwpins $0x1234, 0xcafe(%r13d), %r13w
-	lwpins $0x1234, 0xcafe(%r14d), %r14w
-	lwpins $0x1234, 0xcafe(%r15d), %r15w
 	lwpins $0x12345678, 0xcafe(%r15d), %eax
 	lwpins $0x12345678, 0xcafe(%r14d), %ecx
 	lwpins $0x12345678, 0xcafe(%r13d), %edx
@@ -347,22 +235,6 @@ _start:
 	lwpins $0x12345678, 0xcafe(%esi), %r14
 	lwpins $0x12345678, 0xcafe(%edi), %r15
 
-	lwpval $0x1234, 0xcafe(%eax), %ax
-	lwpval $0x1234, 0xcafe(%ecx), %cx
-	lwpval $0x1234, 0xcafe(%edx), %dx
-	lwpval $0x1234, 0xcafe(%ebx), %bx
-	lwpval $0x1234, 0xcafe(%esp), %sp
-	lwpval $0x1234, 0xcafe(%ebp), %bp
-	lwpval $0x1234, 0xcafe(%esi), %si
-	lwpval $0x1234, 0xcafe(%edi), %di
-	lwpval $0x1234, 0xcafe(%r8d), %r8w
-	lwpval $0x1234, 0xcafe(%r9d), %r9w
-	lwpval $0x1234, 0xcafe(%r10d), %r10w
-	lwpval $0x1234, 0xcafe(%r11d), %r11w
-	lwpval $0x1234, 0xcafe(%r12d), %r12w
-	lwpval $0x1234, 0xcafe(%r13d), %r13w
-	lwpval $0x1234, 0xcafe(%r14d), %r14w
-	lwpval $0x1234, 0xcafe(%r15d), %r15w
 	lwpval $0x12345678, 0xcafe(%r15d), %eax
 	lwpval $0x12345678, 0xcafe(%r14d), %ecx
 	lwpval $0x12345678, 0xcafe(%r13d), %edx

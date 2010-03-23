@@ -114,7 +114,6 @@ static void CRC32_Fixup (int, int);
 static void FXSAVE_Fixup (int, int);
 static void OP_LWPCB_E (int, int);
 static void OP_LWP_E (int, int);
-static void OP_LWP_I (int, int);
 static void OP_Vex_2src_1 (int, int);
 static void OP_Vex_2src_2 (int, int);
 
@@ -2744,8 +2743,8 @@ static const struct dis386 reg_table[][8] = {
   },
   /* REG_XOP_LWP */
   {
-    { "lwpins", { { OP_LWP_E, 0 }, Ed, { OP_LWP_I, 0 } } },
-    { "lwpval",	{ { OP_LWP_E, 0 }, Ed, { OP_LWP_I, 0 } } },
+    { "lwpins", { { OP_LWP_E, 0 }, Ed, Iq } },
+    { "lwpval",	{ { OP_LWP_E, 0 }, Ed, Iq } },
   },
 };
 
@@ -14977,10 +14976,8 @@ OP_LWPCB_E (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 
   if (vex.w)
     names = names64;
-  else if (vex.length == 256)
-    names = names32;
   else
-    names = names16;
+    names = names32;
 
   reg = modrm.rm;
   USED_REX (REX_B);
@@ -14997,20 +14994,9 @@ OP_LWP_E (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 
   if (vex.w)
     names = names64;
-  else if (vex.length == 256)
-    names = names32;
   else
-    names = names16;
+    names = names32;
 
   oappend (names[vex.register_specifier]);
-}
-
-static void
-OP_LWP_I (int bytemode ATTRIBUTE_UNUSED, int sizeflag)
-{
-  if (vex.w || vex.length == 256)
-    OP_I (q_mode, sizeflag);
-  else
-    OP_I (w_mode, sizeflag);
 }
 

@@ -1,3 +1,11 @@
+2010-03-22  Sebastian Pop  <sebastian.pop@amd.com>
+	    Quentin Neill <quentin.neill@amd.com>
+
+	* testsuite/gas/i386/x86-64-lwp.s: Remove use of 16bit LWP insns.
+	* testsuite/gas/i386/lwp.s: Same.
+	* testsuite/gas/i386/x86-64-lwp.d: Updated.
+	* testsuite/gas/i386/lwp.d: Updated.
+
 2010-03-19  Jie Zhang  <jie@codesourcery.com>
 
 	* gas/arm/mapmisc.s: Add the test case for two mapping
