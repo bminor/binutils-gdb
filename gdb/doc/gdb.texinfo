@@ -23128,7 +23128,7 @@ N.A.
 @subsubheading Synopsis
 
 @smallexample
- -break-insert [ -t ] [ -h ] [ -f ] [ -d ]
+ -break-insert [ -t ] [ -h ] [ -f ] [ -d ] [ -a ]
     [ -c @var{condition} ] [ -i @var{ignore-count} ]
     [ -p @var{thread} ] [ @var{location} ]
 @end smallexample
@@ -23165,6 +23165,9 @@ an error, and won't create a breakpoint, if @var{location}
 cannot be parsed.
 @item -d
 Create a disabled breakpoint.
+@item -a
+Create a tracepoint.  @xref{Tracepoints}.  When this parameter
+is used together with @samp{-h}, a fast tracepoint is created.
 @end table
 
 @subsubheading Result
@@ -23301,6 +23304,20 @@ hdr=[@{width="3",alignment="-1",col_name="number",colhdr="Num"@},
 body=[]@}
 (gdb)
 @end smallexample
+
+@subheading The @code{-break-passcount} Command
+@findex -break-passcount
+
+@subsubheading Synopsis
+
+@smallexample
+ -break-passcount @var{tracepoint-number} @var{passcount}
+@end smallexample
+
+Set the passcount for tracepoint @var{tracepoint-number} to
+@var{passcount}.  If the breakpoint referred to by @var{tracepoint-number}
+is not a tracepoint, error is emitted.  This corresponds to CLI
+command @samp{passcount}.
 
 @subheading The @code{-break-watch} Command
 @findex -break-watch
@@ -25959,37 +25976,228 @@ next-page="0x000013c0",prev-page="0x00001380",memory=[
 @node GDB/MI Tracepoint Commands
 @section @sc{gdb/mi} Tracepoint Commands
 
-The tracepoint commands are not yet implemented.
+The commands defined in this section implement MI support for
+tracepoints.  For detailed introduction, see @ref{Tracepoints}.
 
-@c @subheading -trace-actions
+@subheading The @code{-trace-find} Command
+@findex -trace-find
 
-@c @subheading -trace-delete
+@subsubheading Synopsis
 
-@c @subheading -trace-disable
+@smallexample
+ -trace-find @var{mode} [@var{parameters}@dots{}]
+@end smallexample
 
-@c @subheading -trace-dump
+Find a trace frame using criteria defined by @var{mode} and
+@var{parameters}.  The following table lists permissible
+modes and their parameters.  For details of operation, see @ref{tfind}.
 
-@c @subheading -trace-enable
+@table @samp
 
-@c @subheading -trace-exists
+@item none
+No parameters are required.  Stops examining trace frames.
 
-@c @subheading -trace-find
+@item frame-number
+An integer is required as parameter.  Selects tracepoint frame with
+that index.
 
-@c @subheading -trace-frame-number
+@item tracepoint-number
+An integer is required as parameter.  Finds next
+trace frame that corresponds to tracepoint with the specified number.
 
-@c @subheading -trace-info
+@item pc
+An address is required as parameter.  Finds
+next trace frame that corresponds to any tracepoint at the specified
+address.
 
-@c @subheading -trace-insert
+@item pc-inside-range
+Two addresses are required as parameters.  Finds next trace
+frame that corresponds to a tracepoint at an address inside the
+specified range.  Both bounds are considered to be inside the range.
 
-@c @subheading -trace-list
+@item pc-outside-range
+Two addresses are required as parameters.  Finds
+next trace frame that corresponds to a tracepoint at an address outside
+the specified range.  Both bounds are considered to be inside the range.
 
-@c @subheading -trace-pass-count
+@item line
+Line specification is required as parameter.  @xref{Specify Location}.
+Finds next trace frame that corresponds to a tracepoint at
+the specified location.
 
-@c @subheading -trace-save
+@end table
 
-@c @subheading -trace-start
+If @samp{none} was passed as @var{mode}, the response does not
+have fields.  Otherwise, the response may have the following fields:
 
-@c @subheading -trace-stop
+@table @samp
+@item found
+This field has either @samp{0} or @samp{1} as the value, depending
+on whether a matching tracepoint was found.
+
+@item traceframe
+The index of the found traceframe.  This field is present iff
+the @samp{found} field has value of @samp{1}.
+
+@item tracepoint
+The index of the found tracepoint.  This field is present iff
+the @samp{found} field has value of @samp{1}.
+
+@item frame
+The information about the frame corresponding to the found trace
+frame.  This field is present only if a trace frame was found.
+@xref{GDB/MI Frame Information} for description of this field.
+
+@end table
+
+@subheading -trace-define-variable
+@findex -trace-define-variable
+
+@subsubheading Synopsis
+
+@smallexample
+ -trace-define-variable @var{name} [ @var{value} ]
+@end smallexample
+
+Create trace variable @var{name} if it does not exist.  If
+@var{value} is specified, sets the initial value of the specified
+trace variable to that value.  Note that the @var{name} should start
+with the @samp{$} character.
+
+@subheading -trace-list-variables
+@findex -trace-list-variables
+
+@subsubheading Synopsis
+
+@smallexample
+ -trace-list-variables
+@end smallexample
+
+Return a table of all defined trace variables.  Each element of the
+table has the following fields:
+
+@table @samp
+@item name
+The name of the trace variable.  This field is always present.
+
+@item initial
+The initial value.  This is a 64-bit signed integer.  This
+field is always present.
+
+@item current
+The value the trace variable has at the moment.  This is a 64-bit
+signed integer.  This field is absent iff current value is
+not defined, for example if the trace was never run, or is
+presently running.
+
+@end table
+
+@subsubheading Example
+
+@smallexample
+(gdb)
+-trace-list-variables
+^done,trace-variables=@{nr_rows="1",nr_cols="3",
+hdr=[@{width="15",alignment="-1",col_name="name",colhdr="Name"@},
+     @{width="11",alignment="-1",col_name="initial",colhdr="Initial"@},
+     @{width="11",alignment="-1",col_name="current",colhdr="Current"@}],
+body=[variable=@{name="$trace_timestamp",initial="0"@}
+      variable=@{name="$foo",initial="10",current="15"@}]@}
+(gdb)
+@end smallexample
+
+@subheading -trace-save
+@findex -trace-save
+
+@subsubheading Synopsis
+
+@smallexample
+ -trace-save [-r ] @var{filename}
+@end smallexample
+
+Saves the collected trace data to @var{filename}.  Without the
+@samp{-r} option, the data is downloaded from the target and saved
+in a local file.  With the @samp{-r} option the target is asked
+to perform the save.
+
+
+@subheading -trace-start
+@findex -trace-start
+
+@subsubheading Synopsis
+
+@smallexample
+ -trace-start
+@end smallexample
+
+Starts a tracing experiments.  The result of this command does not
+have any fields.
+
+@subheading -trace-status
+@findex -trace-status
+
+@subsubheading Synopsis
+
+@smallexample
+ -trace-status
+@end smallexample
+
+Obtains the status of a tracing experiement.  The result may include
+the following fields:
+
+@table @samp
+
+@item supported
+May have a value of either @samp{0}, when no tracing operations are
+supported, @samp{1}, when all tracing operations are supported, or
+@samp{file} when examining trace file.  In the latter case, examining
+of trace frame is possible but new tracing experiement cannot be
+started.  This field is always present.
+
+@item running
+May have a value of either @samp{0} or @samp{1} depending on whether
+tracing experiement is in progress on target.  This field is present
+if @samp{supported} field is not @samp{0}.
+
+@item stop-reason
+Report the reason why the tracing was stopped last time.  This field
+may be absent iff tracing was never stopped on target yet.  The
+value of @samp{request} means the tracing was stopped as result of
+the @code{-trace-stop} command.  The value of @samp{overflow} means
+the tracing buffer is full.  The value of @samp{disconnection} means
+tracing was automatically stopped when @value{GDBN} has disconnected.
+The value of @samp{passcount} means tracing was stopped when a
+tracepoint was passed a maximal number of times for that tracepoint.
+This field is present if @samp{supported} field is not @samp{0}.
+
+@item stopping-tracepoint
+The number of tracepoint whose passcount as exceeded.  This field is
+present iff the @samp{stop-reason} field has the value of
+@samp{passcount}.
+
+@item frames
+This field is an integer number of currently collected frames.  This
+field is optional.
+
+@item buffer-size
+@itemx buffer-free
+These fields tell the current size of the tracing buffer and the
+remaining space.  These field is optional.
+
+@end table
+
+@subheading -trace-stop
+@findex -trace-stop
+
+@subsubheading Synopsis
+
+@smallexample
+ -trace-stop
+@end smallexample
+
+Stops a tracing experiment.  The result of this command has the same
+fields as @code{-trace-status}, except that the @samp{supported} and
+@samp{running} fields are not output.
 
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
