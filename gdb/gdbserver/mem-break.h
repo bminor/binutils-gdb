@@ -24,6 +24,19 @@
 
 /* Breakpoints are opaque.  */
 
+/* Returns TRUE if breakpoints are supported on this target.  */
+
+int breakpoints_supported (void);
+
+/* Returns TRUE if there's any breakpoint at ADDR in our tables,
+   inserted, or not.  */
+
+int breakpoint_here (CORE_ADDR addr);
+
+/* Returns TRUE if there's any inserted breakpoint set at ADDR.  */
+
+int breakpoint_inserted_here (CORE_ADDR addr);
+
 /* Create a new breakpoint at WHERE, and call HANDLER when
    it is hit.  HANDLER should return 1 if the breakpoint
    should be deleted, 0 otherwise.  */
@@ -36,24 +49,28 @@ void set_breakpoint_at (CORE_ADDR where,
 
 void delete_breakpoint_at (CORE_ADDR addr);
 
-/* Create a reinsertion breakpoint at STOP_AT for the breakpoint
-   currently at STOP_PC (and temporarily remove the breakpoint at
-   STOP_PC).  */
+/* Set a reinsert breakpoint at STOP_AT.  */
 
-void reinsert_breakpoint_by_bp (CORE_ADDR stop_pc, CORE_ADDR stop_at);
+void set_reinsert_breakpoint (CORE_ADDR stop_at);
 
-/* Change the status of the breakpoint at WHERE to inserted.  */
+/* Delete all reinsert breakpoints.  */
 
-void reinsert_breakpoint (CORE_ADDR where);
+void delete_reinsert_breakpoints (void);
 
-/* Change the status of the breakpoint at WHERE to uninserted.  */
+/* Reinsert breakpoints at WHERE (and change their status to
+   inserted).  */
 
-void uninsert_breakpoint (CORE_ADDR where);
+void reinsert_breakpoints_at (CORE_ADDR where);
+
+/* Uninsert breakpoints at WHERE (and change their status to
+   uninserted).  This still leaves the breakpoints in the table.  */
+
+void uninsert_breakpoints_at (CORE_ADDR where);
 
 /* See if any breakpoint claims ownership of STOP_PC.  Call the handler for
    the breakpoint, if found.  */
 
-int check_breakpoints (CORE_ADDR stop_pc);
+void check_breakpoints (CORE_ADDR stop_pc);
 
 /* See if any breakpoints shadow the target memory area from MEM_ADDR
    to MEM_ADDR + MEM_LEN.  Update the data already read from the target

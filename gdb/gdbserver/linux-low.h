@@ -137,7 +137,8 @@ struct lwp_info
      yet.  */
   int stop_expected;
 
-  /* True if this thread was suspended (with vCont;t).  */
+  /* When this is true, we shall not try to resume this thread, even
+     if last_resume_kind isn't resume_stop.  */
   int suspended;
 
   /* If this flag is set, the lwp is known to be stopped right now (stop
@@ -152,14 +153,14 @@ struct lwp_info
   /* When stopped is set, the last wait status recorded for this lwp.  */
   int last_status;
 
+  /* When stopped is set, this is where the lwp stopped, with
+     decr_pc_after_break already accounted for.  */
+  CORE_ADDR stop_pc;
+
   /* If this flag is set, STATUS_PENDING is a waitstatus that has not yet
      been reported.  */
   int status_pending_p;
   int status_pending;
-
-  /* If this flag is set, the pending status is a (GDB-placed) breakpoint.  */
-  int pending_is_breakpoint;
-  CORE_ADDR pending_stop_pc;
 
   /* STOPPED_BY_WATCHPOINT is non-zero if this LWP stopped with a data
      watchpoint trap.  */
@@ -175,8 +176,8 @@ struct lwp_info
      stop (SIGTRAP stops only).  */
   CORE_ADDR bp_reinsert;
 
-  /* If this flag is set, the last continue operation on this process
-     was a single-step.  */
+  /* If this flag is set, the last continue operation at the ptrace
+     level on this process was a single-step.  */
   int stepping;
 
   /* If this flag is set, we need to set the event request flags the
@@ -189,8 +190,14 @@ struct lwp_info
 
   /* A link used when resuming.  It is initialized from the resume request,
      and then processed and cleared in linux_resume_one_lwp.  */
-
   struct thread_resume *resume;
+
+  /* The last resume GDB requested on this thread.  */
+  enum resume_kind last_resume_kind;
+
+  /* True if the LWP was seen stop at an internal breakpoint and needs
+     stepping over later when it is resumed.  */
+  int need_step_over;
 
   int thread_known;
 #ifdef HAVE_THREAD_DB_H

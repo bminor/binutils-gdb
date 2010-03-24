@@ -1,3 +1,87 @@
+2010-03-24  Pedro Alves  <pedro@codesourcery.com>
+
+	Teach linux gdbserver to step-over-breakpoints.
+
+	* linux-low.c (can_hardware_single_step): New.
+	(supports_breakpoints): New.
+	(handle_extended_wait): If stopping threads, read the stop pc of
+	the new cloned LWP.
+	(get_pc): New.
+	(get_stop_pc): Add `lwp' parameter.  Handle it.  Bail out if the
+	low target doesn't support retrieving the PC.
+	(add_lwp): Set last_resume_kind to resume_continue.
+	(linux_attach_lwp_1): Adjust comments.  Always set stop_expected.
+	(linux_attach): Don't clear stop_expected.  Set the lwp's
+	last_resume_kind to resume_stop.
+	(linux_detach_one_lwp): Don't check for removed breakpoints.
+	(check_removed_breakpoint): Delete.
+	(status_pending_p): Rename to ...
+	(status_pending_p_callback): ... this.  Don't check for removed
+	breakpoints.  Don't consider threads that are stopped from GDB's
+	perspective.
+	(linux_wait_for_lwp): Always read the stop_pc here.
+	(cancel_breakpoint): New.
+	(step_over_bkpt): New global.
+	(linux_wait_for_event_1): Implement stepping over breakpoints.
+	(gdb_wants_lwp_stopped): New.
+	(gdb_wants_all_stopped): New.
+	(linux_wait_1): Tag threads as gdb-wants-stopped.  Cancel finished
+	single-step traps here.  Store the thread's last reported target
+	wait status.
+	(send_sigstop): Don't clear stop_expected.  Always set it,
+	instead.
+	(mark_lwp_dead): Remove reference to pending_is_breakpoint.
+	(cancel_finished_single_step): New.
+	(cancel_finished_single_steps): New.
+	(wait_for_sigstop): Don't cancel finished single-step traps here.
+	(linux_resume_one_lwp): Don't check for removed breakpoints.
+	Don't set `step' on non-hardware step archs.
+	(linux_set_resume_request): Ignore resume_stop requests if already
+	stopping or stopped.  Set the lwp's last_resume_kind.
+	(resume_status_pending_p): Don't check for removed breakpoints.
+	(need_step_over_p): New.
+	(start_step_over): New.
+	(finish_step_over): New.
+	(linux_resume_one_thread): Always queue a sigstop for resume_stop
+	requests.  Clear the thread's last reported target waitstatus.
+	Don't use the `suspended' flag.  Don't consider pending breakpoints.
+	(linux_resume): Start a step-over if necessary.
+	(proceed_one_lwp): New.
+	(proceed_all_lwps): New.
+	(unstop_all_lwps): New.
+	* linux-low.h (struct lwp_info): Rewrite comment for the
+	`suspended' flag.  Add the `stop_pc' field.  Delete the
+	`pending_stop_pc' field.  Tweak the `stepping' flag's comment.
+	Add `'last_resume_kind' and `need_step_over' fields.
+	* inferiors.c (struct thread_info): Delete, moved elsewhere.
+	* mem-break.c (struct breakpoint): Delete `reinserting' flag.
+	Delete `breakpoint_to_reinsert' field.  New flag `inserted'.
+	(set_raw_breakpoint_at): New.
+	(set_breakpoint_at): Rewrite to use it.
+	(reinsert_breakpoint_handler): Delete.
+	(set_reinsert_breakpoint): New.
+	(reinsert_breakpoint_by_bp): Delete.
+	(delete_reinsert_breakpoints): New.
+	(uninsert_breakpoint): Rewrite.
+	(uninsert_breakpoints_at): New.
+	(reinsert_breakpoint): Rewrite.
+	(reinsert_breakpoints_at): New.
+	(check_breakpoints): Rewrite.
+	(breakpoint_here): New.
+	(breakpoint_inserted_here): New.
+	(check_mem_read): Adjust.
+	* mem-break.h (breakpoints_supported, breakpoint_here)
+	(breakpoint_inserted_here, set_reinsert_breakpoint): Declare.
+	(reinsert_breakpoint_by_bp): Delete declaration.
+	(delete_reinsert_breakpoints): Declare.
+	(reinsert_breakpoint): Delete declaration.
+	(reinsert_breakpoints_at): Declare.
+	(uninsert_breakpoint): Delete declaration.
+	(uninsert_breakpoints_at): Declare.
+	(check_breakpoints): Adjust prototype.
+	* server.h: Adjust include order.
+	(struct thread_info): Declare here.  Add a `last_status' field.
+
 2010-03-23  Michael Snyder  <msnyder@vmware.com>
 
 	* server.c (crc32): New function.

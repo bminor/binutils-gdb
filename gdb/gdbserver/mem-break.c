@@ -32,19 +32,59 @@ struct breakpoint
   CORE_ADDR pc;
   unsigned char old_data[MAX_BREAKPOINT_LEN];
 
-  /* Non-zero iff we are stepping over this breakpoint.  */
-  int reinserting;
-
-  /* Non-NULL iff this breakpoint was inserted to step over
-     another one.  Points to the other breakpoint (which is also
-     in the *next chain somewhere).  */
-  struct breakpoint *breakpoint_to_reinsert;
+  /* Non-zero if this breakpoint is currently inserted in the
+     inferior.  */
+  int inserted;
 
   /* Function to call when we hit this breakpoint.  If it returns 1,
-     the breakpoint will be deleted; 0, it will be reinserted for
-     another round.  */
+     the breakpoint shall be deleted; 0, it will be left inserted.  */
   int (*handler) (CORE_ADDR);
 };
+
+static struct breakpoint *
+set_raw_breakpoint_at (CORE_ADDR where)
+{
+  struct process_info *proc = current_process ();
+  struct breakpoint *bp;
+  int err;
+
+  if (breakpoint_data == NULL)
+    error ("Target does not support breakpoints.");
+
+  bp = xcalloc (1, sizeof (*bp));
+  bp->pc = where;
+
+  err = (*the_target->read_memory) (where, bp->old_data,
+				    breakpoint_len);
+  if (err != 0)
+    {
+      if (debug_threads)
+	fprintf (stderr,
+		 "Failed to read shadow memory of"
+		 " breakpoint at 0x%s (%s).\n",
+		 paddress (where), strerror (err));
+      free (bp);
+      return NULL;
+    }
+
+  err = (*the_target->write_memory) (where, breakpoint_data,
+				     breakpoint_len);
+  if (err != 0)
+    {
+      if (debug_threads)
+	fprintf (stderr,
+		 "Failed to insert breakpoint at 0x%s (%s).\n",
+		 paddress (where), strerror (err));
+      free (bp);
+      return NULL;
+    }
+
+  /* Link the breakpoint in.  */
+  bp->inserted = 1;
+  bp->next = proc->breakpoints;
+  proc->breakpoints = bp;
+  return bp;
+}
 
 void
 set_breakpoint_at (CORE_ADDR where, int (*handler) (CORE_ADDR))
@@ -52,18 +92,15 @@ set_breakpoint_at (CORE_ADDR where, int (*handler) (CORE_ADDR))
   struct process_info *proc = current_process ();
   struct breakpoint *bp;
 
-  if (breakpoint_data == NULL)
-    error ("Target does not support breakpoints.");
+  bp = set_raw_breakpoint_at (where);
 
-  bp = xmalloc (sizeof (struct breakpoint));
-  memset (bp, 0, sizeof (struct breakpoint));
+  if (bp == NULL)
+    {
+      /* warn? */
+      return;
+    }
 
-  (*the_target->read_memory) (where, bp->old_data,
-			      breakpoint_len);
-  (*the_target->write_memory) (where, breakpoint_data,
-			       breakpoint_len);
-
-  bp->pc = where;
+  bp = xcalloc (1, sizeof (struct breakpoint));
   bp->handler = handler;
 
   bp->next = proc->breakpoints;
@@ -123,97 +160,145 @@ delete_breakpoint_at (CORE_ADDR addr)
     delete_breakpoint (bp);
 }
 
-static int
-reinsert_breakpoint_handler (CORE_ADDR stop_pc)
+void
+set_reinsert_breakpoint (CORE_ADDR stop_at)
 {
-  struct breakpoint *stop_bp, *orig_bp;
-
-  stop_bp = find_breakpoint_at (stop_pc);
-  if (stop_bp == NULL)
-    error ("lost the stopping breakpoint.");
-
-  orig_bp = stop_bp->breakpoint_to_reinsert;
-  if (orig_bp == NULL)
-    error ("no breakpoint to reinsert");
-
-  (*the_target->write_memory) (orig_bp->pc, breakpoint_data,
-			       breakpoint_len);
-  orig_bp->reinserting = 0;
-  return 1;
+  set_breakpoint_at (stop_at, NULL);
 }
 
 void
-reinsert_breakpoint_by_bp (CORE_ADDR stop_pc, CORE_ADDR stop_at)
+delete_reinsert_breakpoints (void)
 {
-  struct breakpoint *bp, *orig_bp;
+  struct process_info *proc = current_process ();
+  struct breakpoint *bp, **bp_link;
 
-  orig_bp = find_breakpoint_at (stop_pc);
-  if (orig_bp == NULL)
-    error ("Could not find original breakpoint in list.");
+  bp = proc->breakpoints;
+  bp_link = &proc->breakpoints;
 
-  set_breakpoint_at (stop_at, reinsert_breakpoint_handler);
+  while (bp)
+    {
+      *bp_link = bp->next;
+      delete_breakpoint (bp);
+      bp = *bp_link;
+    }
+}
 
-  bp = find_breakpoint_at (stop_at);
-  if (bp == NULL)
-    error ("Could not find breakpoint in list (reinserting by breakpoint).");
-  bp->breakpoint_to_reinsert = orig_bp;
+static void
+uninsert_breakpoint (struct breakpoint *bp)
+{
+  if (bp->inserted)
+    {
+      int err;
 
-  (*the_target->write_memory) (orig_bp->pc, orig_bp->old_data,
-			       breakpoint_len);
-  orig_bp->reinserting = 1;
+      bp->inserted = 0;
+      err = (*the_target->write_memory) (bp->pc, bp->old_data,
+					 breakpoint_len);
+      if (err != 0)
+	{
+	  bp->inserted = 1;
+
+	  if (debug_threads)
+	    fprintf (stderr,
+		     "Failed to uninsert raw breakpoint at 0x%s (%s).\n",
+		     paddress (bp->pc), strerror (err));
+	}
+    }
 }
 
 void
-uninsert_breakpoint (CORE_ADDR stopped_at)
+uninsert_breakpoints_at (CORE_ADDR pc)
 {
   struct breakpoint *bp;
 
-  bp = find_breakpoint_at (stopped_at);
+  bp = find_breakpoint_at (pc);
   if (bp == NULL)
-    error ("Could not find breakpoint in list (uninserting).");
+    {
+      /* This can happen when we remove all breakpoints while handling
+	 a step-over.  */
+      if (debug_threads)
+	fprintf (stderr,
+		 "Could not find breakpoint at 0x%s "
+		 "in list (uninserting).\n",
+		 paddress (pc));
+      return;
+    }
 
-  (*the_target->write_memory) (bp->pc, bp->old_data,
-			       breakpoint_len);
-  bp->reinserting = 1;
+  if (bp->inserted)
+    uninsert_breakpoint (bp);
 }
 
-void
-reinsert_breakpoint (CORE_ADDR stopped_at)
+static void
+reinsert_breakpoint (struct breakpoint *bp)
 {
-  struct breakpoint *bp;
+  int err;
 
-  bp = find_breakpoint_at (stopped_at);
-  if (bp == NULL)
-    error ("Could not find breakpoint in list (uninserting).");
-  if (! bp->reinserting)
+  if (bp->inserted)
     error ("Breakpoint already inserted at reinsert time.");
 
-  (*the_target->write_memory) (bp->pc, breakpoint_data,
-			       breakpoint_len);
-  bp->reinserting = 0;
+  err = (*the_target->write_memory) (bp->pc, breakpoint_data,
+				     breakpoint_len);
+  if (err == 0)
+    bp->inserted = 1;
+  else if (debug_threads)
+    fprintf (stderr,
+	     "Failed to reinsert breakpoint at 0x%s (%s).\n",
+	     paddress (bp->pc), strerror (err));
 }
 
-int
-check_breakpoints (CORE_ADDR stop_pc)
+void
+reinsert_breakpoints_at (CORE_ADDR pc)
 {
   struct breakpoint *bp;
 
-  bp = find_breakpoint_at (stop_pc);
+  bp = find_breakpoint_at (pc);
   if (bp == NULL)
-    return 0;
-  if (bp->reinserting)
     {
-      warning ("Hit a removed breakpoint?");
-      return 0;
+      /* This can happen when we remove all breakpoints while handling
+	 a step-over.  */
+      if (debug_threads)
+	fprintf (stderr,
+		 "Could not find breakpoint at 0x%s "
+		 "in list (reinserting).\n",
+		 paddress (pc));
+      return;
     }
 
-  if ((*bp->handler) (bp->pc))
+  reinsert_breakpoint (bp);
+}
+
+void
+check_breakpoints (CORE_ADDR stop_pc)
+{
+  struct process_info *proc = current_process ();
+  struct breakpoint *bp, **bp_link;
+
+  bp = proc->breakpoints;
+  bp_link = &proc->breakpoints;
+
+  while (bp)
     {
-      delete_breakpoint (bp);
-      return 2;
+      if (bp->pc == stop_pc)
+	{
+	  if (!bp->inserted)
+	    {
+	      warning ("Hit a removed breakpoint?");
+	      return;
+	    }
+
+	  if (bp->handler != NULL && (*bp->handler) (stop_pc))
+	    {
+	      *bp_link = bp->next;
+
+	      delete_breakpoint (bp);
+
+	      bp = *bp_link;
+	      continue;
+	    }
+	}
+
+      bp_link = &bp->next;
+      bp = *bp_link;
     }
-  else
-    return 1;
 }
 
 void
@@ -221,6 +306,32 @@ set_breakpoint_data (const unsigned char *bp_data, int bp_len)
 {
   breakpoint_data = bp_data;
   breakpoint_len = bp_len;
+}
+
+int
+breakpoint_here (CORE_ADDR addr)
+{
+  struct process_info *proc = current_process ();
+  struct breakpoint *bp;
+
+  for (bp = proc->breakpoints; bp != NULL; bp = bp->next)
+    if (bp->pc == addr)
+      return 1;
+
+  return 0;
+}
+
+int
+breakpoint_inserted_here (CORE_ADDR addr)
+{
+  struct process_info *proc = current_process ();
+  struct breakpoint *bp;
+
+  for (bp = proc->breakpoints; bp != NULL; bp = bp->next)
+    if (bp->pc == addr && bp->inserted)
+      return 1;
+
+  return 0;
 }
 
 void
@@ -288,7 +399,7 @@ check_mem_write (CORE_ADDR mem_addr, unsigned char *buf, int mem_len)
       buf_offset = start - mem_addr;
 
       memcpy (bp->old_data + copy_offset, buf + buf_offset, copy_len);
-      if (bp->reinserting == 0)
+      if (bp->inserted)
 	memcpy (buf + buf_offset, breakpoint_data + copy_offset, copy_len);
     }
 }

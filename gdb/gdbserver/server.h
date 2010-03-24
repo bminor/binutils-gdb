@@ -162,8 +162,25 @@ struct inferior_list_entry
   struct inferior_list_entry *next;
 };
 
-/* Opaque type for user-visible threads.  */
 struct thread_info;
+struct process_info;
+struct regcache;
+
+#include "regcache.h"
+#include "gdb/signals.h"
+#include "gdb_signals.h"
+#include "target.h"
+#include "mem-break.h"
+
+struct thread_info
+{
+  struct inferior_list_entry entry;
+  void *target_data;
+  void *regcache_data;
+
+  /* The last wait status reported for this thread.  */
+  struct target_waitstatus last_status;
+};
 
 struct dll_info
 {
@@ -202,12 +219,6 @@ struct process_info
 
 struct process_info *current_process (void);
 struct process_info *get_thread_process (struct thread_info *);
-
-#include "regcache.h"
-#include "gdb/signals.h"
-#include "gdb_signals.h"
-#include "target.h"
-#include "mem-break.h"
 
 /* Target-specific functions */
 

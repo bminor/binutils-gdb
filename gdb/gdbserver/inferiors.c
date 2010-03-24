@@ -23,14 +23,6 @@
 
 #include "server.h"
 
-struct thread_info
-{
-  struct inferior_list_entry entry;
-  void *target_data;
-  void *regcache_data;
-  unsigned int gdb_id;
-};
-
 struct inferior_list all_processes;
 struct inferior_list all_threads;
 struct inferior_list all_dlls;
