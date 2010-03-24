@@ -433,6 +433,63 @@ tracepoint_type (const struct breakpoint *b)
   return (b->type == bp_tracepoint || b->type == bp_fast_tracepoint);
 }
   
+/* Allocate a new counted_command_line with reference count of 1.
+   The new structure owns COMMANDS.  */
+
+static struct counted_command_line *
+alloc_counted_command_line (struct command_line *commands)
+{
+  struct counted_command_line *result
+    = xmalloc (sizeof (struct counted_command_line));
+  result->refc = 1;
+  result->commands = commands;
+  return result;
+}
+
+/* Increment reference count.  This does nothing if CMD is NULL.  */
+
+static void
+incref_counted_command_line (struct counted_command_line *cmd)
+{
+  if (cmd)
+    ++cmd->refc;
+}
+
+/* Decrement reference count.  If the reference count reaches 0,
+   destroy the counted_command_line.  Sets *CMDP to NULL.  This does
+   nothing if *CMDP is NULL.  */
+
+static void
+decref_counted_command_line (struct counted_command_line **cmdp)
+{
+  if (*cmdp)
+    {
+      if (--(*cmdp)->refc == 0)
+	{
+	  free_command_lines (&(*cmdp)->commands);
+	  xfree (*cmdp);
+	}
+      *cmdp = NULL;
+    }
+}
+
+/* A cleanup function that calls decref_counted_command_line.  */
+
+static void
+do_cleanup_counted_command_line (void *arg)
+{
+  decref_counted_command_line (arg);
+}
+
+/* Create a cleanup that calls decref_counted_command_line on the
+   argument.  */
+
+static struct cleanup *
+make_cleanup_decref_counted_command_line (struct counted_command_line **cmdp)
+{
+  return make_cleanup (do_cleanup_counted_command_line, cmdp);
+}
+
 /* Default address, symtab and line to put a breakpoint at
    for "break" command with no arg.
    if default_breakpoint_valid is zero, the other three are
@@ -783,8 +840,8 @@ breakpoint_set_commands (struct breakpoint *b, struct command_line *commands)
       check_no_tracepoint_commands (commands);
     }
 
-  free_command_lines (&b->commands);
-  b->commands = commands;
+  decref_counted_command_line (&b->commands);
+  b->commands = alloc_counted_command_line (commands);
   breakpoints_changed ();
   observer_notify_breakpoint_modified (b->number);
 }
@@ -802,13 +859,6 @@ commands_command (char *arg, int from_tty)
   char *p;
   int bnum;
   struct command_line *l;
-
-  /* If we allowed this, we would have problems with when to
-     free the storage, if we change the commands currently
-     being read from.  */
-
-  if (executing_breakpoint_commands)
-    error (_("Can't use the \"commands\" command among a breakpoint's commands."));
 
   p = arg;
   bnum = get_number (&p);
@@ -847,13 +897,6 @@ commands_from_control_command (char *arg, struct command_line *cmd)
   char *p;
   int bnum;
 
-  /* If we allowed this, we would have problems with when to
-     free the storage, if we change the commands currently
-     being read from.  */
-
-  if (executing_breakpoint_commands)
-    error (_("Can't use the \"commands\" command among a breakpoint's commands."));
-
   /* An empty string for the breakpoint number means the last
      breakpoint, but get_number expects a NULL pointer.  */
   if (arg && !*arg)
@@ -868,12 +911,13 @@ commands_from_control_command (char *arg, struct command_line *cmd)
   ALL_BREAKPOINTS (b)
     if (b->number == bnum)
       {
-	free_command_lines (&b->commands);
+	decref_counted_command_line (&b->commands);
 	if (cmd->body_count != 1)
 	  error (_("Invalid \"commands\" block structure."));
 	/* We need to copy the commands because if/while will free the
 	   list after it finishes execution.  */
-	b->commands = copy_command_lines (cmd->body_list[0]);
+	b->commands
+	  = alloc_counted_command_line (copy_command_lines (cmd->body_list[0]));
 	breakpoints_changed ();
 	observer_notify_breakpoint_modified (b->number);
 	return simple_control;
@@ -2697,7 +2741,7 @@ bpstat_free (bpstat bs)
 {
   if (bs->old_val != NULL)
     value_free (bs->old_val);
-  free_command_lines (&bs->commands);
+  decref_counted_command_line (&bs->commands);
   xfree (bs);
 }
 
@@ -2739,8 +2783,7 @@ bpstat_copy (bpstat bs)
     {
       tmp = (bpstat) xmalloc (sizeof (*tmp));
       memcpy (tmp, bs, sizeof (*tmp));
-      if (bs->commands != NULL)
-	tmp->commands = copy_command_lines (bs->commands);
+      incref_counted_command_line (tmp->commands);
       if (bs->old_val != NULL)
 	{
 	  tmp->old_val = value_copy (bs->old_val);
@@ -2841,7 +2884,7 @@ bpstat_clear_actions (bpstat bs)
 {
   for (; bs != NULL; bs = bs->next)
     {
-      free_command_lines (&bs->commands);
+      decref_counted_command_line (&bs->commands);
       if (bs->old_val != NULL)
 	{
 	  value_free (bs->old_val);
@@ -2907,6 +2950,7 @@ bpstat_do_actions_1 (bpstat *bsp)
   breakpoint_proceeded = 0;
   for (; bs != NULL; bs = bs->next)
     {
+      struct counted_command_line *ccmd;
       struct command_line *cmd;
       struct cleanup *this_cmd_tree_chain;
 
@@ -2920,9 +2964,12 @@ bpstat_do_actions_1 (bpstat *bsp)
          commands are only executed once, we don't need to copy it; we
          can clear the pointer in the bpstat, and make sure we free
          the tree when we're done.  */
-      cmd = bs->commands;
-      bs->commands = 0;
-      this_cmd_tree_chain = make_cleanup_free_command_lines (&cmd);
+      ccmd = bs->commands;
+      bs->commands = NULL;
+      this_cmd_tree_chain
+	= make_cleanup_decref_counted_command_line (&ccmd);
+      cmd = bs->commands_left;
+      bs->commands_left = NULL;
 
       while (cmd != NULL)
 	{
@@ -3305,6 +3352,7 @@ bpstat_alloc (const struct bp_location *bl, bpstat cbs /* Current "bs" value */ 
   bs->breakpoint_at = bl;
   /* If the condition is false, etc., don't do the commands.  */
   bs->commands = NULL;
+  bs->commands_left = NULL;
   bs->old_val = NULL;
   bs->print_it = print_it_normal;
   return bs;
@@ -3942,15 +3990,17 @@ bpstat_stop_status (struct address_space *aspace,
 	      if (b->silent)
 		bs->print = 0;
 	      bs->commands = b->commands;
-	      if (bs->commands
-		  && (strcmp ("silent", bs->commands->line) == 0
-		      || (xdb_commands && strcmp ("Q",
-						  bs->commands->line) == 0)))
+	      incref_counted_command_line (bs->commands);
+	      bs->commands_left = bs->commands ? bs->commands->commands : NULL;
+	      if (bs->commands_left
+		  && (strcmp ("silent", bs->commands_left->line) == 0
+		      || (xdb_commands
+			  && strcmp ("Q",
+				     bs->commands_left->line) == 0)))
 		{
-		  bs->commands = bs->commands->next;
+		  bs->commands_left = bs->commands_left->next;
 		  bs->print = 0;
 		}
-	      bs->commands = copy_command_lines (bs->commands);
 	    }
 
 	  /* Print nothing for this entry if we dont stop or dont print.  */
@@ -4617,7 +4667,7 @@ print_one_breakpoint_location (struct breakpoint *b,
       ui_out_text (uiout, " hits\n");
     }
 
-  l = b->commands;
+  l = b->commands ? b->commands->commands : NULL;
   if (!part_of_multiple && l)
     {
       struct cleanup *script_chain;
@@ -9021,7 +9071,7 @@ delete_breakpoint (struct breakpoint *bpt)
       break;
     }
 
-  free_command_lines (&bpt->commands);
+  decref_counted_command_line (&bpt->commands);
   xfree (bpt->cond_string);
   xfree (bpt->cond_exp);
   xfree (bpt->addr_string);
@@ -10446,7 +10496,7 @@ tracepoint_save_command (char *args, int from_tty)
 	ui_out_redirect (uiout, fp);
 	TRY_CATCH (ex, RETURN_MASK_ERROR)
 	  {
-	    print_command_lines (uiout, tp->commands, 2);
+	    print_command_lines (uiout, tp->commands->commands, 2);
 	  }
 	ui_out_redirect (uiout, NULL);
 

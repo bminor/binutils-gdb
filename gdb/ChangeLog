@@ -1,3 +1,31 @@
+2010-03-24  Tom Tromey  <tromey@redhat.com>
+
+	* breakpoint.h (struct counted_command_line): New struct.
+	(struct breakpoint) <commands>: Change type.
+	(struct bpstats) <commands>: Change type.
+	<commands_left>: New field.
+	* breakpoint.c (alloc_counted_command_line): New function.
+	(incref_counted_command_line): Likewise.
+	(decref_counted_command_line): Likewise.
+	(do_cleanup_counted_command_line): Likewise.
+	(make_cleanup_decref_counted_command_line): Likewise.
+	(breakpoint_set_commands): Use decref_counted_command_line and
+	alloc_counted_command_line.
+	(commands_command): Don't error if breakpoint commands are
+	executing.
+	(commands_from_control_command): Likewise.
+	(bpstat_free): Update.
+	(bpstat_copy): Likewise.
+	(bpstat_clear_actions): Likewise.
+	(bpstat_do_actions_1): Likewise.
+	(bpstat_stop_status): Likewise.
+	(print_one_breakpoint_location): Likewise.
+	(delete_breakpoint): Likewise.
+	(bpstat_alloc): Initialize new field.
+	(tracepoint_save_command): Update.
+	* tracepoint.c (encode_actions): Update.
+	(trace_dump_command): Update.
+
 2010-03-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2-frame.c (dwarf2_frame_find_quirks): Use producer_is_realview.

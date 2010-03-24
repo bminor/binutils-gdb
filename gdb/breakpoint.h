@@ -376,6 +376,17 @@ DEF_VEC_I(int);
 typedef struct bp_location *bp_location_p;
 DEF_VEC_P(bp_location_p);
 
+/* A reference-counted struct command_line.  This lets multiple
+   breakpoints share a single command list.  */
+struct counted_command_line
+{
+  /* The reference count.  */
+  int refc;
+
+  /* The command list.  */
+  struct command_line *commands;
+};
+
 /* Note that the ->silent field is not currently used by any commands
    (though the code is in there if it was to be, and set_raw_breakpoint
    does set it to 0).  I implemented it because I thought it would be
@@ -414,7 +425,7 @@ struct breakpoint
        be continued automatically before really stopping.  */
     int ignore_count;
     /* Chain of command lines to execute when this breakpoint is hit.  */
-    struct command_line *commands;
+    struct counted_command_line *commands;
     /* Stack depth (address of frame).  If nonzero, break only if fp
        equals this.  */
     struct frame_id frame_id;
@@ -698,8 +709,11 @@ struct bpstats
     bpstat next;
     /* Breakpoint that we are at.  */
     const struct bp_location *breakpoint_at;
-    /* Commands left to be done.  */
-    struct command_line *commands;
+    /* The associated command list.  */
+    struct counted_command_line *commands;
+    /* Commands left to be done.  This points somewhere in
+       base_command.  */
+    struct command_line *commands_left;
     /* Old value associated with a watchpoint.  */
     struct value *old_val;
 
