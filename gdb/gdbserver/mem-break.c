@@ -26,6 +26,17 @@ int breakpoint_len;
 
 #define MAX_BREAKPOINT_LEN 8
 
+/* The type of a breakpoint.  */
+enum bkpt_type
+  {
+    /* A basic-software-single-step breakpoint.  */
+    reinsert_breakpoint,
+
+    /* Any other breakpoint type that doesn't require specific
+       treatment goes here.  E.g., an event breakpoint.  */
+    other_breakpoint,
+  };
+
 struct breakpoint
 {
   struct breakpoint *next;
@@ -36,10 +47,15 @@ struct breakpoint
      inferior.  */
   int inserted;
 
+  /* The breakpoint's type.  */
+  enum bkpt_type type;
+
   /* Function to call when we hit this breakpoint.  If it returns 1,
      the breakpoint shall be deleted; 0, it will be left inserted.  */
   int (*handler) (CORE_ADDR);
 };
+
+static void uninsert_breakpoint (struct breakpoint *bp);
 
 static struct breakpoint *
 set_raw_breakpoint_at (CORE_ADDR where)
@@ -86,7 +102,7 @@ set_raw_breakpoint_at (CORE_ADDR where)
   return bp;
 }
 
-void
+struct breakpoint *
 set_breakpoint_at (CORE_ADDR where, int (*handler) (CORE_ADDR))
 {
   struct process_info *proc = current_process ();
@@ -97,42 +113,45 @@ set_breakpoint_at (CORE_ADDR where, int (*handler) (CORE_ADDR))
   if (bp == NULL)
     {
       /* warn? */
-      return;
+      return NULL;
     }
 
   bp = xcalloc (1, sizeof (struct breakpoint));
+  bp->type = other_breakpoint;
   bp->handler = handler;
 
   bp->next = proc->breakpoints;
   proc->breakpoints = bp;
+
+  return bp;
 }
 
 static void
-delete_breakpoint (struct breakpoint *bp)
+delete_breakpoint (struct breakpoint *todel)
 {
   struct process_info *proc = current_process ();
-  struct breakpoint *cur;
+  struct breakpoint *bp, **bp_link;
 
-  if (proc->breakpoints == bp)
+  bp = proc->breakpoints;
+  bp_link = &proc->breakpoints;
+
+  while (bp)
     {
-      proc->breakpoints = bp->next;
-      (*the_target->write_memory) (bp->pc, bp->old_data,
-				   breakpoint_len);
-      free (bp);
-      return;
-    }
-  cur = proc->breakpoints;
-  while (cur->next)
-    {
-      if (cur->next == bp)
+      if (bp == todel)
 	{
-	  cur->next = bp->next;
-	  (*the_target->write_memory) (bp->pc, bp->old_data,
-				       breakpoint_len);
+	  *bp_link = bp->next;
+
+	  uninsert_breakpoint (bp);
 	  free (bp);
 	  return;
 	}
+      else
+	{
+	  bp_link = &bp->next;
+	  bp = *bp_link;
+	}
     }
+
   warning ("Could not find breakpoint in list.");
 }
 
@@ -163,7 +182,11 @@ delete_breakpoint_at (CORE_ADDR addr)
 void
 set_reinsert_breakpoint (CORE_ADDR stop_at)
 {
-  set_breakpoint_at (stop_at, NULL);
+  struct breakpoint *bp;
+
+  bp = set_breakpoint_at (stop_at, NULL);
+
+  bp->type = reinsert_breakpoint;
 }
 
 void
@@ -177,9 +200,23 @@ delete_reinsert_breakpoints (void)
 
   while (bp)
     {
-      *bp_link = bp->next;
-      delete_breakpoint (bp);
-      bp = *bp_link;
+      if (bp->type == reinsert_breakpoint)
+	{
+	  *bp_link = bp->next;
+
+	  /* If something goes wrong, maybe this is a shared library
+	     breakpoint, and the shared library has been unmapped.
+	     Assume the breakpoint is gone anyway.  */
+	  uninsert_breakpoint (bp);
+	  free (bp);
+
+	  bp = *bp_link;
+	}
+      else
+	{
+	  bp_link = &bp->next;
+	  bp = *bp_link;
+	}
     }
 }
 
@@ -228,7 +265,7 @@ uninsert_breakpoints_at (CORE_ADDR pc)
 }
 
 static void
-reinsert_breakpoint (struct breakpoint *bp)
+reinsert_raw_breakpoint (struct breakpoint *bp)
 {
   int err;
 
@@ -263,7 +300,7 @@ reinsert_breakpoints_at (CORE_ADDR pc)
       return;
     }
 
-  reinsert_breakpoint (bp);
+  reinsert_raw_breakpoint (bp);
 }
 
 void

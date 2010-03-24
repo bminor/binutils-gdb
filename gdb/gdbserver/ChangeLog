@@ -1,5 +1,21 @@
 2010-03-24  Pedro Alves  <pedro@codesourcery.com>
 
+	* mem-break.c (enum bkpt_type): New.
+	(struct breakpoint): New field `type'.
+	(set_breakpoint_at): Change return type to struct breakpoint
+	pointer.  Set type to `other_breakpoint' by default.
+	(delete_breakpoint): Rewrite, supporting more than one breakpoint
+	in the breakpoint list.
+	(delete_reinsert_breakpoints): Only delete reinsert breakpoints.
+	(reinsert_breakpoint): Rename to ...
+	(reinsert_raw_breakpoint): ... this.
+	(reinsert_breakpoints_at): Adjust.
+	* mem-break.h (struct breakpoint): Declare.
+	(set_breakpoint_at): Change return type to struct breakpoint
+	pointer.
+
+2010-03-24  Pedro Alves  <pedro@codesourcery.com>
+
 	* server.c (handle_query): Assign, not compare.
 
 2010-03-24  Pedro Alves  <pedro@codesourcery.com>

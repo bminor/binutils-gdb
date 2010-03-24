@@ -23,6 +23,7 @@
 #define MEM_BREAK_H
 
 /* Breakpoints are opaque.  */
+struct breakpoint;
 
 /* Returns TRUE if breakpoints are supported on this target.  */
 
@@ -41,8 +42,8 @@ int breakpoint_inserted_here (CORE_ADDR addr);
    it is hit.  HANDLER should return 1 if the breakpoint
    should be deleted, 0 otherwise.  */
 
-void set_breakpoint_at (CORE_ADDR where,
-			int (*handler) (CORE_ADDR));
+struct breakpoint *set_breakpoint_at (CORE_ADDR where,
+				      int (*handler) (CORE_ADDR));
 
 /* Delete a breakpoint previously inserted at ADDR with
    set_breakpoint_at.  */
