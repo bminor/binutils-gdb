@@ -747,7 +747,7 @@ proc gdb_test_multiple { command message user_code } {
 	    fail "$errmsg"
 	    set result -1
 	}
-	 -re "EXIT code \[0-9\r\n\]+Program exited normally.*$gdb_prompt $" {
+	 -re "Program exited normally.*$gdb_prompt $" {
 	    if ![string match "" $message] then {
 		set errmsg "$message (the program exited)"
 	    } else {

@@ -1,3 +1,11 @@
+2010-03-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/call-signal-resume.exp, gdb.base/unwindonsignal.exp: Skip
+	if gdb,nosignals.
+	* gdb.base/watchpoints.c: Do not include unnecessary headers.
+	* lib/gdb.exp (gdb_test_multiple): Relax pattern for "the program
+	exited".
+
 2010-03-24  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.trace/tfile.exp: Expect "trace frame", with a space.

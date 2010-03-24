@@ -22,6 +22,11 @@ if [target_info exists gdb,noinferiorio] {
     continue
 }
 
+if [target_info exists gdb,nosignals] {
+    verbose "Skipping unwindonsignal.exp because of nosignals."
+    continue
+}
+
 set prms_id 0
 set bug_id 0
 

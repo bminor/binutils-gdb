@@ -21,9 +21,6 @@
 /* This source is mainly to test what happens when a watchpoint is
    removed while another watchpoint, inserted later is left active.  */
 
-#include <stdio.h>
-#include <unistd.h>
-
 int count = -1;
 int ival1 = -1;
 int ival2 = -1;
