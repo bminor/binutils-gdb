@@ -4328,19 +4328,23 @@ enable other breakpoints.
 @table @code
 @kindex commands
 @kindex end@r{ (breakpoint commands)}
-@item commands @r{[}@var{bnum}@r{]}
+@item commands @r{[}@var{range}@dots{}@r{]}
 @itemx @dots{} @var{command-list} @dots{}
 @itemx end
-Specify a list of commands for breakpoint number @var{bnum}.  The commands
+Specify a list of commands for the given breakpoints.  The commands
 themselves appear on the following lines.  Type a line containing just
 @code{end} to terminate the commands.
 
 To remove all commands from a breakpoint, type @code{commands} and
 follow it immediately with @code{end}; that is, give no commands.
 
-With no @var{bnum} argument, @code{commands} refers to the last
-breakpoint, watchpoint, or catchpoint set (not to the breakpoint most
-recently encountered).
+With no argument, @code{commands} refers to the last breakpoint,
+watchpoint, or catchpoint set (not to the breakpoint most recently
+encountered).  If the most recent breakpoints were set with a single
+command, then the @code{commands} will apply to all the breakpoints
+set by that command.  This applies to breakpoints set by
+@code{rbreak}, and also breakpoints set with @code{break} that have
+multiple locations.
 @end table
 
 Pressing @key{RET} as a means of repeating the last @value{GDBN} command is

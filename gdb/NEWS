@@ -13,6 +13,10 @@
   16-bit word register AX that are actually portions of the 32-bit
   register EAX or 64-bit register RAX.
 
+* The `commands' command now accepts a range of breakpoints to modify.
+  A plain `commands' following an `rbreak' will affect all the
+  breakpoints set by `rbreak'.
+
 * Python scripting
 
 ** The GDB Python API now has access to symbols, symbol tables, and

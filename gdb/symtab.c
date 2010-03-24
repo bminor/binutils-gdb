@@ -3170,23 +3170,41 @@ rbreak_command_wrapper (char *regexp, int from_tty)
   rbreak_command (regexp, from_tty);
 }
 
+/* A cleanup function that calls end_rbreak_breakpoints.  */
+
+static void
+do_end_rbreak_breakpoints (void *ignore)
+{
+  end_rbreak_breakpoints ();
+}
+
 static void
 rbreak_command (char *regexp, int from_tty)
 {
   struct symbol_search *ss;
   struct symbol_search *p;
   struct cleanup *old_chain;
+  char *string = NULL;
+  int len = 0;
 
   search_symbols (regexp, FUNCTIONS_DOMAIN, 0, (char **) NULL, &ss);
   old_chain = make_cleanup_free_search_symbols (ss);
+  make_cleanup (free_current_contents, &string);
 
+  start_rbreak_breakpoints ();
+  make_cleanup (do_end_rbreak_breakpoints, NULL);
   for (p = ss; p != NULL; p = p->next)
     {
       if (p->msymbol == NULL)
 	{
-	  char *string = alloca (strlen (p->symtab->filename)
-				 + strlen (SYMBOL_LINKAGE_NAME (p->symbol))
-				 + 4);
+	  int newlen = (strlen (p->symtab->filename)
+			+ strlen (SYMBOL_LINKAGE_NAME (p->symbol))
+			+ 4);
+	  if (newlen > len)
+	    {
+	      string = xrealloc (string, newlen);
+	      len = newlen;
+	    }
 	  strcpy (string, p->symtab->filename);
 	  strcat (string, ":'");
 	  strcat (string, SYMBOL_LINKAGE_NAME (p->symbol));
@@ -3200,8 +3218,13 @@ rbreak_command (char *regexp, int from_tty)
 	}
       else
 	{
-	  char *string = alloca (strlen (SYMBOL_LINKAGE_NAME (p->msymbol))
-				 + 3);
+	  int newlen = (strlen (SYMBOL_LINKAGE_NAME (p->msymbol))
+			+ 3);
+	  if (newlen > len)
+	    {
+	      string = xrealloc (string, newlen);
+	      len = newlen;
+	    }
 	  strcpy (string, "'");
 	  strcat (string, SYMBOL_LINKAGE_NAME (p->msymbol));
 	  strcat (string, "'");

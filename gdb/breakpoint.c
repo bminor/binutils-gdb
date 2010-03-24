@@ -79,17 +79,15 @@
 
 static void enable_delete_command (char *, int);
 
-static void enable_delete_breakpoint (struct breakpoint *);
-
 static void enable_once_command (char *, int);
-
-static void enable_once_breakpoint (struct breakpoint *);
 
 static void disable_command (char *, int);
 
 static void enable_command (char *, int);
 
-static void map_breakpoint_numbers (char *, void (*)(struct breakpoint *));
+static void map_breakpoint_numbers (char *, void (*) (struct breakpoint *,
+						      void *),
+				    void *);
 
 static void ignore_command (char *, int);
 
@@ -145,8 +143,6 @@ static void commands_command (char *, int);
 static void condition_command (char *, int);
 
 static int get_number_trailer (char **, int);
-
-void set_breakpoint_count (int);
 
 typedef enum
   {
@@ -392,11 +388,19 @@ VEC(bp_location_p) *moribund_locations = NULL;
 
 /* Number of last breakpoint made.  */
 
-int breakpoint_count;
+static int breakpoint_count;
+
+/* If the last command to create a breakpoint created multiple
+   breakpoints, this holds the start and end breakpoint numbers.  */
+static int multi_start;
+static int multi_end;
+/* True if the last breakpoint set was part of a group set with a
+   single command, e.g., "rbreak".  */
+static int last_was_multi;
 
 /* Number of last tracepoint made.  */
 
-int tracepoint_count;
+static int tracepoint_count;
 
 /* Return whether a breakpoint is an active enabled breakpoint.  */
 static int
@@ -407,11 +411,32 @@ breakpoint_enabled (struct breakpoint *b)
 
 /* Set breakpoint count to NUM.  */
 
-void
+static void
 set_breakpoint_count (int num)
 {
   breakpoint_count = num;
+  last_was_multi = 0;
   set_internalvar_integer (lookup_internalvar ("bpnum"), num);
+}
+
+/* Called at the start an "rbreak" command to record the first
+   breakpoint made.  */
+void
+start_rbreak_breakpoints (void)
+{
+  multi_start = breakpoint_count + 1;
+}
+
+/* Called at the end of an "rbreak" command to record the last
+   breakpoint made.  */
+void
+end_rbreak_breakpoints (void)
+{
+  if (breakpoint_count >= multi_start)
+    {
+      multi_end = breakpoint_count;
+      last_was_multi = 1;
+    }
 }
 
 /* Used in run_command to zero the hit count when a new run starts. */
@@ -792,12 +817,13 @@ breakpoint_is_tracepoint (const struct breakpoint *b)
     }
 }
 
-/* Set the command list of B to COMMANDS.  If breakpoint is tracepoint,
-   validate that only allowed commands are included.
-*/
+/* A helper function that validsates that COMMANDS are valid for a
+   breakpoint.  This function will throw an exception if a problem is
+   found.  */
 
-void
-breakpoint_set_commands (struct breakpoint *b, struct command_line *commands)
+static void
+validate_commands_for_breakpoint (struct breakpoint *b,
+				  struct command_line *commands)
 {
   if (breakpoint_is_tracepoint (b))
     {
@@ -839,6 +865,16 @@ breakpoint_set_commands (struct breakpoint *b, struct command_line *commands)
     {
       check_no_tracepoint_commands (commands);
     }
+}
+
+/* Set the command list of B to COMMANDS.  If breakpoint is tracepoint,
+   validate that only allowed commands are included.
+*/
+
+void
+breakpoint_set_commands (struct breakpoint *b, struct command_line *commands)
+{
+  validate_commands_for_breakpoint (b, commands);
 
   decref_counted_command_line (&b->commands);
   b->commands = alloc_counted_command_line (commands);
@@ -846,43 +882,100 @@ breakpoint_set_commands (struct breakpoint *b, struct command_line *commands)
   observer_notify_breakpoint_modified (b->number);
 }
 
-void check_tracepoint_command (char *line, void *closure)
+void
+check_tracepoint_command (char *line, void *closure)
 {
   struct breakpoint *b = closure;
   validate_actionline (&line, b);
 }
 
+/* A structure used to pass information through
+   map_breakpoint_numbers.  */
+
+struct commands_info
+{
+  /* True if the command was typed at a tty.  */
+  int from_tty;
+  /* Non-NULL if the body of the commands are being read from this
+     already-parsed command.  */
+  struct command_line *control;
+  /* The command lines read from the user, or NULL if they have not
+     yet been read.  */
+  struct counted_command_line *cmd;
+};
+
+/* A callback for map_breakpoint_numbers that sets the commands for
+   commands_command.  */
+
+static void
+do_map_commands_command (struct breakpoint *b, void *data)
+{
+  struct commands_info *info = data;
+
+  if (info->cmd == NULL)
+    {
+      struct command_line *l;
+
+      if (info->control != NULL)
+	l = copy_command_lines (info->control->body_list[0]);
+      else
+
+	l = read_command_lines (_("Type commands for all specified breakpoints"),
+				info->from_tty, 1,
+				(breakpoint_is_tracepoint (b)
+				 ? check_tracepoint_command : 0),
+				b);
+
+      info->cmd = alloc_counted_command_line (l);
+    }
+
+  /* If a breakpoint was on the list more than once, we don't need to
+     do anything.  */
+  if (b->commands != info->cmd)
+    {
+      validate_commands_for_breakpoint (b, info->cmd->commands);
+      incref_counted_command_line (info->cmd);
+      decref_counted_command_line (&b->commands);
+      b->commands = info->cmd;
+      breakpoints_changed ();
+      observer_notify_breakpoint_modified (b->number);
+    }
+}
+
+static void
+commands_command_1 (char *arg, int from_tty, struct command_line *control)
+{
+  struct cleanup *cleanups;
+  struct commands_info info;
+
+  info.from_tty = from_tty;
+  info.control = control;
+  info.cmd = NULL;
+  /* If we read command lines from the user, then `info' will hold an
+     extra reference to the commands that we must clean up.  */
+  cleanups = make_cleanup_decref_counted_command_line (&info.cmd);
+
+  if (arg == NULL || !*arg)
+    {
+      if (last_was_multi)
+	arg = xstrprintf ("%d-%d", multi_start, multi_end);
+      else if (breakpoint_count > 0)
+	arg = xstrprintf ("%d", breakpoint_count);
+      make_cleanup (xfree, arg);
+    }
+
+  map_breakpoint_numbers (arg, do_map_commands_command, &info);
+
+  if (info.cmd == NULL)
+    error (_("No breakpoints specified."));
+
+  do_cleanups (cleanups);
+}
+
 static void
 commands_command (char *arg, int from_tty)
 {
-  struct breakpoint *b;
-  char *p;
-  int bnum;
-  struct command_line *l;
-
-  p = arg;
-  bnum = get_number (&p);
-
-  if (p && *p)
-    error (_("Unexpected extra arguments following breakpoint number."));
-
-  ALL_BREAKPOINTS (b)
-    if (b->number == bnum)
-      {
-	char *tmpbuf = xstrprintf ("Type commands for when breakpoint %d is hit, one per line.", 
-				 bnum);
-	struct cleanup *cleanups = make_cleanup (xfree, tmpbuf);
-
-	if (breakpoint_is_tracepoint (b))
-	  l = read_command_lines (tmpbuf, from_tty, 1,
-				  check_tracepoint_command, b);
-	else
-	  l = read_command_lines (tmpbuf, from_tty, 1, 0, 0);
-	do_cleanups (cleanups);
-	breakpoint_set_commands (b, l);
-	return;
-    }
-  error (_("No breakpoint number %d."), bnum);
+  commands_command_1 (arg, from_tty, NULL);
 }
 
 /* Like commands_command, but instead of reading the commands from
@@ -893,36 +986,8 @@ commands_command (char *arg, int from_tty)
 enum command_control_type
 commands_from_control_command (char *arg, struct command_line *cmd)
 {
-  struct breakpoint *b;
-  char *p;
-  int bnum;
-
-  /* An empty string for the breakpoint number means the last
-     breakpoint, but get_number expects a NULL pointer.  */
-  if (arg && !*arg)
-    p = NULL;
-  else
-    p = arg;
-  bnum = get_number (&p);
-
-  if (p && *p)
-    error (_("Unexpected extra arguments following breakpoint number."));
-
-  ALL_BREAKPOINTS (b)
-    if (b->number == bnum)
-      {
-	decref_counted_command_line (&b->commands);
-	if (cmd->body_count != 1)
-	  error (_("Invalid \"commands\" block structure."));
-	/* We need to copy the commands because if/while will free the
-	   list after it finishes execution.  */
-	b->commands
-	  = alloc_counted_command_line (copy_command_lines (cmd->body_list[0]));
-	breakpoints_changed ();
-	observer_notify_breakpoint_modified (b->number);
-	return simple_control;
-      }
-  error (_("No breakpoint number %d."), bnum);
+  commands_command_1 (arg, 0, cmd);
+  return simple_control;
 }
 
 /* Return non-zero if BL->TARGET_INFO contains valid information.  */
@@ -7111,6 +7176,7 @@ create_breakpoint (struct gdbarch *gdbarch,
   int not_found = 0;
   enum bptype type_wanted;
   int task = 0;
+  int first_bp_set = breakpoint_count + 1;
 
   sals.sals = NULL;
   sals.nelts = 0;
@@ -7267,8 +7333,14 @@ create_breakpoint (struct gdbarch *gdbarch,
     }
   
   if (sals.nelts > 1)
-    warning (_("Multiple breakpoints were set.\n"
-	       "Use the \"delete\" command to delete unwanted breakpoints."));
+    {
+      warning (_("Multiple breakpoints were set.\n"
+		 "Use the \"delete\" command to delete unwanted breakpoints."));
+      multi_start = first_bp_set;
+      multi_end = breakpoint_count;
+      last_was_multi = 1;
+    }
+
   /* That's it.  Discard the cleanups for data inserted into the
      breakpoint.  */
   discard_cleanups (bkpt_chain);
@@ -9124,6 +9196,15 @@ make_cleanup_delete_breakpoint (struct breakpoint *b)
   return make_cleanup (do_delete_breakpoint_cleanup, b);
 }
 
+/* A callback for map_breakpoint_numbers that calls
+   delete_breakpoint.  */
+
+static void
+do_delete_breakpoint (struct breakpoint *b, void *ignore)
+{
+  delete_breakpoint (b);
+}
+
 void
 delete_command (char *arg, int from_tty)
 {
@@ -9171,7 +9252,7 @@ delete_command (char *arg, int from_tty)
 	}
     }
   else
-    map_breakpoint_numbers (arg, delete_breakpoint);
+    map_breakpoint_numbers (arg, do_delete_breakpoint, NULL);
 }
 
 static int
@@ -9632,7 +9713,9 @@ ignore_command (char *args, int from_tty)
    whose numbers are given in ARGS.  */
 
 static void
-map_breakpoint_numbers (char *args, void (*function) (struct breakpoint *))
+map_breakpoint_numbers (char *args, void (*function) (struct breakpoint *,
+						      void *),
+			void *data)
 {
   char *p = args;
   char *p1;
@@ -9660,9 +9743,9 @@ map_breakpoint_numbers (char *args, void (*function) (struct breakpoint *))
 	      {
 		struct breakpoint *related_breakpoint = b->related_breakpoint;
 		match = 1;
-		function (b);
+		function (b, data);
 		if (related_breakpoint)
-		  function (related_breakpoint);
+		  function (related_breakpoint, data);
 		break;
 	      }
 	  if (match == 0)
@@ -9738,6 +9821,15 @@ disable_breakpoint (struct breakpoint *bpt)
   observer_notify_breakpoint_modified (bpt->number);
 }
 
+/* A callback for map_breakpoint_numbers that calls
+   disable_breakpoint.  */
+
+static void
+do_map_disable_breakpoint (struct breakpoint *b, void *ignore)
+{
+  disable_breakpoint (b);
+}
+
 static void
 disable_command (char *args, int from_tty)
 {
@@ -9771,7 +9863,7 @@ disable_command (char *args, int from_tty)
       update_global_location_list (0);
     }
   else
-    map_breakpoint_numbers (args, disable_breakpoint);
+    map_breakpoint_numbers (args, do_map_disable_breakpoint, NULL);
 }
 
 static void
@@ -9828,6 +9920,15 @@ enable_breakpoint (struct breakpoint *bpt)
   do_enable_breakpoint (bpt, bpt->disposition);
 }
 
+/* A callback for map_breakpoint_numbers that calls
+   enable_breakpoint.  */
+
+static void
+do_map_enable_breakpoint (struct breakpoint *b, void *ignore)
+{
+  enable_breakpoint (b);
+}
+
 /* The enable command enables the specified breakpoints (or all defined
    breakpoints) so they once again become (or continue to be) effective
    in stopping the inferior.  */
@@ -9865,11 +9966,11 @@ enable_command (char *args, int from_tty)
       update_global_location_list (1);
     }
   else
-    map_breakpoint_numbers (args, enable_breakpoint);
+    map_breakpoint_numbers (args, do_map_enable_breakpoint, NULL);
 }
 
 static void
-enable_once_breakpoint (struct breakpoint *bpt)
+enable_once_breakpoint (struct breakpoint *bpt, void *ignore)
 {
   do_enable_breakpoint (bpt, disp_disable);
 }
@@ -9877,11 +9978,11 @@ enable_once_breakpoint (struct breakpoint *bpt)
 static void
 enable_once_command (char *args, int from_tty)
 {
-  map_breakpoint_numbers (args, enable_once_breakpoint);
+  map_breakpoint_numbers (args, enable_once_breakpoint, NULL);
 }
 
 static void
-enable_delete_breakpoint (struct breakpoint *bpt)
+enable_delete_breakpoint (struct breakpoint *bpt, void *ignore)
 {
   do_enable_breakpoint (bpt, disp_del);
 }
@@ -9889,7 +9990,7 @@ enable_delete_breakpoint (struct breakpoint *bpt)
 static void
 enable_delete_command (char *args, int from_tty)
 {
-  map_breakpoint_numbers (args, enable_delete_breakpoint);
+  map_breakpoint_numbers (args, enable_delete_breakpoint, NULL);
 }
 
 static void
@@ -10312,7 +10413,7 @@ delete_trace_command (char *arg, int from_tty)
 	}
     }
   else
-    map_breakpoint_numbers (arg, delete_breakpoint);
+    map_breakpoint_numbers (arg, do_delete_breakpoint, NULL);
 }
 
 /* Set passcount for tracepoint.

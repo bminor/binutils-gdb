@@ -1025,4 +1025,9 @@ extern int breakpoint_is_tracepoint (const struct breakpoint *b);
    that each command is suitable for tracepoint command list.  */
 extern void check_tracepoint_command (char *line, void *closure);
 
+/* Call at the start and end of an "rbreak" command to register
+   breakpoint numbers for a later "commands" command.  */
+extern void start_rbreak_breakpoints (void);
+extern void end_rbreak_breakpoints (void);
+
 #endif /* !defined (BREAKPOINT_H) */

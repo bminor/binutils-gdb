@@ -1,5 +1,41 @@
 2010-03-24  Tom Tromey  <tromey@redhat.com>
 
+	PR breakpoints/9352:
+	* NEWS: Mention changes to `commands' and `rbreak'.
+	* symtab.c (do_end_rbreak_breakpoints): New function.
+	(rbreak_command): Call start_rbreak_breakpoints; arrange to call
+	end_rbreak_breakpoints.
+	* breakpoint.c (breakpoint_count, tracepoint_count): Now static.
+	(set_breakpoint_count): Likewise.  Clear last_was_multi.
+	(multi_start, multi_end, last_was_multi): New globals.
+	(start_rbreak_breakpoints, end_rbreak_breakpoints): New
+	functions.
+	(struct commands_info): New
+	(do_map_commands_command): New function.
+	(commands_command_1): New function.
+	(commands_command): Use it.
+	(commands_from_control_command): Likewise.
+	(do_delete_breakpoint): New function.
+	(delete_command): Use it.
+	(map_breakpoint_numbers): Add 'data' argument.  Pass to callback.
+	(do_map_disable_breakpoint): New function.
+	(disable_command): Use it.
+	(do_map_enable_breakpoint): New function.
+	(enable_command): Use it.
+	(enable_once_breakpoint): Add argument.
+	(enable_once_command): Update.
+	(enable_delete_breakpoint): Add argument.
+	(enable_delete_command): Update.
+	(break_command_really): Set last_was_multi when needed.
+	(check_tracepoint_command): Fix formatting.
+	(validate_commands_for_breakpoint): New function.
+	(breakpoint_set_commands): Use it.
+	(tracepoint_save_command): Update.
+	* breakpoint.h (start_rbreak_breakpoints, end_rbreak_breakpoints):
+	Declare.
+
+2010-03-24  Tom Tromey  <tromey@redhat.com>
+
 	* breakpoint.h (struct counted_command_line): New struct.
 	(struct breakpoint) <commands>: Change type.
 	(struct bpstats) <commands>: Change type.

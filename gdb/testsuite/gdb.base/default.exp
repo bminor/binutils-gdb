@@ -100,7 +100,7 @@ gdb_test "cd" "Argument required .new working directory.*" "cd"
 gdb_test "clear" "No source file specified..*" "clear"
 
 #test commands
-gdb_test "commands" "No breakpoint number 0..*" "commands"
+gdb_test "commands" "Argument required .one or more breakpoint numbers...*" "commands"
 
 #test condition
 gdb_test "condition" "Argument required .breakpoint number.*" "condition"

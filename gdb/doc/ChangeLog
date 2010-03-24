@@ -1,3 +1,8 @@
+2010-03-24  Tom Tromey  <tromey@redhat.com>
+
+	PR breakpoints/9352:
+	* gdb.texinfo (Break Commands): Update.
+
 2010-03-24  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Tracepoint Commands): Document MI tracepoint

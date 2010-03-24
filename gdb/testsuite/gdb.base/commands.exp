@@ -299,7 +299,7 @@ proc watchpoint_command_test {} {
 
     send_gdb "commands $wp_id\n"
     gdb_expect {
-      -re "Type commands for when breakpoint $wp_id is hit, one per line.*>" {
+      -re "Type commands for all specified breakpoints.*>" {
 	  pass "begin commands on watch"
       }
       -re "$gdb_prompt $" {fail "begin commands on watch"}
@@ -452,7 +452,7 @@ proc bp_deleted_in_command_test {} {
     
     send_gdb "commands\n"
     gdb_expect {
-      -re "Type commands for when breakpoint .* is hit, one per line.*>" {
+      -re "Type commands for all specified breakpoints.*>" {
           pass "begin commands in bp_deleted_in_command_test"
       }
       -re "$gdb_prompt $" {fail "begin commands in bp_deleted_in_command_test"}
@@ -519,7 +519,7 @@ proc temporary_breakpoint_commands {} {
     
     send_gdb "commands\n"
     gdb_expect {
-	-re "Type commands for when breakpoint .* is hit, one per line.*>" {
+	-re "Type commands for all specified breakpoints.*>" {
 	    pass "begin commands in bp_deleted_in_command_test"
 	}
 	-re "$gdb_prompt $" {fail "begin commands in bp_deleted_in_command_test"}

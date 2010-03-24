@@ -1,3 +1,11 @@
+2010-03-24  Tom Tromey  <tromey@redhat.com>
+
+	PR breakpoints/9352:
+	* gdb.base/default.exp: Update.
+	* gdb.base/commands.exp: Update.
+	* gdb.cp/extern-c.exp: Test setting commands on multiple
+	breakpoints at once.
+
 2010-03-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/call-signal-resume.exp, gdb.base/unwindonsignal.exp: Skip
