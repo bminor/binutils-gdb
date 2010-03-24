@@ -1,3 +1,7 @@
+2010-03-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-dis.c (decode_regs_hi): Change REG_LH2 typo to REG_MH2.
+
 2010-03-23  Joseph Myers  <joseph@codesourcery.com>
 
 	* dis-buf.c (buffer_read_memory): Give error for reading just
