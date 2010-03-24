@@ -1086,6 +1086,12 @@ script_test_3: basic_test.o gcctestdir/ld script_test_3.t
 script_test_3.stdout: script_test_3
 	$(TEST_READELF) -SlW script_test_3 > script_test_3.stdout
 
+check_PROGRAMS += tls_phdrs_script_test
+tls_phdrs_script_test_SOURCES = $(tls_test_SOURCES)
+tls_phdrs_script_test_DEPENDENCIES = $(tls_test_DEPENDENCIES) $(srcdir)/script_test_3.t
+tls_phdrs_script_test_LDFLAGS = $(tls_test_LDFLAGS) -T $(srcdir)/script_test_3.t
+tls_phdrs_script_test_LDADD = $(tls_test_LDADD)
+
 check_SCRIPTS += script_test_4.sh
 check_DATA += script_test_4.stdout
 MOSTLYCLEANFILES += script_test_4

@@ -1,3 +1,14 @@
+2010-03-24  Ian Lance Taylor  <iant@google.com>
+
+	* testsuite/script_test_3.t: Add a TLS segment.
+	* testsuite/Makefile.am (check_PROGRAMS): Add
+	tls_phdrs_script_test.
+	(tls_phdrs_script_test_SOURCES): Define.
+	(tls_phdrs_script_test_DEPENDENCIES): Define.
+	(tls_phdrs_script_test_LDFLAGS): Define.
+	(tls_phdrs_script_test_LDADD): Define.
+	* testsuite/Makefile.in: Rebuild.
+
 2010-03-23  Cary Coutant  <ccoutant@google.com>
 
 	* fileread.cc (find_or_make_view): Fix comment.

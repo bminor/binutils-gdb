@@ -1,6 +1,6 @@
 /* script_test_3.t -- linker script test 3 for gold
 
-   Copyright 2008 Free Software Foundation, Inc.
+   Copyright 2008, 2010 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <iant@google.com>.
 
    This file is part of gold.
@@ -32,6 +32,8 @@ SECTIONS
   . = ALIGN(0x100);
   .dynamic : { *(.dynamic) } :data :dynamic
   .data : { *(.data) } :data
+  .tdata : { *(.tdata*) } :data :tls
+  .tbss : { *(.tbss*) } :data :tls
   . += 0x100000;
   . = ALIGN(0x100);
   .bss : { *(.bss) } :bss
@@ -44,4 +46,5 @@ PHDRS
   dynamic PT_DYNAMIC FLAGS(4);
   data PT_LOAD;
   bss PT_LOAD;
+  tls PT_TLS;
 }
