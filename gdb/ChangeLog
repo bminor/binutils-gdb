@@ -1,3 +1,8 @@
+2010-03-24  Michael Snyder  <msnyder@localhost.localdomain>
+
+	* elfread.c (find_separate_debug_file_by_buildid): 
+	Remove unused local variable.
+
 2010-03-24  Tom Tromey  <tromey@redhat.com>
 
 	PR breakpoints/9352:

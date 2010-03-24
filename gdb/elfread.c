@@ -696,7 +696,6 @@ find_separate_debug_file_by_buildid (struct objfile *objfile)
   char *debugfile = NULL;
   char *canon_name = NULL;
   bfd_size_type debuglink_size;
-  unsigned long crc32;
   int i;
   struct build_id *build_id;
 
