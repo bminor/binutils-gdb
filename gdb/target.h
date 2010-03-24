@@ -675,6 +675,13 @@ struct target_ops
        right now, or in this debug session, or for this target -- return -1.  */
     int (*to_core_of_thread) (struct target_ops *, ptid_t ptid);
 
+    /* Verify that the memory in the [MEMADDR, MEMADDR+SIZE) range
+       matches the contents of [DATA,DATA+SIZE).  Returns 1 if there's
+       a match, 0 if there's a mismatch, and -1 if an error is
+       encountered while reading memory.  */
+    int (*to_verify_memory) (struct target_ops *, const gdb_byte *data,
+			     CORE_ADDR memaddr, ULONGEST size);
+
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */
@@ -1374,6 +1381,14 @@ extern int target_search_memory (CORE_ADDR start_addr,
 
 
 extern int target_core_of_thread (ptid_t ptid);
+
+/* Verify that the memory in the [MEMADDR, MEMADDR+SIZE) range matches
+   the contents of [DATA,DATA+SIZE).  Returns 1 if there's a match, 0
+   if there's a mismatch, and -1 if an error is encountered while
+   reading memory.  Throws an error if the functionality is found not
+   to be supported by the current target.  */
+int target_verify_memory (const gdb_byte *data,
+			  CORE_ADDR memaddr, ULONGEST size);
 
 /* Routines for maintenance of the target structures...
 

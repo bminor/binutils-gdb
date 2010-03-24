@@ -173,8 +173,6 @@ static CORE_ADDR remote_address_masked (CORE_ADDR);
 
 static void print_packet (char *);
 
-static unsigned long crc32 (unsigned char *, int, unsigned int);
-
 static void compare_sections_command (char *, int);
 
 static void packet_command (char *, int);
@@ -7542,7 +7540,7 @@ static unsigned long crc32_table[256] =
 {0, 0};
 
 static unsigned long
-crc32 (unsigned char *buf, int len, unsigned int crc)
+crc32 (const unsigned char *buf, int len, unsigned int crc)
 {
   if (!crc32_table[1])
     {
@@ -7566,38 +7564,59 @@ crc32 (unsigned char *buf, int len, unsigned int crc)
   return crc;
 }
 
+/* Verify memory using the "qCRC:" request.  */
+
+static int
+remote_verify_memory (struct target_ops *ops,
+		      const gdb_byte *data, CORE_ADDR lma, ULONGEST size)
+{
+  struct remote_state *rs = get_remote_state ();
+  unsigned long host_crc, target_crc;
+  char *tmp;
+
+  /* FIXME: assumes lma can fit into long.  */
+  xsnprintf (rs->buf, get_remote_packet_size (), "qCRC:%lx,%lx",
+	     (long) lma, (long) size);
+  putpkt (rs->buf);
+
+  /* Be clever; compute the host_crc before waiting for target
+     reply.  */
+  host_crc = crc32 (data, size, 0xffffffff);
+
+  getpkt (&rs->buf, &rs->buf_size, 0);
+  if (rs->buf[0] == 'E')
+    return -1;
+
+  if (rs->buf[0] != 'C')
+    error (_("remote target does not support this operation"));
+
+  for (target_crc = 0, tmp = &rs->buf[1]; *tmp; tmp++)
+    target_crc = target_crc * 16 + fromhex (*tmp);
+
+  return (host_crc == target_crc);
+}
+
 /* compare-sections command
 
    With no arguments, compares each loadable section in the exec bfd
    with the same memory range on the target, and reports mismatches.
-   Useful for verifying the image on the target against the exec file.
-   Depends on the target understanding the new "qCRC:" request.  */
-
-/* FIXME: cagney/1999-10-26: This command should be broken down into a
-   target method (target verify memory) and generic version of the
-   actual command.  This will allow other high-level code (especially
-   generic_load()) to make use of this target functionality.  */
+   Useful for verifying the image on the target against the exec file.  */
 
 static void
 compare_sections_command (char *args, int from_tty)
 {
-  struct remote_state *rs = get_remote_state ();
   asection *s;
-  unsigned long host_crc, target_crc;
   struct cleanup *old_chain;
-  char *tmp;
   char *sectdata;
   const char *sectname;
   bfd_size_type size;
   bfd_vma lma;
   int matched = 0;
   int mismatched = 0;
+  int res;
 
   if (!exec_bfd)
     error (_("command cannot be used without an exec file"));
-  if (!current_target.to_shortname ||
-      strcmp (current_target.to_shortname, "remote") != 0)
-    error (_("command can only be used with remote target"));
 
   for (s = exec_bfd->sections; s; s = s->next)
     {
@@ -7614,33 +7633,22 @@ compare_sections_command (char *args, int from_tty)
 
       matched = 1;		/* do this section */
       lma = s->lma;
-      /* FIXME: assumes lma can fit into long.  */
-      xsnprintf (rs->buf, get_remote_packet_size (), "qCRC:%lx,%lx",
-		 (long) lma, (long) size);
-      putpkt (rs->buf);
 
-      /* Be clever; compute the host_crc before waiting for target
-	 reply.  */
       sectdata = xmalloc (size);
       old_chain = make_cleanup (xfree, sectdata);
       bfd_get_section_contents (exec_bfd, s, sectdata, 0, size);
-      host_crc = crc32 ((unsigned char *) sectdata, size, 0xffffffff);
 
-      getpkt (&rs->buf, &rs->buf_size, 0);
-      if (rs->buf[0] == 'E')
+      res = target_verify_memory (sectdata, lma, size);
+
+      if (res == -1)
 	error (_("target memory fault, section %s, range %s -- %s"), sectname,
 	       paddress (target_gdbarch, lma),
 	       paddress (target_gdbarch, lma + size));
-      if (rs->buf[0] != 'C')
-	error (_("remote target does not support this operation"));
-
-      for (target_crc = 0, tmp = &rs->buf[1]; *tmp; tmp++)
-	target_crc = target_crc * 16 + fromhex (*tmp);
 
       printf_filtered ("Section %s, range %s -- %s: ", sectname,
 		       paddress (target_gdbarch, lma),
 		       paddress (target_gdbarch, lma + size));
-      if (host_crc == target_crc)
+      if (res)
 	printf_filtered ("matched.\n");
       else
 	{
@@ -9756,6 +9764,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_set_disconnected_tracing = remote_set_disconnected_tracing;
   remote_ops.to_set_circular_trace_buffer = remote_set_circular_trace_buffer;
   remote_ops.to_core_of_thread = remote_core_of_thread;
+  remote_ops.to_verify_memory = remote_verify_memory;
 }
 
 /* Set up the extended remote vector by making a copy of the standard

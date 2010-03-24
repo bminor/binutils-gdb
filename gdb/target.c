@@ -3073,6 +3073,28 @@ target_core_of_thread (ptid_t ptid)
   return -1;
 }
 
+int
+target_verify_memory (const gdb_byte *data, CORE_ADDR memaddr, ULONGEST size)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    {
+      if (t->to_verify_memory != NULL)
+	{
+	  int retval = t->to_verify_memory (t, data, memaddr, size);
+	  if (targetdebug)
+	    fprintf_unfiltered (gdb_stdlog, "target_verify_memory (%s, %s) = %d\n",
+				paddress (target_gdbarch, memaddr),
+				pulongest (size),
+				retval);
+	  return retval;
+	}
+    }
+
+  tcomplain ();
+}
+
 static void
 debug_to_prepare_to_store (struct regcache *regcache)
 {

@@ -1,3 +1,14 @@
+2010-03-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (crc32): Constify `buf' parameter.
+	(remote_verify_memory): New, abstracted out from...
+	(compare_sections_command): ... this.  Remove hardcoded target
+	checks.
+	(init_remote_ops): Install remote_verify_memory.
+	* target.c (target_verify_memory): New.
+	* target.h (struct target_ops) <to_verify_memory>: New field.
+	(target_verify_memory): Declare.
+
 2010-03-24  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Implement -trace-save.
