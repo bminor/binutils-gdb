@@ -422,7 +422,7 @@ tvariables_info_1 (void)
     }
 
   /* Try to acquire values from the target.  */
-  for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
+  for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix, ++count)
     tsv->value_known = target_get_trace_state_variable_value (tsv->number,
 							      &(tsv->value));
 

@@ -1,3 +1,8 @@
+2010-03-24  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* tracepoint.c (tvariables_info_1): Actually compute
+	the number of rows in the result.
+
 2010-03-24  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (crc32): Constify `buf' parameter.
