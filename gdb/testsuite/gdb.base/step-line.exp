@@ -47,7 +47,7 @@ if ![runto_main] then {
 
 set remote_linefile [remote_download host ${srcdir}/${subdir}/${linefile}]
 
-gdb_test "break f1" ".*Breakpoint 2 at .* file step-line.c.*" "break f1"
+gdb_test "break f1" ".*Breakpoint 2 at .* file .*step-line.c.*" "break f1"
 gdb_test "continue" \
          "Continuing.*Breakpoint 2, f1 \\(i=4\\).*dummy \\(1, i\\);" \
 	 "continue to f1"

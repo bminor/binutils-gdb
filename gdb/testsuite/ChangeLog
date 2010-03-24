@@ -1,3 +1,14 @@
+2010-03-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/completion.exp: Allow long instead of long int.
+	* gdb.base/ending-run.exp: Match _rt_entry.* for RealView.
+	* gdb.base/gdbvars.c (main): Remove unused usestubs code.  Reference
+	variable p.
+	* gdb.base/maint.exp: Allow ER_RO and ER_RW instead of .text and .data.
+	* gdb.base/pointers.exp: Allow long instead of long int.
+	* gdb.base/printcmds.exp: XFAIL for RealView on ARM EABI.
+	* gdb.base/step-line.exp: Allow a directory before the source file name.
+
 2010-03-24  Tom Tromey  <tromey@redhat.com>
 
 	PR breakpoints/9352:

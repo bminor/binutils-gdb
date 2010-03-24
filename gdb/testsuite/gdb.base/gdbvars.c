@@ -7,10 +7,6 @@ ptr p = &p;
 int
 main ()
 {
-#ifdef usestubs
-    set_debug_traps ();
-    breakpoint ();
-#endif
-
+  p = &p;
   return 0;
 }

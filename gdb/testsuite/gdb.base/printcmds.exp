@@ -36,6 +36,8 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      return -1
 }
 
+get_compiler_info ${binfile}
+
 # Set the current language to C.  This counts as a test.  If it
 # fails, then we skip the other tests.
 
@@ -777,6 +779,12 @@ gdb_test "set print address off" ""
 gdb_test "set width 0" ""
 
 if [set_lang_c] then {
+    if { [test_compiler_info "armcc-*"] } {
+	# ARM RealView compresses large arrays in the data segment.
+	# Before the program starts, we can not read them.  There is
+	# nothing in the file to indicate that data is compressed.
+	setup_xfail "arm*-*-eabi"
+    }
     gdb_test "p ctable1\[120\]" "120 'x'" "p ctable1\[120\] #1"
 
     gdb_load ${binfile}

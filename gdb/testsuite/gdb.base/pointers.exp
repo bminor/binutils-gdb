@@ -600,4 +600,4 @@ gdb_expect {
 # Regression test for a crash.
 
 gdb_test "p instance.array_variable + 0" \
-  " = \\(long int \\*\\) 0x\[0-9a-f\]*"
+  " = \\(long (int )?\\*\\) 0x\[0-9a-f\]*"
