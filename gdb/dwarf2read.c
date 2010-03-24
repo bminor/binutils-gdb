@@ -3085,6 +3085,12 @@ load_full_comp_unit (struct dwarf2_per_cu_data *per_cu, struct objfile *objfile)
   else
     set_cu_language (language_minimal, cu);
 
+  /* Similarly, if we do not read the producer, we can not apply
+     producer-specific interpretation.  */
+  attr = dwarf2_attr (cu->dies, DW_AT_producer, cu);
+  if (attr)
+    cu->producer = DW_STRING (attr);
+
   /* Link this CU into read_in_chain.  */
   per_cu->cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
   dwarf2_per_objfile->read_in_chain = per_cu;
@@ -5084,6 +5090,11 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
   TYPE_STUB_SUPPORTED (type) = 1;
   if (die_is_declaration (die, cu))
     TYPE_STUB (type) = 1;
+  else if (attr == NULL && die->child == NULL
+	   && producer_is_realview (cu->producer))
+    /* RealView does not output the required DW_AT_declaration
+       on incomplete types.  */
+    TYPE_STUB (type) = 1;
 
   set_descriptive_type (type, die, cu);
 
@@ -5881,6 +5892,12 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
       || cu->language == language_cplus
       || cu->language == language_java
       || cu->language == language_pascal)
+    TYPE_PROTOTYPED (ftype) = 1;
+  else if (producer_is_realview (cu->producer))
+    /* RealView does not emit DW_AT_prototyped.  We can not
+       distinguish prototyped and unprototyped functions; default to
+       prototyped, since that is more common in modern code (and
+       RealView warns about unprototyped functions).  */
     TYPE_PROTOTYPED (ftype) = 1;
 
   /* Store the calling convention in the type if it's available in

@@ -839,43 +839,33 @@ static void
 dwarf2_frame_find_quirks (struct dwarf2_frame_state *fs,
 			  struct dwarf2_fde *fde)
 {
-  static const char *arm_idents[] = {
-    "ARM C Compiler, ADS",
-    "Thumb C Compiler, ADS",
-    "ARM C++ Compiler, ADS",
-    "Thumb C++ Compiler, ADS",
-    "ARM/Thumb C/C++ Compiler, RVCT"
-  };
-  int i;
-
   struct symtab *s;
 
   s = find_pc_symtab (fs->pc);
-  if (s == NULL || s->producer == NULL)
+  if (s == NULL)
     return;
 
-  for (i = 0; i < ARRAY_SIZE (arm_idents); i++)
-    if (strncmp (s->producer, arm_idents[i], strlen (arm_idents[i])) == 0)
-      {
-	if (fde->cie->version == 1)
-	  fs->armcc_cfa_offsets_sf = 1;
+  if (producer_is_realview (s->producer))
+    {
+      if (fde->cie->version == 1)
+	fs->armcc_cfa_offsets_sf = 1;
 
-	if (fde->cie->version == 1)
-	  fs->armcc_cfa_offsets_reversed = 1;
+      if (fde->cie->version == 1)
+	fs->armcc_cfa_offsets_reversed = 1;
 
-	/* The reversed offset problem is present in some compilers
-	   using DWARF3, but it was eventually fixed.  Check the ARM
-	   defined augmentations, which are in the format "armcc" followed
-	   by a list of one-character options.  The "+" option means
-	   this problem is fixed (no quirk needed).  If the armcc
-	   augmentation is missing, the quirk is needed.  */
-	if (fde->cie->version == 3
-	    && (strncmp (fde->cie->augmentation, "armcc", 5) != 0
-		|| strchr (fde->cie->augmentation + 5, '+') == NULL))
-	  fs->armcc_cfa_offsets_reversed = 1;
+      /* The reversed offset problem is present in some compilers
+	 using DWARF3, but it was eventually fixed.  Check the ARM
+	 defined augmentations, which are in the format "armcc" followed
+	 by a list of one-character options.  The "+" option means
+	 this problem is fixed (no quirk needed).  If the armcc
+	 augmentation is missing, the quirk is needed.  */
+      if (fde->cie->version == 3
+	  && (strncmp (fde->cie->augmentation, "armcc", 5) != 0
+	      || strchr (fde->cie->augmentation + 5, '+') == NULL))
+	fs->armcc_cfa_offsets_reversed = 1;
 
-	return;
-      }
+      return;
+    }
 }
 
 

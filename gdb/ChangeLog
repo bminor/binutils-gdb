@@ -1,5 +1,16 @@
 2010-03-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* dwarf2-frame.c (dwarf2_frame_find_quirks): Use producer_is_realview.
+	* dwarf2read.c (load_full_comp_unit): Read DW_AT_producer.
+	(read_structure_type): For RealView, set TYPE_STUB on structures with
+	no byte size and no children.
+	(read_subroutine_type): Mark functions as prototyped by default.
+	* symtab.c (producer_is_realview): New function.
+	* symtab.h (expand_line_sal): Fix declaration formatting.
+	(producer_is_realview): Declare.
+
+2010-03-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* arm-tdep.c (skip_prologue_function): New function.
 	(submask, bit, bits, sbits, BranchDest): Move higher in the file.
 	(thumb_analyze_prologue): Document return value.  Recognize more

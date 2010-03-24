@@ -4424,6 +4424,31 @@ expand_line_sal (struct symtab_and_line sal)
   return ret;
 }
 
+/* Return 1 if the supplied producer string matches the ARM RealView
+   compiler (armcc).  */
+
+int
+producer_is_realview (const char *producer)
+{
+  static const char *const arm_idents[] = {
+    "ARM C Compiler, ADS",
+    "Thumb C Compiler, ADS",
+    "ARM C++ Compiler, ADS",
+    "Thumb C++ Compiler, ADS",
+    "ARM/Thumb C/C++ Compiler, RVCT",
+    "ARM C/C++ Compiler, RVCT"
+  };
+  int i;
+
+  if (producer == NULL)
+    return 0;
+
+  for (i = 0; i < ARRAY_SIZE (arm_idents); i++)
+    if (strncmp (producer, arm_idents[i], strlen (arm_idents[i])) == 0)
+      return 1;
+
+  return 0;
+}
 
 void
 _initialize_symtab (void)

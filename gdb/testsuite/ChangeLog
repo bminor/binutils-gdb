@@ -1,3 +1,10 @@
+2010-03-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/callfuncs.exp (do_function_calls): Add XFAILs for RealView.
+	* gdb.base/ptype.exp (ptype_maybe_prototyped): Add overprototyped
+	argument.  Handle "short" and "long".
+	(Top level): Pass overprototyped output for old_fptr and xptr.
+
 2010-03-23  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.threads/pthreads.c (thread1, thread2, main): Fix printf

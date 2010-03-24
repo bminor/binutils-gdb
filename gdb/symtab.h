@@ -1198,8 +1198,11 @@ struct symbol *lookup_global_symbol_from_objfile (const struct objfile *objfile,
 						  const char *name,
 						  const domain_enum domain);
 
-extern struct symtabs_and_lines
-expand_line_sal (struct symtab_and_line sal);
+extern struct symtabs_and_lines expand_line_sal (struct symtab_and_line sal);
+
+/* Return 1 if the supplied producer string matches the ARM RealView
+   compiler (armcc).  */
+int producer_is_realview (const char *producer);
 
 void fixup_section (struct general_symbol_info *ginfo,
 		    CORE_ADDR addr, struct objfile *objfile);

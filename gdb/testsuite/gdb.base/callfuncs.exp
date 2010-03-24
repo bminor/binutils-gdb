@@ -129,13 +129,19 @@ proc do_function_calls {} {
 	# Gcc emits different stabs for the two parameters; the first is
 	# claimed to be a float, the second a double.
 	# dbxout.c in gcc claims this is the desired behavior.
+	# These tests also fail for RealView, because GDB can not tell that
+	# the function is unprototyped.
 	setup_xfail "mn10300-*-*"
+	if { [test_compiler_info "armcc-*"] } { setup_xfail "*-*-*" }
 	gdb_test "p t_float_values(3.14159,-2.3765)" " = 1"
 	setup_xfail "mn10300-*-*"
+	if { [test_compiler_info "armcc-*"] } { setup_xfail "*-*-*" }
 	gdb_test "p t_float_values(float_val1,float_val2)" " = 1"
 	setup_xfail "mn10300-*-*"
+	if { [test_compiler_info "armcc-*"] } { setup_xfail "*-*-*" }
 	gdb_test "p t_float_values(3.14159,float_val2)" " = 1"
 	setup_xfail "mn10300-*-*"
+	if { [test_compiler_info "armcc-*"] } { setup_xfail "*-*-*" }
 	gdb_test "p t_float_values(float_val1,-2.3765)" " = 1"
 
 	# Test passing of arguments which might not be widened.
