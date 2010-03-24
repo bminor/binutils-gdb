@@ -1,5 +1,20 @@
 2010-03-24  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* aout-target.h: Update copyright year.
+	* aout-tic30.c: Likewise.
+	* coff-alpha.c: Likewise.
+	* coff-rs6000.c: Likewise.
+	* coff64-rs6000.c: Likewise.
+	* elf64-mips.c: Likewise.
+	* ieee.c: Likewise.
+	* libecoff.h: Likewise.
+	* mach-o-target.c: Likewise.
+	* mach-o.c: Likewise.
+	* oasys.c: Likewise.
+	* targets.c: Likewise.
+
+2010-03-24  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* libbfd-in.h: Update copyright year.
 
 2010-03-21  H.J. Lu  <hongjiu.lu@intel.com>
