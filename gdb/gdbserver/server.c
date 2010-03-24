@@ -1471,7 +1471,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       unsigned long long crc;
 
       require_running (own_buf);
-      base == strtoul (own_buf + 5, &comma, 16);
+      base = strtoul (own_buf + 5, &comma, 16);
       if (*comma++ != ',')
 	{
 	  write_enn (own_buf);

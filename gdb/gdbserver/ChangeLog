@@ -1,5 +1,9 @@
 2010-03-24  Pedro Alves  <pedro@codesourcery.com>
 
+	* server.c (handle_query): Assign, not compare.
+
+2010-03-24  Pedro Alves  <pedro@codesourcery.com>
+
 	Teach linux gdbserver to step-over-breakpoints.
 
 	* linux-low.c (can_hardware_single_step): New.
