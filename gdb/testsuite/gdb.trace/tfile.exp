@@ -68,7 +68,7 @@ gdb_test "target tfile basic.tf" "Created tracepoint.*" "target tfile"
 gdb_test "info trace" ".*tracepoint.*in write_basic_trace_file.*" \
     "info tracepoints on trace file"
 
-gdb_test "tfind 0" "Found traceframe 0.*" "tfind 0 on trace file"
+gdb_test "tfind 0" "Found trace frame 0.*" "tfind 0 on trace file"
 
 gdb_test "print testglob" " = 31415" "print testglob on trace file"
 
