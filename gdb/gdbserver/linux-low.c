@@ -146,7 +146,6 @@ static void mark_lwp_dead (struct lwp_info *lwp, int wstat);
 static int linux_core_of_thread (ptid_t ptid);
 static void proceed_all_lwps (void);
 static void unstop_all_lwps (struct lwp_info *except);
-static void cancel_finished_single_steps (struct lwp_info *except);
 static int finish_step_over (struct lwp_info *lwp);
 static CORE_ADDR get_stop_pc (struct lwp_info *lwp);
 static int kill_lwp (unsigned long lwpid, int signo);
@@ -934,8 +933,7 @@ linux_thread_alive (ptid_t ptid)
     return 0;
 }
 
-/* Return 1 if this lwp has an interesting status pending.  This
-   function may silently resume an inferior lwp.  */
+/* Return 1 if this lwp has an interesting status pending.  */
 static int
 status_pending_p_callback (struct inferior_list_entry *entry, void *arg)
 {
@@ -1189,10 +1187,8 @@ ptid_t step_over_bkpt;
 static int
 linux_wait_for_event_1 (ptid_t ptid, int *wstat, int options)
 {
-  CORE_ADDR stop_pc;
   struct lwp_info *event_child, *requested_child;
 
- again:
   event_child = NULL;
   requested_child = NULL;
 
@@ -1232,20 +1228,7 @@ linux_wait_for_event_1 (ptid_t ptid, int *wstat, int options)
      events.  */
   while (1)
     {
-      int step_over_finished = 0;
-      int bp_explains_trap = 0;
-      int cancel_sigtrap;
-
-      if (ptid_equal (step_over_bkpt, null_ptid))
-	event_child = linux_wait_for_lwp (ptid, wstat, options);
-      else
-	{
-	  if (debug_threads)
-	    fprintf (stderr, "step_over_bkpt set [%s], doing a blocking wait\n",
-		     target_pid_to_str (step_over_bkpt));
-	  event_child = linux_wait_for_lwp (step_over_bkpt,
-					    wstat, options & ~WNOHANG);
-	}
+      event_child = linux_wait_for_lwp (ptid, wstat, options);
 
       if ((options & WNOHANG) && event_child == NULL)
 	{
@@ -1380,218 +1363,6 @@ linux_wait_for_event_1 (ptid_t ptid, int *wstat, int options)
 	    }
 	}
 
-      cancel_sigtrap = (stopping_threads
-			|| event_child->last_resume_kind == resume_stop);
-
-      /* Do not allow nested internal breakpoint handling, or leave
-	 the unadjusted PCs visible to GDB.  Simply cancel the
-	 breakpoint now, and eventually when the thread is resumed, it
-	 will trap again, if the breakpoint is still there by
-	 then.  */
-      if (WIFSTOPPED (*wstat)
-	  && WSTOPSIG (*wstat) == SIGTRAP
-	  && cancel_sigtrap)
-	{
-	  if (debug_threads)
-	    fprintf (stderr, "Got a nested SIGTRAP while stopping threads\n");
-
-	  if (cancel_breakpoint (event_child))
-	    {
-	      if (debug_threads)
-		fprintf (stderr, " bkpt canceled\n");
-
-	      /* We don't resume immediately to collect the SIGSTOP,
-		 due to other reasons we may care for this SIGTRAP
-		 below.  Care must be taken to not process anything
-		 breakpoint related though from this point on.  */
-	    }
-	}
-
-      /* If this event was not handled above, and is not a SIGTRAP, we
-	 report it.  SIGILL and SIGSEGV are also treated as traps in
-	 case a breakpoint is inserted at the current PC.  If this
-	 target does not support breakpoints, we also report the
-	 SIGTRAP without further processing; it's of no concern to
-	 us.  */
-      if (!WIFSTOPPED (*wstat)
-	  || !supports_breakpoints ()
-	  || (WSTOPSIG (*wstat) != SIGTRAP
-	      && WSTOPSIG (*wstat) != SIGILL
-	      && WSTOPSIG (*wstat) != SIGSEGV)
-	  /* Only handle SIGILL or SIGSEGV if we've hit a recognized
-	     breakpoint.  */
-	  || (WSTOPSIG (*wstat) != SIGTRAP
-	      && !(*the_low_target.breakpoint_at) (event_child->stop_pc)))
-	{
-	  if (debug_threads && WIFSTOPPED (*wstat))
-	    fprintf (stderr, "Reporting signal %d for LWP %ld.\n",
-		     WSTOPSIG (*wstat), lwpid_of (event_child));
-
-	  /* If we were stepping over a breakpoint, this signal
-	     arriving means we didn't manage to move past the
-	     breakpoint location.  Cancel the operation for now --- it
-	     will be handled again on the next resume, if required
-	     (the breakpoint may be removed meanwhile, for
-	     example).  */
-	  if (finish_step_over (event_child))
-	    {
-	      event_child->need_step_over = 1;
-	      unstop_all_lwps (event_child);
-	    }
-	  return lwpid_of (event_child);
-	}
-
-      stop_pc = event_child->stop_pc;
-
-      /* Handle anything that requires bookkeeping before deciding to
-	 report the event or continue waiting.  */
-
-      /* First check if we can explain the SIGTRAP with an internal
-	 breakpoint, or if we should possibly report the event to GDB.
-	 Do this before anything that may remove or insert a
-	 breakpoint.  */
-      bp_explains_trap = breakpoint_inserted_here (stop_pc);
-
-      /* We have a SIGTRAP, possibly a step-over dance has just
-	 finished.  If so, tweak the state machine accordingly,
-	 reinsert breakpoints and delete any reinsert (software
-	 single-step) breakpoints.  */
-      step_over_finished = finish_step_over (event_child);
-
-      /* Now invoke the callbacks of any breakpoints there.  */
-      if (!cancel_sigtrap)
-	check_breakpoints (stop_pc);
-
-      /* If we're stopping threads, resume once more to collect the
-	 SIGSTOP, and do nothing else.  Note that we don't set
-	 need_step_over.  If this predicate matches, then we've
-	 cancelled the SIGTRAP before reaching here, and we do want
-	 any breakpoint at STOP_PC to be re-hit on resume.  */
-      if (stopping_threads
-	  || event_child->last_resume_kind == resume_stop)
-	{
-	  gdb_assert (cancel_sigtrap);
-
-	  if (step_over_finished)
-	    unstop_all_lwps (event_child);
-
-	  if (debug_threads)
-	    {
-	      if (event_child->last_resume_kind == resume_stop)
-		fprintf (stderr, "Bailing out; GDB wanted the LWP to stop.\n");
-	      else if (stopping_threads)
-		fprintf (stderr, "Bailing out; stopping threads.\n");
-
-	      if (bp_explains_trap)
-		fprintf (stderr, "   Hit a breakpoint.\n");
-	      if (step_over_finished)
-		fprintf (stderr, "   Step-over finished.\n");
-	      if (event_child->stopped_by_watchpoint)
-		fprintf (stderr, "   Stopped by watchpoint.\n");
-	    }
-
-	  /* Leave these pending.  */
-	  if (event_child->stopped_by_watchpoint)
-	    return lwpid_of (event_child);
-
-	  /* Otherwise, there may or not be a pending SIGSTOP.  If
-	     there isn't one, queue one up.  In any case, go back to
-	     the event loop to collect it.  Don't return yet, as we
-	     don't want this SIGTRAP to be left pending.  Note that
-	     since we cancelled the breakpoint above, the PC is
-	     already adjusted, and hence get_stop_pc returns the
-	     correct PC when we collect the SIGSTOP.  */
-
-	  if (!event_child->stop_expected)
-	    {
-	      event_child->stop_expected = 1;
-	      kill_lwp (lwpid_of (event_child), SIGSTOP);
-	    }
-
-	  /* Clear the single-stepping flag and SIGTRAP as we resume.  */
-	  linux_resume_one_lwp (event_child, 0, 0, NULL);
-	  continue;
-	}
-
-      /* We have all the data we need.  Either report the event to
-	 GDB, or resume threads and keep waiting for more.  */
-
-      /* Check If GDB would be interested in this event.  If GDB
-	 wanted this thread to single step, we always want to report
-	 the SIGTRAP, and let GDB handle it.  */
-      if ((event_child->last_resume_kind == resume_step)
-	  || event_child->stopped_by_watchpoint)
-	{
-	  if (step_over_finished)
-	    unstop_all_lwps (event_child);
-
-	  if (debug_threads)
-	    {
-	      if (event_child->last_resume_kind == resume_step)
-		fprintf (stderr, "GDB wanted to single-step, reporting event.\n");
-	      if (event_child->stopped_by_watchpoint)
-		fprintf (stderr, "Stopped by watchpoint.\n");
-	    }
-	}
-      /* We found no reason GDB would want us to stop.  We either hit
-	 one of our own breakpoints, or finished an internal step GDB
-	 shouldn't know about.  */
-      else if (step_over_finished || bp_explains_trap)
-	{
-	  if (debug_threads)
-	    {
-	      if (bp_explains_trap)
-		fprintf (stderr, "Hit a gdbserver breakpoint.\n");
-	      if (step_over_finished)
-		fprintf (stderr, "Step-over finished.\n");
-	    }
-
-	  /* If we stepped or ran into an internal breakpoint, we've
-	     already handled it.  So next time we resume (from this
-	     PC), we should step over it.  */
-	  if (breakpoint_here (stop_pc))
-	    event_child->need_step_over = 1;
-
-	  /* We're not reporting this breakpoint to GDB, so apply the
-	     decr_pc_after_break adjustment to the inferior's regcache
-	     ourselves.  */
-
-	  if (the_low_target.set_pc != NULL)
-	    {
-	      struct regcache *regcache
-		= get_thread_regcache (get_lwp_thread (event_child), 1);
-	      (*the_low_target.set_pc) (regcache, stop_pc);
-	    }
-
-	  /* We've finished stepping over a breakpoint.  We've stopped
-	     all LWPs momentarily except the stepping one.  This is
-	     where we resume them all again.  We're going to keep
-	     waiting, so use proceed, which handles stepping over the
-	     next breakpoint.  */
-	  if (debug_threads)
-	    fprintf (stderr, "proceeding all threads.\n");
-	  proceed_all_lwps ();
-
-	  /* If we stopped threads momentarily, we may have threads
-	     with pending statuses now (except when we're going to
-	     force the next event out of a specific LWP, in which case
-	     don't want to handle the pending events of other LWPs
-	     yet.  */
-	  if (ptid_equal (step_over_bkpt, null_ptid))
-	    goto again;
-	  else
-	    continue;
-	}
-      else
-	{
-	  /* GDB breakpoint or program trap, perhaps.  */
-	  if (step_over_finished)
-	    unstop_all_lwps (event_child);
-	}
-
-      if (debug_threads)
-	fprintf (stderr, "Hit a non-gdbserver trap event.\n");
-
       return lwpid_of (event_child);
     }
 
@@ -1639,6 +1410,151 @@ linux_wait_for_event (ptid_t ptid, int *wstat, int options)
     }
 }
 
+
+/* Count the LWP's that have had events.  */
+
+static int
+count_events_callback (struct inferior_list_entry *entry, void *data)
+{
+  struct lwp_info *lp = (struct lwp_info *) entry;
+  int *count = data;
+
+  gdb_assert (count != NULL);
+
+  /* Count only resumed LWPs that have a SIGTRAP event pending that
+     should be reported to GDB.  */
+  if (get_lwp_thread (lp)->last_status.kind == TARGET_WAITKIND_IGNORE
+      && lp->last_resume_kind != resume_stop
+      && lp->status_pending_p
+      && WIFSTOPPED (lp->status_pending)
+      && WSTOPSIG (lp->status_pending) == SIGTRAP
+      && !breakpoint_inserted_here (lp->stop_pc))
+    (*count)++;
+
+  return 0;
+}
+
+/* Select the LWP (if any) that is currently being single-stepped.  */
+
+static int
+select_singlestep_lwp_callback (struct inferior_list_entry *entry, void *data)
+{
+  struct lwp_info *lp = (struct lwp_info *) entry;
+
+  if (get_lwp_thread (lp)->last_status.kind == TARGET_WAITKIND_IGNORE
+      && lp->last_resume_kind == resume_step
+      && lp->status_pending_p)
+    return 1;
+  else
+    return 0;
+}
+
+/* Select the Nth LWP that has had a SIGTRAP event that should be
+   reported to GDB.  */
+
+static int
+select_event_lwp_callback (struct inferior_list_entry *entry, void *data)
+{
+  struct lwp_info *lp = (struct lwp_info *) entry;
+  int *selector = data;
+
+  gdb_assert (selector != NULL);
+
+  /* Select only resumed LWPs that have a SIGTRAP event pending. */
+  if (lp->last_resume_kind != resume_stop
+      && get_lwp_thread (lp)->last_status.kind == TARGET_WAITKIND_IGNORE
+      && lp->status_pending_p
+      && WIFSTOPPED (lp->status_pending)
+      && WSTOPSIG (lp->status_pending) == SIGTRAP
+      && !breakpoint_inserted_here (lp->stop_pc))
+    if ((*selector)-- == 0)
+      return 1;
+
+  return 0;
+}
+
+static int
+cancel_breakpoints_callback (struct inferior_list_entry *entry, void *data)
+{
+  struct lwp_info *lp = (struct lwp_info *) entry;
+  struct lwp_info *event_lp = data;
+
+  /* Leave the LWP that has been elected to receive a SIGTRAP alone.  */
+  if (lp == event_lp)
+    return 0;
+
+  /* If a LWP other than the LWP that we're reporting an event for has
+     hit a GDB breakpoint (as opposed to some random trap signal),
+     then just arrange for it to hit it again later.  We don't keep
+     the SIGTRAP status and don't forward the SIGTRAP signal to the
+     LWP.  We will handle the current event, eventually we will resume
+     all LWPs, and this one will get its breakpoint trap again.
+
+     If we do not do this, then we run the risk that the user will
+     delete or disable the breakpoint, but the LWP will have already
+     tripped on it.  */
+
+  if (lp->last_resume_kind != resume_stop
+      && get_lwp_thread (lp)->last_status.kind == TARGET_WAITKIND_IGNORE
+      && lp->status_pending_p
+      && WIFSTOPPED (lp->status_pending)
+      && WSTOPSIG (lp->status_pending) == SIGTRAP
+      && cancel_breakpoint (lp))
+    /* Throw away the SIGTRAP.  */
+    lp->status_pending_p = 0;
+
+  return 0;
+}
+
+/* Select one LWP out of those that have events pending.  */
+
+static void
+select_event_lwp (struct lwp_info **orig_lp)
+{
+  int num_events = 0;
+  int random_selector;
+  struct lwp_info *event_lp;
+
+  /* Give preference to any LWP that is being single-stepped.  */
+  event_lp
+    = (struct lwp_info *) find_inferior (&all_lwps,
+					 select_singlestep_lwp_callback, NULL);
+  if (event_lp != NULL)
+    {
+      if (debug_threads)
+	fprintf (stderr,
+		 "SEL: Select single-step %s\n",
+		 target_pid_to_str (ptid_of (event_lp)));
+    }
+  else
+    {
+      /* No single-stepping LWP.  Select one at random, out of those
+         which have had SIGTRAP events.  */
+
+      /* First see how many SIGTRAP events we have.  */
+      find_inferior (&all_lwps, count_events_callback, &num_events);
+
+      /* Now randomly pick a LWP out of those that have had a SIGTRAP.  */
+      random_selector = (int)
+	((num_events * (double) rand ()) / (RAND_MAX + 1.0));
+
+      if (debug_threads && num_events > 1)
+	fprintf (stderr,
+		 "SEL: Found %d SIGTRAP events, selecting #%d\n",
+		 num_events, random_selector);
+
+      event_lp = (struct lwp_info *) find_inferior (&all_lwps,
+						    select_event_lwp_callback,
+						    &random_selector);
+    }
+
+  if (event_lp != NULL)
+    {
+      /* Switch the event LWP.  */
+      *orig_lp = event_lp;
+    }
+}
+
 /* Set this inferior LWP's state as "want-stopped".  We won't resume
    this LWP until the client gives us another action for it.  */
 
@@ -1673,9 +1589,13 @@ linux_wait_1 (ptid_t ptid,
 {
   int w;
   struct thread_info *thread = NULL;
-  struct lwp_info *lwp = NULL;
+  struct lwp_info *event_child = NULL;
   int options;
   int pid;
+  int step_over_finished;
+  int bp_explains_trap;
+  int maybe_internal_trap;
+  int report_to_gdb;
 
   /* Translate generic target options into linux options.  */
   options = __WALL;
@@ -1711,11 +1631,20 @@ retry:
 	ptid = cont_thread;
     }
 
-  pid = linux_wait_for_event (ptid, &w, options);
+  if (ptid_equal (step_over_bkpt, null_ptid))
+    pid = linux_wait_for_event (ptid, &w, options);
+  else
+    {
+      if (debug_threads)
+	fprintf (stderr, "step_over_bkpt set [%s], doing a blocking wait\n",
+		 target_pid_to_str (step_over_bkpt));
+      pid = linux_wait_for_event (step_over_bkpt, &w, options & ~WNOHANG);
+    }
+
   if (pid == 0) /* only if TARGET_WNOHANG */
     return null_ptid;
 
-  lwp = get_thread_lwp (current_inferior);
+  event_child = get_thread_lwp (current_inferior);
 
   /* If we are waiting for a particular child, and it exited,
      linux_wait_for_event will return its exit status.  Similarly if
@@ -1733,13 +1662,13 @@ retry:
     {
       if (WIFEXITED (w) || WIFSIGNALED (w))
 	{
-	  int pid = pid_of (lwp);
+	  int pid = pid_of (event_child);
 	  struct process_info *process = find_process_pid (pid);
 
 #ifdef USE_THREAD_DB
 	  thread_db_free (process, 0);
 #endif
-	  delete_lwp (lwp);
+	  delete_lwp (event_child);
 	  linux_remove_process (process);
 
 	  current_inferior = NULL;
@@ -1771,18 +1700,161 @@ retry:
 	goto retry;
     }
 
+  /* If this event was not handled before, and is not a SIGTRAP, we
+     report it.  SIGILL and SIGSEGV are also treated as traps in case
+     a breakpoint is inserted at the current PC.  If this target does
+     not support internal breakpoints at all, we also report the
+     SIGTRAP without further processing; it's of no concern to us.  */
+  maybe_internal_trap
+    = (supports_breakpoints ()
+       && (WSTOPSIG (w) == SIGTRAP
+	   || ((WSTOPSIG (w) == SIGILL
+		|| WSTOPSIG (w) == SIGSEGV)
+	       && (*the_low_target.breakpoint_at) (event_child->stop_pc))));
+
+  if (maybe_internal_trap)
+    {
+      /* Handle anything that requires bookkeeping before deciding to
+	 report the event or continue waiting.  */
+
+      /* First check if we can explain the SIGTRAP with an internal
+	 breakpoint, or if we should possibly report the event to GDB.
+	 Do this before anything that may remove or insert a
+	 breakpoint.  */
+      bp_explains_trap = breakpoint_inserted_here (event_child->stop_pc);
+
+      /* We have a SIGTRAP, possibly a step-over dance has just
+	 finished.  If so, tweak the state machine accordingly,
+	 reinsert breakpoints and delete any reinsert (software
+	 single-step) breakpoints.  */
+      step_over_finished = finish_step_over (event_child);
+
+      /* Now invoke the callbacks of any internal breakpoints there.  */
+      check_breakpoints (event_child->stop_pc);
+
+      if (bp_explains_trap)
+	{
+	  /* If we stepped or ran into an internal breakpoint, we've
+	     already handled it.  So next time we resume (from this
+	     PC), we should step over it.  */
+	  if (debug_threads)
+	    fprintf (stderr, "Hit a gdbserver breakpoint.\n");
+
+	  event_child->need_step_over = 1;
+	}
+    }
+  else
+    {
+      /* We have some other signal, possibly a step-over dance was in
+	 progress, and it should be cancelled too.  */
+      step_over_finished = finish_step_over (event_child);
+    }
+
+  /* We have all the data we need.  Either report the event to GDB, or
+     resume threads and keep waiting for more.  */
+
+  /* Check If GDB would be interested in this event.  If GDB wanted
+     this thread to single step, we always want to report the SIGTRAP,
+     and let GDB handle it.  */
+  report_to_gdb = (!maybe_internal_trap
+		   || event_child->last_resume_kind == resume_step
+		   || event_child->stopped_by_watchpoint
+		   || (!step_over_finished && !bp_explains_trap));
+
+  /* We found no reason GDB would want us to stop.  We either hit one
+     of our own breakpoints, or finished an internal step GDB
+     shouldn't know about.  */
+  if (!report_to_gdb)
+    {
+      if (debug_threads)
+	{
+	  if (bp_explains_trap)
+	    fprintf (stderr, "Hit a gdbserver breakpoint.\n");
+	  if (step_over_finished)
+	    fprintf (stderr, "Step-over finished.\n");
+	}
+
+      /* We're not reporting this breakpoint to GDB, so apply the
+	 decr_pc_after_break adjustment to the inferior's regcache
+	 ourselves.  */
+
+      if (the_low_target.set_pc != NULL)
+	{
+	  struct regcache *regcache
+	    = get_thread_regcache (get_lwp_thread (event_child), 1);
+	  (*the_low_target.set_pc) (regcache, event_child->stop_pc);
+	}
+
+      /* We've finished stepping over a breakpoint.  We've stopped all
+	 LWPs momentarily except the stepping one.  This is where we
+	 resume them all again.  We're going to keep waiting, so use
+	 proceed, which handles stepping over the next breakpoint.  */
+      if (debug_threads)
+	fprintf (stderr, "proceeding all threads.\n");
+      proceed_all_lwps ();
+      goto retry;
+    }
+
+  if (debug_threads)
+    {
+      if (event_child->last_resume_kind == resume_step)
+	fprintf (stderr, "GDB wanted to single-step, reporting event.\n");
+      if (event_child->stopped_by_watchpoint)
+	fprintf (stderr, "Stopped by watchpoint.\n");
+      if (debug_threads)
+	fprintf (stderr, "Hit a non-gdbserver trap event.\n");
+    }
+
+  /* Alright, we're going to report a stop.  */
+
+  if (!non_stop)
+    {
+      /* In all-stop, stop all threads.  */
+      stop_all_lwps ();
+
+      /* If we're not waiting for a specific LWP, choose an event LWP
+	 from among those that have had events.  Giving equal priority
+	 to all LWPs that have had events helps prevent
+	 starvation.  */
+      if (ptid_equal (ptid, minus_one_ptid))
+	{
+	  event_child->status_pending_p = 1;
+	  event_child->status_pending = w;
+
+	  select_event_lwp (&event_child);
+
+	  event_child->status_pending_p = 0;
+	  w = event_child->status_pending;
+	}
+
+      /* Now that we've selected our final event LWP, cancel any
+	 breakpoints in other LWPs that have hit a GDB breakpoint.
+	 See the comment in cancel_breakpoints_callback to find out
+	 why.  */
+      find_inferior (&all_lwps, cancel_breakpoints_callback, event_child);
+    }
+  else
+    {
+      /* If we just finished a step-over, then all threads had been
+	 momentarily paused.  In all-stop, that's fine, we want
+	 threads stopped by now anyway.  In non-stop, we need to
+	 re-resume threads that GDB wanted to be running.  */
+      if (step_over_finished)
+	unstop_all_lwps (event_child);
+    }
+
   ourstatus->kind = TARGET_WAITKIND_STOPPED;
 
   /* Do this before the gdb_wants_all_stopped calls below, since they
      always set last_resume_kind to resume_stop.  */
-  if (lwp->last_resume_kind == resume_stop && WSTOPSIG (w) == SIGSTOP)
+  if (event_child->last_resume_kind == resume_stop && WSTOPSIG (w) == SIGSTOP)
     {
       /* A thread that has been requested to stop by GDB with vCont;t,
 	 and it stopped cleanly, so report as SIG0.  The use of
 	 SIGSTOP is an implementation detail.  */
       ourstatus->value.sig = TARGET_SIGNAL_0;
     }
-  else if (lwp->last_resume_kind == resume_stop && WSTOPSIG (w) != SIGSTOP)
+  else if (event_child->last_resume_kind == resume_stop && WSTOPSIG (w) != SIGSTOP)
     {
       /* A thread that has been requested to stop by GDB with vCont;t,
 	 but, it stopped for other reasons.  */
@@ -1797,17 +1869,6 @@ retry:
 
   if (!non_stop)
     {
-      /* In all-stop, stop all threads, we're about to report an event
-	 to GDB.  */
-      stop_all_lwps ();
-
-      /* Do not leave a pending single-step finish to be reported to
-	 the client.  The client will give us a new action for this
-	 thread, possibly a continue request --- otherwise, the client
-	 would consider this pending SIGTRAP reported later a spurious
-	 signal.  */
-      cancel_finished_single_steps (lwp);
-
       /* From GDB's perspective, all-stop mode always stops all
 	 threads implicitly.  Tag all threads as "want-stopped".  */
       gdb_wants_all_stopped ();
@@ -1817,17 +1878,17 @@ retry:
       /* We're reporting this LWP as stopped.  Update it's
       	 "want-stopped" state to what the client wants, until it gets
       	 a new resume action.  */
-      gdb_wants_lwp_stopped (&lwp->head);
+      gdb_wants_lwp_stopped (&event_child->head);
     }
 
   if (debug_threads)
     fprintf (stderr, "linux_wait ret = %s, %d, %d\n",
-	     target_pid_to_str (lwp->head.id),
+	     target_pid_to_str (ptid_of (event_child)),
 	     ourstatus->kind,
 	     ourstatus->value.sig);
 
-  get_lwp_thread (lwp)->last_status = *ourstatus;
-  return lwp->head.id;
+  get_lwp_thread (event_child)->last_status = *ourstatus;
+  return ptid_of (event_child);
 }
 
 /* Get rid of any pending event in the pipe.  */
@@ -1954,45 +2015,6 @@ mark_lwp_dead (struct lwp_info *lwp, int wstat)
 
   /* No further stops are expected from a dead lwp.  */
   lwp->stop_expected = 0;
-}
-
-static int
-cancel_finished_single_step (struct inferior_list_entry *entry, void *except)
-{
-  struct lwp_info *lwp = (struct lwp_info *) entry;
-  struct thread_info *saved_inferior;
-
-  if (lwp == except)
-    return 0;
-
-  saved_inferior = current_inferior;
-  current_inferior = get_lwp_thread (lwp);
-
-  /* Do not leave a pending single-step finish to be reported to the
-     client.  The client will give us a new action for this thread,
-     possibly a continue request --- otherwise, the client would
-     consider this pending SIGTRAP reported later a spurious
-     signal.  */
-  if (lwp->status_pending_p
-      && WSTOPSIG (lwp->status_pending) == SIGTRAP
-      && lwp->stepping
-      && !lwp->stopped_by_watchpoint)
-    {
-      if (debug_threads)
-	fprintf (stderr, "  single-step SIGTRAP cancelled\n");
-
-      lwp->status_pending_p = 0;
-      lwp->status_pending = 0;
-    }
-
-  current_inferior = saved_inferior;
-  return 0;
-}
-
-static void
-cancel_finished_single_steps (struct lwp_info *except)
-{
-  find_inferior (&all_lwps, cancel_finished_single_step, except);
 }
 
 static void

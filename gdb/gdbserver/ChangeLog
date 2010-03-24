@@ -1,5 +1,24 @@
 2010-03-24  Pedro Alves  <pedro@codesourcery.com>
 
+	* linux-low.c (status_pending_p_callback): Fix comment.
+	(linux_wait_for_event_1): Move most of the internal breakpoint
+	handling from here...
+	(linux_wait_1): ... to here.
+	(count_events_callback): New.
+	(select_singlestep_lwp_callback): New.
+	(select_event_lwp_callback): New.
+	(cancel_breakpoints_callback): New.
+	(select_event_lwp): New.
+	(linux_wait_1): Simplify internal breakpoint handling.  Give equal
+	priority to all LWPs that have had events that should be reported
+	to the client.  Cancel breakpoints when about to reporting the
+	event to the client, not while stopping lwps.  No longer cancel
+	finished single-steps here.
+	(cancel_finished_single_step): Delete.
+	(cancel_finished_single_steps): Delete.
+
+2010-03-24  Pedro Alves  <pedro@codesourcery.com>
+
 	* mem-break.c (enum bkpt_type): New.
 	(struct breakpoint): New field `type'.
 	(set_breakpoint_at): Change return type to struct breakpoint
