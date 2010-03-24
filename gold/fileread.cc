@@ -469,7 +469,7 @@ File_read::find_or_make_view(off_t offset, off_t start,
   // If --map-whole-files is set, make sure we have a
   // whole file view.  Options may not yet be ready, e.g.,
   // when reading a version script.  We then default to
-  // --no-keep-files-mapped.
+  // --no-map-whole-files.
   if (this->whole_file_view_ == NULL
       && parameters->options_valid()
       && parameters->options().map_whole_files())

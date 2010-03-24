@@ -1,3 +1,7 @@
+2010-03-23  Cary Coutant  <ccoutant@google.com>
+
+	* fileread.cc (find_or_make_view): Fix comment.
+
 2010-03-23  Ian Lance Taylor  <iant@google.com>
 
 	* script-sections.cc (class Orphan_section_placement): Define
