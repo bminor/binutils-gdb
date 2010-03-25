@@ -1,3 +1,9 @@
+2010-03-26  Alan Modra  <amodra@gmail.com>
+
+	PR ld/11426
+	* configure.host (many linux targets <HOSTING_CRT0>): Remove edits.
+	(m68*-motorola-sysv <HOSTING_LIBS>): Use here doc, not echo.
+
 2010-03-25  Joseph Myers  <joseph@codesourcery.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add eelf32_tic6x_be.o and
