@@ -83,6 +83,10 @@ enum bptype
        of scope (with hardware support for watchpoints)).  */
     bp_call_dummy,
 
+    /* A breakpoint set on std::terminate, that is used to catch
+       otherwise uncaught exceptions thrown during an inferior call.  */
+    bp_std_terminate,
+
     /* Some dynamic linkers (HP, maybe Solaris) can arrange for special
        code in the inferior to run when significant events occur in the
        dynamic linker (for example a library is loaded or unloaded).
@@ -117,6 +121,9 @@ enum bptype
        type will be created and enabled.  */
 
     bp_longjmp_master,
+
+    /* Master copies of std::terminate breakpoints.  */
+    bp_std_terminate_master,
 
     bp_catchpoint,
 
@@ -609,6 +616,20 @@ enum bpstat_what_main_action
     BPSTAT_WHAT_LAST
   };
 
+/* An enum indicating the kind of "stack dummy" stop.  This is a bit
+   of a misnomer because only one kind of truly a stack dummy.  */
+enum stop_stack_kind
+  {
+    /* We didn't stop at a stack dummy breakpoint.  */
+    STOP_NONE = 0,
+
+    /* Stopped at a stack dummy.  */
+    STOP_STACK_DUMMY,
+
+    /* Stopped at std::terminate.  */
+    STOP_STD_TERMINATE
+  };
+
 struct bpstat_what
   {
     enum bpstat_what_main_action main_action;
@@ -617,7 +638,7 @@ struct bpstat_what
        of BPSTAT_WHAT_STOP_SILENT or BPSTAT_WHAT_STOP_NOISY (the concept of
        continuing from a call dummy without popping the frame is not a
        useful one).  */
-    int call_dummy;
+    enum stop_stack_kind call_dummy;
   };
 
 /* The possible return values for print_bpstat, print_it_normal,
@@ -864,6 +885,9 @@ extern void delete_longjmp_breakpoint (int thread);
 
 extern void enable_overlay_breakpoints (void);
 extern void disable_overlay_breakpoints (void);
+
+extern void set_std_terminate_breakpoint (void);
+extern void delete_std_terminate_breakpoint (void);
 
 /* These functions respectively disable or reenable all currently
    enabled watchpoints.  When disabled, the watchpoints are marked

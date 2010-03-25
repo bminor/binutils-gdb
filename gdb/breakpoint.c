@@ -2157,6 +2157,41 @@ create_longjmp_master_breakpoint (char *func_name)
   do_cleanups (old_chain);
 }
 
+/* Create a master std::terminate breakpoint.  The actual function
+   looked for is named FUNC_NAME.  */
+static void
+create_std_terminate_master_breakpoint (const char *func_name)
+{
+  struct program_space *pspace;
+  struct objfile *objfile;
+  struct cleanup *old_chain;
+
+  old_chain = save_current_program_space ();
+
+  ALL_PSPACES (pspace)
+    ALL_OBJFILES (objfile)
+    {
+      struct breakpoint *b;
+      struct minimal_symbol *m;
+
+      set_current_program_space (pspace);
+
+      m = lookup_minimal_symbol (func_name, NULL, objfile);
+      if (m == NULL || (MSYMBOL_TYPE (m) != mst_text
+			&& MSYMBOL_TYPE (m) != mst_file_text))
+        continue;
+
+      b = create_internal_breakpoint (get_objfile_arch (objfile),
+				      SYMBOL_VALUE_ADDRESS (m),
+                                      bp_std_terminate_master);
+      b->addr_string = xstrdup (func_name);
+      b->enable_state = bp_disabled;
+    }
+  update_global_location_list (1);
+
+  do_cleanups (old_chain);
+}
+
 void
 update_breakpoints_after_exec (void)
 {
@@ -2198,7 +2233,7 @@ update_breakpoints_after_exec (void)
     /* Thread event breakpoints must be set anew after an exec(),
        as must overlay event and longjmp master breakpoints.  */
     if (b->type == bp_thread_event || b->type == bp_overlay_event
-	|| b->type == bp_longjmp_master)
+	|| b->type == bp_longjmp_master || b->type == bp_std_terminate_master)
       {
 	delete_breakpoint (b);
 	continue;
@@ -2274,6 +2309,7 @@ update_breakpoints_after_exec (void)
   create_longjmp_master_breakpoint ("_longjmp");
   create_longjmp_master_breakpoint ("siglongjmp");
   create_longjmp_master_breakpoint ("_siglongjmp");
+  create_std_terminate_master_breakpoint ("std::terminate()");
 }
 
 int
@@ -3202,6 +3238,12 @@ print_it_typical (bpstat bs)
       result = PRINT_NOTHING;
       break;
 
+    case bp_std_terminate_master:
+      /* These should never be enabled.  */
+      printf_filtered (_("std::terminate Master Breakpoint: gdb should not stop!\n"));
+      result = PRINT_NOTHING;
+      break;
+
     case bp_watchpoint:
     case bp_hardware_watchpoint:
       annotate_watchpoint (b->number);
@@ -3292,6 +3334,7 @@ print_it_typical (bpstat bs)
     case bp_step_resume:
     case bp_watchpoint_scope:
     case bp_call_dummy:
+    case bp_std_terminate:
     case bp_tracepoint:
     case bp_fast_tracepoint:
     case bp_jit_event:
@@ -4035,7 +4078,8 @@ bpstat_stop_status (struct address_space *aspace,
 	    continue;
 
 	  if (b->type == bp_thread_event || b->type == bp_overlay_event
-	      || b->type == bp_longjmp_master)
+	      || b->type == bp_longjmp_master
+	      || b->type == bp_std_terminate_master)
 	    /* We do not stop for these.  */
 	    bs->stop = 0;
 	  else
@@ -4245,7 +4289,7 @@ bpstat_what (bpstat bs)
   enum bpstat_what_main_action current_action = BPSTAT_WHAT_KEEP_CHECKING;
   struct bpstat_what retval;
 
-  retval.call_dummy = 0;
+  retval.call_dummy = STOP_NONE;
   for (; bs != NULL; bs = bs->next)
     {
       enum class bs_class = no_effect;
@@ -4318,6 +4362,7 @@ bpstat_what (bpstat bs)
 	case bp_thread_event:
 	case bp_overlay_event:
 	case bp_longjmp_master:
+	case bp_std_terminate_master:
 	  bs_class = bp_nostop;
 	  break;
 	case bp_catchpoint:
@@ -4337,7 +4382,13 @@ bpstat_what (bpstat bs)
 	  /* Make sure the action is stop (silent or noisy),
 	     so infrun.c pops the dummy frame.  */
 	  bs_class = bp_silent;
-	  retval.call_dummy = 1;
+	  retval.call_dummy = STOP_STACK_DUMMY;
+	  break;
+	case bp_std_terminate:
+	  /* Make sure the action is stop (silent or noisy),
+	     so infrun.c pops the dummy frame.  */
+	  bs_class = bp_silent;
+	  retval.call_dummy = STOP_STD_TERMINATE;
 	  break;
 	case bp_tracepoint:
 	case bp_fast_tracepoint:
@@ -4465,10 +4516,12 @@ print_one_breakpoint_location (struct breakpoint *b,
     {bp_step_resume, "step resume"},
     {bp_watchpoint_scope, "watchpoint scope"},
     {bp_call_dummy, "call dummy"},
+    {bp_std_terminate, "std::terminate"},
     {bp_shlib_event, "shlib events"},
     {bp_thread_event, "thread events"},
     {bp_overlay_event, "overlay events"},
     {bp_longjmp_master, "longjmp master"},
+    {bp_std_terminate_master, "std::terminate master"},
     {bp_catchpoint, "catchpoint"},
     {bp_tracepoint, "tracepoint"},
     {bp_fast_tracepoint, "fast tracepoint"},
@@ -4596,10 +4649,12 @@ print_one_breakpoint_location (struct breakpoint *b,
       case bp_step_resume:
       case bp_watchpoint_scope:
       case bp_call_dummy:
+      case bp_std_terminate:
       case bp_shlib_event:
       case bp_thread_event:
       case bp_overlay_event:
       case bp_longjmp_master:
+      case bp_std_terminate_master:
       case bp_tracepoint:
       case bp_fast_tracepoint:
       case bp_jit_event:
@@ -5235,11 +5290,13 @@ allocate_bp_location (struct breakpoint *bpt)
     case bp_step_resume:
     case bp_watchpoint_scope:
     case bp_call_dummy:
+    case bp_std_terminate:
     case bp_shlib_event:
     case bp_thread_event:
     case bp_overlay_event:
     case bp_jit_event:
     case bp_longjmp_master:
+    case bp_std_terminate_master:
       loc->loc_type = bp_loc_software_breakpoint;
       break;
     case bp_hardware_breakpoint:
@@ -5490,6 +5547,33 @@ disable_overlay_breakpoints (void)
       update_global_location_list (0);
       overlay_events_enabled = 0;
     }
+}
+
+/* Set an active std::terminate breakpoint for each std::terminate
+   master breakpoint.  */
+void
+set_std_terminate_breakpoint (void)
+{
+  struct breakpoint *b, *temp;
+
+  ALL_BREAKPOINTS_SAFE (b, temp)
+    if (b->pspace == current_program_space
+	&& b->type == bp_std_terminate_master)
+      {
+	struct breakpoint *clone = clone_momentary_breakpoint (b);
+	clone->type = bp_std_terminate;
+      }
+}
+
+/* Delete all the std::terminate breakpoints.  */
+void
+delete_std_terminate_breakpoint (void)
+{
+  struct breakpoint *b, *temp;
+
+  ALL_BREAKPOINTS_SAFE (b, temp)
+    if (b->type == bp_std_terminate)
+      delete_breakpoint (b);
 }
 
 struct breakpoint *
@@ -6537,12 +6621,14 @@ mention (struct breakpoint *b)
       case bp_longjmp_resume:
       case bp_step_resume:
       case bp_call_dummy:
+      case bp_std_terminate:
       case bp_watchpoint_scope:
       case bp_shlib_event:
       case bp_thread_event:
       case bp_overlay_event:
       case bp_jit_event:
       case bp_longjmp_master:
+      case bp_std_terminate_master:
 	break;
       }
 
@@ -9222,11 +9308,13 @@ delete_command (char *arg, int from_tty)
       ALL_BREAKPOINTS (b)
       {
 	if (b->type != bp_call_dummy
+	    && b->type != bp_std_terminate
 	    && b->type != bp_shlib_event
 	    && b->type != bp_jit_event
 	    && b->type != bp_thread_event
 	    && b->type != bp_overlay_event
 	    && b->type != bp_longjmp_master
+	    && b->type != bp_std_terminate_master
 	    && b->number >= 0)
 	  {
 	    breaks_to_delete = 1;
@@ -9241,11 +9329,13 @@ delete_command (char *arg, int from_tty)
 	  ALL_BREAKPOINTS_SAFE (b, temp)
 	  {
 	    if (b->type != bp_call_dummy
+		&& b->type != bp_std_terminate
 		&& b->type != bp_shlib_event
 		&& b->type != bp_thread_event
 		&& b->type != bp_jit_event
 		&& b->type != bp_overlay_event
 		&& b->type != bp_longjmp_master
+		&& b->type != bp_std_terminate_master
 		&& b->number >= 0)
 	      delete_breakpoint (b);
 	  }
@@ -9556,6 +9646,7 @@ breakpoint_re_set_one (void *bint)
 	 reset later by breakpoint_re_set.  */
     case bp_overlay_event:
     case bp_longjmp_master:
+    case bp_std_terminate_master:
       delete_breakpoint (b);
       break;
 
@@ -9575,6 +9666,7 @@ breakpoint_re_set_one (void *bint)
     case bp_finish:
     case bp_watchpoint_scope:
     case bp_call_dummy:
+    case bp_std_terminate:
     case bp_step_resume:
     case bp_longjmp:
     case bp_longjmp_resume:
@@ -9620,6 +9712,7 @@ breakpoint_re_set (void)
   create_longjmp_master_breakpoint ("_longjmp");
   create_longjmp_master_breakpoint ("siglongjmp");
   create_longjmp_master_breakpoint ("_siglongjmp");
+  create_std_terminate_master_breakpoint ("std::terminate()");
 }
 
 /* Reset the thread number of this breakpoint:

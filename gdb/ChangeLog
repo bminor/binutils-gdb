@@ -1,3 +1,40 @@
+2010-03-25  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/11327, PR gdb/11328, PR breakpoints/11368:
+	* infrun.c (handle_inferior_event): Change initialization of
+	stop_stack_dummy.
+	(handle_inferior_event): Change assignment to stop_stack_dummy.
+	(normal_stop): Update use of stop_stack_dummy.
+	(struct inferior_status) <stop_stack_dummy>: Change type.
+	* inferior.h (stop_stack_dummy): Update.
+	* infcmd.c (stop_stack_dummy): Change type.
+	* infcall.c (cleanup_delete_std_terminate_breakpoint): New
+	function.
+	(call_function_by_hand): Call set_std_terminate_breakpoint.
+	Rewrite std::terminate handling.
+	* breakpoint.h (enum bptype) <bp_std_terminate,
+	bp_std_terminate_master>: New.
+	(enum stop_stack_kind): New.
+	(struct bpstat_what) <call_dummy>: Change type.
+	(set_std_terminate_breakpoint, delete_std_terminate_breakpoint):
+	Declare.
+	* breakpoint.c (create_std_terminate_master_breakpoint): New
+	function.
+	(update_breakpoints_after_exec): Handle bp_std_terminate_master.
+	Call create_std_terminate_master_breakpoint.
+	(print_it_typical): Handle new breakpoint kinds.
+	(bpstat_stop_status): Handle bp_std_terminate_master.
+	(bpstat_what): Correctly set call_dummy field.  Handle
+	bp_std_terminate_master and bp_std_terminate.
+	(print_one_breakpoint_location): Update.
+	(allocate_bp_location): Update.
+	(set_std_terminate_breakpoint): New function.
+	(delete_std_terminate_breakpoint): Likewise.
+	(create_thread_event_breakpoint): Update.
+	(delete_command): Update.
+	(breakpoint_re_set_one): Update.
+	(breakpoint_re_set): Call create_std_terminate_master_breakpoint.
+
 2010-03-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* symfile.c (build_section_addr_info_from_bfd): New.

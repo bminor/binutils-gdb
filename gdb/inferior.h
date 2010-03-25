@@ -297,7 +297,7 @@ extern CORE_ADDR stop_pc;
 
 /* Nonzero if stopped due to completion of a stack dummy routine.  */
 
-extern int stop_stack_dummy;
+extern enum stop_stack_kind stop_stack_dummy;
 
 /* Nonzero if program stopped due to a random (unexpected) signal in
    inferior process.  */

@@ -155,7 +155,7 @@ int breakpoint_proceeded;
 
 /* Nonzero if stopped due to completion of a stack dummy routine.  */
 
-int stop_stack_dummy;
+enum stop_stack_kind stop_stack_dummy;
 
 /* Nonzero if stopped due to a random (unexpected) signal in inferior
    process.  */

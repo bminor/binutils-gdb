@@ -403,6 +403,13 @@ run_inferior_call (struct thread_info *call_thread, CORE_ADDR real_pc)
   return e;
 }
 
+/* A cleanup function that calls delete_std_terminate_breakpoint.  */
+static void
+cleanup_delete_std_terminate_breakpoint (void *ignore)
+{
+  delete_std_terminate_breakpoint ();
+}
+
 /* All this stuff with a dummy frame may seem unnecessarily complicated
    (why not just save registers in GDB?).  The purpose of pushing a dummy
    frame which looks just like a real frame is so that if you call a
@@ -440,9 +447,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   struct cleanup *args_cleanup;
   struct frame_info *frame;
   struct gdbarch *gdbarch;
-  struct breakpoint *terminate_bp = NULL;
-  struct minimal_symbol *tm;
-  struct cleanup *terminate_bp_cleanup = NULL;
+  struct cleanup *terminate_bp_cleanup;
   ptid_t call_thread_ptid;
   struct gdb_exception e;
   const char *name;
@@ -757,13 +762,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
      call.  Place a momentary breakpoint in the std::terminate function
      and if triggered in the call, rewind.  */
   if (unwind_on_terminating_exception_p)
-     {
-       struct minimal_symbol *tm = lookup_minimal_symbol  ("std::terminate()",
-							   NULL, NULL);
-       if (tm != NULL)
-	   terminate_bp = set_momentary_breakpoint_at_pc
-	     (gdbarch, SYMBOL_VALUE_ADDRESS (tm),  bp_breakpoint);
-     }
+    set_std_terminate_breakpoint ();
 
   /* Everything's ready, push all the info needed to restore the
      caller (and identify the dummy-frame) onto the dummy-frame
@@ -776,8 +775,8 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   discard_cleanups (inf_status_cleanup);
 
   /* Register a clean-up for unwind_on_terminating_exception_breakpoint.  */
-  if (terminate_bp)
-    terminate_bp_cleanup = make_cleanup_delete_breakpoint (terminate_bp);
+  terminate_bp_cleanup = make_cleanup (cleanup_delete_std_terminate_breakpoint,
+				       NULL);
 
   /* - SNIP - SNIP - SNIP - SNIP - SNIP - SNIP - SNIP - SNIP - SNIP -
      If you're looking to implement asynchronous dummy-frames, then
@@ -878,7 +877,7 @@ When the function is done executing, GDB will silently stop."),
 	       name);
     }
 
-  if (stopped_by_random_signal || !stop_stack_dummy)
+  if (stopped_by_random_signal || stop_stack_dummy != STOP_STACK_DUMMY)
     {
       const char *name = get_function_name (funaddr,
 					    name_buf, sizeof (name_buf));
@@ -932,30 +931,17 @@ When the function is done executing, GDB will silently stop."),
 	    }
 	}
 
-      if (!stop_stack_dummy)
+      if (stop_stack_dummy == STOP_STD_TERMINATE)
 	{
+	  /* We must get back to the frame we were before the dummy
+	     call.  */
+	  dummy_frame_pop (dummy_id);
 
-	  /* Check if unwind on terminating exception behaviour is on.  */
-	  if (unwind_on_terminating_exception_p)
-	    {
-	      /* Check that the breakpoint is our special std::terminate
-		 breakpoint.  If it is, we do not want to kill the inferior
-		 in an inferior function call. Rewind, and warn the
-		 user.  */
+	  /* We also need to restore inferior status to that before
+	     the dummy call.  */
+	  restore_inferior_status (inf_status);
 
-	      if (terminate_bp != NULL
-		  && (inferior_thread ()->stop_bpstat->breakpoint_at->address
-		      == terminate_bp->loc->address))
-		{
-		  /* We must get back to the frame we were before the
-		     dummy call.  */
-		  dummy_frame_pop (dummy_id);
-
-		  /* We also need to restore inferior status to that before the
-		     dummy call.  */
-		  restore_inferior_status (inf_status);
-
-		  error (_("\
+	  error (_("\
 The program being debugged entered a std::terminate call, most likely\n\
 caused by an unhandled C++ exception.  GDB blocked this call in order\n\
 to prevent the program from being terminated, and has restored the\n\
@@ -963,9 +949,11 @@ context to its original state before the call.\n\
 To change this behaviour use \"set unwind-on-terminating-exception off\".\n\
 Evaluation of the expression containing the function (%s)\n\
 will be abandoned."),
-			 name);
-		}
-	    }
+		 name);
+	}
+      else if (stop_stack_dummy == STOP_NONE)
+	{
+
 	  /* We hit a breakpoint inside the FUNCTION.
 	     Keep the dummy frame, the user may want to examine its state.
 	     Discard inferior status, we're not at the same point
@@ -992,10 +980,7 @@ When the function is done executing, GDB will silently stop."),
       internal_error (__FILE__, __LINE__, _("... should not be here"));
     }
 
-  /* If we get here and the std::terminate() breakpoint has been set,
-     it has to be cleaned manually.  */
-  if (terminate_bp)
-    do_cleanups (terminate_bp_cleanup);
+  do_cleanups (terminate_bp_cleanup);
 
   /* If we get here the called FUNCTION ran to completion,
      and the dummy frame has already been popped.  */

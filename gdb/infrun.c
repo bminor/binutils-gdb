@@ -2904,7 +2904,7 @@ handle_inferior_event (struct execution_control_state *ecs)
   target_last_waitstatus = ecs->ws;
 
   /* Always clear state belonging to the previous time we stopped.  */
-  stop_stack_dummy = 0;
+  stop_stack_dummy = STOP_NONE;
 
   /* If it's a new process, add it to the thread database */
 
@@ -3970,7 +3970,7 @@ process_event_stop_test:
 
     if (what.call_dummy)
       {
-	stop_stack_dummy = 1;
+	stop_stack_dummy = what.call_dummy;
       }
 
     switch (what.main_action)
@@ -5460,7 +5460,7 @@ Further execution is probably impossible.\n"));
       stop_registers = regcache_dup (get_current_regcache ());
     }
 
-  if (stop_stack_dummy)
+  if (stop_stack_dummy == STOP_STACK_DUMMY)
     {
       /* Pop the empty frame that contains the stack dummy.
 	 This also restores inferior state prior to the call
@@ -6038,7 +6038,7 @@ struct inferior_status
 {
   bpstat stop_bpstat;
   int stop_step;
-  int stop_stack_dummy;
+  enum stop_stack_kind stop_stack_dummy;
   int stopped_by_random_signal;
   int stepping_over_breakpoint;
   CORE_ADDR step_range_start;
