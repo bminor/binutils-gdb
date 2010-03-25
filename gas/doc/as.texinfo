@@ -1,6 +1,6 @@
 \input texinfo @c                               -*-Texinfo-*-
 @c  Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-@c  2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
+@c  2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
 @c  Free Software Foundation, Inc.
 @c UPDATE!!  On future updates--
 @c   (1)   check for new machine-dep cmdline options in
@@ -104,7 +104,7 @@ This file documents the GNU Assembler "@value{AS}".
 
 @c man begin COPYRIGHT
 Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001, 2002,
-2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -154,7 +154,7 @@ done.
 
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001, 2002,
-2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
       Permission is granted to copy, distribute and/or modify this document
       under the terms of the GNU Free Documentation License, Version 1.3
@@ -470,6 +470,13 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @emph{Target TIC54X options:}
  [@b{-mcpu=54[123589]}|@b{-mcpu=54[56]lp}] [@b{-mfar-mode}|@b{-mf}] 
  [@b{-merrors-to-file} @var{<filename>}|@b{-me} @var{<filename>}]
+@end ifset
+
+@ifset TIC6X
+
+@emph{Target TIC6X options:}
+   [@b{-march=@var{arch}}] [@b{-matomic}|@b{-mno-atomic}]
+   [@b{-mbig-endian}|@b{-mlittle-endian}]
 @end ifset
 
 @ifset Z80
@@ -1243,6 +1250,38 @@ Allow or disallow symbolic names for registers.
 Warn whenever the operand for a base or index register has been specified
 but evaluates to zero.
 @end table
+@end ifset
+
+@ifset TIC6X
+The following options are available when @value{AS} is configured for a
+TMS320C6000 processor.
+
+@table @gcctabopt
+@item -march=@var{arch}
+Enable (only) instructions from architecture @var{arch}.  By default,
+all instructions are permitted.
+
+The following values of @var{arch} are accepted: @code{c62x},
+@code{c64x}, @code{c64x+}, @code{c67x}, @code{c67x+}, @code{c674x}.
+
+@item -matomic
+@itemx -mno-atomic
+Enable or disable the optional C64x+ atomic operation instructions.
+By default, they are enabled if no @option{-march} option is given, or
+if an architecture is specified with @option{-march} that implies
+these instructions are present (currently, there are no such
+architectures); they are disabled if an architecture is specified with
+@option{-march} on which the instructions are optional or not
+present.  This option overrides such a default from the architecture,
+independent of the order in which the @option{-march} or
+@option{-matomic} or @option{-mno-atomic} options are passed.
+
+@item -mbig-endian
+@itemx -mlittle-endian
+Generate code for the specified endianness.  The default is
+little-endian.
+@end table
+
 @end ifset
 
 @ifset XTENSA
@@ -2314,6 +2353,9 @@ is considered a comment and is ignored.  The line comment character is
 @end ifset
 @ifset RX
 @samp{#} on the RX;
+@end ifset
+@ifset TIC6X
+@samp{;} on the TMS320C6X;
 @end ifset
 @ifset VAX
 @samp{#} on the Vax;
@@ -6862,6 +6904,9 @@ subject, see the hardware manufacturer's manual.
 @ifset TIC54X
 * TIC54X-Dependent::            TI TMS320C54x Dependent Features
 @end ifset
+@ifset TIC6X
+* TIC6X-Dependent ::            TI TMS320C6x Dependent Features
+@end ifset
 @ifset V850
 * V850-Dependent::              V850 Dependent Features
 @end ifset
@@ -7051,6 +7096,10 @@ family.
 
 @ifset TIC54X
 @include c-tic54x.texi
+@end ifset
+
+@ifset TIC6X
+@include c-tic6x.texi
 @end ifset
 
 @ifset Z80

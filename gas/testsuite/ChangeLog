@@ -1,3 +1,7 @@
+2010-03-25  Joseph Myers  <joseph@codesourcery.com>
+
+	* gas/tic6x: New directory and testcases.
+
 2010-03-23  Joseph Myers  <joseph@codesourcery.com>
 
 	* gas/macros/dot.s: Remove space in .byte operands.

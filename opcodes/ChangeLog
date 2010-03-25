@@ -1,3 +1,13 @@
+2010-03-25  Joseph Myers  <joseph@codesourcery.com>
+
+	* Makefile.am (TARGET_LIBOPCODES_CFILES): Add tic6x-dis.c.
+	* Makefile.in: Regenerate.
+	* configure.in (bfd_tic6x_arch): New.
+	* configure: Regenerate.
+	* disassemble.c (ARCH_tic6x): Define if ARCH_all.
+	(disassembler): Handle TI C6X.
+	* tic6x-dis.c: New.
+
 2010-03-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-dis.c (decode_regs_hi): Change REG_LH2 typo to REG_MH2.

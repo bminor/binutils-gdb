@@ -65,6 +65,7 @@ CPU_DOCS = \
 	c-sh64.texi \
 	c-sparc.texi \
         c-tic54x.texi \
+        c-tic6x.texi \
 	c-vax.texi \
 	c-v850.texi \
 	c-xtensa.texi \

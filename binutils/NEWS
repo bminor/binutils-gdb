@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the TMS320C6000 (TI C6X) processor family.
+
 * Readelf can now display ARM unwind tables (.ARM.exidx / .ARM.extab) using
   the -u / --unwind option.
 

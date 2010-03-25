@@ -137,6 +137,7 @@
 #include "elf/sh.h"
 #include "elf/sparc.h"
 #include "elf/spu.h"
+#include "elf/tic6x.h"
 #include "elf/v850.h"
 #include "elf/vax.h"
 #include "elf/x86-64.h"
@@ -648,6 +649,7 @@ guess_is_rela (unsigned int e_machine)
     case EM_SPARC32PLUS:
     case EM_SPARCV9:
     case EM_SPU:
+    case EM_TI_C6000:
     case EM_V850:
     case EM_CYGNUS_V850:
     case EM_VAX:
@@ -1261,6 +1263,10 @@ dump_relocations (FILE * file,
 	case EM_C166:
 	  rtype = elf_xc16x_reloc_type (type);
 	  break;
+
+	case EM_TI_C6000:
+	  rtype = elf_tic6x_reloc_type (type);
+	  break;
 	}
 
       if (rtype == NULL)
@@ -1638,6 +1644,21 @@ get_score_dynamic_type (unsigned long type)
     }
 }
 
+static const char *
+get_tic6x_dynamic_type (unsigned long type)
+{
+  switch (type)
+    {
+    case DT_C6000_GSYM_OFFSET: return "C6000_GSYM_OFFSET";
+    case DT_C6000_GSTR_OFFSET: return "C6000_GSTR_OFFSET";
+    case DT_C6000_DSBT_BASE:   return "C6000_DSBT_BASE";
+    case DT_C6000_DSBT_SIZE:   return "C6000_DSBT_SIZE";
+    case DT_C6000_PREEMPTMAP:  return "C6000_PREEMPTMAP";
+    case DT_C6000_DSBT_INDEX:  return "C6000_DSBT_INDEX";
+    default:
+      return NULL;
+    }
+}
 
 static const char *
 get_dynamic_type (unsigned long type)
@@ -1749,6 +1770,9 @@ get_dynamic_type (unsigned long type)
 	      break;
 	    case EM_SCORE:
 	      result = get_score_dynamic_type (type);
+	      break;
+	    case EM_TI_C6000:
+	      result = get_tic6x_dynamic_type (type);
 	      break;
 	    default:
 	      result = NULL;
@@ -2544,6 +2568,10 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	case EM_S390:
 	  if (e_flags & EF_S390_HIGH_GPRS)
 	    strcat (buf, ", highgprs");
+
+	case EM_TI_C6000:
+	  if ((e_flags & EF_C6000_REL))
+	    strcat (buf, ", relocatable module");
 	}
     }
 
@@ -2573,9 +2601,42 @@ get_osabi_name (unsigned int osabi)
     case ELFOSABI_NSK:		return "HP - Non-Stop Kernel";
     case ELFOSABI_AROS:		return "AROS";
     case ELFOSABI_FENIXOS:	return "FenixOS";
-    case ELFOSABI_STANDALONE:	return _("Standalone App");
-    case ELFOSABI_ARM:		return "ARM";
     default:
+      if (osabi >= 64)
+	switch (elf_header.e_machine)
+	  {
+	  case EM_ARM:
+	    switch (osabi)
+	      {
+	      case ELFOSABI_ARM:	return "ARM";
+	      default:
+		break;
+	      }
+	    break;
+
+	  case EM_MSP430:
+	  case EM_MSP430_OLD:
+	    switch (osabi)
+	      {
+	      case ELFOSABI_STANDALONE:	return _("Standalone App");
+	      default:
+		break;
+	      }
+	    break;
+
+	  case EM_TI_C6000:
+	    switch (osabi)
+	      {
+	      case ELFOSABI_C6000_ELFABI:	return _("Bare-metal C6000");
+	      case ELFOSABI_C6000_LINUX:	return "Linux C6000";
+	      default:
+		break;
+	      }
+	    break;
+
+	  default:
+	    break;
+	  }
       snprintf (buff, sizeof (buff), _("<unknown: %x>"), osabi);
       return buff;
     }
@@ -2663,6 +2724,19 @@ get_ia64_segment_type (unsigned long type)
 }
 
 static const char *
+get_tic6x_segment_type (unsigned long type)
+{
+  switch (type)
+    {
+    case PT_C6000_PHATTR:	return "C6000_PHATTR";
+    default:
+      break;
+    }
+
+  return NULL;
+}
+
+static const char *
 get_segment_type (unsigned long p_type)
 {
   static char buff[32];
@@ -2702,6 +2776,9 @@ get_segment_type (unsigned long p_type)
 	      break;
 	    case EM_IA_64:
 	      result = get_ia64_segment_type (p_type);
+	      break;
+	    case EM_TI_C6000:
+	      result = get_tic6x_segment_type (p_type);
 	      break;
 	    default:
 	      result = NULL;
@@ -2864,6 +2941,33 @@ get_arm_section_type_name (unsigned int sh_type)
 }
 
 static const char *
+get_tic6x_section_type_name (unsigned int sh_type)
+{
+  switch (sh_type)
+    {
+    case SHT_C6000_UNWIND:
+      return "C6000_UNWIND";
+    case SHT_C6000_PREEMPTMAP:
+      return "C6000_PREEMPTMAP";
+    case SHT_C6000_ATTRIBUTES:
+      return "C6000_ATTRIBUTES";
+    case SHT_TI_ICODE:
+      return "TI_ICODE";
+    case SHT_TI_XREF:
+      return "TI_XREF";
+    case SHT_TI_HANDLER:
+      return "TI_HANDLER";
+    case SHT_TI_INITINFO:
+      return "TI_INITINFO";
+    case SHT_TI_PHATTRS:
+      return "TI_PHATTRS";
+    default:
+      break;
+    }
+  return NULL;
+}
+
+static const char *
 get_section_type_name (unsigned int sh_type)
 {
   static char buff[32];
@@ -2920,6 +3024,9 @@ get_section_type_name (unsigned int sh_type)
 	      break;
 	    case EM_ARM:
 	      result = get_arm_section_type_name (sh_type);
+	      break;
+	    case EM_TI_C6000:
+	      result = get_tic6x_section_type_name (sh_type);
 	      break;
 	    default:
 	      result = NULL;
@@ -8801,6 +8908,8 @@ is_32bit_abs_reloc (unsigned int reloc_type)
 	|| reloc_type == 23; /* R_SPARC_UA32.  */
     case EM_SPU:
       return reloc_type == 6; /* R_SPU_ADDR32 */
+    case EM_TI_C6000:
+      return reloc_type == 1; /* R_C6000_ABS32.  */
     case EM_CYGNUS_V850:
     case EM_V850:
       return reloc_type == 6; /* R_V850_ABS32.  */
@@ -8984,6 +9093,8 @@ is_16bit_abs_reloc (unsigned int reloc_type)
     case EM_ALTERA_NIOS2:
     case EM_NIOS32:
       return reloc_type == 9; /* R_NIOS_16.  */
+    case EM_TI_C6000:
+      return reloc_type == 2; /* R_C6000_ABS16.  */
     case EM_XC16X:
     case EM_C166:
       return reloc_type == 2; /* R_XC16C_ABS_16.  */
@@ -9020,6 +9131,7 @@ is_none_reloc (unsigned int reloc_type)
     case EM_L1OM:    /* R_X86_64_NONE.  */
     case EM_MN10300: /* R_MN10300_NONE.  */
     case EM_M32R:    /* R_M32R_NONE.  */
+    case EM_TI_C6000:/* R_C6000_NONE.  */
     case EM_XC16X:
     case EM_C166:    /* R_XC16X_NONE.  */
       return reloc_type == 0;

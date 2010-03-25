@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the TMS320C6000 (TI C6X) processor family.
+
 * --add-needed renamed to --copy-dt-needed-entries in order to avoid confusion
   with --as-needed option.
 

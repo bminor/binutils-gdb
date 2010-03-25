@@ -1,3 +1,12 @@
+2010-03-25  Joseph Myers  <joseph@codesourcery.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add eelf32_tic6x_be.o and
+	eelf32_tic6x_le.o.
+	(eelf32_tic6x_be.c, eelf32_tic6x_le.c): New.
+	* NEWS: Add news entry for TI C6X support.
+	* configure.tgt (tic6x-*-*): New.
+	* emulparams/elf32_tic6x_be.sh, emulparams/elf32_tic6x_le.sh: New.
+
 2010-03-23  Joseph Myers  <joseph@codesourcery.com>
 
 	* scripttempl/elf.sc (RODATA_NAME, SDATA_NAME, SBSS_NAME,

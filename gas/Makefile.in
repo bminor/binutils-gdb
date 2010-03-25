@@ -425,6 +425,7 @@ TARGET_CPU_CFILES = \
 	config/tc-tic30.c \
 	config/tc-tic4x.c \
 	config/tc-tic54x.c \
+	config/tc-tic6x.c \
 	config/tc-vax.c \
 	config/tc-v850.c \
 	config/tc-xstormy16.c \
@@ -488,6 +489,7 @@ TARGET_CPU_HFILES = \
 	config/tc-tic30.h \
 	config/tc-tic4x.h \
 	config/tc-tic54x.h \
+	config/tc-tic6x.h \
 	config/tc-vax.h \
 	config/tc-v850.h \
 	config/tc-xstormy16.h \
@@ -869,6 +871,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-tic30.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-tic4x.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-tic54x.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-tic6x.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-v850.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-vax.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tc-xc16x.Po@am__quote@
@@ -1656,6 +1659,20 @@ tc-tic54x.obj: config/tc-tic54x.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-tic54x.c' object='tc-tic54x.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-tic54x.obj `if test -f 'config/tc-tic54x.c'; then $(CYGPATH_W) 'config/tc-tic54x.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-tic54x.c'; fi`
+
+tc-tic6x.o: config/tc-tic6x.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-tic6x.o -MD -MP -MF $(DEPDIR)/tc-tic6x.Tpo -c -o tc-tic6x.o `test -f 'config/tc-tic6x.c' || echo '$(srcdir)/'`config/tc-tic6x.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/tc-tic6x.Tpo $(DEPDIR)/tc-tic6x.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-tic6x.c' object='tc-tic6x.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-tic6x.o `test -f 'config/tc-tic6x.c' || echo '$(srcdir)/'`config/tc-tic6x.c
+
+tc-tic6x.obj: config/tc-tic6x.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-tic6x.obj -MD -MP -MF $(DEPDIR)/tc-tic6x.Tpo -c -o tc-tic6x.obj `if test -f 'config/tc-tic6x.c'; then $(CYGPATH_W) 'config/tc-tic6x.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-tic6x.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/tc-tic6x.Tpo $(DEPDIR)/tc-tic6x.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/tc-tic6x.c' object='tc-tic6x.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o tc-tic6x.obj `if test -f 'config/tc-tic6x.c'; then $(CYGPATH_W) 'config/tc-tic6x.c'; else $(CYGPATH_W) '$(srcdir)/config/tc-tic6x.c'; fi`
 
 tc-vax.o: config/tc-vax.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT tc-vax.o -MD -MP -MF $(DEPDIR)/tc-vax.Tpo -c -o tc-vax.o `test -f 'config/tc-vax.c' || echo '$(srcdir)/'`config/tc-vax.c

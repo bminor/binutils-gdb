@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the TMS320C6000 (TI C6X) processor family.
+
 * GAS now understands an extended syntax in the .section directive flags
   for COFF targets that allows the section's alignment to be specified.  This
   feature has also been backported to the 2.20 release series, starting with

@@ -1,3 +1,22 @@
+2010-03-25  Joseph Myers  <joseph@codesourcery.com>
+
+	* Makefile.am (TARGET_CPU_CFILES): Add config/tc-tic6x.c.
+	(TARGET_CPU_HFILES): Add config/tc-tic6x.h.
+	* Makefile.in: Regenerate.
+	* NEWS: Add news entry for TI C6X support.
+	* app.c (do_scrub_chars): Handle "||^" for TI C6X.  Handle
+	TC_PREDICATE_START_CHAR and TC_PREDICATE_END_CHAR.  Keep spaces in
+	operands if TC_KEEP_OPERAND_SPACES.
+	* configure.tgt (tic6x-*-*): New.
+	* config/tc-ia64.h (TC_PREDICATE_START_CHAR,
+	TC_PREDICATE_END_CHAR): Define.
+	* config/tc-tic6x.c, config/tc-tic6x.h: New.
+	* doc/Makefile.am (CPU_DOCS): Add c-tic6x.texi.
+	* doc/Makefile.in: Regenerate.
+	* doc/all.texi (TIC6X): Define.
+	* doc/as.texinfo: Add TI C6X documentation.  Include c-tic6x.texi.
+	* doc/c-tic6x.texi: New.
+
 2010-03-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (lex_got): Use STRING_COMMA_LEN on gotrel.

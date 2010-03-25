@@ -1,3 +1,22 @@
+2010-03-25  Joseph Myers  <joseph@codesourcery.com>
+
+	* MAINTAINERS: Add self as TI C6X maintainer.
+	* NEWS: Add news entry for TI C6X support.
+	* readelf.c: Include elf/tic6x.h.
+	(guess_is_rela): Handle EM_TI_C6000.
+	(dump_relocations): Likewise.
+	(get_tic6x_dynamic_type): New.
+	(get_dynamic_type): Call it.
+	(get_machine_flags): Handle EF_C6000_REL.
+	(get_osabi_name): Handle machine-specific values only for relevant
+	machines.  Handle C6X values.
+	(get_tic6x_segment_type): New.
+	(get_segment_type): Call it.
+	(get_tic6x_section_type_name): New.
+	(get_section_type_name): Call it.
+	(is_32bit_abs_reloc, is_16bit_abs_reloc, is_none_reloc): Handle
+	EM_TI_C6000.
+
 2010-03-25  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* doc/binutils.texi (readelf) <unwind information>: Mention support for

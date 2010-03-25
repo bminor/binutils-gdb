@@ -1465,6 +1465,11 @@ case "${targ}" in
     ;;
 #endif
 
+  tic6x-*-elf)
+    targ_defvec=bfd_elf32_tic6x_le_vec
+    targ_selvecs=bfd_elf32_tic6x_be_vec
+    ;;
+
   tic80*-*-*)
     targ_defvec=tic80coff_vec
     targ_underscore=yes

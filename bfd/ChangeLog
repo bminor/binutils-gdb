@@ -1,3 +1,34 @@
+2010-03-25  Joseph Myers  <joseph@codesourcery.com>
+
+	* Makefile.am (ALL_MACHINES): Add cpu-tic6x.lo.
+	(ALL_MACHINES_CFILES): Add cpu-tic6x.c.
+	(BFD32_BACKENDS): Add elf32-tic6x.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-tic6x.c.
+	* Makefile.in: Regenerate.
+	* archures.c (bfd_arch_tic6x, bfd_tic6x_arch): New.
+	(bfd_archures_list): Update.
+	* config.bfd (tic6x-*-elf): New.
+	* configure.in (bfd_elf32_tic6x_be_vec, bfd_elf32_tic6x_le_vec):
+	New.
+	* configure: Regenerate.
+	* cpu-tic6x.c, elf32-tic6x.c: New.
+	* reloc.c (BFD_RELOC_C6000_PCR_S21, BFD_RELOC_C6000_PCR_S12,
+	BFD_RELOC_C6000_PCR_S10, BFD_RELOC_C6000_PCR_S7,
+	BFD_RELOC_C6000_ABS_S16, BFD_RELOC_C6000_ABS_L16,
+	BFD_RELOC_C6000_ABS_H16, BFD_RELOC_C6000_SBR_U15_B,
+	BFD_RELOC_C6000_SBR_U15_H, BFD_RELOC_C6000_SBR_U15_W,
+	BFD_RELOC_C6000_SBR_S16, BFD_RELOC_C6000_SBR_L16_B,
+	BFD_RELOC_C6000_SBR_L16_H, BFD_RELOC_C6000_SBR_L16_W,
+	BFD_RELOC_C6000_SBR_H16_B, BFD_RELOC_C6000_SBR_H16_H,
+	BFD_RELOC_C6000_SBR_H16_W, BFD_RELOC_C6000_SBR_GOT_U15_W,
+	BFD_RELOC_C6000_SBR_GOT_L16_W, BFD_RELOC_C6000_SBR_GOT_H16_W,
+	BFD_RELOC_C6000_DSBT_INDEX, BFD_RELOC_C6000_PREL31,
+	BFD_RELOC_C6000_COPY, BFD_RELOC_C6000_ALIGN,
+	BFD_RELOC_C6000_FPHEAD, BFD_RELOC_C6000_NOCMP): New.
+	* targets.c (bfd_elf32_tic6x_be_vec, bfd_elf32_tic6x_le_vec): New.
+	(_bfd_target_vector): Update.
+	* bfd-in2.h, libbfd.h: Regenerate.
+
 2010-03-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* aout-target.h: Update copyright year.

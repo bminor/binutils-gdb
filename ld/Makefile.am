@@ -165,6 +165,8 @@ ALL_EMULATIONS = \
 	eelf32_sparc.o \
 	eelf32_sparc_sol2.o \
 	eelf32_sparc_vxworks.o \
+	eelf32_tic6x_be.o \
+	eelf32_tic6x_le.o \
 	eelf32b4300.o \
 	eelf32bfin.o \
 	eelf32bfinfd.o \
@@ -773,6 +775,12 @@ eelf32bfinfd.c: $(srcdir)/emulparams/elf32bfinfd.sh $(srcdir)/emulparams/bfin.sh
 eelf32_dlx.c: $(srcdir)/emulparams/elf32_dlx.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/dlx.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_dlx "$(tdir_elf32_dlx)"
+eelf32_tic6x_be.c: $(srcdir)/emulparams/elf32_tic6x_be.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32_tic6x_be "$(tdir_elf32_tic6x_be)"
+eelf32_tic6x_le.c: $(srcdir)/emulparams/elf32_tic6x_le.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32_tic6x_le "$(tdir_elf32_tic6x_le)"
 eelf32xc16x.c: $(srcdir)/emulparams/elf32xc16x.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/needrelax.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}

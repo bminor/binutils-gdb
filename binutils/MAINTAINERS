@@ -114,6 +114,7 @@ responsibility among the other maintainers.
   SPU		   Alan Modra <amodra@gmail.com>
   TIC4X            Svein Seldal <svein@dev.seldal.com>
   TIC54X           Timothy Wall <twall@alum.mit.edu>
+  TIC6X            Joseph Myers <joseph@codesourcery.com>
   VAX		   Matt Thomas <matt@netbsd.org>
   VAX		   Jan-Benedict Glaw <jbglaw@lug-owl.de>
   VMS		   Tristan Gingold <gingold@adacore.com>
