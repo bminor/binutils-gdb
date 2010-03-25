@@ -319,6 +319,27 @@ build_section_addr_info_from_section_table (const struct target_section *start,
   return sap;
 }
 
+/* Create a section_addr_info from section offsets in ABFD.  */
+
+static struct section_addr_info *
+build_section_addr_info_from_bfd (bfd *abfd)
+{
+  struct section_addr_info *sap;
+  int i;
+  struct bfd_section *sec;
+
+  sap = alloc_section_addr_info (bfd_count_sections (abfd));
+  for (i = 0, sec = abfd->sections; sec != NULL; sec = sec->next)
+    if (bfd_get_section_flags (abfd, sec) & (SEC_ALLOC | SEC_LOAD))
+      {
+	sap->other[i].addr = bfd_get_section_vma (abfd, sec);
+	sap->other[i].name = xstrdup (bfd_get_section_name (abfd, sec));
+	sap->other[i].sectindex = sec->index;
+	i++;
+      }
+  return sap;
+}
+
 /* Create a section_addr_info from section offsets in OBJFILE.  */
 
 struct section_addr_info *
@@ -326,22 +347,19 @@ build_section_addr_info_from_objfile (const struct objfile *objfile)
 {
   struct section_addr_info *sap;
   int i;
-  struct bfd_section *sec;
 
-  sap = alloc_section_addr_info (objfile->num_sections);
-  for (i = 0, sec = objfile->obfd->sections; sec != NULL; sec = sec->next)
-    if (bfd_get_section_flags (objfile->obfd, sec) & (SEC_ALLOC | SEC_LOAD))
-      {
-	sap->other[i].addr = (bfd_get_section_vma (objfile->obfd, sec)
-			      + objfile->section_offsets->offsets[i]);
-	sap->other[i].name = xstrdup (bfd_get_section_name (objfile->obfd,
-							    sec));
-	sap->other[i].sectindex = sec->index;
-	i++;
-      }
+  /* Before reread_symbols gets rewritten it is not safe to call:
+     gdb_assert (objfile->num_sections == bfd_count_sections (objfile->obfd));
+     */
+  sap = build_section_addr_info_from_bfd (objfile->obfd);
+  for (i = 0; i < sap->num_sections && sap->other[i].name; i++)
+    {
+      int sectindex = sap->other[i].sectindex;
+
+      sap->other[i].addr += objfile->section_offsets->offsets[sectindex];
+    }
   return sap;
 }
-
 
 /* Free all memory allocated by build_section_addr_info_from_section_table. */
 
@@ -519,6 +537,46 @@ relative_addr_info_to_section_offsets (struct section_offsets *section_offsets,
     }
 }
 
+/* qsort comparator for addrs_section_sort.  Sort entries in ascending order by
+   their (name, sectindex) pair.  sectindex makes the sort by name stable.  */
+
+static int
+addrs_section_compar (const void *ap, const void *bp)
+{
+  const struct other_sections *a = *((struct other_sections **) ap);
+  const struct other_sections *b = *((struct other_sections **) bp);
+  int retval, a_idx, b_idx;
+
+  retval = strcmp (a->name, b->name);
+  if (retval)
+    return retval;
+
+  /* SECTINDEX is undefined iff ADDR is zero.  */
+  a_idx = a->addr == 0 ? 0 : a->sectindex;
+  b_idx = b->addr == 0 ? 0 : b->sectindex;
+  return a_idx - b_idx;
+}
+
+/* Provide sorted array of pointers to sections of ADDRS.  The array is
+   terminated by NULL.  Caller is responsible to call xfree for it.  */
+
+static struct other_sections **
+addrs_section_sort (struct section_addr_info *addrs)
+{
+  struct other_sections **array;
+  int i;
+
+  /* `+ 1' for the NULL terminator.  */
+  array = xmalloc (sizeof (*array) * (addrs->num_sections + 1));
+  for (i = 0; i < addrs->num_sections && addrs->other[i].name; i++)
+    array[i] = &addrs->other[i];
+  array[i] = NULL;
+
+  qsort (array, i, sizeof (*array), addrs_section_compar);
+
+  return array;
+}
+
 /* Relativize absolute addresses in ADDRS into offsets based on ABFD.  Fill-in
    also SECTINDEXes specific to ABFD there.  This function can be used to
    rebase ADDRS to start referencing different BFD than before.  */
@@ -529,6 +587,10 @@ addr_info_make_relative (struct section_addr_info *addrs, bfd *abfd)
   asection *lower_sect;
   CORE_ADDR lower_offset;
   int i;
+  struct cleanup *my_cleanup;
+  struct section_addr_info *abfd_addrs;
+  struct other_sections **addrs_sorted, **abfd_addrs_sorted;
+  struct other_sections **addrs_to_abfd_addrs;
 
   /* Find lowest loadable section to be used as starting point for
      continguous sections.  */
@@ -543,6 +605,55 @@ addr_info_make_relative (struct section_addr_info *addrs, bfd *abfd)
   else
     lower_offset = bfd_section_vma (bfd_get_filename (abfd), lower_sect);
 
+  /* Create ADDRS_TO_ABFD_ADDRS array to map the sections in ADDRS to sections
+     in ABFD.  Section names are not unique - there can be multiple sections of
+     the same name.  Also the sections of the same name do not have to be
+     adjacent to each other.  Some sections may be present only in one of the
+     files.  Even sections present in both files do not have to be in the same
+     order.
+
+     Use stable sort by name for the sections in both files.  Then linearly
+     scan both lists matching as most of the entries as possible.  */
+
+  addrs_sorted = addrs_section_sort (addrs);
+  my_cleanup = make_cleanup (xfree, addrs_sorted);
+
+  abfd_addrs = build_section_addr_info_from_bfd (abfd);
+  make_cleanup_free_section_addr_info (abfd_addrs);
+  abfd_addrs_sorted = addrs_section_sort (abfd_addrs);
+  make_cleanup (xfree, abfd_addrs_sorted);
+
+  /* Now create ADDRS_TO_ABFD_ADDRS from ADDRS_SORTED and ABFD_ADDRS_SORTED.  */
+
+  addrs_to_abfd_addrs = xzalloc (sizeof (*addrs_to_abfd_addrs)
+				 * addrs->num_sections);
+  make_cleanup (xfree, addrs_to_abfd_addrs);
+
+  while (*addrs_sorted)
+    {
+      const char *sect_name = (*addrs_sorted)->name;
+
+      while (*abfd_addrs_sorted
+	     && strcmp ((*abfd_addrs_sorted)->name, sect_name) < 0)
+	abfd_addrs_sorted++;
+
+      if (*abfd_addrs_sorted
+	  && strcmp ((*abfd_addrs_sorted)->name, sect_name) == 0)
+	{
+	  int index_in_addrs;
+
+	  /* Make the found item directly addressable from ADDRS.  */
+	  index_in_addrs = *addrs_sorted - addrs->other;
+	  gdb_assert (addrs_to_abfd_addrs[index_in_addrs] == NULL);
+	  addrs_to_abfd_addrs[index_in_addrs] = *abfd_addrs_sorted;
+
+	  /* Never use the same ABFD entry twice.  */
+	  abfd_addrs_sorted++;
+	}
+
+      addrs_sorted++;
+    }
+
   /* Calculate offsets for the loadable sections.
      FIXME! Sections must be in order of increasing loadable section
      so that contiguous sections can use the lower-offset!!!
@@ -556,16 +667,16 @@ addr_info_make_relative (struct section_addr_info *addrs, bfd *abfd)
   for (i = 0; i < addrs->num_sections && addrs->other[i].name; i++)
     {
       const char *sect_name = addrs->other[i].name;
-      asection *sect = bfd_get_section_by_name (abfd, sect_name);
+      struct other_sections *sect = addrs_to_abfd_addrs[i];
 
       if (sect)
 	{
 	  /* This is the index used by BFD. */
-	  addrs->other[i].sectindex = sect->index;
+	  addrs->other[i].sectindex = sect->sectindex;
 
 	  if (addrs->other[i].addr != 0)
 	    {
-	      addrs->other[i].addr -= bfd_section_vma (abfd, sect);
+	      addrs->other[i].addr -= sect->addr;
 	      lower_offset = addrs->other[i].addr;
 	    }
 	  else
@@ -597,6 +708,8 @@ addr_info_make_relative (struct section_addr_info *addrs, bfd *abfd)
 	  /* SECTINDEX is invalid if ADDR is zero.  */
 	}
     }
+
+  do_cleanups (my_cleanup);
 }
 
 /* Parse the user's idea of an offset for dynamic linking, into our idea

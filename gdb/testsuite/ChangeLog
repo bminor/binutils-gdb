@@ -1,3 +1,7 @@
+2010-03-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/dup-sect.exp, gdb.base/dup-sect.S: New.
+
 2010-03-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/completion.exp: Allow long instead of long int.

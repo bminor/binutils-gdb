@@ -1,3 +1,13 @@
+2010-03-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* symfile.c (build_section_addr_info_from_bfd): New.
+	(build_section_addr_info_from_objfile): Base it on
+	build_section_addr_info_from_bfd.
+	(addrs_section_compar, addrs_section_sort): New.
+	(addr_info_make_relative): New variables my_cleanup, abfd_addrs,
+	addrs_sorted, abfd_addrs_sorted and addrs_to_abfd_addrs.  Build
+	addrs_to_abfd_addrs.  Use it for recalculating ADDRS.
+
 2010-03-24  Michael Snyder  <msnyder@localhost.localdomain>
 
 	* elfread.c (find_separate_debug_file_by_buildid): 
