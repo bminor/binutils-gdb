@@ -1,3 +1,10 @@
+2010-03-25  Keith Seitz  <keiths@redhat.com>
+
+	* dwarf2read.c (read_subroutine_type): If the compilation unit
+	language is Java, mark any formal parameter named "this" as
+	artificial (GCC/43521).
+	(dwarf2_name): Add special handling for Java constructors.
+
 2010-03-25  Tom Tromey  <tromey@redhat.com>
 
 	PR gdb/11327, PR gdb/11328, PR breakpoints/11368:

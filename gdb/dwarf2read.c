@@ -5949,7 +5949,18 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
 	      if (attr)
 		TYPE_FIELD_ARTIFICIAL (ftype, iparams) = DW_UNSND (attr);
 	      else
-		TYPE_FIELD_ARTIFICIAL (ftype, iparams) = 0;
+		{
+		  TYPE_FIELD_ARTIFICIAL (ftype, iparams) = 0;
+
+		  /* GCC/43521: In java, the formal parameter
+		     "this" is sometimes not marked with DW_AT_artificial.  */
+		  if (cu->language == language_java)
+		    {
+		      const char *name = dwarf2_name (child_die, cu);
+		      if (name && !strcmp (name, "this"))
+			TYPE_FIELD_ARTIFICIAL (ftype, iparams) = 1;
+		    }
+		}
 	      TYPE_FIELD_TYPE (ftype, iparams) = die_type (child_die, cu);
 	      iparams++;
 	    }
@@ -9176,6 +9187,34 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
       /* These tags always have simple identifiers already; no need
 	 to canonicalize them.  */
       return DW_STRING (attr);
+    case DW_TAG_subprogram:
+      /* Java constructors will all be named "<init>", so return
+	 the class name when we see this special case.  */
+      if (cu->language == language_java
+	  && DW_STRING (attr) != NULL
+	  && strcmp (DW_STRING (attr), "<init>") == 0)
+	{
+	  struct dwarf2_cu *spec_cu = cu;
+	  struct die_info *spec_die;
+
+	  /* GCJ will output '<init>' for Java constructor names.
+	     For this special case, return the name of the parent class.  */
+
+	  /* GCJ may output suprogram DIEs with AT_specification set.
+	     If so, use the name of the specified DIE.  */
+	  spec_die = die_specification (die, &spec_cu);
+	  if (spec_die != NULL)
+	    return dwarf2_name (spec_die, spec_cu);
+
+	  do
+	    {
+	      die = die->parent;
+	      if (die->tag == DW_TAG_class_type)
+		return dwarf2_name (die, cu);
+	    }
+	  while (die->tag != DW_TAG_compile_unit);
+	}
+      /* fall through */
     default:
       if (!DW_STRING_IS_CANONICAL (attr))
 	{
