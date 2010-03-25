@@ -4006,7 +4006,8 @@ Displays the contents of the file's relocation section, if it has one.
 @itemx --unwind
 @cindex unwind information
 Displays the contents of the file's unwind section, if it has one.  Only
-the unwind sections for IA64 ELF files are currently supported.
+the unwind sections for IA64 ELF files, as well as ARM unwind tables
+(@code{.ARM.exidx} / @code{.ARM.extab}) are currently supported.
 
 @item -d
 @itemx --dynamic

@@ -1,3 +1,8 @@
+2010-03-25  Thomas Schwinge  <thomas@codesourcery.com>
+
+	* doc/binutils.texi (readelf) <unwind information>: Mention support for
+	ARM unwind tables.
+
 2010-03-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (decode_arm_unwind): Increase buf size to 9 byte.
