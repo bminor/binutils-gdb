@@ -1,3 +1,8 @@
+2010-03-25  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.java/jprint.exp: XFAIL printing of static class members
+	because of GCC debuginfo problem.
+
 2010-03-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/dup-sect.exp, gdb.base/dup-sect.S: New.

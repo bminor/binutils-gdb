@@ -86,5 +86,8 @@ if ![set_lang_java] then {
     gdb_test "call x.addk(44)" "adding k gives 121\r\n.*= 121.*" "inherited virtual fn call"
 
     # Regression test for a crasher.
+    # GCC does not output location information for static class members,
+    # so GDB will report these as "optimized out". See gcc/43260.
+    setup_xfail *-*-* gcc/43260
     gdb_test "print *jprint.props" " = .*" "print a java.util.Properties"
 }
