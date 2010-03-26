@@ -31366,10 +31366,7 @@ The trace stopped because tracepoint @var{tpnum} exceeded its pass count.
 The trace stopped because tracepoint @var{tpnum} had an error.  The
 string @var{text} is available to describe the nature of the error
 (for instance, a divide by zero in the condition expression).
-@var{text} may take either of two forms; it may be plain text, but
-with the restriction that no colons or other special characters are
-allowed, or it may be an @code{X} followed by hex digits encoding the
-text string.
+@var{text} is hex encoded.
 
 @item tunknown:0
 The trace stopped for some other reason.

@@ -1,3 +1,8 @@
+2010-03-26  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (Tracepoint Packets): Remove mention that
+	terror:string may be plain text, and drop mention of X prefix.
+
 2010-03-26  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Tracepoint Commands): Add comma after @xref.

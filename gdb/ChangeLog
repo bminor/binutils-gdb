@@ -1,3 +1,8 @@
+2010-03-26  Pedro Alves  <pedro@codesourcery.com>
+
+	* tracepoint.c (parse_trace_status): Don't allow plain strings in
+	the terror description.  Don't expect an X prefix.
+
 2010-03-25  Stan Shebs  <stan@codesourcery.com>
 
 	* tracepoint.h (trace_stop_reason): Add tracepoint_error.

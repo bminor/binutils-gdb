@@ -3197,18 +3197,9 @@ Status line: '%s'\n"), p, line);
 	  if (p2 != p1)
 	    {
 	      int end;
-	      ts->error_desc = (char *) xmalloc (p2 - p1 + 1);
-	      /* See if we're doing plain text or hex encoding.  */
-	      if (*p1 == 'X')
-		{
-		  ++p1;
-		  end = hex2bin (p1, ts->error_desc, (p2 - p1) / 2);
-		}
-	      else
-		{
-		  memcpy (ts->error_desc, p1, p2 - p1);
-		  end = p2 - p1;
-		}
+
+	      ts->error_desc = xmalloc ((p2 - p1) / 2 + 1);
+	      end = hex2bin (p1, ts->error_desc, (p2 - p1) / 2);
 	      ts->error_desc[end] = '\0';
 	    }
 	  p = unpack_varlen_hex (++p2, &val);
