@@ -1,3 +1,7 @@
+2010-03-26  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* breakpoint.c (bpstat_clear_actions): Reset bs->commands_left.
+
 2010-03-26  Pedro Alves  <pedro@codesourcery.com>
 
 	* tracepoint.c (current_trace_status): Don't make sure error_desc

@@ -2986,6 +2986,7 @@ bpstat_clear_actions (bpstat bs)
   for (; bs != NULL; bs = bs->next)
     {
       decref_counted_command_line (&bs->commands);
+      bs->commands_left = NULL;
       if (bs->old_val != NULL)
 	{
 	  value_free (bs->old_val);
