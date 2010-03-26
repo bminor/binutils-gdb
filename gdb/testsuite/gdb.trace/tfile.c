@@ -41,9 +41,11 @@ finish_trace_file (int fd)
 }
 
 void
-write_basic_trace_file ()
+write_basic_trace_file (void)
 {
-  int fd;
+  int fd, int_x;
+  short short_x;
+  long long ll_x;
 
   fd = start_trace_file ("basic.tf");
 
@@ -61,6 +63,7 @@ write_basic_trace_file ()
 
   /* Dump tracepoint definitions, in syntax similar to that used
      for reconnection uploads.  */
+  /* FIXME need a portable way to print function address in hex */
   snprintf (spbuf, sizeof spbuf, "tp T1:%lx:E:0:0\n",
 	    (long) &write_basic_trace_file);
   write (fd, spbuf, strlen (spbuf));
@@ -71,28 +74,73 @@ write_basic_trace_file ()
   write (fd, "\n", 1);
 
   /* Make up a simulated trace buffer.  */
-  /* (Encapsulate better if we're going to do lots of this.) */
+  /* (Encapsulate better if we're going to do lots of this; note that
+     buffer endianness is the target program's enddianness.) */
   trptr = trbuf;
-  *((short *) trptr) = 1;
-  trptr += sizeof (short);
+  short_x = 1;
+  memcpy (trptr, &short_x, 2);
+  trptr += 2;
   tfsizeptr = trptr;
-  trptr += sizeof (int);
+  trptr += 4;
   *((char *) trptr) = 'M';
   trptr += 1;
-  *((long long *) trptr) = (long) &testglob;
+  ll_x = (long) &testglob;
+  memcpy (trptr, &ll_x, sizeof (long long));
   trptr += sizeof (long long);
-  *((short *) trptr) = sizeof (testglob);
-  trptr += sizeof (short);
-  *((int *) trptr) = testglob;
+  short_x = sizeof (testglob);
+  memcpy (trptr, &short_x, 2);
+  trptr += 2;
+  memcpy (trptr, &testglob, sizeof (testglob));
   trptr += sizeof (testglob);
   /* Go back and patch in the frame size.  */
-  *((int *) tfsizeptr) = trptr - tfsizeptr - sizeof (int);
+  int_x = trptr - tfsizeptr - sizeof (int);
+  memcpy (tfsizeptr, &int_x, 4);
 
   /* Write end of tracebuffer marker.  */
-  *((short *) trptr) = 0;
-  trptr += sizeof (short);
-  *((int *) trptr) = 0;
-  trptr += sizeof (int);
+  memset (trptr, 0, 6);
+  trptr += 6;
+
+  write (fd, trbuf, trptr - trbuf);
+
+  finish_trace_file (fd);
+}
+
+void
+write_error_trace_file (void)
+{
+  int fd;
+
+  fd = start_trace_file ("error.tf");
+
+  /* The next part of the file consists of newline-separated lines
+     defining status, tracepoints, etc.  The section is terminated by
+     an empty line.  */
+
+  /* Dump the size of the R (register) blocks in traceframes.  */
+  snprintf (spbuf, sizeof spbuf, "R %x\n", 500 /* FIXME get from arch */);
+  write (fd, spbuf, strlen (spbuf));
+
+  /* Dump trace status, in the general form of the qTstatus reply.  */
+  snprintf (spbuf, sizeof spbuf, "status 0;terror:made-up error:1;tframes:0;tcreated:0;tfree:100;tsize:1000\n");
+  write (fd, spbuf, strlen (spbuf));
+
+  /* Dump tracepoint definitions, in syntax similar to that used
+     for reconnection uploads.  */
+  /* FIXME need a portable way to print function address in hex */
+  snprintf (spbuf, sizeof spbuf, "tp T1:%lx:E:0:0\n",
+	    (long) &write_basic_trace_file);
+  write (fd, spbuf, strlen (spbuf));
+  /* (Note that we would only need actions defined if we wanted to
+     test tdump.) */
+
+  /* Empty line marks the end of the definition section.  */
+  write (fd, "\n", 1);
+
+  trptr = trbuf;
+
+  /* Write end of tracebuffer marker.  */
+  memset (trptr, 0, 6);
+  trptr += 6;
 
   write (fd, trbuf, trptr - trbuf);
 
@@ -108,6 +156,8 @@ int
 main (int argc, char **argv, char **envp)
 {
   write_basic_trace_file ();
+
+  write_error_trace_file ();
 
   done_making_trace_files ();
 

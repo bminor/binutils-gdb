@@ -47,7 +47,8 @@ if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 gdb_reinitialize_dir $srcdir/$subdir
 
 # Make sure we are starting fresh.
-remote_exec build {sh -xc rm\ -f\ basic.tf}
+remote_file host delete basic.tf
+remote_file host delete error.tf
 
 gdb_load $binfile
 
@@ -83,7 +84,19 @@ Trace buffer has 256 bytes of 4096 bytes free \\(93% full\\).*
 Looking at trace frame 0, tracepoint .*" \
     "tstatus on trace file"
 
+# Now start afresh, using only a trace file.
 
+gdb_exit
+gdb_start
 
+gdb_load $binfile
 
+gdb_test "target tfile error.tf" "Created tracepoint.*" "target tfile"
 
+gdb_test "tstatus" \
+    "Using a trace file.*
+Trace stopped by an error \\(made-up error, tracepoint 1\\).*
+Collected 0 trace frame.*
+Trace buffer has 256 bytes of 4096 bytes free \\(93% full\\).*
+Not looking at any trace frame.*" \
+    "tstatus on error trace file"

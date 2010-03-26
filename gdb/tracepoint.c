@@ -195,12 +195,16 @@ char *stop_reason_names[] = {
   "tstop",
   "tfull",
   "tdisconnected",
-  "tpasscount"
+  "tpasscount",
+  "terror"
 };
 
 struct trace_status *
 current_trace_status ()
 {
+  /* Ensure this is never NULL.  */
+  if (!trace_status.error_desc)
+    trace_status.error_desc = "";
   return &trace_status;
 }
 
@@ -1570,6 +1574,14 @@ trace_status_command (char *args, int from_tty)
 	  printf_filtered (_("Trace stopped by tracepoint %d.\n"),
 			   ts->stopping_tracepoint);
 	  break;
+	case tracepoint_error:
+	  if (ts->stopping_tracepoint)
+	    printf_filtered (_("Trace stopped by an error (%s, tracepoint %d).\n"),
+			     ts->error_desc, ts->stopping_tracepoint);
+	  else
+	    printf_filtered (_("Trace stopped by an error (%s).\n"),
+			     ts->error_desc);
+	  break;
 	case trace_stop_reason_unknown:
 	  printf_filtered (_("Trace stopped for an unknown reason.\n"));
 	  break;
@@ -1684,6 +1696,10 @@ trace_status_mi (int on_stop)
 	      stop_reason = "passcount";
 	      stopping_tracepoint = ts->stopping_tracepoint;
 	      break;
+	    case tracepoint_error:
+	      stop_reason = "error";
+	      stopping_tracepoint = ts->stopping_tracepoint;
+	      break;
 	    }
 	  
 	  if (stop_reason)
@@ -1692,6 +1708,9 @@ trace_status_mi (int on_stop)
 	      if (stopping_tracepoint != -1)
 		ui_out_field_int (uiout, "stopping-tracepoint",
 				  stopping_tracepoint);
+	      if (ts->stop_reason == tracepoint_error)
+		ui_out_field_string (uiout, "error-description",
+				     ts->error_desc);
 	    }
 	}
     }
@@ -2463,9 +2482,16 @@ trace_save (const char *filename, int target_does_save)
   fprintf (fp, "R %x\n", trace_regblock_size);
 
   /* Write out status of the tracing run (aka "tstatus" info).  */
-  fprintf (fp, "status %c;%s:%x",
-	   (ts->running ? '1' : '0'),
- 	   stop_reason_names[ts->stop_reason], ts->stopping_tracepoint);
+  fprintf (fp, "status %c;%s",
+	   (ts->running ? '1' : '0'), stop_reason_names[ts->stop_reason]);
+  /* Encode the error message in hex, might have weird chars.  */
+  if (ts->stop_reason == tracepoint_error)
+    {
+      char *buf = (char *) alloca (strlen (ts->error_desc) * 2 + 1);
+      bin2hex ((gdb_byte *) ts->error_desc, buf, 0);
+      fprintf (fp, ":X%s", buf);
+    }
+  fprintf (fp, ":%x", ts->stopping_tracepoint);
   if (ts->traceframe_count >= 0)
     fprintf (fp, ";tframes:%x", ts->traceframe_count);
   if (ts->traceframes_created >= 0)
@@ -3126,12 +3152,13 @@ extern char *unpack_varlen_hex (char *buff, ULONGEST *result);
 void
 parse_trace_status (char *line, struct trace_status *ts)
 {
-  char *p = line, *p1, *p_temp;
+  char *p = line, *p1, *p2, *p_temp;
   ULONGEST val;
 
   ts->running_known = 1;
   ts->running = (*p++ == '1');
   ts->stop_reason = trace_stop_reason_unknown;
+  ts->error_desc = "";
   ts->traceframe_count = -1;
   ts->traceframes_created = -1;
   ts->buffer_free = -1;
@@ -3163,6 +3190,30 @@ Status line: '%s'\n"), p, line);
 	{
 	  p = unpack_varlen_hex (++p1, &val);
 	  ts->stop_reason = tstop_command;
+	}
+      else if (strncmp (p, stop_reason_names[tracepoint_error], p1 - p) == 0)
+	{
+	  p2 = strchr (++p1, ':');
+	  if (p2 != p1)
+	    {
+	      int end;
+	      ts->error_desc = (char *) xmalloc (p2 - p1 + 1);
+	      /* See if we're doing plain text or hex encoding.  */
+	      if (*p1 == 'X')
+		{
+		  ++p1;
+		  end = hex2bin (p1, ts->error_desc, (p2 - p1) / 2);
+		}
+	      else
+		{
+		  memcpy (ts->error_desc, p1, p2 - p1);
+		  end = p2 - p1;
+		}
+	      ts->error_desc[end] = '\0';
+	    }
+	  p = unpack_varlen_hex (++p2, &val);
+	  ts->stopping_tracepoint = val;
+	  ts->stop_reason = tracepoint_error;
 	}
       else if (strncmp (p, "tframes", p1 - p) == 0)
 	{

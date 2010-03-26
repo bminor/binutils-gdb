@@ -73,7 +73,8 @@ enum trace_stop_reason
     tstop_command,
     trace_buffer_full,
     trace_disconnected,
-    tracepoint_passcount
+    tracepoint_passcount,
+    tracepoint_error
   };
 
 struct trace_status
@@ -89,9 +90,14 @@ struct trace_status
 
   enum trace_stop_reason stop_reason;
 
-  /* If stop_reason == tracepoint_passcount, the on-target number
-     of the tracepoint which caused the stop.  */
+  /* If stop_reason is tracepoint_passcount or tracepoint_error, this
+     is the (on-target) number of the tracepoint which caused the
+     stop.  */
   int stopping_tracepoint;
+
+  /* If stop_reason is tracepoint_error, this is a human-readable
+     string that describes the error that happened on the target.  */
+  char *error_desc;
 
   /* Number of traceframes currently in the buffer.  */
 
