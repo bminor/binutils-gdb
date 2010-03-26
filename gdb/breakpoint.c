@@ -959,8 +959,12 @@ commands_command_1 (char *arg, int from_tty, struct command_line *control)
 	arg = xstrprintf ("%d-%d", multi_start, multi_end);
       else if (breakpoint_count > 0)
 	arg = xstrprintf ("%d", breakpoint_count);
-      make_cleanup (xfree, arg);
     }
+  else
+    /* The command loop has some static state, so we need to preserve
+       our argument.  */
+    arg = xstrdup (arg);
+  make_cleanup (xfree, arg);
 
   map_breakpoint_numbers (arg, do_map_commands_command, &info);
 

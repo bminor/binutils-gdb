@@ -1,3 +1,7 @@
+2010-03-26  Tom Tromey  <tromey@redhat.com>
+
+	* breakpoint.c (commands_command_1): Duplicate 'arg'.
+
 2010-03-26  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* breakpoint.c (expand_line_sal_maybe): Always call skip_prologue_sal.
