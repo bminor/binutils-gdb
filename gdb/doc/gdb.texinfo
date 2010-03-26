@@ -26050,7 +26050,7 @@ the @samp{found} field has value of @samp{1}.
 @item frame
 The information about the frame corresponding to the found trace
 frame.  This field is present only if a trace frame was found.
-@xref{GDB/MI Frame Information} for description of this field.
+@xref{GDB/MI Frame Information}, for description of this field.
 
 @end table
 
