@@ -1,5 +1,11 @@
 2010-03-26  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* dwarf2read.c (dwarf2_name): Work around GCC bugzilla debug/41828 by
+	ignoring spurious DW_AT_name attributes for unnamed structs or unions.
+	* completer.c (add_struct_fields): Fix inverted logic.
+
+2010-03-26  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* breakpoint.c (bpstat_clear_actions): Reset bs->commands_left.
 
 2010-03-26  Pedro Alves  <pedro@codesourcery.com>

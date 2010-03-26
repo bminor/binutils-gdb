@@ -114,6 +114,11 @@ proc test_ptype_si { } {
 	    # gcc 3.4.1 -gstabs+
 	    pass "$name"
 	}
+	-re "No symbol \"tagless_struct\" in current context.$nl$gdb_prompt $" {
+	    # Several GCC 4.x versions provide neither a DW_TAG_typedef DIE
+	    # nor use the typedef name as struct tag name.
+	    xfail "$name"
+	}
     }
 
     set name "ptype variable of type tagless struct"
@@ -490,25 +495,20 @@ proc test_print_anon_union {} {
 
     set name "print variable of type anonymous union"
     gdb_test_multiple "print g_anon_union" $name {
-	-re "$vhn = \{one = 1, \{a = 2, b = 2\}\}$nl$gdb_prompt $" {
+	-re "$vhn = \{one = 1, \{a = 2, b = \[0-9\]+\}\}$nl$gdb_prompt $" {
 	    pass $name
 	}
     }
 
-    # The nested union prints as a multi-line field, but the class body
-    # scanner is inherently line-oriented.  This is ugly but it works.
-
-    cp_test_ptype_class \
-	"ptype g_anon_union" "print type of anonymous union" \
-	"class" "class_with_anon_union" \
-	{
-	    { field public "int one;" }
-	    { field public "union \{" }
-	    { field public "int a;" }
-	    { field public "long int b;" }
-	    { field public "\};" }
+    set name "print type of anonymous union"
+    set re_tag "class_with_anon_union"
+    set re_class "(class $re_tag \{${ws}public:|struct $re_tag\{)"
+    set re_fields "int one;${ws}union \{${ws}int a;${ws}long( int)? b;${ws}\};"
+    gdb_test_multiple "ptype g_anon_union" $name {
+	-re "type = $re_class${ws}$re_fields$nl\}$nl$gdb_prompt $" {
+	    pass $name
 	}
-
+    }
 }
 
 

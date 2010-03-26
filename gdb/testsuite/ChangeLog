@@ -1,3 +1,11 @@
+2010-03-26  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.cp/inherit.exp (test_ptype_si): XFAIL test for GCC versions
+	that do not provide the tagless_struct type name at all.
+	(test_print_anon_union): Do not check value of uninitialized
+	union member.  Do not use cp_test_ptype_class, so we can accept
+	"long" as well as "long int".
+
 2010-03-26  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.trace/tfile.c (tohex, bin2hex): New.

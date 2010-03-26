@@ -401,7 +401,7 @@ add_struct_fields (struct type *type, int *nextp, char **output,
 	      computed_type_name = 1;
 	    }
 	  /* Omit constructors from the completion list.  */
-	  if (type_name && strcmp (type_name, name))
+	  if (!type_name || strcmp (type_name, name))
 	    {
 	      output[*nextp] = xstrdup (name);
 	      ++*nextp;

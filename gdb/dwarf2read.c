@@ -9187,6 +9187,7 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
       /* These tags always have simple identifiers already; no need
 	 to canonicalize them.  */
       return DW_STRING (attr);
+
     case DW_TAG_subprogram:
       /* Java constructors will all be named "<init>", so return
 	 the class name when we see this special case.  */
@@ -9214,17 +9215,33 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 	    }
 	  while (die->tag != DW_TAG_compile_unit);
 	}
-      /* fall through */
+      break;
+
+    case DW_TAG_class_type:
+    case DW_TAG_interface_type:
+    case DW_TAG_structure_type:
+    case DW_TAG_union_type:
+      /* Some GCC versions emit spurious DW_AT_name attributes for unnamed
+	 structures or unions.  These were of the form "._%d" in GCC 4.1,
+	 or simply "<anonymous struct>" or "<anonymous union>" in GCC 4.3
+	 and GCC 4.4.  We work around this problem by ignoring these.  */
+      if (strncmp (DW_STRING (attr), "._", 2) == 0
+	  || strncmp (DW_STRING (attr), "<anonymous", 10) == 0)
+	return NULL;
+      break;
+
     default:
-      if (!DW_STRING_IS_CANONICAL (attr))
-	{
-	  DW_STRING (attr)
-	    = dwarf2_canonicalize_name (DW_STRING (attr), cu,
-					&cu->objfile->objfile_obstack);
-	  DW_STRING_IS_CANONICAL (attr) = 1;
-	}
-      return DW_STRING (attr);
+      break;
     }
+
+  if (!DW_STRING_IS_CANONICAL (attr))
+    {
+      DW_STRING (attr)
+	= dwarf2_canonicalize_name (DW_STRING (attr), cu,
+				    &cu->objfile->objfile_obstack);
+      DW_STRING_IS_CANONICAL (attr) = 1;
+    }
+  return DW_STRING (attr);
 }
 
 /* Return the die that this die in an extension of, or NULL if there
