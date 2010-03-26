@@ -222,8 +222,6 @@ static void disable_trace_command (char *, int);
 
 static void trace_pass_command (char *, int);
 
-static void skip_prologue_sal (struct symtab_and_line *sal);
-
 
 /* Flag indicating that a command has proceeded the inferior past the
    current breakpoint.  */
@@ -6926,39 +6924,13 @@ expand_line_sal_maybe (struct symtab_and_line sal)
 		  remove_sal (&expanded, i);
 		  --i;
 		}
-	      else if (func_addr == pc)	    
-		{	     
-		  /* We're at beginning of a function, and should
-		     skip prologue.  */
-		  struct symbol *sym = find_pc_function (pc);
-		  if (sym)
-		    expanded.sals[i] = find_function_start_sal (sym, 1);
-		  else
-		    {
-		      /* Since find_pc_partial_function returned true,
-			 we should really always find the section here.  */
-		      struct obj_section *section = find_pc_section (pc);
-		      if (section)
-			{
-			  struct gdbarch *gdbarch
-			    = get_objfile_arch (section->objfile);
-			  expanded.sals[i].pc
-			    = gdbarch_skip_prologue (gdbarch, pc);
-			}
-		    }
-		}
 	    }
 	}
     }
-  else
-    {
-      for (i = 0; i < expanded.nelts; ++i)
-	{
-	  /* If this SAL corresponds to a breakpoint inserted using a
-	     line number, then skip the function prologue if necessary.  */
-	  skip_prologue_sal (&expanded.sals[i]);
-	}
-    }
+
+  /* Skip the function prologue if necessary.  */
+  for (i = 0; i < expanded.nelts; ++i)
+    skip_prologue_sal (&expanded.sals[i]);
 
   do_cleanups (old_chain);
 
@@ -7466,37 +7438,6 @@ break_command_1 (char *arg, int flag, int from_tty)
 
 
 
-/* Adjust SAL to the first instruction past the function prologue.
-   The end of the prologue is determined using the line table from
-   the debugging information.  explicit_pc and explicit_line are
-   not modified.
-
-   If SAL is already past the prologue, then do nothing.  */
-
-static void
-skip_prologue_sal (struct symtab_and_line *sal)
-{
-  struct symbol *sym;
-  struct symtab_and_line start_sal;
-  struct cleanup *old_chain;
-
-  old_chain = save_current_space_and_thread ();
-
-  sym = find_pc_function (sal->pc);
-  if (sym != NULL)
-    {
-      start_sal = find_function_start_sal (sym, 1);
-      if (sal->pc < start_sal.pc)
-	{
-	  start_sal.explicit_line = sal->explicit_line;
-	  start_sal.explicit_pc = sal->explicit_pc;
-	  *sal = start_sal;
-	}
-    }
-
-  do_cleanups (old_chain);
-}
-
 /* Helper function for break_command_1 and disassemble_command.  */
 
 void
@@ -7514,12 +7455,7 @@ resolve_sal_pc (struct symtab_and_line *sal)
       /* If this SAL corresponds to a breakpoint inserted using
          a line number, then skip the function prologue if necessary.  */
       if (sal->explicit_line)
-	{
-	  /* Preserve the original line number.  */
-	  int saved_line = sal->line;
-	  skip_prologue_sal (sal);
-	  sal->line = saved_line;
-	}
+	skip_prologue_sal (sal);
     }
 
   if (sal->section == 0 && sal->symtab != NULL)

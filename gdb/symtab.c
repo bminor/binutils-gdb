@@ -2240,26 +2240,6 @@ find_pc_line_pc_range (CORE_ADDR pc, CORE_ADDR *startptr, CORE_ADDR *endptr)
   return sal.symtab != 0;
 }
 
-/* Given a function start address PC and SECTION, find the first
-   address after the function prologue.  */
-CORE_ADDR
-find_function_start_pc (struct gdbarch *gdbarch,
-			CORE_ADDR pc, struct obj_section *section)
-{
-  /* If the function is in an unmapped overlay, use its unmapped LMA address,
-     so that gdbarch_skip_prologue has something unique to work on.  */
-  if (section_is_overlay (section) && !section_is_mapped (section))
-    pc = overlay_unmapped_address (pc, section);
-
-  pc += gdbarch_deprecated_function_start_offset (gdbarch);
-  pc = gdbarch_skip_prologue (gdbarch, pc);
-
-  /* For overlays, map pc back into its mapped VMA range.  */
-  pc = overlay_mapped_address (pc, section);
-
-  return pc;
-}
-
 /* Given a function start address FUNC_ADDR and SYMTAB, find the first
    address for that function that has an entry in SYMTAB's line info
    table.  If such an entry cannot be found, return FUNC_ADDR
@@ -2309,52 +2289,109 @@ skip_prologue_using_lineinfo (CORE_ADDR func_addr, struct symtab *symtab)
 struct symtab_and_line
 find_function_start_sal (struct symbol *sym, int funfirstline)
 {
-  struct block *block = SYMBOL_BLOCK_VALUE (sym);
-  struct objfile *objfile = lookup_objfile_from_block (block);
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
-
-  CORE_ADDR pc;
   struct symtab_and_line sal;
+
+  fixup_symbol_section (sym, NULL);
+  sal = find_pc_sect_line (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)),
+			   SYMBOL_OBJ_SECTION (sym), 0);
+
+  if (funfirstline)
+    skip_prologue_sal (&sal);
+
+  return sal;
+}
+
+/* Adjust SAL to the first instruction past the function prologue.
+   If the PC was explicitly specified, the SAL is not changed.
+   If the line number was explicitly specified, at most the SAL's PC
+   is updated.  If SAL is already past the prologue, then do nothing.  */
+void
+skip_prologue_sal (struct symtab_and_line *sal)
+{
+  struct symbol *sym;
+  struct symtab_and_line start_sal;
+  struct cleanup *old_chain;
+  CORE_ADDR pc;
+  struct obj_section *section;
+  const char *name;
+  struct objfile *objfile;
+  struct gdbarch *gdbarch;
   struct block *b, *function_block;
 
-  struct cleanup *old_chain;
+  /* Do not change the SAL is PC was specified explicitly.  */
+  if (sal->explicit_pc)
+    return;
 
   old_chain = save_current_space_and_thread ();
-  switch_to_program_space_and_thread (objfile->pspace);
+  switch_to_program_space_and_thread (sal->pspace);
 
-  pc = BLOCK_START (block);
-  fixup_symbol_section (sym, objfile);
-  if (funfirstline)
+  sym = find_pc_sect_function (sal->pc, sal->section);
+  if (sym != NULL)
     {
-      /* Skip "first line" of function (which is actually its prologue).  */
-      pc = find_function_start_pc (gdbarch, pc, SYMBOL_OBJ_SECTION (sym));
+      fixup_symbol_section (sym, NULL);
+
+      pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
+      section = SYMBOL_OBJ_SECTION (sym);
+      name = SYMBOL_LINKAGE_NAME (sym);
+      objfile = SYMBOL_SYMTAB (sym)->objfile;
     }
-  sal = find_pc_sect_line (pc, SYMBOL_OBJ_SECTION (sym), 0);
+  else
+    {
+      struct minimal_symbol *msymbol
+        = lookup_minimal_symbol_by_pc_section (sal->pc, sal->section);
+      if (msymbol == NULL)
+	{
+	  do_cleanups (old_chain);
+	  return;
+	}
+
+      pc = SYMBOL_VALUE_ADDRESS (msymbol);
+      section = SYMBOL_OBJ_SECTION (msymbol);
+      name = SYMBOL_LINKAGE_NAME (msymbol);
+      objfile = msymbol_objfile (msymbol);
+    }
+
+  gdbarch = get_objfile_arch (objfile);
+
+  /* If the function is in an unmapped overlay, use its unmapped LMA address,
+     so that gdbarch_skip_prologue has something unique to work on.  */
+  if (section_is_overlay (section) && !section_is_mapped (section))
+    pc = overlay_unmapped_address (pc, section);
+
+  /* Skip "first line" of function (which is actually its prologue).  */
+  pc += gdbarch_deprecated_function_start_offset (gdbarch);
+  pc = gdbarch_skip_prologue (gdbarch, pc);
+
+  /* For overlays, map pc back into its mapped VMA range.  */
+  pc = overlay_mapped_address (pc, section);
+
+  /* Calculate line number.  */
+  start_sal = find_pc_sect_line (pc, section, 0);
 
   /* Check if gdbarch_skip_prologue left us in mid-line, and the next
      line is still part of the same function.  */
-  if (sal.pc != pc
-      && BLOCK_START (block) <= sal.end
-      && sal.end < BLOCK_END (block))
+  if (start_sal.pc != pc
+      && (sym? (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) <= start_sal.end
+	        && start_sal.end < BLOCK_END (SYMBOL_BLOCK_VALUE (sym)))
+          : (lookup_minimal_symbol_by_pc_section (start_sal.end, section)
+             == lookup_minimal_symbol_by_pc_section (pc, section))))
     {
       /* First pc of next line */
-      pc = sal.end;
+      pc = start_sal.end;
       /* Recalculate the line number (might not be N+1).  */
-      sal = find_pc_sect_line (pc, SYMBOL_OBJ_SECTION (sym), 0);
+      start_sal = find_pc_sect_line (pc, section, 0);
     }
 
   /* On targets with executable formats that don't have a concept of
      constructors (ELF with .init has, PE doesn't), gcc emits a call
      to `__main' in `main' between the prologue and before user
      code.  */
-  if (funfirstline
-      && gdbarch_skip_main_prologue_p (gdbarch)
-      && SYMBOL_LINKAGE_NAME (sym)
-      && strcmp (SYMBOL_LINKAGE_NAME (sym), "main") == 0)
+  if (gdbarch_skip_main_prologue_p (gdbarch)
+      && name && strcmp (name, "main") == 0)
     {
       pc = gdbarch_skip_main_prologue (gdbarch, pc);
       /* Recalculate the line number (might not be N+1).  */
-      sal = find_pc_sect_line (pc, SYMBOL_OBJ_SECTION (sym), 0);
+      start_sal = find_pc_sect_line (pc, section, 0);
     }
 
   /* If we still don't have a valid source line, try to find the first
@@ -2365,19 +2402,35 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
      the case with the DJGPP target using "gcc -gcoff" when the
      compiler inserted code after the prologue to make sure the stack
      is aligned.  */
-  if (funfirstline && sal.symtab == NULL)
+  if (sym && start_sal.symtab == NULL)
     {
       pc = skip_prologue_using_lineinfo (pc, SYMBOL_SYMTAB (sym));
       /* Recalculate the line number.  */
-      sal = find_pc_sect_line (pc, SYMBOL_OBJ_SECTION (sym), 0);
+      start_sal = find_pc_sect_line (pc, section, 0);
     }
 
-  sal.pc = pc;
-  sal.pspace = objfile->pspace;
+  do_cleanups (old_chain);
+
+  /* If we're already past the prologue, leave SAL unchanged.  Otherwise
+     forward SAL to the end of the prologue.  */
+  if (sal->pc >= pc)
+    return;
+
+  sal->pc = pc;
+  sal->section = section;
+
+  /* Unless the explicit_line flag was set, update the SAL line
+     and symtab to correspond to the modified PC location.  */
+  if (sal->explicit_line)
+    return;
+
+  sal->symtab = start_sal.symtab;
+  sal->line = start_sal.line;
+  sal->end = start_sal.end;
 
   /* Check if we are now inside an inlined function.  If we can,
      use the call site of the function instead.  */
-  b = block_for_pc_sect (sal.pc, SYMBOL_OBJ_SECTION (sym));
+  b = block_for_pc_sect (sal->pc, sal->section);
   function_block = NULL;
   while (b != NULL)
     {
@@ -2390,12 +2443,9 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
   if (function_block != NULL
       && SYMBOL_LINE (BLOCK_FUNCTION (function_block)) != 0)
     {
-      sal.line = SYMBOL_LINE (BLOCK_FUNCTION (function_block));
-      sal.symtab = SYMBOL_SYMTAB (BLOCK_FUNCTION (function_block));
+      sal->line = SYMBOL_LINE (BLOCK_FUNCTION (function_block));
+      sal->symtab = SYMBOL_SYMTAB (BLOCK_FUNCTION (function_block));
     }
-
-  do_cleanups (old_chain);
-  return sal;
 }
 
 /* If P is of the form "operator[ \t]+..." where `...' is

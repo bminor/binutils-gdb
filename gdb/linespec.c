@@ -1956,26 +1956,7 @@ minsym_found (int funfirstline, struct minimal_symbol *msymbol)
     values.sals[0] = find_pc_sect_line (pc, NULL, 0);
 
   if (funfirstline)
-    {
-      struct symtab_and_line sal;
-
-      values.sals[0].pc = find_function_start_pc (gdbarch,
-						  values.sals[0].pc,
-						  values.sals[0].section);
-
-      sal = find_pc_sect_line (values.sals[0].pc, values.sals[0].section, 0);
-
-      /* Check if SKIP_PROLOGUE left us in mid-line, and the next
-	 line is still part of the same function.  If there is no
-	 line information here, sal.pc will be the passed in PC.  */
-      if (sal.pc != values.sals[0].pc
-	  && (lookup_minimal_symbol_by_pc_section (values.sals[0].pc,
-						   values.sals[0].section)
-	      == lookup_minimal_symbol_by_pc_section (sal.end,
-						      values.sals[0].section)))
-	/* Recalculate the line number (might not be N+1).  */
-	values.sals[0] = find_pc_sect_line (sal.end, values.sals[0].section, 0);
-    }
+    skip_prologue_sal (&values.sals[0]);
 
   values.nelts = 1;
   return values;

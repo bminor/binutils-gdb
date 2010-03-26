@@ -1,5 +1,19 @@
 2010-03-26  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* breakpoint.c (expand_line_sal_maybe): Always call skip_prologue_sal.
+	(skip_prologue_sal): Remove local definition.
+	(resolve_sal_pc): Remove now unnecessary code.
+	* linespec.c (minsym_found): Call skip_prologue_sal.
+	* symtab.c (find_function_start_pc): Remove.
+	(find_function_start_sal): Extract prologue skipping into ...
+	(skip_prologue_sal): ... this new function.  Handle code both
+	with and without debug info.  Respect SAL's explicit_pc and
+	explicit_line flags.  Inline old find_function_start_pc.
+	* symtab.h (find_function_start_pc): Remove.
+	(skip_prologue_sal): Add prototype.
+
+2010-03-26  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* dwarf2read.c (read_func_scope): Also scan specification DIEs
 	for DW_TAG_imported_module children.
 

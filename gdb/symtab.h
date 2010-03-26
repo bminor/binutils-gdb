@@ -1132,11 +1132,10 @@ extern char *find_main_filename (void);
 
 extern struct symtab *find_line_symtab (struct symtab *, int, int *, int *);
 
-extern CORE_ADDR find_function_start_pc (struct gdbarch *,
-					 CORE_ADDR, struct obj_section *);
-
 extern struct symtab_and_line find_function_start_sal (struct symbol *sym,
 						       int);
+
+extern void skip_prologue_sal (struct symtab_and_line *);
 
 /* symfile.c */
 
