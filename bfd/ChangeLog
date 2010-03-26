@@ -1,3 +1,9 @@
+2010-03-26  Alan Modra  <amodra@gmail.com>
+
+	PR ld/11375
+	* elf64-ppc.c (ppc64_elf_relocate_section): Always look up a
+	possible stub on branches.
+
 2010-03-25  Joseph Myers  <joseph@codesourcery.com>
 
 	* Makefile.am (ALL_MACHINES): Add cpu-tic6x.lo.
