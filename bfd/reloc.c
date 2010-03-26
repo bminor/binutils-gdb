@@ -305,10 +305,7 @@ CODE_FRAGMENT
 .      when doing overflow checking.  *}
 .  unsigned int bitsize;
 .
-.  {*  Notes that the relocation is relative to the location in the
-.      data section of the addend.  The relocation function will
-.      subtract from the relocation value the address of the location
-.      being relocated.  *}
+.  {*  The relocation is relative to the field being relocated.  *}
 .  bfd_boolean pc_relative;
 .
 .  {*  The bit position of the reloc value in the destination.

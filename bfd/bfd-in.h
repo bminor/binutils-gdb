@@ -294,7 +294,7 @@ typedef struct bfd_section *sec_ptr;
   (((sec)->rawsize ? (sec)->rawsize : (sec)->size) \
    / bfd_octets_per_byte (bfd))
 
-/* Return TRUE if section has been discarded.  */
+/* Return TRUE if input section SEC has been discarded.  */
 #define elf_discarded_section(sec)				\
   (!bfd_is_abs_section (sec)					\
    && bfd_is_abs_section ((sec)->output_section)		\

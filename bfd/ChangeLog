@@ -1,3 +1,10 @@
+2010-03-26  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_howto_raw <R_PPC_EMB_RELSDA>): Not pc-relative.
+	* bfd-in.h (elf_discarded_section): Clarify comment.
+	* reloc.c (struct reloc_howto_struct <pc_relative>): Likewise.
+	* bfd-in2.h: Regenerate.
+
 2010-03-26  Matt Rice  <ratmice@gmail.com>
 
 	* archive.c (_bfd_compute_and_write_armap): Allow symbols flagged
