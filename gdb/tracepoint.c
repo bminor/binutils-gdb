@@ -202,9 +202,6 @@ char *stop_reason_names[] = {
 struct trace_status *
 current_trace_status ()
 {
-  /* Ensure this is never NULL.  */
-  if (!trace_status.error_desc)
-    trace_status.error_desc = "";
   return &trace_status;
 }
 
@@ -3157,7 +3154,8 @@ parse_trace_status (char *line, struct trace_status *ts)
   ts->running_known = 1;
   ts->running = (*p++ == '1');
   ts->stop_reason = trace_stop_reason_unknown;
-  ts->error_desc = "";
+  xfree (ts->error_desc);
+  ts->error_desc = NULL;
   ts->traceframe_count = -1;
   ts->traceframes_created = -1;
   ts->buffer_free = -1;
@@ -3201,6 +3199,9 @@ Status line: '%s'\n"), p, line);
 	      end = hex2bin (p1, ts->error_desc, (p2 - p1) / 2);
 	      ts->error_desc[end] = '\0';
 	    }
+	  else
+	    ts->error_desc = xstrdup ("");
+
 	  p = unpack_varlen_hex (++p2, &val);
 	  ts->stopping_tracepoint = val;
 	  ts->stop_reason = tracepoint_error;

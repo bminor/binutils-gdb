@@ -1,5 +1,13 @@
 2010-03-26  Pedro Alves  <pedro@codesourcery.com>
 
+	* tracepoint.c (current_trace_status): Don't make sure error_desc
+	is non-NULL here.
+	(parse_trace_status): Release a previous error_desc string, and
+	set it to NULL by default.  If stop reason is tracepoint_error,
+	make sure error_desc is not left NULL.
+
+2010-03-26  Pedro Alves  <pedro@codesourcery.com>
+
 	* tracepoint.c (trace_save): Remove X from tracepoint error
 	description.
 
