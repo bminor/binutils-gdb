@@ -1,3 +1,7 @@
+2010-03-26  Matt Rice  <ratmice@gmail.com>
+
+	* binutils-all/ar.exp (unique_symbol): New test.
+
 2010-02-18  Alan Modra  <amodra@gmail.com>
 
 	* binutils-all/group-5.s, * binutils-all/group-5.d: New test.
@@ -275,9 +279,9 @@
 	empty for testing an installed toolchain.
 
 2008-02-04  Bob Wilson  <bob.wilson@acm.org>
-	
+
 	* binutils-all/objdump.exp (cpus_expected): Add xtensa.
-	
+
 2007-10-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* binutils-all/windres/windres.exp: Don't xfail.
@@ -288,14 +292,14 @@
 	* binutils-all/readelf.ss-64: Likewise.
 	* binutils-all/readelf.ss-mips: Likewise.
 	* binutils-all/readelf.ss-tmips: Likewise.
-	
+
 2007-08-30  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/dumptest.s: New test file.
 	* binutils-all/readelf.exp: Add test of readelf's -p switch.
 
 2007-08-28  Mark Shinwell  <shinwell@codesourcery.com>
-            Joseph Myers  <joseph@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
 
 	* binutils-all/ar.exp (long_filenames): Delete temporary files on
 	the host.
@@ -447,8 +451,8 @@
 	* lib/utils-lib.exp (run_dump_test): Support strip.
 
 2006-08-15  Thiemo Seufer  <ths@mips.com>
-            Nigel Stephens  <nigel@mips.com>
-            David Ung  <davidu@mips.com>
+	    Nigel Stephens  <nigel@mips.com>
+	    David Ung  <davidu@mips.com>
 
 	* binutils-all/readelf.exp (readelf_test): Handle mips*-sde-elf*.
 
@@ -600,7 +604,7 @@
 
 2005-03-08  Ben Elliston  <bje@au.ibm.com>
 
-       * config/default.exp: Remove send_user call for stray output.
+	* config/default.exp: Remove send_user call for stray output.
 
 2005-01-04  Martin Koegler  <mkoegler@auto.tuwien.ac.at>
 
