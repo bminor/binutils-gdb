@@ -3946,6 +3946,31 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   inherit_abstract_dies (die, cu);
 
+  /* If we have a DW_AT_specification, we might need to import using
+     directives from the context of the specification DIE.  See the
+     comment in determine_prefix.  */
+  if (cu->language == language_cplus
+      && dwarf2_attr (die, DW_AT_specification, cu))
+    {
+      struct dwarf2_cu *spec_cu = cu;
+      struct die_info *spec_die = die_specification (die, &spec_cu);
+
+      while (spec_die)
+	{
+	  child_die = spec_die->child;
+	  while (child_die && child_die->tag)
+	    {
+	      if (child_die->tag == DW_TAG_imported_module)
+		process_die (child_die, spec_cu);
+	      child_die = sibling_die (child_die);
+	    }
+
+	  /* In some cases, GCC generates specification DIEs that
+	     themselves contain DW_AT_specification attributes.  */
+	  spec_die = die_specification (spec_die, &spec_cu);
+	}
+    }
+
   new = pop_context ();
   /* Make a block for the local symbols within.  */
   block = finish_block (new->name, &local_symbols, new->old_blocks,

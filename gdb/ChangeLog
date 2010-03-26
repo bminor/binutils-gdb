@@ -1,5 +1,10 @@
 2010-03-26  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* dwarf2read.c (read_func_scope): Also scan specification DIEs
+	for DW_TAG_imported_module children.
+
+2010-03-26  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* dwarf2read.c (dwarf2_name): Work around GCC bugzilla debug/41828 by
 	ignoring spurious DW_AT_name attributes for unnamed structs or unions.
 	* completer.c (add_struct_fields): Fix inverted logic.
