@@ -1,3 +1,8 @@
+2010-03-25  Doug Kwan  <dougkwan@google.com>
+
+	* gold/arm.cc (Arm_exidx_fixup::update_offset_map): Rearrange code
+	to avoid a conversion warning on a 32-bit host.
+
 2010-03-24  Ian Lance Taylor  <iant@google.com>
 
 	* testsuite/script_test_3.t: Add a TLS segment.

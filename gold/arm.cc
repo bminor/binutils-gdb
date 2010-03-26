@@ -5206,10 +5206,11 @@ Arm_exidx_fixup::update_offset_map(
 {
   if (this->section_offset_map_ == NULL)
     this->section_offset_map_ = new Arm_exidx_section_offset_map();
-  section_offset_type output_offset =
-    (delete_entry
-     ? Arm_exidx_input_section::invalid_offset
-     : input_offset - deleted_bytes);
+  section_offset_type output_offset;
+  if (delete_entry)
+    output_offset = Arm_exidx_input_section::invalid_offset;
+  else
+    output_offset = input_offset - deleted_bytes;
   (*this->section_offset_map_)[input_offset] = output_offset;
 }
 
