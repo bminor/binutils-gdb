@@ -1,5 +1,10 @@
 2010-03-26  Pedro Alves  <pedro@codesourcery.com>
 
+	* tracepoint.c (trace_save): Remove X from tracepoint error
+	description.
+
+2010-03-26  Pedro Alves  <pedro@codesourcery.com>
+
 	* tracepoint.c (parse_trace_status): Don't allow plain strings in
 	the terror description.  Don't expect an X prefix.
 

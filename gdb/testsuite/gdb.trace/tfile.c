@@ -105,10 +105,38 @@ write_basic_trace_file (void)
   finish_trace_file (fd);
 }
 
+/* Convert number NIB to a hex digit.  */
+
+static int
+tohex (int nib)
+{
+  if (nib < 10)
+    return '0' + nib;
+  else
+    return 'a' + nib - 10;
+}
+
+int
+bin2hex (const char *bin, char *hex, int count)
+{
+  int i;
+
+  for (i = 0; i < count; i++)
+    {
+      *hex++ = tohex ((*bin >> 4) & 0xf);
+      *hex++ = tohex (*bin++ & 0xf);
+    }
+  *hex = 0;
+  return i;
+}
+
 void
 write_error_trace_file (void)
 {
   int fd;
+  const char made_up[] = "made-up error";
+  int len = sizeof (made_up) - 1;
+  char *hex = alloca (len * 2 + 1);
 
   fd = start_trace_file ("error.tf");
 
@@ -120,8 +148,14 @@ write_error_trace_file (void)
   snprintf (spbuf, sizeof spbuf, "R %x\n", 500 /* FIXME get from arch */);
   write (fd, spbuf, strlen (spbuf));
 
+  bin2hex (made_up, hex, len);
+
   /* Dump trace status, in the general form of the qTstatus reply.  */
-  snprintf (spbuf, sizeof spbuf, "status 0;terror:made-up error:1;tframes:0;tcreated:0;tfree:100;tsize:1000\n");
+  snprintf (spbuf, sizeof spbuf,
+	    "status 0;"
+	    "terror:%s:1;"
+	    "tframes:0;tcreated:0;tfree:100;tsize:1000\n",
+	    hex);
   write (fd, spbuf, strlen (spbuf));
 
   /* Dump tracepoint definitions, in syntax similar to that used

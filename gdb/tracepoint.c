@@ -2484,12 +2484,11 @@ trace_save (const char *filename, int target_does_save)
   /* Write out status of the tracing run (aka "tstatus" info).  */
   fprintf (fp, "status %c;%s",
 	   (ts->running ? '1' : '0'), stop_reason_names[ts->stop_reason]);
-  /* Encode the error message in hex, might have weird chars.  */
   if (ts->stop_reason == tracepoint_error)
     {
       char *buf = (char *) alloca (strlen (ts->error_desc) * 2 + 1);
       bin2hex ((gdb_byte *) ts->error_desc, buf, 0);
-      fprintf (fp, ":X%s", buf);
+      fprintf (fp, ":%s", buf);
     }
   fprintf (fp, ":%x", ts->stopping_tracepoint);
   if (ts->traceframe_count >= 0)
