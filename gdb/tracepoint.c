@@ -1745,6 +1745,13 @@ disconnect_or_stop_tracing (int from_tty)
       if (!cont)
 	stop_tracing ();
     }
+
+  /* Also we want to be out of tfind mode, otherwise things can get
+     confusing upon reconnection.  Just use these calls instead of
+     full tfind_1 behavior because we're in the middle of detaching,
+     and there's no point to updating current stack frame etc.  */
+  set_traceframe_number (-1);
+  set_traceframe_context (NULL);
 }
 
 /* Worker function for the various flavors of the tfind command.  */
