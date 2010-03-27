@@ -1,3 +1,8 @@
+2010-03-27  Matt Rice  <ratmice@gmail.com>
+
+        * gdb.texinfo (ARM): Document arguments to "target sim".
+        (Set Catchpoints): Use @dots{} instead of @r{...}.
+
 2010-03-26  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.texinfo (Tracepoint Packets): Remove mention that

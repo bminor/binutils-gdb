@@ -3872,7 +3872,7 @@ A call to @code{exec}.  This is currently only available for HP-UX
 and @sc{gnu}/Linux.
 
 @item syscall
-@itemx syscall @r{[}@var{name} @r{|} @var{number}@r{]} @r{...}
+@itemx syscall @r{[}@var{name} @r{|} @var{number}@r{]} @dots{} 
 @cindex break on a system call.
 A call to or return from a system call, a.k.a.@: @dfn{syscall}.  A
 syscall is a mechanism for application programs to request a service
@@ -14899,7 +14899,7 @@ useful if you have some other way of getting the stub to the target
 system, and you can put it somewhere in memory where it won't get
 clobbered by the download.
 
-@item target sim
+@item target sim @r{[}@var{simargs}@r{]} @dots{}
 @cindex built-in simulator target
 Builtin CPU simulator.  @value{GDBN} includes simulators for most architectures.
 In general,
@@ -17295,6 +17295,25 @@ well as the Angel monitor.
 Show the setting of RDI heartbeat packets.
 @end table
 
+@table @code
+@item target sim @r{[}@var{simargs}@r{]} @dots{} 
+The @value{GDBN} ARM simulator accepts the following optional arguments.
+
+@table @code
+@item --swi-support=@var{type}
+Tell the simulator which SWI interfaces to support.
+@var{type} may be a comma separated list of the following values.
+The default value is @code{all}.
+
+@table @code
+@item none
+@item demon
+@item angel
+@item redboot
+@item all
+@end table
+@end table
+@end table
 
 @node M32R/D
 @subsection Renesas M32R/D and M32R/SDI
