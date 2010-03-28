@@ -1,6 +1,6 @@
 2010-03-28  Pedro Alves  <pedro@codesourcery.com>
 
-        * cli/cli-script.c (process_next_line): Handle 'stepping'.
+	* cli/cli-script.c (process_next_line): Handle 'stepping'.
 
 2010-03-26  Stan Shebs  <stan@codesourcery.com>
 
