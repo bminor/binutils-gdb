@@ -24,7 +24,8 @@ set bug_id 0
 
 set testfile "collection"
 set srcfile ${testfile}.c
-set binfile $objdir/$subdir/$testfile
+set executable $testfile
+set binfile $objdir/$subdir/$executable
 
 if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 	executable {debug nowarnings}] != "" } {
@@ -45,6 +46,20 @@ if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 set ws "\[\r\n\t \]+"
 set cr "\[\r\n\]+"
 
+if [istarget "x86_64-*"] then {
+    set fpreg "rbp"
+    set spreg "rsp"
+    set pcreg "rip"
+} elseif [istarget "i?86-*"] then {
+    set fpreg "ebp"
+    set spreg "esp"
+    set pcreg "eip"
+} else {
+    set fpreg "fp"
+    set spreg "sp"
+    set pcreg "pc"
+}
+
 #
 # Utility procs
 #
@@ -53,36 +68,35 @@ proc test_register { reg test_id } {
     global cr
     global gdb_prompt
 
-    send_gdb "print $reg\n"
-    gdb_expect {
-	-re "\\$\[0-9\]+ = \[x0\]+$cr$gdb_prompt " {
+    gdb_test_multiple "print /x $reg" "" {
+	-re "\\$\[0-9\]+ = \[x0\]+$cr$gdb_prompt $" {
 	    fail "collect $test_id: collected $reg (zero)"
 	}
-	-re "\\$\[0-9\]+ = \[x0-9a-fA-F\]+$cr$gdb_prompt " {
+	-re "\\$\[0-9\]+ = \[x0-9a-fA-F\]+$cr$gdb_prompt $" {
 	    pass "collect $test_id: collected $reg"
 	}
-	-re "\[Ee\]rror.*$gdb_prompt " {
+	-re "\[Ee\]rror.*$gdb_prompt $" {
 	    fail "collect $test_id: collected $reg (error)"
-	}
-	timeout {
-	    fail "collect $test_id: collected $reg (timeout)"
 	}
     }
 }
 
+proc prepare_for_trace_test {} {
+    global executable
+
+    clean_restart $executable
+
+    runto_main
+
+    gdb_test "break begin" "" ""
+    gdb_test "break end" "" ""
+}
+
 proc run_trace_experiment { msg test_func } {
-    global gdb_prompt
-    gdb_run_cmd
-    gdb_expect {
-	-re ".*Breakpoint \[0-9\]+, begin .*$gdb_prompt $" { 
-	}
-	-re ".*$gdb_prompt $" { 
-	    fail "collect $msg: advance to go"
-	}
-	timeout { 
-	    fail "collect $msg: advance to go (timeout)"
-	}
-    }
+    gdb_test "continue" \
+	".*Breakpoint \[0-9\]+, begin .*" \
+	"collect $msg: advance to begin"
+
     gdb_test "tstart" \
 	    "\[\r\n\]+" \
 	    "collect $msg: start trace experiment"
@@ -106,10 +120,7 @@ proc gdb_collect_args_test { myargs msg } {
     global cr
     global gdb_prompt
 
-    # Make sure we're in a sane starting state.
-    gdb_test "tstop" "" ""
-    gdb_test "tfind none" "" ""
-    gdb_delete_tracepoints
+    prepare_for_trace_test
 
     gdb_test "trace args_test_func" \
 	    "Tracepoint \[0-9\]+ at .*" \
@@ -171,10 +182,7 @@ proc gdb_collect_argstruct_test { myargs msg } {
     global cr
     global gdb_prompt
 
-    # Make sure we're in a sane starting state.
-    gdb_test "tstop" "" ""
-    gdb_test "tfind none" "" ""
-    gdb_delete_tracepoints
+    prepare_for_trace_test
 
     gdb_test "trace argstruct_test_func" \
 	    "Tracepoint \[0-9\]+ at .*" \
@@ -210,10 +218,7 @@ proc gdb_collect_argarray_test { myargs msg } {
     global cr
     global gdb_prompt
 
-    # Make sure we're in a sane starting state.
-    gdb_test "tstop" "" ""
-    gdb_test "tfind none" "" ""
-    gdb_delete_tracepoints
+    prepare_for_trace_test
 
     gdb_test "trace argarray_test_func" \
 	    "Tracepoint \[0-9\]+ at .*" \
@@ -249,10 +254,7 @@ proc gdb_collect_locals_test { func mylocs msg } {
     global cr
     global gdb_prompt
 
-    # Make sure we're in a sane starting state.
-    gdb_test "tstop" "" ""
-    gdb_test "tfind none" "" ""
-    gdb_delete_tracepoints
+    prepare_for_trace_test
 
     # Find the comment-identified line for setting this tracepoint.
     set testline 0
@@ -330,11 +332,11 @@ proc gdb_collect_locals_test { func mylocs msg } {
 proc gdb_collect_registers_test { myregs } {
     global cr
     global gdb_prompt
+    global fpreg
+    global spreg
+    global pcreg
 
-    # Make sure we're in a sane starting state.
-    gdb_test "tstop" "" ""
-    gdb_test "tfind none" "" ""
-    gdb_delete_tracepoints
+    prepare_for_trace_test
 
     # We'll simply re-use the args_test_function for this test
     gdb_test "trace args_test_func" \
@@ -347,9 +349,9 @@ proc gdb_collect_registers_test { myregs } {
     # Begin the test.
     run_trace_experiment $myregs args_test_func
 
-    test_register "\$fp" $myregs
-    test_register "\$sp" $myregs
-    test_register "\$pc" $myregs
+    test_register "\$$fpreg" $myregs
+    test_register "\$$spreg" $myregs
+    test_register "\$$pcreg" $myregs
 
     gdb_test "tfind none" \
 	    "#0  end .*" \
@@ -360,10 +362,7 @@ proc gdb_collect_expression_test { func expr val msg } {
     global cr
     global gdb_prompt
 
-    # Make sure we're in a sane starting state.
-    gdb_test "tstop" "" ""
-    gdb_test "tfind none" "" ""
-    gdb_delete_tracepoints
+    prepare_for_trace_test
 
     # Find the comment-identified line for setting this tracepoint.
     set testline 0
@@ -406,10 +405,7 @@ proc gdb_collect_globals_test { } {
     global cr
     global gdb_prompt
 
-    # Make sure we're in a sane starting state.
-    gdb_test "tstop" "" ""
-    gdb_test "tfind none" "" ""
-    gdb_delete_tracepoints
+    prepare_for_trace_test
 
     # Find the comment-identified line for setting this tracepoint.
     set testline 0
@@ -485,21 +481,11 @@ proc gdb_collect_globals_test { } {
 	    "collect globals: cease trace debugging"
 }
 
-proc gdb_trace_collection_test { } {
-    global gdb_prompt;
+proc gdb_trace_collection_test {} {
+    global fpreg
+    global spreg
+    global pcreg
 
-    gdb_test "set width 0" "" ""
-    delete_breakpoints
-
-    # We generously give ourselves one "pass" if we successfully 
-    # detect that this test cannot be run on this target!
-    if { ![gdb_target_supports_trace] } then { 
-	pass "Current target does not support trace"
-	return 1;
-    }
-
-    gdb_test "break begin" "" ""
-    gdb_test "break end"   "" ""
     gdb_collect_args_test "\$args" \
 	    "args collectively"
     gdb_collect_args_test "argc, argi, argf, argd, argstruct, argarray" \
@@ -527,9 +513,8 @@ proc gdb_trace_collection_test { } {
     gdb_collect_locals_test statlocal_test_func \
 	    "locc, loci, locf, locd, locst, locar" \
 	    "static locals individually"
-    
     gdb_collect_registers_test "\$regs"
-    gdb_collect_registers_test "\$fp, \$sp, \$pc"
+    gdb_collect_registers_test "\$$fpreg, \$$spreg, \$$pcreg"
     gdb_collect_globals_test
     
     #
@@ -605,22 +590,18 @@ proc gdb_trace_collection_test { } {
 
 }
 
-# Start with a fresh gdb.
- 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load $binfile
- 
-if [target_info exists gdb_stub] {
-    gdb_step_for_stub;
+clean_restart $executable
+runto_main
+
+# We generously give ourselves one "pass" if we successfully
+# detect that this test cannot be run on this target!
+if { ![gdb_target_supports_trace] } then {
+    pass "Current target does not support trace"
+    return 1;
 }
- 
+
 # Body of test encased in a proc so we can return prematurely.
 gdb_trace_collection_test
 
 # Finished!
 gdb_test "tfind none" "" ""
-
-
-

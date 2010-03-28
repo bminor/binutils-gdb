@@ -1,3 +1,24 @@
+2010-03-29  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.trace/collection.exp (executable): New.
+	(binfile): Use it.
+	(fpreg, spreg, pcreg): New.
+	(test_register): Use gdb_test_multiple.  Pass /x to print.
+	(prepare_for_trace_test): New.
+	(run_trace_experiment): Use "continue", not gdb_run_cmd.
+	(gdb_collect_args_test, gdb_collect_argstruct_test)
+	(gdb_collect_argarray_test, gdb_collect_locals_test): Use
+	prepare_for_trace_test.
+	(gdb_collect_registers_test): Use prepare_for_trace_test.  Use
+	fpreg, spreg and pcreg.
+	(gdb_collect_expression_test, gdb_collect_globals_test): Use
+	prepare_for_trace_test.
+	(gdb_trace_collection_test): Use fpreg, spreg and pcreg.  Don't
+	try to detect tracing support here.  Don't set breakpoints at
+	`begin' or `end' here.
+	<global scope>: Use clean_restart.  Run to main before checking
+	for tracing support.  Check for for tracing support here.
+
 2010-03-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/break-interp.exp (test_core, test_attach, test_ld): Add
