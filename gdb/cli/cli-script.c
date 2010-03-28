@@ -932,7 +932,8 @@ process_next_line (char *p, struct command_line **command, int parse_commands,
       /* Check for while, if, break, continue, etc and build a new command
 	 line structure for them.  */
       if ((p_end - p >= 14 && !strncmp (p, "while-stepping", 14))
-	  || (p_end -p >= 2 && !strncmp (p, "ws", 2)))
+	  || (p_end - p >= 8 && !strncmp (p, "stepping", 8))
+	  || (p_end - p >= 2 && !strncmp (p, "ws", 2)))
 	{
 	  /* Because validate_actionline and encode_action lookup
 	     command's line as command, we need the line to

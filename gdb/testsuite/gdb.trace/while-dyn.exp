@@ -29,7 +29,8 @@ gdb_start
 
 set testfile "actions"
 set srcfile $testfile.c
-set binfile $objdir/$subdir/while-dyn
+set executable while-dyn
+set binfile $objdir/$subdir/$executable
 if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
 	  executable {debug nowarnings}] != "" } {
     untested while-dyn.exp
@@ -46,22 +47,11 @@ gdb_reinitialize_dir $srcdir/$subdir
 if { ![gdb_target_supports_trace] } then {
     pass "Current target does not support trace"
     return 1;
-
 }
-
-# If testing on a remote host, download the source file.
-# remote_download host $srcdir/$subdir/$srcfile
 
 #
 # test while-stepping dynamically (live target)
 #
-
-## verify number of trace frames collected matches stepcount
-
-gdb_delete_tracepoints
-gdb_test "trace gdb_c_test" \
-	"Tracepoint $decimal at .*" \
-	"Set tracepoint at gdb_c_test"
 
 if [istarget "x86_64-*"] then {
     set fpreg "\$rbp"
@@ -71,33 +61,59 @@ if [istarget "x86_64-*"] then {
     set fpreg "\$fp"
 }
 
-gdb_trace_setactions "5.12: define while-stepping <stepcount>" \
+proc test_while_stepping { while_stepping } {
+    global fpreg
+    global decimal
+    global gdb_prompt
+    global executable
+
+    clean_restart $executable
+
+    gdb_test "tstop" "" ""
+    gdb_test "tfind none" "" ""
+    runto_main
+
+    ## verify number of trace frames collected matches stepcount
+
+    gdb_delete_tracepoints
+    gdb_test "trace gdb_c_test" \
+	"Tracepoint $decimal at .*" \
+	"$while_stepping: Set tracepoint at gdb_c_test"
+
+    gdb_trace_setactions "5.12: define $while_stepping <stepcount>" \
 	"" \
 	"collect $fpreg" "^$" \
-	"while-stepping 5" "^$" \
+	"$while_stepping 5" "^$" \
 	"collect p" "^$" \
 	"end" "^$" \
 	"end" ""
 
-gdb_test "tstart" "" ""
+    gdb_test "tstart" "" ""
 
-gdb_test "break end" "" ""
-gdb_test "continue" \
-    "Continuing.*Breakpoint $decimal, end.*" \
-    "run trace experiment"
+    gdb_test "break end" "" ""
+    gdb_test "continue" \
+	"Continuing.*Breakpoint $decimal, end.*" \
+	"$while_stepping: run trace experiment"
 
-gdb_test "tstop" "" ""
+    gdb_test "tstop" "" ""
 
-gdb_tfind_test "5.12: frame 5 should be the last one collected" "5" "5"
+    gdb_tfind_test "$while_stepping: frame 5 should be the last one collected" "5" "5"
 
-send_gdb "tfind 6\n"
-gdb_expect {
-    -re "failed to find.*$gdb_prompt $" {
-	pass "5.12: trace stopped after 5 stepping frames"
+    set test "$while_stepping: trace stopped after 5 stepping frames"
+    gdb_test_multiple "tfind 6" "$test" {
+	-re "failed to find.*$gdb_prompt $" {
+	    pass "$test"
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "$test"
+	}
     }
-    -re ".*$gdb_prompt $" {
-	fail "5.12: trace stopped after 5 stepping frames"
-    }
+
+    gdb_test "tfind none" "" ""
 }
 
-gdb_test "tfind none" "" ""
+# Test all while-stepping aliases.
+
+test_while_stepping "while-stepping"
+test_while_stepping "stepping"
+test_while_stepping "ws"
