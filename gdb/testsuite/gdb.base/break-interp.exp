@@ -287,7 +287,7 @@ proc test_core {file displacement} {
     gdb_test "set verbose on"
 
     set test "core loaded"
-    set test_displacement "seen displacement message"
+    set test_displacement "seen displacement message as $displacement"
     gdb_test_multiple "core-file $corefile" $test {
 	-re "Using PIE \\(Position Independent Executable\\) displacement (0x\[0-9a-f\]+) " {
 	    # Missing "$gdb_prompt $" is intentional.
@@ -367,7 +367,7 @@ proc test_attach {file displacement} {
     }
 
     set test "attach final prompt"
-    set test_displacement "seen displacement message"
+    set test_displacement "seen displacement message as $displacement"
     gdb_test_multiple "" $test {
 	-re "Using PIE \\(Position Independent Executable\\) displacement (0x\[0-9a-f\]+) " {
 	    # Missing "$gdb_prompt $" is intentional.
@@ -484,7 +484,7 @@ proc test_ld {file ifmain trynosym displacement} {
 	# error code.
 
 	set test "ld.so exit"
-	set test_displacement "seen displacement message"
+	set test_displacement "seen displacement message as $displacement"
 	gdb_test_multiple "run" $test {
 	    -re "Using PIE \\(Position Independent Executable\\) displacement (0x\[0-9a-f\]+) " {
 		# Missing "$gdb_prompt $" is intentional.

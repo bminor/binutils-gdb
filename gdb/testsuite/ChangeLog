@@ -1,3 +1,8 @@
+2010-03-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/break-interp.exp (test_core, test_attach, test_ld): Add
+	" as $displacement" to "seen displacement message".
+
 2010-03-28  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.trace/while-dyn.exp (executable): New variable.
