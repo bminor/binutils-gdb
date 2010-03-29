@@ -1,5 +1,8 @@
 2010-03-29  Stan Shebs  <stan@codesourcery.com>
 
+	* tracepoint.c (collect_symbol): Send LOC_UNRESOLVED symbols to
+	expression handler.
+
 	* tracepoint.c (start_tracing): Check tracepoints before sending
 	commands to target, don't start if all tracepoints disabled.
 

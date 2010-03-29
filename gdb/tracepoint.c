@@ -922,10 +922,11 @@ collect_symbol (struct collection_list *collect,
 	}
       add_memrange (collect, reg, offset, len);
       break;
+
     case LOC_UNRESOLVED:
-      printf_filtered ("Don't know LOC_UNRESOLVED %s\n", 
-		       SYMBOL_PRINT_NAME (sym));
+      treat_as_expr = 1;
       break;
+
     case LOC_OPTIMIZED_OUT:
       printf_filtered ("%s has been optimized out of existence.\n",
 		       SYMBOL_PRINT_NAME (sym));
