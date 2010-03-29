@@ -1449,24 +1449,43 @@ start_tracing (void)
   int ix;
   struct breakpoint *t;
   struct trace_state_variable *tsv;
-  int any_downloaded = 0;
-
-  target_trace_init ();
+  int any_enabled = 0;
   
   tp_vec = all_tracepoints ();
+
+  /* No point in tracing without any tracepoints... */
+  if (VEC_length (breakpoint_p, tp_vec) == 0)
+    {
+      VEC_free (breakpoint_p, tp_vec);
+      error (_("No tracepoints defined, not starting trace"));
+    }
+
+  for (ix = 0; VEC_iterate (breakpoint_p, tp_vec, ix, t); ix++)
+    {
+      if (t->enable_state == bp_enabled)
+	{
+	  any_enabled = 1;
+	  break;
+	}
+    }
+
+  /* No point in tracing with only disabled tracepoints.  */
+  if (!any_enabled)
+    {
+      VEC_free (breakpoint_p, tp_vec);
+      error (_("No tracepoints enabled, not starting trace"));
+    }
+
+  target_trace_init ();
+
   for (ix = 0; VEC_iterate (breakpoint_p, tp_vec, ix, t); ix++)
     {
       t->number_on_target = 0;
       target_download_tracepoint (t);
       t->number_on_target = t->number;
-      any_downloaded = 1;
     }
   VEC_free (breakpoint_p, tp_vec);
-  
-  /* No point in tracing without any tracepoints... */
-  if (!any_downloaded)
-    error ("No tracepoints downloaded, not starting trace");
-  
+
   /* Send down all the trace state variables too.  */
   for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
     {
