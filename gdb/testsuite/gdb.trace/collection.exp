@@ -93,13 +93,19 @@ proc prepare_for_trace_test {} {
 }
 
 proc run_trace_experiment { msg test_func } {
+    global gdb_prompt
+
     gdb_test "continue" \
 	".*Breakpoint \[0-9\]+, begin .*" \
 	"collect $msg: advance to begin"
 
-    gdb_test "tstart" \
-	    "\[\r\n\]+" \
-	    "collect $msg: start trace experiment"
+    set test "collect $msg: start trace experiment"
+    gdb_test_multiple "tstart" "$test" {
+	-re "^tstart\r\n$gdb_prompt $" {
+	    pass "$test"
+	}
+    }
+
     gdb_test "continue" \
 	    "Continuing.*Breakpoint \[0-9\]+, end.*" \
 	    "collect $msg: run trace experiment"

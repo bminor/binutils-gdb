@@ -1,5 +1,10 @@
 2010-03-29  Pedro Alves  <pedro@codesourcery.com>
 
+	* gdb.trace/collection.exp (run_trace_experiment): Make sure
+	"tstart" is silent.
+
+2010-03-29  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdb.trace/collection.exp (executable): New.
 	(binfile): Use it.
 	(fpreg, spreg, pcreg): New.
