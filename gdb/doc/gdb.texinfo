@@ -9334,10 +9334,10 @@ local variables, or global data.  Later, you can use @value{GDBN}
 commands to examine the values these data had at the time the
 tracepoint was hit.
 
-Tracepoints do not support every breakpoint feature.  Conditional
-expressions and ignore counts on tracepoints have no effect, and
-tracepoints cannot run @value{GDBN} commands when they are
-hit.  Tracepoints may not be thread-specific either.
+Tracepoints do not support every breakpoint feature.  Ignore counts on
+tracepoints have no effect, and tracepoints cannot run @value{GDBN}
+commands when they are hit.  Tracepoints may not be thread-specific
+either.
 
 @cindex fast tracepoints
 Some targets may support @dfn{fast tracepoints}, which are inserted in
@@ -9601,7 +9601,7 @@ recently defined (so that you can define a tracepoint and then say
 @code{actions} without bothering about its number).  You specify the
 actions themselves on the following lines, one action at a time, and
 terminate the actions list with a line containing just @code{end}.  So
-far, the only defined actions are @code{collect} and
+far, the only defined actions are @code{collect}, @code{teval}, and
 @code{while-stepping}.
 
 @cindex remove actions from a tracepoint
@@ -9620,10 +9620,10 @@ In the following example, the action list begins with @code{collect}
 commands indicating the things to be collected when the tracepoint is
 hit.  Then, in order to single-step and collect additional data
 following the tracepoint, a @code{while-stepping} command is used,
-followed by the list of things to be collected while stepping.  The
-@code{while-stepping} command is terminated by its own separate
-@code{end} command.  Lastly, the action list is terminated by an
-@code{end} command.
+followed by the list of things to be collected after each step in a
+sequence of single steps.  The @code{while-stepping} command is
+terminated by its own separate @code{end} command.  Lastly, the action
+list is terminated by an @code{end} command.
 
 @smallexample
 (@value{GDBP}) @b{trace foo}
@@ -9674,7 +9674,7 @@ action were used.
 @kindex while-stepping @r{(tracepoints)}
 @item while-stepping @var{n}
 Perform @var{n} single-step instruction traces after the tracepoint,
-collecting new data at each instruction.  The @code{while-stepping}
+collecting new data after each step.  The @code{while-stepping}
 command is followed by the list of what to collect while stepping
 (followed by its own @code{end} command):
 
@@ -9686,7 +9686,9 @@ command is followed by the list of what to collect while stepping
 @end smallexample
 
 @noindent
-You may abbreviate @code{while-stepping} as @code{ws} or
+Note that @code{$pc} is not automatically collected by
+@code{while-stepping}; you need to explicitly collect that register if
+you need it.  You may abbreviate @code{while-stepping} as @code{ws} or
 @code{stepping}.
 
 @item set default-collect @var{expr1}, @var{expr2}, @dots{}
@@ -26073,6 +26075,10 @@ frame.  This field is present only if a trace frame was found.
 
 @end table
 
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{tfind}.
+
 @subheading -trace-define-variable
 @findex -trace-define-variable
 
@@ -26086,6 +26092,10 @@ Create trace variable @var{name} if it does not exist.  If
 @var{value} is specified, sets the initial value of the specified
 trace variable to that value.  Note that the @var{name} should start
 with the @samp{$} character.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{tvariable}.
 
 @subheading -trace-list-variables
 @findex -trace-list-variables
@@ -26115,6 +26125,10 @@ presently running.
 
 @end table
 
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{tvariables}.
+
 @subsubheading Example
 
 @smallexample
@@ -26143,6 +26157,10 @@ Saves the collected trace data to @var{filename}.  Without the
 in a local file.  With the @samp{-r} option the target is asked
 to perform the save.
 
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{tsave}.
+
 
 @subheading -trace-start
 @findex -trace-start
@@ -26155,6 +26173,10 @@ to perform the save.
 
 Starts a tracing experiments.  The result of this command does not
 have any fields.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{tstart}.
 
 @subheading -trace-status
 @findex -trace-status
@@ -26209,6 +26231,10 @@ remaining space.  These field is optional.
 
 @end table
 
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{tstatus}.
+
 @subheading -trace-stop
 @findex -trace-stop
 
@@ -26221,6 +26247,10 @@ remaining space.  These field is optional.
 Stops a tracing experiment.  The result of this command has the same
 fields as @code{-trace-status}, except that the @samp{supported} and
 @samp{running} fields are not output.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{tstop}.
 
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

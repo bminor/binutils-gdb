@@ -1,4 +1,15 @@
 2010-03-29  Stan Shebs  <stan@codesourcery.com>
+	    Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Tracepoint Commands): Add notes about the
+	GDBN equivalent.
+	(Set Tracepoints): Remove mention that conditional tracepoints
+	don't exist.
+	(Tracepoint Actions): Clarify when while-stepping collection
+	happens, note that while-stepping does not automatically collect
+	$pc.
+
+2010-03-29  Stan Shebs  <stan@codesourcery.com>
 	
 	* gdb.texinfo (Tracepoint Packets): Describe QTDPsrc.
 	(General Query Packets): Describe TracepointSource.
