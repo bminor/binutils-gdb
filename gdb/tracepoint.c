@@ -2446,6 +2446,25 @@ trace_dump_command (char *args, int from_tty)
   discard_cleanups (old_cleanups);
 }
 
+/* Encode a piece of a tracepoint's source-level definition in a form
+   that is suitable for both protocol and saving in files.  */
+/* This version does not do multiple encodes for long strings; it should
+   return an offset to the next piece to encode.  FIXME  */
+
+extern int
+encode_source_string (int tpnum, ULONGEST addr,
+		      char *srctype, char *src, char *buf, int buf_size)
+{
+  if (80 + strlen (srctype) > buf_size)
+    error (_("Buffer too small for source encoding"));
+  sprintf (buf, "%x:%s:%s:%x:%x:",
+	   tpnum, phex_nz (addr, sizeof (addr)), srctype, 0, (int) strlen (src));
+  if (strlen (buf) + strlen (src) * 2 >= buf_size)
+    error (_("Source string too long for buffer"));
+  bin2hex (src, buf + strlen (buf), 0);
+  return -1;
+}
+
 extern int trace_regblock_size;
 
 /* Save tracepoint data to file named FILENAME.  If TARGET_DOES_SAVE is
@@ -2463,6 +2482,7 @@ trace_save (const char *filename, int target_does_save)
   struct uploaded_tp *uploaded_tps = NULL, *utp;
   struct uploaded_tsv *uploaded_tsvs = NULL, *utsv;
   int a;
+  struct uploaded_string *cmd;
   LONGEST gotten = 0;
   ULONGEST offset = 0;
 #define MAX_TRACE_UPLOAD 2000
@@ -2497,7 +2517,7 @@ trace_save (const char *filename, int target_does_save)
      binary file, plus a hint as what this file is, and a version
      number in case of future needs.  */
   written = fwrite ("\x7fTRACE0\n", 8, 1, fp);
-  if (written < 8)
+  if (written < 1)
     perror_with_name (pathname);
 
   /* Write descriptive info.  */
@@ -2578,6 +2598,24 @@ trace_save (const char *filename, int target_does_save)
 	fprintf (fp, "tp S%x:%s:%s\n",
 		 utp->number, phex_nz (utp->addr, sizeof (utp->addr)),
 		 utp->step_actions[a]);
+      if (utp->at_string)
+	{
+	  encode_source_string (utp->number, utp->addr,
+				"at", utp->at_string, buf, MAX_TRACE_UPLOAD);
+	  fprintf (fp, "tp Z%s\n", buf);
+	}
+      if (utp->cond_string)
+	{
+	  encode_source_string (utp->number, utp->addr,
+				"cond", utp->cond_string, buf, MAX_TRACE_UPLOAD);
+	  fprintf (fp, "tp Z%s\n", buf);
+	}
+      for (cmd = utp->cmd_strings; cmd; cmd = cmd->next)
+	{
+	  encode_source_string (utp->number, utp->addr, "cmd", cmd->str,
+				buf, MAX_TRACE_UPLOAD);
+	  fprintf (fp, "tp Z%s\n", buf);
+	}
     }
 
   free_uploaded_tps (&uploaded_tps);
@@ -2597,14 +2635,14 @@ trace_save (const char *filename, int target_does_save)
       if (gotten == 0)
 	break;
       written = fwrite (buf, gotten, 1, fp);
-      if (written < gotten)
+      if (written < 1)
 	perror_with_name (pathname);
       offset += gotten;
     }
 
-  /* Mark the end of trace data.  */
+  /* Mark the end of trace data.  (We know that gotten is 0 at this point.)  */
   written = fwrite (&gotten, 4, 1, fp);
-  if (written < 4)
+  if (written < 1)
     perror_with_name (pathname);
 
   do_cleanups (cleanup);
@@ -3266,18 +3304,18 @@ Status line: '%s'\n"), p, line);
     }
 }
 
-/* Given a line of text defining a tracepoint or tracepoint action, parse
-   it into an "uploaded tracepoint".  */
+/* Given a line of text defining a part of a tracepoint, parse it into
+   an "uploaded tracepoint".  */
 
 void
 parse_tracepoint_definition (char *line, struct uploaded_tp **utpp)
 {
   char *p;
   char piece;
-  ULONGEST num, addr, step, pass, orig_size, xlen;
-  int enabled, i;
+  ULONGEST num, addr, step, pass, orig_size, xlen, start;
+  int enabled, i, end;
   enum bptype type;
-  char *cond;
+  char *cond, *srctype, *src, *buf;
   struct uploaded_tp *utp = NULL;
 
   p = line;
@@ -3318,7 +3356,7 @@ parse_tracepoint_definition (char *line, struct uploaded_tp **utpp)
 	      p += 2 * xlen;
 	    }
 	  else
-	    warning ("Unrecognized char '%c' in tracepoint definition, skipping rest", *p);
+	    warning (_("Unrecognized char '%c' in tracepoint definition, skipping rest"), *p);
 	}
       utp = get_uploaded_tp (num, addr, utpp);
       utp->type = type;
@@ -3337,9 +3375,49 @@ parse_tracepoint_definition (char *line, struct uploaded_tp **utpp)
       utp = get_uploaded_tp (num, addr, utpp);
       utp->step_actions[utp->num_step_actions++] = xstrdup (p);
     }
+  else if (piece == 'Z')
+    {
+      /* Parse a chunk of source form definition.  */
+      utp = get_uploaded_tp (num, addr, utpp);
+      srctype = p;
+      p = strchr (p, ':');
+      p++;  /* skip a colon */
+      p = unpack_varlen_hex (p, &start);
+      p++;  /* skip a colon */
+      p = unpack_varlen_hex (p, &xlen);
+      p++;  /* skip a colon */
+
+      buf = alloca (strlen (line));
+
+      end = hex2bin (p, (gdb_byte *) buf, strlen (p) / 2);
+      buf[end] = '\0';
+
+      if (strncmp (srctype, "at:", strlen ("at:")) == 0)
+	utp->at_string = xstrdup (buf);
+      else if (strncmp (srctype, "cond:", strlen ("cond:")) == 0)
+	utp->cond_string = xstrdup (buf);
+      else if (strncmp (srctype, "cmd:", strlen ("cmd:")) == 0)
+	{
+	  /* FIXME consider using a vector? */
+	  struct uploaded_string *last, *newlast;
+	  newlast = (struct uploaded_string *) xmalloc (sizeof (struct uploaded_string));
+	  newlast->str = xstrdup (buf);
+	  newlast->next = NULL;
+	  if (utp->cmd_strings)
+	    {
+	      for (last = utp->cmd_strings; last->next; last = last->next)
+		;
+	      last->next = newlast;
+	    }
+	  else
+	    utp->cmd_strings = newlast;
+	}
+    }
   else
     {
-      error ("Invalid tracepoint piece");
+      /* Don't error out, the target might be sending us optional
+	 info that we don't care about.  */
+      warning (_("Unrecognized tracepoint piece '%c', ignoring"), piece);
     }
 }
 

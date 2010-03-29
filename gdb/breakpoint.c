@@ -10305,6 +10305,26 @@ ftrace_command (char *arg, int from_tty)
     set_tracepoint_count (breakpoint_count);
 }
 
+/* Set up a fake reader function that gets command lines from a linked
+   list that was acquired during tracepoint uploading.  */
+
+static struct uploaded_tp *this_utp;
+static struct uploaded_string *next_cmd;
+
+static char *
+read_uploaded_action (void)
+{
+  char *rslt;
+
+  if (!next_cmd)
+    return NULL;
+
+  rslt = next_cmd->str;
+  next_cmd = next_cmd->next;
+
+  return rslt;
+}
+
 /* Given information about a tracepoint as recorded on a target (which
    can be either a live system or a trace file), attempt to create an
    equivalent GDB tracepoint.  This is not a reliable process, since
@@ -10314,15 +10334,31 @@ ftrace_command (char *arg, int from_tty)
 struct breakpoint *
 create_tracepoint_from_upload (struct uploaded_tp *utp)
 {
-  char buf[100];
+  char *addr_str, small_buf[100];
   struct breakpoint *tp;
 
-  /* In the absence of a source location, fall back to raw address.  */
-  sprintf (buf, "*%s", paddress (get_current_arch(), utp->addr));
+  if (utp->at_string)
+    addr_str = utp->at_string;
+  else
+    {
+      /* In the absence of a source location, fall back to raw
+	 address.  Since there is no way to confirm that the address
+	 means the same thing as when the trace was started, warn the
+	 user.  */
+      warning (_("Uploaded tracepoint %d has no source location, using raw address"),
+	       utp->number);
+      sprintf (small_buf, "*%s", hex_string (utp->addr));
+      addr_str = small_buf;
+    }
+
+  /* There's not much we can do with a sequence of bytecodes.  */
+  if (utp->cond && !utp->cond_string)
+    warning (_("Uploaded tracepoint %d condition has no source form, ignoring it"),
+	     utp->number);
 
   if (!create_breakpoint (get_current_arch (),
-			  buf,
-			  NULL, 0, 1 /* parse arg */,
+			  addr_str,
+			  utp->cond_string, -1, 0 /* parse cond/thread */,
 			  0 /* tempflag */,
 			  (utp->type == bp_fast_tracepoint) /* hardwareflag */,
 			  1 /* traceflag */,
@@ -10335,30 +10371,35 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
 
   set_tracepoint_count (breakpoint_count);
   
+  /* Get the tracepoint we just created.  */
   tp = get_tracepoint (tracepoint_count);
   gdb_assert (tp != NULL);
 
   if (utp->pass > 0)
     {
-      sprintf (buf, "%d %d", utp->pass, tp->number);
+      sprintf (small_buf, "%d %d", utp->pass, tp->number);
 
-      trace_pass_command (buf, 0);
+      trace_pass_command (small_buf, 0);
     }
 
-  if (utp->cond)
+  /* If we have uploaded versions of the original commands, set up a
+     special-purpose "reader" function and call the usual command line
+     reader, then pass the result to the breakpoint command-setting
+     function.  */
+  if (utp->cmd_strings)
     {
-      printf_filtered ("Want to restore a condition\n");
-    }
+      struct command_line *cmd_list;
 
-  if (utp->numactions > 0)
-    {
-      printf_filtered ("Want to restore action list\n");
-    }
+      this_utp = utp;
+      next_cmd = utp->cmd_strings;
 
-  if (utp->num_step_actions > 0)
-    {
-      printf_filtered ("Want to restore action list\n");
+      cmd_list = read_command_lines_1 (read_uploaded_action, 1, NULL, NULL);
+
+      breakpoint_set_commands (tp, cmd_list);
     }
+  else if (utp->numactions > 0 || utp->num_step_actions > 0)
+    warning (_("Uploaded tracepoint %d actions have no source form, ignoring them"),
+	     utp->number);
 
   return tp;
   }

@@ -1,5 +1,19 @@
 2010-03-29  Stan Shebs  <stan@codesourcery.com>
 
+	* tracepoint.h (struct uploaded_string): New struct.
+	(struct uploaded_tp): New fields for source strings.
+	* breakpoint.c (this_utp, next_cmd): New globals.
+	(read_uploaded_action): New function.
+	(create_tracepoint_from_upload): Fill in more parts
+	of a tracepoint.
+	* tracepoint.c (encode_source_string): New function.
+	(trace_save): Write out source strings, fix error checks.
+	(parse_tracepoint_definition): Add source string parsing.
+	* remote.c (PACKET_TracepointSource): New packet type.
+	(remote_download_command_source): New function.
+	(remote_download_tracepoint): Download source pieces also.
+	(_initialize_remote): Add packet config command.
+
 	* tracepoint.c (collect_symbol): Send LOC_UNRESOLVED symbols to
 	expression handler.
 

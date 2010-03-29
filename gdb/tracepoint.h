@@ -122,7 +122,14 @@ extern char *default_collect;
 
 /* Struct to collect random info about tracepoints on the target.  */
 
-struct uploaded_tp {
+struct uploaded_string
+{
+  char *str;
+  struct uploaded_string *next;
+};
+
+struct uploaded_tp
+{
   int number;
   enum bptype type;
   ULONGEST addr;
@@ -135,12 +142,23 @@ struct uploaded_tp {
   char *actions[100];
   int num_step_actions;
   char *step_actions[100];
+
+  /* The original string defining the location of the tracepoint.  */
+  char *at_string;
+
+  /* The original string defining the tracepoint's condition.  */
+  char *cond_string;
+
+  /* List of original strings defining the tracepoint's actions.  */
+  struct uploaded_string *cmd_strings;
+
   struct uploaded_tp *next;
 };
 
 /* Struct recording info about trace state variables on the target.  */
 
-struct uploaded_tsv {
+struct uploaded_tsv
+{
   const char *name;
   int number;
   LONGEST initial_value;
@@ -165,6 +183,10 @@ extern void while_stepping_pseudocommand (char *args, int from_tty);
 
 extern struct trace_state_variable *find_trace_state_variable (const char *name);
 extern struct trace_state_variable *create_trace_state_variable (const char *name);
+
+extern int encode_source_string (int num, ULONGEST addr,
+				 char *srctype, char *src,
+				 char *buf, int buf_size);
 
 extern void parse_trace_status (char *line, struct trace_status *ts);
 

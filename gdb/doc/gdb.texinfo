@@ -30732,6 +30732,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab No
 
+@item @samp{TracepointSource}
+@tab No
+@tab @samp{-}
+@tab No
+
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -30825,6 +30830,10 @@ The remote stub accepts and implements the reverse continue packet
 The remote stub accepts and implements the reverse step packet
 (@pxref{bs}).
 
+@item TracepointSource
+The remote stub understands the @samp{QTDPsrc} packet that supplies
+the source form of tracepoint definitions.
+
 @end table
 
 @item qSymbol::
@@ -30868,6 +30877,7 @@ encoded).  @value{GDBN} will continue to supply the values of symbols
 @item QTBuffer
 @item QTDisconnected
 @itemx QTDP
+@itemx QTDPsrc
 @itemx QTDV
 @itemx qTfP
 @itemx qTfV
@@ -31268,6 +31278,40 @@ The packet was understood and carried out.
 @item 
 The packet was not recognized.
 @end table
+
+@item QTDPsrc:@var{n}:@var{addr}:@var{type}:@var{start}:@var{slen}:@var{bytes}
+@cindex @samp{QTDPsrc} packet
+Specify a source string of tracepoint @var{n} at address @var{addr}.
+This is useful to get accurate reproduction of the tracepoints
+originally downloaded at the beginning of the trace run.  @var{type}
+is the name of the tracepoint part, such as @samp{cond} for the
+tracepoint's conditional expression (see below for a list of types), while
+@var{bytes} is the string, encoded in hexadecimal.
+
+@var{start} is the offset of the @var{bytes} within the overall source
+string, while @var{slen} is the total length of the source string.
+This is intended for handling source strings that are longer than will
+fit in a single packet.
+@c Add detailed example when this info is moved into a dedicated
+@c tracepoint descriptions section.
+
+The available string types are @samp{at} for the location,
+@samp{cond} for the conditional, and @samp{cmd} for an action command.
+@value{GDBN} sends a separate packet for each command in the action
+list, in the same order in which the commands are stored in the list.
+
+The target does not need to do anything with source strings except
+report them back as part of the replies to the @samp{qTfP}/@samp{qTsP}
+query packets.
+
+Although this packet is optional, and @value{GDBN} will only send it
+if the target replies with @samp{TracepointSource} @xref{General
+Query Packets}, it makes both disconnected tracing and trace files
+much easier to use.  Otherwise the user must be careful that the
+tracepoints in effect while looking at trace frames are identical to
+the ones in effect during the trace run; even a small discrepancy
+could cause @samp{tdump} not to work, or a particular trace frame not
+be found.
 
 @item QTDV:@var{n}:@var{value}
 @cindex define trace state variable, remote request
