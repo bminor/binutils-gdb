@@ -206,5 +206,10 @@ if ![runto_main] then {
 gdb_breakpoint [gdb_get_line_number "marker10 stop"]
 gdb_continue_to_breakpoint "marker10 stop"
 
+if { [test_compiler_info {gcc-[0-3]-*}] ||
+     [test_compiler_info {gcc-4-[0-3]-*}]} {
+    setup_xfail *-*-* 
+}
+
 # Assert that M::x is printed and not N::x
 gdb_test "print x" "= 911" "print x (from M::x)"

@@ -31,6 +31,10 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
     return -1
 }
 
+if [get_compiler_info ${binfile}] {
+    return -1
+}
+
 # Get things started.
 
 gdb_exit
@@ -84,5 +88,10 @@ gdb_test "print x" "= 55" "Print local x not namespace x"
 
 gdb_breakpoint [gdb_get_line_number "marker5"]
 gdb_continue_to_breakpoint "marker5"
+
+if { [test_compiler_info {gcc-[0-3]-*}] ||
+     [test_compiler_info {gcc-4-[0-3]-*}]} {
+    setup_xfail *-*-*
+}
 
 gdb_test "print x" "= 11" "Print imported namespace x"

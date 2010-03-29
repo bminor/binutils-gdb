@@ -1,3 +1,9 @@
+2010-03-29  Sami Wagiaalla  <swagiaal@redhat.com>
+
+	* gdb.cp/nsusing.exp: Marked imported declaration test as xfail with
+	gcc < 4.4.
+	* gdb.cp/shadow.exp: Ditto.
+
 2010-03-29  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.trace/collection.exp (run_trace_experiment): Make sure
