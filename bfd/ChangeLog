@@ -1,3 +1,7 @@
+2010-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf32-arm.c (using_thumb_only): Handle v6-M.
+
 2010-03-26  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_howto_raw <R_PPC_EMB_RELSDA>): Not pc-relative.

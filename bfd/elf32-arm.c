@@ -2985,6 +2985,9 @@ using_thumb_only (struct elf32_arm_link_hash_table *globals)
 				       Tag_CPU_arch);
   int profile;
 
+  if (arch == TAG_CPU_ARCH_V6_M || arch == TAG_CPU_ARCH_V6S_M)
+    return TRUE;
+
   if (arch != TAG_CPU_ARCH_V7 && arch != TAG_CPU_ARCH_V7E_M)
     return FALSE;
 

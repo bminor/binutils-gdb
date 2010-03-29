@@ -1,3 +1,7 @@
+2010-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-arm/arm-elf.exp (armeabitests): Add v6-M farcall test.
+
 2010-03-25  Joseph Myers  <joseph@codesourcery.com>
 
 	* ld-elf/flags1.d, ld-elf/merge.d: XFAIL for tic6x-*-*.
