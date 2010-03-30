@@ -2043,33 +2043,16 @@ trace_find_line_command (char *args, int from_tty)
       sals.sals[0] = sal;
     }
   else
-      {
+    {
       sals = decode_line_spec (args, 1);
       sal = sals.sals[0];
     }
   
   old_chain = make_cleanup (xfree, sals.sals);
   if (sal.symtab == 0)
-    {
-      printf_filtered ("TFIND: No line number information available");
-      if (sal.pc != 0)
-	{
-	  /* This is useful for "info line *0x7f34".  If we can't
-	     tell the user about a source line, at least let them
-	     have the symbolic address.  */
-	  printf_filtered (" for address ");
-	  wrap_here ("  ");
-	  print_address (get_current_arch (), sal.pc, gdb_stdout);
-	  printf_filtered (";\n -- will attempt to find by PC. \n");
-  	}
-        else
-  	{
-	  printf_filtered (".\n");
-	  return;		/* No line, no PC; what can we do?  */
-  	}
-    }
-  else if (sal.line > 0
-	   && find_line_pc_range (sal, &start_pc, &end_pc))
+    error (_("No line number information available."));
+
+  if (sal.line > 0 && find_line_pc_range (sal, &start_pc, &end_pc))
     {
       if (start_pc == end_pc)
   	{
