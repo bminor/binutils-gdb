@@ -74,9 +74,9 @@ gdb_test "break [gdb_get_line_number "first breakpoint here"]" \
 gdb_continue_to_breakpoint "continue to first breakpoint in main"
 
 for { set r 1 } { $r <= 6  } { incr r } {
-    set hex [format %x $r]
+    set hexr [format %x $r]
     gdb_test "print/x \$$dword_regs($r)" \
-	".. = 0x${hex}4${hex}3${hex}2${hex}1" \
+	".. = 0x${hexr}4${hexr}3${hexr}2${hexr}1" \
         "check contents of %$dword_regs($r)"
 }
 
@@ -86,9 +86,9 @@ gdb_test "break [gdb_get_line_number "second breakpoint here"]" \
 gdb_continue_to_breakpoint "continue to second breakpoint in main"
 
 for { set r 7 } { $r <= $nr_regs  } { incr r } {
-    set hex [format %x $r]
+    set hexr [format %x $r]
     gdb_test "print/x \$$dword_regs($r)" \
-	".. = 0x${hex}4${hex}3${hex}2${hex}1" \
+	".. = 0x${hexr}4${hexr}3${hexr}2${hexr}1" \
         "check contents of %$dword_regs($r)"
 }
 

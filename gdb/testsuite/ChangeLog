@@ -1,5 +1,9 @@
 2010-03-30  Doug Evans  <dje@google.com>
 
+	* gdb.arch/amd64-word.exp: Rename hex to hexr, the former is defined
+	by dejagnu.
+	* gdb.arch/amd64-dword.exp: Ditto.
+
 	* gdb.base/annota1.exp (break handle_USR1): Make fail and pass text
 	match.
 	(break printf): Ditto.
