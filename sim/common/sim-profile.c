@@ -1051,6 +1051,7 @@ profile_print_speed (sim_cpu *cpu)
     }
 }
 
+#ifdef SIM_HAVE_ADDR_RANGE
 /* Print selected address ranges.  */
 
 static void
@@ -1071,6 +1072,7 @@ profile_print_addr_ranges (sim_cpu *cpu)
       sim_io_printf (sd, "\n");
     }
 }
+#endif
 
 /* Top level function to print all summary profile information.
    It is [currently] intended that all such data is printed by this function.

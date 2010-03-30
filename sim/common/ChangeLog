@@ -1,5 +1,10 @@
 2010-03-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-profile.c (profile_print_addr_ranges): Wrap with the
+	SIM_HAVE_ADDR_RANGE define.
+
+2010-03-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* dv-glue.c (hw_glue_ports): Swap static and const.
 
 2010-03-30  Mike Frysinger  <vapier@gentoo.org>
