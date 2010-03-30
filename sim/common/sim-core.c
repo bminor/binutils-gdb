@@ -516,7 +516,7 @@ sim_core_read_buffer (SIM_DESC sd,
   unsigned count = 0;
   while (count < len)
  {
-    unsigned_word raddr = addr + count;
+    address_word raddr = addr + count;
     sim_core_mapping *mapping =
       sim_core_find_mapping (core, map,
 			    raddr, /*nr-bytes*/1,
@@ -582,7 +582,7 @@ sim_core_write_buffer (SIM_DESC sd,
   unsigned count = 0;
   while (count < len)
     {
-      unsigned_word raddr = addr + count;
+      address_word raddr = addr + count;
       sim_core_mapping *mapping =
 	sim_core_find_mapping (core, map,
 			       raddr, /*nr-bytes*/1,
