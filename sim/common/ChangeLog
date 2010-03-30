@@ -1,5 +1,10 @@
 2010-03-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-utils.c (sim_io_eprintf_cpu): Use %s with printf string.
+	* sim-hw.c (hw_option_handler): Likewise.
+
+2010-03-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-watch.c (watchpoint_type_to_str): Add const to return.
 	(interrupt_nr_to_str): Likewise.
 	(default_interrupt_names): Add const to pointer type.

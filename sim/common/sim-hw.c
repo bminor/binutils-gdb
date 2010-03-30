@@ -257,7 +257,7 @@ hw_option_handler (struct sim_state *sd, sim_cpu *cpu, int opt,
 
     case OPTION_HW_DEVICE:
       {
-	hw_tree_parse (STATE_HW (sd)->tree, arg);
+	hw_tree_parse (STATE_HW (sd)->tree, "%s", arg);
 	return SIM_RC_OK;
       }
 

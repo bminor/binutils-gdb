@@ -170,7 +170,7 @@ sim_io_eprintf_cpu (sim_cpu *cpu, const char *fmt, ...)
   va_list ap;
 
   va_start (ap, fmt);
-  sim_io_eprintf (sd, sim_cpu_msg_prefix (cpu));
+  sim_io_eprintf (sd, "%s", sim_cpu_msg_prefix (cpu));
   sim_io_evprintf (sd, fmt, ap);
   va_end (ap);
 }
