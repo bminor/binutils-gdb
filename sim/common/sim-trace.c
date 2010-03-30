@@ -233,7 +233,6 @@ trace_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 		      char *arg, int is_command)
 {
   int n;
-  int cpu_nr;
 
   switch (opt)
     {
@@ -353,6 +352,7 @@ trace_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
     case OPTION_TRACE_RANGE :
       if (WITH_TRACE)
 	{
+	  int cpu_nr;
 	  char *chp = arg;
 	  unsigned long start,end;
 	  start = strtoul (chp, &chp, 0);
