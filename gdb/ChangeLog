@@ -1,3 +1,7 @@
+2010-03-30  Ozkan Sezer  <sezeroz@gmail.com>
+
+	* serial.h: Include winsock2.h before windows.h.
+
 2010-03-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention xmlRegisters= in qSupported packet.

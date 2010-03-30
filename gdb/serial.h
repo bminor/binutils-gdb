@@ -21,6 +21,7 @@
 #define SERIAL_H
 
 #ifdef USE_WIN32API
+#include <winsock2.h>
 #include <windows.h>
 #endif
 
