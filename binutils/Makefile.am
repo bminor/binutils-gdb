@@ -478,6 +478,10 @@ EXTRA_DIST = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
 diststuff: $(EXTRA_DIST) info
 all: info
 
+# We extract version from bfd/configure.in, make sure to rerun configure
+# when BFD's version changes.
+CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/configure.in
+
 DISTCLEANFILES = sysroff.c sysroff.h site.exp site.bak
 
 MOSTLYCLEANFILES = sysinfo$(EXEEXT_FOR_BUILD) bin2c$(EXEEXT_FOR_BUILD) \
