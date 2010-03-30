@@ -1,5 +1,10 @@
 2010-03-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-core.h (device_error): Add const to message, and add printf
+	format attribute.
+
+2010-03-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-profile.c (profile_print_addr_ranges): Wrap with the
 	SIM_HAVE_ADDR_RANGE define.
 

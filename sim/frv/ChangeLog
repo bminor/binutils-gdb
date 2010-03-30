@@ -1,3 +1,7 @@
+2010-03-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* devices.c (device_error): Add const to message.
+
 2010-02-12  Doug Evans  <dje@sebabeach.org>
 
 	* decode.c, * decode.h: Regenerate.

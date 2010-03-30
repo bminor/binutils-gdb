@@ -102,6 +102,6 @@ device_io_write_buffer (device *me, const void *source, int space,
 }
 
 void
-device_error (device *me, char *message, ...)
+device_error (device *me, const char *message, ...)
 {
 }

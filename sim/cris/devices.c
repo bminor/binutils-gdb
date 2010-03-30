@@ -34,7 +34,7 @@ struct _device { char dummy; } cris_devices;
 
 void
 device_error (device *me ATTRIBUTE_UNUSED,
-	      char *message ATTRIBUTE_UNUSED,
+	      const char *message ATTRIBUTE_UNUSED,
 	      ...)
 {
   abort ();

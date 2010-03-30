@@ -1,3 +1,7 @@
+2010-03-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* devices.c (device_error): Add const to message.
+
 2010-02-11  Doug Evans  <dje@sebabeach.org>
 
 	* cpu.h, * cpu2.h, * cpux.h, * decode.c, * decode2.c, * decodex.c,
