@@ -218,10 +218,7 @@ sim_add_commas (char *buf, int sizeof_buf, unsigned long value)
    bfd open.  */
 
 SIM_RC
-sim_analyze_program (sd, prog_name, prog_bfd)
-     SIM_DESC sd;
-     char *prog_name;
-     bfd *prog_bfd;
+sim_analyze_program (SIM_DESC sd, char *prog_name, bfd *prog_bfd)
 {
   asection *s;
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
@@ -295,7 +292,7 @@ sim_analyze_program (sd, prog_name, prog_bfd)
 /* Called before sim_elapsed_time_since to get a reference point.  */
 
 SIM_ELAPSED_TIME
-sim_elapsed_time_get ()
+sim_elapsed_time_get (void)
 {
 #ifdef HAVE_GETRUSAGE
   struct rusage mytime;
@@ -315,8 +312,7 @@ sim_elapsed_time_get ()
    The actual time may be cpu usage (preferred) or wall clock.  */
 
 unsigned long
-sim_elapsed_time_since (start)
-     SIM_ELAPSED_TIME start;
+sim_elapsed_time_since (SIM_ELAPSED_TIME start)
 {
 #ifdef HAVE_GETRUSAGE
   return sim_elapsed_time_get () - start;

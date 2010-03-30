@@ -1,3 +1,15 @@
+2010-03-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* nrun.c (usage): Use void in definition.
+	* sim-options.c (dup_arg_p): Convert old-style function definition.
+	(sim_parse_args): Likewise.
+	(sim_print_help): Likewise.
+	* sim-trace.c (set_trace_option_mask): Likewise.
+	(set_trace_option): Likewise.
+	* sim-utils.c (sim_analyze_program): Likewise.
+	(sim_elapsed_time_get): Likewise.
+	(sim_elapsed_time_since): Likewise.
+
 2010-03-22  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim/common/sim-options.c (enum): Remove SIM_HAVE_BIENDIAN ifdef.

@@ -489,8 +489,7 @@ standard_install (SIM_DESC sd)
 #define ARG_HASH(a) ((256 * (unsigned char) a[0] + (unsigned char) a[1]) % ARG_HASH_SIZE)
 
 static int
-dup_arg_p (arg)
-     char *arg;
+dup_arg_p (char *arg)
 {
   int hash;
   static char **arg_table = NULL;
@@ -520,9 +519,7 @@ dup_arg_p (arg)
 /* Called by sim_open to parse the arguments.  */
 
 SIM_RC
-sim_parse_args (sd, argv)
-     SIM_DESC sd;
-     char **argv;
+sim_parse_args (SIM_DESC sd, char **argv)
 {
   int c, i, argc, num_opts;
   char *p, *short_options;
@@ -807,9 +804,7 @@ print_help (SIM_DESC sd, sim_cpu *cpu, const struct option_list *ol, int is_comm
 /* Print help messages for the options.  */
 
 void
-sim_print_help (sd, is_command)
-     SIM_DESC sd;
-     int is_command;
+sim_print_help (SIM_DESC sd, int is_command)
 {
   if (STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
     sim_io_printf (sd, "Usage: %s [options] program [program args]\n",

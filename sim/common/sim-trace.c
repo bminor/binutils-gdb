@@ -147,11 +147,7 @@ static const OPTION trace_options[] =
 /* Set/reset the trace options indicated in MASK.  */
 
 static SIM_RC
-set_trace_option_mask (sd, name, mask, arg)
-     SIM_DESC sd;
-     const char *name;
-     int mask;
-     const char *arg;
+set_trace_option_mask (SIM_DESC sd, const char *name, int mask, const char *arg)
 {
   int trace_nr;
   int cpu_nr;
@@ -226,11 +222,7 @@ set_trace_option_mask (sd, name, mask, arg)
 /* Set one trace option based on its IDX value.  */
 
 static SIM_RC
-set_trace_option (sd, name, idx, arg)
-     SIM_DESC sd;
-     const char *name;
-     int idx;
-     const char *arg;
+set_trace_option (SIM_DESC sd, const char *name, int idx, const char *arg)
 {
   return set_trace_option_mask (sd, name, 1 << idx, arg);
 }

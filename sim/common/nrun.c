@@ -219,7 +219,7 @@ main (int argc, char **argv)
 }
 
 static void
-usage ()
+usage (void)
 {
   fprintf (stderr, "Usage: %s [options] program [program args]\n", myname);
   fprintf (stderr, "Run `%s --help' for full list of options.\n", myname);
