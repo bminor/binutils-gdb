@@ -1,5 +1,13 @@
 2010-03-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-watch.c (watchpoint_type_to_str): Add const to return.
+	(interrupt_nr_to_str): Likewise.
+	(default_interrupt_names): Add const to pointer type.
+	(sim_watchpoint_install): Add const to prefix.
+	* sim-watch.h (struct _sim_watchpoints): Add const to interrupt_names.
+
+2010-03-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-core.c (sim_core_read_buffer): Change raddr to address_word.
 	(sim_core_write_buffer): Likewise.
 

@@ -63,7 +63,7 @@ typedef struct _sim_watchpoints {
   /* FIXME: can this be done better?  Look at the PPC's interrupt
      mechanism and table for a rough idea of where it will go next */
   int nr_interrupts;
-  char **interrupt_names;
+  const char **interrupt_names;
 
   /* active watchpoints */
   int last_point_nr;
