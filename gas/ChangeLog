@@ -1,3 +1,9 @@
+2010-03-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/11456
+	* input-scrub.c (input_scrub_next_buffer): Use memmove instead
+	of memcpy to copy overlap memory.
+
 2010-03-25  Joseph Myers  <joseph@codesourcery.com>
 
 	* Makefile.am (TARGET_CPU_CFILES): Add config/tc-tic6x.c.
