@@ -49,5 +49,10 @@ AC_CHECK_MEMBERS([[struct stat.st_dev], [struct stat.st_ino],
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif]])
+AC_CHECK_TYPES(socklen_t, [], [],
+[#include <sys/types.h>
+#include <sys/socket.h>
+])
+
 AC_OUTPUT(Makefile,
 [case x$CONFIG_HEADERS in xcconfig.h:config.in) echo > stamp-h ;; esac])

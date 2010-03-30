@@ -1,5 +1,11 @@
 2010-03-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Check for socklen_t.
+	* configure, config.in: Regenerated.
+	* dv-sockser.c (connected_p): Change addrlen type to socklen_t.
+
+2010-03-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-utils.c (sim_io_eprintf_cpu): Use %s with printf string.
 	* sim-hw.c (hw_option_handler): Likewise.
 

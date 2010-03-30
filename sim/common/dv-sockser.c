@@ -55,6 +55,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "dv-sockser.h"
 
+#ifndef HAVE_SOCKLEN_T
+typedef int socklen_t;
+#endif
+
 /* Get definitions for both O_NONBLOCK and O_NDELAY.  */
 
 #ifndef O_NDELAY
@@ -243,7 +247,7 @@ connected_p (SIM_DESC sd)
   struct timeval tv;
   fd_set readfds;
   struct sockaddr sockaddr;
-  int addrlen;
+  socklen_t addrlen;
 
   if (sockser_listen_fd == -1)
     return 0;

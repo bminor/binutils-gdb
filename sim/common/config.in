@@ -46,6 +46,9 @@
 /* Define to 1 if you have the `sigaction' function. */
 #undef HAVE_SIGACTION
 
+/* Define to 1 if the system has the type `socklen_t'. */
+#undef HAVE_SOCKLEN_T
+
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
 
@@ -58,43 +61,43 @@
 /* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
 
-/* Define to 1 if st_atime is a member of struct stat. */
+/* Define to 1 if `struct stat' is a member of `st_atime'. */
 #undef HAVE_STRUCT_STAT_ST_ATIME
 
-/* Define to 1 if st_blksize is a member of struct stat. */
+/* Define to 1 if `struct stat' is a member of `st_blksize'. */
 #undef HAVE_STRUCT_STAT_ST_BLKSIZE
 
-/* Define to 1 if st_blocks is a member of struct stat. */
+/* Define to 1 if `struct stat' is a member of `st_blocks'. */
 #undef HAVE_STRUCT_STAT_ST_BLOCKS
 
-/* Define to 1 if st_ctime is a member of struct stat. */
+/* Define to 1 if `struct stat' is a member of `st_ctime'. */
 #undef HAVE_STRUCT_STAT_ST_CTIME
 
-/* Define to 1 if st_dev is a member of struct stat. */
+/* Define to 1 if `struct stat' is a member of `st_dev'. */
 #undef HAVE_STRUCT_STAT_ST_DEV
 
-/* Define to 1 if st_gid is a member of struct stat. */
+/* Define to 1 if `struct stat' is a member of `st_gid'. */
 #undef HAVE_STRUCT_STAT_ST_GID
 
-/* Define to 1 if st_ino is a member of struct stat. */
+/* Define to 1 if `struct stat' is a member of `st_ino'. */
 #undef HAVE_STRUCT_STAT_ST_INO
 
-/* Define to 1 if st_mode is a member of struct stat. */
+/* Define to 1 if `struct stat' is a member of `st_mode'. */
 #undef HAVE_STRUCT_STAT_ST_MODE
 
-/* Define to 1 if st_mtime is a member of struct stat. */
+/* Define to 1 if `struct stat' is a member of `st_mtime'. */
 #undef HAVE_STRUCT_STAT_ST_MTIME
 
-/* Define to 1 if st_nlink is a member of struct stat. */
+/* Define to 1 if `struct stat' is a member of `st_nlink'. */
 #undef HAVE_STRUCT_STAT_ST_NLINK
 
-/* Define to 1 if st_rdev is a member of struct stat. */
+/* Define to 1 if `struct stat' is a member of `st_rdev'. */
 #undef HAVE_STRUCT_STAT_ST_RDEV
 
-/* Define to 1 if st_size is a member of struct stat. */
+/* Define to 1 if `struct stat' is a member of `st_size'. */
 #undef HAVE_STRUCT_STAT_ST_SIZE
 
-/* Define to 1 if st_uid is a member of struct stat. */
+/* Define to 1 if `struct stat' is a member of `st_uid'. */
 #undef HAVE_STRUCT_STAT_ST_UID
 
 /* Define to 1 if you have the <sys/mman.h> header file. */
