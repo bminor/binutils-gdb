@@ -1,3 +1,8 @@
+2010-03-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c (interrupt_names): Add const to pointer type.
+	(do_interrupt): Add const to interrupt_name.
+
 2010-01-09  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.

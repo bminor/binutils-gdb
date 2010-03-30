@@ -48,7 +48,7 @@ enum interrupt_type
   num_int_types
 };
 
-char *interrupt_names[] = {
+const char *interrupt_names[] = {
   "reset",
   "nmi",
   "intov1",
@@ -65,7 +65,7 @@ do_interrupt (sd, data)
      SIM_DESC sd;
      void *data;
 {
-  char **interrupt_name = (char**)data;
+  const char **interrupt_name = (const char**)data;
   enum interrupt_type inttype;
   inttype = (interrupt_name - STATE_WATCHPOINTS (sd)->interrupt_names);
 
