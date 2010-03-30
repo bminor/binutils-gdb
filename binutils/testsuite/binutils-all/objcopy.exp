@@ -583,7 +583,7 @@ proc copy_executable { prog flags test1 test2 } {
 	setup_xfail "arm*-*-pe"
 	setup_xfail "thumb*-*-coff"
 	setup_xfail "thumb*-*-pe"
-	setup_xfail "x86_64-*-mingw*"
+	setup_xfail "*-*-mingw*"
 	setup_xfail "*-*-cygwin*"
     
 	fail $test1

@@ -1,3 +1,8 @@
+2010-03-30  Kai TIetz  <kai.tietz@onevision.com>
+
+	* binutils-all/objcopy.exp: Mark simple copy executable
+	as failing for all *-*-mingw32* targets.
+
 2010-03-26  Matt Rice  <ratmice@gmail.com>
 
 	* binutils-all/ar.exp (unique_symbol): New test.
