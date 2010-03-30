@@ -66,6 +66,7 @@ extern void (*deprecated_target_wait_loop_hook) (void);
 
 void register_remote_g_packet_guess (struct gdbarch *gdbarch, int bytes,
 				     const struct target_desc *tdesc);
+void register_remote_support_xml (const char *);
 
 void remote_file_put (const char *local_file, const char *remote_file,
 		      int from_tty);

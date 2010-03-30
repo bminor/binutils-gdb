@@ -44,6 +44,7 @@
 #include "value.h"
 #include "dis-asm.h"
 #include "disasm.h"
+#include "remote.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -6000,4 +6001,7 @@ is \"default\"."),
 
   /* Initialize the standard target descriptions.  */
   initialize_tdesc_i386 ();
+
+  /* Tell remote stub that we support XML target description.  */
+  register_remote_support_xml ("i386");
 }

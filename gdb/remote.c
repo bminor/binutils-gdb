@@ -3467,6 +3467,53 @@ static struct protocol_feature remote_protocol_features[] = {
     PACKET_TracepointSource },
 };
 
+static char *remote_support_xml;
+
+/* Register string appended to "xmlRegisters=" in qSupported query.  */
+
+void
+register_remote_support_xml (const char *xml ATTRIBUTE_UNUSED)
+{
+#if defined(HAVE_LIBEXPAT)
+  if (remote_support_xml == NULL)
+    remote_support_xml = concat ("xmlRegisters=", xml, NULL);
+  else
+    {
+      char *copy = xstrdup (remote_support_xml + 13);
+      char *p = strtok (copy, ",");
+
+      do
+	{
+	  if (strcmp (p, xml) == 0)
+	    {
+	      /* already there */
+	      xfree (copy);
+	      return;
+	    }
+	}
+      while ((p = strtok (NULL, ",")) != NULL);
+      xfree (copy);
+
+      p = concat (remote_support_xml, ",", xml, NULL);
+      xfree (remote_support_xml);
+      remote_support_xml = p;
+    }
+#endif
+}
+
+static char *
+remote_query_supported_append (char *msg, const char *append)
+{
+  if (msg)
+    {
+      char *p = concat (msg, ";", append, NULL);
+      xfree (msg);
+      return p;
+    }
+  else
+    return xstrdup (append);
+}
+
 static void
 remote_query_supported (void)
 {
@@ -3485,24 +3532,27 @@ remote_query_supported (void)
   rs->buf[0] = 0;
   if (remote_protocol_packets[PACKET_qSupported].support != PACKET_DISABLE)
     {
+      char *q = NULL;
       const char *qsupported = gdbarch_qsupported (target_gdbarch);
+
+      if (rs->extended)
+	q = remote_query_supported_append (q, "multiprocess+");
+      
       if (qsupported)
+	q = remote_query_supported_append (q, qsupported);
+
+      if (remote_support_xml)
+	q = remote_query_supported_append (q, remote_support_xml);
+
+      if (q)
 	{
-	  char *q;
-	  if (rs->extended)
-	    q = concat ("qSupported:multiprocess+;", qsupported, NULL);
-	  else
-	    q = concat ("qSupported:", qsupported, NULL);
-	  putpkt (q);
+	  char *p = concat ("qSupported:", q, NULL);
 	  xfree (q);
+	  putpkt (p);
+	  xfree (p);
 	}
       else
-	{
-	  if (rs->extended)
-	    putpkt ("qSupported:multiprocess+");
-	  else
-	    putpkt ("qSupported");
-	}
+	putpkt ("qSupported");
 
       getpkt (&rs->buf, &rs->buf_size, 0);
 

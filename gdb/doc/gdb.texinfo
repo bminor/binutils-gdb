@@ -30633,6 +30633,12 @@ extensions to the remote protocol.  @value{GDBN} does not use such
 extensions unless the stub also reports that it supports them by
 including @samp{multiprocess+} in its @samp{qSupported} reply.
 @xref{multiprocess extensions}, for details.
+
+@item xmlRegisters
+This feature indicates that @value{GDBN} supports the XML target
+description.  If the stub sees @samp{xmlRegisters=} with target
+specific strings separated by a comma, it will report register
+description.
 @end table
 
 Stubs should ignore any unknown values for

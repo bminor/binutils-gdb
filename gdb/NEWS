@@ -3,6 +3,9 @@
 
 *** Changes since GDB 7.1
 
+* GDB now sends xmlRegisters= in qSupported packet to indicate that
+  it understands register description.
+
 * The --batch flag now disables pagination and queries.
 
 * X86 general purpose registers

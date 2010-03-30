@@ -1,3 +1,7 @@
+2010-03-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gdb.texinfo (General Query Packets): Add xmlRegisters.
+
 2010-03-29  Stan Shebs  <stan@codesourcery.com>
 	    Nathan Sidwell  <nathan@codesourcery.com>
 
@@ -16,8 +20,8 @@
 
 2010-03-27  Matt Rice  <ratmice@gmail.com>
 
-        * gdb.texinfo (ARM): Document arguments to "target sim".
-        (Set Catchpoints): Use @dots{} instead of @r{...}.
+	* gdb.texinfo (ARM): Document arguments to "target sim".
+	(Set Catchpoints): Use @dots{} instead of @r{...}.
 
 2010-03-26  Pedro Alves  <pedro@codesourcery.com>
 
@@ -88,7 +92,7 @@
 	description to read_var text.
 
 2010-02-26  Phil Muldoon  <pmuldoon@redhat.com>
-            Tom Tromey  <tromey@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Types In Python): Describe block argument in
 	template_argument and gdb.lookup_type.
@@ -362,7 +366,7 @@
 2009-10-27  Tom Tromey <tromey@redhat.com>
 	    Eli Zaretskii <eliz@gnu.org>
 
-        PR python/10781
+	PR python/10781
 
 	* gdb.texinfo (Values From Inferior): Document cast method.
 
@@ -521,8 +525,8 @@
 
 2009-08-05  Jeremy Bennett  <jeremy.bennett@embecosm.com>
 
-        * gdb.texinfo (Separate Debug Files, Remote Protocol): Clarified
-        CRC definitions.
+	* gdb.texinfo (Separate Debug Files, Remote Protocol): Clarified
+	CRC definitions.
 
 2009-08-03  Vladimir Prus  <vladimir@codesourcery.com>
 
@@ -714,7 +718,7 @@
 	Add index entries.
 
 2009-04-30  Hui Zhu  <teawater@gmail.com>
-            Michael Snyder  <msnyder@vmware.com>
+	    Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.texinfo: (Process Record and Replay): Add documentation for
 	process record and replay.
@@ -778,7 +782,7 @@
 	* gdb.texinfo (Source Path): Document --with-relocated-sources.
 
 2009-04-18  Carlos O'Donell  <carlos@codesourcery.com>
-            Joseph Myers  <joseph@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
 
 	* Makefile.in (MAKEHTML): Set to makeinfo --html.
 	(MAKEHTMLFLAGS): Set to empty.
@@ -1041,7 +1045,7 @@
 	* gdb.texinfo (Define, Hooks): Document prefix command support.
 
 2009-01-14  Joseph Myers  <joseph@codesourcery.com>
-            Carlos O'Donell  <carlos@codesourcery.com>
+	    Carlos O'Donell  <carlos@codesourcery.com>
 
 	Fixes for makeinfo --html.
 
@@ -1106,24 +1110,24 @@
 
 	MI non-stop and multiprocess docs.
 
-        * gdb.texinfo (GDB/MI): New section 'GDB/MI General Design'
-        (GDB/MI Output Records): New section 'GDB/MI Frame Information'
-        Adjust documentation for *stopped, document =thread-created,
-        =thread-exited, =thread-group-created and =thread-group-exited.
-        (GDB/MI Thread Commands): Document the 'state' field in
-        -thread-info output.
-        (GDB/MI Program Execution): Mention --all and --thread-group
-        options.
-        (GDB/MI Variable Objects): Describe floating and fixed variable
-        objects.
-        (GDB/MI Miscellaneous Commands): Document -list-thread-groups.
+	* gdb.texinfo (GDB/MI): New section 'GDB/MI General Design'
+	(GDB/MI Output Records): New section 'GDB/MI Frame Information'
+	Adjust documentation for *stopped, document =thread-created,
+	=thread-exited, =thread-group-created and =thread-group-exited.
+	(GDB/MI Thread Commands): Document the 'state' field in
+	-thread-info output.
+	(GDB/MI Program Execution): Mention --all and --thread-group
+	options.
+	(GDB/MI Variable Objects): Describe floating and fixed variable
+	objects.
+	(GDB/MI Miscellaneous Commands): Document -list-thread-groups.
 
 2008-12-02  Vladimir Prus  <vladimir@codesourcery.com>
 
-        * gdb.texinfo (Operating System Information): New appendix.
-        (Operating System Auxiliary Information): Document 'info os processes'
-        (Remote Configuration): Document 'osdata'
-        (General Query Packets): Document qXfer:osdata:read.
+	* gdb.texinfo (Operating System Information): New appendix.
+	(Operating System Auxiliary Information): Document 'info os processes'
+	(Remote Configuration): Document 'osdata'
+	(General Query Packets): Document qXfer:osdata:read.
 
 2008-11-27  Tristan Gingold  <gingold@adacore.com>
 
@@ -1152,11 +1156,11 @@
 2008-11-17  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Async Records): Document
-        =thread-selected.
+	=thread-selected.
 	
 2008-11-17  Vladimir Prus  <vladimir@codesourcery.com>
 
-        * observer.texi (new_inferior, inferior_exit): New observers.
+	* observer.texi (new_inferior, inferior_exit): New observers.
 
 2008-10-27  Pedro Alves  <pedro@codesourcery.com>
 
@@ -1278,12 +1282,12 @@
 
 2008-08-20  Vladimir Prus  <vladimir@codesourcery.com>
 
-        * gdb.textinfo (GDB/MI Miscellaneous Commands): Use @table
-        for possible features of -list-features.
+	* gdb.textinfo (GDB/MI Miscellaneous Commands): Use @table
+	for possible features of -list-features.
 
 2008-08-19  Vladimir Prus  <vladimir@codesourcery.com>
 
-        * gdb.texinfo (Background execution): Adjust example
+	* gdb.texinfo (Background execution): Adjust example
 	(GDB/MI Miscellaneous Commands): Document -list-target-features.
 
 2008-08-19  Vladimir Prus  <vladimir@codesourcery.com>

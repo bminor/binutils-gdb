@@ -1,3 +1,17 @@
+2010-03-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention xmlRegisters= in qSupported packet.
+
+	* i386-tdep.c: Include "remote.h".
+	(_initialize_i386_tdep): Call register_remote_support_xml.
+
+	* remote.c (remote_support_xml): New.
+	(register_remote_support_xml): Likewise.
+	(remote_query_supported_append): Likewise.
+	(remote_query_supported): Support remote_support_xml.
+
+	* remote.h (register_remote_support_xml): New.
+
 2010-03-29  Stan Shebs  <stan@codesourcery.com>
 
 	* tracepoint.c (trace_find_line_command): Remove dead code.
@@ -1033,23 +1047,23 @@
 	(gnu_v3_print_method_ptr): Use the physname for virtual methods
 	without a demangled name.
 	Print out type information for non-virtual methods.
-        * linespec.c (decode_line_1): Force ANY string using "::" (or
+	* linespec.c (decode_line_1): Force ANY string using "::" (or
 	"." for java) to use decode_compound, and clean up any stray quoting.
-        If we found a file symtab, re-evaluate whether the remainder is_quoted.
-        (decode_compound): Stop consuming at an open parenthesis.
-        Keep template parameters.
-        Keep any overload information.
-        Keep keywords like "const".
-        Remove paren_pointer.
-        Move is_quoted check from set_flags to here.
-        Remove #if 0 code from 2000. Ten years is long enough.
-        (find_method): Before comparing symbol names, canonicalize the string
-        from the user.
-        If a specific overload is requested, find it. Otherwise throw an error.
+	If we found a file symtab, re-evaluate whether the remainder is_quoted.
+	(decode_compound): Stop consuming at an open parenthesis.
+	Keep template parameters.
+	Keep any overload information.
+	Keep keywords like "const".
+	Remove paren_pointer.
+	Move is_quoted check from set_flags to here.
+	Remove #if 0 code from 2000. Ten years is long enough.
+	(find_method): Before comparing symbol names, canonicalize the string
+	from the user.
+	If a specific overload is requested, find it. Otherwise throw an error.
 	(find_method_overload_end): New function.
 	(set_flags): Remove.
-        (decode_compound): Assume that parentheses are matched.
-        It's a lot easier.
+	(decode_compound): Assume that parentheses are matched.
+	It's a lot easier.
 	* symtab.c (symbol_find_demangled_name): Add DMGL_VERBOSE flag
 	to cplus_demangle.
 	* linespec.c (decode_line_1): Keep important keywords like
@@ -1214,7 +1228,7 @@
 2010-03-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* remote.c (remote_get_ada_task_ptid): New function.
-        (init_remote_ops): Set remote_ops.to_get_ada_task_ptid.
+	(init_remote_ops): Set remote_ops.to_get_ada_task_ptid.
 
 2010-03-06  Christopher Faylor  <me+cygwin@cgf.cx>
 
@@ -1307,7 +1321,7 @@
 	address as UnsignedLongLong, not LongLong.
 
 2010-03-05  Kevin Buettner  <kevinb@redhat.com>
-            Pedro Alves  <pedro@codesourcery.com>
+	    Pedro Alves  <pedro@codesourcery.com>
 
 	* remote-mips.c (gdbthread.h): Include.
 	(remote_mips_ptid): Declare.
@@ -1697,7 +1711,7 @@
 	GDB's gdbarch_addr_bit as size of values on the DWARF stack.
 
 2010-02-26  Phil Muldoon  <pmuldoon@redhat.com>
-            Tom Tromey  <tromey@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
 
 	* python/py-type.c (typy_lookup_typename): Add in block argument.
 	If provided restrict lookup to specified blocks.
@@ -2672,8 +2686,8 @@ Mon Feb  8 13:17:10 2010  Chris Moller  <moller@mollerware.com>
 
 2010-01-25  gingold  <gingold@adacore.com>
 
-        * windows-nat.c (windows_continue): Use %x to print thread id.
-        (get_windows_debug_event): Ditto.
+	* windows-nat.c (windows_continue): Use %x to print thread id.
+	(get_windows_debug_event): Ditto.
 
 2010-01-22  Tom Tromey  <tromey@redhat.com>
 
@@ -3704,7 +3718,7 @@ Mon Feb  8 13:17:10 2010  Chris Moller  <moller@mollerware.com>
 
 2010-01-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
-        * features/Makefile (WHICH): Add s390-linux32, s390-linux64,
+	* features/Makefile (WHICH): Add s390-linux32, s390-linux64,
 	and s390x-linux64.
 	(s390-linux32-expedite): Define.
 	(s390-linux64-expedite): Define.
