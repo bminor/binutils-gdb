@@ -1,3 +1,12 @@
+2010-03-30  Pedro Alves  <pedro@codesourcery.com>
+
+	* tui/tui-interp.c (tui_is_toplevel): New.
+	(tui_init): Set it.
+	(tui_allowed_p): New.
+	* tui/tui.c (tui_enable): Check if the TUI is allowed before
+	enabling it.
+	* tui/tui.h (tui_allowed_p): Declare.
+
 2010-03-30  Ozkan Sezer  <sezeroz@gmail.com>
 
 	* serial.h: Include winsock2.h before windows.h.

@@ -364,6 +364,9 @@ tui_initialize_readline (void)
 void
 tui_enable (void)
 {
+  if (!tui_allowed_p ())
+    error (_("TUI mode not allowed"));
+
   if (tui_active)
     return;
 

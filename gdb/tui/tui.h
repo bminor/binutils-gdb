@@ -65,6 +65,10 @@ extern int tui_get_command_dimension (unsigned int *width,
    key shortcut.  */
 extern void tui_initialize_readline (void);
 
+/* True if enabling the TUI is allowed.  Example, if the top level
+   interpreter is MI, enabling curses will certainly lose.  */
+extern int tui_allowed_p (void);
+
 /* Enter in the tui mode (curses).  */
 extern void tui_enable (void);
 
