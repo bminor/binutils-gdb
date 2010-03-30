@@ -1,3 +1,9 @@
+2010-03-30  Doug Evans  <dje@google.com>
+
+	* gdb.base/annota1.exp (break handle_USR1): Make fail and pass text
+	match.
+	(break printf): Ditto.
+
 2010-03-29  Sami Wagiaalla  <swagiaal@redhat.com>
 
 	* gdb.cp/nsusing.exp: Marked imported declaration test as xfail with

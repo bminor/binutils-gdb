@@ -218,9 +218,9 @@ gdb_expect {
 send_gdb "break handle_USR1\n"
 gdb_expect {
   -re  "\r\n\032\032post-prompt\r\n\r\n\032\032breakpoints-invalid\r\nBreakpoint.*at $hex: file.*$srcfile, line.*\r\n$gdb_prompt$" \
-	    { pass "breakpoint handle_USR1" }
-  -re ".*$gdb_prompt$"     { fail "break at handle_USR1" }
-  timeout	            { fail "break at handle_USR1 (timeout)" }
+	    { pass "break handle_USR1" }
+  -re ".*$gdb_prompt$"     { fail "break handle_USR1" }
+  timeout	            { fail "break handle_USR1 (timeout)" }
 }
 
 #
@@ -229,9 +229,9 @@ gdb_expect {
 send_gdb "break printf\n"
 gdb_expect {
   -re  "\r\n\032\032post-prompt\r\n\r\n\032\032breakpoints-invalid\r\nBreakpoint.*at $hex.*$gdb_prompt$" \
-	    { pass "breakpoint printf" }
+	    { pass "break printf" }
   -re  "\r\n\032\032post-prompt\r\nwarning: Breakpoint address adjusted from $hex to $hex.\r\n\r\n\032\032breakpoints-invalid\r\nBreakpoint.*at $hex.*$gdb_prompt$" \
-	    { pass "breakpoint printf"}
+	    { pass "break printf" }
   -re ".*$gdb_prompt$"     { fail "break printf" }
   timeout	            { fail "break printf (timeout)" }
 }
