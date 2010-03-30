@@ -1,3 +1,8 @@
+2010-03-31  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/cris.exp (loop over $srcdir/$subdir/*dso-*.d): Apply
+	"file rootname", not "file tail", before applying runtest_file_p.
+
 2010-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ld-arm/arm-elf.exp (armeabitests): Add v6-M farcall test.
