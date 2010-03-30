@@ -1,5 +1,9 @@
 2010-03-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* dv-glue.c (hw_glue_ports): Swap static and const.
+
+2010-03-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* nrun.c (usage): Use void in definition.
 	* sim-options.c (dup_arg_p): Convert old-style function definition.
 	(sim_parse_args): Likewise.

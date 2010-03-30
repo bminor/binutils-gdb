@@ -186,7 +186,7 @@ struct hw_glue {
 static hw_io_read_buffer_method hw_glue_io_read_buffer;
 static hw_io_write_buffer_method hw_glue_io_write_buffer;
 static hw_port_event_method hw_glue_port_event;
-const static struct hw_port_descriptor hw_glue_ports[];
+static const struct hw_port_descriptor hw_glue_ports[];
 
 static void
 hw_glue_finish (struct hw *me)
