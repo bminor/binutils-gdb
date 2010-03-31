@@ -1,3 +1,10 @@
+2010-03-31  Stan Shebs  <stan@codesourcery.com>
+
+	* breakpoint.c (tracepoint_save_command): Include variables,
+ 	conditionals, tracepoint types, and default-collect.
+	* tracepoint.c (save_trace_state_variables): New function.
+	* tracepoint.h (save_trace_state_variables): Declare it.
+
 2010-03-31  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* src/gdb/remote.c (end_thread): ARI fix: Use xstrdup instead of strdup.

@@ -10649,16 +10649,28 @@ tracepoint_save_command (char *args, int from_tty)
     error (_("Unable to open file '%s' for saving tracepoints (%s)"),
 	   args, safe_strerror (errno));
   make_cleanup_ui_file_delete (fp);
-  
+
+  save_trace_state_variables (fp);
+
   ALL_TRACEPOINTS (tp)
   {
+    if (tp->type == bp_fast_tracepoint)
+      fprintf_unfiltered (fp, "ftrace");
+    else
+      fprintf_unfiltered (fp, "trace");
+
     if (tp->addr_string)
-      fprintf_unfiltered (fp, "trace %s\n", tp->addr_string);
+      fprintf_unfiltered (fp, " %s", tp->addr_string);
     else
       {
 	sprintf_vma (tmp, tp->loc->address);
-	fprintf_unfiltered (fp, "trace *0x%s\n", tmp);
+	fprintf_unfiltered (fp, " *0x%s", tmp);
       }
+
+    if (tp->cond_string)
+      fprintf_unfiltered (fp, " if %s", tp->cond_string);
+
+    fprintf_unfiltered (fp, "\n");
 
     if (tp->pass_count)
       fprintf_unfiltered (fp, "  passcount %d\n", tp->pass_count);
@@ -10682,6 +10694,10 @@ tracepoint_save_command (char *args, int from_tty)
 	fprintf_unfiltered (fp, "  end\n");
       }
   }
+
+  if (*default_collect)
+    fprintf_unfiltered (fp, "set default-collect %s\n", default_collect);
+
   do_cleanups (cleanup);
   if (from_tty)
     printf_filtered (_("Tracepoints saved to file '%s'.\n"), args);

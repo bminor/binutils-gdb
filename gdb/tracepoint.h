@@ -207,6 +207,7 @@ extern void stop_tracing (void);
 extern void trace_status_mi (int on_stop);
 
 extern void tvariables_info_1 (void);
+extern void save_trace_state_variables (struct ui_file *fp);
 
 extern void tfind_1 (enum trace_find_type type, int num,
 		     ULONGEST addr1, ULONGEST addr2,

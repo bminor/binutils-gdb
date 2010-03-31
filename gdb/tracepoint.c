@@ -479,6 +479,23 @@ tvariables_info (char *args, int from_tty)
   tvariables_info_1 ();
 }
 
+/* Stash definitions of tsvs into the given file.  */
+
+void
+save_trace_state_variables (struct ui_file *fp)
+{
+  struct trace_state_variable *tsv;
+  int ix;
+
+  for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
+    {
+      fprintf_unfiltered (fp, "tvariable $%s", tsv->name);
+      if (tsv->initial_value)
+	fprintf_unfiltered (fp, " = %s", plongest (tsv->initial_value));
+      fprintf_unfiltered (fp, "\n");
+    }
+}
+
 /* ACTIONS functions: */
 
 /* The three functions:
