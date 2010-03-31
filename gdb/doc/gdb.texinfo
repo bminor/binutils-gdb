@@ -21653,6 +21653,12 @@ These commands are always available, even when @value{GDBN} is not in
 the TUI mode.  When @value{GDBN} is in the standard mode, most
 of these commands will automatically switch to the TUI mode.
 
+Note that if @value{GDBN}'s @code{stdout} is not connected to a
+terminal, or @value{GDBN} has been started with the machine interface
+interpreter (@pxref{GDB/MI, ,The @sc{gdb/mi} Interface}), most of
+these commands will fail with an error, because it would not be
+possible or desirable to enable curses window management.
+
 @table @code
 @item info win
 @kindex info win
