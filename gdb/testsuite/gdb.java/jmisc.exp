@@ -79,11 +79,8 @@ if ![set_lang_java] then {
     gdb_expect {   
 	-re "type = class jmisc  extends java.lang.Object \{\[\r\n\ \t]+void main\\(java\.lang\.String\\\[]\\);\[\r\n\ \t]+jmisc\\(\\);\[\r\n\ \t]+\}\[\r\n\ \t]+$gdb_prompt $"
 	    { pass "ptype jmisc" }
-	-re "type = class jmisc  extends java.lang.Object \{\[\r\n\ \t]+void main\\(java\.lang\.String\\\[]\\)void;\[\r\n\ \t]+jmisc\\(\\);\[\r\n\ \t]+\}\[\r\n\ \t]+$gdb_prompt $" {
-	    # Just because GCC includes the signature doesn't mean we
-	    # should print it here.  We already show the return type.
-	    kfail "ptype jmisc" gdb/2215
-	}
+	-re "type = class jmisc  extends java.lang.Object \{\[\r\n\ \t]+jmisc\\(\\);\[\r\n\ \t]+void main\\(java\.lang\.String\\\[]\\);\[\r\n\ \t]+\}\[\r\n\ \t]+$gdb_prompt $"
+	    { pass "ptype jmisc" }
 	-re ".*$gdb_prompt $"             { fail "ptype jmisc" }
 	timeout { fail "ptype jmisc (timeout)" ; return }
     }

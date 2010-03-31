@@ -1,3 +1,9 @@
+2010-03-26  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.java/jmisc.exp (ptype jmisc): Allow the constructor to
+	appear in the output before main.
+	Remove KFAIL for gdb/2215 aka bz 9320.
+
 2010-03-30  Doug Evans  <dje@google.com>
 
 	* gdb.arch/amd64-word.exp: Rename hex to hexr, the former is defined
