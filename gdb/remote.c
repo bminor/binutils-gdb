@@ -2450,7 +2450,7 @@ end_thread (struct gdb_xml_parser *parser,
   struct threads_parsing_context *data = user_data;
 
   if (body_text && *body_text)
-    VEC_last (thread_item_t, data->items)->extra = strdup (body_text);
+    VEC_last (thread_item_t, data->items)->extra = xstrdup (body_text);
 }
 
 const struct gdb_xml_attribute thread_attributes[] = {
