@@ -1,3 +1,18 @@
+2010-03-31  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR ld/11458
+	* elf32-cris.c (elf_cris_copy_indirect_symbol): Remove invalid
+	assert of empty pcrel_relocs_copied on the direct symbol.  Instead
+	of moving the list from the indirect symbol to the direct symbol,
+	merge into any existing list.
+	(cris_elf_check_relocs): Store the original section in the
+	pcrel_relocs_copied list, not the relocation section.
+	(elf_cris_discard_excess_dso_dynamics): Adjust accordingly to find
+	the relocation section, for reducing its size.  Change the
+	BFD_ASSERT into a check for the section being read-only, and only
+	emit warnings and TEXTREL marker when there's an entry for a
+	read-only section.
+
 2010-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf32-arm.c (using_thumb_only): Handle v6-M.
