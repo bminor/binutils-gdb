@@ -5938,13 +5938,14 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
   
   if (die->child != NULL)
     {
+      struct type *void_type = objfile_type (cu->objfile)->builtin_void;
       struct die_info *child_die;
-      int nparams = 0;
-      int iparams = 0;
+      int nparams, iparams;
 
       /* Count the number of parameters.
          FIXME: GDB currently ignores vararg functions, but knows about
          vararg member functions.  */
+      nparams = 0;
       child_die = die->child;
       while (child_die && child_die->tag)
 	{
@@ -5960,6 +5961,12 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
       TYPE_FIELDS (ftype) = (struct field *)
 	TYPE_ZALLOC (ftype, nparams * sizeof (struct field));
 
+      /* TYPE_FIELD_TYPE must never be NULL.  Pre-fill the array to ensure it
+	 even if we error out during the parameters reading below.  */
+      for (iparams = 0; iparams < nparams; iparams++)
+	TYPE_FIELD_TYPE (ftype, iparams) = void_type;
+
+      iparams = 0;
       child_die = die->child;
       while (child_die && child_die->tag)
 	{
