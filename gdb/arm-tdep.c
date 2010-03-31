@@ -2959,19 +2959,29 @@ thumb_get_next_pc_raw (struct frame_info *frame, CORE_ADDR pc, int insert_bkpt)
       else if ((inst1 & 0xfff0) == 0xe8d0 && (inst2 & 0xfff0) == 0xf000)
 	{
 	  /* TBB.  */
-	  CORE_ADDR table, offset, length;
+	  CORE_ADDR tbl_reg, table, offset, length;
 
-	  table = get_frame_register_unsigned (frame, bits (inst1, 0, 3));
+	  tbl_reg = bits (inst1, 0, 3);
+	  if (tbl_reg == 0x0f)
+	    table = pc + 4;  /* Regcache copy of PC isn't right yet.  */
+	  else
+	    table = get_frame_register_unsigned (frame, tbl_reg);
+
 	  offset = get_frame_register_unsigned (frame, bits (inst2, 0, 3));
 	  length = 2 * get_frame_memory_unsigned (frame, table + offset, 1);
 	  nextpc = pc_val + length;
 	}
-      else if ((inst1 & 0xfff0) == 0xe8d0 && (inst2 & 0xfff0) == 0xf000)
+      else if ((inst1 & 0xfff0) == 0xe8d0 && (inst2 & 0xfff0) == 0xf010)
 	{
 	  /* TBH.  */
-	  CORE_ADDR table, offset, length;
+	  CORE_ADDR tbl_reg, table, offset, length;
 
-	  table = get_frame_register_unsigned (frame, bits (inst1, 0, 3));
+	  tbl_reg = bits (inst1, 0, 3);
+	  if (tbl_reg == 0x0f)
+	    table = pc + 4;  /* Regcache copy of PC isn't right yet.  */
+	  else
+	    table = get_frame_register_unsigned (frame, tbl_reg);
+
 	  offset = 2 * get_frame_register_unsigned (frame, bits (inst2, 0, 3));
 	  length = 2 * get_frame_memory_unsigned (frame, table + offset, 2);
 	  nextpc = pc_val + length;

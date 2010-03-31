@@ -1,3 +1,9 @@
+2010-03-31  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-tdep.c (thumb_get_next_pc_raw): Correctly detect TBH
+	instructions.  Use the PC+4 if the base of the TBB or TBH is the 
+	PC register.
+
 2010-03-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix crash on reading wrong function declaration DWARF.
@@ -14,7 +20,8 @@
 
 2010-03-31  Pierre Muller  <muller@ics.u-strasbg.fr>
 
-	* src/gdb/remote.c (end_thread): ARI fix: Use xstrdup instead of strdup.
+	* src/gdb/remote.c (end_thread): ARI fix: Use xstrdup instead of
+	strdup.
 
 2010-03-30  Keith Seitz  <keiths@redhat.com>
 
