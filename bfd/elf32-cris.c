@@ -1512,7 +1512,7 @@ cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      if (sreloc == NULL)
 		{
 		  sreloc = _bfd_elf_get_dynamic_reloc_section
-		    (input_bfd, input_section, /*rela?*/ TRUE);
+		    (dynobj, input_section, /*rela?*/ TRUE);
 		  /* The section should have been created in cris_elf_check_relocs,
 		     but that function will not be called for objects which fail in
 		     cris_elf_merge_private_bfd_data.  */
@@ -3978,7 +3978,8 @@ elf_cris_discard_excess_dso_dynamics (h, inf)
       for (s = h->pcrel_relocs_copied; s != NULL; s = s->next)
 	{
 	  asection *sreloc
-	    = _bfd_elf_get_dynamic_reloc_section (s->section->owner,
+	    = _bfd_elf_get_dynamic_reloc_section (elf_hash_table (info)
+						  ->dynobj,
 						  s->section,
 						  /*rela?*/ TRUE);
 	  sreloc->size -= s->count * sizeof (Elf32_External_Rela);

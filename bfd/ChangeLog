@@ -1,3 +1,9 @@
+2010-04-01  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (cris_elf_relocate_section): Correct first argument
+	to _bfd_elf_get_dynamic_reloc_section.
+	(elf_cris_discard_excess_dso_dynamics): Ditto.
+
 2010-03-31  Kai Tietz  <kai.tietz@onevision.com>
 
 	* coff-i386.c (in_reloc_p): Check also for R_SECREL32.
