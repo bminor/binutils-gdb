@@ -1,5 +1,8 @@
 2010-03-31  Hans-Peter Nilsson  <hp@axis.com>
 
+	PR ld/11458
+	* ld-cris/pcrelcp-1.d, ld-cris/pcrelcp-1.s: New test.
+
 	* lib/ld-lib.exp (run_dump_test): When checking linker message and
 	return code, when success with no message is expected, don't
 	continue if we have an abnormal exit with a message.  Check output
