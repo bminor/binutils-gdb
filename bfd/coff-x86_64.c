@@ -192,7 +192,8 @@ coff_amd64_reloc (bfd *abfd,
 static bfd_boolean
 in_reloc_p (bfd *abfd ATTRIBUTE_UNUSED, reloc_howto_type *howto)
 {
-  return ! howto->pc_relative && howto->type != R_AMD64_IMAGEBASE;
+  return ! howto->pc_relative && howto->type != R_AMD64_IMAGEBASE
+	 && howto->type != R_AMD64_SECREL;
 }
 #endif /* COFF_WITH_PE */
 

@@ -195,7 +195,8 @@ static bfd_boolean in_reloc_p (abfd, howto)
      bfd * abfd ATTRIBUTE_UNUSED;
      reloc_howto_type *howto;
 {
-  return ! howto->pc_relative && howto->type != R_IMAGEBASE;
+  return ! howto->pc_relative && howto->type != R_IMAGEBASE
+	 && howto->type != R_SECREL32;
 }
 #endif /* COFF_WITH_PE */
 

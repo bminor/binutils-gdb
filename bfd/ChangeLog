@@ -1,3 +1,8 @@
+2010-03-31  Kai Tietz  <kai.tietz@onevision.com>
+
+	* coff-i386.c (in_reloc_p): Check also for R_SECREL32.
+	* coff-x86_64.c (in_reloc_p): Check also for R_AMD64_SECREL.
+
 2010-03-31  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_relocate_section): Nop out optimized
