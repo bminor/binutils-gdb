@@ -654,11 +654,13 @@ proc simple_diff { file_1 file_2 } {
 #   error: REGEX
 #	An error with message matching REGEX must be emitted for the test
 #	to pass.  The PROG, objdump, nm and objcopy options have no
-#	meaning and need not supplied if this is present.
+#	meaning and need not supplied if this is present.  Multiple "error"
+#	directives append to the expected linker error message.
 #
 #   warning: REGEX
 #	Expect a linker warning matching REGEX.  It is an error to issue
-#	both "error" and "warning".
+#	both "error" and "warning".  Multiple "warning" directives
+#	append to the expected linker warning message.
 #
 # Each option may occur at most once unless otherwise mentioned.
 #
@@ -725,6 +727,8 @@ proc run_dump_test { name } {
 	    xfail {}
 	    target {}
 	    notarget {}
+	    warning {}
+	    error {}
 	    source {
 		# Move any source-specific as-flags to a separate array to
 		# simplify processing.
@@ -925,8 +929,9 @@ proc run_dump_test { name } {
 	    send_log "$comp_output\n"
 	    verbose "$comp_output" 3
 
-	    if { [regexp $expmsg $comp_output] \
-		    && (($cmdret == 0) == ($opts(warning) != "")) } {
+	    if { ($expmsg == "") == ($comp_output == "") \
+		    && [regexp $expmsg $comp_output] \
+		    && (($cmdret == 0) == ($opts(error) == "")) } {
 		# We have the expected output from ld.
 		if { $opts(error) != "" || $program == "" } {
 		    pass $testname
@@ -974,6 +979,7 @@ proc run_dump_test { name } {
     set env(LC_ALL) "C"
     send_log "$cmd\n"
     set cmdret [remote_exec host [concat sh -c [list "$cmd 2>ld.tmp"]] "" "/dev/null"]
+    set cmdret [lindex $cmdret 0]
     remote_upload host "ld.tmp"
     set comp_output [prune_warnings [file_contents "ld.tmp"]]
     remote_file host delete "ld.tmp"
@@ -983,8 +989,8 @@ proc run_dump_test { name } {
     } else {
 	unset env(LC_ALL)
     }
-    if ![string match "" $comp_output] then {
-	send_log "$comp_output\n"
+    if { $cmdret != 0 || $comp_output != "" } {
+	send_log "exited abnormally with $cmdret, output:$comp_output\n"
 	fail $testname
 	return
     }

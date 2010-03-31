@@ -1,5 +1,12 @@
 2010-03-31  Hans-Peter Nilsson  <hp@axis.com>
 
+	* lib/ld-lib.exp (run_dump_test): When checking linker message and
+	return code, when success with no message is expected, don't
+	continue if we have an abnormal exit with a message.  Check output
+	of inspection program and fail if it had output or an abnormal
+	exit code.  Include "warning" and "error" among the directives
+	where multiples are allowed and append to previous values.
+
 	* ld-cris/cris.exp (loop over $srcdir/$subdir/*dso-*.d): Apply
 	"file rootname", not "file tail", before applying runtest_file_p.
 
