@@ -65,7 +65,7 @@ proc run_basefile_test { testname } {
 
     catch "exec wc -c tmpdir/$testname.base" err
 
-    if ![string match "0 tmpdir/$testname.base" $err] then {
+    if ![string match "0 tmpdir/$testname.base" [string trim $err]] then {
       send_log "$err\n"
       if { $verbose == 2 } then { verbose "$err" 2 }
       fail $testname
