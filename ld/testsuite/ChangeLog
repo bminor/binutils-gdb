@@ -1,3 +1,8 @@
+2010-03-31  Kai TIetz  <kai.tietz@onevision.com>
+
+	* ld-pe/basefile1.s: New.
+	* ld-pe/pe-compile.exp: Add base-file test.
+
 2010-03-31  Hans-Peter Nilsson  <hp@axis.com>
 
 	PR ld/11458
