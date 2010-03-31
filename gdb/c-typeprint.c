@@ -416,8 +416,8 @@ c_type_print_args (struct type *type, struct ui_file *stream,
 	}
     }
   else if (!printed_any
-      && (TYPE_PROTOTYPED (type)
-	  || current_language->la_language == language_cplus))
+	   && ((TYPE_PROTOTYPED (type) && language != language_java)
+	       || language == language_cplus))
     fprintf_filtered (stream, "void");
 
   fprintf_filtered (stream, ")");
@@ -616,7 +616,7 @@ c_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
       if (passed_a_ptr)
 	fprintf_filtered (stream, ")");
       if (!demangled_args)
-	c_type_print_args (type, stream, 1, language_c);
+	c_type_print_args (type, stream, 1, current_language->la_language);
       c_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, show,
 				   passed_a_ptr, 0);
       break;

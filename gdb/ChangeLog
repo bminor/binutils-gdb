@@ -1,3 +1,13 @@
+2010-03-30  Keith Seitz  <keiths@redhat.com>
+
+	* c-typeprint.c (c_type_print_args): Don't print "void"
+	for java, regardless of whether it is TYPE_PROTOTYPED.
+	Use the passed-in language instead of current_language.
+	(c_type_print_varspec_suffix): Use current_language instead
+	of assuming language_c.
+	* jv-typeprint.c (java_type_print_base): (bz 9320) Strip off
+	any return type specifier from the physname.
+
 2010-03-30  Pedro Alves  <pedro@codesourcery.com>
 
 	* tui/tui-interp.c (tui_is_toplevel): New.

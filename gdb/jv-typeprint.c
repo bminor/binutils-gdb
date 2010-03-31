@@ -28,6 +28,7 @@
 #include "typeprint.h"
 #include "c-lang.h"
 #include "cp-abi.h"
+#include "gdb_assert.h"
 
 /* Local functions */
 
@@ -219,10 +220,19 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
 
 	      for (j = 0; j < n_overloads; j++)
 		{
-		  char *physname;
+		  char *real_physname, *physname, *p;
 		  int is_full_physname_constructor;
 
-		  physname = TYPE_FN_FIELD_PHYSNAME (f, j);
+		  real_physname = TYPE_FN_FIELD_PHYSNAME (f, j);
+
+		  /* The physname will contain the return type
+		     after the final closing parenthesis.  Strip it off.  */
+		  p = strrchr (real_physname, ')');
+		  gdb_assert (p != NULL);
+		  ++p;   /* Keep the trailing ')'.  */
+		  physname = alloca (p - real_physname + 1);
+		  memcpy (physname, real_physname, p - real_physname);
+		  physname[p - real_physname] = '\0';
 
 		  is_full_physname_constructor
                     = (is_constructor_name (physname)
@@ -268,7 +278,7 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
 		    /* Build something we can demangle.  */
 		    mangled_name = gdb_mangle_name (type, i, j);
 		  else
-		    mangled_name = TYPE_FN_FIELD_PHYSNAME (f, j);
+		    mangled_name = physname;
 
 		  demangled_name =
 		    cplus_demangle (mangled_name,
