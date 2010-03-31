@@ -1,3 +1,7 @@
+2010-03-31  Matthew Gretton-Dann  <matthew.gretton-dann@arm.com>
+
+	* ld-arm/script-type.sym: Fix test.
+
 2010-03-31  Kai TIetz  <kai.tietz@onevision.com>
 
 	* ld-pe/basefile1.s: New.
