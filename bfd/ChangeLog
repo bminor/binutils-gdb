@@ -1,3 +1,8 @@
+2010-03-31  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section): Nop out optimized
+	TPREL16_HI and TPREL16_HA insns.
+
 2010-03-31  Hans-Peter Nilsson  <hp@axis.com>
 
 	PR ld/11458
