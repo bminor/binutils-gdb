@@ -2053,6 +2053,10 @@ class Target_arm : public Sized_target<32, big_endian>
   {
     Object_attribute* attr =
       this->get_aeabi_object_attribute(elfcpp::Tag_CPU_arch);
+
+    if (attr->int_value() == elfcpp::TAG_CPU_ARCH_V6_M
+	|| attr->int_value() == elfcpp::TAG_CPU_ARCH_V6S_M)
+      return true;
     if (attr->int_value() != elfcpp::TAG_CPU_ARCH_V7
 	&& attr->int_value() != elfcpp::TAG_CPU_ARCH_V7E_M)
       return false;
