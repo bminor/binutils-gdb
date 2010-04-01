@@ -215,8 +215,12 @@ amd64_arch_reg_to_regnum (int reg)
 static const char *amd64_byte_names[] =
 {
   "al", "bl", "cl", "dl", "sil", "dil", "bpl", "spl",
-  "r8l", "r9l", "r10l", "r11l", "r12l", "r13l", "r14l", "r15l"
+  "r8l", "r9l", "r10l", "r11l", "r12l", "r13l", "r14l", "r15l",
+  "ah", "bh", "ch", "dh"
 };
+
+/* Number of lower byte registers.  */
+#define AMD64_NUM_LOWER_BYTE_REGS 16
 
 /* Register names for word pseudo-registers.  */
 
@@ -263,8 +267,18 @@ amd64_pseudo_register_read (struct gdbarch *gdbarch,
       int gpnum = regnum - tdep->al_regnum;
 
       /* Extract (always little endian).  */
-      regcache_raw_read (regcache, gpnum, raw_buf);
-      memcpy (buf, raw_buf, 1);
+      if (gpnum >= AMD64_NUM_LOWER_BYTE_REGS)
+	{
+	  /* Special handling for AH, BH, CH, DH.  */
+	  regcache_raw_read (regcache,
+			     gpnum - AMD64_NUM_LOWER_BYTE_REGS, raw_buf);
+	  memcpy (buf, raw_buf + 1, 1);
+	}
+      else
+	{
+	  regcache_raw_read (regcache, gpnum, raw_buf);
+	  memcpy (buf, raw_buf, 1);
+	}
     }
   else if (i386_dword_regnum_p (gdbarch, regnum))
     {
@@ -289,12 +303,26 @@ amd64_pseudo_register_write (struct gdbarch *gdbarch,
     {
       int gpnum = regnum - tdep->al_regnum;
 
-      /* Read ...  */
-      regcache_raw_read (regcache, gpnum, raw_buf);
-      /* ... Modify ... (always little endian).  */
-      memcpy (raw_buf, buf, 1);
-      /* ... Write.  */
-      regcache_raw_write (regcache, gpnum, raw_buf);
+      if (gpnum >= AMD64_NUM_LOWER_BYTE_REGS)
+	{
+	  /* Read ... AH, BH, CH, DH.  */
+	  regcache_raw_read (regcache,
+			     gpnum - AMD64_NUM_LOWER_BYTE_REGS, raw_buf);
+	  /* ... Modify ... (always little endian).  */
+	  memcpy (raw_buf + 1, buf, 1);
+	  /* ... Write.  */
+	  regcache_raw_write (regcache,
+			      gpnum - AMD64_NUM_LOWER_BYTE_REGS, raw_buf);
+	}
+      else
+	{
+	  /* Read ...  */
+	  regcache_raw_read (regcache, gpnum, raw_buf);
+	  /* ... Modify ... (always little endian).  */
+	  memcpy (raw_buf, buf, 1);
+	  /* ... Write.  */
+	  regcache_raw_write (regcache, gpnum, raw_buf);
+	}
     }
   else if (i386_dword_regnum_p (gdbarch, regnum))
     {
@@ -2228,7 +2256,7 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->num_core_regs = AMD64_NUM_GREGS + I387_NUM_REGS;
   tdep->register_names = amd64_register_names;
 
-  tdep->num_byte_regs = 16;
+  tdep->num_byte_regs = 20;
   tdep->num_word_regs = 16;
   tdep->num_dword_regs = 16;
   /* Avoid wiring in the MMX registers for now.  */

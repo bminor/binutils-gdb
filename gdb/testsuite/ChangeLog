@@ -1,3 +1,7 @@
+2010-04-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gdb.arch/amd64-byte.exp: Check "ah", "bh", "ch", "dh".
+
 2010-04-01  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.base/commands.exp: Adjust.

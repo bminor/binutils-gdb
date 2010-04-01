@@ -52,7 +52,6 @@ if ![runto_main] then {
     gdb_suppress_tests
 }
 
-set nr_regs 14
 set byte_regs(1) al
 set byte_regs(2) bl
 set byte_regs(3) cl
@@ -67,6 +66,10 @@ set byte_regs(11) r12l
 set byte_regs(12) r13l
 set byte_regs(13) r14l
 set byte_regs(14) r15l
+set byte_regs(15) ah
+set byte_regs(16) bh
+set byte_regs(17) ch
+set byte_regs(18) dh
 
 gdb_test "break [gdb_get_line_number "first breakpoint here"]" \
          "Breakpoint .* at .*${srcfile}.*" \
@@ -79,12 +82,19 @@ for { set r 1 } { $r <= 6  } { incr r } {
         "check contents of %$byte_regs($r)"
 }
 
+for { set r 1 } { $r <= 4  } { incr r } {
+    set h [expr $r + 14]
+    gdb_test "print/x \$$byte_regs($h)" \
+        ".. = 0x[format %x $r]2" \
+        "check contents of %$byte_regs($h)"
+}
+
 gdb_test "break [gdb_get_line_number "second breakpoint here"]" \
          "Breakpoint .* at .*${srcfile}.*" \
          "set second breakpoint in main"
 gdb_continue_to_breakpoint "continue to second breakpoint in main"
 
-for { set r 7 } { $r <= $nr_regs  } { incr r } {
+for { set r 7 } { $r <= 14  } { incr r } {
     gdb_test "print/x \$$byte_regs($r)" \
         ".. = 0x[format %x $r]1" \
         "check contents of %$byte_regs($r)"
@@ -92,6 +102,11 @@ for { set r 7 } { $r <= $nr_regs  } { incr r } {
 
 for { set r 1 } { $r <= 6  } { incr r } {
   gdb_test "set var \$$byte_regs($r) = $r" "" "set %$byte_regs($r)"
+}
+
+for { set r 1 } { $r <= 4  } { incr r } {
+  set h [expr $r + 14]
+  gdb_test "set var \$$byte_regs($h) = $h" "" "set %$byte_regs($h)"
 }
 
 gdb_test "break [gdb_get_line_number "third breakpoint here"]" \
@@ -105,7 +120,14 @@ for { set r 1 } { $r <= 6  } { incr r } {
         "check contents of %$byte_regs($r)"
 }
 
-for { set r 7 } { $r <= $nr_regs  } { incr r } {
+for { set r 1 } { $r <= 4  } { incr r } {
+    set h [expr $r + 14]
+    gdb_test "print \$$byte_regs($h)" \
+        ".. = $h" \
+        "check contents of %$byte_regs($h)"
+}
+
+for { set r 7 } { $r <= 14  } { incr r } {
   gdb_test "set var \$$byte_regs($r) = $r" "" "set %$byte_regs($r)"
 }
 
@@ -114,7 +136,7 @@ gdb_test "break [gdb_get_line_number "forth breakpoint here"]" \
          "set forth breakpoint in main"
 gdb_continue_to_breakpoint "continue to forth breakpoint in main"
 
-for { set r 7 } { $r <= $nr_regs  } { incr r } {
+for { set r 7 } { $r <= 14  } { incr r } {
     gdb_test "print \$$byte_regs($r)" \
         ".. = $r" \
         "check contents of %$byte_regs($r)"

@@ -1,3 +1,11 @@
+2010-04-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* amd64-tdep.c (amd64_byte_names): Add "ah", "bh", "ch", "dh".
+	(AMD64_NUM_LOWER_BYTE_REGS): New.
+	(amd64_pseudo_register_read): Handle "ah", "bh", "ch", "dh".
+	(amd64_pseudo_register_write): Likewise.
+	(amd64_init_abi): Set num_byte_regs to 20.
+
 2010-04-01  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (multi_start, multi_end, last_was_multi): Delete.
