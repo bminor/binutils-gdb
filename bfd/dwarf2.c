@@ -760,7 +760,7 @@ read_attribute_value (struct attribute *attr,
     case DW_FORM_ref_addr:
       /* DW_FORM_ref_addr is an address in DWARF2, and an offset in
 	 DWARF3.  */
-      if (unit->version == 3)
+      if (unit->version == 3 || unit->version == 4)
 	{
 	  if (unit->offset_size == 4)
 	    attr->u.val = read_4_bytes (unit->abfd, info_ptr);
@@ -773,6 +773,13 @@ read_attribute_value (struct attribute *attr,
     case DW_FORM_addr:
       attr->u.val = read_address (unit, info_ptr);
       info_ptr += unit->addr_size;
+      break;
+    case DW_FORM_sec_offset:
+      if (unit->offset_size == 4)
+	attr->u.val = read_4_bytes (unit->abfd, info_ptr);
+      else
+	attr->u.val = read_8_bytes (unit->abfd, info_ptr);
+      info_ptr += unit->offset_size;
       break;
     case DW_FORM_block2:
       amt = sizeof (struct dwarf_block);
@@ -816,6 +823,7 @@ read_attribute_value (struct attribute *attr,
       attr->u.str = read_indirect_string (unit, info_ptr, &bytes_read);
       info_ptr += bytes_read;
       break;
+    case DW_FORM_exprloc:
     case DW_FORM_block:
       amt = sizeof (struct dwarf_block);
       blk = (struct dwarf_block *) bfd_alloc (abfd, amt);
@@ -845,6 +853,9 @@ read_attribute_value (struct attribute *attr,
     case DW_FORM_flag:
       attr->u.val = read_1_byte (abfd, info_ptr);
       info_ptr += 1;
+      break;
+    case DW_FORM_flag_present:
+      attr->u.val = 1;
       break;
     case DW_FORM_sdata:
       attr->u.sval = read_signed_leb128 (abfd, info_ptr, &bytes_read);
@@ -887,6 +898,7 @@ read_attribute_value (struct attribute *attr,
       (*_bfd_error_handler) (_("Dwarf Error: Invalid or unhandled FORM value: %u."),
 			     form);
       bfd_set_error (bfd_error_bad_value);
+      return NULL;
     }
   return info_ptr;
 }
@@ -2113,6 +2125,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 		    case DW_FORM_block1:
 		    case DW_FORM_block2:
 		    case DW_FORM_block4:
+		    case DW_FORM_exprloc:
 		      if (*attr.u.blk->data == DW_OP_addr)
 			{
 			  var->stack = 0;
@@ -2216,9 +2229,9 @@ parse_comp_unit (struct dwarf2_debug *stash,
   addr_size = read_1_byte (abfd, info_ptr);
   info_ptr += 1;
 
-  if (version != 2 && version != 3)
+  if (version != 2 && version != 3 && version != 4)
     {
-      (*_bfd_error_handler) (_("Dwarf Error: found dwarf version '%u', this reader only handles version 2 and 3 information."), version);
+      (*_bfd_error_handler) (_("Dwarf Error: found dwarf version '%u', this reader only handles version 2, 3 and 4 information."), version);
       bfd_set_error (bfd_error_bad_value);
       return 0;
     }
