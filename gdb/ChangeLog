@@ -1,4 +1,16 @@
 2010-04-01  Stan Shebs  <stan@codesourcery.com>
+	    Nathan Sidwell  <nathan@codesourcery.com>
+
+	* tracepoint.h (enum actionline_type): Remove.
+	(validate_actionline): Change return to void.
+	* tracepoint.c (report_agent_reqs_errors): New function.
+	(validate_actionline): Call it, change return to void, report errors
+	more consistently.
+	(collect_symbol): Call report_agent_reqs_errors.
+	(encode_actions_1): Ditto.
+	(encode_actions): Don't expect a result from validate_actionline.
+
+2010-04-01  Stan Shebs  <stan@codesourcery.com>
 
 	* tracepoint.c (trace_start_command): Confirm if trace is running.
 	(trace_stop_command): Error if trace not running.

@@ -175,7 +175,7 @@ gdb_test "actions [expr $trcpt2 + $trcpt3]" \
 gdb_trace_setactions "5.7: invalid action" \
 	"$trcpt1" \
 	"print gdb_c_test" \
-	"'print gdb_c_test' is not a supported tracepoint action"
+	"`print gdb_c_test' is not a supported tracepoint action"
 
 # 5.8 help actions (collect, while-stepping, end)
 

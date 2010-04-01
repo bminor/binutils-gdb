@@ -82,7 +82,7 @@ proc while_stepping_bogus_arg { bogus msgstring } {
 
     gdb_trace_setactions "$msgstring" \
 	    "" \
-	    "while-stepping $bogus" ".*bad step-count"
+	    "while-stepping $bogus" ".*while-stepping step count"
 }
 
 # 5.14 while-stepping (no argument)

@@ -23,14 +23,6 @@
 #include "breakpoint.h"
 #include "target.h"
 
-enum actionline_type
-  {
-    BADLINE = -1,
-    GENERIC = 0,
-    END = 1,
-    STEPPING = 2
-  };
-
 /* A trace state variable is a value managed by a target being
    traced. A trace state variable (or tsv for short) can be accessed
    and assigned to by tracepoint actions and conditionals, but is not
@@ -176,7 +168,7 @@ void set_traceframe_number (int);
 struct cleanup *make_cleanup_restore_current_traceframe (void);
 
 void free_actions (struct breakpoint *);
-enum actionline_type validate_actionline (char **, struct breakpoint *);
+extern void validate_actionline (char **, struct breakpoint *);
 
 extern void end_actions_pseudocommand (char *args, int from_tty);
 extern void while_stepping_pseudocommand (char *args, int from_tty);

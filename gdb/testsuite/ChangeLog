@@ -1,3 +1,8 @@
+2010-04-01  Stan Shebs  <stan@codesourcery.com>
+
+	* gdb.trace/actions.exp: Tweak expected output.
+	* gdb.trace/while-stepping.exp: Tweak expected output.
+
 2010-04-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gdb.arch/amd64-byte.exp: Check "ah", "bh", "ch", "dh".

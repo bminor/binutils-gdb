@@ -554,8 +554,35 @@ trace_actions_command (char *args, int from_tty)
   /* else just return */
 }
 
+/* Report the results of checking the agent expression, as errors or
+   internal errors.  */
+
+static void
+report_agent_reqs_errors (struct agent_expr *aexpr, struct agent_reqs *areqs)
+{
+  /* All of the "flaws" are serious bytecode generation issues that
+     should never occur.  */
+  if (areqs->flaw != agent_flaw_none)
+    internal_error (__FILE__, __LINE__, _("expression is malformed"));
+
+  /* If analysis shows a stack underflow, GDB must have done something
+     badly wrong in its bytecode generation.  */
+  if (areqs->min_height < 0)
+    internal_error (__FILE__, __LINE__,
+		    _("expression has min height < 0"));
+
+  /* Issue this error if the stack is predicted to get too deep.  The
+     limit is rather arbitrary; a better scheme might be for the
+     target to report how much stack it will have available.  The
+     depth roughly corresponds to parenthesization, so a limit of 20
+     amounts to 20 levels of expression nesting, which is actually
+     a pretty big hairy expression.  */
+  if (areqs->max_height > 20)
+    error (_("Expression is too complicated."));
+}
+
 /* worker function */
-enum actionline_type
+void
 validate_actionline (char **line, struct breakpoint *t)
 {
   struct cmd_list_element *c;
@@ -563,34 +590,29 @@ validate_actionline (char **line, struct breakpoint *t)
   struct cleanup *old_chain = NULL;
   char *p, *tmp_p;
   struct bp_location *loc;
+  struct agent_expr *aexpr;
+  struct agent_reqs areqs;
 
   /* if EOF is typed, *line is NULL */
   if (*line == NULL)
-    return END;
+    return;
 
   for (p = *line; isspace ((int) *p);)
     p++;
 
   /* Symbol lookup etc.  */
   if (*p == '\0')	/* empty line: just prompt for another line.  */
-    return BADLINE;
+    return;
 
   if (*p == '#')		/* comment line */
-    return GENERIC;
+    return;
 
   c = lookup_cmd (&p, cmdlist, "", -1, 1);
   if (c == 0)
-    {
-      warning (_("'%s' is not an action that I know, or is ambiguous."), 
-	       p);
-      return BADLINE;
-    }
+    error (_("`%s' is not a tracepoint action, or is ambiguous."), p);
 
   if (cmd_cfunc_eq (c, collect_pseudocommand))
     {
-      struct agent_expr *aexpr;
-      struct agent_reqs areqs;
-
       do
 	{			/* repeat over a comma-separated list */
 	  QUIT;			/* allow user to bail out with ^C */
@@ -619,16 +641,14 @@ validate_actionline (char **line, struct breakpoint *t)
 		{
 		  if (SYMBOL_CLASS (exp->elts[2].symbol) == LOC_CONST)
 		    {
-		      warning (_("constant %s (value %ld) will not be collected."),
-			       SYMBOL_PRINT_NAME (exp->elts[2].symbol),
-			       SYMBOL_VALUE (exp->elts[2].symbol));
-		      return BADLINE;
+		      error (_("constant `%s' (value %ld) will not be collected."),
+			     SYMBOL_PRINT_NAME (exp->elts[2].symbol),
+			     SYMBOL_VALUE (exp->elts[2].symbol));
 		    }
 		  else if (SYMBOL_CLASS (exp->elts[2].symbol) == LOC_OPTIMIZED_OUT)
 		    {
-		      warning (_("%s is optimized away and cannot be collected."),
-			       SYMBOL_PRINT_NAME (exp->elts[2].symbol));
-		      return BADLINE;
+		      error (_("`%s' is optimized away and cannot be collected."),
+			     SYMBOL_PRINT_NAME (exp->elts[2].symbol));
 		    }
 		}
 
@@ -639,30 +659,21 @@ validate_actionline (char **line, struct breakpoint *t)
 	      make_cleanup_free_agent_expr (aexpr);
 
 	      if (aexpr->len > MAX_AGENT_EXPR_LEN)
-		error (_("expression too complicated, try simplifying"));
+		error (_("Expression is too complicated."));
 
 	      ax_reqs (aexpr, &areqs);
 	      (void) make_cleanup (xfree, areqs.reg_mask);
 
-	      if (areqs.flaw != agent_flaw_none)
-		error (_("malformed expression"));
-
-	      if (areqs.min_height < 0)
-		error (_("gdb: Internal error: expression has min height < 0"));
-
-	      if (areqs.max_height > 20)
-		error (_("expression too complicated, try simplifying"));
+	      report_agent_reqs_errors (aexpr, &areqs);
 
 	      do_cleanups (old_chain);
 	    }
 	}
       while (p && *p++ == ',');
-      return GENERIC;
     }
+
   else if (cmd_cfunc_eq (c, teval_pseudocommand))
     {
-      struct agent_expr *aexpr;
-
       do
 	{			/* repeat over a comma-separated list */
 	  QUIT;			/* allow user to bail out with ^C */
@@ -684,14 +695,19 @@ validate_actionline (char **line, struct breakpoint *t)
 	      make_cleanup_free_agent_expr (aexpr);
 
 	      if (aexpr->len > MAX_AGENT_EXPR_LEN)
-		error (_("expression too complicated, try simplifying"));
+		error (_("Expression is too complicated."));
+
+	      ax_reqs (aexpr, &areqs);
+	      (void) make_cleanup (xfree, areqs.reg_mask);
+
+	      report_agent_reqs_errors (aexpr, &areqs);
 
 	      do_cleanups (old_chain);
 	    }
 	}
       while (p && *p++ == ',');
-      return GENERIC;
     }
+
   else if (cmd_cfunc_eq (c, while_stepping_pseudocommand))
     {
       char *steparg;		/* in case warning is necessary */
@@ -700,19 +716,15 @@ validate_actionline (char **line, struct breakpoint *t)
 	p++;
       steparg = p;
 
-      if (*p == '\0' ||
-	  (t->step_count = strtol (p, &p, 0)) == 0)
-	{
-	  error (_("'%s': bad step-count."), *line);
-	}
-      return STEPPING;
+      if (*p == '\0' || (t->step_count = strtol (p, &p, 0)) == 0)
+	error (_("while-stepping step count `%s' is malformed."), *line);
     }
+
   else if (cmd_cfunc_eq (c, end_actions_pseudocommand))
-    return END;
+    ;
+
   else
-    {
-      error (_("'%s' is not a supported tracepoint action."), *line);
-    }
+    error (_("`%s' is not a supported tracepoint action."), *line);
 }
 
 enum {
@@ -977,13 +989,8 @@ collect_symbol (struct collection_list *collect,
       old_chain1 = make_cleanup_free_agent_expr (aexpr);
 
       ax_reqs (aexpr, &areqs);
-      if (areqs.flaw != agent_flaw_none)
-	error (_("malformed expression"));
-      
-      if (areqs.min_height < 0)
-	error (_("gdb: Internal error: expression has min height < 0"));
-      if (areqs.max_height > 20)
-	error (_("expression too complicated, try simplifying"));
+
+      report_agent_reqs_errors (aexpr, &areqs);
 
       discard_cleanups (old_chain1);
       add_aexpr (collect, aexpr);
@@ -1325,13 +1332,8 @@ encode_actions_1 (struct command_line *action,
 		      old_chain1 = make_cleanup_free_agent_expr (aexpr);
 
 		      ax_reqs (aexpr, &areqs);
-		      if (areqs.flaw != agent_flaw_none)
-			error (_("malformed expression"));
 
-		      if (areqs.min_height < 0)
-			error (_("gdb: Internal error: expression has min height < 0"));
-		      if (areqs.max_height > 20)
-			error (_("expression too complicated, try simplifying"));
+		      report_agent_reqs_errors (aexpr, &areqs);
 
 		      discard_cleanups (old_chain1);
 		      add_aexpr (collect, aexpr);
@@ -1385,13 +1387,8 @@ encode_actions_1 (struct command_line *action,
 		  old_chain1 = make_cleanup_free_agent_expr (aexpr);
 
 		  ax_reqs (aexpr, &areqs);
-		  if (areqs.flaw != agent_flaw_none)
-		    error (_("malformed expression"));
 
-		  if (areqs.min_height < 0)
-		    error (_("gdb: Internal error: expression has min height < 0"));
-		  if (areqs.max_height > 20)
-		    error (_("expression too complicated, try simplifying"));
+		  report_agent_reqs_errors (aexpr, &areqs);
 
 		  discard_cleanups (old_chain1);
 		  /* Even though we're not officially collecting, add
@@ -1452,21 +1449,18 @@ encode_actions (struct breakpoint *t, struct bp_location *tloc,
   if (*default_collect)
     {
       char *line;
-      enum actionline_type linetype;
 
       default_collect_line =  xstrprintf ("collect %s", default_collect);
       make_cleanup (xfree, default_collect_line);
 
       line = default_collect_line;
-      linetype = validate_actionline (&line, t);
-      if (linetype != BADLINE)
-	{
-	  default_collect_action = xmalloc (sizeof (struct command_line));
-	  make_cleanup (xfree, default_collect_action);
-	  default_collect_action->next = t->commands->commands;
-	  default_collect_action->line = line;
-	  actions = default_collect_action;
-	}
+      validate_actionline (&line, t);
+
+      default_collect_action = xmalloc (sizeof (struct command_line));
+      make_cleanup (xfree, default_collect_action);
+      default_collect_action->next = t->commands->commands;
+      default_collect_action->line = line;
+      actions = default_collect_action;
     }
   encode_actions_1 (actions, t, tloc, frame_reg, frame_offset,
 		    &tracepoint_list, &stepping_list);
