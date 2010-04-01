@@ -4884,7 +4884,7 @@ Packet: '%s'\n"),
 	      if (reg == NULL)
 		error (_("Remote sent bad register number %s: %s\n\
 Packet: '%s'\n"),
-		       phex_nz (pnum, 0), p, buf);
+		       hex_string (pnum), p, buf);
 
 	      cached_reg.num = reg->regnum;
 
