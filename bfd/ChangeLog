@@ -1,3 +1,11 @@
+2010-04-01  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* elf32-ppc.c (apuinfo_set): New static var.
+	(ppc_elf_begin_write_processing): Set it here, always create an
+	APUinfo section if there were any in the inputs.
+	(ppc_elf_write_section): Check apuinfo_set.
+	(ppc_elf_final_write_processing): Likewise.
+
 2010-04-01  Tristan Gingold  <gingold@adacore.com>
 
 	* vms.h: Include time.h. Add prototypes for vms_get_module_name,

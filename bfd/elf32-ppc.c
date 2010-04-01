@@ -2077,12 +2077,13 @@ typedef struct apuinfo_list
 apuinfo_list;
 
 static apuinfo_list *head;
-
+static bfd_boolean apuinfo_set;
 
 static void
 apuinfo_list_init (void)
 {
   head = NULL;
+  apuinfo_set = FALSE;
 }
 
 static void
@@ -2162,7 +2163,6 @@ ppc_elf_begin_write_processing (bfd *abfd, struct bfd_link_info *link_info)
   char *buffer = NULL;
   bfd_size_type largest_input_size = 0;
   unsigned i;
-  unsigned num_entries;
   unsigned long length;
   const char *error_message = NULL;
 
@@ -2185,6 +2185,7 @@ ppc_elf_begin_write_processing (bfd *abfd, struct bfd_link_info *link_info)
       if (length < 20)
 	goto fail;
 
+      apuinfo_set = TRUE;
       if (largest_input_size < asec->size)
 	{
 	  if (buffer)
@@ -2228,13 +2229,14 @@ ppc_elf_begin_write_processing (bfd *abfd, struct bfd_link_info *link_info)
 
   error_message = NULL;
 
-  /* Compute the size of the output section.  */
-  num_entries = apuinfo_list_length ();
-
-  if (num_entries)
+  if (apuinfo_set)
     {
+      /* Compute the size of the output section.  */
+      unsigned num_entries = apuinfo_list_length ();
+      
       /* Set the output section size, if it exists.  */
       asec = bfd_get_section_by_name (abfd, APUINFO_SECTION_NAME);
+
       if (asec && ! bfd_set_section_size (abfd, asec, 20 + num_entries * 4))
 	{
 	  ibfd = abfd;
@@ -2259,8 +2261,7 @@ ppc_elf_write_section (bfd *abfd ATTRIBUTE_UNUSED,
 		       asection *asec,
 		       bfd_byte *contents ATTRIBUTE_UNUSED)
 {
-  return (apuinfo_list_length ()
-	  && strcmp (asec->name, APUINFO_SECTION_NAME) == 0);
+  return apuinfo_set && strcmp (asec->name, APUINFO_SECTION_NAME) == 0;
 }
 
 /* Finally we can generate the output section.  */
@@ -2278,7 +2279,7 @@ ppc_elf_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
   if (asec == NULL)
     return;
 
-  if (apuinfo_list_length () == 0)
+  if (!apuinfo_set)
     return;
 
   length = asec->size;

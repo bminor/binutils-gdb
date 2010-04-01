@@ -1,3 +1,9 @@
+2010-04-01  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-powerpc/apuinfo-nul.rd: New.
+	* ld-powerpc/apuinfo-nul1.s: New.
+	* ld-powerpc/powerpc.exp: Add it.
+
 2010-03-31  Kai TIetz  <kai.tietz@onevision.com>
 
 	* ld-pe//pe-compile.exp (run_basefile_test): Trim result of wc
